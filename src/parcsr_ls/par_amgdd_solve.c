@@ -11,7 +11,7 @@
  ***********************************************************************EHEADER*/
 
 #define TEST_RES_COMM 1
-#define DEBUGGING_MESSAGES 1
+#define DEBUGGING_MESSAGES 0
 
 #include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
@@ -443,14 +443,6 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
          // allocate space for the buffers, buffer sizes, requests and status, psiComposite_send, psiComposite_recv, send and recv maps
          recv_buffer = hypre_CTAlloc(HYPRE_Complex*, num_recvs, HYPRE_MEMORY_HOST);
 
-
-
-
-
-
-
-
-
          if (hypre_ParCompGridCommPkgUseAllgatherv(compGridCommPkg)[level])
          {
 
@@ -462,49 +454,21 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
             for (i = 0; i < num_sends; i++) allgatherv_send_buffer[cnt++] = send_procs[level][i];
             for (i = 0; i < num_sends; i++) allgatherv_send_buffer[cnt++] = send_buffer_size[level][i];
 
-
-
-
-            // !!! Debug
-            // if (myid == 0)
-            // {
-            //    HYPRE_Int sum_num_send_nodes = 0;
-            //    HYPRE_Int sum_send_buffer_size = 0;
-            //    for (i = 0; i < num_sends; i++)
-            //    {
-            //       sum_send_buffer_size += send_buffer_size[level][i];
-            //       HYPRE_Int inner_level;
-            //       for (inner_level = level; inner_level < num_levels; inner_level++) sum_num_send_nodes += num_send_nodes[level][i][inner_level];
-            //    }
-            //    printf("sum send_buffer_size = %d\n", sum_send_buffer_size);
-            //    printf("sum num_send_nodes = %d\n", sum_num_send_nodes);
-            //    printf("allgatherv_send_buffer size = %d\n", hypre_ParCompGridCommPkgResRecvcounts(compGridCommPkg)[level][myid]);
-            // }
-
-
             HYPRE_Int offset = num_sends*2 + 1;
             for (i = 0; i < num_sends; i++)
             {
-            // !!! Debug
-               // if (myid == 0) printf("offset = %d\n", offset);
                PackResidualBuffer(send_procs[level][i], &(allgatherv_send_buffer[offset]), send_flag[level][i], num_send_nodes[level][i], compGrid, compGridCommPkg, i, level, num_levels);
                offset += send_buffer_size[level][i];
             }
-
-
-
 
             HYPRE_Complex *allgatherv_recv_buffer = hypre_CTAlloc(HYPRE_Complex, hypre_ParCompGridCommPkgResRecvcounts(compGridCommPkg)[level][num_procs-1] + hypre_ParCompGridCommPkgResDispls(compGridCommPkg)[level][num_procs-1], HYPRE_MEMORY_HOST);
             hypre_MPI_Allgatherv(allgatherv_send_buffer, hypre_ParCompGridCommPkgResRecvcounts(compGridCommPkg)[level][myid], HYPRE_MPI_COMPLEX, 
                allgatherv_recv_buffer, hypre_ParCompGridCommPkgResRecvcounts(compGridCommPkg)[level], 
                hypre_ParCompGridCommPkgResDispls(compGridCommPkg)[level], HYPRE_MPI_COMPLEX, hypre_MPI_COMM_WORLD);
 
-
-
             // Copy appropriate buffers
             for (i = 0; i < num_recvs; i++)
             {
-
                // Find appropriate location to copy from 
                HYPRE_Int cnt = hypre_ParCompGridCommPkgResDispls(compGridCommPkg)[level][recv_procs[level][i]];
                HYPRE_Int num_psi_buffers = allgatherv_recv_buffer[cnt++];
@@ -517,26 +481,7 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
                recv_buffer[i] = hypre_CTAlloc(HYPRE_Complex, recv_buffer_size[level][i], HYPRE_MEMORY_HOST );
                cnt = read_location;
                for (j = 0; j < recv_buffer_size[level][i]; j++) recv_buffer[i][j] = allgatherv_recv_buffer[cnt++];
-
-
-
-
             }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
          }
          else
          {

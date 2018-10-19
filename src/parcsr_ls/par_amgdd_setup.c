@@ -104,26 +104,6 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
 {
    char filename[256];
 
-
-
-
-
-   // !!! Debug 
-   HYPRE_Int new_feature_on = 1;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
    HYPRE_Int   myid, num_procs;
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
@@ -281,30 +261,6 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
       SetupNearestProcessorNeighbors(A_array[level], compGrid[level], compGridCommPkg, level, padding, num_ghost_layers, communication_cost);
    }
 
-
-
-
-   // !!! Debug
-   // if (myid == 1)
-   // {
-   //    printf("use_allgatherv = ");
-   //    for (level = 0; level < num_levels; level++) printf("%d ", hypre_ParCompGridCommPkgUseAllgatherv(compGridCommPkg)[level]);
-   //    printf("\n");
-   // }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
    if (timers) hypre_EndTiming(timers[0]);
 
    #if DEBUG_COMP_GRID == 2
@@ -388,50 +344,27 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
          if (timers) hypre_BeginTiming(timers[2]);
 
          // Communicate buffer sizes
-
-
-
-         // !!! Only allocate the stuff below if we are actually using allgatherv... !!!
-         HYPRE_Int allgatherv_send_size = 0;
-         HYPRE_Int *main_allgatherv_recvcounts = hypre_CTAlloc(HYPRE_Int, num_procs, HYPRE_MEMORY_HOST);
-         HYPRE_Int *main_allgatherv_displs = hypre_CTAlloc(HYPRE_Int, num_procs, HYPRE_MEMORY_HOST); // !!! Save this info in compGridCommPkg structure !!!
-         HYPRE_Int *redundancy_allgatherv_recvcounts = hypre_CTAlloc(HYPRE_Int, num_procs, HYPRE_MEMORY_HOST);
-         HYPRE_Int *redundancy_allgatherv_displs = hypre_CTAlloc(HYPRE_Int, num_procs, HYPRE_MEMORY_HOST);
-         HYPRE_Int allgatherv_total_recv_size = 0;
-         if (hypre_ParCompGridCommPkgUseAllgatherv(compGridCommPkg)[level] && new_feature_on)
+         HYPRE_Int *main_allgatherv_recvcounts;
+         HYPRE_Int *main_allgatherv_displs;
+         HYPRE_Int *redundancy_allgatherv_recvcounts;
+         HYPRE_Int *redundancy_allgatherv_displs;
+         if (hypre_ParCompGridCommPkgUseAllgatherv(compGridCommPkg)[level])
          {
-
-
-
-
-
-
+            main_allgatherv_recvcounts = hypre_CTAlloc(HYPRE_Int, num_procs, HYPRE_MEMORY_HOST);
+            main_allgatherv_displs = hypre_CTAlloc(HYPRE_Int, num_procs, HYPRE_MEMORY_HOST);
+            redundancy_allgatherv_recvcounts = hypre_CTAlloc(HYPRE_Int, num_procs, HYPRE_MEMORY_HOST);
+            redundancy_allgatherv_displs = hypre_CTAlloc(HYPRE_Int, num_procs, HYPRE_MEMORY_HOST);
 
             // Header info
-            allgatherv_send_size = num_sends*2 + 1; // !!! Save this info in compGridCommPkg structure !!!
+            HYPRE_Int allgatherv_send_size = num_sends*2 + 1; // !!! Save this info in compGridCommPkg structure !!!
             // Plus the PsiC buffer sizes
             for (i = 0; i < num_sends; i++) allgatherv_send_size += send_buffer_size[level][i];
 
             hypre_MPI_Allgather(&allgatherv_send_size, 1, HYPRE_MPI_INT, main_allgatherv_recvcounts, 1, HYPRE_MPI_INT, hypre_MPI_COMM_WORLD);
 
-
             // Calculate displacements
             main_allgatherv_displs[0] = 0;
             for (i = 1; i < num_procs; i++) main_allgatherv_displs[i] = main_allgatherv_displs[i-1] + main_allgatherv_recvcounts[i-1];
-            allgatherv_total_recv_size = main_allgatherv_displs[num_procs-1] + main_allgatherv_recvcounts[num_procs-1];
-
-
-
-            // !!! Debug
-            // if (myid == 1)
-            // {
-            //    printf("allgathered send sizes:\n");
-            //    for (i = 0; i < num_procs; i++) printf("%d ", main_allgatherv_recvcounts[i]);
-            //    printf("\n");
-            // }
-
-
-
          }
          else
          {
@@ -451,37 +384,26 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
 
             // wait for all buffer sizes to be received
             hypre_MPI_Waitall( num_sends + num_recvs, requests, status );
-         }
 
+            // free and reallocate space for the requests and status
+            hypre_TFree(requests, HYPRE_MEMORY_HOST);
+            hypre_TFree(status, HYPRE_MEMORY_HOST);
+            requests = hypre_CTAlloc(hypre_MPI_Request, num_sends + num_recvs, HYPRE_MEMORY_HOST );
+            status = hypre_CTAlloc(hypre_MPI_Status, num_sends + num_recvs, HYPRE_MEMORY_HOST );
+            request_counter = 0;
+         }
 
          if (timers) hypre_EndTiming(timers[2]);
 
-         // free and reallocate space for the requests and status
-         hypre_TFree(requests, HYPRE_MEMORY_HOST);
-         hypre_TFree(status, HYPRE_MEMORY_HOST);
-         requests = hypre_CTAlloc(hypre_MPI_Request, num_sends + num_recvs, HYPRE_MEMORY_HOST );
-         status = hypre_CTAlloc(hypre_MPI_Status, num_sends + num_recvs, HYPRE_MEMORY_HOST );
-         request_counter = 0;
 
          if (use_barriers) hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
          if (timers) hypre_BeginTiming(timers[3]);
 
-
-
-
-
-
-
-
-
          // Communicate buffers 
-         if (hypre_ParCompGridCommPkgUseAllgatherv(compGridCommPkg)[level] && new_feature_on)
+         if (hypre_ParCompGridCommPkgUseAllgatherv(compGridCommPkg)[level])
          {
-
-
-
             // Allocate send buffer
-            HYPRE_Int *allgatherv_send_buffer = hypre_CTAlloc(HYPRE_Int, allgatherv_send_size, HYPRE_MEMORY_HOST);
+            HYPRE_Int *allgatherv_send_buffer = hypre_CTAlloc(HYPRE_Int, main_allgatherv_recvcounts[myid], HYPRE_MEMORY_HOST);
 
             // Setup header info
             cnt = 0;
@@ -496,20 +418,10 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
             }
 
             // Allocate recv buffer
-            HYPRE_Int *allgatherv_recv_buffer = hypre_CTAlloc(HYPRE_Int, allgatherv_total_recv_size, HYPRE_MEMORY_HOST);
+            HYPRE_Int *allgatherv_recv_buffer = hypre_CTAlloc(HYPRE_Int, main_allgatherv_displs[num_procs-1] + main_allgatherv_recvcounts[num_procs-1], HYPRE_MEMORY_HOST);
 
-            hypre_MPI_Allgatherv(allgatherv_send_buffer, allgatherv_send_size, HYPRE_MPI_INT, allgatherv_recv_buffer, main_allgatherv_recvcounts, main_allgatherv_displs, HYPRE_MPI_INT, hypre_MPI_COMM_WORLD);
-
-
-            // // !!! Debug
-            // if (myid == 1)
-            // {
-            //    printf("allgather main recv buffer:\n");
-            //    for (i = 0; i < allgatherv_total_recv_size; i++) printf("%d ", allgatherv_recv_buffer[i]);
-            //    printf("\n");
-            // }
-
-
+            hypre_MPI_Allgatherv(allgatherv_send_buffer, main_allgatherv_recvcounts[myid], HYPRE_MPI_INT, allgatherv_recv_buffer, main_allgatherv_recvcounts, main_allgatherv_displs, HYPRE_MPI_INT, hypre_MPI_COMM_WORLD);
+            hypre_TFree(allgatherv_send_buffer, HYPRE_MEMORY_HOST);
 
             // Assemble the redundancy_allgatherv_recvcounts and redundancy_allgatherv_displs for the send flag/recv map redundancy info to be communciated later
             for (i = 0; i < num_procs; i++)
@@ -548,11 +460,6 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
                redundancy_allgatherv_displs[i] = redundancy_allgatherv_displs[i-1] + redundancy_allgatherv_recvcounts[i-1];
             }
 
-
-
-
-
-
             // Copy into expected recv buffers
             for (i = 0; i < num_recvs; i++)
             {
@@ -573,25 +480,8 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
 
             // Free allgatherv recv buffer
             hypre_TFree(allgatherv_recv_buffer, HYPRE_MEMORY_HOST);
-
-
-
-            // // !!! Debug
-            // if (myid == 2)
-            // {
-            //    printf("rank 2 recv_buffer 1:\n");
-            //    for (i = 0; i < recv_buffer_size[level][1]; i++) printf("%d ", recv_buffer[1][i]);
-            //    printf("\n");
-            // }
-
-
-
-
-
-
-
-
-
+            hypre_TFree(main_allgatherv_recvcounts, HYPRE_MEMORY_HOST);
+            hypre_TFree(main_allgatherv_displs, HYPRE_MEMORY_HOST);
          }
          else
          {
@@ -617,21 +507,12 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
             // wait for buffers to be received
             hypre_MPI_Waitall( num_sends + num_recvs, requests, status );
 
-
-
-
-
-            // // !!! Debug
-            // if (myid == 2)
-            // {
-            //    printf("rank 2 recv_buffer 1:\n");
-            //    for (i = 0; i < recv_buffer_size[level][1]; i++) printf("%d ", recv_buffer[1][i]);
-            //    printf("\n");
-            // }
-
-
-
-
+            // free and reallocate space for the requests and status
+            hypre_TFree(requests, HYPRE_MEMORY_HOST);
+            hypre_TFree(status, HYPRE_MEMORY_HOST);
+            requests = hypre_CTAlloc(hypre_MPI_Request, num_sends + num_recvs, HYPRE_MEMORY_HOST );
+            status = hypre_CTAlloc(hypre_MPI_Status, num_sends + num_recvs, HYPRE_MEMORY_HOST );
+            request_counter = 0;
          }
 
 
@@ -683,23 +564,13 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
          // Zero out num_added_nodes
          for (i = level; i < num_levels; i++) num_added_nodes[i] = 0;
 
-         // free and reallocate space for the requests and status
-         hypre_TFree(requests, HYPRE_MEMORY_HOST);
-         hypre_TFree(status, HYPRE_MEMORY_HOST);
-         requests = hypre_CTAlloc(hypre_MPI_Request, num_sends + num_recvs, HYPRE_MEMORY_HOST );
-         status = hypre_CTAlloc(hypre_MPI_Status, num_sends + num_recvs, HYPRE_MEMORY_HOST );
-         request_counter = 0;
 
          if (use_barriers) hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
          if (timers) hypre_BeginTiming(timers[6]);         
 
-
-
-
          // Communicate redundancy info 
-         if (hypre_ParCompGridCommPkgUseAllgatherv(compGridCommPkg)[level] && new_feature_on)
+         if (hypre_ParCompGridCommPkgUseAllgatherv(compGridCommPkg)[level])
          {
-
             HYPRE_Int *redundancy_allgatherv_send_buffer = hypre_CTAlloc(HYPRE_Int, redundancy_allgatherv_recvcounts[myid], HYPRE_MEMORY_HOST);
             cnt = 0;
             redundancy_allgatherv_send_buffer[cnt++] = num_recvs;
@@ -711,65 +582,17 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
             {
                recv_map_send_buffer[i] = hypre_CTAlloc(HYPRE_Int, recv_map_send_buffer_size[i], HYPRE_MEMORY_HOST);
                PackRecvMapSendBuffer(recv_map_send[i], recv_map_send_buffer[i], num_incoming_nodes[i], level, num_levels);
-               
-               // !!! Debug
-               // if (myid == 1 && level == 2)
-               // {
-               //    printf("recv_map_send[%d]:\n",i);
-               //    for (j = 0; j < recv_map_send_buffer_size[i]; j++) 
-               //       printf("%d ", recv_map_send_buffer[i][j]);
-               //    printf("\n");
-               // }
-
                memcpy(&(redundancy_allgatherv_send_buffer[cnt]), recv_map_send_buffer[i], sizeof(HYPRE_Int)*recv_map_send_buffer_size[i]);
-
-
-               // !!! Debug
-               // if (myid == 1 && level == 2)
-               // {
-               //    printf("redundancy_allgatherv_send_buffer:\n");
-               //    for (j = 0; j < redundancy_allgatherv_recvcounts[myid]; j++) 
-               //       printf("%d ", redundancy_allgatherv_send_buffer[j]);
-               //    printf("\n");
-               // }
-
                cnt += recv_map_send_buffer_size[i];
             }
 
             HYPRE_Int *redundancy_allgatherv_recv_buffer = hypre_CTAlloc(HYPRE_Int, redundancy_allgatherv_displs[num_procs-1] + redundancy_allgatherv_recvcounts[num_procs-1], HYPRE_MEMORY_HOST);
-            
-
-
-            // !!! Debug
-            // if (myid == 1 && level == 2)
-            // {
-            //    printf("cnt = %d, redundancy_allgatherv_recvcounts[myid] = %d\n", cnt, redundancy_allgatherv_recvcounts[myid]);
-            //    printf("redundancy_allgatherv_send_buffer:\n");
-            //    for (i = 0; i < redundancy_allgatherv_recvcounts[myid]; i++) 
-            //       printf("%d ", redundancy_allgatherv_send_buffer[i]);
-            //    printf("\n");
-            // }
-
 
             // Do the allgatherv
             hypre_MPI_Allgatherv(redundancy_allgatherv_send_buffer, redundancy_allgatherv_recvcounts[myid], HYPRE_MPI_INT,
                    redundancy_allgatherv_recv_buffer, redundancy_allgatherv_recvcounts, redundancy_allgatherv_displs,
                    HYPRE_MPI_INT, hypre_MPI_COMM_WORLD);
-
-
-
-
-            // !!! Debug
-            // if (myid == 1 && level == 2)
-            // {
-            //    printf("redundancy_allgatherv_recv_buffer:\n");
-            //    for (i = 0; i < redundancy_allgatherv_displs[num_procs-1] + redundancy_allgatherv_recvcounts[num_procs-1]; i++) 
-            //       printf("%d ", redundancy_allgatherv_recv_buffer[i]);
-            //    printf("\n");
-            // }
-
-
-
+            hypre_TFree(redundancy_allgatherv_send_buffer, HYPRE_MEMORY_HOST);
 
             // Copy info into appropriate send_flag_buffer's
             for (i = 0; i < num_sends; i++)
@@ -788,8 +611,6 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
                cnt = read_location;
                for (j = 0; j < send_flag_buffer_size[i]; j++) send_flag_buffer[i][j] = redundancy_allgatherv_recv_buffer[cnt++];
             }
-
-
 
             // Get recvcount and displacement info used for subsequent residual communications
             res_recvcounts[level] = hypre_CTAlloc(HYPRE_Int, num_procs, HYPRE_MEMORY_HOST);
@@ -819,25 +640,9 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
             res_displs[level][0] = 0;
             for (i = 1; i < num_procs; i++) res_displs[level][i] = res_displs[level][i-1] + res_recvcounts[level][i-1];
 
-
-
-
             hypre_TFree(redundancy_allgatherv_recv_buffer, HYPRE_MEMORY_HOST);
-
-
-            // !!! Debug
-            // if (myid == 1 && level == 2)
-            // {
-            //    printf("rank 0 send_flag_buffer 1:\n");
-            //    for (i = 0; i < send_flag_buffer_size[1]; i++) printf("%d ", send_flag_buffer[1][i]);
-            //    printf("\n");
-            // }
-
-
-
-
-
-
+            hypre_TFree(redundancy_allgatherv_recvcounts, HYPRE_MEMORY_HOST);
+            hypre_TFree(redundancy_allgatherv_displs, HYPRE_MEMORY_HOST);
          }
          else
          {
@@ -861,29 +666,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
 
             // wait for maps to be received
             hypre_MPI_Waitall( num_sends + num_recvs, requests, status );
-
-
-
-
-            // !!! Debug
-            // if (myid == 1 && level == 2)
-            // {
-            //    printf("rank 0 send_flag_buffer 1:\n");
-            //    for (i = 0; i < send_flag_buffer_size[1]; i++) printf("%d ", send_flag_buffer[1][i]);
-            //    printf("\n");
-            // }
-
-
-
-
          }
-
-
-
-
-
-
-
 
          #if DEBUGGING_MESSAGES
          hypre_printf("      Rank %d: done waiting on send map buffers\n", myid);
@@ -1315,28 +1098,10 @@ SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGr
       hypre_TFree(num_request_nodes, HYPRE_MEMORY_HOST);
    }
 
-
-
-
-
-
-
-
-
-
    // Do an allreduce to find the global number of communications 
    HYPRE_Int global_num_sends;
    hypre_MPI_Allreduce(&num_sends, &global_num_sends, 1, HYPRE_MPI_INT, MPI_SUM, hypre_MPI_COMM_WORLD);
    if (global_num_sends > num_procs*log(num_procs)/log(2)) hypre_ParCompGridCommPkgUseAllgatherv(compGridCommPkg)[level] = 1;
-
-
-
-
-
-
-
-
-
 
    #if DEBUG_PROC_NEIGHBORS
    // Check to make sure what we end up with has symmetric send/recv relationship 

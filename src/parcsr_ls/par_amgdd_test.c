@@ -12,7 +12,7 @@
 
 #define MEASURE_TEST_COMP_RES 0
 #define DUMP_INTERMEDIATE_TEST_SOLNS 0
-#define DEBUGGING_MESSAGES 1
+#define DEBUGGING_MESSAGES 0
 
 #include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
