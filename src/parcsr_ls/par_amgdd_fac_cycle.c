@@ -229,8 +229,8 @@ FAC_Restrict( hypre_ParCompGrid *compGrid_f, hypre_ParCompGrid *compGrid_c, HYPR
 		// Loop over entries in A
 		for (j = hypre_ParCompGridARowPtr(compGrid_f)[i]; j < hypre_ParCompGridARowPtr(compGrid_f)[i+1]; j++)
 		{
-			// If -1 index encountered, mark the coarse grid connections to this node (don't want to FAC_restrict to these)
-			if ( hypre_ParCompGridAColInd(compGrid_f)[j] == -1 )
+			// If negative index encountered, mark the coarse grid connections to this node (don't want to FAC_restrict to these)
+			if ( hypre_ParCompGridAColInd(compGrid_f)[j] < 0 )
 			{
 				do_FAC_restrict = 0;
             // #if DUMP_INTERMEDIATE_SOLNS
