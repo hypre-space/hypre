@@ -3211,11 +3211,11 @@ HYPRE_Int HYPRE_MGRSolve( HYPRE_Solver solver,
                          HYPRE_ParVector x      );
 
 /*--------------------------------------------------------------------------
- * HYPRE_Int HYPRE_MGRSetCpointsByGlobalBlock
+ * HYPRE_Int HYPRE_MGRSetCpointsByContiguousBlock
  *--------------------------------------------------------------------------*/
 /**
- * Set the block data (by block) and prescribe the coarse indexes per block 
- * for each reduction level.
+ * Set the block data assuming that the physical variables are ordered contiguously,
+ * i.e. p_1, p_2, ..., p_n, s_1, s_2, ..., s_n, ...
  *
  * @param solver [IN] solver or preconditioner object
  * @param block_size [IN] system block size
@@ -3223,7 +3223,7 @@ HYPRE_Int HYPRE_MGRSolve( HYPRE_Solver solver,
  * @param num_block_coarse_points [IN] number of coarse points per block per level
  * @param block_coarse_indexes [IN] index for each block coarse point per level
  **/
-HYPRE_Int HYPRE_MGRSetCpointsByGlobalBlock( HYPRE_Solver solver,
+HYPRE_Int HYPRE_MGRSetCpointsByContiguousBlock( HYPRE_Solver solver,
                          HYPRE_Int  block_size, 
                          HYPRE_Int max_num_levels,
                          HYPRE_Int *idx_array, 
@@ -3231,7 +3231,7 @@ HYPRE_Int HYPRE_MGRSetCpointsByGlobalBlock( HYPRE_Solver solver,
                          HYPRE_Int  **block_coarse_indexes);
 
 /*--------------------------------------------------------------------------
- * HYPRE_Int HYPRE_MGRSetCpointsByLocalBlock
+ * HYPRE_Int HYPRE_MGRSetCpointsByBlock
  *--------------------------------------------------------------------------*/
 /**
  * Set the block data (by grid points) and prescribe the coarse indexes per block 
@@ -3245,7 +3245,7 @@ HYPRE_Int HYPRE_MGRSetCpointsByGlobalBlock( HYPRE_Solver solver,
  * @param num_block_coarse_points [IN] number of coarse points per block per level
  * @param block_coarse_indexes [IN] index for each block coarse point per level
  **/
-HYPRE_Int HYPRE_MGRSetCpointsByLocalBlock( HYPRE_Solver solver,
+HYPRE_Int HYPRE_MGRSetCpointsByBlock( HYPRE_Solver solver,
                          HYPRE_Int  block_size, 
                          HYPRE_Int max_num_levels,
                          HYPRE_Int *num_block_coarse_points, 
@@ -3327,7 +3327,10 @@ HYPRE_MGRSetRelaxType(HYPRE_Solver solver, HYPRE_Int relax_type );
  * \end{tabular} 
  **/
 HYPRE_Int
-HYPRE_MGRSetFRelaxMethod(HYPRE_Solver solver, HYPRE_Int *relax_method );
+HYPRE_MGRSetFRelaxMethod(HYPRE_Solver solver, HYPRE_Int relax_method );
+
+HYPRE_Int
+HYPRE_MGRSetLevelFRelaxMethod(HYPRE_Solver solver, HYPRE_Int *relax_method );
 
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetRelaxNumFunctions
@@ -3339,7 +3342,7 @@ HYPRE_MGRSetFRelaxMethod(HYPRE_Solver solver, HYPRE_Int *relax_method );
  * to the number of scalar PDEs in the system.
  **/
 HYPRE_Int
-HYPRE_MGRSetFRelaxNumFunctions(HYPRE_Solver solver, HYPRE_Int *num_functions);
+HYPRE_MGRSetLevelFRelaxNumFunctions(HYPRE_Solver solver, HYPRE_Int *num_functions);
 
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetRestrictType
@@ -3361,7 +3364,10 @@ HYPRE_MGRSetFRelaxNumFunctions(HYPRE_Solver solver, HYPRE_Int *num_functions);
  * reduction levels use injection. The default is injection.
  **/
 HYPRE_Int
-HYPRE_MGRSetRestrictType( HYPRE_Solver solver, HYPRE_Int *restrict_type);
+HYPRE_MGRSetRestrictType( HYPRE_Solver solver, HYPRE_Int restrict_type);
+
+HYPRE_Int
+HYPRE_MGRSetLevelRestrictType( HYPRE_Solver solver, HYPRE_Int *restrict_type);
 
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetNumRestrictSweeps
@@ -3392,7 +3398,10 @@ HYPRE_MGRSetNumRestrictSweeps( HYPRE_Solver solver, HYPRE_Int nsweeps );
  * reduction levels use diagonal scaling.
  **/
 HYPRE_Int
-HYPRE_MGRSetInterpType( HYPRE_Solver solver, HYPRE_Int *interp_type );
+HYPRE_MGRSetInterpType( HYPRE_Solver solver, HYPRE_Int interp_type );
+
+HYPRE_Int
+HYPRE_MGRSetLevelInterpType( HYPRE_Solver solver, HYPRE_Int *interp_type );
 
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetNumRelaxSweeps

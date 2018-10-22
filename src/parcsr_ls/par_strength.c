@@ -639,18 +639,7 @@ hypre_BoomerAMGCreateSFromCFMarker(hypre_ParCSRMatrix    *A,
 
    S_diag_j = hypre_CTAlloc(HYPRE_Int,  num_nonzeros_diag, HYPRE_MEMORY_HOST);
 
-/*
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-#endif
-   for (i = 0; i < num_nonzeros_diag; i++)
-      S_diag_j[i] = 0;
-*/
-
    HYPRE_Int *S_temp_offd_j = NULL;
-
-   //hypre_printf("Done creating S and S_temp\n"); 
-
   if (num_cols_offd)
   {
     A_offd_data = hypre_CSRMatrixData(A_offd);

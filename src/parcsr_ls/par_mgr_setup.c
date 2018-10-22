@@ -446,14 +446,35 @@ hypre_MGRSetup( void               *mgr_vdata,
     }
     (mgr_data -> Frelax_method) = Frelax_method;
   }
+  /*
   if (Frelax_num_functions== NULL)
   {
-    Frelax_num_functions= hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
+    Frelax_num_functions = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
     for (i = 0; i < max_num_coarse_levels; i++)
     {
-      Frelax_num_functions[i] = 0;
+      Frelax_num_functions[i] = 1;
     }
     (mgr_data -> Frelax_num_functions) = Frelax_num_functions;
+  }
+  */
+  /* Set default for interp_type and restrict_type if not set already */
+  if (interp_type == NULL)
+  {
+    interp_type = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
+    for (i = 0; i < max_num_coarse_levels; i++)
+    {
+      interp_type[i] = 2;
+    }
+    (mgr_data -> interp_type) = interp_type;
+  }
+  if (restrict_type == NULL)
+  {
+    restrict_type = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
+    for (i = 0; i < max_num_coarse_levels; i++)
+    {
+      (mgr_data -> restrict_type) = 0;
+    }
+    (mgr_data -> restrict_type) = restrict_type;
   }
 
   /* set pointers to mgr data */

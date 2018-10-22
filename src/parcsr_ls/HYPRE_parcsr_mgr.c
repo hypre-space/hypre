@@ -71,32 +71,32 @@ HYPRE_MGRSolve( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_MGRSetCpointsByGlobalBlock
+ * HYPRE_MGRSetCpointsByContiguousBlock
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int 
-HYPRE_MGRSetCpointsByGlobalBlock( HYPRE_Solver solver, 
+HYPRE_MGRSetCpointsByContiguousBlock( HYPRE_Solver solver, 
       HYPRE_Int  block_size, 
       HYPRE_Int  max_num_levels, 
       HYPRE_Int  *idx_array,
       HYPRE_Int  *block_num_coarse_points, 
       HYPRE_Int  **block_coarse_indexes)
 {
-   return( hypre_MGRSetCpointsByGlobalBlock( (void *) solver, block_size, max_num_levels, idx_array, block_num_coarse_points, block_coarse_indexes));
+   return( hypre_MGRSetCpointsByContiguousBlock( (void *) solver, block_size, max_num_levels, idx_array, block_num_coarse_points, block_coarse_indexes));
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_MGRSetCpointsByLocalBlock
+ * HYPRE_MGRSetCpointsByBlock
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int 
-HYPRE_MGRSetCpointsByLocalBlock( HYPRE_Solver solver, 
+HYPRE_MGRSetCpointsByBlock( HYPRE_Solver solver, 
 			HYPRE_Int  block_size, 
 			HYPRE_Int  max_num_levels, 
 			HYPRE_Int  *block_num_coarse_points, 
 			HYPRE_Int  **block_coarse_indexes)
 {
-   return( hypre_MGRSetCpointsByLocalBlock( (void *) solver, block_size, max_num_levels, block_num_coarse_points, block_coarse_indexes));
+   return( hypre_MGRSetCpointsByBlock( (void *) solver, block_size, max_num_levels, block_num_coarse_points, block_coarse_indexes));
 }
 
 HYPRE_Int
@@ -150,27 +150,39 @@ HYPRE_MGRSetReservedCoarseNodes( HYPRE_Solver solver, HYPRE_Int reserved_coarse_
  * HYPRE_MGRSetRestrictType
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_MGRSetRestrictType(HYPRE_Solver solver, HYPRE_Int *restrict_type )
+HYPRE_MGRSetRestrictType( HYPRE_Solver solver, HYPRE_Int restrict_type )
 {
-   return hypre_MGRSetRestrictType(solver, restrict_type );
+   return hypre_MGRSetRestrictType( solver, restrict_type );
+}
+
+HYPRE_Int
+HYPRE_MGRSetLevelRestrictType( HYPRE_Solver solver, HYPRE_Int *restrict_type )
+{
+   return hypre_MGRSetLevelRestrictType( solver, restrict_type );
 }
 
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetRelaxMethod
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_MGRSetFRelaxMethod(HYPRE_Solver solver, HYPRE_Int *relax_method )
+HYPRE_MGRSetFRelaxMethod(HYPRE_Solver solver, HYPRE_Int relax_method )
 {
    return hypre_MGRSetFRelaxMethod(solver, relax_method );
+}
+
+HYPRE_Int
+HYPRE_MGRSetLevelFRelaxMethod(HYPRE_Solver solver, HYPRE_Int *relax_method )
+{
+   return hypre_MGRSetLevelFRelaxMethod(solver, relax_method );
 }
 
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetRelaxNumFunctions
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_MGRSetFRelaxNumFunctions(HYPRE_Solver solver, HYPRE_Int *num_functions)
+HYPRE_MGRSetLevelFRelaxNumFunctions(HYPRE_Solver solver, HYPRE_Int *num_functions)
 {
-   return hypre_MGRSetFRelaxNumFunctions(solver, num_functions);
+   return hypre_MGRSetLevelFRelaxNumFunctions(solver, num_functions);
 }
 
 /*--------------------------------------------------------------------------
@@ -193,9 +205,15 @@ HYPRE_MGRSetNumRelaxSweeps( HYPRE_Solver solver, HYPRE_Int nsweeps )
  * HYPRE_MGRSetInterpType
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_MGRSetInterpType( HYPRE_Solver solver, HYPRE_Int *interpType )
+HYPRE_MGRSetInterpType( HYPRE_Solver solver, HYPRE_Int interpType )
 {
    return hypre_MGRSetInterpType(solver, interpType);
+}
+
+HYPRE_Int
+HYPRE_MGRSetLevelInterpType( HYPRE_Solver solver, HYPRE_Int *interpType )
+{
+   return hypre_MGRSetLevelInterpType(solver, interpType);
 }
 
 /*--------------------------------------------------------------------------

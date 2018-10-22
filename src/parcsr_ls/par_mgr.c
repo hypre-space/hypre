@@ -458,7 +458,7 @@ hypre_MGRSetNonCpointsToFpoints( void      *mgr_vdata, HYPRE_Int nonCptToFptFlag
 }
 
 HYPRE_Int
-hypre_MGRSetCpointsByGlobalBlock( void  *mgr_vdata,
+hypre_MGRSetCpointsByContiguousBlock( void  *mgr_vdata,
                           HYPRE_Int  block_size,
                           HYPRE_Int  max_num_levels,
                           HYPRE_Int  *begin_idx_array,
@@ -478,7 +478,7 @@ hypre_MGRSetCpointsByGlobalBlock( void  *mgr_vdata,
       index_array[i] = *(begin_idx_array+i);
     }
   }
-  hypre_MGRSetCpointsByLocalBlock(mgr_data, block_size, max_num_levels, block_num_coarse_points, block_coarse_indexes);
+  hypre_MGRSetCpointsByBlock(mgr_data, block_size, max_num_levels, block_num_coarse_points, block_coarse_indexes);
   (mgr_data -> idx_array) = index_array;
   (mgr_data -> set_c_points_method) = 1;
   return hypre_error_flag;
@@ -486,7 +486,7 @@ hypre_MGRSetCpointsByGlobalBlock( void  *mgr_vdata,
 
 /* Initialize/ set local block data information */
 HYPRE_Int
-hypre_MGRSetCpointsByLocalBlock( void      *mgr_vdata,
+hypre_MGRSetCpointsByBlock( void      *mgr_vdata,
                          HYPRE_Int  block_size,
                          HYPRE_Int  max_num_levels,
                          HYPRE_Int  *block_num_coarse_points,
@@ -2643,7 +2643,27 @@ hypre_MGRSetNumRelaxSweeps( void *mgr_vdata, HYPRE_Int nsweeps )
 
 /* Set the F-relaxation strategy: 0=single level, 1=multi level */
 HYPRE_Int
-hypre_MGRSetFRelaxMethod( void *mgr_vdata, HYPRE_Int *relax_method )
+hypre_MGRSetFRelaxMethod( void *mgr_vdata, HYPRE_Int relax_method )
+{
+  hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
+  HYPRE_Int i;
+  HYPRE_Int max_num_coarse_levels = (mgr_data -> max_num_coarse_levels);
+  if((mgr_data -> Frelax_method) != NULL) {
+    hypre_TFree(mgr_data -> Frelax_method, HYPRE_MEMORY_HOST);
+    (mgr_data -> Frelax_method) = NULL;
+  }
+  HYPRE_Int *Frelax_method = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
+  for (i=0; i < max_num_coarse_levels; i++)
+  {
+    Frelax_method[i] = relax_method;
+  }
+  (mgr_data -> Frelax_method) = Frelax_method;
+  return hypre_error_flag;
+}
+
+/* Set the F-relaxation strategy: 0=single level, 1=multi level */
+HYPRE_Int
+hypre_MGRSetLevelFRelaxMethod( void *mgr_vdata, HYPRE_Int *relax_method )
 {
   hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
   HYPRE_Int i;
@@ -2660,13 +2680,20 @@ hypre_MGRSetFRelaxMethod( void *mgr_vdata, HYPRE_Int *relax_method )
       Frelax_method[i] = relax_method[i];
     }
   }
+  else
+  {
+    for (i = 0; i < max_num_coarse_levels; i++)
+    {
+      Frelax_method[i] = 0;
+    }
+  }
   (mgr_data -> Frelax_method) = Frelax_method;
   return hypre_error_flag;
 }
 
 /* Set the F-relaxation number of functions for each level */
 HYPRE_Int
-hypre_MGRSetFRelaxNumFunctions( void *mgr_vdata, HYPRE_Int *num_functions )
+hypre_MGRSetLevelFRelaxNumFunctions( void *mgr_vdata, HYPRE_Int *num_functions )
 {
   hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
   HYPRE_Int i;
@@ -2683,6 +2710,13 @@ hypre_MGRSetFRelaxNumFunctions( void *mgr_vdata, HYPRE_Int *num_functions )
       Frelax_num_functions[i] = num_functions[i];
     }
   }
+  else
+  {
+    for (i = 0; i < max_num_coarse_levels; i++)
+    {
+      Frelax_num_functions[i] = 1;
+    }
+  }
   (mgr_data -> Frelax_num_functions) = Frelax_num_functions;
   return hypre_error_flag;
 }
@@ -2691,7 +2725,7 @@ hypre_MGRSetFRelaxNumFunctions( void *mgr_vdata, HYPRE_Int *num_functions )
  * for computing restriction operator
 */
 HYPRE_Int
-hypre_MGRSetRestrictType( void *mgr_vdata, HYPRE_Int *restrict_type)
+hypre_MGRSetLevelRestrictType( void *mgr_vdata, HYPRE_Int *restrict_type)
 {
   hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
   HYPRE_Int i;
@@ -2701,15 +2735,45 @@ hypre_MGRSetRestrictType( void *mgr_vdata, HYPRE_Int *restrict_type)
     hypre_TFree((mgr_data -> restrict_type), HYPRE_MEMORY_HOST);
     (mgr_data -> restrict_type) = NULL;
   }
-  HYPRE_Int *restrictTypeLevel = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
+  HYPRE_Int *level_restrict_type = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
   if (restrict_type != NULL)
   {
     for (i=0; i < max_num_coarse_levels; i++)
     {
-      restrictTypeLevel[i] = *(restrict_type + i);
+      level_restrict_type[i] = *(restrict_type + i);
     }
   }
-  (mgr_data -> restrict_type) = restrictTypeLevel;
+  else
+  {
+    for (i=0; i < max_num_coarse_levels; i++)
+    {
+      level_restrict_type[i] = 0;
+    }
+  }
+  (mgr_data -> restrict_type) = level_restrict_type;
+  return hypre_error_flag;
+}
+
+/* Set the type of the restriction type
+ * for computing restriction operator
+*/
+HYPRE_Int
+hypre_MGRSetRestrictType( void *mgr_vdata, HYPRE_Int restrict_type)
+{
+  hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
+  HYPRE_Int i;
+  HYPRE_Int max_num_coarse_levels = (mgr_data -> max_num_coarse_levels);
+  if ((mgr_data -> restrict_type) != NULL)
+  {
+    hypre_TFree((mgr_data -> restrict_type), HYPRE_MEMORY_HOST);
+    (mgr_data -> restrict_type) = NULL;
+  }
+  HYPRE_Int *level_restrict_type = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
+  for (i=0; i < max_num_coarse_levels; i++)
+  {
+    level_restrict_type[i] = restrict_type;
+  }
+  (mgr_data -> restrict_type) = level_restrict_type;
   return hypre_error_flag;
 }
 
@@ -2728,7 +2792,7 @@ hypre_MGRSetNumRestrictSweeps( void *mgr_vdata, HYPRE_Int nsweeps )
  * for computing interpolation operator
 */
 HYPRE_Int
-hypre_MGRSetInterpType( void *mgr_vdata, HYPRE_Int *interpType)
+hypre_MGRSetInterpType( void *mgr_vdata, HYPRE_Int interpType)
 {
   hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
   HYPRE_Int i;
@@ -2738,15 +2802,45 @@ hypre_MGRSetInterpType( void *mgr_vdata, HYPRE_Int *interpType)
     hypre_TFree((mgr_data -> interp_type), HYPRE_MEMORY_HOST);
     (mgr_data -> interp_type) = NULL;
   }
-  HYPRE_Int *interpTypeLevel = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
+  HYPRE_Int *level_interp_type = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
+  for (i=0; i < max_num_coarse_levels; i++)
+  {
+    level_interp_type[i] = interpType;
+  }
+  (mgr_data -> interp_type) = level_interp_type;
+  return hypre_error_flag;
+}
+
+/* Set the type of the interpolation
+ * for computing interpolation operator
+*/
+HYPRE_Int
+hypre_MGRSetLevelInterpType( void *mgr_vdata, HYPRE_Int *interpType)
+{
+  hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
+  HYPRE_Int i;
+  HYPRE_Int max_num_coarse_levels = (mgr_data -> max_num_coarse_levels);
+  if ((mgr_data -> interp_type) != NULL)
+  {
+    hypre_TFree((mgr_data -> interp_type), HYPRE_MEMORY_HOST);
+    (mgr_data -> interp_type) = NULL;
+  }
+  HYPRE_Int *level_interp_type = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
   if (interpType != NULL)
   {
     for (i=0; i < max_num_coarse_levels; i++)
     {
-      interpTypeLevel[i] = *(interpType + i);
+      level_interp_type[i] = *(interpType + i);
     }
   }
-  (mgr_data -> interp_type) = interpTypeLevel;
+  else
+  {
+    for (i=0; i < max_num_coarse_levels; i++)
+    {
+      level_interp_type[i] = 2;
+    }
+  }
+  (mgr_data -> interp_type) = level_interp_type;
   return hypre_error_flag;
 }
 
@@ -3516,7 +3610,7 @@ hypre_MGRWriteSolverParams(void *mgr_vdata)
    hypre_printf("Number of relax sweeps: %d\n", (mgr_data -> num_relax_sweeps));
    //hypre_printf("Interpolation type: %d\n", (mgr_data -> interp_type));
    hypre_printf("Number of interpolation sweeps: %d\n", (mgr_data -> num_interp_sweeps));
-   hypre_printf("Restriction type: %d\n", (mgr_data -> restrict_type));
+   //hypre_printf("Restriction type: %d\n", (mgr_data -> restrict_type));
    hypre_printf("Number of restriction sweeps: %d\n", (mgr_data -> num_restrict_sweeps));
    hypre_printf("Global smoother type: %d\n", (mgr_data ->global_smooth_type));
    hypre_printf("Number of global smoother sweeps: %d\n", (mgr_data ->global_smooth_iters));   

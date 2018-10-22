@@ -227,26 +227,26 @@ main( hypre_int argc,
   HYPRE_Int mgr_nlevels = 2;
   HYPRE_Int mgr_num_reserved_nodes = 0;
   HYPRE_Int mgr_non_c_to_f = 1;
-  HYPRE_Int *mgr_frelax_method = NULL;
+  HYPRE_Int mgr_frelax_method = 0;
   HYPRE_Int *mgr_frelax_num_functions= NULL;
   HYPRE_Int *mgr_idx_array = NULL;
   HYPRE_Int *mgr_num_cindexes = NULL; 
   HYPRE_Int **mgr_cindexes = NULL;
   HYPRE_Int *mgr_reserved_coarse_indexes = NULL;
-  HYPRE_Int mgr_relax_type = 3;
+  HYPRE_Int mgr_relax_type = 0;
   HYPRE_Int mgr_num_relax_sweeps = 1;
   HYPRE_Int mgr_num_interp_sweeps = 0;
   HYPRE_Int mgr_gsmooth_type = 0;
   HYPRE_Int mgr_num_gsmooth_sweeps = 0;
-  HYPRE_Int *mgr_restrict_type = NULL;
+  HYPRE_Int mgr_restrict_type = 0;
   HYPRE_Int mgr_num_restrict_sweeps = 0;   
-  HYPRE_Int *mgr_interp_type = NULL;
-  mgr_interp_type = hypre_CTAlloc(HYPRE_Int, mgr_nlevels, HYPRE_MEMORY_HOST);
-  mgr_interp_type[0] = 2;
-  mgr_interp_type[1] = 2;
-  mgr_restrict_type = hypre_CTAlloc(HYPRE_Int, mgr_nlevels, HYPRE_MEMORY_HOST);
-  mgr_restrict_type[0] = 0;
-  mgr_restrict_type[1] = 0;
+  HYPRE_Int mgr_interp_type = 2;
+  HYPRE_Int *mgr_level_interp_type = hypre_CTAlloc(HYPRE_Int, mgr_nlevels, HYPRE_MEMORY_HOST);
+  mgr_level_interp_type[0] = 2;
+  mgr_level_interp_type[1] = 2;
+  HYPRE_Int *mgr_level_restrict_type = hypre_CTAlloc(HYPRE_Int, mgr_nlevels, HYPRE_MEMORY_HOST);
+  mgr_level_restrict_type[0] = 0;
+  mgr_level_restrict_type[1] = 0;
 
   mgr_cindexes = hypre_CTAlloc(HYPRE_Int*, mgr_nlevels, HYPRE_MEMORY_HOST);
   HYPRE_Int *lv1 = hypre_CTAlloc(HYPRE_Int, mgr_bsize, HYPRE_MEMORY_HOST);
@@ -266,12 +266,13 @@ main( hypre_int argc,
   //mgr_idx_array[2] = 71923;
   //mgr_idx_array[1] = 52800;
 
-  mgr_frelax_method = hypre_CTAlloc(HYPRE_Int, mgr_nlevels, HYPRE_MEMORY_HOST);
-  mgr_frelax_method[0] = 1;
-  mgr_frelax_method[1] = 0;
+  HYPRE_Int *mgr_level_frelax_method = hypre_CTAlloc(HYPRE_Int, mgr_nlevels, HYPRE_MEMORY_HOST);
+  mgr_level_frelax_method[0] = 1;
+  mgr_level_frelax_method[1] = 1;
 
   mgr_frelax_num_functions = hypre_CTAlloc(HYPRE_Int, mgr_nlevels, HYPRE_MEMORY_HOST);
   mgr_frelax_num_functions[0] = 3;
+  mgr_frelax_num_functions[1] = 1;
 
   char* indexList = NULL;
   /* end mgr options */
@@ -560,9 +561,9 @@ main( hypre_int argc,
   
     /* set MGR data by block */
     if (use_block_cf) {
-       HYPRE_MGRSetCpointsByGlobalBlock( pcg_precond, mgr_bsize, mgr_nlevels, mgr_idx_array, mgr_num_cindexes, mgr_cindexes);
+       HYPRE_MGRSetCpointsByContiguousBlock( pcg_precond, mgr_bsize, mgr_nlevels, mgr_idx_array, mgr_num_cindexes, mgr_cindexes);
     } else {
-       HYPRE_MGRSetCpointsByLocalBlock( pcg_precond, mgr_bsize, mgr_nlevels, mgr_num_cindexes,mgr_cindexes);
+       HYPRE_MGRSetCpointsByBlock( pcg_precond, mgr_bsize, mgr_nlevels, mgr_num_cindexes,mgr_cindexes);
     }
     /* set reserved coarse nodes */
     if(mgr_num_reserved_nodes)HYPRE_MGRSetReservedCoarseNodes(pcg_precond, mgr_num_reserved_nodes, mgr_reserved_coarse_indexes);
@@ -570,9 +571,9 @@ main( hypre_int argc,
     /* set intermediate coarse grid strategy */
     HYPRE_MGRSetNonCpointsToFpoints(pcg_precond, mgr_non_c_to_f);
     /* set F relaxation strategy */
-    HYPRE_MGRSetFRelaxMethod(pcg_precond, mgr_frelax_method);
+    HYPRE_MGRSetLevelFRelaxMethod(pcg_precond, mgr_level_frelax_method);
     /* set F relaxation number of functions*/
-    HYPRE_MGRSetFRelaxNumFunctions(pcg_precond, mgr_frelax_num_functions);
+    HYPRE_MGRSetLevelFRelaxNumFunctions(pcg_precond, mgr_frelax_num_functions);
     /* set relax type for single level F-relaxation and post-relaxation */
     HYPRE_MGRSetRelaxType(pcg_precond, mgr_relax_type);
     HYPRE_MGRSetNumRelaxSweeps(pcg_precond, mgr_num_relax_sweeps);
@@ -727,9 +728,9 @@ main( hypre_int argc,
 
     /* set MGR data by block */
     if (use_block_cf) {
-       HYPRE_MGRSetCpointsByGlobalBlock( pcg_precond, mgr_bsize, mgr_nlevels, mgr_idx_array, mgr_num_cindexes, mgr_cindexes);
+       HYPRE_MGRSetCpointsByContiguousBlock( pcg_precond, mgr_bsize, mgr_nlevels, mgr_idx_array, mgr_num_cindexes, mgr_cindexes);
     } else {
-       HYPRE_MGRSetCpointsByLocalBlock( pcg_precond, mgr_bsize, mgr_nlevels, mgr_num_cindexes,mgr_cindexes);
+       HYPRE_MGRSetCpointsByBlock( pcg_precond, mgr_bsize, mgr_nlevels, mgr_num_cindexes,mgr_cindexes);
     } 
 
     /* set reserved coarse nodes */
@@ -894,14 +895,14 @@ main( hypre_int argc,
   HYPRE_IJVectorDestroy(ij_x);
 
   hypre_TFree(mgr_num_cindexes, HYPRE_MEMORY_HOST);
-  hypre_TFree(mgr_frelax_method, HYPRE_MEMORY_HOST);
+  hypre_TFree(mgr_level_frelax_method, HYPRE_MEMORY_HOST);
   hypre_TFree(mgr_frelax_num_functions, HYPRE_MEMORY_HOST);
   hypre_TFree(mgr_idx_array, HYPRE_MEMORY_HOST);
   hypre_TFree(lv1, HYPRE_MEMORY_HOST);
   hypre_TFree(lv2, HYPRE_MEMORY_HOST);
   hypre_TFree(mgr_cindexes, HYPRE_MEMORY_HOST);
-  hypre_TFree(mgr_interp_type, HYPRE_MEMORY_HOST);
-  hypre_TFree(mgr_restrict_type, HYPRE_MEMORY_HOST);
+  hypre_TFree(mgr_level_interp_type, HYPRE_MEMORY_HOST);
+  hypre_TFree(mgr_level_restrict_type, HYPRE_MEMORY_HOST);
 
 
   /*
