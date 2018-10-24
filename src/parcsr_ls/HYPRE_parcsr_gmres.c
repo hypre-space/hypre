@@ -219,3 +219,14 @@ HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
 {
    return( HYPRE_GMRESGetFinalRelativeResidualNorm( solver, norm ) );
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRGMRESGetResidual
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParCSRGMRESGetResidual( HYPRE_Solver solver, 
+                              HYPRE_ParVector *residual   )
+{
+   return( HYPRE_GMRESGetResidual( solver, (void *) residual ) );
+}

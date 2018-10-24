@@ -65,7 +65,7 @@ hypre_StructGridCreate( MPI_Comm           comm,
       hypre_StructGridNumGhost(grid)[i] = 1;
    }
 
-#if defined(HYPRE_USE_CUDA) 
+#if defined(HYPRE_USING_CUDA) 
    hypre_StructGridDataLocation(grid) = HYPRE_MEMORY_DEVICE;
 #endif
    *grid_ptr = grid;
@@ -860,7 +860,7 @@ hypre_StructGridSetNumGhost( hypre_StructGrid *grid, HYPRE_Int  *num_ghost )
 }
 
 
-#if defined(HYPRE_USE_CUDA) 
+#if defined(HYPRE_USING_CUDA) 
 HYPRE_Int
 hypre_StructGridGetMaxBoxSize(hypre_StructGrid *grid)
 {

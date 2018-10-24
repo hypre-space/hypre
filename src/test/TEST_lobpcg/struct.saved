@@ -1,0 +1,100 @@
+# Output file: struct.out.10.lobpcg
+Iterations = 4
+Final Relative Residual Norm = 1.355288e-07
+
+# Output file: struct.out.10.lobpcg.1
+Eigenvalue lambda   1.84366453091860e-01
+Residual   4.52048636947317e-07
+
+# Output file: struct.out.10.lobpcg.5
+Eigenvalue lambda   1.84366453091770e-01
+Eigenvalue lambda   2.50882493969728e-01
+Eigenvalue lambda   3.60090369737200e-01
+Eigenvalue lambda   4.20845334658571e-01
+Eigenvalue lambda   4.20845334658890e-01
+Residual   3.35930189890736e-07
+Residual   3.11260814535858e-07
+Residual   7.33053164875689e-07
+Residual   5.14259223167152e-07
+Residual   7.32161520953280e-07
+
+# Output file: struct.out.11.lobpcg
+Iterations = 8
+Final Relative Residual Norm = 4.807900e-07
+
+# Output file: struct.out.11.lobpcg.1
+Eigenvalue lambda   1.84366453092321e-01
+Residual   1.05361158867902e-06
+
+# Output file: struct.out.11.lobpcg.5
+Eigenvalue lambda   1.84366453091757e-01
+Eigenvalue lambda   2.50882493969850e-01
+Eigenvalue lambda   3.60090369737248e-01
+Eigenvalue lambda   4.20845334660032e-01
+Eigenvalue lambda   4.20845334660335e-01
+Residual   1.94648827548280e-07
+Residual   1.22160192296946e-06
+Residual   7.71834587887496e-07
+Residual   1.28057007298605e-06
+Residual   1.26140377965945e-06
+
+# Output file: struct.out.17.lobpcg
+Iterations = 17
+Final Relative Residual Norm = 8.241147e-07
+
+# Output file: struct.out.17.lobpcg.1
+Eigenvalue lambda   1.84366453091822e-01
+Residual   2.74559569275018e-07
+
+# Output file: struct.out.17.lobpcg.5
+Eigenvalue lambda   1.84366453091761e-01
+Eigenvalue lambda   2.50882493969754e-01
+Eigenvalue lambda   3.60090369737181e-01
+Eigenvalue lambda   4.20845334658550e-01
+Eigenvalue lambda   4.20845334658985e-01
+Residual   2.50212530703055e-07
+Residual   1.21296920560361e-06
+Residual   7.17050537726402e-07
+Residual   8.69189255964679e-07
+Residual   8.69185724273522e-07
+
+# Output file: struct.out.18.lobpcg
+Iterations = 32
+Final Relative Residual Norm = 8.259590e-07
+
+# Output file: struct.out.18.lobpcg.1
+Eigenvalue lambda   1.84366453091920e-01
+Residual   4.04811751101852e-07
+
+# Output file: struct.out.18.lobpcg.5
+Eigenvalue lambda   1.84366453091760e-01
+Eigenvalue lambda   2.50882493969440e-01
+Eigenvalue lambda   3.60090369737180e-01
+Eigenvalue lambda   4.20845334658791e-01
+Eigenvalue lambda   4.20845334659400e-01
+Residual   6.51620151548372e-07
+Residual   1.04113397676966e-06
+Residual   1.05795257133655e-06
+Residual   1.01625954175797e-06
+Residual   1.09288008877697e-06
+
+# Output file: struct.out.19.lobpcg
+Iterations = 32
+Final Relative Residual Norm = 8.259590e-07
+
+# Output file: struct.out.19.lobpcg.1
+Eigenvalue lambda   1.84366453091920e-01
+Residual   4.04811751079993e-07
+
+# Output file: struct.out.19.lobpcg.5
+Eigenvalue lambda   1.84366453091760e-01
+Eigenvalue lambda   2.50882493969706e-01
+Eigenvalue lambda   3.60090369737178e-01
+Eigenvalue lambda   4.20845334658819e-01
+Eigenvalue lambda   4.20845334659484e-01
+Residual   6.51620151941224e-07
+Residual   1.04113396974827e-06
+Residual   1.05795252287838e-06
+Residual   1.01635836602686e-06
+Residual   1.09013903468312e-06
+

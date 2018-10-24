@@ -469,7 +469,7 @@ HYPRE_Int composeSharedNodes(HYPRE_Int nElems, HYPRE_Int elemNNodes, HYPRE_Int *
                sharedIDs[nShared++] = index;
          }
       }
-      qsort0(sharedIDs, 0, nShared-1);
+      hypre_qsort0(sharedIDs, 0, nShared-1);
       ncnt = 1;
       for (i = 1; i < nShared; i++)
       {
