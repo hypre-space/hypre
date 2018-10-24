@@ -145,6 +145,25 @@ extern "C"{
   }
 }
 
+extern "C"{
+__global__
+void DiagScaleVectorKernel(HYPRE_Complex* __restrict__ x, HYPRE_Complex* __restrict y, HYPRE_Complex* __restrict__ A_data, const hypre_int* __restrict__ A_i, hypre_int num_rows){
+   hypre_int i= blockIdx.x * blockDim.x + threadIdx.x;
+   if (i<num_rows)
+   {
+      x[i] = y[i]/A_data[A_i[i]];
+   }
+}
+}
+
+extern "C"{
+   void DiagScaleVector(HYPRE_Complex *x, HYPRE_Complex *y, HYPRE_Complex *A_data, hypre_int *A_i, hypre_int num_rows, cudaStream_t s){
+      const hypre_int tpb=64;
+      hypre_int num_blocks=num_rows/tpb+1;
+      DiagScaleVectorKernel<<<num_blocks,tpb,0,s>>>(x,y,A_data,A_i,num_rows);
+      hypre_CheckErrorDevice(cudaStreamSynchronize(s));
+   }
+}
 
 extern "C"{
 __global__
