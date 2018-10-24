@@ -53,8 +53,8 @@ HYPRE_LIB_SUFFIX = @HYPRE_LIBSUFFIX@
 	$(CXX) $(CXXFLAGS) -c $<
 .cc.o:
 	$(CXX) $(CXXFLAGS) -c $<
-.cu.o:
-	$(NVCC) $(NVCCFLAGS) -c $<
+#.cu.o:
+#	$(CUCC) $(CUFLAGS) -c $<
 
 FC       = @FC@
 FFLAGS   = @FFLAGS@ @FCFLAGS@ $(FC_COMPILE_FLAGS)
@@ -65,9 +65,8 @@ CFLAGS   = @CFLAGS@ @DEFS@ $(C_COMPILE_FLAGS)
 CXX      = @CXX@
 CXXFLAGS = @CXXFLAGS@ @DEFS@ $(CXX_COMPILE_FLAGS)
 
-NVCC 	  = nvcc
-NVCCFLAGS = @NVCCFLAGS@
-NVCCLIBS  = @NVCCLIBS@
+#CUCC     = @CUCC@
+#CUFLAGS  = @CUFLAGS@ @DEFS@ ${CU_COMPILE_FLAGS}
 
 LINK_FC  = @LINK_FC@
 LINK_CC  = @LINK_CC@
@@ -90,10 +89,10 @@ AR     = @AR@
 RANLIB = @RANLIB@
 
 LDFLAGS = @LDFLAGS@
-LIBS    = @LIBS@ @CALIPER_LIBS@ @NVCCLIBS@  @RAJA_LIBS@ @KOKKOS_LIBS@
+LIBS    = @LIBS@ @CALIPER_LIBS@ @HYPRE_CUDA_LIBS@ @RAJA_LIBS@ @KOKKOS_LIBS@
 FLIBS   = @FLIBS@
 
-INCLUDES = @CALIPER_INCLUDE@ @HYPRE_RAJA_INCLUDE@ @HYPRE_KOKKOS_INCLUDE@
+INCLUDES = @CALIPER_INCLUDE@ @HYPRE_RAJA_INCLUDE@ @HYPRE_KOKKOS_INCLUDE@ @HYPRE_CUDA_INCL@
 
 ##################################################################
 ##  LAPACK Library Flags 
@@ -116,9 +115,11 @@ MPILIBS    = @MPILIBS@
 MPIFLAGS   = @MPIFLAGS@
 
 ##################################################################
-##  NVCC options
+##  CUDA options
 ##################################################################
 HYPRE_NVCC_MAKEFILE = @HYPRE_NVCC_MAKEFILE@
+HYPRE_CUDA_INCL = @HYPRE_CUDA_INCL@
+HYPRE_CUDA_LIBS = @HYPRE_CUDA_LIBS@
 
 ##################################################################
 ##  Caliper options
@@ -157,7 +158,6 @@ HYPRE_RAJA_LIB          = @HYPRE_RAJA_LIB@
 ##################################################################
 ##  kokkos options
 ##################################################################
-HYPRE_KOKKOS_SRC_DIR    = @HYPRE_KOKKOS_SRC_DIR@
 HYPRE_KOKKOS_LIB_DIR    = @HYPRE_KOKKOS_LIB_DIR@
 HYPRE_KOKKOS_INCLUDE    = @HYPRE_KOKKOS_INCLUDE@
 HYPRE_KOKKOS_LIB        = @HYPRE_KOKKOS_LIB@

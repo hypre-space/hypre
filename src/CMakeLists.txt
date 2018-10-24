@@ -2,8 +2,8 @@ cmake_minimum_required (VERSION 2.8.8)
 project (hypre)
 
 # The version number.
-set (HYPRE_VERSION 2.14.0)
-set (HYPRE_DATE    2018/03/16)
+set (HYPRE_VERSION 2.15.1)
+set (HYPRE_DATE    2018/10/19)
 set (HYPRE_TIME    00:00:00)
 set (HYPRE_BUGS    hypre-support@llnl.gov)
 set (HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
@@ -189,6 +189,7 @@ list (APPEND HYPRE_HEADERS
   utilities/fortran_matrix.h
 )
 list (APPEND HYPRE_SOURCES
+  utilities/HYPRE_version.c
   utilities/amg_linklist.c
   utilities/binsearch.c
   utilities/exchange_data.c
@@ -240,12 +241,14 @@ list (APPEND HYPRE_HEADERS
 list (APPEND HYPRE_SOURCES
   krylov/bicgstab.c
   krylov/cgnr.c
+  krylov/cogmres.c
   krylov/gmres.c
   krylov/flexgmres.c
   krylov/lgmres.c
   krylov/HYPRE_bicgstab.c
   krylov/HYPRE_cgnr.c
   krylov/HYPRE_gmres.c
+  krylov/HYPRE_cogmres.c
   krylov/HYPRE_lgmres.c
   krylov/HYPRE_flexgmres.c
   krylov/HYPRE_pcg.c
@@ -445,6 +448,7 @@ list (APPEND HYPRE_SOURCES
   parcsr_ls/F90_HYPRE_parcsr_cgnr.c
   parcsr_ls/F90_HYPRE_parcsr_Euclid.c
   parcsr_ls/F90_HYPRE_parcsr_gmres.c
+  parcsr_ls/F90_HYPRE_parcsr_cogmres.c
   parcsr_ls/F90_HYPRE_parcsr_flexgmres.c
   parcsr_ls/F90_HYPRE_parcsr_lgmres.c
   parcsr_ls/F90_HYPRE_parcsr_hybrid.c
@@ -461,6 +465,7 @@ list (APPEND HYPRE_SOURCES
   parcsr_ls/HYPRE_parcsr_cgnr.c
   parcsr_ls/HYPRE_parcsr_Euclid.c
   parcsr_ls/HYPRE_parcsr_gmres.c
+  parcsr_ls/HYPRE_parcsr_cogmres.c
   parcsr_ls/HYPRE_parcsr_flexgmres.c
   parcsr_ls/HYPRE_parcsr_lgmres.c
   parcsr_ls/HYPRE_parcsr_hybrid.c

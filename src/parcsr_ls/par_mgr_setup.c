@@ -1219,8 +1219,6 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
     hypre_BoomerAMGBuildCoarseOperatorKT(P_local, A_array_local[lev_local], 
                         P_local, 0, &RAP_local);
 
-    //hypre_printf("My_ID = %d, Coarse size lev %d = %d\n", my_id, lev_local+1, hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(RAP_local)));
-
 #ifdef HYPRE_NO_GLOBAL_PARTITION
     if (my_id == (num_procs -1)) local_coarse_size = coarse_pnts_global_lvl[1];
       hypre_MPI_Bcast(&local_coarse_size, 1, HYPRE_MPI_INT, num_procs-1, comm);

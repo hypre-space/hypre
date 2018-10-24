@@ -2,7 +2,7 @@
 
 /******************************************************************************
  *
- * a few more relaxation schemes: Chebychev, FCF-Jacobi, CG  - 
+ * a few more relaxation schemes: Chebychev, FCF-Jacobi, CG  -
  * these do not go through the CF interface (hypre_BoomerAMGRelaxIF)
  *
  *****************************************************************************/
@@ -23,7 +23,7 @@ HYPRE_Int hypre_ParCSRMaxEigEstimate(hypre_ParCSRMatrix *A, /* matrix to relax w
                                HYPRE_Int scale, /* scale by diagonal?*/
                                HYPRE_Real *max_eig)
 {
-                              
+
    HYPRE_Real e_max;
    HYPRE_Real row_sum, max_norm;
    HYPRE_Real *A_diag_data;
@@ -37,7 +37,7 @@ HYPRE_Int hypre_ParCSRMaxEigEstimate(hypre_ParCSRMatrix *A, /* matrix to relax w
    HYPRE_Int *A_offd_i;
    HYPRE_Int   j;
    HYPRE_Int i, start;
-   
+
 
    /* estimate with the inf-norm of A - should be ok for SPD matrices */
 
@@ -46,20 +46,20 @@ HYPRE_Int hypre_ParCSRMaxEigEstimate(hypre_ParCSRMatrix *A, /* matrix to relax w
    A_diag_data =  hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(A));
    A_offd_i    =  hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(A));
    A_offd_data =  hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(A));
-    
+
    max_norm = 0.0;
 
    pos_diag = neg_diag = 0;
- 
+
    for ( i = 0; i < A_num_rows; i++ )
    {
       start = A_diag_i[i];
       diag_value = A_diag_data[start];
-      if (diag_value > 0) 
+      if (diag_value > 0)
       {
          pos_diag++;
       }
-      if (diag_value < 0) 
+      if (diag_value < 0)
       {
          neg_diag++;
          diag_value = -diag_value;
@@ -84,36 +84,36 @@ HYPRE_Int hypre_ParCSRMaxEigEstimate(hypre_ParCSRMatrix *A, /* matrix to relax w
    }
 
    /* get max across procs */
-   hypre_MPI_Allreduce(&max_norm, &temp, 1, HYPRE_MPI_REAL, hypre_MPI_MAX, hypre_ParCSRMatrixComm(A)); 
+   hypre_MPI_Allreduce(&max_norm, &temp, 1, HYPRE_MPI_REAL, hypre_MPI_MAX, hypre_ParCSRMatrixComm(A));
    max_norm = temp;
 
    /* from Charles */
    if ( pos_diag == 0 && neg_diag > 0 ) max_norm = - max_norm;
-   
+
    /* eig estimates */
    e_max = max_norm;
-      
+
    /* return */
    *max_eig = e_max;
-   
+
    return hypre_error_flag;
 
 }
 
 /******************************************************************************
-   use CG to get the eigenvalue estimate 
-  scale means get eig est of  (D^{-1/2} A D^{-1/2} 
+   use CG to get the eigenvalue estimate
+  scale means get eig est of  (D^{-1/2} A D^{-1/2}
 ******************************************************************************/
 
 HYPRE_Int hypre_ParCSRMaxEigEstimateCG(hypre_ParCSRMatrix *A, /* matrix to relax with */
                                  HYPRE_Int scale, /* scale by diagonal?*/
                                  HYPRE_Int max_iter,
-                                 HYPRE_Real *max_eig, 
+                                 HYPRE_Real *max_eig,
                                  HYPRE_Real *min_eig)
 {
 
    HYPRE_Int i, j, err;
-  
+
    hypre_ParVector    *p;
    hypre_ParVector    *s;
    hypre_ParVector    *r;
@@ -125,13 +125,13 @@ HYPRE_Int hypre_ParCSRMaxEigEstimateCG(hypre_ParCSRMatrix *A, /* matrix to relax
    HYPRE_Real   *trioffd = NULL;
 
    HYPRE_Real lambda_max ;
-   
+
    HYPRE_Real beta, gamma = 0.0, alpha, sdotp, gamma_old, alphainv;
-  
+
    HYPRE_Real diag;
- 
+
    HYPRE_Real lambda_min;
-   
+
    HYPRE_Real *s_data, *p_data, *ds_data, *u_data;
 
    HYPRE_Int local_size = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
@@ -143,7 +143,7 @@ HYPRE_Int hypre_ParCSRMaxEigEstimateCG(hypre_ParCSRMatrix *A, /* matrix to relax
 
    /* check the size of A - don't iterate more than the size */
    HYPRE_Int size = hypre_ParCSRMatrixGlobalNumRows(A);
-   
+
    if (size < max_iter)
       max_iter = size;
 
@@ -200,7 +200,7 @@ HYPRE_Int hypre_ParCSRMaxEigEstimateCG(hypre_ParCSRMatrix *A, /* matrix to relax
 
     /* set residual to random */
     hypre_ParVectorSetRandomValues(r,1);
-    
+
     if (scale)
     {
        for (i = 0; i < local_size; i++)
@@ -208,29 +208,29 @@ HYPRE_Int hypre_ParCSRMaxEigEstimateCG(hypre_ParCSRMatrix *A, /* matrix to relax
           diag = A_diag_data[A_diag_i[i]];
           ds_data[i] = 1/sqrt(diag);
        }
-       
+
     }
     else
     {
        /* set ds to 1 */
        hypre_ParVectorSetConstantValues(ds,1.0);
     }
-    
- 
+
+
     /* gamma = <r,Cr> */
     gamma = hypre_ParVectorInnerProd(r,p);
 
     /* for the initial filling of the tridiag matrix */
     beta = 1.0;
-    
+
     i = 0;
     while (i < max_iter)
     {
-       
+
         /* s = C*r */
        /* TO DO:  C = diag scale */
        hypre_ParVectorCopy(r, s);
-       
+
        /*gamma = <r,Cr> */
        gamma_old = gamma;
        gamma = hypre_ParVectorInnerProd(r,s);
@@ -245,7 +245,7 @@ HYPRE_Int hypre_ParCSRMaxEigEstimateCG(hypre_ParCSRMatrix *A, /* matrix to relax
        {
           /* beta = gamma / gamma_old */
           beta = gamma / gamma_old;
-          
+
           /* p = s + beta p */
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE
@@ -255,7 +255,7 @@ HYPRE_Int hypre_ParCSRMaxEigEstimateCG(hypre_ParCSRMatrix *A, /* matrix to relax
              p_data[j] = s_data[j] + beta*p_data[j];
           }
        }
-       
+
        if (scale)
        {
            /* s = D^{-1/2}A*D^{-1/2}*p */
@@ -276,13 +276,13 @@ HYPRE_Int hypre_ParCSRMaxEigEstimateCG(hypre_ParCSRMatrix *A, /* matrix to relax
           /* s = A*p */
           hypre_ParCSRMatrixMatvec(1.0, A, p, 0.0, s);
        }
-       
+
        /* <s,p> */
        sdotp =  hypre_ParVectorInnerProd(s,p);
 
        /* alpha = gamma / <s,p> */
        alpha = gamma/sdotp;
-      
+
        /* get tridiagonal matrix */
        alphainv = 1.0/alpha;
 
@@ -291,26 +291,26 @@ HYPRE_Int hypre_ParCSRMaxEigEstimateCG(hypre_ParCSRMatrix *A, /* matrix to relax
        tridiag[i] += alphainv;
 
        trioffd[i+1] = alphainv;
-       trioffd[i] *= sqrt(beta);  
+       trioffd[i] *= sqrt(beta);
 
        /* x = x + alpha*p */
        /* don't need */
 
        /* r = r - alpha*s */
        hypre_ParVectorAxpy( -alpha, s, r);
-              
+
        i++;
-       
+
     }
 
     /* eispack routine - eigenvalues return in tridiag and ordered*/
     hypre_LINPACKcgtql1(&i,tridiag,trioffd,&err);
-    
+
     lambda_max = tridiag[i-1];
     lambda_min = tridiag[0];
     /* hypre_printf("linpack max eig est = %g\n", lambda_max);*/
     /* hypre_printf("linpack min eig est = %g\n", lambda_min);*/
-  
+
     hypre_TFree(tridiag, HYPRE_MEMORY_HOST);
     hypre_TFree(trioffd, HYPRE_MEMORY_HOST);
 
@@ -334,7 +334,7 @@ HYPRE_Int hypre_ParCSRMaxEigEstimateCG(hypre_ParCSRMatrix *A, /* matrix to relax
 
 Chebyshev relaxation
 
- 
+
 Can specify order 1-4 (this is the order of the resid polynomial)- here we
 explicitly code the coefficients (instead of
 iteratively determining)
@@ -354,18 +354,18 @@ means half, and .1 means 10percent)
 
 HYPRE_Int hypre_ParCSRRelax_Cheby(hypre_ParCSRMatrix *A, /* matrix to relax with */
                             hypre_ParVector *f,    /* right-hand side */
-                            HYPRE_Real max_eig,      
-                            HYPRE_Real min_eig,     
-                            HYPRE_Real fraction,   
+                            HYPRE_Real max_eig,
+                            HYPRE_Real min_eig,
+                            HYPRE_Real fraction,
                             HYPRE_Int order,            /* polynomial order */
                             HYPRE_Int scale,            /* scale by diagonal?*/
-                            HYPRE_Int variant,           
+                            HYPRE_Int variant,
                             hypre_ParVector *u,   /* initial/updated approximation */
                             hypre_ParVector *v    /* temporary vector */,
                             hypre_ParVector *r    /*another temp vector */  )
 {
-   
-   
+
+
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
    HYPRE_Real     *A_diag_data  = hypre_CSRMatrixData(A_diag);
    HYPRE_Int            *A_diag_i     = hypre_CSRMatrixI(A_diag);
@@ -377,17 +377,17 @@ HYPRE_Int hypre_ParCSRRelax_Cheby(hypre_ParCSRMatrix *A, /* matrix to relax with
    HYPRE_Real  *r_data = hypre_VectorData(hypre_ParVectorLocalVector(r));
 
    HYPRE_Real theta, delta;
-   
+
    HYPRE_Real den;
    HYPRE_Real upper_bound, lower_bound;
-   
+
    HYPRE_Int i, j;
    HYPRE_Int num_rows = hypre_CSRMatrixNumRows(A_diag);
- 
+
    HYPRE_Real coefs[5];
    HYPRE_Real mult;
    HYPRE_Real *orig_u;
-   
+
    HYPRE_Real tmp_d;
 
    HYPRE_Int cheby_order;
@@ -407,11 +407,11 @@ HYPRE_Int hypre_ParCSRRelax_Cheby(hypre_ParCSRMatrix *A, /* matrix to relax with
 
    /* we are using the order of p(A) */
    cheby_order = order -1;
-   
+
     /* make sure we are large enough -  Adams et al. 2003 */
    upper_bound = max_eig * 1.1;
    /* lower_bound = max_eig/fraction; */
-   lower_bound = (upper_bound - min_eig)* fraction + min_eig; 
+   lower_bound = (upper_bound - min_eig)* fraction + min_eig;
 
 
    /* theta and delta */
@@ -421,77 +421,77 @@ HYPRE_Int hypre_ParCSRRelax_Cheby(hypre_ParCSRMatrix *A, /* matrix to relax with
    if (variant == 1 )
    {
       switch ( cheby_order ) /* these are the corresponding cheby polynomials: u = u_o + s(A)r_0  - so order is
-                                one less that  resid poly: r(t) = 1 - t*s(t) */ 
+                                one less that  resid poly: r(t) = 1 - t*s(t) */
       {
-         case 0: 
-            coefs[0] = 1.0/theta;     
-            
+         case 0:
+            coefs[0] = 1.0/theta;
+
             break;
-            
+
          case 1:  /* (del - t + 2*th)/(th^2 + del*th) */
             den = (theta*theta + delta*theta);
-            
-            coefs[0] = (delta + 2*theta)/den;     
+
+            coefs[0] = (delta + 2*theta)/den;
             coefs[1] = -1.0/den;
-            
+
             break;
-            
+
          case 2:  /* (4*del*th - del^2 - t*(2*del + 6*th) + 2*t^2 + 6*th^2)/(2*del*th^2 - del^2*th - del^3 + 2*th^3)*/
             den = 2*delta*theta*theta - delta*delta*theta - pow(delta,3) + 2*pow(theta,3);
-            
+
             coefs[0] = (4*delta*theta - pow(delta,2) +  6*pow(theta,2))/den;
             coefs[1] = -(2*delta + 6*theta)/den;
             coefs[2] =  2/den;
-            
+
             break;
-            
+
          case 3: /* -(6*del^2*th - 12*del*th^2 - t^2*(4*del + 16*th) + t*(12*del*th - 3*del^2 + 24*th^2) + 3*del^3 + 4*t^3 - 16*th^3)/(4*del*th^3 - 3*del^2*th^2 - 3*del^3*th + 4*th^4)*/
             den = - (4*delta*pow(theta,3) - 3*pow(delta,2)*pow(theta,2) - 3*pow(delta,3)*theta + 4*pow(theta,4) );
-            
+
             coefs[0] = (6*pow(delta,2)*theta - 12*delta*pow(theta,2) + 3*pow(delta,3) - 16*pow(theta,3)   )/den;
             coefs[1] = (12*delta*theta - 3*pow(delta,2) + 24*pow(theta,2))/den;
             coefs[2] =  -( 4*delta + 16*theta)/den;
             coefs[3] = 4/den;
-            
+
             break;
       }
    }
-   
+
    else /* standard chebyshev */
    {
-   
+
       switch ( cheby_order ) /* these are the corresponding cheby polynomials: u = u_o + s(A)r_0  - so order is
-                                one less thatn resid poly: r(t) = 1 - t*s(t) */ 
+                                one less thatn resid poly: r(t) = 1 - t*s(t) */
       {
-         case 0: 
-            coefs[0] = 1.0/theta;     
+         case 0:
+            coefs[0] = 1.0/theta;
             break;
-            
+
          case 1:  /* (  2*t - 4*th)/(del^2 - 2*th^2) */
             den = delta*delta - 2*theta*theta;
-            
-            coefs[0] = -4*theta/den;     
-            coefs[1] = 2/den;   
-            
+
+            coefs[0] = -4*theta/den;
+            coefs[1] = 2/den;
+
             break;
-            
+
          case 2: /* (3*del^2 - 4*t^2 + 12*t*th - 12*th^2)/(3*del^2*th - 4*th^3)*/
             den = 3*(delta*delta)*theta - 4*(theta*theta*theta);
-            
+
             coefs[0] = (3*delta*delta - 12 *theta*theta)/den;
             coefs[1] = 12*theta/den;
-            coefs[2] = -4/den; 
-            
+            coefs[2] = -4/den;
+
             break;
-            
+
          case 3: /*(t*(8*del^2 - 48*th^2) - 16*del^2*th + 32*t^2*th - 8*t^3 + 32*th^3)/(del^4 - 8*del^2*th^2 + 8*th^4)*/
             den = pow(delta,4) - 8*delta*delta*theta*theta + 8*pow(theta,4);
-            
+
             coefs[0] = (32*pow(theta,3)- 16*delta*delta*theta)/den;
             coefs[1] = (8*delta*delta - 48*theta*theta)/den;
             coefs[2] = 32*theta/den;
             coefs[3] = -8/den;
-            
+
             break;
       }
    }
@@ -501,53 +501,53 @@ HYPRE_Int hypre_ParCSRRelax_Cheby(hypre_ParCSRMatrix *A, /* matrix to relax with
    if (!scale)
    {
       /* get residual: r = f - A*u */
-      hypre_ParVectorCopy(f, r); 
+      hypre_ParVectorCopy(f, r);
       hypre_ParCSRMatrixMatvec(-1.0, A, u, 1.0, r);
 
 
 
-      for ( i = 0; i < num_rows; i++ ) 
+      for ( i = 0; i < num_rows; i++ )
       {
          orig_u[i] = u_data[i];
-         u_data[i] = r_data[i] * coefs[cheby_order]; 
+         u_data[i] = r_data[i] * coefs[cheby_order];
       }
-      for (i = cheby_order - 1; i >= 0; i-- ) 
+      for (i = cheby_order - 1; i >= 0; i-- )
       {
          hypre_ParCSRMatrixMatvec(1.0, A, u, 0.0, v);
          mult = coefs[i];
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE 
+#pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE
 #endif
          for ( j = 0; j < num_rows; j++ )
          {
             u_data[j] = mult * r_data[j] + v_data[j];
          }
-         
+
       }
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE 
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
-      for ( i = 0; i < num_rows; i++ ) 
+      for ( i = 0; i < num_rows; i++ )
       {
          u_data[i] = orig_u[i] + u_data[i];
       }
-   
-   
+
+
    }
    else /* scaling! */
    {
-      
+
       /*grab 1/sqrt(diagonal) */
-      
+
       ds = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
                                  hypre_ParCSRMatrixGlobalNumRows(A),
                                  hypre_ParCSRMatrixRowStarts(A));
       hypre_ParVectorInitialize(ds);
       hypre_ParVectorSetPartitioningOwner(ds,0);
       ds_data = hypre_VectorData(hypre_ParVectorLocalVector(ds));
-      
+
       tmp_vec = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
                                       hypre_ParCSRMatrixGlobalNumRows(A),
                                       hypre_ParCSRMatrixRowStarts(A));
@@ -560,7 +560,7 @@ HYPRE_Int hypre_ParCSRRelax_Cheby(hypre_ParCSRMatrix *A, /* matrix to relax with
 
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(j,diag) HYPRE_SMP_SCHEDULE 
+#pragma omp parallel for private(j,diag) HYPRE_SMP_SCHEDULE
 #endif
       for (j = 0; j < num_rows; j++)
       {
@@ -572,32 +572,32 @@ HYPRE_Int hypre_ParCSRRelax_Cheby(hypre_ParCSRMatrix *A, /* matrix to relax with
 
       hypre_ParCSRMatrixMatvec(-1.0, A, u, 0.0, tmp_vec);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE 
+#pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE
 #endif
-      for ( j = 0; j < num_rows; j++ ) 
+      for ( j = 0; j < num_rows; j++ )
       {
          r_data[j] += ds_data[j] * tmp_data[j];
       }
 
-      /* save original u, then start 
+      /* save original u, then start
          the iteration by multiplying r by the cheby coef.*/
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE 
+#pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE
 #endif
-      for ( j = 0; j < num_rows; j++ ) 
+      for ( j = 0; j < num_rows; j++ )
       {
          orig_u[j] = u_data[j]; /* orig, unscaled u */
 
-         u_data[j] = r_data[j] * coefs[cheby_order]; 
+         u_data[j] = r_data[j] * coefs[cheby_order];
       }
 
-      /* now do the other coefficients */   
-      for (i = cheby_order - 1; i >= 0; i-- ) 
+      /* now do the other coefficients */
+      for (i = cheby_order - 1; i >= 0; i-- )
       {
          /* v = D^(-1/2)AD^(-1/2)u */
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE 
+#pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE
 #endif
          for ( j = 0; j < num_rows; j++ )
          {
@@ -609,28 +609,28 @@ HYPRE_Int hypre_ParCSRRelax_Cheby(hypre_ParCSRMatrix *A, /* matrix to relax with
          mult = coefs[i];
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(j,tmp_d) HYPRE_SMP_SCHEDULE 
+#pragma omp parallel for private(j,tmp_d) HYPRE_SMP_SCHEDULE
 #endif
          for ( j = 0; j < num_rows; j++ )
          {
             tmp_d = ds_data[j]* v_data[j];
             u_data[j] = mult * r_data[j] + tmp_d;
          }
-         
+
       } /* end of cheby_order loop */
 
       /* now we have to scale u_data before adding it to u_orig*/
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE 
+#pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE
 #endif
-      for ( j = 0; j < num_rows; j++ ) 
+      for ( j = 0; j < num_rows; j++ )
       {
          u_data[j] = orig_u[j] + ds_data[j]*u_data[j];
       }
-   
+
       hypre_ParVectorDestroy(ds);
-      hypre_ParVectorDestroy(tmp_vec);  
+      hypre_ParVectorDestroy(tmp_vec);
 
 
    }/* end of scaling code */
@@ -638,13 +638,13 @@ HYPRE_Int hypre_ParCSRRelax_Cheby(hypre_ParCSRMatrix *A, /* matrix to relax with
 
 
    hypre_TFree(orig_u, HYPRE_MEMORY_HOST);
-  
 
-   
+
+
 
    return hypre_error_flag;
 
-   
+
 }
 
 /*--------------------------------------------------------------------------
@@ -658,13 +658,13 @@ HYPRE_Int hypre_BoomerAMGRelax_FCFJacobi( hypre_ParCSRMatrix *A,
                                     hypre_ParVector    *u,
                                     hypre_ParVector    *Vtemp)
 {
-   
+
    HYPRE_Int i;
    HYPRE_Int relax_points[3];
    HYPRE_Int relax_type = 0;
- 
+
    hypre_ParVector    *Ztemp = NULL;
-   
+
 
    relax_points[0] = -1; /*F */
    relax_points[1] =  1; /*C */
@@ -683,9 +683,9 @@ HYPRE_Int hypre_BoomerAMGRelax_FCFJacobi( hypre_ParCSRMatrix *A,
                             0.0,
                             NULL,
                             u,
-                            Vtemp, Ztemp); 
+                            Vtemp, Ztemp);
    }
-   else   
+   else
    {
       for (i=0; i < 3; i++)
          hypre_BoomerAMGRelax(A,
@@ -697,16 +697,16 @@ HYPRE_Int hypre_BoomerAMGRelax_FCFJacobi( hypre_ParCSRMatrix *A,
                               0.0,
                               NULL,
                               u,
-                              Vtemp, Ztemp); 
+                              Vtemp, Ztemp);
    }
-   
+
 
    return hypre_error_flag;
-   
+
 }
 
 /*--------------------------------------------------------------------------
- * CG Smoother - 
+ * CG Smoother -
  *
  *--------------------------------------------------------------------------*/
 
@@ -716,11 +716,12 @@ HYPRE_Int hypre_ParCSRRelax_CG( HYPRE_Solver solver,
                              hypre_ParVector    *u,
                              HYPRE_Int num_its)
 {
-  
+
    HYPRE_PCGSetMaxIter(solver, num_its); /* max iterations */
+   HYPRE_PCGSetTol(solver, 0.0); /* max iterations */
    HYPRE_ParCSRPCGSolve(solver, (HYPRE_ParCSRMatrix)A, (HYPRE_ParVector)f, (HYPRE_ParVector)u);
 
-#if 0   
+#if 0
    {
       HYPRE_Int myid;
       HYPRE_Int num_iterations;
@@ -735,8 +736,8 @@ HYPRE_Int hypre_ParCSRRelax_CG( HYPRE_Solver solver,
          hypre_printf("            -----CG PCG Final Relative Residual Norm = %e\n", final_res_norm);
       }
     }
-#endif   
-   
+#endif
+
    return hypre_error_flag;
 
 }
@@ -746,7 +747,7 @@ HYPRE_Int hypre_ParCSRRelax_CG( HYPRE_Solver solver,
 
 
 /* tql1.f --
-  
+
   this is the eispack translation - from Barry Smith in Petsc
 
   Note that this routine always uses real numbers (not complex) even
@@ -809,12 +810,12 @@ HYPRE_Int hypre_LINPACKcgtql1(HYPRE_Int *n,HYPRE_Real *d,HYPRE_Real *e,HYPRE_Int
 /*     CALLS CGPTHY FOR  DSQRT(A*A + B*B) . */
 
 /*     QUESTIONS AND COMMENTS SHOULD BE DIRECTED TO BURTON S. GARBOW, */
-/*     MATHEMATICS AND COMPUTER SCIENCE DIV, ARGONNE NATIONAL LABORATORY 
+/*     MATHEMATICS AND COMPUTER SCIENCE DIV, ARGONNE NATIONAL LABORATORY
 */
 
 /*     THIS VERSION DATED AUGUST 1983. */
 
-/*     ------------------------------------------------------------------ 
+/*     ------------------------------------------------------------------
 */
     HYPRE_Real ds;
 
@@ -906,7 +907,7 @@ L145:
             p = c * d[i] - s * g;
             d[i + 1] = h + s * (c * g + s * d[i]);
         }
- 
+
         p = -s * s2 * c3 * el1 * e[l] / dl1;
         e[l] = s * p;
         d[l] = c * p;
@@ -943,7 +944,7 @@ L1000:
     *ierr = l;
 L1001:
     return 0;
-    
+
 } /* cgtql1_ */
 
 
@@ -951,7 +952,7 @@ HYPRE_Real hypre_LINPACKcgpthy(HYPRE_Real *a,HYPRE_Real *b)
 {
     /* System generated locals */
     HYPRE_Real ret_val,d__1,d__2,d__3;
- 
+
     /* Local variables */
     HYPRE_Real p,r,s,t,u;
 
@@ -991,8 +992,8 @@ L20:
 
 /*--------------------------------------------------------------------------
  * hypre_ParCSRRelax_L1_Jacobi (same as the one in AMS, but this allows CF)
-  
-  u += w D^{-1}(f - A u), where D_ii = ||A(i,:)||_1 
+
+  u += w D^{-1}(f - A u), where D_ii = ||A(i,:)||_1
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int  hypre_ParCSRRelax_L1_Jacobi( hypre_ParCSRMatrix *A,
@@ -1006,7 +1007,7 @@ HYPRE_Int  hypre_ParCSRRelax_L1_Jacobi( hypre_ParCSRMatrix *A,
 
 {
 
-    
+
     MPI_Comm	   comm = hypre_ParCSRMatrixComm(A);
     hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
     HYPRE_Real     *A_diag_data  = hypre_CSRMatrixData(A_diag);
@@ -1018,66 +1019,66 @@ HYPRE_Int  hypre_ParCSRRelax_L1_Jacobi( hypre_ParCSRMatrix *A,
     HYPRE_Int            *A_offd_j     = hypre_CSRMatrixJ(A_offd);
     hypre_ParCSRCommPkg  *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
     hypre_ParCSRCommHandle *comm_handle;
-    
+
     HYPRE_Int             n       = hypre_CSRMatrixNumRows(A_diag);
     HYPRE_Int             num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
-    
+
     hypre_Vector   *u_local = hypre_ParVectorLocalVector(u);
     HYPRE_Real     *u_data  = hypre_VectorData(u_local);
-    
+
     hypre_Vector   *f_local = hypre_ParVectorLocalVector(f);
     HYPRE_Real     *f_data  = hypre_VectorData(f_local);
-    
+
     hypre_Vector   *Vtemp_local = hypre_ParVectorLocalVector(Vtemp);
     HYPRE_Real     *Vtemp_data = hypre_VectorData(Vtemp_local);
     HYPRE_Real 	   *Vext_data = NULL;
     HYPRE_Real 	   *v_buf_data;
-    
+
     HYPRE_Int            i, j;
     HYPRE_Int            ii, jj;
     HYPRE_Int		   num_sends;
     HYPRE_Int		   index, start;
     HYPRE_Int		   num_procs, my_id ;
-    
+
     HYPRE_Real     zero = 0.0;
     HYPRE_Real	   res;
 
 
-    hypre_MPI_Comm_size(comm,&num_procs);  
-    hypre_MPI_Comm_rank(comm,&my_id);  
+    hypre_MPI_Comm_size(comm,&num_procs);
+    hypre_MPI_Comm_rank(comm,&my_id);
 
     if (num_procs > 1)
     {
        num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-       
-       v_buf_data = hypre_CTAlloc(HYPRE_Real,  
+
+       v_buf_data = hypre_CTAlloc(HYPRE_Real,
                                   hypre_ParCSRCommPkgSendMapStart(comm_pkg,  num_sends), HYPRE_MEMORY_HOST);
-       
+
        Vext_data = hypre_CTAlloc(HYPRE_Real, num_cols_offd, HYPRE_MEMORY_HOST);
-       
+
        if (num_cols_offd)
        {
           A_offd_j = hypre_CSRMatrixJ(A_offd);
           A_offd_data = hypre_CSRMatrixData(A_offd);
        }
-       
+
        index = 0;
        for (i = 0; i < num_sends; i++)
        {
           start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
           for (j=start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
-             v_buf_data[index++] 
+             v_buf_data[index++]
                 = u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
        }
-       
-       comm_handle = hypre_ParCSRCommHandleCreate( 1, comm_pkg, v_buf_data, 
+
+       comm_handle = hypre_ParCSRCommHandleCreate( 1, comm_pkg, v_buf_data,
                                                    Vext_data);
     }
 
    /*-----------------------------------------------------------------
     * Copy current approximation into temporary vector.
     *-----------------------------------------------------------------*/
-    
+
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
@@ -1085,17 +1086,17 @@ HYPRE_Int  hypre_ParCSRRelax_L1_Jacobi( hypre_ParCSRMatrix *A,
     {
        Vtemp_data[i] = u_data[i];
     }
-    
+
     if (num_procs > 1)
-    { 
+    {
        hypre_ParCSRCommHandleDestroy(comm_handle);
        comm_handle = NULL;
-    } 
-    
+    }
+
     /*-----------------------------------------------------------------
      * Relax all points.
      *-----------------------------------------------------------------*/
-    
+
     if (relax_points == 0)
     {
 #ifdef HYPRE_USING_OPENMP
@@ -1103,7 +1104,7 @@ HYPRE_Int  hypre_ParCSRRelax_L1_Jacobi( hypre_ParCSRMatrix *A,
 #endif
        for (i = 0; i < n; i++)
        {
-          
+
           /*-----------------------------------------------------------
            * If diagonal is nonzero, relax point i; otherwise, skip it.
            *-----------------------------------------------------------*/
@@ -1124,7 +1125,7 @@ HYPRE_Int  hypre_ParCSRRelax_L1_Jacobi( hypre_ParCSRMatrix *A,
           }
        }
     }
-    
+
     /*-----------------------------------------------------------------
      * Relax only C or F points as determined by relax_points.
      *-----------------------------------------------------------------*/
@@ -1135,13 +1136,13 @@ HYPRE_Int  hypre_ParCSRRelax_L1_Jacobi( hypre_ParCSRMatrix *A,
 #endif
        for (i = 0; i < n; i++)
        {
-          
+
           /*-----------------------------------------------------------
            * If i is of the right type ( C or F ) and diagonal is
            * nonzero, relax point i; otherwise, skip it.
            *-----------------------------------------------------------*/
-          
-          if (cf_marker[i] == relax_points 
+
+          if (cf_marker[i] == relax_points
               && A_diag_data[A_diag_i[i]] != zero)
           {
              res = f_data[i];
@@ -1157,7 +1158,7 @@ HYPRE_Int  hypre_ParCSRRelax_L1_Jacobi( hypre_ParCSRMatrix *A,
              }
              u_data[i] += (relax_weight * res)/l1_norms[i];
           }
-       }     
+       }
     }
     if (num_procs > 1)
     {

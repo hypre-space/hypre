@@ -56,7 +56,7 @@ hypre_SysPFMGCreate( MPI_Comm  comm )
 HYPRE_Int
 hypre_SysPFMGDestroy( void *sys_pfmg_vdata )
 {
-	hypre_SysPFMGData *sys_pfmg_data = (hypre_SysPFMGData *)sys_pfmg_vdata;
+   hypre_SysPFMGData *sys_pfmg_data = (hypre_SysPFMGData *)sys_pfmg_vdata;
 
    HYPRE_Int l;
 

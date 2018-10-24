@@ -40,7 +40,7 @@ typedef struct
       With rowwise storage, vj[i] = data[ j + num_vectors*i] */
    HYPRE_Int  vecstride, idxstride;
    /* ... so vj[i] = data[ j*vecstride + i*idxstride ] regardless of row_storage.*/
-#ifdef HYPRE_USE_GPU
+#ifdef HYPRE_USING_GPU
   HYPRE_Int on_device;
 #endif
 #ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
