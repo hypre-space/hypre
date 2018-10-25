@@ -1543,7 +1543,6 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
    HYPRE_Int		num_functions;
    HYPRE_Int		nodal;
    HYPRE_Int		relax_order;
-   HYPRE_Int		relax_type;
    HYPRE_Int		keepT;
    HYPRE_Int	       *num_grid_sweeps;
    HYPRE_Int	       *grid_relax_type;
