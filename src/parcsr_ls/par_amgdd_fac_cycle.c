@@ -190,8 +190,10 @@ FAC_Project( hypre_ParCompGrid *compGrid_f, hypre_ParCompGrid *compGrid_c )
 		{
          // Update fine grid solution with coarse FAC_projection
 			if (hypre_ParCompGridPColInd(compGrid_f)[j] >= 0)
+         {
             hypre_ParCompGridU(compGrid_f)[i] += hypre_ParCompGridPData(compGrid_f)[j] * hypre_ParCompGridU(compGrid_c)[ hypre_ParCompGridPColInd(compGrid_f)[j] ];
-		}
+         }
+      }
 	}
 	return 0;
 }
@@ -209,7 +211,7 @@ FAC_Restrict( hypre_ParCompGrid *compGrid_f, hypre_ParCompGrid *compGrid_c, HYPR
 	for (i = 0; i < hypre_ParCompGridNumNodes(compGrid_c); i++)
 	{
 		if (hypre_ParCompGridCoarseResidualMarker(compGrid_c)[i] == 2) hypre_ParCompGridF(compGrid_c)[i] = 0.0;
-	}
+   }
 
    // #if DUMP_INTERMEDIATE_SOLNS
    // sprintf(filename, "outputs/comp_r%d_level%d", myid, level);
@@ -258,7 +260,7 @@ FAC_Restrict( hypre_ParCompGrid *compGrid_f, hypre_ParCompGrid *compGrid_c, HYPR
                #endif
    				if (hypre_ParCompGridCoarseResidualMarker(compGrid_c)[ hypre_ParCompGridPColInd(compGrid_f)[j] ] == 2)
    					hypre_ParCompGridF(compGrid_c)[ hypre_ParCompGridPColInd(compGrid_f)[j] ] += res*hypre_ParCompGridPData(compGrid_f)[j];
-			   }
+            }
          }
 		}
       // #if DUMP_INTERMEDIATE_SOLNS
