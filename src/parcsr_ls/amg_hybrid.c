@@ -30,55 +30,57 @@ typedef struct
    HYPRE_Real            tol;
    HYPRE_Real            a_tol;
    HYPRE_Real            cf_tol;
-   HYPRE_Int                   dscg_max_its;
-   HYPRE_Int                   pcg_max_its;
-   HYPRE_Int                   two_norm;
-   HYPRE_Int                   stop_crit;
-   HYPRE_Int                   rel_change;
-   HYPRE_Int                   solver_type;
-   HYPRE_Int                   k_dim;
+   HYPRE_Int             dscg_max_its;
+   HYPRE_Int             pcg_max_its;
+   HYPRE_Int             two_norm;
+   HYPRE_Int             stop_crit;
+   HYPRE_Int             rel_change;
+   HYPRE_Int             solver_type;
+   HYPRE_Int             k_dim;
 
-   HYPRE_Int                   pcg_default;              /* boolean */
-   HYPRE_Int                 (*pcg_precond_solve)(void*,void*,void*,void*);
-   HYPRE_Int                 (*pcg_precond_setup)(void*,void*,void*,void*);
+   HYPRE_Int             pcg_default;              /* boolean */
+   HYPRE_Int           (*pcg_precond_solve)(void*,void*,void*,void*);
+   HYPRE_Int           (*pcg_precond_setup)(void*,void*,void*,void*);
    void                 *pcg_precond;
    void                 *pcg_solver;
 
    /* log info (always logged) */
-   HYPRE_Int                   dscg_num_its;
-   HYPRE_Int                   pcg_num_its;
+   HYPRE_Int             dscg_num_its;
+   HYPRE_Int             pcg_num_its;
    HYPRE_Real            final_rel_res_norm;
-   HYPRE_Int                   time_index;
+   HYPRE_Int             time_index;
 
    /* additional information (place-holder currently used to print norms) */
-   HYPRE_Int                   logging;
-   HYPRE_Int                   print_level; 
+   HYPRE_Int             logging;
+   HYPRE_Int             print_level; 
 
    /* info for BoomerAMG */
-   HYPRE_Real		strong_threshold;
-   HYPRE_Real		max_row_sum;
-   HYPRE_Real		trunc_factor;
-   HYPRE_Int                  pmax;
-   HYPRE_Int                  setup_type;
-   HYPRE_Int			max_levels;
-   HYPRE_Int			measure_type;
-   HYPRE_Int			coarsen_type;
-   HYPRE_Int			interp_type;
-   HYPRE_Int			cycle_type;
-   HYPRE_Int		        relax_order;
-   HYPRE_Int		        max_coarse_size;
-   HYPRE_Int		        min_coarse_size;
-   HYPRE_Int		        seq_threshold;
-   HYPRE_Int		       *num_grid_sweeps;
-   HYPRE_Int		       *grid_relax_type;
-   HYPRE_Int		      **grid_relax_points;
-   HYPRE_Real	       *relax_weight;
-   HYPRE_Real	       *omega;
-   HYPRE_Int		        num_paths;
-   HYPRE_Int		        agg_num_levels;
-   HYPRE_Int		        num_functions;
-   HYPRE_Int		        nodal;
-   HYPRE_Int		       *dof_func;
+   HYPRE_Real	 	 strong_threshold;
+   HYPRE_Real	  	 max_row_sum;
+   HYPRE_Real		 trunc_factor;
+   HYPRE_Int             pmax;
+   HYPRE_Int             setup_type;
+   HYPRE_Int		 max_levels;
+   HYPRE_Int		 measure_type;
+   HYPRE_Int		 coarsen_type;
+   HYPRE_Int		 interp_type;
+   HYPRE_Int		 cycle_type;
+   HYPRE_Int		 relax_order;
+   HYPRE_Int		 relax_type;
+   HYPRE_Int		 keepT;
+   HYPRE_Int		 max_coarse_size;
+   HYPRE_Int		 min_coarse_size;
+   HYPRE_Int		 seq_threshold;
+   HYPRE_Int		*num_grid_sweeps;
+   HYPRE_Int		*grid_relax_type;
+   HYPRE_Int	       **grid_relax_points;
+   HYPRE_Real	        *relax_weight;
+   HYPRE_Real	        *omega;
+   HYPRE_Int		 num_paths;
+   HYPRE_Int		 agg_num_levels;
+   HYPRE_Int		 num_functions;
+   HYPRE_Int		 nodal;
+   HYPRE_Int		*dof_func;
 
 } hypre_AMGHybridData;
 
@@ -130,6 +132,8 @@ hypre_AMGHybridCreate( )
    (AMGhybrid_data -> interp_type)  = 6;
    (AMGhybrid_data -> cycle_type)  = 1;
    (AMGhybrid_data -> relax_order)  = 0;
+   (AMGhybrid_data -> relax_type)  = -1;
+   (AMGhybrid_data -> keepT)  = 0;
    (AMGhybrid_data -> max_coarse_size)  = 9;
    (AMGhybrid_data -> min_coarse_size)  = 1;
    (AMGhybrid_data -> seq_threshold)  = 0;
@@ -906,6 +910,26 @@ hypre_AMGHybridSetRelaxOrder( void *AMGhybrid_vdata,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_AMGHybridSetKeepTranspose
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_AMGHybridSetKeepTranspose( void *AMGhybrid_vdata,
+                              HYPRE_Int   keepT  )
+{
+   hypre_AMGHybridData *AMGhybrid_data =(hypre_AMGHybridData *) AMGhybrid_vdata;
+   if (!AMGhybrid_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   (AMGhybrid_data -> keepT) = keepT;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_AMGHybridSetMaxCoarseSize
  *--------------------------------------------------------------------------*/
 
@@ -1520,6 +1544,9 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
    HYPRE_Int		agg_num_levels;
    HYPRE_Int		num_functions;
    HYPRE_Int		nodal;
+   HYPRE_Int		relax_order;
+   HYPRE_Int		relax_type;
+   HYPRE_Int		keepT;
    HYPRE_Int	       *num_grid_sweeps;
    HYPRE_Int	       *grid_relax_type;
    HYPRE_Int	      **grid_relax_points;
@@ -1600,6 +1627,9 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
    grid_relax_type = (AMGhybrid_data -> grid_relax_type);
    grid_relax_points = (AMGhybrid_data -> grid_relax_points);
    relax_weight = (AMGhybrid_data -> relax_weight);
+   relax_order = (AMGhybrid_data -> relax_order);
+   relax_type = (AMGhybrid_data -> relax_type);
+   keepT = (AMGhybrid_data -> keepT);
    omega = (AMGhybrid_data -> omega);
    max_coarse_size = (AMGhybrid_data -> max_coarse_size);
    min_coarse_size = (AMGhybrid_data -> min_coarse_size);
@@ -1861,6 +1891,8 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
          hypre_BoomerAMGSetNumPaths(pcg_precond, num_paths);
          hypre_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
          hypre_BoomerAMGSetNodal(pcg_precond, nodal);
+         hypre_BoomerAMGSetRelaxOrder(pcg_precond, relax_order);
+         hypre_BoomerAMGSetKeepTranspose(pcg_precond, keepT);
    	 if (grid_relax_type)
          {
 	    boom_grt = hypre_CTAlloc(HYPRE_Int, 4, HYPRE_MEMORY_HOST);
