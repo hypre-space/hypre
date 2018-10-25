@@ -26,9 +26,8 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
                               HYPRE_Int            *num_cpts_global,
                               HYPRE_Int             num_functions,
                               HYPRE_Int            *dof_func,
+                              HYPRE_Real            filter_thresholdR,
                               HYPRE_Int             debug_flag,
-                              HYPRE_Real            trunc_factor,
-                              HYPRE_Int             max_elmts,
                               HYPRE_Int            *col_offd_S_to_A,
                               hypre_ParCSRMatrix  **R_ptr)
 {
@@ -710,6 +709,11 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
 
    /* create CommPkg of R */
    hypre_MatvecCommPkgCreate(R);
+
+   /* Filter small entries from R */
+   if (filter_thresholdR > 0) {
+      hypre_ParCSRMatrixDropSmallEntries(R, filter_thresholdR, -1);
+   }
 
    *R_ptr = R;
 

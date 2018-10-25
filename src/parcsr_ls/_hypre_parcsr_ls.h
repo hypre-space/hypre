@@ -63,6 +63,7 @@ typedef struct
    HYPRE_Int     max_levels;
    HYPRE_Real   strong_threshold;
    HYPRE_Real   strong_thresholdR; /* theta for build R: defines strong F neighbors */
+   HYPRE_Real   filter_thresholdR; /* theta for filtering R  */
    HYPRE_Real   max_row_sum;
    HYPRE_Real   trunc_factor;
    HYPRE_Real   agg_trunc_factor;
@@ -284,10 +285,9 @@ typedef struct
 		  		      
 #define hypre_ParAMGDataRestriction(amg_data) ((amg_data)->restr_par)
 #define hypre_ParAMGDataMaxLevels(amg_data) ((amg_data)->max_levels)
-#define hypre_ParAMGDataStrongThreshold(amg_data) \
-((amg_data)->strong_threshold)
-#define hypre_ParAMGDataStrongThresholdR(amg_data) \
-((amg_data)->strong_thresholdR)
+#define hypre_ParAMGDataStrongThreshold(amg_data)((amg_data)->strong_threshold)
+#define hypre_ParAMGDataStrongThresholdR(amg_data)((amg_data)->strong_thresholdR)
+#define hypre_ParAMGDataFilterThresholdR(amg_data)((amg_data)->filter_thresholdR)
 #define hypre_ParAMGDataSabs(amg_data) (amg_data->Sabs)
 #define hypre_ParAMGDataMaxRowSum(amg_data) ((amg_data)->max_row_sum)
 #define hypre_ParAMGDataTruncFactor(amg_data) ((amg_data)->trunc_factor)
@@ -794,6 +794,8 @@ HYPRE_Int HYPRE_BoomerAMGSetStrongThreshold ( HYPRE_Solver solver , HYPRE_Real s
 HYPRE_Int HYPRE_BoomerAMGGetStrongThreshold ( HYPRE_Solver solver , HYPRE_Real *strong_threshold );
 HYPRE_Int HYPRE_BoomerAMGSetStrongThresholdR ( HYPRE_Solver solver , HYPRE_Real strong_threshold );
 HYPRE_Int HYPRE_BoomerAMGGetStrongThresholdR ( HYPRE_Solver solver , HYPRE_Real *strong_threshold );
+HYPRE_Int HYPRE_BoomerAMGSetFilterThresholdR ( HYPRE_Solver solver , HYPRE_Real filter_threshold );
+HYPRE_Int HYPRE_BoomerAMGGetFilterThresholdR ( HYPRE_Solver solver , HYPRE_Real *filter_threshold );
 HYPRE_Int HYPRE_BoomerAMGSetSabs ( HYPRE_Solver solver , HYPRE_Int Sabs );
 HYPRE_Int HYPRE_BoomerAMGSetMaxRowSum ( HYPRE_Solver solver , HYPRE_Real max_row_sum );
 HYPRE_Int HYPRE_BoomerAMGGetMaxRowSum ( HYPRE_Solver solver , HYPRE_Real *max_row_sum );
@@ -1220,6 +1222,8 @@ HYPRE_Int hypre_BoomerAMGSetStrongThreshold ( void *data , HYPRE_Real strong_thr
 HYPRE_Int hypre_BoomerAMGGetStrongThreshold ( void *data , HYPRE_Real *strong_threshold );
 HYPRE_Int hypre_BoomerAMGSetStrongThresholdR ( void *data , HYPRE_Real strong_threshold );
 HYPRE_Int hypre_BoomerAMGGetStrongThresholdR ( void *data , HYPRE_Real *strong_threshold );
+HYPRE_Int hypre_BoomerAMGSetFilterThresholdR ( void *data , HYPRE_Real filter_threshold );
+HYPRE_Int hypre_BoomerAMGGetFilterThresholdR ( void *data , HYPRE_Real *filter_threshold );
 HYPRE_Int hypre_BoomerAMGSetSabs ( void *data , HYPRE_Int Sabs );
 HYPRE_Int hypre_BoomerAMGSetMaxRowSum ( void *data , HYPRE_Real max_row_sum );
 HYPRE_Int hypre_BoomerAMGGetMaxRowSum ( void *data , HYPRE_Real *max_row_sum );
@@ -1668,11 +1672,11 @@ HYPRE_Int hypre_ParAMGCreateDomainDof ( hypre_ParCSRMatrix *A , HYPRE_Int domain
 HYPRE_Int hypre_ParGenerateScale ( hypre_ParCSRMatrix *A , hypre_CSRMatrix *domain_structure , HYPRE_Real relaxation_weight , HYPRE_Real **scale_pointer );
 HYPRE_Int hypre_ParGenerateHybridScale ( hypre_ParCSRMatrix *A , hypre_CSRMatrix *domain_structure , hypre_CSRMatrix **A_boundary_pointer , HYPRE_Real **scale_pointer );
 /* RL */
-HYPRE_Int hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, hypre_ParCSRMatrix *S, HYPRE_Int *num_cpts_global, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int debug_flag, HYPRE_Real trunc_factor, HYPRE_Int max_elmts, HYPRE_Int *col_offd_S_to_A, hypre_ParCSRMatrix **R_ptr);
+HYPRE_Int hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, hypre_ParCSRMatrix *S, HYPRE_Int *num_cpts_global, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Real filter_thresholdR, HYPRE_Int debug_flag, HYPRE_Int *col_offd_S_to_A, hypre_ParCSRMatrix **R_ptr);
 
-HYPRE_Int hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, hypre_ParCSRMatrix *S, HYPRE_Int *num_cpts_global, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int debug_flag, HYPRE_Real trunc_factor, HYPRE_Int max_elmts, HYPRE_Int *col_offd_S_to_A, hypre_ParCSRMatrix **R_ptr);
+HYPRE_Int hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, hypre_ParCSRMatrix *S, HYPRE_Int *num_cpts_global, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Real filter_thresholdR, HYPRE_Int debug_flag, HYPRE_Int *col_offd_S_to_A, hypre_ParCSRMatrix **R_ptr);
 
-HYPRE_Int hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, hypre_ParCSRMatrix *S, HYPRE_Int *num_cpts_global, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int NeumannDeg, HYPRE_Int debug_flag, HYPRE_Real trunc_factor, HYPRE_Int max_elmts, HYPRE_Int *col_offd_S_to_A, hypre_ParCSRMatrix **R_ptr);
+HYPRE_Int hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, HYPRE_Int *num_cpts_global, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int NeumannDeg, HYPRE_Real strong_thresholdR, HYPRE_Real filter_thresholdR, HYPRE_Int debug_flag, HYPRE_Int *col_offd_S_to_A, hypre_ParCSRMatrix **R_ptr);
 
 #ifdef HAVE_DSUPERLU
 /* superlu.c */

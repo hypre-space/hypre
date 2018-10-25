@@ -1004,7 +1004,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
 
             /* for AIR, need absolute value SOC: use a different threshold */
-            if (restri_type)
+            if ((restri_type == 1) || (restri_type == 2))
             {
                HYPRE_Real           strong_thresholdR;
                strong_thresholdR = hypre_ParAMGDataStrongThresholdR(amg_data);
@@ -1653,7 +1653,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             /* RL: build restriction */
             if (restri_type)
             {
-
+               HYPRE_Real filter_thresholdR;
+               filter_thresholdR = hypre_ParAMGDataFilterThresholdR(amg_data);
                /* !!! RL: ensure that CF_marker contains -1 or 1 !!! */
                for (i = 0; i < hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[level])); i++)
                {
@@ -1664,26 +1665,26 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                {
                   hypre_BoomerAMGBuildRestrAIR(A_array[level], CF_marker,
                                                Sabs, coarse_pnts_global, 1, NULL,
-                                               debug_flag, trunc_factor, P_max_elmts,
+                                               filter_thresholdR, debug_flag,
                                                col_offd_Sabs_to_A, &R );
                }
                else if (restri_type == 2) /* distance-2 AIR */
                {
                   hypre_BoomerAMGBuildRestrDist2AIR(A_array[level], CF_marker,
                                                     Sabs, coarse_pnts_global, 1, NULL,
-                                                    debug_flag, trunc_factor, P_max_elmts,
+                                                    filter_thresholdR, debug_flag,
                                                     col_offd_Sabs_to_A, &R );
                }
                else
                {
                   HYPRE_Int NeumannAIRDeg = restri_type - 3;
-
                   hypre_assert(NeumannAIRDeg >= 0);
-
+                  HYPRE_Real strong_thresholdR;
+                  strong_thresholdR = hypre_ParAMGDataStrongThresholdR(amg_data);
                   hypre_BoomerAMGBuildRestrNeumannAIR(A_array[level], CF_marker,
-                                                      Sabs, coarse_pnts_global, 1, NULL,
-                                                      NeumannAIRDeg,
-                                                      debug_flag, trunc_factor, P_max_elmts,
+                                                      coarse_pnts_global, 1, NULL,
+                                                      NeumannAIRDeg, strong_thresholdR,
+                                                      filter_thresholdR, debug_flag,
                                                       col_offd_Sabs_to_A, &R );
                }
 

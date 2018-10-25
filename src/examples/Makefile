@@ -4,7 +4,7 @@
 CC        = mpicc
 F77       = mpif77
 CXX       = mpicxx
-F90       = mpif90
+F90       = mpifort
 HYPRE_DIR = ../hypre
 
 ########################################################################

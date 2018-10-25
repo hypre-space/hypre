@@ -110,9 +110,8 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
                                    HYPRE_Int            *num_cpts_global,
                                    HYPRE_Int             num_functions,
                                    HYPRE_Int            *dof_func,
+                                   HYPRE_Real            filter_thresholdR,
                                    HYPRE_Int             debug_flag,
-                                   HYPRE_Real            trunc_factor,
-                                   HYPRE_Int             max_elmts,
                                    HYPRE_Int            *col_offd_S_to_A,
                                    hypre_ParCSRMatrix  **R_ptr) 
 {
@@ -1828,6 +1827,11 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
    air_time4 += t4;
    */
 
+   /* Filter small entries from R */
+   if (filter_thresholdR > 0) {
+      hypre_ParCSRMatrixDropSmallEntries(R, filter_thresholdR, -1);
+   }
+
    *R_ptr = R;
 
    hypre_TFree(CF_marker_offd, HYPRE_MEMORY_HOST);
@@ -2266,59 +2270,28 @@ static void jacobiT(HYPRE_Int n,
 HYPRE_Int
 hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
                                      HYPRE_Int            *CF_marker,
-                                     hypre_ParCSRMatrix   *S,
                                      HYPRE_Int            *num_cpts_global,
                                      HYPRE_Int             num_functions,
                                      HYPRE_Int            *dof_func,
                                      HYPRE_Int             NeumannDeg,
+                                     HYPRE_Real            strong_thresholdR,
+                                     HYPRE_Real            filter_thresholdR,
                                      HYPRE_Int             debug_flag,
-                                     HYPRE_Real            trunc_factor,
-                                     HYPRE_Int             max_elmts,
                                      HYPRE_Int            *col_offd_S_to_A,
                                      hypre_ParCSRMatrix  **R_ptr)
 {
    /* HYPRE_Real t0 = hypre_MPI_Wtime(); */
    MPI_Comm                 comm     = hypre_ParCSRMatrixComm(A);
-   /*
-   hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
-   */
    hypre_ParCSRCommHandle  *comm_handle;
 
    /* diag part of A */
    hypre_CSRMatrix *A_diag   = hypre_ParCSRMatrixDiag(A);
-   /*
-   HYPRE_Real      *A_diag_a = hypre_CSRMatrixData(A_diag);
-   HYPRE_Int       *A_diag_i = hypre_CSRMatrixI(A_diag);
-   HYPRE_Int       *A_diag_j = hypre_CSRMatrixJ(A_diag);
-   */
-   /* off-diag part of A */
-   /*
-   hypre_CSRMatrix *A_offd   = hypre_ParCSRMatrixOffd(A);
-   HYPRE_Real      *A_offd_a = hypre_CSRMatrixData(A_offd);
-   HYPRE_Int       *A_offd_i = hypre_CSRMatrixI(A_offd);
-   HYPRE_Int       *A_offd_j = hypre_CSRMatrixJ(A_offd);
 
-   HYPRE_Int        num_cols_A_offd = hypre_CSRMatrixNumCols(A_offd);
-   HYPRE_Int       *col_map_offd_A  = hypre_ParCSRMatrixColMapOffd(A);
-   */
-   /* Strength matrix S */
-   /* diag part of S */
-   /*
-   hypre_CSRMatrix *S_diag   = hypre_ParCSRMatrixDiag(S);
-   HYPRE_Int       *S_diag_i = hypre_CSRMatrixI(S_diag);
-   HYPRE_Int       *S_diag_j = hypre_CSRMatrixJ(S_diag);
-   */
-   /* off-diag part of S */
-   /*
-   hypre_CSRMatrix *S_offd   = hypre_ParCSRMatrixOffd(S);
-   HYPRE_Int       *S_offd_i = hypre_CSRMatrixI(S_offd);
-   HYPRE_Int       *S_offd_j = hypre_CSRMatrixJ(S_offd);
-   */
-   /* Restriction matrix R */
+   /* Restriction matrix R and CSR's */
    hypre_ParCSRMatrix *R;
-   /* csr's */
    hypre_CSRMatrix *R_diag;
    hypre_CSRMatrix *R_offd;
+   
    /* arrays */
    HYPRE_Real      *R_diag_a;
    HYPRE_Int       *R_diag_i;
@@ -2327,34 +2300,18 @@ hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
    HYPRE_Int       *R_offd_i;
    HYPRE_Int       *R_offd_j;
    HYPRE_Int       *col_map_offd_R;
-   /* CF marker off-diag part */
-   /* HYPRE_Int       *CF_marker_offd = NULL; */
-   /* func type off-diag part */
-   /* HYPRE_Int       *dof_func_offd  = NULL; */
 
    HYPRE_Int        i, j, j1, i1, ic,
                     num_cols_offd_R;
-
    HYPRE_Int        my_id, num_procs;
    HYPRE_Int        total_global_cpts/*, my_first_cpt*/;
    HYPRE_Int        nnz_diag, nnz_offd, cnt_diag, cnt_offd;
-   /*
-   HYPRE_Int       *Marker_diag, *Marker_offd;
-   HYPRE_Int        num_sends, num_recvs, num_elems_send;
-   */
    HYPRE_Int       *send_buf_i;
 
    /* local size */
    HYPRE_Int n_fine = hypre_CSRMatrixNumRows(A_diag);
-   /* my column range */
-   /*
-   HYPRE_Int col_start = hypre_ParCSRMatrixFirstColDiag(A);
-   HYPRE_Int col_end   = hypre_ParCSRMatrixLastColDiag(A) + 1;
-   */
    HYPRE_Int col_start = hypre_ParCSRMatrixFirstRowIndex(A);
-   /*
-   HYPRE_Int col_end   = col_start + n_fine;
-   */
+
    /* MPI size and rank*/
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
@@ -2434,8 +2391,8 @@ hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
 #endif
 
    hypre_ParCSRMatrix *AFF, *ACF, *X, *X2, *Z, *Z2;
-   hypre_ParCSRMatrixExtractSubmatrixFC(A, CF_marker, num_cpts_global, "FF", &AFF);
-   hypre_ParCSRMatrixExtractSubmatrixFC(A, CF_marker, num_cpts_global, "CF", &ACF);
+   hypre_ParCSRMatrixExtractSubmatrixFC(A, CF_marker, num_cpts_global, "FF", &AFF, strong_thresholdR);
+   hypre_ParCSRMatrixExtractSubmatrixFC(A, CF_marker, num_cpts_global, "CF", &ACF, strong_thresholdR);
 
    /* A_FF := I - D^{-1}*A_FF */
    hypre_CSRMatrix *AFF_diag = hypre_ParCSRMatrixDiag(AFF);
@@ -2654,6 +2611,11 @@ hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
 
    /* create CommPkg of R */
    hypre_MatvecCommPkgCreate(R);
+
+   /* Filter small entries from R */
+   if (filter_thresholdR > 0) {
+      hypre_ParCSRMatrixDropSmallEntries(R, filter_thresholdR, -1);
+   }
 
    *R_ptr = R;
 

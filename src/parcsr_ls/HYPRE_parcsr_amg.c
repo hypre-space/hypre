@@ -229,6 +229,23 @@ HYPRE_BoomerAMGGetStrongThresholdR( HYPRE_Solver solver,
 }
 
 HYPRE_Int
+HYPRE_BoomerAMGSetFilterThresholdR( HYPRE_Solver solver,
+                                    HYPRE_Real   filter_threshold  )
+{
+   return( hypre_BoomerAMGSetFilterThresholdR( (void *) solver,
+                                              filter_threshold ) );
+}
+
+HYPRE_Int
+HYPRE_BoomerAMGGetFilterThresholdR( HYPRE_Solver solver,
+                                    HYPRE_Real * filter_threshold  )
+{
+   return( hypre_BoomerAMGGetFilterThresholdR( (void *) solver,
+                                              filter_threshold ) );
+}
+
+
+HYPRE_Int
 HYPRE_BoomerAMGSetSabs( HYPRE_Solver solver,
                         HYPRE_Int    Sabs  )
 {

@@ -233,13 +233,20 @@ HYPRE_Int HYPRE_BoomerAMGSetMaxLevels(HYPRE_Solver solver,
  * (Optional) Sets AMG strength threshold. The default is 0.25.
  * For 2d Laplace operators, 0.25 is a good value, for 3d Laplace
  * operators, 0.5 or 0.6 is a better value. For elasticity problems,
- * a large strength threshold, such as 0.9, is often better.
+ * a large strength threshold, such as 0.9, is often better. The
+ * strong threshold for R is strong connections used in building an
+ * approximate ideal restriction, and the filter threshold for R a
+ * threshold to eliminate small entries from R after building it.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetStrongThreshold(HYPRE_Solver solver,
                                             HYPRE_Real   strong_threshold);
 
 HYPRE_Int HYPRE_BoomerAMGSetStrongThresholdR(HYPRE_Solver solver,
                                              HYPRE_Real   strong_threshold);
+
+HYPRE_Int HYPRE_BoomerAMGSetFilterThresholdR(HYPRE_Solver solver,
+                                             HYPRE_Real   filter_threshold);
+
 /**
  * (Optional) Defines the largest strength threshold for which 
  * the strength matrix S uses the communication package of the operator A.

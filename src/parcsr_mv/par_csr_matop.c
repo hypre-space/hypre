@@ -4931,7 +4931,8 @@ hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix  *A,
                                       HYPRE_Int           *CF_marker,
                                       HYPRE_Int           *cpts_starts_in,
                                       const char          *job,
-                                      hypre_ParCSRMatrix **B_ptr)
+                                      hypre_ParCSRMatrix **B_ptr,
+                                      HYPRE_Real           strength_thresh)
 {
    MPI_Comm                 comm     = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
@@ -4953,6 +4954,7 @@ hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix  *A,
 
    hypre_ParCSRMatrix *B;
    hypre_CSRMatrix    *B_diag, *B_offd;
+   HYPRE_Real         *B_maxel_row;
    HYPRE_Int          *B_diag_i, *B_diag_j, *B_offd_i, *B_offd_j;
    HYPRE_Complex      *B_diag_a, *B_offd_a;
    HYPRE_Int           num_cols_B_offd, *col_map_offd_B;
@@ -5154,6 +5156,7 @@ hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix  *A,
 
    /* count nnz and set ia */
    B_nnz_diag = B_nnz_offd = 0;
+   B_maxel_row = hypre_TAlloc(HYPRE_Real, B_nrow_local, HYPRE_MEMORY_HOST);
    B_diag_i = hypre_TAlloc(HYPRE_Int, B_nrow_local+1, HYPRE_MEMORY_HOST);
    B_offd_i = hypre_TAlloc(HYPRE_Int, B_nrow_local+1, HYPRE_MEMORY_HOST);
    B_diag_i[0] = B_offd_i[0] = 0;
@@ -5166,16 +5169,35 @@ hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix  *A,
          continue;
       }
       k++;
-      for (j = A_diag_i[i]; j < A_diag_i[i+1]; j++)
-      {
-         if (sub_idx_diag[A_diag_j[j]] != -1)
+      
+      // Get max abs-value element of this row
+      HYPRE_Real temp_max = 0;
+      if (strength_thresh > 0) {
+         for (j = A_diag_i[i]; j < A_diag_i[i+1]; j++) {
+            if (hypre_abs(A_diag_a[j]) > temp_max) {
+               temp_max = hypre_abs(A_diag_a[j]);
+            }
+         }
+         for (j = A_offd_i[i]; j < A_offd_i[i+1]; j++) {
+            if (hypre_abs(A_offd_a[j]) > temp_max) {
+               temp_max = hypre_abs(A_offd_a[j]);
+            }
+         }
+      }
+      B_maxel_row[k-1] = temp_max;
+
+      // Count nnzs larger than tolerance times max row element
+      for (j = A_diag_i[i]; j < A_diag_i[i+1]; j++) {
+         if ( (sub_idx_diag[A_diag_j[j]] != -1) &&
+              (hypre_abs(A_diag_a[j]) > (strength_thresh*temp_max)) )
          {
             B_nnz_diag++;
          }
       }
       for (j = A_offd_i[i]; j < A_offd_i[i+1]; j++)
       {
-         if (sub_idx_offd[A_offd_j[j]] != -1)
+         if ( (sub_idx_offd[A_offd_j[j]] != -1) &&
+              (hypre_abs(A_offd_a[j]) > (strength_thresh*temp_max)) )
          {
             B_nnz_offd++;
          }
@@ -5198,10 +5220,11 @@ hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix  *A,
       {
          continue;
       }
+      HYPRE_Real maxel = B_maxel_row[k1];
       for (j = A_diag_i[i]; j < A_diag_i[i+1]; j++)
       {
          HYPRE_Int j1 = sub_idx_diag[A_diag_j[j]];
-         if (j1 != -1)
+         if ((j1 != -1) && (hypre_abs(A_diag_a[j]) > (strength_thresh*maxel)))
          {
             B_diag_j[k1] = j1;
             B_diag_a[k1] = A_diag_a[j];
@@ -5211,7 +5234,7 @@ hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix  *A,
       for (j = A_offd_i[i]; j < A_offd_i[i+1]; j++)
       {
          HYPRE_Int j1 = sub_idx_offd[A_offd_j[j]];
-         if (j1 != -1)
+         if ((j1 != -1) && (hypre_abs(A_offd_a[j]) > (strength_thresh*maxel)))
          {
             hypre_assert(j1 >= 0 && j1 < num_cols_B_offd);
             B_offd_j[k2] = j1;
