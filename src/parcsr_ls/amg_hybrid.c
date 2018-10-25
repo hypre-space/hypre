@@ -66,7 +66,6 @@ typedef struct
    HYPRE_Int		 interp_type;
    HYPRE_Int		 cycle_type;
    HYPRE_Int		 relax_order;
-   HYPRE_Int		 relax_type;
    HYPRE_Int		 keepT;
    HYPRE_Int		 max_coarse_size;
    HYPRE_Int		 min_coarse_size;
@@ -132,7 +131,6 @@ hypre_AMGHybridCreate( )
    (AMGhybrid_data -> interp_type)  = 6;
    (AMGhybrid_data -> cycle_type)  = 1;
    (AMGhybrid_data -> relax_order)  = 0;
-   (AMGhybrid_data -> relax_type)  = -1;
    (AMGhybrid_data -> keepT)  = 0;
    (AMGhybrid_data -> max_coarse_size)  = 9;
    (AMGhybrid_data -> min_coarse_size)  = 1;
@@ -1628,7 +1626,6 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
    grid_relax_points = (AMGhybrid_data -> grid_relax_points);
    relax_weight = (AMGhybrid_data -> relax_weight);
    relax_order = (AMGhybrid_data -> relax_order);
-   relax_type = (AMGhybrid_data -> relax_type);
    keepT = (AMGhybrid_data -> keepT);
    omega = (AMGhybrid_data -> omega);
    max_coarse_size = (AMGhybrid_data -> max_coarse_size);
