@@ -5213,14 +5213,16 @@ hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix  *A,
    B_offd_j = hypre_TAlloc(HYPRE_Int,     B_nnz_offd, HYPRE_MEMORY_HOST);
    B_offd_a = hypre_TAlloc(HYPRE_Complex, B_nnz_offd, HYPRE_MEMORY_HOST);
 
-   for (i = 0, k1 = 0, k2 = 0; i < A_nlocal; i++)
+   for (i = 0, k=0, k1 = 0, k2 = 0; i < A_nlocal; i++)
    {
       HYPRE_Int CF_i = CF_marker[i] > 0 ? 1 : -1;
       if (CF_i != row_set)
       {
          continue;
       }
-      HYPRE_Real maxel = B_maxel_row[k1];
+      HYPRE_Real maxel = B_maxel_row[k];
+      k++;
+
       for (j = A_diag_i[i]; j < A_diag_i[i+1]; j++)
       {
          HYPRE_Int j1 = sub_idx_diag[A_diag_j[j]];
