@@ -627,12 +627,12 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
 
 
 
-
-         if (level == 2)
-         {
-            MPI_Finalize();
-            exit(0);
-         }
+         // !!! Debug
+         // if (level == 2)
+         // {
+         //    MPI_Finalize();
+         //    exit(0);
+         // }
 
 
 
@@ -868,24 +868,6 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
       hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
       #endif 
 
-
-
-      // !!! Debug
-      // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
-      // for (i = level-1; i < num_levels; i++)
-      // {
-      //    printf("Rank %d debug printing comp grids\n", myid);
-      //    hypre_sprintf(filename, "outputs/CompGrids/level%dCompGridRank%dLevel%d.txt", level, myid, i);
-      //    hypre_ParCompGridDebugPrint( compGrid[i], filename );
-      // }
-      // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
-
-
-
-
-
-
-
       #if DEBUG_COMP_GRID
       HYPRE_Int error_code;
       error_code = TestCompGrids1(compGrid, num_levels, transition_level, padding, num_ghost_layers, level, 0);
@@ -938,6 +920,27 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    if (myid == 1) hypre_printf("All ranks: done with FinalizeSendFlag()\n");
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
    #endif 
+
+
+
+
+
+   // !!! Debug
+   // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   // for (level = 0; level < num_levels; level++)
+   // {
+   //    printf("Rank %d debug printing comp grids\n", myid);
+   //    hypre_sprintf(filename, "outputs/CompGrids/compGridRank%dLevel%d.txt", myid, level);
+   //    hypre_ParCompGridDebugPrint( compGrid[level], filename );
+   // }
+   // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+
+
+
+
+
+
+
 
    // Communicate data for A and all info for P
    CommunicateRemainingMatrixInfo(compGrid, compGridCommPkg, communication_cost);
@@ -2208,9 +2211,6 @@ RecursivelyBuildPsiComposite(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *com
    HYPRE_Int         i,index,coarse_grid_index;
    HYPRE_Int error_code = 0;
 
-   // !!! Debug 
-   if (need_coarse_info) printf("HEY! NEED COARSE INFO\n");
-
    // Look at neighbors
    for (i = hypre_ParCompGridARowPtr(compGrid)[node]; i < hypre_ParCompGridARowPtr(compGrid)[node+1]; i++)
    {
@@ -2697,10 +2697,13 @@ CommunicateRemainingMatrixInfo(hypre_ParCompGrid **compGrid, hypre_ParCompGridCo
             {
                HYPRE_Int idx = hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[outer_level][proc][level][i];
 
-               HYPRE_Int P_row_size;
-               if (idx < hypre_ParCompGridNumOwnedNodes(compGrid[level])) P_row_size = hypre_ParCompGridPRowPtr(compGrid[level])[idx+1] - hypre_ParCompGridPRowPtr(compGrid[level])[idx];
-               else P_row_size = hypre_ParCompGridPRowPtr(compGrid[level])[idx];
-
+               HYPRE_Int P_row_size = 0;
+               if (level != num_levels-1)
+               {
+                  if (idx < hypre_ParCompGridNumOwnedNodes(compGrid[level])) P_row_size = hypre_ParCompGridPRowPtr(compGrid[level])[idx+1] - hypre_ParCompGridPRowPtr(compGrid[level])[idx];
+                  else P_row_size = hypre_ParCompGridPRowPtr(compGrid[level])[idx];
+               }
+               
                HYPRE_Int A_row_size = hypre_ParCompGridARowPtr(compGrid[level])[idx+1] - hypre_ParCompGridARowPtr(compGrid[level])[idx];
 
                if (level != num_levels-1) send_sizes[2*proc] += 1 + P_row_size;

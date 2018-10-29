@@ -257,10 +257,6 @@ hypre_ParCompGridInitialize ( hypre_ParCompGrid *compGrid, hypre_ParVector *resi
    hypre_ParCompGridPColInd(compGrid) = P_colind;
    hypre_ParCompGridPData(compGrid) = P_data;
 
-   // cleanup memory
-   hypre_TFree( row_col_ind, HYPRE_MEMORY_HOST );
-   hypre_TFree( row_values, HYPRE_MEMORY_HOST );
-
    return 0;
 }
 
