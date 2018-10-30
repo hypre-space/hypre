@@ -123,8 +123,6 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    if (!hypre_ParAMGDataAArray(amg_data))
       hypre_BoomerAMGSetup(amg_vdata, A, b, x);
 
-
-
    #if DEBUGGING_MESSAGES
    hypre_printf("Began comp grid setup on rank %d\n", myid);
    #endif
@@ -266,7 +264,9 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    if (timers) hypre_BeginTiming(timers[0]);
    for (level = 0; level < transition_level; level++)
    {
-      SetupNearestProcessorNeighbors(A_array[level], compGrid[level], compGridCommPkg, level, padding, num_ghost_layers, communication_cost, use_multiple_allgather);
+      // !!! Turning off use_multiple_allgatherv for now
+      SetupNearestProcessorNeighbors(A_array[level], compGrid[level], compGridCommPkg, level, padding, num_ghost_layers, communication_cost, 0);
+      // SetupNearestProcessorNeighbors(A_array[level], compGrid[level], compGridCommPkg, level, padding, num_ghost_layers, communication_cost, use_multiple_allgather);
    }
 
    if (timers) hypre_EndTiming(timers[0]);
@@ -284,7 +284,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
       // hypre_ParCompGridDebugPrint( compGrid[level], filename );
    }
    #endif
-   
+
    /* Outer loop over levels:
    Start from coarsest level and work up to finest */
    #if DEBUGGING_MESSAGES
@@ -361,7 +361,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
             redundancy_allgatherv_displs = hypre_CTAlloc(HYPRE_Int, num_procs, HYPRE_MEMORY_HOST);
 
             // Header info
-            HYPRE_Int allgatherv_send_size = num_sends*2 + 1; // !!! Save this info in compGridCommPkg structure !!!
+            HYPRE_Int allgatherv_send_size = num_sends*2 + 1; 
             // Plus the PsiC buffer sizes
             for (i = 0; i < num_sends; i++) allgatherv_send_size += send_buffer_size[level][i];
 
@@ -575,7 +575,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
          if (timers) hypre_BeginTiming(timers[5]);
          
          hypre_ParCompGridSetupLocalIndices(compGrid, num_added_nodes, transition_level, proc_first_index, proc_last_index);
-         
+
          if (timers) hypre_EndTiming(timers[5]);
 
          #if DEBUGGING_MESSAGES
@@ -584,7 +584,6 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
 
          // Zero out num_added_nodes
          for (i = level; i < num_levels; i++) num_added_nodes[i] = 0;
-
 
          if (use_barriers) hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
          if (timers) hypre_BeginTiming(timers[6]);         
@@ -784,7 +783,6 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
       if (myid == 1) hypre_printf("All ranks: done with level %d\n", level);
       hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
       #endif 
-
 
       #if DEBUG_COMP_GRID
       HYPRE_Int error_code;
@@ -1403,16 +1401,15 @@ RecursivelyFindNeighborNodes(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *com
    , HYPRE_Int level, HYPRE_Int iteration, HYPRE_Int proc )
 {
    HYPRE_Int         i,j,index,coarse_grid_index;
-   hypre_ParCompMatrixRow *A_row = hypre_ParCompGridARows(compGrid)[node];
 
    HYPRE_Int   myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
    // Look at neighbors
-   for (i = 0; i < hypre_ParCompMatrixRowSize(A_row); i++)
+   for (i = hypre_ParCompGridARowPtr(compGrid)[node]; i < hypre_ParCompGridARowPtr(compGrid)[node+1]; i++)
    {
       // Get the index of the neighbor
-      index = hypre_ParCompMatrixRowLocalIndices(A_row)[i];
+      index = hypre_ParCompGridAColInd(compGrid)[i];
 
       // If the neighbor info is available on this proc
       if (index >= 0)
@@ -1430,7 +1427,7 @@ RecursivelyFindNeighborNodes(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *com
       else
       {
          // Check whether we have already requested this node (!!! linear search, but should be over small set !!!)
-         HYPRE_Int global_index = hypre_ParCompMatrixRowGlobalIndices(A_row)[i];
+         HYPRE_Int global_index = hypre_ParCompGridAGlobalColInd(compGrid)[i];
          HYPRE_Int add_requeset = 1;
          for (j = 0; j < (*num_request_nodes); j++)
          {
@@ -1835,6 +1832,9 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
    HYPRE_Int *send_flag_buffer_size, HYPRE_Int ****send_flag, HYPRE_Int ***num_send_nodes,
    HYPRE_Int processor, HYPRE_Int current_level, HYPRE_Int num_levels, HYPRE_Int padding, HYPRE_Int num_ghost_layers, HYPRE_Int send_rank, HYPRE_Int *communication_cost )
 {
+   // send_buffer = [ num_psi_levels , [level] , [level] , ... ]
+   // level = [ num send nodes, [global indices] , [coarse global indices] , [A row sizes] , [A col ind] ]
+
    HYPRE_Int   myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
    
@@ -1892,7 +1892,7 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
    {
       send_elmt = hypre_ParCompGridCommPkgSendMapElmts(compGridCommPkg)[current_level][i];
       send_flag[current_level][processor][current_level][i - start] = send_elmt;
-      (*buffer_size) += hypre_ParCompMatrixRowSize(hypre_ParCompGridARows(compGrid[current_level])[send_elmt]);
+      (*buffer_size) += hypre_ParCompGridARowPtr(compGrid[current_level])[send_elmt+1] - hypre_ParCompGridARowPtr(compGrid[current_level])[send_elmt];
    }
 
    // Now build out the psi_c composite grid (along with required ghost nodes) on coarser levels
@@ -2034,7 +2034,8 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
          else (*buffer_size) += 2*num_send_nodes[current_level][processor][level];
          for (i = 0; i < num_send_nodes[current_level][processor][level]; i++)
          {
-            (*buffer_size) += hypre_ParCompMatrixRowSize(hypre_ParCompGridARows(compGrid[level])[ send_flag[current_level][processor][level][i] ]);
+            (*buffer_size) += hypre_ParCompGridARowPtr(compGrid[level])[ send_flag[current_level][processor][level][i] + 1 ]
+                            - hypre_ParCompGridARowPtr(compGrid[level])[ send_flag[current_level][processor][level][i] ];   
          }
       }
       else break;
@@ -2066,17 +2067,23 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
          }
       }
 
-      // now loop over matrix rows
+      // store the row length for matrix A
       for (i = 0; i < num_send_nodes[current_level][processor][level]; i++)
       {
-         // store the row length for matrix A
-         row_length = hypre_ParCompMatrixRowSize( hypre_ParCompGridARows( compGrid[level] )[ send_flag[current_level][processor][level][i] ] );
+         row_length = hypre_ParCompGridARowPtr(compGrid[level])[ send_flag[current_level][processor][level][i] + 1 ]
+                    - hypre_ParCompGridARowPtr(compGrid[level])[ send_flag[current_level][processor][level][i] ];
          send_buffer[cnt++] = row_length;
+      }
          
-         // copy global indices for matrix A
+      // copy global indices for matrix A
+      for (i = 0; i < num_send_nodes[current_level][processor][level]; i++)
+      {
+         row_length = hypre_ParCompGridARowPtr(compGrid[level])[ send_flag[current_level][processor][level][i] + 1 ]
+                    - hypre_ParCompGridARowPtr(compGrid[level])[ send_flag[current_level][processor][level][i] ];
+         HYPRE_Int offset = hypre_ParCompGridARowPtr(compGrid[level])[ send_flag[current_level][processor][level][i] ];
          for (j = 0; j < row_length; j++)
          {
-            send_buffer[cnt++] = hypre_ParCompMatrixRowGlobalIndices( hypre_ParCompGridARows( compGrid[level] )[ send_flag[current_level][processor][level][i] ] )[j];
+            send_buffer[cnt++] = hypre_ParCompGridAGlobalColInd(compGrid[level])[ offset + j ];
          }
       }
    }
@@ -2097,14 +2104,13 @@ RecursivelyBuildPsiComposite(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *com
    HYPRE_Int need_coarse_info, HYPRE_Int *nodes_to_add, HYPRE_Int padding)
 {
    HYPRE_Int         i,index,coarse_grid_index;
-   hypre_ParCompMatrixRow *A_row = hypre_ParCompGridARows(compGrid)[node];
    HYPRE_Int error_code = 0;
 
    // Look at neighbors
-   for (i = 0; i < hypre_ParCompMatrixRowSize(A_row); i++)
+   for (i = hypre_ParCompGridARowPtr(compGrid)[node]; i < hypre_ParCompGridARowPtr(compGrid)[node+1]; i++)
    {
       // Get the index of the neighbor
-      index = hypre_ParCompMatrixRowLocalIndices(A_row)[i];
+      index = hypre_ParCompGridAColInd(compGrid)[i];
 
       // If the neighbor info is available on this proc
       if (index >= 0)
@@ -2160,6 +2166,8 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
       HYPRE_Int ***num_recv_nodes, HYPRE_Int *recv_map_send_buffer_size, HYPRE_Int current_level, HYPRE_Int num_levels, HYPRE_Int transition_level,
       HYPRE_Int *proc_first_index, HYPRE_Int *proc_last_index, HYPRE_Int *num_added_nodes, HYPRE_Int **num_incoming_nodes, HYPRE_Int buffer_number, HYPRE_Int recv_rank )
 {
+   // recv_buffer = [ num_psi_levels , [level] , [level] , ... ]
+   // level = [ num send nodes, [global indices] , [coarse global indices] , [A row sizes] , [A col ind] ]
 
    HYPRE_Int            level, i, j, k;
    HYPRE_Int            num_psi_levels, row_size, offset, level_start, global_index, add_node_cnt;
@@ -2194,6 +2202,7 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
       HYPRE_Int compGrid_cnt = 0;
       HYPRE_Int incoming_cnt = 0;
       HYPRE_Int *compGrid_dest = hypre_CTAlloc(HYPRE_Int, num_nonowned_nodes, HYPRE_MEMORY_HOST);
+      // NOTE: Don't free incoming_dest because we set that as recv_map_send and use it outside this function
       HYPRE_Int *incoming_dest = hypre_CTAlloc(HYPRE_Int, num_incoming_nodes[buffer_number][level], HYPRE_MEMORY_HOST);
 
       while (incoming_cnt < num_incoming_nodes[buffer_number][level] && compGrid_cnt < num_nonowned_nodes)
@@ -2246,17 +2255,13 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
       recv_map_send[buffer_number][level] = incoming_dest;
 
       // if necessary, reallocate more space for compGrid
-      offset = hypre_ParCompGridNumNodes(compGrid[level]);
-      if (add_node_cnt + offset > hypre_ParCompGridMemSize(compGrid[level])) 
-         hypre_ParCompGridResize(compGrid[level], add_node_cnt + offset, level != num_levels-1); // !!! Is there a better way to manage memory? !!!
+      if (add_node_cnt + num_nodes > hypre_ParCompGridMemSize(compGrid[level])) 
+         hypre_ParCompGridResize(compGrid[level], add_node_cnt + num_nodes, level != num_levels-1, 0); // !!! Is there a better way to manage memory? !!!
 
       // Starting at the end of the list (to avoid overwriting info we want to access later), copy existing comp grid info to its new positions
       for (i = num_nonowned_nodes - 1; i >= 0; i--)
          hypre_ParCompGridGlobalIndices(compGrid[level])[ compGrid_dest[i] ] = hypre_ParCompGridGlobalIndices(compGrid[level])[i + num_owned_nodes];
-      for (i = num_nonowned_nodes - 1; i >= 0; i--)
-      {
-         hypre_ParCompGridARows(compGrid[level])[ compGrid_dest[i] ] = hypre_ParCompGridARows(compGrid[level])[i + num_owned_nodes];
-      }
+      
       if (level != transition_level-1)
       {
          for (i = num_nonowned_nodes - 1; i >= 0; i--)
@@ -2272,10 +2277,10 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
          {
             for (k = 0; k < num_send_nodes[i][j][level]; k++)
             {
-               if (send_flag[i][j][level][k] >= hypre_ParCompGridNumOwnedNodes(compGrid[level]))
-                  send_flag[i][j][level][k] = compGrid_dest[ send_flag[i][j][level][k] - hypre_ParCompGridNumOwnedNodes(compGrid[level]) ];
-               else if (-(send_flag[i][j][level][k]+1) >= hypre_ParCompGridNumOwnedNodes(compGrid[level]))
-                  send_flag[i][j][level][k] = -(compGrid_dest[ -(send_flag[i][j][level][k]+1) - hypre_ParCompGridNumOwnedNodes(compGrid[level]) ] + 1);
+               if (send_flag[i][j][level][k] >= num_owned_nodes)
+                  send_flag[i][j][level][k] = compGrid_dest[ send_flag[i][j][level][k] - num_owned_nodes ];
+               else if (-(send_flag[i][j][level][k]+1) >= num_owned_nodes)
+                  send_flag[i][j][level][k] = -(compGrid_dest[ -(send_flag[i][j][level][k]+1) - num_owned_nodes ] + 1);
             }
          }
       }
@@ -2285,8 +2290,8 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
          {
             for (k = 0; k < num_recv_nodes[i][j][level]; k++)
             {
-               if (recv_map[i][j][level][k] >= hypre_ParCompGridNumOwnedNodes(compGrid[level]))
-                  recv_map[i][j][level][k] = compGrid_dest[ recv_map[i][j][level][k] - hypre_ParCompGridNumOwnedNodes(compGrid[level]) ];
+               if (recv_map[i][j][level][k] >= num_owned_nodes)
+                  recv_map[i][j][level][k] = compGrid_dest[ recv_map[i][j][level][k] - num_owned_nodes ];
             }
          }
       }
@@ -2296,8 +2301,8 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
          {
             for (k = 0; k < num_incoming_nodes[i][level]; k++)
             {
-               if (recv_map_send[i][level][k] >= hypre_ParCompGridNumOwnedNodes(compGrid[level]))
-                  recv_map_send[i][level][k] = compGrid_dest[ recv_map_send[i][level][k] - hypre_ParCompGridNumOwnedNodes(compGrid[level]) ];
+               if (recv_map_send[i][level][k] >= num_owned_nodes)
+                  recv_map_send[i][level][k] = compGrid_dest[ recv_map_send[i][level][k] - num_owned_nodes ];
             }
          }
       }
@@ -2321,34 +2326,93 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
             cnt++;
          }
       }
+
+      // Copy existing row sizes into correct positions in a new row size list
+      HYPRE_Int *A_row_sizes = hypre_CTAlloc(HYPRE_Int, add_node_cnt + num_nodes - num_owned_nodes, HYPRE_MEMORY_HOST);
+
+      for (i = num_nonowned_nodes - 1; i >= 0; i--)
+      {
+         A_row_sizes[ compGrid_dest[i] - num_owned_nodes ] = 
+                                          hypre_ParCompGridARowPtr(compGrid[level])[i + num_owned_nodes + 1]
+                                        - hypre_ParCompGridARowPtr(compGrid[level])[i + num_owned_nodes];
+      }
+      
+      // Place the incoming comp grid A row sizes in the appropriate places and count up number of nonzeros added to A
+      HYPRE_Int added_A_nnz = 0;
       for (i = 0; i < num_incoming_nodes[buffer_number][level]; i++)
       {
          if (incoming_dest[i] >= 0)
          {
-            // get the row length of matrix A
-            row_size = recv_buffer[cnt++];
-            // Create row and allocate space
-            hypre_ParCompGridARows(compGrid[level])[ incoming_dest[i] ] = hypre_ParCompMatrixRowCreate();
-            hypre_ParCompMatrixRowSize( hypre_ParCompGridARows( compGrid[level] )[ incoming_dest[i] ] ) = row_size;
-            hypre_ParCompMatrixRowData( hypre_ParCompGridARows( compGrid[level] )[ incoming_dest[i] ] ) = hypre_CTAlloc(HYPRE_Complex, row_size, HYPRE_MEMORY_HOST);
-            hypre_ParCompMatrixRowGlobalIndices( hypre_ParCompGridARows( compGrid[level] )[ incoming_dest[i] ] ) = hypre_CTAlloc(HYPRE_Int, row_size, HYPRE_MEMORY_HOST);
-            hypre_ParCompMatrixRowLocalIndices( hypre_ParCompGridARows( compGrid[level] )[ incoming_dest[i] ] ) = hypre_CTAlloc(HYPRE_Int, row_size, HYPRE_MEMORY_HOST);
+            row_size = recv_buffer[cnt];
+            added_A_nnz += row_size;
+            A_row_sizes[ incoming_dest[i] - num_owned_nodes ] = row_size;
+         }
+         cnt++;
+      }
 
-            // copy global indices of matrix A
+      // Place the existing comp grid A row sizes in the appropriate places
+      for (i = num_nonowned_nodes - 1; i >= 0; i--)
+      {
+         A_row_sizes[ compGrid_dest[i] - num_owned_nodes ] = 
+                                          hypre_ParCompGridARowPtr(compGrid[level])[i + num_owned_nodes + 1]
+                                        - hypre_ParCompGridARowPtr(compGrid[level])[i + num_owned_nodes];
+      }
+
+      // Now that row sizes are in the right places, setup a new A row pointer appropriately
+      HYPRE_Int *A_new_rowptr = hypre_CTAlloc(HYPRE_Int, add_node_cnt + num_nodes - num_owned_nodes + 1, HYPRE_MEMORY_HOST);
+      A_new_rowptr[0] = hypre_ParCompGridARowPtr(compGrid[level])[num_owned_nodes];
+      for (i = 0; i < add_node_cnt + num_nodes - num_owned_nodes; i++) 
+         A_new_rowptr[i + 1] = A_new_rowptr[i] + A_row_sizes[i];
+
+      // Check whether we need to reallocate space for A nonzero info
+      if (A_new_rowptr[add_node_cnt + num_nodes - num_owned_nodes] > hypre_ParCompGridAMemSize(compGrid[level]))
+      {
+         hypre_ParCompGridResize(compGrid[level], A_new_rowptr[add_node_cnt + num_nodes - num_owned_nodes], level != num_levels-1, 1); // !!! Is there a better way to manage memory? !!!
+      }
+
+      // Move existing A col ind info
+      for (i = num_nodes - 1; i >= num_owned_nodes; i--)
+      {
+         for (j = 0; j < hypre_ParCompGridARowPtr(compGrid[level])[ i+1 ] - hypre_ParCompGridARowPtr(compGrid[level])[ i ]; j++)
+         {
+            HYPRE_Int old_index = hypre_ParCompGridARowPtr(compGrid[level])[ i + 1 ] - 1 - j;
+            HYPRE_Int new_index = A_new_rowptr[ compGrid_dest[i - num_owned_nodes] - num_owned_nodes + 1 ] - 1 - j;
+
+            hypre_ParCompGridAColInd(compGrid[level])[ new_index ] = hypre_ParCompGridAColInd(compGrid[level])[ old_index ];
+            hypre_ParCompGridAGlobalColInd(compGrid[level])[ new_index ] = hypre_ParCompGridAGlobalColInd(compGrid[level])[ old_index ];
+         }
+      }
+
+      // Set new row ptr values
+      for (i = num_owned_nodes; i < num_nodes + add_node_cnt + 1; i++) 
+         hypre_ParCompGridARowPtr(compGrid[level])[i] = A_new_rowptr[i - num_owned_nodes];
+
+      // Copy in new A global col ind info
+      HYPRE_Int size_cnt = cnt - num_incoming_nodes[buffer_number][level];
+      for (i = 0; i < num_incoming_nodes[buffer_number][level]; i++)
+      {
+         row_size = recv_buffer[size_cnt];
+
+         if (incoming_dest[i] >= 0)
+         {
             for (j = 0; j < row_size; j++)
             {
-               hypre_ParCompMatrixRowGlobalIndices( hypre_ParCompGridARows( compGrid[level] )[ incoming_dest[i] ] )[j] = recv_buffer[cnt++];
+               HYPRE_Int index = hypre_ParCompGridARowPtr(compGrid[level])[ incoming_dest[i] ] + j;
+               hypre_ParCompGridAGlobalColInd(compGrid[level])[ index ] = recv_buffer[cnt++];
             }
          }
          else
          {
-            row_size = recv_buffer[cnt++];
-            cnt += row_size;
+            cnt += recv_buffer[size_cnt];
          }
+         size_cnt++;
       }
-      hypre_ParCompGridNumNodes(compGrid[level]) = offset + add_node_cnt;
+
+      hypre_ParCompGridNumNodes(compGrid[level]) = num_nodes + add_node_cnt;
 
       // clean up memory
+      hypre_TFree(A_row_sizes, HYPRE_MEMORY_HOST);
+      hypre_TFree(A_new_rowptr, HYPRE_MEMORY_HOST);
       hypre_TFree(compGrid_dest, HYPRE_MEMORY_HOST);
    }
 
@@ -2422,6 +2486,18 @@ CommunicateRemainingMatrixInfo(hypre_ParCompGrid **compGrid, hypre_ParCompGridCo
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
 
+   HYPRE_Int ***temp_PColInd = hypre_CTAlloc(HYPRE_Int**, transition_level, HYPRE_MEMORY_HOST);
+   HYPRE_Complex ***temp_PData = hypre_CTAlloc(HYPRE_Complex**, transition_level, HYPRE_MEMORY_HOST);
+   for (outer_level = 0; outer_level < transition_level; outer_level++)
+   {
+      temp_PColInd[outer_level] = hypre_CTAlloc(HYPRE_Int*, hypre_ParCompGridNumNodes(compGrid[outer_level])
+         - hypre_ParCompGridNumOwnedNodes(compGrid[outer_level]), HYPRE_MEMORY_HOST);
+      temp_PData[outer_level] = hypre_CTAlloc(HYPRE_Complex*, hypre_ParCompGridNumNodes(compGrid[outer_level])
+         - hypre_ParCompGridNumOwnedNodes(compGrid[outer_level]), HYPRE_MEMORY_HOST);
+   }
+
+
+
    for (outer_level = transition_level-1; outer_level >= 0; outer_level--)
    {
       // Get send/recv info from the comp grid comm pkg
@@ -2439,10 +2515,19 @@ CommunicateRemainingMatrixInfo(hypre_ParCompGrid **compGrid, hypre_ParCompGridCo
             for (i = 0; i < hypre_ParCompGridCommPkgNumSendNodes(compGridCommPkg)[outer_level][proc][level]; i++)
             {
                HYPRE_Int idx = hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[outer_level][proc][level][i];
-               if (level != num_levels-1) send_sizes[2*proc] += 1 + hypre_ParCompMatrixRowSize(hypre_ParCompGridPRows(compGrid[level])[idx]);
-               if (level != num_levels-1) send_sizes[2*proc+1] += hypre_ParCompMatrixRowSize(hypre_ParCompGridARows(compGrid[level])[idx]) 
-                                             + hypre_ParCompMatrixRowSize(hypre_ParCompGridPRows(compGrid[level])[idx]);
-               else send_sizes[2*proc+1] += hypre_ParCompMatrixRowSize(hypre_ParCompGridARows(compGrid[level])[idx]);
+
+               HYPRE_Int P_row_size = 0;
+               if (level != num_levels-1)
+               {
+                  if (idx < hypre_ParCompGridNumOwnedNodes(compGrid[level])) P_row_size = hypre_ParCompGridPRowPtr(compGrid[level])[idx+1] - hypre_ParCompGridPRowPtr(compGrid[level])[idx];
+                  else P_row_size = hypre_ParCompGridPRowPtr(compGrid[level])[idx+1];
+               }
+               
+               HYPRE_Int A_row_size = hypre_ParCompGridARowPtr(compGrid[level])[idx+1] - hypre_ParCompGridARowPtr(compGrid[level])[idx];
+
+               if (level != num_levels-1) send_sizes[2*proc] += 1 + P_row_size;
+               if (level != num_levels-1) send_sizes[2*proc+1] += A_row_size + P_row_size;
+               else send_sizes[2*proc+1] += A_row_size;
             }
          }
       }
@@ -2450,139 +2535,139 @@ CommunicateRemainingMatrixInfo(hypre_ParCompGrid **compGrid, hypre_ParCompGridCo
       HYPRE_Int **int_recv_buffers = hypre_CTAlloc(HYPRE_Int*, num_sends, HYPRE_MEMORY_HOST);
       HYPRE_Complex **complex_recv_buffers = hypre_CTAlloc(HYPRE_Complex*, num_sends, HYPRE_MEMORY_HOST);
 
-      if (hypre_ParCompGridCommPkgUseAllgatherv(compGridCommPkg)[outer_level])
-      {
-         HYPRE_Int *int_recvcounts;
-         HYPRE_Int *complex_recvcounts;
-         HYPRE_Int *int_displs;
-         HYPRE_Int *complex_displs;
+      // if (hypre_ParCompGridCommPkgUseAllgatherv(compGridCommPkg)[outer_level])
+      // {
+      //    HYPRE_Int *int_recvcounts;
+      //    HYPRE_Int *complex_recvcounts;
+      //    HYPRE_Int *int_displs;
+      //    HYPRE_Int *complex_displs;
 
-         // Header info
-         HYPRE_Int allgatherv_send_size[2];
-         allgatherv_send_size[0] = num_sends*2 + 1;
-         allgatherv_send_size[1] = num_sends*2 + 1;
+      //    // Header info
+      //    HYPRE_Int allgatherv_send_size[2];
+      //    allgatherv_send_size[0] = num_sends*2 + 1;
+      //    allgatherv_send_size[1] = num_sends*2 + 1;
 
-         // Plus the PsiC buffer sizes
-         for (i = 0; i < num_sends; i++) allgatherv_send_size[0] += send_sizes[2*i];
-         for (i = 0; i < num_sends; i++) allgatherv_send_size[1] += send_sizes[2*i+1];
+      //    // Plus the PsiC buffer sizes
+      //    for (i = 0; i < num_sends; i++) allgatherv_send_size[0] += send_sizes[2*i];
+      //    for (i = 0; i < num_sends; i++) allgatherv_send_size[1] += send_sizes[2*i+1];
 
-         HYPRE_Int *recvcounts = hypre_CTAlloc(HYPRE_Int, num_procs*2, HYPRE_MEMORY_HOST);
-         hypre_MPI_Allgather(allgatherv_send_size, 2, HYPRE_MPI_INT, recvcounts, 2, HYPRE_MPI_INT, hypre_MPI_COMM_WORLD);
-         if (communication_cost)
-         {
-            communication_cost[outer_level*6 + 2] += log(num_procs)/log(2);
-            communication_cost[outer_level*6 + 3] += 2*sizeof(HYPRE_Int)*(num_procs-1);
-         }
+      //    HYPRE_Int *recvcounts = hypre_CTAlloc(HYPRE_Int, num_procs*2, HYPRE_MEMORY_HOST);
+      //    hypre_MPI_Allgather(allgatherv_send_size, 2, HYPRE_MPI_INT, recvcounts, 2, HYPRE_MPI_INT, hypre_MPI_COMM_WORLD);
+      //    if (communication_cost)
+      //    {
+      //       communication_cost[outer_level*6 + 2] += log(num_procs)/log(2);
+      //       communication_cost[outer_level*6 + 3] += 2*sizeof(HYPRE_Int)*(num_procs-1);
+      //    }
 
-         int_recvcounts = hypre_CTAlloc(HYPRE_Int, num_procs, HYPRE_MEMORY_HOST);
-         complex_recvcounts = hypre_CTAlloc(HYPRE_Int, num_procs, HYPRE_MEMORY_HOST);
-         for (i = 0; i < num_procs; i++) int_recvcounts[i] = recvcounts[2*i];
-         for (i = 0; i < num_procs; i++) complex_recvcounts[i] = recvcounts[2*i+1];
-         hypre_TFree(recvcounts, HYPRE_MEMORY_HOST);
+      //    int_recvcounts = hypre_CTAlloc(HYPRE_Int, num_procs, HYPRE_MEMORY_HOST);
+      //    complex_recvcounts = hypre_CTAlloc(HYPRE_Int, num_procs, HYPRE_MEMORY_HOST);
+      //    for (i = 0; i < num_procs; i++) int_recvcounts[i] = recvcounts[2*i];
+      //    for (i = 0; i < num_procs; i++) complex_recvcounts[i] = recvcounts[2*i+1];
+      //    hypre_TFree(recvcounts, HYPRE_MEMORY_HOST);
 
-         // Calculate displacements
-         int_displs = hypre_CTAlloc(HYPRE_Int, num_procs, HYPRE_MEMORY_HOST);
-         complex_displs = hypre_CTAlloc(HYPRE_Int, num_procs, HYPRE_MEMORY_HOST);
-         int_displs[0] = 0;
-         complex_displs[0] = 0;
-         for (i = 1; i < num_procs; i++) int_displs[i] = int_displs[i-1] + int_recvcounts[i-1];
-         for (i = 1; i < num_procs; i++) complex_displs[i] = complex_displs[i-1] + complex_recvcounts[i-1];
+      //    // Calculate displacements
+      //    int_displs = hypre_CTAlloc(HYPRE_Int, num_procs, HYPRE_MEMORY_HOST);
+      //    complex_displs = hypre_CTAlloc(HYPRE_Int, num_procs, HYPRE_MEMORY_HOST);
+      //    int_displs[0] = 0;
+      //    complex_displs[0] = 0;
+      //    for (i = 1; i < num_procs; i++) int_displs[i] = int_displs[i-1] + int_recvcounts[i-1];
+      //    for (i = 1; i < num_procs; i++) complex_displs[i] = complex_displs[i-1] + complex_recvcounts[i-1];
 
 
 
-         // Allocate and pack the allgatherv send buffers
-         HYPRE_Int *int_send_buffer = hypre_CTAlloc(HYPRE_Int, int_recvcounts[myid], HYPRE_MEMORY_HOST);
-         HYPRE_Complex *complex_send_buffer = hypre_CTAlloc(HYPRE_Complex, complex_recvcounts[myid], HYPRE_MEMORY_HOST);
+      //    // Allocate and pack the allgatherv send buffers
+      //    HYPRE_Int *int_send_buffer = hypre_CTAlloc(HYPRE_Int, int_recvcounts[myid], HYPRE_MEMORY_HOST);
+      //    HYPRE_Complex *complex_send_buffer = hypre_CTAlloc(HYPRE_Complex, complex_recvcounts[myid], HYPRE_MEMORY_HOST);
 
-         HYPRE_Int int_cnt = 0;
-         int_send_buffer[int_cnt++] = num_sends;
-         for (i = 0; i < num_sends; i++) int_send_buffer[int_cnt++] = send_procs[i];
-         for (i = 0; i < num_sends; i++) int_send_buffer[int_cnt++] = send_sizes[2*i];
-         HYPRE_Int complex_cnt = 0;
-         complex_send_buffer[complex_cnt++] = num_sends;
-         for (i = 0; i < num_sends; i++) complex_send_buffer[complex_cnt++] = send_procs[i];
-         for (i = 0; i < num_sends; i++) complex_send_buffer[complex_cnt++] = send_sizes[2*i+1];
+      //    HYPRE_Int int_cnt = 0;
+      //    int_send_buffer[int_cnt++] = num_sends;
+      //    for (i = 0; i < num_sends; i++) int_send_buffer[int_cnt++] = send_procs[i];
+      //    for (i = 0; i < num_sends; i++) int_send_buffer[int_cnt++] = send_sizes[2*i];
+      //    HYPRE_Int complex_cnt = 0;
+      //    complex_send_buffer[complex_cnt++] = num_sends;
+      //    for (i = 0; i < num_sends; i++) complex_send_buffer[complex_cnt++] = send_procs[i];
+      //    for (i = 0; i < num_sends; i++) complex_send_buffer[complex_cnt++] = send_sizes[2*i+1];
 
-         for (proc = 0; proc < num_sends; proc++)
-         {
-            for (level = outer_level; level < num_levels; level++)
-            {
-               for (i = 0; i < hypre_ParCompGridCommPkgNumSendNodes(compGridCommPkg)[outer_level][proc][level]; i++)
-               {
-                  HYPRE_Int idx = hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[outer_level][proc][level][i];
-                  hypre_ParCompMatrixRow *row = hypre_ParCompGridARows(compGrid[level])[idx];
-                  for (j = 0; j < hypre_ParCompMatrixRowSize(row); j++)
-                  {
-                     complex_send_buffer[complex_cnt++] = hypre_ParCompMatrixRowData(row)[j];
-                  }
-                  if (level != num_levels-1)
-                  {
-                     row = hypre_ParCompGridPRows(compGrid[level])[idx];
-                     int_send_buffer[int_cnt++] = hypre_ParCompMatrixRowSize(row);
-                     for (j = 0; j < hypre_ParCompMatrixRowSize(row); j++)
-                     {
-                        int_send_buffer[int_cnt++] = hypre_ParCompMatrixRowGlobalIndices(row)[j];
-                        complex_send_buffer[complex_cnt++] = hypre_ParCompMatrixRowData(row)[j];
-                     }
-                  }
-               }
-            }
-         }
+      //    for (proc = 0; proc < num_sends; proc++)
+      //    {
+      //       for (level = outer_level; level < num_levels; level++)
+      //       {
+      //          for (i = 0; i < hypre_ParCompGridCommPkgNumSendNodes(compGridCommPkg)[outer_level][proc][level]; i++)
+      //          {
+      //             HYPRE_Int idx = hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[outer_level][proc][level][i];
+      //             hypre_ParCompMatrixRow *row = hypre_ParCompGridARows(compGrid[level])[idx];
+      //             for (j = 0; j < hypre_ParCompMatrixRowSize(row); j++)
+      //             {
+      //                complex_send_buffer[complex_cnt++] = hypre_ParCompMatrixRowData(row)[j];
+      //             }
+      //             if (level != num_levels-1)
+      //             {
+      //                row = hypre_ParCompGridPRows(compGrid[level])[idx];
+      //                int_send_buffer[int_cnt++] = hypre_ParCompMatrixRowSize(row);
+      //                for (j = 0; j < hypre_ParCompMatrixRowSize(row); j++)
+      //                {
+      //                   int_send_buffer[int_cnt++] = hypre_ParCompMatrixRowGlobalIndices(row)[j];
+      //                   complex_send_buffer[complex_cnt++] = hypre_ParCompMatrixRowData(row)[j];
+      //                }
+      //             }
+      //          }
+      //       }
+      //    }
 
-         // Do the allgatherv's
-         HYPRE_Int *int_recv_buffer = hypre_CTAlloc(HYPRE_Int, int_displs[num_procs-1] + int_recvcounts[num_procs-1], HYPRE_MEMORY_HOST);
-         HYPRE_Complex *complex_recv_buffer = hypre_CTAlloc(HYPRE_Complex, complex_displs[num_procs-1] + complex_recvcounts[num_procs-1], HYPRE_MEMORY_HOST);
-         hypre_MPI_Allgatherv(int_send_buffer, int_recvcounts[myid], HYPRE_MPI_INT, int_recv_buffer, int_recvcounts, int_displs, HYPRE_MPI_INT, hypre_MPI_COMM_WORLD);
-         hypre_MPI_Allgatherv(complex_send_buffer, complex_recvcounts[myid], HYPRE_MPI_COMPLEX, complex_recv_buffer, complex_recvcounts, complex_displs, HYPRE_MPI_COMPLEX, hypre_MPI_COMM_WORLD);
-         if (communication_cost)
-         {
-            communication_cost[outer_level*6 + 2] += 2*log(num_procs)/log(2);
-            communication_cost[outer_level*6 + 3] += int_recvcounts[myid]*sizeof(HYPRE_Int)*(num_procs-1) + complex_recvcounts[myid]*sizeof(HYPRE_Complex)*(num_procs-1);
-         }
-         hypre_TFree(int_send_buffer, HYPRE_MEMORY_HOST);
-         hypre_TFree(complex_send_buffer, HYPRE_MEMORY_HOST);
+      //    // Do the allgatherv's
+      //    HYPRE_Int *int_recv_buffer = hypre_CTAlloc(HYPRE_Int, int_displs[num_procs-1] + int_recvcounts[num_procs-1], HYPRE_MEMORY_HOST);
+      //    HYPRE_Complex *complex_recv_buffer = hypre_CTAlloc(HYPRE_Complex, complex_displs[num_procs-1] + complex_recvcounts[num_procs-1], HYPRE_MEMORY_HOST);
+      //    hypre_MPI_Allgatherv(int_send_buffer, int_recvcounts[myid], HYPRE_MPI_INT, int_recv_buffer, int_recvcounts, int_displs, HYPRE_MPI_INT, hypre_MPI_COMM_WORLD);
+      //    hypre_MPI_Allgatherv(complex_send_buffer, complex_recvcounts[myid], HYPRE_MPI_COMPLEX, complex_recv_buffer, complex_recvcounts, complex_displs, HYPRE_MPI_COMPLEX, hypre_MPI_COMM_WORLD);
+      //    if (communication_cost)
+      //    {
+      //       communication_cost[outer_level*6 + 2] += 2*log(num_procs)/log(2);
+      //       communication_cost[outer_level*6 + 3] += int_recvcounts[myid]*sizeof(HYPRE_Int)*(num_procs-1) + complex_recvcounts[myid]*sizeof(HYPRE_Complex)*(num_procs-1);
+      //    }
+      //    hypre_TFree(int_send_buffer, HYPRE_MEMORY_HOST);
+      //    hypre_TFree(complex_send_buffer, HYPRE_MEMORY_HOST);
 
-         // Copy desired buffers and free the allgatherv recv buffer
-         for (i = 0; i < num_recvs; i++)
-         {
-            // Find appropriate location to copy from 
-            int_cnt = int_displs[recv_procs[i]];
-            HYPRE_Int num_psi_buffers = int_recv_buffer[int_cnt++];
-            HYPRE_Int buffer_index = 0;
-            for (j = 0; j < num_psi_buffers; j++) if (int_recv_buffer[int_cnt++] == myid) buffer_index = j;
-            HYPRE_Int read_location = int_cnt + num_psi_buffers;
-            for (j = 0; j < buffer_index; j++) read_location += int_recv_buffer[int_cnt++];
-            HYPRE_Int recv_buffer_size = int_recv_buffer[int_cnt++];
+      //    // Copy desired buffers and free the allgatherv recv buffer
+      //    for (i = 0; i < num_recvs; i++)
+      //    {
+      //       // Find appropriate location to copy from 
+      //       int_cnt = int_displs[recv_procs[i]];
+      //       HYPRE_Int num_psi_buffers = int_recv_buffer[int_cnt++];
+      //       HYPRE_Int buffer_index = 0;
+      //       for (j = 0; j < num_psi_buffers; j++) if (int_recv_buffer[int_cnt++] == myid) buffer_index = j;
+      //       HYPRE_Int read_location = int_cnt + num_psi_buffers;
+      //       for (j = 0; j < buffer_index; j++) read_location += int_recv_buffer[int_cnt++];
+      //       HYPRE_Int recv_buffer_size = int_recv_buffer[int_cnt++];
 
-            // Allocate and fill the recv buffer
-            int_recv_buffers[i] = hypre_CTAlloc(HYPRE_Int, recv_buffer_size, HYPRE_MEMORY_HOST );
-            int_cnt = read_location;
-            for (j = 0; j < recv_buffer_size; j++) int_recv_buffers[i][j] = int_recv_buffer[int_cnt++];
-         }
-         hypre_TFree(int_recv_buffer, HYPRE_MEMORY_HOST);
-         for (i = 0; i < num_recvs; i++)
-         {
-            // Find appropriate location to copy from 
-            complex_cnt = complex_displs[recv_procs[i]];
-            HYPRE_Int num_psi_buffers = complex_recv_buffer[complex_cnt++];
-            HYPRE_Int buffer_index = 0;
-            for (j = 0; j < num_psi_buffers; j++) if (complex_recv_buffer[complex_cnt++] == myid) buffer_index = j;
-            HYPRE_Int read_location = complex_cnt + num_psi_buffers;
-            for (j = 0; j < buffer_index; j++) read_location += complex_recv_buffer[complex_cnt++];
-            HYPRE_Int recv_buffer_size = complex_recv_buffer[complex_cnt++];
+      //       // Allocate and fill the recv buffer
+      //       int_recv_buffers[i] = hypre_CTAlloc(HYPRE_Int, recv_buffer_size, HYPRE_MEMORY_HOST );
+      //       int_cnt = read_location;
+      //       for (j = 0; j < recv_buffer_size; j++) int_recv_buffers[i][j] = int_recv_buffer[int_cnt++];
+      //    }
+      //    hypre_TFree(int_recv_buffer, HYPRE_MEMORY_HOST);
+      //    for (i = 0; i < num_recvs; i++)
+      //    {
+      //       // Find appropriate location to copy from 
+      //       complex_cnt = complex_displs[recv_procs[i]];
+      //       HYPRE_Int num_psi_buffers = complex_recv_buffer[complex_cnt++];
+      //       HYPRE_Int buffer_index = 0;
+      //       for (j = 0; j < num_psi_buffers; j++) if (complex_recv_buffer[complex_cnt++] == myid) buffer_index = j;
+      //       HYPRE_Int read_location = complex_cnt + num_psi_buffers;
+      //       for (j = 0; j < buffer_index; j++) read_location += complex_recv_buffer[complex_cnt++];
+      //       HYPRE_Int recv_buffer_size = complex_recv_buffer[complex_cnt++];
 
-            // Allocate and fill the recv buffer
-            complex_recv_buffers[i] = hypre_CTAlloc(HYPRE_Complex, recv_buffer_size, HYPRE_MEMORY_HOST );
-            complex_cnt = read_location;
-            for (j = 0; j < recv_buffer_size; j++) complex_recv_buffers[i][j] = complex_recv_buffer[complex_cnt++];
-         }
-         hypre_TFree(complex_recv_buffer, HYPRE_MEMORY_HOST);
-         hypre_TFree(int_recvcounts, HYPRE_MEMORY_HOST);
-         hypre_TFree(complex_recvcounts, HYPRE_MEMORY_HOST);
-         hypre_TFree(int_displs, HYPRE_MEMORY_HOST);
-         hypre_TFree(complex_displs, HYPRE_MEMORY_HOST);
-      }
-      else
+      //       // Allocate and fill the recv buffer
+      //       complex_recv_buffers[i] = hypre_CTAlloc(HYPRE_Complex, recv_buffer_size, HYPRE_MEMORY_HOST );
+      //       complex_cnt = read_location;
+      //       for (j = 0; j < recv_buffer_size; j++) complex_recv_buffers[i][j] = complex_recv_buffer[complex_cnt++];
+      //    }
+      //    hypre_TFree(complex_recv_buffer, HYPRE_MEMORY_HOST);
+      //    hypre_TFree(int_recvcounts, HYPRE_MEMORY_HOST);
+      //    hypre_TFree(complex_recvcounts, HYPRE_MEMORY_HOST);
+      //    hypre_TFree(int_displs, HYPRE_MEMORY_HOST);
+      //    hypre_TFree(complex_displs, HYPRE_MEMORY_HOST);
+      // }
+      // else
       {
          // Communicate buffer sizes 
          hypre_MPI_Request *size_requests = hypre_CTAlloc(hypre_MPI_Request, 2*num_sends, HYPRE_MEMORY_HOST);
@@ -2604,6 +2689,13 @@ CommunicateRemainingMatrixInfo(hypre_ParCompGrid **compGrid, hypre_ParCompGridCo
          }
 
          // Allocate, pack, and send buffers
+
+         // int_send_buffer = [ [level] , [level] , ... , [level] ]
+         // level = [ [P_rows] ]
+         // P_row = [ row_size, [col_ind] ]
+         // complex_send_buffer = [ [level] , [level] , ... , [level] ]
+         // level = [ [A_data] , [P_data] ]
+
          hypre_MPI_Request *buf_requests = hypre_CTAlloc(hypre_MPI_Request, 4*num_sends, HYPRE_MEMORY_HOST);
          hypre_MPI_Status *buf_statuses = hypre_CTAlloc(hypre_MPI_Status, 4*num_sends, HYPRE_MEMORY_HOST);
          HYPRE_Int **int_send_buffers = hypre_CTAlloc(HYPRE_Int*, num_sends, HYPRE_MEMORY_HOST);
@@ -2622,19 +2714,35 @@ CommunicateRemainingMatrixInfo(hypre_ParCompGrid **compGrid, hypre_ParCompGridCo
                for (i = 0; i < hypre_ParCompGridCommPkgNumSendNodes(compGridCommPkg)[outer_level][proc][level]; i++)
                {
                   HYPRE_Int idx = hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[outer_level][proc][level][i];
-                  hypre_ParCompMatrixRow *row = hypre_ParCompGridARows(compGrid[level])[idx];
-                  for (j = 0; j < hypre_ParCompMatrixRowSize(row); j++)
+                  for (j = hypre_ParCompGridARowPtr(compGrid[level])[idx]; j < hypre_ParCompGridARowPtr(compGrid[level])[idx+1]; j++)
                   {
-                     complex_send_buffers[proc][complex_cnt++] = hypre_ParCompMatrixRowData(row)[j];
+                     complex_send_buffers[proc][complex_cnt++] = hypre_ParCompGridAData(compGrid[level])[j];
                   }
-                  if (level != num_levels-1)
+               }
+               if (level != num_levels-1)
+               {
+                  for (i = 0; i < hypre_ParCompGridCommPkgNumSendNodes(compGridCommPkg)[outer_level][proc][level]; i++)
                   {
-                     row = hypre_ParCompGridPRows(compGrid[level])[idx];
-                     int_send_buffers[proc][int_cnt++] = hypre_ParCompMatrixRowSize(row);
-                     for (j = 0; j < hypre_ParCompMatrixRowSize(row); j++)
+                     HYPRE_Int idx = hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[outer_level][proc][level][i];
+                     
+                     if (idx < hypre_ParCompGridNumOwnedNodes(compGrid[level]))
                      {
-                        int_send_buffers[proc][int_cnt++] = hypre_ParCompMatrixRowGlobalIndices(row)[j];
-                        complex_send_buffers[proc][complex_cnt++] = hypre_ParCompMatrixRowData(row)[j];
+                        int_send_buffers[proc][int_cnt++] = hypre_ParCompGridPRowPtr(compGrid[level])[idx+1] - hypre_ParCompGridPRowPtr(compGrid[level])[idx];
+                        for (j = hypre_ParCompGridPRowPtr(compGrid[level])[idx]; j < hypre_ParCompGridPRowPtr(compGrid[level])[idx+1]; j++)
+                        {
+                           int_send_buffers[proc][int_cnt++] = hypre_ParCompGridPColInd(compGrid[level])[j];
+                           complex_send_buffers[proc][complex_cnt++] = hypre_ParCompGridPData(compGrid[level])[j];
+                        }
+                     }
+                     else
+                     {
+                        int_send_buffers[proc][int_cnt++] = hypre_ParCompGridPRowPtr(compGrid[level])[idx+1];
+                        for (j = 0; j < hypre_ParCompGridPRowPtr(compGrid[level])[idx+1]; j++)
+                        {
+                           HYPRE_Int temp_idx = idx - hypre_ParCompGridNumOwnedNodes(compGrid[level]);
+                           int_send_buffers[proc][int_cnt++] = temp_PColInd[level][temp_idx][j];
+                           complex_send_buffers[proc][complex_cnt++] = temp_PData[level][temp_idx][j];
+                        }
                      }
                   }
                }
@@ -2687,27 +2795,27 @@ CommunicateRemainingMatrixInfo(hypre_ParCompGrid **compGrid, hypre_ParCompGridCo
             for (i = 0; i < hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[outer_level][proc][level]; i++)
             {
                HYPRE_Int idx = hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[outer_level][proc][level][i];
-               hypre_ParCompMatrixRow *row = hypre_ParCompGridARows(compGrid[level])[idx];
-               for (j = 0; j < hypre_ParCompMatrixRowSize(row); j++)
+               for (j = hypre_ParCompGridARowPtr(compGrid[level])[idx]; j < hypre_ParCompGridARowPtr(compGrid[level])[idx+1]; j++)
                {
-                  hypre_ParCompMatrixRowData(row)[j] = complex_recv_buffers[proc][complex_cnt++];
+                  hypre_ParCompGridAData(compGrid[level])[j] = complex_recv_buffers[proc][complex_cnt++];
                }
-               if (level != num_levels-1)
+            }
+            if (level != num_levels-1)
+            {
+               for (i = 0; i < hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[outer_level][proc][level]; i++)
                {
+                  HYPRE_Int idx = hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[outer_level][proc][level][i];
+                  HYPRE_Int temp_idx = hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[outer_level][proc][level][i] - hypre_ParCompGridNumOwnedNodes(compGrid[level]);
 
                   HYPRE_Int row_size = int_recv_buffers[proc][int_cnt++];
+                  hypre_ParCompGridPRowPtr(compGrid[level])[idx+1] = row_size;
+                  temp_PColInd[level][temp_idx] = hypre_CTAlloc(HYPRE_Int, row_size, HYPRE_MEMORY_HOST);
+                  temp_PData[level][temp_idx] = hypre_CTAlloc(HYPRE_Complex, row_size, HYPRE_MEMORY_HOST);
 
-                  row = hypre_ParCompMatrixRowCreate();
-                  hypre_ParCompGridPRows(compGrid[level])[idx] = row;
-                  hypre_ParCompMatrixRowSize(row) = row_size;
-                  hypre_ParCompMatrixRowData(row) = hypre_CTAlloc(HYPRE_Complex, row_size, HYPRE_MEMORY_HOST);
-                  hypre_ParCompMatrixRowGlobalIndices(row) = hypre_CTAlloc(HYPRE_Int, row_size, HYPRE_MEMORY_HOST);
-                  hypre_ParCompMatrixRowLocalIndices(row) = hypre_CTAlloc(HYPRE_Int, row_size, HYPRE_MEMORY_HOST);
-
-                  for (j = 0; j < hypre_ParCompMatrixRowSize(row); j++)
+                  for (j = 0; j < row_size; j++)
                   {
-                     hypre_ParCompMatrixRowGlobalIndices(row)[j] = int_recv_buffers[proc][int_cnt++];
-                     hypre_ParCompMatrixRowData(row)[j] = complex_recv_buffers[proc][complex_cnt++];
+                     temp_PColInd[level][temp_idx][j] = int_recv_buffers[proc][int_cnt++];
+                     temp_PData[level][temp_idx][j] = complex_recv_buffers[proc][complex_cnt++];
                   }
                }
             }
@@ -2721,6 +2829,51 @@ CommunicateRemainingMatrixInfo(hypre_ParCompGrid **compGrid, hypre_ParCompGridCo
       hypre_TFree(complex_recv_buffers, HYPRE_MEMORY_HOST);
       hypre_TFree(send_sizes, HYPRE_MEMORY_HOST);
    }
+
+
+
+   // Fix up P
+   for (level = 0; level < transition_level; level++)
+   {
+      if (level != num_levels-1)
+      {
+         // Setup the row pointer (we stored the row sizes rather than pointer values as we unpacked)
+         for (i = hypre_ParCompGridNumOwnedNodes(compGrid[level]); i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
+         {
+            hypre_ParCompGridPRowPtr(compGrid[level])[i+1] = hypre_ParCompGridPRowPtr(compGrid[level])[i] + hypre_ParCompGridPRowPtr(compGrid[level])[i+1];
+         }
+
+         // Make sure enough space is allocated for P
+         if (hypre_ParCompGridPRowPtr(compGrid[level])[hypre_ParCompGridNumNodes(compGrid[level])] > hypre_ParCompGridPMemSize(compGrid[level]))
+            hypre_ParCompGridResize(compGrid[level], hypre_ParCompGridPRowPtr(compGrid[level])[hypre_ParCompGridNumNodes(compGrid[level])], level != num_levels-1, 2);
+
+         // Copy col ind and data into the CSR structure
+         for (i = hypre_ParCompGridNumOwnedNodes(compGrid[level]); i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
+         {
+            for (j = hypre_ParCompGridPRowPtr(compGrid[level])[i]; j < hypre_ParCompGridPRowPtr(compGrid[level])[i+1]; j++)
+            {
+               hypre_ParCompGridPColInd(compGrid[level])[j] = temp_PColInd[level][i - hypre_ParCompGridNumOwnedNodes(compGrid[level])][j - hypre_ParCompGridPRowPtr(compGrid[level])[i]];
+               hypre_ParCompGridPData(compGrid[level])[j] = temp_PData[level][i - hypre_ParCompGridNumOwnedNodes(compGrid[level])][j - hypre_ParCompGridPRowPtr(compGrid[level])[i]];
+            }
+         }
+      }
+   }
+   for (level = 0; level < transition_level; level++)
+   {
+      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]) - hypre_ParCompGridNumOwnedNodes(compGrid[level]); i++)
+      {
+         hypre_TFree(temp_PColInd[level][i], HYPRE_MEMORY_HOST);
+         hypre_TFree(temp_PData[level][i], HYPRE_MEMORY_HOST);
+      }
+      hypre_TFree(temp_PColInd[level], HYPRE_MEMORY_HOST);
+      hypre_TFree(temp_PData[level], HYPRE_MEMORY_HOST);
+   }
+   hypre_TFree(temp_PColInd, HYPRE_MEMORY_HOST);
+   hypre_TFree(temp_PData, HYPRE_MEMORY_HOST);
+
+
+
+
 
    return 0;
 }
