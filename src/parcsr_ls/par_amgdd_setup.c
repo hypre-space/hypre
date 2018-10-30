@@ -17,9 +17,9 @@
 #include "par_amg.h"
 #include "par_csr_block_matrix.h"	
 
-#define DEBUG_COMP_GRID 0 // if true, runs some tests, prints out what is stored in the comp grids for each processor to a file
+#define DEBUG_COMP_GRID 1 // if true, runs some tests, prints out what is stored in the comp grids for each processor to a file
 #define DEBUG_PROC_NEIGHBORS 0 // if true, dumps info on the add flag structures that determine nearest processor neighbors 
-#define DEBUGGING_MESSAGES 1 // if true, prints a bunch of messages to the screen to let you know where in the algorithm you are
+#define DEBUGGING_MESSAGES 0 // if true, prints a bunch of messages to the screen to let you know where in the algorithm you are
 
 HYPRE_Int
 SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int level, HYPRE_Int padding, HYPRE_Int num_ghost_layers, HYPRE_Int *communication_cost, HYPRE_Int use_multiple_allgather );
@@ -2452,7 +2452,6 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
                                         - hypre_ParCompGridARowPtr(compGrid[level])[i + num_owned_nodes];
       }
       
-
       // Place the incoming comp grid A row sizes in the appropriate places and count up number of nonzeros added to A
       HYPRE_Int added_A_nnz = 0;
       for (i = 0; i < num_incoming_nodes[buffer_number][level]; i++)
@@ -2480,7 +2479,6 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
       for (i = 0; i < add_node_cnt + num_nodes - num_owned_nodes; i++) 
          A_new_rowptr[i + 1] = A_new_rowptr[i] + A_row_sizes[i];
 
-
       // !!! Debug
       // if (myid == 0 && current_level == 3 && buffer_number == 0)
       // {
@@ -2492,13 +2490,15 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
       //    printf("\n");
       // }
 
+      // Check whether we need to reallocate space for A nonzero info
+      if (A_new_rowptr[add_node_cnt + num_nodes - num_owned_nodes] > hypre_ParCompGridAMemSize(compGrid[level]))
+      {
+         hypre_ParCompGridResize(compGrid[level], A_new_rowptr[add_node_cnt + num_nodes - num_owned_nodes], level != num_levels-1, 1); // !!! Is there a better way to manage memory? !!!
+      
+         // !!! Debug
+         // if (myid == 0 && current_level == 3 && buffer_number == 0) printf("reallocated compgrid to = %d\n", hypre_ParCompGridARowPtr(compGrid[level])[add_node_cnt + num_nodes]);
 
-
-
-
-
-
-
+      }
 
       // Move existing A col ind info
       for (i = num_nodes - 1; i >= num_owned_nodes; i--)
@@ -2508,29 +2508,18 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
             HYPRE_Int old_index = hypre_ParCompGridARowPtr(compGrid[level])[ i + 1 ] - 1 - j;
             HYPRE_Int new_index = A_new_rowptr[ compGrid_dest[i - num_owned_nodes] - num_owned_nodes + 1 ] - 1 - j; // !!! Check this
             // !!! Debug:
-            // if (old_index > new_index && myid == 0 && current_level == 3 && buffer_number == 0) printf("i = %d, compGrid_dest = %d, old_index = %d, new_index = %d\n", i, compGrid_dest[i - num_owned_nodes], old_index, new_index);
-            // if (old_index < 0 || old_index >= hypre_ParCompGridAMemSize(compGrid[level])) printf("Rank %d, old_index = %d\n", myid, old_index);
+            if (old_index > new_index && myid == 0 && current_level == 3 && buffer_number == 0) printf("i = %d, compGrid_dest = %d, old_index = %d, new_index = %d\n", i, compGrid_dest[i - num_owned_nodes], old_index, new_index);
+            if (old_index < 0 || old_index >= hypre_ParCompGridAMemSize(compGrid[level])) printf("Rank %d, old_index = %d\n", myid, old_index);
+            if (new_index < 0 || new_index >= hypre_ParCompGridAMemSize(compGrid[level])) printf("Rank %d, new_index = %d\n", myid, new_index);
 
             hypre_ParCompGridAColInd(compGrid[level])[ new_index ] = hypre_ParCompGridAColInd(compGrid[level])[ old_index ];
             hypre_ParCompGridAGlobalColInd(compGrid[level])[ new_index ] = hypre_ParCompGridAGlobalColInd(compGrid[level])[ old_index ];
          }
       }
 
-
-
-
-
-
-
-
-
-
-
       // Set new row ptr values
       for (i = num_owned_nodes; i < num_nodes + add_node_cnt + 1; i++) 
          hypre_ParCompGridARowPtr(compGrid[level])[i] = A_new_rowptr[i - num_owned_nodes];
-
-
 
       // !!! Debug
       // if (myid == 0 && current_level == 3 && buffer_number == 0)
@@ -2540,18 +2529,6 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
       //    printf("\n");
       // }
 
-
-      // Check whether we need to reallocate space for A nonzero info
-      if (hypre_ParCompGridARowPtr(compGrid[level])[add_node_cnt + num_nodes] > hypre_ParCompGridAMemSize(compGrid[level]))
-      {
-         hypre_ParCompGridResize(compGrid[level], hypre_ParCompGridARowPtr(compGrid[level])[add_node_cnt + num_nodes], level != num_levels-1, 1); // !!! Is there a better way to manage memory? !!!
-      
-         // !!! Debug
-         // if (myid == 0 && current_level == 3 && buffer_number == 0) printf("reallocated compgrid to = %d\n", hypre_ParCompGridARowPtr(compGrid[level])[add_node_cnt + num_nodes]);
-
-      }
-
-
       // Copy in new A global col ind info
       HYPRE_Int size_cnt = cnt - num_incoming_nodes[buffer_number][level];
       for (i = 0; i < num_incoming_nodes[buffer_number][level]; i++)
@@ -2559,7 +2536,7 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
          row_size = recv_buffer[size_cnt];
 
          // !!! Debug
-         if (myid == 0 && current_level == 3 && buffer_number == 0) printf("row_size = %d\n", row_size);
+         // if (myid == 0 && current_level == 3 && buffer_number == 0) printf("row_size = %d\n", row_size);
 
          if (incoming_dest[i] >= 0)
          {
@@ -2701,7 +2678,7 @@ CommunicateRemainingMatrixInfo(hypre_ParCompGrid **compGrid, hypre_ParCompGridCo
                if (level != num_levels-1)
                {
                   if (idx < hypre_ParCompGridNumOwnedNodes(compGrid[level])) P_row_size = hypre_ParCompGridPRowPtr(compGrid[level])[idx+1] - hypre_ParCompGridPRowPtr(compGrid[level])[idx];
-                  else P_row_size = hypre_ParCompGridPRowPtr(compGrid[level])[idx];
+                  else P_row_size = hypre_ParCompGridPRowPtr(compGrid[level])[idx+1];
                }
                
                HYPRE_Int A_row_size = hypre_ParCompGridARowPtr(compGrid[level])[idx+1] - hypre_ParCompGridARowPtr(compGrid[level])[idx];
@@ -2905,11 +2882,25 @@ CommunicateRemainingMatrixInfo(hypre_ParCompGrid **compGrid, hypre_ParCompGridCo
                   for (i = 0; i < hypre_ParCompGridCommPkgNumSendNodes(compGridCommPkg)[outer_level][proc][level]; i++)
                   {
                      HYPRE_Int idx = hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[outer_level][proc][level][i];
-                     int_send_buffers[proc][int_cnt++] = hypre_ParCompGridPRowPtr(compGrid[level])[idx+1] - hypre_ParCompGridPRowPtr(compGrid[level])[idx];
-                     for (j = hypre_ParCompGridPRowPtr(compGrid[level])[idx]; j < hypre_ParCompGridPRowPtr(compGrid[level])[idx+1]; j++)
+                     
+                     if (idx < hypre_ParCompGridNumOwnedNodes(compGrid[level]))
                      {
-                        int_send_buffers[proc][int_cnt++] = hypre_ParCompGridPColInd(compGrid[level])[j];
-                        complex_send_buffers[proc][complex_cnt++] = hypre_ParCompGridPData(compGrid[level])[j];
+                        int_send_buffers[proc][int_cnt++] = hypre_ParCompGridPRowPtr(compGrid[level])[idx+1] - hypre_ParCompGridPRowPtr(compGrid[level])[idx];
+                        for (j = hypre_ParCompGridPRowPtr(compGrid[level])[idx]; j < hypre_ParCompGridPRowPtr(compGrid[level])[idx+1]; j++)
+                        {
+                           int_send_buffers[proc][int_cnt++] = hypre_ParCompGridPColInd(compGrid[level])[j];
+                           complex_send_buffers[proc][complex_cnt++] = hypre_ParCompGridPData(compGrid[level])[j];
+                        }
+                     }
+                     else
+                     {
+                        int_send_buffers[proc][int_cnt++] = hypre_ParCompGridPRowPtr(compGrid[level])[idx+1];
+                        for (j = 0; j < hypre_ParCompGridPRowPtr(compGrid[level])[idx+1]; j++)
+                        {
+                           HYPRE_Int temp_idx = idx - hypre_ParCompGridNumOwnedNodes(compGrid[level]);
+                           int_send_buffers[proc][int_cnt++] = temp_PColInd[level][temp_idx][j];
+                           complex_send_buffers[proc][complex_cnt++] = temp_PData[level][temp_idx][j];
+                        }
                      }
                   }
                }

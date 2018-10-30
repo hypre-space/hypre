@@ -15,7 +15,7 @@
 #include "par_amg.h"
 #include "par_csr_block_matrix.h"	
 
-#define DEBUG_FAC 0
+#define DEBUG_FAC 1
 #define DUMP_INTERMEDIATE_SOLNS 0
 
 HYPRE_Int
