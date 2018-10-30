@@ -718,9 +718,12 @@ hypre_ParCompGridDebugPrint ( hypre_ParCompGrid *compGrid, const char* filename 
       hypre_fprintf(file, "A colind:\n");
       for (i = 0; i < A_rowptr[num_nodes]; i++) hypre_fprintf(file, "%d ", A_colind[i]);
       hypre_fprintf(file,"\n\n");
-      hypre_fprintf(file, "A global colind:\n");
-      for (i = 0; i < A_rowptr[num_nodes]; i++) hypre_fprintf(file, "%d ", A_global_colind[i]);
-      hypre_fprintf(file,"\n\n");
+      if (A_global_colind)
+      {
+         hypre_fprintf(file, "A global colind:\n");
+         for (i = 0; i < A_rowptr[num_nodes]; i++) hypre_fprintf(file, "%d ", A_global_colind[i]);
+         hypre_fprintf(file,"\n\n");
+      }
       hypre_fprintf(file, "A data:\n");
       for (i = 0; i < A_rowptr[num_nodes]; i++) hypre_fprintf(file, "%f ", A_data[i]);
       if (P_rowptr)
