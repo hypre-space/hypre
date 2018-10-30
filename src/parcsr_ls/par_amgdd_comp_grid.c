@@ -535,12 +535,6 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *num
                }
                hypre_ParCompGridAColInd(compGrid[level])[j] = local_index;
 
-
-
-               // if (myid == 1 && level == 2) printf("local_index = %d, global_index = %d\n", local_index, global_index);
-
-
-
                // if we need to insert an entry into the matrix (!!! Note that I'm assuming a symmetric matrix here !!!)
                if ( local_index < hypre_ParCompGridNumOwnedNodes(compGrid[level]) && local_index >= 0 )
                {
@@ -588,10 +582,6 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *num
 HYPRE_Int hypre_ParCompGridSetupLocalIndicesP( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int transition_level )
 {
    HYPRE_Int                  i,j,level,global_index,first,last;
-
-   HYPRE_Int myid;
-   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
-   // if (myid == 0) printf("transition_level = %d\n", transition_level);
 
    for (level = 0; level < transition_level-1; level++)
    {
