@@ -424,25 +424,36 @@ hypre_ParCompGridSetupRealDofMarker( hypre_ParCompGrid **compGrid, HYPRE_Int num
 }
 
 HYPRE_Int
-hypre_ParCompGridSetSizeMatricesOnly ( hypre_ParCompGrid *compGrid, HYPRE_Int num_nodes, HYPRE_Int A_nnz, HYPRE_Int P_nnz )
+hypre_ParCompGridSetSize ( hypre_ParCompGrid *compGrid, HYPRE_Int num_nodes, HYPRE_Int A_nnz, HYPRE_Int P_nnz, HYPRE_Int over_allocation_factor, HYPRE_Int full_comp_info )
 {
    hypre_ParCompGridNumNodes(compGrid) = num_nodes;
-   hypre_ParCompGridMemSize(compGrid) = num_nodes;
-   hypre_ParCompGridAMemSize(compGrid) = A_nnz;
-   hypre_ParCompGridPMemSize(compGrid) = P_nnz;
+   hypre_ParCompGridMemSize(compGrid) = num_nodes*over_allocation_factor;
+   hypre_ParCompGridAMemSize(compGrid) = A_nnz*over_allocation_factor;
+   hypre_ParCompGridPMemSize(compGrid) = P_nnz*over_allocation_factor;
 
-   hypre_ParCompGridU(compGrid) = hypre_CTAlloc(HYPRE_Complex, num_nodes, HYPRE_MEMORY_HOST);
-   hypre_ParCompGridF(compGrid) = hypre_CTAlloc(HYPRE_Complex, num_nodes, HYPRE_MEMORY_HOST);
+   hypre_ParCompGridU(compGrid) = hypre_CTAlloc(HYPRE_Complex, num_nodes*over_allocation_factor, HYPRE_MEMORY_HOST);
+   hypre_ParCompGridF(compGrid) = hypre_CTAlloc(HYPRE_Complex, num_nodes*over_allocation_factor, HYPRE_MEMORY_HOST);
    
-   hypre_ParCompGridARowPtr(compGrid) = hypre_CTAlloc(HYPRE_Int, num_nodes+1, HYPRE_MEMORY_HOST);
-   hypre_ParCompGridAColInd(compGrid) = hypre_CTAlloc(HYPRE_Int, A_nnz, HYPRE_MEMORY_HOST);
-   hypre_ParCompGridAData(compGrid) = hypre_CTAlloc(HYPRE_Complex, A_nnz, HYPRE_MEMORY_HOST);
+   hypre_ParCompGridARowPtr(compGrid) = hypre_CTAlloc(HYPRE_Int, (num_nodes+1)*over_allocation_factor, HYPRE_MEMORY_HOST);
+   hypre_ParCompGridAColInd(compGrid) = hypre_CTAlloc(HYPRE_Int, A_nnz*over_allocation_factor, HYPRE_MEMORY_HOST);
+   if (full_comp_info) hypre_ParCompGridAGlobalColInd(compGrid) = hypre_CTAlloc(HYPRE_Int, A_nnz*over_allocation_factor, HYPRE_MEMORY_HOST);
+   hypre_ParCompGridAData(compGrid) = hypre_CTAlloc(HYPRE_Complex, A_nnz*over_allocation_factor, HYPRE_MEMORY_HOST);
+
+   if (full_comp_info)
+   {
+      hypre_ParCompGridGlobalIndices(compGrid) = hypre_CTAlloc(HYPRE_Int, num_nodes*over_allocation_factor, HYPRE_MEMORY_HOST);
+   }
+   if (full_comp_info > 1)
+   {
+      hypre_ParCompGridCoarseGlobalIndices(compGrid) = hypre_CTAlloc(HYPRE_Int, num_nodes*over_allocation_factor, HYPRE_MEMORY_HOST);
+      hypre_ParCompGridCoarseLocalIndices(compGrid) = hypre_CTAlloc(HYPRE_Int, num_nodes*over_allocation_factor, HYPRE_MEMORY_HOST);
+   }
 
    if (P_nnz)
    {
-      hypre_ParCompGridPRowPtr(compGrid) = hypre_CTAlloc(HYPRE_Int, num_nodes+1, HYPRE_MEMORY_HOST);
-      hypre_ParCompGridPColInd(compGrid) = hypre_CTAlloc(HYPRE_Int, P_nnz, HYPRE_MEMORY_HOST);
-      hypre_ParCompGridPData(compGrid) = hypre_CTAlloc(HYPRE_Complex, P_nnz, HYPRE_MEMORY_HOST);      
+      hypre_ParCompGridPRowPtr(compGrid) = hypre_CTAlloc(HYPRE_Int, (num_nodes+1)*over_allocation_factor, HYPRE_MEMORY_HOST);
+      hypre_ParCompGridPColInd(compGrid) = hypre_CTAlloc(HYPRE_Int, P_nnz*over_allocation_factor, HYPRE_MEMORY_HOST);
+      hypre_ParCompGridPData(compGrid) = hypre_CTAlloc(HYPRE_Complex, P_nnz*over_allocation_factor, HYPRE_MEMORY_HOST);      
    }
 
    return 0;
