@@ -3119,7 +3119,7 @@ HYPRE_ParCSRHybridSetNodal(HYPRE_Solver solver,
 
 /**
  * (Optional) Sets whether to store local transposed interpolation
- * The default is 0 (fdon't store).
+ * The default is 0 (don't store).
  **/
 HYPRE_Int
 HYPRE_ParCSRHybridSetKeepTranspose(HYPRE_Solver solver,
