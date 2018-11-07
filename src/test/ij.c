@@ -2809,6 +2809,7 @@ main( hypre_int argc,
       if (relax_coarse > -1)
          HYPRE_ParCSRHybridSetCycleRelaxType(amg_solver, relax_coarse, 3);
       HYPRE_ParCSRHybridSetRelaxOrder(amg_solver, relax_order);
+      HYPRE_ParCSRHybridSetKeepTranspose(amg_solver, keepTranspose);
       HYPRE_ParCSRHybridSetMaxCoarseSize(amg_solver, coarse_threshold);
       HYPRE_ParCSRHybridSetMinCoarseSize(amg_solver, min_coarse_size);
       HYPRE_ParCSRHybridSetSeqThreshold(amg_solver, seq_threshold);

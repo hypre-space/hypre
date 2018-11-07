@@ -84,13 +84,13 @@ extern "C"{
 }
 extern "C"{
   __global__
-  void  PackOnDeviceKernel(HYPRE_Complex* __restrict__ send_data,const HYPRE_Complex* __restrict__ x_local_data, const hypre_int* __restrict__ send_map, hypre_int begin,hypre_int end){
+  void  PackOnDeviceKernel(HYPRE_Complex* __restrict__ send_data,const HYPRE_Complex* __restrict__ x_local_data, const HYPRE_Int* __restrict__ send_map, HYPRE_Int begin, HYPRE_Int end){
     hypre_int i = begin+blockIdx.x * blockDim.x + threadIdx.x;
     if (i<end){
       send_data[i-begin]=x_local_data[send_map[i]];
     }
   }
-  void PackOnDevice(HYPRE_Complex *send_data,HYPRE_Complex *x_local_data, hypre_int *send_map, hypre_int begin,hypre_int end,cudaStream_t s){
+  void PackOnDevice(HYPRE_Complex *send_data,HYPRE_Complex *x_local_data, HYPRE_Int *send_map, HYPRE_Int begin, HYPRE_Int end,cudaStream_t s){
     if ((end-begin)<=0) return;
     hypre_int tpb=64;
     hypre_int num_blocks=(end-begin)/tpb+1;
@@ -145,6 +145,25 @@ extern "C"{
   }
 }
 
+extern "C"{
+__global__
+void DiagScaleVectorKernel(HYPRE_Complex* __restrict__ x, HYPRE_Complex* __restrict y, HYPRE_Complex* __restrict__ A_data, const hypre_int* __restrict__ A_i, hypre_int num_rows){
+   hypre_int i= blockIdx.x * blockDim.x + threadIdx.x;
+   if (i<num_rows)
+   {
+      x[i] = y[i]/A_data[A_i[i]];
+   }
+}
+}
+
+extern "C"{
+   void DiagScaleVector(HYPRE_Complex *x, HYPRE_Complex *y, HYPRE_Complex *A_data, hypre_int *A_i, hypre_int num_rows, cudaStream_t s){
+      const hypre_int tpb=64;
+      hypre_int num_blocks=num_rows/tpb+1;
+      DiagScaleVectorKernel<<<num_blocks,tpb,0,s>>>(x,y,A_data,A_i,num_rows);
+      hypre_CheckErrorDevice(cudaStreamSynchronize(s));
+   }
+}
 
 extern "C"{
 __global__
@@ -233,6 +252,29 @@ extern "C"{
       }
     hypre_CheckErrorDevice(cudaDeviceSynchronize());
   }
+}
+
+extern "C"
+{
+
+   __global__
+   void BigToSmallCopyKernel (hypre_int* __restrict__ tgt, const HYPRE_Int* __restrict__ src, hypre_int size)
+   {
+      hypre_int i = blockIdx.x * blockDim.x + threadIdx.x;
+      if (i<size) tgt[i] = src[i];
+   }
+ 
+   void BigToSmallCopy (hypre_int* tgt, const HYPRE_Int* src, hypre_int size, cudaStream_t s)
+   {
+      hypre_int tpb=64;
+      hypre_int num_blocks=size/tpb+1;
+      PUSH_RANGE_PAYLOAD("VecCopy",5,size);
+      //MemPrefetch(tgt,0,s);
+      //MemPrefetch(src,0,s);
+      BigToSmallCopyKernel<<<num_blocks,tpb,0,s>>>(tgt,src,size);
+      //hypre_CheckErrorDevice(cudaStreamSynchronize(s));
+      POP_RANGE;
+   }
 }
 
 #endif
