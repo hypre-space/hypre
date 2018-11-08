@@ -105,6 +105,7 @@ typedef struct
    HYPRE_Int      hybrid;
    HYPRE_Real   tol;
    HYPRE_Real   cf_tol;
+   HYPRE_Real   residual_norm;
    HYPRE_Real   rel_residual_norm;
    HYPRE_Real   a_tol;
    

@@ -347,6 +347,22 @@ hypre_F90_IFACE(hypre_parcsrpcggetfinalrelative, HYPRE_PARCSRPCGGETFINALRELATIVE
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParCSRPCGGetFinalResidual
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_parcsrpcggetfinalresidual, HYPRE_PARCSRPCGGETFINALRESIDUAL)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Real *norm,
+     hypre_F90_Int *ierr    )
+{
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_ParCSRPCGGetFinalResidualNorm(
+           hypre_F90_PassObj (HYPRE_Solver, solver),
+           hypre_F90_PassRealRef (norm)    ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParCSRDiagScaleSetup
  *--------------------------------------------------------------------------*/
 

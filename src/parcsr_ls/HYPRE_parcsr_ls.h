@@ -164,6 +164,12 @@ HYPRE_Int HYPRE_BoomerAMGGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
                                                       HYPRE_Real   *rel_resid_norm);
 
 /**
+ * Returns the norm of the final residual.
+ **/
+HYPRE_Int HYPRE_BoomerAMGGetFinalResidualNorm(HYPRE_Solver  solver,
+                                              HYPRE_Real   *resid_norm);
+
+/**
  * (Optional) Sets the size of the system of PDEs, if using the systems version.
  * The default is 1, i.e. a scalar system.
  **/
@@ -2218,6 +2224,9 @@ HYPRE_Int HYPRE_ParCSRPCGGetNumIterations(HYPRE_Solver  solver,
 
 HYPRE_Int HYPRE_ParCSRPCGGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
                                                       HYPRE_Real   *norm);
+
+HYPRE_Int HYPRE_ParCSRPCGGetFinalResidualNorm(HYPRE_Solver  solver,
+                                              HYPRE_Real   *norm);
 /**
  * Returns the residual.
  **/

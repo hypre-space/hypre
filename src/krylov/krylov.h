@@ -137,6 +137,7 @@ extern "C" {
     HYPRE_Int      hybrid;
     HYPRE_Real   tol;
     HYPRE_Real   cf_tol;
+    HYPRE_Real   residual_norm;
     HYPRE_Real   rel_residual_norm;
     HYPRE_Real   a_tol;
 
@@ -475,6 +476,7 @@ extern "C" {
     HYPRE_Real   tol;
     HYPRE_Real   cf_tol;
     HYPRE_Real   a_tol;
+    HYPRE_Real   residual_norm;
     HYPRE_Real   rel_residual_norm;
 
     void  *A;
@@ -1209,6 +1211,7 @@ extern "C" {
 
     /* log info (always logged) */
     HYPRE_Int      num_iterations;
+    HYPRE_Real   residual_norm;
     HYPRE_Real   rel_residual_norm;
 
     HYPRE_Int     print_level; /* printing when print_level>0 */
@@ -1293,6 +1296,7 @@ extern "C" {
   HYPRE_Int hypre_BiCGSTABGetConverged ( void *bicgstab_vdata , HYPRE_Int *converged );
   HYPRE_Int hypre_BiCGSTABGetNumIterations ( void *bicgstab_vdata , HYPRE_Int *num_iterations );
   HYPRE_Int hypre_BiCGSTABGetFinalRelativeResidualNorm ( void *bicgstab_vdata , HYPRE_Real *relative_residual_norm );
+  HYPRE_Int hypre_BiCGSTABGetFinalResidualNorm ( void *bicgstab_vdata , HYPRE_Real *relative_residual_norm );
   HYPRE_Int hypre_BiCGSTABGetResidual ( void *bicgstab_vdata , void **residual );
 
   /* cgnr.c */
@@ -1344,6 +1348,7 @@ extern "C" {
   HYPRE_Int hypre_GMRESGetNumIterations ( void *gmres_vdata , HYPRE_Int *num_iterations );
   HYPRE_Int hypre_GMRESGetConverged ( void *gmres_vdata , HYPRE_Int *converged );
   HYPRE_Int hypre_GMRESGetFinalRelativeResidualNorm ( void *gmres_vdata , HYPRE_Real *relative_residual_norm );
+  HYPRE_Int hypre_GMRESGetFinalResidualNorm ( void *gmres_vdata , HYPRE_Real *residual_norm );
 
   /* cogmres.c */
   void *hypre_COGMRESCreate ( hypre_COGMRESFunctions *gmres_functions );
@@ -1464,6 +1469,7 @@ extern "C" {
   HYPRE_Int HYPRE_BiCGSTABSetPrintLevel ( HYPRE_Solver solver , HYPRE_Int print_level );
   HYPRE_Int HYPRE_BiCGSTABGetNumIterations ( HYPRE_Solver solver , HYPRE_Int *num_iterations );
   HYPRE_Int HYPRE_BiCGSTABGetFinalRelativeResidualNorm ( HYPRE_Solver solver , HYPRE_Real *norm );
+  HYPRE_Int HYPRE_BiCGSTABGetFinalResidualNorm ( HYPRE_Solver solver , HYPRE_Real *norm );
   HYPRE_Int HYPRE_BiCGSTABGetResidual ( HYPRE_Solver solver , void *residual );
 
   /* HYPRE_cgnr.c */
@@ -1510,6 +1516,7 @@ extern "C" {
   HYPRE_Int HYPRE_GMRESGetNumIterations ( HYPRE_Solver solver , HYPRE_Int *num_iterations );
   HYPRE_Int HYPRE_GMRESGetConverged ( HYPRE_Solver solver , HYPRE_Int *converged );
   HYPRE_Int HYPRE_GMRESGetFinalRelativeResidualNorm ( HYPRE_Solver solver , HYPRE_Real *norm );
+  HYPRE_Int HYPRE_GMRESGetFinalResidualNorm ( HYPRE_Solver solver , HYPRE_Real *norm );
   HYPRE_Int HYPRE_GMRESGetResidual ( HYPRE_Solver solver , void *residual );
 
   /* HYPRE_cogmres.c */
@@ -1635,6 +1642,7 @@ extern "C" {
   HYPRE_Int HYPRE_PCGGetNumIterations ( HYPRE_Solver solver , HYPRE_Int *num_iterations );
   HYPRE_Int HYPRE_PCGGetConverged ( HYPRE_Solver solver , HYPRE_Int *converged );
   HYPRE_Int HYPRE_PCGGetFinalRelativeResidualNorm ( HYPRE_Solver solver , HYPRE_Real *norm );
+  HYPRE_Int HYPRE_PCGGetFinalResidualNorm ( HYPRE_Solver solver , HYPRE_Real *norm );
   HYPRE_Int HYPRE_PCGGetResidual ( HYPRE_Solver solver , void *residual );
 
   /* pcg.c */
@@ -1676,6 +1684,7 @@ extern "C" {
   HYPRE_Int hypre_PCGGetConverged ( void *pcg_vdata , HYPRE_Int *converged );
   HYPRE_Int hypre_PCGPrintLogging ( void *pcg_vdata , HYPRE_Int myid );
   HYPRE_Int hypre_PCGGetFinalRelativeResidualNorm ( void *pcg_vdata , HYPRE_Real *relative_residual_norm );
+  HYPRE_Int hypre_PCGGetFinalResidualNorm ( void *pcg_vdata , HYPRE_Real *residual_norm );
 
 #ifdef __cplusplus
   }

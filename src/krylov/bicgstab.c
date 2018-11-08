@@ -384,7 +384,10 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
 
    (bicgstab_data -> num_iterations) = iter;
    if (b_norm > 0.0)
+   {
       (bicgstab_data -> rel_residual_norm) = r_norm/b_norm;
+      (bicgstab_data -> residual_norm) = r_norm;
+   }
    /* check for convergence before starting */
    if (r_norm == 0.0)
    {
@@ -503,9 +506,15 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
     
    (bicgstab_data -> num_iterations) = iter;
    if (b_norm > 0.0)
+   {
       (bicgstab_data -> rel_residual_norm) = r_norm/b_norm;
+      (bicgstab_data -> residual_norm) = r_norm;
+   }
    if (b_norm == 0.0)
+   {
       (bicgstab_data -> rel_residual_norm) = r_norm;
+      (bicgstab_data -> residual_norm) = r_norm;
+   }
 
    if (iter >= max_iter && r_norm > epsilon && epsilon > 0 && hybrid != -1) hypre_error(HYPRE_ERROR_CONV);
 
@@ -723,6 +732,21 @@ hypre_BiCGSTABGetFinalRelativeResidualNorm( void   *bicgstab_vdata,
    
    return hypre_error_flag;
 } 
+
+/*--------------------------------------------------------------------------
+ * hypre_BiCGSTABGetFinalResidualNorm
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BiCGSTABGetFinalResidualNorm( void   *bicgstab_vdata,
+                                 HYPRE_Real *residual_norm )
+{
+	hypre_BiCGSTABData *bicgstab_data = (hypre_BiCGSTABData  *)bicgstab_vdata;
+
+   *residual_norm = (bicgstab_data -> residual_norm);
+
+   return hypre_error_flag;
+}
 
 /*--------------------------------------------------------------------------
  * hypre_BiCGSTABGetResidual

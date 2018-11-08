@@ -832,9 +832,15 @@ hypre_GMRESSolve(void  *gmres_vdata,
 
    (gmres_data -> num_iterations) = iter;
    if (b_norm > 0.0)
+   {
       (gmres_data -> rel_residual_norm) = r_norm/b_norm;
+      (gmres_data -> residual_norm) = r_norm;
+   }
    if (b_norm == 0.0)
+   {
       (gmres_data -> rel_residual_norm) = r_norm;
+      (gmres_data -> residual_norm) = r_norm;
+   }
 
    if (iter >= max_iter && r_norm > epsilon && epsilon > 0 && hybrid != -1) hypre_error(HYPRE_ERROR_CONV);
 
@@ -1252,3 +1258,19 @@ hypre_GMRESGetFinalRelativeResidualNorm( void   *gmres_vdata,
    
    return hypre_error_flag;
 } 
+
+/*--------------------------------------------------------------------------
+ * hypre_GMRESGetFinalResidualNorm
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_GMRESGetFinalResidualNorm( void   *gmres_vdata,
+                                 HYPRE_Real *residual_norm )
+{
+   hypre_GMRESData *gmres_data = (hypre_GMRESData *)gmres_vdata;
+
+
+   *residual_norm = (gmres_data -> residual_norm);
+
+   return hypre_error_flag;
+}

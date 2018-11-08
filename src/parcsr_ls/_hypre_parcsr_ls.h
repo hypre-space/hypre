@@ -596,6 +596,7 @@ HYPRE_Int hypre_AMGHybridGetNumIterations ( void *AMGhybrid_vdata , HYPRE_Int *n
 HYPRE_Int hypre_AMGHybridGetDSCGNumIterations ( void *AMGhybrid_vdata , HYPRE_Int *dscg_num_its );
 HYPRE_Int hypre_AMGHybridGetPCGNumIterations ( void *AMGhybrid_vdata , HYPRE_Int *pcg_num_its );
 HYPRE_Int hypre_AMGHybridGetFinalRelativeResidualNorm ( void *AMGhybrid_vdata , HYPRE_Real *final_rel_res_norm );
+HYPRE_Int hypre_AMGHybridGetFinalResidualNorm ( void *AMGhybrid_vdata , HYPRE_Real *final_res_norm );
 HYPRE_Int hypre_AMGHybridSetup ( void *AMGhybrid_vdata , hypre_ParCSRMatrix *A , hypre_ParVector *b , hypre_ParVector *x );
 HYPRE_Int hypre_AMGHybridSolve ( void *AMGhybrid_vdata , hypre_ParCSRMatrix *A , hypre_ParVector *b , hypre_ParVector *x );
 
@@ -1085,6 +1086,7 @@ HYPRE_Int HYPRE_ParCSRHybridGetNumIterations ( HYPRE_Solver solver , HYPRE_Int *
 HYPRE_Int HYPRE_ParCSRHybridGetDSCGNumIterations ( HYPRE_Solver solver , HYPRE_Int *dscg_num_its );
 HYPRE_Int HYPRE_ParCSRHybridGetPCGNumIterations ( HYPRE_Solver solver , HYPRE_Int *pcg_num_its );
 HYPRE_Int HYPRE_ParCSRHybridGetFinalRelativeResidualNorm ( HYPRE_Solver solver , HYPRE_Real *norm );
+HYPRE_Int HYPRE_ParCSRHybridGetFinalResidualNorm ( HYPRE_Solver solver , HYPRE_Real *norm );
 
 /* HYPRE_parcsr_int.c */
 HYPRE_Int hypre_ParSetRandomValues ( void *v , HYPRE_Int seed );
@@ -1169,6 +1171,7 @@ HYPRE_Int HYPRE_ParCSRPCGSetPrintLevel ( HYPRE_Solver solver , HYPRE_Int level )
 HYPRE_Int HYPRE_ParCSRPCGSetLogging ( HYPRE_Solver solver , HYPRE_Int level );
 HYPRE_Int HYPRE_ParCSRPCGGetNumIterations ( HYPRE_Solver solver , HYPRE_Int *num_iterations );
 HYPRE_Int HYPRE_ParCSRPCGGetFinalRelativeResidualNorm ( HYPRE_Solver solver , HYPRE_Real *norm );
+HYPRE_Int HYPRE_ParCSRPCGGetFinalResidualNorm ( HYPRE_Solver solver , HYPRE_Real *norm );
 HYPRE_Int HYPRE_ParCSRPCGGetResidual ( HYPRE_Solver solver , HYPRE_ParVector *residual );
 HYPRE_Int HYPRE_ParCSRDiagScaleSetup ( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector y , HYPRE_ParVector x );
 HYPRE_Int HYPRE_ParCSRDiagScale ( HYPRE_Solver solver , HYPRE_ParCSRMatrix HA , HYPRE_ParVector Hy , HYPRE_ParVector Hx );
