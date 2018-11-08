@@ -264,12 +264,26 @@ HYPRE_ParCSRDiagScale( HYPRE_Solver solver,
    HYPRE_Real *A_data = hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(A));
    HYPRE_Int *A_i = hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(A));
    HYPRE_Int local_size = hypre_VectorSize(hypre_ParVectorLocalVector(x));
-   HYPRE_Int i, ierr = 0;
-
+   HYPRE_Int ierr = 0;
+#if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
+   DiagScaleVector(x_data, y_data, A_data, A_i, local_size, HYPRE_STREAM(4));
+#elif defined(HYPRE_USING_DEVICE_OPENMP) && defined(HYPRE_USING_UNIFIED_MEMORY)
+   HYPRE_Int i;
+#pragma omp target teams  distribute  parallel for private(i) is_device_ptr(x_data,y_data,A_data,A_i)
    for (i=0; i < local_size; i++)
    {
       x_data[i] = y_data[i]/A_data[A_i[i]];
    } 
+#else
+   HYPRE_Int i;
+#if (HYPRE_USING_OPENMP)
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+   for (i=0; i < local_size; i++)
+   {
+      x_data[i] = y_data[i]/A_data[A_i[i]];
+   } 
+#endif
  
    return ierr;
 }
