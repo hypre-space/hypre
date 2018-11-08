@@ -3119,6 +3119,14 @@ HYPRE_ParCSRHybridSetNodal(HYPRE_Solver solver,
                            HYPRE_Int    nodal);
 
 /**
+ * (Optional) Sets whether to store local transposed interpolation
+ * The default is 0 (fdon't store).
+ **/
+HYPRE_Int
+HYPRE_ParCSRHybridSetKeepTranspose(HYPRE_Solver solver,
+                           HYPRE_Int    keepT);
+
+/**
  * Retrieves the total number of iterations.
  **/
 HYPRE_Int HYPRE_ParCSRHybridGetNumIterations(HYPRE_Solver  solver,

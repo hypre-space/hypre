@@ -30,7 +30,7 @@ struct hypre__global_struct hypre__global_handle = {0, 0, 1, 0};
 void hypre_GPUInit(hypre_int use_device)
 {
    char pciBusId[80];
-   hypre_int myid;
+   HYPRE_Int myid;
    hypre_int nDevices;
    //hypre_int device;
 #if defined(TRACK_MEMORY_ALLOCATIONS)
@@ -71,7 +71,7 @@ void hypre_GPUInit(hypre_int use_device)
             hypre_MPI_Info_create(&info);
             hypre_MPI_Comm_split_type(hypre_MPI_COMM_WORLD, hypre_MPI_COMM_TYPE_SHARED, myid, info, &node_comm);
             hypre_int round_robin=1;
-            hypre_int myNodeid, NodeSize;
+            HYPRE_Int myNodeid, NodeSize;
             hypre_MPI_Comm_rank(node_comm, &myNodeid);
             hypre_MPI_Comm_size(node_comm, &NodeSize);
             if (round_robin)
@@ -89,7 +89,7 @@ void hypre_GPUInit(hypre_int use_device)
                /* works correcly for all cases */
                hypre_MPI_Comm numa_comm;
                hypre_MPI_Comm_split(node_comm,getnuma(),myNodeid,&numa_comm);
-               hypre_int myNumaId,NumaSize;
+               HYPRE_Int myNumaId,NumaSize;
                hypre_MPI_Comm_rank(numa_comm, &myNumaId);
                hypre_MPI_Comm_size(numa_comm, &NumaSize);
                hypre_int domain_devices=nDevices/2; /* Again hardwired for 2 NUMA domains */

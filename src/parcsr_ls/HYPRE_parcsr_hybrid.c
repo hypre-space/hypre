@@ -419,6 +419,17 @@ HYPRE_ParCSRHybridSetRelaxOrder( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetKeepTranspose
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParCSRHybridSetKeepTranspose( HYPRE_Solver solver,
+                            HYPRE_Int    keepT    )
+{
+   return( hypre_AMGHybridSetKeepTranspose( (void *) solver, keepT ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParCSRHybridSetMaxCoarseSize
  *--------------------------------------------------------------------------*/
 
