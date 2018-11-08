@@ -399,9 +399,17 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                                  (HYPRE_ParVector) Vtemp,
                                  (HYPRE_ParVector) Utemp);
                  hypre_ParVectorAxpy(relax_weight[level],Utemp,Aux_U);
-              }
+	      }
               else if (smooth_num_levels > level &&
-                    (smooth_type == 6 || smooth_type == 16))
+	               (smooth_type == 5 || smooth_type == 15))
+	      {
+                    HYPRE_ILUSolve(smoother[level],
+                                 (HYPRE_ParCSRMatrix) A_array[level],
+                                 (HYPRE_ParVector) Aux_F,
+                                 (HYPRE_ParVector) Aux_U);
+	      }
+              else if (smooth_num_levels > level &&
+			(smooth_type == 6 || smooth_type == 16))
               {
                  HYPRE_SchwarzSolve(smoother[level],
                                  (HYPRE_ParCSRMatrix) A_array[level],
@@ -714,7 +722,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    if (smooth_num_levels > 0)
    {
      if (smooth_type == 7 || smooth_type == 8 || smooth_type == 9 ||
-         smooth_type == 17 || smooth_type == 18 || smooth_type == 19 )
+	smooth_type == 17 || smooth_type == 18 || smooth_type == 19 )
         hypre_ParVectorDestroy(Utemp);
    }
    //printf("HYPRE_BoomerAMGCycle END\n");

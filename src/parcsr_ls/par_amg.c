@@ -656,28 +656,35 @@ hypre_BoomerAMGDestroy( void *data )
    }
    if (smooth_num_levels)
    {
-      if (hypre_ParAMGDataSmoothType(amg_data) == 7)
+      if (hypre_ParAMGDataSmoothType(amg_data) == 7 || hypre_ParAMGDataSmoothType(amg_data) == 17)
       {
          for (i=0; i < smooth_num_levels; i++)
          {
 	    HYPRE_ParCSRPilutDestroy(smoother[i]);
          }
       }
-      else if (hypre_ParAMGDataSmoothType(amg_data) == 8)
+      else if (hypre_ParAMGDataSmoothType(amg_data) == 8 || hypre_ParAMGDataSmoothType(amg_data) == 18)
       {
          for (i=0; i < smooth_num_levels; i++)
          {
 	    HYPRE_ParCSRParaSailsDestroy(smoother[i]);
          }
       }
-      else if (hypre_ParAMGDataSmoothType(amg_data) == 9)
+      else if (hypre_ParAMGDataSmoothType(amg_data) == 9 || hypre_ParAMGDataSmoothType(amg_data) == 19 ) 
       {
          for (i=0; i < smooth_num_levels; i++)
 	 {
 	    HYPRE_EuclidDestroy(smoother[i]);
          }
       }
-      else if (hypre_ParAMGDataSmoothType(amg_data) == 6)
+      else if (hypre_ParAMGDataSmoothType(amg_data) == 5 || hypre_ParAMGDataSmoothType(amg_data) == 15 )
+      {
+         for (i=0; i < smooth_num_levels; i++)
+	 {
+	    HYPRE_ILUDestroy(smoother[i]);
+         }
+      }
+      else if (hypre_ParAMGDataSmoothType(amg_data) == 6 || hypre_ParAMGDataSmoothType(amg_data) == 16)
       {
          for (i=0; i < smooth_num_levels; i++)
 	 {

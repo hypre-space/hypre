@@ -294,6 +294,32 @@ void hypre_qsort3i( HYPRE_Int *v,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
+/* sort min to max based on real array v */
+
+void hypre_qsort3(HYPRE_Real *v,
+                      HYPRE_Int *w,
+                      HYPRE_Int *z,
+                      HYPRE_Int  left,
+                      HYPRE_Int  right )
+{
+   HYPRE_Int i, last;
+   if (left >= right)
+      return;
+   hypre_swap3_d( v, w, z, left, (left+right)/2);
+   last = left;
+   for (i = left+1; i <= right; i++)
+      if (v[i] < v[left])
+      {
+         hypre_swap3_d(v,w, z, ++last, i);
+      }
+   hypre_swap3_d(v, w, z, left, last);
+   hypre_qsort3(v, w, z, left, last-1);
+   hypre_qsort3(v, w, z, last+1, right);
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
 /* sort min to max based on absolute value */
 
 void hypre_qsort3_abs(HYPRE_Real *v,

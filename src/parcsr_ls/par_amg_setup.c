@@ -566,6 +566,17 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                }
             }
          }
+         else if (hypre_ParAMGDataSmoothType(amg_data) == 5)
+         {
+            for (i=0; i < smooth_num_levels; i++)
+            {
+               if (smoother[i]) 
+               {
+                  HYPRE_ILUDestroy(smoother[i]);
+                  smoother[i] = NULL;
+               }
+            }
+         }
          else if (hypre_ParAMGDataSmoothType(amg_data) == 6)
          {
             for (i=0; i < smooth_num_levels; i++)
@@ -2826,6 +2837,27 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                           (HYPRE_ParCSRMatrix) A_array[j],
                           (HYPRE_ParVector) F_array[j],
                           (HYPRE_ParVector) U_array[j]);
+     }
+     else if ((smooth_type == 5 || smooth_type == 15) && smooth_num_levels > j)
+     {
+        HYPRE_ILUCreate( &smoother[j]);
+        if (eu_bj)
+        {
+           HYPRE_ILUSetType(smoother[j],0);
+           HYPRE_ILUSetMaxIter(smoother[j],1);
+        }
+        else
+        {
+           HYPRE_ILUSetType(smoother[j],30);
+           HYPRE_ILUSetMaxIter(smoother[j],1);
+        }
+        HYPRE_ILUSetLogging(smoother[j],0);
+        HYPRE_ILUSetPrintLevel(smoother[j],0);
+        HYPRE_ILUSetLevelOfFill(smoother[j],eu_level); 
+        HYPRE_ILUSetup(smoother[j],
+                          (HYPRE_ParCSRMatrix) A_array[j],
+                          (HYPRE_ParVector) F_array[j],
+                          (HYPRE_ParVector) U_array[j]); 
      }
      else if ((smooth_type == 8 || smooth_type == 18) && smooth_num_levels > j)
      {
