@@ -113,7 +113,8 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
                                    HYPRE_Real            filter_thresholdR,
                                    HYPRE_Int             debug_flag,
                                    HYPRE_Int            *col_offd_S_to_A,
-                                   hypre_ParCSRMatrix  **R_ptr)
+                                   hypre_ParCSRMatrix  **R_ptr,
+                                   HYPRE_Int             AIR1_5)
 {
    /* HYPRE_Real t0 = hypre_MPI_Wtime(); */
 
@@ -448,11 +449,19 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
    recv_SF_offd_list = hypre_CTAlloc(HYPRE_Int, recv_SF_jlen, HYPRE_MEMORY_HOST);
    for (i = 0, j = 0; i < recv_SF_jlen; i++)
    {
+      HYPRE_Int flag = 1;
       i1 = recv_SF_j[i];
       /* offd */
       if (i1 < col_start || i1 >= col_end)
       {
-         recv_SF_offd_list[j++] = i1;
+         if (AIR1_5)
+         {
+            flag = hypre_BinarySearch(col_map_offd_A, i1, num_cols_A_offd) != -1;
+         }
+         if (flag)
+         {
+            recv_SF_offd_list[j++] = i1;
+         }
       }
    }
 
@@ -476,7 +485,10 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
       if (i1 < col_start || i1 >= col_end)
       {
          j = hypre_BinarySearch(recv_SF_offd_list, i1, recv_SF_offd_list_len);
-         hypre_assert(j >= 0 && j < recv_SF_offd_list_len);
+         if (!AIR1_5)
+         {
+            hypre_assert(j >= 0 && j < recv_SF_offd_list_len);
+         }
          recv_SF_j2[i] = j;
       }
       else
@@ -559,6 +571,11 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
                {
                   /* index in recv_SF_offd_list */
                   k2 = recv_SF_j2[k];
+
+                  if (AIR1_5 && k2 == -1)
+                  {
+                     continue;
+                  }
 
                   hypre_assert(recv_SF_offd_list[k2] == k1);
 
@@ -940,6 +957,11 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
                /* index in recv_SF_offd_list */
                k2 = recv_SF_j2[k];
 
+               if (AIR1_5 && k2 == -1)
+               {
+                  continue;
+               }
+
                hypre_assert(recv_SF_offd_list[k2] == k1);
 
                /* map to FF2_offd */
@@ -1205,6 +1227,11 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
                {
                   /* index in recv_SF_offd_list */
                   k2 = recv_SF_j2[k];
+
+                  if (AIR1_5 && k2 == -1)
+                  {
+                     continue;
+                  }
 
                   hypre_assert(recv_SF_offd_list[k2] == k1);
 

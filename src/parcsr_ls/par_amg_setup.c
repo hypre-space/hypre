@@ -166,7 +166,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Int	     eu_bj;
    HYPRE_Real    eu_sparse_A;
 
-   HYPRE_Int interp_type, restri_type;
+   HYPRE_Int interp_type;
+   HYPRE_Real restri_type;
    HYPRE_Int post_interp_type;  /* what to do after computing the interpolation matrix
                                    0 for nothing, 1 for a Jacobi step */
 
@@ -1004,7 +1005,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
 
             /* for AIR, need absolute value SOC: use a different threshold */
-            if ((restri_type == 1) || (restri_type == 2))
+            if (restri_type > 0.0 && restri_type < 3.0)
             {
                HYPRE_Real           strong_thresholdR;
                strong_thresholdR = hypre_ParAMGDataStrongThresholdR(amg_data);
@@ -1661,19 +1662,19 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   CF_marker[i] = CF_marker[i] > 0 ? 1 : -1;
                }
 
-               if (restri_type == 1) /* distance-1 AIR */
+               if (restri_type == 1.0) /* distance-1 AIR */
                {
                   hypre_BoomerAMGBuildRestrAIR(A_array[level], CF_marker,
                                                Sabs, coarse_pnts_global, 1, NULL,
                                                filter_thresholdR, debug_flag,
                                                col_offd_Sabs_to_A, &R );
                }
-               else if (restri_type == 2) /* distance-2 AIR */
+               else if (restri_type > 1.0 && restri_type < 3.0) /* distance-2 AIR */
                {
                   hypre_BoomerAMGBuildRestrDist2AIR(A_array[level], CF_marker,
                                                     Sabs, coarse_pnts_global, 1, NULL,
                                                     filter_thresholdR, debug_flag,
-                                                    col_offd_Sabs_to_A, &R );
+                                                    col_offd_Sabs_to_A, &R, restri_type < 2.0 );
                }
                else
                {

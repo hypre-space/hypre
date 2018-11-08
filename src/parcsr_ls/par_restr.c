@@ -31,7 +31,7 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
                               HYPRE_Int            *col_offd_S_to_A,
                               hypre_ParCSRMatrix  **R_ptr)
 {
-   
+
    MPI_Comm                 comm     = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    hypre_ParCSRCommHandle  *comm_handle;
@@ -41,7 +41,7 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
    HYPRE_Int       *A_diag_i    = hypre_CSRMatrixI(A_diag);
    HYPRE_Int       *A_diag_j    = hypre_CSRMatrixJ(A_diag);
    /* off-diag part of A */
-   hypre_CSRMatrix *A_offd      = hypre_ParCSRMatrixOffd(A);   
+   hypre_CSRMatrix *A_offd      = hypre_ParCSRMatrixOffd(A);
    HYPRE_Real      *A_offd_data = hypre_CSRMatrixData(A_offd);
    HYPRE_Int       *A_offd_i    = hypre_CSRMatrixI(A_offd);
    HYPRE_Int       *A_offd_j    = hypre_CSRMatrixJ(A_offd);
@@ -54,7 +54,7 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
    HYPRE_Int       *S_diag_i = hypre_CSRMatrixI(S_diag);
    HYPRE_Int       *S_diag_j = hypre_CSRMatrixJ(S_diag);
    /* off-diag part of S */
-   hypre_CSRMatrix *S_offd   = hypre_ParCSRMatrixOffd(S);   
+   hypre_CSRMatrix *S_offd   = hypre_ParCSRMatrixOffd(S);
    HYPRE_Int       *S_offd_i = hypre_CSRMatrixI(S_offd);
    HYPRE_Int       *S_offd_j = hypre_CSRMatrixJ(S_offd);
    /* Restriction matrix R */
@@ -79,8 +79,8 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
    HYPRE_Real      *A_ext_data = NULL;
    HYPRE_Int       *A_ext_i    = NULL;
    HYPRE_Int       *A_ext_j    = NULL;
-   
-   HYPRE_Int        i, j, k, i1, k1, k2, rr, cc, ic, index, start, 
+
+   HYPRE_Int        i, j, k, i1, k1, k2, rr, cc, ic, index, start,
                     local_max_size, local_size, num_cols_offd_R;
 
    /* LAPACK */
@@ -108,7 +108,7 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
    HYPRE_Int col_end   = col_start + n_fine;
 
    /* MPI size and rank*/
-   hypre_MPI_Comm_size(comm, &num_procs);   
+   hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
 
    /*-------------- global number of C points and my start position */
@@ -141,14 +141,14 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
    if (!comm_pkg)
    {
       hypre_MatvecCommPkgCreate(A);
-      comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
+      comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    }
    /* number of sends to do (number of procs) */
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-   /* send buffer, of size send_map_starts[num_sends]), 
+   /* send buffer, of size send_map_starts[num_sends]),
     * i.e., number of entries to send */
    int_buf_data = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),HYPRE_MEMORY_HOST);
-   /* copy CF markers of elements to send to buffer 
+   /* copy CF markers of elements to send to buffer
     * RL: why copy them with two for loops? Why not just loop through all in one */
    index = 0;
    for (i = 0; i < num_sends; i++)
@@ -165,7 +165,7 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
    /* create a handle to start communication. 11: for integer */
    comm_handle = hypre_ParCSRCommHandleCreate(11, comm_pkg, int_buf_data, CF_marker_offd);
    /* destroy the handle to finish communication */
-   hypre_ParCSRCommHandleDestroy(comm_handle);   
+   hypre_ParCSRCommHandleDestroy(comm_handle);
    /* do a similar communication for dof_func */
    if (num_functions > 1)
    {
@@ -179,7 +179,7 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
          }
       }
       comm_handle = hypre_ParCSRCommHandleCreate(11, comm_pkg, int_buf_data, dof_func_offd);
-      hypre_ParCSRCommHandleDestroy(comm_handle);   
+      hypre_ParCSRCommHandleDestroy(comm_handle);
    }
 
    /*-----------------------------------------------------------------------
@@ -243,7 +243,7 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
    R_diag_j    = hypre_CTAlloc(HYPRE_Int,  nnz_diag,HYPRE_MEMORY_HOST);
    R_diag_data = hypre_CTAlloc(HYPRE_Real, nnz_diag,HYPRE_MEMORY_HOST);
 
-   /* not in ``if num_procs > 1'', 
+   /* not in ``if num_procs > 1'',
     * allocation needed even for empty CSR */
    R_offd_i    = hypre_CTAlloc(HYPRE_Int,  n_cpts+1,HYPRE_MEMORY_HOST);
    R_offd_j    = hypre_CTAlloc(HYPRE_Int,  nnz_offd,HYPRE_MEMORY_HOST);
@@ -256,14 +256,14 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
    /* reset counters */
    cnt_diag = 0;
    cnt_offd = 0;
- 
+
    /*----------------------------------------       .-.
     * Get the GHOST rows of A,                     (o o) boo!
     * i.e., adjacent rows to this proc             | O \
     * whose row indices are in A->col_map_offd      \   \
     *-----------------------------------------       `~~~'  */
    /* external rows of A that are needed for perform A multiplication,
-    * the last arg means need data 
+    * the last arg means need data
     * the number of rows is num_cols_A_offd */
    if (num_procs > 1)
    {
@@ -274,7 +274,7 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
    }
 
    /* marker array: if this point is i's strong F neighbors
-    *             >=  0: yes, and is the local dense id 
+    *             >=  0: yes, and is the local dense id
     *             == -1: no */
    marker_diag = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_HOST);
    for (i = 0; i < n_fine; i++)
@@ -287,7 +287,7 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
       marker_offd[i] = -1;
    }
 
-   /* the local matrix and rhs (dense) 
+   /* the local matrix and rhs (dense)
     * column-major as always by BLAS/LAPACK */
    /* matrix */
    DAi = hypre_CTAlloc(HYPRE_Real, local_max_size * local_max_size, HYPRE_MEMORY_HOST);
@@ -316,7 +316,7 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
 
       /* size of Ai, bi */
       local_size = 0;
-      
+
       /* If i is a C-point, build the restriction, from the F-points that
        * strongly influence i
        * Access S for the first time, mark the points we want */
@@ -367,13 +367,13 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
          }
 
          printf("\n");
-         
+
          exit(0);
       }
       */
 
       /* Second, copy values to local system: Ai and bi from A */
-      /* now we have marked all rows/cols we want. next we extract the entries 
+      /* now we have marked all rows/cols we want. next we extract the entries
        * we need from these rows and put them in Ai and bi*/
 
       /* clear DAi and bi */
@@ -525,7 +525,7 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
           * solve the linear system by LAPACK : LU factorization */
 #if AIR_DEBUG
          memcpy(TMPA, DAi, local_size*local_size*sizeof(HYPRE_Real));
-         memcpy(TMPb, Dbi, local_size*sizeof(HYPRE_Real)); 
+         memcpy(TMPb, Dbi, local_size*sizeof(HYPRE_Real));
 #endif
 
          hypre_dgetrf(&local_size, &local_size, DAi, &local_size, Ipi,
@@ -545,7 +545,7 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
 #if AIR_DEBUG
          HYPRE_Int one = 1;
          HYPRE_Real alp = 1.0, bet = 0.0;
-         hypre_dgemv(&charT, &local_size, &local_size, &alp, TMPA, &local_size, Dbi, 
+         hypre_dgemv(&charT, &local_size, &local_size, &alp, TMPA, &local_size, Dbi,
                      &one, &bet, TMPd, &one);
          alp = -1.0;
          hypre_daxpy(&local_size, &alp, TMPb, &one, TMPd, &one);
@@ -556,7 +556,7 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
          }
 #endif
       }
-      
+
       /* now we are ready to fill this row of R */
       /* diag part */
       rr = 0;
@@ -578,7 +578,7 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
       /* global col idx of this entry is ``col_start + i''; */
       R_diag_j[cnt_diag] = i;
       R_diag_data[cnt_diag++] = 1.0;
-      
+
       /* row ptr of the next row */
       R_diag_i[ic+1] = cnt_diag;
 
@@ -606,7 +606,7 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
 
       /* we must have copied all entries */
       hypre_assert(rr == local_size);
-      
+
       /* reset markers */
       for (j = S_diag_i[i]; j < S_diag_i[i+1]; j++)
       {
@@ -640,7 +640,7 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
    hypre_assert(ic == n_cpts)
    hypre_assert(cnt_diag == nnz_diag)
    hypre_assert(cnt_offd == nnz_offd)
-   
+
    /* num of cols in the offd part of R */
    num_cols_offd_R = 0;
    /* to this point, marker_offd should be all -1 */
@@ -704,7 +704,7 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
    hypre_CSRMatrixJ(R_offd)    = R_offd_j;
    /* R does not own ColStarts, since A does */
    hypre_ParCSRMatrixOwnsColStarts(R) = 0;
-   
+
    hypre_ParCSRMatrixColMapOffd(R) = col_map_offd_R;
 
    /* create CommPkg of R */

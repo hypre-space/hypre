@@ -84,6 +84,7 @@ distclean: clean
 
 libHYPRE.a: ${FILES_HYPRE}
 	@echo  "Building libHYPRE ... "
+	rm -f $@
 	${AR} $@ $(FEIHYPREFILES) $(FEMLIFILES) $(IJMVFILES)
 	${AR} $@ $(EUCLIDFILES)
 	${AR} $@ $(PARASAILSFILES)
