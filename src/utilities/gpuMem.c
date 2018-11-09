@@ -30,7 +30,7 @@ struct hypre__global_struct hypre__global_handle = {0, 0, 1, 0};
 void hypre_GPUInit(hypre_int use_device)
 {
    char pciBusId[80];
-   hypre_int myid;
+   HYPRE_Int myid;
    hypre_int nDevices;
    //hypre_int device;
 #if defined(TRACK_MEMORY_ALLOCATIONS)
@@ -71,7 +71,7 @@ void hypre_GPUInit(hypre_int use_device)
             hypre_MPI_Info_create(&info);
             hypre_MPI_Comm_split_type(hypre_MPI_COMM_WORLD, hypre_MPI_COMM_TYPE_SHARED, myid, info, &node_comm);
             hypre_int round_robin=1;
-            hypre_int myNodeid, NodeSize;
+            HYPRE_Int myNodeid, NodeSize;
             hypre_MPI_Comm_rank(node_comm, &myNodeid);
             hypre_MPI_Comm_size(node_comm, &NodeSize);
             if (round_robin)
@@ -80,8 +80,8 @@ void hypre_GPUInit(hypre_int use_device)
                HYPRE_DEVICE=myNodeid%nDevices;
                hypre_CheckErrorDevice(cudaSetDevice(HYPRE_DEVICE));
                cudaDeviceGetPCIBusId ( pciBusId, 80, HYPRE_DEVICE);
-               hypre_printf("WARNING:: Code running without mpibind\n");
-               hypre_printf("Global ID = %d , Node ID %d running on device %d of %d \n",myid,myNodeid,HYPRE_DEVICE,nDevices);
+               //hypre_printf("WARNING:: Code running without mpibind\n");
+               //hypre_printf("Global ID = %d , Node ID %d running on device %d of %d \n",myid,myNodeid,HYPRE_DEVICE,nDevices);
             }
             else
             {
@@ -89,14 +89,14 @@ void hypre_GPUInit(hypre_int use_device)
                /* works correcly for all cases */
                hypre_MPI_Comm numa_comm;
                hypre_MPI_Comm_split(node_comm,getnuma(),myNodeid,&numa_comm);
-               hypre_int myNumaId,NumaSize;
+               HYPRE_Int myNumaId,NumaSize;
                hypre_MPI_Comm_rank(numa_comm, &myNumaId);
                hypre_MPI_Comm_size(numa_comm, &NumaSize);
                hypre_int domain_devices=nDevices/2; /* Again hardwired for 2 NUMA domains */
                HYPRE_DEVICE = getnuma()*2+myNumaId%domain_devices;
                hypre_CheckErrorDevice(cudaSetDevice(HYPRE_DEVICE));
-               hypre_printf("WARNING:: Code running without mpibind\n");
-               hypre_printf("NUMA %d GID %d , NodeID %d NumaID %d running on device %d (RR=%d) of %d \n",getnuma(),myid,myNodeid,myNumaId,HYPRE_DEVICE,myNodeid%nDevices,nDevices);
+               //hypre_printf("WARNING:: Code running without mpibind\n");
+               //hypre_printf("NUMA %d GID %d , NodeID %d NumaID %d running on device %d (RR=%d) of %d \n",getnuma(),myid,myNodeid,myNumaId,HYPRE_DEVICE,myNodeid%nDevices,nDevices);
 
             }
             hypre_MPI_Info_free(&info);
@@ -104,7 +104,7 @@ void hypre_GPUInit(hypre_int use_device)
          else
          {
             /* No device found  */
-            hypre_fprintf(stderr,"ERROR:: NO GPUS found \n");
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ERROR:: NO GPUS found \n");
             exit(2);
          }
       }
@@ -116,7 +116,7 @@ void hypre_GPUInit(hypre_int use_device)
 
 #if defined(HYPRE_USING_OPENMP_OFFLOAD) || defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
       omp_set_default_device(HYPRE_DEVICE);
-      printf("Set OMP Default device to %d \n",HYPRE_DEVICE);
+      //printf("Set OMP Default device to %d \n",HYPRE_DEVICE);
 #endif
 
       /* Create NVTX domain for all the nvtx calls in HYPRE */
@@ -138,7 +138,7 @@ void hypre_GPUInit(hypre_int use_device)
 
       cublasErrchk(cublasCreate(&(HYPRE_CUBLAS_HANDLE)));
       cublasErrchk(cublasSetStream(HYPRE_CUBLAS_HANDLE,HYPRE_STREAM(4)));
-      if (!checkDeviceProps()) hypre_printf("WARNING:: Concurrent memory access not allowed\n");
+      //if (!checkDeviceProps()) hypre_printf("WARNING:: Concurrent memory access not allowed\n");
 
       /* Check if the arch flags used for compiling the cuda kernels match the device */
 #if defined(HYPRE_USING_GPU)
@@ -168,14 +168,14 @@ void hypre_GPUFinalize()
 void MemAdviseReadOnly(const void* ptr, hypre_int device){
   if (ptr==NULL) return;
     size_t size=mempush(ptr,0,0);
-    if (size==0) hypre_printf("WARNING:: Operations with 0 size vector \n");
+    //if (size==0) hypre_printf("WARNING:: Operations with 0 size vector \n");
     hypre_CheckErrorDevice(cudaMemAdvise(ptr,size,cudaMemAdviseSetReadMostly,device));
 }
 
 void MemAdviseUnSetReadOnly(const void* ptr, hypre_int device){
   if (ptr==NULL) return;
     size_t size=mempush(ptr,0,0);
-    if (size==0) hypre_printf("WARNING:: Operations with 0 size vector \n");
+    //if (size==0) hypre_printf("WARNING:: Operations with 0 size vector \n");
     hypre_CheckErrorDevice(cudaMemAdvise(ptr,size,cudaMemAdviseUnsetReadMostly,device));
 }
 
@@ -238,7 +238,7 @@ cublasHandle_t getCublasHandle(){
     firstcall=0;
     stat = cublasCreate(&handle);
     if (stat!=CUBLAS_STATUS_SUCCESS) {
-      printf("ERROR:: CUBLAS Library initialization failed\n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ERROR:: CUBLAS Library initialization failed\n");
       handle=0;
       exit(2);
     }
@@ -256,7 +256,7 @@ cusparseHandle_t getCusparseHandle(){
     firstcall=0;
     status= cusparseCreate(&handle);
     if (status != CUSPARSE_STATUS_SUCCESS) {
-      hypre_printf("ERROR:: CUSPARSE Library initialization failed\n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ERROR:: CUSPARSE Library initialization failed\n");
       handle=0;
       exit(2);
     }
@@ -278,7 +278,7 @@ cudaStream_t getstreamOlde(hypre_int i){
     firstcall=0;
   }
   if (i<MAXSTREAMS) return s[i];
-  fprintf(stderr,"ERROR in HYPRE_STREAM in utilities/gpuMem.c %d is greater than MAXSTREAMS = %d\n Returning default stream",i,MAXSTREAMS);
+  //fprintf(stderr,"ERROR in HYPRE_STREAM in utilities/gpuMem.c %d is greater than MAXSTREAMS = %d\n Returning default stream",i,MAXSTREAMS);
   return 0;
 }
 
@@ -291,7 +291,7 @@ nvtxDomainHandle_t getdomain(hypre_int i){
       firstcall=0;
     }
     if (i<MAXDOMAINS) return h[i];
-    fprintf(stderr,"ERROR in getdomain in utilities/gpuMem.c %d  is greater than MAXDOMAINS = %d \n Returning default domain",i,MAXDOMAINS);
+   // fprintf(stderr,"ERROR in getdomain in utilities/gpuMem.c %d  is greater than MAXDOMAINS = %d \n Returning default domain",i,MAXDOMAINS);
     return NULL;
   }
 
@@ -307,7 +307,7 @@ cudaEvent_t getevent(hypre_int i){
     firstcall=0;
   }
   if (i<MAXEVENTS) return s[i];
-  fprintf(stderr,"ERROR in getevent in utilities/gpuMem.c %d is greater than MAXEVENTS = %d\n Returning default stream",i,MAXEVENTS);
+  //fprintf(stderr,"ERROR in getevent in utilities/gpuMem.c %d is greater than MAXEVENTS = %d\n Returning default stream",i,MAXEVENTS);
   return 0;
 }
 
@@ -388,19 +388,19 @@ hypre_int getcore(){
       }
     }
   } else {
-    fprintf(stderr,"sched_affinity failed\n");
+    hypre_error_w_msg(HYPRE_ERROR_GENERIC,"sched_affinity failed\n");
     switch(errno){
     case EFAULT:
-      printf("INVALID MEMORY ADDRESS\n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"INVALID MEMORY ADDRESS\n");
       break;
     case EINVAL:
-      printf("EINVAL:: NO VALID CPUS\n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"EINVAL:: NO VALID CPUS\n");
       break;
     default:
-      printf("%d something else\n",errno);
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC," something else\n");
     }
   }
-  return 0;
+  return hypre_error_flag;
   //CPU_FREE(mask);
 
 }
@@ -421,19 +421,19 @@ hypre_int getnuma(){
     if (sum0>sum1) return 0;
     else return 1;
   } else {
-    fprintf(stderr,"sched_affinity failed\n");
+    hypre_error_w_msg(HYPRE_ERROR_GENERIC,"sched_affinity failed\n");
     switch(errno){
     case EFAULT:
-      printf("INVALID MEMORY ADDRESS\n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"INVALID MEMORY ADDRESS\n");
       break;
     case EINVAL:
-      printf("EINVAL:: NO VALID CPUS\n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"EINVAL:: NO VALID CPUS\n");
       break;
     default:
-      printf("%d something else\n",errno);
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"something else\n");
     }
   }
-  return 0;
+  return hypre_error_flag;
   //CPU_FREE(mask);
 
 }
