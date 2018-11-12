@@ -32,7 +32,8 @@ hypre_ParCompGridCreate ()
    compGrid = hypre_CTAlloc(hypre_ParCompGrid, 1, HYPRE_MEMORY_HOST);
 
    hypre_ParCompGridNumNodes(compGrid) = 0;
-   hypre_ParCompGridNumOwnedNodes(compGrid) = 0;
+   hypre_ParCompGridNumOwnedBlocks(compGrid) = 0;
+   hypre_ParCompGridOwnedBlockStarts(compGrid) = NULL;
    hypre_ParCompGridNumRealNodes(compGrid) = 0;
    hypre_ParCompGridMemSize(compGrid) = 0;
    hypre_ParCompGridAMemSize(compGrid) = 0;
@@ -149,7 +150,10 @@ hypre_ParCompGridInitialize ( hypre_ParCompGrid *compGrid, hypre_ParVector *resi
    HYPRE_Int         num_nodes = hypre_VectorSize(residual_local);   
 
    hypre_ParCompGridNumNodes(compGrid) = num_nodes;
-   hypre_ParCompGridNumOwnedNodes(compGrid) = num_nodes;
+   hypre_ParCompGridNumOwnedBlocks(compGrid) = 1;
+   hypre_ParCompGridOwnedBlockStarts(compGrid) = hypre_CTAlloc(HYPRE_Int, 2, HYPRE_MEMORY_HOST);
+   hypre_ParCompGridOwnedBlockStarts(compGrid)[0] = 0;
+   hypre_ParCompGridOwnedBlockStarts(compGrid)[1] = num_nodes;
    hypre_ParCompGridNumRealNodes(compGrid) = num_nodes;
    hypre_ParCompGridMemSize(compGrid) = 2*num_nodes;
 
@@ -394,9 +398,10 @@ hypre_ParCompGridSetupRealDofMarker( hypre_ParCompGrid **compGrid, HYPRE_Int num
       hypre_ParCompGridRealDofMarker(compGrid[level]) = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumNodes(compGrid[level]), HYPRE_MEMORY_HOST);
 
       // Mark the real dofs
+      HYPRE_Int num_owned_nodes = hypre_ParCompGridOwnedBlockStarts(compGrid[level])[hypre_ParCompGridNumOwnedBlocks(compGrid[level])];
       if (level == 0)
       {
-         for (i = 0; i < hypre_ParCompGridNumOwnedNodes(compGrid[level]); i++) add_flag_fine[i] = padding + 1;
+         for (i = 0; i < num_owned_nodes; i++) add_flag_fine[i] = padding + 1;
       }
       else
       {
@@ -503,7 +508,7 @@ hypre_ParCompGridResize ( hypre_ParCompGrid *compGrid, HYPRE_Int new_size, HYPRE
 }
 
 HYPRE_Int 
-hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *num_added_nodes, HYPRE_Int transition_level, HYPRE_Int *proc_first_index, HYPRE_Int *proc_last_index )
+hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *num_added_nodes, HYPRE_Int transition_level )
 {
    // when nodes are added to a composite grid, global info is copied over, but local indices must be generated appropriately for all added nodes
    // this must be done on each level as info is added to correctly construct subsequent Psi_c grids
@@ -523,7 +528,8 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *num
       if (num_added_nodes[level])
       {
          // loop over indices of non-owned nodes on this level
-         for (i = hypre_ParCompGridNumOwnedNodes(compGrid[level]); i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
+         HYPRE_Int num_owned_nodes = hypre_ParCompGridOwnedBlockStarts(compGrid[level])[hypre_ParCompGridNumOwnedBlocks(compGrid[level])];
+         for (i = num_owned_nodes; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
          {
             // fix up the local indices for the matrix A row info
             for (j = hypre_ParCompGridARowPtr(compGrid[level])[i]; j < hypre_ParCompGridARowPtr(compGrid[level])[i+1]; j++)
@@ -533,13 +539,22 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *num
                local_index = -global_index-1;
                
                // if global index of j'th row entry is owned by this proc, then local index is calculable
-               if ( global_index >= proc_first_index[level] && global_index <= proc_last_index[level] )
+               HYPRE_Int num_owned_blocks = hypre_ParCompGridNumOwnedBlocks(compGrid[level]);
+               for (k = 0; k < num_owned_blocks; k++)
                {
-                  // set local index for entry in this row of the matrix
-                  local_index = global_index - proc_first_index[level];
+                  if (hypre_ParCompGridOwnedBlockStarts(compGrid[level])[k+1] - hypre_ParCompGridOwnedBlockStarts(compGrid[level])[k] > 0)
+                  {
+                     HYPRE_Int low_global_index = hypre_ParCompGridGlobalIndices(compGrid[level])[ hypre_ParCompGridOwnedBlockStarts(compGrid[level])[k] ];
+                     HYPRE_Int high_global_index = hypre_ParCompGridGlobalIndices(compGrid[level])[ hypre_ParCompGridOwnedBlockStarts(compGrid[level])[k+1] - 1 ];
+                     if ( global_index >= low_global_index && global_index <= high_global_index )
+                     {
+                        // set local index for entry in this row of the matrix
+                        local_index = global_index - low_global_index + hypre_ParCompGridOwnedBlockStarts(compGrid[level])[k];
+                     }
+                  }
                }
                // otherwise find local index via binary search
-               else
+               if (local_index < 0)
                {
                   local_index = hypre_ParCompGridLocalIndexBinarySearch(compGrid[level], global_index, 0);
                   if (local_index == -1) local_index = -global_index-1;
@@ -547,7 +562,7 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *num
                hypre_ParCompGridAColInd(compGrid[level])[j] = local_index;
 
                // if we need to insert an entry into the matrix (!!! Note that I'm assuming a symmetric matrix here !!!)
-               if ( local_index < hypre_ParCompGridNumOwnedNodes(compGrid[level]) && local_index >= 0 )
+               if ( local_index < num_owned_nodes && local_index >= 0 )
                {
                   // search over the row to find the appropriate global index and insert local index
                   for (k = hypre_ParCompGridARowPtr(compGrid[level])[local_index]; k < hypre_ParCompGridARowPtr(compGrid[level])[local_index+1]; k++)
@@ -570,7 +585,8 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *num
          if (num_added_nodes[level] || num_added_nodes[level+1])
          {
             // loop over indices of non-owned nodes on this level
-            for (i = hypre_ParCompGridNumOwnedNodes(compGrid[level]); i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
+            HYPRE_Int num_owned_nodes = hypre_ParCompGridOwnedBlockStarts(compGrid[level])[hypre_ParCompGridNumOwnedBlocks(compGrid[level])];
+            for (i = num_owned_nodes; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
             {
                // fix up the coarse local indices
                coarse_global_index = hypre_ParCompGridCoarseGlobalIndices(compGrid[level])[i];
@@ -596,18 +612,27 @@ HYPRE_Int hypre_ParCompGridSetupLocalIndicesP( hypre_ParCompGrid **compGrid, HYP
 
    for (level = 0; level < transition_level-1; level++)
    {
-      // Get first and last owned global indices on the next level (domain of P)
-      first = hypre_ParCompGridGlobalIndices(compGrid[level+1])[0];
-      if (hypre_ParCompGridNumOwnedNodes(compGrid[level+1])) last = hypre_ParCompGridGlobalIndices(compGrid[level+1])[hypre_ParCompGridNumOwnedNodes(compGrid[level+1]) - 1];
-      else last = -1;
+      HYPRE_Int num_owned_blocks = hypre_ParCompGridNumOwnedBlocks(compGrid[level]);
+
       // Setup all local indices for all nodes (note that PColInd currently stores global indices)
       for (i = 0; i < hypre_ParCompGridPRowPtr(compGrid[level])[ hypre_ParCompGridNumNodes(compGrid[level]) ]; i++)
       {
          global_index = hypre_ParCompGridPColInd(compGrid[level])[i];
          // If global index is owned, simply calculate
-         if (global_index >= first && global_index <= last) hypre_ParCompGridPColInd(compGrid[level])[i] = global_index - first;
+         for (j = 0; j < num_owned_blocks; j++)
+         {
+            if (hypre_ParCompGridOwnedBlockStarts(compGrid[level])[j+1] - hypre_ParCompGridOwnedBlockStarts(compGrid[level])[j] > 0)
+            {
+               HYPRE_Int low_global_index = hypre_ParCompGridGlobalIndices(compGrid[level])[ hypre_ParCompGridOwnedBlockStarts(compGrid[level])[j] ];
+               HYPRE_Int high_global_index = hypre_ParCompGridGlobalIndices(compGrid[level])[ hypre_ParCompGridOwnedBlockStarts(compGrid[level])[j+1] - 1 ];
+               if ( global_index >= low_global_index && global_index <= high_global_index )
+               {
+                  hypre_ParCompGridPColInd(compGrid[level])[i] = global_index - low_global_index + hypre_ParCompGridOwnedBlockStarts(compGrid[level])[j];
+               }
+            }
+         }
          // Otherwise, binary search
-         else hypre_ParCompGridPColInd(compGrid[level])[i] = hypre_ParCompGridLocalIndexBinarySearch(compGrid[level+1], global_index, 0);
+         if (hypre_ParCompGridPColInd(compGrid[level])[i] < 0) hypre_ParCompGridPColInd(compGrid[level])[i] = hypre_ParCompGridLocalIndexBinarySearch(compGrid[level+1], global_index, 0);
          if (hypre_ParCompGridPColInd(compGrid[level])[i] < 0) hypre_ParCompGridPColInd(compGrid[level])[i] = -global_index - 1;
       }
    }
@@ -617,7 +642,8 @@ HYPRE_Int hypre_ParCompGridSetupLocalIndicesP( hypre_ParCompGrid **compGrid, HYP
 
 HYPRE_Int hypre_ParCompGridLocalIndexBinarySearch( hypre_ParCompGrid *compGrid, HYPRE_Int global_index, HYPRE_Int allow_failed_search )
 {
-   HYPRE_Int      left = hypre_ParCompGridNumOwnedNodes(compGrid);
+   HYPRE_Int      num_owned_nodes = hypre_ParCompGridOwnedBlockStarts(compGrid)[hypre_ParCompGridNumOwnedBlocks(compGrid)];
+   HYPRE_Int      left = num_owned_nodes;
    HYPRE_Int      right = hypre_ParCompGridNumNodes(compGrid) - 1;
    HYPRE_Int      index;
 
@@ -642,7 +668,8 @@ hypre_ParCompGridDebugPrint ( hypre_ParCompGrid *compGrid, const char* filename 
 
    // Get composite grid information
    HYPRE_Int       num_nodes = hypre_ParCompGridNumNodes(compGrid);
-   HYPRE_Int       num_owned_nodes = hypre_ParCompGridNumOwnedNodes(compGrid);
+   HYPRE_Int       num_owned_blocks = hypre_ParCompGridNumOwnedBlocks(compGrid);
+   HYPRE_Int       num_owned_nodes = hypre_ParCompGridOwnedBlockStarts(compGrid)[hypre_ParCompGridNumOwnedBlocks(compGrid)];
    HYPRE_Int       mem_size = hypre_ParCompGridMemSize(compGrid);
    HYPRE_Int       A_mem_size = hypre_ParCompGridAMemSize(compGrid);
    HYPRE_Int       P_mem_size = hypre_ParCompGridPMemSize(compGrid);
@@ -674,18 +701,22 @@ hypre_ParCompGridDebugPrint ( hypre_ParCompGrid *compGrid, const char* filename 
    file = fopen(filename,"w");
    hypre_fprintf(file, "Num nodes: %d\nMem size: %d\nA Mem size: %d\nP Mem size: %d\nNum owned nodes: %d\nNum ghost dofs: %d\nNum real dofs: %d\n", 
       num_nodes, mem_size, A_mem_size, P_mem_size, num_owned_nodes, num_nodes - num_real, num_real);
-   hypre_fprintf(file, "u:\n");
-   for (i = 0; i < num_nodes; i++)
-   {
-      hypre_fprintf(file, "%.10f ", u[i]);
-   }
-   hypre_fprintf(file, "\n");
-   hypre_fprintf(file, "f:\n");
-   for (i = 0; i < num_nodes; i++)
-   {
-      hypre_fprintf(file, "%.10f ", f[i]);
-   }
-   hypre_fprintf(file, "\n");
+   hypre_fprintf(file, "Num owned blocks = %d\n", num_owned_blocks);
+   hypre_fprintf(file, "owned_block_starts = ");
+   for (i = 0; i < num_owned_blocks+1; i++) hypre_fprintf(file, "%d ", hypre_ParCompGridOwnedBlockStarts(compGrid)[i]);
+   hypre_fprintf(file,"\n");
+   // hypre_fprintf(file, "u:\n");
+   // for (i = 0; i < num_nodes; i++)
+   // {
+   //    hypre_fprintf(file, "%.10f ", u[i]);
+   // }
+   // hypre_fprintf(file, "\n");
+   // hypre_fprintf(file, "f:\n");
+   // for (i = 0; i < num_nodes; i++)
+   // {
+   //    hypre_fprintf(file, "%.10f ", f[i]);
+   // }
+   // hypre_fprintf(file, "\n");
    if (global_indices)
    {
       hypre_fprintf(file, "global_indices:\n");
@@ -735,20 +766,20 @@ hypre_ParCompGridDebugPrint ( hypre_ParCompGrid *compGrid, const char* filename 
          for (i = 0; i < A_rowptr[num_nodes]; i++) hypre_fprintf(file, "%d ", A_global_colind[i]);
          hypre_fprintf(file,"\n\n");
       }
-      hypre_fprintf(file, "A data:\n");
-      for (i = 0; i < A_rowptr[num_nodes]; i++) hypre_fprintf(file, "%f ", A_data[i]);
-      if (P_rowptr)
-      {
-         hypre_fprintf(file,"\n\n");
-         hypre_fprintf(file, "P row pointer:\n");
-         for (i = 0; i < num_nodes+1; i++) hypre_fprintf(file, "%d ", P_rowptr[i]);
-         hypre_fprintf(file,"\n\n");
-         hypre_fprintf(file, "P colind:\n");
-         for (i = 0; i < P_rowptr[num_nodes]; i++) hypre_fprintf(file, "%d ", P_colind[i]);
-         hypre_fprintf(file,"\n\n");
-         hypre_fprintf(file, "P data:\n");
-         for (i = 0; i < P_rowptr[num_nodes]; i++) hypre_fprintf(file, "%f ", P_data[i]);
-      }
+      // hypre_fprintf(file, "A data:\n");
+      // for (i = 0; i < A_rowptr[num_nodes]; i++) hypre_fprintf(file, "%f ", A_data[i]);
+      // if (P_rowptr)
+      // {
+      //    hypre_fprintf(file,"\n\n");
+      //    hypre_fprintf(file, "P row pointer:\n");
+      //    for (i = 0; i < num_nodes+1; i++) hypre_fprintf(file, "%d ", P_rowptr[i]);
+      //    hypre_fprintf(file,"\n\n");
+      //    hypre_fprintf(file, "P colind:\n");
+      //    for (i = 0; i < P_rowptr[num_nodes]; i++) hypre_fprintf(file, "%d ", P_colind[i]);
+      //    hypre_fprintf(file,"\n\n");
+      //    hypre_fprintf(file, "P data:\n");
+      //    for (i = 0; i < P_rowptr[num_nodes]; i++) hypre_fprintf(file, "%f ", P_data[i]);
+      // }
    }
 
    fclose(file);
@@ -765,7 +796,7 @@ hypre_ParCompGridPrintSolnRHS ( hypre_ParCompGrid *compGrid, const char* filenam
 
    // Get composite grid information
    HYPRE_Int       num_nodes = hypre_ParCompGridNumNodes(compGrid);
-   HYPRE_Int       num_owned_nodes = hypre_ParCompGridNumOwnedNodes(compGrid);
+   HYPRE_Int       num_owned_nodes = hypre_ParCompGridOwnedBlockStarts(compGrid)[hypre_ParCompGridNumOwnedBlocks(compGrid)];
 
    HYPRE_Complex     *u = hypre_ParCompGridU(compGrid);
    HYPRE_Complex     *f = hypre_ParCompGridF(compGrid);
@@ -839,15 +870,16 @@ hypre_ParCompGridDumpSorted( hypre_ParCompGrid *compGrid, const char* filename)
 
    // Get the position where the owned nodes should go in order to output arrays sorted by global index
    HYPRE_Int insert_owned_position;
-   if (hypre_ParCompGridNumOwnedNodes(compGrid))
+   HYPRE_Int num_owned_nodes = hypre_ParCompGridOwnedBlockStarts(compGrid)[hypre_ParCompGridNumOwnedBlocks(compGrid)];
+   if (num_owned_nodes)
    {
       HYPRE_Int first_owned = hypre_ParCompGridGlobalIndices(compGrid)[0];
-      HYPRE_Int last_owned = hypre_ParCompGridGlobalIndices(compGrid)[ hypre_ParCompGridNumOwnedNodes(compGrid) - 1 ];
-      HYPRE_Int first_nonowned = hypre_ParCompGridGlobalIndices(compGrid)[ hypre_ParCompGridNumOwnedNodes(compGrid) ];
+      HYPRE_Int last_owned = hypre_ParCompGridGlobalIndices(compGrid)[ num_owned_nodes - 1 ];
+      HYPRE_Int first_nonowned = hypre_ParCompGridGlobalIndices(compGrid)[ num_owned_nodes ];
       HYPRE_Int last_nonowned = hypre_ParCompGridGlobalIndices(compGrid)[ hypre_ParCompGridNumNodes(compGrid) - 1 ];
 
       // Find where to insert owned nodes in the list of all comp grid nodes (such that they are ordered according to global index)
-      if (last_owned < first_nonowned) insert_owned_position = hypre_ParCompGridNumOwnedNodes(compGrid);
+      if (last_owned < first_nonowned) insert_owned_position = num_owned_nodes;
       else if (first_owned > last_nonowned) insert_owned_position = hypre_ParCompGridNumNodes(compGrid);
       else
       {
@@ -863,11 +895,11 @@ hypre_ParCompGridDumpSorted( hypre_ParCompGrid *compGrid, const char* filename)
    HYPRE_Int i;
 
    // Global indices
-   for (i = hypre_ParCompGridNumOwnedNodes(compGrid); i < insert_owned_position; i++)
+   for (i = num_owned_nodes; i < insert_owned_position; i++)
    {
       hypre_fprintf(file, "%d ", global_indices[i]);
    }
-   for (i = 0; i < hypre_ParCompGridNumOwnedNodes(compGrid); i++)
+   for (i = 0; i < num_owned_nodes; i++)
    {
       hypre_fprintf(file, "%d ", global_indices[i]);
    }
@@ -880,11 +912,11 @@ hypre_ParCompGridDumpSorted( hypre_ParCompGrid *compGrid, const char* filename)
    {
       // Ghost marker
       hypre_fprintf(file, "\n");
-      for (i = hypre_ParCompGridNumOwnedNodes(compGrid); i < insert_owned_position; i++)
+      for (i = num_owned_nodes; i < insert_owned_position; i++)
       {
          hypre_fprintf(file, "%d ", ghost_marker[i]);
       }
-      for (i = 0; i < hypre_ParCompGridNumOwnedNodes(compGrid); i++)
+      for (i = 0; i < num_owned_nodes; i++)
       {
          hypre_fprintf(file, "%d ", ghost_marker[i]);
       }

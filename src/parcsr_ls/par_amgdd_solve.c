@@ -240,7 +240,7 @@ AddSolution( void *amg_vdata )
 	HYPRE_Complex 		*u = hypre_VectorData( hypre_ParVectorLocalVector( hypre_ParAMGDataUArray(amg_data)[0] ) );
 	hypre_ParCompGrid 	**compGrid = hypre_ParAMGDataCompGrid(amg_data);
 	HYPRE_Complex 		*u_comp = hypre_ParCompGridU(compGrid[0]);
-	HYPRE_Int 			num_owned_nodes = hypre_ParCompGridNumOwnedNodes(compGrid[0]);
+	HYPRE_Int 			num_owned_nodes = hypre_ParCompGridOwnedBlockStarts(compGrid[0])[hypre_ParCompGridNumOwnedBlocks(compGrid[0])];
 	HYPRE_Int 			i;
 
 	for (i = 0; i < num_owned_nodes; i++) u[i] += u_comp[i];
@@ -422,7 +422,7 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
 
    #if DEBUGGING_MESSAGES
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
-   if (myid == 0) hypre_printf("Entering looop over levels in residual communication on all ranks\n");
+   if (myid == 0) hypre_printf("Entering loop over levels in residual communication on all ranks\n");
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
    #endif
 

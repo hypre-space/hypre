@@ -203,7 +203,8 @@ SetRelaxMarker(hypre_ParCompGrid *compGrid, hypre_Vector *relax_marker, HYPRE_In
   // Loop over the global indices and mark where to do relaxation
   HYPRE_Int proc_first_index = hypre_ParCompGridGlobalIndices(compGrid)[0];
   HYPRE_Int proc_last_index;
-  if (hypre_ParCompGridNumOwnedNodes(compGrid)) proc_last_index = hypre_ParCompGridGlobalIndices(compGrid)[ hypre_ParCompGridNumOwnedNodes(compGrid) - 1 ];
+  HYPRE_Int num_owned_nodes = hypre_ParCompGridOwnedBlockStarts(compGrid)[hypre_ParCompGridNumOwnedBlocks(compGrid)];
+  if (num_owned_nodes) proc_last_index = hypre_ParCompGridGlobalIndices(compGrid)[ num_owned_nodes - 1 ];
   else proc_last_index = proc_first_index - 1;
   for (i = 0; i < num_nodes; i++)
   {

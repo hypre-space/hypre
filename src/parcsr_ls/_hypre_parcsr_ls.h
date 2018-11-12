@@ -63,6 +63,7 @@ typedef struct
    HYPRE_Int         *transition_res_recv_disps; // if useing the transition level, these are the recv displacements for the Allgatherv
    HYPRE_Int         *num_procs; // number of neighbor procs to communicate with
    HYPRE_Int         *num_partitions; // number of neighbor paritions to communicate with
+   HYPRE_Int         *agglomeration_comms; // local communicators for processor agglomeration on different levels
 
    HYPRE_Int         **procs; // list of neighbor procs
    HYPRE_Int         **partitions; // list of neighbor partitions
@@ -94,6 +95,7 @@ typedef struct
  #define hypre_ParCompGridCommPkgTransitionResRecvDisps(compGridCommPkg)          ((compGridCommPkg) -> transition_res_recv_disps)
  #define hypre_ParCompGridCommPkgNumProcs(compGridCommPkg)           ((compGridCommPkg) -> num_procs)
  #define hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg)            ((compGridCommPkg) -> num_partitions)
+ #define hypre_ParCompGridCommPkgAgglomerationComms(compGridCommPkg)       ((compGridCommPkg) -> agglomeration_comms)
  #define hypre_ParCompGridCommPkgProcs(compGridCommPkg)           ((compGridCommPkg) -> procs)
  #define hypre_ParCompGridCommPkgPartitions(compGridCommPkg)           ((compGridCommPkg) -> partitions)
  #define hypre_ParCompGridCommPkgProcPartitions(compGridCommPkg)           ((compGridCommPkg) -> proc_partitions)
@@ -123,7 +125,8 @@ typedef struct
 typedef struct
 {
    HYPRE_Int       num_nodes; // total number of nodes including real and ghost nodes
-   HYPRE_Int       num_owned_nodes; // number of nodes owned by this proc in the original partition
+   HYPRE_Int       num_owned_blocks; // number of blocks of owned nodes
+   HYPRE_Int       *owned_block_starts; // start positions for the blocks of owned nodes
    HYPRE_Int       num_real_nodes; // number of real nodes
    HYPRE_Int       mem_size;
    HYPRE_Int       A_mem_size;
@@ -156,7 +159,8 @@ typedef struct
  *--------------------------------------------------------------------------*/
 
 #define hypre_ParCompGridNumNodes(compGrid)           ((compGrid) -> num_nodes)
-#define hypre_ParCompGridNumOwnedNodes(compGrid)           ((compGrid) -> num_owned_nodes)
+#define hypre_ParCompGridNumOwnedBlocks(compGrid)           ((compGrid) -> num_owned_blocks)
+#define hypre_ParCompGridOwnedBlockStarts(compGrid)           ((compGrid) -> owned_block_starts)
 #define hypre_ParCompGridNumRealNodes(compGrid)           ((compGrid) -> num_real_nodes)
 #define hypre_ParCompGridMemSize(compGrid)           ((compGrid) -> mem_size)
 #define hypre_ParCompGridAMemSize(compGrid)           ((compGrid) -> A_mem_size)
@@ -1954,7 +1958,7 @@ HYPRE_Int hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, HYPRE_Int num
 HYPRE_Int hypre_ParCompGridSetupRealDofMarker( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int padding );
 HYPRE_Int hypre_ParCompGridSetSize ( hypre_ParCompGrid *compGrid, HYPRE_Int num_nodes, HYPRE_Int A_nnz, HYPRE_Int P_nnz, HYPRE_Int over_allocation_factor, HYPRE_Int full_comp_info );
 HYPRE_Int hypre_ParCompGridResize ( hypre_ParCompGrid *compGrid, HYPRE_Int new_size, HYPRE_Int need_coarse_info, HYPRE_Int type );
-HYPRE_Int hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *num_added_nodes, HYPRE_Int num_levels, HYPRE_Int *proc_first_index, HYPRE_Int *proc_last_index );
+HYPRE_Int hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *num_added_nodes, HYPRE_Int num_levels );
 HYPRE_Int hypre_ParCompGridSetupLocalIndicesP( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int transition_level );
 HYPRE_Int hypre_ParCompGridLocalIndexBinarySearch( hypre_ParCompGrid *compGrid, HYPRE_Int global_index, HYPRE_Int allow_failed_search );
 HYPRE_Int hypre_ParCompGridDebugPrint ( hypre_ParCompGrid *compGrid, const char* filename );
