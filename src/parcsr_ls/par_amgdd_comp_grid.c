@@ -544,6 +544,7 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *num
                   {
                      HYPRE_Int low_global_index = hypre_ParCompGridGlobalIndices(compGrid[level])[ hypre_ParCompGridOwnedBlockStarts(compGrid[level])[k] ];
                      HYPRE_Int high_global_index = hypre_ParCompGridGlobalIndices(compGrid[level])[ hypre_ParCompGridOwnedBlockStarts(compGrid[level])[k+1] - 1 ];
+                     
                      if ( global_index >= low_global_index && global_index <= high_global_index )
                      {
                         // set local index for entry in this row of the matrix
@@ -554,7 +555,16 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *num
                // otherwise find local index via binary search
                if (local_index < 0)
                {
+                  // // !!! Debug
+                  // if (global_index == 1157 && myid == 39)
+                  //    printf("global_index = %d, about to binary search\n", global_index);
+
                   local_index = hypre_ParCompGridLocalIndexBinarySearch(compGrid[level], global_index, 0);
+
+                  // !!! Debug
+                  // if (global_index == 1157 && myid == 39)
+                  //    printf("global_index = %d, after search, local index = %d\n", global_index, local_index);
+
                   if (local_index == -1) local_index = -global_index-1;
                }
                hypre_ParCompGridAColInd(compGrid[level])[j] = local_index;
@@ -597,11 +607,11 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *num
                   {
                      if (hypre_ParCompGridOwnedBlockStarts(compGrid[level+1])[j+1] - hypre_ParCompGridOwnedBlockStarts(compGrid[level+1])[j] > 0)
                      {
-                        HYPRE_Int first = hypre_ParCompGridGlobalIndices(compGrid[level+1])[hypre_ParCompGridOwnedBlockStarts(compGrid[level+1])[j]];
-                        HYPRE_Int last = hypre_ParCompGridGlobalIndices(compGrid[level+1])[hypre_ParCompGridOwnedBlockStarts(compGrid[level+1])[j+1]-1];
-                        if (coarse_global_index >= first && coarse_global_index <= last)
+                        HYPRE_Int low_global_index = hypre_ParCompGridGlobalIndices(compGrid[level+1])[hypre_ParCompGridOwnedBlockStarts(compGrid[level+1])[j]];
+                        HYPRE_Int high_global_index = hypre_ParCompGridGlobalIndices(compGrid[level+1])[hypre_ParCompGridOwnedBlockStarts(compGrid[level+1])[j+1]-1];
+                        if (coarse_global_index >= low_global_index && coarse_global_index <= high_global_index)
                         {
-                           hypre_ParCompGridCoarseLocalIndices(compGrid[level])[i] = coarse_global_index - first + hypre_ParCompGridOwnedBlockStarts(compGrid[level+1])[j];
+                           hypre_ParCompGridCoarseLocalIndices(compGrid[level])[i] = coarse_global_index - low_global_index + hypre_ParCompGridOwnedBlockStarts(compGrid[level+1])[j];
                            break;
                         }
                      }
@@ -659,9 +669,17 @@ HYPRE_Int hypre_ParCompGridLocalIndexBinarySearch( hypre_ParCompGrid *compGrid, 
    HYPRE_Int      right = hypre_ParCompGridNumNodes(compGrid) - 1;
    HYPRE_Int      index;
 
+   HYPRE_Int      myid;
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+
    while (left <= right)
    {
       index = (left + right) / 2;
+
+      // !!! Debug
+      // if (myid == 39 && global_index == 1157) printf("global_index = %d, right = %d, left = %d, index = %d, global at index = %d\n", 
+      //    global_index, right, left, index, hypre_ParCompGridGlobalIndices(compGrid)[index]);
+
       if (hypre_ParCompGridGlobalIndices(compGrid)[index] < global_index) left = index + 1;
       else if (hypre_ParCompGridGlobalIndices(compGrid)[index] > global_index) right = index - 1;
       else return index;
