@@ -516,8 +516,6 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *num
    HYPRE_Int      level,i,j,k,l;
    HYPRE_Int      row_size, global_index, coarse_global_index, local_index, insert_row_size;
 
-
-
    HYPRE_Int myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
 
@@ -577,7 +575,6 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *num
             }
          }
       }
-
       
       // if we are not on the coarsest level
       if (level != transition_level-1)
@@ -592,12 +589,27 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *num
                coarse_global_index = hypre_ParCompGridCoarseGlobalIndices(compGrid[level])[i];
 
                // if this node is repeated on the next coarsest grid, figure out its local index
+               hypre_ParCompGridCoarseLocalIndices(compGrid[level])[i] = -1;
                if ( coarse_global_index != -1)
                {
-                  hypre_ParCompGridCoarseLocalIndices(compGrid[level])[i] = hypre_ParCompGridLocalIndexBinarySearch(compGrid[level+1], coarse_global_index, 0);
+                  // Check whether this node belongs to an owned block on the next level
+                  for (j = 0; j < hypre_ParCompGridNumOwnedBlocks(compGrid[level+1]); j++)
+                  {
+                     if (hypre_ParCompGridOwnedBlockStarts(compGrid[level+1])[j+1] - hypre_ParCompGridOwnedBlockStarts(compGrid[level+1])[j] > 0)
+                     {
+                        HYPRE_Int first = hypre_ParCompGridGlobalIndices(compGrid[level+1])[hypre_ParCompGridOwnedBlockStarts(compGrid[level+1])[j]];
+                        HYPRE_Int last = hypre_ParCompGridGlobalIndices(compGrid[level+1])[hypre_ParCompGridOwnedBlockStarts(compGrid[level+1])[j+1]-1];
+                        if (coarse_global_index >= first && coarse_global_index <= last)
+                        {
+                           hypre_ParCompGridCoarseLocalIndices(compGrid[level])[i] = coarse_global_index - first + hypre_ParCompGridOwnedBlockStarts(compGrid[level+1])[j];
+                           break;
+                        }
+                     }
+                  }
+
+                  if (hypre_ParCompGridCoarseLocalIndices(compGrid[level])[i] < 0)
+                     hypre_ParCompGridCoarseLocalIndices(compGrid[level])[i] = hypre_ParCompGridLocalIndexBinarySearch(compGrid[level+1], coarse_global_index, 0);
                }
-               // otherwise set it to -1
-               else hypre_ParCompGridCoarseLocalIndices(compGrid[level])[i] = -1;
             }
          }
       }

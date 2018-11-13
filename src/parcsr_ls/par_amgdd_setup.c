@@ -119,6 +119,9 @@ TestCompGrids2(hypre_ParCompGrid **compGrid, HYPRE_Int transition_level);
 HYPRE_Int
 TestCompGrids3(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, hypre_ParCSRMatrix **A, hypre_ParCSRMatrix **P, hypre_ParVector **F);
 
+HYPRE_Int
+CheckCompGridLocalIndices(hypre_ParAMGData *amg_data);
+
 /*****************************************************************************
  *
  * Routine for setting up the composite grids in AMG-DD
@@ -741,23 +744,23 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
 
 
          // !!! Debug
-         if (myid == 15 && level == 3)
-         {
-            printf("Rank 15 recv ranks = ");
-            for (i = 0; i < num_neighbor_procs; i++) printf("%d ", hypre_ParCompGridCommPkgProcs(compGridCommPkg)[level][i]);
-            printf("\n");
-            printf("Node 174 with global id 2735 has connections to global dofs: ");
-            for (i = hypre_ParCompGridARowPtr(compGrid[3])[174]; i < hypre_ParCompGridARowPtr(compGrid[3])[175]; i++) printf("%d ", hypre_ParCompGridAGlobalColInd(compGrid[3])[i]);
-            printf("\n");
-         }
-         if ((myid == 15 || myid == 23) && level == 3)
-         {
-            for (i = level; i < num_levels; i++)
-            {
-               hypre_sprintf(filename, "outputs/CompGrids/level%dCompGridRank%dLevel%d.txt", level, myid, i);
-               hypre_ParCompGridDebugPrint( compGrid[i], filename );
-            }
-         }
+         // if (myid == 15 && level == 3)
+         // {
+         //    printf("Rank 15 recv ranks = ");
+         //    for (i = 0; i < num_neighbor_procs; i++) printf("%d ", hypre_ParCompGridCommPkgProcs(compGridCommPkg)[level][i]);
+         //    printf("\n");
+         //    printf("Node 174 with global id 2735 has connections to global dofs: ");
+         //    for (i = hypre_ParCompGridARowPtr(compGrid[3])[174]; i < hypre_ParCompGridARowPtr(compGrid[3])[175]; i++) printf("%d ", hypre_ParCompGridAGlobalColInd(compGrid[3])[i]);
+         //    printf("\n");
+         // }
+         // if (level == 7)
+         // {
+         //    for (i = level; i < num_levels; i++)
+         //    {
+         //       hypre_sprintf(filename, "outputs/CompGrids/level%dCompGridRank%dLevel%d.txt", level, myid, i);
+         //       hypre_ParCompGridDebugPrint( compGrid[i], filename );
+         //    }
+         // }
 
 
 
@@ -798,6 +801,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
       {
          printf("TestCompGrids1 failed! Rank %d, level %d\n", myid, level);
       }
+      CheckCompGridLocalIndices(amg_data);
 
 
       if (level == 3)
@@ -1978,7 +1982,7 @@ AgglomerateProcessors(hypre_ParAMGData *amg_data, hypre_ParCompGridCommPkg *comp
          }
       }
    }
-   for (level = current_level; level < transition_level-1; level++)
+   for (level = current_level-1; level < transition_level-1; level++)
    {
       hypre_ParCompGrid *compGrid = hypre_ParAMGDataCompGrid(amg_data)[level];
       HYPRE_Int num_nodes = hypre_ParCompGridNumNodes(compGrid);
@@ -2508,10 +2512,6 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
    HYPRE_Int            start = hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[current_level][partition];
    HYPRE_Int            finish = hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[current_level][partition+1];
 
-   // !!! Debug
-   if (finish - start == 0) printf("rank %d, inside PackSendBuffer() with no nodes to send...\n", myid);
-
-
    // Get the transition level
    HYPRE_Int transition_level = hypre_ParCompGridCommPkgTransitionLevel(compGridCommPkg);
    if (transition_level < 0) transition_level = num_levels;
@@ -2540,10 +2540,10 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
 
 
             // !!! Debug
-            if (myid == 23 && current_level == 3 && send_rank == 15 && hypre_ParCompGridGlobalIndices(compGrid[current_level])[ send_elmt ] == 4005)
-               printf("\n\n\nRank 23, level 3, global index 4005 has coarse index %d\n", hypre_ParCompGridCoarseGlobalIndices(compGrid[current_level])[send_elmt]);
-            if (myid == 23 && current_level == 3 && send_rank == 15 && hypre_ParCompGridGlobalIndices(compGrid[current_level])[ send_elmt ] == 4005)
-               printf("\n\n\nRank 23, level 3, global index 4005, global index of coarse local index is %d\n", hypre_ParCompGridGlobalIndices(compGrid[current_level+1])[ hypre_ParCompGridCoarseLocalIndices(compGrid[current_level])[send_elmt] ]);
+            // if (myid == 23 && current_level == 3 && send_rank == 15 && hypre_ParCompGridGlobalIndices(compGrid[current_level])[ send_elmt ] == 4005)
+            //    printf("\n\n\nRank 23, level 3, global index 4005 has coarse index %d\n", hypre_ParCompGridCoarseGlobalIndices(compGrid[current_level])[send_elmt]);
+            // if (myid == 23 && current_level == 3 && send_rank == 15 && hypre_ParCompGridGlobalIndices(compGrid[current_level])[ send_elmt ] == 4005)
+            //    printf("\n\n\nRank 23, level 3, global index 4005, global index of coarse local index is %d\n", hypre_ParCompGridGlobalIndices(compGrid[current_level+1])[ hypre_ParCompGridCoarseLocalIndices(compGrid[current_level])[send_elmt] ]);
 
 
 
@@ -2571,8 +2571,8 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
       
       // !!! Debug
       // if (send_rank == 15 && current_level == 3) printf("Rank %d starting node = %d\n", myid, hypre_ParCompGridGlobalIndices(compGrid[current_level])[i]);
-      if (hypre_ParCompGridGlobalIndices(compGrid[current_level])[send_elmt] == 4005 && current_level == 3 && send_rank == 15) 
-         printf("rank %d, global index %d is a starting index on level %d\n", myid, hypre_ParCompGridGlobalIndices(compGrid[current_level])[send_elmt], current_level);
+      // if (hypre_ParCompGridGlobalIndices(compGrid[current_level])[send_elmt] == 4005 && current_level == 3 && send_rank == 15) 
+      //    printf("rank %d, global index %d is a starting index on level %d\n", myid, hypre_ParCompGridGlobalIndices(compGrid[current_level])[send_elmt], current_level);
       
       send_flag[current_level][partition][current_level][i - start] = send_elmt;
       (*buffer_size) += hypre_ParCompGridARowPtr(compGrid[current_level])[send_elmt+1] - hypre_ParCompGridARowPtr(compGrid[current_level])[send_elmt];
@@ -2595,10 +2595,10 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
          for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
          {
             // !!! Debug
-            if (myid == 23 && level == 4 && hypre_ParCompGridGlobalIndices(compGrid[level])[i] == 1174 && send_rank == 15)
-               printf("Rank 23 on level 4 has node 1174 marked as add_flag = %d\n", add_flag[level][i]);
-            if (myid == 23 && level == 4 && hypre_ParCompGridGlobalIndices(compGrid[level])[i] == 1131 && send_rank == 15)
-               printf("Rank 23 on level 4 has node 1131 marked as add_flag = %d\n", add_flag[level][i]);
+            // if (myid == 23 && level == 4 && hypre_ParCompGridGlobalIndices(compGrid[level])[i] == 1174 && send_rank == 15)
+            //    printf("Rank 23 on level 4 has node 1174 marked as add_flag = %d\n", add_flag[level][i]);
+            // if (myid == 23 && level == 4 && hypre_ParCompGridGlobalIndices(compGrid[level])[i] == 1131 && send_rank == 15)
+            //    printf("Rank 23 on level 4 has node 1131 marked as add_flag = %d\n", add_flag[level][i]);
 
             if (add_flag[level][i] == padding + 1)
             {
@@ -2613,16 +2613,18 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
          {
             if (add_flag[level][i] > 1) add_flag[level][i] = num_ghost_layers + 2;
             else if (add_flag[level][i] == 1) add_flag[level][i] = num_ghost_layers + 1;
-            if (myid == 23 && level == 4 && hypre_ParCompGridGlobalIndices(compGrid[level])[i] == 1131 && send_rank == 15)
-               printf("Rank 23 on level 4 in expand by number of ghost layers puts node 1131 marked as add_flag = %d\n", add_flag[level][i]);
+
+            // !!! Debug
+            // if (myid == 23 && level == 4 && hypre_ParCompGridGlobalIndices(compGrid[level])[i] == 1131 && send_rank == 15)
+            //    printf("Rank 23 on level 4 in expand by number of ghost layers puts node 1131 marked as add_flag = %d\n", add_flag[level][i]);
          }
          for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
          {
             // Recursively add the region of ghost nodes (do not add any coarse nodes underneath)
 
             // !!! Debug
-            if (myid == 23 && level == 4 && hypre_ParCompGridGlobalIndices(compGrid[level])[i] == 1131 && send_rank == 15)
-               printf("Rank 23 on level 4 has node 1131 marked as add_flag = %d\n", add_flag[level][i]);
+            // if (myid == 23 && level == 4 && hypre_ParCompGridGlobalIndices(compGrid[level])[i] == 1131 && send_rank == 15)
+            //    printf("Rank 23 on level 4 has node 1131 marked as add_flag = %d\n", add_flag[level][i]);
 
             if (add_flag[level][i] == num_ghost_layers + 1) RecursivelyBuildPsiComposite(i, num_ghost_layers, compGrid[level], add_flag[level], NULL, 0, NULL, 0);
          }
@@ -2653,7 +2655,7 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
                HYPRE_Int first_owned = hypre_ParCompGridGlobalIndices(compGrid[level])[ hypre_ParCompGridOwnedBlockStarts(compGrid[level])[i] ];
 
                // !!! Debug
-               if (hypre_ParCompGridOwnedBlockStarts(compGrid[level])[i+1] - 1 < 0) printf("trying to access info when we don't have any nodes...\n");
+               // if (hypre_ParCompGridOwnedBlockStarts(compGrid[level])[i+1] - 1 < 0) printf("trying to access info when we don't have any nodes...\n");
 
                HYPRE_Int last_owned = hypre_ParCompGridGlobalIndices(compGrid[level])[ hypre_ParCompGridOwnedBlockStarts(compGrid[level])[i+1] - 1 ];
                HYPRE_Int first_nonowned = hypre_ParCompGridGlobalIndices(compGrid[level])[ num_owned_nodes ];
@@ -2771,20 +2773,20 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
       {
          send_buffer[cnt++] = hypre_ParCompGridGlobalIndices(compGrid[level])[ send_flag[current_level][partition][level][i] ];
          // !!! Debug
-         if (myid == 23 && hypre_ParCompGridGlobalIndices(compGrid[level])[ send_flag[current_level][partition][level][i] ] == 4005 && send_rank == 15 && level == 3)
-            printf("Rank %d sending %d to 15\n", myid, hypre_ParCompGridGlobalIndices(compGrid[level])[ send_flag[current_level][partition][level][i] ]);
-         if (myid == 23 && hypre_ParCompGridGlobalIndices(compGrid[level])[ send_flag[current_level][partition][level][i] ] == 1174 && send_rank == 15 && level == 4)
-            printf("Rank %d sending %d to 15\n", myid, hypre_ParCompGridGlobalIndices(compGrid[level])[ send_flag[current_level][partition][level][i] ]);
-         if (myid == 23 && hypre_ParCompGridGlobalIndices(compGrid[level])[ send_flag[current_level][partition][level][i] ] == 1131 && send_rank == 15 && level == 4)
-            printf("Rank %d sending %d to 15\n", myid, hypre_ParCompGridGlobalIndices(compGrid[level])[ send_flag[current_level][partition][level][i] ]);
-         if (myid == 23 && hypre_ParCompGridGlobalIndices(compGrid[level])[ send_flag[current_level][partition][level][i] ] == 1145 && send_rank == 15 && level == 4)
-            printf("Rank %d sending %d to 15\n", myid, hypre_ParCompGridGlobalIndices(compGrid[level])[ send_flag[current_level][partition][level][i] ]);
-         if (myid == 23 && hypre_ParCompGridGlobalIndices(compGrid[level])[ send_flag[current_level][partition][level][i] ] == 1203 && send_rank == 15 && level == 4)
-            printf("Rank %d sending %d to 15\n", myid, hypre_ParCompGridGlobalIndices(compGrid[level])[ send_flag[current_level][partition][level][i] ]);
-         if (myid == 23 && hypre_ParCompGridGlobalIndices(compGrid[level])[ send_flag[current_level][partition][level][i] ] == 1577 && send_rank == 15 && level == 4)
-            printf("Rank %d sending %d to 15\n", myid, hypre_ParCompGridGlobalIndices(compGrid[level])[ send_flag[current_level][partition][level][i] ]);
-         if (myid == 23 && hypre_ParCompGridGlobalIndices(compGrid[level])[ send_flag[current_level][partition][level][i] ] == 1545 && send_rank == 15 && level == 4)
-            printf("Rank %d sending %d to 15\n", myid, hypre_ParCompGridGlobalIndices(compGrid[level])[ send_flag[current_level][partition][level][i] ]);
+         // if (myid == 23 && hypre_ParCompGridGlobalIndices(compGrid[level])[ send_flag[current_level][partition][level][i] ] == 4005 && send_rank == 15 && level == 3)
+         //    printf("Rank %d sending %d to 15\n", myid, hypre_ParCompGridGlobalIndices(compGrid[level])[ send_flag[current_level][partition][level][i] ]);
+         // if (myid == 23 && hypre_ParCompGridGlobalIndices(compGrid[level])[ send_flag[current_level][partition][level][i] ] == 1174 && send_rank == 15 && level == 4)
+         //    printf("Rank %d sending %d to 15\n", myid, hypre_ParCompGridGlobalIndices(compGrid[level])[ send_flag[current_level][partition][level][i] ]);
+         // if (myid == 23 && hypre_ParCompGridGlobalIndices(compGrid[level])[ send_flag[current_level][partition][level][i] ] == 1131 && send_rank == 15 && level == 4)
+         //    printf("Rank %d sending %d to 15\n", myid, hypre_ParCompGridGlobalIndices(compGrid[level])[ send_flag[current_level][partition][level][i] ]);
+         // if (myid == 23 && hypre_ParCompGridGlobalIndices(compGrid[level])[ send_flag[current_level][partition][level][i] ] == 1145 && send_rank == 15 && level == 4)
+         //    printf("Rank %d sending %d to 15\n", myid, hypre_ParCompGridGlobalIndices(compGrid[level])[ send_flag[current_level][partition][level][i] ]);
+         // if (myid == 23 && hypre_ParCompGridGlobalIndices(compGrid[level])[ send_flag[current_level][partition][level][i] ] == 1203 && send_rank == 15 && level == 4)
+         //    printf("Rank %d sending %d to 15\n", myid, hypre_ParCompGridGlobalIndices(compGrid[level])[ send_flag[current_level][partition][level][i] ]);
+         // if (myid == 23 && hypre_ParCompGridGlobalIndices(compGrid[level])[ send_flag[current_level][partition][level][i] ] == 1577 && send_rank == 15 && level == 4)
+         //    printf("Rank %d sending %d to 15\n", myid, hypre_ParCompGridGlobalIndices(compGrid[level])[ send_flag[current_level][partition][level][i] ]);
+         // if (myid == 23 && hypre_ParCompGridGlobalIndices(compGrid[level])[ send_flag[current_level][partition][level][i] ] == 1545 && send_rank == 15 && level == 4)
+         //    printf("Rank %d sending %d to 15\n", myid, hypre_ParCompGridGlobalIndices(compGrid[level])[ send_flag[current_level][partition][level][i] ]);
       }
 
       // if not on last level, copy coarse gobal indices
@@ -2845,19 +2847,19 @@ RecursivelyBuildPsiComposite(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *com
       index = hypre_ParCompGridAColInd(compGrid)[i];
 
       // !!! Debug
-      if (myid == 15 && index == 499 && node == 174) printf("index = %d, global index = %d, node = %d, global id = %d, m = %d\n", 
-         index, hypre_ParCompGridGlobalIndices(compGrid)[index], node, hypre_ParCompGridGlobalIndices(compGrid)[node], m);
+      // if (myid == 15 && index == 499 && node == 174) printf("index = %d, global index = %d, node = %d, global id = %d, m = %d\n", 
+      //    index, hypre_ParCompGridGlobalIndices(compGrid)[index], node, hypre_ParCompGridGlobalIndices(compGrid)[node], m);
 
-      if (myid == 15 && index == 579 && node == 622) printf("index = %d, global index = %d, node = %d, global id = %d, m = %d\n", 
-         index, hypre_ParCompGridGlobalIndices(compGrid)[index], node, hypre_ParCompGridGlobalIndices(compGrid)[node], m);
-      if (myid == 15 && index == 593 && node == 579 && m == 4) printf("index = %d, global index = %d, node = %d, global id = %d, m = %d\n", 
-         index, hypre_ParCompGridGlobalIndices(compGrid)[index], node, hypre_ParCompGridGlobalIndices(compGrid)[node], m);
-      if (myid == 15 && index == 651 && node == 593 && m == 3) printf("index = %d, global index = %d, node = %d, global id = %d, m = %d\n", 
-         index, hypre_ParCompGridGlobalIndices(compGrid)[index], node, hypre_ParCompGridGlobalIndices(compGrid)[node], m);
-      if (myid == 15 && index == 700 && node == 651 && m == 2) printf("index = %d, global index = %d, node = %d, global id = %d, m = %d\n", 
-         index, hypre_ParCompGridGlobalIndices(compGrid)[index], node, hypre_ParCompGridGlobalIndices(compGrid)[node], m);
-      if (myid == 15 && index == -1546 && node == 700 && m == 1) printf("index = %d, global index = %d, node = %d, global id = %d, m = %d\n", 
-         index, hypre_ParCompGridAGlobalColInd(compGrid)[i], node, hypre_ParCompGridGlobalIndices(compGrid)[node], m);
+      // if (myid == 15 && index == 579 && node == 622) printf("index = %d, global index = %d, node = %d, global id = %d, m = %d\n", 
+      //    index, hypre_ParCompGridGlobalIndices(compGrid)[index], node, hypre_ParCompGridGlobalIndices(compGrid)[node], m);
+      // if (myid == 15 && index == 593 && node == 579 && m == 4) printf("index = %d, global index = %d, node = %d, global id = %d, m = %d\n", 
+      //    index, hypre_ParCompGridGlobalIndices(compGrid)[index], node, hypre_ParCompGridGlobalIndices(compGrid)[node], m);
+      // if (myid == 15 && index == 651 && node == 593 && m == 3) printf("index = %d, global index = %d, node = %d, global id = %d, m = %d\n", 
+      //    index, hypre_ParCompGridGlobalIndices(compGrid)[index], node, hypre_ParCompGridGlobalIndices(compGrid)[node], m);
+      // if (myid == 15 && index == 700 && node == 651 && m == 2) printf("index = %d, global index = %d, node = %d, global id = %d, m = %d\n", 
+      //    index, hypre_ParCompGridGlobalIndices(compGrid)[index], node, hypre_ParCompGridGlobalIndices(compGrid)[node], m);
+      // if (myid == 15 && index == -1546 && node == 700 && m == 1) printf("index = %d, global index = %d, node = %d, global id = %d, m = %d\n", 
+      //    index, hypre_ParCompGridAGlobalColInd(compGrid)[i], node, hypre_ParCompGridGlobalIndices(compGrid)[node], m);
 
       // If the neighbor info is available on this proc
       if (index >= 0)
@@ -2879,15 +2881,15 @@ RecursivelyBuildPsiComposite(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *com
                add_flag_coarse[ coarse_grid_index ] = padding+1;
                *nodes_to_add = 1;
                // !!! Debug
-               if (myid == 15 && hypre_ParCompGridCoarseLocalIndices(compGrid)[index] == 622) printf("down to node 622 from node %d with global id %d\n", 
-                  index, hypre_ParCompGridGlobalIndices(compGrid)[index]);
+               // if (myid == 15 && hypre_ParCompGridCoarseLocalIndices(compGrid)[index] == 622) printf("down to node 622 from node %d with global id %d\n", 
+               //    index, hypre_ParCompGridGlobalIndices(compGrid)[index]);
             }
          }
       }
       else
       {
          error_code = 1; 
-         // hypre_printf("Rank %d: Error! Ran into a -1 index when building Psi_c\n", myid);
+         hypre_printf("Rank %d: Error! Ran into a -1 index when building Psi_c\n", myid);
          // if (myid == 15) hypre_printf("Rank %d: Error! Ran into a -1 index when building Psi_c,\ngrid size %d, node = %d with global id %d, index = %d with global id = %d, m = %d\n",
          //    myid, hypre_ParCompGridNumNodes(compGrid), node, hypre_ParCompGridGlobalIndices(compGrid)[node], index, hypre_ParCompGridAGlobalColInd(compGrid)[i], m);
       }
@@ -3558,7 +3560,7 @@ TestCompGrids1(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int tra
             if (add_flag[level][i] == padding + 1)
             {
                // !!! Debug
-               if (myid == 15 && level == 3 && i == 174) printf("Rank 15, level 3, node 174 with global id %d is a starting node\n", hypre_ParCompGridGlobalIndices(compGrid[level])[i]);
+               // if (myid == 15 && level == 3 && i == 174) printf("Rank 15, level 3, node 174 with global id %d is a starting node\n", hypre_ParCompGridGlobalIndices(compGrid[level])[i]);
                // Recursively add the region of padding (flagging coarse nodes on the next level if applicable)
                if (need_coarse_info) error_code = RecursivelyBuildPsiComposite(i, padding, compGrid[level], add_flag[level], add_flag[level+1], need_coarse_info, &nodes_to_add, padding);
                else error_code = RecursivelyBuildPsiComposite(i, padding, compGrid[level], add_flag[level], NULL, need_coarse_info, &nodes_to_add, padding);
@@ -3941,4 +3943,48 @@ TestCompGrids3(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, hypre_ParCSRM
    }
 
    return test_failed;
+}
+
+HYPRE_Int
+CheckCompGridLocalIndices(hypre_ParAMGData *amg_data)
+{
+   hypre_ParCompGrid **compGrid = hypre_ParAMGDataCompGrid(amg_data);
+   HYPRE_Int num_levels = hypre_ParAMGDataNumLevels(amg_data);
+   HYPRE_Int level;
+   HYPRE_Int transition_level = hypre_ParCompGridCommPkgTransitionLevel(hypre_ParAMGDataCompGridCommPkg(amg_data));
+   if (transition_level < 0) transition_level = num_levels;
+
+   HYPRE_Int myid;
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+
+   for (level = 0; level < num_levels; level++)
+   {
+      HYPRE_Int i;
+      HYPRE_Int num_nodes = hypre_ParCompGridNumNodes(compGrid[level]);
+      HYPRE_Int A_nnz = hypre_ParCompGridARowPtr(compGrid[level])[num_nodes];
+
+      for (i = 0; i < A_nnz; i++)
+      {
+         HYPRE_Int local_index = hypre_ParCompGridAColInd(compGrid[level])[i];
+         if (local_index >= 0)
+         {
+            if (hypre_ParCompGridGlobalIndices(compGrid[level])[local_index] != hypre_ParCompGridAGlobalColInd(compGrid[level])[i])
+               printf("Error: A global/local indices don't agree\n");
+         }
+      }
+
+      if (level != transition_level-1)
+      for (i = 0; i < num_nodes; i++)
+      {
+         HYPRE_Int local_index = hypre_ParCompGridCoarseLocalIndices(compGrid[level])[i];
+         if (local_index >= 0)
+         {
+            if (hypre_ParCompGridGlobalIndices(compGrid[level+1])[local_index] != hypre_ParCompGridCoarseGlobalIndices(compGrid[level])[i])
+               printf("Error: coarse local/global indices don't agree, rank %d, level %d\ni = %d, local_index = %d, global index at local = %d, coarse global index = %d\n", 
+                  myid, level, i, local_index, hypre_ParCompGridGlobalIndices(compGrid[level+1])[local_index], hypre_ParCompGridCoarseGlobalIndices(compGrid[level])[i]);
+         }
+      }
+   }
+
+   return 0;
 }
