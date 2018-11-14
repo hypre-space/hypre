@@ -276,6 +276,10 @@ hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, H
 
    HYPRE_Int i,j,k,cnt,level;
 
+   // !!! Debug
+   HYPRE_Int myid;
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+
    // Clean up memory for things we don't need anymore
    for (level = 0; level < transition_level; level++)
    {
@@ -318,7 +322,15 @@ hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, H
                for (k = hypre_ParCompGridPRowPtr(compGrid[level-1])[i]; k < hypre_ParCompGridPRowPtr(compGrid[level-1])[i+1]; k++)
                {
                   if (hypre_ParCompGridPColInd(compGrid[level-1])[k] >= 0)
+                  {
+                     // !!! Debug
+                     // if (hypre_ParCompGridPColInd(compGrid[level-1])[k] >= hypre_ParCompGridNumNodes(compGrid[level])) 
+                     //    printf("Rank %d, level %d, P col ind points out of bounds. Col ind = %d, num nodes = %d\n", 
+                     //       myid, level-1, hypre_ParCompGridPColInd(compGrid[level-1])[k], hypre_ParCompGridNumNodes(compGrid[level]));
+                     
+
                      hypre_ParCompGridCoarseResidualMarker(compGrid[level])[ hypre_ParCompGridPColInd(compGrid[level-1])[k] ] = 1; // Mark coarse dofs that we don't want to restrict to from fine grid
+                  }
                }
                break;
             }
@@ -632,30 +644,46 @@ HYPRE_Int hypre_ParCompGridSetupLocalIndicesP( hypre_ParCompGrid **compGrid, HYP
 {
    HYPRE_Int                  i,j,level,global_index,first,last;
 
+   // !!! Debug
+   HYPRE_Int print_this = 1;
+   HYPRE_Int myid;
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+
    for (level = 0; level < transition_level-1; level++)
    {
-      HYPRE_Int num_owned_blocks = hypre_ParCompGridNumOwnedBlocks(compGrid[level]);
+      HYPRE_Int num_owned_blocks = hypre_ParCompGridNumOwnedBlocks(compGrid[level+1]);
 
       // Setup all local indices for all nodes (note that PColInd currently stores global indices)
       for (i = 0; i < hypre_ParCompGridPRowPtr(compGrid[level])[ hypre_ParCompGridNumNodes(compGrid[level]) ]; i++)
       {
          global_index = hypre_ParCompGridPColInd(compGrid[level])[i];
+         hypre_ParCompGridPColInd(compGrid[level])[i] = -global_index - 1;
          // If global index is owned, simply calculate
          for (j = 0; j < num_owned_blocks; j++)
          {
-            if (hypre_ParCompGridOwnedBlockStarts(compGrid[level])[j+1] - hypre_ParCompGridOwnedBlockStarts(compGrid[level])[j] > 0)
+            if (hypre_ParCompGridOwnedBlockStarts(compGrid[level+1])[j+1] - hypre_ParCompGridOwnedBlockStarts(compGrid[level+1])[j] > 0)
             {
-               HYPRE_Int low_global_index = hypre_ParCompGridGlobalIndices(compGrid[level])[ hypre_ParCompGridOwnedBlockStarts(compGrid[level])[j] ];
-               HYPRE_Int high_global_index = hypre_ParCompGridGlobalIndices(compGrid[level])[ hypre_ParCompGridOwnedBlockStarts(compGrid[level])[j+1] - 1 ];
+               HYPRE_Int low_global_index = hypre_ParCompGridGlobalIndices(compGrid[level+1])[ hypre_ParCompGridOwnedBlockStarts(compGrid[level+1])[j] ];
+               HYPRE_Int high_global_index = hypre_ParCompGridGlobalIndices(compGrid[level+1])[ hypre_ParCompGridOwnedBlockStarts(compGrid[level+1])[j+1] - 1 ];
                if ( global_index >= low_global_index && global_index <= high_global_index )
                {
-                  hypre_ParCompGridPColInd(compGrid[level])[i] = global_index - low_global_index + hypre_ParCompGridOwnedBlockStarts(compGrid[level])[j];
+                  hypre_ParCompGridPColInd(compGrid[level])[i] = global_index - low_global_index + hypre_ParCompGridOwnedBlockStarts(compGrid[level+1])[j];
                }
             }
          }
          // Otherwise, binary search
          if (hypre_ParCompGridPColInd(compGrid[level])[i] < 0) hypre_ParCompGridPColInd(compGrid[level])[i] = hypre_ParCompGridLocalIndexBinarySearch(compGrid[level+1], global_index, 0);
          if (hypre_ParCompGridPColInd(compGrid[level])[i] < 0) hypre_ParCompGridPColInd(compGrid[level])[i] = -global_index - 1;
+      
+         // !!! Debug
+         if (print_this && myid == 1 && hypre_ParCompGridPColInd(compGrid[level])[i] > hypre_ParCompGridNumNodes(compGrid[level+1]))
+         {
+            print_this = 0;
+            printf("Rank %d, level %d, assigned local col ind as %d, global_index = %d\n", myid, level, hypre_ParCompGridPColInd(compGrid[level])[i], global_index);
+         }
+
+
+
       }
    }
 
@@ -796,20 +824,20 @@ hypre_ParCompGridDebugPrint ( hypre_ParCompGrid *compGrid, const char* filename 
          for (i = 0; i < A_rowptr[num_nodes]; i++) hypre_fprintf(file, "%d ", A_global_colind[i]);
          hypre_fprintf(file,"\n\n");
       }
-      // hypre_fprintf(file, "A data:\n");
-      // for (i = 0; i < A_rowptr[num_nodes]; i++) hypre_fprintf(file, "%f ", A_data[i]);
-      // if (P_rowptr)
-      // {
-      //    hypre_fprintf(file,"\n\n");
-      //    hypre_fprintf(file, "P row pointer:\n");
-      //    for (i = 0; i < num_nodes+1; i++) hypre_fprintf(file, "%d ", P_rowptr[i]);
-      //    hypre_fprintf(file,"\n\n");
-      //    hypre_fprintf(file, "P colind:\n");
-      //    for (i = 0; i < P_rowptr[num_nodes]; i++) hypre_fprintf(file, "%d ", P_colind[i]);
-      //    hypre_fprintf(file,"\n\n");
-      //    hypre_fprintf(file, "P data:\n");
-      //    for (i = 0; i < P_rowptr[num_nodes]; i++) hypre_fprintf(file, "%f ", P_data[i]);
-      // }
+      hypre_fprintf(file, "A data:\n");
+      for (i = 0; i < A_rowptr[num_nodes]; i++) hypre_fprintf(file, "%f ", A_data[i]);
+   }
+   if (P_rowptr)
+   {
+      hypre_fprintf(file,"\n\n");
+      hypre_fprintf(file, "P row pointer:\n");
+      for (i = 0; i < num_nodes+1; i++) hypre_fprintf(file, "%d ", P_rowptr[i]);
+      hypre_fprintf(file,"\n\n");
+      hypre_fprintf(file, "P colind:\n");
+      for (i = 0; i < P_rowptr[num_nodes]; i++) hypre_fprintf(file, "%d ", P_colind[i]);
+      hypre_fprintf(file,"\n\n");
+      hypre_fprintf(file, "P data:\n");
+      for (i = 0; i < P_rowptr[num_nodes]; i++) hypre_fprintf(file, "%f ", P_data[i]);
    }
 
    fclose(file);

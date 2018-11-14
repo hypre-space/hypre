@@ -19,7 +19,7 @@
 
 #define DEBUG_COMP_GRID 0 // if true, runs some tests, prints out what is stored in the comp grids for each processor to a file
 #define DEBUG_PROC_NEIGHBORS 0 // if true, dumps info on the add flag structures that determine nearest processor neighbors 
-#define DEBUGGING_MESSAGES 1 // if true, prints a bunch of messages to the screen to let you know where in the algorithm you are
+#define DEBUGGING_MESSAGES 0 // if true, prints a bunch of messages to the screen to let you know where in the algorithm you are
 
 HYPRE_Int
 SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int level, HYPRE_Int padding, HYPRE_Int num_ghost_layers, HYPRE_Int *communication_cost, HYPRE_Int use_multiple_allgather );
@@ -826,11 +826,6 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
       //    }
       // }
 
-      // if (level == 4)
-      // {
-      //    hypre_MPI_Finalize();
-      //    exit(0);
-      // }
 
 
       #if DEBUG_COMP_GRID
@@ -887,31 +882,8 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
    #endif 
 
-
-
-
-
-   // !!! Debug
-   for (level = 0; level < num_levels; level++)
-   {
-      hypre_sprintf(filename, "outputs/CompGrids/beforeCommRemainingCompGridRank%dLevel%d.txt", myid, level);
-      hypre_ParCompGridDebugPrint( compGrid[level], filename );
-   }
-
-
-
-
-
-
-
    // Communicate data for A and all info for P
    CommunicateRemainingMatrixInfo(compGrid, compGridCommPkg, communication_cost);
-
-
-   // !!! Debug
-   hypre_MPI_Finalize();
-   exit(0);
-
 
 
    #if DEBUGGING_MESSAGES
@@ -928,6 +900,24 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    // Setup the local indices for P
    hypre_ParCompGridSetupLocalIndicesP(compGrid, num_levels, transition_level);
 
+
+
+
+   // // !!! Debug
+   // if (myid == 0) printf("Done with hypre_ParCompGridSetupLocalIndicesP\n");
+   // for (level = 0; level < num_levels-1; level++)
+   // {
+   //    char filename[256];
+   //    hypre_sprintf(filename, "outputs/CompGrids/afterSetupLocalPCompGridRank%dLevel%d.txt", myid, level);
+   //    hypre_ParCompGridDebugPrint( compGrid[level], filename );
+   // }
+   // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+
+
+
+
+
+
    #if DEBUGGING_MESSAGES
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
    if (myid == 1) hypre_printf("All ranks: done with hypre_ParCompGridSetupLocalIndicesP()\n");
@@ -942,6 +932,17 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    #else
    hypre_ParCompGridFinalize(compGrid, num_levels, transition_level, 0);
    #endif
+
+   // !!! Debug
+   // hypre_MPI_Finalize();
+   // exit(0);
+
+
+
+
+
+
+
 
    #if DEBUGGING_MESSAGES
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
@@ -3399,12 +3400,34 @@ CommunicateRemainingMatrixInfo(hypre_ParCompGrid **compGrid, hypre_ParCompGridCo
          - num_owned_nodes, HYPRE_MEMORY_HOST);
    }
 
+
+
+
+
+   // !!! Debug
+   for (level = 0; level < num_levels-1; level++)
+   {
+      for (i = hypre_ParCompGridOwnedBlockStarts(compGrid[level])[hypre_ParCompGridNumOwnedBlocks(compGrid[level])]+1; i < hypre_ParCompGridNumNodes(compGrid[level])+1; i++)
+      {
+         hypre_ParCompGridPRowPtr(compGrid[level])[i] = -1;
+      }
+   }
+
+
+   // If no owned nodes, need to initialize start of PRowPtr
+   for (level = 0; level < num_levels-1; level++)
+   {
+      if (!hypre_ParCompGridOwnedBlockStarts(compGrid[level])[hypre_ParCompGridNumOwnedBlocks(compGrid[level])])
+         hypre_ParCompGridPRowPtr(compGrid[level])[0] = 0;
+   }
+
    for (outer_level = transition_level-1; outer_level >= 0; outer_level--)
    {
       // Get send/recv info from the comp grid comm pkg
       HYPRE_Int num_neighbor_procs = hypre_ParCompGridCommPkgNumProcs(compGridCommPkg)[outer_level];
       HYPRE_Int *neighbor_procs = hypre_ParCompGridCommPkgProcs(compGridCommPkg)[outer_level];
-      
+
+
       // Get the buffer sizes
       HYPRE_Int *send_sizes = hypre_CTAlloc(HYPRE_Int, 2*num_neighbor_procs, HYPRE_MEMORY_HOST);
       for (proc = 0; proc < num_neighbor_procs; proc++)
@@ -3596,6 +3619,17 @@ CommunicateRemainingMatrixInfo(hypre_ParCompGrid **compGrid, hypre_ParCompGridCo
       hypre_TFree(send_sizes, HYPRE_MEMORY_HOST);
    }
 
+
+   // !!! Debug
+   for (level = 0; level < num_levels-1; level++)
+   {
+      for (i = hypre_ParCompGridOwnedBlockStarts(compGrid[level])[hypre_ParCompGridNumOwnedBlocks(compGrid[level])]+1; i < hypre_ParCompGridNumNodes(compGrid[level])+1; i++)
+      {
+         if (hypre_ParCompGridPRowPtr(compGrid[level])[i] < 0)
+            printf("Error: P row ptr not entirely initialized! Rank %d, level %d\n", myid, level);
+      }
+   }
+
    // Fix up P
    for (level = 0; level < transition_level; level++)
    {
@@ -3636,6 +3670,7 @@ CommunicateRemainingMatrixInfo(hypre_ParCompGrid **compGrid, hypre_ParCompGridCo
    }
    hypre_TFree(temp_PColInd, HYPRE_MEMORY_HOST);
    hypre_TFree(temp_PData, HYPRE_MEMORY_HOST);
+
 
    return 0;
 }
