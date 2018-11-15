@@ -663,24 +663,54 @@ AgglomeratedProcessorsLocalResidualAllgather(hypre_ParAMGData *amg_data)
    hypre_ParCompGrid **compGrid = hypre_ParAMGDataCompGrid(amg_data);
    hypre_ParCompGridCommPkg *compGridCommPkg = hypre_ParAMGDataCompGridCommPkg(amg_data);
    HYPRE_Int transition_level = hypre_ParCompGridCommPkgTransitionLevel(compGridCommPkg);
-   HYPRE_Int level;
+   HYPRE_Int level, i, j, proc;
 
    for (level = 0; level < transition_level; level++)
    {
       // If a local communicator is stored on this level
       if (hypre_ParCompGridCommPkgAgglomerationComms(compGridCommPkg)[level]) 
       {
-         // Pack up owned residual values from this level down
-         HYPRE_Complex *sendbuf = 
+         // Get comm info
+         MPI_Comm local_comm = hypre_ParCompGridCommPkgAgglomerationComms(compGridCommPkg)[level];
+         HYPRE_Int local_myid, local_num_procs;
+         hypre_MPI_Comm_rank(local_comm, &local_myid);
+         hypre_MPI_Comm_size(local_comm, &local_num_procs);
 
-
-
+         // Count and pack up owned residual values from this level down
+         HYPRE_Int *recvcounts = hypre_CTAlloc(HYPRE_Int, local_num_procs, HYPRE_MEMORY_HOST);
+         for (i = level; i < transition_level; i++)
+         {
+            for (j = 0; j < local_num_procs; j++)
+            {
+               recvcounts[j] += hypre_ParCompGridOwnedBlockStarts(compGrid[i])[j+1] - hypre_ParCompGridOwnedBlockStarts(compGrid[i])[j];
+            }
+         }
+         HYPRE_Int *displs = hypre_CTAlloc(HYPRE_Int, local_num_procs, HYPRE_MEMORY_HOST);
+         for (i = 1; i < local_num_procs; i++) displs[i] = displs[i-1] + recvcounts[i-1];
+         HYPRE_Complex *sendbuf = hypre_CTAlloc(HYPRE_Complex, recvcounts[local_myid], HYPRE_MEMORY_HOST);
+         HYPRE_Int cnt = 0;
+         for (i = level; i < transition_level; i++)
+         {
+            HYPRE_Int start = hypre_ParCompGridOwnedBlockStarts(compGrid[i])[local_myid];
+            HYPRE_Int finish = hypre_ParCompGridOwnedBlockStarts(compGrid[i])[local_myid+1];
+            for (j = start; j < finish; j++) sendbuf[cnt++] = hypre_ParCompGridF(compGrid[i])[j];
+         }
 
          // Do the allgather
-         hypre_MPI_Allgather(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
-                  void *recvbuf, int recvcount, MPI_Datatype recvtype,
-                  hypre_ParCompGridCommPkgAgglomerationComms(compGridCommPkg)[level])
+         HYPRE_Complex *recvbuf = hypre_CTAlloc(HYPRE_Complex, displs[local_num_procs-1] + recvcounts[local_num_procs-1], HYPRE_MEMORY_HOST);
+         hypre_MPI_Allgatherv(sendbuf, recvcounts[local_myid], HYPRE_MPI_COMPLEX, recvbuf, recvcounts, displs, HYPRE_MPI_COMPLEX, local_comm);
 
+         // Unpack values into comp grid
+         cnt = 0;
+         for (proc = 0; proc < local_num_procs; proc++)
+         {
+            for (i = level; i < transition_level; i++)
+            {
+               HYPRE_Int start = hypre_ParCompGridOwnedBlockStarts(compGrid[i])[proc];
+               HYPRE_Int finish = hypre_ParCompGridOwnedBlockStarts(compGrid[i])[proc+1];
+               for (j = start; j < finish; j++) hypre_ParCompGridF(compGrid[i])[j] = recvbuf[cnt++];
+            }
+         }
       }
    }
 
