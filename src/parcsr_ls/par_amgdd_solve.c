@@ -10,7 +10,7 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-#define TEST_RES_COMM 0
+#define TEST_RES_COMM 1
 #define DEBUGGING_MESSAGES 0
 
 #include "_hypre_parcsr_ls.h"
@@ -440,7 +440,7 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
       comm = hypre_ParCSRMatrixComm(A_array[level]);
       num_neighbor_procs = hypre_ParCompGridCommPkgNumProcs(compGridCommPkg)[level];
 
-      if ( (proc_last_index[level] >= proc_first_index[level] && num_neighbor_procs) ) // If there are any owned nodes on this level
+      if ( num_neighbor_procs ) // If there are any owned nodes on this level
       {
 
          // allocate space for the buffers, buffer sizes, requests and status, psiComposite_send, psiComposite_recv, send and recv maps
