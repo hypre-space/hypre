@@ -35,6 +35,9 @@ UnpackResidualBuffer( HYPRE_Int proc, HYPRE_Complex *recv_buffer, HYPRE_Int **re
 HYPRE_Int
 TestResComm(hypre_ParAMGData *amg_data);
 
+HYPRE_Int
+AgglomeratedProcessorsLocalResidualAllgather(hypre_ParAMGData *amg_data);
+
 HYPRE_Int 
 hypre_BoomerAMGDDSolve( void *amg_vdata,
                                  hypre_ParCSRMatrix *A,
@@ -420,6 +423,9 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
       hypre_MPI_Allgatherv(residual_data, hypre_VectorSize(residual_local), HYPRE_MPI_COMPLEX, hypre_ParCompGridF(compGrid[transition_level]), hypre_ParCompGridCommPkgTransitionResRecvSizes(compGridCommPkg), hypre_ParCompGridCommPkgTransitionResRecvDisps(compGridCommPkg), HYPRE_MPI_COMPLEX, hypre_MPI_COMM_WORLD);
    }
 
+   // Do local allgathers for agglomerated procsesors
+   AgglomeratedProcessorsLocalResidualAllgather(amg_data);
+
    #if DEBUGGING_MESSAGES
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
    if (myid == 0) hypre_printf("Entering loop over levels in residual communication on all ranks\n");
@@ -649,4 +655,34 @@ TestResComm(hypre_ParAMGData *amg_data)
    }
 
    return test_failed;
+}
+
+HYPRE_Int
+AgglomeratedProcessorsLocalResidualAllgather(hypre_ParAMGData *amg_data)
+{
+   hypre_ParCompGrid **compGrid = hypre_ParAMGDataCompGrid(amg_data);
+   hypre_ParCompGridCommPkg *compGridCommPkg = hypre_ParAMGDataCompGridCommPkg(amg_data);
+   HYPRE_Int transition_level = hypre_ParCompGridCommPkgTransitionLevel(compGridCommPkg);
+   HYPRE_Int level;
+
+   for (level = 0; level < transition_level; level++)
+   {
+      // If a local communicator is stored on this level
+      if (hypre_ParCompGridCommPkgAgglomerationComms(compGridCommPkg)[level]) 
+      {
+         // Pack up owned residual values from this level down
+         HYPRE_Complex *sendbuf = 
+
+
+
+
+         // Do the allgather
+         hypre_MPI_Allgather(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
+                  void *recvbuf, int recvcount, MPI_Datatype recvtype,
+                  hypre_ParCompGridCommPkgAgglomerationComms(compGridCommPkg)[level])
+
+      }
+   }
+
+   return 0;
 }

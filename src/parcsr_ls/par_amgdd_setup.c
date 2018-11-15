@@ -249,6 +249,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    hypre_ParCompGridCommPkgProcs(compGridCommPkg) = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
    hypre_ParCompGridCommPkgPartitions(compGridCommPkg) = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
    hypre_ParCompGridCommPkgProcPartitions(compGridCommPkg) = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
+   hypre_ParCompGridCommPkgAgglomerationComms(compGridCommPkg) = hypre_CTAlloc(MPI_Comm, num_levels, HYPRE_MEMORY_HOST);
    hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg) = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
    hypre_ParCompGridCommPkgSendMapElmts(compGridCommPkg) = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
    hypre_ParCompGridCommPkgGhostMarker(compGridCommPkg) = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
@@ -808,14 +809,6 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
       hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
 
 
-      // !!! Debug
-      HYPRE_Int error_code;
-      error_code = TestCompGrids1(compGrid, num_levels, transition_level, padding, num_ghost_layers, level, 0);
-      if (error_code)
-      {
-         printf("TestCompGrids1 failed! Rank %d, level %d\n", myid, level);
-      }
-      CheckCompGridLocalIndices(amg_data);
 
       // if (myid == 2)
       // {
@@ -829,7 +822,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
 
 
       #if DEBUG_COMP_GRID
-      // CheckCompGridLocalIndices(amg_data);
+      CheckCompGridLocalIndices(amg_data);
       HYPRE_Int error_code;
       error_code = TestCompGrids1(compGrid, num_levels, transition_level, padding, num_ghost_layers, level, 0);
       if (error_code)
@@ -2003,6 +1996,7 @@ AgglomerateProcessors(hypre_ParAMGData *amg_data, hypre_ParCompGridCommPkg *comp
    HYPRE_Int myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
    hypre_MPI_Comm_split(previous_comm, partition, myid, &local_comm);
+   hypre_ParCompGridCommPkgAgglomerationComms(compGridCommPkg)[current_level] = local_comm;
 
    // Allgather grid info inside the local communicator
    HYPRE_Int *proc_starts = AllgatherCoarseLevels(amg_data, local_comm, current_level, transition_level, NULL, 1);

@@ -40,7 +40,7 @@ typedef struct
    HYPRE_Int         *transition_res_recv_disps; // if useing the transition level, these are the recv displacements for the Allgatherv
 	HYPRE_Int 			*num_procs; // number of neighbor procs to communicate with
 	HYPRE_Int 			*num_partitions; // number of neighbor paritions to communicate with
-   HYPRE_Int         *agglomeration_comms; // local communicators for processor agglomeration on different levels
+   MPI_Comm          *agglomeration_comms; // local communicators for processor agglomeration on different levels
 
    HYPRE_Int         **procs; // list of neighbor procs
    HYPRE_Int         **partitions; // list of neighbor partitions
