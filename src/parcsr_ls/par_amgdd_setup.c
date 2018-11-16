@@ -22,7 +22,7 @@
 #define DEBUGGING_MESSAGES 0 // if true, prints a bunch of messages to the screen to let you know where in the algorithm you are
 
 HYPRE_Int
-SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int level, HYPRE_Int padding, HYPRE_Int num_ghost_layers, HYPRE_Int *communication_cost, HYPRE_Int use_multiple_allgather );
+SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int level, HYPRE_Int padding, HYPRE_Int num_ghost_layers, HYPRE_Int *communication_cost );
 
 HYPRE_Int
 FindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A, HYPRE_Int ***add_flag,
@@ -139,8 +139,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
                         hypre_ParVector *x, 
                         HYPRE_Int *timers, 
                         HYPRE_Int use_barriers,
-                        HYPRE_Int *communication_cost, 
-                        HYPRE_Int use_multiple_allgather )
+                        HYPRE_Int *communication_cost )
 {
 
    // communication_cost measures # messages and comm volume from the perspective of THIS processor and takes the form:
@@ -304,9 +303,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    if (timers) hypre_BeginTiming(timers[0]);
    for (level = 0; level < transition_level; level++)
    {
-      // !!! Turning off use_multiple_allgatherv for now
-      SetupNearestProcessorNeighbors(A_array[level], compGrid[level], compGridCommPkg, level, padding, num_ghost_layers, communication_cost, 0);
-      // SetupNearestProcessorNeighbors(A_array[level], compGrid[level], compGridCommPkg, level, padding, num_ghost_layers, communication_cost, use_multiple_allgather);
+      SetupNearestProcessorNeighbors(A_array[level], compGrid[level], compGridCommPkg, level, padding, num_ghost_layers, communication_cost);   
    }
 
 
@@ -1004,7 +1001,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
 
 
 HYPRE_Int
-SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int level, HYPRE_Int padding, HYPRE_Int num_ghost_layers, HYPRE_Int *communication_cost, HYPRE_Int use_multiple_allgather )
+SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int level, HYPRE_Int padding, HYPRE_Int num_ghost_layers, HYPRE_Int *communication_cost )
 {
    HYPRE_Int               i,j,cnt;
    HYPRE_Int               num_nodes = hypre_ParCSRMatrixNumRows(A);
@@ -1844,12 +1841,14 @@ UnpackCoarseLevels(hypre_ParAMGData *amg_data, MPI_Comm comm, HYPRE_Int *recv_in
          if (level != coarse_level-1) hypre_ParCompGridSetSize(compGrid, global_num_nodes[level - fine_level], global_A_nnz[level - fine_level], global_P_nnz[level - fine_level], 2, 2);
          else hypre_ParCompGridSetSize(compGrid, global_num_nodes[level - fine_level], global_A_nnz[level - fine_level], global_P_nnz[level - fine_level], 2, 1);
          hypre_ParCompGridNumOwnedBlocks(compGrid) = num_procs;
+         if (hypre_ParCompGridOwnedBlockStarts(compGrid)) hypre_TFree(hypre_ParCompGridOwnedBlockStarts(compGrid), HYPRE_MEMORY_HOST);
          hypre_ParCompGridOwnedBlockStarts(compGrid) = hypre_CTAlloc(HYPRE_Int, num_procs+1, HYPRE_MEMORY_HOST);
       }
       else
       {
          hypre_ParCompGridSetSize(compGrid, global_num_nodes[level - fine_level], global_A_nnz[level - fine_level], global_P_nnz[level - fine_level], 1, 0);
          hypre_ParCompGridNumOwnedBlocks(compGrid) = 1;
+         if (hypre_ParCompGridOwnedBlockStarts(compGrid)) hypre_TFree(hypre_ParCompGridOwnedBlockStarts(compGrid), HYPRE_MEMORY_HOST);
          hypre_ParCompGridOwnedBlockStarts(compGrid) = hypre_CTAlloc(HYPRE_Int, 2, HYPRE_MEMORY_HOST);
          hypre_ParCompGridOwnedBlockStarts(compGrid)[0] = 0;
          hypre_ParCompGridOwnedBlockStarts(compGrid)[1] = hypre_ParCSRMatrixNumRows(hypre_ParAMGDataAArray(amg_data)[level]);   
@@ -2749,7 +2748,7 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
                send_flag[current_level][partition][level][cnt++] = j;
             }
          }
-
+         hypre_TFree(insert_owned_positions, HYPRE_MEMORY_HOST);
 
 
          // Check the send flag generated above against the send flags on previous outer levels
@@ -3789,6 +3788,10 @@ TestCompGrids1(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int tra
          }
       }
    }
+
+   // Clean up memory
+   for (level = 0; level < num_levels; level++) if (add_flag[level]) hypre_TFree(add_flag[level], HYPRE_MEMORY_HOST);
+   hypre_TFree(add_flag, HYPRE_MEMORY_HOST);
 
    return test_failed;
 }

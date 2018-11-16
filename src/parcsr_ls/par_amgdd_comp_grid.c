@@ -62,6 +62,11 @@ hypre_ParCompGridDestroy ( hypre_ParCompGrid *compGrid )
 {
    HYPRE_Int      i;
    
+   if (hypre_ParCompGridOwnedBlockStarts(compGrid))
+   {
+      hypre_TFree(hypre_ParCompGridOwnedBlockStarts(compGrid), HYPRE_MEMORY_HOST);
+   }
+
    if (hypre_ParCompGridU(compGrid))
    {
       hypre_TFree(hypre_ParCompGridU(compGrid), HYPRE_MEMORY_HOST);
@@ -1259,6 +1264,11 @@ hypre_ParCompGridCommPkgDestroy( hypre_ParCompGridCommPkg *compGridCommPkg )
          hypre_TFree(hypre_ParCompGridCommPkgGhostMarker(compGridCommPkg)[i], HYPRE_MEMORY_HOST);
       }
       hypre_TFree(hypre_ParCompGridCommPkgGhostMarker(compGridCommPkg), HYPRE_MEMORY_HOST);
+   }
+
+   if ( hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg) )
+   {
+      hypre_TFree(hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg), HYPRE_MEMORY_HOST);
    }
 
    if ( hypre_ParCompGridCommPkgPartitions(compGridCommPkg) )

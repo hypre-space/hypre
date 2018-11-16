@@ -1941,7 +1941,7 @@ HYPRE_Int hypre_BoomerAMGDD_Cycle( void *amg_vdata );
 HYPRE_Int hypre_BoomerAMGDDResidualCommunication( void *amg_vdata );
 
 /* par_amgdd_setup.c */
-HYPRE_Int hypre_BoomerAMGDDSetup(  void *amg_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *b, hypre_ParVector *x, HYPRE_Int *timers, HYPRE_Int use_barriers, HYPRE_Int *bandwidth_cost, HYPRE_Int use_multiple_allgather );
+HYPRE_Int hypre_BoomerAMGDDSetup(  void *amg_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *b, hypre_ParVector *x, HYPRE_Int *timers, HYPRE_Int use_barriers, HYPRE_Int *bandwidth_cost );
 
 /* par_amgdd_test.c */
 HYPRE_Int hypre_BoomerAMGDDTestSolve( void *amg_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u);
