@@ -23,7 +23,7 @@
 
 
 HYPRE_Int
-SetRelaxMarker(hypre_ParCompGrid *compGrid, hypre_Vector *relax_marker, HYPRE_Int proc);
+SetRelaxMarker(hypre_ParCompGrid *compGrid, hypre_ParVector *relax_marker, HYPRE_Int proc);
 
 HYPRE_Real
 GetTestCompositeResidual(hypre_ParCSRMatrix *A, hypre_ParVector *U_comp, hypre_ParVector *res, hypre_Vector *relax_marker, HYPRE_Int proc);
@@ -102,7 +102,7 @@ hypre_BoomerAMGDDTestSolve( void               *amg_vdata,
       relax_marker[level] = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD, hypre_ParVectorGlobalSize(U_comp), hypre_ParVectorPartitioning(U_comp));
       hypre_ParVectorInitialize(relax_marker[level]);
       // Now set the values according to the relevant comp grid
-      if (level < transition_level) SetRelaxMarker(hypre_ParAMGDataCompGrid(amg_data)[level], hypre_ParVectorLocalVector(relax_marker[level]), proc);
+      if (level < transition_level) SetRelaxMarker(hypre_ParAMGDataCompGrid(amg_data)[level], relax_marker[level], proc);
       else hypre_ParVectorSetConstantValues(relax_marker[level], 1.0);
     }
 
@@ -166,7 +166,7 @@ hypre_BoomerAMGDDTestSolve( void               *amg_vdata,
 }
 
 HYPRE_Int
-SetRelaxMarker(hypre_ParCompGrid *compGrid, hypre_Vector *relax_marker, HYPRE_Int proc)
+SetRelaxMarker(hypre_ParCompGrid *compGrid, hypre_ParVector *relax_marker, HYPRE_Int proc)
 {
   HYPRE_Int i;
   HYPRE_Int myid;
@@ -201,16 +201,13 @@ SetRelaxMarker(hypre_ParCompGrid *compGrid, hypre_Vector *relax_marker, HYPRE_In
   hypre_MPI_Bcast(global_indices, num_nodes, HYPRE_MPI_INT, proc, hypre_MPI_COMM_WORLD);
 
   // Loop over the global indices and mark where to do relaxation
-  HYPRE_Int proc_first_index = hypre_ParCompGridGlobalIndices(compGrid)[0];
-  HYPRE_Int proc_last_index;
-  HYPRE_Int num_owned_nodes = hypre_ParCompGridOwnedBlockStarts(compGrid)[hypre_ParCompGridNumOwnedBlocks(compGrid)];
-  if (num_owned_nodes) proc_last_index = hypre_ParCompGridGlobalIndices(compGrid)[ num_owned_nodes - 1 ];
-  else proc_last_index = proc_first_index - 1;
+  HYPRE_Int proc_first_index = hypre_ParVectorFirstIndex(relax_marker);
+  HYPRE_Int proc_last_index = hypre_ParVectorLastIndex(relax_marker);
   for (i = 0; i < num_nodes; i++)
   {
     if (global_indices[i] >= proc_first_index && global_indices[i] <= proc_last_index)
     {
-      hypre_VectorData(relax_marker)[global_indices[i] - proc_first_index] = 1;
+      hypre_VectorData(hypre_ParVectorLocalVector(relax_marker))[global_indices[i] - proc_first_index] = 1;
     }
   }
 

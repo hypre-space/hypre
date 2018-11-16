@@ -397,14 +397,21 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
    }
 
    // copy new restricted residual into comp grid structure
+   HYPRE_Int local_myid = 0;
    for (level = 0; level < transition_level; level++)
    {
+      // Check for agglomeration level
+      if (hypre_ParCompGridCommPkgAgglomerationComms(compGridCommPkg)[level])
+      {
+         hypre_MPI_Comm_rank(hypre_ParCompGridCommPkgAgglomerationComms(compGridCommPkg)[level], &local_myid);
+      }
+
       // Access the residual data
       residual_local = hypre_ParVectorLocalVector(F_array[level]);
       residual_data = hypre_VectorData(residual_local);
-      for (i = 0; i < hypre_VectorSize(residual_local); i++)
+      for (i = hypre_ParCompGridOwnedBlockStarts(compGrid[level])[local_myid]; i < hypre_ParCompGridOwnedBlockStarts(compGrid[level])[local_myid+1]; i++)
       {
-         hypre_ParCompGridF(compGrid[level])[i] = residual_data[i];
+         hypre_ParCompGridF(compGrid[level])[i] = residual_data[i - hypre_ParCompGridOwnedBlockStarts(compGrid[level])[local_myid]];
       }
    }
 
@@ -424,7 +431,25 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
    }
 
    // Do local allgathers for agglomerated procsesors
+
+
+   // !!! Debug
+   // HYPRE_Complex *res_before = hypre_CTAlloc(HYPRE_Complex, hypre_ParCompGridNumNodes(compGrid[4]), HYPRE_MEMORY_HOST);
+   // for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[4]); i++) res_before[i] = hypre_ParCompGridF(compGrid[4])[i];
+
+
    AgglomeratedProcessorsLocalResidualAllgather(amg_data);
+
+   // !!! Debug
+   // local_myid;
+   // hypre_MPI_Comm_rank(hypre_ParCompGridCommPkgAgglomerationComms(compGridCommPkg)[4], &local_myid);
+   // for (i = hypre_ParCompGridOwnedBlockStarts(compGrid[4])[local_myid]; i < hypre_ParCompGridOwnedBlockStarts(compGrid[4])[local_myid+1]; i++)
+   // {
+   //    if (hypre_ParCompGridF(compGrid[4])[i] != res_before[i]) printf("Changed own residual!!!\n");
+   // }
+
+
+
 
    #if DEBUGGING_MESSAGES
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
@@ -662,7 +687,9 @@ AgglomeratedProcessorsLocalResidualAllgather(hypre_ParAMGData *amg_data)
 {
    hypre_ParCompGrid **compGrid = hypre_ParAMGDataCompGrid(amg_data);
    hypre_ParCompGridCommPkg *compGridCommPkg = hypre_ParAMGDataCompGridCommPkg(amg_data);
+   HYPRE_Int num_levels = hypre_ParAMGDataNumLevels(amg_data);
    HYPRE_Int transition_level = hypre_ParCompGridCommPkgTransitionLevel(compGridCommPkg);
+   if (transition_level < 0) transition_level = num_levels;
    HYPRE_Int level, i, j, proc;
 
    for (level = 0; level < transition_level; level++)
