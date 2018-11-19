@@ -104,6 +104,9 @@ hypre_BoomerAMGDDTestSolve( void               *amg_vdata,
       hypre_ParVectorSetPartitioningOwner(relax_marker[level],0);
       hypre_ParVectorInitialize(relax_marker[level]);
       // Now set the values according to the relevant comp grid
+      // !!! Debug
+      // if (level == 0) SetRelaxMarker(hypre_ParAMGDataCompGrid(amg_data)[level], relax_marker[level], proc);
+      // else hypre_ParVectorSetConstantValues(relax_marker[level], 0.0);
       if (level < transition_level) SetRelaxMarker(hypre_ParAMGDataCompGrid(amg_data)[level], relax_marker[level], proc);
       else hypre_ParVectorSetConstantValues(relax_marker[level], 1.0);
     }
@@ -181,6 +184,14 @@ SetRelaxMarker(hypre_ParCompGrid *compGrid, hypre_ParVector *relax_marker, HYPRE
   HYPRE_Int myid;
   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
 
+  // Check whether the global indices are still around
+  if (!hypre_ParCompGridGlobalIndices(compGrid))
+  {
+    if (myid == 0) printf("Error: need to recompile with debugging macros set (in particular, DEBUG_COMP_GRID in par_amgdd_setup.c).\n");
+    hypre_MPI_Finalize();
+    exit(0);
+  }
+
   // Broadcast the number of nodes in the composite gird on this level for the root proc
   HYPRE_Int num_nodes = 0;
   HYPRE_Int is_real;
@@ -212,6 +223,12 @@ SetRelaxMarker(hypre_ParCompGrid *compGrid, hypre_ParVector *relax_marker, HYPRE
   // Loop over the global indices and mark where to do relaxation
   HYPRE_Int proc_first_index = hypre_ParVectorFirstIndex(relax_marker);
   HYPRE_Int proc_last_index = hypre_ParVectorLastIndex(relax_marker);
+  // !!! Debug
+  // if (myid == 0)
+  // {
+  //   printf("\nproc_first_index = %d, owned block start = %d\nproc_last_index = %d, owned block start = %d\n\n", 
+  //     proc_first_index, hypre_ParCompGridGlobalIndices(compGrid)[hypre_ParCompGridOwnedBlockStarts(compGrid)[0]], proc_last_index, hypre_ParCompGridGlobalIndices(compGrid)[hypre_ParCompGridOwnedBlockStarts(compGrid)[1]-1]);
+  // }
   for (i = 0; i < num_nodes; i++)
   {
     if (global_indices[i] >= proc_first_index && global_indices[i] <= proc_last_index)
@@ -964,10 +981,11 @@ TestBoomerAMGCycle( void              *amg_vdata,
 
 
     // This is before smoothing occurs, so save a copy of U
-    hypre_ParVector    *U_copy = hypre_ParVectorCloneShallow(U_array[level]);
-    // U_copy = hypre_ParVectorCreate(comm, hypre_ParVectorGlobalSize(U_array[level]),hypre_ParVectorPartitioning(U_array[level]));
-    // hypre_ParVectorInitialize(U_copy);
-    // hypre_ParVectorCopy( U_array[level], U_copy );
+    // hypre_ParVector    *U_copy = hypre_ParVectorCloneShallow(U_array[level]);
+    hypre_ParVector *U_copy = hypre_ParVectorCreate(comm, hypre_ParVectorGlobalSize(U_array[level]),hypre_ParVectorPartitioning(U_array[level]));
+    hypre_ParVectorInitialize(U_copy);
+    hypre_ParVectorSetPartitioningOwner(U_copy, 0);
+    hypre_ParVectorCopy( U_array[level], U_copy );
 
 
 

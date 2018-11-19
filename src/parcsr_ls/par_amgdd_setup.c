@@ -368,14 +368,15 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    hypre_TFree(local_stencil, HYPRE_MEMORY_HOST);
 
 
-   // for (level = 0; level < transition_level; level++)
-   // {
-   //    if (global_stencil[level] > 2*global_stencil[0])
-   //    {
-   //       AgglomerateProcessors(amg_data, compGridCommPkg, level, global_stencil);
-   //       break;
-   //    }
-   // }
+   for (level = 0; level < transition_level; level++)
+   {
+      if (global_stencil[level] > 2*global_stencil[0])
+      {
+         if (myid == 0) printf("Agglomerating processors on level %d\n", level); 
+         AgglomerateProcessors(amg_data, compGridCommPkg, level, global_stencil);
+         break;
+      }
+   }
 
    hypre_TFree(global_stencil, HYPRE_MEMORY_HOST);
 
@@ -966,6 +967,15 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
       test_failed = 1;
    }
    #endif
+
+   // !!! Debug
+   for (level = 0; level < 1; level++)
+   {
+      hypre_sprintf(filename, "outputs/CompGrids/setupCompGridRank%dLevel%d.txt", myid, level);
+      hypre_ParCompGridDebugPrint( compGrid[level], filename );
+   }
+
+
 
    #if DEBUG_COMP_GRID == 2
    for (level = 0; level < num_levels; level++)
