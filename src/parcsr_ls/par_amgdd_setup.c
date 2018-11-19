@@ -17,7 +17,7 @@
 #include "par_amg.h"
 #include "par_csr_block_matrix.h"	
 
-#define DEBUG_COMP_GRID 0 // if true, runs some tests, prints out what is stored in the comp grids for each processor to a file
+#define DEBUG_COMP_GRID 1 // if true, runs some tests, prints out what is stored in the comp grids for each processor to a file
 #define DEBUG_PROC_NEIGHBORS 0 // if true, dumps info on the add flag structures that determine nearest processor neighbors 
 #define DEBUGGING_MESSAGES 0 // if true, prints a bunch of messages to the screen to let you know where in the algorithm you are
 
@@ -44,13 +44,13 @@ HYPRE_Int
 FindTransitionLevel(hypre_ParAMGData *amg_data);
 
 HYPRE_Int*
-AllgatherCoarseLevels(hypre_ParAMGData *amg_data, MPI_Comm comm, HYPRE_Int fine_level, HYPRE_Int coarse_level, HYPRE_Int *communication_cost, HYPRE_Int get_full_comp_info);
+AllgatherCoarseLevels(hypre_ParAMGData *amg_data, MPI_Comm comm, HYPRE_Int fine_level, HYPRE_Int coarse_level, HYPRE_Int *communication_cost, HYPRE_Int agglomerating_levels);
 
 HYPRE_Int 
-PackCoarseLevels(hypre_ParAMGData *amg_data, HYPRE_Int fine_level, HYPRE_Int coarse_level, HYPRE_Int **int_buffer, HYPRE_Complex **complex_buffer, HYPRE_Int *buffer_sizes, HYPRE_Int get_full_comp_info);
+PackCoarseLevels(hypre_ParAMGData *amg_data, HYPRE_Int fine_level, HYPRE_Int coarse_level, HYPRE_Int **int_buffer, HYPRE_Complex **complex_buffer, HYPRE_Int *buffer_sizes, HYPRE_Int agglomerating_levels);
 
 HYPRE_Int 
-UnpackCoarseLevels(hypre_ParAMGData *amg_data, MPI_Comm comm, HYPRE_Int *recv_int_buffer, HYPRE_Complex *recv_complex_buffer, HYPRE_Int fine_level, HYPRE_Int coarse_level, HYPRE_Int get_full_comp_info);
+UnpackCoarseLevels(hypre_ParAMGData *amg_data, MPI_Comm comm, HYPRE_Int *recv_int_buffer, HYPRE_Complex *recv_complex_buffer, HYPRE_Int fine_level, HYPRE_Int coarse_level, HYPRE_Int agglomerating_levels);
 
 
 
@@ -319,16 +319,15 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    }
    hypre_TFree(local_stencil, HYPRE_MEMORY_HOST);
 
-
-   for (level = 0; level < transition_level; level++)
-   {
-      if (global_stencil[level] > 2*global_stencil[0])
-      {
-         if (myid == 0) printf("Agglomerating processors on level %d\n", level); 
-         AgglomerateProcessors(amg_data, compGridCommPkg, level, global_stencil, communication_cost);
-         break;
-      }
-   }
+   // for (level = 0; level < transition_level; level++)
+   // {
+   //    if (global_stencil[level] > 2*global_stencil[0])
+   //    {
+   //       if (myid == 0) printf("Agglomerating processors on level %d\n", level); 
+   //       AgglomerateProcessors(amg_data, compGridCommPkg, level, global_stencil, communication_cost);
+   //       break;
+   //    }
+   // }
 
    hypre_TFree(global_stencil, HYPRE_MEMORY_HOST);
 
@@ -1372,7 +1371,7 @@ FindTransitionLevel(hypre_ParAMGData *amg_data)
 }
 
 HYPRE_Int*
-AllgatherCoarseLevels(hypre_ParAMGData *amg_data, MPI_Comm comm, HYPRE_Int fine_level, HYPRE_Int coarse_level, HYPRE_Int *communication_cost, HYPRE_Int get_full_comp_info)
+AllgatherCoarseLevels(hypre_ParAMGData *amg_data, MPI_Comm comm, HYPRE_Int fine_level, HYPRE_Int coarse_level, HYPRE_Int *communication_cost, HYPRE_Int agglomerating_levels)
 {
    // Get MPI comm size
    HYPRE_Int   num_procs;
@@ -1382,7 +1381,7 @@ AllgatherCoarseLevels(hypre_ParAMGData *amg_data, MPI_Comm comm, HYPRE_Int fine_
    HYPRE_Int *buffer_sizes = hypre_CTAlloc(HYPRE_Int, 2, HYPRE_MEMORY_HOST);
    HYPRE_Int *send_int_buffer;
    HYPRE_Complex *send_complex_buffer;
-   PackCoarseLevels(amg_data, fine_level, coarse_level, &send_int_buffer, &send_complex_buffer, buffer_sizes, get_full_comp_info);
+   PackCoarseLevels(amg_data, fine_level, coarse_level, &send_int_buffer, &send_complex_buffer, buffer_sizes, agglomerating_levels);
 
    // Do an allreduce to find the maximum buffer size
    HYPRE_Int *global_buffer_sizes = hypre_CTAlloc(HYPRE_Int, 2*num_procs, HYPRE_MEMORY_HOST);
@@ -1426,7 +1425,7 @@ AllgatherCoarseLevels(hypre_ParAMGData *amg_data, MPI_Comm comm, HYPRE_Int fine_
    }
 
    // Unpack the recv buffer and generate the comp grid structures for the coarse levels
-   UnpackCoarseLevels(amg_data, comm, recv_int_buffer, recv_complex_buffer, fine_level, coarse_level, get_full_comp_info);
+   UnpackCoarseLevels(amg_data, comm, recv_int_buffer, recv_complex_buffer, fine_level, coarse_level, agglomerating_levels);
 
    // Get processor starts info
    HYPRE_Int num_comm_levels = coarse_level - fine_level;
@@ -1447,7 +1446,7 @@ AllgatherCoarseLevels(hypre_ParAMGData *amg_data, MPI_Comm comm, HYPRE_Int fine_
          HYPRE_Int A_nnz = recv_int_buffer[offset++];
          HYPRE_Int P_nnz;
          if (level != hypre_ParAMGDataNumLevels(amg_data)-1) P_nnz = recv_int_buffer[offset++];
-         if (get_full_comp_info && level != coarse_level-1) offset += num_nodes;
+         if (agglomerating_levels && level != coarse_level-1) offset += num_nodes;
          offset += num_nodes + A_nnz;
          if (level != hypre_ParAMGDataNumLevels(amg_data)-1) offset += num_nodes + P_nnz;
       }
@@ -1469,7 +1468,7 @@ AllgatherCoarseLevels(hypre_ParAMGData *amg_data, MPI_Comm comm, HYPRE_Int fine_
 }
 
 HYPRE_Int
-PackCoarseLevels(hypre_ParAMGData *amg_data, HYPRE_Int fine_level, HYPRE_Int coarse_level, HYPRE_Int **int_buffer, HYPRE_Complex **complex_buffer, HYPRE_Int *buffer_sizes, HYPRE_Int get_full_comp_info)
+PackCoarseLevels(hypre_ParAMGData *amg_data, HYPRE_Int fine_level, HYPRE_Int coarse_level, HYPRE_Int **int_buffer, HYPRE_Complex **complex_buffer, HYPRE_Int *buffer_sizes, HYPRE_Int agglomerating_levels)
 {
    // The buffers will have the following forms:
    // int_buffer = [ [level], (fine_level)           level = [ global index start,
@@ -1507,7 +1506,7 @@ PackCoarseLevels(hypre_ParAMGData *amg_data, HYPRE_Int fine_level, HYPRE_Int coa
       // Increment the buffer size appropriately
       buffer_sizes[0] += 3;
       buffer_sizes[0] += num_nodes + A_nnz;
-      if (get_full_comp_info && level != coarse_level-1) buffer_sizes[0] += num_nodes;
+      if (agglomerating_levels && level != coarse_level-1) buffer_sizes[0] += num_nodes;
       if (level != num_levels-1) buffer_sizes[0] += 1 + num_nodes + P_nnz;
       buffer_sizes[1] += A_nnz + P_nnz;
    }
@@ -1537,8 +1536,8 @@ PackCoarseLevels(hypre_ParAMGData *amg_data, HYPRE_Int fine_level, HYPRE_Int coa
       if (level != coarse_level-1)
       {
          // If desired, pack the coarse index info
-         if (get_full_comp_info && !hypre_ParAMGDataCompGrid(amg_data)[level]) printf("Error: in order to send coarse indices, need to setup comp grid first.\n");
-         else if (get_full_comp_info)
+         if (agglomerating_levels && !hypre_ParAMGDataCompGrid(amg_data)[level]) printf("Error: in order to send coarse indices, need to setup comp grid first.\n");
+         else if (agglomerating_levels)
          {
             hypre_ParCompGrid *compGrid = hypre_ParAMGDataCompGrid(amg_data)[level];
             for (i = 0; i < num_nodes; i++) (*int_buffer)[int_cnt++] = hypre_ParCompGridCoarseGlobalIndices(compGrid)[i];
@@ -1589,7 +1588,7 @@ PackCoarseLevels(hypre_ParAMGData *amg_data, HYPRE_Int fine_level, HYPRE_Int coa
 }
 
 HYPRE_Int
-UnpackCoarseLevels(hypre_ParAMGData *amg_data, MPI_Comm comm, HYPRE_Int *recv_int_buffer, HYPRE_Complex *recv_complex_buffer, HYPRE_Int fine_level, HYPRE_Int coarse_level, HYPRE_Int get_full_comp_info)
+UnpackCoarseLevels(hypre_ParAMGData *amg_data, MPI_Comm comm, HYPRE_Int *recv_int_buffer, HYPRE_Complex *recv_complex_buffer, HYPRE_Int fine_level, HYPRE_Int coarse_level, HYPRE_Int agglomerating_levels)
 {
    // Get MPI comm size
    HYPRE_Int   num_procs;
@@ -1629,7 +1628,7 @@ UnpackCoarseLevels(hypre_ParAMGData *amg_data, MPI_Comm comm, HYPRE_Int *recv_in
          if (level != num_levels-1) global_P_nnz[level - fine_level] += P_nnz;
 
          // Increment counter appropriately
-         if (get_full_comp_info && level != coarse_level-1) int_cnt += num_nodes;
+         if (agglomerating_levels && level != coarse_level-1) int_cnt += num_nodes;
          int_cnt += num_nodes + A_nnz;
          if (level != num_levels-1) int_cnt += num_nodes + P_nnz;
       }
@@ -1647,7 +1646,7 @@ UnpackCoarseLevels(hypre_ParAMGData *amg_data, MPI_Comm comm, HYPRE_Int *recv_in
 
 
       hypre_ParAMGDataCompGrid(amg_data)[level] = compGrid;
-      if (get_full_comp_info)
+      if (agglomerating_levels)
       {
          if (level != coarse_level-1) hypre_ParCompGridSetSize(compGrid, global_num_nodes[level - fine_level], global_A_nnz[level - fine_level], global_P_nnz[level - fine_level], 2, 2);
          else hypre_ParCompGridSetSize(compGrid, global_num_nodes[level - fine_level], global_A_nnz[level - fine_level], global_P_nnz[level - fine_level], 2, 1);
@@ -1703,7 +1702,7 @@ UnpackCoarseLevels(hypre_ParAMGData *amg_data, MPI_Comm comm, HYPRE_Int *recv_in
          if (level != num_levels-1) P_nnz = recv_int_buffer[int_cnt++];
 
          // If setting up full composite grid information
-         if (get_full_comp_info)
+         if (agglomerating_levels)
          {
             hypre_ParCompGridOwnedBlockStarts(compGrid)[proc+1] = hypre_ParCompGridOwnedBlockStarts(compGrid)[proc] + num_nodes;
             
@@ -1726,7 +1725,7 @@ UnpackCoarseLevels(hypre_ParAMGData *amg_data, MPI_Comm comm, HYPRE_Int *recv_in
             globalRowCnt++;
          }
          // Read in A col indices
-         if (get_full_comp_info)
+         if (agglomerating_levels)
          {
             for (i = 0; i < A_nnz; i++)
             {
@@ -1777,8 +1776,11 @@ UnpackCoarseLevels(hypre_ParAMGData *amg_data, MPI_Comm comm, HYPRE_Int *recv_in
       }
    }
 
-   hypre_ParCompGridCommPkgTransitionResRecvDisps(hypre_ParAMGDataCompGridCommPkg(amg_data)) = transition_res_recv_disps;
-   hypre_ParCompGridCommPkgTransitionResRecvSizes(hypre_ParAMGDataCompGridCommPkg(amg_data)) = transition_res_recv_sizes;
+   if (!agglomerating_levels)
+   {
+      hypre_ParCompGridCommPkgTransitionResRecvDisps(hypre_ParAMGDataCompGridCommPkg(amg_data)) = transition_res_recv_disps;
+      hypre_ParCompGridCommPkgTransitionResRecvSizes(hypre_ParAMGDataCompGridCommPkg(amg_data)) = transition_res_recv_sizes;
+   }
 
    hypre_TFree(global_num_nodes, HYPRE_MEMORY_HOST);
    hypre_TFree(global_A_nnz, HYPRE_MEMORY_HOST);
@@ -3714,7 +3716,7 @@ CheckCompGridLocalIndices(hypre_ParAMGData *amg_data)
    HYPRE_Int myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
 
-   for (level = 0; level < num_levels; level++)
+   for (level = 0; level < transition_level; level++)
    {
       HYPRE_Int i;
       HYPRE_Int num_nodes = hypre_ParCompGridNumNodes(compGrid[level]);

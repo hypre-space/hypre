@@ -10,7 +10,7 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-#define TEST_RES_COMM 0
+#define TEST_RES_COMM 1
 #define DEBUGGING_MESSAGES 0
 
 #include "_hypre_parcsr_ls.h"
@@ -426,12 +426,20 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
    {
       residual_local = hypre_ParVectorLocalVector(F_array[transition_level]);
       residual_data = hypre_VectorData(residual_local);
-      
-      hypre_MPI_Allgatherv(residual_data, hypre_VectorSize(residual_local), HYPRE_MPI_COMPLEX, hypre_ParCompGridF(compGrid[transition_level]), hypre_ParCompGridCommPkgTransitionResRecvSizes(compGridCommPkg), hypre_ParCompGridCommPkgTransitionResRecvDisps(compGridCommPkg), HYPRE_MPI_COMPLEX, hypre_MPI_COMM_WORLD);
+
+      hypre_MPI_Allgatherv(residual_data, 
+         hypre_VectorSize(residual_local), 
+         HYPRE_MPI_COMPLEX, 
+         hypre_ParCompGridF(compGrid[transition_level]), 
+         hypre_ParCompGridCommPkgTransitionResRecvSizes(compGridCommPkg), 
+         hypre_ParCompGridCommPkgTransitionResRecvDisps(compGridCommPkg), 
+         HYPRE_MPI_COMPLEX, 
+         hypre_MPI_COMM_WORLD);
    }
 
    // Do local allgathers for agglomerated procsesors
    AgglomeratedProcessorsLocalResidualAllgather(amg_data);
+
 
    #if DEBUGGING_MESSAGES
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
