@@ -281,10 +281,6 @@ hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, H
 
    HYPRE_Int i,j,k,cnt,level;
 
-   // !!! Debug
-   HYPRE_Int myid;
-   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
-
    // Clean up memory for things we don't need anymore
    for (level = 0; level < transition_level; level++)
    {
@@ -328,12 +324,6 @@ hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, H
                {
                   if (hypre_ParCompGridPColInd(compGrid[level-1])[k] >= 0)
                   {
-                     // !!! Debug
-                     // if (hypre_ParCompGridPColInd(compGrid[level-1])[k] >= hypre_ParCompGridNumNodes(compGrid[level])) 
-                     //    printf("Rank %d, level %d, P col ind points out of bounds. Col ind = %d, num nodes = %d\n", 
-                     //       myid, level-1, hypre_ParCompGridPColInd(compGrid[level-1])[k], hypre_ParCompGridNumNodes(compGrid[level]));
-                     
-
                      hypre_ParCompGridCoarseResidualMarker(compGrid[level])[ hypre_ParCompGridPColInd(compGrid[level-1])[k] ] = 1; // Mark coarse dofs that we don't want to restrict to from fine grid
                   }
                }
@@ -572,16 +562,7 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *num
                // otherwise find local index via binary search
                if (local_index < 0)
                {
-                  // // !!! Debug
-                  // if (global_index == 1157 && myid == 39)
-                  //    printf("global_index = %d, about to binary search\n", global_index);
-
                   local_index = hypre_ParCompGridLocalIndexBinarySearch(compGrid[level], global_index, 0);
-
-                  // !!! Debug
-                  // if (global_index == 1157 && myid == 39)
-                  //    printf("global_index = %d, after search, local index = %d\n", global_index, local_index);
-
                   if (local_index == -1) local_index = -global_index-1;
                }
                hypre_ParCompGridAColInd(compGrid[level])[j] = local_index;
@@ -649,11 +630,6 @@ HYPRE_Int hypre_ParCompGridSetupLocalIndicesP( hypre_ParCompGrid **compGrid, HYP
 {
    HYPRE_Int                  i,j,level,global_index,first,last;
 
-   // !!! Debug
-   HYPRE_Int print_this = 1;
-   HYPRE_Int myid;
-   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
-
    for (level = 0; level < transition_level-1; level++)
    {
       HYPRE_Int num_owned_blocks = hypre_ParCompGridNumOwnedBlocks(compGrid[level+1]);
@@ -679,16 +655,6 @@ HYPRE_Int hypre_ParCompGridSetupLocalIndicesP( hypre_ParCompGrid **compGrid, HYP
          // Otherwise, binary search
          if (hypre_ParCompGridPColInd(compGrid[level])[i] < 0) hypre_ParCompGridPColInd(compGrid[level])[i] = hypre_ParCompGridLocalIndexBinarySearch(compGrid[level+1], global_index, 0);
          if (hypre_ParCompGridPColInd(compGrid[level])[i] < 0) hypre_ParCompGridPColInd(compGrid[level])[i] = -global_index - 1;
-      
-         // !!! Debug
-         if (print_this && myid == 1 && hypre_ParCompGridPColInd(compGrid[level])[i] > hypre_ParCompGridNumNodes(compGrid[level+1]))
-         {
-            print_this = 0;
-            printf("Rank %d, level %d, assigned local col ind as %d, global_index = %d\n", myid, level, hypre_ParCompGridPColInd(compGrid[level])[i], global_index);
-         }
-
-
-
       }
    }
 
@@ -708,11 +674,6 @@ HYPRE_Int hypre_ParCompGridLocalIndexBinarySearch( hypre_ParCompGrid *compGrid, 
    while (left <= right)
    {
       index = (left + right) / 2;
-
-      // !!! Debug
-      // if (myid == 39 && global_index == 1157) printf("global_index = %d, right = %d, left = %d, index = %d, global at index = %d\n", 
-      //    global_index, right, left, index, hypre_ParCompGridGlobalIndices(compGrid)[index]);
-
       if (hypre_ParCompGridGlobalIndices(compGrid)[index] < global_index) left = index + 1;
       else if (hypre_ParCompGridGlobalIndices(compGrid)[index] > global_index) right = index - 1;
       else return index;

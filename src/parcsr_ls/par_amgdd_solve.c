@@ -10,7 +10,7 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-#define TEST_RES_COMM 1
+#define TEST_RES_COMM 0
 #define DEBUGGING_MESSAGES 0
 
 #include "_hypre_parcsr_ls.h"
@@ -431,25 +431,7 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
    }
 
    // Do local allgathers for agglomerated procsesors
-
-
-   // !!! Debug
-   // HYPRE_Complex *res_before = hypre_CTAlloc(HYPRE_Complex, hypre_ParCompGridNumNodes(compGrid[4]), HYPRE_MEMORY_HOST);
-   // for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[4]); i++) res_before[i] = hypre_ParCompGridF(compGrid[4])[i];
-
-
    AgglomeratedProcessorsLocalResidualAllgather(amg_data);
-
-   // !!! Debug
-   // local_myid;
-   // hypre_MPI_Comm_rank(hypre_ParCompGridCommPkgAgglomerationComms(compGridCommPkg)[4], &local_myid);
-   // for (i = hypre_ParCompGridOwnedBlockStarts(compGrid[4])[local_myid]; i < hypre_ParCompGridOwnedBlockStarts(compGrid[4])[local_myid+1]; i++)
-   // {
-   //    if (hypre_ParCompGridF(compGrid[4])[i] != res_before[i]) printf("Changed own residual!!!\n");
-   // }
-
-
-
 
    #if DEBUGGING_MESSAGES
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);

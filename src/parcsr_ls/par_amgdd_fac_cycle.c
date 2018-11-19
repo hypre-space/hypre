@@ -15,7 +15,7 @@
 #include "par_amg.h"
 #include "par_csr_block_matrix.h"	
 
-#define DEBUG_FAC 1
+#define DEBUG_FAC 0
 #define DUMP_INTERMEDIATE_SOLNS 0
 
 HYPRE_Int
@@ -84,12 +84,8 @@ hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata )
 	for (level = 0; level < num_levels - 1; level++)
 	{
 		// Relax on the real nodes
-      // !!! Debug
-      // if (level == 0)
-      {
-         for (i = 0; i < numRelax; i++) FAC_Relax( compGrid[level], relax_type );
-      }
-      
+      for (i = 0; i < numRelax; i++) FAC_Relax( compGrid[level], relax_type );
+
       #if DUMP_INTERMEDIATE_SOLNS
       sprintf(filename, "outputs/comp_u%d_level%d_relax1", myid, level);
       hypre_ParCompGridUDump(compGrid[level],filename);
@@ -101,7 +97,6 @@ hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata )
    }
 
 	//  ... solve on coarsest level ...
-   // !!! Debug
 	for (i = 0; i < numCoarseRelax; i++) FAC_Relax( compGrid[num_levels-1], relax_type );
 
    #if DUMP_INTERMEDIATE_SOLNS
@@ -120,11 +115,7 @@ hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata )
       hypre_ParCompGridUDump(compGrid[level],filename);
       #endif
 
-      // !!! Debug
-      // if (level == 0)
-      {
-	  	   for (i = 0; i < numRelax; i++) FAC_Relax( compGrid[level], relax_type );
-      }
+ 	   for (i = 0; i < numRelax; i++) FAC_Relax( compGrid[level], relax_type );
 
       #if DUMP_INTERMEDIATE_SOLNS
       sprintf(filename, "outputs/comp_u%d_level%d_relax2", myid, level);
@@ -389,15 +380,6 @@ FAC_Jacobi( hypre_ParCompGrid *compGrid )
    // Temporary vector to calculate Jacobi sweep
    HYPRE_Complex           *u_temp = hypre_CTAlloc(HYPRE_Complex, hypre_ParCompGridNumNodes(compGrid), HYPRE_MEMORY_HOST);
 
-   // !!! Debug
-   HYPRE_Int real_dof_cnt = 0;
-
-   // !!! Debug
-   HYPRE_Int   myid, num_procs;
-   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
-   // if (myid == 0) printf("before: u[1420] = %e\n", hypre_ParCompGridU(compGrid)[1420]);
-
-
    // Do Gauss-Seidel relaxation on the real nodes
    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
    {
@@ -405,9 +387,6 @@ FAC_Jacobi( hypre_ParCompGrid *compGrid )
       else is_real = 1;
       if (is_real)
       {
-         // !!! Debug
-         real_dof_cnt++;
-
          // Initialize u as RHS
          u_temp[i] = hypre_ParCompGridF(compGrid)[i];
          diag = 0.0;
@@ -433,9 +412,6 @@ FAC_Jacobi( hypre_ParCompGrid *compGrid )
       }
    }
 
-   // !!! Debug
-   // printf("Rank %d, real_dof_cnt = %d\n", myid, real_dof_cnt);
-
    // Copy over relaxed vector
    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
    {
@@ -447,9 +423,6 @@ FAC_Jacobi( hypre_ParCompGrid *compGrid )
       }
    }
    hypre_TFree(u_temp, HYPRE_MEMORY_HOST);
-
-   // !!! Debug
-   // if (myid == 0) printf("after: u[1420] = %e\n", hypre_ParCompGridU(compGrid)[1420]);
 
    return 0;
 }
