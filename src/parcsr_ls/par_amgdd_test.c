@@ -23,7 +23,7 @@
 
 
 HYPRE_Int
-SetRelaxMarker(hypre_ParCompGrid *compGrid, hypre_Vector *relax_marker, HYPRE_Int proc);
+SetRelaxMarker(hypre_ParCompGrid *compGrid, hypre_ParVector *relax_marker, HYPRE_Int proc);
 
 HYPRE_Real
 GetTestCompositeResidual(hypre_ParCSRMatrix *A, hypre_ParVector *U_comp, hypre_ParVector *res, hypre_Vector *relax_marker, HYPRE_Int proc);
@@ -67,6 +67,7 @@ hypre_BoomerAMGDDTestSolve( void               *amg_vdata,
   // Get AMG info
   hypre_ParAMGData *amg_data = (hypre_ParAMGData*) amg_vdata;
   hypre_ParVector  *U_comp = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD, hypre_ParVectorGlobalSize(u), hypre_ParVectorPartitioning(u));
+  hypre_ParVectorSetPartitioningOwner(U_comp, 0);
   hypre_ParVectorInitialize(U_comp);
   HYPRE_Int num_comp_cycles = hypre_ParAMGDataMaxFACIter(amg_data);
   HYPRE_Int num_levels = hypre_ParAMGDataNumLevels(amg_data);
@@ -75,13 +76,14 @@ hypre_BoomerAMGDDTestSolve( void               *amg_vdata,
 
   // Generate the residual and store in f
   hypre_ParVector *res = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD, hypre_ParVectorGlobalSize(f), hypre_ParVectorPartitioning(f));
+  hypre_ParVectorSetPartitioningOwner(res, 0);
   hypre_ParVectorInitialize(res);
   hypre_ParVectorCopy(f, res);
   hypre_ParCSRMatrixMatvec(-1.0, A, u, 1.0, res );
 
 
   // Loop over processors
-  HYPRE_Int proc;
+  HYPRE_Int proc, level;
   for (proc = 0; proc < num_procs; proc++)
   {
 
@@ -94,15 +96,15 @@ hypre_BoomerAMGDDTestSolve( void               *amg_vdata,
 
 
     // Setup vectors on each level that dictate where relaxation should be suppressed
-    HYPRE_Int level;
     hypre_ParVector  **relax_marker = hypre_CTAlloc(hypre_ParVector*, num_levels, HYPRE_MEMORY_HOST);
     for (level = 0; level < num_levels; level++)
     {
       // Create and initialize the relax_marker vector on this level
       relax_marker[level] = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD, hypre_ParVectorGlobalSize(U_comp), hypre_ParVectorPartitioning(U_comp));
+      hypre_ParVectorSetPartitioningOwner(relax_marker[level],0);
       hypre_ParVectorInitialize(relax_marker[level]);
       // Now set the values according to the relevant comp grid
-      if (level < transition_level) SetRelaxMarker(hypre_ParAMGDataCompGrid(amg_data)[level], hypre_ParVectorLocalVector(relax_marker[level]), proc);
+      if (level < transition_level) SetRelaxMarker(hypre_ParAMGDataCompGrid(amg_data)[level], relax_marker[level], proc);
       else hypre_ParVectorSetConstantValues(relax_marker[level], 1.0);
     }
 
@@ -159,18 +161,33 @@ hypre_BoomerAMGDDTestSolve( void               *amg_vdata,
       // add local part of U_comp to local part of u 
       hypre_SeqVectorAxpy( 1.0, hypre_ParVectorLocalVector(U_comp), hypre_ParVectorLocalVector(u));
     }
+    
+    // Clean up memory
+    for (level = 0; level < num_levels; level++) hypre_ParVectorDestroy(relax_marker[level]);
+    hypre_TFree(relax_marker, HYPRE_MEMORY_HOST);
   }
 
+  // Clean up memory
+  hypre_ParVectorDestroy(U_comp);
+  hypre_ParVectorDestroy(res);
 
   return 0;
 }
 
 HYPRE_Int
-SetRelaxMarker(hypre_ParCompGrid *compGrid, hypre_Vector *relax_marker, HYPRE_Int proc)
+SetRelaxMarker(hypre_ParCompGrid *compGrid, hypre_ParVector *relax_marker, HYPRE_Int proc)
 {
   HYPRE_Int i;
   HYPRE_Int myid;
   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+
+  // Check whether the global indices are still around
+  if (!hypre_ParCompGridGlobalIndices(compGrid))
+  {
+    if (myid == 0) printf("Error: need to recompile with debugging macros set (in particular, DEBUG_COMP_GRID in par_amgdd_setup.c).\n");
+    hypre_MPI_Finalize();
+    exit(0);
+  }
 
   // Broadcast the number of nodes in the composite gird on this level for the root proc
   HYPRE_Int num_nodes = 0;
@@ -201,17 +218,17 @@ SetRelaxMarker(hypre_ParCompGrid *compGrid, hypre_Vector *relax_marker, HYPRE_In
   hypre_MPI_Bcast(global_indices, num_nodes, HYPRE_MPI_INT, proc, hypre_MPI_COMM_WORLD);
 
   // Loop over the global indices and mark where to do relaxation
-  HYPRE_Int proc_first_index = hypre_ParCompGridGlobalIndices(compGrid)[0];
-  HYPRE_Int proc_last_index;
-  if (hypre_ParCompGridNumOwnedNodes(compGrid)) proc_last_index = hypre_ParCompGridGlobalIndices(compGrid)[ hypre_ParCompGridNumOwnedNodes(compGrid) - 1 ];
-  else proc_last_index = proc_first_index - 1;
+  HYPRE_Int proc_first_index = hypre_ParVectorFirstIndex(relax_marker);
+  HYPRE_Int proc_last_index = hypre_ParVectorLastIndex(relax_marker);
   for (i = 0; i < num_nodes; i++)
   {
     if (global_indices[i] >= proc_first_index && global_indices[i] <= proc_last_index)
     {
-      hypre_VectorData(relax_marker)[global_indices[i] - proc_first_index] = 1;
+      hypre_VectorData(hypre_ParVectorLocalVector(relax_marker))[global_indices[i] - proc_first_index] = 1;
     }
   }
+
+  hypre_TFree(global_indices, HYPRE_MEMORY_HOST);
 
   return 0;
 }
@@ -955,9 +972,9 @@ TestBoomerAMGCycle( void              *amg_vdata,
 
 
     // This is before smoothing occurs, so save a copy of U
-    hypre_ParVector    *U_copy;
-    U_copy = hypre_ParVectorCreate(comm, hypre_ParVectorGlobalSize(U_array[level]),hypre_ParVectorPartitioning(U_array[level]));
+    hypre_ParVector *U_copy = hypre_ParVectorCreate(comm, hypre_ParVectorGlobalSize(U_array[level]),hypre_ParVectorPartitioning(U_array[level]));
     hypre_ParVectorInitialize(U_copy);
+    hypre_ParVectorSetPartitioningOwner(U_copy, 0);
     hypre_ParVectorCopy( U_array[level], U_copy );
 
 
@@ -1314,8 +1331,7 @@ TestBoomerAMGCycle( void              *amg_vdata,
         hypre_VectorData(local_U)[i] = hypre_VectorData(local_U_before_relax)[i];
       }
     }
-
-
+    hypre_ParVectorDestroy(U_copy);
 
 
 

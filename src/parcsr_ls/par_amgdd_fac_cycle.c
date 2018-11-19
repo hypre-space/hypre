@@ -15,7 +15,7 @@
 #include "par_amg.h"
 #include "par_csr_block_matrix.h"	
 
-#define DEBUG_FAC 0
+#define DEBUG_FAC 1
 #define DUMP_INTERMEDIATE_SOLNS 0
 
 HYPRE_Int
@@ -62,7 +62,6 @@ hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata )
   	// Do FAC V-cycle 
 
    #if DUMP_INTERMEDIATE_SOLNS
-   for (level = 0; level < num_levels; level++)
    {
       sprintf(filename, "outputs/comp_global_indices%d_level%d", myid, level);
       hypre_ParCompGridGlobalIndicesDump(compGrid[level], filename);
@@ -116,8 +115,8 @@ hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata )
       hypre_ParCompGridUDump(compGrid[level],filename);
       #endif
 
-		for (i = 0; i < numRelax; i++) FAC_Relax( compGrid[level], relax_type );
-      
+ 	   for (i = 0; i < numRelax; i++) FAC_Relax( compGrid[level], relax_type );
+
       #if DUMP_INTERMEDIATE_SOLNS
       sprintf(filename, "outputs/comp_u%d_level%d_relax2", myid, level);
       hypre_ParCompGridUDump(compGrid[level],filename);

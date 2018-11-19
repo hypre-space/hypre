@@ -10,7 +10,7 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-#define TEST_RES_COMM 0
+#define TEST_RES_COMM 1
 #define DEBUGGING_MESSAGES 0
 
 #include "_hypre_parcsr_ls.h"
@@ -34,6 +34,9 @@ UnpackResidualBuffer( HYPRE_Int proc, HYPRE_Complex *recv_buffer, HYPRE_Int **re
 
 HYPRE_Int
 TestResComm(hypre_ParAMGData *amg_data);
+
+HYPRE_Int
+AgglomeratedProcessorsLocalResidualAllgather(hypre_ParAMGData *amg_data);
 
 HYPRE_Int 
 hypre_BoomerAMGDDSolve( void *amg_vdata,
@@ -240,7 +243,7 @@ AddSolution( void *amg_vdata )
 	HYPRE_Complex 		*u = hypre_VectorData( hypre_ParVectorLocalVector( hypre_ParAMGDataUArray(amg_data)[0] ) );
 	hypre_ParCompGrid 	**compGrid = hypre_ParAMGDataCompGrid(amg_data);
 	HYPRE_Complex 		*u_comp = hypre_ParCompGridU(compGrid[0]);
-	HYPRE_Int 			num_owned_nodes = hypre_ParCompGridNumOwnedNodes(compGrid[0]);
+	HYPRE_Int 			num_owned_nodes = hypre_ParCompGridOwnedBlockStarts(compGrid[0])[hypre_ParCompGridNumOwnedBlocks(compGrid[0])];
 	HYPRE_Int 			i;
 
 	for (i = 0; i < num_owned_nodes; i++) u[i] += u_comp[i];
@@ -323,9 +326,8 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
 
    // info from comp grid comm pkg
    hypre_ParCompGridCommPkg   *compGridCommPkg;
-   HYPRE_Int                  num_sends, num_recvs;
-   HYPRE_Int                  **send_procs;
-   HYPRE_Int                  **recv_procs;
+   HYPRE_Int                  num_neighbor_procs;
+   HYPRE_Int                  **neighbor_procs;
    HYPRE_Int                  **send_buffer_size;
    HYPRE_Int                  **recv_buffer_size;
    HYPRE_Int                  ***num_send_nodes;
@@ -359,8 +361,7 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
    // get info from comp grid comm pkg
    HYPRE_Int transition_level = hypre_ParCompGridCommPkgTransitionLevel(compGridCommPkg);
    if (transition_level < 0) transition_level = num_levels;
-   send_procs = hypre_ParCompGridCommPkgSendProcs(compGridCommPkg);
-   recv_procs = hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg);
+   neighbor_procs = hypre_ParCompGridCommPkgProcs(compGridCommPkg);
    send_buffer_size = hypre_ParCompGridCommPkgSendBufferSize(compGridCommPkg);
    recv_buffer_size = hypre_ParCompGridCommPkgRecvBufferSize(compGridCommPkg);
    num_send_nodes = hypre_ParCompGridCommPkgNumSendNodes(compGridCommPkg);
@@ -396,14 +397,21 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
    }
 
    // copy new restricted residual into comp grid structure
+   HYPRE_Int local_myid = 0;
    for (level = 0; level < transition_level; level++)
    {
+      // Check for agglomeration level
+      if (hypre_ParCompGridCommPkgAgglomerationComms(compGridCommPkg)[level])
+      {
+         hypre_MPI_Comm_rank(hypre_ParCompGridCommPkgAgglomerationComms(compGridCommPkg)[level], &local_myid);
+      }
+
       // Access the residual data
       residual_local = hypre_ParVectorLocalVector(F_array[level]);
       residual_data = hypre_VectorData(residual_local);
-      for (i = 0; i < hypre_VectorSize(residual_local); i++)
+      for (i = hypre_ParCompGridOwnedBlockStarts(compGrid[level])[local_myid]; i < hypre_ParCompGridOwnedBlockStarts(compGrid[level])[local_myid+1]; i++)
       {
-         hypre_ParCompGridF(compGrid[level])[i] = residual_data[i];
+         hypre_ParCompGridF(compGrid[level])[i] = residual_data[i - hypre_ParCompGridOwnedBlockStarts(compGrid[level])[local_myid]];
       }
    }
 
@@ -418,13 +426,24 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
    {
       residual_local = hypre_ParVectorLocalVector(F_array[transition_level]);
       residual_data = hypre_VectorData(residual_local);
-      
-      hypre_MPI_Allgatherv(residual_data, hypre_VectorSize(residual_local), HYPRE_MPI_COMPLEX, hypre_ParCompGridF(compGrid[transition_level]), hypre_ParCompGridCommPkgTransitionResRecvSizes(compGridCommPkg), hypre_ParCompGridCommPkgTransitionResRecvDisps(compGridCommPkg), HYPRE_MPI_COMPLEX, hypre_MPI_COMM_WORLD);
+
+      hypre_MPI_Allgatherv(residual_data, 
+         hypre_VectorSize(residual_local), 
+         HYPRE_MPI_COMPLEX, 
+         hypre_ParCompGridF(compGrid[transition_level]), 
+         hypre_ParCompGridCommPkgTransitionResRecvSizes(compGridCommPkg), 
+         hypre_ParCompGridCommPkgTransitionResRecvDisps(compGridCommPkg), 
+         HYPRE_MPI_COMPLEX, 
+         hypre_MPI_COMM_WORLD);
    }
+
+   // Do local allgathers for agglomerated procsesors
+   AgglomeratedProcessorsLocalResidualAllgather(amg_data);
+
 
    #if DEBUGGING_MESSAGES
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
-   if (myid == 0) hypre_printf("Entering looop over levels in residual communication on all ranks\n");
+   if (myid == 0) hypre_printf("Entering loop over levels in residual communication on all ranks\n");
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
    #endif
 
@@ -434,113 +453,63 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
    {      
       // Get some communication info
       comm = hypre_ParCSRMatrixComm(A_array[level]);
-      num_sends = hypre_ParCompGridCommPkgNumSends(compGridCommPkg)[level];
-      num_recvs = hypre_ParCompGridCommPkgNumRecvs(compGridCommPkg)[level];
+      num_neighbor_procs = hypre_ParCompGridCommPkgNumProcs(compGridCommPkg)[level];
 
-      if ( (proc_last_index[level] >= proc_first_index[level] && num_sends) || hypre_ParCompGridCommPkgUseAllgatherv(compGridCommPkg)[level] ) // If there are any owned nodes on this level
+      if ( num_neighbor_procs ) // If there are any owned nodes on this level
       {
 
          // allocate space for the buffers, buffer sizes, requests and status, psiComposite_send, psiComposite_recv, send and recv maps
-         recv_buffer = hypre_CTAlloc(HYPRE_Complex*, num_recvs, HYPRE_MEMORY_HOST);
+         recv_buffer = hypre_CTAlloc(HYPRE_Complex*, num_neighbor_procs, HYPRE_MEMORY_HOST);
 
-         if (hypre_ParCompGridCommPkgUseAllgatherv(compGridCommPkg)[level])
+         request_counter = 0;
+         requests = hypre_CTAlloc(hypre_MPI_Request, num_neighbor_procs + num_neighbor_procs, HYPRE_MEMORY_HOST );
+         status = hypre_CTAlloc(hypre_MPI_Status, num_neighbor_procs + num_neighbor_procs, HYPRE_MEMORY_HOST );
+         send_buffer = hypre_CTAlloc(HYPRE_Complex*, num_neighbor_procs, HYPRE_MEMORY_HOST);
+
+         // allocate space for the receive buffers and post the receives
+         for (i = 0; i < num_neighbor_procs; i++)
          {
-
-
-            // pack and send the buffers
-            HYPRE_Complex *allgatherv_send_buffer = hypre_CTAlloc(HYPRE_Complex, hypre_ParCompGridCommPkgResRecvcounts(compGridCommPkg)[level][myid], HYPRE_MEMORY_HOST);
-            HYPRE_Int cnt = 0;
-            allgatherv_send_buffer[cnt++] = num_sends;
-            for (i = 0; i < num_sends; i++) allgatherv_send_buffer[cnt++] = send_procs[level][i];
-            for (i = 0; i < num_sends; i++) allgatherv_send_buffer[cnt++] = send_buffer_size[level][i];
-
-            HYPRE_Int offset = num_sends*2 + 1;
-            for (i = 0; i < num_sends; i++)
-            {
-               PackResidualBuffer(send_procs[level][i], &(allgatherv_send_buffer[offset]), send_flag[level][i], num_send_nodes[level][i], compGrid, compGridCommPkg, i, level, num_levels);
-               offset += send_buffer_size[level][i];
-            }
-
-            HYPRE_Int allgatherv_recv_buffer_size = hypre_ParCompGridCommPkgResRecvcounts(compGridCommPkg)[level][num_procs-1] + hypre_ParCompGridCommPkgResDispls(compGridCommPkg)[level][num_procs-1];
-            HYPRE_Complex *allgatherv_recv_buffer = hypre_CTAlloc(HYPRE_Complex, allgatherv_recv_buffer_size, HYPRE_MEMORY_HOST);
-            hypre_MPI_Allgatherv(allgatherv_send_buffer, hypre_ParCompGridCommPkgResRecvcounts(compGridCommPkg)[level][myid], HYPRE_MPI_COMPLEX, 
-               allgatherv_recv_buffer, hypre_ParCompGridCommPkgResRecvcounts(compGridCommPkg)[level], 
-               hypre_ParCompGridCommPkgResDispls(compGridCommPkg)[level], HYPRE_MPI_COMPLEX, hypre_MPI_COMM_WORLD);
-            hypre_TFree(allgatherv_send_buffer, HYPRE_MEMORY_HOST);
-
-            // Copy appropriate buffers
-            for (i = 0; i < num_recvs; i++)
-            {
-               // Find appropriate location to copy from 
-               HYPRE_Int cnt = hypre_ParCompGridCommPkgResDispls(compGridCommPkg)[level][recv_procs[level][i]];
-               HYPRE_Int num_psi_buffers = allgatherv_recv_buffer[cnt++];
-               HYPRE_Int buffer_index = 0;
-               for (j = 0; j < num_psi_buffers; j++) if (allgatherv_recv_buffer[cnt++] == myid) buffer_index = j;
-               HYPRE_Int read_location = cnt + num_psi_buffers;
-               for (j = 0; j < buffer_index; j++) read_location += allgatherv_recv_buffer[cnt++];
-
-               // Allocate and fill the recv buffer
-               recv_buffer[i] = hypre_CTAlloc(HYPRE_Complex, recv_buffer_size[level][i], HYPRE_MEMORY_HOST );
-               cnt = read_location;
-               for (j = 0; j < recv_buffer_size[level][i]; j++)
-               {
-                  recv_buffer[i][j] = allgatherv_recv_buffer[cnt++];
-               }
-            }
-            hypre_TFree(allgatherv_recv_buffer, HYPRE_MEMORY_HOST);
-         }
-         else
-         {
-            request_counter = 0;
-            requests = hypre_CTAlloc(hypre_MPI_Request, num_sends + num_recvs, HYPRE_MEMORY_HOST );
-            status = hypre_CTAlloc(hypre_MPI_Status, num_sends + num_recvs, HYPRE_MEMORY_HOST );
-            send_buffer = hypre_CTAlloc(HYPRE_Complex*, num_sends, HYPRE_MEMORY_HOST);
-
-            // allocate space for the receive buffers and post the receives
-            for (i = 0; i < num_recvs; i++)
-            {
-               recv_buffer[i] = hypre_CTAlloc(HYPRE_Complex, recv_buffer_size[level][i], HYPRE_MEMORY_HOST );
-               hypre_MPI_Irecv( recv_buffer[i], recv_buffer_size[level][i], HYPRE_MPI_COMPLEX, recv_procs[level][i], 3, comm, &requests[request_counter++]);
-            }
-
-            // pack and send the buffers
-            for (i = 0; i < num_sends; i++)
-            {
-               send_buffer[i] = hypre_CTAlloc(HYPRE_Complex, send_buffer_size[level][i], HYPRE_MEMORY_HOST);
-               PackResidualBuffer(send_procs[level][i], send_buffer[i], send_flag[level][i], num_send_nodes[level][i], compGrid, compGridCommPkg, i, level, num_levels);
-               hypre_MPI_Isend(send_buffer[i], send_buffer_size[level][i], HYPRE_MPI_COMPLEX, send_procs[level][i], 3, comm, &requests[request_counter++]);
-            }
-
-            #if DEBUGGING_MESSAGES
-            hypre_printf("    Posted sends and recvs on level %d, rank %d\n", level, myid);
-            #endif
-
-            // wait for buffers to be received
-            hypre_MPI_Waitall( num_sends + num_recvs, requests, status );
-
-            #if DEBUGGING_MESSAGES
-            hypre_printf("    Finished waiting on level %d, rank %d\n", level, myid);
-            #endif
-
-
-            hypre_TFree(requests, HYPRE_MEMORY_HOST);
-            hypre_TFree(status, HYPRE_MEMORY_HOST);
-            for (i = 0; i < num_sends; i++)
-            {
-               hypre_TFree(send_buffer[i], HYPRE_MEMORY_HOST);
-            }
-            hypre_TFree(send_buffer, HYPRE_MEMORY_HOST);
+            recv_buffer[i] = hypre_CTAlloc(HYPRE_Complex, recv_buffer_size[level][i], HYPRE_MEMORY_HOST );
+            hypre_MPI_Irecv( recv_buffer[i], recv_buffer_size[level][i], HYPRE_MPI_COMPLEX, neighbor_procs[level][i], 3, comm, &requests[request_counter++]);
          }
 
+         // pack and send the buffers
+         for (i = 0; i < num_neighbor_procs; i++)
+         {
+            send_buffer[i] = hypre_CTAlloc(HYPRE_Complex, send_buffer_size[level][i], HYPRE_MEMORY_HOST);
+            PackResidualBuffer(neighbor_procs[level][i], send_buffer[i], send_flag[level][i], num_send_nodes[level][i], compGrid, compGridCommPkg, i, level, num_levels);
+            hypre_MPI_Isend(send_buffer[i], send_buffer_size[level][i], HYPRE_MPI_COMPLEX, neighbor_procs[level][i], 3, comm, &requests[request_counter++]);
+         }
+
+         #if DEBUGGING_MESSAGES
+         hypre_printf("    Posted sends and recvs on level %d, rank %d\n", level, myid);
+         #endif
+
+         // wait for buffers to be received
+         hypre_MPI_Waitall( num_neighbor_procs + num_neighbor_procs, requests, status );
+
+         #if DEBUGGING_MESSAGES
+         hypre_printf("    Finished waiting on level %d, rank %d\n", level, myid);
+         #endif
+
+
+         hypre_TFree(requests, HYPRE_MEMORY_HOST);
+         hypre_TFree(status, HYPRE_MEMORY_HOST);
+         for (i = 0; i < num_neighbor_procs; i++)
+         {
+            hypre_TFree(send_buffer[i], HYPRE_MEMORY_HOST);
+         }
+         hypre_TFree(send_buffer, HYPRE_MEMORY_HOST);
+         
          // loop over received buffers
-         for (i = 0; i < num_recvs; i++)
+         for (i = 0; i < num_neighbor_procs; i++)
          {
             // unpack the buffers
-            UnpackResidualBuffer(recv_procs[level][i], recv_buffer[i], recv_map[level][i], num_recv_nodes[level][i], compGrid, level, num_levels);
+            UnpackResidualBuffer(neighbor_procs[level][i], recv_buffer[i], recv_map[level][i], num_recv_nodes[level][i], compGrid, level, num_levels);
          }
 
          // clean up memory for this level
-         for (i = 0; i < num_recvs; i++)
+         for (i = 0; i < num_neighbor_procs; i++)
          {
             hypre_TFree(recv_buffer[i], HYPRE_MEMORY_HOST);
          }
@@ -701,4 +670,66 @@ TestResComm(hypre_ParAMGData *amg_data)
    }
 
    return test_failed;
+}
+
+HYPRE_Int
+AgglomeratedProcessorsLocalResidualAllgather(hypre_ParAMGData *amg_data)
+{
+   hypre_ParCompGrid **compGrid = hypre_ParAMGDataCompGrid(amg_data);
+   hypre_ParCompGridCommPkg *compGridCommPkg = hypre_ParAMGDataCompGridCommPkg(amg_data);
+   HYPRE_Int num_levels = hypre_ParAMGDataNumLevels(amg_data);
+   HYPRE_Int transition_level = hypre_ParCompGridCommPkgTransitionLevel(compGridCommPkg);
+   if (transition_level < 0) transition_level = num_levels;
+   HYPRE_Int level, i, j, proc;
+
+   for (level = 0; level < transition_level; level++)
+   {
+      // If a local communicator is stored on this level
+      if (hypre_ParCompGridCommPkgAgglomerationComms(compGridCommPkg)[level]) 
+      {
+         // Get comm info
+         MPI_Comm local_comm = hypre_ParCompGridCommPkgAgglomerationComms(compGridCommPkg)[level];
+         HYPRE_Int local_myid, local_num_procs;
+         hypre_MPI_Comm_rank(local_comm, &local_myid);
+         hypre_MPI_Comm_size(local_comm, &local_num_procs);
+
+         // Count and pack up owned residual values from this level down
+         HYPRE_Int *recvcounts = hypre_CTAlloc(HYPRE_Int, local_num_procs, HYPRE_MEMORY_HOST);
+         for (i = level; i < transition_level; i++)
+         {
+            for (j = 0; j < local_num_procs; j++)
+            {
+               recvcounts[j] += hypre_ParCompGridOwnedBlockStarts(compGrid[i])[j+1] - hypre_ParCompGridOwnedBlockStarts(compGrid[i])[j];
+            }
+         }
+         HYPRE_Int *displs = hypre_CTAlloc(HYPRE_Int, local_num_procs, HYPRE_MEMORY_HOST);
+         for (i = 1; i < local_num_procs; i++) displs[i] = displs[i-1] + recvcounts[i-1];
+         HYPRE_Complex *sendbuf = hypre_CTAlloc(HYPRE_Complex, recvcounts[local_myid], HYPRE_MEMORY_HOST);
+         HYPRE_Int cnt = 0;
+         for (i = level; i < transition_level; i++)
+         {
+            HYPRE_Int start = hypre_ParCompGridOwnedBlockStarts(compGrid[i])[local_myid];
+            HYPRE_Int finish = hypre_ParCompGridOwnedBlockStarts(compGrid[i])[local_myid+1];
+            for (j = start; j < finish; j++) sendbuf[cnt++] = hypre_ParCompGridF(compGrid[i])[j];
+         }
+
+         // Do the allgather
+         HYPRE_Complex *recvbuf = hypre_CTAlloc(HYPRE_Complex, displs[local_num_procs-1] + recvcounts[local_num_procs-1], HYPRE_MEMORY_HOST);
+         hypre_MPI_Allgatherv(sendbuf, recvcounts[local_myid], HYPRE_MPI_COMPLEX, recvbuf, recvcounts, displs, HYPRE_MPI_COMPLEX, local_comm);
+
+         // Unpack values into comp grid
+         cnt = 0;
+         for (proc = 0; proc < local_num_procs; proc++)
+         {
+            for (i = level; i < transition_level; i++)
+            {
+               HYPRE_Int start = hypre_ParCompGridOwnedBlockStarts(compGrid[i])[proc];
+               HYPRE_Int finish = hypre_ParCompGridOwnedBlockStarts(compGrid[i])[proc+1];
+               for (j = start; j < finish; j++) hypre_ParCompGridF(compGrid[i])[j] = recvbuf[cnt++];
+            }
+         }
+      }
+   }
+
+   return 0;
 }
