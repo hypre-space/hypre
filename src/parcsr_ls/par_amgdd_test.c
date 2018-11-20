@@ -86,8 +86,6 @@ hypre_BoomerAMGDDTestSolve( void               *amg_vdata,
   HYPRE_Int proc, level;
   for (proc = 0; proc < num_procs; proc++)
   {
-
-
     #if DEBUGGING_MESSAGES
     hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
     if (myid == 0) hypre_printf("About to set relax marker on all ranks for proc %d\n", proc);
@@ -100,7 +98,7 @@ hypre_BoomerAMGDDTestSolve( void               *amg_vdata,
     for (level = 0; level < num_levels; level++)
     {
       // Create and initialize the relax_marker vector on this level
-      relax_marker[level] = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD, hypre_ParVectorGlobalSize(U_comp), hypre_ParVectorPartitioning(U_comp));
+      relax_marker[level] = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD, hypre_ParVectorGlobalSize(hypre_ParAMGDataUArray(amg_data)[level]), hypre_ParVectorPartitioning(hypre_ParAMGDataUArray(amg_data)[level]));
       hypre_ParVectorSetPartitioningOwner(relax_marker[level],0);
       hypre_ParVectorInitialize(relax_marker[level]);
       // Now set the values according to the relevant comp grid
@@ -108,14 +106,11 @@ hypre_BoomerAMGDDTestSolve( void               *amg_vdata,
       else hypre_ParVectorSetConstantValues(relax_marker[level], 1.0);
     }
 
-
     #if DEBUGGING_MESSAGES
     hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
     if (myid == 0) hypre_printf("Done setting relax marker on all ranks for proc %d\n", proc);
     hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
     #endif
-
-
 
     // Set the initial guess for the AMG solve to 0
     hypre_ParVectorSetConstantValues(U_comp,0);
