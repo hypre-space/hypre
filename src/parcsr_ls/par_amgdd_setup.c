@@ -1940,15 +1940,18 @@ GetNeighborPartitionInfo(hypre_ParAMGData *amg_data,
    HYPRE_Int local_myid, local_num_procs;
    hypre_MPI_Comm_rank(local_comm, &local_myid);
    hypre_MPI_Comm_size(local_comm, &local_num_procs);
-   HYPRE_Int *local_ranks = hypre_CTAlloc(HYPRE_Int, local_num_procs, HYPRE_MEMORY_HOST);
+   int local_num_procs_plain_int;
+   MPI_Comm_size(local_comm, &local_num_procs_plain_int);
+   int *local_ranks = hypre_CTAlloc(int, local_num_procs, HYPRE_MEMORY_HOST);
    for (i = 0; i < local_num_procs; i++) local_ranks[i] = i;
    MPI_Group previous_group, local_group;
    MPI_Comm_group(previous_comm, &previous_group);
    MPI_Comm_group(local_comm, &local_group);
-   HYPRE_Int *previous_ranks = hypre_CTAlloc(HYPRE_Int, local_num_procs, HYPRE_MEMORY_HOST);
-   MPI_Group_translate_ranks(local_group, local_num_procs, local_ranks, previous_group, previous_ranks);
+   int *previous_ranks_plain_int = hypre_CTAlloc(int, local_num_procs, HYPRE_MEMORY_HOST);
+   MPI_Group_translate_ranks(local_group, local_num_procs_plain_int, local_ranks, previous_group, previous_ranks_plain_int);
    hypre_TFree(local_ranks, HYPRE_MEMORY_HOST);
-
+   HYPRE_Int *previous_ranks = hypre_CTAlloc(HYPRE_Int, local_num_procs, HYPRE_MEMORY_HOST);
+   for (i = 0; i < local_num_procs; i++) previous_ranks[i] = (HYPRE_Int) previous_ranks_plain_int[i];
 
    for (level = current_level; level < transition_level; level++)
    {
