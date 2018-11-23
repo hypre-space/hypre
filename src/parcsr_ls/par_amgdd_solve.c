@@ -697,6 +697,7 @@ AgglomeratedProcessorsLocalResidualAllgather(hypre_ParAMGData *amg_data)
          HYPRE_Int *recvcounts = hypre_CTAlloc(HYPRE_Int, local_num_procs, HYPRE_MEMORY_HOST);
          for (i = level; i < transition_level; i++)
          {
+            if (i > level && hypre_ParCompGridCommPkgAgglomerationComms(compGridCommPkg)[i]) break;
             for (j = 0; j < local_num_procs; j++)
             {
                recvcounts[j] += hypre_ParCompGridOwnedBlockStarts(compGrid[i])[j+1] - hypre_ParCompGridOwnedBlockStarts(compGrid[i])[j];
@@ -708,6 +709,7 @@ AgglomeratedProcessorsLocalResidualAllgather(hypre_ParAMGData *amg_data)
          HYPRE_Int cnt = 0;
          for (i = level; i < transition_level; i++)
          {
+            if (i > level && hypre_ParCompGridCommPkgAgglomerationComms(compGridCommPkg)[i]) break;
             HYPRE_Int start = hypre_ParCompGridOwnedBlockStarts(compGrid[i])[local_myid];
             HYPRE_Int finish = hypre_ParCompGridOwnedBlockStarts(compGrid[i])[local_myid+1];
             for (j = start; j < finish; j++) sendbuf[cnt++] = hypre_ParCompGridF(compGrid[i])[j];
@@ -723,6 +725,7 @@ AgglomeratedProcessorsLocalResidualAllgather(hypre_ParAMGData *amg_data)
          {
             for (i = level; i < transition_level; i++)
             {
+               if (i > level && hypre_ParCompGridCommPkgAgglomerationComms(compGridCommPkg)[i]) break;
                HYPRE_Int start = hypre_ParCompGridOwnedBlockStarts(compGrid[i])[proc];
                HYPRE_Int finish = hypre_ParCompGridOwnedBlockStarts(compGrid[i])[proc+1];
                for (j = start; j < finish; j++) hypre_ParCompGridF(compGrid[i])[j] = recvbuf[cnt++];

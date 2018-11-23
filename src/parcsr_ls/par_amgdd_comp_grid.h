@@ -57,9 +57,6 @@ typedef struct
 	HYPRE_Int 			****send_flag; // flags which nodes to send after composite grid is built
 	HYPRE_Int 			****recv_map; // mapping from recv buffer to appropriate local indices on each comp grid
 
-   HYPRE_Int         **res_recvcounts; // recvcounts used for allgatherv when needed for residual communication
-   HYPRE_Int         **res_displs; // displs used for allgatherv when needed for residual communication
-
 } hypre_ParCompGridCommPkg;
 
 /*--------------------------------------------------------------------------
@@ -85,8 +82,6 @@ typedef struct
  #define hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)       ((compGridCommPkg) -> num_recv_nodes)
  #define hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)				((compGridCommPkg) -> send_flag)
  #define hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)				((compGridCommPkg) -> recv_map)
- #define hypre_ParCompGridCommPkgResRecvcounts(compGridCommPkg)            ((compGridCommPkg) -> res_recvcounts)
- #define hypre_ParCompGridCommPkgResDispls(compGridCommPkg)            ((compGridCommPkg) -> res_displs)
 
 
 
