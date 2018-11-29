@@ -786,8 +786,8 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    }
 
    // Setup the ghost/real dof markers for the comp grids
-   if (use_transition_level) hypre_ParCompGridSetupRealDofMarker(compGrid, transition_level+1, padding);
-   else hypre_ParCompGridSetupRealDofMarker(compGrid, num_levels, padding);
+   if (use_transition_level) hypre_ParCompGridSetupRealDofMarker(compGrid, transition_level+1, num_ghost_layers);
+   else hypre_ParCompGridSetupRealDofMarker(compGrid, num_levels, num_ghost_layers);
 
    #if DEBUGGING_MESSAGES
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
@@ -3585,11 +3585,12 @@ TestCompGrids1(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int tra
       {
          for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++) 
          {
-            if (add_flag[level][i] < num_ghost_layers + 1 && hypre_ParCompGridRealDofMarker(compGrid[level])[i] != 0) 
-            {
-               test_failed = 1;
-               if (myid == 1) printf("Error: dof that should have been marked as ghost was marked as real\n");
-            }
+            // !!! NOTE: disabling this check since I've redefined how real dofs are determined after agglomeration (can now be many more real dofs than expected via simple top down construction)
+            // if (add_flag[level][i] < num_ghost_layers + 1 && hypre_ParCompGridRealDofMarker(compGrid[level])[i] != 0) 
+            // {
+            //    test_failed = 1;
+            //    if (myid == 1) printf("Error: dof that should have been marked as ghost was marked as real\n");
+            // }
             if (add_flag[level][i] > num_ghost_layers && hypre_ParCompGridRealDofMarker(compGrid[level])[i] != 1) 
             {
                test_failed = 1;

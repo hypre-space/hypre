@@ -1956,7 +1956,7 @@ hypre_ParCompGrid *hypre_ParCompGridCreate ();
 HYPRE_Int hypre_ParCompGridDestroy ( hypre_ParCompGrid *compGrid );
 HYPRE_Int hypre_ParCompGridInitialize( hypre_ParCompGrid *compGrid, hypre_ParVector *residual, HYPRE_Int *CF_marker_array, HYPRE_Int coarseStart, hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *P );
 HYPRE_Int hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int transition_level, HYPRE_Int debug );
-HYPRE_Int hypre_ParCompGridSetupRealDofMarker( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int padding );
+HYPRE_Int hypre_ParCompGridSetupRealDofMarker( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int num_ghost_layers );
 HYPRE_Int hypre_ParCompGridSetSize ( hypre_ParCompGrid *compGrid, HYPRE_Int num_nodes, HYPRE_Int A_nnz, HYPRE_Int P_nnz, HYPRE_Int over_allocation_factor, HYPRE_Int full_comp_info );
 HYPRE_Int hypre_ParCompGridResize ( hypre_ParCompGrid *compGrid, HYPRE_Int new_size, HYPRE_Int need_coarse_info, HYPRE_Int type );
 HYPRE_Int hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *num_added_nodes, HYPRE_Int num_levels );

@@ -22,7 +22,7 @@
 #include <math.h>
 
 HYPRE_Int
-RecursivelyMarkRealDofs(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *compGrid, HYPRE_Int *add_flag, HYPRE_Int *add_flag_coarse, HYPRE_Int padding);
+RecursivelyMarkGhostDofs(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *compGrid);
 
 hypre_ParCompGrid *
 hypre_ParCompGridCreate ()
@@ -393,43 +393,43 @@ hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, H
 }
 
 HYPRE_Int
-hypre_ParCompGridSetupRealDofMarker( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int padding )
+hypre_ParCompGridSetupRealDofMarker( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int num_ghost_layers )
 {
-   HYPRE_Int *add_flag_fine = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumNodes(compGrid[0]), HYPRE_MEMORY_HOST);
-   HYPRE_Int *add_flag_coarse;
-
-   HYPRE_Int i,level;
+   HYPRE_Int i,j,level;
    for (level = 0; level < num_levels-1; level++)
    {
       // Allocate the real dof marker
       hypre_ParCompGridRealDofMarker(compGrid[level]) = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumNodes(compGrid[level]), HYPRE_MEMORY_HOST);
 
-      // Mark the real dofs
-      if (level == 0)
-      {
-         HYPRE_Int num_owned_nodes = hypre_ParCompGridOwnedBlockStarts(compGrid[level])[hypre_ParCompGridNumOwnedBlocks(compGrid[level])];
-         for (i = 0; i < num_owned_nodes; i++) add_flag_fine[i] = padding + 1;
-      }
-      else
-      {
-         add_flag_fine = add_flag_coarse;
-      }
-
-      // Expand by the padding on this level and add coarse grid counterparts
-      if (level != num_levels-2) add_flag_coarse = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumNodes(compGrid[level+1]), HYPRE_MEMORY_HOST);
-      else add_flag_coarse = NULL;
+      // Initialize to 1 (real) everywhere except where we don't own the full stencil in A
       for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
       {
-         if (add_flag_fine[i] == padding + 1)
+         hypre_ParCompGridRealDofMarker(compGrid[level])[i] = 1;
+         for (j = hypre_ParCompGridARowPtr(compGrid[level])[i]; j < hypre_ParCompGridARowPtr(compGrid[level])[i+1]; j++)
          {
-            // Recursively add the region of padding (flagging coarse nodes on the next level if applicable)
-            hypre_ParCompGridRealDofMarker(compGrid[level])[i] = 1;
-            RecursivelyMarkRealDofs(i, padding, compGrid[level], add_flag_fine, add_flag_coarse, padding);
+            if (hypre_ParCompGridAColInd(compGrid[level])[j] < 0)
+            {
+               hypre_ParCompGridRealDofMarker(compGrid[level])[i] = num_ghost_layers + 1;
+               break;
+            }
          }
       }
 
+      // Find neighbors less than distance (num_ghost_layers) from the edges marded above
+      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
+      {
+         if (hypre_ParCompGridRealDofMarker(compGrid[level])[i] == num_ghost_layers + 1)
+         {
+            // Recursively add the region of padding (flagging coarse nodes on the next level if applicable)
+            RecursivelyMarkGhostDofs(i, num_ghost_layers, compGrid[level]);
+         }
+      }
 
-      hypre_TFree(add_flag_fine, HYPRE_MEMORY_HOST);
+      // Clean up by setting the marker for all ghost dofs to zero
+      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
+      {
+         if (hypre_ParCompGridRealDofMarker(compGrid[level])[i] > 1) hypre_ParCompGridRealDofMarker(compGrid[level])[i] = 0;
+      }
    }
 
    return 0;
@@ -1582,7 +1582,7 @@ hypre_ParCompGridCommPkgCopy( hypre_ParCompGridCommPkg *compGridCommPkg )
 }
 
 HYPRE_Int
-RecursivelyMarkRealDofs(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *compGrid, HYPRE_Int *add_flag, HYPRE_Int *add_flag_coarse, HYPRE_Int padding)
+RecursivelyMarkGhostDofs(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *compGrid)
 {
    HYPRE_Int         i,index,coarse_grid_index;
    HYPRE_Int error_code = 0;
@@ -1597,40 +1597,15 @@ RecursivelyMarkRealDofs(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *compGrid
       if (index >= 0)
       {
          // And if we still need to visit this index (note that add_flag[index] = m means we have already added all distance m-1 neighbors of index)
-         if (add_flag[index] < m)
+         if (hypre_ParCompGridRealDofMarker(compGrid)[index] < m)
          {
-            add_flag[index] = m;
-            hypre_ParCompGridRealDofMarker(compGrid)[index] = 1;
+            hypre_ParCompGridRealDofMarker(compGrid)[index] = m;
+            
             // Recursively call to find distance m-1 neighbors of index
-            if (m-1 > 0) error_code = RecursivelyMarkRealDofs(index, m-1, compGrid, add_flag, add_flag_coarse, padding);
+            if (m > 2) RecursivelyMarkGhostDofs(index, m-1, compGrid);
          }
-         // If m = 1, we won't do another recursive call, so make sure to flag the coarse grid here if applicable
-         if (m == 1 && add_flag_coarse)
-         {
-            coarse_grid_index = hypre_ParCompGridCoarseLocalIndices(compGrid)[index];
-            if ( coarse_grid_index != -1 ) 
-            {
-               // Again, need to set the add_flag to the appropriate value in order to recursively find neighbors on the next level
-               add_flag_coarse[ coarse_grid_index ] = padding+1;
-            }
-         }
-      }
-      else
-      {
-         error_code = 1; 
       }
    }
 
-   // Flag this node on the next coarsest level 
-   if (add_flag_coarse)
-   {
-      coarse_grid_index = hypre_ParCompGridCoarseLocalIndices(compGrid)[node];
-      if ( coarse_grid_index != -1 ) 
-      {
-         // Again, need to set the add_flag to the appropriate value in order to recursively find neighbors on the next level
-         add_flag_coarse[ coarse_grid_index ] = padding+1;
-      }
-   }
-
-   return error_code;
+   return 0;
 }
