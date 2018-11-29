@@ -1450,7 +1450,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 			coarse_pnts_global1, num_functions,
 			dof_func_array[level], debug_flag, agg_P12_trunc_factor,
 			agg_P12_max_elmts, col_offd_S_to_A, &P2);
-                  P = hypre_ParMatmul(P1,P2);
+                  //P = hypre_ParMatmul(P1,P2);
+                  P = hypre_ParCSRMatMat(P1,P2);
                   hypre_BoomerAMGInterpTruncation(P, agg_trunc_factor,
 			agg_P_max_elmts);
 	          hypre_MatvecCommPkgCreate(P);
@@ -1563,7 +1564,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 			coarse_pnts_global1, num_functions,
 			dof_func_array[level], debug_flag, agg_P12_trunc_factor,
 			agg_P12_max_elmts, col_offd_S_to_A, &P2);
-                  P = hypre_ParMatmul(P1,P2);
+                  //P = hypre_ParMatmul(P1,P2);
+                  P = hypre_ParCSRMatMat(P1,P2);
                   hypre_BoomerAMGInterpTruncation(P, agg_trunc_factor,
 			agg_P_max_elmts);
 	          hypre_MatvecCommPkgCreate(P);
@@ -2197,9 +2199,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             if (ns == 1)
             {
                hypre_ParCSRMatrix *Q = NULL;
-               Q = hypre_ParMatmul(A_array[level],P);
+               //Q = hypre_ParMatmul(A_array[level],P);
+               Q = hypre_ParCSRMatMat(A_array[level],P);
                hypre_ParCSRMatrixAminvDB(P,Q,d_diag,&P_array[level]);
-               A_H = hypre_ParTMatmul(P,Q);
+               A_H = hypre_ParCSRTMatMat(P,Q);
+               //A_H = hypre_ParTMatmul(P,Q);
                hypre_ParCSRMatrixRowStarts(A_H) = hypre_ParCSRMatrixColStarts(A_H);
                hypre_ParCSRMatrixOwnsRowStarts(A_H) = 1;
                hypre_ParCSRMatrixOwnsColStarts(A_H) = 0;
@@ -2241,8 +2245,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                {
                   /* Construct AP, and then RAP */
                   hypre_ParCSRMatrix *Q = NULL;
-                  Q = hypre_ParMatmul(A_array[level],P_array[level]);
-                  A_H = hypre_ParTMatmul(P_array[level],Q);
+                  Q = hypre_ParCSRMatMat(A_array[level],P_array[level]);
+                  A_H = hypre_ParCSRTMatMatKT(P_array[level],Q,keepTranspose);
+                  /*Q = hypre_ParMatmul(A_array[level],P_array[level]);
+                  A_H = hypre_ParTMatmul(P_array[level],Q);*/
                   hypre_ParCSRMatrixRowStarts(A_H) = hypre_ParCSRMatrixColStarts(A_H);
                   hypre_ParCSRMatrixOwnsRowStarts(A_H) = 1;
                   hypre_ParCSRMatrixOwnsColStarts(A_H) = 0;
@@ -2266,8 +2272,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                {
                   /* Use two matrix products to generate A_H */
                   hypre_ParCSRMatrix *Q = NULL;
-                  Q = hypre_ParMatmul(A_array[level],P_array[level]);
-                  A_H = hypre_ParTMatmul(P_array[level],Q);
+                  Q = hypre_ParCSRMatMat(A_array[level],P_array[level]);
+                  A_H = hypre_ParCSRTMatMatKT(P_array[level],Q,keepTranspose);
+                  /*Q = hypre_ParMatmul(A_array[level],P_array[level]);
+                  A_H = hypre_ParTMatmul(P_array[level],Q);*/
                   hypre_ParCSRMatrixOwnsRowStarts(A_H) = 1;
                   hypre_ParCSRMatrixOwnsColStarts(A_H) = 0;
                   hypre_ParCSRMatrixOwnsColStarts(P_array[level]) = 0;
@@ -2277,8 +2285,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                }
                else
                {
-	          hypre_BoomerAMGBuildCoarseOperatorKT(P, A_array[level] , P,
-			keepTranspose, &A_H);
+	          A_H = hypre_ParCSRMatrixRAPKT(P, A_array[level], P, keepTranspose);
+	          /*hypre_BoomerAMGBuildCoarseOperatorKT(P, A_array[level] , P,
+			keepTranspose, &A_H);*/
                }
 
                if (add_rlx == 18)
@@ -2290,7 +2299,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                {
                   Pnew = Ptmp;
                   Ptmp = NULL;
-		  Ptmp = hypre_ParMatmul(C,Pnew);
+		  //Ptmp = hypre_ParMatmul(C,Pnew);
+		  Ptmp = hypre_ParCSRMatMat(C,Pnew);
                   if (ns_tmp < ns)
 			hypre_ParCSRMatrixDestroy(Pnew);
 		  ns_tmp--;
@@ -2365,8 +2375,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          {
             /* Construct AP, and then RAP */
             hypre_ParCSRMatrix *Q = NULL;
-            Q = hypre_ParMatmul(A_array[level],P_array[level]);
-            A_H = hypre_ParTMatmul(P_array[level],Q);
+            Q = hypre_ParCSRMatMat(A_array[level],P_array[level]);
+            A_H = hypre_ParCSRTMatMatKT(P_array[level],Q,keepTranspose);
+            /*Q = hypre_ParMatmul(A_array[level],P_array[level]);
+            A_H = hypre_ParTMatmul(P_array[level],Q);*/
             hypre_ParCSRMatrixRowStarts(A_H) = hypre_ParCSRMatrixColStarts(A_H);
             hypre_ParCSRMatrixOwnsRowStarts(A_H) = 1;
             hypre_ParCSRMatrixOwnsColStarts(A_H) = 0;
@@ -2390,8 +2402,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          {
             /* Use two matrix products to generate A_H */
             hypre_ParCSRMatrix *AP = NULL;
-            AP  = hypre_ParMatmul(A_array[level], P_array[level]);
-            A_H = hypre_ParMatmul(R_array[level], AP);
+            AP  = hypre_ParCSRMatMat(A_array[level], P_array[level]);
+            A_H = hypre_ParCSRMatMat(R_array[level], AP);
+            /*AP  = hypre_ParMatmul(A_array[level], P_array[level]);
+            A_H = hypre_ParMatmul(R_array[level], AP);*/
             /* RL: XXX NEED TO CHECK THIS WITH UMY */
             hypre_ParCSRMatrixOwnsRowStarts(A_H) = 1;
             hypre_ParCSRMatrixOwnsColStarts(A_H) = 0;
@@ -2420,8 +2434,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          {
             /* Use two matrix products to generate A_H */
             hypre_ParCSRMatrix *Q = NULL;
-            Q = hypre_ParMatmul(A_array[level],P_array[level]);
-            A_H = hypre_ParTMatmul(P_array[level],Q);
+            Q = hypre_ParCSRMatMat(A_array[level], P_array[level]);
+            A_H = hypre_ParCSRTMatMatKT(P_array[level], Q, keepTranspose);
+            /*Q = hypre_ParMatmul(A_array[level],P_array[level]);
+            A_H = hypre_ParTMatmul(P_array[level],Q);*/
             hypre_ParCSRMatrixOwnsRowStarts(A_H) = 1;
             hypre_ParCSRMatrixOwnsColStarts(A_H) = 0;
             hypre_ParCSRMatrixOwnsColStarts(P_array[level]) = 0;
@@ -2432,8 +2448,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          else
          {
             /* Compute standard Galerkin coarse-grid product */
-            hypre_BoomerAMGBuildCoarseOperatorKT(P_array[level], A_array[level] ,
-                                        P_array[level], keepTranspose, &A_H);
+            A_H = hypre_ParCSRMatrixRAPKT(P_array[level], A_array[level] ,
+                                        P_array[level], keepTranspose);
+            /*hypre_BoomerAMGBuildCoarseOperatorKT(P_array[level], A_array[level] ,
+                                        P_array[level], keepTranspose, &A_H);*/
             if (Pnew && ns==1)
             {
                hypre_ParCSRMatrixDestroy(P);

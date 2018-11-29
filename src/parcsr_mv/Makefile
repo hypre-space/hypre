@@ -54,6 +54,7 @@ FILES =\
  par_csr_matrix.c\
  par_csr_matop_marked.c\
  par_csr_matvec.c\
+ par_csr_triplemat.c\
  par_vector.c\
  par_make_system.c
 
