@@ -2031,7 +2031,7 @@ GetPartition(HYPRE_Int partition_size)
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
 
    HYPRE_Int partition;
-   HYPRE_Int dim = 3;
+   HYPRE_Int dim = 2;
 
    if (dim == 2)
    {
