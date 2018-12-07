@@ -752,6 +752,16 @@ configure_file (
 # BINARY must be first in order to get the correct HYPRE_config.h file
 include_directories(${hypre_BINARY_DIR})
 include_directories(${hypre_SOURCE_DIR})
+
+
+
+# !!! Include ParMETIS: what is the proper way to do this? Need to also make changes in regular makefiles?
+include_directories(../../parmetis-4.0.3/include/)
+include_directories(../../parmetis-4.0.3/metis/include)
+
+
+
+
 include_directories(blas)
 include_directories(lapack)
 include_directories(utilities)
