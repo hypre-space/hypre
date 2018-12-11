@@ -38,13 +38,16 @@ typedef struct
    HYPRE_Int         transition_level; // transition level used for adaptive AMG-RD (at this level and below, each proc owns the global grids)
    HYPRE_Int         *transition_res_recv_sizes; // if using the transition level, these are the recv sizes for the Allgatherv
    HYPRE_Int         *transition_res_recv_disps; // if useing the transition level, these are the recv displacements for the Allgatherv
-	HYPRE_Int 			*num_procs; // number of neighbor procs to communicate with
+	HYPRE_Int 			*num_send_procs; // number of send procs to communicate with
+   HYPRE_Int         *num_recv_procs; // number of recv procs to communicate with
 	HYPRE_Int 			*num_partitions; // number of neighbor paritions to communicate with
-   MPI_Comm          *agglomeration_comms; // local communicators for processor agglomeration on different levels
+   MPI_Comm          *agg_local_comms; // local communicators for processor agglomeration on different levels
+   MPI_Comm          *agg_global_comms; // global communicators between agglomerated partitions on different levels
 
-   HYPRE_Int         **procs; // list of neighbor procs
+   HYPRE_Int         **send_procs; // list of send procs
+   HYPRE_Int         **recv_procs; // list of recv procs
    HYPRE_Int         **partitions; // list of neighbor partitions
-   HYPRE_Int         **proc_partitions; // list of which partition each neighbor proc belongs to
+   HYPRE_Int         **send_proc_partitions; // list of which partition each send proc belongs to
    HYPRE_Int         **send_map_starts; // send map starts from comm pkg of A^eta on each level
    HYPRE_Int         **send_map_elmts; // send map elmts from comm pkg of A^eta on each level
    HYPRE_Int         **ghost_marker; // marks send elmts as ghost or real dofs for the associated processor
@@ -67,12 +70,15 @@ typedef struct
  #define hypre_ParCompGridCommPkgTransitionLevel(compGridCommPkg)          ((compGridCommPkg) -> transition_level)
  #define hypre_ParCompGridCommPkgTransitionResRecvSizes(compGridCommPkg)          ((compGridCommPkg) -> transition_res_recv_sizes)
  #define hypre_ParCompGridCommPkgTransitionResRecvDisps(compGridCommPkg)          ((compGridCommPkg) -> transition_res_recv_disps)
- #define hypre_ParCompGridCommPkgNumProcs(compGridCommPkg)				((compGridCommPkg) -> num_procs)
+ #define hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)				((compGridCommPkg) -> num_send_procs)
+ #define hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg)           ((compGridCommPkg) -> num_recv_procs)
  #define hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg)				((compGridCommPkg) -> num_partitions)
- #define hypre_ParCompGridCommPkgAgglomerationComms(compGridCommPkg)       ((compGridCommPkg) -> agglomeration_comms)
- #define hypre_ParCompGridCommPkgProcs(compGridCommPkg)           ((compGridCommPkg) -> procs)
+ #define hypre_ParCompGridCommPkgAggLocalComms(compGridCommPkg)       ((compGridCommPkg) -> agg_local_comms)
+ #define hypre_ParCompGridCommPkgAggGlobalComms(compGridCommPkg)       ((compGridCommPkg) -> agg_global_comms)
+ #define hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)           ((compGridCommPkg) -> send_procs)
+ #define hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)           ((compGridCommPkg) -> recv_procs)
  #define hypre_ParCompGridCommPkgPartitions(compGridCommPkg)           ((compGridCommPkg) -> partitions)
- #define hypre_ParCompGridCommPkgProcPartitions(compGridCommPkg)           ((compGridCommPkg) -> proc_partitions)
+ #define hypre_ParCompGridCommPkgSendProcPartitions(compGridCommPkg)           ((compGridCommPkg) -> send_proc_partitions)
  #define hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)           ((compGridCommPkg) -> send_map_starts)
  #define hypre_ParCompGridCommPkgSendMapElmts(compGridCommPkg)           ((compGridCommPkg) -> send_map_elmts)
  #define hypre_ParCompGridCommPkgGhostMarker(compGridCommPkg)           ((compGridCommPkg) -> ghost_marker)
