@@ -467,7 +467,7 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
          request_counter = 0;
          requests = hypre_CTAlloc(hypre_MPI_Request, num_send_procs + num_recv_procs, HYPRE_MEMORY_HOST );
          status = hypre_CTAlloc(hypre_MPI_Status, num_send_procs + num_recv_procs, HYPRE_MEMORY_HOST );
-         send_buffer = hypre_CTAlloc(HYPRE_Complex*, num_send_procs, HYPRE_MEMORY_HOST);
+         send_buffer = hypre_CTAlloc(HYPRE_Complex*, num_partitions, HYPRE_MEMORY_HOST);
 
          // allocate space for the receive buffers and post the receives
          for (i = 0; i < num_recv_procs; i++)
@@ -488,16 +488,8 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
             hypre_MPI_Isend(send_buffer[buffer_index], send_buffer_size[level][buffer_index], HYPRE_MPI_COMPLEX, send_procs[level][i], 3, comm, &requests[request_counter++]);
          }
 
-         #if DEBUGGING_MESSAGES
-         hypre_printf("    Posted sends and recvs on level %d, rank %d\n", level, myid);
-         #endif
-
          // wait for buffers to be received
          hypre_MPI_Waitall( num_send_procs + num_recv_procs, requests, status );
-
-         #if DEBUGGING_MESSAGES
-         hypre_printf("    Finished waiting on level %d, rank %d\n", level, myid);
-         #endif
 
          hypre_TFree(requests, HYPRE_MEMORY_HOST);
          hypre_TFree(status, HYPRE_MEMORY_HOST);
@@ -523,7 +515,9 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
       }
 
       #if DEBUGGING_MESSAGES
-      hypre_printf("    Finished residual communication on level %d, rank %d\n", level, myid);
+      hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+      if (myid == 0) hypre_printf("   Finished residual communication on level %d on all ranks\n", level);
+      hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
       #endif
 
    }
