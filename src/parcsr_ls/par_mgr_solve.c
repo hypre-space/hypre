@@ -211,7 +211,7 @@ hypre_MGRSolve( void               *mgr_vdata,
       if (global_smooth_type == 0)//block Jacobi smoother
 	    {
 	      for (i = 0;i < global_smooth_iters;i ++)
-	  	    hypre_block_jacobi(A_array[0],F_array[0],U_array[0],blk_size,n_block,left_size,diaginv,Vtemp);
+	  	    hypre_blockRelax_solve(A_array[0],F_array[0],U_array[0],blk_size,n_block,left_size,global_smooth_type,diaginv,Vtemp);
 	    }
 	    else if ((global_smooth_type > 0) && (global_smooth_type < 7))
 	    {

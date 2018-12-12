@@ -611,7 +611,7 @@ hypre_MGRSetup( void               *mgr_vdata,
     num_interp_sweeps = (mgr_data -> num_interp_sweeps);
 
     hypre_MGRBuildInterp(A_array[lev], CF_marker_array[lev], S, coarse_pnts_global, 1, dof_func_buff, 
-                          debug_flag, trunc_factor, max_elmts, col_offd_S_to_A, &P, 1, interp_type[lev], num_interp_sweeps);
+                          debug_flag, trunc_factor, max_elmts, col_offd_S_to_A, &P, interp_type[lev], num_interp_sweeps);
     
     P_array[lev] = P;
 
@@ -692,7 +692,7 @@ hypre_MGRSetup( void               *mgr_vdata,
 
       num_restrict_sweeps = (mgr_data -> num_restrict_sweeps); /* restriction */
       hypre_MGRBuildInterp(AT, CF_marker_array[lev], ST, coarse_pnts_global, 1, dof_func_buff,
-            debug_flag, trunc_factor, max_elmts, col_offd_ST_to_AT, &RT, 1, restrict_type[lev], num_restrict_sweeps);
+            debug_flag, trunc_factor, max_elmts, col_offd_ST_to_AT, &RT, restrict_type[lev], num_restrict_sweeps);
             
       RT_array[lev] = RT;
 
