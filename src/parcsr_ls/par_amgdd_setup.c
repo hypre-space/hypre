@@ -155,6 +155,14 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    //             4: residual # messages, 5: residual comm volume,
    //             6: direct communication stencil for composite grid level ]
 
+
+
+   // !!! Debug
+   // use_barriers = 1;
+
+
+
+
    char filename[256];
 
    HYPRE_Int   myid, num_procs;
@@ -347,28 +355,6 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
 
 
 
-            // !!! Debug
-            // for (i = 0; i < num_procs; i++)
-            // {
-            //    if (myid == i)
-            //    {
-            //       printf("Rank %d:\n", myid);
-            //       printf("   SendProcs: ");
-            //       for (j = 0; j < hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[level]; j++) printf("%d ", hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level][j]);
-            //       printf("\n");
-            //       printf("   RecvProcs: ");
-            //       for (j = 0; j < hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg)[level]; j++) printf("%d ", hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[level][j]);
-            //       printf("\n");
-            //       printf("   Partitions: ");
-            //       for (j = 0; j < hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg)[level]; j++) printf("%d ", hypre_ParCompGridCommPkgPartitions(compGridCommPkg)[level][j]);
-            //       printf("\n");
-            //       printf("   SendProcPartitions: ");
-            //       for (j = 0; j < hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[level]; j++) printf("%d ", hypre_ParCompGridCommPkgSendProcPartitions(compGridCommPkg)[level][j]);
-            //       printf("\n");
-            //    }
-            //    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
-            // }
-
             // Update global stencil info !!! Make sure this is how you want to do it (as opposed to accounting for num sends in the case of unequal partition sizes)
             for (i = 0; i < transition_level; i++) local_stencil[i] = hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg)[i];
             hypre_MPI_Allreduce(local_stencil, global_stencil, transition_level, HYPRE_MPI_INT, MPI_MAX, hypre_MPI_COMM_WORLD);
@@ -383,6 +369,41 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    }
    hypre_TFree(local_stencil, HYPRE_MEMORY_HOST);
    hypre_TFree(global_stencil, HYPRE_MEMORY_HOST);
+
+
+
+
+
+
+
+   // !!! Debug
+   // for (i = 0; i < num_procs; i++)
+   // {
+   //    if (myid == i && (i == 35 || i == 63))
+   //    {
+   //       printf("Rank %d, level %d:\n", myid, transition_level - 1);
+   //       printf("   SendProcs: ");
+   //       for (j = 0; j < hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[transition_level - 1]; j++) printf("%d ", hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[transition_level - 1][j]);
+   //       printf("\n");
+   //       printf("   RecvProcs: ");
+   //       for (j = 0; j < hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg)[transition_level - 1]; j++) printf("%d ", hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[transition_level - 1][j]);
+   //       printf("\n");
+   //       printf("   Partitions: ");
+   //       for (j = 0; j < hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg)[transition_level - 1]; j++) printf("%d ", hypre_ParCompGridCommPkgPartitions(compGridCommPkg)[transition_level - 1][j]);
+   //       printf("\n");
+   //       printf("   SendProcPartitions: ");
+   //       for (j = 0; j < hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[transition_level - 1]; j++) printf("%d ", hypre_ParCompGridCommPkgSendProcPartitions(compGridCommPkg)[transition_level - 1][j]);
+   //       printf("\n");
+   //    }
+   //    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   // }
+
+
+
+
+
+
+
 
    if (timers) hypre_EndTiming(timers[0]);
 
@@ -449,6 +470,29 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
                                              num_ghost_layers, hypre_ParCompGridCommPkgPartitions(compGridCommPkg)[level][i], communication_cost );
          }
 
+
+
+
+         // !!! Debug
+         // if (level == 4 && myid == 38)
+         // {
+         //    for (i = 0; i < num_send_procs; i++)
+         //    {
+         //       if (hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level][i] == 15)
+         //       {
+         //          HYPRE_Int buffer_index = hypre_ParCompGridCommPkgSendProcPartitions(compGridCommPkg)[level][i];
+         //          printf("Rank 38 num_send_nodes = %d, send_flag[4][%d][5] = \n", num_send_nodes[4][buffer_index][5], buffer_index);
+         //          for (j = 0; j < num_send_nodes[4][buffer_index][5]; j++) printf("%d ", send_flag[4][buffer_index][5][j]);
+         //          printf("\n");
+         //       }
+         //    }
+         // }
+
+
+
+
+
+
          if (timers) hypre_EndTiming(timers[1]);
 
          if (use_barriers) hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
@@ -481,6 +525,9 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
 
          // wait for all buffer sizes to be received
          hypre_MPI_Waitall( num_send_procs + num_recv_procs, requests, status );
+
+         // !!! Debug
+         // printf("Level %d, rank %d, sizes recieved\n", level, myid);
 
          // free and reallocate space for the requests and status
          hypre_TFree(requests, HYPRE_MEMORY_HOST);
@@ -517,6 +564,10 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
          // wait for buffers to be received
          hypre_MPI_Waitall( num_send_procs + num_recv_procs, requests, status );
 
+         // !!! Debug
+         // printf("Level %d, rank %d, buffers recieved\n", level, myid);
+         
+
          // free and reallocate space for the requests and status
          hypre_TFree(requests, HYPRE_MEMORY_HOST);
          hypre_TFree(status, HYPRE_MEMORY_HOST);
@@ -532,6 +583,15 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
          // unpack the buffers
          for (i = 0; i < num_recv_procs; i++)
          {
+
+
+            // !!! Debug
+            // if (level == 4 && myid == 10 || myid == 15)
+            // {
+            //    printf("Rank %d unpacking buffer from partition %d\n", myid, hypre_ParCompGridCommPkgPartitions(compGridCommPkg)[level][i]);
+            // }
+
+
             recv_map_send[i] = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
             num_recv_nodes[level][i] = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
             num_incoming_nodes[i] = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
@@ -541,12 +601,67 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
                num_recv_nodes, &(recv_map_send_buffer_size[i]), level, num_levels, transition_level, num_added_nodes, num_incoming_nodes, i);
          }
 
+
+
+
+
+
+
+
+         // !!! Debug
+         // if (level == 4 && myid == 15)
+         // {
+         //    for (i = 0; i < num_recv_procs; i++)
+         //    {
+         //       if (hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[level][i] == 38)
+         //       {
+         //          printf("Rank 15 num_incoming_nodes = %d, recv_map_send[%d][5] = \n", num_incoming_nodes[i][5], i);
+         //          for (j = 0; j < num_incoming_nodes[i][5]; j++) printf("%d ", recv_map_send[i][5][j]);
+         //          printf("\n");
+         //       }
+         //    }
+         // }
+
+
+
+
+
+
+
+
+
          if (timers) hypre_EndTiming(timers[4]);
 
          // Setup local indices for the composite grid
          if (use_barriers) hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
          if (timers) hypre_BeginTiming(timers[5]);
          
+
+
+
+
+
+
+
+
+         // !!! Debug
+         // if (level == 4 && myid == 10)
+         // {
+         //    for (i = 0; i < num_recv_procs; i++)
+         //    {
+         //       if (hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[level][i] == 38)
+         //       {
+         //          printf("Rank 10 num_incoming_nodes = %d, recv_map_send[%d][5] = \n", num_incoming_nodes[i][5], i);
+         //          for (j = 0; j < num_incoming_nodes[i][5]; j++) printf("%d ", recv_map_send[i][5][j]);
+         //          printf("\n");
+         //       }
+         //    }
+         // }
+
+
+
+
+
          hypre_ParCompGridSetupLocalIndices(compGrid, num_added_nodes, transition_level);
 
          if (timers) hypre_EndTiming(timers[5]);
@@ -564,6 +679,14 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
             // !!! Check send_flag_buffer_size (make sure not overallocated)
             send_flag_buffer[i] = hypre_CTAlloc(HYPRE_Int, send_flag_buffer_size[i], HYPRE_MEMORY_HOST);
             hypre_MPI_Irecv( send_flag_buffer[i], send_flag_buffer_size[i], HYPRE_MPI_INT, hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[level][i], 2, comm, &requests[request_counter++]);
+         
+            // !!! Debug
+            // if (level == 4 && myid == 38 && i == 3)
+            // if (myid == 63 && hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[level][i] == 35)
+            // {
+            //    printf("Rank %d sending to %d, send_flag_buffer_size[%d] = %d\n", hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[level][i], myid, i, send_flag_buffer_size[i]);
+            // }
+
          }
 
          // send recv_map_send to procs received from to become their send maps
@@ -579,6 +702,16 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
          {
             HYPRE_Int buffer_index = hypre_ParCompGridCommPkgSendProcPartitions(compGridCommPkg)[level][i];
             // !!! Check recv_map_send_buffer_size (make sure not overallocated)
+            
+
+            // !!! Debug
+            // if (level == 4 && hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level][i] == 38 && myid == 10) 
+            // if (hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level][i] == 63 && myid == 35) 
+            // {
+            //    printf("Rank %d sending to %d recv_map_send_buffer_size[%d] = %d\n",myid, hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level][i], buffer_index, recv_map_send_buffer_size[buffer_index]);
+            //    printf("recv_map_send_buffer = [%d, %d, %d]\n", recv_map_send_buffer[buffer_index][0], recv_map_send_buffer[buffer_index][1], recv_map_send_buffer[buffer_index][2]);
+            // }
+
             hypre_MPI_Isend( recv_map_send_buffer[buffer_index], recv_map_send_buffer_size[buffer_index], HYPRE_MPI_INT, hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level][i], 2, comm, &requests[request_counter++]);
             if (communication_cost)
             {
@@ -592,11 +725,42 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
          for (i = 0; i < num_neighbor_partitions; i++) hypre_TFree(recv_map_send_buffer[i], HYPRE_MEMORY_HOST);
          hypre_TFree(recv_map_send_buffer, HYPRE_MEMORY_HOST);
 
+         // !!! Debug
+         // printf("Level %d, rank %d, send flag recieved\n", level, myid);
+
          // unpack and setup the send flag arrays
          for (i = 0; i < num_recv_procs; i++)
          {
             UnpackSendFlagBuffer(send_flag_buffer[i], send_flag[level][i], &(send_buffer_size[level][i]), level, num_levels);
          }
+
+
+
+
+
+
+
+         // !!! Debug
+         // if (level == 4 && myid == 38)
+         // {
+         //    for (i = 0; i < num_send_procs; i++)
+         //    {
+         //       if (hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level][i] == 15)
+         //       {
+         //          HYPRE_Int buffer_index = hypre_ParCompGridCommPkgSendProcPartitions(compGridCommPkg)[level][i];
+         //          printf("Rank 38 num_send_nodes = %d, send_flag[4][%d][5] = \n", num_send_nodes[4][buffer_index][5], buffer_index);
+         //          for (j = 0; j < num_send_nodes[4][buffer_index][5]; j++) printf("%d ", send_flag[4][buffer_index][5][j]);
+         //          printf("\n");
+         //       }
+         //    }
+         // }
+
+
+
+
+
+
+
 
          // finalize the recv maps and get final recv buffer size
          for (i = 0; i < num_recv_procs; i++)
@@ -728,8 +892,8 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
 
 
    // !!! Debug
-   hypre_MPI_Finalize();
-   exit(0);
+   // hypre_MPI_Finalize();
+   // exit(0);
 
 
 
@@ -1939,7 +2103,7 @@ AgglomerateProcessors(hypre_ParAMGData *amg_data, hypre_ParCompGridCommPkg *init
 
 
    // !!! Debug
-   if (local_myid == 0) printf("Level %d, Partition size = %d\n", current_level, num_procs);
+   // if (local_myid == 0) printf("Level %d, Partition size = %d\n", current_level, num_procs);
 
 
 
@@ -2466,28 +2630,42 @@ AllgatherCommunicationInfo(hypre_ParAMGData *amg_data, HYPRE_Int level, MPI_Comm
    HYPRE_Int *ghost_marker = hypre_CTAlloc(HYPRE_Int, total_send_elmts, HYPRE_MEMORY_HOST);
    total_send_elmts = 0;   
    HYPRE_Int num_send_procs = 0;
+
+
+
+
+
+   // !!! HERE !!!
+   // Want to sort the partitions so that everyone in the same local partition has same list in same order.
+   HYPRE_Int *sorted_indices = hypre_CTAlloc(HYPRE_Int, num_comm_partitions, HYPRE_MEMORY_HOST);
+   for (i = 0; i < num_comm_partitions; i++) sorted_indices[i] = i;
+   hypre_qsort2i(comm_partitions, sorted_indices, 0, num_comm_partitions-1);
+
+   
+
+
    for (i = 0; i < num_comm_partitions; i++)
    {
       // Figure out ranks of communication partners in this partition. 
       // NOTE: num_procs, myid are both for the local allgather comm. num_ranks is in other partition's local comm
-      HYPRE_Int num_ranks = comm_partition_ranks[i][0];
-      recv_procs[i] = comm_partition_ranks[i][1 + (myid % num_ranks)];
+      HYPRE_Int num_ranks = comm_partition_ranks[ sorted_indices[i] ][0];
+      recv_procs[i] = comm_partition_ranks[ sorted_indices[i] ][1 + (myid % num_ranks)];
       for (j = 0; j < ((num_ranks-1)/num_procs)+1; j++)
       {
          if (j*num_procs + myid < num_ranks)
          {
-            send_procs[num_send_procs] = comm_partition_ranks[i][1 + j*num_procs + myid];
+            send_procs[num_send_procs] = comm_partition_ranks[ sorted_indices[i] ][1 + j*num_procs + myid];
             send_proc_partitions[num_send_procs] = i;
             num_send_procs++;
          }
       }
-      for (j = 0; j < comm_partition_num_send_elmts[i]; j++)
+      for (j = 0; j < comm_partition_num_send_elmts[ sorted_indices[i] ]; j++)
       {
-         send_map_elmts[total_send_elmts + j] = comm_partition_send_elmts[i][j];
-         ghost_marker[total_send_elmts + j] = comm_partition_ghost_marker[i][j];
+         send_map_elmts[total_send_elmts + j] = comm_partition_send_elmts[ sorted_indices[i] ][j];
+         ghost_marker[total_send_elmts + j] = comm_partition_ghost_marker[ sorted_indices[i] ][j];
       }
       send_map_starts[i] = total_send_elmts;
-      total_send_elmts += comm_partition_num_send_elmts[i];
+      total_send_elmts += comm_partition_num_send_elmts[ sorted_indices[i] ];
    }
    send_map_starts[num_comm_partitions] = total_send_elmts;
 
@@ -3289,7 +3467,7 @@ CommunicateRemainingMatrixInfo(hypre_ParCompGrid **compGrid, hypre_ParCompGridCo
             hypre_MPI_Isend(&(send_sizes[2*buffer_index]), 2, HYPRE_MPI_INT, send_procs[proc], 1, hypre_MPI_COMM_WORLD, &(size_requests[request_cnt++]));
             
             // !!! Debug
-            printf("Rank %d: send to rank %d, send_sizes = %d, %d\n", myid, send_procs[proc], send_sizes[2*buffer_index], send_sizes[2*buffer_index+1]);
+            // printf("Rank %d: send to rank %d, send_sizes = %d, %d\n", myid, send_procs[proc], send_sizes[2*buffer_index], send_sizes[2*buffer_index+1]);
 
             if (communication_cost)
             {
@@ -3381,7 +3559,7 @@ CommunicateRemainingMatrixInfo(hypre_ParCompGrid **compGrid, hypre_ParCompGridCo
          for (proc = 0; proc < num_recv_procs; proc++)
          {
             // !!! Debug
-            printf("Rank %d: recv from rank %d, recv sizes = %d, %d\n", myid, recv_procs[proc], recv_sizes[2*proc], recv_sizes[2*proc+1]);
+            // printf("Rank %d: recv from rank %d, recv sizes = %d, %d\n", myid, recv_procs[proc], recv_sizes[2*proc], recv_sizes[2*proc+1]);
 
             int_recv_buffers[proc] = hypre_CTAlloc(HYPRE_Int, recv_sizes[2*proc], HYPRE_MEMORY_HOST);
             complex_recv_buffers[proc] = hypre_CTAlloc(HYPRE_Complex, recv_sizes[2*proc+1], HYPRE_MEMORY_HOST);
@@ -3414,9 +3592,9 @@ CommunicateRemainingMatrixInfo(hypre_ParCompGrid **compGrid, hypre_ParCompGridCo
                   for (j = hypre_ParCompGridARowPtr(compGrid[level])[idx]; j < hypre_ParCompGridARowPtr(compGrid[level])[idx+1]; j++)
                   {
                      // !!! Debug
-                     if (complex_cnt >= recv_sizes[2*proc+1]) 
-                        printf("Error: complex_cnt = %d, recv_size = %d, rank %d, outer_level %d, proc %d, level %d\n", 
-                           complex_cnt, recv_sizes[2*proc+1], myid, outer_level, proc, level);
+                     // if (complex_cnt >= recv_sizes[2*proc+1]) 
+                     //    printf("Error: complex_cnt = %d, recv_size = %d, rank %d, outer_level %d, proc %d, level %d\n", 
+                     //       complex_cnt, recv_sizes[2*proc+1], myid, outer_level, proc, level);
                      
                      hypre_ParCompGridAData(compGrid[level])[j] = complex_recv_buffers[proc][complex_cnt++];
                   }
@@ -3506,30 +3684,30 @@ CommunicateRemainingMatrixInfo(hypre_ParCompGrid **compGrid, hypre_ParCompGridCo
 }
 
 HYPRE_Int
-FinalizeSendFlag(HYPRE_Int ****send_flag, HYPRE_Int ***num_send_nodes, HYPRE_Int *num_sends, HYPRE_Int num_levels)
+FinalizeSendFlag(HYPRE_Int ****send_flag, HYPRE_Int ***num_send_nodes, HYPRE_Int *num_partitions, HYPRE_Int num_levels)
 {
-   HYPRE_Int      level, proc, inner_lvl, i, cnt;
+   HYPRE_Int      level, part, inner_lvl, i, cnt;
    HYPRE_Int      num_nodes;
 
    cnt = 0;
    for (level = 0; level < num_levels; level++)
    {
-      for (proc = 0; proc < num_sends[level]; proc++)
+      for (part = 0; part < num_partitions[level]; part++)
       {
          for (inner_lvl = level; inner_lvl < num_levels; inner_lvl++)
          {
-            num_nodes = num_send_nodes[level][proc][inner_lvl];
-            num_send_nodes[level][proc][inner_lvl] = 0;
+            num_nodes = num_send_nodes[level][part][inner_lvl];
+            num_send_nodes[level][part][inner_lvl] = 0;
 
             for (i = 0; i < num_nodes; i++)
             {
-               if (send_flag[level][proc][inner_lvl][i] >= 0) 
+               if (send_flag[level][part][inner_lvl][i] >= 0) 
                {
                   // discard indices of nodes in send_flag that will not be sent in the future and count the send buffer size
-                  send_flag[level][proc][inner_lvl][ num_send_nodes[level][proc][inner_lvl]++ ] = send_flag[level][proc][inner_lvl][i];
+                  send_flag[level][part][inner_lvl][ num_send_nodes[level][part][inner_lvl]++ ] = send_flag[level][part][inner_lvl][i];
                }
             }
-            send_flag[level][proc][inner_lvl] = hypre_TReAlloc(send_flag[level][proc][inner_lvl], HYPRE_Int, num_send_nodes[level][proc][inner_lvl], HYPRE_MEMORY_HOST);
+            send_flag[level][part][inner_lvl] = hypre_TReAlloc(send_flag[level][part][inner_lvl], HYPRE_Int, num_send_nodes[level][part][inner_lvl], HYPRE_MEMORY_HOST);
          }
       }
    }
@@ -3949,6 +4127,9 @@ CheckCompGridLocalIndices(hypre_ParAMGData *amg_data)
 
 HYPRE_Int CheckCompGridCommPkg(hypre_ParCompGridCommPkg *compGridCommPkg)
 {
+   HYPRE_Int myid;
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+
    HYPRE_Int i, j, level;
    HYPRE_Int num_levels = hypre_ParCompGridCommPkgNumLevels(compGridCommPkg);
 
@@ -3995,7 +4176,8 @@ HYPRE_Int CheckCompGridCommPkg(hypre_ParCompGridCommPkg *compGridCommPkg)
          for (j = level; j < num_levels; j++)
          {
             if (hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[level][i][j] != recv_buffers[i][j - level]) 
-               printf("Error: num nodes sent is not equal to num nodes expected to receive\n");
+               printf("Error: level %d, inner level %d, rank %d sending to rank %d, nodes sent = %d, nodes recieved = %d\n",
+                  level, j, hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[level][i], myid, recv_buffers[i][j - level], hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[level][i][j]);
          }
       }
 
