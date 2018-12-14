@@ -71,6 +71,7 @@ typedef struct
    HYPRE_Int         **recv_procs; // list of recv procs
    HYPRE_Int         **partitions; // list of neighbor partitions
    HYPRE_Int         **send_proc_partitions; // list of which partition each send proc belongs to
+   HYPRE_Int         ***partition_ranks; // list of ranks that belong to each partition in partitions
    HYPRE_Int         **send_map_starts; // send map starts from comm pkg of A^eta on each level
    HYPRE_Int         **send_map_elmts; // send map elmts from comm pkg of A^eta on each level
    HYPRE_Int         **ghost_marker; // marks send elmts as ghost or real dofs for the associated processor
@@ -102,6 +103,7 @@ typedef struct
  #define hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)           ((compGridCommPkg) -> recv_procs)
  #define hypre_ParCompGridCommPkgPartitions(compGridCommPkg)           ((compGridCommPkg) -> partitions)
  #define hypre_ParCompGridCommPkgSendProcPartitions(compGridCommPkg)           ((compGridCommPkg) -> send_proc_partitions)
+ #define hypre_ParCompGridCommPkgPartitionRanks(compGridCommPkg)               ((compGridCommPkg) -> partition_ranks)
  #define hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)           ((compGridCommPkg) -> send_map_starts)
  #define hypre_ParCompGridCommPkgSendMapElmts(compGridCommPkg)           ((compGridCommPkg) -> send_map_elmts)
  #define hypre_ParCompGridCommPkgGhostMarker(compGridCommPkg)           ((compGridCommPkg) -> ghost_marker)

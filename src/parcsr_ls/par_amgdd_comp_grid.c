@@ -1156,6 +1156,7 @@ hypre_ParCompGridCommPkgCreate()
    hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg) = NULL;
    hypre_ParCompGridCommPkgPartitions(compGridCommPkg) = NULL;
    hypre_ParCompGridCommPkgSendProcPartitions(compGridCommPkg) = NULL;
+   hypre_ParCompGridCommPkgPartitionRanks(compGridCommPkg) = NULL;
    hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg) = NULL;
    hypre_ParCompGridCommPkgSendMapElmts(compGridCommPkg) = NULL;
    hypre_ParCompGridCommPkgGhostMarker(compGridCommPkg) = NULL;
@@ -1255,6 +1256,22 @@ hypre_ParCompGridCommPkgDestroy( hypre_ParCompGridCommPkg *compGridCommPkg )
          hypre_TFree(hypre_ParCompGridCommPkgSendProcPartitions(compGridCommPkg)[i], HYPRE_MEMORY_HOST);
       }
       hypre_TFree(hypre_ParCompGridCommPkgSendProcPartitions(compGridCommPkg), HYPRE_MEMORY_HOST);
+   }
+
+   if ( hypre_ParCompGridCommPkgPartitionRanks(compGridCommPkg) )
+   {
+      for (i = 0; i < hypre_ParCompGridCommPkgNumLevels(compGridCommPkg); i++)
+      {
+         if (hypre_ParCompGridCommPkgPartitionRanks(compGridCommPkg)[i])
+         {
+            for (j = 0; j < hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg)[i]; j++)
+            {
+               hypre_TFree(hypre_ParCompGridCommPkgPartitionRanks(compGridCommPkg)[i][j], HYPRE_MEMORY_HOST);
+            }
+            hypre_TFree(hypre_ParCompGridCommPkgPartitionRanks(compGridCommPkg)[i], HYPRE_MEMORY_HOST);
+         }
+      }
+      hypre_TFree(hypre_ParCompGridCommPkgPartitionRanks(compGridCommPkg), HYPRE_MEMORY_HOST);
    }
 
    if ( hypre_ParCompGridCommPkgSendBufferSize(compGridCommPkg) )
@@ -1510,6 +1527,26 @@ hypre_ParCompGridCommPkgCopy( hypre_ParCompGridCommPkg *compGridCommPkg )
          hypre_ParCompGridCommPkgSendProcPartitions(copy_compGridCommPkg)[i] = hypre_CTAlloc(HYPRE_Int, num_comm_procs, HYPRE_MEMORY_HOST);
          for (j = 0; j < num_comm_procs; j++)
             hypre_ParCompGridCommPkgSendProcPartitions(copy_compGridCommPkg)[i][j] = hypre_ParCompGridCommPkgSendProcPartitions(compGridCommPkg)[i][j];
+      }
+   }
+
+   if ( hypre_ParCompGridCommPkgPartitionRanks(compGridCommPkg) )
+   {
+      hypre_ParCompGridCommPkgPartitionRanks(copy_compGridCommPkg) = hypre_CTAlloc(HYPRE_Int**, num_levels, HYPRE_MEMORY_HOST);
+      for (i = 0; i < hypre_ParCompGridCommPkgNumLevels(compGridCommPkg); i++)
+      {
+         if (hypre_ParCompGridCommPkgPartitionRanks(compGridCommPkg)[i])
+         {
+            hypre_ParCompGridCommPkgPartitionRanks(copy_compGridCommPkg)[i] = hypre_CTAlloc(HYPRE_Int*, hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg)[i], HYPRE_MEMORY_HOST);
+            for (j = 0; j < hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg)[i]; j++)
+            {
+               hypre_ParCompGridCommPkgPartitionRanks(copy_compGridCommPkg)[i][j] = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridCommPkgPartitionRanks(compGridCommPkg)[i][j][0]+1, HYPRE_MEMORY_HOST);
+               for (k = 0; k < hypre_ParCompGridCommPkgPartitionRanks(compGridCommPkg)[i][j][0]+1; k++)
+               {
+                  hypre_ParCompGridCommPkgPartitionRanks(copy_compGridCommPkg)[i][j][k] = hypre_ParCompGridCommPkgPartitionRanks(compGridCommPkg)[i][j][k];
+               }
+            }
+         }
       }
    }
 
