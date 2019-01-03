@@ -281,8 +281,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
       for (level = 0; level < transition_level; level++)
       {
          compGrid[level] = hypre_ParCompGridCreate();
-         if (level != num_levels-1) hypre_ParCompGridInitialize( compGrid[level], F_array[level], CF_marker_array[level], proc_first_index[level+1], A_array[level], P_array[level] );
-         else hypre_ParCompGridInitialize( compGrid[level], F_array[level], CF_marker_array[level], 0, A_array[level], NULL );
+         hypre_ParCompGridInitialize( amg_data, level );
       }
    }
    // Otherwise just initialize comp grid on all levels
@@ -292,8 +291,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
       for (level = 0; level < num_levels; level++)
       {
          compGrid[level] = hypre_ParCompGridCreate();
-         if (level != num_levels-1) hypre_ParCompGridInitialize( compGrid[level], F_array[level], CF_marker_array[level], proc_first_index[level+1], A_array[level], P_array[level] );
-         else hypre_ParCompGridInitialize( compGrid[level], F_array[level], CF_marker_array[level], 0, A_array[level], NULL );
+         hypre_ParCompGridInitialize( amg_data, level );
       }   
    }
    if (timers) hypre_EndTiming(timers[8]);
@@ -303,6 +301,15 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    if (myid == 0) hypre_printf("  Done with transition level setup and comp grid initialization\n");
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
    #endif
+
+
+   // !!! Debug
+   for (level = 0; level < num_levels; level++)
+   {
+      printf("Rank %d, level %d, init mem_size = %d, init num_nodes = %d\n", myid, level, hypre_ParCompGridMemSize(compGrid[level]), hypre_ParCompGridNumNodes(compGrid[level]));
+   }
+
+
 
    // On each level, setup a long distance commPkg that has communication info for distance (eta + numGhostLayers)
    if (use_barriers) hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
@@ -357,6 +364,15 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
          }
       }
       hypre_ParCompGridCommPkgDestroy(initCopyCompGridCommPkg);
+
+      
+      // !!! Debug
+      for (level = 0; level < num_levels; level++)
+      {
+         printf("Rank %d, level %d, init mem_size = %d, init num_nodes = %d\n", myid, level, hypre_ParCompGridMemSize(compGrid[level]), hypre_ParCompGridNumNodes(compGrid[level]));
+      }
+
+
    }
    hypre_TFree(local_stencil, HYPRE_MEMORY_HOST);
    hypre_TFree(global_stencil, HYPRE_MEMORY_HOST);
@@ -841,6 +857,18 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    #if DEBUGGING_MESSAGES
    hypre_printf("Finished comp grid setup on rank %d\n", myid);
    #endif
+
+
+
+   // !!! Debug
+   for (level = 0; level < num_levels; level++)
+   {
+      printf("Rank %d, level %d, final mem_size = %d, final num_nodes = %d\n", myid, level, hypre_ParCompGridMemSize(compGrid[level]), hypre_ParCompGridNumNodes(compGrid[level]));
+   }
+
+
+
+
 
    // Cleanup memory
    hypre_TFree(num_added_nodes, HYPRE_MEMORY_HOST);
@@ -1704,22 +1732,21 @@ UnpackCoarseLevels(hypre_ParAMGData *amg_data, MPI_Comm comm, HYPRE_Int *recv_in
    for (level = fine_level; level < coarse_level; level++)
    {
       hypre_ParCompGrid *compGrid = hypre_ParCompGridCreate();
-
-      // !!! Check this: is there a better way to do this? 
       if (hypre_ParAMGDataCompGrid(amg_data)[level]) hypre_ParCompGridDestroy(hypre_ParAMGDataCompGrid(amg_data)[level]);
 
       hypre_ParAMGDataCompGrid(amg_data)[level] = compGrid;
       if (agglomerating_levels)
       {
-         if (level != coarse_level-1) hypre_ParCompGridSetSize(compGrid, global_num_nodes[level - fine_level], global_A_nnz[level - fine_level], global_P_nnz[level - fine_level], 2, 2);
-         else hypre_ParCompGridSetSize(compGrid, global_num_nodes[level - fine_level], global_A_nnz[level - fine_level], global_P_nnz[level - fine_level], 2, 1);
+         HYPRE_Int mem_size = global_num_nodes[level - fine_level] + 2 * (hypre_ParAMGDataAMGDDPadding(amg_data) + hypre_ParAMGDataAMGDDNumGhostLayers(amg_data)) * hypre_CSRMatrixNumCols( hypre_ParCSRMatrixOffd( hypre_ParAMGDataAArray(amg_data)[level] ) );
+         if (level != coarse_level-1) hypre_ParCompGridSetSize(compGrid, global_num_nodes[level - fine_level], mem_size, global_A_nnz[level - fine_level], global_P_nnz[level - fine_level], 2);
+         else hypre_ParCompGridSetSize(compGrid, global_num_nodes[level - fine_level], mem_size, global_A_nnz[level - fine_level], global_P_nnz[level - fine_level], 1);
          hypre_ParCompGridNumOwnedBlocks(compGrid) = num_procs;
          if (hypre_ParCompGridOwnedBlockStarts(compGrid)) hypre_TFree(hypre_ParCompGridOwnedBlockStarts(compGrid), HYPRE_MEMORY_HOST);
          hypre_ParCompGridOwnedBlockStarts(compGrid) = hypre_CTAlloc(HYPRE_Int, num_procs+1, HYPRE_MEMORY_HOST);
       }
       else
       {
-         hypre_ParCompGridSetSize(compGrid, global_num_nodes[level - fine_level], global_A_nnz[level - fine_level], global_P_nnz[level - fine_level], 1, 0);
+         hypre_ParCompGridSetSize(compGrid, global_num_nodes[level - fine_level], global_num_nodes[level - fine_level], global_A_nnz[level - fine_level], global_P_nnz[level - fine_level], 0);
          hypre_ParCompGridNumOwnedBlocks(compGrid) = 1;
          if (hypre_ParCompGridOwnedBlockStarts(compGrid)) hypre_TFree(hypre_ParCompGridOwnedBlockStarts(compGrid), HYPRE_MEMORY_HOST);
          hypre_ParCompGridOwnedBlockStarts(compGrid) = hypre_CTAlloc(HYPRE_Int, 2, HYPRE_MEMORY_HOST);
@@ -2996,7 +3023,12 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
 
       // if necessary, reallocate more space for compGrid
       if (add_node_cnt + num_nodes > hypre_ParCompGridMemSize(compGrid[level])) 
+      {
+         // !!! Debug
+         printf("Rank %d, level %d, reallocating dofs, previous size = %d, new size = %d\n", myid, level, hypre_ParCompGridMemSize(compGrid[level]), add_node_cnt + num_nodes);
+
          hypre_ParCompGridResize(compGrid[level], add_node_cnt + num_nodes, level != num_levels-1, 0); // !!! Is there a better way to manage memory? !!!
+      }
 
       // Starting at the end of the list (to avoid overwriting info we want to access later), copy existing comp grid info to its new positions
       for (i = num_nonowned_nodes - 1; i >= 0; i--)
@@ -3109,6 +3141,9 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
       // Check whether we need to reallocate space for A nonzero info
       if (A_new_rowptr[add_node_cnt + num_nodes - num_owned_nodes] > hypre_ParCompGridAMemSize(compGrid[level]))
       {
+         // !!! Debug
+         printf("Rank %d, level %d, reallocating A, previous size = %d, new size = %d\n", myid, level, hypre_ParCompGridAMemSize(compGrid[level]), A_new_rowptr[add_node_cnt + num_nodes - num_owned_nodes]);
+
          hypre_ParCompGridResize(compGrid[level], A_new_rowptr[add_node_cnt + num_nodes - num_owned_nodes], level != num_levels-1, 1); // !!! Is there a better way to manage memory? !!!
       }
 
@@ -3477,7 +3512,12 @@ CommunicateRemainingMatrixInfo(hypre_ParCompGrid **compGrid, hypre_ParCompGridCo
 
          // Make sure enough space is allocated for P
          if (hypre_ParCompGridPRowPtr(compGrid[level])[hypre_ParCompGridNumNodes(compGrid[level])] > hypre_ParCompGridPMemSize(compGrid[level]))
+         {
+            // !!! Debug
+            printf("Rank %d, level %d, reallocating P, previous size = %d, new size = %d\n", myid, level, hypre_ParCompGridPMemSize(compGrid[level]), hypre_ParCompGridPRowPtr(compGrid[level])[hypre_ParCompGridNumNodes(compGrid[level])] );
+
             hypre_ParCompGridResize(compGrid[level], hypre_ParCompGridPRowPtr(compGrid[level])[hypre_ParCompGridNumNodes(compGrid[level])], level != num_levels-1, 2);
+         }
 
          // Copy col ind and data into the CSR structure
          for (i = num_owned_nodes; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
