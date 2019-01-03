@@ -160,7 +160,9 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
       hypre_BoomerAMGSetup(amg_vdata, A, b, x);
 
    #if DEBUGGING_MESSAGES
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
    hypre_printf("Began comp grid setup on rank %d\n", myid);
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
    #endif
 
    /* Data Structure variables */
@@ -296,6 +298,12 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    }
    if (timers) hypre_EndTiming(timers[8]);
 
+   #if DEBUGGING_MESSAGES
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   hypre_printf("  Done with transition level setup and comp grid initialization\n");
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   #endif
+
    // On each level, setup a long distance commPkg that has communication info for distance (eta + numGhostLayers)
    if (use_barriers) hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
    if (timers) hypre_BeginTiming(timers[0]);
@@ -303,6 +311,12 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    {
       SetupNearestProcessorNeighbors(A_array[level], compGrid[level], compGridCommPkg, level, padding, num_ghost_layers, communication_cost);   
    }
+
+   #if DEBUGGING_MESSAGES
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   hypre_printf("  Done with SetupNearestProcessorNeighbors()\n");
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   #endif
 
    // Get the max stencil size on all levels
    HYPRE_Int *local_stencil = hypre_CTAlloc(HYPRE_Int, transition_level, HYPRE_MEMORY_HOST);
@@ -366,7 +380,9 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    /* Outer loop over levels:
    Start from coarsest level and work up to finest */
    #if DEBUGGING_MESSAGES
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
    if (myid == 0) printf("  Looping over levels\n");
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
    #endif
 
    for (level = transition_level - 1; level >= 0; level--)
