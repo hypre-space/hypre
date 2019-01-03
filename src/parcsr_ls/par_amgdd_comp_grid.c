@@ -154,19 +154,21 @@ hypre_ParCompGridInitialize ( hypre_ParAMGData *amg_data, HYPRE_Int level )
    // Get info from the amg data structure
    hypre_ParCompGrid *compGrid = hypre_ParAMGDataCompGrid(amg_data)[level];
    hypre_ParVector *residual = hypre_ParAMGDataFArray(amg_data)[level];
-   hypre_ParVector *CF_marker_array = hypre_ParAMGDataCFMarkerArray(amg_data)[level];
+   HYPRE_Int *CF_marker_array = hypre_ParAMGDataCFMarkerArray(amg_data)[level];
    hypre_ParCSRMatrix *A = hypre_ParAMGDataAArray(amg_data)[level];
    hypre_ParCSRMatrix *P = NULL;
    HYPRE_Int coarseStart = 0;
    if (level != hypre_ParAMGDataNumLevels(amg_data) - 1)
    {
       hypre_ParCSRMatrix *P = hypre_ParAMGDataPArray(amg_data)[level];
-      HYPRE_Int coarseStart = hypre_ParVectorFirstIndex(hypre_ParAMGDataF(amg_data)[level+1]);
+      HYPRE_Int coarseStart = hypre_ParVectorFirstIndex(hypre_ParAMGDataFArray(amg_data)[level+1]);
    }
 
    hypre_Vector *residual_local = hypre_ParVectorLocalVector(residual);
    HYPRE_Int         num_nodes = hypre_VectorSize(residual_local);
    HYPRE_Int         mem_size = num_nodes + 2 * (hypre_ParAMGDataAMGDDPadding(amg_data) + hypre_ParAMGDataAMGDDNumGhostLayers(amg_data)) * hypre_CSRMatrixNumCols( hypre_ParCSRMatrixOffd(A) );
+   HYPRE_Int         over_allocation_factor = mem_size;
+   if (num_nodes > 0) over_allocation_factor = ceil(mem_size/num_nodes);
 
    hypre_ParCompGridNumNodes(compGrid) = num_nodes;
    hypre_ParCompGridNumOwnedBlocks(compGrid) = 1;
@@ -174,15 +176,15 @@ hypre_ParCompGridInitialize ( hypre_ParAMGData *amg_data, HYPRE_Int level )
    hypre_ParCompGridOwnedBlockStarts(compGrid)[0] = 0;
    hypre_ParCompGridOwnedBlockStarts(compGrid)[1] = num_nodes;
    hypre_ParCompGridNumRealNodes(compGrid) = num_nodes;
-   hypre_ParCompGridMemSize(compGrid) = 2*num_nodes;
+   hypre_ParCompGridMemSize(compGrid) = mem_size;
 
    HYPRE_Int A_nnz = hypre_CSRMatrixNumNonzeros( hypre_ParCSRMatrixDiag(A) ) + hypre_CSRMatrixNumNonzeros( hypre_ParCSRMatrixOffd(A) );
-   hypre_ParCompGridAMemSize(compGrid) = ciel(mem_size/num_nodes)*A_nnz;
+   hypre_ParCompGridAMemSize(compGrid) = over_allocation_factor*A_nnz;
    HYPRE_Int P_nnz;
    if (P)
    {
       P_nnz = hypre_CSRMatrixNumNonzeros( hypre_ParCSRMatrixDiag(P) ) + hypre_CSRMatrixNumNonzeros( hypre_ParCSRMatrixOffd(P) );
-      hypre_ParCompGridPMemSize(compGrid) = ciel(mem_size/num_nodes)*P_nnz;
+      hypre_ParCompGridPMemSize(compGrid) = over_allocation_factor*P_nnz;
    }
 
    // Allocate space for the info on the comp nodes
@@ -194,7 +196,7 @@ hypre_ParCompGridInitialize ( hypre_ParAMGData *amg_data, HYPRE_Int level )
       coarse_global_indices_comp = hypre_CTAlloc(HYPRE_Int, mem_size, HYPRE_MEMORY_HOST); 
       coarse_local_indices_comp = hypre_CTAlloc(HYPRE_Int, mem_size, HYPRE_MEMORY_HOST);
    }
-   HYPRE_Int        *A_rowptr = hypre_CTAlloc(HYPRE_Int, 2*mem_size+1, HYPRE_MEMORY_HOST);
+   HYPRE_Int        *A_rowptr = hypre_CTAlloc(HYPRE_Int, mem_size+1, HYPRE_MEMORY_HOST);
    HYPRE_Int        *A_colind = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridAMemSize(compGrid), HYPRE_MEMORY_HOST);
    HYPRE_Int        *A_global_colind = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridAMemSize(compGrid), HYPRE_MEMORY_HOST);
    HYPRE_Complex    *A_data = hypre_CTAlloc(HYPRE_Complex, hypre_ParCompGridAMemSize(compGrid), HYPRE_MEMORY_HOST);
@@ -203,7 +205,7 @@ hypre_ParCompGridInitialize ( hypre_ParAMGData *amg_data, HYPRE_Int level )
    HYPRE_Complex    *P_data = NULL;
    if (P)
    {
-      P_rowptr = hypre_CTAlloc(HYPRE_Int, 2*mem_size+1, HYPRE_MEMORY_HOST);
+      P_rowptr = hypre_CTAlloc(HYPRE_Int, mem_size+1, HYPRE_MEMORY_HOST);
       P_colind = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridPMemSize(compGrid), HYPRE_MEMORY_HOST);
       P_data = hypre_CTAlloc(HYPRE_Complex, hypre_ParCompGridPMemSize(compGrid), HYPRE_MEMORY_HOST);
    }
@@ -254,7 +256,7 @@ hypre_ParCompGridInitialize ( hypre_ParAMGData *amg_data, HYPRE_Int level )
 
       if (P)
       {
-         // Setup row of matrix A
+         // Setup row of matrix P
          hypre_ParCSRMatrixGetRow( P, global_indices_comp[i], &row_size, &row_col_ind, &row_values );
          P_rowptr[i+1] = P_rowptr[i] + row_size;
          for (j = P_rowptr[i]; j < P_rowptr[i+1]; j++)
@@ -454,8 +456,10 @@ hypre_ParCompGridSetSize ( hypre_ParCompGrid *compGrid, HYPRE_Int num_nodes, HYP
 {
    hypre_ParCompGridNumNodes(compGrid) = num_nodes;
    hypre_ParCompGridMemSize(compGrid) = mem_size;
-   hypre_ParCompGridAMemSize(compGrid) = A_nnz*ciel(mem_size/num_nodes);
-   hypre_ParCompGridPMemSize(compGrid) = P_nnz*ciel(mem_size/num_nodes);
+   HYPRE_Int over_allocation_factor = mem_size;
+   if (num_nodes > 0) over_allocation_factor = ceil(mem_size/num_nodes);
+   hypre_ParCompGridAMemSize(compGrid) = A_nnz*over_allocation_factor;
+   hypre_ParCompGridPMemSize(compGrid) = P_nnz*over_allocation_factor;
 
    hypre_ParCompGridU(compGrid) = hypre_CTAlloc(HYPRE_Complex, mem_size, HYPRE_MEMORY_HOST);
    hypre_ParCompGridF(compGrid) = hypre_CTAlloc(HYPRE_Complex, mem_size, HYPRE_MEMORY_HOST);
