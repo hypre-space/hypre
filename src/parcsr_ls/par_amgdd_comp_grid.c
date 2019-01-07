@@ -160,8 +160,8 @@ hypre_ParCompGridInitialize ( hypre_ParAMGData *amg_data, HYPRE_Int level )
    HYPRE_Int coarseStart = 0;
    if (level != hypre_ParAMGDataNumLevels(amg_data) - 1)
    {
-      hypre_ParCSRMatrix *P = hypre_ParAMGDataPArray(amg_data)[level];
-      HYPRE_Int coarseStart = hypre_ParVectorFirstIndex(hypre_ParAMGDataFArray(amg_data)[level+1]);
+      P = hypre_ParAMGDataPArray(amg_data)[level];
+      coarseStart = hypre_ParVectorFirstIndex(hypre_ParAMGDataFArray(amg_data)[level+1]);
    }
 
    hypre_Vector *residual_local = hypre_ParVectorLocalVector(residual);
