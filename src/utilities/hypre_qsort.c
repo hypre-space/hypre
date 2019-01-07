@@ -262,6 +262,28 @@ void hypre_qsort2( HYPRE_Int *v,
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
+/* qsort2 based on absolute value of entries in w. */
+void hypre_qsort2_abs( HYPRE_Int *v,
+             HYPRE_Real *w,
+             HYPRE_Int  left,
+             HYPRE_Int  right )
+{
+   HYPRE_Int i, last;
+   if (left >= right)
+      return;
+   hypre_swap2( v, w, left, (left+right)/2);
+   last = left;
+   for (i = left+1; i <= right; i++)
+      if (fabs(w[i]) > fabs(w[left]))
+      {
+         hypre_swap2(v, w, ++last, i);
+      }
+   hypre_swap2(v, w, left, last);
+   hypre_qsort2_abs(v, w, left, last-1);
+   hypre_qsort2_abs(v, w, last+1, right);
+}
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
 
 /* sort on v, move w and z (AB 11/04) */
 

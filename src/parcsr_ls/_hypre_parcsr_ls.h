@@ -1454,7 +1454,6 @@ HYPRE_Int hypre_BoomerAMGBuildInterp ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_mar
 HYPRE_Int hypre_BoomerAMGBuildInterpHE ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_marker , hypre_ParCSRMatrix *S , HYPRE_Int *num_cpts_global , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int debug_flag , HYPRE_Real trunc_factor , HYPRE_Int max_elmts , HYPRE_Int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
 HYPRE_Int hypre_BoomerAMGBuildDirInterp ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_marker , hypre_ParCSRMatrix *S , HYPRE_Int *num_cpts_global , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int debug_flag , HYPRE_Real trunc_factor , HYPRE_Int max_elmts , HYPRE_Int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
 HYPRE_Int hypre_BoomerAMGInterpTruncation ( hypre_ParCSRMatrix *P , HYPRE_Real trunc_factor , HYPRE_Int max_elmts );
-void hypre_qsort2abs ( HYPRE_Int *v , HYPRE_Real *w , HYPRE_Int left , HYPRE_Int right );
 HYPRE_Int hypre_BoomerAMGBuildInterpModUnk ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_marker , hypre_ParCSRMatrix *S , HYPRE_Int *num_cpts_global , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int debug_flag , HYPRE_Real trunc_factor , HYPRE_Int max_elmts , HYPRE_Int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
 HYPRE_Int hypre_BoomerAMGTruncandBuild ( hypre_ParCSRMatrix *P , HYPRE_Real trunc_factor , HYPRE_Int max_elmts );
 hypre_ParCSRMatrix *hypre_CreateC ( hypre_ParCSRMatrix *A , HYPRE_Real w );
@@ -1499,7 +1498,6 @@ HYPRE_Int hypre_BoomerAMGCreateScalarCF ( HYPRE_Int *CFN_marker , HYPRE_Int num_
 
 /* par_nongalerkin.c */
 HYPRE_Int hypre_GrabSubArray ( HYPRE_Int *indices , HYPRE_Int start , HYPRE_Int end , HYPRE_Int *array , HYPRE_Int *output );
-void hypre_qsort2_abs ( HYPRE_Int *v , HYPRE_Real *w , HYPRE_Int left , HYPRE_Int right );
 HYPRE_Int hypre_IntersectTwoArrays ( HYPRE_Int *x , HYPRE_Real *x_data , HYPRE_Int x_length , HYPRE_Int *y , HYPRE_Int y_length , HYPRE_Int *z , HYPRE_Real *output_x_data , HYPRE_Int *intersect_length );
 HYPRE_Int hypre_SortedCopyParCSRData ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *B );
 HYPRE_Int hypre_BoomerAMG_MyCreateS ( hypre_ParCSRMatrix *A , HYPRE_Real strength_threshold , HYPRE_Real max_row_sum , HYPRE_Int num_functions , HYPRE_Int *dof_func , hypre_ParCSRMatrix **S_ptr );
