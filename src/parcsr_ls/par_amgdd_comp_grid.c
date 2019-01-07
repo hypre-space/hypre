@@ -492,7 +492,7 @@ hypre_ParCompGridSetSize ( hypre_ParCompGrid *compGrid, HYPRE_Int num_nodes, HYP
 HYPRE_Int
 hypre_ParCompGridResize ( hypre_ParCompGrid *compGrid, HYPRE_Int new_size, HYPRE_Int need_coarse_info, HYPRE_Int type )
 {
-   // This function reallocates exactly enough memory to hold a comp grid of size new_size
+   // This function reallocates memory to hold a comp grid of size new_size
    // num_nodes and mem_size are set to new_size. Use this when exact size of new comp grid is known.
    HYPRE_Int      i;
 
@@ -510,8 +510,7 @@ hypre_ParCompGridResize ( hypre_ParCompGrid *compGrid, HYPRE_Int new_size, HYPRE
          hypre_ParCompGridCoarseLocalIndices(compGrid) = hypre_TReAlloc(hypre_ParCompGridCoarseLocalIndices(compGrid), HYPRE_Int, new_size, HYPRE_MEMORY_HOST);
          hypre_ParCompGridPRowPtr(compGrid) = hypre_TReAlloc(hypre_ParCompGridPRowPtr(compGrid), HYPRE_Int, new_size+1, HYPRE_MEMORY_HOST);
       }
-      hypre_ParCompGridMemSize(compGrid) = new_size;
-      hypre_ParCompGridNumNodes(compGrid) = new_size;    
+      hypre_ParCompGridMemSize(compGrid) = new_size;  
    }
    // Reallocate A matrix
    else if (type == 1)
