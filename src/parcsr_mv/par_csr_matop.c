@@ -16,22 +16,6 @@
 #include "_hypre_lapack.h"
 #include "_hypre_blas.h"
 
-/* RDF: The following prototype already exists in _hypre_parcsr_ls.h, so
- * something needs to be reorganized here.*/
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-   hypre_CSRMatrix *
-   hypre_ExchangeRAPData( hypre_CSRMatrix *RAP_int, hypre_ParCSRCommPkg *comm_pkg_RT);
-/* reference seems necessary to prevent a problem with the
-   "headers" script... */
-
-#ifdef __cplusplus
-}
-#endif
-
 /* The following function was formerly part of hypre_ParMatmul
    but was removed so it can also be used for multiplication of
    Boolean matrices
