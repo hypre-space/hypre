@@ -881,6 +881,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
       //    num_resizes[3*level], num_resizes[3*level + 1], num_resizes[3*level + 2] );
       // printf("Rank %d, level %d, final mem_size = %d, final num_nodes = %d\n", myid, level, hypre_ParCompGridMemSize(compGrid[level]), hypre_ParCompGridNumNodes(compGrid[level]));
    }
+   hypre_TFree(num_resizes, HYPRE_MEMORY_HOST);
 
    // Cleanup memory
    hypre_TFree(num_added_nodes, HYPRE_MEMORY_HOST);
@@ -1410,45 +1411,18 @@ FindTransitionLevel(hypre_ParAMGData *amg_data)
    HYPRE_Int local_transition = num_levels-1;
    HYPRE_Int global_transition;
 
-
-   // Transition level is the level at which all processors must start communicating with an additional layer of processor neighbors ( + use_transition_level )
-   // for (i = 0; i < num_levels; i++)
-   // {
-   //    HYPRE_Int num_sends_before = hypre_ParCSRCommPkgNumSends(hypre_ParCSRMatrixCommPkg(hypre_ParAMGDataAArray(amg_data)[i]));
-   //    HYPRE_Int num_sends_after = hypre_ParCompGridCommPkgNumProcs(hypre_ParAMGDataCompGridCommPkg(amg_data))[i];
-   //    if (num_sends_after > num_sends_before)
-   //    {
-   //       local_transition = i + use_transition_level - 1;
-   //       break;
-   //    }
-   // }
-   // hypre_MPI_Allreduce(&local_transition, &global_transition, 1, HYPRE_MPI_INT, MPI_MAX, hypre_MPI_COMM_WORLD);
-
-   // Transition level is the coarsest level at which every processor owns a dof ( - use_transition_level )
-   // if (use_transition_level > 0)
-   // {
-   //    for (i = num_levels - 1; i >= 0; i--)
-   //    {
-   //       // If this proc owns (use_transition_level) nodes on this level, note this level and leave the loop
-   //       if ( hypre_ParCSRMatrixNumRows( hypre_ParAMGDataAArray(amg_data)[i] ) )
-   //       {
-   //          local_transition = i - use_transition_level + 1;
-   //          break;
-   //       }
-   //    }
-   //    hypre_MPI_Allreduce(&local_transition, &global_transition, 1, HYPRE_MPI_INT, MPI_MIN, hypre_MPI_COMM_WORLD);
-   // }
-
    // Transition level set as a prescribed level
    if (use_transition_level > 0) global_transition = use_transition_level;
    
    // Transition level is the finest level such that the global grid size stored is less than a quarter the size of the fine grid patch
    if (use_transition_level < 0)
    {
-      HYPRE_Int fine_grid_patch = hypre_ParCSRMatrixNumRows(hypre_ParAMGDataAArray(amg_data)[0]);
+      // HYPRE_Int fine_grid_patch = hypre_ParCSRMatrixNumRows(hypre_ParAMGDataAArray(amg_data)[0]);
+      HYPRE_Int fine_grid_num_sends = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(hypre_ParAMGDataAArray(amg_data)[0]));
       for (i = 0; i < num_levels; i++)
       {
-         if ( hypre_ParCSRMatrixGlobalNumRows(hypre_ParAMGDataAArray(amg_data)[i]) < (fine_grid_patch/4) )
+         // if ( hypre_ParCSRMatrixGlobalNumRows(hypre_ParAMGDataAArray(amg_data)[i]) < (fine_grid_patch/4) )
+         if ( hypre_ParCSRMatrixGlobalNumRows(hypre_ParAMGDataAArray(amg_data)[i]) < fine_grid_num_sends )
          {
             local_transition = i;
             break;

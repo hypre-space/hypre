@@ -167,8 +167,8 @@ hypre_ParCompGridInitialize ( hypre_ParAMGData *amg_data, HYPRE_Int level )
    hypre_Vector *residual_local = hypre_ParVectorLocalVector(residual);
    HYPRE_Int         num_nodes = hypre_VectorSize(residual_local);
    HYPRE_Int         mem_size = num_nodes + 2 * (hypre_ParAMGDataAMGDDPadding(amg_data) + hypre_ParAMGDataAMGDDNumGhostLayers(amg_data)) * hypre_CSRMatrixNumCols( hypre_ParCSRMatrixOffd(A) );
-   HYPRE_Int         over_allocation_factor = mem_size;
-   if (num_nodes > 0) over_allocation_factor = ceil(mem_size/num_nodes);
+   HYPRE_Real        over_allocation_factor = (HYPRE_Real) mem_size;
+   if (num_nodes > 0) over_allocation_factor = ((HYPRE_Real) mem_size) / ((HYPRE_Real) num_nodes);
 
    hypre_ParCompGridNumNodes(compGrid) = num_nodes;
    hypre_ParCompGridNumOwnedBlocks(compGrid) = 1;
@@ -214,7 +214,6 @@ hypre_ParCompGridInitialize ( hypre_ParAMGData *amg_data, HYPRE_Int level )
    HYPRE_Int         row_size;
    HYPRE_Int         *row_col_ind;
    HYPRE_Complex     *row_values;
-
 
    // Initialize composite grid data to the given information
    HYPRE_Int        coarseIndexCounter = 0;
