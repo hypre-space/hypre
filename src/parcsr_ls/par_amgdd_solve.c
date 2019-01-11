@@ -180,6 +180,11 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata )
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
    #endif
 
+
+   // !!! New: initialize fine grid temp vector to zero
+   hypre_ParCompGridTemp( hypre_ParAMGDataCompGrid(amg_data)[0] ) = hypre_CTAlloc(HYPRE_Complex, hypre_ParCompGridNumNodes(hypre_ParAMGDataCompGrid(amg_data)[0]), HYPRE_MEMORY_HOST);
+
+
 	// Do the cycles
    if (fac_tol == 0.0)
    {
@@ -224,6 +229,11 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata )
       }
    }
    
+
+   // !!! New: free the temp vector
+   hypre_TFree(hypre_ParCompGridTemp( hypre_ParAMGDataCompGrid(amg_data)[0] ), HYPRE_MEMORY_HOST); 
+
+
 	// Update fine grid solution
    AddSolution( amg_vdata );
 
