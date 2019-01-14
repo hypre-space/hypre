@@ -181,9 +181,15 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata )
    #endif
 
 
-   // !!! New: initialize fine grid temp vector to zero
-   hypre_ParCompGridTemp( hypre_ParAMGDataCompGrid(amg_data)[0] ) = hypre_CTAlloc(HYPRE_Complex, hypre_ParCompGridNumNodes(hypre_ParAMGDataCompGrid(amg_data)[0]), HYPRE_MEMORY_HOST);
-
+   // !!! New: initialize temp vectors to zero
+   HYPRE_Int transition_level = hypre_ParCompGridCommPkgTransitionLevel(hypre_ParAMGDataCompGridCommPkg(amg_data));
+   if (transition_level < 0) transition_level = num_levels;
+   for (level = 0; level < transition_level; level++)
+   {
+      if (!hypre_ParCompGridTemp( hypre_ParAMGDataCompGrid(amg_data)[level] )) 
+         hypre_ParCompGridTemp( hypre_ParAMGDataCompGrid(amg_data)[level] ) = hypre_CTAlloc(HYPRE_Complex, hypre_ParCompGridNumNodes(hypre_ParAMGDataCompGrid(amg_data)[level]), HYPRE_MEMORY_HOST);
+      else for (i = 0; i < hypre_ParCompGridNumNodes(hypre_ParAMGDataCompGrid(amg_data)[level]); i++) hypre_ParCompGridTemp( hypre_ParAMGDataCompGrid(amg_data)[level] )[i] = 0.0;
+   }
 
 	// Do the cycles
    if (fac_tol == 0.0)
@@ -229,9 +235,6 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata )
       }
    }
    
-
-   // !!! New: free the temp vector
-   hypre_TFree(hypre_ParCompGridTemp( hypre_ParAMGDataCompGrid(amg_data)[0] ), HYPRE_MEMORY_HOST); 
 
 
 	// Update fine grid solution

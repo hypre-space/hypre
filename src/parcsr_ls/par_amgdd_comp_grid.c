@@ -72,6 +72,11 @@ hypre_ParCompGridDestroy ( hypre_ParCompGrid *compGrid )
       hypre_TFree(hypre_ParCompGridU(compGrid), HYPRE_MEMORY_HOST);
    }
 
+   if (hypre_ParCompGridTemp(compGrid))
+   {
+      hypre_TFree(hypre_ParCompGridTemp(compGrid), HYPRE_MEMORY_HOST);
+   }
+
    if (hypre_ParCompGridF(compGrid))
    {
       hypre_TFree(hypre_ParCompGridF(compGrid), HYPRE_MEMORY_HOST);
