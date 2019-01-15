@@ -19,7 +19,7 @@
 #include "par_amg.h"
 #include "par_csr_block_matrix.h"	
 
-#define DEBUG_COMP_GRID 1 // if true, runs some tests, prints out what is stored in the comp grids for each processor to a file
+#define DEBUG_COMP_GRID 0 // if true, runs some tests, prints out what is stored in the comp grids for each processor to a file
 #define DEBUG_PROC_NEIGHBORS 0 // if true, dumps info on the add flag structures that determine nearest processor neighbors 
 #define DEBUGGING_MESSAGES 0 // if true, prints a bunch of messages to the screen to let you know where in the algorithm you are
 
@@ -136,7 +136,8 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
                         hypre_ParVector *x, 
                         HYPRE_Int *timers, 
                         HYPRE_Int use_barriers,
-                        HYPRE_Int *communication_cost )
+                        HYPRE_Int *communication_cost,
+                        HYPRE_Int verify_amgdd )
 {
 
    // communication_cost measures # messages and comm volume from the perspective of THIS processor and takes the form:
@@ -814,11 +815,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    }
 
    // Finalize the comp grid structures (convert matrices to CSR structure, etc.)
-   #if DEBUG_COMP_GRID
-   hypre_ParCompGridFinalize(compGrid, num_levels, transition_level, 1);
-   #else
-   hypre_ParCompGridFinalize(compGrid, num_levels, transition_level, 0);
-   #endif
+   hypre_ParCompGridFinalize(compGrid, num_levels, transition_level, verify_amgdd);
 
    #if DEBUGGING_MESSAGES
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
@@ -827,13 +824,14 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    #endif 
 
    #if DEBUG_COMP_GRID
-   if (use_transition_level) error_code = TestCompGrids2(compGrid, transition_level+1);
-   else error_code = TestCompGrids2(compGrid, num_levels);
-   if (error_code)
-   {
-      hypre_printf("TestCompGrids2 failed!\n");
-      test_failed = 1;
-   }
+   // !!! New: removing this test as it no longer applies for the new restriction paradigm
+   // if (use_transition_level) error_code = TestCompGrids2(compGrid, transition_level+1);
+   // else error_code = TestCompGrids2(compGrid, num_levels);
+   // if (error_code)
+   // {
+   //    hypre_printf("TestCompGrids2 failed!\n");
+   //    test_failed = 1;
+   // }
    error_code = TestCompGrids3(compGrid, compGridCommPkg, transition_level, hypre_ParAMGDataAArray(amg_data), hypre_ParAMGDataPArray(amg_data), hypre_ParAMGDataFArray(amg_data));
    if (error_code)
    {
