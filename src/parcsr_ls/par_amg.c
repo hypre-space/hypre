@@ -76,6 +76,7 @@ hypre_BoomerAMGCreate()
    HYPRE_Int      max_iter;
    HYPRE_Int      min_fac_iter;
    HYPRE_Int      max_fac_iter;
+   HYPRE_Int      fac_cycle_type;
    HYPRE_Int      fac_relax_type;
    HYPRE_Int      fac_num_relax;
    HYPRE_Int      cycle_type;    
@@ -203,6 +204,7 @@ hypre_BoomerAMGCreate()
    max_iter  = 20;
    min_fac_iter = 0;
    max_fac_iter = 20;
+   fac_cycle_type = 0;
    fac_relax_type = 1;
    fac_num_relax = 1;
    cycle_type = 1;
@@ -1569,6 +1571,40 @@ hypre_BoomerAMGGetFACTol( void     *data,
 } 
 
 HYPRE_Int
+hypre_BoomerAMGSetFACCycleType( void     *data,
+                        HYPRE_Int       fac_cycle_type )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+ 
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+
+   hypre_ParAMGDataFACCycleType(amg_data) = fac_cycle_type;
+
+   return hypre_error_flag;
+} 
+
+HYPRE_Int
+hypre_BoomerAMGGetFACCycleType( void     *data,
+                        HYPRE_Int *     fac_cycle_type )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+ 
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+
+   *fac_cycle_type = hypre_ParAMGDataFACCycleType(amg_data);
+
+   return hypre_error_flag;
+} 
+
+HYPRE_Int
 hypre_BoomerAMGSetFACRelaxType( void     *data,
                         HYPRE_Int       fac_relax_type )
 {
@@ -1601,7 +1637,6 @@ hypre_BoomerAMGGetFACRelaxType( void     *data,
 
    return hypre_error_flag;
 } 
-
 
 HYPRE_Int
 hypre_BoomerAMGSetFACNumRelax( void     *data,

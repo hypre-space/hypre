@@ -451,6 +451,24 @@ HYPRE_BoomerAMGGetFACNumRelax( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetFACCycleType
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetFACCycleType( HYPRE_Solver solver,
+                           HYPRE_Int          fac_cycle_type  )
+{
+   return( hypre_BoomerAMGSetFACCycleType( (void *) solver, fac_cycle_type ) );
+}
+
+HYPRE_Int
+HYPRE_BoomerAMGGetFACCycleType( HYPRE_Solver solver,
+                           HYPRE_Int        * fac_cycle_type  )
+{
+   return( hypre_BoomerAMGGetFACCycleType( (void *) solver, fac_cycle_type ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetFACRelaxType
  *--------------------------------------------------------------------------*/
 

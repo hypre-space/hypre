@@ -110,6 +110,7 @@ typedef struct
    HYPRE_Int                 min_fac_iter;
    HYPRE_Int                 max_fac_iter;
    HYPRE_Real                fac_tol;
+   HYPRE_Int                 fac_cycle_type;
    HYPRE_Int                 fac_relax_type;
    HYPRE_Int                 fac_num_relax;
    HYPRE_Int                 padding;
@@ -380,6 +381,7 @@ typedef struct
 #define hypre_ParAMGDataMinFACIter(amg_data) ((amg_data)->min_fac_iter)
 #define hypre_ParAMGDataMaxFACIter(amg_data) ((amg_data)->max_fac_iter)
 #define hypre_ParAMGDataFACTol(amg_data) ((amg_data)->fac_tol)
+#define hypre_ParAMGDataFACCycleType(amg_data) ((amg_data)->fac_cycle_type)
 #define hypre_ParAMGDataFACRelaxType(amg_data) ((amg_data)->fac_relax_type)
 #define hypre_ParAMGDataFACNumRelax(amg_data) ((amg_data)->fac_num_relax)
 #define hypre_ParAMGDataAMGDDPadding(amg_data) ((amg_data)->padding)
