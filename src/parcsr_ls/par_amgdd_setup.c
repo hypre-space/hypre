@@ -93,7 +93,7 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
       HYPRE_Int *num_added_nodes, HYPRE_Int buffer_number, HYPRE_Int *num_resizes );
 
 HYPRE_Int
-PackRecvMapSendBuffer(HYPRE_Int **recv_map, HYPRE_Int *recv_map_send_buffer, HYPRE_Int *num_recv_nodes, HYPRE_Int current_level, HYPRE_Int num_levels);
+PackRecvMapSendBuffer(HYPRE_Int *recv_map_send_buffer, HYPRE_Int **recv_map, HYPRE_Int *num_recv_nodes, HYPRE_Int *recv_buffer_size, HYPRE_Int current_level, HYPRE_Int num_levels);
 
 HYPRE_Int
 UnpackSendFlagBuffer(HYPRE_Int *send_flag_buffer, HYPRE_Int **send_flag, HYPRE_Int *num_send_nodes, HYPRE_Int *send_buffer_size, HYPRE_Int current_level, HYPRE_Int num_levels);
@@ -563,7 +563,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
          for (i = 0; i < num_neighbor_partitions; i++)
          {
             recv_map_send_buffer[i] = hypre_CTAlloc(HYPRE_Int, recv_map_send_buffer_size[i], HYPRE_MEMORY_HOST);
-            PackRecvMapSendBuffer(recv_map[level][i], recv_map_send_buffer[i], num_recv_nodes[level][i], level, num_levels);
+            PackRecvMapSendBuffer(recv_map_send_buffer[i], recv_map[level][i], num_recv_nodes[level][i], &(recv_buffer_size[level][i]), level, num_levels);
          }
          // send the recv_map_send_buffer's
          for (i = 0; i < num_send_procs; i++)
@@ -3163,14 +3163,16 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
 }
 
 HYPRE_Int
-PackRecvMapSendBuffer(HYPRE_Int **recv_map, HYPRE_Int *recv_map_send_buffer, HYPRE_Int *num_recv_nodes, HYPRE_Int current_level, HYPRE_Int num_levels)
+PackRecvMapSendBuffer(HYPRE_Int *recv_map_send_buffer, 
+   HYPRE_Int **recv_map, 
+   HYPRE_Int *num_recv_nodes, 
+   HYPRE_Int *recv_buffer_size,
+   HYPRE_Int current_level, 
+   HYPRE_Int num_levels)
 {
    HYPRE_Int      level, i, cnt, num_nodes;
-
-   HYPRE_Int myid;
-   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
-
    cnt = 0;
+   *recv_buffer_size = 0;
    for (level = current_level; level < num_levels; level++)
    {
       // if there were nodes in psiComposite on this level
@@ -3189,6 +3191,7 @@ PackRecvMapSendBuffer(HYPRE_Int **recv_map, HYPRE_Int *recv_map_send_buffer, HYP
             if (recv_map[level][i] != -1)
             {
                recv_map[level][ num_recv_nodes[level]++ ] = recv_map[level][i];
+               (*recv_buffer_size)++;
             }
          }
          recv_map[level] = hypre_TReAlloc(recv_map[level], HYPRE_Int, num_recv_nodes[level], HYPRE_MEMORY_HOST);
