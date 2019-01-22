@@ -327,87 +327,87 @@ hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, H
    }
 
    // Setup the coarse residual marker for use in FAC cycles
-   for (level = 1; level < transition_level; level++)
-   {
-      hypre_ParCompGridCoarseResidualMarker(compGrid[level]) = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumNodes(compGrid[level]), HYPRE_MEMORY_HOST); // mark the coarse dofs as we restrict (or don't) to make sure they are all updated appropriately: 0 = nothing has happened yet, 1 = has incomplete residual info, 2 = restricted to from fine grid
+   // for (level = 1; level < transition_level; level++)
+   // {
+   //    hypre_ParCompGridCoarseResidualMarker(compGrid[level]) = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumNodes(compGrid[level]), HYPRE_MEMORY_HOST); // mark the coarse dofs as we restrict (or don't) to make sure they are all updated appropriately: 0 = nothing has happened yet, 1 = has incomplete residual info, 2 = restricted to from fine grid
 
-      // Look at fine grid A matrix
-      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level-1]); i++)
-      {
-         // Loop over entries in A
-         for (j = hypre_ParCompGridARowPtr(compGrid[level-1])[i]; j < hypre_ParCompGridARowPtr(compGrid[level-1])[i+1]; j++)
-         {
-            // If -1 index encountered, mark the coarse grid connections to this node (don't want to restrict to these)
-            if ( hypre_ParCompGridAColInd(compGrid[level-1])[j] < 0 )
-            {
-               for (k = hypre_ParCompGridPRowPtr(compGrid[level-1])[i]; k < hypre_ParCompGridPRowPtr(compGrid[level-1])[i+1]; k++)
-               {
-                  if (hypre_ParCompGridPColInd(compGrid[level-1])[k] >= 0)
-                  {
-                     hypre_ParCompGridCoarseResidualMarker(compGrid[level])[ hypre_ParCompGridPColInd(compGrid[level-1])[k] ] = 1; // Mark coarse dofs that we don't want to restrict to from fine grid
-                  }
-               }
-               break;
-            }
-         }
-      }
+   //    // Look at fine grid A matrix
+   //    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level-1]); i++)
+   //    {
+   //       // Loop over entries in A
+   //       for (j = hypre_ParCompGridARowPtr(compGrid[level-1])[i]; j < hypre_ParCompGridARowPtr(compGrid[level-1])[i+1]; j++)
+   //       {
+   //          // If -1 index encountered, mark the coarse grid connections to this node (don't want to restrict to these)
+   //          if ( hypre_ParCompGridAColInd(compGrid[level-1])[j] < 0 )
+   //          {
+   //             for (k = hypre_ParCompGridPRowPtr(compGrid[level-1])[i]; k < hypre_ParCompGridPRowPtr(compGrid[level-1])[i+1]; k++)
+   //             {
+   //                if (hypre_ParCompGridPColInd(compGrid[level-1])[k] >= 0)
+   //                {
+   //                   hypre_ParCompGridCoarseResidualMarker(compGrid[level])[ hypre_ParCompGridPColInd(compGrid[level-1])[k] ] = 1; // Mark coarse dofs that we don't want to restrict to from fine grid
+   //                }
+   //             }
+   //             break;
+   //          }
+   //       }
+   //    }
       
-      // Mark where we have complete residual information
-      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level-1]); i++)
-      {
-         // Loop over entries in P
-         for (j = hypre_ParCompGridPRowPtr(compGrid[level-1])[i]; j < hypre_ParCompGridPRowPtr(compGrid[level-1])[i+1]; j++)
-         {
-            if (hypre_ParCompGridPColInd(compGrid[level-1])[j] >= 0)
-            {
-               // Add contribution to restricted residual where appropriate
-               if (hypre_ParCompGridCoarseResidualMarker(compGrid[level])[ hypre_ParCompGridPColInd(compGrid[level-1])[j] ] != 1) 
-               {
-                  hypre_ParCompGridCoarseResidualMarker(compGrid[level])[ hypre_ParCompGridPColInd(compGrid[level-1])[j] ] = 2; // Mark coarse dofs that successfully recieve their value from restriction from the fine grid
-               }
-            }
-         }
-      }
-   }
+   //    // Mark where we have complete residual information
+   //    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level-1]); i++)
+   //    {
+   //       // Loop over entries in P
+   //       for (j = hypre_ParCompGridPRowPtr(compGrid[level-1])[i]; j < hypre_ParCompGridPRowPtr(compGrid[level-1])[i+1]; j++)
+   //       {
+   //          if (hypre_ParCompGridPColInd(compGrid[level-1])[j] >= 0)
+   //          {
+   //             // Add contribution to restricted residual where appropriate
+   //             if (hypre_ParCompGridCoarseResidualMarker(compGrid[level])[ hypre_ParCompGridPColInd(compGrid[level-1])[j] ] != 1) 
+   //             {
+   //                hypre_ParCompGridCoarseResidualMarker(compGrid[level])[ hypre_ParCompGridPColInd(compGrid[level-1])[j] ] = 2; // Mark coarse dofs that successfully recieve their value from restriction from the fine grid
+   //             }
+   //          }
+   //       }
+   //    }
+   // }
 
    // Setup the coarse residual marker for use in FAC cycles
-   if (transition_level != num_levels)
-   {
-      hypre_ParCompGridCoarseResidualMarker(compGrid[transition_level]) = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumNodes(compGrid[transition_level]), HYPRE_MEMORY_HOST); // mark the coarse dofs as we restrict (or don't) to make sure they are all updated appropriately: 0 = nothing has happened yet, 1 = has incomplete residual info, 2 = restricted to from fine grid
+   // if (transition_level != num_levels)
+   // {
+   //    hypre_ParCompGridCoarseResidualMarker(compGrid[transition_level]) = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumNodes(compGrid[transition_level]), HYPRE_MEMORY_HOST); // mark the coarse dofs as we restrict (or don't) to make sure they are all updated appropriately: 0 = nothing has happened yet, 1 = has incomplete residual info, 2 = restricted to from fine grid
 
-      // Look at fine grid A matrix
-      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[transition_level-1]); i++)
-      {
-         // Loop over entries in A
-         for (j = hypre_ParCompGridARowPtr(compGrid[transition_level-1])[i]; j < hypre_ParCompGridARowPtr(compGrid[transition_level-1])[i+1]; j++)
-         {
-            // If -1 index encountered, mark the coarse grid connections to this node (don't want to restrict to these)
-            if ( hypre_ParCompGridAColInd(compGrid[transition_level-1])[j] < 0 )
-            {
-               for (k = hypre_ParCompGridPRowPtr(compGrid[transition_level-1])[i]; k < hypre_ParCompGridPRowPtr(compGrid[transition_level-1])[i+1]; k++)
-               {
-                  hypre_ParCompGridCoarseResidualMarker(compGrid[transition_level])[ hypre_ParCompGridPColInd(compGrid[transition_level-1])[k] ] = 1; // Mark coarse dofs that we don't want to restrict to from fine grid
-               }
-               break;
-            }
-         }
-      }
+   //    // Look at fine grid A matrix
+   //    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[transition_level-1]); i++)
+   //    {
+   //       // Loop over entries in A
+   //       for (j = hypre_ParCompGridARowPtr(compGrid[transition_level-1])[i]; j < hypre_ParCompGridARowPtr(compGrid[transition_level-1])[i+1]; j++)
+   //       {
+   //          // If -1 index encountered, mark the coarse grid connections to this node (don't want to restrict to these)
+   //          if ( hypre_ParCompGridAColInd(compGrid[transition_level-1])[j] < 0 )
+   //          {
+   //             for (k = hypre_ParCompGridPRowPtr(compGrid[transition_level-1])[i]; k < hypre_ParCompGridPRowPtr(compGrid[transition_level-1])[i+1]; k++)
+   //             {
+   //                hypre_ParCompGridCoarseResidualMarker(compGrid[transition_level])[ hypre_ParCompGridPColInd(compGrid[transition_level-1])[k] ] = 1; // Mark coarse dofs that we don't want to restrict to from fine grid
+   //             }
+   //             break;
+   //          }
+   //       }
+   //    }
       
-      // Mark where we have complete residual information
-      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[transition_level-1]); i++)
-      {
-         // Loop over entries in P
-         for (j = hypre_ParCompGridPRowPtr(compGrid[transition_level-1])[i]; j < hypre_ParCompGridPRowPtr(compGrid[transition_level-1])[i+1]; j++)
-         {
-            // Add contribution to restricted residual where appropriate
-            if (hypre_ParCompGridPColInd(compGrid[transition_level-1])[j] < 0) printf("P has -1 index found in comp grid finalize\n");
-            if (hypre_ParCompGridCoarseResidualMarker(compGrid[transition_level])[ hypre_ParCompGridPColInd(compGrid[transition_level-1])[j] ] != 1) 
-            {
-               hypre_ParCompGridCoarseResidualMarker(compGrid[transition_level])[ hypre_ParCompGridPColInd(compGrid[transition_level-1])[j] ] = 2; // Mark coarse dofs that successfully recieve their value from restriction from the fine grid
-            }
-         }
-      }
-   }
+   //    // Mark where we have complete residual information
+   //    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[transition_level-1]); i++)
+   //    {
+   //       // Loop over entries in P
+   //       for (j = hypre_ParCompGridPRowPtr(compGrid[transition_level-1])[i]; j < hypre_ParCompGridPRowPtr(compGrid[transition_level-1])[i+1]; j++)
+   //       {
+   //          // Add contribution to restricted residual where appropriate
+   //          if (hypre_ParCompGridPColInd(compGrid[transition_level-1])[j] < 0) printf("P has -1 index found in comp grid finalize\n");
+   //          if (hypre_ParCompGridCoarseResidualMarker(compGrid[transition_level])[ hypre_ParCompGridPColInd(compGrid[transition_level-1])[j] ] != 1) 
+   //          {
+   //             hypre_ParCompGridCoarseResidualMarker(compGrid[transition_level])[ hypre_ParCompGridPColInd(compGrid[transition_level-1])[j] ] = 2; // Mark coarse dofs that successfully recieve their value from restriction from the fine grid
+   //          }
+   //       }
+   //    }
+   // }
 
    return 0;
 }
@@ -536,7 +536,7 @@ hypre_ParCompGridResize ( hypre_ParCompGrid *compGrid, HYPRE_Int new_size, HYPRE
 }
 
 HYPRE_Int 
-hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *num_added_nodes, HYPRE_Int transition_level )
+hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *nodes_added_on_level, HYPRE_Int transition_level )
 {
    // when nodes are added to a composite grid, global info is copied over, but local indices must be generated appropriately for all added nodes
    // this must be done on each level as info is added to correctly construct subsequent Psi_c grids
@@ -551,7 +551,7 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *num
    for (level = 0; level < transition_level; level++)
    {
       // If we have added nodes on this level
-      if (num_added_nodes[level])
+      if (nodes_added_on_level[level])
       {
          // loop over indices of non-owned nodes on this level
          HYPRE_Int num_owned_nodes = hypre_ParCompGridOwnedBlockStarts(compGrid[level])[hypre_ParCompGridNumOwnedBlocks(compGrid[level])];
@@ -608,7 +608,7 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *num
       // if we are not on the coarsest level
       if (level != transition_level-1)
       {
-         if (num_added_nodes[level] || num_added_nodes[level+1])
+         if (nodes_added_on_level[level] || nodes_added_on_level[level+1])
          {
             // loop over indices of non-owned nodes on this level
             HYPRE_Int num_owned_nodes = hypre_ParCompGridOwnedBlockStarts(compGrid[level])[hypre_ParCompGridNumOwnedBlocks(compGrid[level])];

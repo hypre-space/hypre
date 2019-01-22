@@ -568,11 +568,8 @@ PackResidualBuffer( HYPRE_Complex *send_buffer, HYPRE_Int **send_flag, HYPRE_Int
       for (i = 0; i < num_send_nodes[level]; i++)
       {
          // !!! Debug: can remove this once I get rid of ghost dofs
-         HYPRE_Int send_elmt; 
-         if (send_flag[level][i] < 0)
-            send_elmt = -(send_flag[level][i] + 1);
-         else
-            send_elmt = send_flag[level][i];
+         HYPRE_Int send_elmt = send_flag[level][i]; 
+         if (send_elmt < 0) send_elmt = -(send_elmt + 1);
          send_buffer[cnt++] = hypre_ParCompGridF(compGrid[level])[ send_elmt ];
       }
    }
@@ -589,7 +586,12 @@ UnpackResidualBuffer( HYPRE_Complex *recv_buffer, HYPRE_Int **recv_map, HYPRE_In
    // loop over levels
    for (level = current_level; level < num_levels; level++)
    {
-      for (i = 0; i < num_recv_nodes[level]; i++) hypre_ParCompGridF(compGrid[level])[ recv_map[level][i] ] = recv_buffer[cnt++];
+      for (i = 0; i < num_recv_nodes[level]; i++) 
+      {
+         HYPRE_Int recv_elmt = recv_map[level][i];
+         if (recv_elmt < 0) recv_elmt = -(recv_elmt + 1);
+         hypre_ParCompGridF(compGrid[level])[ recv_elmt ] = recv_buffer[cnt++];
+      }
    }
 
    return 0;

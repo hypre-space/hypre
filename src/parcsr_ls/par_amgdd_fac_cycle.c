@@ -462,9 +462,10 @@ FAC_Jacobi( hypre_ParCompGrid *compGrid )
    // Do Gauss-Seidel relaxation on the real nodes
    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
    {
-      if (hypre_ParCompGridRealDofMarker(compGrid)) is_real = hypre_ParCompGridRealDofMarker(compGrid)[i];
-      else is_real = 1;
-      if (is_real)
+      // if (hypre_ParCompGridRealDofMarker(compGrid)) is_real = hypre_ParCompGridRealDofMarker(compGrid)[i];
+      // else is_real = 1;
+      // if (is_real)
+      if (hypre_ParCompGridARowPtr(compGrid)[i+1] - hypre_ParCompGridARowPtr(compGrid)[i] > 0)
       {
          // Initialize u as RHS
          u_temp[i] = hypre_ParCompGridF(compGrid)[i];
@@ -494,9 +495,10 @@ FAC_Jacobi( hypre_ParCompGrid *compGrid )
    // Copy over relaxed vector
    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
    {
-      if (hypre_ParCompGridRealDofMarker(compGrid)) is_real = hypre_ParCompGridRealDofMarker(compGrid)[i];
-      else is_real = 1;
-      if (is_real)
+      // if (hypre_ParCompGridRealDofMarker(compGrid)) is_real = hypre_ParCompGridRealDofMarker(compGrid)[i];
+      // else is_real = 1;
+      // if (is_real)
+      if (hypre_ParCompGridARowPtr(compGrid)[i+1] - hypre_ParCompGridARowPtr(compGrid)[i] > 0)
       {
          HYPRE_Complex u_before = hypre_ParCompGridU(compGrid)[i];
 
@@ -538,9 +540,10 @@ FAC_GaussSeidel( hypre_ParCompGrid *compGrid )
    // Do Gauss-Seidel relaxation on the real nodes
    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
    {
-      if (hypre_ParCompGridRealDofMarker(compGrid)) is_real = hypre_ParCompGridRealDofMarker(compGrid)[i];
-      else is_real = 1;
-      if (is_real)
+      // if (hypre_ParCompGridRealDofMarker(compGrid)) is_real = hypre_ParCompGridRealDofMarker(compGrid)[i];
+      // else is_real = 1;
+      // if (is_real)
+      if (hypre_ParCompGridARowPtr(compGrid)[i+1] - hypre_ParCompGridARowPtr(compGrid)[i] > 0)
       {
          HYPRE_Complex u_before = hypre_ParCompGridU(compGrid)[i];
 
@@ -565,6 +568,16 @@ FAC_GaussSeidel( hypre_ParCompGrid *compGrid )
 
          // Divide by diagonal
          if (diag == 0.0) printf("Tried to divide by zero diagonal!\n");
+
+         // !!! Debug
+         if (diag == 0.0)
+         {
+            HYPRE_Int   myid;
+            hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+            printf("myid = %d, i = %d, num_nodes = %d\n", myid, i, hypre_ParCompGridNumNodes(compGrid));
+         }
+
+
          hypre_ParCompGridU(compGrid)[i] /= diag;
 
          if (hypre_ParCompGridTemp(compGrid)) temp[i] = hypre_ParCompGridU(compGrid)[i] - u_before;
