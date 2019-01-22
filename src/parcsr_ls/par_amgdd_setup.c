@@ -2793,27 +2793,31 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
       for (i = 0; i < num_send_nodes[current_level][partition][level]; i++)
       {
          if (send_flag[current_level][partition][level][i] < 0)
-            send_elmt = -(send_flag[current_level][partition][level][i] + 1);
+         {
+            send_buffer[cnt++] = 0;
+         }
          else
+         {
             send_elmt = send_flag[current_level][partition][level][i];
-         row_length = hypre_ParCompGridARowPtr(compGrid[level])[ send_elmt + 1 ]
-                    - hypre_ParCompGridARowPtr(compGrid[level])[ send_elmt ];
-         send_buffer[cnt++] = row_length;
+            row_length = hypre_ParCompGridARowPtr(compGrid[level])[ send_elmt + 1 ]
+                       - hypre_ParCompGridARowPtr(compGrid[level])[ send_elmt ];
+            send_buffer[cnt++] = row_length;
+         }
       }
          
       // copy global indices for matrix A
       for (i = 0; i < num_send_nodes[current_level][partition][level]; i++)
       {
-         if (send_flag[current_level][partition][level][i] < 0)
-            send_elmt = -(send_flag[current_level][partition][level][i] + 1);
-         else
-            send_elmt = send_flag[current_level][partition][level][i];
-         row_length = hypre_ParCompGridARowPtr(compGrid[level])[ send_elmt + 1 ]
-                    - hypre_ParCompGridARowPtr(compGrid[level])[ send_elmt ];
-         HYPRE_Int offset = hypre_ParCompGridARowPtr(compGrid[level])[ send_elmt ];
-         for (j = 0; j < row_length; j++)
+         if (send_flag[current_level][partition][level][i] >= 0)
          {
-            send_buffer[cnt++] = hypre_ParCompGridAGlobalColInd(compGrid[level])[ offset + j ];
+            send_elmt = send_flag[current_level][partition][level][i];
+            row_length = hypre_ParCompGridARowPtr(compGrid[level])[ send_elmt + 1 ]
+                       - hypre_ParCompGridARowPtr(compGrid[level])[ send_elmt ];
+            HYPRE_Int offset = hypre_ParCompGridARowPtr(compGrid[level])[ send_elmt ];
+            for (j = 0; j < row_length; j++)
+            {
+               send_buffer[cnt++] = hypre_ParCompGridAGlobalColInd(compGrid[level])[ offset + j ];
+            }
          }
       }
    }
@@ -2961,8 +2965,26 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
          {
             if (incoming_global_index == compGrid_global_index)
             {
-               incoming_dest[incoming_cnt++] = -1;
-               cnt++;
+               if (level != transition_level-1) offset = cnt + 2*num_recv_nodes[current_level][buffer_number][level];
+               else offset = cnt + num_recv_nodes[current_level][buffer_number][level];
+               // If existing dof is a ghost dof and if incoming dof is a real dof
+               if (hypre_ParCompGridARowPtr(compGrid[level])[ compGrid_cnt + num_owned_nodes + 1 ] - hypre_ParCompGridARowPtr(compGrid[level])[ compGrid_cnt + num_owned_nodes ] == 0 && recv_buffer[offset] != 0)
+               {
+
+
+
+                  incoming_dest[incoming_cnt++] = dest++;
+                  cnt++;
+                  add_node_cnt++;
+
+
+                  
+               }
+               else
+               {
+                  incoming_dest[incoming_cnt++] = -1;
+                  cnt++;
+               }
             }
             else if (incoming_global_index < compGrid_global_index)
             {
