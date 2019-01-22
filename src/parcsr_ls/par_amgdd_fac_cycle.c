@@ -15,7 +15,7 @@
 #include "par_amg.h"
 #include "par_csr_block_matrix.h"	
 
-#define DEBUG_FAC 0
+#define DEBUG_FAC 1
 #define DUMP_INTERMEDIATE_SOLNS 0
 
 HYPRE_Int
@@ -459,7 +459,7 @@ FAC_Jacobi( hypre_ParCompGrid *compGrid )
    // Temporary vector to calculate Jacobi sweep
    HYPRE_Complex           *u_temp = hypre_CTAlloc(HYPRE_Complex, hypre_ParCompGridNumNodes(compGrid), HYPRE_MEMORY_HOST);
 
-   // Do Gauss-Seidel relaxation on the real nodes
+   // Do Jacobi relaxation on the real nodes
    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
    {
       // if (hypre_ParCompGridRealDofMarker(compGrid)) is_real = hypre_ParCompGridRealDofMarker(compGrid)[i];
@@ -568,16 +568,6 @@ FAC_GaussSeidel( hypre_ParCompGrid *compGrid )
 
          // Divide by diagonal
          if (diag == 0.0) printf("Tried to divide by zero diagonal!\n");
-
-         // !!! Debug
-         if (diag == 0.0)
-         {
-            HYPRE_Int   myid;
-            hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
-            printf("myid = %d, i = %d, num_nodes = %d\n", myid, i, hypre_ParCompGridNumNodes(compGrid));
-         }
-
-
          hypre_ParCompGridU(compGrid)[i] /= diag;
 
          if (hypre_ParCompGridTemp(compGrid)) temp[i] = hypre_ParCompGridU(compGrid)[i] - u_before;

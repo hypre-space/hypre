@@ -396,20 +396,6 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    }
    #endif
 
-
-
-   // !!! Debug
-   // if (myid == 0)
-   // {
-   //    for (level = 0; level < num_levels; level++)
-   //    {
-   //       hypre_sprintf(filename, "outputs/CompGrids/initCompGridRank%dLevel%d.txt", myid, level);
-   //       hypre_ParCompGridDebugPrint( compGrid[level], filename );
-   //    }
-   // }
-
-
-
    /* Outer loop over levels:
    Start from coarsest level and work up to finest */
    #if DEBUGGING_MESSAGES
@@ -648,7 +634,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
 
 
       // !!! Debug
-      // if (myid == 0)
+      // if (level == 0)
       // {
       //    for (i = level; i < num_levels; i++)
       //    {
@@ -816,6 +802,16 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    //    test_failed = 1;
    // }
    // #endif
+
+   // !!! Debug
+   if (myid == 0)
+   {
+      for (level = 0; level < num_levels; level++)
+      {
+         hypre_sprintf(filename, "outputs/CompGrids/setupCompGridRank%dLevel%d.txt", myid, level);
+         hypre_ParCompGridDebugPrint( compGrid[level], filename );
+      }
+   }
 
    #if DEBUG_COMP_GRID == 2
    for (level = 0; level < num_levels; level++)
@@ -2974,10 +2970,6 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
          HYPRE_Int compGrid_global_index = hypre_ParCompGridGlobalIndices(compGrid[level])[ compGrid_cnt + num_owned_nodes ];
          HYPRE_Int incoming_is_nonowned = 1;
 
-         // !!! Debug
-         // if (myid == 0 && level == 4 && incoming_global_index == 14) 
-         //    printf("rank %d, level %d, incoming_global_index %d, compGrid_global_index %d\n", myid, level, incoming_global_index, compGrid_global_index);
-
          for (i = 0; i < hypre_ParCompGridNumOwnedBlocks(compGrid[level]); i++)
          {
             if (hypre_ParCompGridOwnedBlockStarts(compGrid[level])[i+1] - hypre_ParCompGridOwnedBlockStarts(compGrid[level])[i] > 0)
@@ -3342,12 +3334,6 @@ CommunicateRemainingMatrixInfo(hypre_ParCompGrid **compGrid, hypre_ParCompGridCo
          hypre_ParCompGridPRowPtr(compGrid[level])[0] = 0;
    }
 
-
-   // !!! Debug
-   HYPRE_Int *accounted_for = hypre_CTAlloc(HYPRE_Int, num_levels-1, HYPRE_MEMORY_HOST);
-
-
-
    for (outer_level = transition_level-1; outer_level >= 0; outer_level--)
    {
       // Get send/recv info from the comp grid comm pkg
@@ -3359,16 +3345,6 @@ CommunicateRemainingMatrixInfo(hypre_ParCompGrid **compGrid, hypre_ParCompGridCo
 
       if (num_send_procs || num_recv_procs)
       {
-
-
-         // !!! Debug
-         HYPRE_Int send_flag_real_cnt = 0;
-         HYPRE_Int send_flag_ghost_cnt = 0;
-         HYPRE_Int recv_flag_real_cnt = 0;
-         HYPRE_Int recv_flag_ghost_cnt = 0;
-
-
-
          // Get the buffer sizes
          HYPRE_Int *send_sizes = hypre_CTAlloc(HYPRE_Int, 2*num_comm_partitions, HYPRE_MEMORY_HOST);
          for (part = 0; part < num_comm_partitions; part++)
@@ -3383,15 +3359,9 @@ CommunicateRemainingMatrixInfo(hypre_ParCompGrid **compGrid, hypre_ParCompGridCo
                   {
                      idx = -(hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[outer_level][part][level][i] + 1);
                      A_row_size = 0;
-
-                     // !!! Debug
-                     if (outer_level == 4 && send_procs[part] == 6 && myid == 0) send_flag_ghost_cnt++;
                   }
                   else
                   {
-                     // !!! Debug
-                     if (outer_level == 4 && send_procs[part] == 6 && myid == 0)  send_flag_real_cnt++;
-
                      idx = hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[outer_level][part][level][i];
                      A_row_size = hypre_ParCompGridARowPtr(compGrid[level])[idx+1] - hypre_ParCompGridARowPtr(compGrid[level])[idx];
                   }
@@ -3407,12 +3377,6 @@ CommunicateRemainingMatrixInfo(hypre_ParCompGrid **compGrid, hypre_ParCompGridCo
                   if (level != num_levels-1) send_sizes[2*part+1] += A_row_size + P_row_size;
                   else send_sizes[2*part+1] += A_row_size;
                }
-
-               // !!! Debug
-               if (outer_level == 4 && myid == 0 && send_procs[part] == 6 )  printf("level %d, send_flag_real_cnt = %d, send_flag_ghost_cnt = %d\n", level, send_flag_real_cnt, send_flag_ghost_cnt);
-               send_flag_real_cnt = 0;
-               send_flag_ghost_cnt = 0;
-
             }
          }
 
@@ -3558,22 +3522,10 @@ CommunicateRemainingMatrixInfo(hypre_ParCompGrid **compGrid, hypre_ParCompGridCo
 
                   if (idx >=0 )
                   {
-                     // !!! Debug
-                     if (outer_level == 4 && recv_procs[proc] == 0 && myid == 6)  recv_flag_real_cnt++;
-
-
                      for (j = hypre_ParCompGridARowPtr(compGrid[level])[idx]; j < hypre_ParCompGridARowPtr(compGrid[level])[idx+1]; j++)
                      {
-                        // !!! Debug
-                        if (myid == 6 && outer_level == 4 && level == 6 && complex_cnt >= recv_sizes[2*proc+1]) 
-                           printf("myid = %d, outer_level = %d, level = %d, recv_proc = %d, complex_cnt = %d, buffer size = %d\n", myid, outer_level, level, recv_procs[proc], complex_cnt, recv_sizes[2*proc+1]);
                         hypre_ParCompGridAData(compGrid[level])[j] = complex_recv_buffers[proc][complex_cnt++];
                      }
-                  }
-                  else
-                  {
-                     // !!! Debug
-                     if (outer_level == 4 && recv_procs[proc] == 0 && myid == 6)  recv_flag_ghost_cnt++;
                   }
                }
                if (level != num_levels-1)
@@ -3587,14 +3539,6 @@ CommunicateRemainingMatrixInfo(hypre_ParCompGrid **compGrid, hypre_ParCompGridCo
 
                      HYPRE_Int row_size = int_recv_buffers[proc][int_cnt++];
                      hypre_ParCompGridPRowPtr(compGrid[level])[idx+1] = row_size;
-
-
-
-                     // !!! Debug
-                     if ( idx+1 == hypre_ParCompGridNumNodes(compGrid[level]) ) accounted_for[level] = 1;
-
-
-
                      temp_PColInd[level][temp_idx] = hypre_CTAlloc(HYPRE_Int, row_size, HYPRE_MEMORY_HOST);
                      temp_PData[level][temp_idx] = hypre_CTAlloc(HYPRE_Complex, row_size, HYPRE_MEMORY_HOST);
 
@@ -3605,12 +3549,6 @@ CommunicateRemainingMatrixInfo(hypre_ParCompGrid **compGrid, hypre_ParCompGridCo
                      }
                   }
                }
-
-               // !!! Debug
-               if (outer_level == 4 && myid == 6 && recv_procs[proc] == 0)  printf("level %d, recv_flag_real_cnt = %d, recv_flag_ghost_cnt = %d\n", level, recv_flag_real_cnt, recv_flag_ghost_cnt);
-               recv_flag_ghost_cnt = 0;
-               recv_flag_real_cnt = 0;
-
             }
          }
 
@@ -3633,18 +3571,6 @@ CommunicateRemainingMatrixInfo(hypre_ParCompGrid **compGrid, hypre_ParCompGridCo
       #endif 
    }
 
-
-   // !!! Debug
-   for (level = 0; level < num_levels-1; level++)
-   {
-      if (!accounted_for[level])
-      {
-         printf("Rank %d didn't account for last P row on level %d!\n", myid, level);
-         printf("%d\n", hypre_ParCompGridARowPtr(compGrid[level])[ hypre_ParCompGridNumNodes(compGrid[level]) ]);
-         printf("%d\n", hypre_ParCompGridPRowPtr(compGrid[level])[ hypre_ParCompGridNumNodes(compGrid[level]) ]);
-      }
-   }
-
    // Fix up P
    for (level = 0; level < transition_level; level++)
    {
@@ -3655,9 +3581,6 @@ CommunicateRemainingMatrixInfo(hypre_ParCompGrid **compGrid, hypre_ParCompGridCo
          for (i = num_owned_nodes; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
          {
             hypre_ParCompGridPRowPtr(compGrid[level])[i+1] = hypre_ParCompGridPRowPtr(compGrid[level])[i] + hypre_ParCompGridPRowPtr(compGrid[level])[i+1];
-         
-            // !!! Debug
-            // if (myid == 0) printf("level %d, i+1 = %d, num nodes = %d, PRowPtr[i+1] = %d\n", level, i+1, hypre_ParCompGridNumNodes(compGrid[level]), hypre_ParCompGridPRowPtr(compGrid[level])[i+1]);
          }
 
          // Make sure enough space is allocated for P
