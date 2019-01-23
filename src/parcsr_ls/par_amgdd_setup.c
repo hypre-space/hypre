@@ -3723,14 +3723,14 @@ TestCompGrids1(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int tra
 
       // Check whether add_flag has any zeros (zeros indicate that we have extra nodes in the comp grid that don't belong) 
       // !!! NOTE: disabling this check for now since I think processor agglomeration may put extra nodes in (and that is OK)
-      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
-      {
-         if (add_flag[level][i] == 0) 
-         {
-            test_failed = 1;
-            if (myid == 0) hypre_printf("Error: extra nodes present in comp grid\n");
-         }
-      }
+      // for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
+      // {
+      //    if (add_flag[level][i] == 0) 
+      //    {
+      //       test_failed = 1;
+      //       if (myid == 0) hypre_printf("Error: extra nodes present in comp grid\n");
+      //    }
+      // }
 
       // Check to make sure we have the correct identification of ghost nodes
       if (level != transition_level-1 && check_ghost_info)
@@ -3738,11 +3738,11 @@ TestCompGrids1(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int tra
          for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++) 
          {
             // !!! NOTE: disabling this check since I've redefined how real dofs are determined after agglomeration (can now be many more real dofs than expected via simple top down construction)
-            if (add_flag[level][i] < num_ghost_layers + 1 && hypre_ParCompGridARowPtr(compGrid[level])[i+1] - hypre_ParCompGridARowPtr(compGrid[level])[i] != 0) 
-            {
-               test_failed = 1;
-               if (myid == 0) hypre_printf("Error: dof that should have been marked as ghost was marked as real\n");
-            }
+            // if (add_flag[level][i] < num_ghost_layers + 1 && hypre_ParCompGridARowPtr(compGrid[level])[i+1] - hypre_ParCompGridARowPtr(compGrid[level])[i] != 0) 
+            // {
+            //    test_failed = 1;
+            //    if (myid == 0) hypre_printf("Error: dof that should have been marked as ghost was marked as real\n");
+            // }
             if (add_flag[level][i] > num_ghost_layers && hypre_ParCompGridARowPtr(compGrid[level])[i+1] - hypre_ParCompGridARowPtr(compGrid[level])[i] == 0) 
             {
                test_failed = 1;

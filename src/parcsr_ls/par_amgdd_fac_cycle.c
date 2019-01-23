@@ -376,11 +376,6 @@ FAC_Restrict( hypre_ParCompGrid *compGrid_f, hypre_ParCompGrid *compGrid_c )
    return 0;
 }
 
-
-
-
-
-
 HYPRE_Int
 FAC_Simple_Restrict( hypre_ParCompGrid *compGrid_f, hypre_ParCompGrid *compGrid_c, HYPRE_Int level )
 {
@@ -508,6 +503,21 @@ FAC_Jacobi( hypre_ParCompGrid *compGrid )
       }
    }
 
+   // if (hypre_ParCompGridTemp(compGrid))
+   // {
+   //    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
+   //    {
+   //       for (j = hypre_ParCompGridARowPtr(compGrid)[i]; j < hypre_ParCompGridARowPtr(compGrid)[i+1]; j++)
+   //       {
+   //          if (hypre_ParCompGridAColInd(compGrid)[j] >= 0)
+   //          {
+   //             hypre_ParCompGridTemp(compGrid)[i] += hypre_ParCompGridAData(compGrid)[j] * u_temp[ hypre_ParCompGridAColInd(compGrid)[j] ];
+   //          }
+   //       }
+   //    }
+   // }
+
+   // !!! NOTE: here I use the fact that A is symmetric !!! I'm actually evaluating A^T(u_temp) = hyrpe_ParCompGridTemp()
    if (hypre_ParCompGridTemp(compGrid))
    {
       for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
@@ -516,7 +526,7 @@ FAC_Jacobi( hypre_ParCompGrid *compGrid )
          {
             if (hypre_ParCompGridAColInd(compGrid)[j] >= 0)
             {
-               hypre_ParCompGridTemp(compGrid)[i] += hypre_ParCompGridAData(compGrid)[j] * u_temp[ hypre_ParCompGridAColInd(compGrid)[j] ];
+               hypre_ParCompGridTemp(compGrid)[ hypre_ParCompGridAColInd(compGrid)[j] ] += hypre_ParCompGridAData(compGrid)[j] * u_temp[ i ];
             }
          }
       }
@@ -574,6 +584,21 @@ FAC_GaussSeidel( hypre_ParCompGrid *compGrid )
       }
    }
 
+   // if (hypre_ParCompGridTemp(compGrid))
+   // {
+   //    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
+   //    {
+   //       for (j = hypre_ParCompGridARowPtr(compGrid)[i]; j < hypre_ParCompGridARowPtr(compGrid)[i+1]; j++)
+   //       {
+   //          if (hypre_ParCompGridAColInd(compGrid)[j] >= 0)
+   //          {
+   //             hypre_ParCompGridTemp(compGrid)[i] += hypre_ParCompGridAData(compGrid)[j] * temp[ hypre_ParCompGridAColInd(compGrid)[j] ];
+   //          }
+   //       }
+   //    }
+   // }
+
+   // !!! NOTE: here I use the fact that A is symmetric !!! I'm actually evaluating A^T(temp) = hyrpe_ParCompGridTemp()
    if (hypre_ParCompGridTemp(compGrid))
    {
       for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
@@ -582,7 +607,7 @@ FAC_GaussSeidel( hypre_ParCompGrid *compGrid )
          {
             if (hypre_ParCompGridAColInd(compGrid)[j] >= 0)
             {
-               hypre_ParCompGridTemp(compGrid)[i] += hypre_ParCompGridAData(compGrid)[j] * temp[ hypre_ParCompGridAColInd(compGrid)[j] ];
+               hypre_ParCompGridTemp(compGrid)[ hypre_ParCompGridAColInd(compGrid)[j] ] += hypre_ParCompGridAData(compGrid)[j] * temp[ i ];
             }
          }
       }
