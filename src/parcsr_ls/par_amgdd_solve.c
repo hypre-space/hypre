@@ -189,6 +189,9 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata )
       if (!hypre_ParCompGridTemp( hypre_ParAMGDataCompGrid(amg_data)[level] )) 
          hypre_ParCompGridTemp( hypre_ParAMGDataCompGrid(amg_data)[level] ) = hypre_CTAlloc(HYPRE_Complex, hypre_ParCompGridNumNodes(hypre_ParAMGDataCompGrid(amg_data)[level]), HYPRE_MEMORY_HOST);
       else for (i = 0; i < hypre_ParCompGridNumNodes(hypre_ParAMGDataCompGrid(amg_data)[level]); i++) hypre_ParCompGridTemp( hypre_ParAMGDataCompGrid(amg_data)[level] )[i] = 0.0;
+      if (!hypre_ParCompGridATemp( hypre_ParAMGDataCompGrid(amg_data)[level] )) 
+         hypre_ParCompGridATemp( hypre_ParAMGDataCompGrid(amg_data)[level] ) = hypre_CTAlloc(HYPRE_Complex, hypre_ParCompGridNumNodes(hypre_ParAMGDataCompGrid(amg_data)[level]), HYPRE_MEMORY_HOST);
+      else for (i = 0; i < hypre_ParCompGridNumNodes(hypre_ParAMGDataCompGrid(amg_data)[level]); i++) hypre_ParCompGridATemp( hypre_ParAMGDataCompGrid(amg_data)[level] )[i] = 0.0;
    }
 
 	// Do the cycles
@@ -271,7 +274,7 @@ GetCompositeResidual(hypre_ParCompGrid *compGrid)
    HYPRE_Real res_norm = 0.0;
    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
    {
-      if (hypre_ParCompGridRealDofMarker(compGrid)[i])
+      if (hypre_ParCompGridARowPtr(compGrid)[i+1] - hypre_ParCompGridARowPtr(compGrid)[i] > 0)
       {
          HYPRE_Real res = hypre_ParCompGridF(compGrid)[i];
          for (j = hypre_ParCompGridARowPtr(compGrid)[i]; j < hypre_ParCompGridARowPtr(compGrid)[i+1]; j++)

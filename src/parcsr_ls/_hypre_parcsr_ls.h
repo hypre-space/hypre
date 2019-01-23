@@ -137,15 +137,12 @@ typedef struct
 
    HYPRE_Complex     *u;
    HYPRE_Complex     *f;
-
-   // !!! New
    HYPRE_Complex     *temp;
+   HYPRE_Complex     *Atemp;
 
    HYPRE_Int        *global_indices;
    HYPRE_Int        *coarse_global_indices; 
-   HYPRE_Int        *coarse_local_indices; 
-   HYPRE_Int        *real_dof_marker;
-   HYPRE_Int        *coarse_residual_marker;
+   HYPRE_Int        *coarse_local_indices;
 
    HYPRE_Int        *A_rowptr;
    HYPRE_Int        *A_colind;
@@ -173,15 +170,11 @@ typedef struct
 #define hypre_ParCompGridPMemSize(compGrid)           ((compGrid) -> P_mem_size)
 #define hypre_ParCompGridU(compGrid)           ((compGrid) -> u)
 #define hypre_ParCompGridF(compGrid)           ((compGrid) -> f)
-
-// !!! New
 #define hypre_ParCompGridTemp(compGrid)        ((compGrid) -> temp)
-
+#define hypre_ParCompGridATemp(compGrid)        ((compGrid) -> Atemp)
 #define hypre_ParCompGridGlobalIndices(compGrid)           ((compGrid) -> global_indices)
 #define hypre_ParCompGridCoarseGlobalIndices(compGrid)           ((compGrid) -> coarse_global_indices)
 #define hypre_ParCompGridCoarseLocalIndices(compGrid)           ((compGrid) -> coarse_local_indices)
-#define hypre_ParCompGridRealDofMarker(compGrid)           ((compGrid) -> real_dof_marker)
-#define hypre_ParCompGridCoarseResidualMarker(compGrid)           ((compGrid) -> coarse_residual_marker)
 #define hypre_ParCompGridARowPtr(compGrid)         ((compGrid) -> A_rowptr)
 #define hypre_ParCompGridAColInd(compGrid)         ((compGrid) -> A_colind)
 #define hypre_ParCompGridAGlobalColInd(compGrid)         ((compGrid) -> A_global_colind)

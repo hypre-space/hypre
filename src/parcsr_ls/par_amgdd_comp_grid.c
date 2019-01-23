@@ -40,11 +40,11 @@ hypre_ParCompGridCreate ()
    hypre_ParCompGridPMemSize(compGrid) = 0;   
    hypre_ParCompGridU(compGrid) = NULL;
    hypre_ParCompGridF(compGrid) = NULL;
+   hypre_ParCompGridTemp(compGrid) = NULL;
+   hypre_ParCompGridATemp(compGrid) = NULL;
    hypre_ParCompGridGlobalIndices(compGrid) = NULL;
    hypre_ParCompGridCoarseGlobalIndices(compGrid) = NULL;
    hypre_ParCompGridCoarseLocalIndices(compGrid) = NULL;
-   hypre_ParCompGridRealDofMarker(compGrid) = NULL;
-   hypre_ParCompGridCoarseResidualMarker(compGrid) = NULL;
 
    hypre_ParCompGridARowPtr(compGrid) = NULL;
    hypre_ParCompGridAColInd(compGrid) = NULL;
@@ -77,6 +77,11 @@ hypre_ParCompGridDestroy ( hypre_ParCompGrid *compGrid )
       hypre_TFree(hypre_ParCompGridTemp(compGrid), HYPRE_MEMORY_HOST);
    }
 
+   if (hypre_ParCompGridATemp(compGrid))
+   {
+      hypre_TFree(hypre_ParCompGridATemp(compGrid), HYPRE_MEMORY_HOST);
+   }
+
    if (hypre_ParCompGridF(compGrid))
    {
       hypre_TFree(hypre_ParCompGridF(compGrid), HYPRE_MEMORY_HOST);
@@ -95,16 +100,6 @@ hypre_ParCompGridDestroy ( hypre_ParCompGrid *compGrid )
    if (hypre_ParCompGridCoarseLocalIndices(compGrid))
    {
       hypre_TFree(hypre_ParCompGridCoarseLocalIndices(compGrid), HYPRE_MEMORY_HOST);
-   }
-
-   if (hypre_ParCompGridRealDofMarker(compGrid))
-   {
-      hypre_TFree(hypre_ParCompGridRealDofMarker(compGrid), HYPRE_MEMORY_HOST);
-   }
-
-   if (hypre_ParCompGridCoarseResidualMarker(compGrid))
-   {
-      hypre_TFree(hypre_ParCompGridCoarseResidualMarker(compGrid), HYPRE_MEMORY_HOST);
    }
 
    if (hypre_ParCompGridARowPtr(compGrid))
@@ -323,132 +318,6 @@ hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, H
       {
          hypre_TFree(hypre_ParCompGridCoarseLocalIndices(compGrid[level]), HYPRE_MEMORY_HOST);
          hypre_ParCompGridCoarseLocalIndices(compGrid[level]) = NULL;
-      }
-   }
-
-   // Setup the coarse residual marker for use in FAC cycles
-   // for (level = 1; level < transition_level; level++)
-   // {
-   //    hypre_ParCompGridCoarseResidualMarker(compGrid[level]) = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumNodes(compGrid[level]), HYPRE_MEMORY_HOST); // mark the coarse dofs as we restrict (or don't) to make sure they are all updated appropriately: 0 = nothing has happened yet, 1 = has incomplete residual info, 2 = restricted to from fine grid
-
-   //    // Look at fine grid A matrix
-   //    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level-1]); i++)
-   //    {
-   //       // Loop over entries in A
-   //       for (j = hypre_ParCompGridARowPtr(compGrid[level-1])[i]; j < hypre_ParCompGridARowPtr(compGrid[level-1])[i+1]; j++)
-   //       {
-   //          // If -1 index encountered, mark the coarse grid connections to this node (don't want to restrict to these)
-   //          if ( hypre_ParCompGridAColInd(compGrid[level-1])[j] < 0 )
-   //          {
-   //             for (k = hypre_ParCompGridPRowPtr(compGrid[level-1])[i]; k < hypre_ParCompGridPRowPtr(compGrid[level-1])[i+1]; k++)
-   //             {
-   //                if (hypre_ParCompGridPColInd(compGrid[level-1])[k] >= 0)
-   //                {
-   //                   hypre_ParCompGridCoarseResidualMarker(compGrid[level])[ hypre_ParCompGridPColInd(compGrid[level-1])[k] ] = 1; // Mark coarse dofs that we don't want to restrict to from fine grid
-   //                }
-   //             }
-   //             break;
-   //          }
-   //       }
-   //    }
-      
-   //    // Mark where we have complete residual information
-   //    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level-1]); i++)
-   //    {
-   //       // Loop over entries in P
-   //       for (j = hypre_ParCompGridPRowPtr(compGrid[level-1])[i]; j < hypre_ParCompGridPRowPtr(compGrid[level-1])[i+1]; j++)
-   //       {
-   //          if (hypre_ParCompGridPColInd(compGrid[level-1])[j] >= 0)
-   //          {
-   //             // Add contribution to restricted residual where appropriate
-   //             if (hypre_ParCompGridCoarseResidualMarker(compGrid[level])[ hypre_ParCompGridPColInd(compGrid[level-1])[j] ] != 1) 
-   //             {
-   //                hypre_ParCompGridCoarseResidualMarker(compGrid[level])[ hypre_ParCompGridPColInd(compGrid[level-1])[j] ] = 2; // Mark coarse dofs that successfully recieve their value from restriction from the fine grid
-   //             }
-   //          }
-   //       }
-   //    }
-   // }
-
-   // Setup the coarse residual marker for use in FAC cycles
-   // if (transition_level != num_levels)
-   // {
-   //    hypre_ParCompGridCoarseResidualMarker(compGrid[transition_level]) = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumNodes(compGrid[transition_level]), HYPRE_MEMORY_HOST); // mark the coarse dofs as we restrict (or don't) to make sure they are all updated appropriately: 0 = nothing has happened yet, 1 = has incomplete residual info, 2 = restricted to from fine grid
-
-   //    // Look at fine grid A matrix
-   //    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[transition_level-1]); i++)
-   //    {
-   //       // Loop over entries in A
-   //       for (j = hypre_ParCompGridARowPtr(compGrid[transition_level-1])[i]; j < hypre_ParCompGridARowPtr(compGrid[transition_level-1])[i+1]; j++)
-   //       {
-   //          // If -1 index encountered, mark the coarse grid connections to this node (don't want to restrict to these)
-   //          if ( hypre_ParCompGridAColInd(compGrid[transition_level-1])[j] < 0 )
-   //          {
-   //             for (k = hypre_ParCompGridPRowPtr(compGrid[transition_level-1])[i]; k < hypre_ParCompGridPRowPtr(compGrid[transition_level-1])[i+1]; k++)
-   //             {
-   //                hypre_ParCompGridCoarseResidualMarker(compGrid[transition_level])[ hypre_ParCompGridPColInd(compGrid[transition_level-1])[k] ] = 1; // Mark coarse dofs that we don't want to restrict to from fine grid
-   //             }
-   //             break;
-   //          }
-   //       }
-   //    }
-      
-   //    // Mark where we have complete residual information
-   //    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[transition_level-1]); i++)
-   //    {
-   //       // Loop over entries in P
-   //       for (j = hypre_ParCompGridPRowPtr(compGrid[transition_level-1])[i]; j < hypre_ParCompGridPRowPtr(compGrid[transition_level-1])[i+1]; j++)
-   //       {
-   //          // Add contribution to restricted residual where appropriate
-   //          if (hypre_ParCompGridPColInd(compGrid[transition_level-1])[j] < 0) printf("P has -1 index found in comp grid finalize\n");
-   //          if (hypre_ParCompGridCoarseResidualMarker(compGrid[transition_level])[ hypre_ParCompGridPColInd(compGrid[transition_level-1])[j] ] != 1) 
-   //          {
-   //             hypre_ParCompGridCoarseResidualMarker(compGrid[transition_level])[ hypre_ParCompGridPColInd(compGrid[transition_level-1])[j] ] = 2; // Mark coarse dofs that successfully recieve their value from restriction from the fine grid
-   //          }
-   //       }
-   //    }
-   // }
-
-   return 0;
-}
-
-HYPRE_Int
-hypre_ParCompGridSetupRealDofMarker( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int num_ghost_layers )
-{
-   HYPRE_Int i,j,level;
-   for (level = 0; level < num_levels-1; level++)
-   {
-      // Allocate the real dof marker
-      hypre_ParCompGridRealDofMarker(compGrid[level]) = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumNodes(compGrid[level]), HYPRE_MEMORY_HOST);
-
-      // Initialize to 1 (real) everywhere except where we don't own the full stencil in A
-      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
-      {
-         hypre_ParCompGridRealDofMarker(compGrid[level])[i] = 1;
-         for (j = hypre_ParCompGridARowPtr(compGrid[level])[i]; j < hypre_ParCompGridARowPtr(compGrid[level])[i+1]; j++)
-         {
-            if (hypre_ParCompGridAColInd(compGrid[level])[j] < 0)
-            {
-               hypre_ParCompGridRealDofMarker(compGrid[level])[i] = num_ghost_layers + 1;
-               break;
-            }
-         }
-      }
-
-      // Find neighbors less than distance (num_ghost_layers) from the edges marded above
-      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
-      {
-         if (hypre_ParCompGridRealDofMarker(compGrid[level])[i] == num_ghost_layers + 1)
-         {
-            // Recursively add the region of padding (flagging coarse nodes on the next level if applicable)
-            RecursivelyMarkGhostDofs(i, num_ghost_layers, compGrid[level]);
-         }
-      }
-
-      // Clean up by setting the marker for all ghost dofs to zero
-      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
-      {
-         if (hypre_ParCompGridRealDofMarker(compGrid[level])[i] > 1) hypre_ParCompGridRealDofMarker(compGrid[level])[i] = 0;
       }
    }
 
@@ -725,7 +594,6 @@ hypre_ParCompGridDebugPrint ( hypre_ParCompGrid *compGrid, const char* filename 
    HYPRE_Int        *global_indices = hypre_ParCompGridGlobalIndices(compGrid);
    HYPRE_Int        *coarse_global_indices = hypre_ParCompGridCoarseGlobalIndices(compGrid);
    HYPRE_Int        *coarse_local_indices = hypre_ParCompGridCoarseLocalIndices(compGrid);
-   HYPRE_Int        *real_dof_marker = hypre_ParCompGridRealDofMarker(compGrid);
 
    HYPRE_Int *A_rowptr = hypre_ParCompGridARowPtr(compGrid);
    HYPRE_Int *A_colind = hypre_ParCompGridAColInd(compGrid);
@@ -739,7 +607,7 @@ hypre_ParCompGridDebugPrint ( hypre_ParCompGrid *compGrid, const char* filename 
 
    // Measure number of ghost nodes
    HYPRE_Int num_real = 0;
-   if (real_dof_marker) for (i = 0; i < num_nodes; i++) if (real_dof_marker[i]) num_real++;
+   for (i = 0; i < num_nodes; i++) if (A_rowptr[i+1] - A_rowptr[i] > 0) num_real++;
 
    // Print info to given filename   
    FILE             *file;
@@ -768,15 +636,6 @@ hypre_ParCompGridDebugPrint ( hypre_ParCompGrid *compGrid, const char* filename 
       for (i = 0; i < num_nodes; i++)
       {
          hypre_fprintf(file, "%d ", global_indices[i]);
-      }
-   }
-   if (real_dof_marker)
-   {
-      hypre_fprintf(file, "\n");
-      hypre_fprintf(file, "real_dof_marker:\n");
-      for (i = 0; i < num_nodes; i++)
-      {
-         hypre_fprintf(file, "%d ", real_dof_marker[i]);
       }
    }
    if (coarse_global_indices)
@@ -849,7 +708,6 @@ hypre_ParCompGridPrintSolnRHS ( hypre_ParCompGrid *compGrid, const char* filenam
    HYPRE_Int        *global_indices = hypre_ParCompGridGlobalIndices(compGrid);
    HYPRE_Int        *coarse_global_indices = hypre_ParCompGridCoarseGlobalIndices(compGrid);
    HYPRE_Int        *coarse_local_indices = hypre_ParCompGridCoarseLocalIndices(compGrid);
-   HYPRE_Int        *ghost_marker = hypre_ParCompGridRealDofMarker(compGrid);
 
    HYPRE_Int         i;
 
@@ -874,11 +732,6 @@ hypre_ParCompGridPrintSolnRHS ( hypre_ParCompGrid *compGrid, const char* filenam
    }
    if (coarse_global_indices)
    {
-      hypre_fprintf(file, "\n");
-      for (i = 0; i < num_nodes; i++)
-      {
-         hypre_fprintf(file, "%d ", ghost_marker[i]);
-      }
       hypre_fprintf(file, "\n");
       for (i = 0; i < num_nodes; i++)
       {
@@ -911,7 +764,6 @@ hypre_ParCompGridDumpSorted( hypre_ParCompGrid *compGrid, const char* filename)
 
    // Get composite grid information
    HYPRE_Int        *global_indices = hypre_ParCompGridGlobalIndices(compGrid);
-   HYPRE_Int        *ghost_marker = hypre_ParCompGridRealDofMarker(compGrid);
 
    // Get the position where the owned nodes should go in order to output arrays sorted by global index
    HYPRE_Int insert_owned_position;
@@ -952,25 +804,6 @@ hypre_ParCompGridDumpSorted( hypre_ParCompGrid *compGrid, const char* filename)
    {
       hypre_fprintf(file, "%d ", global_indices[i]);
    }
-
-   if (ghost_marker)
-   {
-      // Ghost marker
-      hypre_fprintf(file, "\n");
-      for (i = num_owned_nodes; i < insert_owned_position; i++)
-      {
-         hypre_fprintf(file, "%d ", ghost_marker[i]);
-      }
-      for (i = 0; i < num_owned_nodes; i++)
-      {
-         hypre_fprintf(file, "%d ", ghost_marker[i]);
-      }
-      for (i = insert_owned_position; i < hypre_ParCompGridNumNodes(compGrid); i++)
-      {
-         hypre_fprintf(file, "%d ", ghost_marker[i]);
-      }
-      hypre_fprintf(file, "\n");
-   }
    hypre_fprintf(file, "\n");
 
    fclose(file);
@@ -997,27 +830,6 @@ hypre_ParCompGridGlobalIndicesDump( hypre_ParCompGrid *compGrid, const char* fil
 }
 
 HYPRE_Int 
-hypre_ParCompGridRealDofMarkerDump( hypre_ParCompGrid *compGrid, const char* filename)
-{
-   if (hypre_ParCompGridRealDofMarker(compGrid))
-   {
-      FILE             *file;
-      file = fopen(filename,"w");
-      HYPRE_Int i;
-
-      // Global indices
-      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
-      {
-         hypre_fprintf(file, "%d\n", hypre_ParCompGridRealDofMarker(compGrid)[i]);
-      }
-
-      fclose(file);
-   }
-
-   return 0;
-}
-
-HYPRE_Int 
 hypre_ParCompGridCoarseGlobalIndicesDump( hypre_ParCompGrid *compGrid, const char* filename)
 {
       FILE             *file;
@@ -1030,27 +842,6 @@ hypre_ParCompGridCoarseGlobalIndicesDump( hypre_ParCompGrid *compGrid, const cha
       for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
       {
          hypre_fprintf(file, "%d\n", hypre_ParCompGridCoarseGlobalIndices(compGrid)[i]);
-      }
-
-      fclose(file);
-   }
-
-   return 0;
-}
-
-HYPRE_Int 
-hypre_ParCompGridCoarseResidualMarkerDump( hypre_ParCompGrid *compGrid, const char* filename)
-{
-      FILE             *file;
-      file = fopen(filename,"w");
-      HYPRE_Int i;
-
-   if (hypre_ParCompGridCoarseResidualMarker(compGrid))
-   {
-      // Global indices
-      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
-      {
-         hypre_fprintf(file, "%d\n", hypre_ParCompGridCoarseResidualMarker(compGrid)[i]);
       }
 
       fclose(file);
@@ -1680,33 +1471,4 @@ hypre_ParCompGridCommPkgCopy( hypre_ParCompGridCommPkg *compGridCommPkg )
    }
 
    return copy_compGridCommPkg;
-}
-
-HYPRE_Int
-RecursivelyMarkGhostDofs(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *compGrid)
-{
-   HYPRE_Int         i,index,coarse_grid_index;
-   HYPRE_Int error_code = 0;
-
-   // Look at neighbors
-   for (i = hypre_ParCompGridARowPtr(compGrid)[node]; i < hypre_ParCompGridARowPtr(compGrid)[node+1]; i++)
-   {
-      // Get the index of the neighbor
-      index = hypre_ParCompGridAColInd(compGrid)[i];
-
-      // If the neighbor info is available on this proc
-      if (index >= 0)
-      {
-         // And if we still need to visit this index (note that add_flag[index] = m means we have already added all distance m-1 neighbors of index)
-         if (hypre_ParCompGridRealDofMarker(compGrid)[index] < m)
-         {
-            hypre_ParCompGridRealDofMarker(compGrid)[index] = m;
-            
-            // Recursively call to find distance m-1 neighbors of index
-            if (m > 2) RecursivelyMarkGhostDofs(index, m-1, compGrid);
-         }
-      }
-   }
-
-   return 0;
 }

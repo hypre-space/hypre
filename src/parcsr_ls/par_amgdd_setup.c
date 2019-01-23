@@ -19,7 +19,7 @@
 #include "par_amg.h"
 #include "par_csr_block_matrix.h"	
 
-#define DEBUG_COMP_GRID 1 // if true, runs some tests, prints out what is stored in the comp grids for each processor to a file
+#define DEBUG_COMP_GRID 0 // if true, runs some tests, prints out what is stored in the comp grids for each processor to a file
 #define DEBUG_PROC_NEIGHBORS 0 // if true, dumps info on the add flag structures that determine nearest processor neighbors 
 #define DEBUGGING_MESSAGES 0 // if true, prints a bunch of messages to the screen to let you know where in the algorithm you are
 
@@ -631,33 +631,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
          hypre_printf("TestCompGrids1 failed! Rank %d, level %d\n", myid, level);
       }
       #endif
-
-
-      // !!! Debug
-      // if (level == 0)
-      // {
-      //    for (i = level; i < num_levels; i++)
-      //    {
-      //       hypre_sprintf(filename, "outputs/CompGrids/setupLevel%dCompGridRank%dLevel%d.txt", level, myid, i);
-      //       hypre_ParCompGridDebugPrint( compGrid[i], filename );
-      //    }
-      // }
-      // hypre_MPI_Finalize();
-      // exit(0);
-
-
-
    }
-
-   // Setup the ghost/real dof markers for the comp grids
-   // if (use_transition_level) hypre_ParCompGridSetupRealDofMarker(compGrid, transition_level+1, num_ghost_layers);
-   // else hypre_ParCompGridSetupRealDofMarker(compGrid, num_levels, num_ghost_layers);
-
-   // #if DEBUGGING_MESSAGES
-   // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
-   // if (myid == 0) hypre_printf("All ranks: done with hypre_ParCompGridSetupRealDofMarker()\n");
-   // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
-   // #endif 
 
    #if DEBUG_COMP_GRID
    // Test whether comp grids have correct shape
@@ -803,16 +777,6 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    // }
    // #endif
 
-   // !!! Debug
-   if (myid == 0)
-   {
-      for (level = 0; level < num_levels; level++)
-      {
-         hypre_sprintf(filename, "outputs/CompGrids/setupCompGridRank%dLevel%d.txt", myid, level);
-         hypre_ParCompGridDebugPrint( compGrid[level], filename );
-      }
-   }
-
    #if DEBUG_COMP_GRID == 2
    for (level = 0; level < num_levels; level++)
    {
@@ -833,28 +797,8 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    hypre_printf("Finished comp grid setup on rank %d\n", myid);
    #endif
 
-   // Print memory consumption stats
-   for (level = 0; level < num_levels-1; level++)
-   {
-      // printf("Rank %d, level %d, dof ratio = %f, A ratio = %f, P ratio = %f, dof guess = %f, A guess = %f, P guess = %f\n",
-      //    myid, level,
-      //    ((float) hypre_ParCompGridMemSize(compGrid[level]) )/hypre_ParCompGridNumNodes(compGrid[level]),
-      //    ((float) hypre_ParCompGridAMemSize(compGrid[level]) )/hypre_ParCompGridARowPtr(compGrid[level])[hypre_ParCompGridNumNodes(compGrid[level])],
-      //    ((float) hypre_ParCompGridPMemSize(compGrid[level]) )/hypre_ParCompGridPRowPtr(compGrid[level])[hypre_ParCompGridNumNodes(compGrid[level])],
-      //    ((float) init_dof_mem[level] )/hypre_ParCompGridMemSize(compGrid[level]),
-      //    ((float) init_A_mem[level] )/hypre_ParCompGridAMemSize(compGrid[level]),
-      //    ((float) init_P_mem[level] )/hypre_ParCompGridPMemSize(compGrid[level]) );
-      // printf("Rank %d, level %d, dof ratio = %f, A ratio = %f, P ratio = %f, dof resizes = %d, A resizes = %d, P resizes = %d\n",
-      //    myid, level,
-      //    ((float) hypre_ParCompGridMemSize(compGrid[level]) )/hypre_ParCompGridNumNodes(compGrid[level]),
-      //    ((float) hypre_ParCompGridAMemSize(compGrid[level]) )/hypre_ParCompGridARowPtr(compGrid[level])[hypre_ParCompGridNumNodes(compGrid[level])],
-      //    ((float) hypre_ParCompGridPMemSize(compGrid[level]) )/hypre_ParCompGridPRowPtr(compGrid[level])[hypre_ParCompGridNumNodes(compGrid[level])],
-      //    num_resizes[3*level], num_resizes[3*level + 1], num_resizes[3*level + 2] );
-      // printf("Rank %d, level %d, final mem_size = %d, final num_nodes = %d\n", myid, level, hypre_ParCompGridMemSize(compGrid[level]), hypre_ParCompGridNumNodes(compGrid[level]));
-   }
-   hypre_TFree(num_resizes, HYPRE_MEMORY_HOST);
-
    // Cleanup memory
+   hypre_TFree(num_resizes, HYPRE_MEMORY_HOST);
    hypre_TFree(nodes_added_on_level, HYPRE_MEMORY_HOST);
    hypre_TFree(proc_first_index, HYPRE_MEMORY_HOST);
    hypre_TFree(proc_last_index, HYPRE_MEMORY_HOST);
@@ -2798,10 +2742,6 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
          send_elmt = send_flag[current_level][partition][level][i];
          if (send_elmt < 0) send_elmt = -(send_elmt + 1);            
          send_buffer[cnt++] = hypre_ParCompGridGlobalIndices(compGrid[level])[ send_elmt ];
-
-         // !!! Debug
-         // if (example_send_proc == 0 && level == 5 && hypre_ParCompGridGlobalIndices(compGrid[level])[ send_elmt ] == 18)
-            // printf("Rank %d, outer_level %d, level %d, sending node %d to rank %d as %d\n", myid, current_level, level, hypre_ParCompGridGlobalIndices(compGrid[level])[ send_elmt ], example_send_proc, send_flag[current_level][partition][level][i] >= 0);
       }
 
       // if not on last level, copy coarse gobal indices
@@ -2990,17 +2930,8 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
          }
          if (incoming_is_nonowned)
          {
-            // !!! Debug
-            if (level != transition_level-1) offset = cnt + 2*num_recv_nodes[current_level][buffer_number][level];
-            else offset = cnt + num_recv_nodes[current_level][buffer_number][level];
-
-
             if (incoming_global_index == compGrid_global_index)
             {
-               // !!! Debug: uncomment this and remove above
-               // if (level != transition_level-1) offset = cnt + 2*num_recv_nodes[current_level][buffer_number][level];
-               // else offset = cnt + num_recv_nodes[current_level][buffer_number][level];
-
                // If existing dof is a ghost dof and if incoming dof is a real dof, overwrite by sending existing comp grid and incoming to same location
                if (hypre_ParCompGridARowPtr(compGrid[level])[ compGrid_cnt + num_owned_nodes + 1 ] - hypre_ParCompGridARowPtr(compGrid[level])[ compGrid_cnt + num_owned_nodes ] == 0 && recv_buffer[offset] != 0)
                {
@@ -3009,23 +2940,11 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
                   dest++;
                   cnt++;
                   nodes_added_on_level[level] = 1;
-
-                  // !!! Debug
-                  // if (myid == 0 && level == 5 && incoming_global_index == 18)
-                     // printf("Rank %d, level %d, incoming_global_index %d, compGrid_global_index %d, overwrite\n", myid, level, incoming_global_index, compGrid_global_index);
-
-
                }
                else
                {
                   incoming_dest[incoming_cnt++] = -1;
                   cnt++;
-
-                  // !!! Debug
-                  // if (myid == 0 && level == 5 && incoming_global_index == 18)
-                     // printf("Rank %d, level %d, incoming_global_index %d, compGrid_global_index, %d, mark redundant, incoming is %d\n", myid, level, incoming_global_index, compGrid_global_index, recv_buffer[offset]);
-
-
                }
             }
             else if (incoming_global_index < compGrid_global_index)
@@ -3034,12 +2953,6 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
                cnt++;
                add_node_cnt++;
                nodes_added_on_level[level] = 1;
-
-               // !!! Debug
-               // if (myid == 0 && level == 5 && incoming_global_index == 18)
-                  // printf("Rank %d, level %d, incoming_global_index %d, compGrid_global_index %d add, real %d\n", myid, level, incoming_global_index, compGrid_global_index, recv_buffer[offset]);
-
-
             }
             else
             {
@@ -3071,12 +2984,6 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
             add_node_cnt++;
             nodes_added_on_level[level] = 1;
             cnt++;
-
-            // !!! Debug
-            // if (myid == 0 && level == 5 && incoming_global_index == 18)
-            //    printf("Rank %d, level %d, incoming_global_index %d, add\n", myid, level, incoming_global_index);
-
-
          }
       }
       while (compGrid_cnt < num_nonowned_nodes)
@@ -3788,11 +3695,6 @@ TestCompGrids1(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int tra
             {
                test_failed = 1;
                if (myid == 0) hypre_printf("Error: dof that should have been marked as real was marked as ghost\n");
-               // !!! Debug
-               // if (myid == 0 && level == 5 && i == 18)
-               //    printf("Rank %d, level %d, node %d should have been marked as ghost\n", myid, level, i);
-
-
             }
          }
       }
@@ -3811,71 +3713,71 @@ TestCompGrids2(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels)
    // TEST 2: See if the composite grid is set up such that restriction can occur correctly
    // The CoarseResidualMarker shows where we have all the required info to restrict a correct residual
    // Here we mark the locations where a restricted residual (rather than a residual just recalculated on the coarse grid) is REQUIRED (i.e. where is the coarse grid residual affected by fine grid relaxation)
-   HYPRE_Int myid;
-   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
-   HYPRE_Int            level,i,j,k;
-   HYPRE_Int test_failed = 0;
-   for (level = 0; level < num_levels-1; level++)
-   { 
-      HYPRE_Int *needs_restrict = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumNodes(compGrid[level+1]), HYPRE_MEMORY_HOST);
-      // For dof in the comp grid
-      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
-      {
-         // Look at the row of A for dof
-         HYPRE_Int find_restrict_range = 0;
-         for (j = hypre_ParCompGridARowPtr(compGrid[level])[i]; j < hypre_ParCompGridARowPtr(compGrid[level])[i+1]; j++)
-         {
-            // If dof is connected through A to a real node
-            if (hypre_ParCompGridAColInd(compGrid[level])[j] >= 0)
-            {
-               if (hypre_ParCompGridRealDofMarker(compGrid[level])[ hypre_ParCompGridAColInd(compGrid[level])[j] ])
-               {
-                  // Then the residual here will change, so find where that residual will propogate on the coarse grid
-                  find_restrict_range = 1;
-                  break;
-               }
-            }
-         }
-         // If dof was connected to a real node
-         if (find_restrict_range)
-         {
-            // Look at the row of P for dof
-            for (j = hypre_ParCompGridPRowPtr(compGrid[level])[i]; j < hypre_ParCompGridPRowPtr(compGrid[level])[i+1]; j++)
-            {
-               // Mark everything in the restriction range of dof
-               if (hypre_ParCompGridPColInd(compGrid[level])[j] < 0)
-               {
-                  // If negative P col index encountered, make sure this is disconnected through A on the coarse grid
-                  for (k = 0; k < hypre_ParCompGridNumNodes(compGrid[level+1]); k++)
-                  {
-                     if (hypre_ParCompGridGlobalIndices(compGrid[level+1])[k] == -hypre_ParCompGridPColInd(compGrid[level])[j]-1)
-                     {
-                        hypre_printf("Error: negative P column index points to a global index that is found in the next coarsest composite grid.\n");
-                        test_failed = 1;
-                     }
-                  }
-               }
-               else needs_restrict[ hypre_ParCompGridPColInd(compGrid[level])[j] ] = 1;
-            }
-         }
-      }
-      // Now check against the coarse residual marker
-      // That is, coarse residual marker shows where we CAN restrict a correct residual and needs_restrict shows where we NEED to restrict a correct residual
-      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level+1]); i++)
-      {
-         if (needs_restrict[i])
-         {
-            if (hypre_ParCompGridCoarseResidualMarker(compGrid[level+1])[i] != 2)
-            {
-               test_failed = 1;
-               // hypre_printf("Error: Need residual to be restricted at a location where it is not possible: proc %d, level %d, global index %d\n", myid, level+1, hypre_ParCompGridGlobalIndices(compGrid[level+1])[i]);
-            }
-         }
-      }
-      hypre_TFree(needs_restrict, HYPRE_MEMORY_HOST);
-   }
+   // HYPRE_Int myid;
+   // hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+   // HYPRE_Int            level,i,j,k;
+   // HYPRE_Int test_failed = 0;
+   // for (level = 0; level < num_levels-1; level++)
+   // { 
+   //    HYPRE_Int *needs_restrict = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumNodes(compGrid[level+1]), HYPRE_MEMORY_HOST);
+   //    // For dof in the comp grid
+   //    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
+   //    {
+   //       // Look at the row of A for dof
+   //       HYPRE_Int find_restrict_range = 0;
+   //       for (j = hypre_ParCompGridARowPtr(compGrid[level])[i]; j < hypre_ParCompGridARowPtr(compGrid[level])[i+1]; j++)
+   //       {
+   //          // If dof is connected through A to a real node
+   //          if (hypre_ParCompGridAColInd(compGrid[level])[j] >= 0)
+   //          {
+   //             if (hypre_ParCompGridRealDofMarker(compGrid[level])[ hypre_ParCompGridAColInd(compGrid[level])[j] ])
+   //             {
+   //                // Then the residual here will change, so find where that residual will propogate on the coarse grid
+   //                find_restrict_range = 1;
+   //                break;
+   //             }
+   //          }
+   //       }
+   //       // If dof was connected to a real node
+   //       if (find_restrict_range)
+   //       {
+   //          // Look at the row of P for dof
+   //          for (j = hypre_ParCompGridPRowPtr(compGrid[level])[i]; j < hypre_ParCompGridPRowPtr(compGrid[level])[i+1]; j++)
+   //          {
+   //             // Mark everything in the restriction range of dof
+   //             if (hypre_ParCompGridPColInd(compGrid[level])[j] < 0)
+   //             {
+   //                // If negative P col index encountered, make sure this is disconnected through A on the coarse grid
+   //                for (k = 0; k < hypre_ParCompGridNumNodes(compGrid[level+1]); k++)
+   //                {
+   //                   if (hypre_ParCompGridGlobalIndices(compGrid[level+1])[k] == -hypre_ParCompGridPColInd(compGrid[level])[j]-1)
+   //                   {
+   //                      hypre_printf("Error: negative P column index points to a global index that is found in the next coarsest composite grid.\n");
+   //                      test_failed = 1;
+   //                   }
+   //                }
+   //             }
+   //             else needs_restrict[ hypre_ParCompGridPColInd(compGrid[level])[j] ] = 1;
+   //          }
+   //       }
+   //    }
+   //    // Now check against the coarse residual marker
+   //    // That is, coarse residual marker shows where we CAN restrict a correct residual and needs_restrict shows where we NEED to restrict a correct residual
+   //    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level+1]); i++)
+   //    {
+   //       if (needs_restrict[i])
+   //       {
+   //          if (hypre_ParCompGridCoarseResidualMarker(compGrid[level+1])[i] != 2)
+   //          {
+   //             test_failed = 1;
+   //             // hypre_printf("Error: Need residual to be restricted at a location where it is not possible: proc %d, level %d, global index %d\n", myid, level+1, hypre_ParCompGridGlobalIndices(compGrid[level+1])[i]);
+   //          }
+   //       }
+   //    }
+   //    hypre_TFree(needs_restrict, HYPRE_MEMORY_HOST);
+   // }
 
-   return test_failed;
+   // return test_failed;
 }
 
 HYPRE_Int
