@@ -810,12 +810,6 @@ HYPRE_IJMatrixGetValues( HYPRE_IJMatrix matrix,
       return hypre_error_flag;
    }
 
-   if (nrows < 0)
-   {
-      hypre_error_in_arg(2);
-      return hypre_error_flag;
-   }
-
    if (!ncols)
    {
       hypre_error_in_arg(3);
