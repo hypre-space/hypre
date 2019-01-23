@@ -65,7 +65,7 @@ hypre_CSRMatrixCreate( HYPRE_Int num_rows,
  * hypre_CSRMatrixDestroy
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_CSRMatrixDestroy( hypre_CSRMatrix *matrix )
 {
    HYPRE_Int  ierr=0;
@@ -97,7 +97,7 @@ hypre_CSRMatrixDestroy( hypre_CSRMatrix *matrix )
  * hypre_CSRMatrixInitialize
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_CSRMatrixInitialize( hypre_CSRMatrix *matrix )
 {
    HYPRE_Int  num_rows     = hypre_CSRMatrixNumRows(matrix);
@@ -107,16 +107,26 @@ hypre_CSRMatrixInitialize( hypre_CSRMatrix *matrix )
    HYPRE_Int  ierr=0;
 
    if ( ! hypre_CSRMatrixData(matrix) && num_nonzeros )
+   {
       hypre_CSRMatrixData(matrix) = hypre_CTAlloc(HYPRE_Complex,  num_nonzeros, HYPRE_MEMORY_SHARED);
-   else {
+   }
+   else
+   {
      //if (PointerAttributes(hypre_CSRMatrixData(matrix))==HYPRE_HOST_POINTER) printf("MATREIX INITIAL WITH JHOST DATA\n");
    }
+
    if ( ! hypre_CSRMatrixI(matrix) )
+   {
       hypre_CSRMatrixI(matrix)    = hypre_CTAlloc(HYPRE_Int,  num_rows + 1, HYPRE_MEMORY_SHARED);
+   }
+
 /*   if ( ! hypre_CSRMatrixRownnz(matrix) )
      hypre_CSRMatrixRownnz(matrix)    = hypre_CTAlloc(HYPRE_Int,  num_rownnz, HYPRE_MEMORY_SHARED);*/
+
    if ( ! hypre_CSRMatrixJ(matrix) && num_nonzeros )
+   {
       hypre_CSRMatrixJ(matrix)    = hypre_CTAlloc(HYPRE_Int,  num_nonzeros, HYPRE_MEMORY_SHARED);
+   }
 
    return ierr;
 }
@@ -125,7 +135,7 @@ hypre_CSRMatrixInitialize( hypre_CSRMatrix *matrix )
  * hypre_CSRMatrixSetDataOwner
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_CSRMatrixSetDataOwner( hypre_CSRMatrix *matrix,
                              HYPRE_Int              owns_data )
 {
@@ -201,7 +211,7 @@ hypre_CSRMatrixRead( char *file_name )
    HYPRE_Int      max_col = 0;
 
    HYPRE_Int      file_base = 1;
-   
+
    HYPRE_Int      j;
 
    /*----------------------------------------------------------
@@ -265,9 +275,9 @@ hypre_CSRMatrixPrint( hypre_CSRMatrix *matrix,
    HYPRE_Int     *matrix_i;
    HYPRE_Int     *matrix_j;
    HYPRE_Int      num_rows;
-   
+
    HYPRE_Int      file_base = 1;
-   
+
    HYPRE_Int      j;
 
    HYPRE_Int      ierr = 0;
@@ -397,12 +407,12 @@ hypre_CSRMatrixPrintHB( hypre_CSRMatrix *matrix_input,
 
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixCopy:
- * copys A to B, 
+ * copys A to B,
  * if copy_data = 0 only the structure of A is copied to B.
- * the routine does not check if the dimensions of A and B match !!! 
+ * the routine does not check if the dimensions of A and B match !!!
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_CSRMatrixCopy( hypre_CSRMatrix *A, hypre_CSRMatrix *B, HYPRE_Int copy_data )
 {
    HYPRE_Int      ierr=0;
@@ -750,7 +760,7 @@ void hypre_CSRMatrixPrefetchToHost(hypre_CSRMatrix *A){
   POP_RANGE;
 }
 hypre_int hypre_CSRMatrixIsManaged(hypre_CSRMatrix *a){
-  return ((pointerIsManaged((void*)hypre_CSRMatrixData(a))) 
+  return ((pointerIsManaged((void*)hypre_CSRMatrixData(a)))
 	  && (pointerIsManaged((void*)hypre_CSRMatrixI(a)))
 	  && (pointerIsManaged((void*)hypre_CSRMatrixJ(a))));
 }
@@ -763,7 +773,7 @@ void hypre_CSRMatrixMapToDevice(hypre_CSRMatrix *A){
   HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
   HYPRE_Int         num_rows = hypre_CSRMatrixNumRows(A);
   HYPRE_Int         num_cols = hypre_CSRMatrixNumCols(A);
-  HYPRE_Int         nnz  = hypre_CSRMatrixNumNonzeros(A); 
+  HYPRE_Int         nnz  = hypre_CSRMatrixNumNonzeros(A);
   //printf("MAPPED %p sizes = %d %d \n",A,nnz,num_rows);
 
 #pragma omp target enter data map(to:A[0:0])
@@ -779,7 +789,7 @@ void hypre_CSRMatrixUpdateToDevice(hypre_CSRMatrix *A){
   HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
   HYPRE_Int         num_rows = hypre_CSRMatrixNumRows(A);
   HYPRE_Int         num_cols = hypre_CSRMatrixNumCols(A);
-  HYPRE_Int         nnz  = hypre_CSRMatrixNumNonzeros(A); 
+  HYPRE_Int         nnz  = hypre_CSRMatrixNumNonzeros(A);
   //printf("Updating MAtrix...%p \n",A);
   //#pragma omp target update device(0) to(A[0:0])
   //printf("Updating MAtrix data...%p %d\n",A_data,nnz);
@@ -797,7 +807,7 @@ void hypre_CSRMatrixUnMapFromDevice(hypre_CSRMatrix *A){
   HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
   HYPRE_Int         num_rows = hypre_CSRMatrixNumRows(A);
   HYPRE_Int         num_cols = hypre_CSRMatrixNumCols(A);
-  HYPRE_Int         nnz  = hypre_CSRMatrixNumNonzeros(A); 
+  HYPRE_Int         nnz  = hypre_CSRMatrixNumNonzeros(A);
   //#pragma omp target exit data map(delete:A[0:0])
 #pragma omp target exit data map(delete:A_data[0:nnz]) if (nnz>0)
 #pragma omp target exit data map(delete:A_i[0:num_rows+1]) if (num_rows>0)
