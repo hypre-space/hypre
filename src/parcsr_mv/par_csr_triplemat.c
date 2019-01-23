@@ -673,7 +673,7 @@ hypre_ParCSRMatrix *hypre_ParCSRMatrixRAPKT( hypre_ParCSRMatrix *R,
       else
       {
          num_cols_offd_Q = num_cols_offd_P;
-         col_map_offd_Q = hypre_CTAlloc(HYPRE_Int, num_cols_offd_Q, HYPRE_MEMORY_SHARED);
+         col_map_offd_Q = hypre_CTAlloc(HYPRE_Int, num_cols_offd_Q, HYPRE_MEMORY_HOST);
          for (i=0; i < num_cols_offd_P; i++)
             col_map_offd_Q[i] = col_map_offd_P[i];
       }
@@ -1085,7 +1085,7 @@ HYPRE_Int hypre_CSRMatrixSplit(hypre_CSRMatrix *Bs_ext, HYPRE_Int *col_map_offd_
          }
 
          if (num_cols_offd_C)
-            col_map_offd_C = hypre_CTAlloc(HYPRE_Int,num_cols_offd_C, HYPRE_MEMORY_SHARED);
+            col_map_offd_C = hypre_CTAlloc(HYPRE_Int,num_cols_offd_C, HYPRE_MEMORY_HOST);
 
          for (i=0; i < num_cols_offd_C; i++)
             col_map_offd_C[i] = temp[i];
