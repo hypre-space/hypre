@@ -349,22 +349,28 @@ hypre_ParCSRMatrix *hypre_ParCSRTMatMatKT( hypre_ParCSRMatrix  *A,
       }
 
       for (i=num_recvs; i > 0; i--)
+      {
          for (j = recv_vec_starts[i]; j > recv_vec_starts[i-1]; j--)
+         {
             C_int_i[j] -= C_int_i[j-1];
+         }
+      }
 
       /*--------------------------------------------------------------------------
        * initialize communication
        *--------------------------------------------------------------------------*/
-
       if (num_recvs && num_sends)
-          comm_handle = hypre_ParCSRCommHandleCreate(12,comm_pkg_A,
-                &C_int_i[1], &C_ext_i[1]);
+      {
+         comm_handle = hypre_ParCSRCommHandleCreate(12, comm_pkg_A, &C_int_i[1], &C_ext_i[1]);
+      }
       else if (num_recvs)
-          comm_handle = hypre_ParCSRCommHandleCreate(12,comm_pkg_A,
-                &C_int_i[1], NULL);
+      {
+         comm_handle = hypre_ParCSRCommHandleCreate(12, comm_pkg_A, &C_int_i[1], NULL);
+      }
       else if (num_sends)
-          comm_handle = hypre_ParCSRCommHandleCreate(12,comm_pkg_A,
-                NULL, &C_ext_i[1]);
+      {
+         comm_handle = hypre_ParCSRCommHandleCreate(12, comm_pkg_A, NULL, &C_ext_i[1]);
+      }
 
       tmp_comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1, HYPRE_MEMORY_SHARED);
       hypre_ParCSRCommPkgComm(tmp_comm_pkg) = comm;
@@ -379,10 +385,13 @@ hypre_ParCSRMatrix *hypre_ParCSRTMatMatKT( hypre_ParCSRMatrix  *A,
      /*--------------------------------------------------------------------------
       * compute num_nonzeros for C_ext
       *--------------------------------------------------------------------------*/
-
       for (i=0; i < num_sends; i++)
+      {
         for (j = send_map_starts[i]; j < send_map_starts[i+1]; j++)
-                C_ext_i[j+1] += C_ext_i[j];
+        {
+           C_ext_i[j+1] += C_ext_i[j];
+        }
+      }
 
       num_rows = send_map_starts[num_sends];
       num_nonzeros = C_ext_i[num_rows];
@@ -400,10 +409,8 @@ hypre_ParCSRMatrix *hypre_ParCSRTMatMatKT( hypre_ParCSRMatrix  *A,
       hypre_ParCSRCommPkgRecvVecStarts(tmp_comm_pkg) = jdata_send_map_starts;
       hypre_ParCSRCommPkgSendMapStarts(tmp_comm_pkg) = jdata_recv_vec_starts;
 
-      comm_handle = hypre_ParCSRCommHandleCreate(1,tmp_comm_pkg,C_int_data,
-                                        C_ext_data);
-      comm_handle_2 = hypre_ParCSRCommHandleCreate(11,tmp_comm_pkg,C_int_j,
-                                        C_ext_j);
+      comm_handle = hypre_ParCSRCommHandleCreate(1, tmp_comm_pkg, C_int_data, C_ext_data);
+      comm_handle_2 = hypre_ParCSRCommHandleCreate(11, tmp_comm_pkg, C_int_j, C_ext_j);
       C_ext = hypre_CSRMatrixCreate(num_rows,num_cols,num_nonzeros);
 
       hypre_CSRMatrixI(C_ext) = C_ext_i;
@@ -523,8 +530,8 @@ hypre_ParCSRMatrix *hypre_ParCSRTMatMat( hypre_ParCSRMatrix  *A,
 }
 
 hypre_ParCSRMatrix *hypre_ParCSRMatrixRAPKT( hypre_ParCSRMatrix *R,
-                                             hypre_ParCSRMatrix  *A,
-                                             hypre_ParCSRMatrix  *P ,
+                                             hypre_ParCSRMatrix *A,
+                                             hypre_ParCSRMatrix *P,
                                              HYPRE_Int keep_transpose )
 {
    MPI_Comm         comm = hypre_ParCSRMatrixComm(A);
