@@ -78,7 +78,7 @@ AllgatherCommunicationInfo(hypre_ParAMGData *amg_data, HYPRE_Int level, MPI_Comm
 HYPRE_Int*
 PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int *buffer_size, HYPRE_Int *send_flag_buffer_size, 
    HYPRE_Int ****send_flag, HYPRE_Int ***num_send_nodes, HYPRE_Int partition, HYPRE_Int current_level, HYPRE_Int num_levels, HYPRE_Int padding, 
-   HYPRE_Int num_ghost_layers, HYPRE_Int *communication_cost );
+   HYPRE_Int num_ghost_layers );
 
 HYPRE_Int
 RecursivelyBuildPsiComposite(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *compGrid, HYPRE_Int *add_flag, HYPRE_Int *add_flag_coarse, 
@@ -328,22 +328,22 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
    #endif
 
-   // Get the max stencil size on all levels
-   HYPRE_Int *local_stencil = hypre_CTAlloc(HYPRE_Int, transition_level, HYPRE_MEMORY_HOST);
-   for (level = 0; level < transition_level; level++) local_stencil[level] = hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg)[level];
-   HYPRE_Int *global_stencil = hypre_CTAlloc(HYPRE_Int, transition_level, HYPRE_MEMORY_HOST);
-   hypre_MPI_Allreduce(local_stencil, global_stencil, transition_level, HYPRE_MPI_INT, MPI_MAX, hypre_MPI_COMM_WORLD);
-   if (communication_cost)
-   {
-      communication_cost[0] += log(num_procs)/log(2);
-      communication_cost[1] += sizeof(HYPRE_Int)*(num_procs-1);
-   }
-
    HYPRE_Int agglomeration_max_num_levels = hypre_ParAMGDataAMGDDAgglomerationMaxNumLevels(amg_data);
-   HYPRE_Int agglomeration_threshold = hypre_ParAMGDataAMGDDAgglomerationThreshold(amg_data);
-   HYPRE_Int agglomeration_partition_size = hypre_ParAMGDataAMGDDAgglomerationPartitionSize(amg_data);
    if (agglomeration_max_num_levels)
    {
+      // Get the max stencil size on all levels
+      HYPRE_Int *local_stencil = hypre_CTAlloc(HYPRE_Int, transition_level, HYPRE_MEMORY_HOST);
+      for (level = 0; level < transition_level; level++) local_stencil[level] = hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg)[level];
+      HYPRE_Int *global_stencil = hypre_CTAlloc(HYPRE_Int, transition_level, HYPRE_MEMORY_HOST);
+      hypre_MPI_Allreduce(local_stencil, global_stencil, transition_level, HYPRE_MPI_INT, MPI_MAX, hypre_MPI_COMM_WORLD);
+      if (communication_cost)
+      {
+         communication_cost[0] += log(num_procs)/log(2);
+         communication_cost[1] += sizeof(HYPRE_Int)*(num_procs-1);
+      }
+
+      HYPRE_Int agglomeration_threshold = hypre_ParAMGDataAMGDDAgglomerationThreshold(amg_data);
+      HYPRE_Int agglomeration_partition_size = hypre_ParAMGDataAMGDDAgglomerationPartitionSize(amg_data);
       HYPRE_Int agglomeration_num_levels = 0;
       hypre_ParCompGridCommPkg *initCopyCompGridCommPkg = hypre_ParCompGridCommPkgCopy(compGridCommPkg);
       for (level = 1; level < transition_level; level++)
@@ -376,9 +376,9 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
          init_P_mem[level] = hypre_ParCompGridPMemSize(compGrid[level]);
          // printf("Rank %d, level %d, init mem_size = %d, init num_nodes = %d\n", myid, level, hypre_ParCompGridMemSize(compGrid[level]), hypre_ParCompGridNumNodes(compGrid[level]));
       }
+      hypre_TFree(local_stencil, HYPRE_MEMORY_HOST);
+      hypre_TFree(global_stencil, HYPRE_MEMORY_HOST);
    }
-   hypre_TFree(local_stencil, HYPRE_MEMORY_HOST);
-   hypre_TFree(global_stencil, HYPRE_MEMORY_HOST);
 
    if (timers) hypre_EndTiming(timers[0]);
 
@@ -445,7 +445,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
             num_send_nodes[level][i] = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
             send_buffer[i] = PackSendBuffer( compGrid, compGridCommPkg, &(send_buffer_size[level][i]), 
                                              &(send_flag_buffer_size[i]), send_flag, num_send_nodes, i, level, num_levels, padding, 
-                                             num_ghost_layers, communication_cost );
+                                             num_ghost_layers );
          }
 
          if (timers) hypre_EndTiming(timers[1]);
@@ -691,6 +691,12 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
 
    if (timers) hypre_EndTiming(timers[5]);
 
+   // Finalize the comp grid structures
+   hypre_ParCompGridFinalize(compGrid, num_levels, transition_level, verify_amgdd);
+
+   // Finalize the send flag and the recv
+   FinalizeSendFlagRecvMap(compGridCommPkg);
+
    // Count up the cost for subsequent residual communications
    if (communication_cost)
    {
@@ -700,7 +706,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
          for (i = 0; i < hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[level]; i++)
          {
             HYPRE_Int buffer_index = hypre_ParCompGridCommPkgSendProcPartitions(compGridCommPkg)[level][i];
-            communication_cost[level*7 + 5] += send_buffer_size[level][buffer_index]*sizeof(HYPRE_Complex);
+            communication_cost[level*7 + 5] += hypre_ParCompGridCommPkgSendBufferSize(compGridCommPkg)[level][buffer_index]*sizeof(HYPRE_Complex);
          }
          if (hypre_ParCompGridCommPkgAggLocalComms(compGridCommPkg)[level])
          {
@@ -747,12 +753,6 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
       for (level = 0; level < transition_level; level++) hypre_TFree(global_partition[level], HYPRE_MEMORY_HOST);
       hypre_TFree(global_partition, HYPRE_MEMORY_HOST);
    }
-
-   // Finalize the comp grid structures
-   hypre_ParCompGridFinalize(compGrid, num_levels, transition_level, verify_amgdd);
-
-   // Finalize the send flag and the recv
-   FinalizeSendFlagRecvMap(compGridCommPkg);
 
    #if DEBUGGING_MESSAGES
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
@@ -2438,7 +2438,7 @@ AllgatherCommunicationInfo(hypre_ParAMGData *amg_data, HYPRE_Int level, MPI_Comm
 HYPRE_Int*
 PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int *buffer_size, 
    HYPRE_Int *send_flag_buffer_size, HYPRE_Int ****send_flag, HYPRE_Int ***num_send_nodes,
-   HYPRE_Int partition, HYPRE_Int current_level, HYPRE_Int num_levels, HYPRE_Int padding, HYPRE_Int num_ghost_layers, HYPRE_Int *communication_cost )
+   HYPRE_Int partition, HYPRE_Int current_level, HYPRE_Int num_levels, HYPRE_Int padding, HYPRE_Int num_ghost_layers )
 {
    // send_buffer = [ num_psi_levels , [level] , [level] , ... ]
    // level = [ num send nodes, [global indices] , [coarse global indices] , [A row sizes] , [A col ind] ]
