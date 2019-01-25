@@ -80,7 +80,7 @@ hypre_MGRCreate()
   (mgr_data -> max_iter) = 20;
   (mgr_data -> tol) = 1.0e-7;
   (mgr_data -> relax_type) = 0;
-  (mgr_data -> relax_order) = 1;
+  (mgr_data -> relax_order) = 1; // not fully utilized. Only used to compute L1-norms.
   (mgr_data -> interp_type) = NULL;
   (mgr_data -> restrict_type) = NULL;
   (mgr_data -> num_relax_sweeps) = 1;
@@ -96,13 +96,15 @@ hypre_MGRCreate()
   (mgr_data -> reserved_Cpoint_local_indexes) = NULL;    
   
   (mgr_data -> diaginv) = NULL;
-  (mgr_data -> global_smooth_iters) = 0;
+  (mgr_data -> global_smooth_iters) = 1;
   (mgr_data -> global_smooth_type) = 0;
   
   (mgr_data -> set_non_Cpoints_to_F) = 0;
   (mgr_data -> idx_array) = NULL;
 
   (mgr_data -> Frelax_method) = NULL;
+  (mgr_data -> VcycleRelaxVtemp) = NULL;
+  (mgr_data -> VcycleRelaxZtemp) = NULL;
   (mgr_data -> FrelaxVcycleData) = NULL;
   (mgr_data -> Frelax_num_functions) = NULL;
   (mgr_data -> max_local_lvls) = 10;
@@ -314,6 +316,16 @@ hypre_MGRDestroy( void *data )
     (mgr_data -> Frelax_num_functions) = NULL;
   }
   /* data for V-cycle F-relaxation */
+  if((mgr_data -> VcycleRelaxVtemp))
+  {
+    hypre_ParVectorDestroy( (mgr_data -> VcycleRelaxVtemp) );
+    (mgr_data -> VcycleRelaxVtemp) = NULL;
+  }
+  if((mgr_data -> VcycleRelaxZtemp))
+  {
+    hypre_ParVectorDestroy( (mgr_data -> VcycleRelaxZtemp) );
+    (mgr_data -> VcycleRelaxZtemp) = NULL;
+  }  
   if (mgr_data -> FrelaxVcycleData) {
     for (i = 0; i < num_coarse_levels; i++) {
       if ((mgr_data -> FrelaxVcycleData)[i]) {
@@ -368,7 +380,11 @@ hypre_MGRCreateFrelaxVcycleData()
   hypre_ParAMGDataMaxLevels(vdata) = 10;
   hypre_ParAMGDataNumFunctions(vdata) = 1;
   hypre_ParAMGDataSCommPkgSwitch(vdata) = 1.0;
-
+  hypre_ParAMGDataRelaxOrder(vdata) = 1;
+  hypre_ParAMGDataMaxCoarseSize(vdata) = 9;
+  hypre_ParAMGDataMinCoarseSize(vdata) = 0;
+  hypre_ParAMGDataUserCoarseRelaxType(vdata) = 9;    
+  
   return (void *) vdata;
 }
 
@@ -402,22 +418,22 @@ hypre_MGRDestroyFrelaxVcycleData( void *data )
     hypre_TFree(hypre_ParAMGDataCFMarkerArray(vdata)[0], HYPRE_MEMORY_HOST);
   }
 
-  /* Points to vtemp of mgr_data, which is already destroyed */
-  //  hypre_ParVectorDestroy(hypre_ParAMGDataVtemp(vdata)); 
+  /* Points to VcycleRelaxVtemp of mgr_data, which is already destroyed */
+//  hypre_ParVectorDestroy(hypre_ParAMGDataVtemp(vdata));
   hypre_TFree(hypre_ParAMGDataFArray(vdata), HYPRE_MEMORY_HOST);
   hypre_TFree(hypre_ParAMGDataUArray(vdata), HYPRE_MEMORY_HOST);
   hypre_TFree(hypre_ParAMGDataAArray(vdata), HYPRE_MEMORY_HOST);
   hypre_TFree(hypre_ParAMGDataPArray(vdata), HYPRE_MEMORY_HOST);
   hypre_TFree(hypre_ParAMGDataCFMarkerArray(vdata), HYPRE_MEMORY_HOST);
-  hypre_TFree(hypre_ParAMGDataGridRelaxType(vdata), HYPRE_MEMORY_HOST);
+//  hypre_TFree(hypre_ParAMGDataGridRelaxType(vdata), HYPRE_MEMORY_HOST);
   hypre_TFree(hypre_ParAMGDataDofFuncArray(vdata), HYPRE_MEMORY_HOST);
 
-  /* Points to ztemp of mgr_data, which is already destroyed */
+  /* Points to VcycleRelaxZtemp of mgr_data, which is already destroyed */
   /*
   if (hypre_ParAMGDataZtemp(vdata))
     hypre_ParVectorDestroy(hypre_ParAMGDataZtemp(vdata));
   */
-
+  
   if (hypre_ParAMGDataAMat(vdata)) hypre_TFree(hypre_ParAMGDataAMat(vdata), HYPRE_MEMORY_HOST);
   if (hypre_ParAMGDataBVec(vdata)) hypre_TFree(hypre_ParAMGDataBVec(vdata), HYPRE_MEMORY_HOST);
   if (hypre_ParAMGDataCommInfo(vdata)) hypre_TFree(hypre_ParAMGDataCommInfo(vdata), HYPRE_MEMORY_HOST);

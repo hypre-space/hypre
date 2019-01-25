@@ -106,6 +106,8 @@ typedef struct
   HYPRE_Int *Frelax_num_functions;
   /* V-cycle F relaxation method */
   hypre_ParAMGData    **FrelaxVcycleData;
+  hypre_ParVector   *VcycleRelaxVtemp;
+  hypre_ParVector   *VcycleRelaxZtemp;  
 
   HYPRE_Int   max_local_lvls;
 

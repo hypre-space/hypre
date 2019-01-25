@@ -96,7 +96,10 @@ hypre_MGRSetup( void               *mgr_vdata,
   hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
   HYPRE_Int             n       = hypre_CSRMatrixNumRows(A_diag);
 
-  hypre_ParAMGData    **FrelaxVcycleData = (mgr_data -> FrelaxVcycleData);  
+  HYPRE_Int use_VcycleSmoother = 0;  
+  hypre_ParVector     *VcycleRelaxZtemp;
+  hypre_ParVector     *VcycleRelaxVtemp;
+  hypre_ParAMGData    **FrelaxVcycleData;  
   HYPRE_Int *Frelax_method = (mgr_data -> Frelax_method);
   HYPRE_Int *Frelax_num_functions = (mgr_data -> Frelax_num_functions);
       
@@ -301,21 +304,29 @@ hypre_MGRSetup( void               *mgr_vdata,
   }
 
   /* Free previously allocated FrelaxVcycleData if not destroyed */
-  if (FrelaxVcycleData)
+  if ((mgr_data -> VcycleRelaxZtemp))
+  {
+    hypre_ParVectorDestroy((mgr_data -> VcycleRelaxZtemp));
+    (mgr_data -> VcycleRelaxZtemp) = NULL;
+  }
+  if ((mgr_data -> VcycleRelaxVtemp))
+  {
+    hypre_ParVectorDestroy((mgr_data -> VcycleRelaxVtemp));
+    (mgr_data -> VcycleRelaxVtemp) = NULL;
+  }
+  if ((mgr_data -> FrelaxVcycleData))
   {
     for (j = 0; j < old_num_coarse_levels; j++)
     {
-      if (FrelaxVcycleData[j])
+      if ((mgr_data -> FrelaxVcycleData)[j])
       {
-        hypre_MGRDestroyFrelaxVcycleData(FrelaxVcycleData[j]);
-        FrelaxVcycleData[j] = NULL;
+        hypre_MGRDestroyFrelaxVcycleData((mgr_data -> FrelaxVcycleData)[j]);
+        (mgr_data -> FrelaxVcycleData)[j] = NULL;
       }
     }
-    hypre_TFree(FrelaxVcycleData, HYPRE_MEMORY_HOST);
-    FrelaxVcycleData = NULL;   
+    hypre_TFree((mgr_data -> FrelaxVcycleData), HYPRE_MEMORY_HOST);
+    (mgr_data -> FrelaxVcycleData) = NULL;   
   }
-  // reset pointer to NULL
-  (mgr_data -> FrelaxVcycleData) = FrelaxVcycleData;
 
   /* destroy final coarse grid matrix, if not previously destroyed */
   if((mgr_data -> RAP))
@@ -809,7 +820,13 @@ hypre_MGRSetup( void               *mgr_vdata,
     ST = NULL;
     hypre_TFree(col_offd_ST_to_AT, HYPRE_MEMORY_HOST);
     col_offd_ST_to_AT = NULL;
-
+    
+    /* check if Vcycle smoother setup required */
+    if(Frelax_method[lev] == 1)
+    {
+       use_VcycleSmoother = 1;
+    }
+    
     /* check if last level */
     if(last_level) break;
   }
@@ -850,6 +867,7 @@ hypre_MGRSetup( void               *mgr_vdata,
     l1_norms = hypre_CTAlloc(HYPRE_Real *,  num_c_levels, HYPRE_MEMORY_HOST);
     (mgr_data -> l1_norms) = l1_norms;
   }
+  
   for (j = 0; j < num_c_levels; j++)
   {
     if (num_threads == 1)
@@ -889,24 +907,43 @@ hypre_MGRSetup( void               *mgr_vdata,
   }
   
   /* Setup Vcycle data for Frelax_method > 0 */
-  /* allocate memory and set pointer to (mgr_data -> FrelaxVcycleData) */
-  if (FrelaxVcycleData == NULL)
-    FrelaxVcycleData = hypre_CTAlloc(hypre_ParAMGData*,  max_num_coarse_levels, HYPRE_MEMORY_HOST);
-  (mgr_data -> FrelaxVcycleData) = FrelaxVcycleData;  
-
-  /* loop over levels */
-  for (i=0; i < max_num_coarse_levels; i++)
+  if(use_VcycleSmoother)
   {
-    if (Frelax_method[i] == 1) {
-      FrelaxVcycleData[i] = (hypre_ParAMGData*) hypre_MGRCreateFrelaxVcycleData();
-      if (Frelax_num_functions != NULL)
-        hypre_ParAMGDataNumFunctions(FrelaxVcycleData[i]) = Frelax_num_functions[i];
-      (FrelaxVcycleData[i] -> Vtemp) = Vtemp;
-      (FrelaxVcycleData[i] -> Ztemp) = Ztemp;
+     /* setup temporary storage */
+     VcycleRelaxVtemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
+                  hypre_ParCSRMatrixGlobalNumRows(A),
+                  hypre_ParCSRMatrixRowStarts(A));
+     hypre_ParVectorInitialize(VcycleRelaxVtemp);
+     hypre_ParVectorSetPartitioningOwner(VcycleRelaxVtemp,0);
+     (mgr_data ->VcycleRelaxVtemp) = VcycleRelaxVtemp;
+
+     VcycleRelaxZtemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
+                  hypre_ParCSRMatrixGlobalNumRows(A),
+                  hypre_ParCSRMatrixRowStarts(A));
+     hypre_ParVectorInitialize(VcycleRelaxZtemp);
+     hypre_ParVectorSetPartitioningOwner(VcycleRelaxZtemp,0);
+     (mgr_data -> VcycleRelaxZtemp) = VcycleRelaxZtemp;
+     /* allocate memory and set pointer to (mgr_data -> FrelaxVcycleData) */
+     FrelaxVcycleData = hypre_CTAlloc(hypre_ParAMGData*,  max_num_coarse_levels, HYPRE_MEMORY_HOST);
+     (mgr_data -> FrelaxVcycleData) = FrelaxVcycleData;  
+
+     /* loop over levels */
+     for (i=0; i < (mgr_data->num_coarse_levels); i++)
+     {
+       if (Frelax_method[i] == 1) 
+       {
+         FrelaxVcycleData[i] = (hypre_ParAMGData*) hypre_MGRCreateFrelaxVcycleData();
+         if (Frelax_num_functions != NULL)
+         {
+            hypre_ParAMGDataNumFunctions(FrelaxVcycleData[i]) = Frelax_num_functions[i];
+         }
+         (FrelaxVcycleData[i] -> Vtemp) = VcycleRelaxVtemp;
+         (FrelaxVcycleData[i] -> Ztemp) = VcycleRelaxZtemp;
     
-      // setup variables for the V-cycle in the F-relaxation step //
-      hypre_MGRSetupFrelaxVcycleData(mgr_data, A_array[i], F_array[i], U_array[i], i);
-    }
+         // setup variables for the V-cycle in the F-relaxation step //
+         hypre_MGRSetupFrelaxVcycleData(mgr_data, A_array[i], F_array[i], U_array[i], i);
+       }
+     }
   }
 
   if ( logging > 1 )
@@ -958,9 +995,7 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
   HYPRE_Int max_local_lvls = (mgr_data -> max_local_lvls);  
   HYPRE_Int lev_local;
   HYPRE_Int not_finished;
-  //HYPRE_Int min_local_coarse_size = 0;
-  HYPRE_Int max_local_coarse_size = 9;
-  HYPRE_Int ge_relax_type = 9;
+  HYPRE_Int max_local_coarse_size = hypre_ParAMGDataMaxCoarseSize(FrelaxVcycleData[lev]);
   HYPRE_Int            **CF_marker_array = (mgr_data -> CF_marker_array);
   HYPRE_Int local_size, coarse_size;
   HYPRE_Int local_coarse_size;
@@ -983,7 +1018,7 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
   HYPRE_Real      max_row_sum = 0.9;
   HYPRE_Real      S_commpkg_switch = hypre_ParAMGDataSCommPkgSwitch(FrelaxVcycleData[lev]);
   
-  HYPRE_Int       old_num_levels = (FrelaxVcycleData[lev] -> num_levels);
+  HYPRE_Int       old_num_levels = hypre_ParAMGDataNumLevels(FrelaxVcycleData[lev]);
   HYPRE_Int            **CF_marker_array_local = (FrelaxVcycleData[lev] -> CF_marker_array);
   HYPRE_Int            *CF_marker_local = NULL;
   hypre_ParCSRMatrix   **A_array_local = (FrelaxVcycleData[lev] -> A_array);
@@ -991,26 +1026,16 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
   hypre_ParVector      **F_array_local = (FrelaxVcycleData[lev] -> F_array);
   hypre_ParVector      **U_array_local = (FrelaxVcycleData[lev] -> U_array);
   HYPRE_Int            **dof_func_array = (FrelaxVcycleData[lev] -> dof_func_array);
-  HYPRE_Int            *grid_relax_type = NULL;
   HYPRE_Int            relax_type = 3;
   HYPRE_Int            indx, k, tms;
   HYPRE_Int            num_fine_points = 0;
-  HYPRE_Int            num_functions = (FrelaxVcycleData[lev] -> num_functions);
+  HYPRE_Int            num_functions = hypre_ParAMGDataNumFunctions(FrelaxVcycleData[lev]);
+  HYPRE_Int            relax_order = hypre_ParAMGDataRelaxOrder(FrelaxVcycleData[lev]);
 
   hypre_MPI_Comm_size(comm, &num_procs);
   hypre_MPI_Comm_rank(comm,&my_id);
   
   local_size = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
-
-  // set grid relax type
-  if (hypre_ParAMGDataGridRelaxType(FrelaxVcycleData[lev]) == NULL)
-    hypre_ParAMGDataGridRelaxType(FrelaxVcycleData[lev]) = hypre_CTAlloc(HYPRE_Int, 4, HYPRE_MEMORY_HOST);
-  grid_relax_type = hypre_ParAMGDataGridRelaxType(FrelaxVcycleData[lev]);
-
-  for (i=0; i < 3; i++)
-    grid_relax_type[i] = relax_type;
-  grid_relax_type[3] = 9;
-  // end set grid relax type
 
   /* Free any local data not previously destroyed */
   if (A_array_local || P_array_local || CF_marker_array_local)
@@ -1144,27 +1169,13 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
                    dof_func_array[lev_local], &S_local);
     }
 
+/*##
     if (strong_threshold > S_commpkg_switch)
       hypre_BoomerAMGCreateSCommPkg(A_array_local[lev_local],S_local,&col_offd_S_to_A);
-
+*/
     hypre_BoomerAMGCoarsenHMIS(S_local, A_array_local[lev_local], measure_type, debug_flag, &CF_marker_local);     
-    /* For the lev_local=0, the coarsening routine is called on the fine-grid (the whole matrix) 
-    * thus, some C-points of the outer MGR level may have been set to F-points in the coarsening 
-    * routine. We need to reset these back to C-points (before building the interpolation operator.
-    */
-    /* QB: We do not need to reset the CF_marker here. The coarsening routine depends on the SOC
-    * matrix, which is computed only for the F-points of the fine-grid (the whole matrix) for
-    * the first level (lev_local ==0)
-    */
-    /*
-    if (lev_local == 0) {
-    for (i = 0; i < local_size; i++) {
-      if (CF_marker_array[lev][i] == -1) {
-       CF_marker_local[i] = 1;
-      }
-    }
-    }
-    */
+//    hypre_BoomerAMGCoarsen(S_local, A_array_local[lev_local], 0, 0, &CF_marker_local);      
+
 
     hypre_BoomerAMGCoarseParms(comm, local_size,
                         num_functions, dof_func_array[lev_local], CF_marker_local,
@@ -1179,17 +1190,11 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
 
     if (coarse_size == 0) // stop coarsening
     {
-      if (local_size > max_local_coarse_size)
-      {
-        grid_relax_type[3] = grid_relax_type[0];
-      }
       if (S_local) hypre_ParCSRMatrixDestroy(S_local);
       hypre_TFree(coarse_pnts_global_lvl, HYPRE_MEMORY_HOST);
       hypre_TFree(coarse_dof_func_lvl, HYPRE_MEMORY_HOST);
       hypre_TFree(col_offd_S_to_A, HYPRE_MEMORY_HOST);
       hypre_TFree(CF_marker_local, HYPRE_MEMORY_HOST);
-      // save the CF_marker pointers 
-      //CF_marker_array_local[lev_local] = CF_marker_local;
 
       break;
     }
@@ -1197,19 +1202,44 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
     hypre_BoomerAMGBuildExtPIInterp(A_array_local[lev_local], CF_marker_local, 
                         S_local, coarse_pnts_global_lvl, num_functions, dof_func_array[lev_local], 
                         debug_flag, trunc_factor, P_max_elmts, col_offd_S_to_A, &P_local);
-    /* reset the C-points of the outer MGR level to -3 since
-     * hypre_BoomerAMGBuildInterp changed them to -1 */
-    if (lev_local == 0) 
-    {
-      for (i = 0; i < local_size; i++) {
-        if (CF_marker_array[lev][i] == 1) {
-         CF_marker_local[i] = -3;
-        }
-      }
-    } 
 
-    /* save the CF_marker and interpolation matrix pointers */
-    CF_marker_array_local[lev_local] = CF_marker_local;
+//    hypre_BoomerAMGBuildInterp(A_array_local[lev_local], CF_marker_local, 
+//                                   S_local, coarse_pnts_global_lvl, 1, NULL, 
+//                                   0, 0.0, 0, NULL, &P_local);
+
+    /* Save the CF_marker pointer. For lev_local = 0, save the cf_marker from outer MGR level (lev).
+     * This is necessary to enable relaxations over the A_FF matrix during the solve phase. -- DOK
+     */
+    if(lev_local == 0)
+    {
+       if(relax_order == 1)
+       {
+          /* We need to mask out C-points from outer CF-marker for C/F relaxation at solve phase --DOK*/
+          for (i = 0; i < local_size; i++) 
+          {
+             if (CF_marker_array[lev][i] == 1) 
+             {
+                CF_marker_local[i] = 0;
+             }
+          }
+
+          CF_marker_array_local[lev_local] = CF_marker_local;
+       }
+       else
+       {  
+          /* Do lexicographic relaxation on F-points from outer CF-marker --DOK */ 
+          for (i = 0; i < local_size; i++) 
+          {
+             CF_marker_local[i] = CF_marker_array[lev][i];
+          }
+          CF_marker_array_local[lev_local] = CF_marker_local;
+       }
+    }
+    else
+    {
+       CF_marker_array_local[lev_local] = CF_marker_local;    
+    }
+    /* Save interpolation matrix pointer */
     P_array_local[lev_local] = P_local;
 
     if (num_functions > 1)
@@ -1258,10 +1288,19 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
   (FrelaxVcycleData[lev] -> CF_marker_array) = CF_marker_array_local;
   (FrelaxVcycleData[lev] -> num_levels) = lev_local;
 
-  if ((lev_local > 1) && (grid_relax_type[3] == 9))
+  /* setup GE for coarsest level (if small enough) */  
+  if ((lev_local > 1) && (hypre_ParAMGDataUserCoarseRelaxType(FrelaxVcycleData[lev]) == 9))
   {
-   hypre_GaussElimSetup(FrelaxVcycleData[lev], lev_local, ge_relax_type);
+     if((local_coarse_size <= max_local_coarse_size))
+     {
+        hypre_GaussElimSetup(FrelaxVcycleData[lev], lev_local, 9);
+     }
+     else
+     {
+        /* use relaxation */
+        hypre_ParAMGDataUserCoarseRelaxType(FrelaxVcycleData[lev]) = relax_type;
+     }
   }
-
+  
   return hypre_error_flag;
 }
