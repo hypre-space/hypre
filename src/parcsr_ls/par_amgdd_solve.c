@@ -488,24 +488,33 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
          // allocate space for the receive buffers and post the receives
          for (i = 0; i < num_recv_procs; i++)
          {
-            recv_buffer[i] = hypre_CTAlloc(HYPRE_Complex, recv_buffer_size[level][i], HYPRE_MEMORY_HOST );
-            hypre_MPI_Irecv( recv_buffer[i], recv_buffer_size[level][i], HYPRE_MPI_COMPLEX, recv_procs[level][i], 3, comm, &requests[request_counter++]);
+            if (recv_buffer_size[level][i])
+            {
+               recv_buffer[i] = hypre_CTAlloc(HYPRE_Complex, recv_buffer_size[level][i], HYPRE_MEMORY_HOST );
+               hypre_MPI_Irecv( recv_buffer[i], recv_buffer_size[level][i], HYPRE_MPI_COMPLEX, recv_procs[level][i], 3, comm, &requests[request_counter++]);
+            }
          }
 
          // pack and send the buffers
          for (i = 0; i < num_partitions; i++)
          {
-            send_buffer[i] = hypre_CTAlloc(HYPRE_Complex, send_buffer_size[level][i], HYPRE_MEMORY_HOST);
-            PackResidualBuffer(send_buffer[i], send_flag[level][i], num_send_nodes[level][i], compGrid, level, num_levels);
+            if (send_buffer_size[level][i])
+            {
+               send_buffer[i] = hypre_CTAlloc(HYPRE_Complex, send_buffer_size[level][i], HYPRE_MEMORY_HOST);
+               PackResidualBuffer(send_buffer[i], send_flag[level][i], num_send_nodes[level][i], compGrid, level, num_levels);
+            }
          }
          for (i = 0; i < num_send_procs; i++)
          {
             HYPRE_Int buffer_index = hypre_ParCompGridCommPkgSendProcPartitions(compGridCommPkg)[level][i];
-            hypre_MPI_Isend(send_buffer[buffer_index], send_buffer_size[level][buffer_index], HYPRE_MPI_COMPLEX, send_procs[level][i], 3, comm, &requests[request_counter++]);
+            if (send_buffer_size[level][buffer_index])
+            {
+               hypre_MPI_Isend(send_buffer[buffer_index], send_buffer_size[level][buffer_index], HYPRE_MPI_COMPLEX, send_procs[level][i], 3, comm, &requests[request_counter++]);
+            }
          }
 
          // wait for buffers to be received
-         hypre_MPI_Waitall( num_send_procs + num_recv_procs, requests, status );
+         hypre_MPI_Waitall( request_counter, requests, status );
 
          hypre_TFree(requests, HYPRE_MEMORY_HOST);
          hypre_TFree(status, HYPRE_MEMORY_HOST);

@@ -102,7 +102,7 @@ HYPRE_Int
 CommunicateRemainingMatrixInfo(hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int *communication_cost, HYPRE_Int *num_resizes);
 
 HYPRE_Int
-FinalizeSendFlagRecvMap(hypre_ParCompGridCommPkg *compGridCommPkg);
+FinalizeCompGridCommPkg(hypre_ParCompGridCommPkg *compGridCommPkg);
 
 HYPRE_Int
 TestCompGrids1(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int transition_level, HYPRE_Int padding, HYPRE_Int num_ghost_layers, HYPRE_Int current_level, HYPRE_Int check_ghost_info);
@@ -692,18 +692,18 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    if (timers) hypre_EndTiming(timers[5]);
 
    // Finalize the send flag and the recv
-   FinalizeSendFlagRecvMap(compGridCommPkg);
+   FinalizeCompGridCommPkg(compGridCommPkg);
 
    // Count up the cost for subsequent residual communications
    if (communication_cost)
    {
       for (level = 0; level < transition_level; level++)
       {
-         communication_cost[level*7 + 4] += hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[level];
          for (i = 0; i < hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[level]; i++)
          {
             HYPRE_Int buffer_index = hypre_ParCompGridCommPkgSendProcPartitions(compGridCommPkg)[level][i];
             communication_cost[level*7 + 5] += hypre_ParCompGridCommPkgSendBufferSize(compGridCommPkg)[level][buffer_index]*sizeof(HYPRE_Complex);
+            if (hypre_ParCompGridCommPkgSendBufferSize(compGridCommPkg)[level][buffer_index]) communication_cost[level*7 + 4]++;
          }
          if (hypre_ParCompGridCommPkgAggLocalComms(compGridCommPkg)[level])
          {
@@ -2494,7 +2494,7 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
          send_flag[current_level][partition][current_level][i - start] = send_elmt;
          (*buffer_size) += hypre_ParCompGridARowPtr(compGrid[current_level])[send_elmt+1] - hypre_ParCompGridARowPtr(compGrid[current_level])[send_elmt];
       }
-}
+   }
    (*send_flag_buffer_size) += finish - start;
 
    // Add the nodes listed by the coarse grid counterparts if applicable
@@ -3573,7 +3573,7 @@ CommunicateRemainingMatrixInfo(hypre_ParCompGrid **compGrid, hypre_ParCompGridCo
 }
 
 HYPRE_Int
-FinalizeSendFlagRecvMap(hypre_ParCompGridCommPkg *compGridCommPkg)
+FinalizeCompGridCommPkg(hypre_ParCompGridCommPkg *compGridCommPkg)
 {
    HYPRE_Int outer_level, part, level, i;
    HYPRE_Int num_levels = hypre_ParCompGridCommPkgNumLevels(compGridCommPkg);
@@ -3581,7 +3581,6 @@ FinalizeSendFlagRecvMap(hypre_ParCompGridCommPkg *compGridCommPkg)
    for (outer_level = 0; outer_level < num_levels; outer_level++)
    {
       HYPRE_Int num_neighbor_partitions = hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg)[outer_level];
-
       for (part = 0; part < num_neighbor_partitions; part++)
       {
          HYPRE_Int send_buffer_size = 0;
