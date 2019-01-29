@@ -630,19 +630,40 @@ TestResComm(hypre_ParAMGData *amg_data)
       {
          // Broadcast the number of nodes
          HYPRE_Int num_nodes = 0;
-         if (myid == proc) num_nodes = hypre_ParCompGridNumNodes(compGrid[level]);
+         if (myid == proc)
+         {
+            for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
+            {
+               if (hypre_ParCompGridARowPtr(compGrid[level])[i+1] - hypre_ParCompGridARowPtr(compGrid[level])[i] > 0) 
+                  num_nodes++;
+            }
+         }
          hypre_MPI_Bcast(&num_nodes, 1, HYPRE_MPI_INT, proc, hypre_MPI_COMM_WORLD);
 
          // Broadcast the composite residual
-         HYPRE_Complex *comp_res;
-         if (myid == proc) comp_res = hypre_ParCompGridF(compGrid[level]);
-         else comp_res = hypre_CTAlloc(HYPRE_Complex, num_nodes, HYPRE_MEMORY_HOST);
+         HYPRE_Complex *comp_res = hypre_CTAlloc(HYPRE_Complex, num_nodes, HYPRE_MEMORY_HOST);
+         if (myid == proc)
+         {
+            HYPRE_Int cnt = 0;
+            for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
+            {
+               if (hypre_ParCompGridARowPtr(compGrid[level])[i+1] - hypre_ParCompGridARowPtr(compGrid[level])[i] > 0) 
+                  comp_res[cnt++] = hypre_ParCompGridF(compGrid[level])[i];
+            }
+         }
          hypre_MPI_Bcast(comp_res, num_nodes, HYPRE_MPI_COMPLEX, proc, hypre_MPI_COMM_WORLD);
 
          // Broadcast the global indices
-         HYPRE_Int *global_indices;
-         if (myid == proc) global_indices = hypre_ParCompGridGlobalIndices(compGrid[level]);
-         else global_indices = hypre_CTAlloc(HYPRE_Int, num_nodes, HYPRE_MEMORY_HOST);
+         HYPRE_Int *global_indices = hypre_CTAlloc(HYPRE_Int, num_nodes, HYPRE_MEMORY_HOST);
+         if (myid == proc)
+         {
+            HYPRE_Int cnt = 0;
+            for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
+            {
+               if (hypre_ParCompGridARowPtr(compGrid[level])[i+1] - hypre_ParCompGridARowPtr(compGrid[level])[i] > 0) 
+                  global_indices[cnt++] = hypre_ParCompGridGlobalIndices(compGrid[level])[i];
+            }
+         }
          hypre_MPI_Bcast(global_indices, num_nodes, HYPRE_MPI_INT, proc, hypre_MPI_COMM_WORLD);
 
          // Now, each processors checks their owned residual value against the composite residual

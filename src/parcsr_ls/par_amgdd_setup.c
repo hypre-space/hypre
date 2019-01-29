@@ -108,10 +108,7 @@ HYPRE_Int
 TestCompGrids1(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int transition_level, HYPRE_Int padding, HYPRE_Int num_ghost_layers, HYPRE_Int current_level, HYPRE_Int check_ghost_info);
 
 HYPRE_Int
-TestCompGrids2(hypre_ParCompGrid **compGrid, HYPRE_Int transition_level);
-
-HYPRE_Int
-TestCompGrids3(hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int num_levels, hypre_ParCSRMatrix **A, hypre_ParCSRMatrix **P, hypre_ParVector **F);
+TestCompGrids2(hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int num_levels, hypre_ParCSRMatrix **A, hypre_ParCSRMatrix **P, hypre_ParVector **F);
 
 HYPRE_Int
 CheckCompGridLocalIndices(hypre_ParAMGData *amg_data);
@@ -352,7 +349,9 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
          if (agglomeration_num_levels == agglomeration_max_num_levels) break;
          if (global_stencil[level] > agglomeration_threshold*global_stencil[0])
          {
-            // if (myid == 0) hypre_printf("Agglomerating processors on level %d\n", level); 
+            #if DEBUGGING_MESSAGES
+            if (myid == 0) hypre_printf("Agglomerating processors on level %d\n", level); 
+            #endif
             AgglomerateProcessors(amg_data, initCopyCompGridCommPkg, level, agglomeration_partition_size, communication_cost);
             agglomeration_num_levels++;
 
@@ -457,14 +456,14 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
          for (i = 0; i < num_recv_procs; i++)
          {
             // !!! Check recv_buffer_size (make sure not overallocated)
-            hypre_MPI_Irecv( &(recv_buffer_size[level][i]), 1, HYPRE_MPI_INT, hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[level][i], 0, comm, &requests[request_counter++] );
+            hypre_MPI_Irecv( &(recv_buffer_size[level][i]), 1, HYPRE_MPI_INT, hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[level][i], 0, comm, &(requests[request_counter++]) );
          }
 
          // send the buffer sizes
          for (i = 0; i < num_send_procs; i++)
          {
             HYPRE_Int buffer_index = hypre_ParCompGridCommPkgSendProcPartitions(compGridCommPkg)[level][i];
-            hypre_MPI_Isend(&(send_buffer_size[level][buffer_index]), 1, HYPRE_MPI_INT, hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level][i], 0, comm, &requests[request_counter++]);
+            hypre_MPI_Isend(&(send_buffer_size[level][buffer_index]), 1, HYPRE_MPI_INT, hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level][i], 0, comm, &(requests[request_counter++]));
             if (communication_cost)
             {
                communication_cost[level*7 + 2]++;
@@ -492,14 +491,14 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
          for (i = 0; i < num_recv_procs; i++)
          {
             recv_buffer[i] = hypre_CTAlloc(HYPRE_Int, recv_buffer_size[level][i], HYPRE_MEMORY_HOST );
-            hypre_MPI_Irecv( recv_buffer[i], recv_buffer_size[level][i], HYPRE_MPI_INT, hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[level][i], 1, comm, &requests[request_counter++]);
+            hypre_MPI_Irecv( recv_buffer[i], recv_buffer_size[level][i], HYPRE_MPI_INT, hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[level][i], 1, comm, &(requests[request_counter++]));
          }
 
          // send the buffers
          for (i = 0; i < num_send_procs; i++)
          {
             HYPRE_Int buffer_index = hypre_ParCompGridCommPkgSendProcPartitions(compGridCommPkg)[level][i];
-            hypre_MPI_Isend(send_buffer[buffer_index], send_buffer_size[level][buffer_index], HYPRE_MPI_INT, hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level][i], 1, comm, &requests[request_counter++]);
+            hypre_MPI_Isend(send_buffer[buffer_index], send_buffer_size[level][buffer_index], HYPRE_MPI_INT, hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level][i], 1, comm, &(requests[request_counter++]));
             if (communication_cost)
             {
                communication_cost[level*7 + 2]++;
@@ -544,7 +543,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
          {
             // !!! Check send_flag_buffer_size (make sure not overallocated)
             send_flag_buffer[i] = hypre_CTAlloc(HYPRE_Int, send_flag_buffer_size[i], HYPRE_MEMORY_HOST);
-            hypre_MPI_Irecv( send_flag_buffer[i], send_flag_buffer_size[i], HYPRE_MPI_INT, hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[level][i], 2, comm, &requests[request_counter++]);
+            hypre_MPI_Irecv( send_flag_buffer[i], send_flag_buffer_size[i], HYPRE_MPI_INT, hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[level][i], 2, comm, &(requests[request_counter++]));
          }
 
          // send the recv_map_send_buffer's
@@ -552,7 +551,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
          {
             HYPRE_Int buffer_index = hypre_ParCompGridCommPkgSendProcPartitions(compGridCommPkg)[level][i];
             // !!! Check recv_map_send_buffer_size (make sure not overallocated)
-            hypre_MPI_Isend( recv_map_send_buffer[buffer_index], recv_map_send_buffer_size[buffer_index], HYPRE_MPI_INT, hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level][i], 2, comm, &requests[request_counter++]);
+            hypre_MPI_Isend( recv_map_send_buffer[buffer_index], recv_map_send_buffer_size[buffer_index], HYPRE_MPI_INT, hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level][i], 2, comm, &(requests[request_counter++]));
             if (communication_cost)
             {
                communication_cost[level*7 + 2]++;
@@ -760,22 +759,14 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
    #endif 
 
-   // #if DEBUG_COMP_GRID
-   // !!! New: removing this test as it no longer applies for the new restriction paradigm
-   // if (use_transition_level) error_code = TestCompGrids2(compGrid, transition_level+1);
-   // else error_code = TestCompGrids2(compGrid, num_levels);
-   // if (error_code)
-   // {
-   //    hypre_printf("TestCompGrids2 failed!\n");
-   //    test_failed = 1;
-   // }
-   // error_code = TestCompGrids3(compGrid, compGridCommPkg, transition_level, hypre_ParAMGDataAArray(amg_data), hypre_ParAMGDataPArray(amg_data), hypre_ParAMGDataFArray(amg_data));
-   // if (error_code)
-   // {
-   //    hypre_printf("TestCompGrids3 failed!\n");
-   //    test_failed = 1;
-   // }
-   // #endif
+   #if DEBUG_COMP_GRID
+   error_code = TestCompGrids2(compGrid, compGridCommPkg, transition_level, hypre_ParAMGDataAArray(amg_data), hypre_ParAMGDataPArray(amg_data), hypre_ParAMGDataFArray(amg_data));
+   if (error_code)
+   {
+      hypre_printf("TestCompGrids2 failed!\n");
+      test_failed = 1;
+   }
+   #endif
 
    #if DEBUG_COMP_GRID == 2
    for (level = 0; level < num_levels; level++)
@@ -794,7 +785,9 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    #endif
 
    #if DEBUGGING_MESSAGES
-   hypre_printf("Finished comp grid setup on rank %d\n", myid);
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   if (myid == 0) hypre_printf("Finished comp grid setup on all ranks\n");
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
    #endif
 
    // Cleanup memory
@@ -2452,12 +2445,6 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
    HYPRE_Int            **redundant_add_flag = hypre_CTAlloc( HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST );
    HYPRE_Int            num_psi_levels = 1;
 
-   HYPRE_Int example_send_proc;
-   for (i = 0; i < hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[current_level]; i++) 
-   {
-      if (hypre_ParCompGridCommPkgSendProcPartitions(compGridCommPkg)[current_level][i] == partition) 
-         example_send_proc = hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[current_level][i];
-   }
    HYPRE_Int coarse_partition_id = hypre_ParCompGridCommPkgPartitions(compGridCommPkg)[current_level][partition];
    HYPRE_Int coarse_partition = partition;
 
@@ -2559,11 +2546,12 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
          {
             coarse_partition_id = -1;
             coarse_partition = -1;
+            HYPRE_Int example_proc = hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[current_level][partition];
             for (j = 0; j < hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg)[level]; j++)
             {
                for (k = 0; k < hypre_ParCompGridCommPkgPartitionRanks(compGridCommPkg)[level][j][0]; k++)
                {
-                  if (example_send_proc == hypre_ParCompGridCommPkgPartitionRanks(compGridCommPkg)[level][j][k+1]) 
+                  if (example_proc == hypre_ParCompGridCommPkgPartitionRanks(compGridCommPkg)[level][j][k+1]) 
                   {
                      coarse_partition_id = hypre_ParCompGridCommPkgPartitions(compGridCommPkg)[level][j];
                      coarse_partition = j;
@@ -3716,80 +3704,7 @@ TestCompGrids1(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int tra
 }
 
 HYPRE_Int
-TestCompGrids2(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels)
-{
-   // TEST 2: See if the composite grid is set up such that restriction can occur correctly
-   // The CoarseResidualMarker shows where we have all the required info to restrict a correct residual
-   // Here we mark the locations where a restricted residual (rather than a residual just recalculated on the coarse grid) is REQUIRED (i.e. where is the coarse grid residual affected by fine grid relaxation)
-   // HYPRE_Int myid;
-   // hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
-   // HYPRE_Int            level,i,j,k;
-   // HYPRE_Int test_failed = 0;
-   // for (level = 0; level < num_levels-1; level++)
-   // { 
-   //    HYPRE_Int *needs_restrict = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumNodes(compGrid[level+1]), HYPRE_MEMORY_HOST);
-   //    // For dof in the comp grid
-   //    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
-   //    {
-   //       // Look at the row of A for dof
-   //       HYPRE_Int find_restrict_range = 0;
-   //       for (j = hypre_ParCompGridARowPtr(compGrid[level])[i]; j < hypre_ParCompGridARowPtr(compGrid[level])[i+1]; j++)
-   //       {
-   //          // If dof is connected through A to a real node
-   //          if (hypre_ParCompGridAColInd(compGrid[level])[j] >= 0)
-   //          {
-   //             if (hypre_ParCompGridRealDofMarker(compGrid[level])[ hypre_ParCompGridAColInd(compGrid[level])[j] ])
-   //             {
-   //                // Then the residual here will change, so find where that residual will propogate on the coarse grid
-   //                find_restrict_range = 1;
-   //                break;
-   //             }
-   //          }
-   //       }
-   //       // If dof was connected to a real node
-   //       if (find_restrict_range)
-   //       {
-   //          // Look at the row of P for dof
-   //          for (j = hypre_ParCompGridPRowPtr(compGrid[level])[i]; j < hypre_ParCompGridPRowPtr(compGrid[level])[i+1]; j++)
-   //          {
-   //             // Mark everything in the restriction range of dof
-   //             if (hypre_ParCompGridPColInd(compGrid[level])[j] < 0)
-   //             {
-   //                // If negative P col index encountered, make sure this is disconnected through A on the coarse grid
-   //                for (k = 0; k < hypre_ParCompGridNumNodes(compGrid[level+1]); k++)
-   //                {
-   //                   if (hypre_ParCompGridGlobalIndices(compGrid[level+1])[k] == -hypre_ParCompGridPColInd(compGrid[level])[j]-1)
-   //                   {
-   //                      hypre_printf("Error: negative P column index points to a global index that is found in the next coarsest composite grid.\n");
-   //                      test_failed = 1;
-   //                   }
-   //                }
-   //             }
-   //             else needs_restrict[ hypre_ParCompGridPColInd(compGrid[level])[j] ] = 1;
-   //          }
-   //       }
-   //    }
-   //    // Now check against the coarse residual marker
-   //    // That is, coarse residual marker shows where we CAN restrict a correct residual and needs_restrict shows where we NEED to restrict a correct residual
-   //    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level+1]); i++)
-   //    {
-   //       if (needs_restrict[i])
-   //       {
-   //          if (hypre_ParCompGridCoarseResidualMarker(compGrid[level+1])[i] != 2)
-   //          {
-   //             test_failed = 1;
-   //             // hypre_printf("Error: Need residual to be restricted at a location where it is not possible: proc %d, level %d, global index %d\n", myid, level+1, hypre_ParCompGridGlobalIndices(compGrid[level+1])[i]);
-   //          }
-   //       }
-   //    }
-   //    hypre_TFree(needs_restrict, HYPRE_MEMORY_HOST);
-   // }
-
-   // return test_failed;
-}
-
-HYPRE_Int
-TestCompGrids3(hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int num_levels, hypre_ParCSRMatrix **A, hypre_ParCSRMatrix **P, hypre_ParVector **F)
+TestCompGrids2(hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int num_levels, hypre_ParCSRMatrix **A, hypre_ParCSRMatrix **P, hypre_ParVector **F)
 {
    // TEST 3: See whether the dofs in the composite grid have the correct info.
    // Each processor in turn will broadcast out the info associate with its composite grids on each level.
@@ -3801,9 +3716,8 @@ TestCompGrids3(hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridC
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
 
+   HYPRE_Int i,j;
    HYPRE_Int test_failed = 0;
-
-   HYPRE_Int local_myid = 0;
 
    // For each processor and each level broadcast the residual data and global indices out and check agains the owning procs
    HYPRE_Int proc;
@@ -3812,19 +3726,12 @@ TestCompGrids3(hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridC
       HYPRE_Int level;
       for (level = 0; level < num_levels; level++)
       {
-         // Get local comm info if available
-         if (hypre_ParCompGridCommPkgAggLocalComms(compGridCommPkg)[level])
-         {
-            hypre_MPI_Comm_rank(hypre_ParCompGridCommPkgAggLocalComms(compGridCommPkg)[level], &local_myid);
-         }
-
          // Broadcast the number of nodes and num non zeros for A and P
          HYPRE_Int num_nodes = 0;
          HYPRE_Int num_coarse_nodes = 0;
          HYPRE_Int nnz_A = 0;
          HYPRE_Int nnz_P = 0;
          HYPRE_Int sizes_buf[4];
-         HYPRE_Int i;
          if (myid == proc) 
          {
             num_nodes = hypre_ParCompGridNumNodes(compGrid[level]);
@@ -3855,7 +3762,6 @@ TestCompGrids3(hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridC
          if (myid == proc) global_indices = hypre_ParCompGridGlobalIndices(compGrid[level]);
          else global_indices = hypre_CTAlloc(HYPRE_Int, num_nodes, HYPRE_MEMORY_HOST);
          hypre_MPI_Bcast(global_indices, num_nodes, HYPRE_MPI_INT, proc, hypre_MPI_COMM_WORLD);
-
 
          // Broadcast the A row pointer
          HYPRE_Int *A_rowPtr;
@@ -3912,30 +3818,32 @@ TestCompGrids3(hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridC
                HYPRE_Int row_size;
                HYPRE_Int *row_col_ind;
                HYPRE_Complex *row_values;
-               hypre_ParCSRMatrixGetRow( A[level], global_indices[i], &row_size, &row_col_ind, &row_values );
-               if (row_size != A_rowPtr[i+1] - A_rowPtr[i])
+               if (A_rowPtr[i+1] - A_rowPtr[i] > 0)
                {
-                  // hypre_printf("Error: proc %d has incorrect row size at global index %d on level %d, checked by rank %d\n", proc, global_indices[i], level, myid);
-                  test_failed = 1;
-               }
-               HYPRE_Int j;
-               for (j = A_rowPtr[i]; j < A_rowPtr[i+1]; j++)
-               {
-                  if (A_colInd[j] >= 0)
+                  hypre_ParCSRMatrixGetRow( A[level], global_indices[i], &row_size, &row_col_ind, &row_values );
+                  if (row_size != A_rowPtr[i+1] - A_rowPtr[i])
                   {
-                     if (global_indices[ A_colInd[j] ] != row_col_ind[j - A_rowPtr[i]])
+                     // hypre_printf("Error: proc %d has incorrect row size at global index %d on level %d, checked by rank %d\n", proc, global_indices[i], level, myid);
+                     test_failed = 1;
+                  }
+                  for (j = A_rowPtr[i]; j < A_rowPtr[i+1]; j++)
+                  {
+                     if (A_colInd[j] >= 0)
                      {
-                        // hypre_printf("Error: proc %d has incorrect A col index at global index %d on level %d, checked by rank %d\n", proc, global_indices[i], level, myid);
-                        test_failed = 1;
-                     }
-                     if (A_data[j] != row_values[j - A_rowPtr[i]])
-                     {
-                        // hypre_printf("Error: proc %d has incorrect A data at global index %d on level %d, checked by rank %d\n", proc, global_indices[i], level, myid);
-                        test_failed = 1;
+                        if (global_indices[ A_colInd[j] ] != row_col_ind[j - A_rowPtr[i]])
+                        {
+                           // hypre_printf("Error: proc %d has incorrect A col index at global index %d on level %d, checked by rank %d\n", proc, global_indices[i], level, myid);
+                           test_failed = 1;
+                        }
+                        if (A_data[j] != row_values[j - A_rowPtr[i]])
+                        {
+                           // hypre_printf("Error: proc %d has incorrect A data at global index %d on level %d, checked by rank %d\n", proc, global_indices[i], level, myid);
+                           test_failed = 1;
+                        }
                      }
                   }
+                  hypre_ParCSRMatrixRestoreRow( A[level], global_indices[i], &row_size, &row_col_ind, &row_values );
                }
-               hypre_ParCSRMatrixRestoreRow( A[level], global_indices[i], &row_size, &row_col_ind, &row_values );
                if (level != num_levels-1)
                {
                   hypre_ParCSRMatrixGetRow( P[level], global_indices[i], &row_size, &row_col_ind, &row_values );
