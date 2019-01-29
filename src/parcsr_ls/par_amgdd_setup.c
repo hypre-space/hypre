@@ -330,7 +330,20 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    {
       // Get the max stencil size on all levels
       HYPRE_Int *local_stencil = hypre_CTAlloc(HYPRE_Int, transition_level, HYPRE_MEMORY_HOST);
-      for (level = 0; level < transition_level; level++) local_stencil[level] = hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg)[level];
+      for (level = 0; level < transition_level; level++)
+      {
+         for (i = 0; i < hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg)[level]; i++)
+         {
+            for (j = hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[level][i]; j < hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[level][i+1]; j++)
+            {
+               if (!hypre_ParCompGridCommPkgGhostMarker(compGridCommPkg)[level][j])
+               {
+                  local_stencil[level]++;
+                  break;
+               }
+            }
+         }
+      }
       HYPRE_Int *global_stencil = hypre_CTAlloc(HYPRE_Int, transition_level, HYPRE_MEMORY_HOST);
       hypre_MPI_Allreduce(local_stencil, global_stencil, transition_level, HYPRE_MPI_INT, MPI_MAX, hypre_MPI_COMM_WORLD);
       if (communication_cost)
@@ -356,7 +369,21 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
             agglomeration_num_levels++;
 
             // Update global stencil info !!! Make sure this is how you want to do it (as opposed to accounting for num sends in the case of unequal partition sizes)
-            for (i = 0; i < transition_level; i++) local_stencil[i] = hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg)[i];
+            for (l = 0; l < transition_level; l++)
+            {
+               local_stencil[l] = 0;
+               for (i = 0; i < hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg)[l]; i++)
+               {
+                  for (j = hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[l][i]; j < hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[l][i+1]; j++)
+                  {
+                     if (!hypre_ParCompGridCommPkgGhostMarker(compGridCommPkg)[l][j])
+                     {
+                        local_stencil[l]++;
+                        break;
+                     }
+                  }
+               }
+            }
             hypre_MPI_Allreduce(local_stencil, global_stencil, transition_level, HYPRE_MPI_INT, MPI_MAX, hypre_MPI_COMM_WORLD);
             if (communication_cost)
             {
