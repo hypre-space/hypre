@@ -186,21 +186,23 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata )
    if (transition_level < 0) transition_level = num_levels;
    for (level = 0; level < transition_level; level++)
    {
-      if (!hypre_ParCompGridTemp( hypre_ParAMGDataCompGrid(amg_data)[level] )) 
-         hypre_ParCompGridTemp( hypre_ParAMGDataCompGrid(amg_data)[level] ) = hypre_CTAlloc(HYPRE_Complex, hypre_ParCompGridNumNodes(hypre_ParAMGDataCompGrid(amg_data)[level]), HYPRE_MEMORY_HOST);
-      else for (i = 0; i < hypre_ParCompGridNumNodes(hypre_ParAMGDataCompGrid(amg_data)[level]); i++) hypre_ParCompGridTemp( hypre_ParAMGDataCompGrid(amg_data)[level] )[i] = 0.0;
-      if (!hypre_ParCompGridATemp( hypre_ParAMGDataCompGrid(amg_data)[level] )) 
-         hypre_ParCompGridATemp( hypre_ParAMGDataCompGrid(amg_data)[level] ) = hypre_CTAlloc(HYPRE_Complex, hypre_ParCompGridNumNodes(hypre_ParAMGDataCompGrid(amg_data)[level]), HYPRE_MEMORY_HOST);
-      else for (i = 0; i < hypre_ParCompGridNumNodes(hypre_ParAMGDataCompGrid(amg_data)[level]); i++) hypre_ParCompGridATemp( hypre_ParAMGDataCompGrid(amg_data)[level] )[i] = 0.0;
+      if (!hypre_ParCompGridT( hypre_ParAMGDataCompGrid(amg_data)[level] )) 
+         hypre_ParCompGridT( hypre_ParAMGDataCompGrid(amg_data)[level] ) = hypre_CTAlloc(HYPRE_Complex, hypre_ParCompGridNumNodes(hypre_ParAMGDataCompGrid(amg_data)[level]), HYPRE_MEMORY_HOST);
+      else for (i = 0; i < hypre_ParCompGridNumNodes(hypre_ParAMGDataCompGrid(amg_data)[level]); i++) hypre_ParCompGridT( hypre_ParAMGDataCompGrid(amg_data)[level] )[i] = 0.0;
+      if (!hypre_ParCompGridS( hypre_ParAMGDataCompGrid(amg_data)[level] )) 
+         hypre_ParCompGridS( hypre_ParAMGDataCompGrid(amg_data)[level] ) = hypre_CTAlloc(HYPRE_Complex, hypre_ParCompGridNumNodes(hypre_ParAMGDataCompGrid(amg_data)[level]), HYPRE_MEMORY_HOST);
+      else for (i = 0; i < hypre_ParCompGridNumNodes(hypre_ParAMGDataCompGrid(amg_data)[level]); i++) hypre_ParCompGridS( hypre_ParAMGDataCompGrid(amg_data)[level] )[i] = 0.0;
    }
 
 	// Do the cycles
+   HYPRE_Int first_iteration = 1;
    if (fac_tol == 0.0)
    {
       while ( cycle_count < max_fac_iter )
       {
          // Do FAC cycle
-         hypre_BoomerAMGDD_FAC_Cycle( amg_vdata );
+         hypre_BoomerAMGDD_FAC_Cycle( amg_vdata, first_iteration );
+         first_iteration = 0;
 
          ++cycle_count;
          hypre_ParAMGDataNumFACIterations(amg_data) = cycle_count;
@@ -211,7 +213,8 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata )
       while ( (relative_resid >= fac_tol || cycle_count < min_fac_iter) && cycle_count < max_fac_iter )
       {
          // Do FAC cycle
-   		hypre_BoomerAMGDD_FAC_Cycle( amg_vdata );
+   		hypre_BoomerAMGDD_FAC_Cycle( amg_vdata, first_iteration );
+         first_iteration = 0;
 
          // Check convergence and up the cycle count
          resid_nrm = GetCompositeResidual(hypre_ParAMGDataCompGrid(amg_data)[0]);
@@ -227,7 +230,8 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata )
       while ( (conv_fact <= fac_tol || conv_fact >= 1.0 || cycle_count < min_fac_iter) && cycle_count < max_fac_iter )
       {
          // Do FAC cycle
-         hypre_BoomerAMGDD_FAC_Cycle( amg_vdata );
+         hypre_BoomerAMGDD_FAC_Cycle( amg_vdata, first_iteration );
+         first_iteration = 0;
 
          // Check convergence and up the cycle count
          resid_nrm = GetCompositeResidual(hypre_ParAMGDataCompGrid(amg_data)[0]);

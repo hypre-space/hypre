@@ -137,8 +137,9 @@ typedef struct
 
    HYPRE_Complex     *u;
    HYPRE_Complex     *f;
+   HYPRE_Complex     *t;
+   HYPRE_Complex     *s;
    HYPRE_Complex     *temp;
-   HYPRE_Complex     *Atemp;
 
    HYPRE_Int        *global_indices;
    HYPRE_Int        *coarse_global_indices; 
@@ -170,8 +171,9 @@ typedef struct
 #define hypre_ParCompGridPMemSize(compGrid)           ((compGrid) -> P_mem_size)
 #define hypre_ParCompGridU(compGrid)           ((compGrid) -> u)
 #define hypre_ParCompGridF(compGrid)           ((compGrid) -> f)
+#define hypre_ParCompGridT(compGrid)           ((compGrid) -> t)
+#define hypre_ParCompGridS(compGrid)           ((compGrid) -> s)
 #define hypre_ParCompGridTemp(compGrid)        ((compGrid) -> temp)
-#define hypre_ParCompGridATemp(compGrid)        ((compGrid) -> Atemp)
 #define hypre_ParCompGridGlobalIndices(compGrid)           ((compGrid) -> global_indices)
 #define hypre_ParCompGridCoarseGlobalIndices(compGrid)           ((compGrid) -> coarse_global_indices)
 #define hypre_ParCompGridCoarseLocalIndices(compGrid)           ((compGrid) -> coarse_local_indices)
@@ -1962,7 +1964,7 @@ HYPRE_Int hypre_BoomerAMGDDSetup(  void *amg_vdata, hypre_ParCSRMatrix *A, hypre
 HYPRE_Int hypre_BoomerAMGDDTestSolve( void *amg_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u);
 
 /* par_amgdd_fac_cycle.c */
-HYPRE_Int hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata );
+HYPRE_Int hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata, HYPRE_Int first_iteration );
 HYPRE_Int hypre_BoomerAMGDD_FAC_Cycle_timed( void *amg_vdata, HYPRE_Int time_part );
 
 /* par_amgdd_comp_grid.c */

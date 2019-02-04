@@ -40,8 +40,9 @@ hypre_ParCompGridCreate ()
    hypre_ParCompGridPMemSize(compGrid) = 0;   
    hypre_ParCompGridU(compGrid) = NULL;
    hypre_ParCompGridF(compGrid) = NULL;
+   hypre_ParCompGridT(compGrid) = NULL;
+   hypre_ParCompGridS(compGrid) = NULL;
    hypre_ParCompGridTemp(compGrid) = NULL;
-   hypre_ParCompGridATemp(compGrid) = NULL;
    hypre_ParCompGridGlobalIndices(compGrid) = NULL;
    hypre_ParCompGridCoarseGlobalIndices(compGrid) = NULL;
    hypre_ParCompGridCoarseLocalIndices(compGrid) = NULL;
@@ -72,19 +73,24 @@ hypre_ParCompGridDestroy ( hypre_ParCompGrid *compGrid )
       hypre_TFree(hypre_ParCompGridU(compGrid), HYPRE_MEMORY_HOST);
    }
 
-   if (hypre_ParCompGridTemp(compGrid))
-   {
-      hypre_TFree(hypre_ParCompGridTemp(compGrid), HYPRE_MEMORY_HOST);
-   }
-
-   if (hypre_ParCompGridATemp(compGrid))
-   {
-      hypre_TFree(hypre_ParCompGridATemp(compGrid), HYPRE_MEMORY_HOST);
-   }
-
    if (hypre_ParCompGridF(compGrid))
    {
       hypre_TFree(hypre_ParCompGridF(compGrid), HYPRE_MEMORY_HOST);
+   }
+
+   if (hypre_ParCompGridT(compGrid))
+   {
+      hypre_TFree(hypre_ParCompGridT(compGrid), HYPRE_MEMORY_HOST);
+   }
+
+   if (hypre_ParCompGridS(compGrid))
+   {
+      hypre_TFree(hypre_ParCompGridS(compGrid), HYPRE_MEMORY_HOST);
+   }
+
+   if (hypre_ParCompGridTemp(compGrid))
+   {
+      hypre_TFree(hypre_ParCompGridTemp(compGrid), HYPRE_MEMORY_HOST);
    }
 
    if (hypre_ParCompGridGlobalIndices(compGrid))
