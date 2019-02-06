@@ -150,7 +150,7 @@ hypre_ParCompGridDestroy ( hypre_ParCompGrid *compGrid )
 }
 
 HYPRE_Int
-hypre_ParCompGridInitialize ( hypre_ParAMGData *amg_data, HYPRE_Int level )
+hypre_ParCompGridInitialize ( hypre_ParAMGData *amg_data, HYPRE_Int padding, HYPRE_Int level )
 {
    HYPRE_Int      myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
@@ -172,7 +172,7 @@ hypre_ParCompGridInitialize ( hypre_ParAMGData *amg_data, HYPRE_Int level )
 
    hypre_Vector *residual_local = hypre_ParVectorLocalVector(residual);
    HYPRE_Int         num_nodes = hypre_VectorSize(residual_local);
-   HYPRE_Int         mem_size = num_nodes + 2 * (hypre_ParAMGDataAMGDDPadding(amg_data) + hypre_ParAMGDataAMGDDNumGhostLayers(amg_data)) * hypre_CSRMatrixNumCols( hypre_ParCSRMatrixOffd(A) );
+   HYPRE_Int         mem_size = num_nodes + 2 * (padding + hypre_ParAMGDataAMGDDNumGhostLayers(amg_data)) * hypre_CSRMatrixNumCols( hypre_ParCSRMatrixOffd(A) );
    HYPRE_Real        over_allocation_factor = (HYPRE_Real) mem_size;
    if (num_nodes > 0) over_allocation_factor = ((HYPRE_Real) mem_size) / ((HYPRE_Real) num_nodes);
 

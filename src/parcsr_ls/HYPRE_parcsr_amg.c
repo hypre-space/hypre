@@ -505,6 +505,24 @@ HYPRE_BoomerAMGGetAMGDDPadding( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetAMGDDPadding
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetAMGDDVariablePadding( HYPRE_Solver solver,
+                           HYPRE_Int          variable_padding  )
+{
+   return( hypre_BoomerAMGSetAMGDDVariablePadding( (void *) solver, variable_padding ) );
+}
+
+HYPRE_Int
+HYPRE_BoomerAMGGetAMGDDVariablePadding( HYPRE_Solver solver,
+                           HYPRE_Int        * variable_padding  )
+{
+   return( hypre_BoomerAMGGetAMGDDVariablePadding( (void *) solver, variable_padding ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetAMGDDNumGhostLayers
  *--------------------------------------------------------------------------*/
 

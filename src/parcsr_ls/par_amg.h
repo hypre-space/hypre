@@ -114,6 +114,7 @@ typedef struct
    HYPRE_Int                 fac_relax_type;
    HYPRE_Int                 fac_num_relax;
    HYPRE_Int                 padding;
+   HYPRE_Int                 variable_padding;
    HYPRE_Int                 num_ghost_layers;
    HYPRE_Int                 use_transition_layer;
    HYPRE_Int                 amgdd_agglomeration_max_num_levels;
@@ -385,6 +386,7 @@ typedef struct
 #define hypre_ParAMGDataFACRelaxType(amg_data) ((amg_data)->fac_relax_type)
 #define hypre_ParAMGDataFACNumRelax(amg_data) ((amg_data)->fac_num_relax)
 #define hypre_ParAMGDataAMGDDPadding(amg_data) ((amg_data)->padding)
+#define hypre_ParAMGDataAMGDDVariablePadding(amg_data) ((amg_data)->variable_padding)
 #define hypre_ParAMGDataAMGDDNumGhostLayers(amg_data) ((amg_data)->num_ghost_layers)
 #define hypre_ParAMGDataAMGDDUseTransitionLayer(amg_data) ((amg_data)->use_transition_layer)
 #define hypre_ParAMGDataAMGDDAgglomerationMaxNumLevels(amg_data) ((amg_data)->amgdd_agglomeration_max_num_levels)

@@ -292,6 +292,7 @@ typedef struct
    HYPRE_Int                 fac_relax_type;
    HYPRE_Int                 fac_num_relax;
    HYPRE_Int                 padding;
+   HYPRE_Int                 variable_padding;
    HYPRE_Int                 num_ghost_layers;
    HYPRE_Int                 use_transition_level;
    HYPRE_Int                 amgdd_agglomeration_max_num_levels;
@@ -560,6 +561,7 @@ typedef struct
 #define hypre_ParAMGDataFACRelaxType(amg_data) ((amg_data)->fac_relax_type)
 #define hypre_ParAMGDataFACNumRelax(amg_data) ((amg_data)->fac_num_relax)
 #define hypre_ParAMGDataAMGDDPadding(amg_data) ((amg_data)->padding)
+#define hypre_ParAMGDataAMGDDVariablePadding(amg_data) ((amg_data)->variable_padding)
 #define hypre_ParAMGDataAMGDDNumGhostLayers(amg_data) ((amg_data)->num_ghost_layers)
 #define hypre_ParAMGDataAMGDDUseTransitionLevel(amg_data) ((amg_data)->use_transition_level)
 #define hypre_ParAMGDataAMGDDAgglomerationMaxNumLevels(amg_data) ((amg_data)->amgdd_agglomeration_max_num_levels)
@@ -975,6 +977,8 @@ HYPRE_Int HYPRE_BoomerAMGSetFACNumRelax ( HYPRE_Solver solver, HYPRE_Int fac_num
 HYPRE_Int HYPRE_BoomerAMGGetFACNumRelax ( HYPRE_Solver solver, HYPRE_Int *fac_num_relax );
 HYPRE_Int HYPRE_BoomerAMGSetAMGDDPadding ( HYPRE_Solver solver , HYPRE_Int padding );
 HYPRE_Int HYPRE_BoomerAMGGetAMGDDPadding ( HYPRE_Solver solver , HYPRE_Int *padding );
+HYPRE_Int HYPRE_BoomerAMGSetAMGDDVariablePadding ( HYPRE_Solver solver , HYPRE_Int variable_padding );
+HYPRE_Int HYPRE_BoomerAMGGetAMGDDVariablePadding ( HYPRE_Solver solver , HYPRE_Int *variable_padding );
 HYPRE_Int HYPRE_BoomerAMGSetAMGDDNumGhostLayers ( HYPRE_Solver solver , HYPRE_Int num_ghost_layers );
 HYPRE_Int HYPRE_BoomerAMGGetAMGDDNumGhostLayers ( HYPRE_Solver solver , HYPRE_Int *num_ghost_layers );
 HYPRE_Int HYPRE_BoomerAMGSetAMGDDUseTransitionLevel ( HYPRE_Solver solver , HYPRE_Int use_transition_level );
@@ -1970,7 +1974,7 @@ HYPRE_Int hypre_BoomerAMGDD_FAC_Cycle_timed( void *amg_vdata, HYPRE_Int time_par
 /* par_amgdd_comp_grid.c */
 hypre_ParCompGrid *hypre_ParCompGridCreate ();
 HYPRE_Int hypre_ParCompGridDestroy ( hypre_ParCompGrid *compGrid );
-HYPRE_Int hypre_ParCompGridInitialize( hypre_ParAMGData *amg_data, HYPRE_Int level );
+HYPRE_Int hypre_ParCompGridInitialize( hypre_ParAMGData *amg_data, HYPRE_Int padding, HYPRE_Int level );
 HYPRE_Int hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int transition_level, HYPRE_Int debug );
 HYPRE_Int hypre_ParCompGridSetupRealDofMarker( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int num_ghost_layers );
 HYPRE_Int hypre_ParCompGridSetSize ( hypre_ParCompGrid *compGrid, HYPRE_Int num_nodes, HYPRE_Int mem_size, HYPRE_Int A_nnz, HYPRE_Int P_nnz, HYPRE_Int full_comp_info );
