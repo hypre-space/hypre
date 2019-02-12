@@ -78,6 +78,7 @@ HYPRE_DRIVERS =\
  struct_migrate.c\
  sstruct_fac.c\
  ij_mv.c\
+ ij_mm.c\
  zboxloop.c
 
 HYPRE_DRIVERS_CXX =\
@@ -169,6 +170,10 @@ sstruct_fac: sstruct_fac.o
 	${LINK_CC} -o $@ $@.o ${LFLAGS}
 
 ij_mv: ij_mv.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $@.o ${LFLAGS}
+
+ij_mm: ij_mm.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $@.o ${LFLAGS}
 

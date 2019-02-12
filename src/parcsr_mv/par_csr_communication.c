@@ -256,7 +256,7 @@ void hypre_ParCSRPersistentCommHandleWait( hypre_ParCSRPersistentCommHandle *com
 }
 #endif // HYPRE_USING_PERSISTENT_COMM
 
-hypre_ParCSRCommHandle *
+hypre_ParCSRCommHandle*
 hypre_ParCSRCommHandleCreate ( HYPRE_Int            job,
                                hypre_ParCSRCommPkg *comm_pkg,
                                void                *send_data,
@@ -322,9 +322,9 @@ hypre_ParCSRCommHandleCreate ( HYPRE_Int            job,
          }
          for (i = 0; i < num_sends; i++)
          {
+            ip = hypre_ParCSRCommPkgSendProc(comm_pkg, i);
             vec_start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
             vec_len = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1)-vec_start;
-            ip = hypre_ParCSRCommPkgSendProc(comm_pkg, i);
             hypre_MPI_Isend(&d_send_data[vec_start], vec_len, HYPRE_MPI_COMPLEX,
                             ip, 0, comm, &requests[j++]);
          }
@@ -336,9 +336,9 @@ hypre_ParCSRCommHandleCreate ( HYPRE_Int            job,
          HYPRE_Complex *d_recv_data = (HYPRE_Complex *) recv_data;
          for (i = 0; i < num_sends; i++)
          {
+            ip = hypre_ParCSRCommPkgSendProc(comm_pkg, i);
             vec_start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
             vec_len = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1) - vec_start;
-            ip = hypre_ParCSRCommPkgSendProc(comm_pkg, i);
             hypre_MPI_Irecv(&d_recv_data[vec_start], vec_len, HYPRE_MPI_COMPLEX,
                             ip, 0, comm, &requests[j++]);
          }
@@ -366,9 +366,9 @@ hypre_ParCSRCommHandleCreate ( HYPRE_Int            job,
          }
          for (i = 0; i < num_sends; i++)
          {
+            ip = hypre_ParCSRCommPkgSendProc(comm_pkg, i);
             vec_start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
             vec_len = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1)-vec_start;
-            ip = hypre_ParCSRCommPkgSendProc(comm_pkg, i);
             hypre_MPI_Isend(&i_send_data[vec_start], vec_len, HYPRE_MPI_INT,
                             ip, 0, comm, &requests[j++]);
          }
@@ -380,9 +380,9 @@ hypre_ParCSRCommHandleCreate ( HYPRE_Int            job,
          HYPRE_Int *i_recv_data = (HYPRE_Int *) recv_data;
          for (i = 0; i < num_sends; i++)
          {
+            ip = hypre_ParCSRCommPkgSendProc(comm_pkg, i);
             vec_start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
             vec_len = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1) - vec_start;
-            ip = hypre_ParCSRCommPkgSendProc(comm_pkg, i);
             hypre_MPI_Irecv(&i_recv_data[vec_start], vec_len, HYPRE_MPI_INT,
                             ip, 0, comm, &requests[j++]);
          }
@@ -417,7 +417,11 @@ hypre_ParCSRCommHandleDestroy( hypre_ParCSRCommHandle *comm_handle )
 {
    hypre_MPI_Status          *status0;
 
-   if ( comm_handle==NULL ) return hypre_error_flag;
+   if ( comm_handle == NULL )
+   {
+      return hypre_error_flag;
+   }
+
    if (hypre_ParCSRCommHandleNumRequests(comm_handle))
    {
       status0 = hypre_CTAlloc(hypre_MPI_Status,
@@ -785,41 +789,32 @@ hypre_MatvecCommPkgDestroy( hypre_ParCSRCommPkg *comm_pkg )
 /* AHB 11/06 : alternate to the extend function below - creates a
  * second comm pkg based on indices - this makes it easier to use the
  * global partition
- * RL: reanme and move it here
+ * RL: reanmed and moved it here
+ * RL: changed the interface
  * */
 HYPRE_Int
-hypre_ParCSRFindExtendCommPkg(hypre_ParCSRMatrix *A, HYPRE_Int indices_len, HYPRE_Int *indices,
+hypre_ParCSRFindExtendCommPkg(MPI_Comm              comm,
+                              HYPRE_Int             global_num,
+                              HYPRE_Int             my_first,
+                              HYPRE_Int             local_num,
+                              HYPRE_Int            *starts,
+                              hypre_IJAssumedPart  *apart,
+                              HYPRE_Int             indices_len,
+                              HYPRE_Int            *indices,
                               hypre_ParCSRCommPkg **extend_comm_pkg)
-
 {
-   MPI_Comm  comm            = hypre_ParCSRMatrixComm(A);
-   HYPRE_Int first_col_diag  = hypre_ParCSRMatrixFirstColDiag(A);
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-   HYPRE_Int global_num_cols = hypre_ParCSRMatrixGlobalNumCols(A);
-   /* Create the assumed partition */
-   if  (hypre_ParCSRMatrixAssumedPartition(A) == NULL)
-   {
-      hypre_ParCSRMatrixCreateAssumedPartition(A);
-   }
-   hypre_IJAssumedPart *apart = hypre_ParCSRMatrixAssumedPartition(A);
-#else
-   HYPRE_Int *col_starts      = hypre_ParCSRMatrixColStarts(A);
-   HYPRE_Int  num_cols_diag   = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(A));
-#endif
    /*-----------------------------------------------------------
     * setup commpkg
     *----------------------------------------------------------*/
    hypre_ParCSRCommPkg *new_comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1, HYPRE_MEMORY_HOST);
    *extend_comm_pkg = new_comm_pkg;
+
 #ifdef HYPRE_NO_GLOBAL_PARTITION
-   hypre_ParCSRCommPkgCreateApart ( comm, indices, first_col_diag,
-                                    indices_len, global_num_cols,
-                                    apart,
+   hypre_assert(apart != NULL);
+   hypre_ParCSRCommPkgCreateApart ( comm, indices, my_first, indices_len, global_num, apart,
                                     new_comm_pkg );
 #else
-   hypre_ParCSRCommPkgCreate      ( comm, indices, first_col_diag,
-                                    col_starts,
-                                    num_cols_diag, indices_len,
+   hypre_ParCSRCommPkgCreate      ( comm, indices, my_first, starts, local_num, indices_len,
                                     new_comm_pkg );
 #endif
 

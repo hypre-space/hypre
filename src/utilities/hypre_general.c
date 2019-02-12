@@ -11,6 +11,7 @@
  ***********************************************************************EHEADER*/
 
 #include "_hypre_utilities.h"
+#include "../seq_mv/csr_sparse_device.h"
 
 #if defined(HYPRE_USING_KOKKOS)
 #include <Kokkos_Core.hpp>
@@ -27,7 +28,7 @@ HYPRE_Init( hypre_int argc, char *argv[] )
 {
    /*
    HYPRE_Int  num_procs, myid;
-   
+
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
    */
@@ -60,6 +61,19 @@ HYPRE_Init( hypre_int argc, char *argv[] )
    */
    HYPRE_OMPOffloadOn();
 #endif
+
+#if defined(HYPRE_USING_CUDA)
+   hypre_device_sparse_opts = hypre_TAlloc(hypre_DeviceCSRSparseOpts, 1, HYPRE_MEMORY_HOST);
+   hypre_device_sparse_opts->rownnz_estimate_method = 3; /* 1: naive overestimate
+                                                            2: naive underestimate
+                                                            3: Cohen's algorithm */
+   hypre_device_sparse_opts->rownnz_estimate_nsamples = 128;
+   hypre_device_sparse_opts->rownnz_estimate_mult_factor = 1.0;
+   hypre_device_sparse_opts->hash_type = 'L';
+   hypre_device_sparse_opts->do_timing = 0;
+
+   hypre_device_sparse_handle = hypre_CTAlloc(hypre_DeviceCSRSparseHandle, 1, HYPRE_MEMORY_HOST);
+#endif
 }
 
 /******************************************************************************
@@ -87,13 +101,12 @@ HYPRE_Finalize()
    hypre_TFree(cuda_reduce_buffer, HYPRE_MEMORY_DEVICE);
 #endif
 
-   if (global_send_buffer)
-   {
-     hypre_TFree(global_send_buffer, HYPRE_MEMORY_DEVICE);
-   }
-   if (global_recv_buffer)
-   {
-     hypre_TFree(global_recv_buffer, HYPRE_MEMORY_DEVICE);
-   }
+   hypre_TFree(global_send_buffer, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(global_recv_buffer, HYPRE_MEMORY_DEVICE);
+
+#if defined(HYPRE_USING_CUDA)
+   hypre_TFree(hypre_device_sparse_opts, HYPRE_MEMORY_HOST);
+   hypre_TFree(hypre_device_sparse_handle, HYPRE_MEMORY_HOST);
+#endif
 }
 

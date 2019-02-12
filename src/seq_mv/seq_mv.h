@@ -53,38 +53,42 @@ typedef struct
    /* Does the CSRMatrix create/destroy `data', `i', `j'? */
    HYPRE_Int      owns_data;
 
-   HYPRE_Complex  *data;
+   HYPRE_Complex *data;
 
    /* for compressing rows in matrix multiplication  */
    HYPRE_Int     *rownnz;
    HYPRE_Int      num_rownnz;
 
+   /* memory location of arrays i, j, data */
+   HYPRE_Int      memory_location;
+
 #ifdef HYPRE_USING_UNIFIED_MEMORY
-  /* Flag to keeping track of prefetching */
-  HYPRE_Int on_device;
+   /* Flag to keeping track of prefetching */
+   HYPRE_Int on_device;
 #endif
 #ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
-  HYPRE_Int mapped;
+   HYPRE_Int mapped;
 #endif
 #ifdef HYPRE_BIGINT
    hypre_int *i_short, *j_short;
 #endif
-   
+
 } hypre_CSRMatrix;
 
 /*--------------------------------------------------------------------------
  * Accessor functions for the CSR Matrix structure
  *--------------------------------------------------------------------------*/
 
-#define hypre_CSRMatrixData(matrix)         ((matrix) -> data)
-#define hypre_CSRMatrixI(matrix)            ((matrix) -> i)
-#define hypre_CSRMatrixJ(matrix)            ((matrix) -> j)
-#define hypre_CSRMatrixNumRows(matrix)      ((matrix) -> num_rows)
-#define hypre_CSRMatrixNumCols(matrix)      ((matrix) -> num_cols)
-#define hypre_CSRMatrixNumNonzeros(matrix)  ((matrix) -> num_nonzeros)
-#define hypre_CSRMatrixRownnz(matrix)       ((matrix) -> rownnz)
-#define hypre_CSRMatrixNumRownnz(matrix)    ((matrix) -> num_rownnz)
-#define hypre_CSRMatrixOwnsData(matrix)     ((matrix) -> owns_data)
+#define hypre_CSRMatrixData(matrix)           ((matrix) -> data)
+#define hypre_CSRMatrixI(matrix)              ((matrix) -> i)
+#define hypre_CSRMatrixJ(matrix)              ((matrix) -> j)
+#define hypre_CSRMatrixNumRows(matrix)        ((matrix) -> num_rows)
+#define hypre_CSRMatrixNumCols(matrix)        ((matrix) -> num_cols)
+#define hypre_CSRMatrixNumNonzeros(matrix)    ((matrix) -> num_nonzeros)
+#define hypre_CSRMatrixRownnz(matrix)         ((matrix) -> rownnz)
+#define hypre_CSRMatrixNumRownnz(matrix)      ((matrix) -> num_rownnz)
+#define hypre_CSRMatrixOwnsData(matrix)       ((matrix) -> owns_data)
+#define hypre_CSRMatrixMemoryLocation(matrix) ((matrix) -> memory_location)
 
 HYPRE_Int hypre_CSRMatrixGetLoadBalancedPartitionBegin( hypre_CSRMatrix *A );
 HYPRE_Int hypre_CSRMatrixGetLoadBalancedPartitionEnd( hypre_CSRMatrix *A );
@@ -133,7 +137,7 @@ typedef struct
 typedef struct
 {
    void               *matrix;
-   HYPRE_Int               (*ColMap)(HYPRE_Int, void *);
+   HYPRE_Int          (*ColMap)(HYPRE_Int, void *);
    void               *MapData;
 
 } hypre_MappedMatrix;
@@ -167,8 +171,8 @@ typedef struct
 
 typedef struct
 {
-   HYPRE_Int                  num_submatrices;
-   HYPRE_Int                 *submatrix_types;
+   HYPRE_Int             num_submatrices;
+   HYPRE_Int            *submatrix_types;
    void                **submatrices;
 
 } hypre_MultiblockMatrix;
@@ -220,12 +224,12 @@ typedef struct
    HYPRE_Int  vecstride, idxstride;
    /* ... so vj[i] = data[ j*vecstride + i*idxstride ] regardless of row_storage.*/
 #ifdef HYPRE_USING_GPU
-  HYPRE_Int on_device;
+   HYPRE_Int on_device;
 #endif
 #ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
-  HYPRE_Int mapped;
-  HYPRE_Int drc; /* device ref count */
-  HYPRE_Int hrc; /* host ref count */
+   HYPRE_Int mapped;
+   HYPRE_Int drc; /* device ref count */
+   HYPRE_Int hrc; /* host ref count */
 #endif
 
 } hypre_Vector;
@@ -261,24 +265,41 @@ void PackOnDevice(HYPRE_Complex *send_data,HYPRE_Complex *x_local_data, HYPRE_In
 #endif
 
 /* csr_matop.c */
+hypre_CSRMatrix *hypre_CSRMatrixAddHost ( hypre_CSRMatrix *A , hypre_CSRMatrix *B );
 hypre_CSRMatrix *hypre_CSRMatrixAdd ( hypre_CSRMatrix *A , hypre_CSRMatrix *B );
+hypre_CSRMatrix *hypre_CSRMatrixMultiplyHost ( hypre_CSRMatrix *A , hypre_CSRMatrix *B );
 hypre_CSRMatrix *hypre_CSRMatrixMultiply ( hypre_CSRMatrix *A , hypre_CSRMatrix *B );
 hypre_CSRMatrix *hypre_CSRMatrixDeleteZeros ( hypre_CSRMatrix *A , HYPRE_Real tol );
+HYPRE_Int hypre_CSRMatrixTransposeHost ( hypre_CSRMatrix *A , hypre_CSRMatrix **AT , HYPRE_Int data );
+HYPRE_Int hypre_CSRMatrixTransposeDevice ( hypre_CSRMatrix *A , hypre_CSRMatrix **AT , HYPRE_Int data );
 HYPRE_Int hypre_CSRMatrixTranspose ( hypre_CSRMatrix *A , hypre_CSRMatrix **AT , HYPRE_Int data );
 HYPRE_Int hypre_CSRMatrixReorder ( hypre_CSRMatrix *A );
 HYPRE_Complex hypre_CSRMatrixSumElts ( hypre_CSRMatrix *A );
+HYPRE_Real hypre_CSRMatrixFnorm( hypre_CSRMatrix *A );
+HYPRE_Int hypre_CSRMatrixSplit(hypre_CSRMatrix *Bs_ext, HYPRE_Int first_col_diag_B, HYPRE_Int last_col_diag_B, HYPRE_Int num_cols_offd_B, HYPRE_Int *col_map_offd_B, HYPRE_Int *num_cols_offd_C_ptr, HYPRE_Int **col_map_offd_C_ptr, hypre_CSRMatrix **Bext_diag_ptr, hypre_CSRMatrix **Bext_offd_ptr);
+hypre_CSRMatrix * hypre_CSRMatrixAddPartial( hypre_CSRMatrix *A, hypre_CSRMatrix *B, HYPRE_Int *row_nums);
+
+/* csr_matop_device.c */
+hypre_CSRMatrix *hypre_CSRMatrixAddDevice ( hypre_CSRMatrix *A , hypre_CSRMatrix *B );
+hypre_CSRMatrix *hypre_CSRMatrixMultiplyDevice ( hypre_CSRMatrix *A , hypre_CSRMatrix *B );
+HYPRE_Int hypre_CSRMatrixSplitDevice(hypre_CSRMatrix *Bs_ext, HYPRE_Int first_col_diag_B, HYPRE_Int last_col_diag_B, HYPRE_Int num_cols_offd_B, HYPRE_Int *col_map_offd_B, HYPRE_Int **map_B_to_C, HYPRE_Int *num_cols_offd_C_ptr, HYPRE_Int **col_map_offd_C_ptr, hypre_CSRMatrix **Bext_diag_ptr, hypre_CSRMatrix **Bext_offd_ptr);
+hypre_CSRMatrix* hypre_CSRMatrixAddPartialDevice( hypre_CSRMatrix *A, hypre_CSRMatrix *B, HYPRE_Int *row_nums);
 
 /* csr_matrix.c */
 hypre_CSRMatrix *hypre_CSRMatrixCreate ( HYPRE_Int num_rows , HYPRE_Int num_cols , HYPRE_Int num_nonzeros );
 HYPRE_Int hypre_CSRMatrixDestroy ( hypre_CSRMatrix *matrix );
 HYPRE_Int hypre_CSRMatrixInitialize ( hypre_CSRMatrix *matrix );
+HYPRE_Int hypre_CSRMatrixInitialize_v2( hypre_CSRMatrix *matrix, HYPRE_Int memory_location );
 HYPRE_Int hypre_CSRMatrixSetDataOwner ( hypre_CSRMatrix *matrix , HYPRE_Int owns_data );
 HYPRE_Int hypre_CSRMatrixSetRownnz ( hypre_CSRMatrix *matrix );
 hypre_CSRMatrix *hypre_CSRMatrixRead ( char *file_name );
-HYPRE_Int hypre_CSRMatrixPrint ( hypre_CSRMatrix *matrix , char *file_name );
+HYPRE_Int hypre_CSRMatrixPrint ( hypre_CSRMatrix *matrix, const char *file_name );
+HYPRE_Int hypre_CSRMatrixPrint2( hypre_CSRMatrix *matrix, const char *file_name );
 HYPRE_Int hypre_CSRMatrixPrintHB ( hypre_CSRMatrix *matrix_input , char *file_name );
+HYPRE_Int hypre_CSRMatrixPrintMM( hypre_CSRMatrix *matrix, HYPRE_Int basei, HYPRE_Int basej, HYPRE_Int trans, const char *file_name );
 HYPRE_Int hypre_CSRMatrixCopy ( hypre_CSRMatrix *A , hypre_CSRMatrix *B , HYPRE_Int copy_data );
-hypre_CSRMatrix *hypre_CSRMatrixClone ( hypre_CSRMatrix *A );
+hypre_CSRMatrix *hypre_CSRMatrixClone ( hypre_CSRMatrix *A, HYPRE_Int copy_data );
+hypre_CSRMatrix *hypre_CSRMatrixClone_v2( hypre_CSRMatrix *A, HYPRE_Int copy_data, HYPRE_Int memory_location );
 hypre_CSRMatrix *hypre_CSRMatrixUnion ( hypre_CSRMatrix *A , hypre_CSRMatrix *B , HYPRE_Int *col_map_offd_A , HYPRE_Int *col_map_offd_B , HYPRE_Int **col_map_offd_C );
 #ifdef HYPRE_USING_UNIFIED_MEMORY
 void hypre_CSRMatrixPrefetchToDevice(hypre_CSRMatrix *A);

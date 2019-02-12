@@ -84,9 +84,9 @@ inline const char *cusparseErrorCheck(cusparseStatus_t error)
         case CUSPARSE_STATUS_MATRIX_TYPE_NOT_SUPPORTED:
             return "CUSPARSE_STATUS_MATRIX_TYPE_NOT_SUPPORTED";
         default:
-	    return "Unknown error in cusparseErrorCheck";
+            return "Unknown error in cusparseErrorCheck";
     }
-    
+
 }
 
 inline const char *cublasErrorCheck(cublasStatus_t error)
@@ -129,7 +129,7 @@ inline const char *cublasErrorCheck(cublasStatus_t error)
 #define cusparseErrchk(ans) { cusparseAssert((ans), __FILE__, __LINE__); }
 inline void cusparseAssert(cusparseStatus_t code, const char *file, int line)
 {
-   if (code != CUSPARSE_STATUS_SUCCESS) 
+   if (code != CUSPARSE_STATUS_SUCCESS)
    {
      fprintf(stderr,"CUSPARSE ERROR  ( Code = %d) IN CUDA CALL line %d of file %s\n",code,line,file);
      fprintf(stderr,"CUSPARSE ERROR : %s \n", cusparseErrorCheck(code));
@@ -139,7 +139,7 @@ inline void cusparseAssert(cusparseStatus_t code, const char *file, int line)
 #define cublasErrchk(ans){ cublasAssert((ans), __FILE__, __LINE__); }
 inline void cublasAssert(cublasStatus_t code, const char *file, int line)
 {
-   if (code != CUBLAS_STATUS_SUCCESS) 
+   if (code != CUBLAS_STATUS_SUCCESS)
    {
      fprintf(stderr,"CUBLAS ERROR  ( Code = %d) IN CUDA CALL line %d of file %s\n",code,line,file);
      fprintf(stderr,"CUBLAS ERROR : %s \n", cublasErrorCheck(code));

@@ -18,6 +18,7 @@
 
 #include "_hypre_utilities.h"
 #include "../struct_mv/_hypre_struct_mv.h"
+
 #ifdef HYPRE_USE_UMALLOC
 #undef HYPRE_USE_UMALLOC
 #endif
@@ -44,34 +45,6 @@ size_t hypre__target_dtoh_bytes = 0;
  * Helper routines
  *
  *****************************************************************************/
-/*--------------------------------------------------------------------------
- * hypre_RedefMemLocation
- *   Redefine location based on the selected memory model in hypre_memory.h
- *--------------------------------------------------------------------------*/
-static inline HYPRE_Int hypre_RedefMemLocation(HYPRE_Int location)
-{
-   if (location == HYPRE_MEMORY_HOST)
-   {
-      return HYPRE_MEMORY_HOST_ACT;
-   }
-
-   if (location == HYPRE_MEMORY_DEVICE)
-   {
-      return HYPRE_MEMORY_DEVICE_ACT;
-   }
-
-   if (location == HYPRE_MEMORY_SHARED)
-   {
-      return HYPRE_MEMORY_SHARED_ACT;
-   }
-
-   if (location == HYPRE_MEMORY_HOST_PINNED)
-   {
-      return HYPRE_MEMORY_HOST_PINNED_ACT;
-   }
-
-   return HYPRE_MEMORY_UNSET;
-}
 
 /*--------------------------------------------------------------------------
  * hypre_OutOfMemory
@@ -97,7 +70,7 @@ hypre_WrongMemoryLocation()
 static inline size_t
 hypre_GetPadMemsize(void *ptr, HYPRE_Int location)
 {
-   location = hypre_RedefMemLocation(location);
+   location = hypre_GetActualMemLocation(location);
 
    /* no stored size for host memory */
    if (location == HYPRE_MEMORY_HOST)
@@ -261,7 +234,7 @@ hypre_MAlloc_core(size_t size, HYPRE_Int zeroinit, HYPRE_Int location)
 
    void *ptr = NULL;
 
-   location = hypre_RedefMemLocation(location);
+   location = hypre_GetActualMemLocation(location);
 
    switch (location)
    {
@@ -363,7 +336,7 @@ hypre_Free(void *ptr, HYPRE_Int location)
       return;
    }
 
-   location = hypre_RedefMemLocation(location);
+   location = hypre_GetActualMemLocation(location);
 
    switch (location)
    {
@@ -414,7 +387,7 @@ hypre_Device_Unified_HostPinned_ReAlloc(void *ptr, size_t size, HYPRE_Int locati
 void *
 hypre_ReAlloc(void *ptr, size_t size, HYPRE_Int location)
 {
-   location = hypre_RedefMemLocation(location);
+   location = hypre_GetActualMemLocation(location);
 
    if (size == 0)
    {
@@ -462,11 +435,16 @@ hypre_Memcpy(void *dst, void *src, size_t size, HYPRE_Int loc_dst, HYPRE_Int loc
 {
    if (dst == NULL || src == NULL)
    {
+      if (size)
+      {
+         hypre_printf("hypre_Memcpy warning: copy %ld bytes from %p to %p !\n", size, src, dst);
+      }
+
       return;
    }
 
-   loc_dst = hypre_RedefMemLocation(loc_dst);
-   loc_src = hypre_RedefMemLocation(loc_src);
+   loc_dst = hypre_GetActualMemLocation(loc_dst);
+   loc_src = hypre_GetActualMemLocation(loc_src);
 
    /* 4 x 4 = 16 cases = 9 + 2 + 2 + 2 + 1 */
    /* 9: Host   <-- Host, Host   <-- Shared, Host   <-- Pinned,
@@ -545,12 +523,21 @@ hypre_Memcpy(void *dst, void *src, size_t size, HYPRE_Int loc_dst, HYPRE_Int loc
 void *
 hypre_Memset(void *ptr, HYPRE_Int value, size_t num, HYPRE_Int location)
 {
-   if (ptr == NULL || num == 0)
+   if (num == 0)
    {
       return ptr;
    }
 
-   location = hypre_RedefMemLocation(location);
+   if (ptr == NULL)
+   {
+      if (num)
+      {
+         hypre_printf("hypre_Memset warning: set values for %ld bytes at %p !\n", num, ptr);
+      }
+      return ptr;
+   }
+
+   location = hypre_GetActualMemLocation(location);
 
 #if defined(HYPRE_DEVICE_OPENMP_ALLOC)
    unsigned char *ucptr = (unsigned char *) ptr;

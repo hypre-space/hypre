@@ -552,6 +552,36 @@ extern "C" {
 /* #define HYPRE_MEMORY_SHARED_ACT  HYPRE_MEMORY_? */
 /* #define HYPRE_MEMORY_PINNED_ACT  HYPRE_MEMORY_? */
 
+/*-------------------------------------------------------
+ * hypre_GetActualMemLocation
+ *   return actual location based on the selected memory model
+ *-------------------------------------------------------*/
+static inline HYPRE_Int
+hypre_GetActualMemLocation(HYPRE_Int location)
+{
+   if (location == HYPRE_MEMORY_HOST)
+   {
+      return HYPRE_MEMORY_HOST_ACT;
+   }
+
+   if (location == HYPRE_MEMORY_DEVICE)
+   {
+      return HYPRE_MEMORY_DEVICE_ACT;
+   }
+
+   if (location == HYPRE_MEMORY_SHARED)
+   {
+      return HYPRE_MEMORY_SHARED_ACT;
+   }
+
+   if (location == HYPRE_MEMORY_HOST_PINNED)
+   {
+      return HYPRE_MEMORY_HOST_PINNED_ACT;
+   }
+
+   return HYPRE_MEMORY_UNSET;
+}
+
 #define HYPRE_MEM_PAD_LEN 1
 
 /*
@@ -747,11 +777,11 @@ void assert_check_host(void *ptr, char *file, HYPRE_Int line);
 
 #endif
 
-#define hypre_TFree(ptr,location) \
-( hypre_Free((char *)ptr, location), ptr = NULL )
+#define hypre_TFree(ptr, location) \
+( hypre_Free((void *)ptr, location), ptr = NULL )
 
 #define hypre_TMemcpy(dst, src, type, count, locdst, locsrc) \
-(hypre_Memcpy((char *)(dst),(char *)(src),(size_t)(sizeof(type) * (count)),locdst, locsrc))
+(hypre_Memcpy((void *)(dst), (void *)(src), (size_t)(sizeof(type) * (count)), locdst, locsrc))
 
 /*--------------------------------------------------------------------------
  * Prototypes
@@ -1296,9 +1326,9 @@ inline const char *cusparseErrorCheck(cusparseStatus_t error)
         case CUSPARSE_STATUS_MATRIX_TYPE_NOT_SUPPORTED:
             return "CUSPARSE_STATUS_MATRIX_TYPE_NOT_SUPPORTED";
         default:
-	    return "Unknown error in cusparseErrorCheck";
+            return "Unknown error in cusparseErrorCheck";
     }
-    
+
 }
 
 inline const char *cublasErrorCheck(cublasStatus_t error)
@@ -1341,7 +1371,7 @@ inline const char *cublasErrorCheck(cublasStatus_t error)
 #define cusparseErrchk(ans) { cusparseAssert((ans), __FILE__, __LINE__); }
 inline void cusparseAssert(cusparseStatus_t code, const char *file, int line)
 {
-   if (code != CUSPARSE_STATUS_SUCCESS) 
+   if (code != CUSPARSE_STATUS_SUCCESS)
    {
      fprintf(stderr,"CUSPARSE ERROR  ( Code = %d) IN CUDA CALL line %d of file %s\n",code,line,file);
      fprintf(stderr,"CUSPARSE ERROR : %s \n", cusparseErrorCheck(code));
@@ -1351,7 +1381,7 @@ inline void cusparseAssert(cusparseStatus_t code, const char *file, int line)
 #define cublasErrchk(ans){ cublasAssert((ans), __FILE__, __LINE__); }
 inline void cublasAssert(cublasStatus_t code, const char *file, int line)
 {
-   if (code != CUBLAS_STATUS_SUCCESS) 
+   if (code != CUBLAS_STATUS_SUCCESS)
    {
      fprintf(stderr,"CUBLAS ERROR  ( Code = %d) IN CUDA CALL line %d of file %s\n",code,line,file);
      fprintf(stderr,"CUBLAS ERROR : %s \n", cublasErrorCheck(code));
@@ -1399,7 +1429,7 @@ void VecSet(double* tgt, int size, double value, cudaStream_t s);
 void VecScale(double *u, double *v, double *l1_norm, int num_rows,cudaStream_t s);
 void VecScaleSplit(double *u, double *v, double *l1_norm, int num_rows,cudaStream_t s);
 void CudaCompileFlagCheck();
-void BigToSmallCopy(hypre_int *tgt, const HYPRE_Int* src, hypre_int size, cudaStream_t s);
+void BigToSmallCopy(hypre_int *tgt, const HYPRE_Int *src, hypre_int size, cudaStream_t s);
 cudaStream_t getstreamOlde(hypre_int i);
 nvtxDomainHandle_t getdomain(hypre_int i);
 cudaEvent_t getevent(hypre_int i);
@@ -1878,7 +1908,7 @@ void hypre_union2(HYPRE_Int n1, HYPRE_Int *arr1, HYPRE_Int n2, HYPRE_Int *arr2, 
 
 /* Check if atomic operations are available to use concurrent hopscotch hash table */
 #if defined(__GNUC__) && defined(__GNUC_MINOR__) && defined(__GNUC_PATCHLEVEL__) && (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__) > 40100
-#define HYPRE_USING_ATOMIC 
+#define HYPRE_USING_ATOMIC
 //#elif defined _MSC_VER // JSP: haven't tested, so comment out for now
 //#define HYPRE_USING_ATOMIC
 //#elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L && !defined(__STDC_NO_ATOMICS__)
@@ -1892,9 +1922,9 @@ void hypre_union2(HYPRE_Int n1, HYPRE_Int *arr1, HYPRE_Int n2, HYPRE_Int *arr2, 
 #ifdef HYPRE_HOPSCOTCH
 #ifdef HYPRE_USING_ATOMIC
 // concurrent hopscotch hashing is possible only with atomic supports
-#define HYPRE_CONCURRENT_HOPSCOTCH 
-#endif 
-#endif 
+#define HYPRE_CONCURRENT_HOPSCOTCH
+#endif
+#endif
 
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
 typedef struct {
@@ -1915,14 +1945,14 @@ typedef struct {
  */
 typedef struct
 {
-	HYPRE_Int  volatile              segmentMask;
-	HYPRE_Int  volatile              bucketMask;
+   HYPRE_Int  volatile              segmentMask;
+   HYPRE_Int  volatile              bucketMask;
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
-	hypre_HopscotchSegment* volatile segments;
+   hypre_HopscotchSegment* volatile segments;
 #endif
   HYPRE_Int *volatile              key;
   hypre_uint *volatile             hopInfo;
-	HYPRE_Int *volatile	             hash;
+  HYPRE_Int *volatile              hash;
 } hypre_UnorderedIntSet;
 
 typedef struct
@@ -1941,12 +1971,12 @@ typedef struct
  */
 typedef struct
 {
-	HYPRE_Int  volatile              segmentMask;
-	HYPRE_Int  volatile              bucketMask;
+   HYPRE_Int  volatile              segmentMask;
+   HYPRE_Int  volatile              bucketMask;
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
-	hypre_HopscotchSegment*	volatile segments;
+   hypre_HopscotchSegment* volatile segments;
 #endif
-	hypre_HopscotchBucket* volatile	 table;
+   hypre_HopscotchBucket* volatile table;
 } hypre_UnorderedIntMap;
 
 /**
@@ -1956,6 +1986,223 @@ typedef struct
  */
 void hypre_sort_and_create_inverse_map(
   HYPRE_Int *in, HYPRE_Int len, HYPRE_Int **out, hypre_UnorderedIntMap *inverse_map);
+
+/* hypre_cuda_utils.h */
+HYPRE_Int hypreDevice_GetRowNnz(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int *d_diag_ia, HYPRE_Int *d_offd_ia, HYPRE_Int *d_rownnz);
+
+HYPRE_Int hypreDevice_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int job, HYPRE_Int has_offd, HYPRE_Int first_col, HYPRE_Int *d_col_map_offd_A, HYPRE_Int *d_diag_i, HYPRE_Int *d_diag_j, HYPRE_Complex *d_diag_a, HYPRE_Int *d_offd_i, HYPRE_Int *d_offd_j, HYPRE_Complex *d_offd_a, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex *d_ab);
+
+HYPRE_Int hypreDevice_IntegerReduceSum(HYPRE_Int m, HYPRE_Int *d_i);
+
+HYPRE_Int hypreDevice_IntegerInclusiveScan(HYPRE_Int n, HYPRE_Int *d_i);
+
+HYPRE_Int hypreDevice_IntegerExclusiveScan(HYPRE_Int n, HYPRE_Int *d_i);
+
+HYPRE_Int* hypreDevice_CsrRowPtrsToIndices(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr);
+
+HYPRE_Int hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int *d_row_ptr, HYPRE_Int *d_row_ind);
+
+HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int *d_row_ptr, HYPRE_Int *d_row_num, HYPRE_Int *d_row_ind);
+
+HYPRE_Int* hypreDevice_CsrRowIndicesToPtrs(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ind);
+
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
+
+#ifndef HYPRE_CUDA_UTILS_H
+#define HYPRE_CUDA_UTILS_H
+
+#if defined(HYPRE_USING_CUDA)
+
+#ifdef __cplusplus
+extern "C++" {
+#endif
+
+#include <cuda.h>
+#include <cuda_runtime.h>
+#include <assert.h>
+
+#include <thrust/execution_policy.h>
+#include <thrust/count.h>
+#include <thrust/device_ptr.h>
+#include <thrust/unique.h>
+#include <thrust/sort.h>
+#include <thrust/binary_search.h>
+#include <thrust/iterator/constant_iterator.h>
+#include <thrust/iterator/counting_iterator.h>
+#include <thrust/transform.h>
+#include <thrust/functional.h>
+#include <thrust/gather.h>
+#include <thrust/scan.h>
+#include <thrust/fill.h>
+#include <thrust/adjacent_difference.h>
+
+#define HYPRE_WARP_SIZE      32
+#define HYPRE_WARP_FULL_MASK 0xFFFFFFFF
+#define HYPRE_MAX_NUM_WARPS  (64 * 64 * 32)
+#define HYPRE_FLT_LARGE      1e30
+
+#if CUDART_VERSION < 9000
+
+template <typename T>
+static __device__ __forceinline__
+T __shfl_sync(unsigned mask, T val, hypre_int src_line, hypre_int width=32)
+{
+   return __shfl(val, src_line, width);
+}
+
+template <typename T>
+static __device__ __forceinline__
+T __shfl_down_sync(unsigned mask, T val, unsigned delta, hypre_int width=32)
+{
+   return __shfl_down(val, delta, width);
+}
+
+template <typename T>
+static __device__ __forceinline__
+T __shfl_xor_sync(unsigned mask, T val, unsigned lanemask, hypre_int width=32)
+{
+   return __shfl_xor(val, lanemask, width);
+}
+
+template <typename T>
+static __device__ __forceinline__
+T __shfl_up_sync(unsigned mask, T val, unsigned delta, hypre_int width=32)
+{
+   return __shfl_up(val, delta, width);
+}
+
+static __device__ __forceinline__
+void __syncwarp()
+{
+}
+
+#endif
+
+template <typename T>
+static __device__ __forceinline__
+T read_only_load( const T *ptr )
+{
+   return __ldg( ptr );
+}
+
+template <typename T>
+static __device__ __forceinline__
+T warp_prefix_sum(hypre_int lane_id, T in, T &all_sum)
+{
+#pragma unroll
+   for (hypre_int d = 2; d <= 32; d <<= 1)
+   {
+      T t = __shfl_up_sync(HYPRE_WARP_FULL_MASK, in, d >> 1);
+      if ( (lane_id & (d - 1)) == d - 1 )
+      {
+         in += t;
+      }
+   }
+
+   all_sum = __shfl_sync(HYPRE_WARP_FULL_MASK, in, 31);
+
+   if (lane_id == 31)
+   {
+      in = 0;
+   }
+
+#pragma unroll
+   for (hypre_int d = 16; d > 0; d >>= 1)
+   {
+      if ( (lane_id & (d - 1)) == d - 1)
+      {
+         T t = __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d);
+         if ( (lane_id & (d << 1 - 1)) == (d << 1 - 1) )
+         {
+            in += t;
+         }
+         else
+         {
+            in = t;
+         }
+      }
+   }
+   return in;
+}
+
+template <typename T>
+static __device__ __forceinline__
+T warp_reduce_sum(T in)
+{
+#pragma unroll
+  for (hypre_int d = 16; d > 0; d >>= 1)
+  {
+    in += __shfl_down_sync(HYPRE_WARP_FULL_MASK, in, d);
+  }
+  return in;
+}
+
+template <typename T>
+static __device__ __forceinline__
+T warp_allreduce_sum(T in)
+{
+#pragma unroll
+  for (hypre_int d = 16; d > 0; d >>= 1)
+  {
+    in += __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d);
+  }
+  return in;
+}
+
+template <typename T>
+static __device__ __forceinline__
+T warp_reduce_max(T in)
+{
+#pragma unroll
+  for (hypre_int d = 16; d > 0; d >>= 1)
+  {
+    in = max(in, __shfl_down_sync(HYPRE_WARP_FULL_MASK, in, d));
+  }
+  return in;
+}
+
+static __device__ __forceinline__
+hypre_int next_power_of_2(hypre_int n)
+{
+   if (n <= 0)
+   {
+      return 0;
+   }
+
+   /* if n is power of 2, return itself */
+   if ( (n & (n - 1)) == 0 )
+   {
+      return n;
+   }
+
+   n |= (n >>  1);
+   n |= (n >>  2);
+   n |= (n >>  4);
+   n |= (n >>  8);
+   n |= (n >> 16);
+   n ^= (n >>  1);
+   n  = (n <<  1);
+
+   return n;
+}
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* HYPRE_USING_CUDA */
+#endif /* #ifndef HYPRE_CUDA_UTILS_H */
+
 
 #ifdef __cplusplus
 }

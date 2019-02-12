@@ -1434,7 +1434,6 @@ HYPRE_Int hypre_BoomerAMGCycle ( void *amg_vdata , hypre_ParVector **F_array , h
 HYPRE_ParCSRMatrix GenerateDifConv ( MPI_Comm comm , HYPRE_Int nx , HYPRE_Int ny , HYPRE_Int nz , HYPRE_Int P , HYPRE_Int Q , HYPRE_Int R , HYPRE_Int p , HYPRE_Int q , HYPRE_Int r , HYPRE_Real *value );
 
 /* par_gsmg.c */
-HYPRE_Int hypre_ParCSRMatrixClone ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix **Sp , HYPRE_Int copy_data );
 HYPRE_Int hypre_ParCSRMatrixFillSmooth ( HYPRE_Int nsamples , HYPRE_Real *samples , hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , HYPRE_Int num_functions , HYPRE_Int *dof_func );
 HYPRE_Real hypre_ParCSRMatrixChooseThresh ( hypre_ParCSRMatrix *S );
 HYPRE_Int hypre_ParCSRMatrixThreshold ( hypre_ParCSRMatrix *A , HYPRE_Real thresh );

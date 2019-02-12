@@ -37,8 +37,16 @@ HEADERS =\
 
 FILES =\
  csr_matop.c\
+ csr_matop_device.c\
  csr_matrix.c\
  csr_matvec.c\
+ csr_spadd_device.c\
+ csr_spgemm_device.c\
+ csr_spgemm_device_confident.c\
+ csr_spgemm_device_rowbound.c\
+ csr_spgemm_device_rowest.c\
+ csr_spgemm_device_util.c\
+ csr_sptrans_device.c\
  genpart.c\
  HYPRE_csr_matrix.c\
  HYPRE_mapped_matrix.c\

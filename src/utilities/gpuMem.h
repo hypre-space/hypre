@@ -33,7 +33,7 @@ void VecSet(double* tgt, int size, double value, cudaStream_t s);
 void VecScale(double *u, double *v, double *l1_norm, int num_rows,cudaStream_t s);
 void VecScaleSplit(double *u, double *v, double *l1_norm, int num_rows,cudaStream_t s);
 void CudaCompileFlagCheck();
-void BigToSmallCopy (hypre_int* tgt, const HYPRE_Int *src, hypre_int size, cudaStream_t s):
+void BigToSmallCopy(hypre_int *tgt, const HYPRE_Int *src, hypre_int size, cudaStream_t s);
 cudaStream_t getstreamOlde(hypre_int i);
 nvtxDomainHandle_t getdomain(hypre_int i);
 cudaEvent_t getevent(hypre_int i);

@@ -148,6 +148,36 @@ extern "C" {
 /* #define HYPRE_MEMORY_SHARED_ACT  HYPRE_MEMORY_? */
 /* #define HYPRE_MEMORY_PINNED_ACT  HYPRE_MEMORY_? */
 
+/*-------------------------------------------------------
+ * hypre_GetActualMemLocation
+ *   return actual location based on the selected memory model
+ *-------------------------------------------------------*/
+static inline HYPRE_Int
+hypre_GetActualMemLocation(HYPRE_Int location)
+{
+   if (location == HYPRE_MEMORY_HOST)
+   {
+      return HYPRE_MEMORY_HOST_ACT;
+   }
+
+   if (location == HYPRE_MEMORY_DEVICE)
+   {
+      return HYPRE_MEMORY_DEVICE_ACT;
+   }
+
+   if (location == HYPRE_MEMORY_SHARED)
+   {
+      return HYPRE_MEMORY_SHARED_ACT;
+   }
+
+   if (location == HYPRE_MEMORY_HOST_PINNED)
+   {
+      return HYPRE_MEMORY_HOST_PINNED_ACT;
+   }
+
+   return HYPRE_MEMORY_UNSET;
+}
+
 #define HYPRE_MEM_PAD_LEN 1
 
 /*
@@ -343,11 +373,11 @@ void assert_check_host(void *ptr, char *file, HYPRE_Int line);
 
 #endif
 
-#define hypre_TFree(ptr,location) \
-( hypre_Free((char *)ptr, location), ptr = NULL )
+#define hypre_TFree(ptr, location) \
+( hypre_Free((void *)ptr, location), ptr = NULL )
 
 #define hypre_TMemcpy(dst, src, type, count, locdst, locsrc) \
-(hypre_Memcpy((char *)(dst),(char *)(src),(size_t)(sizeof(type) * (count)),locdst, locsrc))
+(hypre_Memcpy((void *)(dst), (void *)(src), (size_t)(sizeof(type) * (count)), locdst, locsrc))
 
 /*--------------------------------------------------------------------------
  * Prototypes
