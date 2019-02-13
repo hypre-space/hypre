@@ -384,7 +384,7 @@ hypre_CSRMatrixSplitDevice(hypre_CSRMatrix  *B_ext,
                            hypre_CSRMatrix **B_ext_diag_ptr,
                            hypre_CSRMatrix **B_ext_offd_ptr)
 {
-   return NULL;
+   return -1;
 }
 
 HYPRE_Int
@@ -392,7 +392,7 @@ hypre_CSRMatrixTransposeDevice(hypre_CSRMatrix  *A,
                                hypre_CSRMatrix **AT_ptr,
                                HYPRE_Int         data)
 {
-   return NULL;
+   return -1;
 }
 
 hypre_CSRMatrix*

@@ -781,6 +781,7 @@ void hypre_ParCSRMatrixExtractBExt_Arrays ( HYPRE_Int **pB_ext_i , HYPRE_Int **p
 void hypre_ParCSRMatrixExtractBExt_Arrays_Overlap ( HYPRE_Int **pB_ext_i , HYPRE_Int **pB_ext_j , HYPRE_Complex **pB_ext_data , HYPRE_Int **pB_ext_row_map , HYPRE_Int *num_nonzeros , HYPRE_Int data , HYPRE_Int find_row_map , MPI_Comm comm , hypre_ParCSRCommPkg *comm_pkg , HYPRE_Int num_cols_B , HYPRE_Int num_recvs , HYPRE_Int num_sends , HYPRE_Int first_col_diag , HYPRE_Int *row_starts , HYPRE_Int *recv_vec_starts , HYPRE_Int *send_map_starts , HYPRE_Int *send_map_elmts , HYPRE_Int *diag_i , HYPRE_Int *diag_j , HYPRE_Int *offd_i , HYPRE_Int *offd_j , HYPRE_Int *col_map_offd , HYPRE_Real *diag_data , HYPRE_Real *offd_data, hypre_ParCSRCommHandle **comm_handle_idx, hypre_ParCSRCommHandle **comm_handle_data, HYPRE_Int *CF_marker, HYPRE_Int *CF_marker_offd, HYPRE_Int skip_fine, HYPRE_Int skip_same_sign );
 hypre_CSRMatrix *hypre_ParCSRMatrixExtractBExt ( hypre_ParCSRMatrix *B , hypre_ParCSRMatrix *A , HYPRE_Int data );
 hypre_CSRMatrix *hypre_ParCSRMatrixExtractBExt_Overlap ( hypre_ParCSRMatrix *B , hypre_ParCSRMatrix *A , HYPRE_Int data, hypre_ParCSRCommHandle **comm_handle_idx, hypre_ParCSRCommHandle **comm_handle_data, HYPRE_Int *CF_marker, HYPRE_Int *CF_marker_offd, HYPRE_Int skip_fine, HYPRE_Int skip_same_sign );
+hypre_CSRMatrix* hypre_ParCSRMatrixExtractBExtDevice( hypre_ParCSRMatrix *B, hypre_ParCSRMatrix *A, HYPRE_Int want_data );
 HYPRE_Int hypre_ParCSRMatrixTranspose ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix **AT_ptr , HYPRE_Int data );
 void hypre_ParCSRMatrixGenSpanningTree ( hypre_ParCSRMatrix *G_csr , HYPRE_Int **indices , HYPRE_Int G_type );
 void hypre_ParCSRMatrixExtractSubmatrices ( hypre_ParCSRMatrix *A_csr , HYPRE_Int *indices2 , hypre_ParCSRMatrix ***submatrices );
@@ -789,8 +790,10 @@ HYPRE_Complex hypre_ParCSRMatrixLocalSumElts ( hypre_ParCSRMatrix *A );
 HYPRE_Int hypre_ParCSRMatrixAminvDB ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *B , HYPRE_Complex *d , hypre_ParCSRMatrix **C_ptr );
 hypre_ParCSRMatrix *hypre_ParTMatmul ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *B );
 HYPRE_Real hypre_ParCSRMatrixFnorm( hypre_ParCSRMatrix *A );
-hypre_CSRMatrix* hypre_ExchangeExternalRows( hypre_CSRMatrix *B_ext, hypre_ParCSRCommPkg *comm_pkg_A);
-hypre_CSRMatrix* hypre_ExchangeExternalRowsDevice( hypre_CSRMatrix *B_ext, hypre_ParCSRCommPkg *comm_pkg_A);
+HYPRE_Int hypre_ExchangeExternalRowsInit( hypre_CSRMatrix *B_ext, hypre_ParCSRCommPkg *comm_pkg_A, void **request_ptr);
+hypre_CSRMatrix* hypre_ExchangeExternalRowsWait(void *vequest);
+HYPRE_Int hypre_ExchangeExternalRowsDeviceInit( hypre_CSRMatrix *B_ext, hypre_ParCSRCommPkg *comm_pkg_A, void **request_ptr);
+hypre_CSRMatrix* hypre_ExchangeExternalRowsDeviceWait(void *vrequest);
 
 #ifdef HYPRE_USING_PERSISTENT_COMM
 hypre_ParCSRPersistentCommHandle *
@@ -807,9 +810,10 @@ hypre_ParCSRPersistentCommHandleDestroy(hypre_ParCSRPersistentCommHandle *comm_h
 void hypre_ParCSRPersistentCommHandleStart(hypre_ParCSRPersistentCommHandle *comm_handle);
 void hypre_ParCSRPersistentCommHandleWait(hypre_ParCSRPersistentCommHandle *comm_handle);
 #endif
-
-hypre_CSRMatrix* hypre_ParcsrGetExternalRows( hypre_ParCSRMatrix *A, HYPRE_Int indices_len, HYPRE_Int *indices, hypre_ParCSRCommPkg *comm_pkg, HYPRE_Int want_data );
-hypre_CSRMatrix* hypre_ParcsrGetExternalRowsDevice( hypre_ParCSRMatrix *A, HYPRE_Int indices_len, HYPRE_Int *indices, hypre_ParCSRCommPkg *comm_pkg, HYPRE_Int want_data );
+HYPRE_Int hypre_ParcsrGetExternalRowsInit( hypre_ParCSRMatrix *A, HYPRE_Int indices_len, HYPRE_Int *indices, hypre_ParCSRCommPkg *comm_pkg, HYPRE_Int want_data, void **request_ptr);
+hypre_CSRMatrix* hypre_ParcsrGetExternalRowsWait(void *vrequest);
+HYPRE_Int hypre_ParcsrGetExternalRowsDeviceInit( hypre_ParCSRMatrix *A, HYPRE_Int indices_len, HYPRE_Int *indices, hypre_ParCSRCommPkg *comm_pkg, HYPRE_Int want_data, void **request_ptr);
+hypre_CSRMatrix* hypre_ParcsrGetExternalRowsDeviceWait(void *vrequest);
 
 HYPRE_Int hypre_ParvecBdiagInvScal( hypre_ParVector *b, HYPRE_Int blockSize, hypre_ParVector **bs, HYPRE_Complex *bdiaginv, hypre_ParCSRCommPkg *comm_pkg);
 

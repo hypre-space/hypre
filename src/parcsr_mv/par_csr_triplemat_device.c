@@ -99,7 +99,7 @@ hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A,
        * equally load balanced partitionings within
        * hypre_ParCSRMatrixExtractBExt
        *--------------------------------------------------------------------*/
-      Bs_ext = hypre_ParCSRMatrixExtractBExt(B, A, 1); /* contains communication
+      Bs_ext = hypre_ParCSRMatrixExtractBExtDevice(B, A, 1); /* contains communication
                                                           which should be explicitly included to allow for overlap */
 
       hypre_CSRMatrixSplitDevice(Bs_ext, first_col_diag_B, last_col_diag_B,

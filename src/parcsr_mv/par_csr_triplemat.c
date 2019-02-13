@@ -322,6 +322,7 @@ hypre_ParCSRTMatMatKTHost( hypre_ParCSRMatrix  *A,
       HYPRE_Int *C_tmp_offd_i;
       HYPRE_Int *C_tmp_offd_j;
       HYPRE_Int *send_map_elmts_A;
+      void      *request;
 
       hypre_CSRMatrixTranspose(A_offd, &AT_offd, 1);
 
@@ -337,7 +338,8 @@ hypre_ParCSRTMatMatKTHost( hypre_ParCSRMatrix  *A,
       hypre_ParCSRMatrixOffd(B) = B_offd;
 
       /* contains communication; should be explicitly included to allow for overlap */
-      C_ext = hypre_ExchangeExternalRows(C_int, comm_pkg_A);
+      hypre_ExchangeExternalRowsInit(C_int, comm_pkg_A, &request);
+      C_ext = hypre_ExchangeExternalRowsWait(request);
 
       hypre_CSRMatrixDestroy(C_int);
       hypre_CSRMatrixDestroy(C_int_diag);
@@ -594,7 +596,8 @@ hypre_ParCSRMatrix *hypre_ParCSRMatrixRAPKT( hypre_ParCSRMatrix *R,
       HYPRE_Int   *C_tmp_offd_i;
       HYPRE_Int   *C_tmp_offd_j;
 
-      HYPRE_Int       *send_map_elmts_R;
+      HYPRE_Int   *send_map_elmts_R;
+      void        *request;
       /*---------------------------------------------------------------------
        * If there exists no CommPkg for A, a CommPkg is generated using
        * equally load balanced partitionings within
@@ -747,8 +750,9 @@ hypre_ParCSRMatrix *hypre_ParCSRMatrixRAPKT( hypre_ParCSRMatrix *R,
          hypre_CSRMatrixInitialize(C_int);
       }
 
-      C_ext = hypre_ExchangeExternalRows(C_int, comm_pkg_R); /* contains
-      communication; should be explicitly included to allow for overlap */
+      /* contains communication; should be explicitly included to allow for overlap */
+      hypre_ExchangeExternalRowsInit(C_int, comm_pkg_R, &request);
+      C_ext = hypre_ExchangeExternalRowsWait(request);
 
       hypre_CSRMatrixDestroy(C_int);
       if (num_cols_offd_R)

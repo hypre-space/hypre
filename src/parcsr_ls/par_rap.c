@@ -987,11 +987,13 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
    RAP_ext_size = 0;
    if (num_sends_RT || num_recvs_RT)
    {
-        RAP_ext = hypre_ExchangeExternalRows(RAP_int,comm_pkg_RT);
-        RAP_ext_i = hypre_CSRMatrixI(RAP_ext);
-        RAP_ext_j = hypre_CSRMatrixJ(RAP_ext);
-        RAP_ext_data = hypre_CSRMatrixData(RAP_ext);
-        RAP_ext_size = RAP_ext_i[hypre_CSRMatrixNumRows(RAP_ext)];
+      void *request;
+      hypre_ExchangeExternalRowsInit(RAP_int, comm_pkg_RT, &request);
+      RAP_ext = hypre_ExchangeExternalRowsWait(request);
+      RAP_ext_i = hypre_CSRMatrixI(RAP_ext);
+      RAP_ext_j = hypre_CSRMatrixJ(RAP_ext);
+      RAP_ext_data = hypre_CSRMatrixData(RAP_ext);
+      RAP_ext_size = RAP_ext_i[hypre_CSRMatrixNumRows(RAP_ext)];
    }
    if (num_cols_offd_RT)
    {

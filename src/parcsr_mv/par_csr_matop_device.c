@@ -18,12 +18,13 @@
 
 #if defined(HYPRE_USING_CUDA)
 
-hypre_CSRMatrix*
-hypre_ParcsrGetExternalRowsDevice( hypre_ParCSRMatrix   *A,
-                                   HYPRE_Int             indices_len,
-                                   HYPRE_Int            *indices,
-                                   hypre_ParCSRCommPkg  *comm_pkg,
-                                   HYPRE_Int             want_data)
+HYPRE_Int
+hypre_ParcsrGetExternalRowsDeviceInit( hypre_ParCSRMatrix   *A,
+                                       HYPRE_Int             indices_len,
+                                       HYPRE_Int            *indices,
+                                       hypre_ParCSRCommPkg  *comm_pkg,
+                                       HYPRE_Int             want_data,
+                                       void                **request_ptr)
 {
    HYPRE_Int  i, j;
    HYPRE_Int  num_sends, num_rows_send, num_nnz_send, num_recvs, num_rows_recv, num_nnz_recv;
@@ -31,7 +32,7 @@ hypre_ParcsrGetExternalRowsDevice( hypre_ParCSRMatrix   *A,
    HYPRE_Int *send_jstarts, *recv_jstarts, *send_i_offset;
    HYPRE_Complex *d_send_a = NULL, *send_a = NULL, *recv_a = NULL;
    hypre_ParCSRCommPkg     *comm_pkg_j;
-   hypre_ParCSRCommHandle  *comm_handle;
+   hypre_ParCSRCommHandle  *comm_handle, *comm_handle_j, *comm_handle_a;
    /* HYPRE_Int global_num_rows = hypre_ParCSRMatrixGlobalNumRows(A); */
    /* diag part of A */
    hypre_CSRMatrix *A_diag   = hypre_ParCSRMatrixDiag(A);
@@ -56,6 +57,7 @@ hypre_ParcsrGetExternalRowsDevice( hypre_ParCSRMatrix   *A,
 
    HYPRE_Int        num_procs;
    HYPRE_Int        my_id;
+   void           **vrequest;
 
    hypre_CSRMatrix *A_ext, *A_ext_device;
 
@@ -181,29 +183,67 @@ hypre_ParcsrGetExternalRowsDevice( hypre_ParCSRMatrix   *A,
    hypre_ParCSRCommPkgRecvProcs    (comm_pkg_j) = hypre_ParCSRCommPkgRecvProcs(comm_pkg);
    hypre_ParCSRCommPkgRecvVecStarts(comm_pkg_j) = recv_jstarts;
 
-   /* do communication */
+   /* init communication */
    /* ja */
-   comm_handle = hypre_ParCSRCommHandleCreate(11, comm_pkg_j, send_j, recv_j);
-   /* ... */
-   hypre_ParCSRCommHandleDestroy(comm_handle);
-
+   comm_handle_j = hypre_ParCSRCommHandleCreate(11, comm_pkg_j, send_j, recv_j);
    if (want_data)
    {
       /* a */
-      comm_handle = hypre_ParCSRCommHandleCreate( 1, comm_pkg_j, send_a, recv_a);
-      /* ... */
-      hypre_ParCSRCommHandleDestroy(comm_handle);
+      comm_handle_a = hypre_ParCSRCommHandleCreate(1, comm_pkg_j, send_a, recv_a);
+   }
+   else
+   {
+      comm_handle_a = NULL;
    }
 
-   /* A_ext is ready */
+   /* create A_ext */
    A_ext = hypre_CSRMatrixCreate(num_rows_recv, hypre_ParCSRMatrixGlobalNumCols(A), num_nnz_recv);
-
    hypre_CSRMatrixI   (A_ext) = recv_i;
    hypre_CSRMatrixJ   (A_ext) = recv_j;
    hypre_CSRMatrixData(A_ext) = recv_a;
    hypre_CSRMatrixMemoryLocation(A_ext) = HYPRE_MEMORY_HOST;
 
-   A_ext_device = hypre_CSRMatrixClone_v2(A_ext, 1, HYPRE_MEMORY_DEVICE);
+   /* output */
+   vrequest = hypre_TAlloc(void *, 4, HYPRE_MEMORY_HOST);
+   vrequest[0] = (void *) comm_handle_j;
+   vrequest[1] = (void *) comm_handle_a;
+   vrequest[2] = (void *) A_ext;
+   vrequest[3] = (void *) comm_pkg_j;
+
+   *request_ptr = (void *) vrequest;
+
+   /* free */
+   hypre_TFree(d_send_i, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(d_send_map, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(send_i, HYPRE_MEMORY_HOST);
+   hypre_TFree(send_i_offset, HYPRE_MEMORY_HOST);
+   hypre_TFree(d_send_j, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(d_send_a, HYPRE_MEMORY_DEVICE);
+
+   return hypre_error_flag;
+}
+
+hypre_CSRMatrix*
+hypre_ParcsrGetExternalRowsDeviceWait(void *vrequest)
+{
+   void **request = (void **) vrequest;
+
+   hypre_ParCSRCommHandle *comm_handle_j = (hypre_ParCSRCommHandle *) request[0];
+   hypre_ParCSRCommHandle *comm_handle_a = (hypre_ParCSRCommHandle *) request[1];
+   hypre_CSRMatrix        *A_ext         = (hypre_CSRMatrix *)        request[2];
+   hypre_ParCSRCommPkg    *comm_pkg_j    = (hypre_ParCSRCommPkg *)    request[3];
+   hypre_Int              *send_j        = hypre_ParCSRCommHandleSendData(comm_handle_j);
+   hypre_Complex          *send_a        = hypre_ParCSRCommHandleSendData(comm_handle_a);
+
+   hypre_ParCSRCommHandleDestroy(comm_handle_j);
+   hypre_ParCSRCommHandleDestroy(comm_handle_a);
+
+   hypre_TFree(send_j, HYPRE_MEMORY_HOST);
+   hypre_TFree(send_a, HYPRE_MEMORY_HOST);
+
+   hypre_TFree(hypre_ParCSRCommPkgSendMapStarts(comm_pkg_j), HYPRE_MEMORY_HOST);
+   hypre_TFree(hypre_ParCSRCommPkgRecvVecStarts(comm_pkg_j), HYPRE_MEMORY_HOST);
+   hypre_TFree(comm_pkg_j, HYPRE_MEMORY_HOST);
 
    /*
    if (my_id == 1)
@@ -213,17 +253,7 @@ hypre_ParcsrGetExternalRowsDevice( hypre_ParCSRMatrix   *A,
    exit(0);
    */
 
-   hypre_TFree(d_send_i, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(d_send_map, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(send_i, HYPRE_MEMORY_HOST);
-   hypre_TFree(send_i_offset, HYPRE_MEMORY_HOST);
-   hypre_TFree(d_send_j, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(send_j, HYPRE_MEMORY_HOST);
-   hypre_TFree(d_send_a, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(send_a, HYPRE_MEMORY_HOST);
-   hypre_TFree(send_jstarts, HYPRE_MEMORY_HOST);
-   hypre_TFree(recv_jstarts, HYPRE_MEMORY_HOST);
-   hypre_TFree(comm_pkg_j, HYPRE_MEMORY_HOST);
+   A_ext_device = hypre_CSRMatrixClone_v2(A_ext, 1, HYPRE_MEMORY_DEVICE);
    hypre_CSRMatrixDestroy(A_ext);
 
    return A_ext_device;
@@ -296,9 +326,10 @@ hypre_MergeDiagAndOffdDevice(hypre_ParCSRMatrix *A)
    return B;
 }
 
-hypre_CSRMatrix*
-hypre_ExchangeExternalRowsDevice( hypre_CSRMatrix     *B_ext,
-                                  hypre_ParCSRCommPkg *comm_pkg_A)
+HYPRE_Int
+hypre_ExchangeExternalRowsDeviceInit( hypre_CSRMatrix      *B_ext,
+                                      hypre_ParCSRCommPkg  *comm_pkg_A,
+                                      void                **request_ptr)
 {
    MPI_Comm   comm             = hypre_ParCSRCommPkgComm(comm_pkg_A);
    HYPRE_Int  num_recvs        = hypre_ParCSRCommPkgNumRecvs(comm_pkg_A);
@@ -419,58 +450,84 @@ hypre_ExchangeExternalRowsDevice( hypre_CSRMatrix     *B_ext,
    comm_handle_a = hypre_ParCSRCommHandleCreate( 1, comm_pkg_j, B_ext_a_h, B_int_a_h);
    comm_handle_j = hypre_ParCSRCommHandleCreate(11, comm_pkg_j, B_ext_j_h, B_int_j_h);
 
-   /* .... */
-
-   /* communication done */
-   hypre_ParCSRCommHandleDestroy(comm_handle_a);
-   hypre_ParCSRCommHandleDestroy(comm_handle_j);
-
-   /* output CSR */
+   /* create CSR */
    B_int_h = hypre_CSRMatrixCreate(B_int_nrows, B_int_ncols, B_int_nnz);
-
    hypre_CSRMatrixI(B_int_h)    = B_int_i_h;
    hypre_CSRMatrixJ(B_int_h)    = B_int_j_h;
    hypre_CSRMatrixData(B_int_h) = B_int_a_h;
    hypre_CSRMatrixMemoryLocation(B_int_h) = HYPRE_MEMORY_HOST;
 
-   B_int_d = hypre_CSRMatrixClone_v2(B_int_h, 1, HYPRE_MEMORY_DEVICE);
+   /* output */
+   vrequest = hypre_TAlloc(void *, 4, HYPRE_MEMORY_HOST);
+   vrequest[0] = (void *) comm_handle_j;
+   vrequest[1] = (void *) comm_handle_a;
+   vrequest[2] = (void *) B_int_h;
+   vrequest[3] = (void *) comm_pkg_j;
 
-   hypre_TFree(jdata_recv_vec_starts, HYPRE_MEMORY_HOST);
-   hypre_TFree(jdata_send_map_starts, HYPRE_MEMORY_HOST);
-   hypre_TFree(comm_pkg_j,            HYPRE_MEMORY_HOST);
+   *request_ptr = (void *) vrequest;
+
+   hypre_TFree(B_ext_rownnz_d, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(B_ext_rownnz_h, HYPRE_MEMORY_HOST);
+   hypre_TFree(B_ext_i_h,      HYPRE_MEMORY_HOST);
+
+   return hypre_error_flag;
+}
+
+hypre_CSRMatrix*
+hypre_ExchangeExternalRowsDeviceWait(void *vrequest)
+{
+   void **request = (void **) vrequest;
+
+   hypre_ParCSRCommHandle *comm_handle_j = (hypre_ParCSRCommHandle *) request[0];
+   hypre_ParCSRCommHandle *comm_handle_a = (hypre_ParCSRCommHandle *) request[1];
+   hypre_CSRMatrix        *B_int_h       = (hypre_CSRMatrix *)        request[2];
+   hypre_ParCSRCommPkg    *comm_pkg_j    = (hypre_ParCSRCommPkg *)    request[3];
+   hypre_Int              *B_ext_j_h     = hypre_ParCSRCommHandleSendData(comm_handle_j);
+   hypre_Complex          *B_ext_a_h     = hypre_ParCSRCommHandleSendData(comm_handle_a);
+
+   /* communication done */
+   hypre_ParCSRCommHandleDestroy(comm_handle_j);
+   hypre_ParCSRCommHandleDestroy(comm_handle_a);
+
+   hypre_TFree(B_ext_j_h, HYPRE_MEMORY_HOST);
+   hypre_TFree(B_ext_a_h, HYPRE_MEMORY_HOST);
+
+   hypre_TFree(hypre_ParCSRCommPkgSendMapStarts(comm_pkg_j), HYPRE_MEMORY_HOST);
+   hypre_TFree(hypre_ParCSRCommPkgRecvVecStarts(comm_pkg_j), HYPRE_MEMORY_HOST);
+   hypre_TFree(comm_pkg_j, HYPRE_MEMORY_HOST);
+
+   B_int_d = hypre_CSRMatrixClone_v2(B_int_h, 1, HYPRE_MEMORY_DEVICE);
    hypre_CSRMatrixDestroy(B_int_h);
-   hypre_TFree(B_ext_rownnz_d,        HYPRE_MEMORY_DEVICE);
-   hypre_TFree(B_ext_rownnz_h,        HYPRE_MEMORY_HOST);
-   hypre_TFree(B_ext_i_h,             HYPRE_MEMORY_HOST);
-   hypre_TFree(B_ext_j_h,             HYPRE_MEMORY_HOST);
-   hypre_TFree(B_ext_a_h,             HYPRE_MEMORY_HOST);
 
    return B_int_d;
 }
 
-#else
-
 hypre_CSRMatrix*
-hypre_ParcsrGetExternalRowsDevice( hypre_ParCSRMatrix   *A,
-                                   HYPRE_Int             indices_len,
-                                   HYPRE_Int            *indices,
-                                   hypre_ParCSRCommPkg  *comm_pkg,
-                                   HYPRE_Int             want_data)
+hypre_ParCSRMatrixExtractBExtDevice( hypre_ParCSRMatrix *B,
+                                     hypre_ParCSRMatrix *A,
+                                     HYPRE_Int want_data )
 {
-   return NULL;
-}
+   HYPRE_Int memory_location = hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(B));
 
-hypre_CSRMatrix*
-hypre_MergeDiagAndOffdDevice(hypre_ParCSRMatrix *A)
-{
-   return NULL;
-}
+   hypre_assert( hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(B)) ==
+                 hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixOffd(B)) );
 
-hypre_CSRMatrix*
-hypre_ExchangeExternalRowsDevice( hypre_CSRMatrix     *B_ext,
-                                  hypre_ParCSRCommPkg *comm_pkg_A)
-{
-   return NULL;
+   hypre_assert( hypre_GetActualMemLocation(memory_location) == HYPRE_MEMORY_DEVICE );
+
+   hypre_CSRMatrix *B_ext;
+   void            *request;
+
+   hypre_ParcsrGetExternalRowsDeviceInit(B,
+                                         hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A)),
+                                         hypre_ParCSRMatrixColMapOffd(A),
+                                         hypre_ParCSRMatrixCommPkg(A),
+                                         want_data,
+                                         &request);
+
+   B_ext = hypre_ParcsrGetExternalRowsDeviceWait(request);
+
+   return B_ext;
 }
 
 #endif // #if defined(HYPRE_USING_CUDA)
+
