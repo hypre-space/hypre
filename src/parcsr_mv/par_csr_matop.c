@@ -4722,8 +4722,8 @@ hypre_ParcsrGetExternalRowsWait(void *vrequest)
    hypre_ParCSRCommHandle *comm_handle_a = (hypre_ParCSRCommHandle *) request[1];
    hypre_CSRMatrix        *A_ext         = (hypre_CSRMatrix *)        request[2];
    hypre_ParCSRCommPkg    *comm_pkg_j    = (hypre_ParCSRCommPkg *)    request[3];
-   hypre_Int              *send_j        = hypre_ParCSRCommHandleSendData(comm_handle_j);
-   hypre_Complex          *send_a        = hypre_ParCSRCommHandleSendData(comm_handle_a);
+   HYPRE_Int              *send_j        = (HYPRE_Int *)     hypre_ParCSRCommHandleSendData(comm_handle_j);
+   HYPRE_Complex          *send_a        = (HYPRE_Complex *) hypre_ParCSRCommHandleSendData(comm_handle_a);
 
    hypre_ParCSRCommHandleDestroy(comm_handle_j);
    hypre_ParCSRCommHandleDestroy(comm_handle_a);
