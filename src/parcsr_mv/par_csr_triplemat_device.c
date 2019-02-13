@@ -53,10 +53,8 @@ hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A,
 
    HYPRE_Int        num_cols_offd_C = 0;
 
-   hypre_CSRMatrix *Bs_ext;
-
+   hypre_CSRMatrix *Bext;
    hypre_CSRMatrix *Bext_diag;
-
    hypre_CSRMatrix *Bext_offd;
 
    hypre_CSRMatrix *AB_diag;
@@ -94,19 +92,26 @@ hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A,
     *-----------------------------------------------------------------------*/
    if (num_procs > 1)
    {
+      void *request;
       /*---------------------------------------------------------------------
        * If there exists no CommPkg for A, a CommPkg is generated using
        * equally load balanced partitionings within
        * hypre_ParCSRMatrixExtractBExt
        *--------------------------------------------------------------------*/
-      Bs_ext = hypre_ParCSRMatrixExtractBExtDevice(B, A, 1); /* contains communication
-                                                          which should be explicitly included to allow for overlap */
+      /* contains communication which should be explicitly included to allow for overlap */
+      hypre_ParCSRMatrixExtractBExtDeviceInit(B, A, 1, &request);
 
-      hypre_CSRMatrixSplitDevice(Bs_ext, first_col_diag_B, last_col_diag_B,
+      /* These are local and could be overlapped with communication */
+      AB_diag = hypre_CSRMatrixMultiply(A_diag, B_diag);
+      AB_offd = hypre_CSRMatrixMultiply(A_diag, B_offd);
+
+      Bext = hypre_ParCSRMatrixExtractBExtDeviceWait(request);
+
+      hypre_CSRMatrixSplitDevice(Bext, first_col_diag_B, last_col_diag_B,
                                  num_cols_offd_B, hypre_ParCSRMatrixDeviceColMapOffd(B), &map_B_to_C,
                                  &num_cols_offd_C, &col_map_offd_C,
                                  &Bext_diag, &Bext_offd);
-      hypre_CSRMatrixDestroy(Bs_ext);
+      hypre_CSRMatrixDestroy(Bext);
 
 /*
 if (my_id == 3)
@@ -122,10 +127,6 @@ hypre_CSRMatrixPrint2(Bext_offd_host, NULL);
 }
 exit(0);
 */
-
-      /* These are local and could be overlapped with communication */
-      AB_diag = hypre_CSRMatrixMultiply(A_diag, B_diag);
-      AB_offd = hypre_CSRMatrixMultiply(A_diag, B_offd);
 
       /* These require data from other processes */
       ABext_diag = hypre_CSRMatrixMultiply(A_offd, Bext_diag);
@@ -155,6 +156,7 @@ hypre_CSRMatrixPrint2(AB_offd_host, NULL);
       hypre_CSRMatrixNumCols(AB_diag)    = num_cols_diag_B;
       hypre_CSRMatrixNumCols(ABext_diag) = num_cols_diag_B;
       */
+      /* !!! adjust num of cols of AB_offd */
       hypre_CSRMatrixNumCols(AB_offd)    = num_cols_offd_C;
       /*
       hypre_CSRMatrixNumCols(ABext_offd) = num_cols_offd_C;
@@ -197,8 +199,6 @@ hypre_CSRMatrixPrint2(C_offd_host, NULL);
     *  Allocate C_diag_data and C_diag_j arrays.
     *  Allocate C_offd_data and C_offd_j arrays.
     *-----------------------------------------------------------------------*/
-
-
    C = hypre_ParCSRMatrixCreate(comm, n_rows_A, n_cols_B, row_starts_A,
                                 col_starts_B, num_cols_offd_C,
                                 C_diag->num_nonzeros, C_offd->num_nonzeros);
@@ -334,9 +334,7 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
       hypre_ParCSRMatrixOffd(B) = B_offd;
 
       hypre_ExchangeExternalRowsDeviceInit(C_int, comm_pkg_A, &request);
-      C_ext = hypre_ExchangeExternalRowsDeviceWait(request);
 
-      hypre_CSRMatrixDestroy(C_int);
       hypre_CSRMatrixDestroy(C_int_diag);
       hypre_CSRMatrixDestroy(C_int_offd);
 
@@ -360,6 +358,10 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
       {
         hypre_CSRMatrixDestroy(AT_offd);
       }
+
+      C_ext = hypre_ExchangeExternalRowsDeviceWait(request);
+
+      hypre_CSRMatrixDestroy(C_int);
 
       hypre_CSRMatrixSplitDevice(C_ext, first_col_diag_B, last_col_diag_B,
                                  num_cols_offd_B, hypre_ParCSRMatrixDeviceColMapOffd(B), &map_B_to_C,

@@ -255,6 +255,7 @@ hypre_ParcsrGetExternalRowsDeviceWait(void *vrequest)
 
    hypre_CSRMatrix *A_ext_device = hypre_CSRMatrixClone_v2(A_ext, 1, HYPRE_MEMORY_DEVICE);
    hypre_CSRMatrixDestroy(A_ext);
+   hypre_TFree(request, HYPRE_MEMORY_HOST);
 
    return A_ext_device;
 }
@@ -499,14 +500,16 @@ hypre_ExchangeExternalRowsDeviceWait(void *vrequest)
 
    hypre_CSRMatrix *B_int_d = hypre_CSRMatrixClone_v2(B_int_h, 1, HYPRE_MEMORY_DEVICE);
    hypre_CSRMatrixDestroy(B_int_h);
+   hypre_TFree(request, HYPRE_MEMORY_HOST);
 
    return B_int_d;
 }
 
-hypre_CSRMatrix*
-hypre_ParCSRMatrixExtractBExtDevice( hypre_ParCSRMatrix *B,
-                                     hypre_ParCSRMatrix *A,
-                                     HYPRE_Int want_data )
+HYPRE_Int
+hypre_ParCSRMatrixExtractBExtDeviceInit( hypre_ParCSRMatrix  *B,
+                                         hypre_ParCSRMatrix  *A,
+                                         HYPRE_Int            want_data,
+                                         void               **request_ptr)
 {
    HYPRE_Int memory_location = hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(B));
 
@@ -515,19 +518,29 @@ hypre_ParCSRMatrixExtractBExtDevice( hypre_ParCSRMatrix *B,
 
    hypre_assert( hypre_GetActualMemLocation(memory_location) == HYPRE_MEMORY_DEVICE );
 
-   hypre_CSRMatrix *B_ext;
-   void            *request;
-
    hypre_ParcsrGetExternalRowsDeviceInit(B,
                                          hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A)),
                                          hypre_ParCSRMatrixColMapOffd(A),
                                          hypre_ParCSRMatrixCommPkg(A),
                                          want_data,
-                                         &request);
+                                         request_ptr);
+   return hypre_error_flag;
+}
 
-   B_ext = hypre_ParcsrGetExternalRowsDeviceWait(request);
+hypre_CSRMatrix*
+hypre_ParCSRMatrixExtractBExtDeviceWait(void *request)
+{
+   return hypre_ParcsrGetExternalRowsDeviceWait(request);
+}
 
-   return B_ext;
+hypre_CSRMatrix*
+hypre_ParCSRMatrixExtractBExtDevice( hypre_ParCSRMatrix *B,
+                                     hypre_ParCSRMatrix *A,
+                                     HYPRE_Int want_data )
+{
+   void *request;
+   hypre_ParCSRMatrixExtractBExtDeviceInit(B, A, want_data, &request);
+   return hypre_ParCSRMatrixExtractBExtDeviceWait(request);
 }
 
 #endif // #if defined(HYPRE_USING_CUDA)
