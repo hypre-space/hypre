@@ -586,6 +586,19 @@ HYPRE_ParCSRHybridSetDofFunc( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetNonGalerkTol
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParCSRHybridSetNonGalerkinTol( HYPRE_Solver solver,
+                              HYPRE_Int   nongalerk_num_tol,
+                              HYPRE_Real  *nongalerkin_tol)
+{
+   return( hypre_AMGHybridSetNonGalerkinTol( (void *) solver, nongalerk_num_tol, nongalerkin_tol ) );
+}
+
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParCSRHybridGetNumIterations
  *--------------------------------------------------------------------------*/
 
