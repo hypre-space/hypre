@@ -130,7 +130,9 @@ extern "C" {
 
 typedef hypre_int      hypre_F90_Comm;
 typedef HYPRE_Int      hypre_F90_Int;
+typedef HYPRE_BigInt   hypre_F90_BigInt;
 typedef HYPRE_Int      hypre_F90_IntArray;
+typedef HYPRE_BigInt   hypre_F90_BigIntArray;
 typedef HYPRE_Real     hypre_F90_Real;
 typedef HYPRE_Real     hypre_F90_RealArray;
 typedef HYPRE_Complex  hypre_F90_Complex;
@@ -142,6 +144,9 @@ typedef HYPRE_Int     *hypre_F90_ObjRef;
 #define hypre_F90_PassInt(arg)           ((HYPRE_Int) *arg)
 #define hypre_F90_PassIntRef(arg)        ((HYPRE_Int *) arg)
 #define hypre_F90_PassIntArray(arg)      ((HYPRE_Int *) arg)
+#define hypre_F90_PassBigInt(arg)        ((HYPRE_BigInt) *arg)
+#define hypre_F90_PassBigIntRef(arg)     ((HYPRE_BigInt *) arg)
+#define hypre_F90_PassBigIntArray(arg)   ((HYPRE_BigInt *) arg)
 #define hypre_F90_PassReal(arg)          ((HYPRE_Real) *arg)
 #define hypre_F90_PassRealRef(arg)       ((HYPRE_Real *) arg)
 #define hypre_F90_PassRealArray(arg)     ((HYPRE_Real *) arg)

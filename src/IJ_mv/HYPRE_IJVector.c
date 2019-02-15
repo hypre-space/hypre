@@ -26,18 +26,19 @@
 
 HYPRE_Int
 HYPRE_IJVectorCreate( MPI_Comm        comm,
-                      HYPRE_Int       jlower,
-                      HYPRE_Int       jupper,
+                      HYPRE_BigInt    jlower,
+                      HYPRE_BigInt    jupper,
                       HYPRE_IJVector *vector )
 {
    hypre_IJVector *vec;
-   HYPRE_Int num_procs, my_id, *partitioning;
+   HYPRE_Int num_procs, my_id;
+   HYPRE_BigInt *partitioning;
  
 #ifdef HYPRE_NO_GLOBAL_PARTITION
-   HYPRE_Int  row0, rowN;
+   HYPRE_BigInt  row0, rowN;
 #else
-   HYPRE_Int *recv_buf;
-   HYPRE_Int *info;
+   HYPRE_BigInt *recv_buf;
+   HYPRE_BigInt *info;
    HYPRE_Int i, i2;
 #endif
 
@@ -67,7 +68,7 @@ HYPRE_IJVectorCreate( MPI_Comm        comm,
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
 
-   partitioning = hypre_CTAlloc(HYPRE_Int,  2, HYPRE_MEMORY_HOST);
+   partitioning = hypre_CTAlloc(HYPRE_BigInt,  2, HYPRE_MEMORY_HOST);
 
    partitioning[0] = jlower;
    partitioning[1] = jupper+1;
@@ -81,27 +82,27 @@ HYPRE_IJVectorCreate( MPI_Comm        comm,
    {
       row0 = jlower;
    }
-   hypre_MPI_Bcast(&row0, 1, HYPRE_MPI_INT, 0, comm);
+   hypre_MPI_Bcast(&row0, 1, HYPRE_MPI_BIG_INT, 0, comm);
    /* proc (num_procs-1) has the last row  */   
    if (my_id == (num_procs-1))
    {
       rowN = jupper;
    }
-   hypre_MPI_Bcast(&rowN, 1, HYPRE_MPI_INT, num_procs-1, comm);
+   hypre_MPI_Bcast(&rowN, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
 
    hypre_IJVectorGlobalFirstRow(vec) = row0;
    hypre_IJVectorGlobalNumRows(vec) = rowN - row0 + 1;
    
 #else
 
-   info = hypre_CTAlloc(HYPRE_Int, 2, HYPRE_MEMORY_HOST);
-   recv_buf = hypre_CTAlloc(HYPRE_Int,  2*num_procs, HYPRE_MEMORY_HOST);
-   partitioning = hypre_CTAlloc(HYPRE_Int,  num_procs+1, HYPRE_MEMORY_HOST);
+   info = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
+   recv_buf = hypre_CTAlloc(HYPRE_BigInt,  2*num_procs, HYPRE_MEMORY_HOST);
+   partitioning = hypre_CTAlloc(HYPRE_BigInt,  num_procs+1, HYPRE_MEMORY_HOST);
 
    info[0] = jlower;
    info[1] = jupper;
 
-   hypre_MPI_Allgather(info, 2, HYPRE_MPI_INT, recv_buf, 2, HYPRE_MPI_INT, comm);
+   hypre_MPI_Allgather(info, 2, HYPRE_MPI_BIG_INT, recv_buf, 2, HYPRE_MPI_BIG_INT, comm);
 
    partitioning[0] = recv_buf[0];
    for (i=0; i < num_procs-1; i++)
@@ -244,7 +245,7 @@ HYPRE_IJVectorSetPrintLevel( HYPRE_IJVector vector,
 HYPRE_Int 
 HYPRE_IJVectorSetValues( HYPRE_IJVector        vector,
                          HYPRE_Int             nvalues,
-                         const HYPRE_Int      *indices,
+                         const HYPRE_BigInt   *indices,
                          const HYPRE_Complex  *values   )
 {
    hypre_IJVector *vec = (hypre_IJVector *) vector;
@@ -288,7 +289,7 @@ HYPRE_IJVectorSetValues( HYPRE_IJVector        vector,
 HYPRE_Int 
 HYPRE_IJVectorAddToValues( HYPRE_IJVector        vector,
                            HYPRE_Int             nvalues,
-                           const HYPRE_Int      *indices,
+                           const HYPRE_BigInt   *indices,
                            const HYPRE_Complex  *values )
 {
    hypre_IJVector *vec = (hypre_IJVector *) vector;
@@ -357,10 +358,10 @@ HYPRE_IJVectorAssemble( HYPRE_IJVector  vector )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int 
-HYPRE_IJVectorGetValues( HYPRE_IJVector   vector,
-                         HYPRE_Int        nvalues,
-                         const HYPRE_Int *indices,
-                         HYPRE_Complex   *values )
+HYPRE_IJVectorGetValues( HYPRE_IJVector      vector,
+                         HYPRE_Int           nvalues,
+                         const HYPRE_BigInt *indices,
+                         HYPRE_Complex      *values )
 {
    hypre_IJVector *vec = (hypre_IJVector *) vector;
 
@@ -472,12 +473,12 @@ HYPRE_IJVectorGetObjectType( HYPRE_IJVector  vector,
 
 HYPRE_Int
 HYPRE_IJVectorGetLocalRange( HYPRE_IJVector  vector,
-                             HYPRE_Int      *jlower,
-                             HYPRE_Int      *jupper )
+                             HYPRE_BigInt   *jlower,
+                             HYPRE_BigInt   *jupper )
 {
    hypre_IJVector *vec = (hypre_IJVector *) vector;
    MPI_Comm comm;
-   HYPRE_Int *partitioning;
+   HYPRE_BigInt *partitioning;
    HYPRE_Int my_id;
 
    if (!vec)
@@ -532,7 +533,7 @@ HYPRE_IJVectorRead( const char     *filename,
                     HYPRE_IJVector *vector_ptr )
 {
    HYPRE_IJVector  vector;
-   HYPRE_Int       jlower, jupper, j;
+   HYPRE_BigInt    jlower, jupper, j;
    HYPRE_Complex   value;
    HYPRE_Int       myid, ret;
    char            new_filename[255];
@@ -589,8 +590,8 @@ HYPRE_IJVectorPrint( HYPRE_IJVector  vector,
                      const char     *filename )
 {
    MPI_Comm        comm;
-   HYPRE_Int      *partitioning;
-   HYPRE_Int       jlower, jupper, j;
+   HYPRE_BigInt   *partitioning;
+   HYPRE_BigInt    jlower, jupper, j;
    HYPRE_Complex   value;
    HYPRE_Int       myid;
    char            new_filename[255];

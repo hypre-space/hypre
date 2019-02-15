@@ -45,32 +45,32 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
 
    hypre_CSRMatrix *A_diag;
    HYPRE_Real      *A_diag_data;
-   HYPRE_Int             *A_diag_i;
+   HYPRE_Int       *A_diag_i;
 
    hypre_CSRBlockMatrix *A_block_diag;
 
    hypre_CSRMatrix *A_offd;   
    HYPRE_Real      *A_offd_data;
-   HYPRE_Int             *A_offd_i;
+   HYPRE_Int       *A_offd_i;
 
    hypre_CSRBlockMatrix *A_block_offd;
 
    hypre_CSRMatrix *P_diag;
    HYPRE_Real      *P_diag_data;
-   HYPRE_Int             *P_diag_i;
+   HYPRE_Int       *P_diag_i;
 
    hypre_CSRBlockMatrix *P_block_diag;
 
    hypre_CSRMatrix *P_offd;   
    HYPRE_Real      *P_offd_data;
-   HYPRE_Int             *P_offd_i;
+   HYPRE_Int       *P_offd_i;
 
    hypre_CSRBlockMatrix *P_block_offd;
 
 
    HYPRE_Int	    numrows;
 
-   HYPRE_Int	    *row_starts;
+   HYPRE_BigInt	    *row_starts;
 
  
    HYPRE_Int      num_levels; 
@@ -89,7 +89,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
 
    HYPRE_Int       level;
    HYPRE_Int       j;
-   HYPRE_Int       fine_size;
+   HYPRE_BigInt    fine_size;
  
    HYPRE_Int       min_entries;
    HYPRE_Int       max_entries;
@@ -106,7 +106,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    HYPRE_Int       i;
    
 
-   HYPRE_Int       coarse_size;
+   HYPRE_BigInt    coarse_size;
    HYPRE_Int       entries;
 
    HYPRE_Real    avg_entries;
@@ -132,8 +132,8 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    HYPRE_Real   memory_cmplxty = 0;
 
    /* amg solve params */
-   HYPRE_Int      max_iter;
-   HYPRE_Int      cycle_type;    
+   HYPRE_Int     max_iter;
+   HYPRE_Int     cycle_type;    
    HYPRE_Int     *num_grid_sweeps;  
    HYPRE_Int     *grid_relax_type;   
    HYPRE_Int      relax_order;

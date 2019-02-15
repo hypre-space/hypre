@@ -70,8 +70,8 @@ hypre_DistributedMatrixPrintPETSc( hypre_DistributedMatrix *matrix )
 
 HYPRE_Int 
 hypre_DistributedMatrixGetLocalRangePETSc( hypre_DistributedMatrix *matrix,
-                             HYPRE_Int *start,
-                             HYPRE_Int *end )
+                             HYPRE_BigInt *start,
+                             HYPRE_BigInt *end )
 {
    HYPRE_Int ierr=0;
 #ifdef PETSC_AVAILABLE
@@ -101,9 +101,9 @@ hypre_DistributedMatrixGetLocalRangePETSc( hypre_DistributedMatrix *matrix,
 
 HYPRE_Int 
 hypre_DistributedMatrixGetRowPETSc( hypre_DistributedMatrix *matrix,
-                             HYPRE_Int row,
+                             HYPRE_BigInt row,
                              HYPRE_Int *size,
-                             HYPRE_Int **col_ind,
+                             HYPRE_BigInt **col_ind,
                              HYPRE_Real **values )
 {
    HYPRE_Int ierr=0;
@@ -124,9 +124,9 @@ hypre_DistributedMatrixGetRowPETSc( hypre_DistributedMatrix *matrix,
 
 HYPRE_Int 
 hypre_DistributedMatrixRestoreRowPETSc( hypre_DistributedMatrix *matrix,
-                             HYPRE_Int row,
+                             HYPRE_BigInt row,
                              HYPRE_Int *size,
-                             HYPRE_Int **col_ind,
+                             HYPRE_BigInt **col_ind,
                              HYPRE_Real **values )
 {
    HYPRE_Int ierr=0;

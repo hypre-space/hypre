@@ -32,7 +32,7 @@ void Timer_dhCreate(Timer_dh *t)
 #endif
 
 #if defined(EUCLID_TIMING)
-  hypre_sprintf(msgBuf_dh, "using EUCLID_TIMING; _SC_CLK_TCK = %i", (HYPRE_Int)tmp->sc_clk_tck);
+  hypre_sprintf(msgBuf_dh, "using EUCLID_TIMING; _SC_CLK_TCK = %i", (HYPRE_BigInt)tmp->sc_clk_tck);
   SET_INFO(msgBuf_dh);
 #elif defined(hypre_MPI_TIMING) 
   SET_INFO("using MPI timing")

@@ -56,7 +56,7 @@ new_format( const char *format,
          {
             case 'd':
             case 'i':
-#if defined(HYPRE_BIGINT)
+#if defined(HYPRE_ALLBIGINT)
                *nfp = 'l'; nfp++;
                *nfp = 'l'; nfp++;
 #endif

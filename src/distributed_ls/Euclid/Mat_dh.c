@@ -23,8 +23,8 @@
 /* #include "Hash_i_dh.h" */
 
 static void setup_matvec_sends_private(Mat_dh mat, HYPRE_Int *inlist);
-static void setup_matvec_receives_private(Mat_dh mat, HYPRE_Int *beg_rows, HYPRE_Int *end_rows,
-                           HYPRE_Int reqlen, HYPRE_Int *reqind, HYPRE_Int *outlist);
+static void setup_matvec_receives_private(Mat_dh mat, HYPRE_BigInt *beg_rows, HYPRE_BigInt *end_rows,
+                           HYPRE_Int reqlen, HYPRE_BigInt *reqind, HYPRE_Int *outlist);
 
 #if 0
 
@@ -150,28 +150,29 @@ void Mat_dhMatVecSetup(Mat_dh mat)
 
   else {
     HYPRE_Int *outlist, *inlist;
-    HYPRE_Int ierr, i, row, *rp = mat->rp, *cval = mat->cval;
+    HYPRE_Int ierr, i, row, *rp = mat->rp;
+    HYPRE_BigInt *cval = mat->cval;
     Numbering_dh numb;
     HYPRE_Int m = mat->m;
-    HYPRE_Int firstLocal = mat->beg_row;
-    HYPRE_Int lastLocal = firstLocal+m;
-    HYPRE_Int *beg_rows, *end_rows;
+    HYPRE_BigInt firstLocal = mat->beg_row;
+    HYPRE_BigInt lastLocal = firstLocal+(HYPRE_BigInt)m;
+    HYPRE_BigInt *beg_rows, *end_rows;
   
     mat->recv_req = (hypre_MPI_Request *)MALLOC_DH(np_dh * sizeof(hypre_MPI_Request)); CHECK_V_ERROR;
     mat->send_req = (hypre_MPI_Request *)MALLOC_DH(np_dh * sizeof(hypre_MPI_Request)); CHECK_V_ERROR;
     mat->status = (hypre_MPI_Status *)MALLOC_DH(np_dh * sizeof(hypre_MPI_Status)); CHECK_V_ERROR;
-    beg_rows = (HYPRE_Int*)MALLOC_DH(np_dh*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-    end_rows = (HYPRE_Int*)MALLOC_DH(np_dh*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+    beg_rows = (HYPRE_BigInt*)MALLOC_DH(np_dh*sizeof(HYPRE_BigInt)); CHECK_V_ERROR;
+    end_rows = (HYPRE_BigInt*)MALLOC_DH(np_dh*sizeof(HYPRE_BigInt)); CHECK_V_ERROR;
   
     if (np_dh == 1) { /* this is for debugging purposes in some of the drivers */
       beg_rows[0] = 0;
       end_rows[0] = m;
     } else {
-      ierr = hypre_MPI_Allgather(&firstLocal, 1, HYPRE_MPI_INT, beg_rows, 1, HYPRE_MPI_INT, comm_dh); 
+      ierr = hypre_MPI_Allgather(&firstLocal, 1, HYPRE_MPI_BIG_INT, beg_rows, 1, HYPRE_MPI_INT, comm_dh); 
   
   CHECK_MPI_V_ERROR(ierr);
   
-      ierr = hypre_MPI_Allgather(&lastLocal, 1, HYPRE_MPI_INT, end_rows, 1, HYPRE_MPI_INT, comm_dh); CHECK_MPI_V_ERROR(ierr);
+      ierr = hypre_MPI_Allgather(&lastLocal, 1, HYPRE_MPI_BIG_INT, end_rows, 1, HYPRE_MPI_INT, comm_dh); CHECK_MPI_V_ERROR(ierr);
     }
   
     outlist = (HYPRE_Int *)MALLOC_DH(np_dh*sizeof(HYPRE_Int)); CHECK_V_ERROR;
@@ -200,7 +201,7 @@ void Mat_dhMatVecSetup(Mat_dh mat)
     /* Convert to local indices */
     for (row=0; row<m; row++) {
       HYPRE_Int len = rp[row+1]-rp[row];
-      HYPRE_Int *ind = cval+rp[row];
+      HYPRE_BigInt *ind = cval+(HYPRE_BigInt)rp[row];
       Numbering_dhGlobalToLocal(numb, len, ind, ind); CHECK_V_ERROR;
     }
   
@@ -218,8 +219,8 @@ DO_NOTHING: ;
 /* adopted from Edmond Chow's ParaSails */
 #undef __FUNC__
 #define __FUNC__ "setup_matvec_receives_private"
-void setup_matvec_receives_private(Mat_dh mat, HYPRE_Int *beg_rows, HYPRE_Int *end_rows,
-                           HYPRE_Int reqlen, HYPRE_Int *reqind, HYPRE_Int *outlist)
+void setup_matvec_receives_private(Mat_dh mat, HYPRE_BigInt *beg_rows, HYPRE_BigInt *end_rows,
+                           HYPRE_Int reqlen, HYPRE_BigInt *reqind, HYPRE_Int *outlist)
 {
   START_FUNC_DH
   HYPRE_Int ierr, i, j, this_pe;
@@ -267,7 +268,8 @@ void setup_matvec_receives_private(Mat_dh mat, HYPRE_Int *beg_rows, HYPRE_Int *e
 void setup_matvec_sends_private(Mat_dh mat, HYPRE_Int *inlist)
 {
   START_FUNC_DH
-  HYPRE_Int ierr, i, j, sendlen, first = mat->beg_row;
+  HYPRE_Int ierr, i, j, sendlen;
+  HYPRE_BigInt first = mat->beg_row;
   hypre_MPI_Request *requests;
   hypre_MPI_Status  *statuses;
 
@@ -279,14 +281,14 @@ void setup_matvec_sends_private(Mat_dh mat, HYPRE_Int *inlist)
   for (i=0; i<np_dh; i++) sendlen += inlist[i];
   mat->sendlen = sendlen;
   mat->sendbuf = (HYPRE_Real *)MALLOC_DH(sendlen * sizeof(HYPRE_Real)); CHECK_V_ERROR;
-  mat->sendind = (HYPRE_Int *)MALLOC_DH(sendlen * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  mat->sendind = (HYPRE_BigInt *)MALLOC_DH(sendlen * sizeof(HYPRE_BigInt)); CHECK_V_ERROR;
 
   j = 0;
   mat->num_send = 0;
   for (i=0; i<np_dh; i++) {
     if (inlist[i] != 0) {
       /* Post receive for the actual indices */
-      ierr = hypre_MPI_Irecv(&mat->sendind[j], inlist[i], HYPRE_MPI_INT, i, 444, comm_dh,
+      ierr = hypre_MPI_Irecv(&mat->sendind[j], inlist[i], HYPRE_MPI_BIG_INT, i, 444, comm_dh,
                             &requests[mat->num_send]); CHECK_MPI_V_ERROR(ierr);
       /* Set up the send */
       ierr = hypre_MPI_Send_init(&mat->sendbuf[j], inlist[i], hypre_MPI_REAL, i, 555, comm_dh,
@@ -304,7 +306,7 @@ void setup_matvec_sends_private(Mat_dh mat, HYPRE_Int *inlist)
   ierr = hypre_MPI_Waitall(mat->num_send, requests, statuses); CHECK_MPI_V_ERROR(ierr);
   /* convert global indices to local indices */
   /* these are all indices on this processor */
-  for (i=0; i<mat->sendlen; i++) mat->sendind[i] -= first;
+  for (i=0; i<mat->sendlen; i++) mat->sendind[i] -= (HYPRE_BigInt)first;
 
   FREE_DH(requests);
   FREE_DH(statuses);
@@ -324,9 +326,10 @@ void Mat_dhMatVec(Mat_dh mat, HYPRE_Real *x, HYPRE_Real *b)
 
   else {
     HYPRE_Int    ierr, i, row, m = mat->m;
-    HYPRE_Int    *rp = mat->rp, *cval = mat->cval;
+    HYPRE_Int    *rp = mat->rp;
+    HYPRE_BigInt *cval = mat->cval;
     HYPRE_Real *aval = mat->aval;
-    HYPRE_Int    *sendind = mat->sendind;
+    HYPRE_BigInt *sendind = mat->sendind;
     HYPRE_Int    sendlen = mat->sendlen;
     HYPRE_Real *sendbuf = mat->sendbuf; 
     HYPRE_Real *recvbuf = mat->recvbuf;
@@ -365,7 +368,7 @@ void Mat_dhMatVec(Mat_dh mat, HYPRE_Real *x, HYPRE_Real *b)
     /* do the multiply */
     for (row=0; row<m; row++) {
       HYPRE_Int len = rp[row+1] - rp[row];
-      HYPRE_Int * ind = cval+rp[row];
+      HYPRE_BigInt * ind = cval+(HYPRE_BigInt)rp[row];
       HYPRE_Real * val = aval+rp[row];
       HYPRE_Real temp = 0.0;
       for (i=0; i<len; i++) {
@@ -391,15 +394,17 @@ void Mat_dhMatVec_omp(Mat_dh mat, HYPRE_Real *x, HYPRE_Real *b)
 {
   START_FUNC_DH
   HYPRE_Int    ierr, i, row, m = mat->m;
-  HYPRE_Int    *rp = mat->rp, *cval = mat->cval;
+  HYPRE_Int    *rp = mat->rp;
+  HYPRE_BigInt *cval = mat->cval;
   HYPRE_Real *aval = mat->aval;
-  HYPRE_Int    *sendind = mat->sendind;
+  HYPRE_BigInt    *sendind = mat->sendind;
   HYPRE_Int    sendlen = mat->sendlen;
   HYPRE_Real *sendbuf = mat->sendbuf; 
   HYPRE_Real *recvbuf = mat->recvbuf;
   HYPRE_Real t1 = 0, t2 = 0, t3 = 0, t4 = 0, tx = 0;
   HYPRE_Real *val, temp;
-  HYPRE_Int len, *ind;
+  HYPRE_Int len;
+  HYPRE_BigInt *ind;
   bool   timeFlag = mat->matvec_timing;
 
   if (timeFlag) t1 = hypre_MPI_Wtime();
@@ -443,7 +448,7 @@ void Mat_dhMatVec_omp(Mat_dh mat, HYPRE_Real *x, HYPRE_Real *b)
 #endif
   for (row=0; row<m; row++) {
     len = rp[row+1] - rp[row];
-    ind = cval+rp[row];
+    ind = cval+(HYPRE_BigInt)rp[row];
     val = aval+rp[row];
     temp = 0.0;
     for (i=0; i<len; i++) {
@@ -469,7 +474,8 @@ void Mat_dhMatVec_uni_omp(Mat_dh mat, HYPRE_Real *x, HYPRE_Real *b)
 {
   START_FUNC_DH
   HYPRE_Int    i, row, m = mat->m;
-  HYPRE_Int    *rp = mat->rp, *cval = mat->cval;
+  HYPRE_Int    *rp = mat->rp;
+  HYPRE_BigInt *cval = mat->cval;
   HYPRE_Real *aval = mat->aval;
   HYPRE_Real t1 = 0, t2 = 0;
   bool   timeFlag = mat->matvec_timing;
@@ -482,11 +488,11 @@ void Mat_dhMatVec_uni_omp(Mat_dh mat, HYPRE_Real *x, HYPRE_Real *b)
 #endif
   for (row=0; row<m; row++) {
     HYPRE_Int len = rp[row+1] - rp[row];
-    HYPRE_Int * ind = cval+rp[row];
+    HYPRE_BigInt * ind = cval+(HYPRE_BigInt)rp[row];
     HYPRE_Real * val = aval+rp[row];
     HYPRE_Real temp = 0.0;
     for (i=0; i<len; i++) {
-      temp += (val[i] * x[ind[i]]);
+      temp += (val[i] * x[(HYPRE_Int)ind[i]]);
     }
     b[row] = temp;
   }
@@ -508,7 +514,8 @@ void Mat_dhMatVec_uni(Mat_dh mat, HYPRE_Real *x, HYPRE_Real *b)
 {
   START_FUNC_DH
   HYPRE_Int    i, row, m = mat->m;
-  HYPRE_Int    *rp = mat->rp, *cval = mat->cval;
+  HYPRE_Int    *rp = mat->rp;
+  HYPRE_BigInt *cval = mat->cval;
   HYPRE_Real *aval = mat->aval;
   HYPRE_Real t1 = 0, t2 = 0;
   bool   timeFlag = mat->matvec_timing;
@@ -517,11 +524,11 @@ void Mat_dhMatVec_uni(Mat_dh mat, HYPRE_Real *x, HYPRE_Real *b)
 
   for (row=0; row<m; row++) {
     HYPRE_Int len = rp[row+1] - rp[row];
-    HYPRE_Int * ind = cval+rp[row];
+    HYPRE_BigInt * ind = cval+(HYPRE_BigInt)rp[row];
     HYPRE_Real * val = aval+rp[row];
     HYPRE_Real temp = 0.0;
     for (i=0; i<len; i++) {
-      temp += (val[i] * x[ind[i]]);
+      temp += (val[i] * x[(HYPRE_Int)ind[i]]);
     }
     b[row] = temp;
   }
@@ -570,7 +577,7 @@ void Mat_dhAllocate_getRow_private(Mat_dh A)
   }
 
   /* allocate private storage */
-  A->cval_private = (HYPRE_Int*)MALLOC_DH(len*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  A->cval_private = (HYPRE_BigInt*)MALLOC_DH(len*sizeof(HYPRE_BigInt)); CHECK_V_ERROR;
   A->aval_private = (HYPRE_Real*)MALLOC_DH(len*sizeof(HYPRE_Real)); CHECK_V_ERROR;
   A->len_private = len;
   END_FUNC_DH
@@ -612,8 +619,9 @@ void Mat_dhPermute(Mat_dh A, HYPRE_Int *n2o, Mat_dh *Bout)
 {
   START_FUNC_DH
   Mat_dh B;
-  HYPRE_Int  i, j, *RP = A->rp, *CVAL = A->cval;
-  HYPRE_Int  *o2n, *rp, *cval, m = A->m, nz = RP[m];
+  HYPRE_Int  i, j, *RP = A->rp;
+  HYPRE_BigInt  *CVAL = A->cval, *cval;
+  HYPRE_Int  *o2n, *rp, m = A->m, nz = RP[m];
   HYPRE_Real *aval, *AVAL = A->aval;
 
   Mat_dhCreate(&B); CHECK_V_ERROR;
@@ -626,7 +634,7 @@ void Mat_dhPermute(Mat_dh A, HYPRE_Int *n2o, Mat_dh *Bout)
 
   /* allocate storage for permuted matrix */
   rp = B->rp = (HYPRE_Int*)MALLOC_DH((m+1)*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  cval = B->cval = (HYPRE_Int*)MALLOC_DH(nz*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  cval = B->cval = (HYPRE_BigInt*)MALLOC_DH(nz*sizeof(HYPRE_BigInt)); CHECK_V_ERROR;
   aval = B->aval = (HYPRE_Real*)MALLOC_DH(nz*sizeof(HYPRE_Real)); CHECK_V_ERROR;
 
   /* form new rp array */
@@ -641,7 +649,7 @@ void Mat_dhPermute(Mat_dh A, HYPRE_Int *n2o, Mat_dh *Bout)
     HYPRE_Int oldRow = n2o[i];
     HYPRE_Int idx = rp[i];
     for (j=RP[oldRow]; j<RP[oldRow+1]; ++j) {
-      cval[idx] = o2n[CVAL[j]];
+      cval[idx] = (HYPRE_BigInt)o2n[(HYPRE_Int)CVAL[j]];
       aval[idx] = AVAL[j];
       ++idx;
     }
@@ -676,7 +684,7 @@ void Mat_dhPrintGraph(Mat_dh A, SubdomainGraph_dh sg, FILE *fp)
         mat_dh_print_graph_private(A->m, A->beg_row, A->rp, A->cval, 
                   A->aval, NULL, NULL, NULL, fp); CHECK_V_ERROR;
       } else {
-        HYPRE_Int beg_row = sg->beg_rowP[myid_dh];
+        HYPRE_BigInt beg_row = sg->beg_rowP[myid_dh];
         mat_dh_print_graph_private(A->m, beg_row, A->rp, A->cval, 
                   A->aval, sg->n2o_row, sg->o2n_col, sg->o2n_ext, fp); CHECK_V_ERROR;
       }
@@ -692,7 +700,8 @@ void Mat_dhPrintRows(Mat_dh A, SubdomainGraph_dh sg, FILE *fp)
 {
   START_FUNC_DH
   bool noValues; 
-  HYPRE_Int m = A->m, *rp = A->rp, *cval = A->cval;
+  HYPRE_Int m = A->m, *rp = A->rp;
+  HYPRE_BigInt *cval = A->cval;
   HYPRE_Real *aval = A->aval;
 
   noValues = (Parser_dhHasSwitch(parser_dh, "-noValues"));
@@ -703,7 +712,7 @@ void Mat_dhPrintRows(Mat_dh A, SubdomainGraph_dh sg, FILE *fp)
    *----------------------------------------------------------------*/
   if (sg == NULL) {
     HYPRE_Int i, j;
-    HYPRE_Int beg_row = A->beg_row;
+    HYPRE_BigInt beg_row = A->beg_row;
 
     hypre_fprintf(fp, "\n----- A, unpermuted ------------------------------------\n");
     for (i=0; i<m; ++i) {
@@ -724,7 +733,7 @@ void Mat_dhPrintRows(Mat_dh A, SubdomainGraph_dh sg, FILE *fp)
    *----------------------------------------------------------------*/
   else if (np_dh == 1) {
     HYPRE_Int i, k, idx = 1;
-    HYPRE_Int oldRow;
+    HYPRE_BigInt oldRow;
 
     for (i=0; i<sg->blocks; ++i) {
       HYPRE_Int oldBlock = sg->n2o_sub[i];
@@ -732,8 +741,8 @@ void Mat_dhPrintRows(Mat_dh A, SubdomainGraph_dh sg, FILE *fp)
       /* here, 'beg_row' and 'end_row' refer to rows in the
          original ordering of A.
       */
-      HYPRE_Int beg_row = sg->beg_row[oldBlock];
-      HYPRE_Int end_row = beg_row + sg->row_count[oldBlock];
+      HYPRE_BigInt beg_row = sg->beg_row[oldBlock];
+      HYPRE_BigInt end_row = beg_row + (HYPRE_BigInt)(sg->row_count[oldBlock]);
 
       hypre_fprintf(fp, "\n");
       hypre_fprintf(fp, "\n----- A, permuted, single mpi task  ------------------\n");
@@ -745,7 +754,8 @@ void Mat_dhPrintRows(Mat_dh A, SubdomainGraph_dh sg, FILE *fp)
       hypre_fprintf(fp, "     1st bdry row= %i \n", 1+end_row-sg->bdry_count[oldBlock]);
 
       for (oldRow=beg_row; oldRow<end_row; ++oldRow) {
-        HYPRE_Int len = 0, *cval;
+        HYPRE_Int len = 0;
+        HYPRE_BigInt *cval;
         HYPRE_Real *aval;
 
         hypre_fprintf(fp, "%3i (old= %3i) :: ", idx, 1+oldRow);
@@ -772,25 +782,25 @@ void Mat_dhPrintRows(Mat_dh A, SubdomainGraph_dh sg, FILE *fp)
   else {
     Hash_i_dh hash = sg->o2n_ext;
     HYPRE_Int *o2n_col = sg->o2n_col, *n2o_row = sg->n2o_row;
-    HYPRE_Int beg_row = sg->beg_row[myid_dh];
-    HYPRE_Int beg_rowP = sg->beg_rowP[myid_dh];
+    HYPRE_BigInt beg_row = sg->beg_row[myid_dh];
+    HYPRE_BigInt beg_rowP = sg->beg_rowP[myid_dh];
     HYPRE_Int i, j;
 
     for (i=0; i<m; ++i) {
       HYPRE_Int row = n2o_row[i];
       hypre_fprintf(fp, "%3i (old= %3i) :: ", 1+i+beg_rowP, 1+row+beg_row);
       for (j=rp[row]; j<rp[row+1]; ++j) {
-        HYPRE_Int col = cval[j];
+        HYPRE_BigInt col = cval[j];
 
         /* find permuted (old-to-new) value for the column */
         /* case i: column is locally owned */
         if (col >= beg_row && col < beg_row+m) {
-          col = o2n_col[col-beg_row] + beg_rowP;
+          col = o2n_col[(HYPRE_Int)(col-beg_row)] + beg_rowP;
         } 
 
         /* case ii: column is external */
         else {
-          HYPRE_Int tmp = col;
+          HYPRE_BigInt tmp = col;
           tmp = Hash_i_dhLookup(hash, col); CHECK_V_ERROR;
           if (tmp == -1) { 
             hypre_sprintf(msgBuf_dh, "nonlocal column= %i not in hash table", 1+col); 
@@ -819,7 +829,8 @@ void Mat_dhPrintRows(Mat_dh A, SubdomainGraph_dh sg, FILE *fp)
 void Mat_dhPrintTriples(Mat_dh A, SubdomainGraph_dh sg, char *filename)
 {
   START_FUNC_DH
-  HYPRE_Int m = A->m, *rp = A->rp, *cval = A->cval;
+  HYPRE_Int m = A->m, *rp = A->rp;
+  HYPRE_BigInt *cval = A->cval;
   HYPRE_Real *aval = A->aval;
   bool noValues; 
   bool matlab;
@@ -834,7 +845,7 @@ void Mat_dhPrintTriples(Mat_dh A, SubdomainGraph_dh sg, char *filename)
    *----------------------------------------------------------------*/
   if (sg == NULL) {
     HYPRE_Int i, j, pe;
-    HYPRE_Int beg_row = A->beg_row;
+    HYPRE_BigInt beg_row = A->beg_row;
     HYPRE_Real val;
 
     for (pe=0; pe<np_dh; ++pe) {
@@ -872,13 +883,14 @@ void Mat_dhPrintTriples(Mat_dh A, SubdomainGraph_dh sg, char *filename)
 
     for (i=0; i<sg->blocks; ++i) {
       HYPRE_Int oldBlock = sg->n2o_sub[i];
-      HYPRE_Int beg_row = sg->beg_rowP[oldBlock];
-      HYPRE_Int end_row = beg_row + sg->row_count[oldBlock];
+      HYPRE_BigInt beg_row = sg->beg_rowP[oldBlock];
+      HYPRE_BigInt end_row = beg_row + (HYPRE_BigInt)(sg->row_count[oldBlock]);
 
       for (j=beg_row; j<end_row; ++j) {
-        HYPRE_Int len = 0, *cval;
+        HYPRE_Int len = 0;
+        HYPRE_BigInt *cval;
         HYPRE_Real *aval;
-        HYPRE_Int oldRow = sg->n2o_row[j];
+        HYPRE_BigInt oldRow = (HYPRE_BigInt)(sg->n2o_row[j]);
 
         Mat_dhGetRow(A, oldRow, &len, &cval, &aval); CHECK_V_ERROR;
    
@@ -908,8 +920,8 @@ void Mat_dhPrintTriples(Mat_dh A, SubdomainGraph_dh sg, char *filename)
   else {
     Hash_i_dh hash = sg->o2n_ext;
     HYPRE_Int *o2n_col = sg->o2n_col, *n2o_row = sg->n2o_row;
-    HYPRE_Int beg_row = sg->beg_row[myid_dh];
-    HYPRE_Int beg_rowP = sg->beg_rowP[myid_dh];
+    HYPRE_BigInt beg_row = sg->beg_row[myid_dh];
+    HYPRE_BigInt beg_rowP = sg->beg_rowP[myid_dh];
     HYPRE_Int i, j, pe;
     HYPRE_Int id = sg->o2n_sub[myid_dh];
 
@@ -926,7 +938,7 @@ void Mat_dhPrintTriples(Mat_dh A, SubdomainGraph_dh sg, char *filename)
         for (i=0; i<m; ++i) {
           HYPRE_Int row = n2o_row[i];
           for (j=rp[row]; j<rp[row+1]; ++j) {
-            HYPRE_Int col = cval[j];
+            HYPRE_BigInt col = cval[j];
             HYPRE_Real val = 0.0;
 
             if (aval != NULL) val = aval[j]; 
@@ -935,12 +947,12 @@ void Mat_dhPrintTriples(Mat_dh A, SubdomainGraph_dh sg, char *filename)
             /* find permuted (old-to-new) value for the column */
             /* case i: column is locally owned */
             if (col >= beg_row && col < beg_row+m) {
-              col = o2n_col[col-beg_row] + beg_rowP;
+              col = (HYPRE_BigInt)o2n_col[col-beg_row] + beg_rowP;
             } 
 
             /* case ii: column is external */
             else {
-              HYPRE_Int tmp = col;
+              HYPRE_BigInt tmp = col;
               tmp = Hash_i_dhLookup(hash, col); CHECK_V_ERROR;
               if (tmp == -1) { 
                 hypre_sprintf(msgBuf_dh, "nonlocal column= %i not in hash table", 1+col); 
@@ -1126,7 +1138,8 @@ void Mat_dhFixDiags(Mat_dh A)
 {
   START_FUNC_DH
   HYPRE_Int i, j;
-  HYPRE_Int *rp = A->rp, *cval = A->cval, m = A->m;
+  HYPRE_Int *rp = A->rp, m = A->m;
+  HYPRE_BigInt *cval = A->cval;
   HYPRE_Int ct = 0;  /* number of missing diagonals */
   HYPRE_Real *aval = A->aval;
 
@@ -1134,7 +1147,7 @@ void Mat_dhFixDiags(Mat_dh A)
   for (i=0; i<m; ++i) {
     bool flag = true;
     for (j=rp[i]; j<rp[i+1]; ++j) {
-      HYPRE_Int col = cval[j];
+      HYPRE_BigInt col = cval[j];
       if (col == i) {
         flag = false;
         break;
@@ -1173,14 +1186,15 @@ void Mat_dhFixDiags(Mat_dh A)
 void insert_diags_private(Mat_dh A, HYPRE_Int ct)
 {
   START_FUNC_DH
-  HYPRE_Int *RP = A->rp, *CVAL = A->cval;
-  HYPRE_Int *rp, *cval, m = A->m;
+  HYPRE_Int *RP = A->rp;
+  HYPRE_BigInt *CVAL = A->cval, *cval;
+  HYPRE_Int *rp, m = A->m;
   HYPRE_Real *aval, *AVAL = A->aval;
   HYPRE_Int nz = RP[m] + ct;
   HYPRE_Int i, j, idx = 0;
 
   rp = A->rp = (HYPRE_Int*)MALLOC_DH((m+1)*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  cval = A->cval = (HYPRE_Int*)MALLOC_DH(nz*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  cval = A->cval = (HYPRE_BigInt*)MALLOC_DH(nz*sizeof(HYPRE_BigInt)); CHECK_V_ERROR;
   aval = A->aval = (HYPRE_Real*)MALLOC_DH(nz*sizeof(HYPRE_Real)); CHECK_V_ERROR;
   rp[0] = 0;
 
@@ -1214,7 +1228,8 @@ void Mat_dhPrintDiags(Mat_dh A, FILE *fp)
 {
   START_FUNC_DH
   HYPRE_Int i, j, m = A->m;
-  HYPRE_Int *rp = A->rp, *cval = A->cval;
+  HYPRE_Int *rp = A->rp;
+  HYPRE_BigInt *cval = A->cval;
   HYPRE_Real *aval = A->aval;
 
   hypre_fprintf(fp, "=================== diagonal elements ====================\n");
@@ -1237,10 +1252,10 @@ void Mat_dhPrintDiags(Mat_dh A, FILE *fp)
 
 #undef __FUNC__
 #define __FUNC__ "Mat_dhGetRow"
-void Mat_dhGetRow(Mat_dh B, HYPRE_Int globalRow, HYPRE_Int *len, HYPRE_Int **ind, HYPRE_Real **val) 
+void Mat_dhGetRow(Mat_dh B, HYPRE_BigInt globalRow, HYPRE_Int *len, HYPRE_BigInt **ind, HYPRE_Real **val) 
 {
   START_FUNC_DH
-  HYPRE_Int row = globalRow - B->beg_row;
+  HYPRE_Int row = (HYPRE_Int)(globalRow - B->beg_row);
   if (row > B->m) {
     hypre_sprintf(msgBuf_dh, "requested globalRow= %i, which is local row= %i, but only have %i rows!",
                                 globalRow, row, B->m);
@@ -1254,7 +1269,7 @@ void Mat_dhGetRow(Mat_dh B, HYPRE_Int globalRow, HYPRE_Int *len, HYPRE_Int **ind
 
 #undef __FUNC__
 #define __FUNC__ "Mat_dhRestoreRow"
-void Mat_dhRestoreRow(Mat_dh B, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, HYPRE_Real **val) 
+void Mat_dhRestoreRow(Mat_dh B, HYPRE_BigInt row, HYPRE_Int *len, HYPRE_BigInt **ind, HYPRE_Real **val) 
 {
   START_FUNC_DH
   END_FUNC_DH
@@ -1269,7 +1284,8 @@ void Mat_dhRowPermute(Mat_dh mat)
 
 #if 0
   HYPRE_Int i, j, m = mat->m, nz = mat->rp[m];
-  HYPRE_Int *o2n, *cval;
+  HYPRE_Int *o2n;
+  HYPRE_BigInt *cval;
   HYPRE_Int algo = 1;
   HYPRE_Real *r1, *c1;
   bool debug = mat->debug;
@@ -1345,7 +1361,8 @@ void Mat_dhRowPermute(Mat_dh mat)
   if (isNatural) {
     hypre_printf("@@@ [%i] Mat_dhRowPermute :: got natural ordering!\n", myid_dh);
   } else {
-    HYPRE_Int *rp = B->rp, *cval = B->cval;
+    HYPRE_Int *rp = B->rp;
+    HYPRE_BigInt *cval = B->cval;
     HYPRE_Real *aval = B->aval;
 
     if (algo == 5) {
@@ -1358,7 +1375,7 @@ void Mat_dhRowPermute(Mat_dh mat)
       }
       for (i=0; i<m; i++)
         for (j=rp[i]; j<rp[i+1]; j++)
-          aval[j] *= r1[cval[j]] * c1[i];
+          aval[j] *= r1[(HYPRE_Int)cval[j]] * c1[i];
     }
 
     mat_dh_transpose_reuse_private(B->m, B->rp, B->cval, B->aval,
@@ -1378,22 +1395,23 @@ void Mat_dhRowPermute(Mat_dh mat)
 /*==============================================================================*/
 #undef __FUNC__
 #define __FUNC__ "Mat_dhPartition"
-void build_adj_lists_private(Mat_dh mat, HYPRE_Int **rpOUT, HYPRE_Int **cvalOUT)
+void build_adj_lists_private(Mat_dh mat, HYPRE_Int **rpOUT, HYPRE_BigInt **cvalOUT)
 {
   START_FUNC_DH
   HYPRE_Int m = mat->m;
-  HYPRE_Int *RP = mat->rp, *CVAL = mat->cval;
+  HYPRE_Int *RP = mat->rp;
+  HYPRE_BigInt *cval, *CVAL = mat->cval;
   HYPRE_Int nz = RP[m];
-  HYPRE_Int i, j, *rp, *cval, idx = 0;
+  HYPRE_Int i, j, *rp, idx = 0;
 
   rp = *rpOUT = (HYPRE_Int *)MALLOC_DH((m+1)*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  cval = *cvalOUT = (HYPRE_Int *)MALLOC_DH(nz*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  cval = *cvalOUT = (HYPRE_BigInt *)MALLOC_DH(nz*sizeof(HYPRE_BigInt)); CHECK_V_ERROR;
   rp[0] = 0;
 
   /* assume symmetry for now! */
   for (i=0; i<m; ++i)  {
     for (j=RP[i]; j<RP[i+1]; ++j) {
-      HYPRE_Int col = CVAL[j];
+      HYPRE_BigInt col = CVAL[j];
       if (col != i) {
         cval[idx++] = col;
       }
@@ -1407,7 +1425,7 @@ void build_adj_lists_private(Mat_dh mat, HYPRE_Int **rpOUT, HYPRE_Int **cvalOUT)
 #undef __FUNC__
 #define __FUNC__ "Mat_dhPartition"
 void Mat_dhPartition(Mat_dh mat, HYPRE_Int blocks, 
-                     HYPRE_Int **beg_rowOUT, HYPRE_Int **row_countOUT,  HYPRE_Int **n2oOUT, HYPRE_Int **o2nOUT)
+                     HYPRE_BigInt **beg_rowOUT, HYPRE_Int **row_countOUT,  HYPRE_Int **n2oOUT, HYPRE_Int **o2nOUT)
 {
   START_FUNC_DH
 #ifndef HAVE_METIS_DH

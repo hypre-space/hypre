@@ -40,11 +40,35 @@ void shellSort_int(const HYPRE_Int n, HYPRE_Int *x)
 }
 
 #undef __FUNC__
+#define __FUNC__ "shellSort_bigint"
+void shellSort_bigint(const HYPRE_Int n, HYPRE_BigInt *x)
+{
+  START_FUNC_DH
+  HYPRE_Int m, max, j, k;
+  HYPRE_BigInt itemp;
+
+  m = n/2;
+  while (m > 0) {
+    max = n - m;
+    for (j=0; j<max; j++) {
+      for (k=j; k>=0; k-=m) {
+        if (x[k+m] >= x[k]) break;
+        itemp = x[k+m];
+        x[k+m] = x[k];
+        x[k] = itemp;
+      }
+    }
+    m = m/2;
+  }
+  END_FUNC_DH
+}
+
+#undef __FUNC__
 #define __FUNC__ "shellSort_float"
 void shellSort_float(const HYPRE_Int n, HYPRE_Real *x)
 {
   START_FUNC_DH
-  HYPRE_Int m, max, j, k;
+  HYPRE_BigInt m, max, j, k;
   HYPRE_Real itemp;
 
   m = n/2;
@@ -67,10 +91,10 @@ void shellSort_float(const HYPRE_Int n, HYPRE_Real *x)
 #if 0
 #undef __FUNC__
 #define __FUNC__ "shellSort_int_float"
-void shellSort_int_float(HYPRE_Int n, HYPRE_Int *x, VAL_DH *xVals)
+void shellSort_int_float(HYPRE_BigInt n, HYPRE_BigInt *x, VAL_DH *xVals)
 {
   START_FUNC_DH
-  HYPRE_Int m, max, j, k, itemp;
+  HYPRE_BigInt m, max, j, k, itemp;
   VAL_DH atemp;
 
   m = n/2;

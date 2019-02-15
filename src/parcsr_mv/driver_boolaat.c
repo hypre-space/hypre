@@ -26,7 +26,7 @@ main( HYPRE_Int   argc,
    hypre_ParCSRBooleanMatrix     *A;
    hypre_ParCSRBooleanMatrix     *C;
    hypre_CSRBooleanMatrix *As;
-   HYPRE_Int *row_starts, *col_starts;
+   HYPRE_BigInt *row_starts, *col_starts;
    HYPRE_Int num_procs, my_id;
 
    /* Initialize MPI */

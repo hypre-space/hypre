@@ -763,6 +763,7 @@ enable_option_checking
 enable_debug
 enable_shared
 enable_bigint
+enable_allbigint
 enable_single
 enable_longdouble
 enable_complex
@@ -1456,6 +1457,7 @@ Optional Features:
   --enable-debug          Set compiler flags for debugging.
   --enable-shared         Build shared libraries (default is NO).
   --enable-bigint         Use long long int for HYPRE_Int (default is NO).
+  --enable-allbigint      Use long long int for HYPRE_Int (default is NO).
   --enable-single         Use single precision values (default is NO).
   --enable-longdouble     Use long double precision values (default is NO).
   --enable-complex        Use complex values (default is NO).
@@ -2765,6 +2767,25 @@ fi
 if test "$hypre_using_bigint" = "yes"
 then
    $as_echo "#define HYPRE_BIGINT 1" >>confdefs.h
+
+fi
+
+# Check whether --enable-allbigint was given.
+if test "${enable_allbigint+set}" = set; then :
+  enableval=$enable_allbigint; case "${enableval}" in
+    yes) hypre_using_fei=no
+         hypre_using_allbigint=yes ;;
+    no)  hypre_using_allbigint=no ;;
+    *)   as_fn_error $? "Bad value ${enableval} for --enable-allbigint" "$LINENO" 5 ;;
+ esac
+else
+  hypre_using_allbigint=no
+
+fi
+
+if test "$hypre_using_allbigint" = "yes"
+then
+   $as_echo "#define HYPRE_ALLBIGINT 1" >>confdefs.h
 
 fi
 

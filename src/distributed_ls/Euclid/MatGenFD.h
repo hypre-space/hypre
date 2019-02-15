@@ -78,7 +78,7 @@ struct _matgenfd {
    */
   HYPRE_Real a, b, c, d, e, f, g, h;
 
-  HYPRE_Int first; /* global number of first locally owned row */
+  HYPRE_BigInt first; /* global number of first locally owned row */
   bool debug;
 
   /* boundary conditions; if value is < 0, neumen; else, dirichelet */

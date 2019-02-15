@@ -18,7 +18,7 @@
 /* #include "euclid_common.h" */
 
 typedef struct _srecord {
-    HYPRE_Int    col;
+    HYPRE_BigInt col;
     HYPRE_Int    level;
     HYPRE_Real val;
     HYPRE_Int next;

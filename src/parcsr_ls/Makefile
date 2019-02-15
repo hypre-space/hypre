@@ -103,9 +103,9 @@ FILES =\
  par_interp.c\
  par_jacobi_interp.c\
  par_multi_interp.c\
+ par_laplace.c\
  par_laplace_27pt.c\
  par_laplace_9pt.c\
- par_laplace.c\
  par_lr_interp.c\
  par_mgr.c\
  par_mgr_setup.c\
@@ -115,8 +115,6 @@ FILES =\
  par_rap.c\
  par_rap_communication.c\
  par_rotate_7pt.c\
- par_vardifconv.c\
- par_vardifconv_rs.c\
  par_relax.c\
  par_relax_more.c\
  par_relax_interface.c\
@@ -126,6 +124,8 @@ FILES =\
  par_strength.c\
  par_sv_interp.c\
  par_sv_interp_ln.c\
+ par_vardifconv.c\
+ par_vardifconv_rs.c\
  partial.c\
  pcg_par.c\
  schwarz.c\

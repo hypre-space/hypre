@@ -14,7 +14,7 @@
  * Assumption: no duplicates in arr1 and arr2
  * arr3 should have enough space on entry 
  * map1 and map2 map arr1 and arr2 to arr3 */
-void hypre_union2(HYPRE_Int n1, HYPRE_Int *arr1, HYPRE_Int n2, HYPRE_Int *arr2, HYPRE_Int *n3, HYPRE_Int *arr3,
+void hypre_union2(HYPRE_Int n1, HYPRE_BigInt *arr1, HYPRE_Int n2, HYPRE_BigInt *arr2, HYPRE_Int *n3, HYPRE_BigInt *arr3,
                   HYPRE_Int *map1, HYPRE_Int *map2)
 {
    HYPRE_Int i = 0, j = 0, k = 0;
@@ -374,6 +374,63 @@ void hypre_sort_and_create_inverse_map(
     }
   }
   assert(hypre_UnorderedIntMapSize(inverse_map) == len);
+#endif
+
+   if (*out == in)
+   {
+      hypre_TFree(temp, HYPRE_MEMORY_HOST);
+   }
+   else
+   {
+      hypre_TFree(in, HYPRE_MEMORY_HOST);
+   }
+
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_MERGE] += hypre_MPI_Wtime();
+#endif
+}
+
+void hypre_big_sort_and_create_inverse_map(
+  HYPRE_BigInt *in, HYPRE_Int len, HYPRE_BigInt **out, hypre_BigUnorderedIntMap *inverse_map)
+{
+   if (len == 0)
+   {
+      return;
+   }
+
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_MERGE] -= hypre_MPI_Wtime();
+#endif
+
+   HYPRE_BigInt *temp = hypre_TAlloc(HYPRE_Int,  len, HYPRE_MEMORY_HOST);
+   hypre_big_merge_sort(in, temp, len, out);
+   hypre_BigUnorderedIntMapCreate(inverse_map, 2*len, 16*hypre_NumThreads());
+   HYPRE_Int i;
+#pragma omp parallel for HYPRE_SMP_SCHEDULE
+   for (i = 0; i < len; i++)
+   {
+      HYPRE_Int old = hypre_BigUnorderedIntMapPutIfAbsent(inverse_map, (*out)[i], i);
+      assert(old == HYPRE_HOPSCOTCH_HASH_EMPTY);
+#ifdef DBG_MERGE_SORT
+      if (hypre_BigUnorderedIntMapGet(inverse_map, (*out)[i]) != i)
+      {
+         fprintf(stderr, "%d %d\n", i, (*out)[i]);
+         assert(false);
+      }
+#endif
+   }
+
+#ifdef DBG_MERGE_SORT
+  std::unordered_map<HYPRE_Int, HYPRE_Int> inverse_map2(len);
+  for (HYPRE_Int i = 0; i < len; ++i) {
+    inverse_map2[(*out)[i]] = i;
+    if (hypre_BigUnorderedIntMapGet(inverse_map, (*out)[i]) != i)
+    {
+      fprintf(stderr, "%d %d\n", i, (*out)[i]);
+      assert(false);
+    }
+  }
+  assert(hypre_BigUnorderedIntMapSize(inverse_map) == len);
 #endif
 
    if (*out == in)

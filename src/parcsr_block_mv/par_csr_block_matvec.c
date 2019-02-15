@@ -38,8 +38,10 @@ hypre_ParCSRBlockMatrixMatvec(HYPRE_Complex alpha,
    hypre_ParCSRCommPkg    *comm_pkg;
    hypre_CSRBlockMatrix   *diag, *offd;
    hypre_Vector           *x_local, *y_local, *x_tmp;
-   HYPRE_Int               i, j, k, index, num_rows, num_cols;
-   HYPRE_Int               blk_size, x_size, y_size, size;
+   HYPRE_BigInt            num_rows, num_cols;
+   HYPRE_Int               i, j, k, index;
+   HYPRE_Int               blk_size, size;
+   HYPRE_BigInt            x_size, y_size;
    HYPRE_Int               num_cols_offd, start, finish, elem;
    HYPRE_Int               ierr = 0, nprocs, num_sends, mypid;
    HYPRE_Complex          *x_tmp_data, *x_buf_data, *x_local_data;
@@ -63,9 +65,9 @@ hypre_ParCSRBlockMatrixMatvec(HYPRE_Complex alpha,
     *  Check for size compatibility.  
     *--------------------------------------------------------------------*/
  
-   if (num_cols*blk_size != x_size) ierr = 11;
-   if (num_rows*blk_size != y_size) ierr = 12;
-   if (num_cols*blk_size != x_size && num_rows*blk_size != y_size) ierr = 13;
+   if (num_cols*(HYPRE_BigInt)blk_size != x_size) ierr = 11;
+   if (num_rows*(HYPRE_BigInt)blk_size != y_size) ierr = 12;
+   if (num_cols*(HYPRE_BigInt)blk_size != x_size && num_rows*(HYPRE_BigInt)blk_size != y_size) ierr = 13;
 
    if (nprocs > 1)
    {
@@ -134,14 +136,14 @@ hypre_ParCSRBlockMatrixMatvecT( HYPRE_Complex    alpha,
 
    HYPRE_Complex    *y_local_data;
    HYPRE_Int         blk_size = hypre_ParCSRBlockMatrixBlockSize(A);
-   HYPRE_Int         x_size = hypre_ParVectorGlobalSize(x);
-   HYPRE_Int         y_size = hypre_ParVectorGlobalSize(y);
+   HYPRE_BigInt      x_size = hypre_ParVectorGlobalSize(x);
+   HYPRE_BigInt      y_size = hypre_ParVectorGlobalSize(y);
    HYPRE_Complex    *y_tmp_data, *y_buf_data;
    
 
-   HYPRE_Int         num_rows  = hypre_ParCSRBlockMatrixGlobalNumRows(A);
-   HYPRE_Int         num_cols  = hypre_ParCSRBlockMatrixGlobalNumCols(A);
-   HYPRE_Int           num_cols_offd = hypre_CSRBlockMatrixNumCols(offd);
+   HYPRE_BigInt      num_rows  = hypre_ParCSRBlockMatrixGlobalNumRows(A);
+   HYPRE_BigInt      num_cols  = hypre_ParCSRBlockMatrixGlobalNumCols(A);
+   HYPRE_Int         num_cols_offd = hypre_CSRBlockMatrixNumCols(offd);
 
 
    HYPRE_Int         i, j, index, start, finish, elem, num_sends;
@@ -161,13 +163,13 @@ hypre_ParCSRBlockMatrixMatvecT( HYPRE_Complex    alpha,
     *  is informational only.
     *--------------------------------------------------------------------*/
  
-   if (num_rows*blk_size != x_size)
+   if (num_rows*(HYPRE_BigInt)blk_size != x_size)
       ierr = 1;
 
-   if (num_cols*blk_size != y_size)
+   if (num_cols*(HYPRE_BigInt)blk_size != y_size)
       ierr = 2;
 
-   if (num_rows*blk_size != x_size && num_cols*blk_size != y_size)
+   if (num_rows*(HYPRE_BigInt)blk_size != x_size && num_cols*(HYPRE_BigInt)blk_size != y_size)
       ierr = 3;
    /*-----------------------------------------------------------------------
     *-----------------------------------------------------------------------*/
@@ -175,7 +177,6 @@ hypre_ParCSRBlockMatrixMatvecT( HYPRE_Complex    alpha,
 
    y_tmp = hypre_SeqVectorCreate(num_cols_offd*blk_size);
    hypre_SeqVectorInitialize(y_tmp);
-
 
    /*---------------------------------------------------------------------
     * If there exists no CommPkg for A, a CommPkg is generated using

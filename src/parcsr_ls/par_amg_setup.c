@@ -12,7 +12,7 @@
 
 #include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
-#include "par_csr_block_matrix.h"
+#include "../parcsr_block_mv/par_csr_block_matrix.h"
 
 #define DEBUG 0
 #define PRINT_CF 0
@@ -112,12 +112,12 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Int       old_num_levels, num_levels;
    HYPRE_Int       level;
    HYPRE_Int       local_size, i;
-   HYPRE_Int       first_local_row;
-   HYPRE_Int       coarse_size;
+   HYPRE_BigInt    first_local_row;
+   HYPRE_BigInt    coarse_size;
    HYPRE_Int       coarsen_type;
    HYPRE_Int       measure_type;
    HYPRE_Int       setup_type;
-   HYPRE_Int       fine_size;
+   HYPRE_BigInt    fine_size;
    HYPRE_Int       rest, tms, indx;
    HYPRE_Real    size;
    HYPRE_Int       not_finished_coarsening = 1;
@@ -136,8 +136,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Int       agg_interp_type = hypre_ParAMGDataAggInterpType(amg_data);
    HYPRE_Int       sep_weight = hypre_ParAMGDataSepWeight(amg_data);
    HYPRE_Int	    *coarse_dof_func = NULL;
-   HYPRE_Int	    *coarse_pnts_global;
-   HYPRE_Int	    *coarse_pnts_global1;
+   HYPRE_BigInt	   *coarse_pnts_global;
+   HYPRE_BigInt	   *coarse_pnts_global1;
    HYPRE_Int       num_cg_sweeps;
 
    HYPRE_Real *max_eig_est = NULL;
@@ -616,9 +616,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       dof_func_array = hypre_CTAlloc(HYPRE_Int*, max_levels, HYPRE_MEMORY_HOST);
    if (num_functions > 1 && dof_func == NULL)
    {
+      HYPRE_BigInt num_fun = (HYPRE_BigInt) num_functions;
       first_local_row = hypre_ParCSRMatrixFirstRowIndex(A);
       dof_func = hypre_CTAlloc(HYPRE_Int, local_size, HYPRE_MEMORY_HOST);
-      rest = first_local_row-((first_local_row/num_functions)*num_functions);
+      rest = first_local_row-((first_local_row/num_fun)*num_fun);
       indx = num_functions-rest;
       if (rest == 0) indx = 0;
       k = num_functions - 1;
@@ -1314,7 +1315,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             }
 #ifdef HYPRE_NO_GLOBAL_PARTITION
             if (my_id == (num_procs -1)) coarse_size = coarse_pnts_global[1];
-            hypre_MPI_Bcast(&coarse_size, 1, HYPRE_MPI_INT, num_procs-1, comm);
+            hypre_MPI_Bcast(&coarse_size, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
 #else
             coarse_size = coarse_pnts_global[num_procs];
 #endif
@@ -1579,7 +1580,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             }
 #ifdef HYPRE_NO_GLOBAL_PARTITION
             if (my_id == (num_procs -1)) coarse_size = coarse_pnts_global[1];
-            hypre_MPI_Bcast(&coarse_size, 1, HYPRE_MPI_INT, num_procs-1, comm);
+            hypre_MPI_Bcast(&coarse_size, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
 #else
             coarse_size = coarse_pnts_global[num_procs];
 #endif
@@ -1602,7 +1603,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             }
 #ifdef HYPRE_NO_GLOBAL_PARTITION
             if (my_id == (num_procs -1)) coarse_size = coarse_pnts_global[1];
-            hypre_MPI_Bcast(&coarse_size, 1, HYPRE_MPI_INT, num_procs-1, comm);
+            hypre_MPI_Bcast(&coarse_size, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
 #else
             coarse_size = coarse_pnts_global[num_procs];
 #endif
@@ -2464,7 +2465,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       }
 
       size = ((HYPRE_Real) fine_size )*.75;
-      if (coarsen_type > 0 && coarse_size >= (HYPRE_Int) size)
+      if (coarsen_type > 0 && coarse_size >= (HYPRE_BigInt) size)
       {
 	coarsen_type = 0;
       }
@@ -2475,7 +2476,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 #ifdef HAVE_DSUPERLU
 	 max_thresh = hypre_max(max_thresh, dslu_threshold);
 #endif
-         if ( (level == max_levels-1) || (coarse_size <= max_thresh) )
+         if ( (level == max_levels-1) || (coarse_size <= (HYPRE_BigInt) max_thresh) )
          {
             not_finished_coarsening = 0;
          }
@@ -2483,13 +2484,13 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    }  /* end of coarsening loop: while (not_finished_coarsening) */
 
    /* redundant coarse grid solve */
-   if (  (seq_threshold >= coarse_threshold) && (coarse_size > coarse_threshold) && (level != max_levels-1))
+   if (  (seq_threshold >= coarse_threshold) && (coarse_size > (HYPRE_BigInt)coarse_threshold) && (level != max_levels-1))
    {
       hypre_seqAMGSetup( amg_data, level, coarse_threshold);
 
    }
 #ifdef HAVE_DSUPERLU
-   else if (  ((dslu_threshold >= coarse_threshold) && (coarse_size > coarse_threshold) && (level != max_levels-1)))
+   else if (  ((dslu_threshold >= coarse_threshold) && (coarse_size > (HYPRE_BigInt)coarse_threshold) && (level != max_levels-1)))
    {
       HYPRE_Solver dslu_solver;
       hypre_SLUDistSetup(&dslu_solver, A_array[level], amg_print_level);

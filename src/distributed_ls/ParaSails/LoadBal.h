@@ -28,9 +28,9 @@
 typedef struct
 {
     HYPRE_Int  pe;
-    HYPRE_Int  beg_row;
-    HYPRE_Int  end_row;
-    HYPRE_Int *buffer;
+    HYPRE_BigInt  beg_row;
+    HYPRE_BigInt  end_row;
+    HYPRE_BigInt *buffer;
 }
 DonorData;
 

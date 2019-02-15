@@ -39,7 +39,7 @@
  * MatrixCreate - Return (a pointer to) a matrix object.
  *--------------------------------------------------------------------------*/
 
-Matrix *MatrixCreate(MPI_Comm comm, HYPRE_Int beg_row, HYPRE_Int end_row)
+Matrix *MatrixCreate(MPI_Comm comm, HYPRE_BigInt beg_row, HYPRE_BigInt end_row)
 {
     HYPRE_Int num_rows, mype, npes;
 
@@ -52,10 +52,10 @@ Matrix *MatrixCreate(MPI_Comm comm, HYPRE_Int beg_row, HYPRE_Int end_row)
 
     mat->mem = (Mem *) MemCreate();
 
-    num_rows = mat->end_row - mat->beg_row + 1;
+    num_rows = (HYPRE_Int)(mat->end_row - mat->beg_row + 1);
 
     mat->lens = (HYPRE_Int *)     MemAlloc(mat->mem, num_rows * sizeof(HYPRE_Int));
-    mat->inds = (HYPRE_Int **)    MemAlloc(mat->mem, num_rows * sizeof(HYPRE_Int *));
+    mat->inds = (HYPRE_BigInt **)    MemAlloc(mat->mem, num_rows * sizeof(HYPRE_BigInt *));
     mat->vals = (HYPRE_Real **) MemAlloc(mat->mem, num_rows * sizeof(HYPRE_Real *));
 
     /* Send beg_row and end_row to all processors */
@@ -64,11 +64,11 @@ Matrix *MatrixCreate(MPI_Comm comm, HYPRE_Int beg_row, HYPRE_Int end_row)
     hypre_MPI_Comm_rank(comm, &mype);
     hypre_MPI_Comm_size(comm, &npes);
 
-    mat->beg_rows = (HYPRE_Int *) MemAlloc(mat->mem, npes * sizeof(HYPRE_Int));
-    mat->end_rows = (HYPRE_Int *) MemAlloc(mat->mem, npes * sizeof(HYPRE_Int));
+    mat->beg_rows = (HYPRE_BigInt *) MemAlloc(mat->mem, npes * sizeof(HYPRE_BigInt));
+    mat->end_rows = (HYPRE_BigInt *) MemAlloc(mat->mem, npes * sizeof(HYPRE_BigInt));
 
-    hypre_MPI_Allgather(&beg_row, 1, HYPRE_MPI_INT, mat->beg_rows, 1, HYPRE_MPI_INT, comm);
-    hypre_MPI_Allgather(&end_row, 1, HYPRE_MPI_INT, mat->end_rows, 1, HYPRE_MPI_INT, comm);
+    hypre_MPI_Allgather(&beg_row, 1, HYPRE_MPI_BIG_INT, mat->beg_rows, 1, HYPRE_MPI_BIG_INT, comm);
+    hypre_MPI_Allgather(&end_row, 1, HYPRE_MPI_BIG_INT, mat->end_rows, 1, HYPRE_MPI_BIG_INT, comm);
 
     mat->num_recv = 0;
     mat->num_send = 0;
@@ -93,7 +93,7 @@ Matrix *MatrixCreate(MPI_Comm comm, HYPRE_Int beg_row, HYPRE_Int end_row)
  * The matrix created by this call is a local matrix, not a global matrix.
  *--------------------------------------------------------------------------*/
 
-Matrix *MatrixCreateLocal(HYPRE_Int beg_row, HYPRE_Int end_row)
+Matrix *MatrixCreateLocal(HYPRE_BigInt beg_row, HYPRE_BigInt end_row)
 {
     HYPRE_Int num_rows;
 
@@ -109,7 +109,7 @@ Matrix *MatrixCreateLocal(HYPRE_Int beg_row, HYPRE_Int end_row)
     num_rows = mat->end_row - mat->beg_row + 1;
 
     mat->lens = (HYPRE_Int *)     MemAlloc(mat->mem, num_rows * sizeof(HYPRE_Int));
-    mat->inds = (HYPRE_Int **)    MemAlloc(mat->mem, num_rows * sizeof(HYPRE_Int *));
+    mat->inds = (HYPRE_BigInt **)    MemAlloc(mat->mem, num_rows * sizeof(HYPRE_BigInt *));
     mat->vals = (HYPRE_Real **) MemAlloc(mat->mem, num_rows * sizeof(HYPRE_Real *));
 
     /* Send beg_row and end_row to all processors */
@@ -181,12 +181,12 @@ void MatrixDestroy(Matrix *mat)
  * the matrix is destroyed.  "row" is in global coordinate numbering.
  *--------------------------------------------------------------------------*/
 
-void MatrixSetRow(Matrix *mat, HYPRE_Int row, HYPRE_Int len, HYPRE_Int *ind, HYPRE_Real *val)
+void MatrixSetRow(Matrix *mat, HYPRE_BigInt global_row, HYPRE_Int len, HYPRE_BigInt *ind, HYPRE_Real *val)
 {
-    row -= mat->beg_row;
+    HYPRE_Int row = (HYPRE_Int)(global_row-mat->beg_row);
 
     mat->lens[row] = len;
-    mat->inds[row] = (HYPRE_Int *) MemAlloc(mat->mem, len*sizeof(HYPRE_Int));
+    mat->inds[row] = (HYPRE_BigInt *) MemAlloc(mat->mem, len*sizeof(HYPRE_BigInt));
     mat->vals[row] = (HYPRE_Real *) MemAlloc(mat->mem, len*sizeof(HYPRE_Real));
 
     if (ind != NULL)
@@ -200,7 +200,7 @@ void MatrixSetRow(Matrix *mat, HYPRE_Int row, HYPRE_Int len, HYPRE_Int *ind, HYP
  * MatrixGetRow - Get a *local* row in a matrix.  
  *--------------------------------------------------------------------------*/
 
-void MatrixGetRow(Matrix *mat, HYPRE_Int row, HYPRE_Int *lenp, HYPRE_Int **indp, HYPRE_Real **valp)
+void MatrixGetRow(Matrix *mat, HYPRE_BigInt row, HYPRE_Int *lenp, HYPRE_BigInt **indp, HYPRE_Real **valp)
 {
     *lenp = mat->lens[row];
     *indp = mat->inds[row];
@@ -211,12 +211,12 @@ void MatrixGetRow(Matrix *mat, HYPRE_Int row, HYPRE_Int *lenp, HYPRE_Int **indp,
  * MatrixRowPe - Map "row" to a processor number.
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int MatrixRowPe(Matrix *mat, HYPRE_Int row)
+HYPRE_Int MatrixRowPe(Matrix *mat, HYPRE_BigInt row)
 {
     HYPRE_Int npes, pe;
 
-    HYPRE_Int *beg = mat->beg_rows;
-    HYPRE_Int *end = mat->end_rows;
+    HYPRE_BigInt *beg = mat->beg_rows;
+    HYPRE_BigInt *end = mat->end_rows;
 
     hypre_MPI_Comm_size(mat->comm, &npes);
 
@@ -240,7 +240,7 @@ HYPRE_Int MatrixNnz(Matrix *mat)
 {
     HYPRE_Int num_local, i, total, alltotal;
 
-    num_local = mat->end_row - mat->beg_row + 1;
+    num_local = (HYPRE_Int)(mat->end_row - mat->beg_row + 1);
 
     total = 0;
     for (i=0; i<num_local; i++)
@@ -259,7 +259,8 @@ HYPRE_Int MatrixNnz(Matrix *mat)
 void MatrixPrint(Matrix *mat, char *filename)
 {
     HYPRE_Int mype, npes, pe;
-    HYPRE_Int row, i, len, *ind;
+    HYPRE_BigInt *ind;
+    HYPRE_Int row, i, len;
     HYPRE_Real *val;
 
     hypre_MPI_Comm_rank(mat->comm, &mype);
@@ -274,13 +275,13 @@ void MatrixPrint(Matrix *mat, char *filename)
             FILE *file = fopen(filename, (pe==0 ? "w" : "a"));
             assert(file != NULL);
 
-            for (row=0; row<=mat->end_row - mat->beg_row; row++)
+            for (row=0; row<=(HYPRE_Int)(mat->end_row - mat->beg_row); row++)
             {
                 MatrixGetRow(mat, row, &len, &ind, &val);
 
                 for (i=0; i<len; i++)
                     hypre_fprintf(file, "%d %d %.14e\n", 
-			row + mat->beg_row, 
+			(HYPRE_BigInt)row + mat->beg_row, 
 			mat->numb->local_to_global[ind[i]], val[i]);
             }
 
@@ -300,18 +301,18 @@ static void MatrixReadMaster(Matrix *mat, char *filename)
     FILE *file;
     HYPRE_Int ret;
     HYPRE_Int num_rows, curr_proc;
-    HYPRE_Int row, col;
+    HYPRE_BigInt row, col;
     HYPRE_Real value;
     hypre_longint offset;
     hypre_longint outbuf;
 
-    HYPRE_Int curr_row;
+    HYPRE_BigInt curr_row;
     HYPRE_Int len;
-    HYPRE_Int ind[MAX_NZ_PER_ROW];
+    HYPRE_BigInt ind[MAX_NZ_PER_ROW];
     HYPRE_Real val[MAX_NZ_PER_ROW];
 
     char line[100];
-    HYPRE_Int oldrow;
+    HYPRE_BigInt oldrow;
 
     hypre_MPI_Request request;
     hypre_MPI_Status  status;
@@ -419,13 +420,13 @@ static void MatrixReadSlave(Matrix *mat, char *filename)
     HYPRE_Int mype;
     FILE *file;
     HYPRE_Int ret;
-    HYPRE_Int row, col;
+    HYPRE_BigInt row, col;
     HYPRE_Real value;
     hypre_longint offset;
 
-    HYPRE_Int curr_row;
+    HYPRE_BigInt curr_row;
     HYPRE_Int len;
-    HYPRE_Int ind[MAX_NZ_PER_ROW];
+    HYPRE_BigInt ind[MAX_NZ_PER_ROW];
     HYPRE_Real val[MAX_NZ_PER_ROW];
 
     HYPRE_Real time0, time1;
@@ -528,7 +529,7 @@ void RhsRead(HYPRE_Real *rhs, Matrix *mat, char *filename)
     hypre_MPI_Comm_size(mat->comm, &npes);
     hypre_MPI_Comm_rank(mat->comm, &mype);
 
-    num_local = mat->end_row - mat->beg_row + 1;
+    num_local = (HYPRE_Int)(mat->end_row - mat->beg_row + 1);
 
     if (mype != 0)
     {
@@ -552,7 +553,7 @@ void RhsRead(HYPRE_Real *rhs, Matrix *mat, char *filename)
 
     for (pe=1; pe<npes; pe++)
     {
-	num_local = mat->end_rows[pe] - mat->beg_rows[pe]+ 1;
+	num_local = (HYPRE_Int)(mat->end_rows[pe] - mat->beg_rows[pe]+ 1);
 
 	if (buflen < num_local)
 	{
@@ -577,12 +578,12 @@ void RhsRead(HYPRE_Real *rhs, Matrix *mat, char *filename)
  * SetupReceives
  *--------------------------------------------------------------------------*/
 
-static void SetupReceives(Matrix *mat, HYPRE_Int reqlen, HYPRE_Int *reqind, HYPRE_Int *outlist)
+static void SetupReceives(Matrix *mat, HYPRE_Int reqlen, HYPRE_BigInt *reqind, HYPRE_Int *outlist)
 {
     HYPRE_Int i, j, this_pe, mype;
     hypre_MPI_Request request;
     MPI_Comm comm = mat->comm;
-    HYPRE_Int num_local = mat->end_row - mat->beg_row + 1;
+    HYPRE_Int num_local = (HYPRE_Int)(mat->end_row - mat->beg_row + 1);
 
     hypre_MPI_Comm_rank(comm, &mype);
 
@@ -608,7 +609,7 @@ static void SetupReceives(Matrix *mat, HYPRE_Int reqlen, HYPRE_Int *reqind, HYPR
         }
 
         /* Request rows in reqind[i..j-1] */
-        hypre_MPI_Isend(&reqind[i], j-i, HYPRE_MPI_INT, this_pe, 444, comm, &request);
+        hypre_MPI_Isend(&reqind[i], j-i, HYPRE_MPI_BIG_INT, this_pe, 444, comm, &request);
         hypre_MPI_Request_free(&request);
 
 	/* Count of number of number of indices needed from this_pe */
@@ -632,6 +633,7 @@ static void SetupReceives(Matrix *mat, HYPRE_Int reqlen, HYPRE_Int *reqind, HYPR
 static void SetupSends(Matrix *mat, HYPRE_Int *inlist)
 {
     HYPRE_Int i, j, mype, npes;
+    HYPRE_BigInt *big_sendind = NULL;
     hypre_MPI_Request *requests;
     hypre_MPI_Status  *statuses;
     MPI_Comm comm = mat->comm;
@@ -652,6 +654,7 @@ static void SetupSends(Matrix *mat, HYPRE_Int *inlist)
     {
         mat->sendbuf = hypre_TAlloc(HYPRE_Real, mat->sendlen , HYPRE_MEMORY_HOST);
         mat->sendind = hypre_TAlloc(HYPRE_Int, mat->sendlen , HYPRE_MEMORY_HOST);
+        big_sendind = hypre_TAlloc(HYPRE_BigInt, mat->sendlen , HYPRE_MEMORY_HOST);
     }
 
     j = 0;
@@ -661,7 +664,7 @@ static void SetupSends(Matrix *mat, HYPRE_Int *inlist)
 	if (inlist[i] != 0)
 	{
 	    /* Post receive for the actual indices */
-	    hypre_MPI_Irecv(&mat->sendind[j], inlist[i], HYPRE_MPI_INT, i, 444, comm, 
+	    hypre_MPI_Irecv(&big_sendind[j], inlist[i], HYPRE_MPI_BIG_INT, i, 444, comm, 
                 &requests[mat->num_send]);
 
 	    /* Set up the send */
@@ -685,7 +688,8 @@ static void SetupSends(Matrix *mat, HYPRE_Int *inlist)
     /* convert global indices to local indices */
     /* these are all indices on this processor */
     for (i=0; i<mat->sendlen; i++)
-        mat->sendind[i] -= mat->beg_row;
+        mat->sendind[i] = (HYPRE_Int)(big_sendind[i]-mat->beg_row);
+    free(big_sendind);
 }
 
 /*--------------------------------------------------------------------------
@@ -696,7 +700,8 @@ void MatrixComplete(Matrix *mat)
 {
     HYPRE_Int mype, npes;
     HYPRE_Int *outlist, *inlist;
-    HYPRE_Int row, len, *ind;
+    HYPRE_BigInt *ind;
+    HYPRE_Int len, row;
     HYPRE_Real *val;
 
     hypre_MPI_Comm_rank(mat->comm, &mype);
@@ -725,7 +730,7 @@ void MatrixComplete(Matrix *mat)
     free(inlist);
 
     /* Convert to local indices */
-    for (row=0; row<=mat->end_row - mat->beg_row; row++)
+    for (row=0; row<=(HYPRE_Int)(mat->end_row - mat->beg_row); row++)
     {
         MatrixGetRow(mat, row, &len, &ind, &val);
 	NumberingGlobalToLocal(mat->numb, len, ind, ind);
@@ -739,9 +744,10 @@ void MatrixComplete(Matrix *mat)
 
 void MatrixMatvec(Matrix *mat, HYPRE_Real *x, HYPRE_Real *y)
 {
-    HYPRE_Int row, i, len, *ind;
+    HYPRE_Int row, i, len;
+    HYPRE_BigInt *ind;
     HYPRE_Real *val, temp;
-    HYPRE_Int num_local = mat->end_row - mat->beg_row + 1;
+    HYPRE_Int num_local = (HYPRE_Int)(mat->end_row - mat->beg_row + 1);
 
     /* Set up persistent communications */
 
@@ -764,7 +770,7 @@ void MatrixMatvec(Matrix *mat, HYPRE_Real *x, HYPRE_Real *y)
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(row,len,ind,val,temp,i) schedule(static)
 #endif
-    for (row=0; row<=mat->end_row - mat->beg_row; row++)
+    for (row=0; row<=(HYPRE_Int)(mat->end_row - mat->beg_row); row++)
     {
         MatrixGetRow(mat, row, &len, &ind, &val);
 
@@ -781,9 +787,10 @@ void MatrixMatvec(Matrix *mat, HYPRE_Real *x, HYPRE_Real *y)
 
 void MatrixMatvecSerial(Matrix *mat, HYPRE_Real *x, HYPRE_Real *y)
 {
-    HYPRE_Int row, i, len, *ind;
+    HYPRE_Int row, i, len;
+    HYPRE_BigInt *ind;
     HYPRE_Real *val, temp;
-    HYPRE_Int num_local = mat->end_row - mat->beg_row + 1;
+    HYPRE_Int num_local = (HYPRE_Int)(mat->end_row - mat->beg_row + 1);
 
     /* Set up persistent communications */
 
@@ -803,7 +810,7 @@ void MatrixMatvecSerial(Matrix *mat, HYPRE_Real *x, HYPRE_Real *y)
     hypre_MPI_Waitall(mat->num_recv, mat->recv_req, mat->statuses);
 
     /* do the multiply */
-    for (row=0; row<=mat->end_row - mat->beg_row; row++)
+    for (row=0; row<=(HYPRE_Int)(mat->end_row - mat->beg_row); row++)
     {
         MatrixGetRow(mat, row, &len, &ind, &val);
 
@@ -825,9 +832,10 @@ void MatrixMatvecSerial(Matrix *mat, HYPRE_Real *x, HYPRE_Real *y)
 
 void MatrixMatvecTrans(Matrix *mat, HYPRE_Real *x, HYPRE_Real *y)
 {
-    HYPRE_Int row, i, len, *ind;
+    HYPRE_Int i, len;
+    HYPRE_BigInt row, *ind;
     HYPRE_Real *val;
-    HYPRE_Int num_local = mat->end_row - mat->beg_row + 1;
+    HYPRE_Int num_local = (HYPRE_Int)(mat->end_row - mat->beg_row + 1);
 
     /* Set up persistent communications */
 
@@ -841,7 +849,7 @@ void MatrixMatvecTrans(Matrix *mat, HYPRE_Real *x, HYPRE_Real *y)
         mat->recvbuf[i] = 0.0;
 
     /* do the multiply */
-    for (row=0; row<=mat->end_row - mat->beg_row; row++)
+    for (row=0; row<=(HYPRE_Int)(mat->end_row - mat->beg_row); row++)
     {
         MatrixGetRow(mat, row, &len, &ind, &val);
 

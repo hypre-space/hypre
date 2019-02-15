@@ -3031,7 +3031,7 @@ typedef struct hypre_StructGrid_struct
    hypre_Box           *bounding_box; /* Bounding box around grid */
 
    HYPRE_Int            local_size;   /* Number of grid points locally */
-   HYPRE_Int            global_size;  /* Total number of grid points */
+   HYPRE_BigInt         global_size;  /* Total number of grid points */
 
    hypre_Index          periodic;     /* Indicates if grid is periodic */
    HYPRE_Int            num_periods;  /* number of box set periods */
@@ -3534,7 +3534,7 @@ typedef struct hypre_StructMatrix_struct
    HYPRE_Int            *symm_elements;             /* Which elements are "symmetric" */
    HYPRE_Int             num_ghost[2*HYPRE_MAXDIM]; /* Num ghost layers in each direction */
                       
-   HYPRE_Int             global_size;               /* Total number of nonzero coeffs */
+   HYPRE_BigInt          global_size;               /* Total number of nonzero coeffs */
 
    hypre_CommPkg        *comm_pkg;                  /* Info on how to update ghost data */
 
@@ -3630,7 +3630,7 @@ typedef struct hypre_StructVector_struct
                                                      * direction */
    HYPRE_Int             bghost_not_clear; /* Are boundary ghosts clear? */
                       
-   HYPRE_Int             global_size;  /* Total number coefficients */
+   HYPRE_BigInt          global_size;  /* Total number coefficients */
 
    HYPRE_Int             ref_count;
 

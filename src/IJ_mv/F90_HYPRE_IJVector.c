@@ -30,16 +30,16 @@ extern "C" {
 void
 hypre_F90_IFACE(hypre_ijvectorcreate, HYPRE_IJVECTORCREATE)
    ( hypre_F90_Comm *comm,
-     hypre_F90_Int *jlower,
-     hypre_F90_Int *jupper,
+     hypre_F90_BigInt *jlower,
+     hypre_F90_BigInt *jupper,
      hypre_F90_Obj *vector,
      hypre_F90_Int *ierr    )
 {
    *ierr = (hypre_F90_Int)
       ( HYPRE_IJVectorCreate(
            hypre_F90_PassComm (comm),
-           hypre_F90_PassInt (jlower),
-           hypre_F90_PassInt (jupper), 
+           hypre_F90_PassBigInt (jlower),
+           hypre_F90_PassBigInt (jupper), 
            hypre_F90_PassObjRef (HYPRE_IJVector, vector)  ) );
 }
 
@@ -79,7 +79,7 @@ void
 hypre_F90_IFACE(hypre_ijvectorsetvalues, HYPRE_IJVECTORSETVALUES)
    ( hypre_F90_Obj *vector,
      hypre_F90_Int *num_values,
-     hypre_F90_IntArray *indices,
+     hypre_F90_BigIntArray *indices,
      hypre_F90_ComplexArray *values,
      hypre_F90_Int *ierr        )
 {
@@ -87,7 +87,7 @@ hypre_F90_IFACE(hypre_ijvectorsetvalues, HYPRE_IJVECTORSETVALUES)
       ( HYPRE_IJVectorSetValues(
            hypre_F90_PassObj (HYPRE_IJVector, vector),
            hypre_F90_PassInt (num_values),
-           hypre_F90_PassIntArray (indices),
+           hypre_F90_PassBigIntArray (indices),
            hypre_F90_PassComplexArray (values)      ) );
 }
 
@@ -99,7 +99,7 @@ void
 hypre_F90_IFACE(hypre_ijvectoraddtovalues, HYPRE_IJVECTORADDTOVALUES)
    ( hypre_F90_Obj *vector,
      hypre_F90_Int *num_values,
-     hypre_F90_IntArray *indices,
+     hypre_F90_BigIntArray *indices,
      hypre_F90_ComplexArray *values,
      hypre_F90_Int *ierr        )
 {
@@ -107,7 +107,7 @@ hypre_F90_IFACE(hypre_ijvectoraddtovalues, HYPRE_IJVECTORADDTOVALUES)
       ( HYPRE_IJVectorAddToValues(
            hypre_F90_PassObj (HYPRE_IJVector, vector),
            hypre_F90_PassInt (num_values),
-           hypre_F90_PassIntArray (indices),
+           hypre_F90_PassBigIntArray (indices),
            hypre_F90_PassComplexArray (values)      ) );
 }
 
@@ -133,7 +133,7 @@ void
 hypre_F90_IFACE(hypre_ijvectorgetvalues, HYPRE_IJVECTORGETVALUES)
    ( hypre_F90_Obj *vector,
      hypre_F90_Int *num_values,
-     hypre_F90_IntArray *indices,
+     hypre_F90_BigIntArray *indices,
      hypre_F90_ComplexArray *values,
      hypre_F90_Int *ierr        )
 {
@@ -141,7 +141,7 @@ hypre_F90_IFACE(hypre_ijvectorgetvalues, HYPRE_IJVECTORGETVALUES)
       ( HYPRE_IJVectorGetValues(
            hypre_F90_PassObj (HYPRE_IJVector, vector),
            hypre_F90_PassInt (num_values),
-           hypre_F90_PassIntArray (indices),
+           hypre_F90_PassBigIntArray (indices),
            hypre_F90_PassComplexArray (values)      ) );
 }
 
@@ -200,15 +200,15 @@ hypre_F90_IFACE(hypre_ijvectorgetobjecttype, HYPRE_IJVECTORGETOBJECTTYPE)
 void
 hypre_F90_IFACE(hypre_ijvectorgetlocalrange, HYPRE_IJVECTORGETLOCALRANGE)
    ( hypre_F90_Obj *vector,
-     hypre_F90_Int *jlower,
-     hypre_F90_Int *jupper,
+     hypre_F90_BigInt *jlower,
+     hypre_F90_BigInt *jupper,
      hypre_F90_Int *ierr    )
 {
    *ierr = (hypre_F90_Int)
       (HYPRE_IJVectorGetLocalRange(
           hypre_F90_PassObj (HYPRE_IJVector, vector),
-          hypre_F90_PassIntRef (jlower),
-          hypre_F90_PassIntRef (jupper)  ) );
+          hypre_F90_PassBigIntRef (jlower),
+          hypre_F90_PassBigIntRef (jupper)  ) );
 }
 
 /*--------------------------------------------------------------------------

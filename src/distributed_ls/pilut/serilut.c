@@ -53,7 +53,8 @@ HYPRE_Int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
   HYPRE_Int i, ii, j, k, kk, l, m, ierr, diag_present;
   HYPRE_Int *perm, *iperm, 
           *usrowptr, *uerowptr, *ucolind;
-  HYPRE_Int row_size, *col_ind;
+  HYPRE_Int row_size;
+  HYPRE_BigInt *col_ind;
   HYPRE_Real *values, *uvalues, *dvalues, *nrm2s;
   HYPRE_Int nlocal, nbnd;
   HYPRE_Real mult, rtol;
@@ -359,7 +360,8 @@ HYPRE_Int hypre_SelectInterior( HYPRE_Int local_num_rows,
 {
   HYPRE_Int nbnd, nlocal, i, j;
   HYPRE_Int break_loop; /* marks finding an element making this row exterior. -AC */
-  HYPRE_Int row_size, *col_ind;
+  HYPRE_Int row_size;
+  HYPRE_BigInt *col_ind;
   HYPRE_Real *values;
 
   /* Determine which vertices are in the boundary,
@@ -415,7 +417,8 @@ HYPRE_Int hypre_FindStructuralUnion( HYPRE_DistributedMatrix matrix,
                     HYPRE_Int **structural_union,
                     hypre_PilutSolverGlobals *globals )
 { 
-  HYPRE_Int ierr=0, i, j, row_size, *col_ind;
+  HYPRE_Int ierr=0, i, j, row_size;
+  HYPRE_BigInt *col_ind;
 
   /* Allocate and clear structural_union vector */
   *structural_union = hypre_CTAlloc( HYPRE_Int,  nrows , HYPRE_MEMORY_HOST);

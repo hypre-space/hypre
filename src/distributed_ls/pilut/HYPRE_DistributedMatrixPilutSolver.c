@@ -326,7 +326,8 @@ HYPRE_Int HYPRE_DistributedMatrixPilutSolverSetMaxIts(
 
 HYPRE_Int HYPRE_DistributedMatrixPilutSolverSetup( HYPRE_DistributedMatrixPilutSolver in_ptr )
 {
-   HYPRE_Int m, n, nprocs, start, end, *rowdist, col0, coln, ierr;
+   HYPRE_BigInt m, n, nprocs, start, end, col0, coln;
+   HYPRE_Int *rowdist, ierr;
    hypre_DistributedMatrixPilutSolver *solver = 
       (hypre_DistributedMatrixPilutSolver *) in_ptr;
    hypre_PilutSolverGlobals *globals = hypre_DistributedMatrixPilutSolverGlobals(solver);

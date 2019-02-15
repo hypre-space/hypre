@@ -42,26 +42,26 @@ typedef struct
 {
    MPI_Comm		comm;
 
-   HYPRE_Int     		global_num_rows;
-   HYPRE_Int     		global_num_cols;
-   HYPRE_Int			first_row_index;
-   HYPRE_Int			first_col_diag;
+   HYPRE_BigInt   	global_num_rows;
+   HYPRE_BigInt     	global_num_cols;
+   HYPRE_BigInt		first_row_index;
+   HYPRE_BigInt		first_col_diag;
 
  /* need to know entire local range in case row_starts and col_starts 
     are null */ 
-   HYPRE_Int                  last_row_index;
-   HYPRE_Int                  last_col_diag;
+   HYPRE_BigInt         last_row_index;
+   HYPRE_BigInt         last_col_diag;
 
    hypre_CSRBlockMatrix	*diag;
    hypre_CSRBlockMatrix	*offd;
-   HYPRE_Int			*col_map_offd; 
+   HYPRE_BigInt		*col_map_offd; 
 	/* maps columns of offd to global columns */
-   HYPRE_Int 			*row_starts; 
+   HYPRE_BigInt		*row_starts; 
 	/* array of length num_procs+1, row_starts[i] contains the 
 	   global number of the first row on proc i,  
 	   first_row_index = row_starts[my_id],
 	   row_starts[num_procs] = global_num_rows */
-   HYPRE_Int 			*col_starts;
+   HYPRE_BigInt		*col_starts;
 	/* array of length num_procs+1, col_starts[i] contains the 
 	   global number of the first column of diag on proc i,  
 	   first_col_diag = col_starts[my_id],
@@ -80,9 +80,9 @@ typedef struct
    HYPRE_Real   d_num_nonzeros;
 
    /* Buffers used by GetRow to hold row currently being accessed. AJC, 4/99 */
-   HYPRE_Int     *rowindices;
+   HYPRE_Int   *rowindices;
    HYPRE_Real  *rowvalues;
-   HYPRE_Int      getrowactive;
+   HYPRE_Int    getrowactive;
 
    hypre_IJAssumedPart *assumed_partition; /* only populated if no_global_partition option
                                               is used (compile-time option)*/
@@ -140,57 +140,57 @@ hypre_ParCSRBlockMatrixDestroy( hypre_ParCSRBlockMatrix *matrix );
 
 HYPRE_Int
 hypre_BoomerAMGBuildBlockInterp( hypre_ParCSRBlockMatrix   *A,
-                                 HYPRE_Int                  *CF_marker,
-                                 hypre_ParCSRMatrix   *S,
-                                 HYPRE_Int                  *num_cpts_global,
-                                 HYPRE_Int                   num_functions,
-                                 HYPRE_Int                  *dof_func,
-                                 HYPRE_Int                   debug_flag,
-                                 HYPRE_Real            trunc_factor,
-                                 HYPRE_Int		       max_elmts,
-                                 HYPRE_Int                   add_weak_to_diag,    
-                                 HYPRE_Int 		      *col_offd_S_to_A,
+                                 HYPRE_Int                 *CF_marker,
+                                 hypre_ParCSRMatrix        *S,
+                                 HYPRE_BigInt              *num_cpts_global,
+                                 HYPRE_Int                  num_functions,
+                                 HYPRE_Int                 *dof_func,
+                                 HYPRE_Int                  debug_flag,
+                                 HYPRE_Real                 trunc_factor,
+                                 HYPRE_Int	            max_elmts,
+                                 HYPRE_Int                  add_weak_to_diag,    
+                                 HYPRE_Int 		   *col_offd_S_to_A,
                                  hypre_ParCSRBlockMatrix  **P_ptr);
    
 
 
 HYPRE_Int
-hypre_BoomerAMGBuildBlockInterpRV( hypre_ParCSRBlockMatrix   *A,
+hypre_BoomerAMGBuildBlockInterpRV( hypre_ParCSRBlockMatrix  *A,
                                  HYPRE_Int                  *CF_marker,
-                                 hypre_ParCSRMatrix   *S,
-                                 HYPRE_Int                  *num_cpts_global,
+                                 hypre_ParCSRMatrix         *S,
+                                 HYPRE_BigInt               *num_cpts_global,
                                  HYPRE_Int                   num_functions,
                                  HYPRE_Int                  *dof_func,
                                  HYPRE_Int                   debug_flag,
-                                 HYPRE_Real            trunc_factor,
-                                   HYPRE_Int		       max_elmts,
-                                 HYPRE_Int 		      *col_offd_S_to_A,
+                                 HYPRE_Real                  trunc_factor,
+                                 HYPRE_Int		     max_elmts,
+                                 HYPRE_Int 		    *col_offd_S_to_A,
                                  hypre_ParCSRBlockMatrix  **P_ptr);
    
 HYPRE_Int
-hypre_BoomerAMGBuildBlockInterpRV2( hypre_ParCSRBlockMatrix   *A,
+hypre_BoomerAMGBuildBlockInterpRV2( hypre_ParCSRBlockMatrix *A,
                                  HYPRE_Int                  *CF_marker,
-                                 hypre_ParCSRMatrix   *S,
-                                 HYPRE_Int                  *num_cpts_global,
+                                 hypre_ParCSRMatrix         *S,
+                                 HYPRE_BigInt               *num_cpts_global,
                                  HYPRE_Int                   num_functions,
                                  HYPRE_Int                  *dof_func,
                                  HYPRE_Int                   debug_flag,
-                                 HYPRE_Real            trunc_factor,
-                                    HYPRE_Int		       max_elmts,
-                                 HYPRE_Int 		      *col_offd_S_to_A,
+                                 HYPRE_Real                  trunc_factor,
+                                 HYPRE_Int		     max_elmts,
+                                 HYPRE_Int 		    *col_offd_S_to_A,
                                  hypre_ParCSRBlockMatrix  **P_ptr);
 HYPRE_Int
 hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix   *A,
-                                     HYPRE_Int                  *CF_marker,
-                                     hypre_ParCSRMatrix   *S,
-                                     HYPRE_Int                  *num_cpts_global,
-                                     HYPRE_Int                   num_functions,
-                                     HYPRE_Int                  *dof_func,
-                                     HYPRE_Int                   debug_flag,
-                                     HYPRE_Real            trunc_factor,
-                                     HYPRE_Int		       max_elmts,
-                                     HYPRE_Int                   add_weak_to_diag,    
-                                     HYPRE_Int 		      *col_offd_S_to_A,
+                                     HYPRE_Int                 *CF_marker,
+                                     hypre_ParCSRMatrix        *S,
+                                     HYPRE_BigInt                 *num_cpts_global,
+                                     HYPRE_Int                  num_functions,
+                                     HYPRE_Int                 *dof_func,
+                                     HYPRE_Int                  debug_flag,
+                                     HYPRE_Real                 trunc_factor,
+                                     HYPRE_Int		        max_elmts,
+                                     HYPRE_Int                  add_weak_to_diag,    
+                                     HYPRE_Int 		       *col_offd_S_to_A,
                                      hypre_ParCSRBlockMatrix  **P_ptr);
 
 HYPRE_Int hypre_BoomerAMGBlockInterpTruncation( hypre_ParCSRBlockMatrix *P,
@@ -198,44 +198,44 @@ HYPRE_Int hypre_BoomerAMGBlockInterpTruncation( hypre_ParCSRBlockMatrix *P,
    
 
 HYPRE_Int
-hypre_BoomerAMGBuildBlockDirInterp( hypre_ParCSRBlockMatrix   *A,
+hypre_BoomerAMGBuildBlockDirInterp( hypre_ParCSRBlockMatrix    *A,
                                     HYPRE_Int                  *CF_marker,
-                                    hypre_ParCSRMatrix   *S,
-                                    HYPRE_Int                  *num_cpts_global,
+                                    hypre_ParCSRMatrix         *S,
+                                    HYPRE_BigInt               *num_cpts_global,
                                     HYPRE_Int                   num_functions,
                                     HYPRE_Int                  *dof_func,
                                     HYPRE_Int                   debug_flag,
-                                    HYPRE_Real            trunc_factor,
-                                    HYPRE_Int		       max_elmts,
-                                    HYPRE_Int 		      *col_offd_S_to_A,
-                                    hypre_ParCSRBlockMatrix  **P_ptr);
+                                    HYPRE_Real                  trunc_factor,
+                                    HYPRE_Int		        max_elmts,
+                                    HYPRE_Int 		       *col_offd_S_to_A,
+                                    hypre_ParCSRBlockMatrix   **P_ptr);
    
 
 HYPRE_Int  hypre_BoomerAMGBlockRelaxIF( hypre_ParCSRBlockMatrix *A,
-                             hypre_ParVector    *f,
-                             HYPRE_Int                *cf_marker,
-                             HYPRE_Int                 relax_type,
-                             HYPRE_Int                 relax_order,
-                             HYPRE_Int                 cycle_type,
-                             HYPRE_Real          relax_weight,
-                             HYPRE_Real          omega,
-                             hypre_ParVector    *u,
-                             hypre_ParVector    *Vtemp );
+                                        hypre_ParVector    *f,
+                                        HYPRE_Int          *cf_marker,
+                                        HYPRE_Int           relax_type,
+                                        HYPRE_Int           relax_order,
+                                        HYPRE_Int           cycle_type,
+                                        HYPRE_Real          relax_weight,
+                                        HYPRE_Real          omega,
+                                        hypre_ParVector    *u,
+                                        hypre_ParVector    *Vtemp );
    
 
 HYPRE_Int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
-                                hypre_ParVector    *f,
-                                HYPRE_Int                *cf_marker,
-                                HYPRE_Int                 relax_type,
-                                HYPRE_Int                 relax_points,
-                                HYPRE_Real          relax_weight,
-                                HYPRE_Real          omega,
-                                hypre_ParVector    *u,
-                                hypre_ParVector    *Vtemp );
+                                      hypre_ParVector         *f,
+                                      HYPRE_Int               *cf_marker,
+                                      HYPRE_Int                relax_type,
+                                      HYPRE_Int                relax_points,
+                                      HYPRE_Real               relax_weight,
+                                      HYPRE_Real               omega,
+                                      hypre_ParVector         *u,
+                                      hypre_ParVector         *Vtemp );
    
 HYPRE_Int
 hypre_GetCommPkgBlockRTFromCommPkgBlockA( hypre_ParCSRBlockMatrix *RT,
-			       	hypre_ParCSRBlockMatrix *A,
+			       	          hypre_ParCSRBlockMatrix *A,
                                           HYPRE_Int *fine_to_coarse_offd);
    
 
@@ -289,8 +289,8 @@ hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix    *A,
    
 hypre_ParVector *
 hypre_ParVectorCreateFromBlock(MPI_Comm comm,
-                               HYPRE_Int p_global_size, 
-                               HYPRE_Int *p_partitioning, HYPRE_Int block_size);
+                               HYPRE_BigInt p_global_size, 
+                               HYPRE_BigInt *p_partitioning, HYPRE_Int block_size);
    
 HYPRE_Int
 hypre_ParCSRBlockMatrixMatvec(HYPRE_Real alpha, hypre_ParCSRBlockMatrix *A,

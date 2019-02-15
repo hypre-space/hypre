@@ -40,8 +40,8 @@ struct _subdomain_dh {
                      this array is probably only useful for debugging.
                    */
 
-  HYPRE_Int *beg_row;   /* global ordering of first local row owned by P_i */
-  HYPRE_Int *beg_rowP;  /* global ordering of first local row owned by P_i after
+  HYPRE_BigInt *beg_row;   /* global ordering of first local row owned by P_i */
+  HYPRE_BigInt *beg_rowP;  /* global ordering of first local row owned by P_i after
                      subdomain reordering 
                    */
   HYPRE_Int *row_count; /* P_i owns row_count[i] local rows */

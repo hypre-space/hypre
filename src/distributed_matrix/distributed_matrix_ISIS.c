@@ -28,7 +28,7 @@ extern "C" {
 
 typedef struct
 {
-    HYPRE_Int *ind;
+    HYPRE_BigInt *ind;
     HYPRE_Real *val;
 } 
 RowBuf;
@@ -48,8 +48,8 @@ hypre_InitializeDistributedMatrixISIS(hypre_DistributedMatrix *dm)
 
    const Map& map = mat->getMap();
 
-   HYPRE_Int num_rows = mat->getMap().n();
-   HYPRE_Int num_cols = mat->getMap().n();
+   HYPRE_BigInt num_rows = mat->getMap().n();
+   HYPRE_BigInt num_cols = mat->getMap().n();
    
    hypre_DistributedMatrixM(dm) = num_rows;
    hypre_DistributedMatrixN(dm) = num_cols;
@@ -57,7 +57,7 @@ hypre_InitializeDistributedMatrixISIS(hypre_DistributedMatrix *dm)
    /* allocate space for row buffers */
 
    RowBuf *rowbuf = new RowBuf;
-   rowbuf->ind = new HYPRE_Int[num_cols];
+   rowbuf->ind = new HYPRE_BigInt[num_cols];
    rowbuf->val = new HYPRE_Real[num_cols];
 
    dm->auxiliary_data = (void *) rowbuf;
@@ -104,8 +104,8 @@ hypre_PrintDistributedMatrixISIS( hypre_DistributedMatrix *matrix )
 
 HYPRE_Int 
 hypre_GetDistributedMatrixLocalRangeISIS( hypre_DistributedMatrix *dm,
-                             HYPRE_Int *start,
-                             HYPRE_Int *end )
+                             HYPRE_BigInt *start,
+                             HYPRE_BigInt *end )
 {
 #ifdef ISIS_AVAILABLE
    RowMatrix *mat = (RowMatrix *) hypre_DistributedMatrixLocalStorage(dm);
@@ -127,9 +127,9 @@ hypre_GetDistributedMatrixLocalRangeISIS( hypre_DistributedMatrix *dm,
 
 HYPRE_Int 
 hypre_GetDistributedMatrixRowISIS( hypre_DistributedMatrix *dm,
-                             HYPRE_Int row,
+                             HYPRE_BigInt row,
                              HYPRE_Int *size,
-                             HYPRE_Int **col_ind,
+                             HYPRE_BigInt **col_ind,
                              HYPRE_Real **values )
 {
 #ifdef ISIS_AVAILABLE
@@ -165,7 +165,7 @@ hypre_GetDistributedMatrixRowISIS( hypre_DistributedMatrix *dm,
    /* set pointers to local buffers */
    if (col_ind != NULL)
    {
-       HYPRE_Int *p;
+       HYPRE_BigInt *p;
 
        *size = temp;
        *col_ind = rowbuf->ind;
@@ -192,9 +192,9 @@ hypre_GetDistributedMatrixRowISIS( hypre_DistributedMatrix *dm,
 
 HYPRE_Int 
 hypre_RestoreDistributedMatrixRowISIS( hypre_DistributedMatrix *dm,
-                             HYPRE_Int row,
+                             HYPRE_BigInt row,
                              HYPRE_Int *size,
-                             HYPRE_Int **col_ind,
+                             HYPRE_BigInt **col_ind,
                              HYPRE_Real **values )
 {
   /* does nothing, since we use local buffers */

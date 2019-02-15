@@ -139,12 +139,12 @@ void LoadBalDonorSend(MPI_Comm comm, Matrix *mat, Numbering *numb,
   HYPRE_Int num_given, const HYPRE_Int *donor_data_pe, const HYPRE_Real *donor_data_cost, 
   DonorData *donor_data, HYPRE_Int *local_beg_row, hypre_MPI_Request *request)
 {
-    HYPRE_Int send_beg_row, send_end_row;
-    HYPRE_Int i, row;
+    HYPRE_BigInt send_beg_row, send_end_row;
+    HYPRE_Int i, len;
     HYPRE_Real accum;
     HYPRE_Int buflen;
-    HYPRE_Int *bufferp;
-    HYPRE_Int len, *ind;
+    HYPRE_BigInt *bufferp;
+    HYPRE_BigInt row, *ind;
     HYPRE_Real *val;
 
     send_end_row = mat->beg_row - 1; /* imaginary end of previous block */
@@ -175,7 +175,7 @@ void LoadBalDonorSend(MPI_Comm comm, Matrix *mat, Numbering *numb,
         donor_data[i].pe      = donor_data_pe[i];
         donor_data[i].beg_row = send_beg_row;
         donor_data[i].end_row = send_end_row;
-        donor_data[i].buffer  = hypre_TAlloc(HYPRE_Int, (buflen) , HYPRE_MEMORY_HOST);
+        donor_data[i].buffer  = hypre_TAlloc(HYPRE_BigInt, (buflen) , HYPRE_MEMORY_HOST);
 
 	/* Construct send buffer */
 
@@ -207,11 +207,11 @@ void LoadBalDonorSend(MPI_Comm comm, Matrix *mat, Numbering *numb,
 void LoadBalRecipRecv(MPI_Comm comm, Numbering *numb,
   HYPRE_Int num_taken, RecipData *recip_data)
 {
-    HYPRE_Int i, row;
+    HYPRE_Int i;
     HYPRE_Int count;
     hypre_MPI_Status status;
-    HYPRE_Int *buffer, *bufferp;
-    HYPRE_Int beg_row, end_row;
+    HYPRE_BigInt *buffer, *bufferp;
+    HYPRE_BigInt beg_row, end_row, row;
     HYPRE_Int len;
 
     for (i=0; i<num_taken; i++)
@@ -220,8 +220,8 @@ void LoadBalRecipRecv(MPI_Comm comm, Numbering *numb,
         recip_data[i].pe = status.hypre_MPI_SOURCE;
         hypre_MPI_Get_count(&status, HYPRE_MPI_INT, &count);
 
-        buffer = hypre_TAlloc(HYPRE_Int, count , HYPRE_MEMORY_HOST);
-        hypre_MPI_Recv(buffer, count, HYPRE_MPI_INT, recip_data[i].pe, LOADBAL_REQ_TAG, 
+        buffer = hypre_TAlloc(HYPRE_BigInt, count , HYPRE_MEMORY_HOST);
+        hypre_MPI_Recv(buffer, count, HYPRE_MPI_BIG_INT, recip_data[i].pe, LOADBAL_REQ_TAG, 
            comm, &status);
 
 	bufferp =  buffer;
@@ -254,10 +254,10 @@ void LoadBalRecipRecv(MPI_Comm comm, Numbering *numb,
 void LoadBalRecipSend(MPI_Comm comm, HYPRE_Int num_taken, 
   RecipData *recip_data, hypre_MPI_Request *request)
 {
-    HYPRE_Int i, row, buflen;
+    HYPRE_Int i, len, buflen;
     HYPRE_Real *bufferp;
     Matrix *mat;
-    HYPRE_Int len, *ind;
+    HYPRE_BigInt row, *ind;
     HYPRE_Real *val;
 
     for (i=0; i<num_taken; i++)
@@ -300,11 +300,11 @@ void LoadBalRecipSend(MPI_Comm comm, HYPRE_Int num_taken,
 void LoadBalDonorRecv(MPI_Comm comm, Matrix *mat, 
   HYPRE_Int num_given, DonorData *donor_data)
 {
-    HYPRE_Int i, j, row;
+    HYPRE_Int i, j, len;
     HYPRE_Int source, count;
     hypre_MPI_Status status;
     HYPRE_Real *buffer, *bufferp;
-    HYPRE_Int len, *ind;
+    HYPRE_BigInt row, *ind;
     HYPRE_Real *val;
 
     for (i=0; i<num_given; i++)

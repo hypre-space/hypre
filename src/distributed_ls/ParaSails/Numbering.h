@@ -30,12 +30,12 @@
 struct numbering
 {
     HYPRE_Int   size;    /* max number of indices that can be stored */
-    HYPRE_Int   beg_row;
-    HYPRE_Int   end_row;
+    HYPRE_BigInt   beg_row;
+    HYPRE_BigInt   end_row;
     HYPRE_Int   num_loc; /* number of local indices */
     HYPRE_Int   num_ind; /* number of indices */
 
-    HYPRE_Int  *local_to_global;
+    HYPRE_BigInt  *local_to_global;
     Hash *hash;
 };
 
@@ -44,7 +44,7 @@ typedef struct numbering Numbering;
 Numbering *NumberingCreate(Matrix *m, HYPRE_Int size);
 Numbering *NumberingCreateCopy(Numbering *orig);
 void NumberingDestroy(Numbering *numb);
-void NumberingLocalToGlobal(Numbering *numb, HYPRE_Int len, HYPRE_Int *local, HYPRE_Int *global);
-void NumberingGlobalToLocal(Numbering *numb, HYPRE_Int len, HYPRE_Int *global, HYPRE_Int *local);
+void NumberingLocalToGlobal(Numbering *numb, HYPRE_Int len, HYPRE_BigInt *local, HYPRE_BigInt *global);
+void NumberingGlobalToLocal(Numbering *numb, HYPRE_Int len, HYPRE_BigInt *global, HYPRE_BigInt *local);
 
 #endif /* _NUMBERING_H */

@@ -51,7 +51,7 @@ HYPRE_Int FindNumReplies(MPI_Comm comm, HYPRE_Int *replies_list);
  *--------------------------------------------------------------------------*/
 
 static void ExchangeDiagEntries(MPI_Comm comm, Matrix *mat, HYPRE_Int reqlen, 
-  HYPRE_Int *reqind, HYPRE_Real *diags, HYPRE_Int *num_requests, hypre_MPI_Request *requests,
+  HYPRE_BigInt *reqind, HYPRE_Real *diags, HYPRE_Int *num_requests, hypre_MPI_Request *requests,
   HYPRE_Int *replies_list)
 {
     hypre_MPI_Request request;
@@ -145,8 +145,8 @@ DiagScale *DiagScaleCreate(Matrix *A, Numbering *numb)
 {
     hypre_MPI_Request *requests;
     hypre_MPI_Status  *statuses;
-    HYPRE_Int npes, row, j, num_requests, num_replies, *replies_list;
-    HYPRE_Int len, *ind;
+    HYPRE_Int npes, len, j, num_requests, num_replies, *replies_list;
+    HYPRE_BigInt row, *ind;
     HYPRE_Real *val, *temp;
 
     Mem *mem;
@@ -156,7 +156,7 @@ DiagScale *DiagScaleCreate(Matrix *A, Numbering *numb)
 
     /* Storage for local diagonal entries */
     p->local_diags = (HYPRE_Real *) 
-        hypre_TAlloc(HYPRE_Real, (A->end_row - A->beg_row + 1) , HYPRE_MEMORY_HOST);
+        hypre_TAlloc(HYPRE_Real, (HYPRE_Int)(A->end_row - A->beg_row + 1) , HYPRE_MEMORY_HOST);
 
     /* Extract the local diagonal entries */
     for (row=0; row<=A->end_row - A->beg_row; row++)
@@ -184,7 +184,7 @@ DiagScale *DiagScaleCreate(Matrix *A, Numbering *numb)
     p->ext_diags = NULL;
     if (len)
     {
-        ind = hypre_TAlloc(HYPRE_Int, len , HYPRE_MEMORY_HOST);
+        ind = hypre_TAlloc(HYPRE_BigInt, len , HYPRE_MEMORY_HOST);
         hypre_TMemcpy(ind,  &numb->local_to_global[numb->num_loc], HYPRE_Int, len, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
 
         /* buffer for receiving diagonal values from other processors */

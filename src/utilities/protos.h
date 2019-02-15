@@ -20,6 +20,7 @@ void hypre_enter_on_lists ( hypre_LinkList *LoL_head_ptr , hypre_LinkList *LoL_t
 HYPRE_Int hypre_BinarySearch ( HYPRE_Int *list , HYPRE_Int value , HYPRE_Int list_length );
 HYPRE_Int hypre_BinarySearch2 ( HYPRE_Int *list , HYPRE_Int value , HYPRE_Int low , HYPRE_Int high , HYPRE_Int *spot );
 HYPRE_Int *hypre_LowerBound( HYPRE_Int *first, HYPRE_Int *last, HYPRE_Int value );
+HYPRE_BigInt *hypre_BigLowerBound( HYPRE_BigInt *first, HYPRE_BigInt *last, HYPRE_BigInt value );
 
 /* hypre_complex.c */
 #ifdef HYPRE_COMPLEX
@@ -58,6 +59,7 @@ HYPRE_Int hypre_sscanf( char *s , const char *format, ... );
 /* hypre_qsort.c */
 void hypre_swap ( HYPRE_Int *v , HYPRE_Int i , HYPRE_Int j );
 void hypre_swap2 ( HYPRE_Int *v , HYPRE_Real *w , HYPRE_Int i , HYPRE_Int j );
+void hypre_BigSwap2 ( HYPRE_BigInt *v , HYPRE_Real *w , HYPRE_Int i , HYPRE_Int j );
 void hypre_swap2i ( HYPRE_Int *v , HYPRE_Int *w , HYPRE_Int i , HYPRE_Int j );
 void hypre_swap3i ( HYPRE_Int *v , HYPRE_Int *w , HYPRE_Int *z , HYPRE_Int i , HYPRE_Int j );
 void hypre_swap3_d ( HYPRE_Real *v , HYPRE_Int *w , HYPRE_Int *z , HYPRE_Int i , HYPRE_Int j );
@@ -65,6 +67,7 @@ void hypre_swap4_d ( HYPRE_Real *v , HYPRE_Int *w , HYPRE_Int *z , HYPRE_Int *y 
 void hypre_swap_d ( HYPRE_Real *v , HYPRE_Int i , HYPRE_Int j );
 void hypre_qsort0 ( HYPRE_Int *v , HYPRE_Int left , HYPRE_Int right );
 void hypre_qsort1 ( HYPRE_Int *v , HYPRE_Real *w , HYPRE_Int left , HYPRE_Int right );
+void hypre_BigQsort1 ( HYPRE_BigInt *v , HYPRE_Real *w , HYPRE_Int left , HYPRE_Int right );
 void hypre_qsort2i ( HYPRE_Int *v , HYPRE_Int *w , HYPRE_Int left , HYPRE_Int right );
 void hypre_qsort2 ( HYPRE_Int *v , HYPRE_Real *w , HYPRE_Int left , HYPRE_Int right );
 void hypre_qsort3i ( HYPRE_Int *v , HYPRE_Int *w , HYPRE_Int *z , HYPRE_Int left , HYPRE_Int right );

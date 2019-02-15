@@ -79,7 +79,7 @@ typedef struct
    hypre_ComputePkg    **up_compute_pkg_l;
 
    HYPRE_Int             time_index;
-   HYPRE_Int             solve_flops;
+   HYPRE_BigInt          solve_flops;
    HYPRE_Int             max_levels;
 } hypre_CyclicReductionData;
 
@@ -716,9 +716,9 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
                    hypre_IndexY(base_stride) *
                    hypre_IndexZ(base_stride)  );
    (cyc_red_data -> solve_flops) =
-      hypre_StructVectorGlobalSize(x_l[0])/2/flop_divisor;
+      hypre_StructVectorGlobalSize(x_l[0])/2/(HYPRE_BigInt)flop_divisor;
    (cyc_red_data -> solve_flops) +=
-      5*hypre_StructVectorGlobalSize(x_l[0])/2/flop_divisor;
+      5*hypre_StructVectorGlobalSize(x_l[0])/2/(HYPRE_BigInt)flop_divisor;
    for (l = 1; l < (num_levels - 1); l++)
    {
       (cyc_red_data -> solve_flops) +=

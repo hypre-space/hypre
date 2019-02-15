@@ -26,8 +26,8 @@ HYPRE_Int hypre_ParCSRMatrixEliminateRowsCols (hypre_ParCSRMatrix *A,
 
    hypre_CSRMatrix *diag      = hypre_ParCSRMatrixDiag(A);
    hypre_CSRMatrix *offd      = hypre_ParCSRMatrixOffd(A);
-   HYPRE_Int diag_nrows             = hypre_CSRMatrixNumRows(diag);
-   HYPRE_Int offd_ncols             = hypre_CSRMatrixNumCols(offd);
+   HYPRE_Int diag_nrows       = hypre_CSRMatrixNumRows(diag);
+   HYPRE_Int offd_ncols       = hypre_CSRMatrixNumCols(offd);
 
    HYPRE_Int ncols_to_eliminate;
    HYPRE_Int *cols_to_eliminate;

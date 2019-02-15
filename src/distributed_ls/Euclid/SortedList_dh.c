@@ -20,8 +20,8 @@
 struct _sortedList_dh {
   HYPRE_Int m;          /* number of local rows */
   HYPRE_Int row;        /* local number of row being factored */
-  HYPRE_Int beg_row;    /* global number of first locally owned row, wrt A */
-  HYPRE_Int beg_rowP;   /* global number of first locally owned row, wrt F */
+  HYPRE_BigInt beg_row;    /* global number of first locally owned row, wrt A */
+  HYPRE_BigInt beg_rowP;   /* global number of first locally owned row, wrt F */
   HYPRE_Int count;      /* number of items entered in the list, 
                      plus 1 (for header node) 
                    */
@@ -159,7 +159,7 @@ SRecord * SortedList_dhGetSmallestLowerTri(SortedList_dh sList)
   SRecord *node = NULL;
   SRecord *list = sList->list;
   HYPRE_Int getLower = sList->getLower;
-  HYPRE_Int globalRow = sList->row + sList->beg_rowP;
+  HYPRE_BigInt globalRow = sList->row + sList->beg_rowP;
 
   getLower = list[getLower].next;
 
@@ -177,10 +177,10 @@ bool SortedList_dhPermuteAndInsert(SortedList_dh sList, SRecord *sr, HYPRE_Real 
 {
   START_FUNC_DH
   bool wasInserted = false;
-  HYPRE_Int col = sr->col;
+  HYPRE_BigInt col = sr->col;
   HYPRE_Real testVal = fabs(sr->val);
-  HYPRE_Int beg_row = sList->beg_row, end_row = beg_row + sList->m;
-  HYPRE_Int beg_rowP = sList->beg_rowP;
+  HYPRE_BigInt beg_row = sList->beg_row, end_row = beg_row + sList->m;
+  HYPRE_BigInt beg_rowP = sList->beg_rowP;
 
   /* insertion of local indices */
   if (col >= beg_row && col < end_row) {
@@ -210,7 +210,7 @@ hypre_fprintf(logFile, "local row: %i  DROPPED: col= %i  val= %g (thresh= %g)\n"
     if (sList->o2n_external == NULL) {
       col = -1;
     } else {
-      HYPRE_Int tmp = Hash_i_dhLookup(sList->o2n_external, col); CHECK_ERROR(-1);
+      HYPRE_BigInt tmp = Hash_i_dhLookup(sList->o2n_external, col); CHECK_ERROR(-1);
       if (tmp == -1) {
         col = -1;
       } else {
@@ -253,8 +253,8 @@ void SortedList_dhInsertOrUpdate(SortedList_dh sList, SRecord *sr)
 void SortedList_dhInsert(SortedList_dh sList, SRecord *sr)
 {
   START_FUNC_DH
-  HYPRE_Int prev, next;
-  HYPRE_Int ct, col = sr->col;
+  HYPRE_Int prev, next, ct;
+  HYPRE_BigInt col = sr->col;
   SRecord *list = sList->list;
 
   /* lengthen list if out of space */
@@ -291,7 +291,7 @@ SRecord * SortedList_dhFind(SortedList_dh sList, SRecord *sr)
 {
   START_FUNC_DH
   HYPRE_Int i, count = sList->countMax;
-  HYPRE_Int c = sr->col;
+  HYPRE_BigInt c = sr->col;
   SRecord *s = sList->list;
   SRecord *node = NULL;
 
@@ -331,8 +331,8 @@ void lengthen_list_private(SortedList_dh sList)
 
 
 static bool check_constraint_private(SubdomainGraph_dh sg, 
-                                     HYPRE_Int thisSubdomain, HYPRE_Int col);
-void delete_private(SortedList_dh sList, HYPRE_Int col);
+                                     HYPRE_Int thisSubdomain, HYPRE_BigInt col);
+void delete_private(SortedList_dh sList, HYPRE_BigInt col);
 
 #undef __FUNC__
 #define __FUNC__ "SortedList_dhEnforceConstraint"
@@ -340,9 +340,10 @@ void SortedList_dhEnforceConstraint(SortedList_dh sList, SubdomainGraph_dh sg)
 {
   START_FUNC_DH
   HYPRE_Int thisSubdomain = myid_dh;
-  HYPRE_Int col, count;
-  HYPRE_Int beg_rowP = sList->beg_rowP;
-  HYPRE_Int end_rowP = beg_rowP + sList->m;
+  HYPRE_BigInt col;
+  HYPRE_Int count;
+  HYPRE_BigInt beg_rowP = sList->beg_rowP;
+  HYPRE_BigInt end_rowP = beg_rowP + sList->m;
   bool debug = false;
 
   if (Parser_dhHasSwitch(parser_dh, "-debug_SortedList")) debug = true;
@@ -417,7 +418,7 @@ void SortedList_dhEnforceConstraint(SortedList_dh sList, SubdomainGraph_dh sg)
 /* this is similar to a function in ilu_seq.c */
 #undef __FUNC__
 #define __FUNC__ "check_constraint_private"
-bool check_constraint_private(SubdomainGraph_dh sg, HYPRE_Int p1, HYPRE_Int j)
+bool check_constraint_private(SubdomainGraph_dh sg, HYPRE_Int p1, HYPRE_BigInt j)
 {
   START_FUNC_DH
   bool retval = false;
@@ -441,7 +442,7 @@ bool check_constraint_private(SubdomainGraph_dh sg, HYPRE_Int p1, HYPRE_Int j)
 
 #undef __FUNC__
 #define __FUNC__ "delete_private"
-void delete_private(SortedList_dh sList, HYPRE_Int col)
+void delete_private(SortedList_dh sList, HYPRE_BigInt col)
 {
   START_FUNC_DH
   HYPRE_Int curNode = 0;

@@ -872,7 +872,7 @@ hypre_CSRMatrixMatvecDeviceBIGINT( HYPRE_Complex    alpha,
                        hypre_Vector    *y,
                        HYPRE_Int offset )
 {
-#ifdef HYPRE_BIGINT
+#ifdef HYPRE_ALLBIGINT
   static cusparseHandle_t handle;
   static cusparseMatDescr_t descr;
   static HYPRE_Int FirstCall=1;

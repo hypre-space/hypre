@@ -30,15 +30,15 @@ extern "C" {
 void
 hypre_F90_IFACE(hypre_parvectorcreate, HYPRE_PARVECTORCREATE)
    ( hypre_F90_Comm *comm,
-     hypre_F90_Int *global_size,
-     hypre_F90_IntArray *partitioning,
+     hypre_F90_BigInt *global_size,
+     hypre_F90_BigIntArray *partitioning,
      hypre_F90_Obj *vector,
      hypre_F90_Int *ierr )
 {
    *ierr = (hypre_F90_Int) HYPRE_ParVectorCreate(
       hypre_F90_PassComm (comm),
-      hypre_F90_PassInt (global_size),
-      hypre_F90_PassIntArray (partitioning),
+      hypre_F90_PassBigInt (global_size),
+      hypre_F90_PassBigIntArray (partitioning),
       hypre_F90_PassObjRef (HYPRE_ParVector, vector) );
 
 }
@@ -50,16 +50,16 @@ hypre_F90_IFACE(hypre_parvectorcreate, HYPRE_PARVECTORCREATE)
 void
 hypre_F90_IFACE(hypre_parmultivectorcreate, HYPRE_PARMULTIVECTORCREATE)
    ( hypre_F90_Comm *comm,
-     hypre_F90_Int *global_size,
-     hypre_F90_IntArray *partitioning,
+     hypre_F90_BigInt *global_size,
+     hypre_F90_BigIntArray *partitioning,
      hypre_F90_Int *number_vectors,
      hypre_F90_Obj *vector,
      hypre_F90_Int *ierr          )
 {
    *ierr = (hypre_F90_Int) HYPRE_ParMultiVectorCreate(
       hypre_F90_PassComm (comm),
-      hypre_F90_PassInt (global_size),
-      hypre_F90_PassIntArray (partitioning),
+      hypre_F90_PassBigInt (global_size),
+      hypre_F90_PassBigIntArray (partitioning),
       hypre_F90_PassInt (number_vectors),
       hypre_F90_PassObjRef (HYPRE_ParVector, vector) );
 

@@ -137,7 +137,7 @@ HYPRE_Int SubdomainGraph_dhFindOwner(SubdomainGraph_dh s, HYPRE_Int idx, bool pe
 {
   START_FUNC_DH
   HYPRE_Int sd;
-  HYPRE_Int *beg_row = s->beg_row;
+  HYPRE_BigInt *beg_row = s->beg_row;
   HYPRE_Int *row_count = s->row_count;
   HYPRE_Int owner = -1, blocks = s->blocks;
 
@@ -253,8 +253,8 @@ void SubdomainGraph_dhPrintStatsLong(SubdomainGraph_dh s, FILE *fp)
     hypre_fprintf(fp, "\nlocal n2o_row permutation:\n");
     hypre_fprintf(fp, "--------------------------\n");
     for (k=0; k<s->blocks; ++k) {
-      HYPRE_Int beg_row = s->beg_row[k];
-      HYPRE_Int end_row = beg_row + s->row_count[k];
+      HYPRE_BigInt beg_row = s->beg_row[k];
+      HYPRE_BigInt end_row = beg_row + s->row_count[k];
 
       for (i=beg_row; i<end_row; ++i) {
         hypre_fprintf(fp, "%i ", s->n2o_row[i]);
@@ -268,8 +268,8 @@ void SubdomainGraph_dhPrintStatsLong(SubdomainGraph_dh s, FILE *fp)
     hypre_fprintf(fp, "\nlocal o2n_col permutation:\n");
     hypre_fprintf(fp, "--------------------------\n");
     for (k=0; k<s->blocks; ++k) {
-      HYPRE_Int beg_row = s->beg_row[k];
-      HYPRE_Int end_row = beg_row + s->row_count[k];
+      HYPRE_BigInt beg_row = s->beg_row[k];
+      HYPRE_BigInt end_row = beg_row + s->row_count[k];
 
       for (i=beg_row; i<end_row; ++i) {
         hypre_fprintf(fp, "%i ", s->o2n_col[i]);
@@ -288,7 +288,8 @@ void SubdomainGraph_dhPrintStatsLong(SubdomainGraph_dh s, FILE *fp)
 void init_seq_private(SubdomainGraph_dh s, HYPRE_Int blocks, bool bj, void *A)
 {
   START_FUNC_DH
-  HYPRE_Int m, n, beg_row;
+  HYPRE_Int m;
+  HYPRE_BigInt beg_row, n;
   HYPRE_Real t1;
 
   /*-------------------------------------------------------
@@ -451,8 +452,8 @@ void allocate_storage_private(SubdomainGraph_dh s, HYPRE_Int blocks, HYPRE_Int m
 
   /* these are probably only needed for single mpi task -- ?? */
   /* nope; beg_row and row_ct are needed by ilu_mpi_bj; yuck! */
-  s->beg_row = (HYPRE_Int*)MALLOC_DH((blocks)*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  s->beg_rowP = (HYPRE_Int*)MALLOC_DH((blocks)*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  s->beg_row = (HYPRE_BigInt*)MALLOC_DH((blocks)*sizeof(HYPRE_BigInt)); CHECK_V_ERROR;
+  s->beg_rowP = (HYPRE_BigInt*)MALLOC_DH((blocks)*sizeof(HYPRE_BigInt)); CHECK_V_ERROR;
   s->row_count = (HYPRE_Int*)MALLOC_DH(blocks*sizeof(HYPRE_Int)); CHECK_V_ERROR;
   s->bdry_count = (HYPRE_Int*)MALLOC_DH(blocks*sizeof(HYPRE_Int)); CHECK_V_ERROR;
   s->o2n_sub = (HYPRE_Int*)MALLOC_DH(blocks*sizeof(HYPRE_Int)); CHECK_V_ERROR;
@@ -469,7 +470,9 @@ void allocate_storage_private(SubdomainGraph_dh s, HYPRE_Int blocks, HYPRE_Int m
 void init_mpi_private(SubdomainGraph_dh s, HYPRE_Int blocks, bool bj, void *A)
 {
   START_FUNC_DH
-  HYPRE_Int m, n, beg_row;
+  HYPRE_Int m;
+  HYPRE_BigInt n;
+  HYPRE_BigInt beg_row;
   bool symmetric;
   HYPRE_Real t1;
 
@@ -499,9 +502,9 @@ void init_mpi_private(SubdomainGraph_dh s, HYPRE_Int blocks, bool bj, void *A)
    * At this point, beg_rowP[] is a copy of beg_row[])
    *-------------------------------------------------------------*/
   if (!bj) {
-    hypre_MPI_Allgather(&beg_row, 1, HYPRE_MPI_INT, s->beg_row, 1, HYPRE_MPI_INT, comm_dh);
+    hypre_MPI_Allgather(&beg_row, 1, HYPRE_MPI_BIG_INT, s->beg_row, 1, HYPRE_MPI_INT, comm_dh);
     hypre_MPI_Allgather(&m, 1, HYPRE_MPI_INT, s->row_count, 1, HYPRE_MPI_INT, comm_dh);
-    hypre_TMemcpy(s->beg_rowP,  s->beg_row, HYPRE_Int, np_dh, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+    hypre_TMemcpy(s->beg_rowP,  s->beg_row, HYPRE_BigInt, np_dh, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
   } else {
     s->beg_row[myid_dh] = beg_row;
     s->beg_rowP[myid_dh] = beg_row;
@@ -646,8 +649,8 @@ void SubdomainGraph_dhExchangePerms(SubdomainGraph_dh s)
   HYPRE_Int *nabors = s->allNabors, naborCount = s->allCount;
   HYPRE_Int i, j, *sendBuf = NULL, *recvBuf = NULL, *naborIdx = NULL, nz;
   HYPRE_Int m = s->row_count[myid_dh];
-  HYPRE_Int beg_row = s->beg_row[myid_dh];
-  HYPRE_Int beg_rowP = s->beg_rowP[myid_dh];
+  HYPRE_BigInt beg_row = s->beg_row[myid_dh];
+  HYPRE_BigInt beg_rowP = s->beg_rowP[myid_dh];
   HYPRE_Int *bdryNodeCounts = s->bdry_count;
   HYPRE_Int myBdryCount = s->bdry_count[myid_dh];
   bool debug = false;
@@ -834,8 +837,10 @@ void form_subdomaingraph_mpi_private(SubdomainGraph_dh s)
 void form_subdomaingraph_seq_private(SubdomainGraph_dh s, HYPRE_Int m, void *A)
 {
   START_FUNC_DH
-  HYPRE_Int *dense, i, j, row, blocks = s->blocks;
-  HYPRE_Int *cval, len, *adj;
+  HYPRE_Int *dense, i, j, blocks = s->blocks;
+  HYPRE_Int len, *adj;
+  HYPRE_Int row;
+  HYPRE_BigInt *cval;
   HYPRE_Int idx = 0, *ptrs = s->ptrs;
 
   /* allocate storage for adj[]; since this function is intended
@@ -850,13 +855,13 @@ void form_subdomaingraph_seq_private(SubdomainGraph_dh s, HYPRE_Int m, void *A)
 
   /* loop over each block's rows to identify all boundary nodes */
   for (i=0; i<blocks; ++i) {
-    HYPRE_Int beg_row = s->beg_row[i];
-    HYPRE_Int end_row = beg_row + s->row_count[i];
+    HYPRE_BigInt beg_row = s->beg_row[i];
+    HYPRE_BigInt end_row = beg_row + (HYPRE_BigInt)(s->row_count[i]);
 
     for (row=beg_row; row<end_row; ++row) {
       EuclidGetRow(A, row, &len, &cval, NULL); CHECK_V_ERROR;
       for (j=0; j<len; ++j) {
-        HYPRE_Int col = cval[j];
+        HYPRE_BigInt col = cval[j];
         if (col < beg_row  ||  col >= end_row) {
           HYPRE_Int owner = SubdomainGraph_dhFindOwner(s, col, false); CHECK_V_ERROR;
           dense[i*blocks+owner] = 1;
@@ -890,8 +895,10 @@ void form_subdomaingraph_seq_private(SubdomainGraph_dh s, HYPRE_Int m, void *A)
 void find_all_neighbors_sym_private(SubdomainGraph_dh s, HYPRE_Int m, void *A)
 {
   START_FUNC_DH
-  HYPRE_Int *marker, i, j, beg_row, end_row;
-  HYPRE_Int row, len, *cval, ct = 0;
+  HYPRE_Int *marker, i, j, len, ct = 0;
+  HYPRE_BigInt beg_row, end_row;
+  HYPRE_BigInt row;
+  HYPRE_BigInt *cval;
   HYPRE_Int *nabors = s->allNabors;
 
   marker = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
@@ -901,12 +908,12 @@ void find_all_neighbors_sym_private(SubdomainGraph_dh s, HYPRE_Int m, void *A)
   SET_INFO("(if this isn't what you want, use '-sym 0' switch)");
 
   beg_row = s->beg_row[myid_dh];
-  end_row = beg_row + s->row_count[myid_dh];
+  end_row = beg_row + (HYPRE_BigInt)(s->row_count[myid_dh]);
 
   for (row=beg_row; row<end_row; ++row) {
     EuclidGetRow(A, row, &len, &cval, NULL); CHECK_V_ERROR;
     for (j=0; j<len; ++j) {
-      HYPRE_Int col = cval[j];
+      HYPRE_BigInt col = cval[j];
       if (col < beg_row  ||  col >= end_row) {
         HYPRE_Int owner = SubdomainGraph_dhFindOwner(s, col, false); CHECK_V_ERROR;
         if (! marker[owner]) {
@@ -930,9 +937,10 @@ void find_all_neighbors_sym_private(SubdomainGraph_dh s, HYPRE_Int m, void *A)
 void find_all_neighbors_unsym_private(SubdomainGraph_dh s, HYPRE_Int m, void *A)
 {
   START_FUNC_DH
-  HYPRE_Int i, j, row, beg_row, end_row;
+  HYPRE_Int i, j;
+  HYPRE_BigInt *cval, row, beg_row, end_row;
   HYPRE_Int *marker;
-  HYPRE_Int *cval, len, idx = 0;
+  HYPRE_Int len, idx = 0;
   HYPRE_Int nz, *nabors = s->allNabors, *myNabors;
 
   myNabors = (HYPRE_Int*)MALLOC_DH(np_dh*sizeof(HYPRE_Int)); CHECK_V_ERROR;
@@ -945,7 +953,7 @@ void find_all_neighbors_unsym_private(SubdomainGraph_dh s, HYPRE_Int m, void *A)
      subdomain graph
    */
   beg_row = s->beg_row[myid_dh];
-  end_row = beg_row + s->row_count[myid_dh];
+  end_row = beg_row + (HYPRE_BigInt)(s->row_count[myid_dh]);
 
 
 
@@ -953,7 +961,7 @@ void find_all_neighbors_unsym_private(SubdomainGraph_dh s, HYPRE_Int m, void *A)
   for (row=beg_row; row<end_row; ++row) {
     EuclidGetRow(A, row, &len, &cval, NULL); CHECK_V_ERROR;
     for (j=0; j<len; ++j) {
-      HYPRE_Int col = cval[j];
+      HYPRE_BigInt col = cval[j];
       /*for each column that corresponds to a non-locally owned row ...  */
       if (col < beg_row  ||  col >= end_row) {
         HYPRE_Int owner = SubdomainGraph_dhFindOwner(s, col, false); CHECK_V_ERROR;
@@ -1028,12 +1036,12 @@ void find_bdry_nodes_sym_private(SubdomainGraph_dh s, HYPRE_Int m, void* A,
                      HYPRE_Int *interiorCount, HYPRE_Int *bdryCount)
 {
   START_FUNC_DH
-  HYPRE_Int beg_row = s->beg_row[myid_dh];
-  HYPRE_Int end_row = beg_row + s->row_count[myid_dh];
-  HYPRE_Int row, inCt = 0, bdCt = 0;
+  HYPRE_BigInt beg_row = s->beg_row[myid_dh];
+  HYPRE_BigInt end_row = beg_row + (HYPRE_BigInt)(s->row_count[myid_dh]);
+  HYPRE_Int inCt = 0, bdCt = 0;
 
   HYPRE_Int j;
-  HYPRE_Int *cval;
+  HYPRE_BigInt *cval, row;
 
   /* determine if the row is a boundary row */
   for (row=beg_row; row<end_row; ++row) { /* for each row in the subdomain */
@@ -1042,7 +1050,7 @@ void find_bdry_nodes_sym_private(SubdomainGraph_dh s, HYPRE_Int m, void* A,
     EuclidGetRow(A, row, &len, &cval, NULL); CHECK_V_ERROR;
 
     for (j=0; j<len; ++j) { /* for each column in the row */
-      HYPRE_Int col = cval[j];
+      HYPRE_BigInt col = cval[j];
       if (col < beg_row  ||  col >= end_row) {
         isBdry = true;
         break;
@@ -1051,9 +1059,9 @@ void find_bdry_nodes_sym_private(SubdomainGraph_dh s, HYPRE_Int m, void* A,
     EuclidRestoreRow(A, row, &len, &cval, NULL); CHECK_V_ERROR;
 
     if (isBdry) {
-      bdryNodes[bdCt++] = row-beg_row;
+      bdryNodes[bdCt++] = (HYPRE_Int)(row-beg_row);
     } else {
-      interiorNodes[inCt++] = row-beg_row;
+      interiorNodes[inCt++] = (HYPRE_Int)(row-beg_row);
     }
   }
 
@@ -1072,10 +1080,10 @@ void find_bdry_nodes_unsym_private(SubdomainGraph_dh s, HYPRE_Int m, void* A,
                      HYPRE_Int *interiorCount, HYPRE_Int *bdryCount)
 {
   START_FUNC_DH
-  HYPRE_Int beg_row = s->beg_row[myid_dh];
-  HYPRE_Int end_row = beg_row + s->row_count[myid_dh];
-  HYPRE_Int i, j, row, max;
-  HYPRE_Int *cval;
+  HYPRE_BigInt beg_row = s->beg_row[myid_dh];
+  HYPRE_BigInt end_row = beg_row + (HYPRE_BigInt)(s->row_count[myid_dh]);
+  HYPRE_Int i, j, max;
+  HYPRE_BigInt *cval, row;
   HYPRE_Int *list, count;
   HYPRE_Int *rpIN = NULL, *rpOUT = NULL;
   HYPRE_Int *sendBuf, *recvBuf;
@@ -1098,7 +1106,7 @@ void find_bdry_nodes_unsym_private(SubdomainGraph_dh s, HYPRE_Int m, void* A,
     EuclidGetRow(A, row, &len, &cval, NULL); CHECK_V_ERROR;
 
     for (j=0; j<len; ++j) {
-      HYPRE_Int col = cval[j];
+      HYPRE_BigInt col = cval[j];
       if (col < beg_row  ||  col >= end_row) {
         isBdry = true;           /* this row is a boundary node */
         SortedSet_dhInsert(ss, col); CHECK_V_ERROR;
@@ -1266,7 +1274,8 @@ void color_subdomain_graph_private(SubdomainGraph_dh s)
 {
   START_FUNC_DH
   HYPRE_Int i, n = np_dh;
-  HYPRE_Int *rp = s->ptrs, *cval = s->adj;
+  HYPRE_Int *rp = s->ptrs;
+  HYPRE_Int *cval = s->adj;
   HYPRE_Int j, *marker, thisNodesColor, *colorCounter;
   HYPRE_Int *o2n = s->o2n_sub;
   HYPRE_Int *color = s->colorVec;
@@ -1493,8 +1502,8 @@ note: this won't match the parallel case, since
 
       hypre_fprintf(fp, "----- o2n_col\n");
       for (i=0; i<sCt; ++i) {
-        HYPRE_Int br = s->beg_row[i];
-        HYPRE_Int er = br + s->row_count[i];
+        HYPRE_BigInt br = s->beg_row[i];
+        HYPRE_BigInt er = br + s->row_count[i];
 
         for (j=br; j<er; ++j) {
           hypre_fprintf(fp, "%i ", 1+s->o2n_col[j]);
@@ -1514,7 +1523,7 @@ note: this won't match the parallel case, since
     HYPRE_Int id = s->n2o_sub[myid_dh];
     HYPRE_Int m = s->m;
     HYPRE_Int pe;
-    HYPRE_Int beg_row = 0;
+    HYPRE_BigInt beg_row = 0;
     if (s->beg_row != 0) beg_row = s->beg_row[myid_dh];
 
     /* write n2o_row */
@@ -1567,7 +1576,8 @@ void find_bdry_nodes_seq_private(SubdomainGraph_dh s, HYPRE_Int m, void* A)
 {
   START_FUNC_DH
   HYPRE_Int i, j, row, blocks = s->blocks;
-  HYPRE_Int *cval, *tmp;
+  HYPRE_BigInt *cval;
+  HYPRE_Int *tmp;
 
     tmp = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
     for (i=0; i<m; ++i) tmp[i] = 0;
@@ -1576,8 +1586,8 @@ void find_bdry_nodes_seq_private(SubdomainGraph_dh s, HYPRE_Int m, void* A)
      * mark all boundary nodes
      *------------------------------------------ */
     for (i=0; i<blocks; ++i) {
-      HYPRE_Int beg_row = s->beg_row[i];
-      HYPRE_Int end_row = beg_row + s->row_count[i];
+      HYPRE_BigInt beg_row = s->beg_row[i];
+      HYPRE_BigInt end_row = beg_row + s->row_count[i];
 
       for (row=beg_row; row<end_row; ++row) {
         bool isBdry = false;
@@ -1585,7 +1595,7 @@ void find_bdry_nodes_seq_private(SubdomainGraph_dh s, HYPRE_Int m, void* A)
         EuclidGetRow(A, row, &len, &cval, NULL); CHECK_V_ERROR;
 
         for (j=0; j<len; ++j) { /* for each column in the row */
-          HYPRE_Int col = cval[j];
+          HYPRE_BigInt col = cval[j];
 
           if (col < beg_row  ||  col >= end_row) {
             tmp[col] = 1;
@@ -1601,8 +1611,8 @@ void find_bdry_nodes_seq_private(SubdomainGraph_dh s, HYPRE_Int m, void* A)
      * fill in the bdry_count[] array
      *------------------------------------------ */
     for (i=0; i<blocks; ++i) {
-      HYPRE_Int beg_row = s->beg_row[i];
-      HYPRE_Int end_row = beg_row + s->row_count[i];
+      HYPRE_BigInt beg_row = s->beg_row[i];
+      HYPRE_BigInt end_row = beg_row + s->row_count[i];
       HYPRE_Int ct = 0;
       for (row=beg_row; row<end_row; ++row) {
         if (tmp[row]) ++ct;
@@ -1614,9 +1624,9 @@ void find_bdry_nodes_seq_private(SubdomainGraph_dh s, HYPRE_Int m, void* A)
      * form the o2n_col[] permutation
      *------------------------------------------ */
     for (i=0; i<blocks; ++i) {
-      HYPRE_Int beg_row = s->beg_row[i];
-      HYPRE_Int end_row = beg_row + s->row_count[i];
-      HYPRE_Int interiorIDX = beg_row;
+      HYPRE_BigInt beg_row = s->beg_row[i];
+      HYPRE_BigInt end_row = beg_row + s->row_count[i];
+      HYPRE_Int interiorIDX = (HYPRE_Int)beg_row;
       HYPRE_Int bdryIDX = end_row - s->bdry_count[i];
 
       for (row=beg_row; row<end_row; ++row) {
@@ -1679,9 +1689,9 @@ void adjust_matrix_perms_private(SubdomainGraph_dh s, HYPRE_Int m)
   HYPRE_Int *o2n = s->o2n_col;
 
   for (i=0; i<blocks; ++i) {
-    HYPRE_Int beg_row = s->beg_row[i];
-    HYPRE_Int end_row = beg_row + s->row_count[i];
-    HYPRE_Int adjust = s->beg_rowP[i] - s->beg_row[i];
+    HYPRE_BigInt beg_row = s->beg_row[i];
+    HYPRE_BigInt end_row = beg_row + s->row_count[i];
+    HYPRE_Int adjust = (HYPRE_Int)(s->beg_rowP[i] - s->beg_row[i]);
     for (j=beg_row; j<end_row; ++j) o2n[j] += adjust;
   }
 

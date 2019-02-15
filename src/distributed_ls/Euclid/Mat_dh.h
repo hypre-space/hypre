@@ -25,16 +25,17 @@
 #define MATVEC_WORDS      4  /* total words sent to other procs. */
 
 struct _mat_dh {
-  HYPRE_Int m, n;    /* dimensions of local rectangular submatrix;
+  HYPRE_Int m; 
+  HYPRE_BigInt n;    /* dimensions of local rectangular submatrix;
                 * the global matrix is n by n.
                 */
-  HYPRE_Int beg_row;   /* global number of 1st locally owned row */
+  HYPRE_BigInt beg_row;   /* global number of 1st locally owned row */
   HYPRE_Int bs;        /* block size */
 
   /* sparse row-oriented storage for locally owned submatrix */
   HYPRE_Int *rp;       
   HYPRE_Int *len;   /* length of each row; only used for MPI triangular solves */
-  HYPRE_Int *cval;
+  HYPRE_BigInt *cval;
   HYPRE_Int *fill;
   HYPRE_Int *diag;
   HYPRE_Real *aval;
@@ -43,7 +44,7 @@ struct _mat_dh {
   /* working space for getRow */
   HYPRE_Int len_private;
   HYPRE_Int rowCheckedOut;
-  HYPRE_Int *cval_private;
+  HYPRE_BigInt *cval_private;
   HYPRE_Real *aval_private;
 
   /* row permutations to increase positive definiteness */
@@ -61,7 +62,7 @@ struct _mat_dh {
   hypre_MPI_Request  *recv_req;
   hypre_MPI_Request  *send_req; 
   HYPRE_Real   *recvbuf, *sendbuf;  
-  HYPRE_Int          *sendind;
+  HYPRE_BigInt       *sendind;
   HYPRE_Int          sendlen;               
   HYPRE_Int          recvlen;               
   bool         matvecIsSetup;
@@ -134,8 +135,8 @@ extern void Mat_dhFixDiags(Mat_dh A);
 
 extern void Mat_dhPrintDiags(Mat_dh A, FILE *fp);
 
-extern void Mat_dhGetRow(Mat_dh B, HYPRE_Int globalRow, HYPRE_Int *len, HYPRE_Int **ind, HYPRE_Real **val);
-extern void Mat_dhRestoreRow(Mat_dh B, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, HYPRE_Real **val);
+extern void Mat_dhGetRow(Mat_dh B, HYPRE_BigInt globalRow, HYPRE_Int *len, HYPRE_BigInt **ind, HYPRE_Real **val);
+extern void Mat_dhRestoreRow(Mat_dh B, HYPRE_BigInt row, HYPRE_Int *len, HYPRE_BigInt **ind, HYPRE_Real **val);
 
   /* partition matrix into "k" blocks.  User must free storage. */
 extern void Mat_dhPartition(Mat_dh mat, HYPRE_Int k, HYPRE_Int **beg_rowOUT, 

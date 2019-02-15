@@ -192,8 +192,8 @@ static inline HYPRE_Int first_lsb_bit_indx(hypre_uint x)
 #  define HYPRE_XXH_rotl32(x,r) ((x << r) | (x >> (32 - r)))
 #  define HYPRE_XXH_rotl64(x,r) ((x << r) | (x >> (64 - r)))
 
-#ifdef HYPRE_BIGINT
-static inline HYPRE_Int hypre_Hash(HYPRE_Int input)
+#if defined(HYPRE_BIGINT) || defined(HYPRE_ALLBIGINT)
+static inline HYPRE_BigInt hypre_Hash(HYPRE_BigInt input)
 {
     hypre_ulongint h64 = HYPRE_XXH_PRIME64_5 + sizeof(input);
 

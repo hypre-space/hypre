@@ -35,7 +35,7 @@ extern void Hash_i_dhCreate(Hash_i_dh *h, HYPRE_Int size);
 extern void Hash_i_dhDestroy(Hash_i_dh h);
 extern void Hash_i_dhReset(Hash_i_dh h);
 
-extern void Hash_i_dhInsert(Hash_i_dh h, HYPRE_Int key, HYPRE_Int data);
+extern void Hash_i_dhInsert(Hash_i_dh h, HYPRE_Int key, HYPRE_BigInt data);
   /* throws error if <data, data> is already inserted;
      grows hash table if out of space.
    */

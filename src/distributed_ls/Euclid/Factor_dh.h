@@ -17,10 +17,11 @@
 
 struct _factor_dh {
   /* dimensions of local rectangular submatrix; global matrix is n*n */
-  HYPRE_Int m, n;    
+  HYPRE_Int m;
+  HYPRE_BigInt n;    
 
   HYPRE_Int id;          /* this subdomain's id after reordering */
-  HYPRE_Int beg_row;     /* global number of 1st locally owned row */
+  HYPRE_BigInt beg_row;     /* global number of 1st locally owned row */
   HYPRE_Int first_bdry;  /* local number of first boundary row */
   HYPRE_Int bdry_count;  /* m - first_boundary */
 
@@ -31,7 +32,7 @@ struct _factor_dh {
 
   /* sparse row-oriented storage for locally owned submatrix */
   HYPRE_Int *rp;       
-  HYPRE_Int *cval;
+  HYPRE_BigInt *cval;
   REAL_DH *aval;
   HYPRE_Int *fill;
   HYPRE_Int *diag;
@@ -66,7 +67,7 @@ extern void Factor_dhDestroy(Factor_dh mat);
 extern void Factor_dhTranspose(Factor_dh matIN, Factor_dh *matOUT);
 
 extern void Factor_dhInit(void *A, bool fillFlag, bool avalFlag,
-                          HYPRE_Real rho, HYPRE_Int id, HYPRE_Int beg_rowP, Factor_dh *F);
+                          HYPRE_Real rho, HYPRE_Int id, HYPRE_BigInt beg_rowP, Factor_dh *F);
 
 extern void Factor_dhReallocate(Factor_dh F, HYPRE_Int used, HYPRE_Int additional);
   /* ensures fill, cval, and aval arrays can accomodate

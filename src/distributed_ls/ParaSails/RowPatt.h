@@ -29,9 +29,9 @@ typedef struct
     HYPRE_Int  maxlen;
     HYPRE_Int  len;
     HYPRE_Int  prev_len;
-    HYPRE_Int *ind;
+    HYPRE_BigInt *ind;
     HYPRE_Int *mark;
-    HYPRE_Int *buffer; /* buffer used for outputting indices */
+    HYPRE_BigInt *buffer; /* buffer used for outputting indices */
     HYPRE_Int  buflen; /* length of this buffer */
 }
 RowPatt;
@@ -39,9 +39,9 @@ RowPatt;
 RowPatt *RowPattCreate(HYPRE_Int maxlen);
 void RowPattDestroy(RowPatt *p);
 void RowPattReset(RowPatt *p);
-void RowPattMerge(RowPatt *p, HYPRE_Int len, HYPRE_Int *ind);
-void RowPattMergeExt(RowPatt *p, HYPRE_Int len, HYPRE_Int *ind, HYPRE_Int num_loc);
-void RowPattGet(RowPatt *p, HYPRE_Int *lenp, HYPRE_Int **indp);
-void RowPattPrevLevel(RowPatt *p, HYPRE_Int *lenp, HYPRE_Int **indp);
+void RowPattMerge(RowPatt *p, HYPRE_Int len, HYPRE_BigInt *ind);
+void RowPattMergeExt(RowPatt *p, HYPRE_Int len, HYPRE_BigInt *ind, HYPRE_Int num_loc);
+void RowPattGet(RowPatt *p, HYPRE_Int *lenp, HYPRE_BigInt **indp);
+void RowPattPrevLevel(RowPatt *p, HYPRE_Int *lenp, HYPRE_BigInt **indp);
 
 #endif /* _ROWPATT_H */

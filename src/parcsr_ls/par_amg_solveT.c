@@ -598,12 +598,12 @@ HYPRE_Int  hypre_BoomerAMGRelaxT( hypre_ParCSRMatrix *A,
                         hypre_ParVector    *Vtemp )
 {
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
-   HYPRE_Real     *A_diag_data  = hypre_CSRMatrixData(A_diag);
-   HYPRE_Int            *A_diag_i     = hypre_CSRMatrixI(A_diag);
+   HYPRE_Real      *A_diag_data  = hypre_CSRMatrixData(A_diag);
+   HYPRE_Int       *A_diag_i     = hypre_CSRMatrixI(A_diag);
 
-   HYPRE_Int             n_global= hypre_ParCSRMatrixGlobalNumRows(A);
-   HYPRE_Int             n       = hypre_CSRMatrixNumRows(A_diag);
-   HYPRE_Int	      	   first_index = hypre_ParVectorFirstIndex(u);
+   HYPRE_BigInt     global_num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
+   HYPRE_Int        n       = hypre_CSRMatrixNumRows(A_diag);
+   HYPRE_BigInt     first_index = hypre_ParVectorFirstIndex(u);
    
    hypre_Vector   *u_local = hypre_ParVectorLocalVector(u);
    HYPRE_Real     *u_data  = hypre_VectorData(u_local);
@@ -612,22 +612,22 @@ HYPRE_Int  hypre_BoomerAMGRelaxT( hypre_ParCSRMatrix *A,
    HYPRE_Real     *Vtemp_data = hypre_VectorData(Vtemp_local);
 
    hypre_CSRMatrix *A_CSR;
-   HYPRE_Int		   *A_CSR_i;   
-   HYPRE_Int		   *A_CSR_j;
+   HYPRE_Int	   *A_CSR_i;   
+   HYPRE_Int	   *A_CSR_j;
    HYPRE_Real	   *A_CSR_data;
    
    hypre_Vector    *f_vector;
    HYPRE_Real	   *f_vector_data;
 
-   HYPRE_Int             i;
-   HYPRE_Int             jj;
-   HYPRE_Int             column;
-   HYPRE_Int             relax_error = 0;
+   HYPRE_Int        i;
+   HYPRE_Int        jj;
+   HYPRE_Int        column;
+   HYPRE_Int        relax_error = 0;
 
-   HYPRE_Real     *A_mat;
-   HYPRE_Real     *b_vec;
+   HYPRE_Real      *A_mat;
+   HYPRE_Real      *b_vec;
 
-   HYPRE_Real      zero = 0.0;
+   HYPRE_Real       zero = 0.0;
 
    HYPRE_ANNOTATION_BEGIN("BoomerAMG.relaxT");
       
@@ -674,6 +674,7 @@ HYPRE_Int  hypre_BoomerAMGRelaxT( hypre_ParCSRMatrix *A,
       case 9: /* Direct solve: use gaussian elimination */
       {
 
+         HYPRE_Int n_global = (HYPRE_Int) global_num_rows;         
          /*-----------------------------------------------------------------
           *  Generate CSR matrix from ParCSRMatrix A
           *-----------------------------------------------------------------*/

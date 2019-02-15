@@ -240,7 +240,7 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
    HYPRE_Int size, ghostsize;
    HYPRE_Int num_local_boxes;
    HYPRE_Int myid, num_procs;
-   HYPRE_Int global_size;
+   HYPRE_BigInt global_size;
    HYPRE_Int max_nentries;
    HYPRE_Int info_size;
    HYPRE_Int num_periods;
@@ -379,7 +379,8 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
    {
       /*************** set the global size *****************/
 
-      hypre_MPI_Allreduce(&size, &global_size, 1, HYPRE_MPI_INT,
+      HYPRE_BigInt big_size = (HYPRE_BigInt)size;
+      hypre_MPI_Allreduce(&big_size, &global_size, 1, HYPRE_MPI_BIG_INT,
                           hypre_MPI_SUM, comm);
       hypre_StructGridGlobalSize(grid) = global_size; /* TO DO: this HYPRE_Int
                                                        * could overflow! (used

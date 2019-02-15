@@ -37,65 +37,66 @@
 HYPRE_Int
 hypre_BoomerAMGCoarsenCGCb( hypre_ParCSRMatrix    *S,
                             hypre_ParCSRMatrix    *A,
-                            HYPRE_Int                    measure_type,
-                            HYPRE_Int                    coarsen_type,
-			    HYPRE_Int                    cgc_its,
-                            HYPRE_Int                    debug_flag,
-                            HYPRE_Int                  **CF_marker_ptr)
+                            HYPRE_Int              measure_type,
+                            HYPRE_Int              coarsen_type,
+			    HYPRE_Int              cgc_its,
+                            HYPRE_Int              debug_flag,
+                            HYPRE_Int            **CF_marker_ptr)
 {
    MPI_Comm         comm          = hypre_ParCSRMatrixComm(S);
    hypre_ParCSRCommPkg   *comm_pkg      = hypre_ParCSRMatrixCommPkg(S);
    hypre_ParCSRCommHandle *comm_handle;
    hypre_CSRMatrix *S_diag        = hypre_ParCSRMatrixDiag(S);
    hypre_CSRMatrix *S_offd        = hypre_ParCSRMatrixOffd(S);
-   HYPRE_Int             *S_i           = hypre_CSRMatrixI(S_diag);
-   HYPRE_Int             *S_j           = hypre_CSRMatrixJ(S_diag);
-   HYPRE_Int             *S_offd_i      = hypre_CSRMatrixI(S_offd);
+   HYPRE_Int       *S_i           = hypre_CSRMatrixI(S_diag);
+   HYPRE_Int       *S_j           = hypre_CSRMatrixJ(S_diag);
+   HYPRE_Int       *S_offd_i      = hypre_CSRMatrixI(S_offd);
    /*HYPRE_Int             *S_offd_j      = hypre_CSRMatrixJ(S_offd);*/
-   HYPRE_Int              num_variables = hypre_CSRMatrixNumRows(S_diag);
-   HYPRE_Int              num_cols_offd = hypre_CSRMatrixNumCols(S_offd);
+   HYPRE_Int        num_variables = hypre_CSRMatrixNumRows(S_diag);
+   HYPRE_Int        num_cols_offd = hypre_CSRMatrixNumCols(S_offd);
                   
    hypre_CSRMatrix *S_ext;
-   HYPRE_Int             *S_ext_i;
-   HYPRE_Int             *S_ext_j;
+   HYPRE_Int       *S_ext_i;
+   HYPRE_BigInt    *S_ext_j;
                  
    hypre_CSRMatrix *ST;
-   HYPRE_Int             *ST_i;
-   HYPRE_Int             *ST_j;
+   HYPRE_Int       *ST_i;
+   HYPRE_Int       *ST_j;
                  
-   HYPRE_Int             *CF_marker;
-   HYPRE_Int             *CF_marker_offd=NULL;
-   HYPRE_Int              ci_tilde = -1;
-   HYPRE_Int              ci_tilde_mark = -1;
+   HYPRE_Int       *CF_marker;
+   HYPRE_Int       *CF_marker_offd=NULL;
+   HYPRE_Int        ci_tilde = -1;
+   HYPRE_Int        ci_tilde_mark = -1;
 
-   HYPRE_Int             *measure_array;
-   HYPRE_Int             *measure_array_master;
-   HYPRE_Int             *graph_array;
-   HYPRE_Int 	           *int_buf_data=NULL;
+   HYPRE_Int       *measure_array;
+   HYPRE_Int       *measure_array_master;
+   HYPRE_Int       *graph_array;
+   HYPRE_Int       *int_buf_data=NULL;
    /*HYPRE_Int 	           *ci_array=NULL;*/
 
-   HYPRE_Int              i, j, k, l, jS;
-   HYPRE_Int		    ji, jj, index;
-   HYPRE_Int		    set_empty = 1;
-   HYPRE_Int		    C_i_nonempty = 0;
-   HYPRE_Int		    num_nonzeros;
-   HYPRE_Int		    num_procs, my_id;
-   HYPRE_Int		    num_sends = 0;
-   HYPRE_Int		    first_col, start;
+   HYPRE_Int        i, j, k, l, jS;
+   HYPRE_Int	    ji, jj, index;
+   HYPRE_Int	    set_empty = 1;
+   HYPRE_Int	    C_i_nonempty = 0;
+   HYPRE_Int	    num_nonzeros;
+   HYPRE_Int	    num_procs, my_id;
+   HYPRE_Int	    num_sends = 0;
+   HYPRE_BigInt	    first_col;
+   HYPRE_Int	    start;
    /*HYPRE_Int		    col_0, col_n;*/
 
    hypre_LinkList   LoL_head;
    hypre_LinkList   LoL_tail;
 
-   HYPRE_Int             *lists, *where;
-   HYPRE_Int              measure, new_meas;
-   HYPRE_Int              num_left;
-   HYPRE_Int              nabor, nabor_two;
+   HYPRE_Int       *lists, *where;
+   HYPRE_Int        measure, new_meas;
+   HYPRE_Int        num_left;
+   HYPRE_Int        nabor, nabor_two;
 
-   HYPRE_Int              use_commpkg_A = 0;
+   HYPRE_Int        use_commpkg_A = 0;
    HYPRE_Real	    wall_time;
 
-   HYPRE_Int              measure_max; /* BM Aug 30, 2006: maximal measure, needed for CGC */
+   HYPRE_Int        measure_max; /* BM Aug 30, 2006: maximal measure, needed for CGC */
 
    if (coarsen_type < 0) coarsen_type = -coarsen_type;
 
@@ -213,7 +214,7 @@ hypre_BoomerAMGCoarsenCGCb( hypre_ParCSRMatrix    *S,
       else
          S_ext      = hypre_ParCSRMatrixExtractBExt(S,S,0);
       S_ext_i    = hypre_CSRMatrixI(S_ext);
-      S_ext_j    = hypre_CSRMatrixJ(S_ext);
+      S_ext_j    = hypre_CSRMatrixBigJ(S_ext);
       num_nonzeros = S_ext_i[num_cols_offd];
       first_col = hypre_ParCSRMatrixFirstColDiag(S);
       /*col_0 = first_col-1;
@@ -222,7 +223,7 @@ hypre_BoomerAMGCoarsenCGCb( hypre_ParCSRMatrix    *S,
       {
 	 for (i=0; i < num_nonzeros; i++)
          {
-	    index = S_ext_j[i] - first_col;
+	    index = (HYPRE_Int)(S_ext_j[i] - first_col);
 	    if (index > -1 && index < num_variables)
 		measure_array_master[index]++;
          } 
@@ -627,8 +628,8 @@ HYPRE_Int hypre_BoomerAMGCoarsenCGC (hypre_ParCSRMatrix    *S,HYPRE_Int numberof
   * =====================================================================================================*/
 {
   HYPRE_Int j,/*p,*/mpisize,mpirank,/*rstart,rend,*/choice,*coarse;
-  HYPRE_Int *vertexrange = NULL;
-  HYPRE_Int *vertexrange_all = NULL;
+  HYPRE_BigInt *vertexrange = NULL;
+  HYPRE_BigInt *vertexrange_all = NULL;
   HYPRE_Int *CF_marker_offd = NULL;
   HYPRE_Int num_variables = hypre_CSRMatrixNumRows (hypre_ParCSRMatrixDiag(S));
 /*   HYPRE_Int num_cols_offd = hypre_CSRMatrixNumCols (hypre_ParCSRMatrixOffd (S)); */
@@ -677,9 +678,9 @@ HYPRE_Int hypre_BoomerAMGCoarsenCGC (hypre_ParCSRMatrix    *S,HYPRE_Int numberof
   /* classical CGC does not really make sense in combination with HYPRE_NO_GLOBAL_PARTITION,
      but anyway, here it is:
   */
-   HYPRE_Int nlocal = vertexrange[1]-vertexrange[0];
-   vertexrange_all = hypre_CTAlloc(HYPRE_Int, mpisize+1, HYPRE_MEMORY_HOST);
-   hypre_MPI_Allgather (&nlocal,1,HYPRE_MPI_INT,vertexrange_all+1,1,HYPRE_MPI_INT,comm);
+   HYPRE_Int nlocal = (HYPRE_Int)(vertexrange[1]-vertexrange[0]);
+   vertexrange_all = hypre_CTAlloc(HYPRE_BigInt, mpisize+1, HYPRE_MEMORY_HOST);
+   hypre_MPI_Allgather (&nlocal,1,HYPRE_MPI_INT,vertexrange_all+1,1,HYPRE_MPI_BIG_INT,comm);
    vertexrange_all[0]=0;
    for (j=2;j<=mpisize;j++) vertexrange_all[j]+=vertexrange_all[j-1];
  }
@@ -763,7 +764,7 @@ HYPRE_Int hypre_BoomerAMGCoarsenCGC (hypre_ParCSRMatrix    *S,HYPRE_Int numberof
   return hypre_error_flag;
 }
 
-HYPRE_Int hypre_AmgCGCPrepare (hypre_ParCSRMatrix *S,HYPRE_Int nlocal,HYPRE_Int *CF_marker,HYPRE_Int **CF_marker_offd,HYPRE_Int coarsen_type,HYPRE_Int **vrange)
+HYPRE_Int hypre_AmgCGCPrepare (hypre_ParCSRMatrix *S,HYPRE_Int nlocal,HYPRE_Int *CF_marker,HYPRE_Int **CF_marker_offd,HYPRE_Int coarsen_type,HYPRE_BigInt **vrange)
 /* assemble a graph representing the connections between the grids
  * ================================================================================================
  * S : the strength matrix
@@ -775,8 +776,8 @@ HYPRE_Int hypre_AmgCGCPrepare (hypre_ParCSRMatrix *S,HYPRE_Int nlocal,HYPRE_Int 
 {
   HYPRE_Int mpisize,mpirank;
   HYPRE_Int num_sends;
-  HYPRE_Int *vertexrange=NULL;
-  HYPRE_Int vstart/*,vend*/;
+  HYPRE_BigInt *vertexrange=NULL;
+  HYPRE_BigInt vstart/*,vend*/;
   HYPRE_Int *int_buf_data;
   HYPRE_Int start;
   HYPRE_Int i,ii,j;
@@ -802,10 +803,10 @@ HYPRE_Int hypre_AmgCGCPrepare (hypre_ParCSRMatrix *S,HYPRE_Int nlocal,HYPRE_Int 
   if (coarsen_type % 2 == 0) nlocal++; /* even coarsen_type means allow_emptygrids */
 #ifdef HYPRE_NO_GLOBAL_PARTITION
    {
-      HYPRE_Int scan_recv;
+      HYPRE_BigInt scan_recv;
       
-      vertexrange = hypre_CTAlloc(HYPRE_Int, 2, HYPRE_MEMORY_HOST);
-      hypre_MPI_Scan(&nlocal, &scan_recv, 1, HYPRE_MPI_INT, hypre_MPI_SUM, comm);
+      vertexrange = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
+      hypre_MPI_Scan(&nlocal, &scan_recv, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
       /* first point in my range */ 
       vertexrange[0] = scan_recv - nlocal;
       /* first point in next proc's range */
@@ -814,9 +815,9 @@ HYPRE_Int hypre_AmgCGCPrepare (hypre_ParCSRMatrix *S,HYPRE_Int nlocal,HYPRE_Int 
       /*vend   = vertexrange[1];*/
    }
 #else
-  vertexrange = hypre_CTAlloc(HYPRE_Int, mpisize+1, HYPRE_MEMORY_HOST);
+  vertexrange = hypre_CTAlloc(HYPRE_BigInt, mpisize+1, HYPRE_MEMORY_HOST);
  
-  hypre_MPI_Allgather (&nlocal,1,HYPRE_MPI_INT,vertexrange+1,1,HYPRE_MPI_INT,comm);
+  hypre_MPI_Allgather (&nlocal,1,HYPRE_MPI_INT,vertexrange+1,1,HYPRE_MPI_BIG_INT,comm);
   vertexrange[0]=0;
   for (i=2;i<=mpisize;i++) vertexrange[i]+=vertexrange[i-1];
   vstart = vertexrange[mpirank];
@@ -861,7 +862,7 @@ HYPRE_Int hypre_AmgCGCPrepare (hypre_ParCSRMatrix *S,HYPRE_Int nlocal,HYPRE_Int 
 #define tag_pointrange 301
 #define tag_vertexrange 302
 
-HYPRE_Int hypre_AmgCGCGraphAssemble (hypre_ParCSRMatrix *S,HYPRE_Int *vertexrange,HYPRE_Int *CF_marker,HYPRE_Int *CF_marker_offd,HYPRE_Int coarsen_type,
+HYPRE_Int hypre_AmgCGCGraphAssemble (hypre_ParCSRMatrix *S,HYPRE_BigInt *vertexrange,HYPRE_Int *CF_marker,HYPRE_Int *CF_marker_offd,HYPRE_Int coarsen_type,
 			 HYPRE_IJMatrix *ijG)
 /* assemble a graph representing the connections between the grids
  * ================================================================================================
@@ -872,7 +873,8 @@ HYPRE_Int hypre_AmgCGCGraphAssemble (hypre_ParCSRMatrix *S,HYPRE_Int *vertexrang
  * ijG : the created graph
  * ================================================================================================*/
 {
-  HYPRE_Int i,/* ii,ip,*/ j,jj,m,n,p;
+  HYPRE_Int i,/* ii,ip,*/ j,jj,p;
+  HYPRE_BigInt big_jj,m,n;
   HYPRE_Int mpisize,mpirank;
 
   HYPRE_Real weight;
@@ -889,11 +891,12 @@ HYPRE_Int hypre_AmgCGCGraphAssemble (hypre_ParCSRMatrix *S,HYPRE_Int *vertexrang
   HYPRE_Int *S_offd_j = NULL;
   HYPRE_Int num_variables = hypre_CSRMatrixNumRows (S_diag);
   HYPRE_Int num_cols_offd = hypre_CSRMatrixNumCols (S_offd);
-  HYPRE_Int *col_map_offd = hypre_ParCSRMatrixColMapOffd (S);
-  HYPRE_Int *pointrange,*pointrange_nonlocal,*pointrange_strong=NULL;
-  HYPRE_Int vertexrange_start,vertexrange_end;
-  HYPRE_Int *vertexrange_strong= NULL;
-  HYPRE_Int *vertexrange_nonlocal;
+  HYPRE_BigInt *col_map_offd = hypre_ParCSRMatrixColMapOffd (S);
+  HYPRE_BigInt *pointrange,*pointrange_nonlocal;
+  HYPRE_BigInt *pointrange_strong=NULL;
+  HYPRE_BigInt vertexrange_start,vertexrange_end;
+  HYPRE_BigInt *vertexrange_strong= NULL;
+  HYPRE_BigInt *vertexrange_nonlocal;
   HYPRE_Int num_recvs,num_recvs_strong;
   HYPRE_Int *recv_procs,*recv_procs_strong=NULL;
   HYPRE_Int /* *zeros,*rownz,*/*rownz_diag,*rownz_offd;
@@ -911,18 +914,18 @@ HYPRE_Int hypre_AmgCGCGraphAssemble (hypre_ParCSRMatrix *S,HYPRE_Int *vertexrang
   num_recvs = hypre_ParCSRCommPkgNumRecvs (comm_pkg);
   recv_procs = hypre_ParCSRCommPkgRecvProcs (comm_pkg);
   pointrange = hypre_ParCSRMatrixRowStarts (S);
-  pointrange_nonlocal = hypre_CTAlloc(HYPRE_Int,  2*num_recvs, HYPRE_MEMORY_HOST);
-  vertexrange_nonlocal = hypre_CTAlloc(HYPRE_Int,  2*num_recvs, HYPRE_MEMORY_HOST);
+  pointrange_nonlocal = hypre_CTAlloc(HYPRE_BigInt,  2*num_recvs, HYPRE_MEMORY_HOST);
+  vertexrange_nonlocal = hypre_CTAlloc(HYPRE_BigInt,  2*num_recvs, HYPRE_MEMORY_HOST);
 #ifdef HYPRE_NO_GLOBAL_PARTITION
   {
     HYPRE_Int num_sends  =  hypre_ParCSRCommPkgNumSends (comm_pkg);
     HYPRE_Int *send_procs =  hypre_ParCSRCommPkgSendProcs (comm_pkg);
-    HYPRE_Int *int_buf_data   = hypre_CTAlloc(HYPRE_Int, 4*num_sends, HYPRE_MEMORY_HOST);
-    HYPRE_Int *int_buf_data2  = int_buf_data + 2*num_sends;
+    HYPRE_BigInt *int_buf_data   = hypre_CTAlloc(HYPRE_BigInt, 4*num_sends, HYPRE_MEMORY_HOST);
+    HYPRE_BigInt *int_buf_data2  = int_buf_data + 2*num_sends;
     hypre_MPI_Request *sendrequest,*recvrequest;
-    HYPRE_Int pointrange_start,pointrange_end;
+    HYPRE_BigInt pointrange_start,pointrange_end;
 
-    nlocal = vertexrange[1] - vertexrange[0];
+    nlocal = (HYPRE_Int)(vertexrange[1] - vertexrange[0]);
     pointrange_start = pointrange[0];
     pointrange_end   = pointrange[1];
     vertexrange_start = vertexrange[0];
@@ -931,23 +934,23 @@ HYPRE_Int hypre_AmgCGCGraphAssemble (hypre_ParCSRMatrix *S,HYPRE_Int *vertexrang
     recvrequest = sendrequest+2*num_sends;
 
     for (i=0;i<num_recvs;i++) {
-      hypre_MPI_Irecv (pointrange_nonlocal+2*i,2,HYPRE_MPI_INT,recv_procs[i],tag_pointrange,comm,&recvrequest[2*i]);
-      hypre_MPI_Irecv (vertexrange_nonlocal+2*i,2,HYPRE_MPI_INT,recv_procs[i],tag_vertexrange,comm,&recvrequest[2*i+1]);
+      hypre_MPI_Irecv (pointrange_nonlocal+2*i,2,HYPRE_MPI_BIG_INT,recv_procs[i],tag_pointrange,comm,&recvrequest[2*i]);
+      hypre_MPI_Irecv (vertexrange_nonlocal+2*i,2,HYPRE_MPI_BIG_INT,recv_procs[i],tag_vertexrange,comm,&recvrequest[2*i+1]);
     }
     for (i=0;i<num_sends;i++) {
       int_buf_data[2*i] = pointrange_start;
       int_buf_data[2*i+1] = pointrange_end;
       int_buf_data2[2*i] = vertexrange_start;
       int_buf_data2[2*i+1] = vertexrange_end;
-      hypre_MPI_Isend (int_buf_data+2*i,2,HYPRE_MPI_INT,send_procs[i],tag_pointrange,comm,&sendrequest[2*i]);
-      hypre_MPI_Isend (int_buf_data2+2*i,2,HYPRE_MPI_INT,send_procs[i],tag_vertexrange,comm,&sendrequest[2*i+1]);
+      hypre_MPI_Isend (int_buf_data+2*i,2,HYPRE_MPI_BIG_INT,send_procs[i],tag_pointrange,comm,&sendrequest[2*i]);
+      hypre_MPI_Isend (int_buf_data2+2*i,2,HYPRE_MPI_BIG_INT,send_procs[i],tag_vertexrange,comm,&sendrequest[2*i+1]);
     }
     hypre_MPI_Waitall (2*(num_sends+num_recvs),sendrequest,hypre_MPI_STATUSES_IGNORE);
     hypre_TFree(int_buf_data, HYPRE_MEMORY_HOST);
     hypre_TFree(sendrequest, HYPRE_MEMORY_HOST);
   }
 #else
-  nlocal = vertexrange[mpirank+1] - vertexrange[mpirank];
+  nlocal = (HYPRE_Int)(vertexrange[mpirank+1] - vertexrange[mpirank]);
   /*pointrange_start = pointrange[mpirank];
   pointrange_end   = pointrange[mpirank+1];*/
   vertexrange_start = vertexrange[mpirank];
@@ -968,16 +971,16 @@ HYPRE_Int hypre_AmgCGCGraphAssemble (hypre_ParCSRMatrix *S,HYPRE_Int *vertexrang
     recv_procs_strong = hypre_CTAlloc(HYPRE_Int, num_recvs, HYPRE_MEMORY_HOST);
     memset (recv_procs_strong,0,num_recvs*sizeof(HYPRE_Int));
     /* don't forget to shorten the pointrange and vertexrange arrays accordingly */
-    pointrange_strong = hypre_CTAlloc(HYPRE_Int, 2*num_recvs, HYPRE_MEMORY_HOST);
-    memset (pointrange_strong,0,2*num_recvs*sizeof(HYPRE_Int));
-    vertexrange_strong = hypre_CTAlloc(HYPRE_Int, 2*num_recvs, HYPRE_MEMORY_HOST);
-    memset (vertexrange_strong,0,2*num_recvs*sizeof(HYPRE_Int));
+    pointrange_strong = hypre_CTAlloc(HYPRE_BigInt, 2*num_recvs, HYPRE_MEMORY_HOST);
+    memset (pointrange_strong,0,2*num_recvs*sizeof(HYPRE_BigInt));
+    vertexrange_strong = hypre_CTAlloc(HYPRE_BigInt, 2*num_recvs, HYPRE_MEMORY_HOST);
+    memset (vertexrange_strong,0,2*num_recvs*sizeof(HYPRE_BigInt));
     
     for (i=0;i<num_variables;i++)
       for (j=S_offd_i[i];j<S_offd_i[i+1];j++) {
-	jj = col_map_offd[S_offd_j[j]];
+	big_jj = col_map_offd[S_offd_j[j]];
 	for (p=0;p<num_recvs;p++) /* S_offd_j is NOT sorted! */
-	  if (jj >= pointrange_nonlocal[2*p] && jj < pointrange_nonlocal[2*p+1]) break;
+	  if (big_jj >= pointrange_nonlocal[2*p] && big_jj < pointrange_nonlocal[2*p+1]) break;
 #if 0
 	hypre_printf ("Processor %d, remote point %d on processor %d\n",mpirank,jj,recv_procs[p]);
 #endif
@@ -1003,7 +1006,7 @@ HYPRE_Int hypre_AmgCGCGraphAssemble (hypre_ParCSRMatrix *S,HYPRE_Int *vertexrang
   rownz_diag = hypre_CTAlloc(HYPRE_Int, 2*nlocal, HYPRE_MEMORY_HOST);
   rownz_offd = rownz_diag + nlocal;
   for (p=0,nz=0;p<num_recvs_strong;p++) {
-    nz += vertexrange_strong[2*p+1]-vertexrange_strong[2*p];
+    nz += (HYPRE_Int)(vertexrange_strong[2*p+1]-vertexrange_strong[2*p]);
   }
   for (m=0;m<nlocal;m++) {
     rownz_diag[m]=nlocal-1;
@@ -1075,7 +1078,7 @@ HYPRE_Int hypre_AmgCGCGraphAssemble (hypre_ParCSRMatrix *S,HYPRE_Int *vertexrang
   return hypre_error_flag;
 }
 
-HYPRE_Int hypre_AmgCGCChoose (hypre_CSRMatrix *G,HYPRE_Int *vertexrange,HYPRE_Int mpisize,HYPRE_Int **coarse)
+HYPRE_Int hypre_AmgCGCChoose (hypre_CSRMatrix *G,HYPRE_BigInt *vertexrange,HYPRE_Int mpisize,HYPRE_Int **coarse)
   /* chooses one grid for every processor
    * ============================================================
    * G : the connectivity graph

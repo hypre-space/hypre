@@ -50,7 +50,7 @@ typedef struct { HYPRE_Int prev; HYPRE_Int next; } Link;
 #define CUMNUMIT
 
 
-#include "par_csr_block_matrix.h"
+#include "../parcsr_block_mv/par_csr_block_matrix.h"
 
 /*--------------------------------------------------------------------------
  * hypre_ParAMGData
@@ -130,11 +130,11 @@ typedef struct
    hypre_ParVector    **U_array;
    hypre_ParCSRMatrix **P_array;
    hypre_ParCSRMatrix **R_array;
-   HYPRE_Int                **CF_marker_array;
-   HYPRE_Int                **dof_func_array;
-   HYPRE_Int                **dof_point_array;
-   HYPRE_Int                **point_dof_map_array;
-   HYPRE_Int                  num_levels;
+   HYPRE_Int          **CF_marker_array;
+   HYPRE_Int          **dof_func_array;
+   HYPRE_Int          **dof_point_array;
+   HYPRE_Int          **point_dof_map_array;
+   HYPRE_Int            num_levels;
    HYPRE_Real         **l1_norms;
 
 
@@ -146,20 +146,20 @@ typedef struct
    HYPRE_Int block_mode;
 
    /* data for more complex smoothers */
-   HYPRE_Int                  smooth_num_levels;
-   HYPRE_Int                  smooth_type;
+   HYPRE_Int            smooth_num_levels;
+   HYPRE_Int            smooth_type;
    HYPRE_Solver        *smoother;
-   HYPRE_Int			smooth_num_sweeps;
-   HYPRE_Int                  schw_variant;
-   HYPRE_Int                  schw_overlap;
-   HYPRE_Int                  schw_domain_type;
+   HYPRE_Int		smooth_num_sweeps;
+   HYPRE_Int            schw_variant;
+   HYPRE_Int            schw_overlap;
+   HYPRE_Int            schw_domain_type;
    HYPRE_Real		schwarz_rlx_weight;
-   HYPRE_Int                  schwarz_use_nonsymm;
-   HYPRE_Int			ps_sym;
-   HYPRE_Int			ps_level;
-   HYPRE_Int			pi_max_nz_per_row;
-   HYPRE_Int			eu_level;
-   HYPRE_Int			eu_bj;
+   HYPRE_Int            schwarz_use_nonsymm;
+   HYPRE_Int		ps_sym;
+   HYPRE_Int		ps_level;
+   HYPRE_Int		pi_max_nz_per_row;
+   HYPRE_Int		eu_level;
+   HYPRE_Int		eu_bj;
    HYPRE_Real		ps_threshold;
    HYPRE_Real		ps_filter;
    HYPRE_Real		pi_drop_tol;
@@ -168,10 +168,10 @@ typedef struct
 
    HYPRE_Real          *max_eig_est;
    HYPRE_Real          *min_eig_est;
-   HYPRE_Int           cheby_eig_est;
+   HYPRE_Int            cheby_eig_est;
    HYPRE_Int            cheby_order;
-   HYPRE_Int           cheby_variant;
-   HYPRE_Int           cheby_scale;
+   HYPRE_Int            cheby_variant;
+   HYPRE_Int            cheby_scale;
    HYPRE_Real           cheby_fraction;
    HYPRE_Real         **cheby_ds;
    HYPRE_Real         **cheby_coefs;
@@ -218,16 +218,16 @@ typedef struct
    float    *coordinates;
 
  /* data for fitting vectors in interpolation */
-   HYPRE_Int               num_interp_vectors;
-   HYPRE_Int               num_levels_interp_vectors; /* not set by user */
-   hypre_ParVector **interp_vectors;
+   HYPRE_Int          num_interp_vectors;
+   HYPRE_Int          num_levels_interp_vectors; /* not set by user */
+   hypre_ParVector  **interp_vectors;
    hypre_ParVector ***interp_vectors_array;   
-   HYPRE_Int               interp_vec_variant;
-   HYPRE_Int               interp_vec_first_level;
-   HYPRE_Real        interp_vectors_abs_q_trunc;
-   HYPRE_Int               interp_vectors_q_max;
-   HYPRE_Int               interp_refine;
-   HYPRE_Int               smooth_interp_vectors;
+   HYPRE_Int          interp_vec_variant;
+   HYPRE_Int          interp_vec_first_level;
+   HYPRE_Real         interp_vectors_abs_q_trunc;
+   HYPRE_Int          interp_vectors_q_max;
+   HYPRE_Int          interp_refine;
+   HYPRE_Int          smooth_interp_vectors;
    HYPRE_Real       *expandp_weights; /* currently not set by user */
 
  /* enable redundant coarse grid solve */
@@ -639,21 +639,22 @@ HYPRE_Int hypre_AMSGetNumIterations ( void *solver , HYPRE_Int *num_iterations )
 HYPRE_Int hypre_AMSGetFinalRelativeResidualNorm ( void *solver , HYPRE_Real *rel_resid_norm );
 HYPRE_Int hypre_AMSProjectOutGradients ( void *solver , hypre_ParVector *x );
 HYPRE_Int hypre_AMSConstructDiscreteGradient ( hypre_ParCSRMatrix *A , hypre_ParVector *x_coord , HYPRE_Int *edge_vertex , HYPRE_Int edge_orientation , hypre_ParCSRMatrix **G_ptr );
-HYPRE_Int hypre_AMSFEISetup ( void *solver , hypre_ParCSRMatrix *A , hypre_ParVector *b , hypre_ParVector *x , HYPRE_Int num_vert , HYPRE_Int num_local_vert , HYPRE_Int *vert_number , HYPRE_Real *vert_coord , HYPRE_Int num_edges , HYPRE_Int *edge_vertex );
+HYPRE_Int hypre_AMSFEISetup ( void *solver , hypre_ParCSRMatrix *A , hypre_ParVector *b , hypre_ParVector *x , HYPRE_Int num_vert , HYPRE_Int num_local_vert , HYPRE_BigInt *vert_number , HYPRE_Real *vert_coord , HYPRE_Int num_edges , HYPRE_Int *edge_vertex );
 HYPRE_Int hypre_AMSFEIDestroy ( void *solver );
 HYPRE_Int hypre_ParCSRComputeL1NormsThreads ( hypre_ParCSRMatrix *A , HYPRE_Int option , HYPRE_Int num_threads , HYPRE_Int *cf_marker , HYPRE_Real **l1_norm_ptr );
 HYPRE_Int hypre_ParCSRRelaxThreads ( hypre_ParCSRMatrix *A , hypre_ParVector *f , HYPRE_Int relax_type , HYPRE_Int relax_times , HYPRE_Real *l1_norms , HYPRE_Real relax_weight , HYPRE_Real omega , hypre_ParVector *u , hypre_ParVector *Vtemp , hypre_ParVector *z );
 
 /* aux_interp.c */
 HYPRE_Int hypre_alt_insert_new_nodes ( hypre_ParCSRCommPkg *comm_pkg , hypre_ParCSRCommPkg *extend_comm_pkg , HYPRE_Int *IN_marker , HYPRE_Int full_off_procNodes , HYPRE_Int *OUT_marker );
-HYPRE_Int hypre_ssort ( HYPRE_Int *data , HYPRE_Int n );
-HYPRE_Int hypre_index_of_minimum ( HYPRE_Int *data , HYPRE_Int n );
-void hypre_swap_int ( HYPRE_Int *data , HYPRE_Int a , HYPRE_Int b );
-void hypre_initialize_vecs ( HYPRE_Int diag_n , HYPRE_Int offd_n , HYPRE_Int *diag_ftc , HYPRE_Int *offd_ftc , HYPRE_Int *diag_pm , HYPRE_Int *offd_pm , HYPRE_Int *tmp_CF );
+HYPRE_Int hypre_big_insert_new_nodes ( hypre_ParCSRCommPkg *comm_pkg , hypre_ParCSRCommPkg *extend_comm_pkg , HYPRE_Int *IN_marker , HYPRE_Int full_off_procNodes , HYPRE_BigInt offset , HYPRE_BigInt *OUT_marker );
+HYPRE_Int hypre_ssort ( HYPRE_BigInt *data , HYPRE_Int n );
+HYPRE_Int hypre_index_of_minimum ( HYPRE_BigInt *data , HYPRE_Int n );
+void hypre_swap_int ( HYPRE_BigInt *data , HYPRE_Int a , HYPRE_Int b );
+void hypre_initialize_vecs ( HYPRE_Int diag_n , HYPRE_Int offd_n , HYPRE_Int *diag_ftc , HYPRE_BigInt *offd_ftc , HYPRE_Int *diag_pm , HYPRE_Int *offd_pm , HYPRE_Int *tmp_CF );
 /*HYPRE_Int hypre_new_offd_nodes(HYPRE_Int **found , HYPRE_Int num_cols_A_offd , HYPRE_Int *A_ext_i , HYPRE_Int *A_ext_j, HYPRE_Int num_cols_S_offd, HYPRE_Int *col_map_offd, HYPRE_Int col_1, HYPRE_Int col_n, HYPRE_Int *Sop_i, HYPRE_Int *Sop_j, HYPRE_Int *CF_marker_offd );*/
 HYPRE_Int hypre_exchange_marker(hypre_ParCSRCommPkg *comm_pkg, HYPRE_Int *IN_marker, HYPRE_Int *OUT_marker);
 HYPRE_Int hypre_exchange_interp_data( HYPRE_Int **CF_marker_offd, HYPRE_Int **dof_func_offd, hypre_CSRMatrix **A_ext, HYPRE_Int *full_off_procNodes, hypre_CSRMatrix **Sop, hypre_ParCSRCommPkg **extend_comm_pkg, hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, hypre_ParCSRMatrix *S, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int skip_fine_or_same_sign);
-void hypre_build_interp_colmap(hypre_ParCSRMatrix *P, HYPRE_Int full_off_procNodes, HYPRE_Int *tmp_CF_marker_offd, HYPRE_Int *fine_to_coarse_offd);
+void hypre_build_interp_colmap(hypre_ParCSRMatrix *P, HYPRE_Int full_off_procNodes, HYPRE_Int *tmp_CF_marker_offd, HYPRE_BigInt *fine_to_coarse_offd);
 
 /* block_tridiag.c */
 void *hypre_BlockTridiagCreate ( void );
@@ -744,7 +745,7 @@ HYPRE_Int HYPRE_AMSGetNumIterations ( HYPRE_Solver solver , HYPRE_Int *num_itera
 HYPRE_Int HYPRE_AMSGetFinalRelativeResidualNorm ( HYPRE_Solver solver , HYPRE_Real *rel_resid_norm );
 HYPRE_Int HYPRE_AMSProjectOutGradients ( HYPRE_Solver solver , HYPRE_ParVector x );
 HYPRE_Int HYPRE_AMSConstructDiscreteGradient ( HYPRE_ParCSRMatrix A , HYPRE_ParVector x_coord , HYPRE_Int *edge_vertex , HYPRE_Int edge_orientation , HYPRE_ParCSRMatrix *G );
-HYPRE_Int HYPRE_AMSFEISetup ( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x , HYPRE_Int *EdgeNodeList_ , HYPRE_Int *NodeNumbers_ , HYPRE_Int numEdges_ , HYPRE_Int numLocalNodes_ , HYPRE_Int numNodes_ , HYPRE_Real *NodalCoord_ );
+HYPRE_Int HYPRE_AMSFEISetup ( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x , HYPRE_Int *EdgeNodeList_ , HYPRE_BigInt *NodeNumbers_ , HYPRE_Int numEdges_ , HYPRE_Int numLocalNodes_ , HYPRE_Int numNodes_ , HYPRE_Real *NodalCoord_ );
 HYPRE_Int HYPRE_AMSFEIDestroy ( HYPRE_Solver solver );
 
 /* HYPRE_parcsr_amg.c */
@@ -1383,9 +1384,10 @@ HYPRE_Int hypre_BoomerAMGRelaxT ( hypre_ParCSRMatrix *A , hypre_ParVector *f , H
 /* par_cgc_coarsen.c */
 HYPRE_Int hypre_BoomerAMGCoarsenCGCb ( hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , HYPRE_Int measure_type , HYPRE_Int coarsen_type , HYPRE_Int cgc_its , HYPRE_Int debug_flag , HYPRE_Int **CF_marker_ptr );
 HYPRE_Int hypre_BoomerAMGCoarsenCGC ( hypre_ParCSRMatrix *S , HYPRE_Int numberofgrids , HYPRE_Int coarsen_type , HYPRE_Int *CF_marker );
-HYPRE_Int hypre_AmgCGCPrepare ( hypre_ParCSRMatrix *S , HYPRE_Int nlocal , HYPRE_Int *CF_marker , HYPRE_Int **CF_marker_offd , HYPRE_Int coarsen_type , HYPRE_Int **vrange );
-HYPRE_Int hypre_AmgCGCGraphAssemble ( hypre_ParCSRMatrix *S , HYPRE_Int *vertexrange , HYPRE_Int *CF_marker , HYPRE_Int *CF_marker_offd , HYPRE_Int coarsen_type , HYPRE_IJMatrix *ijG );
-HYPRE_Int hypre_AmgCGCChoose ( hypre_CSRMatrix *G , HYPRE_Int *vertexrange , HYPRE_Int mpisize , HYPRE_Int **coarse );
+HYPRE_Int hypre_AmgCGCPrepare ( hypre_ParCSRMatrix *S , HYPRE_Int nlocal , HYPRE_Int *CF_marker , HYPRE_Int **CF_marker_offd , HYPRE_Int coarsen_type , HYPRE_BigInt **vrange );
+//HYPRE_Int hypre_AmgCGCPrepare ( hypre_ParCSRMatrix *S , HYPRE_Int nlocal , HYPRE_Int *CF_marker , HYPRE_BigInt **CF_marker_offd , HYPRE_Int coarsen_type , HYPRE_BigInt **vrange );
+HYPRE_Int hypre_AmgCGCGraphAssemble ( hypre_ParCSRMatrix *S , HYPRE_BigInt *vertexrange , HYPRE_Int *CF_marker, HYPRE_Int *CF_marker_offd , HYPRE_Int coarsen_type , HYPRE_IJMatrix *ijG );
+HYPRE_Int hypre_AmgCGCChoose ( hypre_CSRMatrix *G , HYPRE_BigInt *vertexrange , HYPRE_Int mpisize , HYPRE_Int **coarse );
 HYPRE_Int hypre_AmgCGCBoundaryFix ( hypre_ParCSRMatrix *S , HYPRE_Int *CF_marker , HYPRE_Int *CF_marker_offd );
 
 /* par_cg_relax_wt.c */
@@ -1404,13 +1406,13 @@ HYPRE_Int hypre_BoomerAMGCoarsenHMIS ( hypre_ParCSRMatrix *S , hypre_ParCSRMatri
 HYPRE_Int hypre_BoomerAMGCoarsenPMIS ( hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , HYPRE_Int CF_init , HYPRE_Int debug_flag , HYPRE_Int **CF_marker_ptr );
 
 /* par_coarse_parms.c */
-HYPRE_Int hypre_BoomerAMGCoarseParms ( MPI_Comm comm , HYPRE_Int local_num_variables , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int *CF_marker , HYPRE_Int **coarse_dof_func_ptr , HYPRE_Int **coarse_pnts_global_ptr );
+HYPRE_Int hypre_BoomerAMGCoarseParms ( MPI_Comm comm , HYPRE_Int local_num_variables , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int *CF_marker , HYPRE_Int **coarse_dof_func_ptr , HYPRE_BigInt **coarse_pnts_global_ptr );
 
 /* par_coordinates.c */
-float *GenerateCoordinates ( MPI_Comm comm , HYPRE_Int nx , HYPRE_Int ny , HYPRE_Int nz , HYPRE_Int P , HYPRE_Int Q , HYPRE_Int R , HYPRE_Int p , HYPRE_Int q , HYPRE_Int r , HYPRE_Int coorddim );
+float *GenerateCoordinates ( MPI_Comm comm , HYPRE_BigInt nx , HYPRE_BigInt ny , HYPRE_BigInt nz , HYPRE_Int P , HYPRE_Int Q , HYPRE_Int R , HYPRE_Int p , HYPRE_Int q , HYPRE_Int r , HYPRE_Int coorddim );
 
 /* par_cr.c */
-HYPRE_Int hypre_BoomerAMGCoarsenCR1 ( hypre_ParCSRMatrix *A , HYPRE_Int **CF_marker_ptr , HYPRE_Int *coarse_size_ptr , HYPRE_Int num_CR_relax_steps , HYPRE_Int IS_type , HYPRE_Int CRaddCpoints );
+HYPRE_Int hypre_BoomerAMGCoarsenCR1 ( hypre_ParCSRMatrix *A , HYPRE_Int **CF_marker_ptr , HYPRE_BigInt *coarse_size_ptr , HYPRE_Int num_CR_relax_steps , HYPRE_Int IS_type , HYPRE_Int CRaddCpoints );
 HYPRE_Int hypre_cr ( HYPRE_Int *A_i , HYPRE_Int *A_j , HYPRE_Real *A_data , HYPRE_Int n , HYPRE_Int *cf , HYPRE_Int rlx , HYPRE_Real omega , HYPRE_Real tg , HYPRE_Int mu );
 HYPRE_Int hypre_GraphAdd ( Link *list , HYPRE_Int *head , HYPRE_Int *tail , HYPRE_Int index , HYPRE_Int istack );
 HYPRE_Int hypre_GraphRemove ( Link *list , HYPRE_Int *head , HYPRE_Int *tail , HYPRE_Int index );
@@ -1425,13 +1427,13 @@ HYPRE_Int hypre_BoomerAMGIndepHMIS ( hypre_ParCSRMatrix *S , HYPRE_Int measure_t
 HYPRE_Int hypre_BoomerAMGIndepHMISa ( hypre_ParCSRMatrix *S , HYPRE_Int measure_type , HYPRE_Int debug_flag , HYPRE_Int *CF_marker );
 HYPRE_Int hypre_BoomerAMGIndepPMIS ( hypre_ParCSRMatrix *S , HYPRE_Int CF_init , HYPRE_Int debug_flag , HYPRE_Int *CF_marker );
 HYPRE_Int hypre_BoomerAMGIndepPMISa ( hypre_ParCSRMatrix *S , HYPRE_Int CF_init , HYPRE_Int debug_flag , HYPRE_Int *CF_marker );
-HYPRE_Int hypre_BoomerAMGCoarsenCR ( hypre_ParCSRMatrix *A , HYPRE_Int **CF_marker_ptr , HYPRE_Int *coarse_size_ptr , HYPRE_Int num_CR_relax_steps , HYPRE_Int IS_type , HYPRE_Int num_functions , HYPRE_Int rlx_type , HYPRE_Real relax_weight , HYPRE_Real omega , HYPRE_Real theta , HYPRE_Solver smoother , hypre_ParCSRMatrix *AN , HYPRE_Int useCG , hypre_ParCSRMatrix *S );
+HYPRE_Int hypre_BoomerAMGCoarsenCR ( hypre_ParCSRMatrix *A , HYPRE_Int **CF_marker_ptr , HYPRE_BigInt *coarse_size_ptr , HYPRE_Int num_CR_relax_steps , HYPRE_Int IS_type , HYPRE_Int num_functions , HYPRE_Int rlx_type , HYPRE_Real relax_weight , HYPRE_Real omega , HYPRE_Real theta , HYPRE_Solver smoother , hypre_ParCSRMatrix *AN , HYPRE_Int useCG , hypre_ParCSRMatrix *S );
 
 /* par_cycle.c */
 HYPRE_Int hypre_BoomerAMGCycle ( void *amg_vdata , hypre_ParVector **F_array , hypre_ParVector **U_array );
 
 /* par_difconv.c */
-HYPRE_ParCSRMatrix GenerateDifConv ( MPI_Comm comm , HYPRE_Int nx , HYPRE_Int ny , HYPRE_Int nz , HYPRE_Int P , HYPRE_Int Q , HYPRE_Int R , HYPRE_Int p , HYPRE_Int q , HYPRE_Int r , HYPRE_Real *value );
+HYPRE_ParCSRMatrix GenerateDifConv ( MPI_Comm comm , HYPRE_BigInt nx , HYPRE_BigInt ny , HYPRE_BigInt nz , HYPRE_Int P , HYPRE_Int Q , HYPRE_Int R , HYPRE_Int p , HYPRE_Int q , HYPRE_Int r , HYPRE_Real *value );
 
 /* par_gsmg.c */
 HYPRE_Int hypre_ParCSRMatrixClone ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix **Sp , HYPRE_Int copy_data );
@@ -1442,24 +1444,24 @@ HYPRE_Int hypre_BoomerAMGCreateSmoothVecs ( void *data , hypre_ParCSRMatrix *A ,
 HYPRE_Int hypre_BoomerAMGCreateSmoothDirs ( void *data , hypre_ParCSRMatrix *A , HYPRE_Real *SmoothVecs , HYPRE_Real thresh , HYPRE_Int num_functions , HYPRE_Int *dof_func , hypre_ParCSRMatrix **S_ptr );
 HYPRE_Int hypre_BoomerAMGNormalizeVecs ( HYPRE_Int n , HYPRE_Int num , HYPRE_Real *V );
 HYPRE_Int hypre_BoomerAMGFitVectors ( HYPRE_Int ip , HYPRE_Int n , HYPRE_Int num , const HYPRE_Real *V , HYPRE_Int nc , const HYPRE_Int *ind , HYPRE_Real *val );
-HYPRE_Int hypre_BoomerAMGBuildInterpLS ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_marker , hypre_ParCSRMatrix *S , HYPRE_Int *num_cpts_global , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int debug_flag , HYPRE_Real trunc_factor , HYPRE_Int num_smooth , HYPRE_Real *SmoothVecs , hypre_ParCSRMatrix **P_ptr );
-HYPRE_Int hypre_BoomerAMGBuildInterpGSMG ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_marker , hypre_ParCSRMatrix *S , HYPRE_Int *num_cpts_global , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int debug_flag , HYPRE_Real trunc_factor , hypre_ParCSRMatrix **P_ptr );
+HYPRE_Int hypre_BoomerAMGBuildInterpLS ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_marker , hypre_ParCSRMatrix *S , HYPRE_BigInt *num_cpts_global , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int debug_flag , HYPRE_Real trunc_factor , HYPRE_Int num_smooth , HYPRE_Real *SmoothVecs , hypre_ParCSRMatrix **P_ptr );
+HYPRE_Int hypre_BoomerAMGBuildInterpGSMG ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_marker , hypre_ParCSRMatrix *S , HYPRE_BigInt *num_cpts_global , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int debug_flag , HYPRE_Real trunc_factor , hypre_ParCSRMatrix **P_ptr );
 
 /* par_indepset.c */
 HYPRE_Int hypre_BoomerAMGIndepSetInit ( hypre_ParCSRMatrix *S , HYPRE_Real *measure_array , HYPRE_Int seq_rand );
 HYPRE_Int hypre_BoomerAMGIndepSet ( hypre_ParCSRMatrix *S , HYPRE_Real *measure_array , HYPRE_Int *graph_array , HYPRE_Int graph_array_size , HYPRE_Int *graph_array_offd , HYPRE_Int graph_array_offd_size , HYPRE_Int *IS_marker , HYPRE_Int *IS_marker_offd );
 
 /* par_interp.c */
-HYPRE_Int hypre_BoomerAMGBuildInterp ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_marker , hypre_ParCSRMatrix *S , HYPRE_Int *num_cpts_global , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int debug_flag , HYPRE_Real trunc_factor , HYPRE_Int max_elmts , HYPRE_Int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
-HYPRE_Int hypre_BoomerAMGBuildInterpHE ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_marker , hypre_ParCSRMatrix *S , HYPRE_Int *num_cpts_global , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int debug_flag , HYPRE_Real trunc_factor , HYPRE_Int max_elmts , HYPRE_Int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
-HYPRE_Int hypre_BoomerAMGBuildDirInterp ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_marker , hypre_ParCSRMatrix *S , HYPRE_Int *num_cpts_global , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int debug_flag , HYPRE_Real trunc_factor , HYPRE_Int max_elmts , HYPRE_Int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
+HYPRE_Int hypre_BoomerAMGBuildInterp ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_marker , hypre_ParCSRMatrix *S , HYPRE_BigInt *num_cpts_global , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int debug_flag , HYPRE_Real trunc_factor , HYPRE_Int max_elmts , HYPRE_Int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
+HYPRE_Int hypre_BoomerAMGBuildInterpHE ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_marker , hypre_ParCSRMatrix *S , HYPRE_BigInt *num_cpts_global , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int debug_flag , HYPRE_Real trunc_factor , HYPRE_Int max_elmts , HYPRE_Int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
+HYPRE_Int hypre_BoomerAMGBuildDirInterp ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_marker , hypre_ParCSRMatrix *S , HYPRE_BigInt *num_cpts_global , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int debug_flag , HYPRE_Real trunc_factor , HYPRE_Int max_elmts , HYPRE_Int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
 HYPRE_Int hypre_BoomerAMGInterpTruncation ( hypre_ParCSRMatrix *P , HYPRE_Real trunc_factor , HYPRE_Int max_elmts );
 void hypre_qsort2abs ( HYPRE_Int *v , HYPRE_Real *w , HYPRE_Int left , HYPRE_Int right );
-HYPRE_Int hypre_BoomerAMGBuildInterpModUnk ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_marker , hypre_ParCSRMatrix *S , HYPRE_Int *num_cpts_global , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int debug_flag , HYPRE_Real trunc_factor , HYPRE_Int max_elmts , HYPRE_Int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
+HYPRE_Int hypre_BoomerAMGBuildInterpModUnk ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_marker , hypre_ParCSRMatrix *S , HYPRE_BigInt *num_cpts_global , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int debug_flag , HYPRE_Real trunc_factor , HYPRE_Int max_elmts , HYPRE_Int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
 HYPRE_Int hypre_BoomerAMGTruncandBuild ( hypre_ParCSRMatrix *P , HYPRE_Real trunc_factor , HYPRE_Int max_elmts );
 hypre_ParCSRMatrix *hypre_CreateC ( hypre_ParCSRMatrix *A , HYPRE_Real w );
 
-HYPRE_Int hypre_BoomerAMGBuildInterpOnePnt( hypre_ParCSRMatrix  *A, HYPRE_Int *CF_marker, hypre_ParCSRMatrix *S, HYPRE_Int *num_cpts_global, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int debug_flag, HYPRE_Int *col_offd_S_to_A, hypre_ParCSRMatrix **P_ptr);
+HYPRE_Int hypre_BoomerAMGBuildInterpOnePnt( hypre_ParCSRMatrix  *A, HYPRE_Int *CF_marker, hypre_ParCSRMatrix *S, HYPRE_BigInt *num_cpts_global, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int debug_flag, HYPRE_Int *col_offd_S_to_A, hypre_ParCSRMatrix **P_ptr);
 
 /* par_jacobi_interp.c */
 void hypre_BoomerAMGJacobiInterp ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix **P , hypre_ParCSRMatrix *S , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int *CF_marker , HYPRE_Int level , HYPRE_Real truncation_threshold , HYPRE_Real truncation_threshold_minus );
@@ -1468,29 +1470,29 @@ void hypre_BoomerAMGTruncateInterp ( hypre_ParCSRMatrix *P , HYPRE_Real eps , HY
 HYPRE_Int hypre_ParCSRMatrix_dof_func_offd ( hypre_ParCSRMatrix *A , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int **dof_func_offd );
 
 /* par_laplace_27pt.c */
-HYPRE_ParCSRMatrix GenerateLaplacian27pt ( MPI_Comm comm , HYPRE_Int nx , HYPRE_Int ny , HYPRE_Int nz , HYPRE_Int P , HYPRE_Int Q , HYPRE_Int R , HYPRE_Int p , HYPRE_Int q , HYPRE_Int r , HYPRE_Real *value );
-HYPRE_Int hypre_map3 ( HYPRE_Int ix , HYPRE_Int iy , HYPRE_Int iz , HYPRE_Int p , HYPRE_Int q , HYPRE_Int r , HYPRE_Int P , HYPRE_Int Q , HYPRE_Int R , HYPRE_Int *nx_part , HYPRE_Int *ny_part , HYPRE_Int *nz_part , HYPRE_Int *global_part );
+HYPRE_ParCSRMatrix GenerateLaplacian27pt ( MPI_Comm comm , HYPRE_BigInt nx , HYPRE_BigInt ny , HYPRE_BigInt nz , HYPRE_Int P , HYPRE_Int Q , HYPRE_Int R , HYPRE_Int p , HYPRE_Int q , HYPRE_Int r , HYPRE_Real *value );
+HYPRE_Int hypre_map3 ( HYPRE_BigInt ix , HYPRE_BigInt iy , HYPRE_BigInt iz , HYPRE_Int p , HYPRE_Int q , HYPRE_Int r , HYPRE_Int P , HYPRE_Int Q , HYPRE_Int R , HYPRE_BigInt *nx_part , HYPRE_BigInt *ny_part , HYPRE_BigInt *nz_part );
 
 /* par_laplace_9pt.c */
-HYPRE_ParCSRMatrix GenerateLaplacian9pt ( MPI_Comm comm , HYPRE_Int nx , HYPRE_Int ny , HYPRE_Int P , HYPRE_Int Q , HYPRE_Int p , HYPRE_Int q , HYPRE_Real *value );
-HYPRE_Int hypre_map2 ( HYPRE_Int ix , HYPRE_Int iy , HYPRE_Int p , HYPRE_Int q , HYPRE_Int P , HYPRE_Int Q , HYPRE_Int *nx_part , HYPRE_Int *ny_part , HYPRE_Int *global_part );
+HYPRE_ParCSRMatrix GenerateLaplacian9pt ( MPI_Comm comm , HYPRE_BigInt nx , HYPRE_BigInt ny , HYPRE_Int P , HYPRE_Int Q , HYPRE_Int p , HYPRE_Int q , HYPRE_Real *value );
+HYPRE_BigInt hypre_map2 ( HYPRE_BigInt ix , HYPRE_BigInt iy , HYPRE_Int p , HYPRE_Int q , HYPRE_BigInt nx , HYPRE_BigInt *nx_part , HYPRE_BigInt *ny_part );
 
 /* par_laplace.c */
-HYPRE_ParCSRMatrix GenerateLaplacian ( MPI_Comm comm , HYPRE_Int nx , HYPRE_Int ny , HYPRE_Int nz , HYPRE_Int P , HYPRE_Int Q , HYPRE_Int R , HYPRE_Int p , HYPRE_Int q , HYPRE_Int r , HYPRE_Real *value );
-HYPRE_Int hypre_map ( HYPRE_Int ix , HYPRE_Int iy , HYPRE_Int iz , HYPRE_Int p , HYPRE_Int q , HYPRE_Int r , HYPRE_Int P , HYPRE_Int Q , HYPRE_Int R , HYPRE_Int *nx_part , HYPRE_Int *ny_part , HYPRE_Int *nz_part , HYPRE_Int *global_part );
-HYPRE_ParCSRMatrix GenerateSysLaplacian ( MPI_Comm comm , HYPRE_Int nx , HYPRE_Int ny , HYPRE_Int nz , HYPRE_Int P , HYPRE_Int Q , HYPRE_Int R , HYPRE_Int p , HYPRE_Int q , HYPRE_Int r , HYPRE_Int num_fun , HYPRE_Real *mtrx , HYPRE_Real *value );
-HYPRE_ParCSRMatrix GenerateSysLaplacianVCoef ( MPI_Comm comm , HYPRE_Int nx , HYPRE_Int ny , HYPRE_Int nz , HYPRE_Int P , HYPRE_Int Q , HYPRE_Int R , HYPRE_Int p , HYPRE_Int q , HYPRE_Int r , HYPRE_Int num_fun , HYPRE_Real *mtrx , HYPRE_Real *value );
+HYPRE_ParCSRMatrix GenerateLaplacian ( MPI_Comm comm , HYPRE_BigInt ix , HYPRE_BigInt ny , HYPRE_BigInt nz , HYPRE_Int P , HYPRE_Int Q , HYPRE_Int R , HYPRE_Int p , HYPRE_Int q , HYPRE_Int r , HYPRE_Real *value );
+HYPRE_BigInt hypre_map ( HYPRE_BigInt ix , HYPRE_BigInt iy , HYPRE_BigInt iz , HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, HYPRE_BigInt nx , HYPRE_BigInt ny, HYPRE_BigInt *nx_part, HYPRE_BigInt *ny_part, HYPRE_BigInt *nz_part );
+HYPRE_ParCSRMatrix GenerateSysLaplacian ( MPI_Comm comm , HYPRE_BigInt nx , HYPRE_BigInt ny , HYPRE_BigInt nz , HYPRE_Int P , HYPRE_Int Q , HYPRE_Int R , HYPRE_Int p , HYPRE_Int q , HYPRE_Int r , HYPRE_Int num_fun , HYPRE_Real *mtrx , HYPRE_Real *value );
+HYPRE_ParCSRMatrix GenerateSysLaplacianVCoef ( MPI_Comm comm , HYPRE_BigInt nx , HYPRE_BigInt ny , HYPRE_BigInt nz , HYPRE_Int P , HYPRE_Int Q , HYPRE_Int R , HYPRE_Int p , HYPRE_Int q , HYPRE_Int r , HYPRE_Int num_fun , HYPRE_Real *mtrx , HYPRE_Real *value );
 
 /* par_lr_interp.c */
-HYPRE_Int hypre_BoomerAMGBuildStdInterp ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_marker , hypre_ParCSRMatrix *S , HYPRE_Int *num_cpts_global , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int debug_flag , HYPRE_Real trunc_factor , HYPRE_Int max_elmts , HYPRE_Int sep_weight , HYPRE_Int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
-HYPRE_Int hypre_BoomerAMGBuildExtPIInterp ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_marker , hypre_ParCSRMatrix *S , HYPRE_Int *num_cpts_global , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int debug_flag , HYPRE_Real trunc_factor , HYPRE_Int max_elmts , HYPRE_Int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
-HYPRE_Int hypre_BoomerAMGBuildExtPICCInterp ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_marker , hypre_ParCSRMatrix *S , HYPRE_Int *num_cpts_global , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int debug_flag , HYPRE_Real trunc_factor , HYPRE_Int max_elmts , HYPRE_Int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
-HYPRE_Int hypre_BoomerAMGBuildFFInterp ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_marker , hypre_ParCSRMatrix *S , HYPRE_Int *num_cpts_global , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int debug_flag , HYPRE_Real trunc_factor , HYPRE_Int max_elmts , HYPRE_Int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
-HYPRE_Int hypre_BoomerAMGBuildFF1Interp ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_marker , hypre_ParCSRMatrix *S , HYPRE_Int *num_cpts_global , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int debug_flag , HYPRE_Real trunc_factor , HYPRE_Int max_elmts , HYPRE_Int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
-HYPRE_Int hypre_BoomerAMGBuildExtInterp ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_marker , hypre_ParCSRMatrix *S , HYPRE_Int *num_cpts_global , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int debug_flag , HYPRE_Real trunc_factor , HYPRE_Int max_elmts , HYPRE_Int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
+HYPRE_Int hypre_BoomerAMGBuildStdInterp ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_marker , hypre_ParCSRMatrix *S , HYPRE_BigInt *num_cpts_global , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int debug_flag , HYPRE_Real trunc_factor , HYPRE_Int max_elmts , HYPRE_Int sep_weight , HYPRE_Int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
+HYPRE_Int hypre_BoomerAMGBuildExtPIInterp ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_marker , hypre_ParCSRMatrix *S , HYPRE_BigInt *num_cpts_global , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int debug_flag , HYPRE_Real trunc_factor , HYPRE_Int max_elmts , HYPRE_Int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
+HYPRE_Int hypre_BoomerAMGBuildExtPICCInterp ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_marker , hypre_ParCSRMatrix *S , HYPRE_BigInt *num_cpts_global , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int debug_flag , HYPRE_Real trunc_factor , HYPRE_Int max_elmts , HYPRE_Int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
+HYPRE_Int hypre_BoomerAMGBuildFFInterp ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_marker , hypre_ParCSRMatrix *S , HYPRE_BigInt *num_cpts_global , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int debug_flag , HYPRE_Real trunc_factor , HYPRE_Int max_elmts , HYPRE_Int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
+HYPRE_Int hypre_BoomerAMGBuildFF1Interp ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_marker , hypre_ParCSRMatrix *S , HYPRE_BigInt *num_cpts_global , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int debug_flag , HYPRE_Real trunc_factor , HYPRE_Int max_elmts , HYPRE_Int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
+HYPRE_Int hypre_BoomerAMGBuildExtInterp ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_marker , hypre_ParCSRMatrix *S , HYPRE_BigInt *num_cpts_global , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int debug_flag , HYPRE_Real trunc_factor , HYPRE_Int max_elmts , HYPRE_Int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
 
 /* par_multi_interp.c */
-HYPRE_Int hypre_BoomerAMGBuildMultipass ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_marker , hypre_ParCSRMatrix *S , HYPRE_Int *num_cpts_global , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int debug_flag , HYPRE_Real trunc_factor , HYPRE_Int P_max_elmts , HYPRE_Int weight_option , HYPRE_Int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
+HYPRE_Int hypre_BoomerAMGBuildMultipass ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_marker , hypre_ParCSRMatrix *S , HYPRE_BigInt *num_cpts_global , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int debug_flag , HYPRE_Real trunc_factor , HYPRE_Int P_max_elmts , HYPRE_Int weight_option , HYPRE_Int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
 
 /* par_nodal_systems.c */
 HYPRE_Int hypre_BoomerAMGCreateNodalA ( hypre_ParCSRMatrix *A , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int option , HYPRE_Int diag_option , hypre_ParCSRMatrix **AN_ptr );
@@ -1498,18 +1500,19 @@ HYPRE_Int hypre_BoomerAMGCreateScalarCFS ( hypre_ParCSRMatrix *SN , HYPRE_Int *C
 HYPRE_Int hypre_BoomerAMGCreateScalarCF ( HYPRE_Int *CFN_marker , HYPRE_Int num_functions , HYPRE_Int num_nodes , HYPRE_Int **dof_func_ptr , HYPRE_Int **CF_marker_ptr );
 
 /* par_nongalerkin.c */
-HYPRE_Int hypre_GrabSubArray ( HYPRE_Int *indices , HYPRE_Int start , HYPRE_Int end , HYPRE_Int *array , HYPRE_Int *output );
+HYPRE_Int hypre_GrabSubArray ( HYPRE_Int *indices , HYPRE_Int start , HYPRE_Int end , HYPRE_BigInt *array , HYPRE_Int *output );
 void hypre_qsort2_abs ( HYPRE_Int *v , HYPRE_Real *w , HYPRE_Int left , HYPRE_Int right );
 HYPRE_Int hypre_IntersectTwoArrays ( HYPRE_Int *x , HYPRE_Real *x_data , HYPRE_Int x_length , HYPRE_Int *y , HYPRE_Int y_length , HYPRE_Int *z , HYPRE_Real *output_x_data , HYPRE_Int *intersect_length );
 HYPRE_Int hypre_SortedCopyParCSRData ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *B );
 HYPRE_Int hypre_BoomerAMG_MyCreateS ( hypre_ParCSRMatrix *A , HYPRE_Real strength_threshold , HYPRE_Real max_row_sum , HYPRE_Int num_functions , HYPRE_Int *dof_func , hypre_ParCSRMatrix **S_ptr );
 HYPRE_Int hypre_BoomerAMGCreateSFromCFMarker(hypre_ParCSRMatrix    *A, HYPRE_Real strength_threshold, HYPRE_Real max_row_sum, HYPRE_Int *CF_marker, HYPRE_Int SMRK, hypre_ParCSRMatrix    **S_ptr);
 HYPRE_Int hypre_NonGalerkinIJBufferInit ( HYPRE_Int *ijbuf_cnt , HYPRE_Int *ijbuf_rowcounter , HYPRE_Int *ijbuf_numcols );
-HYPRE_Int hypre_NonGalerkinIJBufferNewRow ( HYPRE_Int *ijbuf_rownums , HYPRE_Int *ijbuf_numcols , HYPRE_Int *ijbuf_rowcounter , HYPRE_Int new_row );
-HYPRE_Int hypre_NonGalerkinIJBufferCompressRow ( HYPRE_Int *ijbuf_cnt , HYPRE_Int ijbuf_rowcounter , HYPRE_Real *ijbuf_data , HYPRE_Int *ijbuf_cols , HYPRE_Int *ijbuf_rownums , HYPRE_Int *ijbuf_numcols );
-HYPRE_Int hypre_NonGalerkinIJBufferCompress ( HYPRE_Int ijbuf_size , HYPRE_Int *ijbuf_cnt , HYPRE_Int *ijbuf_rowcounter , HYPRE_Real **ijbuf_data , HYPRE_Int **ijbuf_cols , HYPRE_Int **ijbuf_rownums , HYPRE_Int **ijbuf_numcols );
-HYPRE_Int hypre_NonGalerkinIJBufferWrite ( HYPRE_IJMatrix B , HYPRE_Int *ijbuf_cnt , HYPRE_Int ijbuf_size , HYPRE_Int *ijbuf_rowcounter , HYPRE_Real **ijbuf_data , HYPRE_Int **ijbuf_cols , HYPRE_Int **ijbuf_rownums , HYPRE_Int **ijbuf_numcols , HYPRE_Int row_to_write , HYPRE_Int col_to_write , HYPRE_Real val_to_write );
-HYPRE_Int hypre_NonGalerkinIJBufferEmpty ( HYPRE_IJMatrix B , HYPRE_Int ijbuf_size , HYPRE_Int *ijbuf_cnt , HYPRE_Int ijbuf_rowcounter , HYPRE_Real **ijbuf_data , HYPRE_Int **ijbuf_cols , HYPRE_Int **ijbuf_rownums , HYPRE_Int **ijbuf_numcols );
+HYPRE_Int hypre_NonGalerkinIJBigBufferInit ( HYPRE_Int *ijbuf_cnt , HYPRE_Int *ijbuf_rowcounter , HYPRE_BigInt *ijbuf_numcols );
+HYPRE_Int hypre_NonGalerkinIJBufferNewRow ( HYPRE_BigInt *ijbuf_rownums , HYPRE_Int *ijbuf_numcols , HYPRE_Int *ijbuf_rowcounter , HYPRE_BigInt new_row );
+HYPRE_Int hypre_NonGalerkinIJBufferCompressRow ( HYPRE_Int *ijbuf_cnt , HYPRE_Int ijbuf_rowcounter , HYPRE_Real *ijbuf_data , HYPRE_BigInt *ijbuf_cols , HYPRE_BigInt *ijbuf_rownums , HYPRE_Int *ijbuf_numcols );
+HYPRE_Int hypre_NonGalerkinIJBufferCompress ( HYPRE_Int ijbuf_size , HYPRE_Int *ijbuf_cnt , HYPRE_Int *ijbuf_rowcounter , HYPRE_Real **ijbuf_data , HYPRE_BigInt **ijbuf_cols , HYPRE_BigInt **ijbuf_rownums , HYPRE_Int **ijbuf_numcols );
+HYPRE_Int hypre_NonGalerkinIJBufferWrite ( HYPRE_IJMatrix B , HYPRE_Int *ijbuf_cnt , HYPRE_Int ijbuf_size , HYPRE_Int *ijbuf_rowcounter , HYPRE_Real **ijbuf_data , HYPRE_BigInt **ijbuf_cols , HYPRE_BigInt **ijbuf_rownums , HYPRE_Int **ijbuf_numcols , HYPRE_BigInt row_to_write , HYPRE_BigInt col_to_write , HYPRE_Real val_to_write );
+HYPRE_Int hypre_NonGalerkinIJBufferEmpty ( HYPRE_IJMatrix B , HYPRE_Int ijbuf_size , HYPRE_Int *ijbuf_cnt , HYPRE_Int ijbuf_rowcounter , HYPRE_Real **ijbuf_data , HYPRE_BigInt **ijbuf_cols , HYPRE_BigInt **ijbuf_rownums , HYPRE_Int **ijbuf_numcols );
 hypre_ParCSRMatrix * hypre_NonGalerkinSparsityPattern(hypre_ParCSRMatrix *R_IAP, hypre_ParCSRMatrix *RAP, HYPRE_Int * CF_marker, HYPRE_Real droptol, HYPRE_Int sym_collapse, HYPRE_Int collapse_beta );
 HYPRE_Int hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr, hypre_ParCSRMatrix *AP, HYPRE_Real strong_threshold, HYPRE_Real max_row_sum, HYPRE_Int num_functions, HYPRE_Int * dof_func_value, HYPRE_Real S_commpkg_switch, HYPRE_Int * CF_marker, HYPRE_Real droptol, HYPRE_Int sym_collapse, HYPRE_Real lump_percent, HYPRE_Int collapse_beta );
 
@@ -1519,7 +1522,7 @@ HYPRE_Int hypre_BoomerAMGBuildCoarseOperator ( hypre_ParCSRMatrix *RT , hypre_Pa
 HYPRE_Int hypre_BoomerAMGBuildCoarseOperatorKT ( hypre_ParCSRMatrix *RT , hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *P , HYPRE_Int keepTranspose, hypre_ParCSRMatrix **RAP_ptr );
 
 /* par_rap_communication.c */
-HYPRE_Int hypre_GetCommPkgRTFromCommPkgA ( hypre_ParCSRMatrix *RT , hypre_ParCSRMatrix *A , HYPRE_Int *fine_to_coarse_offd );
+HYPRE_Int hypre_GetCommPkgRTFromCommPkgA ( hypre_ParCSRMatrix *RT , hypre_ParCSRMatrix *A , HYPRE_Int *fine_to_coarse, HYPRE_Int *tmp_map_offd );
 HYPRE_Int hypre_GenerateSendMapAndCommPkg ( MPI_Comm comm , HYPRE_Int num_sends , HYPRE_Int num_recvs , HYPRE_Int *recv_procs , HYPRE_Int *send_procs , HYPRE_Int *recv_vec_starts , hypre_ParCSRMatrix *A );
 
 /* par_relax.c */
@@ -1541,7 +1544,7 @@ HYPRE_Real hypre_LINPACKcgpthy ( HYPRE_Real *a , HYPRE_Real *b );
 HYPRE_Int hypre_ParCSRRelax_L1_Jacobi ( hypre_ParCSRMatrix *A , hypre_ParVector *f , HYPRE_Int *cf_marker , HYPRE_Int relax_points , HYPRE_Real relax_weight , HYPRE_Real *l1_norms , hypre_ParVector *u , hypre_ParVector *Vtemp );
 
 /* par_rotate_7pt.c */
-HYPRE_ParCSRMatrix GenerateRotate7pt ( MPI_Comm comm , HYPRE_Int nx , HYPRE_Int ny , HYPRE_Int P , HYPRE_Int Q , HYPRE_Int p , HYPRE_Int q , HYPRE_Real alpha , HYPRE_Real eps );
+HYPRE_ParCSRMatrix GenerateRotate7pt ( MPI_Comm comm , HYPRE_BigInt nx , HYPRE_BigInt ny , HYPRE_Int P , HYPRE_Int Q , HYPRE_Int p , HYPRE_Int q , HYPRE_Real alpha , HYPRE_Real eps );
 
 /* par_scaled_matnorm.c */
 HYPRE_Int hypre_ParCSRMatrixScaledNorm ( hypre_ParCSRMatrix *A , HYPRE_Real *scnorm );
@@ -1571,7 +1574,7 @@ HYPRE_Int hypre_BoomerAMGWriteSolverParams ( void *data );
 HYPRE_Int hypre_BoomerAMGCreateS ( hypre_ParCSRMatrix *A , HYPRE_Real strength_threshold , HYPRE_Real max_row_sum , HYPRE_Int num_functions , HYPRE_Int *dof_func , hypre_ParCSRMatrix **S_ptr );
 HYPRE_Int hypre_BoomerAMGCreateSabs ( hypre_ParCSRMatrix *A , HYPRE_Real strength_threshold , HYPRE_Real max_row_sum , HYPRE_Int num_functions , HYPRE_Int *dof_func , hypre_ParCSRMatrix **S_ptr );
 HYPRE_Int hypre_BoomerAMGCreateSCommPkg ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *S , HYPRE_Int **col_offd_S_to_A_ptr );
-HYPRE_Int hypre_BoomerAMGCreate2ndS ( hypre_ParCSRMatrix *S , HYPRE_Int *CF_marker , HYPRE_Int num_paths , HYPRE_Int *coarse_row_starts , hypre_ParCSRMatrix **C_ptr );
+HYPRE_Int hypre_BoomerAMGCreate2ndS ( hypre_ParCSRMatrix *S , HYPRE_Int *CF_marker , HYPRE_Int num_paths , HYPRE_BigInt *coarse_row_starts , hypre_ParCSRMatrix **C_ptr );
 HYPRE_Int hypre_BoomerAMGCorrectCFMarker ( HYPRE_Int *CF_marker , HYPRE_Int num_var , HYPRE_Int *new_CF_marker );
 HYPRE_Int hypre_BoomerAMGCorrectCFMarker2 ( HYPRE_Int *CF_marker , HYPRE_Int num_var , HYPRE_Int *new_CF_marker );
 
@@ -1579,21 +1582,21 @@ HYPRE_Int hypre_BoomerAMGCorrectCFMarker2 ( HYPRE_Int *CF_marker , HYPRE_Int num
 HYPRE_Int hypre_BoomerAMGSmoothInterpVectors ( hypre_ParCSRMatrix *A , HYPRE_Int num_smooth_vecs , hypre_ParVector **smooth_vecs , HYPRE_Int smooth_steps );
 HYPRE_Int hypre_BoomerAMGCoarsenInterpVectors ( hypre_ParCSRMatrix *P , HYPRE_Int num_smooth_vecs , hypre_ParVector **smooth_vecs , HYPRE_Int *CF_marker , hypre_ParVector ***new_smooth_vecs , HYPRE_Int expand_level , HYPRE_Int num_functions );
 HYPRE_Int hypre_BoomerAMG_GMExpandInterp ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix **P , HYPRE_Int num_smooth_vecs , hypre_ParVector **smooth_vecs , HYPRE_Int *nf , HYPRE_Int *dof_func , HYPRE_Int **coarse_dof_func , HYPRE_Int variant , HYPRE_Int level , HYPRE_Real abs_trunc , HYPRE_Real *weights , HYPRE_Int q_max , HYPRE_Int *CF_marker , HYPRE_Int interp_vec_first_level );
-HYPRE_Int hypre_BoomerAMGRefineInterp ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix **P , HYPRE_Int *num_cpts_global , HYPRE_Int *nf , HYPRE_Int *dof_func , HYPRE_Int *CF_marker , HYPRE_Int level );
+HYPRE_Int hypre_BoomerAMGRefineInterp ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix **P , HYPRE_BigInt *num_cpts_global , HYPRE_Int *nf , HYPRE_Int *dof_func , HYPRE_Int *CF_marker , HYPRE_Int level );
 
 /* par_sv_interp_ln.c */
-HYPRE_Int hypre_BoomerAMG_LNExpandInterp ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix **P , HYPRE_Int *num_cpts_global , HYPRE_Int *nf , HYPRE_Int *dof_func , HYPRE_Int **coarse_dof_func , HYPRE_Int *CF_marker , HYPRE_Int level , HYPRE_Real *weights , HYPRE_Int num_smooth_vecs , hypre_ParVector **smooth_vecs , HYPRE_Real abs_trunc , HYPRE_Int q_max , HYPRE_Int interp_vec_first_level );
+HYPRE_Int hypre_BoomerAMG_LNExpandInterp ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix **P , HYPRE_BigInt *num_cpts_global , HYPRE_Int *nf , HYPRE_Int *dof_func , HYPRE_Int **coarse_dof_func , HYPRE_Int *CF_marker , HYPRE_Int level , HYPRE_Real *weights , HYPRE_Int num_smooth_vecs , hypre_ParVector **smooth_vecs , HYPRE_Real abs_trunc , HYPRE_Int q_max , HYPRE_Int interp_vec_first_level );
 
 /* par_sv_interp_lsfit.c */
 HYPRE_Int hypre_BoomerAMGFitInterpVectors ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix **P , HYPRE_Int num_smooth_vecs , hypre_ParVector **smooth_vecs , hypre_ParVector **coarse_smooth_vecs , HYPRE_Real delta , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int *CF_marker , HYPRE_Int max_elmts , HYPRE_Real trunc_factor , HYPRE_Int variant , HYPRE_Int level );
 
 /* partial.c */
-HYPRE_Int hypre_BoomerAMGBuildPartialExtPIInterp ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_marker , hypre_ParCSRMatrix *S , HYPRE_Int *num_cpts_global , HYPRE_Int *num_old_cpts_global , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int debug_flag , HYPRE_Real trunc_factor , HYPRE_Int max_elmts , HYPRE_Int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
-HYPRE_Int hypre_BoomerAMGBuildPartialStdInterp ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_marker , hypre_ParCSRMatrix *S , HYPRE_Int *num_cpts_global , HYPRE_Int *num_old_cpts_global , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int debug_flag , HYPRE_Real trunc_factor , HYPRE_Int max_elmts , HYPRE_Int sep_weight , HYPRE_Int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
-HYPRE_Int hypre_BoomerAMGBuildPartialExtInterp ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_marker , hypre_ParCSRMatrix *S , HYPRE_Int *num_cpts_global , HYPRE_Int *num_old_cpts_global , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int debug_flag , HYPRE_Real trunc_factor , HYPRE_Int max_elmts , HYPRE_Int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
+HYPRE_Int hypre_BoomerAMGBuildPartialExtPIInterp ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_marker , hypre_ParCSRMatrix *S , HYPRE_BigInt *num_cpts_global , HYPRE_BigInt *num_old_cpts_global , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int debug_flag , HYPRE_Real trunc_factor , HYPRE_Int max_elmts , HYPRE_Int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
+HYPRE_Int hypre_BoomerAMGBuildPartialStdInterp ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_marker , hypre_ParCSRMatrix *S , HYPRE_BigInt *num_cpts_global , HYPRE_BigInt *num_old_cpts_global , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int debug_flag , HYPRE_Real trunc_factor , HYPRE_Int max_elmts , HYPRE_Int sep_weight , HYPRE_Int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
+HYPRE_Int hypre_BoomerAMGBuildPartialExtInterp ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_marker , hypre_ParCSRMatrix *S , HYPRE_BigInt *num_cpts_global , HYPRE_BigInt *num_old_cpts_global , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int debug_flag , HYPRE_Real trunc_factor , HYPRE_Int max_elmts , HYPRE_Int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
 
 /* par_vardifconv.c */
-HYPRE_ParCSRMatrix GenerateVarDifConv ( MPI_Comm comm , HYPRE_Int nx , HYPRE_Int ny , HYPRE_Int nz , HYPRE_Int P , HYPRE_Int Q , HYPRE_Int R , HYPRE_Int p , HYPRE_Int q , HYPRE_Int r , HYPRE_Real eps , HYPRE_ParVector *rhs_ptr );
+HYPRE_ParCSRMatrix GenerateVarDifConv ( MPI_Comm comm , HYPRE_BigInt nx , HYPRE_BigInt ny , HYPRE_BigInt nz , HYPRE_Int P , HYPRE_Int Q , HYPRE_Int R , HYPRE_Int p , HYPRE_Int q , HYPRE_Int r , HYPRE_Real eps , HYPRE_ParVector *rhs_ptr );
 HYPRE_Real afun ( HYPRE_Real xx , HYPRE_Real yy , HYPRE_Real zz );
 HYPRE_Real bfun ( HYPRE_Real xx , HYPRE_Real yy , HYPRE_Real zz );
 HYPRE_Real cfun ( HYPRE_Real xx , HYPRE_Real yy , HYPRE_Real zz );
@@ -1605,7 +1608,7 @@ HYPRE_Real rfun ( HYPRE_Real xx , HYPRE_Real yy , HYPRE_Real zz );
 HYPRE_Real bndfun ( HYPRE_Real xx , HYPRE_Real yy , HYPRE_Real zz );
 
 /* par_vardifconv_rs.c */
-HYPRE_ParCSRMatrix GenerateRSVarDifConv ( MPI_Comm comm , HYPRE_Int nx , HYPRE_Int ny , HYPRE_Int nz , HYPRE_Int P , HYPRE_Int Q , HYPRE_Int R , HYPRE_Int p , HYPRE_Int q , HYPRE_Int r , HYPRE_Real eps , HYPRE_ParVector *rhs_ptr, HYPRE_Int type );
+HYPRE_ParCSRMatrix GenerateRSVarDifConv ( MPI_Comm comm , HYPRE_BigInt nx , HYPRE_BigInt ny , HYPRE_BigInt nz , HYPRE_Int P , HYPRE_Int Q , HYPRE_Int R , HYPRE_Int p , HYPRE_Int q , HYPRE_Int r , HYPRE_Real eps , HYPRE_ParVector *rhs_ptr, HYPRE_Int type );
 HYPRE_Real afun_rs ( HYPRE_Real xx , HYPRE_Real yy , HYPRE_Real zz );
 HYPRE_Real bfun_rs ( HYPRE_Real xx , HYPRE_Real yy , HYPRE_Real zz );
 HYPRE_Real cfun_rs ( HYPRE_Real xx , HYPRE_Real yy , HYPRE_Real zz );
@@ -1663,9 +1666,9 @@ HYPRE_Int hypre_ParAMGCreateDomainDof ( hypre_ParCSRMatrix *A , HYPRE_Int domain
 HYPRE_Int hypre_ParGenerateScale ( hypre_ParCSRMatrix *A , hypre_CSRMatrix *domain_structure , HYPRE_Real relaxation_weight , HYPRE_Real **scale_pointer );
 HYPRE_Int hypre_ParGenerateHybridScale ( hypre_ParCSRMatrix *A , hypre_CSRMatrix *domain_structure , hypre_CSRMatrix **A_boundary_pointer , HYPRE_Real **scale_pointer );
 /* RL */
-HYPRE_Int hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, hypre_ParCSRMatrix *S, HYPRE_Int *num_cpts_global, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int debug_flag, HYPRE_Real trunc_factor, HYPRE_Int max_elmts, HYPRE_Int *col_offd_S_to_A, hypre_ParCSRMatrix **R_ptr);
+HYPRE_Int hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, hypre_ParCSRMatrix *S, HYPRE_BigInt *num_cpts_global, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int debug_flag, HYPRE_Real trunc_factor, HYPRE_Int max_elmts, HYPRE_Int *col_offd_S_to_A, hypre_ParCSRMatrix **R_ptr);
 
-HYPRE_Int hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, hypre_ParCSRMatrix *S, HYPRE_Int *num_cpts_global, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int debug_flag, HYPRE_Real trunc_factor, HYPRE_Int max_elmts, HYPRE_Int *col_offd_S_to_A, hypre_ParCSRMatrix **R_ptr);
+HYPRE_Int hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, hypre_ParCSRMatrix *S, HYPRE_BigInt *num_cpts_global, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int debug_flag, HYPRE_Real trunc_factor, HYPRE_Int max_elmts, HYPRE_Int *col_offd_S_to_A, hypre_ParCSRMatrix **R_ptr);
 
 #ifdef HAVE_DSUPERLU
 /* superlu.c */
@@ -1691,7 +1694,7 @@ HYPRE_Int hypre_MGRSetNonCpointsToFpoints( void      *mgr_vdata, HYPRE_Int nonCp
 
 //HYPRE_Int hypre_MGRInitCFMarker(HYPRE_Int num_variables, HYPRE_Int *CF_marker, HYPRE_Int initial_coarse_size,HYPRE_Int *initial_coarse_indexes);
 //HYPRE_Int hypre_MGRUpdateCoarseIndexes(HYPRE_Int num_variables, HYPRE_Int *CF_marker, HYPRE_Int initial_coarse_size,HYPRE_Int *initial_coarse_indexes);
-HYPRE_Int hypre_MGRBuildInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, hypre_ParCSRMatrix *S, HYPRE_Int *num_cpts_global, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int debug_flag, HYPRE_Real trunc_factor, HYPRE_Int max_elmts, HYPRE_Int *col_offd_S_to_A, hypre_ParCSRMatrix  **P, HYPRE_Int last_level, HYPRE_Int level, HYPRE_Int numsweeps);
+HYPRE_Int hypre_MGRBuildInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, hypre_ParCSRMatrix *S, HYPRE_BigInt *num_cpts_global, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int debug_flag, HYPRE_Real trunc_factor, HYPRE_Int max_elmts, HYPRE_Int *col_offd_S_to_A, hypre_ParCSRMatrix  **P, HYPRE_Int last_level, HYPRE_Int level, HYPRE_Int numsweeps);
 //HYPRE_Int hypre_MGRBuildRestrictionToper(hypre_ParCSRMatrix *AT, HYPRE_Int *CF_marker, hypre_ParCSRMatrix *ST, HYPRE_Int *num_cpts_global,HYPRE_Int num_functions,HYPRE_Int *dof_func,HYPRE_Int debug_flag,HYPRE_Real trunc_factor, HYPRE_Int max_elmts, HYPRE_Int  *col_offd_ST_to_AT,hypre_ParCSRMatrix  **RT,HYPRE_Int last_level,HYPRE_Int level, HYPRE_Int numsweeps);
 //HYPRE_Int hypre_BoomerAMGBuildInjectionInterp( hypre_ParCSRMatrix   *A, HYPRE_Int *CF_marker, HYPRE_Int *num_cpts_global, HYPRE_Int num_functions, HYPRE_Int debug_flag,HYPRE_Int init_data,hypre_ParCSRMatrix  **P_ptr);
 HYPRE_Int hypre_MGRSetCoarseSolver( void  *mgr_vdata, HYPRE_Int  (*coarse_grid_solver_solve)(void*,void*,void*,void*), HYPRE_Int  (*coarse_grid_solver_setup)(void*,void*,void*,void*), void  *coarse_grid_solver );
@@ -1703,7 +1706,7 @@ HYPRE_Int hypre_blockRelax_setup(hypre_ParCSRMatrix *A,HYPRE_Int blk_size, HYPRE
 HYPRE_Int hypre_blockRelax(hypre_ParCSRMatrix *A,hypre_ParVector *f,hypre_ParVector *u,HYPRE_Int blk_size,HYPRE_Int reserved_coarse_size,hypre_ParVector *Vtemp,hypre_ParVector *Ztemp);
 
 HYPRE_Int hypre_MGRBuildAff( MPI_Comm comm, HYPRE_Int local_num_variables, HYPRE_Int num_functions, 
-HYPRE_Int *dof_func, HYPRE_Int *CF_marker, HYPRE_Int **coarse_dof_func_ptr, HYPRE_Int **coarse_pnts_global_ptr,
+HYPRE_Int *dof_func, HYPRE_Int *CF_marker, HYPRE_Int **coarse_dof_func_ptr, HYPRE_BigInt **coarse_pnts_global_ptr,
 hypre_ParCSRMatrix *A, HYPRE_Int debug_flag, hypre_ParCSRMatrix **P_f_ptr, hypre_ParCSRMatrix **A_ff_ptr );
 
 HYPRE_Int hypre_MGRWriteSolverParams(void *mgr_vdata);	

@@ -28,25 +28,25 @@
 
 typedef struct hypre_IJMatrix_struct
 {
-   MPI_Comm    comm;
+   MPI_Comm     comm;
 
-   HYPRE_Int        *row_partitioning;    /* distribution of rows across processors */
-   HYPRE_Int        *col_partitioning;    /* distribution of columns */
+   HYPRE_BigInt *row_partitioning;    /* distribution of rows across processors */
+   HYPRE_BigInt *col_partitioning;    /* distribution of columns */
 
-   HYPRE_Int         object_type;         /* Indicates the type of "object" */
-   void       *object;              /* Structure for storing local portion */
-   void       *translator;          /* optional storage_type specfic structure
+   HYPRE_Int     object_type;         /* Indicates the type of "object" */
+   void         *object;              /* Structure for storing local portion */
+   void         *translator;          /* optional storage_type specfic structure
                                        for holding additional local info */
-   void       *assumed_part;	   /* IJMatrix assumed partition */
-   HYPRE_Int         assemble_flag;       /* indicates whether matrix has been 
+   void         *assumed_part;	   /* IJMatrix assumed partition */
+   HYPRE_Int     assemble_flag;       /* indicates whether matrix has been 
 				       assembled */
 
-   HYPRE_Int         global_first_row;    /* these for data items are necessary */
-   HYPRE_Int         global_first_col;    /*   to be able to avoind using the global */
-   HYPRE_Int         global_num_rows;     /*   global partition */ 
-   HYPRE_Int         global_num_cols;
-   HYPRE_Int         omp_flag;
-   HYPRE_Int         print_level;
+   HYPRE_BigInt  global_first_row;    /* these for data items are necessary */
+   HYPRE_BigInt  global_first_col;    /*   to be able to avoind using the global */
+   HYPRE_BigInt  global_num_rows;     /*   global partition */ 
+   HYPRE_BigInt  global_num_cols;
+   HYPRE_Int     omp_flag;
+   HYPRE_Int     print_level;
 
 } hypre_IJMatrix;
 
