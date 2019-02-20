@@ -5190,7 +5190,7 @@ hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix  *A,
       j = A_diag_i[i];
       if (sub_idx_diag[A_diag_j[j]] != -1)
       {
-    	  B_nnz_diag++;
+         B_nnz_diag++;
       }
 
       // Count nnzs larger than tolerance times max row element
@@ -5284,6 +5284,7 @@ hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix  *A,
 
    *B_ptr = B;
 
+   hypre_TFree(B_maxel_row, HYPRE_MEMORY_HOST);
    hypre_TFree(send_buf_data, HYPRE_MEMORY_HOST);
    hypre_TFree(sub_idx_diag, HYPRE_MEMORY_HOST);
    hypre_TFree(sub_idx_offd, HYPRE_MEMORY_HOST);

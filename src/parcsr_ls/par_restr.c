@@ -708,6 +708,8 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
    hypre_ParCSRMatrixColMapOffd(R) = col_map_offd_R;
 
    /* create CommPkg of R */
+   hypre_ParCSRMatrixAssumedPartition(R) = hypre_ParCSRMatrixAssumedPartition(A);
+   hypre_ParCSRMatrixOwnsAssumedPartition(R) = 0;
    hypre_MatvecCommPkgCreate(R);
 
    /* Filter small entries from R */
