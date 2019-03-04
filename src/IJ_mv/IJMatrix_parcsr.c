@@ -413,7 +413,7 @@ HYPRE_Int hypre_IJMatrixGetRowCountsParCSR( hypre_IJMatrix *matrix,
          ncols[i] = 0;
          if (print_level)
          {
-            hypre_printf ("Warning! Row %d is not on Proc. %d!\n",
+            hypre_printf ("Warning! Row %b is not on Proc. %d!\n",
                           row_index, my_id);
          }
       }
@@ -555,7 +555,7 @@ hypre_IJMatrixGetValuesParCSR( hypre_IJMatrix *matrix,
          {
             if (print_level)
             {
-               hypre_printf ("Warning! Row %d is not on Proc. %d!\n", row, my_id);
+               hypre_printf ("Warning! Row %b is not on Proc. %d!\n", row, my_id);
             }
          }
       }
@@ -622,7 +622,7 @@ hypre_IJMatrixGetValuesParCSR( hypre_IJMatrix *matrix,
          {
             if (print_level)
             {
-               hypre_printf ("Warning! Row %d is not on Proc. %d!\n", row, my_id);
+               hypre_printf ("Warning! Row %b is not on Proc. %d!\n", row, my_id);
             }
          }
       }
@@ -761,7 +761,7 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix       *matrix,
                hypre_error(HYPRE_ERROR_GENERIC);
                if (print_level)
                {
-                  hypre_printf (" row %d too long! \n", row);
+                  hypre_printf (" row %b too long! \n", row);
                }
                return hypre_error_flag;
             }
@@ -784,7 +784,7 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix       *matrix,
                      hypre_error(HYPRE_ERROR_GENERIC);
                      if (print_level)
                      {
-                        hypre_printf (" Error, element %d %d does not exist\n",
+                        hypre_printf (" Error, element %b %b does not exist\n",
                                       row, cols[indx]);
                      }
                      return hypre_error_flag;
@@ -803,7 +803,7 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix       *matrix,
                      hypre_error(HYPRE_ERROR_GENERIC);
                      if (print_level)
                      {
-                        hypre_printf (" Error, element %d %d does not exist\n",
+                        hypre_printf (" Error, element %b %b does not exist\n",
                                       row, cols[indx]);
                      }
                      return hypre_error_flag;
@@ -818,7 +818,7 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix       *matrix,
                      hypre_error(HYPRE_ERROR_GENERIC);
                      if (print_level)
                      {
-                        hypre_printf (" Error, element %d %d does not exist\n",
+                        hypre_printf (" Error, element %b %b does not exist\n",
                                       row, cols[indx]);
                      }
                      /* return -1;*/
@@ -842,7 +842,7 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix       *matrix,
                      hypre_error(HYPRE_ERROR_GENERIC);
                      if (print_level)
                      {
-                        hypre_printf (" Error, element %d %d does not exist\n",
+                        hypre_printf (" Error, element %b %b does not exist\n",
                                       row, cols[indx]);
                      }
                      /* return -1; */
@@ -1004,7 +1004,7 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix       *matrix,
                            hypre_error(HYPRE_ERROR_GENERIC);
                            if (print_level)
                            {
-                              hypre_printf("Error in row %d ! Too many elements!\n",
+                              hypre_printf("Error in row %b ! Too many elements!\n",
                                            row);
                            }
                            /* return 1; */
@@ -1037,7 +1037,7 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix       *matrix,
                            hypre_error(HYPRE_ERROR_GENERIC);
                            if (print_level)
                            {
-                              hypre_printf("Error in row %d ! Too many elements !\n",
+                              hypre_printf("Error in row %b ! Too many elements !\n",
                                            row);
                            }
                            /* return 1; */
@@ -1232,7 +1232,7 @@ hypre_IJMatrixAddToValuesParCSR( hypre_IJMatrix       *matrix,
                hypre_error(HYPRE_ERROR_GENERIC);
                if (print_level)
                {
-                  hypre_printf (" row %d too long! \n", row);
+                  hypre_printf (" row %b too long! \n", row);
                }
                return hypre_error_flag;
             }
@@ -1255,7 +1255,7 @@ hypre_IJMatrixAddToValuesParCSR( hypre_IJMatrix       *matrix,
                      hypre_error(HYPRE_ERROR_GENERIC);
                      if (print_level)
                      {
-                        hypre_printf (" Error, element %d %d does not exist\n",
+                        hypre_printf (" Error, element %b %b does not exist\n",
                                       row, cols[indx]);
                      }
                      return hypre_error_flag;
@@ -1275,7 +1275,7 @@ hypre_IJMatrixAddToValuesParCSR( hypre_IJMatrix       *matrix,
                      hypre_error(HYPRE_ERROR_GENERIC);
                      if (print_level)
                      {
-                        hypre_printf (" Error, element %d %d does not exist\n",
+                        hypre_printf (" Error, element %b %b does not exist\n",
                                       row, cols[indx]);
                      }
                      return hypre_error_flag;
@@ -1290,7 +1290,7 @@ hypre_IJMatrixAddToValuesParCSR( hypre_IJMatrix       *matrix,
                      hypre_error(HYPRE_ERROR_GENERIC);
                      if (print_level)
                      {
-                        hypre_printf (" Error, element %d %d does not exist\n",
+                        hypre_printf (" Error, element %b %b does not exist\n",
                                       row, cols[indx]);
                      }
                      return hypre_error_flag;
@@ -1313,7 +1313,7 @@ hypre_IJMatrixAddToValuesParCSR( hypre_IJMatrix       *matrix,
                      hypre_error(HYPRE_ERROR_GENERIC);
                      if (print_level)
                      {
-                        hypre_printf (" Error, element %d %d does not exist\n",
+                        hypre_printf (" Error, element %b %b does not exist\n",
                                       row, cols[indx]);
                      }
                      return hypre_error_flag;
@@ -1536,7 +1536,7 @@ hypre_IJMatrixAddToValuesParCSR( hypre_IJMatrix       *matrix,
                            hypre_error(HYPRE_ERROR_GENERIC);
                            if (print_level)
                            {
-                              hypre_printf("Error in row %d ! Too many elements!\n",
+                              hypre_printf("Error in row %b ! Too many elements!\n",
                                            row);
                            }
                            /* return 1;*/
@@ -1570,7 +1570,7 @@ hypre_IJMatrixAddToValuesParCSR( hypre_IJMatrix       *matrix,
                            hypre_error(HYPRE_ERROR_GENERIC);
                            if (print_level)
                            {
-                              hypre_printf("Error in row %d ! Too many elements !\n",
+                              hypre_printf("Error in row %b ! Too many elements !\n",
                                            row);
                            }
                            /* return 1; */
@@ -3197,7 +3197,7 @@ hypre_IJMatrixSetValuesOMPParCSR( hypre_IJMatrix       *matrix,
                   error_flag++;
                   if (print_level)
                   {
-                     hypre_printf (" row %d too long! \n", row);
+                     hypre_printf (" row %b too long! \n", row);
                   }
                   break;
                   /*return hypre_error_flag; */
@@ -3225,7 +3225,7 @@ hypre_IJMatrixSetValuesOMPParCSR( hypre_IJMatrix       *matrix,
                         error_flag++;
                         if (print_level)
                         {
-                           hypre_printf (" Error, element %d %d does not exist\n",
+                           hypre_printf (" Error, element %b %b does not exist\n",
                                          row, cols[indx]);
                         }
                         break;
@@ -3249,7 +3249,7 @@ hypre_IJMatrixSetValuesOMPParCSR( hypre_IJMatrix       *matrix,
                         error_flag++;
                         if (print_level)
                         {
-                           hypre_printf (" Error, element %d %d does not exist\n",
+                           hypre_printf (" Error, element %b %b does not exist\n",
                                          row, cols[indx]);
                         }
                         break;
@@ -3269,7 +3269,7 @@ hypre_IJMatrixSetValuesOMPParCSR( hypre_IJMatrix       *matrix,
                         error_flag++;
                         if (print_level)
                         {
-                           hypre_printf (" Error, element %d %d does not exist\n",
+                           hypre_printf (" Error, element %b %b does not exist\n",
                                          row, cols[indx]);
                         }
                         break;
@@ -3297,7 +3297,7 @@ hypre_IJMatrixSetValuesOMPParCSR( hypre_IJMatrix       *matrix,
                         error_flag++;
                         if (print_level)
                         {
-                           hypre_printf (" Error, element %d %d does not exist\n",
+                           hypre_printf (" Error, element %b %b does not exist\n",
                                          row, cols[indx]);
                         }
                         break;
@@ -3555,7 +3555,7 @@ hypre_IJMatrixSetValuesOMPParCSR( hypre_IJMatrix       *matrix,
                               error_flag++;
                               if (print_level)
                               {
-                                 hypre_printf("Error in row %d ! Too many elements!\n",
+                                 hypre_printf("Error in row %b ! Too many elements!\n",
                                               row);
                               }
                               break;
@@ -3591,7 +3591,7 @@ hypre_IJMatrixSetValuesOMPParCSR( hypre_IJMatrix       *matrix,
                               error_flag++;
                               if (print_level)
                               {
-                                 hypre_printf("Error in row %d ! Too many elements !\n",
+                                 hypre_printf("Error in row %b ! Too many elements !\n",
                                               row);
                               }
                               break;
@@ -3828,7 +3828,7 @@ hypre_IJMatrixAddToValuesOMPParCSR( hypre_IJMatrix       *matrix,
                   error_flag++;
                   if (print_level)
                   {
-                     hypre_printf (" row %d too long! \n", row);
+                     hypre_printf (" row %b too long! \n", row);
                   }
                   break;
                   /*return hypre_error_flag; */
@@ -3856,7 +3856,7 @@ hypre_IJMatrixAddToValuesOMPParCSR( hypre_IJMatrix       *matrix,
                         error_flag++;
                         if (print_level)
                         {
-                           hypre_printf (" Error, element %d %d does not exist\n",
+                           hypre_printf (" Error, element %b %b does not exist\n",
                                          row, cols[indx]);
                         }
                         break;
@@ -3880,7 +3880,7 @@ hypre_IJMatrixAddToValuesOMPParCSR( hypre_IJMatrix       *matrix,
                         error_flag++;
                         if (print_level)
                         {
-                           hypre_printf (" Error, element %d %d does not exist\n",
+                           hypre_printf (" Error, element %b %b does not exist\n",
                                          row, cols[indx]);
                         }
                         break;
@@ -3900,7 +3900,7 @@ hypre_IJMatrixAddToValuesOMPParCSR( hypre_IJMatrix       *matrix,
                         error_flag++;
                         if (print_level)
                         {
-                           hypre_printf (" Error, element %d %d does not exist\n",
+                           hypre_printf (" Error, element %b %b does not exist\n",
                                          row, cols[indx]);
                         }
                         break;
@@ -3928,7 +3928,7 @@ hypre_IJMatrixAddToValuesOMPParCSR( hypre_IJMatrix       *matrix,
                         error_flag++;
                         if (print_level)
                         {
-                           hypre_printf (" Error, element %d %d does not exist\n",
+                           hypre_printf (" Error, element %b %b does not exist\n",
                                          row, cols[indx]);
                         }
                         break;
@@ -4171,7 +4171,7 @@ hypre_IJMatrixAddToValuesOMPParCSR( hypre_IJMatrix       *matrix,
                               error_flag++;
                               if (print_level)
                               {
-                                 hypre_printf("Error in row %d ! Too many elements!\n",
+                                 hypre_printf("Error in row %b ! Too many elements!\n",
                                               row);
                               }
                               break;
@@ -4207,7 +4207,7 @@ hypre_IJMatrixAddToValuesOMPParCSR( hypre_IJMatrix       *matrix,
                               error_flag++;
                               if (print_level)
                               {
-                                 hypre_printf("Error in row %d ! Too many elements !\n",
+                                 hypre_printf("Error in row %b ! Too many elements !\n",
                                               row);
                               }
                               break;

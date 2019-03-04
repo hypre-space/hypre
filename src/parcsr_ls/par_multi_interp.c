@@ -1997,7 +1997,7 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
       hypre_BigQsort0(col_map_offd_P,0,num_cols_offd_P-1);
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i,k1) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(i,big_k1) HYPRE_SMP_SCHEDULE
 #endif
       for (i=0; i < new_counter[num_passes-1]; i++)
       {

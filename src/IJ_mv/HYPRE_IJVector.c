@@ -549,7 +549,7 @@ HYPRE_IJVectorRead( const char     *filename,
       return hypre_error_flag;
    }
 
-   hypre_fscanf(file, "%d %d", &jlower, &jupper);
+   hypre_fscanf(file, "%b %b", &jlower, &jupper);
    HYPRE_IJVectorCreate(comm, jlower, jupper, &vector);
 
    HYPRE_IJVectorSetObjectType(vector, type);
@@ -559,7 +559,7 @@ HYPRE_IJVectorRead( const char     *filename,
     * catch mistakes in the input file.  This is done with %*[ \t].  Using a
     * space here causes an input line with a single decimal value on it to be
     * read as if it were an integer followed by a decimal value. */
-   while ( (ret = hypre_fscanf(file, "%d%*[ \t]%le", &j, &value)) != EOF )
+   while ( (ret = hypre_fscanf(file, "%b%*[ \t]%le", &j, &value)) != EOF )
    {
       if (ret != 2)
       {
@@ -622,13 +622,13 @@ HYPRE_IJVectorPrint( HYPRE_IJVector  vector,
    jlower = partitioning[myid];
    jupper = partitioning[myid+1] - 1;
 #endif
-   hypre_fprintf(file, "%d %d\n", jlower, jupper);
+   hypre_fprintf(file, "%b %b\n", jlower, jupper);
 
    for (j = jlower; j <= jupper; j++)
    {
       HYPRE_IJVectorGetValues(vector, 1, &j, &value);
 
-      hypre_fprintf(file, "%d %.14e\n", j, value);
+      hypre_fprintf(file, "%b %.14e\n", j, value);
    }
 
    fclose(file);

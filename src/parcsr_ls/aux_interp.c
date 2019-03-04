@@ -314,21 +314,21 @@ static HYPRE_Int hypre_new_offd_nodes(HYPRE_BigInt **found, HYPRE_Int num_cols_A
   HYPRE_Int newoff = 0;
 
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
-  hypre_UnorderedIntMap col_map_offd_inverse;
-  hypre_UnorderedIntMapCreate(&col_map_offd_inverse, 2*num_cols_A_offd, 16*hypre_NumThreads());
+  hypre_UnorderedBigIntMap col_map_offd_inverse;
+  hypre_UnorderedBigIntMapCreate(&col_map_offd_inverse, 2*num_cols_A_offd, 16*hypre_NumThreads());
 
 #pragma omp parallel for HYPRE_SMP_SCHEDULE
   for (i = 0; i < num_cols_A_offd; i++)
   {
-     hypre_UnorderedIntMapPutIfAbsent(&col_map_offd_inverse, col_map_offd[i], i);
+     hypre_UnorderedBigIntMapPutIfAbsent(&col_map_offd_inverse, col_map_offd[i], i);
   }
 
   /* Find nodes that will be added to the off diag list */ 
   HYPRE_Int size_offP = A_ext_i[num_cols_A_offd];
-  hypre_UnorderedIntSet set;
-  hypre_UnorderedIntSetCreate(&set, size_offP, 16*hypre_NumThreads());
+  hypre_UnorderedBigIntSet set;
+  hypre_UnorderedBigIntSetCreate(&set, size_offP, 16*hypre_NumThreads());
 
-#pragma omp parallel private(i,j,i1)
+#pragma omp parallel private(i,j,big_i1)
   {
 #pragma omp for HYPRE_SMP_SCHEDULE
     for (i = 0; i < num_cols_A_offd; i++)
@@ -340,16 +340,16 @@ static HYPRE_Int hypre_new_offd_nodes(HYPRE_BigInt **found, HYPRE_Int num_cols_A
         big_i1 = A_ext_j[j];
         if(big_i1 < col_1 || big_i1 >= col_n)
         {
-          if (!hypre_UnorderedIntSetContains(&set, big_i1))
+          if (!hypre_UnorderedBigIntSetContains(&set, big_i1))
           {
-            HYPRE_Int k = hypre_UnorderedIntMapGet(&col_map_offd_inverse, big_i1);
+            HYPRE_Int k = hypre_UnorderedBigIntMapGet(&col_map_offd_inverse, big_i1);
             if (-1 == k)
             {
-               hypre_UnorderedIntSetPut(&set, big_i1);
+               hypre_UnorderedBigIntSetPut(&set, big_i1);
             }
             else
             {
-               A_ext_j[j] = (HYPRE_BigInt)(-k - 1);
+               A_ext_j[j] = -k - 1;
             }
           }
         }
@@ -359,9 +359,9 @@ static HYPRE_Int hypre_new_offd_nodes(HYPRE_BigInt **found, HYPRE_Int num_cols_A
         big_i1 = Sop_j[j];
         if(big_i1 < col_1 || big_i1 >= col_n)
         {
-          if (!hypre_UnorderedIntSetContains(&set, big_i1))
+          if (!hypre_UnorderedBigIntSetContains(&set, big_i1))
           {
-            Sop_j[j] = -hypre_UnorderedIntMapGet(&col_map_offd_inverse, big_i1) - 1;
+            Sop_j[j] = -hypre_UnorderedBigIntMapGet(&col_map_offd_inverse, big_i1) - 1;
           }
         }
       }
@@ -369,19 +369,19 @@ static HYPRE_Int hypre_new_offd_nodes(HYPRE_BigInt **found, HYPRE_Int num_cols_A
     } /* for each row */
   } /* omp parallel */
 
-  hypre_UnorderedIntMapDestroy(&col_map_offd_inverse);
-  HYPRE_Int *tmp_found = hypre_UnorderedIntSetCopyToArray(&set, &newoff);
-  hypre_UnorderedIntSetDestroy(&set);
+  hypre_UnorderedBigIntMapDestroy(&col_map_offd_inverse);
+  HYPRE_BigInt *tmp_found = hypre_UnorderedBigIntSetCopyToArray(&set, &newoff);
+  hypre_UnorderedBigIntSetDestroy(&set);
 
   /* Put found in monotone increasing order */
 #ifdef HYPRE_PROFILE
   hypre_profile_times[HYPRE_TIMER_ID_MERGE] -= hypre_MPI_Wtime();
 #endif
 
-  hypre_UnorderedIntMap tmp_found_inverse;
+  hypre_UnorderedBigIntMap tmp_found_inverse;
   if (newoff > 0)
   {
-    hypre_sort_and_create_inverse_map(tmp_found, newoff, &tmp_found, &tmp_found_inverse);
+    hypre_big_sort_and_create_inverse_map(tmp_found, newoff, &tmp_found, &tmp_found_inverse);
   }
 
 #ifdef HYPRE_PROFILE
@@ -390,7 +390,7 @@ static HYPRE_Int hypre_new_offd_nodes(HYPRE_BigInt **found, HYPRE_Int num_cols_A
 
   /* Set column indices for Sop and A_ext such that offd nodes are
    * negatively indexed */
-#pragma omp parallel for private(kk,k1,got_loc,loc_col) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(kk,big_k1,got_loc,loc_col) HYPRE_SMP_SCHEDULE
   for(i = 0; i < num_cols_A_offd; i++)
   {
    if (CF_marker_offd[i] < 0)
@@ -400,7 +400,7 @@ static HYPRE_Int hypre_new_offd_nodes(HYPRE_BigInt **found, HYPRE_Int num_cols_A
        big_k1 = Sop_j[kk];
        if(big_k1 > -1 && (big_k1 < col_1 || big_k1 >= col_n))
        { 
-         got_loc = hypre_UnorderedIntMapGet(&tmp_found_inverse, big_k1);
+         got_loc = hypre_UnorderedBigIntMapGet(&tmp_found_inverse, big_k1);
          loc_col = got_loc + num_cols_A_offd;
          Sop_j[kk] = (HYPRE_BigInt)(-loc_col - 1);
        }
@@ -410,7 +410,7 @@ static HYPRE_Int hypre_new_offd_nodes(HYPRE_BigInt **found, HYPRE_Int num_cols_A
        big_k1 = A_ext_j[kk];
        if(big_k1 > -1 && (big_k1 < col_1 || big_k1 >= col_n))
        {
-         got_loc = hypre_UnorderedIntMapGet(&tmp_found_inverse, big_k1);
+         got_loc = hypre_UnorderedBigIntMapGet(&tmp_found_inverse, big_k1);
          loc_col = got_loc + num_cols_A_offd;
          A_ext_j[kk] = (HYPRE_BigInt)(-loc_col - 1);
        }
@@ -419,7 +419,7 @@ static HYPRE_Int hypre_new_offd_nodes(HYPRE_BigInt **found, HYPRE_Int num_cols_A
   }
   if (newoff)
   {
-    hypre_UnorderedIntMapDestroy(&tmp_found_inverse);
+    hypre_UnorderedBigIntMapDestroy(&tmp_found_inverse);
   }
 #else /* !HYPRE_CONCURRENT_HOPSCOTCH */
   HYPRE_Int size_offP;
@@ -600,7 +600,7 @@ HYPRE_Int hypre_exchange_interp_data(
   hypre_ParCSRCommHandle *comm_handle_s_idx;
   *Sop           = hypre_ParCSRMatrixExtractBExt_Overlap(S,A,0,&comm_handle_s_idx,NULL,CF_marker,*CF_marker_offd,skip_fine_or_same_sign,0);
   HYPRE_Int *Sop_i          = hypre_CSRMatrixI(*Sop);
-  HYPRE_BigInt *Sop_j          = hypre_CSRMatrixBigJ(*Sop);
+  HYPRE_BigInt *Sop_j       = hypre_CSRMatrixBigJ(*Sop);
   HYPRE_Int  Soprows        = hypre_CSRMatrixNumRows(*Sop);
 
   HYPRE_Int *send_idx = (HYPRE_Int *)comm_handle_s_idx->send_data;
@@ -730,17 +730,17 @@ void hypre_build_interp_colmap(hypre_ParCSRMatrix *P, HYPRE_Int full_off_procNod
      }
    }
 
-   hypre_UnorderedIntMap col_map_offd_P_inverse;
-   hypre_sort_and_create_inverse_map(col_map_offd_P, num_cols_P_offd, &col_map_offd_P, &col_map_offd_P_inverse);
+   hypre_UnorderedBigIntMap col_map_offd_P_inverse;
+   hypre_big_sort_and_create_inverse_map(col_map_offd_P, num_cols_P_offd, &col_map_offd_P, &col_map_offd_P_inverse);
 
    // find old idx -> new idx map
 #pragma omp parallel for
    for (i = 0; i < full_off_procNodes; i++)
-     P_marker[i] = hypre_UnorderedIntMapGet(&col_map_offd_P_inverse, fine_to_coarse_offd[i]);
+     P_marker[i] = hypre_UnorderedBigIntMapGet(&col_map_offd_P_inverse, fine_to_coarse_offd[i]);
 
    if (num_cols_P_offd)
    {
-     hypre_UnorderedIntMapDestroy(&col_map_offd_P_inverse);
+     hypre_UnorderedBigIntMapDestroy(&col_map_offd_P_inverse);
    }
 #pragma omp parallel for
    for(i = 0; i < P_offd_size; i++)

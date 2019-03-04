@@ -118,7 +118,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 
    HYPRE_BigInt          *iFace, *iEdge;
    HYPRE_Int             *jFace_edge, *jEdge_iedge;
-   HYPRE_Int             *jElement_Face, *jedge_Edge;
+   HYPRE_BigInt          *jElement_Face, *jedge_Edge;
    HYPRE_BigInt          *iElement, *jElement_Edge, *iedgeEdge, *jElement_edge;
 
    HYPRE_Real            *vals_ElementEdge, *vals_ElementFace, *vals_edgeEdge, *vals_Faceedge;
@@ -1840,7 +1840,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
       }
 
       j*= nElements;
-      jElement_Face   = hypre_CTAlloc(HYPRE_Int,  j, HYPRE_MEMORY_HOST);
+      jElement_Face   = hypre_CTAlloc(HYPRE_BigInt,  j, HYPRE_MEMORY_HOST);
       vals_ElementFace= hypre_CTAlloc(HYPRE_Real,  j, HYPRE_MEMORY_HOST);
       for (i= 0; i< j; i++)
       {
@@ -3270,7 +3270,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
       }
    }
    vals_edgeEdge = hypre_CTAlloc(HYPRE_Real,  k, HYPRE_MEMORY_HOST);
-   jedge_Edge    = hypre_CTAlloc(HYPRE_Int,  k, HYPRE_MEMORY_HOST);
+   jedge_Edge    = hypre_CTAlloc(HYPRE_BigInt,  k, HYPRE_MEMORY_HOST);
    size1         = j;
 
    /*********************************************************************

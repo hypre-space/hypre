@@ -2015,8 +2015,6 @@ hypre_BoomerAMGBuildDirInterp( hypre_ParCSRMatrix   *A,
 
    HYPRE_Int        P_diag_size, P_offd_size;
    
-   HYPRE_Int       *P_marker, *P_marker_offd;
-
    HYPRE_Int        jj_counter,jj_counter_offd;
    HYPRE_Int       *jj_count, *jj_count_offd;
    HYPRE_Int        jj_begin_row,jj_begin_row_offd;
@@ -2338,10 +2336,12 @@ hypre_BoomerAMGBuildDirInterp( hypre_ParCSRMatrix   *A,
     *-----------------------------------------------------------------------*/
     
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i,j,jl,i1,jj,ns,ne,size,rest,diagonal,P_marker,P_marker_offd,jj_counter,jj_counter_offd,jj_begin_row,jj_end_row,jj_begin_row_offd,jj_end_row_offd) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(i,j,jl,i1,jj,ns,ne,size,rest,diagonal,jj_counter,jj_counter_offd,jj_begin_row,jj_end_row,jj_begin_row_offd,jj_end_row_offd,sum_P_pos,sum_P_neg,sum_N_pos,sum_N_neg,alfa,beta) HYPRE_SMP_SCHEDULE
 #endif
    for (jl = 0; jl < num_threads; jl++)
    {
+     HYPRE_Int       *P_marker, *P_marker_offd;
+
      size = n_fine/num_threads;
      rest = n_fine - size*num_threads;
      if (jl < rest)
@@ -2610,7 +2610,7 @@ hypre_BoomerAMGBuildDirInterp( hypre_ParCSRMatrix   *A,
    num_cols_P_offd = 0;
    if (P_offd_size)
    {
-      P_marker = hypre_CTAlloc(HYPRE_Int,  num_cols_A_offd, HYPRE_MEMORY_HOST);
+      HYPRE_Int *P_marker = hypre_CTAlloc(HYPRE_Int,  num_cols_A_offd, HYPRE_MEMORY_HOST);
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE

@@ -1531,7 +1531,7 @@ HYPRE_Int hypre_AMSComputePi(hypre_ParCSRMatrix *A,
 
          for (i = 0; i < G_offd_ncols; i++)
             for (d = 0; d < dim; d++)
-               Pi_cmap[dim*i+d] = dim*G_cmap[i]+d;
+               Pi_cmap[dim*i+d] = (HYPRE_BigInt)dim*G_cmap[i]+(HYPRE_BigInt)d;
       }
 
    }
@@ -2115,7 +2115,8 @@ HYPRE_Int hypre_AMSSetup(void *solver,
             for (i = 0; i < nnz; i++)
                data[i] *= factor;
          }
-         C_tmp = hypre_CSRMatrixAdd(A_local, B_local);
+         C_tmp = hypre_CSRMatrixBigAdd(A_local, B_local);
+         hypre_CSRMatrixBigJtoJ(C_tmp);
          C_local = hypre_CSRMatrixDeleteZeros(C_tmp,0.0);
          if (C_local)
             hypre_CSRMatrixDestroy(C_tmp);

@@ -1826,17 +1826,17 @@ HYPRE_Int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker
 #endif
 
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
+      HYPRE_BigInt          *S_big_offd_j = NULL;
       S_ext_diag_i = hypre_TAlloc(HYPRE_Int,  num_cols_offd_S+1, HYPRE_MEMORY_HOST);
       S_ext_diag_i[0] = 0;
       S_ext_offd_i = hypre_TAlloc(HYPRE_Int,  num_cols_offd_S+1, HYPRE_MEMORY_HOST);
       S_ext_offd_i[0] = 0;
 
-      /*HYPRE_Int temp_size = 0;*/
 
-      hypre_UnorderedIntSet found_set;
-      hypre_UnorderedIntSetCreate(&found_set, S_ext_i[num_cols_offd_S] + num_cols_offd_S, 16*hypre_NumThreads());
+      hypre_UnorderedBigIntSet found_set;
+      hypre_UnorderedBigIntSetCreate(&found_set, S_ext_i[num_cols_offd_S] + num_cols_offd_S, 16*hypre_NumThreads());
 
-#pragma omp parallel private(i,j)
+#pragma omp parallel private(i,j, big_i1)
       {
          HYPRE_Int S_ext_offd_size_private = 0;
          HYPRE_Int S_ext_diag_size_private = 0;
@@ -1848,15 +1848,15 @@ HYPRE_Int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker
          {
             if (CF_marker_offd[i] > 0)
             {
-               hypre_UnorderedIntSetPut(&found_set, fine_to_coarse_offd[i]);
+               hypre_UnorderedBigIntSetPut(&found_set, fine_to_coarse_offd[i]);
             }
             for (j=S_ext_i[i]; j < S_ext_i[i+1]; j++)
             {
-               HYPRE_BigInt i1 = S_ext_j[j];
-               if (i1 < my_first_cpt || i1 > my_last_cpt)
+               big_i1 = S_ext_j[j];
+               if (big_i1 < my_first_cpt || big_i1 > my_last_cpt)
                {
                   S_ext_offd_size_private++;
-                  hypre_UnorderedIntSetPut(&found_set, i1);
+                  hypre_UnorderedBigIntSetPut(&found_set, big_i1);
                }
                else
                   S_ext_diag_size_private++;
@@ -1873,7 +1873,10 @@ HYPRE_Int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker
             if (S_ext_diag_size)
                S_ext_diag_j = hypre_TAlloc(HYPRE_Int,  S_ext_diag_size, HYPRE_MEMORY_HOST);
             if (S_ext_offd_size)
+            {
                S_ext_offd_j = hypre_TAlloc(HYPRE_Int,  S_ext_offd_size, HYPRE_MEMORY_HOST);
+               S_big_offd_j = hypre_TAlloc(HYPRE_BigInt,  S_ext_offd_size, HYPRE_MEMORY_HOST);
+            }
          }
 
 #pragma omp barrier
@@ -1882,33 +1885,34 @@ HYPRE_Int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker
          {
             for (j=S_ext_i[i]; j < S_ext_i[i+1]; j++)
             {
-               HYPRE_BigInt i1 = S_ext_j[j];
-               if (i1 < my_first_cpt || i1 > my_last_cpt)
-                  S_ext_j[S_ext_offd_size_private++] = i1; /* >>> Fix this! */
-                  //S_ext_offd_j[S_ext_offd_size_private++] = i1; /* >>> Fix this! */
+               big_i1 = S_ext_j[j];
+               if (big_i1 < my_first_cpt || big_i1 > my_last_cpt)
+                  S_big_offd_j[S_ext_offd_size_private++] = big_i1; 
+                  //S_ext_offd_j[S_ext_offd_size_private++] = big_i1; 
                else
-                  S_ext_diag_j[S_ext_diag_size_private++] = (HYPRE_Int)(i1 - my_first_cpt);
+                  S_ext_diag_j[S_ext_diag_size_private++] = (HYPRE_Int)(big_i1 - my_first_cpt);
             }
             S_ext_diag_i[i + 1] = S_ext_diag_size_private;
             S_ext_offd_i[i + 1] = S_ext_offd_size_private;
          }
       } // omp parallel
 
-      temp = hypre_UnorderedIntSetCopyToArray(&found_set, &num_cols_offd_C);
+      temp = hypre_UnorderedBigIntSetCopyToArray(&found_set, &num_cols_offd_C);
       
-      hypre_UnorderedIntSetDestroy(&found_set);
+      hypre_UnorderedBigIntSetDestroy(&found_set);
       hypre_TFree(S_ext_i, HYPRE_MEMORY_HOST);
-      hypre_TFree(S_ext_j, HYPRE_MEMORY_HOST);
 
-      hypre_UnorderedIntMap col_map_offd_C_inverse;
-      hypre_sort_and_create_inverse_map(temp, num_cols_offd_C, &col_map_offd_C, &col_map_offd_C_inverse);
+      hypre_UnorderedBigIntMap col_map_offd_C_inverse;
+      hypre_big_sort_and_create_inverse_map(temp, num_cols_offd_C, &col_map_offd_C, &col_map_offd_C_inverse);
 
 #pragma omp parallel for HYPRE_SMP_SCHEDULE
       for (i=0 ; i < S_ext_offd_size; i++)
-         S_ext_offd_j[i] = hypre_UnorderedIntMapGet(&col_map_offd_C_inverse, S_ext_j[i]);
+         S_ext_offd_j[i] = hypre_UnorderedBigIntMapGet(&col_map_offd_C_inverse, S_big_offd_j[i]);
          //S_ext_offd_j[i] = hypre_UnorderedIntMapGet(&col_map_offd_C_inverse, S_ext_offd_j[i]);
 
-      if (num_cols_offd_C) hypre_UnorderedIntMapDestroy(&col_map_offd_C_inverse);
+      hypre_TFree(S_ext_j, HYPRE_MEMORY_HOST);
+      hypre_TFree(S_big_offd_j, HYPRE_MEMORY_HOST);
+      if (num_cols_offd_C) hypre_UnorderedBigIntMapDestroy(&col_map_offd_C_inverse);
 #else /* !HYPRE_CONCURRENT_HOPSCOTCH */
       HYPRE_Int cnt_offd, cnt_diag, cnt, value;
       S_ext_diag_size = 0;
@@ -1997,10 +2001,10 @@ HYPRE_Int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker
          S_ext_offd_j[i] = hypre_BigBinarySearch(col_map_offd_C,
                                            S_ext_j[i],
                                            num_cols_offd_C);
+      hypre_TFree(S_ext_j, HYPRE_MEMORY_HOST);
 
 #endif /* !HYPRE_CONCURRENT_HOPSCOTCH */
 
-      hypre_TFree(S_ext_j, HYPRE_MEMORY_HOST);
       if (num_cols_offd_S)
       {
          map_S_to_C = hypre_TAlloc(HYPRE_Int, num_cols_offd_S, HYPRE_MEMORY_HOST);
@@ -2112,7 +2116,7 @@ HYPRE_Int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker
              *  Set marker for diagonal entry, C_{i1,i1} (for square matrices). 
              *--------------------------------------------------------------------*/
 
-             HYPRE_Int i1 = coarse_to_fine[ic];
+             i1 = coarse_to_fine[ic];
        
              HYPRE_Int jj_row_begin_diag = num_nonzeros_diag;
              HYPRE_Int jj_row_begin_offd = num_nonzeros_offd;
@@ -2204,7 +2208,7 @@ HYPRE_Int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker
              *  Set marker for diagonal entry, C_{i1,i1} (for square matrices). 
              *--------------------------------------------------------------------*/
 
-             HYPRE_Int i1 = coarse_to_fine[ic];
+             i1 = coarse_to_fine[ic];
        
              HYPRE_Int jj_row_begin_diag = jj_count_diag;
              HYPRE_Int jj_row_begin_offd = jj_count_offd;
@@ -2398,7 +2402,7 @@ HYPRE_Int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker
              *  Set marker for diagonal entry, C_{i1,i1} (for square matrices). 
              *--------------------------------------------------------------------*/
 
-             HYPRE_Int i1 = coarse_to_fine[ic];
+             i1 = coarse_to_fine[ic];
        
              HYPRE_Int jj_row_begin_diag = num_nonzeros_diag;
              HYPRE_Int jj_row_begin_offd = num_nonzeros_offd;
@@ -2493,7 +2497,7 @@ HYPRE_Int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker
              *  Set marker for diagonal entry, C_{i1,i1} (for square matrices). 
              *--------------------------------------------------------------------*/
 
-             HYPRE_Int i1 = coarse_to_fine[ic];
+             i1 = coarse_to_fine[ic];
        
              HYPRE_Int jj_row_begin_diag = jj_count_diag;
              HYPRE_Int jj_row_begin_offd = jj_count_offd;

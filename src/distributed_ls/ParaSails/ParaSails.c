@@ -106,7 +106,7 @@ static void SendRequests(MPI_Comm comm, HYPRE_Int tag, Matrix *mat, HYPRE_Int re
     hypre_MPI_Request request;
     HYPRE_Int i, j, this_pe;
 
-    hypre_shell_sort(reqlen, reqind);
+    hypre_big_shell_sort(reqlen, reqind);
 
     *num_requests = 0;
 
@@ -217,7 +217,7 @@ static void SendReplyPrunedRows(MPI_Comm comm, Numbering *numb,
     /* Construct integer reply message in local buffer, with this format:
        number of rows to send, row numbers, indices of each row */
 
-    *indbufp++ = count; /* number of rows to send */
+    *indbufp++ = (HYPRE_BigInt)count; /* number of rows to send */
 
     for (j=0; j<count; j++)
         *indbufp++ = buffer[j]; /* row numbers */
@@ -227,10 +227,10 @@ static void SendReplyPrunedRows(MPI_Comm comm, Numbering *numb,
         NumberingGlobalToLocal(numb, 1, &buffer[j], &temp);
         PrunedRowsGet(pruned_rows, temp, &len, &ind);
 
-        *indbufp++ = len;
+        *indbufp++ = (HYPRE_BigInt)len;
         /* memcpy(indbufp, ind, sizeof(HYPRE_Int)*len); */
         NumberingLocalToGlobal(numb, len, ind, indbufp);
-        indbufp += len;
+        indbufp += (HYPRE_BigInt)len;
     }
 
     hypre_MPI_Isend(indbuf, indbufp-indbuf, HYPRE_MPI_BIG_INT, dest, ROW_REPI_TAG,
@@ -265,9 +265,9 @@ static void ReceiveReplyPrunedRows(MPI_Comm comm, Numbering *numb,
     hypre_MPI_Recv(ind, count, HYPRE_MPI_BIG_INT, source, ROW_REPI_TAG, comm, &status);
 
     /* Parse the message */
-    num_rows = *ind++; /* number of rows */
+    num_rows = (HYPRE_Int)*ind++; /* number of rows */
     row_nums = ind;    /* row numbers */
-    ind += num_rows;
+    ind += (HYPRE_BigInt)num_rows;
 
     /* Convert global row numbers to local row numbers */
     NumberingGlobalToLocal(numb, num_rows, row_nums, row_nums);
@@ -275,11 +275,11 @@ static void ReceiveReplyPrunedRows(MPI_Comm comm, Numbering *numb,
     /* Set the pointers to the individual rows */
     for (j=0; j<num_rows; j++)
     {
-        len = *ind++;
+        len = (HYPRE_Int)*ind++;
         NumberingGlobalToLocal(numb, len, ind, ind);
         PrunedRowsPut(pruned_rows, row_nums[j], len, ind);
         RowPattMergeExt(patt, len, ind, numb->num_loc);
-        ind += len;
+        ind += (HYPRE_BigInt)len;
     }
 }
 
@@ -336,7 +336,7 @@ static void SendReplyStoredRows(MPI_Comm comm, Numbering *numb,
        number of rows to send, row numbers, len of row, indices each row,
        len of next row, indices of row, etc. */
 
-    *indbufp++ = count; /* number of rows to send */
+    *indbufp++ = (HYPRE_BigInt)count; /* number of rows to send */
 
     for (j=0; j<count; j++)
         *indbufp++ = buffer[j]; /* row numbers */
@@ -346,11 +346,11 @@ static void SendReplyStoredRows(MPI_Comm comm, Numbering *numb,
         NumberingGlobalToLocal(numb, 1, &buffer[j], &temp);
         StoredRowsGet(stored_rows, temp, &len, &ind, &val);
 
-        *indbufp++ = len;
+        *indbufp++ = (HYPRE_BigInt)len;
         /* memcpy(indbufp, ind, sizeof(HYPRE_Int)*len); */
         NumberingLocalToGlobal(numb, len, ind, indbufp);
         hypre_TMemcpy(valbufp,  val, HYPRE_Real, len, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-        indbufp += len;
+        indbufp += (HYPRE_BigInt)len;
         valbufp += len;
     }
 
@@ -392,9 +392,9 @@ static void ReceiveReplyStoredRows(MPI_Comm comm, Numbering *numb,
     hypre_MPI_Recv(val, count, hypre_MPI_REAL, source, ROW_REPV_TAG, comm, &status);
 
     /* Parse the message */
-    num_rows = *ind++; /* number of rows */
+    num_rows = (HYPRE_Int)*ind++; /* number of rows */
     row_nums = ind;    /* row numbers */
-    ind += num_rows;
+    ind += (HYPRE_BigInt)num_rows;
 
     /* Convert global row numbers to local row numbers */
     NumberingGlobalToLocal(numb, num_rows, row_nums, row_nums);
@@ -402,10 +402,10 @@ static void ReceiveReplyStoredRows(MPI_Comm comm, Numbering *numb,
     /* Set the pointers to the individual rows */
     for (j=0; j<num_rows; j++)
     {
-        len = *ind++;
+        len = (HYPRE_Int)*ind++;
         NumberingGlobalToLocal(numb, len, ind, ind);
         StoredRowsPut(stored_rows, row_nums[j], len, ind, val);
-        ind += len;
+        ind += (HYPRE_BigInt)len;
         val += len;
     }
 }
@@ -1011,8 +1011,8 @@ static HYPRE_Int ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
   HYPRE_Int local_beg_row, Numbering *numb, HYPRE_Int symmetric)
 {
     HYPRE_Int *marker;
-    HYPRE_Int maxlen, len;
-    HYPRE_BigInt row, *ind, loc, *ind2;
+    HYPRE_Int maxlen, len, loc;
+    HYPRE_BigInt row, *ind, big_loc, *ind2;
     HYPRE_Real *val;
 
     HYPRE_Real *ahat, *ahatp;
@@ -1130,7 +1130,8 @@ static HYPRE_Int ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
         /* Set the right-hand side */
 /*        bzero((char *) val, len*sizeof(HYPRE_Real));*/
         memset(val, 0, len*sizeof(HYPRE_Real));
-        NumberingGlobalToLocal(numb, 1, &row, &loc);
+        NumberingGlobalToLocal(numb, 1, &row, &big_loc);
+        loc = (HYPRE_Int)big_loc;
         loc = marker[loc];
         assert(loc != -1);
         val[loc] = 1.0;

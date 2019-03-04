@@ -336,6 +336,7 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
    HYPRE_Real      *P_ext_offd_data = NULL;
    HYPRE_Int       *P_ext_offd_i = NULL;
    HYPRE_Int       *P_ext_offd_j = NULL;
+   HYPRE_BigInt    *P_big_offd_j = NULL;
 
    HYPRE_BigInt    *col_map_offd_Pext;
    HYPRE_Int       *map_P_to_Pext = NULL;
@@ -349,7 +350,6 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
    HYPRE_BigInt    *temp;
 
    HYPRE_BigInt     n_coarse, n_coarse_RT;
-   HYPRE_BigInt     value;
    HYPRE_Int        square = 1;
    HYPRE_Int        num_cols_offd_Pext = 0;
    
@@ -490,7 +490,7 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
          send_map_elmts_RT_aggregated[offset] = i;
       }
    }
-#endif /* HYPRE_CONCURRENT_HOPSCOTCH */
+#endif  /* HYPRE_CONCURRENT_HOPSCOTCH */
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_RENUMBER_COLIDX] -= hypre_MPI_Wtime();
@@ -516,9 +516,9 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
    /*HYPRE_Int prefix_sum_workspace[2*(num_threads + 1)];*/
    prefix_sum_workspace = hypre_TAlloc(HYPRE_Int,  2*(num_threads + 1), HYPRE_MEMORY_HOST);
 
-#ifdef HYPRE_USING_OPENMP
+#ifdef HYPRE_USING_OPENMP 
 #pragma omp parallel private(i,j)
-#endif
+#endif /* This threading causes problem, maybe the prefix_sum in combination with BigInt? */
    {
       HYPRE_Int i_begin, i_end;
       hypre_GetSimpleThreadPartition(&i_begin, &i_end, num_cols_offd_A);
@@ -549,10 +549,10 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
          if (P_ext_offd_size)
          {
             P_ext_offd_j = hypre_CTAlloc(HYPRE_Int,  P_ext_offd_size, HYPRE_MEMORY_HOST);
+            P_big_offd_j = hypre_CTAlloc(HYPRE_BigInt,  P_ext_offd_size, HYPRE_MEMORY_HOST);
             P_ext_offd_data = hypre_CTAlloc(HYPRE_Real,  P_ext_offd_size, HYPRE_MEMORY_HOST);
+            //temp = hypre_CTAlloc(HYPRE_BigInt,  P_ext_offd_size+num_cols_offd_P, HYPRE_MEMORY_HOST);
          }
-         if (P_ext_offd_size || num_cols_offd_P)
-            temp = hypre_CTAlloc(HYPRE_BigInt,  P_ext_offd_size+num_cols_offd_P, HYPRE_MEMORY_HOST);
       }
 #ifdef HYPRE_USING_OPENMP
 #pragma omp barrier
@@ -562,12 +562,12 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
       {
          for (j=Ps_ext_i[i]; j < Ps_ext_i[i+1]; j++)
          {
-            value = Ps_ext_j[j];
+            HYPRE_BigInt value = Ps_ext_j[j];
             if (value < first_col_diag_P || value > last_col_diag_P)
             {
-               //P_ext_offd_j[P_ext_offd_size_private] = Ps_ext_j[j];
-               Ps_ext_j[P_ext_offd_size_private] = value;
-               temp[P_ext_offd_size_private] = value;
+               //Ps_ext_j[P_ext_offd_size_private] = value;
+               //temp[P_ext_offd_size_private] = value;
+               P_big_offd_j[P_ext_offd_size_private] = value;
                P_ext_offd_data[P_ext_offd_size_private++] = Ps_ext_data[j];
             }
             else
@@ -582,46 +582,55 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
    } /* omp parallel */
    hypre_TFree(prefix_sum_workspace, HYPRE_MEMORY_HOST);
 
+   if (num_procs > 1) 
+   {
+      hypre_CSRMatrixDestroy(Ps_ext);
+      Ps_ext = NULL;
+   }
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
    if (P_ext_offd_size || num_cols_offd_P)
    {
-      hypre_BigUnorderedIntSet found_set;
-      hypre_BigUnorderedIntSetCreate(&found_set, P_ext_offd_size + num_cols_offd_P, 16*hypre_NumThreads());
+      hypre_UnorderedBigIntSet found_set;
+      hypre_UnorderedBigIntSetCreate(&found_set, P_ext_offd_size + num_cols_offd_P, 16*hypre_NumThreads());
 
 #pragma omp parallel private(i)
       {
 #pragma omp for HYPRE_SMP_SCHEDULE
          for (i = 0; i < P_ext_offd_size; i++)
          {
-            hypre_BigUnorderedIntSetPut(&found_set, Ps_ext_j[i]);
+            //hypre_UnorderedBigIntSetPut(&found_set, Ps_ext_j[i]);
+            hypre_UnorderedBigIntSetPut(&found_set, P_big_offd_j[i]);
          }
 
 #pragma omp for HYPRE_SMP_SCHEDULE
          for (i = 0; i < num_cols_offd_P; i++)
          {
-            hypre_BigUnorderedIntSetPut(&found_set, col_map_offd_P[i]);
+            hypre_UnorderedBigIntSetPut(&found_set, col_map_offd_P[i]);
          }
-      } /* omp parallel */
+      }  /* omp parallel */
 
  /* Warning on getting temp right !!!!! */
 
-      temp = hypre_BigUnorderedIntSetCopyToArray(&found_set, &num_cols_offd_Pext);
-      hypre_BigUnorderedIntSetDestroy(&found_set);
+      temp = hypre_UnorderedBigIntSetCopyToArray(&found_set, &num_cols_offd_Pext);
+      hypre_UnorderedBigIntSetDestroy(&found_set);
 
-      hypre_BigUnorderedIntMap col_map_offd_Pext_inverse;
+      hypre_UnorderedBigIntMap col_map_offd_Pext_inverse;
       hypre_big_sort_and_create_inverse_map(temp, num_cols_offd_Pext, &col_map_offd_Pext, &col_map_offd_Pext_inverse);
 
 #pragma omp parallel for HYPRE_SMP_SCHEDULE
       for (i=0 ; i < P_ext_offd_size; i++)
-         P_ext_offd_j[i] = hypre_BigUnorderedIntMapGet(&col_map_offd_Pext_inverse, Ps_ext_j[i]);
-      if (num_cols_offd_Pext) hypre_BigUnorderedIntMapDestroy(&col_map_offd_Pext_inverse);
+         //Ps_ext_j[i] = hypre_UnorderedBigIntMapGet(&col_map_offd_Pext_inverse, Ps_ext_j[i]);
+         P_ext_offd_j[i] = hypre_UnorderedBigIntMapGet(&col_map_offd_Pext_inverse, P_big_offd_j[i]);
+      if (num_cols_offd_Pext) hypre_UnorderedBigIntMapDestroy(&col_map_offd_Pext_inverse);
    }
 #else /* !HYPRE_CONCURRENT_HOPSCOTCH */
    if (P_ext_offd_size || num_cols_offd_P)
    {
-      /*temp = hypre_CTAlloc(HYPRE_Int,  P_ext_offd_size+num_cols_offd_P, HYPRE_MEMORY_HOST);
+      temp = hypre_CTAlloc(HYPRE_BigInt,  P_ext_offd_size+num_cols_offd_P, HYPRE_MEMORY_HOST);
       for (i=0; i < P_ext_offd_size; i++)
-         temp[i] = P_ext_offd_j[i]; */
+         //Ps_ext_j[i] = temp[i]; 
+         //temp[i] = Ps_ext_j[i]; 
+         temp[i] = P_big_offd_j[i]; 
       cnt = P_ext_offd_size;
       for (i=0; i < num_cols_offd_P; i++)
          temp[cnt++] = col_map_offd_P[i];
@@ -631,7 +640,7 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
       hypre_BigQsort0(temp, 0, cnt-1);
 
       num_cols_offd_Pext = 1;
-      value = temp[0];
+      HYPRE_BigInt value = temp[0];
       for (i=1; i < cnt; i++)
       {
          if (temp[i] > value)
@@ -651,17 +660,20 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
    if (P_ext_offd_size || num_cols_offd_P)
       hypre_TFree(temp, HYPRE_MEMORY_HOST);
 
+   /*if (P_ext_offd_size)
+      P_ext_offd_j = hypre_CTAlloc(HYPRE_Int,  P_ext_offd_size, HYPRE_MEMORY_HOST);*/
    for (i=0 ; i < P_ext_offd_size; i++)
       P_ext_offd_j[i] = hypre_BigBinarySearch(col_map_offd_Pext,
-                                           Ps_ext_j[i],
+                                           //Ps_ext_j[i],
+                                           P_big_offd_j[i],
                                            num_cols_offd_Pext);
 #endif /* !HYPRE_CONCURRENT_HOPSCOTCH */
 
-   if (num_procs > 1) 
+   /*if (num_procs > 1) 
    {
       hypre_CSRMatrixDestroy(Ps_ext);
       Ps_ext = NULL;
-   }
+   }*/
 
    if (num_cols_offd_P)
    {
@@ -1197,11 +1209,11 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
     *-----------------------------------------------------------------------*/
 
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
-   hypre_UnorderedIntMap col_map_offd_RAP_inverse;
+   hypre_UnorderedBigIntMap col_map_offd_RAP_inverse;
    if (RAP_ext_size || num_cols_offd_Pext)
    {
-      hypre_BigUnorderedIntSet found_set;
-      hypre_BigUnorderedIntSetCreate(&found_set, 2*(RAP_ext_size + num_cols_offd_Pext), 16*hypre_NumThreads());
+      hypre_UnorderedBigIntSet found_set;
+      hypre_UnorderedBigIntSetCreate(&found_set, 2*(RAP_ext_size + num_cols_offd_Pext), 16*hypre_NumThreads());
       cnt = 0;
 
 #pragma omp parallel private(i)
@@ -1211,20 +1223,19 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
          {
             if (RAP_ext_j[i] < first_col_diag_RAP 
                            || RAP_ext_j[i] > last_col_diag_RAP)
-               hypre_BigUnorderedIntSetPut(&found_set, RAP_ext_j[i]);
+               hypre_UnorderedBigIntSetPut(&found_set, RAP_ext_j[i]);
          }
 
 #pragma omp for HYPRE_SMP_SCHEDULE
          for (i = 0; i < num_cols_offd_Pext; i++)
          {
-            hypre_BigUnorderedIntSetPut(&found_set, col_map_offd_Pext[i]);
+            hypre_UnorderedBigIntSetPut(&found_set, col_map_offd_Pext[i]);
          }
       } /* omp parallel */
 
-      temp = hypre_UnorderedIntSetCopyToArray(&found_set, &num_cols_offd_RAP);
-      hypre_UnorderedIntSetDestroy(&found_set);
+      temp = hypre_UnorderedBigIntSetCopyToArray(&found_set, &num_cols_offd_RAP);
+      hypre_UnorderedBigIntSetDestroy(&found_set);
       hypre_big_sort_and_create_inverse_map(temp, num_cols_offd_RAP, &col_map_offd_RAP, &col_map_offd_RAP_inverse);
-      // num_cols_offd_RAP <= RAP_ext_size + num_cols_offd_Pext
    }
 #else /* !HYPRE_CONCURRENT_HOPSCOTCH */
    if (RAP_ext_size || num_cols_offd_Pext)
@@ -1242,7 +1253,7 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
       if (cnt)
       {
          hypre_BigQsort0(temp,0,cnt-1);
-         value = temp[0];
+         HYPRE_BigInt value = temp[0];
          num_cols_offd_RAP = 1;
          for (i=1; i < cnt; i++)
          {
@@ -1303,7 +1314,7 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
                         || RAP_ext_j[i] > last_col_diag_RAP)
             RAP_ext_j[i] = (HYPRE_BigInt)num_cols_diag_P
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
-               +(HYPRE_BigInt)hypre_BigUnorderedIntMapGet(&col_map_offd_RAP_inverse, RAP_ext_j[i]);
+               +(HYPRE_BigInt)hypre_UnorderedBigIntMapGet(&col_map_offd_RAP_inverse, RAP_ext_j[i]);
 #else
                +(HYPRE_BigInt)hypre_BigBinarySearch(col_map_offd_RAP, RAP_ext_j[i],num_cols_offd_RAP);
 #endif
@@ -1312,7 +1323,7 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
 
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
    if (num_cols_offd_RAP)
-      hypre_BigUnorderedIntMapDestroy(&col_map_offd_RAP_inverse);
+      hypre_UnorderedBigIntMapDestroy(&col_map_offd_RAP_inverse);
 #endif
 
 #ifdef HYPRE_PROFILE

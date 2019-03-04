@@ -54,7 +54,8 @@ HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix       * Aee,
 
    HYPRE_Int  i, j;
    HYPRE_BigInt  big_k;
-   HYPRE_Int *offproc_rnums, *swap;
+   HYPRE_BigInt *offproc_rnums;
+   HYPRE_Int *swap;
 
    hypre_ParCSRMatrix * dof_DOF = (hypre_ParCSRMatrix *)hypre_IJMatrixObject(IJ_dof_DOF);
    hypre_ParCSRMatrix * ELEM_DOF = ELEM_EDGE;
@@ -86,7 +87,7 @@ HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix       * Aee,
   /* sort the offproc rows to get quicker comparison for later */
    if (num_OffProcRows)
    {
-      offproc_rnums= hypre_TAlloc(HYPRE_Int,  num_OffProcRows, HYPRE_MEMORY_HOST);
+      offproc_rnums= hypre_TAlloc(HYPRE_BigInt,  num_OffProcRows, HYPRE_MEMORY_HOST);
       swap         = hypre_TAlloc(HYPRE_Int,  num_OffProcRows, HYPRE_MEMORY_HOST);
       for (i= 0; i< num_OffProcRows; i++)
       {
@@ -97,7 +98,7 @@ HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix       * Aee,
 
    if (num_OffProcRows > 1)
    {
-      hypre_qsort2i(offproc_rnums, swap, 0, num_OffProcRows-1);
+      hypre_BigQsortbi(offproc_rnums, swap, 0, num_OffProcRows-1);
    }
 
    if (FACE_idof == EDGE_idof)

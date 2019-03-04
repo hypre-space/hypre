@@ -104,7 +104,7 @@ Numbering *NumberingCreate(Matrix *mat, HYPRE_Int size)
     }
 
     /* Sort the indices */
-    hypre_shell_sort(num_external, &numb->local_to_global[numb->num_loc]);
+    hypre_big_shell_sort(num_external, &numb->local_to_global[numb->num_loc]);
 
     /* Redo the hash table for the sorted indices */
     HashReset(numb->hash);

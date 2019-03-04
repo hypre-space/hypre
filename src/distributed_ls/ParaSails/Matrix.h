@@ -51,7 +51,7 @@ typedef struct
     HYPRE_Int     sendlen;
     HYPRE_Int     recvlen;
 
-    HYPRE_Int    *sendind;
+    HYPRE_BigInt *sendind;
     HYPRE_Real *sendbuf;
     HYPRE_Real *recvbuf;
 
@@ -74,7 +74,7 @@ HYPRE_Int  MatrixRowPe(Matrix *mat, HYPRE_BigInt row);
 void MatrixPrint(Matrix *mat, char *filename);
 void MatrixRead(Matrix *mat, char *filename);
 void RhsRead(HYPRE_Real *rhs, Matrix *mat, char *filename);
-HYPRE_Int  MatrixNnz(Matrix *mat);
+HYPRE_BigInt  MatrixNnz(Matrix *mat);
 
 void MatrixComplete(Matrix *mat);
 void MatrixMatvec(Matrix *mat, HYPRE_Real *x, HYPRE_Real *y);

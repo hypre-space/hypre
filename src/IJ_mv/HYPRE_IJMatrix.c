@@ -1066,7 +1066,7 @@ HYPRE_IJMatrixRead( const char     *filename,
       return hypre_error_flag;
    }
 
-   hypre_fscanf(file, "%d %d %d %d", &ilower, &iupper, &jlower, &jupper);
+   hypre_fscanf(file, "%b %b %b %b", &ilower, &iupper, &jlower, &jupper);
    HYPRE_IJMatrixCreate(comm, ilower, iupper, jlower, jupper, &matrix);
 
    HYPRE_IJMatrixSetObjectType(matrix, type);
@@ -1075,7 +1075,7 @@ HYPRE_IJMatrixRead( const char     *filename,
    /* It is important to ensure that whitespace follows the index value to help
     * catch mistakes in the input file.  See comments in IJVectorRead(). */
    ncols = 1;
-   while ( (ret = hypre_fscanf(file, "%d %d%*[ \t]%le", &I, &J, &value)) != EOF )
+   while ( (ret = hypre_fscanf(file, "%b %b%*[ \t]%le", &I, &J, &value)) != EOF )
    {
       if (ret != 3)
       {
@@ -1158,7 +1158,7 @@ HYPRE_IJMatrixPrint( HYPRE_IJMatrix  matrix,
    jlower = col_partitioning[myid];
    jupper = col_partitioning[myid+1] - 1;
 #endif
-   hypre_fprintf(file, "%d %d %d %d\n", ilower, iupper, jlower, jupper);
+   hypre_fprintf(file, "%b %b %b %b\n", ilower, iupper, jlower, jupper);
 
    HYPRE_IJMatrixGetObject(matrix, &object);
 
@@ -1185,7 +1185,7 @@ HYPRE_IJMatrixPrint( HYPRE_IJMatrix  matrix,
 
       for (j = 0; j < ncols; j++)
       {
-         hypre_fprintf(file, "%d %d %.14e\n", i, cols[j], values[j]);
+         hypre_fprintf(file, "%b %b %.14e\n", i, cols[j], values[j]);
       }
 
       if ( hypre_IJMatrixObjectType(matrix) == HYPRE_PARCSR )

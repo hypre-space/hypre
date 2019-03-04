@@ -44,7 +44,19 @@ new_format( const char *format,
       }
       else if (foundpercent)
       {
-         if (*fp == 'l')
+         if (*fp == 'b')
+         {
+            fp++; /* remove 'b' and replace */
+#if defined(HYPRE_BIGINT)
+            *nfp = 'l'; nfp++;
+            *nfp = 'l'; nfp++;
+#elif defined(HYPRE_MIXEDINT)
+            *nfp = 'l'; nfp++;
+            *nfp = 'l'; nfp++;
+#endif
+            *nfp = 'd'; nfp++;
+         }
+         else if (*fp == 'l')
          {
             fp++; /* remove 'l' and maybe add it back in switch statement */
             if (*fp == 'l')
@@ -56,7 +68,7 @@ new_format( const char *format,
          {
             case 'd':
             case 'i':
-#if defined(HYPRE_ALLBIGINT)
+#if defined(HYPRE_BIGINT)
                *nfp = 'l'; nfp++;
                *nfp = 'l'; nfp++;
 #endif

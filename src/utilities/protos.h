@@ -142,6 +142,8 @@ HYPRE_Int hypre_merge_sort_unique2(HYPRE_Int *in, HYPRE_Int *temp, HYPRE_Int len
 
 void hypre_merge_sort(HYPRE_Int *in, HYPRE_Int *temp, HYPRE_Int len, HYPRE_Int **sorted);
 
+void hypre_big_merge_sort(HYPRE_BigInt *in, HYPRE_BigInt *temp, HYPRE_Int len, HYPRE_BigInt **sorted);
+
 void hypre_union2(HYPRE_Int n1, HYPRE_Int *arr1, HYPRE_Int n2, HYPRE_Int *arr2, HYPRE_Int *n3, HYPRE_Int *arr3, HYPRE_Int *map1, HYPRE_Int *map2);
 
 /* hypre_hopscotch_hash.c */
@@ -187,15 +189,27 @@ typedef struct {
  */
 typedef struct
 {
-	HYPRE_Int  volatile              segmentMask;
-	HYPRE_Int  volatile              bucketMask;
+   HYPRE_Int  volatile              segmentMask;
+   HYPRE_Int  volatile              bucketMask;
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
-	hypre_HopscotchSegment* volatile segments;
+   hypre_HopscotchSegment* volatile segments;
 #endif
-  HYPRE_Int *volatile              key;
-  hypre_uint *volatile             hopInfo;
-	HYPRE_Int *volatile	             hash;
+   HYPRE_Int *volatile              key;
+   hypre_uint *volatile             hopInfo;
+   HYPRE_Int *volatile	            hash;
 } hypre_UnorderedIntSet;
+
+typedef struct
+{
+   HYPRE_Int volatile            segmentMask;
+   HYPRE_Int volatile            bucketMask;
+#ifdef HYPRE_CONCURRENT_HOPSCOTCH
+   hypre_HopscotchSegment* volatile segments;
+#endif
+   HYPRE_BigInt *volatile           key;
+   hypre_uint *volatile             hopInfo;
+   HYPRE_BigInt *volatile           hash;
+} hypre_UnorderedBigIntSet;
 
 typedef struct
 {
@@ -204,6 +218,14 @@ typedef struct
   HYPRE_Int  volatile key;
   HYPRE_Int  volatile data;
 } hypre_HopscotchBucket;
+
+typedef struct
+{
+  hypre_uint volatile hopInfo;
+  HYPRE_BigInt  volatile hash;
+  HYPRE_BigInt  volatile key;
+  HYPRE_Int  volatile data;
+} hypre_BigHopscotchBucket;
 
 /**
  * The current typical use case of unoredered map is putting input sequence
@@ -220,6 +242,16 @@ typedef struct
 #endif
 	hypre_HopscotchBucket* volatile	 table;
 } hypre_UnorderedIntMap;
+
+typedef struct
+{
+	HYPRE_Int  volatile              segmentMask;
+	HYPRE_Int  volatile              bucketMask;
+#ifdef HYPRE_CONCURRENT_HOPSCOTCH
+	hypre_HopscotchSegment*	volatile segments;
+#endif
+	hypre_BigHopscotchBucket* volatile	 table;
+} hypre_UnorderedBigIntMap;
 
 /**
  * Sort array "in" with length len and put result in array "out"

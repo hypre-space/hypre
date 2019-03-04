@@ -418,16 +418,16 @@ hypre_ParCSRBooleanMatrixRead( MPI_Comm comm, const char *file_name )
    hypre_sprintf(new_file_o,"%s.O.%d",file_name,my_id);
    hypre_sprintf(new_file_info,"%s.INFO.%d",file_name,my_id);
    fp = fopen(new_file_info, "r");
-   hypre_fscanf(fp, "%d", &global_num_rows);
-   hypre_fscanf(fp, "%d", &global_num_cols);
+   hypre_fscanf(fp, "%b", &global_num_rows);
+   hypre_fscanf(fp, "%b", &global_num_cols);
    hypre_fscanf(fp, "%d", &num_cols_offd);
    for (i=0; i < num_procs; i++)
-           hypre_fscanf(fp, "%d %d", &row_starts[i], &col_starts[i]);
+           hypre_fscanf(fp, "%b %b", &row_starts[i], &col_starts[i]);
    row_starts[num_procs] = global_num_rows;
    col_starts[num_procs] = global_num_cols;
    col_map_offd = hypre_CTAlloc(HYPRE_BigInt,  num_cols_offd, HYPRE_MEMORY_HOST);
    for (i=0; i < num_cols_offd; i++)
-        hypre_fscanf(fp, "%d", &col_map_offd[i]);
+        hypre_fscanf(fp, "%b", &col_map_offd[i]);
         
    fclose(fp);
 
@@ -517,13 +517,13 @@ HYPRE_Int hypre_ParCSRBooleanMatrixPrint( hypre_ParCSRBooleanMatrix *matrix,
                                 new_file_o);
   
    fp = fopen(new_file_info, "w");
-   hypre_fprintf(fp, "%d\n", global_num_rows);
-   hypre_fprintf(fp, "%d\n", global_num_cols);
+   hypre_fprintf(fp, "%b\n", global_num_rows);
+   hypre_fprintf(fp, "%b\n", global_num_cols);
    hypre_fprintf(fp, "%d\n", num_cols_offd);
    for (i=0; i < num_procs; i++)
-      hypre_fprintf(fp, "%d %d\n", row_starts[i], col_starts[i]);
+      hypre_fprintf(fp, "%b %b\n", row_starts[i], col_starts[i]);
    for (i=0; i < num_cols_offd; i++)
-      hypre_fprintf(fp, "%d\n", col_map_offd[i]);
+      hypre_fprintf(fp, "%b\n", col_map_offd[i]);
    fclose(fp);
 
    return ierr;
@@ -547,7 +547,8 @@ HYPRE_Int hypre_ParCSRBooleanMatrixPrintIJ( hypre_ParCSRBooleanMatrix *matrix,
    HYPRE_Int     *diag_j;
    HYPRE_Int     *offd_i;
    HYPRE_Int     *offd_j;
-   HYPRE_Int      myid, i, j, I, J;
+   HYPRE_Int      myid, i, j;
+   HYPRE_BigInt   I, J;
    HYPRE_Int      ierr = 0;
    char     new_filename[255];
    FILE    *file;
@@ -568,7 +569,7 @@ HYPRE_Int hypre_ParCSRBooleanMatrixPrintIJ( hypre_ParCSRBooleanMatrix *matrix,
       exit(1);
    }
 
-   hypre_fprintf(file, "%d, %d\n", global_num_rows, global_num_cols);
+   hypre_fprintf(file, "%b, %b\n", global_num_rows, global_num_cols);
    hypre_fprintf(file, "%d\n", num_rows);
 
    diag_i    = hypre_CSRBooleanMatrix_Get_I(diag);
@@ -586,7 +587,7 @@ HYPRE_Int hypre_ParCSRBooleanMatrixPrintIJ( hypre_ParCSRBooleanMatrix *matrix,
       for (j = diag_i[i]; j < diag_i[i+1]; j++)
       {
          J = first_col_diag + diag_j[j];
-         hypre_fprintf(file, "%d, %d\n", I, J );
+         hypre_fprintf(file, "%b, %b\n", I, J );
       }
 
       /* print offd columns */
@@ -595,7 +596,7 @@ HYPRE_Int hypre_ParCSRBooleanMatrixPrintIJ( hypre_ParCSRBooleanMatrix *matrix,
          for (j = offd_i[i]; j < offd_i[i+1]; j++)
          {
             J = col_map_offd[offd_j[j]];
-            hypre_fprintf(file, "%d, %d \n", I, J);
+            hypre_fprintf(file, "%b, %b \n", I, J);
          }
       }
    }

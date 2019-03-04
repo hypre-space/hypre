@@ -227,14 +227,14 @@ hypre_ParVector
 
    hypre_sprintf(new_file_name,"%s.INFO.%d",file_name,my_id); 
    fp = fopen(new_file_name, "r");
-   hypre_fscanf(fp, "%d\n", &global_size);
+   hypre_fscanf(fp, "%b\n", &global_size);
 #ifdef HYPRE_NO_GLOBAL_PARTITION
    for (i=0; i < 2; i++)
-      hypre_fscanf(fp, "%d\n", &partitioning[i]);
+      hypre_fscanf(fp, "%b\n", &partitioning[i]);
    fclose (fp);
 #else
    for (i=0; i < num_procs; i++)
-      hypre_fscanf(fp, "%d\n", &partitioning[i]);
+      hypre_fscanf(fp, "%b\n", &partitioning[i]);
    fclose (fp);
    partitioning[num_procs] = global_size; 
 #endif
@@ -296,13 +296,13 @@ hypre_ParVectorPrint( hypre_ParVector  *vector,
    hypre_SeqVectorPrint(local_vector,new_file_name);
    hypre_sprintf(new_file_name,"%s.INFO.%d",file_name,my_id); 
    fp = fopen(new_file_name, "w");
-   hypre_fprintf(fp, "%d\n", global_size);
+   hypre_fprintf(fp, "%b\n", global_size);
 #ifdef HYPRE_NO_GLOBAL_PARTITION
    for (i=0; i < 2; i++)
-      hypre_fprintf(fp, "%d\n", partitioning[i]);
+      hypre_fprintf(fp, "%b\n", partitioning[i]);
 #else
    for (i=0; i < num_procs; i++)
-      hypre_fprintf(fp, "%d\n", partitioning[i]);
+      hypre_fprintf(fp, "%b\n", partitioning[i]);
 #endif
 
    fclose (fp);
@@ -668,11 +668,11 @@ hypre_ParVectorToVectorAll( hypre_ParVector *par_v )
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
 
-   HYPRE_BigInt *new_vec_starts;
+   HYPRE_Int *new_vec_starts;
    
    HYPRE_Int num_contacts;
    HYPRE_Int contact_proc_list[1];
-   HYPRE_BigInt contact_send_buf[1];
+   HYPRE_Int contact_send_buf[1];
    HYPRE_Int contact_send_buf_starts[2];
    HYPRE_Int max_response_size;
    HYPRE_Int *response_recv_buf=NULL;
@@ -680,7 +680,7 @@ hypre_ParVectorToVectorAll( hypre_ParVector *par_v )
    hypre_DataExchangeResponse response_obj;
    hypre_ProcListElements send_proc_obj;
    
-   HYPRE_BigInt *send_info = NULL;
+   HYPRE_Int *send_info = NULL;
    hypre_MPI_Status  status1;
    HYPRE_Int count, tag1 = 112, tag2 = 223;
    HYPRE_Int start;
@@ -692,8 +692,8 @@ hypre_ParVectorToVectorAll( hypre_ParVector *par_v )
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
 
-   local_size = hypre_ParVectorLastIndex(par_v) - 
-      hypre_ParVectorFirstIndex(par_v) + 1;
+   local_size = (HYPRE_Int)(hypre_ParVectorLastIndex(par_v) - 
+      hypre_ParVectorFirstIndex(par_v) + 1);
 
    /* determine procs which hold data of par_v and store ids in used_procs */
    /* we need to do an exchange data for this.  If I own row then I will contact
@@ -734,7 +734,8 @@ hypre_ParVectorToVectorAll( hypre_ParVector *par_v )
    
    hypre_DataExchangeList(num_contacts, 
                           contact_proc_list, contact_send_buf, 
-                          contact_send_buf_starts, sizeof(HYPRE_BigInt), 
+                          contact_send_buf_starts, sizeof(HYPRE_Int), 
+                          //0, &response_obj, 
                           sizeof(HYPRE_Int), &response_obj, 
                           max_response_size, 1,
                           comm, (void**) &response_recv_buf,       
@@ -751,13 +752,13 @@ hypre_ParVectorToVectorAll( hypre_ParVector *par_v )
          hypre_MPI_Probe(0, tag1, comm, &status1);
          hypre_MPI_Get_count(&status1, HYPRE_MPI_INT, &count);
          
-         send_info = hypre_CTAlloc(HYPRE_BigInt,  count, HYPRE_MEMORY_HOST);
-         hypre_MPI_Recv(send_info, count, HYPRE_MPI_BIG_INT, 0, tag1, comm, &status1);
+         send_info = hypre_CTAlloc(HYPRE_Int,  count, HYPRE_MEMORY_HOST);
+         hypre_MPI_Recv(send_info, count, HYPRE_MPI_INT, 0, tag1, comm, &status1);
 
          /* now unpack */  
          num_types = send_info[0];
          used_procs =  hypre_CTAlloc(HYPRE_Int,  num_types, HYPRE_MEMORY_HOST);  
-         new_vec_starts = hypre_CTAlloc(HYPRE_BigInt,  num_types+1, HYPRE_MEMORY_HOST);
+         new_vec_starts = hypre_CTAlloc(HYPRE_Int,  num_types+1, HYPRE_MEMORY_HOST);
 
          for (i=1; i<= num_types; i++)
          {
@@ -782,7 +783,7 @@ hypre_ParVectorToVectorAll( hypre_ParVector *par_v )
    {
       num_types = send_proc_obj.length;
       used_procs =  hypre_CTAlloc(HYPRE_Int,  num_types, HYPRE_MEMORY_HOST);  
-      new_vec_starts = hypre_CTAlloc(HYPRE_BigInt,  num_types+1, HYPRE_MEMORY_HOST);
+      new_vec_starts = hypre_CTAlloc(HYPRE_Int,  num_types+1, HYPRE_MEMORY_HOST);
       
       new_vec_starts[0] = 0;
       for (i=0; i< num_types; i++)
@@ -791,14 +792,14 @@ hypre_ParVectorToVectorAll( hypre_ParVector *par_v )
          new_vec_starts[i+1] = send_proc_obj.elements[i]+1;
       }
       hypre_qsort0(used_procs, 0, num_types-1);
-      hypre_BigQsort0(new_vec_starts, 0, num_types);
+      hypre_qsort0(new_vec_starts, 0, num_types);
       /*now we need to put into an array to send */
       count =  2*num_types+2;
-      send_info = hypre_CTAlloc(HYPRE_BigInt,  count, HYPRE_MEMORY_HOST);
+      send_info = hypre_CTAlloc(HYPRE_Int,  count, HYPRE_MEMORY_HOST);
       send_info[0] = num_types;
       for (i=1; i<= num_types; i++)
       {
-         send_info[i] = (HYPRE_BigInt)used_procs[i-1];
+         send_info[i] = (HYPRE_Int)used_procs[i-1];
       }
       for (i=num_types+1; i< count; i++)
       {
@@ -817,7 +818,7 @@ hypre_ParVectorToVectorAll( hypre_ParVector *par_v )
       
       for (i=start; i < num_types; i++)
       {
-         hypre_MPI_Isend(send_info, count, HYPRE_MPI_BIG_INT, used_procs[i],
+         hypre_MPI_Isend(send_info, count, HYPRE_MPI_INT, used_procs[i],
                          tag1, comm, &requests[i-start]);
       }
       hypre_MPI_Waitall(num_types-start, requests, status);
@@ -846,7 +847,7 @@ hypre_ParVectorToVectorAll( hypre_ParVector *par_v )
    /* this vector should be rather small */
 
    local_data = hypre_VectorData(local_vector);
-   vector = hypre_SeqVectorCreate(global_size);
+   vector = hypre_SeqVectorCreate((HYPRE_Int)global_size);
    hypre_VectorNumVectors(vector) = num_vectors;
    hypre_SeqVectorInitialize(vector);
    vector_data = hypre_VectorData(vector);
@@ -864,7 +865,7 @@ hypre_ParVectorToVectorAll( hypre_ParVector *par_v )
    {
       proc_id = used_procs[i];
       vec_len = (HYPRE_Int)(new_vec_starts[i+1] - new_vec_starts[i]);
-      hypre_MPI_Irecv(&vector_data[new_vec_starts[i]], num_vectors*vec_len,
+      hypre_MPI_Irecv(&vector_data[(HYPRE_Int)new_vec_starts[i]], num_vectors*vec_len,
                       HYPRE_MPI_COMPLEX, proc_id, tag2, comm, &requests[j++]);
    }
    for (i = 0; i < num_types; i++)
@@ -886,7 +887,7 @@ hypre_ParVectorToVectorAll( hypre_ParVector *par_v )
    
 #else
 
-   local_size = vec_starts[my_id+1] - vec_starts[my_id];
+   local_size = (HYPRE_Int)(vec_starts[my_id+1] - vec_starts[my_id]);
 
    /* if my_id contains no data, return NULL  */
 
@@ -959,10 +960,10 @@ hypre_ParVectorPrintIJ( hypre_ParVector *vector,
                         const char      *filename )
 {
    MPI_Comm          comm;
-   HYPRE_BigInt      global_size;
+   HYPRE_BigInt      global_size, j;
    HYPRE_BigInt     *partitioning;
    HYPRE_Complex    *local_data;
-   HYPRE_Int         myid, num_procs, i, j, part0;
+   HYPRE_Int         myid, num_procs, i, part0;
    char              new_filename[255];
    FILE             *file;
    if (!vector)
@@ -991,31 +992,31 @@ hypre_ParVectorPrintIJ( hypre_ParVector *vector,
 
    local_data = hypre_VectorData(hypre_ParVectorLocalVector(vector));
 
-   hypre_fprintf(file, "%d \n", global_size);
+   hypre_fprintf(file, "%b \n", global_size);
 #ifdef HYPRE_NO_GLOBAL_PARTITION
    for (i=0; i < 2; i++)
    {
-      hypre_fprintf(file, "%d ", partitioning[i] + base_j);
+      hypre_fprintf(file, "%b ", partitioning[i] + base_j);
    }
 #else
    for (i=0; i <= num_procs; i++)
    {
-      hypre_fprintf(file, "%d ", partitioning[i] + base_j);
+      hypre_fprintf(file, "%b ", partitioning[i] + base_j);
    }
 #endif
    hypre_fprintf(file, "\n");
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
-   part0 = (HYPRE_Int)partitioning[0];
-   for (j = part0; j < (HYPRE_Int)partitioning[1]; j++)
+   part0 = partitioning[0];
+   for (j = part0; j < partitioning[1]; j++)
    {
-      hypre_fprintf(file, "%d %.14e\n", j + base_j, local_data[j-part0]);
+      hypre_fprintf(file, "%b %.14e\n", j + base_j, local_data[(HYPRE_Int)(j-part0)]);
    }
 #else
-   part0 = (HYPRE_Int)partitioning[myid];
-   for (j = part0; j < (HYPRE_Int)partitioning[myid+1]; j++)
+   part0 = partitioning[myid];
+   for (j = part0; j < partitioning[myid+1]; j++)
    {
-      hypre_fprintf(file, "%d %.14e\n", j + base_j, local_data[j-part0]);
+      hypre_fprintf(file, "%b %.14e\n", j + base_j, local_data[(HYPRE_Int)(j-part0)]);
    }
 #endif
 
@@ -1035,14 +1036,14 @@ hypre_ParVectorReadIJ( MPI_Comm          comm,
                        HYPRE_Int        *base_j_ptr,
                        hypre_ParVector **vector_ptr )
 {
-   HYPRE_BigInt      global_size;
+   HYPRE_BigInt      global_size, J;
    hypre_ParVector  *vector;
    hypre_Vector     *local_vector;
    HYPRE_Complex    *local_data;
    HYPRE_BigInt     *partitioning;
    HYPRE_Int         base_j;
 
-   HYPRE_Int         myid, num_procs, i, j, J;
+   HYPRE_Int         myid, num_procs, i, j;
    char              new_filename[255];
    FILE             *file;
 
@@ -1057,25 +1058,25 @@ hypre_ParVectorReadIJ( MPI_Comm          comm,
       return hypre_error_flag;
    }
 
-   hypre_fscanf(file, "%d", &global_size);
+   hypre_fscanf(file, "%b", &global_size);
 #ifdef HYPRE_NO_GLOBAL_PARTITION
    /* this may need to be changed so that the base is available in the file! */
    partitioning = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
 
-   hypre_fscanf(file, "%d", partitioning);
+   hypre_fscanf(file, "%b", partitioning);
    for (i = 0; i < 2; i++)
    {
-      hypre_fscanf(file, "%d", partitioning+i);
+      hypre_fscanf(file, "%b", partitioning+i);
    }
    /* This is not yet implemented correctly! */
    base_j = 0;
 #else
    partitioning = hypre_CTAlloc(HYPRE_BigInt, num_procs+1, HYPRE_MEMORY_HOST);
 
-   hypre_fscanf(file, "%d", partitioning);
+   hypre_fscanf(file, "%b", partitioning);
    for (i = 1; i <= num_procs; i++)
    {
-      hypre_fscanf(file, "%d", partitioning+i);
+      hypre_fscanf(file, "%b", partitioning+i);
       partitioning[i] -= partitioning[0];
    }
    base_j = (HYPRE_Int)partitioning[0];
@@ -1092,12 +1093,12 @@ hypre_ParVectorReadIJ( MPI_Comm          comm,
 #ifdef HYPRE_NO_GLOBAL_PARTITION
    for (j = 0; j < (HYPRE_Int)(partitioning[1] - partitioning[0]); j++)
    {
-      hypre_fscanf(file, "%d %le", &J, local_data + j);
+      hypre_fscanf(file, "%b %le", &J, local_data + j);
    }
 #else
    for (j = 0; j < (HYPRE_Int)(partitioning[myid+1] - partitioning[myid]); j++)
    {
-      hypre_fscanf(file, "%d %le", &J, local_data + j);
+      hypre_fscanf(file, "%b %le", &J, local_data + j);
    }
 #endif
 
