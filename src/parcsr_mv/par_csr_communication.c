@@ -189,9 +189,6 @@ hypre_ParCSRPersistentCommHandleCreate( HYPRE_Int job,
                           ip, 0, comm, requests + num_sends + i);
          }
          break;
-      default:
-         hypre_assert(1 == 0);
-         break;
 
       case HYPRE_COMM_PKG_JOB_BIGINT:
          if (!send_data)
