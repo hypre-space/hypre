@@ -2820,6 +2820,7 @@ main( hypre_int argc,
          HYPRE_ParCSRHybridSetLevelRelaxWt(amg_solver, relax_wt_level, level_w);
       if (level_ow > -1)
          HYPRE_ParCSRHybridSetLevelOuterWt(amg_solver, outer_wt_level, level_ow);
+      HYPRE_ParCSRHybridSetNonGalerkinTol(amg_solver, nongalerk_num_tol, nongalerk_tol); 
 
       HYPRE_ParCSRHybridSetup(amg_solver, parcsr_A, b, x);
 

@@ -81,6 +81,9 @@ typedef struct
    HYPRE_Int		 nodal;
    HYPRE_Int		*dof_func;
 
+   /* data needed for non-Galerkin option */
+   HYPRE_Int           nongalerk_num_tol;
+   HYPRE_Real         *nongalerkin_tol;
 } hypre_AMGHybridData;
 
 /*--------------------------------------------------------------------------
@@ -145,6 +148,8 @@ hypre_AMGHybridCreate( )
    (AMGhybrid_data -> num_functions)  = 1;
    (AMGhybrid_data -> nodal)  = 0;
    (AMGhybrid_data -> dof_func)  = NULL;
+   (AMGhybrid_data -> nongalerk_num_tol)  = 0;
+   (AMGhybrid_data -> nongalerkin_tol)  = NULL;
 
    return (void *) AMGhybrid_data; 
 }
@@ -278,6 +283,33 @@ hypre_AMGHybridSetConvergenceTol( void   *AMGhybrid_vdata,
    }
 
    (AMGhybrid_data -> cf_tol) = cf_tol;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_AMGHybridSetNonGalerkinTol
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_AMGHybridSetNonGalerkinTol( void   *AMGhybrid_vdata,
+                               HYPRE_Int  nongalerk_num_tol,
+                               HYPRE_Real *nongalerkin_tol       )
+{
+   hypre_AMGHybridData *AMGhybrid_data =(hypre_AMGHybridData *) AMGhybrid_vdata;
+   if (!AMGhybrid_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   if (nongalerk_num_tol < 0)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   (AMGhybrid_data -> nongalerk_num_tol) = nongalerk_num_tol;
+   (AMGhybrid_data -> nongalerkin_tol) = nongalerkin_tol;
 
    return hypre_error_flag;
 }
@@ -1579,6 +1611,8 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
    HYPRE_Int	      pre_print_level; /* print_level for preconditioner */
    HYPRE_Int	      max_coarse_size, seq_threshold; 
    HYPRE_Int	      min_coarse_size;
+   HYPRE_Int	      nongalerk_num_tol;
+   HYPRE_Real  	     *nongalerkin_tol;
 
    if (!AMGhybrid_data)
    {
@@ -1632,6 +1666,8 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
    seq_threshold = (AMGhybrid_data -> seq_threshold);
    dof_func = (AMGhybrid_data -> dof_func);
    pcg_default    = (AMGhybrid_data -> pcg_default);
+   nongalerk_num_tol    = (AMGhybrid_data -> nongalerk_num_tol);
+   nongalerkin_tol    = (AMGhybrid_data -> nongalerkin_tol);
    if (!b)
    {
       hypre_error_in_arg(3);
@@ -1889,6 +1925,7 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
          hypre_BoomerAMGSetNodal(pcg_precond, nodal);
          hypre_BoomerAMGSetRelaxOrder(pcg_precond, relax_order);
          hypre_BoomerAMGSetKeepTranspose(pcg_precond, keepT);
+         hypre_BoomerAMGSetNonGalerkTol(pcg_precond, nongalerk_num_tol, nongalerkin_tol);
    	 if (grid_relax_type)
          {
 	    boom_grt = hypre_CTAlloc(HYPRE_Int, 4, HYPRE_MEMORY_HOST);

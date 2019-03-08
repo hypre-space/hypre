@@ -3126,6 +3126,17 @@ HYPRE_ParCSRHybridSetKeepTranspose(HYPRE_Solver solver,
                            HYPRE_Int    keepT);
 
 /**
+ * (Optional) Sets whether to use non-Galerkin option
+ * The default is no non-Galerkin option
+ * num_levels sets the number of levels where to use it
+ * nongalerkin_tol contains the tolerances for <num_levels> levels
+ **/
+HYPRE_Int
+HYPRE_ParCSRHybridSetNonGalerkinTol(HYPRE_Solver solver,
+                           HYPRE_Int   num_levels,
+                           HYPRE_Real *nongalerkin_tol);
+
+/**
  * Retrieves the total number of iterations.
  **/
 HYPRE_Int HYPRE_ParCSRHybridGetNumIterations(HYPRE_Solver  solver,

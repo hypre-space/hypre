@@ -547,6 +547,7 @@ HYPRE_Int hypre_AMGHybridDestroy ( void *AMGhybrid_vdata );
 HYPRE_Int hypre_AMGHybridSetTol ( void *AMGhybrid_vdata , HYPRE_Real tol );
 HYPRE_Int hypre_AMGHybridSetAbsoluteTol ( void *AMGhybrid_vdata , HYPRE_Real a_tol );
 HYPRE_Int hypre_AMGHybridSetConvergenceTol ( void *AMGhybrid_vdata , HYPRE_Real cf_tol );
+HYPRE_Int hypre_AMGHybridSetNonGalerkinTol ( void *AMGhybrid_vdata , HYPRE_Int nongalerk_num_tol, HYPRE_Real *nongalerkin_tol );
 HYPRE_Int hypre_AMGHybridSetDSCGMaxIter ( void *AMGhybrid_vdata , HYPRE_Int dscg_max_its );
 HYPRE_Int hypre_AMGHybridSetPCGMaxIter ( void *AMGhybrid_vdata , HYPRE_Int pcg_max_its );
 HYPRE_Int hypre_AMGHybridSetSetupType ( void *AMGhybrid_vdata , HYPRE_Int setup_type );
@@ -1079,6 +1080,7 @@ HYPRE_Int HYPRE_ParCSRHybridSetNumPaths ( HYPRE_Solver solver , HYPRE_Int num_pa
 HYPRE_Int HYPRE_ParCSRHybridSetNumFunctions ( HYPRE_Solver solver , HYPRE_Int num_functions );
 HYPRE_Int HYPRE_ParCSRHybridSetNodal ( HYPRE_Solver solver , HYPRE_Int nodal );
 HYPRE_Int HYPRE_ParCSRHybridSetDofFunc ( HYPRE_Solver solver , HYPRE_Int *dof_func );
+HYPRE_Int HYPRE_ParCSRHybridSetNonGalerkinTol ( HYPRE_Solver solver , HYPRE_Int nongalerk_num_tol, HYPRE_Real *nongalerkin_tol );
 HYPRE_Int HYPRE_ParCSRHybridGetNumIterations ( HYPRE_Solver solver , HYPRE_Int *num_its );
 HYPRE_Int HYPRE_ParCSRHybridGetDSCGNumIterations ( HYPRE_Solver solver , HYPRE_Int *dscg_num_its );
 HYPRE_Int HYPRE_ParCSRHybridGetPCGNumIterations ( HYPRE_Solver solver , HYPRE_Int *pcg_num_its );
