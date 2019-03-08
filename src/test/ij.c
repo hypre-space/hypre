@@ -6744,7 +6744,7 @@ BuildParLaplacian( HYPRE_Int                  argc,
    if (myid == 0)
    {
       hypre_printf("  Laplacian:   num_fun = %d\n", num_fun);
-      hypre_printf("    (nx, ny, nz) = (%d, %d, %d)\n", nx, ny, nz);
+      hypre_printf("    (nx, ny, nz) = (%b, %b, %b)\n", nx, ny, nz);
       hypre_printf("    (Px, Py, Pz) = (%d, %d, %d)\n", P,  Q,  R);
       hypre_printf("    (cx, cy, cz) = (%f, %f, %f)\n\n", cx, cy, cz);
    }
@@ -7225,7 +7225,7 @@ BuildParDifConv( HYPRE_Int                  argc,
    {
       hypre_printf("  Convection-Diffusion: \n");
       hypre_printf("    -cx Dxx - cy Dyy - cz Dzz + ax Dx + ay Dy + az Dz = f\n");
-      hypre_printf("    (nx, ny, nz) = (%d, %d, %d)\n", nx, ny, nz);
+      hypre_printf("    (nx, ny, nz) = (%b, %b, %b)\n", nx, ny, nz);
       hypre_printf("    (Px, Py, Pz) = (%d, %d, %d)\n", P,  Q,  R);
       hypre_printf("    (cx, cy, cz) = (%f, %f, %f)\n", cx, cy, cz);
       hypre_printf("    (ax, ay, az) = (%f, %f, %f)\n\n", ax, ay, az);
@@ -7753,7 +7753,7 @@ BuildParLaplacian9pt( HYPRE_Int                  argc,
    if (myid == 0)
    {
       hypre_printf("  Laplacian 9pt:\n");
-      hypre_printf("    (nx, ny) = (%d, %d)\n", nx, ny);
+      hypre_printf("    (nx, ny) = (%b, %b)\n", nx, ny);
       hypre_printf("    (Px, Py) = (%d, %d)\n\n", P,  Q);
    }
 
@@ -7878,7 +7878,7 @@ BuildParLaplacian27pt( HYPRE_Int                  argc,
    if (myid == 0)
    {
       hypre_printf("  Laplacian_27pt:\n");
-      hypre_printf("    (nx, ny, nz) = (%d, %d, %d)\n", nx, ny, nz);
+      hypre_printf("    (nx, ny, nz) = (%b, %b, %b)\n", nx, ny, nz);
       hypre_printf("    (Px, Py, Pz) = (%d, %d, %d)\n\n", P,  Q,  R);
    }
 
@@ -8004,7 +8004,7 @@ BuildParRotate7pt( HYPRE_Int                  argc,
    {
       hypre_printf("  Rotate 7pt:\n");
       hypre_printf("    alpha = %f, eps = %f\n", alpha,eps);
-      hypre_printf("    (nx, ny) = (%d, %d)\n", nx, ny);
+      hypre_printf("    (nx, ny) = (%b, %b)\n", nx, ny);
       hypre_printf("    (Px, Py) = (%d, %d)\n", P,  Q);
    }
 
@@ -8133,7 +8133,7 @@ BuildParVarDifConv( HYPRE_Int                  argc,
    {
       hypre_printf("  ell PDE: eps = %f\n", eps);
       hypre_printf("    Dx(aDxu) + Dy(bDyu) + Dz(cDzu) + d Dxu + e Dyu + f Dzu  + g u= f\n");
-      hypre_printf("    (nx, ny, nz) = (%d, %d, %d)\n", nx, ny, nz);
+      hypre_printf("    (nx, ny, nz) = (%b, %b, %b)\n", nx, ny, nz);
       hypre_printf("    (Px, Py, Pz) = (%d, %d, %d)\n", P,  Q,  R);
    }
    /*-----------------------------------------------------------
@@ -8360,7 +8360,7 @@ BuildParIsoLaplacian( HYPRE_Int argc, char** argv, HYPRE_ParCSRMatrix *A_ptr )
    if (myid == 0)
    {
       hypre_printf("  Laplacian:\n");
-      hypre_printf("    (nx, ny, nz) = (%d, %d, %d)\n", nx, ny, nz);
+      hypre_printf("    (nx, ny, nz) = (%b, %b, %b)\n", nx, ny, nz);
       hypre_printf("    (Px, Py, Pz) = (%d, %d, %d)\n", P,  Q,  R);
       hypre_printf("    (cx, cy, cz) = (%f, %f, %f)\n\n", cx, cy, cz);
    }

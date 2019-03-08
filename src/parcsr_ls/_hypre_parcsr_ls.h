@@ -50,7 +50,7 @@ typedef struct { HYPRE_Int prev; HYPRE_Int next; } Link;
 #define CUMNUMIT
 
 
-#include "../parcsr_block_mv/par_csr_block_matrix.h"
+#include "par_csr_block_matrix.h"
 
 /*--------------------------------------------------------------------------
  * hypre_ParAMGData
@@ -307,10 +307,10 @@ typedef struct
 #define hypre_ParAMGDataISType(amg_data) ((amg_data)->IS_type)
 #define hypre_ParAMGDataCRUseCG(amg_data) ((amg_data)->CR_use_CG)
 #define hypre_ParAMGDataL1Norms(amg_data) ((amg_data)->l1_norms)
- #define hypre_ParAMGDataCGCIts(amg_data) ((amg_data)->cgc_its)
- #define hypre_ParAMGDataMaxCoarseSize(amg_data) ((amg_data)->max_coarse_size)
- #define hypre_ParAMGDataMinCoarseSize(amg_data) ((amg_data)->min_coarse_size)
- #define hypre_ParAMGDataSeqThreshold(amg_data) ((amg_data)->seq_threshold)
+#define hypre_ParAMGDataCGCIts(amg_data) ((amg_data)->cgc_its)
+#define hypre_ParAMGDataMaxCoarseSize(amg_data) ((amg_data)->max_coarse_size)
+#define hypre_ParAMGDataMinCoarseSize(amg_data) ((amg_data)->min_coarse_size)
+#define hypre_ParAMGDataSeqThreshold(amg_data) ((amg_data)->seq_threshold)
 
 /* solve params */
 
@@ -1384,10 +1384,10 @@ HYPRE_Int hypre_BoomerAMGRelaxT ( hypre_ParCSRMatrix *A , hypre_ParVector *f , H
 /* par_cgc_coarsen.c */
 HYPRE_Int hypre_BoomerAMGCoarsenCGCb ( hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , HYPRE_Int measure_type , HYPRE_Int coarsen_type , HYPRE_Int cgc_its , HYPRE_Int debug_flag , HYPRE_Int **CF_marker_ptr );
 HYPRE_Int hypre_BoomerAMGCoarsenCGC ( hypre_ParCSRMatrix *S , HYPRE_Int numberofgrids , HYPRE_Int coarsen_type , HYPRE_Int *CF_marker );
-HYPRE_Int hypre_AmgCGCPrepare ( hypre_ParCSRMatrix *S , HYPRE_Int nlocal , HYPRE_Int *CF_marker , HYPRE_Int **CF_marker_offd , HYPRE_Int coarsen_type , HYPRE_BigInt **vrange );
+HYPRE_Int hypre_AmgCGCPrepare ( hypre_ParCSRMatrix *S , HYPRE_Int nlocal , HYPRE_Int *CF_marker , HYPRE_Int **CF_marker_offd , HYPRE_Int coarsen_type , HYPRE_Int **vrange );
 //HYPRE_Int hypre_AmgCGCPrepare ( hypre_ParCSRMatrix *S , HYPRE_Int nlocal , HYPRE_Int *CF_marker , HYPRE_BigInt **CF_marker_offd , HYPRE_Int coarsen_type , HYPRE_BigInt **vrange );
-HYPRE_Int hypre_AmgCGCGraphAssemble ( hypre_ParCSRMatrix *S , HYPRE_BigInt *vertexrange , HYPRE_Int *CF_marker, HYPRE_Int *CF_marker_offd , HYPRE_Int coarsen_type , HYPRE_IJMatrix *ijG );
-HYPRE_Int hypre_AmgCGCChoose ( hypre_CSRMatrix *G , HYPRE_BigInt *vertexrange , HYPRE_Int mpisize , HYPRE_Int **coarse );
+HYPRE_Int hypre_AmgCGCGraphAssemble ( hypre_ParCSRMatrix *S , HYPRE_Int *vertexrange , HYPRE_Int *CF_marker, HYPRE_Int *CF_marker_offd , HYPRE_Int coarsen_type , HYPRE_IJMatrix *ijG );
+HYPRE_Int hypre_AmgCGCChoose ( hypre_CSRMatrix *G , HYPRE_Int *vertexrange , HYPRE_Int mpisize , HYPRE_Int **coarse );
 HYPRE_Int hypre_AmgCGCBoundaryFix ( hypre_ParCSRMatrix *S , HYPRE_Int *CF_marker , HYPRE_Int *CF_marker_offd );
 
 /* par_cg_relax_wt.c */

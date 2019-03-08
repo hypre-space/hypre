@@ -1882,7 +1882,9 @@ HYPRE_Int hypre_merge_sort_unique2(HYPRE_Int *in, HYPRE_Int *temp, HYPRE_Int len
 
 void hypre_merge_sort(HYPRE_Int *in, HYPRE_Int *temp, HYPRE_Int len, HYPRE_Int **sorted);
 
+#ifdef HYPRE_CONCURRENT_HOPSCOTCH
 void hypre_big_merge_sort(HYPRE_BigInt *in, HYPRE_BigInt *temp, HYPRE_Int len, HYPRE_BigInt **sorted);
+#endif
 
 void hypre_union2(HYPRE_Int n1, HYPRE_BigInt *arr1, HYPRE_Int n2, HYPRE_BigInt *arr2, HYPRE_Int *n3, HYPRE_BigInt *arr3, HYPRE_Int *map1, HYPRE_Int *map2);
 
@@ -2000,8 +2002,11 @@ typedef struct
  */
 void hypre_sort_and_create_inverse_map(
   HYPRE_Int *in, HYPRE_Int len, HYPRE_Int **out, hypre_UnorderedIntMap *inverse_map);
+
+#ifdef HYPRE_CONCURRENT_HOPSCOTCH
 void hypre_big_sort_and_create_inverse_map(
   HYPRE_BigInt *in, HYPRE_Int len, HYPRE_BigInt **out, hypre_UnorderedBigIntMap *inverse_map);
+#endif
 
 #ifdef __cplusplus
 }

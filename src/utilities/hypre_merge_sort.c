@@ -79,7 +79,7 @@ static void hypre_merge(HYPRE_Int *first1, HYPRE_Int *last1, HYPRE_Int *first2, 
       *out = *first2;
    }
 }
-
+#ifdef HYPRE_CONCURRENT_HOPSCOTCH
 static void hypre_big_merge(HYPRE_BigInt *first1, HYPRE_BigInt *last1, HYPRE_BigInt *first2, HYPRE_BigInt *last2, HYPRE_BigInt *out)
 {
    for ( ; first1 != last1; ++out)
@@ -108,6 +108,7 @@ static void hypre_big_merge(HYPRE_BigInt *first1, HYPRE_BigInt *last1, HYPRE_Big
       *out = *first2;
    }
 }
+#endif
 
 static void kth_element_(
    HYPRE_Int *out1, HYPRE_Int *out2,
@@ -225,6 +226,7 @@ static void kth_element(
 #endif
 }
 
+#ifdef HYPRE_CONCURRENT_HOPSCOTCH
 static void big_kth_element_(
    HYPRE_Int *out1, HYPRE_Int *out2,
    HYPRE_BigInt *a1, HYPRE_BigInt *a2,
@@ -340,6 +342,7 @@ static void big_kth_element(
    assert(*out1 + *out2 == k);
 #endif
 }
+#endif
 
 /**
  * @param num_threads number of threads that participate in this merge
@@ -396,6 +399,7 @@ static void hypre_parallel_merge(
 #endif
 }
 
+#ifdef HYPRE_CONCURRENT_HOPSCOTCH
 /**
  * @param num_threads number of threads that participate in this merge
  * @param my_thread_num thread id (zeor-based) among the threads that participate in this merge
@@ -450,6 +454,7 @@ static void hypre_big_parallel_merge(
    assert(std::is_sorted(out + begin1 + begin2, out + end1 + end2));
 #endif
 }
+#endif
 
 void hypre_merge_sort(HYPRE_Int *in, HYPRE_Int *temp, HYPRE_Int len, HYPRE_Int **out)
 {
@@ -590,6 +595,7 @@ void hypre_sort_and_create_inverse_map(
 #endif
 }
 
+#ifdef HYPRE_CONCURRENT_HOPSCOTCH
 void hypre_big_merge_sort(HYPRE_BigInt *in, HYPRE_BigInt *temp, HYPRE_Int len, HYPRE_BigInt **out)
 {
    if (0 == len) return;
@@ -728,6 +734,7 @@ void hypre_big_sort_and_create_inverse_map(
    hypre_profile_times[HYPRE_TIMER_ID_MERGE] += hypre_MPI_Wtime();
 #endif
 }
+#endif
 #endif
 
 /* vim: set tabstop=8 softtabstop=3 sw=3 expandtab: */

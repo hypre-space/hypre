@@ -1716,6 +1716,7 @@ HYPRE_Int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker
                                                                                 
       hypre_ParCSRCommHandleDestroy(comm_handle);
       hypre_TFree(int_buf_data, HYPRE_MEMORY_HOST);
+      hypre_TFree(big_int_buf_data, HYPRE_MEMORY_HOST);
 
       S_int_i = hypre_TAlloc(HYPRE_Int,  end+1, HYPRE_MEMORY_HOST);
       S_ext_i = hypre_CTAlloc(HYPRE_Int,  recv_vec_starts[num_recvs]+1, HYPRE_MEMORY_HOST);

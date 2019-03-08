@@ -601,6 +601,7 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
    }
 
    hypre_TFree(int_buf_data, HYPRE_MEMORY_HOST);
+   hypre_TFree(big_buf_data, HYPRE_MEMORY_HOST);
 
    num_passes = pass;
 

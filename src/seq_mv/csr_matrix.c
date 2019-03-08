@@ -147,8 +147,6 @@ hypre_CSRMatrixBigInitialize( hypre_CSRMatrix *matrix )
       hypre_CSRMatrixI(matrix)    = hypre_CTAlloc(HYPRE_Int,  num_rows + 1, HYPRE_MEMORY_SHARED);
 /*   if ( ! hypre_CSRMatrixRownnz(matrix) )
      hypre_CSRMatrixRownnz(matrix)    = hypre_CTAlloc(HYPRE_Int,  num_rownnz, HYPRE_MEMORY_SHARED);*/
-   if ( ! hypre_CSRMatrixJ(matrix) && num_nonzeros )
-      hypre_CSRMatrixJ(matrix)    = hypre_CTAlloc(HYPRE_Int,  num_nonzeros, HYPRE_MEMORY_SHARED);
    if ( ! hypre_CSRMatrixBigJ(matrix) && num_nonzeros )
       hypre_CSRMatrixBigJ(matrix)    = hypre_CTAlloc(HYPRE_BigInt,  num_nonzeros, HYPRE_MEMORY_SHARED);
 
@@ -297,7 +295,6 @@ hypre_CSRMatrixRead( char *file_name )
    /*----------------------------------------------------------
     * Read in the data
     *----------------------------------------------------------*/
-
    fp = fopen(file_name, "r");
 
    hypre_fscanf(fp, "%d", &num_rows);

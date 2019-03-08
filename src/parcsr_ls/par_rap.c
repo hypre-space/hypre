@@ -669,6 +669,8 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
                                            num_cols_offd_Pext);
 #endif /* !HYPRE_CONCURRENT_HOPSCOTCH */
 
+   if (P_ext_offd_size)
+      hypre_TFree(P_big_offd_j, HYPRE_MEMORY_HOST);
    /*if (num_procs > 1) 
    {
       hypre_CSRMatrixDestroy(Ps_ext);

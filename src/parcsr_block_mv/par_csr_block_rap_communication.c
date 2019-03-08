@@ -203,6 +203,7 @@ hypre_GetCommPkgBlockRTFromCommPkgBlockA( hypre_ParCSRBlockMatrix *RT,
 
    hypre_TFree(status, HYPRE_MEMORY_HOST);
    hypre_TFree(requests, HYPRE_MEMORY_HOST);
+   hypre_TFree(send_big_elmts, HYPRE_MEMORY_HOST);
 
    hypre_ParCSRBlockMatrixCommPkg(RT) = comm_pkg;
    hypre_TFree(change_array, HYPRE_MEMORY_HOST);

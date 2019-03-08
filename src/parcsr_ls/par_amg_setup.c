@@ -1027,8 +1027,14 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                hypre_BoomerAMGCoarsenHMIS(S, A_array[level], measure_type,
                                           debug_flag, &CF_marker);
            else if (coarsen_type == 21 || coarsen_type == 22)
+           {
+#ifdef HYPRE_MIXEDINT
+              hypre_error_w_msg(HYPRE_ERROR_GENERIC,"CGC coarsening is not available in mixedint mode!");
+              return hypre_error_flag;
+#endif
                hypre_BoomerAMGCoarsenCGCb(S, A_array[level], measure_type,
                            coarsen_type, cgc_its, debug_flag, &CF_marker);
+           }
            else if (coarsen_type == 98)
                hypre_BoomerAMGCoarsenCR1(A_array[level], &CF_marker,
                         &coarse_size,
@@ -2815,6 +2821,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
      }
      else if ((smooth_type == 9 || smooth_type == 19) && smooth_num_levels > j)
      {
+#ifdef HYPRE_MIXEDINT
+        hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Euclid smoothing is not available in mixedint mode!");
+        return hypre_error_flag;
+#endif
         HYPRE_EuclidCreate(comm, &smoother[j]);
         if (euclidfile)
            HYPRE_EuclidSetParamsFromFile(smoother[j],euclidfile);
@@ -2830,6 +2840,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
      }
      else if ((smooth_type == 8 || smooth_type == 18) && smooth_num_levels > j)
      {
+#ifdef HYPRE_MIXEDINT
+        hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails smoothing is not available in mixedint mode!");
+        return hypre_error_flag;
+#endif
         HYPRE_ParCSRParaSailsCreate(comm, &smoother[j]);
         HYPRE_ParCSRParaSailsSetParams(smoother[j],thresh,nlevel);
         HYPRE_ParCSRParaSailsSetFilter(smoother[j],filter);
@@ -2841,6 +2855,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
      }
      else if ((smooth_type == 7 || smooth_type == 17) && smooth_num_levels > j)
      {
+#ifdef HYPRE_MIXEDINT
+        hypre_error_w_msg(HYPRE_ERROR_GENERIC,"pilut smoothing is not available in mixedint mode!");
+        return hypre_error_flag;
+#endif
         HYPRE_ParCSRPilutCreate(comm, &smoother[j]);
         HYPRE_ParCSRPilutSetup(smoother[j],
                                (HYPRE_ParCSRMatrix) A_array[j],

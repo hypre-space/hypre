@@ -1066,7 +1066,11 @@ HYPRE_IJMatrixRead( const char     *filename,
       return hypre_error_flag;
    }
 
+#ifdef HYPRE_MIXEDINT
    hypre_fscanf(file, "%b %b %b %b", &ilower, &iupper, &jlower, &jupper);
+#else
+   hypre_fscanf(file, "%d %d %d %d", &ilower, &iupper, &jlower, &jupper);
+#endif
    HYPRE_IJMatrixCreate(comm, ilower, iupper, jlower, jupper, &matrix);
 
    HYPRE_IJMatrixSetObjectType(matrix, type);
@@ -1075,7 +1079,11 @@ HYPRE_IJMatrixRead( const char     *filename,
    /* It is important to ensure that whitespace follows the index value to help
     * catch mistakes in the input file.  See comments in IJVectorRead(). */
    ncols = 1;
+#ifdef HYPRE_MIXEDINT
    while ( (ret = hypre_fscanf(file, "%b %b%*[ \t]%le", &I, &J, &value)) != EOF )
+#else
+   while ( (ret = hypre_fscanf(file, "%d %d%*[ \t]%le", &I, &J, &value)) != EOF )
+#endif
    {
       if (ret != 3)
       {

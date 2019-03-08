@@ -142,7 +142,9 @@ HYPRE_Int hypre_merge_sort_unique2(HYPRE_Int *in, HYPRE_Int *temp, HYPRE_Int len
 
 void hypre_merge_sort(HYPRE_Int *in, HYPRE_Int *temp, HYPRE_Int len, HYPRE_Int **sorted);
 
+#ifdef HYPRE_CONCURRENT_HOPSCOTCH
 void hypre_big_merge_sort(HYPRE_BigInt *in, HYPRE_BigInt *temp, HYPRE_Int len, HYPRE_BigInt **sorted);
+#endif
 
 void hypre_union2(HYPRE_Int n1, HYPRE_Int *arr1, HYPRE_Int n2, HYPRE_Int *arr2, HYPRE_Int *n3, HYPRE_Int *arr3, HYPRE_Int *map1, HYPRE_Int *map2);
 
