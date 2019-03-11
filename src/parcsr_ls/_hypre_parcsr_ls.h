@@ -973,8 +973,6 @@ HYPRE_Int HYPRE_BoomerAMGSetFACCycleType ( HYPRE_Solver solver , HYPRE_Int fac_c
 HYPRE_Int HYPRE_BoomerAMGGetFACCycleType ( HYPRE_Solver solver , HYPRE_Int *fac_cycle_type );
 HYPRE_Int HYPRE_BoomerAMGSetFACRelaxType ( HYPRE_Solver solver , HYPRE_Int fac_relax_type );
 HYPRE_Int HYPRE_BoomerAMGGetFACRelaxType ( HYPRE_Solver solver , HYPRE_Int *fac_relax_type );
-HYPRE_Int HYPRE_BoomerAMGSetFACNumRelax ( HYPRE_Solver solver, HYPRE_Int fac_num_relax );
-HYPRE_Int HYPRE_BoomerAMGGetFACNumRelax ( HYPRE_Solver solver, HYPRE_Int *fac_num_relax );
 HYPRE_Int HYPRE_BoomerAMGSetAMGDDPadding ( HYPRE_Solver solver , HYPRE_Int padding );
 HYPRE_Int HYPRE_BoomerAMGGetAMGDDPadding ( HYPRE_Solver solver , HYPRE_Int *padding );
 HYPRE_Int HYPRE_BoomerAMGSetAMGDDVariablePadding ( HYPRE_Solver solver , HYPRE_Int variable_padding );
