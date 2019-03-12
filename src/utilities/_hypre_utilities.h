@@ -1399,7 +1399,7 @@ void VecSet(double* tgt, int size, double value, cudaStream_t s);
 void VecScale(double *u, double *v, double *l1_norm, int num_rows,cudaStream_t s);
 void VecScaleSplit(double *u, double *v, double *l1_norm, int num_rows,cudaStream_t s);
 void CudaCompileFlagCheck();
-void BigToSmallCopy (hypre_int* tgt, const HYPRE_Int *src, hypre_int size, cudaStream_t s):
+void BigToSmallCopy (hypre_int* tgt, const HYPRE_Int *src, hypre_int size, cudaStream_t s);
 cudaStream_t getstreamOlde(hypre_int i);
 nvtxDomainHandle_t getdomain(hypre_int i);
 cudaEvent_t getevent(hypre_int i);
@@ -1806,14 +1806,14 @@ void hypre_qsort3i ( HYPRE_Int *v , HYPRE_Int *w , HYPRE_Int *z , HYPRE_Int left
 void hypre_qsort3_abs ( HYPRE_Real *v , HYPRE_Int *w , HYPRE_Int *z , HYPRE_Int left , HYPRE_Int right );
 void hypre_BigQsort4_abs ( HYPRE_Real *v , HYPRE_BigInt *w , HYPRE_Int *z , HYPRE_Int *y , HYPRE_Int left , HYPRE_Int right );
 void hypre_qsort_abs ( HYPRE_Real *w , HYPRE_Int left , HYPRE_Int right );
-void hypre_BigSwapbi ( HYPRE_BigInt *v , HYPRE_Int *w, HYPRE_Int i , HYPRE_Int j );
-void hypre_BigQsortbi ( HYPRE_BigInt *v , HYPRE_Int *w , HYPRE_Int left , HYPRE_Int right );
-void hypre_BigSwapLoc ( HYPRE_BigInt *v , HYPRE_Int *w, HYPRE_Int i , HYPRE_Int j );
-void hypre_BigQsortbLoc ( HYPRE_BigInt *v , HYPRE_Int *w , HYPRE_Int left , HYPRE_Int right );
-void hypre_BigSwapb2i ( HYPRE_BigInt *v , HYPRE_Int *w , HYPRE_Int *z , HYPRE_Int i , HYPRE_Int j );
-void hypre_BigQsortb2i ( HYPRE_BigInt *v , HYPRE_Int *w , HYPRE_Int *z , HYPRE_Int left , HYPRE_Int right );
-void hypre_BigSwap ( HYPRE_BigInt *v , HYPRE_Int i , HYPRE_Int j );
-void hypre_BigQsort0 ( HYPRE_BigInt *v , HYPRE_Int left , HYPRE_Int right );
+void hypre_BigSwapbi(HYPRE_BigInt  *v, HYPRE_Int  *w, HYPRE_Int  i, HYPRE_Int  j );
+void hypre_BigQsortbi( HYPRE_BigInt *v, HYPRE_Int *w, HYPRE_Int  left, HYPRE_Int  right );
+void hypre_BigSwapLoc(HYPRE_BigInt  *v, HYPRE_Int  *w, HYPRE_Int  i, HYPRE_Int  j );
+void hypre_BigQsortbLoc( HYPRE_BigInt *v, HYPRE_Int *w, HYPRE_Int  left, HYPRE_Int  right );
+void hypre_BigSwapb2i(HYPRE_BigInt  *v, HYPRE_Int  *w, HYPRE_Int  *z, HYPRE_Int  i, HYPRE_Int  j );
+void hypre_BigQsortb2i( HYPRE_BigInt *v, HYPRE_Int *w, HYPRE_Int *z, HYPRE_Int  left, HYPRE_Int  right );
+void hypre_BigSwap( HYPRE_BigInt *v, HYPRE_Int  i, HYPRE_Int  j );
+void hypre_BigQsort0( HYPRE_BigInt *v, HYPRE_Int  left, HYPRE_Int  right );
 
 /* qsplit.c */
 HYPRE_Int hypre_DoubleQuickSplit ( HYPRE_Real *values , HYPRE_Int *indices , HYPRE_Int list_length , HYPRE_Int NumberKept );
@@ -1882,10 +1882,6 @@ HYPRE_Int hypre_merge_sort_unique2(HYPRE_Int *in, HYPRE_Int *temp, HYPRE_Int len
 
 void hypre_merge_sort(HYPRE_Int *in, HYPRE_Int *temp, HYPRE_Int len, HYPRE_Int **sorted);
 
-#ifdef HYPRE_CONCURRENT_HOPSCOTCH
-void hypre_big_merge_sort(HYPRE_BigInt *in, HYPRE_BigInt *temp, HYPRE_Int len, HYPRE_BigInt **sorted);
-#endif
-
 void hypre_union2(HYPRE_Int n1, HYPRE_BigInt *arr1, HYPRE_Int n2, HYPRE_BigInt *arr2, HYPRE_Int *n3, HYPRE_BigInt *arr3, HYPRE_Int *map1, HYPRE_Int *map2);
 
 /* hypre_hopscotch_hash.c */
@@ -1931,26 +1927,26 @@ typedef struct {
  */
 typedef struct
 {
-  HYPRE_Int  volatile              segmentMask;
-  HYPRE_Int  volatile              bucketMask;
+   HYPRE_Int  volatile              segmentMask;
+   HYPRE_Int  volatile              bucketMask;
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
-  hypre_HopscotchSegment* volatile segments;
+   hypre_HopscotchSegment* volatile segments;
 #endif
-  HYPRE_Int *volatile              key;
-  hypre_uint *volatile             hopInfo;
-  HYPRE_Int *volatile	           hash;
+   HYPRE_Int *volatile              key;
+   hypre_uint *volatile             hopInfo;
+   HYPRE_Int *volatile	            hash;
 } hypre_UnorderedIntSet;
 
 typedef struct
 {
-  HYPRE_BigInt  volatile           segmentMask;
-  HYPRE_BigInt  volatile           bucketMask;
+   HYPRE_Int volatile            segmentMask;
+   HYPRE_Int volatile            bucketMask;
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
-  hypre_HopscotchSegment* volatile segments;
+   hypre_HopscotchSegment* volatile segments;
 #endif
-  HYPRE_BigInt *volatile           key;
-  hypre_uint *volatile             hopInfo;
-  HYPRE_BigInt *volatile	   hash;
+   HYPRE_BigInt *volatile           key;
+   hypre_uint *volatile             hopInfo;
+   HYPRE_BigInt *volatile           hash;
 } hypre_UnorderedBigIntSet;
 
 typedef struct
@@ -1970,7 +1966,7 @@ typedef struct
 } hypre_BigHopscotchBucket;
 
 /**
- * The current typical use case of unordered map is putting input sequence
+ * The current typical use case of unoredered map is putting input sequence
  * with no duplication (inverse map of a bijective mapping) followed by
  * lots of lookups.
  * For lookup, array of structure (AoS) gives better cache line utilization.
@@ -1987,12 +1983,12 @@ typedef struct
 
 typedef struct
 {
-	HYPRE_BigInt  volatile           segmentMask;
-	HYPRE_BigInt  volatile           bucketMask;
+	HYPRE_Int  volatile              segmentMask;
+	HYPRE_Int  volatile              bucketMask;
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
 	hypre_HopscotchSegment*	volatile segments;
 #endif
-	hypre_BigHopscotchBucket* volatile table;
+	hypre_BigHopscotchBucket* volatile	 table;
 } hypre_UnorderedBigIntMap;
 
 /**
@@ -2002,11 +1998,12 @@ typedef struct
  */
 void hypre_sort_and_create_inverse_map(
   HYPRE_Int *in, HYPRE_Int len, HYPRE_Int **out, hypre_UnorderedIntMap *inverse_map);
-
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
+void hypre_big_merge_sort(HYPRE_BigInt *in, HYPRE_BigInt *temp, HYPRE_Int len, HYPRE_BigInt **sorted);
 void hypre_big_sort_and_create_inverse_map(
   HYPRE_BigInt *in, HYPRE_Int len, HYPRE_BigInt **out, hypre_UnorderedBigIntMap *inverse_map);
 #endif
+
 
 #ifdef __cplusplus
 }
