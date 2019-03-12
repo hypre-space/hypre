@@ -165,6 +165,10 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
       ASSERT_MANAGED(x_local_data);
       ASSERT_MANAGED(hypre_ParCSRCommPkgSendMapElmts(comm_pkg));
 #endif
+      /*
+      printf("%d %d %d\n", PointerAttributes(x_buf_data[0]), PointerAttributes(x_local_data),
+                           PointerAttributes(hypre_ParCSRCommPkgSendMapElmts(comm_pkg)));
+                           */
       PackOnDevice((HYPRE_Complex*)x_buf_data[0],x_local_data,hypre_ParCSRCommPkgSendMapElmts(comm_pkg),begin,end,HYPRE_STREAM(4));
 #if defined(DEBUG_PACK_ON_DEVICE)
       hypre_CheckErrorDevice(cudaPeekAtLastError());
