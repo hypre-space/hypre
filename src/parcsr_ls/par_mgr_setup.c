@@ -926,10 +926,10 @@ hypre_MGRSetup( void               *mgr_vdata,
      /* allocate memory and set pointer to (mgr_data -> FrelaxVcycleData) */
      FrelaxVcycleData = hypre_CTAlloc(hypre_ParAMGData*,  max_num_coarse_levels, HYPRE_MEMORY_HOST);
      (mgr_data -> FrelaxVcycleData) = FrelaxVcycleData;  
-
+     
      /* loop over levels */
      for (i=0; i < (mgr_data->num_coarse_levels); i++)
-     {
+     {    
        if (Frelax_method[i] == 1) 
        {
          FrelaxVcycleData[i] = (hypre_ParAMGData*) hypre_MGRCreateFrelaxVcycleData();
@@ -943,6 +943,7 @@ hypre_MGRSetup( void               *mgr_vdata,
          // setup variables for the V-cycle in the F-relaxation step //
          hypre_MGRSetupFrelaxVcycleData(mgr_data, A_array[i], F_array[i], U_array[i], i);
        }
+// hypre_printf("SETUP::OK TILL HERE >>> %d, %d, %d, %d, %d \n", i, Frelax_method[i], max_num_coarse_levels, (mgr_data->num_coarse_levels)),hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[i]));
      }
   }
 
@@ -1035,6 +1036,7 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
   hypre_MPI_Comm_size(comm, &num_procs);
   hypre_MPI_Comm_rank(comm,&my_id);
   
+
   local_size = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
 
   /* Free any local data not previously destroyed */
@@ -1194,8 +1196,31 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
       hypre_TFree(coarse_pnts_global_lvl, HYPRE_MEMORY_HOST);
       hypre_TFree(coarse_dof_func_lvl, HYPRE_MEMORY_HOST);
       hypre_TFree(col_offd_S_to_A, HYPRE_MEMORY_HOST);
-      hypre_TFree(CF_marker_local, HYPRE_MEMORY_HOST);
-
+//      hypre_TFree(CF_marker_local, HYPRE_MEMORY_HOST);
+      
+      // Save the cf_marker from outer MGR level (lev).
+      if(relax_order == 1)
+      {
+         /* We need to mask out C-points from outer CF-marker for C/F relaxation at solve phase --DOK*/
+         for (i = 0; i < local_size; i++) 
+         {
+            if (CF_marker_array[lev][i] == 1) 
+            {
+               CF_marker_local[i] = 0;
+            }
+         }
+         CF_marker_array_local[lev_local] = CF_marker_local;
+      }
+      else
+      {  
+         /* Do lexicographic relaxation on F-points from outer CF-marker --DOK */ 
+         for (i = 0; i < local_size; i++) 
+         {
+            CF_marker_local[i] = CF_marker_array[lev][i];
+         }
+         CF_marker_array_local[lev_local] = CF_marker_local;
+      }
+      
       break;
     }
 
@@ -1279,7 +1304,7 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
     hypre_ParVectorSetPartitioningOwner(U_array_local[lev_local], 0);        
 
   } // end while loop
-  
+//   hypre_printf("SETUP::OK TILL HERE >>> lev = %d, lev_local = %d \n",lev, lev_local);
   // setup Vcycle data
   (FrelaxVcycleData[lev] -> A_array) = A_array_local;
   (FrelaxVcycleData[lev] -> P_array) = P_array_local;
@@ -1287,9 +1312,16 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
   (FrelaxVcycleData[lev] -> U_array) = U_array_local;
   (FrelaxVcycleData[lev] -> CF_marker_array) = CF_marker_array_local;
   (FrelaxVcycleData[lev] -> num_levels) = lev_local;
-
+//          if(lev == 1)
+//          {
+//          for (i = 0; i < local_size; i++) 
+//          {
+//              if(CF_marker_array_local[0][i] == 1)
+//                 hypre_printf("cfmarker[%d] = %d\n",i, CF_marker_array_local[0][i]);          
+//          }
+//          }
   /* setup GE for coarsest level (if small enough) */  
-  if ((lev_local > 1) && (hypre_ParAMGDataUserCoarseRelaxType(FrelaxVcycleData[lev]) == 9))
+  if ((lev_local > 0) && (hypre_ParAMGDataUserCoarseRelaxType(FrelaxVcycleData[lev]) == 9))
   {
      if((local_coarse_size <= max_local_coarse_size))
      {

@@ -398,7 +398,7 @@ hypre_MGRFrelaxVcycle ( void   *Frelax_vdata, hypre_ParVector *f, hypre_ParVecto
                                            Ztemp);
       }       
    }
-   
+
    /* coarse grids exist */
    if(num_c_levels > 0)
      Not_Finished = 1;
@@ -603,55 +603,57 @@ hypre_MGRCycle( void               *mgr_vdata,
       /**** cycle up ***/
       cycle_type = 2;
     }
-	  /* F-relaxation */
-	  else if(cycle_type == 1)
-	  {
-	    fine_grid = level;
-	    coarse_grid = level + 1;
-		  /* Relax solution - F-relaxation */
-		  relax_points = -1;
+    /* F-relaxation */
+    else if(cycle_type == 1)
+    {
+       fine_grid = level;
+       coarse_grid = level + 1;
+       /* Relax solution - F-relaxation */
+       relax_points = -1;
 
-      if (Frelax_method[level] == 0) 
-      { /* (single level) relaxation for A_ff */
-		    if (relax_type == 18)
-		    {
-		      for(i=0; i<nsweeps; i++)
-		      {
-		        hypre_ParCSRRelax_L1_Jacobi(A_array[fine_grid], F_array[fine_grid], CF_marker[fine_grid],
-						   relax_points, relax_weight, relax_l1_norms[fine_grid], U_array[fine_grid], Vtemp);
-		      }
-		    }
-		    else if(relax_type == 8 || relax_type == 13 || relax_type == 14)
-		    {
-		      for(i=0; i<nsweeps; i++)
-		      {
-		        hypre_BoomerAMGRelax(A_array[fine_grid], F_array[fine_grid], CF_marker[fine_grid],
-		   						relax_type, relax_points, relax_weight,
-		   						omega, relax_l1_norms[fine_grid], U_array[fine_grid], Vtemp, Ztemp);
-		      }
-		    }
-		    else
-		    {
-		      for(i=0; i<nsweeps; i++)
-		      {
-			    Solve_err_flag = hypre_BoomerAMGRelax(A_array[fine_grid], F_array[fine_grid], CF_marker[fine_grid],
-			                 relax_type,relax_points,relax_weight,omega,NULL, U_array[fine_grid], Vtemp, Ztemp);
-			                 
-		      }
-		    }		    
-      }
-      else if (Frelax_method[level] == 1) 
-      {
-        /* v-cycle smoother for A_ff */
-        //HYPRE_Real convergence_factor_frelax;
-        // compute residual before solve
-        //  hypre_ParCSRMatrixMatvecOutOfPlace(-1.0, A_array[level],
-        //                                    U_array[level], 1.0, F_array[level], Vtemp);
-        //  convergence_factor_frelax = hypre_ParVectorInnerProd(Vtemp, Vtemp);
-        for(i=0; i<nsweeps; i++) 
-        {
-          hypre_MGRFrelaxVcycle(FrelaxVcycleData[level], F_array[level], U_array[level]);
+       if (Frelax_method[level] == 0) 
+       { /* (single level) relaxation for A_ff */
+          if (relax_type == 18)
+	  {
+	     for(i=0; i<nsweeps; i++)
+	     {
+	        hypre_ParCSRRelax_L1_Jacobi(A_array[fine_grid], F_array[fine_grid], CF_marker[fine_grid],
+			   relax_points, relax_weight, relax_l1_norms[fine_grid], U_array[fine_grid], Vtemp);
+	     }
+	  }
+	  else if(relax_type == 8 || relax_type == 13 || relax_type == 14)
+	  {
+	     for(i=0; i<nsweeps; i++)
+	     {
+	        hypre_BoomerAMGRelax(A_array[fine_grid], F_array[fine_grid], CF_marker[fine_grid],
+						relax_type, relax_points, relax_weight,
+						omega, relax_l1_norms[fine_grid], U_array[fine_grid], Vtemp, Ztemp);
+	     }
+	  }
+	  else
+	  {
+	     for(i=0; i<nsweeps; i++)
+	     {
+	        Solve_err_flag = hypre_BoomerAMGRelax(A_array[fine_grid], F_array[fine_grid], CF_marker[fine_grid],
+  	                 relax_type,relax_points,relax_weight,omega,NULL, U_array[fine_grid], Vtemp, Ztemp);		                 
+             }
+	  }		    
+       }
+       else if (Frelax_method[level] == 1) 
+       {
+         /* v-cycle smoother for A_ff */
+         //HYPRE_Real convergence_factor_frelax;
+         // compute residual before solve
+         //  hypre_ParCSRMatrixMatvecOutOfPlace(-1.0, A_array[level],
+         //                                    U_array[level], 1.0, F_array[level], Vtemp);
+         //  convergence_factor_frelax = hypre_ParVectorInnerProd(Vtemp, Vtemp);
+
+         for(i=0; i<nsweeps; i++) 
+         {
+
+           hypre_MGRFrelaxVcycle(FrelaxVcycleData[level], F_array[level], U_array[level]);
         }
+
         // compute residual after solve
         //hypre_ParCSRMatrixMatvecOutOfPlace(-1.0, A_array[level],
         //                                  U_array[level], 1.0, F_array[level], Vtemp);
