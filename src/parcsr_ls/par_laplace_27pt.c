@@ -1654,7 +1654,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
    hypre_TFree(nx_part, HYPRE_MEMORY_HOST);
    hypre_TFree(ny_part, HYPRE_MEMORY_HOST);
    hypre_TFree(nz_part, HYPRE_MEMORY_HOST);
-   hypre_TFree(big_offd_j, HYPRE_MEMORY_HOST);
+   hypre_TFree(big_offd_j, HYPRE_MEMORY_SHARED);
 
    return (HYPRE_ParCSRMatrix) A;
 }

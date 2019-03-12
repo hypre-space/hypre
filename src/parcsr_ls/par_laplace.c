@@ -884,7 +884,7 @@ GenerateSysLaplacian( MPI_Comm comm,
    hypre_TFree(nx_part, HYPRE_MEMORY_HOST);
    hypre_TFree(ny_part, HYPRE_MEMORY_HOST);
    hypre_TFree(nz_part, HYPRE_MEMORY_HOST);
-   hypre_TFree(big_offd_j, HYPRE_MEMORY_HOST);
+   hypre_TFree(big_offd_j, HYPRE_MEMORY_SHARED);
 
    return (HYPRE_ParCSRMatrix) A;
 }
@@ -997,8 +997,8 @@ GenerateSysLaplacianVCoef( MPI_Comm comm,
 #endif
 
    local_num_rows = num_fun*local_grid_size;
-   diag_i = hypre_CTAlloc(HYPRE_Int,  local_num_rows+1, HYPRE_MEMORY_HOST);
-   offd_i = hypre_CTAlloc(HYPRE_Int,  local_num_rows+1, HYPRE_MEMORY_HOST);
+   diag_i = hypre_CTAlloc(HYPRE_Int,  local_num_rows+1, HYPRE_MEMORY_SHARED);
+   offd_i = hypre_CTAlloc(HYPRE_Int,  local_num_rows+1, HYPRE_MEMORY_SHARED);
 
    P_busy = hypre_min(nx,P);
    Q_busy = hypre_min(ny,Q);
@@ -1101,9 +1101,9 @@ GenerateSysLaplacianVCoef( MPI_Comm comm,
 
    if (num_procs > 1)
    {
-      offd_j = hypre_CTAlloc(HYPRE_Int, offd_i[local_num_rows], HYPRE_MEMORY_HOST);
-      big_offd_j = hypre_CTAlloc(HYPRE_BigInt, offd_i[local_num_rows], HYPRE_MEMORY_HOST);
-      offd_data = hypre_CTAlloc(HYPRE_Real, offd_i[local_num_rows], HYPRE_MEMORY_HOST);
+      offd_j = hypre_CTAlloc(HYPRE_Int, offd_i[local_num_rows], HYPRE_MEMORY_SHARED);
+      big_offd_j = hypre_CTAlloc(HYPRE_BigInt, offd_i[local_num_rows], HYPRE_MEMORY_SHARED);
+      offd_data = hypre_CTAlloc(HYPRE_Real, offd_i[local_num_rows], HYPRE_MEMORY_SHARED);
    }
 
    row_index = 0;
@@ -1389,7 +1389,7 @@ GenerateSysLaplacianVCoef( MPI_Comm comm,
    hypre_TFree(nx_part, HYPRE_MEMORY_HOST);
    hypre_TFree(ny_part, HYPRE_MEMORY_HOST);
    hypre_TFree(nz_part, HYPRE_MEMORY_HOST);
-   hypre_TFree(big_offd_j, HYPRE_MEMORY_HOST);
+   hypre_TFree(big_offd_j, HYPRE_MEMORY_SHARED);
 
    return (HYPRE_ParCSRMatrix) A;
 }

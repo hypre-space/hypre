@@ -359,7 +359,7 @@ GenerateVarDifConv( MPI_Comm comm,
                offd_j[i] = j;
                break;
             }
-      hypre_TFree(big_offd_j, HYPRE_MEMORY_HOST);
+      hypre_TFree(big_offd_j, HYPRE_MEMORY_SHARED);
    }
 
    par_rhs = hypre_ParVectorCreate(comm, grid_size, global_part);
