@@ -505,14 +505,14 @@ hypre_CSRMatrixCopy( hypre_CSRMatrix *A, hypre_CSRMatrix *B, HYPRE_Int copy_data
    HYPRE_Int i, j;
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
    for (i=0; i <= num_rows; i++)
    {
       B_i[i] = A_i[i];
    }
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE
 #endif
    for (j = 0; j < num_nonzeros; ++j)
    {
@@ -524,7 +524,7 @@ hypre_CSRMatrixCopy( hypre_CSRMatrix *A, hypre_CSRMatrix *B, HYPRE_Int copy_data
       A_data = hypre_CSRMatrixData(A);
       B_data = hypre_CSRMatrixData(B);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE
 #endif
       for (j=0; j < num_nonzeros; j++)
       {
