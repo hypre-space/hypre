@@ -2525,7 +2525,7 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
    hypre_TFree(CF_marker_offd, HYPRE_MEMORY_HOST);
    hypre_TFree(dof_func_offd, HYPRE_MEMORY_HOST);
    hypre_TFree(int_buf_data, HYPRE_MEMORY_HOST);
-   hypre_TFree(big_buf_data, HYPRE_MEMORY_HOST);
+   hypre_TFree(big_buf_data, HYPRE_MEMORY_SHARED);
    hypre_TFree(col_map, HYPRE_MEMORY_HOST);
    hypre_TFree(P_offd_j_big, HYPRE_MEMORY_HOST);
 
