@@ -443,7 +443,7 @@ void hypre_topo_sort(HYPRE_Int *row_ptr,
    while (order_ind < n) {
       hypre_search_row(temp_row, row_ptr, col_inds, data,
                        visited, ordering, &order_ind);
-      temp_row += 1;    // TODO : what if temp_row > n?
+      temp_row += 1;
    }
    free(visited);
 }
@@ -473,7 +473,7 @@ void hypre_topo_sort_submat(HYPRE_Int *row_ptr,
    while (order_ind < n) {
       hypre_search_row_submat(temp_row, row_ptr, col_inds, data,
                               visited, ordering, &order_ind, cf_marker, CF);
-      temp_row += 1;    // TODO : what if temp_row > n?
+      temp_row += 1;
    }
    for (i=order_ind; i<n; i++) {
       ordering[i] = -1;
