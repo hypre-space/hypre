@@ -100,9 +100,9 @@ typedef struct
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_ParCSRCommPkg
  *--------------------------------------------------------------------------*/
- 
+
 #define hypre_ParCSRCommPkgComm(comm_pkg)          (comm_pkg -> comm)
-                                               
+
 #define hypre_ParCSRCommPkgNumSends(comm_pkg)      (comm_pkg -> num_sends)
 #define hypre_ParCSRCommPkgSendProcs(comm_pkg)     (comm_pkg -> send_procs)
 #define hypre_ParCSRCommPkgSendProc(comm_pkg, i)   (comm_pkg -> send_procs[i])
@@ -126,7 +126,7 @@ typedef struct
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_ParCSRCommHandle
  *--------------------------------------------------------------------------*/
- 
+
 #define hypre_ParCSRCommHandleCommPkg(comm_handle)     (comm_handle -> comm_pkg)
 #define hypre_ParCSRCommHandleSendData(comm_handle)    (comm_handle -> send_data)
 #define hypre_ParCSRCommHandleRecvData(comm_handle)    (comm_handle -> recv_data)
@@ -158,7 +158,7 @@ typedef struct
    HYPRE_Int                   storage_length;
    HYPRE_Int                  *proc_list;
    HYPRE_Int                  *row_start_list;
-   HYPRE_Int                  *row_end_list;  
+   HYPRE_Int                  *row_end_list;
    HYPRE_Int                  *sort_index;
 } hypre_IJAssumedPart;
 
@@ -185,15 +185,15 @@ typedef struct
 typedef struct
 {
    HYPRE_Int       length;
-   HYPRE_Int       storage_length; 
+   HYPRE_Int       storage_length;
    HYPRE_Int      *id;
    HYPRE_Int      *vec_starts;
-   HYPRE_Int       element_storage_length; 
+   HYPRE_Int       element_storage_length;
    HYPRE_Int      *elements;
    HYPRE_Real     *d_elements; /* Is this used anywhere? */
    void           *v_elements;
-   
-}  hypre_ProcListElements;   
+
+}  hypre_ProcListElements;
 
 #endif /* hypre_NEW_COMMPKG */
 
@@ -239,10 +239,10 @@ typedef struct hypre_ParVector_struct
    HYPRE_Int             first_index;
    HYPRE_Int             last_index;
    HYPRE_Int            *partitioning;
-   /* stores actual length of data in local vector to allow memory 
+   /* stores actual length of data in local vector to allow memory
     * manipulations for temporary vectors*/
-   HYPRE_Int             actual_local_size; 
-   hypre_Vector         *local_vector; 
+   HYPRE_Int             actual_local_size;
+   hypre_Vector         *local_vector;
 
    /* Does the Vector create/destroy `data'? */
    HYPRE_Int             owns_data;
@@ -315,7 +315,7 @@ typedef struct hypre_ParCSRMatrix_struct
    HYPRE_Int             global_num_cols;
    HYPRE_Int             first_row_index;
    HYPRE_Int             first_col_diag;
-   /* need to know entire local range in case row_starts and col_starts 
+   /* need to know entire local range in case row_starts and col_starts
       are null  (i.e., bgl) AHB 6/05*/
    HYPRE_Int             last_row_index;
    HYPRE_Int             last_col_diag;
@@ -324,22 +324,22 @@ typedef struct hypre_ParCSRMatrix_struct
    hypre_CSRMatrix      *offd;
    hypre_CSRMatrix      *diagT, *offdT;
         /* JSP: transposed matrices are created lazily and optional */
-   HYPRE_Int            *col_map_offd; 
+   HYPRE_Int            *col_map_offd;
         /* maps columns of offd to global columns */
-   HYPRE_Int            *row_starts; 
-        /* array of length num_procs+1, row_starts[i] contains the 
-           global number of the first row on proc i,  
+   HYPRE_Int            *row_starts;
+        /* array of length num_procs+1, row_starts[i] contains the
+           global number of the first row on proc i,
            first_row_index = row_starts[my_id],
            row_starts[num_procs] = global_num_rows */
    HYPRE_Int            *col_starts;
-        /* array of length num_procs+1, col_starts[i] contains the 
-           global number of the first column of diag on proc i,  
+        /* array of length num_procs+1, col_starts[i] contains the
+           global number of the first column of diag on proc i,
            first_col_diag = col_starts[my_id],
            col_starts[num_procs] = global_num_cols */
 
    hypre_ParCSRCommPkg  *comm_pkg;
    hypre_ParCSRCommPkg  *comm_pkgT;
-   
+
    /* Does the ParCSRMatrix create/destroy `diag', `offd', `col_map_offd'? */
    HYPRE_Int             owns_data;
    /* Does the ParCSRMatrix create/destroy `row_starts', `col_starts'? */
@@ -357,6 +357,7 @@ typedef struct hypre_ParCSRMatrix_struct
    hypre_IJAssumedPart  *assumed_partition; /* only populated if
                                               no_global_partition option is used
                                               (compile-time option)*/
+   HYPRE_Int             owns_assumed_partition;
    /* Array to store ordering of local diagonal block to relax. In particular,
    used for triangulr matrices that are not ordered to be triangular. */
    HYPRE_Int            *proc_ordering;
@@ -401,6 +402,7 @@ hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(matrix))
 #define hypre_ParCSRMatrixRowvalues(matrix)       ((matrix) -> rowvalues)
 #define hypre_ParCSRMatrixGetrowactive(matrix)    ((matrix) -> getrowactive)
 #define hypre_ParCSRMatrixAssumedPartition(matrix) ((matrix) -> assumed_partition)
+#define hypre_ParCSRMatrixOwnsAssumedPartition(matrix)   ((matrix) -> owns_assumed_partition)
 #define hypre_ParCSRMatrixProcOrdering(matrix)    ((matrix) -> proc_ordering)
 
 /*--------------------------------------------------------------------------
@@ -418,8 +420,8 @@ typedef struct
    HYPRE_Int               last_col_diag;
    hypre_CSRBooleanMatrix *diag;
    hypre_CSRBooleanMatrix *offd;
-   HYPRE_Int              *col_map_offd; 
-   HYPRE_Int              *row_starts; 
+   HYPRE_Int              *col_map_offd;
+   HYPRE_Int              *row_starts;
    HYPRE_Int              *col_starts;
    hypre_ParCSRCommPkg    *comm_pkg;
    hypre_ParCSRCommPkg    *comm_pkgT;
@@ -560,8 +562,8 @@ typedef struct
   HYPRE_Int *inprocessor;
 
   /* receiving in idof from different (in)processors; ---------------------- */
-  HYPRE_Int *num_idofs_inprocessor; 
-  HYPRE_Int **idof_inprocessor; 
+  HYPRE_Int *num_idofs_inprocessor;
+  HYPRE_Int **idof_inprocessor;
 
   /* symmetric information: ----------------------------------------------- */
   /* this can be replaces by CSR format: ---------------------------------- */
@@ -611,7 +613,7 @@ typedef struct
 #define hypre_ParChordMatrixNumRdofs(matrix)    ((matrix) -> num_rdofs)
 
 #define hypre_ParChordMatrixFirstindexIdof(matrix) ((matrix) -> firstindex_idof)
-#define hypre_ParChordMatrixFirstindexRdof(matrix) ((matrix) -> firstindex_rdof) 
+#define hypre_ParChordMatrixFirstindexRdof(matrix) ((matrix) -> firstindex_rdof)
 
 /* participation of rdof in different processors; ---------- */
 
