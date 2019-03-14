@@ -223,8 +223,8 @@ hypre_GetCommPkgRTFromCommPkgA( hypre_ParCSRMatrix *RT,
  * generate send_map_elmts
  *--------------------------------------------------------------------------*/
 
-   send_map_elmts_RT = hypre_CTAlloc(HYPRE_Int, send_map_starts_RT[num_sends_RT], HYPRE_MEMORY_SHARED);
-   send_big_elmts = hypre_CTAlloc(HYPRE_BigInt, send_map_starts_RT[num_sends_RT], HYPRE_MEMORY_SHARED);
+   send_map_elmts_RT = hypre_CTAlloc(HYPRE_Int, send_map_starts_RT[num_sends_RT], HYPRE_MEMORY_HOST);
+   send_big_elmts = hypre_CTAlloc(HYPRE_BigInt, send_map_starts_RT[num_sends_RT], HYPRE_MEMORY_HOST);
 
    j = 0;
    for (i=0; i < num_sends_RT; i++)
@@ -261,7 +261,7 @@ hypre_GetCommPkgRTFromCommPkgA( hypre_ParCSRMatrix *RT,
 
    hypre_TFree(status, HYPRE_MEMORY_HOST);
    hypre_TFree(requests, HYPRE_MEMORY_HOST);
-   hypre_TFree(send_big_elmts, HYPRE_MEMORY_SHARED);
+   hypre_TFree(send_big_elmts, HYPRE_MEMORY_HOST);
 
    hypre_ParCSRMatrixCommPkg(RT) = comm_pkg;
    hypre_TFree(change_array, HYPRE_MEMORY_HOST);
@@ -309,8 +309,8 @@ hypre_GenerateSendMapAndCommPkg(MPI_Comm comm, HYPRE_Int num_sends, HYPRE_Int nu
    for (i=0; i < num_sends; i++)
 	send_map_starts[i+1] += send_map_starts[i]; 
 
-   send_map_elmts = hypre_CTAlloc(HYPRE_Int, send_map_starts[num_sends], HYPRE_MEMORY_SHARED);
-   send_big_elmts = hypre_CTAlloc(HYPRE_BigInt, send_map_starts[num_sends], HYPRE_MEMORY_SHARED);
+   send_map_elmts = hypre_CTAlloc(HYPRE_Int, send_map_starts[num_sends], HYPRE_MEMORY_HOST);
+   send_big_elmts = hypre_CTAlloc(HYPRE_BigInt, send_map_starts[num_sends], HYPRE_MEMORY_HOST);
 
    j = 0;
    for (i=0; i < num_sends; i++)
@@ -347,6 +347,7 @@ hypre_GenerateSendMapAndCommPkg(MPI_Comm comm, HYPRE_Int num_sends, HYPRE_Int nu
 
    hypre_TFree(status, HYPRE_MEMORY_HOST);
    hypre_TFree(requests, HYPRE_MEMORY_HOST);
+   hypre_TFree(send_big_elmts, HYPRE_MEMORY_HOST);
 
    hypre_ParCSRMatrixCommPkg(A) = comm_pkg;
    return 0;

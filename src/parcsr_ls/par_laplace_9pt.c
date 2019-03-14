@@ -251,7 +251,7 @@ GenerateLaplacian9pt( MPI_Comm comm,
    {
       offd_j = hypre_CTAlloc(HYPRE_Int,  offd_i[local_num_rows], HYPRE_MEMORY_SHARED);
       offd_data = hypre_CTAlloc(HYPRE_Real,  offd_i[local_num_rows], HYPRE_MEMORY_SHARED);
-      big_offd_j = hypre_CTAlloc(HYPRE_BigInt,  offd_i[local_num_rows], HYPRE_MEMORY_SHARED);
+      big_offd_j = hypre_CTAlloc(HYPRE_BigInt,  offd_i[local_num_rows], HYPRE_MEMORY_HOST);
    }
 
    row_index = 0;
@@ -452,7 +452,7 @@ GenerateLaplacian9pt( MPI_Comm comm,
          offd_j[i] = hypre_BigBinarySearch(col_map_offd,big_offd_j[i],num_cols_offd);
       }
 
-      hypre_TFree(big_offd_j, HYPRE_MEMORY_SHARED);
+      hypre_TFree(big_offd_j, HYPRE_MEMORY_HOST);
       hypre_TFree(tmp, HYPRE_MEMORY_HOST);
    }
 

@@ -800,7 +800,7 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
 
    if (new_send_elmts_size > send_map_starts[num_sends])
    {
-      new_send_map_elmts = hypre_CTAlloc(HYPRE_Int, new_send_elmts_size, HYPRE_MEMORY_SHARED);
+      new_send_map_elmts = hypre_CTAlloc(HYPRE_Int, new_send_elmts_size, HYPRE_MEMORY_HOST);
       cnt = 0;
       send_map_starts[0] = 0;
       for (i=0; i < num_sends; i++)
@@ -812,7 +812,7 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
 	       new_send_map_elmts[cnt++] = send_map_elmts_AN[j]*num_functions+k;
 	 }
       }
-      hypre_TFree(send_map_elmts, HYPRE_MEMORY_SHARED);
+      hypre_TFree(send_map_elmts, HYPRE_MEMORY_HOST);
       hypre_ParCSRCommPkgSendMapElmts(comm_pkg) = new_send_map_elmts;
    }
  

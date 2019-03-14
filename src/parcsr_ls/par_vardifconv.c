@@ -220,7 +220,7 @@ GenerateVarDifConv( MPI_Comm comm,
 
    if (num_procs > 1)
    {
-      big_offd_j = hypre_CTAlloc(HYPRE_BigInt,  offd_i[local_num_rows], HYPRE_MEMORY_SHARED);
+      big_offd_j = hypre_CTAlloc(HYPRE_BigInt,  offd_i[local_num_rows], HYPRE_MEMORY_HOST);
       offd_j = hypre_CTAlloc(HYPRE_Int,  offd_i[local_num_rows], HYPRE_MEMORY_SHARED);
       offd_data = hypre_CTAlloc(HYPRE_Real,  offd_i[local_num_rows], HYPRE_MEMORY_SHARED);
    }
@@ -359,7 +359,7 @@ GenerateVarDifConv( MPI_Comm comm,
                offd_j[i] = j;
                break;
             }
-      hypre_TFree(big_offd_j, HYPRE_MEMORY_SHARED);
+      hypre_TFree(big_offd_j, HYPRE_MEMORY_HOST);
    }
 
    par_rhs = hypre_ParVectorCreate(comm, grid_size, global_part);
