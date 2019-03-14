@@ -708,7 +708,7 @@ hypre_ParCSRCommPkgCreate_core(
    if (num_sends)
    {
       send_procs = hypre_CTAlloc(HYPRE_Int,  num_sends, HYPRE_MEMORY_HOST);
-      send_map_elmts = hypre_CTAlloc(HYPRE_Int,  proc_add[num_sends], HYPRE_MEMORY_HOST);
+      send_map_elmts = hypre_CTAlloc(HYPRE_Int,  proc_add[num_sends], HYPRE_MEMORY_SHARED);
       big_buf_data = hypre_CTAlloc(HYPRE_BigInt,  proc_add[num_sends], HYPRE_MEMORY_HOST);
    }
    send_map_starts = hypre_CTAlloc(HYPRE_Int,  num_sends+1, HYPRE_MEMORY_HOST);
@@ -882,7 +882,7 @@ hypre_MatvecCommPkgDestroy( hypre_ParCSRCommPkg *comm_pkg )
    if (hypre_ParCSRCommPkgNumSends(comm_pkg))
    {
       hypre_TFree(hypre_ParCSRCommPkgSendProcs(comm_pkg), HYPRE_MEMORY_HOST);
-      hypre_TFree(hypre_ParCSRCommPkgSendMapElmts(comm_pkg), HYPRE_MEMORY_HOST);
+      hypre_TFree(hypre_ParCSRCommPkgSendMapElmts(comm_pkg), HYPRE_MEMORY_SHARED);
    }
    hypre_TFree(hypre_ParCSRCommPkgSendMapStarts(comm_pkg), HYPRE_MEMORY_HOST);
    /* if (hypre_ParCSRCommPkgSendMPITypes(comm_pkg))

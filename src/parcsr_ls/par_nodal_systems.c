@@ -441,7 +441,7 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
       if (num_sends) 
       {
          send_procs_AN = hypre_CTAlloc(HYPRE_Int, num_sends, HYPRE_MEMORY_HOST);
-         send_map_elmts_AN = hypre_CTAlloc(HYPRE_Int, send_map_starts[num_sends], HYPRE_MEMORY_HOST);
+         send_map_elmts_AN = hypre_CTAlloc(HYPRE_Int, send_map_starts[num_sends], HYPRE_MEMORY_SHARED);
       }
       send_map_starts_AN = hypre_CTAlloc(HYPRE_Int, num_sends+1, HYPRE_MEMORY_HOST);
       recv_vec_starts_AN = hypre_CTAlloc(HYPRE_Int, num_recvs+1, HYPRE_MEMORY_HOST);
@@ -800,7 +800,7 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
 
    if (new_send_elmts_size > send_map_starts[num_sends])
    {
-      new_send_map_elmts = hypre_CTAlloc(HYPRE_Int, new_send_elmts_size, HYPRE_MEMORY_HOST);
+      new_send_map_elmts = hypre_CTAlloc(HYPRE_Int, new_send_elmts_size, HYPRE_MEMORY_SHARED);
       cnt = 0;
       send_map_starts[0] = 0;
       for (i=0; i < num_sends; i++)
@@ -812,7 +812,7 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
 	       new_send_map_elmts[cnt++] = send_map_elmts_AN[j]*num_functions+k;
 	 }
       }
-      hypre_TFree(send_map_elmts, HYPRE_MEMORY_HOST);
+      hypre_TFree(send_map_elmts, HYPRE_MEMORY_SHARED);
       hypre_ParCSRCommPkgSendMapElmts(comm_pkg) = new_send_map_elmts;
    }
  
@@ -1024,7 +1024,7 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix  *SN,
       {
          send_procs_S = hypre_CTAlloc(HYPRE_Int, num_sends, HYPRE_MEMORY_HOST);
          send_map_elmts_S = hypre_CTAlloc(HYPRE_Int, 
-		num_functions*send_map_starts[num_sends], HYPRE_MEMORY_HOST);
+		num_functions*send_map_starts[num_sends], HYPRE_MEMORY_SHARED);
       }
       send_map_starts_S = hypre_CTAlloc(HYPRE_Int, num_sends+1, HYPRE_MEMORY_HOST);
       recv_vec_starts_S = hypre_CTAlloc(HYPRE_Int, num_recvs+1, HYPRE_MEMORY_HOST);

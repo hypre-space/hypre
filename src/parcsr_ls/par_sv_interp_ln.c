@@ -506,7 +506,7 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
    P_diag_data_new = hypre_CTAlloc(HYPRE_Real,  new_nnz_diag, HYPRE_MEMORY_SHARED);
    P_diag_i_new = hypre_CTAlloc(HYPRE_Int,  num_rows_P + 1, HYPRE_MEMORY_SHARED);
    
-   P_offd_j_big = hypre_CTAlloc(HYPRE_BigInt,  new_nnz_offd, HYPRE_MEMORY_HOST);
+   P_offd_j_big = hypre_CTAlloc(HYPRE_BigInt,  new_nnz_offd, HYPRE_MEMORY_SHARED);
    P_offd_j_new = hypre_CTAlloc(HYPRE_Int,  new_nnz_offd, HYPRE_MEMORY_SHARED);
    P_offd_data_new = hypre_CTAlloc(HYPRE_Real,  new_nnz_offd, HYPRE_MEMORY_SHARED);
    P_offd_i_new = hypre_CTAlloc(HYPRE_Int,  num_rows_P + 1, HYPRE_MEMORY_SHARED);
@@ -2527,7 +2527,7 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
    hypre_TFree(int_buf_data, HYPRE_MEMORY_HOST);
    hypre_TFree(big_buf_data, HYPRE_MEMORY_HOST);
    hypre_TFree(col_map, HYPRE_MEMORY_HOST);
-   hypre_TFree(P_offd_j_big, HYPRE_MEMORY_HOST);
+   hypre_TFree(P_offd_j_big, HYPRE_MEMORY_SHARED);
 
    hypre_TFree(smooth_vec_offd, HYPRE_MEMORY_HOST);
    hypre_TFree(smooth_vec_offd_P, HYPRE_MEMORY_HOST);

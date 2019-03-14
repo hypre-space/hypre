@@ -487,7 +487,7 @@ HYPRE_Int hypre_BoomerAMG_GMExpandInterp( hypre_ParCSRMatrix *A,
    P_diag_data_new = hypre_CTAlloc(HYPRE_Real,  new_nnz_diag, HYPRE_MEMORY_SHARED);
    P_diag_i_new = hypre_CTAlloc(HYPRE_Int,  nv + 1, HYPRE_MEMORY_SHARED);
 
-   P_offd_j_big = hypre_CTAlloc(HYPRE_BigInt,  new_nnz_offd, HYPRE_MEMORY_HOST);
+   P_offd_j_big = hypre_CTAlloc(HYPRE_BigInt,  new_nnz_offd, HYPRE_MEMORY_SHARED);
    P_offd_j_new = hypre_CTAlloc(HYPRE_Int,  new_nnz_offd, HYPRE_MEMORY_SHARED);
    P_offd_data_new = hypre_CTAlloc(HYPRE_Real,  new_nnz_offd, HYPRE_MEMORY_SHARED);
    P_offd_i_new = hypre_CTAlloc(HYPRE_Int,  nv + 1, HYPRE_MEMORY_SHARED);
@@ -1475,7 +1475,7 @@ HYPRE_Int hypre_BoomerAMG_GMExpandInterp( hypre_ParCSRMatrix *A,
    hypre_TFree(aux_j, HYPRE_MEMORY_HOST);
    hypre_TFree(aux_data, HYPRE_MEMORY_HOST);
    hypre_TFree(is_diag, HYPRE_MEMORY_HOST);
-   hypre_TFree(P_offd_j_big, HYPRE_MEMORY_HOST);
+   hypre_TFree(P_offd_j_big, HYPRE_MEMORY_SHARED);
       
    hypre_TFree(q_count_sv, HYPRE_MEMORY_HOST);
    hypre_TFree(num_lost_sv, HYPRE_MEMORY_HOST);

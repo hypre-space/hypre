@@ -386,7 +386,7 @@ hypre_ParCSRCommPkgCreateApart_core(
    send_proc_obj.vec_starts = hypre_CTAlloc(HYPRE_Int,  send_proc_obj.storage_length + 1, HYPRE_MEMORY_HOST);
    send_proc_obj.vec_starts[0] = 0;
    send_proc_obj.element_storage_length = num_cols_off_d;
-   send_proc_obj.elements = hypre_CTAlloc(HYPRE_BigInt,  send_proc_obj.element_storage_length, HYPRE_MEMORY_HOST);
+   send_proc_obj.elements = hypre_CTAlloc(HYPRE_BigInt,  send_proc_obj.element_storage_length, HYPRE_MEMORY_SHARED);
 
    response_obj2.fill_response = hypre_FillResponseIJDetermineSendProcs;
    response_obj2.data1 = NULL;
@@ -437,7 +437,7 @@ hypre_ParCSRCommPkgCreateApart_core(
 
       orig_order = hypre_CTAlloc(HYPRE_Int,  num_sends, HYPRE_MEMORY_HOST);
       orig_send_map_starts = hypre_CTAlloc(HYPRE_Int,  num_sends+1, HYPRE_MEMORY_HOST);
-      orig_send_elements = hypre_CTAlloc(HYPRE_BigInt,  send_proc_obj.vec_starts[num_sends], HYPRE_MEMORY_HOST);
+      orig_send_elements = hypre_CTAlloc(HYPRE_BigInt,  send_proc_obj.vec_starts[num_sends], HYPRE_MEMORY_SHARED);
 
       orig_send_map_starts[0] = 0;
       /* copy send map starts and elements */
@@ -468,7 +468,7 @@ hypre_ParCSRCommPkgCreateApart_core(
       }
       /* clean up */
       hypre_TFree(orig_order, HYPRE_MEMORY_HOST);
-      hypre_TFree(orig_send_elements, HYPRE_MEMORY_HOST);
+      hypre_TFree(orig_send_elements, HYPRE_MEMORY_SHARED);
       hypre_TFree(orig_send_map_starts, HYPRE_MEMORY_HOST);
    }
 
@@ -502,20 +502,20 @@ hypre_ParCSRCommPkgCreateApart_core(
 
    if (num_sends)
    {
-      HYPRE_Int *tmp_elements = hypre_CTAlloc(HYPRE_Int, send_proc_obj.vec_starts[num_sends], HYPRE_MEMORY_HOST);
+      HYPRE_Int *tmp_elements = hypre_CTAlloc(HYPRE_Int, send_proc_obj.vec_starts[num_sends], HYPRE_MEMORY_SHARED);
       for (i=0; i<send_proc_obj.vec_starts[num_sends]; i++)
       {
          //send_proc_obj.elements[i] -= first_col_diag;
          tmp_elements[i] = (HYPRE_Int)(send_proc_obj.elements[i] - first_col_diag);
       }
       *p_send_map_elements =  tmp_elements;
-      hypre_TFree(send_proc_obj.elements, HYPRE_MEMORY_HOST);
+      hypre_TFree(send_proc_obj.elements, HYPRE_MEMORY_SHARED);
       send_proc_obj.elements = NULL;
 
    }
    else
    {
-      hypre_TFree(send_proc_obj.elements, HYPRE_MEMORY_HOST);
+      hypre_TFree(send_proc_obj.elements, HYPRE_MEMORY_SHARED);
       send_proc_obj.elements = NULL;
      *p_send_map_elements =  NULL;
    }
@@ -620,7 +620,7 @@ hypre_NewCommPkgDestroy(hypre_ParCSRMatrix *parcsr_A)
    }
    if (hypre_ParCSRCommPkgSendMapElmts(comm_pkg))
    {
-      hypre_TFree(hypre_ParCSRCommPkgSendMapElmts(comm_pkg), HYPRE_MEMORY_HOST);
+      hypre_TFree(hypre_ParCSRCommPkgSendMapElmts(comm_pkg), HYPRE_MEMORY_SHARED);
    }
    if (hypre_ParCSRCommPkgSendMapStarts(comm_pkg))
    {
@@ -790,7 +790,7 @@ hypre_FillResponseIJDetermineSendProcs(void *p_recv_contact_buf,
       elength = hypre_max(contact_size, 50);
       elength += index;
       send_proc_obj->elements = hypre_TReAlloc(send_proc_obj->elements,
-					       HYPRE_BigInt,  elength, HYPRE_MEMORY_HOST);
+					       HYPRE_BigInt,  elength, HYPRE_MEMORY_SHARED);
       send_proc_obj->element_storage_length = elength;
    }
    /*populate send_proc_obj*/
