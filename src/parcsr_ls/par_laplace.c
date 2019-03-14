@@ -975,7 +975,7 @@ GenerateSysLaplacianVCoef( MPI_Comm comm,
 
    HYPRE_Int nx_size, ny_size, nz_size;
    HYPRE_Int jx, jy, jz;
-   global_part = hypre_CTAlloc(HYPRE_Int, num_procs+1, HYPRE_MEMORY_HOST);
+   global_part = hypre_CTAlloc(HYPRE_BigInt, num_procs+1, HYPRE_MEMORY_HOST);
 
    global_part[0] = 0;
    cnt = 1;

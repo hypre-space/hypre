@@ -122,6 +122,7 @@ hypre_ParCSRCommPkgCreateApart_core(
    HYPRE_Int        j, i;
    HYPRE_BigInt     range_start, range_end;
 
+   HYPRE_BigInt     big_size;
    HYPRE_Int        size;
    HYPRE_Int        count;
 
@@ -204,9 +205,9 @@ hypre_ParCSRCommPkgCreateApart_core(
    /*estimate the storage needed*/
    if (num_cols_off_d > 0 && (apart->row_end - apart->row_start) > 0  )
    {
-      size = col_map_off_d[num_cols_off_d-1] - col_map_off_d[0];
+      big_size = col_map_off_d[num_cols_off_d-1] - col_map_off_d[0];
 
-      size = (size/(apart->row_end - apart->row_start)) + 2;
+      size = (HYPRE_Int)(big_size/(apart->row_end - apart->row_start)) + 2;
    }
    else
    {
