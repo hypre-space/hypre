@@ -27,7 +27,7 @@ HYPRE_Init( hypre_int argc, char *argv[] )
 {
    /*
    HYPRE_Int  num_procs, myid;
-   
+
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
    */
@@ -38,13 +38,6 @@ HYPRE_Init( hypre_int argc, char *argv[] )
    Kokkos::initialize (args);
    */
    Kokkos::initialize (argc, argv);
-#endif
-
-#if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && defined(HYPRE_USING_CUDA)
-   if (!cuda_reduce_buffer)
-   {
-      cuda_reduce_buffer = hypre_TAlloc(HYPRE_double6, 1024, HYPRE_MEMORY_DEVICE);
-   }
 #endif
 
 #if defined(HYPRE_USING_UNIFIED_MEMORY)

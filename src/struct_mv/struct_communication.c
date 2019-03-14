@@ -19,7 +19,7 @@ char       filename[255];
 FILE      *file;
 #endif
 
-/* These are device buffers needed to do MPI communication 
+/* These are device buffers needed to do MPI communication
  * when the computations (BoxLoop) are excuted on device and the host memory
  * are not accessible from device
  * */
@@ -858,23 +858,23 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
       send_buffers_data = hypre_TAlloc(HYPRE_Complex *, num_sends,HYPRE_MEMORY_HOST);
       if (num_sends > 0)
       {
-	 size = hypre_CommPkgSendBufsize(comm_pkg);
-	 if (size > global_send_size)
-	 {
-	    if (global_send_size > 0)
-	    {
-	       hypre_TFree(global_send_buffer,HYPRE_MEMORY_DEVICE);
-	    }
-	    global_send_buffer = hypre_CTAlloc(HYPRE_Complex, 5*size,HYPRE_MEMORY_DEVICE);
-	    global_send_size   = 5*size;
-	 }
-	 send_buffers_data[0] = global_send_buffer;
-	 for (i = 1; i < num_sends; i++)
-	 {
-	    comm_type = hypre_CommPkgSendType(comm_pkg, i-1);
-	    size = hypre_CommTypeBufsize(comm_type);
-	    send_buffers_data[i] = send_buffers_data[i-1] + size;
-	 }
+         size = hypre_CommPkgSendBufsize(comm_pkg);
+         if (size > global_send_size)
+         {
+            if (global_send_size > 0)
+            {
+               hypre_TFree(global_send_buffer,HYPRE_MEMORY_DEVICE);
+            }
+            global_send_buffer = hypre_CTAlloc(HYPRE_Complex, 5*size,HYPRE_MEMORY_DEVICE);
+            global_send_size   = 5*size;
+         }
+         send_buffers_data[0] = global_send_buffer;
+         for (i = 1; i < num_sends; i++)
+         {
+            comm_type = hypre_CommPkgSendType(comm_pkg, i-1);
+            size = hypre_CommTypeBufsize(comm_type);
+            send_buffers_data[i] = send_buffers_data[i-1] + size;
+         }
       }
    }
    else
@@ -898,28 +898,28 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
 
    /* Prepare recv buffers */
    if (alloc_dev_buffer)
-   {    
+   {
       recv_buffers_data = hypre_TAlloc(HYPRE_Complex *, num_recvs,HYPRE_MEMORY_HOST);
       if (num_recvs > 0)
       {
-	 size = hypre_CommPkgRecvBufsize(comm_pkg);
+         size = hypre_CommPkgRecvBufsize(comm_pkg);
 
-	 if (size > global_recv_size)
-	 {
-	    if (global_recv_size > 0)
-	    {
-	       hypre_TFree(global_recv_buffer,HYPRE_MEMORY_DEVICE);
-	    }
-	    global_recv_buffer = hypre_CTAlloc(HYPRE_Complex, 5*size,HYPRE_MEMORY_DEVICE);
-	    global_recv_size   = 5*size;
-	 }
-	 recv_buffers_data[0] = global_recv_buffer;
-	 for (i = 1; i < num_recvs; i++)
-	 {
-	    comm_type = hypre_CommPkgRecvType(comm_pkg, i-1);
-	    size = hypre_CommTypeBufsize(comm_type);
-	    recv_buffers_data[i] = recv_buffers_data[i-1] + size;
-	 }
+         if (size > global_recv_size)
+         {
+            if (global_recv_size > 0)
+            {
+               hypre_TFree(global_recv_buffer,HYPRE_MEMORY_DEVICE);
+            }
+            global_recv_buffer = hypre_CTAlloc(HYPRE_Complex, 5*size,HYPRE_MEMORY_DEVICE);
+            global_recv_size   = 5*size;
+         }
+         recv_buffers_data[0] = global_recv_buffer;
+         for (i = 1; i < num_recvs; i++)
+         {
+            comm_type = hypre_CommPkgRecvType(comm_pkg, i-1);
+            size = hypre_CommTypeBufsize(comm_type);
+            recv_buffers_data[i] = recv_buffers_data[i-1] + size;
+         }
       }
    }
    else
@@ -960,7 +960,7 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
             if (order[ll] > -1)
             {
                kptr = lptr + order[ll]*stride_array[ndim];
-	       
+
 #define DEVICE_VAR is_device_ptr(dptr,kptr)
                hypre_BasicBoxLoop2Begin(ndim, length_array,
                                         stride_array, ki,
@@ -1010,10 +1010,10 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
          qptr = (HYPRE_Int *) send_buffers[i];
          *qptr = num_entries;
          qptr ++;
-         hypre_TMemcpy(qptr,  hypre_CommTypeRemBoxnums(comm_type), 
+         hypre_TMemcpy(qptr,  hypre_CommTypeRemBoxnums(comm_type),
                HYPRE_Int, num_entries, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
          qptr += num_entries;
-         hypre_TMemcpy(qptr,  hypre_CommTypeRemBoxes(comm_type), 
+         hypre_TMemcpy(qptr,  hypre_CommTypeRemBoxes(comm_type),
                hypre_Box, num_entries, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
          hypre_CommTypeRemBoxnums(comm_type) = NULL;
          hypre_CommTypeRemBoxes(comm_type)   = NULL;
@@ -1236,7 +1236,7 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
       dptr_host = (HYPRE_Complex *) recv_buffers[0];
       dptr      = (HYPRE_Complex *) recv_buffers_data[0];
 
-      hypre_TMemcpy( dptr, dptr_host, HYPRE_Complex, size, 
+      hypre_TMemcpy( dptr, dptr_host, HYPRE_Complex, size,
                      HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST );
    }
 
@@ -1314,11 +1314,11 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
 
    hypre_TFree(comm_handle, HYPRE_MEMORY_HOST);
 
-   if (send_buffers == send_buffers_data) 
+   if (send_buffers == send_buffers_data)
    {
       hypre_TFree(send_buffers, HYPRE_MEMORY_HOST);
-   } 
-   else 
+   }
+   else
    {
       hypre_TFree(send_buffers, HYPRE_MEMORY_HOST);
       hypre_TFree(send_buffers_data, HYPRE_MEMORY_HOST);
