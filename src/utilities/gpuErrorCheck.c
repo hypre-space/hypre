@@ -38,7 +38,7 @@ void cudaSafeFree(void *ptr,int padding)
   err=cudaPointerGetAttributes(&ptr_att,ptr);
   if (err!=cudaSuccess)
   {
-    cudaGetLastError(); 
+    cudaGetLastError();
 #ifndef ABORT_ON_RAW_POINTER
 #ifdef FULL_WARN
     if (err==cudaErrorInvalidValue)
@@ -77,11 +77,11 @@ void cudaSafeFree(void *ptr,int padding)
     /* Code below for handling managed memory pointers not allocated using hypre_CTAlloc oir hypre_TAlooc */
     if (PointerAttributes(ptr)!=PointerAttributes(sptr)){
       //fprintf(stderr,"ERROR IN Pointer for freeing %p %p\n",ptr,sptr);
-      hypre_CheckErrorDevice(cudaFree(ptr)); 
+      hypre_CheckErrorDevice(cudaFree(ptr));
       return;
     }
-    hypre_CheckErrorDevice(cudaFree(sptr)); 
-  } 
+    hypre_CheckErrorDevice(cudaFree(sptr));
+  }
   else
   {
     /* It is a pinned memory pointer */
@@ -89,10 +89,10 @@ void cudaSafeFree(void *ptr,int padding)
     if (ptr_att.memoryType==cudaMemoryTypeHost)
     {
       hypre_CheckErrorDevice(cudaFreeHost(sptr));
-    } 
+    }
     else if (ptr_att.memoryType==cudaMemoryTypeDevice)
     {
-      hypre_CheckErrorDevice(cudaFree(sptr)); 
+      hypre_CheckErrorDevice(cudaFree(sptr));
     }
   }
   POP_RANGE;
@@ -139,7 +139,7 @@ hypre_int PointerAttributes(const void *ptr){
      return HYPRE_HOST_POINTER;
   }
   if (ptr_att.isManaged){
-    return HYPRE_MANAGED_POINTER; 
+    return HYPRE_MANAGED_POINTER;
   }
   else {
     if (ptr_att.memoryType==cudaMemoryTypeHost) return HYPRE_PINNED_POINTER; /* Host pointer from cudaMallocHost */
@@ -167,7 +167,7 @@ void assert_check(void *ptr, char *file, int line){
 	PrintPointerAttributes(ptr);
       }
     }
-  
+
 }
 void assert_check_host(void *ptr, char *file, int line){
   if (ptr==NULL) return;
@@ -187,9 +187,9 @@ void assert_check_host(void *ptr, char *file, int line){
 	fprintf(stderr,"ASSERT_HOST FAILURE in line %d of file %s \n NO ALLOCATION INFO\n",line,file);
       }
     }
-  
+
 }
 
 #endif /* TRACK_MEMORY_ALLOCATIONS */
 
-#endif 
+#endif
