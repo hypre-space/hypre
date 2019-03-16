@@ -42,15 +42,14 @@
 
 Hash *HashCreate(HYPRE_Int size)
 {
-    HYPRE_Int i;
-    HYPRE_BigInt *p;
+    HYPRE_Int i, *p;
 
     Hash *h = hypre_TAlloc(Hash, 1, HYPRE_MEMORY_HOST);
 
     h->size  = size;
     h->num   = 0;
-    h->keys  = hypre_TAlloc(HYPRE_BigInt, size , HYPRE_MEMORY_HOST);
-    h->table = hypre_TAlloc(HYPRE_BigInt, size , HYPRE_MEMORY_HOST);
+    h->keys  = hypre_TAlloc(HYPRE_Int, size , HYPRE_MEMORY_HOST);
+    h->table = hypre_TAlloc(HYPRE_Int, size , HYPRE_MEMORY_HOST);
     h->data  = hypre_TAlloc(HYPRE_Int, size , HYPRE_MEMORY_HOST);
 
     /* Initialize the table to empty */
@@ -78,13 +77,13 @@ void HashDestroy(Hash *h)
  * associated with the key, or return HASH_NOTFOUND.
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int HashLookup(Hash *h, HYPRE_BigInt key)
+HYPRE_Int HashLookup(Hash *h, HYPRE_Int key)
 {
     HYPRE_Int loc;
 
     /* loc = key % h->size; */
     HYPRE_Real keyd = key * 0.6180339887;
-    loc = (HYPRE_Int) (h->size * (keyd - (HYPRE_BigInt) keyd));
+    loc = (HYPRE_Int) (h->size * (keyd - (HYPRE_Int) keyd));
 
     while (h->table[loc] != key)
     {
@@ -102,13 +101,13 @@ HYPRE_Int HashLookup(Hash *h, HYPRE_BigInt key)
  * If the key is already in the hash table, the data item is replaced.
  *--------------------------------------------------------------------------*/
 
-void HashInsert(Hash *h, HYPRE_BigInt key, HYPRE_Int data)
+void HashInsert(Hash *h, HYPRE_Int key, HYPRE_Int data)
 {
     HYPRE_Int loc;
 
     /* loc = key % h->size; */
     HYPRE_Real keyd = (HYPRE_Real) key * 0.6180339887;
-    loc = (HYPRE_Int) ((HYPRE_Real) h->size * (keyd - (HYPRE_BigInt) keyd));
+    loc = (HYPRE_Int) ((HYPRE_Real) h->size * (keyd - (HYPRE_Int) keyd));
 
     while (h->table[loc] != key)
     {
@@ -149,8 +148,7 @@ void HashRehash(Hash *oldHash, Hash *newHash)
 
 void HashReset(Hash *h)
 {
-    HYPRE_Int i;
-    HYPRE_BigInt *p;
+    HYPRE_Int i, *p;
 
     h->num = 0;
     p = h->table;
@@ -164,8 +162,7 @@ void HashReset(Hash *h)
 
 void HashPrint(Hash *h)
 {
-    HYPRE_Int i, j;
-    HYPRE_BigInt *p;
+    HYPRE_Int i, j, *p;
     HYPRE_Int lines = h->size/38;
 
     hypre_printf("Hash size: %d\n", h->size);

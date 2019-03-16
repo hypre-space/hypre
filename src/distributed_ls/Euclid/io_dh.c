@@ -44,16 +44,16 @@ void closeFile_dh(FILE *fpIN)
 }
 
 /*----------------------------------------------------------------*/
-void io_dh_print_ebin_mat_private(HYPRE_Int m, HYPRE_BigInt beg_row,
-                                HYPRE_Int *rp, HYPRE_BigInt *cval, HYPRE_Real *aval, 
+void io_dh_print_ebin_mat_private(HYPRE_Int m, HYPRE_Int beg_row,
+                                HYPRE_Int *rp, HYPRE_Int *cval, HYPRE_Real *aval, 
                            HYPRE_Int *n2o, HYPRE_Int *o2n, Hash_i_dh hash, char *filename)
 {}
 
-extern void io_dh_read_ebin_mat_private(HYPRE_Int *m, HYPRE_Int **rp, HYPRE_BigInt **cval,
+extern void io_dh_read_ebin_mat_private(HYPRE_Int *m, HYPRE_Int **rp, HYPRE_Int **cval,
                                      HYPRE_Real **aval, char *filename)
 {}
 
-void io_dh_print_ebin_vec_private(HYPRE_Int n, HYPRE_BigInt beg_row, HYPRE_Real *vals,
+void io_dh_print_ebin_vec_private(HYPRE_Int n, HYPRE_Int beg_row, HYPRE_Real *vals,
                            HYPRE_Int *n2o, HYPRE_Int *o2n, Hash_i_dh hash, char *filename)
 {}
 

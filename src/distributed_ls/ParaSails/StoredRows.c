@@ -54,7 +54,7 @@ StoredRows *StoredRowsCreate(Matrix *mat, HYPRE_Int size)
     p->num_loc = mat->end_row - mat->beg_row + 1;
 
     p->len = hypre_CTAlloc(HYPRE_Int, size, HYPRE_MEMORY_HOST);
-    p->ind = hypre_TAlloc(HYPRE_BigInt *, size , HYPRE_MEMORY_HOST);
+    p->ind = hypre_TAlloc(HYPRE_Int *, size , HYPRE_MEMORY_HOST);
     p->val = hypre_TAlloc(HYPRE_Real *, size , HYPRE_MEMORY_HOST);
 
     p->count = 0;
@@ -80,9 +80,9 @@ void StoredRowsDestroy(StoredRows *p)
  * stored rows object "p".  The indices may span several rows.
  *--------------------------------------------------------------------------*/
 
-HYPRE_BigInt *StoredRowsAllocInd(StoredRows *p, HYPRE_Int len)
+HYPRE_Int *StoredRowsAllocInd(StoredRows *p, HYPRE_Int len)
 {
-    return (HYPRE_BigInt *) MemAlloc(p->mem, len*sizeof(HYPRE_BigInt));
+    return (HYPRE_Int *) MemAlloc(p->mem, len*sizeof(HYPRE_Int));
 }
 
 /*--------------------------------------------------------------------------
@@ -101,9 +101,9 @@ HYPRE_Real *StoredRowsAllocVal(StoredRows *p, HYPRE_Int len)
  * this interface; the local stored rows are put using the create function.
  *--------------------------------------------------------------------------*/
 
-void StoredRowsPut(StoredRows *p, HYPRE_BigInt index, HYPRE_Int len, HYPRE_BigInt *ind, HYPRE_Real *val)
+void StoredRowsPut(StoredRows *p, HYPRE_Int index, HYPRE_Int len, HYPRE_Int *ind, HYPRE_Real *val)
 {
-    HYPRE_Int i = (HYPRE_Int)(index - p->num_loc);
+    HYPRE_Int i = index - p->num_loc;
 
     /* Reallocate if necessary */
     if (i >= p->size)
@@ -116,7 +116,7 @@ void StoredRowsPut(StoredRows *p, HYPRE_BigInt index, HYPRE_Int len, HYPRE_BigIn
 		    hypre_printf("StoredRows resize %d\n", newsize);
 #endif
         p->len = hypre_TReAlloc(p->len,HYPRE_Int,  newsize , HYPRE_MEMORY_HOST);
-        p->ind = hypre_TReAlloc(p->ind,HYPRE_BigInt *,  newsize , HYPRE_MEMORY_HOST);
+        p->ind = hypre_TReAlloc(p->ind,HYPRE_Int *,  newsize , HYPRE_MEMORY_HOST);
         p->val = hypre_TReAlloc(p->val,HYPRE_Real *,  newsize , HYPRE_MEMORY_HOST);
 
 	/* set lengths to zero */
@@ -141,7 +141,7 @@ void StoredRowsPut(StoredRows *p, HYPRE_BigInt index, HYPRE_Int len, HYPRE_BigIn
  * "lenp", "indp" and "valp" in the stored rows object "p".
  *--------------------------------------------------------------------------*/
 
-void StoredRowsGet(StoredRows *p, HYPRE_BigInt index, HYPRE_Int *lenp, HYPRE_BigInt **indp, 
+void StoredRowsGet(StoredRows *p, HYPRE_Int index, HYPRE_Int *lenp, HYPRE_Int **indp, 
   HYPRE_Real **valp)
 {
     if (index < p->num_loc)

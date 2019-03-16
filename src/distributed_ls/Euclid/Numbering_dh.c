@@ -68,15 +68,14 @@ Then in the matvec, no reordering of the data is needed.
 void Numbering_dhSetup(Numbering_dh numb, Mat_dh mat)
 {
   START_FUNC_DH
-  HYPRE_Int       i, len;
-  HYPRE_BigInt    *cval = mat->cval;
+  HYPRE_Int       i, len, *cval = mat->cval;
   HYPRE_Int       num_ext, num_extLo, num_extHi;
   HYPRE_Int       m = mat->m, size;
   Hash_i_dh global_to_local_hash;
-  HYPRE_BigInt    first = mat->beg_row, last  = first+m;
-  HYPRE_BigInt    *idx_ext;
-  HYPRE_BigInt     data;
-/*  HYPRE_BigInt       debug = false; */
+  HYPRE_Int       first = mat->beg_row, last  = first+m;
+  HYPRE_Int       *idx_ext;
+  HYPRE_Int       data;
+/*  HYPRE_Int       debug = false; */
 
 /*   if (logFile != NULL && numb->debug) debug = true; */
 
@@ -90,7 +89,7 @@ void Numbering_dhSetup(Numbering_dh numb, Mat_dh mat)
   Hash_i_dhCreate(&(numb->global_to_local), m); CHECK_V_ERROR;
 
   global_to_local_hash = numb->global_to_local;
-  idx_ext = numb->idx_ext = (HYPRE_BigInt*)MALLOC_DH(size*sizeof(HYPRE_BigInt)); CHECK_V_ERROR;
+  idx_ext = numb->idx_ext = (HYPRE_Int*)MALLOC_DH(size*sizeof(HYPRE_Int)); CHECK_V_ERROR;
   
   /* find all external indices; at the end of this block, 
      idx_ext[] will contain an unsorted list of external indices.
@@ -98,7 +97,7 @@ void Numbering_dhSetup(Numbering_dh numb, Mat_dh mat)
   len = mat->rp[m];
   num_ext = num_extLo = num_extHi = 0;
   for (i=0; i<len; i++) {       /* for each nonzero "index" in the matrix */
-    HYPRE_BigInt index = cval[i];
+    HYPRE_Int index = cval[i];
 
     /* Only interested in external indices */
     if (index < first || index >= last) {
@@ -115,7 +114,7 @@ void Numbering_dhSetup(Numbering_dh numb, Mat_dh mat)
         /* RL : why ``m+num_ext'' instead of ``num_ext+1'' ??? */
         if (m+num_ext >= size) {
           HYPRE_Int newSize = hypre_max(m+num_ext+1, size*1.5);  /* heuristic */
-          HYPRE_BigInt *tmp = (HYPRE_BigInt*)MALLOC_DH(newSize*sizeof(HYPRE_BigInt)); CHECK_V_ERROR;
+          HYPRE_Int *tmp = (HYPRE_Int*)MALLOC_DH(newSize*sizeof(HYPRE_Int)); CHECK_V_ERROR;
           hypre_TMemcpy(tmp,  idx_ext, size, size, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
           FREE_DH(idx_ext); CHECK_V_ERROR;
           size = numb->size = newSize;
@@ -144,7 +143,7 @@ void Numbering_dhSetup(Numbering_dh numb, Mat_dh mat)
      table; the table is used to convert external indices
      in Numbering_dhGlobalToLocal()
   */
-  shellSort_bigint(num_ext, idx_ext);
+  shellSort_int(num_ext, idx_ext);
 
   Hash_i_dhReset(global_to_local_hash); CHECK_V_ERROR;
   for (i=0; i<num_ext; i++) {
@@ -156,17 +155,17 @@ void Numbering_dhSetup(Numbering_dh numb, Mat_dh mat)
 #undef __FUNC__
 #define __FUNC__ "Numbering_dhGlobalToLocal"
 void Numbering_dhGlobalToLocal(Numbering_dh numb, HYPRE_Int len, 
-                                      HYPRE_BigInt *global, HYPRE_BigInt *local)
+                                      HYPRE_Int *global, HYPRE_Int *local)
 {
   START_FUNC_DH
   HYPRE_Int i;
-  HYPRE_BigInt first = numb->first;
-  HYPRE_BigInt last = first + numb->m;
-  HYPRE_BigInt data;
+  HYPRE_Int first = numb->first;
+  HYPRE_Int last = first + numb->m;
+  HYPRE_Int data;
   Hash_i_dh  global_to_local = numb->global_to_local;
 
   for (i=0; i<len; i++) {
-    HYPRE_BigInt idxGlobal = global[i];
+    HYPRE_Int idxGlobal = global[i];
     if (idxGlobal >= first && idxGlobal < last) {
       local[i] = idxGlobal - first;
        /* note: for matvec setup, numb->num_extLo = 0. */

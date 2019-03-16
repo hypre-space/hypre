@@ -16,7 +16,6 @@
 /* #include "euclid_common.h" */
 
 extern void shellSort_int(const HYPRE_Int n, HYPRE_Int *x);
-extern void shellSort_bigint(const HYPRE_Int n, HYPRE_BigInt *x);
 extern void shellSort_float(HYPRE_Int n, HYPRE_Real *v);
 
 /*

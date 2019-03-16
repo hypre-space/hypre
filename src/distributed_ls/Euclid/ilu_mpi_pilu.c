@@ -23,7 +23,7 @@
 /* #include "ExternalRows_dh.h" */
 /* #include "SubdomainGraph_dh.h" */
 
-static void iluk_symbolic_row_private(HYPRE_Int localRow, HYPRE_Int len, HYPRE_BigInt *CVAL, 
+static void iluk_symbolic_row_private(HYPRE_Int localRow, HYPRE_Int len, HYPRE_Int *CVAL, 
                                       HYPRE_Real *AVAL, ExternalRows_dh extRows, 
                                       SortedList_dh sList, Euclid_dh ctx, 
                                       bool debug);
@@ -40,12 +40,10 @@ void iluk_mpi_pilu(Euclid_dh ctx)
   HYPRE_Int from = ctx->from, to = ctx->to;
   HYPRE_Int i, m; 
   HYPRE_Int *n2o_row; /* *o2n_col; */
-  HYPRE_Int *rp, *diag, *fill;
-  HYPRE_BigInt *cval;
-  HYPRE_BigInt beg_row, beg_rowP, end_rowP;
+  HYPRE_Int *rp, *cval, *diag, *fill;
+  HYPRE_Int beg_row, beg_rowP, end_rowP;
   SubdomainGraph_dh sg = ctx->sg;
-  HYPRE_Int len, idx = 0, count;
-  HYPRE_BigInt *CVAL;
+  HYPRE_Int *CVAL, len, idx = 0, count;
   HYPRE_Real *AVAL;
   REAL_DH *aval;
   Factor_dh F = ctx->F;
@@ -86,7 +84,7 @@ void iluk_mpi_pilu(Euclid_dh ctx)
   for (i=from; i<to; ++i) {
 
     HYPRE_Int row = n2o_row[i];            /* local row number */
-    HYPRE_BigInt globalRow = row + beg_row;   /* global row number */
+    HYPRE_Int globalRow = row + beg_row;   /* global row number */
 
     if (debug) {
       hypre_fprintf(logFile, "\nILU_pilu global: %i  old_Local: %i =========================================================\n", i+1+beg_rowP, row+1);
@@ -138,7 +136,7 @@ void iluk_mpi_pilu(Euclid_dh ctx)
 
     /* Copy factor to permanent storage */
     if (bj) {   /* for debugging: blockJacobi case */
-      HYPRE_BigInt col;
+      HYPRE_Int col;
       while (count--) {
         SRecord *sr = SortedList_dhGetSmallest(slist); CHECK_V_ERROR;
         col = sr->col;
@@ -230,22 +228,20 @@ void iluk_mpi_pilu(Euclid_dh ctx)
 
 #undef __FUNC__
 #define __FUNC__ "iluk_symbolic_row_private"
-void iluk_symbolic_row_private(HYPRE_Int localRow, HYPRE_Int len, HYPRE_BigInt *CVAL, 
+void iluk_symbolic_row_private(HYPRE_Int localRow, HYPRE_Int len, HYPRE_Int *CVAL, 
                                HYPRE_Real *AVAL, ExternalRows_dh extRows, 
                                SortedList_dh slist, Euclid_dh ctx, bool debug)
 {
   START_FUNC_DH
   HYPRE_Int       level = ctx->level, m = ctx->m;
-  HYPRE_BigInt    beg_row = ctx->sg->beg_row[myid_dh];
-  HYPRE_BigInt    beg_rowP = ctx->sg->beg_rowP[myid_dh];
-  HYPRE_BigInt    *cval = ctx->F->cval;
-  HYPRE_Int       *diag = ctx->F->diag; 
+  HYPRE_Int       beg_row = ctx->sg->beg_row[myid_dh];
+  HYPRE_Int       beg_rowP = ctx->sg->beg_rowP[myid_dh];
+  HYPRE_Int       *cval = ctx->F->cval, *diag = ctx->F->diag; 
   HYPRE_Int       *rp = ctx->F->rp, *fill = ctx->F->fill;
   HYPRE_Int       j, node, col;
-  HYPRE_BigInt    end_rowP = beg_rowP + m;
+  HYPRE_Int       end_rowP = beg_rowP + m;
   HYPRE_Int       level_1, level_2;
-  HYPRE_BigInt    *cvalPtr;
-  HYPRE_Int       *fillPtr;
+  HYPRE_Int       *cvalPtr, *fillPtr;
   SRecord   sr, *srPtr;
   REAL_DH   scale, *avalPtr;
   HYPRE_Real    thresh = ctx->sparseTolA;
@@ -344,13 +340,12 @@ void iluk_numeric_row_private(HYPRE_Int new_row, ExternalRows_dh extRows,
 {
   START_FUNC_DH
   HYPRE_Int    m = ctx->m;
-  HYPRE_BigInt beg_rowP = ctx->sg->beg_rowP[myid_dh];
-  HYPRE_BigInt end_rowP = beg_rowP + m;
-  HYPRE_Int    len;
-  HYPRE_BigInt *cval = ctx->F->cval;
-  HYPRE_Int    *rp = ctx->F->rp, *diag = ctx->F->diag;
+  HYPRE_Int    beg_rowP = ctx->sg->beg_rowP[myid_dh];
+  HYPRE_Int    end_rowP = beg_rowP + m;
+  HYPRE_Int    len, row;
+  HYPRE_Int    *rp = ctx->F->rp, *cval = ctx->F->cval, *diag = ctx->F->diag;
   REAL_DH *avalPtr, *aval = ctx->F->aval;
-  HYPRE_BigInt  *cvalPtr, row;
+  HYPRE_Int     *cvalPtr;
   HYPRE_Real  multiplier, pc, pv;
   SRecord sr, *srPtr;
 
@@ -367,10 +362,10 @@ void iluk_numeric_row_private(HYPRE_Int new_row, ExternalRows_dh extRows,
     row = srPtr->col;
 
     if (row >= beg_rowP && row < end_rowP) {
-      HYPRE_Int local_row = (HYPRE_Int)(row - beg_rowP);
+      HYPRE_Int local_row = row - beg_rowP;
 
       len = rp[local_row+1] - diag[local_row];
-      cvalPtr = cval + (HYPRE_BigInt)diag[local_row];
+      cvalPtr = cval + diag[local_row];
       avalPtr = aval + diag[local_row]; 
     } else {
       len = 0;

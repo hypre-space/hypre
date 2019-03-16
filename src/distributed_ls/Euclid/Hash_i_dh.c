@@ -42,7 +42,7 @@ typedef struct _hash_i_node_private Hash_i_Record;
 struct _hash_i_node_private {
   HYPRE_Int  key;
   HYPRE_Int  mark;
-  HYPRE_BigInt  data;
+  HYPRE_Int  data;
 };
 
 
@@ -159,7 +159,7 @@ HYPRE_Int Hash_i_dhLookup(Hash_i_dh h, HYPRE_Int key)
 
 #undef __FUNC__
 #define __FUNC__ "Hash_i_dhInsert"
-void Hash_i_dhInsert(Hash_i_dh h, HYPRE_Int key, HYPRE_BigInt dataIN)
+void Hash_i_dhInsert(Hash_i_dh h, HYPRE_Int key, HYPRE_Int dataIN)
 {
   START_FUNC_DH
   HYPRE_Int i, idx, inc, start, size;

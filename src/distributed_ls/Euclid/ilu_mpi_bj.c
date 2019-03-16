@@ -22,13 +22,13 @@
 /* #include "Factor_dh.h" */
 /* #include "SubdomainGraph_dh.h" */
 
-HYPRE_Int symbolic_row_private(HYPRE_Int localRow, HYPRE_BigInt beg_row, HYPRE_BigInt end_row,
+HYPRE_Int symbolic_row_private(HYPRE_Int localRow, HYPRE_Int beg_row, HYPRE_Int end_row,
                  HYPRE_Int *list, HYPRE_Int *marker, HYPRE_Int *tmpFill,
-                 HYPRE_Int len, HYPRE_BigInt *CVAL, HYPRE_Real *AVAL,
+                 HYPRE_Int len, HYPRE_Int *CVAL, HYPRE_Real *AVAL,
                  HYPRE_Int *o2n_col, Euclid_dh ctx);
 
-static HYPRE_Int numeric_row_private(HYPRE_Int localRow, HYPRE_BigInt beg_row, HYPRE_BigInt end_row,
-                        HYPRE_Int len, HYPRE_BigInt *CVAL, HYPRE_Real *AVAL,
+static HYPRE_Int numeric_row_private(HYPRE_Int localRow, HYPRE_Int beg_row, HYPRE_Int end_row,
+                        HYPRE_Int len, HYPRE_Int *CVAL, HYPRE_Real *AVAL,
                         REAL_DH *work, HYPRE_Int *o2n_col, Euclid_dh ctx);
 
 
@@ -38,13 +38,13 @@ static HYPRE_Int numeric_row_private(HYPRE_Int localRow, HYPRE_BigInt beg_row, H
 void iluk_mpi_bj(Euclid_dh ctx)
 {
   START_FUNC_DH
-  HYPRE_Int      *rp, *diag;
-  HYPRE_BigInt   *CVAL, *cval;
+  HYPRE_Int      *rp, *cval, *diag;
+  HYPRE_Int      *CVAL;
   HYPRE_Int      i, j, len, count, col, idx = 0;
   HYPRE_Int      *list, *marker, *fill, *tmpFill;
   HYPRE_Int      temp, m, from = ctx->from, to = ctx->to;
   HYPRE_Int      *n2o_row, *o2n_col;
-  HYPRE_BigInt   first_row, last_row;
+  HYPRE_Int      first_row, last_row;
   HYPRE_Real   *AVAL;
   REAL_DH  *work, *aval;
   Factor_dh F = ctx->F;
@@ -90,7 +90,7 @@ if (ctx->F->rp == NULL) {
   for (i=from; i<to; ++i) {
 
     HYPRE_Int row = n2o_row[i];            /* local row number */
-    HYPRE_BigInt globalRow = row + first_row; /* global row number */
+    HYPRE_Int globalRow = row + first_row; /* global row number */
 
     EuclidGetRow(ctx->A, globalRow, &len, &CVAL, &AVAL); CHECK_V_ERROR;
 
@@ -119,7 +119,7 @@ if (ctx->F->rp == NULL) {
     /* Copy factored symbolic row to permanent storage */
     col = list[m];
     while (count--) {
-      cval[idx] = (HYPRE_BigInt)col;  
+      cval[idx] = col;  
       fill[idx] = tmpFill[col];
       ++idx;
       col = list[col];
@@ -143,7 +143,7 @@ if (ctx->F->rp == NULL) {
        and re-zero work vector
      */
     for (j=rp[i]; j<rp[i+1]; ++j) {
-      col = (HYPRE_Int)cval[j];  
+      col = cval[j];  
       aval[j] = work[col];  
       work[col] = 0.0;
     } 
@@ -171,18 +171,17 @@ if (ctx->F->rp == NULL) {
 */
 #undef __FUNC__
 #define __FUNC__ "symbolic_row_private"
-HYPRE_Int symbolic_row_private(HYPRE_Int localRow, HYPRE_BigInt beg_row, HYPRE_BigInt end_row,
+HYPRE_Int symbolic_row_private(HYPRE_Int localRow, HYPRE_Int beg_row, HYPRE_Int end_row,
                  HYPRE_Int *list, HYPRE_Int *marker, HYPRE_Int *tmpFill,
-                 HYPRE_Int len, HYPRE_BigInt *CVAL, HYPRE_Real *AVAL,
+                 HYPRE_Int len, HYPRE_Int *CVAL, HYPRE_Real *AVAL,
                  HYPRE_Int *o2n_col, Euclid_dh ctx)
 {
   START_FUNC_DH
   HYPRE_Int level = ctx->level, m = ctx->F->m;
-  HYPRE_BigInt *cval = ctx->F->cval, col;
-  HYPRE_Int *diag = ctx->F->diag, *rp = ctx->F->rp; 
+  HYPRE_Int *cval = ctx->F->cval, *diag = ctx->F->diag, *rp = ctx->F->rp; 
   HYPRE_Int *fill = ctx->F->fill;
   HYPRE_Int count = 0;
-  HYPRE_Int j, node, tmp, head;
+  HYPRE_Int j, node, tmp, col, head;
   HYPRE_Int fill1, fill2;
   float val;
   HYPRE_Real thresh = ctx->sparseTolA;
@@ -203,15 +202,15 @@ HYPRE_Int symbolic_row_private(HYPRE_Int localRow, HYPRE_BigInt beg_row, HYPRE_B
 
     /* throw out nonlocal columns */
     if (col >= beg_row && col < end_row) {
-        HYPRE_Int col0 = (HYPRE_Int)(col - beg_row);        /* adjust column to local zero-based */
-        col0 = o2n_col[col0];    /* permute column */
-      if (fabs(scale*val) > thresh || col0 == localRow) {  /* sparsification */
+        col -= beg_row;        /* adjust column to local zero-based */
+        col = o2n_col[col];    /* permute column */
+      if (fabs(scale*val) > thresh || col == localRow) {  /* sparsification */
         ++count;
-        while (col0 > list[tmp]) tmp = list[tmp];
-        list[col0]   = list[tmp];
-        list[tmp]   = col0;
-        tmpFill[col0] = 0;
-        marker[col0] = localRow;
+        while (col > list[tmp]) tmp = list[tmp];
+        list[col]   = list[tmp];
+        list[tmp]   = col;
+        tmpFill[col] = 0;
+        marker[col] = localRow;
       }
     }
   }
@@ -238,26 +237,26 @@ HYPRE_Int symbolic_row_private(HYPRE_Int localRow, HYPRE_BigInt beg_row, HYPRE_B
 
       if (fill1 < level) {
         for (j = diag[node]+1; j<rp[node+1]; ++j) {
-          HYPRE_Int col0 = (HYPRE_Int)cval[j];
+          col = cval[j];
           fill2 = fill1 + fill[j] + 1;
 
           if (fill2 <= level) {
             /* if newly discovered fill entry, mark it as discovered;
              * if entry has level <= K, add it to the linked-list.
              */
-            if (marker[col0] < localRow) {
+            if (marker[col] < localRow) {
               tmp = head;
-              marker[col0] = localRow;
-              tmpFill[col0] = fill2;
-              while (col0 > list[tmp]) tmp = list[tmp];
-              list[col0] = list[tmp];
-              list[tmp]    = col0;
+              marker[col] = localRow;
+              tmpFill[col] = fill2;
+              while (col > list[tmp]) tmp = list[tmp];
+              list[col] = list[tmp];
+              list[tmp]    = col;
               ++count; /* increment fill count */
             }
 
             /* if previously-discovered fill, update the entry's level. */
             else {
-              tmpFill[col0] = (fill2 < tmpFill[col0]) ? fill2 : tmpFill[col0];
+              tmpFill[col] = (fill2 < tmpFill[col]) ? fill2 : tmpFill[col];
             }
           }
         }
@@ -271,15 +270,14 @@ HYPRE_Int symbolic_row_private(HYPRE_Int localRow, HYPRE_BigInt beg_row, HYPRE_B
 
 #undef __FUNC__
 #define __FUNC__ "numeric_row_private"
-HYPRE_Int numeric_row_private(HYPRE_Int localRow, HYPRE_BigInt beg_row, HYPRE_BigInt end_row,
-                        HYPRE_Int len, HYPRE_BigInt *CVAL, HYPRE_Real *AVAL,
+HYPRE_Int numeric_row_private(HYPRE_Int localRow, HYPRE_Int beg_row, HYPRE_Int end_row,
+                        HYPRE_Int len, HYPRE_Int *CVAL, HYPRE_Real *AVAL,
                         REAL_DH *work, HYPRE_Int *o2n_col, Euclid_dh ctx)
 {
   START_FUNC_DH
   HYPRE_Real  pc, pv, multiplier;
   HYPRE_Int     j, k, col, row;
-  HYPRE_Int     *rp = ctx->F->rp;
-  HYPRE_BigInt  *cval = ctx->F->cval, big_col;
+  HYPRE_Int     *rp = ctx->F->rp, *cval = ctx->F->cval;
   HYPRE_Int     *diag = ctx->F->diag;
   HYPRE_Real  val;
   REAL_DH *aval = ctx->F->aval, scale;
@@ -291,18 +289,18 @@ HYPRE_Int numeric_row_private(HYPRE_Int localRow, HYPRE_BigInt beg_row, HYPRE_Bi
            local (zero-based)
    */
   for (j=rp[localRow]; j<rp[localRow+1]; ++j) { 
-    col = (HYPRE_Int)cval[j];  
+    col = cval[j];  
     work[col] = 0.0; 
   }
 
   /* init work vector with values from A */
   /* (note: some values may be na due to sparsification; this is O.K.) */
   for (j=0; j<len; ++j) {
-    big_col = *CVAL++;
+    col = *CVAL++;
     val = *AVAL++;
 
-    if (big_col >= beg_row && big_col < end_row) {
-      col = (HYPRE_Int)(big_col-beg_row);        /* adjust column to local zero-based */
+    if (col >= beg_row && col < end_row) {
+      col -= beg_row;        /* adjust column to local zero-based */
       col = o2n_col[col];    /* we permute the indices from A */
       work[col] = val*scale;
     }
@@ -318,7 +316,7 @@ HYPRE_Int numeric_row_private(HYPRE_Int localRow, HYPRE_BigInt beg_row, HYPRE_Bi
       work[row] = multiplier;
 
       for (k=diag[row]+1; k<rp[row+1]; ++k) {
-        col = (HYPRE_Int)cval[k];
+        col = cval[k];
         work[col] -= (multiplier * aval[k]);
       }
     }

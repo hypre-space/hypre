@@ -111,7 +111,7 @@ struct _mpi_interface_dh {
     */
 
   HYPRE_Int m;         /* local rows in matrix */
-  HYPRE_BigInt n;         /* global rows in matrix */
+  HYPRE_Int n;         /* global rows in matrix */
   HYPRE_Real *rhs;   /* used for debugging; this vector is not owned! */
   void *A;       /*  PETSc, HYPRE, Euclid, or other matrix object. */
   Factor_dh F;   /* data structure for the factor, F = L+U-I */

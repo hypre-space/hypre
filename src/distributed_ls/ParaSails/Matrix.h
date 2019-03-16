@@ -34,15 +34,15 @@ typedef struct
 {
     MPI_Comm comm;
 
-    HYPRE_BigInt      beg_row;
-    HYPRE_BigInt      end_row;
-    HYPRE_BigInt     *beg_rows;
-    HYPRE_BigInt     *end_rows;
+    HYPRE_Int      beg_row;
+    HYPRE_Int      end_row;
+    HYPRE_Int     *beg_rows;
+    HYPRE_Int     *end_rows;
 
     Mem     *mem;
 
     HYPRE_Int     *lens;
-    HYPRE_BigInt **inds;
+    HYPRE_Int    **inds;
     HYPRE_Real **vals;
 
     HYPRE_Int     num_recv;
@@ -51,7 +51,7 @@ typedef struct
     HYPRE_Int     sendlen;
     HYPRE_Int     recvlen;
 
-    HYPRE_BigInt *sendind;
+    HYPRE_Int    *sendind;
     HYPRE_Real *sendbuf;
     HYPRE_Real *recvbuf;
 
@@ -65,16 +65,16 @@ typedef struct
 }
 Matrix;
 
-Matrix *MatrixCreate(MPI_Comm comm, HYPRE_BigInt beg_row, HYPRE_BigInt end_row);
-Matrix *MatrixCreateLocal(HYPRE_BigInt beg_row, HYPRE_BigInt end_row);
+Matrix *MatrixCreate(MPI_Comm comm, HYPRE_Int beg_row, HYPRE_Int end_row);
+Matrix *MatrixCreateLocal(HYPRE_Int beg_row, HYPRE_Int end_row);
 void MatrixDestroy(Matrix *mat);
-void MatrixSetRow(Matrix *mat, HYPRE_BigInt row, HYPRE_Int len, HYPRE_BigInt *ind, HYPRE_Real *val);
-void MatrixGetRow(Matrix *mat, HYPRE_BigInt row, HYPRE_Int *lenp, HYPRE_BigInt **indp, HYPRE_Real **valp);
-HYPRE_Int  MatrixRowPe(Matrix *mat, HYPRE_BigInt row);
+void MatrixSetRow(Matrix *mat, HYPRE_Int row, HYPRE_Int len, HYPRE_Int *ind, HYPRE_Real *val);
+void MatrixGetRow(Matrix *mat, HYPRE_Int row, HYPRE_Int *lenp, HYPRE_Int **indp, HYPRE_Real **valp);
+HYPRE_Int  MatrixRowPe(Matrix *mat, HYPRE_Int row);
 void MatrixPrint(Matrix *mat, char *filename);
 void MatrixRead(Matrix *mat, char *filename);
 void RhsRead(HYPRE_Real *rhs, Matrix *mat, char *filename);
-HYPRE_BigInt  MatrixNnz(Matrix *mat);
+HYPRE_Int  MatrixNnz(Matrix *mat);
 
 void MatrixComplete(Matrix *mat);
 void MatrixMatvec(Matrix *mat, HYPRE_Real *x, HYPRE_Real *y);

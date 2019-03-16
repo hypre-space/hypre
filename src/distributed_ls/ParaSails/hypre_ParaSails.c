@@ -46,7 +46,7 @@ static void balance_info(MPI_Comm comm, Matrix *mat)
    HYPRE_Int mype, num_local, i, total;
 
    hypre_MPI_Comm_rank(comm, &mype);
-   num_local = (HYPRE_Int)(mat->end_row - mat->beg_row + 1);
+   num_local = mat->end_row - mat->beg_row + 1;
 
    /* compute number of nonzeros on local matrix */
    total = 0;
@@ -65,7 +65,7 @@ static void matvec_timing(MPI_Comm comm, Matrix *mat)
    HYPRE_Real trial1, trial2, trial3, trial4, trial5, trial6;
    HYPRE_Real *temp1, *temp2;
    HYPRE_Int i, mype;
-   HYPRE_Int n = (HYPRE_Int)(mat->end_row - mat->beg_row + 1);
+   HYPRE_Int n = mat->end_row - mat->beg_row + 1;
 
    temp1 = hypre_CTAlloc(HYPRE_Real, n, HYPRE_MEMORY_HOST);
    temp2 = hypre_CTAlloc(HYPRE_Real, n, HYPRE_MEMORY_HOST);
@@ -142,8 +142,8 @@ static void matvec_timing(MPI_Comm comm, Matrix *mat)
 
 static Matrix *convert_matrix(MPI_Comm comm, HYPRE_DistributedMatrix distmat)
 {
-   HYPRE_BigInt beg_row, end_row, row, dummy, *ind;
-   HYPRE_Int len;
+   HYPRE_Int beg_row, end_row, row, dummy;
+   HYPRE_Int len, *ind;
    HYPRE_Real *val;
    Matrix *mat;
 
@@ -346,9 +346,9 @@ hypre_ParaSailsBuildIJMatrix(hypre_ParaSails obj, HYPRE_IJMatrix *pij_A)
    ParaSails *ps = internal->ps;
    Matrix *mat = internal->ps->M;
 
-   HYPRE_Int *diag_sizes, *offdiag_sizes, local_row, j;
+   HYPRE_Int *diag_sizes, *offdiag_sizes, local_row, i, j;
    HYPRE_Int size;
-   HYPRE_BigInt *col_inds, i;
+   HYPRE_Int *col_inds;
    HYPRE_Real *values;
 
    HYPRE_IJMatrixCreate( ps->comm, ps->beg_row, ps->end_row,
@@ -357,8 +357,8 @@ hypre_ParaSailsBuildIJMatrix(hypre_ParaSails obj, HYPRE_IJMatrix *pij_A)
 
    HYPRE_IJMatrixSetObjectType( *pij_A, HYPRE_PARCSR );
 
-   diag_sizes = hypre_CTAlloc(HYPRE_Int,  (HYPRE_Int)(ps->end_row - ps->beg_row + 1), HYPRE_MEMORY_HOST);
-   offdiag_sizes = hypre_CTAlloc(HYPRE_Int,  (HYPRE_Int)(ps->end_row - ps->beg_row + 1), HYPRE_MEMORY_HOST);
+   diag_sizes = hypre_CTAlloc(HYPRE_Int,  ps->end_row - ps->beg_row + 1, HYPRE_MEMORY_HOST);
+   offdiag_sizes = hypre_CTAlloc(HYPRE_Int,  ps->end_row - ps->beg_row + 1, HYPRE_MEMORY_HOST);
    local_row = 0;
    for (i=ps->beg_row; i<= ps->end_row; i++)
    {
@@ -387,7 +387,7 @@ hypre_ParaSailsBuildIJMatrix(hypre_ParaSails obj, HYPRE_IJMatrix *pij_A)
    {
       MatrixGetRow(mat, local_row, &size, &col_inds, &values);
 
-      HYPRE_IJMatrixSetValues( *pij_A, 1, &size, &i, (const HYPRE_BigInt *) col_inds,
+      HYPRE_IJMatrixSetValues( *pij_A, 1, &size, &i, (const HYPRE_Int *) col_inds,
                                (const HYPRE_Real *) values );
 
       NumberingGlobalToLocal(ps->numb, size, col_inds, col_inds);

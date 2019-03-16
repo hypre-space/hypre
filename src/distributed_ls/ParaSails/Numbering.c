@@ -50,26 +50,25 @@
 Numbering *NumberingCreate(Matrix *mat, HYPRE_Int size)
 {
     Numbering *numb = hypre_TAlloc(Numbering, 1, HYPRE_MEMORY_HOST);
-    HYPRE_Int i, len;
-    HYPRE_BigInt row, *ind;
+    HYPRE_Int row, i, len, *ind;
     HYPRE_Real *val;
     HYPRE_Int num_external = 0;
 
     numb->size    = size;
     numb->beg_row = mat->beg_row;
     numb->end_row = mat->end_row;
-    numb->num_loc = (HYPRE_Int)(mat->end_row - mat->beg_row + 1);
-    numb->num_ind = (HYPRE_Int)(mat->end_row - mat->beg_row + 1);
+    numb->num_loc = mat->end_row - mat->beg_row + 1;
+    numb->num_ind = mat->end_row - mat->beg_row + 1;
 
-    numb->local_to_global = hypre_TAlloc(HYPRE_BigInt, (numb->num_loc+size) , HYPRE_MEMORY_HOST);
+    numb->local_to_global = hypre_TAlloc(HYPRE_Int, (numb->num_loc+size) , HYPRE_MEMORY_HOST);
     numb->hash            = HashCreate(2*size+1);
 
     /* Set up the local part of local_to_global */
     for (i=0; i<numb->num_loc; i++)
-        numb->local_to_global[i] = mat->beg_row + (HYPRE_BigInt)i;
+        numb->local_to_global[i] = mat->beg_row + i;
 
     /* Fill local_to_global array */
-    for (row=0; row<=(mat->end_row - mat->beg_row); row++)
+    for (row=0; row<=mat->end_row - mat->beg_row; row++)
     {
         MatrixGetRow(mat, row, &len, &ind, &val);
 
@@ -86,8 +85,8 @@ Numbering *NumberingCreate(Matrix *mat, HYPRE_Int size)
 
 		        /* allocate more space for numbering */
 		        numb->size *= 2;
-		        numb->local_to_global = (HYPRE_BigInt *) 
-			    hypre_TReAlloc(numb->local_to_global,HYPRE_BigInt,  
+		        numb->local_to_global = (HYPRE_Int *) 
+			    hypre_TReAlloc(numb->local_to_global,HYPRE_Int,  
 			    (numb->num_loc+numb->size), HYPRE_MEMORY_HOST);
                         newHash = HashCreate(2*numb->size+1);
 		        HashRehash(numb->hash, newHash);
@@ -104,7 +103,7 @@ Numbering *NumberingCreate(Matrix *mat, HYPRE_Int size)
     }
 
     /* Sort the indices */
-    hypre_big_shell_sort(num_external, &numb->local_to_global[numb->num_loc]);
+    hypre_shell_sort(num_external, &numb->local_to_global[numb->num_loc]);
 
     /* Redo the hash table for the sorted indices */
     HashReset(numb->hash);
@@ -134,9 +133,9 @@ Numbering *NumberingCreateCopy(Numbering *orig)
     numb->num_ind = orig->num_ind;
 
     numb->local_to_global = 
-        hypre_TAlloc(HYPRE_BigInt, (numb->num_loc+numb->size) , HYPRE_MEMORY_HOST);
+        hypre_TAlloc(HYPRE_Int, (numb->num_loc+numb->size) , HYPRE_MEMORY_HOST);
     hypre_TMemcpy(numb->local_to_global,  orig->local_to_global,  
-				  HYPRE_BigInt, numb->num_ind, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+				  HYPRE_Int, numb->num_ind, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
 
     numb->hash = HashCreate(2*numb->size+1);
     HashRehash(orig->hash, numb->hash);
@@ -161,12 +160,12 @@ void NumberingDestroy(Numbering *numb)
  * numbering.  May be done in place.
  *--------------------------------------------------------------------------*/
 
-void NumberingLocalToGlobal(Numbering *numb, HYPRE_Int len, HYPRE_BigInt *local, HYPRE_BigInt *global)
+void NumberingLocalToGlobal(Numbering *numb, HYPRE_Int len, HYPRE_Int *local, HYPRE_Int *global)
 {
     HYPRE_Int i;
 
     for (i=0; i<len; i++)
-        global[i] = numb->local_to_global[(HYPRE_Int)local[i]];
+        global[i] = numb->local_to_global[local[i]];
 }
 
 /*--------------------------------------------------------------------------
@@ -175,7 +174,7 @@ void NumberingLocalToGlobal(Numbering *numb, HYPRE_Int len, HYPRE_BigInt *local,
  * to the numbering object.  May be done in place.
  *--------------------------------------------------------------------------*/
 
-void NumberingGlobalToLocal(Numbering *numb, HYPRE_Int len, HYPRE_BigInt *global, HYPRE_BigInt *local)
+void NumberingGlobalToLocal(Numbering *numb, HYPRE_Int len, HYPRE_Int *global, HYPRE_Int *local)
 {
     HYPRE_Int i, l;
 
@@ -196,9 +195,9 @@ void NumberingGlobalToLocal(Numbering *numb, HYPRE_Int len, HYPRE_BigInt *global
 #ifdef PARASAILS_DEBUG
 		    hypre_printf("Numbering resize %d\n", numb->size);
 #endif
-		    numb->local_to_global = (HYPRE_BigInt *) 
+		    numb->local_to_global = (HYPRE_Int *) 
 			realloc(numb->local_to_global, 
-			(numb->num_loc+numb->size)*sizeof(HYPRE_BigInt));
+			(numb->num_loc+numb->size)*sizeof(HYPRE_Int));
                     newHash = HashCreate(2*numb->size+1);
 		    HashRehash(numb->hash, newHash);
 		    HashDestroy(numb->hash);

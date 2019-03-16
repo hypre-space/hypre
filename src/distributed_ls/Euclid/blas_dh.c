@@ -15,7 +15,7 @@
 
 #undef __FUNC__
 #define __FUNC__ "matvec_euclid_seq"
-void matvec_euclid_seq(HYPRE_Int n, HYPRE_Int *rp, HYPRE_BigInt *cval, HYPRE_Real *aval, HYPRE_Real *x, HYPRE_Real *y)
+void matvec_euclid_seq(HYPRE_Int n, HYPRE_Int *rp, HYPRE_Int *cval, HYPRE_Real *aval, HYPRE_Real *x, HYPRE_Real *y)
 {
   START_FUNC_DH
   HYPRE_Int i, j;
@@ -38,7 +38,7 @@ void matvec_euclid_seq(HYPRE_Int n, HYPRE_Int *rp, HYPRE_BigInt *cval, HYPRE_Rea
         from = rp[i]; 
         to = rp[i+1];
         for (j=from; j<to; ++j) {
-          col = (HYPRE_Int)cval[j];
+          col = cval[j];
           sum += (aval[j]*x[col]);
         }
         y[i] = sum;

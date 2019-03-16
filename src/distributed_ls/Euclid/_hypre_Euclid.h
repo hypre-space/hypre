@@ -547,8 +547,8 @@ extern void ExternalRows_dhDestroy(ExternalRows_dh er);
 extern void ExternalRows_dhInit(ExternalRows_dh er, Euclid_dh ctx);
 extern void ExternalRows_dhRecvRows(ExternalRows_dh extRows);
 extern void ExternalRows_dhSendRows(ExternalRows_dh extRows);
-extern void ExternalRows_dhGetRow(ExternalRows_dh er, HYPRE_BigInt globalRow,
-                        HYPRE_Int *len, HYPRE_BigInt **cval, HYPRE_Int **fill, REAL_DH **aval);
+extern void ExternalRows_dhGetRow(ExternalRows_dh er, HYPRE_Int globalRow,
+                        HYPRE_Int *len, HYPRE_Int **cval, HYPRE_Int **fill, REAL_DH **aval);
 
 struct _extrows_dh {
     SubdomainGraph_dh sg;  /* not owned! */
@@ -571,10 +571,10 @@ struct _extrows_dh {
     HYPRE_Int rcv_row_counts[MAX_MPI_TASKS]; /* P_i will send rcv_row_counts[i] rows */
     HYPRE_Int rcv_nz_counts[MAX_MPI_TASKS];  /* P_i's rows contain rcv_nz_counts[i] nonzeros */
     HYPRE_Int *rcv_row_lengths[MAX_MPI_TASKS];  /* rcv_row_lengths[i][] lists the length of each row */
-    HYPRE_BigInt *rcv_row_numbers[MAX_MPI_TASKS];  /* rcv_row_lengths[i][] lists the length of each row */
+    HYPRE_Int *rcv_row_numbers[MAX_MPI_TASKS];  /* rcv_row_lengths[i][] lists the length of each row */
 
     /* for reception of the actual rows: */
-    HYPRE_BigInt      *cvalExt;
+    HYPRE_Int      *cvalExt;
     HYPRE_Int      *fillExt;
     REAL_DH  *avalExt;
 
@@ -586,11 +586,11 @@ struct _extrows_dh {
      *--------------------------------------------------------------------------*/
     /* for sending row counts, numbers, and lengths: */
     HYPRE_Int *my_row_counts;     /* my_row_counts[i] = nzcount in upper tri portion o */
-    HYPRE_BigInt *my_row_numbers;    /* my_row_numbers[i] = global row number of local ro */
+    HYPRE_Int *my_row_numbers;    /* my_row_numbers[i] = global row number of local ro */
 
     /* for sending the actual rows: */
     HYPRE_Int     nzSend;      /* total entries in upper tri portions of bdry rows */
-    HYPRE_BigInt     *cvalSend;
+    HYPRE_Int     *cvalSend;
     HYPRE_Int     *fillSend;
     REAL_DH  *avalSend;
 
@@ -620,7 +620,7 @@ struct _factor_dh {
   HYPRE_Int m, n;    
 
   HYPRE_Int id;          /* this subdomain's id after reordering */
-  HYPRE_BigInt beg_row;     /* global number of 1st locally owned row */
+  HYPRE_Int beg_row;     /* global number of 1st locally owned row */
   HYPRE_Int first_bdry;  /* local number of first boundary row */
   HYPRE_Int bdry_count;  /* m - first_boundary */
 
@@ -631,7 +631,7 @@ struct _factor_dh {
 
   /* sparse row-oriented storage for locally owned submatrix */
   HYPRE_Int *rp;       
-  HYPRE_BigInt *cval;
+  HYPRE_Int *cval;
   REAL_DH *aval;
   HYPRE_Int *fill;
   HYPRE_Int *diag;
@@ -666,7 +666,7 @@ extern void Factor_dhDestroy(Factor_dh mat);
 extern void Factor_dhTranspose(Factor_dh matIN, Factor_dh *matOUT);
 
 extern void Factor_dhInit(void *A, bool fillFlag, bool avalFlag,
-                          HYPRE_Real rho, HYPRE_Int id, HYPRE_BigInt beg_rowP, Factor_dh *F);
+                          HYPRE_Real rho, HYPRE_Int id, HYPRE_Int beg_rowP, Factor_dh *F);
 
 extern void Factor_dhReallocate(Factor_dh F, HYPRE_Int used, HYPRE_Int additional);
   /* ensures fill, cval, and aval arrays can accomodate
@@ -824,7 +824,7 @@ struct _matgenfd {
    */
   HYPRE_Real a, b, c, d, e, f, g, h;
 
-  HYPRE_BigInt first; /* global number of first locally owned row */
+  HYPRE_Int first; /* global number of first locally owned row */
   bool debug;
 
   /* boundary conditions; if value is < 0, neumen; else, dirichelet */
@@ -914,17 +914,16 @@ extern HYPRE_Real box_2(HYPRE_Real coeff, HYPRE_Real x, HYPRE_Real y, HYPRE_Real
 #define MATVEC_WORDS      4  /* total words sent to other procs. */
 
 struct _mat_dh {
-  HYPRE_Int m;    /* dimensions of local rectangular submatrix*/
-  HYPRE_BigInt n;    /* dimensions of local rectangular submatrix;
+  HYPRE_Int m, n;    /* dimensions of local rectangular submatrix;
                 * the global matrix is n by n.
                 */
-  HYPRE_BigInt beg_row;   /* global number of 1st locally owned row */
+  HYPRE_Int beg_row;   /* global number of 1st locally owned row */
   HYPRE_Int bs;        /* block size */
 
   /* sparse row-oriented storage for locally owned submatrix */
   HYPRE_Int *rp;       
   HYPRE_Int *len;   /* length of each row; only used for MPI triangular solves */
-  HYPRE_BigInt *cval;
+  HYPRE_Int *cval;
   HYPRE_Int *fill;
   HYPRE_Int *diag;
   HYPRE_Real *aval;
@@ -933,7 +932,7 @@ struct _mat_dh {
   /* working space for getRow */
   HYPRE_Int len_private;
   HYPRE_Int rowCheckedOut;
-  HYPRE_BigInt *cval_private;
+  HYPRE_Int *cval_private;
   HYPRE_Real *aval_private;
 
   /* row permutations to increase positive definiteness */
@@ -951,7 +950,7 @@ struct _mat_dh {
   hypre_MPI_Request  *recv_req;
   hypre_MPI_Request  *send_req; 
   HYPRE_Real   *recvbuf, *sendbuf;  
-  HYPRE_BigInt       *sendind;
+  HYPRE_Int          *sendind;
   HYPRE_Int          sendlen;               
   HYPRE_Int          recvlen;               
   bool         matvecIsSetup;
@@ -1024,11 +1023,11 @@ extern void Mat_dhFixDiags(Mat_dh A);
 
 extern void Mat_dhPrintDiags(Mat_dh A, FILE *fp);
 
-extern void Mat_dhGetRow(Mat_dh B, HYPRE_BigInt globalRow, HYPRE_Int *len, HYPRE_BigInt **ind, HYPRE_Real **val);
-extern void Mat_dhRestoreRow(Mat_dh B, HYPRE_BigInt row, HYPRE_Int *len, HYPRE_BigInt **ind, HYPRE_Real **val);
+extern void Mat_dhGetRow(Mat_dh B, HYPRE_Int globalRow, HYPRE_Int *len, HYPRE_Int **ind, HYPRE_Real **val);
+extern void Mat_dhRestoreRow(Mat_dh B, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, HYPRE_Real **val);
 
   /* partition matrix into "k" blocks.  User must free storage. */
-extern void Mat_dhPartition(Mat_dh mat, HYPRE_Int k, HYPRE_BigInt **beg_rowOUT, 
+extern void Mat_dhPartition(Mat_dh mat, HYPRE_Int k, HYPRE_Int **beg_rowOUT, 
                             HYPRE_Int **row_countOUT, HYPRE_Int **n2oOUT, HYPRE_Int **o2nOUT);
 
 
@@ -1087,8 +1086,8 @@ struct _subdomain_dh {
                      this array is probably only useful for debugging.
                    */
 
-  HYPRE_BigInt *beg_row;   /* global ordering of first local row owned by P_i */
-  HYPRE_BigInt *beg_rowP;  /* global ordering of first local row owned by P_i after
+  HYPRE_Int *beg_row;   /* global ordering of first local row owned by P_i */
+  HYPRE_Int *beg_rowP;  /* global ordering of first local row owned by P_i after
                      subdomain reordering 
                    */
   HYPRE_Int *row_count; /* P_i owns row_count[i] local rows */
@@ -1282,7 +1281,6 @@ extern void  Mem_dhPrint(Mem_dh m, FILE* fp, bool allPrint);
 /* #include "euclid_common.h" */
 
 extern void shellSort_int(const HYPRE_Int n, HYPRE_Int *x);
-extern void shellSort_bigint(const HYPRE_Int n, HYPRE_BigInt *x);
 extern void shellSort_float(HYPRE_Int n, HYPRE_Real *v);
 
 /*
@@ -1317,11 +1315,11 @@ struct _numbering_dh {
   HYPRE_Int   size;    /* max number of indices that can be stored;
                     (length of idx_ext[]) 
                   */
-  HYPRE_BigInt   first;   /* global number of 1st local index (row) */
+  HYPRE_Int   first;   /* global number of 1st local index (row) */
   HYPRE_Int   m;       /* number of local indices (number of local rows in mat) */
-  HYPRE_BigInt   *idx_ext;   /* sorted list of external indices */
-  HYPRE_BigInt   *idx_extLo; /* sorted list of external indices that are < first */
-  HYPRE_BigInt   *idx_extHi; /* sorted list of external indices that are >= first+m */
+  HYPRE_Int   *idx_ext;   /* sorted list of external indices */
+  HYPRE_Int   *idx_extLo; /* sorted list of external indices that are < first */
+  HYPRE_Int   *idx_extHi; /* sorted list of external indices that are >= first+m */
   HYPRE_Int   num_ext; /* number of external (non-local) indices = num_extLo+num_extHi */
   HYPRE_Int   num_extLo; /* number of external indices < first */
   HYPRE_Int   num_extHi; /* number of external indices >= first+num_loc */
@@ -1344,7 +1342,7 @@ extern void Numbering_dhSetup(Numbering_dh numb, Mat_dh mat);
      note: global_in[] and local_out[] may be identical.
    */
 extern void Numbering_dhGlobalToLocal(Numbering_dh numb, HYPRE_Int len, 
-                                      HYPRE_BigInt *global_in, HYPRE_BigInt *local_out);
+                                      HYPRE_Int *global_in, HYPRE_Int *local_out);
 
 #endif
 /*BHEADER**********************************************************************
@@ -1384,7 +1382,7 @@ extern void Hash_i_dhCreate(Hash_i_dh *h, HYPRE_Int size);
 extern void Hash_i_dhDestroy(Hash_i_dh h);
 extern void Hash_i_dhReset(Hash_i_dh h);
 
-extern void Hash_i_dhInsert(Hash_i_dh h, HYPRE_Int key, HYPRE_BigInt data);
+extern void Hash_i_dhInsert(Hash_i_dh h, HYPRE_Int key, HYPRE_Int data);
   /* throws error if <data, data> is already inserted;
      grows hash table if out of space.
    */
@@ -1582,7 +1580,7 @@ extern void Parser_dhInit(Parser_dh p, HYPRE_Int argc, char *argv[]);
 /* #include "euclid_common.h" */
 
 typedef struct _srecord {
-    HYPRE_BigInt    col;
+    HYPRE_Int    col;
     HYPRE_Int    level;
     HYPRE_Real val;
     HYPRE_Int next;
@@ -1679,9 +1677,9 @@ extern void SortedList_dhUpdateVal(SortedList_dh sList, SRecord *sr);
    in hashing <key, HYPRE_Int> pairs!
 */
 typedef struct _hash_node {
-  HYPRE_BigInt     iData;      /* integer */
+  HYPRE_Int     iData;      /* integer */
   HYPRE_Real  fData;      /* float */
-  HYPRE_BigInt     *iDataPtr;  /* pointer to integer */
+  HYPRE_Int     *iDataPtr;  /* pointer to integer */
   HYPRE_Int     *iDataPtr2; /* pointer to integer */
   HYPRE_Real  *fDataPtr;  /* pointer to float */
 } HashData;
@@ -1742,16 +1740,16 @@ extern void Hash_dhPrint(Hash_dh h, FILE *fp);
 
 /* #include "euclid_common.h" */
 
-extern HYPRE_Int mat_find_owner(HYPRE_BigInt *beg_rows, HYPRE_BigInt *end_rows, HYPRE_Int index);
+extern HYPRE_Int mat_find_owner(HYPRE_Int *beg_rows, HYPRE_Int *end_rows, HYPRE_Int index);
 
 extern void mat_dh_transpose_private(HYPRE_Int m, HYPRE_Int *rpIN, HYPRE_Int **rpOUT,
-                                     HYPRE_BigInt *cvalIN, HYPRE_BigInt **cvalOUT,
+                                     HYPRE_Int *cvalIN, HYPRE_Int **cvalOUT,
                                      HYPRE_Real *avalIN, HYPRE_Real **avalOUT);
 
   /* same as above, but memory for output was already allocated */
 extern void mat_dh_transpose_reuse_private(HYPRE_Int m, 
-                                     HYPRE_Int *rpIN, HYPRE_BigInt *cvalIN, HYPRE_Real *avalIN,
-                                     HYPRE_Int *rpOUT, HYPRE_BigInt *cvalOUT, HYPRE_Real *avalOUT);
+                                     HYPRE_Int *rpIN, HYPRE_Int *cvalIN, HYPRE_Real *avalIN,
+                                     HYPRE_Int *rpOUT, HYPRE_Int *cvalOUT, HYPRE_Real *avalOUT);
 
 /*-------------------------------------------------------------------------
  * utility functions for reading and writing matrices in various formats.
@@ -1802,28 +1800,28 @@ extern void profileMat(Mat_dh A);
  *-------------------------------------------------------------------------*/
 
 /* seq or mpi */
-extern void mat_dh_print_graph_private(HYPRE_Int m, HYPRE_BigInt beg_row, HYPRE_Int *rp, HYPRE_BigInt *cval, 
+extern void mat_dh_print_graph_private(HYPRE_Int m, HYPRE_Int beg_row, HYPRE_Int *rp, HYPRE_Int *cval, 
                    HYPRE_Real *aval, HYPRE_Int *n2o, HYPRE_Int *o2n, Hash_i_dh hash, FILE* fp);
 
 
 /* seq; reordering not implemented */
 /* see io_dh.h
-                                HYPRE_Int *rp, HYPRE_BigInt *cval, HYPRE_Real *aval, 
+                                HYPRE_Int *rp, HYPRE_Int *cval, HYPRE_Real *aval, 
                            HYPRE_Int *n2o, HYPRE_Int *o2n, Hash_i_dh hash, char *filename);
 */
 
 /* seq only */
-extern void mat_dh_print_csr_private(HYPRE_Int m, HYPRE_Int *rp, HYPRE_BigInt *cval, HYPRE_Real *aval,
+extern void mat_dh_print_csr_private(HYPRE_Int m, HYPRE_Int *rp, HYPRE_Int *cval, HYPRE_Real *aval,
                                                                     FILE* fp); 
 
 
 /* seq only */
-extern void mat_dh_read_csr_private(HYPRE_Int *m, HYPRE_Int **rp, HYPRE_BigInt **cval, HYPRE_Real **aval,
+extern void mat_dh_read_csr_private(HYPRE_Int *m, HYPRE_Int **rp, HYPRE_Int **cval, HYPRE_Real **aval,
                                                                     FILE* fp); 
 
 /* seq only */
 extern void mat_dh_read_triples_private(HYPRE_Int ignore, HYPRE_Int *m, HYPRE_Int **rp, 
-                                         HYPRE_BigInt **cval, HYPRE_Real **aval, FILE* fp); 
+                                         HYPRE_Int **cval, HYPRE_Real **aval, FILE* fp); 
 
 /* seq or mpi */ 
 /* see io_dh.h
@@ -1837,15 +1835,15 @@ extern void destroy_nat_ordering_private(HYPRE_Int *p);
 extern void invert_perm(HYPRE_Int m, HYPRE_Int *pIN, HYPRE_Int *pOUT);
 
 
-extern void make_full_private(HYPRE_Int m, HYPRE_Int **rp, HYPRE_BigInt **cval, HYPRE_Real **aval);
+extern void make_full_private(HYPRE_Int m, HYPRE_Int **rp, HYPRE_Int **cval, HYPRE_Real **aval);
   /* converts upper or lower triangular to full;
      may bomb if input is not triangular!
    */
 
-extern void make_symmetric_private(HYPRE_Int m, HYPRE_Int **rp, HYPRE_BigInt **cval, HYPRE_Real **aval);
+extern void make_symmetric_private(HYPRE_Int m, HYPRE_Int **rp, HYPRE_Int **cval, HYPRE_Real **aval);
   /* pads with zeros to make structurally symmetric. */
 
-extern void make_symmetric_private(HYPRE_Int m, HYPRE_Int **rp, HYPRE_BigInt **cval, HYPRE_Real **aval);
+extern void make_symmetric_private(HYPRE_Int m, HYPRE_Int **rp, HYPRE_Int **cval, HYPRE_Real **aval);
 
 #endif
 /*BHEADER**********************************************************************
@@ -1867,13 +1865,13 @@ extern void make_symmetric_private(HYPRE_Int m, HYPRE_Int **rp, HYPRE_BigInt **c
 
 /* "row" refers to global row number */
 
-extern void EuclidGetDimensions(void *A, HYPRE_BigInt *beg_row, HYPRE_Int *rowsLocal, HYPRE_BigInt *rowsGlobal);
-extern void EuclidGetRow(void *A, HYPRE_BigInt row, HYPRE_Int *len, HYPRE_BigInt **ind, HYPRE_Real **val);
-extern void EuclidRestoreRow(void *A, HYPRE_BigInt row, HYPRE_Int *len, HYPRE_BigInt **ind, HYPRE_Real **val);
+extern void EuclidGetDimensions(void *A, HYPRE_Int *beg_row, HYPRE_Int *rowsLocal, HYPRE_Int *rowsGlobal);
+extern void EuclidGetRow(void *A, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, HYPRE_Real **val);
+extern void EuclidRestoreRow(void *A, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, HYPRE_Real **val);
 
 extern HYPRE_Int EuclidReadLocalNz(void *A);
 
-extern void PrintMatUsingGetRow(void* A, HYPRE_BigInt beg_row, HYPRE_Int m,
+extern void PrintMatUsingGetRow(void* A, HYPRE_Int beg_row, HYPRE_Int m,
                           HYPRE_Int *n2o_row, HYPRE_Int *n2o_col, char *filename);
 
 
@@ -1897,7 +1895,7 @@ extern void PrintMatUsingGetRow(void* A, HYPRE_BigInt beg_row, HYPRE_Int m,
 /* #include "euclid_common.h" */
 
 void reallocate_private(HYPRE_Int row, HYPRE_Int newEntries, HYPRE_Int *nzHave,
-                HYPRE_Int **rp, HYPRE_BigInt **cval, float **aval, HYPRE_Real **avalD, HYPRE_Int **fill);
+                HYPRE_Int **rp, HYPRE_Int **cval, float **aval, HYPRE_Real **avalD, HYPRE_Int **fill);
 
 extern void ilu_mpi_pilu(Euclid_dh ctx);
   /* driver for comms intermingled with factorization */
@@ -2038,7 +2036,7 @@ struct _mpi_interface_dh {
     */
 
   HYPRE_Int m;         /* local rows in matrix */
-  HYPRE_BigInt n;         /* global rows in matrix */
+  HYPRE_Int n;         /* global rows in matrix */
   HYPRE_Real *rhs;   /* used for debugging; this vector is not owned! */
   void *A;       /*  PETSc, HYPRE, Euclid, or other matrix object. */
   Factor_dh F;   /* data structure for the factor, F = L+U-I */
@@ -2152,16 +2150,16 @@ extern void closeFile_dh(FILE *fpIN);
 bool isSmallEndian();
 
 /* seq only ?? */
-extern void io_dh_print_ebin_mat_private(HYPRE_Int m, HYPRE_BigInt beg_row,
-                                HYPRE_Int *rp, HYPRE_BigInt *cval, HYPRE_Real *aval, 
+extern void io_dh_print_ebin_mat_private(HYPRE_Int m, HYPRE_Int beg_row,
+                                HYPRE_Int *rp, HYPRE_Int *cval, HYPRE_Real *aval, 
                            HYPRE_Int *n2o, HYPRE_Int *o2n, Hash_i_dh hash, char *filename);
 
 /* seq only ?? */
-extern void io_dh_read_ebin_mat_private(HYPRE_Int *m, HYPRE_Int **rp, HYPRE_BigInt **cval,
+extern void io_dh_read_ebin_mat_private(HYPRE_Int *m, HYPRE_Int **rp, HYPRE_Int **cval,
                                      HYPRE_Real **aval, char *filename);
 
 /* seq only */
-extern void io_dh_print_ebin_vec_private(HYPRE_Int n, HYPRE_BigInt beg_row, HYPRE_Real *vals,
+extern void io_dh_print_ebin_vec_private(HYPRE_Int n, HYPRE_Int beg_row, HYPRE_Real *vals,
                            HYPRE_Int *n2o, HYPRE_Int *o2n, Hash_i_dh hash, char *filename);
 /* seq only */
 extern void io_dh_read_ebin_vec_private(HYPRE_Int *n, HYPRE_Real **vals, char *filename);
@@ -2196,7 +2194,7 @@ extern void io_dh_read_ebin_vec_private(HYPRE_Int *n, HYPRE_Real **vals, char *f
 #define MatVec       matvec_euclid_seq
 #endif
 
-extern void matvec_euclid_seq(HYPRE_Int n, HYPRE_Int *rp, HYPRE_BigInt *cval, HYPRE_Real *aval, HYPRE_Real *x, HYPRE_Real *y);
+extern void matvec_euclid_seq(HYPRE_Int n, HYPRE_Int *rp, HYPRE_Int *cval, HYPRE_Real *aval, HYPRE_Real *x, HYPRE_Real *y);
 extern HYPRE_Real InnerProd(HYPRE_Int local_n, HYPRE_Real *x, HYPRE_Real *y);
 extern HYPRE_Real Norm2(HYPRE_Int local_n, HYPRE_Real *x);
 extern void Axpy(HYPRE_Int n, HYPRE_Real alpha, HYPRE_Real *x, HYPRE_Real *y);

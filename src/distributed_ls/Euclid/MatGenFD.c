@@ -30,11 +30,11 @@ static bool isThreeD;
 #define BACK(a)   a[6]
 #define RHS(a)    a[7]
 
-static void setBoundary_private(HYPRE_Int node, HYPRE_BigInt *cval, HYPRE_Real *aval, HYPRE_Int len,
+static void setBoundary_private(HYPRE_Int node, HYPRE_Int *cval, HYPRE_Real *aval, HYPRE_Int len,
                  HYPRE_Real *rhs, HYPRE_Real bc, HYPRE_Real coeff, HYPRE_Real ctr, HYPRE_Int nabor);
-static void generateStriped(MatGenFD mg, HYPRE_Int *rp, HYPRE_BigInt *cval, 
+static void generateStriped(MatGenFD mg, HYPRE_Int *rp, HYPRE_Int *cval, 
                                     HYPRE_Real *aval, Mat_dh A, Vec_dh b);
-static void generateBlocked(MatGenFD mg, HYPRE_Int *rp, HYPRE_BigInt *cval, HYPRE_Real *aval, 
+static void generateBlocked(MatGenFD mg, HYPRE_Int *rp, HYPRE_Int *cval, HYPRE_Real *aval, 
                                                          Mat_dh A, Vec_dh b);
 static void getstencil(MatGenFD g, HYPRE_Int ix, HYPRE_Int iy, HYPRE_Int iz);
 
@@ -187,7 +187,7 @@ void MatGenFD_Run(MatGenFD mg, HYPRE_Int id, HYPRE_Int np, Mat_dh *AOut, Vec_dh 
   if (mg->allocateMem) {
     A->rp = (HYPRE_Int*)MALLOC_DH((m+1)*sizeof(HYPRE_Int)); CHECK_V_ERROR;
     A->rp[0] = 0;  
-    A->cval = (HYPRE_BigInt*)MALLOC_DH(nnz*sizeof(HYPRE_BigInt)); CHECK_V_ERROR
+    A->cval = (HYPRE_Int*)MALLOC_DH(nnz*sizeof(HYPRE_Int)); CHECK_V_ERROR
     A->aval = (HYPRE_Real*)MALLOC_DH(nnz*sizeof(HYPRE_Real)); CHECK_V_ERROR;
     /* rhs->vals = (HYPRE_Real*)MALLOC_DH(m*sizeof(HYPRE_Real)); CHECK_V_ERROR; */
   }
@@ -218,12 +218,12 @@ void MatGenFD_Run(MatGenFD mg, HYPRE_Int id, HYPRE_Int np, Mat_dh *AOut, Vec_dh 
 
 #undef __FUNC__
 #define __FUNC__ "generateStriped"
-void generateStriped(MatGenFD mg, HYPRE_Int *rp, HYPRE_BigInt *cval, HYPRE_Real *aval, Mat_dh A, Vec_dh b)
+void generateStriped(MatGenFD mg, HYPRE_Int *rp, HYPRE_Int *cval, HYPRE_Real *aval, Mat_dh A, Vec_dh b)
 {
   START_FUNC_DH
-  HYPRE_BigInt mGlobal;
+  HYPRE_Int mGlobal;
   HYPRE_Int m = mg->m;
-  HYPRE_BigInt beg_row, end_row;
+  HYPRE_Int beg_row, end_row;
   HYPRE_Int i, j, k, row;
   bool threeD = mg->threeD;
   HYPRE_Int idx = 0;
@@ -275,7 +275,7 @@ void generateStriped(MatGenFD mg, HYPRE_Int *rp, HYPRE_BigInt *cval, HYPRE_Real 
   }
 
   for (row = beg_row; row<end_row; ++row) {
-        HYPRE_Int localRow = (HYPRE_Int)(row-beg_row);
+        HYPRE_Int localRow = row-beg_row;
 
         /* compute current node's position in grid */
         k = (row / plane);      
@@ -650,7 +650,7 @@ HYPRE_Real box_2(HYPRE_Real coeff, HYPRE_Real x, HYPRE_Real y, HYPRE_Real z)
 
 #undef __FUNC__
 #define __FUNC__ "generateBlocked"
-void generateBlocked(MatGenFD mg, HYPRE_Int *rp, HYPRE_BigInt *cval, HYPRE_Real *aval, Mat_dh A, Vec_dh b)
+void generateBlocked(MatGenFD mg, HYPRE_Int *rp, HYPRE_Int *cval, HYPRE_Real *aval, Mat_dh A, Vec_dh b)
 {
   START_FUNC_DH
   bool applyBdry = true;
@@ -662,7 +662,7 @@ void generateBlocked(MatGenFD mg, HYPRE_Int *rp, HYPRE_BigInt *cval, HYPRE_Real 
   HYPRE_Int cc = mg->cc; /* local grid dimension (grid of unknowns) */
   HYPRE_Int nx = cc, ny = cc, nz = cc;
   HYPRE_Int lowerx, upperx, lowery, uppery, lowerz, upperz;
-  HYPRE_BigInt startRow;
+  HYPRE_Int startRow;
   HYPRE_Int x, y, z;
   bool debug = false;
   HYPRE_Int idx = 0, localRow = 0; /* nabor; */
@@ -797,7 +797,7 @@ hypre_fprintf(logFile, "--- row: %i;  x >= nx*px-1; nobors2 has old value: %i\n"
 
        /* apply boundary conditions; only for 2D! */
        if (!threeD && applyBdry) {
-         HYPRE_BigInt globalRow = localRow+startRow-1;
+         HYPRE_Int globalRow = localRow+startRow-1;
          HYPRE_Int offset = rp[localRow-1];
          HYPRE_Int len = rp[localRow] - rp[localRow-1];
          HYPRE_Real ctr, coeff;
@@ -847,7 +847,7 @@ hypre_fprintf(logFile, "--- row: %i;  x >= nx*px-1; nobors2 has old value: %i\n"
 
 #undef __FUNC__
 #define __FUNC__ "setBoundary_private"
-void setBoundary_private(HYPRE_Int node, HYPRE_BigInt *cval, HYPRE_Real *aval, HYPRE_Int len,
+void setBoundary_private(HYPRE_Int node, HYPRE_Int *cval, HYPRE_Real *aval, HYPRE_Int len,
                                HYPRE_Real *rhs, HYPRE_Real bc, HYPRE_Real coeff, HYPRE_Real ctr, HYPRE_Int nabor)
 {
   START_FUNC_DH

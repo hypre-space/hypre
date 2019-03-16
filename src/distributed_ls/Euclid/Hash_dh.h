@@ -22,12 +22,12 @@
 /* This should be done with templates, if this were in C++;
    for now, a record contains every type of entry we might
    need; this is a waste of memory, when one is only intersted
-   in hashing <key, HYPRE_BigInt> pairs!
+   in hashing <key, HYPRE_Int> pairs!
 */
 typedef struct _hash_node {
-  HYPRE_BigInt     iData;      /* integer */
+  HYPRE_Int     iData;      /* integer */
   HYPRE_Real  fData;      /* float */
-  HYPRE_BigInt  *iDataPtr;  /* pointer to integer */
+  HYPRE_Int     *iDataPtr;  /* pointer to integer */
   HYPRE_Int     *iDataPtr2; /* pointer to integer */
   HYPRE_Real  *fDataPtr;  /* pointer to float */
 } HashData;
@@ -37,9 +37,9 @@ typedef struct _hash_node_private HashRecord;
 
 /* data structure for the hash table; do not directly access */
 struct _hash_dh {
-  HYPRE_Int    size;   /* total slots in table */
-  HYPRE_Int    count;  /* number of insertions in table */
-  HYPRE_Int    curMark;
+  HYPRE_Int         size;   /* total slots in table */
+  HYPRE_Int         count;  /* number of insertions in table */
+  HYPRE_Int         curMark;
   HashRecord  *data;
 };
 

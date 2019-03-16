@@ -22,8 +22,8 @@ extern void ExternalRows_dhDestroy(ExternalRows_dh er);
 extern void ExternalRows_dhInit(ExternalRows_dh er, Euclid_dh ctx);
 extern void ExternalRows_dhRecvRows(ExternalRows_dh extRows);
 extern void ExternalRows_dhSendRows(ExternalRows_dh extRows);
-extern void ExternalRows_dhGetRow(ExternalRows_dh er, HYPRE_BigInt globalRow,
-                        HYPRE_Int *len, HYPRE_BigInt **cval, HYPRE_Int **fill, REAL_DH **aval);
+extern void ExternalRows_dhGetRow(ExternalRows_dh er, HYPRE_Int globalRow,
+                        HYPRE_Int *len, HYPRE_Int **cval, HYPRE_Int **fill, REAL_DH **aval);
 
 struct _extrows_dh {
     SubdomainGraph_dh sg;  /* not owned! */
@@ -46,10 +46,10 @@ struct _extrows_dh {
     HYPRE_Int rcv_row_counts[MAX_MPI_TASKS]; /* P_i will send rcv_row_counts[i] rows */
     HYPRE_Int rcv_nz_counts[MAX_MPI_TASKS];  /* P_i's rows contain rcv_nz_counts[i] nonzeros */
     HYPRE_Int *rcv_row_lengths[MAX_MPI_TASKS];  /* rcv_row_lengths[i][] lists the length of each row */
-    HYPRE_BigInt *rcv_row_numbers[MAX_MPI_TASKS];  /* rcv_row_lengths[i][] lists the length of each row */
+    HYPRE_Int *rcv_row_numbers[MAX_MPI_TASKS];  /* rcv_row_lengths[i][] lists the length of each row */
 
     /* for reception of the actual rows: */
-    HYPRE_BigInt      *cvalExt;
+    HYPRE_Int      *cvalExt;
     HYPRE_Int      *fillExt;
     REAL_DH  *avalExt;
 
@@ -61,11 +61,11 @@ struct _extrows_dh {
      *--------------------------------------------------------------------------*/
     /* for sending row counts, numbers, and lengths: */
     HYPRE_Int *my_row_counts;     /* my_row_counts[i] = nzcount in upper tri portion o */
-    HYPRE_BigInt *my_row_numbers;    /* my_row_numbers[i] = global row number of local ro */
+    HYPRE_Int *my_row_numbers;    /* my_row_numbers[i] = global row number of local ro */
 
     /* for sending the actual rows: */
     HYPRE_Int     nzSend;      /* total entries in upper tri portions of bdry rows */
-    HYPRE_BigInt     *cvalSend;
+    HYPRE_Int     *cvalSend;
     HYPRE_Int     *fillSend;
     REAL_DH  *avalSend;
 

@@ -49,14 +49,14 @@ typedef struct
     Matrix    *M;             /* preconditioner */
 
     MPI_Comm   comm;
-    HYPRE_BigInt        beg_row;
-    HYPRE_BigInt        end_row;
-    HYPRE_BigInt       *beg_rows;
-    HYPRE_BigInt       *end_rows;
+    HYPRE_Int        beg_row;
+    HYPRE_Int        end_row;
+    HYPRE_Int       *beg_rows;
+    HYPRE_Int       *end_rows;
 }
 ParaSails;
 
-ParaSails *ParaSailsCreate(MPI_Comm comm, HYPRE_BigInt beg_row, HYPRE_BigInt end_row, HYPRE_Int sym);
+ParaSails *ParaSailsCreate(MPI_Comm comm, HYPRE_Int beg_row, HYPRE_Int end_row, HYPRE_Int sym);
 void ParaSailsDestroy(ParaSails *ps);
 void ParaSailsSetupPattern(ParaSails *ps, Matrix *A, 
   HYPRE_Real thresh, HYPRE_Int num_levels);

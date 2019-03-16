@@ -25,7 +25,7 @@
 #define MatVec       matvec_euclid_seq
 #endif
 
-extern void matvec_euclid_seq(HYPRE_Int n, HYPRE_Int *rp, HYPRE_BigInt *cval, HYPRE_Real *aval, HYPRE_Real *x, HYPRE_Real *y);
+extern void matvec_euclid_seq(HYPRE_Int n, HYPRE_Int *rp, HYPRE_Int *cval, HYPRE_Real *aval, HYPRE_Real *x, HYPRE_Real *y);
 extern HYPRE_Real InnerProd(HYPRE_Int local_n, HYPRE_Real *x, HYPRE_Real *y);
 extern HYPRE_Real Norm2(HYPRE_Int local_n, HYPRE_Real *x);
 extern void Axpy(HYPRE_Int n, HYPRE_Real alpha, HYPRE_Real *x, HYPRE_Real *y);

@@ -46,7 +46,7 @@ static void resize(RowPatt *p, HYPRE_Int newlen)
     oldlen = p->maxlen;
     p->maxlen = newlen;
 
-    p->ind  = hypre_TReAlloc(p->ind,HYPRE_BigInt,   p->maxlen , HYPRE_MEMORY_HOST);
+    p->ind  = hypre_TReAlloc(p->ind,HYPRE_Int,   p->maxlen , HYPRE_MEMORY_HOST);
     p->mark = hypre_TReAlloc(p->mark,HYPRE_Int,  p->maxlen , HYPRE_MEMORY_HOST);
 
     /* initialize the new portion of the mark array */
@@ -67,7 +67,7 @@ RowPatt *RowPattCreate(HYPRE_Int maxlen)
     p->maxlen   = maxlen;
     p->len      = 0;
     p->prev_len = 0;
-    p->ind      = hypre_TAlloc(HYPRE_BigInt, maxlen , HYPRE_MEMORY_HOST);
+    p->ind      = hypre_TAlloc(HYPRE_Int, maxlen , HYPRE_MEMORY_HOST);
     p->mark     = hypre_TAlloc(HYPRE_Int, maxlen , HYPRE_MEMORY_HOST);
     p->buffer   = NULL;
     p->buflen   = 0;
@@ -109,7 +109,7 @@ void RowPattReset(RowPatt *p)
  * RowPattMerge - Merge the "len" nonzeros in array "ind" with pattern "p".
  *--------------------------------------------------------------------------*/
 
-void RowPattMerge(RowPatt *p, HYPRE_Int len, HYPRE_BigInt *ind)
+void RowPattMerge(RowPatt *p, HYPRE_Int len, HYPRE_Int *ind)
 {
     HYPRE_Int i;
 
@@ -135,7 +135,7 @@ void RowPattMerge(RowPatt *p, HYPRE_Int len, HYPRE_BigInt *ind)
  * that are less than "beg" or greater than "end".
  *--------------------------------------------------------------------------*/
 
-void RowPattMergeExt(RowPatt *p, HYPRE_Int len, HYPRE_BigInt *ind, HYPRE_Int num_loc)
+void RowPattMergeExt(RowPatt *p, HYPRE_Int len, HYPRE_Int *ind, HYPRE_Int num_loc)
 {
     HYPRE_Int i;
 
@@ -165,7 +165,7 @@ void RowPattMergeExt(RowPatt *p, HYPRE_Int len, HYPRE_BigInt *ind, HYPRE_Int num
  * call to RowPattGet or RowPattPrevLevel.
  *--------------------------------------------------------------------------*/
 
-void RowPattGet(RowPatt *p, HYPRE_Int *lenp, HYPRE_BigInt **indp)
+void RowPattGet(RowPatt *p, HYPRE_Int *lenp, HYPRE_Int **indp)
 {
     HYPRE_Int len;
 
@@ -175,10 +175,10 @@ void RowPattGet(RowPatt *p, HYPRE_Int *lenp, HYPRE_BigInt **indp)
     {
 	free(p->buffer);
 	p->buflen = len + 100;
-	p->buffer = hypre_TAlloc(HYPRE_BigInt, p->buflen , HYPRE_MEMORY_HOST);
+	p->buffer = hypre_TAlloc(HYPRE_Int, p->buflen , HYPRE_MEMORY_HOST);
     }
 
-    hypre_TMemcpy(p->buffer,  p->ind, HYPRE_BigInt, len, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+    hypre_TMemcpy(p->buffer,  p->ind, HYPRE_Int, len, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
 
     *lenp = len;
     *indp = p->buffer;
@@ -193,7 +193,7 @@ void RowPattGet(RowPatt *p, HYPRE_Int *lenp, HYPRE_BigInt **indp)
  * call to RowPattGet or RowPattPrevLevel.
  *--------------------------------------------------------------------------*/
 
-void RowPattPrevLevel(RowPatt *p, HYPRE_Int *lenp, HYPRE_BigInt **indp)
+void RowPattPrevLevel(RowPatt *p, HYPRE_Int *lenp, HYPRE_Int **indp)
 {
     HYPRE_Int len;
 
@@ -203,10 +203,10 @@ void RowPattPrevLevel(RowPatt *p, HYPRE_Int *lenp, HYPRE_BigInt **indp)
     {
 	free(p->buffer);
 	p->buflen = len + 100;
-	p->buffer = hypre_TAlloc(HYPRE_BigInt, p->buflen , HYPRE_MEMORY_HOST);
+	p->buffer = hypre_TAlloc(HYPRE_Int, p->buflen , HYPRE_MEMORY_HOST);
     }
 
-    hypre_TMemcpy(p->buffer,  &p->ind[p->prev_len], HYPRE_BigInt, len, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+    hypre_TMemcpy(p->buffer,  &p->ind[p->prev_len], HYPRE_Int, len, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
 
     *lenp = len;
     *indp = p->buffer;

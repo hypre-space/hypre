@@ -132,8 +132,7 @@ void Euclid_dhDestroy(Euclid_dh ctx)
 void Euclid_dhSetup(Euclid_dh ctx)
 {
   START_FUNC_DH
-  HYPRE_Int m;
-  HYPRE_BigInt n, beg_row;
+  HYPRE_Int m, n, beg_row;
   HYPRE_Real t1;
   bool isSetup = ctx->isSetup;
   bool bj = false;
@@ -594,8 +593,7 @@ void discard_indices_private(Euclid_dh ctx)
 {
   START_FUNC_DH
 #if 0
-  HYPRE_Int *rp = ctx->F->rp;
-  HYPRE_BigInt *cval = ctx->F->cval;
+  HYPRE_Int *rp = ctx->F->rp, *cval = ctx->F->cval;
   HYPRE_Real *aval = ctx->F->aval;
   HYPRE_Int m = F->m, *nabors = ctx->nabors, nc = ctx->naborCount;
   HYPRE_Int i, j, k, idx, count = 0, start_of_row;
@@ -609,7 +607,7 @@ void discard_indices_private(Euclid_dh ctx)
    */
   for (i=0; i<m; ++i) {
     for (j=rp[i]; j<rp[i+1]; ++j) {
-      HYPRE_BigInt col = cval[j];
+      HYPRE_Int col = cval[j];
       if (col < beg_row  || col >= end_row) {
         bool flag = true;
         HYPRE_Int owner = find_owner_private_mpi(ctx, col); CHECK_V_ERROR;
@@ -637,7 +635,7 @@ void discard_indices_private(Euclid_dh ctx)
   start_of_row = 0;
   for (i=0; i<m; ++i) {
     for (j=start_of_row; j<rp[i+1]; ++j) {
-      HYPRE_BigInt    col = cval[j];
+      HYPRE_Int    col = cval[j];
       HYPRE_Real val = aval[j];
       if (col != -1) { 
         cval[idx] = col;

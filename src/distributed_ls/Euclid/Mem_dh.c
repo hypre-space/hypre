@@ -79,7 +79,7 @@ void* Mem_dhMalloc(Mem_dh m, size_t size)
   address = PRIVATE_MALLOC(s);
 
   if (address == NULL) {
-    hypre_sprintf(msgBuf_dh, "PRIVATE_MALLOC failed; totalMem = %g; requested additional = %i", m->totalMem, (HYPRE_BigInt)s);
+    hypre_sprintf(msgBuf_dh, "PRIVATE_MALLOC failed; totalMem = %g; requested additional = %i", m->totalMem, (HYPRE_Int)s);
     SET_ERROR(NULL, msgBuf_dh);
   }
 

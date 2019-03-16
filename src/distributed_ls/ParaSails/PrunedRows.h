@@ -32,15 +32,15 @@ typedef struct
     HYPRE_Int      size;
 
     HYPRE_Int     *len;
-    HYPRE_BigInt **ind;
+    HYPRE_Int    **ind;
 }
 PrunedRows;
 
 PrunedRows *PrunedRowsCreate(Matrix *mat, HYPRE_Int size, DiagScale *diag_scale,
   HYPRE_Real thresh);
 void PrunedRowsDestroy(PrunedRows *p);
-HYPRE_BigInt *PrunedRowsAlloc(PrunedRows *p, HYPRE_Int len);
-void PrunedRowsPut(PrunedRows *p, HYPRE_BigInt index, HYPRE_Int len, HYPRE_BigInt *ind);
-void PrunedRowsGet(PrunedRows *p, HYPRE_BigInt index, HYPRE_Int *lenp, HYPRE_BigInt **indp);
+HYPRE_Int *PrunedRowsAlloc(PrunedRows *p, HYPRE_Int len);
+void PrunedRowsPut(PrunedRows *p, HYPRE_Int index, HYPRE_Int len, HYPRE_Int *ind);
+void PrunedRowsGet(PrunedRows *p, HYPRE_Int index, HYPRE_Int *lenp, HYPRE_Int **indp);
 
 #endif /* _PRUNEDROWS_H */
