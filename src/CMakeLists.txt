@@ -25,7 +25,6 @@ set (CMAKE_BUILD_TYPE "${HYPRE_BUILD_TYPE}" CACHE INTERNAL "" FORCE)
 # Configuration options
 option(HYPRE_SHARED               "Build a shared library" OFF)
 option(HYPRE_BIGINT               "Use long long int for HYPRE_Int" OFF)
-option(HYPRE_MIXEDINT             "Use long long int for HYPRE_BigInt" OFF)
 option(HYPRE_SINGLE               "Use float for HYPRE_Real" OFF)
 option(HYPRE_LONG_DOUBLE          "Use long double for HYPRE_Real" OFF)
 option(HYPRE_SEQUENTIAL           "Compile without MPI" OFF)

@@ -660,6 +660,10 @@ HYPRE_FEI_HYPRE_FILES
 HYPRE_FEI_SUBDIRS
 HYPRE_FEI_BASE_DIR
 HYPRE_FEI_SRC_DIR
+HYPRE_PILUT_FILES
+HYPRE_PARASAILS_FILES
+HYPRE_EUCLID_FILES
+HYPRE_DISTRIBUTED_LS_DIR
 MPIFLAGS
 MPILIBDIRS
 MPIINCLUDE
@@ -2617,6 +2621,8 @@ hypre_using_cxx=yes
 
 hypre_using_mpi=yes
 
+hypre_using_distributed_ls=yes
+
 hypre_using_superlu=no
 hypre_using_dsuperlu=no
 
@@ -2755,8 +2761,10 @@ fi
 if test "${enable_mixedint+set}" = set; then :
   enableval=$enable_mixedint; case "${enableval}" in
     yes) hypre_using_fei=no
-         hypre_using_mixedint=yes ;;
-    no)  hypre_using_mixedint=no ;;
+         hypre_using_mixedint=yes
+         hypre_using_distributed_ls=no ;;
+    no)  hypre_using_mixedint=no
+         hypre_using_distributed_ls=yes ;;
     *)   as_fn_error $? "Bad value ${enableval} for --enable-mixedint" "$LINENO" 5 ;;
  esac
 else
@@ -7604,6 +7612,19 @@ else
    HYPRE_FEI_FEMLI_FILES=
 fi
 
+if test "$hypre_using_distributed_ls" = "yes"
+then
+   HYPRE_DISTRIBUTED_LS_DIR="$HYPRE_SRCDIR/distributed_ls"
+   HYPRE_EUCLID_FILES="$HYPRE_SRCDIR/distributed_ls/Euclid/*.o"
+   HYPRE_PARASAILS_FILES="$HYPRE_SRCDIR/distributed_ls/ParaSails/*.o"
+   HYPRE_PILUT_FILES="$HYPRE_SRCDIR/distributed_ls/pilut/*.o"
+else
+   HYPRE_DISTRIBUTED_LS_DIR=
+   HYPRE_EUCLID_FILES=
+   HYPRE_PARASAILS_FILES=
+   HYPRE_PILUT_FILES=
+fi
+
 if test "$hypre_using_debug" = "yes"
 then
 
@@ -8582,6 +8603,11 @@ $as_echo "$HYPRE_ARCH" >&6; }
          fi
          ;;
    esac
+
+
+
+
+
 
 
 

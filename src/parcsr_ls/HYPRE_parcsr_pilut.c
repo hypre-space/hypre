@@ -52,7 +52,7 @@ HYPRE_ParCSRPilutCreate( MPI_Comm comm, HYPRE_Solver *solver )
 #ifdef HYPRE_MIXEDINT
    hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Pilut cannot be used in mixedint mode!");
    return hypre_error_flag;
-#endif
+#else
 
    HYPRE_NewDistributedMatrixPilutSolver( comm, NULL, 
             (HYPRE_DistributedMatrixPilutSolver *) solver);
@@ -61,6 +61,7 @@ HYPRE_ParCSRPilutCreate( MPI_Comm comm, HYPRE_Solver *solver )
       (HYPRE_DistributedMatrixPilutSolver) solver );
 
    return hypre_error_flag;
+#endif
 }
 
 /*--------------------------------------------------------------------------
@@ -73,7 +74,7 @@ HYPRE_ParCSRPilutDestroy( HYPRE_Solver solver )
 #ifdef HYPRE_MIXEDINT
    hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Pilut cannot be used in mixedint mode!");
    return hypre_error_flag;
-#endif
+#else
 
    HYPRE_DistributedMatrix mat = HYPRE_DistributedMatrixPilutSolverGetMatrix(
       (HYPRE_DistributedMatrixPilutSolver) solver );
@@ -83,6 +84,7 @@ HYPRE_ParCSRPilutDestroy( HYPRE_Solver solver )
       (HYPRE_DistributedMatrixPilutSolver) solver );
 
    return hypre_error_flag;
+#endif
 }
 
 /*--------------------------------------------------------------------------
@@ -98,7 +100,7 @@ HYPRE_ParCSRPilutSetup( HYPRE_Solver solver,
 #ifdef HYPRE_MIXEDINT
    hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Pilut cannot be used in mixedint mode!");
    return hypre_error_flag;
-#endif
+#else
 
    HYPRE_DistributedMatrix matrix;
    HYPRE_DistributedMatrixPilutSolver distributed_solver = 
@@ -112,6 +114,7 @@ HYPRE_ParCSRPilutSetup( HYPRE_Solver solver,
    HYPRE_DistributedMatrixPilutSolverSetup( distributed_solver );
 
    return hypre_error_flag;
+#endif
 }
 
 /*--------------------------------------------------------------------------
@@ -127,7 +130,7 @@ HYPRE_ParCSRPilutSolve( HYPRE_Solver solver,
 #ifdef HYPRE_MIXEDINT
    hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Pilut cannot be used in mixedint mode!");
    return hypre_error_flag;
-#endif
+#else
 
    HYPRE_Real *rhs, *soln;
 
@@ -139,6 +142,7 @@ HYPRE_ParCSRPilutSolve( HYPRE_Solver solver,
       soln, rhs );
 
    return hypre_error_flag;
+#endif
 }
 
 /*--------------------------------------------------------------------------
@@ -152,13 +156,14 @@ HYPRE_ParCSRPilutSetMaxIter( HYPRE_Solver solver,
 #ifdef HYPRE_MIXEDINT
    hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Pilut cannot be used in mixedint mode!");
    return hypre_error_flag;
-#endif
+#else
 
 
    HYPRE_DistributedMatrixPilutSolverSetMaxIts(
       (HYPRE_DistributedMatrixPilutSolver) solver, max_iter );
 
    return hypre_error_flag;
+#endif
 }
 
 /*--------------------------------------------------------------------------
@@ -172,12 +177,13 @@ HYPRE_ParCSRPilutSetDropTolerance( HYPRE_Solver solver,
 #ifdef HYPRE_MIXEDINT
    hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Pilut cannot be used in mixedint mode!");
    return hypre_error_flag;
-#endif
+#else
 
    HYPRE_DistributedMatrixPilutSolverSetDropTolerance(
       (HYPRE_DistributedMatrixPilutSolver) solver, tol );
 
    return hypre_error_flag;
+#endif
 }
 
 /*--------------------------------------------------------------------------
@@ -191,11 +197,12 @@ HYPRE_ParCSRPilutSetFactorRowSize( HYPRE_Solver solver,
 #ifdef HYPRE_MIXEDINT
    hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Pilut cannot be used in mixedint mode!");
    return hypre_error_flag;
-#endif
+#else
 
    HYPRE_DistributedMatrixPilutSolverSetFactorRowSize(
       (HYPRE_DistributedMatrixPilutSolver) solver, size );
 
    return hypre_error_flag;
+#endif
 }
 

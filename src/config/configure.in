@@ -142,6 +142,8 @@ hypre_using_cxx=yes
 
 hypre_using_mpi=yes
 
+hypre_using_distributed_ls=yes
+
 hypre_using_superlu=no
 hypre_using_dsuperlu=no
 
@@ -217,8 +219,10 @@ AS_HELP_STRING([--enable-mixedint],
                [Use long long int for HYPRE_Int (default is NO).]),
 [case "${enableval}" in
     yes) hypre_using_fei=no
-         hypre_using_mixedint=yes ;;
-    no)  hypre_using_mixedint=no ;;
+         hypre_using_mixedint=yes
+         hypre_using_distributed_ls=no ;;
+    no)  hypre_using_mixedint=no
+         hypre_using_distributed_ls=yes ;;
     *)   AC_MSG_ERROR([Bad value ${enableval} for --enable-mixedint]) ;;
  esac],
 [hypre_using_mixedint=no]
@@ -1384,6 +1388,22 @@ else
 fi
 
 dnl *********************************************************************
+dnl * Determine if Euclid, ParaSails, and Pilut are needed
+dnl *********************************************************************
+if test "$hypre_using_distributed_ls" = "yes"
+then
+   HYPRE_DISTRIBUTED_LS_DIR="$HYPRE_SRCDIR/distributed_ls"
+   HYPRE_EUCLID_FILES="$HYPRE_SRCDIR/distributed_ls/Euclid/*.o"
+   HYPRE_PARASAILS_FILES="$HYPRE_SRCDIR/distributed_ls/ParaSails/*.o"
+   HYPRE_PILUT_FILES="$HYPRE_SRCDIR/distributed_ls/pilut/*.o"
+else
+   HYPRE_DISTRIBUTED_LS_DIR=
+   HYPRE_EUCLID_FILES=
+   HYPRE_PARASAILS_FILES=
+   HYPRE_PILUT_FILES=
+fi
+
+dnl *********************************************************************
 dnl * Set debug/optimization flags  
 dnl *********************************************************************
 if test "$hypre_using_debug" = "yes"
@@ -1832,6 +1852,14 @@ AC_SUBST(MPIINCLUDE)
 AC_SUBST(MPILIBS)
 AC_SUBST(MPILIBDIRS)
 AC_SUBST(MPIFLAGS)
+
+dnl *********************************************************************
+dnl * distributed_ls related files, libraries and directories
+dnl *********************************************************************
+AC_SUBST(HYPRE_DISTRIBUTED_LS_DIR)
+AC_SUBST(HYPRE_EUCLID_FILES)
+AC_SUBST(HYPRE_PARASAILS_FILES)
+AC_SUBST(HYPRE_PILUT_FILES)
 
 dnl *********************************************************************
 dnl * FEI-related files, libraries and directories
