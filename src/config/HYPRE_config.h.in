@@ -46,7 +46,10 @@
 /* Define to 1 for IRIX64 platforms */
 #undef HYPRE_IRIX64
 
-/* Define to 1 if using long long int for HYPRE_Int */
+/* Define to 1 if using long long int for HYPRE_BigInt */
+#undef HYPRE_MIXEDINT
+
+/* Define to 1 if using long long int for HYPRE_Int and HYPRE_BigInt */
 #undef HYPRE_BIGINT
 
 /* Define to 1 if using single precision values for HYPRE_Real */

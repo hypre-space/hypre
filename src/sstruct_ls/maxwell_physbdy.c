@@ -55,7 +55,7 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
    HYPRE_Int              *BdryRanksCnts_l;
 
    HYPRE_Int              *npts;
-   HYPRE_Int              *ranks, *upper_rank, *lower_rank;
+   HYPRE_BigInt           *ranks, *upper_rank, *lower_rank;
    hypre_BoxManEntry      *boxman_entry;
 
    hypre_SStructGrid      *grid;
@@ -101,8 +101,8 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
    hypre_BoxInit(&intersect, ndim);
 
    /* bounding global ranks of this processor & allocate boundary box markers. */
-   upper_rank= hypre_CTAlloc(HYPRE_Int,  num_levels, HYPRE_MEMORY_HOST);
-   lower_rank= hypre_CTAlloc(HYPRE_Int,  num_levels, HYPRE_MEMORY_HOST);
+   upper_rank= hypre_CTAlloc(HYPRE_BigInt,  num_levels, HYPRE_MEMORY_HOST);
+   lower_rank= hypre_CTAlloc(HYPRE_BigInt,  num_levels, HYPRE_MEMORY_HOST);
 
    boxes_with_bdry= hypre_TAlloc(HYPRE_Int *,  num_levels, HYPRE_MEMORY_HOST);
    for (i= 0; i< num_levels; i++)
@@ -457,7 +457,7 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
       cboxes= hypre_StructGridBoxes(cell_cgrid);
       nboxes= hypre_BoxArraySize(hypre_StructGridBoxes(cell_cgrid));
  
-      ranks= hypre_TAlloc(HYPRE_Int,  npts[i], HYPRE_MEMORY_HOST);
+      ranks= hypre_TAlloc(HYPRE_BigInt,  npts[i], HYPRE_MEMORY_HOST);
       cnt= 0;
       for (j= 0; j< nboxes; j++)
       {
@@ -518,7 +518,7 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
       /* sort the ranks & extract the unique ones */
       if (cnt)  /* recall that some may not have bdry pts */
       {
-         hypre_qsort0(ranks, 0, cnt-1);
+         hypre_BigQsort0(ranks, 0, cnt-1);
 
          k= 0;
          if (ranks[0] < 0) /* remove the off-processor markers */

@@ -77,7 +77,8 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
    hypre_Index                  ilower;
 
    HYPRE_Real                  *values;
-   HYPRE_Int                   *ncols, *rows, *cols, tot_cols;
+   HYPRE_Int                   *ncols, tot_cols;
+   HYPRE_BigInt                *rows, *cols;
 
    hypre_SStructStencil        *stencils;
    hypre_Index                  stencil_shape, loop_size;
@@ -107,7 +108,7 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
     * the same.
     *--------------------------------------------------------------------------*/
    ncols= hypre_CTAlloc(HYPRE_Int,  nUventries, HYPRE_MEMORY_HOST);
-   rows = hypre_CTAlloc(HYPRE_Int,  nUventries, HYPRE_MEMORY_HOST);
+   rows = hypre_CTAlloc(HYPRE_BigInt,  nUventries, HYPRE_MEMORY_HOST);
 
    tot_cols= 0;
    for (i= 0; i< nUventries; i++)
@@ -115,7 +116,7 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
       Uventry= Uventries[iUventries[i]];
       tot_cols+= hypre_SStructUVEntryNUEntries(Uventry);
    }
-   cols = hypre_CTAlloc(HYPRE_Int,  tot_cols, HYPRE_MEMORY_HOST);
+   cols = hypre_CTAlloc(HYPRE_BigInt,  tot_cols, HYPRE_MEMORY_HOST);
 
    k    = 0;
    for (i= 0; i< nUventries; i++)
@@ -140,7 +141,7 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
    HYPRE_IJMatrixGetValues(ij_A, nUventries, ncols, rows, cols, values);
 
    HYPRE_IJMatrixSetValues(hypre_SStructMatrixIJMatrix(fac_A), nUventries,
-                           ncols, (const HYPRE_Int *) rows, (const HYPRE_Int *) cols,
+                           ncols, (const HYPRE_BigInt *) rows, (const HYPRE_BigInt *) cols,
                            (const HYPRE_Real *) values);
    hypre_TFree(ncols, HYPRE_MEMORY_HOST);
    hypre_TFree(rows, HYPRE_MEMORY_HOST);

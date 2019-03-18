@@ -22,7 +22,7 @@
 
 #include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
-#include "par_csr_block_matrix.h"
+#include "../parcsr_block_mv/par_csr_block_matrix.h"
 
 #ifdef HYPRE_USING_CALIPER
 #include <caliper/cali.h>

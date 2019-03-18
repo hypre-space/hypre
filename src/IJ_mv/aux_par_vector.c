@@ -75,7 +75,7 @@ hypre_AuxParVectorInitialize( hypre_AuxParVector *vector )
    /* allocate stash for setting or adding off processor values */
    if (max_off_proc_elmts > 0)
    {
-      hypre_AuxParVectorOffProcI(vector) = hypre_CTAlloc(HYPRE_Int, 
+      hypre_AuxParVectorOffProcI(vector) = hypre_CTAlloc(HYPRE_BigInt, 
                                                          max_off_proc_elmts, HYPRE_MEMORY_HOST);
       hypre_AuxParVectorOffProcData(vector) = hypre_CTAlloc(HYPRE_Complex, 
                                                             max_off_proc_elmts, HYPRE_MEMORY_HOST);

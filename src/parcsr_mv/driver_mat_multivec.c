@@ -35,11 +35,11 @@ main( HYPRE_Int   argc,
    HYPRE_Int          num_procs, my_id;
    HYPRE_Int            local_size;
    HYPRE_Int          num_vectors;
-   HYPRE_Int            global_num_rows, global_num_cols;
-   HYPRE_Int            first_index;
+   HYPRE_BigInt         global_num_rows, global_num_cols;
+   HYPRE_BigInt         first_index;
    HYPRE_Int            i, j, ierr=0;
    HYPRE_Complex        *data, *data2;
-   HYPRE_Int            *row_starts, *col_starts;
+   HYPRE_BigInt         *row_starts, *col_starts;
    char         file_name[80];
    /* Initialize MPI */
    hypre_MPI_Init(&argc, &argv);
@@ -91,7 +91,7 @@ main( HYPRE_Int   argc,
    idxstride_x = hypre_VectorIndexStride(x_local);
    for ( j=0; j<num_vectors; ++j )
       for (i=0; i < local_size; i++)
-         data[i*idxstride_x + j*vecstride_x] = first_index+i+1 + 100*j;
+         data[i*idxstride_x + j*vecstride_x] = (HYPRE_Int)first_index+i+1 + 100*j;
 
    x2 = hypre_ParMultiVectorCreate( hypre_MPI_COMM_WORLD, global_num_cols,
                                     col_starts, num_vectors );
@@ -101,7 +101,7 @@ main( HYPRE_Int   argc,
 
    row_starts = hypre_ParCSRMatrixRowStarts(par_matrix);
    first_index = row_starts[my_id];
-   local_size = row_starts[my_id+1] - first_index;
+   local_size = (HYPRE_Int)(row_starts[my_id+1] - first_index);
    y = hypre_ParMultiVectorCreate( hypre_MPI_COMM_WORLD, global_num_rows,
                                    row_starts, num_vectors );
    hypre_ParVectorSetPartitioningOwner(y,0);
@@ -119,7 +119,7 @@ main( HYPRE_Int   argc,
  
    for ( j=0; j<num_vectors; ++j )
       for (i=0; i < local_size; i++)
-         data2[i*idxstride_y+j*vecstride_y] = first_index+i+1 + 100*j;
+         data2[i*idxstride_y+j*vecstride_y] = (HYPRE_Int)first_index+i+1 + 100*j;
 
    hypre_ParVectorSetConstantValues(y,1.0);
    hypre_printf(" initialized vectors, first_index=%i\n", first_index);

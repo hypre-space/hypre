@@ -516,14 +516,15 @@ HYPRE_Int hypre_ADSComputePi(hypre_ParCSRMatrix *A,
       /* Create the parallel interpolation matrix */
       {
          MPI_Comm comm = hypre_ParCSRMatrixComm(F2V);
-         HYPRE_Int global_num_rows = hypre_ParCSRMatrixGlobalNumRows(F2V);
-         HYPRE_Int global_num_cols = 3*hypre_ParCSRMatrixGlobalNumCols(F2V);
-         HYPRE_Int *row_starts = hypre_ParCSRMatrixRowStarts(F2V);
-         HYPRE_Int col_starts_size, *col_starts;
+         HYPRE_BigInt global_num_rows = hypre_ParCSRMatrixGlobalNumRows(F2V);
+         HYPRE_BigInt global_num_cols = 3*hypre_ParCSRMatrixGlobalNumCols(F2V);
+         HYPRE_BigInt *row_starts = hypre_ParCSRMatrixRowStarts(F2V);
+         HYPRE_BigInt *col_starts;
+         HYPRE_Int col_starts_size;
          HYPRE_Int num_cols_offd = 3*hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(F2V));
          HYPRE_Int num_nonzeros_diag = 3*hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(F2V));
          HYPRE_Int num_nonzeros_offd = 3*hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(F2V));
-         HYPRE_Int *col_starts_F2V = hypre_ParCSRMatrixColStarts(F2V);
+         HYPRE_BigInt *col_starts_F2V = hypre_ParCSRMatrixColStarts(F2V);
 #ifdef HYPRE_NO_GLOBAL_PARTITION
          col_starts_size = 2;
 #else
@@ -531,7 +532,7 @@ HYPRE_Int hypre_ADSComputePi(hypre_ParCSRMatrix *A,
          hypre_MPI_Comm_size(comm, &num_procs);
          col_starts_size = num_procs+1;
 #endif
-         col_starts = hypre_TAlloc(HYPRE_Int, col_starts_size, HYPRE_MEMORY_HOST);
+         col_starts = hypre_TAlloc(HYPRE_BigInt, col_starts_size, HYPRE_MEMORY_HOST);
          for (i = 0; i < col_starts_size; i++)
             col_starts[i] = 3 * col_starts_F2V[i];
 
@@ -596,8 +597,8 @@ HYPRE_Int hypre_ADSComputePi(hypre_ParCSRMatrix *A,
          HYPRE_Int *Pi_offd_J = hypre_CSRMatrixJ(Pi_offd);
          HYPRE_Real *Pi_offd_data = hypre_CSRMatrixData(Pi_offd);
 
-         HYPRE_Int *F2V_cmap = hypre_ParCSRMatrixColMapOffd(F2V);
-         HYPRE_Int *Pi_cmap = hypre_ParCSRMatrixColMapOffd(Pi);
+         HYPRE_BigInt *F2V_cmap = hypre_ParCSRMatrixColMapOffd(F2V);
+         HYPRE_BigInt *Pi_cmap = hypre_ParCSRMatrixColMapOffd(Pi);
 
          if (F2V_offd_ncols)
             for (i = 0; i < F2V_offd_nrows+1; i++)
@@ -617,7 +618,7 @@ HYPRE_Int hypre_ADSComputePi(hypre_ParCSRMatrix *A,
 
          for (i = 0; i < F2V_offd_ncols; i++)
             for (d = 0; d < 3; d++)
-               Pi_cmap[3*i+d] = 3*F2V_cmap[i]+d;
+               Pi_cmap[3*i+d] = 3*F2V_cmap[i]+(HYPRE_BigInt)d;
       }
 
       if (HYPRE_AssumedPartitionCheck())
@@ -707,10 +708,10 @@ HYPRE_Int hypre_ADSComputePixyz(hypre_ParCSRMatrix *A,
       /* Create the components of the parallel interpolation matrix */
       {
          MPI_Comm comm = hypre_ParCSRMatrixComm(F2V);
-         HYPRE_Int global_num_rows = hypre_ParCSRMatrixGlobalNumRows(F2V);
-         HYPRE_Int global_num_cols = hypre_ParCSRMatrixGlobalNumCols(F2V);
-         HYPRE_Int *row_starts = hypre_ParCSRMatrixRowStarts(F2V);
-         HYPRE_Int *col_starts = hypre_ParCSRMatrixColStarts(F2V);
+         HYPRE_BigInt global_num_rows = hypre_ParCSRMatrixGlobalNumRows(F2V);
+         HYPRE_BigInt global_num_cols = hypre_ParCSRMatrixGlobalNumCols(F2V);
+         HYPRE_BigInt *row_starts = hypre_ParCSRMatrixRowStarts(F2V);
+         HYPRE_BigInt *col_starts = hypre_ParCSRMatrixColStarts(F2V);
          HYPRE_Int num_cols_offd = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(F2V));
          HYPRE_Int num_nonzeros_diag = hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(F2V));
          HYPRE_Int num_nonzeros_offd = hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(F2V));
@@ -827,10 +828,10 @@ HYPRE_Int hypre_ADSComputePixyz(hypre_ParCSRMatrix *A,
          HYPRE_Int *Piz_offd_J = hypre_CSRMatrixJ(Piz_offd);
          HYPRE_Real *Piz_offd_data = hypre_CSRMatrixData(Piz_offd);
 
-         HYPRE_Int *F2V_cmap = hypre_ParCSRMatrixColMapOffd(F2V);
-         HYPRE_Int *Pix_cmap = hypre_ParCSRMatrixColMapOffd(Pix);
-         HYPRE_Int *Piy_cmap = hypre_ParCSRMatrixColMapOffd(Piy);
-         HYPRE_Int *Piz_cmap = hypre_ParCSRMatrixColMapOffd(Piz);
+         HYPRE_BigInt *F2V_cmap = hypre_ParCSRMatrixColMapOffd(F2V);
+         HYPRE_BigInt *Pix_cmap = hypre_ParCSRMatrixColMapOffd(Pix);
+         HYPRE_BigInt *Piy_cmap = hypre_ParCSRMatrixColMapOffd(Piy);
+         HYPRE_BigInt *Piz_cmap = hypre_ParCSRMatrixColMapOffd(Piz);
 
          if (F2V_offd_ncols)
             for (i = 0; i < F2V_offd_nrows+1; i++)

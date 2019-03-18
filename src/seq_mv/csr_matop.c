@@ -129,6 +129,114 @@ hypre_CSRMatrixAdd( hypre_CSRMatrix *A,
 }       
 
 /*--------------------------------------------------------------------------
+ * hypre_CSRMatrixBigAdd:
+ * adds two CSR Matrices A and B and returns a CSR Matrix C;
+ * Note: The routine does not check for 0-elements which might be generated
+ *       through cancellation of elements in A and B or already contained
+ in A and B. To remove those, use hypre_CSRMatrixDeleteZeros 
+ *--------------------------------------------------------------------------*/
+
+hypre_CSRMatrix *
+hypre_CSRMatrixBigAdd( hypre_CSRMatrix *A,
+                    hypre_CSRMatrix *B )
+{
+   HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
+   HYPRE_Int        *A_i      = hypre_CSRMatrixI(A);
+   HYPRE_BigInt     *A_j      = hypre_CSRMatrixBigJ(A);
+   HYPRE_Int         nrows_A  = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int         ncols_A  = hypre_CSRMatrixNumCols(A);
+   HYPRE_Complex    *B_data   = hypre_CSRMatrixData(B);
+   HYPRE_Int        *B_i      = hypre_CSRMatrixI(B);
+   HYPRE_BigInt     *B_j      = hypre_CSRMatrixBigJ(B);
+   HYPRE_Int         nrows_B  = hypre_CSRMatrixNumRows(B);
+   HYPRE_Int         ncols_B  = hypre_CSRMatrixNumCols(B);
+   hypre_CSRMatrix  *C;
+   HYPRE_Complex    *C_data;
+   HYPRE_Int        *C_i;
+   HYPRE_BigInt     *C_j;
+
+   HYPRE_Int         ia, ib, ic, num_nonzeros;
+   HYPRE_BigInt      jcol;
+   HYPRE_Int         pos;
+   HYPRE_Int         *marker;
+
+   if (nrows_A != nrows_B || ncols_A != ncols_B)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Warning! incompatible matrix dimensions!\n");
+      return NULL;
+   }
+
+
+   marker = hypre_CTAlloc(HYPRE_Int,  ncols_A, HYPRE_MEMORY_HOST);
+   C_i = hypre_CTAlloc(HYPRE_Int,  nrows_A+1, HYPRE_MEMORY_SHARED);
+
+   for (ia = 0; ia < ncols_A; ia++)
+      marker[ia] = -1;
+
+   num_nonzeros = 0;
+   C_i[0] = 0;
+   for (ic = 0; ic < nrows_A; ic++)
+   {
+      for (ia = A_i[ic]; ia < A_i[ic+1]; ia++)
+      {
+         jcol = A_j[ia];
+         marker[jcol] = ic;
+         num_nonzeros++;
+      }
+      for (ib = B_i[ic]; ib < B_i[ic+1]; ib++)
+      {
+         jcol = B_j[ib];
+         if (marker[jcol] != ic)
+         {
+            marker[jcol] = ic;
+            num_nonzeros++;
+         }
+      }
+      C_i[ic+1] = num_nonzeros;
+   }
+
+   C = hypre_CSRMatrixCreate(nrows_A, ncols_A, num_nonzeros);
+   hypre_CSRMatrixI(C) = C_i;
+   hypre_CSRMatrixBigInitialize(C);
+   C_j = hypre_CSRMatrixBigJ(C);
+   C_data = hypre_CSRMatrixData(C);
+
+   for (ia = 0; ia < ncols_A; ia++)
+      marker[ia] = -1;
+
+   pos = 0;
+   for (ic = 0; ic < nrows_A; ic++)
+   {
+      for (ia = A_i[ic]; ia < A_i[ic+1]; ia++)
+      {
+         jcol = A_j[ia];
+         C_j[pos] = jcol;
+         C_data[pos] = A_data[ia];
+         marker[jcol] = pos;
+         pos++;
+      }
+      for (ib = B_i[ic]; ib < B_i[ic+1]; ib++)
+      {
+         jcol = B_j[ib];
+         if (marker[jcol] < C_i[ic])
+         {
+            C_j[pos] = jcol;
+            C_data[pos] = B_data[ib];
+            marker[jcol] = pos;
+            pos++;
+         }
+         else
+         {
+            C_data[marker[jcol]] += B_data[ib];
+         }
+      }
+   }
+
+   hypre_TFree(marker, HYPRE_MEMORY_HOST);
+   return C;
+}       
+
+/*--------------------------------------------------------------------------
  * hypre_CSRMatrixMultiply
  * multiplies two CSR Matrices A and B and returns a CSR Matrix C;
  * Note: The routine does not check for 0-elements which might be generated

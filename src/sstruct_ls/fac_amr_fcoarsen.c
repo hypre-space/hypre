@@ -151,8 +151,8 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
    hypre_Box               coarse_cell_box;
    HYPRE_Int               volume_coarse_cell_box;
    HYPRE_Int              *volume_shift_box;
-   HYPRE_Int               max_contribut_size, stencil_i, rank;
-   HYPRE_Int               startrank;
+   HYPRE_Int               max_contribut_size, stencil_i;
+   HYPRE_BigInt            startrank, rank;
    HYPRE_Real             *vals, *vals2;
 
    HYPRE_Int               i, j, k, l, m, n, ll, kk, jj;
@@ -178,8 +178,10 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
    hypre_Index             index, *cindex, *Uv_cindex;
    HYPRE_Int               box_array_size, cbox_array_size;
 
-   HYPRE_Int               nrows, to_rank;
-   HYPRE_Int              *ncols, *rows, *cols;
+   HYPRE_Int               nrows;
+   HYPRE_BigInt            to_rank;
+   HYPRE_Int              *ncols;
+   HYPRE_BigInt           *rows, *cols;
    HYPRE_Int             **interface_max_stencil_ranks;
    HYPRE_Int             **interface_max_stencil_cnt;
    HYPRE_Int             **interface_rank_stencils;
@@ -2213,8 +2215,8 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                               ncols[l]= 1;
                            }
 
-                           rows = hypre_TAlloc(HYPRE_Int,  cnt1, HYPRE_MEMORY_HOST);
-                           cols = hypre_TAlloc(HYPRE_Int,  cnt1, HYPRE_MEMORY_HOST);
+                           rows = hypre_TAlloc(HYPRE_BigInt,  cnt1, HYPRE_MEMORY_HOST);
+                           cols = hypre_TAlloc(HYPRE_BigInt,  cnt1, HYPRE_MEMORY_HOST);
                            vals2= hypre_CTAlloc(HYPRE_Real,  cnt1, HYPRE_MEMORY_HOST);
 
                            cnt1= 0;
@@ -2244,7 +2246,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                                     {
                                        i= hypre_SStructGraphIUVEntry(graph, 0);
                                        m= hypre_SStructGraphIUVEntry(graph, nUventries-1);
-                                       if ((rank-startrank) >= i && (rank-startrank) <= m)
+                                       if ((HYPRE_Int)(rank-startrank) >= i && (HYPRE_Int)(rank-startrank) <= m)
                                        {
                                           found= trueV;
                                        }
@@ -2252,7 +2254,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
 
                                     if (found)
                                     {
-                                       Uventry= hypre_SStructGraphUVEntry(graph, rank-startrank);
+                                       Uventry= hypre_SStructGraphUVEntry(graph, (HYPRE_Int)(rank-startrank));
 
                                        if (Uventry != NULL)
                                        {
@@ -2749,8 +2751,8 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                ncols[i]= 1;
             }
 
-            rows=  hypre_TAlloc(HYPRE_Int,  nrows, HYPRE_MEMORY_HOST);
-            cols=  hypre_TAlloc(HYPRE_Int,  nrows, HYPRE_MEMORY_HOST);
+            rows=  hypre_TAlloc(HYPRE_BigInt,  nrows, HYPRE_MEMORY_HOST);
+            cols=  hypre_TAlloc(HYPRE_BigInt,  nrows, HYPRE_MEMORY_HOST);
             vals=  hypre_CTAlloc(HYPRE_Real,  nrows, HYPRE_MEMORY_HOST);
 
             interface_max_stencil_ranks=  hypre_TAlloc(HYPRE_Int *,  cnt1, HYPRE_MEMORY_HOST);

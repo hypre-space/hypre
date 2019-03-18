@@ -43,7 +43,7 @@ typedef struct hypre_StructVector_struct
                                                      * direction */
    HYPRE_Int             bghost_not_clear; /* Are boundary ghosts clear? */
                       
-   HYPRE_Int             global_size;  /* Total number coefficients */
+   HYPRE_BigInt          global_size;  /* Total number coefficients */
 
    HYPRE_Int             ref_count;
 

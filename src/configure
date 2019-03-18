@@ -660,6 +660,10 @@ HYPRE_FEI_HYPRE_FILES
 HYPRE_FEI_SUBDIRS
 HYPRE_FEI_BASE_DIR
 HYPRE_FEI_SRC_DIR
+HYPRE_PILUT_FILES
+HYPRE_PARASAILS_FILES
+HYPRE_EUCLID_FILES
+HYPRE_DISTRIBUTED_LS_DIR
 MPIFLAGS
 MPILIBDIRS
 MPIINCLUDE
@@ -762,6 +766,7 @@ ac_user_opts='
 enable_option_checking
 enable_debug
 enable_shared
+enable_mixedint
 enable_bigint
 enable_single
 enable_longdouble
@@ -1455,6 +1460,7 @@ Optional Features:
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --enable-debug          Set compiler flags for debugging.
   --enable-shared         Build shared libraries (default is NO).
+  --enable-mixedint       Use long long int for HYPRE_Int (default is NO).
   --enable-bigint         Use long long int for HYPRE_Int (default is NO).
   --enable-single         Use single precision values (default is NO).
   --enable-longdouble     Use long double precision values (default is NO).
@@ -2615,6 +2621,8 @@ hypre_using_cxx=yes
 
 hypre_using_mpi=yes
 
+hypre_using_distributed_ls=yes
+
 hypre_using_superlu=no
 hypre_using_dsuperlu=no
 
@@ -2748,6 +2756,27 @@ else
 
 fi
 
+
+# Check whether --enable-mixedint was given.
+if test "${enable_mixedint+set}" = set; then :
+  enableval=$enable_mixedint; case "${enableval}" in
+    yes) hypre_using_fei=no
+         hypre_using_mixedint=yes
+         hypre_using_distributed_ls=no ;;
+    no)  hypre_using_mixedint=no
+         hypre_using_distributed_ls=yes ;;
+    *)   as_fn_error $? "Bad value ${enableval} for --enable-mixedint" "$LINENO" 5 ;;
+ esac
+else
+  hypre_using_mixedint=no
+
+fi
+
+if test "$hypre_using_mixedint" = "yes"
+then
+   $as_echo "#define HYPRE_MIXEDINT 1" >>confdefs.h
+
+fi
 
 # Check whether --enable-bigint was given.
 if test "${enable_bigint+set}" = set; then :
@@ -7583,6 +7612,19 @@ else
    HYPRE_FEI_FEMLI_FILES=
 fi
 
+if test "$hypre_using_distributed_ls" = "yes"
+then
+   HYPRE_DISTRIBUTED_LS_DIR="$HYPRE_SRCDIR/distributed_ls"
+   HYPRE_EUCLID_FILES="$HYPRE_SRCDIR/distributed_ls/Euclid/*.o"
+   HYPRE_PARASAILS_FILES="$HYPRE_SRCDIR/distributed_ls/ParaSails/*.o"
+   HYPRE_PILUT_FILES="$HYPRE_SRCDIR/distributed_ls/pilut/*.o"
+else
+   HYPRE_DISTRIBUTED_LS_DIR=
+   HYPRE_EUCLID_FILES=
+   HYPRE_PARASAILS_FILES=
+   HYPRE_PILUT_FILES=
+fi
+
 if test "$hypre_using_debug" = "yes"
 then
 
@@ -8561,6 +8603,11 @@ $as_echo "$HYPRE_ARCH" >&6; }
          fi
          ;;
    esac
+
+
+
+
+
 
 
 

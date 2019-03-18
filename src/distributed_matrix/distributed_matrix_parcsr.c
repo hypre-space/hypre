@@ -73,10 +73,10 @@ hypre_DistributedMatrixPrintParCSR( hypre_DistributedMatrix *matrix )
 
 HYPRE_Int 
 hypre_DistributedMatrixGetLocalRangeParCSR( hypre_DistributedMatrix *matrix,
-                             HYPRE_Int *row_start,
-                             HYPRE_Int *row_end,
-                             HYPRE_Int *col_start,
-                             HYPRE_Int *col_end )
+                             HYPRE_BigInt *row_start,
+                             HYPRE_BigInt *row_end,
+                             HYPRE_BigInt *col_start,
+                             HYPRE_BigInt *col_end )
 {
    HYPRE_Int ierr=0;
    HYPRE_ParCSRMatrix Parcsr_matrix = (HYPRE_ParCSRMatrix) hypre_DistributedMatrixLocalStorage(matrix);
@@ -96,9 +96,9 @@ hypre_DistributedMatrixGetLocalRangeParCSR( hypre_DistributedMatrix *matrix,
 
 HYPRE_Int 
 hypre_DistributedMatrixGetRowParCSR( hypre_DistributedMatrix *matrix,
-                             HYPRE_Int row,
+                             HYPRE_BigInt row,
                              HYPRE_Int *size,
-                             HYPRE_Int **col_ind,
+                             HYPRE_BigInt **col_ind,
                              HYPRE_Real **values )
 {
    HYPRE_Int ierr = 0;
@@ -117,9 +117,9 @@ hypre_DistributedMatrixGetRowParCSR( hypre_DistributedMatrix *matrix,
 
 HYPRE_Int 
 hypre_DistributedMatrixRestoreRowParCSR( hypre_DistributedMatrix *matrix,
-                             HYPRE_Int row,
+                             HYPRE_BigInt row,
                              HYPRE_Int *size,
-                             HYPRE_Int **col_ind,
+                             HYPRE_BigInt **col_ind,
                              HYPRE_Real **values )
 {
    HYPRE_Int ierr;

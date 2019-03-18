@@ -104,9 +104,9 @@ HYPRE_SStructGraphDestroy( HYPRE_SStructGraph graph )
    HYPRE_Int             **fem_entries;
    HYPRE_Int               nUventries;
    HYPRE_Int              *iUventries;
-    hypre_SStructUVEntry **Uventries;
+   hypre_SStructUVEntry  **Uventries;
    hypre_SStructUVEntry   *Uventry;
-   HYPRE_Int             **Uveoffsets;
+   HYPRE_BigInt          **Uveoffsets;
    HYPRE_Int               nvars;
    HYPRE_Int               part, var, i;
 
@@ -322,7 +322,7 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
    HYPRE_Int                *iUventries;
    hypre_SStructUVEntry    **Uventries;
    HYPRE_Int                 Uvesize;
-   HYPRE_Int               **Uveoffsets;
+   HYPRE_BigInt            **Uveoffsets;
    HYPRE_Int                 type        = hypre_SStructGraphObjectType(graph);
    hypre_SStructGraphEntry **add_entries = hypre_SStructGraphEntries(graph);
    HYPRE_Int                 n_add_entries = hypre_SStructNGraphEntries(graph);
@@ -343,7 +343,7 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
    HYPRE_Int                 to_var;
    HYPRE_Int                 to_boxnum;
    HYPRE_Int                 to_proc;
-   HYPRE_Int                 Uverank, rank;
+   HYPRE_BigInt              Uverank, rank;
    hypre_BoxManEntry        *boxman_entry;
                          
    HYPRE_Int                 nprocs, myproc;
@@ -570,12 +570,12 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
    /* first set up Uvesize and Uveoffsets */
 
    Uvesize = 0;
-   Uveoffsets = hypre_TAlloc(HYPRE_Int *,  nparts, HYPRE_MEMORY_HOST);
+   Uveoffsets = hypre_TAlloc(HYPRE_BigInt *,  nparts, HYPRE_MEMORY_HOST);
    for (part = 0; part < nparts; part++)
    {
       pgrid = hypre_SStructGridPGrid(grid, part);
       nvars = hypre_SStructPGridNVars(pgrid);
-      Uveoffsets[part] = hypre_TAlloc(HYPRE_Int,  nvars, HYPRE_MEMORY_HOST);
+      Uveoffsets[part] = hypre_TAlloc(HYPRE_BigInt,  nvars, HYPRE_MEMORY_HOST);
       for (var = 0; var < nvars; var++)
       {
          Uveoffsets[part][var] = Uvesize;

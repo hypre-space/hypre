@@ -188,7 +188,7 @@ HYPRE_DistributedMatrixGetContext( HYPRE_DistributedMatrix matrix )
 
 HYPRE_Int
 HYPRE_DistributedMatrixGetDims( HYPRE_DistributedMatrix matrix, 
-                               HYPRE_Int *M, HYPRE_Int *N )
+                               HYPRE_BigInt *M, HYPRE_BigInt *N )
 {
    HYPRE_Int ierr=0;
 
@@ -204,7 +204,7 @@ HYPRE_DistributedMatrixGetDims( HYPRE_DistributedMatrix matrix,
 
 HYPRE_Int
 HYPRE_DistributedMatrixSetDims( HYPRE_DistributedMatrix matrix, 
-                               HYPRE_Int M, HYPRE_Int N )
+                               HYPRE_BigInt M, HYPRE_BigInt N )
 {
    HYPRE_Int ierr=0;
 
@@ -234,8 +234,8 @@ HYPRE_DistributedMatrixPrint( HYPRE_DistributedMatrix matrix )
 
 HYPRE_Int
 HYPRE_DistributedMatrixGetLocalRange( HYPRE_DistributedMatrix matrix, 
-                               HYPRE_Int *row_start, HYPRE_Int *row_end ,
-                               HYPRE_Int *col_start, HYPRE_Int *col_end )
+                               HYPRE_BigInt *row_start, HYPRE_BigInt *row_end ,
+                               HYPRE_BigInt *col_start, HYPRE_BigInt *col_end )
 {
    return( hypre_DistributedMatrixGetLocalRange( (hypre_DistributedMatrix *) matrix,
                              row_start, row_end, col_start, col_end ) );
@@ -247,9 +247,9 @@ HYPRE_DistributedMatrixGetLocalRange( HYPRE_DistributedMatrix matrix,
 
 HYPRE_Int 
 HYPRE_DistributedMatrixGetRow( HYPRE_DistributedMatrix matrix,
-                             HYPRE_Int row,
+                             HYPRE_BigInt row,
                              HYPRE_Int *size,
-                             HYPRE_Int **col_ind,
+                             HYPRE_BigInt **col_ind,
                              HYPRE_Real **values )
 {
    return( hypre_DistributedMatrixGetRow( (hypre_DistributedMatrix *) matrix,
@@ -265,9 +265,9 @@ HYPRE_DistributedMatrixGetRow( HYPRE_DistributedMatrix matrix,
 
 HYPRE_Int 
 HYPRE_DistributedMatrixRestoreRow( HYPRE_DistributedMatrix matrix,
-                             HYPRE_Int row,
+                             HYPRE_BigInt row,
                              HYPRE_Int *size,
-                             HYPRE_Int **col_ind,
+                             HYPRE_BigInt **col_ind,
                              HYPRE_Real **values )
 {
    return( hypre_DistributedMatrixRestoreRow( (hypre_DistributedMatrix *) matrix,

@@ -30,10 +30,10 @@ extern "C" {
 void 
 hypre_F90_IFACE(hypre_parcsrmatrixglobalnumrows, HYPRE_PARCSRMATRIXGLOBALNUMROWS)
    ( hypre_F90_Obj *matrix,
-     hypre_F90_Int *num_rows,
+     hypre_F90_BigInt *num_rows,
      hypre_F90_Int *ierr      )
 {
-   *num_rows = (hypre_F90_Int)
+   *num_rows = (hypre_F90_BigInt)
       ( hypre_ParCSRMatrixGlobalNumRows(
            (hypre_ParCSRMatrix *) *matrix ) );
 

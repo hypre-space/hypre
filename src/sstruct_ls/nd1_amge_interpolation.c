@@ -52,8 +52,10 @@ HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix       * Aee,
 {
    HYPRE_Int ierr = 0;
 
-   HYPRE_Int  i, j, k;
-   HYPRE_Int *offproc_rnums, *swap;
+   HYPRE_Int  i, j;
+   HYPRE_BigInt  big_k;
+   HYPRE_BigInt *offproc_rnums;
+   HYPRE_Int *swap;
 
    hypre_ParCSRMatrix * dof_DOF = (hypre_ParCSRMatrix *)hypre_IJMatrixObject(IJ_dof_DOF);
    hypre_ParCSRMatrix * ELEM_DOF = ELEM_EDGE;
@@ -85,7 +87,7 @@ HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix       * Aee,
   /* sort the offproc rows to get quicker comparison for later */
    if (num_OffProcRows)
    {
-      offproc_rnums= hypre_TAlloc(HYPRE_Int,  num_OffProcRows, HYPRE_MEMORY_HOST);
+      offproc_rnums= hypre_TAlloc(HYPRE_BigInt,  num_OffProcRows, HYPRE_MEMORY_HOST);
       swap         = hypre_TAlloc(HYPRE_Int,  num_OffProcRows, HYPRE_MEMORY_HOST);
       for (i= 0; i< num_OffProcRows; i++)
       {
@@ -96,7 +98,7 @@ HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix       * Aee,
 
    if (num_OffProcRows > 1)
    {
-      hypre_qsort2i(offproc_rnums, swap, 0, num_OffProcRows-1);
+      hypre_BigQsortbi(offproc_rnums, swap, 0, num_OffProcRows-1);
    }
 
    if (FACE_idof == EDGE_idof)
@@ -112,82 +114,84 @@ HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix       * Aee,
    ELEM_EDGEidof = hypre_ParMatmul(ELEM_EDGE, EDGE_idof);
 
    /* Loop over local coarse elements */
-   k = hypre_ParCSRMatrixFirstRowIndex(ELEM_EDGE);
-   for (i = 0; i < numELEM; i++, k++)
+   big_k = hypre_ParCSRMatrixFirstRowIndex(ELEM_EDGE);
+   for (i = 0; i < numELEM; i++, big_k++)
    {
       HYPRE_Int size1, size2;
-      HYPRE_Int *col_ind0, *col_ind1, *col_ind2;
+      HYPRE_BigInt *col_ind0, *col_ind1, *col_ind2;
 
-      HYPRE_Int num_DOF, *DOF0, *DOF;
-      HYPRE_Int num_idof, *idof0, *idof;
-      HYPRE_Int num_bdof, *bdof;
+      HYPRE_BigInt *DOF0, *DOF;
+      HYPRE_Int num_DOF;
+      HYPRE_Int num_idof;
+      HYPRE_BigInt *idof0, *idof, *bdof;
+      HYPRE_Int num_bdof;
 
       HYPRE_Real *boolean_data;
 
       /* Determine the coarse DOFs */
-      hypre_ParCSRMatrixGetRow (ELEM_DOF, k, &num_DOF, &DOF0, &boolean_data);
-      DOF= hypre_TAlloc(HYPRE_Int,  num_DOF, HYPRE_MEMORY_HOST);
+      hypre_ParCSRMatrixGetRow (ELEM_DOF, big_k, &num_DOF, &DOF0, &boolean_data);
+      DOF= hypre_TAlloc(HYPRE_BigInt,  num_DOF, HYPRE_MEMORY_HOST);
       for (j= 0; j< num_DOF; j++)
       {
          DOF[j]= DOF0[j];
       }
-      hypre_ParCSRMatrixRestoreRow (ELEM_DOF, k, &num_DOF, &DOF0, &boolean_data);
+      hypre_ParCSRMatrixRestoreRow (ELEM_DOF, big_k, &num_DOF, &DOF0, &boolean_data);
 
-      hypre_qsort0(DOF,0,num_DOF-1);
+      hypre_BigQsort0(DOF,0,num_DOF-1);
 
       /* Find the fine dofs interior for the current coarse element */
-      hypre_ParCSRMatrixGetRow (ELEM_idof, k, &num_idof, &idof0, &boolean_data);
-      idof= hypre_TAlloc(HYPRE_Int,  num_idof, HYPRE_MEMORY_HOST);
+      hypre_ParCSRMatrixGetRow (ELEM_idof, big_k, &num_idof, &idof0, &boolean_data);
+      idof= hypre_TAlloc(HYPRE_BigInt,  num_idof, HYPRE_MEMORY_HOST);
       for (j= 0; j< num_idof; j++)
       {
          idof[j]= idof0[j];
       }
-      hypre_ParCSRMatrixRestoreRow (ELEM_idof, k, &num_idof, &idof0, &boolean_data);
+      hypre_ParCSRMatrixRestoreRow (ELEM_idof, big_k, &num_idof, &idof0, &boolean_data);
 
       /* Sort the interior dofs according to their global number */
-      hypre_qsort0(idof,0,num_idof-1);
+      hypre_BigQsort0(idof,0,num_idof-1);
 
       /* Find the fine dofs on the boundary of the current coarse element */
       if (three_dimensional_problem)
       {
-         hypre_ParCSRMatrixGetRow (ELEM_FACEidof, k, &size1, &col_ind0, &boolean_data);
-         col_ind1= hypre_TAlloc(HYPRE_Int,  size1, HYPRE_MEMORY_HOST);
+         hypre_ParCSRMatrixGetRow (ELEM_FACEidof, big_k, &size1, &col_ind0, &boolean_data);
+         col_ind1= hypre_TAlloc(HYPRE_BigInt,  size1, HYPRE_MEMORY_HOST);
          for (j= 0; j< size1; j++)
          {
             col_ind1[j]= col_ind0[j];
          }
-         hypre_ParCSRMatrixRestoreRow (ELEM_FACEidof, k, &size1, &col_ind0, &boolean_data);
+         hypre_ParCSRMatrixRestoreRow (ELEM_FACEidof, big_k, &size1, &col_ind0, &boolean_data);
       }
       else
          size1 = 0;
 
-      hypre_ParCSRMatrixGetRow (ELEM_EDGEidof, k, &size2, &col_ind0, &boolean_data);
-      col_ind2= hypre_TAlloc(HYPRE_Int,  size2, HYPRE_MEMORY_HOST);
+      hypre_ParCSRMatrixGetRow (ELEM_EDGEidof, big_k, &size2, &col_ind0, &boolean_data);
+      col_ind2= hypre_TAlloc(HYPRE_BigInt,  size2, HYPRE_MEMORY_HOST);
       for (j= 0; j< size2; j++)
       {
          col_ind2[j]= col_ind0[j];
       }
-      hypre_ParCSRMatrixRestoreRow (ELEM_EDGEidof, k, &size2, &col_ind0, &boolean_data);
+      hypre_ParCSRMatrixRestoreRow (ELEM_EDGEidof, big_k, &size2, &col_ind0, &boolean_data);
 
       /* Merge and sort the boundary dofs according to their global number */
       num_bdof = size1 + size2;
-      bdof = hypre_CTAlloc(HYPRE_Int,  num_bdof, HYPRE_MEMORY_HOST);
+      bdof = hypre_CTAlloc(HYPRE_BigInt,  num_bdof, HYPRE_MEMORY_HOST);
       if (three_dimensional_problem)
-		 hypre_TMemcpy(bdof,  col_ind1, HYPRE_Int, size1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(bdof+size1,  col_ind2, HYPRE_Int, size2, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+		 hypre_TMemcpy(bdof,  col_ind1, HYPRE_BigInt, size1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(bdof+size1,  col_ind2, HYPRE_BigInt, size2, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
 
-      hypre_qsort0(bdof,0,num_bdof-1);
+      hypre_BigQsort0(bdof,0,num_bdof-1);
 
       /* A = extract_rows(Aee, idof) */
       A = hypre_CSRMatrixCreate (num_idof, num_idof + num_bdof,
                                  num_idof * (num_idof + num_bdof));
-      hypre_CSRMatrixInitialize(A);
+      hypre_CSRMatrixBigInitialize(A);
       {
          HYPRE_Int *I = hypre_CSRMatrixI(A);
-         HYPRE_Int *J = hypre_CSRMatrixJ(A);
+         HYPRE_BigInt *J = hypre_CSRMatrixBigJ(A);
          HYPRE_Real *data = hypre_CSRMatrixData(A);
 
-         HYPRE_Int *tmp_J;
+         HYPRE_BigInt *tmp_J;
          HYPRE_Real *tmp_data;
 
          I[0] = 0;
@@ -196,7 +200,7 @@ HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix       * Aee,
             getrow_ierr= hypre_ParCSRMatrixGetRow (Aee, idof[j], &I[j+1], &tmp_J, &tmp_data);
             if (getrow_ierr <0)
                hypre_printf("getrow Aee off proc[%d] = \n",myproc);
-            hypre_TMemcpy(J,  tmp_J, HYPRE_Int, I[j+1], HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+            hypre_TMemcpy(J,  tmp_J, HYPRE_BigInt, I[j+1], HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
             hypre_TMemcpy(data,  tmp_data, HYPRE_Real, I[j+1], HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
             J+= I[j+1];
             data+= I[j+1];
@@ -208,14 +212,14 @@ HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix       * Aee,
       /* P = extract_rows(dof_DOF, idof+bdof) */
       P = hypre_CSRMatrixCreate (num_idof + num_bdof, num_DOF,
                                  (num_idof + num_bdof) * num_DOF);
-      hypre_CSRMatrixInitialize(P);
+      hypre_CSRMatrixBigInitialize(P);
       {
          HYPRE_Int *I = hypre_CSRMatrixI(P);
-         HYPRE_Int *J = hypre_CSRMatrixJ(P);
+         HYPRE_BigInt *J = hypre_CSRMatrixBigJ(P);
          HYPRE_Real *data = hypre_CSRMatrixData(P);
          HYPRE_Int     m;
 
-         HYPRE_Int *tmp_J;
+         HYPRE_BigInt *tmp_J;
          HYPRE_Real *tmp_data;
      
          I[0] = 0;
@@ -224,7 +228,7 @@ HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix       * Aee,
             getrow_ierr= hypre_ParCSRMatrixGetRow (dof_DOF, idof[j], &I[j+1], &tmp_J, &tmp_data);
             if (getrow_ierr >= 0)
             {
-			   hypre_TMemcpy(J,  tmp_J, HYPRE_Int, I[j+1], HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+			   hypre_TMemcpy(J,  tmp_J, HYPRE_BigInt, I[j+1], HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
                hypre_TMemcpy(data,  tmp_data, HYPRE_Real, I[j+1], HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
                J+= I[j+1];
                data+= I[j+1];
@@ -250,7 +254,7 @@ HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix       * Aee,
                I[j+1]= (OffProcRows[swap[m]] -> ncols);
                tmp_J = (OffProcRows[swap[m]] -> cols);
                tmp_data= (OffProcRows[swap[m]] -> data);
-               hypre_TMemcpy(J,  tmp_J, HYPRE_Int, I[j+1], HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+               hypre_TMemcpy(J,  tmp_J, HYPRE_BigInt, I[j+1], HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
                hypre_TMemcpy(data,  tmp_data, HYPRE_Real, I[j+1], HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
                J+= I[j+1];
                data+= I[j+1];
@@ -263,7 +267,7 @@ HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix       * Aee,
             getrow_ierr= hypre_ParCSRMatrixGetRow (dof_DOF, bdof[j-num_idof], &I[j+1], &tmp_J, &tmp_data);
             if (getrow_ierr >= 0)
             {
-				hypre_TMemcpy(J,  tmp_J, HYPRE_Int, I[j+1], HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+				hypre_TMemcpy(J,  tmp_J, HYPRE_BigInt, I[j+1], HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
 				hypre_TMemcpy(data,  tmp_data, HYPRE_Real, I[j+1], HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
                J+= I[j+1];
                data+= I[j+1];
@@ -290,7 +294,7 @@ HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix       * Aee,
                I[j+1]= (OffProcRows[swap[m]] -> ncols);
                tmp_J = (OffProcRows[swap[m]] -> cols);
                tmp_data= (OffProcRows[swap[m]] -> data);
-               hypre_TMemcpy(J,  tmp_J, HYPRE_Int, I[j+1], HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+               hypre_TMemcpy(J,  tmp_J, HYPRE_BigInt, I[j+1], HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
                hypre_TMemcpy(data,  tmp_data, HYPRE_Real, I[j+1], HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
                J+= I[j+1];
                data+= I[j+1];
@@ -316,7 +320,7 @@ HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix       * Aee,
 
          hypre_IJMatrixAddToValuesParCSR (IJ_dof_DOF,
                                           num_idof, ncols, idof, idof_indexes,
-                                          hypre_CSRMatrixJ(P),
+                                          hypre_CSRMatrixBigJ(P),
                                           hypre_CSRMatrixData(P));
 
          hypre_TFree(ncols, HYPRE_MEMORY_HOST);
@@ -358,9 +362,9 @@ HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix       * Aee,
 
 HYPRE_Int hypre_HarmonicExtension (hypre_CSRMatrix *A,
                              hypre_CSRMatrix *P,
-                             HYPRE_Int num_DOF, HYPRE_Int *DOF,
-                             HYPRE_Int num_idof, HYPRE_Int *idof,
-                             HYPRE_Int num_bdof, HYPRE_Int *bdof)
+                             HYPRE_Int num_DOF, HYPRE_BigInt *DOF,
+                             HYPRE_Int num_idof, HYPRE_BigInt *idof,
+                             HYPRE_Int num_bdof, HYPRE_BigInt *bdof)
 {
    HYPRE_Int ierr = 0;
 
@@ -368,11 +372,11 @@ HYPRE_Int hypre_HarmonicExtension (hypre_CSRMatrix *A,
    HYPRE_Real factor;
 
    HYPRE_Int *IA = hypre_CSRMatrixI(A);
-   HYPRE_Int *JA = hypre_CSRMatrixJ(A);
+   HYPRE_BigInt *JA = hypre_CSRMatrixBigJ(A);
    HYPRE_Real *dataA = hypre_CSRMatrixData(A);
 
    HYPRE_Int *IP = hypre_CSRMatrixI(P);
-   HYPRE_Int *JP = hypre_CSRMatrixJ(P);
+   HYPRE_BigInt *JP = hypre_CSRMatrixBigJ(P);
    HYPRE_Real *dataP = hypre_CSRMatrixData(P);
 
    HYPRE_Real * Aii = hypre_CTAlloc(HYPRE_Real,  num_idof*num_idof, HYPRE_MEMORY_HOST);
@@ -383,16 +387,16 @@ HYPRE_Int hypre_HarmonicExtension (hypre_CSRMatrix *A,
       for (j = IA[i]; j < IA[i+1]; j++)
       {
          /* Global to local*/
-         k = hypre_BinarySearch(idof,JA[j], num_idof);
+         k = hypre_BigBinarySearch(idof,JA[j], num_idof);
          /* If a column is a bdof, compute its participation in Pi = Aib x Pb */
          if (k == -1)
          {
-            k = hypre_BinarySearch(bdof,JA[j], num_bdof);
+            k = hypre_BigBinarySearch(bdof,JA[j], num_bdof);
             if (k > -1)
             {
                for (l = IP[k+num_idof]; l < IP[k+num_idof+1]; l++)
                {
-                  m = hypre_BinarySearch(DOF,JP[l], num_DOF);
+                  m = hypre_BigBinarySearch(DOF,JP[l], num_DOF);
                   if (m > -1)
                   {
                      m+=i*num_DOF;

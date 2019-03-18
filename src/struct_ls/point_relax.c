@@ -50,7 +50,7 @@ typedef struct
    /* log info (always logged) */
    HYPRE_Int               num_iterations;
    HYPRE_Int               time_index;
-   HYPRE_Int               flops;
+   HYPRE_BigInt            flops;
 
 } hypre_PointRelaxData;
 
@@ -301,7 +301,7 @@ hypre_PointRelaxSetup( void               *relax_vdata,
       frac  *= hypre_IndexZ(stride);
       scale += (pointset_sizes[p] / frac);
    }
-   (relax_data -> flops) = scale * (hypre_StructMatrixGlobalSize(A) +
+   (relax_data -> flops) = (HYPRE_BigInt)scale * (hypre_StructMatrixGlobalSize(A) +
                                     hypre_StructVectorGlobalSize(x));
 
    return hypre_error_flag;

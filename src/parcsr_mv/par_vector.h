@@ -36,10 +36,10 @@ typedef struct hypre_ParVector_struct
 {
    MPI_Comm      comm;
 
-   HYPRE_Int     global_size;
-   HYPRE_Int     first_index;
-   HYPRE_Int     last_index;
-   HYPRE_Int    *partitioning;
+   HYPRE_BigInt  global_size;
+   HYPRE_BigInt  first_index;
+   HYPRE_BigInt  last_index;
+   HYPRE_BigInt *partitioning;
    HYPRE_Int     actual_local_size; /* stores actual length of data in local vector
                                        to allow memory manipulations for temporary vectors*/
    hypre_Vector *local_vector;

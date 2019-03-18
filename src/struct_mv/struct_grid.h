@@ -38,7 +38,7 @@ typedef struct hypre_StructGrid_struct
    hypre_Box           *bounding_box; /* Bounding box around grid */
 
    HYPRE_Int            local_size;   /* Number of grid points locally */
-   HYPRE_Int            global_size;  /* Total number of grid points */
+   HYPRE_BigInt         global_size;  /* Total number of grid points */
 
    hypre_Index          periodic;     /* Indicates if grid is periodic */
    HYPRE_Int            num_periods;  /* number of box set periods */

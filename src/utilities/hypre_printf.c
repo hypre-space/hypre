@@ -30,6 +30,7 @@ new_format( const char *format,
    const char *fp;
    char       *newformat, *nfp;
    HYPRE_Int   newformatlen;
+   HYPRE_Int   copychar;
    HYPRE_Int   foundpercent = 0;
 
    newformatlen = 2*strlen(format)+1; /* worst case is all %d's to %lld's */
@@ -38,6 +39,7 @@ new_format( const char *format,
    nfp = newformat;
    for (fp = format; *fp != '\0'; fp++)
    {
+      copychar = 1;
       if (*fp == '%')
       {
          foundpercent = 1;
@@ -54,6 +56,13 @@ new_format( const char *format,
          }
          switch(*fp)
          {
+            case 'b': /* used for BigInt type in hypre */
+#if defined(HYPRE_BIGINT) || defined(HYPRE_MIXEDINT)
+               *nfp = 'l'; nfp++;
+               *nfp = 'l'; nfp++;
+#endif
+               *nfp = 'd'; nfp++; copychar = 0;
+               foundpercent = 0; break;
             case 'd':
             case 'i':
 #if defined(HYPRE_BIGINT)
@@ -85,7 +94,10 @@ new_format( const char *format,
                foundpercent = 0; break;
          }
       }
-      *nfp = *fp; nfp++;
+      if (copychar)
+      {
+         *nfp = *fp; nfp++;
+      }
    }
    *nfp = *fp;
 

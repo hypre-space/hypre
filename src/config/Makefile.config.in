@@ -128,6 +128,14 @@ CALIPER_INCLUDE = @CALIPER_INCLUDE@
 CALIPER_LIBS    = @CALIPER_LIBS@
 
 ##################################################################
+##  Euclid, ParaSails, pilut options
+##################################################################
+HYPRE_DISTRIBUTED_LS_DIR = @HYPRE_DISTRIBUTED_LS_DIR@
+HYPRE_EUCLID_FILES       = @HYPRE_EUCLID_FILES@
+HYPRE_PARASAILS_FILES    = @HYPRE_PARASAILS_FILES@
+HYPRE_PILUT_FILES        = @HYPRE_PILUT_FILES@
+
+##################################################################
 ##  SuperLU options
 ##################################################################
 SUPERLU_INCLUDE = @SUPERLU_INCLUDE@
