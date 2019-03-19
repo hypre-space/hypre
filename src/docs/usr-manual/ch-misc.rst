@@ -101,10 +101,6 @@ Some of the commonly used options include:
                                   HYPRE_Int.
                                   NOTE: This option disables Euclid, ParaSails,
                                         pilut and CGC coarsening.
-   --enable-global-partition      Store a global partition of the data
-                                  NOTE: this option may produce faster code on
-                                        small numbers of processors (< 100), but
-                                        is not recommended in general.
 
 The user can mix and match the configure options and variable settings to meet
 their needs.  It should be noted that hypre can be configured with external BLAS
