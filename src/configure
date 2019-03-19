@@ -1460,7 +1460,10 @@ Optional Features:
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --enable-debug          Set compiler flags for debugging.
   --enable-shared         Build shared libraries (default is NO).
-  --enable-mixedint       Use long long int for HYPRE_Int (default is NO).
+  --enable-mixedint       Use long long int for HYPRE_BigInt and int for
+                          HYPRE_Int (default is int for both). Note: This
+                          option disables Euclid, ParaSails, pilut and CGC
+                          coarsening.
   --enable-bigint         Use long long int for HYPRE_Int (default is NO).
   --enable-single         Use single precision values (default is NO).
   --enable-longdouble     Use long double precision values (default is NO).

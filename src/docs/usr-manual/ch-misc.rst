@@ -94,6 +94,13 @@ Some of the commonly used options include:
                                         the libraries defined in the environment 
                                         variable LD_LIBRARY_PATH. 
    --with-print-errors            Print HYPRE errors
+   --with-openmp                  Use OpenMP. This may affect which compiler is
+                                  chosen.
+   --enable-bigint                Use long long int for HYPRE_Int (default is NO).
+   --enable-mixedint              Use long long int for HYPRE_BigInt and int for
+                                  HYPRE_Int.
+                                  NOTE: This option disables Euclid, ParaSails,
+                                        pilut and CGC coarsening.
    --enable-global-partition      Store a global partition of the data
                                   NOTE: this option may produce faster code on
                                         small numbers of processors (< 100), but
