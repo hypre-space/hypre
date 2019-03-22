@@ -58,6 +58,9 @@
 /* Use Caliper instrumentation */
 #cmakedefine HYPRE_USING_CALIPER
 
+/* Use SuperLU_Dist */
+#cmakedefine HAVE_DSUPERLU
+
 /* #undef HYPRE_HAVE_MPI */
 /* #undef HYPRE_HAVE_MPI_COMM_F2C */
 

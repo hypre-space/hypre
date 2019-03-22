@@ -12,6 +12,10 @@ if (${hypre_SOURCE_DIR} STREQUAL ${hypre_BINARY_DIR})
   message(FATAL_ERROR "In-place build not allowed! Please use a separate build directory. See the Users Manual or INSTALL file for details.")
 endif ()
 
+# Set cmake module path (where Find.. files are located)
+set(CMAKE_MODULE_PATH ${hypre_SOURCE_DIR}/cmake) 
+include(hypre_CMakeUtilities)
+
 # Set default installation directory, but provide a means for users to change
 set (HYPRE_INSTALL_PREFIX "${PROJECT_SOURCE_DIR}/hypre" CACHE PATH
   "Installation directory for HYPRE")
@@ -36,9 +40,13 @@ option(HYPRE_NO_GLOBAL_PARTITION  "Use assumed partition" ON)
 option(HYPRE_PRINT_ERRORS         "Print HYPRE errors" OFF)
 option(HYPRE_USING_OPENMP         "Use OpenMP" OFF)
 option(HYPRE_HOPSCOTCH            "Use hopscotch hashing with OpenMP" OFF)
-option(HAVE_DSUPERLU              "required if using SuperLU_dist" OFF)
+option(HAVE_DSUPERLU              "Enable SuperLU_Dist" OFF)
 option(HYPRE_USING_FEI            "Use FEI" ON)
 option(HYPRE_USING_CALIPER        "Use Caliper" OFF)  # TODO: Finish this cmake feature
+option(HYPRE_BUILD_EXAMPLES       "Build examples" OFF)
+
+option(TPL_DSUPERLU_LIBRARIES     "List of absolute paths to SuperLU_Dist link libraries [].")
+option(TPL_DSUPERLU_INCLUDE_DIRS  "List of absolute paths to SuperLU_Dist include directories [].")
 
 if (HYPRE_SHARED)
   # FEI doesn't currently compile with shared
@@ -61,7 +69,6 @@ if (HYPRE_SEQUENTIAL)
   set (HYPRE_NO_GLOBAL_PARTITION OFF CACHE BOOL "" FORCE)
 endif ()
 
-#   --with-examples         Build example codes.
 #   --with-fei              Use internal FEI routines.
 #   --with-superlu          Use internal SuperLU routines.
 #   --with-mli              Use MLI
@@ -77,110 +84,161 @@ list (APPEND HYPRE_HEADERS
   HYPRE.h
 )
 
+# This is a list of TPLs that are used by all targets
+set(TPL_LIBRARIES "")
+
+# This is a list of linker flags to be used with TPLs for all targets
+set(TPL_LINKER_FLAGS "")
+
+# Find DSUPERLU, if requested 
+if (HAVE_DSUPERLU)
+  if (NOT TPL_DSUPERLU_LIBRARIES)
+    message(FATAL_ERROR "TPL_DSUPERLU_LIBRARIES option should be set for SuperLU_Dist support to be enabled.")
+  endif()
+
+  if (NOT TPL_DSUPERLU_INCLUDE_DIRS)
+    message(FATAL_ERROR "TPL_DSUPERLU_INCLUDE_DIRS option be set for SuperLU_Dist support to be enabled.")
+  endif()
+  foreach(dir ${TPL_DSUPERLU_INCLUDE_DIRS})
+    if (NOT EXISTS ${dir})
+      message(FATAL_ERROR "SuperLU_Dist include directory not found: ${dir}")
+    endif()
+    set(CMAKE_C_FLAGS "-I${dir} ${CMAKE_C_FLAGS}")
+  endforeach()
+
+  message("-- Enabled support for DSUPERLU.")
+  set(DSUPERLU_FOUND TRUE)
+  list(APPEND TPL_LIBRARIES ${TPL_DSUPERLU_LIBRARIES})
+endif()
+
+# Build the TPL_LIBRARIES LIST
+if (TPL_DSUPERLU_INCLUDE_DIRS)
+  include_directories(${TPL_DSUPERLU_INCLUDE_DIRS})  
+endif ()
+
+if(DSUPERLU_FOUND)
+  set(HAVE_DSUPERLU TRUE)
+endif()
+
+
 # Headers and sources: blas
-list (APPEND HYPRE_SOURCES
-  blas/dasum.c
-  blas/daxpy.c
-  blas/dcopy.c
-  blas/ddot.c
-  blas/dgemm.c
-  blas/dgemv.c
-  blas/dger.c
-  blas/dnrm2.c
-  blas/drot.c
-  blas/dscal.c
-  blas/dswap.c
-  blas/dsymm.c
-  blas/dsymv.c
-  blas/dsyr2.c
-  blas/dsyr2k.c
-  blas/dsyrk.c
-  blas/dtrmm.c
-  blas/dtrmv.c
-  blas/dtrsm.c
-  blas/dtrsv.c
-  blas/f2c.c
-  blas/idamax.c
-  blas/lsame.c
-  blas/xerbla.c
-)
+if (HYPRE_USING_HYPRE_BLAS)
+  list (APPEND HYPRE_SOURCES
+    blas/dasum.c
+    blas/daxpy.c
+    blas/dcopy.c
+    blas/ddot.c
+    blas/dgemm.c
+    blas/dgemv.c
+    blas/dger.c
+    blas/dnrm2.c
+    blas/drot.c
+    blas/dscal.c
+    blas/dswap.c
+    blas/dsymm.c
+    blas/dsymv.c
+    blas/dsyr2.c
+    blas/dsyr2k.c
+    blas/dsyrk.c
+    blas/dtrmm.c
+    blas/dtrmv.c
+    blas/dtrsm.c
+    blas/dtrsv.c
+    blas/f2c.c
+    blas/idamax.c
+    blas/lsame.c
+    blas/xerbla.c
+  )
+else()
+  # Find system blas
+  find_package(BLAS REQUIRED)
+  list(APPEND TPL_LIBRARIES ${BLAS_LIBRARIES})
+  set(CMAKE_C_FLAGS "-DUSE_VENDOR_BLAS ${CMAKE_C_FLAGS}")
+endif()
 
 # Headers and sources: lapack
-list (APPEND HYPRE_SOURCES
-  lapack/dbdsqr.c
-  lapack/dgebd2.c
-  lapack/dgebrd.c
-  lapack/dgelq2.c
-  lapack/dgelqf.c
-  lapack/dgels.c
-  lapack/dgeqr2.c
-  lapack/dgeqrf.c
-  lapack/dgesvd.c
-  lapack/dgetrf.c
-  lapack/dgetri.c
-  lapack/dgetrs.c
-  lapack/dgetf2.c
-  lapack/dlabad.c
-  lapack/dlabrd.c
-  lapack/dlacpy.c
-  lapack/dlae2.c
-  lapack/dlaev2.c
-  lapack/dlamch.c
-  lapack/dlange.c
-  lapack/dlanst.c
-  lapack/dlansy.c
-  lapack/dlapy2.c
-  lapack/dlarfb.c
-  lapack/dlarf.c
-  lapack/dlarfg.c
-  lapack/dlarft.c
-  lapack/dlartg.c
-  lapack/dlas2.c
-  lapack/dlascl.c
-  lapack/dlaset.c
-  lapack/dlasq1.c
-  lapack/dlasq2.c
-  lapack/dlasq3.c
-  lapack/dlasq4.c
-  lapack/dlasq5.c
-  lapack/dlasq6.c
-  lapack/dlasr.c
-  lapack/dlasrt.c
-  lapack/dlassq.c
-  lapack/dlaswp.c
-  lapack/dlasv2.c
-  lapack/dlatrd.c
-  lapack/dorg2l.c
-  lapack/dorg2r.c
-  lapack/dorgbr.c
-  lapack/dorgl2.c
-  lapack/dorglq.c
-  lapack/dorgql.c
-  lapack/dorgqr.c
-  lapack/dorgtr.c
-  lapack/dorm2r.c
-  lapack/dormbr.c
-  lapack/dorml2.c
-  lapack/dormlq.c
-  lapack/dormqr.c
-  lapack/dpotf2.c
-  lapack/dpotrf.c
-  lapack/dpotrs.c
-  lapack/dsteqr.c
-  lapack/dsterf.c
-  lapack/dsyev.c
-  lapack/dsygs2.c
-  lapack/dsygst.c
-  lapack/dsygv.c
-  lapack/dsytd2.c
-  lapack/dsytrd.c
-  lapack/dtrti2.c
-  lapack/dtrtri.c
-  lapack/ieeeck.c
-  lapack/ilaenv.c
-  lapack/lsame.c
-  lapack/xerbla.c
-)
+if (HYPRE_USING_HYPRE_LAPACK)
+  list (APPEND HYPRE_SOURCES
+    lapack/dbdsqr.c
+    lapack/dgebd2.c
+    lapack/dgebrd.c
+    lapack/dgelq2.c
+    lapack/dgelqf.c
+    lapack/dgels.c
+    lapack/dgeqr2.c
+    lapack/dgeqrf.c
+    lapack/dgesvd.c
+    lapack/dgetrf.c
+    lapack/dgetri.c
+    lapack/dgetrs.c
+    lapack/dgetf2.c
+    lapack/dlabad.c
+    lapack/dlabrd.c
+    lapack/dlacpy.c
+    lapack/dlae2.c
+    lapack/dlaev2.c
+    lapack/dlamch.c
+    lapack/dlange.c
+    lapack/dlanst.c
+    lapack/dlansy.c
+    lapack/dlapy2.c
+    lapack/dlarfb.c
+    lapack/dlarf.c
+    lapack/dlarfg.c
+    lapack/dlarft.c
+    lapack/dlartg.c
+    lapack/dlas2.c
+    lapack/dlascl.c
+    lapack/dlaset.c
+    lapack/dlasq1.c
+    lapack/dlasq2.c
+    lapack/dlasq3.c
+    lapack/dlasq4.c
+    lapack/dlasq5.c
+    lapack/dlasq6.c
+    lapack/dlasr.c
+    lapack/dlasrt.c
+    lapack/dlassq.c
+    lapack/dlaswp.c
+    lapack/dlasv2.c
+    lapack/dlatrd.c
+    lapack/dorg2l.c
+    lapack/dorg2r.c
+    lapack/dorgbr.c
+    lapack/dorgl2.c
+    lapack/dorglq.c
+    lapack/dorgql.c
+    lapack/dorgqr.c
+    lapack/dorgtr.c
+    lapack/dorm2r.c
+    lapack/dormbr.c
+    lapack/dorml2.c
+    lapack/dormlq.c
+    lapack/dormqr.c
+    lapack/dpotf2.c
+    lapack/dpotrf.c
+    lapack/dpotrs.c
+    lapack/dsteqr.c
+    lapack/dsterf.c
+    lapack/dsyev.c
+    lapack/dsygs2.c
+    lapack/dsygst.c
+    lapack/dsygv.c
+    lapack/dsytd2.c
+    lapack/dsytrd.c
+    lapack/dtrti2.c
+    lapack/dtrtri.c
+    lapack/ieeeck.c
+    lapack/ilaenv.c
+    lapack/lsame.c
+    lapack/xerbla.c
+  )
+else()
+  # Find system lapack
+  find_package(LAPACK REQUIRED)
+  list(APPEND TPL_LIBRARIES ${LAPACK_LIBRARIES})
+endif()
+
 
 # Headers and sources: utilities
 list (APPEND HYPRE_HEADERS
@@ -534,6 +592,11 @@ list (APPEND HYPRE_SOURCES
   parcsr_ls/par_lr_restr.c
 )
 
+if (HAVE_DSUPERLU)
+  list (APPEND HYPRE_SOURCES
+    parcsr_ls/superlu.c)
+endif()
+
 # Headers and sources: struct_mv
 list (APPEND HYPRE_HEADERS
   struct_mv/HYPRE_struct_mv.h
@@ -800,6 +863,7 @@ if (HYPRE_USING_OPENMP)
   endif (OPENMP_FOUND)
 endif (HYPRE_USING_OPENMP)
 
+
 # Turn optimization off for this file
 if (MSVC)
   set_source_files_properties (lapack/dlamch.c PROPERTIES COMPILE_FLAGS /Od)
@@ -834,7 +898,17 @@ if (HYPRE_USING_FEI)
   add_subdirectory(FEI_mv)
 endif ()
 
+# Build the examples directory, if requested
+if (HYPRE_BUILD_EXAMPLES)
+  add_subdirectory(examples)
+endif()
+
+# Cleanup the TPL list
+list(REMOVE_DUPLICATES TPL_LIBRARIES)
+
 add_library (HYPRE ${HYPRE_SOURCES} ${FEI_LIBS})
+
+target_link_libraries(HYPRE PUBLIC ${TPL_LIBRARIES})
 
 install (TARGETS HYPRE DESTINATION lib)
 install (FILES ${HYPRE_HEADERS} DESTINATION include)
