@@ -205,7 +205,7 @@ HYPRE_Int FAC_Cycle_timed(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type
    // Restrict the residual at all fine points (real and ghost) and set residual at coarse points not under the fine grid
    if (time_part == 2)
    { 
-      if (level < transition_level) FAC_Restrict( compGrid[level], compGrid[level+1], 0 );
+      if (level < transition_level) FAC_Restrict( compGrid[level], compGrid[level+1], 1 );
       else FAC_Simple_Restrict( compGrid[level], compGrid[level+1], level );
    }
 
@@ -213,7 +213,7 @@ HYPRE_Int FAC_Cycle_timed(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type
    if (hypre_ParCompGridT(compGrid[level])) for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++) hypre_ParCompGridT(compGrid[level])[i] = 0.0;
 
    //  Either solve on the coarse level or recurse
-   if (time_part == 1) if (level+1 == num_levels-1) for (i = 0; i < 20; i++) FAC_Relax( compGrid[num_levels-1], relax_type );
+   if (level+1 == num_levels-1) for (i = 0; i < 20; i++) FAC_Relax( compGrid[num_levels-1], relax_type );
    else for (i = 0; i < cycle_type; i++) FAC_Cycle_timed(amg_vdata, level+1, cycle_type, time_part);
 
    // Project up and relax
@@ -426,6 +426,7 @@ FAC_Jacobi( hypre_ParCompGrid *compGrid )
    HYPRE_Int               i, j; // loop variables
    HYPRE_Int               is_real;
    HYPRE_Complex           diag; // placeholder for the diagonal of A
+   HYPRE_Complex           u_before;
 
 
    // Temporary vector to calculate Jacobi sweep
@@ -466,7 +467,7 @@ FAC_Jacobi( hypre_ParCompGrid *compGrid )
    {
       if (hypre_ParCompGridARowPtr(compGrid)[i+1] - hypre_ParCompGridARowPtr(compGrid)[i] > 0)
       {
-         HYPRE_Complex u_before = hypre_ParCompGridU(compGrid)[i];
+         u_before = hypre_ParCompGridU(compGrid)[i];
 
          hypre_ParCompGridU(compGrid)[i] = hypre_ParCompGridTemp(compGrid)[i];
 
@@ -484,13 +485,14 @@ FAC_GaussSeidel( hypre_ParCompGrid *compGrid )
    HYPRE_Int               i, j; // loop variables
    HYPRE_Int               is_real;
    HYPRE_Complex           diag; // placeholder for the diagonal of A
+   HYPRE_Complex           u_before;
 
    // Do Gauss-Seidel relaxation on the real nodes
    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
    {
       if (hypre_ParCompGridARowPtr(compGrid)[i+1] - hypre_ParCompGridARowPtr(compGrid)[i] > 0)
       {
-         HYPRE_Complex u_before = hypre_ParCompGridU(compGrid)[i];
+         u_before = hypre_ParCompGridU(compGrid)[i];
 
          // Initialize u as RHS
          hypre_ParCompGridU(compGrid)[i] = hypre_ParCompGridF(compGrid)[i];

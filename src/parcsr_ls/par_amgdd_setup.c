@@ -224,6 +224,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    num_levels = hypre_ParAMGDataNumLevels(amg_data);
    pad = hypre_ParAMGDataAMGDDPadding(amg_data);
    variable_padding = hypre_ParAMGDataAMGDDVariablePadding(amg_data);
+   if (variable_padding == 0) variable_padding = num_levels+1;
    num_ghost_layers = hypre_ParAMGDataAMGDDNumGhostLayers(amg_data);
    use_transition_level = hypre_ParAMGDataAMGDDUseTransitionLevel(amg_data);
 
@@ -232,7 +233,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    for (level = 0; level < num_levels; level++)
    {
       padding[level] = pad;
-      pad += variable_padding;
+      if (level % variable_padding == variable_padding-1) pad *= 2;
    }
 
    // get first and last global indices on each level for this proc
