@@ -13,14 +13,14 @@
 
 
 
- 
+
 #include "_hypre_parcsr_ls.h"
- 
+
 /*--------------------------------------------------------------------------
  * hypre_GenerateLaplacian9pt
  *--------------------------------------------------------------------------*/
 
-HYPRE_ParCSRMatrix 
+HYPRE_ParCSRMatrix
 GenerateLaplacian9pt( MPI_Comm comm,
                       HYPRE_Int      nx,
                       HYPRE_Int      ny,
@@ -45,7 +45,7 @@ GenerateLaplacian9pt( MPI_Comm comm,
    HYPRE_Int *global_part;
    HYPRE_Int ix, iy;
    HYPRE_Int cnt, o_cnt;
-   HYPRE_Int local_num_rows; 
+   HYPRE_Int local_num_rows;
    HYPRE_Int *col_map_offd;
    HYPRE_Int *work;
    HYPRE_Int row_index;
@@ -92,8 +92,8 @@ GenerateLaplacian9pt( MPI_Comm comm,
    num_procs = P*Q;
 
    local_num_rows = nx_local*ny_local;
-   diag_i = hypre_CTAlloc(HYPRE_Int,  local_num_rows+1, HYPRE_MEMORY_HOST);
-   offd_i = hypre_CTAlloc(HYPRE_Int,  local_num_rows+1, HYPRE_MEMORY_HOST);
+   diag_i = hypre_CTAlloc(HYPRE_Int,  local_num_rows+1, HYPRE_MEMORY_SHARED);
+   offd_i = hypre_CTAlloc(HYPRE_Int,  local_num_rows+1, HYPRE_MEMORY_SHARED);
 
    P_busy = hypre_min(nx,P);
    Q_busy = hypre_min(ny,Q);
@@ -125,7 +125,7 @@ GenerateLaplacian9pt( MPI_Comm comm,
          diag_i[cnt] = diag_i[cnt-1];
          offd_i[o_cnt] = offd_i[o_cnt-1];
          diag_i[cnt]++;
-         if (iy > ny_part[q]) 
+         if (iy > ny_part[q])
          {
             diag_i[cnt]++;
 	    if (ix > nx_part[p])
@@ -134,7 +134,7 @@ GenerateLaplacian9pt( MPI_Comm comm,
 	    }
 	    else
 	    {
-	       if (ix) 
+	       if (ix)
 		  offd_i[o_cnt]++;
 	    }
 	    if (ix < nx_part[p+1]-1)
@@ -143,13 +143,13 @@ GenerateLaplacian9pt( MPI_Comm comm,
 	    }
 	    else
 	    {
-	       if (ix+1 < nx) 
+	       if (ix+1 < nx)
 		  offd_i[o_cnt]++;
 	    }
          }
          else
          {
-            if (iy) 
+            if (iy)
             {
                offd_i[o_cnt]++;
 	       if (ix > nx_part[p])
@@ -170,25 +170,25 @@ GenerateLaplacian9pt( MPI_Comm comm,
 	       }
             }
          }
-         if (ix > nx_part[p]) 
+         if (ix > nx_part[p])
             diag_i[cnt]++;
          else
          {
-            if (ix) 
+            if (ix)
             {
-               offd_i[o_cnt]++; 
+               offd_i[o_cnt]++;
             }
          }
-         if (ix+1 < nx_part[p+1]) 
+         if (ix+1 < nx_part[p+1])
             diag_i[cnt]++;
          else
          {
-            if (ix+1 < nx) 
+            if (ix+1 < nx)
             {
-               offd_i[o_cnt]++; 
+               offd_i[o_cnt]++;
             }
          }
-         if (iy+1 < ny_part[q+1]) 
+         if (iy+1 < ny_part[q+1])
          {
             diag_i[cnt]++;
 	    if (ix > nx_part[p])
@@ -197,7 +197,7 @@ GenerateLaplacian9pt( MPI_Comm comm,
 	    }
 	    else
 	    {
-	       if (ix) 
+	       if (ix)
 		  offd_i[o_cnt]++;
 	    }
 	    if (ix < nx_part[p+1]-1)
@@ -206,13 +206,13 @@ GenerateLaplacian9pt( MPI_Comm comm,
 	    }
 	    else
 	    {
-	       if (ix+1 < nx) 
+	       if (ix+1 < nx)
 		  offd_i[o_cnt]++;
 	    }
          }
          else
          {
-            if (iy+1 < ny) 
+            if (iy+1 < ny)
             {
                offd_i[o_cnt]++;
 	       if (ix > nx_part[p])
@@ -236,13 +236,13 @@ GenerateLaplacian9pt( MPI_Comm comm,
       }
    }
 
-   diag_j = hypre_CTAlloc(HYPRE_Int,  diag_i[local_num_rows], HYPRE_MEMORY_HOST);
-   diag_data = hypre_CTAlloc(HYPRE_Real,  diag_i[local_num_rows], HYPRE_MEMORY_HOST);
+   diag_j = hypre_CTAlloc(HYPRE_Int,  diag_i[local_num_rows], HYPRE_MEMORY_SHARED);
+   diag_data = hypre_CTAlloc(HYPRE_Real,  diag_i[local_num_rows], HYPRE_MEMORY_SHARED);
 
    if (num_procs > 1)
    {
-      offd_j = hypre_CTAlloc(HYPRE_Int,  offd_i[local_num_rows], HYPRE_MEMORY_HOST);
-      offd_data = hypre_CTAlloc(HYPRE_Real,  offd_i[local_num_rows], HYPRE_MEMORY_HOST);
+      offd_j = hypre_CTAlloc(HYPRE_Int,  offd_i[local_num_rows], HYPRE_MEMORY_SHARED);
+      offd_data = hypre_CTAlloc(HYPRE_Real,  offd_i[local_num_rows], HYPRE_MEMORY_SHARED);
    }
 
    row_index = 0;
@@ -254,7 +254,7 @@ GenerateLaplacian9pt( MPI_Comm comm,
       {
          diag_j[cnt] = row_index;
          diag_data[cnt++] = value[0];
-         if (iy > ny_part[q]) 
+         if (iy > ny_part[q])
          {
 	    if (ix > nx_part[p])
 	    {
@@ -263,12 +263,12 @@ GenerateLaplacian9pt( MPI_Comm comm,
 	    }
 	    else
 	    {
-	       if (ix) 
-	       { 
+	       if (ix)
+	       {
                   offd_j[o_cnt] = hypre_map2(ix-1,iy-1,p-1,q,P,Q,
                                    nx_part,ny_part,global_part);
                   offd_data[o_cnt++] = value[1];
-	       } 
+	       }
 	    }
             diag_j[cnt] = row_index-nx_local;
             diag_data[cnt++] = value[1];
@@ -280,16 +280,16 @@ GenerateLaplacian9pt( MPI_Comm comm,
 	    else
 	    {
 	       if (ix+1 < nx)
-	       { 
+	       {
 		  offd_j[o_cnt] = hypre_map2(ix+1,iy-1,p+1,q,P,Q,
                                    nx_part,ny_part,global_part);
                   offd_data[o_cnt++] = value[1];
-	       } 
+	       }
 	    }
          }
          else
          {
-            if (iy) 
+            if (iy)
             {
 	       if (ix > nx_part[p])
 	       {
@@ -320,35 +320,35 @@ GenerateLaplacian9pt( MPI_Comm comm,
 	       }
             }
          }
-         if (ix > nx_part[p]) 
+         if (ix > nx_part[p])
          {
             diag_j[cnt] = row_index-1;
             diag_data[cnt++] = value[1];
          }
          else
          {
-            if (ix) 
+            if (ix)
             {
                offd_j[o_cnt] = hypre_map2(ix-1,iy,p-1,q,P,Q,
                                    nx_part,ny_part,global_part);
                offd_data[o_cnt++] = value[1];
             }
          }
-         if (ix+1 < nx_part[p+1]) 
+         if (ix+1 < nx_part[p+1])
          {
             diag_j[cnt] = row_index+1;
             diag_data[cnt++] = value[1];
          }
          else
          {
-            if (ix+1 < nx) 
+            if (ix+1 < nx)
             {
                offd_j[o_cnt] = hypre_map2(ix+1,iy,p+1,q,P,Q,
                                    nx_part,ny_part,global_part);
                offd_data[o_cnt++] = value[1];
             }
          }
-         if (iy+1 < ny_part[q+1]) 
+         if (iy+1 < ny_part[q+1])
          {
 	    if (ix > nx_part[p])
 	    {
@@ -357,7 +357,7 @@ GenerateLaplacian9pt( MPI_Comm comm,
 	    }
 	    else
 	    {
-	       if (ix) 
+	       if (ix)
                {
                   offd_j[o_cnt] = hypre_map2(ix-1,iy+1,p-1,q,P,Q,
                                    nx_part,ny_part,global_part);
@@ -374,16 +374,16 @@ GenerateLaplacian9pt( MPI_Comm comm,
 	    else
 	    {
 	       if (ix+1 < nx)
-	       { 
+	       {
                   offd_j[o_cnt] = hypre_map2(ix+1,iy+1,p+1,q,P,Q,
                                    nx_part,ny_part,global_part);
                   offd_data[o_cnt++] = value[1];
-	       } 
+	       }
 	    }
          }
          else
          {
-            if (iy+1 < ny) 
+            if (iy+1 < ny)
             {
 	       if (ix > nx_part[p])
 	       {
@@ -514,12 +514,12 @@ hypre_map2( HYPRE_Int  ix,
    HYPRE_Int iy_local;
    HYPRE_Int global_index;
    HYPRE_Int proc_num;
- 
+
    proc_num = q*P + p;
    nx_local = nx_part[p+1] - nx_part[p];
    ix_local = ix - nx_part[p];
    iy_local = iy - ny_part[q];
-   global_index = global_part[proc_num] 
+   global_index = global_part[proc_num]
       + iy_local*nx_local + ix_local;
 
    return global_index;

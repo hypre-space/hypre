@@ -770,6 +770,7 @@ hypre_MatvecCommPkgDestroy( hypre_ParCSRCommPkg *comm_pkg )
    {
       hypre_TFree(hypre_ParCSRCommPkgSendProcs(comm_pkg), HYPRE_MEMORY_HOST);
       hypre_TFree(hypre_ParCSRCommPkgSendMapElmts(comm_pkg), HYPRE_MEMORY_SHARED);
+      hypre_TFree(hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg), HYPRE_MEMORY_DEVICE);
    }
    hypre_TFree(hypre_ParCSRCommPkgSendMapStarts(comm_pkg), HYPRE_MEMORY_HOST);
    /* if (hypre_ParCSRCommPkgSendMPITypes(comm_pkg))

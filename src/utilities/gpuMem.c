@@ -29,20 +29,47 @@ struct hypre__global_struct hypre__global_handle = {0, 0, 1, 0};
 /* Application passes device number it is using or -1 to let Hypre decide on which device to use */
 void hypre_GPUInit(hypre_int use_device)
 {
-   char pciBusId[80];
-   HYPRE_Int myid;
+   //char pciBusId[80];
+   HYPRE_Int myid, nproc;
    hypre_int nDevices;
-   //hypre_int device;
+
 #if defined(TRACK_MEMORY_ALLOCATIONS)
    hypre_printf("\n\n\n WARNING :: TRACK_MEMORY_ALLOCATIONS IS ON \n\n");
 #endif /* TRACK_MEMORY_ALLOCATIONS */
 
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &nproc);
+
    if (!HYPRE_GPU_HANDLE)
    {
-      HYPRE_GPU_HANDLE=1;
-      HYPRE_DEVICE=0;
+      HYPRE_GPU_HANDLE = 1;
+      HYPRE_DEVICE = 0;
       hypre_CheckErrorDevice(cudaGetDeviceCount(&nDevices));
+      HYPRE_DEVICE_COUNT = nDevices;
 
+      hypre_MPI_Comm node_comm;
+      hypre_MPI_Comm_split_type(hypre_MPI_COMM_WORLD, hypre_MPI_COMM_TYPE_SHARED, myid, MPI_INFO_NULL, &node_comm);
+      HYPRE_Int myNodeid, NodeSize;
+      hypre_MPI_Comm_rank(node_comm, &myNodeid);
+      hypre_MPI_Comm_size(node_comm, &NodeSize);
+      hypre_MPI_Comm_free(&node_comm);
+
+      if (use_device < 0)
+      {
+         HYPRE_DEVICE = myNodeid % nDevices;
+      }
+      else
+      {
+         HYPRE_DEVICE = use_device;
+      }
+
+      hypre_CheckErrorDevice(cudaSetDevice(HYPRE_DEVICE));
+
+      hypre_int device_id;
+      hypre_CheckErrorDevice(cudaGetDevice(&device_id));
+      printf("Proc [global %d/%d, local %d/%d] can see %d GPUs and is running on %d\n",
+              myid, nproc, myNodeid, NodeSize, nDevices, device_id);
+#if 0
       /* XXX */
       nDevices = 1; /* DO NOT COMMENT ME OUT AGAIN! nDevices does NOT WORK !!!! */
       HYPRE_DEVICE_COUNT=nDevices;
@@ -64,7 +91,6 @@ void hypre_GPUInit(hypre_int use_device)
          {
             // THIS IS A HACK THAT WORKS ONLY AT LLNL
             /* No mpibind or it is a single rank run */
-            hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
             //affs(myid);
             hypre_MPI_Comm node_comm;
             hypre_MPI_Info info;
@@ -113,6 +139,7 @@ void hypre_GPUInit(hypre_int use_device)
          HYPRE_DEVICE = use_device;
          hypre_CheckErrorDevice(cudaSetDevice(HYPRE_DEVICE));
       }
+#endif
 
 #if defined(HYPRE_USING_OPENMP_OFFLOAD) || defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
       omp_set_default_device(HYPRE_DEVICE);
@@ -128,7 +155,6 @@ void hypre_GPUInit(hypre_int use_device)
          hypre_CheckErrorDevice(cudaStreamCreateWithFlags(&(HYPRE_STREAM(jj)),cudaStreamNonBlocking));
 
       /* Initialize the library handles and streams */
-
       cusparseErrchk(cusparseCreate(&(HYPRE_CUSPARSE_HANDLE)));
       cusparseErrchk(cusparseSetStream(HYPRE_CUSPARSE_HANDLE,HYPRE_STREAM(4)));
       //cusparseErrchk(cusparseSetStream(HYPRE_CUSPARSE_HANDLE,0)); // Cusparse MxV happens in default stream
@@ -163,6 +189,13 @@ void hypre_GPUFinalize()
    {
       hypre_CheckErrorDevice(cudaStreamDestroy(HYPRE_STREAM(jj)));
    }
+
+   cudaError_t cudaerr = cudaGetLastError() ;
+   if (cudaerr != cudaSuccess)
+   {
+      hypre_printf("CUDA error: %s\n",cudaGetErrorString(cudaerr));
+   }
+
 }
 
 void MemAdviseReadOnly(const void* ptr, hypre_int device){
@@ -194,13 +227,13 @@ void MemPrefetch(const void *ptr,hypre_int device,cudaStream_t stream){
   if (ptr==NULL) return;
   size_t size;
   size=memsize(ptr);
-  PUSH_RANGE("MemPreFetchForce",4);
+  //PUSH_RANGE("MemPreFetchForce",4);
   /* Do a prefetch every time until a possible UM bug is fixed */
   if (size>0){
      PrintPointerAttributes(ptr);
      hypre_CheckErrorDevice(cudaMemPrefetchAsync(ptr,size,device,stream));
      hypre_CheckErrorDevice(cudaStreamSynchronize(stream));
-     POP_RANGE;
+     //POP_RANGE;
      return;
   }
   return;
@@ -210,19 +243,19 @@ void MemPrefetch(const void *ptr,hypre_int device,cudaStream_t stream){
 void MemPrefetchForce(const void *ptr,hypre_int device,cudaStream_t stream){
   if (ptr==NULL) return;
   size_t size=memsize(ptr);
-  PUSH_RANGE_PAYLOAD("MemPreFetchForce",4,size);
+  //PUSH_RANGE_PAYLOAD("MemPreFetchForce",4,size);
   hypre_CheckErrorDevice(cudaMemPrefetchAsync(ptr,size,device,stream));
-  POP_RANGE;
+  //POP_RANGE;
   return;
 }
 
 void MemPrefetchSized(const void *ptr,size_t size,hypre_int device,cudaStream_t stream){
   if (ptr==NULL) return;
-  PUSH_RANGE_DOMAIN("MemPreFetchSized",4,0);
+  //PUSH_RANGE_DOMAIN("MemPreFetchSized",4,0);
   /* Do a prefetch every time until a possible UM bug is fixed */
   if (size>0){
     hypre_CheckErrorDevice(cudaMemPrefetchAsync(ptr,size,device,stream));
-    POP_RANGE_DOMAIN(0);
+    //POP_RANGE_DOMAIN(0);
     return;
   }
   return;

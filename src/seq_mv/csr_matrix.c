@@ -783,7 +783,7 @@ HYPRE_Int hypre_CSRMatrixGetLoadBalancedPartitionEnd(hypre_CSRMatrix *A)
 void hypre_CSRMatrixPrefetchToDevice(hypre_CSRMatrix *A){
   if (hypre_CSRMatrixNumNonzeros(A)==0) return;
 
-  PUSH_RANGE_PAYLOAD("hypre_CSRMatrixPrefetchToDevice",0,hypre_CSRMatrixNumNonzeros(A));
+  //PUSH_RANGE_PAYLOAD("hypre_CSRMatrixPrefetchToDevice",0,hypre_CSRMatrixNumNonzeros(A));
   if ((!A->on_device)&&(hypre_CSRMatrixNumNonzeros(A)>8192)){
     //printf("Pointer type %d value = %p\n",PointerAttributes((hypre_CSRMatrixI(A))),hypre_CSRMatrixI(A));
 #if defined(TRACK_MEMORY_ALLOCATIONS)
@@ -803,12 +803,12 @@ void hypre_CSRMatrixPrefetchToDevice(hypre_CSRMatrix *A){
     A->on_device=1;
 #endif
   }
-  POP_RANGE;
+  //POP_RANGE;
 }
 void hypre_CSRMatrixPrefetchToDeviceBIGINT(hypre_CSRMatrix *A){
   if (hypre_CSRMatrixNumNonzeros(A)==0) return;
 
-  PUSH_RANGE_PAYLOAD("hypre_CSRMatrixPrefetchToDevice",0,hypre_CSRMatrixNumNonzeros(A));
+  //PUSH_RANGE_PAYLOAD("hypre_CSRMatrixPrefetchToDevice",0,hypre_CSRMatrixNumNonzeros(A));
   if ((!A->on_device)&&(hypre_CSRMatrixNumNonzeros(A)>8192)){
     //printf("Pointer type %d value = %p\n",PointerAttributes((hypre_CSRMatrixI(A))),hypre_CSRMatrixI(A));
 #if defined(TRACK_MEMORY_ALLOCATIONS)
@@ -828,10 +828,10 @@ void hypre_CSRMatrixPrefetchToDeviceBIGINT(hypre_CSRMatrix *A){
     A->on_device=1;
 #endif
   }
-  POP_RANGE;
+  //POP_RANGE;
 }
 void hypre_CSRMatrixPrefetchToHost(hypre_CSRMatrix *A){
-  PUSH_RANGE("hypre_CSRMatrixPrefetchToDevice",0);
+  //PUSH_RANGE("hypre_CSRMatrixPrefetchToDevice",0);
   if (A->on_device){
     A->on_device=0;
     hypre_CheckErrorDevice(cudaMemPrefetchAsync(hypre_CSRMatrixData(A),hypre_CSRMatrixNumNonzeros(A)*sizeof(HYPRE_Complex),cudaCpuDeviceId,HYPRE_STREAM(4)));
@@ -839,7 +839,7 @@ void hypre_CSRMatrixPrefetchToHost(hypre_CSRMatrix *A){
     hypre_CheckErrorDevice(cudaMemPrefetchAsync(hypre_CSRMatrixJ(A),hypre_CSRMatrixNumNonzeros(A)*sizeof(HYPRE_Int),cudaCpuDeviceId,HYPRE_STREAM(4)));
     hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(4)));
   }
-  POP_RANGE;
+  //POP_RANGE;
 }
 hypre_int hypre_CSRMatrixIsManaged(hypre_CSRMatrix *a){
   return ((pointerIsManaged((void*)hypre_CSRMatrixData(a)))

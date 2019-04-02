@@ -28,7 +28,7 @@ extern "C"{
 
 extern "C"{
   void VecScale(HYPRE_Complex *u, HYPRE_Complex *v, HYPRE_Complex *l1_norm, hypre_int num_rows,cudaStream_t s){
-    PUSH_RANGE_PAYLOAD("VECSCALE",1,num_rows);
+    //PUSH_RANGE_PAYLOAD("VECSCALE",1,num_rows);
     const hypre_int tpb=64;
     hypre_int num_blocks=num_rows/tpb+1;
 #ifdef CATCH_LAUNCH_ERRORS
@@ -42,7 +42,7 @@ extern "C"{
     hypre_CheckErrorDevice(cudaDeviceSynchronize());
 #endif
     hypre_CheckErrorDevice(cudaStreamSynchronize(s));
-    POP_RANGE;
+    //POP_RANGE;
   }
 }
 
@@ -57,12 +57,12 @@ extern "C"{
   void VecCopy(HYPRE_Complex* tgt, const HYPRE_Complex* src, hypre_int size,cudaStream_t s){
     hypre_int tpb=64;
     hypre_int num_blocks=size/tpb+1;
-    PUSH_RANGE_PAYLOAD("VecCopy",5,size);
+    //PUSH_RANGE_PAYLOAD("VecCopy",5,size);
     //MemPrefetch(tgt,0,s);
     //MemPrefetch(src,0,s);
     VecCopyKernel<<<num_blocks,tpb,0,s>>>(tgt,src,size);
     //hypre_CheckErrorDevice(cudaStreamSynchronize(s));
-    POP_RANGE;
+    //POP_RANGE;
   }
 }
 extern "C"{
@@ -103,11 +103,11 @@ extern "C"{
     hypre_CheckErrorDevice(cudaPeekAtLastError());
     hypre_CheckErrorDevice(cudaDeviceSynchronize());
 #endif
-    PUSH_RANGE("PACK_PREFETCH",1);
+    //PUSH_RANGE("PACK_PREFETCH",1);
 #ifndef HYPRE_GPU_USE_PINNED
     MemPrefetchSized((void*)send_data,(end-begin)*sizeof(HYPRE_Complex),cudaCpuDeviceId,s);
 #endif
-    POP_RANGE;
+    //POP_RANGE;
     //hypre_CheckErrorDevice(cudaStreamSynchronize(s));
   }
 }
@@ -127,7 +127,7 @@ void VecScaleScalarKernel(HYPRE_Complex *__restrict__ u, const HYPRE_Complex alp
 }
 extern "C"{
   hypre_int VecScaleScalar(HYPRE_Complex *u, const HYPRE_Complex alpha,  hypre_int num_rows,cudaStream_t s){
-    PUSH_RANGE("SEQVECSCALE",4);
+    //PUSH_RANGE("SEQVECSCALE",4);
     hypre_int num_blocks=num_rows/64+1;
 
 #ifdef CATCH_LAUNCH_ERRORS
@@ -140,7 +140,7 @@ extern "C"{
     hypre_CheckErrorDevice(cudaDeviceSynchronize());
 #endif
     hypre_CheckErrorDevice(cudaStreamSynchronize(s));
-    POP_RANGE;
+    //POP_RANGE;
     return 0;
   }
 }
@@ -263,17 +263,17 @@ extern "C"
       hypre_int i = blockIdx.x * blockDim.x + threadIdx.x;
       if (i<size) tgt[i] = src[i];
    }
- 
+
    void BigToSmallCopy (hypre_int* tgt, const HYPRE_Int* src, hypre_int size, cudaStream_t s)
    {
       hypre_int tpb=64;
       hypre_int num_blocks=size/tpb+1;
-      PUSH_RANGE_PAYLOAD("VecCopy",5,size);
+      //PUSH_RANGE_PAYLOAD("VecCopy",5,size);
       //MemPrefetch(tgt,0,s);
       //MemPrefetch(src,0,s);
       BigToSmallCopyKernel<<<num_blocks,tpb,0,s>>>(tgt,src,size);
       //hypre_CheckErrorDevice(cudaStreamSynchronize(s));
-      POP_RANGE;
+      //POP_RANGE;
    }
 }
 

@@ -21,10 +21,21 @@ hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int    
                        HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_ac_out,
                        HYPRE_Int   want_data)
 {
+   /* trivial case */
+   if (nnzA == 0)
+   {
+      *d_ic_out = hypre_CTAlloc(HYPRE_Int, n + 1, HYPRE_MEMORY_DEVICE);
+      *d_jc_out = hypre_CTAlloc(HYPRE_Int,     0, HYPRE_MEMORY_DEVICE);
+      *d_ac_out = hypre_CTAlloc(HYPRE_Complex, 0, HYPRE_MEMORY_DEVICE);
+
+      return hypre_error_flag;
+   }
+
    HYPRE_Int do_timing = hypre_device_sparse_opts->do_timing;
    hypre_double tt = 0.0, tm;
    HYPRE_Int *d_jt, *d_it, *d_pm, *d_ic, *d_jc;
    HYPRE_Complex *d_ac = NULL;
+   HYPRE_Int *mem_work = hypre_TAlloc(HYPRE_Int, 3*nnzA, HYPRE_MEMORY_DEVICE);
 
    /* allocate C */
    d_jc = hypre_TAlloc(HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE);
@@ -34,7 +45,8 @@ hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int    
    }
 
    /* permutation vector */
-   d_pm = hypre_TAlloc(HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE);
+   //d_pm = hypre_TAlloc(HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE);
+   d_pm = mem_work;
 
    if (do_timing)
    {
@@ -43,10 +55,13 @@ hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int    
    }
 
    /* expansion: A's row idx */
-   d_it = hypreDevice_CsrRowPtrsToIndices(m, nnzA, d_ia);
+   //d_it = hypre_TAlloc(HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE);
+   d_it = d_pm + nnzA;
+   hypreDevice_CsrRowPtrsToIndices_v2(m, d_ia, d_it);
 
    /* a copy of col idx of A */
-   d_jt = hypre_TAlloc(HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE);
+   //d_jt = hypre_TAlloc(HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE);
+   d_jt = d_it + nnzA;
    hypre_TMemcpy(d_jt, d_ja, HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
    if (do_timing)
@@ -54,7 +69,7 @@ hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int    
       cudaThreadSynchronize();
       hypre_double tm_old = tm;
       tm = time_getWallclockSeconds();
-      hypre_device_sparse_handle->sptrans_expansion_time = tm - tm_old;
+      hypre_device_sparse_handle->sptrans_expansion_time += tm - tm_old;
    }
 
    /* sort: by col */
@@ -88,12 +103,15 @@ hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int    
       cudaThreadSynchronize();
       hypre_double tm_old = tm;
       tm = time_getWallclockSeconds();
-      hypre_device_sparse_handle->sptrans_rowptr_time = tm - tm_old;
+      hypre_device_sparse_handle->sptrans_rowptr_time += tm - tm_old;
    }
 
+   /*
    hypre_TFree(d_jt, HYPRE_MEMORY_DEVICE);
    hypre_TFree(d_it, HYPRE_MEMORY_DEVICE);
    hypre_TFree(d_pm, HYPRE_MEMORY_DEVICE);
+   */
+   hypre_TFree(mem_work, HYPRE_MEMORY_DEVICE);
 
    *d_ic_out = d_ic;
    *d_jc_out = d_jc;
@@ -103,7 +121,7 @@ hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int    
    {
       cudaThreadSynchronize();
       tt = time_getWallclockSeconds() - tt;
-      hypre_device_sparse_handle->sptrans_time = tt;
+      hypre_device_sparse_handle->sptrans_time += tt;
    }
 
    return hypre_error_flag;

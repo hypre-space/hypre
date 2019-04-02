@@ -101,6 +101,8 @@ hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A,
       /* contains communication which should be explicitly included to allow for overlap */
       hypre_ParCSRMatrixExtractBExtDeviceInit(B, A, 1, &request);
 
+      //Bext = hypre_ParCSRMatrixExtractBExtDeviceWait(request);
+
       /* These are local and could be overlapped with communication */
       AB_diag = hypre_CSRMatrixMultiply(A_diag, B_diag);
       AB_offd = hypre_CSRMatrixMultiply(A_diag, B_offd);
@@ -335,6 +337,8 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
 
       hypre_ExchangeExternalRowsDeviceInit(C_int, comm_pkg_A, &request);
 
+      //C_ext = hypre_ExchangeExternalRowsDeviceWait(request);
+
       hypre_CSRMatrixDestroy(C_int_diag);
       hypre_CSRMatrixDestroy(C_int_offd);
 
@@ -381,9 +385,14 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
       num_sends_A        = hypre_ParCSRCommPkgNumSends(comm_pkg_A);
       num_elmts_send_A   = hypre_ParCSRCommPkgSendMapStart(comm_pkg_A, num_sends_A);
       h_send_map_elmts_A = hypre_ParCSRCommPkgSendMapElmts(comm_pkg_A);
-      d_send_map_elmts_A = hypre_TAlloc(HYPRE_Int, num_elmts_send_A, HYPRE_MEMORY_DEVICE);
-      hypre_TMemcpy(d_send_map_elmts_A, h_send_map_elmts_A, HYPRE_Int, num_elmts_send_A,
-                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+      d_send_map_elmts_A = hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg_A);
+      if (d_send_map_elmts_A == NULL)
+      {
+         d_send_map_elmts_A = hypre_TAlloc(HYPRE_Int, num_elmts_send_A, HYPRE_MEMORY_DEVICE);
+         hypre_TMemcpy(d_send_map_elmts_A, h_send_map_elmts_A, HYPRE_Int, num_elmts_send_A,
+                       HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+         hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg_A) = d_send_map_elmts_A;
+      }
 
       hypre_assert(hypre_CSRMatrixNumRows(C_ext_diag) == num_elmts_send_A);
       hypre_assert(hypre_CSRMatrixNumRows(C_ext_offd) == num_elmts_send_A);
@@ -395,7 +404,6 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
       hypre_CSRMatrixDestroy(C_tmp_offd);
       hypre_CSRMatrixDestroy(C_ext_diag);
       hypre_CSRMatrixDestroy(C_ext_offd);
-      hypre_TFree(d_send_map_elmts_A, HYPRE_MEMORY_DEVICE);
    }
 
    C = hypre_ParCSRMatrixCreate(comm, n_cols_A, n_cols_B, col_starts_A, col_starts_B,

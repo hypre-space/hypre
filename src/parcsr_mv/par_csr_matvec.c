@@ -72,7 +72,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
     *  these conditions terminates processing, and the ierr flag
     *  is informational only.
     *--------------------------------------------------------------------*/
-   PUSH_RANGE_PAYLOAD("PAR_CSR_MATVEC",5,x_size);
+   //PUSH_RANGE_PAYLOAD("PAR_CSR_MATVEC",5,x_size);
    hypre_assert( idxstride>0 );
 
    if (num_cols != x_size)
@@ -108,7 +108,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] -= hypre_MPI_Wtime();
 #endif
-   PUSH_RANGE("MPI_PACK",3);
+   //PUSH_RANGE("MPI_PACK",3);
    HYPRE_Int use_persistent_comm = 0;
 #ifdef HYPRE_USING_PERSISTENT_COMM
    use_persistent_comm = num_vectors == 1;
@@ -121,7 +121,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    if ( use_persistent_comm )
    {
 #ifdef HYPRE_USING_PERSISTENT_COMM
-     PUSH_RANGE("PERCOMM1",0);
+      //PUSH_RANGE("PERCOMM1",0);
       persistent_comm_handle = hypre_ParCSRCommPkgGetPersistentCommHandle(1, comm_pkg);
 
       HYPRE_Int num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
@@ -129,7 +129,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
 
       hypre_VectorData(x_tmp) = (HYPRE_Complex *)persistent_comm_handle->recv_data;
       hypre_SeqVectorSetDataOwner(x_tmp, 0);
-      POP_RANGE;
+      //POP_RANGE;
 #endif
    }
    else
@@ -153,7 +153,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
       HYPRE_Int begin = hypre_ParCSRCommPkgSendMapStart(comm_pkg, 0);
       HYPRE_Int end   = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
 #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
-      PUSH_RANGE("PERCOMM2DEVICE",4);
+      //PUSH_RANGE("PERCOMM2DEVICE",4);
 #ifdef HYPRE_USING_PERSISTENT_COMM
       PackOnDevice((HYPRE_Complex*)persistent_comm_handle->send_data,x_local_data,hypre_ParCSRCommPkgSendMapElmts(comm_pkg),begin,end,HYPRE_STREAM(4));
       //PrintPointerAttributes(persistent_comm_handle->send_data);
@@ -171,7 +171,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
       hypre_CheckErrorDevice(cudaDeviceSynchronize());
 #endif
 #endif
-      POP_RANGE;
+      //POP_RANGE;
       SetAsyncMode(1);
       hypre_CheckErrorDevice(cudaPeekAtLastError());
       hypre_CheckErrorDevice(cudaDeviceSynchronize());
@@ -182,7 +182,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
       SetAsyncMode(0);
 #else
 #ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
-      PUSH_RANGE("MPI_PACK_OMP",4);
+      //PUSH_RANGE("MPI_PACK_OMP",4);
       SyncVectorToHost(x_local);
 #endif
 
@@ -204,7 +204,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
 #endif
             = x_local_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,i)];
       }
-      POP_RANGE; // "MPI_PACK_OMP"
+      //POP_RANGE; // "MPI_PACK_OMP"
 #endif
    }
    else
@@ -235,8 +235,8 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] += hypre_MPI_Wtime();
    hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] -= hypre_MPI_Wtime();
 #endif
-   POP_RANGE;
-   PUSH_RANGE("MPI_HALO_EXC_SEND",4);
+   //POP_RANGE;
+   //PUSH_RANGE("MPI_HALO_EXC_SEND",4);
    if (use_persistent_comm)
    {
 #ifdef HYPRE_USING_PERSISTENT_COMM
@@ -255,14 +255,14 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] += hypre_MPI_Wtime();
 #endif
-   POP_RANGE;
+   //POP_RANGE;
 #if !defined(HYPRE_USING_GPU) || !defined(HYPRE_USING_UNIFIED_MEMORY)
    hypre_CSRMatrixMatvecOutOfPlace( alpha, diag, x_local, beta, b_local, y_local, 0);
 #endif
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] -= hypre_MPI_Wtime();
 #endif
-   PUSH_RANGE("MPI_HALO_EXC_RECV",6);
+   //PUSH_RANGE("MPI_HALO_EXC_RECV",6);
    if (use_persistent_comm)
    {
 #ifdef HYPRE_USING_PERSISTENT_COMM
@@ -278,7 +278,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
       }
       hypre_TFree(comm_handle, HYPRE_MEMORY_HOST);
    }
-   POP_RANGE;
+   //POP_RANGE;
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] += hypre_MPI_Wtime();
 #endif
@@ -293,7 +293,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] -= hypre_MPI_Wtime();
 #endif
-   PUSH_RANGE("MPI_UNPACK",5);
+   //PUSH_RANGE("MPI_UNPACK",5);
    hypre_SeqVectorDestroy(x_tmp);
    x_tmp = NULL;
    if (!use_persistent_comm)
@@ -305,11 +305,11 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] += hypre_MPI_Wtime();
 #endif
-   POP_RANGE;
+   //POP_RANGE;
 #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
    hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(4)));
 #endif
-   POP_RANGE; // PAR_CSR
+   //POP_RANGE; // PAR_CSR
    return ierr;
 }
 

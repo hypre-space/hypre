@@ -530,6 +530,7 @@ extern "C" {
 #define HYPRE_MEMORY_HOST_ACT         HYPRE_MEMORY_HOST
 #define HYPRE_MEMORY_DEVICE_ACT       HYPRE_MEMORY_DEVICE
 #define HYPRE_MEMORY_SHARED_ACT       HYPRE_MEMORY_SHARED
+//#define HYPRE_MEMORY_SHARED_ACT       HYPRE_MEMORY_HOST
 #define HYPRE_MEMORY_HOST_PINNED_ACT  HYPRE_MEMORY_HOST_PINNED
 
 #else
@@ -744,22 +745,26 @@ void assert_check_host(void *ptr, char *file, HYPRE_Int line);
 /* These Allocs are with printfs, for debug */
 #define hypre_TAlloc(type, count, location) \
 (\
- /*printf("[%s:%d] MALLOC %ld B\n", __FILE__,__LINE__, (size_t)(sizeof(type) * (count))) ,*/ \
- (type *) hypre_MAlloc((size_t)(sizeof(type) * (count)), location) \
+{\
+ if (location == HYPRE_MEMORY_DEVICE) printf("[%s:%d] TALLOC %.3f MB\n", __FILE__,__LINE__, (size_t)(sizeof(type) * (count))/1024.0/1024.0); \
+ (type *) hypre_MAlloc((size_t)(sizeof(type) * (count)), location); \
+}\
 )
 
 #define hypre_CTAlloc(type, count, location) \
 (\
 {\
- /* if (location == HYPRE_MEMORY_DEVICE) printf("[%s:%d] CTALLOC %.3f MB\n", __FILE__,__LINE__, (size_t)(sizeof(type) * (count))/1024.0/1024.0); */ \
+ if (location == HYPRE_MEMORY_DEVICE) printf("[%s:%d] CTALLOC %.3f MB\n", __FILE__,__LINE__, (size_t)(sizeof(type) * (count))/1024.0/1024.0); \
  (type *) hypre_CAlloc((size_t)(count), (size_t)sizeof(type), location); \
 }\
 )
 
 #define hypre_TReAlloc(ptr, type, count, location) \
 (\
- /* printf("[%s:%d] TReALLOC %ld B\n", __FILE__,__LINE__, (size_t)(sizeof(type) * (count))) , */ \
- (type *)hypre_ReAlloc((char *)ptr, (size_t)(sizeof(type) * (count)), location) \
+{\
+ if (location == HYPRE_MEMORY_DEVICE) printf("[%s:%d] TReALLOC %p, %.3f MB\n", __FILE__,__LINE__, ptr, (size_t)(sizeof(type) * (count))/1024.0/1024.0); \
+ (type *)hypre_ReAlloc((char *)ptr, (size_t)(sizeof(type) * (count)), location); \
+}\
 )
 
 #else
@@ -2119,9 +2124,10 @@ T warp_prefix_sum(hypre_int lane_id, T in, T &all_sum)
 #pragma unroll
    for (hypre_int d = 16; d > 0; d >>= 1)
    {
+      T t = __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d);
+
       if ( (lane_id & (d - 1)) == d - 1)
       {
-         T t = __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d);
          if ( (lane_id & (d << 1 - 1)) == (d << 1 - 1) )
          {
             in += t;

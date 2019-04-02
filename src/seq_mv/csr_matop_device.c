@@ -96,11 +96,13 @@ hypre_CSRMatrixMultiplyDevice( hypre_CSRMatrix *A,
    HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
    HYPRE_Int         nrows_A  = hypre_CSRMatrixNumRows(A);
    HYPRE_Int         ncols_A  = hypre_CSRMatrixNumCols(A);
+   HYPRE_Int         nnz_A    = hypre_CSRMatrixNumNonzeros(A);
    HYPRE_Complex    *B_data   = hypre_CSRMatrixData(B);
    HYPRE_Int        *B_i      = hypre_CSRMatrixI(B);
    HYPRE_Int        *B_j      = hypre_CSRMatrixJ(B);
    HYPRE_Int         nrows_B  = hypre_CSRMatrixNumRows(B);
    HYPRE_Int         ncols_B  = hypre_CSRMatrixNumCols(B);
+   HYPRE_Int         nnz_B    = hypre_CSRMatrixNumNonzeros(B);
    HYPRE_Complex    *C_data;
    HYPRE_Int        *C_i;
    HYPRE_Int        *C_j;
@@ -111,6 +113,7 @@ hypre_CSRMatrixMultiplyDevice( hypre_CSRMatrix *A,
 
    if (ncols_A != nrows_B)
    {
+      hypre_printf("Warning! incompatible matrix dimensions!\n");
       hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Warning! incompatible matrix dimensions!\n");
 
       return NULL;
@@ -123,7 +126,7 @@ hypre_CSRMatrixMultiplyDevice( hypre_CSRMatrix *A,
    }
    */
 
-   hypreDevice_CSRSpGemm(nrows_A, ncols_A, ncols_B, A_i, A_j, A_data, B_i, B_j, B_data,
+   hypreDevice_CSRSpGemm(nrows_A, ncols_A, ncols_B, nnz_A, nnz_B, A_i, A_j, A_data, B_i, B_j, B_data,
                          &C_i, &C_j, &C_data, &nnzC);
 
    C = hypre_CSRMatrixCreate(nrows_A, ncols_B, nnzC);
@@ -191,10 +194,17 @@ hypre_CSRMatrixSplitDevice(hypre_CSRMatrix  *B_ext,
    B_ext_offd_j = hypre_TAlloc(HYPRE_Int,     B_ext_offd_nnz, HYPRE_MEMORY_DEVICE);
    B_ext_offd_a = hypre_TAlloc(HYPRE_Complex, B_ext_offd_nnz, HYPRE_MEMORY_DEVICE);
 
+   HYPRE_Int *work_mem = hypre_TAlloc(HYPRE_Int, 2*B_ext_nnz, HYPRE_MEMORY_DEVICE);
+   B_ext_row_indices = work_mem;
+   B_ext_diag_row_indices = B_ext_row_indices + B_ext_nnz;
+   B_ext_offd_row_indices = B_ext_diag_row_indices + B_ext_diag_nnz;
+   /*
    B_ext_diag_row_indices = hypre_TAlloc(HYPRE_Int, B_ext_diag_nnz, HYPRE_MEMORY_DEVICE);
    B_ext_offd_row_indices = hypre_TAlloc(HYPRE_Int, B_ext_offd_nnz, HYPRE_MEMORY_DEVICE);
+   B_ext_row_indices      = hypre_TAlloc(HYPRE_Int, B_ext_nnz, HYPRE_MEMORY_DEVICE);
+   */
 
-   B_ext_row_indices = hypreDevice_CsrRowPtrsToIndices(num_rows, B_ext_nnz, B_ext_i);
+   hypreDevice_CsrRowPtrsToIndices_v2(num_rows, B_ext_i, B_ext_row_indices);
 
    /* copy to diag */
    tmpi = thrust::copy_if(thrust::device, B_ext_j, B_ext_j + B_ext_nnz, B_ext_j, B_ext_diag_j, pred1);
@@ -225,7 +235,14 @@ hypre_CSRMatrixSplitDevice(hypre_CSRMatrix  *B_ext,
    thrust::sort(thrust::device, col_map_offd_C, col_map_offd_C + B_ext_offd_nnz + num_cols_offd_B);
    tmpi = thrust::unique(thrust::device, col_map_offd_C, col_map_offd_C + B_ext_offd_nnz + num_cols_offd_B);
    num_cols_offd_C = tmpi - col_map_offd_C;
+#if 1
+   HYPRE_Int *tmp = hypre_TAlloc(HYPRE_Int, num_cols_offd_C, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(tmp, col_map_offd_C, HYPRE_Int, num_cols_offd_C, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(col_map_offd_C, HYPRE_MEMORY_DEVICE);
+   col_map_offd_C = tmp;
+#else
    col_map_offd_C = hypre_TReAlloc(col_map_offd_C, HYPRE_Int, num_cols_offd_C, HYPRE_MEMORY_DEVICE);
+#endif
 
    /* create map from col_map_offd_B */
    map_B_to_C = hypre_TAlloc(HYPRE_Int, num_cols_offd_B, HYPRE_MEMORY_DEVICE);
@@ -260,9 +277,12 @@ hypre_CSRMatrixSplitDevice(hypre_CSRMatrix  *B_ext,
    hypre_CSRMatrixMemoryLocation(B_ext_offd) = HYPRE_MEMORY_DEVICE;
 
    /* free */
+   /*
    hypre_TFree(B_ext_diag_row_indices, HYPRE_MEMORY_DEVICE);
    hypre_TFree(B_ext_offd_row_indices, HYPRE_MEMORY_DEVICE);
    hypre_TFree(B_ext_row_indices,      HYPRE_MEMORY_DEVICE);
+   */
+   hypre_TFree(work_mem, HYPRE_MEMORY_DEVICE);
 
    *map_B_to_C_ptr      = map_B_to_C;
    *num_cols_offd_C_ptr = num_cols_offd_C;

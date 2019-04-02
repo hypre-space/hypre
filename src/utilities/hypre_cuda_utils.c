@@ -52,6 +52,12 @@ hypreDevice_GetRowNnz(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int *d_di
    HYPRE_Int bDim = 512;
    HYPRE_Int gDim = (nrows + bDim - 1) / bDim;
 
+   /* trivial case */
+   if (nrows <= 0)
+   {
+      return hypre_error_flag;
+   }
+
    hypreCUDAKernel_GetRowNnz<<<gDim, bDim>>>(nrows, d_row_indices, d_diag_ia, d_offd_ia, d_rownnz);
 
    return hypre_error_flag;
@@ -141,6 +147,12 @@ hypreDevice_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int 
                            HYPRE_Int *d_offd_i, HYPRE_Int *d_offd_j, HYPRE_Complex *d_offd_a,
                            HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex *d_ab)
 {
+   /* trivial case */
+   if (nrows <= 0)
+   {
+      return hypre_error_flag;
+   }
+
    HYPRE_Int num_warps_per_block = 16;
    dim3 bDim(HYPRE_WARP_SIZE, num_warps_per_block);
    HYPRE_Int gDim = (nrows + num_warps_per_block - 1) / num_warps_per_block;
@@ -223,6 +235,12 @@ hypreCUDAKernel_CsrRowPtrsToIndices(HYPRE_Int n, HYPRE_Int *ptr, HYPRE_Int *num,
 HYPRE_Int*
 hypreDevice_CsrRowPtrsToIndices(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr)
 {
+   /* trivial case */
+   if (nrows <= 0)
+   {
+      return NULL;
+   }
+
    HYPRE_Int *d_row_ind = hypre_TAlloc(HYPRE_Int, nnz, HYPRE_MEMORY_DEVICE);
 
    HYPRE_Int num_warps_per_block = 16;
@@ -237,6 +255,12 @@ hypreDevice_CsrRowPtrsToIndices(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row
 HYPRE_Int
 hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int *d_row_ptr, HYPRE_Int *d_row_ind)
 {
+   /* trivial case */
+   if (nrows <= 0)
+   {
+      return hypre_error_flag;
+   }
+
    HYPRE_Int num_warps_per_block = 16;
    dim3 bDim(HYPRE_WARP_SIZE, num_warps_per_block);
    HYPRE_Int gDim = (nrows + num_warps_per_block - 1) / num_warps_per_block;
@@ -249,6 +273,12 @@ hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int *d_row_ptr, HYPRE_
 HYPRE_Int
 hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int *d_row_ptr, HYPRE_Int *d_row_num, HYPRE_Int *d_row_ind)
 {
+   /* trivial case */
+   if (nrows <= 0)
+   {
+      return hypre_error_flag;
+   }
+
    HYPRE_Int num_warps_per_block = 16;
    dim3 bDim(HYPRE_WARP_SIZE, num_warps_per_block);
    HYPRE_Int gDim = (nrows + num_warps_per_block - 1) / num_warps_per_block;
@@ -270,6 +300,18 @@ hypreDevice_CsrRowIndicesToPtrs(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row
                        d_row_ptr);
 
    return d_row_ptr;
+}
+
+HYPRE_Int
+hypreDevice_CsrRowIndicesToPtrs_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ind, HYPRE_Int *d_row_ptr)
+{
+   thrust::lower_bound(thrust::device,
+                       d_row_ind, d_row_ind + nnz,
+                       thrust::counting_iterator<HYPRE_Int>(0),
+                       thrust::counting_iterator<HYPRE_Int>(nrows+1),
+                       d_row_ptr);
+
+   return hypre_error_flag;
 }
 
 #endif // #if defined(HYPRE_USING_CUDA)

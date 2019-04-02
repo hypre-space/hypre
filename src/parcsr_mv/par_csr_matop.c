@@ -4615,7 +4615,7 @@ hypre_ParcsrGetExternalRowsInit( hypre_ParCSRMatrix   *A,
 
    /* fill the CSR matrix: j and a */
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for HYPRE_SMP_SCHEDULE
+#pragma omp parallel for HYPRE_SMP_SCHEDULE private(i,j,k)
 #endif
    for (i = 0; i < num_rows_send; i++)
    {

@@ -89,59 +89,53 @@ csr_spmm_compute_row_numer(HYPRE_Int  rowi,
    HYPRE_Int num_new_insert = 0;
 
    /* load column idx and values of row i of A */
-   for (i = istart; i < iend; i += HYPRE_WARP_SIZE)
+   for (i = istart; i < iend; i += blockDim.y)
    {
-      HYPRE_Int  colA = -1;
+      HYPRE_Int     colA = -1;
       HYPRE_Complex valA = 0.0;
 
-      if (i + lane_id < iend)
+      if (threadIdx.x == 0 && i + threadIdx.y < iend)
       {
-         colA = read_only_load(ja + i + lane_id);
-         valA = read_only_load(aa + i + lane_id);
+         colA = read_only_load(ja + i + threadIdx.y);
+         valA = read_only_load(aa + i + threadIdx.y);
       }
 
 #if 0
       //const HYPRE_Int ymask = get_mask<4>(lane_id);
       // TODO: need to confirm the behavior of __ballot_sync, leave it here for now
-      const HYPRE_Int num_valid_rows = __popc(__ballot_sync(ymask, valid_i));
-      for (HYPRE_Int j = 0; j < num_valid_rows; j++)
+      //const HYPRE_Int num_valid_rows = __popc(__ballot_sync(ymask, valid_i));
+      //for (HYPRE_Int j = 0; j < num_valid_rows; j++)
 #endif
-      for (HYPRE_Int j = 0; j < blockDim.x; j++)
-      {
-         /* threads in the same ygroup work on one row together */
-         const HYPRE_Int rowB = __shfl_sync(HYPRE_WARP_FULL_MASK, colA, j, blockDim.x);
-         if (rowB == -1)
-         {
-            return num_new_insert;
-         }
-         const HYPRE_Complex mult = __shfl_sync(HYPRE_WARP_FULL_MASK, valA, j, blockDim.x);
-         /* open this row of B, collectively */
-         HYPRE_Int tmp = -1;
-         if (threadIdx.x < 2)
-         {
-            tmp = read_only_load(ib+rowB+threadIdx.x);
-         }
-         const HYPRE_Int rowB_start = __shfl_sync(HYPRE_WARP_FULL_MASK, tmp, 0, blockDim.x);
-         const HYPRE_Int rowB_end   = __shfl_sync(HYPRE_WARP_FULL_MASK, tmp, 1, blockDim.x);
 
-         for (HYPRE_Int k = rowB_start; k < rowB_end; k += blockDim.x)
+      /* threads in the same ygroup work on one row together */
+      const HYPRE_Int     rowB = __shfl_sync(HYPRE_WARP_FULL_MASK, colA, 0, blockDim.x);
+      const HYPRE_Complex mult = __shfl_sync(HYPRE_WARP_FULL_MASK, valA, 0, blockDim.x);
+      /* open this row of B, collectively */
+      HYPRE_Int tmp = -1;
+      if (rowB != -1 && threadIdx.x < 2)
+      {
+         tmp = read_only_load(ib+rowB+threadIdx.x);
+      }
+      const HYPRE_Int rowB_start = __shfl_sync(HYPRE_WARP_FULL_MASK, tmp, 0, blockDim.x);
+      const HYPRE_Int rowB_end   = __shfl_sync(HYPRE_WARP_FULL_MASK, tmp, 1, blockDim.x);
+
+      for (HYPRE_Int k = rowB_start; k < rowB_end; k += blockDim.x)
+      {
+         if (k + threadIdx.x < rowB_end)
          {
-            if (k + threadIdx.x < rowB_end)
+            const HYPRE_Int     k_idx = read_only_load(jb + k + threadIdx.x);
+            const HYPRE_Complex k_val = read_only_load(ab + k + threadIdx.x) * mult;
+            /* first try to insert into shared memory hash table */
+            HYPRE_Int pos = hash_insert_numer<HashType, FAILED_SYMBL>
+               (s_HashSize, s_HashKeys, s_HashVals, k_idx, k_val, num_new_insert);
+            if (-1 == pos)
             {
-               const HYPRE_Int  k_idx = read_only_load(jb + k + threadIdx.x);
-               const HYPRE_Complex k_val = read_only_load(ab + k + threadIdx.x) * mult;
-               /* first try to insert into shared memory hash table */
-               HYPRE_Int pos = hash_insert_numer<HashType, FAILED_SYMBL>
-                  (s_HashSize, s_HashKeys, s_HashVals, k_idx, k_val, num_new_insert);
-               if (-1 == pos)
-               {
-                  pos = hash_insert_numer<HashType, FAILED_SYMBL>
+               pos = hash_insert_numer<HashType, FAILED_SYMBL>
                      (g_HashSize, g_HashKeys, g_HashVals, k_idx, k_val, num_new_insert);
-               }
-#if DEBUG_MODE
-               assert(pos != -1);
-#endif
             }
+#if DEBUG_MODE
+            assert(pos != -1);
+#endif
          }
       }
    }
@@ -158,7 +152,7 @@ copy_from_hash_into_C_row(         HYPRE_Int      lane_id,
                                    HYPRE_Int      ghash_size,
                                    HYPRE_Int     *jg_start,
                                    HYPRE_Complex *ag_start,
-                                   HYPRE_Int  *jc_start,
+                                   HYPRE_Int     *jc_start,
                                    HYPRE_Complex *ac_start)
 {
    HYPRE_Int j = 0;
@@ -367,7 +361,8 @@ hypreDevice_CSRSpGemmWithRownnzUpperbound(HYPRE_Int   m,        HYPRE_Int   k,  
                                           HYPRE_Int  *d_rc,     HYPRE_Int   exact_rownnz,
                                           HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_c_out,
                                           HYPRE_Int *nnzC,
-                                          hypre_DeviceCSRSparseOpts *opts, hypre_DeviceCSRSparseHandle *handle)
+                                          hypre_DeviceCSRSparseOpts *opts,
+                                          hypre_DeviceCSRSparseHandle *handle)
 {
    const HYPRE_Int num_warps_per_block =  20;
    const HYPRE_Int shmem_hash_size     = 128;
@@ -410,8 +405,8 @@ hypreDevice_CSRSpGemmWithRownnzUpperbound(HYPRE_Int   m,        HYPRE_Int   k,  
    {
       cudaThreadSynchronize();
       t2 = time_getWallclockSeconds();
-      printf("^^^^create hash table time                                %.2e\n", t2 - t1);
-      handle->spmm_create_hashtable_time = t2 - t1;
+      //printf("^^^^create hash table time                                %.2e\n", t2 - t1);
+      handle->spmm_create_hashtable_time += t2 - t1;
    }
 
    /* ---------------------------------------------------------------------------
@@ -520,8 +515,8 @@ hypreDevice_CSRSpGemmWithRownnzUpperbound(HYPRE_Int   m,        HYPRE_Int   k,  
    {
       cudaThreadSynchronize();
       t2 = time_getWallclockSeconds();
-      printf("^^^^Numeric multiplication time                           %.2e\n", t2 - t1);
-      handle->spmm_numeric_time = t2 - t1;
+      //printf("^^^^Numeric multiplication time                           %.2e\n", t2 - t1);
+      handle->spmm_numeric_time += t2 - t1;
    }
 
    if (do_timing)
@@ -538,8 +533,8 @@ hypreDevice_CSRSpGemmWithRownnzUpperbound(HYPRE_Int   m,        HYPRE_Int   k,  
    {
       cudaThreadSynchronize();
       t2 = time_getWallclockSeconds();
-      printf("^^^^Postprocess time after numerical                      %.2e\n", t2 - t1);
-      handle->spmm_post_numeric_time = t2 - t1;
+      //printf("^^^^Postprocess time after numerical                      %.2e\n", t2 - t1);
+      handle->spmm_post_numeric_time += t2 - t1;
    }
 
    handle->ghash_size = ghash_size;

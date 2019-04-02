@@ -39,17 +39,17 @@ hypre_CSRMatrixMatvecOutOfPlace( HYPRE_Complex    alpha,
 #endif
 
 #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY) /* CUDA */
-   PUSH_RANGE_PAYLOAD("MATVEC",0, hypre_CSRMatrixNumRows(A));
+   //PUSH_RANGE_PAYLOAD("MATVEC",0, hypre_CSRMatrixNumRows(A));
 #ifdef HYPRE_BIGINT
    HYPRE_Int ierr = hypre_CSRMatrixMatvecDeviceBIGINT( alpha,A,x,beta,b,y,offset );
 #else
    HYPRE_Int ierr = hypre_CSRMatrixMatvecDevice( alpha,A,x,beta,b,y,offset );
 #endif
-   POP_RANGE;
+   //POP_RANGE;
 #elif defined(HYPRE_USING_OPENMP_OFFLOAD) /* OMP 4.5 */
-   PUSH_RANGE_PAYLOAD("MATVEC-OMP",0, hypre_CSRMatrixNumRows(A));
+   //PUSH_RANGE_PAYLOAD("MATVEC-OMP",0, hypre_CSRMatrixNumRows(A));
    HYPRE_Int ierr = hypre_CSRMatrixMatvecOutOfPlaceOOMP( alpha,A,x,beta,b,y,offset );
-   POP_RANGE;
+   //POP_RANGE;
 #else /* CPU */
    HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
    HYPRE_Int        *A_i      = hypre_CSRMatrixI(A) + offset;
@@ -809,15 +809,15 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Complex    alpha,
 
   if (b!=y){
 
-    PUSH_RANGE_PAYLOAD("MEMCPY",1,y->size-offset);
+    //PUSH_RANGE_PAYLOAD("MEMCPY",1,y->size-offset);
     VecCopy(y->data,b->data,(y->size-offset),HYPRE_STREAM(4));
-    POP_RANGE
+    //POP_RANGE
   }
 
   if (x==y) hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ERROR::x and y are the same pointer in hypre_CSRMatrixMatvecDevice\n");
 
   if (FirstCall){
-    PUSH_RANGE("FIRST_CALL",4);
+    //PUSH_RANGE("FIRST_CALL",4);
 
     handle=getCusparseHandle();
 
@@ -837,10 +837,10 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Complex    alpha,
     nvtxNameCudaStreamA(s[4], "HYPRE_COMPUTE_STREAM");
     hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
     myid++;
-    POP_RANGE;
+    //POP_RANGE;
   }
 
-  PUSH_RANGE("PREFETCH+SPMV",2);
+  //PUSH_RANGE("PREFETCH+SPMV",2);
 
   hypre_CSRMatrixPrefetchToDevice(A);
   hypre_SeqVectorPrefetchToDevice(x);
@@ -857,7 +857,7 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Complex    alpha,
   if (!GetAsyncMode()){
   hypre_CheckErrorDevice(cudaStreamSynchronize(s[4]));
   }
-  POP_RANGE;
+  //POP_RANGE;
 #endif
   return hypre_error_flag;
 
@@ -882,15 +882,15 @@ hypre_CSRMatrixMatvecDeviceBIGINT( HYPRE_Complex    alpha,
 
   if (b!=y){
 
-    PUSH_RANGE_PAYLOAD("MEMCPY",1,y->size-offset);
+    //PUSH_RANGE_PAYLOAD("MEMCPY",1,y->size-offset);
     VecCopy(y->data,b->data,(y->size-offset),HYPRE_STREAM(4));
-    POP_RANGE
+    //POP_RANGE
   }
 
   if (x==y) fprintf(stderr,"ERROR::x and y are the same pointer in hypre_CSRMatrixMatvecDevice\n");
 
   if (FirstCall){
-    PUSH_RANGE("FIRST_CALL",4);
+    //PUSH_RANGE("FIRST_CALL",4);
 
     handle=getCusparseHandle();
 
@@ -910,10 +910,10 @@ hypre_CSRMatrixMatvecDeviceBIGINT( HYPRE_Complex    alpha,
     nvtxNameCudaStreamA(s[4], "HYPRE_COMPUTE_STREAM");
     hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
     myid++;
-    POP_RANGE;
+    //POP_RANGE;
   }
 
-  PUSH_RANGE("PREFETCH+SPMV",2);
+  //PUSH_RANGE("PREFETCH+SPMV",2);
   hypre_int  num_rows     = hypre_CSRMatrixNumRows(A);
   hypre_int  num_cols     = hypre_CSRMatrixNumCols(A);
   hypre_int  num_nonzeros = hypre_CSRMatrixNumNonzeros(A);
@@ -951,7 +951,7 @@ hypre_CSRMatrixMatvecDeviceBIGINT( HYPRE_Complex    alpha,
   if (!GetAsyncMode()){
   hypre_CheckErrorDevice(cudaStreamSynchronize(s[4]));
   }
-  POP_RANGE;
+  //POP_RANGE;
 #endif
   return 0;
 

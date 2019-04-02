@@ -438,6 +438,10 @@ void hypre_SeqVectorUpdateHost(hypre_Vector *x);
 
 HYPRE_Int hypre_CSRMatrixMatvecOutOfPlaceOOMP3( HYPRE_Complex alpha, hypre_CSRMatrix *A, hypre_Vector *x, HYPRE_Complex beta, hypre_Vector *b, hypre_Vector *y, HYPRE_Int offset);
 
+HYPRE_Int hypreDevice_CSRSparseHandlePrint();
+
+HYPRE_Int hypreDevice_CSRSparseHandleClearStats();
+
 #ifdef __cplusplus
 }
 #endif

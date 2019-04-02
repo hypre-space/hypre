@@ -42,7 +42,9 @@ FILES =\
  csr_matvec.c\
  csr_spadd_device.c\
  csr_spgemm_device.c\
+ csr_spgemm_device_attempt.c\
  csr_spgemm_device_confident.c\
+ csr_spgemm_device_cusparse.c\
  csr_spgemm_device_rowbound.c\
  csr_spgemm_device_rowest.c\
  csr_spgemm_device_util.c\

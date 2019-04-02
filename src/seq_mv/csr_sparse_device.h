@@ -18,7 +18,7 @@
 #include <curand.h>
 
 #define COHEN_USE_SHMEM 0
-#define DEBUG_MODE      1
+#define DEBUG_MODE      0
 
 #define CURAND_CALL(x) do { if((x)!=CURAND_STATUS_SUCCESS) { \
     printf("Error at %s:%d\n",__FILE__,__LINE__);\
@@ -26,6 +26,8 @@
 
 typedef struct
 {
+   HYPRE_Int   use_cusparse_spgemm;
+   HYPRE_Int   spgemm_num_passes;
    HYPRE_Int   rownnz_estimate_method;
    HYPRE_Int   rownnz_estimate_nsamples;
    float       rownnz_estimate_mult_factor;
@@ -35,6 +37,7 @@ typedef struct
 
 typedef struct
 {
+   curandGenerator_t gen;
    size_t      ghash_size, ghash2_size;
    HYPRE_Int   nnzC_gpu;
 
@@ -67,6 +70,8 @@ typedef struct
    HYPRE_Real  sptrans_sorting_time;
    HYPRE_Real  sptrans_rowptr_time;
    HYPRE_Real  sptrans_time;
+
+   HYPRE_Real  spmm_cusparse_time;
 
 } hypre_DeviceCSRSparseHandle;
 
@@ -102,7 +107,10 @@ hypre_int get_lane_id()
    return threadIdx.y * blockDim.x + threadIdx.x;           // if blockDim.x * blockDim.y = WARP_SIZE
 }
 
-HYPRE_Int hypreDevice_CSRSpGemm(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex *d_b, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_c_out, HYPRE_Int *nnzC);
+hypre_DeviceCSRSparseHandle* hypre_DeviceCSRSparseHandleCreate(hypre_DeviceCSRSparseOpts *opts);
+HYPRE_Int hypre_DeviceCSRSparseHandleDestroy(hypre_DeviceCSRSparseHandle *handle);
+
+HYPRE_Int hypreDevice_CSRSpGemm(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int nnza, HYPRE_Int nnzb, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex *d_b, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_c_out, HYPRE_Int *nnzC);
 
 HYPRE_Int hypreDevice_CSRSpGemmRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Int *d_rc, hypre_DeviceCSRSparseOpts *opts, hypre_DeviceCSRSparseHandle *handle);
 
@@ -111,6 +119,10 @@ HYPRE_Int hypreDevice_CSRSpGemmRownnzUpperbound(HYPRE_Int m, HYPRE_Int k, HYPRE_
 HYPRE_Int hypreDevice_CSRSpGemmRownnz(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Int *d_rc, hypre_DeviceCSRSparseOpts *opts, hypre_DeviceCSRSparseHandle *handle);
 
 HYPRE_Int hypreDevice_CSRSpGemmWithRownnzUpperbound(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex *d_b, HYPRE_Int *d_rc, HYPRE_Int exact_rownnz, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_c_out, HYPRE_Int *nnzC, hypre_DeviceCSRSparseOpts *opts, hypre_DeviceCSRSparseHandle *handle);
+
+HYPRE_Int hypreDevice_CSRSpGemmWithRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex *d_b, HYPRE_Int *d_rc, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_c_out, HYPRE_Int *nnzC, hypre_DeviceCSRSparseOpts *opts, hypre_DeviceCSRSparseHandle *handle);
+
+HYPRE_Int hypreDevice_CSRSpGemmCusparse(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a, HYPRE_Int nnzB, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex *d_b, HYPRE_Int *nnzC_out, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_c_out, hypre_DeviceCSRSparseOpts *opts, hypre_DeviceCSRSparseHandle *handle);
 
 void csr_spmm_create_ija(HYPRE_Int m, HYPRE_Int *d_i, HYPRE_Int **d_j, HYPRE_Complex **d_a, HYPRE_Int *nnz);
 

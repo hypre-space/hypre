@@ -20,12 +20,13 @@
  *****************************************************************************/
 
 #include "seq_mv.h"
+#include "csr_sparse_device.h"
 
 /*--------------------------------------------------------------------------
  * HYPRE_CSRMatrixCreate
  *--------------------------------------------------------------------------*/
 
-HYPRE_CSRMatrix 
+HYPRE_CSRMatrix
 HYPRE_CSRMatrixCreate( HYPRE_Int  num_rows,
                        HYPRE_Int  num_cols,
                        HYPRE_Int *row_sizes )
@@ -51,7 +52,7 @@ HYPRE_CSRMatrixCreate( HYPRE_Int  num_rows,
  * HYPRE_CSRMatrixDestroy
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_CSRMatrixDestroy( HYPRE_CSRMatrix matrix )
 {
    return( hypre_CSRMatrixDestroy( (hypre_CSRMatrix *) matrix ) );
@@ -71,7 +72,7 @@ HYPRE_CSRMatrixInitialize( HYPRE_CSRMatrix matrix )
  * HYPRE_CSRMatrixRead
  *--------------------------------------------------------------------------*/
 
-HYPRE_CSRMatrix 
+HYPRE_CSRMatrix
 HYPRE_CSRMatrixRead( char            *file_name )
 {
    return ( (HYPRE_CSRMatrix) hypre_CSRMatrixRead( file_name ) );
@@ -81,7 +82,7 @@ HYPRE_CSRMatrixRead( char            *file_name )
  * HYPRE_CSRMatrixPrint
  *--------------------------------------------------------------------------*/
 
-void 
+void
 HYPRE_CSRMatrixPrint( HYPRE_CSRMatrix  matrix,
                       char            *file_name )
 {
@@ -103,4 +104,98 @@ HYPRE_CSRMatrixGetNumRows( HYPRE_CSRMatrix matrix, HYPRE_Int *num_rows )
    return 0;
 }
 
+HYPRE_Int
+HYPRE_CSRMatrixDeviceSpGemmSetRownnzEstimateMethod( HYPRE_Int value )
+{
+   if (hypre_device_sparse_opts == NULL)
+   {
+      return -1;
+   }
+
+   if (value == 1 || value == 2 || value == 3)
+   {
+      hypre_device_sparse_opts->rownnz_estimate_method = value;
+   }
+   else
+   {
+      return -1;
+   }
+
+   return 0;
+}
+
+HYPRE_Int
+HYPRE_CSRMatrixDeviceSpGemmSetRownnzEstimateNSamples( HYPRE_Int value )
+{
+   if (hypre_device_sparse_opts == NULL)
+   {
+      return -1;
+   }
+
+   hypre_device_sparse_opts->rownnz_estimate_nsamples = value;
+
+   return 0;
+}
+
+HYPRE_Int
+HYPRE_CSRMatrixDeviceSpGemmSetRownnzEstimateMultFactor( HYPRE_Real value )
+{
+   if (hypre_device_sparse_opts == NULL)
+   {
+      return -1;
+   }
+
+   if (value > 0.0)
+   {
+      hypre_device_sparse_opts->rownnz_estimate_mult_factor = value;
+   }
+   else
+   {
+      return -1;
+   }
+
+   return 0;
+}
+
+HYPRE_Int
+HYPRE_CSRMatrixDeviceSpGemmSetHashType( char value )
+{
+   if (hypre_device_sparse_opts == NULL)
+   {
+      return -1;
+   }
+
+   if (value == 'L' || value == 'Q' || value == 'D')
+   {
+      hypre_device_sparse_opts->hash_type = value;
+   }
+
+   return 0;
+}
+
+HYPRE_Int
+HYPRE_CSRMatrixDeviceSpGemmSetUseCusparse( HYPRE_Int value )
+{
+   if (hypre_device_sparse_opts == NULL)
+   {
+      return -1;
+   }
+
+   hypre_device_sparse_opts->use_cusparse_spgemm = value != 0;
+
+   return 0;
+}
+
+HYPRE_Int
+HYPRE_CSRMatrixDeviceSpGemmSetDoTiming( HYPRE_Int value )
+{
+   if (hypre_device_sparse_opts == NULL)
+   {
+      return -1;
+   }
+
+   hypre_device_sparse_opts->do_timing = value != 0;
+
+   return 0;
+}
 

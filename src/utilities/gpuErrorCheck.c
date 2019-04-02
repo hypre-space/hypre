@@ -32,7 +32,7 @@ extern void cusparseAssert(cusparseStatus_t code, const char *file, int line);
  */
 void cudaSafeFree(void *ptr,int padding)
 {
-  PUSH_RANGE("SAFE_FREE",3);
+  //PUSH_RANGE("SAFE_FREE",3);
   struct cudaPointerAttributes ptr_att;
   size_t *sptr=(size_t*)ptr-padding;
   cudaError_t err;
@@ -97,7 +97,7 @@ void cudaSafeFree(void *ptr,int padding)
       hypre_CheckErrorDevice(cudaFree(sptr));
     }
   }
-  POP_RANGE;
+  //POP_RANGE;
 
   return;
 }

@@ -44,9 +44,9 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP2( HYPRE_Complex    alpha,
 #endif
 
 #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
-   PUSH_RANGE_PAYLOAD("MATVEC_OOMP",0, hypre_CSRMatrixNumRows(A));
+   //PUSH_RANGE_PAYLOAD("MATVEC_OOMP",0, hypre_CSRMatrixNumRows(A));
    HYPRE_Int ierr = hypre_CSRMatrixMatvecDevice( alpha,A,x,beta,b,y,offset );
-   POP_RANGE;
+   //POP_RANGE;
 #else
    HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
    HYPRE_Int        *A_i      = hypre_CSRMatrixI(A) + offset;
@@ -378,7 +378,7 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Complex    alpha,
    static cudaStream_t s[10];
    static HYPRE_Int myid;
    if (FirstCall){
-    PUSH_RANGE("FIRST_CALL",4);
+    //PUSH_RANGE("FIRST_CALL",4);
 
     handle=getCusparseHandle();
 
@@ -398,7 +398,7 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Complex    alpha,
     nvtxNameCudaStreamA(s[4], "HYPRE_COMPUTE_STREAM");
     hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
     myid++;
-    POP_RANGE;
+    //POP_RANGE;
   }
 #endif
 

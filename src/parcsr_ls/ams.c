@@ -66,7 +66,7 @@ HYPRE_Int hypre_ParCSRRelax(/* matrix to relax with */
    {
       if (relax_type == 1) /* l1-scaled Jacobi */
       {
-         PUSH_RANGE_PAYLOAD("RELAX",4,sweep);
+         // PUSH_RANGE_PAYLOAD("RELAX",4,sweep);
          HYPRE_Int num_rows = hypre_ParCSRMatrixNumRows(A);
 #ifdef HYPRE_USING_UNIFIED_MEMORY
          if (sweep==0)
@@ -91,7 +91,7 @@ HYPRE_Int hypre_ParCSRRelax(/* matrix to relax with */
 
          //SyncVectorToHost(hypre_ParVectorLocalVector(v));
          //SyncVectorToHost(hypre_ParVectorLocalVector(u));
-         PUSH_RANGE_PAYLOAD("VECSCALE-RELAX",5,num_rows);
+         //PUSH_RANGE_PAYLOAD("VECSCALE-RELAX",5,num_rows);
 #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
          VecScale(u_data,v_data,l1_norms,num_rows,HYPRE_STREAM(4));
 #else
@@ -115,8 +115,8 @@ HYPRE_Int hypre_ParCSRRelax(/* matrix to relax with */
          UpdateDRC(hypre_ParVectorLocalVector(u));
 #endif
          //printf("AMS.C DONE %d = %d \n",num_rows,num_teams*1024);
-         POP_RANGE;
-         POP_RANGE;
+         //POP_RANGE;
+         //POP_RANGE;
       }
       else if (relax_type == 2 || relax_type == 4) /* offd-l1-scaled block GS */
       {

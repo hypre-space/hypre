@@ -303,7 +303,7 @@ hypre_DeviceFree(void *ptr)
    size_t size = ((size_t *) ptr)[-HYPRE_MEM_PAD_LEN];
    HYPRE_OMPOffload(hypre__offload_device_num, ptr, size, "exit", "delete");
 #elif defined(HYPRE_USING_CUDA)
-   /* cudaFree((size_t *) ptr - HYPRE_MEM_PAD_LEN); */
+   /* hypre_CheckErrorDevice(cudaFree((size_t *) ptr - HYPRE_MEM_PAD_LEN)); */
    cudaSafeFree(ptr, HYPRE_MEM_PAD_LEN);
 #endif
 }

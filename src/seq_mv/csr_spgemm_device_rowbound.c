@@ -80,58 +80,52 @@ csr_spmm_compute_row_symbl(HYPRE_Int   rowi,                HYPRE_Int  lane_id,
    HYPRE_Int num_new_insert = 0;
 
    /* load column idx and values of row i of A */
-   for (HYPRE_Int i = istart; i < iend; i += HYPRE_WARP_SIZE)
+   for (HYPRE_Int i = istart; i < iend; i += blockDim.y)
    {
       HYPRE_Int colA = -1;
 
-      if (i + lane_id < iend)
+      if (threadIdx.x == 0 && i + threadIdx.y < iend)
       {
-         colA = read_only_load(ja + i + lane_id);
+         colA = read_only_load(ja + i + threadIdx.y);
       }
 
 #if 0
       //const HYPRE_Int ymask = get_mask<4>(lane_id);
       // TODO: need to confirm the behavior of __ballot_sync, leave it here for now
-      const HYPRE_Int num_valid_rows = __popc(__ballot_sync(ymask, valid_i));
-      for (HYPRE_Int j = 0; j < num_valid_rows; j++)
+      //const HYPRE_Int num_valid_rows = __popc(__ballot_sync(ymask, valid_i));
+      //for (HYPRE_Int j = 0; j < num_valid_rows; j++)
 #endif
-      for (HYPRE_Int j = 0; j < blockDim.x; j++)
-      {
-         /* threads in the same ygroup work on one row together */
-         const HYPRE_Int rowB = __shfl_sync(HYPRE_WARP_FULL_MASK, colA, j, blockDim.x);
-         if (rowB == -1)
-         {
-            return num_new_insert;
-         }
-         /* open this row of B, collectively */
-         HYPRE_Int tmp = -1;
-         if (threadIdx.x < 2)
-         {
-            tmp = read_only_load(ib+rowB+threadIdx.x);
-         }
-         const HYPRE_Int rowB_start = __shfl_sync(HYPRE_WARP_FULL_MASK, tmp, 0, blockDim.x);
-         const HYPRE_Int rowB_end   = __shfl_sync(HYPRE_WARP_FULL_MASK, tmp, 1, blockDim.x);
 
-         for (HYPRE_Int k = rowB_start; k < rowB_end; k += blockDim.x)
+      /* threads in the same ygroup work on one row together */
+      const HYPRE_Int rowB = __shfl_sync(HYPRE_WARP_FULL_MASK, colA, 0, blockDim.x);
+      /* open this row of B, collectively */
+      HYPRE_Int tmp = -1;
+      if (rowB != -1 && threadIdx.x < 2)
+      {
+         tmp = read_only_load(ib+rowB+threadIdx.x);
+      }
+      const HYPRE_Int rowB_start = __shfl_sync(HYPRE_WARP_FULL_MASK, tmp, 0, blockDim.x);
+      const HYPRE_Int rowB_end   = __shfl_sync(HYPRE_WARP_FULL_MASK, tmp, 1, blockDim.x);
+
+      for (HYPRE_Int k = rowB_start; k < rowB_end; k += blockDim.x)
+      {
+         if (k + threadIdx.x < rowB_end)
          {
-            if (k + threadIdx.x < rowB_end)
+            const HYPRE_Int k_idx = read_only_load(jb + k + threadIdx.x);
+            /* first try to insert into shared memory hash table */
+            HYPRE_Int pos = hash_insert_symbl<HashType>(s_HashSize, s_HashKeys, k_idx, num_new_insert);
+            if (-1 == pos)
             {
-               const HYPRE_Int k_idx = read_only_load(jb + k + threadIdx.x);
-               /* first try to insert into shared memory hash table */
-               HYPRE_Int pos = hash_insert_symbl<HashType>(s_HashSize, s_HashKeys, k_idx, num_new_insert);
-               if (-1 == pos)
-               {
-                  pos = hash_insert_symbl<HashType>(g_HashSize, g_HashKeys, k_idx, num_new_insert);
-               }
-               /* if failed again, both hash tables must have been full
-                  (hash table size estimation was too small).
-                  Increase the counter anyhow (will lead to over-counting)
-                */
-               if (pos == -1)
-               {
-                  num_new_insert ++;
-                  failed = 1;
-               }
+               pos = hash_insert_symbl<HashType>(g_HashSize, g_HashKeys, k_idx, num_new_insert);
+            }
+            /* if failed again, both hash tables must have been full
+               (hash table size estimation was too small).
+               Increase the counter anyhow (will lead to over-counting)
+               */
+            if (pos == -1)
+            {
+               num_new_insert ++;
+               failed = 1;
             }
          }
       }
@@ -302,7 +296,7 @@ void gpu_csr_spmm_rownnz_attempt(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    {
       cudaThreadSynchronize();
       t2 = time_getWallclockSeconds();
-      printf("^^^^create hash table time                                %.2e\n", t2 - t1);
+      //printf("^^^^create hash table time                                %.2e\n", t2 - t1);
       handle->spmm_create_hashtable_time += t2 - t1;
    }
 
@@ -344,7 +338,7 @@ void gpu_csr_spmm_rownnz_attempt(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    {
       cudaThreadSynchronize();
       t2 = time_getWallclockSeconds();
-      printf("^^^^Symbolic multiplication time                          %.2e\n", t2 - t1);
+      //printf("^^^^Symbolic multiplication time                          %.2e\n", t2 - t1);
       handle->spmm_symbolic_time += t2 - t1;
    }
 

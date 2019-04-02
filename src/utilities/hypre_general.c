@@ -42,10 +42,12 @@ HYPRE_Init( hypre_int argc, char *argv[] )
 #endif
 
 #if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && defined(HYPRE_USING_CUDA)
+   /*
    if (!cuda_reduce_buffer)
    {
       cuda_reduce_buffer = hypre_TAlloc(HYPRE_double6, 1024, HYPRE_MEMORY_DEVICE);
    }
+   */
 #endif
 
 #if defined(HYPRE_USING_UNIFIED_MEMORY)
@@ -64,15 +66,17 @@ HYPRE_Init( hypre_int argc, char *argv[] )
 
 #if defined(HYPRE_USING_CUDA)
    hypre_device_sparse_opts = hypre_TAlloc(hypre_DeviceCSRSparseOpts, 1, HYPRE_MEMORY_HOST);
-   hypre_device_sparse_opts->rownnz_estimate_method = 3; /* 1: naive overestimate
-                                                            2: naive underestimate
-                                                            3: Cohen's algorithm */
-   hypre_device_sparse_opts->rownnz_estimate_nsamples = 128;
-   hypre_device_sparse_opts->rownnz_estimate_mult_factor = 1.0;
-   hypre_device_sparse_opts->hash_type = 'L';
-   hypre_device_sparse_opts->do_timing = 0;
+   hypre_device_sparse_opts->rownnz_estimate_method      = 3; /* 1: naive overestimate
+                                                                 2: naive underestimate
+                                                                 3: Cohen's algorithm */
+   hypre_device_sparse_opts->spgemm_num_passes           = 3;
+   hypre_device_sparse_opts->rownnz_estimate_nsamples    = 32;
+   hypre_device_sparse_opts->rownnz_estimate_mult_factor = 1.5;
+   hypre_device_sparse_opts->hash_type                   = 'L';
+   hypre_device_sparse_opts->do_timing                   = 0;
+   hypre_device_sparse_opts->use_cusparse_spgemm         = 0;
 
-   hypre_device_sparse_handle = hypre_CTAlloc(hypre_DeviceCSRSparseHandle, 1, HYPRE_MEMORY_HOST);
+   hypre_device_sparse_handle = hypre_DeviceCSRSparseHandleCreate(hypre_device_sparse_opts);
 #endif
 }
 
@@ -106,7 +110,7 @@ HYPRE_Finalize()
 
 #if defined(HYPRE_USING_CUDA)
    hypre_TFree(hypre_device_sparse_opts, HYPRE_MEMORY_HOST);
-   hypre_TFree(hypre_device_sparse_handle, HYPRE_MEMORY_HOST);
+   hypre_DeviceCSRSparseHandleDestroy(hypre_device_sparse_handle);
 #endif
 }
 

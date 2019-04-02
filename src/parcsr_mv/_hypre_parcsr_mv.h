@@ -68,6 +68,7 @@ typedef struct
    HYPRE_Int                   *send_procs;
    HYPRE_Int                   *send_map_starts;
    HYPRE_Int                   *send_map_elmts;
+   HYPRE_Int                   *device_send_map_elmts;
 
    HYPRE_Int                    num_recvs;
    HYPRE_Int                   *recv_procs;
@@ -103,13 +104,14 @@ typedef struct
 
 #define hypre_ParCSRCommPkgComm(comm_pkg)          (comm_pkg -> comm)
 
-#define hypre_ParCSRCommPkgNumSends(comm_pkg)      (comm_pkg -> num_sends)
-#define hypre_ParCSRCommPkgSendProcs(comm_pkg)     (comm_pkg -> send_procs)
-#define hypre_ParCSRCommPkgSendProc(comm_pkg, i)   (comm_pkg -> send_procs[i])
-#define hypre_ParCSRCommPkgSendMapStarts(comm_pkg) (comm_pkg -> send_map_starts)
-#define hypre_ParCSRCommPkgSendMapStart(comm_pkg,i)(comm_pkg -> send_map_starts[i])
-#define hypre_ParCSRCommPkgSendMapElmts(comm_pkg)  (comm_pkg -> send_map_elmts)
-#define hypre_ParCSRCommPkgSendMapElmt(comm_pkg,i) (comm_pkg -> send_map_elmts[i])
+#define hypre_ParCSRCommPkgNumSends(comm_pkg)           (comm_pkg -> num_sends)
+#define hypre_ParCSRCommPkgSendProcs(comm_pkg)          (comm_pkg -> send_procs)
+#define hypre_ParCSRCommPkgSendProc(comm_pkg, i)        (comm_pkg -> send_procs[i])
+#define hypre_ParCSRCommPkgSendMapStarts(comm_pkg)      (comm_pkg -> send_map_starts)
+#define hypre_ParCSRCommPkgSendMapStart(comm_pkg,i)     (comm_pkg -> send_map_starts[i])
+#define hypre_ParCSRCommPkgSendMapElmts(comm_pkg)       (comm_pkg -> send_map_elmts)
+#define hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) (comm_pkg -> device_send_map_elmts)
+#define hypre_ParCSRCommPkgSendMapElmt(comm_pkg,i)      (comm_pkg -> send_map_elmts[i])
 
 #define hypre_ParCSRCommPkgNumRecvs(comm_pkg)      (comm_pkg -> num_recvs)
 #define hypre_ParCSRCommPkgRecvProcs(comm_pkg)     (comm_pkg -> recv_procs)
@@ -796,6 +798,8 @@ HYPRE_Int hypre_ExchangeExternalRowsInit( hypre_CSRMatrix *B_ext, hypre_ParCSRCo
 hypre_CSRMatrix* hypre_ExchangeExternalRowsWait(void *vequest);
 HYPRE_Int hypre_ExchangeExternalRowsDeviceInit( hypre_CSRMatrix *B_ext, hypre_ParCSRCommPkg *comm_pkg_A, void **request_ptr);
 hypre_CSRMatrix* hypre_ExchangeExternalRowsDeviceWait(void *vrequest);
+HYPRE_Int hypre_ExchangeExternalRowsDeviceInit_v2( hypre_CSRMatrix *B_ext, hypre_ParCSRCommPkg *comm_pkg_A, void **request_ptr);
+hypre_CSRMatrix* hypre_ExchangeExternalRowsDeviceWait_v2(void *vrequest);
 
 #ifdef HYPRE_USING_PERSISTENT_COMM
 hypre_ParCSRPersistentCommHandle *

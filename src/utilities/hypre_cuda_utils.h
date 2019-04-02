@@ -111,9 +111,10 @@ T warp_prefix_sum(hypre_int lane_id, T in, T &all_sum)
 #pragma unroll
    for (hypre_int d = 16; d > 0; d >>= 1)
    {
+      T t = __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d);
+
       if ( (lane_id & (d - 1)) == d - 1)
       {
-         T t = __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d);
          if ( (lane_id & (d << 1 - 1)) == (d << 1 - 1) )
          {
             in += t;
