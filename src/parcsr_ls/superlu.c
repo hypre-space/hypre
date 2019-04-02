@@ -73,7 +73,7 @@ HYPRE_Int hypre_SLUDistSetup( HYPRE_Solver *solver, hypre_ParCSRMatrix *A, HYPRE
       prows -= 1;
       pcols = num_procs/prows;
    }
-   hypre_printf(" prows %d pcols %d\n", prows, pcols);
+   //hypre_printf(" prows %d pcols %d\n", prows, pcols);
 
    superlu_gridinit(comm, prows, pcols, &(dslu_data->dslu_data_grid));
 

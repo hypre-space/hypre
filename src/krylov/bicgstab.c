@@ -85,6 +85,7 @@ hypre_BiCGSTABCreate( hypre_BiCGSTABFunctions * bicgstab_functions )
    (bicgstab_data -> precond_data)   = NULL;
    (bicgstab_data -> logging)        = 0;
    (bicgstab_data -> print_level)    = 0;
+   (bicgstab_data -> hybrid)         = 0;
    (bicgstab_data -> p)              = NULL;
    (bicgstab_data -> q)              = NULL;
    (bicgstab_data -> r)              = NULL;
@@ -180,8 +181,9 @@ hypre_BiCGSTABSetup( void *bicgstab_vdata,
  
    if ((bicgstab_data->logging)>0 || (bicgstab_data->print_level) > 0)
    {
-      if ((bicgstab_data -> norms) == NULL)
-         (bicgstab_data -> norms) = hypre_CTAlloc(HYPRE_Real,  max_iter + 1, HYPRE_MEMORY_HOST);
+      if ((bicgstab_data -> norms) != NULL)
+         hypre_TFree (bicgstab_data -> norms, HYPRE_MEMORY_HOST);
+      (bicgstab_data -> norms) = hypre_CTAlloc(HYPRE_Real,  max_iter + 1, HYPRE_MEMORY_HOST);
    }
    if ((bicgstab_data -> print_level) > 0)
    {
@@ -208,6 +210,7 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
    HYPRE_Int               min_iter     = (bicgstab_data -> min_iter);
    HYPRE_Int 		     max_iter     = (bicgstab_data -> max_iter);
    HYPRE_Int 		     stop_crit    = (bicgstab_data -> stop_crit);
+   HYPRE_Int 		     hybrid    = (bicgstab_data -> hybrid);
    HYPRE_Real 	     r_tol     = (bicgstab_data -> tol);
    HYPRE_Real 	     cf_tol       = (bicgstab_data -> cf_tol);
    void             *matvec_data  = (bicgstab_data -> matvec_data);
@@ -504,7 +507,7 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
    if (b_norm == 0.0)
       (bicgstab_data -> rel_residual_norm) = r_norm;
 
-   if (iter >= max_iter && r_norm > epsilon && epsilon > 0) hypre_error(HYPRE_ERROR_CONV);
+   if (iter >= max_iter && r_norm > epsilon && epsilon > 0 && hybrid != -1) hypre_error(HYPRE_ERROR_CONV);
 
 
    return hypre_error_flag;
@@ -646,6 +649,17 @@ hypre_BiCGSTABSetLogging( void *bicgstab_vdata,
 	hypre_BiCGSTABData *bicgstab_data = (hypre_BiCGSTABData  *)bicgstab_vdata;
  
    (bicgstab_data -> logging) = logging;
+ 
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BiCGSTABSetHybrid( void *bicgstab_vdata,
+                       HYPRE_Int   logging)
+{
+	hypre_BiCGSTABData *bicgstab_data = (hypre_BiCGSTABData  *)bicgstab_vdata;
+ 
+   (bicgstab_data -> hybrid) = logging;
  
    return hypre_error_flag;
 }

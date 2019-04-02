@@ -37,7 +37,7 @@ extern "C"{
 #endif
     MemPrefetchSized(l1_norm,num_rows*sizeof(HYPRE_Complex),HYPRE_DEVICE,s);
     VecScaleKernel<<<num_blocks,tpb,0,s>>>(u,v,l1_norm,num_rows);
-#ifdef CATCH_LAUNCH_ERRORS    
+#ifdef CATCH_LAUNCH_ERRORS
     hypre_CheckErrorDevice(cudaPeekAtLastError());
     hypre_CheckErrorDevice(cudaDeviceSynchronize());
 #endif
@@ -111,7 +111,7 @@ extern "C"{
     //hypre_CheckErrorDevice(cudaStreamSynchronize(s));
   }
 }
-  
+
   // Scale vector by scalar
 
 extern "C"{
@@ -129,7 +129,7 @@ extern "C"{
   hypre_int VecScaleScalar(HYPRE_Complex *u, const HYPRE_Complex alpha,  hypre_int num_rows,cudaStream_t s){
     PUSH_RANGE("SEQVECSCALE",4);
     hypre_int num_blocks=num_rows/64+1;
-    
+
 #ifdef CATCH_LAUNCH_ERRORS
     hypre_CheckErrorDevice(cudaPeekAtLastError());
     hypre_CheckErrorDevice(cudaDeviceSynchronize());
@@ -182,7 +182,7 @@ void SpMVCudaKernelZB(HYPRE_Complex* __restrict__ y,HYPRE_Complex alpha, const H
 #ifdef CATCH_LAUNCH_ERRORS
     hypre_CheckErrorDevice(cudaPeekAtLastError());
     hypre_CheckErrorDevice(cudaDeviceSynchronize());
-#endif    
+#endif
     if (beta==0.0)
       SpMVCudaKernelZB<<<num_blocks,num_threads>>>(y,alpha,A_data,A_i,A_j,x,num_rows);
     else
@@ -200,11 +200,11 @@ extern "C"{
 #ifdef __CUDA_ARCH__
     hypre_int cudarch=__CUDA_ARCH__;
     if (cudarch!=actual){
-      printf("WARNING :: nvcc -arch flag does not match actual device architecture\nWARNING :: The code can fail silently and produce wrong results\n");
-      printf("Arch specified at compile = sm_%d Actual device = sm_%d\n",cudarch/10,actual/10);
-    } 
+      //printf("WARNING :: nvcc -arch flag does not match actual device architecture\nWARNING :: The code can fail silently and produce wrong results\n");
+      //printf("Arch specified at compile = sm_%d Actual device = sm_%d\n",cudarch/10,actual/10);
+    }
 #else
-    printf("ERROR:: CUDA_ ARCH is not defined \n This should not be happening\n");
+    hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ERROR:: CUDA_ ARCH is not defined \n This should not be happening\n");
 #endif
   }
 }
@@ -226,8 +226,9 @@ extern "C"{
     cudaError_t code=cudaPeekAtLastError();
     if (code != cudaSuccess)
       {
-	fprintf(stderr,"ERROR in CudaCompileFlagCheck%s \n", cudaGetErrorString(code));
-	fprintf(stderr,"ERROR :: Check if compile arch flags match actual device arch = sm_%d\n",cudarch_actual/10);
+	hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ERROR in CudaCompileFlagCheck \nERROR :: Check if compile arch flags match actual device arch = sm_\n");
+	//fprintf(stderr,"ERROR in CudaCompileFlagCheck%s \n", cudaGetErrorString(code));
+	//fprintf(stderr,"ERROR :: Check if compile arch flags match actual device arch = sm_%d\n",cudarch_actual/10);
 	exit(2);
       }
     hypre_CheckErrorDevice(cudaDeviceSynchronize());

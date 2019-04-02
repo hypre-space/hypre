@@ -94,6 +94,7 @@ hypre_GMRESCreate( hypre_GMRESFunctions *gmres_functions )
    (gmres_data -> skip_real_r_check) = 0;
    (gmres_data -> stop_crit)      = 0; /* rel. residual norm  - this is obsolete!*/
    (gmres_data -> converged)      = 0;
+   (gmres_data -> hybrid)         = 0;
    (gmres_data -> precond_data)   = NULL;
    (gmres_data -> print_level)    = 0;
    (gmres_data -> logging)        = 0;
@@ -223,8 +224,9 @@ hypre_GMRESSetup( void *gmres_vdata,
  
    if ( (gmres_data->logging)>0 || (gmres_data->print_level) > 0 )
    {
-      if ((gmres_data -> norms) == NULL)
-         (gmres_data -> norms) = hypre_CTAllocF(HYPRE_Real, max_iter + 1,gmres_functions, HYPRE_MEMORY_HOST);
+      if ((gmres_data -> norms) != NULL)
+         hypre_TFreeF(gmres_data -> norms,gmres_functions);
+      (gmres_data -> norms) = hypre_CTAllocF(HYPRE_Real, max_iter + 1,gmres_functions, HYPRE_MEMORY_HOST);
    }
    if ( (gmres_data->print_level) > 0 ) {
       if ((gmres_data -> log_file_name) == NULL)
@@ -251,6 +253,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
    HYPRE_Int 		     max_iter     = (gmres_data -> max_iter);
    HYPRE_Int               rel_change   = (gmres_data -> rel_change);
    HYPRE_Int         skip_real_r_check  = (gmres_data -> skip_real_r_check);
+   HYPRE_Int 		     hybrid        = (gmres_data -> hybrid);
    HYPRE_Real 	     r_tol        = (gmres_data -> tol);
    HYPRE_Real 	     cf_tol       = (gmres_data -> cf_tol);
    HYPRE_Real        a_tol        = (gmres_data -> a_tol);
@@ -833,7 +836,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
    if (b_norm == 0.0)
       (gmres_data -> rel_residual_norm) = r_norm;
 
-   if (iter >= max_iter && r_norm > epsilon && epsilon > 0) hypre_error(HYPRE_ERROR_CONV);
+   if (iter >= max_iter && r_norm > epsilon && epsilon > 0 && hybrid != -1) hypre_error(HYPRE_ERROR_CONV);
 
    hypre_TFreeF(c,gmres_functions); 
    hypre_TFreeF(s,gmres_functions); 
@@ -1174,7 +1177,6 @@ hypre_GMRESSetLogging( void *gmres_vdata,
                       HYPRE_Int   level)
 {
    hypre_GMRESData *gmres_data = (hypre_GMRESData *)gmres_vdata;
-
  
    (gmres_data -> logging) = level;
  
@@ -1186,9 +1188,19 @@ hypre_GMRESGetLogging( void *gmres_vdata,
                       HYPRE_Int * level)
 {
    hypre_GMRESData *gmres_data = (hypre_GMRESData *)gmres_vdata;
-
  
    *level = (gmres_data -> logging);
+ 
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_GMRESSetHybrid( void *gmres_vdata,
+                      HYPRE_Int   level)
+{
+   hypre_GMRESData *gmres_data = (hypre_GMRESData *)gmres_vdata;
+ 
+   (gmres_data -> hybrid) = level;
  
    return hypre_error_flag;
 }
