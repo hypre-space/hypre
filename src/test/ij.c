@@ -4597,7 +4597,7 @@ main( hypre_int argc,
 
          HYPRE_BoomerAMGSetCGCIts(pcg_precond, cgcits);
          HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
-         HYPRE_BoomerAMGSetRestriction(amg_solver, restri_type); /* 0: P^T, 1: AIR, 2: AIR-2 */
+         HYPRE_BoomerAMGSetRestriction(pcg_precond, restri_type); /* 0: P^T, 1: AIR, 2: AIR-2 */
          HYPRE_BoomerAMGSetPostInterpType(pcg_precond, post_interp_type);
          HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
          HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
