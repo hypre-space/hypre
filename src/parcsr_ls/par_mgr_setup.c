@@ -23,7 +23,8 @@ hypre_MGRSetup( void               *mgr_vdata,
 	MPI_Comm 	         comm = hypre_ParCSRMatrixComm(A);
 	hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
 
-	HYPRE_Int       cnt,i,j, final_coarse_size, block_size, idx, row, **block_cf_marker;
+	HYPRE_Int       cnt,i,j, final_coarse_size, block_size, idx, **block_cf_marker;
+	HYPRE_BigInt    row;
 	HYPRE_Int	   lev, num_coarsening_levs, last_level, num_c_levels, num_threads,nc,index_i,cflag;
 	HYPRE_Int	   debug_flag = 0;
 
@@ -36,7 +37,7 @@ hypre_MGRSetup( void               *mgr_vdata,
 	HYPRE_Int * col_offd_S_to_A = NULL;
 	HYPRE_Int * col_offd_ST_to_AT = NULL;
 	HYPRE_Int * dof_func_buff = NULL;
-	HYPRE_Int * coarse_pnts_global = NULL;
+	HYPRE_BigInt * coarse_pnts_global = NULL;
 	HYPRE_Real         **l1_norms = NULL;
 
 	hypre_ParVector     *Ztemp;
@@ -99,14 +100,14 @@ hypre_MGRSetup( void               *mgr_vdata,
     HYPRE_Int **level_coarse_indexes = NULL;
     HYPRE_Int *level_coarse_size = NULL;
     HYPRE_Int setNonCpointToF = (mgr_data -> set_non_Cpoints_to_F);
-    HYPRE_Int *reserved_coarse_indexes = (mgr_data -> reserved_coarse_indexes);
+    HYPRE_BigInt *reserved_coarse_indexes = (mgr_data -> reserved_coarse_indexes);
 
 
 //  HYPRE_Int num_coarse_levels = (mgr_data -> max_num_coarse_levels);
   
   HYPRE_Int nloc =  hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
-  HYPRE_Int ilower =  hypre_ParCSRMatrixFirstRowIndex(A);
-  HYPRE_Int iupper =  hypre_ParCSRMatrixLastRowIndex(A);
+  HYPRE_BigInt ilower =  hypre_ParCSRMatrixFirstRowIndex(A);
+  HYPRE_BigInt iupper =  hypre_ParCSRMatrixLastRowIndex(A);
 
 	hypre_MPI_Comm_size(comm,&num_procs);
 	hypre_MPI_Comm_rank(comm,&my_id);
@@ -149,7 +150,7 @@ hypre_MGRSetup( void               *mgr_vdata,
 			for(i=0; i<reserved_coarse_size; i++)
 			{
 				row = reserved_coarse_indexes[i];
-				reserved_Cpoint_local_indexes[cnt++] = row - ilower;
+				reserved_Cpoint_local_indexes[cnt++] = (HYPRE_Int)(row - ilower);
 			}
 		        HYPRE_BoomerAMGSetCpointsToKeep((mgr_data ->coarse_grid_solver), 25,reserved_coarse_size,reserved_Cpoint_local_indexes);	
    		}
@@ -199,7 +200,7 @@ hypre_MGRSetup( void               *mgr_vdata,
         idx = row % block_size;
         if(block_cf_marker[i][idx] == CMRK)
         {
-           level_coarse_indexes[i][final_coarse_size++] = row - ilower;
+           level_coarse_indexes[i][final_coarse_size++] = (HYPRE_Int)(row - ilower);
         }
      }
      level_coarse_size[i] = final_coarse_size;
@@ -221,10 +222,10 @@ hypre_MGRSetup( void               *mgr_vdata,
 		{
 		   if(block_cf_marker[j][idx] != CMRK)
 		   {
-		      level_coarse_indexes[j][level_coarse_size[j]++] = row - ilower;
+		      level_coarse_indexes[j][level_coarse_size[j]++] = (HYPRE_Int)(row - ilower);
 		   }
 		}
-		reserved_Cpoint_local_indexes[i] = row - ilower;
+		reserved_Cpoint_local_indexes[i] = (HYPRE_Int)(row - ilower);
 	}
    }   
     
@@ -727,7 +728,7 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
   HYPRE_Int local_size;
   HYPRE_Int local_coarse_size;
 
-  HYPRE_Int *coarse_pnts_global_lvl = NULL;
+  HYPRE_BigInt *coarse_pnts_global_lvl = NULL;
   HYPRE_Int *coarse_dof_func_lvl = NULL;
 
   hypre_ParCSRMatrix *RAP_local = NULL;
@@ -879,7 +880,7 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
         if (my_id == (num_procs -1)) local_coarse_size = coarse_pnts_global_lvl[1];
-        hypre_MPI_Bcast(&local_coarse_size, 1, HYPRE_MPI_INT, num_procs-1, comm);
+        hypre_MPI_Bcast(&local_coarse_size, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
 #else
         local_coarse_size = coarse_pnts_global_lvl[num_procs];
 #endif

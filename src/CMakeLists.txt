@@ -2,8 +2,8 @@ cmake_minimum_required (VERSION 2.8.8)
 project (hypre)
 
 # The version number.
-set (HYPRE_VERSION 2.15.1)
-set (HYPRE_DATE    2018/10/19)
+set (HYPRE_VERSION 2.16.0)
+set (HYPRE_DATE    2019/03/20)
 set (HYPRE_TIME    00:00:00)
 set (HYPRE_BUGS    hypre-support@llnl.gov)
 set (HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
@@ -31,9 +31,12 @@ option(HYPRE_SEQUENTIAL           "Compile without MPI" OFF)
 option(HYPRE_TIMING               "Use HYPRE timing routines" OFF)
 option(HYPRE_USING_HYPRE_BLAS     "Use internal BLAS library" ON)
 option(HYPRE_USING_HYPRE_LAPACK   "Use internal LAPACK library" ON)
+option(HYPRE_USING_PERSISTENT_COMM "Use persistent communication" OFF)
 option(HYPRE_NO_GLOBAL_PARTITION  "Use assumed partition" ON)
 option(HYPRE_PRINT_ERRORS         "Print HYPRE errors" OFF)
 option(HYPRE_USING_OPENMP         "Use OpenMP" OFF)
+option(HYPRE_HOPSCOTCH            "Use hopscotch hashing with OpenMP" OFF)
+option(HAVE_DSUPERLU              "required if using SuperLU_dist" OFF)
 option(HYPRE_USING_FEI            "Use FEI" ON)
 option(HYPRE_USING_CALIPER        "Use Caliper" OFF)  # TODO: Finish this cmake feature
 

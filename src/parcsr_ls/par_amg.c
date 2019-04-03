@@ -37,9 +37,9 @@ hypre_BoomerAMGCreate()
    hypre_ParAMGData  *amg_data;
 
    /* setup params */
-   HYPRE_Int      max_levels;
-   HYPRE_Int      max_coarse_size;
-   HYPRE_Int      min_coarse_size;
+   HYPRE_Int    max_levels;
+   HYPRE_Int    max_coarse_size;
+   HYPRE_Int    min_coarse_size;
    HYPRE_Real   strong_threshold;
    HYPRE_Real   max_row_sum;
    HYPRE_Real   trunc_factor;
@@ -50,52 +50,52 @@ hypre_BoomerAMGCreate()
    HYPRE_Real   CR_rate;
    HYPRE_Real   CR_strong_th;
    HYPRE_Real   A_drop_tol;
-   HYPRE_Int      interp_type;
-   HYPRE_Int      sep_weight;
-   HYPRE_Int      coarsen_type;
-   HYPRE_Int      measure_type;
-   HYPRE_Int      setup_type;
-   HYPRE_Int      P_max_elmts;
-   HYPRE_Int 	    num_functions;
-   HYPRE_Int 	    nodal, nodal_levels, nodal_diag;
-   HYPRE_Int 	    num_paths;
-   HYPRE_Int 	    agg_num_levels;
-   HYPRE_Int      agg_interp_type;
-   HYPRE_Int      agg_P_max_elmts;
-   HYPRE_Int      agg_P12_max_elmts;
-   HYPRE_Int      post_interp_type;
-   HYPRE_Int 	    num_CR_relax_steps;
-   HYPRE_Int 	    IS_type;
-   HYPRE_Int 	    CR_use_CG;
-   HYPRE_Int 	    cgc_its;
-   HYPRE_Int 	    seq_threshold;
-   HYPRE_Int        redundant;
+   HYPRE_Int    interp_type;
+   HYPRE_Int    sep_weight;
+   HYPRE_Int    coarsen_type;
+   HYPRE_Int    measure_type;
+   HYPRE_Int    setup_type;
+   HYPRE_Int    P_max_elmts;
+   HYPRE_Int 	num_functions;
+   HYPRE_Int 	nodal, nodal_levels, nodal_diag;
+   HYPRE_Int 	num_paths;
+   HYPRE_Int 	agg_num_levels;
+   HYPRE_Int    agg_interp_type;
+   HYPRE_Int    agg_P_max_elmts;
+   HYPRE_Int    agg_P12_max_elmts;
+   HYPRE_Int    post_interp_type;
+   HYPRE_Int 	num_CR_relax_steps;
+   HYPRE_Int 	IS_type;
+   HYPRE_Int 	CR_use_CG;
+   HYPRE_Int 	cgc_its;
+   HYPRE_Int 	seq_threshold;
+   HYPRE_Int    redundant;
 
    /* solve params */
-   HYPRE_Int      min_iter;
-   HYPRE_Int      max_iter;
-   HYPRE_Int      cycle_type;
+   HYPRE_Int    min_iter;
+   HYPRE_Int    max_iter;
+   HYPRE_Int    cycle_type;
 
    HYPRE_Int    converge_type;
    HYPRE_Real   tol;
 
-   HYPRE_Int      num_sweeps;
-   HYPRE_Int      relax_down;
-   HYPRE_Int      relax_up;
-   HYPRE_Int      relax_coarse;
-   HYPRE_Int      relax_order;
+   HYPRE_Int    num_sweeps;
+   HYPRE_Int    relax_down;
+   HYPRE_Int    relax_up;
+   HYPRE_Int    relax_coarse;
+   HYPRE_Int    relax_order;
    HYPRE_Real   relax_wt;
    HYPRE_Real   outer_wt;
    HYPRE_Real   nongalerkin_tol;
-   HYPRE_Int      smooth_type;
-   HYPRE_Int      smooth_num_levels;
-   HYPRE_Int      smooth_num_sweeps;
+   HYPRE_Int    smooth_type;
+   HYPRE_Int    smooth_num_levels;
+   HYPRE_Int    smooth_num_sweeps;
 
-   HYPRE_Int      variant, overlap, domain_type, schwarz_use_nonsymm;
+   HYPRE_Int    variant, overlap, domain_type, schwarz_use_nonsymm;
    HYPRE_Real   schwarz_rlx_weight;
-   HYPRE_Int	    level, sym;
-   HYPRE_Int	    eu_level, eu_bj;
-   HYPRE_Int	    max_nz_per_row;
+   HYPRE_Int	level, sym;
+   HYPRE_Int	eu_level, eu_bj;
+   HYPRE_Int	max_nz_per_row;
    HYPRE_Real   thresh, filter;
    HYPRE_Real   drop_tol;
    HYPRE_Real   eu_sparse_A;
@@ -109,25 +109,25 @@ hypre_BoomerAMGCreate()
 
    HYPRE_Int block_mode;
 
-   HYPRE_Int        additive;
-   HYPRE_Int        mult_additive;
-   HYPRE_Int        simple;
-   HYPRE_Int        add_last_lvl;
+   HYPRE_Int    additive;
+   HYPRE_Int    mult_additive;
+   HYPRE_Int    simple;
+   HYPRE_Int    add_last_lvl;
    HYPRE_Real   add_trunc_factor;
-   HYPRE_Int      add_P_max_elmts;
-   HYPRE_Int      add_rlx_type;
+   HYPRE_Int    add_P_max_elmts;
+   HYPRE_Int    add_rlx_type;
    HYPRE_Real   add_rlx_wt;
 
    /* log info */
-   HYPRE_Int      num_iterations;
-   HYPRE_Int      cum_num_iterations;
+   HYPRE_Int    num_iterations;
+   HYPRE_Int    cum_num_iterations;
 
    /* output params */
-   HYPRE_Int      print_level;
-   HYPRE_Int      logging;
+   HYPRE_Int    print_level;
+   HYPRE_Int    logging;
    /* HYPRE_Int      cycle_op_count; */
    char     log_file_name[256];
-   HYPRE_Int      debug_flag;
+   HYPRE_Int    debug_flag;
 
    char     plot_file_name[251] = {0};
 

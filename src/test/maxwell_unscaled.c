@@ -1295,8 +1295,8 @@ main( hypre_int argc,
    Index                *refine;
    Index                *distribute;
    Index                *block;
-   HYPRE_Int                   solver_id;
-   HYPRE_Int                   print_system;
+   HYPRE_Int             solver_id;
+   HYPRE_Int             print_system;
                         
    HYPRE_SStructGrid     grid;
    HYPRE_SStructStencil *stencils;

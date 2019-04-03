@@ -202,7 +202,7 @@ hypre_FinalizeTiming( HYPRE_Int time_index )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_IncFLOPCount( HYPRE_Int inc )
+hypre_IncFLOPCount( HYPRE_BigInt inc )
 {
    HYPRE_Int  ierr = 0;
 

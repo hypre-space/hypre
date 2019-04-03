@@ -29,7 +29,7 @@ typedef struct
    hypre_ComputePkg    *compute_pkg;
 
    HYPRE_Int            time_index;
-   HYPRE_Int            flops;
+   HYPRE_BigInt         flops;
 
 } hypre_SMGResidualData;
 
@@ -113,7 +113,7 @@ hypre_SMGResidualSetup( void               *residual_vdata,
 
    (residual_data -> flops) =
       (hypre_StructMatrixGlobalSize(A) + hypre_StructVectorGlobalSize(x)) /
-      (hypre_IndexX(base_stride) *
+      (HYPRE_BigInt)(hypre_IndexX(base_stride) *
        hypre_IndexY(base_stride) *
        hypre_IndexZ(base_stride)  );
 

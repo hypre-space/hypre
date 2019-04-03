@@ -44,7 +44,7 @@ HYPRE_ConvertParCSRMatrixToDistributedMatrix(
    HYPRE_DistributedMatrix *DistributedMatrix )
 {
    MPI_Comm comm;
-   HYPRE_Int M, N;
+   HYPRE_BigInt M, N;
 
 #ifdef HYPRE_TIMING
    HYPRE_Int           timer;

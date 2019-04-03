@@ -33,11 +33,11 @@ hypre_IJMatrixCreateAssumedPartition( hypre_IJMatrix *matrix)
 {
 
 
-   HYPRE_Int global_num_rows;
-   HYPRE_Int global_first_row;
+   HYPRE_BigInt global_num_rows;
+   HYPRE_BigInt global_first_row;
    HYPRE_Int myid;
-   HYPRE_Int  row_start = 0, row_end = 0;
-   HYPRE_Int *row_partitioning = hypre_IJMatrixRowPartitioning(matrix);
+   HYPRE_BigInt row_start = 0, row_end = 0;
+   HYPRE_BigInt *row_partitioning = hypre_IJMatrixRowPartitioning(matrix);
 
    MPI_Comm   comm;
    
@@ -68,8 +68,8 @@ hypre_IJMatrixCreateAssumedPartition( hypre_IJMatrix *matrix)
     /*room for 10 owners of the assumed partition*/ 
     apart->storage_length = 10; /*need to be >=1 */ 
     apart->proc_list = hypre_TAlloc(HYPRE_Int,  apart->storage_length, HYPRE_MEMORY_HOST);
-    apart->row_start_list =   hypre_TAlloc(HYPRE_Int,  apart->storage_length, HYPRE_MEMORY_HOST);
-    apart->row_end_list =   hypre_TAlloc(HYPRE_Int,  apart->storage_length, HYPRE_MEMORY_HOST);
+    apart->row_start_list =   hypre_TAlloc(HYPRE_BigInt,  apart->storage_length, HYPRE_MEMORY_HOST);
+    apart->row_end_list =   hypre_TAlloc(HYPRE_BigInt,  apart->storage_length, HYPRE_MEMORY_HOST);
 
 
     /* now we want to reconcile our actual partition with the assumed partition */
@@ -101,10 +101,10 @@ hypre_IJVectorCreateAssumedPartition( hypre_IJVector *vector)
 {
 
 
-   HYPRE_Int global_num, global_first_row;
+   HYPRE_BigInt global_num, global_first_row;
    HYPRE_Int myid;
    HYPRE_Int  start=0, end=0;
-   HYPRE_Int  *partitioning = hypre_IJVectorPartitioning(vector);
+   HYPRE_BigInt *partitioning = hypre_IJVectorPartitioning(vector);
 
    MPI_Comm   comm;
    
@@ -133,8 +133,8 @@ hypre_IJVectorCreateAssumedPartition( hypre_IJVector *vector)
     /*room for 10 owners of the assumed partition*/ 
     apart->storage_length = 10; /*need to be >=1 */ 
     apart->proc_list = hypre_TAlloc(HYPRE_Int,  apart->storage_length, HYPRE_MEMORY_HOST);
-    apart->row_start_list =   hypre_TAlloc(HYPRE_Int,  apart->storage_length, HYPRE_MEMORY_HOST);
-    apart->row_end_list =   hypre_TAlloc(HYPRE_Int,  apart->storage_length, HYPRE_MEMORY_HOST);
+    apart->row_start_list =   hypre_TAlloc(HYPRE_BigInt,  apart->storage_length, HYPRE_MEMORY_HOST);
+    apart->row_end_list =   hypre_TAlloc(HYPRE_BigInt,  apart->storage_length, HYPRE_MEMORY_HOST);
 
 
     /* now we want to reconcile our actual partition with the assumed partition */

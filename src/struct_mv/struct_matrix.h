@@ -56,7 +56,7 @@ typedef struct hypre_StructMatrix_struct
    HYPRE_Int            *symm_elements;             /* Which elements are "symmetric" */
    HYPRE_Int             num_ghost[2*HYPRE_MAXDIM]; /* Num ghost layers in each direction */
                       
-   HYPRE_Int             global_size;               /* Total number of nonzero coeffs */
+   HYPRE_BigInt          global_size;               /* Total number of nonzero coeffs */
 
    hypre_CommPkg        *comm_pkg;                  /* Info on how to update ghost data */
 

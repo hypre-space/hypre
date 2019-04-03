@@ -44,7 +44,7 @@ hypre_SStructGraphGetUVEntryRank( hypre_SStructGraph    *graph,
                                   HYPRE_Int              part,
                                   HYPRE_Int              var,
                                   hypre_Index            index,
-                                  HYPRE_Int             *rank )
+                                  HYPRE_BigInt          *rank )
 {
    HYPRE_Int              ndim  = hypre_SStructGraphNDim(graph);
    hypre_SStructGrid     *grid  = hypre_SStructGraphGrid(graph);
@@ -78,7 +78,7 @@ hypre_SStructGraphGetUVEntryRank( hypre_SStructGraph    *graph,
             vol = vol*(hypre_BoxSizeD(box, d) + 2) +
                (hypre_IndexD(index, d) - hypre_BoxIMinD(box, d) + 1);
          }
-         *rank += vol;
+         *rank += (HYPRE_BigInt)vol;
          return hypre_error_flag;
       }
       else
@@ -88,7 +88,7 @@ hypre_SStructGraphGetUVEntryRank( hypre_SStructGraph    *graph,
          {
             vol *= (hypre_BoxSizeD(box, d) + 2);
          }
-         *rank += vol;
+         *rank += (HYPRE_BigInt)vol;
       }
    }
 
@@ -121,7 +121,7 @@ hypre_SStructGraphFindBoxEndpt(hypre_SStructGraph    *graph,
    hypre_BoxManEntry     *boxman_entry;
    hypre_StructGrid      *sgrid;
    hypre_Box             *box;
-   HYPRE_Int              rank;
+   HYPRE_BigInt           rank;
 
    /* Should we be checking the neighbor box manager also ?*/
 

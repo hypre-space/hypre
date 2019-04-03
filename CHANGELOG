@@ -15,6 +15,22 @@
 # recent release.
 #=============================================================================
 
+Version 2.16.0 released 2019/03/20
+
+- Added new '--enable-mixedint' configure option. This introduces a HYPRE_BigInt
+  type that is set to 'long long int' (when configured with this option) to
+  enable the solution of linear systems that have more than 2 billion unknowns,
+  while reducing the memory use and computational costs needed with the previous
+  option '--enable-bigint' (still available). Note that this option currently
+  disables Euclid, ParaSails, pilut, and CGC coarsening in BoomerAMG.
+
+- Various GPU optimizations.
+
+- Changed documentation to use Sphinx and Doxygen. The User Manual is available
+  online through the hypre GitHub repo. The Reference Manual is not yet online.
+
+- Various bug fixes.
+
 Version 2.15.1 released 2018/10/19
 
 - Added hypre version functions: HYPRE_Version(), HYPRE_VersionNumber()

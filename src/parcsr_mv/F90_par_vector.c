@@ -164,7 +164,7 @@ void
 hypre_F90_IFACE(hypre_vectortoparvector, HYPRE_VECTORTOPARVECTOR)
    ( hypre_F90_Comm *comm,
      hypre_F90_Obj *vector,
-     hypre_F90_IntArray *vec_starts,
+     hypre_F90_BigIntArray *vec_starts,
      hypre_F90_Obj *par_vector,
      hypre_F90_Int *ierr        )
 {
@@ -172,7 +172,7 @@ hypre_F90_IFACE(hypre_vectortoparvector, HYPRE_VECTORTOPARVECTOR)
       ( hypre_VectorToParVector(
            hypre_F90_PassComm (comm),
            (hypre_Vector *) *vector,
-           hypre_F90_PassIntArray (vec_starts) ) );
+           hypre_F90_PassBigIntArray (vec_starts) ) );
 
    *ierr = 0;
 }

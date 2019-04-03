@@ -127,7 +127,7 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
    HYPRE_Int               trueV = 1;
    HYPRE_Int               found;
    HYPRE_Int              *stencil_ranks, *rank_stencils;
-   HYPRE_Int               rank, startrank;
+   HYPRE_BigInt            rank, startrank;
    HYPRE_Real             *vals;
 
    HYPRE_Int               i, j;
@@ -141,7 +141,8 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
    HYPRE_Int               nUentries, cnt1;
    HYPRE_Int               box_array_size;
 
-   HYPRE_Int              *ncols, *rows, *cols;
+   HYPRE_Int              *ncols;
+   HYPRE_BigInt           *rows, *cols;
    
    HYPRE_Int              *temp1, *temp2;
 
@@ -405,8 +406,8 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
                            }
 
                            ncols= hypre_TAlloc(HYPRE_Int,  cnt1, HYPRE_MEMORY_HOST);
-                           rows = hypre_TAlloc(HYPRE_Int,  cnt1, HYPRE_MEMORY_HOST);
-                           cols = hypre_TAlloc(HYPRE_Int,  cnt1, HYPRE_MEMORY_HOST);
+                           rows = hypre_TAlloc(HYPRE_BigInt,  cnt1, HYPRE_MEMORY_HOST);
+                           cols = hypre_TAlloc(HYPRE_BigInt,  cnt1, HYPRE_MEMORY_HOST);
                            temp2= hypre_TAlloc(HYPRE_Int,  cnt1, HYPRE_MEMORY_HOST);
                            vals = hypre_CTAlloc(HYPRE_Real,  cnt1, HYPRE_MEMORY_HOST);
 

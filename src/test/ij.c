@@ -68,18 +68,18 @@ HYPRE_Int BuildParDifConv (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index ,
 HYPRE_Int BuildParFromOneFile (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_Int num_functions , HYPRE_ParCSRMatrix *A_ptr );
 HYPRE_Int BuildFuncsFromFiles (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix A , HYPRE_Int **dof_func_ptr );
 HYPRE_Int BuildFuncsFromOneFile (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix A , HYPRE_Int **dof_func_ptr );
-HYPRE_Int BuildRhsParFromOneFile (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_Int *partitioning , HYPRE_ParVector *b_ptr );
+HYPRE_Int BuildRhsParFromOneFile (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_BigInt *partitioning , HYPRE_ParVector *b_ptr );
 HYPRE_Int BuildParLaplacian9pt (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 HYPRE_Int BuildParLaplacian27pt (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 HYPRE_Int BuildParRotate7pt (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 HYPRE_Int BuildParVarDifConv (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix *A_ptr , HYPRE_ParVector *rhs_ptr );
-HYPRE_ParCSRMatrix GenerateSysLaplacian (MPI_Comm comm, HYPRE_Int nx, HYPRE_Int ny, HYPRE_Int nz,
+HYPRE_ParCSRMatrix GenerateSysLaplacian (MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz,
                                          HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r,
                                          HYPRE_Int num_fun, HYPRE_Real *mtrx, HYPRE_Real *value);
-HYPRE_ParCSRMatrix GenerateSysLaplacianVCoef (MPI_Comm comm, HYPRE_Int nx, HYPRE_Int ny, HYPRE_Int nz,
+HYPRE_ParCSRMatrix GenerateSysLaplacianVCoef (MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz,
                                               HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r,
                                               HYPRE_Int num_fun, HYPRE_Real *mtrx, HYPRE_Real *value);
-HYPRE_Int SetSysVcoefValues(HYPRE_Int num_fun, HYPRE_Int nx, HYPRE_Int ny, HYPRE_Int nz, HYPRE_Real vcx, HYPRE_Real vcy, HYPRE_Real vcz, HYPRE_Int mtx_entry, HYPRE_Real *values);
+HYPRE_Int SetSysVcoefValues(HYPRE_Int num_fun, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Real vcx, HYPRE_Real vcy, HYPRE_Real vcz, HYPRE_Int mtx_entry, HYPRE_Real *values);
 
 HYPRE_Int BuildParCoordinates (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_Int *coorddim_ptr , float **coord_ptr );
 
@@ -156,10 +156,10 @@ main( hypre_int argc,
    HYPRE_Int                *row_sizes;
    HYPRE_Int                *diag_sizes;
    HYPRE_Int                *offdiag_sizes;
-   HYPRE_Int                *rows;
+   HYPRE_BigInt             *rows;
    HYPRE_Int                 size;
    HYPRE_Int                *ncols;
-   HYPRE_Int                *col_inds;
+   HYPRE_BigInt             *col_inds;
    HYPRE_Int                *dof_func;
    HYPRE_Int		       num_functions = 1;
    HYPRE_Int		       num_paths = 1;
@@ -168,9 +168,10 @@ main( hypre_int argc,
 
    HYPRE_Int		       time_index;
    MPI_Comm            comm = hypre_MPI_COMM_WORLD;
-   HYPRE_Int M, N;
-   HYPRE_Int first_local_row, last_local_row, local_num_rows;
-   HYPRE_Int first_local_col, last_local_col, local_num_cols;
+   HYPRE_BigInt M, N, big_i;
+   HYPRE_Int local_num_rows, local_num_cols;
+   HYPRE_BigInt first_local_row, last_local_row;
+   HYPRE_BigInt first_local_col, last_local_col;
    HYPRE_Int variant, overlap, domain_type;
    HYPRE_Real schwarz_rlx_weight;
    HYPRE_Real *values, val;
@@ -370,9 +371,9 @@ main( hypre_int argc,
    HYPRE_Real     *nongalerk_tol = NULL;
    HYPRE_Int       nongalerk_num_tol = 0;
 
-   HYPRE_Int *row_nums = NULL;
+   HYPRE_BigInt *row_nums = NULL;
    HYPRE_Int *num_cols = NULL;
-   HYPRE_Int *col_nums = NULL;
+   HYPRE_BigInt *col_nums = NULL;
    HYPRE_Int i_indx, j_indx, num_rows;
    HYPRE_Real *data = NULL;
 
@@ -1964,8 +1965,8 @@ main( hypre_int argc,
                                           &first_local_row, &last_local_row ,
                                           &first_local_col, &last_local_col );
 
-      local_num_rows = last_local_row - first_local_row + 1;
-      local_num_cols = last_local_col - first_local_col + 1;
+      local_num_rows = (HYPRE_Int)(last_local_row - first_local_row + 1);
+      local_num_cols = (HYPRE_Int)(last_local_col - first_local_col + 1);
       ierr += HYPRE_IJMatrixGetObject( ij_A, &object);
       parcsr_A = (HYPRE_ParCSRMatrix) object;
    }
@@ -1978,8 +1979,8 @@ main( hypre_int argc,
                                               &first_local_row, &last_local_row ,
                                               &first_local_col, &last_local_col );
 
-      local_num_rows = last_local_row - first_local_row + 1;
-      local_num_cols = last_local_col - first_local_col + 1;
+      local_num_rows = (HYPRE_Int)(last_local_row - first_local_row + 1);
+      local_num_cols = (HYPRE_Int)(last_local_col - first_local_col + 1);
    }
    hypre_EndTiming(time_index);
    hypre_PrintTiming("Generate Matrix", hypre_MPI_COMM_WORLD);
@@ -2008,7 +2009,7 @@ main( hypre_int argc,
       }
       /* The following shows how to build an IJMatrix if one has only an
          estimate for the row sizes */
-     row_nums = hypre_CTAlloc(HYPRE_Int,  num_rows, HYPRE_MEMORY_HOST);
+     row_nums = hypre_CTAlloc(HYPRE_BigInt,  num_rows, HYPRE_MEMORY_HOST);
      num_cols = hypre_CTAlloc(HYPRE_Int,  num_rows, HYPRE_MEMORY_HOST);
      if (sparsity_known == 1)
      {
@@ -2032,7 +2033,7 @@ main( hypre_int argc,
      if (build_matrix_type == 2) mx_size = 7;
      if (build_matrix_type == 3) mx_size = 9;
      if (build_matrix_type == 4) mx_size = 27;
-     col_nums = hypre_CTAlloc(HYPRE_Int,  mx_size*num_rows, HYPRE_MEMORY_HOST);
+     col_nums = hypre_CTAlloc(HYPRE_BigInt,  mx_size*num_rows, HYPRE_MEMORY_HOST);
      data = hypre_CTAlloc(HYPRE_Real,  mx_size*num_rows, HYPRE_MEMORY_HOST);
      i_indx = 0;
      j_indx = 0;
@@ -2092,11 +2093,11 @@ main( hypre_int argc,
      {
          if (add)
 	    ierr += HYPRE_IJMatrixAddToValues(ij_A, num_rows, num_cols, row_nums,
-					(const HYPRE_Int *) col_nums,
+					(const HYPRE_BigInt *) col_nums,
 					(const HYPRE_Real *) data);
          else
             ierr += HYPRE_IJMatrixSetValues(ij_A, num_rows, num_cols, row_nums,
-					(const HYPRE_Int *) col_nums,
+					(const HYPRE_BigInt *) col_nums,
 					(const HYPRE_Real *) data);
      }
      else
@@ -2106,11 +2107,11 @@ main( hypre_int argc,
          {
             if (add)
                ierr += HYPRE_IJMatrixAddToValues( ij_A, 1, &num_cols[i], &row_nums[i],
-                                             (const HYPRE_Int *) &col_nums[j_indx],
+                                             (const HYPRE_BigInt *) &col_nums[j_indx],
                                              (const HYPRE_Real *) &data[j_indx] );
             else
                ierr += HYPRE_IJMatrixSetValues( ij_A, 1, &num_cols[i], &row_nums[i],
-                                             (const HYPRE_Int *) &col_nums[j_indx],
+                                             (const HYPRE_BigInt *) &col_nums[j_indx],
                                              (const HYPRE_Real *) &data[j_indx] );
             j_indx += num_cols[i];
          }
@@ -2152,8 +2153,8 @@ main( hypre_int argc,
          ierr += HYPRE_IJMatrixSetConstantValues( ij_A, -1.0 );
 
       ncols    = hypre_CTAlloc(HYPRE_Int,  last_local_row - first_local_row + 1, HYPRE_MEMORY_HOST);
-      rows     = hypre_CTAlloc(HYPRE_Int,  last_local_row - first_local_row + 1, HYPRE_MEMORY_HOST);
-      col_inds = hypre_CTAlloc(HYPRE_Int,  last_local_row - first_local_row + 1, HYPRE_MEMORY_HOST);
+      rows     = hypre_CTAlloc(HYPRE_BigInt,  last_local_row - first_local_row + 1, HYPRE_MEMORY_HOST);
+      col_inds = hypre_CTAlloc(HYPRE_BigInt,  last_local_row - first_local_row + 1, HYPRE_MEMORY_HOST);
       values   = hypre_CTAlloc(HYPRE_Real,  last_local_row - first_local_row + 1, HYPRE_MEMORY_HOST);
 
       val = 0.0;
@@ -2164,19 +2165,19 @@ main( hypre_int argc,
       else
          val += 0.0;   /* Use zero to avoid unintentional loss of significance */
 
-      for (i = first_local_row; i <= last_local_row; i++)
+      for (big_i = first_local_row; big_i <= last_local_row; big_i++)
       {
-         j = i - first_local_row;
-         rows[j] = i;
+         j = (HYPRE_Int)(big_i - first_local_row);
+         rows[j] = big_i;
          ncols[j] = 1;
-         col_inds[j] = i;
+         col_inds[j] = big_i;
          values[j] = val;
       }
 
       ierr += HYPRE_IJMatrixAddToValues( ij_A,
                                       local_num_rows,
                                       ncols, rows,
-                                      (const HYPRE_Int *) col_inds,
+                                      (const HYPRE_BigInt *) col_inds,
                                       (const HYPRE_Real *) values );
 
       hypre_TFree(values, HYPRE_MEMORY_HOST);
@@ -2819,6 +2820,7 @@ main( hypre_int argc,
          HYPRE_ParCSRHybridSetLevelRelaxWt(amg_solver, relax_wt_level, level_w);
       if (level_ow > -1)
          HYPRE_ParCSRHybridSetLevelOuterWt(amg_solver, outer_wt_level, level_ow);
+      HYPRE_ParCSRHybridSetNonGalerkinTol(amg_solver, nongalerk_num_tol, nongalerk_tol); 
 
       HYPRE_ParCSRHybridSetup(amg_solver, parcsr_A, b, x);
 
@@ -3709,8 +3711,8 @@ main( hypre_int argc,
                                                &first_local_row, &last_local_row ,
                                                &first_local_col, &last_local_col );
 
-       local_num_rows = last_local_row - first_local_row + 1;
-       local_num_cols = last_local_col - first_local_col + 1;
+       local_num_rows = (HYPRE_Int)(last_local_row - first_local_row + 1);
+       local_num_cols = (HYPRE_Int)(last_local_col - first_local_col + 1);
        ierr += HYPRE_ParCSRMatrixGetDims( parcsr_B, &M, &N );
 
        ierr += HYPRE_IJMatrixCreate( comm, first_local_row, last_local_row,
@@ -3723,8 +3725,8 @@ main( hypre_int argc,
          diag_sizes = hypre_CTAlloc(HYPRE_Int,  local_num_rows, HYPRE_MEMORY_HOST);
          offdiag_sizes = hypre_CTAlloc(HYPRE_Int,  local_num_rows, HYPRE_MEMORY_HOST);
          local_row = 0;
-         for (i=first_local_row; i<= last_local_row; i++) {
-           ierr += HYPRE_ParCSRMatrixGetRow( parcsr_B, i, &size,
+         for (big_i=first_local_row; big_i<= last_local_row; big_i++) {
+           ierr += HYPRE_ParCSRMatrixGetRow( parcsr_B, big_i, &size,
                                              &col_inds, &values );
            for (j=0; j < size; j++)
              {
@@ -3734,7 +3736,7 @@ main( hypre_int argc,
                  diag_sizes[local_row]++;
              }
            local_row++;
-           ierr += HYPRE_ParCSRMatrixRestoreRow( parcsr_B, i, &size,
+           ierr += HYPRE_ParCSRMatrixRestoreRow( parcsr_B, big_i, &size,
                                                  &col_inds, &values );
          }
          ierr += HYPRE_IJMatrixSetDiagOffdSizes( ij_B,
@@ -3745,16 +3747,16 @@ main( hypre_int argc,
 
          ierr = HYPRE_IJMatrixInitialize( ij_B );
 
-         for (i=first_local_row; i<= last_local_row; i++)
+         for (big_i=first_local_row; big_i<= last_local_row; big_i++)
            {
-             ierr += HYPRE_ParCSRMatrixGetRow( parcsr_B, i, &size,
+             ierr += HYPRE_ParCSRMatrixGetRow( parcsr_B, big_i, &size,
                                                &col_inds, &values );
 
-             ierr += HYPRE_IJMatrixSetValues( ij_B, 1, &size, &i,
-                                              (const HYPRE_Int *) col_inds,
+             ierr += HYPRE_IJMatrixSetValues( ij_B, 1, &size, &big_i,
+                                              (const HYPRE_BigInt *) col_inds,
                                               (const HYPRE_Real *) values );
 
-             ierr += HYPRE_ParCSRMatrixRestoreRow( parcsr_B, i, &size,
+             ierr += HYPRE_ParCSRMatrixRestoreRow( parcsr_B, big_i, &size,
                                                    &col_inds, &values );
            }
        }
@@ -3783,16 +3785,16 @@ main( hypre_int argc,
            ierr = HYPRE_IJMatrixInitialize( ij_B );
 
            /* Loop through all locally stored rows and insert them into ij_matrix */
-           for (i=first_local_row; i<= last_local_row; i++)
+           for (big_i=first_local_row; big_i<= last_local_row; big_i++)
              {
-               ierr += HYPRE_ParCSRMatrixGetRow( parcsr_B, i, &size,
+               ierr += HYPRE_ParCSRMatrixGetRow( parcsr_B, big_i, &size,
                                                  &col_inds, &values );
 
-               ierr += HYPRE_IJMatrixSetValues( ij_B, 1, &size, &i,
-                                                (const HYPRE_Int *) col_inds,
+               ierr += HYPRE_IJMatrixSetValues( ij_B, 1, &size, &big_i,
+                                                (const HYPRE_BigInt *) col_inds,
                                                 (const HYPRE_Real *) values );
 
-               ierr += HYPRE_ParCSRMatrixRestoreRow( parcsr_B, i, &size,
+               ierr += HYPRE_ParCSRMatrixRestoreRow( parcsr_B, big_i, &size,
                                                      &col_inds, &values );
              }
          }
@@ -4919,15 +4921,15 @@ main( hypre_int argc,
 
       if (check_residual)
       {
-         HYPRE_Int *indices;
+         HYPRE_BigInt *indices;
          HYPRE_Int num_values = 20;
          HYPRE_ParCSRGMRESGetResidual(pcg_solver, &residual);
          HYPRE_ParCSRMatrixGetLocalRange( parcsr_A,
                                               &first_local_row, &last_local_row ,
                                               &first_local_col, &last_local_col );
-         local_num_rows = last_local_row - first_local_row + 1;
+         local_num_rows = (HYPRE_Int)(last_local_row - first_local_row + 1);
          if (local_num_rows < 20) num_values = local_num_rows;
-         indices = hypre_CTAlloc(HYPRE_Int, num_values, HYPRE_MEMORY_HOST);
+         indices = hypre_CTAlloc(HYPRE_BigInt, num_values, HYPRE_MEMORY_HOST);
          values = hypre_CTAlloc(HYPRE_Real, num_values, HYPRE_MEMORY_HOST);
          for (i=0; i < num_values; i++)
             indices[i] = first_local_row+i;
@@ -6625,7 +6627,7 @@ BuildParLaplacian( HYPRE_Int                  argc,
                    HYPRE_Int                  arg_index,
                    HYPRE_ParCSRMatrix  *A_ptr     )
 {
-   HYPRE_Int                 nx, ny, nz;
+   HYPRE_BigInt              nx, ny, nz;
    HYPRE_Int                 P, Q, R;
    HYPRE_Real          cx, cy, cz;
 
@@ -6743,7 +6745,7 @@ BuildParLaplacian( HYPRE_Int                  argc,
    if (myid == 0)
    {
       hypre_printf("  Laplacian:   num_fun = %d\n", num_fun);
-      hypre_printf("    (nx, ny, nz) = (%d, %d, %d)\n", nx, ny, nz);
+      hypre_printf("    (nx, ny, nz) = (%b, %b, %b)\n", nx, ny, nz);
       hypre_printf("    (Px, Py, Pz) = (%d, %d, %d)\n", P,  Q,  R);
       hypre_printf("    (cx, cy, cz) = (%f, %f, %f)\n\n", cx, cy, cz);
    }
@@ -7119,7 +7121,7 @@ BuildParDifConv( HYPRE_Int                  argc,
                  HYPRE_Int                  arg_index,
                  HYPRE_ParCSRMatrix  *A_ptr)
 {
-   HYPRE_Int           nx, ny, nz;
+   HYPRE_BigInt        nx, ny, nz;
    HYPRE_Int           P, Q, R;
    HYPRE_Real          cx, cy, cz;
    HYPRE_Real          ax, ay, az, atype;
@@ -7224,7 +7226,7 @@ BuildParDifConv( HYPRE_Int                  argc,
    {
       hypre_printf("  Convection-Diffusion: \n");
       hypre_printf("    -cx Dxx - cy Dyy - cz Dzz + ax Dx + ay Dy + az Dz = f\n");
-      hypre_printf("    (nx, ny, nz) = (%d, %d, %d)\n", nx, ny, nz);
+      hypre_printf("    (nx, ny, nz) = (%b, %b, %b)\n", nx, ny, nz);
       hypre_printf("    (Px, Py, Pz) = (%d, %d, %d)\n", P,  Q,  R);
       hypre_printf("    (cx, cy, cz) = (%f, %f, %f)\n", cx, cy, cz);
       hypre_printf("    (ax, ay, az) = (%f, %f, %f)\n\n", ax, ay, az);
@@ -7239,9 +7241,9 @@ BuildParDifConv( HYPRE_Int                  argc,
    q = (( myid - p)/P) % Q;
    r = ( myid - p - P*q)/( P*Q );
 
-   hinx = 1./(nx+1);
-   hiny = 1./(ny+1);
-   hinz = 1./(nz+1);
+   hinx = 1./(HYPRE_Real)(nx+1);
+   hiny = 1./(HYPRE_Real)(ny+1);
+   hinz = 1./(HYPRE_Real)(nz+1);
 
    /*-----------------------------------------------------------
     * Generate the matrix
@@ -7419,8 +7421,8 @@ BuildParFromOneFile( HYPRE_Int                  argc,
 
    HYPRE_Int                 myid, numprocs;
    HYPRE_Int                 i, rest, size, num_nodes, num_dofs;
-   HYPRE_Int		      *row_part;
-   HYPRE_Int		      *col_part;
+   HYPRE_BigInt		      *row_part;
+   HYPRE_BigInt		      *col_part;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -7471,7 +7473,7 @@ BuildParFromOneFile( HYPRE_Int                  argc,
       }
       else
       {
-         row_part = hypre_CTAlloc(HYPRE_Int,  numprocs+1, HYPRE_MEMORY_HOST);
+         row_part = hypre_CTAlloc(HYPRE_BigInt,  numprocs+1, HYPRE_MEMORY_HOST);
 	 row_part[0] = 0;
 	 size = num_nodes/numprocs;
 	 rest = num_nodes-size*numprocs;
@@ -7524,11 +7526,12 @@ BuildFuncsFromOneFile(  HYPRE_Int                  argc,
    char           *filename;
 
    HYPRE_Int             myid, num_procs;
-   HYPRE_Int            *partitioning;
+   HYPRE_BigInt         *partitioning;
    HYPRE_Int            *dof_func;
    HYPRE_Int            *dof_func_local;
    HYPRE_Int             i, j;
-   HYPRE_Int             local_size, global_size;
+   HYPRE_Int             local_size;
+   HYPRE_Int             global_size;
    hypre_MPI_Request	  *requests;
    hypre_MPI_Status	  *status, status0;
    MPI_Comm	   comm;
@@ -7620,7 +7623,7 @@ HYPRE_Int
 BuildRhsParFromOneFile( HYPRE_Int                  argc,
                         char                *argv[],
                         HYPRE_Int                  arg_index,
-                        HYPRE_Int                 *partitioning,
+                        HYPRE_BigInt              *partitioning,
                         HYPRE_ParVector     *b_ptr     )
 {
    char           *filename;
@@ -7684,7 +7687,7 @@ BuildParLaplacian9pt( HYPRE_Int                  argc,
                       HYPRE_Int                  arg_index,
                       HYPRE_ParCSRMatrix  *A_ptr     )
 {
-   HYPRE_Int                 nx, ny;
+   HYPRE_BigInt              nx, ny;
    HYPRE_Int                 P, Q;
 
    HYPRE_ParCSRMatrix  A;
@@ -7751,7 +7754,7 @@ BuildParLaplacian9pt( HYPRE_Int                  argc,
    if (myid == 0)
    {
       hypre_printf("  Laplacian 9pt:\n");
-      hypre_printf("    (nx, ny) = (%d, %d)\n", nx, ny);
+      hypre_printf("    (nx, ny) = (%b, %b)\n", nx, ny);
       hypre_printf("    (Px, Py) = (%d, %d)\n\n", P,  Q);
    }
 
@@ -7805,7 +7808,7 @@ BuildParLaplacian27pt( HYPRE_Int                  argc,
                        HYPRE_Int                  arg_index,
                        HYPRE_ParCSRMatrix  *A_ptr     )
 {
-   HYPRE_Int                 nx, ny, nz;
+   HYPRE_BigInt              nx, ny, nz;
    HYPRE_Int                 P, Q, R;
 
    HYPRE_ParCSRMatrix  A;
@@ -7876,7 +7879,7 @@ BuildParLaplacian27pt( HYPRE_Int                  argc,
    if (myid == 0)
    {
       hypre_printf("  Laplacian_27pt:\n");
-      hypre_printf("    (nx, ny, nz) = (%d, %d, %d)\n", nx, ny, nz);
+      hypre_printf("    (nx, ny, nz) = (%b, %b, %b)\n", nx, ny, nz);
       hypre_printf("    (Px, Py, Pz) = (%d, %d, %d)\n\n", P,  Q,  R);
    }
 
@@ -7924,7 +7927,7 @@ BuildParRotate7pt( HYPRE_Int                  argc,
                    HYPRE_Int                  arg_index,
                    HYPRE_ParCSRMatrix  *A_ptr     )
 {
-   HYPRE_Int                 nx, ny;
+   HYPRE_BigInt              nx, ny;
    HYPRE_Int                 P, Q;
 
    HYPRE_ParCSRMatrix  A;
@@ -8002,7 +8005,7 @@ BuildParRotate7pt( HYPRE_Int                  argc,
    {
       hypre_printf("  Rotate 7pt:\n");
       hypre_printf("    alpha = %f, eps = %f\n", alpha,eps);
-      hypre_printf("    (nx, ny) = (%d, %d)\n", nx, ny);
+      hypre_printf("    (nx, ny) = (%b, %b)\n", nx, ny);
       hypre_printf("    (Px, Py) = (%d, %d)\n", P,  Q);
    }
 
@@ -8043,7 +8046,7 @@ BuildParVarDifConv( HYPRE_Int                  argc,
                     HYPRE_ParCSRMatrix  *A_ptr    ,
                     HYPRE_ParVector  *rhs_ptr     )
 {
-   HYPRE_Int                 nx, ny, nz;
+   HYPRE_BigInt              nx, ny, nz;
    HYPRE_Int                 P, Q, R;
 
    HYPRE_ParCSRMatrix  A;
@@ -8131,7 +8134,7 @@ BuildParVarDifConv( HYPRE_Int                  argc,
    {
       hypre_printf("  ell PDE: eps = %f\n", eps);
       hypre_printf("    Dx(aDxu) + Dy(bDyu) + Dz(cDzu) + d Dxu + e Dyu + f Dzu  + g u= f\n");
-      hypre_printf("    (nx, ny, nz) = (%d, %d, %d)\n", nx, ny, nz);
+      hypre_printf("    (nx, ny, nz) = (%b, %b, %b)\n", nx, ny, nz);
       hypre_printf("    (Px, Py, Pz) = (%d, %d, %d)\n", P,  Q,  R);
    }
    /*-----------------------------------------------------------
@@ -8168,7 +8171,7 @@ BuildParVarDifConv( HYPRE_Int                  argc,
 /**************************************************************************/
 
 
-HYPRE_Int SetSysVcoefValues(HYPRE_Int num_fun, HYPRE_Int nx, HYPRE_Int ny, HYPRE_Int nz, HYPRE_Real vcx,
+HYPRE_Int SetSysVcoefValues(HYPRE_Int num_fun, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Real vcx,
                             HYPRE_Real vcy, HYPRE_Real vcz, HYPRE_Int mtx_entry, HYPRE_Real *values)
 {
 
@@ -8208,7 +8211,7 @@ BuildParCoordinates( HYPRE_Int                  argc,
                      HYPRE_Int                 *coorddim_ptr,
                      float               **coord_ptr     )
 {
-   HYPRE_Int                 nx, ny, nz;
+   HYPRE_BigInt              nx, ny, nz;
    HYPRE_Int                 P, Q, R;
 
    HYPRE_Int                 num_procs, myid;
@@ -8298,7 +8301,7 @@ HYPRE_Int
 BuildParIsoLaplacian( HYPRE_Int argc, char** argv, HYPRE_ParCSRMatrix *A_ptr )
 {
 
-   HYPRE_Int                 nx, ny, nz;
+   HYPRE_BigInt              nx, ny, nz;
    HYPRE_Real          cx, cy, cz;
 
    HYPRE_Int                 P, Q, R;
@@ -8358,7 +8361,7 @@ BuildParIsoLaplacian( HYPRE_Int argc, char** argv, HYPRE_ParCSRMatrix *A_ptr )
    if (myid == 0)
    {
       hypre_printf("  Laplacian:\n");
-      hypre_printf("    (nx, ny, nz) = (%d, %d, %d)\n", nx, ny, nz);
+      hypre_printf("    (nx, ny, nz) = (%b, %b, %b)\n", nx, ny, nz);
       hypre_printf("    (Px, Py, Pz) = (%d, %d, %d)\n", P,  Q,  R);
       hypre_printf("    (cx, cy, cz) = (%f, %f, %f)\n\n", cx, cy, cz);
    }
