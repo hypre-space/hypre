@@ -1,0 +1,108 @@
+<html><head><title>Example Codes</title></head><body>
+<h2> BoomerAMG Example Codes  </h2>
+
+<blockquote>
+
+<a href="ex5.c.html"><h2>Example 5</h2></a>
+<p>
+This example solves the 2-D
+Laplacian problem with zero boundary conditions
+on an nxn grid.  The number of unknowns is N=n^2.
+The standard 5-point stencil is used, and we solve
+for the interior nodes only.
+<p>
+This example solves the same problem as Example 3.
+Available solvers are AMG, PCG, PCG with AMG or
+Parasails preconditioners, or Flexible GMRES with 
+AMG preconditioner.
+<a href="ex9.c.html"><h2>Example 9</h2></a>
+<p>
+This code solves a system corresponding to a discretization
+of the biharmonic problem treated as a system of equations
+on the unit square.  Specifically, instead of solving
+Delta^2(u) = f with zero boundary conditions for u and
+Delta(u), we solve the system A x = b, where
+<p>
+<center> A = [ Delta -I ; 0 Delta], x = [ u ; v] and b = [ 0 ; f]  
+</center>
+<p>                   
+The corresponding boundary conditions are u = 0 and v = 0.
+<p>
+The domain is split into an N x N processor grid.  Thus, the
+given number of processors should be a perfect square.
+Each processor's piece of the grid has n x n cells with n x n
+nodes. We use cell-centered variables, and, therefore, the
+nodes are not shared. Note that we have two variables, u and
+v, and need only one part to describe the domain. We use the
+standard 5-point stencil to discretize the Laplace operators.
+The boundary conditions are incorporated as in Example 3.
+<p>
+We recommend viewing Examples 3, 6 and 7 before this example.
+<a href="ex12.c.html"><h2>Example 12</h2></a>
+<p>
+The grid layout is the same as ex1, but with nodal unknowns. The solver is PCG
+preconditioned with either PFMG or BoomerAMG, selected on the command line.
+<p>
+We recommend viewing the Struct examples before viewing this and the other
+SStruct examples.  This is one of the simplest SStruct examples, used primarily
+to demonstrate how to set up non-cell-centered problems, and to demonstrate how
+easy it is to switch between structured solvers (PFMG) and solvers designed for
+more general settings (AMG).
+<a href="ex13.c.html"><h2>Example 13</h2></a>
+<p>
+This code solves the 2D Laplace equation using bilinear finite element
+discretization on a mesh with an "enhanced connectivity" point.  Specifically,
+we solve -Delta u = 1 with zero boundary conditions on a star-shaped domain
+consisting of identical rhombic parts each meshed with a uniform n x n grid.
+Every part is assigned to a different processor and all parts meet at the
+origin, equally subdividing the 2*pi angle there. The case of six processors
+(parts) looks as follows:
+<p>
+<pre>
+                                    +
+                                   / \
+                                  /   \
+                                 /     \
+                       +--------+   1   +---------+
+                        \        \     /         /
+                         \    2   \   /    0    /
+                          \        \ /         /
+                           +--------+---------+
+                          /        / \         \
+                         /    3   /   \    5    \
+                        /        /     \         \
+                       +--------+   4   +---------+
+                                 \     /
+                                  \   /
+                                   \ /
+                                    +
+</pre>
+<p>
+Note that in this problem we use nodal variables, which will be shared between
+the different parts, so the node at the origin, for example, will belong to all
+parts.
+<p>
+We recommend viewing the Struct examples before viewing this and the other
+SStruct examples.  The primary role of this particular SStruct example is to
+demonstrate how to set up non-cell-centered problems, and specifically problems
+with an "enhanced connectivity" point.
+<a href="ex14.c.html"><h2>Example 14</h2></a>
+<p>
+This is a version of <a href="ex13.html">Example 13</a>, which uses the SStruct
+FEM input functions instead of stencils to describe a problem on a mesh with an "enhanced
+connectivity" point.  This is the recommended way to set up a finite element
+problem in the SStruct interface.
+<a href="ex16.c.html"><h2>Example 16</h2></a>
+<p>
+This code solves the 2D Laplace equation using a high order Q3 finite element
+discretization.  Specifically, we solve -Delta u = 1 with zero boundary
+conditions on a unit square domain meshed with a uniform grid.  The mesh is
+distributed across an N x N process grid, with each processor containing an n x
+n sub-mesh of data, so the global mesh is nN x nN.
+
+</blockquote>
+
+<center>
+<a href="http://www.llnl.gov/CASC/hypre"><img border="0" src="hypre_wiw.gif"></a>
+</center>
+</body></html>

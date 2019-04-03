@@ -15,332 +15,511 @@
 #include "par_amg.h"
 #include "par_csr_block_matrix.h"	
 
-#define DEBUG_COMP_GRID 0 // if true, prints out what is stored in the comp grids for each processor to a file at different points in the iteration
+#define DEBUG_FAC 0
 
 HYPRE_Int
-Project( hypre_ParCompMatrixRow **P_rows, HYPRE_Complex *u_f, HYPRE_Complex *u_c, HYPRE_Int num_fine );
+FAC_Cycle(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type, HYPRE_Int first_iteration);
+
+HYPRE_Int 
+FAC_FCycle(void *amg_vdata, HYPRE_Int first_iteration);
 
 HYPRE_Int
-Restrict( hypre_ParCompMatrixRow **A_rows_f, hypre_ParCompMatrixRow **A_rows_c, hypre_ParCompMatrixRow **P_rows, HYPRE_Complex *u_f, HYPRE_Complex *u_c, HYPRE_Complex *f_f, 
-			HYPRE_Complex *f_c, HYPRE_Int num_nodes_f, HYPRE_Int num_real_nodes_f, HYPRE_Int num_nodes_c, HYPRE_Int num_owned_nodes_c );
+FAC_Cycle_timed(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type, HYPRE_Int time_part);
+
+HYPRE_Int 
+FAC_FCycle_timed(void *amg_vdata, HYPRE_Int time_part);
 
 HYPRE_Int
-Relax( hypre_ParCompMatrixRow **A_rows, HYPRE_Complex *u, HYPRE_Complex *f, HYPRE_Int num_real_nodes );
+FAC_Project( hypre_ParCompGrid *compGrid_f, hypre_ParCompGrid *compGrid_c );
 
 HYPRE_Int
-hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata )
+FAC_Restrict( hypre_ParCompGrid *compGrid_f, hypre_ParCompGrid *compGrid_c, HYPRE_Int first_iteration );
+
+HYPRE_Int
+FAC_Simple_Restrict( hypre_ParCompGrid *compGrid_f, hypre_ParCompGrid *compGrid_c, HYPRE_Int level );
+
+HYPRE_Int
+FAC_Relax( hypre_ParCompGrid *compGrid, HYPRE_Int type );
+
+HYPRE_Int
+FAC_Jacobi( hypre_ParCompGrid *compGrid );
+
+HYPRE_Int
+FAC_GaussSeidel( hypre_ParCompGrid *compGrid );
+
+HYPRE_Int
+hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata, HYPRE_Int first_iteration )
 {
-	#if DEBUG_COMP_GRID
-	HYPRE_Int   myid, num_procs;
-	hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
-	hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
-	#endif
-	
-	HYPRE_Int   myid, num_procs;
-	hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+   HYPRE_Int   myid;
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
-	HYPRE_Int level, i, j; // loop variables
-	HYPRE_Int numCoarseRelax = 20; // number of relaxations used to solve the coarse grid
+   hypre_ParAMGData   *amg_data = amg_vdata;
+   HYPRE_Int cycle_type = hypre_ParAMGDataFACCycleType(amg_data);
 
-	// Get the AMG structure
-  	hypre_ParAMGData   *amg_data = amg_vdata;
-  	HYPRE_Int num_levels = hypre_ParAMGDataNumLevels(amg_data);
+   if (cycle_type == 1 || cycle_type == 2) FAC_Cycle(amg_vdata, 0, cycle_type, first_iteration);
+   else if (cycle_type == 3) FAC_FCycle(amg_vdata, first_iteration);
+   else
+   {
+      if (myid == 0) hypre_printf("Error: unknown cycle type\n");
+   }
 
-	// Get the composite grid
-   	hypre_ParCompGrid          **compGrid = hypre_ParAMGDataCompGrid(amg_data);
-
-   	// Get operators and nodes from comp grid on each level
-	HYPRE_Int        *num_nodes = hypre_CTAlloc(HYPRE_Int, num_levels );
-	HYPRE_Int		 *num_real_nodes = hypre_CTAlloc(HYPRE_Int, num_levels );
-
-	HYPRE_Complex     **u = hypre_CTAlloc(HYPRE_Complex*, num_levels );
-	HYPRE_Complex     **f = hypre_CTAlloc(HYPRE_Complex*, num_levels );
-
-	HYPRE_Int        **global_indices = hypre_CTAlloc(HYPRE_Int*, num_levels );
-	HYPRE_Int        **coarse_global_indices = hypre_CTAlloc(HYPRE_Int*, num_levels );
-	HYPRE_Int        **coarse_local_indices = hypre_CTAlloc(HYPRE_Int*, num_levels ); 
-
-	hypre_ParCompMatrixRow 	***A_rows = hypre_CTAlloc(hypre_ParCompMatrixRow**, num_levels );
-	hypre_ParCompMatrixRow  ***P_rows = hypre_CTAlloc(hypre_ParCompMatrixRow**, num_levels );
-
-	for (level = 0; level < num_levels; level++)
-	{
-		num_nodes[level] = hypre_ParCompGridNumNodes(compGrid[level]);
-		num_real_nodes[level] = hypre_ParCompGridNumRealNodes(compGrid[level]);
-
-		u[level] = hypre_ParCompGridU(compGrid[level]);
-		f[level] = hypre_ParCompGridF(compGrid[level]);
-
-		global_indices[level] = hypre_ParCompGridGlobalIndices(compGrid[level]);
-		coarse_global_indices[level] = hypre_ParCompGridCoarseGlobalIndices(compGrid[level]);
-		coarse_local_indices[level] = hypre_ParCompGridCoarseLocalIndices(compGrid[level]); 
-
-		A_rows[level] = hypre_ParCompGridARows(compGrid[level]);
-		P_rows[level] = hypre_ParCompGridPRows(compGrid[level]);
-	}
-
-
-
-	// // Debug: just relax on fine grid
-	// for (i = 0; i < 100; i++) Relax( A_rows[0], u[0], f[0], num_real_nodes[0] );
-
-
-
-
-   	// Do FAC V-cycle (Debugging: do V-cycles starting on each level (but don't project soln up as in an FMG cycle))
-   	HYPRE_Int current_level;
-	for (current_level = num_levels - 1; current_level >= 0; current_level++)
-	{
-
-		// Measure initial norm of u
-		HYPRE_Complex 		prev_norm_u = 0.0, norm_u = 0.0;
-		for (j = 0; j < num_nodes[current_level]; j++) prev_norm_u += u[current_level][j]*u[current_level][j];
-		prev_norm_u = sqrt(prev_norm_u);
-
-		#if DEBUG_COMP_GRID
-		char filename[256];
-		for (level = 0; level < num_levels; level++)
-		{
-			hypre_sprintf(filename, "../../../scratch/CompGrids/before_Proc%dLevel%d.txt", myid, level);
-			hypre_ParCompGridDebugPrint( compGrid[level], filename );
-		}
-		#endif
-
-
-		// ... work down to coarsest ...
-		for (i = current_level; i < num_levels - 1; i++)
-		{
-			// Relax on the real nodes
-			Relax( A_rows[i], u[i], f[i], num_real_nodes[i] );
-			// Restrict the residual at all fine points (real and ghost) and set residual at coarse points not under the fine grid
-			Restrict( A_rows[i], A_rows[i+1], P_rows[i], u[i], u[i+1], f[i], f[i+1], num_nodes[i], num_real_nodes[i], num_nodes[i+1], hypre_ParCompGridNumOwnedNodes(compGrid[i+1]) );
-		}
-
-		//  ... solve on coarsest level ...
-		// hypre_printf("Level %d: solve\n", i);
-		for (i = 0; i < numCoarseRelax; i++) Relax( A_rows[num_levels-1], u[num_levels-1], f[num_levels-1], num_real_nodes[num_levels-1] );
-
-		// See if relaxation blew up the solution
-		norm_u = 0.0;
-		for (j = 0; j < num_nodes[current_level]; j++) norm_u += u[current_level][j]*u[current_level][j];
-		norm_u = sqrt(norm_u);
-		if (norm_u >= prev_norm_u) printf("Rank %d, level %d: relaxation blew up norm u. norm_u/prev_norm_u = %f\n", myid, current_level, norm_u/prev_norm_u);
-		prev_norm_u = norm_u;
-
-		#if DEBUG_COMP_GRID
-		for (level = 0; level < num_levels; level++)
-		{
-			hypre_sprintf(filename, "../../../scratch/CompGrids/post_relax_Proc%dLevel%d.txt", myid, level);
-			hypre_ParCompGridDebugPrint( compGrid[level], filename );
-		}
-		#endif
-
-
-		// ... and work back up to the finest
-		for (i = num_levels - 2; i > current_level-1; i--)
-		{
-			// Project up and relax
-			Project(  P_rows[i], u[i], u[i+1], num_nodes[i] );
-			Relax( A_rows[i], u[i], f[i], num_real_nodes[i] );
-		}
-
-		// See if coarse grid correction blew up the solution
-		norm_u = 0.0;
-		for (j = 0; j < num_nodes[current_level]; j++) norm_u += u[current_level][j]*u[current_level][j];
-		norm_u = sqrt(norm_u);
-		if (norm_u >= prev_norm_u) printf("Rank %d, level %d: coarse grid correction blew up norm u. norm_u/prev_norm_u = %f\n", myid, current_level, norm_u/prev_norm_u);
-
-		#if DEBUG_COMP_GRID
-		for (level = 0; level < num_levels; level++)
-		{
-			hypre_sprintf(filename, "../../../scratch/CompGrids/after_Proc%dLevel%d.txt", myid, level);
-			hypre_ParCompGridDebugPrint( compGrid[level], filename );
-		}
-		#endif
-	}
-
-	// Cleanup memory
-	hypre_TFree(num_nodes);
-	hypre_TFree(num_real_nodes);
-
-	hypre_TFree(u);
-	hypre_TFree(f);
-
-	hypre_TFree(global_indices);
-	hypre_TFree(coarse_global_indices);
-	hypre_TFree(coarse_local_indices ); 
-
-	hypre_TFree(A_rows);
-	hypre_TFree(P_rows);
-
-	return 0;
+   return 0;
 }
 
 HYPRE_Int
-Project( hypre_ParCompMatrixRow **P_rows, HYPRE_Complex *u_f, HYPRE_Complex *u_c, HYPRE_Int num_fine )
+hypre_BoomerAMGDD_FAC_Cycle_timed( void *amg_vdata, HYPRE_Int time_part )
+{
+   HYPRE_Int   myid;
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+
+   hypre_ParAMGData   *amg_data = amg_vdata;
+   HYPRE_Int cycle_type = hypre_ParAMGDataFACCycleType(amg_data);
+
+   if (cycle_type == 1 || cycle_type == 2) FAC_Cycle_timed(amg_vdata, 0, cycle_type, time_part);
+   else if (cycle_type == 3) FAC_FCycle_timed(amg_vdata, time_part);
+   else
+   {
+      if (myid == 0) hypre_printf("Error: unknown cycle type\n");
+   }
+
+   return 0;
+}
+
+HYPRE_Int FAC_Cycle(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type, HYPRE_Int first_iteration)
+{
+   HYPRE_Int   myid;
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+
+   HYPRE_Int i, j; // loop variables
+
+   // Get the AMG structure
+   hypre_ParAMGData   *amg_data = amg_vdata;
+   HYPRE_Int num_levels = hypre_ParAMGDataNumLevels(amg_data);
+   HYPRE_Int transition_level = hypre_ParCompGridCommPkgTransitionLevel(hypre_ParAMGDataCompGridCommPkg(amg_data));
+   if (transition_level < 0) transition_level = num_levels;
+   HYPRE_Int relax_type = hypre_ParAMGDataFACRelaxType(amg_data);
+   HYPRE_Int *numRelax = hypre_ParAMGDataNumGridSweeps(amg_data);
+
+
+   // Get the composite grid
+   hypre_ParCompGrid          **compGrid = hypre_ParAMGDataCompGrid(amg_data);
+
+   // Relax on the real nodes
+   for (i = 0; i < numRelax[1]; i++) FAC_Relax( compGrid[level], relax_type );
+
+   // Restrict the residual at all fine points (real and ghost) and set residual at coarse points not under the fine grid
+   if (level < transition_level) FAC_Restrict( compGrid[level], compGrid[level+1], first_iteration );
+   else FAC_Simple_Restrict( compGrid[level], compGrid[level+1], level );
+
+   if (hypre_ParCompGridS(compGrid[level])) for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++) hypre_ParCompGridS(compGrid[level])[i] = 0.0;
+   if (hypre_ParCompGridT(compGrid[level])) for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++) hypre_ParCompGridT(compGrid[level])[i] = 0.0;
+
+   //  Either solve on the coarse level or recurse
+   if (level+1 == num_levels-1) for (i = 0; i < 20; i++) FAC_Relax( compGrid[num_levels-1], relax_type );
+   else for (i = 0; i < cycle_type; i++)
+   {
+      FAC_Cycle(amg_vdata, level+1, cycle_type, first_iteration);
+      first_iteration = 0;
+   }
+
+   // Project up and relax
+   FAC_Project( compGrid[level], compGrid[level+1] );
+
+   for (i = 0; i < numRelax[2]; i++) FAC_Relax( compGrid[level], relax_type );
+
+   return 0;
+}
+
+HYPRE_Int FAC_FCycle(void *amg_vdata, HYPRE_Int first_iteration)
+{
+   char filename[256];
+   HYPRE_Int   myid, num_procs;
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
+
+   HYPRE_Int level, i, j; // loop variables
+
+   // Get the AMG structure
+   hypre_ParAMGData   *amg_data = amg_vdata;
+   HYPRE_Int num_levels = hypre_ParAMGDataNumLevels(amg_data);
+   HYPRE_Int transition_level = hypre_ParCompGridCommPkgTransitionLevel(hypre_ParAMGDataCompGridCommPkg(amg_data));
+   if (transition_level < 0) transition_level = num_levels;
+   HYPRE_Int relax_type = hypre_ParAMGDataFACRelaxType(amg_data);
+   HYPRE_Int *numRelax = hypre_ParAMGDataNumGridSweeps(amg_data);
+
+   // Get the composite grid
+   hypre_ParCompGrid          **compGrid = hypre_ParAMGDataCompGrid(amg_data);
+
+   // ... work down to coarsest ... Note: proper restricted values already stored on and above transition level
+   if (!first_iteration)
+   {
+      for (level = 0; level < num_levels - 1; level++)
+      {
+         // Restrict down from the transition level
+         if (level < transition_level) FAC_Restrict( compGrid[level], compGrid[level+1], 0 );
+         else FAC_Simple_Restrict( compGrid[level], compGrid[level+1], level );
+
+         if (hypre_ParCompGridS(compGrid[level])) for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++) hypre_ParCompGridS(compGrid[level])[i] = 0.0;
+         if (hypre_ParCompGridT(compGrid[level])) for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++) hypre_ParCompGridT(compGrid[level])[i] = 0.0;
+
+      }
+   }
+
+   //  ... solve on coarsest level ...
+   for (i = 0; i < 20; i++) FAC_Relax( compGrid[num_levels-1], relax_type );
+
+   // ... and work back up to the finest
+   for (level = num_levels - 2; level > -1; level--)
+   {
+      // Project up and relax
+      FAC_Project( compGrid[level], compGrid[level+1] );
+
+      // V-cycle
+      FAC_Cycle( amg_vdata, level, 1, 0 );
+   }
+
+   return 0;
+}
+
+HYPRE_Int FAC_Cycle_timed(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type, HYPRE_Int time_part)
+{
+   HYPRE_Int   myid;
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+
+   HYPRE_Int i, j; // loop variables
+
+   // Get the AMG structure
+   hypre_ParAMGData   *amg_data = amg_vdata;
+   HYPRE_Int num_levels = hypre_ParAMGDataNumLevels(amg_data);
+   HYPRE_Int transition_level = hypre_ParCompGridCommPkgTransitionLevel(hypre_ParAMGDataCompGridCommPkg(amg_data));
+   if (transition_level < 0) transition_level = num_levels;
+   HYPRE_Int relax_type = hypre_ParAMGDataFACRelaxType(amg_data);
+   HYPRE_Int *numRelax = hypre_ParAMGDataNumGridSweeps(amg_data);
+
+   // Get the composite grid
+   hypre_ParCompGrid          **compGrid = hypre_ParAMGDataCompGrid(amg_data);
+
+   // Relax on the real nodes
+   if (time_part == 1) for (i = 0; i < numRelax[1]; i++) FAC_Relax( compGrid[level], relax_type );
+
+   // Restrict the residual at all fine points (real and ghost) and set residual at coarse points not under the fine grid
+   if (time_part == 2)
+   { 
+      if (level < transition_level) FAC_Restrict( compGrid[level], compGrid[level+1], 1 );
+      else FAC_Simple_Restrict( compGrid[level], compGrid[level+1], level );
+   }
+
+   if (hypre_ParCompGridS(compGrid[level])) for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++) hypre_ParCompGridS(compGrid[level])[i] = 0.0;
+   if (hypre_ParCompGridT(compGrid[level])) for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++) hypre_ParCompGridT(compGrid[level])[i] = 0.0;
+
+   //  Either solve on the coarse level or recurse
+   if (level+1 == num_levels-1) for (i = 0; i < 20; i++) FAC_Relax( compGrid[num_levels-1], relax_type );
+   else for (i = 0; i < cycle_type; i++) FAC_Cycle_timed(amg_vdata, level+1, cycle_type, time_part);
+
+   // Project up and relax
+   if (time_part == 3) FAC_Project( compGrid[level], compGrid[level+1] );
+
+   if (time_part == 1) for (i = 0; i < numRelax[2]; i++) FAC_Relax( compGrid[level], relax_type );
+
+   return 0;
+}
+
+HYPRE_Int FAC_FCycle_timed(void *amg_vdata, HYPRE_Int time_part)
+{
+   char filename[256];
+   HYPRE_Int   myid, num_procs;
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
+
+   HYPRE_Int level, i, j; // loop variables
+
+   // Get the AMG structure
+   hypre_ParAMGData   *amg_data = amg_vdata;
+   HYPRE_Int num_levels = hypre_ParAMGDataNumLevels(amg_data);
+   HYPRE_Int transition_level = hypre_ParCompGridCommPkgTransitionLevel(hypre_ParAMGDataCompGridCommPkg(amg_data));
+   if (transition_level < 0) transition_level = num_levels;
+   HYPRE_Int relax_type = hypre_ParAMGDataFACRelaxType(amg_data);
+   HYPRE_Int *numRelax = hypre_ParAMGDataNumGridSweeps(amg_data);
+
+   // Get the composite grid
+   hypre_ParCompGrid          **compGrid = hypre_ParAMGDataCompGrid(amg_data);
+
+   // ... work down to coarsest ... Note: proper restricted values already stored on and above transition level
+   for (level = 0; level < num_levels - 1; level++)
+   {
+      // Restrict down from the transition level
+      if (time_part == 2)
+      {
+         if (level < transition_level) FAC_Restrict( compGrid[level], compGrid[level+1], 0 );
+         else FAC_Simple_Restrict( compGrid[level], compGrid[level+1], level );
+      }
+
+      if (hypre_ParCompGridS(compGrid[level])) for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++) hypre_ParCompGridS(compGrid[level])[i] = 0.0;
+      if (hypre_ParCompGridT(compGrid[level])) for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++) hypre_ParCompGridT(compGrid[level])[i] = 0.0;
+
+   }
+
+   //  ... solve on coarsest level ...
+   if (time_part == 1) for (i = 0; i < 20; i++) FAC_Relax( compGrid[num_levels-1], relax_type );
+
+   // ... and work back up to the finest
+   for (level = num_levels - 2; level > -1; level--)
+   {
+      // Project up and relax
+      if (time_part == 3) FAC_Project( compGrid[level], compGrid[level+1] );
+
+      // V-cycle
+      FAC_Cycle_timed( amg_vdata, level, 1, time_part );
+   }
+
+   return 0;
+}
+
+HYPRE_Int
+FAC_Project( hypre_ParCompGrid *compGrid_f, hypre_ParCompGrid *compGrid_c )
 {
 	HYPRE_Int 					i, j; // loop variables
-	hypre_ParCompMatrixRow 		*row; // row of matrix P
 
 	// Loop over nodes on the fine grid
-	for (i = 0; i < num_fine; i++)
+	for (i = 0; i < hypre_ParCompGridNumNodes(compGrid_f); i++)
 	{
-		// Get row of P associated with node i
-		row = P_rows[i];
-
 		// Loop over entries in row of P
-		for (j = 0; j < hypre_ParCompMatrixRowSize(row); j++)
+		for (j = hypre_ParCompGridPRowPtr(compGrid_f)[i]; j < hypre_ParCompGridPRowPtr(compGrid_f)[i+1]; j++)
 		{
-			// Debugging: make sure everyone has full interpolation stencil
-			if (hypre_ParCompMatrixRowLocalIndices(row)[j] < 0) printf("A point doesn't have its full interpolation stencil! P row %d, entry %d is < 0\n",i,j);
-			// Update fine grid solution with coarse projection
-			u_f[i] += hypre_ParCompMatrixRowData(row)[j] * u_c[ hypre_ParCompMatrixRowLocalIndices(row)[j] ];
-		}
+         // Update fine grid solution with coarse FAC_projection
+			if (hypre_ParCompGridPColInd(compGrid_f)[j] >= 0)
+         {
+            hypre_ParCompGridU(compGrid_f)[i] += hypre_ParCompGridPData(compGrid_f)[j] * hypre_ParCompGridU(compGrid_c)[ hypre_ParCompGridPColInd(compGrid_f)[j] ];
+         }
+      }
 	}
 	return 0;
 }
 
 HYPRE_Int
-Restrict( hypre_ParCompMatrixRow **A_rows_f, hypre_ParCompMatrixRow **A_rows_c, hypre_ParCompMatrixRow **P_rows, HYPRE_Complex *u_f, HYPRE_Complex *u_c, HYPRE_Complex *f_f, 
-			HYPRE_Complex *f_c, HYPRE_Int num_nodes_f, HYPRE_Int num_real_nodes_f, HYPRE_Int num_nodes_c, HYPRE_Int num_owned_nodes_c )
+FAC_Restrict( hypre_ParCompGrid *compGrid_f, hypre_ParCompGrid *compGrid_c, HYPRE_Int first_iteration )
 {
-	HYPRE_Int 					i, j; // loop variables
-	hypre_ParCompMatrixRow 		*row; // variable to store required matrix rows
-	HYPRE_Complex 				*res, *restrict_res;
-	HYPRE_Int 					*restrict_marker; // markers to denote which C-points are restricted to from the fine grid
+   char filename[256];
+   HYPRE_Int   myid;
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
-	// Allocate space for the calculated residual, temporary restricted residual, and the restriction marker
-	res = hypre_CTAlloc(HYPRE_Complex, num_nodes_f);
-	restrict_res = hypre_CTAlloc(HYPRE_Complex, num_nodes_c);
-	restrict_marker = hypre_CTAlloc(HYPRE_Int, num_nodes_c);
+   HYPRE_Int               i, j, k; // loop variables
 
+   // Recalculate residual on coarse grid
+   if (!first_iteration)
+   {
+      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid_c); i++)
+      {
+         for (j = hypre_ParCompGridARowPtr(compGrid_c)[i]; j < hypre_ParCompGridARowPtr(compGrid_c)[i+1]; j++)
+         {
+            if (hypre_ParCompGridAColInd(compGrid_c)[j] >= 0) 
+            {
+               hypre_ParCompGridF(compGrid_c)[i] -= hypre_ParCompGridAData(compGrid_c)[j] * hypre_ParCompGridU(compGrid_c)[ hypre_ParCompGridAColInd(compGrid_c)[j] ];   
+            }
+         }
+      }
+   }
 
-	// Calculate fine grid residuals and restrict
-	int no_residual_counter = 0;
-	for (i = 0; i < num_nodes_f; i++)
-	{
-		// Get row of A
-		row = A_rows_f[i];
+   // Get update: s_l <- A_lt_l + s_l (NOTE: I'm assuming here that A is symmetric and computing s_l <- A_l^Tt_l + s_l)
+   for (i = 0; i < hypre_ParCompGridNumNodes(compGrid_f); i++)
+   {
+      for (j = hypre_ParCompGridARowPtr(compGrid_f)[i]; j < hypre_ParCompGridARowPtr(compGrid_f)[i+1]; j++)
+      {
+         hypre_ParCompGridS(compGrid_f)[ hypre_ParCompGridAColInd(compGrid_f)[j] ] += hypre_ParCompGridAData(compGrid_f)[j] * hypre_ParCompGridT(compGrid_f)[i];
+      }
+   }
 
-		// Initialize res to RHS
-		res[i] = f_f[i];
+   // If we need to preserve the updates on the next level
+   if (hypre_ParCompGridS(compGrid_c)) 
+   {
+      // Zero out coarse grid update: s_{l+1} <- 0
+      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid_c); i++) hypre_ParCompGridS(compGrid_c)[i] = 0.0;
 
-		// Loop over entries in A
-		for (j = 0; j < hypre_ParCompMatrixRowSize(row); j++)
-		{
-			// If -1 index encountered, disregard skip this computation (don't need a residual here)
-			if ( hypre_ParCompMatrixRowLocalIndices(row)[j] == -1 )
-			{
-				no_residual_counter++;
-				break;
-			}
-			// Otherwise just subtract off A_ij * u_j
-			else res[i] -= hypre_ParCompMatrixRowData(row)[j] * u_f[ hypre_ParCompMatrixRowLocalIndices(row)[j] ];
-		}
-	}
-	if (no_residual_counter > (0.5)*(num_nodes_f - num_real_nodes_f)) hypre_printf("Num nodes where no residual calculated / num ghost nodes = %f\n", ((float) no_residual_counter) / ((float) num_nodes_f - num_real_nodes_f));
+      // Restrict update: s_{l+1} <- P_l^Ts_l
+      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid_f); i++)
+      {
+         for (j = hypre_ParCompGridPRowPtr(compGrid_f)[i]; j < hypre_ParCompGridPRowPtr(compGrid_f)[i+1]; j++)
+         {
+            if (hypre_ParCompGridPColInd(compGrid_f)[j] >= 0)
+            {
+               hypre_ParCompGridS(compGrid_c)[ hypre_ParCompGridPColInd(compGrid_f)[j] ] += hypre_ParCompGridPData(compGrid_f)[j] * hypre_ParCompGridS(compGrid_f)[i];
+            }
+         }
+      }
 
-	// Restrict from real nodes
-	for (i = 0; i < num_real_nodes_f; i++)
-	{
-		// Get row of P associated with node i
-		row = P_rows[i];
+      // Subtract restricted update from recalculated residual: f_{l+1} <- f_{l+1} - s_{l+1}
+      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid_c); i++)
+      {
+         hypre_ParCompGridF(compGrid_c)[i] -= hypre_ParCompGridS(compGrid_c)[i];
+      }
+   }
+   else
+   {
+      // Restrict and subtract update from recalculated residual: f_{l+1} <- f_{l+1} - P_l^Ts_l
+      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid_f); i++)
+      {
+         for (j = hypre_ParCompGridPRowPtr(compGrid_f)[i]; j < hypre_ParCompGridPRowPtr(compGrid_f)[i+1]; j++)
+         {
+            if (hypre_ParCompGridPColInd(compGrid_f)[j] >= 0)
+            {
+               hypre_ParCompGridF(compGrid_c)[ hypre_ParCompGridPColInd(compGrid_f)[j] ] -= hypre_ParCompGridPData(compGrid_f)[j] * hypre_ParCompGridS(compGrid_f)[i];
+            }
+         }
+      }
+   }
 
-		// Loop over entries in P
-		for (j = 0; j < hypre_ParCompMatrixRowSize(row); j++)
-		{
-			// Add contribution to restricted residual and mark this as a node that should be restricted to from ghost nodes
-			restrict_res[ hypre_ParCompMatrixRowLocalIndices(row)[j] ] += hypre_ParCompMatrixRowData(row)[j] * res[i];
-			restrict_marker[ hypre_ParCompMatrixRowLocalIndices(row)[j] ] = 1;
-			// Debugging: make sure local indices in P are appropriate (i.e. they point to something on this procs coarse grid and aren't -1)
-			if ( (hypre_ParCompMatrixRowLocalIndices(row)[j] > num_nodes_c - 1) || (hypre_ParCompMatrixRowLocalIndices(row)[j] < 0) ) printf("Real rows of P: local index = %d, i = %d, j = %d, num_nodes = %d\n", hypre_ParCompMatrixRowLocalIndices(row)[j], i, j, num_nodes_c);
-		}
-	}
+   // Zero out initial guess on coarse grid
+   for (i = 0; i < hypre_ParCompGridNumNodes(compGrid_c); i++) hypre_ParCompGridU(compGrid_c)[i] = 0.0;
 
-	// Restrict from ghost nodes where needed
-	for (i = num_real_nodes_f; i < num_nodes_f; i++)
-	{
-		// Get row of P associated with node i
-		row = P_rows[i];
+   return 0;
+}
 
-		// Loop over entries in P
-		for (j = 0; j < hypre_ParCompMatrixRowSize(row); j++)
-		{
-			// If the coarse point was restricted to from a real node, add contribution to restricted residual
-			if (restrict_marker[ hypre_ParCompMatrixRowLocalIndices(row)[j] ] == 1) restrict_res[ hypre_ParCompMatrixRowLocalIndices(row)[j] ] += hypre_ParCompMatrixRowData(row)[j] * res[i];
-			if ( (hypre_ParCompMatrixRowLocalIndices(row)[j] > num_nodes_c - 1) || (hypre_ParCompMatrixRowLocalIndices(row)[j] < 0) ) printf("Ghost rows of P: local index = %d, i = %d, j = %d, num_nodes = %d\n", hypre_ParCompMatrixRowLocalIndices(row)[j], i, j, num_nodes_c);
-		}
-	}
+HYPRE_Int
+FAC_Simple_Restrict( hypre_ParCompGrid *compGrid_f, hypre_ParCompGrid *compGrid_c, HYPRE_Int level )
+{
+   char filename[256];
+   HYPRE_Int   myid;
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
-	// Set residual on coarse grid where there was no restriction from fine grid
-	int restriction_counter = 0;
-	for (i = 0; i < num_nodes_c; i++)
-	{
-		if (!restrict_marker[i])
-		{
-			restrict_res[i] = f_c[i];
-			// Loop over row of coarse grid operator 
-			row = A_rows_c[i];
-			for (j = 0; j < hypre_ParCompMatrixRowSize(row); j++)
-			{
-				if ( hypre_ParCompMatrixRowLocalIndices(row)[j] == -1 ) break;
-				else restrict_res[i] -= hypre_ParCompMatrixRowData(row)[j] * u_c[ hypre_ParCompMatrixRowLocalIndices(row)[j] ];
-			}
-		}
-		// Debugging: count up how many coarse grid nodes are restricted to from the fine grid
-		else restriction_counter++;
-	}
+   HYPRE_Int               i, j, k; // loop variables
 
-	// Debugging: compare how many nodes are restricted to vs. num owned nodes
-	if (num_owned_nodes_c > restriction_counter) printf("Num owned nodes = %d, num nodes restricted to = %d\n", num_owned_nodes_c, restriction_counter );
+   // Zero out coarse grid right hand side where we will FAC_restrict from fine grid
+   for (i = 0; i < hypre_ParCompGridNumNodes(compGrid_c); i++) hypre_ParCompGridF(compGrid_c)[i] = 0.0;
 
-	// Now restrict_res should hold all appropriate restricted residaul values, so copy into f_c
-	for (i = 0; i < num_nodes_c; i++) f_c[i] = restrict_res[i];
+   // Calculate fine grid residuals and restrict
+   for (i = 0; i < hypre_ParCompGridNumNodes(compGrid_f); i++)
+   {
+      // Initialize res to RHS
+      HYPRE_Complex res = hypre_ParCompGridF(compGrid_f)[i];
 
-	// Zero out initial guess on coarse grid
-	for (i = 0; i < num_nodes_c; i++) u_c[i] = 0;
+      // Loop over entries in A
+      for (j = hypre_ParCompGridARowPtr(compGrid_f)[i]; j < hypre_ParCompGridARowPtr(compGrid_f)[i+1]; j++)
+         res -= hypre_ParCompGridAData(compGrid_f)[j] * hypre_ParCompGridU(compGrid_f)[ hypre_ParCompGridAColInd(compGrid_f)[j] ];
 
-	// Cleanup memory
-	hypre_TFree(res);
-	hypre_TFree(restrict_res);
-	hypre_TFree(restrict_marker);
+      for (j = hypre_ParCompGridPRowPtr(compGrid_f)[i]; j < hypre_ParCompGridPRowPtr(compGrid_f)[i+1]; j++)
+      {
+         #if DEBUG_FAC
+         if (hypre_ParCompGridPColInd(compGrid_f)[j] < 0) printf("Rank %d, P has -1 col index when simple restricting\n", myid);
+         else if (hypre_ParCompGridPColInd(compGrid_f)[j] >= hypre_ParCompGridNumNodes(compGrid_c)) printf("Rank %d, P col index out of bounds when simple restricting\n", myid);
+         #endif
+         hypre_ParCompGridF(compGrid_c)[ hypre_ParCompGridPColInd(compGrid_f)[j] ] += res*hypre_ParCompGridPData(compGrid_f)[j];
+      }
+   }
+   
+   // Zero out initial guess on coarse grid
+   for (i = 0; i < hypre_ParCompGridNumNodes(compGrid_c); i++) hypre_ParCompGridU(compGrid_c)[i] = 0.0;
 
+   return 0;
+}
+
+HYPRE_Int
+FAC_Relax( hypre_ParCompGrid *compGrid, HYPRE_Int type )
+{
+   if (type == 0) FAC_Jacobi(compGrid);
+   else if (type == 1) FAC_GaussSeidel(compGrid);
 	return 0;
 }
 
 HYPRE_Int
-Relax( hypre_ParCompMatrixRow **A_rows, HYPRE_Complex *u, HYPRE_Complex *f, HYPRE_Int num_real_nodes )
+FAC_Jacobi( hypre_ParCompGrid *compGrid )
 {
-	HYPRE_Int 					i, j; // loop variables
-	hypre_ParCompMatrixRow 		*row; // variable to store required matrix rows
-	HYPRE_Complex 				diag; // placeholder for the diagonal of A
+   HYPRE_Int               i, j; // loop variables
+   HYPRE_Int               is_real;
+   HYPRE_Complex           diag; // placeholder for the diagonal of A
+   HYPRE_Complex           u_before;
 
 
-	// Do Gauss-Seidel relaxation on the real nodes
-	for (i = 0; i < num_real_nodes; i++)
-	{
-		// Get row of A
-		row = A_rows[i];
+   // Temporary vector to calculate Jacobi sweep
+   if (!hypre_ParCompGridTemp(compGrid)) hypre_ParCompGridTemp(compGrid) = hypre_CTAlloc(HYPRE_Complex, hypre_ParCompGridNumNodes(compGrid), HYPRE_MEMORY_HOST);
 
-		// Initialize u as RHS
-		u[i] = f[i];
+   // Do Jacobi relaxation on the real nodes
+   for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
+   {
+      if (hypre_ParCompGridARowPtr(compGrid)[i+1] - hypre_ParCompGridARowPtr(compGrid)[i] > 0)
+      {
+         // Initialize u as RHS
+         hypre_ParCompGridTemp(compGrid)[i] = hypre_ParCompGridF(compGrid)[i];
+         diag = 0.0;
 
-		// Loop over entries in A
-		for (j = 0; j < hypre_ParCompMatrixRowSize(row); j++)
-		{
-			// Debugging: make sure we have the full neighborhood for all real nodes
-			if (hypre_ParCompMatrixRowLocalIndices(row)[j] < 0) printf("Real node doesn't have its full stencil in A! row %d, entry %d\n",i,j);
-			// If this is the diagonal, store for later division
-			if (hypre_ParCompMatrixRowLocalIndices(row)[j] == i) diag = hypre_ParCompMatrixRowData(row)[j];
-			// Else, subtract off A_ij*u_j
-			else
-			{
-				u[i] -= hypre_ParCompMatrixRowData(row)[j] * u[ hypre_ParCompMatrixRowLocalIndices(row)[j] ];
-			}
-		}
+         // Loop over entries in A
+         for (j = hypre_ParCompGridARowPtr(compGrid)[i]; j < hypre_ParCompGridARowPtr(compGrid)[i+1]; j++)
+         {
+            #if DEBUG_FAC
+            if (hypre_ParCompGridAColInd(compGrid)[j] < 0) printf("Real node doesn't have its full stencil in A! row %d, entry %d\n",i,j);
+            #endif
+            // If this is the diagonal, store for later division
+            if (hypre_ParCompGridAColInd(compGrid)[j] == i) diag = hypre_ParCompGridAData(compGrid)[j];
+            // Else, subtract off A_ij*u_j
+            else
+            {
+               hypre_ParCompGridTemp(compGrid)[i] -= hypre_ParCompGridAData(compGrid)[j] * hypre_ParCompGridU(compGrid)[ hypre_ParCompGridAColInd(compGrid)[j] ];
+            }
+         }
 
-		// Divide by diagonal
-		u[i] /= diag;
-	}
-	return 0;
+         // Divide by diagonal
+         if (diag == 0.0) printf("Tried to divide by zero diagonal!\n");
+         hypre_ParCompGridTemp(compGrid)[i] /= diag;
+      }
+   }
+
+   // Copy over relaxed vector
+   for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
+   {
+      if (hypre_ParCompGridARowPtr(compGrid)[i+1] - hypre_ParCompGridARowPtr(compGrid)[i] > 0)
+      {
+         u_before = hypre_ParCompGridU(compGrid)[i];
+
+         hypre_ParCompGridU(compGrid)[i] = hypre_ParCompGridTemp(compGrid)[i];
+
+         // if (hypre_ParCompGridT(compGrid)) hypre_ParCompGridT(compGrid)[i] = hypre_ParCompGridT(compGrid)[i] - u_before;
+         if (hypre_ParCompGridT(compGrid)) hypre_ParCompGridT(compGrid)[i] += hypre_ParCompGridTemp(compGrid)[i] - u_before;
+      }
+   }
+
+   return 0;
+}
+
+HYPRE_Int
+FAC_GaussSeidel( hypre_ParCompGrid *compGrid )
+{
+   HYPRE_Int               i, j; // loop variables
+   HYPRE_Int               is_real;
+   HYPRE_Complex           diag; // placeholder for the diagonal of A
+   HYPRE_Complex           u_before;
+
+   // Do Gauss-Seidel relaxation on the real nodes
+   for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
+   {
+      if (hypre_ParCompGridARowPtr(compGrid)[i+1] - hypre_ParCompGridARowPtr(compGrid)[i] > 0)
+      {
+         u_before = hypre_ParCompGridU(compGrid)[i];
+
+         // Initialize u as RHS
+         hypre_ParCompGridU(compGrid)[i] = hypre_ParCompGridF(compGrid)[i];
+         diag = 0.0;
+
+         // Loop over entries in A
+         for (j = hypre_ParCompGridARowPtr(compGrid)[i]; j < hypre_ParCompGridARowPtr(compGrid)[i+1]; j++)
+         {
+            #if DEBUG_FAC
+            if (hypre_ParCompGridAColInd(compGrid)[j] < 0) printf("Real node doesn't have its full stencil in A! row %d, entry %d\n",i,j);
+            #endif
+            // If this is the diagonal, store for later division
+            if (hypre_ParCompGridAColInd(compGrid)[j] == i) diag = hypre_ParCompGridAData(compGrid)[j];
+            // Else, subtract off A_ij*u_j
+            else
+            {
+               hypre_ParCompGridU(compGrid)[i] -= hypre_ParCompGridAData(compGrid)[j] * hypre_ParCompGridU(compGrid)[ hypre_ParCompGridAColInd(compGrid)[j] ];
+            }
+         }
+
+         // Divide by diagonal
+         if (diag == 0.0) printf("Tried to divide by zero diagonal!\n");
+         hypre_ParCompGridU(compGrid)[i] /= diag;
+
+         if (hypre_ParCompGridT(compGrid)) hypre_ParCompGridT(compGrid)[i] += hypre_ParCompGridU(compGrid)[i] - u_before;
+      }
+   }
+
+   return 0;
 }

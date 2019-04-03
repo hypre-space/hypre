@@ -1,4 +1,3 @@
-
 /*BHEADER**********************************************************************
  * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
@@ -197,9 +196,15 @@ hypre_BoomerAMGCreate()
    /* solve params */
    min_iter  = 0;
    max_iter  = 20;
+   min_fac_iter = 0;
+   max_fac_iter = 20;
+   fac_cycle_type = 0;
+   fac_relax_type = 1;
+   fac_num_relax = 1;
    cycle_type = 1;
    converge_type = 0;
    tol = 1.0e-7;
+   fac_tol = 1.0e-7;
 
    num_sweeps = 1;
    relax_down = 13;
@@ -303,6 +308,10 @@ hypre_BoomerAMGCreate()
 
    hypre_BoomerAMGSetMinIter(amg_data, min_iter);
    hypre_BoomerAMGSetMaxIter(amg_data, max_iter);
+   hypre_BoomerAMGSetMinFACIter(amg_data, min_fac_iter);
+   hypre_BoomerAMGSetMaxFACIter(amg_data, max_fac_iter);
+   hypre_BoomerAMGSetFACRelaxType(amg_data, fac_relax_type);
+   hypre_BoomerAMGSetFACTol(amg_data, fac_tol);
    hypre_BoomerAMGSetCycleType(amg_data, cycle_type);
    hypre_BoomerAMGSetConvergeType(amg_data, converge_type);
    hypre_BoomerAMGSetTol(amg_data, tol);
@@ -337,6 +346,14 @@ hypre_BoomerAMGCreate()
    hypre_ParAMGDataXtilde(amg_data) = NULL;
    hypre_ParAMGDataRtilde(amg_data) = NULL;
    hypre_ParAMGDataDinv(amg_data) = NULL;
+
+   hypre_ParAMGDataAMGDDPadding(amg_data) = 1;
+   hypre_ParAMGDataAMGDDVariablePadding(amg_data) = 0;
+   hypre_ParAMGDataAMGDDNumGhostLayers(amg_data) = 6;
+   hypre_ParAMGDataAMGDDUseTransitionLevel(amg_data) = 0;
+   hypre_ParAMGDataAMGDDAgglomerationMaxNumLevels(amg_data) = 100;
+   hypre_ParAMGDataAMGDDAgglomerationThreshold(amg_data) = 4;
+   hypre_ParAMGDataAMGDDAgglomerationPartitionSize(amg_data) = 2;
    hypre_ParAMGDataCompGrid(amg_data) = NULL;
    hypre_ParAMGDataCompGridCommPkg(amg_data) = NULL;
 
@@ -754,6 +771,18 @@ hypre_BoomerAMGDestroy( void *data )
    {
        hypre_MPI_Comm_free (&new_comm);
    }
+
+   // get rid of comp grids
+   if (hypre_ParAMGDataCompGrid(amg_data))
+   {
+      for (i = 0; i < num_levels; i++)
+      {
+         hypre_ParCompGridDestroy(hypre_ParAMGDataCompGrid(amg_data)[i]);
+      }
+      hypre_TFree(hypre_ParAMGDataCompGrid(amg_data), HYPRE_MEMORY_HOST);
+      hypre_ParCompGridCommPkgDestroy(hypre_ParAMGDataCompGridCommPkg(amg_data));
+   }
+
    hypre_TFree(amg_data, HYPRE_MEMORY_HOST);
 
    HYPRE_ANNOTATION_END("BoomerAMG.destroy");
@@ -1432,6 +1461,312 @@ hypre_BoomerAMGGetMaxIter( void     *data,
 
    return hypre_error_flag;
 }
+
+HYPRE_Int
+hypre_BoomerAMGSetMinFACIter( void     *data,
+                        HYPRE_Int       min_fac_iter )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+ 
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+
+   hypre_ParAMGDataMinFACIter(amg_data) = min_fac_iter;
+
+   return hypre_error_flag;
+} 
+
+HYPRE_Int
+hypre_BoomerAMGGetMinFACIter( void     *data,
+                        HYPRE_Int *     min_fac_iter )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+ 
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+
+   *min_fac_iter = hypre_ParAMGDataMinFACIter(amg_data);
+
+   return hypre_error_flag;
+} 
+
+HYPRE_Int
+hypre_BoomerAMGSetMaxFACIter( void     *data,
+                        HYPRE_Int       max_fac_iter )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+ 
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+
+   hypre_ParAMGDataMaxFACIter(amg_data) = max_fac_iter;
+
+   return hypre_error_flag;
+} 
+
+HYPRE_Int
+hypre_BoomerAMGGetMaxFACIter( void     *data,
+                        HYPRE_Int *     max_fac_iter )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+ 
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+
+   *max_fac_iter = hypre_ParAMGDataMaxFACIter(amg_data);
+
+   return hypre_error_flag;
+} 
+
+HYPRE_Int
+hypre_BoomerAMGSetFACTol( void     *data,
+                        HYPRE_Real       fac_tol )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+ 
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+
+   hypre_ParAMGDataFACTol(amg_data) = fac_tol;
+
+   return hypre_error_flag;
+} 
+
+HYPRE_Int
+hypre_BoomerAMGGetFACTol( void     *data,
+                        HYPRE_Real *     fac_tol )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+ 
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+
+   *fac_tol = hypre_ParAMGDataFACTol(amg_data);
+
+   return hypre_error_flag;
+} 
+
+HYPRE_Int
+hypre_BoomerAMGSetFACCycleType( void     *data,
+                        HYPRE_Int       fac_cycle_type )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+ 
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+
+   hypre_ParAMGDataFACCycleType(amg_data) = fac_cycle_type;
+
+   return hypre_error_flag;
+} 
+
+HYPRE_Int
+hypre_BoomerAMGGetFACCycleType( void     *data,
+                        HYPRE_Int *     fac_cycle_type )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+ 
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+
+   *fac_cycle_type = hypre_ParAMGDataFACCycleType(amg_data);
+
+   return hypre_error_flag;
+} 
+
+HYPRE_Int
+hypre_BoomerAMGSetFACRelaxType( void     *data,
+                        HYPRE_Int       fac_relax_type )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+ 
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+
+   hypre_ParAMGDataFACRelaxType(amg_data) = fac_relax_type;
+
+   return hypre_error_flag;
+} 
+
+HYPRE_Int
+hypre_BoomerAMGGetFACRelaxType( void     *data,
+                        HYPRE_Int *     fac_relax_type )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+ 
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+
+   *fac_relax_type = hypre_ParAMGDataFACRelaxType(amg_data);
+
+   return hypre_error_flag;
+} 
+
+HYPRE_Int
+hypre_BoomerAMGSetAMGDDPadding( void     *data,
+                        HYPRE_Int       padding )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+ 
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+
+   hypre_ParAMGDataAMGDDPadding(amg_data) = padding;
+
+   return hypre_error_flag;
+} 
+
+HYPRE_Int
+hypre_BoomerAMGGetAMGDDPadding( void     *data,
+                        HYPRE_Int *     padding )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+ 
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+
+   *padding = hypre_ParAMGDataAMGDDPadding(amg_data);
+
+   return hypre_error_flag;
+} 
+
+HYPRE_Int
+hypre_BoomerAMGSetAMGDDVariablePadding( void     *data,
+                        HYPRE_Int       variable_padding )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+ 
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+
+   hypre_ParAMGDataAMGDDVariablePadding(amg_data) = variable_padding;
+
+   return hypre_error_flag;
+} 
+
+HYPRE_Int
+hypre_BoomerAMGGetAMGDDVariablePadding( void     *data,
+                        HYPRE_Int *     variable_padding )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+ 
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+
+   *variable_padding = hypre_ParAMGDataAMGDDVariablePadding(amg_data);
+
+   return hypre_error_flag;
+} 
+
+HYPRE_Int
+hypre_BoomerAMGSetAMGDDNumGhostLayers( void     *data,
+                        HYPRE_Int       num_ghost_layers )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+ 
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+
+   hypre_ParAMGDataAMGDDNumGhostLayers(amg_data) = num_ghost_layers;
+
+   return hypre_error_flag;
+} 
+
+HYPRE_Int
+hypre_BoomerAMGGetAMGDDNumGhostLayers( void     *data,
+                        HYPRE_Int *     num_ghost_layers )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+ 
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+
+   *num_ghost_layers = hypre_ParAMGDataAMGDDNumGhostLayers(amg_data);
+
+   return hypre_error_flag;
+} 
+
+HYPRE_Int
+hypre_BoomerAMGSetAMGDDUseTransitionLevel( void     *data,
+                        HYPRE_Int       use_transition_level )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+ 
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+
+   hypre_ParAMGDataAMGDDUseTransitionLevel(amg_data) = use_transition_level;
+
+   return hypre_error_flag;
+} 
+
+HYPRE_Int
+hypre_BoomerAMGGetAMGDDUseTransitionLevel( void     *data,
+                        HYPRE_Int *     use_transition_level )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+ 
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+
+   *use_transition_level = hypre_ParAMGDataAMGDDUseTransitionLevel(amg_data);
+
+   return hypre_error_flag;
+} 
 
 HYPRE_Int
 hypre_BoomerAMGSetCoarsenType( void  *data,
@@ -3224,6 +3559,22 @@ hypre_BoomerAMGGetNumIterations( void     *data,
       return hypre_error_flag;
    }
    *num_iterations = hypre_ParAMGDataNumIterations(amg_data);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGGetNumFACIterations( void     *data,
+                              HYPRE_Int      *num_fac_iterations )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+   *num_fac_iterations = hypre_ParAMGDataNumFACIterations(amg_data);
 
    return hypre_error_flag;
 }

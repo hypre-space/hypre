@@ -1,0 +1,474 @@
+<html>
+<head>
+  <title>../ex5f.f</title>
+</head>
+<body bgcolor="#ffffff" text="#000000">
+<a href="../ex5f.f">download the original source code</a>.
+<pre>
+<a name="line1">  1</a> <font color="#444444">c</font>
+<a name="line2">  2</a> <font color="#444444">c   Example 5</font>
+<a name="line3">  3</a> <font color="#444444">c</font>
+<a name="line4">  4</a> <font color="#444444">c   Interface:    Linear-Algebraic (IJ), Fortran (77) version</font>
+<a name="line5">  5</a> <font color="#444444">c</font>
+<a name="line6">  6</a> <font color="#444444">c   Compile with: make ex5f</font>
+<a name="line7">  7</a> <font color="#444444">c</font>
+<a name="line8">  8</a> <font color="#444444">c   Sample run:   mpirun -np 4 ex5f</font>
+<a name="line9">  9</a> <font color="#444444">c</font>
+<a name="line10"> 10</a> <font color="#444444">c   Description:  This example solves the 2-D</font>
+<a name="line11"> 11</a> <font color="#444444">c                 Laplacian problem with zero boundary conditions</font>
+<a name="line12"> 12</a> <font color="#444444">c                 on an nxn grid.  The number of unknowns is N=n^2.</font>
+<a name="line13"> 13</a> <font color="#444444">c                 The standard 5-point stencil is used, and we solve</font>
+<a name="line14"> 14</a> <font color="#444444">c                 for the interior nodes only.</font>
+<a name="line15"> 15</a> <font color="#444444">c</font>
+<a name="line16"> 16</a> <font color="#444444">c                 This example solves the same problem as Example 3.</font>
+<a name="line17"> 17</a> <font color="#444444">c                 Available solvers are AMG, PCG, and PCG with AMG,</font>
+<a name="line18"> 18</a> <font color="#444444">c                 and PCG with ParaSails    </font>
+<a name="line19"> 19</a> <font color="#444444">c</font>
+<a name="line20"> 20</a> <font color="#444444">c</font>
+<a name="line21"> 21</a> <font color="#444444">c                 Notes: for PCG, GMRES and BiCGStab, precond_id means:</font>
+<a name="line22"> 22</a> <font color="#444444">c                        0 - do not set up a preconditioner</font>
+<a name="line23"> 23</a> <font color="#444444">c                        1 - set up a ds preconditioner</font>
+<a name="line24"> 24</a> <font color="#444444">c                        2 - set up an amg preconditioner</font>
+<a name="line25"> 25</a> <font color="#444444">c                        3 - set up a pilut preconditioner</font>
+<a name="line26"> 26</a> <font color="#444444">c                        4 - set up a ParaSails preconditioner</font>
+<a name="line27"> 27</a> <font color="#444444">c</font>
+<a name="line28"> 28</a> 
+<a name="line29"> 29</a>       <strong>program</strong> <font color="#2040a0">ex5f</font>
+<a name="line30"> 30</a> 
+<a name="line31"> 31</a> 
+<a name="line32"> 32</a>       <strong>implicit</strong> <strong>none</strong>
+<a name="line33"> 33</a> 
+<a name="line34"> 34</a>       <strong>include</strong> '<font color="#2040a0">mpif</font>.<font color="#2040a0">h</font>'
+<a name="line35"> 35</a> 
+<a name="line36"> 36</a>       <strong>integer</strong>    <font color="#2040a0">MAX_LOCAL_SIZE</font>
+<a name="line37"> 37</a>       <strong>integer</strong>    <font color="#2040a0">HYPRE_PARCSR</font>
+<a name="line38"> 38</a> 
+<a name="line39"> 39</a>       <strong>parameter</strong>  <font color="4444FF">(</font><font color="#2040a0">MAX_LOCAL_SIZE</font><font color="4444FF">=</font><font color="#FF0000">123000</font><font color="4444FF">)</font>
+<a name="line40"> 40</a> 
+<a name="line41"> 41</a> <font color="#444444">c     the following is from HYPRE.c</font>
+<a name="line42"> 42</a>       <strong>parameter</strong>  <font color="4444FF">(</font><font color="#2040a0">HYPRE_PARCSR</font><font color="4444FF">=</font><font color="#FF0000">5555</font><font color="4444FF">)</font>
+<a name="line43"> 43</a> 
+<a name="line44"> 44</a>       <strong>integer</strong>    <font color="#2040a0">ierr</font>
+<a name="line45"> 45</a>       <strong>integer</strong>    <font color="#2040a0">num_procs</font>, <font color="#2040a0">myid</font>
+<a name="line46"> 46</a>       <strong>integer</strong>    <font color="#2040a0">local_size</font>, <font color="#2040a0">extra</font>
+<a name="line47"> 47</a>       <strong>integer</strong>    <font color="#2040a0">n</font>, <font color="#2040a0">solver_id</font>, <font color="#2040a0">print_solution</font>, <font color="#2040a0">ng</font>
+<a name="line48"> 48</a>       <strong>integer</strong>    <font color="#2040a0">nnz</font>, <font color="#2040a0">ilower</font>, <font color="#2040a0">iupper</font>, <font color="#2040a0">i</font>
+<a name="line49"> 49</a>       <strong>integer</strong>    <font color="#2040a0">precond_id</font><font color="4444FF">;</font>
+<a name="line50"> 50</a>       <strong>double precision</strong> <font color="#2040a0">h</font>, <font color="#2040a0">h2</font>
+<a name="line51"> 51</a>       <strong>double precision</strong> <font color="#2040a0">rhs_values</font><font color="4444FF">(</font><font color="#2040a0">MAX_LOCAL_SIZE</font><font color="4444FF">)</font>
+<a name="line52"> 52</a>       <strong>double precision</strong> <font color="#2040a0">x_values</font><font color="4444FF">(</font><font color="#2040a0">MAX_LOCAL_SIZE</font><font color="4444FF">)</font>
+<a name="line53"> 53</a>       <strong>integer</strong>    <font color="#2040a0">rows</font><font color="4444FF">(</font><font color="#2040a0">MAX_LOCAL_SIZE</font><font color="4444FF">)</font>
+<a name="line54"> 54</a>       <strong>integer</strong>    <font color="#2040a0">cols</font><font color="4444FF">(</font><font color="#FF0000">5</font><font color="4444FF">)</font>
+<a name="line55"> 55</a>       <strong>double precision</strong> <font color="#2040a0">values</font><font color="4444FF">(</font><font color="#FF0000">5</font><font color="4444FF">)</font>
+<a name="line56"> 56</a>       <strong>integer</strong>    <font color="#2040a0">num_iterations</font>
+<a name="line57"> 57</a>       <strong>double precision</strong> <font color="#2040a0">final_res_norm</font>, <font color="#2040a0">tol</font>
+<a name="line58"> 58</a> 
+<a name="line59"> 59</a>       <strong>integer</strong>    <font color="#2040a0">mpi_comm</font>
+<a name="line60"> 60</a> 
+<a name="line61"> 61</a>       <strong>integer*8</strong>  <font color="#2040a0">parcsr_A</font>
+<a name="line62"> 62</a>       <strong>integer*8</strong>  <font color="#2040a0">A</font>
+<a name="line63"> 63</a>       <strong>integer*8</strong>  <font color="#2040a0">b</font>
+<a name="line64"> 64</a>       <strong>integer*8</strong>  <font color="#2040a0">x</font>
+<a name="line65"> 65</a>       <strong>integer*8</strong>  <font color="#2040a0">par_b</font>
+<a name="line66"> 66</a>       <strong>integer*8</strong>  <font color="#2040a0">par_x</font>
+<a name="line67"> 67</a>       <strong>integer*8</strong>  <font color="#2040a0">solver</font>
+<a name="line68"> 68</a>       <strong>integer*8</strong>  <font color="#2040a0">precond</font>
+<a name="line69"> 69</a>  
+<a name="line70"> 70</a> <font color="#444444">c-----------------------------------------------------------------------</font>
+<a name="line71"> 71</a> <font color="#444444">c     Initialize MPI</font>
+<a name="line72"> 72</a> <font color="#444444">c-----------------------------------------------------------------------</font>
+<a name="line73"> 73</a> 
+<a name="line74"> 74</a>       <strong>call</strong> <font color="#2040a0">MPI_INIT</font><font color="4444FF">(</font><font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line75"> 75</a>       <strong>call</strong> <font color="#2040a0">MPI_COMM_RANK</font><font color="4444FF">(</font><font color="#2040a0">MPI_COMM_WORLD</font>, <font color="#2040a0">myid</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line76"> 76</a>       <strong>call</strong> <font color="#2040a0">MPI_COMM_SIZE</font><font color="4444FF">(</font><font color="#2040a0">MPI_COMM_WORLD</font>, <font color="#2040a0">num_procs</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line77"> 77</a>       <font color="#2040a0">mpi_comm</font> <font color="4444FF">=</font> <font color="#2040a0">MPI_COMM_WORLD</font>
+<a name="line78"> 78</a> 
+<a name="line79"> 79</a> <font color="#444444">c   Default problem parameters</font>
+<a name="line80"> 80</a>       <font color="#2040a0">n</font> <font color="4444FF">=</font> <font color="#FF0000">33</font>
+<a name="line81"> 81</a>       <font color="#2040a0">solver_id</font> <font color="4444FF">=</font> <font color="#FF0000">0</font>
+<a name="line82"> 82</a>       <font color="#2040a0">print_solution</font>  <font color="4444FF">=</font> <font color="#FF0000">0</font>
+<a name="line83"> 83</a>       <font color="#2040a0">tol</font> <font color="4444FF">=</font> <font color="#FF0000">1.0d-7</font>
+<a name="line84"> 84</a> 
+<a name="line85"> 85</a> <font color="#444444">c   The input section not implemented yet.</font>
+<a name="line86"> 86</a> 
+<a name="line87"> 87</a> <font color="#444444">c   Preliminaries: want at least one processor per row</font>
+<a name="line88"> 88</a>       <strong>if</strong> <font color="4444FF">(</font> <font color="#2040a0">n</font><font color="4444FF">*</font><font color="#2040a0">n</font> .<font color="#2040a0">lt</font>. <font color="#2040a0">num_procs</font> <font color="4444FF">)</font> <strong>then</strong>
+<a name="line89"> 89</a>          <font color="#2040a0">n</font> <font color="4444FF">=</font> <font color="#2040a0">int</font><font color="4444FF">(</font><font color="#2040a0">sqrt</font><font color="4444FF">(</font><strong>real</strong><font color="4444FF">(</font><font color="#2040a0">num_procs</font><font color="4444FF">)</font><font color="4444FF">)</font><font color="4444FF">)</font> <font color="4444FF">+</font> <font color="#FF0000">1</font>
+<a name="line90"> 90</a>       <strong>endif</strong>
+<a name="line91"> 91</a> <font color="#444444">c     ng = global no. rows, h = mesh size      </font>
+<a name="line92"> 92</a>       <font color="#2040a0">ng</font> <font color="4444FF">=</font> <font color="#2040a0">n</font><font color="4444FF">*</font><font color="#2040a0">n</font>
+<a name="line93"> 93</a>       <font color="#2040a0">h</font> <font color="4444FF">=</font> <font color="#FF0000">1.0d0</font>/<font color="4444FF">(</font><font color="#2040a0">n</font><font color="4444FF">+</font><font color="#FF0000">1</font><font color="4444FF">)</font>
+<a name="line94"> 94</a>       <font color="#2040a0">h2</font> <font color="4444FF">=</font> <font color="#2040a0">h</font><font color="4444FF">*</font><font color="#2040a0">h</font>
+<a name="line95"> 95</a> 
+<a name="line96"> 96</a> <font color="#444444">c     Each processor knows only of its own rows - the range is denoted by ilower</font>
+<a name="line97"> 97</a> <font color="#444444">c     and upper.  Here we partition the rows. We account for the fact that</font>
+<a name="line98"> 98</a> <font color="#444444">c     N may not divide evenly by the number of processors.</font>
+<a name="line99"> 99</a>       <font color="#2040a0">local_size</font> <font color="4444FF">=</font> <font color="#2040a0">ng</font>/<font color="#2040a0">num_procs</font>
+<a name="line100">100</a>       <font color="#2040a0">extra</font> <font color="4444FF">=</font> <font color="#2040a0">ng</font> <font color="4444FF">-</font> <font color="#2040a0">local_size</font><font color="4444FF">*</font><font color="#2040a0">num_procs</font>
+<a name="line101">101</a> 
+<a name="line102">102</a>       <font color="#2040a0">ilower</font> <font color="4444FF">=</font> <font color="#2040a0">local_size</font><font color="4444FF">*</font><font color="#2040a0">myid</font>
+<a name="line103">103</a>       <font color="#2040a0">ilower</font> <font color="4444FF">=</font> <font color="#2040a0">ilower</font> <font color="4444FF">+</font> <font color="#2040a0">min</font><font color="4444FF">(</font><font color="#2040a0">myid</font>, <font color="#2040a0">extra</font><font color="4444FF">)</font>
+<a name="line104">104</a> 
+<a name="line105">105</a>       <font color="#2040a0">iupper</font> <font color="4444FF">=</font> <font color="#2040a0">local_size</font><font color="4444FF">*</font><font color="4444FF">(</font><font color="#2040a0">myid</font><font color="4444FF">+</font><font color="#FF0000">1</font><font color="4444FF">)</font>
+<a name="line106">106</a>       <font color="#2040a0">iupper</font> <font color="4444FF">=</font> <font color="#2040a0">iupper</font> <font color="4444FF">+</font> <font color="#2040a0">min</font><font color="4444FF">(</font><font color="#2040a0">myid</font><font color="4444FF">+</font><font color="#FF0000">1</font>, <font color="#2040a0">extra</font><font color="4444FF">)</font>
+<a name="line107">107</a>       <font color="#2040a0">iupper</font> <font color="4444FF">=</font> <font color="#2040a0">iupper</font> <font color="4444FF">-</font> <font color="#FF0000">1</font>
+<a name="line108">108</a> 
+<a name="line109">109</a> <font color="#444444">c     How many rows do I have?</font>
+<a name="line110">110</a>       <font color="#2040a0">local_size</font> <font color="4444FF">=</font> <font color="#2040a0">iupper</font> <font color="4444FF">-</font> <font color="#2040a0">ilower</font> <font color="4444FF">+</font> <font color="#FF0000">1</font>
+<a name="line111">111</a> 
+<a name="line112">112</a> <font color="#444444">c     Create the matrix.</font>
+<a name="line113">113</a> <font color="#444444">c     Note that this is a square matrix, so we indicate the row partition</font>
+<a name="line114">114</a> <font color="#444444">c     size twice (since number of rows = number of cols)</font>
+<a name="line115">115</a>       <strong>call</strong> <font color="#2040a0">HYPRE_IJMatrixCreate</font><font color="4444FF">(</font><font color="#2040a0">mpi_comm</font>, <font color="#2040a0">ilower</font>,
+<a name="line116">116</a>      <font color="#FF0000">1</font>     <font color="#2040a0">iupper</font>, <font color="#2040a0">ilower</font>, <font color="#2040a0">iupper</font>, <font color="#2040a0">A</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line117">117</a> 
+<a name="line118">118</a> 
+<a name="line119">119</a> <font color="#444444">c     Choose a parallel csr format storage (see the User's Manual)</font>
+<a name="line120">120</a>       <strong>call</strong> <font color="#2040a0">HYPRE_IJMatrixSetObjectType</font><font color="4444FF">(</font><font color="#2040a0">A</font>, <font color="#2040a0">HYPRE_PARCSR</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line121">121</a> 
+<a name="line122">122</a> <font color="#444444">c     Initialize before setting coefficients</font>
+<a name="line123">123</a>       <strong>call</strong> <font color="#2040a0">HYPRE_IJMatrixInitialize</font><font color="4444FF">(</font><font color="#2040a0">A</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line124">124</a> 
+<a name="line125">125</a> 
+<a name="line126">126</a> <font color="#444444">c     Now go through my local rows and set the matrix entries.</font>
+<a name="line127">127</a> <font color="#444444">c     Each row has at most 5 entries. For example, if n=3:</font>
+<a name="line128">128</a> <font color="#444444">c</font>
+<a name="line129">129</a> <font color="#444444">c      A = [M -I 0; -I M -I; 0 -I M]</font>
+<a name="line130">130</a> <font color="#444444">c      M = [4 -1 0; -1 4 -1; 0 -1 4]</font>
+<a name="line131">131</a> <font color="#444444">c</font>
+<a name="line132">132</a> <font color="#444444">c     Note that here we are setting one row at a time, though</font>
+<a name="line133">133</a> <font color="#444444">c     one could set all the rows together (see the User's Manual).</font>
+<a name="line134">134</a> 
+<a name="line135">135</a> 
+<a name="line136">136</a>       <strong>do</strong> <font color="#2040a0">i</font> <font color="4444FF">=</font> <font color="#2040a0">ilower</font>, <font color="#2040a0">iupper</font>
+<a name="line137">137</a>          <font color="#2040a0">nnz</font> <font color="4444FF">=</font> <font color="#FF0000">1</font>
+<a name="line138">138</a>          
+<a name="line139">139</a> 
+<a name="line140">140</a> <font color="#444444">c        The left identity block:position i-n</font>
+<a name="line141">141</a>          <strong>if</strong> <font color="4444FF">(</font> <font color="4444FF">(</font><font color="#2040a0">i</font><font color="4444FF">-</font><font color="#2040a0">n</font><font color="4444FF">)</font> .<font color="#2040a0">ge</font>. <font color="#FF0000">0</font> <font color="4444FF">)</font> <strong>then</strong>
+<a name="line142">142</a> 	    <font color="#2040a0">cols</font><font color="4444FF">(</font><font color="#2040a0">nnz</font><font color="4444FF">)</font> <font color="4444FF">=</font> <font color="#2040a0">i</font><font color="4444FF">-</font><font color="#2040a0">n</font>
+<a name="line143">143</a> 	    <font color="#2040a0">values</font><font color="4444FF">(</font><font color="#2040a0">nnz</font><font color="4444FF">)</font> <font color="4444FF">=</font> <font color="4444FF">-</font><font color="#FF0000">1.0d0</font>
+<a name="line144">144</a> 	    <font color="#2040a0">nnz</font> <font color="4444FF">=</font> <font color="#2040a0">nnz</font> <font color="4444FF">+</font> <font color="#FF0000">1</font>
+<a name="line145">145</a>          <strong>endif</strong>
+<a name="line146">146</a> 
+<a name="line147">147</a> <font color="#444444">c         The left -1: position i-1</font>
+<a name="line148">148</a>          <strong>if</strong> <font color="4444FF">(</font> <font color="#2040a0">mod</font><font color="4444FF">(</font><font color="#2040a0">i</font>,<font color="#2040a0">n</font><font color="4444FF">)</font>.<font color="#2040a0">ne</font><font color="#FF0000">.0</font> <font color="4444FF">)</font> <strong>then</strong>
+<a name="line149">149</a>             <font color="#2040a0">cols</font><font color="4444FF">(</font><font color="#2040a0">nnz</font><font color="4444FF">)</font> <font color="4444FF">=</font> <font color="#2040a0">i</font><font color="4444FF">-</font><font color="#FF0000">1</font>
+<a name="line150">150</a>             <font color="#2040a0">values</font><font color="4444FF">(</font><font color="#2040a0">nnz</font><font color="4444FF">)</font> <font color="4444FF">=</font> <font color="4444FF">-</font><font color="#FF0000">1.0d0</font>
+<a name="line151">151</a>             <font color="#2040a0">nnz</font> <font color="4444FF">=</font> <font color="#2040a0">nnz</font> <font color="4444FF">+</font> <font color="#FF0000">1</font>
+<a name="line152">152</a>          <strong>endif</strong>
+<a name="line153">153</a> 
+<a name="line154">154</a> <font color="#444444">c        Set the diagonal: position i</font>
+<a name="line155">155</a>          <font color="#2040a0">cols</font><font color="4444FF">(</font><font color="#2040a0">nnz</font><font color="4444FF">)</font> <font color="4444FF">=</font> <font color="#2040a0">i</font>
+<a name="line156">156</a>          <font color="#2040a0">values</font><font color="4444FF">(</font><font color="#2040a0">nnz</font><font color="4444FF">)</font> <font color="4444FF">=</font> <font color="#FF0000">4.0d0</font>
+<a name="line157">157</a>          <font color="#2040a0">nnz</font> <font color="4444FF">=</font> <font color="#2040a0">nnz</font> <font color="4444FF">+</font> <font color="#FF0000">1</font>
+<a name="line158">158</a> 
+<a name="line159">159</a> <font color="#444444">c        The right -1: position i+1</font>
+<a name="line160">160</a>          <strong>if</strong> <font color="4444FF">(</font> <font color="#2040a0">mod</font><font color="4444FF">(</font><font color="4444FF">(</font><font color="#2040a0">i</font><font color="4444FF">+</font><font color="#FF0000">1</font><font color="4444FF">)</font>,<font color="#2040a0">n</font><font color="4444FF">)</font> .<font color="#2040a0">ne</font>. <font color="#FF0000">0</font> <font color="4444FF">)</font> <strong>then</strong>
+<a name="line161">161</a>             <font color="#2040a0">cols</font><font color="4444FF">(</font><font color="#2040a0">nnz</font><font color="4444FF">)</font> <font color="4444FF">=</font> <font color="#2040a0">i</font><font color="4444FF">+</font><font color="#FF0000">1</font>
+<a name="line162">162</a>             <font color="#2040a0">values</font><font color="4444FF">(</font><font color="#2040a0">nnz</font><font color="4444FF">)</font> <font color="4444FF">=</font> <font color="4444FF">-</font><font color="#FF0000">1.0d0</font>
+<a name="line163">163</a>             <font color="#2040a0">nnz</font> <font color="4444FF">=</font> <font color="#2040a0">nnz</font> <font color="4444FF">+</font> <font color="#FF0000">1</font>
+<a name="line164">164</a>          <strong>endif</strong>
+<a name="line165">165</a> 
+<a name="line166">166</a> <font color="#444444">c        The right identity block:position i+n</font>
+<a name="line167">167</a>          <strong>if</strong> <font color="4444FF">(</font> <font color="4444FF">(</font><font color="#2040a0">i</font><font color="4444FF">+</font><font color="#2040a0">n</font><font color="4444FF">)</font> .<font color="#2040a0">lt</font>. <font color="#2040a0">ng</font> <font color="4444FF">)</font> <strong>then</strong>
+<a name="line168">168</a>             <font color="#2040a0">cols</font><font color="4444FF">(</font><font color="#2040a0">nnz</font><font color="4444FF">)</font> <font color="4444FF">=</font> <font color="#2040a0">i</font><font color="4444FF">+</font><font color="#2040a0">n</font>
+<a name="line169">169</a>             <font color="#2040a0">values</font><font color="4444FF">(</font><font color="#2040a0">nnz</font><font color="4444FF">)</font> <font color="4444FF">=</font> <font color="4444FF">-</font><font color="#FF0000">1.0d0</font>
+<a name="line170">170</a>             <font color="#2040a0">nnz</font> <font color="4444FF">=</font> <font color="#2040a0">nnz</font> <font color="4444FF">+</font> <font color="#FF0000">1</font>
+<a name="line171">171</a>          <strong>endif</strong>
+<a name="line172">172</a> 
+<a name="line173">173</a> <font color="#444444">c        Set the values for row i</font>
+<a name="line174">174</a>          <strong>call</strong> <font color="#2040a0">HYPRE_IJMatrixSetValues</font><font color="4444FF">(</font>
+<a name="line175">175</a>      <font color="#FF0000">1</font>        <font color="#2040a0">A</font>, <font color="#FF0000">1</font>, <font color="#2040a0">nnz</font><font color="4444FF">-</font><font color="#FF0000">1</font>, <font color="#2040a0">i</font>, <font color="#2040a0">cols</font>, <font color="#2040a0">values</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line176">176</a> 
+<a name="line177">177</a>       <font color="#2040a0">enddo</font>
+<a name="line178">178</a> 
+<a name="line179">179</a> 
+<a name="line180">180</a> <font color="#444444">c     Assemble after setting the coefficients</font>
+<a name="line181">181</a>       <strong>call</strong> <font color="#2040a0">HYPRE_IJMatrixAssemble</font><font color="4444FF">(</font><font color="#2040a0">A</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line182">182</a> 
+<a name="line183">183</a> <font color="#444444">c     Get parcsr matrix object</font>
+<a name="line184">184</a>       <strong>call</strong> <font color="#2040a0">HYPRE_IJMatrixGetObject</font><font color="4444FF">(</font><font color="#2040a0">A</font>, <font color="#2040a0">parcsr_A</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line185">185</a> 
+<a name="line186">186</a> 
+<a name="line187">187</a> <font color="#444444">c     Create the rhs and solution</font>
+<a name="line188">188</a>       <strong>call</strong> <font color="#2040a0">HYPRE_IJVectorCreate</font><font color="4444FF">(</font><font color="#2040a0">mpi_comm</font>,
+<a name="line189">189</a>      <font color="#FF0000">1</font>     <font color="#2040a0">ilower</font>, <font color="#2040a0">iupper</font>, <font color="#2040a0">b</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line190">190</a>       <strong>call</strong> <font color="#2040a0">HYPRE_IJVectorSetObjectType</font><font color="4444FF">(</font><font color="#2040a0">b</font>, <font color="#2040a0">HYPRE_PARCSR</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line191">191</a>       <strong>call</strong> <font color="#2040a0">HYPRE_IJVectorInitialize</font><font color="4444FF">(</font><font color="#2040a0">b</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line192">192</a>   
+<a name="line193">193</a>       <strong>call</strong> <font color="#2040a0">HYPRE_IJVectorCreate</font><font color="4444FF">(</font><font color="#2040a0">mpi_comm</font>,
+<a name="line194">194</a>      <font color="#FF0000">1</font>     <font color="#2040a0">ilower</font>, <font color="#2040a0">iupper</font>, <font color="#2040a0">x</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line195">195</a>       <strong>call</strong> <font color="#2040a0">HYPRE_IJVectorSetObjectType</font><font color="4444FF">(</font><font color="#2040a0">x</font>, <font color="#2040a0">HYPRE_PARCSR</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line196">196</a>       <strong>call</strong> <font color="#2040a0">HYPRE_IJVectorInitialize</font><font color="4444FF">(</font><font color="#2040a0">x</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line197">197</a> 
+<a name="line198">198</a> 
+<a name="line199">199</a> <font color="#444444">c     Set the rhs values to h^2 and the solution to zero</font>
+<a name="line200">200</a>       <strong>do</strong> <font color="#2040a0">i</font> <font color="4444FF">=</font> <font color="#FF0000">1</font>, <font color="#2040a0">local_size</font>
+<a name="line201">201</a>          <font color="#2040a0">rhs_values</font><font color="4444FF">(</font><font color="#2040a0">i</font><font color="4444FF">)</font> <font color="4444FF">=</font> <font color="#2040a0">h2</font>
+<a name="line202">202</a>          <font color="#2040a0">x_values</font><font color="4444FF">(</font><font color="#2040a0">i</font><font color="4444FF">)</font> <font color="4444FF">=</font> <font color="#FF0000">0.0</font>
+<a name="line203">203</a>          <font color="#2040a0">rows</font><font color="4444FF">(</font><font color="#2040a0">i</font><font color="4444FF">)</font> <font color="4444FF">=</font> <font color="#2040a0">ilower</font> <font color="4444FF">+</font> <font color="#2040a0">i</font> <font color="4444FF">-</font><font color="#FF0000">1</font>
+<a name="line204">204</a>       <font color="#2040a0">enddo</font>
+<a name="line205">205</a>       <strong>call</strong> <font color="#2040a0">HYPRE_IJVectorSetValues</font><font color="4444FF">(</font>
+<a name="line206">206</a>      <font color="#FF0000">1</font>     <font color="#2040a0">b</font>, <font color="#2040a0">local_size</font>, <font color="#2040a0">rows</font>, <font color="#2040a0">rhs_values</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line207">207</a>       <strong>call</strong> <font color="#2040a0">HYPRE_IJVectorSetValues</font><font color="4444FF">(</font>
+<a name="line208">208</a>      <font color="#FF0000">1</font>     <font color="#2040a0">x</font>, <font color="#2040a0">local_size</font>, <font color="#2040a0">rows</font>, <font color="#2040a0">x_values</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line209">209</a> 
+<a name="line210">210</a> 
+<a name="line211">211</a>       <strong>call</strong> <font color="#2040a0">HYPRE_IJVectorAssemble</font><font color="4444FF">(</font><font color="#2040a0">b</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line212">212</a>       <strong>call</strong> <font color="#2040a0">HYPRE_IJVectorAssemble</font><font color="4444FF">(</font><font color="#2040a0">x</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line213">213</a> 
+<a name="line214">214</a> <font color="#444444">c get the x and b objects</font>
+<a name="line215">215</a> 
+<a name="line216">216</a>       <strong>call</strong> <font color="#2040a0">HYPRE_IJVectorGetObject</font><font color="4444FF">(</font><font color="#2040a0">b</font>, <font color="#2040a0">par_b</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line217">217</a>       <strong>call</strong> <font color="#2040a0">HYPRE_IJVectorGetObject</font><font color="4444FF">(</font><font color="#2040a0">x</font>, <font color="#2040a0">par_x</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line218">218</a> 
+<a name="line219">219</a> 
+<a name="line220">220</a> <font color="#444444">c     Choose a solver and solve the system</font>
+<a name="line221">221</a> 
+<a name="line222">222</a> <font color="#444444">c     AMG</font>
+<a name="line223">223</a>       <strong>if</strong> <font color="4444FF">(</font> <font color="#2040a0">solver_id</font> .<font color="#2040a0">eq</font>. <font color="#FF0000">0</font> <font color="4444FF">)</font> <strong>then</strong>
+<a name="line224">224</a> 
+<a name="line225">225</a> <font color="#444444">c        Create solver</font>
+<a name="line226">226</a>          <strong>call</strong> <font color="#2040a0">HYPRE_BoomerAMGCreate</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line227">227</a> 
+<a name="line228">228</a> 
+<a name="line229">229</a> <font color="#444444">c        Set some parameters (See Reference Manual for more parameters)</font>
+<a name="line230">230</a> 
+<a name="line231">231</a> <font color="#444444">c        print solve info + parameters </font>
+<a name="line232">232</a>          <strong>call</strong> <font color="#2040a0">HYPRE_BoomerAMGSetPrintLevel</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#FF0000">3</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>  
+<a name="line233">233</a> <font color="#444444">c        old defaults, Falgout coarsening, mod. class. interpolation</font>
+<a name="line234">234</a>          <strong>call</strong> <font color="#2040a0">HYPRE_BoomerAMGSetOldDefault</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font> 
+<a name="line235">235</a> <font color="#444444">c        G-S/Jacobi hybrid relaxation </font>
+<a name="line236">236</a>          <strong>call</strong> <font color="#2040a0">HYPRE_BoomerAMGSetRelaxType</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#FF0000">3</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>     
+<a name="line237">237</a> <font color="#444444">c        C/F relaxation </font>
+<a name="line238">238</a>          <strong>call</strong> <font color="#2040a0">HYPRE_BoomerAMGSetRelaxOrder</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#FF0000">1</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>     
+<a name="line239">239</a> <font color="#444444">c        Sweeeps on each level</font>
+<a name="line240">240</a>          <strong>call</strong> <font color="#2040a0">HYPRE_BoomerAMGSetNumSweeps</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#FF0000">1</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>  
+<a name="line241">241</a> <font color="#444444">c         maximum number of levels </font>
+<a name="line242">242</a>          <strong>call</strong> <font color="#2040a0">HYPRE_BoomerAMGSetMaxLevels</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#FF0000">20</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font> 
+<a name="line243">243</a> <font color="#444444">c        conv. tolerance</font>
+<a name="line244">244</a>          <strong>call</strong> <font color="#2040a0">HYPRE_BoomerAMGSetTol</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#FF0000">1.0d-7</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>    
+<a name="line245">245</a> 
+<a name="line246">246</a> <font color="#444444">c        Now setup and solve!</font>
+<a name="line247">247</a>          <strong>call</strong> <font color="#2040a0">HYPRE_BoomerAMGSetup</font><font color="4444FF">(</font>
+<a name="line248">248</a>      <font color="#FF0000">1</font>        <font color="#2040a0">solver</font>, <font color="#2040a0">parcsr_A</font>, <font color="#2040a0">par_b</font>, <font color="#2040a0">par_x</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line249">249</a>          <strong>call</strong> <font color="#2040a0">HYPRE_BoomerAMGSolve</font><font color="4444FF">(</font>
+<a name="line250">250</a>      <font color="#FF0000">1</font>        <font color="#2040a0">solver</font>, <font color="#2040a0">parcsr_A</font>, <font color="#2040a0">par_b</font>, <font color="#2040a0">par_x</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line251">251</a> 
+<a name="line252">252</a> 
+<a name="line253">253</a> <font color="#444444">c        Run info - needed logging turned on </font>
+<a name="line254">254</a>          <strong>call</strong> <font color="#2040a0">HYPRE_BoomerAMGGetNumIterations</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#2040a0">num_iterations</font>, 
+<a name="line255">255</a>      <font color="#FF0000">1</font>        <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line256">256</a>          <strong>call</strong> <font color="#2040a0">HYPRE_BoomerAMGGetFinalReltvRes</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#2040a0">final_res_norm</font>,
+<a name="line257">257</a>      <font color="#FF0000">1</font>        <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line258">258</a> 
+<a name="line259">259</a> 
+<a name="line260">260</a>          <strong>if</strong> <font color="4444FF">(</font> <font color="#2040a0">myid</font> .<font color="#2040a0">eq</font>. <font color="#FF0000">0</font> <font color="4444FF">)</font> <strong>then</strong>
+<a name="line261">261</a>             <strong>print</strong> <font color="4444FF">*</font>
+<a name="line262">262</a>             <strong>print</strong> '<font color="4444FF">(</font><font color="#2040a0">A</font>,<font color="#2040a0">I2</font><font color="4444FF">)</font>', <font color="#008000">&quot; Iterations = &quot;</font>, <font color="#2040a0">num_iterations</font>
+<a name="line263">263</a>             <strong>print</strong> '<font color="4444FF">(</font><font color="#2040a0">A</font>,<font color="#2040a0">ES16</font><font color="#FF0000">.8</font><font color="4444FF">)</font>',
+<a name="line264">264</a>      <font color="#FF0000">1</font>            <font color="#008000">&quot; Final Relative Residual Norm = &quot;</font>, <font color="#2040a0">final_res_norm</font>
+<a name="line265">265</a>             <strong>print</strong> <font color="4444FF">*</font>
+<a name="line266">266</a>          <strong>endif</strong>
+<a name="line267">267</a>          
+<a name="line268">268</a> <font color="#444444">c        Destroy solver</font>
+<a name="line269">269</a>          <strong>call</strong> <font color="#2040a0">HYPRE_BoomerAMGDestroy</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line270">270</a> 
+<a name="line271">271</a> <font color="#444444">c     PCG (with DS)</font>
+<a name="line272">272</a>       <strong>elseif</strong> <font color="4444FF">(</font> <font color="#2040a0">solver_id</font> .<font color="#2040a0">eq</font>. <font color="#FF0000">50</font> <font color="4444FF">)</font> <strong>then</strong>  
+<a name="line273">273</a>          
+<a name="line274">274</a> 
+<a name="line275">275</a> <font color="#444444">c        Create solver</font>
+<a name="line276">276</a>          <strong>call</strong> <font color="#2040a0">HYPRE_ParCSRPCGCreate</font><font color="4444FF">(</font><font color="#2040a0">MPI_COMM_WORLD</font>, <font color="#2040a0">solver</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line277">277</a> 
+<a name="line278">278</a> <font color="#444444">c        Set some parameters (See Reference Manual for more parameters) </font>
+<a name="line279">279</a>          <strong>call</strong> <font color="#2040a0">HYPRE_ParCSRPCGSetMaxIter</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#FF0000">1000</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line280">280</a>          <strong>call</strong> <font color="#2040a0">HYPRE_ParCSRPCGSetTol</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#FF0000">1.0d-7</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line281">281</a>          <strong>call</strong> <font color="#2040a0">HYPRE_ParCSRPCGSetTwoNorm</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#FF0000">1</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line282">282</a>          <strong>call</strong> <font color="#2040a0">HYPRE_ParCSRPCGSetPrintLevel</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#FF0000">2</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line283">283</a>          <strong>call</strong> <font color="#2040a0">HYPRE_ParCSRPCGSetLogging</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#FF0000">1</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line284">284</a> 
+<a name="line285">285</a> <font color="#444444">c        set ds (diagonal scaling) as the pcg preconditioner </font>
+<a name="line286">286</a>          <font color="#2040a0">precond_id</font> <font color="4444FF">=</font> <font color="#FF0000">1</font>
+<a name="line287">287</a>          <strong>call</strong> <font color="#2040a0">HYPRE_ParCSRPCGSetPrecond</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#2040a0">precond_id</font>,
+<a name="line288">288</a>      <font color="#FF0000">1</font>        <font color="#2040a0">precond</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line289">289</a> 
+<a name="line290">290</a> 
+<a name="line291">291</a> 
+<a name="line292">292</a> <font color="#444444">c        Now setup and solve!</font>
+<a name="line293">293</a>          <strong>call</strong> <font color="#2040a0">HYPRE_ParCSRPCGSetup</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#2040a0">parcsr_A</font>, <font color="#2040a0">par_b</font>,
+<a name="line294">294</a>      <font color="4444FF">&amp;</font>                            <font color="#2040a0">par_x</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line295">295</a>          <strong>call</strong> <font color="#2040a0">HYPRE_ParCSRPCGSolve</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#2040a0">parcsr_A</font>, <font color="#2040a0">par_b</font>,
+<a name="line296">296</a>      <font color="4444FF">&amp;</font>                            <font color="#2040a0">par_x</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line297">297</a> 
+<a name="line298">298</a> 
+<a name="line299">299</a> <font color="#444444">c        Run info - needed logging turned on </font>
+<a name="line300">300</a> 
+<a name="line301">301</a>         <strong>call</strong> <font color="#2040a0">HYPRE_ParCSRPCGGetNumIterations</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#2040a0">num_iterations</font>,
+<a name="line302">302</a>      <font color="4444FF">&amp;</font>                                       <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line303">303</a>         <strong>call</strong> <font color="#2040a0">HYPRE_ParCSRPCGGetFinalRelative</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#2040a0">final_res_norm</font>,
+<a name="line304">304</a>      <font color="4444FF">&amp;</font>                                       <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line305">305</a> 
+<a name="line306">306</a>        <strong>if</strong> <font color="4444FF">(</font> <font color="#2040a0">myid</font> .<font color="#2040a0">eq</font>. <font color="#FF0000">0</font> <font color="4444FF">)</font> <strong>then</strong>
+<a name="line307">307</a>             <strong>print</strong> <font color="4444FF">*</font>
+<a name="line308">308</a>             <strong>print</strong> <font color="4444FF">*</font>, <font color="#008000">&quot;Iterations = &quot;</font>, <font color="#2040a0">num_iterations</font>
+<a name="line309">309</a>             <strong>print</strong> <font color="4444FF">*</font>, <font color="#008000">&quot;Final Relative Residual Norm = &quot;</font>, <font color="#2040a0">final_res_norm</font>
+<a name="line310">310</a>             <strong>print</strong> <font color="4444FF">*</font>
+<a name="line311">311</a>          <strong>endif</strong>
+<a name="line312">312</a> 
+<a name="line313">313</a> <font color="#444444">c       Destroy solver </font>
+<a name="line314">314</a>         <strong>call</strong> <font color="#2040a0">HYPRE_ParCSRPCGDestroy</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line315">315</a> 
+<a name="line316">316</a> 
+<a name="line317">317</a> <font color="#444444">c     PCG with AMG preconditioner</font>
+<a name="line318">318</a>       <strong>elseif</strong> <font color="4444FF">(</font> <font color="#2040a0">solver_id</font> <font color="4444FF">=</font><font color="4444FF">=</font> <font color="#FF0000">1</font> <font color="4444FF">)</font> <strong>then</strong>
+<a name="line319">319</a>      
+<a name="line320">320</a> <font color="#444444">c        Create solver</font>
+<a name="line321">321</a>          <strong>call</strong> <font color="#2040a0">HYPRE_ParCSRPCGCreate</font><font color="4444FF">(</font><font color="#2040a0">MPI_COMM_WORLD</font>, <font color="#2040a0">solver</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line322">322</a> 
+<a name="line323">323</a> <font color="#444444">c        Set some parameters (See Reference Manual for more parameters) </font>
+<a name="line324">324</a>          <strong>call</strong> <font color="#2040a0">HYPRE_ParCSRPCGSetMaxIter</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#FF0000">1000</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line325">325</a>          <strong>call</strong> <font color="#2040a0">HYPRE_ParCSRPCGSetTol</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#FF0000">1.0d-7</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line326">326</a>          <strong>call</strong> <font color="#2040a0">HYPRE_ParCSRPCGSetTwoNorm</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#FF0000">1</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line327">327</a>          <strong>call</strong> <font color="#2040a0">HYPRE_ParCSRPCGSetPrintLevel</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#FF0000">2</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line328">328</a>          <strong>call</strong> <font color="#2040a0">HYPRE_ParCSRPCGSetLogging</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#FF0000">1</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line329">329</a> 
+<a name="line330">330</a> <font color="#444444">c        Now set up the AMG preconditioner and specify any parameters</font>
+<a name="line331">331</a> 
+<a name="line332">332</a>          <strong>call</strong> <font color="#2040a0">HYPRE_BoomerAMGCreate</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line333">333</a> 
+<a name="line334">334</a> 
+<a name="line335">335</a> <font color="#444444">c        Set some parameters (See Reference Manual for more parameters)</font>
+<a name="line336">336</a> 
+<a name="line337">337</a> <font color="#444444">c        print less solver info since a preconditioner</font>
+<a name="line338">338</a>          <strong>call</strong> <font color="#2040a0">HYPRE_BoomerAMGSetPrintLevel</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">1</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font><font color="4444FF">;</font> 
+<a name="line339">339</a> <font color="#444444">c        Falgout coarsening</font>
+<a name="line340">340</a>          <strong>call</strong> <font color="#2040a0">HYPRE_BoomerAMGSetCoarsenType</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">6</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font> 
+<a name="line341">341</a> <font color="#444444">c        old defaults</font>
+<a name="line342">342</a>          <strong>call</strong> <font color="#2040a0">HYPRE_BoomerAMGSetOldDefault</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font> 
+<a name="line343">343</a> <font color="#444444">c        SYMMETRIC G-S/Jacobi hybrid relaxation </font>
+<a name="line344">344</a>          <strong>call</strong> <font color="#2040a0">HYPRE_BoomerAMGSetRelaxType</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">6</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>     
+<a name="line345">345</a> <font color="#444444">c        Sweeeps on each level</font>
+<a name="line346">346</a>          <strong>call</strong> <font color="#2040a0">HYPRE_BoomerAMGSetNumSweeps</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">1</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>  
+<a name="line347">347</a> <font color="#444444">c        conv. tolerance</font>
+<a name="line348">348</a>          <strong>call</strong> <font color="#2040a0">HYPRE_BoomerAMGSetTol</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">0.0d0</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>     
+<a name="line349">349</a> <font color="#444444">c        do only one iteration! </font>
+<a name="line350">350</a>          <strong>call</strong> <font color="#2040a0">HYPRE_BoomerAMGSetMaxIter</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">1</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line351">351</a> 
+<a name="line352">352</a> <font color="#444444">c        set amg as the pcg preconditioner</font>
+<a name="line353">353</a>          <font color="#2040a0">precond_id</font> <font color="4444FF">=</font> <font color="#FF0000">2</font>
+<a name="line354">354</a>          <strong>call</strong> <font color="#2040a0">HYPRE_ParCSRPCGSetPrecond</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#2040a0">precond_id</font>,
+<a name="line355">355</a>      <font color="#FF0000">1</font>        <font color="#2040a0">precond</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line356">356</a> 
+<a name="line357">357</a> 
+<a name="line358">358</a> <font color="#444444">c        Now setup and solve!</font>
+<a name="line359">359</a>          <strong>call</strong> <font color="#2040a0">HYPRE_ParCSRPCGSetup</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#2040a0">parcsr_A</font>, <font color="#2040a0">par_b</font>,
+<a name="line360">360</a>      <font color="#FF0000">1</font>                            <font color="#2040a0">par_x</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line361">361</a>          <strong>call</strong> <font color="#2040a0">HYPRE_ParCSRPCGSolve</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#2040a0">parcsr_A</font>, <font color="#2040a0">par_b</font>,
+<a name="line362">362</a>      <font color="#FF0000">1</font>                            <font color="#2040a0">par_x</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line363">363</a> 
+<a name="line364">364</a> 
+<a name="line365">365</a> <font color="#444444">c        Run info - needed logging turned on </font>
+<a name="line366">366</a> 
+<a name="line367">367</a>         <strong>call</strong> <font color="#2040a0">HYPRE_ParCSRPCGGetNumIterations</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#2040a0">num_iterations</font>,
+<a name="line368">368</a>      <font color="#FF0000">1</font>                                       <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line369">369</a>         <strong>call</strong> <font color="#2040a0">HYPRE_ParCSRPCGGetFinalRelative</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#2040a0">final_res_norm</font>,
+<a name="line370">370</a>      <font color="#FF0000">1</font>                                       <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line371">371</a> 
+<a name="line372">372</a>        <strong>if</strong> <font color="4444FF">(</font> <font color="#2040a0">myid</font> .<font color="#2040a0">eq</font>. <font color="#FF0000">0</font> <font color="4444FF">)</font> <strong>then</strong>
+<a name="line373">373</a>             <strong>print</strong> <font color="4444FF">*</font>
+<a name="line374">374</a>             <strong>print</strong> <font color="4444FF">*</font>, <font color="#008000">&quot;Iterations = &quot;</font>, <font color="#2040a0">num_iterations</font>
+<a name="line375">375</a>             <strong>print</strong> <font color="4444FF">*</font>, <font color="#008000">&quot;Final Relative Residual Norm = &quot;</font>, <font color="#2040a0">final_res_norm</font>
+<a name="line376">376</a>             <strong>print</strong> <font color="4444FF">*</font>
+<a name="line377">377</a>          <strong>endif</strong>
+<a name="line378">378</a> 
+<a name="line379">379</a> <font color="#444444">c       Destroy precond and solver</font>
+<a name="line380">380</a> 
+<a name="line381">381</a>         <strong>call</strong> <font color="#2040a0">HYPRE_BoomerAMGDestroy</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line382">382</a>         <strong>call</strong> <font color="#2040a0">HYPRE_ParCSRPCGDestroy</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line383">383</a> 
+<a name="line384">384</a> <font color="#444444">c     PCG with ParaSails</font>
+<a name="line385">385</a>       <strong>elseif</strong> <font color="4444FF">(</font> <font color="#2040a0">solver_id</font> .<font color="#2040a0">eq</font>. <font color="#FF0000">8</font> <font color="4444FF">)</font> <strong>then</strong>
+<a name="line386">386</a> 
+<a name="line387">387</a> <font color="#444444">c        Create solver</font>
+<a name="line388">388</a>          <strong>call</strong> <font color="#2040a0">HYPRE_ParCSRPCGCreate</font><font color="4444FF">(</font><font color="#2040a0">MPI_COMM_WORLD</font>, <font color="#2040a0">solver</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line389">389</a> 
+<a name="line390">390</a> <font color="#444444">c        Set some parameters (See Reference Manual for more parameters) </font>
+<a name="line391">391</a>          <strong>call</strong> <font color="#2040a0">HYPRE_ParCSRPCGSetMaxIter</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#FF0000">1000</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line392">392</a>          <strong>call</strong> <font color="#2040a0">HYPRE_ParCSRPCGSetTol</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#FF0000">1.0d-7</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line393">393</a>          <strong>call</strong> <font color="#2040a0">HYPRE_ParCSRPCGSetTwoNorm</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#FF0000">1</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line394">394</a>          <strong>call</strong> <font color="#2040a0">HYPRE_ParCSRPCGSetPrintLevel</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#FF0000">2</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line395">395</a>          <strong>call</strong> <font color="#2040a0">HYPRE_ParCSRPCGSetLogging</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#FF0000">1</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line396">396</a> 
+<a name="line397">397</a> <font color="#444444">c        Now set up the Parasails preconditioner and specify any parameters</font>
+<a name="line398">398</a>          <strong>call</strong> <font color="#2040a0">HYPRE_ParaSailsCreate</font><font color="4444FF">(</font><font color="#2040a0">MPI_COMM_WORLD</font>, <font color="#2040a0">precond</font>,<font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line399">399</a>          <strong>call</strong> <font color="#2040a0">HYPRE_ParaSailsSetParams</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">0.1d0</font>, <font color="#FF0000">1</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line400">400</a>          <strong>call</strong> <font color="#2040a0">HYPRE_ParaSailsSetFilter</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">0.05d0</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line401">401</a>          <strong>call</strong> <font color="#2040a0">HYPRE_ParaSailsSetSym</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">1</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line402">402</a>          <strong>call</strong> <font color="#2040a0">HYPRE_ParaSailsSetLogging</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">3</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line403">403</a> 
+<a name="line404">404</a> <font color="#444444">c        set parsails as the pcg preconditioner</font>
+<a name="line405">405</a>          <font color="#2040a0">precond_id</font> <font color="4444FF">=</font> <font color="#FF0000">4</font>
+<a name="line406">406</a>          <strong>call</strong> <font color="#2040a0">HYPRE_ParCSRPCGSetPrecond</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#2040a0">precond_id</font>,
+<a name="line407">407</a>      <font color="#FF0000">1</font>        <font color="#2040a0">precond</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line408">408</a> 
+<a name="line409">409</a> 
+<a name="line410">410</a> <font color="#444444">c        Now setup and solve!</font>
+<a name="line411">411</a>          <strong>call</strong> <font color="#2040a0">HYPRE_ParCSRPCGSetup</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#2040a0">parcsr_A</font>, <font color="#2040a0">par_b</font>,
+<a name="line412">412</a>      <font color="#FF0000">1</font>                            <font color="#2040a0">par_x</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line413">413</a>          <strong>call</strong> <font color="#2040a0">HYPRE_ParCSRPCGSolve</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#2040a0">parcsr_A</font>, <font color="#2040a0">par_b</font>,
+<a name="line414">414</a>      <font color="#FF0000">1</font>                            <font color="#2040a0">par_x</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line415">415</a> 
+<a name="line416">416</a> 
+<a name="line417">417</a> <font color="#444444">c        Run info - needed logging turned on </font>
+<a name="line418">418</a> 
+<a name="line419">419</a>         <strong>call</strong> <font color="#2040a0">HYPRE_ParCSRPCGGetNumIterations</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#2040a0">num_iterations</font>,
+<a name="line420">420</a>      <font color="#FF0000">1</font>                                       <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line421">421</a>         <strong>call</strong> <font color="#2040a0">HYPRE_ParCSRPCGGetFinalRelative</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#2040a0">final_res_norm</font>,
+<a name="line422">422</a>      <font color="#FF0000">1</font>                                       <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line423">423</a> 
+<a name="line424">424</a>        <strong>if</strong> <font color="4444FF">(</font> <font color="#2040a0">myid</font> .<font color="#2040a0">eq</font>. <font color="#FF0000">0</font> <font color="4444FF">)</font> <strong>then</strong>
+<a name="line425">425</a>             <strong>print</strong> <font color="4444FF">*</font>
+<a name="line426">426</a>             <strong>print</strong> <font color="4444FF">*</font>, <font color="#008000">&quot;Iterations = &quot;</font>, <font color="#2040a0">num_iterations</font>
+<a name="line427">427</a>             <strong>print</strong> <font color="4444FF">*</font>, <font color="#008000">&quot;Final Relative Residual Norm = &quot;</font>, <font color="#2040a0">final_res_norm</font>
+<a name="line428">428</a>             <strong>print</strong> <font color="4444FF">*</font>
+<a name="line429">429</a>          <strong>endif</strong>
+<a name="line430">430</a> 
+<a name="line431">431</a> <font color="#444444">c       Destroy precond and solver</font>
+<a name="line432">432</a> 
+<a name="line433">433</a>         <strong>call</strong> <font color="#2040a0">HYPRE_ParaSailsDestroy</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line434">434</a>         <strong>call</strong> <font color="#2040a0">HYPRE_ParCSRPCGDestroy</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line435">435</a> 
+<a name="line436">436</a>       <strong>else</strong>
+<a name="line437">437</a>          <strong>if</strong> <font color="4444FF">(</font> <font color="#2040a0">myid</font> .<font color="#2040a0">eq</font>. <font color="#FF0000">0</font> <font color="4444FF">)</font> <strong>then</strong> 
+<a name="line438">438</a>            <strong>print</strong> <font color="4444FF">*</font>,'<font color="#2040a0">Invalid</font> <font color="#2040a0">solver</font> <font color="#2040a0">id</font> <font color="#2040a0">specified</font>'
+<a name="line439">439</a>            <strong>stop</strong>
+<a name="line440">440</a>          <strong>endif</strong>  
+<a name="line441">441</a>       <strong>endif</strong>
+<a name="line442">442</a> 
+<a name="line443">443</a> 
+<a name="line444">444</a> 
+<a name="line445">445</a> <font color="#444444">c     Print the solution</font>
+<a name="line446">446</a>       <strong>if</strong> <font color="4444FF">(</font> <font color="#2040a0">print_solution</font> .<font color="#2040a0">ne</font>. <font color="#FF0000">0</font> <font color="4444FF">)</font> <strong>then</strong>
+<a name="line447">447</a>          <strong>call</strong> <font color="#2040a0">HYPRE_IJVectorPrint</font><font color="4444FF">(</font><font color="#2040a0">x</font>, <font color="#008000">&quot;ij.out.x&quot;</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line448">448</a>       <strong>endif</strong>
+<a name="line449">449</a> 
+<a name="line450">450</a> <font color="#444444">c     Clean up</font>
+<a name="line451">451</a> 
+<a name="line452">452</a>       <strong>call</strong> <font color="#2040a0">HYPRE_IJMatrixDestroy</font><font color="4444FF">(</font><font color="#2040a0">A</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line453">453</a>       <strong>call</strong> <font color="#2040a0">HYPRE_IJVectorDestroy</font><font color="4444FF">(</font><font color="#2040a0">b</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line454">454</a>       <strong>call</strong> <font color="#2040a0">HYPRE_IJVectorDestroy</font><font color="4444FF">(</font><font color="#2040a0">x</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line455">455</a> 
+<a name="line456">456</a> 
+<a name="line457">457</a> <font color="#444444">c     Finalize MPI</font>
+<a name="line458">458</a>       <strong>call</strong> <font color="#2040a0">MPI_Finalize</font><font color="4444FF">(</font><font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line459">459</a> 
+<a name="line460">460</a>       <strong>stop</strong>
+<a name="line461">461</a>       <strong>end</strong>
+
+</pre>
+<hr>
+syntax highlighted by <a href="http://www.palfrader.org/code2html">Code2HTML</a>, v. 0.9.1
+</body>
+</html>

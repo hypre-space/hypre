@@ -482,6 +482,11 @@ list (APPEND HYPRE_SOURCES
   parcsr_ls/HYPRE_ads.c
   parcsr_ls/HYPRE_ame.c
   parcsr_ls/par_amg.c
+  parcsr_ls/par_amgdd_comp_grid.c
+  parcsr_ls/par_amgdd_solve.c
+  parcsr_ls/par_amgdd_fac_cycle.c
+  parcsr_ls/par_amgdd_setup.c
+  parcsr_ls/par_amgdd_test.c
   parcsr_ls/par_amg_setup.c
   parcsr_ls/par_amg_solve.c
   parcsr_ls/par_amg_solveT.c
@@ -751,6 +756,16 @@ configure_file (
 # BINARY must be first in order to get the correct HYPRE_config.h file
 include_directories(${hypre_BINARY_DIR})
 include_directories(${hypre_SOURCE_DIR})
+
+
+
+# !!! Include ParMETIS: what is the proper way to do this? Need to also make changes in regular makefiles?
+include_directories(../../parmetis-4.0.3/include/)
+include_directories(../../parmetis-4.0.3/metis/include)
+
+
+
+
 include_directories(blas)
 include_directories(lapack)
 include_directories(utilities)
