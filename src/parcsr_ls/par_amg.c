@@ -74,10 +74,16 @@ hypre_BoomerAMGCreate()
    /* solve params */
    HYPRE_Int    min_iter;
    HYPRE_Int    max_iter;
+   HYPRE_Int    min_fac_iter;
+   HYPRE_Int    max_fac_iter;
+   HYPRE_Int    fac_cycle_type;
+   HYPRE_Int    fac_relax_type;
+   HYPRE_Int    fac_num_relax;
    HYPRE_Int    cycle_type;
 
    HYPRE_Int    converge_type;
    HYPRE_Real   tol;
+   HYPRE_Real   fac_tol;
 
    HYPRE_Int    num_sweeps;
    HYPRE_Int    relax_down;
