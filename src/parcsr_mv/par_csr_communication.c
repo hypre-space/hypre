@@ -260,7 +260,6 @@ hypre_ParCSRCommHandleCreate ( HYPRE_Int            job,
    HYPRE_Int                  num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
    HYPRE_Int                  num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
    MPI_Comm                   comm      = hypre_ParCSRCommPkgComm(comm_pkg);
-
    hypre_ParCSRCommHandle    *comm_handle;
    HYPRE_Int                  num_requests;
    hypre_MPI_Request         *requests;
@@ -294,13 +293,87 @@ hypre_ParCSRCommHandleCreate ( HYPRE_Int            job,
     *           addresses, e.g. generated using hypre_MPI_Address .
     *--------------------------------------------------------------------*/
 
+   requests = NULL;
+   num_requests = 0;
+
+// Node-aware communication
+#if HYPRE_USING_NODE_AWARE_MPI 
+   comm_handle->nap_data = NULL;
+   j = 0;
+   switch (job)
+   {
+      case  1:
+      {
+         comm_handle->nap_data = hypre_TAlloc(NAPData, 1, HYPRE_MEMORY_HOST);
+         HYPRE_Complex *d_send_data = (HYPRE_Complex *) send_data;
+         HYPRE_Complex *d_recv_data = (HYPRE_Complex *) recv_data;
+         MPIX_INAPsend(d_send_data, comm_pkg->nap_comm, HYPRE_MPI_COMPLEX, 20423, comm, comm_handle->nap_data);
+         MPIX_INAPrecv(d_recv_data, comm_pkg->nap_comm, HYPRE_MPI_COMPLEX, 20423, comm, comm_handle->nap_data);
+      }
+      // TODO : Node-aware not yet implemented for transpose
+      case  2:
+      {
+         num_requests = num_sends + num_recvs;
+         requests = hypre_CTAlloc(hypre_MPI_Request,  num_requests, HYPRE_MEMORY_HOST);
+         HYPRE_Complex *d_send_data = (HYPRE_Complex *) send_data;
+         HYPRE_Complex *d_recv_data = (HYPRE_Complex *) recv_data;
+         for (i = 0; i < num_sends; i++)
+         {
+            vec_start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+            vec_len = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1) - vec_start;
+            ip = hypre_ParCSRCommPkgSendProc(comm_pkg, i);
+            hypre_MPI_Irecv(&d_recv_data[vec_start], vec_len, HYPRE_MPI_COMPLEX,
+                            ip, 0, comm, &requests[j++]);
+         }
+         for (i = 0; i < num_recvs; i++)
+         {
+            ip = hypre_ParCSRCommPkgRecvProc(comm_pkg, i);
+            vec_start = hypre_ParCSRCommPkgRecvVecStart(comm_pkg,i);
+            vec_len = hypre_ParCSRCommPkgRecvVecStart(comm_pkg,i+1)-vec_start;
+            hypre_MPI_Isend(&d_send_data[vec_start], vec_len, HYPRE_MPI_COMPLEX,
+                            ip, 0, comm, &requests[j++]);
+         }
+         break;
+      }
+      case  11:
+      {
+         comm_handle->nap_data = hypre_TAlloc(NAPData, 1, HYPRE_MEMORY_HOST);
+         HYPRE_Int *i_send_data = (HYPRE_Int *) send_data;
+         HYPRE_Int *i_recv_data = (HYPRE_Int *) recv_data;
+         MPIX_INAPsend(i_send_data, comm_pkg->nap_comm, HYPRE_MPI_INT, 20423, comm, comm_handle->nap_data);
+         MPIX_INAPrecv(i_recv_data, comm_pkg->nap_comm, HYPRE_MPI_INT, 20423, comm, comm_handle->nap_data);
+      }
+      // TODO : Node-aware not yet implemented for transpose
+      case  12:
+      {
+         num_requests = num_sends + num_recvs;
+         requests = hypre_CTAlloc(hypre_MPI_Request,  num_requests, HYPRE_MEMORY_HOST);
+         HYPRE_Int *i_send_data = (HYPRE_Int *) send_data;
+         HYPRE_Int *i_recv_data = (HYPRE_Int *) recv_data;
+         for (i = 0; i < num_sends; i++)
+         {
+            vec_start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+            vec_len = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1) - vec_start;
+            ip = hypre_ParCSRCommPkgSendProc(comm_pkg, i);
+            hypre_MPI_Irecv(&i_recv_data[vec_start], vec_len, HYPRE_MPI_INT,
+                            ip, 0, comm, &requests[j++]);
+         }
+         for (i = 0; i < num_recvs; i++)
+         {
+            ip = hypre_ParCSRCommPkgRecvProc(comm_pkg, i);
+            vec_start = hypre_ParCSRCommPkgRecvVecStart(comm_pkg,i);
+            vec_len = hypre_ParCSRCommPkgRecvVecStart(comm_pkg,i+1)-vec_start;
+            hypre_MPI_Isend(&i_send_data[vec_start], vec_len, HYPRE_MPI_INT,
+                            ip, 0, comm, &requests[j++]);
+         }
+         break;
+      }
+   }
+// Normal (not node-aware) communication
+#else
+   j = 0;
    num_requests = num_sends + num_recvs;
    requests = hypre_CTAlloc(hypre_MPI_Request,  num_requests, HYPRE_MEMORY_HOST);
-
-   hypre_MPI_Comm_size(comm,&num_procs);
-   hypre_MPI_Comm_rank(comm,&my_id);
-
-   j = 0;
    switch (job)
    {
       case  1:
@@ -392,11 +465,13 @@ hypre_ParCSRCommHandleCreate ( HYPRE_Int            job,
          break;
       }
    }
+#endif
+
    /*--------------------------------------------------------------------
     * set up comm_handle and return
     *--------------------------------------------------------------------*/
 
-   comm_handle = hypre_CTAlloc(hypre_ParCSRCommHandle,  1, HYPRE_MEMORY_HOST);
+   comm_handle = hypre_CTAlloc(hypre_ParCSRCommHandle, 1, HYPRE_MEMORY_HOST);
 
    hypre_ParCSRCommHandleCommPkg(comm_handle)     = comm_pkg;
    hypre_ParCSRCommHandleSendData(comm_handle)    = send_data;
@@ -413,6 +488,14 @@ hypre_ParCSRCommHandleDestroy( hypre_ParCSRCommHandle *comm_handle )
    hypre_MPI_Status          *status0;
 
    if ( comm_handle==NULL ) return hypre_error_flag;
+
+#if HYPRE_USING_NODE_AWARE_MPI 
+   if (comm_handle->nap_data) {
+      MPIX_NAPwait<int, int>((comm_handle->comm_pkg)->nap_comm, comm_handle->nap_data);
+      hypre_TFree(comm_handle->nap_data, HYPRE_MEMORY_HOST);
+   }
+#endif
+
    if (hypre_ParCSRCommHandleNumRequests(comm_handle))
    {
       status0 = hypre_CTAlloc(hypre_MPI_Status,
@@ -422,7 +505,9 @@ hypre_ParCSRCommHandleDestroy( hypre_ParCSRCommHandle *comm_handle )
       hypre_TFree(status0, HYPRE_MEMORY_HOST);
    }
 
-   hypre_TFree(hypre_ParCSRCommHandleRequests(comm_handle), HYPRE_MEMORY_HOST);
+   if (hypre_ParCSRCommHandleRequests(comm_handle)) {
+      hypre_TFree(hypre_ParCSRCommHandleRequests(comm_handle), HYPRE_MEMORY_HOST);
+   }
    hypre_TFree(comm_handle, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
@@ -693,6 +778,24 @@ hypre_ParCSRCommPkgCreate
    hypre_ParCSRCommPkgSendMapStarts(comm_pkg) = send_map_starts;
    hypre_ParCSRCommPkgSendMapElmts (comm_pkg) = send_map_elmts;
 
+
+#if HYPRE_USING_NODE_AWARE_MPI 
+   HYPRE_Int i;
+   HYPRE_Int *global_send_inds; 
+   HYPRE_Int glob_size = send_map_starts[num_sends];
+   global_send_inds = hypre_CTAlloc(HYPRE_Int,  glob_size, HYPRE_MEMORY_HOST);
+   for (i=0; i<glob_size; i++) {
+      global_send_inds[i] = send_map_elmts[i] + first_col_diag;
+   }
+   hypre_ParCSRCommPkgGlobalSendInds (comm_pkg) = global_send_inds;
+
+   // Initialize node-aware communication package
+   MPIX_NAPinit(num_sends, send_procs, send_map_starts,
+                send_map_elmts, num_recvs, recv_procs,
+                recv_vec_starts, global_send_inds,
+                col_map_offd, comm, comm_pkg->nap_comm);
+#endif
+
    return hypre_error_flag;
 }
 
@@ -772,6 +875,14 @@ hypre_MatvecCommPkgDestroy( hypre_ParCSRCommPkg *comm_pkg )
    hypre_TFree(hypre_ParCSRCommPkgRecvVecStarts(comm_pkg), HYPRE_MEMORY_HOST);
    /* if (hypre_ParCSRCommPkgRecvMPITypes(comm_pkg))
       hypre_TFree(hypre_ParCSRCommPkgRecvMPITypes(comm_pkg), HYPRE_MEMORY_HOST); */
+
+#if HYPRE_USING_NODE_AWARE_MPI 
+   if (hypre_ParCSRCommPkgSendMapStart(comm_pkg, hypre_ParCSRCommPkgNumSends(comm_pkg))) {
+      hypre_TFree(hypre_ParCSRCommPkgGlobalSendInds(comm_pkg), HYPRE_MEMORY_HOST);
+   }
+   MPIX_NAPDestroy(comm_pkg->nap_comm);
+#endif
+
    hypre_TFree(comm_pkg, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;

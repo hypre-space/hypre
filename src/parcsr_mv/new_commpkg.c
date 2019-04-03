@@ -581,9 +581,24 @@ hypre_ParCSRCommPkgCreateApart
    hypre_ParCSRCommPkgSendMapStarts(comm_pkg) = send_map_starts;
    hypre_ParCSRCommPkgSendMapElmts (comm_pkg) = send_map_elmts;
    
+#if HYPRE_USING_NODE_AWARE_MPI 
+   HYPRE_Int i;
+   HYPRE_Int *global_send_inds; 
+   HYPRE_Int glob_size = send_map_starts[num_sends];
+   global_send_inds = hypre_CTAlloc(HYPRE_Int,  glob_size, HYPRE_MEMORY_HOST);
+   for (i=0; i<glob_size; i++) {
+      global_send_inds[i] = send_map_elmts[i] + first_col_diag;
+   }
+   hypre_ParCSRCommPkgGlobalSendInds (comm_pkg) = global_send_inds;
+
+   // Initialize node-aware communication package
+   MPIX_NAPinit(num_sends, send_procs, send_map_starts,
+                send_map_elmts, num_recvs, recv_procs,
+                recv_vec_starts, global_send_inds,
+                col_map_off_d, comm, comm_pkg->nap_comm);
+#endif
+
    return hypre_error_flag;
-      
-   
 }
 
 
@@ -623,6 +638,13 @@ hypre_NewCommPkgDestroy(hypre_ParCSRMatrix *parcsr_A)
    {
       hypre_TFree(hypre_ParCSRCommPkgRecvVecStarts(comm_pkg), HYPRE_MEMORY_HOST);
    }
+
+#if HYPRE_USING_NODE_AWARE_MPI 
+   if (hypre_ParCSRCommPkgSendMapStart(comm_pkg, hypre_ParCSRCommPkgNumSends(comm_pkg))) {
+      hypre_TFree(hypre_ParCSRCommPkgGlobalSendInds(comm_pkg), HYPRE_MEMORY_HOST);
+   }
+   MPIX_NAPDestroy(comm_pkg->nap_comm);
+#endif
 
    hypre_TFree(comm_pkg, HYPRE_MEMORY_HOST);
    hypre_ParCSRMatrixCommPkg(parcsr_A) = NULL;  /*this gets freed again in destroy 

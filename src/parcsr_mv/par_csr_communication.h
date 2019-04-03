@@ -65,6 +65,11 @@ typedef struct
 #ifdef HYPRE_USING_PERSISTENT_COMM
    hypre_ParCSRPersistentCommHandle *persistent_comm_handles[NUM_OF_COMM_PKG_JOB_TYPE];
 #endif
+
+#if HYPRE_USING_NODE_AWARE_MPI 
+    HYPRE_Int *global_send_inds; 
+    NAPComm* nap_comm;
+#endif
 } hypre_ParCSRCommPkg;
 
 /*--------------------------------------------------------------------------
@@ -80,6 +85,9 @@ typedef struct
    HYPRE_Int             num_requests;
    hypre_MPI_Request    *requests;
 
+#if HYPRE_USING_NODE_AWARE_MPI 
+   NAPdata *nap_data;
+#endif
 } hypre_ParCSRCommHandle;
 
 /*--------------------------------------------------------------------------
@@ -95,6 +103,9 @@ typedef struct
 #define hypre_ParCSRCommPkgSendMapStart(comm_pkg,i)(comm_pkg -> send_map_starts[i])
 #define hypre_ParCSRCommPkgSendMapElmts(comm_pkg)  (comm_pkg -> send_map_elmts)
 #define hypre_ParCSRCommPkgSendMapElmt(comm_pkg,i) (comm_pkg -> send_map_elmts[i])
+#if HYPRE_USING_NODE_AWARE_MPI 
+#define hypre_ParCSRCommPkgGlobalSendInds(comm_pkg) (comm_pkg -> global_send_inds)
+#endif
 
 #define hypre_ParCSRCommPkgNumRecvs(comm_pkg)      (comm_pkg -> num_recvs)
 #define hypre_ParCSRCommPkgRecvProcs(comm_pkg)     (comm_pkg -> recv_procs)
