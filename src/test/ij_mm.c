@@ -142,7 +142,7 @@ main( hypre_int argc,
    /* Initialize Hypre */
    HYPRE_Init(argc, argv);
 
-   omp_set_num_threads(20);
+   hypre_SetNumThreads(20);
    hypre_printf("CPU #OMP THREADS %d\n", hypre_NumThreads());
 
    /*-----------------------------------------------------------
