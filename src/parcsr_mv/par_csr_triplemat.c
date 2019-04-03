@@ -603,8 +603,8 @@ hypre_ParCSRMatrix *hypre_ParCSRMatrixRAPKT( hypre_ParCSRMatrix *R,
        * equally load balanced partitionings within
        * hypre_ParCSRMatrixExtractBExt
        *--------------------------------------------------------------------*/
-      Ps_ext = hypre_ParCSRMatrixExtractBExt(P,A,1); /* contains communication
-                                                        which should be explicitly included to allow for overlap */
+      Ps_ext = hypre_ParCSRMatrixExtractBExt(P, A, 1); /* contains communication
+                                                          which should be explicitly included to allow for overlap */
       if (num_cols_offd_A)
       {
          last_col_diag_P = first_col_diag_P + num_cols_diag_P -1;

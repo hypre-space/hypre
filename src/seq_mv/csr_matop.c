@@ -155,7 +155,7 @@ hypre_CSRMatrixAdd( hypre_CSRMatrix *A,
  * adds two CSR Matrices A and B and returns a CSR Matrix C;
  * Note: The routine does not check for 0-elements which might be generated
  *       through cancellation of elements in A and B or already contained
- in A and B. To remove those, use hypre_CSRMatrixDeleteZeros 
+ in A and B. To remove those, use hypre_CSRMatrixDeleteZeros
  *--------------------------------------------------------------------------*/
 
 hypre_CSRMatrix *
@@ -256,7 +256,7 @@ hypre_CSRMatrixBigAdd( hypre_CSRMatrix *A,
 
    hypre_TFree(marker, HYPRE_MEMORY_HOST);
    return C;
-}       
+}
 
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixMultiply
@@ -739,36 +739,36 @@ hypre_CSRMatrixTranspose(hypre_CSRMatrix  *A,
 }
 
 HYPRE_Int hypre_CSRMatrixSplit(hypre_CSRMatrix  *Bs_ext,
-                               HYPRE_Int         first_col_diag_B,
-                               HYPRE_Int         last_col_diag_B,
+                               HYPRE_BigInt      first_col_diag_B,
+                               HYPRE_BigInt      last_col_diag_B,
                                HYPRE_Int         num_cols_offd_B,
-                               HYPRE_Int        *col_map_offd_B,
+                               HYPRE_BigInt     *col_map_offd_B,
                                HYPRE_Int        *num_cols_offd_C_ptr,
-                               HYPRE_Int       **col_map_offd_C_ptr,
+                               HYPRE_BigInt    **col_map_offd_C_ptr,
                                hypre_CSRMatrix **Bext_diag_ptr,
                                hypre_CSRMatrix **Bext_offd_ptr)
 {
    HYPRE_Complex   *Bs_ext_data = hypre_CSRMatrixData(Bs_ext);
-   HYPRE_Int    *Bs_ext_i    = hypre_CSRMatrixI(Bs_ext);
-   HYPRE_Int    *Bs_ext_j    = hypre_CSRMatrixJ(Bs_ext);
-   HYPRE_Int num_rows_Bext = hypre_CSRMatrixNumRows(Bs_ext);
-   HYPRE_Int B_ext_diag_size = 0;
-   HYPRE_Int B_ext_offd_size = 0;
-   HYPRE_Int *B_ext_diag_i = NULL;
-   HYPRE_Int *B_ext_diag_j = NULL;
-   HYPRE_Complex *B_ext_diag_data = NULL;
-   HYPRE_Int *B_ext_offd_i = NULL;
-   HYPRE_Int *B_ext_offd_j = NULL;
-   HYPRE_Complex *B_ext_offd_data = NULL;
+   HYPRE_Int       *Bs_ext_i    = hypre_CSRMatrixI(Bs_ext);
+   HYPRE_BigInt    *Bs_ext_j    = hypre_CSRMatrixBigJ(Bs_ext);
+   HYPRE_Int        num_rows_Bext = hypre_CSRMatrixNumRows(Bs_ext);
+   HYPRE_Int        B_ext_diag_size = 0;
+   HYPRE_Int        B_ext_offd_size = 0;
+   HYPRE_Int       *B_ext_diag_i = NULL;
+   HYPRE_Int       *B_ext_diag_j = NULL;
+   HYPRE_Complex   *B_ext_diag_data = NULL;
+   HYPRE_Int       *B_ext_offd_i = NULL;
+   HYPRE_Int       *B_ext_offd_j = NULL;
+   HYPRE_Complex   *B_ext_offd_data = NULL;
    HYPRE_Int       *my_diag_array;
    HYPRE_Int       *my_offd_array;
-   HYPRE_Int       *temp;
+   HYPRE_BigInt    *temp;
    HYPRE_Int        max_num_threads;
-   HYPRE_Int        cnt = 0, value = 0;
+   HYPRE_Int        cnt = 0;
    hypre_CSRMatrix *Bext_diag = NULL;
    hypre_CSRMatrix *Bext_offd = NULL;
-   HYPRE_Int       *col_map_offd_C = NULL;
-   HYPRE_Int        num_cols_offd_C=0;
+   HYPRE_BigInt    *col_map_offd_C = NULL;
+   HYPRE_Int        num_cols_offd_C = 0;
 
    B_ext_diag_i = hypre_CTAlloc(HYPRE_Int, num_rows_Bext+1, HYPRE_MEMORY_HOST);
    B_ext_offd_i = hypre_CTAlloc(HYPRE_Int, num_rows_Bext+1, HYPRE_MEMORY_HOST);
@@ -808,7 +808,7 @@ HYPRE_Int hypre_CSRMatrixSplit(hypre_CSRMatrix  *Bs_ext,
       {
          B_ext_diag_i[i] = my_diag_size;
          B_ext_offd_i[i] = my_offd_size;
-         for (j=Bs_ext_i[i]; j < Bs_ext_i[i+1]; j++)
+         for (j = Bs_ext_i[i]; j < Bs_ext_i[i+1]; j++)
          {
             if (Bs_ext_j[j] < first_col_diag_B || Bs_ext_j[j] > last_col_diag_B)
             {
@@ -857,17 +857,17 @@ HYPRE_Int hypre_CSRMatrixSplit(hypre_CSRMatrix  *Bs_ext,
 
          if (B_ext_diag_size)
          {
-            B_ext_diag_j = hypre_CTAlloc(HYPRE_Int, B_ext_diag_size, HYPRE_MEMORY_HOST);
+            B_ext_diag_j    = hypre_CTAlloc(HYPRE_Int,     B_ext_diag_size, HYPRE_MEMORY_HOST);
             B_ext_diag_data = hypre_CTAlloc(HYPRE_Complex, B_ext_diag_size, HYPRE_MEMORY_HOST);
          }
          if (B_ext_offd_size)
          {
-            B_ext_offd_j = hypre_CTAlloc(HYPRE_Int, B_ext_offd_size, HYPRE_MEMORY_HOST);
+            B_ext_offd_j    = hypre_CTAlloc(HYPRE_Int,     B_ext_offd_size, HYPRE_MEMORY_HOST);
             B_ext_offd_data = hypre_CTAlloc(HYPRE_Complex, B_ext_offd_size, HYPRE_MEMORY_HOST);
          }
          if (B_ext_offd_size || num_cols_offd_B)
          {
-            temp = hypre_CTAlloc(HYPRE_Int, B_ext_offd_size+num_cols_offd_B, HYPRE_MEMORY_HOST);
+            temp = hypre_CTAlloc(HYPRE_BigInt, B_ext_offd_size + num_cols_offd_B, HYPRE_MEMORY_HOST);
          }
       }
 
@@ -877,9 +877,10 @@ HYPRE_Int hypre_CSRMatrixSplit(hypre_CSRMatrix  *Bs_ext,
 
       cnt_offd = B_ext_offd_i[ns];
       cnt_diag = B_ext_diag_i[ns];
-      for (i=ns; i < ne; i++)
+      for (i = ns; i < ne; i++)
       {
-         for (j=Bs_ext_i[i]; j < Bs_ext_i[i+1]; j++)
+         for (j = Bs_ext_i[i]; j < Bs_ext_i[i+1]; j++)
+         {
             if (Bs_ext_j[j] < first_col_diag_B || Bs_ext_j[j] > last_col_diag_B)
             {
                temp[cnt_offd] = Bs_ext_j[j];
@@ -891,6 +892,7 @@ HYPRE_Int hypre_CSRMatrixSplit(hypre_CSRMatrix  *Bs_ext,
                B_ext_diag_j[cnt_diag] = Bs_ext_j[j] - first_col_diag_B;
                B_ext_diag_data[cnt_diag++] = Bs_ext_data[j];
             }
+         }
       }
 
       /* This computes the mappings */
@@ -910,10 +912,10 @@ HYPRE_Int hypre_CSRMatrixSplit(hypre_CSRMatrix  *Bs_ext,
             }
             if (cnt)
             {
-               hypre_qsort0(temp, 0, cnt-1);
+               hypre_BigQsort0(temp, 0, cnt-1);
                num_cols_offd_C = 1;
-               value = temp[0];
-               for (i=1; i < cnt; i++)
+               HYPRE_BigInt value = temp[0];
+               for (i = 1; i < cnt; i++)
                {
                   if (temp[i] > value)
                   {
@@ -925,10 +927,10 @@ HYPRE_Int hypre_CSRMatrixSplit(hypre_CSRMatrix  *Bs_ext,
 
             if (num_cols_offd_C)
             {
-               col_map_offd_C = hypre_CTAlloc(HYPRE_Int,num_cols_offd_C, HYPRE_MEMORY_HOST);
+               col_map_offd_C = hypre_CTAlloc(HYPRE_BigInt, num_cols_offd_C, HYPRE_MEMORY_HOST);
             }
 
-            for (i=0; i < num_cols_offd_C; i++)
+            for (i = 0; i < num_cols_offd_C; i++)
             {
                col_map_offd_C[i] = temp[i];
             }
@@ -941,14 +943,13 @@ HYPRE_Int hypre_CSRMatrixSplit(hypre_CSRMatrix  *Bs_ext,
 #pragma omp barrier
 #endif
 
-      for (i=ns; i < ne; i++)
+      for (i = ns; i < ne; i++)
       {
-         for (j=B_ext_offd_i[i]; j < B_ext_offd_i[i+1]; j++)
+         for (j = B_ext_offd_i[i]; j < B_ext_offd_i[i+1]; j++)
          {
-            B_ext_offd_j[j] = hypre_BinarySearch(col_map_offd_C, B_ext_offd_j[j], num_cols_offd_C);
+            B_ext_offd_j[j] = hypre_BigBinarySearch(col_map_offd_C, B_ext_offd_j[j], num_cols_offd_C);
          }
       }
-
    } /* end parallel region */
 
    hypre_TFree(my_diag_array, HYPRE_MEMORY_HOST);
@@ -956,12 +957,13 @@ HYPRE_Int hypre_CSRMatrixSplit(hypre_CSRMatrix  *Bs_ext,
 
    Bext_diag = hypre_CSRMatrixCreate(num_rows_Bext, last_col_diag_B-first_col_diag_B+1, B_ext_diag_size);
    Bext_offd = hypre_CSRMatrixCreate(num_rows_Bext, num_cols_offd_C, B_ext_offd_size);
-   hypre_CSRMatrixI(Bext_diag) = B_ext_diag_i;
-   hypre_CSRMatrixJ(Bext_diag) = B_ext_diag_j;
+   hypre_CSRMatrixI(Bext_diag)    = B_ext_diag_i;
+   hypre_CSRMatrixJ(Bext_diag)    = B_ext_diag_j;
    hypre_CSRMatrixData(Bext_diag) = B_ext_diag_data;
-   hypre_CSRMatrixI(Bext_offd) = B_ext_offd_i;
-   hypre_CSRMatrixJ(Bext_offd) = B_ext_offd_j;
+   hypre_CSRMatrixI(Bext_offd)    = B_ext_offd_i;
+   hypre_CSRMatrixJ(Bext_offd)    = B_ext_offd_j;
    hypre_CSRMatrixData(Bext_offd) = B_ext_offd_data;
+
    *col_map_offd_C_ptr = col_map_offd_C;
    *Bext_diag_ptr = Bext_diag;
    *Bext_offd_ptr = Bext_offd;

@@ -107,6 +107,7 @@ HYPRE_CSRMatrixGetNumRows( HYPRE_CSRMatrix matrix, HYPRE_Int *num_rows )
 HYPRE_Int
 HYPRE_CSRMatrixDeviceSpGemmSetRownnzEstimateMethod( HYPRE_Int value )
 {
+#if defined(HYPRE_USING_CUDA)
    if (hypre_device_sparse_opts == NULL)
    {
       return -1;
@@ -120,6 +121,7 @@ HYPRE_CSRMatrixDeviceSpGemmSetRownnzEstimateMethod( HYPRE_Int value )
    {
       return -1;
    }
+#endif
 
    return 0;
 }
@@ -127,12 +129,14 @@ HYPRE_CSRMatrixDeviceSpGemmSetRownnzEstimateMethod( HYPRE_Int value )
 HYPRE_Int
 HYPRE_CSRMatrixDeviceSpGemmSetRownnzEstimateNSamples( HYPRE_Int value )
 {
+#if defined(HYPRE_USING_CUDA)
    if (hypre_device_sparse_opts == NULL)
    {
       return -1;
    }
 
    hypre_device_sparse_opts->rownnz_estimate_nsamples = value;
+#endif
 
    return 0;
 }
@@ -140,6 +144,7 @@ HYPRE_CSRMatrixDeviceSpGemmSetRownnzEstimateNSamples( HYPRE_Int value )
 HYPRE_Int
 HYPRE_CSRMatrixDeviceSpGemmSetRownnzEstimateMultFactor( HYPRE_Real value )
 {
+#if defined(HYPRE_USING_CUDA)
    if (hypre_device_sparse_opts == NULL)
    {
       return -1;
@@ -153,6 +158,7 @@ HYPRE_CSRMatrixDeviceSpGemmSetRownnzEstimateMultFactor( HYPRE_Real value )
    {
       return -1;
    }
+#endif
 
    return 0;
 }
@@ -160,6 +166,7 @@ HYPRE_CSRMatrixDeviceSpGemmSetRownnzEstimateMultFactor( HYPRE_Real value )
 HYPRE_Int
 HYPRE_CSRMatrixDeviceSpGemmSetHashType( char value )
 {
+#if defined(HYPRE_USING_CUDA)
    if (hypre_device_sparse_opts == NULL)
    {
       return -1;
@@ -169,6 +176,7 @@ HYPRE_CSRMatrixDeviceSpGemmSetHashType( char value )
    {
       hypre_device_sparse_opts->hash_type = value;
    }
+#endif
 
    return 0;
 }
@@ -176,12 +184,14 @@ HYPRE_CSRMatrixDeviceSpGemmSetHashType( char value )
 HYPRE_Int
 HYPRE_CSRMatrixDeviceSpGemmSetUseCusparse( HYPRE_Int value )
 {
+#if defined(HYPRE_USING_CUDA)
    if (hypre_device_sparse_opts == NULL)
    {
       return -1;
    }
 
    hypre_device_sparse_opts->use_cusparse_spgemm = value != 0;
+#endif
 
    return 0;
 }
@@ -189,12 +199,14 @@ HYPRE_CSRMatrixDeviceSpGemmSetUseCusparse( HYPRE_Int value )
 HYPRE_Int
 HYPRE_CSRMatrixDeviceSpGemmSetDoTiming( HYPRE_Int value )
 {
+#if defined(HYPRE_USING_CUDA)
    if (hypre_device_sparse_opts == NULL)
    {
       return -1;
    }
 
    hypre_device_sparse_opts->do_timing = value != 0;
+#endif
 
    return 0;
 }

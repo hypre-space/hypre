@@ -4545,8 +4545,8 @@ hypre_ParcsrGetExternalRowsInit( hypre_ParCSRMatrix   *A,
                                  HYPRE_Int             want_data,
                                  void                **request_ptr)
 {
-   HYPRE_Int i, j, k,
-             num_sends, num_rows_send, num_nnz_send, *send_i,
+   HYPRE_Int i, j, k;
+   HYPRE_Int num_sends, num_rows_send, num_nnz_send, *send_i,
              num_recvs, num_rows_recv, num_nnz_recv, *recv_i,
             *send_jstarts, *recv_jstarts, *send_i_offset;
    HYPRE_BigInt *send_j, *recv_j;
@@ -4709,7 +4709,7 @@ hypre_ParcsrGetExternalRowsInit( hypre_ParCSRMatrix   *A,
    comm_handle_j = hypre_ParCSRCommHandleCreate(21, comm_pkg_j, send_j, recv_j);
    if (want_data)
    {
-   /* a */
+      /* a */
       comm_handle_a = hypre_ParCSRCommHandleCreate(1, comm_pkg_j, send_a, recv_a);
    }
    else
@@ -4720,7 +4720,7 @@ hypre_ParcsrGetExternalRowsInit( hypre_ParCSRMatrix   *A,
    /* create A_ext */
    A_ext = hypre_CSRMatrixCreate(num_rows_recv, hypre_ParCSRMatrixGlobalNumCols(A), num_nnz_recv);
    hypre_CSRMatrixI   (A_ext) = recv_i;
-   hypre_CSRMatrixJ   (A_ext) = recv_j;
+   hypre_CSRMatrixBigJ(A_ext) = recv_j;
    hypre_CSRMatrixData(A_ext) = recv_a;
 
    /* output */
@@ -4742,7 +4742,7 @@ hypre_ParcsrGetExternalRowsInit( hypre_ParCSRMatrix   *A,
 
 hypre_CSRMatrix*
 hypre_ParcsrGetExternalRowsWait(void *vrequest)
-   {
+{
    void **request = (void **) vrequest;
 
    hypre_ParCSRCommHandle *comm_handle_j = (hypre_ParCSRCommHandle *) request[0];

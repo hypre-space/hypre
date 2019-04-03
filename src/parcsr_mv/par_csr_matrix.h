@@ -46,9 +46,10 @@ typedef struct hypre_ParCSRMatrix_struct
    hypre_CSRMatrix      *offd;
    hypre_CSRMatrix      *diagT, *offdT;
    /* JSP: transposed matrices are created lazily and optional */
-   HYPRE_BigInt         *col_map_offd; 
+   HYPRE_BigInt         *col_map_offd;
+   HYPRE_BigInt         *device_col_map_offd;
    /* maps columns of offd to global columns */
-   HYPRE_BigInt         *row_starts; 
+   HYPRE_BigInt         *row_starts;
    /* array of length num_procs+1, row_starts[i] contains the
       global number of the first row on proc i,
       first_row_index = row_starts[my_id],
@@ -98,6 +99,7 @@ typedef struct hypre_ParCSRMatrix_struct
 #define hypre_ParCSRMatrixDiagT(matrix)            ((matrix) -> diagT)
 #define hypre_ParCSRMatrixOffdT(matrix)            ((matrix) -> offdT)
 #define hypre_ParCSRMatrixColMapOffd(matrix)      ((matrix) -> col_map_offd)
+#define hypre_ParCSRMatrixDeviceColMapOffd(matrix) ((matrix) -> device_col_map_offd)
 #define hypre_ParCSRMatrixRowStarts(matrix)       ((matrix) -> row_starts)
 #define hypre_ParCSRMatrixColStarts(matrix)       ((matrix) -> col_starts)
 #define hypre_ParCSRMatrixCommPkg(matrix)         ((matrix) -> comm_pkg)
@@ -131,8 +133,8 @@ typedef struct
    HYPRE_BigInt            last_col_diag;
    hypre_CSRBooleanMatrix *diag;
    hypre_CSRBooleanMatrix *offd;
-   HYPRE_BigInt           *col_map_offd; 
-   HYPRE_BigInt           *row_starts; 
+   HYPRE_BigInt           *col_map_offd;
+   HYPRE_BigInt           *row_starts;
    HYPRE_BigInt           *col_starts;
    hypre_ParCSRCommPkg    *comm_pkg;
    hypre_ParCSRCommPkg    *comm_pkgT;

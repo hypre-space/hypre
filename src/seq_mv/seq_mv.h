@@ -85,7 +85,7 @@ typedef struct
 #define hypre_CSRMatrixData(matrix)           ((matrix) -> data)
 #define hypre_CSRMatrixI(matrix)              ((matrix) -> i)
 #define hypre_CSRMatrixJ(matrix)              ((matrix) -> j)
-#define hypre_CSRMatrixBigJ(matrix)         ((matrix) -> big_j)
+#define hypre_CSRMatrixBigJ(matrix)           ((matrix) -> big_j)
 #define hypre_CSRMatrixNumRows(matrix)        ((matrix) -> num_rows)
 #define hypre_CSRMatrixNumCols(matrix)        ((matrix) -> num_cols)
 #define hypre_CSRMatrixNumNonzeros(matrix)    ((matrix) -> num_nonzeros)
