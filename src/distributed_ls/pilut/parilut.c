@@ -151,27 +151,27 @@ void hypre_ParILUT(DataDistType *ddist, FactorMatType *ldu,
 	     cinfo.snbrind, cinfo.srowind, cinfo.snbrptr,
              cinfo.incolind,  cinfo.invalues,
              newperm, newiperm, vrowdist, -1);*/
-  hypre_TFree(jr);
-  hypre_TFree(jw);
-  hypre_TFree(lr);
-  hypre_TFree(w);
-  hypre_TFree(pilut_map);
-  hypre_TFree(nrmat.rmat_rnz);
-  hypre_TFree(nrmat.rmat_rrowlen);
-  hypre_TFree(nrmat.rmat_rcolind);
-  hypre_TFree(nrmat.rmat_rvalues);
-  hypre_TFree(cinfo.gatherbuf);
-  hypre_TFree(cinfo.rrowind);
-  hypre_TFree(cinfo.rnbrind);
-  hypre_TFree(cinfo.rnbrptr);
-  hypre_TFree(cinfo.snbrind);
-  hypre_TFree(cinfo.srowind);
-  hypre_TFree(cinfo.snbrptr);
-  hypre_TFree(cinfo.incolind);
-  hypre_TFree(cinfo.invalues);
-  hypre_TFree(newperm);
-  hypre_TFree(newiperm);
-  hypre_TFree(vrowdist);
+  hypre_TFree(jr, HYPRE_MEMORY_HOST);
+  hypre_TFree(jw, HYPRE_MEMORY_HOST);
+  hypre_TFree(lr, HYPRE_MEMORY_HOST);
+  hypre_TFree(w, HYPRE_MEMORY_HOST);
+  hypre_TFree(pilut_map, HYPRE_MEMORY_HOST);
+  hypre_TFree(nrmat.rmat_rnz, HYPRE_MEMORY_HOST);
+  hypre_TFree(nrmat.rmat_rrowlen, HYPRE_MEMORY_HOST);
+  hypre_TFree(nrmat.rmat_rcolind, HYPRE_MEMORY_HOST);
+  hypre_TFree(nrmat.rmat_rvalues, HYPRE_MEMORY_HOST);
+  hypre_TFree(cinfo.gatherbuf, HYPRE_MEMORY_HOST);
+  hypre_TFree(cinfo.rrowind, HYPRE_MEMORY_HOST);
+  hypre_TFree(cinfo.rnbrind, HYPRE_MEMORY_HOST);
+  hypre_TFree(cinfo.rnbrptr, HYPRE_MEMORY_HOST);
+  hypre_TFree(cinfo.snbrind, HYPRE_MEMORY_HOST);
+  hypre_TFree(cinfo.srowind, HYPRE_MEMORY_HOST);
+  hypre_TFree(cinfo.snbrptr, HYPRE_MEMORY_HOST);
+  hypre_TFree(cinfo.incolind, HYPRE_MEMORY_HOST);
+  hypre_TFree(cinfo.invalues, HYPRE_MEMORY_HOST);
+  hypre_TFree(newperm, HYPRE_MEMORY_HOST);
+  hypre_TFree(newiperm, HYPRE_MEMORY_HOST);
+  hypre_TFree(vrowdist, HYPRE_MEMORY_HOST);
 
   jr = NULL;
   jw = NULL;
@@ -298,7 +298,7 @@ void hypre_ComputeCommInfo(ReduceMatType *rmat, CommInfoType *cinfo, HYPRE_Int *
   cinfo->snnbr = snnbr;
 
   /* Allocate requests */
-  index_requests = hypre_CTAlloc( hypre_MPI_Request, snnbr );
+  index_requests = hypre_CTAlloc( hypre_MPI_Request,  snnbr , HYPRE_MEMORY_HOST);
 
   maxnsend = hypre_GlobalSEMax(nsend, pilut_comm);
 
@@ -332,7 +332,7 @@ void hypre_ComputeCommInfo(ReduceMatType *rmat, CommInfoType *cinfo, HYPRE_Int *
   hypre_EndTiming( globals->CCI_timer  );
 #endif
   /* clean up memory */
-  hypre_TFree(index_requests);
+  hypre_TFree(index_requests, HYPRE_MEMORY_HOST);
 }
 
 
@@ -490,8 +490,8 @@ void hypre_SendFactoredRows(FactorMatType *ldu, CommInfoType *cinfo,
   dvalues  = ldu->dvalues;
 
   /* Allocate requests */
-  index_requests = hypre_CTAlloc( hypre_MPI_Request, rnnbr );
-  value_requests = hypre_CTAlloc( hypre_MPI_Request, rnnbr );
+  index_requests = hypre_CTAlloc( hypre_MPI_Request,  rnnbr , HYPRE_MEMORY_HOST);
+  value_requests = hypre_CTAlloc( hypre_MPI_Request,  rnnbr , HYPRE_MEMORY_HOST);
 
   /* Issue asynchronous receives for rows from other processors.
      Asynchronous receives needed to avoid overflowing comm buffers. */
@@ -503,7 +503,7 @@ void hypre_SendFactoredRows(FactorMatType *ldu, CommInfoType *cinfo,
     hypre_MPI_Irecv( incolind+j, cnt, HYPRE_MPI_INT,
 	      penum, TAG_Send_colind, pilut_comm, &index_requests[i] );
 
-    hypre_MPI_Irecv( invalues+j, cnt, hypre_MPI_DOUBLE,
+    hypre_MPI_Irecv( invalues+j, cnt, hypre_MPI_REAL,
 	      penum, TAG_Send_values, pilut_comm, &value_requests[i] );
 
     j += cnt;
@@ -550,7 +550,7 @@ void hypre_SendFactoredRows(FactorMatType *ldu, CommInfoType *cinfo,
 
   /* send values to each neighbor */
   for (i=0; i<snnbr; i++) {
-    hypre_MPI_Send( dgatherbuf, l, hypre_MPI_DOUBLE,
+    hypre_MPI_Send( dgatherbuf, l, hypre_MPI_REAL,
 	      snbrind[i], TAG_Send_values, pilut_comm );
   }
 
@@ -578,8 +578,8 @@ void hypre_SendFactoredRows(FactorMatType *ldu, CommInfoType *cinfo,
 #endif 
 
   /* clean up memory */
-  hypre_TFree(index_requests);
-  hypre_TFree(value_requests);
+  hypre_TFree(index_requests, HYPRE_MEMORY_HOST);
+  hypre_TFree(value_requests, HYPRE_MEMORY_HOST);
 }
 
 
@@ -1170,8 +1170,8 @@ void hypre_FormNRmat(HYPRE_Int rrow, HYPRE_Int first, ReduceMatType *nrmat,
   if( out_rowlen > in_rowlen )
   {
     /*hypre_free_multi( in_colind, in_values, -1 );*/
-    hypre_TFree(in_colind);
-    hypre_TFree(in_values);
+    hypre_TFree(in_colind, HYPRE_MEMORY_HOST);
+    hypre_TFree(in_values, HYPRE_MEMORY_HOST);
     in_colind = NULL; in_values = NULL;
     rcolind = hypre_idx_malloc( out_rowlen, "FornNRmat: rcolind");
     rvalues = hypre_fp_malloc( out_rowlen, "FornNRmat: rvalues");
@@ -1390,6 +1390,6 @@ void hypre_ParINIT( ReduceMatType *nrmat, CommInfoType *cinfo, HYPRE_Int *rowdis
   /*cinfo->gatherbuf = hypre_fp_malloc(ntogo*(global_maxnz+2), "ComputeMIS: gatherbuf");*/
   /* RDF: There is a purify UMR problem that a calloc gets rid of.
    * Don't know if this is actually an indication of a bug */
-  cinfo->gatherbuf = hypre_CTAlloc(HYPRE_Real, ntogo*(global_maxnz+2));
+  cinfo->gatherbuf = hypre_CTAlloc(HYPRE_Real,  ntogo*(global_maxnz+2), HYPRE_MEMORY_HOST);
 
 }

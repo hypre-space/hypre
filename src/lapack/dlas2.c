@@ -1,8 +1,11 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include "hypre_lapack.h"
 #include "f2c.h"
+#include "hypre_lapack.h"
 
-/* Subroutine */ HYPRE_Int dlas2_(doublereal *f, doublereal *g, doublereal *h__, 
+/* Subroutine */ integer dlas2_(doublereal *f, doublereal *g, doublereal *h__, 
 	doublereal *ssmin, doublereal *ssmax)
 {
 /*  -- LAPACK auxiliary routine (version 3.0) --   
@@ -60,8 +63,6 @@
     ==================================================================== */
     /* System generated locals */
     doublereal d__1, d__2;
-    /* Builtin functions */
-    HYPRE_Real sqrt(doublereal);
     /* Local variables */
     static doublereal fhmn, fhmx, c__, fa, ga, ha, as, at, au;
 
@@ -121,3 +122,6 @@
 
 } /* dlas2_ */
 
+#ifdef __cplusplus
+}
+#endif

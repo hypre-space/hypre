@@ -12,6 +12,8 @@
 #EHEADER**********************************************************************
 
 TNAME=`basename $0 .sh`
+RTOL=$1
+ATOL=$2
 
 #=============================================================================
 # compare with baseline case
@@ -25,6 +27,11 @@ FILES="\
  ${TNAME}.out.4\
  ${TNAME}.out.5\
  ${TNAME}.out.6\
+ ${TNAME}.out.7\
+ ${TNAME}.out.8\
+ ${TNAME}.out.9\
+ ${TNAME}.out.10\
+ ${TNAME}.out.11\
 "
 
 for i in $FILES
@@ -42,7 +49,8 @@ if [ "$OUT_COUNT" != "$SAVED_COUNT" ]; then
 fi
 
 if [ -z $HYPRE_NO_SAVED ]; then
-   diff -U3 -bI"time" ${TNAME}.saved ${TNAME}.out >&2
+   #diff -U3 -bI"time" ${TNAME}.saved ${TNAME}.out >&2
+   (../runcheck.sh ${TNAME}.out ${TNAME}.saved $RTOL $ATOL) >&2
 fi
 
 #=============================================================================

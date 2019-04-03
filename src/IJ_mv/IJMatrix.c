@@ -37,7 +37,7 @@ The ijmatrix to be pointed to.
 
 HYPRE_Int
 hypre_IJMatrixGetRowPartitioning( HYPRE_IJMatrix matrix ,
-				  HYPRE_Int    **row_partitioning )
+				  HYPRE_BigInt **row_partitioning )
 {
    hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
 
@@ -71,7 +71,7 @@ The ijmatrix to be pointed to.
 
 HYPRE_Int
 hypre_IJMatrixGetColPartitioning( HYPRE_IJMatrix matrix ,
-				  HYPRE_Int    **col_partitioning )
+				  HYPRE_BigInt **col_partitioning )
 {
    hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
 

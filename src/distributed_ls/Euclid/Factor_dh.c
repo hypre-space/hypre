@@ -39,6 +39,7 @@ static void unadjust_bj_private(Factor_dh mat);
 void Factor_dhCreate(Factor_dh *mat)
 {
   START_FUNC_DH
+  HYPRE_Int i;
   struct _factor_dh* tmp; 
 
   if (np_dh > MAX_MPI_TASKS) {
@@ -74,7 +75,16 @@ void Factor_dhCreate(Factor_dh *mat)
   tmp->numbSolve = NULL;
 
   tmp->debug = Parser_dhHasSwitch(parser_dh, "-debug_Factor");
-
+  
+  /* initialize MPI request to null */
+  for(i=0; i<MAX_MPI_TASKS; i++)
+  {
+     tmp->recv_reqLo[i] = hypre_MPI_REQUEST_NULL;
+     tmp->recv_reqHi[i] = hypre_MPI_REQUEST_NULL;
+     tmp->send_reqLo[i] = hypre_MPI_REQUEST_NULL;
+     tmp->send_reqHi[i] = hypre_MPI_REQUEST_NULL;
+     tmp->requests[i] = hypre_MPI_REQUEST_NULL;
+  }
 /*  Factor_dhZeroTiming(tmp); CHECK_V_ERROR; */
   END_FUNC_DH
 }
@@ -84,6 +94,7 @@ void Factor_dhCreate(Factor_dh *mat)
 void Factor_dhDestroy(Factor_dh mat)
 {
   START_FUNC_DH
+  HYPRE_Int i;
 
   if (mat->rp != NULL) { FREE_DH(mat->rp); CHECK_V_ERROR; }
   if (mat->cval != NULL) { FREE_DH(mat->cval); CHECK_V_ERROR; }
@@ -99,6 +110,16 @@ void Factor_dhDestroy(Factor_dh mat)
   if (mat->sendindHi != NULL) { FREE_DH(mat->sendindHi); CHECK_V_ERROR; }
 
   if (mat->numbSolve != NULL) { Numbering_dhDestroy(mat->numbSolve); CHECK_V_ERROR; }
+  
+  /* cleanup MPI requests */
+  for(i=0; i<MAX_MPI_TASKS; i++)
+  {
+     if(mat->recv_reqLo[i] != hypre_MPI_REQUEST_NULL) hypre_MPI_Request_free(&(mat->recv_reqLo[i]));
+     if(mat->recv_reqHi[i] != hypre_MPI_REQUEST_NULL) hypre_MPI_Request_free(&(mat->recv_reqHi[i]));     
+     if(mat->send_reqLo[i] != hypre_MPI_REQUEST_NULL) hypre_MPI_Request_free(&(mat->send_reqLo[i]));
+     if(mat->send_reqHi[i] != hypre_MPI_REQUEST_NULL) hypre_MPI_Request_free(&(mat->send_reqHi[i]));
+     if(mat->requests[i] != hypre_MPI_REQUEST_NULL) hypre_MPI_Request_free(&(mat->requests[i]));     
+  }
   FREE_DH(mat); CHECK_V_ERROR; 
   END_FUNC_DH
 }
@@ -358,7 +379,7 @@ static HYPRE_Int setup_receives_private(Factor_dh mat, HYPRE_Int *beg_rows, HYPR
     hypre_MPI_Request_free(&request); 
 
     /* set up persistent comms for receiving the values from this_pe */
-    hypre_MPI_Recv_init(recvBuf+i, j-i, hypre_MPI_DOUBLE, this_pe, 555,
+    hypre_MPI_Recv_init(recvBuf+i, j-i, hypre_MPI_REAL, this_pe, 555,
                         comm_dh, req+num_recv); 
     ++num_recv;
   }
@@ -436,7 +457,7 @@ static void setup_sends_private(Factor_dh mat, HYPRE_Int *inlist,
       ++count;
 
       /* Set up the send */
-      hypre_MPI_Send_init(sendBuf, inlist[i], hypre_MPI_DOUBLE, i, 555, comm_dh, sendReq); 
+      hypre_MPI_Send_init(sendBuf, inlist[i], hypre_MPI_REAL, i, 555, comm_dh, sendReq); 
     }
   }
 
@@ -744,7 +765,7 @@ for (i=0; i<m+offsetLo+offsetHi; ++i) {
   }
 
   /* copy solution from work vector lhs vector */
-  memcpy(lhs, work_x, m*sizeof(HYPRE_Real));
+  hypre_TMemcpy(lhs,  work_x, HYPRE_Real, m, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
 
   if (debug) {
     hypre_fprintf(logFile, "\nFACT solution: ");
@@ -925,18 +946,18 @@ void Factor_dhReallocate(Factor_dh F, HYPRE_Int used, HYPRE_Int additional)
     F->alloc = alloc;
     tmpI = F->cval;
     F->cval = (HYPRE_Int*)MALLOC_DH(alloc*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-    memcpy(F->cval, tmpI, used*sizeof(HYPRE_Int));
+    hypre_TMemcpy(F->cval,  tmpI, HYPRE_Int, used, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
     FREE_DH(tmpI); CHECK_V_ERROR;
     if (F->fill != NULL) {
       tmpI = F->fill;
       F->fill = (HYPRE_Int*)MALLOC_DH(alloc*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-      memcpy(F->fill, tmpI, used*sizeof(HYPRE_Int));
+      hypre_TMemcpy(F->fill,  tmpI, HYPRE_Int, used, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
       FREE_DH(tmpI); CHECK_V_ERROR;
     }
     if (F->aval != NULL) {
       REAL_DH *tmpF = F->aval;
       F->aval = (REAL_DH*)MALLOC_DH(alloc*sizeof(REAL_DH)); CHECK_V_ERROR;
-      memcpy(F->aval, tmpF, used*sizeof(REAL_DH));
+      hypre_TMemcpy(F->aval,  tmpF, REAL_DH, used, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
       FREE_DH(tmpF); CHECK_V_ERROR;
     }
   }
@@ -1107,7 +1128,7 @@ HYPRE_Real Factor_dhMaxPivotInverse(Factor_dh mat)
   if (np_dh == 1) {
     minGlobal = min;
   } else {
-    hypre_MPI_Reduce(&min, &minGlobal, 1, hypre_MPI_DOUBLE, hypre_MPI_MIN, 0, comm_dh);
+    hypre_MPI_Reduce(&min, &minGlobal, 1, hypre_MPI_REAL, hypre_MPI_MIN, 0, comm_dh);
   }
 
   if (minGlobal == 0) {
@@ -1134,7 +1155,7 @@ HYPRE_Real Factor_dhMaxValue(Factor_dh mat)
   if (np_dh == 1) {
     maxGlobal = max;
   } else {
-    hypre_MPI_Reduce(&max, &maxGlobal, 1, hypre_MPI_DOUBLE, hypre_MPI_MAX, 0, comm_dh);
+    hypre_MPI_Reduce(&max, &maxGlobal, 1, hypre_MPI_REAL, hypre_MPI_MAX, 0, comm_dh);
   }
   END_FUNC_VAL(maxGlobal)
 }
@@ -1164,7 +1185,7 @@ HYPRE_Real Factor_dhCondEst(Factor_dh mat, Euclid_dh ctx)
   if (np_dh == 1) {
     maxGlobal = max;
   } else {
-    hypre_MPI_Reduce(&max, &maxGlobal, 1, hypre_MPI_DOUBLE, hypre_MPI_MAX, 0, comm_dh);
+    hypre_MPI_Reduce(&max, &maxGlobal, 1, hypre_MPI_REAL, hypre_MPI_MAX, 0, comm_dh);
   }
   END_FUNC_VAL(maxGlobal)
 }

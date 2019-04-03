@@ -30,7 +30,10 @@ Parser_dh   parser_dh = NULL;   /* for setting/getting runtime options */
 TimeLog_dh  tlog_dh = NULL;     /* internal timing  functionality */
 Mem_dh      mem_dh = NULL;      /* memory management */
 FILE        *logFile = NULL;
+#if defined(HYPRE_USING_RAJA) || defined(HYPRE_USING_KOKKOS) || defined(HYPRE_USING_CUDA)
+#else
 char        msgBuf_dh[MSG_BUF_SIZE_DH]; /* for internal use */
+#endif
 HYPRE_Int         np_dh = 1;     /* number of processors and subdomains */
 HYPRE_Int         myid_dh = 0;   /* rank of this processor (and subdomain) */
 MPI_Comm    comm_dh = 0;

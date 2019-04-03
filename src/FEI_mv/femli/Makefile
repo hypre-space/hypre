@@ -19,6 +19,7 @@ MLI_INCLUDES = \
  -I.\
  -I../..\
  -I$(srcdir)\
+ -I$(srcdir)/../../blas\
  -I$(srcdir)/../../lapack\
  -I$(srcdir)/../../utilities\
  -I$(srcdir)/../../IJ_mv\
@@ -31,7 +32,8 @@ MLI_INCLUDES = \
  -I$(srcdir)/../../distributed_ls\
  -I$(srcdir)/../../FEI_mv/fei-hypre\
  -I$(srcdir)/../../FEI_mv/femli\
- -I$(srcdir)/../../FEI_mv/SuperLU/SRC
+ ${SUPERLU_INCLUDE}
+# ${DSUPERLU_INCLUDE}
 
 C_COMPILE_FLAGS =\
  -DMLI_SUPERLU\
@@ -127,7 +129,7 @@ OBJSC = ${FILES:.c=.o}
 OBJSCXX = ${OBJSC:.cxx=.o}
 OBJS = ${OBJSCXX:.f=.o}
 
-SONAME = libHYPRE_mli-${HYPRE_RELEASE_VERSION}.so
+SONAME = libHYPRE_mli-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
 ##################################################################
 # Targets
@@ -155,7 +157,7 @@ libHYPRE_mli.a: ${OBJS}
 	${AR} $@ ${OBJS}
 	${RANLIB} $@
 
-libHYPRE_mli.so: ${OBJS}
+libHYPRE_mli.so libHYPRE_mli.dylib: ${OBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
 	ln -s ${SONAME} $@

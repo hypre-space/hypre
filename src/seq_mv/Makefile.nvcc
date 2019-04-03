@@ -1,0 +1,4 @@
+
+FILES_NVCC =\
+ gpukernels.cu
+

@@ -49,6 +49,7 @@ typedef struct
    hypre_StructGrid    **PT_grid_l;
                     
    HYPRE_Real           *data;
+   HYPRE_Real           *data_const;
    hypre_StructMatrix  **A_l;
    hypre_StructMatrix  **PT_l;
    hypre_StructMatrix  **R_l;
@@ -76,7 +77,9 @@ typedef struct
    HYPRE_Int             logging;
    HYPRE_Real           *norms;
    HYPRE_Real           *rel_norms;
-
+#if defined(HYPRE_USING_CUDA)
+   HYPRE_Int             devicelevel;
+#endif
 } hypre_SMGData;
 
 /*--------------------------------------------------------------------------

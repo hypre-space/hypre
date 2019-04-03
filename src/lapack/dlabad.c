@@ -1,8 +1,11 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include "hypre_lapack.h"
 #include "f2c.h"
+#include "hypre_lapack.h"
 
-/* Subroutine */ HYPRE_Int dlabad_(doublereal *small, doublereal *large)
+/* Subroutine */ integer dlabad_(doublereal *small, doublereal *large)
 {
 /*  -- LAPACK auxiliary routine (version 3.0) --   
        Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
@@ -41,7 +44,7 @@
        If it looks like we're on a Cray, take the square root of   
        SMALL and LARGE to avoid overflow and underflow problems. */
     /* Builtin functions */
-    HYPRE_Real d_lg10(doublereal *), sqrt(doublereal);
+    doublereal d_lg10(doublereal *);
 
 
     if (d_lg10(large) > 2e3) {
@@ -55,3 +58,6 @@
 
 } /* dlabad_ */
 
+#ifdef __cplusplus
+}
+#endif

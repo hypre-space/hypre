@@ -70,7 +70,7 @@ void * hypre_SymQMRCreate( )
 {
    hypre_SymQMRData *symqmr_data;
  
-   symqmr_data = hypre_CTAlloc(hypre_SymQMRData, 1);
+   symqmr_data = hypre_CTAlloc(hypre_SymQMRData,  1, HYPRE_MEMORY_HOST);
  
    /* set defaults */
    (symqmr_data -> tol)            = 1.0e-06;
@@ -106,7 +106,7 @@ int hypre_SymQMRDestroy( void *symqmr_vdata )
    {
       if ((symqmr_data -> logging) > 0)
       {
-         hypre_TFree(symqmr_data -> norms);
+         hypre_TFree(symqmr_data -> norms, HYPRE_MEMORY_HOST);
       }
  
       hypre_ParKrylovMatvecDestroy(symqmr_data -> matvec_data);
@@ -118,7 +118,7 @@ int hypre_SymQMRDestroy( void *symqmr_vdata )
       hypre_ParKrylovDestroyVector(symqmr_data -> t);
       hypre_ParKrylovDestroyVector(symqmr_data -> rq);
  
-      hypre_TFree(symqmr_data);
+      hypre_TFree(symqmr_data, HYPRE_MEMORY_HOST);
    }
  
    return(ierr);
@@ -168,7 +168,7 @@ int hypre_SymQMRSetup( void *symqmr_vdata, void *A, void *b, void *x         )
    if ((symqmr_data -> logging) > 0)
    {
       if ((symqmr_data -> norms) == NULL)
-         (symqmr_data -> norms) = hypre_CTAlloc(double, max_iter + 1);
+         (symqmr_data -> norms) = hypre_CTAlloc(double,  max_iter + 1, HYPRE_MEMORY_HOST);
       if ((symqmr_data -> log_file_name) == NULL)
 		  (symqmr_data -> log_file_name) = (char*)"symqmr.out.log";
    }

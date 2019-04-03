@@ -11,11 +11,9 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
-
-
-
 TNAME=`basename $0 .sh`
+RTOL=$1
+ATOL=$2
 
 #=============================================================================
 # sstruct: Test various blockings and distributions of default problem
@@ -25,10 +23,26 @@ tail -3 ${TNAME}.out.0 > ${TNAME}.testdata
 tail -3 ${TNAME}.out.2 > ${TNAME}.testdata.temp
 diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
+tail -3 ${TNAME}.out.10 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.12 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+
+tail -3 ${TNAME}.out.20 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.22 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+
 #=============================================================================
 
 tail -3 ${TNAME}.out.1 > ${TNAME}.testdata
 tail -3 ${TNAME}.out.3 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+
+tail -3 ${TNAME}.out.11 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.13 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+
+tail -3 ${TNAME}.out.21 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.23 > ${TNAME}.testdata.temp
 diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
 #=============================================================================
@@ -40,6 +54,14 @@ FILES="\
  ${TNAME}.out.1\
  ${TNAME}.out.2\
  ${TNAME}.out.3\
+ ${TNAME}.out.10\
+ ${TNAME}.out.11\
+ ${TNAME}.out.12\
+ ${TNAME}.out.13\
+ ${TNAME}.out.20\
+ ${TNAME}.out.21\
+ ${TNAME}.out.22\
+ ${TNAME}.out.23\
 "
 
 for i in $FILES
@@ -57,7 +79,8 @@ if [ "$OUT_COUNT" != "$SAVED_COUNT" ]; then
 fi
 
 if [ -z $HYPRE_NO_SAVED ]; then
-   diff -U3 -bI"time" ${TNAME}.saved ${TNAME}.out >&2
+   #diff -U3 -bI"time" ${TNAME}.saved ${TNAME}.out >&2
+   (../runcheck.sh ${TNAME}.out ${TNAME}.saved $RTOL $ATOL) >&2
 fi
 
 #=============================================================================

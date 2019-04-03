@@ -65,9 +65,14 @@ typedef struct
 HYPRE_Int 
 HYPRE_ParCSRParaSailsCreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
-   Secret *secret;
+#ifdef HYPRE_MIXEDINT
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   return hypre_error_flag;
+#else
    
-   secret = (Secret *) malloc(sizeof(Secret));
+   Secret *secret;
+
+   secret = hypre_TAlloc(Secret, 1, HYPRE_MEMORY_HOST);
 
    if (secret == NULL)
    {
@@ -89,6 +94,7 @@ HYPRE_ParCSRParaSailsCreate( MPI_Comm comm, HYPRE_Solver *solver )
    *solver = (HYPRE_Solver) secret;
 
    return hypre_error_flag;
+#endif
 }
 
 /*--------------------------------------------------------------------------
@@ -98,6 +104,11 @@ HYPRE_ParCSRParaSailsCreate( MPI_Comm comm, HYPRE_Solver *solver )
 HYPRE_Int 
 HYPRE_ParCSRParaSailsDestroy( HYPRE_Solver solver )
 {
+#ifdef HYPRE_MIXEDINT
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   return hypre_error_flag;
+#else
+   
    Secret *secret;
 
    secret = (Secret *) solver;
@@ -106,6 +117,7 @@ HYPRE_ParCSRParaSailsDestroy( HYPRE_Solver solver )
    free(secret);
 
    return hypre_error_flag;
+#endif
 }
 
 /*--------------------------------------------------------------------------
@@ -120,6 +132,11 @@ HYPRE_ParCSRParaSailsSetup( HYPRE_Solver solver,
                             HYPRE_ParVector b,
                             HYPRE_ParVector x      )
 {
+#ifdef HYPRE_MIXEDINT
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   return hypre_error_flag;
+#else
+   
    static HYPRE_Int virgin = 1;
    HYPRE_DistributedMatrix mat;
    Secret *secret = (Secret *) solver;
@@ -148,6 +165,7 @@ HYPRE_ParCSRParaSailsSetup( HYPRE_Solver solver,
    HYPRE_DistributedMatrixDestroy(mat);
 
    return hypre_error_flag;
+#endif
 }
 
 /*--------------------------------------------------------------------------
@@ -160,6 +178,11 @@ HYPRE_ParCSRParaSailsSolve( HYPRE_Solver solver,
                             HYPRE_ParVector b,
                             HYPRE_ParVector x     )
 {
+#ifdef HYPRE_MIXEDINT
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   return hypre_error_flag;
+#else
+   
    HYPRE_Real *rhs, *soln;
    Secret *secret = (Secret *) solver;
 
@@ -169,6 +192,7 @@ HYPRE_ParCSRParaSailsSolve( HYPRE_Solver solver,
    hypre_ParaSailsApply(secret->obj, rhs, soln);
 
    return hypre_error_flag;
+#endif
 }
 
 /*--------------------------------------------------------------------------
@@ -181,12 +205,18 @@ HYPRE_ParCSRParaSailsSetParams(HYPRE_Solver solver,
                                HYPRE_Real   thresh,
                                HYPRE_Int    nlevels )
 {
+#ifdef HYPRE_MIXEDINT
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   return hypre_error_flag;
+#else
+   
    Secret *secret = (Secret *) solver;
 
    secret->thresh  = thresh;
    secret->nlevels = nlevels;
 
    return hypre_error_flag;
+#endif
 }
 
 /*--------------------------------------------------------------------------
@@ -198,22 +228,34 @@ HYPRE_Int
 HYPRE_ParCSRParaSailsSetFilter(HYPRE_Solver solver, 
                                HYPRE_Real   filter  )
 {
+#ifdef HYPRE_MIXEDINT
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   return hypre_error_flag;
+#else
+   
    Secret *secret = (Secret *) solver;
 
    secret->filter = filter;
 
    return hypre_error_flag;
+#endif
 }
 
 HYPRE_Int
 HYPRE_ParCSRParaSailsGetFilter(HYPRE_Solver solver, 
                                HYPRE_Real * filter  )
 {
+#ifdef HYPRE_MIXEDINT
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   return hypre_error_flag;
+#else
+   
    Secret *secret = (Secret *) solver;
 
    *filter = secret->filter;
 
    return hypre_error_flag;
+#endif
 }
 
 /*--------------------------------------------------------------------------
@@ -225,11 +267,17 @@ HYPRE_Int
 HYPRE_ParCSRParaSailsSetSym(HYPRE_Solver solver, 
                             HYPRE_Int    sym     )
 {
+#ifdef HYPRE_MIXEDINT
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   return hypre_error_flag;
+#else
+   
    Secret *secret = (Secret *) solver;
 
    secret->sym = sym;
 
    return hypre_error_flag;
+#endif
 }
 
 /*--------------------------------------------------------------------------
@@ -240,22 +288,34 @@ HYPRE_Int
 HYPRE_ParCSRParaSailsSetLoadbal(HYPRE_Solver solver, 
                                 HYPRE_Real   loadbal )
 {
+#ifdef HYPRE_MIXEDINT
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   return hypre_error_flag;
+#else
+   
    Secret *secret = (Secret *) solver;
 
    secret->loadbal = loadbal;
 
    return hypre_error_flag;
+#endif
 }
 
 HYPRE_Int
 HYPRE_ParCSRParaSailsGetLoadbal(HYPRE_Solver solver, 
                                 HYPRE_Real * loadbal )
 {
+#ifdef HYPRE_MIXEDINT
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   return hypre_error_flag;
+#else
+   
    Secret *secret = (Secret *) solver;
 
    *loadbal = secret->loadbal;
 
    return hypre_error_flag;
+#endif
 }
 
 /*--------------------------------------------------------------------------
@@ -266,11 +326,17 @@ HYPRE_Int
 HYPRE_ParCSRParaSailsSetReuse(HYPRE_Solver solver, 
                               HYPRE_Int    reuse   )
 {
+#ifdef HYPRE_MIXEDINT
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   return hypre_error_flag;
+#else
+   
    Secret *secret = (Secret *) solver;
 
    secret->reuse = reuse;
 
    return hypre_error_flag;
+#endif
 }
 
 /*--------------------------------------------------------------------------
@@ -281,11 +347,17 @@ HYPRE_Int
 HYPRE_ParCSRParaSailsSetLogging(HYPRE_Solver solver, 
                                 HYPRE_Int    logging )
 {
+#ifdef HYPRE_MIXEDINT
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   return hypre_error_flag;
+#else
+   
    Secret *secret = (Secret *) solver;
 
    secret->logging = logging;
 
    return hypre_error_flag;
+#endif
 }
 
 /******************************************************************************
@@ -303,9 +375,14 @@ HYPRE_ParCSRParaSailsSetLogging(HYPRE_Solver solver,
 HYPRE_Int 
 HYPRE_ParaSailsCreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
+#ifdef HYPRE_MIXEDINT
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   return hypre_error_flag;
+#else
+   
    Secret *secret;
    
-   secret = (Secret *) malloc(sizeof(Secret));
+   secret = hypre_TAlloc(Secret, 1, HYPRE_MEMORY_HOST);
 
    if (secret == NULL)
    {
@@ -327,6 +404,7 @@ HYPRE_ParaSailsCreate( MPI_Comm comm, HYPRE_Solver *solver )
    *solver = (HYPRE_Solver) secret;
 
    return hypre_error_flag;
+#endif
 }
 
 /*--------------------------------------------------------------------------
@@ -336,6 +414,11 @@ HYPRE_ParaSailsCreate( MPI_Comm comm, HYPRE_Solver *solver )
 HYPRE_Int 
 HYPRE_ParaSailsDestroy( HYPRE_Solver solver )
 {
+#ifdef HYPRE_MIXEDINT
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   return hypre_error_flag;
+#else
+   
    Secret *secret;
 
    secret = (Secret *) solver;
@@ -344,6 +427,7 @@ HYPRE_ParaSailsDestroy( HYPRE_Solver solver )
    free(secret);
 
    return hypre_error_flag;
+#endif
 }
 
 /*--------------------------------------------------------------------------
@@ -358,6 +442,11 @@ HYPRE_ParaSailsSetup( HYPRE_Solver solver,
                       HYPRE_ParVector b,
                       HYPRE_ParVector x     )
 {
+#ifdef HYPRE_MIXEDINT
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   return hypre_error_flag;
+#else
+   
    static HYPRE_Int virgin = 1;
    HYPRE_DistributedMatrix mat;
    Secret *secret = (Secret *) solver;
@@ -388,6 +477,7 @@ HYPRE_ParaSailsSetup( HYPRE_Solver solver,
    HYPRE_DistributedMatrixDestroy(mat);
 
    return hypre_error_flag;
+#endif
 }
 /*--------------------------------------------------------------------------
  * HYPRE_ParaSailsSolve - Solve function for ParaSails.
@@ -399,6 +489,11 @@ HYPRE_ParaSailsSolve( HYPRE_Solver solver,
                       HYPRE_ParVector b,
                       HYPRE_ParVector x     )
 {
+#ifdef HYPRE_MIXEDINT
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   return hypre_error_flag;
+#else
+   
    HYPRE_Real *rhs, *soln;
    Secret *secret = (Secret *) solver;
 
@@ -408,6 +503,7 @@ HYPRE_ParaSailsSolve( HYPRE_Solver solver,
    hypre_ParaSailsApply(secret->obj, rhs, soln);
 
    return hypre_error_flag;
+#endif
 }
 
 /*--------------------------------------------------------------------------
@@ -420,12 +516,18 @@ HYPRE_ParaSailsSetParams(HYPRE_Solver solver,
                          HYPRE_Real   thresh,
                          HYPRE_Int    nlevels )
 {
+#ifdef HYPRE_MIXEDINT
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   return hypre_error_flag;
+#else
+   
    Secret *secret = (Secret *) solver;
 
    secret->thresh  = thresh;
    secret->nlevels = nlevels;
 
    return hypre_error_flag;
+#endif
 }
 
 /*--------------------------------------------------------------------------
@@ -438,22 +540,34 @@ HYPRE_Int
 HYPRE_ParaSailsSetThresh( HYPRE_Solver solver, 
                           HYPRE_Real   thresh )
 {
+#ifdef HYPRE_MIXEDINT
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   return hypre_error_flag;
+#else
+   
    Secret *secret = (Secret *) solver;
 
    secret->thresh  = thresh;
 
    return hypre_error_flag;
+#endif
 }
 
 HYPRE_Int
 HYPRE_ParaSailsGetThresh( HYPRE_Solver solver, 
                           HYPRE_Real * thresh )
 {
+#ifdef HYPRE_MIXEDINT
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   return hypre_error_flag;
+#else
+   
    Secret *secret = (Secret *) solver;
 
    *thresh = secret->thresh;
 
    return hypre_error_flag;
+#endif
 }
 
 /*--------------------------------------------------------------------------
@@ -466,22 +580,34 @@ HYPRE_Int
 HYPRE_ParaSailsSetNlevels( HYPRE_Solver solver, 
                            HYPRE_Int    nlevels )
 {
+#ifdef HYPRE_MIXEDINT
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   return hypre_error_flag;
+#else
+   
    Secret *secret = (Secret *) solver;
 
    secret->nlevels  = nlevels;
 
    return hypre_error_flag;
+#endif
 }
 
 HYPRE_Int
 HYPRE_ParaSailsGetNlevels( HYPRE_Solver solver, 
                            HYPRE_Int  * nlevels )
 {
+#ifdef HYPRE_MIXEDINT
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   return hypre_error_flag;
+#else
+   
    Secret *secret = (Secret *) solver;
 
    *nlevels = secret->nlevels;
 
    return hypre_error_flag;
+#endif
 }
 
 /*--------------------------------------------------------------------------
@@ -493,22 +619,34 @@ HYPRE_Int
 HYPRE_ParaSailsSetFilter(HYPRE_Solver solver, 
                          HYPRE_Real   filter  )
 {
+#ifdef HYPRE_MIXEDINT
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   return hypre_error_flag;
+#else
+   
    Secret *secret = (Secret *) solver;
 
    secret->filter = filter;
 
    return hypre_error_flag;
+#endif
 }
 
 HYPRE_Int
 HYPRE_ParaSailsGetFilter(HYPRE_Solver solver, 
                          HYPRE_Real * filter  )
 {
+#ifdef HYPRE_MIXEDINT
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   return hypre_error_flag;
+#else
+   
    Secret *secret = (Secret *) solver;
 
    *filter = secret->filter;
 
    return hypre_error_flag;
+#endif
 }
 
 /*--------------------------------------------------------------------------
@@ -521,22 +659,34 @@ HYPRE_Int
 HYPRE_ParaSailsSetSym(HYPRE_Solver solver, 
                       HYPRE_Int    sym     )
 {
+#ifdef HYPRE_MIXEDINT
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   return hypre_error_flag;
+#else
+   
    Secret *secret = (Secret *) solver;
 
    secret->sym = sym;
 
    return hypre_error_flag;
+#endif
 }
 
 HYPRE_Int
 HYPRE_ParaSailsGetSym(HYPRE_Solver solver, 
                       HYPRE_Int  * sym     )
 {
+#ifdef HYPRE_MIXEDINT
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   return hypre_error_flag;
+#else
+   
    Secret *secret = (Secret *) solver;
 
    *sym = secret->sym;
 
    return hypre_error_flag;
+#endif
 }
 
 /*--------------------------------------------------------------------------
@@ -547,22 +697,34 @@ HYPRE_Int
 HYPRE_ParaSailsSetLoadbal(HYPRE_Solver solver, 
                           HYPRE_Real   loadbal )
 {
+#ifdef HYPRE_MIXEDINT
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   return hypre_error_flag;
+#else
+   
    Secret *secret = (Secret *) solver;
 
    secret->loadbal = loadbal;
 
    return hypre_error_flag;
+#endif
 }
 
 HYPRE_Int
 HYPRE_ParaSailsGetLoadbal(HYPRE_Solver solver, 
                           HYPRE_Real * loadbal )
 {
+#ifdef HYPRE_MIXEDINT
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   return hypre_error_flag;
+#else
+   
    Secret *secret = (Secret *) solver;
 
    *loadbal = secret->loadbal;
 
    return hypre_error_flag;
+#endif
 }
 
 /*--------------------------------------------------------------------------
@@ -574,22 +736,34 @@ HYPRE_Int
 HYPRE_ParaSailsSetReuse(HYPRE_Solver solver, 
                         HYPRE_Int    reuse   )
 {
+#ifdef HYPRE_MIXEDINT
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   return hypre_error_flag;
+#else
+   
    Secret *secret = (Secret *) solver;
 
    secret->reuse = reuse;
 
    return hypre_error_flag;
+#endif
 }
 
 HYPRE_Int
 HYPRE_ParaSailsGetReuse(HYPRE_Solver solver, 
                         HYPRE_Int  * reuse   )
 {
+#ifdef HYPRE_MIXEDINT
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   return hypre_error_flag;
+#else
+   
    Secret *secret = (Secret *) solver;
 
    *reuse = secret->reuse;
 
    return hypre_error_flag;
+#endif
 }
 
 /*--------------------------------------------------------------------------
@@ -600,22 +774,34 @@ HYPRE_Int
 HYPRE_ParaSailsSetLogging(HYPRE_Solver solver, 
                           HYPRE_Int    logging )
 {
+#ifdef HYPRE_MIXEDINT
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   return hypre_error_flag;
+#else
+   
    Secret *secret = (Secret *) solver;
 
    secret->logging = logging;
 
    return hypre_error_flag;
+#endif
 }
 
 HYPRE_Int
 HYPRE_ParaSailsGetLogging(HYPRE_Solver solver, 
                           HYPRE_Int  * logging )
 {
+#ifdef HYPRE_MIXEDINT
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   return hypre_error_flag;
+#else
+   
    Secret *secret = (Secret *) solver;
 
    *logging = secret->logging;
 
    return hypre_error_flag;
+#endif
 }
 
 /*--------------------------------------------------------------------------
@@ -624,9 +810,15 @@ HYPRE_ParaSailsGetLogging(HYPRE_Solver solver,
 HYPRE_Int
 HYPRE_ParaSailsBuildIJMatrix(HYPRE_Solver solver, HYPRE_IJMatrix *pij_A)
 {
+#ifdef HYPRE_MIXEDINT
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   return hypre_error_flag;
+#else
+   
    Secret *secret = (Secret *) solver;
 
    hypre_ParaSailsBuildIJMatrix(secret->obj, pij_A);
     
    return hypre_error_flag;
+#endif
 }

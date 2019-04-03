@@ -25,8 +25,8 @@
 
 hypre_FlexGMRESFunctions *
 hypre_FlexGMRESFunctionsCreate(
-   char *       (*CAlloc)        ( size_t count, size_t elt_size ),
-   HYPRE_Int    (*Free)          ( char *ptr ),
+   void *       (*CAlloc)        ( size_t count, size_t elt_size, HYPRE_Int location ),
+   HYPRE_Int    (*Free)          ( void *ptr ),
    HYPRE_Int    (*CommInfo)      ( void  *A, HYPRE_Int   *my_id,
                                    HYPRE_Int   *num_procs ),
    void *       (*CreateVector)  ( void *vector ),
@@ -47,7 +47,7 @@ hypre_FlexGMRESFunctionsCreate(
 {
    hypre_FlexGMRESFunctions * fgmres_functions;
    fgmres_functions = (hypre_FlexGMRESFunctions *)
-      CAlloc( 1, sizeof(hypre_FlexGMRESFunctions) );
+      CAlloc( 1, sizeof(hypre_FlexGMRESFunctions), HYPRE_MEMORY_HOST );
 
    fgmres_functions->CAlloc = CAlloc;
    fgmres_functions->Free = Free;
@@ -82,7 +82,7 @@ hypre_FlexGMRESCreate( hypre_FlexGMRESFunctions *fgmres_functions )
 {
    hypre_FlexGMRESData *fgmres_data;
  
-   fgmres_data = hypre_CTAllocF(hypre_FlexGMRESData, 1, fgmres_functions);
+   fgmres_data = hypre_CTAllocF(hypre_FlexGMRESData, 1, fgmres_functions, HYPRE_MEMORY_HOST);
 
    fgmres_data->functions = fgmres_functions;
  
@@ -245,7 +245,7 @@ hypre_FlexGMRESSetup( void *fgmres_vdata,
    if ( (fgmres_data->logging)>0 || (fgmres_data->print_level) > 0 )
    {
       if ((fgmres_data -> norms) == NULL)
-         (fgmres_data -> norms) = hypre_CTAllocF(HYPRE_Real, max_iter + 1,fgmres_functions);
+         (fgmres_data -> norms) = hypre_CTAllocF(HYPRE_Real, max_iter + 1,fgmres_functions, HYPRE_MEMORY_HOST);
    }
    if ( (fgmres_data->print_level) > 0 ) {
       if ((fgmres_data -> log_file_name) == NULL)
@@ -330,16 +330,16 @@ hypre_FlexGMRESSolve(void  *fgmres_vdata,
    }
 
    /* initialize work arrays  */
-   rs = hypre_CTAllocF(HYPRE_Real,k_dim+1,fgmres_functions); 
-   c = hypre_CTAllocF(HYPRE_Real,k_dim,fgmres_functions); 
-   s = hypre_CTAllocF(HYPRE_Real,k_dim,fgmres_functions); 
+   rs = hypre_CTAllocF(HYPRE_Real,k_dim+1,fgmres_functions, HYPRE_MEMORY_HOST);
+   c = hypre_CTAllocF(HYPRE_Real,k_dim,fgmres_functions, HYPRE_MEMORY_HOST);
+   s = hypre_CTAllocF(HYPRE_Real,k_dim,fgmres_functions, HYPRE_MEMORY_HOST);
 
 
   /* fgmres mod. - need non-modified hessenberg ???? */
-   hh = hypre_CTAllocF(HYPRE_Real*,k_dim+1,fgmres_functions); 
+   hh = hypre_CTAllocF(HYPRE_Real*,k_dim+1,fgmres_functions, HYPRE_MEMORY_HOST); 
    for (i=0; i < k_dim+1; i++)
    {	
-      hh[i] = hypre_CTAllocF(HYPRE_Real,k_dim,fgmres_functions); 
+      hh[i] = hypre_CTAllocF(HYPRE_Real,k_dim,fgmres_functions, HYPRE_MEMORY_HOST); 
    }
    
    (*(fgmres_functions->CopyVector))(b,p[0]);
@@ -690,7 +690,7 @@ hypre_FlexGMRESSolve(void  *fgmres_vdata,
    if (b_norm == 0.0)
       (fgmres_data -> rel_residual_norm) = r_norm;
 
-   if (iter >= max_iter && r_norm > epsilon) hypre_error(HYPRE_ERROR_CONV);
+   if (iter >= max_iter && r_norm > epsilon && epsilon > 0) hypre_error(HYPRE_ERROR_CONV);
    
 
    hypre_TFreeF(c,fgmres_functions); 

@@ -18,6 +18,8 @@ CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
 C_COMPILE_FLAGS = \
  -I..\
  -I$(srcdir)/..\
+ -I$(srcdir)/../blas\
+ -I$(srcdir)/../lapack\
  -I$(srcdir)/../multivector\
  -I$(srcdir)/../utilities\
  ${CINCLUDES}
@@ -28,6 +30,7 @@ HEADERS =\
  bicgstab.h\
  cgnr.h\
  gmres.h\
+ cogmres.h\
  flexgmres.h\
  lgmres.h\
  pcg.h\
@@ -39,11 +42,13 @@ FILES =\
  bicgstab.c\
  cgnr.c\
  gmres.c\
+ cogmres.c\
  flexgmres.c\
  lgmres.c\
  HYPRE_bicgstab.c\
  HYPRE_cgnr.c\
  HYPRE_gmres.c\
+ HYPRE_cogmres.c\
  HYPRE_lgmres.c\
  HYPRE_flexgmres.c\
  HYPRE_pcg.c\
@@ -53,7 +58,7 @@ FILES =\
 
 OBJS = ${FILES:.c=.o}
 
-SONAME = libHYPRE_krylov-${HYPRE_RELEASE_VERSION}.so
+SONAME = libHYPRE_krylov-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
 ##################################################################
 # Targets
@@ -86,7 +91,7 @@ libHYPRE_krylov.a: ${OBJS}
 	${AR} $@ ${OBJS}
 	${RANLIB} $@
 
-libHYPRE_krylov.so: ${OBJS}
+libHYPRE_krylov.so libHYPRE_krylov.dylib: ${OBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
 	ln -s ${SONAME} $@

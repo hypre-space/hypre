@@ -1,8 +1,11 @@
-#include "../blas/hypre_blas.h"
-#include "hypre_lapack.h"
-#include "f2c.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-/* Subroutine */ HYPRE_Int dlarfg_(integer *n, doublereal *alpha, doublereal *x, 
+#include "f2c.h"
+#include "hypre_lapack.h"
+
+/* Subroutine */ integer dlarfg_(integer *n, doublereal *alpha, doublereal *x, 
 	integer *incx, doublereal *tau)
 {
 /*  -- LAPACK auxiliary routine (version 3.0) --   
@@ -63,12 +66,12 @@
     integer i__1;
     doublereal d__1;
     /* Builtin functions */
-    HYPRE_Real d_sign(doublereal *, doublereal *);
+    doublereal d_sign(doublereal *, doublereal *);
     /* Local variables */
     static doublereal beta;
     extern doublereal dnrm2_(integer *, doublereal *, integer *);
     static integer j;
-    extern /* Subroutine */ HYPRE_Int dscal_(integer *, doublereal *, doublereal *, 
+    extern /* Subroutine */ integer dscal_(integer *, doublereal *, doublereal *, 
 	    integer *);
     static doublereal xnorm;
     extern doublereal dlapy2_(doublereal *, doublereal *), dlamch_(const char *);
@@ -148,3 +151,6 @@ L10:
 
 } /* dlarfg_ */
 
+#ifdef __cplusplus
+}
+#endif

@@ -33,7 +33,7 @@ HYPRE_SStructVectorCreate( MPI_Comm              comm,
    hypre_SStructPGrid    *pgrid;
    HYPRE_Int              part;
 
-   vector = hypre_TAlloc(hypre_SStructVector, 1);
+   vector = hypre_TAlloc(hypre_SStructVector,  1, HYPRE_MEMORY_HOST);
 
    hypre_SStructVectorComm(vector) = comm;
    hypre_SStructVectorNDim(vector) = hypre_SStructGridNDim(grid);
@@ -41,7 +41,7 @@ HYPRE_SStructVectorCreate( MPI_Comm              comm,
    hypre_SStructVectorObjectType(vector) = HYPRE_SSTRUCT;
    nparts = hypre_SStructGridNParts(grid);
    hypre_SStructVectorNParts(vector) = nparts;
-   pvectors = hypre_TAlloc(hypre_SStructPVector *, nparts);
+   pvectors = hypre_TAlloc(hypre_SStructPVector *,  nparts, HYPRE_MEMORY_HOST);
    for (part = 0; part < nparts; part++)
    {
       pgrid = hypre_SStructGridPGrid(grid, part);
@@ -100,22 +100,23 @@ HYPRE_SStructVectorDestroy( HYPRE_SStructVector vector )
          {
             hypre_SStructPVectorDestroy(pvectors[part]);
          }
-         hypre_TFree(pvectors);
+         hypre_TFree(pvectors, HYPRE_MEMORY_HOST);
          HYPRE_IJVectorDestroy(hypre_SStructVectorIJVector(vector));
+
          /* GEC1002 the ijdestroy takes care of the data when the
           *  vector is type HYPRE_SSTRUCT. This is a result that the
           * ijvector does not use the owndata flag in the data structure
           * unlike the structvector                               */                      
 
 	 /* GEC if data has been allocated then free the pointer */
-         hypre_TFree(hypre_SStructVectorDataIndices(vector));
+         hypre_TFree(hypre_SStructVectorDataIndices(vector), HYPRE_MEMORY_HOST);
          
          if (hypre_SStructVectorData(vector) && (vector_type == HYPRE_PARCSR))
 	 {
-            hypre_TFree(hypre_SStructVectorData(vector));
+            hypre_TFree(hypre_SStructVectorData(vector), HYPRE_MEMORY_SHARED);
          }
 
-         hypre_TFree(vector);
+         hypre_TFree(vector, HYPRE_MEMORY_HOST);
       }
    }
 
@@ -162,7 +163,7 @@ HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector )
 
    datasize = hypre_SStructVectorDataSize(vector);
 
-   data = hypre_CTAlloc(HYPRE_Complex, datasize);
+   data = hypre_CTAlloc(HYPRE_Complex,  datasize, HYPRE_MEMORY_SHARED);
 
    dataindices = hypre_SStructVectorDataIndices(vector);
 
@@ -239,9 +240,9 @@ HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector )
 
    if (vector_type == HYPRE_SSTRUCT || vector_type == HYPRE_STRUCT)
    {
-	   par_vector = (hypre_ParVector        *)hypre_IJVectorObject(ijvector);
+      par_vector = (hypre_ParVector        *)hypre_IJVectorObject(ijvector);
       parlocal_vector = hypre_ParVectorLocalVector(par_vector);
-      hypre_TFree(hypre_VectorData(parlocal_vector));
+      hypre_TFree(hypre_VectorData(parlocal_vector), HYPRE_MEMORY_SHARED);
       hypre_VectorData(parlocal_vector) = data ;
    }
 
@@ -408,15 +409,8 @@ HYPRE_SStructVectorSetBoxValues( HYPRE_SStructVector  vector,
                                  HYPRE_Int            var,
                                  HYPRE_Complex       *values )
 {
-   HYPRE_Int             ndim    = hypre_SStructVectorNDim(vector);
-   hypre_SStructPVector *pvector = hypre_SStructVectorPVector(vector, part);
-   hypre_Index           cilower;
-   hypre_Index           ciupper;
-
-   hypre_CopyToCleanIndex(ilower, ndim, cilower);
-   hypre_CopyToCleanIndex(iupper, ndim, ciupper);
-
-   hypre_SStructPVectorSetBoxValues(pvector, cilower, ciupper, var, values, 0);
+   HYPRE_SStructVectorSetBoxValues2(vector, part, ilower, iupper, var,
+                                    ilower, iupper, values);
 
    return hypre_error_flag;
 }
@@ -432,16 +426,8 @@ HYPRE_SStructVectorAddToBoxValues( HYPRE_SStructVector  vector,
                                    HYPRE_Int            var,
                                    HYPRE_Complex       *values )
 {
-   HYPRE_Int             ndim    = hypre_SStructVectorNDim(vector);
-   hypre_SStructPVector *pvector = hypre_SStructVectorPVector(vector, part);
-   hypre_Index           cilower;
-   hypre_Index           ciupper;
-
-   hypre_CopyToCleanIndex(ilower, ndim, cilower);
-   hypre_CopyToCleanIndex(iupper, ndim, ciupper);
-
-   hypre_SStructPVectorSetBoxValues(pvector, cilower, ciupper,
-                                    var, values, 1);
+   HYPRE_SStructVectorAddToBoxValues2(vector, part, ilower, iupper, var,
+                                      ilower, iupper, values);
 
    return hypre_error_flag;
 }
@@ -457,16 +443,119 @@ HYPRE_SStructVectorGetBoxValues(HYPRE_SStructVector  vector,
                                 HYPRE_Int            var,
                                 HYPRE_Complex       *values )
 {
-   HYPRE_Int             ndim    = hypre_SStructVectorNDim(vector);
+   HYPRE_SStructVectorGetBoxValues2(vector, part, ilower, iupper, var,
+                                    ilower, iupper, values);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructVectorSetBoxValues2( HYPRE_SStructVector  vector,
+                                  HYPRE_Int            part,
+                                  HYPRE_Int           *ilower,
+                                  HYPRE_Int           *iupper,
+                                  HYPRE_Int            var,
+                                  HYPRE_Int           *vilower,
+                                  HYPRE_Int           *viupper,
+                                  HYPRE_Complex       *values )
+{
    hypre_SStructPVector *pvector = hypre_SStructVectorPVector(vector, part);
-   hypre_Index           cilower;
-   hypre_Index           ciupper;
+   hypre_Box            *set_box, *value_box;
+   HYPRE_Int             d, ndim = hypre_SStructVectorNDim(vector);
 
-   hypre_CopyToCleanIndex(ilower, ndim, cilower);
-   hypre_CopyToCleanIndex(iupper, ndim, ciupper);
+   /* This creates boxes with zeroed-out extents */
+   set_box = hypre_BoxCreate(ndim);
+   value_box = hypre_BoxCreate(ndim);
 
-   hypre_SStructPVectorGetBoxValues(pvector, cilower, ciupper,
-                                    var, values);
+   for (d = 0; d < ndim; d++)
+   {
+      hypre_BoxIMinD(set_box, d) = ilower[d];
+      hypre_BoxIMaxD(set_box, d) = iupper[d];
+      hypre_BoxIMinD(value_box, d) = vilower[d];
+      hypre_BoxIMaxD(value_box, d) = viupper[d];
+   }
+
+   hypre_SStructPVectorSetBoxValues(pvector, set_box, var, value_box, values, 0);
+
+   hypre_BoxDestroy(set_box);
+   hypre_BoxDestroy(value_box);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructVectorAddToBoxValues2( HYPRE_SStructVector  vector,
+                                    HYPRE_Int            part,
+                                    HYPRE_Int           *ilower,
+                                    HYPRE_Int           *iupper,
+                                    HYPRE_Int            var,
+                                    HYPRE_Int           *vilower,
+                                    HYPRE_Int           *viupper,
+                                    HYPRE_Complex       *values )
+{
+   hypre_SStructPVector *pvector = hypre_SStructVectorPVector(vector, part);
+   hypre_Box            *set_box, *value_box;
+   HYPRE_Int             d, ndim = hypre_SStructVectorNDim(vector);
+
+   /* This creates boxes with zeroed-out extents */
+   set_box = hypre_BoxCreate(ndim);
+   value_box = hypre_BoxCreate(ndim);
+
+   for (d = 0; d < ndim; d++)
+   {
+      hypre_BoxIMinD(set_box, d) = ilower[d];
+      hypre_BoxIMaxD(set_box, d) = iupper[d];
+      hypre_BoxIMinD(value_box, d) = vilower[d];
+      hypre_BoxIMaxD(value_box, d) = viupper[d];
+   }
+
+   hypre_SStructPVectorSetBoxValues(pvector, set_box, var, value_box, values, 1);
+
+   hypre_BoxDestroy(set_box);
+   hypre_BoxDestroy(value_box);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructVectorGetBoxValues2(HYPRE_SStructVector  vector,
+                                 HYPRE_Int            part,
+                                 HYPRE_Int           *ilower,
+                                 HYPRE_Int           *iupper,
+                                 HYPRE_Int            var,
+                                 HYPRE_Int           *vilower,
+                                 HYPRE_Int           *viupper,
+                                 HYPRE_Complex       *values )
+{
+   hypre_SStructPVector *pvector = hypre_SStructVectorPVector(vector, part);
+   hypre_Box            *set_box, *value_box;
+   HYPRE_Int             d, ndim = hypre_SStructVectorNDim(vector);
+
+   /* This creates boxes with zeroed-out extents */
+   set_box = hypre_BoxCreate(ndim);
+   value_box = hypre_BoxCreate(ndim);
+
+   for (d = 0; d < ndim; d++)
+   {
+      hypre_BoxIMinD(set_box, d) = ilower[d];
+      hypre_BoxIMaxD(set_box, d) = iupper[d];
+      hypre_BoxIMinD(value_box, d) = vilower[d];
+      hypre_BoxIMaxD(value_box, d) = viupper[d];
+   }
+
+   hypre_SStructPVectorGetBoxValues(pvector, set_box, var, value_box, values);
+
+   hypre_BoxDestroy(set_box);
+   hypre_BoxDestroy(value_box);
 
    return hypre_error_flag;
 }

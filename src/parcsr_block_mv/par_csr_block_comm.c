@@ -47,7 +47,7 @@ hypre_ParCSRBlockCommHandleCreate(HYPRE_Int job,
     *------------------------------------------------------------------------*/
 
    num_requests = num_sends + num_recvs;
-   requests = hypre_CTAlloc(hypre_MPI_Request, num_requests);
+   requests = hypre_CTAlloc(hypre_MPI_Request,  num_requests, HYPRE_MEMORY_HOST);
  
    hypre_MPI_Comm_size(comm,&num_procs);
    hypre_MPI_Comm_rank(comm,&my_id);
@@ -107,7 +107,7 @@ hypre_ParCSRBlockCommHandleCreate(HYPRE_Int job,
     * set up comm_handle and return
     *--------------------------------------------------------------------*/
 
-   comm_handle = hypre_CTAlloc(hypre_ParCSRCommHandle, 1);
+   comm_handle = hypre_CTAlloc(hypre_ParCSRCommHandle,  1, HYPRE_MEMORY_HOST);
 
    hypre_ParCSRCommHandleCommPkg(comm_handle)     = comm_pkg;
    hypre_ParCSRCommHandleSendData(comm_handle)    = send_data;
@@ -130,15 +130,15 @@ hypre_ParCSRBlockCommHandleDestroy(hypre_ParCSRCommHandle *comm_handle)
 
    if (hypre_ParCSRCommHandleNumRequests(comm_handle))
    {
-      status0 = hypre_CTAlloc(hypre_MPI_Status,
-                              hypre_ParCSRCommHandleNumRequests(comm_handle));
+      status0 = hypre_CTAlloc(hypre_MPI_Status, 
+                              hypre_ParCSRCommHandleNumRequests(comm_handle), HYPRE_MEMORY_HOST);
       hypre_MPI_Waitall(hypre_ParCSRCommHandleNumRequests(comm_handle),
                         hypre_ParCSRCommHandleRequests(comm_handle), status0);
-      hypre_TFree(status0);
+      hypre_TFree(status0, HYPRE_MEMORY_HOST);
    }
 
-   hypre_TFree(hypre_ParCSRCommHandleRequests(comm_handle));
-   hypre_TFree(comm_handle);
+   hypre_TFree(hypre_ParCSRCommHandleRequests(comm_handle), HYPRE_MEMORY_HOST);
+   hypre_TFree(comm_handle, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }
@@ -154,9 +154,9 @@ hypre_ParCSRBlockCommHandleDestroy(hypre_ParCSRCommHandle *comm_handle)
 HYPRE_Int
 hypre_ParCSRBlockMatrixCreateAssumedPartition( hypre_ParCSRBlockMatrix *matrix) 
 {
-   HYPRE_Int global_num_cols;
+   HYPRE_BigInt global_num_cols;
    HYPRE_Int myid;
-   HYPRE_Int  col_start = 0, col_end = 0;
+   HYPRE_BigInt  col_start = 0, col_end = 0;
 
    MPI_Comm   comm;
    
@@ -172,7 +172,7 @@ hypre_ParCSRBlockMatrixCreateAssumedPartition( hypre_ParCSRBlockMatrix *matrix)
    hypre_MPI_Comm_rank(comm, &myid );
 
    /* allocate space */
-   apart = hypre_CTAlloc(hypre_IJAssumedPart, 1);
+   apart = hypre_CTAlloc(hypre_IJAssumedPart,  1, HYPRE_MEMORY_HOST);
 
    /* get my assumed partitioning  - we want partitioning of the vector that the
       matrix multiplies - so we use the col start and end */
@@ -183,9 +183,9 @@ hypre_ParCSRBlockMatrixCreateAssumedPartition( hypre_ParCSRBlockMatrix *matrix)
    apart->length = 0;
    /*room for 10 owners of the assumed partition*/ 
    apart->storage_length = 10; /*need to be >=1 */ 
-   apart->proc_list = hypre_TAlloc(HYPRE_Int, apart->storage_length);
-   apart->row_start_list =   hypre_TAlloc(HYPRE_Int, apart->storage_length);
-   apart->row_end_list =   hypre_TAlloc(HYPRE_Int, apart->storage_length);
+   apart->proc_list = hypre_TAlloc(HYPRE_Int,  apart->storage_length, HYPRE_MEMORY_HOST);
+   apart->row_start_list =   hypre_TAlloc(HYPRE_BigInt,  apart->storage_length, HYPRE_MEMORY_HOST);
+   apart->row_end_list =   hypre_TAlloc(HYPRE_BigInt,  apart->storage_length, HYPRE_MEMORY_HOST);
 
    /* now we want to reconcile our actual partition with the assumed partition */
    hypre_LocateAssummedPartition(comm, col_start, col_end,
@@ -212,13 +212,13 @@ hypre_ParCSRBlockMatrixDestroyAssumedPartition( hypre_ParCSRBlockMatrix *matrix 
    
    if(apart->storage_length > 0) 
    {      
-      hypre_TFree(apart->proc_list);
-      hypre_TFree(apart->row_start_list);
-      hypre_TFree(apart->row_end_list);
-      hypre_TFree(apart->sort_index);
+      hypre_TFree(apart->proc_list, HYPRE_MEMORY_HOST);
+      hypre_TFree(apart->row_start_list, HYPRE_MEMORY_HOST);
+      hypre_TFree(apart->row_end_list, HYPRE_MEMORY_HOST);
+      hypre_TFree(apart->sort_index, HYPRE_MEMORY_HOST);
    }
 
-   hypre_TFree(apart);
+   hypre_TFree(apart, HYPRE_MEMORY_HOST);
 
    return (0);
 }

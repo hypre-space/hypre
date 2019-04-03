@@ -1,4 +1,6 @@
-
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /*  -- translated by f2c (version 19940927).
    You must link the resulting object file with the libraries:
@@ -8,7 +10,7 @@
 #include "f2c.h"
 #include "hypre_blas.h"
 
-/* Subroutine */ HYPRE_Int dgemv_(const char *trans, integer *m, integer *n, doublereal *
+/* Subroutine */ integer dgemv_(const char *trans, integer *m, integer *n, doublereal *
 	alpha, doublereal *a, integer *lda, doublereal *x, integer *incx, 
 	doublereal *beta, doublereal *y, integer *incy)
 {
@@ -20,9 +22,9 @@
     static integer info;
     static doublereal temp;
     static integer lenx, leny, i, j;
-    extern logical hypre_lsame_(const char *,const char *);
+    extern logical lsame_(const char *,const char *);
     static integer ix, iy, jx, jy, kx, ky;
-    extern /* Subroutine */ HYPRE_Int hypre_xerbla_(const char *, integer *);
+    extern /* Subroutine */ integer xerbla_(const char *, integer *);
 
 
 /*  Purpose   
@@ -131,8 +133,8 @@
 #define A(I,J) a[(I)-1 + ((J)-1)* ( *lda)]
 
     info = 0;
-    if (! hypre_lsame_(trans, "N") && ! hypre_lsame_(trans, "T") && ! 
-	    hypre_lsame_(trans, "C")) {
+    if (! lsame_(trans, "N") && ! lsame_(trans, "T") && ! 
+	    lsame_(trans, "C")) {
 	info = 1;
     } else if (*m < 0) {
 	info = 2;
@@ -146,7 +148,7 @@
 	info = 11;
     }
     if (info != 0) {
-	hypre_xerbla_("DGEMV ", &info);
+	xerbla_("DGEMV ", &info);
 	return 0;
     }
 
@@ -160,7 +162,7 @@
   
        up the start points in  X  and  Y. */
 
-    if (hypre_lsame_(trans, "N")) {
+    if (lsame_(trans, "N")) {
 	lenx = *n;
 	leny = *m;
     } else {
@@ -216,7 +218,7 @@
     if (*alpha == 0.) {
 	return 0;
     }
-    if (hypre_lsame_(trans, "N")) {
+    if (lsame_(trans, "N")) {
 
 /*        Form  y := alpha*A*x + y. */
 
@@ -285,3 +287,7 @@
 /*     End of DGEMV . */
 
 } /* dgemv_ */
+
+#ifdef __cplusplus
+}
+#endif

@@ -25,8 +25,8 @@
 
 hypre_GMRESFunctions *
 hypre_GMRESFunctionsCreate(
-   char *       (*CAlloc)        ( size_t count, size_t elt_size ),
-   HYPRE_Int    (*Free)          ( char *ptr ),
+   void *       (*CAlloc)        ( size_t count, size_t elt_size, HYPRE_Int location ),
+   HYPRE_Int    (*Free)          ( void *ptr ),
    HYPRE_Int    (*CommInfo)      ( void  *A, HYPRE_Int   *my_id,
                                    HYPRE_Int   *num_procs ),
    void *       (*CreateVector)  ( void *vector ),
@@ -47,7 +47,7 @@ hypre_GMRESFunctionsCreate(
 {
    hypre_GMRESFunctions * gmres_functions;
    gmres_functions = (hypre_GMRESFunctions *)
-      CAlloc( 1, sizeof(hypre_GMRESFunctions) );
+      CAlloc( 1, sizeof(hypre_GMRESFunctions), HYPRE_MEMORY_HOST );
 
    gmres_functions->CAlloc = CAlloc;
    gmres_functions->Free = Free;
@@ -79,7 +79,7 @@ hypre_GMRESCreate( hypre_GMRESFunctions *gmres_functions )
 {
    hypre_GMRESData *gmres_data;
  
-   gmres_data = hypre_CTAllocF(hypre_GMRESData, 1, gmres_functions);
+   gmres_data = hypre_CTAllocF(hypre_GMRESData, 1, gmres_functions, HYPRE_MEMORY_HOST);
 
    gmres_data->functions = gmres_functions;
  
@@ -94,6 +94,7 @@ hypre_GMRESCreate( hypre_GMRESFunctions *gmres_functions )
    (gmres_data -> skip_real_r_check) = 0;
    (gmres_data -> stop_crit)      = 0; /* rel. residual norm  - this is obsolete!*/
    (gmres_data -> converged)      = 0;
+   (gmres_data -> hybrid)         = 0;
    (gmres_data -> precond_data)   = NULL;
    (gmres_data -> print_level)    = 0;
    (gmres_data -> logging)        = 0;
@@ -223,8 +224,9 @@ hypre_GMRESSetup( void *gmres_vdata,
  
    if ( (gmres_data->logging)>0 || (gmres_data->print_level) > 0 )
    {
-      if ((gmres_data -> norms) == NULL)
-         (gmres_data -> norms) = hypre_CTAllocF(HYPRE_Real, max_iter + 1,gmres_functions);
+      if ((gmres_data -> norms) != NULL)
+         hypre_TFreeF(gmres_data -> norms,gmres_functions);
+      (gmres_data -> norms) = hypre_CTAllocF(HYPRE_Real, max_iter + 1,gmres_functions, HYPRE_MEMORY_HOST);
    }
    if ( (gmres_data->print_level) > 0 ) {
       if ((gmres_data -> log_file_name) == NULL)
@@ -251,6 +253,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
    HYPRE_Int 		     max_iter     = (gmres_data -> max_iter);
    HYPRE_Int               rel_change   = (gmres_data -> rel_change);
    HYPRE_Int         skip_real_r_check  = (gmres_data -> skip_real_r_check);
+   HYPRE_Int 		     hybrid        = (gmres_data -> hybrid);
    HYPRE_Real 	     r_tol        = (gmres_data -> tol);
    HYPRE_Real 	     cf_tol       = (gmres_data -> cf_tol);
    HYPRE_Real        a_tol        = (gmres_data -> a_tol);
@@ -312,17 +315,17 @@ hypre_GMRESSolve(void  *gmres_vdata,
    }
 
    /* initialize work arrays */
-   rs = hypre_CTAllocF(HYPRE_Real,k_dim+1,gmres_functions); 
-   c = hypre_CTAllocF(HYPRE_Real,k_dim,gmres_functions); 
-   s = hypre_CTAllocF(HYPRE_Real,k_dim,gmres_functions); 
-   if (rel_change) rs_2 = hypre_CTAllocF(HYPRE_Real,k_dim+1,gmres_functions); 
+   rs = hypre_CTAllocF(HYPRE_Real,k_dim+1,gmres_functions, HYPRE_MEMORY_HOST);
+   c = hypre_CTAllocF(HYPRE_Real,k_dim,gmres_functions, HYPRE_MEMORY_HOST);
+   s = hypre_CTAllocF(HYPRE_Real,k_dim,gmres_functions, HYPRE_MEMORY_HOST);
+   if (rel_change) rs_2 = hypre_CTAllocF(HYPRE_Real,k_dim+1,gmres_functions, HYPRE_MEMORY_HOST); 
    
 
 
-   hh = hypre_CTAllocF(HYPRE_Real*,k_dim+1,gmres_functions); 
+   hh = hypre_CTAllocF(HYPRE_Real*,k_dim+1,gmres_functions, HYPRE_MEMORY_HOST);
    for (i=0; i < k_dim+1; i++)
    {	
-   	hh[i] = hypre_CTAllocF(HYPRE_Real,k_dim,gmres_functions); 
+   	hh[i] = hypre_CTAllocF(HYPRE_Real,k_dim,gmres_functions, HYPRE_MEMORY_HOST);
    }
 
    (*(gmres_functions->CopyVector))(b,p[0]);
@@ -419,18 +422,19 @@ hypre_GMRESSolve(void  *gmres_vdata,
    if ( print_level>1 && my_id == 0 )
    {
       if (b_norm > 0.0)
-         {hypre_printf("=============================================\n\n");
-          hypre_printf("Iters     resid.norm     conv.rate  rel.res.norm\n");
-          hypre_printf("-----    ------------    ---------- ------------\n");
+      {
+         hypre_printf("=============================================\n\n");
+         hypre_printf("Iters     resid.norm     conv.rate  rel.res.norm\n");
+         hypre_printf("-----    ------------    ---------- ------------\n");
       
-          }
-
+      }
       else
-         {hypre_printf("=============================================\n\n");
-          hypre_printf("Iters     resid.norm     conv.rate\n");
-          hypre_printf("-----    ------------    ----------\n");
+      {
+         hypre_printf("=============================================\n\n");
+         hypre_printf("Iters     resid.norm     conv.rate\n");
+         hypre_printf("-----    ------------    ----------\n");
       
-          };
+      };
    }
 
 
@@ -669,7 +673,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
                  }
                  num_rel_change_check++;
               }
-           else /* no relative change */
+              else /* no relative change */
               {
                  break;
               }
@@ -832,8 +836,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
    if (b_norm == 0.0)
       (gmres_data -> rel_residual_norm) = r_norm;
 
-   if (iter >= max_iter && r_norm > epsilon) hypre_error(HYPRE_ERROR_CONV);
-   
+   if (iter >= max_iter && r_norm > epsilon && epsilon > 0 && hybrid != -1) hypre_error(HYPRE_ERROR_CONV);
 
    hypre_TFreeF(c,gmres_functions); 
    hypre_TFreeF(s,gmres_functions); 
@@ -1174,7 +1177,6 @@ hypre_GMRESSetLogging( void *gmres_vdata,
                       HYPRE_Int   level)
 {
    hypre_GMRESData *gmres_data = (hypre_GMRESData *)gmres_vdata;
-
  
    (gmres_data -> logging) = level;
  
@@ -1186,9 +1188,19 @@ hypre_GMRESGetLogging( void *gmres_vdata,
                       HYPRE_Int * level)
 {
    hypre_GMRESData *gmres_data = (hypre_GMRESData *)gmres_vdata;
-
  
    *level = (gmres_data -> logging);
+ 
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_GMRESSetHybrid( void *gmres_vdata,
+                      HYPRE_Int   level)
+{
+   hypre_GMRESData *gmres_data = (hypre_GMRESData *)gmres_vdata;
+ 
+   (gmres_data -> hybrid) = level;
  
    return hypre_error_flag;
 }

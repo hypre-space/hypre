@@ -110,7 +110,7 @@ void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, HYPRE_Real *x, HYPR
 
 
   /* Allocate requests */
-  receive_requests = hypre_CTAlloc( hypre_MPI_Request, npes );
+  receive_requests = hypre_CTAlloc( hypre_MPI_Request,  npes , HYPRE_MEMORY_HOST);
 
 #ifdef HYPRE_TIMING
   hypre_BeginTiming( globals->Lp_timer );
@@ -126,7 +126,7 @@ void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, HYPRE_Real *x, HYPR
     /* Recv the required lx elements from the appropriate processors */
     for (i=0; i<rnbrpes; i++) {
       if ( rnum[i] > 0 ) { /* Something to recv */
-	hypre_MPI_Irecv( raddr[i]+rdone[i], rnum[i], hypre_MPI_DOUBLE,
+	hypre_MPI_Irecv( raddr[i]+rdone[i], rnum[i], hypre_MPI_REAL,
 		  rpes[i], TAG, pilut_comm, &receive_requests[i] );
 
 	rdone[i] += rnum[i] ;
@@ -139,7 +139,7 @@ void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, HYPRE_Real *x, HYPR
         for (j=auxsptr[i], l=0;   j<sptr[i+1] && sindex[j]<nnodes[ii];   j++, l++) 
           gatherbuf[l] = lx[sindex[j]];
 
-	hypre_MPI_Send( gatherbuf, l, hypre_MPI_DOUBLE,
+	hypre_MPI_Send( gatherbuf, l, hypre_MPI_REAL,
 		  spes[i], TAG, pilut_comm );
 
         auxsptr[i] = j;
@@ -212,7 +212,7 @@ void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, HYPRE_Real *x, HYPR
     /* Recv the required ux elements from the appropriate processors */
     for (i=0; i<rnbrpes; i++) {
       if ( rnum[i] > 0 ) { /* Something to recv */
-	hypre_MPI_Irecv( raddr[i]+rdone[i], rnum[i], hypre_MPI_DOUBLE,
+	hypre_MPI_Irecv( raddr[i]+rdone[i], rnum[i], hypre_MPI_REAL,
 		  rpes[i], TAG, pilut_comm, &receive_requests[ i ] );
 
 	rdone[i] += rnum[i] ;
@@ -225,7 +225,7 @@ void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, HYPRE_Real *x, HYPR
         for (j=auxsptr[i], l=0;   j<sptr[i+1] && sindex[j]>=nnodes[ii-1];   j++, l++) 
           gatherbuf[l] = ux[sindex[j]];
 
-	hypre_MPI_Send( gatherbuf, l, hypre_MPI_DOUBLE,
+	hypre_MPI_Send( gatherbuf, l, hypre_MPI_REAL,
 		  spes[i], TAG, pilut_comm );
 
         auxsptr[i] = j;
@@ -265,7 +265,7 @@ void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, HYPRE_Real *x, HYPR
   for (i=0; i<lnrows; i++)
     x[i] = ux[iperm[i]];
 
-  hypre_TFree( receive_requests );
+  hypre_TFree( receive_requests , HYPRE_MEMORY_HOST);
 }
 
 
@@ -324,9 +324,9 @@ HYPRE_Int hypre_SetUpLUFactor(DataDistType *ddist, FactorMatType *ldu, HYPRE_Int
   ldu->gatherbuf = hypre_fp_malloc(maxsend, "hypre_SetUpLUFactor: ldu->gatherbuf");
 
   /*hypre_free_multi(petotal, rind, imap, -1);*/
-  hypre_TFree(petotal);
-  hypre_TFree(rind);
-  hypre_TFree(imap);
+  hypre_TFree(petotal, HYPRE_MEMORY_HOST);
+  hypre_TFree(rind, HYPRE_MEMORY_HOST);
+  hypre_TFree(imap, HYPRE_MEMORY_HOST);
 
   return(0);
 }
@@ -462,7 +462,7 @@ void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, HYPRE_Int maxnz,
   sptr[0] = 0;
 
   /* Allocate requests */
-  receive_requests = hypre_CTAlloc( hypre_MPI_Request, npes );
+  receive_requests = hypre_CTAlloc( hypre_MPI_Request,  npes , HYPRE_MEMORY_HOST);
 
   /* Start asynchronous receives */
   for (i=0; i<snbrpes; i++) {
@@ -627,10 +627,10 @@ void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, HYPRE_Int maxnz,
   if ( DoingL ) {
     /* Free memory that stored the L so far and relink the data structures */
     /*hypre_free_multi(ldu->lsrowptr, ldu->lerowptr, ldu->lcolind, ldu->lvalues, -1);*/
-    hypre_TFree(ldu->lsrowptr);
-    hypre_TFree(ldu->lerowptr);
-    hypre_TFree(ldu->lcolind);
-    hypre_TFree(ldu->lvalues);
+    hypre_TFree(ldu->lsrowptr, HYPRE_MEMORY_HOST);
+    hypre_TFree(ldu->lerowptr, HYPRE_MEMORY_HOST);
+    hypre_TFree(ldu->lcolind, HYPRE_MEMORY_HOST);
+    hypre_TFree(ldu->lvalues, HYPRE_MEMORY_HOST);
     ldu->lrowptr = newrowptr;
     ldu->lcolind = newcolind;
     ldu->lvalues = newvalues;
@@ -643,17 +643,17 @@ void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, HYPRE_Int maxnz,
 
     /* Free memory that stored the U so far and relink the data structures */
     /*hypre_free_multi(ldu->usrowptr, ldu->uerowptr, ldu->ucolind, ldu->uvalues, -1);*/
-    hypre_TFree(ldu->usrowptr);
-    hypre_TFree(ldu->uerowptr);
-    hypre_TFree(ldu->ucolind);
-    hypre_TFree(ldu->uvalues);
+    hypre_TFree(ldu->usrowptr, HYPRE_MEMORY_HOST);
+    hypre_TFree(ldu->uerowptr, HYPRE_MEMORY_HOST);
+    hypre_TFree(ldu->ucolind, HYPRE_MEMORY_HOST);
+    hypre_TFree(ldu->uvalues, HYPRE_MEMORY_HOST);
     ldu->urowptr = newrowptr;
     ldu->ucolind = newcolind;
     ldu->uvalues = newvalues;
   }
 
   /* clean up memory */
-  hypre_TFree(receive_requests);
+  hypre_TFree(receive_requests, HYPRE_MEMORY_HOST);
 
   /* Reset the imap by only touching the appropriate elements */
   for (i=0; i<nrecv; i++)

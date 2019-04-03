@@ -19,6 +19,7 @@ C_COMPILE_FLAGS = \
  -I../..\
  -I$(srcdir)\
  -I$(srcdir)/../..\
+ -I$(srcdir)/../../blas\
  -I$(srcdir)/../../utilities\
  -I$(srcdir)/../../distributed_matrix\
 ${CINCLUDES}
@@ -49,7 +50,7 @@ FILES =\
 
 OBJS = ${FILES:.c=.o}
 
-SONAME = libHYPRE_DistributedMatrixPilutSolver-${HYPRE_RELEASE_VERSION}.so
+SONAME = libHYPRE_DistributedMatrixPilutSolver-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
 ##################################################################
 # Targets
@@ -78,7 +79,7 @@ libHYPRE_DistributedMatrixPilutSolver.a: ${OBJS}
 	${AR} $@ ${OBJS}
 	${RANLIB} $@
 
-libHYPRE_DistributedMatrixPilutSolver.so: ${OBJS}
+libHYPRE_DistributedMatrixPilutSolver.so libHYPRE_DistributedMatrixPilutSolver.dylib: ${OBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
 	ln -s ${SONAME} $@

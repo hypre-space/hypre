@@ -10,14 +10,23 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-#define HYPRE_RELEASE_NAME @CMAKE_PROJECT_NAME@
-#define HYPRE_RELEASE_VERSION @HYPRE_VERSION@
-#define HYPRE_RELEASE_DATE @HYPRE_DATE@
-#define HYPRE_RELEASE_TIME @HYPRE_TIME@
-#define HYPRE_RELEASE_BUGS @HYPRE_BUGS@
+#define HYPRE_RELEASE_NAME    "@CMAKE_PROJECT_NAME@"
+#define HYPRE_RELEASE_VERSION "@HYPRE_VERSION@"
+#define HYPRE_RELEASE_DATE    "@HYPRE_DATE@"
+#define HYPRE_RELEASE_TIME    "@HYPRE_TIME@"
+#define HYPRE_RELEASE_BUGS    "@HYPRE_BUGS@"
 
-/* Use long long int for HYPRE_Int */
+/* Use long long int for HYPRE_BigInt */
+#cmakedefine HYPRE_MIXEDINT
+
+/* Use long long int for HYPRE_BigInt and HYPRE_Int*/
 #cmakedefine HYPRE_BIGINT
+
+/* Use single precision values for HYPRE_Real */
+#cmakedefine HYPRE_SINGLE
+
+/* Use quad precision values for HYPRE_Real */
+#cmakedefine HYPRE_LONG_DOUBLE
 
 /* Use complex values */
 #cmakedefine HYPRE_COMPLEX
@@ -46,6 +55,9 @@
 /* Use OpenMP */
 #cmakedefine HYPRE_USING_OPENMP
 
+/* Use Caliper instrumentation */
+#cmakedefine HYPRE_USING_CALIPER
+
 /* #undef HYPRE_HAVE_MPI */
 /* #undef HYPRE_HAVE_MPI_COMM_F2C */
 
@@ -54,7 +66,8 @@
  * 1 = no underscores
  * 2 = one underscore
  * 3 = two underscores
- * 4 = caps, no underscores */
+ * 4 = caps, no underscores
+ * 5 = one underscore before and after */
 #define HYPRE_FMANGLE 0
 
 /* Define as in HYPRE_FMANGLE to set the BLAS name mangling scheme */

@@ -25,12 +25,12 @@ main( HYPRE_Int   argc,
    hypre_ParVector   *tmp_vector;
 
    HYPRE_Int          num_procs, my_id;
-   HYPRE_Int            global_size = 20;
+   HYPRE_BigInt         global_size = 20;
    HYPRE_Int            local_size;
-   HYPRE_Int            first_index;
+   HYPRE_BigInt         first_index;
    HYPRE_Int          num_vectors, vecstride, idxstride;
    HYPRE_Int            i, j;
-   HYPRE_Int            *partitioning;
+   HYPRE_BigInt         *partitioning;
    HYPRE_Real           prod;
    HYPRE_Complex        *data, *data2;
    hypre_Vector *vector; 
@@ -63,7 +63,7 @@ main( HYPRE_Int   argc,
           vecstride, idxstride, local_size, num_vectors );
    for (j=0; j<num_vectors; ++j )
       for (i=0; i < local_size; i++)
-         data[ j*vecstride + i*idxstride ] = first_index+i + 100*j;
+         data[ j*vecstride + i*idxstride ] = (HYPRE_Int)first_index+i + 100*j;
 
    hypre_ParVectorPrint(vector1, "Vector");
 
@@ -82,7 +82,7 @@ main( HYPRE_Int   argc,
    partitioning[2] = 10;
    partitioning[3] = 20;
 */
-   partitioning = hypre_CTAlloc(HYPRE_Int,1+num_procs);
+   partitioning = hypre_CTAlloc(HYPRE_BigInt, 1+num_procs, HYPRE_MEMORY_HOST);
    hypre_GeneratePartitioning( global_size, num_procs, &partitioning );
 
    vector2 = hypre_VectorToParVector(hypre_MPI_COMM_WORLD,local_vector2,partitioning);

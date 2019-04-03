@@ -444,7 +444,7 @@ void convert_triples_to_scr_private(HYPRE_Int m, HYPRE_Int nz, HYPRE_Int *I, HYP
   for (i=1; i<=m; ++i) {
     rp[i] = rp[i-1] + rowCounts[i-1];
   }
-  memcpy(rowCounts, rp, (m+1)*sizeof(HYPRE_Int));
+  hypre_TMemcpy(rowCounts,  rp, HYPRE_Int, (m+1), HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
 
   /* write SCR arrays */
   for (i=0; i<nz; ++i) {
@@ -907,7 +907,7 @@ void mat_dh_transpose_reuse_private_private(bool allocateMem, HYPRE_Int m,
     }
   }
   for (i=1; i<=m; ++i) tmp[i] += tmp[i-1];
-  memcpy(rp, tmp, (m+1)*sizeof(HYPRE_Int));
+  hypre_TMemcpy(rp,  tmp, HYPRE_Int, (m+1), HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
 
   if (avalOUT != NULL) {
     for (i=0; i<m; ++i) {
@@ -1082,7 +1082,7 @@ void partition_and_distribute_metis_private(Mat_dh A, Mat_dh *Bout)
       }
 
       hypre_MPI_Isend(cval+rp[i], count, HYPRE_MPI_INT, owner, CVAL_TAG, comm_dh, send_req+2*i);
-      hypre_MPI_Isend(aval+rp[i], count, hypre_MPI_DOUBLE, owner, AVAL_TAG, comm_dh, send_req+2*i+1);
+      hypre_MPI_Isend(aval+rp[i], count, hypre_MPI_REAL, owner, AVAL_TAG, comm_dh, send_req+2*i+1);
     }
   } 
 
@@ -1105,7 +1105,7 @@ void partition_and_distribute_metis_private(Mat_dh A, Mat_dh *Bout)
       }
 
       hypre_MPI_Irecv(cval+rp[i], count, HYPRE_MPI_INT, 0, CVAL_TAG, comm_dh, rcv_req+2*i);
-      hypre_MPI_Irecv(aval+rp[i], count, hypre_MPI_DOUBLE, 0, AVAL_TAG, comm_dh, rcv_req+2*i+1);
+      hypre_MPI_Irecv(aval+rp[i], count, hypre_MPI_REAL, 0, AVAL_TAG, comm_dh, rcv_req+2*i+1);
     }
   }
 
@@ -1195,7 +1195,7 @@ void partition_and_distribute_private(Mat_dh A, Mat_dh *Bout)
       }
 
       hypre_MPI_Isend(cval+rp[i], count, HYPRE_MPI_INT, owner, CVAL_TAG, comm_dh, send_req+2*i);
-      hypre_MPI_Isend(aval+rp[i], count, hypre_MPI_DOUBLE, owner, AVAL_TAG, comm_dh, send_req+2*i+1);
+      hypre_MPI_Isend(aval+rp[i], count, hypre_MPI_REAL, owner, AVAL_TAG, comm_dh, send_req+2*i+1);
     }
   } 
 
@@ -1218,7 +1218,7 @@ void partition_and_distribute_private(Mat_dh A, Mat_dh *Bout)
       }
 
       hypre_MPI_Irecv(cval+rp[i], count, HYPRE_MPI_INT, 0, CVAL_TAG, comm_dh, rcv_req+2*i);
-      hypre_MPI_Irecv(aval+rp[i], count, hypre_MPI_DOUBLE, 0, AVAL_TAG, comm_dh, rcv_req+2*i+1);
+      hypre_MPI_Irecv(aval+rp[i], count, hypre_MPI_REAL, 0, AVAL_TAG, comm_dh, rcv_req+2*i+1);
     }
   }
 
@@ -1350,7 +1350,7 @@ void make_full_private(HYPRE_Int m, HYPRE_Int **rpIN, HYPRE_Int **cvalIN, HYPRE_
   /* prefix sum to form row pointers for full representation */
   rpNew = (HYPRE_Int*)MALLOC_DH((m+1)*sizeof(HYPRE_Int)); CHECK_V_ERROR;
   for (i=1; i<=m; ++i) rowCounts[i] += rowCounts[i-1];
-  memcpy(rpNew, rowCounts, (m+1)*sizeof(HYPRE_Int));
+  hypre_TMemcpy(rpNew,  rowCounts, HYPRE_Int, (m+1), HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
 
   /* form full representation */
   nz = rpNew[m];
@@ -1449,7 +1449,7 @@ void make_symmetric_private(HYPRE_Int m, HYPRE_Int **rpIN, HYPRE_Int **cvalIN, H
   /* prefix sum to form row pointers for full representation */
   rpNew = (HYPRE_Int*)MALLOC_DH((m+1)*sizeof(HYPRE_Int)); CHECK_V_ERROR;
   for (i=1; i<=m; ++i) rowCounts[i] += rowCounts[i-1];
-  memcpy(rpNew, rowCounts, (m+1)*sizeof(HYPRE_Int));
+  hypre_TMemcpy(rpNew,  rowCounts, HYPRE_Int, (m+1), HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
   for (i=0; i<m; ++i) work[i] = -1;
 
   /* form full representation */

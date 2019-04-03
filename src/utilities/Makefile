@@ -34,10 +34,10 @@ HEADERS =\
  mpistubs.h\
  threading.h\
  timing.h\
- umalloc_local.h\
  _hypre_utilities.h
 
 FILES =\
+ HYPRE_version.c\
  amg_linklist.c\
  binsearch.c\
  exchange_data.c\
@@ -47,24 +47,26 @@ FILES =\
  hypre_memory.c\
  hypre_printf.c\
  hypre_qsort.c\
- memory_dmalloc.c\
  mpistubs.c\
  qsplit.c\
  random.c\
  threading.c\
  timer.c\
  timing.c\
- umalloc_local.c\
  hypre_mpi_comm_f2c.c\
  hypre_error.c\
  F90_HYPRE_error.c\
  hypre_prefix_sum.c\
  hypre_merge_sort.c\
- hypre_hopscotch_hash.c
+ hypre_hopscotch_hash.c\
+ gpuErrorCheck.c\
+ gpuMem.c\
+ hypre_general.c\
+ hypre_reducesum.c
 
 OBJS = ${FILES:.c=.o}
 
-SONAME = libHYPRE_utilities-${HYPRE_RELEASE_VERSION}.so
+SONAME = libHYPRE_utilities-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
 ##################################################################
 # Targets
@@ -98,7 +100,7 @@ libHYPRE_utilities.a: ${OBJS}
 	${AR} $@ *.o
 	${RANLIB} $@
 
-libHYPRE_utilities.so: ${OBJS}
+libHYPRE_utilities.so libHYPRE_utilities.dylib: ${OBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
 	ln -s ${SONAME} $@

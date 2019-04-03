@@ -29,9 +29,6 @@ hypre_StructCopy( hypre_StructVector *x,
    hypre_Box       *x_data_box;
    hypre_Box       *y_data_box;
                    
-   HYPRE_Int        xi;
-   HYPRE_Int        yi;
-                   
    HYPRE_Complex   *xp;
    HYPRE_Complex   *yp;
                    
@@ -59,17 +56,15 @@ hypre_StructCopy( hypre_StructVector *x,
 
       hypre_BoxGetSize(box, loop_size);
 
+#define DEVICE_VAR is_device_ptr(yp,xp)
       hypre_BoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
                           x_data_box, start, unit_stride, xi,
                           y_data_box, start, unit_stride, yi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,xi,yi) HYPRE_SMP_SCHEDULE
-#endif
-      hypre_BoxLoop2For(xi, yi)
       {
          yp[yi] = xp[xi];
       }
       hypre_BoxLoop2End(xi, yi);
+#undef DEVICE_VAR
    }
 
    return hypre_error_flag;
@@ -88,9 +83,6 @@ hypre_StructPartialCopy( hypre_StructVector  *x,
 {
    hypre_Box       *x_data_box;
    hypre_Box       *y_data_box;
-
-   HYPRE_Int        xi;
-   HYPRE_Int        yi;
 
    HYPRE_Complex   *xp;
    HYPRE_Complex   *yp;
@@ -123,17 +115,15 @@ hypre_StructPartialCopy( hypre_StructVector  *x,
          start = hypre_BoxIMin(box);
          hypre_BoxGetSize(box, loop_size);
 
+#define DEVICE_VAR is_device_ptr(yp,xp)
          hypre_BoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
                              x_data_box, start, unit_stride, xi,
                              y_data_box, start, unit_stride, yi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,xi,yi) HYPRE_SMP_SCHEDULE
-#endif
-         hypre_BoxLoop2For(xi, yi)
          {
             yp[yi] = xp[xi];
          }
          hypre_BoxLoop2End(xi, yi);
+#undef DEVICE_VAR
       }
    }
 

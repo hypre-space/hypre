@@ -35,9 +35,9 @@ hypre_SchwarzCreate()
    HYPRE_Int      variant;
    HYPRE_Int      domain_type;
    HYPRE_Int      overlap;
-   HYPRE_Int 	    num_functions;
+   HYPRE_Int 	  num_functions;
    HYPRE_Int      use_nonsymm;
-   HYPRE_Real   relax_weight;
+   HYPRE_Real     relax_weight;
 
    /*-----------------------------------------------------------------------
     * Setup default values for parameters
@@ -51,7 +51,7 @@ hypre_SchwarzCreate()
    use_nonsymm = 0;
    relax_weight = 1.0;
      
-   schwarz_data = hypre_CTAlloc(hypre_SchwarzData,1);
+   schwarz_data = hypre_CTAlloc(hypre_SchwarzData, 1, HYPRE_MEMORY_HOST);
 
    hypre_SchwarzSetVariant(schwarz_data, variant); 
    hypre_SchwarzSetDomainType(schwarz_data, domain_type);
@@ -79,19 +79,19 @@ hypre_SchwarzDestroy( void *data )
 	hypre_SchwarzData  *schwarz_data = (hypre_SchwarzData*) data;
 
    if (hypre_SchwarzDataScale(schwarz_data))
-      hypre_TFree (hypre_SchwarzDataScale(schwarz_data));
+      hypre_TFree(hypre_SchwarzDataScale(schwarz_data), HYPRE_MEMORY_HOST);
    if (hypre_SchwarzDataDofFunc(schwarz_data))
-      hypre_TFree (hypre_SchwarzDataDofFunc(schwarz_data));
+      hypre_TFree(hypre_SchwarzDataDofFunc(schwarz_data), HYPRE_MEMORY_HOST);
    hypre_CSRMatrixDestroy(hypre_SchwarzDataDomainStructure(schwarz_data));
    if (hypre_SchwarzDataVariant(schwarz_data) == 3)
       hypre_CSRMatrixDestroy(hypre_SchwarzDataABoundary(schwarz_data));
    hypre_ParVectorDestroy(hypre_SchwarzDataVtemp(schwarz_data));
 
    if (hypre_SchwarzDataPivots(schwarz_data))
-      hypre_TFree (hypre_SchwarzDataPivots(schwarz_data));
+      hypre_TFree(hypre_SchwarzDataPivots(schwarz_data), HYPRE_MEMORY_HOST);
 
 
-   hypre_TFree(schwarz_data);
+   hypre_TFree(schwarz_data, HYPRE_MEMORY_HOST);
    return hypre_error_flag;
 
 }
@@ -136,20 +136,23 @@ hypre_SchwarzSetup(void               *schwarz_vdata,
                                   num_functions, dof_func,
                                   &domain_structure, &pivots, use_nonsymm);
 
-      if (variant == 2)
+      if (domain_structure)
       {
+       if (variant == 2)
+       {
          hypre_ParGenerateScale(A, domain_structure, relax_weight,
 		&scale);
          hypre_SchwarzDataScale(schwarz_data) = scale;
-      }
-      else
-      {
+       }
+       else
+       {
          hypre_ParGenerateHybridScale(A, domain_structure, &A_boundary, &scale);
          hypre_SchwarzDataScale(schwarz_data) = scale;
          if (hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A)))
             hypre_SchwarzDataABoundary(schwarz_data) = A_boundary;
          else
             hypre_SchwarzDataABoundary(schwarz_data) = NULL;
+       }
       }
    }
    else
@@ -158,12 +161,15 @@ hypre_SchwarzSetup(void               *schwarz_vdata,
                                 domain_type, overlap,
                                 num_functions, dof_func,
                                 &domain_structure, &pivots, use_nonsymm);
-      if (variant == 1)
+      if (domain_structure)
       {
+       if (variant == 1)
+       {
          hypre_GenerateScale(domain_structure, 
 		hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A)),
 		relax_weight, &scale);
          hypre_SchwarzDataScale(schwarz_data) = scale;
+       }
       }
    }
 
@@ -197,30 +203,33 @@ hypre_SchwarzSolve(void               *schwarz_vdata,
    
    HYPRE_Int *pivots = hypre_SchwarzDataPivots(schwarz_data);
 
-   if (variant == 2)
+   if (domain_structure)
    {
+    if (variant == 2)
+    {
       hypre_ParAdSchwarzSolve(A, f, domain_structure, scale, u, Vtemp, pivots, use_nonsymm);
-   }
-   else if (variant == 3)
-   {
+    }
+    else if (variant == 3)
+    {
       hypre_ParMPSchwarzSolve(A, A_boundary, f, domain_structure, u,
                               relax_wt, scale, Vtemp, pivots, use_nonsymm); 
-   }
-   else if (variant == 1)
-   {
+    }
+    else if (variant == 1)
+    {
       hypre_AdSchwarzSolve(A, f, domain_structure, scale, u, Vtemp, pivots, use_nonsymm);
-   }
-   else if (variant == 4)
-   {
+    }
+    else if (variant == 4)
+    {
       hypre_MPSchwarzFWSolve(A, hypre_ParVectorLocalVector(f), 
 				domain_structure, u, relax_wt, 
                              hypre_ParVectorLocalVector(Vtemp), pivots, use_nonsymm);
-   }
-   else 
-   {
+    }
+    else 
+    {
       hypre_MPSchwarzSolve(A, hypre_ParVectorLocalVector(f), 
                                   domain_structure, u, relax_wt, 
                                   hypre_ParVectorLocalVector(Vtemp), pivots, use_nonsymm);
+    }
    }
       
    return hypre_error_flag;

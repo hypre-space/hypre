@@ -87,13 +87,13 @@ mv_TempMultiVectorCreateFromSampleVector( void* ii_, HYPRE_Int n, void* sample )
   mv_TempMultiVector* x;
   mv_InterfaceInterpreter* ii = (mv_InterfaceInterpreter*)ii_;
 
-  x = (mv_TempMultiVector*) malloc(sizeof(mv_TempMultiVector));
+  x = hypre_TAlloc(mv_TempMultiVector, 1, HYPRE_MEMORY_HOST);
   hypre_assert( x != NULL );
   
   x->interpreter = ii;
   x->numVectors = n;
   
-  x->vector = (void**) calloc( n, sizeof(void*) );
+  x->vector = hypre_CTAlloc(void*,  n, HYPRE_MEMORY_HOST);
   hypre_assert( x->vector != NULL );
 
   x->ownsVectors = 1;
@@ -231,9 +231,9 @@ mv_TempMultiVectorCopy( void* src_, void* dest_ ) {
   md = aux_maskCount( dest->numVectors, dest->mask );
   hypre_assert( ms == md );
 	
-  ps = (void**) calloc( ms, sizeof(void*) );
+  ps = hypre_CTAlloc(void*,  ms, HYPRE_MEMORY_HOST);
   hypre_assert( ps != NULL );
-  pd = (void**) calloc( md, sizeof(void*) );
+  pd = hypre_CTAlloc(void*,  md, HYPRE_MEMORY_HOST);
   hypre_assert( pd != NULL );
 
   mv_collectVectorPtr( src->mask, src, ps );
@@ -263,9 +263,9 @@ mv_TempMultiVectorAxpy( HYPRE_Complex a, void* x_, void* y_ ) {
   my = aux_maskCount( y->numVectors, y->mask );
   hypre_assert( mx == my );
 
-  px = (void**) calloc( mx, sizeof(void*) );
+  px = hypre_CTAlloc(void*,  mx, HYPRE_MEMORY_HOST);
   hypre_assert( px != NULL );
-  py = (void**) calloc( my, sizeof(void*) );
+  py = hypre_CTAlloc(void*,  my, HYPRE_MEMORY_HOST);
   hypre_assert( py != NULL );
 
   mv_collectVectorPtr( x->mask, x, px );
@@ -301,9 +301,9 @@ mv_TempMultiVectorByMultiVector( void* x_, void* y_,
   my = aux_maskCount( y->numVectors, y->mask );
   hypre_assert( my == xyWidth );
 
-  px = (void**) calloc( mx, sizeof(void*) );
+  px = hypre_CTAlloc(void*,  mx, HYPRE_MEMORY_HOST);
   hypre_assert( px != NULL );
-  py = (void**) calloc( my, sizeof(void*) );
+  py = hypre_CTAlloc(void*,  my, HYPRE_MEMORY_HOST);
   hypre_assert( py != NULL );
 
   mv_collectVectorPtr( x->mask, x, px );
@@ -342,15 +342,15 @@ mv_TempMultiVectorByMultiVectorDiag( void* x_, void* y_,
   m = aux_maskCount( n, mask );
   hypre_assert( mx == my && mx == m );
 
-  px = (void**) calloc( mx, sizeof(void*) );
+  px = hypre_CTAlloc(void*,  mx, HYPRE_MEMORY_HOST);
   hypre_assert( px != NULL );
-  py = (void**) calloc( my, sizeof(void*) );
+  py = hypre_CTAlloc(void*,  my, HYPRE_MEMORY_HOST);
   hypre_assert( py != NULL );
 
   mv_collectVectorPtr( x->mask, x, px );
   mv_collectVectorPtr( y->mask, y, py );
 
-  index = (HYPRE_Int*)calloc( m, sizeof(HYPRE_Int) );
+  index = hypre_CTAlloc(HYPRE_Int,  m, HYPRE_MEMORY_HOST);
   aux_indexFromMask( n, mask, index );
 
   for ( i = 0; i < m; i++ )
@@ -385,9 +385,9 @@ mv_TempMultiVectorByMatrix( void* x_,
 
   hypre_assert( mx == rHeight && my == rWidth );
   
-  px = (void**) calloc( mx, sizeof(void*) );
+  px = hypre_CTAlloc(void*,  mx, HYPRE_MEMORY_HOST);
   hypre_assert( px != NULL );
-  py = (void**) calloc( my, sizeof(void*) );
+  py = hypre_CTAlloc(void*,  my, HYPRE_MEMORY_HOST);
   hypre_assert( py != NULL );
   
   mv_collectVectorPtr( x->mask, x, px );
@@ -428,9 +428,9 @@ mv_TempMultiVectorXapy( void* x_,
 
   hypre_assert( mx == rHeight && my == rWidth );
   
-  px = (void**) calloc( mx, sizeof(void*) );
+  px = hypre_CTAlloc(void*,  mx, HYPRE_MEMORY_HOST);
   hypre_assert( px != NULL );
-  py = (void**) calloc( my, sizeof(void*) );
+  py = hypre_CTAlloc(void*,  my, HYPRE_MEMORY_HOST);
   hypre_assert( py != NULL );
   
   mv_collectVectorPtr( x->mask, x, px );
@@ -473,12 +473,12 @@ mv_TempMultiVectorByDiagonal( void* x_,
   if ( m < 1 )
     return;
 
-  px = (void**) calloc( mx, sizeof(void*) );
+  px = hypre_CTAlloc(void*,  mx, HYPRE_MEMORY_HOST);
   hypre_assert( px != NULL );
-  py = (void**) calloc( my, sizeof(void*) );
+  py = hypre_CTAlloc(void*,  my, HYPRE_MEMORY_HOST);
   hypre_assert( py != NULL );
 
-  index = (HYPRE_Int*)calloc( m, sizeof(HYPRE_Int) );
+  index = hypre_CTAlloc(HYPRE_Int,  m, HYPRE_MEMORY_HOST);
   aux_indexFromMask( n, mask, index );
 
   mv_collectVectorPtr( x->mask, x, px );
@@ -517,9 +517,9 @@ mv_TempMultiVectorEval( void (*f)( void*, void*, void* ), void* par,
   my = aux_maskCount( y->numVectors, y->mask );
   hypre_assert( mx == my );
 
-  px = (void**) calloc( mx, sizeof(void*) );
+  px = hypre_CTAlloc(void*,  mx, HYPRE_MEMORY_HOST);
   hypre_assert( px != NULL );
-  py = (void**) calloc( my, sizeof(void*) );
+  py = hypre_CTAlloc(void*,  my, HYPRE_MEMORY_HOST);
   hypre_assert( py != NULL );
 
   mv_collectVectorPtr( x->mask, x, px );

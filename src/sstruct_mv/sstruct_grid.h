@@ -59,7 +59,7 @@ typedef struct
    hypre_Index            *pnbor_offsets;
 
    HYPRE_Int               local_size;       /* Number of variables locally */
-   HYPRE_Int               global_size;      /* Total number of variables */
+   HYPRE_BigInt            global_size;      /* Total number of variables */
 
    hypre_Index             periodic;         /* Indicates if pgrid is periodic */
 
@@ -89,16 +89,16 @@ enum hypre_SStructBoxManInfoType
 typedef struct
 {
    HYPRE_Int  type;
-   HYPRE_Int  offset;
-   HYPRE_Int  ghoffset; 
+   HYPRE_BigInt offset;
+   HYPRE_BigInt ghoffset; 
 
 } hypre_SStructBoxManInfo;
 
 typedef struct
 {
    HYPRE_Int    type;
-   HYPRE_Int    offset;   /* minimum offset for this box */
-   HYPRE_Int    ghoffset; /* minimum offset ghost for this box */
+   HYPRE_BigInt offset;   /* minimum offset for this box */
+   HYPRE_BigInt ghoffset; /* minimum offset ghost for this box */
    HYPRE_Int    proc;     /* redundant with the proc in the entry, but
                              makes some coding easier */
    HYPRE_Int    boxnum;   /* this is different from the entry id */ 
@@ -153,17 +153,18 @@ typedef struct hypre_SStructGrid_struct
    hypre_BoxManager        ***boxmans;      /* manager for each part, var */
    hypre_BoxManager        ***nbor_boxmans; /* manager for each part, var */
 
-   HYPRE_Int                  start_rank;
+   HYPRE_BigInt               start_rank;
 
    HYPRE_Int                  local_size;  /* Number of variables locally */
-   HYPRE_Int                  global_size; /* Total number of variables */
+   HYPRE_BigInt               global_size; /* Total number of variables */
                               
    HYPRE_Int                  ref_count;
 
  /* GEC0902 additions for ghost expansion of boxes */
 
    HYPRE_Int               ghlocal_size;  /* GEC0902 Number of vars including ghosts */
-   HYPRE_Int               ghstart_rank;  /* GEC0902 start rank including ghosts  */
+   HYPRE_BigInt            ghstart_rank;  /* GEC0902 start rank including ghosts  */
+   HYPRE_Int               num_ghost[2*HYPRE_MAXDIM]; /* ghost layer size */  
 
 } hypre_SStructGrid;
 
@@ -206,6 +207,7 @@ typedef struct hypre_SStructGrid_struct
 #define hypre_SStructGridRefCount(grid)       ((grid) -> ref_count)
 #define hypre_SStructGridGhlocalSize(grid)    ((grid) -> ghlocal_size)
 #define hypre_SStructGridGhstartRank(grid)    ((grid) -> ghstart_rank)
+#define hypre_SStructGridNumGhost(grid)       ((grid) -> num_ghost)
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_SStructPGrid

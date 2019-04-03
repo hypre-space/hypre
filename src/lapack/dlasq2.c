@@ -1,11 +1,14 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
 
+#include "f2c.h"
 #include "hypre_lapack.h"
+
 /*  -- translated by f2c (version 19990503).
    You must link the resulting object file with the libraries:
 	-lf2c -lm   (in that order)
 */
-
-#include "f2c.h"
 
 /* Table of constant values */
 
@@ -16,14 +19,11 @@ static integer c__3 = 3;
 static integer c__4 = 4;
 static integer c__11 = 11;
 
-/* Subroutine */ HYPRE_Int dlasq2_(integer *n, doublereal *z__, integer *info)
+/* Subroutine */ integer dlasq2_(integer *n, doublereal *z__, integer *info)
 {
     /* System generated locals */
     integer i__1, i__2, i__3;
     doublereal d__1, d__2;
-
-    /* Builtin functions */
-    HYPRE_Real sqrt(doublereal);
 
     /* Local variables */
     static logical ieee;
@@ -38,16 +38,16 @@ static integer c__11 = 11;
     static integer nfail;
     static doublereal desig, trace, sigma;
     static integer iinfo, i0, i4, n0;
-    extern /* Subroutine */ HYPRE_Int dlasq3_(integer *, integer *, doublereal *, 
+    extern /* Subroutine */ integer dlasq3_(integer *, integer *, doublereal *, 
 	    integer *, doublereal *, doublereal *, doublereal *, doublereal *,
 	     integer *, integer *, integer *, logical *);
     extern doublereal dlamch_(const char *);
     static integer pp, iwhila, iwhilb;
     static doublereal oldemn, safmin;
-    extern /* Subroutine */ HYPRE_Int xerbla_(const char *, integer *);
+    extern /* Subroutine */ integer xerbla_(const char *, integer *);
     extern integer ilaenv_(integer *,const char *,const char *, integer *, integer *, 
 	    integer *, integer *, ftnlen, ftnlen);
-    extern /* Subroutine */ HYPRE_Int dlasrt_(const char *, integer *, doublereal *, 
+    extern /* Subroutine */ integer dlasrt_(const char *, integer *, doublereal *, 
 	    integer *);
     static doublereal eps, tol;
     static integer ipn4;
@@ -522,3 +522,6 @@ L150:
 
 } /* dlasq2_ */
 
+#ifdef __cplusplus
+}
+#endif

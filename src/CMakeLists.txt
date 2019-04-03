@@ -2,8 +2,8 @@ cmake_minimum_required (VERSION 2.8.8)
 project (hypre)
 
 # The version number.
-set (HYPRE_VERSION 2.11.1)
-set (HYPRE_DATE    2016/06/09)
+set (HYPRE_VERSION 2.16.0)
+set (HYPRE_DATE    2019/03/20)
 set (HYPRE_TIME    00:00:00)
 set (HYPRE_BUGS    hypre-support@llnl.gov)
 set (HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
@@ -25,14 +25,20 @@ set (CMAKE_BUILD_TYPE "${HYPRE_BUILD_TYPE}" CACHE INTERNAL "" FORCE)
 # Configuration options
 option(HYPRE_SHARED               "Build a shared library" OFF)
 option(HYPRE_BIGINT               "Use long long int for HYPRE_Int" OFF)
+option(HYPRE_SINGLE               "Use float for HYPRE_Real" OFF)
+option(HYPRE_LONG_DOUBLE          "Use long double for HYPRE_Real" OFF)
 option(HYPRE_SEQUENTIAL           "Compile without MPI" OFF)
 option(HYPRE_TIMING               "Use HYPRE timing routines" OFF)
 option(HYPRE_USING_HYPRE_BLAS     "Use internal BLAS library" ON)
 option(HYPRE_USING_HYPRE_LAPACK   "Use internal LAPACK library" ON)
+option(HYPRE_USING_PERSISTENT_COMM "Use persistent communication" OFF)
 option(HYPRE_NO_GLOBAL_PARTITION  "Use assumed partition" ON)
 option(HYPRE_PRINT_ERRORS         "Print HYPRE errors" OFF)
 option(HYPRE_USING_OPENMP         "Use OpenMP" OFF)
+option(HYPRE_HOPSCOTCH            "Use hopscotch hashing with OpenMP" OFF)
+option(HAVE_DSUPERLU              "required if using SuperLU_dist" OFF)
 option(HYPRE_USING_FEI            "Use FEI" ON)
+option(HYPRE_USING_CALIPER        "Use Caliper" OFF)  # TODO: Finish this cmake feature
 
 if (HYPRE_SHARED)
   # FEI doesn't currently compile with shared
@@ -43,10 +49,19 @@ if (HYPRE_BIGINT)
   set (HYPRE_USING_FEI OFF CACHE BOOL "" FORCE)
 endif ()
 
+if (HYPRE_SINGLE)
+  set (HYPRE_USING_FEI OFF CACHE BOOL "" FORCE)
+endif ()
+
+if (HYPRE_LONG_DOUBLE)
+  set (HYPRE_USING_FEI OFF CACHE BOOL "" FORCE)
+endif ()
+
 if (HYPRE_SEQUENTIAL)
   set (HYPRE_NO_GLOBAL_PARTITION OFF CACHE BOOL "" FORCE)
 endif ()
 
+#   --with-examples         Build example codes.
 #   --with-fei              Use internal FEI routines.
 #   --with-superlu          Use internal SuperLU routines.
 #   --with-mli              Use MLI
@@ -63,9 +78,7 @@ list (APPEND HYPRE_HEADERS
 )
 
 # Headers and sources: blas
-if (HYPRE_USING_HYPRE_BLAS)
 list (APPEND HYPRE_SOURCES
-  blas/blas_utils.c
   blas/dasum.c
   blas/daxpy.c
   blas/dcopy.c
@@ -86,12 +99,13 @@ list (APPEND HYPRE_SOURCES
   blas/dtrmv.c
   blas/dtrsm.c
   blas/dtrsv.c
+  blas/f2c.c
   blas/idamax.c
+  blas/lsame.c
+  blas/xerbla.c
 )
-endif (HYPRE_USING_HYPRE_BLAS)
 
 # Headers and sources: lapack
-if (HYPRE_USING_HYPRE_LAPACK)
 list (APPEND HYPRE_SOURCES
   lapack/dbdsqr.c
   lapack/dgebd2.c
@@ -103,6 +117,7 @@ list (APPEND HYPRE_SOURCES
   lapack/dgeqrf.c
   lapack/dgesvd.c
   lapack/dgetrf.c
+  lapack/dgetri.c
   lapack/dgetrs.c
   lapack/dgetf2.c
   lapack/dlabad.c
@@ -159,13 +174,13 @@ list (APPEND HYPRE_SOURCES
   lapack/dsygv.c
   lapack/dsytd2.c
   lapack/dsytrd.c
+  lapack/dtrti2.c
+  lapack/dtrtri.c
   lapack/ieeeck.c
   lapack/ilaenv.c
-  lapack/lapack_utils.c
   lapack/lsame.c
   lapack/xerbla.c
 )
-endif (HYPRE_USING_HYPRE_LAPACK)
 
 # Headers and sources: utilities
 list (APPEND HYPRE_HEADERS
@@ -177,6 +192,7 @@ list (APPEND HYPRE_HEADERS
   utilities/fortran_matrix.h
 )
 list (APPEND HYPRE_SOURCES
+  utilities/HYPRE_version.c
   utilities/amg_linklist.c
   utilities/binsearch.c
   utilities/exchange_data.c
@@ -185,6 +201,7 @@ list (APPEND HYPRE_SOURCES
   utilities/hypre_ap.c
   utilities/hypre_complex.c
   utilities/hypre_error.c
+  utilities/hypre_general.c
   utilities/hypre_hopscotch_hash.c
   utilities/hypre_memory.c
   utilities/hypre_merge_sort.c
@@ -192,14 +209,12 @@ list (APPEND HYPRE_SOURCES
   utilities/hypre_prefix_sum.c
   utilities/hypre_printf.c
   utilities/hypre_qsort.c
-  utilities/memory_dmalloc.c
   utilities/mpistubs.c
   utilities/qsplit.c
   utilities/random.c
   utilities/threading.c
   utilities/timer.c
   utilities/timing.c
-  utilities/umalloc_local.c
 )
 
 # Headers and sources: multivector
@@ -229,12 +244,14 @@ list (APPEND HYPRE_HEADERS
 list (APPEND HYPRE_SOURCES
   krylov/bicgstab.c
   krylov/cgnr.c
+  krylov/cogmres.c
   krylov/gmres.c
   krylov/flexgmres.c
   krylov/lgmres.c
   krylov/HYPRE_bicgstab.c
   krylov/HYPRE_cgnr.c
   krylov/HYPRE_gmres.c
+  krylov/HYPRE_cogmres.c
   krylov/HYPRE_lgmres.c
   krylov/HYPRE_flexgmres.c
   krylov/HYPRE_pcg.c
@@ -434,6 +451,7 @@ list (APPEND HYPRE_SOURCES
   parcsr_ls/F90_HYPRE_parcsr_cgnr.c
   parcsr_ls/F90_HYPRE_parcsr_Euclid.c
   parcsr_ls/F90_HYPRE_parcsr_gmres.c
+  parcsr_ls/F90_HYPRE_parcsr_cogmres.c
   parcsr_ls/F90_HYPRE_parcsr_flexgmres.c
   parcsr_ls/F90_HYPRE_parcsr_lgmres.c
   parcsr_ls/F90_HYPRE_parcsr_hybrid.c
@@ -450,10 +468,12 @@ list (APPEND HYPRE_SOURCES
   parcsr_ls/HYPRE_parcsr_cgnr.c
   parcsr_ls/HYPRE_parcsr_Euclid.c
   parcsr_ls/HYPRE_parcsr_gmres.c
+  parcsr_ls/HYPRE_parcsr_cogmres.c
   parcsr_ls/HYPRE_parcsr_flexgmres.c
   parcsr_ls/HYPRE_parcsr_lgmres.c
   parcsr_ls/HYPRE_parcsr_hybrid.c
   parcsr_ls/HYPRE_parcsr_int.c
+  parcsr_ls/HYPRE_parcsr_mgr.c
   parcsr_ls/HYPRE_parcsr_ParaSails.c
   parcsr_ls/HYPRE_parcsr_pcg.c
   parcsr_ls/HYPRE_parcsr_pilut.c
@@ -468,6 +488,7 @@ list (APPEND HYPRE_SOURCES
   parcsr_ls/par_cg_relax_wt.c
   parcsr_ls/par_coarsen.c
   parcsr_ls/par_cgc_coarsen.c
+  parcsr_ls/par_cheby.c
   parcsr_ls/par_coarse_parms.c
   parcsr_ls/par_coordinates.c
   parcsr_ls/par_cr.c
@@ -483,12 +504,16 @@ list (APPEND HYPRE_SOURCES
   parcsr_ls/par_laplace_9pt.c
   parcsr_ls/par_laplace.c
   parcsr_ls/par_lr_interp.c
+  parcsr_ls/par_mgr.c
+  parcsr_ls/par_mgr_setup.c
+  parcsr_ls/par_mgr_solve.c
   parcsr_ls/par_nongalerkin.c
   parcsr_ls/par_nodal_systems.c
   parcsr_ls/par_rap.c
   parcsr_ls/par_rap_communication.c
   parcsr_ls/par_rotate_7pt.c
   parcsr_ls/par_vardifconv.c
+  parcsr_ls/par_vardifconv_rs.c
   parcsr_ls/par_relax.c
   parcsr_ls/par_relax_more.c
   parcsr_ls/par_relax_interface.c
@@ -505,6 +530,8 @@ list (APPEND HYPRE_SOURCES
   parcsr_ls/ams.c
   parcsr_ls/ads.c
   parcsr_ls/ame.c
+  parcsr_ls/par_restr.c
+  parcsr_ls/par_lr_restr.c
 )
 
 # Headers and sources: struct_mv
@@ -788,13 +815,19 @@ if (MSVC)
   set_source_files_properties (seq_mv/csr_matop.c               PROPERTIES COMPILE_FLAGS /TP)
   set_source_files_properties (parcsr_mv/par_csr_matop.c        PROPERTIES COMPILE_FLAGS /TP)
   set_source_files_properties (parcsr_mv/par_csr_matvec.c       PROPERTIES COMPILE_FLAGS /TP)
+  set_source_files_properties (parcsr_ls/ams.c                  PROPERTIES COMPILE_FLAGS /TP)
   set_source_files_properties (parcsr_ls/aux_interp.c           PROPERTIES COMPILE_FLAGS /TP)
+  set_source_files_properties (parcsr_ls/par_add_cycle.c        PROPERTIES COMPILE_FLAGS /TP)
+  set_source_files_properties (parcsr_ls/par_amg_setup.c        PROPERTIES COMPILE_FLAGS /TP)
   set_source_files_properties (parcsr_ls/par_coarsen.c          PROPERTIES COMPILE_FLAGS /TP)
   set_source_files_properties (parcsr_ls/par_cgc_coarsen.c      PROPERTIES COMPILE_FLAGS /TP)
   set_source_files_properties (parcsr_ls/par_jacobi_interp.c    PROPERTIES COMPILE_FLAGS /TP)
+  set_source_files_properties (parcsr_ls/par_mgr_setup.c        PROPERTIES COMPILE_FLAGS /TP)
   set_source_files_properties (parcsr_ls/par_rap.c              PROPERTIES COMPILE_FLAGS /TP)
   set_source_files_properties (parcsr_ls/par_relax.c            PROPERTIES COMPILE_FLAGS /TP)
   set_source_files_properties (parcsr_ls/par_strength.c         PROPERTIES COMPILE_FLAGS /TP)
+  #Fix issue with visual studio 2013
+  set_source_files_properties (struct_ls/pfmg3_setup_rap.c      PROPERTIES COMPILE_FLAGS /Od)
 endif ()
 
 if (HYPRE_USING_FEI)

@@ -34,17 +34,17 @@ typedef struct
 {
    MPI_Comm      context;
 
-   HYPRE_Int M, N;                               /* number of rows and cols in matrix */
+   HYPRE_BigInt M, N;                               /* number of rows and cols in matrix */
 
    void         *auxiliary_data;           /* Placeholder for implmentation specific
                                               data */
 
    void         *local_storage;            /* Structure for storing local portion */
-   HYPRE_Int      	 local_storage_type;       /* Indicates the type of "local storage" */
+   HYPRE_Int   	 local_storage_type;       /* Indicates the type of "local storage" */
    void         *translator;               /* optional storage_type specfic structure
                                               for holding additional local info */
 #ifdef HYPRE_TIMING
-   HYPRE_Int           GetRow_timer;
+   HYPRE_Int     GetRow_timer;
 #endif
 } hypre_DistributedMatrix;
 

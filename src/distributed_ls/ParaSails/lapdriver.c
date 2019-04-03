@@ -211,8 +211,8 @@ HYPRE_Int main(HYPRE_Int argc, char *argv[])
    beg_row = mype*(nx*ny*nz)+1;
    end_row = (mype+1)*(nx*ny*nz);
 
-    x0 = (HYPRE_Real *) malloc((end_row-beg_row+1) * sizeof(HYPRE_Real));
-    b  = (HYPRE_Real *) malloc((end_row-beg_row+1) * sizeof(HYPRE_Real));
+    x0 = hypre_TAlloc(HYPRE_Real, (end_row-beg_row+1) , HYPRE_MEMORY_HOST);
+    b  = hypre_TAlloc(HYPRE_Real, (end_row-beg_row+1) , HYPRE_MEMORY_HOST);
 
         for (i=0; i<end_row-beg_row+1; i++)
 	{
@@ -304,9 +304,9 @@ hcstop();
         ParaSailsStatsPattern(ps, A);
         ParaSailsStatsValues(ps, A);
 
-        hypre_MPI_Reduce(&setup_time, &max_setup_time, 1, hypre_MPI_DOUBLE, hypre_MPI_MAX, 0,
+        hypre_MPI_Reduce(&setup_time, &max_setup_time, 1, hypre_MPI_REAL, hypre_MPI_MAX, 0,
             hypre_MPI_COMM_WORLD);
-        hypre_MPI_Reduce(&solve_time, &max_solve_time, 1, hypre_MPI_DOUBLE, hypre_MPI_MAX, 0,
+        hypre_MPI_Reduce(&solve_time, &max_solve_time, 1, hypre_MPI_REAL, hypre_MPI_MAX, 0,
             hypre_MPI_COMM_WORLD);
 
         if (mype == 0)

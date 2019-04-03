@@ -198,8 +198,14 @@ you need to write EUCLID_GET_ROW() functions: see src/getRow.c
 #define FABS(a)    ((a) < 0 ? -(a) : a)
 #endif
 
-/* used in Mat_SEQ_PrintTriples, so matlab won't discard zeros (yuck!) */
+#ifdef HYPRE_SINGLE
+#define _ATOL_ 1.0e-16   /* used to compute absolute tolerance for Euclid's internal Krylov solvers */
+#define _MATLAB_ZERO_  1e-30 /* used in Mat_SEQ_PrintTriples, so matlab won't discard zeros (yuck!) */
+#else // default
+#define _ATOL_ 1.0e-50
 #define _MATLAB_ZERO_  1e-100
+#endif
+
 
 
 /*---------------------------------------------------------------------- 
@@ -481,7 +487,11 @@ extern void  printErrorMsg(FILE *fp);
 #endif
 
 #define MSG_BUF_SIZE_DH MAX(1024, hypre_MPI_MAX_ERROR_STRING)
+#if defined(HYPRE_USING_RAJA) || defined(HYPRE_USING_KOKKOS) || defined(HYPRE_USING_CUDA)
+static char  msgBuf_dh[MSG_BUF_SIZE_DH];
+#else
 extern char  msgBuf_dh[MSG_BUF_SIZE_DH];
+#endif
 
 /* Each processor (may) open a logfile.
  * The bools are switches for controlling the amount of informational 

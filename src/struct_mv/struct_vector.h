@@ -31,7 +31,7 @@ typedef struct hypre_StructVector_struct
 
    hypre_BoxArray       *data_space;
 
-   HYPRE_Complex        *data;         /* Pointer to vector data */
+   HYPRE_Complex        *data;         /* Pointer to vector data on device*/
    HYPRE_Int             data_alloced; /* Boolean used for freeing data */
    HYPRE_Int             data_size;    /* Size of vector data */
    HYPRE_Int            *data_indices; /* num-boxes array of indices into
@@ -43,7 +43,7 @@ typedef struct hypre_StructVector_struct
                                                      * direction */
    HYPRE_Int             bghost_not_clear; /* Are boundary ghosts clear? */
                       
-   HYPRE_Int             global_size;  /* Total number coefficients */
+   HYPRE_BigInt          global_size;  /* Total number coefficients */
 
    HYPRE_Int             ref_count;
 

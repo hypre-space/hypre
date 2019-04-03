@@ -405,7 +405,7 @@ c        Create the Struct PFMG solver for use as a preconditioner
          call HYPRE_StructPFMGCreate(MPI_COMM_WORLD, precond, ierr)
 c        Set PFMG parameters
          call HYPRE_StructPFMGSetMaxIter(precond, 1, ierr)
-         call HYPRE_StructPFMGSetTol(precond, 0.0, ierr)
+         call HYPRE_StructPFMGSetTol(precond, 0.0d0, ierr)
          call HYPRE_StructPFMGSetZeroGuess(precond, ierr)
          call HYPRE_StructPFMGSetNumPreRelax(precond, 2, ierr)
          call HYPRE_StructPFMGSetNumPostRelax(precond, 2, ierr)
@@ -449,6 +449,7 @@ c        Set BoomerAMG parameters
 c        Print amg solution info
          call HYPRE_BoomerAMGSetPrintLevel(precond, 1, ierr)
          call HYPRE_BoomerAMGSetCoarsenType(precond, 6, ierr)
+         call HYPRE_BoomerAMGSetOldDefault(precond, ierr)
 c        Sym G.S./Jacobi hybrid
          call HYPRE_BoomerAMGSetRelaxType(precond, 6, ierr)
          call HYPRE_BoomerAMGSetNumSweeps(precond, 1, ierr)

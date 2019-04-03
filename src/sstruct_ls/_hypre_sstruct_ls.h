@@ -309,7 +309,7 @@ typedef struct
    HYPRE_Int row;
                                                                                                                                     
    HYPRE_Int ncols;
-   HYPRE_Int      *cols;
+   HYPRE_BigInt *cols;
    HYPRE_Real   *data;
                                                                                                                                     
 } hypre_MaxwellOffProcRow;
@@ -587,8 +587,8 @@ HYPRE_Int hypre_SStructKrylovIdentitySetup ( void *vdata , void *A , void *b , v
 HYPRE_Int hypre_SStructKrylovIdentity ( void *vdata , void *A , void *b , void *x );
 
 /* krylov_sstruct.c */
-char *hypre_SStructKrylovCAlloc ( HYPRE_Int count , HYPRE_Int elt_size );
-HYPRE_Int hypre_SStructKrylovFree ( char *ptr );
+void *hypre_SStructKrylovCAlloc ( HYPRE_Int count , HYPRE_Int elt_size );
+HYPRE_Int hypre_SStructKrylovFree ( void *ptr );
 void *hypre_SStructKrylovCreateVector ( void *vvector );
 void *hypre_SStructKrylovCreateVectorArray ( HYPRE_Int n , void *vvector );
 HYPRE_Int hypre_SStructKrylovDestroyVector ( void *vvector );
@@ -650,7 +650,7 @@ HYPRE_Int hypre_SeqVectorZeroBCValues ( hypre_Vector *v , HYPRE_Int *rows , HYPR
 
 /* nd1_amge_interpolation.c */
 HYPRE_Int hypre_ND1AMGeInterpolation ( hypre_ParCSRMatrix *Aee , hypre_ParCSRMatrix *ELEM_idof , hypre_ParCSRMatrix *FACE_idof , hypre_ParCSRMatrix *EDGE_idof , hypre_ParCSRMatrix *ELEM_FACE , hypre_ParCSRMatrix *ELEM_EDGE , HYPRE_Int num_OffProcRows , hypre_MaxwellOffProcRow **OffProcRows , hypre_IJMatrix *IJ_dof_DOF );
-HYPRE_Int hypre_HarmonicExtension ( hypre_CSRMatrix *A , hypre_CSRMatrix *P , HYPRE_Int num_DOF , HYPRE_Int *DOF , HYPRE_Int num_idof , HYPRE_Int *idof , HYPRE_Int num_bdof , HYPRE_Int *bdof );
+HYPRE_Int hypre_HarmonicExtension ( hypre_CSRMatrix *A , hypre_CSRMatrix *P , HYPRE_Int num_DOF , HYPRE_BigInt *DOF , HYPRE_Int num_idof , HYPRE_BigInt *idof , HYPRE_Int num_bdof , HYPRE_BigInt *bdof );
 
 /* node_relax.c */
 void *hypre_NodeRelaxCreate ( MPI_Comm comm );

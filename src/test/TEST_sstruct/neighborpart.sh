@@ -13,6 +13,8 @@
 
 
 TNAME=`basename $0 .sh`
+RTOL=$1
+ATOL=$2
 
 #=============================================================================
 # Test SetNeighborPart by comparing one-part problem against
@@ -24,7 +26,7 @@ tail -3 ${TNAME}.out.0 > ${TNAME}.testdata
 for i in 1 2 3
 do
    tail -3 ${TNAME}.out.$i > ${TNAME}.testdata.temp
-   diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+   (../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $RTOL $ATOL) >&2
 done
 
 #=============================================================================
@@ -33,35 +35,35 @@ done
 
 tail -3 ${TNAME}.out.10 > ${TNAME}.testdata
 tail -3 ${TNAME}.out.11 > ${TNAME}.testdata.temp
-diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+(../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $RTOL $ATOL) >&2
 
 tail -3 ${TNAME}.out.20 > ${TNAME}.testdata
 tail -3 ${TNAME}.out.21 > ${TNAME}.testdata.temp
-diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+(../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $RTOL $ATOL) >&2
 
 tail -3 ${TNAME}.out.30 > ${TNAME}.testdata
 for i in 31 32
 do
    tail -3 ${TNAME}.out.$i > ${TNAME}.testdata.temp
-   diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+   (../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $RTOL $ATOL) >&2
 done
 
 tail -3 ${TNAME}.out.40 > ${TNAME}.testdata
 tail -3 ${TNAME}.out.41 > ${TNAME}.testdata.temp
-diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+(../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $RTOL $ATOL) >&2
 
 tail -3 ${TNAME}.out.50 > ${TNAME}.testdata
 for i in 51 52
 do
    tail -3 ${TNAME}.out.$i > ${TNAME}.testdata.temp
-   diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+   (../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $RTOL $ATOL) >&2
 done
 
 tail -3 ${TNAME}.out.60 > ${TNAME}.testdata
 for i in 61 62
 do
    tail -3 ${TNAME}.out.$i > ${TNAME}.testdata.temp
-   diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+   (../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $RTOL $ATOL) >&2
 done
 
 #=============================================================================
@@ -105,7 +107,7 @@ if [ "$OUT_COUNT" != "$SAVED_COUNT" ]; then
 fi
 
 if [ -z $HYPRE_NO_SAVED ]; then
-   diff -U3 -bI"time" ${TNAME}.saved ${TNAME}.out >&2
+   (../runcheck.sh ${TNAME}.out ${TNAME}.saved $RTOL $ATOL) >&2
 fi
 
 #=============================================================================

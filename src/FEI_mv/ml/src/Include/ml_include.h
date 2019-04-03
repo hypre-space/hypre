@@ -57,7 +57,7 @@
 #include "ml_agg_reitzinger.h"
 #include "ml_aztec_utils.h"
 #include "ml_memory.h"
-#include "ml_vampir.h"
+//#include "ml_vampir.h"
 #include "ml_amesos.h"
 #include "ml_ifpack.h"
 #include "ml_agg_METIS.h"

@@ -48,8 +48,8 @@ HYPRE_Real time_get_cpu_seconds_( void );
 #define hypre_IncFLOPCount(inc)
 #define hypre_BeginTiming(i)
 #define hypre_EndTiming(i)
-#define hypre_ClearTiming()
 #define hypre_PrintTiming(heading, comm)
+#define hypre_ClearTiming()
 
 /*--------------------------------------------------------------------------
  * With timing on
@@ -106,7 +106,7 @@ extern hypre_TimingType *hypre_global_timing;
 /* timing.c */
 HYPRE_Int hypre_InitializeTiming( const char *name );
 HYPRE_Int hypre_FinalizeTiming( HYPRE_Int time_index );
-HYPRE_Int hypre_IncFLOPCount( HYPRE_Int inc );
+HYPRE_Int hypre_IncFLOPCount( HYPRE_BigInt inc );
 HYPRE_Int hypre_BeginTiming( HYPRE_Int time_index );
 HYPRE_Int hypre_EndTiming( HYPRE_Int time_index );
 HYPRE_Int hypre_ClearTiming( void );
@@ -119,3 +119,4 @@ HYPRE_Int hypre_PrintTiming( const char *heading , MPI_Comm comm );
 #endif
 
 #endif
+

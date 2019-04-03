@@ -53,8 +53,6 @@
 #include "HYPRE_MLMaxwell.h"
 #include "HYPRE_SlideReduction.h"
 
-#include "dsuperlu_include.h"
-
 //***************************************************************************
 // timers 
 //---------------------------------------------------------------------------
@@ -678,7 +676,8 @@ int HYPRE_LinSysCore::setLookup(Lookup& lookup)
    // set the lookup object and initialize the MLI_FEData object
    //-------------------------------------------------------------------
 
-   if (&lookup == NULL) return (0);
+   // RDF: The following line doesn't make sense and generates warnings with some compilers
+   //if (&lookup == NULL) return (0);
    lookup_ = &lookup;
    haveLookup_ = 1;
 
@@ -5209,13 +5208,13 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
          HYPRE_ParCSRHybridSetCoarsenType(HYSolver_, amgCoarsenType_);
          HYPRE_ParCSRHybridSetMeasureType(HYSolver_, amgMeasureType_);
          HYPRE_ParCSRHybridSetStrongThreshold(HYSolver_,amgStrongThreshold_);
-         numSweeps = hypre_CTAlloc(int,4);
+         numSweeps = hypre_CTAlloc(int,4,HYPRE_MEMORY_HOST);
          for ( i = 0; i < 4; i++ ) numSweeps[i] = amgNumSweeps_[i];
          HYPRE_ParCSRHybridSetNumGridSweeps(HYSolver_, numSweeps);
-         relaxType = hypre_CTAlloc(int,4);
+         relaxType = hypre_CTAlloc(int,4,HYPRE_MEMORY_HOST);
          for ( i = 0; i < 4; i++ ) relaxType[i] = amgRelaxType_[i];
          HYPRE_ParCSRHybridSetGridRelaxType(HYSolver_, relaxType);
-         relaxWt = hypre_CTAlloc(double,25);
+         relaxWt = hypre_CTAlloc(double,25,HYPRE_MEMORY_HOST);
          for ( i = 0; i < 25; i++ ) relaxWt[i] = amgRelaxWeight_[i];
          HYPRE_ParCSRHybridSetRelaxWeight(HYSolver_, relaxWt);
          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )

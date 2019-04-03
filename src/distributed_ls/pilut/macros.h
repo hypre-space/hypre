@@ -82,14 +82,15 @@
 #endif
 #else
 #ifdef MACHINE_IS_SOLARIS
+#include "_hypre_blas.h"
 #ifdef USE_SHORT
-#define SNRM2 hypre_F90_NAME_BLAS(snrm2, SNRM2)
-#define SDOT hypre_F90_NAME_BLAS(sdot, SDOT)
-#define SCOPY hypre_F90_NAME_BLAS(scopy, SCOPY)
+#define SNRM2 hypre_snrm2
+#define SDOT hypre_sdot
+#define SCOPY hypre_scopy
 #else
-#define SNRM2 hypre_F90_NAME_BLAS(dnrm2, DNRM2)
-#define SDOT hypre_F90_NAME_BLAS(ddot, DDOT)
-#define SCOPY hypre_F90_NAME_BLAS(dcopy, DCOPY)
+#define SNRM2 hypre_dnrm2
+#define SDOT hypre_ddot
+#define SCOPY hypre_dcopy
 #endif
 #else
 #ifdef USE_SHORT

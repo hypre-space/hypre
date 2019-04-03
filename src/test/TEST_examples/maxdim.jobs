@@ -15,6 +15,6 @@
 # Run maxdim examples
 #=============================================================================
 
-mpirun -np 16 ex17 -n 10 > maxdim.out.1
+mpirun -np 16 ./ex17 -n 10 > maxdim.out.1
 
-mpirun -np 16 ex18 -n 4 > maxdim.out.2
+mpirun -np 16 ./ex18 -n 4 > maxdim.out.2

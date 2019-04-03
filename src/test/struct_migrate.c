@@ -65,9 +65,11 @@ main( hypre_int argc,
 
    /* Initialize MPI */
    hypre_MPI_Init(&argc, &argv);
-
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+
+   /* Initialize Hypre */
+   HYPRE_Init(argc, argv);
 
    /*-----------------------------------------------------------
     * Set defaults
@@ -242,14 +244,14 @@ main( hypre_int argc,
     * prepare space for the extents
     *-----------------------------------------------------------*/
 
-   ilower = hypre_CTAlloc(HYPRE_Int*, nblocks);
-   iupper = hypre_CTAlloc(HYPRE_Int*, nblocks);
-   iupper2 = hypre_CTAlloc(HYPRE_Int*, nblocks);
+   ilower = hypre_CTAlloc(HYPRE_Int*,  nblocks, HYPRE_MEMORY_HOST);
+   iupper = hypre_CTAlloc(HYPRE_Int*,  nblocks, HYPRE_MEMORY_HOST);
+   iupper2 = hypre_CTAlloc(HYPRE_Int*,  nblocks, HYPRE_MEMORY_HOST);
    for (i = 0; i < nblocks; i++)
    {
-      ilower[i] = hypre_CTAlloc(HYPRE_Int, dim);
-      iupper[i] = hypre_CTAlloc(HYPRE_Int, dim);
-      iupper2[i] = hypre_CTAlloc(HYPRE_Int, dim);
+      ilower[i] = hypre_CTAlloc(HYPRE_Int,  dim, HYPRE_MEMORY_HOST);
+      iupper[i] = hypre_CTAlloc(HYPRE_Int,  dim, HYPRE_MEMORY_HOST);
+      iupper2[i] = hypre_CTAlloc(HYPRE_Int,  dim, HYPRE_MEMORY_HOST);
    }
 
    ib = 0;
@@ -362,7 +364,7 @@ main( hypre_int argc,
 
    if (myid == 0)
    {
-      printf("\nCheck = %1.0f (success = 0)\n\n", check);
+      hypre_printf("\nCheck = %1.0f (success = 0)\n\n", check);
    }
 
    /*-----------------------------------------------------------
@@ -384,17 +386,20 @@ main( hypre_int argc,
    
    for (i = 0; i < nblocks; i++)
    {
-      hypre_TFree(ilower[i]);
-      hypre_TFree(iupper[i]);
-      hypre_TFree(iupper2[i]);
+      hypre_TFree(ilower[i], HYPRE_MEMORY_HOST);
+      hypre_TFree(iupper[i], HYPRE_MEMORY_HOST);
+      hypre_TFree(iupper2[i], HYPRE_MEMORY_HOST);
    }
-   hypre_TFree(ilower);
-   hypre_TFree(iupper);
-   hypre_TFree(iupper2);
+   hypre_TFree(ilower, HYPRE_MEMORY_HOST);
+   hypre_TFree(iupper, HYPRE_MEMORY_HOST);
+   hypre_TFree(iupper2, HYPRE_MEMORY_HOST);
 
    HYPRE_StructVectorDestroy(from_vector);
    HYPRE_StructVectorDestroy(to_vector);
    HYPRE_StructVectorDestroy(check_vector);
+
+   /* Finalize Hypre */
+   HYPRE_Finalize();
 
    /* Finalize MPI */
    hypre_MPI_Finalize();
@@ -413,7 +418,7 @@ AddValuesVector( hypre_StructGrid   *grid,
 {
    HYPRE_Int          ierr = 0;
    hypre_BoxArray    *gridboxes;
-   HYPRE_Int          i,ib;
+   HYPRE_Int          ib;
    hypre_IndexRef     ilower;
    hypre_IndexRef     iupper;
    hypre_Box         *box;
@@ -426,18 +431,21 @@ AddValuesVector( hypre_StructGrid   *grid,
    hypre_ForBoxI(ib, gridboxes)
    {
       box      = hypre_BoxArrayBox(gridboxes, ib);
-      volume   =  hypre_BoxVolume(box);
-      values   = hypre_CTAlloc(HYPRE_Real, volume);
+      volume   = hypre_BoxVolume(box);
+      values   =  hypre_CTAlloc(HYPRE_Real,  volume, HYPRE_MEMORY_DEVICE);
 
-      for (i = 0; i < volume; i++)
+#define DEVICE_VAR is_device_ptr(values)
+      hypre_LoopBegin(volume,i)
       {
          values[i] = value;
       }
-
+      hypre_LoopEnd();
+#undef DEVICE_VAR
+	
       ilower = hypre_BoxIMin(box);
       iupper = hypre_BoxIMax(box);
       HYPRE_StructVectorSetBoxValues(vector, ilower, iupper, values);
-      hypre_TFree(values);
+      hypre_TFree(values, HYPRE_MEMORY_DEVICE);
    }
 
    return ierr;

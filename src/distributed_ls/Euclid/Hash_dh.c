@@ -154,7 +154,7 @@ void Hash_dhInsert(Hash_dh h, HYPRE_Int key, HashData *dataIN)
     if (data[idx].mark < curMark) {
       data[idx].key = key;
       data[idx].mark = curMark;
-      memcpy(&(data[idx].data), dataIN, sizeof(HashData));
+      hypre_TMemcpy(&(data[idx].data),  dataIN, HashData, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
       break;
     }
   }

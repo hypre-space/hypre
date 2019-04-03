@@ -10,18 +10,17 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
 include ../../config/Makefile.config
 
 BASE_DIR = ${HYPRE_FEI_BASE_DIR}
 
-SUPERLU_INCLUDE = -I$(srcdir)/../SuperLU/SRC
-SUPERLU_LIB     = -L$(srcdir)/../SuperLU
+#SUPERLU_INCLUDE = -I$(srcdir)/../SuperLU/SRC
+#SUPERLU_LIB     = -L$(srcdir)/../SuperLU
 
 CINCLUDES=${INCLUDES} ${MPIINCLUDE} -I../ml/src/Include
 CXXINCLUDES=${INCLUDES} ${MPIINCLUDE} -I../ml/src/Include
-CDEFS = -DHAVE_SUPERLU -DBOOL_NOT_SUPPORTED -DHAVE_MLI
-CXXDEFS = -DHAVE_SUPERLU -DBOOL_NOT_SUPPORTED -DMPICH_SKIP_MPICXX -DHAVE_MLI
+CDEFS = -DBOOL_NOT_SUPPORTED
+CXXDEFS = ${CDEFS} -DMPICH_SKIP_MPICXX
 
 C_COMPILE_FLAGS = \
  ${CDEFS}\
@@ -41,6 +40,7 @@ C_COMPILE_FLAGS = \
  -I$(srcdir)/../../distributed_ls\
  -I$(srcdir)/../fei-base\
  ${SUPERLU_INCLUDE}\
+ ${DSUPERLU_INCLUDE}\
  ${CINCLUDES}
 
 CXX_COMPILE_FLAGS = \
@@ -61,6 +61,7 @@ CXX_COMPILE_FLAGS = \
  -I$(srcdir)/../femli\
  -I$(srcdir)/../fei-base\
  ${SUPERLU_INCLUDE}\
+ ${DSUPERLU_INCLUDE}\
  ${CXXINCLUDES}
 
 HEADERS =\
@@ -158,7 +159,7 @@ OBJSC = ${FILESC:.c=.o}
 OBJSCXX = ${FILESCXX:.cxx=.o}
 OBJS = ${OBJSC} ${OBJSCXX}
 
-SONAME = libHYPRE_FEI-${HYPRE_RELEASE_VERSION}.so
+SONAME = libHYPRE_FEI-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
 ##################################################################
 # Targets
@@ -210,7 +211,7 @@ libHYPRE_FEI.a: ${OBJS}
 	${AR} $@ ${OBJS}
 	${RANLIB} $@
 
-libHYPRE_FEI.so: ${OBJS}
+libHYPRE_FEI.so libHYPRE_FEI.dylib: ${OBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
 	ln -s ${SONAME} $@

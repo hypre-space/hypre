@@ -10,7 +10,6 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
 include ../config/Makefile.config
 
 ## Euclid specific macros taken from distributed_ls/Euclid
@@ -22,6 +21,8 @@ C_COMPILE_FLAGS =\
  -I../distributed_ls/Euclid\
  -I$(srcdir)\
  -I$(srcdir)/..\
+ -I$(srcdir)/../blas\
+ -I$(srcdir)/../lapack\
  -I$(srcdir)/../multivector\
  -I$(srcdir)/../utilities\
  -I$(srcdir)/../krylov\
@@ -31,6 +32,7 @@ C_COMPILE_FLAGS =\
  -I$(srcdir)/../matrix_matrix\
  -I$(srcdir)/../IJ_mv\
  -I$(srcdir)/../parcsr_block_mv\
+ $(DSUPERLU_INCLUDE)\
  ${CINCLUDES}
 
 HEADERS =\
@@ -53,6 +55,7 @@ FILES =\
  F90_HYPRE_parcsr_cgnr.c\
  F90_HYPRE_parcsr_Euclid.c\
  F90_HYPRE_parcsr_gmres.c\
+ F90_HYPRE_parcsr_cogmres.c\
  F90_HYPRE_parcsr_flexgmres.c\
  F90_HYPRE_parcsr_lgmres.c\
  F90_HYPRE_parcsr_hybrid.c\
@@ -69,10 +72,12 @@ FILES =\
  HYPRE_parcsr_cgnr.c\
  HYPRE_parcsr_Euclid.c\
  HYPRE_parcsr_gmres.c\
+ HYPRE_parcsr_cogmres.c\
  HYPRE_parcsr_flexgmres.c\
  HYPRE_parcsr_lgmres.c\
  HYPRE_parcsr_hybrid.c\
  HYPRE_parcsr_int.c\
+ HYPRE_parcsr_mgr.c\
  HYPRE_parcsr_ParaSails.c\
  HYPRE_parcsr_pcg.c\
  HYPRE_parcsr_pilut.c\
@@ -91,6 +96,7 @@ FILES =\
  par_cg_relax_wt.c\
  par_coarsen.c\
  par_cgc_coarsen.c\
+ par_cheby.c\
  par_coarse_parms.c\
  par_coordinates.c\
  par_cr.c\
@@ -102,16 +108,18 @@ FILES =\
  par_interp.c\
  par_jacobi_interp.c\
  par_multi_interp.c\
+ par_laplace.c\
  par_laplace_27pt.c\
  par_laplace_9pt.c\
- par_laplace.c\
  par_lr_interp.c\
+ par_mgr.c\
+ par_mgr_setup.c\
+ par_mgr_solve.c\
  par_nongalerkin.c\
  par_nodal_systems.c\
  par_rap.c\
  par_rap_communication.c\
  par_rotate_7pt.c\
- par_vardifconv.c\
  par_relax.c\
  par_relax_more.c\
  par_relax_interface.c\
@@ -121,17 +129,22 @@ FILES =\
  par_strength.c\
  par_sv_interp.c\
  par_sv_interp_ln.c\
+ par_vardifconv.c\
+ par_vardifconv_rs.c\
  partial.c\
  pcg_par.c\
  schwarz.c\
  block_tridiag.c\
  ams.c\
  ads.c\
- ame.c
+ ame.c\
+ par_restr.c\
+ par_lr_restr.c\
+ superlu.c
 
 OBJS = ${FILES:.c=.o}
 
-SONAME = libHYPRE_parcsr_ls-${HYPRE_RELEASE_VERSION}.so
+SONAME = libHYPRE_parcsr_ls-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
 ##################################################################
 # Targets
@@ -163,7 +176,7 @@ libHYPRE_parcsr_ls.a: ${OBJS}
 	${AR} $@ ${OBJS}
 	${RANLIB} $@
 
-libHYPRE_parcsr_ls.so: ${OBJS}
+libHYPRE_parcsr_ls.so libHYPRE_parcsr_ls.dylib: ${OBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
 	ln -s ${SONAME} $@

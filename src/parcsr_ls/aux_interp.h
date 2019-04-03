@@ -27,9 +27,9 @@ HYPRE_Int alt_insert_new_nodes(hypre_ParCSRCommPkg *comm_pkg,
                           HYPRE_Int full_off_procNodes,
                           HYPRE_Int *OUT_marker);
 
-HYPRE_Int hypre_ssort(HYPRE_Int *data, HYPRE_Int n);
-HYPRE_Int index_of_minimum(HYPRE_Int *data, HYPRE_Int n);
-void swap_int(HYPRE_Int *data, HYPRE_Int a, HYPRE_Int b);
+HYPRE_Int hypre_ssort(HYPRE_BigInt *data, HYPRE_Int n);
+HYPRE_Int index_of_minimum(HYPRE_BigInt *data, HYPRE_Int n);
+void swap_int(HYPRE_BigInt *data, HYPRE_Int a, HYPRE_Int b);
 void initialize_vecs(HYPRE_Int diag_n, HYPRE_Int offd_n, HYPRE_Int *diag_ftc, HYPRE_Int *offd_ftc, 
 		     HYPRE_Int *diag_pm, HYPRE_Int *offd_pm, HYPRE_Int *tmp_CF);
 

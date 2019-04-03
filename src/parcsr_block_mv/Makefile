@@ -26,6 +26,8 @@ C_COMPILE_FLAGS = \
  -I$(srcdir)/../parcsr_ls\
  -I$(srcdir)/../IJ_mv\
  -I$(srcdir)/../krylov\
+ $(SUPERLU_INCLUDE)\
+ $(DSUPERLU_INCLUDE)\
  ${CINCLUDES}
 
 LFLAGS = \
@@ -59,7 +61,7 @@ DRIVER_FILES =
 OBJS = ${FILES:.c=.o}
 DRIVER_OBJS = ${DRIVER_FILES:.c=.o}
 
-SONAME = libHYPRE_parcsr_block_mv-${HYPRE_RELEASE_VERSION}.so
+SONAME = libHYPRE_parcsr_block_mv-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
 ##################################################################
 # Targets
@@ -114,7 +116,7 @@ libHYPRE_parcsr_block_mv.a: ${OBJS}
 	${AR} $@ ${OBJS}
 	${RANLIB} $@
 
-libHYPRE_parcsr_block_mv.so: ${OBJS}
+libHYPRE_parcsr_block_mv.so libHYPRE_parcsr_block_mv.dylib: ${OBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
 	ln -s ${SONAME} $@

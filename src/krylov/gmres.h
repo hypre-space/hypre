@@ -53,8 +53,8 @@
 
 typedef struct
 {
-   char *       (*CAlloc)        ( size_t count, size_t elt_size );
-   HYPRE_Int    (*Free)          ( char *ptr );
+   void *       (*CAlloc)        ( size_t count, size_t elt_size );
+   HYPRE_Int    (*Free)          ( void *ptr );
    HYPRE_Int    (*CommInfo)      ( void  *A, HYPRE_Int   *my_id,
                                    HYPRE_Int   *num_procs );
    void *       (*CreateVector)  ( void *vector );
@@ -88,6 +88,7 @@ typedef struct
    HYPRE_Int      skip_real_r_check;
    HYPRE_Int      stop_crit;
    HYPRE_Int      converged;
+   HYPRE_Int      hybrid;
    HYPRE_Real   tol;
    HYPRE_Real   cf_tol;
    HYPRE_Real   a_tol;
@@ -133,8 +134,8 @@ extern "C" {
 
 hypre_GMRESFunctions *
 hypre_GMRESFunctionsCreate(
-   char *       (*CAlloc)        ( size_t count, size_t elt_size ),
-   HYPRE_Int    (*Free)          ( char *ptr ),
+   void *       (*CAlloc)        ( size_t count, size_t elt_size ),
+   HYPRE_Int    (*Free)          ( void *ptr ),
    HYPRE_Int    (*CommInfo)      ( void  *A, HYPRE_Int   *my_id,
                                    HYPRE_Int   *num_procs ),
    void *       (*CreateVector)  ( void *vector ),

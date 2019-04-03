@@ -69,7 +69,7 @@ HYPRE_Int hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
   
       hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
       hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
-      HYPRE_Int *col_map_offd = hypre_ParCSRMatrixColMapOffd(A);
+      HYPRE_BigInt *col_map_offd = hypre_ParCSRMatrixColMapOffd(A);
       HYPRE_Int *A_diag_i = hypre_CSRMatrixI(A_diag);
       HYPRE_Int *A_offd_i = hypre_CSRMatrixI(A_offd);
       HYPRE_Int *A_diag_j = hypre_CSRMatrixJ(A_diag);
@@ -77,8 +77,9 @@ HYPRE_Int hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
       HYPRE_Real *A_diag_data = hypre_CSRMatrixData(A_diag);
       HYPRE_Real *A_offd_data = hypre_CSRMatrixData(A_offd);
       HYPRE_Int num_rows = hypre_CSRMatrixNumRows(A_diag);
-      HYPRE_Int first_row_index = hypre_ParCSRMatrixFirstRowIndex(A);
-      HYPRE_Int new_num_procs, *row_starts;
+      HYPRE_BigInt first_row_index = hypre_ParCSRMatrixFirstRowIndex(A);
+      HYPRE_Int new_num_procs;
+      HYPRE_BigInt *row_starts;
 
       hypre_GenerateSubComm(comm, num_rows, &new_comm); 
 
@@ -86,11 +87,11 @@ HYPRE_Int hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
       /*hypre_MPI_Group orig_group, new_group; 
       HYPRE_Int *ranks, new_num_procs, *row_starts;
 
-      info = hypre_CTAlloc(HYPRE_Int, num_procs);
+      info = hypre_CTAlloc(HYPRE_Int,  num_procs, HYPRE_MEMORY_HOST);
 
       hypre_MPI_Allgather(&num_rows, 1, HYPRE_MPI_INT, info, 1, HYPRE_MPI_INT, comm);
 
-      ranks = hypre_CTAlloc(HYPRE_Int, num_procs);
+      ranks = hypre_CTAlloc(HYPRE_Int,  num_procs, HYPRE_MEMORY_HOST);
 
       new_num_procs = 0;
       for (i=0; i < num_procs; i++)
@@ -111,7 +112,7 @@ HYPRE_Int hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
          hypre_ParAMGDataParticipate(amg_data) = 1;
          hypre_MPI_Comm_size(new_comm, &new_num_procs); 
          hypre_MPI_Comm_rank(new_comm, &my_id);
-         info = hypre_CTAlloc(HYPRE_Int, new_num_procs);
+         info = hypre_CTAlloc(HYPRE_Int,  new_num_procs, HYPRE_MEMORY_HOST);
 
          if (redundant)
             hypre_MPI_Allgather(&num_rows, 1, HYPRE_MPI_INT, info, 1, HYPRE_MPI_INT, new_comm);
@@ -151,7 +152,7 @@ HYPRE_Int hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
          }
 
          /* Create CSR Matrix, will be Diag part of new matrix */
-         A_tmp_i = hypre_CTAlloc(HYPRE_Int, num_rows+1);
+         A_tmp_i = hypre_CTAlloc(HYPRE_Int,  num_rows+1, HYPRE_MEMORY_HOST);
 
          A_tmp_i[0] = 0;
          for (i=1; i < num_rows+1; i++)
@@ -159,25 +160,25 @@ HYPRE_Int hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
 
          num_nonzeros = A_offd_i[num_rows]+A_diag_i[num_rows];
 
-         A_tmp_j = hypre_CTAlloc(HYPRE_Int, num_nonzeros);
-         A_tmp_data = hypre_CTAlloc(HYPRE_Real, num_nonzeros);
+         A_tmp_j = hypre_CTAlloc(HYPRE_Int,  num_nonzeros, HYPRE_MEMORY_HOST);
+         A_tmp_data = hypre_CTAlloc(HYPRE_Real,  num_nonzeros, HYPRE_MEMORY_HOST);
 
          cnt = 0;
          for (i=0; i < num_rows; i++)
          {
             for (j=A_diag_i[i]; j < A_diag_i[i+1]; j++)
 	    {
-	       A_tmp_j[cnt] = A_diag_j[j]+first_row_index;
+	       A_tmp_j[cnt] = A_diag_j[j]+(HYPRE_Int)first_row_index;
 	       A_tmp_data[cnt++] = A_diag_data[j];
 	    }
             for (j=A_offd_i[i]; j < A_offd_i[i+1]; j++)
 	    {
-	       A_tmp_j[cnt] = col_map_offd[A_offd_j[j]];
+	       A_tmp_j[cnt] = (HYPRE_Int)col_map_offd[A_offd_j[j]];
 	       A_tmp_data[cnt++] = A_offd_data[j];
 	    }
          }
 
-         displs = hypre_CTAlloc(HYPRE_Int, new_num_procs+1);
+         displs = hypre_CTAlloc(HYPRE_Int,  new_num_procs+1, HYPRE_MEMORY_HOST);
          displs[0] = 0;
          for (i=1; i < new_num_procs+1; i++)
             displs[i] = displs[i-1]+info[i-1];
@@ -185,9 +186,9 @@ HYPRE_Int hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
   
          if (redundant || my_id == 0)
          {
-            A_seq_i = hypre_CTAlloc(HYPRE_Int, size+1);
-            A_seq_offd_i = hypre_CTAlloc(HYPRE_Int, size+1);
-            if (num_functions > 1) seq_dof_func = hypre_CTAlloc(HYPRE_Int, size);
+            A_seq_i = hypre_CTAlloc(HYPRE_Int,  size+1, HYPRE_MEMORY_SHARED);
+            A_seq_offd_i = hypre_CTAlloc(HYPRE_Int,  size+1, HYPRE_MEMORY_SHARED);
+            if (num_functions > 1) seq_dof_func = hypre_CTAlloc(HYPRE_Int,  size, HYPRE_MEMORY_HOST);
          }
 
          if (redundant)
@@ -219,7 +220,7 @@ HYPRE_Int hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
 
          if (redundant || my_id == 0)
          {
-            displs2 = hypre_CTAlloc(HYPRE_Int, new_num_procs+1);
+            displs2 = hypre_CTAlloc(HYPRE_Int,  new_num_procs+1, HYPRE_MEMORY_HOST);
 
             A_seq_i[0] = 0;
             displs2[0] = 0;
@@ -241,8 +242,8 @@ HYPRE_Int hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
             }
 
             total_nnz = displs2[new_num_procs];
-            A_seq_j = hypre_CTAlloc(HYPRE_Int, total_nnz);
-            A_seq_data = hypre_CTAlloc(HYPRE_Real, total_nnz);
+            A_seq_j = hypre_CTAlloc(HYPRE_Int,  total_nnz, HYPRE_MEMORY_SHARED);
+            A_seq_data = hypre_CTAlloc(HYPRE_Real,  total_nnz, HYPRE_MEMORY_SHARED);
          }
          if (redundant)
          {
@@ -265,17 +266,17 @@ HYPRE_Int hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
                        HYPRE_MPI_REAL, 0, new_comm );
          }
 
-         hypre_TFree(info);
-         hypre_TFree(displs);
-         hypre_TFree(A_tmp_i);
-         hypre_TFree(A_tmp_j);
-         hypre_TFree(A_tmp_data);
+         hypre_TFree(info, HYPRE_MEMORY_HOST);
+         hypre_TFree(displs, HYPRE_MEMORY_HOST);
+         hypre_TFree(A_tmp_i, HYPRE_MEMORY_HOST);
+         hypre_TFree(A_tmp_j, HYPRE_MEMORY_HOST);
+         hypre_TFree(A_tmp_data, HYPRE_MEMORY_HOST);
 
          if (redundant || my_id == 0)
          {
-            hypre_TFree(displs2);
+            hypre_TFree(displs2, HYPRE_MEMORY_HOST);
    
-            row_starts = hypre_CTAlloc(HYPRE_Int,2);
+            row_starts = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
             row_starts[0] = 0; 
             row_starts[1] = size;
  
@@ -353,7 +354,7 @@ hypre_seqAMGCycle( hypre_ParAMGData *amg_data,
    Aux_U = Par_U_array[p_level];
    Aux_F = Par_F_array[p_level];
 
-   first_index = hypre_ParVectorFirstIndex(Aux_U);
+   first_index = (HYPRE_Int)hypre_ParVectorFirstIndex(Aux_U);
    u_local = hypre_ParVectorLocalVector(Aux_U);
    u_data  = hypre_VectorData(u_local);
    n =  hypre_VectorSize(u_local);
@@ -381,7 +382,7 @@ hypre_seqAMGCycle( hypre_ParAMGData *amg_data,
       nf =  hypre_VectorSize(f_local);
 
       /* first f */
-      info = hypre_CTAlloc(HYPRE_Int, new_num_procs);
+      info = hypre_CTAlloc(HYPRE_Int,  new_num_procs, HYPRE_MEMORY_HOST);
       local_info = nf;
       if (redundant)
          hypre_MPI_Allgather(&local_info, 1, HYPRE_MPI_INT, info, 1, HYPRE_MPI_INT, new_comm);
@@ -390,7 +391,7 @@ hypre_seqAMGCycle( hypre_ParAMGData *amg_data,
 
       if (redundant || my_id ==0)
       {
-         displs = hypre_CTAlloc(HYPRE_Int, new_num_procs+1);
+         displs = hypre_CTAlloc(HYPRE_Int,  new_num_procs+1, HYPRE_MEMORY_HOST);
          displs[0] = 0;
          for (i=1; i < new_num_procs+1; i++)
             displs[i] = displs[i-1]+info[i-1]; 
@@ -423,8 +424,8 @@ hypre_seqAMGCycle( hypre_ParAMGData *amg_data,
          hypre_MPI_Allgatherv ( u_data, n, HYPRE_MPI_REAL,
                        recv_buf, info, displs,
                        HYPRE_MPI_REAL, new_comm );
-         hypre_TFree(displs);
-         hypre_TFree(info);
+         hypre_TFree(displs, HYPRE_MEMORY_HOST);
+         hypre_TFree(info, HYPRE_MEMORY_HOST);
       }
       else
          hypre_MPI_Gatherv ( u_data, n, HYPRE_MPI_REAL,
@@ -462,8 +463,8 @@ hypre_seqAMGCycle( hypre_ParAMGData *amg_data,
             local_data =  hypre_VectorData(hypre_ParVectorLocalVector(F_coarse));
             hypre_MPI_Scatterv ( local_data, info, displs, HYPRE_MPI_REAL,
                        f_data, n, HYPRE_MPI_REAL, 0, new_comm );*/
-         if (my_id == 0) hypre_TFree(displs);
-         hypre_TFree(info);
+         if (my_id == 0) hypre_TFree(displs, HYPRE_MEMORY_HOST);
+         hypre_TFree(info, HYPRE_MEMORY_HOST);
       }
    }
 
@@ -495,7 +496,7 @@ HYPRE_Int hypre_GenerateSubComm(MPI_Comm comm, HYPRE_Int participate, MPI_Comm *
       *new_comm_ptr = new_comm;
       return 0;
    }
-   ranks = hypre_CTAlloc(HYPRE_Int, new_num_procs+2);
+   ranks =  hypre_CTAlloc(HYPRE_Int,  new_num_procs+2, HYPRE_MEMORY_HOST);
    if (new_num_procs == 1)
    {
       if (participate) my_info = my_id;
@@ -503,8 +504,9 @@ HYPRE_Int hypre_GenerateSubComm(MPI_Comm comm, HYPRE_Int participate, MPI_Comm *
    }
    else
    {
-      info = hypre_CTAlloc(HYPRE_Int, new_num_procs+2);
-      list_len = hypre_CTAlloc(HYPRE_Int, 1);
+      info =  hypre_CTAlloc(HYPRE_Int,  new_num_procs+2, HYPRE_MEMORY_HOST);
+      list_len =  hypre_CTAlloc(HYPRE_Int,  1, HYPRE_MEMORY_HOST);
+
 
       if (participate) 
       {
@@ -522,8 +524,9 @@ HYPRE_Int hypre_GenerateSubComm(MPI_Comm comm, HYPRE_Int participate, MPI_Comm *
       hypre_MPI_Allreduce(info, ranks, list_len[0], HYPRE_MPI_INT, hypre_MPI_MERGE, comm);
 
       hypre_MPI_Op_free (&hypre_MPI_MERGE);
-      hypre_TFree(list_len);
-      hypre_TFree(info);
+
+       hypre_TFree(list_len, HYPRE_MEMORY_HOST);
+       hypre_TFree(info, HYPRE_MEMORY_HOST);
    }
    hypre_MPI_Comm_size(comm,&num_procs);
    hypre_MPI_Comm_group(comm, &orig_group);
@@ -532,7 +535,7 @@ HYPRE_Int hypre_GenerateSubComm(MPI_Comm comm, HYPRE_Int participate, MPI_Comm *
    hypre_MPI_Group_free(&new_group);
    hypre_MPI_Group_free(&orig_group);
 
-   hypre_TFree(ranks);
+    hypre_TFree(ranks, HYPRE_MEMORY_HOST);
    
    *new_comm_ptr = new_comm;
    

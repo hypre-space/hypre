@@ -143,7 +143,7 @@ hypre_FacZeroCData( void                 *fac_vdata,
                   /*------------------------------------------------------------
                    * Coarse underlying box found. Now zero off.
                    *------------------------------------------------------------*/
-                   values= hypre_CTAlloc(HYPRE_Real, intersect_size);
+                   values= hypre_CTAlloc(HYPRE_Real,  intersect_size, HYPRE_MEMORY_HOST);
 
                    for (j= 0; j< stencil_size; j++)
                    {
@@ -160,12 +160,12 @@ hypre_FacZeroCData( void                 *fac_vdata,
                                                       var, 1, &j, values);
                    }
 
-                   hypre_TFree(values);
+                   hypre_TFree(values, HYPRE_MEMORY_HOST);
 
                 }  /* if (intersect_size > 0) */
              }     /* for (i= 0; i< nboxman_entries; i++) */
 
-             hypre_TFree(boxman_entries);
+             hypre_TFree(boxman_entries, HYPRE_MEMORY_HOST);
 
          }   /* hypre_ForBoxI(ci, cgrid_boxes) */
       }      /* for (var= 0; var< nvars; var++) */

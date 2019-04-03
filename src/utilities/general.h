@@ -10,7 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
 /******************************************************************************
  *
  * General structures and values
@@ -19,6 +18,15 @@
 
 #ifndef hypre_GENERAL_HEADER
 #define hypre_GENERAL_HEADER
+
+/* This allows us to consistently avoid 'int' throughout hypre */
+typedef int               hypre_int;
+typedef long int          hypre_longint;
+typedef unsigned int      hypre_uint;
+typedef unsigned long int hypre_ulongint;
+
+/* This allows us to consistently avoid 'double' throughout hypre */
+typedef double            hypre_double;
 
 /*--------------------------------------------------------------------------
  * Define various functions
@@ -31,6 +39,10 @@
 #define hypre_min(a,b)  (((a)<(b)) ? (a) : (b))
 #endif
 
+#ifndef hypre_abs
+#define hypre_abs(a)  (((a)>0) ? (a) : -(a))
+#endif
+
 #ifndef hypre_round
 #define hypre_round(x)  ( ((x) < 0.0) ? ((HYPRE_Int)(x - 0.5)) : ((HYPRE_Int)(x + 0.5)) )
 #endif
@@ -40,3 +52,4 @@
 #endif
 
 #endif
+

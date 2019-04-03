@@ -10,9 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 /******************************************************************************
  *
  * FlexGmres - Preconditioned flexible GMRES algorithm using the
@@ -24,20 +21,16 @@
 #include "Common.h"
 #include "Matrix.h"
 #include "ParaSails.h"
-
-HYPRE_Real hypre_F90_NAME_BLAS(ddot, DDOT)(HYPRE_Int *, HYPRE_Real *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *);
-HYPRE_Int hypre_F90_NAME_BLAS(dcopy, DCOPY)(HYPRE_Int *, HYPRE_Real *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *);
-HYPRE_Int hypre_F90_NAME_BLAS(dscal, DSCAL)(HYPRE_Int *, HYPRE_Real *, HYPRE_Real *, HYPRE_Int *);
-HYPRE_Int hypre_F90_NAME_BLAS(daxpy, DAXPY)(HYPRE_Int *, HYPRE_Real *, HYPRE_Real *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *);
+#include "_hypre_blas.h"
 
 static HYPRE_Real InnerProd(HYPRE_Int n, HYPRE_Real *x, HYPRE_Real *y, MPI_Comm comm)
 {
     HYPRE_Real local_result, result;
 
     HYPRE_Int one = 1;
-    local_result = hypre_F90_NAME_BLAS(ddot, DDOT)(&n, x, &one, y, &one);
+    local_result = hypre_ddot(&n, x, &one, y, &one);
 
-    hypre_MPI_Allreduce(&local_result, &result, 1, hypre_MPI_DOUBLE, hypre_MPI_SUM, comm);
+    hypre_MPI_Allreduce(&local_result, &result, 1, hypre_MPI_REAL, hypre_MPI_SUM, comm);
 
     return result;
 }
@@ -45,19 +38,19 @@ static HYPRE_Real InnerProd(HYPRE_Int n, HYPRE_Real *x, HYPRE_Real *y, MPI_Comm 
 static void CopyVector(HYPRE_Int n, HYPRE_Real *x, HYPRE_Real *y)
 {
     HYPRE_Int one = 1;
-    hypre_F90_NAME_BLAS(dcopy, DCOPY)(&n, x, &one, y, &one);
+    hypre_dcopy(&n, x, &one, y, &one);
 }
 
 static void ScaleVector(HYPRE_Int n, HYPRE_Real alpha, HYPRE_Real *x)
 {
     HYPRE_Int one = 1;
-    hypre_F90_NAME_BLAS(dscal, DSCAL)(&n, &alpha, x, &one);
+    hypre_dscal(&n, &alpha, x, &one);
 }
 
 static void Axpy(HYPRE_Int n, HYPRE_Real alpha, HYPRE_Real *x, HYPRE_Real *y)
 {
     HYPRE_Int one = 1;
-    hypre_F90_NAME_BLAS(daxpy, DAXPY)(&n, &alpha, x, &one, y, &one);
+    hypre_daxpy(&n, &alpha, x, &one, y, &one);
 }
 
 /* simulate 2-D arrays at the cost of some arithmetic */
@@ -96,7 +89,7 @@ void FGMRES_ParaSails(Matrix *mat, ParaSails *ps, HYPRE_Real *b, HYPRE_Real *x,
     HYPRE_Int iter;
     HYPRE_Real rel_resid;
 
-    HYPRE_Real *H  = (HYPRE_Real *) malloc(dim*(dim+1) * sizeof(HYPRE_Real));
+    HYPRE_Real *H  = hypre_TAlloc(HYPRE_Real, dim*(dim+1) , HYPRE_MEMORY_HOST);
 
     /* local problem size */
     HYPRE_Int n = mat->end_row - mat->beg_row + 1;
@@ -105,12 +98,12 @@ void FGMRES_ParaSails(Matrix *mat, ParaSails *ps, HYPRE_Real *b, HYPRE_Real *x,
     HYPRE_Int i, j, k;
     HYPRE_Real beta, resid0;
 
-    HYPRE_Real *s  = (HYPRE_Real *) malloc((dim+1) * sizeof(HYPRE_Real));
-    HYPRE_Real *cs = (HYPRE_Real *) malloc(dim * sizeof(HYPRE_Real));
-    HYPRE_Real *sn = (HYPRE_Real *) malloc(dim * sizeof(HYPRE_Real));
+    HYPRE_Real *s  = hypre_TAlloc(HYPRE_Real, (dim+1) , HYPRE_MEMORY_HOST);
+    HYPRE_Real *cs = hypre_TAlloc(HYPRE_Real, dim , HYPRE_MEMORY_HOST);
+    HYPRE_Real *sn = hypre_TAlloc(HYPRE_Real, dim , HYPRE_MEMORY_HOST);
 
-    HYPRE_Real *V  = (HYPRE_Real *) malloc(n*(dim+1) * sizeof(HYPRE_Real));
-    HYPRE_Real *W  = (HYPRE_Real *) malloc(n*dim * sizeof(HYPRE_Real));
+    HYPRE_Real *V  = hypre_TAlloc(HYPRE_Real, n*(dim+1) , HYPRE_MEMORY_HOST);
+    HYPRE_Real *W  = hypre_TAlloc(HYPRE_Real, n*dim , HYPRE_MEMORY_HOST);
 
     MPI_Comm comm = mat->comm;
     hypre_MPI_Comm_rank(comm, &mype);

@@ -18,16 +18,6 @@
 
 #include "_hypre_parcsr_block_mv.h"
 
-#define LB_VERSION 0 /* lapack and blas version 5/12/06 - preliminary testing
-                        shows this is slower for block sizes < 4 (did not try
-                        larger block sizes)- need to edit the Makefile to find
-                        blas and lapack */
-
-#if LB_VERSION
-#include "hypre_blas.h"
-#include "hypre_lapack.h"
-#endif
-
 /*--------------------------------------------------------------------------
  * hypre_CSRBlockMatrixCreate
  *--------------------------------------------------------------------------*/
@@ -40,11 +30,12 @@ hypre_CSRBlockMatrixCreate(HYPRE_Int block_size,
 {
    hypre_CSRBlockMatrix  *matrix;
 
-   matrix = hypre_CTAlloc(hypre_CSRBlockMatrix, 1);
+   matrix = hypre_CTAlloc(hypre_CSRBlockMatrix,  1, HYPRE_MEMORY_HOST);
 
    hypre_CSRBlockMatrixData(matrix) = NULL;
    hypre_CSRBlockMatrixI(matrix)    = NULL;
    hypre_CSRBlockMatrixJ(matrix)    = NULL;
+   hypre_CSRBlockMatrixBigJ(matrix)    = NULL;
    hypre_CSRBlockMatrixBlockSize(matrix) = block_size;
    hypre_CSRBlockMatrixNumRows(matrix) = num_rows;
    hypre_CSRBlockMatrixNumCols(matrix) = num_cols;
@@ -67,13 +58,14 @@ hypre_CSRBlockMatrixDestroy(hypre_CSRBlockMatrix *matrix)
 
    if (matrix)
    {
-      hypre_TFree(hypre_CSRBlockMatrixI(matrix));
+      hypre_TFree(hypre_CSRBlockMatrixI(matrix), HYPRE_MEMORY_HOST);
       if ( hypre_CSRBlockMatrixOwnsData(matrix) )
       {
-         hypre_TFree(hypre_CSRBlockMatrixData(matrix));
-         hypre_TFree(hypre_CSRBlockMatrixJ(matrix));
+         hypre_TFree(hypre_CSRBlockMatrixData(matrix), HYPRE_MEMORY_HOST);
+         hypre_TFree(hypre_CSRBlockMatrixJ(matrix), HYPRE_MEMORY_HOST);
+         hypre_TFree(hypre_CSRBlockMatrixBigJ(matrix), HYPRE_MEMORY_HOST);
       }
-      hypre_TFree(matrix);
+      hypre_TFree(matrix, HYPRE_MEMORY_HOST);
    }
 
    return ierr;
@@ -92,17 +84,50 @@ hypre_CSRBlockMatrixInitialize(hypre_CSRBlockMatrix *matrix)
    HYPRE_Int ierr=0, nnz;
 
    if ( ! hypre_CSRBlockMatrixI(matrix) )
-      hypre_TFree(hypre_CSRBlockMatrixI(matrix));
+      hypre_TFree(hypre_CSRBlockMatrixI(matrix), HYPRE_MEMORY_HOST);
    if ( ! hypre_CSRBlockMatrixJ(matrix) )
-      hypre_TFree(hypre_CSRBlockMatrixJ(matrix));
+      hypre_TFree(hypre_CSRBlockMatrixJ(matrix), HYPRE_MEMORY_HOST);
+   if ( ! hypre_CSRBlockMatrixBigJ(matrix) )
+      hypre_TFree(hypre_CSRBlockMatrixBigJ(matrix), HYPRE_MEMORY_HOST);
    if ( ! hypre_CSRBlockMatrixData(matrix) )
-      hypre_TFree(hypre_CSRBlockMatrixData(matrix));
+      hypre_TFree(hypre_CSRBlockMatrixData(matrix), HYPRE_MEMORY_HOST);
 
    nnz = num_nonzeros * block_size * block_size;
-   hypre_CSRBlockMatrixI(matrix) = hypre_CTAlloc(HYPRE_Int, num_rows + 1);
-   if (nnz) hypre_CSRBlockMatrixData(matrix) = hypre_CTAlloc(HYPRE_Complex, nnz);
+   hypre_CSRBlockMatrixI(matrix) = hypre_CTAlloc(HYPRE_Int,  num_rows + 1, HYPRE_MEMORY_HOST);
+   if (nnz) hypre_CSRBlockMatrixData(matrix) = hypre_CTAlloc(HYPRE_Complex,  nnz, HYPRE_MEMORY_HOST);
    else     hypre_CSRBlockMatrixData(matrix) = NULL;
-   if (nnz) hypre_CSRBlockMatrixJ(matrix) = hypre_CTAlloc(HYPRE_Int,num_nonzeros);
+   if (nnz) hypre_CSRBlockMatrixJ(matrix) = hypre_CTAlloc(HYPRE_Int, num_nonzeros, HYPRE_MEMORY_HOST);
+   else     hypre_CSRBlockMatrixJ(matrix) = NULL;
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_CSRBlockMatrixBigInitialize
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int 
+hypre_CSRBlockMatrixBigInitialize(hypre_CSRBlockMatrix *matrix)
+{
+   HYPRE_Int block_size   = hypre_CSRBlockMatrixBlockSize(matrix);
+   HYPRE_Int num_rows     = hypre_CSRBlockMatrixNumRows(matrix);
+   HYPRE_Int num_nonzeros = hypre_CSRBlockMatrixNumNonzeros(matrix);
+   HYPRE_Int ierr=0, nnz;
+
+   if ( ! hypre_CSRBlockMatrixI(matrix) )
+      hypre_TFree(hypre_CSRBlockMatrixI(matrix), HYPRE_MEMORY_HOST);
+   if ( ! hypre_CSRBlockMatrixJ(matrix) )
+      hypre_TFree(hypre_CSRBlockMatrixJ(matrix), HYPRE_MEMORY_HOST);
+   if ( ! hypre_CSRBlockMatrixBigJ(matrix) )
+      hypre_TFree(hypre_CSRBlockMatrixBigJ(matrix), HYPRE_MEMORY_HOST);
+   if ( ! hypre_CSRBlockMatrixData(matrix) )
+      hypre_TFree(hypre_CSRBlockMatrixData(matrix), HYPRE_MEMORY_HOST);
+
+   nnz = num_nonzeros * block_size * block_size;
+   hypre_CSRBlockMatrixI(matrix) = hypre_CTAlloc(HYPRE_Int,  num_rows + 1, HYPRE_MEMORY_HOST);
+   if (nnz) hypre_CSRBlockMatrixData(matrix) = hypre_CTAlloc(HYPRE_Complex,  nnz, HYPRE_MEMORY_HOST);
+   else     hypre_CSRBlockMatrixData(matrix) = NULL;
+   if (nnz) hypre_CSRBlockMatrixBigJ(matrix) = hypre_CTAlloc(HYPRE_BigInt, num_nonzeros, HYPRE_MEMORY_HOST);
    else     hypre_CSRBlockMatrixJ(matrix) = NULL;
 
    return ierr;
@@ -249,7 +274,7 @@ hypre_CSRBlockMatrixConvertFromCSRMatrix(hypre_CSRMatrix *matrix,
    matrix_C_num_rows = num_rows/matrix_C_block_size;
    matrix_C_num_cols = num_cols/matrix_C_block_size;
 
-   counter = hypre_CTAlloc(HYPRE_Int, matrix_C_num_cols);
+   counter = hypre_CTAlloc(HYPRE_Int,  matrix_C_num_cols, HYPRE_MEMORY_HOST);
    for(i = 0; i < matrix_C_num_cols; i++) counter[i] = -1;
    matrix_C_num_nonzeros = 0;
    for(i = 0; i < matrix_C_num_rows; i++)
@@ -300,7 +325,7 @@ hypre_CSRBlockMatrixConvertFromCSRMatrix(hypre_CSRMatrix *matrix,
    }
    matrix_C_i[matrix_C_num_rows] = matrix_C_num_nonzeros;
 
-   hypre_TFree(counter);
+   hypre_TFree(counter, HYPRE_MEMORY_HOST);
    
 
    return matrix_C;
@@ -515,7 +540,7 @@ hypre_CSRBlockMatrixBlockNorm(HYPRE_Int norm_type, HYPRE_Complex* data, HYPRE_Re
       case 5: /* one norm  - max col sum*/
       {
         
-         totals = hypre_CTAlloc(HYPRE_Real, block_size);
+         totals = hypre_CTAlloc(HYPRE_Real,  block_size, HYPRE_MEMORY_HOST);
          for(i = 0; i < block_size; i++) /* row */
          {
             for(j = 0; j < block_size; j++) /* col */
@@ -529,7 +554,7 @@ hypre_CSRBlockMatrixBlockNorm(HYPRE_Int norm_type, HYPRE_Complex* data, HYPRE_Re
          {
             if (totals[j] > sum) sum = totals[j];
          }
-         hypre_TFree(totals);
+         hypre_TFree(totals, HYPRE_MEMORY_HOST);
          
          break;
          
@@ -537,7 +562,7 @@ hypre_CSRBlockMatrixBlockNorm(HYPRE_Int norm_type, HYPRE_Complex* data, HYPRE_Re
       case 4: /* inf norm - max row sum */
       {
       
-         totals = hypre_CTAlloc(HYPRE_Real, block_size);
+         totals = hypre_CTAlloc(HYPRE_Real,  block_size, HYPRE_MEMORY_HOST);
          for(i = 0; i < block_size; i++) /* row */
          {
             for(j = 0; j < block_size; j++) /* col */
@@ -551,7 +576,7 @@ hypre_CSRBlockMatrixBlockNorm(HYPRE_Int norm_type, HYPRE_Complex* data, HYPRE_Re
          {
             if (totals[i] > sum) sum = totals[i];
          }
-         hypre_TFree(totals);
+         hypre_TFree(totals, HYPRE_MEMORY_HOST);
          
          break;
       }
@@ -816,7 +841,7 @@ hypre_CSRBlockMatrixBlockMultAddDiag3(HYPRE_Complex* i1,
 
    HYPRE_Complex *row_sum;
 
-   row_sum = hypre_CTAlloc(HYPRE_Complex, block_size);
+   row_sum = hypre_CTAlloc(HYPRE_Complex,  block_size, HYPRE_MEMORY_HOST);
    for (i = 0; i < block_size; i++)
       {
          for (j = 0; j < block_size; j++)
@@ -859,7 +884,7 @@ hypre_CSRBlockMatrixBlockMultAddDiag3(HYPRE_Complex* i1,
       }
    }
 
-   hypre_TFree(row_sum);
+   hypre_TFree(row_sum, HYPRE_MEMORY_HOST);
       
    return 0;
 }
@@ -964,7 +989,7 @@ hypre_CSRBlockMatrixBlockInvMatvec(HYPRE_Complex* mat, HYPRE_Complex* v,
    HYPRE_Int ierr = 0;
    HYPRE_Complex *mat_i;
 
-   mat_i = hypre_CTAlloc(HYPRE_Complex, block_size*block_size);
+   mat_i = hypre_CTAlloc(HYPRE_Complex,  block_size*block_size, HYPRE_MEMORY_HOST);
 
 #if LB_VERSION
    {
@@ -975,7 +1000,7 @@ hypre_CSRBlockMatrixBlockInvMatvec(HYPRE_Complex* mat, HYPRE_Complex* v,
       
       
       one = 1;
-      piv = hypre_CTAlloc(HYPRE_Int, block_size);
+      piv = hypre_CTAlloc(HYPRE_Int,  block_size, HYPRE_MEMORY_HOST);
       sz = block_size*block_size;
       
 
@@ -988,8 +1013,8 @@ hypre_CSRBlockMatrixBlockInvMatvec(HYPRE_Complex* mat, HYPRE_Complex* v,
       dgetrf_(&block_size,&block_size, mat_i, &block_size, piv , &info);
       if (info) 
       {
-         hypre_TFree(mat_i);
-         hypre_TFree(piv);
+         hypre_TFree(mat_i, HYPRE_MEMORY_HOST);
+         hypre_TFree(piv, HYPRE_MEMORY_HOST);
          return(-1);
       }
       
@@ -998,12 +1023,12 @@ hypre_CSRBlockMatrixBlockInvMatvec(HYPRE_Complex* mat, HYPRE_Complex* v,
            mat_i, &block_size, piv, ov, &block_size, &info);
       if (info) 
       {
-         hypre_TFree(mat_i);
-         hypre_TFree(piv);
+         hypre_TFree(mat_i, HYPRE_MEMORY_HOST);
+         hypre_TFree(piv, HYPRE_MEMORY_HOST);
          return(-1);
       }
 
-      hypre_TFree(piv);
+      hypre_TFree(piv, HYPRE_MEMORY_HOST);
 
    }
    
@@ -1021,13 +1046,13 @@ hypre_CSRBlockMatrixBlockInvMatvec(HYPRE_Complex* mat, HYPRE_Complex* v,
          if (hypre_cabs(mat[0]) > 1e-10)
          {
             ov[0] = v[0]/mat[0];
-            hypre_TFree(mat_i);
+            hypre_TFree(mat_i, HYPRE_MEMORY_HOST);
             return(ierr);
          }
          else
          {
             /* hypre_printf("GE zero pivot error\n"); */
-            hypre_TFree(mat_i);
+            hypre_TFree(mat_i, HYPRE_MEMORY_HOST);
             return(-1);
          }
       }
@@ -1093,7 +1118,7 @@ hypre_CSRBlockMatrixBlockInvMatvec(HYPRE_Complex* mat, HYPRE_Complex* v,
             else
             {
                /* hypre_printf("Block of matrix is nearly singular: zero pivot error\n");  */
-               hypre_TFree(mat_i);
+               hypre_TFree(mat_i, HYPRE_MEMORY_HOST);
                return(-1);
             }
          }
@@ -1103,7 +1128,7 @@ hypre_CSRBlockMatrixBlockInvMatvec(HYPRE_Complex* mat, HYPRE_Complex* v,
          if ( hypre_cabs(mat_i[k*block_size+k]) < eps)
          {
             /* hypre_printf("Block of matrix is nearly singular: zero pivot error\n");  */
-            hypre_TFree(mat_i);
+            hypre_TFree(mat_i, HYPRE_MEMORY_HOST);
             return(-1);
          }
          
@@ -1127,7 +1152,7 @@ hypre_CSRBlockMatrixBlockInvMatvec(HYPRE_Complex* mat, HYPRE_Complex* v,
 #endif
   
 
-   hypre_TFree(mat_i);
+   hypre_TFree(mat_i, HYPRE_MEMORY_HOST);
    
    return (ierr);
 }
@@ -1146,7 +1171,7 @@ hypre_CSRBlockMatrixBlockInvMult(HYPRE_Complex* i1, HYPRE_Complex* i2, HYPRE_Com
    HYPRE_Int i, j;
    HYPRE_Complex *m_i1;
 
-   m_i1 = hypre_CTAlloc(HYPRE_Complex, block_size*block_size);
+   m_i1 = hypre_CTAlloc(HYPRE_Complex,  block_size*block_size, HYPRE_MEMORY_HOST);
 
 #if LB_VERSION
    {
@@ -1158,8 +1183,8 @@ hypre_CSRBlockMatrixBlockInvMult(HYPRE_Complex* i1, HYPRE_Complex* i2, HYPRE_Com
       HYPRE_Complex *i2_t;
 
       one = 1;
-      i2_t = hypre_CTAlloc(HYPRE_Complex, block_size*block_size);
-      piv = hypre_CTAlloc(HYPRE_Int, block_size);
+      i2_t = hypre_CTAlloc(HYPRE_Complex,  block_size*block_size, HYPRE_MEMORY_HOST);
+      piv = hypre_CTAlloc(HYPRE_Int,  block_size, HYPRE_MEMORY_HOST);
       
 
      /* copy i1 to m_i1*/
@@ -1171,9 +1196,9 @@ hypre_CSRBlockMatrixBlockInvMult(HYPRE_Complex* i1, HYPRE_Complex* i2, HYPRE_Com
       dgetrf_(&block_size, &block_size, m_i1, &block_size, piv , &info);
       if (info) 
       {
-         hypre_TFree(m_i1);
-         hypre_TFree(i2_t);
-         hypre_TFree(piv);
+         hypre_TFree(m_i1, HYPRE_MEMORY_HOST);
+         hypre_TFree(i2_t, HYPRE_MEMORY_HOST);
+         hypre_TFree(piv, HYPRE_MEMORY_HOST);
          return (-1);
       }
       
@@ -1191,9 +1216,9 @@ hypre_CSRBlockMatrixBlockInvMult(HYPRE_Complex* i1, HYPRE_Complex* i2, HYPRE_Com
            m_i1, &block_size, piv, i2_t, &block_size, &info);
       if (info) 
       {
-         hypre_TFree(m_i1);
-         hypre_TFree(i2_t);
-         hypre_TFree(piv);
+         hypre_TFree(m_i1, HYPRE_MEMORY_HOST);
+         hypre_TFree(i2_t, HYPRE_MEMORY_HOST);
+         hypre_TFree(piv, HYPRE_MEMORY_HOST);
          return (-1);
       }
    
@@ -1206,8 +1231,8 @@ hypre_CSRBlockMatrixBlockInvMult(HYPRE_Complex* i1, HYPRE_Complex* i2, HYPRE_Com
          }
       }
      
-      hypre_TFree(i2_t);
-      hypre_TFree(piv);
+      hypre_TFree(i2_t, HYPRE_MEMORY_HOST);
+      hypre_TFree(piv, HYPRE_MEMORY_HOST);
       
    }
    
@@ -1226,13 +1251,13 @@ hypre_CSRBlockMatrixBlockInvMult(HYPRE_Complex* i1, HYPRE_Complex* i2, HYPRE_Com
          if (hypre_cabs(m_i1[0]) > 1e-10)
          {
             o[0] = i2[0]/i1[0];
-            hypre_TFree(m_i1);
+            hypre_TFree(m_i1, HYPRE_MEMORY_HOST);
             return(ierr);
          }
          else
          {
             /* hypre_printf("GE zero pivot error\n"); */
-            hypre_TFree(m_i1);
+            hypre_TFree(m_i1, HYPRE_MEMORY_HOST);
             return(-1);
          }
       }
@@ -1305,7 +1330,7 @@ hypre_CSRBlockMatrixBlockInvMult(HYPRE_Complex* i1, HYPRE_Complex* i2, HYPRE_Com
             else
             {
                /* hypre_printf("Block of matrix is nearly singular: zero pivot error\n"); */
-               hypre_TFree(m_i1);
+               hypre_TFree(m_i1, HYPRE_MEMORY_HOST);
                return(-1);
             }
          }
@@ -1316,7 +1341,7 @@ hypre_CSRBlockMatrixBlockInvMult(HYPRE_Complex* i1, HYPRE_Complex* i2, HYPRE_Com
          if ( hypre_cabs(m_i1[k*block_size+k]) < eps)
          {
             /* hypre_printf("Block of matrix is nearly singular: zero pivot error\n"); */
-            hypre_TFree(m_i1);
+            hypre_TFree(m_i1, HYPRE_MEMORY_HOST);
             return(-1);
          }
          
@@ -1341,7 +1366,7 @@ hypre_CSRBlockMatrixBlockInvMult(HYPRE_Complex* i1, HYPRE_Complex* i2, HYPRE_Com
    }
    
 #endif
-   hypre_TFree(m_i1);
+   hypre_TFree(m_i1, HYPRE_MEMORY_HOST);
    
    return ierr;
 }
@@ -1368,8 +1393,8 @@ hypre_CSRBlockMatrixBlockMultInv(HYPRE_Complex* i1, HYPRE_Complex* i2, HYPRE_Com
       HYPRE_Int sz, one;
       
 
-      piv = hypre_CTAlloc(HYPRE_Int, block_size);
-      m_i1 = hypre_CTAlloc(HYPRE_Complex, block_size*block_size);
+      piv = hypre_CTAlloc(HYPRE_Int,  block_size, HYPRE_MEMORY_HOST);
+      m_i1 = hypre_CTAlloc(HYPRE_Complex,  block_size*block_size, HYPRE_MEMORY_HOST);
       one = 1;
       sz = block_size*block_size;
 
@@ -1382,8 +1407,8 @@ hypre_CSRBlockMatrixBlockMultInv(HYPRE_Complex* i1, HYPRE_Complex* i2, HYPRE_Com
       dgetrf_(&block_size, &block_size, m_i1, &block_size, piv , &info);
       if (info) 
       {
-         hypre_TFree(m_i1);
-         hypre_TFree(piv);
+         hypre_TFree(m_i1, HYPRE_MEMORY_HOST);
+         hypre_TFree(piv, HYPRE_MEMORY_HOST);
          return (-1);
       }
      /* writes over B */
@@ -1391,13 +1416,13 @@ hypre_CSRBlockMatrixBlockMultInv(HYPRE_Complex* i1, HYPRE_Complex* i2, HYPRE_Com
            m_i1, &block_size, piv, o, &block_size, &info);
       if (info) 
       {
-         hypre_TFree(m_i1);
-         hypre_TFree(piv);
+         hypre_TFree(m_i1, HYPRE_MEMORY_HOST);
+         hypre_TFree(piv, HYPRE_MEMORY_HOST);
          return (-1);
       }
 
-      hypre_TFree(m_i1);
-      hypre_TFree(piv);
+      hypre_TFree(m_i1, HYPRE_MEMORY_HOST);
+      hypre_TFree(piv, HYPRE_MEMORY_HOST);
    }
    
 #else
@@ -1423,9 +1448,9 @@ hypre_CSRBlockMatrixBlockMultInv(HYPRE_Complex* i1, HYPRE_Complex* i2, HYPRE_Com
       else
       {
          
-         i1_t = hypre_CTAlloc(HYPRE_Complex, block_size*block_size);
-         i2_t = hypre_CTAlloc(HYPRE_Complex, block_size*block_size);
-         o_t = hypre_CTAlloc(HYPRE_Complex, block_size*block_size);
+         i1_t = hypre_CTAlloc(HYPRE_Complex,  block_size*block_size, HYPRE_MEMORY_HOST);
+         i2_t = hypre_CTAlloc(HYPRE_Complex,  block_size*block_size, HYPRE_MEMORY_HOST);
+         o_t = hypre_CTAlloc(HYPRE_Complex,  block_size*block_size, HYPRE_MEMORY_HOST);
          
          /* TO DO:: this could be done more efficiently! */  
          hypre_CSRBlockMatrixBlockTranspose(i1, i1_t, block_size);
@@ -1434,9 +1459,9 @@ hypre_CSRBlockMatrixBlockMultInv(HYPRE_Complex* i1, HYPRE_Complex* i2, HYPRE_Com
          
          if (!ierr) hypre_CSRBlockMatrixBlockTranspose(o_t, o, block_size);
          
-         hypre_TFree(i1_t);
-         hypre_TFree(i2_t);
-         hypre_TFree(o_t);
+         hypre_TFree(i1_t, HYPRE_MEMORY_HOST);
+         hypre_TFree(i2_t, HYPRE_MEMORY_HOST);
+         hypre_TFree(o_t, HYPRE_MEMORY_HOST);
          
       }
    }
@@ -1607,13 +1632,13 @@ HYPRE_Int hypre_CSRBlockMatrixTranspose(hypre_CSRBlockMatrix *A,
    *AT = hypre_CSRBlockMatrixCreate(block_size, num_rowsAT, num_colsAT, 
                                     num_nonzerosAT);
 
-   AT_i = hypre_CTAlloc(HYPRE_Int, num_rowsAT+1);
-   AT_j = hypre_CTAlloc(HYPRE_Int, num_nonzerosAT);
+   AT_i = hypre_CTAlloc(HYPRE_Int,  num_rowsAT+1, HYPRE_MEMORY_HOST);
+   AT_j = hypre_CTAlloc(HYPRE_Int,  num_nonzerosAT, HYPRE_MEMORY_HOST);
    hypre_CSRBlockMatrixI(*AT) = AT_i;
    hypre_CSRBlockMatrixJ(*AT) = AT_j;
    if (data) 
    {
-      AT_data = hypre_CTAlloc(HYPRE_Complex, num_nonzerosAT*bnnz);
+      AT_data = hypre_CTAlloc(HYPRE_Complex,  num_nonzerosAT*bnnz, HYPRE_MEMORY_HOST);
       hypre_CSRBlockMatrixData(*AT) = AT_data;
    }
 

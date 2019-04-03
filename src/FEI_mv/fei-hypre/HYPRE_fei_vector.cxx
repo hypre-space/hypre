@@ -39,7 +39,7 @@ extern "C" int
 HYPRE_FEVectorCreate(MPI_Comm comm, HYPRE_FEMesh mesh, HYPRE_FEVector *vector)
 {
    HYPRE_FEVector myVector;
-   myVector = (HYPRE_FEVector) malloc(sizeof(HYPRE_FEVector));
+   myVector = (HYPRE_FEVector) hypre_TAlloc(HYPRE_FEVector, 1, HYPRE_MEMORY_HOST);
    myVector->mesh_ = mesh;
    myVector->comm_ = comm;
    (*vector) = myVector;

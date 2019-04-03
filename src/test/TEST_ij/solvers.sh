@@ -12,6 +12,8 @@
 #EHEADER**********************************************************************
 
 TNAME=`basename $0 .sh`
+RTOL=$1
+ATOL=$2
 
 #=============================================================================
 # IJ: Run multiplicative and mult_additive cycle and compare results 
@@ -24,6 +26,18 @@ tail -17 ${TNAME}.out.109 | head -6 > ${TNAME}.testdata
 
 tail -17 ${TNAME}.out.110 | head -6 > ${TNAME}.testdata.temp
 diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+
+#=============================================================================
+# IJ: MGR case nlevels < 1 and bsize < 2 should be the same 
+#                    compare results
+#=============================================================================
+
+tail -17 ${TNAME}.out.200 | head -6 > ${TNAME}.mgr_testdata
+
+#=============================================================================
+
+tail -17 ${TNAME}.out.202 | head -6 > ${TNAME}.mgr_testdata.temp
+diff ${TNAME}.mgr_testdata ${TNAME}.mgr_testdata.temp >&2
 
 #=============================================================================
 # compare with baseline case
@@ -51,30 +65,19 @@ FILES="\
  ${TNAME}.out.9\
  ${TNAME}.out.10\
  ${TNAME}.out.11\
+ ${TNAME}.out.12\
+ ${TNAME}.out.13\
+ ${TNAME}.out.14\
+ ${TNAME}.out.15\
+ ${TNAME}.out.16\
+ ${TNAME}.out.17\
+ ${TNAME}.out.18\
 "
 
 for i in $FILES
 do
   echo "# Output file: $i"
   tail -5 $i
-done >> ${TNAME}.out
-
-FILES="\
- ${TNAME}.out.1.lobpcg\
- ${TNAME}.out.2.lobpcg\
- ${TNAME}.out.8.lobpcg\
- ${TNAME}.out.12.lobpcg\
- ${TNAME}.out.43.lobpcg\
-"
-
-for i in $FILES
-do
-  echo "# Output file: $i"
-  tail -3 $i
-  echo "# Output file: $i.1"
-  tail -13 $i.1 | head -3
-  echo "# Output file: $i.5"
-  tail -21 $i.5 | head -11
 done >> ${TNAME}.out
 
 FILES="\
@@ -107,6 +110,32 @@ FILES="\
  ${TNAME}.out.115\
  ${TNAME}.out.116\
  ${TNAME}.out.117\
+ ${TNAME}.out.118\
+ ${TNAME}.out.119\
+ ${TNAME}.out.120\
+"
+
+for i in $FILES
+do
+  echo "# Output file: $i"
+  tail -3 $i
+done >> ${TNAME}.out
+
+FILES="\
+ ${TNAME}.out.200\
+ ${TNAME}.out.201\
+ ${TNAME}.out.202\
+ ${TNAME}.out.203\
+ ${TNAME}.out.204\
+ ${TNAME}.out.205\
+ ${TNAME}.out.206\
+ ${TNAME}.out.207\
+ ${TNAME}.out.208\
+ ${TNAME}.out.209\
+ ${TNAME}.out.210\
+ ${TNAME}.out.211\
+ ${TNAME}.out.212\
+ ${TNAME}.out.213\
 "
 
 for i in $FILES
@@ -124,7 +153,7 @@ if [ "$OUT_COUNT" != "$SAVED_COUNT" ]; then
 fi
 
 if [ -z $HYPRE_NO_SAVED ]; then
-   diff -U3 -bI"time" ${TNAME}.saved ${TNAME}.out >&2
+   (../runcheck.sh ${TNAME}.out ${TNAME}.saved $RTOL $ATOL) >&2
 fi
 
 #=============================================================================
@@ -132,3 +161,4 @@ fi
 #=============================================================================
 
 rm -f ${TNAME}.testdata*
+rm -r ${TNAME}.mgr_testdata*

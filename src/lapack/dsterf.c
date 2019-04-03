@@ -1,8 +1,11 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include "hypre_lapack.h"
 #include "f2c.h"
+#include "hypre_lapack.h"
 
-/* Subroutine */ HYPRE_Int dsterf_(integer *n, doublereal *d__, doublereal *e, 
+/* Subroutine */ integer dsterf_(integer *n, doublereal *d__, doublereal *e, 
 	integer *info)
 {
 /*  -- LAPACK routine (version 3.0) --   
@@ -54,11 +57,11 @@
     integer i__1;
     doublereal d__1, d__2, d__3;
     /* Builtin functions */
-    HYPRE_Real sqrt(doublereal), d_sign(doublereal *, doublereal *);
+    doublereal d_sign(doublereal *, doublereal *);
     /* Local variables */
     static doublereal oldc;
     static integer lend, jtot;
-    extern /* Subroutine */ HYPRE_Int dlae2_(doublereal *, doublereal *, doublereal 
+    extern /* Subroutine */ integer dlae2_(doublereal *, doublereal *, doublereal 
 	    *, doublereal *, doublereal *);
     static doublereal c__;
     static integer i__, l, m;
@@ -68,14 +71,14 @@
     static doublereal bb;
     extern doublereal dlamch_(const char *);
     static integer iscale;
-    extern /* Subroutine */ HYPRE_Int dlascl_(const char *, integer *, integer *, 
+    extern /* Subroutine */ integer dlascl_(const char *, integer *, integer *, 
 	    doublereal *, doublereal *, integer *, integer *, doublereal *, 
 	    integer *, integer *);
     static doublereal oldgam, safmin;
-    extern /* Subroutine */ HYPRE_Int xerbla_(const char *, integer *);
+    extern /* Subroutine */ integer xerbla_(const char *, integer *);
     static doublereal safmax;
     extern doublereal dlanst_(const char *, integer *, doublereal *, doublereal *);
-    extern /* Subroutine */ HYPRE_Int dlasrt_(const char *, integer *, doublereal *, 
+    extern /* Subroutine */ integer dlasrt_(const char *, integer *, doublereal *, 
 	    integer *);
     static integer lendsv;
     static doublereal ssfmin;
@@ -433,3 +436,6 @@ L180:
 
 } /* dsterf_ */
 
+#ifdef __cplusplus
+}
+#endif

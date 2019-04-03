@@ -10,8 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
 /******************************************************************************
  *
  * Header file link lists
@@ -28,9 +26,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#define LIST_HEAD -1
-#define LIST_TAIL -2
 
 struct double_linked_list
 {
@@ -49,3 +44,4 @@ typedef hypre_ListElement  *hypre_LinkList;
 #endif
 
 #endif
+

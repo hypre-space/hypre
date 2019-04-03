@@ -38,7 +38,7 @@ typedef struct hypre_StructGrid_struct
    hypre_Box           *bounding_box; /* Bounding box around grid */
 
    HYPRE_Int            local_size;   /* Number of grid points locally */
-   HYPRE_Int            global_size;  /* Total number of grid points */
+   HYPRE_BigInt         global_size;  /* Total number of grid points */
 
    hypre_Index          periodic;     /* Indicates if grid is periodic */
    HYPRE_Int            num_periods;  /* number of box set periods */
@@ -53,7 +53,9 @@ typedef struct hypre_StructGrid_struct
    HYPRE_Int            num_ghost[2*HYPRE_MAXDIM]; /* ghost layer size */  
 
    hypre_BoxManager    *boxman;
-
+#if defined(HYPRE_USING_CUDA) 
+   HYPRE_Int            data_location;
+#endif
 } hypre_StructGrid;
 
 /*--------------------------------------------------------------------------
@@ -84,7 +86,9 @@ typedef struct hypre_StructGrid_struct
 
 #define hypre_StructGridIDPeriod(grid) \
 hypre_BoxNeighborsIDPeriod(hypre_StructGridNeighbors(grid))
-
+#if defined(HYPRE_USING_CUDA) 
+#define hypre_StructGridDataLocation(grid)        ((grid) -> data_location)
+#endif
 /*--------------------------------------------------------------------------
  * Looping macros:
  *--------------------------------------------------------------------------*/

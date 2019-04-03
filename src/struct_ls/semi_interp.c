@@ -36,7 +36,7 @@ hypre_SemiInterpCreate( )
 {
    hypre_SemiInterpData *interp_data;
 
-   interp_data = hypre_CTAlloc(hypre_SemiInterpData, 1);
+   interp_data = hypre_CTAlloc(hypre_SemiInterpData,  1, HYPRE_MEMORY_HOST);
    (interp_data -> time_index)  = hypre_InitializeTiming("SemiInterp");
 
    return (void *) interp_data;
@@ -125,13 +125,11 @@ hypre_SemiInterp( void               *interp_vdata,
    hypre_Box              *e_dbox;
                        
    HYPRE_Int               Pi;
-   HYPRE_Int               xci;
-   HYPRE_Int               ei;
    HYPRE_Int               constant_coefficient;
                          
    HYPRE_Real             *Pp0, *Pp1;
    HYPRE_Real             *xcp;
-   HYPRE_Real             *ep, *ep0, *ep1;
+   HYPRE_Real             *ep;
                        
    hypre_Index             loop_size;
    hypre_Index             start;
@@ -142,6 +140,7 @@ hypre_SemiInterp( void               *interp_vdata,
    hypre_Index            *stencil_shape;
 
    HYPRE_Int               compute_i, fi, ci, j;
+   hypre_StructVector     *xc_tmp;
 
    /*-----------------------------------------------------------------------
     * Initialize some things
@@ -176,6 +175,26 @@ hypre_SemiInterp( void               *interp_vdata,
    cgrid_boxes = hypre_StructGridBoxes(cgrid);
    cgrid_ids = hypre_StructGridIDs(cgrid);
 
+#if defined(HYPRE_USING_CUDA)
+   HYPRE_Int data_location_f = hypre_StructGridDataLocation(fgrid);
+   HYPRE_Int data_location_c = hypre_StructGridDataLocation(cgrid);
+   
+   if (data_location_f != data_location_c)
+   {
+      xc_tmp = hypre_StructVectorCreate(hypre_MPI_COMM_WORLD, cgrid);
+      hypre_StructVectorSetNumGhost(xc_tmp, hypre_StructVectorNumGhost(xc));
+      hypre_StructGridDataLocation(cgrid) = data_location_f;
+      hypre_StructVectorInitialize(xc_tmp);
+      hypre_StructVectorAssemble(xc_tmp);
+      hypre_TMemcpy(hypre_StructVectorData(xc_tmp), hypre_StructVectorData(xc), HYPRE_Complex,hypre_StructVectorDataSize(xc),HYPRE_MEMORY_DEVICE,HYPRE_MEMORY_HOST);
+   }
+   else
+   {
+      xc_tmp = xc;
+   }
+#else
+   xc_tmp = xc;
+#endif
    fi = 0;
    hypre_ForBoxI(ci, cgrid_boxes)
    {
@@ -193,21 +212,19 @@ hypre_SemiInterp( void               *interp_vdata,
       xc_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(xc), ci);
 
       ep  = hypre_StructVectorBoxData(e, fi);
-      xcp = hypre_StructVectorBoxData(xc, ci);
+      xcp = hypre_StructVectorBoxData(xc_tmp, ci);
 
       hypre_BoxGetSize(compute_box, loop_size);
 
+#define DEVICE_VAR is_device_ptr(ep,xcp)
       hypre_BoxLoop2Begin(hypre_StructMatrixNDim(P), loop_size,
                           e_dbox, start, stride, ei,
                           xc_dbox, startc, stridec, xci);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,ei,xci) HYPRE_SMP_SCHEDULE
-#endif
-      hypre_BoxLoop2For(ei, xci)
       {
          ep[ei] = xcp[xci];
       }
       hypre_BoxLoop2End(ei, xci);
+#undef DEVICE_VAR
    }
 
    /*-----------------------------------------------------------------------
@@ -241,19 +258,21 @@ hypre_SemiInterp( void               *interp_vdata,
          P_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(P), fi);
          e_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(e), fi);
 
+         //RL:PTROFFSET
+         HYPRE_Int Pp1_offset = 0, ep0_offset, ep1_offset;
          if (P_stored_as_transpose)
          {
             if ( constant_coefficient )
             {
                Pp0 = hypre_StructMatrixBoxData(P, fi, 1);
-               Pp1 = hypre_StructMatrixBoxData(P, fi, 0) -
-                  hypre_CCBoxOffsetDistance(P_dbox, stencil_shape[0]);
+               Pp1 = hypre_StructMatrixBoxData(P, fi, 0);
+               Pp1_offset = -hypre_CCBoxOffsetDistance(P_dbox, stencil_shape[0]);
             }
             else
             {
                Pp0 = hypre_StructMatrixBoxData(P, fi, 1);
-               Pp1 = hypre_StructMatrixBoxData(P, fi, 0) -
-                  hypre_BoxOffsetDistance(P_dbox, stencil_shape[0]);
+               Pp1 = hypre_StructMatrixBoxData(P, fi, 0);
+               Pp1_offset = -hypre_BoxOffsetDistance(P_dbox, stencil_shape[0]);
             }
          }
          else
@@ -262,8 +281,8 @@ hypre_SemiInterp( void               *interp_vdata,
             Pp1 = hypre_StructMatrixBoxData(P, fi, 1);
          }
          ep  = hypre_StructVectorBoxData(e, fi);
-         ep0 = ep + hypre_BoxOffsetDistance(e_dbox, stencil_shape[0]);
-         ep1 = ep + hypre_BoxOffsetDistance(e_dbox, stencil_shape[1]);
+         ep0_offset = hypre_BoxOffsetDistance(e_dbox, stencil_shape[0]);
+         ep1_offset = hypre_BoxOffsetDistance(e_dbox, stencil_shape[1]);
 
          hypre_ForBoxI(j, compute_box_a)
          {
@@ -276,38 +295,44 @@ hypre_SemiInterp( void               *interp_vdata,
 
             if ( constant_coefficient )
             {
+	       HYPRE_Complex Pp0val,Pp1val;
                Pi = hypre_CCBoxIndexRank( P_dbox, startc );
+	       Pp0val = Pp0[Pi];
+	       Pp1val = Pp1[Pi+Pp1_offset];
+
+#define DEVICE_VAR is_device_ptr(ep)
                hypre_BoxLoop1Begin(hypre_StructMatrixNDim(P), loop_size,
                                    e_dbox, start, stride, ei);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,ei) HYPRE_SMP_SCHEDULE
-#endif
-               hypre_BoxLoop1For(ei)
                {
-                  ep[ei] =  (Pp0[Pi] * ep0[ei] +
-                             Pp1[Pi] * ep1[ei]);
+                  ep[ei] =  (Pp0val * ep[ei+ep0_offset] +
+                             Pp1val * ep[ei+ep1_offset]);
                }
                hypre_BoxLoop1End(ei);
+#undef DEVICE_VAR
             }
             else
             {
+#define DEVICE_VAR is_device_ptr(ep,Pp0,Pp1)
                hypre_BoxLoop2Begin(hypre_StructMatrixNDim(P), loop_size,
                                    P_dbox, startc, stridec, Pi,
                                    e_dbox, start, stride, ei);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Pi,ei) HYPRE_SMP_SCHEDULE
-#endif
-               hypre_BoxLoop2For(Pi, ei)
                {
-                  ep[ei] =  (Pp0[Pi] * ep0[ei] +
-                             Pp1[Pi] * ep1[ei]);
+                  ep[ei] =  (Pp0[Pi]            * ep[ei+ep0_offset] +
+                             Pp1[Pi+Pp1_offset] * ep[ei+ep1_offset]);
                }
                hypre_BoxLoop2End(Pi, ei);
+#undef DEVICE_VAR
             }
          }
       }
    }
-
+#if defined(HYPRE_USING_CUDA)
+   if (data_location_f != data_location_c)
+   {
+      hypre_StructVectorDestroy(xc_tmp);
+      hypre_StructGridDataLocation(cgrid) = data_location_c;
+   }
+#endif
    /*-----------------------------------------------------------------------
     * Return
     *-----------------------------------------------------------------------*/
@@ -331,7 +356,7 @@ hypre_SemiInterpDestroy( void *interp_vdata )
       hypre_StructMatrixDestroy(interp_data -> P);
       hypre_ComputePkgDestroy(interp_data -> compute_pkg);
       hypre_FinalizeTiming(interp_data -> time_index);
-      hypre_TFree(interp_data);
+      hypre_TFree(interp_data, HYPRE_MEMORY_HOST);
    }
 
    return hypre_error_flag;

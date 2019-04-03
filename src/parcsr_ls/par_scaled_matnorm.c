@@ -32,16 +32,16 @@ hypre_ParCSRMatrixScaledNorm( hypre_ParCSRMatrix *A, HYPRE_Real *scnorm)
    hypre_ParCSRCommPkg	*comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    MPI_Comm		 comm = hypre_ParCSRMatrixComm(A);
    hypre_CSRMatrix      *diag   = hypre_ParCSRMatrixDiag(A);
-   HYPRE_Int			*diag_i = hypre_CSRMatrixI(diag);
-   HYPRE_Int			*diag_j = hypre_CSRMatrixJ(diag);
+   HYPRE_Int		*diag_i = hypre_CSRMatrixI(diag);
+   HYPRE_Int		*diag_j = hypre_CSRMatrixJ(diag);
    HYPRE_Real		*diag_data = hypre_CSRMatrixData(diag);
    hypre_CSRMatrix      *offd   = hypre_ParCSRMatrixOffd(A);
-   HYPRE_Int			*offd_i = hypre_CSRMatrixI(offd);
-   HYPRE_Int			*offd_j = hypre_CSRMatrixJ(offd);
+   HYPRE_Int		*offd_i = hypre_CSRMatrixI(offd);
+   HYPRE_Int		*offd_j = hypre_CSRMatrixJ(offd);
    HYPRE_Real		*offd_data = hypre_CSRMatrixData(offd);
-   HYPRE_Int         		 global_num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
-   HYPRE_Int	                *row_starts = hypre_ParCSRMatrixRowStarts(A);
-   HYPRE_Int			 num_rows = hypre_CSRMatrixNumRows(diag);
+   HYPRE_BigInt     	 global_num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
+   HYPRE_BigInt	        *row_starts = hypre_ParCSRMatrixRowStarts(A);
+   HYPRE_Int		 num_rows = hypre_CSRMatrixNumRows(diag);
 
    hypre_ParVector      *dinvsqrt;
    HYPRE_Real		*dis_data;
@@ -85,8 +85,8 @@ hypre_ParCSRMatrixScaledNorm( hypre_ParCSRMatrix *A, HYPRE_Real *scnorm)
    }
 
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-   d_buf_data = hypre_CTAlloc(HYPRE_Real, hypre_ParCSRCommPkgSendMapStart(comm_pkg,
-						num_sends));
+   d_buf_data = hypre_CTAlloc(HYPRE_Real,  hypre_ParCSRCommPkgSendMapStart(comm_pkg, 
+						num_sends), HYPRE_MEMORY_HOST);
 
    index = 0;
    for (i = 0; i < num_sends; i++)
@@ -129,7 +129,7 @@ hypre_ParCSRMatrixScaledNorm( hypre_ParCSRMatrix *A, HYPRE_Real *scnorm)
    hypre_ParVectorDestroy(dinvsqrt);
    hypre_SeqVectorDestroy(sum);
    hypre_SeqVectorDestroy(dis_ext);
-   hypre_TFree(d_buf_data);
+   hypre_TFree(d_buf_data, HYPRE_MEMORY_HOST);
 
    *scnorm = mat_norm;  
    return 0;

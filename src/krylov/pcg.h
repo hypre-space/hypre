@@ -53,8 +53,8 @@
 
 typedef struct
 {
-   char *       (*CAlloc)        ( size_t count, size_t elt_size );
-   HYPRE_Int    (*Free)          ( char *ptr );
+   void *       (*CAlloc)        ( size_t count, size_t elt_size );
+   HYPRE_Int    (*Free)          ( void *ptr );
    HYPRE_Int    (*CommInfo)      ( void  *A, HYPRE_Int   *my_id,
                                    HYPRE_Int   *num_procs );
    void *       (*CreateVector)  ( void *vector );
@@ -123,6 +123,7 @@ typedef struct
    HYPRE_Int    recompute_residual_p;
    HYPRE_Int    stop_crit;
    HYPRE_Int    converged;
+   HYPRE_Int    hybrid;
 
    void    *A;
    void    *p;
@@ -168,8 +169,8 @@ extern "C" {
 
 hypre_PCGFunctions *
 hypre_PCGFunctionsCreate(
-   char *       (*CAlloc)        ( size_t count, size_t elt_size ),
-   HYPRE_Int    (*Free)          ( char *ptr ),
+   void *       (*CAlloc)        ( size_t count, size_t elt_size ),
+   HYPRE_Int    (*Free)          ( void *ptr ),
    HYPRE_Int    (*CommInfo)      ( void  *A, HYPRE_Int   *my_id,
                                    HYPRE_Int   *num_procs ),
    void *       (*CreateVector)  ( void *vector ),

@@ -27,7 +27,7 @@
 
 void hypre_ParChordMatrix_RowStarts(
    hypre_ParChordMatrix *Ac, MPI_Comm comm,
-   HYPRE_Int ** row_starts, HYPRE_Int * global_num_cols )
+   HYPRE_BigInt ** row_starts, HYPRE_BigInt * global_num_cols )
    /* This function computes the ParCSRMatrix-style row_starts from a chord matrix.
       It requires the the idofs of the chord matrix be partitioned among
       processors, so their numbering is monotonic with the processor number;
@@ -60,20 +60,20 @@ void hypre_ParChordMatrix_RowStarts(
       col_starts should be NULL; later we shall let the Create function compute one.
    */
 {
-   HYPRE_Int * fis_idof = hypre_ParChordMatrixFirstindexIdof(Ac);
-   HYPRE_Int * fis_rdof = hypre_ParChordMatrixFirstindexRdof(Ac);
+   HYPRE_BigInt * fis_idof = hypre_ParChordMatrixFirstindexIdof(Ac);
+   HYPRE_BigInt * fis_rdof = hypre_ParChordMatrixFirstindexRdof(Ac);
    HYPRE_Int my_id, num_procs;
    HYPRE_Int num_idofs = hypre_ParChordMatrixNumIdofs(Ac);
    HYPRE_Int num_rdofs = hypre_ParChordMatrixNumRdofs(Ac);
-   HYPRE_Int min_rdof, max_rdof, global_min_rdof, global_max_rdof;
+   HYPRE_BigInt min_rdof, max_rdof, global_min_rdof, global_max_rdof;
    HYPRE_Int p, lens[2], lastlens[2];
    hypre_MPI_Status *status;
    hypre_MPI_Request *request;
 
    hypre_MPI_Comm_rank(comm, &my_id);
    hypre_MPI_Comm_size(comm, &num_procs);
-   request = hypre_CTAlloc(hypre_MPI_Request, 1 );
-   status = hypre_CTAlloc(hypre_MPI_Status, 1 );
+   request = hypre_CTAlloc(hypre_MPI_Request,  1 , HYPRE_MEMORY_HOST);
+   status = hypre_CTAlloc(hypre_MPI_Status,  1 , HYPRE_MEMORY_HOST);
 
    min_rdof = fis_rdof[my_id];
    max_rdof = min_rdof + num_rdofs;
@@ -81,7 +81,7 @@ void hypre_ParChordMatrix_RowStarts(
    lens[1] = num_rdofs;
 
    /* row_starts (except last value */
-   *row_starts = hypre_CTAlloc( HYPRE_Int, num_procs+1 );
+   *row_starts = hypre_CTAlloc( HYPRE_BigInt,  num_procs+1 , HYPRE_MEMORY_HOST);
    for ( p=0; p<num_procs; ++p ) {
       (*row_starts)[p] = fis_idof[p];
    }
@@ -95,13 +95,13 @@ void hypre_ParChordMatrix_RowStarts(
    if ( my_id<num_procs-1 )
 	hypre_MPI_Waitall( 1, request, status);
    if ( my_id>0 )
-      hypre_assert( (*row_starts)[my_id] == (*row_starts)[my_id-1] + lastlens[0] );
-   hypre_TFree( request );
-   hypre_TFree( status );
+      hypre_assert( (*row_starts)[my_id] == (*row_starts)[my_id-1] + (HYPRE_BigInt)lastlens[0] );
+   hypre_TFree( request , HYPRE_MEMORY_HOST);
+   hypre_TFree( status , HYPRE_MEMORY_HOST);
       
    /* Get the upper bound for all the rows */
    hypre_MPI_Bcast( lens, 2, HYPRE_MPI_INT, num_procs-1, comm );
-   (*row_starts)[num_procs] = (*row_starts)[num_procs-1] + lens[0];
+   (*row_starts)[num_procs] = (*row_starts)[num_procs-1] + (HYPRE_Int)lens[0];
 
    /* Global number of columns */
 /*   hypre_MPI_Allreduce( &num_rdofs, global_num_cols, 1, HYPRE_MPI_INT, hypre_MPI_SUM, comm );*/
@@ -119,12 +119,14 @@ hypre_ParChordMatrixToParCSRMatrix(
    /* Some parts of this function are copied from hypre_CSRMatrixToParCSRMatrix. */
 
    hypre_ParCSRMatrix *Ap;
-   HYPRE_Int *row_starts, *col_starts;
-   HYPRE_Int global_num_rows, global_num_cols, my_id, num_procs;
+   HYPRE_BigInt *row_starts, *col_starts;
+   HYPRE_BigInt global_num_rows, global_num_cols;
+   HYPRE_Int my_id, num_procs;
    HYPRE_Int num_cols_offd, num_nonzeros_diag, num_nonzeros_offd;
-   HYPRE_Int          *local_num_rows;
+   HYPRE_Int *local_num_rows;
 /* not computed   HYPRE_Int          *local_num_nonzeros; */
-   HYPRE_Int          num_nonzeros, first_col_diag, last_col_diag;
+   HYPRE_Int num_nonzeros;
+   HYPRE_BigInt first_col_diag, last_col_diag;
    HYPRE_Int i,ic,ij,ir,ilocal,p,r,r_p,r_global,r_local, jlen;
    HYPRE_Int *a_i, *a_j, *ilen;
    HYPRE_Int **rdofs, **ps;
@@ -157,30 +159,30 @@ hypre_ParChordMatrixToParCSRMatrix(
    row_starts = hypre_ParCSRMatrixRowStarts(Ap);
    col_starts = hypre_ParCSRMatrixColStarts(Ap);
 
-   local_num_rows = hypre_CTAlloc(HYPRE_Int, num_procs);
+   local_num_rows = hypre_CTAlloc(HYPRE_Int,  num_procs, HYPRE_MEMORY_HOST);
    for (i=0; i < num_procs; i++)
-         local_num_rows[i] = row_starts[i+1] - row_starts[i];
+         local_num_rows[i] = (HYPRE_Int)(row_starts[i+1] - row_starts[i]);
 
    num_nonzeros = 0;
    for ( p=0; p<hypre_ParChordMatrixNumInprocessors(Ac); ++p ) {
       num_nonzeros += hypre_ParChordMatrixNumInchords(Ac)[p];
    };
 
-   local_A = hypre_CSRMatrixCreate( local_num_rows[my_id], global_num_cols,
+   local_A = hypre_CSRMatrixCreate( local_num_rows[my_id], (HYPRE_Int)global_num_cols,
                                     num_nonzeros );
 
    /* Compute local CSRMatrix-like i,j arrays for this processor. */
 
-   ps = hypre_CTAlloc( HYPRE_Int*, hypre_ParChordMatrixNumIdofs(Ac) );
-   rdofs = hypre_CTAlloc( HYPRE_Int*, hypre_ParChordMatrixNumIdofs(Ac) );
-   datas = hypre_CTAlloc( HYPRE_Complex*, hypre_ParChordMatrixNumIdofs(Ac) );
-   ilen  = hypre_CTAlloc( HYPRE_Int, hypre_ParChordMatrixNumIdofs(Ac) );
+   ps = hypre_CTAlloc( HYPRE_Int*,  hypre_ParChordMatrixNumIdofs(Ac) , HYPRE_MEMORY_HOST);
+   rdofs = hypre_CTAlloc( HYPRE_Int*,  hypre_ParChordMatrixNumIdofs(Ac) , HYPRE_MEMORY_HOST);
+   datas = hypre_CTAlloc( HYPRE_Complex*,  hypre_ParChordMatrixNumIdofs(Ac) , HYPRE_MEMORY_HOST);
+   ilen  = hypre_CTAlloc( HYPRE_Int,  hypre_ParChordMatrixNumIdofs(Ac) , HYPRE_MEMORY_HOST);
    jlen = 0;
    for ( i=0; i<hypre_ParChordMatrixNumIdofs(Ac); ++i ) {
       ilen[i] = 0;
-      ps[i] = hypre_CTAlloc( HYPRE_Int, hypre_ParChordMatrixNumRdofs(Ac) );
-      rdofs[i] = hypre_CTAlloc( HYPRE_Int, hypre_ParChordMatrixNumRdofs(Ac) );
-      datas[i] = hypre_CTAlloc( HYPRE_Complex, hypre_ParChordMatrixNumRdofs(Ac) );
+      ps[i] = hypre_CTAlloc( HYPRE_Int,  hypre_ParChordMatrixNumRdofs(Ac) , HYPRE_MEMORY_HOST);
+      rdofs[i] = hypre_CTAlloc( HYPRE_Int,  hypre_ParChordMatrixNumRdofs(Ac) , HYPRE_MEMORY_HOST);
+      datas[i] = hypre_CTAlloc( HYPRE_Complex,  hypre_ParChordMatrixNumRdofs(Ac) , HYPRE_MEMORY_HOST);
       /* ... rdofs[i], datas[i] will generally, not always, be much too big */
    }
    for ( p=0; p<hypre_ParChordMatrixNumInprocessors(Ac); ++p ) {
@@ -196,9 +198,9 @@ hypre_ParChordMatrixToParCSRMatrix(
       }
    };
 
-   a_i = hypre_CTAlloc( HYPRE_Int, hypre_ParChordMatrixNumIdofs(Ac)+1 );
-   a_j = hypre_CTAlloc( HYPRE_Int, jlen );
-   a_data = hypre_CTAlloc( HYPRE_Complex, jlen );
+   a_i = hypre_CTAlloc( HYPRE_Int,  hypre_ParChordMatrixNumIdofs(Ac)+1 , HYPRE_MEMORY_HOST);
+   a_j = hypre_CTAlloc( HYPRE_Int,  jlen , HYPRE_MEMORY_HOST);
+   a_data = hypre_CTAlloc( HYPRE_Complex,  jlen , HYPRE_MEMORY_HOST);
    a_i[0] = 0;
    for ( ilocal=0; ilocal<hypre_ParChordMatrixNumIdofs(Ac); ++ilocal ) {
       a_i[ilocal+1] = a_i[ilocal] + ilen[ilocal];
@@ -215,14 +217,14 @@ hypre_ParChordMatrixToParCSRMatrix(
    };
 
    for ( i=0; i<hypre_ParChordMatrixNumIdofs(Ac); ++i ) {
-      hypre_TFree( ps[i] );
-      hypre_TFree( rdofs[i] );
-      hypre_TFree( datas[i] );
+      hypre_TFree( ps[i] , HYPRE_MEMORY_HOST);
+      hypre_TFree( rdofs[i] , HYPRE_MEMORY_HOST);
+      hypre_TFree( datas[i] , HYPRE_MEMORY_HOST);
    };
-   hypre_TFree( ps );
-   hypre_TFree( rdofs );
-   hypre_TFree( datas );
-   hypre_TFree( ilen );
+   hypre_TFree( ps , HYPRE_MEMORY_HOST);
+   hypre_TFree( rdofs , HYPRE_MEMORY_HOST);
+   hypre_TFree( datas , HYPRE_MEMORY_HOST);
+   hypre_TFree( ilen , HYPRE_MEMORY_HOST);
 
    first_col_diag = col_starts[my_id];
    last_col_diag = col_starts[my_id+1]-1;
@@ -237,16 +239,16 @@ hypre_ParChordMatrixToParCSRMatrix(
    /* set pointers back to NULL before destroying */
    if (my_id == 0)
    {
-      hypre_TFree(a_data);
+      hypre_TFree(a_data, HYPRE_MEMORY_HOST);
       /* ... the data has been copied into different diag & offd arrays of Ap */
-      hypre_TFree(a_j);
-      hypre_TFree(a_i);
+      hypre_TFree(a_j, HYPRE_MEMORY_HOST);
+      hypre_TFree(a_i, HYPRE_MEMORY_HOST);
       hypre_CSRMatrixData(local_A) = NULL;
       hypre_CSRMatrixI(local_A) = NULL;
       hypre_CSRMatrixJ(local_A) = NULL; 
    }      
    hypre_CSRMatrixDestroy(local_A);
-   hypre_TFree(local_num_rows);
+   hypre_TFree(local_num_rows, HYPRE_MEMORY_HOST);
 /*   hypre_TFree(csr_matrix_datatypes);*/
    return 0;
 }
@@ -257,14 +259,14 @@ hypre_ParCSRMatrixToParChordMatrix(
    MPI_Comm comm,
    hypre_ParChordMatrix **pAc )
 {
-   HYPRE_Int * row_starts = hypre_ParCSRMatrixRowStarts(Ap);
-   HYPRE_Int * col_starts = hypre_ParCSRMatrixColStarts(Ap);
+   HYPRE_BigInt * row_starts = hypre_ParCSRMatrixRowStarts(Ap);
+   HYPRE_BigInt * col_starts = hypre_ParCSRMatrixColStarts(Ap);
    hypre_CSRMatrix * diag = hypre_ParCSRMatrixDiag(Ap);
    hypre_CSRMatrix * offd = hypre_ParCSRMatrixOffd(Ap);
    HYPRE_Int * offd_j = hypre_CSRMatrixJ(offd);
    HYPRE_Int * diag_j = hypre_CSRMatrixJ(diag);
-   HYPRE_Int * col_map_offd = hypre_ParCSRMatrixColMapOffd(Ap);
-   HYPRE_Int first_col_diag = hypre_ParCSRMatrixFirstColDiag(Ap);
+   HYPRE_BigInt * col_map_offd = hypre_ParCSRMatrixColMapOffd(Ap);
+   HYPRE_BigInt first_col_diag = hypre_ParCSRMatrixFirstColDiag(Ap);
 
    hypre_ParChordMatrix * Ac;
    hypre_NumbersNode * rdofs, * offd_cols_me;
@@ -306,8 +308,8 @@ hypre_ParCSRMatrixToParChordMatrix(
    into offd_j,offd_data, pj[jj] is the processor which owns jj as a row (idof)
    (the number jj is local to this processor).
    */
-   pcr = hypre_CTAlloc( HYPRE_Int, num_procs );
-   qcr = hypre_CTAlloc( HYPRE_Int, num_procs );
+   pcr = hypre_CTAlloc( HYPRE_Int,  num_procs , HYPRE_MEMORY_HOST);
+   qcr = hypre_CTAlloc( HYPRE_Int,  num_procs , HYPRE_MEMORY_HOST);
    for ( p=0; p<num_procs; ++p ) pcr[p]=0;
    for ( jj=0; jj<hypre_CSRMatrixNumNonzeros(offd); ++jj ) {
       j_local = offd_j[jj];
@@ -345,12 +347,12 @@ hypre_ParCSRMatrixToParChordMatrix(
 
    num_inprocessors = 0;
    for ( q=0; q<num_procs; ++q ) if ( qcr[q]==1 ) ++num_inprocessors;
-   inprocessor = hypre_CTAlloc( HYPRE_Int, num_inprocessors );
+   inprocessor = hypre_CTAlloc( HYPRE_Int,  num_inprocessors , HYPRE_MEMORY_HOST);
    p = 0;
    for ( q=0; q<num_procs; ++q ) if ( qcr[q]==1 ) inprocessor[ p++ ] = q;
    num_toprocessors = 0;
    for ( q=0; q<num_procs; ++q ) if ( pcr[q]==1 ) ++num_toprocessors;
-   toprocessor = hypre_CTAlloc( HYPRE_Int, num_toprocessors );
+   toprocessor = hypre_CTAlloc( HYPRE_Int,  num_toprocessors , HYPRE_MEMORY_HOST);
    p = 0;
    for ( q=0; q<num_procs; ++q ) if ( pcr[q]==1 ) toprocessor[ p++ ] = q;
 
@@ -358,7 +360,7 @@ hypre_ParCSRMatrixToParChordMatrix(
    hypre_ParChordMatrixInprocessor(Ac) = inprocessor;
    hypre_ParChordMatrixNumToprocessors(Ac) = num_toprocessors;
    hypre_ParChordMatrixToprocessor(Ac) = toprocessor;
-   hypre_TFree( qcr );
+   hypre_TFree( qcr , HYPRE_MEMORY_HOST);
 
    /* FirstIndexIdof[p] is the global index of proc. p's row 0 */
    /* FirstIndexRdof[p] is the global index of proc. p's col 0 */
@@ -369,8 +371,8 @@ hypre_ParCSRMatrixToParChordMatrix(
       index of the first column in p (whether that's in the diag or offd block).
       So it's more involved than row/idof: we also check the offd block, and
       have to do a gather to get first_index_rdof for every proc. on every proc. */
-   first_index_idof = hypre_CTAlloc( HYPRE_Int, num_procs+1 );
-   first_index_rdof = hypre_CTAlloc( HYPRE_Int, num_procs+1 );
+   first_index_idof = hypre_CTAlloc( HYPRE_Int,  num_procs+1 , HYPRE_MEMORY_HOST);
+   first_index_rdof = hypre_CTAlloc( HYPRE_Int,  num_procs+1 , HYPRE_MEMORY_HOST);
    for ( p=0; p<=num_procs; ++p ) {
       first_index_idof[p] = row_starts[p];
       first_index_rdof[p] = col_starts[p];
@@ -388,12 +390,12 @@ hypre_ParCSRMatrixToParChordMatrix(
       inchord_rdof[p], inchord_data[p].
    */
 
-   inchord_idof = hypre_CTAlloc( HYPRE_Int*, num_inprocessors );
-   inchord_rdof = hypre_CTAlloc( HYPRE_Int*, num_inprocessors );
-   inchord_data = hypre_CTAlloc( HYPRE_Complex*, num_inprocessors );
-   num_inchords = hypre_CTAlloc( HYPRE_Int, num_inprocessors );
-   chord = hypre_CTAlloc( HYPRE_Int, num_inprocessors );
-   chordto = hypre_CTAlloc( HYPRE_Int, num_toprocessors );
+   inchord_idof = hypre_CTAlloc( HYPRE_Int*,  num_inprocessors , HYPRE_MEMORY_HOST);
+   inchord_rdof = hypre_CTAlloc( HYPRE_Int*,  num_inprocessors , HYPRE_MEMORY_HOST);
+   inchord_data = hypre_CTAlloc( HYPRE_Complex*,  num_inprocessors , HYPRE_MEMORY_HOST);
+   num_inchords = hypre_CTAlloc( HYPRE_Int,  num_inprocessors , HYPRE_MEMORY_HOST);
+   chord = hypre_CTAlloc( HYPRE_Int,  num_inprocessors , HYPRE_MEMORY_HOST);
+   chordto = hypre_CTAlloc( HYPRE_Int,  num_toprocessors , HYPRE_MEMORY_HOST);
    num_rdofs = 0;
    for ( q=0; q<num_inprocessors; ++q ) num_inchords[q] = 0;
    my_q = -1;
@@ -412,9 +414,9 @@ hypre_ParCSRMatrixToParChordMatrix(
       }
    };
    num_rdofs = hypre_NumbersNEntered( rdofs );
-   inchord_idof[my_q] = hypre_CTAlloc( HYPRE_Int, num_inchords[my_q] );
-   inchord_rdof[my_q] = hypre_CTAlloc( HYPRE_Int, num_inchords[my_q] );
-   inchord_data[my_q] = hypre_CTAlloc( HYPRE_Complex, num_inchords[my_q] );
+   inchord_idof[my_q] = hypre_CTAlloc( HYPRE_Int,  num_inchords[my_q] , HYPRE_MEMORY_HOST);
+   inchord_rdof[my_q] = hypre_CTAlloc( HYPRE_Int,  num_inchords[my_q] , HYPRE_MEMORY_HOST);
+   inchord_data[my_q] = hypre_CTAlloc( HYPRE_Complex,  num_inchords[my_q] , HYPRE_MEMORY_HOST);
    chord[0] = 0;
    for ( row=0; row<hypre_CSRMatrixNumRows(diag); ++row ) {
       for ( i=hypre_CSRMatrixI(diag)[row]; i<hypre_CSRMatrixI(diag)[row+1]; ++i ) {
@@ -447,11 +449,11 @@ hypre_ParCSRMatrixToParChordMatrix(
          hypre_NumbersEnter( offd_cols_me, j_global );
       }
    }
-   offd_col_array = hypre_CTAlloc( HYPRE_Int*, num_inprocessors );
-   len_offd_col_array = hypre_CTAlloc( HYPRE_Int, num_inprocessors );
+   offd_col_array = hypre_CTAlloc( HYPRE_Int*,  num_inprocessors , HYPRE_MEMORY_HOST);
+   len_offd_col_array = hypre_CTAlloc( HYPRE_Int,  num_inprocessors , HYPRE_MEMORY_HOST);
    offd_col_array_me = hypre_NumbersArray( offd_cols_me );
    len_offd_col_array_me = hypre_NumbersNEntered( offd_cols_me );
-   request = hypre_CTAlloc(hypre_MPI_Request, 2*num_procs );
+   request = hypre_CTAlloc(hypre_MPI_Request,  2*num_procs , HYPRE_MEMORY_HOST);
    ireq = 0;
    for ( q=0; q<num_inprocessors; ++q )
       hypre_MPI_Irecv( &len_offd_col_array[q], 1, HYPRE_MPI_INT,
@@ -459,12 +461,12 @@ hypre_ParCSRMatrixToParChordMatrix(
    for ( p=0; p<num_procs; ++p ) if ( pcr[p]==1 ) {
       hypre_MPI_Isend( &len_offd_col_array_me, 1, HYPRE_MPI_INT, p, 0, comm, &request[ireq++] );
    }
-   status = hypre_CTAlloc(hypre_MPI_Status, ireq );
+   status = hypre_CTAlloc(hypre_MPI_Status,  ireq , HYPRE_MEMORY_HOST);
    hypre_MPI_Waitall( ireq, request, status );
-   hypre_TFree(status);
+   hypre_TFree(status, HYPRE_MEMORY_HOST);
    ireq = 0;
    for ( q=0; q<num_inprocessors; ++q )
-      offd_col_array[q] = hypre_CTAlloc( HYPRE_Int, len_offd_col_array[q] );
+      offd_col_array[q] = hypre_CTAlloc( HYPRE_Int,  len_offd_col_array[q] , HYPRE_MEMORY_HOST);
    for ( q=0; q<num_inprocessors; ++q )
       hypre_MPI_Irecv( offd_col_array[q], len_offd_col_array[q], HYPRE_MPI_INT,
                  inprocessor[q], 0, comm, &request[ireq++] );
@@ -472,11 +474,11 @@ hypre_ParCSRMatrixToParChordMatrix(
       hypre_MPI_Isend( offd_col_array_me, len_offd_col_array_me,
                  HYPRE_MPI_INT, p, 0, comm, &request[ireq++] );
    }
-   status = hypre_CTAlloc(hypre_MPI_Status, ireq );
+   status = hypre_CTAlloc(hypre_MPI_Status,  ireq , HYPRE_MEMORY_HOST);
    hypre_MPI_Waitall( ireq, request, status );
-   hypre_TFree(request);
-   hypre_TFree(status);
-   offd_cols = hypre_CTAlloc( hypre_NumbersNode *, num_inprocessors );
+   hypre_TFree(request, HYPRE_MEMORY_HOST);
+   hypre_TFree(status, HYPRE_MEMORY_HOST);
+   offd_cols = hypre_CTAlloc( hypre_NumbersNode *,  num_inprocessors , HYPRE_MEMORY_HOST);
    for ( q=0; q<num_inprocessors; ++q ) {
       offd_cols[q] = hypre_NumbersNewNode();
       for ( i=0; i<len_offd_col_array[q]; ++i )
@@ -485,9 +487,9 @@ hypre_ParCSRMatrixToParChordMatrix(
 
    len_num_rdofs_toprocessor = 1 + hypre_CSRMatrixI(offd)
       [hypre_CSRMatrixNumRows(offd)];
-   inproc = hypre_CTAlloc( HYPRE_Int, len_num_rdofs_toprocessor );
-   toproc = hypre_CTAlloc( HYPRE_Int, len_num_rdofs_toprocessor );
-   num_rdofs_toprocessor = hypre_CTAlloc( HYPRE_Int, len_num_rdofs_toprocessor );
+   inproc = hypre_CTAlloc( HYPRE_Int,  len_num_rdofs_toprocessor , HYPRE_MEMORY_HOST);
+   toproc = hypre_CTAlloc( HYPRE_Int,  len_num_rdofs_toprocessor , HYPRE_MEMORY_HOST);
+   num_rdofs_toprocessor = hypre_CTAlloc( HYPRE_Int,  len_num_rdofs_toprocessor , HYPRE_MEMORY_HOST);
    for ( qto=0; qto<len_num_rdofs_toprocessor; ++qto ) {
       inproc[qto] = -1;
       toproc[qto] = -1;
@@ -562,9 +564,9 @@ hypre_ParCSRMatrixToParChordMatrix(
    hypre_NumbersDeleteNode(rdofs);
 
    for ( q=0; q<num_inprocessors; ++q ) if (q!=my_q) {
-      inchord_idof[q] = hypre_CTAlloc( HYPRE_Int, num_inchords[q] );
-      inchord_rdof[q] = hypre_CTAlloc( HYPRE_Int, num_inchords[q] );
-      inchord_data[q] = hypre_CTAlloc( HYPRE_Complex, num_inchords[q] );
+      inchord_idof[q] = hypre_CTAlloc( HYPRE_Int,  num_inchords[q] , HYPRE_MEMORY_HOST);
+      inchord_rdof[q] = hypre_CTAlloc( HYPRE_Int,  num_inchords[q] , HYPRE_MEMORY_HOST);
+      inchord_data[q] = hypre_CTAlloc( HYPRE_Complex,  num_inchords[q] , HYPRE_MEMORY_HOST);
       chord[q] = 0;
    };
    for ( q=0; q<num_inprocessors; ++q ) if (q!=my_q) {
@@ -572,10 +574,10 @@ hypre_ParCSRMatrixToParChordMatrix(
          inchord_idof[q][i] = -1;
       }
    };
-   rdof_toprocessor = hypre_CTAlloc( HYPRE_Int*, num_toprocessors );
+   rdof_toprocessor = hypre_CTAlloc( HYPRE_Int*,  num_toprocessors , HYPRE_MEMORY_HOST);
    for ( qto=0; qto<num_toprocessors; ++qto )  /*if (qto!=my_q)*/ {
       hypre_assert( qto < len_num_rdofs_toprocessor );
-      rdof_toprocessor[qto] = hypre_CTAlloc( HYPRE_Int, num_rdofs_toprocessor[qto] );
+      rdof_toprocessor[qto] = hypre_CTAlloc( HYPRE_Int,  num_rdofs_toprocessor[qto] , HYPRE_MEMORY_HOST);
       chordto[qto] = 0;
    };
    for ( row=0; row<hypre_CSRMatrixNumRows(offd); ++row ) {
@@ -613,16 +615,16 @@ hypre_ParCSRMatrixToParChordMatrix(
    hypre_NumbersDeleteNode( offd_cols_me );
    for ( q=0; q<num_inprocessors; ++q )
       hypre_NumbersDeleteNode( offd_cols[q]);
-   hypre_TFree( offd_cols );
+   hypre_TFree( offd_cols , HYPRE_MEMORY_HOST);
    for ( q=0; q<num_inprocessors; ++q )
-      hypre_TFree( offd_col_array[q] );
-   hypre_TFree( offd_col_array );
-   hypre_TFree( len_offd_col_array );
-   hypre_TFree( chordto );
-   hypre_TFree( inproc );
-   hypre_TFree( toproc );
-   hypre_TFree( chord );
-   hypre_TFree( pcr );
+      hypre_TFree( offd_col_array[q] , HYPRE_MEMORY_HOST);
+   hypre_TFree( offd_col_array , HYPRE_MEMORY_HOST);
+   hypre_TFree( len_offd_col_array , HYPRE_MEMORY_HOST);
+   hypre_TFree( chordto , HYPRE_MEMORY_HOST);
+   hypre_TFree( inproc , HYPRE_MEMORY_HOST);
+   hypre_TFree( toproc , HYPRE_MEMORY_HOST);
+   hypre_TFree( chord , HYPRE_MEMORY_HOST);
+   hypre_TFree( pcr , HYPRE_MEMORY_HOST);
 
 
    hypre_ParChordMatrixFirstindexIdof(Ac) = first_index_idof;

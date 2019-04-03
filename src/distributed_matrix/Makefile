@@ -40,7 +40,7 @@ FILES =\
 
 OBJS = ${FILES:.c=.o}
 
-SONAME = libHYPRE_DistributedMatrix-${HYPRE_RELEASE_VERSION}.so
+SONAME = libHYPRE_DistributedMatrix-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
 ##################################################################
 # Targets
@@ -69,7 +69,7 @@ libHYPRE_DistributedMatrix.a: ${OBJS}
 	${AR} $@ ${OBJS}
 	${RANLIB} $@
 
-libHYPRE_DistributedMatrix.so: ${OBJS}
+libHYPRE_DistributedMatrix.so libHYPRE_DistributedMatrix.dylib: ${OBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
 	ln -s ${SONAME} $@

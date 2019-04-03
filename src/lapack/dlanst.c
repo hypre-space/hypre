@@ -1,6 +1,9 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include "hypre_lapack.h"
 #include "f2c.h"
+#include "hypre_lapack.h"
 
 doublereal dlanst_(const char *norm, integer *n, doublereal *d__, doublereal *e)
 {
@@ -62,14 +65,12 @@ doublereal dlanst_(const char *norm, integer *n, doublereal *d__, doublereal *e)
     /* System generated locals */
     integer i__1;
     doublereal ret_val, d__1, d__2, d__3, d__4, d__5;
-    /* Builtin functions */
-    HYPRE_Real sqrt(doublereal);
     /* Local variables */
     static integer i__;
     static doublereal scale;
     extern logical lsame_(const char *,const char *);
     static doublereal anorm;
-    extern /* Subroutine */ HYPRE_Int dlassq_(integer *, doublereal *, integer *, 
+    extern /* Subroutine */ integer dlassq_(integer *, doublereal *, integer *, 
 	    doublereal *, doublereal *);
     static doublereal sum;
 
@@ -138,3 +139,6 @@ doublereal dlanst_(const char *norm, integer *n, doublereal *d__, doublereal *e)
 
 } /* dlanst_ */
 
+#ifdef __cplusplus
+}
+#endif

@@ -1,0 +1,112 @@
+# Output file: lobpcg.out.vfromfile
+Eigenvalue lambda   2.43042158313018e-01
+Eigenvalue lambda   4.79521039879688e-01
+Residual   7.49244273975386e-08
+Residual   3.13511570089364e-07
+
+# Output file: lobpcg.out.vout.1
+Eigenvalue lambda   2.43042159336231e-01
+Eigenvalue lambda   4.79521040556427e-01
+Residual   5.93138904669372e-05
+Residual   3.00153697741728e-05
+
+# Output file: lobpcg.out.1.lobpcg
+Iterations = 6
+Final Relative Residual Norm = 1.767838e-07
+
+# Output file: lobpcg.out.1.lobpcg.1
+Eigenvalue lambda   2.43042158313718e-01
+Residual   1.05888375241797e-06
+
+# Output file: lobpcg.out.1.lobpcg.5
+Eigenvalue lambda   2.43042158313047e-01
+Eigenvalue lambda   4.79521039879736e-01
+Eigenvalue lambda   4.79521039879869e-01
+Eigenvalue lambda   4.79521039880020e-01
+Eigenvalue lambda   7.15999921447659e-01
+Residual   6.11700821392749e-07
+Residual   7.03316483557853e-07
+Residual   8.51096556735168e-07
+Residual   8.72875343951290e-07
+Residual   1.20344285081769e-06
+
+# Output file: lobpcg.out.2.lobpcg
+Iterations = 20
+Final Relative Residual Norm = 5.962015e-07
+
+# Output file: lobpcg.out.2.lobpcg.1
+Eigenvalue lambda   2.43042158313121e-01
+Residual   4.63315030208772e-07
+
+# Output file: lobpcg.out.2.lobpcg.5
+Eigenvalue lambda   2.43042158313016e-01
+Eigenvalue lambda   4.79521039879677e-01
+Eigenvalue lambda   4.79521039879700e-01
+Eigenvalue lambda   4.79521039879780e-01
+Eigenvalue lambda   7.15999921447091e-01
+Residual   1.43322942857248e-07
+Residual   4.86501096019624e-07
+Residual   3.72232026886917e-07
+Residual   5.18126375223749e-07
+Residual   1.02530795888815e-06
+
+# Output file: lobpcg.out.8.lobpcg
+Iterations = 15
+Final Relative Residual Norm = 6.352784e-07
+
+# Output file: lobpcg.out.8.lobpcg.1
+Eigenvalue lambda   2.43042158313109e-01
+Residual   4.35799317942064e-07
+
+# Output file: lobpcg.out.8.lobpcg.5
+Eigenvalue lambda   2.43042158313016e-01
+Eigenvalue lambda   4.79521039879678e-01
+Eigenvalue lambda   4.79521039879699e-01
+Eigenvalue lambda   4.79521039879799e-01
+Eigenvalue lambda   7.15999921446891e-01
+Residual   1.37749965131754e-07
+Residual   4.63010776375628e-07
+Residual   3.87579831562450e-07
+Residual   5.41642190641787e-07
+Residual   9.41630860798197e-07
+
+# Output file: lobpcg.out.12.lobpcg
+Iterations = 13
+Final Relative Residual Norm = 3.896456e-07
+
+# Output file: lobpcg.out.12.lobpcg.1
+Eigenvalue lambda   2.43042158313099e-01
+Residual   3.94665203904632e-07
+
+# Output file: lobpcg.out.12.lobpcg.5
+Eigenvalue lambda   2.43042158313016e-01
+Eigenvalue lambda   4.79521039879675e-01
+Eigenvalue lambda   4.79521039879685e-01
+Eigenvalue lambda   4.79521039879788e-01
+Eigenvalue lambda   7.15999921447147e-01
+Residual   1.36414438599642e-07
+Residual   4.59913522980684e-07
+Residual   3.72152569537697e-07
+Residual   5.07587948203054e-07
+Residual   1.11208056285383e-06
+
+# Output file: lobpcg.out.43.lobpcg
+Iterations = 9
+Final Relative Residual Norm = 5.971754e-07
+
+# Output file: lobpcg.out.43.lobpcg.1
+Eigenvalue lambda   2.43042158313103e-01
+Residual   4.06686999057609e-07
+
+# Output file: lobpcg.out.43.lobpcg.5
+Eigenvalue lambda   2.43042158313016e-01
+Eigenvalue lambda   4.79521039879682e-01
+Eigenvalue lambda   4.79521039879706e-01
+Eigenvalue lambda   4.79521039879825e-01
+Eigenvalue lambda   7.15999921446956e-01
+Residual   1.61376258673867e-07
+Residual   4.76948835732272e-07
+Residual   4.01718127440120e-07
+Residual   5.82137557078099e-07
+Residual   9.97061314149104e-07
+

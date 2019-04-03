@@ -16,7 +16,7 @@
 #include "_hypre_parcsr_mv.h"
 
 void hypre_RowsWithColumn_original
-( HYPRE_Int * rowmin, HYPRE_Int * rowmax, HYPRE_Int column, hypre_ParCSRMatrix * A )
+( HYPRE_Int * rowmin, HYPRE_Int * rowmax, HYPRE_BigInt column, hypre_ParCSRMatrix * A )
 /* Finds rows of A which have a nonzero at the given (global) column number.
    Sets rowmin to the minimum (local) row number of such rows, and rowmax
    to the max.  If there are no such rows, will return rowmax<0<=rowmin */
@@ -25,8 +25,8 @@ void hypre_RowsWithColumn_original
    hypre_CSRMatrix * offd = hypre_ParCSRMatrixOffd(A);
    HYPRE_Int * mat_i, * mat_j;
    HYPRE_Int i, j, num_rows;
-   HYPRE_Int firstColDiag;
-   HYPRE_Int * colMapOffd;
+   HYPRE_BigInt firstColDiag;
+   HYPRE_BigInt * colMapOffd;
 
    mat_i = hypre_CSRMatrixI(diag);
    mat_j = hypre_CSRMatrixJ(diag);
@@ -38,7 +38,7 @@ void hypre_RowsWithColumn_original
    for ( i=0; i<num_rows; ++i ) {
       /* global number: row = i + firstRowIndex;*/
       for ( j=mat_i[i]; j<mat_i[i+1]; ++j ) {
-         if ( mat_j[j]+firstColDiag==column ) {
+         if ( (HYPRE_BigInt)mat_j[j]+firstColDiag==column ) {
             /* row i (local row number) has column mat_j[j] (local column number) */
             *rowmin = i<*rowmin ? i : *rowmin;
             *rowmax = i>*rowmax ? i : *rowmax;
@@ -70,8 +70,8 @@ void hypre_RowsWithColumn_original
 }
 
 void hypre_RowsWithColumn
-( HYPRE_Int * rowmin, HYPRE_Int * rowmax, HYPRE_Int column,
-  HYPRE_Int num_rows_diag, HYPRE_Int firstColDiag, HYPRE_Int * colMapOffd,
+( HYPRE_Int * rowmin, HYPRE_Int * rowmax, HYPRE_BigInt column,
+  HYPRE_Int num_rows_diag, HYPRE_BigInt firstColDiag, HYPRE_BigInt * colMapOffd,
   HYPRE_Int * mat_i_diag, HYPRE_Int * mat_j_diag, HYPRE_Int * mat_i_offd, HYPRE_Int * mat_j_offd )
 /* Finds rows of A which have a nonzero at the given (global) column number.
    Sets rowmin to the minimum (local) row number of such rows, and rowmax
@@ -94,7 +94,7 @@ void hypre_RowsWithColumn
    for ( i=0; i<num_rows_diag; ++i ) {
       /* global number: row = i + firstRowIndex;*/
       for ( j=mat_i_diag[i]; j<mat_i_diag[i+1]; ++j ) {
-         if ( mat_j_diag[j]+firstColDiag==column ) {
+         if ( (HYPRE_BigInt)mat_j_diag[j]+firstColDiag==column ) {
             /* row i (local row number) has column mat_j[j] (local column number) */
             *rowmin = i<*rowmin ? i : *rowmin;
             *rowmax = i>*rowmax ? i : *rowmax;
@@ -133,9 +133,9 @@ void
 hypre_MatTCommPkgCreate_core (
 
 /* input args: */
-   MPI_Comm comm, HYPRE_Int * col_map_offd, HYPRE_Int first_col_diag, HYPRE_Int * col_starts,
-   HYPRE_Int num_rows_diag, HYPRE_Int num_cols_diag, HYPRE_Int num_cols_offd, HYPRE_Int * row_starts,
-   HYPRE_Int firstColDiag, HYPRE_Int * colMapOffd,
+   MPI_Comm comm, HYPRE_BigInt * col_map_offd, HYPRE_BigInt first_col_diag, HYPRE_BigInt *col_starts,
+   HYPRE_Int num_rows_diag, HYPRE_Int num_cols_diag, HYPRE_Int num_cols_offd, HYPRE_BigInt *row_starts,
+   HYPRE_BigInt firstColDiag, HYPRE_BigInt *colMapOffd,
    HYPRE_Int * mat_i_diag, HYPRE_Int * mat_j_diag, HYPRE_Int * mat_i_offd, HYPRE_Int * mat_j_offd,
 
    HYPRE_Int data,  /* = 1 for a matrix with floating-point data, =0 for Boolean matrix */
@@ -155,17 +155,19 @@ hypre_MatTCommPkgCreate_core (
    HYPRE_Int			*recv_procs;
    HYPRE_Int			*recv_vec_starts;
    HYPRE_Int	i, j, j2, k, ir, rowmin, rowmax;
-   HYPRE_Int	*tmp, *recv_buf, *displs, *info, *send_buf, *all_num_sends3;
+   HYPRE_BigInt	*tmp, *recv_buf;
+   HYPRE_Int	*displs, *info, *send_buf, *all_num_sends3;
    HYPRE_Int	num_procs, my_id, num_elmts;
    HYPRE_Int	local_info, index, index2;
-   HYPRE_Int pmatch, col, kc, p;
+   HYPRE_Int pmatch, p;
+   HYPRE_BigInt col, kc;
    HYPRE_Int * recv_sz_buf;
    HYPRE_Int * row_marker;
    
    hypre_MPI_Comm_size(comm, &num_procs);  
    hypre_MPI_Comm_rank(comm, &my_id);
 
-   info = hypre_CTAlloc(HYPRE_Int, num_procs);
+   info = hypre_CTAlloc(HYPRE_Int,  num_procs, HYPRE_MEMORY_HOST);
 
 /* ----------------------------------------------------------------------
  * determine which processors to receive from (set proc_mark) and num_recvs,
@@ -236,12 +238,12 @@ hypre_MatTCommPkgCreate_core (
  * indices of elements (in this order)
  * ---------------------------------------------------------------------*/
 
-   displs = hypre_CTAlloc(HYPRE_Int, num_procs+1);
+   displs = hypre_CTAlloc(HYPRE_Int,  num_procs+1, HYPRE_MEMORY_HOST);
    displs[0] = 0;
    for (i=1; i < num_procs+1; i++)
 	displs[i] = displs[i-1]+info[i-1]; 
-   recv_buf = hypre_CTAlloc(HYPRE_Int, displs[num_procs]); 
-   tmp = hypre_CTAlloc(HYPRE_Int, local_info);
+   recv_buf = hypre_CTAlloc(HYPRE_BigInt,  displs[num_procs], HYPRE_MEMORY_HOST); 
+   tmp = hypre_CTAlloc(HYPRE_BigInt,  local_info, HYPRE_MEMORY_HOST);
 
    j = 0;
    for (i=0; i < num_procs; i++) {
@@ -254,14 +256,14 @@ hypre_MatTCommPkgCreate_core (
             ++(tmp[j2]);
          };
       for (k=0; k < num_cols_diag; k++)
-         if ( k+first_col_diag >= col_starts[i] && 
-              k+first_col_diag < col_starts[i+1] ) {
-            tmp[j++] = k + first_col_diag;
+         if ( (HYPRE_BigInt)k+first_col_diag >= col_starts[i] && 
+              (HYPRE_BigInt)k+first_col_diag < col_starts[i+1] ) {
+            tmp[j++] = (HYPRE_BigInt)k + first_col_diag;
             ++(tmp[j2]);
          }
    }
 
-   hypre_MPI_Allgatherv(tmp,local_info,HYPRE_MPI_INT,recv_buf,info,displs,HYPRE_MPI_INT,comm);
+   hypre_MPI_Allgatherv(tmp,local_info,HYPRE_MPI_BIG_INT,recv_buf,info,displs,HYPRE_MPI_INT,comm);
 	
 
 /* ----------------------------------------------------------------------
@@ -284,10 +286,10 @@ hypre_MatTCommPkgCreate_core (
    num_sends = num_procs;   /* may turn out to be less, but we can't know yet */
    num_elmts = (num_procs-1)*num_rows_diag;
    /* ... a crude upper bound; should try to do better even if more comm required */
-   send_procs = hypre_CTAlloc(HYPRE_Int, num_sends);
-   send_map_starts = hypre_CTAlloc(HYPRE_Int, num_sends+1);
-   send_map_elmts = hypre_CTAlloc(HYPRE_Int, num_elmts);
-   row_marker = hypre_CTAlloc(HYPRE_Int,num_rows_diag);
+   send_procs = hypre_CTAlloc(HYPRE_Int,  num_sends, HYPRE_MEMORY_HOST);
+   send_map_starts = hypre_CTAlloc(HYPRE_Int,  num_sends+1, HYPRE_MEMORY_HOST);
+   send_map_elmts = hypre_CTAlloc(HYPRE_Int,  num_elmts, HYPRE_MEMORY_HOST);
+   row_marker = hypre_CTAlloc(HYPRE_Int, num_rows_diag, HYPRE_MEMORY_HOST);
  
    index = 0;
    index2 = 0; 
@@ -370,8 +372,8 @@ hypre_MatTCommPkgCreate_core (
    num_sends = index;  /* no. of proc. rows will be sent to */
 
 /* Compute receive arrays recv_procs, recv_vec_starts ... */
-   recv_procs = hypre_CTAlloc(HYPRE_Int, num_recvs);
-   recv_vec_starts = hypre_CTAlloc(HYPRE_Int, num_recvs+1);
+   recv_procs = hypre_CTAlloc(HYPRE_Int,  num_recvs, HYPRE_MEMORY_HOST);
+   recv_vec_starts = hypre_CTAlloc(HYPRE_Int,  num_recvs+1, HYPRE_MEMORY_HOST);
    j2 = 0;
    for (i=0; i < num_procs; i++) {
       if ( i!=my_id ) { recv_procs[j2] = i; j2++; };
@@ -395,8 +397,8 @@ hypre_MatTCommPkgCreate_core (
      may be much slower than Allgather or may be a bit faster depending on
      implementations
 */
-   send_buf = hypre_CTAlloc( HYPRE_Int, 3*num_sends );
-   all_num_sends3 = hypre_CTAlloc( HYPRE_Int, num_procs );
+   send_buf = hypre_CTAlloc( HYPRE_Int,  3*num_sends , HYPRE_MEMORY_HOST);
+   all_num_sends3 = hypre_CTAlloc( HYPRE_Int,  num_procs , HYPRE_MEMORY_HOST);
 
    /* scatter-gather num_sends, to set up the size for the main comm. step */
    i = 3*num_sends;
@@ -405,7 +407,7 @@ hypre_MatTCommPkgCreate_core (
    for ( p=0; p<num_procs; ++p ) {
       displs[p+1] = displs[p] + all_num_sends3[p];
    };
-   recv_sz_buf = hypre_CTAlloc( HYPRE_Int, displs[num_procs] );
+   recv_sz_buf = hypre_CTAlloc( HYPRE_Int,  displs[num_procs] , HYPRE_MEMORY_HOST);
    
    /* scatter-gather size of row info to send, and proc. to send to */
    index = 0;
@@ -452,14 +454,14 @@ hypre_MatTCommPkgCreate_core (
           my_id, num_recvs, recv_sz_buf[0], recv_sz_buf[1], recv_sz_buf[2] );
 #endif
 
-   hypre_TFree(send_buf);
-   hypre_TFree(all_num_sends3);
-   hypre_TFree(tmp);
-   hypre_TFree(recv_buf);
-   hypre_TFree(displs);
-   hypre_TFree(info);
-   hypre_TFree(recv_sz_buf);
-   hypre_TFree(row_marker);
+   hypre_TFree(send_buf, HYPRE_MEMORY_HOST);
+   hypre_TFree(all_num_sends3, HYPRE_MEMORY_HOST);
+   hypre_TFree(tmp, HYPRE_MEMORY_HOST);
+   hypre_TFree(recv_buf, HYPRE_MEMORY_HOST);
+   hypre_TFree(displs, HYPRE_MEMORY_HOST);
+   hypre_TFree(info, HYPRE_MEMORY_HOST);
+   hypre_TFree(recv_sz_buf, HYPRE_MEMORY_HOST);
+   hypre_TFree(row_marker, HYPRE_MEMORY_HOST);
 
 
    /* finish up with the hand-coded call-by-reference... */
@@ -498,15 +500,15 @@ hypre_MatTCommPkgCreate ( hypre_ParCSRMatrix *A)
    HYPRE_Int			*recv_procs;
    HYPRE_Int			*recv_vec_starts;
    
-   HYPRE_Int  *col_map_offd = hypre_ParCSRMatrixColMapOffd(A);
-   HYPRE_Int  first_col_diag = hypre_ParCSRMatrixFirstColDiag(A);
-   HYPRE_Int  *col_starts = hypre_ParCSRMatrixColStarts(A);
+   HYPRE_BigInt  *col_map_offd = hypre_ParCSRMatrixColMapOffd(A);
+   HYPRE_BigInt  first_col_diag = hypre_ParCSRMatrixFirstColDiag(A);
+   HYPRE_BigInt  *col_starts = hypre_ParCSRMatrixColStarts(A);
 
    HYPRE_Int	ierr = 0;
    HYPRE_Int	num_rows_diag = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
    HYPRE_Int	num_cols_diag = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(A));
    HYPRE_Int	num_cols_offd = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A));
-   HYPRE_Int * row_starts = hypre_ParCSRMatrixRowStarts(A);
+   HYPRE_BigInt * row_starts = hypre_ParCSRMatrixRowStarts(A);
 
    hypre_MatTCommPkgCreate_core (
       comm, col_map_offd, first_col_diag, col_starts,
@@ -523,7 +525,7 @@ hypre_MatTCommPkgCreate ( hypre_ParCSRMatrix *A)
       &send_map_elmts
       );
 
-   comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1);
+   comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg,  1, HYPRE_MEMORY_HOST);
 
    hypre_ParCSRCommPkgComm(comm_pkg) = comm;
 

@@ -53,13 +53,13 @@
    }
 
 
-#define AbsStencilShape(stencil, abs_shape)     \
-   {                                            \
-      HYPRE_Int ii,jj,kk;                       \
-      ii = hypre_IndexX(stencil);               \
-      jj = hypre_IndexY(stencil);               \
-      kk = hypre_IndexZ(stencil);               \
-      abs_shape= abs(ii) + abs(jj) + abs(kk);   \
+#define AbsStencilShape(stencil, abs_shape)                     \
+   {                                                            \
+      HYPRE_Int ii,jj,kk;                                       \
+      ii = hypre_IndexX(stencil);                               \
+      jj = hypre_IndexY(stencil);                               \
+      kk = hypre_IndexZ(stencil);                               \
+      abs_shape= hypre_abs(ii) + hypre_abs(jj) + hypre_abs(kk); \
    }
 
 /*--------------------------------------------------------------------------
@@ -151,13 +151,13 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
    hypre_Box               coarse_cell_box;
    HYPRE_Int               volume_coarse_cell_box;
    HYPRE_Int              *volume_shift_box;
-   HYPRE_Int               max_contribut_size, stencil_i, rank;
-   HYPRE_Int               startrank;
+   HYPRE_Int               max_contribut_size, stencil_i;
+   HYPRE_BigInt            startrank, rank;
    HYPRE_Real             *vals, *vals2;
 
    HYPRE_Int               i, j, k, l, m, n, ll, kk, jj;
    HYPRE_Int               nvars, var1, var2, var2_start; 
-   HYPRE_Int               iA, iAc, iA_shift_z, iA_shift_zy, iA_shift_zyx;
+   HYPRE_Int               iA_shift_z, iA_shift_zy, iA_shift_zyx;
 
    hypre_Index             lindex;
    hypre_Index             index1, index2;
@@ -178,8 +178,10 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
    hypre_Index             index, *cindex, *Uv_cindex;
    HYPRE_Int               box_array_size, cbox_array_size;
 
-   HYPRE_Int               nrows, to_rank;
-   HYPRE_Int              *ncols, *rows, *cols;
+   HYPRE_Int               nrows;
+   HYPRE_BigInt            to_rank;
+   HYPRE_Int              *ncols;
+   HYPRE_BigInt           *rows, *cols;
    HYPRE_Int             **interface_max_stencil_ranks;
    HYPRE_Int             **interface_max_stencil_cnt;
    HYPRE_Int             **interface_rank_stencils;
@@ -265,32 +267,32 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
     *--------------------------------------------------------------------------*/
    nvars    =  hypre_SStructPMatrixNVars(A_pmatrix);
 
-   fgrid_crse_extents      = hypre_TAlloc(hypre_BoxArray **, nvars);
-   fbox_interior           = hypre_TAlloc(hypre_BoxArray **, nvars);
-   fbox_bdy                = hypre_TAlloc(hypre_BoxArrayArray **, nvars);
-   interior_fboxi          = hypre_TAlloc(HYPRE_Int **, nvars);
-   bdy_fboxi               = hypre_TAlloc(HYPRE_Int **, nvars);
-   cboxi_fboxes            = hypre_TAlloc(HYPRE_Int **, nvars);
-   cboxi_fcnt              = hypre_TAlloc(HYPRE_Int *, nvars);
+   fgrid_crse_extents      = hypre_TAlloc(hypre_BoxArray **,  nvars, HYPRE_MEMORY_HOST);
+   fbox_interior           = hypre_TAlloc(hypre_BoxArray **,  nvars, HYPRE_MEMORY_HOST);
+   fbox_bdy                = hypre_TAlloc(hypre_BoxArrayArray **,  nvars, HYPRE_MEMORY_HOST);
+   interior_fboxi          = hypre_TAlloc(HYPRE_Int **,  nvars, HYPRE_MEMORY_HOST);
+   bdy_fboxi               = hypre_TAlloc(HYPRE_Int **,  nvars, HYPRE_MEMORY_HOST);
+   cboxi_fboxes            = hypre_TAlloc(HYPRE_Int **,  nvars, HYPRE_MEMORY_HOST);
+   cboxi_fcnt              = hypre_TAlloc(HYPRE_Int *,  nvars, HYPRE_MEMORY_HOST);
 
    for (var1= 0; var1< nvars; var1++)
    {
       cgrid= hypre_SStructPGridSGrid(hypre_SStructPMatrixPGrid(A_crse), var1);
       cgrid_boxes= hypre_StructGridBoxes(cgrid); 
-      fgrid_crse_extents[var1]= hypre_TAlloc(hypre_BoxArray *, 
-                                             hypre_BoxArraySize(cgrid_boxes));
-      fbox_interior[var1]= hypre_TAlloc(hypre_BoxArray *,
-                                        hypre_BoxArraySize(cgrid_boxes));
-      fbox_bdy[var1]     = hypre_TAlloc(hypre_BoxArrayArray *,
-                                        hypre_BoxArraySize(cgrid_boxes));
-      interior_fboxi[var1]= hypre_TAlloc(HYPRE_Int *, hypre_BoxArraySize(cgrid_boxes));
-      bdy_fboxi[var1]     = hypre_TAlloc(HYPRE_Int *, hypre_BoxArraySize(cgrid_boxes));
+      fgrid_crse_extents[var1]= hypre_TAlloc(hypre_BoxArray *,  
+                                             hypre_BoxArraySize(cgrid_boxes), HYPRE_MEMORY_HOST);
+      fbox_interior[var1]= hypre_TAlloc(hypre_BoxArray *, 
+                                        hypre_BoxArraySize(cgrid_boxes), HYPRE_MEMORY_HOST);
+      fbox_bdy[var1]     = hypre_TAlloc(hypre_BoxArrayArray *, 
+                                        hypre_BoxArraySize(cgrid_boxes), HYPRE_MEMORY_HOST);
+      interior_fboxi[var1]= hypre_TAlloc(HYPRE_Int *,  hypre_BoxArraySize(cgrid_boxes), HYPRE_MEMORY_HOST);
+      bdy_fboxi[var1]     = hypre_TAlloc(HYPRE_Int *,  hypre_BoxArraySize(cgrid_boxes), HYPRE_MEMORY_HOST);
 
       fgrid= hypre_SStructPGridSGrid(hypre_SStructPMatrixPGrid(A_pmatrix), var1);
       fgrid_boxes= hypre_StructGridBoxes(fgrid); 
 
-      cboxi_fboxes[var1]= hypre_CTAlloc(HYPRE_Int *, hypre_BoxArraySize(fgrid_boxes));
-      cboxi_fcnt[var1]  = hypre_CTAlloc(HYPRE_Int  , hypre_BoxArraySize(fgrid_boxes));
+      cboxi_fboxes[var1]= hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArraySize(fgrid_boxes), HYPRE_MEMORY_HOST);
+      cboxi_fcnt[var1]  = hypre_CTAlloc(HYPRE_Int  ,  hypre_BoxArraySize(fgrid_boxes), HYPRE_MEMORY_HOST);
 
       /*-----------------------------------------------------------------------
        *  Determine the fine grid boxes that are underlying a coarse grid box.
@@ -307,7 +309,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
          hypre_CopyIndex(hypre_BoxIMin(cgrid_box), cstart);
 
          cnt1= 0;
-         temp1= hypre_CTAlloc(HYPRE_Int, hypre_BoxArraySize(fgrid_boxes));
+         temp1= hypre_CTAlloc(HYPRE_Int,  hypre_BoxArraySize(fgrid_boxes), HYPRE_MEMORY_HOST);
 
          hypre_ClearIndex(index_temp);
          hypre_ForBoxI(fi, fgrid_boxes)
@@ -338,8 +340,8 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
          fgrid_crse_extents[var1][ci]= hypre_BoxArrayCreate(cnt1, ndim);
          fbox_interior[var1][ci]  = hypre_BoxArrayCreate(cnt1, ndim);
          fbox_bdy[var1][ci]       = hypre_BoxArrayArrayCreate(cnt1, ndim);
-         interior_fboxi[var1][ci] = hypre_CTAlloc(HYPRE_Int, cnt1);
-         bdy_fboxi[var1][ci]      = hypre_CTAlloc(HYPRE_Int, cnt1);
+         interior_fboxi[var1][ci] = hypre_CTAlloc(HYPRE_Int,  cnt1, HYPRE_MEMORY_HOST);
+         bdy_fboxi[var1][ci]      = hypre_CTAlloc(HYPRE_Int,  cnt1, HYPRE_MEMORY_HOST);
 
          for (fi= 0; fi< cnt1; fi++)
          {
@@ -409,7 +411,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                                 hypre_BoxArrayArrayBoxArray(fbox_bdy[var1][ci], fi));
             bdy_fboxi[var1][ci][fi]= temp1[fi];
          }
-         hypre_TFree(temp1);
+         hypre_TFree(temp1, HYPRE_MEMORY_HOST);
 
       }  /* hypre_ForBoxI(ci, cgrid_boxes) */
 
@@ -434,7 +436,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
          hypre_StructMapFineToCoarse(hypre_BoxIMax(fgrid_box), index_temp,
                                      refine_factors, hypre_BoxIMax(&fine_box));
 
-         temp1= hypre_CTAlloc(HYPRE_Int, hypre_BoxArraySize(cgrid_boxes));
+         temp1= hypre_CTAlloc(HYPRE_Int,  hypre_BoxArraySize(cgrid_boxes), HYPRE_MEMORY_HOST);
          hypre_ForBoxI(i, cgrid_boxes)
          {
             cgrid_box= hypre_BoxArrayBox(cgrid_boxes, i);
@@ -446,12 +448,12 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
             }
          }
 
-         cboxi_fboxes[var1][fi]= hypre_TAlloc(HYPRE_Int, cboxi_fcnt[var1][fi]);
+         cboxi_fboxes[var1][fi]= hypre_TAlloc(HYPRE_Int,  cboxi_fcnt[var1][fi], HYPRE_MEMORY_HOST);
          for (i= 0; i< cboxi_fcnt[var1][fi]; i++)
          {
             cboxi_fboxes[var1][fi][i]= temp1[i];
          }
-         hypre_TFree(temp1);
+         hypre_TFree(temp1, HYPRE_MEMORY_HOST);
       }
    }     /* for (var1= 0; var1< nvars; var1++) */
 
@@ -491,10 +493,10 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
     * Offsets in y & z directions for refinement patches. These will be used
     * for pointing to correct coarse stencil location.
     *--------------------------------------------------------------------------*/
-   OffsetA =  hypre_CTAlloc(HYPRE_Int *, 2);
+   OffsetA =  hypre_CTAlloc(HYPRE_Int *,  2, HYPRE_MEMORY_HOST);
    for (i= 0; i< 2; i++)
    {
-      OffsetA[i]= hypre_CTAlloc(HYPRE_Int, refine_factors[i+1]);
+      OffsetA[i]= hypre_CTAlloc(HYPRE_Int,  refine_factors[i+1], HYPRE_MEMORY_HOST);
    }
 
    /*--------------------------------------------------------------------------
@@ -587,28 +589,28 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      {
                         found= trueV;
                         stencil_marker= trueV;
-                        hypre_TFree(stencil_contrib_cnt);
-                        hypre_TFree(stencil_ranks);
+                        hypre_TFree(stencil_contrib_cnt, HYPRE_MEMORY_HOST);
+                        hypre_TFree(stencil_ranks, HYPRE_MEMORY_HOST);
                         for (i= 0; i< stencil_size; i++)
                         {
                            hypre_BoxDestroy(shift_box[i]);
                         }
-                        hypre_TFree(shift_box);
-                        hypre_TFree(volume_shift_box);
-                        hypre_TFree(vals);
+                        hypre_TFree(shift_box, HYPRE_MEMORY_HOST);
+                        hypre_TFree(volume_shift_box, HYPRE_MEMORY_HOST);
+                        hypre_TFree(vals, HYPRE_MEMORY_HOST);
 
                         for (j= 1; j< max_stencil_size; j++)
                         {
                            stencil_i= rank_stencils[j];
                            if (stencil_i != -1)
                            {
-                              hypre_TFree(stencil_contrib_i[stencil_i]);
-                              hypre_TFree(weight_contrib_i[stencil_i]);
+                              hypre_TFree(stencil_contrib_i[stencil_i], HYPRE_MEMORY_HOST);
+                              hypre_TFree(weight_contrib_i[stencil_i], HYPRE_MEMORY_HOST);
                            }
                         }
-                        hypre_TFree(stencil_contrib_i);
-                        hypre_TFree(weight_contrib_i);
-                        hypre_TFree(rank_stencils);
+                        hypre_TFree(stencil_contrib_i, HYPRE_MEMORY_HOST);
+                        hypre_TFree(weight_contrib_i, HYPRE_MEMORY_HOST);
+                        hypre_TFree(rank_stencils, HYPRE_MEMORY_HOST);
                      }
 
                      if (found)
@@ -647,13 +649,13 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                /* mark stencil_marker for the next stencil */
                stencil_marker= falseV;
 
-               stencil_contrib_cnt= hypre_CTAlloc(HYPRE_Int, stencil_size);
-               stencil_contrib_i  = hypre_TAlloc(HYPRE_Int *, stencil_size);
-               weight_contrib_i   = hypre_TAlloc(HYPRE_Real *, stencil_size);
-               stencil_ranks      = hypre_TAlloc(HYPRE_Int, stencil_size);
-               rank_stencils      = hypre_TAlloc(HYPRE_Int, max_stencil_size);
-               shift_box          = hypre_TAlloc(hypre_Box *, stencil_size);
-               volume_shift_box   = hypre_TAlloc(HYPRE_Int, stencil_size);
+               stencil_contrib_cnt= hypre_CTAlloc(HYPRE_Int,  stencil_size, HYPRE_MEMORY_HOST);
+               stencil_contrib_i  = hypre_TAlloc(HYPRE_Int *,  stencil_size, HYPRE_MEMORY_HOST);
+               weight_contrib_i   = hypre_TAlloc(HYPRE_Real *,  stencil_size, HYPRE_MEMORY_HOST);
+               stencil_ranks      = hypre_TAlloc(HYPRE_Int,  stencil_size, HYPRE_MEMORY_HOST);
+               rank_stencils      = hypre_TAlloc(HYPRE_Int,  max_stencil_size, HYPRE_MEMORY_HOST);
+               shift_box          = hypre_TAlloc(hypre_Box *,  stencil_size, HYPRE_MEMORY_HOST);
+               volume_shift_box   = hypre_TAlloc(HYPRE_Int,  stencil_size, HYPRE_MEMORY_HOST);
 
                for (i= 0; i< max_stencil_size; i++)
                {
@@ -730,9 +732,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                if (stencil_i != -1)
                {
                   stencil_contrib_i[stencil_i]= 
-                     hypre_TAlloc(HYPRE_Int, stencil_contrib_cnt[stencil_i]);
+                     hypre_TAlloc(HYPRE_Int,  stencil_contrib_cnt[stencil_i], HYPRE_MEMORY_HOST);
                   weight_contrib_i[stencil_i] = 
-                     hypre_TAlloc(HYPRE_Real, stencil_contrib_cnt[stencil_i]);
+                     hypre_TAlloc(HYPRE_Real,  stencil_contrib_cnt[stencil_i], HYPRE_MEMORY_HOST);
                   sum= 0.0;
                   k= 0;
 
@@ -811,9 +813,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                if (stencil_i != -1)
                {
                   stencil_contrib_i[stencil_i]=
-                     hypre_TAlloc(HYPRE_Int, stencil_contrib_cnt[stencil_i]);
+                     hypre_TAlloc(HYPRE_Int,  stencil_contrib_cnt[stencil_i], HYPRE_MEMORY_HOST);
                   weight_contrib_i[stencil_i] =
-                     hypre_TAlloc(HYPRE_Real, stencil_contrib_cnt[stencil_i]);
+                     hypre_TAlloc(HYPRE_Real,  stencil_contrib_cnt[stencil_i], HYPRE_MEMORY_HOST);
                   sum= 0.0;
                   k= 0;
 
@@ -892,9 +894,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                if (stencil_i != -1)
                {
                   stencil_contrib_i[stencil_i]=
-                     hypre_TAlloc(HYPRE_Int, stencil_contrib_cnt[stencil_i]);
+                     hypre_TAlloc(HYPRE_Int,  stencil_contrib_cnt[stencil_i], HYPRE_MEMORY_HOST);
                   weight_contrib_i[stencil_i] =
-                     hypre_TAlloc(HYPRE_Real, stencil_contrib_cnt[stencil_i]);
+                     hypre_TAlloc(HYPRE_Real,  stencil_contrib_cnt[stencil_i], HYPRE_MEMORY_HOST);
                   sum= 0.0;
                   k= 0;
 
@@ -973,9 +975,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                if (stencil_i != -1)
                {
                   stencil_contrib_i[stencil_i]=
-                     hypre_TAlloc(HYPRE_Int, stencil_contrib_cnt[stencil_i]);
+                     hypre_TAlloc(HYPRE_Int,  stencil_contrib_cnt[stencil_i], HYPRE_MEMORY_HOST);
                   weight_contrib_i[stencil_i] =
-                     hypre_TAlloc(HYPRE_Real, stencil_contrib_cnt[stencil_i]);
+                     hypre_TAlloc(HYPRE_Real,  stencil_contrib_cnt[stencil_i], HYPRE_MEMORY_HOST);
                   sum= 0.0;
                   k= 0;
 
@@ -1036,8 +1038,8 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      if (stencil_i != -1)
                      {
                         stencil_contrib_cnt[stencil_i]++;
-                        stencil_contrib_i[stencil_i]= hypre_TAlloc(HYPRE_Int, 1);
-                        weight_contrib_i[stencil_i] =  hypre_TAlloc(HYPRE_Real, 1);
+                        stencil_contrib_i[stencil_i]= hypre_TAlloc(HYPRE_Int,  1, HYPRE_MEMORY_HOST);
+                        weight_contrib_i[stencil_i] =  hypre_TAlloc(HYPRE_Real,  1, HYPRE_MEMORY_HOST);
                         stencil_contrib_i[stencil_i][0]= stencil_i;
                         weight_contrib_i[stencil_i][0] = weights[0];
                      }
@@ -1050,8 +1052,8 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      if (stencil_i != -1)
                      {
                         stencil_contrib_cnt[stencil_i]++;
-                        stencil_contrib_i[stencil_i]= hypre_TAlloc(HYPRE_Int, 1);
-                        weight_contrib_i[stencil_i] =  hypre_TAlloc(HYPRE_Real, 1);
+                        stencil_contrib_i[stencil_i]= hypre_TAlloc(HYPRE_Int,  1, HYPRE_MEMORY_HOST);
+                        weight_contrib_i[stencil_i] =  hypre_TAlloc(HYPRE_Real,  1, HYPRE_MEMORY_HOST);
                         stencil_contrib_i[stencil_i][0]= stencil_i;
                         weight_contrib_i[stencil_i][0] = weights[0];
                      }
@@ -1080,9 +1082,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                   if (stencil_i != -1)
                   {
                      stencil_contrib_i[stencil_i]=
-                        hypre_TAlloc(HYPRE_Int, stencil_contrib_cnt[stencil_i]);
+                        hypre_TAlloc(HYPRE_Int,  stencil_contrib_cnt[stencil_i], HYPRE_MEMORY_HOST);
                      weight_contrib_i[stencil_i] =
-                        hypre_TAlloc(HYPRE_Real, stencil_contrib_cnt[stencil_i]);
+                        hypre_TAlloc(HYPRE_Real,  stencil_contrib_cnt[stencil_i], HYPRE_MEMORY_HOST);
                      sum= 0.0;
                      k= 0;
 
@@ -1128,9 +1130,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                   if (stencil_i != -1)
                   {
                      stencil_contrib_i[stencil_i]=
-                        hypre_TAlloc(HYPRE_Int, stencil_contrib_cnt[stencil_i]);
+                        hypre_TAlloc(HYPRE_Int,  stencil_contrib_cnt[stencil_i], HYPRE_MEMORY_HOST);
                      weight_contrib_i[stencil_i] =
-                        hypre_TAlloc(HYPRE_Real, stencil_contrib_cnt[stencil_i]);
+                        hypre_TAlloc(HYPRE_Real,  stencil_contrib_cnt[stencil_i], HYPRE_MEMORY_HOST);
                      sum= 0.0;
                      k= 0;
 
@@ -1176,9 +1178,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                   if (stencil_i != -1)
                   {
                      stencil_contrib_i[stencil_i]=
-                        hypre_TAlloc(HYPRE_Int, stencil_contrib_cnt[stencil_i]);
+                        hypre_TAlloc(HYPRE_Int,  stencil_contrib_cnt[stencil_i], HYPRE_MEMORY_HOST);
                      weight_contrib_i[stencil_i] =
-                        hypre_TAlloc(HYPRE_Real, stencil_contrib_cnt[stencil_i]);
+                        hypre_TAlloc(HYPRE_Real,  stencil_contrib_cnt[stencil_i], HYPRE_MEMORY_HOST);
                      sum= 0.0;
                      k= 0;
 
@@ -1224,9 +1226,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                   if (stencil_i != -1)
                   {
                      stencil_contrib_i[stencil_i]=
-                        hypre_TAlloc(HYPRE_Int, stencil_contrib_cnt[stencil_i]);
+                        hypre_TAlloc(HYPRE_Int,  stencil_contrib_cnt[stencil_i], HYPRE_MEMORY_HOST);
                      weight_contrib_i[stencil_i] =
-                        hypre_TAlloc(HYPRE_Real, stencil_contrib_cnt[stencil_i]);
+                        hypre_TAlloc(HYPRE_Real,  stencil_contrib_cnt[stencil_i], HYPRE_MEMORY_HOST);
                      sum= 0.0;
                      k= 0;
 
@@ -1272,9 +1274,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                   if (stencil_i != -1)
                   {
                      stencil_contrib_i[stencil_i]=
-                        hypre_TAlloc(HYPRE_Int, stencil_contrib_cnt[stencil_i]);
+                        hypre_TAlloc(HYPRE_Int,  stencil_contrib_cnt[stencil_i], HYPRE_MEMORY_HOST);
                      weight_contrib_i[stencil_i] =
-                        hypre_TAlloc(HYPRE_Real, stencil_contrib_cnt[stencil_i]);
+                        hypre_TAlloc(HYPRE_Real,  stencil_contrib_cnt[stencil_i], HYPRE_MEMORY_HOST);
                      sum= 0.0;
                      k= 0;
 
@@ -1320,9 +1322,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                   if (stencil_i != -1)
                   {
                      stencil_contrib_i[stencil_i]=
-                        hypre_TAlloc(HYPRE_Int, stencil_contrib_cnt[stencil_i]);
+                        hypre_TAlloc(HYPRE_Int,  stencil_contrib_cnt[stencil_i], HYPRE_MEMORY_HOST);
                      weight_contrib_i[stencil_i] =
-                        hypre_TAlloc(HYPRE_Real, stencil_contrib_cnt[stencil_i]);
+                        hypre_TAlloc(HYPRE_Real,  stencil_contrib_cnt[stencil_i], HYPRE_MEMORY_HOST);
                      sum= 0.0;
                      k= 0;
 
@@ -1368,9 +1370,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                   if (stencil_i != -1)
                   {
                      stencil_contrib_i[stencil_i]=
-                        hypre_TAlloc(HYPRE_Int, stencil_contrib_cnt[stencil_i]);
+                        hypre_TAlloc(HYPRE_Int,  stencil_contrib_cnt[stencil_i], HYPRE_MEMORY_HOST);
                      weight_contrib_i[stencil_i] =
-                        hypre_TAlloc(HYPRE_Real, stencil_contrib_cnt[stencil_i]);
+                        hypre_TAlloc(HYPRE_Real,  stencil_contrib_cnt[stencil_i], HYPRE_MEMORY_HOST);
                      sum= 0.0;
                      k= 0;
 
@@ -1416,9 +1418,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                   if (stencil_i != -1)
                   {
                      stencil_contrib_i[stencil_i]=
-                        hypre_TAlloc(HYPRE_Int, stencil_contrib_cnt[stencil_i]);
+                        hypre_TAlloc(HYPRE_Int,  stencil_contrib_cnt[stencil_i], HYPRE_MEMORY_HOST);
                      weight_contrib_i[stencil_i] =
-                        hypre_TAlloc(HYPRE_Real, stencil_contrib_cnt[stencil_i]);
+                        hypre_TAlloc(HYPRE_Real,  stencil_contrib_cnt[stencil_i], HYPRE_MEMORY_HOST);
                      sum= 0.0;
                      k= 0;
 
@@ -1464,9 +1466,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                   if (stencil_i != -1)
                   {
                      stencil_contrib_i[stencil_i]=
-                        hypre_TAlloc(HYPRE_Int, stencil_contrib_cnt[stencil_i]);
+                        hypre_TAlloc(HYPRE_Int,  stencil_contrib_cnt[stencil_i], HYPRE_MEMORY_HOST);
                      weight_contrib_i[stencil_i] =
-                        hypre_TAlloc(HYPRE_Real, stencil_contrib_cnt[stencil_i]);
+                        hypre_TAlloc(HYPRE_Real,  stencil_contrib_cnt[stencil_i], HYPRE_MEMORY_HOST);
                      sum= 0.0;
                      k= 0;
 
@@ -1512,9 +1514,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                   if (stencil_i != -1)
                   {
                      stencil_contrib_i[stencil_i]=
-                        hypre_TAlloc(HYPRE_Int, stencil_contrib_cnt[stencil_i]);
+                        hypre_TAlloc(HYPRE_Int,  stencil_contrib_cnt[stencil_i], HYPRE_MEMORY_HOST);
                      weight_contrib_i[stencil_i] =
-                        hypre_TAlloc(HYPRE_Real, stencil_contrib_cnt[stencil_i]);
+                        hypre_TAlloc(HYPRE_Real,  stencil_contrib_cnt[stencil_i], HYPRE_MEMORY_HOST);
                      sum= 0.0;
                      k= 0;
 
@@ -1560,9 +1562,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                   if (stencil_i != -1)
                   {
                      stencil_contrib_i[stencil_i]=
-                        hypre_TAlloc(HYPRE_Int, stencil_contrib_cnt[stencil_i]);
+                        hypre_TAlloc(HYPRE_Int,  stencil_contrib_cnt[stencil_i], HYPRE_MEMORY_HOST);
                      weight_contrib_i[stencil_i] =
-                        hypre_TAlloc(HYPRE_Real, stencil_contrib_cnt[stencil_i]);
+                        hypre_TAlloc(HYPRE_Real,  stencil_contrib_cnt[stencil_i], HYPRE_MEMORY_HOST);
                      sum= 0.0;
                      k= 0;
 
@@ -1608,9 +1610,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                   if (stencil_i != -1)
                   {
                      stencil_contrib_i[stencil_i]=
-                        hypre_TAlloc(HYPRE_Int, stencil_contrib_cnt[stencil_i]);
+                        hypre_TAlloc(HYPRE_Int,  stencil_contrib_cnt[stencil_i], HYPRE_MEMORY_HOST);
                      weight_contrib_i[stencil_i] =
-                        hypre_TAlloc(HYPRE_Real, stencil_contrib_cnt[stencil_i]);
+                        hypre_TAlloc(HYPRE_Real,  stencil_contrib_cnt[stencil_i], HYPRE_MEMORY_HOST);
                      sum= 0.0;
                      k= 0;
 
@@ -1656,9 +1658,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                   if (stencil_i != -1)
                   {
                      stencil_contrib_i[stencil_i]=
-                        hypre_TAlloc(HYPRE_Int, stencil_contrib_cnt[stencil_i]);
+                        hypre_TAlloc(HYPRE_Int,  stencil_contrib_cnt[stencil_i], HYPRE_MEMORY_HOST);
                      weight_contrib_i[stencil_i] =
-                        hypre_TAlloc(HYPRE_Real, stencil_contrib_cnt[stencil_i]);
+                        hypre_TAlloc(HYPRE_Real,  stencil_contrib_cnt[stencil_i], HYPRE_MEMORY_HOST);
                      sum= 0.0;
                      k= 0;
 
@@ -1704,9 +1706,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                   if (stencil_i != -1)
                   {
                      stencil_contrib_i[stencil_i]=
-                        hypre_TAlloc(HYPRE_Int, stencil_contrib_cnt[stencil_i]);
+                        hypre_TAlloc(HYPRE_Int,  stencil_contrib_cnt[stencil_i], HYPRE_MEMORY_HOST);
                      weight_contrib_i[stencil_i] =
-                        hypre_TAlloc(HYPRE_Real, stencil_contrib_cnt[stencil_i]);
+                        hypre_TAlloc(HYPRE_Real,  stencil_contrib_cnt[stencil_i], HYPRE_MEMORY_HOST);
                      sum= 0.0;
                      k= 0;
 
@@ -1744,8 +1746,8 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                         if (stencil_i != -1)
                         {
                            stencil_contrib_cnt[stencil_i]++;
-                           stencil_contrib_i[stencil_i]= hypre_TAlloc(HYPRE_Int, 1);
-                           weight_contrib_i[stencil_i] =  hypre_TAlloc(HYPRE_Real, 1);
+                           stencil_contrib_i[stencil_i]= hypre_TAlloc(HYPRE_Int,  1, HYPRE_MEMORY_HOST);
+                           weight_contrib_i[stencil_i] =  hypre_TAlloc(HYPRE_Real,  1, HYPRE_MEMORY_HOST);
                            stencil_contrib_i[stencil_i][0]= stencil_i;
                            weight_contrib_i[stencil_i][0] = weights[0];
                         }
@@ -1756,8 +1758,8 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                         if (stencil_i != -1)
                         {
                            stencil_contrib_cnt[stencil_i]++;
-                           stencil_contrib_i[stencil_i]= hypre_TAlloc(HYPRE_Int, 1);
-                           weight_contrib_i[stencil_i] =  hypre_TAlloc(HYPRE_Real, 1);
+                           stencil_contrib_i[stencil_i]= hypre_TAlloc(HYPRE_Int,  1, HYPRE_MEMORY_HOST);
+                           weight_contrib_i[stencil_i] =  hypre_TAlloc(HYPRE_Real,  1, HYPRE_MEMORY_HOST);
                            stencil_contrib_i[stencil_i][0]= stencil_i;
                            weight_contrib_i[stencil_i][0] = weights[0];
                         }
@@ -1769,7 +1771,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                 *  Allocate for the temporary vector used in computing the 
                 *  averages.
                 *-----------------------------------------------------------------*/
-               vals= hypre_CTAlloc(HYPRE_Real, max_contribut_size);
+               vals= hypre_CTAlloc(HYPRE_Real,  max_contribut_size, HYPRE_MEMORY_HOST);
 
                /*-----------------------------------------------------------------
                 *  coarse grid stencil contributor structures have been formed.
@@ -1785,8 +1787,8 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
             /*---------------------------------------------------------------------
              *  data ptrs to extract and fill in data.
              *---------------------------------------------------------------------*/
-            a_ptrs   = hypre_TAlloc(HYPRE_Real *, stencil_size);
-            crse_ptrs= hypre_TAlloc(HYPRE_Real *, stencil_size);
+            a_ptrs   = hypre_TAlloc(HYPRE_Real *,  stencil_size, HYPRE_MEMORY_HOST);
+            crse_ptrs= hypre_TAlloc(HYPRE_Real *,  stencil_size, HYPRE_MEMORY_HOST);
 
             hypre_ForBoxI(ci, cgrid_boxes)
             {
@@ -1868,19 +1870,12 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                   /*----------------------------------------------------------------
                    * Loop over interior grid box. 
                    *----------------------------------------------------------------*/
+
                   hypre_BoxGetSize(&fine_box, loop_size);
 
-                  hypre_BoxLoop2Begin(ndim, loop_size,
-                                      A_dbox, fstart, stridef, iA,
-                                      crse_dbox, cstart, stridec, iAc);
-#if 0
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iA,iAc,i,rank,index1,index2,m,l,k,j,iA_shift_z,iA_shift_zy,iA_shift_zyx,stencil_i,sum,vals) HYPRE_SMP_SCHEDULE
-#endif
-#else
-                  hypre_BoxLoopSetOneBlock();
-#endif
-                  hypre_BoxLoop2For(iA, iAc)
+                  hypre_SerialBoxLoop2Begin(ndim, loop_size,
+                                            A_dbox, fstart, stridef, iA,
+                                            crse_dbox, cstart, stridec, iAc);
                   {
                      for (i= 0; i< stencil_size; i++)
                      {
@@ -1986,7 +1981,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      }
                      crse_ptrs[ rank_stencils[0] ][iAc]= sum;
                   }
-                  hypre_BoxLoop2End(iA, iAc);
+                  hypre_SerialBoxLoop2End(iA, iAc);
                }    /* end hypre_ForBoxI(fi, fbox_interior_ci) */
 
                /*------------------------------------------------------------------
@@ -2050,19 +2045,12 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      /*--------------------------------------------------------------
                       * Loop over boundary grid box.
                       *--------------------------------------------------------------*/
+
                      hypre_BoxGetSize(&fine_box, loop_size);
 
-                     hypre_BoxLoop2Begin(ndim, loop_size,
-                                         A_dbox, fstart, stridef, iA,
-                                         crse_dbox, cstart, stridec, iAc);
-#if 0
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iA,iAc,i,rank,index1,index2,m,l,k,j,iA_shift_z,iA_shift_zy,iA_shift_zyx,stencil_i,temp3,ll,kk,jj,temp2,cnt1,index_temp,boxman_entry,found,Uventry,nUentries,ncols,rows,cols,vals2,sum,vals) HYPRE_SMP_SCHEDULE
-#endif
-#else
-                     hypre_BoxLoopSetOneBlock();
-#endif
-                     hypre_BoxLoop2For(iA, iAc)
+                     hypre_SerialBoxLoop2Begin(ndim, loop_size,
+                                               A_dbox, fstart, stridef, iA,
+                                               crse_dbox, cstart, stridec, iAc);
                      {
                         hypre_BoxLoopGetIndex(lindex);
                         for (i= 0; i< stencil_size; i++)
@@ -2131,7 +2119,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                         hypre_CopyIndex(hypre_BoxIMin(&coarse_cell_box), index1);
                         hypre_CopyIndex(hypre_BoxIMax(&coarse_cell_box), index2);
 
-                        temp3= hypre_CTAlloc(HYPRE_Real, volume_coarse_cell_box);
+                        temp3= hypre_CTAlloc(HYPRE_Real,  volume_coarse_cell_box, HYPRE_MEMORY_HOST);
                     
                         /*---------------------------------------------------------------
                          *  iA_shift_zyx is computed correctly for 1 & 2-d. Also,
@@ -2163,7 +2151,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                          *------------------------------------------------------------*/
                         if (nUventries > 0)
                         {
-                           temp2= hypre_CTAlloc(HYPRE_Int, volume_coarse_cell_box);
+                           temp2= hypre_CTAlloc(HYPRE_Int,  volume_coarse_cell_box, HYPRE_MEMORY_HOST);
                            cnt1= 0;
                            for (l= index1[2]; l<= index2[2]; l++)
                            {
@@ -2221,15 +2209,15 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                               }      /* for (k= index1[1]; k<= index2[1]; k++) */
                            }         /* for (l= index1[2]; l<= index2[2]; l++) */
 
-                           ncols= hypre_TAlloc(HYPRE_Int, cnt1);
+                           ncols= hypre_TAlloc(HYPRE_Int,  cnt1, HYPRE_MEMORY_HOST);
                            for (l= 0; l< cnt1; l++)
                            {
                               ncols[l]= 1;
                            }
 
-                           rows = hypre_TAlloc(HYPRE_Int, cnt1);
-                           cols = hypre_TAlloc(HYPRE_Int, cnt1);
-                           vals2= hypre_CTAlloc(HYPRE_Real, cnt1);
+                           rows = hypre_TAlloc(HYPRE_BigInt,  cnt1, HYPRE_MEMORY_HOST);
+                           cols = hypre_TAlloc(HYPRE_BigInt,  cnt1, HYPRE_MEMORY_HOST);
+                           vals2= hypre_CTAlloc(HYPRE_Real,  cnt1, HYPRE_MEMORY_HOST);
 
                            cnt1= 0;
                            for (l= index1[2]; l<= index2[2]; l++)
@@ -2258,7 +2246,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                                     {
                                        i= hypre_SStructGraphIUVEntry(graph, 0);
                                        m= hypre_SStructGraphIUVEntry(graph, nUventries-1);
-                                       if ((rank-startrank) >= i && (rank-startrank) <= m)
+                                       if ((HYPRE_Int)(rank-startrank) >= i && (HYPRE_Int)(rank-startrank) <= m)
                                        {
                                           found= trueV;
                                        }
@@ -2266,7 +2254,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
 
                                     if (found)
                                     {
-                                       Uventry= hypre_SStructGraphUVEntry(graph, rank-startrank);
+                                       Uventry= hypre_SStructGraphUVEntry(graph, (HYPRE_Int)(rank-startrank));
 
                                        if (Uventry != NULL)
                                        {
@@ -2309,11 +2297,11 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                               }           /* for (k= index1[1]; k<= index2[1]; k++) */
                            }              /* for (l= index1[2]; l<= index2[2]; l++) */
 
-                           hypre_TFree(ncols);
-                           hypre_TFree(rows);
-                           hypre_TFree(cols);
-                           hypre_TFree(vals2);
-                           hypre_TFree(temp2);
+                           hypre_TFree(ncols, HYPRE_MEMORY_HOST);
+                           hypre_TFree(rows, HYPRE_MEMORY_HOST);
+                           hypre_TFree(cols, HYPRE_MEMORY_HOST);
+                           hypre_TFree(vals2, HYPRE_MEMORY_HOST);
+                           hypre_TFree(temp2, HYPRE_MEMORY_HOST);
 
                         }   /* if Uventries > 0 */
 
@@ -2335,30 +2323,30 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                         sum /= scaling;
                         crse_ptrs[ rank_stencils[0] ][iAc]= sum;
 
-                        hypre_TFree(temp3);
+                        hypre_TFree(temp3, HYPRE_MEMORY_HOST);
 
                      }
-                     hypre_BoxLoop2End(iA, iAc);
+                     hypre_SerialBoxLoop2End(iA, iAc);
 
                   }  /* hypre_ForBoxI(fi, fbox_bdy_ci_fi) */
                }      /* hypre_ForBoxArrayI(arrayi, fbox_bdy_ci) */
             }          /* hypre_ForBoxI(ci, cgrid_boxes) */
 
-            hypre_TFree(a_ptrs);
-            hypre_TFree(crse_ptrs);
+            hypre_TFree(a_ptrs, HYPRE_MEMORY_HOST);
+            hypre_TFree(crse_ptrs, HYPRE_MEMORY_HOST);
 
          }    /* if (stencils != NULL) */
       }       /* end var2 */
    }          /* end var1 */
 
    if (stencil_contrib_cnt) 
-      hypre_TFree(stencil_contrib_cnt);
+      hypre_TFree(stencil_contrib_cnt, HYPRE_MEMORY_HOST);
    if (stencil_ranks)
-      hypre_TFree(stencil_ranks);
+      hypre_TFree(stencil_ranks, HYPRE_MEMORY_HOST);
    if (volume_shift_box)
-      hypre_TFree(volume_shift_box);
+      hypre_TFree(volume_shift_box, HYPRE_MEMORY_HOST);
    if (vals)
-      hypre_TFree(vals);
+      hypre_TFree(vals, HYPRE_MEMORY_HOST);
 
    if (shift_box)
    {
@@ -2367,7 +2355,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
          if (shift_box[j])
             hypre_BoxDestroy(shift_box[j]);
       }
-      hypre_TFree(shift_box);
+      hypre_TFree(shift_box, HYPRE_MEMORY_HOST);
    }
 
    if (stencil_contrib_i)
@@ -2378,10 +2366,10 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
          if (stencil_i != -1)
          {
             if (stencil_contrib_i[stencil_i])
-               hypre_TFree(stencil_contrib_i[stencil_i]);
+               hypre_TFree(stencil_contrib_i[stencil_i], HYPRE_MEMORY_HOST);
          }
       }
-      hypre_TFree(stencil_contrib_i);
+      hypre_TFree(stencil_contrib_i, HYPRE_MEMORY_HOST);
    }
 
    if (weight_contrib_i)
@@ -2392,23 +2380,23 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
          if (stencil_i != -1)
          {
             if (weight_contrib_i[stencil_i])
-               hypre_TFree(weight_contrib_i[stencil_i]);
+               hypre_TFree(weight_contrib_i[stencil_i], HYPRE_MEMORY_HOST);
          }
       }
-      hypre_TFree(weight_contrib_i);
+      hypre_TFree(weight_contrib_i, HYPRE_MEMORY_HOST);
    }
 
    if (rank_stencils)
-      hypre_TFree(rank_stencils);
+      hypre_TFree(rank_stencils, HYPRE_MEMORY_HOST);
 
    if (OffsetA)
    {
       for (j= 0; j< 2; j++)
       {
          if (OffsetA[j])
-            hypre_TFree(OffsetA[j]);
+            hypre_TFree(OffsetA[j], HYPRE_MEMORY_HOST);
       }
-      hypre_TFree(OffsetA);
+      hypre_TFree(OffsetA, HYPRE_MEMORY_HOST);
    }
 
    /*--------------------------------------------------------------------------
@@ -2474,8 +2462,8 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
          stencils    = hypre_SStructPMatrixSStencil(A_crse, var1, var1);
          stencil_size= hypre_StructStencilSize(stencils);
 
-         stencil_ranks= hypre_TAlloc(HYPRE_Int, stencil_size);
-         rank_stencils= hypre_TAlloc(HYPRE_Int, max_stencil_size);
+         stencil_ranks= hypre_TAlloc(HYPRE_Int,  stencil_size, HYPRE_MEMORY_HOST);
+         rank_stencils= hypre_TAlloc(HYPRE_Int,  max_stencil_size, HYPRE_MEMORY_HOST);
          for (i= 0; i< stencil_size; i++)
          {
             hypre_CopyIndex(hypre_StructStencilElement(stencils, i),
@@ -2495,8 +2483,8 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
          fgrid= hypre_SStructPGridSGrid(hypre_SStructPMatrixPGrid(A_pmatrix), var1);
          fgrid_boxes= hypre_StructGridBoxes(fgrid);
 
-         box_starts= hypre_CTAlloc(HYPRE_Int, hypre_BoxArraySize(fgrid_boxes));
-         box_ends  = hypre_CTAlloc(HYPRE_Int, hypre_BoxArraySize(fgrid_boxes));
+         box_starts= hypre_CTAlloc(HYPRE_Int,  hypre_BoxArraySize(fgrid_boxes), HYPRE_MEMORY_HOST);
+         box_ends  = hypre_CTAlloc(HYPRE_Int,  hypre_BoxArraySize(fgrid_boxes), HYPRE_MEMORY_HOST);
          hypre_SStructGraphFindSGridEndpts(graph, part_fine, var1, myid, 
                                            0, box_starts);
          hypre_SStructGraphFindSGridEndpts(graph, part_fine, var1, myid, 
@@ -2515,11 +2503,11 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
           *-----------------------------------------------------------------*/
          box_array_size   = hypre_BoxArraySize(fgrid_boxes);
          cbox_array_size  = hypre_BoxArraySize(cgrid_boxes);
-         box_graph_indices= hypre_CTAlloc(HYPRE_Int *, box_array_size);
-         box_graph_cnts   = hypre_CTAlloc(HYPRE_Int , box_array_size);
+         box_graph_indices= hypre_CTAlloc(HYPRE_Int *,  box_array_size, HYPRE_MEMORY_HOST);
+         box_graph_cnts   = hypre_CTAlloc(HYPRE_Int ,  box_array_size, HYPRE_MEMORY_HOST);
 
          data_space = hypre_StructMatrixDataSpace(crse_smatrix);
-         cdata_space_ranks= hypre_CTAlloc(HYPRE_Int, cbox_array_size);
+         cdata_space_ranks= hypre_CTAlloc(HYPRE_Int,  cbox_array_size, HYPRE_MEMORY_HOST);
          cdata_space_ranks[0]= 0;
          for (i= 1; i< cbox_array_size; i++)
          {
@@ -2540,7 +2528,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
             if (i >= 0) 
             {
                j= hypre_UpperBinarySearch(iUventries, box_ends[fi], nUventries);
-               box_graph_indices[fi]= hypre_TAlloc(HYPRE_Int, j-i+1);
+               box_graph_indices[fi]= hypre_TAlloc(HYPRE_Int,  j-i+1, HYPRE_MEMORY_HOST);
 
                for (k= 0; k< (j-i+1); k++)
                {
@@ -2596,12 +2584,12 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
              * temp1 & temp2 are linked lists vectors used for grouping the
              * Uventries for a given coarse node.
              *-------------------------------------------------------------*/
-            box_ranks       = hypre_TAlloc(HYPRE_Int, box_graph_cnts[fi]);
-            box_connections = hypre_TAlloc(HYPRE_Int, box_graph_cnts[fi]);
-            parents         = hypre_TAlloc(HYPRE_Int, box_graph_cnts[fi]);
-            temp1           = hypre_CTAlloc(HYPRE_Int, box_graph_cnts[fi]+1);
-            temp2           = hypre_CTAlloc(HYPRE_Int, box_graph_cnts[fi]);
-            Uv_cindex       = hypre_TAlloc(hypre_Index, box_graph_cnts[fi]);
+            box_ranks       = hypre_TAlloc(HYPRE_Int,  box_graph_cnts[fi], HYPRE_MEMORY_HOST);
+            box_connections = hypre_TAlloc(HYPRE_Int,  box_graph_cnts[fi], HYPRE_MEMORY_HOST);
+            parents         = hypre_TAlloc(HYPRE_Int,  box_graph_cnts[fi], HYPRE_MEMORY_HOST);
+            temp1           = hypre_CTAlloc(HYPRE_Int,  box_graph_cnts[fi]+1, HYPRE_MEMORY_HOST);
+            temp2           = hypre_CTAlloc(HYPRE_Int,  box_graph_cnts[fi], HYPRE_MEMORY_HOST);
+            Uv_cindex       = hypre_TAlloc(hypre_Index,  box_graph_cnts[fi], HYPRE_MEMORY_HOST);
 
             /*-------------------------------------------------------------
              * determine the parent box of this fgrid_box. 
@@ -2672,11 +2660,11 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
              *  Store the graph entry info and other index info for each coarse
              *  grid node.
              *-----------------------------------------------------------------*/
-            parents_cnodes      = hypre_TAlloc(HYPRE_Int, cnt1);
-            fine_interface_ranks= hypre_TAlloc(HYPRE_Int, cnt1);
-            box_ranks_cnt       = hypre_CTAlloc(HYPRE_Int, cnt1);
-            coarse_contrib_Uv   = hypre_TAlloc(HYPRE_Int *, cnt1);
-            cindex              = hypre_TAlloc(hypre_Index, cnt1);
+            parents_cnodes      = hypre_TAlloc(HYPRE_Int,  cnt1, HYPRE_MEMORY_HOST);
+            fine_interface_ranks= hypre_TAlloc(HYPRE_Int,  cnt1, HYPRE_MEMORY_HOST);
+            box_ranks_cnt       = hypre_CTAlloc(HYPRE_Int,  cnt1, HYPRE_MEMORY_HOST);
+            coarse_contrib_Uv   = hypre_TAlloc(HYPRE_Int *,  cnt1, HYPRE_MEMORY_HOST);
+            cindex              = hypre_TAlloc(hypre_Index,  cnt1, HYPRE_MEMORY_HOST);
 
             for (i= 0; i< box_graph_cnts[fi]; i++)
             {
@@ -2690,7 +2678,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                   hypre_CopyIndex(Uv_cindex[i], cindex[j]);
 
                   box_ranks_cnt[j]       = temp1[j+1] - temp1[j];
-                  coarse_contrib_Uv[j]   = hypre_TAlloc(HYPRE_Int, box_ranks_cnt[j]);
+                  coarse_contrib_Uv[j]   = hypre_TAlloc(HYPRE_Int,  box_ranks_cnt[j], HYPRE_MEMORY_HOST);
 
                   l                      = temp1[j];
                   for (k= 0; k< box_ranks_cnt[j]; k++)
@@ -2701,17 +2689,17 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
             }
 
             if (box_ranks)
-               hypre_TFree(box_ranks);
+               hypre_TFree(box_ranks, HYPRE_MEMORY_HOST);
             if (box_connections)
-               hypre_TFree(box_connections);
+               hypre_TFree(box_connections, HYPRE_MEMORY_HOST);
             if (parents)
-               hypre_TFree(parents);
+               hypre_TFree(parents, HYPRE_MEMORY_HOST);
             if (temp1)
-               hypre_TFree(temp1);
+               hypre_TFree(temp1, HYPRE_MEMORY_HOST);
             if (temp2)
-               hypre_TFree(temp2);
+               hypre_TFree(temp2, HYPRE_MEMORY_HOST);
             if (Uv_cindex)
-               hypre_TFree(Uv_cindex);
+               hypre_TFree(Uv_cindex, HYPRE_MEMORY_HOST);
 
             /*------------------------------------------------------------------------
              *  Step 3:
@@ -2740,7 +2728,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
             hypre_ClearIndex(index_temp);
 
             nrows= 0;
-            box_to_ranks_cnt=  hypre_CTAlloc(HYPRE_Int, cnt1);
+            box_to_ranks_cnt=  hypre_CTAlloc(HYPRE_Int,  cnt1, HYPRE_MEMORY_HOST);
             for (i= 0; i< cnt1; i++)
             {
                for (j= 0; j< box_ranks_cnt[i]; j++)
@@ -2757,21 +2745,21 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                nrows+= box_to_ranks_cnt[i];
             }
 
-            ncols= hypre_TAlloc(HYPRE_Int, nrows);
+            ncols= hypre_TAlloc(HYPRE_Int,  nrows, HYPRE_MEMORY_HOST);
             for (i= 0; i< nrows; i++)
             {
                ncols[i]= 1;
             }
 
-            rows=  hypre_TAlloc(HYPRE_Int, nrows);
-            cols=  hypre_TAlloc(HYPRE_Int, nrows);
-            vals=  hypre_CTAlloc(HYPRE_Real, nrows);
+            rows=  hypre_TAlloc(HYPRE_BigInt,  nrows, HYPRE_MEMORY_HOST);
+            cols=  hypre_TAlloc(HYPRE_BigInt,  nrows, HYPRE_MEMORY_HOST);
+            vals=  hypre_CTAlloc(HYPRE_Real,  nrows, HYPRE_MEMORY_HOST);
 
-            interface_max_stencil_ranks=  hypre_TAlloc(HYPRE_Int *, cnt1);
-            interface_max_stencil_cnt  =  hypre_TAlloc(HYPRE_Int *, cnt1);
-            interface_rank_stencils    =  hypre_TAlloc(HYPRE_Int *, cnt1);
-            interface_stencil_ranks    =  hypre_TAlloc(HYPRE_Int *, cnt1);
-            coarse_stencil_cnt         =  hypre_CTAlloc(HYPRE_Int , cnt1);
+            interface_max_stencil_ranks=  hypre_TAlloc(HYPRE_Int *,  cnt1, HYPRE_MEMORY_HOST);
+            interface_max_stencil_cnt  =  hypre_TAlloc(HYPRE_Int *,  cnt1, HYPRE_MEMORY_HOST);
+            interface_rank_stencils    =  hypre_TAlloc(HYPRE_Int *,  cnt1, HYPRE_MEMORY_HOST);
+            interface_stencil_ranks    =  hypre_TAlloc(HYPRE_Int *,  cnt1, HYPRE_MEMORY_HOST);
+            coarse_stencil_cnt         =  hypre_CTAlloc(HYPRE_Int ,  cnt1, HYPRE_MEMORY_HOST);
 
             k= 0;
             for (i= 0; i< cnt1; i++)
@@ -2780,8 +2768,8 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                 * for each coarse interface node, we get a stencil. We compute only
                 * the ranks assuming a maximum size stencil of 27.
                 *-----------------------------------------------------------------*/
-               interface_max_stencil_ranks[i]= hypre_TAlloc(HYPRE_Int, box_to_ranks_cnt[i]);
-               interface_max_stencil_cnt[i]  = hypre_CTAlloc(HYPRE_Int, max_stencil_size);
+               interface_max_stencil_ranks[i]= hypre_TAlloc(HYPRE_Int,  box_to_ranks_cnt[i], HYPRE_MEMORY_HOST);
+               interface_max_stencil_cnt[i]  = hypre_CTAlloc(HYPRE_Int,  max_stencil_size, HYPRE_MEMORY_HOST);
 
                /*-----------------------------------------------------------------
                 * conjugate the coarse node index for determining the stencil
@@ -2830,7 +2818,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      }
                   }
                }
-               hypre_TFree(coarse_contrib_Uv[i]);
+               hypre_TFree(coarse_contrib_Uv[i], HYPRE_MEMORY_HOST);
 
                /*-----------------------------------------------------------------
                 * Determine only the distinct stencil ranks for coarse node i.
@@ -2845,8 +2833,8 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                }
 
                coarse_stencil_cnt[i]= l;
-               interface_stencil_ranks[i]= hypre_TAlloc(HYPRE_Int, l);
-               interface_rank_stencils[i]= hypre_TAlloc(HYPRE_Int, max_stencil_size);
+               interface_stencil_ranks[i]= hypre_TAlloc(HYPRE_Int,  l, HYPRE_MEMORY_HOST);
+               interface_rank_stencils[i]= hypre_TAlloc(HYPRE_Int,  max_stencil_size, HYPRE_MEMORY_HOST);
 
                /*-----------------------------------------------------------------
                 * For each stencil rank, assign one of the stencil_shape_i index.
@@ -2863,18 +2851,18 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                }
             }   /* for (i= 0; i< cnt1; i++) */
 
-            hypre_TFree(coarse_contrib_Uv);
-            hypre_TFree(box_ranks_cnt);
-            hypre_TFree(cindex);
+            hypre_TFree(coarse_contrib_Uv, HYPRE_MEMORY_HOST);
+            hypre_TFree(box_ranks_cnt, HYPRE_MEMORY_HOST);
+            hypre_TFree(cindex, HYPRE_MEMORY_HOST);
 
             /*-----------------------------------------------------------------
              * Extract data from IJ matrix
              *-----------------------------------------------------------------*/
             HYPRE_IJMatrixGetValues(ij_A, nrows, ncols, rows, cols, vals);
 
-            hypre_TFree(ncols);
-            hypre_TFree(rows);
-            hypre_TFree(cols);
+            hypre_TFree(ncols, HYPRE_MEMORY_HOST);
+            hypre_TFree(rows, HYPRE_MEMORY_HOST);
+            hypre_TFree(cols, HYPRE_MEMORY_HOST);
 
             /*-----------------------------------------------------------------
              *  Steps 4 & 5:
@@ -2896,7 +2884,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
             k= 0;
             for (i= 0; i< cnt1; i++)
             {
-               stencil_vals= hypre_CTAlloc(HYPRE_Real, coarse_stencil_cnt[i]);
+               stencil_vals= hypre_CTAlloc(HYPRE_Real,  coarse_stencil_cnt[i], HYPRE_MEMORY_HOST);
 
                /*-----------------------------------------------------------------
                 * Compute the arithmetic stencil averages for coarse node i.
@@ -2908,9 +2896,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                   stencil_vals[l]+= vals[k]/interface_max_stencil_cnt[i][m];
                   k++;
                }
-               hypre_TFree(interface_max_stencil_ranks[i]);
-               hypre_TFree(interface_max_stencil_cnt[i]);
-               hypre_TFree(interface_rank_stencils[i]);
+               hypre_TFree(interface_max_stencil_ranks[i], HYPRE_MEMORY_HOST);
+               hypre_TFree(interface_max_stencil_cnt[i], HYPRE_MEMORY_HOST);
+               hypre_TFree(interface_rank_stencils[i], HYPRE_MEMORY_HOST);
 
                /*-----------------------------------------------------------------
                 * Determine which stencil has to be formed. This is accomplished
@@ -2933,19 +2921,19 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
 
                if ( (coarse_stencil_cnt[i]>1) && (sort==trueV) )
                {
-                  temp1= hypre_TAlloc(HYPRE_Int, coarse_stencil_cnt[i]);
+                  temp1= hypre_TAlloc(HYPRE_Int,  coarse_stencil_cnt[i], HYPRE_MEMORY_HOST);
                   for (j= 0; j< coarse_stencil_cnt[i]; j++)
                   {
                      temp1[j]= j;
                   }
 
                   hypre_qsort1(interface_stencil_ranks[i], (HYPRE_Real *) temp1, 0,
-                         coarse_stencil_cnt[i]-1);
+                               coarse_stencil_cnt[i]-1);
 
                   /*---------------------------------------------------------------
                    * swap the stencil_vals to agree with the rank swapping.
                    *---------------------------------------------------------------*/
-                  temp3  = hypre_TAlloc(HYPRE_Real, coarse_stencil_cnt[i]);
+                  temp3  = hypre_TAlloc(HYPRE_Real,  coarse_stencil_cnt[i], HYPRE_MEMORY_HOST);
                   for (j=0; j< coarse_stencil_cnt[i]; j++)
                   {
                      m         = temp1[j];
@@ -2956,16 +2944,16 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      stencil_vals[j]= temp3[j];
                   }
 
-                  hypre_TFree(temp1);
-                  hypre_TFree(temp3);
+                  hypre_TFree(temp1, HYPRE_MEMORY_HOST);
+                  hypre_TFree(temp3, HYPRE_MEMORY_HOST);
                }
 
                /*-----------------------------------------------------------------
                 * Compute the weights for the averaged stencil contributions.
                 * We need to convert the ranks back to stencil_shapes and then
-                * fine the abs of the stencil shape.
+                * find the abs of the stencil shape.
                 *-----------------------------------------------------------------*/
-               temp3= hypre_TAlloc(HYPRE_Real, coarse_stencil_cnt[i]);
+               temp3= hypre_TAlloc(HYPRE_Real,  coarse_stencil_cnt[i], HYPRE_MEMORY_HOST);
                for (j=0; j< coarse_stencil_cnt[i]; j++)
                {
                   InverseMapStencilRank(interface_stencil_ranks[i][j], index_temp);
@@ -2979,9 +2967,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                 * WE ARE ASSUMING THAT THE COARSE INTERFACE STENCIL HAS SOME
                 * COMMON STENCIL SHAPE WITH THE COARSE STENCIL.
                 *-----------------------------------------------------------------*/
-               common_rank_stencils= hypre_TAlloc(HYPRE_Int, stencil_size);
-               common_stencil_ranks= hypre_TAlloc(HYPRE_Int, stencil_size);
-               common_stencil_i    = hypre_TAlloc(HYPRE_Int, stencil_size);
+               common_rank_stencils= hypre_TAlloc(HYPRE_Int,  stencil_size, HYPRE_MEMORY_HOST);
+               common_stencil_ranks= hypre_TAlloc(HYPRE_Int,  stencil_size, HYPRE_MEMORY_HOST);
+               common_stencil_i    = hypre_TAlloc(HYPRE_Int,  stencil_size, HYPRE_MEMORY_HOST);
 
                l= 0;
                m= 0;
@@ -3068,7 +3056,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                             *      17  15  16           8  6  7         26   24   25
                             *----------------------------------------------------------*/
                            l    =  common_stencil_ranks[j];
-                           temp1=  hypre_TAlloc(HYPRE_Int, 2);
+                           temp1=  hypre_TAlloc(HYPRE_Int,  2, HYPRE_MEMORY_HOST);
 
                            switch(l)
                            {
@@ -3182,7 +3170,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                            l= common_stencil_i[j];
                            crse_ptr[fine_interface_ranks[i]]= sum_contrib;
 
-                           hypre_TFree(temp1);
+                           hypre_TFree(temp1, HYPRE_MEMORY_HOST);
 
                         }    /* else if (ndim == 3) */
 
@@ -3199,7 +3187,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                         else if (ndim == 2)
                         {
                            l    =  common_stencil_ranks[j];
-                           temp1=  hypre_TAlloc(HYPRE_Int, 2);
+                           temp1=  hypre_TAlloc(HYPRE_Int,  2, HYPRE_MEMORY_HOST);
 
                            switch(l)
                            {
@@ -3263,14 +3251,14 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                            l= common_stencil_i[j];
                            crse_ptr[fine_interface_ranks[i]]= sum_contrib;
 
-                           hypre_TFree(temp1);
+                           hypre_TFree(temp1, HYPRE_MEMORY_HOST);
 
                         }   /* else if (ndim == 2) */
 
                         else /* 3-d */
                         {
                            l    =  common_stencil_ranks[j];
-                           temp1=  hypre_TAlloc(HYPRE_Int, 8);
+                           temp1=  hypre_TAlloc(HYPRE_Int,  8, HYPRE_MEMORY_HOST);
 
                            switch(l)
                            {
@@ -3375,7 +3363,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                            l= common_stencil_i[j];
                            crse_ptr[fine_interface_ranks[i]]= sum_contrib;
 
-                           hypre_TFree(temp1);
+                           hypre_TFree(temp1, HYPRE_MEMORY_HOST);
 
                         }    /* else */
 
@@ -3384,45 +3372,45 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                   }   /* switch(abs_stencil_shape) */
                }       /* for (j= 0; j< m; j++) */
 
-               hypre_TFree(interface_stencil_ranks[i]);
+               hypre_TFree(interface_stencil_ranks[i], HYPRE_MEMORY_HOST);
 
-               hypre_TFree(stencil_vals);
-               hypre_TFree(temp3);
-               hypre_TFree(common_rank_stencils);
-               hypre_TFree(common_stencil_ranks);
-               hypre_TFree(common_stencil_ranks);
-               hypre_TFree(common_stencil_i);
+               hypre_TFree(stencil_vals, HYPRE_MEMORY_HOST);
+               hypre_TFree(temp3, HYPRE_MEMORY_HOST);
+               hypre_TFree(common_rank_stencils, HYPRE_MEMORY_HOST);
+               hypre_TFree(common_stencil_ranks, HYPRE_MEMORY_HOST);
+               hypre_TFree(common_stencil_ranks, HYPRE_MEMORY_HOST);
+               hypre_TFree(common_stencil_i, HYPRE_MEMORY_HOST);
 
             }          /* for (i= 0; i< cnt1; i++) */
 
-            hypre_TFree(box_to_ranks_cnt);
-            hypre_TFree(interface_max_stencil_ranks);
-            hypre_TFree(interface_max_stencil_cnt);
-            hypre_TFree(interface_rank_stencils);
-            hypre_TFree(interface_stencil_ranks);
-            hypre_TFree(coarse_stencil_cnt);
-            hypre_TFree(fine_interface_ranks);
-            hypre_TFree(parents_cnodes);
-            hypre_TFree(vals);
+            hypre_TFree(box_to_ranks_cnt, HYPRE_MEMORY_HOST);
+            hypre_TFree(interface_max_stencil_ranks, HYPRE_MEMORY_HOST);
+            hypre_TFree(interface_max_stencil_cnt, HYPRE_MEMORY_HOST);
+            hypre_TFree(interface_rank_stencils, HYPRE_MEMORY_HOST);
+            hypre_TFree(interface_stencil_ranks, HYPRE_MEMORY_HOST);
+            hypre_TFree(coarse_stencil_cnt, HYPRE_MEMORY_HOST);
+            hypre_TFree(fine_interface_ranks, HYPRE_MEMORY_HOST);
+            hypre_TFree(parents_cnodes, HYPRE_MEMORY_HOST);
+            hypre_TFree(vals, HYPRE_MEMORY_HOST);
 
             /*-----------------------------------------------------------
              *  Box fi is completed.
              *-----------------------------------------------------------*/
          }     /* for (fi= 0; fi< box_array_size; fi++) */
 
-         hypre_TFree(stencil_ranks);
-         hypre_TFree(rank_stencils);
-         hypre_TFree(cdata_space_ranks);
-         hypre_TFree(box_graph_cnts);
+         hypre_TFree(stencil_ranks, HYPRE_MEMORY_HOST);
+         hypre_TFree(rank_stencils, HYPRE_MEMORY_HOST);
+         hypre_TFree(cdata_space_ranks, HYPRE_MEMORY_HOST);
+         hypre_TFree(box_graph_cnts, HYPRE_MEMORY_HOST);
          for (i= 0; i< box_array_size; i++)
          {
             if (box_graph_indices[i])
-               hypre_TFree(box_graph_indices[i]);
+               hypre_TFree(box_graph_indices[i], HYPRE_MEMORY_HOST);
          }
-         hypre_TFree(box_graph_indices);
+         hypre_TFree(box_graph_indices, HYPRE_MEMORY_HOST);
 
-         hypre_TFree(box_starts);
-         hypre_TFree(box_ends);
+         hypre_TFree(box_starts, HYPRE_MEMORY_HOST);
+         hypre_TFree(box_ends, HYPRE_MEMORY_HOST);
       }  /* for (var1= 0; var1< nvars; var1++) */
    }    /* if (nUventries > 0) */
 
@@ -3440,9 +3428,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
       smatrix_var  = hypre_SStructPMatrixSMatrix(A_crse, var1, var1);
       stencils     = hypre_SStructPMatrixSStencil(A_crse, var1, var1);
       stencil_size = hypre_StructStencilSize(stencils);
-      a_ptrs       = hypre_TAlloc(HYPRE_Real *, stencil_size);
+      a_ptrs       = hypre_TAlloc(HYPRE_Real *,  stencil_size, HYPRE_MEMORY_HOST);
 
-      rank_stencils= hypre_TAlloc(HYPRE_Int, max_stencil_size);
+      rank_stencils= hypre_TAlloc(HYPRE_Int,  max_stencil_size, HYPRE_MEMORY_HOST);
       for (i= 0; i< stencil_size; i++)
       {
          hypre_CopyIndex(hypre_StructStencilElement(stencils, i),
@@ -3487,13 +3475,11 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                hypre_CopyIndex(hypre_BoxIMin(&fine_box), cstart);
                hypre_BoxGetSize(&fine_box, loop_size);
 
+#define DEVICE_VAR is_device_ptr(a_ptrs)
                hypre_BoxLoop1Begin(ndim, loop_size,
                                    A_dbox, cstart, stridec, iA);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iA,i) HYPRE_SMP_SCHEDULE
-#endif
-               hypre_BoxLoop1For(iA)
                {
+                  HYPRE_Int i;
                   for (i= 0; i< stencil_size; i++)
                   {
                      if (i != centre)
@@ -3503,13 +3489,14 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                   }
                }
                hypre_BoxLoop1End(iA);
+#undef DEVICE_VAR
 
             }  /* hypre_ForBoxI(fi, fbox_bdy_ci_fi) */
          }      /* hypre_ForBoxArrayI(arrayi, fbox_bdy_ci) */
       }          /* hypre_ForBoxI(ci, cgrid_boxes) */
 
-      hypre_TFree(a_ptrs);
-      hypre_TFree(rank_stencils);
+      hypre_TFree(a_ptrs, HYPRE_MEMORY_HOST);
+      hypre_TFree(rank_stencils, HYPRE_MEMORY_HOST);
 
    }  /* for (var1= 0; var1< nvars; var1++) */
  
@@ -3526,29 +3513,29 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
          hypre_BoxArrayDestroy(fgrid_crse_extents[var1][ci]);
          hypre_BoxArrayDestroy(fbox_interior[var1][ci]);
          hypre_BoxArrayArrayDestroy(fbox_bdy[var1][ci]);
-         hypre_TFree(interior_fboxi[var1][ci]);
-         hypre_TFree(bdy_fboxi[var1][ci]);
+         hypre_TFree(interior_fboxi[var1][ci], HYPRE_MEMORY_HOST);
+         hypre_TFree(bdy_fboxi[var1][ci], HYPRE_MEMORY_HOST);
       }
-      hypre_TFree(fgrid_crse_extents[var1]);
-      hypre_TFree(fbox_interior[var1]);
-      hypre_TFree(fbox_bdy[var1]);
-      hypre_TFree(interior_fboxi[var1]);
-      hypre_TFree(bdy_fboxi[var1]);
+      hypre_TFree(fgrid_crse_extents[var1], HYPRE_MEMORY_HOST);
+      hypre_TFree(fbox_interior[var1], HYPRE_MEMORY_HOST);
+      hypre_TFree(fbox_bdy[var1], HYPRE_MEMORY_HOST);
+      hypre_TFree(interior_fboxi[var1], HYPRE_MEMORY_HOST);
+      hypre_TFree(bdy_fboxi[var1], HYPRE_MEMORY_HOST);
 
       hypre_ForBoxI(fi, fgrid_boxes)
       {
-         hypre_TFree(cboxi_fboxes[var1][fi]);
+         hypre_TFree(cboxi_fboxes[var1][fi], HYPRE_MEMORY_HOST);
       }
-      hypre_TFree(cboxi_fboxes[var1]);
-      hypre_TFree(cboxi_fcnt[var1]);
+      hypre_TFree(cboxi_fboxes[var1], HYPRE_MEMORY_HOST);
+      hypre_TFree(cboxi_fcnt[var1], HYPRE_MEMORY_HOST);
    }
-   hypre_TFree(fgrid_crse_extents);
-   hypre_TFree(fbox_interior);
-   hypre_TFree(fbox_bdy);
-   hypre_TFree(interior_fboxi);
-   hypre_TFree(bdy_fboxi);
-   hypre_TFree(cboxi_fboxes);
-   hypre_TFree(cboxi_fcnt);
+   hypre_TFree(fgrid_crse_extents, HYPRE_MEMORY_HOST);
+   hypre_TFree(fbox_interior, HYPRE_MEMORY_HOST);
+   hypre_TFree(fbox_bdy, HYPRE_MEMORY_HOST);
+   hypre_TFree(interior_fboxi, HYPRE_MEMORY_HOST);
+   hypre_TFree(bdy_fboxi, HYPRE_MEMORY_HOST);
+   hypre_TFree(cboxi_fboxes, HYPRE_MEMORY_HOST);
+   hypre_TFree(cboxi_fcnt, HYPRE_MEMORY_HOST);
 
    return 0;
 }

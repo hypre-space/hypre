@@ -35,7 +35,7 @@ hypre_DistributedMatrixCreate( MPI_Comm     context  )
 {
    hypre_DistributedMatrix    *matrix;
 
-   matrix = hypre_CTAlloc(hypre_DistributedMatrix, 1);
+   matrix = hypre_CTAlloc(hypre_DistributedMatrix,  1, HYPRE_MEMORY_HOST);
 
    hypre_DistributedMatrixContext(matrix) = context;
    hypre_DistributedMatrixM(matrix)    = -1;
@@ -72,7 +72,7 @@ hypre_DistributedMatrixDestroy( hypre_DistributedMatrix *matrix )
 #ifdef HYPRE_TIMING
    hypre_FinalizeTiming ( matrix->GetRow_timer );
 #endif
-   hypre_TFree(matrix);
+   hypre_TFree(matrix, HYPRE_MEMORY_HOST);
 
    return(0);
 }
@@ -85,7 +85,7 @@ HYPRE_Int
 hypre_DistributedMatrixLimitedDestroy( hypre_DistributedMatrix *matrix )
 {
 
-   hypre_TFree(matrix);
+   hypre_TFree(matrix, HYPRE_MEMORY_HOST);
 
    return(0);
 }
@@ -273,10 +273,10 @@ hypre_DistributedMatrixPrint( hypre_DistributedMatrix *matrix )
 
 HYPRE_Int 
 hypre_DistributedMatrixGetLocalRange( hypre_DistributedMatrix *matrix,
-                             HYPRE_Int *row_start,
-                             HYPRE_Int *row_end,
-                             HYPRE_Int *col_start,
-                             HYPRE_Int *col_end )
+                             HYPRE_BigInt *row_start,
+                             HYPRE_BigInt *row_end,
+                             HYPRE_BigInt *col_start,
+                             HYPRE_BigInt *col_end )
 {
    if ( hypre_DistributedMatrixLocalStorageType(matrix) == HYPRE_PETSC )
       return( hypre_DistributedMatrixGetLocalRangePETSc( matrix, row_start, row_end ) );
@@ -294,9 +294,9 @@ hypre_DistributedMatrixGetLocalRange( hypre_DistributedMatrix *matrix,
 
 HYPRE_Int 
 hypre_DistributedMatrixGetRow( hypre_DistributedMatrix *matrix,
-                             HYPRE_Int row,
+                             HYPRE_BigInt row,
                              HYPRE_Int *size,
-                             HYPRE_Int **col_ind,
+                             HYPRE_BigInt **col_ind,
                              HYPRE_Real **values )
 {
    HYPRE_Int ierr = 0;
@@ -330,9 +330,9 @@ hypre_DistributedMatrixGetRow( hypre_DistributedMatrix *matrix,
 
 HYPRE_Int 
 hypre_DistributedMatrixRestoreRow( hypre_DistributedMatrix *matrix,
-                             HYPRE_Int row,
+                             HYPRE_BigInt row,
                              HYPRE_Int *size,
-                             HYPRE_Int **col_ind,
+                             HYPRE_BigInt **col_ind,
                              HYPRE_Real **values )
 {
    HYPRE_Int ierr = 0;

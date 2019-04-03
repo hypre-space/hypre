@@ -20,7 +20,7 @@ typedef struct
    HYPRE_Int      *id;
    HYPRE_Int      *vec_starts;
    HYPRE_Int       element_storage_length; 
-   HYPRE_Int      *elements;
+   HYPRE_BigInt   *elements;
    HYPRE_Real     *d_elements; /* Is this used anywhere? */
    void           *v_elements;
    

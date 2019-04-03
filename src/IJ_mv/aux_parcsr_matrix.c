@@ -31,7 +31,7 @@ hypre_AuxParCSRMatrixCreate( hypre_AuxParCSRMatrix **aux_matrix,
 {
    hypre_AuxParCSRMatrix  *matrix;
    
-   matrix = hypre_CTAlloc(hypre_AuxParCSRMatrix, 1);
+   matrix = hypre_CTAlloc(hypre_AuxParCSRMatrix,  1, HYPRE_MEMORY_HOST);
   
    hypre_AuxParCSRMatrixLocalNumRows(matrix) = local_num_rows;
    hypre_AuxParCSRMatrixLocalNumCols(matrix) = local_num_cols;
@@ -80,32 +80,32 @@ hypre_AuxParCSRMatrixDestroy( hypre_AuxParCSRMatrix *matrix )
    {
       num_rows = hypre_AuxParCSRMatrixLocalNumRows(matrix);
       if (hypre_AuxParCSRMatrixRowLength(matrix))
-         hypre_TFree(hypre_AuxParCSRMatrixRowLength(matrix));
+         hypre_TFree(hypre_AuxParCSRMatrixRowLength(matrix), HYPRE_MEMORY_HOST);
       if (hypre_AuxParCSRMatrixRowSpace(matrix))
-         hypre_TFree(hypre_AuxParCSRMatrixRowSpace(matrix));
+         hypre_TFree(hypre_AuxParCSRMatrixRowSpace(matrix), HYPRE_MEMORY_HOST);
       if (hypre_AuxParCSRMatrixAuxJ(matrix))
       {
          for (i=0; i < num_rows; i++)
-	    hypre_TFree(hypre_AuxParCSRMatrixAuxJ(matrix)[i]);
-	 hypre_TFree(hypre_AuxParCSRMatrixAuxJ(matrix));
+	    hypre_TFree(hypre_AuxParCSRMatrixAuxJ(matrix)[i], HYPRE_MEMORY_HOST);
+	 hypre_TFree(hypre_AuxParCSRMatrixAuxJ(matrix), HYPRE_MEMORY_HOST);
       }
       if (hypre_AuxParCSRMatrixAuxData(matrix))
       {
          for (i=0; i < num_rows; i++)
-            hypre_TFree(hypre_AuxParCSRMatrixAuxData(matrix)[i]);
-	 hypre_TFree(hypre_AuxParCSRMatrixAuxData(matrix));
+            hypre_TFree(hypre_AuxParCSRMatrixAuxData(matrix)[i], HYPRE_MEMORY_HOST);
+	 hypre_TFree(hypre_AuxParCSRMatrixAuxData(matrix), HYPRE_MEMORY_HOST);
       }
       if (hypre_AuxParCSRMatrixIndxDiag(matrix))
-            hypre_TFree(hypre_AuxParCSRMatrixIndxDiag(matrix));
+            hypre_TFree(hypre_AuxParCSRMatrixIndxDiag(matrix), HYPRE_MEMORY_HOST);
       if (hypre_AuxParCSRMatrixIndxOffd(matrix))
-            hypre_TFree(hypre_AuxParCSRMatrixIndxOffd(matrix));
+            hypre_TFree(hypre_AuxParCSRMatrixIndxOffd(matrix), HYPRE_MEMORY_HOST);
       if (hypre_AuxParCSRMatrixOffProcI(matrix))
-      	    hypre_TFree(hypre_AuxParCSRMatrixOffProcI(matrix));
+      	    hypre_TFree(hypre_AuxParCSRMatrixOffProcI(matrix), HYPRE_MEMORY_HOST);
       if (hypre_AuxParCSRMatrixOffProcJ(matrix))
-      	    hypre_TFree(hypre_AuxParCSRMatrixOffProcJ(matrix));
+      	    hypre_TFree(hypre_AuxParCSRMatrixOffProcJ(matrix), HYPRE_MEMORY_HOST);
       if (hypre_AuxParCSRMatrixOffProcData(matrix))
-      	    hypre_TFree(hypre_AuxParCSRMatrixOffProcData(matrix));
-      hypre_TFree(matrix);
+      	    hypre_TFree(hypre_AuxParCSRMatrixOffProcData(matrix), HYPRE_MEMORY_HOST);
+      hypre_TFree(matrix, HYPRE_MEMORY_HOST);
    }
 
    return ierr;
@@ -121,7 +121,7 @@ hypre_AuxParCSRMatrixInitialize( hypre_AuxParCSRMatrix *matrix )
    HYPRE_Int local_num_rows = hypre_AuxParCSRMatrixLocalNumRows(matrix);
    HYPRE_Int *row_space = hypre_AuxParCSRMatrixRowSpace(matrix);
    HYPRE_Int max_off_proc_elmts = hypre_AuxParCSRMatrixMaxOffProcElmts(matrix);
-   HYPRE_Int **aux_j;
+   HYPRE_BigInt **aux_j;
    HYPRE_Complex **aux_data;
    HYPRE_Int i;
 
@@ -132,36 +132,36 @@ hypre_AuxParCSRMatrixInitialize( hypre_AuxParCSRMatrix *matrix )
    /* allocate stash for setting or adding off processor values */
    if (max_off_proc_elmts > 0)
    {
-      hypre_AuxParCSRMatrixOffProcI(matrix) = hypre_CTAlloc(HYPRE_Int,
-		2*max_off_proc_elmts);
-      hypre_AuxParCSRMatrixOffProcJ(matrix) = hypre_CTAlloc(HYPRE_Int,
-		max_off_proc_elmts);
-      hypre_AuxParCSRMatrixOffProcData(matrix) = hypre_CTAlloc(HYPRE_Complex,
-		max_off_proc_elmts);
+      hypre_AuxParCSRMatrixOffProcI(matrix) = hypre_CTAlloc(HYPRE_BigInt, 
+		2*max_off_proc_elmts, HYPRE_MEMORY_HOST);
+      hypre_AuxParCSRMatrixOffProcJ(matrix) = hypre_CTAlloc(HYPRE_BigInt, 
+		max_off_proc_elmts, HYPRE_MEMORY_HOST);
+      hypre_AuxParCSRMatrixOffProcData(matrix) = hypre_CTAlloc(HYPRE_Complex, 
+		max_off_proc_elmts, HYPRE_MEMORY_HOST);
    }
    if (hypre_AuxParCSRMatrixNeedAux(matrix))
    {
-      aux_j = hypre_CTAlloc(HYPRE_Int *, local_num_rows);
-      aux_data = hypre_CTAlloc(HYPRE_Complex *, local_num_rows);
+      aux_j = hypre_CTAlloc(HYPRE_BigInt *, local_num_rows, HYPRE_MEMORY_HOST);
+      aux_data = hypre_CTAlloc(HYPRE_Complex *, local_num_rows, HYPRE_MEMORY_HOST);
       if (!hypre_AuxParCSRMatrixRowLength(matrix))
          hypre_AuxParCSRMatrixRowLength(matrix) = 
-  		hypre_CTAlloc(HYPRE_Int, local_num_rows);
+  	 hypre_CTAlloc(HYPRE_Int,  local_num_rows, HYPRE_MEMORY_HOST);
       if (row_space)
       {
          for (i=0; i < local_num_rows; i++)
          {
-            aux_j[i] = hypre_CTAlloc(HYPRE_Int, row_space[i]);
-            aux_data[i] = hypre_CTAlloc(HYPRE_Complex, row_space[i]);
+            aux_j[i] = hypre_CTAlloc(HYPRE_BigInt,  row_space[i], HYPRE_MEMORY_HOST);
+            aux_data[i] = hypre_CTAlloc(HYPRE_Complex,  row_space[i], HYPRE_MEMORY_HOST);
          }
       }
       else
       {
-         row_space = hypre_CTAlloc(HYPRE_Int, local_num_rows);
+         row_space = hypre_CTAlloc(HYPRE_Int,  local_num_rows, HYPRE_MEMORY_HOST);
          for (i=0; i < local_num_rows; i++)
          {
             row_space[i] = 30;
-            aux_j[i] = hypre_CTAlloc(HYPRE_Int, 30);
-            aux_data[i] = hypre_CTAlloc(HYPRE_Complex, 30);
+            aux_j[i] = hypre_CTAlloc(HYPRE_BigInt,  30, HYPRE_MEMORY_HOST);
+            aux_data[i] = hypre_CTAlloc(HYPRE_Complex,  30, HYPRE_MEMORY_HOST);
          }
          hypre_AuxParCSRMatrixRowSpace(matrix) = row_space;
       }
@@ -170,8 +170,8 @@ hypre_AuxParCSRMatrixInitialize( hypre_AuxParCSRMatrix *matrix )
    }
    else
    {
-      hypre_AuxParCSRMatrixIndxDiag(matrix) = hypre_CTAlloc(HYPRE_Int,local_num_rows);
-      hypre_AuxParCSRMatrixIndxOffd(matrix) = hypre_CTAlloc(HYPRE_Int,local_num_rows);
+      hypre_AuxParCSRMatrixIndxDiag(matrix) = hypre_CTAlloc(HYPRE_Int, local_num_rows, HYPRE_MEMORY_HOST);
+      hypre_AuxParCSRMatrixIndxOffd(matrix) = hypre_CTAlloc(HYPRE_Int, local_num_rows, HYPRE_MEMORY_HOST);
    }
 
    return 0;

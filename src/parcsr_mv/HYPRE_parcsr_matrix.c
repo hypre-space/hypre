@@ -24,10 +24,10 @@
 
 HYPRE_Int
 HYPRE_ParCSRMatrixCreate( MPI_Comm            comm,
-                          HYPRE_Int           global_num_rows,
-                          HYPRE_Int           global_num_cols,
-                          HYPRE_Int          *row_starts,
-                          HYPRE_Int          *col_starts,
+                          HYPRE_BigInt        global_num_rows,
+                          HYPRE_BigInt        global_num_cols,
+                          HYPRE_BigInt       *row_starts,
+                          HYPRE_BigInt       *col_starts,
                           HYPRE_Int           num_cols_offd,
                           HYPRE_Int           num_nonzeros_diag,
                           HYPRE_Int           num_nonzeros_offd,
@@ -121,8 +121,8 @@ HYPRE_ParCSRMatrixGetComm( HYPRE_ParCSRMatrix  matrix,
 
 HYPRE_Int
 HYPRE_ParCSRMatrixGetDims( HYPRE_ParCSRMatrix  matrix,
-                           HYPRE_Int          *M,
-                           HYPRE_Int          *N )
+                           HYPRE_BigInt       *M,
+                           HYPRE_BigInt       *N )
 {  
    if (!matrix)
    {
@@ -141,9 +141,9 @@ HYPRE_ParCSRMatrixGetDims( HYPRE_ParCSRMatrix  matrix,
 
 HYPRE_Int
 HYPRE_ParCSRMatrixGetRowPartitioning( HYPRE_ParCSRMatrix   matrix,
-                                      HYPRE_Int          **row_partitioning_ptr )
+                                      HYPRE_BigInt       **row_partitioning_ptr )
 {  
-   HYPRE_Int *row_partitioning, *row_starts;
+   HYPRE_BigInt *row_partitioning, *row_starts;
    HYPRE_Int num_procs, i;
 
    if (!matrix) 
@@ -156,7 +156,7 @@ HYPRE_ParCSRMatrixGetRowPartitioning( HYPRE_ParCSRMatrix   matrix,
                        &num_procs);
    row_starts = hypre_ParCSRMatrixRowStarts((hypre_ParCSRMatrix *) matrix);
    if (!row_starts) return -1;
-   row_partitioning = hypre_CTAlloc(HYPRE_Int, num_procs+1);
+   row_partitioning = hypre_CTAlloc(HYPRE_BigInt,  num_procs+1, HYPRE_MEMORY_HOST);
    for (i=0; i < num_procs + 1; i++)
       row_partitioning[i] = row_starts[i];
 
@@ -170,9 +170,9 @@ HYPRE_ParCSRMatrixGetRowPartitioning( HYPRE_ParCSRMatrix   matrix,
 
 HYPRE_Int
 HYPRE_ParCSRMatrixGetColPartitioning( HYPRE_ParCSRMatrix   matrix,
-                                      HYPRE_Int          **col_partitioning_ptr )
+                                      HYPRE_BigInt       **col_partitioning_ptr )
 {  
-   HYPRE_Int *col_partitioning, *col_starts;
+   HYPRE_BigInt *col_partitioning, *col_starts;
    HYPRE_Int num_procs, i;
 
    if (!matrix) 
@@ -185,7 +185,7 @@ HYPRE_ParCSRMatrixGetColPartitioning( HYPRE_ParCSRMatrix   matrix,
                        &num_procs);
    col_starts = hypre_ParCSRMatrixColStarts((hypre_ParCSRMatrix *) matrix);
    if (!col_starts) return -1;
-   col_partitioning = hypre_CTAlloc(HYPRE_Int, num_procs+1);
+   col_partitioning = hypre_CTAlloc(HYPRE_BigInt,  num_procs+1, HYPRE_MEMORY_HOST);
    for (i=0; i < num_procs + 1; i++)
       col_partitioning[i] = col_starts[i];
 
@@ -215,10 +215,10 @@ HYPRE_ParCSRMatrixGetColPartitioning( HYPRE_ParCSRMatrix   matrix,
 
 HYPRE_Int
 HYPRE_ParCSRMatrixGetLocalRange( HYPRE_ParCSRMatrix  matrix,
-                                 HYPRE_Int          *row_start,
-                                 HYPRE_Int          *row_end,
-                                 HYPRE_Int          *col_start,
-                                 HYPRE_Int          *col_end )
+                                 HYPRE_BigInt       *row_start,
+                                 HYPRE_BigInt       *row_end,
+                                 HYPRE_BigInt       *col_start,
+                                 HYPRE_BigInt       *col_end )
 {  
    if (!matrix) 
    {
@@ -237,9 +237,9 @@ HYPRE_ParCSRMatrixGetLocalRange( HYPRE_ParCSRMatrix  matrix,
 
 HYPRE_Int 
 HYPRE_ParCSRMatrixGetRow( HYPRE_ParCSRMatrix  matrix,
-                          HYPRE_Int           row,
+                          HYPRE_BigInt        row,
                           HYPRE_Int          *size,
-                          HYPRE_Int         **col_ind,
+                          HYPRE_BigInt      **col_ind,
                           HYPRE_Complex     **values )
 {  
    if (!matrix) 
@@ -259,9 +259,9 @@ HYPRE_ParCSRMatrixGetRow( HYPRE_ParCSRMatrix  matrix,
 
 HYPRE_Int 
 HYPRE_ParCSRMatrixRestoreRow( HYPRE_ParCSRMatrix  matrix,
-                              HYPRE_Int           row,
+                              HYPRE_BigInt        row,
                               HYPRE_Int          *size,
-                              HYPRE_Int         **col_ind,
+                              HYPRE_BigInt      **col_ind,
                               HYPRE_Complex     **values )
 {  
    if (!matrix) 
@@ -288,8 +288,8 @@ HYPRE_ParCSRMatrixRestoreRow( HYPRE_ParCSRMatrix  matrix,
 HYPRE_Int
 HYPRE_CSRMatrixToParCSRMatrix( MPI_Comm            comm,
                                HYPRE_CSRMatrix     A_CSR,
-                               HYPRE_Int          *row_partitioning,
-                               HYPRE_Int          *col_partitioning,
+                               HYPRE_BigInt       *row_partitioning,
+                               HYPRE_BigInt       *col_partitioning,
                                HYPRE_ParCSRMatrix *matrix)
 {
    if (!matrix)
