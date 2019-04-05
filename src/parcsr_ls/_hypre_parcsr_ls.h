@@ -42,6 +42,152 @@ typedef struct { HYPRE_Int prev; HYPRE_Int next; } Link;
  ***********************************************************************EHEADER*/
 
 
+#ifndef hypre_PAR_AMGDD_COMP_GRID_HEADER
+#define hypre_PAR_AMGDD_COMP_GRID_HEADER
+
+
+/*--------------------------------------------------------------------------
+ * hypre_ParCompGridCommPkg
+ *--------------------------------------------------------------------------*/
+
+#ifndef HYPRE_PAR_AMGDD_COMP_GRID_COMM_PKG
+#define HYPRE_PAR_AMGDD_COMP_GRID_COMM_PKG
+#endif
+
+typedef struct
+{
+   // Info needed for subsequent psi_c residual communication
+   HYPRE_Int         num_levels; // levels in the amg hierarchy
+   HYPRE_Int         transition_level; // transition level used for adaptive AMG-RD (at this level and below, each proc owns the global grids)
+   HYPRE_Int         *transition_res_recv_sizes; // if using the transition level, these are the recv sizes for the Allgatherv
+   HYPRE_Int         *transition_res_recv_disps; // if useing the transition level, these are the recv displacements for the Allgatherv
+   HYPRE_Int         *num_send_procs; // number of send procs to communicate with
+   HYPRE_Int         *num_recv_procs; // number of recv procs to communicate with
+   HYPRE_Int         *num_partitions; // number of neighbor paritions to communicate with
+   MPI_Comm          *agg_local_comms; // local communicators for processor agglomeration on different levels
+   MPI_Comm          *agg_global_comms; // global communicators between agglomerated partitions on different levels
+
+   HYPRE_Int         **send_procs; // list of send procs
+   HYPRE_Int         **recv_procs; // list of recv procs
+   HYPRE_Int         **partitions; // list of neighbor partitions
+   HYPRE_Int         **send_proc_partitions; // list of which partition each send proc belongs to
+   HYPRE_Int         ***partition_ranks; // list of ranks that belong to each partition in partitions
+   HYPRE_Int         **send_map_starts; // send map starts from comm pkg of A^eta on each level
+   HYPRE_Int         **send_map_elmts; // send map elmts from comm pkg of A^eta on each level
+   HYPRE_Int         **ghost_marker; // marks send elmts as ghost or real dofs for the associated processor
+
+   HYPRE_Int         **send_buffer_size; // size of send buffer on each level for each proc
+   HYPRE_Int         **recv_buffer_size; // size of recv buffer on each level for each proc
+
+   HYPRE_Int         ***num_send_nodes; // number of nodes to send on each composite level
+   HYPRE_Int         ***num_recv_nodes; // number of nodes to recv on each composite level
+   HYPRE_Int         ****send_flag; // flags which nodes to send after composite grid is built
+   HYPRE_Int         ****recv_map; // mapping from recv buffer to appropriate local indices on each comp grid
+
+} hypre_ParCompGridCommPkg;
+
+/*--------------------------------------------------------------------------
+ * Accessor functions for the Comp Grid Comm Pkg structure
+ *--------------------------------------------------------------------------*/
+
+ #define hypre_ParCompGridCommPkgNumLevels(compGridCommPkg)          ((compGridCommPkg) -> num_levels)
+ #define hypre_ParCompGridCommPkgTransitionLevel(compGridCommPkg)          ((compGridCommPkg) -> transition_level)
+ #define hypre_ParCompGridCommPkgTransitionResRecvSizes(compGridCommPkg)          ((compGridCommPkg) -> transition_res_recv_sizes)
+ #define hypre_ParCompGridCommPkgTransitionResRecvDisps(compGridCommPkg)          ((compGridCommPkg) -> transition_res_recv_disps)
+ #define hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)          ((compGridCommPkg) -> num_send_procs)
+ #define hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg)           ((compGridCommPkg) -> num_recv_procs)
+ #define hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg)            ((compGridCommPkg) -> num_partitions)
+ #define hypre_ParCompGridCommPkgAggLocalComms(compGridCommPkg)       ((compGridCommPkg) -> agg_local_comms)
+ #define hypre_ParCompGridCommPkgAggGlobalComms(compGridCommPkg)       ((compGridCommPkg) -> agg_global_comms)
+ #define hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)           ((compGridCommPkg) -> send_procs)
+ #define hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)           ((compGridCommPkg) -> recv_procs)
+ #define hypre_ParCompGridCommPkgPartitions(compGridCommPkg)           ((compGridCommPkg) -> partitions)
+ #define hypre_ParCompGridCommPkgSendProcPartitions(compGridCommPkg)           ((compGridCommPkg) -> send_proc_partitions)
+ #define hypre_ParCompGridCommPkgPartitionRanks(compGridCommPkg)               ((compGridCommPkg) -> partition_ranks)
+ #define hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)           ((compGridCommPkg) -> send_map_starts)
+ #define hypre_ParCompGridCommPkgSendMapElmts(compGridCommPkg)           ((compGridCommPkg) -> send_map_elmts)
+ #define hypre_ParCompGridCommPkgGhostMarker(compGridCommPkg)           ((compGridCommPkg) -> ghost_marker)
+ #define hypre_ParCompGridCommPkgSendBufferSize(compGridCommPkg)     ((compGridCommPkg) -> send_buffer_size)
+ #define hypre_ParCompGridCommPkgRecvBufferSize(compGridCommPkg)     ((compGridCommPkg) -> recv_buffer_size)
+ #define hypre_ParCompGridCommPkgNumSendNodes(compGridCommPkg)       ((compGridCommPkg) -> num_send_nodes)
+ #define hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)       ((compGridCommPkg) -> num_recv_nodes)
+ #define hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)           ((compGridCommPkg) -> send_flag)
+ #define hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)            ((compGridCommPkg) -> recv_map)
+
+
+
+
+/*--------------------------------------------------------------------------
+ * hypre_ParCompGrid
+ *--------------------------------------------------------------------------*/
+
+#ifndef HYPRE_PAR_AMGDD_COMP_GRID_STRUCT
+#define HYPRE_PAR_AMGDD_COMP_GRID_STRUCT
+#endif
+
+typedef struct
+{
+   HYPRE_Int       num_nodes; // total number of nodes including real and ghost nodes
+   HYPRE_Int       num_owned_blocks; // number of blocks of owned nodes
+   HYPRE_Int       *owned_block_starts; // start positions for the blocks of owned nodes
+   HYPRE_Int       num_real_nodes; // number of real nodes
+   HYPRE_Int       mem_size;
+   HYPRE_Int       A_mem_size;
+   HYPRE_Int       P_mem_size;
+
+   HYPRE_Complex     *u;
+   HYPRE_Complex     *f;
+   HYPRE_Complex     *t;
+   HYPRE_Complex     *s;
+   HYPRE_Complex     *temp;
+
+   HYPRE_Int        *global_indices;
+   HYPRE_Int        *coarse_global_indices; 
+   HYPRE_Int        *coarse_local_indices;
+
+   HYPRE_Int        *A_rowptr;
+   HYPRE_Int        *A_colind;
+   HYPRE_Int        *A_global_colind;
+   HYPRE_Complex    *A_data;
+
+   HYPRE_Int        *P_rowptr;
+   HYPRE_Int        *P_colind;
+   HYPRE_Complex    *P_data;
+
+
+
+} hypre_ParCompGrid;
+
+/*--------------------------------------------------------------------------
+ * Accessor functions for the Comp Grid structure
+ *--------------------------------------------------------------------------*/
+
+#define hypre_ParCompGridNumNodes(compGrid)           ((compGrid) -> num_nodes)
+#define hypre_ParCompGridNumOwnedBlocks(compGrid)           ((compGrid) -> num_owned_blocks)
+#define hypre_ParCompGridOwnedBlockStarts(compGrid)           ((compGrid) -> owned_block_starts)
+#define hypre_ParCompGridNumRealNodes(compGrid)           ((compGrid) -> num_real_nodes)
+#define hypre_ParCompGridMemSize(compGrid)           ((compGrid) -> mem_size)
+#define hypre_ParCompGridAMemSize(compGrid)           ((compGrid) -> A_mem_size)
+#define hypre_ParCompGridPMemSize(compGrid)           ((compGrid) -> P_mem_size)
+#define hypre_ParCompGridU(compGrid)           ((compGrid) -> u)
+#define hypre_ParCompGridF(compGrid)           ((compGrid) -> f)
+#define hypre_ParCompGridT(compGrid)           ((compGrid) -> t)
+#define hypre_ParCompGridS(compGrid)           ((compGrid) -> s)
+#define hypre_ParCompGridTemp(compGrid)        ((compGrid) -> temp)
+#define hypre_ParCompGridGlobalIndices(compGrid)           ((compGrid) -> global_indices)
+#define hypre_ParCompGridCoarseGlobalIndices(compGrid)           ((compGrid) -> coarse_global_indices)
+#define hypre_ParCompGridCoarseLocalIndices(compGrid)           ((compGrid) -> coarse_local_indices)
+#define hypre_ParCompGridARowPtr(compGrid)         ((compGrid) -> A_rowptr)
+#define hypre_ParCompGridAColInd(compGrid)         ((compGrid) -> A_colind)
+#define hypre_ParCompGridAGlobalColInd(compGrid)         ((compGrid) -> A_global_colind)
+#define hypre_ParCompGridAData(compGrid)           ((compGrid) -> A_data)
+#define hypre_ParCompGridPRowPtr(compGrid)         ((compGrid) -> P_rowptr)
+#define hypre_ParCompGridPColInd(compGrid)         ((compGrid) -> P_colind)
+#define hypre_ParCompGridPData(compGrid)           ((compGrid) -> P_data)
+
+#endif
+
+
 
 
 #ifndef hypre_ParAMG_DATA_HEADER
@@ -141,6 +287,23 @@ typedef struct
    HYPRE_Int                  num_levels;
    HYPRE_Real         **l1_norms;
 
+   /* composide grid data for AMG-DD */
+   HYPRE_Int                 min_fac_iter;
+   HYPRE_Int                 max_fac_iter;
+   HYPRE_Real                fac_tol;
+   HYPRE_Int                 fac_cycle_type;
+   HYPRE_Int                 fac_relax_type;
+   HYPRE_Int                 fac_num_relax;
+   HYPRE_Int                 padding;
+   HYPRE_Int                 variable_padding;
+   HYPRE_Int                 num_ghost_layers;
+   HYPRE_Int                 use_transition_level;
+   HYPRE_Int                 amgdd_agglomeration_max_num_levels;
+   HYPRE_Int                 amgdd_agglomeration_threshold;
+   HYPRE_Int                 amgdd_agglomeration_partition_size;
+   hypre_ParCompGrid       **compGrid;
+   hypre_ParCompGridCommPkg *compGridCommPkg;
+
    /* Block data */
    hypre_ParCSRBlockMatrix **A_block_array;
    hypre_ParCSRBlockMatrix **P_block_array;
@@ -201,6 +364,7 @@ typedef struct
    /* log info */
    HYPRE_Int      logging;
    HYPRE_Int      num_iterations;
+   HYPRE_Int      num_fac_iterations;
 #ifdef CUMNUMIT
    HYPRE_Int      cum_num_iterations;
 #endif
@@ -398,6 +562,23 @@ typedef struct
 #define hypre_ParAMGDataChebyDS(amg_data) ((amg_data)->cheby_ds)
 #define hypre_ParAMGDataChebyCoefs(amg_data) ((amg_data)->cheby_coefs)
 
+/* composite grid data */
+#define hypre_ParAMGDataMinFACIter(amg_data) ((amg_data)->min_fac_iter)
+#define hypre_ParAMGDataMaxFACIter(amg_data) ((amg_data)->max_fac_iter)
+#define hypre_ParAMGDataFACTol(amg_data) ((amg_data)->fac_tol)
+#define hypre_ParAMGDataFACCycleType(amg_data) ((amg_data)->fac_cycle_type)
+#define hypre_ParAMGDataFACRelaxType(amg_data) ((amg_data)->fac_relax_type)
+#define hypre_ParAMGDataFACNumRelax(amg_data) ((amg_data)->fac_num_relax)
+#define hypre_ParAMGDataAMGDDPadding(amg_data) ((amg_data)->padding)
+#define hypre_ParAMGDataAMGDDVariablePadding(amg_data) ((amg_data)->variable_padding)
+#define hypre_ParAMGDataAMGDDNumGhostLayers(amg_data) ((amg_data)->num_ghost_layers)
+#define hypre_ParAMGDataAMGDDUseTransitionLevel(amg_data) ((amg_data)->use_transition_level)
+#define hypre_ParAMGDataAMGDDAgglomerationMaxNumLevels(amg_data) ((amg_data)->amgdd_agglomeration_max_num_levels)
+#define hypre_ParAMGDataAMGDDAgglomerationThreshold(amg_data) ((amg_data)->amgdd_agglomeration_threshold)
+#define hypre_ParAMGDataAMGDDAgglomerationPartitionSize(amg_data) ((amg_data)->amgdd_agglomeration_partition_size)
+#define hypre_ParAMGDataCompGrid(amg_data) ((amg_data)->compGrid)
+#define hypre_ParAMGDataCompGridCommPkg(amg_data) ((amg_data)->compGridCommPkg)
+
 /* block */
 #define hypre_ParAMGDataABlockArray(amg_data) ((amg_data)->A_block_array)
 #define hypre_ParAMGDataPBlockArray(amg_data) ((amg_data)->P_block_array)
@@ -422,6 +603,7 @@ typedef struct
 /* log info data */
 #define hypre_ParAMGDataLogging(amg_data) ((amg_data)->logging)
 #define hypre_ParAMGDataNumIterations(amg_data) ((amg_data)->num_iterations)
+#define hypre_ParAMGDataNumFACIterations(amg_data) ((amg_data)->num_fac_iterations)
 #ifdef CUMNUMIT
 #define hypre_ParAMGDataCumNumIterations(amg_data) ((amg_data)->cum_num_iterations)
 #endif
@@ -813,6 +995,24 @@ HYPRE_Int HYPRE_BoomerAMGSetSepWeight ( HYPRE_Solver solver , HYPRE_Int sep_weig
 HYPRE_Int HYPRE_BoomerAMGSetMinIter ( HYPRE_Solver solver , HYPRE_Int min_iter );
 HYPRE_Int HYPRE_BoomerAMGSetMaxIter ( HYPRE_Solver solver , HYPRE_Int max_iter );
 HYPRE_Int HYPRE_BoomerAMGGetMaxIter ( HYPRE_Solver solver , HYPRE_Int *max_iter );
+HYPRE_Int HYPRE_BoomerAMGSetMinFACIter ( HYPRE_Solver solver , HYPRE_Int min_fac_iter );
+HYPRE_Int HYPRE_BoomerAMGGetMinFACIter ( HYPRE_Solver solver , HYPRE_Int *min_fac_iter );
+HYPRE_Int HYPRE_BoomerAMGSetMaxFACIter ( HYPRE_Solver solver , HYPRE_Int max_fac_iter );
+HYPRE_Int HYPRE_BoomerAMGGetMaxFACIter ( HYPRE_Solver solver , HYPRE_Int *max_fac_iter );
+HYPRE_Int HYPRE_BoomerAMGSetFACTol ( HYPRE_Solver solver , HYPRE_Real fac_tol );
+HYPRE_Int HYPRE_BoomerAMGGetFACTol ( HYPRE_Solver solver , HYPRE_Real *fac_tol );
+HYPRE_Int HYPRE_BoomerAMGSetFACCycleType ( HYPRE_Solver solver , HYPRE_Int fac_cycle_type );
+HYPRE_Int HYPRE_BoomerAMGGetFACCycleType ( HYPRE_Solver solver , HYPRE_Int *fac_cycle_type );
+HYPRE_Int HYPRE_BoomerAMGSetFACRelaxType ( HYPRE_Solver solver , HYPRE_Int fac_relax_type );
+HYPRE_Int HYPRE_BoomerAMGGetFACRelaxType ( HYPRE_Solver solver , HYPRE_Int *fac_relax_type );
+HYPRE_Int HYPRE_BoomerAMGSetAMGDDPadding ( HYPRE_Solver solver , HYPRE_Int padding );
+HYPRE_Int HYPRE_BoomerAMGGetAMGDDPadding ( HYPRE_Solver solver , HYPRE_Int *padding );
+HYPRE_Int HYPRE_BoomerAMGSetAMGDDVariablePadding ( HYPRE_Solver solver , HYPRE_Int variable_padding );
+HYPRE_Int HYPRE_BoomerAMGGetAMGDDVariablePadding ( HYPRE_Solver solver , HYPRE_Int *variable_padding );
+HYPRE_Int HYPRE_BoomerAMGSetAMGDDNumGhostLayers ( HYPRE_Solver solver , HYPRE_Int num_ghost_layers );
+HYPRE_Int HYPRE_BoomerAMGGetAMGDDNumGhostLayers ( HYPRE_Solver solver , HYPRE_Int *num_ghost_layers );
+HYPRE_Int HYPRE_BoomerAMGSetAMGDDUseTransitionLevel ( HYPRE_Solver solver , HYPRE_Int use_transition_level );
+HYPRE_Int HYPRE_BoomerAMGGetAMGDDUseTransitionLevel ( HYPRE_Solver solver , HYPRE_Int *use_transition_level );
 HYPRE_Int HYPRE_BoomerAMGSetCoarsenType ( HYPRE_Solver solver , HYPRE_Int coarsen_type );
 HYPRE_Int HYPRE_BoomerAMGGetCoarsenType ( HYPRE_Solver solver , HYPRE_Int *coarsen_type );
 HYPRE_Int HYPRE_BoomerAMGSetMeasureType ( HYPRE_Solver solver , HYPRE_Int measure_type );
@@ -857,6 +1057,7 @@ HYPRE_Int HYPRE_BoomerAMGSetDebugFlag ( HYPRE_Solver solver , HYPRE_Int debug_fl
 HYPRE_Int HYPRE_BoomerAMGGetDebugFlag ( HYPRE_Solver solver , HYPRE_Int *debug_flag );
 HYPRE_Int HYPRE_BoomerAMGGetNumIterations ( HYPRE_Solver solver , HYPRE_Int *num_iterations );
 HYPRE_Int HYPRE_BoomerAMGGetCumNumIterations ( HYPRE_Solver solver , HYPRE_Int *cum_num_iterations );
+HYPRE_Int HYPRE_BoomerAMGGetNumFACIterations ( HYPRE_Solver solver, HYPRE_Int *num_fac_iterations );
 HYPRE_Int HYPRE_BoomerAMGGetResidual ( HYPRE_Solver solver , HYPRE_ParVector *residual );
 HYPRE_Int HYPRE_BoomerAMGGetFinalRelativeResidualNorm ( HYPRE_Solver solver , HYPRE_Real *rel_resid_norm );
 HYPRE_Int HYPRE_BoomerAMGSetVariant ( HYPRE_Solver solver , HYPRE_Int variant );
@@ -939,6 +1140,11 @@ HYPRE_Int HYPRE_BoomerAMGSetKeepTranspose ( HYPRE_Solver solver , HYPRE_Int keep
 HYPRE_Int HYPRE_BoomerAMGSetDSLUThreshold ( HYPRE_Solver solver , HYPRE_Int slu_threshold );
 #endif
 HYPRE_Int HYPRE_BoomerAMGSetCpointsToKeep( HYPRE_Solver solver, HYPRE_Int cpt_coarse_level, HYPRE_Int num_cpt_coarse,HYPRE_Int *cpt_coarse_index);
+
+
+HYPRE_Int HYPRE_BoomerAMGDDSetup ( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x );
+HYPRE_Int HYPRE_BoomerAMGDDSolve ( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x );
+
 
 /* HYPRE_parcsr_bicgstab.c */
 HYPRE_Int HYPRE_ParCSRBiCGSTABCreate ( MPI_Comm comm , HYPRE_Solver *solver );
@@ -1244,6 +1450,24 @@ HYPRE_Int hypre_BoomerAMGSetMinIter ( void *data , HYPRE_Int min_iter );
 HYPRE_Int hypre_BoomerAMGGetMinIter ( void *data , HYPRE_Int *min_iter );
 HYPRE_Int hypre_BoomerAMGSetMaxIter ( void *data , HYPRE_Int max_iter );
 HYPRE_Int hypre_BoomerAMGGetMaxIter ( void *data , HYPRE_Int *max_iter );
+HYPRE_Int hypre_BoomerAMGSetMinFACIter ( void *data , HYPRE_Int min_fac_iter );
+HYPRE_Int hypre_BoomerAMGGetMinFACIter ( void *data , HYPRE_Int *min_fac_iter );
+HYPRE_Int hypre_BoomerAMGSetMaxFACIter ( void *data , HYPRE_Int max_fac_iter );
+HYPRE_Int hypre_BoomerAMGGetMaxFACIter ( void *data , HYPRE_Int *max_fac_iter );
+HYPRE_Int hypre_BoomerAMGSetFACTol ( void *data , HYPRE_Real fac_tol );
+HYPRE_Int hypre_BoomerAMGGetFACTol ( void *data , HYPRE_Real *fac_tol );
+HYPRE_Int hypre_BoomerAMGSetFACCycleType ( void *data , HYPRE_Int fac_cycle_type );
+HYPRE_Int hypre_BoomerAMGGetFACCycleType ( void *data , HYPRE_Int *fac_cycle_type );
+HYPRE_Int hypre_BoomerAMGSetFACRelaxType ( void *data , HYPRE_Int fac_relax_type );
+HYPRE_Int hypre_BoomerAMGGetFACRelaxType ( void *data , HYPRE_Int *fac_relax_type );
+HYPRE_Int hypre_BoomerAMGSetFACNumRelax ( void *data, HYPRE_Int fac_num_relax );
+HYPRE_Int hypre_BoomerAMGGetFACNumRelax ( void *data, HYPRE_Int *fac_num_relax );
+HYPRE_Int hypre_BoomerAMGSetAMGDDPadding ( void *data , HYPRE_Int padding );
+HYPRE_Int hypre_BoomerAMGGetAMGDDPadding ( void *data , HYPRE_Int *padding );
+HYPRE_Int hypre_BoomerAMGSetAMGDDNumGhostLayers ( void *data , HYPRE_Int num_ghost_layers );
+HYPRE_Int hypre_BoomerAMGGetAMGDDNumGhostLayers ( void *data , HYPRE_Int *num_ghost_layers );
+HYPRE_Int hypre_BoomerAMGSetAMGDDUseTransitionLevel ( void *data , HYPRE_Int use_transition_level );
+HYPRE_Int hypre_BoomerAMGGetAMGDDUseTransitionLevel ( void *data , HYPRE_Int *use_transition_level );
 HYPRE_Int hypre_BoomerAMGSetCoarsenType ( void *data , HYPRE_Int coarsen_type );
 HYPRE_Int hypre_BoomerAMGGetCoarsenType ( void *data , HYPRE_Int *coarsen_type );
 HYPRE_Int hypre_BoomerAMGSetMeasureType ( void *data , HYPRE_Int measure_type );
@@ -1331,6 +1555,7 @@ HYPRE_Int hypre_BoomerAMGSetPointDofMap ( void *data , HYPRE_Int *point_dof_map 
 HYPRE_Int hypre_BoomerAMGSetDofPoint ( void *data , HYPRE_Int *dof_point );
 HYPRE_Int hypre_BoomerAMGGetNumIterations ( void *data , HYPRE_Int *num_iterations );
 HYPRE_Int hypre_BoomerAMGGetCumNumIterations ( void *data , HYPRE_Int *cum_num_iterations );
+HYPRE_Int hypre_BoomerAMGGetNumFACIterations ( void *data , HYPRE_Int *num_fac_iterations );
 HYPRE_Int hypre_BoomerAMGGetResidual ( void *data , hypre_ParVector **resid );
 HYPRE_Int hypre_BoomerAMGGetRelResidualNorm ( void *data , HYPRE_Real *rel_resid_norm );
 HYPRE_Int hypre_BoomerAMGSetVariant ( void *data , HYPRE_Int variant );
@@ -1740,6 +1965,46 @@ HYPRE_Int hypre_MGRSetTol( void *mgr_vdata, HYPRE_Real tol );
 HYPRE_Int hypre_MGRGetNumIterations( void *mgr_vdata, HYPRE_Int *num_iterations );
 HYPRE_Int hypre_MGRGetFinalRelativeResidualNorm( void *mgr_vdata, HYPRE_Real *res_norm );
 
+/* par_amgdd_solve.c */
+HYPRE_Int hypre_BoomerAMGDDSolve( void *solver, hypre_ParCSRMatrix *A, hypre_ParVector *b,hypre_ParVector *x );
+HYPRE_Int hypre_BoomerAMGDD_Cycle( void *amg_vdata );
+HYPRE_Int hypre_BoomerAMGDDResidualCommunication( void *amg_vdata );
+
+/* par_amgdd_setup.c */
+HYPRE_Int hypre_BoomerAMGDDSetup(  void *amg_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *b, hypre_ParVector *x, HYPRE_Int *timers, HYPRE_Int use_barriers, HYPRE_Int *communication_cost, HYPRE_Int verify_amgdd );
+
+/* par_amgdd_test.c */
+HYPRE_Int hypre_BoomerAMGDDTestSolve( void *amg_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u);
+
+/* par_amgdd_fac_cycle.c */
+HYPRE_Int hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata, HYPRE_Int first_iteration );
+HYPRE_Int hypre_BoomerAMGDD_FAC_Cycle_timed( void *amg_vdata, HYPRE_Int time_part );
+
+/* par_amgdd_comp_grid.c */
+hypre_ParCompGrid *hypre_ParCompGridCreate ();
+HYPRE_Int hypre_ParCompGridDestroy ( hypre_ParCompGrid *compGrid );
+HYPRE_Int hypre_ParCompGridInitialize( hypre_ParAMGData *amg_data, HYPRE_Int padding, HYPRE_Int level );
+HYPRE_Int hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int transition_level, HYPRE_Int debug );
+HYPRE_Int hypre_ParCompGridSetupRealDofMarker( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int num_ghost_layers );
+HYPRE_Int hypre_ParCompGridSetSize ( hypre_ParCompGrid *compGrid, HYPRE_Int num_nodes, HYPRE_Int mem_size, HYPRE_Int A_nnz, HYPRE_Int P_nnz, HYPRE_Int full_comp_info );
+HYPRE_Int hypre_ParCompGridResize ( hypre_ParCompGrid *compGrid, HYPRE_Int new_size, HYPRE_Int need_coarse_info, HYPRE_Int type );
+HYPRE_Int hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *num_added_nodes, HYPRE_Int num_levels );
+HYPRE_Int hypre_ParCompGridSetupLocalIndicesP( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int transition_level );
+HYPRE_Int hypre_ParCompGridLocalIndexBinarySearch( hypre_ParCompGrid *compGrid, HYPRE_Int global_index, HYPRE_Int allow_failed_search );
+HYPRE_Int hypre_ParCompGridDebugPrint ( hypre_ParCompGrid *compGrid, const char* filename );
+HYPRE_Int hypre_ParCompGridDumpSorted( hypre_ParCompGrid *compGrid, const char* filename);
+HYPRE_Int hypre_ParCompGridGlobalIndicesDump( hypre_ParCompGrid *compGrid, const char* filename);
+HYPRE_Int hypre_ParCompGridRealDofMarkerDump( hypre_ParCompGrid *compGrid, const char* filename);
+HYPRE_Int hypre_ParCompGridCoarseGlobalIndicesDump( hypre_ParCompGrid *compGrid, const char* filename);
+HYPRE_Int hypre_ParCompGridCoarseResidualMarkerDump( hypre_ParCompGrid *compGrid, const char* filename);
+HYPRE_Int hypre_ParCompGridUDump( hypre_ParCompGrid *compGrid, const char* filename);
+HYPRE_Int hypre_ParCompGridFDump( hypre_ParCompGrid *compGrid, const char* filename);
+HYPRE_Int hypre_ParCompGridMatlabAMatrixDump( hypre_ParCompGrid *compGrid, const char* filename);
+HYPRE_Int hypre_ParCompGridMatlabPMatrixDump( hypre_ParCompGrid *compGrid, const char* filename);
+HYPRE_Int hypre_ParCompGridPrintSolnRHS ( hypre_ParCompGrid *compGrid, const char* filename );
+hypre_ParCompGridCommPkg *hypre_ParCompGridCommPkgCreate ();
+HYPRE_Int hypre_ParCompGridCommPkgDestroy ( hypre_ParCompGridCommPkg *compGridCommPkg );
+hypre_ParCompGridCommPkg *hypre_ParCompGridCommPkgCopy ( hypre_ParCompGridCommPkg *compGridCommPkg );
 
 #ifdef __cplusplus
 }

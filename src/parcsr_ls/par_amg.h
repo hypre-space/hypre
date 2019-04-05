@@ -108,6 +108,23 @@ typedef struct
    HYPRE_Int                  num_levels;
    HYPRE_Real         **l1_norms;
 
+   /* composide grid data for AMG-DD */
+   HYPRE_Int                 min_fac_iter;
+   HYPRE_Int                 max_fac_iter;
+   HYPRE_Real                fac_tol;
+   HYPRE_Int                 fac_cycle_type;
+   HYPRE_Int                 fac_relax_type;
+   HYPRE_Int                 fac_num_relax;
+   HYPRE_Int                 padding;
+   HYPRE_Int                 variable_padding;
+   HYPRE_Int                 num_ghost_layers;
+   HYPRE_Int                 use_transition_layer;
+   HYPRE_Int                 amgdd_agglomeration_max_num_levels;
+   HYPRE_Int                 amgdd_agglomeration_threshold;
+   HYPRE_Int                 amgdd_agglomeration_partition_size;
+   hypre_ParCompGrid       **compGrid;
+   hypre_ParCompGridCommPkg *compGridCommPkg;
+
    /* Block data */
    hypre_ParCSRBlockMatrix **A_block_array;
    hypre_ParCSRBlockMatrix **P_block_array;
@@ -168,6 +185,7 @@ typedef struct
    /* log info */
    HYPRE_Int      logging;
    HYPRE_Int      num_iterations;
+   HYPRE_Int      num_fac_iterations;
 #ifdef CUMNUMIT
    HYPRE_Int      cum_num_iterations;
 #endif
@@ -363,6 +381,23 @@ typedef struct
 #define hypre_ParAMGDataChebyDS(amg_data) ((amg_data)->cheby_ds)
 #define hypre_ParAMGDataChebyCoefs(amg_data) ((amg_data)->cheby_coefs)
 
+/* composite grid data */
+#define hypre_ParAMGDataMinFACIter(amg_data) ((amg_data)->min_fac_iter)
+#define hypre_ParAMGDataMaxFACIter(amg_data) ((amg_data)->max_fac_iter)
+#define hypre_ParAMGDataFACTol(amg_data) ((amg_data)->fac_tol)
+#define hypre_ParAMGDataFACCycleType(amg_data) ((amg_data)->fac_cycle_type)
+#define hypre_ParAMGDataFACRelaxType(amg_data) ((amg_data)->fac_relax_type)
+#define hypre_ParAMGDataFACNumRelax(amg_data) ((amg_data)->fac_num_relax)
+#define hypre_ParAMGDataAMGDDPadding(amg_data) ((amg_data)->padding)
+#define hypre_ParAMGDataAMGDDVariablePadding(amg_data) ((amg_data)->variable_padding)
+#define hypre_ParAMGDataAMGDDNumGhostLayers(amg_data) ((amg_data)->num_ghost_layers)
+#define hypre_ParAMGDataAMGDDUseTransitionLayer(amg_data) ((amg_data)->use_transition_layer)
+#define hypre_ParAMGDataAMGDDAgglomerationMaxNumLevels(amg_data) ((amg_data)->amgdd_agglomeration_max_num_levels)
+#define hypre_ParAMGDataAMGDDAgglomerationThreshold(amg_data) ((amg_data)->amgdd_agglomeration_threshold)
+#define hypre_ParAMGDataAMGDDAgglomerationPartitionSize(amg_data) ((amg_data)->amgdd_agglomeration_partition_size)
+#define hypre_ParAMGDataCompGrid(amg_data) ((amg_data)->compGrid)
+#define hypre_ParAMGDataCompGridCommPkg(amg_data) ((amg_data)->compGridCommPkg)
+
 /* block */
 #define hypre_ParAMGDataABlockArray(amg_data) ((amg_data)->A_block_array)
 #define hypre_ParAMGDataPBlockArray(amg_data) ((amg_data)->P_block_array)
@@ -387,6 +422,7 @@ typedef struct
 /* log info data */
 #define hypre_ParAMGDataLogging(amg_data) ((amg_data)->logging)
 #define hypre_ParAMGDataNumIterations(amg_data) ((amg_data)->num_iterations)
+#define hypre_ParAMGDataNumFACIterations(amg_data) ((amg_data)->num_fac_iterations)
 #ifdef CUMNUMIT
 #define hypre_ParAMGDataCumNumIterations(amg_data) ((amg_data)->cum_num_iterations)
 #endif
