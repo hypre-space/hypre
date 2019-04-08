@@ -1337,8 +1337,8 @@ hypre_ILUGetPermddPQ(hypre_ParCSRMatrix *A, HYPRE_Int **io_pperm, HYPRE_Int **io
 /*
  * Get perm array from parcsr matrix based on diag and offdiag matrix
  * Just simply loop through the rows of offd of A, check for nonzero rows
- * Put interial nodes at the beginning
- * A: parcer matrix
+ * Put interior nodes at the beginning
+ * A: parcsr matrix
  * perm: permutation array
  * nLU: number of interial nodes
  */
@@ -1412,13 +1412,13 @@ hypre_ILUGetPerm(hypre_ParCSRMatrix *A, HYPRE_Int **perm, HYPRE_Int *nLU)
 }
 
 /*
- * Get no permutation for block-jacobi case 
- * A: parcer matrix
+ * Get the (local) ordering of the diag (local) matrix (no permutation). This is the permutation used for the block-jacobi case 
+ * A: parcsr matrix
  * perm: permutation array
- * nLU: number of interial nodes
+ * nLU: number of interior nodes
  */
 HYPRE_Int
-hypre_ILUGetNoPerm(hypre_ParCSRMatrix *A, HYPRE_Int **perm, HYPRE_Int *nLU)
+hypre_ILUGetLocalPerm(hypre_ParCSRMatrix *A, HYPRE_Int **perm, HYPRE_Int *nLU)
 {
    /* get basic information of A */
    HYPRE_Int            n = hypre_ParCSRMatrixNumRows(A);

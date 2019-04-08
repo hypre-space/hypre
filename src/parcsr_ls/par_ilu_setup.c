@@ -225,7 +225,7 @@ hypre_ILUSetup( void               *ilu_vdata,
             hypre_ILUGetPermddPQ(matA, &perm, &qperm, tol_ddPQ, &nLU, &nI);
             break;
 	 case 0: case 1:
-	    hypre_ILUGetNoPerm(matA, &perm, &nLU);
+	    hypre_ILUGetLocalPerm(matA, &perm, &nLU);
             break;
          default:
             hypre_ILUGetPerm(matA, &perm, &nLU);

@@ -132,7 +132,7 @@ HYPRE_ILUSetNSHDropThreshold( HYPRE_Solver solver, HYPRE_Real threshold )
 HYPRE_Int
 HYPRE_ILUSetNSHDropThresholdArray( HYPRE_Solver solver, HYPRE_Real *threshold )
 {
-   return hypre_ILUSetSchurNSHDropThresholdArray( solver, *threshold );
+   return hypre_ILUSetSchurNSHDropThresholdArray( solver, threshold );
 }
 /*--------------------------------------------------------------------------
  * HYPRE_ILUSetSchurMaxIter
