@@ -2564,7 +2564,7 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
             {
                // Recursively add the region of padding (flagging coarse nodes on the next level if applicable)
                if (level != transition_level-1) RecursivelyBuildPsiComposite(i, padding[level], compGrid[level], add_flag[level], add_flag[level+1], 1, &nodes_to_add, padding[level+1]);
-               else RecursivelyBuildPsiComposite(i, padding[level], compGrid[level], add_flag[level], NULL, 0, &nodes_to_add, padding[level+1]);
+               else RecursivelyBuildPsiComposite(i, padding[level], compGrid[level], add_flag[level], NULL, 0, &nodes_to_add, 0);
             }
          }
 
