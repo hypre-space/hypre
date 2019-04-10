@@ -1277,10 +1277,6 @@ dnl   then
 dnl   fi
 fi
 
-if test "$hypre_using_node_aware_mpi" = "yes"
-then
-   AC_DEFINE(HYPRE_USING_NODE_AWARE_MPI, 1)
-fi
 
 dnl *********************************************************************
 dnl * Define appropriate variables if user set blas to either essl or dxml
@@ -1763,6 +1759,14 @@ then
       CFLAGS+=" -O2"
       CXXFLAGS+=" -O2"
    fi
+fi
+
+if test "$hypre_using_node_aware_mpi" = "yes"
+then
+   CC=${CXX}
+   CFLAGS+=" -std=c++11 "
+   CXXFLAGS+=" -std=c++11 "
+   AC_DEFINE(HYPRE_USING_NODE_AWARE_MPI, 1)
 fi
 
 dnl *********************************************************************

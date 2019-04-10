@@ -297,18 +297,18 @@ hypre_ParCSRCommHandleCreate ( HYPRE_Int            job,
    num_requests = 0;
 
 // Node-aware communication
-#if HYPRE_USING_NODE_AWARE_MPI 
-   comm_handle->nap_data = NULL;
+#if HYPRE_USING_NODE_AWARE_MPI
+   NAPData *nap_data = NULL;
    j = 0;
    switch (job)
    {
       case  1:
       {
-         comm_handle->nap_data = hypre_TAlloc(NAPData, 1, HYPRE_MEMORY_HOST);
+         nap_data = hypre_TAlloc(NAPData, 1, HYPRE_MEMORY_HOST);
          HYPRE_Complex *d_send_data = (HYPRE_Complex *) send_data;
          HYPRE_Complex *d_recv_data = (HYPRE_Complex *) recv_data;
-         MPIX_INAPsend(d_send_data, comm_pkg->nap_comm, HYPRE_MPI_COMPLEX, 20423, comm, comm_handle->nap_data);
-         MPIX_INAPrecv(d_recv_data, comm_pkg->nap_comm, HYPRE_MPI_COMPLEX, 20423, comm, comm_handle->nap_data);
+         MPIX_INAPsend(d_send_data, comm_pkg->nap_comm, HYPRE_MPI_COMPLEX, 20423, comm, nap_data);
+         MPIX_INAPrecv(d_recv_data, comm_pkg->nap_comm, HYPRE_MPI_COMPLEX, 20423, comm, nap_data);
       }
       // TODO : Node-aware not yet implemented for transpose
       case  2:
@@ -337,11 +337,11 @@ hypre_ParCSRCommHandleCreate ( HYPRE_Int            job,
       }
       case  11:
       {
-         comm_handle->nap_data = hypre_TAlloc(NAPData, 1, HYPRE_MEMORY_HOST);
+         nap_data = hypre_TAlloc(NAPData, 1, HYPRE_MEMORY_HOST);
          HYPRE_Int *i_send_data = (HYPRE_Int *) send_data;
          HYPRE_Int *i_recv_data = (HYPRE_Int *) recv_data;
-         MPIX_INAPsend(i_send_data, comm_pkg->nap_comm, HYPRE_MPI_INT, 20423, comm, comm_handle->nap_data);
-         MPIX_INAPrecv(i_recv_data, comm_pkg->nap_comm, HYPRE_MPI_INT, 20423, comm, comm_handle->nap_data);
+         MPIX_INAPsend(i_send_data, comm_pkg->nap_comm, HYPRE_MPI_INT, 20423, comm, nap_data);
+         MPIX_INAPrecv(i_recv_data, comm_pkg->nap_comm, HYPRE_MPI_INT, 20423, comm, nap_data);
       }
       // TODO : Node-aware not yet implemented for transpose
       case  12:
@@ -479,6 +479,10 @@ hypre_ParCSRCommHandleCreate ( HYPRE_Int            job,
    hypre_ParCSRCommHandleNumRequests(comm_handle) = num_requests;
    hypre_ParCSRCommHandleRequests(comm_handle)    = requests;
 
+#if HYPRE_USING_NODE_AWARE_MPI
+   comm_handle->nap_data = nap_data;
+#endif
+
    return ( comm_handle );
 }
 
@@ -489,8 +493,9 @@ hypre_ParCSRCommHandleDestroy( hypre_ParCSRCommHandle *comm_handle )
 
    if ( comm_handle==NULL ) return hypre_error_flag;
 
-#if HYPRE_USING_NODE_AWARE_MPI 
-   if (comm_handle->nap_data) {
+#if HYPRE_USING_NODE_AWARE_MPI
+   if (comm_handle->nap_data)
+   {
       MPIX_NAPwait<int, int>((comm_handle->comm_pkg)->nap_comm, comm_handle->nap_data);
       hypre_TFree(comm_handle->nap_data, HYPRE_MEMORY_HOST);
    }
@@ -779,9 +784,9 @@ hypre_ParCSRCommPkgCreate
    hypre_ParCSRCommPkgSendMapElmts (comm_pkg) = send_map_elmts;
 
 
-#if HYPRE_USING_NODE_AWARE_MPI 
+#if HYPRE_USING_NODE_AWARE_MPI
    HYPRE_Int i;
-   HYPRE_Int *global_send_inds; 
+   HYPRE_Int *global_send_inds;
    HYPRE_Int glob_size = send_map_starts[num_sends];
    global_send_inds = hypre_CTAlloc(HYPRE_Int,  glob_size, HYPRE_MEMORY_HOST);
    for (i=0; i<glob_size; i++) {
@@ -793,7 +798,7 @@ hypre_ParCSRCommPkgCreate
    MPIX_NAPinit(num_sends, send_procs, send_map_starts,
                 send_map_elmts, num_recvs, recv_procs,
                 recv_vec_starts, global_send_inds,
-                col_map_offd, comm, comm_pkg->nap_comm);
+                col_map_offd, comm, &comm_pkg->nap_comm);
 #endif
 
    return hypre_error_flag;
@@ -828,7 +833,7 @@ hypre_MatvecCommPkgCreate ( hypre_ParCSRMatrix *A )
    /*-----------------------------------------------------------
     * setup commpkg
     *----------------------------------------------------------*/
-   hypre_ParCSRCommPkg *comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1,HYPRE_MEMORY_HOST);
+   hypre_ParCSRCommPkg *comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1, HYPRE_MEMORY_HOST);
    hypre_ParCSRMatrixCommPkg(A) = comm_pkg;
 #ifdef HYPRE_NO_GLOBAL_PARTITION
    hypre_ParCSRCommPkgCreateApart ( comm, col_map_offd, first_col_diag,
@@ -876,11 +881,10 @@ hypre_MatvecCommPkgDestroy( hypre_ParCSRCommPkg *comm_pkg )
    /* if (hypre_ParCSRCommPkgRecvMPITypes(comm_pkg))
       hypre_TFree(hypre_ParCSRCommPkgRecvMPITypes(comm_pkg), HYPRE_MEMORY_HOST); */
 
-#if HYPRE_USING_NODE_AWARE_MPI 
-   if (hypre_ParCSRCommPkgSendMapStart(comm_pkg, hypre_ParCSRCommPkgNumSends(comm_pkg))) {
-      hypre_TFree(hypre_ParCSRCommPkgGlobalSendInds(comm_pkg), HYPRE_MEMORY_HOST);
-   }
-   MPIX_NAPDestroy(comm_pkg->nap_comm);
+#if HYPRE_USING_NODE_AWARE_MPI
+   hypre_TFree(hypre_ParCSRCommPkgGlobalSendInds(comm_pkg), HYPRE_MEMORY_HOST);
+
+   MPIX_NAPDestroy(&comm_pkg->nap_comm);
 #endif
 
    hypre_TFree(comm_pkg, HYPRE_MEMORY_HOST);

@@ -102,7 +102,7 @@ void hypre_swap3_d(HYPRE_Real  *v,
 {
    HYPRE_Int temp;
    HYPRE_Real temp_d;
-   
+
 
    temp_d = v[i];
    v[i] = v[j];
@@ -121,13 +121,13 @@ void hypre_swap3_d(HYPRE_Real  *v,
 void hypre_swap4_d(HYPRE_Real  *v,
                   HYPRE_Int  *w,
                   HYPRE_Int  *z,
-                  HYPRE_Int *y, 
+                  HYPRE_Int *y,
                   HYPRE_Int  i,
                   HYPRE_Int  j )
 {
    HYPRE_Int temp;
    HYPRE_Real temp_d;
-   
+
 
    temp_d = v[i];
    v[i] = v[j];
@@ -380,7 +380,7 @@ void hypre_search_row(HYPRE_Int row,
 {
    HYPRE_Int j;
    // If this row has not been visited, call recursive DFS on nonzero
-   // column entries 
+   // column entries
    if (!visited[row]) {
       visited[row] = 1;
       for (j=row_ptr[row]; j<row_ptr[row+1]; j++) {
@@ -437,7 +437,7 @@ void hypre_topo_sort(HYPRE_Int *row_ptr,
                      HYPRE_Int *ordering,
                      HYPRE_Int n)
 {
-   HYPRE_Int *visited = calloc(n, sizeof(HYPRE_Int));
+   HYPRE_Int *visited = hypre_CTAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
    HYPRE_Int order_ind = 0;
    HYPRE_Int temp_row = 0;
    while (order_ind < n) {
@@ -445,13 +445,13 @@ void hypre_topo_sort(HYPRE_Int *row_ptr,
                        visited, ordering, &order_ind);
       temp_row += 1;
    }
-   free(visited);
+   hypre_TFree(visited, HYPRE_MEMORY_HOST);
 }
 
 
 // Find topological ordering on acyclic CSR submatrix. That is, find ordering
 // of matrix to be triangular, where submatrix indices, i, are denoted by
-// cf_marker[i] == CF. 
+// cf_marker[i] == CF.
 //
 // INPUT
 // -----
@@ -467,7 +467,7 @@ void hypre_topo_sort_submat(HYPRE_Int *row_ptr,
                             HYPRE_Int CF)
 {
    HYPRE_Int i;
-   HYPRE_Int *visited = calloc(n, sizeof(HYPRE_Int));
+   HYPRE_Int *visited = hypre_CTAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
    HYPRE_Int order_ind = 0;
    HYPRE_Int temp_row = 0;
    while (order_ind < n) {
@@ -478,6 +478,6 @@ void hypre_topo_sort_submat(HYPRE_Int *row_ptr,
    for (i=order_ind; i<n; i++) {
       ordering[i] = -1;
    }
-   free(visited);
+   hypre_TFree(visited, HYPRE_MEMORY_HOST);
 }
 
