@@ -141,7 +141,12 @@ FILES =\
  par_lr_restr.c\
  superlu.c
 
-OBJS = ${FILES:.c=.o}
+FILESCXX = \
+par_amgdd_helpers.cxx
+
+OBJSC = ${FILES:.c=.o}
+OBJSCXX = ${FILESCXX:.cxx=.o}
+OBJS = ${OBJSC} ${OBJSCXX}
 
 SONAME = libHYPRE_parcsr_ls-${HYPRE_RELEASE_VERSION}.so
 
