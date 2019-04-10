@@ -855,33 +855,12 @@ SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGr
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
-   // Get the default (distance 1) number of send procs
+   // Get the default (distance 1) number of send and recv procs
    HYPRE_Int      num_sends = hypre_ParCSRCommPkgNumSends(commPkg);
+   HYPRE_Int      num_recvs = hypre_ParCSRCommPkgNumRecvs(commPkg);
 
-   #if DEBUG_PROC_NEIGHBORS
-   // Check to make sure original matrix has symmetric send/recv relationship !!! I should really have a check to make sure the matrix is actually symmetric !!!
-   HYPRE_Int num_recvs = hypre_ParCSRCommPkgNumRecvs(commPkg);
-   if (num_sends == num_recvs)
-   {
-      for (i = 0; i < num_sends; i++)
-      {
-         HYPRE_Int send_found = 0;
-         for (j = 0; j < num_recvs; j++)
-         {
-            if (hypre_ParCSRCommPkgSendProc(commPkg,i) == hypre_ParCSRCommPkgRecvProc(commPkg,j))
-            {
-               send_found = 1;
-               break;
-            }
-         }
-         if (!send_found) hypre_printf("Error: initial commPkg send and recv ranks differ on level %d, rank %d\n", level, myid);
-      }
-   }
-   else hypre_printf("Error: num_sends doesn't equal num_recvs for original commPkg on  level %d, rank %d\n", level, myid);
-   #endif
-
-   // If num_sends is zero, then simply note that in compGridCommPkg and we are done
-   if (num_sends == 0)
+   // If num_sends and num_recvs are zero, then simply note that in compGridCommPkg and we are done
+   if (num_sends == 0 && num_recvs == 0)
    {
       hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[level] = num_sends;
       hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg)[level] = num_sends;
@@ -1038,34 +1017,6 @@ SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGr
       hypre_TFree(num_starting_nodes, HYPRE_MEMORY_HOST);
       hypre_TFree(num_request_nodes, HYPRE_MEMORY_HOST);
    }
-
-   #if DEBUG_PROC_NEIGHBORS
-   // Check to make sure what we end up with has symmetric send/recv relationship 
-   HYPRE_Int max_size;
-   HYPRE_Int   num_procs;
-   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
-   hypre_MPI_Allreduce(&num_sends, &max_size, 1, HYPRE_MPI_INT, MPI_MAX, hypre_MPI_COMM_WORLD);
-   HYPRE_Int *send_send_procs = hypre_CTAlloc(HYPRE_Int, max_size, HYPRE_MEMORY_HOST);
-   HYPRE_Int *recv_send_procs = hypre_CTAlloc(HYPRE_Int, max_size*num_procs, HYPRE_MEMORY_HOST);
-   for (i = 0; i < num_sends; i++) send_send_procs[i] = hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level][i];
-   for (i = num_sends; i < max_size; i++) send_send_procs[i] = -1;
-   hypre_MPI_Allgather(send_send_procs, max_size, HYPRE_MPI_INT, recv_send_procs, max_size, HYPRE_MPI_INT, hypre_MPI_COMM_WORLD);
-   for (i = 0; i < num_sends; i++)
-   {
-      HYPRE_Int send_found = 0;
-      for (j = 0; j < max_size; j++)
-      {
-         if (recv_send_procs[ hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level][i]*max_size + j ] == myid)
-         {
-            send_found = 1;
-            break;
-         }
-      }
-      if (!send_found) hypre_printf("Error: send and recv ranks differ on level %d, rank %d sends to proc %d, but not the reverse\n", level, myid, hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level][i]);
-   }
-   #endif
-
-
 
    return 0;
 }
@@ -2564,7 +2515,7 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
             {
                // Recursively add the region of padding (flagging coarse nodes on the next level if applicable)
                if (level != transition_level-1) RecursivelyBuildPsiComposite(i, padding[level], compGrid[level], add_flag[level], add_flag[level+1], 1, &nodes_to_add, padding[level+1]);
-               else RecursivelyBuildPsiComposite(i, padding[level], compGrid[level], add_flag[level], NULL, 0, &nodes_to_add, padding[level+1]);
+               else RecursivelyBuildPsiComposite(i, padding[level], compGrid[level], add_flag[level], NULL, 0, &nodes_to_add, 0);
             }
          }
 
