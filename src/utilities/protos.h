@@ -278,7 +278,7 @@ void hypre_big_sort_and_create_inverse_map(
 /* hypre_cuda_utils.h */
 HYPRE_Int hypreDevice_GetRowNnz(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int *d_diag_ia, HYPRE_Int *d_offd_ia, HYPRE_Int *d_rownnz);
 
-HYPRE_Int hypreDevice_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int job, HYPRE_Int has_offd, HYPRE_Int first_col, HYPRE_Int *d_col_map_offd_A, HYPRE_Int *d_diag_i, HYPRE_Int *d_diag_j, HYPRE_Complex *d_diag_a, HYPRE_Int *d_offd_i, HYPRE_Int *d_offd_j, HYPRE_Complex *d_offd_a, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex *d_ab);
+HYPRE_Int hypreDevice_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int job, HYPRE_Int has_offd, HYPRE_Int first_col, HYPRE_Int *d_col_map_offd_A, HYPRE_Int *d_diag_i, HYPRE_Int *d_diag_j, HYPRE_Complex *d_diag_a, HYPRE_Int *d_offd_i, HYPRE_Int *d_offd_j, HYPRE_Complex *d_offd_a, HYPRE_Int *d_ib, HYPRE_BigInt *d_jb, HYPRE_Complex *d_ab);
 
 HYPRE_Int hypreDevice_IntegerReduceSum(HYPRE_Int m, HYPRE_Int *d_i);
 

@@ -147,20 +147,20 @@ hypre_CSRMatrixMultiplyDevice( hypre_CSRMatrix *A,
 
 HYPRE_Int
 hypre_CSRMatrixSplitDevice(hypre_CSRMatrix  *B_ext,
-                           HYPRE_Int         first_col_diag_B,
-                           HYPRE_Int         last_col_diag_B,
+                           HYPRE_BigInt      first_col_diag_B,
+                           HYPRE_BigInt      last_col_diag_B,
                            HYPRE_Int         num_cols_offd_B,
-                           HYPRE_Int        *col_map_offd_B,
+                           HYPRE_BigInt     *col_map_offd_B,
                            HYPRE_Int       **map_B_to_C_ptr,
                            HYPRE_Int        *num_cols_offd_C_ptr,
-                           HYPRE_Int       **col_map_offd_C_ptr,
+                           HYPRE_BigInt    **col_map_offd_C_ptr,
                            hypre_CSRMatrix **B_ext_diag_ptr,
                            hypre_CSRMatrix **B_ext_offd_ptr)
 {
    HYPRE_Int        num_rows   = hypre_CSRMatrixNumRows(B_ext);
    HYPRE_Int        B_ext_nnz  = hypre_CSRMatrixNumNonzeros(B_ext);
    HYPRE_Int       *B_ext_i    = hypre_CSRMatrixI(B_ext);
-   HYPRE_Int       *B_ext_j    = hypre_CSRMatrixJ(B_ext);
+   HYPRE_BigInt    *B_ext_j    = hypre_CSRMatrixBigJ(B_ext);
    HYPRE_Complex   *B_ext_a = hypre_CSRMatrixData(B_ext);
    hypre_CSRMatrix *B_ext_diag = NULL;
    hypre_CSRMatrix *B_ext_offd = NULL;
@@ -172,12 +172,13 @@ hypre_CSRMatrixSplitDevice(hypre_CSRMatrix  *B_ext,
 
    HYPRE_Int     *B_ext_diag_i    = NULL;
    HYPRE_Int     *B_ext_diag_j    = NULL;
-   HYPRE_Complex *B_ext_diag_a = NULL;
+   HYPRE_Complex *B_ext_diag_a    = NULL;
    HYPRE_Int     *B_ext_offd_i    = NULL;
    HYPRE_Int     *B_ext_offd_j    = NULL;
-   HYPRE_Complex *B_ext_offd_a = NULL;
+   HYPRE_Complex *B_ext_offd_a    = NULL;
 
-   HYPRE_Int     *col_map_offd_C, *map_B_to_C;
+   HYPRE_BigInt  *col_map_offd_C;
+   HYPRE_Int     *map_B_to_C;
    HYPRE_Int      num_cols_offd_C;
 
    in_range     pred1(first_col_diag_B, last_col_diag_B);
@@ -229,15 +230,15 @@ hypre_CSRMatrixSplitDevice(hypre_CSRMatrix  *B_ext,
    hypre_assert(tmpi - B_ext_offd_row_indices == B_ext_offd_nnz);
 
    /* offd map of B_ext_offd Union col_map_offd_B */
-   col_map_offd_C = hypre_TAlloc(HYPRE_Int, B_ext_offd_nnz + num_cols_offd_B, HYPRE_MEMORY_DEVICE);
+   col_map_offd_C = hypre_TAlloc(HYPRE_BigInt, B_ext_offd_nnz + num_cols_offd_B, HYPRE_MEMORY_DEVICE);
    hypre_TMemcpy(col_map_offd_C, B_ext_offd_j, HYPRE_Int, B_ext_offd_nnz, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
    hypre_TMemcpy(col_map_offd_C + B_ext_offd_nnz, col_map_offd_B, HYPRE_Int, num_cols_offd_B, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
    thrust::sort(thrust::device, col_map_offd_C, col_map_offd_C + B_ext_offd_nnz + num_cols_offd_B);
    tmpi = thrust::unique(thrust::device, col_map_offd_C, col_map_offd_C + B_ext_offd_nnz + num_cols_offd_B);
    num_cols_offd_C = tmpi - col_map_offd_C;
 #if 1
-   HYPRE_Int *tmp = hypre_TAlloc(HYPRE_Int, num_cols_offd_C, HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy(tmp, col_map_offd_C, HYPRE_Int, num_cols_offd_C, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+   HYPRE_BigInt *tmp = hypre_TAlloc(HYPRE_BigInt, num_cols_offd_C, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(tmp, col_map_offd_C, HYPRE_BigInt, num_cols_offd_C, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
    hypre_TFree(col_map_offd_C, HYPRE_MEMORY_DEVICE);
    col_map_offd_C = tmp;
 #else
@@ -394,13 +395,13 @@ hypre_CSRMatrixMultiplyDevice( hypre_CSRMatrix *A,
 
 HYPRE_Int
 hypre_CSRMatrixSplitDevice(hypre_CSRMatrix  *B_ext,
-                           HYPRE_Int         first_col_diag_B,
-                           HYPRE_Int         last_col_diag_B,
+                           HYPRE_BigInt      first_col_diag_B,
+                           HYPRE_BigInt      last_col_diag_B,
                            HYPRE_Int         num_cols_offd_B,
-                           HYPRE_Int        *col_map_offd_B,
+                           HYPRE_BigInt     *col_map_offd_B,
                            HYPRE_Int       **map_B_to_C_ptr,
                            HYPRE_Int        *num_cols_offd_C_ptr,
-                           HYPRE_Int       **col_map_offd_C_ptr,
+                           HYPRE_BigInt    **col_map_offd_C_ptr,
                            hypre_CSRMatrix **B_ext_diag_ptr,
                            hypre_CSRMatrix **B_ext_offd_ptr)
 {

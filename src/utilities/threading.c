@@ -50,12 +50,10 @@ hypre_GetThreadNum( )
    return my_thread_num;
 }
 
-HYPRE_Int
+void
 hypre_SetNumThreads(HYPRE_Int nt)
 {
    omp_set_num_threads(nt);
-
-   return nt;
 }
 
 #endif

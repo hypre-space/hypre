@@ -68,7 +68,7 @@ hypreCUDAKernel_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_
                                HYPRE_Int first_col, HYPRE_Int *d_col_map_offd_A,
                                HYPRE_Int *d_diag_i, HYPRE_Int *d_diag_j, HYPRE_Complex *d_diag_a,
                                HYPRE_Int *d_offd_i, HYPRE_Int *d_offd_j, HYPRE_Complex *d_offd_a,
-                               HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex *d_ab)
+                               HYPRE_Int *d_ib, HYPRE_BigInt *d_jb, HYPRE_Complex *d_ab)
 {
    HYPRE_Int global_warp_id = blockIdx.x * blockDim.y + threadIdx.y;
 
@@ -142,10 +142,10 @@ hypreCUDAKernel_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_
 /* special case: if d_row_indices == NULL, it means d_row_indices=[0,1,...,nrows-1] */
 HYPRE_Int
 hypreDevice_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int job, HYPRE_Int has_offd,
-                           HYPRE_Int first_col, HYPRE_Int *d_col_map_offd_A,
+                           HYPRE_BigInt first_col, HYPRE_BigInt *d_col_map_offd_A,
                            HYPRE_Int *d_diag_i, HYPRE_Int *d_diag_j, HYPRE_Complex *d_diag_a,
                            HYPRE_Int *d_offd_i, HYPRE_Int *d_offd_j, HYPRE_Complex *d_offd_a,
-                           HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex *d_ab)
+                           HYPRE_Int *d_ib, HYPRE_BigInt *d_jb, HYPRE_Complex *d_ab)
 {
    /* trivial case */
    if (nrows <= 0)

@@ -40,7 +40,7 @@ HYPRE_Int hypre_FillResponseParToCSRMatrix(void*, HYPRE_Int, HYPRE_Int, void*, M
    containing the start row of the calling processor followed by the start row
    of the next processor - AHB 6/05 */
 
-hypre_ParCSRMatrix *
+hypre_ParCSRMatrix*
 hypre_ParCSRMatrixCreate( MPI_Comm comm,
                           HYPRE_BigInt global_num_rows,
                           HYPRE_BigInt global_num_cols,
@@ -224,8 +224,8 @@ hypre_ParCSRMatrixInitialize_v2( hypre_ParCSRMatrix *matrix, HYPRE_Int memory_lo
       return hypre_error_flag;
    }
 
-   hypre_CSRMatrixInitialize_v2(hypre_ParCSRMatrixDiag(matrix), memory_location);
-   hypre_CSRMatrixInitialize_v2(hypre_ParCSRMatrixOffd(matrix), memory_location);
+   hypre_CSRMatrixInitialize_v2(hypre_ParCSRMatrixDiag(matrix), 0, memory_location);
+   hypre_CSRMatrixInitialize_v2(hypre_ParCSRMatrixOffd(matrix), 0, memory_location);
 
    hypre_ParCSRMatrixColMapOffd(matrix) =
       hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(matrix)),
@@ -1497,7 +1497,7 @@ hypre_MergeDiagAndOffd(hypre_ParCSRMatrix *par_matrix)
    hypre_CSRMatrix  *offd = hypre_ParCSRMatrixOffd(par_matrix);
    hypre_CSRMatrix  *matrix;
 
-   HYPRE_Int          num_cols = hypre_ParCSRMatrixGlobalNumCols(par_matrix);
+   HYPRE_BigInt       num_cols = hypre_ParCSRMatrixGlobalNumCols(par_matrix);
    HYPRE_BigInt       first_col_diag = hypre_ParCSRMatrixFirstColDiag(par_matrix);
    HYPRE_BigInt      *col_map_offd = hypre_ParCSRMatrixColMapOffd(par_matrix);
    HYPRE_Int          num_rows = hypre_CSRMatrixNumRows(diag);

@@ -283,20 +283,23 @@ HYPRE_Int hypre_CSRMatrixTranspose ( hypre_CSRMatrix *A , hypre_CSRMatrix **AT ,
 HYPRE_Int hypre_CSRMatrixReorder ( hypre_CSRMatrix *A );
 HYPRE_Complex hypre_CSRMatrixSumElts ( hypre_CSRMatrix *A );
 HYPRE_Real hypre_CSRMatrixFnorm( hypre_CSRMatrix *A );
-HYPRE_Int hypre_CSRMatrixSplit(hypre_CSRMatrix *Bs_ext, HYPRE_Int first_col_diag_B, HYPRE_Int last_col_diag_B, HYPRE_Int num_cols_offd_B, HYPRE_Int *col_map_offd_B, HYPRE_Int *num_cols_offd_C_ptr, HYPRE_Int **col_map_offd_C_ptr, hypre_CSRMatrix **Bext_diag_ptr, hypre_CSRMatrix **Bext_offd_ptr);
+HYPRE_Int hypre_CSRMatrixSplit(hypre_CSRMatrix *Bs_ext, HYPRE_BigInt first_col_diag_B, HYPRE_BigInt last_col_diag_B, HYPRE_Int num_cols_offd_B, HYPRE_BigInt *col_map_offd_B, HYPRE_Int *num_cols_offd_C_ptr, HYPRE_BigInt **col_map_offd_C_ptr, hypre_CSRMatrix **Bext_diag_ptr, hypre_CSRMatrix **Bext_offd_ptr);
 hypre_CSRMatrix * hypre_CSRMatrixAddPartial( hypre_CSRMatrix *A, hypre_CSRMatrix *B, HYPRE_Int *row_nums);
 
 /* csr_matop_device.c */
 hypre_CSRMatrix *hypre_CSRMatrixAddDevice ( hypre_CSRMatrix *A , hypre_CSRMatrix *B );
+
 hypre_CSRMatrix *hypre_CSRMatrixMultiplyDevice ( hypre_CSRMatrix *A , hypre_CSRMatrix *B );
-HYPRE_Int hypre_CSRMatrixSplitDevice(hypre_CSRMatrix *Bs_ext, HYPRE_Int first_col_diag_B, HYPRE_Int last_col_diag_B, HYPRE_Int num_cols_offd_B, HYPRE_Int *col_map_offd_B, HYPRE_Int **map_B_to_C, HYPRE_Int *num_cols_offd_C_ptr, HYPRE_Int **col_map_offd_C_ptr, hypre_CSRMatrix **Bext_diag_ptr, hypre_CSRMatrix **Bext_offd_ptr);
+
+HYPRE_Int hypre_CSRMatrixSplitDevice(hypre_CSRMatrix *B_ext, HYPRE_BigInt first_col_diag_B, HYPRE_BigInt last_col_diag_B, HYPRE_Int num_cols_offd_B, HYPRE_BigInt *col_map_offd_B, HYPRE_Int **map_B_to_C_ptr, HYPRE_Int *num_cols_offd_C_ptr, HYPRE_BigInt **col_map_offd_C_ptr, hypre_CSRMatrix **B_ext_diag_ptr, hypre_CSRMatrix **B_ext_offd_ptr);
+
 hypre_CSRMatrix* hypre_CSRMatrixAddPartialDevice( hypre_CSRMatrix *A, hypre_CSRMatrix *B, HYPRE_Int *row_nums);
 
 /* csr_matrix.c */
 hypre_CSRMatrix *hypre_CSRMatrixCreate ( HYPRE_Int num_rows , HYPRE_Int num_cols , HYPRE_Int num_nonzeros );
 HYPRE_Int hypre_CSRMatrixDestroy ( hypre_CSRMatrix *matrix );
+HYPRE_Int hypre_CSRMatrixInitialize_v2( hypre_CSRMatrix *matrix, HYPRE_Int bigInit, HYPRE_Int memory_location );
 HYPRE_Int hypre_CSRMatrixInitialize ( hypre_CSRMatrix *matrix );
-HYPRE_Int hypre_CSRMatrixInitialize_v2( hypre_CSRMatrix *matrix, HYPRE_Int memory_location );
 HYPRE_Int hypre_CSRMatrixBigInitialize ( hypre_CSRMatrix *matrix );
 HYPRE_Int hypre_CSRMatrixBigJtoJ ( hypre_CSRMatrix *matrix );
 HYPRE_Int hypre_CSRMatrixJtoBigJ ( hypre_CSRMatrix *matrix );

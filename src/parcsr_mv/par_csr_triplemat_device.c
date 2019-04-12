@@ -24,31 +24,29 @@ hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A,
    MPI_Comm         comm = hypre_ParCSRMatrixComm(A);
 
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
-
    hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
 
-   HYPRE_Int       *row_starts_A = hypre_ParCSRMatrixRowStarts(A);
+   HYPRE_BigInt    *row_starts_A    = hypre_ParCSRMatrixRowStarts(A);
    HYPRE_Int        num_cols_diag_A = hypre_CSRMatrixNumCols(A_diag);
    HYPRE_Int        num_rows_diag_A = hypre_CSRMatrixNumRows(A_diag);
 
    hypre_CSRMatrix *B_diag = hypre_ParCSRMatrixDiag(B);
 
    hypre_CSRMatrix *B_offd = hypre_ParCSRMatrixOffd(B);
-   /* HYPRE_Int       *col_map_offd_B = hypre_ParCSRMatrixColMapOffd(B); */
+   /* HYPRE_BigInt       *col_map_offd_B = hypre_ParCSRMatrixColMapOffd(B); */
 
-   HYPRE_Int        first_col_diag_B = hypre_ParCSRMatrixFirstColDiag(B);
-   HYPRE_Int        last_col_diag_B;
-   HYPRE_Int       *col_starts_B = hypre_ParCSRMatrixColStarts(B);
-   HYPRE_Int        num_rows_diag_B = hypre_CSRMatrixNumRows(B_diag);
-   HYPRE_Int        num_cols_diag_B = hypre_CSRMatrixNumCols(B_diag);
-   HYPRE_Int        num_cols_offd_B = hypre_CSRMatrixNumCols(B_offd);
+   HYPRE_BigInt     first_col_diag_B = hypre_ParCSRMatrixFirstColDiag(B);
+   HYPRE_BigInt     last_col_diag_B;
+   HYPRE_BigInt    *col_starts_B     = hypre_ParCSRMatrixColStarts(B);
+   HYPRE_Int        num_rows_diag_B  = hypre_CSRMatrixNumRows(B_diag);
+   HYPRE_Int        num_cols_diag_B  = hypre_CSRMatrixNumCols(B_diag);
+   HYPRE_Int        num_cols_offd_B  = hypre_CSRMatrixNumCols(B_offd);
 
    hypre_ParCSRMatrix *C;
-   HYPRE_Int          *col_map_offd_C = NULL;
-   HYPRE_Int          *map_B_to_C=NULL;
+   HYPRE_BigInt       *col_map_offd_C = NULL;
+   HYPRE_Int          *map_B_to_C = NULL;
 
    hypre_CSRMatrix *C_diag = NULL;
-
    hypre_CSRMatrix *C_offd = NULL;
 
    HYPRE_Int        num_cols_offd_C = 0;
@@ -64,8 +62,8 @@ hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A,
    hypre_CSRMatrix *ABext_diag;
    hypre_CSRMatrix *ABext_offd;
 
-   HYPRE_Int        n_rows_A, n_cols_A;
-   HYPRE_Int        n_rows_B, n_cols_B;
+   HYPRE_BigInt     n_rows_A, n_cols_A;
+   HYPRE_BigInt     n_rows_B, n_cols_B;
    HYPRE_Int        num_procs;
    HYPRE_Int        my_id;
 
@@ -84,7 +82,7 @@ hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A,
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
 
-   last_col_diag_B = first_col_diag_B + num_cols_diag_B -1;
+   last_col_diag_B = first_col_diag_B + num_cols_diag_B - 1;
 
    /*-----------------------------------------------------------------------
     *  Extract B_ext, i.e. portion of B that is stored on neighbor procs
@@ -184,7 +182,7 @@ hypre_CSRMatrixPrint2(AB_offd_host, NULL);
    {
       C_diag = hypre_CSRMatrixMultiply(A_diag, B_diag);
       C_offd = hypre_CSRMatrixCreate(num_rows_diag_A, 0, 0);
-      hypre_CSRMatrixInitialize_v2(C_offd, HYPRE_MEMORY_DEVICE);
+      hypre_CSRMatrixInitialize_v2(C_offd, 0, HYPRE_MEMORY_DEVICE);
    }
 
 /*
@@ -219,8 +217,8 @@ hypre_CSRMatrixPrint2(C_offd_host, NULL);
    {
       hypre_ParCSRMatrixDeviceColMapOffd(C) = col_map_offd_C;
 
-      hypre_ParCSRMatrixColMapOffd(C) = hypre_TAlloc(HYPRE_Int, num_cols_offd_C, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(hypre_ParCSRMatrixColMapOffd(C), col_map_offd_C, HYPRE_Int, num_cols_offd_C,
+      hypre_ParCSRMatrixColMapOffd(C) = hypre_TAlloc(HYPRE_BigInt, num_cols_offd_C, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(hypre_ParCSRMatrixColMapOffd(C), col_map_offd_C, HYPRE_BigInt, num_cols_offd_C,
                     HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    }
 
@@ -241,24 +239,24 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
    hypre_CSRMatrix *B_offd  = hypre_ParCSRMatrixOffd(B);
    hypre_CSRMatrix *AT_diag = NULL;
 
-   HYPRE_Int num_rows_diag_A  = hypre_CSRMatrixNumRows(A_diag);
-   HYPRE_Int num_cols_diag_A  = hypre_CSRMatrixNumCols(A_diag);
-   HYPRE_Int num_rows_diag_B  = hypre_CSRMatrixNumRows(B_diag);
-   HYPRE_Int num_cols_diag_B  = hypre_CSRMatrixNumCols(B_diag);
-   HYPRE_Int num_cols_offd_B  = hypre_CSRMatrixNumCols(B_offd);
-   HYPRE_Int first_col_diag_B = hypre_ParCSRMatrixFirstColDiag(B);
-   HYPRE_Int last_col_diag_B  = first_col_diag_B + num_cols_diag_B - 1;
+   HYPRE_Int    num_rows_diag_A  = hypre_CSRMatrixNumRows(A_diag);
+   HYPRE_Int    num_cols_diag_A  = hypre_CSRMatrixNumCols(A_diag);
+   HYPRE_Int    num_rows_diag_B  = hypre_CSRMatrixNumRows(B_diag);
+   HYPRE_Int    num_cols_diag_B  = hypre_CSRMatrixNumCols(B_diag);
+   HYPRE_Int    num_cols_offd_B  = hypre_CSRMatrixNumCols(B_offd);
+   HYPRE_BigInt first_col_diag_B = hypre_ParCSRMatrixFirstColDiag(B);
+   HYPRE_BigInt last_col_diag_B  = first_col_diag_B + num_cols_diag_B - 1;
 
-   /* HYPRE_Int *col_map_offd_B = hypre_ParCSRMatrixColMapOffd(B); */
+   /* HYPRE_BigInt *col_map_offd_B = hypre_ParCSRMatrixColMapOffd(B); */
 
-   HYPRE_Int *col_starts_A = hypre_ParCSRMatrixColStarts(A);
-   HYPRE_Int *col_starts_B = hypre_ParCSRMatrixColStarts(B);
+   HYPRE_BigInt *col_starts_A = hypre_ParCSRMatrixColStarts(A);
+   HYPRE_BigInt *col_starts_B = hypre_ParCSRMatrixColStarts(B);
 
    hypre_ParCSRMatrix *C;
    hypre_CSRMatrix *C_diag = NULL;
    hypre_CSRMatrix *C_offd = NULL;
 
-   HYPRE_Int *col_map_offd_C = NULL;
+   HYPRE_BigInt *col_map_offd_C = NULL;
    HYPRE_Int *map_B_to_C;
    /*
    HYPRE_Int  first_col_diag_C;
@@ -266,8 +264,8 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
    */
    HYPRE_Int  num_cols_offd_C = 0;
 
-   HYPRE_Int n_rows_A, n_cols_A;
-   HYPRE_Int n_rows_B, n_cols_B;
+   HYPRE_BigInt n_rows_A, n_cols_A;
+   HYPRE_BigInt n_rows_B, n_cols_B;
    HYPRE_Int num_procs, my_id;
 
    n_rows_A = hypre_ParCSRMatrixGlobalNumRows(A);
@@ -292,7 +290,7 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
    {
       C_diag = hypre_CSRMatrixMultiply(AT_diag, B_diag);
       C_offd = hypre_CSRMatrixCreate(num_cols_diag_A, 0, 0);
-      hypre_CSRMatrixInitialize_v2(C_offd, HYPRE_MEMORY_DEVICE);
+      hypre_CSRMatrixInitialize_v2(C_offd, 0, HYPRE_MEMORY_DEVICE);
       if (keep_transpose)
       {
          A->diagT = AT_diag;
@@ -423,8 +421,8 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
    {
       hypre_ParCSRMatrixDeviceColMapOffd(C) = col_map_offd_C;
 
-      hypre_ParCSRMatrixColMapOffd(C) = hypre_TAlloc(HYPRE_Int, num_cols_offd_C, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(hypre_ParCSRMatrixColMapOffd(C), col_map_offd_C, HYPRE_Int, num_cols_offd_C,
+      hypre_ParCSRMatrixColMapOffd(C) = hypre_TAlloc(HYPRE_BigInt, num_cols_offd_C, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(hypre_ParCSRMatrixColMapOffd(C), col_map_offd_C, HYPRE_BigInt, num_cols_offd_C,
                     HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    }
 
