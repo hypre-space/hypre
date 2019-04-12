@@ -756,6 +756,8 @@ include_directories(${hypre_SOURCE_DIR})
 include_directories(../../parmetis-4.0.3/include/)
 include_directories(../../parmetis-4.0.3/metis/include)
 
+# !!! What's the proper way to ensure C++11 support?
+set (CMAKE_CXX_STANDARD 11)
 
 
 include_directories(blas)

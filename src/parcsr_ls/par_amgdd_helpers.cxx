@@ -6,9 +6,32 @@
 #include "par_csr_block_matrix.h"   
 
 #ifdef __cplusplus
+
+#include <vector>
+#include <map>
+
+using namespace std;
+
 extern "C"
 {
+
 #endif
+
+HYPRE_Int
+SetupNearestProcessorNeighborsNew( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int level, HYPRE_Int *padding, HYPRE_Int num_ghost_layers, HYPRE_Int *communication_cost );
+
+HYPRE_Int
+SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int level, HYPRE_Int *padding, HYPRE_Int num_ghost_layers, HYPRE_Int *communication_cost );
+
+#ifdef __cplusplus
+}
+
+HYPRE_Int 
+FindNeighborProcessorsNew(hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A, 
+   map<HYPRE_Int, map<HYPRE_Int, HYPRE_Int> > &send_proc_dofs, 
+   map<HYPRE_Int, vector<HYPRE_Int> > starting_dofs, 
+   HYPRE_Int level, HYPRE_Int *communication_cost);
+
 HYPRE_Int
 FindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A, HYPRE_Int ***add_flag,
    HYPRE_Int **num_starting_nodes, HYPRE_Int ***starting_nodes,
@@ -21,19 +44,69 @@ FindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A, HYPR
    , HYPRE_Int level, HYPRE_Int iteration, HYPRE_Int *communication_cost );
 
 HYPRE_Int
+RecursivelyFindNeighborNodesNew(HYPRE_Int dof_index, HYPRE_Int distance, hypre_ParCompGrid *compGrid, 
+   map<HYPRE_Int, HYPRE_Int> &send_dofs, 
+   map<HYPRE_Int, HYPRE_Int> &request_dofs );
+
+HYPRE_Int
 RecursivelyFindNeighborNodes(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *compGrid, HYPRE_Int *add_flag, 
    HYPRE_Int *request_nodes, HYPRE_Int *num_request_nodes
    , HYPRE_Int level, HYPRE_Int iteration, HYPRE_Int proc );
 
+
+
+
 HYPRE_Int
-SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int level, HYPRE_Int *padding, HYPRE_Int num_ghost_layers, HYPRE_Int *communication_cost );
+SetupNearestProcessorNeighborsNew( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int level, HYPRE_Int *padding, HYPRE_Int num_ghost_layers, HYPRE_Int *communication_cost )
+{
+   HYPRE_Int               i,j,cnt;
+   HYPRE_Int               num_nodes = hypre_ParCSRMatrixNumRows(A);
+   hypre_ParCSRCommPkg     *commPkg = hypre_ParCSRMatrixCommPkg(A);
+   HYPRE_Int               start,finish;
 
-#ifdef __cplusplus
+   HYPRE_Int   myid, num_procs;
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+
+   // Get the default (distance 1) number of send and recv procs
+   HYPRE_Int      num_sends = hypre_ParCSRCommPkgNumSends(commPkg);
+   HYPRE_Int      num_recvs = hypre_ParCSRCommPkgNumRecvs(commPkg);
+
+   // If num_sends and num_recvs are zero, then simply note that in compGridCommPkg and we are done
+   if (num_sends == 0 && num_recvs == 0)
+   {
+      hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[level] = 0;
+      hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg)[level] = 0;
+      hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg)[level] = 0;
+   }
+   else
+   {
+      // Initialize add_flag (this is how we will track nodes to send to each proc until routine finishes)
+      map<HYPRE_Int, map<HYPRE_Int, HYPRE_Int> > send_proc_dofs; // send_proc_dofs[send_proc] = send_dofs, send_dofs[dof_index] = distance value
+      map<HYPRE_Int, vector<HYPRE_Int> > starting_dofs; // starting_dofs[send_proc] = vector of starting dofs for searching through stencil
+      for (i = 0; i < num_sends; i++)
+      {
+         send_proc_dofs[hypre_ParCSRCommPkgSendProc(commPkg,i)]; // initialize the send procs as the keys in the outer map
+         starting_dofs[hypre_ParCSRCommPkgSendProc(commPkg,i)];
+         start = hypre_ParCSRCommPkgSendMapStart(commPkg,i);
+         finish = hypre_ParCSRCommPkgSendMapStart(commPkg,i+1);
+         for (j = start; j < finish; j++)
+         {
+            send_proc_dofs[hypre_ParCSRCommPkgSendProc(commPkg,i)][hypre_ParCSRCommPkgSendMapElmt(commPkg,j)] = padding[level] + num_ghost_layers;
+            starting_dofs[hypre_ParCSRCommPkgSendProc(commPkg,i)].push_back(hypre_ParCSRCommPkgSendMapElmt(commPkg,j));
+         }
+      }
+
+      // Iteratively communicate with longer and longer distance neighbors to grow the communication stencils
+      for (i = 0; i < padding[level] + num_ghost_layers - 1; i++)
+      {
+         FindNeighborProcessorsNew(compGrid, A, send_proc_dofs, starting_dofs, level, communication_cost);
+      }
+   }
+   // !!! Finish
+
+   return 0;
 }
-
-
-#include <vector>
-using namespace std;
 
 HYPRE_Int
 SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int level, HYPRE_Int *padding, HYPRE_Int num_ghost_layers, HYPRE_Int *communication_cost )
@@ -54,9 +127,9 @@ SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGr
    // If num_sends and num_recvs are zero, then simply note that in compGridCommPkg and we are done
    if (num_sends == 0 && num_recvs == 0)
    {
-      hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[level] = num_sends;
-      hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg)[level] = num_sends;
-      hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg)[level] = num_sends;
+      hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[level] = 0;
+      hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg)[level] = 0;
+      hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg)[level] = 0;
    }
    else
    {
@@ -75,6 +148,7 @@ SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGr
          finish = hypre_ParCSRCommPkgSendMapStart(commPkg,i+1);
          for (j = start; j < finish; j++) add_flag[i][ hypre_ParCSRCommPkgSendMapElmt(commPkg,j) ] = padding[level] + num_ghost_layers; // must be set to padding + numGhostLayers (note that the starting nodes are already distance 1 from their neighbors on the adjacent processor)
       }
+
 
       // Setup initial num_starting_nodes and starting_nodes (these are the starting nodes when searching for long distance neighbors) !!! I don't think I actually have a good upper bound on sizes here... how to properly allocate/reallocate these? !!!
       HYPRE_Int *num_starting_nodes = hypre_CTAlloc( HYPRE_Int, send_proc_array_size, HYPRE_MEMORY_HOST );
@@ -102,8 +176,6 @@ SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGr
       HYPRE_Int *num_request_nodes = hypre_CTAlloc(HYPRE_Int, send_proc_array_size, HYPRE_MEMORY_HOST);
       HYPRE_Int **request_nodes = hypre_CTAlloc(HYPRE_Int*, send_proc_array_size, HYPRE_MEMORY_HOST);
 
-      FILE *file;
-      char filename[256];
       for (i = 0; i < padding[level] + num_ghost_layers - 1; i++)
       {
          FindNeighborProcessors(compGrid, A, &(add_flag), 
@@ -116,40 +188,6 @@ SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGr
             max_starting_nodes_size
             , level, i, communication_cost); // Note that num_sends may change here
       }
-
-      #if DEBUG_PROC_NEIGHBORS
-      for (j = 0; j < num_sends; j++)
-      {
-         sprintf(filename,"outputs/add_flag_level%d_proc%d_rank%d.txt", level, send_procs[j], myid);
-         file = fopen(filename,"w");
-         HYPRE_Int k;
-         for (k = 0; k < num_nodes; k++)
-         {
-            fprintf(file, "%d ", add_flag[j][k]);
-         }
-         fprintf(file, "\n");
-         for (k = 0; k < num_nodes; k++)
-         {
-            fprintf(file, "%d ", hypre_ParCompGridGlobalIndices(compGrid)[k]);
-         }
-         fclose(file);
-         // if (num_request_nodes[j])
-         // {
-         //    sprintf(filename,"outputs/request_nodes_level%d_proc%d_rank%d_i%d.txt", level, send_procs[j], myid, padding[level] + num_ghost_layers - 1);
-         //    file = fopen(filename,"w");
-         //    for (k = 0; k < num_request_nodes[j]; k++)
-         //    {
-         //       fprintf(file, "%d ", request_nodes[j][2*k]);
-         //    }
-         //    fprintf(file, "\n");
-         //    for (k = 0; k < num_request_nodes[j]; k++)
-         //    {
-         //       fprintf(file, "%d ", request_nodes[j][2*k+1]);
-         //    }
-         //    fclose(file);
-         // }
-      }
-      #endif
 
       // Use add_flag to generate relevant info for CompGridCommPkg
       cnt = 0;
@@ -212,6 +250,38 @@ SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGr
 
    return 0;
 }
+
+HYPRE_Int 
+FindNeighborProcessorsNew(hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A, 
+   map<HYPRE_Int, map<HYPRE_Int, HYPRE_Int> > &send_proc_dofs, 
+   map<HYPRE_Int, vector<HYPRE_Int> > starting_dofs, 
+   HYPRE_Int level, HYPRE_Int *communication_cost)
+{
+   HYPRE_Int j;
+   
+   // Nodes to request from other processors
+   map<HYPRE_Int, map<HYPRE_Int, HYPRE_Int> > request_dofs;
+
+   // Recursively search through the operator stencil to find longer distance neighboring dofs
+   // Loop over destination processors
+   for (auto it = starting_dofs.begin(); it != starting_dofs.end(); ++it)
+   {
+      HYPRE_Int destination_proc = it->first;
+      // Loop over starting nodes for this proc
+      for (j = 0; j < it->second.size(); j++)
+      {
+         HYPRE_Int dof_index = it->second[j];
+         HYPRE_Int distance = send_proc_dofs[destination_proc][dof_index];
+         RecursivelyFindNeighborNodesNew(dof_index, distance, compGrid, send_proc_dofs[destination_proc], request_dofs[destination_proc]);
+      }
+   }
+
+   // !!! Finish
+
+   return 0;
+}
+
+
 
 HYPRE_Int
 FindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A, HYPRE_Int ***add_flag,
@@ -431,6 +501,63 @@ FindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A, HYPR
    hypre_TFree(recv_sizes, HYPRE_MEMORY_HOST);
    hypre_TFree(requests, HYPRE_MEMORY_HOST);
    hypre_TFree(statuses, HYPRE_MEMORY_HOST);
+
+   return 0;
+}
+
+HYPRE_Int
+RecursivelyFindNeighborNodesNew(HYPRE_Int dof_index, HYPRE_Int distance, hypre_ParCompGrid *compGrid, 
+   map<HYPRE_Int, HYPRE_Int> &send_dofs, 
+   map<HYPRE_Int, HYPRE_Int> &request_dofs )
+{
+   HYPRE_Int         i,j;
+
+   // Look at neighbors
+   for (i = hypre_ParCompGridARowPtr(compGrid)[dof_index]; i < hypre_ParCompGridARowPtr(compGrid)[dof_index+1]; i++)
+   {
+      // Get the index of the neighbor
+      HYPRE_Int neighbor_index = hypre_ParCompGridAColInd(compGrid)[i];
+
+      // If the neighbor info is available on this proc
+      if (neighbor_index >= 0)
+      {
+         // And if we still need to visit this index (note that send_dofs[neighbor_index] = distance means we have already added all distance-1 neighbors of index)
+         
+         // See whether this dof is in the send dofs
+         auto neighbor_dof = send_dofs.find(neighbor_index);
+         if (neighbor_dof == send_dofs.end())
+         {
+            // If neighbor dof isn't in the send dofs, add it with appropriate distance and recurse
+            send_dofs[neighbor_index] = distance;
+            if (distance-1 > 0) RecursivelyFindNeighborNodesNew(neighbor_index, distance-1, compGrid, send_dofs, request_dofs);
+         }
+         else if (neighbor_dof->second < distance)
+         {
+            // If neighbor dof is in the send dofs, but at smaller distance, also need to update distance and recurse
+            send_dofs[neighbor_index] = distance;
+            if (distance-1 > 0) RecursivelyFindNeighborNodesNew(neighbor_index, distance-1, compGrid, send_dofs, request_dofs);
+         }
+      }
+      // otherwise note this as a request dof
+      else
+      {
+         // Check whether we have already requested this node 
+         HYPRE_Int global_index = hypre_ParCompGridAGlobalColInd(compGrid)[i];
+
+
+         auto req_dof = request_dofs.find(global_index);
+         if (req_dof == request_dofs.end())
+         {
+            // If this hasn't yet been requested, add it
+            request_dofs[global_index] = distance;
+         }
+         else if (req_dof->second < distance)
+         {
+            // If reqest is already there, but at smaller distance, update the distance
+            request_dofs[global_index] = distance;
+         }
+      }
+   }
 
    return 0;
 }
