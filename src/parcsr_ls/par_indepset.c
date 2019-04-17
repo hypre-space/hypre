@@ -119,11 +119,11 @@ hypre_BoomerAMGIndepSet( hypre_ParCSRMatrix *S,
                          HYPRE_Int          *IS_marker,
                          HYPRE_Int          *IS_marker_offd     )
 {
-   hypre_CSRMatrix *S_diag      = hypre_ParCSRMatrixDiag(S);
-   HYPRE_Int       *S_diag_i    = hypre_CSRMatrixI(S_diag);
-   HYPRE_Int       *S_diag_j    = hypre_CSRMatrixJ(S_diag);
-   hypre_CSRMatrix *S_offd      = hypre_ParCSRMatrixOffd(S);
-   HYPRE_Int       *S_offd_i    = hypre_CSRMatrixI(S_offd);
+   hypre_CSRMatrix *S_diag   = hypre_ParCSRMatrixDiag(S);
+   HYPRE_Int       *S_diag_i = hypre_CSRMatrixI(S_diag);
+   HYPRE_Int       *S_diag_j = hypre_CSRMatrixJ(S_diag);
+   hypre_CSRMatrix *S_offd   = hypre_ParCSRMatrixOffd(S);
+   HYPRE_Int       *S_offd_i = hypre_CSRMatrixI(S_offd);
    HYPRE_Int       *S_offd_j = NULL;
 
    HYPRE_Int        local_num_vars = hypre_CSRMatrixNumRows(S_diag);
@@ -190,7 +190,10 @@ hypre_BoomerAMGIndepSet( hypre_ParCSRMatrix *S,
          for (jS = S_offd_i[i]; jS < S_offd_i[i+1]; jS++)
          {
             jj = S_offd_j[jS];
-            if (jj < 0) jj = -jj-1;
+            if (jj < 0)
+            {
+               jj = -jj-1;
+            }
             j = local_num_vars+jj;
 
             /* only consider valid graph edges */
