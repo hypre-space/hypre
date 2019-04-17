@@ -47,6 +47,7 @@ hypre_MGRSetup( void               *mgr_vdata,
 
   /* pointers to mgr data */
   HYPRE_Int  use_default_cgrid_solver = (mgr_data -> use_default_cgrid_solver);
+  HYPRE_Int  use_default_fsolver = (mgr_data -> use_default_fsolver);
   HYPRE_Int  logging = (mgr_data -> logging);
   HYPRE_Int  print_level = (mgr_data -> print_level);
   HYPRE_Int  relax_type = (mgr_data -> relax_type);
@@ -70,7 +71,7 @@ hypre_MGRSetup( void               *mgr_vdata,
   hypre_ParCSRMatrix  *RAP_ptr = NULL;
 
   hypre_ParCSRMatrix  *A_ff_ptr = NULL;
-  HYPRE_Solver **aff_solver = NULL;
+  HYPRE_Solver **aff_solver = (mgr_data -> aff_solver);
   hypre_ParCSRMatrix  **A_ff_array = (mgr_data -> A_ff_array);
   hypre_ParVector    **F_fine_array = (mgr_data -> F_fine_array);
   hypre_ParVector    **U_fine_array = (mgr_data -> U_fine_array);
@@ -102,8 +103,14 @@ hypre_MGRSetup( void               *mgr_vdata,
   hypre_ParAMGData    **FrelaxVcycleData;  
   HYPRE_Int *Frelax_method = (mgr_data -> Frelax_method);
   HYPRE_Int *Frelax_num_functions = (mgr_data -> Frelax_num_functions);
+
+  HYPRE_Int *use_non_galerkin_cg = (mgr_data -> use_non_galerkin_cg);
+
+  hypre_ParCSRMatrix *A_ff_inv = (mgr_data -> A_ff_inv);
       
   HYPRE_Int use_air = 0;
+
+  HYPRE_Real wall_time, wall_time1;
 
   /* ----- begin -----*/
 
@@ -194,7 +201,7 @@ hypre_MGRSetup( void               *mgr_vdata,
   for(i=0; i<max_num_coarse_levels; i++)
   {
     final_coarse_size = 0;
-    if (set_c_points_method == 0) 
+    if (set_c_points_method == 0) // interleaved ordering, i.e. s1,p1,s2,p2,...
     {
       // loop over rows
       for(row = ilower; row <=iupper; row++)
@@ -206,7 +213,7 @@ hypre_MGRSetup( void               *mgr_vdata,
         }
       }
     }
-    else if (set_c_points_method == 1) 
+    else if (set_c_points_method == 1) // block ordering s1,s2,...,p1,p2,...
     {
       for (j=0; j < block_size; j++) 
       {
@@ -336,22 +343,36 @@ hypre_MGRSetup( void               *mgr_vdata,
   }
 
   /* Setup for global block smoothers*/
-
-  if (my_id == num_procs)
+  if (set_c_points_method == 0)
   {
-    mgr_data -> n_block   = (n - reserved_coarse_size) / block_size;
-    mgr_data -> left_size = n - block_size*(mgr_data -> n_block);
+    if (my_id == num_procs)
+    {
+      mgr_data -> n_block   = (n - reserved_coarse_size) / block_size;
+      mgr_data -> left_size = n - block_size*(mgr_data -> n_block);
+    }
+    else
+    {
+      mgr_data -> n_block = n / block_size;
+      mgr_data -> left_size = n - block_size*(mgr_data -> n_block);
+    }
   }
   else
   {
-    mgr_data -> n_block = n / block_size;
-    mgr_data -> left_size = n - block_size*(mgr_data -> n_block);
+    mgr_data -> n_block = n;
+    mgr_data -> left_size = 0;
   }
+  wall_time = time_getWallclockSeconds();
   if (global_smooth_iters > 0)
   {
     if (global_smooth_type == 0)
     {
-      hypre_blockRelax_setup(A,block_size,reserved_coarse_size,&(mgr_data -> diaginv));
+      if (set_c_points_method == 0)
+      {
+        hypre_blockRelax_setup(A,block_size,reserved_coarse_size,&(mgr_data -> diaginv));
+      } else
+      {
+        hypre_blockRelax_setup(A,1,reserved_coarse_size,&(mgr_data -> diaginv));
+      }
     }
     else if (global_smooth_type == 8)
     {
@@ -360,7 +381,17 @@ hypre_MGRSetup( void               *mgr_vdata,
       HYPRE_EuclidSetBJ(mgr_data -> global_smoother, 1);
       HYPRE_EuclidSetup(mgr_data -> global_smoother, A, f, u);
     }
+    else if (global_smooth_type == 16)
+    {
+      HYPRE_ILUCreate(&(mgr_data -> global_smoother));
+      HYPRE_ILUSetType(mgr_data -> global_smoother, 0);
+      HYPRE_ILUSetLevelOfFill(mgr_data -> global_smoother, 0);
+      HYPRE_ILUSetMaxIter(mgr_data -> global_smoother, global_smooth_iters);
+      HYPRE_ILUSetup(mgr_data -> global_smoother, A, f, u);
+    }
   }
+  wall_time = time_getWallclockSeconds() - wall_time;
+  //hypre_printf("Proc = %d     Global smoother setup: %f\n", my_id, wall_time);
 
 
   /* clear old l1_norm data, if created */
@@ -457,6 +488,17 @@ hypre_MGRSetup( void               *mgr_vdata,
     }
     (mgr_data -> Frelax_method) = Frelax_method;
   }
+  /* Set default for using non-Galerkin coarse grid */
+  if (use_non_galerkin_cg == NULL)
+  {
+    use_non_galerkin_cg = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
+    for (i = 0; i < max_num_coarse_levels; i++)
+    {
+      use_non_galerkin_cg[i] = 0;
+    }
+    (mgr_data -> use_non_galerkin_cg) = use_non_galerkin_cg;
+  }
+
   /*
   if (Frelax_num_functions== NULL)
   {
@@ -519,12 +561,12 @@ hypre_MGRSetup( void               *mgr_vdata,
 
   if (A_ff_array)
   {
-    for (j = 1; j < old_num_coarse_levels; j++)
+    for (j = 0; j < old_num_coarse_levels - 1; j++)
     {
-      if (A_ff_array[j-1])
+      if (A_ff_array[j])
       {
-        hypre_ParCSRMatrixDestroy(A_ff_array[j-1]);
-        A_ff_array[j-1] = NULL;
+        hypre_ParCSRMatrixDestroy(A_ff_array[j]);
+        A_ff_array[j] = NULL;
       }
     }
     hypre_TFree(A_ff_array, HYPRE_MEMORY_HOST);
@@ -558,7 +600,10 @@ hypre_MGRSetup( void               *mgr_vdata,
   if (U_fine_array == NULL)
     U_fine_array = hypre_CTAlloc(hypre_ParVector*,  max_num_coarse_levels+1, HYPRE_MEMORY_HOST);
   if (aff_solver == NULL)
+  {
     aff_solver = hypre_CTAlloc(HYPRE_Solver*, max_num_coarse_levels, HYPRE_MEMORY_HOST);
+    (mgr_data -> aff_solver) = aff_solver;
+  }
   if (A_ff_array == NULL)
     A_ff_array = hypre_CTAlloc(hypre_ParCSRMatrix*, max_num_coarse_levels, HYPRE_MEMORY_HOST);
 
@@ -571,8 +616,9 @@ hypre_MGRSetup( void               *mgr_vdata,
 
   (mgr_data -> F_fine_array) = F_fine_array;
   (mgr_data -> U_fine_array) = U_fine_array;
-  (mgr_data -> aff_solver) = aff_solver;
+  //(mgr_data -> aff_solver) = aff_solver;
   (mgr_data -> A_ff_array) = A_ff_array;
+  //aff_solver = (mgr_data -> aff_solver);
 
   /* begin coarsening loop */
   num_coarsening_levs = max_num_coarse_levels;
@@ -621,8 +667,19 @@ hypre_MGRSetup( void               *mgr_vdata,
     /* Interpolation operator */
     num_interp_sweeps = (mgr_data -> num_interp_sweeps);
 
-    hypre_MGRBuildInterp(A_array[lev], CF_marker_array[lev], S, coarse_pnts_global, 1, dof_func_buff, 
+    if (interp_type[lev] != 5)
+    {
+      hypre_MGRBuildInterp(A_array[lev], CF_marker_array[lev], S, coarse_pnts_global, 1, dof_func_buff, 
                           debug_flag, trunc_factor, max_elmts, col_offd_S_to_A, &P, interp_type[lev], num_interp_sweeps);
+    }
+    else
+    {
+      //wall_time = time_getWallclockSeconds();
+      hypre_MGRBuildInterp(A_array[lev], CF_marker_array[lev], A_ff_inv, coarse_pnts_global, 1, dof_func_buff, 
+                          debug_flag, trunc_factor, max_elmts, col_offd_S_to_A, &P, interp_type[lev], num_interp_sweeps);
+      //wall_time = time_getWallclockSeconds() - wall_time;
+      //hypre_printf("Proc = %d     BuildInterp: %f\n", my_id, wall_time);
+    }
     
     P_array[lev] = P;
 
@@ -708,7 +765,17 @@ hypre_MGRSetup( void               *mgr_vdata,
       RT_array[lev] = RT;
 
       /* Compute RAP for next level */
-      hypre_BoomerAMGBuildCoarseOperator(RT, A_array[lev], P, &RAP_ptr);
+      if (use_non_galerkin_cg[lev] != 0)
+      {
+        hypre_MGRComputeNonGalerkinCoarseGrid(A_array[lev], 2, 0, 0, CF_marker_array[lev], &RAP_ptr);
+        hypre_ParCSRMatrixOwnsColStarts(RAP_ptr) = 0;
+        hypre_ParCSRMatrixOwnsColStarts(P_array[lev]) = 0;
+        hypre_ParCSRMatrixOwnsRowStarts(RT) = 0;
+      }
+      else
+      {
+        hypre_BoomerAMGBuildCoarseOperator(RT, A_array[lev], P, &RAP_ptr);
+      }
     }
 
     if (Frelax_method[lev] == 99)
@@ -729,15 +796,19 @@ hypre_MGRSetup( void               *mgr_vdata,
       hypre_ParVectorSetPartitioningOwner(U_fine_array[lev+1],0);
       A_ff_array[lev] = A_ff_ptr;
 
-      aff_solver[lev] = (HYPRE_Solver*) hypre_BoomerAMGCreate();
-      hypre_BoomerAMGSetMaxIter(aff_solver[lev], 1);
-      hypre_BoomerAMGSetRelaxOrder(aff_solver[lev], 1);
-      hypre_BoomerAMGSetNumSweeps(aff_solver[lev], 1);
-      hypre_BoomerAMGSetPrintLevel(aff_solver[lev], 1);
-      hypre_BoomerAMGSetRelaxType(aff_solver[lev], 3);
-      hypre_BoomerAMGSetNumFunctions(aff_solver[lev], 3);
+      if (use_default_fsolver)
+      {
+        aff_solver[lev] = (HYPRE_Solver*) hypre_BoomerAMGCreate();
+        hypre_BoomerAMGSetMaxIter(aff_solver[lev], 1);
+        //hypre_BoomerAMGSetRelaxOrder(aff_solver[lev], 1);
+        HYPRE_BoomerAMGSetAggNumLevels(aff_solver[lev], 1);
+        hypre_BoomerAMGSetNumSweeps(aff_solver[lev], 3);
+        hypre_BoomerAMGSetPrintLevel(aff_solver[lev], 1);
+        //hypre_BoomerAMGSetRelaxType(aff_solver[lev], 3);
+        hypre_BoomerAMGSetNumFunctions(aff_solver[lev], 3);
 
-      fine_grid_solver_setup(aff_solver[lev], A_ff_ptr, F_fine_array[lev+1], U_fine_array[lev+1]);
+        fine_grid_solver_setup(aff_solver[lev], A_ff_ptr, F_fine_array[lev+1], U_fine_array[lev+1]);
+      }
     }
 
     /* Update coarse level indexes for next levels */
@@ -859,7 +930,11 @@ hypre_MGRSetup( void               *mgr_vdata,
     HYPRE_BoomerAMGSetCpointsToKeep((mgr_data ->coarse_grid_solver), 25,reserved_coarse_size,reserved_Cpoint_local_indexes);
 
   /* setup coarse grid solver */
+  wall_time = time_getWallclockSeconds();
   coarse_grid_solver_setup((mgr_data -> coarse_grid_solver), RAP_ptr, F_array[num_c_levels], U_array[num_c_levels]);
+  //hypre_ParCSRMatrixPrintIJ(RAP_ptr,1,1,"RAP");
+  wall_time = time_getWallclockSeconds() - wall_time;
+  //hypre_printf("Proc = %d   Coarse grid setup: %f\n", my_id, wall_time);
 
   /* Setup smoother for fine grid */
   if ( relax_type == 8 || relax_type == 13 || relax_type == 14 || relax_type == 18 )

@@ -106,6 +106,32 @@ HYPRE_MGRSetNonCpointsToFpoints( HYPRE_Solver solver, HYPRE_Int nonCptToFptFlag)
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_MGRSetFSolver
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_MGRSetFSolver(HYPRE_Solver          solver,
+                             HYPRE_Int    level,
+                             HYPRE_PtrToParSolverFcn  fine_grid_solver_solve,
+                             HYPRE_PtrToParSolverFcn  fine_grid_solver_setup,
+                             HYPRE_Solver          fsolver )
+{
+   return( hypre_MGRSetFSolver( (void *) solver,
+                     level,
+                     (HYPRE_Int (*)(void*, void*, void*, void*)) fine_grid_solver_solve,
+                     (HYPRE_Int (*)(void*, void*, void*, void*)) fine_grid_solver_setup,
+                     (void *) fsolver ) );
+}
+
+HYPRE_Int HYPRE_MGRBuildAffNew(HYPRE_ParCSRMatrix A,
+                               HYPRE_Int *CF_marker,
+                               HYPRE_Int debug_flag,
+                               HYPRE_ParCSRMatrix *A_ff)
+{
+   return (hypre_MGRBuildAffNew(A, CF_marker, debug_flag, A_ff));
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_MGRSetCoarseSolver
  *--------------------------------------------------------------------------*/
 
@@ -165,33 +191,42 @@ HYPRE_MGRSetLevelRestrictType( HYPRE_Solver solver, HYPRE_Int *restrict_type )
  * HYPRE_MGRSetRelaxMethod
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_MGRSetFRelaxMethod(HYPRE_Solver solver, HYPRE_Int relax_method )
+HYPRE_MGRSetFRelaxMethod( HYPRE_Solver solver, HYPRE_Int relax_method )
 {
-   return hypre_MGRSetFRelaxMethod(solver, relax_method );
+   return hypre_MGRSetFRelaxMethod( solver, relax_method );
 }
 
 HYPRE_Int
-HYPRE_MGRSetLevelFRelaxMethod(HYPRE_Solver solver, HYPRE_Int *relax_method )
+HYPRE_MGRSetLevelFRelaxMethod( HYPRE_Solver solver, HYPRE_Int *relax_method )
 {
-   return hypre_MGRSetLevelFRelaxMethod(solver, relax_method );
+   return hypre_MGRSetLevelFRelaxMethod( solver, relax_method );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_MGRSetRelaxMethod
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_MGRSetCoarseGridMethod( HYPRE_Solver solver, HYPRE_Int *cg_method )
+{
+   return hypre_MGRSetCoarseGridMethod( solver, cg_method );
 }
 
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetRelaxNumFunctions
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_MGRSetLevelFRelaxNumFunctions(HYPRE_Solver solver, HYPRE_Int *num_functions)
+HYPRE_MGRSetLevelFRelaxNumFunctions( HYPRE_Solver solver, HYPRE_Int *num_functions )
 {
-   return hypre_MGRSetLevelFRelaxNumFunctions(solver, num_functions);
+   return hypre_MGRSetLevelFRelaxNumFunctions( solver, num_functions );
 }
 
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetRelaxType
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_MGRSetRelaxType(HYPRE_Solver solver, HYPRE_Int relax_type )
+HYPRE_MGRSetRelaxType( HYPRE_Solver solver, HYPRE_Int relax_type )
 {
-   return hypre_MGRSetRelaxType(solver, relax_type );
+   return hypre_MGRSetRelaxType( solver, relax_type );
 }
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetNumRelaxSweeps

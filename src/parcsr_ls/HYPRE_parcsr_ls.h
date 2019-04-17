@@ -3375,7 +3375,6 @@ HYPRE_Int HYPRE_MGRSetCpointsByBlock( HYPRE_Solver solver,
  **/                         
 HYPRE_Int
 HYPRE_MGRSetNonCpointsToFpoints( HYPRE_Solver solver, HYPRE_Int nonCptToFptFlag);
-
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetMaxCoarseLevels
  *--------------------------------------------------------------------------*/
@@ -3440,6 +3439,22 @@ HYPRE_MGRSetFRelaxMethod(HYPRE_Solver solver, HYPRE_Int relax_method );
 
 HYPRE_Int
 HYPRE_MGRSetLevelFRelaxMethod(HYPRE_Solver solver, HYPRE_Int *relax_method );
+
+/*--------------------------------------------------------------------------
+ * HYPRE_MGRSetCoarseGridMethod
+ *--------------------------------------------------------------------------*/
+/**
+ * (Optional) Set the strategy for coarse grid computation.
+ * Options for {\tt cg\_method} are:
+ *
+ * \begin{tabular}{|c|l|} \hline
+ * 0 & Galerkin coarse grid computation using RAP. \\
+ * 1 & Non-Galerkin coarse grid computation with dropping strategy. \\
+ * \hline
+ * \end{tabular} 
+ **/
+HYPRE_Int
+HYPRE_MGRSetCoarseGridMethod(HYPRE_Solver solver, HYPRE_Int *cg_method );
 
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetRelaxNumFunctions
@@ -3531,6 +3546,18 @@ HYPRE_MGRSetNumRelaxSweeps( HYPRE_Solver solver, HYPRE_Int nsweeps );
  **/
 HYPRE_Int
 HYPRE_MGRSetNumInterpSweeps( HYPRE_Solver solver, HYPRE_Int nsweeps );                         
+
+
+HYPRE_Int HYPRE_MGRSetFSolver(HYPRE_Solver          solver,
+                             HYPRE_Int level,
+                             HYPRE_PtrToParSolverFcn  fine_grid_solver_solve,
+                             HYPRE_PtrToParSolverFcn  fine_grid_solver_setup,
+                             HYPRE_Solver          fsolver );
+
+HYPRE_Int HYPRE_MGRBuildAffNew(HYPRE_ParCSRMatrix A,
+                               HYPRE_Int *CF_marker,
+                               HYPRE_Int debug_flag,
+                               HYPRE_ParCSRMatrix *A_ff);
 
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetCoarseSolver

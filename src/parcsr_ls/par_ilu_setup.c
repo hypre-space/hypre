@@ -30,7 +30,7 @@ hypre_ILUSetup( void               *ilu_vdata,
 
    /* pointers to ilu data */
    HYPRE_Int            logging              = hypre_ParILUDataLogging(ilu_data);
-// HYPRE_Int            print_level          = hypre_ParILUDataPrintLevel(ilu_data);
+   HYPRE_Int            print_level          = hypre_ParILUDataPrintLevel(ilu_data);
    HYPRE_Int            ilu_type             = hypre_ParILUDataIluType(ilu_data);
    HYPRE_Int            nLU                  = hypre_ParILUDataNLU(ilu_data);
    HYPRE_Int            nI                   = hypre_ParILUDataNI(ilu_data);
@@ -436,7 +436,7 @@ hypre_ILUSetup( void               *ilu_vdata,
                                           hypre_ParCSRMatrixDNumNonzeros(matL) + 
                                           hypre_ParCSRMatrixDNumNonzeros(matU)) / 
                                           hypre_ParCSRMatrixDNumNonzeros(matA);
-   if (my_id == 0)
+   if ((my_id == 0) && (print_level > 0))
    {
       hypre_printf("ILU SETUP: operator complexity = %f  \n", ilu_data -> operator_complexity);
    }
