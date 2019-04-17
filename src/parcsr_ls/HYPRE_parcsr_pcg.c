@@ -276,7 +276,7 @@ HYPRE_ParCSRDiagScale( HYPRE_Solver solver,
    } 
 #else
    HYPRE_Int i;
-#if (HYPRE_USING_OPENMP)
+#if defined(HYPRE_USING_OPENMP)
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
    for (i=0; i < local_size; i++)
