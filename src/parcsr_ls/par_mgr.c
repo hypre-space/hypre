@@ -1933,7 +1933,7 @@ hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix    *A,
     // compute the triple product
     hypre_ParCSRMatrixLeftScale(A_fc, D_ff_inv);
     A_h_correction = hypre_ParMatmul(A_cf, A_fc);
-    hypre_ParCSRMatrixPrintIJ(A_h_correction,1,1,"A_h_correction");
+    //hypre_ParCSRMatrixPrintIJ(A_h_correction,1,1,"A_h_correction");
 
     hypre_TFree(D_ff_inv, HYPRE_MEMORY_HOST);
   }
@@ -1944,7 +1944,7 @@ hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix    *A,
     hypre_MGRApproximateInverse(A_ff, &A_ff_inv);
     minus_Wp = hypre_ParMatmul(A_ff_inv, A_fc);
     A_h_correction = hypre_ParMatmul(A_cf, minus_Wp);
-    hypre_ParCSRMatrixPrintIJ(A_h_correction,1,1,"A_h_correction");
+    //hypre_ParCSRMatrixPrintIJ(A_h_correction,1,1,"A_h_correction");
 
     hypre_ParCSRMatrixDestroy(minus_Wp);
   }
@@ -2036,8 +2036,10 @@ hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix    *A,
       }
       for (jj = 0; jj < max_elmts; jj++)
       {
-        HYPRE_Int col_idx = aux_j[cnt-1-jj];
-        HYPRE_Real col_value = aux_data[cnt-1-jj];
+        //HYPRE_Int col_idx = aux_j[cnt-1-jj];
+        //HYPRE_Real col_value = aux_data[cnt-1-jj];
+        HYPRE_Int col_idx = aux_j[jj];
+        HYPRE_Real col_value = aux_data[jj];
         if (col_idx < ncol_diag && (col_idx < row_start || col_idx > row_stop))
         {
           A_h_correction_diag_j_new[num_nonzeros_diag_new] = col_idx;
@@ -2111,7 +2113,7 @@ hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix    *A,
     hypre_printf("Error!! Block ordering is not supported at the moment\n");
     exit(-1);
   }
-  hypre_ParCSRMatrixPrintIJ(A_h_correction,1,1,"A_h_correction_filtered");
+  //hypre_ParCSRMatrixPrintIJ(A_h_correction,1,1,"A_h_correction_filtered");
 
   // coarse grid / schur complement
   hypre_ParcsrAdd(1.0, A_cc, -1.0, A_h_correction, &A_h);
