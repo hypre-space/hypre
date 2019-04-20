@@ -17,6 +17,8 @@ based on release 3.2.1 (though many of the files here are much older).  To add a
 new BLAS or LAPACK routine, copy the file to the appropriate directory, then do
 the following:
 
+- Add the University of Tennessee copyright statement to the top of the file
+
 - Add C include guards at the beginning and end of the file to allow for C++ compilation
 
 - Change the 'blaswrap.h' include file to either 'hypre_blas.h' or 'hypre_lapack.h'
