@@ -90,6 +90,7 @@ FILES =\
  par_amg_solveT.c\
  par_cg_relax_wt.c\
  par_coarsen.c\
+ par_coarsen_device.c\
  par_cgc_coarsen.c\
  par_cheby.c\
  par_coarse_parms.c\
