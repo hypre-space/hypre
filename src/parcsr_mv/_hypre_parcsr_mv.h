@@ -92,8 +92,15 @@ typedef struct
 typedef struct
 {
    hypre_ParCSRCommPkg  *comm_pkg;
+
+   HYPRE_Int             send_memory_location;
+   HYPRE_Int             recv_memory_location;
+
    void                 *send_data;
    void                 *recv_data;
+
+   void                 *send_data_host_buffer;
+   void                 *recv_data_host_buffer;
 
    HYPRE_Int             num_requests;
    hypre_MPI_Request    *requests;
