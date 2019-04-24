@@ -14,7 +14,7 @@ dnl *********************************************************************
 dnl * File Name: configure.in
 dnl *
 dnl * This file is read when autoconf is run and the configure script is
-dnl * generated. 
+dnl * generated.
 dnl * Configure.in is structured as follows:
 dnl * initialization information
 dnl * determine the current architecture
@@ -23,14 +23,14 @@ dnl *
 dnl * For the given the architecture, an optimal compiler is
 dnl * found (if not specified by the user). If the architecture is
 dnl * unknown or none of the preferred compilers are available then
-dnl * default compilers are found.  
+dnl * default compilers are found.
 dnl *
-dnl * For each chosen compiler, the appropriate flags are set for 
+dnl * For each chosen compiler, the appropriate flags are set for
 dnl * optimization, debugging, MPI and pthreading (as required) and the
 dnl * C preprocessor is checked.
-dnl * 
+dnl *
 dnl * Finally, library flags are added and AC_SUBST is used to export
-dnl * all necessary macro values.  
+dnl * all necessary macro values.
 dnl *********************************************************************
 
 dnl *********************************************************************
@@ -156,6 +156,7 @@ hypre_using_insure=no
 hypre_using_cuda=no
 hypre_using_gpu=no
 hypre_using_um=no
+hypre_gpu_mpi=no
 
 hypre_using_caliper=no
 hypre_user_gave_caliper_lib=no
@@ -322,7 +323,7 @@ fi
 
 AC_ARG_ENABLE(hopscotch,
 AS_HELP_STRING([--enable-hopscotch],
-               [Uses hopscotch hashing if configured with OpenMP and 
+               [Uses hopscotch hashing if configured with OpenMP and
 		atomic capability available(default is NO).]),
 [case "${enableval}" in
     yes) hypre_using_hopscotch=yes ;;
@@ -377,6 +378,17 @@ AS_HELP_STRING([--enable-unified-memory],
     *)   hypre_using_um=no ;;
  esac],
 [hypre_using_um=no]
+)
+
+AC_ARG_ENABLE(gpu-aware-mpi,
+AS_HELP_STRING([--enable-gpu-aware-mpi],
+               [Use GPU memory aware MPI]),
+[case "${enableval}" in
+    yes) hypre_gpu_mpi=yes ;;
+    no)  hypre_gpu_mpi=no ;;
+    *)   AC_MSG_ERROR([Bad value ${enableval} for --enable-gpu-aware-mpi]) ;;
+ esac],
+[hypre_gpu_mpi=no]
 )
 
 dnl * The AC_DEFINE is below, after hypre_using_mpi is completely set
@@ -446,13 +458,13 @@ fi
 dnl *********************************************************************
 dnl * Set default AR value if not defined by the user
 dnl *********************************************************************
-if test "x$AR" = "x"  
+if test "x$AR" = "x"
 then
    AR="ar -rcu"
 fi
 
 dnl *********************************************************************
-dnl * If the user has specified a c, c++, or fortran compiler on the 
+dnl * If the user has specified a c, c++, or fortran compiler on the
 dnl * command line, that compiler will be used.  No checks are done
 dnl * to assure this compiler is present or working.  Additionally,
 dnl * if the user indicated any MPI include, library, or directory
@@ -569,7 +581,7 @@ AS_HELP_STRING([--with-strict-checking],
     CXXFLAGS="-g --strict --lint --display_error_number"
     CXXFLAGS="$CXXFLAGS --diag_suppress 381,450,1023,1024"
  fi
- 
+
  AC_CHECK_PROGS(CXX, [g++ gcc icpc icc pgCC pgcc xlC xlc KCC kcc], [""])
  if test "x$CXX" = "x"
  then
@@ -594,7 +606,7 @@ dnl ***** MPI
 AC_ARG_WITH(MPI-include,
 AS_HELP_STRING([--with-MPI-include=DIR],
                [User specifies that mpi.h is in DIR.  The options
-                --with-MPI-include --with-MPI-libs and 
+                --with-MPI-include --with-MPI-libs and
                 --with-MPI-lib-dirs must be used together.]),
 [for mpi_dir in $withval; do
     MPIINCLUDE="$MPIINCLUDE -I$mpi_dir"
@@ -606,7 +618,7 @@ AS_HELP_STRING([--with-MPI-include=DIR],
 AC_ARG_WITH(MPI-libs,
 AS_HELP_STRING([--with-MPI-libs=LIBS],
                [LIBS is space-separated list (enclosed in quotes) of library
-                names needed for MPI, e.g. "nsl socket mpi".  The options 
+                names needed for MPI, e.g. "nsl socket mpi".  The options
                 --with-MPI-include --with-MPI-libs and --with-MPI-lib-dirs
                 must be used together.]),
 [for mpi_lib in $withval; do
@@ -630,7 +642,7 @@ AS_HELP_STRING([--with-MPI-lib-dirs=DIRS],
 
 AC_ARG_WITH(MPI-flags,
 AS_HELP_STRING([--with-MPI-flags=FLAGS],
-               [FLAGS is a space separated list (enclosed in quotes) of 
+               [FLAGS is a space separated list (enclosed in quotes) of
                 whatever flags other than -l and -L are needed to link
                 with MPI libraries-- Does not de-activate autosearch for
                 other MPI information. May be used with the other three
@@ -676,8 +688,8 @@ AS_HELP_STRING([--with-blas-libs=LIBS],
 
 AC_ARG_WITH(blas-lib-dirs,
 AS_HELP_STRING([--with-blas-lib-dirs=DIRS],
-               [DIRS is space-separated list (enclosed in quotes) of 
-                directories containing the libraries specified by 
+               [DIRS is space-separated list (enclosed in quotes) of
+                directories containing the libraries specified by
                 --with-blas-libs, e.g "usr/lib /usr/local/blas/lib".
                 The  options --with-blas-libs and --with-blas-lib-dirs
                 must be used together.]),
@@ -720,8 +732,8 @@ AS_HELP_STRING([--with-lapack-libs=LIBS],
 
 AC_ARG_WITH(lapack-lib-dirs,
 AS_HELP_STRING([--with-lapack-lib-dirs=DIRS],
-               [DIRS is space-separated list (enclosed in quotes) of 
-                directories containing the libraries specified by 
+               [DIRS is space-separated list (enclosed in quotes) of
+                directories containing the libraries specified by
                 --with-lapack-libs, e.g "usr/lib /usr/local/lapack/lib".
                 The options --with-lapack-libs and --with-lapack-lib-dirs
                 must be used together.]),
@@ -729,7 +741,7 @@ AS_HELP_STRING([--with-lapack-lib-dirs=DIRS],
     LAPACKLIBDIRS="-L$lapack_lib_dir $LAPACKLIBDIRS"
  done;
  hypre_user_chose_lapack=yes
- hypre_lapack_lib_dir_old_style=yes] 
+ hypre_lapack_lib_dir_old_style=yes]
 )
 
 dnl * Define a generic macro to set hypre_fmangle based on withval
@@ -778,7 +790,7 @@ AS_HELP_STRING([--with-fmangle-blas=FMANGLE],
 AC_DEFINE_UNQUOTED(HYPRE_FMANGLE_BLAS, [$hypre_fmangle_blas], [BLAS mangling])
 
 dnl * Define a generic macro to set hypre_fmangle_blaslapack based on withval
-dnl * This could use the same variable for blas, but it is redefined here for the 
+dnl * This could use the same variable for blas, but it is redefined here for the
 dnl * rare case that blas/ lapack manglings could be different
 AC_DEFUN([AC_HYPRE_SET_FMANGLE_LAPACK],
 [
@@ -938,7 +950,7 @@ AC_ARG_WITH(MPI,
 AS_HELP_STRING([--with-MPI],
                [DEFAULT: Compile with MPI.  Selecting --without-MPI
                 may affect which compiler is chosen.]),
-[case "$withval" in 
+[case "$withval" in
     no) hypre_using_mpi=no ;;
     *)  hypre_using_mpi=yes ;;
  esac]
@@ -986,7 +998,7 @@ AS_HELP_STRING([--with-kokkos],
 AC_ARG_WITH(raja-include,
 AS_HELP_STRING([--with-raja-include=DIR],
                [User specifies that RAJA/*.h is in DIR.  The options
-                --with-raja-include --with-raja-libs and 
+                --with-raja-include --with-raja-libs and
                 --with-raja-lib-dirs must be used together.]),
 [for raja_dir in $withval; do
     HYPRE_RAJA_INCLUDE="-I$raja_dir $HYPRE_RAJA_INCLUDE"
@@ -1017,8 +1029,8 @@ hypre_user_chose_raja=yes]
 
 AC_ARG_WITH(raja-lib-dirs,
 AS_HELP_STRING([--with-raja-lib-dirs=DIRS],
-               [DIRS is space-separated list (enclosed in quotes) of 
-                directories containing the libraries specified by 
+               [DIRS is space-separated list (enclosed in quotes) of
+                directories containing the libraries specified by
                 --with-raja-libs, e.g "usr/lib /usr/local/lib".
                 The  options --with-raja-libs and --raja-blas-lib-dirs
                 must be used together.]),
@@ -1030,8 +1042,8 @@ AS_HELP_STRING([--with-raja-lib-dirs=DIRS],
 
 AC_ARG_WITH(kokkos-lib-dirs,
 AS_HELP_STRING([--with-kokkos-lib-dirs=DIRS],
-               [DIRS is space-separated list (enclosed in quotes) of 
-                directories containing the libraries and 
+               [DIRS is space-separated list (enclosed in quotes) of
+                directories containing the libraries and
                 Makefile.kokkos is assumed to be in DIRS/../ .
                 The  options --with-kokkos-libs and --with-kokkos-dirs
                 must be used together.]),
@@ -1045,12 +1057,12 @@ AC_ARG_WITH(kokkos-include,
 AS_HELP_STRING([--with-kokkos-include=DIR],
                [User specifies that KOKKOS headers is in DIR.  The options
                 --with-kokkos-include --with-kokkos-libs and
-                --with-kokkos-dirs must be used together.]), 
+                --with-kokkos-dirs must be used together.]),
 [for kokkos_dir in $withval; do
 HYPRE_KOKKOS_INCLUDE="-I$kokkos_dir $HYPRE_KOKKOS_INCLUDE"
 done;
 hypre_user_chose_kokkos=yes]
-) 
+)
 
 AC_ARG_WITH(kokkos-lib,
 AS_HELP_STRING([--with-kokkos-lib=LIBS],
@@ -1105,7 +1117,7 @@ AS_HELP_STRING([--with-caliper-lib=LIBS],
 )
 
 dnl *********************************************************************
-dnl * Select compilers if not already defined by command line options 
+dnl * Select compilers if not already defined by command line options
 dnl *********************************************************************
 if test "$hypre_user_chose_ccompilers" = "no"
 then
@@ -1203,7 +1215,7 @@ then
 fi
 
 dnl *********************************************************************
-dnl * Check for general programs 
+dnl * Check for general programs
 dnl *********************************************************************
 AC_PROG_MAKE_SET
 AC_PROG_RANLIB
@@ -1212,7 +1224,7 @@ dnl AC_PROG_AWK
 dnl AC_PROG_LN_S
 
 dnl *********************************************************************
-dnl * Check for compiler related programs 
+dnl * Check for compiler related programs
 dnl * Most of these AC_PROG_ macros check to see if the compilers works.
 dnl *********************************************************************
 if test "$hypre_using_c" = "yes"
@@ -1284,7 +1296,7 @@ then
 fi
 
 dnl *********************************************************************
-dnl * Find BLAS library if not already set by the user 
+dnl * Find BLAS library if not already set by the user
 dnl * If user specified --without-blas or a system one cannot be found,
 dnl * default to internal HYPRE routines
 dnl *********************************************************************
@@ -1327,7 +1339,7 @@ then
 fi
 
 dnl *********************************************************************
-dnl * Find LAPACK library if not already set by the user 
+dnl * Find LAPACK library if not already set by the user
 dnl * If user specified --without-lapack or a system one cannot be found,
 dnl * default to internal HYPRE routines
 dnl *********************************************************************
@@ -1404,7 +1416,7 @@ else
 fi
 
 dnl *********************************************************************
-dnl * Set debug/optimization flags  
+dnl * Set debug/optimization flags
 dnl *********************************************************************
 if test "$hypre_using_debug" = "yes"
 then
@@ -1488,9 +1500,9 @@ dnl *********************************************************************
    then
          AC_MSG_ERROR([*********** Unspecified BLASLIBDIRS error: ******************************
                        --with-blas-libs set without setting corresponding --with-blas-lib-dirs.
-                       Please specify directory paths to preferred blas libraries. 
-                       Otherwise use --with-blas to search for library on the system. 
-                       See "configure --help" for usage details. 
+                       Please specify directory paths to preferred blas libraries.
+                       Otherwise use --with-blas to search for library on the system.
+                       See "configure --help" for usage details.
                        ********************************************************************],[9])
    fi
    if test "$hypre_blas_lib_old_style" = "no" -a "$hypre_blas_lib_dir_old_style" = "yes";
@@ -1498,8 +1510,8 @@ dnl *********************************************************************
          AC_MSG_ERROR([*********** Unspecified BLASLIB error: **********************************
                        --with-blas-lib-dirs set without setting corresponding --with-blas-libs.
                        Please specify base names of preferred blas libraries in the provided dir paths.
-                       Otherwise use --with-blas to search for library on the system. 
-                       See "configure --help" for usage details. 
+                       Otherwise use --with-blas to search for library on the system.
+                       See "configure --help" for usage details.
                        ********************************************************************],[9])
    fi
 dnl   AC_HYPRE_CHECK_USER_BLASLIBS
@@ -1511,9 +1523,9 @@ dnl   AC_HYPRE_CHECK_USER_BLASLIBS
    then
          AC_MSG_ERROR([*********** Unspecified LAPACKLIBDIRS error: ******************************
                        --with-lapack-libs set without setting corresponding --with-lapack-lib-dirs.
-                       Please specify directory paths to preferred lapack libraries. 
-                       Otherwise use --with-lapack to search for library on the system. 
-                       See "configure --help" for usage details. 
+                       Please specify directory paths to preferred lapack libraries.
+                       Otherwise use --with-lapack to search for library on the system.
+                       See "configure --help" for usage details.
                        ********************************************************************],[9])
    fi
    if test "$hypre_lapack_lib_old_style" = "no" -a "$hypre_lapack_lib_dir_old_style" = "yes";
@@ -1521,8 +1533,8 @@ dnl   AC_HYPRE_CHECK_USER_BLASLIBS
          AC_MSG_ERROR([*********** Unspecified LAPACKLIB error: **********************************
                        --with-lapack-lib-dirs set without setting corresponding --with-lapack-libs.
                        Please specify base names of preferred lapack libraries in the provided dir paths.
-                       Otherwise use --with-lapack to search for library on the system. 
-                       See "configure --help" for usage details. 
+                       Otherwise use --with-lapack to search for library on the system.
+                       See "configure --help" for usage details.
                        ********************************************************************],[9])
    fi
 dnl   AC_HYPRE_CHECK_USER_LAPACKLIBS
@@ -1537,7 +1549,7 @@ then
    if test "$hypre_user_gave_caliper_inc" != "yes"
    then
        AC_MSG_WARN([*******************************************************])
-       AC_MSG_WARN([Configuring with --with-caliper=yes without providing]) 
+       AC_MSG_WARN([Configuring with --with-caliper=yes without providing])
        AC_MSG_WARN([--with-caliper-include=<path-to-caliper-install>.])
        AC_MSG_WARN([Using default user include path.])
        AC_MSG_WARN([NOTE: Caliper annotations may not work.])
@@ -1581,12 +1593,12 @@ then
    if test "$hypre_using_cuda" != "yes"
    then
       if [test "$CXX" = "mpixlC" || test "$CXX" = "xlC_r"]
-      then 
+      then
          CXXFLAGS="${CXXFLAGS} -+ -std=c++11"
       fi
    fi
 
-   dnl let CC be CXX 
+   dnl let CC be CXX
    CC=${CXX}
    LINK_CC=${LINK_CXX}
    CFLAGS=${CXXFLAGS}
@@ -1603,12 +1615,12 @@ then
    if test "$hypre_using_cuda" != "yes"
    then
       if [test "$CXX" = "mpixlC" || test "$CXX" = "xlC_r"]
-      then 
+      then
          CXXFLAGS="${CXXFLAGS} -+ -std=c++11"
       fi
    fi
 
-   dnl let CC be CXX 
+   dnl let CC be CXX
    CC=${CXX}
    LINK_CC=${LINK_CXX}
    CFLAGS=${CXXFLAGS}
@@ -1658,7 +1670,7 @@ then
    if test "$hypre_user_chose_cuda" = "yes"
    then
       AC_MSG_NOTICE([***********************************************************])
-      AC_MSG_NOTICE([Configuring with --with-cuda=yes without unified memory.]) 
+      AC_MSG_NOTICE([Configuring with --with-cuda=yes without unified memory.])
       AC_MSG_NOTICE([It only works for struct interface.])
       AC_MSG_NOTICE([Use --enable-unified-memory to compile with unified memory.])
       AC_MSG_NOTICE([***********************************************************])
@@ -1666,7 +1678,7 @@ then
    if test "$hypre_using_device_openmp" = "yes"
    then
       AC_MSG_NOTICE([***********************************************************])
-      AC_MSG_NOTICE([Configuring with --with-device-openmp=yes without unified memory.]) 
+      AC_MSG_NOTICE([Configuring with --with-device-openmp=yes without unified memory.])
       AC_MSG_NOTICE([It only works for struct interface.])
       AC_MSG_NOTICE([Use --enable-unified-memory to compile with unified memory.])
       AC_MSG_NOTICE([***********************************************************])
@@ -1774,6 +1786,11 @@ else
    fi
 fi
 
+if test "$hypre_gpu_mpi" = "yes"
+then
+   AC_DEFINE([HYPRE_WITH_GPU_AWARE_MPI],1,[HYPRE WITH GPU AWARE MPI])
+fi
+
 dnl *********************************************************************
 dnl * Set installation directories
 dnl *********************************************************************
@@ -1788,7 +1805,7 @@ AC_HYPRE_SET_ARCH
 
 dnl *********************************************************************
 dnl * AC_SUBST performs the variable substitutions so they may be used in
-dnl * the Makefile.in files. Some macros call AC_SUBST for some of these 
+dnl * the Makefile.in files. Some macros call AC_SUBST for some of these
 dnl * variables, but it does no damage to call it again.
 dnl *********************************************************************
 
@@ -1894,7 +1911,7 @@ AC_SUBST(HYPRE_KOKKOS_LIB_DIR)
 AC_SUBST(HYPRE_KOKKOS_INCLUDE)
 AC_SUBST(HYPRE_KOKKOS_LIB)
 AC_SUBST(KOKKOS_LIBS)
-AC_SUBST(HYPRE_KOKKOS_INC_FILE)	
+AC_SUBST(HYPRE_KOKKOS_INC_FILE)
 
 dnl *********************************************************************
 dnl * CUDA stuff
@@ -1928,7 +1945,7 @@ AC_SUBST(AR)
 AC_SUBST(RANLIB)
 
 dnl *********************************************************************
-dnl * Define the files to be configured and made 
+dnl * Define the files to be configured and made
 dnl *********************************************************************
 AC_CONFIG_FILES([config/Makefile.config])
 

@@ -143,6 +143,9 @@
 /* FIXME: replace this with USING_CUDA */
 #undef HYPRE_USING_GPU
 
+/* Define to 1 if using GPU aware MPI */
+#undef HYPRE_WITH_GPU_AWARE_MPI
+
 
 
 /* Define as follows to set the Fortran name mangling scheme:
@@ -178,4 +181,3 @@
 
 /* Define to 1 if using MLI */
 #undef HAVE_MLI
-
