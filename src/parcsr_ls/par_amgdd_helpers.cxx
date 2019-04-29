@@ -376,8 +376,48 @@ FindNeighborProcessorsNew(hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A,
    statuses = hypre_CTAlloc(hypre_MPI_Status, send_proc_dofs.size() + request_proc_dofs.size(), HYPRE_MEMORY_HOST);
    request_cnt = 0;
 
-   // Update send_proc_dofs and starting_dofs !!! Finish
+   // Update send_proc_dofs and starting_dofs 
+   // Loop over send_proc's, i.e. the processors that we just received from 
+   cnt = 0;
+   for (auto send_proc_it = send_proc_dofs.begin(); send_proc_it != send_proc_dofs.end(); ++send_proc_it)
+   {
+      HYPRE_Int inner_cnt = 0;      
+      HYPRE_Int num_destination_procs = recv_buffers[cnt][inner_cnt++];
+      for (HYPRE_Int destination_proc = 0; destination_proc < num_destination_procs; destination_proc++)
+      {
+         // Get destination proc id
+         HYPRE_Int proc_id = recv_buffers[cnt][inner_cnt++];
 
+         // create new map for this destination proc if it doesn't already exist
+         send_proc_dofs[proc_id];
+
+         // Loop over the requested dofs for this destination proc
+         HYPRE_Int num_requested_dofs = recv_buffers[cnt][inner_cnt++];
+         for (HYPRE_Int i = 0; i < num_requested_dofs; i++)
+         {
+            // Get the local index for this dof on this processor
+            HYPRE_Int req_dof_local_index = recv_buffers[cnt][inner_cnt++] - hypre_ParCSRMatrixFirstRowIndex(A);
+
+            // If we already have a this dof accounted for for this destination...
+            if (send_proc_dofs[proc_id].find(req_dof_local_index) != send_proc_dofs[proc_id].end())
+            {
+               // ... but at a smaller distance, overwrite with new distance and add to starting_dofs
+               if (send_proc_dofs[proc_id][req_dof_local_index] < recv_buffers[cnt][inner_cnt])
+               {
+                  send_proc_dofs[proc_id][req_dof_local_index] = recv_buffers[cnt][inner_cnt];
+                  starting_dofs[proc_id].insert(req_dof_local_index);
+               }
+            } 
+            // Otherwise, add this dof for this destination at this distance and add to starting_dofs
+            else
+            {
+               send_proc_dofs[proc_id][req_dof_local_index] = recv_buffers[cnt][inner_cnt];
+               starting_dofs[proc_id].insert(req_dof_local_index);
+            }
+            inner_cnt++;
+         }
+      }
+   }
 
    // Clean up memory
    for (size_t i = 0; i < send_proc_dofs.size(); i++) hypre_TFree(recv_buffers, HYPRE_MEMORY_HOST);
