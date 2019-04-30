@@ -885,9 +885,6 @@ HYPRE_BoomerAMGSetRelaxOrder( HYPRE_Solver  solver,
 
 /*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetGridRelaxPoints
- * DEPRECATED.  There are memory management problems associated with the
- * use of a user-supplied array (who releases it?).
- * Ulrike Yang suspects that nobody uses this function.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
