@@ -109,10 +109,51 @@ SetupNearestProcessorNeighborsNew( hypre_ParCSRMatrix *A, hypre_ParCompGrid *com
       {
          FindNeighborProcessorsNew(compGrid, A, send_proc_dofs, starting_dofs, recv_procs, level, communication_cost);
       }
+   
+      // Use send_proc_dofs and recv_procs to generate relevant info for CompGridCommPkg
+      // Set the number of send and recv procs
+      hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[level] = send_proc_dofs.size();
+      hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg)[level] = recv_procs.size();
+      hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg)[level] = send_proc_dofs.size();
+      // Setup the list of send procs, partitions, and proc partitions, and count up the total number of send elmts
+      HYPRE_Int total_send_elmts = 0;
+      hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level] = hypre_CTAlloc(HYPRE_Int, send_proc_dofs.size(), HYPRE_MEMORY_HOST);
+      hypre_ParCompGridCommPkgPartitions(compGridCommPkg)[level] = hypre_CTAlloc(HYPRE_Int, send_proc_dofs.size(), HYPRE_MEMORY_HOST);
+      hypre_ParCompGridCommPkgSendProcPartitions(compGridCommPkg)[level] = hypre_CTAlloc(HYPRE_Int, send_proc_dofs.size(), HYPRE_MEMORY_HOST);
+      cnt = 0;
+      for (auto send_proc_it = send_proc_dofs.begin(); send_proc_it != send_proc_dofs.end(); ++send_proc_it)
+      {
+         hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level][cnt] = send_proc_it->first;
+         hypre_ParCompGridCommPkgPartitions(compGridCommPkg)[level][cnt] = send_proc_it->first;
+         hypre_ParCompGridCommPkgSendProcPartitions(compGridCommPkg)[level][cnt] = cnt;
+         total_send_elmts += send_proc_it->second.size();
+         cnt++;
+      }
+      // Setup the list of recv procs
+      hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[level] = hypre_CTAlloc(HYPRE_Int, recv_procs.size(), HYPRE_MEMORY_HOST);
+      cnt = 0;
+      for (auto recv_proc_it = recv_procs.begin(); recv_proc_it != recv_procs.end(); ++recv_proc_it)
+      {
+         hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[level][cnt++] = *recv_proc_it;
+      }
+      // Setup the send map elmts, starts, and ghost marker
+      hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[level] = hypre_CTAlloc(HYPRE_Int, send_proc_dofs.size() + 1, HYPRE_MEMORY_HOST);
+      hypre_ParCompGridCommPkgSendMapElmts(compGridCommPkg)[level] = hypre_CTAlloc(HYPRE_Int, total_send_elmts, HYPRE_MEMORY_HOST);
+      hypre_ParCompGridCommPkgGhostMarker(compGridCommPkg)[level] = hypre_CTAlloc(HYPRE_Int, total_send_elmts, HYPRE_MEMORY_HOST);
+      HYPRE_Int proc_cnt = 0;
+      cnt = 0;
+      for (auto send_proc_it = send_proc_dofs.begin(); send_proc_it != send_proc_dofs.end(); ++send_proc_it)
+      {
+         hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[level][proc_cnt++] = cnt;
+         for (auto dof_it = send_proc_it->second.begin(); dof_it != send_proc_it->second.end(); ++dof_it)
+         {
+            hypre_ParCompGridCommPkgSendMapElmts(compGridCommPkg)[level][cnt] = dof_it->first;
+            if (dof_it->second <= num_ghost_layers) hypre_ParCompGridCommPkgGhostMarker(compGridCommPkg)[level][cnt] = 1;
+            cnt++;
+         }
+      }
+      hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[level][send_proc_dofs.size()] = total_send_elmts;
    }
-
-   // Use send_proc_dofs and recv_procs to generate relevant info for CompGridCommPkg
-   // !!! Finish
 
    return 0;
 }
@@ -155,7 +196,10 @@ SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGr
          add_flag[i] = hypre_CTAlloc( HYPRE_Int, num_nodes, HYPRE_MEMORY_HOST); // !!! Kind of a costly allocation, I guess... on the finest grid, this allocates num_sends*(num dofs on the fine grid) in all... don't currently know a better way of doing this though
          start = hypre_ParCSRCommPkgSendMapStart(commPkg,i);
          finish = hypre_ParCSRCommPkgSendMapStart(commPkg,i+1);
-         for (j = start; j < finish; j++) add_flag[i][ hypre_ParCSRCommPkgSendMapElmt(commPkg,j) ] = padding[level] + num_ghost_layers; // must be set to padding + numGhostLayers (note that the starting nodes are already distance 1 from their neighbors on the adjacent processor)
+         for (j = start; j < finish; j++)
+         {
+            add_flag[i][ hypre_ParCSRCommPkgSendMapElmt(commPkg,j) ] = padding[level] + num_ghost_layers; // must be set to padding + numGhostLayers (note that the starting nodes are already distance 1 from their neighbors on the adjacent processor)
+         }
       }
 
 
@@ -268,9 +312,13 @@ FindNeighborProcessorsNew(hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A,
    HYPRE_Int level, HYPRE_Int *communication_cost)
 {
    
-   // Nodes to request from other processors
+   HYPRE_Int   myid;
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+
+   // Nodes to request from other processors. Note, requests are only issued to processors within distance 1, i.e. within the original communication stencil for A
+   hypre_ParCSRCommPkg *commPkg = hypre_ParCSRMatrixCommPkg(A);
    map< HYPRE_Int, map<HYPRE_Int, map<HYPRE_Int, HYPRE_Int> > > request_proc_dofs; // request_proc_dofs[proc to request from, i.e. recv_proc][destination_proc][dof global index][distance]
-   for (auto it = recv_procs.begin(); it != recv_procs.end(); ++it) request_proc_dofs[*it];
+   for (HYPRE_Int i = 0; i < hypre_ParCSRCommPkgNumRecvs(commPkg); i++) request_proc_dofs[ hypre_ParCSRCommPkgRecvProc(commPkg,i) ];
 
    // Recursively search through the operator stencil to find longer distance neighboring dofs
    // Loop over destination processors
@@ -282,30 +330,111 @@ FindNeighborProcessorsNew(hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A,
       {
          HYPRE_Int dof_index = *dof_it;
          HYPRE_Int distance = send_proc_dofs[destination_proc][dof_index];
-         RecursivelyFindNeighborNodesNew(dof_index, distance, compGrid, A, send_proc_dofs[destination_proc], request_proc_dofs, destination_proc);
+         RecursivelyFindNeighborNodesNew(dof_index, distance-1, compGrid, A, send_proc_dofs[destination_proc], request_proc_dofs, destination_proc);
       }
    }
    // Clear the list of starting dofs
    starting_dofs.clear();
 
    //////////////////////////////////////////////////
-   // Communicate request dofs to processors that I recv from: sending to request_procs and receiving from send_procs
+   // Communicate newly connected longer-distance processors to send procs: sending to current long distance send_procs and receiving from current long distance recv_procs
+   //////////////////////////////////////////////////
+
+   // Get the sizes
+   hypre_MPI_Request *requests = hypre_CTAlloc(hypre_MPI_Request, send_proc_dofs.size() + recv_procs.size(), HYPRE_MEMORY_HOST);
+   hypre_MPI_Status *statuses = hypre_CTAlloc(hypre_MPI_Status, send_proc_dofs.size() + recv_procs.size(), HYPRE_MEMORY_HOST);
+   HYPRE_Int request_cnt = 0;
+
+   HYPRE_Int *recv_sizes = hypre_CTAlloc(HYPRE_Int, recv_procs.size(), HYPRE_MEMORY_HOST);
+   HYPRE_Int cnt = 0;
+   for (auto recv_proc_it = recv_procs.begin(); recv_proc_it != recv_procs.end(); ++recv_proc_it)
+   {
+      hypre_MPI_Irecv(&(recv_sizes[cnt++]), 1, HYPRE_MPI_INT, *recv_proc_it, 6, hypre_MPI_COMM_WORLD, &(requests[request_cnt++]));
+   }
+   HYPRE_Int *send_sizes = hypre_CTAlloc(HYPRE_Int, send_proc_dofs.size(), HYPRE_MEMORY_HOST);
+   cnt = 0;
+   for (auto send_proc_it = send_proc_dofs.begin(); send_proc_it != send_proc_dofs.end(); ++send_proc_it)
+   {
+      for (auto req_proc_it = request_proc_dofs.begin(); req_proc_it != request_proc_dofs.end(); ++req_proc_it)
+      {
+         if (req_proc_it->second.find(send_proc_it->first) != req_proc_it->second.end()) send_sizes[cnt]++; 
+      }
+      hypre_MPI_Isend(&(send_sizes[cnt]), 1, HYPRE_MPI_INT, send_proc_it->first, 6, hypre_MPI_COMM_WORLD, &(requests[request_cnt++]));
+      cnt++;
+   }
+
+   // Wait 
+   hypre_MPI_Waitall(send_proc_dofs.size() + recv_procs.size(), requests, statuses);
+   hypre_TFree(requests, HYPRE_MEMORY_HOST);
+   hypre_TFree(statuses, HYPRE_MEMORY_HOST);
+   requests = hypre_CTAlloc(hypre_MPI_Request, send_proc_dofs.size() + recv_procs.size(), HYPRE_MEMORY_HOST);
+   statuses = hypre_CTAlloc(hypre_MPI_Status, send_proc_dofs.size() + recv_procs.size(), HYPRE_MEMORY_HOST);
+   request_cnt = 0;
+
+   // Allocate and post the recvs
+   HYPRE_Int **recv_buffers = hypre_CTAlloc(HYPRE_Int*, recv_procs.size(), HYPRE_MEMORY_HOST);
+   cnt = 0;
+   for (auto recv_proc_it = recv_procs.begin(); recv_proc_it != recv_procs.end(); ++recv_proc_it)
+   {
+      recv_buffers[cnt] = hypre_CTAlloc(HYPRE_Int, recv_sizes[cnt], HYPRE_MEMORY_HOST);
+      hypre_MPI_Irecv(recv_buffers[cnt], recv_sizes[cnt], HYPRE_MPI_INT, *recv_proc_it, 7, hypre_MPI_COMM_WORLD, &(requests[request_cnt++]));
+      cnt++;
+   }
+   // Setup and send the send buffers
+   HYPRE_Int **send_buffers = hypre_CTAlloc(HYPRE_Int*, send_proc_dofs.size(), HYPRE_MEMORY_HOST);
+   cnt = 0;
+   for (auto send_proc_it = send_proc_dofs.begin(); send_proc_it != send_proc_dofs.end(); ++send_proc_it)
+   {
+      send_buffers[cnt] = hypre_CTAlloc(HYPRE_Int, send_sizes[cnt], HYPRE_MEMORY_HOST);
+      HYPRE_Int inner_cnt = 0;
+      for (auto req_proc_it = request_proc_dofs.begin(); req_proc_it != request_proc_dofs.end(); ++req_proc_it)
+      {
+         if (req_proc_it->second.find(send_proc_it->first) != req_proc_it->second.end()) send_buffers[cnt][inner_cnt++] = req_proc_it->first; 
+      }
+      hypre_MPI_Isend(send_buffers[cnt], send_sizes[cnt], HYPRE_MPI_INT, send_proc_it->first, 7, hypre_MPI_COMM_WORLD, &(requests[request_cnt++]));
+      cnt++;
+   }
+
+   // Wait 
+   hypre_MPI_Waitall(send_proc_dofs.size() + recv_procs.size(), requests, statuses);
+   hypre_TFree(requests, HYPRE_MEMORY_HOST);
+   hypre_TFree(statuses, HYPRE_MEMORY_HOST);
+
+   // Update recv_procs
+   HYPRE_Int old_num_recv_procs = recv_procs.size();
+   for (HYPRE_Int i = 0; i < old_num_recv_procs; i++)
+   {
+      for (HYPRE_Int j = 0; j < recv_sizes[i]; j++)
+      {
+         recv_procs.insert(recv_buffers[i][j]);
+      }
+   }
+
+   // Clean up memory
+   for (size_t i = 0; i < send_proc_dofs.size(); i++) hypre_TFree(recv_buffers, HYPRE_MEMORY_HOST);
+   for (size_t i = 0; i < request_proc_dofs.size(); i++) hypre_TFree(send_buffers, HYPRE_MEMORY_HOST);
+   hypre_TFree(recv_buffers, HYPRE_MEMORY_HOST);
+   hypre_TFree(send_buffers, HYPRE_MEMORY_HOST);
+   hypre_TFree(recv_sizes, HYPRE_MEMORY_HOST);
+   hypre_TFree(send_sizes, HYPRE_MEMORY_HOST);
+
+   //////////////////////////////////////////////////
+   // Communicate request dofs to processors that I recv from: sending to request_procs and receiving from distance 1 send procs
    //////////////////////////////////////////////////
 
    // Count up the send size: 1 + sum_{destination_procs}(2 + 2*num_requested_dofs)
    // send_buffer = [num destination procs, [request info for proc], [request info for proc], ... ]
    // [request info for proc] = [proc id, num requested dofs, [(dof index, distance), (dof index, distance), ...] ]
-   HYPRE_Int *send_sizes = hypre_CTAlloc(HYPRE_Int, request_proc_dofs.size(), HYPRE_MEMORY_HOST);
 
    // Exchange message sizes
-   HYPRE_Int *recv_sizes = hypre_CTAlloc(HYPRE_Int, request_proc_dofs.size(), HYPRE_MEMORY_HOST);
-   hypre_MPI_Request *requests = hypre_CTAlloc(hypre_MPI_Request, send_proc_dofs.size() + request_proc_dofs.size(), HYPRE_MEMORY_HOST);
-   hypre_MPI_Status *statuses = hypre_CTAlloc(hypre_MPI_Status, send_proc_dofs.size() + request_proc_dofs.size(), HYPRE_MEMORY_HOST);
-   HYPRE_Int request_cnt = 0;
-   HYPRE_Int cnt = 0;   
-   for (auto send_proc_it = send_proc_dofs.begin(); send_proc_it != send_proc_dofs.end(); ++send_proc_it)
+   send_sizes = hypre_CTAlloc(HYPRE_Int, request_proc_dofs.size(), HYPRE_MEMORY_HOST);
+   recv_sizes = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRCommPkgNumSends(commPkg), HYPRE_MEMORY_HOST);
+   requests = hypre_CTAlloc(hypre_MPI_Request, hypre_ParCSRCommPkgNumSends(commPkg) + request_proc_dofs.size(), HYPRE_MEMORY_HOST);
+   statuses = hypre_CTAlloc(hypre_MPI_Status, hypre_ParCSRCommPkgNumSends(commPkg) + request_proc_dofs.size(), HYPRE_MEMORY_HOST);
+   request_cnt = 0;
+   for (HYPRE_Int i = 0; i < hypre_ParCSRCommPkgNumSends(commPkg); i++)
    {
-      hypre_MPI_Irecv(&(recv_sizes[cnt++]), 1, HYPRE_MPI_INT, send_proc_it->first, 4, hypre_MPI_COMM_WORLD, &(requests[request_cnt++]));
+      hypre_MPI_Irecv(&(recv_sizes[i]), 1, HYPRE_MPI_INT, hypre_ParCSRCommPkgSendProc(commPkg,i), 4, hypre_MPI_COMM_WORLD, &(requests[request_cnt++]));
    }
    cnt = 0;
    for (auto req_proc_it = request_proc_dofs.begin(); req_proc_it != request_proc_dofs.end(); ++req_proc_it)
@@ -325,28 +454,27 @@ FindNeighborProcessorsNew(hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A,
    }
 
    // Wait on the recv sizes, then free and re-allocate the requests and statuses
-   hypre_MPI_Waitall(send_proc_dofs.size() + request_proc_dofs.size(), requests, statuses);
+   hypre_MPI_Waitall(hypre_ParCSRCommPkgNumSends(commPkg) + request_proc_dofs.size(), requests, statuses);
    hypre_TFree(requests, HYPRE_MEMORY_HOST);
    hypre_TFree(statuses, HYPRE_MEMORY_HOST);
-   requests = hypre_CTAlloc(hypre_MPI_Request, send_proc_dofs.size() + request_proc_dofs.size(), HYPRE_MEMORY_HOST);
-   statuses = hypre_CTAlloc(hypre_MPI_Status, send_proc_dofs.size() + request_proc_dofs.size(), HYPRE_MEMORY_HOST);
+   requests = hypre_CTAlloc(hypre_MPI_Request, hypre_ParCSRCommPkgNumSends(commPkg) + request_proc_dofs.size(), HYPRE_MEMORY_HOST);
+   statuses = hypre_CTAlloc(hypre_MPI_Status, hypre_ParCSRCommPkgNumSends(commPkg) + request_proc_dofs.size(), HYPRE_MEMORY_HOST);
    request_cnt = 0;
 
    // Allocate recv buffers and post the recvs
-   HYPRE_Int **recv_buffers = hypre_CTAlloc(HYPRE_Int*, send_proc_dofs.size(), HYPRE_MEMORY_HOST);
-   cnt = 0;
-   for (auto send_proc_it = send_proc_dofs.begin(); send_proc_it != send_proc_dofs.end(); ++send_proc_it)
+   recv_buffers = hypre_CTAlloc(HYPRE_Int*, hypre_ParCSRCommPkgNumSends(commPkg), HYPRE_MEMORY_HOST);
+   for (HYPRE_Int i = 0; i < hypre_ParCSRCommPkgNumSends(commPkg); i++)
    {
-      recv_buffers[cnt] = hypre_CTAlloc(HYPRE_Int, recv_sizes[cnt], HYPRE_MEMORY_HOST);
-      hypre_MPI_Irecv(recv_buffers[cnt], recv_sizes[cnt], HYPRE_MPI_INT, send_proc_it->first, 5, hypre_MPI_COMM_WORLD, &(requests[request_cnt++]));
-      cnt++;
+      recv_buffers[i] = hypre_CTAlloc(HYPRE_Int, recv_sizes[i], HYPRE_MEMORY_HOST);
+      hypre_MPI_Irecv(recv_buffers[i], recv_sizes[i], HYPRE_MPI_INT, hypre_ParCSRCommPkgSendProc(commPkg,i), 5, hypre_MPI_COMM_WORLD, &(requests[request_cnt++]));
    }
    
    // Setup the send buffer and post the sends
-   HYPRE_Int **send_buffers = hypre_CTAlloc(HYPRE_Int*, request_proc_dofs.size(), HYPRE_MEMORY_HOST);
+   send_buffers = hypre_CTAlloc(HYPRE_Int*, request_proc_dofs.size(), HYPRE_MEMORY_HOST);
    cnt = 0;
    for (auto req_proc_it = request_proc_dofs.begin(); req_proc_it != request_proc_dofs.end(); ++req_proc_it)
    {
+      send_buffers[cnt] = hypre_CTAlloc(HYPRE_Int, send_sizes[cnt], HYPRE_MEMORY_HOST);
       HYPRE_Int inner_cnt = 0;
       send_buffers[cnt][inner_cnt++] = req_proc_it->second.size();
       for (auto dest_proc_it = req_proc_it->second.begin(); dest_proc_it != req_proc_it->second.end(); ++dest_proc_it)
@@ -372,49 +500,45 @@ FindNeighborProcessorsNew(hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A,
    hypre_MPI_Waitall(send_proc_dofs.size() + request_proc_dofs.size(), requests, statuses);
    hypre_TFree(requests, HYPRE_MEMORY_HOST);
    hypre_TFree(statuses, HYPRE_MEMORY_HOST);
-   requests = hypre_CTAlloc(hypre_MPI_Request, send_proc_dofs.size() + request_proc_dofs.size(), HYPRE_MEMORY_HOST);
-   statuses = hypre_CTAlloc(hypre_MPI_Status, send_proc_dofs.size() + request_proc_dofs.size(), HYPRE_MEMORY_HOST);
-   request_cnt = 0;
 
    // Update send_proc_dofs and starting_dofs 
    // Loop over send_proc's, i.e. the processors that we just received from 
-   cnt = 0;
-   for (auto send_proc_it = send_proc_dofs.begin(); send_proc_it != send_proc_dofs.end(); ++send_proc_it)
+   for (HYPRE_Int i = 0; i < hypre_ParCSRCommPkgNumSends(commPkg); i++)
    {
-      HYPRE_Int inner_cnt = 0;      
-      HYPRE_Int num_destination_procs = recv_buffers[cnt][inner_cnt++];
+      cnt = 0;      
+      HYPRE_Int num_destination_procs = recv_buffers[i][cnt++];
       for (HYPRE_Int destination_proc = 0; destination_proc < num_destination_procs; destination_proc++)
       {
-         // Get destination proc id
-         HYPRE_Int proc_id = recv_buffers[cnt][inner_cnt++];
+         // Get destination proc id and the number of requested dofs
+         HYPRE_Int proc_id = recv_buffers[i][cnt++];
+         HYPRE_Int num_requested_dofs = recv_buffers[i][cnt++];
 
          // create new map for this destination proc if it doesn't already exist
          send_proc_dofs[proc_id];
 
          // Loop over the requested dofs for this destination proc
-         HYPRE_Int num_requested_dofs = recv_buffers[cnt][inner_cnt++];
-         for (HYPRE_Int i = 0; i < num_requested_dofs; i++)
+         for (HYPRE_Int j = 0; j < num_requested_dofs; j++)
          {
             // Get the local index for this dof on this processor
-            HYPRE_Int req_dof_local_index = recv_buffers[cnt][inner_cnt++] - hypre_ParCSRMatrixFirstRowIndex(A);
+            HYPRE_Int req_dof_local_index = recv_buffers[i][cnt++] - hypre_ParCSRMatrixFirstRowIndex(A);
 
             // If we already have a this dof accounted for for this destination...
             if (send_proc_dofs[proc_id].find(req_dof_local_index) != send_proc_dofs[proc_id].end())
             {
                // ... but at a smaller distance, overwrite with new distance and add to starting_dofs
-               if (send_proc_dofs[proc_id][req_dof_local_index] < recv_buffers[cnt][inner_cnt])
+               if (send_proc_dofs[proc_id][req_dof_local_index] < recv_buffers[i][cnt])
                {
-                  send_proc_dofs[proc_id][req_dof_local_index] = recv_buffers[cnt][inner_cnt];
+                  send_proc_dofs[proc_id][req_dof_local_index] = recv_buffers[i][cnt];
                   starting_dofs[proc_id].insert(req_dof_local_index);
                }
             } 
             // Otherwise, add this dof for this destination at this distance and add to starting_dofs
             else
             {
-               send_proc_dofs[proc_id][req_dof_local_index] = recv_buffers[cnt][inner_cnt];
+               send_proc_dofs[proc_id][req_dof_local_index] = recv_buffers[i][cnt];
                starting_dofs[proc_id].insert(req_dof_local_index);
             }
-            inner_cnt++;
+            cnt++;
          }
       }
    }
@@ -426,84 +550,6 @@ FindNeighborProcessorsNew(hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A,
    hypre_TFree(send_buffers, HYPRE_MEMORY_HOST);
    hypre_TFree(recv_sizes, HYPRE_MEMORY_HOST);
    hypre_TFree(send_sizes, HYPRE_MEMORY_HOST);
-
-   //////////////////////////////////////////////////
-   // Communicate newly connected longer-distance processors to send procs: sending to send_procs and receiving from recv_procs
-   //////////////////////////////////////////////////
-
-   // Get the sizes
-   recv_sizes = hypre_CTAlloc(HYPRE_Int, recv_procs.size(), HYPRE_MEMORY_HOST);
-   cnt = 0;
-   for (auto recv_proc_it = recv_procs.begin(); recv_proc_it != recv_procs.end(); ++recv_proc_it)
-   {
-      hypre_MPI_Irecv(&(recv_sizes[cnt++]), 1, HYPRE_MPI_INT, *recv_proc_it, 6, hypre_MPI_COMM_WORLD, &(requests[request_cnt++]));
-   }
-   send_sizes = hypre_CTAlloc(HYPRE_Int, send_proc_dofs.size(), HYPRE_MEMORY_HOST);
-   cnt = 0;
-   for (auto send_proc_it = send_proc_dofs.begin(); send_proc_it != send_proc_dofs.end(); ++send_proc_it)
-   {
-      for (auto req_proc_it = request_proc_dofs.begin(); req_proc_it != request_proc_dofs.end(); ++req_proc_it)
-      {
-         if (req_proc_it->second.find(send_proc_it->first) != req_proc_it->second.end()) send_sizes[cnt]++; 
-      }
-      hypre_MPI_Isend(&(send_sizes[cnt]), 1, HYPRE_MPI_INT, send_proc_it->first, 6, hypre_MPI_COMM_WORLD, &(requests[request_cnt++]));
-      cnt++;
-   }
-
-   // Wait 
-   hypre_MPI_Waitall(send_proc_dofs.size() + request_proc_dofs.size(), requests, statuses);
-   hypre_TFree(requests, HYPRE_MEMORY_HOST);
-   hypre_TFree(statuses, HYPRE_MEMORY_HOST);
-   requests = hypre_CTAlloc(hypre_MPI_Request, send_proc_dofs.size() + request_proc_dofs.size(), HYPRE_MEMORY_HOST);
-   statuses = hypre_CTAlloc(hypre_MPI_Status, send_proc_dofs.size() + request_proc_dofs.size(), HYPRE_MEMORY_HOST);
-   request_cnt = 0;
-
-   // Allocate and post the recvs
-   recv_buffers = hypre_CTAlloc(HYPRE_Int*, recv_procs.size(), HYPRE_MEMORY_HOST);
-   cnt = 0;
-   for (auto recv_proc_it = recv_procs.begin(); recv_proc_it != recv_procs.end(); ++recv_proc_it)
-   {
-      recv_buffers[cnt] = hypre_CTAlloc(HYPRE_Int, recv_sizes[cnt], HYPRE_MEMORY_HOST);
-      hypre_MPI_Irecv(recv_buffers[cnt], recv_sizes[cnt], HYPRE_MPI_INT, *recv_proc_it, 7, hypre_MPI_COMM_WORLD, &(requests[request_cnt++]));
-   }
-   // Setup and send the send buffers
-   send_buffers = hypre_CTAlloc(HYPRE_Int*, send_proc_dofs.size(), HYPRE_MEMORY_HOST);
-   cnt = 0;
-   for (auto send_proc_it = send_proc_dofs.begin(); send_proc_it != send_proc_dofs.end(); ++send_proc_it)
-   {
-      send_buffers[cnt] = hypre_CTAlloc(HYPRE_Int, send_sizes[cnt], HYPRE_MEMORY_HOST);
-      HYPRE_Int inner_cnt = 0;
-      for (auto req_proc_it = request_proc_dofs.begin(); req_proc_it != request_proc_dofs.end(); ++req_proc_it)
-      {
-         if (req_proc_it->second.find(send_proc_it->first) != req_proc_it->second.end()) send_buffers[cnt][inner_cnt++] = req_proc_it->first; 
-      }
-      hypre_MPI_Isend(send_buffers[cnt], send_sizes[cnt], HYPRE_MPI_INT, send_proc_it->first, 7, hypre_MPI_COMM_WORLD, &(requests[request_cnt++]));
-      cnt++;
-   }
-
-   // Wait 
-   hypre_MPI_Waitall(send_proc_dofs.size() + request_proc_dofs.size(), requests, statuses);
-   hypre_TFree(requests, HYPRE_MEMORY_HOST);
-   hypre_TFree(statuses, HYPRE_MEMORY_HOST);
-
-   // Update recv_procs
-   HYPRE_Int old_num_recv_procs = recv_procs.size();
-   for (HYPRE_Int i = 0; i < old_num_recv_procs; i++)
-   {
-      for (HYPRE_Int j = 0; j < recv_sizes[i]; j++)
-      {
-         recv_procs.insert(recv_buffers[i][j]);
-      }
-   }
-
-   // Clean up memory
-   for (size_t i = 0; i < send_proc_dofs.size(); i++) hypre_TFree(recv_buffers, HYPRE_MEMORY_HOST);
-   for (size_t i = 0; i < request_proc_dofs.size(); i++) hypre_TFree(send_buffers, HYPRE_MEMORY_HOST);
-   hypre_TFree(recv_buffers, HYPRE_MEMORY_HOST);
-   hypre_TFree(send_buffers, HYPRE_MEMORY_HOST);
-   hypre_TFree(recv_sizes, HYPRE_MEMORY_HOST);
-   hypre_TFree(send_sizes, HYPRE_MEMORY_HOST);
-
 
    return 0;
 }
@@ -768,21 +814,25 @@ RecursivelyFindNeighborNodesNew(HYPRE_Int dof_index, HYPRE_Int distance, hypre_P
       // otherwise note this as a request dof
       else
       {
-         // Check whether we have already requested this node 
          HYPRE_Int neighbor_global_index = hypre_ParCompGridAGlobalColInd(compGrid)[i];
 
          HYPRE_Int recv_proc = GetDofRecvProc(dof_index, neighbor_global_index, A);
 
-         auto req_dof = request_proc_dofs[recv_proc][destination_proc].find(neighbor_global_index);
-         if (req_dof == request_proc_dofs[recv_proc][destination_proc].end())
+         // If request proc isn't the destination proc
+         if (recv_proc != destination_proc)
          {
-            // If this hasn't yet been requested, add it
-            request_proc_dofs[recv_proc][destination_proc][neighbor_global_index] = distance;
-         }
-         else if (req_dof->second < distance)
-         {
-            // If reqest is already there, but at smaller distance, update the distance
-            request_proc_dofs[recv_proc][destination_proc][neighbor_global_index] = distance;
+            // Check whether we have already requested this node 
+            auto req_dof = request_proc_dofs[recv_proc][destination_proc].find(neighbor_global_index);
+            if (req_dof == request_proc_dofs[recv_proc][destination_proc].end())
+            {
+               // If this hasn't yet been requested, add it
+               request_proc_dofs[recv_proc][destination_proc][neighbor_global_index] = distance;
+            }
+            else if (req_dof->second < distance)
+            {
+               // If reqest is already there, but at smaller distance, update the distance
+               request_proc_dofs[recv_proc][destination_proc][neighbor_global_index] = distance;
+            }
          }
       }
    }
@@ -857,7 +907,7 @@ GetDofRecvProc(HYPRE_Int dof_index, HYPRE_Int neighbor_global_index, hypre_ParCS
    // Get the appropriate column index in the offd part of A
    for (HYPRE_Int i = offdRowPtr[dof_index]; i < offdRowPtr[dof_index+1]; i++)
    {
-      if (colmap[i] == neighbor_global_index)
+      if (colmap[ hypre_CSRMatrixJ( hypre_ParCSRMatrixOffd(A) )[i] ] == neighbor_global_index)
       {
          offdColIndex = hypre_CSRMatrixJ( hypre_ParCSRMatrixOffd(A) )[i];
       }

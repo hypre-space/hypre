@@ -1478,3 +1478,63 @@ hypre_ParCompGridCommPkgCopy( hypre_ParCompGridCommPkg *compGridCommPkg )
 
    return copy_compGridCommPkg;
 }
+
+HYPRE_Int
+hypre_ParCompGridCommPkgDebugPrint( hypre_ParCompGridCommPkg *compGridCommPkg, const char* filename )
+{
+   // Print info to given filename   
+   FILE             *file;
+   file = fopen(filename,"w");
+
+   HYPRE_Int         level, i, j, k;
+
+   hypre_fprintf(file, "num_levels = %d\n", hypre_ParCompGridCommPkgNumLevels(compGridCommPkg) );
+   for (level = 0; level < hypre_ParCompGridCommPkgNumLevels(compGridCommPkg); level++)
+   {
+   
+      hypre_fprintf(file, "num send procs = %d, send procs:\n", hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[level] );
+      for (i = 0; i < hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[level]; i++)
+         hypre_fprintf(file, "%d ", hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level][i] );
+      hypre_fprintf(file, "\n");
+
+      hypre_fprintf(file, "num partitions = %d, partitions:\n", hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg)[level] );
+      for (i = 0; i < hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg)[level]; i++)
+         hypre_fprintf(file, "%d ", hypre_ParCompGridCommPkgPartitions(compGridCommPkg)[level][i] );
+      hypre_fprintf(file, "\n");
+
+      hypre_fprintf(file, "proc partitions:\n");
+      for (i = 0; i < hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[level]; i++)
+         hypre_fprintf(file, "%d ", hypre_ParCompGridCommPkgSendProcPartitions(compGridCommPkg)[level][i] );
+      hypre_fprintf(file, "\n");
+
+      hypre_fprintf(file, "num recv procs = %d, recv procs:\n", hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg)[level] );
+      for (i = 0; i < hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg)[level]; i++)
+         hypre_fprintf(file, "%d ", hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[level][i] );
+      hypre_fprintf(file, "\n");
+
+      hypre_fprintf(file, "send map starts:\n");
+      for (i = 0; i < hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg)[level]+1; i++)
+         hypre_fprintf(file, "%d ", hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[level][i] );
+      hypre_fprintf(file, "\n");
+
+      hypre_fprintf(file, "send map elmts:\n");
+      for (i = 0; i < hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg)[level]; i++)
+      {
+         for (j = hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[level][i]; j < hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[level][i+1]; j++)
+            hypre_fprintf(file, "%d ", hypre_ParCompGridCommPkgSendMapElmts(compGridCommPkg)[level][j] );
+         hypre_fprintf(file, "\n");
+      }
+
+      hypre_fprintf(file, "ghost marker:\n");
+      for (i = 0; i < hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg)[level]; i++)
+      {
+         for (j = hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[level][i]; j < hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[level][i+1]; j++)
+            hypre_fprintf(file, "%d ", hypre_ParCompGridCommPkgGhostMarker(compGridCommPkg)[level][j] );
+         hypre_fprintf(file, "\n");
+      }
+   }
+
+   fclose(file);
+
+   return 0;
+}

@@ -2005,6 +2005,7 @@ HYPRE_Int hypre_ParCompGridPrintSolnRHS ( hypre_ParCompGrid *compGrid, const cha
 hypre_ParCompGridCommPkg *hypre_ParCompGridCommPkgCreate ();
 HYPRE_Int hypre_ParCompGridCommPkgDestroy ( hypre_ParCompGridCommPkg *compGridCommPkg );
 hypre_ParCompGridCommPkg *hypre_ParCompGridCommPkgCopy ( hypre_ParCompGridCommPkg *compGridCommPkg );
+HYPRE_Int hypre_ParCompGridCommPkgDebugPrint ( hypre_ParCompGridCommPkg *compGridCommPkg, const char* filename );
 
 #ifdef __cplusplus
 }
