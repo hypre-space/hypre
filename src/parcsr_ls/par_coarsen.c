@@ -2141,7 +2141,7 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
    for (i = 0; i < num_variables; i++)
    {
-     measure_array[i] = measure_array_temp[i];
+      measure_array[i] = measure_array_temp[i];
    }
 
    hypre_TFree(measure_array_temp, HYPRE_MEMORY_HOST);

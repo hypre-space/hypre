@@ -64,7 +64,7 @@ typedef struct
 
 typedef struct
 {
-   MPI_Comm               comm;
+   MPI_Comm                     comm;
 
    HYPRE_Int                    num_sends;
    HYPRE_Int                   *send_procs;
@@ -92,8 +92,18 @@ typedef struct
 typedef struct
 {
    hypre_ParCSRCommPkg  *comm_pkg;
+
+   HYPRE_Int             send_memory_location;
+   HYPRE_Int             recv_memory_location;
+
+   HYPRE_Int             num_send_bytes;
+   HYPRE_Int             num_recv_bytes;
+
    void                 *send_data;
    void                 *recv_data;
+
+   void                 *send_data_buffer;
+   void                 *recv_data_buffer;
 
    HYPRE_Int             num_requests;
    hypre_MPI_Request    *requests;
@@ -131,12 +141,18 @@ typedef struct
  * Accessor macros: hypre_ParCSRCommHandle
  *--------------------------------------------------------------------------*/
 
-#define hypre_ParCSRCommHandleCommPkg(comm_handle)     (comm_handle -> comm_pkg)
-#define hypre_ParCSRCommHandleSendData(comm_handle)    (comm_handle -> send_data)
-#define hypre_ParCSRCommHandleRecvData(comm_handle)    (comm_handle -> recv_data)
-#define hypre_ParCSRCommHandleNumRequests(comm_handle) (comm_handle -> num_requests)
-#define hypre_ParCSRCommHandleRequests(comm_handle)    (comm_handle -> requests)
-#define hypre_ParCSRCommHandleRequest(comm_handle, i)  (comm_handle -> requests[i])
+#define hypre_ParCSRCommHandleCommPkg(comm_handle)                (comm_handle -> comm_pkg)
+#define hypre_ParCSRCommHandleSendMemoryLocation(comm_handle)     (comm_handle -> send_memory_location)
+#define hypre_ParCSRCommHandleRecvMemoryLocation(comm_handle)     (comm_handle -> recv_memory_location)
+#define hypre_ParCSRCommHandleNumSendBytes(comm_handle)           (comm_handle -> num_send_bytes)
+#define hypre_ParCSRCommHandleNumRecvBytes(comm_handle)           (comm_handle -> num_recv_bytes)
+#define hypre_ParCSRCommHandleSendData(comm_handle)               (comm_handle -> send_data)
+#define hypre_ParCSRCommHandleRecvData(comm_handle)               (comm_handle -> recv_data)
+#define hypre_ParCSRCommHandleSendDataBuffer(comm_handle)         (comm_handle -> send_data_buffer)
+#define hypre_ParCSRCommHandleRecvDataBuffer(comm_handle)         (comm_handle -> recv_data_buffer)
+#define hypre_ParCSRCommHandleNumRequests(comm_handle)            (comm_handle -> num_requests)
+#define hypre_ParCSRCommHandleRequests(comm_handle)               (comm_handle -> requests)
+#define hypre_ParCSRCommHandleRequest(comm_handle, i)             (comm_handle -> requests[i])
 
 #endif /* HYPRE_PAR_CSR_COMMUNICATION_HEADER */
 /*BHEADER**********************************************************************
@@ -772,6 +788,7 @@ HYPRE_Int hypre_BooleanGenerateDiagAndOffd ( hypre_CSRBooleanMatrix *A , hypre_P
 
 /* par_csr_communication.c */
 hypre_ParCSRCommHandle *hypre_ParCSRCommHandleCreate ( HYPRE_Int job , hypre_ParCSRCommPkg *comm_pkg , void *send_data , void *recv_data );
+hypre_ParCSRCommHandle *hypre_ParCSRCommHandleCreate_v2 ( HYPRE_Int job, hypre_ParCSRCommPkg *comm_pkg, HYPRE_Int send_memory_location, void *send_data_in, HYPRE_Int recv_memory_location, void *recv_data_in );
 HYPRE_Int hypre_ParCSRCommHandleDestroy ( hypre_ParCSRCommHandle *comm_handle );
 void hypre_ParCSRCommPkgCreate_core ( MPI_Comm comm , HYPRE_BigInt *col_map_offd , HYPRE_BigInt first_col_diag , HYPRE_BigInt *col_starts , HYPRE_Int num_cols_diag , HYPRE_Int num_cols_offd , HYPRE_Int *p_num_recvs , HYPRE_Int **p_recv_procs , HYPRE_Int **p_recv_vec_starts , HYPRE_Int *p_num_sends , HYPRE_Int **p_send_procs , HYPRE_Int **p_send_map_starts , HYPRE_Int **p_send_map_elmts );
 HYPRE_Int
@@ -932,4 +949,3 @@ hypre_int hypre_ParVectorIsManaged(hypre_ParVector *vector);
 #endif
 
 #endif
-

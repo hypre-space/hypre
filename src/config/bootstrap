@@ -43,4 +43,4 @@ sed -e 's#HYPRE_TIME    [^)]*#HYPRE_TIME    '$vtime'#' > CMakeLists.txt.tmp
 mv CMakeLists.txt.tmp CMakeLists.txt
 
 # Update release information in documentation
-(cd docs; update-release.sh)
+(cd docs; ./update-release.sh)
