@@ -3133,14 +3133,14 @@ HYPRE_Int  hypre_BoomerAMGRelax(hypre_ParCSRMatrix *A,
          // compute ordering and point matrix variable to array.
          HYPRE_Int *proc_ordering;
          if (!hypre_ParCSRMatrixProcOrdering(A)) {
-            proc_ordering = malloc(n*sizeof(HYPRE_Int));
+            proc_ordering = hypre_CTAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
             hypre_topo_sort(A_diag_i, A_diag_j, A_diag_data, proc_ordering, n);
             hypre_ParCSRMatrixProcOrdering(A) = proc_ordering;
          }
          else {
             proc_ordering = hypre_ParCSRMatrixProcOrdering(A);
          }
-         HYPRE_Real *residual = calloc(n, sizeof(HYPRE_Real));
+         HYPRE_Real *residual = hypre_CTAlloc(HYPRE_Real, n, HYPRE_MEMORY_HOST);
 
          /*-----------------------------------------------------------------
           * Relax all points.
