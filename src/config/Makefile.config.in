@@ -93,7 +93,7 @@ LDFLAGS = @LDFLAGS@
 LIBS    = @LIBS@ @CALIPER_LIBS@ @NVCCLIBS@  @RAJA_LIBS@ @KOKKOS_LIBS@
 FLIBS   = @FLIBS@
 
-INCLUDES = @CALIPER_INCLUDE@ @HYPRE_RAJA_INCLUDE@ @HYPRE_KOKKOS_INCLUDE@
+INCLUDES = @CALIPER_INCLUDE@ @HYPRE_RAJA_INCLUDE@ @HYPRE_KOKKOS_INCLUDE@ @HYPRE_NAP_INCLUDE@
 
 ##################################################################
 ##  LAPACK Library Flags 
@@ -114,6 +114,11 @@ MPIINCLUDE = @MPIINCLUDE@
 MPILIBDIRS = @MPILIBDIRS@
 MPILIBS    = @MPILIBS@
 MPIFLAGS   = @MPIFLAGS@
+
+##################################################################
+##  Node Aware MPI options
+##################################################################
+HYPRE_NAP_INCLUDE = @HYPRE_NAP_INCLUDE@
 
 ##################################################################
 ##  NVCC options

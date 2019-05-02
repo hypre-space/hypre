@@ -159,6 +159,8 @@ hypre_using_caliper=no
 hypre_user_gave_caliper_lib=no
 hypre_user_gave_caliper_inc=no
 
+hypre_using_node_aware_mpi=no
+
 dnl *********************************************************************
 dnl * Initialize flag-check variables
 dnl *********************************************************************
@@ -606,6 +608,27 @@ AS_HELP_STRING([--with-MPI-flags=FLAGS],
     *)   MPIFLAGS=$withval ;;
  esac],
 [MPIFLAGS=""]
+)
+
+dnl ***** Node Aware MPI
+AC_ARG_WITH(node-aware-mpi,
+AS_HELP_STRING([--with-node-aware-mpi],
+               [Use Node Aware MPI (default is NO).]),
+[case "$withval" in
+    yes) hypre_using_node_aware_mpi=yes;;
+    no)  hypre_using_node_aware_mpi=no ;;
+    *)   hypre_using_node_aware_mpi=no ;;
+ esac],
+[hypre_using_node_aware_mpi=no]
+)
+
+AC_ARG_WITH(node-aware-mpi-include,
+AS_HELP_STRING([--with-node-aware-mpi-include=DIR],
+               [User specifies that nap_comm.hpp is in DIR.]),
+[for nap_dir in $withval; do
+    HYPRE_NAP_INCLUDE="$HYPRE_NAP_INCLUDE -I$nap_dir"
+ done;
+ hypre_using_node_aware_mpi=yes]
 )
 
 dnl ***** BLAS
@@ -1254,6 +1277,11 @@ dnl   then
 dnl   fi
 fi
 
+if test "$hypre_using_node_aware_mpi" = "yes"
+then
+   AC_DEFINE(HYPRE_USING_NODE_AWARE_MPI, 1)
+fi
+
 dnl *********************************************************************
 dnl * Define appropriate variables if user set blas to either essl or dxml
 dnl *********************************************************************
@@ -1817,6 +1845,11 @@ AC_SUBST(MPILIBDIRS)
 AC_SUBST(MPIFLAGS)
 
 dnl *********************************************************************
+dnl * Node_Aware_MPI
+dnl *********************************************************************
+AC_SUBST(HYPRE_NAP_INCLUDE)
+
+dnl *********************************************************************
 dnl * FEI-related files, libraries and directories
 dnl *********************************************************************
 AC_SUBST(HYPRE_FEI_SRC_DIR)
@@ -1848,7 +1881,7 @@ dnl *********************************************************************
 AC_SUBST(HYPRE_KOKKOS_SRC_DIR)
 AC_SUBST(HYPRE_KOKKOS_LIB_DIR)
 AC_SUBST(HYPRE_KOKKOS_INCLUDE)
-AC_SUBST(HYPRE_KOKKOS_INC_FILE)	
+AC_SUBST(HYPRE_KOKKOS_INC_FILE)
 AC_SUBST(HYPRE_KOKKOS_LIB)
 AC_SUBST(KOKKOS_LIBS)
 

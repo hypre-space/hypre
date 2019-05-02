@@ -477,4 +477,3 @@ void hypre_dense_topo_sort(const HYPRE_Complex *L,
    }
    free(visited);
 }
-

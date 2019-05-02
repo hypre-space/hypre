@@ -625,6 +625,7 @@ HYPRE_FEI_HYPRE_FILES
 HYPRE_FEI_SUBDIRS
 HYPRE_FEI_BASE_DIR
 HYPRE_FEI_SRC_DIR
+HYPRE_NAP_INCLUDE
 MPIFLAGS
 MPILIBDIRS
 MPIINCLUDE
@@ -703,6 +704,7 @@ infodir
 docdir
 oldincludedir
 includedir
+runstatedir
 localstatedir
 sharedstatedir
 sysconfdir
@@ -749,6 +751,8 @@ with_MPI_include
 with_MPI_libs
 with_MPI_lib_dirs
 with_MPI_flags
+with_node_aware_mpi
+with_node_aware_mpi_include
 with_blas_lib
 with_blas_libs
 with_blas_lib_dirs
@@ -841,6 +845,7 @@ datadir='${datarootdir}'
 sysconfdir='${prefix}/etc'
 sharedstatedir='${prefix}/com'
 localstatedir='${prefix}/var'
+runstatedir='${localstatedir}/run'
 includedir='${prefix}/include'
 oldincludedir='/usr/include'
 docdir='${datarootdir}/doc/${PACKAGE_TARNAME}'
@@ -1093,6 +1098,15 @@ do
   | -silent | --silent | --silen | --sile | --sil)
     silent=yes ;;
 
+  -runstatedir | --runstatedir | --runstatedi | --runstated \
+  | --runstate | --runstat | --runsta | --runst | --runs \
+  | --run | --ru | --r)
+    ac_prev=runstatedir ;;
+  -runstatedir=* | --runstatedir=* | --runstatedi=* | --runstated=* \
+  | --runstate=* | --runstat=* | --runsta=* | --runst=* | --runs=* \
+  | --run=* | --ru=* | --r=*)
+    runstatedir=$ac_optarg ;;
+
   -sbindir | --sbindir | --sbindi | --sbind | --sbin | --sbi | --sb)
     ac_prev=sbindir ;;
   -sbindir=* | --sbindir=* | --sbindi=* | --sbind=* | --sbin=* \
@@ -1230,7 +1244,7 @@ fi
 for ac_var in	exec_prefix prefix bindir sbindir libexecdir datarootdir \
 		datadir sysconfdir sharedstatedir localstatedir includedir \
 		oldincludedir docdir infodir htmldir dvidir pdfdir psdir \
-		libdir localedir mandir
+		libdir localedir mandir runstatedir
 do
   eval ac_val=\$$ac_var
   # Remove trailing slashes.
@@ -1383,6 +1397,7 @@ Fine tuning of the installation directories:
   --sysconfdir=DIR        read-only single-machine data [PREFIX/etc]
   --sharedstatedir=DIR    modifiable architecture-independent data [PREFIX/com]
   --localstatedir=DIR     modifiable single-machine data [PREFIX/var]
+  --runstatedir=DIR       modifiable per-process data [LOCALSTATEDIR/run]
   --libdir=DIR            object code libraries [EPREFIX/lib]
   --includedir=DIR        C header files [PREFIX/include]
   --oldincludedir=DIR     C header files for non-gcc [/usr/include]
@@ -1476,6 +1491,9 @@ Optional Packages:
                           autosearch for other MPI information. May be used
                           with the other three MPI options or alone in
                           conjunction with the automatic MPI search.
+  --with-node-aware-mpi   Use Node Aware MPI (default is NO).
+  --with-node-aware-mpi-include=DIR
+                          User specifies that nap_comm.hpp is in DIR.
   --with-blas-lib=LIBS    LIBS is space-separated linkable list (enclosed in
                           quotes) of libraries needed for BLAS. OK to use -L
                           and -l flags in the list
@@ -2425,6 +2443,8 @@ hypre_using_caliper=no
 hypre_user_gave_caliper_lib=no
 hypre_user_gave_caliper_inc=no
 
+hypre_using_node_aware_mpi=no
+
 hypre_blas_lib_old_style=no
 hypre_blas_lib_dir_old_style=no
 hypre_lapack_lib_old_style=no
@@ -3069,6 +3089,31 @@ if test "${with_MPI_flags+set}" = set; then :
  esac
 else
   MPIFLAGS=""
+
+fi
+
+
+
+# Check whether --with-node-aware-mpi was given.
+if test "${with_node_aware_mpi+set}" = set; then :
+  withval=$with_node_aware_mpi; case "$withval" in
+    yes) hypre_using_node_aware_mpi=yes;;
+    no)  hypre_using_node_aware_mpi=no ;;
+    *)   hypre_using_node_aware_mpi=no ;;
+ esac
+else
+  hypre_using_node_aware_mpi=no
+
+fi
+
+
+
+# Check whether --with-node-aware-mpi-include was given.
+if test "${with_node_aware_mpi_include+set}" = set; then :
+  withval=$with_node_aware_mpi_include; for nap_dir in $withval; do
+    HYPRE_NAP_INCLUDE="$HYPRE_NAP_INCLUDE -I$nap_dir"
+ done;
+ hypre_using_node_aware_mpi=yes
 
 fi
 
@@ -7146,6 +7191,12 @@ then
 
 fi
 
+if test "$hypre_using_node_aware_mpi" = "yes"
+then
+   $as_echo "#define HYPRE_USING_NODE_AWARE_MPI 1" >>confdefs.h
+
+fi
+
 if test "$hypre_user_chose_blas" = "yes"
 then
    for blas_lib in $BLASLIBS; do
@@ -8366,6 +8417,8 @@ $as_echo "$HYPRE_ARCH" >&6; }
          fi
          ;;
    esac
+
+
 
 
 

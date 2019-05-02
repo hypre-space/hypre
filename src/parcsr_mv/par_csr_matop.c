@@ -5173,7 +5173,7 @@ hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix  *A,
       // Get max abs-value element of this row
       HYPRE_Real temp_max = 0;
       if (strength_thresh > 0) {
-         for (j = A_diag_i[i]; j < A_diag_i[i+1]; j++) {
+         for (j = A_diag_i[i]+1; j < A_diag_i[i+1]; j++) {
             if (hypre_abs(A_diag_a[j]) > temp_max) {
                temp_max = hypre_abs(A_diag_a[j]);
             }
@@ -5186,8 +5186,15 @@ hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix  *A,
       }
       B_maxel_row[k-1] = temp_max;
 
+      // add one for diagonal element
+      j = A_diag_i[i];
+      if (sub_idx_diag[A_diag_j[j]] != -1)
+      {
+         B_nnz_diag++;
+      }
+
       // Count nnzs larger than tolerance times max row element
-      for (j = A_diag_i[i]; j < A_diag_i[i+1]; j++) {
+      for (j = A_diag_i[i]+1; j < A_diag_i[i+1]; j++) {
          if ( (sub_idx_diag[A_diag_j[j]] != -1) &&
               (hypre_abs(A_diag_a[j]) > (strength_thresh*temp_max)) )
          {
@@ -5226,7 +5233,7 @@ hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix  *A,
       for (j = A_diag_i[i]; j < A_diag_i[i+1]; j++)
       {
          HYPRE_Int j1 = sub_idx_diag[A_diag_j[j]];
-         if ((j1 != -1) && (hypre_abs(A_diag_a[j]) > (strength_thresh*maxel)))
+         if ( (j1 != -1) && ( (hypre_abs(A_diag_a[j]) > (strength_thresh*maxel)) || j==A_diag_i[i] ) )
          {
             B_diag_j[k1] = j1;
             B_diag_a[k1] = A_diag_a[j];
@@ -5277,6 +5284,7 @@ hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix  *A,
 
    *B_ptr = B;
 
+   hypre_TFree(B_maxel_row, HYPRE_MEMORY_HOST);
    hypre_TFree(send_buf_data, HYPRE_MEMORY_HOST);
    hypre_TFree(sub_idx_diag, HYPRE_MEMORY_HOST);
    hypre_TFree(sub_idx_offd, HYPRE_MEMORY_HOST);

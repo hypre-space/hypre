@@ -147,6 +147,7 @@ hypre_BoomerAMGCreate()
    redundant = 0;
    strong_threshold = 0.25;
    strong_threshold_R = 0.25;
+   filter_threshold_R = 0.0;
    Sabs = 0;
    max_row_sum = 0.9;
    trunc_factor = 0.0;
