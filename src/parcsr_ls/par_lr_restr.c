@@ -1434,14 +1434,8 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
          }
       }
 
-      // HYPRE_Complex *Soli = (is_triangular || (Aisol_method=='G')) ? Dxi : Dbi;
-      HYPRE_Complex *Soli;
-      if (is_triangular || (Aisol_method=='G')) {
-         Soli = Dxi;
-      }
-      else {
-         Soli = Dbi;
-      }
+      HYPRE_Complex *Soli = (is_triangular || (Aisol_method=='G')) ? Dxi : Dbi;
+
       /*- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
        * Now we are ready to fill this row of R
        *- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/

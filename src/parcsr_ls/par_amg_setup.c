@@ -1669,7 +1669,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   hypre_BoomerAMGBuildRestrAIR(A_array[level], CF_marker,
                                                Sabs, coarse_pnts_global, 1, NULL,
                                                filter_thresholdR, debug_flag,
-                                               col_offd_Sabs_to_A, &R );
+                                               col_offd_Sabs_to_A, &R,
+                                               is_triangular, gmres_switch );
                }
                else if (restri_type > 1.0 && restri_type < 3.0) /* distance-2 AIR */
                {

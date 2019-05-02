@@ -1681,7 +1681,7 @@ HYPRE_Int hypre_ParAMGCreateDomainDof ( hypre_ParCSRMatrix *A , HYPRE_Int domain
 HYPRE_Int hypre_ParGenerateScale ( hypre_ParCSRMatrix *A , hypre_CSRMatrix *domain_structure , HYPRE_Real relaxation_weight , HYPRE_Real **scale_pointer );
 HYPRE_Int hypre_ParGenerateHybridScale ( hypre_ParCSRMatrix *A , hypre_CSRMatrix *domain_structure , hypre_CSRMatrix **A_boundary_pointer , HYPRE_Real **scale_pointer );
 /* RL */
-HYPRE_Int hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, hypre_ParCSRMatrix *S, HYPRE_Int *num_cpts_global, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Real filter_thresholdR, HYPRE_Int debug_flag, HYPRE_Int *col_offd_S_to_A, hypre_ParCSRMatrix **R_ptr);
+HYPRE_Int hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, hypre_ParCSRMatrix *S, HYPRE_Int *num_cpts_global, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Real filter_thresholdR, HYPRE_Int debug_flag, HYPRE_Int *col_offd_S_to_A, hypre_ParCSRMatrix **R_ptr, HYPRE_Int is_triangular, HYPRE_Int gmres_switch);
 
 HYPRE_Int hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, hypre_ParCSRMatrix *S, HYPRE_Int *num_cpts_global, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Real filter_thresholdR, HYPRE_Int debug_flag, HYPRE_Int *col_offd_S_to_A, hypre_ParCSRMatrix **R_ptr, HYPRE_Int AIR1_5, HYPRE_Int is_triangular, HYPRE_Int gmres_switch);
 
