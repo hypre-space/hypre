@@ -1094,6 +1094,14 @@ HYPRE_Int HYPRE_BoomerAMGSetIsTriangular(HYPRE_Solver solver,
                                          HYPRE_Int   is_triangular);
 
 /**
+ * (Optional) Set local problem size at which GMRES is used over
+ * a direct solve in approximating ideal restriction.
+ * The default is 0.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetGMRESSwitchR(HYPRE_Solver solver,
+                                         HYPRE_Int   gmres_switch);
+
+/**
  * (Optional) Defines the drop tolerance for the A-matrices
  * from the 2nd level of AMG.
  * The default is 0.

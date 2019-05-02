@@ -16,7 +16,7 @@
 #include "_hypre_blas.h"
 
 
-// TODO : delete vxi, vbi, allocAi, csrAi, csrAi_i, csrAi_j,
+// TODO : delete csrAi, csrAi_i, csrAi_j,
 //             csrAi_a, csrAiT_i, csrAiT_j, csrAiT_a
 //    Use
 //       hypre_dense_topo_sort(HYPRE_Real *L, HYPRE_Int *ordering, HYPRE_Int n)
@@ -67,7 +67,8 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
                                    HYPRE_Int            *col_offd_S_to_A,
                                    hypre_ParCSRMatrix  **R_ptr,
                                    HYPRE_Int             AIR1_5,
-                                   HYPRE_Int             is_triangular)
+                                   HYPRE_Int             is_triangular,
+                                   HYPRE_Int             gmres_switch)
 {
    /* HYPRE_Real t0 = hypre_MPI_Wtime(); */
 
@@ -105,7 +106,7 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
    hypre_CSRMatrix *R_diag;
    hypre_CSRMatrix *R_offd;
    /* arrays */
-   HYPRE_Complex      *R_diag_data;
+   HYPRE_Complex   *R_diag_data;
    HYPRE_Int       *R_diag_i;
    HYPRE_Int       *R_diag_j;
    HYPRE_Complex      *R_offd_data;
@@ -131,18 +132,10 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
    HYPRE_Int *Ipi, lapack_info, ione = 1, *RRi, *KKi;
    char charT = 'T';
 
-   hypre_Vector *vxi, *vbi;
-
-   HYPRE_Int nnzAi, allocAi;
-
-   /* if the size of local system is larger than dense_switch, use GMRES */
-   HYPRE_Int dense_switch = 64;
+   /* if the size of local system is larger than gmres_switch, use GMRES */
    char Aisol_method;
-   hypre_CSRMatrix *csrAi = NULL;
-   HYPRE_Int gmresAi_maxit = 20;
-   HYPRE_Real gmresAi_tol = 1e-2;
-   HYPRE_Int diagprec = 0;
-
+   HYPRE_Int gmresAi_maxit = 50;
+   HYPRE_Real gmresAi_tol = 1e-3;
 
    HYPRE_Int my_id, num_procs;
    HYPRE_Int total_global_cpts/*, my_first_cpt*/;
@@ -154,10 +147,6 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
    HYPRE_Int n_fine = hypre_CSRMatrixNumRows(A_diag);
    HYPRE_Int n_cpts = 0;
    /* my column range */
-   /*
-   HYPRE_Int col_start = hypre_ParCSRMatrixFirstColDiag(A);
-   HYPRE_Int col_end   = hypre_ParCSRMatrixLastColDiag(A) + 1;
-   */
    HYPRE_Int col_start = hypre_ParCSRMatrixFirstRowIndex(A);
    HYPRE_Int col_end   = col_start + n_fine;
 
@@ -997,7 +986,7 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
 
    // Allocate memory for GMRES if it will be used
    HYPRE_Int kdim_max = hypre_min(gmresAi_maxit, local_max_size);
-   if (dense_switch < local_max_size) {
+   if (gmres_switch < local_max_size) {
       fgmresT(local_max_size, NULL, NULL, 0.0, kdim_max, NULL, NULL, NULL, -1);
    }
 
@@ -1038,7 +1027,6 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
 
       /* size of Ai, bi */
       local_size = 0;
-      nnzAi = 0;
 
       /* Access matrices for the First time, mark the points we want */
       /* diag part of row i */
@@ -1184,6 +1172,7 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
 
       /* clear DAi and bi */
       memset(DAi, 0, local_size * local_size * sizeof(HYPRE_Complex));
+      memset(Dxi, 0, local_size * sizeof(HYPRE_Complex));
       memset(Dbi, 0, local_size * sizeof(HYPRE_Complex));
 
 
@@ -1359,10 +1348,10 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
       /*- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
        * We have Ai and bi built. Solve the linear system by:
        *    - forward solve for triangular matrix
-       *    - LU factorization (LAPACK) for local_size <= dense_switch
-       *    - Dense GMRES for local_size > dense_switch
+       *    - LU factorization (LAPACK) for local_size <= gmres_switch
+       *    - Dense GMRES for local_size > gmres_switch
        *- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
-      Aisol_method = local_size <= dense_switch ? 'L' : 'G';
+      Aisol_method = local_size <= gmres_switch ? 'L' : 'G';
       if (local_size > 0)
       {
          if (is_triangular) {
@@ -1445,8 +1434,14 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
          }
       }
 
-      HYPRE_Complex *Soli = (is_triangular || (Aisol_method=='G')) ? Dxi : Dbi;
-
+      // HYPRE_Complex *Soli = (is_triangular || (Aisol_method=='G')) ? Dxi : Dbi;
+      HYPRE_Complex *Soli;
+      if (is_triangular || (Aisol_method=='G')) {
+         Soli = Dxi;
+      }
+      else {
+         Soli = Dbi;
+      }
       /*- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
        * Now we are ready to fill this row of R
        *- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
@@ -1660,7 +1655,7 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
    hypre_TFree(RRi, HYPRE_MEMORY_HOST);
    hypre_TFree(KKi, HYPRE_MEMORY_HOST);
 
-   if (dense_switch < local_max_size) {
+   if (gmres_switch < local_max_size) {
       fgmresT(0, NULL, NULL, 0.0, 0, NULL, NULL, NULL, -2);
    }
 

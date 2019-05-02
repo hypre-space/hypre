@@ -108,9 +108,20 @@ HYPRE_BoomerAMGSetRestriction( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_BoomerAMGSetIsTriangular( HYPRE_Solver solver,
-                                HYPRE_Int   is_triangular  )
+                                HYPRE_Int    is_triangular  )
 {
    return( hypre_BoomerAMGSetIsTriangular( (void *) solver, is_triangular ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetGMRESSwitchR
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetGMRESSwitchR( HYPRE_Solver solver,
+                                HYPRE_Int    gmres_switch  )
+{
+   return( hypre_BoomerAMGSetGMRESSwitchR( (void *) solver, gmres_switch ) );
 }
 
 /*--------------------------------------------------------------------------

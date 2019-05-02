@@ -444,7 +444,7 @@ static void hypre_dense_search_row(HYPRE_Int row,
             val = L[row*n + col];
          }
          if (fabs(val) > 1e-14) {
-            dense_search_row(col, L, visited, ordering, order_ind, n, is_col_major);
+            hypre_dense_search_row(col, L, visited, ordering, order_ind, n, is_col_major);
          }
       }
       // Add node to ordering *after* it has been searched
@@ -471,7 +471,7 @@ void hypre_dense_topo_sort(const HYPRE_Complex *L,
    HYPRE_Int order_ind = 0;
    HYPRE_Int temp_row = 0;
    while (order_ind < n) {
-      dense_search_row(temp_row, L, visited, ordering, &order_ind, n, is_col_major);
+      hypre_dense_search_row(temp_row, L, visited, ordering, &order_ind, n, is_col_major);
       temp_row += 1;
       if (temp_row == n) temp_row = 0;
    }

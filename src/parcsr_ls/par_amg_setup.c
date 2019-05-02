@@ -1657,6 +1657,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                HYPRE_Real filter_thresholdR;
                filter_thresholdR = hypre_ParAMGDataFilterThresholdR(amg_data);
                HYPRE_Int is_triangular = hypre_ParAMGDataIsTriangular(amg_data);
+               HYPRE_Int gmres_switch = hypre_ParAMGDataGMRESSwitchR(amg_data);
                /* !!! RL: ensure that CF_marker contains -1 or 1 !!! */
                for (i = 0; i < hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[level])); i++)
                {
@@ -1676,7 +1677,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                                     Sabs, coarse_pnts_global, 1, NULL,
                                                     filter_thresholdR, debug_flag,
                                                     col_offd_Sabs_to_A, &R, restri_type < 2.0,
-                                                    is_triangular);
+                                                    is_triangular, gmres_switch);
                }
                else
                {
