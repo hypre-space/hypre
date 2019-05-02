@@ -1211,7 +1211,7 @@ HYPRE_Int hypre_CreateDinv ( void *amg_vdata );
 void *hypre_BoomerAMGCreate ( void );
 HYPRE_Int hypre_BoomerAMGDestroy ( void *data );
 HYPRE_Int hypre_BoomerAMGSetRestriction ( void *data , HYPRE_Real restr_par );
-HYPRE_Int HYPRE_BoomerAMGSetIsTriangular ( void *data , HYPRE_Int is_triangular );
+HYPRE_Int hypre_BoomerAMGSetIsTriangular ( void *data , HYPRE_Int is_triangular );
 HYPRE_Int hypre_BoomerAMGSetMaxLevels ( void *data , HYPRE_Int max_levels );
 HYPRE_Int hypre_BoomerAMGGetMaxLevels ( void *data , HYPRE_Int *max_levels );
 HYPRE_Int hypre_BoomerAMGSetMaxCoarseSize ( void *data , HYPRE_Int max_coarse_size );
