@@ -103,6 +103,17 @@ HYPRE_BoomerAMGSetRestriction( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetIsTriangular
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetIsTriangular( HYPRE_Solver solver,
+                                HYPRE_Int   is_triangular  )
+{
+   return( hypre_BoomerAMGSetIsTriangular( (void *) solver, is_triangular ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetMaxLevels, HYPRE_BoomerAMGGetMaxLevels
  *--------------------------------------------------------------------------*/
 

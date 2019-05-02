@@ -356,7 +356,8 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetPrintFileName(amg_data, log_file_name);
    hypre_BoomerAMGSetDebugFlag(amg_data, debug_flag);
    hypre_BoomerAMGSetRestriction(amg_data, 0);
-
+   hypre_BoomerAMGSetIsTriangular(amg_data, 0);
+   
    hypre_BoomerAMGSetGSMG(amg_data, 0);
    hypre_BoomerAMGSetNumSamples(amg_data, 0);
 
@@ -798,6 +799,23 @@ hypre_BoomerAMGSetRestriction( void *data,
    }
 
    hypre_ParAMGDataRestriction(amg_data) = restr_par;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGSetIsTriangular(void *data,
+                               HYPRE_Int is_triangular )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   hypre_ParAMGDataIsTriangular(amg_data) = is_triangular;
 
    return hypre_error_flag;
 }

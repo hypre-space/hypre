@@ -370,13 +370,13 @@ void hypre_qsort_abs(HYPRE_Real *w,
 
 
 // Recursive DFS search.
-void hypre_search_row(HYPRE_Int row,
-                      HYPRE_Int *row_ptr,
-                      HYPRE_Int *col_inds,
-                      HYPRE_Real *data,
-                      HYPRE_Int *visited,
-                      HYPRE_Int *ordering,
-                      HYPRE_Int *order_ind)
+static void hypre_search_row(HYPRE_Int row,
+                             const HYPRE_Int *row_ptr,
+                             const HYPRE_Int *col_inds,
+                             const HYPRE_Complex *data,
+                             HYPRE_Int *visited,
+                             HYPRE_Int *ordering,
+                             HYPRE_Int *order_ind)
 {
    // If this row has not been visited, call recursive DFS on nonzero
    // column entries 
@@ -402,9 +402,9 @@ void hypre_search_row(HYPRE_Int row,
 // -----
 //    - rowptr[], colinds[], data[] form a CSR structure for nxn matrix
 //    - ordering[] should be empty array of length n
-void hypre_topo_sort(HYPRE_Int *row_ptr,
-                     HYPRE_Int *col_inds,
-                     HYPRE_Real *data,
+void hypre_topo_sort(const HYPRE_Int *row_ptr,
+                     const HYPRE_Int *col_inds,
+                     const HYPRE_Complex *data,
                      HYPRE_Int *ordering,
                      HYPRE_Int n)
 {
@@ -422,12 +422,13 @@ void hypre_topo_sort(HYPRE_Int *row_ptr,
 
 
 // Recursive DFS search.
-void hypre_dense_search_row(HYPRE_Int row,
-                            HYPRE_Real *L,
-                            HYPRE_Int *visited,
-                            HYPRE_Int *ordering,
-                            HYPRE_Int *order_ind,
-                            HYPRE_Int n)
+static void hypre_dense_search_row(HYPRE_Int row,
+                                   const HYPRE_Complex *L,
+                                   HYPRE_Int *visited,
+                                   HYPRE_Int *ordering,
+                                   HYPRE_Int *order_ind,
+                                   HYPRE_Int n,
+                                   HYPRE_Int is_col_major)
 {
    // If this row has not been visited, call recursive DFS on nonzero
    // column entries 
@@ -435,9 +436,15 @@ void hypre_dense_search_row(HYPRE_Int row,
       HYPRE_Int col;
       visited[row] = 1;
       for (col=0; col<n; col++) {
-         HYPRE_Real val = L[col*n + row];
+         HYPRE_Complex val;
+         if (is_col_major) {
+            val = L[col*n + row];
+         }
+         else {
+            val = L[row*n + col];
+         }
          if (fabs(val) > 1e-14) {
-            dense_search_row(col, L, visited, ordering, order_ind, n);
+            dense_search_row(col, L, visited, ordering, order_ind, n, is_col_major);
          }
       }
       // Add node to ordering *after* it has been searched
@@ -455,15 +462,16 @@ void hypre_dense_search_row(HYPRE_Int row,
 //    - L[] : dense nxn matrix in column major format
 //    - ordering[] should be empty array of length n
 //    - row is the row to start the search from
-void hypre_dense_topo_sort(HYPRE_Real *L,
+void hypre_dense_topo_sort(const HYPRE_Complex *L,
                            HYPRE_Int *ordering,
-                           HYPRE_Int n)
+                           HYPRE_Int n,
+                           HYPRE_Int is_col_major)
 {
    HYPRE_Int *visited = hypre_CTAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
    HYPRE_Int order_ind = 0;
    HYPRE_Int temp_row = 0;
    while (order_ind < n) {
-      dense_search_row(temp_row, L, visited, ordering, &order_ind, n);
+      dense_search_row(temp_row, L, visited, ordering, &order_ind, n, is_col_major);
       temp_row += 1;
       if (temp_row == n) temp_row = 0;
    }

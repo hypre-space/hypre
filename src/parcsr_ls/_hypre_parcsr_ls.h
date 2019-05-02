@@ -84,6 +84,7 @@ typedef struct
    HYPRE_Int      agg_P_max_elmts;
    HYPRE_Int      agg_P12_max_elmts;
    HYPRE_Real     restr_par;
+   HYPRE_Int      is_triangular;
    HYPRE_Int      agg_num_levels;
    HYPRE_Int      num_paths;
    HYPRE_Int      post_interp_type;
@@ -284,6 +285,7 @@ typedef struct
 /* setup params */
 
 #define hypre_ParAMGDataRestriction(amg_data) ((amg_data)->restr_par)
+#define hypre_ParAMGDataIsTriangular(amg_data) ((amg_data)->is_triangular)
 #define hypre_ParAMGDataMaxLevels(amg_data) ((amg_data)->max_levels)
 #define hypre_ParAMGDataStrongThreshold(amg_data)((amg_data)->strong_threshold)
 #define hypre_ParAMGDataStrongThresholdR(amg_data)((amg_data)->strong_thresholdR)
@@ -780,6 +782,7 @@ HYPRE_Int HYPRE_BoomerAMGSetup ( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HY
 HYPRE_Int HYPRE_BoomerAMGSolve ( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x );
 HYPRE_Int HYPRE_BoomerAMGSolveT ( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x );
 HYPRE_Int HYPRE_BoomerAMGSetRestriction ( HYPRE_Solver solver , HYPRE_Real restr_par );
+HYPRE_Int HYPRE_BoomerAMGSetIsTriangular ( HYPRE_Solver solver , HYPRE_Int is_triangular );
 HYPRE_Int HYPRE_BoomerAMGSetMaxLevels ( HYPRE_Solver solver , HYPRE_Int max_levels );
 HYPRE_Int HYPRE_BoomerAMGGetMaxLevels ( HYPRE_Solver solver , HYPRE_Int *max_levels );
 HYPRE_Int HYPRE_BoomerAMGSetMaxCoarseSize ( HYPRE_Solver solver , HYPRE_Int max_coarse_size );
@@ -1208,6 +1211,7 @@ HYPRE_Int hypre_CreateDinv ( void *amg_vdata );
 void *hypre_BoomerAMGCreate ( void );
 HYPRE_Int hypre_BoomerAMGDestroy ( void *data );
 HYPRE_Int hypre_BoomerAMGSetRestriction ( void *data , HYPRE_Real restr_par );
+HYPRE_Int HYPRE_BoomerAMGSetIsTriangular ( void *data , HYPRE_Int is_triangular );
 HYPRE_Int hypre_BoomerAMGSetMaxLevels ( void *data , HYPRE_Int max_levels );
 HYPRE_Int hypre_BoomerAMGGetMaxLevels ( void *data , HYPRE_Int *max_levels );
 HYPRE_Int hypre_BoomerAMGSetMaxCoarseSize ( void *data , HYPRE_Int max_coarse_size );
@@ -1674,7 +1678,7 @@ HYPRE_Int hypre_ParGenerateHybridScale ( hypre_ParCSRMatrix *A , hypre_CSRMatrix
 /* RL */
 HYPRE_Int hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, hypre_ParCSRMatrix *S, HYPRE_Int *num_cpts_global, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Real filter_thresholdR, HYPRE_Int debug_flag, HYPRE_Int *col_offd_S_to_A, hypre_ParCSRMatrix **R_ptr);
 
-HYPRE_Int hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, hypre_ParCSRMatrix *S, HYPRE_Int *num_cpts_global, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Real filter_thresholdR, HYPRE_Int debug_flag, HYPRE_Int *col_offd_S_to_A, hypre_ParCSRMatrix **R_ptr, HYPRE_Int AIR1_5);
+HYPRE_Int hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, hypre_ParCSRMatrix *S, HYPRE_Int *num_cpts_global, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Real filter_thresholdR, HYPRE_Int debug_flag, HYPRE_Int *col_offd_S_to_A, hypre_ParCSRMatrix **R_ptr, HYPRE_Int AIR1_5, HYPRE_Int is_triangular);
 
 HYPRE_Int hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, HYPRE_Int *num_cpts_global, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int NeumannDeg, HYPRE_Real strong_thresholdR, HYPRE_Real filter_thresholdR, HYPRE_Int debug_flag, HYPRE_Int *col_offd_S_to_A, hypre_ParCSRMatrix **R_ptr);
 

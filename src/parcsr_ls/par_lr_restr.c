@@ -27,15 +27,11 @@ HYPRE_Int AIR_TOT_SOL_SIZE = 0;
 HYPRE_Int AIR_MAX_SOL_SIZE = 0;
 
 #define AIR_DEBUG 0
+#define EPSILON 1e-18
+#define EPSIMAC 1e-16
 
-/* 0: use HYPRE_GMRES, 1: use GMRES in this file, 2: use Jacobi in this file */
-#define LOCAL_SOLVE 1
-
-LOCAL_SOLVE==0
-
-#if LOCAL_SOLVE == 1
 static void fgmresT(HYPRE_Int n,
-                    hypre_CSRMatrix *A,
+                    HYPRE_Complex *A,
                     HYPRE_Complex *b,
                     HYPRE_Real tol,
                     HYPRE_Int kdim,
@@ -43,7 +39,11 @@ static void fgmresT(HYPRE_Int n,
                     HYPRE_Real *relres,
                     HYPRE_Int *iter,
                     HYPRE_Int job);
-#endif
+
+static void ordered_GS(const HYPRE_Complex L[],
+                       const HYPRE_Complex rhs[],
+                             HYPRE_Complex x[],
+                       const HYPRE_Int n);
 
 /*
 HYPRE_Real air_time0 = 0.0;
@@ -54,62 +54,6 @@ HYPRE_Real air_time3 = 0.0;
 HYPRE_Real air_time4 = 0.0;
 */
 
-/* Ordered Gauss Seidel on dense matrix in column major format. */
-void ordered_GS(const HYPRE_Real L[],
-                const HYPRE_Real rhs[],
-                      HYPRE_Real x[],
-                const HYPRE_Int ordering[],
-                const HYPRE_Int n)
-{
-   // Ordered Gauss-Seidel iteration
-   HYPRE_Int i, col;
-   for (i=0; i<n; i++) {
-      HYPRE_Int row = ordering[i];
-      HYPRE_Real temp = rhs[row];
-      for (col=0; col<n; col++) {
-         if (col != row) {
-            temp -= L[col*n+row] * x[col];                
-         }
-      }
-      HYPRE_Real diag = L[row*n + row];
-      if (fabs(diag) < 1e-12) {
-         x[row] = 0.0;
-      }
-      else{
-         x[row] = temp / diag;
-      }
-   }
-}
-
-
-
-HYPRE_Int
-hypre_CSRDiagPrecondSetup( void *vdata,
-                           void *A,
-                           void *b,
-                           void *x     )
-
-{
-   return 0;
-}
-
-HYPRE_Int
-hypre_CSRDiagPrecond( void *vdata,
-                      void *A,
-                      void *b,
-                      void *x )
-{
-   HYPRE_Complex *diaginv = (HYPRE_Complex *) vdata;
-   hypre_Vector *vb = (hypre_Vector *) b;
-   hypre_Vector *vx = (hypre_Vector *) x;
-   HYPRE_Int i, size = hypre_VectorSize(vb);
-   for (i = 0; i < size; i++)
-   {
-      hypre_VectorData(vx)[i] = hypre_VectorData(vb)[i] * diaginv[i];
-   }
-
-   return 0;
-}
 
 HYPRE_Int
 hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
@@ -122,7 +66,8 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
                                    HYPRE_Int             debug_flag,
                                    HYPRE_Int            *col_offd_S_to_A,
                                    hypre_ParCSRMatrix  **R_ptr,
-                                   HYPRE_Int             AIR1_5)
+                                   HYPRE_Int             AIR1_5,
+                                   HYPRE_Int             is_triangular)
 {
    /* HYPRE_Real t0 = hypre_MPI_Wtime(); */
 
@@ -134,12 +79,12 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
 
    /* diag part of A */
    hypre_CSRMatrix *A_diag   = hypre_ParCSRMatrixDiag(A);
-   HYPRE_Real      *A_diag_a = hypre_CSRMatrixData(A_diag);
+   HYPRE_Complex      *A_diag_a = hypre_CSRMatrixData(A_diag);
    HYPRE_Int       *A_diag_i = hypre_CSRMatrixI(A_diag);
    HYPRE_Int       *A_diag_j = hypre_CSRMatrixJ(A_diag);
    /* off-diag part of A */
    hypre_CSRMatrix *A_offd   = hypre_ParCSRMatrixOffd(A);
-   HYPRE_Real      *A_offd_a = hypre_CSRMatrixData(A_offd);
+   HYPRE_Complex      *A_offd_a = hypre_CSRMatrixData(A_offd);
    HYPRE_Int       *A_offd_i = hypre_CSRMatrixI(A_offd);
    HYPRE_Int       *A_offd_j = hypre_CSRMatrixJ(A_offd);
 
@@ -160,10 +105,10 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
    hypre_CSRMatrix *R_diag;
    hypre_CSRMatrix *R_offd;
    /* arrays */
-   HYPRE_Real      *R_diag_data;
+   HYPRE_Complex      *R_diag_data;
    HYPRE_Int       *R_diag_i;
    HYPRE_Int       *R_diag_j;
-   HYPRE_Real      *R_offd_data;
+   HYPRE_Complex      *R_offd_data;
    HYPRE_Int       *R_offd_i;
    HYPRE_Int       *R_offd_j;
    HYPRE_Int       *col_map_offd_R;
@@ -178,9 +123,9 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
    HYPRE_Int        *FF2_offd, FF2_offd_len;
 
    /* LAPACK */
-   HYPRE_Real *DAi, *Dbi;
+   HYPRE_Complex *DAi, *Dbi, *Dxi;
 #if AIR_DEBUG
-   HYPRE_Real *TMPA, *TMPb, *TMPd;
+   HYPRE_Complex *TMPA, *TMPb, *TMPd;
    hypre_Vector *tmpv;
 #endif
    HYPRE_Int *Ipi, lapack_info, ione = 1, *RRi, *KKi;
@@ -1004,13 +949,13 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
    /*------------- allocate arrays */
    R_diag_i    = hypre_CTAlloc(HYPRE_Int,  n_cpts+1, HYPRE_MEMORY_HOST);
    R_diag_j    = hypre_CTAlloc(HYPRE_Int,  nnz_diag, HYPRE_MEMORY_HOST);
-   R_diag_data = hypre_CTAlloc(HYPRE_Real, nnz_diag, HYPRE_MEMORY_HOST);
+   R_diag_data = hypre_CTAlloc(HYPRE_Complex, nnz_diag, HYPRE_MEMORY_HOST);
 
    /* not in ``if num_procs > 1'',
     * allocation needed even for empty CSR */
    R_offd_i    = hypre_CTAlloc(HYPRE_Int,  n_cpts+1, HYPRE_MEMORY_HOST);
    R_offd_j    = hypre_CTAlloc(HYPRE_Int,  nnz_offd, HYPRE_MEMORY_HOST);
-   R_offd_data = hypre_CTAlloc(HYPRE_Real, nnz_offd, HYPRE_MEMORY_HOST);
+   R_offd_data = hypre_CTAlloc(HYPRE_Complex, nnz_offd, HYPRE_MEMORY_HOST);
 
    /* redundant */
    R_diag_i[0] = 0;
@@ -1042,37 +987,25 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
    //{
    //   Marker_recv_SF_list[i] = -1;
    //}
-
    //printf("AIR: max local dense solve size %d\n", local_max_size);
 
-   /* the rhs and dense local matrix in column-major form (for LAPACK) */
-   HYPRE_Int local_max_size = hypre_min(local_max_size, dense_switch);
-   DAi = hypre_CTAlloc(HYPRE_Real, local_max_size*local_max_size, HYPRE_MEMORY_HOST);
-   /* rhs */
-   Dbi = hypre_CTAlloc(HYPRE_Real, local_max_size, HYPRE_MEMORY_HOST);
-   /* pivot */
-   Ipi = hypre_CTAlloc(HYPRE_Int, local_max_size, HYPRE_MEMORY_HOST);
+   // Allocate the rhs and dense local matrix in column-major form (for LAPACK)
+   DAi = hypre_CTAlloc(HYPRE_Complex, local_max_size*local_max_size, HYPRE_MEMORY_HOST);
+   Dbi = hypre_CTAlloc(HYPRE_Complex, local_max_size, HYPRE_MEMORY_HOST);
+   Dxi = hypre_CTAlloc(HYPRE_Complex, local_max_size, HYPRE_MEMORY_HOST);
+   Ipi = hypre_CTAlloc(HYPRE_Int, local_max_size, HYPRE_MEMORY_HOST); // pivot matrix
 
-   // TODO : do we need this?
-   /* Diag precond */
-   if (diagprec)
-   {
-      Ai_diaginv = hypre_TAlloc(HYPRE_Complex, local_max_size, HYPRE_MEMORY_HOST);
-   }
-   
-
-#if LOCAL_SOLVE == 1
+   // Allocate memory for GMRES if it will be used
    HYPRE_Int kdim_max = hypre_min(gmresAi_maxit, local_max_size);
-   // alloc memory
-   fgmresT(local_max_size, NULL, NULL, 0.0, kdim_max, NULL, NULL, NULL, -1);
+   if (dense_switch < local_max_size) {
+      fgmresT(local_max_size, NULL, NULL, 0.0, kdim_max, NULL, NULL, NULL, -1);
+   }
 
 #if AIR_DEBUG
    /* FOR DEBUG */
-   TMPA = hypre_CTAlloc(HYPRE_Real, local_max_size * local_max_size, HYPRE_MEMORY_HOST);
-   TMPb = hypre_CTAlloc(HYPRE_Real, local_max_size, HYPRE_MEMORY_HOST);
-   TMPd = hypre_CTAlloc(HYPRE_Real, local_max_size, HYPRE_MEMORY_HOST);
-   tmpv = hypre_SeqVectorCreate(local_max_size);
-   hypre_SeqVectorInitialize(tmpv);
+   TMPA = hypre_CTAlloc(HYPRE_Complex, local_max_size * local_max_size, HYPRE_MEMORY_HOST);
+   TMPb = hypre_CTAlloc(HYPRE_Complex, local_max_size, HYPRE_MEMORY_HOST);
+   TMPd = hypre_CTAlloc(HYPRE_Complex, local_max_size, HYPRE_MEMORY_HOST);
 #endif
 
    /*- - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1245,16 +1178,13 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
 
       hypre_assert(local_size <= local_max_size);
 
-      /* solve by Lapack (dense) or gmres (sparse) */
-      Aisol_method = local_size <= dense_switch ? 'L' : 'G';
-
       /* Second, copy values to local system: Ai and bi from A */
       /* now we have marked all rows/cols we want. next we extract the entries
        * we need from these rows and put them in Ai and bi*/
 
       /* clear DAi and bi */
-      memset(DAi, 0, local_size * local_size * sizeof(HYPRE_Real));
-      memset(Dbi, 0, local_size * sizeof(HYPRE_Real));
+      memset(DAi, 0, local_size * local_size * sizeof(HYPRE_Complex));
+      memset(Dbi, 0, local_size * sizeof(HYPRE_Complex));
 
 
       /* we will populate Ai row-by-row */
@@ -1354,7 +1284,7 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
          /* done with row rr */
       }
 
-      /*
+      /* TODO bs: remove?
       {
          char Buf[4096];
          char Buf2[4096];
@@ -1426,18 +1356,35 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
 
       hypre_assert(rr <= local_size);
 
+      /*- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+       * We have Ai and bi built. Solve the linear system by:
+       *    - forward solve for triangular matrix
+       *    - LU factorization (LAPACK) for local_size <= dense_switch
+       *    - Dense GMRES for local_size > dense_switch
+       *- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
+      Aisol_method = local_size <= dense_switch ? 'L' : 'G';
       if (local_size > 0)
       {
-         /*- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-          * we have Ai and bi build
-          * Solve the linear system by LAPACK : LU factorization, or
-          *                         by GMRES: (sparse)
-          *- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
-         if (Aisol_method == 'L')
+         if (is_triangular) {
+            ordered_GS(DAi, Dbi, Dxi, local_size);
+#if AIR_DEBUG
+            HYPRE_Real alp = -1.0, err;
+            colmaj_mvT(DAi, Dxi, TMPd, local_size);
+            hypre_daxpy(&local_size, &alp, Dbi, &ione, TMPd, &ione);
+            err = hypre_dnrm2(&local_size, TMPd, &ione);
+            if (err > 1e-8)
+            {
+               hypre_printf("triangular solve res: %e\n", err);
+               exit(0);
+            }
+#endif
+         }
+         // Solve using LAPACK and LU factorization
+         else if (Aisol_method == 'L')
          {
 #if AIR_DEBUG
-            memcpy(TMPA, DAi, local_size*local_size*sizeof(HYPRE_Real));
-            memcpy(TMPb, Dbi, local_size*sizeof(HYPRE_Real));
+            memcpy(TMPA, DAi, local_size*local_size*sizeof(HYPRE_Complex));
+            memcpy(TMPb, Dbi, local_size*sizeof(HYPRE_Complex));
 #endif
             hypre_dgetrf(&local_size, &local_size, DAi, &local_size, Ipi,
                          &lapack_info);
@@ -1450,18 +1397,15 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
                 * solution is saved in b_i on return */
                hypre_dgetrs(&charT, &local_size, &ione, DAi, &local_size,
                             Ipi, Dbi, &local_size, &lapack_info);
-
                hypre_assert(lapack_info == 0);
             }
-
 #if AIR_DEBUG
-            HYPRE_Int one = 1;
             HYPRE_Real alp = 1.0, bet = 0.0, err;
             hypre_dgemv(&charT, &local_size, &local_size, &alp, TMPA, &local_size, Dbi,
-                        &one, &bet, TMPd, &one);
+                        &ione, &bet, TMPd, &ione);
             alp = -1.0;
-            hypre_daxpy(&local_size, &alp, TMPb, &one, TMPd, &one);
-            err = hypre_dnrm2(&local_size, TMPd, &one);
+            hypre_daxpy(&local_size, &alp, TMPb, &ione, TMPd, &ione);
+            err = hypre_dnrm2(&local_size, TMPd, &ione);
             if (err > 1e-8)
             {
                hypre_printf("dense: local res norm %e\n", err);
@@ -1469,22 +1413,14 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
             }
 #endif
          }
-         /* solve by GMRES */
+         // Solve by GMRES
          else
          {
-            hypre_CSRMatrixI(csrAi) = csrAi_i;
-            hypre_CSRMatrixJ(csrAi) = csrAi_j;
-            hypre_CSRMatrixData(csrAi) = csrAi_a;
-
-            hypre_CSRMatrixNumRows(csrAi) = local_size;
-            hypre_CSRMatrixNumCols(csrAi) = local_size;
-            hypre_CSRMatrixNumNonzeros(csrAi) = nnzAi;
-
             HYPRE_Real gmresAi_res;
             HYPRE_Int  gmresAi_niter;
             HYPRE_Int kdim = hypre_min(gmresAi_maxit, local_size);
 
-            fgmresT(local_size, csrAi, hypre_VectorData(vbi), gmresAi_tol, kdim, hypre_VectorData(vxi),
+            fgmresT(local_size, DAi, Dbi, gmresAi_tol, kdim, Dxi,
                     &gmresAi_res, &gmresAi_niter, 0);
 
             if (gmresAi_res > gmresAi_tol)
@@ -1494,11 +1430,11 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
 
 #if AIR_DEBUG
             HYPRE_Real err, nrmb;
-            hypre_VectorSize(tmpv) = local_size;
-            hypre_CSRMatrixMatvecT(1.0, csrAi, vxi, 0.0, tmpv);
-            hypre_SeqVectorAxpy(-1.0, vbi, tmpv);
-            nrmb = sqrt(hypre_SeqVectorInnerProd(vbi, vbi));
-            err = sqrt(hypre_SeqVectorInnerProd(tmpv, tmpv));;
+            colmaj_mvT(DAi, Dxi, TMPd, local_size);
+            HYPRE_Real alp = -1.0;
+            nrmb = hypre_dnrm2(&local_size, Dbi, &ione);
+            hypre_daxpy(&local_size, &alp, Dbi, &ione, TMPd, &ione);
+            err = hypre_dnrm2(&local_size, TMPd, &ione);
             if (err/nrmb > gmresAi_tol)
             {
                hypre_printf("GMRES/Jacobi: res norm %e, nrmb %e, relative %e\n", err, nrmb, err/nrmb);
@@ -1509,7 +1445,7 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
          }
       }
 
-      HYPRE_Complex *Soli = Aisol_method == 'L' ? Dbi : vxi->data;
+      HYPRE_Complex *Soli = (is_triangular || (Aisol_method=='G')) ? Dxi : Dbi;
 
       /*- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
        * Now we are ready to fill this row of R
@@ -1713,8 +1649,8 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
    hypre_TFree(Marker_FF2_offd_j, HYPRE_MEMORY_HOST);
    hypre_TFree(DAi, HYPRE_MEMORY_HOST);
    hypre_TFree(Dbi, HYPRE_MEMORY_HOST);
+   hypre_TFree(Dxi, HYPRE_MEMORY_HOST);
    hypre_TFree(Ipi, HYPRE_MEMORY_HOST);
-   hypre_TFree(Ai_diaginv, HYPRE_MEMORY_HOST);
 #if AIR_DEBUG
    hypre_TFree(TMPA, HYPRE_MEMORY_HOST);
    hypre_TFree(TMPb, HYPRE_MEMORY_HOST);
@@ -1724,8 +1660,9 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
    hypre_TFree(RRi, HYPRE_MEMORY_HOST);
    hypre_TFree(KKi, HYPRE_MEMORY_HOST);
 
-#if LOCAL_SOLVE == 1
-   fgmresT(0, NULL, NULL, 0.0, 0, NULL, NULL, NULL, -2);
+   if (dense_switch < local_max_size) {
+      fgmresT(0, NULL, NULL, 0.0, 0, NULL, NULL, NULL, -2);
+   }
 
    /*
    t0 = hypre_MPI_Wtime() - t0;
@@ -1734,37 +1671,26 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
 
    return 0;
 }
-#endif
 
-#if LOCAL_SOLVE == 1
 
-#define EPSILON 1e-18
-#define EPSIMAC 1e-16
-
-/* TODO: */
-static inline void csrmvT(hypre_CSRMatrix *A, HYPRE_Complex *x, HYPRE_Complex *y)
+/* Compute matvec A^Tx = y, where A is stored in column major form. */
+// This can also probably be accomplished with BLAS
+static inline void colmaj_mvT(HYPRE_Complex *A, HYPRE_Complex *x, HYPRE_Complex *y, HYPRE_Int n)
 {
-   HYPRE_Int i, j, n = hypre_CSRMatrixNumRows(A), *ia, *ja;
-   HYPRE_Complex *aa;
-
-   ia = hypre_CSRMatrixI(A);
-   ja = hypre_CSRMatrixJ(A);
-   aa = hypre_CSRMatrixData(A);
-
    memset(y, 0, n*sizeof(HYPRE_Complex));
-
+   HYPRE_Int i, j;
    for (i = 0; i < n; i++)
    {
-      HYPRE_Complex xi = x[i];
-      for (j = ia[i]; j < ia[i+1]; j++)
+      HYPRE_Int row0 = i*n;
+      for (j = 0; j < n; j++)
       {
-         y[ja[j]] += xi * aa[j];
+         y[i] += x[j] * A[row0 + j];
       }
    }
 }
 
 static void fgmresT(HYPRE_Int n,
-                    hypre_CSRMatrix *A,
+                    HYPRE_Complex *A,
                     HYPRE_Complex *b,
                     HYPRE_Real tol,
                     HYPRE_Int kdim,
@@ -1802,8 +1728,6 @@ static void fgmresT(HYPRE_Int n,
       return;
    }
 
-   n = hypre_CSRMatrixNumRows(A);
-
    /* XXX: x_0 is all ZERO !!! so r0 = b */
    v = V;
    memcpy(v, b, n*sizeof(HYPRE_Complex));
@@ -1830,7 +1754,7 @@ static void fgmresT(HYPRE_Int n,
       /* memcpy(z, v, n*sizeof(HYPRE_Complex)); */
       // w = v_{i+1} = A * zi
       w = V + i * n;
-      csrmvT(A, z, w);
+      colmaj_mvT(A, z, w, n);
       // modified Gram-schmidt
       for (j = 0; j < i; j++)
       {
@@ -1894,7 +1818,37 @@ static void fgmresT(HYPRE_Int n,
    *iter = i;
 }
 
-#endif
+
+/* Ordered Gauss Seidel on A^T in column major format. Since we are
+ * solving A^T, equivalent to solving A in row major format. */
+static void ordered_GS(const HYPRE_Complex L[],
+                       const HYPRE_Complex rhs[],
+                             HYPRE_Complex x[],
+                       const HYPRE_Int n)
+{
+   // Get triangular ordering of L^T in col major as ordering of L in row major
+   HYPRE_Int ordering[n];
+   hypre_dense_topo_sort(L, ordering, n, 0);
+
+   // Ordered Gauss-Seidel iteration
+   HYPRE_Int i, col;
+   for (i=0; i<n; i++) {
+      HYPRE_Int row = ordering[i];
+      HYPRE_Complex temp = rhs[row];
+      for (col=0; col<n; col++) {
+         if (col != row) {
+            temp -= L[row*n+col] * x[col];   // row-major             
+         }
+      }
+      HYPRE_Complex diag = L[row*n + row];
+      if (fabs(diag) < 1e-12) {
+         x[row] = 0.0;
+      }
+      else{
+         x[row] = temp / diag;
+      }
+   }
+}
 
 
 HYPRE_Int
@@ -1923,10 +1877,10 @@ hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
    hypre_CSRMatrix *R_offd;
 
    /* arrays */
-   HYPRE_Real      *R_diag_a;
+   HYPRE_Complex      *R_diag_a;
    HYPRE_Int       *R_diag_i;
    HYPRE_Int       *R_diag_j;
-   HYPRE_Real      *R_offd_a;
+   HYPRE_Complex      *R_offd_a;
    HYPRE_Int       *R_offd_i;
    HYPRE_Int       *R_offd_j;
    HYPRE_Int       *col_map_offd_R;
@@ -2160,13 +2114,13 @@ hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
    /*------------- allocate arrays */
    R_diag_i = hypre_CTAlloc(HYPRE_Int,  n_cpts+1, HYPRE_MEMORY_HOST);
    R_diag_j = hypre_CTAlloc(HYPRE_Int,  nnz_diag, HYPRE_MEMORY_HOST);
-   R_diag_a = hypre_CTAlloc(HYPRE_Real, nnz_diag, HYPRE_MEMORY_HOST);
+   R_diag_a = hypre_CTAlloc(HYPRE_Complex, nnz_diag, HYPRE_MEMORY_HOST);
 
    /* not in ``if num_procs > 1'',
     * allocation needed even for empty CSR */
    R_offd_i = hypre_CTAlloc(HYPRE_Int,  n_cpts+1, HYPRE_MEMORY_HOST);
    R_offd_j = hypre_CTAlloc(HYPRE_Int,  nnz_offd, HYPRE_MEMORY_HOST);
-   R_offd_a = hypre_CTAlloc(HYPRE_Real, nnz_offd, HYPRE_MEMORY_HOST);
+   R_offd_a = hypre_CTAlloc(HYPRE_Complex, nnz_offd, HYPRE_MEMORY_HOST);
 
    /* redundant */
    R_diag_i[0] = 0;
