@@ -314,6 +314,12 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
    Dxi = hypre_CTAlloc(HYPRE_Complex, local_max_size, HYPRE_MEMORY_HOST);
    Ipi = hypre_CTAlloc(HYPRE_Int, local_max_size, HYPRE_MEMORY_HOST); // pivot matrix
 
+   // Allocate memory for GMRES if it will be used
+   HYPRE_Int kdim_max = hypre_min(gmresAi_maxit, local_max_size);
+   if (gmres_switch < local_max_size) {
+      fgmresT(local_max_size, NULL, NULL, 0.0, kdim_max, NULL, NULL, NULL, -1);
+   }
+
 #if AIR_DEBUG
    /* FOR DEBUG */
    TMPA = hypre_CTAlloc(HYPRE_Complex, local_max_size * local_max_size, HYPRE_MEMORY_HOST);
@@ -811,6 +817,10 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
       hypre_CSRMatrixDestroy(A_ext);
    }
 
+   if (gmres_switch < local_max_size) {
+      fgmresT(0, NULL, NULL, 0.0, 0, NULL, NULL, NULL, -2);
+   }
+
    return 0;
 }
 
@@ -830,6 +840,8 @@ static inline void colmaj_mvT(HYPRE_Complex *A, HYPRE_Complex *x, HYPRE_Complex 
       }
    }
 }
+
+// TODO : need to initialize and de-initialize GMRES
 
 static void fgmresT(HYPRE_Int n,
                     HYPRE_Complex *A,

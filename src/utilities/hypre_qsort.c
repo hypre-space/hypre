@@ -408,7 +408,8 @@ void hypre_topo_sort(const HYPRE_Int *row_ptr,
                      HYPRE_Int *ordering,
                      HYPRE_Int n)
 {
-   HYPRE_Int *visited = hypre_CTAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
+   HYPRE_Int visited[n];
+   memset(visited, 0, n*sizeof(HYPRE_Int));
    HYPRE_Int order_ind = 0;
    HYPRE_Int temp_row = 0;
    while (order_ind < n) {
@@ -417,7 +418,6 @@ void hypre_topo_sort(const HYPRE_Int *row_ptr,
       temp_row += 1;
       if (temp_row == n) temp_row = 0;
    }
-   free(visited);
 }
 
 
@@ -467,7 +467,8 @@ void hypre_dense_topo_sort(const HYPRE_Complex *L,
                            HYPRE_Int n,
                            HYPRE_Int is_col_major)
 {
-   HYPRE_Int *visited = hypre_CTAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
+   HYPRE_Int visited[n];
+   memset(visited, 0, n*sizeof(HYPRE_Int));
    HYPRE_Int order_ind = 0;
    HYPRE_Int temp_row = 0;
    while (order_ind < n) {
@@ -475,5 +476,4 @@ void hypre_dense_topo_sort(const HYPRE_Complex *L,
       temp_row += 1;
       if (temp_row == n) temp_row = 0;
    }
-   free(visited);
 }
