@@ -80,7 +80,7 @@ SetupNearestProcessorNeighborsNew( hypre_ParCSRMatrix *A, hypre_ParCompGrid *com
    {
       hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[level] = 0;
       hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg)[level] = 0;
-      hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg)[level] = 0;
+      hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg)[level] = 0;
    }
    else
    {
@@ -114,17 +114,17 @@ SetupNearestProcessorNeighborsNew( hypre_ParCSRMatrix *A, hypre_ParCompGrid *com
       // Set the number of send and recv procs
       hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[level] = send_proc_dofs.size();
       hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg)[level] = recv_procs.size();
-      hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg)[level] = send_proc_dofs.size();
+      hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg)[level] = send_proc_dofs.size();
       // Setup the list of send procs, partitions, and proc partitions, and count up the total number of send elmts
       HYPRE_Int total_send_elmts = 0;
       hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level] = hypre_CTAlloc(HYPRE_Int, send_proc_dofs.size(), HYPRE_MEMORY_HOST);
-      hypre_ParCompGridCommPkgPartitions(compGridCommPkg)[level] = hypre_CTAlloc(HYPRE_Int, send_proc_dofs.size(), HYPRE_MEMORY_HOST);
+      hypre_ParCompGridCommPkgSendPartitions(compGridCommPkg)[level] = hypre_CTAlloc(HYPRE_Int, send_proc_dofs.size(), HYPRE_MEMORY_HOST);
       hypre_ParCompGridCommPkgSendProcPartitions(compGridCommPkg)[level] = hypre_CTAlloc(HYPRE_Int, send_proc_dofs.size(), HYPRE_MEMORY_HOST);
       cnt = 0;
       for (auto send_proc_it = send_proc_dofs.begin(); send_proc_it != send_proc_dofs.end(); ++send_proc_it)
       {
          hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level][cnt] = send_proc_it->first;
-         hypre_ParCompGridCommPkgPartitions(compGridCommPkg)[level][cnt] = send_proc_it->first;
+         hypre_ParCompGridCommPkgSendPartitions(compGridCommPkg)[level][cnt] = send_proc_it->first;
          hypre_ParCompGridCommPkgSendProcPartitions(compGridCommPkg)[level][cnt] = cnt;
          total_send_elmts += send_proc_it->second.size();
          cnt++;
@@ -179,7 +179,7 @@ SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGr
    {
       hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[level] = 0;
       hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg)[level] = 0;
-      hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg)[level] = 0;
+      hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg)[level] = 0;
    }
    else
    {
@@ -277,10 +277,10 @@ SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGr
 
       hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[level] = num_sends;
       hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg)[level] = num_sends;
-      hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg)[level] = num_sends;
+      hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg)[level] = num_sends;
       hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level] = send_procs;
       hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[level] = recv_procs;
-      hypre_ParCompGridCommPkgPartitions(compGridCommPkg)[level] = partitions;
+      hypre_ParCompGridCommPkgSendPartitions(compGridCommPkg)[level] = partitions;
       hypre_ParCompGridCommPkgSendProcPartitions(compGridCommPkg)[level] = proc_partitions;
       hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[level] = send_map_starts;
       hypre_ParCompGridCommPkgSendMapElmts(compGridCommPkg)[level] = send_map_elmts;

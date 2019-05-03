@@ -346,7 +346,7 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
 
    // info from comp grid comm pkg
    hypre_ParCompGridCommPkg   *compGridCommPkg;
-   HYPRE_Int                  num_send_procs, num_recv_procs, num_partitions;
+   HYPRE_Int                  num_send_procs, num_recv_procs, num_send_partitions;
    HYPRE_Int                  **send_procs;
    HYPRE_Int                  **recv_procs;
    HYPRE_Int                  **send_buffer_size;
@@ -477,7 +477,7 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
       comm = hypre_ParCSRMatrixComm(A_array[level]);
       num_send_procs = hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[level];
       num_recv_procs = hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg)[level];
-      num_partitions = hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg)[level];
+      num_send_partitions = hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg)[level];
 
       if ( num_send_procs || num_recv_procs ) // If there are any owned nodes on this level
       {
@@ -487,7 +487,7 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
          request_counter = 0;
          requests = hypre_CTAlloc(hypre_MPI_Request, num_send_procs + num_recv_procs, HYPRE_MEMORY_HOST );
          status = hypre_CTAlloc(hypre_MPI_Status, num_send_procs + num_recv_procs, HYPRE_MEMORY_HOST );
-         send_buffer = hypre_CTAlloc(HYPRE_Complex*, num_partitions, HYPRE_MEMORY_HOST);
+         send_buffer = hypre_CTAlloc(HYPRE_Complex*, num_send_partitions, HYPRE_MEMORY_HOST);
 
          // allocate space for the receive buffers and post the receives
          for (i = 0; i < num_recv_procs; i++)
@@ -500,7 +500,7 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
          }
 
          // pack and send the buffers
-         for (i = 0; i < num_partitions; i++)
+         for (i = 0; i < num_send_partitions; i++)
          {
             if (send_buffer_size[level][i])
             {
@@ -522,7 +522,7 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
 
          hypre_TFree(requests, HYPRE_MEMORY_HOST);
          hypre_TFree(status, HYPRE_MEMORY_HOST);
-         for (i = 0; i < num_partitions; i++)
+         for (i = 0; i < num_send_partitions; i++)
          {
             hypre_TFree(send_buffer[i], HYPRE_MEMORY_HOST);
          }

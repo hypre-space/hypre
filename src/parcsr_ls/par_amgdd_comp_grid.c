@@ -969,12 +969,12 @@ hypre_ParCompGridCommPkgCreate()
    hypre_ParCompGridCommPkgAggGlobalComms(compGridCommPkg) = NULL;
    hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg) = NULL;
    hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg) = NULL;
-   hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg) = NULL;
+   hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg) = NULL;
    hypre_ParCompGridCommPkgSendProcs(compGridCommPkg) = NULL;
    hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg) = NULL;
-   hypre_ParCompGridCommPkgPartitions(compGridCommPkg) = NULL;
+   hypre_ParCompGridCommPkgSendPartitions(compGridCommPkg) = NULL;
    hypre_ParCompGridCommPkgSendProcPartitions(compGridCommPkg) = NULL;
-   hypre_ParCompGridCommPkgPartitionRanks(compGridCommPkg) = NULL;
+   hypre_ParCompGridCommPkgSendPartitionRanks(compGridCommPkg) = NULL;
    hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg) = NULL;
    hypre_ParCompGridCommPkgSendMapElmts(compGridCommPkg) = NULL;
    hypre_ParCompGridCommPkgGhostMarker(compGridCommPkg) = NULL;
@@ -1058,13 +1058,13 @@ hypre_ParCompGridCommPkgDestroy( hypre_ParCompGridCommPkg *compGridCommPkg )
       hypre_TFree(hypre_ParCompGridCommPkgGhostMarker(compGridCommPkg), HYPRE_MEMORY_HOST);
    }
 
-   if ( hypre_ParCompGridCommPkgPartitions(compGridCommPkg) )
+   if ( hypre_ParCompGridCommPkgSendPartitions(compGridCommPkg) )
    {
       for (i = 0; i < hypre_ParCompGridCommPkgNumLevels(compGridCommPkg); i++)
       {
-         hypre_TFree(hypre_ParCompGridCommPkgPartitions(compGridCommPkg)[i], HYPRE_MEMORY_HOST);
+         hypre_TFree(hypre_ParCompGridCommPkgSendPartitions(compGridCommPkg)[i], HYPRE_MEMORY_HOST);
       }
-      hypre_TFree(hypre_ParCompGridCommPkgPartitions(compGridCommPkg), HYPRE_MEMORY_HOST);
+      hypre_TFree(hypre_ParCompGridCommPkgSendPartitions(compGridCommPkg), HYPRE_MEMORY_HOST);
    }
 
    if ( hypre_ParCompGridCommPkgSendProcPartitions(compGridCommPkg) )
@@ -1076,20 +1076,20 @@ hypre_ParCompGridCommPkgDestroy( hypre_ParCompGridCommPkg *compGridCommPkg )
       hypre_TFree(hypre_ParCompGridCommPkgSendProcPartitions(compGridCommPkg), HYPRE_MEMORY_HOST);
    }
 
-   if ( hypre_ParCompGridCommPkgPartitionRanks(compGridCommPkg) )
+   if ( hypre_ParCompGridCommPkgSendPartitionRanks(compGridCommPkg) )
    {
       for (i = 0; i < hypre_ParCompGridCommPkgNumLevels(compGridCommPkg); i++)
       {
-         if (hypre_ParCompGridCommPkgPartitionRanks(compGridCommPkg)[i])
+         if (hypre_ParCompGridCommPkgSendPartitionRanks(compGridCommPkg)[i])
          {
-            for (j = 0; j < hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg)[i]; j++)
+            for (j = 0; j < hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg)[i]; j++)
             {
-               hypre_TFree(hypre_ParCompGridCommPkgPartitionRanks(compGridCommPkg)[i][j], HYPRE_MEMORY_HOST);
+               hypre_TFree(hypre_ParCompGridCommPkgSendPartitionRanks(compGridCommPkg)[i][j], HYPRE_MEMORY_HOST);
             }
-            hypre_TFree(hypre_ParCompGridCommPkgPartitionRanks(compGridCommPkg)[i], HYPRE_MEMORY_HOST);
+            hypre_TFree(hypre_ParCompGridCommPkgSendPartitionRanks(compGridCommPkg)[i], HYPRE_MEMORY_HOST);
          }
       }
-      hypre_TFree(hypre_ParCompGridCommPkgPartitionRanks(compGridCommPkg), HYPRE_MEMORY_HOST);
+      hypre_TFree(hypre_ParCompGridCommPkgSendPartitionRanks(compGridCommPkg), HYPRE_MEMORY_HOST);
    }
 
    if ( hypre_ParCompGridCommPkgSendBufferSize(compGridCommPkg) )
@@ -1114,7 +1114,7 @@ hypre_ParCompGridCommPkgDestroy( hypre_ParCompGridCommPkg *compGridCommPkg )
    {
       for (i = 0; i < hypre_ParCompGridCommPkgNumLevels(compGridCommPkg); i++)
       {
-         for (j = 0; j < hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg)[i]; j++)
+         for (j = 0; j < hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg)[i]; j++)
          {
             for (k = 0; k < hypre_ParCompGridCommPkgNumLevels(compGridCommPkg); k++)
             {
@@ -1148,7 +1148,7 @@ hypre_ParCompGridCommPkgDestroy( hypre_ParCompGridCommPkg *compGridCommPkg )
    {
       for (i = 0; i < hypre_ParCompGridCommPkgNumLevels(compGridCommPkg); i++)
       {
-         for (j = 0; j < hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg)[i]; j++)
+         for (j = 0; j < hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg)[i]; j++)
          {
             hypre_TFree( hypre_ParCompGridCommPkgNumSendNodes(compGridCommPkg)[i][j], HYPRE_MEMORY_HOST );
          }
@@ -1180,9 +1180,9 @@ hypre_ParCompGridCommPkgDestroy( hypre_ParCompGridCommPkg *compGridCommPkg )
       hypre_TFree( hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg), HYPRE_MEMORY_HOST );
    }
    
-   if  ( hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg) )
+   if  ( hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg) )
    {
-      hypre_TFree( hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg), HYPRE_MEMORY_HOST );
+      hypre_TFree( hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg), HYPRE_MEMORY_HOST );
    }
 
    hypre_TFree(compGridCommPkg, HYPRE_MEMORY_HOST);
@@ -1248,11 +1248,11 @@ hypre_ParCompGridCommPkgCopy( hypre_ParCompGridCommPkg *compGridCommPkg )
          hypre_ParCompGridCommPkgNumRecvProcs(copy_compGridCommPkg)[i] = hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg)[i];
    }
    
-   if  ( hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg) )
+   if  ( hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg) )
    {
-      hypre_ParCompGridCommPkgNumPartitions(copy_compGridCommPkg) = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
+      hypre_ParCompGridCommPkgNumSendPartitions(copy_compGridCommPkg) = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
       for (i = 0; i < num_levels; i++)
-         hypre_ParCompGridCommPkgNumPartitions(copy_compGridCommPkg)[i] = hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg)[i];
+         hypre_ParCompGridCommPkgNumSendPartitions(copy_compGridCommPkg)[i] = hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg)[i];
    }
 
    if ( hypre_ParCompGridCommPkgSendProcs(compGridCommPkg) )
@@ -1279,15 +1279,15 @@ hypre_ParCompGridCommPkgCopy( hypre_ParCompGridCommPkg *compGridCommPkg )
       }
    }
 
-   if ( hypre_ParCompGridCommPkgPartitions(compGridCommPkg) )
+   if ( hypre_ParCompGridCommPkgSendPartitions(compGridCommPkg) )
    {
-      hypre_ParCompGridCommPkgPartitions(copy_compGridCommPkg) = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
+      hypre_ParCompGridCommPkgSendPartitions(copy_compGridCommPkg) = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
       for (i = 0; i < num_levels; i++)
       {
-         HYPRE_Int num_comm_partitions = hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg)[i];
-         hypre_ParCompGridCommPkgPartitions(copy_compGridCommPkg)[i] = hypre_CTAlloc(HYPRE_Int, num_comm_partitions, HYPRE_MEMORY_HOST);
+         HYPRE_Int num_comm_partitions = hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg)[i];
+         hypre_ParCompGridCommPkgSendPartitions(copy_compGridCommPkg)[i] = hypre_CTAlloc(HYPRE_Int, num_comm_partitions, HYPRE_MEMORY_HOST);
          for (j = 0; j < num_comm_partitions; j++)
-            hypre_ParCompGridCommPkgPartitions(copy_compGridCommPkg)[i][j] = hypre_ParCompGridCommPkgPartitions(compGridCommPkg)[i][j];
+            hypre_ParCompGridCommPkgSendPartitions(copy_compGridCommPkg)[i][j] = hypre_ParCompGridCommPkgSendPartitions(compGridCommPkg)[i][j];
       }
    }
 
@@ -1298,7 +1298,7 @@ hypre_ParCompGridCommPkgCopy( hypre_ParCompGridCommPkg *compGridCommPkg )
       {
          if (hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[i])
          {
-            HYPRE_Int num_comm_partitions = hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg)[i];
+            HYPRE_Int num_comm_partitions = hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg)[i];
             hypre_ParCompGridCommPkgSendMapStarts(copy_compGridCommPkg)[i] = hypre_CTAlloc(HYPRE_Int, num_comm_partitions+1, HYPRE_MEMORY_HOST);
             for (j = 0; j < num_comm_partitions+1; j++)
                hypre_ParCompGridCommPkgSendMapStarts(copy_compGridCommPkg)[i][j] = hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[i][j];
@@ -1313,7 +1313,7 @@ hypre_ParCompGridCommPkgCopy( hypre_ParCompGridCommPkg *compGridCommPkg )
       {
          if (hypre_ParCompGridCommPkgSendMapElmts(compGridCommPkg)[i])
          {
-            HYPRE_Int num_elmts = hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[i][ hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg)[i] ];
+            HYPRE_Int num_elmts = hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[i][ hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg)[i] ];
             hypre_ParCompGridCommPkgSendMapElmts(copy_compGridCommPkg)[i] = hypre_CTAlloc(HYPRE_Int, num_elmts, HYPRE_MEMORY_HOST);
             for (j = 0; j < num_elmts; j++)
                hypre_ParCompGridCommPkgSendMapElmts(copy_compGridCommPkg)[i][j] = hypre_ParCompGridCommPkgSendMapElmts(compGridCommPkg)[i][j];
@@ -1328,7 +1328,7 @@ hypre_ParCompGridCommPkgCopy( hypre_ParCompGridCommPkg *compGridCommPkg )
       {
          if (hypre_ParCompGridCommPkgGhostMarker(compGridCommPkg)[i])
          {
-            HYPRE_Int num_elmts = hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[i][ hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg)[i] ];
+            HYPRE_Int num_elmts = hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[i][ hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg)[i] ];
             hypre_ParCompGridCommPkgGhostMarker(copy_compGridCommPkg)[i] = hypre_CTAlloc(HYPRE_Int, num_elmts, HYPRE_MEMORY_HOST);
             for (j = 0; j < num_elmts; j++)
                hypre_ParCompGridCommPkgGhostMarker(copy_compGridCommPkg)[i][j] = hypre_ParCompGridCommPkgGhostMarker(compGridCommPkg)[i][j];
@@ -1348,20 +1348,20 @@ hypre_ParCompGridCommPkgCopy( hypre_ParCompGridCommPkg *compGridCommPkg )
       }
    }
 
-   if ( hypre_ParCompGridCommPkgPartitionRanks(compGridCommPkg) )
+   if ( hypre_ParCompGridCommPkgSendPartitionRanks(compGridCommPkg) )
    {
-      hypre_ParCompGridCommPkgPartitionRanks(copy_compGridCommPkg) = hypre_CTAlloc(HYPRE_Int**, num_levels, HYPRE_MEMORY_HOST);
+      hypre_ParCompGridCommPkgSendPartitionRanks(copy_compGridCommPkg) = hypre_CTAlloc(HYPRE_Int**, num_levels, HYPRE_MEMORY_HOST);
       for (i = 0; i < hypre_ParCompGridCommPkgNumLevels(compGridCommPkg); i++)
       {
-         if (hypre_ParCompGridCommPkgPartitionRanks(compGridCommPkg)[i])
+         if (hypre_ParCompGridCommPkgSendPartitionRanks(compGridCommPkg)[i])
          {
-            hypre_ParCompGridCommPkgPartitionRanks(copy_compGridCommPkg)[i] = hypre_CTAlloc(HYPRE_Int*, hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg)[i], HYPRE_MEMORY_HOST);
-            for (j = 0; j < hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg)[i]; j++)
+            hypre_ParCompGridCommPkgSendPartitionRanks(copy_compGridCommPkg)[i] = hypre_CTAlloc(HYPRE_Int*, hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg)[i], HYPRE_MEMORY_HOST);
+            for (j = 0; j < hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg)[i]; j++)
             {
-               hypre_ParCompGridCommPkgPartitionRanks(copy_compGridCommPkg)[i][j] = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridCommPkgPartitionRanks(compGridCommPkg)[i][j][0]+1, HYPRE_MEMORY_HOST);
-               for (k = 0; k < hypre_ParCompGridCommPkgPartitionRanks(compGridCommPkg)[i][j][0]+1; k++)
+               hypre_ParCompGridCommPkgSendPartitionRanks(copy_compGridCommPkg)[i][j] = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridCommPkgSendPartitionRanks(compGridCommPkg)[i][j][0]+1, HYPRE_MEMORY_HOST);
+               for (k = 0; k < hypre_ParCompGridCommPkgSendPartitionRanks(compGridCommPkg)[i][j][0]+1; k++)
                {
-                  hypre_ParCompGridCommPkgPartitionRanks(copy_compGridCommPkg)[i][j][k] = hypre_ParCompGridCommPkgPartitionRanks(compGridCommPkg)[i][j][k];
+                  hypre_ParCompGridCommPkgSendPartitionRanks(copy_compGridCommPkg)[i][j][k] = hypre_ParCompGridCommPkgSendPartitionRanks(compGridCommPkg)[i][j][k];
                }
             }
          }
@@ -1497,9 +1497,9 @@ hypre_ParCompGridCommPkgDebugPrint( hypre_ParCompGridCommPkg *compGridCommPkg, c
          hypre_fprintf(file, "%d ", hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level][i] );
       hypre_fprintf(file, "\n");
 
-      hypre_fprintf(file, "num partitions = %d, partitions:\n", hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg)[level] );
-      for (i = 0; i < hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg)[level]; i++)
-         hypre_fprintf(file, "%d ", hypre_ParCompGridCommPkgPartitions(compGridCommPkg)[level][i] );
+      hypre_fprintf(file, "num partitions = %d, partitions:\n", hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg)[level] );
+      for (i = 0; i < hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg)[level]; i++)
+         hypre_fprintf(file, "%d ", hypre_ParCompGridCommPkgSendPartitions(compGridCommPkg)[level][i] );
       hypre_fprintf(file, "\n");
 
       hypre_fprintf(file, "proc partitions:\n");
@@ -1513,12 +1513,12 @@ hypre_ParCompGridCommPkgDebugPrint( hypre_ParCompGridCommPkg *compGridCommPkg, c
       hypre_fprintf(file, "\n");
 
       hypre_fprintf(file, "send map starts:\n");
-      for (i = 0; i < hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg)[level]+1; i++)
+      for (i = 0; i < hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg)[level]+1; i++)
          hypre_fprintf(file, "%d ", hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[level][i] );
       hypre_fprintf(file, "\n");
 
       hypre_fprintf(file, "send map elmts:\n");
-      for (i = 0; i < hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg)[level]; i++)
+      for (i = 0; i < hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg)[level]; i++)
       {
          for (j = hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[level][i]; j < hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[level][i+1]; j++)
             hypre_fprintf(file, "%d ", hypre_ParCompGridCommPkgSendMapElmts(compGridCommPkg)[level][j] );
@@ -1526,7 +1526,7 @@ hypre_ParCompGridCommPkgDebugPrint( hypre_ParCompGridCommPkg *compGridCommPkg, c
       }
 
       hypre_fprintf(file, "ghost marker:\n");
-      for (i = 0; i < hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg)[level]; i++)
+      for (i = 0; i < hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg)[level]; i++)
       {
          for (j = hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[level][i]; j < hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[level][i+1]; j++)
             hypre_fprintf(file, "%d ", hypre_ParCompGridCommPkgGhostMarker(compGridCommPkg)[level][j] );
