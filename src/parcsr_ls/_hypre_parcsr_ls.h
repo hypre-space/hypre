@@ -284,6 +284,7 @@ typedef struct
    HYPRE_Real         **l1_norms;
 
    /* composide grid data for AMG-DD */
+   HYPRE_Int                 amgdd_start_level;
    HYPRE_Int                 min_fac_iter;
    HYPRE_Int                 max_fac_iter;
    HYPRE_Real                fac_tol;
@@ -553,6 +554,7 @@ typedef struct
 #define hypre_ParAMGDataChebyCoefs(amg_data) ((amg_data)->cheby_coefs)
 
 /* composite grid data */
+#define hypre_ParAMGDataAMGDDStartLevel(amg_data) ((amg_data)->amgdd_start_level)
 #define hypre_ParAMGDataMinFACIter(amg_data) ((amg_data)->min_fac_iter)
 #define hypre_ParAMGDataMaxFACIter(amg_data) ((amg_data)->max_fac_iter)
 #define hypre_ParAMGDataFACTol(amg_data) ((amg_data)->fac_tol)
@@ -1652,6 +1654,7 @@ HYPRE_Int hypre_BoomerAMGCoarsenCR ( hypre_ParCSRMatrix *A , HYPRE_Int **CF_mark
 
 /* par_cycle.c */
 HYPRE_Int hypre_BoomerAMGCycle ( void *amg_vdata , hypre_ParVector **F_array , hypre_ParVector **U_array );
+HYPRE_Int hypre_BoomerAMGPartialCycle( void *amg_vdata, hypre_ParVector **F_array, hypre_ParVector **U_array, HYPRE_Int coarsest_level, HYPRE_Int down_up_cycle );
 
 /* par_difconv.c */
 HYPRE_ParCSRMatrix GenerateDifConv ( MPI_Comm comm , HYPRE_BigInt nx , HYPRE_BigInt ny , HYPRE_BigInt nz , HYPRE_Int P , HYPRE_Int Q , HYPRE_Int R , HYPRE_Int p , HYPRE_Int q , HYPRE_Int r , HYPRE_Real *value );

@@ -353,6 +353,7 @@ hypre_BoomerAMGCreate()
    hypre_ParAMGDataRtilde(amg_data) = NULL;
    hypre_ParAMGDataDinv(amg_data) = NULL;
 
+   hypre_ParAMGDataAMGDDStartLevel(amg_data) = 0;
    hypre_ParAMGDataAMGDDPadding(amg_data) = 1;
    hypre_ParAMGDataAMGDDVariablePadding(amg_data) = 0;
    hypre_ParAMGDataAMGDDNumGhostLayers(amg_data) = 6;

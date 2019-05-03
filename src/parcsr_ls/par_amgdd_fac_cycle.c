@@ -56,7 +56,7 @@ hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata, HYPRE_Int first_iteration )
    hypre_ParAMGData   *amg_data = amg_vdata;
    HYPRE_Int cycle_type = hypre_ParAMGDataFACCycleType(amg_data);
 
-   if (cycle_type == 1 || cycle_type == 2) FAC_Cycle(amg_vdata, 0, cycle_type, first_iteration);
+   if (cycle_type == 1 || cycle_type == 2) FAC_Cycle(amg_vdata, hypre_ParAMGDataAMGDDStartLevel(amg_data), cycle_type, first_iteration);
    else if (cycle_type == 3) FAC_FCycle(amg_vdata, first_iteration);
    else
    {
@@ -75,7 +75,7 @@ hypre_BoomerAMGDD_FAC_Cycle_timed( void *amg_vdata, HYPRE_Int time_part )
    hypre_ParAMGData   *amg_data = amg_vdata;
    HYPRE_Int cycle_type = hypre_ParAMGDataFACCycleType(amg_data);
 
-   if (cycle_type == 1 || cycle_type == 2) FAC_Cycle_timed(amg_vdata, 0, cycle_type, time_part);
+   if (cycle_type == 1 || cycle_type == 2) FAC_Cycle_timed(amg_vdata, hypre_ParAMGDataAMGDDStartLevel(amg_data), cycle_type, time_part);
    else if (cycle_type == 3) FAC_FCycle_timed(amg_vdata, time_part);
    else
    {
@@ -153,7 +153,7 @@ HYPRE_Int FAC_FCycle(void *amg_vdata, HYPRE_Int first_iteration)
    // ... work down to coarsest ... Note: proper restricted values already stored on and above transition level
    if (!first_iteration)
    {
-      for (level = 0; level < num_levels - 1; level++)
+      for (level = hypre_ParAMGDataAMGDDStartLevel(amg_data); level < num_levels - 1; level++)
       {
          // Restrict down from the transition level
          if (level < transition_level) FAC_Restrict( compGrid[level], compGrid[level+1], 0 );
@@ -169,7 +169,7 @@ HYPRE_Int FAC_FCycle(void *amg_vdata, HYPRE_Int first_iteration)
    for (i = 0; i < 20; i++) FAC_Relax( compGrid[num_levels-1], relax_type );
 
    // ... and work back up to the finest
-   for (level = num_levels - 2; level > -1; level--)
+   for (level = num_levels - 2; level > hypre_ParAMGDataAMGDDStartLevel(amg_data)-1; level--)
    {
       // Project up and relax
       FAC_Project( compGrid[level], compGrid[level+1] );
@@ -245,7 +245,7 @@ HYPRE_Int FAC_FCycle_timed(void *amg_vdata, HYPRE_Int time_part)
    hypre_ParCompGrid          **compGrid = hypre_ParAMGDataCompGrid(amg_data);
 
    // ... work down to coarsest ... Note: proper restricted values already stored on and above transition level
-   for (level = 0; level < num_levels - 1; level++)
+   for (level = hypre_ParAMGDataAMGDDStartLevel(amg_data); level < num_levels - 1; level++)
    {
       // Restrict down from the transition level
       if (time_part == 2)
@@ -263,7 +263,7 @@ HYPRE_Int FAC_FCycle_timed(void *amg_vdata, HYPRE_Int time_part)
    if (time_part == 1) for (i = 0; i < 20; i++) FAC_Relax( compGrid[num_levels-1], relax_type );
 
    // ... and work back up to the finest
-   for (level = num_levels - 2; level > -1; level--)
+   for (level = num_levels - 2; level > hypre_ParAMGDataAMGDDStartLevel(amg_data)-1; level--)
    {
       // Project up and relax
       if (time_part == 3) FAC_Project( compGrid[level], compGrid[level+1] );

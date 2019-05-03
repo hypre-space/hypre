@@ -166,6 +166,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    /* Data Structure variables */
  
    // level counters, indices, and parameters
+   HYPRE_Int                  amgdd_start_level;
    HYPRE_Int                  num_levels;
    HYPRE_Int                  *padding;
    HYPRE_Int                  pad;
@@ -222,6 +223,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    Vtemp = hypre_ParAMGDataVtemp(amg_data);
    CF_marker_array = hypre_ParAMGDataCFMarkerArray(amg_data);
    num_levels = hypre_ParAMGDataNumLevels(amg_data);
+   amgdd_start_level = hypre_ParAMGDataAMGDDStartLevel(amg_data);
    pad = hypre_ParAMGDataAMGDDPadding(amg_data);
    variable_padding = hypre_ParAMGDataAMGDDVariablePadding(amg_data);
    if (variable_padding == 0) variable_padding = num_levels+1;
@@ -230,7 +232,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
 
    // Figure out padding on each level
    padding = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
-   for (level = 0; level < num_levels; level++)
+   for (level = amgdd_start_level; level < num_levels; level++)
    {
       padding[level] = pad;
       if (level % variable_padding == variable_padding-1) pad *= 2;
@@ -326,7 +328,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    // On each level, setup a long distance commPkg that has communication info for distance (eta + numGhostLayers)
    if (use_barriers) hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
    if (timers) hypre_BeginTiming(timers[0]);
-   for (level = 0; level < transition_level; level++)
+   for (level = amgdd_start_level; level < transition_level; level++)
    {
       SetupNearestProcessorNeighbors(A_array[level], compGrid[level], compGridCommPkg, level, padding, num_ghost_layers, communication_cost);  
    }
@@ -442,7 +444,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
    #endif
 
-   for (level = transition_level - 1; level >= 0; level--)
+   for (level = transition_level - 1; level >= amgdd_start_level; level--)
    {
       comm = hypre_ParCSRMatrixComm(A_array[level]);
       num_send_procs = hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[level];
