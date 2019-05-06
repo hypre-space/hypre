@@ -430,7 +430,8 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *nod
       {
          // loop over indices of non-owned nodes on this level
          HYPRE_Int num_owned_nodes = hypre_ParCompGridOwnedBlockStarts(compGrid[level])[hypre_ParCompGridNumOwnedBlocks(compGrid[level])];
-         for (i = num_owned_nodes; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
+         // !!! Debug: original below looped over i = num_owned_nodes... switching to 0 in order to test padding 0 (in this case owned A col ind never get updated)
+         for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
          {
             // fix up the local indices for the matrix A row info
             for (j = hypre_ParCompGridARowPtr(compGrid[level])[i]; j < hypre_ParCompGridARowPtr(compGrid[level])[i+1]; j++)
