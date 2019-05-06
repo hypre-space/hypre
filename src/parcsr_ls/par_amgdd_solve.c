@@ -338,7 +338,7 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
    hypre_ParCSRMatrix         **A_array;
    hypre_ParVector            **F_array;
    hypre_ParVector            **U_array;
-   hypre_ParCSRMatrix         **P_array;
+   hypre_ParCSRMatrix         **R_array;
    hypre_ParVector            *Vtemp;
    HYPRE_Int                  *proc_first_index, *proc_last_index;
    HYPRE_Int                  *global_nodes;
@@ -371,7 +371,7 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
 
    // get info from amg
    A_array = hypre_ParAMGDataAArray(amg_data);
-   P_array = hypre_ParAMGDataPArray(amg_data);
+   R_array = hypre_ParAMGDataRArray(amg_data);
    F_array = hypre_ParAMGDataFArray(amg_data);
    U_array = hypre_ParAMGDataUArray(amg_data);
    Vtemp = hypre_ParAMGDataVtemp(amg_data);
@@ -405,17 +405,13 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
    // Restrict residual down to all levels (or just to the transition level) and initialize composite grids
    for (level = 0; level < transition_level-1; level++)
    {
-      alpha = 1.0;
-      beta = 0.0;
-      hypre_ParCSRMatrixMatvecT(alpha,P_array[level],F_array[level],
-                            beta,F_array[level+1]);
+      if ( hypre_ParAMGDataRestriction(amg_data) ) hypre_ParCSRMatrixMatvec(1.0, R_array[level], F_array[level], 0.0, F_array[level+1]);
+      else hypre_ParCSRMatrixMatvecT(1.0, R_array[level], F_array[level], 0.0, F_array[level+1]);
    }
    if (transition_level != num_levels)
    {
-      alpha = 1.0;
-      beta = 0.0;
-      hypre_ParCSRMatrixMatvecT(alpha,P_array[transition_level-1],F_array[transition_level-1],
-                            beta,F_array[transition_level]);
+      if ( hypre_ParAMGDataRestriction(amg_data) ) hypre_ParCSRMatrixMatvec(1.0, R_array[transition_level-1], F_array[transition_level-1], 0.0, F_array[transition_level]);
+      else hypre_ParCSRMatrixMatvecT(1.0, R_array[transition_level-1], F_array[transition_level-1], 0.0, F_array[transition_level]);
    }
 
    // copy new restricted residual into comp grid structure

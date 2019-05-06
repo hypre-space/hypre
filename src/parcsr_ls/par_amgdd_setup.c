@@ -84,7 +84,7 @@ HYPRE_Int
 CommunicateRemainingMatrixInfo(hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int *communication_cost, HYPRE_Int *num_resizes);
 
 HYPRE_Int
-FinalizeCompGridCommPkg(hypre_ParCompGridCommPkg *compGridCommPkg);
+FinalizeCompGridCommPkg(hypre_ParCompGridCommPkg *compGridCommPkg, hypre_ParCompGrid **compGrid);
 
 HYPRE_Int
 TestCompGrids1(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int transition_level, HYPRE_Int *padding, HYPRE_Int num_ghost_layers, HYPRE_Int current_level, HYPRE_Int check_ghost_info);
@@ -678,12 +678,6 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    if (use_barriers) hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
    if (timers) hypre_BeginTiming(timers[7]);
 
-   #if DEBUGGING_MESSAGES
-   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
-   if (myid == 0) hypre_printf("All ranks: done with FinalizeSendFlag()\n");
-   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
-   #endif 
-
    // Communicate data for A and all info for P
    CommunicateRemainingMatrixInfo(compGrid, compGridCommPkg, communication_cost, num_resizes);
 
@@ -709,8 +703,12 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
 
    if (timers) hypre_EndTiming(timers[5]);
 
+   // Setup the ghost/real dof markers for the comp grids
+   if (use_transition_level) hypre_ParCompGridSetupRealDofMarker(compGrid, transition_level+1, num_ghost_layers);
+   else hypre_ParCompGridSetupRealDofMarker(compGrid, num_levels, num_ghost_layers);
+
    // Finalize the send flag and the recv
-   FinalizeCompGridCommPkg(compGridCommPkg);
+   FinalizeCompGridCommPkg(compGridCommPkg, compGrid);
 
    // Count up the cost for subsequent residual communications
    if (communication_cost)
@@ -1986,16 +1984,8 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
    for (i = start; i < finish; i++)
    {
       send_elmt = hypre_ParCompGridCommPkgSendMapElmts(compGridCommPkg)[current_level][i];
-      if (hypre_ParCompGridCommPkgGhostMarker(compGridCommPkg)[current_level][i]) 
-      {
-         send_flag[current_level][partition][current_level][i - start] = -(send_elmt + 1);
-         (*buffer_size) += hypre_ParCompGridARowPtr(compGrid[current_level])[send_elmt+1] - hypre_ParCompGridARowPtr(compGrid[current_level])[send_elmt];
-      }
-      else
-      {
-         send_flag[current_level][partition][current_level][i - start] = send_elmt;
-         (*buffer_size) += hypre_ParCompGridARowPtr(compGrid[current_level])[send_elmt+1] - hypre_ParCompGridARowPtr(compGrid[current_level])[send_elmt];
-      }
+      send_flag[current_level][partition][current_level][i - start] = send_elmt;
+      (*buffer_size) += hypre_ParCompGridARowPtr(compGrid[current_level])[send_elmt+1] - hypre_ParCompGridARowPtr(compGrid[current_level])[send_elmt];
    }
    (*send_flag_buffer_size) += finish - start;
 
@@ -2193,25 +2183,19 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
          {
             for (j = insert_owned_positions[i]; j < insert_owned_positions[i+1]; j++)
             {
-               if (add_flag[level][j] > num_ghost_layers)
+               if (add_flag[level][j] > 0)
                   send_flag[current_level][partition][level][cnt++] = j;
-               else if (add_flag[level][j] > 0)
-                  send_flag[current_level][partition][level][cnt++] = -(j+1);
             }
             for (j = hypre_ParCompGridOwnedBlockStarts(compGrid[level])[i]; j < hypre_ParCompGridOwnedBlockStarts(compGrid[level])[i+1]; j++)
             {
-               if (add_flag[level][j] > num_ghost_layers)
+               if (add_flag[level][j] > 0)
                   send_flag[current_level][partition][level][cnt++] = j;
-               else if (add_flag[level][j] > 0)
-                  send_flag[current_level][partition][level][cnt++] = -(j+1);
             }
          }
          for (j = insert_owned_positions[hypre_ParCompGridNumOwnedBlocks(compGrid[level])]; j < hypre_ParCompGridNumNodes(compGrid[level]); j++)
          {
-               if (add_flag[level][j] > num_ghost_layers)
+               if (add_flag[level][j] > 0)
                   send_flag[current_level][partition][level][cnt++] = j;
-               else if (add_flag[level][j] > 0)
-                  send_flag[current_level][partition][level][cnt++] = -(j+1);
          }
          hypre_TFree(insert_owned_positions, HYPRE_MEMORY_HOST);
 
@@ -2243,12 +2227,7 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
       for (i = 0; i < num_send_nodes[current_level][partition][level]; i++)
       {
          send_elmt = send_flag[current_level][partition][level][i];
-         if (send_elmt < 0)
-         {
-            send_elmt = -(send_elmt + 1);
-            send_buffer[cnt++] = -hypre_ParCompGridGlobalIndices(compGrid[level])[ send_elmt ] - 1;
-         }
-         else send_buffer[cnt++] = hypre_ParCompGridGlobalIndices(compGrid[level])[ send_elmt ];
+         send_buffer[cnt++] = hypre_ParCompGridGlobalIndices(compGrid[level])[ send_elmt ];
       }
 
       // if not on last level, copy coarse gobal indices
@@ -2257,7 +2236,6 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
          for (i = 0; i < num_send_nodes[current_level][partition][level]; i++)
          {
             send_elmt = send_flag[current_level][partition][level][i];
-            if (send_elmt < 0) send_elmt = -(send_elmt + 1);
             send_buffer[cnt++] = hypre_ParCompGridCoarseGlobalIndices(compGrid[level])[ send_elmt ];
          }
       }
@@ -2266,7 +2244,6 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
       for (i = 0; i < num_send_nodes[current_level][partition][level]; i++)
       {
          send_elmt = send_flag[current_level][partition][level][i];
-         if (send_elmt < 0) send_elmt = -(send_elmt + 1);
          row_length = hypre_ParCompGridARowPtr(compGrid[level])[ send_elmt + 1 ]
                     - hypre_ParCompGridARowPtr(compGrid[level])[ send_elmt ];
          send_buffer[cnt++] = row_length;
@@ -2276,15 +2253,12 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
       for (i = 0; i < num_send_nodes[current_level][partition][level]; i++)
       {
          send_elmt = send_flag[current_level][partition][level][i];
-         if (send_elmt >= 0)
+         row_length = hypre_ParCompGridARowPtr(compGrid[level])[ send_elmt + 1 ]
+                    - hypre_ParCompGridARowPtr(compGrid[level])[ send_elmt ];
+         HYPRE_Int offset = hypre_ParCompGridARowPtr(compGrid[level])[ send_elmt ];
+         for (j = 0; j < row_length; j++)
          {
-            row_length = hypre_ParCompGridARowPtr(compGrid[level])[ send_elmt + 1 ]
-                       - hypre_ParCompGridARowPtr(compGrid[level])[ send_elmt ];
-            HYPRE_Int offset = hypre_ParCompGridARowPtr(compGrid[level])[ send_elmt ];
-            for (j = 0; j < row_length; j++)
-            {
-               send_buffer[cnt++] = hypre_ParCompGridAGlobalColInd(compGrid[level])[ offset + j ];
-            }
+            send_buffer[cnt++] = hypre_ParCompGridAGlobalColInd(compGrid[level])[ offset + j ];
          }
       }
    }
@@ -2376,7 +2350,7 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
    // level = [ num send nodes, [global indices] , [coarse global indices] , [A row sizes] , [A col ind] ]
 
    HYPRE_Int            level, i, j, k;
-   HYPRE_Int            num_psi_levels, row_size, offset, level_start, global_index, add_node_cnt;
+   HYPRE_Int            num_psi_levels, row_size, level_start, global_index, add_node_cnt;
    // HYPRE_Int            *add_flag;
 
    HYPRE_Int myid;
@@ -2435,23 +2409,8 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
          {
             if (incoming_global_index == compGrid_global_index)
             {
-               if (level != transition_level-1) offset = cnt + 2*num_recv_nodes[current_level][buffer_number][level];
-               else offset = cnt + num_recv_nodes[current_level][buffer_number][level];
-
-               // If existing dof is a ghost dof and if incoming dof is a real dof, overwrite by sending existing comp grid and incoming to same location
-               if (hypre_ParCompGridARowPtr(compGrid[level])[ compGrid_cnt + num_owned_nodes + 1 ] - hypre_ParCompGridARowPtr(compGrid[level])[ compGrid_cnt + num_owned_nodes ] == 0 && recv_buffer[offset] != 0)
-               {
-                  incoming_dest[incoming_cnt++] = dest;
-                  compGrid_dest[compGrid_cnt++] = dest;
-                  dest++;
-                  cnt++;
-                  nodes_added_on_level[level] = 1;
-               }
-               else
-               {
-                  incoming_dest[incoming_cnt++] = -1;
-                  cnt++;
-               }
+               incoming_dest[incoming_cnt++] = -1;
+               cnt++;
             }
             else if (incoming_global_index < compGrid_global_index)
             {
@@ -2533,21 +2492,17 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
             {
                if (send_flag[i][j][level][k] >= num_owned_nodes)
                   send_flag[i][j][level][k] = compGrid_dest[ send_flag[i][j][level][k] - num_owned_nodes ];
-               else if (-(send_flag[i][j][level][k]+1) >= num_owned_nodes)
-                  send_flag[i][j][level][k] = -(compGrid_dest[ -(send_flag[i][j][level][k]+1) - num_owned_nodes ] + 1);
             }
          }
       }
       for (i = current_level+1; i < num_levels; i++)
       {
-         for (j = 0; j < hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg)[i]; j++)
+         for (j = 0; j < hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg)[i]; j++)
          {
             for (k = 0; k < num_recv_nodes[i][j][level]; k++)
             {
                if (recv_map[i][j][level][k] >= num_owned_nodes)
                   recv_map[i][j][level][k] = compGrid_dest[ recv_map[i][j][level][k] - num_owned_nodes ];
-               else if (-(recv_map[i][j][level][k]+1) >= num_owned_nodes)
-                  recv_map[i][j][level][k] = -(compGrid_dest[ -(recv_map[i][j][level][k]+1) - num_owned_nodes ] + 1);
             }
          }
       }
@@ -2559,8 +2514,6 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
             {
                if (recv_map[current_level][i][level][k] >= num_owned_nodes)
                   recv_map[current_level][i][level][k] = compGrid_dest[ recv_map[current_level][i][level][k] - num_owned_nodes ];
-               else if (-(recv_map[current_level][i][level][k]+1) >= num_owned_nodes)
-                  recv_map[current_level][i][level][k] = -(compGrid_dest[ -(recv_map[current_level][i][level][k]+1) - num_owned_nodes ] + 1);
             }
          }
       }
@@ -2700,14 +2653,7 @@ PackRecvMapSendBuffer(HYPRE_Int *recv_map_send_buffer,
 
             if (recv_map[level][i] != -1)
             {
-               if (hypre_ParCompGridARowPtr(compGrid[level])[ recv_map[level][i] + 1 ] - hypre_ParCompGridARowPtr(compGrid[level])[ recv_map[level][i] ] > 0)
-               {
-                  recv_map[level][ num_recv_nodes[level]++ ] = recv_map[level][i];
-               }
-               else
-               {
-                  recv_map[level][ num_recv_nodes[level]++ ] = -(recv_map[level][i] + 1);
-               }
+               recv_map[level][ num_recv_nodes[level]++ ] = recv_map[level][i];
                (*recv_buffer_size)++;
             }
          }
@@ -2803,17 +2749,9 @@ CommunicateRemainingMatrixInfo(hypre_ParCompGrid **compGrid, hypre_ParCompGridCo
                for (i = 0; i < hypre_ParCompGridCommPkgNumSendNodes(compGridCommPkg)[outer_level][part][level]; i++)
                {
                   HYPRE_Int idx, A_row_size;
-                  if (hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[outer_level][part][level][i] < 0)
-                  {
-                     idx = -(hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[outer_level][part][level][i] + 1);
-                     A_row_size = 0;
-                  }
-                  else
-                  {
-                     idx = hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[outer_level][part][level][i];
-                     A_row_size = hypre_ParCompGridARowPtr(compGrid[level])[idx+1] - hypre_ParCompGridARowPtr(compGrid[level])[idx];
-                  }
-
+                  idx = hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[outer_level][part][level][i];
+                  A_row_size = hypre_ParCompGridARowPtr(compGrid[level])[idx+1] - hypre_ParCompGridARowPtr(compGrid[level])[idx];
+                  
                   HYPRE_Int P_row_size = 0;
                   if (level != num_levels-1)
                   {
@@ -2880,13 +2818,10 @@ CommunicateRemainingMatrixInfo(hypre_ParCompGrid **compGrid, hypre_ParCompGridCo
             {
                for (i = 0; i < hypre_ParCompGridCommPkgNumSendNodes(compGridCommPkg)[outer_level][part][level]; i++)
                {
-                  if (hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[outer_level][part][level][i] >= 0)
+                  HYPRE_Int idx = hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[outer_level][part][level][i];
+                  for (j = hypre_ParCompGridARowPtr(compGrid[level])[idx]; j < hypre_ParCompGridARowPtr(compGrid[level])[idx+1]; j++)
                   {
-                     HYPRE_Int idx = hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[outer_level][part][level][i];
-                     for (j = hypre_ParCompGridARowPtr(compGrid[level])[idx]; j < hypre_ParCompGridARowPtr(compGrid[level])[idx+1]; j++)
-                     {
-                        complex_send_buffers[part][complex_cnt++] = hypre_ParCompGridAData(compGrid[level])[j];
-                     }
+                     complex_send_buffers[part][complex_cnt++] = hypre_ParCompGridAData(compGrid[level])[j];
                   }
                }
                if (level != num_levels-1)
@@ -2895,7 +2830,6 @@ CommunicateRemainingMatrixInfo(hypre_ParCompGrid **compGrid, hypre_ParCompGridCo
                   for (i = 0; i < hypre_ParCompGridCommPkgNumSendNodes(compGridCommPkg)[outer_level][part][level]; i++)
                   {
                      HYPRE_Int idx = hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[outer_level][part][level][i];
-                     if (idx < 0) idx = -(idx + 1);                     
                      if (idx < num_owned_nodes)
                      {
                         int_send_buffers[part][int_cnt++] = hypre_ParCompGridPRowPtr(compGrid[level])[idx+1] - hypre_ParCompGridPRowPtr(compGrid[level])[idx];
@@ -2968,12 +2902,9 @@ CommunicateRemainingMatrixInfo(hypre_ParCompGrid **compGrid, hypre_ParCompGridCo
                {
                   HYPRE_Int idx = hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[outer_level][proc][level][i];
 
-                  if (idx >=0 )
+                  for (j = hypre_ParCompGridARowPtr(compGrid[level])[idx]; j < hypre_ParCompGridARowPtr(compGrid[level])[idx+1]; j++)
                   {
-                     for (j = hypre_ParCompGridARowPtr(compGrid[level])[idx]; j < hypre_ParCompGridARowPtr(compGrid[level])[idx+1]; j++)
-                     {
-                        hypre_ParCompGridAData(compGrid[level])[j] = complex_recv_buffers[proc][complex_cnt++];
-                     }
+                     hypre_ParCompGridAData(compGrid[level])[j] = complex_recv_buffers[proc][complex_cnt++];
                   }
                }
                if (level != num_levels-1)
@@ -2981,7 +2912,6 @@ CommunicateRemainingMatrixInfo(hypre_ParCompGrid **compGrid, hypre_ParCompGridCo
                   for (i = 0; i < hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[outer_level][proc][level]; i++)
                   {
                      HYPRE_Int idx = hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[outer_level][proc][level][i];
-                     if (idx < 0) idx = -(idx + 1);
                      HYPRE_Int num_owned_nodes = hypre_ParCompGridOwnedBlockStarts(compGrid[level])[hypre_ParCompGridNumOwnedBlocks(compGrid[level])];
                      HYPRE_Int temp_idx = idx - num_owned_nodes;
 
@@ -3074,9 +3004,9 @@ CommunicateRemainingMatrixInfo(hypre_ParCompGrid **compGrid, hypre_ParCompGridCo
 }
 
 HYPRE_Int
-FinalizeCompGridCommPkg(hypre_ParCompGridCommPkg *compGridCommPkg)
+FinalizeCompGridCommPkg(hypre_ParCompGridCommPkg *compGridCommPkg, hypre_ParCompGrid **compGrid)
 {
-   HYPRE_Int outer_level, part, level, i;
+   HYPRE_Int outer_level, part, level, i, idx;
    HYPRE_Int num_levels = hypre_ParCompGridCommPkgNumLevels(compGridCommPkg);
 
    for (outer_level = 0; outer_level < num_levels; outer_level++)
@@ -3091,9 +3021,10 @@ FinalizeCompGridCommPkg(hypre_ParCompGridCommPkg *compGridCommPkg)
             HYPRE_Int num_send_nodes = 0;
             for (i = 0; i < hypre_ParCompGridCommPkgNumSendNodes(compGridCommPkg)[outer_level][part][level]; i++)
             {
-               if (hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[outer_level][part][level][i] >= 0)
+               idx = hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[outer_level][part][level][i];
+               if (hypre_ParCompGridRealDofMarker(compGrid[level])[idx])
                {
-                  hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[outer_level][part][level][ num_send_nodes++ ] = hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[outer_level][part][level][i];
+                  hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[outer_level][part][level][ num_send_nodes++ ] = idx;
                }
             }
             hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[outer_level][part][level] = hypre_TReAlloc(hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[outer_level][part][level], HYPRE_Int, num_send_nodes, HYPRE_MEMORY_HOST);
@@ -3103,9 +3034,10 @@ FinalizeCompGridCommPkg(hypre_ParCompGridCommPkg *compGridCommPkg)
             HYPRE_Int num_recv_nodes = 0;
             for (i = 0; i < hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[outer_level][part][level]; i++)
             {
-               if (hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[outer_level][part][level][i] >= 0)
+               idx = hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[outer_level][part][level][i];
+               if (hypre_ParCompGridRealDofMarker(compGrid[level])[idx])
                {
-                  hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[outer_level][part][level][ num_recv_nodes++ ] = hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[outer_level][part][level][i];
+                  hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[outer_level][part][level][ num_recv_nodes++ ] = idx;
                }
             }
             hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[outer_level][part][level] = hypre_TReAlloc(hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[outer_level][part][level], HYPRE_Int, num_recv_nodes, HYPRE_MEMORY_HOST);

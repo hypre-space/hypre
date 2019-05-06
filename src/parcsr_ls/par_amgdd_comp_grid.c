@@ -46,6 +46,7 @@ hypre_ParCompGridCreate ()
    hypre_ParCompGridGlobalIndices(compGrid) = NULL;
    hypre_ParCompGridCoarseGlobalIndices(compGrid) = NULL;
    hypre_ParCompGridCoarseLocalIndices(compGrid) = NULL;
+   hypre_ParCompGridRealDofMarker(compGrid) = NULL;
 
    hypre_ParCompGridARowPtr(compGrid) = NULL;
    hypre_ParCompGridAColInd(compGrid) = NULL;
@@ -106,6 +107,11 @@ hypre_ParCompGridDestroy ( hypre_ParCompGrid *compGrid )
    if (hypre_ParCompGridCoarseLocalIndices(compGrid))
    {
       hypre_TFree(hypre_ParCompGridCoarseLocalIndices(compGrid), HYPRE_MEMORY_HOST);
+   }
+
+   if (hypre_ParCompGridRealDofMarker(compGrid))
+   {
+      hypre_TFree(hypre_ParCompGridRealDofMarker(compGrid), HYPRE_MEMORY_HOST);
    }
 
    if (hypre_ParCompGridARowPtr(compGrid))
@@ -331,6 +337,68 @@ hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, H
 }
 
 HYPRE_Int
+hypre_ParCompGridSetupRealDofMarker( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int num_ghost_layers )
+{
+   HYPRE_Int i,j,level;
+   for (level = 0; level < num_levels-1; level++)
+   {
+      // Allocate the real dof marker
+      hypre_ParCompGridRealDofMarker(compGrid[level]) = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumNodes(compGrid[level]), HYPRE_MEMORY_HOST);
+
+      if (num_ghost_layers > 1)
+      {
+         // Initialize to 1 (real) everywhere except where we don't own the full stencil in A
+         for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
+         {
+            hypre_ParCompGridRealDofMarker(compGrid[level])[i] = 1;
+            for (j = hypre_ParCompGridARowPtr(compGrid[level])[i]; j < hypre_ParCompGridARowPtr(compGrid[level])[i+1]; j++)
+            {
+               if (hypre_ParCompGridAColInd(compGrid[level])[j] < 0)
+               {
+                  hypre_ParCompGridRealDofMarker(compGrid[level])[i] = num_ghost_layers + 1;
+                  break;
+               }
+            }
+         }
+
+         // Find neighbors less than distance (num_ghost_layers) from the edges marded above
+         for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
+         {
+            if (hypre_ParCompGridRealDofMarker(compGrid[level])[i] == num_ghost_layers + 1)
+            {
+               // Recursively add the region of padding (flagging coarse nodes on the next level if applicable)
+               RecursivelyMarkGhostDofs(i, num_ghost_layers, compGrid[level]);
+            }
+         }
+
+         // Clean up by setting the marker for all ghost dofs to zero
+         for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
+         {
+            if (hypre_ParCompGridRealDofMarker(compGrid[level])[i] > 1) hypre_ParCompGridRealDofMarker(compGrid[level])[i] = 0;
+         }
+      }
+      else
+      {
+         // Initialize to 1 (real) everywhere except where we don't own the full stencil in A
+         for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
+         {
+            hypre_ParCompGridRealDofMarker(compGrid[level])[i] = 1;
+            for (j = hypre_ParCompGridARowPtr(compGrid[level])[i]; j < hypre_ParCompGridARowPtr(compGrid[level])[i+1]; j++)
+            {
+               if (hypre_ParCompGridAColInd(compGrid[level])[j] < 0)
+               {
+                  hypre_ParCompGridRealDofMarker(compGrid[level])[i] = 0;
+                  break;
+               }
+            }
+         }         
+      }
+   }
+
+   return 0;
+}
+
+HYPRE_Int
 hypre_ParCompGridSetSize ( hypre_ParCompGrid *compGrid, HYPRE_Int num_nodes, HYPRE_Int mem_size, HYPRE_Int A_nnz, HYPRE_Int P_nnz, HYPRE_Int full_comp_info )
 {
    hypre_ParCompGridNumNodes(compGrid) = num_nodes;
@@ -428,9 +496,8 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *nod
       // If we have added nodes on this level
       if (nodes_added_on_level[level])
       {
-         // loop over indices of non-owned nodes on this level
-         HYPRE_Int num_owned_nodes = hypre_ParCompGridOwnedBlockStarts(compGrid[level])[hypre_ParCompGridNumOwnedBlocks(compGrid[level])];
-         for (i = num_owned_nodes; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
+         // loop over indices on this level !!! This could be made more efficient! I now loop over all the owned nodes, and most of these don't need any work, yet I'm doing it anyway...
+         for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
          {
             // fix up the local indices for the matrix A row info
             for (j = hypre_ParCompGridARowPtr(compGrid[level])[i]; j < hypre_ParCompGridARowPtr(compGrid[level])[i+1]; j++)
@@ -462,20 +529,6 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *nod
                   if (local_index == -1) local_index = -global_index-1;
                }
                hypre_ParCompGridAColInd(compGrid[level])[j] = local_index;
-
-               // if we need to insert an entry into the matrix (!!! Note that I'm assuming a symmetric matrix here !!!)
-               if ( local_index < num_owned_nodes && local_index >= 0 )
-               {
-                  // search over the row to find the appropriate global index and insert local index
-                  for (k = hypre_ParCompGridARowPtr(compGrid[level])[local_index]; k < hypre_ParCompGridARowPtr(compGrid[level])[local_index+1]; k++)
-                  {
-                     if ( hypre_ParCompGridAGlobalColInd(compGrid[level])[k] == hypre_ParCompGridGlobalIndices(compGrid[level])[i] )
-                     {
-                        hypre_ParCompGridAColInd(compGrid[level])[k] = i;
-                        break;
-                     }
-                  }
-               }
             }
          }
       }
@@ -1535,6 +1588,35 @@ hypre_ParCompGridCommPkgDebugPrint( hypre_ParCompGridCommPkg *compGridCommPkg, c
    }
 
    fclose(file);
+
+   return 0;
+}
+
+HYPRE_Int
+RecursivelyMarkGhostDofs(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *compGrid)
+{
+   HYPRE_Int         i,index,coarse_grid_index;
+   HYPRE_Int error_code = 0;
+
+   // Look at neighbors
+   for (i = hypre_ParCompGridARowPtr(compGrid)[node]; i < hypre_ParCompGridARowPtr(compGrid)[node+1]; i++)
+   {
+      // Get the index of the neighbor
+      index = hypre_ParCompGridAColInd(compGrid)[i];
+
+      // If the neighbor info is available on this proc
+      if (index >= 0)
+      {
+         // And if we still need to visit this index (note that add_flag[index] = m means we have already added all distance m-1 neighbors of index)
+         if (hypre_ParCompGridRealDofMarker(compGrid)[index] < m)
+         {
+            hypre_ParCompGridRealDofMarker(compGrid)[index] = m;
+            
+            // Recursively call to find distance m-1 neighbors of index
+            if (m > 2) RecursivelyMarkGhostDofs(index, m-1, compGrid);
+         }
+      }
+   }
 
    return 0;
 }

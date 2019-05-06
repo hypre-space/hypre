@@ -320,12 +320,12 @@ FAC_Restrict( hypre_ParCompGrid *compGrid_f, hypre_ParCompGrid *compGrid_c, HYPR
       }
    }
 
-   // Get update: s_l <- A_lt_l + s_l (NOTE: I'm assuming here that A is symmetric and computing s_l <- A_l^Tt_l + s_l)
+   // Get update: s_l <- A_lt_l + s_l 
    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid_f); i++)
    {
       for (j = hypre_ParCompGridARowPtr(compGrid_f)[i]; j < hypre_ParCompGridARowPtr(compGrid_f)[i+1]; j++)
       {
-         hypre_ParCompGridS(compGrid_f)[ hypre_ParCompGridAColInd(compGrid_f)[j] ] += hypre_ParCompGridAData(compGrid_f)[j] * hypre_ParCompGridT(compGrid_f)[i];
+         hypre_ParCompGridS(compGrid_f)[i] += hypre_ParCompGridAData(compGrid_f)[j] * hypre_ParCompGridT(compGrid_f)[ hypre_ParCompGridAColInd(compGrid_f)[j] ];
       }
    }
 
@@ -435,7 +435,7 @@ FAC_Jacobi( hypre_ParCompGrid *compGrid )
    // Do Jacobi relaxation on the real nodes
    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
    {
-      if (hypre_ParCompGridARowPtr(compGrid)[i+1] - hypre_ParCompGridARowPtr(compGrid)[i] > 0)
+      if (hypre_ParCompGridRealDofMarker(compGrid)[i])
       {
          // Initialize u as RHS
          hypre_ParCompGridTemp(compGrid)[i] = hypre_ParCompGridF(compGrid)[i];
@@ -465,7 +465,7 @@ FAC_Jacobi( hypre_ParCompGrid *compGrid )
    // Copy over relaxed vector
    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
    {
-      if (hypre_ParCompGridARowPtr(compGrid)[i+1] - hypre_ParCompGridARowPtr(compGrid)[i] > 0)
+      if (hypre_ParCompGridRealDofMarker(compGrid)[i])
       {
          u_before = hypre_ParCompGridU(compGrid)[i];
 
@@ -490,7 +490,7 @@ FAC_GaussSeidel( hypre_ParCompGrid *compGrid )
    // Do Gauss-Seidel relaxation on the real nodes
    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
    {
-      if (hypre_ParCompGridARowPtr(compGrid)[i+1] - hypre_ParCompGridARowPtr(compGrid)[i] > 0)
+      if (hypre_ParCompGridRealDofMarker(compGrid)[i])
       {
          u_before = hypre_ParCompGridU(compGrid)[i];
 

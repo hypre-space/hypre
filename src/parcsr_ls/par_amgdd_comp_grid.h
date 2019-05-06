@@ -121,6 +121,7 @@ typedef struct
    HYPRE_Int        *global_indices; // This also encodes whether a dof is real or ghost (negative indices are ghost)
    HYPRE_Int        *coarse_global_indices; 
    HYPRE_Int        *coarse_local_indices;
+   HYPRE_Int        *real_dof_marker;
 
    HYPRE_Int        *A_rowptr;
    HYPRE_Int        *A_colind;
@@ -154,6 +155,7 @@ typedef struct
 #define hypre_ParCompGridGlobalIndices(compGrid)           ((compGrid) -> global_indices)
 #define hypre_ParCompGridCoarseGlobalIndices(compGrid)           ((compGrid) -> coarse_global_indices)
 #define hypre_ParCompGridCoarseLocalIndices(compGrid)           ((compGrid) -> coarse_local_indices)
+#define hypre_ParCompGridRealDofMarker(compGrid) ((compGrid) -> real_dof_marker)
 #define hypre_ParCompGridARowPtr(compGrid)         ((compGrid) -> A_rowptr)
 #define hypre_ParCompGridAColInd(compGrid)         ((compGrid) -> A_colind)
 #define hypre_ParCompGridAGlobalColInd(compGrid)         ((compGrid) -> A_global_colind)
