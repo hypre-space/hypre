@@ -658,51 +658,35 @@ HYPRE_Int hypre_BoomerAMGRelax_FCFJacobi( hypre_ParCSRMatrix *A,
                                           hypre_ParVector    *u,
                                           hypre_ParVector    *Vtemp)
 {
-
    HYPRE_Int i;
    HYPRE_Int relax_points[3];
    HYPRE_Int relax_type = 0;
-
-   hypre_ParVector    *Ztemp = NULL;
-
 
    relax_points[0] = -1; /*F */
    relax_points[1] =  1; /*C */
    relax_points[2] = -1; /*F */
 
-   /* if we are on the coarsest level ,the cf_marker will be null
-      and we just do one sweep regular jacobi */
+   /* cf == NULL --> size == 0 */
    if (cf_marker == NULL)
    {
-       hypre_BoomerAMGRelax(A,
-                            f,
-                            cf_marker,
-                            relax_type,
-                            0,
-                            relax_weight,
-                            0.0,
-                            NULL,
-                            u,
-                            Vtemp, Ztemp);
-   }
-   else
-   {
-      for (i=0; i < 3; i++)
-         hypre_BoomerAMGRelax(A,
-                              f,
-                              cf_marker,
-                              relax_type,
-                              relax_points[i],
-                              relax_weight,
-                              0.0,
-                              NULL,
-                              u,
-                              Vtemp, Ztemp);
+      hypre_assert(hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A)) == 0);
    }
 
+   for (i=0; i < 3; i++)
+   {
+      hypre_BoomerAMGRelax(A,
+                           f,
+                           cf_marker,
+                           relax_type,
+                           relax_points[i],
+                           relax_weight,
+                           0.0,
+                           NULL,
+                           u,
+                           Vtemp, NULL);
+   }
 
    return hypre_error_flag;
-
 }
 
 /*--------------------------------------------------------------------------
