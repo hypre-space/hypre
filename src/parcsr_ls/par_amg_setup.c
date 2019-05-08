@@ -1656,6 +1656,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             {
                HYPRE_Real filter_thresholdR;
                filter_thresholdR = hypre_ParAMGDataFilterThresholdR(amg_data);
+               HYPRE_Int is_triangular = hypre_ParAMGDataIsTriangular(amg_data);
+               HYPRE_Int gmres_switch = hypre_ParAMGDataGMRESSwitchR(amg_data);
                /* !!! RL: ensure that CF_marker contains -1 or 1 !!! */
                for (i = 0; i < hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[level])); i++)
                {
@@ -1667,14 +1669,16 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   hypre_BoomerAMGBuildRestrAIR(A_array[level], CF_marker,
                                                Sabs, coarse_pnts_global, 1, NULL,
                                                filter_thresholdR, debug_flag,
-                                               col_offd_Sabs_to_A, &R );
+                                               col_offd_Sabs_to_A, &R,
+                                               is_triangular, gmres_switch );
                }
                else if (restri_type > 1.0 && restri_type < 3.0) /* distance-2 AIR */
                {
                   hypre_BoomerAMGBuildRestrDist2AIR(A_array[level], CF_marker,
                                                     Sabs, coarse_pnts_global, 1, NULL,
                                                     filter_thresholdR, debug_flag,
-                                                    col_offd_Sabs_to_A, &R, restri_type < 2.0 );
+                                                    col_offd_Sabs_to_A, &R, restri_type < 2.0,
+                                                    is_triangular, gmres_switch);
                }
                else
                {
