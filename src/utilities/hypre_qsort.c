@@ -102,7 +102,7 @@ void hypre_swap3_d(HYPRE_Real  *v,
 {
    HYPRE_Int temp;
    HYPRE_Real temp_d;
-   
+
 
    temp_d = v[i];
    v[i] = v[j];
@@ -121,13 +121,13 @@ void hypre_swap3_d(HYPRE_Real  *v,
 void hypre_swap4_d(HYPRE_Real  *v,
                   HYPRE_Int  *w,
                   HYPRE_Int  *z,
-                  HYPRE_Int *y, 
+                  HYPRE_Int *y,
                   HYPRE_Int  i,
                   HYPRE_Int  j )
 {
    HYPRE_Int temp;
    HYPRE_Real temp_d;
-   
+
 
    temp_d = v[i];
    v[i] = v[j];
@@ -379,14 +379,16 @@ static void hypre_search_row(HYPRE_Int row,
                              HYPRE_Int *order_ind)
 {
    // If this row has not been visited, call recursive DFS on nonzero
-   // column entries 
-   if (!visited[row]) {
+   // column entries
+   if (!visited[row])
+   {
       HYPRE_Int j;
       visited[row] = 1;
-      for (j=row_ptr[row]; j<row_ptr[row+1]; j++) {
+      for (j=row_ptr[row]; j<row_ptr[row+1]; j++)
+      {
          HYPRE_Int col = col_inds[j];
          hypre_search_row(col, row_ptr, col_inds, data,
-                         visited, ordering, order_ind);
+                          visited, ordering, order_ind);
       }
       // Add node to ordering *after* it has been searched
       ordering[*order_ind] = row;
@@ -408,16 +410,20 @@ void hypre_topo_sort(const HYPRE_Int *row_ptr,
                      HYPRE_Int *ordering,
                      HYPRE_Int n)
 {
-   HYPRE_Int visited[n];
-   memset(visited, 0, n*sizeof(HYPRE_Int));
+   HYPRE_Int *visited = hypre_CTAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
    HYPRE_Int order_ind = 0;
    HYPRE_Int temp_row = 0;
-   while (order_ind < n) {
+   while (order_ind < n)
+   {
       hypre_search_row(temp_row, row_ptr, col_inds, data,
                        visited, ordering, &order_ind);
       temp_row += 1;
-      if (temp_row == n) temp_row = 0;
+      if (temp_row == n)
+      {
+         temp_row = 0;
+      }
    }
+   hypre_TFree(visited, HYPRE_MEMORY_HOST);
 }
 
 
@@ -431,19 +437,24 @@ static void hypre_dense_search_row(HYPRE_Int row,
                                    HYPRE_Int is_col_major)
 {
    // If this row has not been visited, call recursive DFS on nonzero
-   // column entries 
-   if (!visited[row]) {
+   // column entries
+   if (!visited[row])
+   {
       HYPRE_Int col;
       visited[row] = 1;
-      for (col=0; col<n; col++) {
+      for (col=0; col<n; col++)
+      {
          HYPRE_Complex val;
-         if (is_col_major) {
+         if (is_col_major)
+         {
             val = L[col*n + row];
          }
-         else {
+         else
+         {
             val = L[row*n + col];
          }
-         if (fabs(val) > 1e-14) {
+         if (fabs(val) > 1e-14)
+         {
             hypre_dense_search_row(col, L, visited, ordering, order_ind, n, is_col_major);
          }
       }
@@ -467,13 +478,17 @@ void hypre_dense_topo_sort(const HYPRE_Complex *L,
                            HYPRE_Int n,
                            HYPRE_Int is_col_major)
 {
-   HYPRE_Int visited[n];
-   memset(visited, 0, n*sizeof(HYPRE_Int));
+   HYPRE_Int *visited = hypre_CTAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
    HYPRE_Int order_ind = 0;
    HYPRE_Int temp_row = 0;
-   while (order_ind < n) {
+   while (order_ind < n)
+   {
       hypre_dense_search_row(temp_row, L, visited, ordering, &order_ind, n, is_col_major);
       temp_row += 1;
-      if (temp_row == n) temp_row = 0;
+      if (temp_row == n)
+      {
+         temp_row = 0;
+      }
    }
+   hypre_TFree(visited, HYPRE_MEMORY_HOST);
 }

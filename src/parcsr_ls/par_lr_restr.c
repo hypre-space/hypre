@@ -20,7 +20,7 @@
 //             csrAi_a, csrAiT_i, csrAiT_j, csrAiT_a
 //    Use
 //       hypre_dense_topo_sort(HYPRE_Real *L, HYPRE_Int *ordering, HYPRE_Int n)
-//    to get ordering for triangular solve. Can provide 
+//    to get ordering for triangular solve. Can provide
 
 
 HYPRE_Int AIR_TOT_SOL_SIZE = 0;
@@ -967,7 +967,7 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
    }
    Marker_FF2_offd_j = hypre_CTAlloc(HYPRE_Int, FF2_offd_len, HYPRE_MEMORY_HOST);
 
-   // TODO bs : what is this for? Should we remove? 
+   // TODO bs : what is this for? Should we remove?
    //for (i = 0; i < num_cols_A_offd; i++)
    //{
    //   Marker_offd[i] = -1;
@@ -1823,19 +1823,24 @@ static void ordered_GS(const HYPRE_Complex L[],
 
    // Ordered Gauss-Seidel iteration
    HYPRE_Int i, col;
-   for (i=0; i<n; i++) {
+   for (i=0; i<n; i++)
+   {
       HYPRE_Int row = ordering[i];
       HYPRE_Complex temp = rhs[row];
-      for (col=0; col<n; col++) {
-         if (col != row) {
-            temp -= L[row*n+col] * x[col];   // row-major             
+      for (col=0; col<n; col++)
+      {
+         if (col != row)
+         {
+            temp -= L[row*n+col] * x[col];   // row-major
          }
       }
       HYPRE_Complex diag = L[row*n + row];
-      if (fabs(diag) < 1e-12) {
+      if (fabs(diag) < 1e-12)
+      {
          x[row] = 0.0;
       }
-      else{
+      else
+      {
          x[row] = temp / diag;
       }
    }
@@ -1868,7 +1873,7 @@ hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
    hypre_CSRMatrix *R_offd;
 
    /* arrays */
-   HYPRE_Complex      *R_diag_a;
+   HYPRE_Complex   *R_diag_a;
    HYPRE_Int       *R_diag_i;
    HYPRE_Int       *R_diag_j;
    HYPRE_Complex      *R_offd_a;
