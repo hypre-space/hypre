@@ -32,16 +32,16 @@ hypre_ParCSRMatrixScaledNorm( hypre_ParCSRMatrix *A, HYPRE_Real *scnorm)
    hypre_ParCSRCommPkg	*comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    MPI_Comm		 comm = hypre_ParCSRMatrixComm(A);
    hypre_CSRMatrix      *diag   = hypre_ParCSRMatrixDiag(A);
-   HYPRE_Int			*diag_i = hypre_CSRMatrixI(diag);
-   HYPRE_Int			*diag_j = hypre_CSRMatrixJ(diag);
+   HYPRE_Int		*diag_i = hypre_CSRMatrixI(diag);
+   HYPRE_Int		*diag_j = hypre_CSRMatrixJ(diag);
    HYPRE_Real		*diag_data = hypre_CSRMatrixData(diag);
    hypre_CSRMatrix      *offd   = hypre_ParCSRMatrixOffd(A);
-   HYPRE_Int			*offd_i = hypre_CSRMatrixI(offd);
-   HYPRE_Int			*offd_j = hypre_CSRMatrixJ(offd);
+   HYPRE_Int		*offd_i = hypre_CSRMatrixI(offd);
+   HYPRE_Int		*offd_j = hypre_CSRMatrixJ(offd);
    HYPRE_Real		*offd_data = hypre_CSRMatrixData(offd);
-   HYPRE_Int         		 global_num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
-   HYPRE_Int	                *row_starts = hypre_ParCSRMatrixRowStarts(A);
-   HYPRE_Int			 num_rows = hypre_CSRMatrixNumRows(diag);
+   HYPRE_BigInt     	 global_num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
+   HYPRE_BigInt	        *row_starts = hypre_ParCSRMatrixRowStarts(A);
+   HYPRE_Int		 num_rows = hypre_CSRMatrixNumRows(diag);
 
    hypre_ParVector      *dinvsqrt;
    HYPRE_Real		*dis_data;

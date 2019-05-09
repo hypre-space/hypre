@@ -11,19 +11,10 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
-
-
-
 TNAME=`basename $0 .sh`
-CONVTOL=$1
+RTOL=$1
+ATOL=$2
 
-# Set default check tolerance
-if [ x$CONVTOL = "x" ];
-then
-    CONVTOL=0.0
-fi
-#echo "tol = $CONVTOL"
 #=============================================================================
 # compare with baseline case
 #=============================================================================
@@ -56,7 +47,7 @@ if [ "$OUT_COUNT" != "$SAVED_COUNT" ]; then
 fi
 
 if [ -z $HYPRE_NO_SAVED ]; then
-   (../runcheck.sh ${TNAME}.out ${TNAME}.saved $CONVTOL) >&2
+   (../runcheck.sh ${TNAME}.out ${TNAME}.saved $RTOL $ATOL) >&2
 fi
 
 #=============================================================================

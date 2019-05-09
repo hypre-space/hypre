@@ -106,7 +106,7 @@ extern hypre_TimingType *hypre_global_timing;
 /* timing.c */
 HYPRE_Int hypre_InitializeTiming( const char *name );
 HYPRE_Int hypre_FinalizeTiming( HYPRE_Int time_index );
-HYPRE_Int hypre_IncFLOPCount( HYPRE_Int inc );
+HYPRE_Int hypre_IncFLOPCount( HYPRE_BigInt inc );
 HYPRE_Int hypre_BeginTiming( HYPRE_Int time_index );
 HYPRE_Int hypre_EndTiming( HYPRE_Int time_index );
 HYPRE_Int hypre_ClearTiming( void );

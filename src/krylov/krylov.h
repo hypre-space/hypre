@@ -134,11 +134,12 @@ typedef struct
    HYPRE_Int      max_iter;
    HYPRE_Int      stop_crit;
    HYPRE_Int      converged;
+   HYPRE_Int      hybrid;
    HYPRE_Real   tol;
    HYPRE_Real   cf_tol;
    HYPRE_Real   rel_residual_norm;
    HYPRE_Real   a_tol;
-   
+
 
    void  *A;
    void  *r;
@@ -155,7 +156,7 @@ typedef struct
 
    /* log info (always logged) */
    HYPRE_Int      num_iterations;
- 
+
    /* additional log info (logged when `logging' > 0) */
    HYPRE_Int      logging;
    HYPRE_Int      print_level;
@@ -163,6 +164,8 @@ typedef struct
    char    *log_file_name;
 
 } hypre_BiCGSTABData;
+
+#define hypre_BiCGSTABDataHybrid(pcgdata)  ((pcgdata) -> hybrid)
 
 #ifdef __cplusplus
 extern "C" {
@@ -461,38 +464,41 @@ typedef struct
 
 typedef struct
 {
-   HYPRE_Int    k_dim;
-   HYPRE_Int    min_iter;
-   HYPRE_Int    max_iter;
-   HYPRE_Int    rel_change;
-   HYPRE_Int    skip_real_r_check;
-   HYPRE_Int    stop_crit;
-   HYPRE_Int    converged;
+   HYPRE_Int      k_dim;
+   HYPRE_Int      min_iter;
+   HYPRE_Int      max_iter;
+   HYPRE_Int      rel_change;
+   HYPRE_Int      skip_real_r_check;
+   HYPRE_Int      stop_crit;
+   HYPRE_Int      converged;
+   HYPRE_Int      hybrid;
    HYPRE_Real   tol;
    HYPRE_Real   cf_tol;
    HYPRE_Real   a_tol;
    HYPRE_Real   rel_residual_norm;
 
-   void   *A;
-   void   *r;
-   void   *w;
-   void   *w_2;
+   void  *A;
+   void  *r;
+   void  *w;
+   void  *w_2;
    void  **p;
 
-   void   *matvec_data;
-   void   *precond_data;
+   void    *matvec_data;
+   void    *precond_data;
 
-   hypre_GMRESFunctions *functions;
+   hypre_GMRESFunctions * functions;
 
    /* log info (always logged) */
-   HYPRE_Int num_iterations;
- 
+   HYPRE_Int      num_iterations;
+
    HYPRE_Int     print_level; /* printing when print_level>0 */
    HYPRE_Int     logging;  /* extra computations for logging when logging>0 */
-   HYPRE_Real   *norms;
-   char         *log_file_name;
+   HYPRE_Real  *norms;
+   char    *log_file_name;
 
 } hypre_GMRESData;
+
+#define hypre_GMRESDataHybrid(pcgdata)  ((pcgdata) -> hybrid)
 
 #ifdef __cplusplus
 extern "C" {
@@ -558,6 +564,179 @@ hypre_GMRESCreate( hypre_GMRESFunctions *gmres_functions );
  *
  * $Revision$
  ***********************************************************************EHEADER*/
+
+  /***********KS code ****************/
+  /******************************************************************************
+   *
+   * COGMRES cogmres
+   *
+   *****************************************************************************/
+
+#ifndef hypre_KRYLOV_COGMRES_HEADER
+#define hypre_KRYLOV_COGMRES_HEADER
+
+  /*--------------------------------------------------------------------------
+   *--------------------------------------------------------------------------*/
+
+  /**
+   * @name Generic GMRES Interface
+   *
+   * A general description of the interface goes here...
+   *
+   * @memo A generic GMRES linear solver interface
+   * @version 0.1
+   * @author Jeffrey F. Painter
+   **/
+  /*@{*/
+
+  /*--------------------------------------------------------------------------
+   *--------------------------------------------------------------------------*/
+
+  /*--------------------------------------------------------------------------
+   * hypre_COGMRESData and hypre_COGMRESFunctions
+   *--------------------------------------------------------------------------*/
+
+  /**
+   * @name GMRES structs
+   *
+   * Description...
+   **/
+  /*@{*/
+
+  /**
+   * The {\tt hypre\_GMRESFunctions} object ...
+   **/
+
+  typedef struct
+  {
+    void *       (*CAlloc)        ( size_t count, size_t elt_size, HYPRE_Int location );
+    HYPRE_Int    (*Free)          ( void *ptr );
+    HYPRE_Int    (*CommInfo)      ( void  *A, HYPRE_Int   *my_id,
+        HYPRE_Int   *num_procs );
+    void *       (*CreateVector)  ( void *vector );
+    void *       (*CreateVectorArray)  ( HYPRE_Int size, void *vectors );
+    HYPRE_Int    (*DestroyVector) ( void *vector );
+    void *       (*MatvecCreate)  ( void *A, void *x );
+    HYPRE_Int    (*Matvec)        ( void *matvec_data, HYPRE_Complex alpha, void *A,
+        void *x, HYPRE_Complex beta, void *y );
+    HYPRE_Int    (*MatvecDestroy) ( void *matvec_data );
+    HYPRE_Real   (*InnerProd)     ( void *x, void *y );
+    HYPRE_Int    (*MassInnerProd) ( void *x, void **p, HYPRE_Int k, HYPRE_Int unroll, void *result);
+    HYPRE_Int    (*MassDotpTwo)   ( void *x, void *y, void **p, HYPRE_Int k, HYPRE_Int unroll, void *result_x, void *result_y);
+    HYPRE_Int    (*CopyVector)    ( void *x, void *y );
+    HYPRE_Int    (*ClearVector)   ( void *x );
+    HYPRE_Int    (*ScaleVector)   ( HYPRE_Complex alpha, void *x );
+    HYPRE_Int    (*Axpy)          ( HYPRE_Complex alpha, void *x, void *y );
+    HYPRE_Int    (*MassAxpy)      ( HYPRE_Complex * alpha, void **x, void *y, HYPRE_Int k, HYPRE_Int unroll);
+    HYPRE_Int    (*precond)       (void *vdata , void *A , void *b , void *x);
+    HYPRE_Int    (*precond_setup) (void *vdata , void *A , void *b , void *x);
+
+    HYPRE_Int    (*modify_pc)( void *precond_data, HYPRE_Int iteration, HYPRE_Real rel_residual_norm);
+
+
+  } hypre_COGMRESFunctions;
+
+  /**
+   * The {\tt hypre\_GMRESData} object ...
+   **/
+
+  typedef struct
+  {
+    HYPRE_Int      k_dim;
+    HYPRE_Int      unroll;
+    HYPRE_Int      cgs;
+    HYPRE_Int      min_iter;
+    HYPRE_Int      max_iter;
+    HYPRE_Int      rel_change;
+    HYPRE_Int      skip_real_r_check;
+    HYPRE_Int      stop_crit;
+    HYPRE_Int      converged;
+    HYPRE_Real   tol;
+    HYPRE_Real   cf_tol;
+    HYPRE_Real   a_tol;
+    HYPRE_Real   rel_residual_norm;
+
+    void  *A;
+    void  *r;
+    void  *w;
+    void  *w_2;
+    void  **p;
+
+    void    *matvec_data;
+    void    *precond_data;
+
+    hypre_COGMRESFunctions * functions;
+
+    /* log info (always logged) */
+    HYPRE_Int      num_iterations;
+
+    HYPRE_Int     print_level; /* printing when print_level>0 */
+    HYPRE_Int     logging;  /* extra computations for logging when logging>0 */
+    HYPRE_Real  *norms;
+    char    *log_file_name;
+
+  } hypre_COGMRESData;
+
+#ifdef __cplusplus
+  extern "C" {
+#endif
+
+    /**
+     * @name generic GMRES Solver
+     *
+     * Description...
+     **/
+    /*@{*/
+
+    /**
+     * Description...
+     *
+     * @param param [IN] ...
+     **/
+
+    hypre_COGMRESFunctions *
+      hypre_COGMRESFunctionsCreate(
+          void *       (*CAlloc)        ( size_t count, size_t elt_size, HYPRE_Int location ),
+          HYPRE_Int    (*Free)          ( void *ptr ),
+          HYPRE_Int    (*CommInfo)      ( void  *A, HYPRE_Int   *my_id,
+            HYPRE_Int   *num_procs ),
+          void *       (*CreateVector)  ( void *vector ),
+          void *       (*CreateVectorArray)  ( HYPRE_Int size, void *vectors ),
+          HYPRE_Int    (*DestroyVector) ( void *vector ),
+          void *       (*MatvecCreate)  ( void *A, void *x ),
+          HYPRE_Int    (*Matvec)        ( void *matvec_data, HYPRE_Complex alpha, void *A, void *x, HYPRE_Complex beta, void *y ),
+          HYPRE_Int    (*MatvecDestroy) ( void *matvec_data ),
+          HYPRE_Real   (*InnerProd)     ( void *x, void *y ),
+          HYPRE_Int    (*MassInnerProd) ( void *x, void **p, HYPRE_Int k, HYPRE_Int unroll, void *result),
+          HYPRE_Int    (*MassDotpTwo)   ( void *x, void *y, void **p, HYPRE_Int k, HYPRE_Int unroll, void *result_x, void *result_y),
+          HYPRE_Int    (*CopyVector)    ( void *x, void *y ),
+          HYPRE_Int    (*ClearVector)   ( void *x ),
+          HYPRE_Int    (*ScaleVector)   ( HYPRE_Complex alpha, void *x ),
+          HYPRE_Int    (*Axpy)          ( HYPRE_Complex alpha, void *x, void *y ),
+          HYPRE_Int    (*MassAxpy)      ( HYPRE_Complex *alpha, void **x, void *y, HYPRE_Int k, HYPRE_Int unroll),
+          HYPRE_Int    (*PrecondSetup)  ( void *vdata, void *A, void *b, void *x ),
+          HYPRE_Int    (*Precond)       ( void *vdata, void *A, void *b, void *x )
+          );
+
+    /**
+     * Description...
+     *
+     * @param param [IN] ...
+     **/
+
+    void *
+      hypre_COGMRESCreate( hypre_COGMRESFunctions *gmres_functions );
+
+#ifdef __cplusplus
+  }
+#endif
+#endif
+
+
+
+  /***********end of KS code *********/
+
+
 
 /******************************************************************************
  *
@@ -659,7 +838,7 @@ typedef struct
 
    /* log info (always logged) */
    HYPRE_Int      num_iterations;
- 
+
    HYPRE_Int     print_level; /* printing when print_level>0 */
    HYPRE_Int     logging;  /* extra computations for logging when logging>0 */
    HYPRE_Real  *norms;
@@ -793,7 +972,7 @@ typedef struct
    HYPRE_Int    (*precond_setup)(void *vdata, void *A, void *b, void *x );
 
    HYPRE_Int    (*modify_pc)( void *precond_data, HYPRE_Int iteration, HYPRE_Real rel_residual_norm);
-   
+
 } hypre_FlexGMRESFunctions;
 
 /**
@@ -828,7 +1007,7 @@ typedef struct
 
    /* log info (always logged) */
    HYPRE_Int      num_iterations;
- 
+
    HYPRE_Int     print_level; /* printing when print_level>0 */
    HYPRE_Int     logging;  /* extra computations for logging when logging>0 */
    HYPRE_Real  *norms;
@@ -1014,6 +1193,7 @@ typedef struct
    HYPRE_Int      recompute_residual_p;
    HYPRE_Int      stop_crit;
    HYPRE_Int      converged;
+   HYPRE_Int      hybrid;
 
    void    *A;
    void    *p;
@@ -1039,6 +1219,7 @@ typedef struct
 } hypre_PCGData;
 
 #define hypre_PCGDataOwnsMatvecData(pcgdata)  ((pcgdata) -> owns_matvec_data)
+#define hypre_PCGDataHybrid(pcgdata)  ((pcgdata) -> hybrid)
 
 #ifdef __cplusplus
 extern "C" {
@@ -1058,7 +1239,7 @@ extern "C" {
  **/
 
 hypre_PCGFunctions *
-hypre_PCGFunctionsCreate(
+hypre_PCGFunctionsCreate (
    void *       (*CAlloc)        ( size_t count, size_t elt_size, HYPRE_Int location ),
    HYPRE_Int    (*Free)          ( void *ptr ),
    HYPRE_Int    (*CommInfo)      ( void  *A, HYPRE_Int   *my_id,
@@ -1076,7 +1257,7 @@ hypre_PCGFunctionsCreate(
    HYPRE_Int    (*Axpy)          ( HYPRE_Complex alpha, void *x, void *y ),
    HYPRE_Int    (*PrecondSetup)  ( void *vdata, void *A, void *b, void *x ),
    HYPRE_Int    (*Precond)       ( void *vdata, void *A, void *b, void *x )
-   );
+);
 
 /**
  * Description...
@@ -1107,6 +1288,7 @@ HYPRE_Int hypre_BiCGSTABSetStopCrit ( void *bicgstab_vdata , HYPRE_Int stop_crit
 HYPRE_Int hypre_BiCGSTABSetPrecond ( void *bicgstab_vdata , HYPRE_Int (*precond )(void*,void*,void*,void*), HYPRE_Int (*precond_setup )(void*,void*,void*,void*), void *precond_data );
 HYPRE_Int hypre_BiCGSTABGetPrecond ( void *bicgstab_vdata , HYPRE_Solver *precond_data_ptr );
 HYPRE_Int hypre_BiCGSTABSetLogging ( void *bicgstab_vdata , HYPRE_Int logging );
+HYPRE_Int hypre_BiCGSTABSetHybrid ( void *bicgstab_vdata , HYPRE_Int logging );
 HYPRE_Int hypre_BiCGSTABSetPrintLevel ( void *bicgstab_vdata , HYPRE_Int print_level );
 HYPRE_Int hypre_BiCGSTABGetConverged ( void *bicgstab_vdata , HYPRE_Int *converged );
 HYPRE_Int hypre_BiCGSTABGetNumIterations ( void *bicgstab_vdata , HYPRE_Int *num_iterations );
@@ -1158,9 +1340,49 @@ HYPRE_Int hypre_GMRESSetPrintLevel ( void *gmres_vdata , HYPRE_Int level );
 HYPRE_Int hypre_GMRESGetPrintLevel ( void *gmres_vdata , HYPRE_Int *level );
 HYPRE_Int hypre_GMRESSetLogging ( void *gmres_vdata , HYPRE_Int level );
 HYPRE_Int hypre_GMRESGetLogging ( void *gmres_vdata , HYPRE_Int *level );
+HYPRE_Int hypre_GMRESSetHybrid ( void *gmres_vdata , HYPRE_Int level );
 HYPRE_Int hypre_GMRESGetNumIterations ( void *gmres_vdata , HYPRE_Int *num_iterations );
 HYPRE_Int hypre_GMRESGetConverged ( void *gmres_vdata , HYPRE_Int *converged );
 HYPRE_Int hypre_GMRESGetFinalRelativeResidualNorm ( void *gmres_vdata , HYPRE_Real *relative_residual_norm );
+
+/* cogmres.c */
+void *hypre_COGMRESCreate ( hypre_COGMRESFunctions *gmres_functions );
+HYPRE_Int hypre_COGMRESDestroy ( void *gmres_vdata );
+HYPRE_Int hypre_COGMRESGetResidual ( void *gmres_vdata , void **residual );
+HYPRE_Int hypre_COGMRESSetup ( void *gmres_vdata , void *A , void *b , void *x );
+HYPRE_Int hypre_COGMRESSolve ( void *gmres_vdata , void *A , void *b , void *x );
+HYPRE_Int hypre_COGMRESSetKDim ( void *gmres_vdata , HYPRE_Int k_dim );
+HYPRE_Int hypre_COGMRESGetKDim ( void *gmres_vdata , HYPRE_Int *k_dim );
+HYPRE_Int hypre_COGMRESSetUnroll ( void *gmres_vdata , HYPRE_Int unroll );
+HYPRE_Int hypre_COGMRESGetUnroll ( void *gmres_vdata , HYPRE_Int *unroll );
+HYPRE_Int hypre_COGMRESSetCGS ( void *gmres_vdata , HYPRE_Int cgs );
+HYPRE_Int hypre_COGMRESGetCGS ( void *gmres_vdata , HYPRE_Int *cgs );
+HYPRE_Int hypre_COGMRESSetTol ( void *gmres_vdata , HYPRE_Real tol );
+HYPRE_Int hypre_COGMRESGetTol ( void *gmres_vdata , HYPRE_Real *tol );
+HYPRE_Int hypre_COGMRESSetAbsoluteTol ( void *gmres_vdata , HYPRE_Real a_tol );
+HYPRE_Int hypre_COGMRESGetAbsoluteTol ( void *gmres_vdata , HYPRE_Real *a_tol );
+HYPRE_Int hypre_COGMRESSetConvergenceFactorTol ( void *gmres_vdata , HYPRE_Real cf_tol );
+HYPRE_Int hypre_COGMRESGetConvergenceFactorTol ( void *gmres_vdata , HYPRE_Real *cf_tol );
+HYPRE_Int hypre_COGMRESSetMinIter ( void *gmres_vdata , HYPRE_Int min_iter );
+HYPRE_Int hypre_COGMRESGetMinIter ( void *gmres_vdata , HYPRE_Int *min_iter );
+HYPRE_Int hypre_COGMRESSetMaxIter ( void *gmres_vdata , HYPRE_Int max_iter );
+HYPRE_Int hypre_COGMRESGetMaxIter ( void *gmres_vdata , HYPRE_Int *max_iter );
+HYPRE_Int hypre_COGMRESSetRelChange ( void *gmres_vdata , HYPRE_Int rel_change );
+HYPRE_Int hypre_COGMRESGetRelChange ( void *gmres_vdata , HYPRE_Int *rel_change );
+HYPRE_Int hypre_COGMRESSetSkipRealResidualCheck ( void *gmres_vdata , HYPRE_Int skip_real_r_check );
+HYPRE_Int hypre_COGMRESGetSkipRealResidualCheck ( void *gmres_vdata , HYPRE_Int *skip_real_r_check );
+HYPRE_Int hypre_COGMRESSetPrecond ( void *gmres_vdata , HYPRE_Int (*precond )(void*,void*,void*,void*), HYPRE_Int (*precond_setup )(void*,void*,void*,void*), void *precond_data );
+HYPRE_Int hypre_COGMRESGetPrecond ( void *gmres_vdata , HYPRE_Solver *precond_data_ptr );
+HYPRE_Int hypre_COGMRESSetPrintLevel ( void *gmres_vdata , HYPRE_Int level );
+HYPRE_Int hypre_COGMRESGetPrintLevel ( void *gmres_vdata , HYPRE_Int *level );
+HYPRE_Int hypre_COGMRESSetLogging ( void *gmres_vdata , HYPRE_Int level );
+HYPRE_Int hypre_COGMRESGetLogging ( void *gmres_vdata , HYPRE_Int *level );
+HYPRE_Int hypre_COGMRESGetNumIterations ( void *gmres_vdata , HYPRE_Int *num_iterations );
+HYPRE_Int hypre_COGMRESGetConverged ( void *gmres_vdata , HYPRE_Int *converged );
+HYPRE_Int hypre_COGMRESGetFinalRelativeResidualNorm ( void *gmres_vdata , HYPRE_Real *relative_residual_norm );
+HYPRE_Int hypre_COGMRESSetModifyPC ( void *fgmres_vdata , HYPRE_Int (*modify_pc )(void *precond_data, HYPRE_Int iteration, HYPRE_Real rel_residual_norm));
+
+
 
 /* flexgmres.c */
 void *hypre_FlexGMRESCreate ( hypre_FlexGMRESFunctions *fgmres_functions );
@@ -1242,7 +1464,7 @@ HYPRE_Int HYPRE_BiCGSTABSetLogging ( HYPRE_Solver solver , HYPRE_Int logging );
 HYPRE_Int HYPRE_BiCGSTABSetPrintLevel ( HYPRE_Solver solver , HYPRE_Int print_level );
 HYPRE_Int HYPRE_BiCGSTABGetNumIterations ( HYPRE_Solver solver , HYPRE_Int *num_iterations );
 HYPRE_Int HYPRE_BiCGSTABGetFinalRelativeResidualNorm ( HYPRE_Solver solver , HYPRE_Real *norm );
-HYPRE_Int HYPRE_BiCGSTABGetResidual ( HYPRE_Solver solver , void **residual );
+HYPRE_Int HYPRE_BiCGSTABGetResidual ( HYPRE_Solver solver , void *residual );
 
 /* HYPRE_cgnr.c */
 HYPRE_Int HYPRE_CGNRDestroy ( HYPRE_Solver solver );
@@ -1288,7 +1510,41 @@ HYPRE_Int HYPRE_GMRESGetLogging ( HYPRE_Solver solver , HYPRE_Int *level );
 HYPRE_Int HYPRE_GMRESGetNumIterations ( HYPRE_Solver solver , HYPRE_Int *num_iterations );
 HYPRE_Int HYPRE_GMRESGetConverged ( HYPRE_Solver solver , HYPRE_Int *converged );
 HYPRE_Int HYPRE_GMRESGetFinalRelativeResidualNorm ( HYPRE_Solver solver , HYPRE_Real *norm );
-HYPRE_Int HYPRE_GMRESGetResidual ( HYPRE_Solver solver , void **residual );
+HYPRE_Int HYPRE_GMRESGetResidual ( HYPRE_Solver solver , void *residual );
+
+/* HYPRE_cogmres.c */
+HYPRE_Int HYPRE_COGMRESSetup ( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_Vector b , HYPRE_Vector x );
+HYPRE_Int HYPRE_COGMRESSolve ( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_Vector b , HYPRE_Vector x );
+HYPRE_Int HYPRE_COGMRESSetKDim ( HYPRE_Solver solver , HYPRE_Int k_dim );
+HYPRE_Int HYPRE_COGMRESGetKDim ( HYPRE_Solver solver , HYPRE_Int *k_dim );
+HYPRE_Int HYPRE_COGMRESSetUnroll ( HYPRE_Solver solver , HYPRE_Int unroll );
+HYPRE_Int HYPRE_COGMRESGetUnroll ( HYPRE_Solver solver , HYPRE_Int *unroll );
+HYPRE_Int HYPRE_COGMRESSetCGS ( HYPRE_Solver solver , HYPRE_Int cgs );
+HYPRE_Int HYPRE_COGMRESGetCGS ( HYPRE_Solver solver , HYPRE_Int *cgs );
+HYPRE_Int HYPRE_COGMRESSetTol ( HYPRE_Solver solver , HYPRE_Real tol );
+HYPRE_Int HYPRE_COGMRESGetTol ( HYPRE_Solver solver , HYPRE_Real *tol );
+HYPRE_Int HYPRE_COGMRESSetAbsoluteTol ( HYPRE_Solver solver , HYPRE_Real a_tol );
+HYPRE_Int HYPRE_COGMRESGetAbsoluteTol ( HYPRE_Solver solver , HYPRE_Real *a_tol );
+HYPRE_Int HYPRE_COGMRESSetConvergenceFactorTol ( HYPRE_Solver solver , HYPRE_Real cf_tol );
+HYPRE_Int HYPRE_COGMRESGetConvergenceFactorTol ( HYPRE_Solver solver , HYPRE_Real *cf_tol );
+HYPRE_Int HYPRE_COGMRESSetMinIter ( HYPRE_Solver solver , HYPRE_Int min_iter );
+HYPRE_Int HYPRE_COGMRESGetMinIter ( HYPRE_Solver solver , HYPRE_Int *min_iter );
+HYPRE_Int HYPRE_COGMRESSetMaxIter ( HYPRE_Solver solver , HYPRE_Int max_iter );
+HYPRE_Int HYPRE_COGMRESGetMaxIter ( HYPRE_Solver solver , HYPRE_Int *max_iter );
+HYPRE_Int HYPRE_COGMRESSetRelChange ( HYPRE_Solver solver , HYPRE_Int rel_change );
+HYPRE_Int HYPRE_COGMRESGetRelChange ( HYPRE_Solver solver , HYPRE_Int *rel_change );
+HYPRE_Int HYPRE_COGMRESSetSkipRealResidualCheck ( HYPRE_Solver solver , HYPRE_Int skip_real_r_check );
+HYPRE_Int HYPRE_COGMRESGetSkipRealResidualCheck ( HYPRE_Solver solver , HYPRE_Int *skip_real_r_check );
+HYPRE_Int HYPRE_COGMRESSetPrecond ( HYPRE_Solver solver , HYPRE_PtrToSolverFcn precond , HYPRE_PtrToSolverFcn precond_setup , HYPRE_Solver precond_solver );
+HYPRE_Int HYPRE_COGMRESGetPrecond ( HYPRE_Solver solver , HYPRE_Solver *precond_data_ptr );
+HYPRE_Int HYPRE_COGMRESSetPrintLevel ( HYPRE_Solver solver , HYPRE_Int level );
+HYPRE_Int HYPRE_COGMRESGetPrintLevel ( HYPRE_Solver solver , HYPRE_Int *level );
+HYPRE_Int HYPRE_COGMRESSetLogging ( HYPRE_Solver solver , HYPRE_Int level );
+HYPRE_Int HYPRE_COGMRESGetLogging ( HYPRE_Solver solver , HYPRE_Int *level );
+HYPRE_Int HYPRE_COGMRESGetNumIterations ( HYPRE_Solver solver , HYPRE_Int *num_iterations );
+HYPRE_Int HYPRE_COGMRESGetConverged ( HYPRE_Solver solver , HYPRE_Int *converged );
+HYPRE_Int HYPRE_COGMRESGetFinalRelativeResidualNorm ( HYPRE_Solver solver , HYPRE_Real *norm );
+HYPRE_Int HYPRE_COGMRESGetResidual ( HYPRE_Solver solver , void *residual );
 
 /* HYPRE_flexgmres.c */
 HYPRE_Int HYPRE_FlexGMRESSetup ( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_Vector b , HYPRE_Vector x );
@@ -1314,7 +1570,7 @@ HYPRE_Int HYPRE_FlexGMRESGetLogging ( HYPRE_Solver solver , HYPRE_Int *level );
 HYPRE_Int HYPRE_FlexGMRESGetNumIterations ( HYPRE_Solver solver , HYPRE_Int *num_iterations );
 HYPRE_Int HYPRE_FlexGMRESGetConverged ( HYPRE_Solver solver , HYPRE_Int *converged );
 HYPRE_Int HYPRE_FlexGMRESGetFinalRelativeResidualNorm ( HYPRE_Solver solver , HYPRE_Real *norm );
-HYPRE_Int HYPRE_FlexGMRESGetResidual ( HYPRE_Solver solver , void **residual );
+HYPRE_Int HYPRE_FlexGMRESGetResidual ( HYPRE_Solver solver , void *residual );
 HYPRE_Int HYPRE_FlexGMRESSetModifyPC ( HYPRE_Solver solver , HYPRE_Int (*modify_pc )(HYPRE_Solver ,HYPRE_Int ,HYPRE_Real ));
 
 /* HYPRE_lgmres.c */
@@ -1343,7 +1599,7 @@ HYPRE_Int HYPRE_LGMRESGetLogging ( HYPRE_Solver solver , HYPRE_Int *level );
 HYPRE_Int HYPRE_LGMRESGetNumIterations ( HYPRE_Solver solver , HYPRE_Int *num_iterations );
 HYPRE_Int HYPRE_LGMRESGetConverged ( HYPRE_Solver solver , HYPRE_Int *converged );
 HYPRE_Int HYPRE_LGMRESGetFinalRelativeResidualNorm ( HYPRE_Solver solver , HYPRE_Real *norm );
-HYPRE_Int HYPRE_LGMRESGetResidual ( HYPRE_Solver solver , void **residual );
+HYPRE_Int HYPRE_LGMRESGetResidual ( HYPRE_Solver solver , void *residual );
 
 /* HYPRE_pcg.c */
 HYPRE_Int HYPRE_PCGSetup ( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_Vector b , HYPRE_Vector x );
@@ -1379,7 +1635,7 @@ HYPRE_Int HYPRE_PCGGetPrintLevel ( HYPRE_Solver solver , HYPRE_Int *level );
 HYPRE_Int HYPRE_PCGGetNumIterations ( HYPRE_Solver solver , HYPRE_Int *num_iterations );
 HYPRE_Int HYPRE_PCGGetConverged ( HYPRE_Solver solver , HYPRE_Int *converged );
 HYPRE_Int HYPRE_PCGGetFinalRelativeResidualNorm ( HYPRE_Solver solver , HYPRE_Real *norm );
-HYPRE_Int HYPRE_PCGGetResidual ( HYPRE_Solver solver , void **residual );
+HYPRE_Int HYPRE_PCGGetResidual ( HYPRE_Solver solver , void *residual );
 
 /* pcg.c */
 void *hypre_PCGCreate ( hypre_PCGFunctions *pcg_functions );
@@ -1415,6 +1671,7 @@ HYPRE_Int hypre_PCGSetPrintLevel ( void *pcg_vdata , HYPRE_Int level );
 HYPRE_Int hypre_PCGGetPrintLevel ( void *pcg_vdata , HYPRE_Int *level );
 HYPRE_Int hypre_PCGSetLogging ( void *pcg_vdata , HYPRE_Int level );
 HYPRE_Int hypre_PCGGetLogging ( void *pcg_vdata , HYPRE_Int *level );
+HYPRE_Int hypre_PCGSetHybrid ( void *pcg_vdata , HYPRE_Int level );
 HYPRE_Int hypre_PCGGetNumIterations ( void *pcg_vdata , HYPRE_Int *num_iterations );
 HYPRE_Int hypre_PCGGetConverged ( void *pcg_vdata , HYPRE_Int *converged );
 HYPRE_Int hypre_PCGPrintLogging ( void *pcg_vdata , HYPRE_Int myid );

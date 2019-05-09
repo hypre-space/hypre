@@ -35,9 +35,9 @@ hypre_SchwarzCreate()
    HYPRE_Int      variant;
    HYPRE_Int      domain_type;
    HYPRE_Int      overlap;
-   HYPRE_Int 	    num_functions;
+   HYPRE_Int 	  num_functions;
    HYPRE_Int      use_nonsymm;
-   HYPRE_Real   relax_weight;
+   HYPRE_Real     relax_weight;
 
    /*-----------------------------------------------------------------------
     * Setup default values for parameters

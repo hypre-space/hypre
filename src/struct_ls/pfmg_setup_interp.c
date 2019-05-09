@@ -18,6 +18,9 @@
 #endif
 #define MAX_DEPTH 7
 
+/* 2: the most explicit implementation, a function for each stencil size */
+#define CC0_IMPLEMENTATION 2
+
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
@@ -33,9 +36,9 @@ hypre_PFMGCreateInterpOp( hypre_StructMatrix *A,
    hypre_Index          *stencil_shape;
    HYPRE_Int             stencil_size;
    HYPRE_Int             stencil_dim;
-                       
+
    HYPRE_Int             num_ghost[] = {1, 1, 1, 1, 1, 1};
-                       
+
    HYPRE_Int             i;
    HYPRE_Int             constant_coefficient;
 
@@ -76,7 +79,7 @@ hypre_PFMGCreateInterpOp( hypre_StructMatrix *A,
    }
 
    hypre_StructStencilDestroy(stencil);
- 
+
    return P;
 }
 
@@ -93,26 +96,26 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
 {
    hypre_BoxArray        *compute_boxes;
    hypre_Box             *compute_box;
-                        
+
    hypre_Box             *A_dbox;
    hypre_Box             *P_dbox;
-                        
+
    HYPRE_Real            *Pp0, *Pp1;
    HYPRE_Int              constant_coefficient;
-                        
+
    hypre_StructStencil   *stencil;
    hypre_Index           *stencil_shape;
    HYPRE_Int              stencil_size;
    hypre_StructStencil   *P_stencil;
    hypre_Index           *P_stencil_shape;
-                        
+
    HYPRE_Int              Pstenc0, Pstenc1;
-                        
+
    hypre_Index            loop_size;
    hypre_Index            start;
    hypre_IndexRef         startc;
    hypre_Index            stridec;
-                        
+
    HYPRE_Int              i, si;
 
    HYPRE_Int              si0, si1;
@@ -164,7 +167,7 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
          si1 = si;
       }
    }
-            
+
    hypre_SetIndex3(stridec, 1, 1, 1);
 
    /*----------------------------------------------------------
@@ -184,7 +187,7 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
 
       Pstenc0 = hypre_IndexD(P_stencil_shape[0], cdir);
       Pstenc1 = hypre_IndexD(P_stencil_shape[1], cdir);
- 
+
       startc  = hypre_BoxIMin(compute_box);
       hypre_StructMapCoarseToFine(startc, findex, stride, start);
 
@@ -209,51 +212,54 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
       else
          /* constant_coefficient == 0 , all coefficients in A vary */
       {
-/*	
-	hypre_PFMGSetupInterpOp_CC0
+#if CC0_IMPLEMENTATION <= 1
+         hypre_PFMGSetupInterpOp_CC0
             ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
               P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, si0, si1 );
-*/	
+#else
+         switch (stencil_size)
+         {
+            case 5:
+               hypre_PFMGSetupInterpOp_CC0_SS5
+                  ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
+                    P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, P_stencil_shape );
+               break;
+            case 9:
+               hypre_PFMGSetupInterpOp_CC0_SS9
+                  ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
+                    P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, P_stencil_shape );
+               break;
+            case 7:
+               hypre_PFMGSetupInterpOp_CC0_SS7
+                  ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
+                    P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, P_stencil_shape );
+               break;
+            case 15:
+               hypre_PFMGSetupInterpOp_CC0_SS15
+                  ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
+                    P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, P_stencil_shape );
+               break;
+            case 19:
+               hypre_PFMGSetupInterpOp_CC0_SS19
+                  ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
+                    P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, P_stencil_shape );
+               break;
+            case 27:
+               hypre_PFMGSetupInterpOp_CC0_SS27
+                  ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
+                    P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, P_stencil_shape );
+               break;
+            default:
+               /*
+               hypre_PFMGSetupInterpOp_CC0
+                  ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
+                    P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, si0, si1 );
+                */
 
-	switch (stencil_size)
-	{
-	case 5:
-	   hypre_PFMGSetupInterpOp_CC0_SS5
-	     ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
-	       P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, P_stencil_shape );
-	   break;
-	case 9:
-	   hypre_PFMGSetupInterpOp_CC0_SS9
-	     ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
-	       P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, P_stencil_shape );
-	   break;
-	case 7:
-	   hypre_PFMGSetupInterpOp_CC0_SS7
-	     ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
-	       P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, P_stencil_shape );
-	   break;
-        case 15:
-	   hypre_PFMGSetupInterpOp_CC0_SS15
-	     ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
-	       P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, P_stencil_shape );
-           break;
-	case 19:
-	   hypre_PFMGSetupInterpOp_CC0_SS19
-	     ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
-	       P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, P_stencil_shape );
-	   break;
-	case 27:
-	   hypre_PFMGSetupInterpOp_CC0_SS27
-	     ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
-	       P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, P_stencil_shape );
-	   break;
-	default:
-		 hypre_PFMGSetupInterpOp_CC0
-            ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
-              P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, si0, si1 );
-           hypre_printf("hypre error: unsupported stencil size %d\n", stencil_size);
-           hypre_MPI_Abort(hypre_MPI_COMM_WORLD, 1);
-	};
+               hypre_printf("hypre error: unsupported stencil size %d\n", stencil_size);
+               hypre_MPI_Abort(hypre_MPI_COMM_WORLD, 1);
+         }
+#endif
       }
    }
 
@@ -265,6 +271,8 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
 
    return hypre_error_flag;
 }
+
+#if CC0_IMPLEMENTATION == 0
 
 HYPRE_Int
 hypre_PFMGSetupInterpOp_CC0
@@ -291,39 +299,36 @@ hypre_PFMGSetupInterpOp_CC0
    HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
    HYPRE_Int              warning_cnt= 0;
 
-#if defined(HYPRE_USE_CUDA)
+#if defined(HYPRE_USING_CUDA)
    HYPRE_Int              data_location = hypre_StructGridDataLocation(hypre_StructMatrixGrid(A));
 #endif
 
-#if defined(HYPRE_MEMORY_GPU)|| defined(HYPRE_USE_OMP45)
-   HYPRE_Int * indices_d;
-   HYPRE_Int indices_h[stencil_size];
-   HYPRE_Int * stencil_shape_d;
-   HYPRE_Int  stencil_shape_h[stencil_size];
-   HYPRE_Complex * data_A = hypre_StructMatrixData(A);
-   indices_d =  hypre_TAlloc(HYPRE_Int,  stencil_size, HYPRE_MEMORY_DEVICE);
-   stencil_shape_d =  hypre_TAlloc(HYPRE_Int, stencil_size, HYPRE_MEMORY_DEVICE);
-   for (HYPRE_Int ii = 0; ii < stencil_size; ii++)
-   {
-      indices_h[ii]       = hypre_StructMatrixDataIndices(A)[i][ii];
-      stencil_shape_h[ii] = hypre_IndexD(stencil_shape[ii], cdir);
-   }
-   hypre_TMemcpy( indices_d, indices_h, HYPRE_Int, stencil_size, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST );
-   hypre_TMemcpy( stencil_shape_d, stencil_shape_h, HYPRE_Int, stencil_size, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST );
+   HYPRE_Int     **data_indices = hypre_StructMatrixDataIndices(A);
+   HYPRE_Complex  *matrixA_data = hypre_StructMatrixData(A);
+   HYPRE_Int      *data_indices_boxi_d; /* On device */
+   hypre_Index    *stencil_shape_d;
+
+#if (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)) && (HYPRE_MEMORY_HOST_ACT != HYPRE_MEMORY_SHARED)
+   data_indices_boxi_d = hypre_TAlloc(HYPRE_Int,   stencil_size, HYPRE_MEMORY_DEVICE);
+   stencil_shape_d     = hypre_TAlloc(hypre_Index, stencil_size, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(data_indices_boxi_d, data_indices[i], HYPRE_Int, stencil_size,
+                 HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+   hypre_TMemcpy(stencil_shape_d, stencil_shape, hypre_Index, stencil_size, 
+                 HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+#else
+   data_indices_boxi_d = data_indices[i];
+   stencil_shape_d     = stencil_shape;
 #endif
 
-//TODO NOTE: Pay attention to GetMatrixBoxData: device ptr hidden inside
-//stencil_shape is not used, so not declared as device_ptr !!!
-#undef DEVICE_VAR
-#define DEVICE_VAR is_device_ptr(Pp0,Pp1,stencil_shape_d,data_A,indices_d)
+#define DEVICE_VAR is_device_ptr(Pp0,Pp1,matrixA_data,stencil_shape_d,data_indices_boxi_d)
    hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
-                       A_dbox, start, stride, Ai,
+                       A_dbox, start,  stride,  Ai,
                        P_dbox, startc, stridec, Pi);
    {
-      HYPRE_Int si,mrk0,mrk1,Astenc;
+      HYPRE_Int si, mrk0, mrk1, Astenc;
       HYPRE_Real center;
       HYPRE_Real *Ap;
-           
+
       center  = 0.0;
       Pp0[Pi] = 0.0;
       Pp1[Pi] = 0.0;
@@ -332,23 +337,20 @@ hypre_PFMGSetupInterpOp_CC0
 
       for (si = 0; si < stencil_size; si++)
       {
-	//Ap = hypre_StructGetMatrixBoxData(A, i, si);
-	//Astenc = hypre_StructGetIndexD(stencil_shape[si], cdir,stencil_shape_d[si]);
-
-#if defined(HYPRE_USE_CUDA) 
-         if (data_location < 1)
+#if defined(HYPRE_USING_CUDA)
+         if (data_location != HYPRE_MEMORY_HOST)
          {
-	    Ap = hypre_StructGetMatrixBoxData(A, i, si);
-	    Astenc = hypre_StructGetIndexD(stencil_shape[si], cdir,stencil_shape_d[si]);
+            Ap     = matrixA_data + data_indices_boxi_d[si];
+            Astenc = hypre_IndexD(stencil_shape_d[si], cdir);
          }
          else
          {
-            Ap = hypre_StructMatrixBoxData(A, i, si);
+            Ap     = hypre_StructMatrixBoxData(A, i, si);
             Astenc = hypre_IndexD(stencil_shape[si], cdir);
          }
 #else
-	 Ap = hypre_StructGetMatrixBoxData(A, i, si);
-	 Astenc = hypre_StructGetIndexD(stencil_shape[si], cdir, stencil_shape_d[si]);
+         Ap     = matrixA_data + data_indices_boxi_d[si];
+         Astenc = hypre_IndexD(stencil_shape_d[si], cdir);
 #endif
 
          if (Astenc == 0)
@@ -363,23 +365,27 @@ hypre_PFMGSetupInterpOp_CC0
          {
             Pp1[Pi] -= Ap[Ai];
          }
-         
+
          if (si == si0 && Ap[Ai] == 0.0)
+         {
             mrk0++;
+         }
          if (si == si1 && Ap[Ai] == 0.0)
+         {
             mrk1++;
+         }
       }
 
       if (!center)
       {
          //warning_cnt++;
          Pp0[Pi] = 0.0;
-         Pp1[Pi] = 0.0;  
+         Pp1[Pi] = 0.0;
       }
       else
       {
          Pp0[Pi] /= center;
-         Pp1[Pi] /= center;  
+         Pp1[Pi] /= center;
       }
 
       /*----------------------------------------------
@@ -389,23 +395,149 @@ hypre_PFMGSetupInterpOp_CC0
        * outside domain.
        *----------------------------------------------*/
       if (mrk0 != 0)
+      {
          Pp0[Pi] = 0.0;
+      }
       if (mrk1 != 0)
+      {
          Pp1[Pi] = 0.0;
+      }
    }
    hypre_BoxLoop2End(Ai, Pi);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
 
    if (warning_cnt)
    {
-      hypre_error_w_msg(
-         HYPRE_ERROR_GENERIC,
-         "Warning 0 center in interpolation. Setting interp = 0.");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "Warning 0 center in interpolation. Setting interp = 0.");
    }
+
+#if (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)) && (HYPRE_MEMORY_HOST_ACT != HYPRE_MEMORY_SHARED)
+   hypre_TFree(data_indices_boxi_d, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(stencil_shape_d,     HYPRE_MEMORY_DEVICE);
+#endif
 
    return hypre_error_flag;
 }
+
+#endif
+
+#if CC0_IMPLEMENTATION == 1
+
+HYPRE_Int
+hypre_PFMGSetupInterpOp_CC0
+( HYPRE_Int           i, /* box index */
+  hypre_StructMatrix *A,
+  hypre_Box          *A_dbox,
+  HYPRE_Int           cdir,
+  hypre_Index         stride,
+  hypre_Index         stridec,
+  hypre_Index         start,
+  hypre_IndexRef      startc,
+  hypre_Index         loop_size,
+  hypre_Box          *P_dbox,
+  HYPRE_Int           Pstenc0,
+  HYPRE_Int           Pstenc1,
+  HYPRE_Real         *Pp0,
+  HYPRE_Real         *Pp1,
+  HYPRE_Int           rap_type,
+  HYPRE_Int           si0,
+  HYPRE_Int           si1 )
+{
+   hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
+   hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
+   HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
+   HYPRE_Int              warning_cnt = 0;
+   HYPRE_Int              dim, si, loop_length = 1, Astenc;
+   HYPRE_Real            *Ap, *center, *Ap0, *Ap1;
+
+#if defined(HYPRE_USING_CUDA)
+   //What TODO? HYPRE_Int data_location = hypre_StructGridDataLocation(hypre_StructMatrixGrid(A));
+#endif
+
+   for (dim = 0; dim < hypre_StructMatrixNDim(A); dim++)
+   {
+      loop_length *= loop_size[dim];
+   }
+   center = hypre_CTAlloc(HYPRE_Real, loop_length, HYPRE_MEMORY_DEVICE);
+
+   for (si = 0; si < stencil_size; si++)
+   {
+      Ap     = hypre_StructMatrixBoxData(A, i, si);
+      Astenc = hypre_IndexD(stencil_shape[si], cdir);
+
+      if (Astenc == 0)
+      {
+#define DEVICE_VAR is_device_ptr(center, Ap)
+         hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
+                             A_dbox, start,  stride,  Ai,
+                             P_dbox, startc, stridec, Pi)
+            center[idx] += Ap[Ai];
+         hypre_BoxLoop2End(Ai, Pi)
+#undef DEVICE_VAR
+      }
+      else if (Astenc == Pstenc0)
+      {
+#define DEVICE_VAR is_device_ptr(Pp0, Ap)
+         hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
+                             A_dbox, start,  stride,  Ai,
+                             P_dbox, startc, stridec, Pi)
+            Pp0[Pi] -= Ap[Ai];
+         hypre_BoxLoop2End(Ai, Pi)
+#undef DEVICE_VAR
+      }
+      else if (Astenc == Pstenc1)
+      {
+#define DEVICE_VAR is_device_ptr(Pp1, Ap)
+         hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
+                             A_dbox, start,  stride,  Ai,
+                             P_dbox, startc, stridec, Pi)
+            Pp1[Pi] -= Ap[Ai];
+         hypre_BoxLoop2End(Ai, Pi)
+#undef DEVICE_VAR
+      }
+   }
+
+   Ap0 = hypre_StructMatrixBoxData(A, i, si0);
+   Ap1 = hypre_StructMatrixBoxData(A, i, si1);
+#define DEVICE_VAR is_device_ptr(center, Pp0, Pp1, Ap0, Ap1)
+   hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
+                       A_dbox, start,  stride,  Ai,
+                       P_dbox, startc, stridec, Pi)
+      HYPRE_Real cval = center[idx];
+      if (Ap0[Ai] == 0.0 || cval == 0.0)
+      {
+         Pp0[Pi] = 0.0;
+      }
+      else
+      {
+         Pp0[Pi] /= cval;
+      }
+
+      if (Ap1[Ai] == 0.0 || cval == 0.0)
+      {
+         Pp1[Pi] = 0.0;
+      }
+      else
+      {
+         Pp1[Pi] /= cval;
+      }
+   hypre_BoxLoop2End(Ai, Pi)
+#undef DEVICE_VAR
+
+   if (warning_cnt)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "Warning 0 center in interpolation. Setting interp = 0.");
+   }
+
+   hypre_TFree(center, HYPRE_MEMORY_DEVICE);
+
+   return hypre_error_flag;
+}
+
+#endif
+
 
 HYPRE_Int
 hypre_PFMGSetupInterpOp_CC1
@@ -449,7 +581,7 @@ hypre_PFMGSetupInterpOp_CC1
 
    for (si = 0; si < stencil_size; si++)
    {
-      Ap = hypre_StructMatrixBoxData(A, i, si);
+      Ap     = hypre_StructMatrixBoxData(A, i, si);
       Astenc = hypre_IndexD(stencil_shape[si], cdir);
 
       if (Astenc == 0)
@@ -466,9 +598,13 @@ hypre_PFMGSetupInterpOp_CC1
       }
 
       if (si == si0 && Ap[Ai] == 0.0)
+      {
          mrk0++;
+      }
       if (si == si1 && Ap[Ai] == 0.0)
+      {
          mrk1++;
+      }
    }
    if (!center)
    {
@@ -494,9 +630,13 @@ hypre_PFMGSetupInterpOp_CC1
     * do this.
     *----------------------------------------------*/
    if (mrk0 != 0)
+   {
       Pp0[Pi] = 0.0;
+   }
    if (mrk1 != 0)
+   {
       Pp1[Pi] = 0.0;
+   }
 
    if (warning_cnt)
    {
@@ -543,9 +683,6 @@ hypre_PFMGSetupInterpOp_CC2
    HYPRE_Int              diag_rank;
    HYPRE_Int              warning_cnt= 0;
 
-#if defined(HYPRE_USE_CUDA)
-   HYPRE_Int              data_location = hypre_StructGridDataLocation(hypre_StructMatrixGrid(A));
-#endif
    hypre_SetIndex3(diag_index, 0, 0, 0);
    diag_rank = hypre_StructStencilElementRank(stencil, diag_index);
 
@@ -592,51 +729,39 @@ hypre_PFMGSetupInterpOp_CC2
             }
 
             if (si == si0 && Ap[Ai] == 0.0)
+            {
                mrk0_offd++;
+            }
             if (si == si1 && Ap[Ai] == 0.0)
+            {
                mrk1_offd++;
+            }
          }
       }
 
       si = diag_rank;
-      
-      hypre_MatrixIndexMove(A, stencil_size, i, si, 1);
-      //Ap = hypre_StructGetMatrixBoxData(A, i, si);
-#undef DEVICE_VAR
-#define DEVICE_VAR is_device_ptr(Pp0,Pp1,data_A,indices_d)
+
+      HYPRE_Real *Ap = hypre_StructMatrixBoxData(A, i, si);
+
+#define DEVICE_VAR is_device_ptr(Pp0,Pp1,Ap)
       hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                           A_dbox, start, stride, Ai,
                           P_dbox, startc, stridec, Pi);
       {
          HYPRE_Int   mrk0,mrk1;
          HYPRE_Real  center;
-         HYPRE_Real *Ap;
-         HYPRE_Real p0val,p1val;
-         
-         //Pp0[Pi] = P0;
-         //Pp1[Pi] = P1;
+         HYPRE_Real  p0val,p1val;
+
          p0val = P0;
          p1val = P1;
-         
          center = center_offd;
          mrk0 = mrk0_offd;
          mrk1 = mrk1_offd;
 
-#if defined(HYPRE_USE_CUDA)
-         if (data_location == HYPRE_MEMORY_DEVICE)
-         {
-	    Ap = hypre_StructGetMatrixBoxData(A, i, si);
-         }
-         else
-         {
-            Ap = hypre_StructMatrixBoxData(A, i, si);
-         }
-#else
-	 Ap = hypre_StructGetMatrixBoxData(A, i, si);
-#endif
-         //Ap = hypre_StructGetMatrixBoxData(A, i, si);
-         //Astenc = hypre_IndexD(stencil_shape[si], cdir);
-         //hypre_assert( Astenc==0 );
+         /* RL: Astenc is only needed for assertion, comment out
+            Astenc = hypre_IndexD(stencil_shape[si], cdir);
+            hypre_assert( Astenc==0 );
+         */
 
          center += Ap[Ai];
 
@@ -648,15 +773,11 @@ hypre_PFMGSetupInterpOp_CC2
          if (!center)
          {
             //warning_cnt++;
-            //Pp0[Pi] = 0.0;
-            //Pp1[Pi] = 0.0;
-            p0val = 0;
-            p1val = 0;
+            p0val = 0.0;
+            p1val = 0.0;
          }
          else
          {
-            //Pp0[Pi] /= center;
-            //Pp1[Pi] /= center;
             p0val /= center;
             p1val /= center;
          }
@@ -667,31 +788,31 @@ hypre_PFMGSetupInterpOp_CC2
           * interpolation and operator stencils reaching
           * outside domain.
           *----------------------------------------------*/
-
          if (mrk0 != 0)
-            Pp0[Pi] = 0.0;
+         {
+            p0val = 0.0;
+         }
          if (mrk1 != 0)
-            Pp1[Pi] = 0.0;
+         {
+            p1val = 0.0;
+         }
          Pp0[Pi] = p0val;
          Pp1[Pi] = p1val;
 
       }
       hypre_BoxLoop2End(Ai, Pi);
 #undef DEVICE_VAR
-#define DEVICE_VAR
-
-      hypre_StructCleanIndexD();
    }
 
    if (warning_cnt)
    {
-      hypre_error_w_msg(
-         HYPRE_ERROR_GENERIC,
-         "Warning 0 center in interpolation. Setting interp = 0.");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Warning 0 center in interpolation. Setting interp = 0.");
    }
 
    return hypre_error_flag;
 }
+
+#if CC0_IMPLEMENTATION > 1
 
 HYPRE_Int
 hypre_PFMGSetupInterpOp_CC0_SS5
@@ -749,7 +870,6 @@ hypre_PFMGSetupInterpOp_CC0_SS5
    hypre_SetIndex3(index,0,1,0);
    a_cn = hypre_StructMatrixExtractPointerByIndex(A, i, index);   
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(a_cc,a_cs,a_cn,a_cw,a_ce,Pp0,Pp1,p0,p1)
    hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                        A_dbox, start, stride, Ai,
@@ -759,17 +879,17 @@ hypre_PFMGSetupInterpOp_CC0_SS5
 
       switch (cdir)
       {
-      case 0:
-	 center = a_cc[Ai] + a_cs[Ai] + a_cn[Ai];
-	 left   =-a_cw[Ai];
-	 right  =-a_ce[Ai];
-	 break;
-      case 1:
-	 center = a_cc[Ai] + a_cw[Ai] + a_ce[Ai];
-	 left   =-a_cs[Ai];
-	 right  =-a_cn[Ai];
-	 break;
-      };
+         case 0:
+            center = a_cc[Ai] + a_cs[Ai] + a_cn[Ai];
+            left   =-a_cw[Ai];
+            right  =-a_ce[Ai];
+            break;
+         case 1:
+            center = a_cc[Ai] + a_cw[Ai] + a_ce[Ai];
+            left   =-a_cs[Ai];
+            right  =-a_cn[Ai];
+            break;
+      }
 
       if (!center)
       {
@@ -779,21 +899,25 @@ hypre_PFMGSetupInterpOp_CC0_SS5
       }
       else
       {
-	switch (Pstenc0)
-	{
-	case -1:
-	   Pp0[Pi] = left/center;break;
-	case 1:
-	   Pp0[Pi] = right/center;break;
-	};
+         switch (Pstenc0)
+         {
+            case -1:
+               Pp0[Pi] = left/center;
+               break;
+            case  1:
+               Pp0[Pi] = right/center;
+               break;
+         }
 
-	switch (Pstenc1)
-	{
-	case -1:
-	   Pp1[Pi] = left/center;break;
-	case 1:
-	   Pp1[Pi] = right/center;break;
-	};
+         switch (Pstenc1)
+         {
+            case -1:
+               Pp1[Pi] = left/center;
+               break;
+            case  1:
+               Pp1[Pi] = right/center;
+               break;
+         }
       }
 
       if (p0[Ai] == 0.0) Pp0[Pi] = 0.0;
@@ -811,7 +935,6 @@ hypre_PFMGSetupInterpOp_CC0_SS5
    }
    hypre_BoxLoop2End(Ai, Pi);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
 
    return hypre_error_flag;
 }
@@ -893,7 +1016,6 @@ hypre_PFMGSetupInterpOp_CC0_SS9
    hypre_SetIndex3(index, 1, 1, 0);
    a_cne = hypre_StructMatrixExtractPointerByIndex(A, i, index);   
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(a_cc,a_cs,a_cn,a_cw,a_csw,a_cnw,a_ce,a_cse,a_cne,Pp0,Pp1,p0,p1)
    hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                        A_dbox, start, stride, Ai,
@@ -903,16 +1025,16 @@ hypre_PFMGSetupInterpOp_CC0_SS9
 
       switch (cdir)
       {
-      case 0:
-	 center = a_cc[Ai] +  a_cs[Ai] +  a_cn[Ai];
-	 left   =-a_cw[Ai] - a_csw[Ai] - a_cnw[Ai];
-	 right  =-a_ce[Ai] - a_cse[Ai] - a_cne[Ai];
-	 break;
-      case 1:
-	 center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai];
-	 left   =-a_cs[Ai] - a_csw[Ai] - a_cse[Ai];
-	 right  =-a_cn[Ai] - a_cnw[Ai] - a_cne[Ai];
-	 break;
+         case 0:
+            center = a_cc[Ai] +  a_cs[Ai] +  a_cn[Ai];
+            left   =-a_cw[Ai] - a_csw[Ai] - a_cnw[Ai];
+            right  =-a_ce[Ai] - a_cse[Ai] - a_cne[Ai];
+            break;
+         case 1:
+            center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai];
+            left   =-a_cs[Ai] - a_csw[Ai] - a_cse[Ai];
+            right  =-a_cn[Ai] - a_cnw[Ai] - a_cne[Ai];
+            break;
       };
 
       if (!center)
@@ -923,26 +1045,26 @@ hypre_PFMGSetupInterpOp_CC0_SS9
       }
       else
       {
-	switch (Pstenc0)
-	{
-	case -1:
-	   Pp0[Pi] = left/center;
-	   Pp1[Pi] = right/center;
-	   break;
-	case 1:
-	   Pp0[Pi] = right/center;
-	   Pp1[Pi] = left/center;
-	   break;
-	};
-	/*
-	switch (Pstenc1)
-	{
-	case -1:
-	   Pp1[Pi] = left/center;break;
-	case 1:
-	   Pp1[Pi] = right/center;break;
-	};
-	*/
+         switch (Pstenc0)
+         {
+            case -1:
+               Pp0[Pi] = left/center;
+               Pp1[Pi] = right/center;
+               break;
+            case 1:
+               Pp0[Pi] = right/center;
+               Pp1[Pi] = left/center;
+               break;
+         };
+         /*
+            switch (Pstenc1)
+            {
+            case -1:
+            Pp1[Pi] = left/center;break;
+            case 1:
+            Pp1[Pi] = right/center;break;
+            };
+            */
       }
 
       if (p0[Ai] == 0.0) Pp0[Pi] = 0.0;
@@ -950,7 +1072,6 @@ hypre_PFMGSetupInterpOp_CC0_SS9
    }
    hypre_BoxLoop2End(Ai, Pi);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
 
    return hypre_error_flag;
 }
@@ -1019,7 +1140,6 @@ hypre_PFMGSetupInterpOp_CC0_SS7
    hypre_SetIndex3(index,0,0,-1);
    a_bc = hypre_StructMatrixExtractPointerByIndex(A, i, index);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(a_cc,a_cs,a_cn,a_ac,a_bc,a_cw,a_ce,Pp0,Pp1,p0,p1)
    hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                        A_dbox, start, stride, Ai,
@@ -1029,21 +1149,21 @@ hypre_PFMGSetupInterpOp_CC0_SS7
 
       switch (cdir)
       {
-      case 0:
-	 center = a_cc[Ai] +  a_cs[Ai] + a_cn[Ai] + a_ac[Ai] + a_bc[Ai];
-	 left   =-a_cw[Ai];
-	 right  =-a_ce[Ai];
-	 break;
-      case 1:
-	 center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai] + a_ac[Ai] + a_bc[Ai] ;
-	 left   =-a_cs[Ai];
-	 right  =-a_cn[Ai];
-	 break;
-      case 2:
-	 center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai] + a_cs[Ai] + a_cn[Ai] ;
-	 left   =-a_bc[Ai];
-	 right  =-a_ac[Ai];
-	 break;
+         case 0:
+            center = a_cc[Ai] +  a_cs[Ai] + a_cn[Ai] + a_ac[Ai] + a_bc[Ai];
+            left   =-a_cw[Ai];
+            right  =-a_ce[Ai];
+            break;
+         case 1:
+            center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai] + a_ac[Ai] + a_bc[Ai] ;
+            left   =-a_cs[Ai];
+            right  =-a_cn[Ai];
+            break;
+         case 2:
+            center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai] + a_cs[Ai] + a_cn[Ai] ;
+            left   =-a_bc[Ai];
+            right  =-a_ac[Ai];
+            break;
       };
 
       if (!center)
@@ -1053,37 +1173,36 @@ hypre_PFMGSetupInterpOp_CC0_SS7
       }
       else
       {
-	switch (Pstenc0)
-	{
-	case -1:
-	   Pp0[Pi] = left/center;
-	   Pp1[Pi] = right/center;
-	   break;
-	case 1:
-	   Pp0[Pi] = right/center;
-	   Pp1[Pi] = left/center;
-	   break;
-	};
-	/*
-	switch (Pstenc1)
-	{
-	case -1:
-	   Pp1[Pi] = left/center;break;
-	case 1:
-	   Pp1[Pi] = right/center;break;
-	};
-	*/
+         switch (Pstenc0)
+         {
+            case -1:
+               Pp0[Pi] = left/center;
+               Pp1[Pi] = right/center;
+               break;
+            case 1:
+               Pp0[Pi] = right/center;
+               Pp1[Pi] = left/center;
+               break;
+         };
+         /*
+            switch (Pstenc1)
+            {
+            case -1:
+            Pp1[Pi] = left/center;break;
+            case 1:
+            Pp1[Pi] = right/center;break;
+            };
+            */
       }
 
       if (p0[Ai] == 0.0) Pp0[Pi] = 0.0;
       if (p1[Ai] == 0.0) Pp1[Pi] = 0.0;
 
       //printf("%d: %d, Pp0[%d] = %e, Pp1 = %e, %e, %e, %e, cc=%e, cw=%e, ce=%e, cs=%e, cn=%e, bc=%e, ac=%e \n",Ai,cdir, Pi,Pp0[Pi],Pp1[Pi],center, left, right,
-      //	     a_cc[Ai],a_cw[Ai],a_ce[Ai],a_cs[Ai],a_cn[Ai],a_bc[Ai],a_ac[Ai]);
+      //     a_cc[Ai],a_cw[Ai],a_ce[Ai],a_cs[Ai],a_cn[Ai],a_bc[Ai],a_ac[Ai]);
    }
    hypre_BoxLoop2End(Ai, Pi);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
 
    return hypre_error_flag;
 }
@@ -1203,7 +1322,7 @@ hypre_PFMGSetupInterpOp_CC0_SS15
 
    hypre_SetIndex3(index, 1, 1, 0);
    a_cne = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-   
+
    if (a_csw)
    {
       if (a_as)
@@ -1222,13 +1341,12 @@ hypre_PFMGSetupInterpOp_CC0_SS15
 
    //printf("loop_size %d %d %d, cdir %d, %p %p %p %p %p %p %p %p %p %p %p %p %p %p %p\n", loop_size[0], loop_size[1], loop_size[2], cdir, a_cc, a_cw, a_ce, a_ac, a_bc, a_cs, a_as, a_bs, a_csw, a_cse, a_cn, a_an, a_bn, a_cnw, a_cne);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(a_cc,a_cs,a_cn,a_ac,a_bc,a_as,a_an,a_bs,a_bn,a_cw,a_aw,a_bw,a_ce,a_ae,a_be,a_cnw,a_cne,a_csw,a_cse,Pp0,Pp1,p0,p1)
    if (stencil_type15 == 0)
    {
       hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
-            A_dbox, start, stride, Ai,
-            P_dbox, startc, stridec, Pi);
+                          A_dbox, start, stride, Ai,
+                          P_dbox, startc, stridec, Pi);
       {
          HYPRE_Real center, left, right;
 
@@ -1347,8 +1465,8 @@ hypre_PFMGSetupInterpOp_CC0_SS15
    else
    {
       hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
-            A_dbox, start, stride, Ai,
-            P_dbox, startc, stridec, Pi);
+                          A_dbox, start, stride, Ai,
+                          P_dbox, startc, stridec, Pi);
       {
          HYPRE_Real center, left, right;
 
@@ -1405,7 +1523,6 @@ hypre_PFMGSetupInterpOp_CC0_SS15
       hypre_BoxLoop2End(Ai, Pi);
    }
 #undef DEVICE_VAR
-#define DEVICE_VAR 
 
    return hypre_error_flag;
 }
@@ -1517,7 +1634,7 @@ hypre_PFMGSetupInterpOp_CC0_SS19
 
    hypre_SetIndex3(index, 0, 1,-1);
    a_bn = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-   
+
    hypre_SetIndex3(index,-1,-1, 0);
    a_csw = hypre_StructMatrixExtractPointerByIndex(A, i, index);
 
@@ -1530,7 +1647,6 @@ hypre_PFMGSetupInterpOp_CC0_SS19
    hypre_SetIndex3(index, 1, 1, 0);
    a_cne = hypre_StructMatrixExtractPointerByIndex(A, i, index);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(a_cc,a_cs,a_cn,a_ac,a_bc,a_as,a_an,a_bs,a_bn,a_cw,a_aw,a_bw,a_csw,a_cnw,a_ce,a_ae,a_be,a_cse,a_cne,Pp0,Pp1,p0,p1)
    hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                        A_dbox, start, stride, Ai,
@@ -1540,21 +1656,21 @@ hypre_PFMGSetupInterpOp_CC0_SS19
 
       switch (cdir)
       {
-      case 0:
-	 center = a_cc[Ai] +  a_cs[Ai] + a_cn[Ai] + a_ac[Ai] + a_bc[Ai] + a_as[Ai] + a_an[Ai] + a_bs[Ai] + a_bn[Ai];
-	 left   =-a_cw[Ai] - a_aw[Ai] - a_bw[Ai] - a_csw[Ai] - a_cnw[Ai];
-	 right  =-a_ce[Ai] - a_ae[Ai] - a_be[Ai] - a_cse[Ai] - a_cne[Ai];
-	 break;
-      case 1:
-	 center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai] + a_ac[Ai] + a_bc[Ai] + a_aw[Ai] + a_ae[Ai] + a_bw[Ai] + a_be[Ai];
-	 left   =-a_cs[Ai] - a_as[Ai] - a_bs[Ai] - a_csw[Ai] - a_cse[Ai];
-	 right  =-a_cn[Ai] - a_an[Ai] - a_bn[Ai] - a_cnw[Ai] - a_cne[Ai];
-	 break;
-      case 2:
-	 center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai] +  a_cs[Ai] + a_cn[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai];
-	 left   =-a_bc[Ai] - a_bw[Ai] - a_be[Ai] - a_bs[Ai] - a_bn[Ai];
-	 right  =-a_ac[Ai] - a_aw[Ai] - a_ae[Ai] - a_as[Ai] - a_an[Ai];
-	 break;
+         case 0:
+            center = a_cc[Ai] +  a_cs[Ai] + a_cn[Ai] + a_ac[Ai] + a_bc[Ai] + a_as[Ai] + a_an[Ai] + a_bs[Ai] + a_bn[Ai];
+            left   =-a_cw[Ai] - a_aw[Ai] - a_bw[Ai] - a_csw[Ai] - a_cnw[Ai];
+            right  =-a_ce[Ai] - a_ae[Ai] - a_be[Ai] - a_cse[Ai] - a_cne[Ai];
+            break;
+         case 1:
+            center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai] + a_ac[Ai] + a_bc[Ai] + a_aw[Ai] + a_ae[Ai] + a_bw[Ai] + a_be[Ai];
+            left   =-a_cs[Ai] - a_as[Ai] - a_bs[Ai] - a_csw[Ai] - a_cse[Ai];
+            right  =-a_cn[Ai] - a_an[Ai] - a_bn[Ai] - a_cnw[Ai] - a_cne[Ai];
+            break;
+         case 2:
+            center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai] +  a_cs[Ai] + a_cn[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai];
+            left   =-a_bc[Ai] - a_bw[Ai] - a_be[Ai] - a_bs[Ai] - a_bn[Ai];
+            right  =-a_ac[Ai] - a_aw[Ai] - a_ae[Ai] - a_as[Ai] - a_an[Ai];
+            break;
       };
 
       if (!center)
@@ -1564,26 +1680,26 @@ hypre_PFMGSetupInterpOp_CC0_SS19
       }
       else
       {
-	switch (Pstenc0)
-	{
-	case -1:
-	   Pp0[Pi] = left/center;
-	   Pp1[Pi] = right/center;
-	   break;
-	case 1:
-	   Pp0[Pi] = right/center;
-	   Pp1[Pi] = left/center;
-	   break;
-	};
-	/*
-	switch (Pstenc1)
-	{
-	case -1:
-	   Pp1[Pi] = left/center;break;
-	case 1:
-	   Pp1[Pi] = right/center;break;
-	};
-	*/
+         switch (Pstenc0)
+         {
+            case -1:
+               Pp0[Pi] = left/center;
+               Pp1[Pi] = right/center;
+               break;
+            case 1:
+               Pp0[Pi] = right/center;
+               Pp1[Pi] = left/center;
+               break;
+         };
+         /*
+            switch (Pstenc1)
+            {
+            case -1:
+            Pp1[Pi] = left/center;break;
+            case 1:
+            Pp1[Pi] = right/center;break;
+            };
+            */
       }
 
       if (p0[Ai] == 0.0) Pp0[Pi] = 0.0;
@@ -1592,7 +1708,6 @@ hypre_PFMGSetupInterpOp_CC0_SS19
    }
    hypre_BoxLoop2End(Ai, Pi);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
 
    return hypre_error_flag;
 }
@@ -1704,7 +1819,7 @@ hypre_PFMGSetupInterpOp_CC0_SS27
 
    hypre_SetIndex3(index, 0, 1,-1);
    a_bn = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-   
+
    hypre_SetIndex3(index,-1,-1, 0);
    a_csw = hypre_StructMatrixExtractPointerByIndex(A, i, index);
 
@@ -1754,7 +1869,6 @@ hypre_PFMGSetupInterpOp_CC0_SS27
    hypre_SetIndex3(index, 1, 1,-1);
    a_bne = hypre_StructMatrixExtractPointerByIndex(A, i, index);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(a_cc,a_cs,a_cn,a_ac,a_bc,a_as,a_an,a_bs,a_bn,a_cw,a_aw,a_bw,a_csw,a_cnw,a_asw,a_anw,a_bsw,a_bnw,a_ce,a_ae,a_be,a_cse,a_cne,a_ase,a_ane,a_bse,a_bne,Pp0,Pp1,p0,p1)
    hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                        A_dbox, start, stride, Ai,
@@ -1765,50 +1879,50 @@ hypre_PFMGSetupInterpOp_CC0_SS27
       switch (cdir)
       {
       case 0:
-	 center = a_cc[Ai] +  a_cs[Ai] + a_cn[Ai] + a_ac[Ai] + a_bc[Ai] + a_as[Ai] + a_an[Ai] + a_bs[Ai] + a_bn[Ai];
-	 left   =-a_cw[Ai] - a_aw[Ai] - a_bw[Ai] - a_csw[Ai] - a_cnw[Ai] - a_asw[Ai] - a_anw[Ai] - a_bsw[Ai] - a_bnw[Ai];
-	 right  =-a_ce[Ai] - a_ae[Ai] - a_be[Ai] - a_cse[Ai] - a_cne[Ai] - a_ase[Ai] - a_ane[Ai] - a_bse[Ai] - a_bne[Ai];
-	 break;
+         center = a_cc[Ai] +  a_cs[Ai] + a_cn[Ai] + a_ac[Ai] + a_bc[Ai] + a_as[Ai] + a_an[Ai] + a_bs[Ai] + a_bn[Ai];
+         left   =-a_cw[Ai] - a_aw[Ai] - a_bw[Ai] - a_csw[Ai] - a_cnw[Ai] - a_asw[Ai] - a_anw[Ai] - a_bsw[Ai] - a_bnw[Ai];
+         right  =-a_ce[Ai] - a_ae[Ai] - a_be[Ai] - a_cse[Ai] - a_cne[Ai] - a_ase[Ai] - a_ane[Ai] - a_bse[Ai] - a_bne[Ai];
+         break;
       case 1:
-	 center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai] + a_ac[Ai] + a_bc[Ai] + a_aw[Ai] + a_ae[Ai] + a_bw[Ai] + a_be[Ai];
-	 left   =-a_cs[Ai] - a_as[Ai] - a_bs[Ai] - a_csw[Ai] - a_cse[Ai] - a_asw[Ai] - a_ase[Ai] - a_bsw[Ai] - a_bse[Ai];
-	 right  =-a_cn[Ai] - a_an[Ai] - a_bn[Ai] - a_cnw[Ai] - a_cne[Ai] - a_anw[Ai] - a_ane[Ai] - a_bnw[Ai] - a_bne[Ai];
-	 break;
+         center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai] + a_ac[Ai] + a_bc[Ai] + a_aw[Ai] + a_ae[Ai] + a_bw[Ai] + a_be[Ai];
+         left   =-a_cs[Ai] - a_as[Ai] - a_bs[Ai] - a_csw[Ai] - a_cse[Ai] - a_asw[Ai] - a_ase[Ai] - a_bsw[Ai] - a_bse[Ai];
+         right  =-a_cn[Ai] - a_an[Ai] - a_bn[Ai] - a_cnw[Ai] - a_cne[Ai] - a_anw[Ai] - a_ane[Ai] - a_bnw[Ai] - a_bne[Ai];
+         break;
       case 2:
-	 center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai] +  a_cs[Ai] + a_cn[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai];
-	 left   =-a_bc[Ai] - a_bw[Ai] - a_be[Ai] - a_bs[Ai] - a_bn[Ai] - a_bsw[Ai] - a_bse[Ai] - a_bnw[Ai] - a_bne[Ai];
-	 right  =-a_ac[Ai] - a_aw[Ai] - a_ae[Ai] - a_as[Ai] - a_an[Ai] - a_asw[Ai] - a_ase[Ai] - a_anw[Ai] - a_ane[Ai];
-	 break;
+         center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai] +  a_cs[Ai] + a_cn[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai];
+         left   =-a_bc[Ai] - a_bw[Ai] - a_be[Ai] - a_bs[Ai] - a_bn[Ai] - a_bsw[Ai] - a_bse[Ai] - a_bnw[Ai] - a_bne[Ai];
+         right  =-a_ac[Ai] - a_aw[Ai] - a_ae[Ai] - a_as[Ai] - a_an[Ai] - a_asw[Ai] - a_ase[Ai] - a_anw[Ai] - a_ane[Ai];
+         break;
       };
 
       if (!center)
       {
          //warning_cnt++;
          Pp0[Pi] = 0.0;
-         Pp1[Pi] = 0.0;  
+         Pp1[Pi] = 0.0;
       }
       else
       {
-	switch (Pstenc0)
-	{
-	case -1:
-	   Pp0[Pi] = left/center;
-	   Pp1[Pi] = right/center;
-	   break;
-	case 1:
-	   Pp0[Pi] = right/center;
-	   Pp1[Pi] = left/center;
-	   break;
-	};
-	/*
-	switch (Pstenc1)
-	{
-	case -1:
-	   Pp1[Pi] = left/center;break;
-	case 1:
-	   Pp1[Pi] = right/center;break;
-	};
-	*/
+         switch (Pstenc0)
+         {
+            case -1:
+               Pp0[Pi] = left/center;
+               Pp1[Pi] = right/center;
+               break;
+            case 1:
+               Pp0[Pi] = right/center;
+               Pp1[Pi] = left/center;
+               break;
+         };
+         /*
+            switch (Pstenc1)
+            {
+            case -1:
+            Pp1[Pi] = left/center;break;
+            case 1:
+            Pp1[Pi] = right/center;break;
+            };
+            */
       }
 
       if (p0[Ai] == 0.0) Pp0[Pi] = 0.0;
@@ -1817,7 +1931,9 @@ hypre_PFMGSetupInterpOp_CC0_SS27
    }
    hypre_BoxLoop2End(Ai, Pi);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
 
    return hypre_error_flag;
 }
+
+#endif
+

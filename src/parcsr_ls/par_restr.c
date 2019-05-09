@@ -41,7 +41,7 @@ HYPRE_Int
 hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
                               HYPRE_Int            *CF_marker,
                               hypre_ParCSRMatrix   *S,
-                              HYPRE_Int            *num_cpts_global,
+                              HYPRE_BigInt         *num_cpts_global,
                               HYPRE_Int             num_functions,
                               HYPRE_Int            *dof_func,
                               HYPRE_Real            filter_thresholdR,
@@ -67,7 +67,7 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
    HYPRE_Int       *A_offd_j    = hypre_CSRMatrixJ(A_offd);
 
    HYPRE_Int        num_cols_A_offd = hypre_CSRMatrixNumCols(A_offd);
-   HYPRE_Int       *col_map_offd_A  = hypre_ParCSRMatrixColMapOffd(A);
+   HYPRE_BigInt    *col_map_offd_A  = hypre_ParCSRMatrixColMapOffd(A);
    /* Strength matrix S */
    /* diag part of S */
    hypre_CSRMatrix *S_diag   = hypre_ParCSRMatrixDiag(S);
@@ -89,7 +89,8 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
    HYPRE_Complex      *R_offd_data;
    HYPRE_Int       *R_offd_i;
    HYPRE_Int       *R_offd_j;
-   HYPRE_Int       *col_map_offd_R;
+   HYPRE_BigInt    *col_map_offd_R = NULL;
+   HYPRE_Int       *tmp_map_offd = NULL;
    /* CF marker off-diag part */
    HYPRE_Int       *CF_marker_offd = NULL;
    /* func type off-diag part */
@@ -98,7 +99,7 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
    hypre_CSRMatrix *A_ext      = NULL;
    HYPRE_Complex      *A_ext_data = NULL;
    HYPRE_Int       *A_ext_i    = NULL;
-   HYPRE_Int       *A_ext_j    = NULL;
+   HYPRE_BigInt    *A_ext_j    = NULL;
 
    HYPRE_Int        i, j, k, i1, k1, k2, rr, cc, ic, index, start,
                     local_max_size, local_size, num_cols_offd_R;
@@ -117,7 +118,7 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
    HYPRE_Real gmresAi_tol = 1e-3;
 
    HYPRE_Int my_id, num_procs;
-   HYPRE_Int total_global_cpts/*, my_first_cpt*/;
+   HYPRE_BigInt total_global_cpts/*, my_first_cpt*/;
    HYPRE_Int nnz_diag, nnz_offd, cnt_diag, cnt_offd;
    HYPRE_Int *marker_diag, *marker_offd;
    HYPRE_Int num_sends, *int_buf_data;
@@ -125,8 +126,8 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
    HYPRE_Int n_fine = hypre_CSRMatrixNumRows(A_diag);
    HYPRE_Int n_cpts = 0;
    /* my first column range */
-   HYPRE_Int col_start = hypre_ParCSRMatrixFirstRowIndex(A);
-   HYPRE_Int col_end   = col_start + n_fine;
+   HYPRE_BigInt col_start = hypre_ParCSRMatrixFirstRowIndex(A);
+   HYPRE_BigInt col_end   = col_start + (HYPRE_BigInt)n_fine;
 
    /* MPI size and rank*/
    hypre_MPI_Comm_size(comm, &num_procs);
@@ -139,7 +140,7 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
    {
       total_global_cpts = num_cpts_global[1];
    }
-   hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_INT, num_procs-1, comm);
+   hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
 #else
    /*my_first_cpt = num_cpts_global[my_id];*/
    total_global_cpts = num_cpts_global[num_procs];
@@ -290,7 +291,7 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
    {
       A_ext      = hypre_ParCSRMatrixExtractBExt(A, A, 1);
       A_ext_i    = hypre_CSRMatrixI(A_ext);
-      A_ext_j    = hypre_CSRMatrixJ(A_ext);
+      A_ext_j    = hypre_CSRMatrixBigJ(A_ext);
       A_ext_data = hypre_CSRMatrixData(A_ext);
    }
 
@@ -316,7 +317,8 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
 
    // Allocate memory for GMRES if it will be used
    HYPRE_Int kdim_max = hypre_min(gmresAi_maxit, local_max_size);
-   if (gmres_switch < local_max_size) {
+   if (gmres_switch < local_max_size) 
+   {
       fgmresT(local_max_size, NULL, NULL, 0.0, kdim_max, NULL, NULL, NULL, -1);
    }
 
@@ -455,6 +457,7 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
        *    in matrix A_ext */
       if (num_procs > 1)
       {
+         HYPRE_BigInt big_k1;
          for (j = S_offd_i[i]; j < S_offd_i[i+1]; j++)
          {
             /* row i1: use this mapping to have offd indices of A */
@@ -466,11 +469,11 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
                for (k = A_ext_i[i1]; k < A_ext_i[i1+1]; k++)
                {
                   /* k1 is a global index! */
-                  k1 = A_ext_j[k];
-                  if (k1 >= col_start && k1 < col_end)
+                  big_k1 = A_ext_j[k];
+                  if (big_k1 >= col_start && big_k1 < col_end)
                   {
-                     /* k1 is in the diag part, adjust to local index */
-                     k1 -= col_start;
+                     /* big_k1 is in the diag part, adjust to local index */
+                     k1 = (HYPRE_Int)(big_k1-col_start);
                      /* if this col is marked with its local dense id*/
                      if ((cc = marker_diag[k1]) >= 0)
                      {
@@ -484,7 +487,7 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
                   {
                      /* k1 is in the offd part
                       * search k1 in A->col_map_offd */
-                     k2 = hypre_BinarySearch(col_map_offd_A, k1, num_cols_A_offd);
+                     k2 = hypre_BigBinarySearch(col_map_offd_A, big_k1, num_cols_A_offd);
                      /* if found, k2 is the position of column id k1 in col_map_offd */
                      if (k2 > -1)
                      {
@@ -553,7 +556,8 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
       Aisol_method = local_size <= gmres_switch ? 'L' : 'G';
       if (local_size > 0)
       {
-         if (is_triangular) {
+         if (is_triangular) 
+         {
             ordered_GS(DAi, Dbi, Dxi, local_size);
 #if AIR_DEBUG
             HYPRE_Real alp = -1.0, err;
@@ -734,12 +738,16 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
 
    /* col_map_offd_R: the col indices of the offd of R
     * we first keep them be the offd-idx of A */
-   col_map_offd_R = hypre_CTAlloc(HYPRE_Int, num_cols_offd_R, HYPRE_MEMORY_HOST);
+   if (num_cols_offd_R)
+   {
+      col_map_offd_R = hypre_CTAlloc(HYPRE_BigInt, num_cols_offd_R, HYPRE_MEMORY_HOST);
+      tmp_map_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd_R, HYPRE_MEMORY_HOST);
+   }
    for (i = 0, i1 = 0; i < num_cols_A_offd; i++)
    {
       if (marker_offd[i] == 1)
       {
-         col_map_offd_R[i1++] = i;
+         tmp_map_offd[i1++] = i;
       }
    }
    hypre_assert(i1 == num_cols_offd_R);
@@ -749,7 +757,7 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
    for (i = 0; i < nnz_offd; i++)
    {
       i1 = R_offd_j[i];
-      k1 = hypre_BinarySearch(col_map_offd_R, i1, num_cols_offd_R);
+      k1 = hypre_BinarySearch(tmp_map_offd, i1, num_cols_offd_R);
       /* search must succeed */
       hypre_assert(k1 >= 0 && k1 < num_cols_offd_R);
       R_offd_j[i] = k1;
@@ -758,7 +766,7 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
    /* change col_map_offd_R to global ids */
    for (i = 0; i < num_cols_offd_R; i++)
    {
-      col_map_offd_R[i] = col_map_offd_A[col_map_offd_R[i]];
+      col_map_offd_R[i] = col_map_offd_A[tmp_map_offd[i]];
    }
 
    /* Now, we should have everything of Parcsr matrix R */
@@ -798,6 +806,7 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
    *R_ptr = R;
 
    /* free workspace */
+   hypre_TFree(tmp_map_offd, HYPRE_MEMORY_HOST);
    hypre_TFree(CF_marker_offd, HYPRE_MEMORY_HOST);
    hypre_TFree(dof_func_offd, HYPRE_MEMORY_HOST);
    hypre_TFree(int_buf_data, HYPRE_MEMORY_HOST);

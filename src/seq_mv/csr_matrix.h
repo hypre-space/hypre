@@ -29,10 +29,13 @@ typedef struct
 {
    HYPRE_Int     *i;
    HYPRE_Int     *j;
+   HYPRE_BigInt  *big_j;
    HYPRE_Int      num_rows;
    HYPRE_Int      num_cols;
    HYPRE_Int      num_nonzeros;
 
+   hypre_int    *i_short;
+   hypre_int    *j_short;
    /* Does the CSRMatrix create/destroy `data', `i', `j'? */
    HYPRE_Int      owns_data;
 
@@ -51,6 +54,7 @@ typedef struct
 #define hypre_CSRMatrixData(matrix)         ((matrix) -> data)
 #define hypre_CSRMatrixI(matrix)            ((matrix) -> i)
 #define hypre_CSRMatrixJ(matrix)            ((matrix) -> j)
+#define hypre_CSRMatrixBigJ(matrix)         ((matrix) -> big_j)
 #define hypre_CSRMatrixNumRows(matrix)      ((matrix) -> num_rows)
 #define hypre_CSRMatrixNumCols(matrix)      ((matrix) -> num_cols)
 #define hypre_CSRMatrixNumNonzeros(matrix)  ((matrix) -> num_nonzeros)
@@ -69,6 +73,7 @@ typedef struct
 {
    HYPRE_Int    *i;
    HYPRE_Int    *j;
+   HYPRE_BigInt *big_j;
    HYPRE_Int     num_rows;
    HYPRE_Int     num_cols;
    HYPRE_Int     num_nonzeros;
@@ -82,6 +87,7 @@ typedef struct
 
 #define hypre_CSRBooleanMatrix_Get_I(matrix)        ((matrix)->i)
 #define hypre_CSRBooleanMatrix_Get_J(matrix)        ((matrix)->j)
+#define hypre_CSRBooleanMatrix_Get_BigJ(matrix)     ((matrix)->big_j)
 #define hypre_CSRBooleanMatrix_Get_NRows(matrix)    ((matrix)->num_rows)
 #define hypre_CSRBooleanMatrix_Get_NCols(matrix)    ((matrix)->num_cols)
 #define hypre_CSRBooleanMatrix_Get_NNZ(matrix)      ((matrix)->num_nonzeros)

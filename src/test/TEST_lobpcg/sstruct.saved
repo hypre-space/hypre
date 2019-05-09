@@ -1,0 +1,72 @@
+# Output file: sstruct.out.10.lobpcg
+Iterations = 24
+Final Relative Residual Norm = 6.429522e-07
+
+# Output file: sstruct.out.10.lobpcg.1
+Eigenvalue lambda   1.34880853089918e+00
+Residual   1.40515754419491e-04
+
+# Output file: sstruct.out.10.lobpcg.4
+Eigenvalue lambda   1.34880848246852e+00
+Eigenvalue lambda   1.36560847743334e+00
+Eigenvalue lambda   1.47908699641636e+00
+Eigenvalue lambda   1.49589925873578e+00
+Residual   1.88411068757809e-06
+Residual   1.92352730596892e-06
+Residual   2.62402461132032e-06
+Residual   5.33772292781341e-06
+
+# Output file: sstruct.out.11.lobpcg
+Iterations = 24
+Final Relative Residual Norm = 6.654613e-07
+
+# Output file: sstruct.out.11.lobpcg.1
+Eigenvalue lambda   1.34880853049719e+00
+Residual   1.27609473238620e-04
+
+# Output file: sstruct.out.11.lobpcg.4
+Eigenvalue lambda   1.34880848246868e+00
+Eigenvalue lambda   1.36560847743149e+00
+Eigenvalue lambda   1.47908699638228e+00
+Eigenvalue lambda   1.49589925867103e+00
+Residual   2.34138563461796e-06
+Residual   2.11050112612293e-06
+Residual   2.34272528133832e-06
+Residual   4.55132485053271e-06
+
+# Output file: sstruct.out.18.lobpcg
+Iterations = 25
+Final Relative Residual Norm = 9.124482e-07
+
+# Output file: sstruct.out.18.lobpcg.1
+Eigenvalue lambda   1.34880848247421e+00
+Residual   1.68760664468992e-06
+
+# Output file: sstruct.out.18.lobpcg.4
+Eigenvalue lambda   1.34880848246833e+00
+Eigenvalue lambda   1.36560847743301e+00
+Eigenvalue lambda   1.47908699641137e+00
+Eigenvalue lambda   1.49589925871590e+00
+Residual   7.29467860779249e-07
+Residual   9.62135023675930e-07
+Residual   1.05238502112812e-06
+Residual   1.42836272383011e-06
+
+# Output file: sstruct.out.19.lobpcg
+Iterations = 25
+Final Relative Residual Norm = 9.124482e-07
+
+# Output file: sstruct.out.19.lobpcg.1
+Eigenvalue lambda   1.34880848247421e+00
+Residual   1.68760664640186e-06
+
+# Output file: sstruct.out.19.lobpcg.4
+Eigenvalue lambda   1.34880848246915e+00
+Eigenvalue lambda   1.36560847743475e+00
+Eigenvalue lambda   1.47908699641975e+00
+Eigenvalue lambda   1.49589925875392e+00
+Residual   7.29467866482847e-07
+Residual   9.62135024900930e-07
+Residual   1.05238500241244e-06
+Residual   1.42836275555007e-06
+

@@ -33,29 +33,29 @@ typedef struct hypre_ParCSRMatrix_struct
 {
    MPI_Comm              comm;
 
-   HYPRE_Int             global_num_rows;
-   HYPRE_Int             global_num_cols;
-   HYPRE_Int             first_row_index;
-   HYPRE_Int             first_col_diag;
+   HYPRE_BigInt          global_num_rows;
+   HYPRE_BigInt          global_num_cols;
+   HYPRE_BigInt          first_row_index;
+   HYPRE_BigInt          first_col_diag;
    /* need to know entire local range in case row_starts and col_starts 
       are null  (i.e., bgl) AHB 6/05*/
-   HYPRE_Int             last_row_index;
-   HYPRE_Int             last_col_diag;
+   HYPRE_BigInt          last_row_index;
+   HYPRE_BigInt          last_col_diag;
 
    hypre_CSRMatrix      *diag;
    hypre_CSRMatrix      *offd;
    hypre_CSRMatrix      *diagT, *offdT;
         /* JSP: transposed matrices are created lazily and optional */
-   HYPRE_Int            *col_map_offd; 
+   HYPRE_BigInt         *col_map_offd; 
         /* maps columns of offd to global columns */
-   HYPRE_Int            *row_starts; 
+   HYPRE_BigInt         *row_starts; 
         /* array of length 2 giving the glboal index of the first row
            on this processor, and 1+index of the final row on this
            processor. If –enable-global-partition is used, then array
            is length num_procs+1, and row_starts[i] contains the 
            global number of the first row on proc i, first_row_index =
            row_starts[my_id], row_starts[num_procs] = global_num_rows */
-   HYPRE_Int            *col_starts;
+   HYPRE_BigInt         *col_starts;
         /* array of length num_procs+1, col_starts[i] contains the 
            global number of the first column of diag on proc i,  
            first_col_diag = col_starts[my_id],
@@ -70,11 +70,11 @@ typedef struct hypre_ParCSRMatrix_struct
    HYPRE_Int             owns_row_starts;
    HYPRE_Int             owns_col_starts;
 
-   HYPRE_Int             num_nonzeros;
+   HYPRE_BigInt          num_nonzeros;
    HYPRE_Real            d_num_nonzeros;
 
    /* Buffers used by GetRow to hold row currently being accessed. AJC, 4/99 */
-   HYPRE_Int            *rowindices;
+   HYPRE_BigInt         *rowindices;
    HYPRE_Complex        *rowvalues;
    HYPRE_Int             getrowactive;
 
@@ -130,24 +130,24 @@ hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(matrix))
 typedef struct
 {
    MPI_Comm                comm;
-   HYPRE_Int               global_num_rows;
-   HYPRE_Int               global_num_cols;
-   HYPRE_Int               first_row_index;
-   HYPRE_Int               first_col_diag;
-   HYPRE_Int               last_row_index;
-   HYPRE_Int               last_col_diag;
+   HYPRE_BigInt            global_num_rows;
+   HYPRE_BigInt            global_num_cols;
+   HYPRE_BigInt            first_row_index;
+   HYPRE_BigInt            first_col_diag;
+   HYPRE_BigInt            last_row_index;
+   HYPRE_BigInt            last_col_diag;
    hypre_CSRBooleanMatrix *diag;
    hypre_CSRBooleanMatrix *offd;
-   HYPRE_Int              *col_map_offd; 
-   HYPRE_Int              *row_starts; 
-   HYPRE_Int              *col_starts;
+   HYPRE_BigInt           *col_map_offd; 
+   HYPRE_BigInt           *row_starts; 
+   HYPRE_BigInt           *col_starts;
    hypre_ParCSRCommPkg    *comm_pkg;
    hypre_ParCSRCommPkg    *comm_pkgT;
    HYPRE_Int               owns_data;
    HYPRE_Int               owns_row_starts;
    HYPRE_Int               owns_col_starts;
-   HYPRE_Int               num_nonzeros;
-   HYPRE_Int              *rowindices;
+   HYPRE_BigInt            num_nonzeros;
+   HYPRE_BigInt           *rowindices;
    HYPRE_Int               getrowactive;
 
 } hypre_ParCSRBooleanMatrix;

@@ -56,40 +56,38 @@ typedef struct hypre_StructMatrix_struct
    HYPRE_Int            *symm_elements;             /* Which elements are "symmetric" */
    HYPRE_Int             num_ghost[2*HYPRE_MAXDIM]; /* Num ghost layers in each direction */
                       
-   HYPRE_Int             global_size;               /* Total number of nonzero coeffs */
+   HYPRE_BigInt          global_size;               /* Total number of nonzero coeffs */
 
    hypre_CommPkg        *comm_pkg;                  /* Info on how to update ghost data */
 
    HYPRE_Int             ref_count;
 
-   HYPRE_Int            *data_indices_device;
 } hypre_StructMatrix;
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_StructMatrix
  *--------------------------------------------------------------------------*/
 
-#define hypre_StructMatrixComm(matrix)          ((matrix) -> comm)
-#define hypre_StructMatrixGrid(matrix)          ((matrix) -> grid)
-#define hypre_StructMatrixUserStencil(matrix)   ((matrix) -> user_stencil)
-#define hypre_StructMatrixStencil(matrix)       ((matrix) -> stencil)
-#define hypre_StructMatrixNumValues(matrix)     ((matrix) -> num_values)
-#define hypre_StructMatrixDataSpace(matrix)     ((matrix) -> data_space)
-#define hypre_StructMatrixData(matrix)          ((matrix) -> data)
-#define hypre_StructMatrixDataConst(matrix)     ((matrix) -> data_const)
-#define hypre_StructMatrixStencilData(matrix)   ((matrix) -> stencil_data)
-#define hypre_StructMatrixDataAlloced(matrix)   ((matrix) -> data_alloced)
-#define hypre_StructMatrixDataSize(matrix)      ((matrix) -> data_size)
-#define hypre_StructMatrixDataConstSize(matrix) ((matrix) -> data_const_size)
-#define hypre_StructMatrixDataIndices(matrix)   ((matrix) -> data_indices)
+#define hypre_StructMatrixComm(matrix)                ((matrix) -> comm)
+#define hypre_StructMatrixGrid(matrix)                ((matrix) -> grid)
+#define hypre_StructMatrixUserStencil(matrix)         ((matrix) -> user_stencil)
+#define hypre_StructMatrixStencil(matrix)             ((matrix) -> stencil)
+#define hypre_StructMatrixNumValues(matrix)           ((matrix) -> num_values)
+#define hypre_StructMatrixDataSpace(matrix)           ((matrix) -> data_space)
+#define hypre_StructMatrixData(matrix)                ((matrix) -> data)
+#define hypre_StructMatrixDataConst(matrix)           ((matrix) -> data_const)
+#define hypre_StructMatrixStencilData(matrix)         ((matrix) -> stencil_data)
+#define hypre_StructMatrixDataAlloced(matrix)         ((matrix) -> data_alloced)
+#define hypre_StructMatrixDataSize(matrix)            ((matrix) -> data_size)
+#define hypre_StructMatrixDataConstSize(matrix)       ((matrix) -> data_const_size)
+#define hypre_StructMatrixDataIndices(matrix)         ((matrix) -> data_indices)
 #define hypre_StructMatrixConstantCoefficient(matrix) ((matrix) -> constant_coefficient)
-#define hypre_StructMatrixSymmetric(matrix)     ((matrix) -> symmetric)
-#define hypre_StructMatrixSymmElements(matrix)  ((matrix) -> symm_elements)
-#define hypre_StructMatrixNumGhost(matrix)      ((matrix) -> num_ghost)
-#define hypre_StructMatrixGlobalSize(matrix)    ((matrix) -> global_size)
-#define hypre_StructMatrixCommPkg(matrix)       ((matrix) -> comm_pkg)
-#define hypre_StructMatrixRefCount(matrix)      ((matrix) -> ref_count)
-#define hypre_StructMatrixDataDeviceIndices(matrix)   ((matrix) -> data_indices_device)
+#define hypre_StructMatrixSymmetric(matrix)           ((matrix) -> symmetric)
+#define hypre_StructMatrixSymmElements(matrix)        ((matrix) -> symm_elements)
+#define hypre_StructMatrixNumGhost(matrix)            ((matrix) -> num_ghost)
+#define hypre_StructMatrixGlobalSize(matrix)          ((matrix) -> global_size)
+#define hypre_StructMatrixCommPkg(matrix)             ((matrix) -> comm_pkg)
+#define hypre_StructMatrixRefCount(matrix)            ((matrix) -> ref_count)
 
 #define hypre_StructMatrixNDim(matrix) \
 hypre_StructGridNDim(hypre_StructMatrixGrid(matrix))

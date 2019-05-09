@@ -24,8 +24,8 @@
 
 HYPRE_Int
 HYPRE_ParVectorCreate( MPI_Comm         comm,
-                       HYPRE_Int        global_size, 
-                       HYPRE_Int       *partitioning,
+                       HYPRE_BigInt     global_size, 
+                       HYPRE_BigInt    *partitioning,
                        HYPRE_ParVector *vector )
 {
    if (!vector)
@@ -44,8 +44,8 @@ HYPRE_ParVectorCreate( MPI_Comm         comm,
 
 HYPRE_Int
 HYPRE_ParMultiVectorCreate( MPI_Comm         comm,
-                            HYPRE_Int        global_size, 
-                            HYPRE_Int       *partitioning,
+                            HYPRE_BigInt     global_size, 
+                            HYPRE_BigInt    *partitioning,
                             HYPRE_Int        number_vectors,
                             HYPRE_ParVector *vector )
 {
@@ -211,7 +211,7 @@ HYPRE_ParVectorInnerProd( HYPRE_ParVector x,
 HYPRE_Int
 HYPRE_VectorToParVector( MPI_Comm         comm,
                          HYPRE_Vector     b,
-                         HYPRE_Int       *partitioning,
+                         HYPRE_BigInt    *partitioning,
                          HYPRE_ParVector *vector)
 {
    if (!vector)
@@ -221,5 +221,37 @@ HYPRE_VectorToParVector( MPI_Comm         comm,
    }
    *vector = (HYPRE_ParVector)
       hypre_VectorToParVector (comm, (hypre_Vector *) b, partitioning);
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParVectorGetValues
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParVectorGetValues( HYPRE_ParVector vector,
+                          HYPRE_Int       num_values,
+                          HYPRE_BigInt   *indices,
+                          HYPRE_Complex  *values)
+{
+   hypre_ParVector *par_vector = (hypre_ParVector *) vector;
+
+   if (!par_vector)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   if (num_values < 0)
+   { 
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+   if (!values)
+   { 
+      hypre_error_in_arg(4);
+      return hypre_error_flag;
+   }
+
+   hypre_ParVectorGetValues(par_vector, num_values, indices, values);      
    return hypre_error_flag;
 }

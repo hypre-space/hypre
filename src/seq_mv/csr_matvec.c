@@ -32,30 +32,25 @@ hypre_CSRMatrixMatvecOutOfPlace( HYPRE_Complex    alpha,
                                  HYPRE_Complex    beta,
                                  hypre_Vector    *b,
                                  hypre_Vector    *y,
-                                 HYPRE_Int        offset     )
+                                 HYPRE_Int        offset )
 {
 #ifdef HYPRE_PROFILE
    HYPRE_Real time_begin = hypre_MPI_Wtime();
 #endif
-#ifdef HYPRE_USE_GPU
-   PUSH_RANGE_PAYLOAD("MATVEC",0, hypre_CSRMatrixNumRows(A));
-   HYPRE_Int ret=hypre_CSRMatrixMatvecDevice( alpha,A,x,beta,b,y,offset);
-   POP_RANGE;
-  return ret;
-#ifdef HYPRE_PROFILE
-   hypre_profile_times[HYPRE_TIMER_ID_MATVEC] += hypre_MPI_Wtime() - time_begin;
-#endif
-#endif
 
-#ifdef HYPRE_USING_OPENMP_OFFLOAD
-   PUSH_RANGE_PAYLOAD("MATVEC-OMP",0, hypre_CSRMatrixNumRows(A));
-   HYPRE_Int ret=hypre_CSRMatrixMatvecOutOfPlaceOOMP( alpha,A,x,beta,b,y,offset);
+#if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY) /* CUDA */
+   PUSH_RANGE_PAYLOAD("MATVEC",0, hypre_CSRMatrixNumRows(A));
+#ifdef HYPRE_BIGINT
+   HYPRE_Int ierr = hypre_CSRMatrixMatvecDeviceBIGINT( alpha,A,x,beta,b,y,offset );
+#else
+   HYPRE_Int ierr = hypre_CSRMatrixMatvecDevice( alpha,A,x,beta,b,y,offset );
+#endif
    POP_RANGE;
-  return ret;
-#ifdef HYPRE_PROFILE
-   hypre_profile_times[HYPRE_TIMER_ID_MATVEC] += hypre_MPI_Wtime() - time_begin;
-#endif
-#endif
+#elif defined(HYPRE_USING_OPENMP_OFFLOAD) /* OMP 4.5 */
+   PUSH_RANGE_PAYLOAD("MATVEC-OMP",0, hypre_CSRMatrixNumRows(A));
+   HYPRE_Int ierr = hypre_CSRMatrixMatvecOutOfPlaceOOMP( alpha,A,x,beta,b,y,offset );
+   POP_RANGE;
+#else /* CPU */
    HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
    HYPRE_Int        *A_i      = hypre_CSRMatrixI(A) + offset;
    HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
@@ -79,17 +74,10 @@ hypre_CSRMatrixMatvecOutOfPlace( HYPRE_Complex    alpha,
    HYPRE_Int         vecstride_b = hypre_VectorVectorStride(b);*/
    HYPRE_Int         idxstride_x = hypre_VectorIndexStride(x);
    HYPRE_Int         vecstride_x = hypre_VectorVectorStride(x);
-
    HYPRE_Complex     temp, tempx;
-
-   HYPRE_Int         i, j, jj;
-
-   HYPRE_Int         m;
-
+   HYPRE_Int         i, j, jj, m, ierr=0;
    HYPRE_Real        xpar=0.7;
-
-   HYPRE_Int         ierr = 0;
-   hypre_Vector	    *x_tmp = NULL;
+   hypre_Vector     *x_tmp = NULL;
 
    /*---------------------------------------------------------------------
     *  Check for size compatibility.  Matvec returns ierr = 1 if
@@ -97,11 +85,11 @@ hypre_CSRMatrixMatvecOutOfPlace( HYPRE_Complex    alpha,
     *  ierr = 2 if the length of Y doesn't equal the number of rows
     *  of A, and ierr = 3 if both are true.
     *
-    *  Because temporary vectors are often used in Matvec, none of 
+    *  Because temporary vectors are often used in Matvec, none of
     *  these conditions terminates processing, and the ierr flag
     *  is informational only.
     *--------------------------------------------------------------------*/
- 
+
    hypre_assert( num_vectors == hypre_VectorNumVectors(y) );
    hypre_assert( num_vectors == hypre_VectorNumVectors(b) );
 
@@ -142,9 +130,9 @@ hypre_CSRMatrixMatvecOutOfPlace( HYPRE_Complex    alpha,
    /*-----------------------------------------------------------------------
     * y = (beta/alpha)*y
     *-----------------------------------------------------------------------*/
-   
+
    temp = beta / alpha;
-   
+
 /* use rownnz pointer to do the A*x multiplication  when num_rownnz is smaller than num_rows */
 
    if (num_rownnz < xpar*(num_rows) || num_vectors > 1)
@@ -152,7 +140,7 @@ hypre_CSRMatrixMatvecOutOfPlace( HYPRE_Complex    alpha,
       /*-----------------------------------------------------------------------
        * y = (beta/alpha)*y
        *-----------------------------------------------------------------------*/
-     
+
       if (temp != 1.0)
       {
          if (temp == 0.0)
@@ -210,7 +198,7 @@ hypre_CSRMatrixMatvecOutOfPlace( HYPRE_Complex    alpha,
                for ( j=0; j<num_vectors; ++j )
                {
                   tempx = 0;
-                  for (jj = A_i[m]; jj < A_i[m+1]; jj++) 
+                  for (jj = A_i[m]; jj < A_i[m+1]; jj++)
                      tempx +=  A_data[jj] * x_data[ j*vecstride_x + A_j[jj]*idxstride_x ];
                   y_data[ j*vecstride_y + m*idxstride_y] += tempx;
                }
@@ -421,9 +409,12 @@ hypre_CSRMatrixMatvecOutOfPlace( HYPRE_Complex    alpha,
 
    if (x == y) hypre_SeqVectorDestroy(x_tmp);
 
+#endif /* CPU */
+
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_MATVEC] += hypre_MPI_Wtime() - time_begin;
 #endif
+
    return ierr;
 }
 
@@ -437,7 +428,7 @@ hypre_CSRMatrixMatvec( HYPRE_Complex    alpha,
    return hypre_CSRMatrixMatvecOutOfPlace(alpha, A, x, beta, y, y, 0);
 }
 
-#if defined (HYPRE_USE_MANAGED)
+#if defined (HYPRE_USING_UNIFIED_MEMORY)
 HYPRE_Int
 hypre_CSRMatrixMatvec3( HYPRE_Complex    alpha,
                        hypre_CSRMatrix *A,
@@ -486,7 +477,7 @@ hypre_CSRMatrixMatvecT( HYPRE_Complex    alpha,
 
    HYPRE_Complex    *y_data_expand;
    HYPRE_Int         my_thread_num = 0, offset = 0;
-   
+
    HYPRE_Int         i, j, jv, jj;
    HYPRE_Int         num_threads;
 
@@ -497,16 +488,16 @@ hypre_CSRMatrixMatvecT( HYPRE_Complex    alpha,
    /*---------------------------------------------------------------------
     *  Check for size compatibility.  MatvecT returns ierr = 1 if
     *  length of X doesn't equal the number of rows of A,
-    *  ierr = 2 if the length of Y doesn't equal the number of 
+    *  ierr = 2 if the length of Y doesn't equal the number of
     *  columns of A, and ierr = 3 if both are true.
     *
-    *  Because temporary vectors are often used in MatvecT, none of 
+    *  Because temporary vectors are often used in MatvecT, none of
     *  these conditions terminates processing, and the ierr flag
     *  is informational only.
     *--------------------------------------------------------------------*/
 
    hypre_assert( num_vectors == hypre_VectorNumVectors(y) );
- 
+
    if (num_rows != x_size)
       ierr = 1;
 
@@ -541,7 +532,7 @@ hypre_CSRMatrixMatvecT( HYPRE_Complex    alpha,
     *-----------------------------------------------------------------------*/
 
    temp = beta / alpha;
-   
+
    if (temp != 1.0)
    {
       if (temp == 0.0)
@@ -576,7 +567,7 @@ hypre_CSRMatrixMatvecT( HYPRE_Complex    alpha,
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel private(i,jj,j,my_thread_num,offset)
 #endif
-         {                                      
+         {
             my_thread_num = hypre_GetThreadNum();
             offset =  y_size*my_thread_num;
 #ifdef HYPRE_USING_OPENMP
@@ -591,7 +582,7 @@ hypre_CSRMatrixMatvecT( HYPRE_Complex    alpha,
                }
             }
 
-            /* implied barrier (for threads)*/           
+            /* implied barrier (for threads)*/
 #ifdef HYPRE_USING_OPENMP
 #pragma omp for HYPRE_SMP_SCHEDULE
 #endif
@@ -600,7 +591,7 @@ hypre_CSRMatrixMatvecT( HYPRE_Complex    alpha,
                for (j = 0; j < num_threads; j++)
                {
                   y_data[i] += y_data_expand[j*y_size + i];
-                  
+
                }
             }
 
@@ -626,7 +617,7 @@ hypre_CSRMatrixMatvecT( HYPRE_Complex    alpha,
       hypre_TFree(y_data_expand, HYPRE_MEMORY_HOST);
 
    }
-   else 
+   else
    {
       for (i = 0; i < num_rows; i++)
       {
@@ -796,17 +787,92 @@ hypre_CSRMatrixMatvec_FF( HYPRE_Complex    alpha,
 
    return ierr;
 }
-#ifdef HYPRE_USE_GPU
+#if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
 HYPRE_Int
 hypre_CSRMatrixMatvecDevice( HYPRE_Complex    alpha,
+                             hypre_CSRMatrix *A,
+                             hypre_Vector    *x,
+                             HYPRE_Complex    beta,
+                             hypre_Vector    *b,
+                             hypre_Vector    *y,
+                             HYPRE_Int        offset )
+{
+#ifdef HYPRE_BIGINT
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ERROR: hypre_CSRMatvecDevice should not be called when bigint is enabled!");
+#else
+  static cusparseHandle_t handle;
+  static cusparseMatDescr_t descr;
+  static HYPRE_Int FirstCall=1;
+  cusparseStatus_t status;
+  static cudaStream_t s[10];
+  static HYPRE_Int myid;
+
+  if (b!=y){
+
+    PUSH_RANGE_PAYLOAD("MEMCPY",1,y->size-offset);
+    VecCopy(y->data,b->data,(y->size-offset),HYPRE_STREAM(4));
+    POP_RANGE
+  }
+
+  if (x==y) hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ERROR::x and y are the same pointer in hypre_CSRMatrixMatvecDevice\n");
+
+  if (FirstCall){
+    PUSH_RANGE("FIRST_CALL",4);
+
+    handle=getCusparseHandle();
+
+    status= cusparseCreateMatDescr(&descr);
+    if (status != CUSPARSE_STATUS_SUCCESS) {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ERROR:: Matrix descriptor initialization failed\n");
+      return hypre_error_flag;
+    }
+
+    cusparseSetMatType(descr,CUSPARSE_MATRIX_TYPE_GENERAL);
+    cusparseSetMatIndexBase(descr,CUSPARSE_INDEX_BASE_ZERO);
+
+    FirstCall=0;
+    hypre_int jj;
+    for(jj=0;jj<5;jj++)
+      s[jj]=HYPRE_STREAM(jj);
+    nvtxNameCudaStreamA(s[4], "HYPRE_COMPUTE_STREAM");
+    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+    myid++;
+    POP_RANGE;
+  }
+
+  PUSH_RANGE("PREFETCH+SPMV",2);
+
+  hypre_CSRMatrixPrefetchToDevice(A);
+  hypre_SeqVectorPrefetchToDevice(x);
+  hypre_SeqVectorPrefetchToDevice(y);
+
+  //if (offset!=0) hypre_printf("WARNING:: Offset is not zero in hypre_CSRMatrixMatvecDevice :: \n");
+  cusparseErrchk(cusparseDcsrmv(handle ,
+                 CUSPARSE_OPERATION_NON_TRANSPOSE,
+                 A->num_rows-offset, A->num_cols, A->num_nonzeros,
+                 &alpha, descr,
+                 A->data ,A->i+offset,A->j,
+                 x->data, &beta, y->data+offset));
+
+  if (!GetAsyncMode()){
+  hypre_CheckErrorDevice(cudaStreamSynchronize(s[4]));
+  }
+  POP_RANGE;
+#endif
+  return hypre_error_flag;
+
+}
+
+HYPRE_Int
+hypre_CSRMatrixMatvecDeviceBIGINT( HYPRE_Complex    alpha,
                        hypre_CSRMatrix *A,
                        hypre_Vector    *x,
                        HYPRE_Complex    beta,
-		       hypre_Vector    *b,
-		       hypre_Vector    *y,
-		       HYPRE_Int offset )
+                       hypre_Vector    *b,
+                       hypre_Vector    *y,
+                       HYPRE_Int offset )
 {
-
+#ifdef HYPRE_BIGINT
   static cusparseHandle_t handle;
   static cusparseMatDescr_t descr;
   static HYPRE_Int FirstCall=1;
@@ -827,16 +893,16 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Complex    alpha,
     PUSH_RANGE("FIRST_CALL",4);
 
     handle=getCusparseHandle();
-    
-    status= cusparseCreateMatDescr(&descr); 
+
+    status= cusparseCreateMatDescr(&descr);
     if (status != CUSPARSE_STATUS_SUCCESS) {
       printf("ERROR:: Matrix descriptor initialization failed\n");
       exit(2);
-    } 
-    
+    }
+
     cusparseSetMatType(descr,CUSPARSE_MATRIX_TYPE_GENERAL);
     cusparseSetMatIndexBase(descr,CUSPARSE_INDEX_BASE_ZERO);
-    
+
     FirstCall=0;
     hypre_int jj;
     for(jj=0;jj<5;jj++)
@@ -848,25 +914,47 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Complex    alpha,
   }
 
   PUSH_RANGE("PREFETCH+SPMV",2);
+  hypre_int  num_rows     = hypre_CSRMatrixNumRows(A);
+  hypre_int  num_cols     = hypre_CSRMatrixNumCols(A);
+  hypre_int  num_nonzeros = hypre_CSRMatrixNumNonzeros(A);
 
-  hypre_CSRMatrixPrefetchToDevice(A);
+  if (A->i_short==NULL) {
+
+
+
+    A->i_short = hypre_CTAlloc(hypre_int,  num_rows + 1, HYPRE_MEMORY_SHARED);
+    A->j_short = hypre_CTAlloc(hypre_int,  num_nonzeros, HYPRE_MEMORY_SHARED);
+
+    hypre_CSRMatrixPrefetchToDevice(A);
+    hypre_CSRMatrixPrefetchToDeviceBIGINT(A);
+
+    BigToSmallCopy(A->i_short,A->i,num_rows+1,0);
+    BigToSmallCopy(A->j_short,A->j,num_nonzeros,0);
+
+    hypre_CheckErrorDevice(cudaStreamSynchronize(0));
+    //hypre_printf("BIGINT MOD :: Arrays copied \n");
+  }
+
+  //hypre_CSRMatrixPrefetchToDevice(A);
   hypre_SeqVectorPrefetchToDevice(x);
   hypre_SeqVectorPrefetchToDevice(y);
-  
-  if (offset!=0) printf("WARNING:: Offset is not zero in hypre_CSRMatrixMatvecDevice :: %d \n",offset);
+
+  if (offset!=0) hypre_error_w_msg(HYPRE_ERROR_GENERIC, "WARNING:: Offset is not zero in hypre_CSRMatrixMatvecDevice \n");
+
   cusparseErrchk(cusparseDcsrmv(handle ,
-				CUSPARSE_OPERATION_NON_TRANSPOSE, 
-				A->num_rows-offset, A->num_cols, A->num_nonzeros,
-				&alpha, descr,
-				A->data ,A->i+offset,A->j,
-				x->data, &beta, y->data+offset));
-  
+                                CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                num_rows-offset, num_cols, num_nonzeros,
+                                &alpha, descr,
+                                A->data ,A->i_short+offset,A->j_short,
+                                x->data, &beta, y->data+offset));
+
   if (!GetAsyncMode()){
   hypre_CheckErrorDevice(cudaStreamSynchronize(s[4]));
   }
   POP_RANGE;
-  
+#endif
   return 0;
-  
+
 }
+
 #endif

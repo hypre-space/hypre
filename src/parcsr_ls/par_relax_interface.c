@@ -26,18 +26,18 @@
  * hypre_BoomerAMGRelax
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int  hypre_BoomerAMGRelaxIF(hypre_ParCSRMatrix *A,
-                                  hypre_ParVector    *f,
-                                  HYPRE_Int          *cf_marker,
-                                  HYPRE_Int           relax_type,
-                                  HYPRE_Int           relax_order,
-                                  HYPRE_Int           cycle_type,
-                                  HYPRE_Real          relax_weight,
-                                  HYPRE_Real          omega,
-                                  HYPRE_Real         *l1_norms,
-                                  hypre_ParVector    *u,
-                                  hypre_ParVector    *Vtemp,
-                                  hypre_ParVector    *Ztemp )
+HYPRE_Int  hypre_BoomerAMGRelaxIF( hypre_ParCSRMatrix *A,
+                                   hypre_ParVector    *f,
+                                   HYPRE_Int          *cf_marker,
+                                   HYPRE_Int           relax_type,
+                                   HYPRE_Int           relax_order,
+                                   HYPRE_Int           cycle_type,
+                                   HYPRE_Real          relax_weight,
+                                   HYPRE_Real          omega,
+                                   HYPRE_Real         *l1_norms,
+                                   hypre_ParVector    *u,
+                                   hypre_ParVector    *Vtemp,
+                                   hypre_ParVector    *Ztemp )
 {
    HYPRE_Int i, Solve_err_flag = 0;
    HYPRE_Int relax_points[2];

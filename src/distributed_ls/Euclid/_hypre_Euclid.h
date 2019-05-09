@@ -487,7 +487,7 @@ extern void  printErrorMsg(FILE *fp);
 #endif
 
 #define MSG_BUF_SIZE_DH MAX(1024, hypre_MPI_MAX_ERROR_STRING)
-#if defined(HYPRE_USE_RAJA) || defined(HYPRE_USE_KOKKOS) || defined(HYPRE_USE_CUDA)
+#if defined(HYPRE_USING_RAJA) || defined(HYPRE_USING_KOKKOS) || defined(HYPRE_USING_CUDA)
 static char  msgBuf_dh[MSG_BUF_SIZE_DH];
 #else
 extern char  msgBuf_dh[MSG_BUF_SIZE_DH];

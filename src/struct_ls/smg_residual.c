@@ -28,7 +28,7 @@ typedef struct
    hypre_ComputePkg    *compute_pkg;
 
    HYPRE_Int            time_index;
-   HYPRE_Int            flops;
+   HYPRE_BigInt         flops;
 
 } hypre_SMGResidualData;
 
@@ -105,7 +105,7 @@ hypre_SMGResidualSetup( void               *residual_vdata,
 
    (residual_data -> flops) =
       (hypre_StructMatrixGlobalSize(A) + hypre_StructVectorGlobalSize(x)) /
-      (hypre_IndexX(base_stride) *
+      (HYPRE_BigInt)(hypre_IndexX(base_stride) *
        hypre_IndexY(base_stride) *
        hypre_IndexZ(base_stride)  );
 
@@ -193,7 +193,6 @@ hypre_SMGResidual( void               *residual_vdata,
 
                hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(rp,bp)
                hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                                    b_data_box, start, base_stride, bi,
@@ -203,7 +202,6 @@ hypre_SMGResidual( void               *residual_vdata,
                }
                hypre_BoxLoop2End(bi, ri);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
             }
          }
          break;
@@ -246,7 +244,6 @@ hypre_SMGResidual( void               *residual_vdata,
                hypre_BoxGetStrideSize(compute_box, base_stride,
                                       loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(rp,Ap,xp)
                hypre_BoxLoop3Begin(hypre_StructMatrixNDim(A), loop_size,
                                    A_data_box, start, base_stride, Ai,
@@ -257,7 +254,6 @@ hypre_SMGResidual( void               *residual_vdata,
                }
                hypre_BoxLoop3End(Ai, xi, ri);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
             }
          }
       }

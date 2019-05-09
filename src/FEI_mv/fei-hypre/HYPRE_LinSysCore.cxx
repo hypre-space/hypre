@@ -4653,6 +4653,11 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
    HYPRE_SlideReduction *slideObj = (HYPRE_SlideReduction *) slideObj_;
 
    //-------------------------------------------------------------------
+   // Clear Errors
+   //-------------------------------------------------------------------
+   HYPRE_ClearAllErrors();
+
+   //-------------------------------------------------------------------
    // diagnostic message 
    //-------------------------------------------------------------------
 

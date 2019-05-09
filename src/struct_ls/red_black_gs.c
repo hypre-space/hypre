@@ -289,7 +289,6 @@ hypre_RedBlackGS( void               *relax_vdata,
                }
 
                hypre_RedBlackLoopInit();
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(xp,bp,Ap)
                hypre_RedBlackLoopBegin(ni,nj,nk,redblack,
                                        Astart,Ani,Anj,Ai,
@@ -300,7 +299,6 @@ hypre_RedBlackGS( void               *relax_vdata,
                }
                hypre_RedBlackLoopEnd();
 #undef DEVICE_VAR
-#define DEVICE_VAR 
             }
          }
       }
@@ -415,7 +413,6 @@ hypre_RedBlackGS( void               *relax_vdata,
                {
                   case 7:
                      hypre_RedBlackLoopInit();
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(xp,bp,Ap0,Ap1,Ap2,Ap3,Ap4,Ap5,Ap)
                      hypre_RedBlackLoopBegin(ni,nj,nk,redblack,
                                              Astart,Ani,Anj,Ai,
@@ -433,12 +430,10 @@ hypre_RedBlackGS( void               *relax_vdata,
                      }
                      hypre_RedBlackLoopEnd();
 #undef DEVICE_VAR
-#define DEVICE_VAR 
                      break;
 
                   case 5:
                      hypre_RedBlackLoopInit();
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(xp,bp,Ap0,Ap1,Ap2,Ap3,Ap)
                      hypre_RedBlackLoopBegin(ni,nj,nk,redblack,
                                              Astart,Ani,Anj,Ai,
@@ -454,12 +449,10 @@ hypre_RedBlackGS( void               *relax_vdata,
                      }
                      hypre_RedBlackLoopEnd();
 #undef DEVICE_VAR
-#define DEVICE_VAR 
                      break;
 
                   case 3:
                      hypre_RedBlackLoopInit();
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(xp,bp,Ap0,Ap1,Ap)
                      hypre_RedBlackLoopBegin(ni,nj,nk,redblack,
                                              Astart,Ani,Anj,Ai,
@@ -473,7 +466,6 @@ hypre_RedBlackGS( void               *relax_vdata,
                      }
                      hypre_RedBlackLoopEnd();
 #undef DEVICE_VAR
-#define DEVICE_VAR 
 
                      break;
                }

@@ -31,3 +31,16 @@ sed 's/FC_FUNC/HYPRE_FC_FUNC/g' < HYPRE_config.h.tmp > HYPRE_config.h
 rm -f HYPRE_config.h.tmp
 
 EOF
+
+# Update release information for CMake build system
+# NOTE: Using '#' as delimiter in sed to allow for '/' in vdate
+vnumb=`utilities/version -number`
+vdate=`utilities/version -date`
+vtime=`utilities/version -time`
+sed -e 's#HYPRE_VERSION [^)]*#HYPRE_VERSION '$vnumb'#' CMakeLists.txt |
+sed -e 's#HYPRE_DATE    [^)]*#HYPRE_DATE    '$vdate'#' |
+sed -e 's#HYPRE_TIME    [^)]*#HYPRE_TIME    '$vtime'#' > CMakeLists.txt.tmp
+mv CMakeLists.txt.tmp CMakeLists.txt
+
+# Update release information in documentation
+(cd docs; ./update-release.sh)

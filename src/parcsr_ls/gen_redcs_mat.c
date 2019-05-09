@@ -69,7 +69,7 @@ HYPRE_Int hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
   
       hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
       hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
-      HYPRE_Int *col_map_offd = hypre_ParCSRMatrixColMapOffd(A);
+      HYPRE_BigInt *col_map_offd = hypre_ParCSRMatrixColMapOffd(A);
       HYPRE_Int *A_diag_i = hypre_CSRMatrixI(A_diag);
       HYPRE_Int *A_offd_i = hypre_CSRMatrixI(A_offd);
       HYPRE_Int *A_diag_j = hypre_CSRMatrixJ(A_diag);
@@ -77,8 +77,9 @@ HYPRE_Int hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
       HYPRE_Real *A_diag_data = hypre_CSRMatrixData(A_diag);
       HYPRE_Real *A_offd_data = hypre_CSRMatrixData(A_offd);
       HYPRE_Int num_rows = hypre_CSRMatrixNumRows(A_diag);
-      HYPRE_Int first_row_index = hypre_ParCSRMatrixFirstRowIndex(A);
-      HYPRE_Int new_num_procs, *row_starts;
+      HYPRE_BigInt first_row_index = hypre_ParCSRMatrixFirstRowIndex(A);
+      HYPRE_Int new_num_procs;
+      HYPRE_BigInt *row_starts;
 
       hypre_GenerateSubComm(comm, num_rows, &new_comm); 
 
@@ -167,12 +168,12 @@ HYPRE_Int hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
          {
             for (j=A_diag_i[i]; j < A_diag_i[i+1]; j++)
 	    {
-	       A_tmp_j[cnt] = A_diag_j[j]+first_row_index;
+	       A_tmp_j[cnt] = A_diag_j[j]+(HYPRE_Int)first_row_index;
 	       A_tmp_data[cnt++] = A_diag_data[j];
 	    }
             for (j=A_offd_i[i]; j < A_offd_i[i+1]; j++)
 	    {
-	       A_tmp_j[cnt] = col_map_offd[A_offd_j[j]];
+	       A_tmp_j[cnt] = (HYPRE_Int)col_map_offd[A_offd_j[j]];
 	       A_tmp_data[cnt++] = A_offd_data[j];
 	    }
          }
@@ -275,7 +276,7 @@ HYPRE_Int hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
          {
             hypre_TFree(displs2, HYPRE_MEMORY_HOST);
    
-            row_starts = hypre_CTAlloc(HYPRE_Int, 2, HYPRE_MEMORY_HOST);
+            row_starts = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
             row_starts[0] = 0; 
             row_starts[1] = size;
  
@@ -353,7 +354,7 @@ hypre_seqAMGCycle( hypre_ParAMGData *amg_data,
    Aux_U = Par_U_array[p_level];
    Aux_F = Par_F_array[p_level];
 
-   first_index = hypre_ParVectorFirstIndex(Aux_U);
+   first_index = (HYPRE_Int)hypre_ParVectorFirstIndex(Aux_U);
    u_local = hypre_ParVectorLocalVector(Aux_U);
    u_data  = hypre_VectorData(u_local);
    n =  hypre_VectorSize(u_local);

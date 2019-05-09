@@ -37,9 +37,9 @@ hypre_BoomerAMGCreate()
    hypre_ParAMGData  *amg_data;
 
    /* setup params */
-   HYPRE_Int      max_levels;
-   HYPRE_Int      max_coarse_size;
-   HYPRE_Int      min_coarse_size;
+   HYPRE_Int    max_levels;
+   HYPRE_Int    max_coarse_size;
+   HYPRE_Int    min_coarse_size;
    HYPRE_Real   strong_threshold;
    HYPRE_Real   strong_threshold_R;
    HYPRE_Real   filter_threshold_R;
@@ -54,52 +54,53 @@ hypre_BoomerAMGCreate()
    HYPRE_Real   CR_strong_th;
    HYPRE_Real   A_drop_tol;
    HYPRE_Int    A_drop_type;
-   HYPRE_Int      interp_type;
-   HYPRE_Int      sep_weight;
-   HYPRE_Int      coarsen_type;
-   HYPRE_Int      measure_type;
-   HYPRE_Int      setup_type;
-   HYPRE_Int      P_max_elmts;
-   HYPRE_Int 	    num_functions;
-   HYPRE_Int 	    nodal, nodal_levels, nodal_diag;
-   HYPRE_Int 	    num_paths;
-   HYPRE_Int 	    agg_num_levels;
-   HYPRE_Int      agg_interp_type;
-   HYPRE_Int      agg_P_max_elmts;
-   HYPRE_Int      agg_P12_max_elmts;
-   HYPRE_Int      post_interp_type;
-   HYPRE_Int 	    num_CR_relax_steps;
-   HYPRE_Int 	    IS_type;
-   HYPRE_Int 	    CR_use_CG;
-   HYPRE_Int 	    cgc_its;
-   HYPRE_Int 	    seq_threshold;
-   HYPRE_Int        redundant;
+   HYPRE_Int    interp_type;
+   HYPRE_Int    sep_weight;
+   HYPRE_Int    coarsen_type;
+   HYPRE_Int    measure_type;
+   HYPRE_Int    setup_type;
+   HYPRE_Int    P_max_elmts;
+   HYPRE_Int 	num_functions;
+   HYPRE_Int 	nodal, nodal_levels, nodal_diag;
+   HYPRE_Int 	num_paths;
+   HYPRE_Int 	agg_num_levels;
+   HYPRE_Int    agg_interp_type;
+   HYPRE_Int    agg_P_max_elmts;
+   HYPRE_Int    agg_P12_max_elmts;
+   HYPRE_Int    post_interp_type;
+   HYPRE_Int 	num_CR_relax_steps;
+   HYPRE_Int 	IS_type;
+   HYPRE_Int 	CR_use_CG;
+   HYPRE_Int 	cgc_its;
+   HYPRE_Int 	seq_threshold;
+   HYPRE_Int    redundant;
 
    /* solve params */
-   HYPRE_Int      min_iter;
-   HYPRE_Int      max_iter;
-   HYPRE_Int      cycle_type;
+   HYPRE_Int    min_iter;
+   HYPRE_Int    max_iter;
+   HYPRE_Int    fcycle;
+   HYPRE_Int    cycle_type;
 
    HYPRE_Int    converge_type;
    HYPRE_Real   tol;
 
-   HYPRE_Int      num_sweeps;
-   HYPRE_Int      relax_down;
-   HYPRE_Int      relax_up;
-   HYPRE_Int      relax_coarse;
-   HYPRE_Int      relax_order;
+   HYPRE_Int    num_sweeps;
+   HYPRE_Int    relax_down;
+   HYPRE_Int    relax_up;
+   HYPRE_Int    relax_coarse;
+   HYPRE_Int    relax_order;
    HYPRE_Real   relax_wt;
    HYPRE_Real   outer_wt;
    HYPRE_Real   nongalerkin_tol;
-   HYPRE_Int      smooth_type;
-   HYPRE_Int      smooth_num_levels;
-   HYPRE_Int      smooth_num_sweeps;
+   HYPRE_Int    smooth_type;
+   HYPRE_Int    smooth_num_levels;
+   HYPRE_Int    smooth_num_sweeps;
 
-   HYPRE_Int      variant, overlap, domain_type, schwarz_use_nonsymm;
+   HYPRE_Int    variant, overlap, domain_type, schwarz_use_nonsymm;
    HYPRE_Real   schwarz_rlx_weight;
-   HYPRE_Int	    level, sym;
-   HYPRE_Int	    eu_level, eu_bj;
-   HYPRE_Int	    max_nz_per_row;
+   HYPRE_Int	level, sym;
+   HYPRE_Int	eu_level, eu_bj;
+   HYPRE_Int	max_nz_per_row;
    HYPRE_Real   thresh, filter;
    HYPRE_Real   drop_tol;
    HYPRE_Real   eu_sparse_A;
@@ -113,25 +114,25 @@ hypre_BoomerAMGCreate()
 
    HYPRE_Int block_mode;
 
-   HYPRE_Int        additive;
-   HYPRE_Int        mult_additive;
-   HYPRE_Int        simple;
-   HYPRE_Int        add_last_lvl;
+   HYPRE_Int    additive;
+   HYPRE_Int    mult_additive;
+   HYPRE_Int    simple;
+   HYPRE_Int    add_last_lvl;
    HYPRE_Real   add_trunc_factor;
-   HYPRE_Int      add_P_max_elmts;
-   HYPRE_Int      add_rlx_type;
+   HYPRE_Int    add_P_max_elmts;
+   HYPRE_Int    add_rlx_type;
    HYPRE_Real   add_rlx_wt;
 
    /* log info */
-   HYPRE_Int      num_iterations;
-   HYPRE_Int      cum_num_iterations;
+   HYPRE_Int    num_iterations;
+   HYPRE_Int    cum_num_iterations;
 
    /* output params */
-   HYPRE_Int      print_level;
-   HYPRE_Int      logging;
+   HYPRE_Int    print_level;
+   HYPRE_Int    logging;
    /* HYPRE_Int      cycle_op_count; */
    char     log_file_name[256];
-   HYPRE_Int      debug_flag;
+   HYPRE_Int    debug_flag;
 
    char     plot_file_name[251] = {0};
 
@@ -204,6 +205,7 @@ hypre_BoomerAMGCreate()
    /* solve params */
    min_iter  = 0;
    max_iter  = 20;
+   fcycle = 0;
    cycle_type = 1;
    converge_type = 0;
    tol = 1.0e-7;
@@ -315,6 +317,7 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetMinIter(amg_data, min_iter);
    hypre_BoomerAMGSetMaxIter(amg_data, max_iter);
    hypre_BoomerAMGSetCycleType(amg_data, cycle_type);
+   hypre_BoomerAMGSetFCycle(amg_data, fcycle);
    hypre_BoomerAMGSetConvergeType(amg_data, converge_type);
    hypre_BoomerAMGSetTol(amg_data, tol);
    hypre_BoomerAMGSetNumSweeps(amg_data, num_sweeps);
@@ -359,7 +362,7 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetRestriction(amg_data, 0);
    hypre_BoomerAMGSetIsTriangular(amg_data, 0);
    hypre_BoomerAMGSetGMRESSwitchR(amg_data, 64);
-   
+
    hypre_BoomerAMGSetGSMG(amg_data, 0);
    hypre_BoomerAMGSetNumSamples(amg_data, 0);
 
@@ -1715,6 +1718,40 @@ hypre_BoomerAMGGetCycleType( void  *data,
    }
 
    *cycle_type = hypre_ParAMGDataCycleType(amg_data);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGSetFCycle( void     *data,
+                          HYPRE_Int fcycle )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   hypre_ParAMGDataFCycle(amg_data) = fcycle != 0;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGGetFCycle( void      *data,
+                          HYPRE_Int *fcycle )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   *fcycle = hypre_ParAMGDataFCycle(amg_data);
 
    return hypre_error_flag;
 }
@@ -3229,7 +3266,7 @@ hypre_BoomerAMGSetCRStrongTh( void     *data,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_BoomerAMGSetADropTol( void       *data,
+hypre_BoomerAMGSetADropTol( void     *data,
                             HYPRE_Real  A_drop_tol )
 {
    hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;

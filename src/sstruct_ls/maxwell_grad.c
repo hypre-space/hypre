@@ -72,7 +72,7 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
    hypre_BoxManager      *boxman;
    hypre_BoxManEntry     *entry;
 
-   HYPRE_Int             *inode, *jedge;
+   HYPRE_BigInt          *inode, *jedge;
    HYPRE_Int              nrows, nnodes, *nflag, *eflag, *ncols;
    HYPRE_Real            *vals;
 
@@ -89,13 +89,14 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
 
    HYPRE_Int              nvars, part;
 
-   HYPRE_Int              i, j, k, m, n, d;
+   HYPRE_BigInt           m;
+   HYPRE_Int              i, j, k, n, d;
    HYPRE_Int             *direction, ndirection;
 
-   HYPRE_Int              ilower, iupper;
-   HYPRE_Int              jlower, jupper;
+   HYPRE_BigInt           ilower, iupper;
+   HYPRE_BigInt           jlower, jupper;
 
-   HYPRE_Int              start_rank1, start_rank2, rank;
+   HYPRE_BigInt           start_rank1, start_rank2, rank;
 
    HYPRE_Int              myproc;
    HYPRE_Int              ierr=0;
@@ -327,12 +328,6 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
                hypre_CopyIndex(hypre_BoxIMin(box_piece), start);
          
                hypre_SerialBoxLoop0Begin(ndim, loop_size);
-#if 0 /* Are private static arrays a problem? */
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,lindex,index,rank) HYPRE_SMP_SCHEDULE
-#endif
-#else
-#endif
                {
                   hypre_BoxLoopGetIndex(lindex);
                   hypre_SetIndex3(index, lindex[0], lindex[1], lindex[2]);
@@ -434,12 +429,6 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
                      hypre_CopyIndex(hypre_BoxIMin(box_piece), start);
 
                      hypre_SerialBoxLoop0Begin(ndim, loop_size);
-#if 0 /* Are private static arrays a problem? */
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,lindex,index,rank) HYPRE_SMP_SCHEDULE
-#endif
-#else
-#endif
                      {
                         hypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(index, lindex[0], lindex[1], lindex[2]);
@@ -464,12 +453,6 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
                      hypre_CopyIndex(hypre_BoxIMin(box_piece), start);
 
                      hypre_SerialBoxLoop0Begin(ndim, loop_size);
-#if 0 /* Are private static arrays a problem? */
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,lindex,index,rank) HYPRE_SMP_SCHEDULE
-#endif
-#else
-#endif
                      {
                         hypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(index, lindex[0], lindex[1], lindex[2]);
@@ -493,12 +476,12 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
 
    /* set vals. Will have more memory than is needed- extra allotted
       for repeated nodes. */
-   inode= hypre_CTAlloc(HYPRE_Int,  nrows, HYPRE_MEMORY_HOST);
+   inode= hypre_CTAlloc(HYPRE_BigInt,  nrows, HYPRE_MEMORY_HOST);
    ncols= hypre_CTAlloc(HYPRE_Int,  nrows, HYPRE_MEMORY_HOST);
 
    /* each row can have at most two columns */
    k= 2*nrows;
-   jedge= hypre_CTAlloc(HYPRE_Int,  k, HYPRE_MEMORY_HOST);
+   jedge= hypre_CTAlloc(HYPRE_BigInt,  k, HYPRE_MEMORY_HOST);
    vals = hypre_TAlloc(HYPRE_Real,  k, HYPRE_MEMORY_HOST);
    for (i= 0; i< k; i++)
    {
@@ -598,12 +581,6 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
                then the column ranks for the connected nodes. Change the 
                appropriate values to 1. */
             hypre_SerialBoxLoop0Begin(ndim, loop_size);
-#if 0
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,lindex,index,entry,m,i,nrows) HYPRE_SMP_SCHEDULE
-#endif
-#else
-#endif
             {
                hypre_BoxLoopGetIndex(lindex);
                hypre_SetIndex3(index, lindex[0], lindex[1], lindex[2]);
@@ -665,12 +642,6 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
                   hypre_CopyIndex(hypre_BoxIMin(&layer), start);
 
                   hypre_SerialBoxLoop0Begin(ndim, loop_size);
-#if 0
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,lindex,index,entry,m,i,nrows) HYPRE_SMP_SCHEDULE
-#endif
-#else
-#endif
                   {
                      hypre_BoxLoopGetIndex(lindex);
                      hypre_SetIndex3(index, lindex[0], lindex[1], lindex[2]);
@@ -760,7 +731,7 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
    HYPRE_SStructGridDestroy(edge_grid);
 
    HYPRE_IJMatrixSetValues(T_grad, nrows, ncols,
-                           (const HYPRE_Int*) inode, (const HYPRE_Int*) jedge,
+                           (const HYPRE_BigInt*) inode, (const HYPRE_BigInt*) jedge,
                            (const HYPRE_Real*) vals);
    HYPRE_IJMatrixAssemble(T_grad);
 

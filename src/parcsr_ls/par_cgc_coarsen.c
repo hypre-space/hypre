@@ -43,6 +43,11 @@ hypre_BoomerAMGCoarsenCGCb( hypre_ParCSRMatrix    *S,
                             HYPRE_Int                    debug_flag,
                             HYPRE_Int                  **CF_marker_ptr)
 {
+#ifdef HYPRE_MIXEDINT
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"CGC coarsening is not enabled in mixedint mode!");
+   return hypre_error_flag;
+#endif
+
    MPI_Comm         comm          = hypre_ParCSRMatrixComm(S);
    hypre_ParCSRCommPkg   *comm_pkg      = hypre_ParCSRMatrixCommPkg(S);
    hypre_ParCSRCommHandle *comm_handle;
@@ -57,7 +62,7 @@ hypre_BoomerAMGCoarsenCGCb( hypre_ParCSRMatrix    *S,
                   
    hypre_CSRMatrix *S_ext;
    HYPRE_Int             *S_ext_i;
-   HYPRE_Int             *S_ext_j;
+   HYPRE_BigInt          *S_ext_j;
                  
    hypre_CSRMatrix *ST;
    HYPRE_Int             *ST_i;
@@ -81,7 +86,8 @@ hypre_BoomerAMGCoarsenCGCb( hypre_ParCSRMatrix    *S,
    HYPRE_Int		    num_nonzeros;
    HYPRE_Int		    num_procs, my_id;
    HYPRE_Int		    num_sends = 0;
-   HYPRE_Int		    first_col, start;
+   HYPRE_BigInt		    first_col;
+   HYPRE_Int		    start;
    /*HYPRE_Int		    col_0, col_n;*/
 
    hypre_LinkList   LoL_head;
@@ -213,7 +219,7 @@ hypre_BoomerAMGCoarsenCGCb( hypre_ParCSRMatrix    *S,
       else
          S_ext      = hypre_ParCSRMatrixExtractBExt(S,S,0);
       S_ext_i    = hypre_CSRMatrixI(S_ext);
-      S_ext_j    = hypre_CSRMatrixJ(S_ext);
+      S_ext_j    = hypre_CSRMatrixBigJ(S_ext);
       num_nonzeros = S_ext_i[num_cols_offd];
       first_col = hypre_ParCSRMatrixFirstColDiag(S);
       /*col_0 = first_col-1;
@@ -222,7 +228,7 @@ hypre_BoomerAMGCoarsenCGCb( hypre_ParCSRMatrix    *S,
       {
 	 for (i=0; i < num_nonzeros; i++)
          {
-	    index = S_ext_j[i] - first_col;
+	    index = (HYPRE_Int)(S_ext_j[i] - first_col);
 	    if (index > -1 && index < num_variables)
 		measure_array_master[index]++;
          } 
@@ -889,8 +895,9 @@ HYPRE_Int hypre_AmgCGCGraphAssemble (hypre_ParCSRMatrix *S,HYPRE_Int *vertexrang
   HYPRE_Int *S_offd_j = NULL;
   HYPRE_Int num_variables = hypre_CSRMatrixNumRows (S_diag);
   HYPRE_Int num_cols_offd = hypre_CSRMatrixNumCols (S_offd);
-  HYPRE_Int *col_map_offd = hypre_ParCSRMatrixColMapOffd (S);
-  HYPRE_Int *pointrange,*pointrange_nonlocal,*pointrange_strong=NULL;
+  HYPRE_BigInt *col_map_offd = hypre_ParCSRMatrixColMapOffd (S);
+  HYPRE_BigInt *pointrange;
+  HYPRE_Int *pointrange_nonlocal,*pointrange_strong=NULL;
   HYPRE_Int vertexrange_start,vertexrange_end;
   HYPRE_Int *vertexrange_strong= NULL;
   HYPRE_Int *vertexrange_nonlocal;
@@ -1021,9 +1028,11 @@ HYPRE_Int hypre_AmgCGCGraphAssemble (hypre_ParCSRMatrix *S,HYPRE_Int *vertexrang
   /* initialize graph */
   weight = -1;
   for (m=vertexrange_start;m<vertexrange_end;m++) {
+    HYPRE_BigInt big_m = (HYPRE_BigInt)m;
     for (p=0;p<num_recvs_strong;p++) {
       for (n=vertexrange_strong[2*p];n<vertexrange_strong[2*p+1];n++) {
-	HYPRE_IJMatrixAddToValues (ijmatrix,1,&one,&m,&n,&weight);
+        HYPRE_BigInt big_n = (HYPRE_BigInt)n;
+	HYPRE_IJMatrixAddToValues (ijmatrix,1,&one,&big_m,&big_n,&weight);
 /*#if 0
 	if (ierr) hypre_printf ("Processor %d: error %d while initializing graphs at (%d, %d)\n",mpirank,ierr,m,n);
 #endif*/
@@ -1042,8 +1051,10 @@ HYPRE_Int hypre_AmgCGCGraphAssemble (hypre_ParCSRMatrix *S,HYPRE_Int *vertexrang
       /*ip=recv_procs_strong[p];*/
       /* loop over all coarse grids constructed on this processor domain */
       for (m=vertexrange_start;m<vertexrange_end;m++) {
+        HYPRE_BigInt big_m = (HYPRE_BigInt)m;
 	/* loop over all coarse grids constructed on neighbor processor domain */
 	for (n=vertexrange_strong[2*p];n<vertexrange_strong[2*p+1];n++) {
+          HYPRE_BigInt big_n = (HYPRE_BigInt)n;
 	  /* coarse grid counting inside gridpartition->local/gridpartition->nonlocal starts with one
 	     while counting inside range starts with zero */
 	  if (CF_marker[i]-1==m && CF_marker_offd[jj]-1==n)
@@ -1054,7 +1065,7 @@ HYPRE_Int hypre_AmgCGCGraphAssemble (hypre_ParCSRMatrix *S,HYPRE_Int *vertexrang
 	    /* C-F-coupling */
 	    weight = 0;
 	  else weight = -8; /* F-F-coupling */
-	  HYPRE_IJMatrixAddToValues (ijmatrix,1,&one,&m,&n,&weight);
+	  HYPRE_IJMatrixAddToValues (ijmatrix,1,&one,&big_m,&big_n,&weight);
 /*#if 0
 	  if (ierr) hypre_printf ("Processor %d: error %d while adding %lf to entry (%d, %d)\n",mpirank,ierr,weight,m,n);
 #endif*/

@@ -55,6 +55,7 @@ FILES =\
  F90_HYPRE_parcsr_cgnr.c\
  F90_HYPRE_parcsr_Euclid.c\
  F90_HYPRE_parcsr_gmres.c\
+ F90_HYPRE_parcsr_cogmres.c\
  F90_HYPRE_parcsr_flexgmres.c\
  F90_HYPRE_parcsr_lgmres.c\
  F90_HYPRE_parcsr_hybrid.c\
@@ -71,6 +72,7 @@ FILES =\
  HYPRE_parcsr_cgnr.c\
  HYPRE_parcsr_Euclid.c\
  HYPRE_parcsr_gmres.c\
+ HYPRE_parcsr_cogmres.c\
  HYPRE_parcsr_flexgmres.c\
  HYPRE_parcsr_lgmres.c\
  HYPRE_parcsr_hybrid.c\
@@ -102,9 +104,9 @@ FILES =\
  par_interp.c\
  par_jacobi_interp.c\
  par_multi_interp.c\
+ par_laplace.c\
  par_laplace_27pt.c\
  par_laplace_9pt.c\
- par_laplace.c\
  par_lr_interp.c\
  par_mgr.c\
  par_mgr_setup.c\
@@ -114,8 +116,6 @@ FILES =\
  par_rap.c\
  par_rap_communication.c\
  par_rotate_7pt.c\
- par_vardifconv.c\
- par_vardifconv_rs.c\
  par_relax.c\
  par_relax_more.c\
  par_relax_interface.c\
@@ -125,6 +125,8 @@ FILES =\
  par_strength.c\
  par_sv_interp.c\
  par_sv_interp_ln.c\
+ par_vardifconv.c\
+ par_vardifconv_rs.c\
  partial.c\
  pcg_par.c\
  schwarz.c\
@@ -138,7 +140,7 @@ FILES =\
 
 OBJS = ${FILES:.c=.o}
 
-SONAME = libHYPRE_parcsr_ls-${HYPRE_RELEASE_VERSION}.so
+SONAME = libHYPRE_parcsr_ls-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
 ##################################################################
 # Targets
@@ -170,7 +172,7 @@ libHYPRE_parcsr_ls.a: ${OBJS}
 	${AR} $@ ${OBJS}
 	${RANLIB} $@
 
-libHYPRE_parcsr_ls.so: ${OBJS}
+libHYPRE_parcsr_ls.so libHYPRE_parcsr_ls.dylib: ${OBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
 	ln -s ${SONAME} $@

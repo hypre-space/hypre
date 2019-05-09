@@ -847,7 +847,6 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
 
             hypre_BoxGetSize(own_box, loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(xcp, xcp_temp)
             hypre_BoxLoop2Begin(ndim, loop_size,
                                 xc_temp_dbox, hypre_BoxIMin(own_box), stridec, xfi,
@@ -857,7 +856,6 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
             }
             hypre_BoxLoop2End(xfi, xci);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
          
          }  /* hypre_ForBoxI(i, own_boxes) */
       }     /* hypre_ForBoxI(ci, cgrid_boxes) */

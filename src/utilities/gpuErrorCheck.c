@@ -1,25 +1,26 @@
-
 #include "_hypre_utilities.h"
 
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD) || defined(HYPRE_USE_OMP45)
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+
 void CheckError(cudaError_t const err, const char* file, char const* const fun, const HYPRE_Int line)
 {
     if (err)
     {
+#if HYPRE_ALLBIGINT
+      printf("CUDA Error Code[%d]: %s\n %s(%s) Line:%lld\n", err, cudaGetErrorString(err), file, fun, line);
+#else
       printf("CUDA Error Code[%d]: %s\n %s(%s) Line:%d\n", err, cudaGetErrorString(err), file, fun, line);
+#endif
       HYPRE_Int *p = NULL; *p = 1;
     }
 }
-#endif //defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
 
-//#include <signal.h>
-#ifdef HYPRE_USE_GPU
+/*
 extern const char *cusparseErrorCheck(cusparseStatus_t error);
 extern void gpuAssert(cudaError_t code, const char *file, int line);
 extern void cusparseAssert(cusparseStatus_t code, const char *file, int line);
-#endif /* HYPRE_USE_GPU */
-
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USE_OMP45)
+*/
 
 /*
   cudaSafeFree frees Managed memory allocated in hypre_MAlloc,hypre_CAlloc and hypre_ReAlloc
@@ -35,14 +36,27 @@ void cudaSafeFree(void *ptr,int padding)
   cudaError_t err;
 
   err=cudaPointerGetAttributes(&ptr_att,ptr);
-  if (err!=cudaSuccess){
-    cudaGetLastError(); 
+  if (err!=cudaSuccess)
+  {
+    cudaGetLastError();
 #ifndef ABORT_ON_RAW_POINTER
 #ifdef FULL_WARN
-    if (err==cudaErrorInvalidValue) fprintf(stderr,"WARNING :: Raw pointer passed to cudaSafeFree %p\n",ptr);
-    else if (err==cudaErrorInvalidDevice) fprintf(stderr,"WARNING :: cudaSafeFree :: INVALID DEVICE on ptr = %p\n",ptr);
-    else if (err==cudaErrorIncompatibleDriverContext) fprintf(stderr,"WARNING :: cudaSafeFree :: Incompatible  Driver Context on ptr = %p\n",ptr);
-    else fprintf(stderr,"Point Attrib check error is %d \n",err);
+    if (err==cudaErrorInvalidValue)
+    {
+       fprintf(stderr,"WARNING :: Raw pointer passed to cudaSafeFree %p\n",ptr);
+    }
+    else if (err==cudaErrorInvalidDevice)
+    {
+       fprintf(stderr,"WARNING :: cudaSafeFree :: INVALID DEVICE on ptr = %p\n",ptr);
+    }
+    else if (err==cudaErrorIncompatibleDriverContext)
+    {
+       fprintf(stderr,"WARNING :: cudaSafeFree :: Incompatible  Driver Context on ptr = %p\n",ptr);
+    }
+    else
+    {
+       fprintf(stderr,"Point Attrib check error is %d \n",err);
+    }
     //PrintPointerAttributes(ptr);
 #endif /* FULL_WARN */
 #else
@@ -52,29 +66,37 @@ void cudaSafeFree(void *ptr,int padding)
     free(ptr); /* Free the nonManaged pointer */
     return;
   }
-  if (ptr_att.isManaged){
-#if defined(HYPRE_USE_GPU) && defined(HYPRE_MEASURE_GPU_HWM)
-    size_t mfree,mtotal;
-    hypre_CheckErrorDevice(cudaMemGetInfo(&mfree,&mtotal));
-    HYPRE_GPU_HWM=hypre_max((mtotal-mfree),HYPRE_GPU_HWM);
-#endif /* defined(HYPRE_USE_GPU) && defined(HYPRE_MEASURE_GPU_HWM) */
+
+  if (ptr_att.isManaged)
+  {
+#if defined(HYPRE_MEASURE_GPU_HWM)
+     size_t mfree,mtotal;
+     hypre_CheckErrorDevice(cudaMemGetInfo(&mfree,&mtotal));
+     HYPRE_GPU_HWM = hypre_max((mtotal-mfree),HYPRE_GPU_HWM);
+#endif
     /* Code below for handling managed memory pointers not allocated using hypre_CTAlloc oir hypre_TAlooc */
     if (PointerAttributes(ptr)!=PointerAttributes(sptr)){
       //fprintf(stderr,"ERROR IN Pointer for freeing %p %p\n",ptr,sptr);
-      hypre_CheckErrorDevice(cudaFree(ptr)); 
+      hypre_CheckErrorDevice(cudaFree(ptr));
       return;
     }
-    hypre_CheckErrorDevice(cudaFree(sptr)); 
-  } else {
+    hypre_CheckErrorDevice(cudaFree(sptr));
+  }
+  else
+  {
     /* It is a pinned memory pointer */
     //printf("ERROR:: NON-managed pointer passed to cudaSafeFree\n");
-    if (ptr_att.memoryType==cudaMemoryTypeHost){
+    if (ptr_att.memoryType==cudaMemoryTypeHost)
+    {
       hypre_CheckErrorDevice(cudaFreeHost(sptr));
-    } else if (ptr_att.memoryType==cudaMemoryTypeDevice){
-      hypre_CheckErrorDevice(cudaFree(sptr)); 
+    }
+    else if (ptr_att.memoryType==cudaMemoryTypeDevice)
+    {
+      hypre_CheckErrorDevice(cudaFree(sptr));
     }
   }
   POP_RANGE;
+
   return;
 }
 
@@ -117,7 +139,7 @@ hypre_int PointerAttributes(const void *ptr){
      return HYPRE_HOST_POINTER;
   }
   if (ptr_att.isManaged){
-    return HYPRE_MANAGED_POINTER; 
+    return HYPRE_MANAGED_POINTER;
   }
   else {
     if (ptr_att.memoryType==cudaMemoryTypeHost) return HYPRE_PINNED_POINTER; /* Host pointer from cudaMallocHost */
@@ -125,6 +147,7 @@ hypre_int PointerAttributes(const void *ptr){
     return HYPRE_UNDEFINED_POINTER1; /* Shouldn't happen */
   }
 }
+
 #if defined(TRACK_MEMORY_ALLOCATIONS)
 void assert_check(void *ptr, char *file, int line){
   if (ptr==NULL) return;
@@ -144,7 +167,7 @@ void assert_check(void *ptr, char *file, int line){
 	PrintPointerAttributes(ptr);
       }
     }
-  
+
 }
 void assert_check_host(void *ptr, char *file, int line){
   if (ptr==NULL) return;
@@ -164,7 +187,9 @@ void assert_check_host(void *ptr, char *file, int line){
 	fprintf(stderr,"ASSERT_HOST FAILURE in line %d of file %s \n NO ALLOCATION INFO\n",line,file);
       }
     }
-  
+
 }
+
 #endif /* TRACK_MEMORY_ALLOCATIONS */
-#endif /* defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USE_OMP45) */
+
+#endif

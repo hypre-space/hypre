@@ -66,7 +66,8 @@ hypre_FacSetup2( void                 *fac_vdata,
    hypre_Index             index, to_index, stride;
    HYPRE_Int               var, to_var, to_part, level_part, level_topart;
    HYPRE_Int               var1, var2;
-   HYPRE_Int               i, j, k, to_rank, row_coord, nUentries;
+   HYPRE_Int               i, j, k, nUentries;
+   HYPRE_BigInt            row_coord, to_rank;
    hypre_BoxManEntry      *boxman_entry;
 
    hypre_SStructMatrix    *A_rap;
@@ -108,13 +109,13 @@ hypre_FacSetup2( void                 *fac_vdata,
  
    HYPRE_Int              *nrows;
    HYPRE_Int             **ncols;
-   HYPRE_Int             **rows;
-   HYPRE_Int             **cols;
+   HYPRE_BigInt          **rows;
+   HYPRE_BigInt          **cols;
    HYPRE_Int              *cnt;
    HYPRE_Real             *vals;
    
-   HYPRE_Int              *level_rows;
-   HYPRE_Int              *level_cols;
+   HYPRE_BigInt           *level_rows;
+   HYPRE_BigInt           *level_cols;
    HYPRE_Int               level_cnt;
 
    HYPRE_IJMatrix          ij_A;
@@ -493,7 +494,6 @@ hypre_FacSetup2( void                 *fac_vdata,
 
                hypre_BoxGetSize(sgrid_box, loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(values,A_smatrix_value)
                hypre_BoxLoop2Begin(ndim, loop_size,
                                    sgrid_box, box_start, stride, k,
@@ -503,7 +503,6 @@ hypre_FacSetup2( void                 *fac_vdata,
                }
                hypre_BoxLoop2End(k, iA);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
 
                HYPRE_SStructMatrixSetBoxValues(A_level[level], part_fine, box_start, box_end,
                                                var1, 1, &i, values);
@@ -568,7 +567,6 @@ hypre_FacSetup2( void                 *fac_vdata,
 
                   hypre_BoxGetSize(sgrid_box, loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(values,A_smatrix_value)
                   hypre_BoxLoop2Begin(ndim, loop_size,
                                       sgrid_box, box_start, stride, k,
@@ -578,7 +576,6 @@ hypre_FacSetup2( void                 *fac_vdata,
                   }
                   hypre_BoxLoop2End(k, iA);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
 
                   HYPRE_SStructMatrixSetBoxValues(A_level[level], part_crse, box_start, box_end,
                                                   var1, 1, &i, values);
@@ -603,8 +600,8 @@ hypre_FacSetup2( void                 *fac_vdata,
     * Allocate memory for arguments of HYPRE_IJMatrixGetValues.
     *-----------------------------------------------------------*/
    ncols =  hypre_TAlloc(HYPRE_Int *,  max_level+1, HYPRE_MEMORY_HOST);
-   rows  =  hypre_TAlloc(HYPRE_Int *,  max_level+1, HYPRE_MEMORY_HOST);
-   cols  =  hypre_TAlloc(HYPRE_Int *,  max_level+1, HYPRE_MEMORY_HOST);
+   rows  =  hypre_TAlloc(HYPRE_BigInt *,  max_level+1, HYPRE_MEMORY_HOST);
+   cols  =  hypre_TAlloc(HYPRE_BigInt *,  max_level+1, HYPRE_MEMORY_HOST);
    cnt   =  hypre_CTAlloc(HYPRE_Int,  max_level+1, HYPRE_MEMORY_HOST);
 
    ncols[0]= NULL;
@@ -617,8 +614,8 @@ hypre_FacSetup2( void                 *fac_vdata,
       {
          ncols[level][i]= 1;
       }
-      rows[level] = hypre_TAlloc(HYPRE_Int,  nrows[level], HYPRE_MEMORY_HOST);
-      cols[level] = hypre_TAlloc(HYPRE_Int,  nrows[level], HYPRE_MEMORY_HOST);
+      rows[level] = hypre_TAlloc(HYPRE_BigInt,  nrows[level], HYPRE_MEMORY_HOST);
+      cols[level] = hypre_TAlloc(HYPRE_BigInt,  nrows[level], HYPRE_MEMORY_HOST);
    }
    
    for (i= 0; i< nUventries; i++)
@@ -653,8 +650,8 @@ hypre_FacSetup2( void                 *fac_vdata,
    {
   
       vals      = hypre_CTAlloc(HYPRE_Real,  nrows[level], HYPRE_MEMORY_HOST);
-      level_rows= hypre_TAlloc(HYPRE_Int,  nrows[level], HYPRE_MEMORY_HOST);
-      level_cols= hypre_TAlloc(HYPRE_Int,  nrows[level], HYPRE_MEMORY_HOST);
+      level_rows= hypre_TAlloc(HYPRE_BigInt,  nrows[level], HYPRE_MEMORY_HOST);
+      level_cols= hypre_TAlloc(HYPRE_BigInt,  nrows[level], HYPRE_MEMORY_HOST);
 
       HYPRE_IJMatrixGetValues(ij_A, nrows[level], ncols[level], rows[level], 
                               cols[level], vals);
@@ -697,8 +694,8 @@ hypre_FacSetup2( void                 *fac_vdata,
        * matrices.
        *-----------------------------------------------------------*/
       HYPRE_IJMatrixSetValues( hypre_SStructMatrixIJMatrix(A_level[level]),
-                               nrows[level], ncols[level], (const HYPRE_Int *) level_rows, 
-                               (const HYPRE_Int *) level_cols, (const HYPRE_Real *) vals );
+                               nrows[level], ncols[level], (const HYPRE_BigInt *) level_rows, 
+                               (const HYPRE_BigInt *) level_cols, (const HYPRE_Real *) vals );
       
       hypre_TFree(ncols[level], HYPRE_MEMORY_HOST);
       hypre_TFree(rows[level], HYPRE_MEMORY_HOST);
@@ -829,7 +826,6 @@ hypre_FacSetup2( void                 *fac_vdata,
 
             hypre_BoxGetSize(sgrid_box, loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(values,A_smatrix_value)
             hypre_BoxLoop2Begin(ndim, loop_size,
                                 sgrid_box, box_start, stride, k,
@@ -839,7 +835,6 @@ hypre_FacSetup2( void                 *fac_vdata,
             }
             hypre_BoxLoop2End(k, iA);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
 
             HYPRE_SStructMatrixSetBoxValues(A_level[0], part_crse, box_start, box_end,
                                             var1, 1, &i, values);

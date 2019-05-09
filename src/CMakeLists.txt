@@ -2,8 +2,8 @@ cmake_minimum_required (VERSION 2.8.8)
 project (hypre)
 
 # The version number.
-set (HYPRE_VERSION 2.14.0)
-set (HYPRE_DATE    2018/03/16)
+set (HYPRE_VERSION 2.16.0)
+set (HYPRE_DATE    2019/03/20)
 set (HYPRE_TIME    00:00:00)
 set (HYPRE_BUGS    hypre-support@llnl.gov)
 set (HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
@@ -31,9 +31,12 @@ option(HYPRE_SEQUENTIAL           "Compile without MPI" OFF)
 option(HYPRE_TIMING               "Use HYPRE timing routines" OFF)
 option(HYPRE_USING_HYPRE_BLAS     "Use internal BLAS library" ON)
 option(HYPRE_USING_HYPRE_LAPACK   "Use internal LAPACK library" ON)
+option(HYPRE_USING_PERSISTENT_COMM "Use persistent communication" OFF)
 option(HYPRE_NO_GLOBAL_PARTITION  "Use assumed partition" ON)
 option(HYPRE_PRINT_ERRORS         "Print HYPRE errors" OFF)
 option(HYPRE_USING_OPENMP         "Use OpenMP" OFF)
+option(HYPRE_HOPSCOTCH            "Use hopscotch hashing with OpenMP" OFF)
+option(HAVE_DSUPERLU              "required if using SuperLU_dist" OFF)
 option(HYPRE_USING_FEI            "Use FEI" ON)
 option(HYPRE_USING_CALIPER        "Use Caliper" OFF)  # TODO: Finish this cmake feature
 
@@ -189,6 +192,7 @@ list (APPEND HYPRE_HEADERS
   utilities/fortran_matrix.h
 )
 list (APPEND HYPRE_SOURCES
+  utilities/HYPRE_version.c
   utilities/amg_linklist.c
   utilities/binsearch.c
   utilities/exchange_data.c
@@ -240,12 +244,14 @@ list (APPEND HYPRE_HEADERS
 list (APPEND HYPRE_SOURCES
   krylov/bicgstab.c
   krylov/cgnr.c
+  krylov/cogmres.c
   krylov/gmres.c
   krylov/flexgmres.c
   krylov/lgmres.c
   krylov/HYPRE_bicgstab.c
   krylov/HYPRE_cgnr.c
   krylov/HYPRE_gmres.c
+  krylov/HYPRE_cogmres.c
   krylov/HYPRE_lgmres.c
   krylov/HYPRE_flexgmres.c
   krylov/HYPRE_pcg.c
@@ -445,6 +451,7 @@ list (APPEND HYPRE_SOURCES
   parcsr_ls/F90_HYPRE_parcsr_cgnr.c
   parcsr_ls/F90_HYPRE_parcsr_Euclid.c
   parcsr_ls/F90_HYPRE_parcsr_gmres.c
+  parcsr_ls/F90_HYPRE_parcsr_cogmres.c
   parcsr_ls/F90_HYPRE_parcsr_flexgmres.c
   parcsr_ls/F90_HYPRE_parcsr_lgmres.c
   parcsr_ls/F90_HYPRE_parcsr_hybrid.c
@@ -461,6 +468,7 @@ list (APPEND HYPRE_SOURCES
   parcsr_ls/HYPRE_parcsr_cgnr.c
   parcsr_ls/HYPRE_parcsr_Euclid.c
   parcsr_ls/HYPRE_parcsr_gmres.c
+  parcsr_ls/HYPRE_parcsr_cogmres.c
   parcsr_ls/HYPRE_parcsr_flexgmres.c
   parcsr_ls/HYPRE_parcsr_lgmres.c
   parcsr_ls/HYPRE_parcsr_hybrid.c

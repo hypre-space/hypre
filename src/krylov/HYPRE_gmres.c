@@ -327,9 +327,9 @@ HYPRE_GMRESGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
  * HYPRE_GMRESGetResidual
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int HYPRE_GMRESGetResidual( HYPRE_Solver solver, void **residual )
+HYPRE_Int HYPRE_GMRESGetResidual( HYPRE_Solver solver, void *residual )
 {
    /* returns a pointer to the residual vector */
-   return hypre_GMRESGetResidual( (void *) solver, residual );
+   return hypre_GMRESGetResidual( (void *) solver, (void **) residual );
 }
 

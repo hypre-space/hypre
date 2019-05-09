@@ -47,8 +47,8 @@ hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix *A,
    HYPRE_Int               *A_diag_j        = hypre_CSRBlockMatrixJ(A_diag);
    HYPRE_Int               *A_offd_j        = hypre_CSRBlockMatrixJ(A_offd);
 
-   HYPRE_Int               *row_starts      = hypre_ParCSRBlockMatrixRowStarts(A);
-   HYPRE_Int               *col_map_offd    = hypre_ParCSRBlockMatrixColMapOffd(A);
+   HYPRE_BigInt            *row_starts      = hypre_ParCSRBlockMatrixRowStarts(A);
+   HYPRE_BigInt            *col_map_offd    = hypre_ParCSRBlockMatrixColMapOffd(A);
    HYPRE_Int                num_nonzeros_diag;
    HYPRE_Int                num_nonzeros_offd = 0;
    HYPRE_Int                num_cols_offd = 0;
@@ -62,8 +62,8 @@ hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix *A,
    HYPRE_Int          *AN_offd_i;
    HYPRE_Int          *AN_offd_j = NULL;
    HYPRE_Real         *AN_offd_data = NULL; 
-   HYPRE_Int          *col_map_offd_AN = NULL;
-   HYPRE_Int          *row_starts_AN;
+   HYPRE_BigInt       *col_map_offd_AN = NULL;
+   HYPRE_BigInt       *row_starts_AN;
 
                  
    hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRBlockMatrixCommPkg(A);
@@ -90,7 +90,7 @@ hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix *A,
    HYPRE_Int            cnt;
    HYPRE_Int            norm_type;
 
-   HYPRE_Int            global_num_nodes;
+   HYPRE_BigInt         global_num_nodes;
    HYPRE_Int            num_nodes;
 
    HYPRE_Int            index, k;
@@ -113,13 +113,13 @@ hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix *A,
 
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
-   row_starts_AN = hypre_CTAlloc(HYPRE_Int,  2, HYPRE_MEMORY_HOST);
+   row_starts_AN = hypre_CTAlloc(HYPRE_BigInt,  2, HYPRE_MEMORY_HOST);
    for (i=0; i < 2; i++)
    {
       row_starts_AN[i] = row_starts[i];
    }
 #else
-   row_starts_AN = hypre_CTAlloc(HYPRE_Int,  num_procs+1, HYPRE_MEMORY_HOST);
+   row_starts_AN = hypre_CTAlloc(HYPRE_BigInt,  num_procs+1, HYPRE_MEMORY_HOST);
    for (i=0; i < num_procs+1; i++)
    {
       row_starts_AN[i] = row_starts[i];
@@ -245,7 +245,7 @@ hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix *A,
    /* the off-diag part */
 
    num_cols_offd = hypre_CSRBlockMatrixNumCols(A_offd);
-   col_map_offd_AN = hypre_CTAlloc(HYPRE_Int,  num_cols_offd, HYPRE_MEMORY_HOST);
+   col_map_offd_AN = hypre_CTAlloc(HYPRE_BigInt,  num_cols_offd, HYPRE_MEMORY_HOST);
    for (i=0; i < num_cols_offd; i++)
    {
       col_map_offd_AN[i] = col_map_offd[i];

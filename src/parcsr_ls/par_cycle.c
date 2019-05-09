@@ -22,31 +22,11 @@
 
 #include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
-#include "par_csr_block_matrix.h"
+#include "../parcsr_block_mv/par_csr_block_matrix.h"
 
 #ifdef HYPRE_USING_CALIPER
 #include <caliper/cali.h>
 #endif
-
-HYPRE_Int V_cycle(HYPRE_Int visits)
-{
-   if (visits == 1) return -1;
-   else return 1;
-}
-
-HYPRE_Int F_cycle(HYPRE_Int visits)
-{
-   if (visits == 1) return -1;
-   else if (visits % 2 == 0) return -1;
-   else return 1;
-}
-
-HYPRE_Int W_cycle(HYPRE_Int visits)
-{
-   if (visits % 3 == 0) return 1;
-   else return -1;
-}
-
 
 /*--------------------------------------------------------------------------
  * hypre_BoomerAMGCycle
@@ -54,8 +34,8 @@ HYPRE_Int W_cycle(HYPRE_Int visits)
 
 HYPRE_Int
 hypre_BoomerAMGCycle( void              *amg_vdata,
-                   hypre_ParVector  **F_array,
-                   hypre_ParVector  **U_array   )
+                      hypre_ParVector  **F_array,
+                      hypre_ParVector  **U_array   )
 {
    hypre_ParAMGData *amg_data = (hypre_ParAMGData*) amg_vdata;
 
@@ -84,8 +64,9 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    HYPRE_Int     **point_map_array;
    HYPRE_Int     **v_at_point_array; */
 
-   HYPRE_Real    cycle_op_count;
+   HYPRE_Real      cycle_op_count;
    HYPRE_Int       cycle_type;
+   HYPRE_Int       fcycle, fcycle_lev;
    HYPRE_Int       num_levels;
    HYPRE_Int       max_levels;
 
@@ -99,7 +80,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    HYPRE_Int      cheby_order;
 
  /* Local variables  */
-   HYPRE_Int      *num_visits;
+   HYPRE_Int      *lev_counter;
    HYPRE_Int       Solve_err_flag;
    HYPRE_Int       k;
    HYPRE_Int       i, j, jj;
@@ -115,28 +96,26 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    HYPRE_Int       relax_order;
    HYPRE_Int       relax_local;
    HYPRE_Int       old_version = 0;
-   HYPRE_Real   *relax_weight;
-   HYPRE_Real   *omega;
-   HYPRE_Real    alfa, beta, gammaold;
-   HYPRE_Real    gamma = 1.0;
+   HYPRE_Real     *relax_weight;
+   HYPRE_Real     *omega;
+   HYPRE_Real      alfa, beta, gammaold;
+   HYPRE_Real      gamma = 1.0;
    HYPRE_Int       local_size;
 /*   HYPRE_Int      *smooth_option; */
    HYPRE_Int       smooth_type;
    HYPRE_Int       smooth_num_levels;
-   HYPRE_Int       num_threads, my_id;
-
-   /* RL */
+   HYPRE_Int       my_id;
+#if !( defined(HYPRE_USING_GPU)|| defined(HYPRE_USING_OPENMP_OFFLOAD) || defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD) )
+   HYPRE_Int       num_threads = hypre_NumThreads();
+#endif
    HYPRE_Int       restri_type;
-   
-   HYPRE_Real    alpha;
-   HYPRE_Real  **l1_norms = NULL;
-   HYPRE_Real   *l1_norms_level;
-   HYPRE_Real   **ds = hypre_ParAMGDataChebyDS(amg_data);
-   HYPRE_Real   **coefs = hypre_ParAMGDataChebyCoefs(amg_data);
-
-   HYPRE_Int seq_cg = 0;
-
-   MPI_Comm comm;
+   HYPRE_Real      alpha;
+   HYPRE_Real    **l1_norms = NULL;
+   HYPRE_Real     *l1_norms_level;
+   HYPRE_Real    **ds = hypre_ParAMGDataChebyDS(amg_data);
+   HYPRE_Real    **coefs = hypre_ParAMGDataChebyCoefs(amg_data);
+   HYPRE_Int       seq_cg = 0;
+   MPI_Comm        comm;
 
 #if 0
    HYPRE_Real   *D_mat;
@@ -147,11 +126,8 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    cali_id_t iter_attr =
      cali_create_attribute("hypre.par_cycle.level", CALI_TYPE_INT, CALI_ATTR_DEFAULT);
 #endif
-   
+
    /* Acquire data and allocate storage */
-
-   num_threads = hypre_NumThreads();
-
    A_array           = hypre_ParAMGDataAArray(amg_data);
    P_array           = hypre_ParAMGDataPArray(amg_data);
    R_array           = hypre_ParAMGDataRArray(amg_data);
@@ -163,6 +139,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    num_levels        = hypre_ParAMGDataNumLevels(amg_data);
    max_levels        = hypre_ParAMGDataMaxLevels(amg_data);
    cycle_type        = hypre_ParAMGDataCycleType(amg_data);
+   fcycle            = hypre_ParAMGDataFCycle(amg_data);
 
    A_block_array     = hypre_ParAMGDataABlockArray(amg_data);
    P_block_array     = hypre_ParAMGDataPBlockArray(amg_data);
@@ -180,8 +157,8 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    l1_norms            = hypre_ParAMGDataL1Norms(amg_data);
    /* smooth_option       = hypre_ParAMGDataSmoothOption(amg_data); */
    /* RL */
-   restri_type = hypre_ParAMGDataRestriction(amg_data); 
-   
+   restri_type = hypre_ParAMGDataRestriction(amg_data);
+
    /*max_eig_est = hypre_ParAMGDataMaxEigEst(amg_data);
    min_eig_est = hypre_ParAMGDataMinEigEst(amg_data);
    cheby_fraction = hypre_ParAMGDataChebyFraction(amg_data);*/
@@ -189,7 +166,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 
    cycle_op_count = hypre_ParAMGDataCycleOpCount(amg_data);
 
-   num_visits = hypre_CTAlloc(HYPRE_Int,  num_levels, HYPRE_MEMORY_HOST);
+   lev_counter = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
 
    if (hypre_ParAMGDataParticipate(amg_data)) seq_cg = 1;
 
@@ -234,17 +211,22 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
     *        is set to the max of (lev_counter[k],cycle_type)
     *---------------------------------------------------------------------*/
 
-   // Set function pointer for cycle type
-   HYPRE_Int (*NextLevel)(HYPRE_Int);
-   if (cycle_type == 1) NextLevel = &V_cycle;
-   else if (cycle_type == 2) NextLevel = &W_cycle;
-   else NextLevel = &F_cycle;
-
    Not_Finished = 1;
-   for (k = 0; k < num_levels; ++k)
+
+   lev_counter[0] = 1;
+   for (k = 1; k < num_levels; ++k)
    {
-      num_visits[k] = 0;
+      if (fcycle)
+      {
+         lev_counter[k] = 1;
+
+      }
+      else
+      {
+         lev_counter[k] = cycle_type;
+      }
    }
+   fcycle_lev = num_levels - 2;
 
    level = 0;
    cycle_param = 1;
@@ -266,11 +248,11 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          if (local_size < actual_local_size)
          {
             hypre_VectorData(hypre_ParVectorLocalVector(Utemp)) =
-               hypre_CTAlloc(HYPRE_Complex,  actual_local_size, HYPRE_MEMORY_HOST);
+            hypre_CTAlloc(HYPRE_Complex,  actual_local_size, HYPRE_MEMORY_HOST);
             hypre_ParVectorActualLocalSize(Utemp) = actual_local_size;
          }
          else
-        hypre_ParVectorInitialize(Utemp);
+            hypre_ParVectorInitialize(Utemp);
       }
    }
 
@@ -282,12 +264,9 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 #ifdef HYPRE_USING_CALIPER
    cali_set_int(iter_attr, level);
 #endif
-   
+
    while (Not_Finished)
    {
-      // Increment number of visits to grid
-      num_visits[level]++;
-
       if (num_levels > 1)
       {
          local_size
@@ -474,9 +453,9 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                   }
                   else /* not CF - so use through AMS */
                   {
-#if defined(HYPRE_USE_GPU)|| defined(HYPRE_USING_OPENMP_OFFLOAD) || defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
+#if defined(HYPRE_USING_GPU)|| defined(HYPRE_USING_OPENMP_OFFLOAD) || defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
                      //printf("par_cycle.c 3 %d\n",level);
-                     hypre_ParCSRRelax(A_array[level], 
+                     hypre_ParCSRRelax(A_array[level],
                                        Aux_F,
                                        1,
                                        1,
@@ -484,7 +463,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                                        relax_weight[level],
                                        omega[level],0,0,0,0,
                                        Aux_U,
-                                       Vtemp, 
+                                       Vtemp,
                                        Ztemp);
                      //printf("par_cycle.c 3 done %d\n",level);
 #else
@@ -533,23 +512,31 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                }
                else if (relax_type ==17)
                {
-                  hypre_BoomerAMGRelax_FCFJacobi(A_array[level],
-                                                 Aux_F,
-                                                 CF_marker_array[level],
-                                                 relax_weight[level],
-                                                 Aux_U,
-                                                 Vtemp);
+                 //printf("Proc %d: level %d, n %d, CF %p\n", my_id, level, local_size, CF_marker_array[level]);
+                 if (level == num_levels - 1)
+                 {
+                    /* if we are on the coarsest level, the cf_marker will be null
+                       and we just do one sweep regular jacobi */
+                    hypre_assert(cycle_param == 3);
+                    hypre_BoomerAMGRelax(A_array[level], Aux_F, CF_marker_array[level], 0, 0, relax_weight[level],
+                                         0.0, NULL, Aux_U, Vtemp, NULL);
+                 }
+                 else
+                 {
+                    hypre_BoomerAMGRelax_FCFJacobi(A_array[level], Aux_F, CF_marker_array[level], relax_weight[level],
+                                                   Aux_U, Vtemp);
+                 }
                }
                else if (old_version)
                {
-                  /* 
-                  printf("cycle %d: relax_type %d, relax_points %d\n", 
-                         cycle_param, relax_type, relax_points);
+                  /*
+                  printf("cycle %d: relax_type %d, relax_points %d\n",
+                          cycle_param, relax_type, relax_points);
                   */
                   Solve_err_flag = hypre_BoomerAMGRelax(A_array[level],
                                                         Aux_F,
                                                         CF_marker_array[level],
-                                                        relax_type, 
+                                                        relax_type,
                                                         relax_points,
                                                         relax_weight[level],
                                                         omega[level],
@@ -619,8 +606,9 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
        * Decrement the control counter and determine which grid to visit next
        *-----------------------------------------------------------------*/
 
+      --lev_counter[level];
 
-      if ( (level != num_levels-1) && ((*NextLevel)(num_visits[level]) < 0) )
+      if ( level != num_levels-1 && lev_counter[level] >= 0 )
       {
          /*---------------------------------------------------------------
           * Visit coarser level next.
@@ -683,14 +671,16 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          }
 
          ++level;
+         lev_counter[level] = hypre_max(lev_counter[level], cycle_type);
          cycle_param = 1;
-         if (level == num_levels-1) cycle_param = 3;
-
+         if (level == num_levels-1)
+         {
+            cycle_param = 3;
+         }
 #ifdef HYPRE_USING_CALIPER
          cali_set_int(iter_attr, level);  /* set the level for caliper here */
 #endif
       }
-
       else if (level != 0)
       {
          /*---------------------------------------------------------------
@@ -710,16 +700,23 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          }
          else
          {
-            //printf("par_cycle.c 6 %d\n",level);
+            /* printf("Proc %d: level %d, n %d, Interpolation\n", my_id, level, local_size); */
             hypre_ParCSRMatrixMatvec(alpha, P_array[fine_grid],
                                      U_array[coarse_grid],
                                      beta, U_array[fine_grid]);
-            //printf("par_cycle.c 6 done %d\n",level);
+            /* printf("Proc %d: level %d, n %d, Interpolation done\n", my_id, level, local_size); */
          }
 
          --level;
+
+         if (fcycle && fcycle_lev == level)
+         {
+            lev_counter[level] = hypre_max(lev_counter[level], 1);
+            fcycle_lev --;
+         }
+
          cycle_param = 2;
-         
+
 #ifdef HYPRE_USING_CALIPER
          cali_set_int(iter_attr, level);  /* set the level for caliper here */
 #endif
@@ -728,15 +725,15 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
       {
          Not_Finished = 0;
       }
-   }
+   } /* main loop: while (Not_Finished) */
 
 #ifdef HYPRE_USING_CALIPER
    cali_end(iter_attr);  /* unset "iter" */
 #endif
-   
+
    hypre_ParAMGDataCycleOpCount(amg_data) = cycle_op_count;
 
-   hypre_TFree(num_visits, HYPRE_MEMORY_HOST);
+   hypre_TFree(lev_counter, HYPRE_MEMORY_HOST);
    hypre_TFree(num_coeffs, HYPRE_MEMORY_HOST);
    if (smooth_num_levels > 0)
    {
@@ -747,3 +744,4 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    //printf("HYPRE_BoomerAMGCycle END\n");
    return(Solve_err_flag);
 }
+

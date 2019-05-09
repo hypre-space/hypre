@@ -45,7 +45,7 @@ HYPRE_Int HYPRE_IJMatrixSetLocalSize(HYPRE_IJMatrix ij_matrix,
                                HYPRE_Int row, HYPRE_Int col );
 
 HYPRE_Int HYPRE_IJMatrixInsertRow( HYPRE_IJMatrix ij_matrix, 
-                             HYPRE_Int size, HYPRE_Int i, HYPRE_Int *col_ind,
+                             HYPRE_Int size, HYPRE_BigInt i, HYPRE_BigInt *col_ind,
                              HYPRE_Real *values );
 
 /*--------------------------------------------------------------------------
@@ -67,11 +67,12 @@ HYPRE_BuildIJMatrixFromDistributedMatrix(
 {
    HYPRE_Int ierr;
    MPI_Comm comm;
-   HYPRE_Int M, N;
-   HYPRE_Int first_local_row, last_local_row;
-   HYPRE_Int first_local_col, last_local_col;
-   HYPRE_Int i;
-   HYPRE_Int size, *col_ind;
+   HYPRE_BigInt M, N;
+   HYPRE_BigInt first_local_row, last_local_row;
+   HYPRE_BigInt first_local_col, last_local_col;
+   HYPRE_BigInt i;
+   HYPRE_Int size;
+   HYPRE_BigInt *col_ind;
    HYPRE_Real *values;
 
 

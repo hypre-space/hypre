@@ -10,15 +10,11 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 
-
-	
 #include "_hypre_utilities.h"
-
 
 #include "HYPRE_sstruct_ls.h"
 #include "HYPRE_struct_ls.h"
@@ -29,8 +25,6 @@
 
 #include <time.h>
 
-
-    
 #include "fortran_matrix.h"
 #include "HYPRE_lobpcg.h"
 #include "interpreter.h"
@@ -2176,6 +2170,7 @@ PrintUsage( char *progname,
    {
       hypre_printf("\n");
       hypre_printf("Usage: %s [-in <filename>] [<options>]\n", progname);
+      hypre_printf("       %s -help | -version | -vernum \n", progname);
       hypre_printf("\n");
       hypre_printf("  -in <filename> : input file (default is `%s')\n",
                    infile_default);
@@ -2390,6 +2385,7 @@ main( hypre_int argc,
    HYPRE_Int             arg_index, part, var, box, s, entry, i, j, k, size;
    HYPRE_Int             row, col;
    HYPRE_Int             gradient_matrix;
+   HYPRE_Int             old_default;
                         
    /* begin lobpcg */
 
@@ -2405,7 +2401,6 @@ main( hypre_int argc,
    HYPRE_Int printLevel = 0;
    HYPRE_Int pcgIterations = 0;
    HYPRE_Int pcgMode = 0;
-   HYPRE_Int old_default = 0;
    HYPRE_Real tol = 1e-6;
    HYPRE_Real pcgTol = 1e-2;
    HYPRE_Real nonOrthF;
@@ -2438,8 +2433,8 @@ main( hypre_int argc,
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
 
-   /* GPU Init stuff inside */
-   hypre_init();
+   /* Initialize Hypre */
+   HYPRE_Init(argc, argv);
 
    /*-----------------------------------------------------------
     * Read input file
@@ -2458,6 +2453,22 @@ main( hypre_int argc,
       else if ( strcmp(argv[arg_index], "-help") == 0 )
       {
          PrintUsage(argv[0], myid);
+         exit(1);
+      }
+      else if ( strcmp(argv[arg_index], "-version") == 0 )
+      {
+         char *version_string;
+         HYPRE_Version(&version_string);
+         hypre_printf("%s\n", version_string);
+         hypre_TFree(version_string, HYPRE_MEMORY_HOST);
+         exit(1);
+      }
+      else if ( strcmp(argv[arg_index], "-vernum") == 0 )
+      {
+         HYPRE_Int major, minor, patch, single;
+         HYPRE_VersionNumber(&major, &minor, &patch, &single);
+         hypre_printf("HYPRE Version %d.%d.%d\n", major, minor, patch);
+         hypre_printf("HYPRE Single = %d\n", single);
          exit(1);
       }
    }
@@ -2511,6 +2522,8 @@ main( hypre_int argc,
    skip = 0;
    n_pre  = 1;
    n_post = 1;
+
+   old_default = 0;
 
    /*-----------------------------------------------------------
     * Parse command line
@@ -2669,6 +2682,11 @@ main( hypre_int argc,
             cycred_stride[i] = atoi(argv[arg_index++]);
          }
       }
+      else if ( strcmp(argv[arg_index], "-old_default") == 0 )
+      {		 /* uses old BoomerAMG defaults */
+         arg_index++;
+         old_default = 1;
+      }
       /* begin lobpcg */
       else if ( strcmp(argv[arg_index], "-lobpcg") == 0 ) 
       {					 /* use lobpcg */
@@ -2714,11 +2732,6 @@ main( hypre_int argc,
       {		 /* lobpcg: initial guess for inner pcg */
          arg_index++;	      /* 0: zero, otherwise rhs */
          pcgMode = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-old_default") == 0 )
-      {		 /* uses old BoomerAMG defaults */
-         arg_index++;
-         old_default = 1;
       }
       else if ( strcmp(argv[arg_index], "-vout") == 0 )
       {			      /* lobpcg: print level */
@@ -5747,8 +5760,8 @@ main( hypre_int argc,
    hypre_TFree(block, HYPRE_MEMORY_HOST);
    /*hypre_FinalizeMemoryDebug(); */
 
-   /* GPU finalize stuff inside */
-   hypre_finalize();
+   /* Finalize Hypre */
+   HYPRE_Finalize();
 
    /* Finalize MPI */
    hypre_MPI_Finalize();

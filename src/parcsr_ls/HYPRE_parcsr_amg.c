@@ -520,6 +520,24 @@ HYPRE_BoomerAMGGetCycleType( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetFCycle, HYPRE_BoomerAMGGetFCycle
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetFCycle( HYPRE_Solver solver,
+                          HYPRE_Int    fcycle  )
+{
+   return( hypre_BoomerAMGSetFCycle( (void *) solver, fcycle ) );
+}
+
+HYPRE_Int
+HYPRE_BoomerAMGGetFCycle( HYPRE_Solver solver,
+                          HYPRE_Int   *fcycle  )
+{
+   return( hypre_BoomerAMGGetFCycle( (void *) solver, fcycle ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetConvergeType, HYPRE_BoomerAMGGetConvergeType
  *--------------------------------------------------------------------------*/
 

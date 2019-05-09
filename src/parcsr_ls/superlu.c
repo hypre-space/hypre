@@ -12,7 +12,7 @@
 
 typedef struct 
 {
-   HYPRE_Int global_num_rows;
+   HYPRE_BigInt global_num_rows;
    SuperMatrix A_dslu;
    HYPRE_Real *berr;
    LUstruct_t dslu_data_LU;
@@ -29,7 +29,7 @@ hypre_DSLUData;
 HYPRE_Int hypre_SLUDistSetup( HYPRE_Solver *solver, hypre_ParCSRMatrix *A, HYPRE_Int print_level)
 {
       /* Par Data Structure variables */
-   HYPRE_Int global_num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
+   HYPRE_BigInt global_num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
    MPI_Comm           comm = hypre_ParCSRMatrixComm(A);
    hypre_CSRMatrix *A_local;
    HYPRE_Int num_rows;
@@ -73,7 +73,7 @@ HYPRE_Int hypre_SLUDistSetup( HYPRE_Solver *solver, hypre_ParCSRMatrix *A, HYPRE
       prows -= 1;
       pcols = num_procs/prows;
    }
-   hypre_printf(" prows %d pcols %d\n", prows, pcols);
+   //hypre_printf(" prows %d pcols %d\n", prows, pcols);
 
    superlu_gridinit(comm, prows, pcols, &(dslu_data->dslu_data_grid));
 

@@ -170,7 +170,7 @@ hypre_SemiRestrict( void               *restrict_vdata,
    cgrid_boxes = hypre_StructGridBoxes(cgrid);
    cgrid_ids = hypre_StructGridIDs(cgrid);
 
-#if defined(HYPRE_USE_CUDA)
+#if defined(HYPRE_USING_CUDA)
    HYPRE_Int data_location_f = hypre_StructGridDataLocation(fgrid);
    HYPRE_Int data_location_c = hypre_StructGridDataLocation(cgrid);
 
@@ -189,6 +189,7 @@ hypre_SemiRestrict( void               *restrict_vdata,
 #else
    rc_tmp = rc;
 #endif
+
    for (compute_i = 0; compute_i < 2; compute_i++)
    {
       switch(compute_i)
@@ -267,7 +268,6 @@ hypre_SemiRestrict( void               *restrict_vdata,
 
 	       Rp0val = Rp0[Ri+Rp0_offset];
 	       Rp1val = Rp1[Ri];
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(rcp,rp)
                hypre_BoxLoop2Begin(hypre_StructMatrixNDim(R), loop_size,
                                    r_dbox,  start,  stride,  ri,
@@ -278,11 +278,9 @@ hypre_SemiRestrict( void               *restrict_vdata,
                }
                hypre_BoxLoop2End(ri, rci);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
             }
             else
             {
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(rcp,rp,Rp0,Rp1)
                hypre_BoxLoop3Begin(hypre_StructMatrixNDim(R), loop_size,
                                    R_dbox,  startc, stridec, Ri,
@@ -294,12 +292,11 @@ hypre_SemiRestrict( void               *restrict_vdata,
                }
                hypre_BoxLoop3End(Ri, ri, rci);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
             }
          }
       }
    }
-#if defined(HYPRE_USE_CUDA)
+#if defined(HYPRE_USING_CUDA)
    if (data_location_f != data_location_c)
    {
       hypre_TMemcpy(hypre_StructVectorData(rc),hypre_StructVectorData(rc_tmp),HYPRE_Complex,hypre_StructVectorDataSize(rc_tmp),HYPRE_MEMORY_HOST,HYPRE_MEMORY_DEVICE);

@@ -25,11 +25,11 @@ main( HYPRE_Int   argc,
    hypre_ParVector   *tmp_vector;
 
    HYPRE_Int          num_procs, my_id;
-   HYPRE_Int	 	global_size = 20;
+   HYPRE_BigInt 	global_size = 20;
    HYPRE_Int		local_size;
-   HYPRE_Int		first_index;
+   HYPRE_BigInt		first_index;
    HYPRE_Int 		i;
-   HYPRE_Int 		*partitioning;
+   HYPRE_BigInt 	*partitioning;
    HYPRE_Complex	prod;
    HYPRE_Complex 	*data, *data2;
    hypre_Vector *vector; 

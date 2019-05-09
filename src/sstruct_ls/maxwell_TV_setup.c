@@ -50,7 +50,8 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
    hypre_ParCSRMatrix    *T_transpose;
    hypre_ParCSRMatrix    *transpose;
    hypre_ParCSRMatrix    *parcsr_mat;
-   HYPRE_Int              size, *col_inds;
+   HYPRE_Int              size;
+   HYPRE_BigInt          *col_inds;
    HYPRE_Real            *values;
 
    hypre_ParVector       *parvector_x;
@@ -132,21 +133,24 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
    HYPRE_Int              ndim = hypre_SStructMatrixNDim(Aee_in); 
    HYPRE_Int              nparts, part, vars, nboxes, lev_nboxes;
 
-   HYPRE_Int              nrows, rank, start_rank;
-   HYPRE_Int             *flag, *flag2, *inode, *ncols, *jnode;
+   HYPRE_Int              nrows;
+   HYPRE_BigInt           rank, start_rank, *jnode, *inode;
+   HYPRE_Int             *flag, *ncols;
+   HYPRE_BigInt          *flag2;
    HYPRE_Real            *vals;
 
    HYPRE_Int              i, j, k, l, m;
+   HYPRE_BigInt           big_i;
 
    hypre_BoxManager      *node_boxman;
    hypre_BoxManEntry     *entry;
    HYPRE_Int              kstart=0, kend=0;
-   HYPRE_Int              ilower, iupper;
-   HYPRE_Int              jlower, jupper;
+   HYPRE_BigInt           ilower, iupper;
+   HYPRE_BigInt           jlower, jupper;
    HYPRE_Int              myproc;
 
-   HYPRE_Int              first_local_row, last_local_row;
-   HYPRE_Int              first_local_col, last_local_col;
+   HYPRE_BigInt           first_local_row, last_local_row;
+   HYPRE_BigInt           first_local_col, last_local_col;
 
    HYPRE_Int              edge_maxlevels, edge_numlevels, en_numlevels;
 
@@ -312,14 +316,14 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
                                    &first_local_row, &last_local_row,
                                    &first_local_col, &last_local_col);
 
-   for (i= first_local_row; i<= last_local_row; i++)
+   for (big_i= first_local_row; big_i<= last_local_row; big_i++)
    {
       HYPRE_ParCSRMatrixGetRow((HYPRE_ParCSRMatrix) parcsr_mat, 
-                               i, &size, &col_inds, &values);
-      HYPRE_IJMatrixSetValues(Aen, 1, &size, &i, (const HYPRE_Int *) col_inds,
+                               big_i, &size, &col_inds, &values);
+      HYPRE_IJMatrixSetValues(Aen, 1, &size, &big_i, (const HYPRE_BigInt *) col_inds,
                               (const HYPRE_Real *) values);
       HYPRE_ParCSRMatrixRestoreRow((HYPRE_ParCSRMatrix) parcsr_mat, 
-                                   i, &size, &col_inds, &values);
+                                   big_i, &size, &col_inds, &values);
    }
    hypre_ParCSRMatrixDestroy(parcsr_mat);
    HYPRE_IJMatrixAssemble(Aen);
@@ -332,15 +336,15 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
                                    &first_local_row, &last_local_row,
                                    &first_local_col, &last_local_col);
 
-   for (i= first_local_row; i<= last_local_row; i++)
+   for (big_i= first_local_row; big_i<= last_local_row; big_i++)
    {
       HYPRE_ParCSRMatrixGetRow((HYPRE_ParCSRMatrix) parcsr_mat, 
-                               i, &size, &col_inds, &values);
+                               big_i, &size, &col_inds, &values);
       HYPRE_IJMatrixSetValues(hypre_SStructMatrixIJMatrix(Ann),
-                              1, &size, &i, (const HYPRE_Int *) col_inds,
+                              1, &size, &big_i, (const HYPRE_BigInt *) col_inds,
                               (const HYPRE_Real *) values);
       HYPRE_ParCSRMatrixRestoreRow((HYPRE_ParCSRMatrix) parcsr_mat, 
-                                   i, &size, &col_inds, &values);
+                                   big_i, &size, &col_inds, &values);
    }
    hypre_ParCSRMatrixDestroy(parcsr_mat);
 
@@ -354,7 +358,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
    }
 
    flag = hypre_CTAlloc(HYPRE_Int,  nrows, HYPRE_MEMORY_HOST);
-   flag2= hypre_CTAlloc(HYPRE_Int,  nrows, HYPRE_MEMORY_HOST);
+   flag2= hypre_CTAlloc(HYPRE_BigInt,  nrows, HYPRE_MEMORY_HOST);
    for (i= 0; i< nrows; i++)
    {
       flag[i]= 1;
@@ -388,11 +392,6 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
                hypre_CopyIndex(hypre_BoxIMin(box_piece), start);
 
                hypre_SerialBoxLoop0Begin(ndim, loop_size);
-#if 0 /* Are private static arrays a problem? */
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,lindex,index,rank) HYPRE_SMP_SCHEDULE
-#endif
-#endif
                {
                   hypre_BoxLoopGetIndex(lindex);
                   hypre_SetIndex3(index, lindex[0], lindex[1], lindex[2]);
@@ -400,8 +399,8 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
 
                   hypre_SStructBoxManEntryGetGlobalRank(entry, index,
                                                         &rank, matrix_type);
-                  flag[rank-start_rank] = 0;
-                  flag2[rank-start_rank]= rank;
+                  flag[(HYPRE_Int)(rank-start_rank)] = 0;
+                  flag2[(HYPRE_Int)(rank-start_rank)]= rank;
                }
                hypre_SerialBoxLoop0End();
             }  /* if (hypre_BoxVolume(box_piece) < i) */
@@ -420,9 +419,9 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
       }
    }
 
-   inode= hypre_CTAlloc(HYPRE_Int,  j, HYPRE_MEMORY_HOST);
+   inode= hypre_CTAlloc(HYPRE_BigInt,  j, HYPRE_MEMORY_HOST);
    ncols= hypre_CTAlloc(HYPRE_Int,  j, HYPRE_MEMORY_HOST);
-   jnode= hypre_CTAlloc(HYPRE_Int,  j, HYPRE_MEMORY_HOST);
+   jnode= hypre_CTAlloc(HYPRE_BigInt,  j, HYPRE_MEMORY_HOST);
    vals = hypre_TAlloc(HYPRE_Real,  j, HYPRE_MEMORY_HOST);
 
    j= 0;
@@ -441,8 +440,8 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
    hypre_TFree(flag2, HYPRE_MEMORY_HOST);
 
    HYPRE_IJMatrixSetValues(hypre_SStructMatrixIJMatrix(Ann),
-                           j, ncols, (const HYPRE_Int*) inode,
-                           (const HYPRE_Int*) jnode, (const HYPRE_Real*) vals);
+                           j, ncols, (const HYPRE_BigInt*) inode,
+                           (const HYPRE_BigInt*) jnode, (const HYPRE_Real*) vals);
    hypre_TFree(ncols, HYPRE_MEMORY_HOST);
    hypre_TFree(inode, HYPRE_MEMORY_HOST);
    hypre_TFree(jnode, HYPRE_MEMORY_HOST);

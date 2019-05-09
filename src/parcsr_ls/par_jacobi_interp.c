@@ -83,7 +83,7 @@ void hypre_BoomerAMGJacobiInterp_1( hypre_ParCSRMatrix * A,
    hypre_CSRMatrix *P_diag = hypre_ParCSRMatrixDiag(*P);
    /*hypre_CSRMatrix *P_offd = hypre_ParCSRMatrixOffd(*P);
    HYPRE_Real      *P_diag_data = hypre_CSRMatrixData(P_diag);*/
-   HYPRE_Int             *P_diag_i = hypre_CSRMatrixI(P_diag);
+   HYPRE_Int       *P_diag_i = hypre_CSRMatrixI(P_diag);
    /*HYPRE_Int             *P_diag_j = hypre_CSRMatrixJ(P_diag);
    HYPRE_Real      *P_offd_data = hypre_CSRMatrixData(P_offd);
    HYPRE_Int             *P_offd_i = hypre_CSRMatrixI(P_offd);
@@ -405,13 +405,13 @@ void hypre_BoomerAMGTruncateInterp( hypre_ParCSRMatrix *P,
    hypre_CSRMatrix *P_diag = hypre_ParCSRMatrixDiag(P);
    hypre_CSRMatrix *P_offd = hypre_ParCSRMatrixOffd(P);
    HYPRE_Real      *P_diag_data = hypre_CSRMatrixData(P_diag);
-   HYPRE_Int             *P_diag_i = hypre_CSRMatrixI(P_diag);
-   HYPRE_Int             *P_diag_j = hypre_CSRMatrixJ(P_diag);
+   HYPRE_Int       *P_diag_i = hypre_CSRMatrixI(P_diag);
+   HYPRE_Int       *P_diag_j = hypre_CSRMatrixJ(P_diag);
    HYPRE_Real      *P_offd_data = hypre_CSRMatrixData(P_offd);
-   HYPRE_Int             *P_offd_i = hypre_CSRMatrixI(P_offd);
-   HYPRE_Int             *P_offd_j = hypre_CSRMatrixJ(P_offd);
-   HYPRE_Int             *new_P_diag_i;
-   HYPRE_Int             *new_P_offd_i;
+   HYPRE_Int       *P_offd_i = hypre_CSRMatrixI(P_offd);
+   HYPRE_Int       *P_offd_j = hypre_CSRMatrixJ(P_offd);
+   HYPRE_Int       *new_P_diag_i;
+   HYPRE_Int       *new_P_offd_i;
    HYPRE_Int	num_rows_diag_P = hypre_CSRMatrixNumRows(P_diag);
    HYPRE_Int	num_rows_offd_P = hypre_CSRMatrixNumRows(P_offd);
    HYPRE_Int num_nonzeros_diag = hypre_CSRMatrixNumNonzeros(P_diag);
