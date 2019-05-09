@@ -224,6 +224,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    CF_marker_array = hypre_ParAMGDataCFMarkerArray(amg_data);
    num_levels = hypre_ParAMGDataNumLevels(amg_data);
    amgdd_start_level = hypre_ParAMGDataAMGDDStartLevel(amg_data);
+   if (amgdd_start_level >= num_levels) amgdd_start_level = num_levels-1;
    pad = hypre_ParAMGDataAMGDDPadding(amg_data);
    variable_padding = hypre_ParAMGDataAMGDDVariablePadding(amg_data);
    num_ghost_layers = hypre_ParAMGDataAMGDDNumGhostLayers(amg_data);
@@ -1385,6 +1386,8 @@ FindTransitionLevel(hypre_ParAMGData *amg_data)
       hypre_MPI_Allreduce(&local_transition, &global_transition, 1, HYPRE_MPI_INT, MPI_MAX, hypre_MPI_COMM_WORLD);
    }
    
+   if (global_transition > hypre_ParAMGDataAMGDDStartLevel(amg_data)) global_transition = hypre_ParAMGDataAMGDDStartLevel(amg_data);
+
    return global_transition;
 }
 
