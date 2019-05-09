@@ -921,9 +921,18 @@ hypre_BoomerAMGPartialCycle( void              *amg_vdata,
       lev_counter[k] = cycle_type;
    }
 
-   if (down_up_cycle == 0) level = 0;
-   else level = coarsest_level;
-   cycle_param = 1;
+   if (down_up_cycle == 0)
+   {
+    level = 0;
+    cycle_param = 1;
+   }
+   else
+   {
+    level = coarsest_level;
+    if (level == num_levels-1) cycle_param = 3;
+    else if (down_up_cycle == 2) cycle_param = 1;
+    else cycle_param = 2;
+   }
 
    smoother = hypre_ParAMGDataSmoother(amg_data);
 
@@ -1015,9 +1024,9 @@ hypre_BoomerAMGPartialCycle( void              *amg_vdata,
       }
 
       if (l1_norms != NULL)
-         l1_norms_level = l1_norms[level];
+        l1_norms_level = l1_norms[level];
       else
-         l1_norms_level = NULL;
+        l1_norms_level = NULL;
 
       if (cycle_param == 3 && seq_cg)
       {
