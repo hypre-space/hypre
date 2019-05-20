@@ -548,7 +548,7 @@ hypre_ParCSRCommPkgCreateApart
 (
    /* input args: */
    MPI_Comm   comm,
-   HYPRE_Int *col_map_off_d,
+   HYPRE_Int *col_map_offd,
    HYPRE_Int  first_col_diag,
    HYPRE_Int  num_cols_off_d,
    HYPRE_Int  global_num_cols,
@@ -565,7 +565,7 @@ hypre_ParCSRCommPkgCreateApart
     * get commpkg info information
     *----------------------------------------------------------*/
 
-   hypre_ParCSRCommPkgCreateApart_core( comm, col_map_off_d, first_col_diag,
+   hypre_ParCSRCommPkgCreateApart_core( comm, col_map_offd, first_col_diag,
                                         num_cols_off_d, global_num_cols,
                                         &num_recvs, &recv_procs, &recv_vec_starts,
                                         &num_sends, &send_procs, &send_map_starts,
@@ -582,21 +582,7 @@ hypre_ParCSRCommPkgCreateApart
    hypre_ParCSRCommPkgSendMapElmts (comm_pkg) = send_map_elmts;
 
 #if HYPRE_USING_NODE_AWARE_MPI
-   HYPRE_Int i;
-   HYPRE_Int *global_send_inds;
-   HYPRE_Int glob_size = send_map_starts[num_sends];
-   global_send_inds = hypre_CTAlloc(HYPRE_Int, glob_size, HYPRE_MEMORY_HOST);
-   for (i=0; i < glob_size; i++)
-   {
-      global_send_inds[i] = send_map_elmts[i] + first_col_diag;
-   }
-   hypre_ParCSRCommPkgGlobalSendInds (comm_pkg) = global_send_inds;
-
-   // Initialize node-aware communication package
-   MPIX_NAPinit(num_sends, send_procs, send_map_starts,
-                send_map_elmts, num_recvs, recv_procs,
-                recv_vec_starts, global_send_inds,
-                col_map_off_d, comm, &(comm_pkg->nap_comm));
+   hypre_ParCSRNAPinit(comm_pkg, first_col_diag, col_map_offd);
 #endif
 
    return hypre_error_flag;

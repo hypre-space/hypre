@@ -93,7 +93,7 @@ typedef struct
 
 #if HYPRE_USING_NODE_AWARE_MPI
     HYPRE_Int *global_send_inds;
-    NAPComm *nap_comm;
+    NAPComm   *nap_comm;
 #endif
 } hypre_ParCSRCommPkg;
 
@@ -130,6 +130,7 @@ typedef struct
 #define hypre_ParCSRCommPkgSendMapElmt(comm_pkg,i) (comm_pkg -> send_map_elmts[i])
 #if HYPRE_USING_NODE_AWARE_MPI
 #define hypre_ParCSRCommPkgGlobalSendInds(comm_pkg) (comm_pkg -> global_send_inds)
+#define hypre_ParCSRCommPkgNAPComm(comm_pkg)        (comm_pkg -> nap_comm)
 #endif
 
 #define hypre_ParCSRCommPkgNumRecvs(comm_pkg)      (comm_pkg -> num_recvs)
@@ -803,6 +804,7 @@ HYPRE_Int hypre_MatvecCommPkgDestroy ( hypre_ParCSRCommPkg *comm_pkg );
 HYPRE_Int hypre_BuildCSRMatrixMPIDataType ( HYPRE_Int num_nonzeros , HYPRE_Int num_rows , HYPRE_Complex *a_data , HYPRE_Int *a_i , HYPRE_Int *a_j , hypre_MPI_Datatype *csr_matrix_datatype );
 HYPRE_Int hypre_BuildCSRJDataType ( HYPRE_Int num_nonzeros , HYPRE_Complex *a_data , HYPRE_Int *a_j , hypre_MPI_Datatype *csr_jdata_datatype );
 HYPRE_Int hypre_ParCSRFindExtendCommPkg ( hypre_ParCSRMatrix *A , HYPRE_Int newoff , HYPRE_Int *found , hypre_ParCSRCommPkg **extend_comm_pkg );
+HYPRE_Int hypre_ParCSRNAPinit( hypre_ParCSRCommPkg *comm_pkg, HYPRE_Int first_col_diag, HYPRE_Int *col_map_offd );
 
 /* par_csr_matop.c */
 void hypre_ParMatmul_RowSizes ( HYPRE_Int **C_diag_i , HYPRE_Int **C_offd_i , HYPRE_Int *A_diag_i , HYPRE_Int *A_diag_j , HYPRE_Int *A_offd_i , HYPRE_Int *A_offd_j , HYPRE_Int *B_diag_i , HYPRE_Int *B_diag_j , HYPRE_Int *B_offd_i , HYPRE_Int *B_offd_j , HYPRE_Int *B_ext_diag_i , HYPRE_Int *B_ext_diag_j , HYPRE_Int *B_ext_offd_i , HYPRE_Int *B_ext_offd_j , HYPRE_Int *map_B_to_C , HYPRE_Int *C_diag_size , HYPRE_Int *C_offd_size , HYPRE_Int num_rows_diag_A , HYPRE_Int num_cols_offd_A , HYPRE_Int allsquare , HYPRE_Int num_cols_diag_B , HYPRE_Int num_cols_offd_B , HYPRE_Int num_cols_offd_C );
