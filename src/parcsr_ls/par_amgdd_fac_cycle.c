@@ -17,6 +17,12 @@
 
 #define DEBUG_FAC 0
 
+// !!! Debug: 
+// int MISSING_P_CONNECTION;
+// int FULL_COARSE_GRID;
+
+
+
 HYPRE_Int
 FAC_Cycle(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type, HYPRE_Int first_iteration);
 
@@ -50,6 +56,12 @@ FAC_GaussSeidel( hypre_ParCompGrid *compGrid );
 HYPRE_Int
 hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata, HYPRE_Int first_iteration )
 {
+
+   // !!! Debug
+   // MISSING_P_CONNECTION = 0;
+   // FULL_COARSE_GRID = 0;
+
+
    HYPRE_Int   myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
@@ -62,6 +74,16 @@ hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata, HYPRE_Int first_iteration )
    {
       if (myid == 0) hypre_printf("Error: unknown cycle type\n");
    }
+
+
+
+   // !!! Debug
+   // if (hypre_ParCSRMatrixGlobalNumRows( hypre_ParAMGDataAArray(amg_data)[ hypre_ParAMGDataNumLevels(amg_data)-1 ] ) == hypre_ParCompGridNumNodes( hypre_ParAMGDataCompGrid(amg_data)[ hypre_ParAMGDataNumLevels(amg_data)-1 ] ))
+   //    FULL_COARSE_GRID = 1;
+
+   // printf("missing P = %d, full coarse = %d\n", MISSING_P_CONNECTION, FULL_COARSE_GRID);
+   // if (FULL_COARSE_GRID && MISSING_P_CONNECTION) printf("\n\nOH NO! FAC cycle not guaranteed to produce correct result.\n\n\n");
+
 
    return 0;
 }
@@ -291,6 +313,8 @@ FAC_Project( hypre_ParCompGrid *compGrid_f, hypre_ParCompGrid *compGrid_c )
          {
             hypre_ParCompGridU(compGrid_f)[i] += hypre_ParCompGridPData(compGrid_f)[j] * hypre_ParCompGridU(compGrid_c)[ hypre_ParCompGridPColInd(compGrid_f)[j] ];
          }
+         // !!! Debug
+         // else MISSING_P_CONNECTION = 1;
       }
 	}
 	return 0;
