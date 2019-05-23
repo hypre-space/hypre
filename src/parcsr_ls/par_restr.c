@@ -317,7 +317,7 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
 
    // Allocate memory for GMRES if it will be used
    HYPRE_Int kdim_max = hypre_min(gmresAi_maxit, local_max_size);
-   if (gmres_switch < local_max_size) 
+   if (gmres_switch < local_max_size)
    {
       fgmresT(local_max_size, NULL, NULL, 0.0, kdim_max, NULL, NULL, NULL, -1);
    }
@@ -556,7 +556,7 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
       Aisol_method = local_size <= gmres_switch ? 'L' : 'G';
       if (local_size > 0)
       {
-         if (is_triangular) 
+         if (is_triangular)
          {
             ordered_GS(DAi, Dbi, Dxi, local_size);
 #if AIR_DEBUG
@@ -617,7 +617,7 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
 
             if (gmresAi_res > gmresAi_tol)
             {
-               printf("gmres/jacobi not converge to %e: final_res %e\n", gmresAi_tol, gmresAi_res);
+               hypre_printf("gmres/jacobi not converge to %e: final_res %e\n", gmresAi_tol, gmresAi_res);
             }
 
 #if AIR_DEBUG
@@ -1000,7 +1000,7 @@ static void ordered_GS(const HYPRE_Complex L[],
       HYPRE_Complex temp = rhs[row];
       for (col=0; col<n; col++) {
          if (col != row) {
-            temp -= L[row*n+col] * x[col];   // row-major             
+            temp -= L[row*n+col] * x[col];   // row-major
          }
       }
       HYPRE_Complex diag = L[row*n + row];

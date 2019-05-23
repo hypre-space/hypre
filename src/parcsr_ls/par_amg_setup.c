@@ -712,7 +712,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    hypre_ParVectorSetPartitioningOwner(Vtemp,0);
    hypre_ParAMGDataVtemp(amg_data) = Vtemp;
 
-   if ( (smooth_num_levels > 0 && smooth_type > 9) || 
+   if ( (smooth_num_levels > 0 && smooth_type > 9) ||
         relax_weight[0] < 0 || omega[0] < 0 ||
         hypre_ParAMGDataSchwarzRlxWeight(amg_data) < 0 )
    {
@@ -2262,7 +2262,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                hypre_ParCSRMatrixOwnsRowStarts(A_H) = 1;
                hypre_ParCSRMatrixOwnsColStarts(A_H) = 0;
                hypre_ParCSRMatrixOwnsColStarts(P) = 0;
-               if (num_procs > 1) hypre_MatvecCommPkgCreate(A_H);
+               if (num_procs > 1)
+               {
+                  hypre_MatvecCommPkgCreate(A_H);
+               }
                /*hypre_ParCSRMatrixDestroy(P); */
                hypre_TFree(d_diag, HYPRE_MEMORY_SHARED);
                /* Set NonGalerkin drop tol on each level */
@@ -2283,7 +2286,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                      hypre_MatvecCommPkgCreate(A_H);
                }
                hypre_ParCSRMatrixDestroy(Q);
-
             }
             else
             {

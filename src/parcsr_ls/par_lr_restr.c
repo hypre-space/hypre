@@ -1424,7 +1424,7 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
 
             if (gmresAi_res > gmresAi_tol)
             {
-               printf("gmres/jacobi not converge to %e: final_res %e\n", gmresAi_tol, gmresAi_res);
+               hypre_printf("gmres/jacobi not converge to %e: final_res %e\n", gmresAi_tol, gmresAi_res);
             }
 
 #if AIR_DEBUG

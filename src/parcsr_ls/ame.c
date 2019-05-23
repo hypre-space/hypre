@@ -295,7 +295,7 @@ HYPRE_Int hypre_AMESetup(void *esolver)
          }
       }
 
-      hypre_ParCSRMatrixTranspose(ams_data -> G, &Gt, 1);
+      hypre_ParCSRMatrixTranspose(ams_data->G, &Gt, 1);
 
       /* Use a Matvec communication to find which of the edges
          connected to local vertices are on the boundary */
@@ -311,9 +311,10 @@ HYPRE_Int hypre_AMESetup(void *esolver)
          comm_pkg = hypre_ParCSRMatrixCommPkg(Gt);
 
          num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-         int_buf_data = hypre_CTAlloc(HYPRE_Int, 
-                                      hypre_ParCSRCommPkgSendMapStart(comm_pkg, 
-                                                                      num_sends), HYPRE_MEMORY_HOST);
+         int_buf_data = hypre_CTAlloc(
+               HYPRE_Int,
+               hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+               HYPRE_MEMORY_HOST );
          index = 0;
          for (i = 0; i < num_sends; i++)
          {
