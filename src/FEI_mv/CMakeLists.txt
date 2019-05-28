@@ -1,7 +1,6 @@
 
 project(HYPRE_FEI C CXX)
 
-include_directories(fei-base)
 include_directories(fei-hypre)
 
 # option(HYPRE_USING_SUPERLU "Use internal SuperLU routines" ON)

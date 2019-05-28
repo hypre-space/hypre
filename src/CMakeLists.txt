@@ -37,7 +37,7 @@ option(HYPRE_PRINT_ERRORS         "Print HYPRE errors" OFF)
 option(HYPRE_USING_OPENMP         "Use OpenMP" OFF)
 option(HYPRE_HOPSCOTCH            "Use hopscotch hashing with OpenMP" OFF)
 option(HAVE_DSUPERLU              "required if using SuperLU_dist" OFF)
-option(HYPRE_USING_FEI            "Use FEI" ON)
+option(HYPRE_USING_FEI            "Use FEI" OFF)
 option(HYPRE_USING_CALIPER        "Use Caliper" OFF)  # TODO: Finish this cmake feature
 
 if (HYPRE_SHARED)

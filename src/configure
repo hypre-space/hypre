@@ -800,7 +800,6 @@ with_lapack_lib_dirs
 with_fmangle
 with_fmangle_blas
 with_fmangle_lapack
-with_fei_inc_dir
 with_print_errors
 with_timing
 with_openmp
@@ -811,7 +810,7 @@ with_superlu_lib
 with_dsuperlu
 with_dsuperlu_include
 with_dsuperlu_lib
-with_fei
+with_fei_inc_dir
 with_mli
 with_MPI
 with_cuda
@@ -1566,8 +1565,6 @@ Optional Packages:
                           Name mangling for BLAS. See --with-fmangle.
   --with-fmangle-lapack=FMANGLE
                           Name mangling for LAPACK. See --with-fmangle.
-  --with-fei-inc-dir=DIR  DIR is the directory containing the FEI
-                          distribution.
   --with-print-errors     Print HYPRE errors.
   --with-timing           Use HYPRE timing routines.
   --with-openmp           Use OpenMP. This may affect which compiler is
@@ -1587,7 +1584,8 @@ Optional Packages:
                           LIBS is space-separated linkable list (enclosed in
                           quotes) of libraries needed for DSuperLU. OK to use
                           -L and -l flags in the list
-  --with-fei              Use internal FEI routines.
+  --with-fei-inc-dir=DIR  DIR is the directory containing the FEI
+                          distribution.
   --with-mli              Use MLI
   --with-MPI              DEFAULT: Compile with MPI. Selecting --without-MPI
                           may affect which compiler is chosen.
@@ -2614,7 +2612,6 @@ PACKAGE_BUGREPORT=
 hypre_user_chose_mpi=no
 hypre_user_chose_blas=no
 hypre_user_chose_lapack=no
-hypre_user_chose_fei=no
 hypre_user_chose_cuda=no
 hypre_user_chose_raja=no
 hypre_user_chose_kokkos=no
@@ -2629,7 +2626,7 @@ hypre_using_distributed_ls=yes
 hypre_using_superlu=no
 hypre_using_dsuperlu=no
 
-hypre_using_fei=yes
+hypre_using_fei=no
 hypre_using_mli=no
 
 hypre_using_openmp=no
@@ -3478,16 +3475,6 @@ _ACEOF
 
 
 
-# Check whether --with-fei-inc-dir was given.
-if test "${with_fei_inc_dir+set}" = set; then :
-  withval=$with_fei_inc_dir; HYPRE_FEI_BASE_DIR="$withval";
- hypre_using_fei=yes;
- hypre_user_chose_fei=yes
-
-fi
-
-
-
 # Check whether --with-print-errors was given.
 if test "${with_print_errors+set}" = set; then :
   withval=$with_print_errors; if test "$withval" = "yes"
@@ -3617,12 +3604,10 @@ fi
 
 
 
-# Check whether --with-fei was given.
-if test "${with_fei+set}" = set; then :
-  withval=$with_fei; case "${withval}" in
-    no) hypre_using_fei=no ;;
-    *)  hypre_using_fei=yes ;;
- esac
+# Check whether --with-fei-inc-dir was given.
+if test "${with_fei_inc_dir+set}" = set; then :
+  withval=$with_fei_inc_dir; HYPRE_FEI_BASE_DIR="$withval";
+ hypre_using_fei=yes
 
 fi
 
@@ -7555,10 +7540,6 @@ then
 $as_echo "#define HAVE_MLI 1" >>confdefs.h
 
       fi
-   fi
-   if test "$hypre_user_chose_fei" = "no"
-   then
-      HYPRE_FEI_BASE_DIR="$HYPRE_SRCDIR/FEI_mv/fei-base"
    fi
    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for __gxx_personality_v0 in -lstdc++" >&5
 $as_echo_n "checking for __gxx_personality_v0 in -lstdc++... " >&6; }
