@@ -384,28 +384,28 @@ hypre_ParCSRCommHandleCreate_v2 ( HYPRE_Int            job,
    switch (job)
    {
       case 1:
-         num_send_bytes = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends+1) * sizeof(HYPRE_MPI_COMPLEX);
-         num_recv_bytes = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, num_recvs+1) * sizeof(HYPRE_MPI_COMPLEX);
+         num_send_bytes = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends) * sizeof(HYPRE_Complex);
+         num_recv_bytes = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, num_recvs) * sizeof(HYPRE_Complex);
          break;
       case 2:
-         num_send_bytes = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, num_recvs+1) * sizeof(HYPRE_MPI_COMPLEX);
-         num_recv_bytes = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends+1) * sizeof(HYPRE_MPI_COMPLEX);
+         num_send_bytes = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, num_recvs) * sizeof(HYPRE_Complex);
+         num_recv_bytes = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends) * sizeof(HYPRE_Complex);
          break;
       case 11:
-         num_send_bytes = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends+1) * sizeof(HYPRE_MPI_INT);
-         num_recv_bytes = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, num_recvs+1) * sizeof(HYPRE_MPI_INT);
+         num_send_bytes = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends) * sizeof(HYPRE_Int);
+         num_recv_bytes = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, num_recvs) * sizeof(HYPRE_Int);
          break;
       case 12:
-         num_send_bytes = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, num_recvs+1) * sizeof(HYPRE_MPI_INT);
-         num_recv_bytes = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends+1) * sizeof(HYPRE_MPI_INT);
+         num_send_bytes = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, num_recvs) * sizeof(HYPRE_Int);
+         num_recv_bytes = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends) * sizeof(HYPRE_Int);
          break;
       case 21:
-         num_send_bytes = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends+1) * sizeof(HYPRE_MPI_BIG_INT);
-         num_recv_bytes = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, num_recvs+1) * sizeof(HYPRE_MPI_BIG_INT);
+         num_send_bytes = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends) * sizeof(HYPRE_BigInt);
+         num_recv_bytes = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, num_recvs) * sizeof(HYPRE_BigInt);
          break;
       case 22:
-         num_send_bytes = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, num_recvs+1) * sizeof(HYPRE_MPI_BIG_INT);
-         num_recv_bytes = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends+1) * sizeof(HYPRE_MPI_BIG_INT);
+         num_send_bytes = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, num_recvs) * sizeof(HYPRE_BigInt);
+         num_recv_bytes = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends) * sizeof(HYPRE_BigInt);
          break;
    }
 

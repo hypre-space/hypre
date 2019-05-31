@@ -18,9 +18,10 @@
 
 #include "seq_mv.h"
 #include "csr_matrix.h"
-#include "csr_sparse_device.h"
 
 #if defined(HYPRE_USING_CUDA)
+
+hypre_DeviceCSRHandle *hypre_device_csr_handle = NULL;
 
 struct in_range
 {
@@ -321,7 +322,7 @@ hypre_CSRMatrixTransposeDevice(hypre_CSRMatrix  *A,
 
    *AT_ptr = C;
 
-   return 0;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -377,6 +378,46 @@ hypre_CSRMatrixAddPartialDevice( hypre_CSRMatrix *A,
    return C;
 }
 
+HYPRE_Int
+hypre_CSRMatrixColNNzRealDevice( hypre_CSRMatrix  *A,
+                                 HYPRE_Real       *colnnz)
+{
+   HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
+   HYPRE_Int         ncols_A  = hypre_CSRMatrixNumCols(A);
+   HYPRE_Int         nnz_A    = hypre_CSRMatrixNumNonzeros(A);
+   HYPRE_Int        *A_j_sorted;
+   HYPRE_Int         num_reduced_col_indices;
+   HYPRE_Int        *reduced_col_indices;
+   HYPRE_Int        *reduced_col_nnz;
+
+   A_j_sorted = hypre_TAlloc(HYPRE_Int, nnz_A, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(A_j_sorted, A_j, HYPRE_Int, nnz_A, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+   thrust::sort(thrust::device, A_j_sorted, A_j_sorted + nnz_A);
+
+   reduced_col_indices = hypre_TAlloc(HYPRE_Int, ncols_A, HYPRE_MEMORY_DEVICE);
+   reduced_col_nnz     = hypre_TAlloc(HYPRE_Int, ncols_A, HYPRE_MEMORY_DEVICE);
+
+   thrust::pair<HYPRE_Int*, HYPRE_Int*> new_end =
+   thrust::reduce_by_key(thrust::device, A_j_sorted, A_j_sorted + nnz_A,
+                         thrust::make_constant_iterator(1),
+                         reduced_col_indices,
+                         reduced_col_nnz);
+
+   hypre_assert(new_end.first - reduced_col_indices == new_end.second - reduced_col_nnz);
+
+   num_reduced_col_indices = new_end.first - reduced_col_indices;
+
+   hypre_Memset(colnnz, 0, ncols_A * sizeof(HYPRE_Real), HYPRE_MEMORY_DEVICE);
+   thrust::scatter(thrust::device, reduced_col_nnz, reduced_col_nnz + num_reduced_col_indices,
+                   reduced_col_indices, colnnz);
+
+   hypre_TFree(A_j_sorted,          HYPRE_MEMORY_DEVICE);
+   hypre_TFree(reduced_col_indices, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(reduced_col_nnz,     HYPRE_MEMORY_DEVICE);
+
+   return hypre_error_flag;
+}
+
 #else
 
 hypre_CSRMatrix*
@@ -425,4 +466,110 @@ hypre_CSRMatrixAddPartialDevice( hypre_CSRMatrix *A,
 }
 
 #endif /* HYPRE_USING_CUDA */
+
+hypre_DeviceCSRHandle*
+hypre_DeviceCSRHandleCreate()
+{
+   hypre_DeviceCSRHandle *handle = hypre_CTAlloc(hypre_DeviceCSRHandle, 1, HYPRE_MEMORY_HOST);
+
+   /* set default options */
+   handle->rownnz_estimate_method      = 3; /* 1: naive overestimate
+                                               2: naive underestimate
+                                               3: Cohen's algorithm */
+   handle->spgemm_num_passes           = 3;
+   handle->rownnz_estimate_nsamples    = 32;
+   handle->rownnz_estimate_mult_factor = 1.5;
+   handle->hash_type                   = 'L';
+   handle->do_timing                   = 0;
+   handle->use_cusparse_spgemm         = 0;
+
+   /* Create pseudo-random number generator */
+   CURAND_CALL(curandCreateGenerator(&handle->gen, CURAND_RNG_PSEUDO_DEFAULT));
+   /* Set seed */
+   CURAND_CALL(curandSetPseudoRandomGeneratorSeed(handle->gen, 1234ULL));
+
+   return handle;
+}
+
+HYPRE_Int
+hypre_DeviceCSRHandleDestroy(hypre_DeviceCSRHandle *handle)
+{
+   if (handle->gen)
+   {
+      CURAND_CALL(curandDestroyGenerator(handle->gen));
+   }
+   hypre_TFree(handle, HYPRE_MEMORY_HOST);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypreDevice_CSRHandlePrint()
+{
+   hypre_printf("ghash_size                   %ld\n",  hypre_device_csr_handle->ghash_size);
+   hypre_printf("ghash2_size                  %ld\n",  hypre_device_csr_handle->ghash2_size);
+   hypre_printf("nnzC_gpu                     %ld\n",  hypre_device_csr_handle->nnzC_gpu);
+   hypre_printf("rownnz_estimate_time         %.2f\n", hypre_device_csr_handle->rownnz_estimate_time);
+   hypre_printf("rownnz_estimate_curand_time  %.2f\n", hypre_device_csr_handle->rownnz_estimate_curand_time);
+   hypre_printf("rownnz_estimate_mem          %ld\n",  hypre_device_csr_handle->rownnz_estimate_mem);
+   hypre_printf("spmm_create_hashtable_time   %.2f\n", hypre_device_csr_handle->spmm_create_hashtable_time);
+   hypre_printf("spmm_attempt1_time           %.2f\n", hypre_device_csr_handle->spmm_attempt1_time);
+   hypre_printf("spmm_post_attempt1_time      %.2f\n", hypre_device_csr_handle->spmm_post_attempt1_time);
+   hypre_printf("spmm_attempt2_time           %.2f\n", hypre_device_csr_handle->spmm_attempt2_time);
+   hypre_printf("spmm_post_attempt2_time      %.2f\n", hypre_device_csr_handle->spmm_post_attempt2_time);
+   hypre_printf("spmm_attempt_mem             %ld\n",  hypre_device_csr_handle->spmm_attempt_mem);
+   hypre_printf("spmm_symbolic_time           %.2f\n", hypre_device_csr_handle->spmm_symbolic_time);
+   hypre_printf("spmm_symbolic_mem            %ld\n",  hypre_device_csr_handle->spmm_symbolic_mem);
+   hypre_printf("spmm_post_symbolic_time      %.2f\n", hypre_device_csr_handle->spmm_post_symbolic_time);
+   hypre_printf("spmm_numeric_time            %.2f\n", hypre_device_csr_handle->spmm_numeric_time);
+   hypre_printf("spmm_numeric_mem             %ld\n",  hypre_device_csr_handle->spmm_numeric_mem);
+   hypre_printf("spmm_post_numeric_time       %.2f\n", hypre_device_csr_handle->spmm_post_numeric_time);
+   hypre_printf("spadd_expansion_time         %.2f\n", hypre_device_csr_handle->spadd_expansion_time);
+   hypre_printf("spadd_sorting_time           %.2f\n", hypre_device_csr_handle->spadd_sorting_time);
+   hypre_printf("spadd_compression_time       %.2f\n", hypre_device_csr_handle->spadd_compression_time);
+   hypre_printf("spadd_convert_ptr_time       %.2f\n", hypre_device_csr_handle->spadd_convert_ptr_time);
+   hypre_printf("spadd_time                   %.2f\n", hypre_device_csr_handle->spadd_time);
+   hypre_printf("sptrans_expansion_time       %.2f\n", hypre_device_csr_handle->sptrans_expansion_time);
+   hypre_printf("sptrans_sorting_time         %.2f\n", hypre_device_csr_handle->sptrans_sorting_time);
+   hypre_printf("sptrans_rowptr_time          %.2f\n", hypre_device_csr_handle->sptrans_rowptr_time);
+   hypre_printf("sptrans_time                 %.2f\n", hypre_device_csr_handle->sptrans_time);
+   hypre_printf("spmm_cusparse_time           %.2f\n", hypre_device_csr_handle->spmm_cusparse_time);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypreDevice_CSRHandleClearStats()
+{
+   hypre_device_csr_handle->ghash_size = 0;
+   hypre_device_csr_handle->ghash2_size = 0;
+   hypre_device_csr_handle->nnzC_gpu = 0;
+   hypre_device_csr_handle->rownnz_estimate_time = 0;
+   hypre_device_csr_handle->rownnz_estimate_curand_time = 0;
+   hypre_device_csr_handle->rownnz_estimate_mem = 0;
+   hypre_device_csr_handle->spmm_create_hashtable_time = 0;
+   hypre_device_csr_handle->spmm_attempt1_time = 0;
+   hypre_device_csr_handle->spmm_post_attempt1_time = 0;
+   hypre_device_csr_handle->spmm_attempt2_time = 0;
+   hypre_device_csr_handle->spmm_post_attempt2_time = 0;
+   hypre_device_csr_handle->spmm_attempt_mem = 0;
+   hypre_device_csr_handle->spmm_symbolic_time = 0;
+   hypre_device_csr_handle->spmm_symbolic_mem = 0;
+   hypre_device_csr_handle->spmm_post_symbolic_time = 0;
+   hypre_device_csr_handle->spmm_numeric_time = 0;
+   hypre_device_csr_handle->spmm_numeric_mem = 0;
+   hypre_device_csr_handle->spmm_post_numeric_time = 0;
+   hypre_device_csr_handle->spadd_expansion_time = 0;
+   hypre_device_csr_handle->spadd_sorting_time = 0;
+   hypre_device_csr_handle->spadd_compression_time = 0;
+   hypre_device_csr_handle->spadd_convert_ptr_time = 0;
+   hypre_device_csr_handle->spadd_time = 0;
+   hypre_device_csr_handle->sptrans_expansion_time = 0;
+   hypre_device_csr_handle->sptrans_sorting_time = 0;
+   hypre_device_csr_handle->sptrans_rowptr_time = 0;
+   hypre_device_csr_handle->sptrans_time = 0;
+   hypre_device_csr_handle->spmm_cusparse_time = 0;
+
+   return hypre_error_flag;
+}
 

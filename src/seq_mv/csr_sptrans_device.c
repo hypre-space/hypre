@@ -11,7 +11,6 @@
  ***********************************************************************EHEADER*/
 
 #include "seq_mv.h"
-#include "csr_sparse_device.h"
 
 #if defined(HYPRE_USING_CUDA)
 
@@ -31,7 +30,7 @@ hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int    
       return hypre_error_flag;
    }
 
-   HYPRE_Int do_timing = hypre_device_sparse_opts->do_timing;
+   HYPRE_Int do_timing = hypre_device_csr_handle->do_timing;
    hypre_double tt = 0.0, tm;
    HYPRE_Int *d_jt, *d_it, *d_pm, *d_ic, *d_jc;
    HYPRE_Complex *d_ac = NULL;
@@ -69,7 +68,7 @@ hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int    
       cudaThreadSynchronize();
       hypre_double tm_old = tm;
       tm = time_getWallclockSeconds();
-      hypre_device_sparse_handle->sptrans_expansion_time += tm - tm_old;
+      hypre_device_csr_handle->sptrans_expansion_time += tm - tm_old;
    }
 
    /* sort: by col */
@@ -86,7 +85,7 @@ hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int    
       cudaThreadSynchronize();
       hypre_double tm_old = tm;
       tm = time_getWallclockSeconds();
-      hypre_device_sparse_handle->sptrans_sorting_time = tm - tm_old;
+      hypre_device_csr_handle->sptrans_sorting_time = tm - tm_old;
    }
 
    /* convert into ic: row idx --> row ptrs */
@@ -103,7 +102,7 @@ hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int    
       cudaThreadSynchronize();
       hypre_double tm_old = tm;
       tm = time_getWallclockSeconds();
-      hypre_device_sparse_handle->sptrans_rowptr_time += tm - tm_old;
+      hypre_device_csr_handle->sptrans_rowptr_time += tm - tm_old;
    }
 
    /*
@@ -121,7 +120,7 @@ hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int    
    {
       cudaThreadSynchronize();
       tt = time_getWallclockSeconds() - tt;
-      hypre_device_sparse_handle->sptrans_time += tt;
+      hypre_device_csr_handle->sptrans_time += tt;
    }
 
    return hypre_error_flag;

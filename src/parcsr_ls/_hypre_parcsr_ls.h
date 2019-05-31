@@ -1410,7 +1410,7 @@ HYPRE_Int hypre_BoomerAMGCoarsenPMIS ( hypre_ParCSRMatrix *S , hypre_ParCSRMatri
 HYPRE_Int hypre_BoomerAMGCoarsenPMISDevice( hypre_ParCSRMatrix *S, hypre_ParCSRMatrix *A, HYPRE_Int CF_init, HYPRE_Int debug_flag, HYPRE_Int **CF_marker_ptr );
 
 /* par_coarsen_device.c */
-HYPRE_Int hypre_GetGlobalMeasureDevice( hypre_ParCSRMatrix *S, HYPRE_Int CF_init, HYPRE_Int aug_rand, HYPRE_Real *measure_diag, HYPRE_Real *measure_offd );
+HYPRE_Int hypre_GetGlobalMeasureDevice( hypre_ParCSRMatrix *S, hypre_ParCSRCommPkg *comm_pkg, HYPRE_Int CF_init, HYPRE_Int aug_rand, HYPRE_Real *measure_diag, HYPRE_Real *measure_offd, HYPRE_Real *real_send_buf );
 
 /* par_coarse_parms.c */
 HYPRE_Int hypre_BoomerAMGCoarseParms ( MPI_Comm comm , HYPRE_Int local_num_variables , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int *CF_marker , HYPRE_Int **coarse_dof_func_ptr , HYPRE_BigInt **coarse_pnts_global_ptr );
@@ -1459,7 +1459,7 @@ HYPRE_Int hypre_BoomerAMGIndepSet ( hypre_ParCSRMatrix *S , HYPRE_Real *measure_
 
 HYPRE_Int hypre_BoomerAMGIndepSetInitDevice( hypre_ParCSRMatrix *S, HYPRE_Real *measure_array, HYPRE_Int aug_rand);
 
-HYPRE_Int hypre_BoomerAMGIndepSetDevice( hypre_ParCSRMatrix *S, HYPRE_Real *measure_diag, HYPRE_Real *measure_offd, HYPRE_Int graph_diag_size, HYPRE_Int graph_offd_size, HYPRE_Int *graph_diag, HYPRE_Int *graph_offd, HYPRE_Int *IS_marker_diag, HYPRE_Int *IS_marker_offd );
+HYPRE_Int hypre_BoomerAMGIndepSetDevice( hypre_ParCSRMatrix *S, HYPRE_Real *measure_diag, HYPRE_Real *measure_offd, HYPRE_Int graph_diag_size, HYPRE_Int *graph_diag, HYPRE_Int *IS_marker_diag, HYPRE_Int *IS_marker_offd, hypre_ParCSRCommPkg *comm_pkg, HYPRE_Int *int_send_buf );
 
 /* par_interp.c */
 HYPRE_Int hypre_BoomerAMGBuildInterp ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_marker , hypre_ParCSRMatrix *S , HYPRE_BigInt *num_cpts_global , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int debug_flag , HYPRE_Real trunc_factor , HYPRE_Int max_elmts , HYPRE_Int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );

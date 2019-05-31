@@ -11,7 +11,7 @@
  ***********************************************************************EHEADER*/
 
 #include "seq_mv.h"
-#include "csr_sparse_device.h"
+#include "csr_spgemm_device.h"
 
 #if defined(HYPRE_USING_CUDA)
 
@@ -246,8 +246,7 @@ void csr_spmm_symbolic(HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
 template <HYPRE_Int ATTEMPT>
 void gpu_csr_spmm_rownnz_attempt(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
                                  HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Int *d_ib, HYPRE_Int *d_jb,
-                                 HYPRE_Int *d_rc, HYPRE_Int *d_rf,
-                                 hypre_DeviceCSRSparseOpts *opts, hypre_DeviceCSRSparseHandle *handle)
+                                 HYPRE_Int *d_rc, HYPRE_Int *d_rf)
 {
    const HYPRE_Int num_warps_per_block =  20;
    const HYPRE_Int shmem_hash_size     = 256;//512;
@@ -266,8 +265,8 @@ void gpu_csr_spmm_rownnz_attempt(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    double t1 = 0, t2 = 0;
    size_t mem_alloc = 0;
 
-   HYPRE_Int do_timing = opts->do_timing;
-   char hash_type = opts->hash_type;
+   HYPRE_Int do_timing = hypre_device_csr_handle->do_timing;
+   char hash_type = hypre_device_csr_handle->hash_type;
 
    if (do_timing)
    {
@@ -297,7 +296,7 @@ void gpu_csr_spmm_rownnz_attempt(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
       cudaThreadSynchronize();
       t2 = time_getWallclockSeconds();
       //printf("^^^^create hash table time                                %.2e\n", t2 - t1);
-      handle->spmm_create_hashtable_time += t2 - t1;
+      hypre_device_csr_handle->spmm_create_hashtable_time += t2 - t1;
    }
 
    if (do_timing)
@@ -339,21 +338,20 @@ void gpu_csr_spmm_rownnz_attempt(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
       cudaThreadSynchronize();
       t2 = time_getWallclockSeconds();
       //printf("^^^^Symbolic multiplication time                          %.2e\n", t2 - t1);
-      handle->spmm_symbolic_time += t2 - t1;
+      hypre_device_csr_handle->spmm_symbolic_time += t2 - t1;
    }
 
-   handle->ghash_size = ghash_size;
-   handle->spmm_symbolic_mem = mem_alloc;
+   hypre_device_csr_handle->ghash_size = ghash_size;
+   hypre_device_csr_handle->spmm_symbolic_mem = mem_alloc;
 }
 
 HYPRE_Int
 hypreDevice_CSRSpGemmRownnzUpperbound(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
                                       HYPRE_Int *d_ia, HYPRE_Int *d_ja,
                                       HYPRE_Int *d_ib, HYPRE_Int *d_jb,
-                                      HYPRE_Int *d_rc, HYPRE_Int *d_rf,
-                                      hypre_DeviceCSRSparseOpts *opts, hypre_DeviceCSRSparseHandle *handle)
+                                      HYPRE_Int *d_rc, HYPRE_Int *d_rf)
 {
-   gpu_csr_spmm_rownnz_attempt<1> (m, k, n, d_ia, d_ja, d_ib, d_jb, d_rc, d_rf, opts, handle);
+   gpu_csr_spmm_rownnz_attempt<1> (m, k, n, d_ia, d_ja, d_ib, d_jb, d_rc, d_rf);
 
    return hypre_error_flag;
 }
@@ -362,13 +360,12 @@ HYPRE_Int
 hypreDevice_CSRSpGemmRownnz(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
                             HYPRE_Int *d_ia, HYPRE_Int *d_ja,
                             HYPRE_Int *d_ib, HYPRE_Int *d_jb,
-                            HYPRE_Int *d_rc,
-                            hypre_DeviceCSRSparseOpts *opts, hypre_DeviceCSRSparseHandle *handle)
+                            HYPRE_Int *d_rc)
 {
    /* a binary array to indicate if row nnz counting is failed for a row */
    HYPRE_Int *d_rf = hypre_TAlloc(HYPRE_Int, m, HYPRE_MEMORY_DEVICE);
 
-   gpu_csr_spmm_rownnz_attempt<1> (m, k, n, d_ia, d_ja, d_ib, d_jb, d_rc, d_rf, opts, handle);
+   gpu_csr_spmm_rownnz_attempt<1> (m, k, n, d_ia, d_ja, d_ib, d_jb, d_rc, d_rf);
 
    /* row nnz is exact if no row failed */
    HYPRE_Int rownnz_exact = hypreDevice_IntegerReduceSum(m, d_rf);
@@ -377,7 +374,7 @@ hypreDevice_CSRSpGemmRownnz(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
 
    if (rownnz_exact != 0)
    {
-      gpu_csr_spmm_rownnz_attempt<2> (m, k, n, d_ia, d_ja, d_ib, d_jb, d_rc, d_rf, opts, handle);
+      gpu_csr_spmm_rownnz_attempt<2> (m, k, n, d_ia, d_ja, d_ib, d_jb, d_rc, d_rf);
 
 #if DEBUG_MODE
       assert(hypreDevice_IntegerReduceSum(m, d_rf) == 0);

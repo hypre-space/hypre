@@ -11,7 +11,7 @@
  ***********************************************************************EHEADER*/
 
 #include "seq_mv.h"
-#include "csr_sparse_device.h"
+#include "csr_spgemm_device.h"
 
 #if defined(HYPRE_USING_CUDA)
 
@@ -22,15 +22,13 @@ hypreDevice_CSRSpGemmCusparse(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
                               HYPRE_Int nnzB,
                               HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex *d_b,
                               HYPRE_Int *nnzC_out,
-                              HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_c_out,
-                              hypre_DeviceCSRSparseOpts *opts,
-                              hypre_DeviceCSRSparseHandle *handle)
+                              HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_c_out)
 {
    HYPRE_Int  *d_ic, *d_jc, baseC, nnzC;
    HYPRE_Int  *d_ja_sorted, *d_jb_sorted;
    HYPRE_Complex *d_c, *d_a_sorted, *d_b_sorted;
    double tt = 0.0;
-   HYPRE_Int do_timing = opts->do_timing;
+   HYPRE_Int do_timing = hypre_device_csr_handle->do_timing;
 
    if (do_timing)
    {
@@ -171,7 +169,7 @@ hypreDevice_CSRSpGemmCusparse(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
       cudaThreadSynchronize();
       tt = time_getWallclockSeconds() - tt;
       //printf("^^^^Cusparse time                                             %.2e\n", tt);
-      handle->spmm_cusparse_time += tt;
+      hypre_device_csr_handle->spmm_cusparse_time += tt;
    }
 
    return hypre_error_flag;

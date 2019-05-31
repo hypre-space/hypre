@@ -291,6 +291,8 @@ hypre_CSRMatrix *hypre_CSRMatrixAddDevice ( hypre_CSRMatrix *A , hypre_CSRMatrix
 
 hypre_CSRMatrix *hypre_CSRMatrixMultiplyDevice ( hypre_CSRMatrix *A , hypre_CSRMatrix *B );
 
+HYPRE_Int hypre_CSRMatrixColNNzRealDevice( hypre_CSRMatrix *A, HYPRE_Real *colnnz);
+
 HYPRE_Int hypre_CSRMatrixSplitDevice(hypre_CSRMatrix *B_ext, HYPRE_BigInt first_col_diag_B, HYPRE_BigInt last_col_diag_B, HYPRE_Int num_cols_offd_B, HYPRE_BigInt *col_map_offd_B, HYPRE_Int **map_B_to_C_ptr, HYPRE_Int *num_cols_offd_C_ptr, HYPRE_BigInt **col_map_offd_C_ptr, hypre_CSRMatrix **B_ext_diag_ptr, hypre_CSRMatrix **B_ext_offd_ptr);
 
 hypre_CSRMatrix* hypre_CSRMatrixAddPartialDevice( hypre_CSRMatrix *A, hypre_CSRMatrix *B, HYPRE_Int *row_nums);
@@ -451,9 +453,85 @@ void hypre_SeqVectorUpdateHost(hypre_Vector *x);
 
 HYPRE_Int hypre_CSRMatrixMatvecOutOfPlaceOOMP3( HYPRE_Complex alpha, hypre_CSRMatrix *A, hypre_Vector *x, HYPRE_Complex beta, hypre_Vector *b, hypre_Vector *y, HYPRE_Int offset);
 
-HYPRE_Int hypreDevice_CSRSparseHandlePrint();
+#if defined(HYPRE_USING_CUDA)
+#include <curand.h>
 
-HYPRE_Int hypreDevice_CSRSparseHandleClearStats();
+#define CURAND_CALL(x) do { if((x)!=CURAND_STATUS_SUCCESS) { \
+    printf("Error at %s:%d\n",__FILE__,__LINE__);\
+    exit(1);}} while(0)
+
+typedef struct
+{
+   curandGenerator_t gen;
+
+   HYPRE_Int   do_timing;
+
+   /* spgemm options */
+   HYPRE_Int   use_cusparse_spgemm;
+   HYPRE_Int   spgemm_num_passes;
+   HYPRE_Int   rownnz_estimate_method;
+   HYPRE_Int   rownnz_estimate_nsamples;
+   float       rownnz_estimate_mult_factor;
+   char        hash_type;
+
+   /* spgemm stats */
+   size_t      ghash_size, ghash2_size;
+   HYPRE_Int   nnzC_gpu;
+
+   HYPRE_Real  rownnz_estimate_time;
+   HYPRE_Real  rownnz_estimate_curand_time;
+   size_t      rownnz_estimate_mem;
+
+   HYPRE_Real  spmm_create_hashtable_time;
+
+   HYPRE_Real  spmm_attempt1_time;
+   HYPRE_Real  spmm_post_attempt1_time;
+   HYPRE_Real  spmm_attempt2_time;
+   HYPRE_Real  spmm_post_attempt2_time;
+   size_t      spmm_attempt_mem;
+
+   HYPRE_Real  spmm_symbolic_time;
+   size_t      spmm_symbolic_mem;
+   HYPRE_Real  spmm_post_symbolic_time;
+   HYPRE_Real  spmm_numeric_time;
+   size_t      spmm_numeric_mem;
+   HYPRE_Real  spmm_post_numeric_time;
+
+   /* spadd stats */
+   HYPRE_Real  spadd_expansion_time;
+   HYPRE_Real  spadd_sorting_time;
+   HYPRE_Real  spadd_compression_time;
+   HYPRE_Real  spadd_convert_ptr_time;
+   HYPRE_Real  spadd_time;
+
+   /* sptrans stats */
+   HYPRE_Real  sptrans_expansion_time;
+   HYPRE_Real  sptrans_sorting_time;
+   HYPRE_Real  sptrans_rowptr_time;
+   HYPRE_Real  sptrans_time;
+
+   /* cusparse stats */
+   HYPRE_Real  spmm_cusparse_time;
+
+} hypre_DeviceCSRHandle;
+
+extern hypre_DeviceCSRHandle *hypre_device_csr_handle;
+
+HYPRE_Int hypreDevice_CSRSpAdd(HYPRE_Int ma, HYPRE_Int mb, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int nnzB, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_aa, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex *d_ab, HYPRE_Int *d_num_b, HYPRE_Int *nnzC_out, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_ac_out);
+
+HYPRE_Int hypreDevice_CSRSpTrans(HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_aa, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_ac_out, HYPRE_Int want_data);
+
+HYPRE_Int hypreDevice_CSRSpGemm(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int nnza, HYPRE_Int nnzb, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex *d_b, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_c_out, HYPRE_Int *nnzC);
+
+hypre_DeviceCSRHandle* hypre_DeviceCSRHandleCreate();
+
+HYPRE_Int hypre_DeviceCSRHandleDestroy(hypre_DeviceCSRHandle *handle);
+
+#endif
+
+HYPRE_Int hypreDevice_CSRHandlePrint();
+
+HYPRE_Int hypreDevice_CSRHandleClearStats();
 
 #ifdef __cplusplus
 }

@@ -14,7 +14,7 @@
            Perform SpMM with Row Nnz Upper Bound
  *- - - - - - - - - - - - - - - - - - - - - - - - - - */
 #include "seq_mv.h"
-#include "csr_sparse_device.h"
+#include "csr_spgemm_device.h"
 
 #if defined(HYPRE_USING_CUDA)
 
@@ -360,9 +360,7 @@ hypreDevice_CSRSpGemmWithRownnzUpperbound(HYPRE_Int   m,        HYPRE_Int   k,  
                                           HYPRE_Int  *d_ib,     HYPRE_Int  *d_jb,     HYPRE_Complex  *d_b,
                                           HYPRE_Int  *d_rc,     HYPRE_Int   exact_rownnz,
                                           HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_c_out,
-                                          HYPRE_Int *nnzC,
-                                          hypre_DeviceCSRSparseOpts *opts,
-                                          hypre_DeviceCSRSparseHandle *handle)
+                                          HYPRE_Int *nnzC)
 {
    const HYPRE_Int num_warps_per_block =  20;
    const HYPRE_Int shmem_hash_size     = 128;
@@ -383,8 +381,8 @@ hypreDevice_CSRSpGemmWithRownnzUpperbound(HYPRE_Int   m,        HYPRE_Int   k,  
    hypre_double t1 = 0, t2 = 0;
    size_t mem_alloc = 0;
 
-   HYPRE_Int do_timing = opts->do_timing;
-   char hash_type = opts->hash_type;
+   HYPRE_Int do_timing = hypre_device_csr_handle->do_timing;
+   char hash_type = hypre_device_csr_handle->hash_type;
 
    if (do_timing)
    {
@@ -406,7 +404,7 @@ hypreDevice_CSRSpGemmWithRownnzUpperbound(HYPRE_Int   m,        HYPRE_Int   k,  
       cudaThreadSynchronize();
       t2 = time_getWallclockSeconds();
       //printf("^^^^create hash table time                                %.2e\n", t2 - t1);
-      handle->spmm_create_hashtable_time += t2 - t1;
+      hypre_device_csr_handle->spmm_create_hashtable_time += t2 - t1;
    }
 
    /* ---------------------------------------------------------------------------
@@ -516,7 +514,7 @@ hypreDevice_CSRSpGemmWithRownnzUpperbound(HYPRE_Int   m,        HYPRE_Int   k,  
       cudaThreadSynchronize();
       t2 = time_getWallclockSeconds();
       //printf("^^^^Numeric multiplication time                           %.2e\n", t2 - t1);
-      handle->spmm_numeric_time += t2 - t1;
+      hypre_device_csr_handle->spmm_numeric_time += t2 - t1;
    }
 
    if (do_timing)
@@ -534,12 +532,12 @@ hypreDevice_CSRSpGemmWithRownnzUpperbound(HYPRE_Int   m,        HYPRE_Int   k,  
       cudaThreadSynchronize();
       t2 = time_getWallclockSeconds();
       //printf("^^^^Postprocess time after numerical                      %.2e\n", t2 - t1);
-      handle->spmm_post_numeric_time += t2 - t1;
+      hypre_device_csr_handle->spmm_post_numeric_time += t2 - t1;
    }
 
-   handle->ghash_size = ghash_size;
-   handle->nnzC_gpu  = nnzC_nume;
-   handle->spmm_numeric_mem = mem_alloc;
+   hypre_device_csr_handle->ghash_size = ghash_size;
+   hypre_device_csr_handle->nnzC_gpu  = nnzC_nume;
+   hypre_device_csr_handle->spmm_numeric_mem = mem_alloc;
 
    *d_ic_out = d_ic;
    *d_jc_out = d_jc;

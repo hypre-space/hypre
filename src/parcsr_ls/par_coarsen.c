@@ -2331,6 +2331,8 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
       /* stop the coarsening if nothing left to be coarsened */
       hypre_MPI_Allreduce(&big_graph_size, &global_graph_size, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM,comm);
 
+      /* if (my_id == 0) { hypre_printf("graph size %b\n", global_graph_size); } */
+
       if (global_graph_size == 0)
       {
          break;

@@ -2032,12 +2032,12 @@ typedef struct
 
 typedef struct
 {
-	HYPRE_Int  volatile              segmentMask;
-	HYPRE_Int  volatile              bucketMask;
+   HYPRE_Int  volatile                segmentMask;
+   HYPRE_Int  volatile                bucketMask;
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
-	hypre_HopscotchSegment*	volatile segments;
+   hypre_HopscotchSegment*   volatile segments;
 #endif
-	hypre_BigHopscotchBucket* volatile	 table;
+   hypre_BigHopscotchBucket* volatile table;
 } hypre_UnorderedBigIntMap;
 
 /**
@@ -2056,6 +2056,17 @@ void hypre_big_sort_and_create_inverse_map(
 
 
 /* hypre_cuda_utils.h */
+#if defined(HYPRE_USING_CUDA)
+#ifdef __cplusplus
+extern "C++" {
+#endif
+dim3 hypre_GetDefaultCUDABlockDimension();
+
+dim3 hypre_GetDefaultCUDAGridDimension( HYPRE_Int n, const char *granularity, dim3 bDim );
+#ifdef __cplusplus
+}
+#endif
+
 HYPRE_Int hypreDevice_GetRowNnz(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int *d_diag_ia, HYPRE_Int *d_offd_ia, HYPRE_Int *d_rownnz);
 
 HYPRE_Int hypreDevice_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int job, HYPRE_Int has_offd, HYPRE_Int first_col, HYPRE_Int *d_col_map_offd_A, HYPRE_Int *d_diag_i, HYPRE_Int *d_diag_j, HYPRE_Complex *d_diag_a, HYPRE_Int *d_offd_i, HYPRE_Int *d_offd_j, HYPRE_Complex *d_offd_a, HYPRE_Int *d_ib, HYPRE_BigInt *d_jb, HYPRE_Complex *d_ab);
@@ -2073,6 +2084,12 @@ HYPRE_Int hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int *d_row_p
 HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int *d_row_ptr, HYPRE_Int *d_row_num, HYPRE_Int *d_row_ind);
 
 HYPRE_Int* hypreDevice_CsrRowIndicesToPtrs(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ind);
+
+HYPRE_Int hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Real *y);
+
+HYPRE_Int hypreDevice_ScatterConstant(HYPRE_Int *x, HYPRE_Int n, HYPRE_Int *map, HYPRE_Int v);
+
+#endif
 
 /*BHEADER**********************************************************************
  * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
@@ -2118,6 +2135,161 @@ extern "C++" {
 #define HYPRE_WARP_FULL_MASK 0xFFFFFFFF
 #define HYPRE_MAX_NUM_WARPS  (64 * 64 * 32)
 #define HYPRE_FLT_LARGE      1e30
+#define HYPRE_1D_BLOCK_SIZE  512
+
+/* macro for launching CUDA kernels */
+#define HYPRE_CUDA_LAUNCH HYPRE_CUDA_LAUNCH_ASYNC
+
+#define HYPRE_CUDA_LAUNCH_ASYNC(kernel_name, gridsize, blocksize, ...) \
+{ \
+   if ( gridsize.x  == 0 || gridsize.y  == 0 || gridsize.z  == 0 || \
+        blocksize.x == 0 || blocksize.y == 0 || blocksize.z == 0 ) \
+   { \
+      hypre_printf("Warning %s %d: Zero CUDA grid/block (%d %d %d) (%d %d %d)\n", \
+                   __FILE__, __LINE__,\
+                   gridsize.x, gridsize.y, gridsize.z, blocksize.x, blocksize.y, blocksize.z); \
+   } \
+   else \
+   { \
+      (kernel_name) <<< (gridsize), (blocksize) >>> (__VA_ARGS__); \
+   } \
+}
+
+#define HYPRE_CUDA_LAUNCH_SYNC(kernel_name, gridsize, blocksize, ...) \
+    HYPRE_CUDA_LAUNCH_ASYNC(kernel_name, gridsize, blocksize, __VA_ARGS__) \
+    cudaDeviceSynchronize();
+
+/* return the number of threads in block */
+template <hypre_int dim>
+static __device__ __forceinline__
+hypre_int hypre_cuda_get_num_threads()
+{
+   switch (dim)
+   {
+      case 1:
+         return (blockDim.x);
+      case 2:
+         return (blockDim.x * blockDim.y);
+      case 3:
+         return (blockDim.x * blockDim.y * blockDim.z);
+   }
+
+   return -1;
+}
+
+/* return the flattened thread id in block */
+template <hypre_int dim>
+static __device__ __forceinline__
+hypre_int hypre_cuda_get_thread_id()
+{
+   switch (dim)
+   {
+      case 1:
+         return (threadIdx.x);
+      case 2:
+         return (threadIdx.y * blockDim.x + threadIdx.x);
+      case 3:
+         return (threadIdx.z * blockDim.x * blockDim.y + threadIdx.y * blockDim.x +
+                 threadIdx.x);
+   }
+
+   return -1;
+}
+
+/* return the number of warps in block  */
+template <hypre_int dim>
+static __device__ __forceinline__
+hypre_int hypre_cuda_get_num_warps()
+{
+   return hypre_cuda_get_num_threads<dim>() >> 5;
+}
+
+/* return the warp id in block */
+template <hypre_int dim>
+static __device__ __forceinline__
+hypre_int hypre_cuda_get_warp_id()
+{
+   return hypre_cuda_get_thread_id<dim>() >> 5;
+}
+
+/* return the thread lane id in warp */
+template <hypre_int dim>
+static __device__ __forceinline__
+hypre_int hypre_cuda_get_lane_id()
+{
+   return hypre_cuda_get_thread_id<dim>() & (HYPRE_WARP_SIZE-1);
+}
+
+/* return the num of blocks in grid */
+template <hypre_int dim>
+static __device__ __forceinline__
+hypre_int hypre_cuda_get_num_blocks()
+{
+   switch (dim)
+   {
+      case 1:
+         return (gridDim.x);
+      case 2:
+         return (gridDim.x * gridDim.y);
+      case 3:
+         return (gridDim.x * gridDim.y * gridDim.z);
+   }
+
+   return -1;
+}
+
+/* return the flattened block id in grid */
+template <hypre_int dim>
+static __device__ __forceinline__
+hypre_int hypre_cuda_get_block_id()
+{
+   switch (dim)
+   {
+      case 1:
+         return (blockIdx.x);
+      case 2:
+         return (blockIdx.y * gridDim.x + blockIdx.x);
+      case 3:
+         return (blockIdx.z * gridDim.x * gridDim.y + blockIdx.y * gridDim.x +
+                 blockIdx.x);
+   }
+
+   return -1;
+}
+
+/* return the number of threads in grid */
+template <hypre_int bdim, hypre_int gdim>
+static __device__ __forceinline__
+hypre_int hypre_cuda_get_grid_num_threads()
+{
+   return hypre_cuda_get_num_blocks<gdim>() * hypre_cuda_get_num_threads<bdim>();
+}
+
+/* return the flattened thread id in grid */
+template <hypre_int bdim, hypre_int gdim>
+static __device__ __forceinline__
+hypre_int hypre_cuda_get_grid_thread_id()
+{
+   return hypre_cuda_get_block_id<gdim>() * hypre_cuda_get_num_threads<bdim>() +
+          hypre_cuda_get_thread_id<bdim>();
+}
+
+/* return the number of warps in grid */
+template <hypre_int bdim, hypre_int gdim>
+static __device__ __forceinline__
+hypre_int hypre_cuda_get_grid_num_warps()
+{
+   return hypre_cuda_get_num_blocks<gdim>() * hypre_cuda_get_num_warps<bdim>();
+}
+
+/* return the flattened warp id in grid */
+template <hypre_int bdim, hypre_int gdim>
+static __device__ __forceinline__
+hypre_int hypre_cuda_get_grid_warp_id()
+{
+   return hypre_cuda_get_block_id<gdim>() * hypre_cuda_get_num_warps<bdim>() +
+          hypre_cuda_get_warp_id<bdim>();
+}
 
 #if CUDART_VERSION < 9000
 
@@ -2236,6 +2408,42 @@ T warp_reduce_max(T in)
   for (hypre_int d = 16; d > 0; d >>= 1)
   {
     in = max(in, __shfl_down_sync(HYPRE_WARP_FULL_MASK, in, d));
+  }
+  return in;
+}
+
+template <typename T>
+static __device__ __forceinline__
+T warp_allreduce_max(T in)
+{
+#pragma unroll
+  for (hypre_int d = 16; d > 0; d >>= 1)
+  {
+    in = max(in, __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d));
+  }
+  return in;
+}
+
+template <typename T>
+static __device__ __forceinline__
+T warp_reduce_min(T in)
+{
+#pragma unroll
+  for (hypre_int d = 16; d > 0; d >>= 1)
+  {
+    in = min(in, __shfl_down_sync(HYPRE_WARP_FULL_MASK, in, d));
+  }
+  return in;
+}
+
+template <typename T>
+static __device__ __forceinline__
+T warp_allreduce_min(T in)
+{
+#pragma unroll
+  for (hypre_int d = 16; d > 0; d >>= 1)
+  {
+    in = min(in, __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d));
   }
   return in;
 }
