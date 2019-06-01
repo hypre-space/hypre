@@ -418,55 +418,6 @@ hypre_CSRMatrixColNNzRealDevice( hypre_CSRMatrix  *A,
    return hypre_error_flag;
 }
 
-#else
-
-hypre_CSRMatrix*
-hypre_CSRMatrixAddDevice ( hypre_CSRMatrix *A,
-                           hypre_CSRMatrix *B )
-{
-   return NULL;
-}
-
-hypre_CSRMatrix*
-hypre_CSRMatrixMultiplyDevice( hypre_CSRMatrix *A,
-                               hypre_CSRMatrix *B)
-{
-   return NULL;
-}
-
-HYPRE_Int
-hypre_CSRMatrixSplitDevice(hypre_CSRMatrix  *B_ext,
-                           HYPRE_BigInt      first_col_diag_B,
-                           HYPRE_BigInt      last_col_diag_B,
-                           HYPRE_Int         num_cols_offd_B,
-                           HYPRE_BigInt     *col_map_offd_B,
-                           HYPRE_Int       **map_B_to_C_ptr,
-                           HYPRE_Int        *num_cols_offd_C_ptr,
-                           HYPRE_BigInt    **col_map_offd_C_ptr,
-                           hypre_CSRMatrix **B_ext_diag_ptr,
-                           hypre_CSRMatrix **B_ext_offd_ptr)
-{
-   return -1;
-}
-
-HYPRE_Int
-hypre_CSRMatrixTransposeDevice(hypre_CSRMatrix  *A,
-                               hypre_CSRMatrix **AT_ptr,
-                               HYPRE_Int         data)
-{
-   return -1;
-}
-
-hypre_CSRMatrix*
-hypre_CSRMatrixAddPartialDevice( hypre_CSRMatrix *A,
-                                 hypre_CSRMatrix *B,
-                                 HYPRE_Int       *row_nums)
-{
-   return NULL;
-}
-
-#endif /* HYPRE_USING_CUDA */
-
 hypre_DeviceCSRHandle*
 hypre_DeviceCSRHandleCreate()
 {
@@ -572,4 +523,53 @@ hypreDevice_CSRHandleClearStats()
 
    return hypre_error_flag;
 }
+
+#else
+
+hypre_CSRMatrix*
+hypre_CSRMatrixAddDevice ( hypre_CSRMatrix *A,
+                           hypre_CSRMatrix *B )
+{
+   return NULL;
+}
+
+hypre_CSRMatrix*
+hypre_CSRMatrixMultiplyDevice( hypre_CSRMatrix *A,
+                               hypre_CSRMatrix *B)
+{
+   return NULL;
+}
+
+HYPRE_Int
+hypre_CSRMatrixSplitDevice(hypre_CSRMatrix  *B_ext,
+                           HYPRE_BigInt      first_col_diag_B,
+                           HYPRE_BigInt      last_col_diag_B,
+                           HYPRE_Int         num_cols_offd_B,
+                           HYPRE_BigInt     *col_map_offd_B,
+                           HYPRE_Int       **map_B_to_C_ptr,
+                           HYPRE_Int        *num_cols_offd_C_ptr,
+                           HYPRE_BigInt    **col_map_offd_C_ptr,
+                           hypre_CSRMatrix **B_ext_diag_ptr,
+                           hypre_CSRMatrix **B_ext_offd_ptr)
+{
+   return -1;
+}
+
+HYPRE_Int
+hypre_CSRMatrixTransposeDevice(hypre_CSRMatrix  *A,
+                               hypre_CSRMatrix **AT_ptr,
+                               HYPRE_Int         data)
+{
+   return -1;
+}
+
+hypre_CSRMatrix*
+hypre_CSRMatrixAddPartialDevice( hypre_CSRMatrix *A,
+                                 hypre_CSRMatrix *B,
+                                 HYPRE_Int       *row_nums)
+{
+   return NULL;
+}
+
+#endif /* HYPRE_USING_CUDA */
 

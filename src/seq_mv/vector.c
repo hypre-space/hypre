@@ -35,7 +35,7 @@ hypre_SeqVectorCreate( HYPRE_Int size )
 {
    hypre_Vector  *vector;
 
-   vector =  hypre_CTAlloc(hypre_Vector,  1, HYPRE_MEMORY_HOST);
+   vector = hypre_CTAlloc(hypre_Vector, 1, HYPRE_MEMORY_HOST);
 
 #ifdef HYPRE_USING_GPU
    vector->on_device=0;
@@ -54,6 +54,8 @@ hypre_SeqVectorCreate( HYPRE_Int size )
    /* set defaults */
    hypre_VectorOwnsData(vector) = 1;
 
+   hypre_VectorMemoryLocation(vector) = HYPRE_MEMORY_SHARED;
+
    return vector;
 }
 
@@ -66,6 +68,7 @@ hypre_SeqMultiVectorCreate( HYPRE_Int size, HYPRE_Int num_vectors )
 {
    hypre_Vector *vector = hypre_SeqVectorCreate(size);
    hypre_VectorNumVectors(vector) = num_vectors;
+
    return vector;
 }
 
@@ -76,21 +79,25 @@ hypre_SeqMultiVectorCreate( HYPRE_Int size, HYPRE_Int num_vectors )
 HYPRE_Int
 hypre_SeqVectorDestroy( hypre_Vector *vector )
 {
-   HYPRE_Int  ierr=0;
+   HYPRE_Int ierr=0;
 
    if (vector)
    {
+      HYPRE_Int memory_location = hypre_VectorMemoryLocation(vector);
+
 #ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
-     if (vector->mapped) {
-       //printf("Unmap in hypre_SeqVectorDestroy\n");
-       hypre_SeqVectorUnMapFromDevice(vector);
-     }
+      if (vector->mapped)
+      {
+         //printf("Unmap in hypre_SeqVectorDestroy\n");
+         hypre_SeqVectorUnMapFromDevice(vector);
+      }
 #endif
       if ( hypre_VectorOwnsData(vector) )
       {
-         hypre_TFree(hypre_VectorData(vector), HYPRE_MEMORY_SHARED);
+         hypre_TFree(hypre_VectorData(vector), memory_location);
       }
-       hypre_TFree(vector, HYPRE_MEMORY_HOST);
+
+      hypre_TFree(vector, HYPRE_MEMORY_HOST);
    }
 
    return ierr;
@@ -101,15 +108,24 @@ hypre_SeqVectorDestroy( hypre_Vector *vector )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SeqVectorInitialize( hypre_Vector *vector )
+hypre_SeqVectorInitialize_v2( hypre_Vector *vector, HYPRE_Int memory_location )
 {
    HYPRE_Int  size = hypre_VectorSize(vector);
    HYPRE_Int  ierr = 0;
    HYPRE_Int  num_vectors = hypre_VectorNumVectors(vector);
    HYPRE_Int  multivec_storage_method = hypre_VectorMultiVecStorageMethod(vector);
 
-   if ( ! hypre_VectorData(vector) )
-      hypre_VectorData(vector) = hypre_CTAlloc(HYPRE_Complex,  num_vectors*size, HYPRE_MEMORY_SHARED);
+   hypre_VectorMemoryLocation(vector) = memory_location;
+
+   /* Caveat: for pre-existing data, the memory location must be guaranteed
+    * to be consistent with `memory_location'
+    * Otherwise, mismatches will exist and problems will be encountered
+    * when being used, and freed */
+   if ( !hypre_VectorData(vector) )
+   {
+      hypre_VectorData(vector) = hypre_CTAlloc(HYPRE_Complex, num_vectors*size,
+                                               memory_location);
+   }
 
    if ( multivec_storage_method == 0 )
    {
@@ -122,10 +138,24 @@ hypre_SeqVectorInitialize( hypre_Vector *vector )
       hypre_VectorIndexStride(vector) = num_vectors;
    }
    else
+   {
       ++ierr;
+   }
+
 #ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
    UpdateHRC;
 #endif
+
+   return ierr;
+}
+
+HYPRE_Int
+hypre_SeqVectorInitialize( hypre_Vector *vector )
+{
+   HYPRE_Int ierr;
+
+   ierr = hypre_SeqVectorInitialize_v2( vector, HYPRE_MEMORY_SHARED );
+
    return ierr;
 }
 
@@ -1933,36 +1963,57 @@ HYPRE_Real   hypre_SeqVectorInnerProdDevice( hypre_Vector *x,
   return result;
 
 }
-void hypre_SeqVectorPrefetchToDevice(hypre_Vector *x){
-  if (hypre_VectorSize(x)==0) return;
+void hypre_SeqVectorPrefetchToDevice(hypre_Vector *x)
+{
+   if (hypre_GetActualMemLocation(hypre_VectorMemoryLocation(x)) != HYPRE_MEMORY_SHARED)
+   {
+      return;
+   }
+
+   if (hypre_VectorSize(x)==0) return;
 #if defined(TRACK_MEMORY_ALLOCATIONS)
-  ASSERT_MANAGED(hypre_VectorData(x));
+   ASSERT_MANAGED(hypre_VectorData(x));
 #endif
-  //PrintPointerAttributes(hypre_VectorData(x));
-  //PUSH_RANGE("hypre_SeqVectorPrefetchToDevice",0);
-  hypre_CheckErrorDevice(cudaMemPrefetchAsync(hypre_VectorData(x),hypre_VectorSize(x)*sizeof(HYPRE_Complex),HYPRE_DEVICE,HYPRE_STREAM(4)));
-  hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(4)));
+   //PrintPointerAttributes(hypre_VectorData(x));
+   //PUSH_RANGE("hypre_SeqVectorPrefetchToDevice",0);
+   hypre_CheckErrorDevice(cudaMemPrefetchAsync(hypre_VectorData(x),hypre_VectorSize(x)*sizeof(HYPRE_Complex),HYPRE_DEVICE,HYPRE_STREAM(4)));
+   hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(4)));
   //POP_RANGE;
 }
-void hypre_SeqVectorPrefetchToHost(hypre_Vector *x){
-  if (hypre_VectorSize(x)==0) return;
-  //PUSH_RANGE("hypre_SeqVectorPrefetchToHost",0);
-  hypre_CheckErrorDevice(cudaMemPrefetchAsync(hypre_VectorData(x),hypre_VectorSize(x)*sizeof(HYPRE_Complex),cudaCpuDeviceId,HYPRE_STREAM(4)));
-  hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(4)));
-  //POP_RANGE;
+
+void hypre_SeqVectorPrefetchToHost(hypre_Vector *x)
+{
+   if (hypre_GetActualMemLocation(hypre_VectorMemoryLocation(x)) != HYPRE_MEMORY_SHARED)
+   {
+      return;
+   }
+
+   if (hypre_VectorSize(x)==0) return;
+   //PUSH_RANGE("hypre_SeqVectorPrefetchToHost",0);
+   hypre_CheckErrorDevice(cudaMemPrefetchAsync(hypre_VectorData(x),hypre_VectorSize(x)*sizeof(HYPRE_Complex),cudaCpuDeviceId,HYPRE_STREAM(4)));
+   hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(4)));
+   //POP_RANGE;
 }
-void hypre_SeqVectorPrefetchToDeviceInStream(hypre_Vector *x, HYPRE_Int index){
-  if (hypre_VectorSize(x)==0) return;
+
+void hypre_SeqVectorPrefetchToDeviceInStream(hypre_Vector *x, HYPRE_Int index)
+{
+   if (hypre_GetActualMemLocation(hypre_VectorMemoryLocation(x)) != HYPRE_MEMORY_SHARED)
+   {
+      return;
+   }
+
+   if (hypre_VectorSize(x)==0) return;
 #if defined(TRACK_MEMORY_ALLOCATIONS)
-  ASSERT_MANAGED(hypre_VectorData(x));
+   ASSERT_MANAGED(hypre_VectorData(x));
 #endif
-  //PUSH_RANGE("hypre_SeqVectorPrefetchToDevice",0);
-  hypre_CheckErrorDevice(cudaMemPrefetchAsync(hypre_VectorData(x),hypre_VectorSize(x)*sizeof(HYPRE_Complex),HYPRE_DEVICE,HYPRE_STREAM(index)));
-  hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(index)));
-  //POP_RANGE;
+   //PUSH_RANGE("hypre_SeqVectorPrefetchToDevice",0);
+   hypre_CheckErrorDevice(cudaMemPrefetchAsync(hypre_VectorData(x),hypre_VectorSize(x)*sizeof(HYPRE_Complex),HYPRE_DEVICE,HYPRE_STREAM(index)));
+   hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(index)));
+   //POP_RANGE;
 }
+
 hypre_int hypre_SeqVectorIsManaged(hypre_Vector *x){
-  return pointerIsManaged((void*)hypre_VectorData(x));
+   return pointerIsManaged((void*)hypre_VectorData(x));
 }
 #endif
 

@@ -43,7 +43,7 @@ hypre_CSRMatrixMatvecOutOfPlace( HYPRE_Complex    alpha,
 #ifdef HYPRE_BIGINT
    HYPRE_Int ierr = hypre_CSRMatrixMatvecDeviceBIGINT( alpha,A,x,beta,b,y,offset );
 #else
-   HYPRE_Int ierr = hypre_CSRMatrixMatvecDevice( alpha,A,x,beta,b,y,offset );
+   HYPRE_Int ierr = hypre_CSRMatrixMatvecDevice(0, alpha,A,x,beta,b,y,offset );
 #endif
    //POP_RANGE;
 #elif defined(HYPRE_USING_OPENMP_OFFLOAD) /* OMP 4.5 */
@@ -457,6 +457,9 @@ hypre_CSRMatrixMatvecT( HYPRE_Complex    alpha,
                         HYPRE_Complex    beta,
                         hypre_Vector    *y     )
 {
+#if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY) /* CUDA */
+   HYPRE_Int ierr = hypre_CSRMatrixMatvecDevice(1, alpha, A, x, beta, y, y ,0 );
+#else
    HYPRE_Complex    *A_data    = hypre_CSRMatrixData(A);
    HYPRE_Int        *A_i       = hypre_CSRMatrixI(A);
    HYPRE_Int        *A_j       = hypre_CSRMatrixJ(A);
@@ -658,6 +661,8 @@ hypre_CSRMatrixMatvecT( HYPRE_Complex    alpha,
 
    if (x == y) hypre_SeqVectorDestroy(x_tmp);
 
+#endif
+
    return ierr;
 }
 
@@ -789,7 +794,8 @@ hypre_CSRMatrixMatvec_FF( HYPRE_Complex    alpha,
 }
 #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
 HYPRE_Int
-hypre_CSRMatrixMatvecDevice( HYPRE_Complex    alpha,
+hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
+                             HYPRE_Complex    alpha,
                              hypre_CSRMatrix *A,
                              hypre_Vector    *x,
                              HYPRE_Complex    beta,
@@ -807,37 +813,40 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Complex    alpha,
   static cudaStream_t s[10];
   static HYPRE_Int myid;
 
-  if (b!=y){
-
-    //PUSH_RANGE_PAYLOAD("MEMCPY",1,y->size-offset);
+  if (b != y)
+  {
     VecCopy(y->data,b->data,(y->size-offset),HYPRE_STREAM(4));
-    //POP_RANGE
   }
 
-  if (x==y) hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ERROR::x and y are the same pointer in hypre_CSRMatrixMatvecDevice\n");
+  if (x == y)
+  {
+     hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ERROR::x and y are the same pointer in hypre_CSRMatrixMatvecDevice\n");
+  }
 
-  if (FirstCall){
-    //PUSH_RANGE("FIRST_CALL",4);
+  if (FirstCall)
+  {
+    handle = getCusparseHandle();
 
-    handle=getCusparseHandle();
-
-    status= cusparseCreateMatDescr(&descr);
-    if (status != CUSPARSE_STATUS_SUCCESS) {
+    status = cusparseCreateMatDescr(&descr);
+    if (status != CUSPARSE_STATUS_SUCCESS)
+    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ERROR:: Matrix descriptor initialization failed\n");
       return hypre_error_flag;
     }
 
-    cusparseSetMatType(descr,CUSPARSE_MATRIX_TYPE_GENERAL);
+    cusparseSetMatType(descr, CUSPARSE_MATRIX_TYPE_GENERAL);
     cusparseSetMatIndexBase(descr,CUSPARSE_INDEX_BASE_ZERO);
 
-    FirstCall=0;
+    FirstCall = 0;
+
+    /*
     hypre_int jj;
     for(jj=0;jj<5;jj++)
-      s[jj]=HYPRE_STREAM(jj);
+      s[jj] = HYPRE_STREAM(jj);
     nvtxNameCudaStreamA(s[4], "HYPRE_COMPUTE_STREAM");
     hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
     myid++;
-    //POP_RANGE;
+    */
   }
 
   //PUSH_RANGE("PREFETCH+SPMV",2);
@@ -847,18 +856,45 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Complex    alpha,
   hypre_SeqVectorPrefetchToDevice(y);
 
   //if (offset!=0) hypre_printf("WARNING:: Offset is not zero in hypre_CSRMatrixMatvecDevice :: \n");
-  cusparseErrchk(cusparseDcsrmv(handle ,
-                 CUSPARSE_OPERATION_NON_TRANSPOSE,
-                 A->num_rows-offset, A->num_cols, A->num_nonzeros,
-                 &alpha, descr,
-                 A->data ,A->i+offset,A->j,
-                 x->data, &beta, y->data+offset));
 
-  if (!GetAsyncMode()){
-  hypre_CheckErrorDevice(cudaStreamSynchronize(s[4]));
+  hypre_assert(offset == 0);
+
+  if (trans)
+  {
+     HYPRE_Complex *csc_a = hypre_TAlloc(HYPRE_Complex, A->num_nonzeros, HYPRE_MEMORY_DEVICE);
+     HYPRE_Int     *csc_j = hypre_TAlloc(HYPRE_Int,     A->num_nonzeros, HYPRE_MEMORY_DEVICE);
+     HYPRE_Int     *csc_i = hypre_TAlloc(HYPRE_Int,     A->num_cols+1,   HYPRE_MEMORY_DEVICE);
+
+     cusparseErrchk( cusparseDcsr2csc(handle, A->num_rows, A->num_cols, A->num_nonzeros,
+                     A->data, A->i, A->j, csc_a, csc_j, csc_i,
+                     CUSPARSE_ACTION_NUMERIC, CUSPARSE_INDEX_BASE_ZERO) );
+
+     cusparseErrchk( cusparseDcsrmv(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
+                     A->num_cols, A->num_rows, A->num_nonzeros,
+                     &alpha, descr,
+                     csc_a, csc_i, csc_j,
+                     x->data, &beta, y->data) );
+
+     hypre_TFree(csc_a, HYPRE_MEMORY_DEVICE);
+     hypre_TFree(csc_i, HYPRE_MEMORY_DEVICE);
+     hypre_TFree(csc_j, HYPRE_MEMORY_DEVICE);
   }
-  //POP_RANGE;
+  else
+  {
+     cusparseErrchk( cusparseDcsrmv(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
+                     A->num_rows-offset, A->num_cols, A->num_nonzeros,
+                     &alpha, descr,
+                     A->data, A->i+offset, A->j,
+                     x->data, &beta, y->data+offset) );
+  }
+/*
+  if (!GetAsyncMode())
+  {
+     hypre_CheckErrorDevice(cudaStreamSynchronize(s[4]));
+  }
+*/
 #endif
+
   return hypre_error_flag;
 
 }

@@ -113,7 +113,7 @@ hypre_CSRMatrixInitialize_v2( hypre_CSRMatrix *matrix, HYPRE_Int bigInit, HYPRE_
    hypre_CSRMatrixMemoryLocation(matrix) = memory_location;
 
    /* Caveat: for pre-existing i, j, data, their memory location must be guaranteed to be consistent with `memory_location'
-    * Otherwise, mismatches will exist inside parcsr and problems will be encountered when being used, and freed */
+    * Otherwise, mismatches will exist and problems will be encountered when being used, and freed */
 
    if ( !hypre_CSRMatrixData(matrix) && num_nonzeros )
    {

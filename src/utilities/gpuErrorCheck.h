@@ -120,9 +120,9 @@ inline const char *cublasErrorCheck(cublasStatus_t error)
         case CUBLAS_STATUS_NOT_SUPPORTED:
             return "CUBLAS_STATUS_NOT_SUPPORTED";
         case CUBLAS_STATUS_LICENSE_ERROR:
-	    return "CUBLAS_STATUS_LICENSE_ERROR";
+            return "CUBLAS_STATUS_LICENSE_ERROR";
         default:
-	    return "Unknown error in cublasErrorCheck";
+            return "Unknown error in cublasErrorCheck";
     }
 }
 
@@ -133,6 +133,7 @@ inline void cusparseAssert(cusparseStatus_t code, const char *file, int line)
    {
      fprintf(stderr,"CUSPARSE ERROR  ( Code = %d) IN CUDA CALL line %d of file %s\n",code,line,file);
      fprintf(stderr,"CUSPARSE ERROR : %s \n", cusparseErrorCheck(code));
+     exit(0);
    }
 }
 

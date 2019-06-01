@@ -18,13 +18,6 @@
 
 #include "_hypre_parcsr_mv.h"
 #include <assert.h>
-/*#ifdef HYPRE_USING_GPU
-extern "C"
-{
-void PackOnDevice(HYPRE_Complex *send_data,HYPRE_Complex *x_local_data, HYPRE_Int *send_map, HYPRE_Int begin,HYPRE_Int end,cudaStream_t s);
-}
-#endif
-*/
 /*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixMatvec
  *--------------------------------------------------------------------------*/
@@ -38,20 +31,20 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
                                     hypre_ParVector    *y )
 {
    hypre_ParCSRCommHandle **comm_handle;
-   hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
-   hypre_CSRMatrix   *diag   = hypre_ParCSRMatrixDiag(A);
-   hypre_CSRMatrix   *offd   = hypre_ParCSRMatrixOffd(A);
-   hypre_Vector      *x_local  = hypre_ParVectorLocalVector(x);
-   hypre_Vector      *b_local  = hypre_ParVectorLocalVector(b);
-   hypre_Vector      *y_local  = hypre_ParVectorLocalVector(y);
-   HYPRE_BigInt       num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
-   HYPRE_BigInt       num_cols = hypre_ParCSRMatrixGlobalNumCols(A);
+   hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+   hypre_CSRMatrix         *diag     = hypre_ParCSRMatrixDiag(A);
+   hypre_CSRMatrix         *offd     = hypre_ParCSRMatrixOffd(A);
+   hypre_Vector            *x_local  = hypre_ParVectorLocalVector(x);
+   hypre_Vector            *b_local  = hypre_ParVectorLocalVector(b);
+   hypre_Vector            *y_local  = hypre_ParVectorLocalVector(y);
+   HYPRE_BigInt             num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
+   HYPRE_BigInt             num_cols = hypre_ParCSRMatrixGlobalNumCols(A);
+   hypre_Vector            *x_tmp;
+   HYPRE_BigInt             x_size   = hypre_ParVectorGlobalSize(x);
+   HYPRE_BigInt             b_size   = hypre_ParVectorGlobalSize(b);
+   HYPRE_BigInt             y_size   = hypre_ParVectorGlobalSize(y);
 
-   hypre_Vector      *x_tmp;
-   HYPRE_BigInt       x_size = hypre_ParVectorGlobalSize(x);
-   HYPRE_BigInt       b_size = hypre_ParVectorGlobalSize(b);
-   HYPRE_BigInt       y_size = hypre_ParVectorGlobalSize(y);
-   HYPRE_Int          num_vectors = hypre_VectorNumVectors(x_local);
+   HYPRE_Int          num_vectors   = hypre_VectorNumVectors(x_local);
    HYPRE_Int          num_cols_offd = hypre_CSRMatrixNumCols(offd);
    HYPRE_Int          ierr = 0;
    HYPRE_Int          num_sends, i, j, jv, index, start;
@@ -72,26 +65,33 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
     *  these conditions terminates processing, and the ierr flag
     *  is informational only.
     *--------------------------------------------------------------------*/
-   //PUSH_RANGE_PAYLOAD("PAR_CSR_MATVEC",5,x_size);
    hypre_assert( idxstride>0 );
 
    if (num_cols != x_size)
+   {
       ierr = 11;
+   }
 
    if (num_rows != y_size || num_rows != b_size)
+   {
       ierr = 12;
+   }
 
    if (num_cols != x_size && (num_rows != y_size || num_rows != b_size))
+   {
       ierr = 13;
+   }
 
-   hypre_assert( hypre_VectorNumVectors(b_local)==num_vectors );
-   hypre_assert( hypre_VectorNumVectors(y_local)==num_vectors );
+   hypre_assert( hypre_VectorNumVectors(b_local) == num_vectors );
+   hypre_assert( hypre_VectorNumVectors(y_local) == num_vectors );
 
-   if ( num_vectors==1 )
+   if ( num_vectors == 1 )
+   {
       x_tmp = hypre_SeqVectorCreate( num_cols_offd );
+   }
    else
    {
-      hypre_assert( num_vectors>1 );
+      hypre_assert( num_vectors > 1 );
       x_tmp = hypre_SeqMultiVectorCreate( num_cols_offd, num_vectors );
    }
 
@@ -108,7 +108,6 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] -= hypre_MPI_Wtime();
 #endif
-   //PUSH_RANGE("MPI_PACK",3);
    HYPRE_Int use_persistent_comm = 0;
 #ifdef HYPRE_USING_PERSISTENT_COMM
    use_persistent_comm = num_vectors == 1;
@@ -121,70 +120,75 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    if ( use_persistent_comm )
    {
 #ifdef HYPRE_USING_PERSISTENT_COMM
-      //PUSH_RANGE("PERCOMM1",0);
       persistent_comm_handle = hypre_ParCSRCommPkgGetPersistentCommHandle(1, comm_pkg);
 
       HYPRE_Int num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
+
       hypre_assert(num_cols_offd == hypre_ParCSRCommPkgRecvVecStart(comm_pkg, num_recvs));
 
       hypre_VectorData(x_tmp) = (HYPRE_Complex *)persistent_comm_handle->recv_data;
       hypre_SeqVectorSetDataOwner(x_tmp, 0);
-      //POP_RANGE;
 #endif
    }
    else
    {
       comm_handle = hypre_CTAlloc(hypre_ParCSRCommHandle*, num_vectors, HYPRE_MEMORY_HOST);
    }
-   hypre_SeqVectorInitialize(x_tmp);
+
+   hypre_SeqVectorInitialize_v2(x_tmp, HYPRE_MEMORY_DEVICE);
    x_tmp_data = hypre_VectorData(x_tmp);
 
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
    if (!use_persistent_comm)
    {
-      x_buf_data = hypre_CTAlloc( HYPRE_Complex*,  num_vectors , HYPRE_MEMORY_HOST);
-      for ( jv=0; jv<num_vectors; ++jv )
-         x_buf_data[jv] = hypre_CTAlloc(HYPRE_Complex,  hypre_ParCSRCommPkgSendMapStart
-                                        (comm_pkg,  num_sends), HYPRE_MEMORY_SHARED);
+      x_buf_data = hypre_CTAlloc(HYPRE_Complex*, num_vectors, HYPRE_MEMORY_HOST);
+      for ( jv = 0; jv < num_vectors; ++jv )
+      {
+         x_buf_data[jv] = hypre_CTAlloc(HYPRE_Complex,
+                                        hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                                        HYPRE_MEMORY_DEVICE);
+      }
    }
 
-   if ( num_vectors==1 )
+   if ( num_vectors == 1 )
    {
       HYPRE_Int begin = hypre_ParCSRCommPkgSendMapStart(comm_pkg, 0);
       HYPRE_Int end   = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
+
+      hypre_assert(begin == 0);
+
+#ifdef HYPRE_USING_PERSISTENT_COMM
+      HYPRE_Complex *send_data = (HYPRE_Complex *) persistent_comm_handle->send_data;
+#else
+      HYPRE_Complex *send_data = (HYPRE_Complex *) x_buf_data[0];
+#endif
+
 #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
-      //PUSH_RANGE("PERCOMM2DEVICE",4);
+      thrust::gather(thrust::device,
+                     hypre_ParCSRCommPkgSendMapElmts(comm_pkg),
+                     hypre_ParCSRCommPkgSendMapElmts(comm_pkg) +
+                     hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                     x_local_data,
+                     send_data);
+/*
 #ifdef HYPRE_USING_PERSISTENT_COMM
       PackOnDevice((HYPRE_Complex*)persistent_comm_handle->send_data,x_local_data,hypre_ParCSRCommPkgSendMapElmts(comm_pkg),begin,end,HYPRE_STREAM(4));
-      //PrintPointerAttributes(persistent_comm_handle->send_data);
 #else
-#if defined(DEBUG_PACK_ON_DEVICE)
-      hypre_CheckErrorDevice(cudaPeekAtLastError());
-      hypre_CheckErrorDevice(cudaDeviceSynchronize());
-      ASSERT_MANAGED(x_buf_data[0]);
-      ASSERT_MANAGED(x_local_data);
-      ASSERT_MANAGED(hypre_ParCSRCommPkgSendMapElmts(comm_pkg));
-#endif
-      /*
-      printf("%d %d %d\n", PointerAttributes(x_buf_data[0]), PointerAttributes(x_local_data),
-                           PointerAttributes(hypre_ParCSRCommPkgSendMapElmts(comm_pkg)));
-                           */
       PackOnDevice((HYPRE_Complex*)x_buf_data[0],x_local_data,hypre_ParCSRCommPkgSendMapElmts(comm_pkg),begin,end,HYPRE_STREAM(4));
-#if defined(DEBUG_PACK_ON_DEVICE)
-      hypre_CheckErrorDevice(cudaPeekAtLastError());
-      hypre_CheckErrorDevice(cudaDeviceSynchronize());
 #endif
-#endif
-      //POP_RANGE;
+*/
       SetAsyncMode(1);
       hypre_CheckErrorDevice(cudaPeekAtLastError());
       hypre_CheckErrorDevice(cudaDeviceSynchronize());
-      hypre_CSRMatrixMatvecOutOfPlace( alpha, diag, x_local, beta, b_local, y_local, 0);
+
+      hypre_CSRMatrixMatvecOutOfPlace( alpha, diag, x_local, beta, b_local, y_local, 0 );
+
       //hypre_SeqVectorUpdateHost(y_local);
       //hypre_SeqVectorUpdateHost(x_local);
       //hypre_SeqVectorUpdateHost(b_local);
       SetAsyncMode(0);
-#else
+#else // defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
+
 #ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
       //PUSH_RANGE("MPI_PACK_OMP",4);
       SyncVectorToHost(x_local);
@@ -201,32 +205,29 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
 #endif
       for (i = begin; i < end; i++)
       {
-#ifdef HYPRE_USING_PERSISTENT_COMM
-         ((HYPRE_Complex *)persistent_comm_handle->send_data)[i - begin]
-#else
-         x_buf_data[0][i - begin]
-#endif
-            = x_local_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,i)];
+         send_data[i] = x_local_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,i)];
       }
-      //POP_RANGE; // "MPI_PACK_OMP"
 #endif
    }
    else
-      for ( jv=0; jv<num_vectors; ++jv )
+   {
+      for ( jv = 0; jv < num_vectors; ++jv )
       {
          index = 0;
          for (i = 0; i < num_sends; i++)
          {
             start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
             for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
-               x_buf_data[jv][index++]
-                  = x_local_data[
-                     jv*vecstride +
-                     idxstride*hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j) ];
+            {
+               x_buf_data[jv][index++] =
+                  x_local_data[jv*vecstride + idxstride * hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
+            }
          }
       }
+   }
 
    hypre_assert( idxstride==1 );
+
    /* ... The assert is because the following loop only works for 'column'
       storage of a multivector. This needs to be fixed to work more generally,
       at least for 'row' storage. This in turn, means either change CommPkg so
@@ -239,8 +240,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] += hypre_MPI_Wtime();
    hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] -= hypre_MPI_Wtime();
 #endif
-   //POP_RANGE;
-   //PUSH_RANGE("MPI_HALO_EXC_SEND",4);
+
    if (use_persistent_comm)
    {
 #ifdef HYPRE_USING_PERSISTENT_COMM
@@ -251,22 +251,22 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    {
       for ( jv=0; jv<num_vectors; ++jv )
       {
-         comm_handle[jv] = hypre_ParCSRCommHandleCreate
-            ( 1, comm_pkg, x_buf_data[jv], &(x_tmp_data[jv*num_cols_offd]) );
+         comm_handle[jv] = hypre_ParCSRCommHandleCreate_v2
+            ( 1, comm_pkg,
+              HYPRE_MEMORY_DEVICE, x_buf_data[jv],
+              HYPRE_MEMORY_DEVICE, &x_tmp_data[jv*num_cols_offd] );
       }
    }
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] += hypre_MPI_Wtime();
 #endif
-   //POP_RANGE;
 #if !defined(HYPRE_USING_GPU) || !defined(HYPRE_USING_UNIFIED_MEMORY)
    hypre_CSRMatrixMatvecOutOfPlace( alpha, diag, x_local, beta, b_local, y_local, 0);
 #endif
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] -= hypre_MPI_Wtime();
 #endif
-   //PUSH_RANGE("MPI_HALO_EXC_RECV",6);
    if (use_persistent_comm)
    {
 #ifdef HYPRE_USING_PERSISTENT_COMM
@@ -291,29 +291,32 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
 #ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
    UpdateHRC(x_tmp);
 #endif
-   if (num_cols_offd) hypre_CSRMatrixMatvec( alpha, offd, x_tmp, 1.0, y_local);
+   if (num_cols_offd)
+   {
+      hypre_CSRMatrixMatvec( alpha, offd, x_tmp, 1.0, y_local );
+   }
    //if (num_cols_offd) hypre_SeqVectorUpdateHost(y_local);
    //hypre_SeqVectorUpdateHost(x_tmp);
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] -= hypre_MPI_Wtime();
 #endif
-   //PUSH_RANGE("MPI_UNPACK",5);
    hypre_SeqVectorDestroy(x_tmp);
    x_tmp = NULL;
    if (!use_persistent_comm)
    {
-      for ( jv=0; jv<num_vectors; ++jv ) hypre_TFree(x_buf_data[jv], HYPRE_MEMORY_SHARED);
+      for ( jv=0; jv<num_vectors; ++jv )
+      {
+         hypre_TFree(x_buf_data[jv], HYPRE_MEMORY_DEVICE);
+      }
       hypre_TFree(x_buf_data, HYPRE_MEMORY_HOST);
    }
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] += hypre_MPI_Wtime();
 #endif
-   //POP_RANGE;
 #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
    hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(4)));
 #endif
-   //POP_RANGE; // PAR_CSR
    return ierr;
 }
 
@@ -330,26 +333,28 @@ hypre_ParCSRMatrixMatvec( HYPRE_Complex       alpha,
 #ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
 HYPRE_Int
 hypre_ParCSRMatrixMatvec3( HYPRE_Complex       alpha,
-                          hypre_ParCSRMatrix *A,
-                          hypre_ParVector    *x,
-                          HYPRE_Complex       beta,
-                          hypre_ParVector    *y )
+                           hypre_ParCSRMatrix *A,
+                           hypre_ParVector    *x,
+                           HYPRE_Complex       beta,
+                           hypre_ParVector    *y )
 {
-   HYPRE_Int rval=hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A, x, beta, y, y);
+   HYPRE_Int rval = hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A, x, beta, y, y);
    hypre_SeqVectorUpdateHost(y->local_vector);
 }
+
 HYPRE_Int
 hypre_ParCSRMatrixMatvecOutOfPlace3( HYPRE_Complex       alpha,
-                                    hypre_ParCSRMatrix *A,
-                                    hypre_ParVector    *x,
-                                    HYPRE_Complex       beta,
-                                    hypre_ParVector    *b,
-                                    hypre_ParVector    *y )
+                                     hypre_ParCSRMatrix *A,
+                                     hypre_ParVector    *x,
+                                     HYPRE_Complex       beta,
+                                     hypre_ParVector    *b,
+                                     hypre_ParVector    *y )
 {
   hypre_ParCSRMatrixMatvecOutOfPlace(alpha,A,x,beta,b,y);
   hypre_SeqVectorUpdateHost(y->local_vector);
 }
 #endif
+
 /*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixMatvecT
  *
@@ -387,10 +392,12 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
 
    HYPRE_Int         ierr  = 0;
 
-   if (y==NULL) {
+   if (y == NULL)
+   {
      printf("NULLY %p\b", (void*) y);
      return 1;
    }
+
    /*---------------------------------------------------------------------
     *  Check for size compatibility.  MatvecT returns ierr = 1 if
     *  length of X doesn't equal the number of rows of A,
@@ -403,23 +410,29 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
     *--------------------------------------------------------------------*/
 
    if (num_rows != x_size)
+   {
       ierr = 1;
+   }
 
    if (num_cols != y_size)
+   {
       ierr = 2;
+   }
 
    if (num_rows != x_size && num_cols != y_size)
+   {
       ierr = 3;
+   }
+
    /*-----------------------------------------------------------------------
     *-----------------------------------------------------------------------*/
-
-   if ( num_vectors==1 )
+   if ( num_vectors == 1 )
    {
       y_tmp = hypre_SeqVectorCreate(num_cols_offd);
    }
    else
    {
-      y_tmp = hypre_SeqMultiVectorCreate(num_cols_offd,num_vectors);
+      y_tmp = hypre_SeqMultiVectorCreate(num_cols_offd, num_vectors);
    }
 
    /*---------------------------------------------------------------------
@@ -462,21 +475,26 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
    {
       comm_handle = hypre_CTAlloc(hypre_ParCSRCommHandle*, num_vectors, HYPRE_MEMORY_HOST);
    }
-   hypre_SeqVectorInitialize(y_tmp);
+   hypre_SeqVectorInitialize_v2(y_tmp, HYPRE_MEMORY_DEVICE);
 
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+
    if (!use_persistent_comm)
    {
-      y_buf_data = hypre_CTAlloc( HYPRE_Complex*,  num_vectors , HYPRE_MEMORY_HOST);
-      for ( jv=0; jv<num_vectors; ++jv )
-         y_buf_data[jv] = hypre_CTAlloc(HYPRE_Complex,  hypre_ParCSRCommPkgSendMapStart
-                                        (comm_pkg,  num_sends), HYPRE_MEMORY_HOST);
+      y_buf_data = hypre_CTAlloc(HYPRE_Complex*, num_vectors, HYPRE_MEMORY_HOST);
+      for ( jv = 0; jv < num_vectors; ++jv )
+      {
+         y_buf_data[jv] = hypre_CTAlloc(HYPRE_Complex,
+                                        hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                                        HYPRE_MEMORY_DEVICE);
+      }
    }
    y_tmp_data = hypre_VectorData(y_tmp);
    y_local_data = hypre_VectorData(y_local);
 
    hypre_assert( idxstride==1 ); /* only 'column' storage of multivectors
                                   * implemented so far */
+
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] += hypre_MPI_Wtime();
 #endif
@@ -488,7 +506,7 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
          // offdT is optional. Used only if it's present.
          hypre_CSRMatrixMatvec(alpha, A->offdT, x_local, 0.0, y_tmp);
 #ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
-	 SyncVectorToHost(y_tmp);
+         SyncVectorToHost(y_tmp);
 #endif
       }
       else
@@ -512,8 +530,10 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
       for ( jv=0; jv<num_vectors; ++jv )
       {
          /* this is where we assume multivectors are 'column' storage */
-         comm_handle[jv] = hypre_ParCSRCommHandleCreate
-            ( 2, comm_pkg, &(y_tmp_data[jv*num_cols_offd]), y_buf_data[jv] );
+         comm_handle[jv] = hypre_ParCSRCommHandleCreate_v2
+            ( 2, comm_pkg,
+              HYPRE_MEMORY_DEVICE, &y_tmp_data[jv*num_cols_offd],
+              HYPRE_MEMORY_DEVICE, y_buf_data[jv] );
       }
    }
 
@@ -559,22 +579,34 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
    hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] -= hypre_MPI_Wtime();
 #endif
 
-   if ( num_vectors==1 )
+   if ( num_vectors == 1 )
    {
+#ifdef HYPRE_USING_PERSISTENT_COMM
+      HYPRE_Complex *recv_data = (HYPRE_Complex *) persistent_comm_handle->recv_data;
+#else
+      HYPRE_Complex *recv_data = (HYPRE_Complex *) y_buf_data[0];
+#endif
+
+
+#if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
+      hypreDevice_GenScatterAdd(y_local_data,
+                                hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                                hypre_ParCSRCommPkgSendMapElmts(comm_pkg),
+                                recv_data);
+#else
       index = 0;
       for (i = 0; i < num_sends; i++)
       {
          start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
          for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
-            y_local_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)]
-#ifdef HYPRE_USING_PERSISTENT_COMM
-               += ((HYPRE_Complex *)persistent_comm_handle->recv_data)[index++];
-#else
-               += y_buf_data[0][index++];
-#endif
+         {
+            y_local_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)] += recv_data[index++];
+         }
       }
+#endif
    }
    else
+   {
       for ( jv=0; jv<num_vectors; ++jv )
       {
          index = 0;
@@ -587,6 +619,7 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
                   += y_buf_data[jv][index++];
          }
       }
+   }
 #ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
    UpdateHRC(y_local);
 #endif
@@ -594,7 +627,10 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
    y_tmp = NULL;
    if (!use_persistent_comm)
    {
-      for ( jv=0; jv<num_vectors; ++jv ) hypre_TFree(y_buf_data[jv], HYPRE_MEMORY_HOST);
+      for ( jv=0; jv<num_vectors; ++jv )
+      {
+         hypre_TFree(y_buf_data[jv], HYPRE_MEMORY_DEVICE);
+      }
       hypre_TFree(y_buf_data, HYPRE_MEMORY_HOST);
    }
 
@@ -608,7 +644,7 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
 /*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixMatvec_FF
  *--------------------------------------------------------------------------*/
-                                                                                    HYPRE_Int
+HYPRE_Int
 hypre_ParCSRMatrixMatvec_FF( HYPRE_Complex       alpha,
                              hypre_ParCSRMatrix *A,
                              hypre_ParVector    *x,

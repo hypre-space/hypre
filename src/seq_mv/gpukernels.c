@@ -82,6 +82,8 @@ extern "C"{
     //cudaDeviceSynchronize();
   }
 }
+
+/*
 extern "C"{
   __global__
   void  PackOnDeviceKernel(HYPRE_Complex* __restrict__ send_data,const HYPRE_Complex* __restrict__ x_local_data, const HYPRE_Int* __restrict__ send_map, HYPRE_Int begin, HYPRE_Int end){
@@ -111,9 +113,9 @@ extern "C"{
     //hypre_CheckErrorDevice(cudaStreamSynchronize(s));
   }
 }
+*/
 
-  // Scale vector by scalar
-
+// Scale vector by scalar
 extern "C"{
 __global__
 void VecScaleScalarKernel(HYPRE_Complex *__restrict__ u, const HYPRE_Complex alpha, HYPRE_Int num_rows){
