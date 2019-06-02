@@ -303,8 +303,8 @@ hypre_DeviceFree(void *ptr)
    size_t size = ((size_t *) ptr)[-HYPRE_MEM_PAD_LEN];
    HYPRE_OMPOffload(hypre__offload_device_num, ptr, size, "exit", "delete");
 #elif defined(HYPRE_USING_CUDA)
-   /* hypre_CheckErrorDevice(cudaFree((size_t *) ptr - HYPRE_MEM_PAD_LEN)); */
-   cudaSafeFree(ptr, HYPRE_MEM_PAD_LEN);
+   hypre_CheckErrorDevice( cudaFree((size_t *) ptr - HYPRE_MEM_PAD_LEN) );
+   //cudaSafeFree(ptr, HYPRE_MEM_PAD_LEN);
 #endif
 }
 
@@ -313,8 +313,8 @@ hypre_UnifiedFree(void *ptr)
 {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    /* with UM, managed memory free */
-   /* cudaFree((size_t *) ptr - HYPRE_MEM_PAD_LEN); */
-   cudaSafeFree(ptr, HYPRE_MEM_PAD_LEN);
+   hypre_CheckErrorDevice( cudaFree((size_t *) ptr - HYPRE_MEM_PAD_LEN) );
+   //cudaSafeFree(ptr, HYPRE_MEM_PAD_LEN);
 #endif
 }
 
@@ -323,8 +323,8 @@ hypre_HostPinnedFree(void *ptr)
 {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    /* page-locked memory on the host */
-   /* cudaFreeHost((size_t *) ptr - HYPRE_MEM_PAD_LEN); */
-   cudaSafeFree(ptr, HYPRE_MEM_PAD_LEN);
+   hypre_CheckErrorDevice( cudaFreeHost((size_t *) ptr - HYPRE_MEM_PAD_LEN) );
+   //cudaSafeFree(ptr, HYPRE_MEM_PAD_LEN);
 #endif
 }
 
@@ -519,6 +519,7 @@ hypre_Memcpy(void *dst, void *src, size_t size, HYPRE_Int loc_dst, HYPRE_Int loc
  * hypre_Memset
  * "Sets the first num bytes of the block of memory pointed by ptr to the specified value
  * (*** interpreted as an unsigned char ***)"
+ * http://www.cplusplus.com/reference/cstring/memset/
  *--------------------------------------------------------------------------*/
 void *
 hypre_Memset(void *ptr, HYPRE_Int value, size_t num, HYPRE_Int location)

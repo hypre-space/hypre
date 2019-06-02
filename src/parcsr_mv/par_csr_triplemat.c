@@ -209,14 +209,12 @@ hypre_ParCSRMatrix*
 hypre_ParCSRMatMat( hypre_ParCSRMatrix  *A,
                     hypre_ParCSRMatrix  *B )
 {
-   HYPRE_Int memory_locationA, memory_locationB;
+   HYPRE_Int exec = hypre_GetExecPolicy2( hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(A)),
+                                          hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(B)) );
 
-   memory_locationA = hypre_GetActualMemLocation(hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(A)));
-   memory_locationB = hypre_GetActualMemLocation(hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(B)));
+   hypre_assert(exec != HYPRE_EXEC_UNSET);
 
-   hypre_assert(memory_locationA == memory_locationB);
-
-   if (memory_locationA != HYPRE_MEMORY_DEVICE)
+   if (exec == HYPRE_EXEC_HOST)
    {
       return hypre_ParCSRMatMatHost(A,B);
    }
@@ -452,14 +450,12 @@ hypre_ParCSRTMatMatKT( hypre_ParCSRMatrix  *A,
                        hypre_ParCSRMatrix  *B,
                        HYPRE_Int            keep_transpose)
 {
-   HYPRE_Int memory_locationA, memory_locationB;
+   HYPRE_Int exec = hypre_GetExecPolicy2( hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(A)),
+                                          hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(B)) );
 
-   memory_locationA = hypre_GetActualMemLocation(hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(A)));
-   memory_locationB = hypre_GetActualMemLocation(hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(B)));
+   hypre_assert(exec != HYPRE_EXEC_UNSET);
 
-   hypre_assert(memory_locationA == memory_locationB);
-
-   if (memory_locationA != HYPRE_MEMORY_DEVICE)
+   if (exec == HYPRE_EXEC_HOST)
    {
       return hypre_ParCSRTMatMatKTHost(A, B, keep_transpose);
    }

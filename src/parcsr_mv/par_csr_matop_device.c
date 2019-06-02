@@ -889,12 +889,10 @@ hypre_ParCSRMatrixExtractBExtDeviceInit( hypre_ParCSRMatrix  *B,
                                          HYPRE_Int            want_data,
                                          void               **request_ptr)
 {
-   HYPRE_Int memory_location = hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(B));
-
    hypre_assert( hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(B)) ==
                  hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixOffd(B)) );
 
-   hypre_assert( hypre_GetActualMemLocation(memory_location) == HYPRE_MEMORY_DEVICE );
+   hypre_assert( hypre_GetActualMemLocation(hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(B))) == HYPRE_MEMORY_DEVICE );
 
    hypre_ParcsrGetExternalRowsDeviceInit(B,
                                          hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A)),

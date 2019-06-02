@@ -30,6 +30,7 @@ extern void cusparseAssert(cusparseStatus_t code, const char *file, int line);
   allocated using the above routines. This behaviour can be changed by defining ABORT_ON_RAW_POINTER.
   The core file can then be used to find the location of the anomalous hypre_Free.
  */
+#if 0
 void cudaSafeFree(void *ptr,int padding)
 {
   //PUSH_RANGE("SAFE_FREE",3);
@@ -101,6 +102,7 @@ void cudaSafeFree(void *ptr,int padding)
 
   return;
 }
+#endif
 
 hypre_int PrintPointerAttributes(const void *ptr){
   struct cudaPointerAttributes ptr_att;

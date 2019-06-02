@@ -35,7 +35,7 @@ extern "C++" {
 #define HYPRE_UNDEFINED_POINTER2 5
 
 void CheckError(cudaError_t const err, const char* file, char const* const fun, const HYPRE_Int line);
-void cudaSafeFree(void *ptr,int padding);
+//void cudaSafeFree(void *ptr,int padding);
 hypre_int PrintPointerAttributes(const void *ptr);
 hypre_int PointerAttributes(const void *ptr);
 

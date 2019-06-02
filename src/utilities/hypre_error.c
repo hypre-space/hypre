@@ -36,6 +36,7 @@ void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, c
          filename, line, ierr);
    }
 #endif
+   assert(0);
 }
 
 HYPRE_Int HYPRE_GetError()

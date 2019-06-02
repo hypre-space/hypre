@@ -551,13 +551,17 @@ hypre_BoomerAMGCreateSHost(hypre_ParCSRMatrix    *A,
 /* ----------------------------------------------------------------------- */
 HYPRE_Int
 hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
-		       HYPRE_Real             strength_threshold,
-		       HYPRE_Real             max_row_sum,
-		       HYPRE_Int              num_functions,
-		       HYPRE_Int             *dof_func,
-		       hypre_ParCSRMatrix   **S_ptr)
+                       HYPRE_Real             strength_threshold,
+                       HYPRE_Real             max_row_sum,
+                       HYPRE_Int              num_functions,
+                       HYPRE_Int             *dof_func,
+                       hypre_ParCSRMatrix   **S_ptr)
 {
-   if( hypre_GetActualMemLocation(hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(A)))!= HYPRE_MEMORY_DEVICE )
+   HYPRE_Int exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(A)) );
+
+   hypre_assert(exec != HYPRE_EXEC_UNSET);
+
+   if (exec == HYPRE_EXEC_HOST)
    {
       return hypre_BoomerAMGCreateSHost(A,strength_threshold,max_row_sum,num_functions,dof_func,S_ptr);
    }
@@ -569,8 +573,8 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
 
 
 /* ----------------------------------------------------------------------- */
-/* 
-   Create Strength matrix from CF marker array data. Provides a more 
+/*
+   Create Strength matrix from CF marker array data. Provides a more
    general form to build S for specific nodes of the 'global' matrix
    (for example, F points or A_FF part), given the entire matrix.
    These nodes have the SMRK tag.
@@ -581,18 +585,18 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
  */
 HYPRE_Int
 hypre_BoomerAMGCreateSFromCFMarker(hypre_ParCSRMatrix    *A,
-                          HYPRE_Real            strength_threshold,
-                          HYPRE_Real            max_row_sum,
-                          HYPRE_Int             *CF_marker,
-                          HYPRE_Int		SMRK,
-                          hypre_ParCSRMatrix    **S_ptr)
+                                   HYPRE_Real             strength_threshold,
+                                   HYPRE_Real             max_row_sum,
+                                   HYPRE_Int             *CF_marker,
+                                   HYPRE_Int              SMRK,
+                                   hypre_ParCSRMatrix   **S_ptr)
 {
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_CREATES] -= hypre_MPI_Wtime();
 #endif
 
-   MPI_Comm          comm            = hypre_ParCSRMatrixComm(A);
-   hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+   MPI_Comm             comm           = hypre_ParCSRMatrixComm(A);
+   hypre_ParCSRCommPkg *comm_pkg       = hypre_ParCSRMatrixCommPkg(A);
    hypre_CSRMatrix    *A_diag          = hypre_ParCSRMatrixDiag(A);
    HYPRE_Int          *A_diag_i        = hypre_CSRMatrixI(A_diag);
    HYPRE_Real         *A_diag_data     = hypre_CSRMatrixData(A_diag);
@@ -600,7 +604,7 @@ hypre_BoomerAMGCreateSFromCFMarker(hypre_ParCSRMatrix    *A,
 
    hypre_CSRMatrix    *A_offd          = hypre_ParCSRMatrixOffd(A);
    HYPRE_Int          *A_offd_i        = hypre_CSRMatrixI(A_offd);
-   HYPRE_Real         *A_offd_data = NULL;
+   HYPRE_Real         *A_offd_data     = NULL;
    HYPRE_Int          *A_diag_j        = hypre_CSRMatrixJ(A_diag);
    HYPRE_Int          *A_offd_j        = hypre_CSRMatrixJ(A_offd);
 

@@ -90,6 +90,10 @@ extern "C" {
 #define HYPRE_MEMORY_SHARED        ( 2)
 #define HYPRE_MEMORY_HOST_PINNED   ( 3)
 
+#define HYPRE_EXEC_UNSET           (-1)
+#define HYPRE_EXEC_DEVICE          ( 0)
+#define HYPRE_EXEC_HOST            ( 1)
+
 /*==================================================================
  *       default def of memory location selected based memory env
  *   +-------------------------------------------------------------+
@@ -139,7 +143,9 @@ extern "C" {
 
 #endif
 
-/* the above definitions might be overridden to customize a memory location */
+/* the above definitions might be overridden to customize
+ * memory locations */
+
 /* #undef  HYPRE_MEMORY_HOST_ACT */
 /* #undef  HYPRE_MEMORY_DEVICE_ACT */
 /* #undef  HYPRE_MEMORY_SHARED_ACT */
@@ -177,6 +183,80 @@ hypre_GetActualMemLocation(HYPRE_Int location)
    }
 
    return HYPRE_MEMORY_UNSET;
+}
+
+/*---------------------------------------------------
+ * hypre_GetExecPolicy
+ * Return execution policy based on memory locations
+ *---------------------------------------------------*/
+/* for unary operation */
+static inline HYPRE_Int
+hypre_GetExecPolicy1(HYPRE_Int location)
+{
+   HYPRE_Int exec = HYPRE_EXEC_UNSET;
+
+   location = hypre_GetActualMemLocation(location);
+
+   switch (location)
+   {
+      case HYPRE_MEMORY_HOST :
+      case HYPRE_MEMORY_HOST_PINNED :
+         exec = HYPRE_EXEC_HOST;
+         break;
+      case HYPRE_MEMORY_DEVICE :
+         exec = HYPRE_EXEC_DEVICE;
+         break;
+      case HYPRE_MEMORY_SHARED :
+         exec = HYPRE_EXEC_HOST;
+         break;
+   }
+
+   return exec;
+}
+
+/* for binary operation */
+static inline HYPRE_Int
+hypre_GetExecPolicy2(HYPRE_Int location1,
+                     HYPRE_Int location2)
+{
+   location1 = hypre_GetActualMemLocation(location1);
+   location2 = hypre_GetActualMemLocation(location2);
+
+   /* HOST_PINNED has the same exec policy as HOST */
+   if (location1 == HYPRE_MEMORY_HOST_PINNED)
+   {
+      location1 = HYPRE_MEMORY_HOST;
+   }
+
+   if (location2 == HYPRE_MEMORY_HOST_PINNED)
+   {
+      location2 = HYPRE_MEMORY_HOST;
+   }
+
+   /* no policy for these combinations */
+   if ( (location1 == HYPRE_MEMORY_HOST && location2 == HYPRE_MEMORY_DEVICE) ||
+        (location2 == HYPRE_MEMORY_HOST && location1 == HYPRE_MEMORY_DEVICE) )
+   {
+      return HYPRE_EXEC_UNSET;
+   }
+
+   /* policy for S-S can be HOST or DEVICE. Choose HOST by default */
+   if (location1 == HYPRE_MEMORY_SHARED && location2 == HYPRE_MEMORY_SHARED)
+   {
+      return HYPRE_EXEC_HOST;
+   }
+
+   if (location1 == HYPRE_MEMORY_HOST || location2 == HYPRE_MEMORY_HOST)
+   {
+      return HYPRE_EXEC_HOST;
+   }
+
+   if (location1 == HYPRE_MEMORY_DEVICE || location2 == HYPRE_MEMORY_DEVICE)
+   {
+      return HYPRE_EXEC_DEVICE;
+   }
+
+   return HYPRE_EXEC_UNSET;
 }
 
 #define HYPRE_MEM_PAD_LEN 1
