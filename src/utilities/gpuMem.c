@@ -152,7 +152,10 @@ void hypre_GPUInit(hypre_int use_device)
       /* Initialize streams */
       hypre_int jj;
       for(jj=0;jj<MAX_HGS_ELEMENTS;jj++)
-         hypre_CheckErrorDevice(cudaStreamCreateWithFlags(&(HYPRE_STREAM(jj)),cudaStreamNonBlocking));
+      {
+         //hypre_CheckErrorDevice(cudaStreamCreateWithFlags(&(HYPRE_STREAM(jj)),cudaStreamNonBlocking));
+         hypre_CheckErrorDevice(cudaStreamCreateWithFlags(&(HYPRE_STREAM(jj)), cudaStreamDefault));
+      }
 
       /* Initialize the library handles and streams */
       cusparseErrchk(cusparseCreate(&(HYPRE_CUSPARSE_HANDLE)));
