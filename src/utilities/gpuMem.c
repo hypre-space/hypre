@@ -3,11 +3,6 @@
 #endif
 #include "_hypre_utilities.h"
 
-
-
-
-
-
 #if defined(HYPRE_USING_UNIFIED_MEMORY)
 size_t memsize(const void *ptr){
    return ((size_t*)ptr)[-HYPRE_MEM_PAD_LEN];
