@@ -106,6 +106,32 @@ HYPRE_MGRSetNonCpointsToFpoints( HYPRE_Solver solver, HYPRE_Int nonCptToFptFlag)
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_MGRSetFSolver
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_MGRSetFSolver(HYPRE_Solver          solver,
+                             HYPRE_Int    level,
+                             HYPRE_PtrToParSolverFcn  fine_grid_solver_solve,
+                             HYPRE_PtrToParSolverFcn  fine_grid_solver_setup,
+                             HYPRE_Solver          fsolver )
+{
+   return( hypre_MGRSetFSolver( (void *) solver,
+                     level,
+                     (HYPRE_Int (*)(void*, void*, void*, void*)) fine_grid_solver_solve,
+                     (HYPRE_Int (*)(void*, void*, void*, void*)) fine_grid_solver_setup,
+                     (void *) fsolver ) );
+}
+
+HYPRE_Int HYPRE_MGRBuildAffNew(HYPRE_ParCSRMatrix A,
+                               HYPRE_Int *CF_marker,
+                               HYPRE_Int debug_flag,
+                               HYPRE_ParCSRMatrix *A_ff)
+{
+   return (hypre_MGRBuildAffNew(A, CF_marker, debug_flag, A_ff));
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_MGRSetCoarseSolver
  *--------------------------------------------------------------------------*/
 
@@ -174,6 +200,15 @@ HYPRE_Int
 HYPRE_MGRSetLevelFRelaxMethod(HYPRE_Solver solver, HYPRE_Int *relax_method )
 {
    return hypre_MGRSetLevelFRelaxMethod(solver, relax_method );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_MGRSetCoarseGridMethod
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_MGRSetCoarseGridMethod( HYPRE_Solver solver, HYPRE_Int *cg_method )
+{
+   return hypre_MGRSetCoarseGridMethod( solver, cg_method );
 }
 
 /*--------------------------------------------------------------------------

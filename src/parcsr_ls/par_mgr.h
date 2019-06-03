@@ -76,6 +76,7 @@ typedef struct
   HYPRE_Int (*coarse_grid_solver_solve)(void*,void*,void*,void*);
 
   HYPRE_Int use_default_cgrid_solver;
+  HYPRE_Int use_default_fsolver;
   HYPRE_Real  omega;
 
   /* temp vectors for solve phase */
@@ -85,6 +86,7 @@ typedef struct
   hypre_ParVector   *Ftemp;
 
   HYPRE_Real          *diaginv;
+  hypre_ParCSRMatrix  *A_ff_inv;
   HYPRE_Int           n_block;
   HYPRE_Int           left_size;
   HYPRE_Int           global_smooth_iters;
@@ -104,6 +106,10 @@ typedef struct
   /* F-relaxation method */
   HYPRE_Int *Frelax_method;
   HYPRE_Int *Frelax_num_functions;
+
+  /* Non-Galerkin coarse grid */
+  HYPRE_Int *use_non_galerkin_cg;
+
   /* V-cycle F relaxation method */
   hypre_ParAMGData    **FrelaxVcycleData;
   hypre_ParVector   *VcycleRelaxVtemp;
@@ -130,5 +136,6 @@ typedef struct
 #define CPT(i, bsize) (((i) % (bsize)) == CMRK)
 
 #define SMALLREAL 1e-20
+#define DIVIDE_TOL 1e-32
 
 #endif

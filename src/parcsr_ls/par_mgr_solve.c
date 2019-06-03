@@ -45,8 +45,8 @@ hypre_MGRSolve( void               *mgr_vdata,
   hypre_ParVector     	*Utemp = (mgr_data -> Utemp);
   hypre_ParVector     	*residual;
 
-  HYPRE_Real           alpha = -1;
-  HYPRE_Real           beta = 1;
+  HYPRE_Real           alpha = -1.0;
+  HYPRE_Real           beta = 1.0;
   HYPRE_Real           conv_factor = 0.0;
   HYPRE_Real   	resnorm = 1.0;
   HYPRE_Real   	init_resnorm = 0.0;
@@ -66,6 +66,7 @@ hypre_MGRSolve( void               *mgr_vdata,
   */
   HYPRE_Solver    	cg_solver = (mgr_data -> coarse_grid_solver);
   HYPRE_Int		(*coarse_grid_solver_solve)(void*,void*,void*,void*) = (mgr_data -> coarse_grid_solver_solve);
+  HYPRE_Int  set_c_points_method = (mgr_data -> set_c_points_method);
 
   HYPRE_Int    blk_size  = (mgr_data -> block_size);
   HYPRE_Real    *diaginv = (mgr_data -> diaginv);
@@ -74,6 +75,8 @@ hypre_MGRSolve( void               *mgr_vdata,
 
   HYPRE_Int    global_smooth_iters      =  (mgr_data -> global_smooth_iters);
   HYPRE_Int    global_smooth_type =  (mgr_data -> global_smooth_type);
+
+  HYPRE_Real   wall_time = 0.0;
 
   HYPRE_Int    i;
 
@@ -208,11 +211,24 @@ hypre_MGRSolve( void               *mgr_vdata,
   {
     if (global_smooth_iters)
     {
+      wall_time = time_getWallclockSeconds();
+      hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[0], U_array[0], beta, F_array[0], Vtemp);
+      HYPRE_Real resnorm_gsmooth = hypre_ParVectorInnerProd(Vtemp, Vtemp);
+      HYPRE_Real conv_factor_gsmooth = resnorm_gsmooth;
       if (global_smooth_type == 0)//block Jacobi smoother
 	    {
 	      for (i = 0;i < global_smooth_iters;i ++)
+        {
+          if (set_c_points_method == 0)
+          {
 	  	    hypre_blockRelax_solve(A_array[0],F_array[0],U_array[0],blk_size,n_block,left_size,global_smooth_type,diaginv,Vtemp);
 	    }
+          else 
+          {
+            hypre_blockRelax_solve(A_array[0],F_array[0],U_array[0],1,n_block,left_size,global_smooth_type,diaginv,Vtemp);
+          }
+        }
+      }
 	    else if ((global_smooth_type > 0) && (global_smooth_type < 7))
 	    {
           for (i = 0;i < global_smooth_iters;i ++)
@@ -232,10 +248,28 @@ hypre_MGRSolve( void               *mgr_vdata,
           hypre_ParVectorAxpy(beta, Utemp, U_array[0]);				
         }
       }
+      else if (global_smooth_type == 16) // HYPRE ILU
+      {
+        // compute residual
+        hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[0], U_array[0], beta, F_array[0], Vtemp);
+        // solve
+        HYPRE_ILUSolve(mgr_data -> global_smoother, A_array[0], Vtemp, U_array[0]);
+        // update solution
+        hypre_ParVectorAxpy(beta, Utemp, U_array[0]);       
+      }
+      hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[0], U_array[0], beta, F_array[0], Vtemp);
+      resnorm_gsmooth = hypre_ParVectorInnerProd(Vtemp, Vtemp);
+      //if (my_id == 0) hypre_printf("Global smoothing convergence factor: %1.2f\n", resnorm_gsmooth/conv_factor_gsmooth);
+      wall_time = time_getWallclockSeconds() - wall_time;
+      //if (my_id == 0) hypre_printf("Global smoother solve: %f\n", wall_time);
     }
 
+    wall_time = time_getWallclockSeconds();
       /* Do one cycle of reduction solve on Ae=r */
       hypre_MGRCycle(mgr_data, F_array, U_array);
+    wall_time = time_getWallclockSeconds() - wall_time;
+    //if (my_id == 0) hypre_printf("MGR Cycle time: %f\n", wall_time);
+
 
       /*---------------------------------------------------------------
        *    Compute  fine-grid residual and residual norm
@@ -523,7 +557,7 @@ hypre_MGRCycle( void               *mgr_vdata,
                   hypre_ParVector    **F_array,
                   hypre_ParVector    **U_array )
 {
-  //MPI_Comm 	         comm;
+  MPI_Comm 	         comm;
   hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
 
   HYPRE_Int       Solve_err_flag;
@@ -537,6 +571,7 @@ hypre_MGRCycle( void               *mgr_vdata,
   hypre_ParCSRMatrix  	**RT_array  = (mgr_data -> RT_array);
   hypre_ParCSRMatrix  	**P_array   = (mgr_data -> P_array);
   hypre_ParCSRMatrix  	*RAP = (mgr_data -> RAP);
+  HYPRE_Int  use_default_cgrid_solver = (mgr_data -> use_default_cgrid_solver);
   HYPRE_Solver    	cg_solver = (mgr_data -> coarse_grid_solver);
   HYPRE_Int		(*coarse_grid_solver_solve)(void*, void*, void*, void*) = (mgr_data -> coarse_grid_solver_solve);
 
@@ -565,11 +600,16 @@ hypre_MGRCycle( void               *mgr_vdata,
 
   HYPRE_Int      *restrict_type = (mgr_data -> restrict_type);
   HYPRE_Int      use_air = 0;
+  HYPRE_Int      my_id;
+
+  HYPRE_Real     wall_time;
 
   /* Initialize */
 
       
-  //comm = hypre_ParCSRMatrixComm(A_array[0]);
+  comm = hypre_ParCSRMatrixComm(A_array[0]);
+  hypre_MPI_Comm_rank(comm, &my_id);
+
   Solve_err_flag = 0;
   Not_Finished = 1;
   cycle_type = 1;
@@ -583,11 +623,24 @@ hypre_MGRCycle( void               *mgr_vdata,
     {
       /* call coarse grid solver here */
       /* default is BoomerAMG */
+      wall_time = time_getWallclockSeconds();
       coarse_grid_solver_solve(cg_solver, RAP, F_array[level], U_array[level]);
+      if (use_default_cgrid_solver)
+      {
       HYPRE_Real convergence_factor_cg;
       hypre_BoomerAMGGetRelResidualNorm(cg_solver, &convergence_factor_cg);
       (mgr_data -> cg_convergence_factor) = convergence_factor_cg;
-      //hypre_printf("Coarse grid V-cycle convergence factor: %5f\n", convergence_factor_cg);
+        if (my_id == 0 && convergence_factor_cg > 1.0)
+        {
+          hypre_printf("Warning!!! Coarse grid solve diverges. Factor = %1.2e\n", convergence_factor_cg);
+        }
+        if (/*mgr_data -> print_level > 2 &&*/ my_id == 0)
+        {
+          hypre_printf("Coarse grid V-cycle convergence factor: %5f\n", convergence_factor_cg);
+        }
+      }
+      wall_time = time_getWallclockSeconds() - wall_time;
+      //if (my_id == 0) hypre_printf("Coarse grid solve: %f\n", wall_time);
 
       // DEBUG: print the coarse system indicated by mgr_data ->print_coarse_system
       if(mgr_data -> print_coarse_system)
@@ -611,6 +664,7 @@ hypre_MGRCycle( void               *mgr_vdata,
        /* Relax solution - F-relaxation */
        relax_points = -1;
 
+       wall_time = time_getWallclockSeconds() - wall_time;
        if (Frelax_method[level] == 0) 
        { /* (single level) relaxation for A_ff */
           if (relax_type == 18)
@@ -676,6 +730,9 @@ hypre_MGRCycle( void               *mgr_vdata,
               relax_type, relax_points, relax_weight, omega, NULL, U_array[fine_grid], Vtemp, Ztemp);
         }
       }
+      wall_time = time_getWallclockSeconds() - wall_time;
+      //if (my_id == 0) hypre_printf("F-relaxation solve level %d: %f\n", coarse_grid, wall_time);
+
 		  // Update residual and compute coarse-grid rhs
 		  alpha = -1.0;
 		  beta = 1.0;
