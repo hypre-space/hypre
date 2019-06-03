@@ -45,32 +45,32 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
 
    hypre_CSRMatrix *A_diag;
    HYPRE_Real      *A_diag_data;
-   HYPRE_Int             *A_diag_i;
+   HYPRE_Int       *A_diag_i;
 
    hypre_CSRBlockMatrix *A_block_diag;
 
    hypre_CSRMatrix *A_offd;   
    HYPRE_Real      *A_offd_data;
-   HYPRE_Int             *A_offd_i;
+   HYPRE_Int       *A_offd_i;
 
    hypre_CSRBlockMatrix *A_block_offd;
 
    hypre_CSRMatrix *P_diag;
    HYPRE_Real      *P_diag_data;
-   HYPRE_Int             *P_diag_i;
+   HYPRE_Int       *P_diag_i;
 
    hypre_CSRBlockMatrix *P_block_diag;
 
    hypre_CSRMatrix *P_offd;   
    HYPRE_Real      *P_offd_data;
-   HYPRE_Int             *P_offd_i;
+   HYPRE_Int       *P_offd_i;
 
    hypre_CSRBlockMatrix *P_block_offd;
 
 
    HYPRE_Int	    numrows;
 
-   HYPRE_Int	    *row_starts;
+   HYPRE_BigInt	    *row_starts;
 
  
    HYPRE_Int      num_levels; 
@@ -89,7 +89,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
 
    HYPRE_Int       level;
    HYPRE_Int       j;
-   HYPRE_Int       fine_size;
+   HYPRE_BigInt    fine_size;
  
    HYPRE_Int       min_entries;
    HYPRE_Int       max_entries;
@@ -106,7 +106,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    HYPRE_Int       i;
    
 
-   HYPRE_Int       coarse_size;
+   HYPRE_BigInt    coarse_size;
    HYPRE_Int       entries;
 
    HYPRE_Real    avg_entries;
@@ -115,8 +115,8 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    HYPRE_Real    min_weight;
    HYPRE_Real    max_weight;
 
-   HYPRE_Int       global_min_e;
-   HYPRE_Int       global_max_e;
+   HYPRE_Int     global_min_e;
+   HYPRE_Int     global_max_e;
 
    HYPRE_Real    global_min_rsum;
    HYPRE_Real    global_max_rsum;
@@ -132,8 +132,8 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    HYPRE_Real   memory_cmplxty = 0;
 
    /* amg solve params */
-   HYPRE_Int      max_iter;
-   HYPRE_Int      cycle_type;    
+   HYPRE_Int     max_iter;
+   HYPRE_Int     cycle_type;    
    HYPRE_Int     *num_grid_sweeps;  
    HYPRE_Int     *grid_relax_type;   
    HYPRE_Int      relax_order;
@@ -550,7 +550,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
       
 #ifdef HYPRE_NO_GLOBAL_PARTITION       
 
-       numrows = row_starts[1]-row_starts[0];
+       numrows = (HYPRE_Int)(row_starts[1]-row_starts[0]);
        if (!numrows) /* if we don't have any rows, then don't have this count toward
                          min row sum or min num entries */
        {
@@ -567,12 +567,12 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
        
        if (my_id ==0)
        {
-          global_min_e = - gather_buff[0];
-          global_max_e = gather_buff[1];
+          global_min_e = - (HYPRE_Int)gather_buff[0];
+          global_max_e = (HYPRE_Int)gather_buff[1];
           global_min_rsum = - gather_buff[2];
           global_max_rsum = gather_buff[3];
           
-          hypre_printf( "%2d %7d %8.0f  %0.3f  %4d %4d",
+          hypre_printf( "%2d %7b %8.0f  %0.3f  %4d %4d",
                   level, fine_size, global_nonzeros, sparse, global_min_e, 
                   global_max_e);
           hypre_printf("  %4.1f  %10.3e  %10.3e\n", avg_entries,
@@ -606,7 +606,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
              global_max_rsum = hypre_max(global_max_rsum, gather_buff[j*4 +3]);
           }
 
-          hypre_printf( "%2d %7d %8.0f  %0.3f  %4d %4d",
+          hypre_printf( "%2d %7b %8.0f  %0.3f  %4d %4d",
                   level, fine_size, global_nonzeros, sparse, global_min_e, 
                   global_max_e);
           hypre_printf("  %4.1f  %10.3e  %10.3e\n", avg_entries,
@@ -847,14 +847,14 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
 
       if (my_id == 0)
       {
-         global_min_e = - gather_buff[0];
-         global_max_e = gather_buff[1];
+         global_min_e = - (HYPRE_Int)gather_buff[0];
+         global_max_e = (HYPRE_Int)gather_buff[1];
          global_min_rsum = -gather_buff[2];
          global_max_rsum = gather_buff[3];
          global_min_wt = -gather_buff[4];
          global_max_wt = gather_buff[5];
 
-          hypre_printf( "%2d %5d x %-5d %3d %3d",
+          hypre_printf( "%2d %5b x %-5b %3d %3d",
                  level, fine_size, coarse_size,  global_min_e, global_max_e);
          hypre_printf("  %10.3e %9.3e %9.3e %9.3e\n",
                 global_min_wt, global_max_wt, 
@@ -896,7 +896,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
             global_max_wt = hypre_max(global_max_wt, gather_buff[j*6+5]);
          }
          
-         hypre_printf( "%2d %5d x %-5d %3d %3d",
+         hypre_printf( "%2d %5b x %-5b %3d %3d",
                  level, fine_size, coarse_size,  global_min_e, global_max_e);
          hypre_printf("  %10.3e %9.3e %9.3e %9.3e\n",
                 global_min_wt, global_max_wt, 

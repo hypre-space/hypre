@@ -230,20 +230,20 @@ MGR Iterations = 50
 Final Relative Residual Norm = 7.963764e-09
 
 # Output file: solvers.out.208
-MGR Iterations = 74
-Final Relative Residual Norm = 8.553484e-09
+(??)MGR Iterations = 57
+(??)Final Relative Residual Norm = 7.786878e-09
 
 # Output file: solvers.out.209
-MGR Iterations = 70
-Final Relative Residual Norm = 9.518056e-09
+(??)MGR Iterations = 54
+(??)Final Relative Residual Norm = 7.641495e-09
 
 # Output file: solvers.out.210
-MGR Iterations = 52
-Final Relative Residual Norm = 7.228497e-09
+(??)MGR Iterations = 5
+(??)Final Relative Residual Norm = 2.728494e-10
 
 # Output file: solvers.out.211
-MGR Iterations = 50
-Final Relative Residual Norm = 7.963764e-09
+(??)MGR Iterations = 5
+(??)Final Relative Residual Norm = 4.056401e-10
 
 # Output file: solvers.out.212
 Iterations = 5

@@ -28,7 +28,7 @@ main( HYPRE_Int   argc,
    hypre_ParCSRBooleanMatrix     *C;
    hypre_CSRBooleanMatrix *As;
    hypre_CSRBooleanMatrix *Bs;
-   HYPRE_Int *row_starts, *col_starts;
+   HYPRE_BigInt *row_starts, *col_starts;
    HYPRE_Int num_procs, my_id;
    HYPRE_Int a_nrows, a_ncols, b_nrows, b_ncols;
 

@@ -775,7 +775,7 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
 
    hypre_TFree(row_sizes, HYPRE_MEMORY_HOST);
    hypre_SStructMatrixTmpColCoords(matrix) =
-      hypre_CTAlloc(HYPRE_Int,  max_row_size, HYPRE_MEMORY_HOST);
+      hypre_CTAlloc(HYPRE_BigInt,  max_row_size, HYPRE_MEMORY_HOST);
    hypre_SStructMatrixTmpCoeffs(matrix) =
       hypre_CTAlloc(HYPRE_Complex,  max_row_size, HYPRE_MEMORY_HOST);
 
@@ -817,11 +817,12 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
    hypre_SStructUVEntry    *Uventry;
    hypre_BoxManEntry       *boxman_entry;
    hypre_SStructBoxManInfo *entry_info;
-   HYPRE_Int                row_coord;
-   HYPRE_Int               *col_coords;
+   HYPRE_BigInt             row_coord;
+   HYPRE_BigInt            *col_coords;
    HYPRE_Int                ncoeffs;
    HYPRE_Complex           *coeffs;
-   HYPRE_Int                i, entry, Uverank;
+   HYPRE_Int                i, entry;
+   HYPRE_BigInt             Uverank;
    HYPRE_Int                matrix_type = hypre_SStructMatrixObjectType(matrix);
 
    hypre_SStructGridFindBoxManEntry(grid, part, index, var, &boxman_entry);
@@ -894,13 +895,13 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
    if (action > 0)
    {
       HYPRE_IJMatrixAddToValues(ijmatrix, 1, &ncoeffs, &row_coord,
-                                (const HYPRE_Int *) col_coords,
+                                (const HYPRE_BigInt *) col_coords,
                                 (const HYPRE_Complex *) coeffs);
    }
    else if (action > -1)
    {
       HYPRE_IJMatrixSetValues(ijmatrix, 1, &ncoeffs, &row_coord,
-                              (const HYPRE_Int *) col_coords,
+                              (const HYPRE_BigInt *) col_coords,
                               (const HYPRE_Complex *) coeffs);
    }
    else
@@ -961,7 +962,8 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
    hypre_BoxManEntry   **boxman_to_entries;
    HYPRE_Int             nboxman_to_entries;
    HYPRE_Int             nrows;
-   HYPRE_Int            *ncols, *rows, *row_indexes, *cols;
+   HYPRE_Int            *ncols, *row_indexes;;
+   HYPRE_BigInt         *rows, *cols;
    HYPRE_Complex        *ijvalues;
    hypre_Box            *box;
    hypre_Box            *to_box;
@@ -970,7 +972,7 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
    hypre_Index           index, stride, loop_size;
    hypre_IndexRef        start;
    hypre_Index           rs, cs;
-   HYPRE_Int             row_base, col_base;
+   HYPRE_BigInt          row_base, col_base;
    HYPRE_Int             ei, entry, ii, jj, i;
    HYPRE_Int             matrix_type = hypre_SStructMatrixObjectType(matrix);
 
@@ -988,9 +990,9 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
 
       nrows       = hypre_BoxVolume(set_box);
       ncols       = hypre_CTAlloc(HYPRE_Int, nrows, HYPRE_MEMORY_SHARED);
-      rows        = hypre_CTAlloc(HYPRE_Int, nrows, HYPRE_MEMORY_SHARED);
+      rows        = hypre_CTAlloc(HYPRE_BigInt, nrows, HYPRE_MEMORY_SHARED);
       row_indexes = hypre_CTAlloc(HYPRE_Int, nrows, HYPRE_MEMORY_SHARED);
-      cols        = hypre_CTAlloc(HYPRE_Int, nrows*nentries, HYPRE_MEMORY_SHARED);
+      cols        = hypre_CTAlloc(HYPRE_BigInt, nrows*nentries, HYPRE_MEMORY_SHARED);
       ijvalues    = hypre_CTAlloc(HYPRE_Complex, nrows*nentries, HYPRE_MEMORY_SHARED);
 
       hypre_SetIndex(stride, 1);
@@ -1090,17 +1092,17 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
          if (action > 0)
          {
             HYPRE_IJMatrixAddToValues2(ijmatrix, nrows, ncols,
-                                       (const HYPRE_Int *) rows,
+                                       (const HYPRE_BigInt *) rows,
                                        (const HYPRE_Int *) row_indexes,
-                                       (const HYPRE_Int *) cols,
+                                       (const HYPRE_BigInt *) cols,
                                        (const HYPRE_Complex *) ijvalues);
          }
          else if (action > -1)
          {
             HYPRE_IJMatrixSetValues2(ijmatrix, nrows, ncols,
-                                     (const HYPRE_Int *) rows,
+                                     (const HYPRE_BigInt *) rows,
                                      (const HYPRE_Int *) row_indexes,
-                                     (const HYPRE_Int *) cols,
+                                     (const HYPRE_BigInt *) cols,
                                      (const HYPRE_Complex *) ijvalues);
          }
          else

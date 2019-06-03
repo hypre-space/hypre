@@ -95,7 +95,7 @@ typedef struct
   For example, number of well equations
   */
   HYPRE_Int reserved_coarse_size;
-  HYPRE_Int *reserved_coarse_indexes;
+  HYPRE_BigInt *reserved_coarse_indexes;
   HYPRE_Int *reserved_Cpoint_local_indexes;
 
   HYPRE_Int set_non_Cpoints_to_F;

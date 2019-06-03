@@ -64,8 +64,8 @@ HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix * Aee,
 */
 HYPRE_Int hypre_HarmonicExtension (hypre_CSRMatrix *A,
                              hypre_CSRMatrix *P,
-                             HYPRE_Int num_DOF, HYPRE_Int *DOF,
-                             HYPRE_Int num_idof, HYPRE_Int *idof,
-                             HYPRE_Int num_bdof, HYPRE_Int *bdof);
+                             HYPRE_Int num_DOF, HYPRE_BigInt *DOF,
+                             HYPRE_Int num_idof, HYPRE_BigInt *idof,
+                             HYPRE_Int num_bdof, HYPRE_BigInt *bdof);
 
 #endif

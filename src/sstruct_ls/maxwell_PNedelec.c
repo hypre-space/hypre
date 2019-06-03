@@ -39,13 +39,13 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
    HYPRE_Int            **cfbox_mapping, **fcbox_mapping;
 
    hypre_BoxManEntry     *entry;
-   HYPRE_Int              rank, rank2;
-   HYPRE_Int              start_rank1, start_rank2; 
+   HYPRE_BigInt           rank, rank2;
+   HYPRE_BigInt           start_rank1, start_rank2; 
 
    HYPRE_Int              nedges;
 
-   HYPRE_Int             *iedgeEdge;
-   HYPRE_Int             *jedge_Edge;
+   HYPRE_BigInt          *iedgeEdge;
+   HYPRE_BigInt          *jedge_Edge;
 
    HYPRE_Real            *vals_edgeEdge;
    HYPRE_Real             fCedge_ratio;
@@ -69,11 +69,12 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
    HYPRE_Int              nvars, Edge_nvars, part, var;
    HYPRE_Int              tot_vars= 8;
 
-   HYPRE_Int              t, i, j, k, l, m, n, p, size;
+   HYPRE_Int              t, i, j, k, m, n, size;
+   HYPRE_BigInt           l, p;
 
-   HYPRE_Int              ilower, iupper;
-   HYPRE_Int              jlower, jupper;
-   HYPRE_Int            **lower_ranks, **upper_ranks;
+   HYPRE_BigInt           ilower, iupper;
+   HYPRE_BigInt           jlower, jupper;
+   HYPRE_BigInt         **lower_ranks, **upper_ranks;
 
    HYPRE_Int           ***n_CtoVbox, ****CtoVboxnums;
    HYPRE_Int             *num_vboxes, **vboxnums;
@@ -239,15 +240,15 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
    }
 
    /* variable rank bounds for this processor */
-   lower_ranks= hypre_TAlloc(HYPRE_Int *,  nparts, HYPRE_MEMORY_HOST);
-   upper_ranks= hypre_TAlloc(HYPRE_Int *,  nparts, HYPRE_MEMORY_HOST);
+   lower_ranks= hypre_TAlloc(HYPRE_BigInt *,  nparts, HYPRE_MEMORY_HOST);
+   upper_ranks= hypre_TAlloc(HYPRE_BigInt *,  nparts, HYPRE_MEMORY_HOST);
    for (part= 0; part< nparts; part++)
    {
       p_fgrid  = hypre_SStructGridPGrid(fgrid_edge, part);
       Edge_nvars= hypre_SStructPGridNVars(p_fgrid);
 
-      lower_ranks[part]= hypre_CTAlloc(HYPRE_Int,  Edge_nvars, HYPRE_MEMORY_HOST);
-      upper_ranks[part]= hypre_CTAlloc(HYPRE_Int,  Edge_nvars, HYPRE_MEMORY_HOST);
+      lower_ranks[part]= hypre_CTAlloc(HYPRE_BigInt,  Edge_nvars, HYPRE_MEMORY_HOST);
+      upper_ranks[part]= hypre_CTAlloc(HYPRE_BigInt,  Edge_nvars, HYPRE_MEMORY_HOST);
       for (t= 0; t< Edge_nvars; t++)
       {
          var_fgrid= hypre_SStructPGridSGrid(p_fgrid, t);
@@ -326,7 +327,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
     *-----------------------------------------------------------------------*/
 
    /* count the row/col connections */
-   iedgeEdge     = hypre_CTAlloc(HYPRE_Int,  nedges, HYPRE_MEMORY_HOST);
+   iedgeEdge     = hypre_CTAlloc(HYPRE_BigInt,  nedges, HYPRE_MEMORY_HOST);
    ncols_edgeEdge= hypre_CTAlloc(HYPRE_Int,  nedges, HYPRE_MEMORY_HOST);
 
    /* get the contracted boxes */
@@ -1465,7 +1466,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
       }
    }
    vals_edgeEdge = hypre_CTAlloc(HYPRE_Real,  k, HYPRE_MEMORY_HOST);
-   jedge_Edge    = hypre_CTAlloc(HYPRE_Int,  k, HYPRE_MEMORY_HOST);
+   jedge_Edge    = hypre_CTAlloc(HYPRE_BigInt,  k, HYPRE_MEMORY_HOST);
 
    /* update nedges so that the true number of rows is set */
    size= j;
@@ -2838,7 +2839,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
    }        /* for (part= 0; part< nparts; part++) */
 
    HYPRE_IJMatrixSetValues(edge_Edge, size, ncols_edgeEdge,
-                           (const HYPRE_Int*) iedgeEdge, (const HYPRE_Int*) jedge_Edge,
+                           (const HYPRE_BigInt*) iedgeEdge, (const HYPRE_BigInt*) jedge_Edge,
                            (const HYPRE_Real*) vals_edgeEdge);
    HYPRE_IJMatrixAssemble((HYPRE_IJMatrix) edge_Edge);
 

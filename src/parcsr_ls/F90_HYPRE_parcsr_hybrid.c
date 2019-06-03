@@ -570,6 +570,120 @@ hypre_F90_IFACE(hypre_parcsrhybridsetcyclerelax, HYPRE_PARCSRHYBRIDSETCYCLERELAX
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetAggNumLevels
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_parcsrhybridsetaggnumlev, HYPRE_PARCSRHYBRIDSETAGGNUMLEV)
+   (hypre_F90_Obj *solver,
+    hypre_F90_Int *agg_nl,
+    hypre_F90_Int *ierr)
+{
+   *ierr = (hypre_F90_Int)
+      (HYPRE_ParCSRHybridSetAggNumLevels(
+          hypre_F90_PassObj (HYPRE_Solver, solver),
+          hypre_F90_PassInt (agg_nl) ));
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetNumPaths
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_parcsrhybridsetnumpaths, HYPRE_PARCSRHYBRIDSETNUMPATHS)
+   (hypre_F90_Obj *solver,
+    hypre_F90_Int *num_paths,
+    hypre_F90_Int *ierr)
+{
+   *ierr = (hypre_F90_Int)
+      (HYPRE_ParCSRHybridSetNumPaths(
+          hypre_F90_PassObj (HYPRE_Solver, solver),
+          hypre_F90_PassInt (num_paths) ));
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetNumFunctions
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_parcsrhybridsetnumfunc, HYPRE_PARCSRHYBRIDSETNUMFUNC)
+   (hypre_F90_Obj *solver,
+    hypre_F90_Int *num_fun,
+    hypre_F90_Int *ierr)
+{
+   *ierr = (hypre_F90_Int)
+      (HYPRE_ParCSRHybridSetNumFunctions(
+          hypre_F90_PassObj (HYPRE_Solver, solver),
+          hypre_F90_PassInt (num_fun) ));
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetNodal
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_parcsrhybridsetnodal, HYPRE_PARCSRHYBRIDSETNODAL)
+   (hypre_F90_Obj *solver,
+    hypre_F90_Int *nodal,
+    hypre_F90_Int *ierr)
+{
+   *ierr = (hypre_F90_Int)
+      (HYPRE_ParCSRHybridSetNodal(
+          hypre_F90_PassObj (HYPRE_Solver, solver),
+          hypre_F90_PassInt (nodal) ));
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetKeepTranspose
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_parcsrhybridsetkeeptrans, HYPRE_PARCSRHYBRIDSETKEEPTRANS)
+   (hypre_F90_Obj *solver,
+    hypre_F90_Int *keepT,
+    hypre_F90_Int *ierr)
+{
+   *ierr = (hypre_F90_Int)
+      (HYPRE_ParCSRHybridSetKeepTranspose(
+          hypre_F90_PassObj (HYPRE_Solver, solver),
+          hypre_F90_PassInt (keepT) ));
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetDofFunc
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_parcsrhybridsetdoffunc, HYPRE_PARCSRHYBRIDSETDOFFUNC)
+   (hypre_F90_Obj *solver,
+    hypre_F90_IntArray *dof_func,
+    hypre_F90_Int *ierr)
+{
+   *ierr = (hypre_F90_Int)
+      (HYPRE_ParCSRHybridSetDofFunc(
+          hypre_F90_PassObj (HYPRE_Solver, solver),
+          hypre_F90_PassIntArray (dof_func) ));
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetNonGalerkinTol
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_parcsrhybridsetnongaltol, HYPRE_PARCSRHYBRIDSETNONGALTOL)
+   (hypre_F90_Obj *solver,
+    hypre_F90_Int *ng_num_tol,
+    hypre_F90_RealArray *nongal_tol,
+    hypre_F90_Int *ierr)
+{
+   *ierr = (hypre_F90_Int)
+      (HYPRE_ParCSRHybridSetNonGalerkinTol(
+          hypre_F90_PassObj (HYPRE_Solver, solver),
+          hypre_F90_PassInt (ng_num_tol),
+          hypre_F90_PassRealArray (nongal_tol) ));
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParCSRHybridSetRelaxOrder
  *--------------------------------------------------------------------------*/
 

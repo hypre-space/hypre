@@ -28,28 +28,28 @@ hypre_StructInnerProd( hypre_StructVector *x,
 {
    HYPRE_Real       final_innerprod_result;
    HYPRE_Real       process_result;
-                   
+
    hypre_Box       *x_data_box;
    hypre_Box       *y_data_box;
-                   
+
    HYPRE_Complex   *xp;
    HYPRE_Complex   *yp;
-                   
+
    hypre_BoxArray  *boxes;
    hypre_Box       *box;
    hypre_Index      loop_size;
    hypre_IndexRef   start;
    hypre_Index      unit_stride;
-    
-   HYPRE_Int        ndim = hypre_StructVectorNDim(x);               
+
+   HYPRE_Int        ndim = hypre_StructVectorNDim(x);
    HYPRE_Int        i;
-   
-#if defined(HYPRE_USING_CUDA)       
+
+#if defined(HYPRE_USING_CUDA)
    //const HYPRE_Int  data_location = hypre_StructGridDataLocation(hypre_StructVectorGrid(y));
 #endif
 
    HYPRE_Real       local_result = 0.0;
-   
+
    hypre_SetIndex(unit_stride, 1);
 
    boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(y));
@@ -57,13 +57,13 @@ hypre_StructInnerProd( hypre_StructVector *x,
    {
       box   = hypre_BoxArrayBox(boxes, i);
       start = hypre_BoxIMin(box);
-     
+
       x_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
       y_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), i);
-     
+
       xp = hypre_StructVectorBoxData(x, i);
       yp = hypre_StructVectorBoxData(y, i);
-     
+
       hypre_BoxGetSize(box, loop_size);
 
 #if defined(HYPRE_USING_KOKKOS)
@@ -76,7 +76,7 @@ hypre_StructInnerProd( hypre_StructVector *x,
       HYPRE_Real box_sum = 0.0;
 #endif
 
-#ifdef HYPRE_BOX_REDUCTION 
+#ifdef HYPRE_BOX_REDUCTION
 #undef HYPRE_BOX_REDUCTION
 #endif
 
@@ -92,8 +92,8 @@ hypre_StructInnerProd( hypre_StructVector *x,
                                    y_data_box, start, unit_stride, yi,
                                    box_sum)
       {
-         HYPRE_Real tmp = xp[xi] * hypre_conj(yp[yi]); 
-         box_sum += tmp; 
+         HYPRE_Real tmp = xp[xi] * hypre_conj(yp[yi]);
+         box_sum += tmp;
       }
       hypre_BoxLoop2ReductionEnd(xi, yi, box_sum);
 

@@ -67,11 +67,11 @@ typedef struct hypre_SStructMatrix_struct
    HYPRE_Int               entries_size;
    HYPRE_Int              *Sentries;
    HYPRE_Int              *Uentries;
-   HYPRE_Int              *tmp_col_coords;
+   HYPRE_BigInt           *tmp_col_coords;
    HYPRE_Complex          *tmp_coeffs;
 
    HYPRE_Int               ns_symmetric; /* Non-stencil entries symmetric? */
-   HYPRE_Int               global_size;  /* Total number of nonzero coeffs */
+   HYPRE_BigInt            global_size;  /* Total number of nonzero coeffs */
 
    HYPRE_Int               ref_count;
 

@@ -939,7 +939,7 @@ extern hypre_TimingType *hypre_global_timing;
 /* timing.c */
 HYPRE_Int hypre_InitializeTiming( const char *name );
 HYPRE_Int hypre_FinalizeTiming( HYPRE_Int time_index );
-HYPRE_Int hypre_IncFLOPCount( HYPRE_Int inc );
+HYPRE_Int hypre_IncFLOPCount( HYPRE_BigInt inc );
 HYPRE_Int hypre_BeginTiming( HYPRE_Int time_index );
 HYPRE_Int hypre_EndTiming( HYPRE_Int time_index );
 HYPRE_Int hypre_ClearTiming( void );
@@ -1583,6 +1583,7 @@ struct HYPRE_double6
 
 };
 
+/* reduction within a warp */
 __inline__ __host__ __device__
 HYPRE_Real warpReduceSum(HYPRE_Real val)
 {
@@ -1625,6 +1626,7 @@ HYPRE_double6 warpReduceSum(HYPRE_double6 val) {
   return val;
 }
 
+/* reduction within a block */
 template <typename T>
 __inline__ __host__ __device__
 T blockReduceSum(T val) 
@@ -1673,15 +1675,24 @@ struct ReduceSum
    T *d_buf;                  /* place to store partial sum of a block */
    HYPRE_Int nblocks;         /* number of blocks used in the first round */
 
+   /* constructor.
+    * val is the initial value (added to the reduced sum) */
    __host__
    ReduceSum(T val)
    {
       init = val;
       __thread_sum = 0.0;
+
+      if (cuda_reduce_buffer == NULL)
+      {
+         /* allocate for the max size for reducing double6 type */
+         cuda_reduce_buffer = hypre_TAlloc(HYPRE_double6, 1024, HYPRE_MEMORY_DEVICE);
+      }
+
       d_buf = (T*) cuda_reduce_buffer;
-      //d_buf = hypre_CTAlloc(T, 1024, HYPRE_MEMORY_DEVICE);
    }
 
+   /* copy constructor */
    __host__ __device__ 
    ReduceSum(const ReduceSum<T>& other)
    {
@@ -1719,6 +1730,7 @@ struct ReduceSum
       return val;
    }
 
+   /* destructor */
    __host__ __device__ 
    ~ReduceSum<T>()
    {
@@ -1749,8 +1761,10 @@ void hypre_enter_on_lists ( hypre_LinkList *LoL_head_ptr , hypre_LinkList *LoL_t
 
 /* binsearch.c */
 HYPRE_Int hypre_BinarySearch ( HYPRE_Int *list , HYPRE_Int value , HYPRE_Int list_length );
+HYPRE_Int hypre_BigBinarySearch ( HYPRE_BigInt *list , HYPRE_BigInt value , HYPRE_Int list_length );
 HYPRE_Int hypre_BinarySearch2 ( HYPRE_Int *list , HYPRE_Int value , HYPRE_Int low , HYPRE_Int high , HYPRE_Int *spot );
 HYPRE_Int *hypre_LowerBound( HYPRE_Int *first, HYPRE_Int *last, HYPRE_Int value );
+HYPRE_BigInt *hypre_BigLowerBound( HYPRE_BigInt *first, HYPRE_BigInt *last, HYPRE_BigInt value );
 
 /* hypre_complex.c */
 #ifdef HYPRE_COMPLEX
@@ -1789,21 +1803,31 @@ HYPRE_Int hypre_sscanf( char *s , const char *format, ... );
 /* hypre_qsort.c */
 void hypre_swap ( HYPRE_Int *v , HYPRE_Int i , HYPRE_Int j );
 void hypre_swap2 ( HYPRE_Int *v , HYPRE_Real *w , HYPRE_Int i , HYPRE_Int j );
+void hypre_BigSwap2 ( HYPRE_BigInt *v , HYPRE_Real *w , HYPRE_Int i , HYPRE_Int j );
 void hypre_swap2i ( HYPRE_Int *v , HYPRE_Int *w , HYPRE_Int i , HYPRE_Int j );
 void hypre_swap3i ( HYPRE_Int *v , HYPRE_Int *w , HYPRE_Int *z , HYPRE_Int i , HYPRE_Int j );
 void hypre_swap3_d ( HYPRE_Real *v , HYPRE_Int *w , HYPRE_Int *z , HYPRE_Int i , HYPRE_Int j );
-void hypre_swap4_d ( HYPRE_Real *v , HYPRE_Int *w , HYPRE_Int *z , HYPRE_Int *y , HYPRE_Int i , HYPRE_Int j );
+void hypre_BigSwap4_d ( HYPRE_Real *v , HYPRE_BigInt *w , HYPRE_Int *z , HYPRE_Int *y , HYPRE_Int i , HYPRE_Int j );
 void hypre_swap_d ( HYPRE_Real *v , HYPRE_Int i , HYPRE_Int j );
 void hypre_qsort0 ( HYPRE_Int *v , HYPRE_Int left , HYPRE_Int right );
 void hypre_qsort1 ( HYPRE_Int *v , HYPRE_Real *w , HYPRE_Int left , HYPRE_Int right );
+void hypre_BigQsort1 ( HYPRE_BigInt *v , HYPRE_Real *w , HYPRE_Int left , HYPRE_Int right );
 void hypre_qsort2i ( HYPRE_Int *v , HYPRE_Int *w , HYPRE_Int left , HYPRE_Int right );
 void hypre_qsort2 ( HYPRE_Int *v , HYPRE_Real *w , HYPRE_Int left , HYPRE_Int right );
 void hypre_qsort2_abs ( HYPRE_Int *v , HYPRE_Real *w , HYPRE_Int left , HYPRE_Int right );
 void hypre_qsort3i ( HYPRE_Int *v , HYPRE_Int *w , HYPRE_Int *z , HYPRE_Int left , HYPRE_Int right );
 void hypre_qsort3_abs ( HYPRE_Real *v , HYPRE_Int *w , HYPRE_Int *z , HYPRE_Int left , HYPRE_Int right );
 void hypre_qsort3 ( HYPRE_Real *v , HYPRE_Int *w , HYPRE_Int *z , HYPRE_Int left , HYPRE_Int right );
-void hypre_qsort4_abs ( HYPRE_Real *v , HYPRE_Int *w , HYPRE_Int *z , HYPRE_Int *y , HYPRE_Int left , HYPRE_Int right );
+void hypre_BigQsort4_abs ( HYPRE_Real *v , HYPRE_BigInt *w , HYPRE_Int *z , HYPRE_Int *y , HYPRE_Int left , HYPRE_Int right );
 void hypre_qsort_abs ( HYPRE_Real *w , HYPRE_Int left , HYPRE_Int right );
+void hypre_BigSwapbi(HYPRE_BigInt  *v, HYPRE_Int  *w, HYPRE_Int  i, HYPRE_Int  j );
+void hypre_BigQsortbi( HYPRE_BigInt *v, HYPRE_Int *w, HYPRE_Int  left, HYPRE_Int  right );
+void hypre_BigSwapLoc(HYPRE_BigInt  *v, HYPRE_Int  *w, HYPRE_Int  i, HYPRE_Int  j );
+void hypre_BigQsortbLoc( HYPRE_BigInt *v, HYPRE_Int *w, HYPRE_Int  left, HYPRE_Int  right );
+void hypre_BigSwapb2i(HYPRE_BigInt  *v, HYPRE_Int  *w, HYPRE_Int  *z, HYPRE_Int  i, HYPRE_Int  j );
+void hypre_BigQsortb2i( HYPRE_BigInt *v, HYPRE_Int *w, HYPRE_Int *z, HYPRE_Int  left, HYPRE_Int  right );
+void hypre_BigSwap( HYPRE_BigInt *v, HYPRE_Int  i, HYPRE_Int  j );
+void hypre_BigQsort0( HYPRE_BigInt *v, HYPRE_Int  left, HYPRE_Int  right );
 
 /* qsplit.c */
 HYPRE_Int hypre_DoubleQuickSplit ( HYPRE_Real *values , HYPRE_Int *indices , HYPRE_Int list_length , HYPRE_Int NumberKept );
@@ -1872,7 +1896,7 @@ HYPRE_Int hypre_merge_sort_unique2(HYPRE_Int *in, HYPRE_Int *temp, HYPRE_Int len
 
 void hypre_merge_sort(HYPRE_Int *in, HYPRE_Int *temp, HYPRE_Int len, HYPRE_Int **sorted);
 
-void hypre_union2(HYPRE_Int n1, HYPRE_Int *arr1, HYPRE_Int n2, HYPRE_Int *arr2, HYPRE_Int *n3, HYPRE_Int *arr3, HYPRE_Int *map1, HYPRE_Int *map2);
+void hypre_union2(HYPRE_Int n1, HYPRE_BigInt *arr1, HYPRE_Int n2, HYPRE_BigInt *arr2, HYPRE_Int *n3, HYPRE_BigInt *arr3, HYPRE_Int *map1, HYPRE_Int *map2);
 
 /* hypre_hopscotch_hash.c */
 
@@ -1929,11 +1953,31 @@ typedef struct
 
 typedef struct
 {
+   HYPRE_Int volatile            segmentMask;
+   HYPRE_Int volatile            bucketMask;
+#ifdef HYPRE_CONCURRENT_HOPSCOTCH
+   hypre_HopscotchSegment* volatile segments;
+#endif
+   HYPRE_BigInt *volatile           key;
+   hypre_uint *volatile             hopInfo;
+   HYPRE_BigInt *volatile           hash;
+} hypre_UnorderedBigIntSet;
+
+typedef struct
+{
   hypre_uint volatile hopInfo;
   HYPRE_Int  volatile hash;
   HYPRE_Int  volatile key;
   HYPRE_Int  volatile data;
 } hypre_HopscotchBucket;
+
+typedef struct
+{
+  hypre_uint volatile hopInfo;
+  HYPRE_BigInt  volatile hash;
+  HYPRE_BigInt  volatile key;
+  HYPRE_Int  volatile data;
+} hypre_BigHopscotchBucket;
 
 /**
  * The current typical use case of unoredered map is putting input sequence
@@ -1951,6 +1995,16 @@ typedef struct
 	hypre_HopscotchBucket* volatile	 table;
 } hypre_UnorderedIntMap;
 
+typedef struct
+{
+	HYPRE_Int  volatile              segmentMask;
+	HYPRE_Int  volatile              bucketMask;
+#ifdef HYPRE_CONCURRENT_HOPSCOTCH
+	hypre_HopscotchSegment*	volatile segments;
+#endif
+	hypre_BigHopscotchBucket* volatile	 table;
+} hypre_UnorderedBigIntMap;
+
 /**
  * Sort array "in" with length len and put result in array "out"
  * "in" will be deallocated unless in == *out
@@ -1958,6 +2012,12 @@ typedef struct
  */
 void hypre_sort_and_create_inverse_map(
   HYPRE_Int *in, HYPRE_Int len, HYPRE_Int **out, hypre_UnorderedIntMap *inverse_map);
+#ifdef HYPRE_CONCURRENT_HOPSCOTCH
+void hypre_big_merge_sort(HYPRE_BigInt *in, HYPRE_BigInt *temp, HYPRE_Int len, HYPRE_BigInt **sorted);
+void hypre_big_sort_and_create_inverse_map(
+  HYPRE_BigInt *in, HYPRE_Int len, HYPRE_BigInt **out, hypre_UnorderedBigIntMap *inverse_map);
+#endif
+
 
 #ifdef __cplusplus
 }

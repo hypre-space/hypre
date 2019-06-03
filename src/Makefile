@@ -37,7 +37,6 @@ HYPRE_IJ_DIRS =\
  distributed_matrix\
  IJ_mv\
  matrix_matrix\
- distributed_ls\
  parcsr_ls
 
 #These are the directories for the structured interface
@@ -49,6 +48,9 @@ HYPRE_STRUCT_DIRS =\
 HYPRE_SSTRUCT_DIRS =\
  sstruct_mv\
  sstruct_ls
+
+#These are the directories for the distributed_ls codes
+HYPRE_DISTRIBUTED_LS_DIRS = ${HYPRE_DISTRIBUTED_LS_DIR}
 
 #These are the directories for the FEI
 HYPRE_FEI_DIRS = ${HYPRE_FEI_SRC_DIR}
@@ -73,6 +75,7 @@ HYPRE_DIRS =\
  ${HYPRE_IJ_DIRS}\
  ${HYPRE_STRUCT_DIRS}\
  ${HYPRE_SSTRUCT_DIRS}\
+ ${HYPRE_DISTRIBUTED_LS_DIRS}\
  ${HYPRE_FEI_DIRS}\
  ${HYPRE_LIBS_DIRS}
 

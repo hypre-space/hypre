@@ -68,7 +68,7 @@ typedef struct hypre_SStructVector_struct
                                           of vector data for the part=partx    */
    HYPRE_Int               datasize    ;  /* GEC1002 size of all data = ghlocalsize */
 
-   HYPRE_Int               global_size;  /* Total number coefficients */
+   HYPRE_BigInt            global_size;  /* Total number coefficients */
 
    HYPRE_Int               ref_count;
 

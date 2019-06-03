@@ -22,7 +22,7 @@
 
 #include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
-#include "par_csr_block_matrix.h"
+#include "../parcsr_block_mv/par_csr_block_matrix.h"
 
 #ifdef HYPRE_USING_CALIPER
 #include <caliper/cali.h>
@@ -510,12 +510,20 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
               }
               else if (relax_type ==17)
               {
-                 hypre_BoomerAMGRelax_FCFJacobi(A_array[level],
-                                              Aux_F,
-                                              CF_marker_array[level],
-                                              relax_weight[level],
-                                              Aux_U,
-                                              Vtemp);
+                 //printf("Proc %d: level %d, n %d, CF %p\n", my_id, level, local_size, CF_marker_array[level]);
+                 if (level == num_levels - 1)
+                 {
+                    /* if we are on the coarsest level ,the cf_marker will be null
+                       and we just do one sweep regular jacobi */
+                    hypre_assert(cycle_param == 3);
+                    hypre_BoomerAMGRelax(A_array[level], Aux_F, CF_marker_array[level], 0, 0, relax_weight[level],
+                                         0.0, NULL, Aux_U, Vtemp, NULL);
+                 }
+                 else
+                 {
+                    hypre_BoomerAMGRelax_FCFJacobi(A_array[level], Aux_F, CF_marker_array[level], relax_weight[level],
+                                                   Aux_U, Vtemp);
+                 }
               }
               else if (old_version)
               {
@@ -662,15 +670,16 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          }
 
          ++level;
-         lev_counter[level] = hypre_max(lev_counter[level],cycle_type);
+         lev_counter[level] = hypre_max(lev_counter[level], cycle_type);
          cycle_param = 1;
-         if (level == num_levels-1) cycle_param = 3;
-
+         if (level == num_levels-1)
+         {
+            cycle_param = 3;
+         }
 #ifdef HYPRE_USING_CALIPER
          cali_set_int(iter_attr, level);  /* set the level for caliper here */
 #endif
       }
-
       else if (level != 0)
       {
          /*---------------------------------------------------------------
@@ -691,11 +700,11 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          }
          else
          {
-            //printf("par_cycle.c 6 %d\n",level);
+            /* printf("Proc %d: level %d, n %d, Interpolation\n", my_id, level, local_size); */
             hypre_ParCSRMatrixMatvec(alpha, P_array[fine_grid],
                                      U_array[coarse_grid],
                                      beta, U_array[fine_grid]);
-            //printf("par_cycle.c 6 done %d\n",level);
+            /* printf("Proc %d: level %d, n %d, Interpolation done\n", my_id, level, local_size); */
          }
 
          --level;
@@ -709,7 +718,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
       {
          Not_Finished = 0;
       }
-   }
+   } /* main loop: while (Not_Finished) */
 
 #ifdef HYPRE_USING_CALIPER
    cali_end(iter_attr);  /* unset "iter" */

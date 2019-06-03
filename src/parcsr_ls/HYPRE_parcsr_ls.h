@@ -3127,6 +3127,17 @@ HYPRE_ParCSRHybridSetKeepTranspose(HYPRE_Solver solver,
                            HYPRE_Int    keepT);
 
 /**
+ * (Optional) Sets whether to use non-Galerkin option
+ * The default is no non-Galerkin option
+ * num_levels sets the number of levels where to use it
+ * nongalerkin_tol contains the tolerances for <num_levels> levels
+ **/
+HYPRE_Int
+HYPRE_ParCSRHybridSetNonGalerkinTol(HYPRE_Solver solver,
+                           HYPRE_Int   num_levels,
+                           HYPRE_Real *nongalerkin_tol);
+
+/**
  * Retrieves the total number of iterations.
  **/
 HYPRE_Int HYPRE_ParCSRHybridGetNumIterations(HYPRE_Solver  solver,
@@ -3896,9 +3907,9 @@ HYPRE_ILUGetFinalRelativeResidualNorm(  HYPRE_Solver solver, HYPRE_Real *res_nor
  *--------------------------------------------------------------------------*/
 
 HYPRE_ParCSRMatrix GenerateLaplacian(MPI_Comm    comm,
-                                     HYPRE_Int   nx,
-                                     HYPRE_Int   ny,
-                                     HYPRE_Int   nz,
+                                     HYPRE_BigInt   nx,
+                                     HYPRE_BigInt   ny,
+                                     HYPRE_BigInt   nz,
                                      HYPRE_Int   P,
                                      HYPRE_Int   Q,
                                      HYPRE_Int   R,
@@ -3908,9 +3919,9 @@ HYPRE_ParCSRMatrix GenerateLaplacian(MPI_Comm    comm,
                                      HYPRE_Real *value);
 
 HYPRE_ParCSRMatrix GenerateLaplacian27pt(MPI_Comm    comm,
-                                         HYPRE_Int   nx,
-                                         HYPRE_Int   ny,
-                                         HYPRE_Int   nz,
+                                         HYPRE_BigInt   nx,
+                                         HYPRE_BigInt   ny,
+                                         HYPRE_BigInt   nz,
                                          HYPRE_Int   P,
                                          HYPRE_Int   Q,
                                          HYPRE_Int   R,
@@ -3920,8 +3931,8 @@ HYPRE_ParCSRMatrix GenerateLaplacian27pt(MPI_Comm    comm,
                                          HYPRE_Real *value);
 
 HYPRE_ParCSRMatrix GenerateLaplacian9pt(MPI_Comm    comm,
-                                        HYPRE_Int   nx,
-                                        HYPRE_Int   ny,
+                                        HYPRE_BigInt   nx,
+                                        HYPRE_BigInt   ny,
                                         HYPRE_Int   P,
                                         HYPRE_Int   Q,
                                         HYPRE_Int   p,
@@ -3929,9 +3940,9 @@ HYPRE_ParCSRMatrix GenerateLaplacian9pt(MPI_Comm    comm,
                                         HYPRE_Real *value);
 
 HYPRE_ParCSRMatrix GenerateDifConv(MPI_Comm    comm,
-                                   HYPRE_Int   nx,
-                                   HYPRE_Int   ny,
-                                   HYPRE_Int   nz,
+                                   HYPRE_BigInt   nx,
+                                   HYPRE_BigInt   ny,
+                                   HYPRE_BigInt   nz,
                                    HYPRE_Int   P,
                                    HYPRE_Int   Q,
                                    HYPRE_Int   R,
@@ -3942,8 +3953,8 @@ HYPRE_ParCSRMatrix GenerateDifConv(MPI_Comm    comm,
 
 HYPRE_ParCSRMatrix
 GenerateRotate7pt(MPI_Comm   comm,
-                  HYPRE_Int  nx,
-                  HYPRE_Int  ny,
+                  HYPRE_BigInt  nx,
+                  HYPRE_BigInt  ny,
                   HYPRE_Int  P,
                   HYPRE_Int  Q,
                   HYPRE_Int  p,
@@ -3953,9 +3964,9 @@ GenerateRotate7pt(MPI_Comm   comm,
                                                                                 
 HYPRE_ParCSRMatrix
 GenerateVarDifConv(MPI_Comm         comm,
-                   HYPRE_Int        nx,
-                   HYPRE_Int        ny,
-                   HYPRE_Int        nz,
+                   HYPRE_BigInt        nx,
+                   HYPRE_BigInt        ny,
+                   HYPRE_BigInt        nz,
                    HYPRE_Int        P,
                    HYPRE_Int        Q,
                    HYPRE_Int        R,
@@ -3967,9 +3978,9 @@ GenerateVarDifConv(MPI_Comm         comm,
 
 HYPRE_ParCSRMatrix
 GenerateRSVarDifConv(MPI_Comm         comm,
-                     HYPRE_Int        nx,
-                     HYPRE_Int        ny,
-                     HYPRE_Int        nz,
+                     HYPRE_BigInt        nx,
+                     HYPRE_BigInt        ny,
+                     HYPRE_BigInt        nz,
                      HYPRE_Int        P,
                      HYPRE_Int        Q,
                      HYPRE_Int        R,
@@ -3982,9 +3993,9 @@ GenerateRSVarDifConv(MPI_Comm         comm,
 
 float*
 GenerateCoordinates(MPI_Comm  comm,
-                    HYPRE_Int nx,
-                    HYPRE_Int ny,
-                    HYPRE_Int nz,
+                    HYPRE_BigInt nx,
+                    HYPRE_BigInt ny,
+                    HYPRE_BigInt nz,
                     HYPRE_Int P,
                     HYPRE_Int Q,
                     HYPRE_Int R,

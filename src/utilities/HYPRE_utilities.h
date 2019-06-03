@@ -38,11 +38,21 @@ extern "C" {
  *--------------------------------------------------------------------------*/
 
 #if defined(HYPRE_BIGINT)
+typedef long long int HYPRE_BigInt;
 typedef long long int HYPRE_Int;
+#define HYPRE_MPI_BIG_INT MPI_LONG_LONG_INT
 #define HYPRE_MPI_INT MPI_LONG_LONG_INT
+ 
+#elif defined(HYPRE_MIXEDINT)
+typedef long long int HYPRE_BigInt;
+typedef int HYPRE_Int;
+#define HYPRE_MPI_BIG_INT MPI_LONG_LONG_INT
+#define HYPRE_MPI_INT MPI_INT
 
 #else /* default */
+typedef int HYPRE_BigInt;
 typedef int HYPRE_Int;
+#define HYPRE_MPI_BIG_INT MPI_INT
 #define HYPRE_MPI_INT MPI_INT
 #endif
 

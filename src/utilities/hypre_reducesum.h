@@ -50,12 +50,12 @@ struct HYPRE_double4
 struct HYPRE_double6
 {
    HYPRE_Real x,y,z,w,u,v;
- 
+
    __host__ __device__
    HYPRE_double6() {}
 
    __host__ __device__
-   HYPRE_double6(HYPRE_Real x1, HYPRE_Real x2, HYPRE_Real x3, HYPRE_Real x4, 
+   HYPRE_double6(HYPRE_Real x1, HYPRE_Real x2, HYPRE_Real x3, HYPRE_Real x4,
                  HYPRE_Real x5, HYPRE_Real x6)
    {
       x = x1;
@@ -85,6 +85,7 @@ struct HYPRE_double6
 
 };
 
+/* reduction within a warp */
 __inline__ __host__ __device__
 HYPRE_Real warpReduceSum(HYPRE_Real val)
 {
@@ -127,9 +128,10 @@ HYPRE_double6 warpReduceSum(HYPRE_double6 val) {
   return val;
 }
 
+/* reduction within a block */
 template <typename T>
 __inline__ __host__ __device__
-T blockReduceSum(T val) 
+T blockReduceSum(T val)
 {
 #ifdef __CUDA_ARCH__
    //static __shared__ T shared[32]; // Shared mem for 32 partial sums
@@ -175,16 +177,25 @@ struct ReduceSum
    T *d_buf;                  /* place to store partial sum of a block */
    HYPRE_Int nblocks;         /* number of blocks used in the first round */
 
+   /* constructor.
+    * val is the initial value (added to the reduced sum) */
    __host__
    ReduceSum(T val)
    {
       init = val;
       __thread_sum = 0.0;
+
+      if (cuda_reduce_buffer == NULL)
+      {
+         /* allocate for the max size for reducing double6 type */
+         cuda_reduce_buffer = hypre_TAlloc(HYPRE_double6, 1024, HYPRE_MEMORY_DEVICE);
+      }
+
       d_buf = (T*) cuda_reduce_buffer;
-      //d_buf = hypre_CTAlloc(T, 1024, HYPRE_MEMORY_DEVICE);
    }
 
-   __host__ __device__ 
+   /* copy constructor */
+   __host__ __device__
    ReduceSum(const ReduceSum<T>& other)
    {
       *this = other;
@@ -196,13 +207,13 @@ struct ReduceSum
 #ifdef __CUDA_ARCH__
       __thread_sum = blockReduceSum(__thread_sum);
       if (threadIdx.x == 0)
-      {                                   
+      {
          d_buf[blockIdx.x] = __thread_sum;
       }
 #endif
    }
-   
-   __host__ __device__ 
+
+   __host__ __device__
    void operator+=(T val) const
    {
       __thread_sum += val;
@@ -221,7 +232,8 @@ struct ReduceSum
       return val;
    }
 
-   __host__ __device__ 
+   /* destructor */
+   __host__ __device__
    ~ReduceSum<T>()
    {
    }

@@ -31,12 +31,12 @@ HYPRE_Int hypre_ParCSRMaxEigEstimate(hypre_ParCSRMatrix *A, /* matrix to relax w
    HYPRE_Real temp;
    HYPRE_Real diag_value;
 
-   HYPRE_Int   pos_diag, neg_diag;
+   HYPRE_Int  pos_diag, neg_diag;
    HYPRE_Int  A_num_rows;
    HYPRE_Int *A_diag_i;
    HYPRE_Int *A_offd_i;
-   HYPRE_Int   j;
-   HYPRE_Int i, start;
+   HYPRE_Int  j;
+   HYPRE_Int  i, start;
 
 
    /* estimate with the inf-norm of A - should be ok for SPD matrices */
@@ -137,15 +137,15 @@ HYPRE_Int hypre_ParCSRMaxEigEstimateCG(hypre_ParCSRMatrix *A, /* matrix to relax
    HYPRE_Int local_size = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
 
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
-   HYPRE_Real     *A_diag_data  = hypre_CSRMatrixData(A_diag);
-   HYPRE_Int            *A_diag_i     = hypre_CSRMatrixI(A_diag);
+   HYPRE_Real      *A_diag_data  = hypre_CSRMatrixData(A_diag);
+   HYPRE_Int       *A_diag_i     = hypre_CSRMatrixI(A_diag);
 
 
    /* check the size of A - don't iterate more than the size */
-   HYPRE_Int size = hypre_ParCSRMatrixGlobalNumRows(A);
+   HYPRE_BigInt size = hypre_ParCSRMatrixGlobalNumRows(A);
 
-   if (size < max_iter)
-      max_iter = size;
+   if (size < (HYPRE_BigInt) max_iter)
+      max_iter = (HYPRE_Int) size;
 
    /* create some temp vectors: p, s, r , ds, u*/
 
@@ -652,57 +652,41 @@ HYPRE_Int hypre_ParCSRRelax_Cheby(hypre_ParCSRMatrix *A, /* matrix to relax with
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_BoomerAMGRelax_FCFJacobi( hypre_ParCSRMatrix *A,
-                                    hypre_ParVector    *f,
-                                    HYPRE_Int                *cf_marker,
-                                    HYPRE_Real          relax_weight,
-                                    hypre_ParVector    *u,
-                                    hypre_ParVector    *Vtemp)
+                                          hypre_ParVector    *f,
+                                          HYPRE_Int          *cf_marker,
+                                          HYPRE_Real          relax_weight,
+                                          hypre_ParVector    *u,
+                                          hypre_ParVector    *Vtemp)
 {
-
    HYPRE_Int i;
    HYPRE_Int relax_points[3];
    HYPRE_Int relax_type = 0;
-
-   hypre_ParVector    *Ztemp = NULL;
-
 
    relax_points[0] = -1; /*F */
    relax_points[1] =  1; /*C */
    relax_points[2] = -1; /*F */
 
-   /* if we are on the coarsest level ,the cf_marker will be null
-      and we just do one sweep regular jacobi */
+   /* cf == NULL --> size == 0 */
    if (cf_marker == NULL)
    {
-       hypre_BoomerAMGRelax(A,
-                            f,
-                            cf_marker,
-                            relax_type,
-                            0,
-                            relax_weight,
-                            0.0,
-                            NULL,
-                            u,
-                            Vtemp, Ztemp);
-   }
-   else
-   {
-      for (i=0; i < 3; i++)
-         hypre_BoomerAMGRelax(A,
-                              f,
-                              cf_marker,
-                              relax_type,
-                              relax_points[i],
-                              relax_weight,
-                              0.0,
-                              NULL,
-                              u,
-                              Vtemp, Ztemp);
+      hypre_assert(hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A)) == 0);
    }
 
+   for (i=0; i < 3; i++)
+   {
+      hypre_BoomerAMGRelax(A,
+                           f,
+                           cf_marker,
+                           relax_type,
+                           relax_points[i],
+                           relax_weight,
+                           0.0,
+                           NULL,
+                           u,
+                           Vtemp, NULL);
+   }
 
    return hypre_error_flag;
-
 }
 
 /*--------------------------------------------------------------------------
