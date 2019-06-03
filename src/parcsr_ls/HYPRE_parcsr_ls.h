@@ -3386,7 +3386,6 @@ HYPRE_Int HYPRE_MGRSetCpointsByBlock( HYPRE_Solver solver,
  **/                         
 HYPRE_Int
 HYPRE_MGRSetNonCpointsToFpoints( HYPRE_Solver solver, HYPRE_Int nonCptToFptFlag);
-
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetMaxCoarseLevels
  *--------------------------------------------------------------------------*/

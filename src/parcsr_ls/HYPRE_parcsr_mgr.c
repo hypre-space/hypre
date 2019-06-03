@@ -191,15 +191,24 @@ HYPRE_MGRSetLevelRestrictType( HYPRE_Solver solver, HYPRE_Int *restrict_type )
  * HYPRE_MGRSetRelaxMethod
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_MGRSetFRelaxMethod(HYPRE_Solver solver, HYPRE_Int relax_method )
+HYPRE_MGRSetFRelaxMethod( HYPRE_Solver solver, HYPRE_Int relax_method )
 {
-   return hypre_MGRSetFRelaxMethod(solver, relax_method );
+   return hypre_MGRSetFRelaxMethod( solver, relax_method );
 }
 
 HYPRE_Int
-HYPRE_MGRSetLevelFRelaxMethod(HYPRE_Solver solver, HYPRE_Int *relax_method )
+HYPRE_MGRSetLevelFRelaxMethod( HYPRE_Solver solver, HYPRE_Int *relax_method )
 {
-   return hypre_MGRSetLevelFRelaxMethod(solver, relax_method );
+   return hypre_MGRSetLevelFRelaxMethod( solver, relax_method );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_MGRSetRelaxMethod
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_MGRSetCoarseGridMethod( HYPRE_Solver solver, HYPRE_Int *cg_method )
+{
+   return hypre_MGRSetCoarseGridMethod( solver, cg_method );
 }
 
 /*--------------------------------------------------------------------------
@@ -215,18 +224,18 @@ HYPRE_MGRSetCoarseGridMethod( HYPRE_Solver solver, HYPRE_Int *cg_method )
  * HYPRE_MGRSetRelaxNumFunctions
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_MGRSetLevelFRelaxNumFunctions(HYPRE_Solver solver, HYPRE_Int *num_functions)
+HYPRE_MGRSetLevelFRelaxNumFunctions( HYPRE_Solver solver, HYPRE_Int *num_functions )
 {
-   return hypre_MGRSetLevelFRelaxNumFunctions(solver, num_functions);
+   return hypre_MGRSetLevelFRelaxNumFunctions( solver, num_functions );
 }
 
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetRelaxType
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_MGRSetRelaxType(HYPRE_Solver solver, HYPRE_Int relax_type )
+HYPRE_MGRSetRelaxType( HYPRE_Solver solver, HYPRE_Int relax_type )
 {
-   return hypre_MGRSetRelaxType(solver, relax_type );
+   return hypre_MGRSetRelaxType( solver, relax_type );
 }
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetNumRelaxSweeps

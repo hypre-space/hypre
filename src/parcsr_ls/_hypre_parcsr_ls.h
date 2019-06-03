@@ -1704,7 +1704,7 @@ HYPRE_Int hypre_MGRSetup( void *mgr_vdata, hypre_ParCSRMatrix *A, hypre_ParVecto
 HYPRE_Int hypre_MGRSolve( void *mgr_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector  *u );
 HYPRE_Int hypre_block_jacobi_scaling(hypre_ParCSRMatrix *A,hypre_ParCSRMatrix **B_ptr,void               *mgr_vdata,HYPRE_Int             debug_flag);
 HYPRE_Int hypre_blockRelax_solve(hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u, HYPRE_Real blk_size, HYPRE_Int n_block, HYPRE_Int left_size, HYPRE_Int method, HYPRE_Real *diaginv, hypre_ParVector *Vtemp);
-HYPRE_Int hypre_blockRelax_setup(hypre_ParCSRMatrix *A,HYPRE_Int blk_size, HYPRE_Int reserved_coarse_size, HYPRE_Real **diaginvptr);
+HYPRE_Int hypre_blockRelax_setup(hypre_ParCSRMatrix *A, HYPRE_Int blk_size, HYPRE_Int reserved_coarse_size, HYPRE_Real **diaginvptr);
 HYPRE_Int hypre_blockRelax(hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u, HYPRE_Int blk_size, HYPRE_Int reserved_coarse_size, HYPRE_Int method, hypre_ParVector *Vtemp, hypre_ParVector *Ztemp);
 
 HYPRE_Int hypre_MGRBuildAff( MPI_Comm comm, HYPRE_Int local_num_variables, HYPRE_Int num_functions, 

@@ -235,7 +235,7 @@ hypre_MGRSolve( void               *mgr_vdata,
           {
 		      hypre_BoomerAMGRelax(A_array[0], F_array[0], NULL, global_smooth_type-1, 0, 1.0, 0.0, NULL, U_array[0], Vtemp, NULL);
 	      }
-	    }
+	      }
 	    else if (global_smooth_type == 8)//EUCLID ILU smoother
 	    {
         for (i = 0;i < global_smooth_iters;i ++)
