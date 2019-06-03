@@ -13,9 +13,6 @@
 
 include ../config/Makefile.config
 
-#FILES_NVCC = gpukernels.cu
-#include $(HYPRE_NVCC_MAKEFILE)
-
 CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
 
 C_COMPILE_FLAGS =\
@@ -57,8 +54,7 @@ FILES =\
  mapped_matrix.c\
  multiblock_matrix.c\
  vector.c\
- csr_matvec_oomp.c\
- gpukernels.c
+ csr_matvec_oomp.c
 
 OBJS = ${FILES:.c=.o}
 #CUOBJS = ${FILES_NVCC:.cu=.o}

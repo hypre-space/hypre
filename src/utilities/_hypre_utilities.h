@@ -1511,13 +1511,6 @@ extern HYPRE_Int hypre_exec_policy;
 #include <cuda_runtime_api.h>
 void hypre_GPUInit(hypre_int use_device);
 void hypre_GPUFinalize();
-int VecScaleScalar(double *u, const double alpha,  int num_rows,cudaStream_t s);
-void VecCopy(double* tgt, const double* src, int size,cudaStream_t s);
-void VecSet(double* tgt, int size, double value, cudaStream_t s);
-void VecScale(double *u, double *v, double *l1_norm, int num_rows,cudaStream_t s);
-void VecScaleSplit(double *u, double *v, double *l1_norm, int num_rows,cudaStream_t s);
-void CudaCompileFlagCheck();
-void BigToSmallCopy(hypre_int *tgt, const HYPRE_Int *src, hypre_int size, cudaStream_t s);
 cudaStream_t getstreamOlde(hypre_int i);
 nvtxDomainHandle_t getdomain(hypre_int i);
 cudaEvent_t getevent(hypre_int i);
@@ -2169,6 +2162,15 @@ HYPRE_Int* hypreDevice_CsrRowIndicesToPtrs(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE
 HYPRE_Int hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Real *y);
 
 HYPRE_Int hypreDevice_ScatterConstant(HYPRE_Int *x, HYPRE_Int n, HYPRE_Int *map, HYPRE_Int v);
+
+HYPRE_Int hypreDevice_IVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y);
+
+HYPRE_Int hypreDevice_DiagScaleVector(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data, HYPRE_Complex *x, HYPRE_Complex *y);
+
+HYPRE_Int hypreDevice_BigToSmallCopy(HYPRE_Int *tgt, const HYPRE_BigInt *src, HYPRE_Int size);
+
+/* gpuMem.c */
+void hypre_CudaCompileFlagCheck();
 
 #endif
 

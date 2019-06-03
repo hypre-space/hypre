@@ -815,7 +815,7 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
 
   if (b != y)
   {
-    VecCopy(y->data,b->data,(y->size-offset),HYPRE_STREAM(4));
+     thrust::copy_n(thrust::device, b->data, y->size-offset, y->data);
   }
 
   if (x == y)
@@ -916,11 +916,9 @@ hypre_CSRMatrixMatvecDeviceBIGINT( HYPRE_Complex    alpha,
   static cudaStream_t s[10];
   static HYPRE_Int myid;
 
-  if (b!=y){
-
-    //PUSH_RANGE_PAYLOAD("MEMCPY",1,y->size-offset);
-    VecCopy(y->data,b->data,(y->size-offset),HYPRE_STREAM(4));
-    //POP_RANGE
+  if (b!=y)
+  {
+     thrust::copy_n(thrust::device, b->data, y->size-offset, y->data);
   }
 
   if (x==y) fprintf(stderr,"ERROR::x and y are the same pointer in hypre_CSRMatrixMatvecDevice\n");

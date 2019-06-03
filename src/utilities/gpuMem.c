@@ -171,7 +171,7 @@ void hypre_GPUInit(hypre_int use_device)
 
       /* Check if the arch flags used for compiling the cuda kernels match the device */
 #if defined(HYPRE_USING_GPU)
-      CudaCompileFlagCheck();
+      hypre_CudaCompileFlagCheck();
 #endif
    }
 }

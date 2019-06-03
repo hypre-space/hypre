@@ -17,9 +17,7 @@
  *****************************************************************************/
 
 #include "seq_mv.h"
-#ifdef HYPRE_USING_GPU
-#include "gpukernels.h"
-#endif
+
 #ifdef HYPRE_PROFILE
 HYPRE_Real hypre_profile_times[HYPRE_TIMER_ID_COUNT] = { 0 };
 #endif

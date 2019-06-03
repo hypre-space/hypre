@@ -16,6 +16,51 @@ void CheckError(cudaError_t const err, const char* file, char const* const fun, 
     }
 }
 
+__global__ void
+hypreCUDAKernel_CompileFlagSafetyCheck(HYPRE_Int *cuda_arch)
+{
+#ifdef __CUDA_ARCH__
+    cuda_arch[0] = __CUDA_ARCH__;
+#endif
+}
+
+void hypre_CudaCompileFlagCheck()
+{
+   /*
+   HYPRE_Int i;
+   HYPRE_Int devCount;
+   cudaGetDeviceCount(&devCount);
+   for(i = 0; i < devCount; ++i)
+   {
+      struct cudaDeviceProp props;
+      cudaGetDeviceProperties(&props, i);
+      cudarch_actual = props.major*100 + props.minor*10;
+   }
+   */
+
+   hypre_int device;
+   hypre_CheckErrorDevice( cudaGetDevice(&device) );
+
+   struct cudaDeviceProp props;
+   cudaGetDeviceProperties(&props, device);
+   HYPRE_Int cuda_arch_actual = props.major*100 + props.minor*10;
+
+   HYPRE_Int *cuda_arch = hypre_TAlloc(HYPRE_Int, 1, HYPRE_MEMORY_DEVICE);
+   HYPRE_Int h_cuda_arch;
+
+   dim3 gDim(1,1,1), bDim(1,1,1);
+   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_CompileFlagSafetyCheck, gDim, bDim, cuda_arch );
+
+   hypre_TMemcpy(&h_cuda_arch, cuda_arch, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+
+   if (h_cuda_arch != cuda_arch_actual)
+   {
+      hypre_printf("ERROR: Compile arch flags %d does not match actual device arch = sm_%d\n");
+   }
+
+   hypre_CheckErrorDevice(cudaDeviceSynchronize());
+}
+
 /*
 extern const char *cusparseErrorCheck(cusparseStatus_t error);
 extern void gpuAssert(cudaError_t code, const char *file, int line);

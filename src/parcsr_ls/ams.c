@@ -77,13 +77,8 @@ HYPRE_Int hypre_ParCSRRelax(/* matrix to relax with */
 #endif
          //SyncVectorToHost(hypre_ParVectorLocalVector(v));
          //SyncVectorToHost(hypre_ParVectorLocalVector(f));
-#if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
-         VecCopy(v_data,f_data,hypre_VectorSize(hypre_ParVectorLocalVector(v)),HYPRE_STREAM(4));
-#else
-         //printRC(hypre_ParVectorLocalVector(v),"Pre-COPY V");
-         //printRC(hypre_ParVectorLocalVector(f),"Pre-COPY F");
          hypre_ParVectorCopy(f,v);
-#endif
+
 #ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
          SyncVectorToDevice(hypre_ParVectorLocalVector(v));
 #endif
@@ -93,7 +88,7 @@ HYPRE_Int hypre_ParCSRRelax(/* matrix to relax with */
          //SyncVectorToHost(hypre_ParVectorLocalVector(u));
          //PUSH_RANGE_PAYLOAD("VECSCALE-RELAX",5,num_rows);
 #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
-         VecScale(u_data,v_data,l1_norms,num_rows,HYPRE_STREAM(4));
+         hypreDevice_IVAXPY(num_rows, l1_norms, v_data, u_data);
 #else
          HYPRE_Int i;
          /* u += w D^{-1}(f - A u), where D_ii = ||A(i,:)||_1 */

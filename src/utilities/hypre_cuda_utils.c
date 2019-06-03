@@ -430,5 +430,87 @@ hypreDevice_ScatterConstant(HYPRE_Int *x, HYPRE_Int n, HYPRE_Int *map, HYPRE_Int
    return hypre_error_flag;
 }
 
+__global__ void
+hypreCUDAKernel_IVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y)
+{
+   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1,1>();
+
+   if (i < n)
+   {
+      y[i] += x[i] / a[i];
+   }
+}
+
+/* Inverse Vector AXPY: y[i] = x[i] / a[i] + y[i] */
+HYPRE_Int
+hypreDevice_IVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y)
+{
+   /* trivial case */
+   if (n <= 0)
+   {
+      return hypre_error_flag;
+   }
+
+   dim3 bDim = hypre_GetDefaultCUDABlockDimension();
+   dim3 gDim = hypre_GetDefaultCUDAGridDimension(n, "thread", bDim);
+
+   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_IVAXPY, gDim, bDim, n, a, x, y );
+
+   return hypre_error_flag;
+}
+
+__global__ void
+hypreCUDAKernel_DiagScaleVector(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data, HYPRE_Complex *x, HYPRE_Complex *y)
+{
+   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1,1>();
+
+   if (i < n)
+   {
+      y[i] = x[i] / A_data[A_i[i]];
+   }
+}
+
+/* y = diag(A) \ x. A_i[i] points to the ith diagonal entry of A */
+HYPRE_Int
+hypreDevice_DiagScaleVector(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data, HYPRE_Complex *x, HYPRE_Complex *y)
+{
+   /* trivial case */
+   if (n <= 0)
+   {
+      return hypre_error_flag;
+   }
+
+   dim3 bDim = hypre_GetDefaultCUDABlockDimension();
+   dim3 gDim = hypre_GetDefaultCUDAGridDimension(n, "thread", bDim);
+
+   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_DiagScaleVector, gDim, bDim, n, A_i, A_data, x, y );
+
+   return hypre_error_flag;
+}
+
+__global__ void
+hypreCUDAKernel_BigToSmallCopy(      HYPRE_Int*    __restrict__ tgt,
+                               const HYPRE_BigInt* __restrict__ src,
+                                     HYPRE_Int                  size)
+{
+   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1,1>();
+
+   if (i < size)
+   {
+      tgt[i] = src[i];
+   }
+}
+
+HYPRE_Int
+hypreDevice_BigToSmallCopy(HYPRE_Int *tgt, const HYPRE_BigInt *src, HYPRE_Int size)
+{
+   dim3 bDim = hypre_GetDefaultCUDABlockDimension();
+   dim3 gDim = hypre_GetDefaultCUDAGridDimension(size, "thread", bDim);
+
+   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_BigToSmallCopy, gDim, bDim, tgt, src, size);
+
+   return hypre_error_flag;
+}
+
 #endif // #if defined(HYPRE_USING_CUDA)
 
