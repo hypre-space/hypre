@@ -22,6 +22,8 @@
 #define DEBUG_COMP_GRID 0 // if true, runs some tests, prints out what is stored in the comp grids for each processor to a file
 #define DEBUG_PROC_NEIGHBORS 0 // if true, dumps info on the add flag structures that determine nearest processor neighbors 
 #define DEBUGGING_MESSAGES 0 // if true, prints a bunch of messages to the screen to let you know where in the algorithm you are
+#define ENABLE_AGGLOMERATION 0 // if true, enable coarse level processor agglomeration, which requires linking with parmetis
+
 
 HYPRE_Int
 SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int level, HYPRE_Int *padding, HYPRE_Int num_ghost_layers, HYPRE_Int *communication_cost );
@@ -57,8 +59,10 @@ UnpackCoarseLevels(hypre_ParAMGData *amg_data, MPI_Comm comm, HYPRE_Int *recv_in
 HYPRE_Int
 AgglomerateProcessors(hypre_ParAMGData *amg_data, hypre_ParCompGridCommPkg *initCopyCompGridCommPkg, HYPRE_Int *padding, HYPRE_Int level, HYPRE_Int partition_size, HYPRE_Int *communication_cost);
 
+#if ENABLE_AGGLOMERATION
 HYPRE_Int
 GetPartition(HYPRE_Int partition_size, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int level,MPI_Comm local_comm, MPI_Comm global_comm);
+#endif
 
 HYPRE_Int
 GetNeighborPartitionInfo(hypre_ParAMGData *amg_data, hypre_ParCompGridCommPkg *initCopyCompGridCommPkg, MPI_Comm local_comm, HYPRE_Int *proc_starts, HYPRE_Int partition, HYPRE_Int current_level, HYPRE_Int transition_level, HYPRE_Int *communication_cost);
@@ -1855,7 +1859,13 @@ AgglomerateProcessors(hypre_ParAMGData *amg_data, hypre_ParCompGridCommPkg *init
    }
 
    // Get the partitioning of the communication graph
-   HYPRE_Int partition = GetPartition(partition_size, compGridCommPkg, current_level, previous_local_comm, previous_global_comm);
+   HYPRE_Int partition;
+   #if ENABLE_AGGLOMERATION
+   partition = GetPartition(partition_size, compGridCommPkg, current_level, previous_local_comm, previous_global_comm);
+   #else
+   printf("Need to enable processor agglomeration.\n");
+   return 0;
+   #endif
 
    // Split the old communicator
    MPI_Comm local_comm;
@@ -1927,6 +1937,7 @@ AgglomerateProcessors(hypre_ParAMGData *amg_data, hypre_ParCompGridCommPkg *init
    return 0;
 }
 
+#if ENABLE_AGGLOMERATION
 HYPRE_Int 
 GetPartition(HYPRE_Int partition_size, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int level, MPI_Comm local_comm, MPI_Comm global_comm)
 {
@@ -1980,6 +1991,7 @@ GetPartition(HYPRE_Int partition_size, hypre_ParCompGridCommPkg *compGridCommPkg
 
    return new_partition;
 }
+#endif
 
 HYPRE_Int
 GetNeighborPartitionInfo(hypre_ParAMGData *amg_data, 
