@@ -4991,11 +4991,13 @@ hypre_ParcsrAdd( HYPRE_Complex alpha,
    hypre_CSRMatrixData(C_diag) = C_diag_a;
    hypre_CSRMatrixI(C_diag)    = C_diag_i;
    hypre_CSRMatrixJ(C_diag)    = C_diag_j;
+   hypre_CSRMatrixMemoryLocation(C_diag) = HYPRE_MEMORY_HOST;
 
    C_offd = hypre_ParCSRMatrixOffd(C);
    hypre_CSRMatrixData(C_offd) = C_offd_a;
    hypre_CSRMatrixI(C_offd)    = C_offd_i;
    hypre_CSRMatrixJ(C_offd)    = C_offd_j;
+   hypre_CSRMatrixMemoryLocation(C_offd) = HYPRE_MEMORY_HOST;
 
    hypre_ParCSRMatrixColMapOffd(C) = col_map_offd_C;
 

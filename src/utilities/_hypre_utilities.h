@@ -413,6 +413,140 @@ HYPRE_Int hypre_MPI_Info_free( hypre_MPI_Info *info );
  *
  * $Revision$
  ***********************************************************************EHEADER*/
+#ifndef HYPRE_OMP_DEVICE
+#define HYPRE_OMP_DEVICE
+
+#if defined(HYPRE_USING_DEVICE_OPENMP)
+
+#include "omp.h"
+
+/* stringification:
+ * _Pragma(string-literal), so we need to cast argument to a string
+ * The three dots as last argument of the macro tells compiler that this is a variadic macro.
+ * I.e. this is a macro that receives variable number of arguments.
+ */
+#define HYPRE_STR(s...) #s
+#define HYPRE_XSTR(s...) HYPRE_STR(s)
+
+/* OpenMP 4.5 device memory management */
+extern HYPRE_Int hypre__global_offload;
+extern HYPRE_Int hypre__offload_device_num;
+extern HYPRE_Int hypre__offload_host_num;
+
+/* stats */
+extern size_t hypre__target_allc_count;
+extern size_t hypre__target_free_count;
+extern size_t hypre__target_allc_bytes;
+extern size_t hypre__target_free_bytes;
+extern size_t hypre__target_htod_count;
+extern size_t hypre__target_dtoh_count;
+extern size_t hypre__target_htod_bytes;
+extern size_t hypre__target_dtoh_bytes;
+
+/* DEBUG MODE: check if offloading has effect
+ * (it is turned on when configured with --enable-debug) */
+
+#ifdef HYPRE_OMP45_DEBUG
+/* if we ``enter'' an address, it should not exist in device [o.w NO EFFECT]
+   if we ``exit'' or ''update'' an address, it should exist in device [o.w ERROR]
+hypre__offload_flag: 0 == OK; 1 == WRONG
+ */
+#define HYPRE_OFFLOAD_FLAG(devnum, hptr, type) \
+   HYPRE_Int hypre__offload_flag = (type[1] == 'n') == omp_target_is_present(hptr, devnum);
+#else
+#define HYPRE_OFFLOAD_FLAG(...) \
+   HYPRE_Int hypre__offload_flag = 0; /* non-debug mode, always OK */
+#endif
+
+/* OMP 4.5 offloading macro */
+#define hypre_omp45_offload(devnum, hptr, datatype, offset, count, type1, type2) \
+{\
+   /* devnum: device number \
+    * hptr: host poiter \
+    * datatype \
+    * type1: ``e(n)ter'', ''e(x)it'', or ``u(p)date'' \
+    * type2: ``(a)lloc'', ``(t)o'', ``(d)elete'', ''(f)rom'' \
+    */ \
+   datatype *hypre__offload_hptr = (datatype *) hptr; \
+   /* if hypre__global_offload ==    0, or
+    *    hptr (host pointer)   == NULL,
+    *    this offload will be IGNORED */ \
+   if (hypre__global_offload && hypre__offload_hptr != NULL) { \
+      /* offloading offset and size (in datatype) */ \
+      size_t hypre__offload_offset = offset, hypre__offload_size = count; \
+      /* in HYPRE_OMP45_DEBUG mode, we test if this offload has effect */ \
+      HYPRE_OFFLOAD_FLAG(devnum, hypre__offload_hptr, type1) \
+      if (hypre__offload_flag) { \
+         printf("[!NO Effect! %s %d] device %d target: %6s %6s, data %p, [%ld:%ld]\n", __FILE__, __LINE__, devnum, type1, type2, (void *)hypre__offload_hptr, hypre__offload_offset, hypre__offload_size); exit(0); \
+      } else { \
+         size_t offload_bytes = count * sizeof(datatype); \
+         /* printf("[            %s %d] device %d target: %6s %6s, data %p, [%d:%d]\n", __FILE__, __LINE__, devnum, type1, type2, (void *)hypre__offload_hptr, hypre__offload_offset, hypre__offload_size); */ \
+         if (type1[1] == 'n' && type2[0] == 't') { \
+            /* enter to */\
+            hypre__target_allc_count ++; \
+            hypre__target_allc_bytes += offload_bytes; \
+            hypre__target_htod_count ++; \
+            hypre__target_htod_bytes += offload_bytes; \
+            _Pragma (HYPRE_XSTR(omp target enter data map(to:hypre__offload_hptr[hypre__offload_offset:hypre__offload_size]))) \
+         } else if (type1[1] == 'n' && type2[0] == 'a') { \
+            /* enter alloc */ \
+            hypre__target_allc_count ++; \
+            hypre__target_allc_bytes += offload_bytes; \
+            _Pragma (HYPRE_XSTR(omp target enter data map(alloc:hypre__offload_hptr[hypre__offload_offset:hypre__offload_size]))) \
+         } else if (type1[1] == 'x' && type2[0] == 'd') { \
+            /* exit delete */\
+            hypre__target_free_count ++; \
+            hypre__target_free_bytes += offload_bytes; \
+            _Pragma (HYPRE_XSTR(omp target exit data map(delete:hypre__offload_hptr[hypre__offload_offset:hypre__offload_size]))) \
+         } else if (type1[1] == 'x' && type2[0] == 'f') {\
+            /* exit from */ \
+            hypre__target_free_count ++; \
+            hypre__target_free_bytes += offload_bytes; \
+            hypre__target_dtoh_count ++; \
+            hypre__target_dtoh_bytes += offload_bytes; \
+            _Pragma (HYPRE_XSTR(omp target exit data map(from:hypre__offload_hptr[hypre__offload_offset:hypre__offload_size]))) \
+         } else if (type1[1] == 'p' && type2[0] == 't') { \
+            /* update to */ \
+            hypre__target_htod_count ++; \
+            hypre__target_htod_bytes += offload_bytes; \
+            _Pragma (HYPRE_XSTR(omp target update to(hypre__offload_hptr[hypre__offload_offset:hypre__offload_size]))) \
+         } else if (type1[1] == 'p' && type2[0] == 'f') {\
+            /* update from */ \
+            hypre__target_dtoh_count ++; \
+            hypre__target_dtoh_bytes += offload_bytes; \
+            _Pragma (HYPRE_XSTR(omp target update from(hypre__offload_hptr[hypre__offload_offset:hypre__offload_size]))) \
+         } else {\
+            printf("error: unrecognized offloading type combination!\n"); exit(-1); \
+         } \
+      } \
+   } \
+}
+
+HYPRE_Int HYPRE_OMPOffload(HYPRE_Int device, void *ptr, size_t num, const char *type1, const char *type2);
+HYPRE_Int HYPRE_OMPPtrIsMapped(void *p, HYPRE_Int device_num);
+HYPRE_Int HYPRE_OMPOffloadOn();
+HYPRE_Int HYPRE_OMPOffloadOff();
+HYPRE_Int HYPRE_OMPOffloadStatPrint();
+
+#define HYPRE_MIN_GPU_SIZE (131072)
+
+#define hypre_SetDeviceOn() HYPRE_OMPOffloadOn()
+#define hypre_SetDeviceOff() HYPRE_OMPOffloadOff()
+
+#endif /* HYPRE_USING_DEVICE_OPENMP */
+#endif /* HYPRE_OMP_DEVICE */
+
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
 
 /******************************************************************************
  *
@@ -665,163 +799,8 @@ hypre_GetExecPolicy2(HYPRE_Int location1,
 
 #define HYPRE_MEM_PAD_LEN 1
 
-/*
-#if defined(HYPRE_USING_CUDA)
-#define HYPRE_CUDA_GLOBAL __host__ __device__
-#else
-#define HYPRE_CUDA_GLOBAL
-#endif
-*/
-
-/* OpenMP 4.5 */
-#if defined(HYPRE_USING_DEVICE_OPENMP)
-
-#include "omp.h"
-
-/* stringification:
- * _Pragma(string-literal), so we need to cast argument to a string
- * The three dots as last argument of the macro tells compiler that this is a variadic macro.
- * I.e. this is a macro that receives variable number of arguments.
- */
-#define HYPRE_STR(s...) #s
-#define HYPRE_XSTR(s...) HYPRE_STR(s)
-
-/* OpenMP 4.5 device memory management */
-extern HYPRE_Int hypre__global_offload;
-extern HYPRE_Int hypre__offload_device_num;
-extern HYPRE_Int hypre__offload_host_num;
-
-/* stats */
-extern size_t hypre__target_allc_count;
-extern size_t hypre__target_free_count;
-extern size_t hypre__target_allc_bytes;
-extern size_t hypre__target_free_bytes;
-extern size_t hypre__target_htod_count;
-extern size_t hypre__target_dtoh_count;
-extern size_t hypre__target_htod_bytes;
-extern size_t hypre__target_dtoh_bytes;
-
-/* DEBUG MODE: check if offloading has effect
- * (it is turned on when configured with --enable-debug) */
-
-#ifdef HYPRE_OMP45_DEBUG
-/* if we ``enter'' an address, it should not exist in device [o.w NO EFFECT]
-   if we ``exit'' or ''update'' an address, it should exist in device [o.w ERROR]
-hypre__offload_flag: 0 == OK; 1 == WRONG
- */
-#define HYPRE_OFFLOAD_FLAG(devnum, hptr, type) \
-   HYPRE_Int hypre__offload_flag = (type[1] == 'n') == omp_target_is_present(hptr, devnum);
-#else
-#define HYPRE_OFFLOAD_FLAG(...) \
-   HYPRE_Int hypre__offload_flag = 0; /* non-debug mode, always OK */
-#endif
-
-/* OMP 4.5 offloading macro */
-#define hypre_omp45_offload(devnum, hptr, datatype, offset, count, type1, type2) \
-{\
-   /* devnum: device number \
-    * hptr: host poiter \
-    * datatype \
-    * type1: ``e(n)ter'', ''e(x)it'', or ``u(p)date'' \
-    * type2: ``(a)lloc'', ``(t)o'', ``(d)elete'', ''(f)rom'' \
-    */ \
-   datatype *hypre__offload_hptr = (datatype *) hptr; \
-   /* if hypre__global_offload ==    0, or
-    *    hptr (host pointer)   == NULL,
-    *    this offload will be IGNORED */ \
-   if (hypre__global_offload && hypre__offload_hptr != NULL) { \
-      /* offloading offset and size (in datatype) */ \
-      size_t hypre__offload_offset = offset, hypre__offload_size = count; \
-      /* in HYPRE_OMP45_DEBUG mode, we test if this offload has effect */ \
-      HYPRE_OFFLOAD_FLAG(devnum, hypre__offload_hptr, type1) \
-      if (hypre__offload_flag) { \
-         printf("[!NO Effect! %s %d] device %d target: %6s %6s, data %p, [%ld:%ld]\n", __FILE__, __LINE__, devnum, type1, type2, (void *)hypre__offload_hptr, hypre__offload_offset, hypre__offload_size); exit(0); \
-      } else { \
-         size_t offload_bytes = count * sizeof(datatype); \
-         /* printf("[            %s %d] device %d target: %6s %6s, data %p, [%d:%d]\n", __FILE__, __LINE__, devnum, type1, type2, (void *)hypre__offload_hptr, hypre__offload_offset, hypre__offload_size); */ \
-         if (type1[1] == 'n' && type2[0] == 't') { \
-            /* enter to */\
-            hypre__target_allc_count ++; \
-            hypre__target_allc_bytes += offload_bytes; \
-            hypre__target_htod_count ++; \
-            hypre__target_htod_bytes += offload_bytes; \
-            _Pragma (HYPRE_XSTR(omp target enter data map(to:hypre__offload_hptr[hypre__offload_offset:hypre__offload_size]))) \
-         } else if (type1[1] == 'n' && type2[0] == 'a') { \
-            /* enter alloc */ \
-            hypre__target_allc_count ++; \
-            hypre__target_allc_bytes += offload_bytes; \
-            _Pragma (HYPRE_XSTR(omp target enter data map(alloc:hypre__offload_hptr[hypre__offload_offset:hypre__offload_size]))) \
-         } else if (type1[1] == 'x' && type2[0] == 'd') { \
-            /* exit delete */\
-            hypre__target_free_count ++; \
-            hypre__target_free_bytes += offload_bytes; \
-            _Pragma (HYPRE_XSTR(omp target exit data map(delete:hypre__offload_hptr[hypre__offload_offset:hypre__offload_size]))) \
-         } else if (type1[1] == 'x' && type2[0] == 'f') {\
-            /* exit from */ \
-            hypre__target_free_count ++; \
-            hypre__target_free_bytes += offload_bytes; \
-            hypre__target_dtoh_count ++; \
-            hypre__target_dtoh_bytes += offload_bytes; \
-            _Pragma (HYPRE_XSTR(omp target exit data map(from:hypre__offload_hptr[hypre__offload_offset:hypre__offload_size]))) \
-         } else if (type1[1] == 'p' && type2[0] == 't') { \
-            /* update to */ \
-            hypre__target_htod_count ++; \
-            hypre__target_htod_bytes += offload_bytes; \
-            _Pragma (HYPRE_XSTR(omp target update to(hypre__offload_hptr[hypre__offload_offset:hypre__offload_size]))) \
-         } else if (type1[1] == 'p' && type2[0] == 'f') {\
-            /* update from */ \
-            hypre__target_dtoh_count ++; \
-            hypre__target_dtoh_bytes += offload_bytes; \
-            _Pragma (HYPRE_XSTR(omp target update from(hypre__offload_hptr[hypre__offload_offset:hypre__offload_size]))) \
-         } else {\
-            printf("error: unrecognized offloading type combination!\n"); exit(-1); \
-         } \
-      } \
-   } \
-}
-
-#endif /*  #if defined(HYPRE_USING_DEVICE_OPENMP) */
-
-/*
-#define hypre_InitMemoryDebug(id)
-#define hypre_FinalizeMemoryDebug()
-*/
-//#define TRACK_MEMORY_ALLOCATIONS
-#if defined(TRACK_MEMORY_ALLOCATIONS)
-
-typedef struct {
-  char *file;
-  size_t size;
-  void *end;
-  HYPRE_Int line;
-  HYPRE_Int type;} pattr_t;
-
-pattr_t *patpush(void *ptr, pattr_t *ss);
-
-#define hypre_TAlloc(type, count, location) \
-  ( (type *)hypre_MAllocIns((size_t)(sizeof(type) * (count)), location,__FILE__,__LINE__) )
-
-#define hypre_CTAlloc(type, count, location) \
-  ( (type *)hypre_CAllocIns((size_t)(count), (size_t)sizeof(type), location,__FILE__,__LINE__) )
-
-#define hypre_TReAlloc(ptr, type, count, location) \
-  ( (type *)hypre_ReAllocIns((char *)ptr, (size_t)(sizeof(type) * (count)), location,__FILE__,__LINE__) )
-
-void assert_check(void *ptr, char *file, HYPRE_Int line);
-
-void assert_check_host(void *ptr, char *file, HYPRE_Int line);
-
-
-#define ASSERT_MANAGED(ptr)\
-  ( assert_check((ptr),__FILE__,__LINE__))
-
-#define ASSERT_HOST(ptr)\
-  ( assert_check_host((ptr),__FILE__,__LINE__))
-
-#else
 
 #if 0
-
 /* These Allocs are with printfs, for debug */
 #define hypre_TAlloc(type, count, location) \
 (\
@@ -857,8 +836,6 @@ void assert_check_host(void *ptr, char *file, HYPRE_Int line);
 
 #define hypre_TReAlloc(ptr, type, count, location) \
 ( (type *) hypre_ReAlloc((char *)ptr, (size_t)(sizeof(type) * (count)), location) )
-
-#endif
 
 #endif
 
@@ -1267,925 +1244,6 @@ void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, c
  * $Revision$
  ***********************************************************************EHEADER*/
 
-#ifdef USE_NVTX
-#include "nvToolsExt.h"
-#include "nvToolsExtCudaRt.h"
-
-static const uint32_t colors[] = { 0x0000ff00, 0x000000ff, 0x00ffff00, 0x00ff00ff, 0x0000ffff, 0x00ff0000, 0x00ffffff };
-static const int num_colors = sizeof(colors)/sizeof(uint32_t);
-
-#define PUSH_RANGE(name,cid) { \
-    int color_id = cid; \
-    color_id = color_id%num_colors;\
-    nvtxEventAttributes_t eventAttrib = {0}; \
-    eventAttrib.version = NVTX_VERSION; \
-    eventAttrib.size = NVTX_EVENT_ATTRIB_STRUCT_SIZE; \
-    eventAttrib.colorType = NVTX_COLOR_ARGB; \
-    eventAttrib.color = colors[color_id]; \
-    eventAttrib.messageType = NVTX_MESSAGE_TYPE_ASCII; \
-    eventAttrib.message.ascii = name; \
-    nvtxDomainRangePushEx(HYPRE_DOMAIN,&eventAttrib);	\
-}
-
-#define PUSH_RANGE_PAYLOAD(name,cid,load) {		\
-    int color_id = cid; \
-    color_id = color_id%num_colors;\
-    nvtxEventAttributes_t eventAttrib = {0}; \
-    eventAttrib.version = NVTX_VERSION; \
-    eventAttrib.size = NVTX_EVENT_ATTRIB_STRUCT_SIZE; \
-    eventAttrib.colorType = NVTX_COLOR_ARGB; \
-    eventAttrib.color = colors[color_id]; \
-    eventAttrib.messageType = NVTX_MESSAGE_TYPE_ASCII; \
-    eventAttrib.message.ascii = name; \
-    eventAttrib.payloadType = NVTX_PAYLOAD_TYPE_INT64; \
-    eventAttrib.payload.llValue = load; \
-    eventAttrib.category=1; \
-    nvtxDomainRangePushEx(HYPRE_DOMAIN,&eventAttrib); \
-}
-
-#define PUSH_RANGE_DOMAIN(name,cid,dId) {				\
-    int color_id = cid; \
-    color_id = color_id%num_colors;\
-    nvtxEventAttributes_t eventAttrib = {0}; \
-    eventAttrib.version = NVTX_VERSION; \
-    eventAttrib.size = NVTX_EVENT_ATTRIB_STRUCT_SIZE; \
-    eventAttrib.colorType = NVTX_COLOR_ARGB; \
-    eventAttrib.color = colors[color_id]; \
-    eventAttrib.messageType = NVTX_MESSAGE_TYPE_ASCII; \
-    eventAttrib.message.ascii = name; \
-    nvtxDomainRangePushEx(getdomain(dId),&eventAttrib);	\
-}
-
-#define POP_RANGE nvtxDomainRangePop(HYPRE_DOMAIN);
-#define POP_RANGE_DOMAIN(dId) {			\
-  nvtxDomainRangePop(getdomain(dId));		\
-  }
-#else
-#define PUSH_RANGE(name,cid)
-#define POP_RANGE
-#define PUSH_RANGE_PAYLOAD(name,cid,load)
-#define PUSH_RANGE_DOMAIN(name,cid,domainName)
-#endif
-
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-#ifndef hypre_GPU_ERROR_HEADER
-#define hypre_GPU_ERROR_HEADER
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-
-//#include <cuda_runtime_api.h>
-#ifdef __cplusplus
-extern "C++" {
-#endif
-#include <cuda.h>
-#include <cuda_runtime.h>
-#ifdef __cplusplus
-}
-#endif
-
-#define hypre_CheckErrorDevice(err) CheckError(err,__FILE__, __FUNCTION__, __LINE__)
-#define CUDAMEMATTACHTYPE cudaMemAttachGlobal
-#define HYPRE_HOST_POINTER 0
-#define HYPRE_MANAGED_POINTER 1
-#define HYPRE_PINNED_POINTER 2
-#define HYPRE_DEVICE_POINTER 3
-#define HYPRE_UNDEFINED_POINTER1 4
-#define HYPRE_UNDEFINED_POINTER2 5
-
-void CheckError(cudaError_t const err, const char* file, char const* const fun, const HYPRE_Int line);
-//void cudaSafeFree(void *ptr,int padding);
-hypre_int PrintPointerAttributes(const void *ptr);
-hypre_int PointerAttributes(const void *ptr);
-
-/* CUBLAS and CUSPARSE related */
-#ifndef __cusparseErrorCheck__
-#define __cusparseErrorCheck__
-
-/* MUST HAVE " extern "C++" " for C++ header cusparse.h, and the headers therein */
-#ifdef __cplusplus
-extern "C++" {
-#endif
-#include <cusparse.h>
-#ifdef __cplusplus
-}
-#endif
-#include <cublas_v2.h>
-#include <cuda_runtime_api.h>
-inline const char *cusparseErrorCheck(cusparseStatus_t error)
-{
-    switch (error)
-    {
-        case CUSPARSE_STATUS_SUCCESS:
-            return "CUSPARSE_STATUS_SUCCESS";
-
-        case CUSPARSE_STATUS_NOT_INITIALIZED:
-            return "CUSPARSE_STATUS_NOT_INITIALIZED";
-
-        case CUSPARSE_STATUS_ALLOC_FAILED:
-            return "CUSPARSE_STATUS_ALLOC_FAILED";
-
-        case CUSPARSE_STATUS_INVALID_VALUE:
-            return "CUSPARSE_STATUS_INVALID_VALUE";
-
-        case CUSPARSE_STATUS_ARCH_MISMATCH:
-            return "CUSPARSE_STATUS_ARCH_MISMATCH";
-
-        case CUSPARSE_STATUS_MAPPING_ERROR:
-            return "CUSPARSE_STATUS_MAPPING_ERROR";
-
-        case CUSPARSE_STATUS_EXECUTION_FAILED:
-            return "CUSPARSE_STATUS_EXECUTION_FAILED";
-
-        case CUSPARSE_STATUS_INTERNAL_ERROR:
-            return "CUSPARSE_STATUS_INTERNAL_ERROR";
-
-        case CUSPARSE_STATUS_MATRIX_TYPE_NOT_SUPPORTED:
-            return "CUSPARSE_STATUS_MATRIX_TYPE_NOT_SUPPORTED";
-        default:
-            return "Unknown error in cusparseErrorCheck";
-    }
-
-}
-
-inline const char *cublasErrorCheck(cublasStatus_t error)
-{
-    switch (error)
-    {
-        case CUBLAS_STATUS_SUCCESS:
-            return "CUBLAS_STATUS_SUCCESS";
-
-        case CUBLAS_STATUS_NOT_INITIALIZED:
-            return "CUBLAS_STATUS_NOT_INITIALIZED";
-
-        case CUBLAS_STATUS_ALLOC_FAILED:
-            return "CUBLAS_STATUS_ALLOC_FAILED";
-
-        case CUBLAS_STATUS_INVALID_VALUE:
-            return "CUBLAS_STATUS_INVALID_VALUE";
-
-        case CUBLAS_STATUS_ARCH_MISMATCH:
-            return "CUBLAS_STATUS_ARCH_MISMATCH";
-
-        case CUBLAS_STATUS_MAPPING_ERROR:
-            return "CUBLAS_STATUS_MAPPING_ERROR";
-
-        case CUBLAS_STATUS_EXECUTION_FAILED:
-            return "CUBLAS_STATUS_EXECUTION_FAILED";
-
-        case CUBLAS_STATUS_INTERNAL_ERROR:
-            return "CUBLAS_STATUS_INTERNAL_ERROR";
-
-        case CUBLAS_STATUS_NOT_SUPPORTED:
-            return "CUBLAS_STATUS_NOT_SUPPORTED";
-        case CUBLAS_STATUS_LICENSE_ERROR:
-            return "CUBLAS_STATUS_LICENSE_ERROR";
-        default:
-            return "Unknown error in cublasErrorCheck";
-    }
-}
-
-#define cusparseErrchk(ans) { cusparseAssert((ans), __FILE__, __LINE__); }
-inline void cusparseAssert(cusparseStatus_t code, const char *file, int line)
-{
-   if (code != CUSPARSE_STATUS_SUCCESS)
-   {
-     fprintf(stderr,"CUSPARSE ERROR  ( Code = %d) IN CUDA CALL line %d of file %s\n",code,line,file);
-     fprintf(stderr,"CUSPARSE ERROR : %s \n", cusparseErrorCheck(code));
-     exit(0);
-   }
-}
-
-#define cublasErrchk(ans){ cublasAssert((ans), __FILE__, __LINE__); }
-inline void cublasAssert(cublasStatus_t code, const char *file, int line)
-{
-   if (code != CUBLAS_STATUS_SUCCESS)
-   {
-     fprintf(stderr,"CUBLAS ERROR  ( Code = %d) IN CUDA CALL line %d of file %s\n",code,line,file);
-     fprintf(stderr,"CUBLAS ERROR : %s \n", cublasErrorCheck(code));
-   }
-}
-
-#endif // __cusparseErrorCheck__
-
-#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-
-#endif // hypre_GPU_ERROR_HEADER
-
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-#ifndef __GPUMEM_H__
-#define  __GPUMEM_H__
-
-#if defined(HYPRE_USING_CUDA)
-#define HYPRE_MIN_GPU_SIZE (131072)
-extern HYPRE_Int hypre_exec_policy;
-#define hypre_SetDeviceOn()  hypre_exec_policy = HYPRE_MEMORY_DEVICE
-#define hypre_SetDeviceOff() hypre_exec_policy = HYPRE_MEMORY_HOST
-#endif /* #if defined(HYPRE_USING_CUDA) */
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-
-#define HYPRE_USE_MANAGED_SCALABLE 1
-#define HYPRE_GPU_USE_PINNED 1
-
-#include <cuda_runtime_api.h>
-void hypre_GPUInit(hypre_int use_device);
-void hypre_GPUFinalize();
-cudaStream_t getstreamOlde(hypre_int i);
-nvtxDomainHandle_t getdomain(hypre_int i);
-cudaEvent_t getevent(hypre_int i);
-void MemAdviseReadOnly(const void *ptr, hypre_int device);
-void MemAdviseUnSetReadOnly(const void *ptr, hypre_int device);
-void MemAdviseSetPrefLocDevice(const void *ptr, hypre_int device);
-void MemAdviseSetPrefLocHost(const void *ptr);
-void MemPrefetch(const void *ptr,hypre_int device,cudaStream_t stream);
-void MemPrefetchSized(const void *ptr,size_t size,hypre_int device,cudaStream_t stream);
-void MemPrefetchForce(const void *ptr,hypre_int device,cudaStream_t stream);
-cublasHandle_t getCublasHandle();
-cusparseHandle_t getCusparseHandle();
-hypre_int getsetasyncmode(hypre_int mode, hypre_int action);
-void SetAsyncMode(hypre_int mode);
-hypre_int GetAsyncMode();
-void branchStream(hypre_int i, hypre_int j);
-void joinStreams(hypre_int i, hypre_int j, hypre_int k);
-void affs(hypre_int myid);
-hypre_int getcore();
-hypre_int getnuma();
-hypre_int checkDeviceProps();
-hypre_int pointerIsManaged(const void *ptr);
-
-/*
- * Global struct for keeping HYPRE GPU Init state
- */
-
-#define MAX_HGS_ELEMENTS 10
-struct hypre__global_struct
-{
-   hypre_int initd;
-   hypre_int device;
-   hypre_int device_count;
-   size_t memoryHWM;
-   cublasHandle_t cublas_handle;
-   cusparseHandle_t cusparse_handle;
-   cusparseMatDescr_t cusparse_mat_descr;
-   cudaStream_t streams[MAX_HGS_ELEMENTS];
-   nvtxDomainHandle_t nvtx_domain;
-   hypre_int concurrent_managed_access;
-};
-
-extern struct hypre__global_struct hypre__global_handle ;
-
-/*
- * Macros for accessing elements of the global handle
- */
-
-#define HYPRE_DOMAIN  hypre__global_handle.nvtx_domain
-#define HYPRE_STREAM(index) (hypre__global_handle.streams[index])
-#define HYPRE_GPU_HANDLE hypre__global_handle.initd
-#define HYPRE_CUBLAS_HANDLE hypre__global_handle.cublas_handle
-#define HYPRE_CUSPARSE_HANDLE hypre__global_handle.cusparse_handle
-#define HYPRE_DEVICE hypre__global_handle.device
-#define HYPRE_DEVICE_COUNT hypre__global_handle.device_count
-#define HYPRE_CUSPARSE_MAT_DESCR hypre__global_handle.cusparse_mat_descr
-#define HYPRE_GPU_CMA hypre__global_handle.concurrent_managed_access
-#define HYPRE_GPU_HWM hypre__global_handle.memoryHWM
-
-
-typedef struct node {
-  const void *ptr;
-  size_t size;
-  struct node *next;
-} node;
-size_t mempush(const void *ptr, size_t size, hypre_int action);
-node *memfind(node *head, const void *ptr);
-void memdel(node **head, node *found);
-void meminsert(node **head, const void *ptr,size_t size);
-void printlist(node *head,hypre_int nc);
-size_t memsize(const void *ptr);
-
-#endif /* #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP) */
-
-
-#if defined(HYPRE_USING_DEVICE_OPENMP)
-HYPRE_Int HYPRE_OMPOffload(HYPRE_Int device, void *ptr, size_t num,
-                           const char *type1, const char *type2);
-
-HYPRE_Int HYPRE_OMPPtrIsMapped(void *p, HYPRE_Int device_num);
-
-HYPRE_Int HYPRE_OMPOffloadOn();
-
-HYPRE_Int HYPRE_OMPOffloadOff();
-
-HYPRE_Int HYPRE_OMPOffloadStatPrint();
-
-#define HYPRE_MIN_GPU_SIZE (131072)
-
-#define hypre_SetDeviceOn() HYPRE_OMPOffloadOn()
-#define hypre_SetDeviceOff() HYPRE_OMPOffloadOff()
-
-#endif /* #if defined(HYPRE_USING_DEVICE_OPENMP) */
-
-#endif/* __GPUMEM_H__ */
-
-#if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && defined(HYPRE_USING_CUDA)
-
-#ifndef CUDART_VERSION
-#error CUDART_VERSION Undefined!
-#elif (CUDART_VERSION >= 9000)
-#define WARP_SHFL_DOWN(mask, var, delta)  __shfl_down_sync(mask, var, delta)
-#elif (CUDART_VERSION <= 8000)
-#define WARP_SHFL_DOWN(mask, var, delta)  __shfl_down(var, delta);
-#endif
-
-extern "C++" {
-
-extern void *cuda_reduce_buffer;
-
-template<typename T> void OneBlockReduce(T *d_arr, HYPRE_Int N, T *h_out);
-
-struct HYPRE_double4
-{
-   HYPRE_Real x,y,z,w;
-
-   __host__ __device__
-   HYPRE_double4() {}
-
-   __host__ __device__
-   HYPRE_double4(HYPRE_Real x1, HYPRE_Real x2, HYPRE_Real x3, HYPRE_Real x4)
-   {
-      x = x1;
-      y = x2;
-      z = x3;
-      w = x4;
-   }
-
-   __host__ __device__
-   void operator=(HYPRE_Real val)
-   {
-      x = y = z = w = val;
-   }
-
-   __host__ __device__
-   void operator+=(HYPRE_double4 rhs)
-   {
-      x += rhs.x;
-      y += rhs.y;
-      z += rhs.z;
-      w += rhs.w;
-   }
-
-};
-
-struct HYPRE_double6
-{
-   HYPRE_Real x,y,z,w,u,v;
-
-   __host__ __device__
-   HYPRE_double6() {}
-
-   __host__ __device__
-   HYPRE_double6(HYPRE_Real x1, HYPRE_Real x2, HYPRE_Real x3, HYPRE_Real x4,
-                 HYPRE_Real x5, HYPRE_Real x6)
-   {
-      x = x1;
-      y = x2;
-      z = x3;
-      w = x4;
-      u = x5;
-      v = x6;
-   }
-
-   __host__ __device__
-   void operator=(HYPRE_Real val)
-   {
-      x = y = z = w = u = v = val;
-   }
-
-   __host__ __device__
-   void operator+=(HYPRE_double6 rhs)
-   {
-      x += rhs.x;
-      y += rhs.y;
-      z += rhs.z;
-      w += rhs.w;
-      u += rhs.u;
-      v += rhs.v;
-   }
-
-};
-
-/* reduction within a warp */
-__inline__ __host__ __device__
-HYPRE_Real warpReduceSum(HYPRE_Real val)
-{
-#ifdef __CUDA_ARCH__
-  for (HYPRE_Int offset = warpSize/2; offset > 0; offset /= 2)
-  {
-    val += WARP_SHFL_DOWN(0xFFFFFFFF, val, offset);
-  }
-#endif
-  return val;
-}
-
-__inline__ __host__ __device__
-HYPRE_double4 warpReduceSum(HYPRE_double4 val) {
-#ifdef __CUDA_ARCH__
-  for (HYPRE_Int offset = warpSize / 2; offset > 0; offset /= 2)
-  {
-    val.x += WARP_SHFL_DOWN(0xFFFFFFFF, val.x, offset);
-    val.y += WARP_SHFL_DOWN(0xFFFFFFFF, val.y, offset);
-    val.z += WARP_SHFL_DOWN(0xFFFFFFFF, val.z, offset);
-    val.w += WARP_SHFL_DOWN(0xFFFFFFFF, val.w, offset);
-  }
-#endif
-  return val;
-}
-
-__inline__ __host__ __device__
-HYPRE_double6 warpReduceSum(HYPRE_double6 val) {
-#ifdef __CUDA_ARCH__
-  for (HYPRE_Int offset = warpSize / 2; offset > 0; offset /= 2)
-  {
-    val.x += WARP_SHFL_DOWN(0xFFFFFFFF, val.x, offset);
-    val.y += WARP_SHFL_DOWN(0xFFFFFFFF, val.y, offset);
-    val.z += WARP_SHFL_DOWN(0xFFFFFFFF, val.z, offset);
-    val.w += WARP_SHFL_DOWN(0xFFFFFFFF, val.w, offset);
-    val.u += WARP_SHFL_DOWN(0xFFFFFFFF, val.u, offset);
-    val.v += WARP_SHFL_DOWN(0xFFFFFFFF, val.v, offset);
-  }
-#endif
-  return val;
-}
-
-/* reduction within a block */
-template <typename T>
-__inline__ __host__ __device__
-T blockReduceSum(T val)
-{
-#ifdef __CUDA_ARCH__
-   //static __shared__ T shared[32]; // Shared mem for 32 partial sums
-   __shared__ T shared[32];        // Shared mem for 32 partial sums
-   HYPRE_Int lane = threadIdx.x % warpSize;
-   HYPRE_Int wid  = threadIdx.x / warpSize;
-
-   val = warpReduceSum(val);       // Each warp performs partial reduction
-
-   if (lane == 0)
-   {
-      shared[wid] = val;          // Write reduced value to shared memory
-   }
-
-   __syncthreads();               // Wait for all partial reductions
-
-   //read from shared memory only if that warp existed
-   if (threadIdx.x < blockDim.x / warpSize)
-   {
-      val = shared[lane];
-   }
-   else
-   {
-      val = 0.0;
-   }
-
-   if (wid == 0)
-   {
-      val = warpReduceSum(val); //Final reduce within first warp
-   }
-
-#endif
-   return val;
-}
-
-/* Reducer class */
-template <typename T>
-struct ReduceSum
-{
-   T init;                    /* initial value passed in */
-   mutable T __thread_sum;    /* place to hold local sum of a thread,
-                                 and partial sum of a block */
-   T *d_buf;                  /* place to store partial sum of a block */
-   HYPRE_Int nblocks;         /* number of blocks used in the first round */
-
-   /* constructor.
-    * val is the initial value (added to the reduced sum) */
-   __host__
-   ReduceSum(T val)
-   {
-      init = val;
-      __thread_sum = 0.0;
-
-      if (cuda_reduce_buffer == NULL)
-      {
-         /* allocate for the max size for reducing double6 type */
-         cuda_reduce_buffer = hypre_TAlloc(HYPRE_double6, 1024, HYPRE_MEMORY_DEVICE);
-      }
-
-      d_buf = (T*) cuda_reduce_buffer;
-   }
-
-   /* copy constructor */
-   __host__ __device__
-   ReduceSum(const ReduceSum<T>& other)
-   {
-      *this = other;
-   }
-
-   __host__ __device__
-   void BlockReduce() const
-   {
-#ifdef __CUDA_ARCH__
-      __thread_sum = blockReduceSum(__thread_sum);
-      if (threadIdx.x == 0)
-      {
-         d_buf[blockIdx.x] = __thread_sum;
-      }
-#endif
-   }
-
-   __host__ __device__
-   void operator+=(T val) const
-   {
-      __thread_sum += val;
-   }
-
-   /* we invoke the 2nd reduction at the time we want the sum from the reducer
-    * class */
-   __host__
-   operator T()
-   {
-      T val;
-      /* 2nd reduction with only *one* block */
-      OneBlockReduce(d_buf, nblocks, &val);
-      val += init;
-      //hypre_TFree(d_buf, HYPRE_MEMORY_DEVICE);
-      return val;
-   }
-
-   /* destructor */
-   __host__ __device__
-   ~ReduceSum<T>()
-   {
-   }
-};
-
-} // extern "C++"
-
-#endif
-
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-/* amg_linklist.c */
-void hypre_dispose_elt ( hypre_LinkList element_ptr );
-void hypre_remove_point ( hypre_LinkList *LoL_head_ptr , hypre_LinkList *LoL_tail_ptr , HYPRE_Int measure , HYPRE_Int index , HYPRE_Int *lists , HYPRE_Int *where );
-hypre_LinkList hypre_create_elt ( HYPRE_Int Item );
-void hypre_enter_on_lists ( hypre_LinkList *LoL_head_ptr , hypre_LinkList *LoL_tail_ptr , HYPRE_Int measure , HYPRE_Int index , HYPRE_Int *lists , HYPRE_Int *where );
-
-/* binsearch.c */
-HYPRE_Int hypre_BinarySearch ( HYPRE_Int *list , HYPRE_Int value , HYPRE_Int list_length );
-HYPRE_Int hypre_BigBinarySearch(HYPRE_BigInt *list, HYPRE_BigInt value, HYPRE_Int list_length);
-HYPRE_Int hypre_BinarySearch2 ( HYPRE_Int *list , HYPRE_Int value , HYPRE_Int low , HYPRE_Int high , HYPRE_Int *spot );
-HYPRE_Int *hypre_LowerBound( HYPRE_Int *first, HYPRE_Int *last, HYPRE_Int value );
-HYPRE_BigInt *hypre_BigLowerBound( HYPRE_BigInt *first, HYPRE_BigInt *last, HYPRE_BigInt value );
-
-/* hypre_complex.c */
-#ifdef HYPRE_COMPLEX
-HYPRE_Complex hypre_conj( HYPRE_Complex value );
-HYPRE_Real    hypre_cabs( HYPRE_Complex value );
-HYPRE_Real    hypre_creal( HYPRE_Complex value );
-HYPRE_Real    hypre_cimag( HYPRE_Complex value );
-#else
-#define hypre_conj(value)  value
-#define hypre_cabs(value)  fabs(value)
-#define hypre_creal(value) value
-#define hypre_cimag(value) 0.0
-#endif
-
-/* hypre_general.c */
-void HYPRE_Init( hypre_int argc, char *argv[] );
-void HYPRE_Finalize();
-
-/* hypre_printf.c */
-// #ifdef HYPRE_BIGINT
-HYPRE_Int hypre_printf( const char *format , ... );
-HYPRE_Int hypre_fprintf( FILE *stream , const char *format, ... );
-HYPRE_Int hypre_sprintf( char *s , const char *format, ... );
-HYPRE_Int hypre_scanf( const char *format , ... );
-HYPRE_Int hypre_fscanf( FILE *stream , const char *format, ... );
-HYPRE_Int hypre_sscanf( char *s , const char *format, ... );
-// #else
-// #define hypre_printf  printf
-// #define hypre_fprintf fprintf
-// #define hypre_sprintf sprintf
-// #define hypre_scanf   scanf
-// #define hypre_fscanf  fscanf
-// #define hypre_sscanf  sscanf
-// #endif
-
-/* hypre_qsort.c */
-void hypre_swap ( HYPRE_Int *v , HYPRE_Int i , HYPRE_Int j );
-void hypre_swap2 ( HYPRE_Int *v , HYPRE_Real *w , HYPRE_Int i , HYPRE_Int j );
-void hypre_BigSwap2 ( HYPRE_BigInt *v , HYPRE_Real *w , HYPRE_Int i , HYPRE_Int j );
-void hypre_swap2i ( HYPRE_Int *v , HYPRE_Int *w , HYPRE_Int i , HYPRE_Int j );
-void hypre_swap3i ( HYPRE_Int *v , HYPRE_Int *w , HYPRE_Int *z , HYPRE_Int i , HYPRE_Int j );
-void hypre_swap3_d ( HYPRE_Real *v , HYPRE_Int *w , HYPRE_Int *z , HYPRE_Int i , HYPRE_Int j );
-void hypre_BigSwap4_d ( HYPRE_Real *v , HYPRE_BigInt *w , HYPRE_Int *z , HYPRE_Int *y , HYPRE_Int i , HYPRE_Int j );
-void hypre_swap_d ( HYPRE_Real *v , HYPRE_Int i , HYPRE_Int j );
-void hypre_qsort0 ( HYPRE_Int *v , HYPRE_Int left , HYPRE_Int right );
-void hypre_qsort1 ( HYPRE_Int *v , HYPRE_Real *w , HYPRE_Int left , HYPRE_Int right );
-void hypre_BigQsort1 ( HYPRE_BigInt *v , HYPRE_Real *w , HYPRE_Int left , HYPRE_Int right );
-void hypre_qsort2i ( HYPRE_Int *v , HYPRE_Int *w , HYPRE_Int left , HYPRE_Int right );
-void hypre_qsort2 ( HYPRE_Int *v , HYPRE_Real *w , HYPRE_Int left , HYPRE_Int right );
-void hypre_qsort3i ( HYPRE_Int *v , HYPRE_Int *w , HYPRE_Int *z , HYPRE_Int left , HYPRE_Int right );
-void hypre_qsort3_abs ( HYPRE_Real *v , HYPRE_Int *w , HYPRE_Int *z , HYPRE_Int left , HYPRE_Int right );
-void hypre_BigQsort4_abs ( HYPRE_Real *v , HYPRE_BigInt *w , HYPRE_Int *z , HYPRE_Int *y , HYPRE_Int left , HYPRE_Int right );
-void hypre_qsort_abs ( HYPRE_Real *w , HYPRE_Int left , HYPRE_Int right );
-void hypre_BigSwapbi(HYPRE_BigInt  *v, HYPRE_Int  *w, HYPRE_Int  i, HYPRE_Int  j );
-void hypre_BigQsortbi( HYPRE_BigInt *v, HYPRE_Int *w, HYPRE_Int  left, HYPRE_Int  right );
-void hypre_BigSwapLoc(HYPRE_BigInt  *v, HYPRE_Int  *w, HYPRE_Int  i, HYPRE_Int  j );
-void hypre_BigQsortbLoc( HYPRE_BigInt *v, HYPRE_Int *w, HYPRE_Int  left, HYPRE_Int  right );
-void hypre_BigSwapb2i(HYPRE_BigInt  *v, HYPRE_Int  *w, HYPRE_Int  *z, HYPRE_Int  i, HYPRE_Int  j );
-void hypre_BigQsortb2i( HYPRE_BigInt *v, HYPRE_Int *w, HYPRE_Int *z, HYPRE_Int  left, HYPRE_Int  right );
-void hypre_BigSwap( HYPRE_BigInt *v, HYPRE_Int  i, HYPRE_Int  j );
-void hypre_BigQsort0( HYPRE_BigInt *v, HYPRE_Int  left, HYPRE_Int  right );
-
-/* qsplit.c */
-HYPRE_Int hypre_DoubleQuickSplit ( HYPRE_Real *values , HYPRE_Int *indices , HYPRE_Int list_length , HYPRE_Int NumberKept );
-
-/* random.c */
-/* HYPRE_CUDA_GLOBAL */ void hypre_SeedRand ( HYPRE_Int seed );
-/* HYPRE_CUDA_GLOBAL */ HYPRE_Int hypre_RandI ( void );
-/* HYPRE_CUDA_GLOBAL */ HYPRE_Real hypre_Rand ( void );
-
-/* hypre_prefix_sum.c */
-/**
- * Assumed to be called within an omp region.
- * Let x_i be the input of ith thread.
- * The output of ith thread y_i = x_0 + x_1 + ... + x_{i-1}
- * Additionally, sum = x_0 + x_1 + ... + x_{nthreads - 1}
- * Note that always y_0 = 0
- *
- * @param workspace at least with length (nthreads+1)
- *                  workspace[tid] will contain result for tid
- *                  workspace[nthreads] will contain sum
- */
-void hypre_prefix_sum(HYPRE_Int *in_out, HYPRE_Int *sum, HYPRE_Int *workspace);
-/**
- * This version does prefix sum in pair.
- * Useful when we prefix sum of diag and offd in tandem.
- *
- * @param worksapce at least with length 2*(nthreads+1)
- *                  workspace[2*tid] and workspace[2*tid+1] will contain results for tid
- *                  workspace[3*nthreads] and workspace[3*nthreads + 1] will contain sums
- */
-void hypre_prefix_sum_pair(HYPRE_Int *in_out1, HYPRE_Int *sum1, HYPRE_Int *in_out2, HYPRE_Int *sum2, HYPRE_Int *workspace);
-/**
- * @param workspace at least with length 3*(nthreads+1)
- *                  workspace[3*tid:3*tid+3) will contain results for tid
- */
-void hypre_prefix_sum_triple(HYPRE_Int *in_out1, HYPRE_Int *sum1, HYPRE_Int *in_out2, HYPRE_Int *sum2, HYPRE_Int *in_out3, HYPRE_Int *sum3, HYPRE_Int *workspace);
-
-/**
- * n prefix-sums together.
- * workspace[n*tid:n*(tid+1)) will contain results for tid
- * workspace[nthreads*tid:nthreads*(tid+1)) will contain sums
- *
- * @param workspace at least with length n*(nthreads+1)
- */
-void hypre_prefix_sum_multiple(HYPRE_Int *in_out, HYPRE_Int *sum, HYPRE_Int n, HYPRE_Int *workspace);
-
-/* hypre_merge_sort.c */
-/**
- * Why merge sort?
- * 1) Merge sort can take advantage of eliminating duplicates.
- * 2) Merge sort is more efficiently parallelizable than qsort
- */
-
-/**
- * Out of place merge sort with duplicate elimination
- * @ret number of unique elements
- */
-HYPRE_Int hypre_merge_sort_unique(HYPRE_Int *in, HYPRE_Int *out, HYPRE_Int len);
-/**
- * Out of place merge sort with duplicate elimination
- *
- * @param out pointer to output can be in or temp
- * @ret number of unique elements
- */
-HYPRE_Int hypre_merge_sort_unique2(HYPRE_Int *in, HYPRE_Int *temp, HYPRE_Int len, HYPRE_Int **out);
-
-void hypre_merge_sort(HYPRE_Int *in, HYPRE_Int *temp, HYPRE_Int len, HYPRE_Int **sorted);
-
-void hypre_union2(HYPRE_Int n1, HYPRE_BigInt *arr1, HYPRE_Int n2, HYPRE_BigInt *arr2, HYPRE_Int *n3, HYPRE_BigInt *arr3, HYPRE_Int *map1, HYPRE_Int *map2);
-
-/* hypre_hopscotch_hash.c */
-
-#ifdef HYPRE_USING_OPENMP
-
-/* Check if atomic operations are available to use concurrent hopscotch hash table */
-#if defined(__GNUC__) && defined(__GNUC_MINOR__) && defined(__GNUC_PATCHLEVEL__) && (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__) > 40100
-#define HYPRE_USING_ATOMIC
-//#elif defined _MSC_VER // JSP: haven't tested, so comment out for now
-//#define HYPRE_USING_ATOMIC
-//#elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L && !defined(__STDC_NO_ATOMICS__)
-// JSP: not many compilers have implemented this, so comment out for now
-//#define HYPRE_USING_ATOMIC
-//#include <stdatomic.h>
-#endif
-
-#endif // HYPRE_USING_OPENMP
-
-#ifdef HYPRE_HOPSCOTCH
-#ifdef HYPRE_USING_ATOMIC
-// concurrent hopscotch hashing is possible only with atomic supports
-#define HYPRE_CONCURRENT_HOPSCOTCH
-#endif
-#endif
-
-#ifdef HYPRE_CONCURRENT_HOPSCOTCH
-typedef struct {
-  HYPRE_Int volatile timestamp;
-  omp_lock_t         lock;
-} hypre_HopscotchSegment;
-#endif
-
-/**
- * The current typical use case of unordered set is putting input sequence
- * with lots of duplication (putting all colidx received from other ranks),
- * followed by one sweep of enumeration.
- * Since the capacity is set to the number of inputs, which is much larger
- * than the number of unique elements, we optimize for initialization and
- * enumeration whose time is proportional to the capacity.
- * For initialization and enumeration, structure of array (SoA) is better
- * for vectorization, cache line utilization, and so on.
- */
-typedef struct
-{
-   HYPRE_Int  volatile              segmentMask;
-   HYPRE_Int  volatile              bucketMask;
-#ifdef HYPRE_CONCURRENT_HOPSCOTCH
-   hypre_HopscotchSegment* volatile segments;
-#endif
-   HYPRE_Int *volatile              key;
-   hypre_uint *volatile             hopInfo;
-   HYPRE_Int *volatile              hash;
-} hypre_UnorderedIntSet;
-
-typedef struct
-{
-   HYPRE_Int volatile            segmentMask;
-   HYPRE_Int volatile            bucketMask;
-#ifdef HYPRE_CONCURRENT_HOPSCOTCH
-   hypre_HopscotchSegment* volatile segments;
-#endif
-   HYPRE_BigInt *volatile           key;
-   hypre_uint *volatile             hopInfo;
-   HYPRE_BigInt *volatile           hash;
-} hypre_UnorderedBigIntSet;
-
-typedef struct
-{
-  hypre_uint volatile hopInfo;
-  HYPRE_Int  volatile hash;
-  HYPRE_Int  volatile key;
-  HYPRE_Int  volatile data;
-} hypre_HopscotchBucket;
-
-typedef struct
-{
-  hypre_uint volatile hopInfo;
-  HYPRE_BigInt  volatile hash;
-  HYPRE_BigInt  volatile key;
-  HYPRE_Int  volatile data;
-} hypre_BigHopscotchBucket;
-
-/**
- * The current typical use case of unoredered map is putting input sequence
- * with no duplication (inverse map of a bijective mapping) followed by
- * lots of lookups.
- * For lookup, array of structure (AoS) gives better cache line utilization.
- */
-typedef struct
-{
-   HYPRE_Int  volatile              segmentMask;
-   HYPRE_Int  volatile              bucketMask;
-#ifdef HYPRE_CONCURRENT_HOPSCOTCH
-   hypre_HopscotchSegment* volatile segments;
-#endif
-   hypre_HopscotchBucket* volatile table;
-} hypre_UnorderedIntMap;
-
-typedef struct
-{
-   HYPRE_Int  volatile                segmentMask;
-   HYPRE_Int  volatile                bucketMask;
-#ifdef HYPRE_CONCURRENT_HOPSCOTCH
-   hypre_HopscotchSegment*   volatile segments;
-#endif
-   hypre_BigHopscotchBucket* volatile table;
-} hypre_UnorderedBigIntMap;
-
-/**
- * Sort array "in" with length len and put result in array "out"
- * "in" will be deallocated unless in == *out
- * inverse_map is an inverse hash table s.t. inverse_map[i] = j iff (*out)[j] = i
- */
-void hypre_sort_and_create_inverse_map(
-  HYPRE_Int *in, HYPRE_Int len, HYPRE_Int **out, hypre_UnorderedIntMap *inverse_map);
-
-#ifdef HYPRE_CONCURRENT_HOPSCOTCH
-void hypre_big_merge_sort(HYPRE_BigInt *in, HYPRE_BigInt *temp, HYPRE_Int len, HYPRE_BigInt **sorted);
-void hypre_big_sort_and_create_inverse_map(
-  HYPRE_BigInt *in, HYPRE_Int len, HYPRE_BigInt **out, hypre_UnorderedBigIntMap *inverse_map);
-#endif
-
-
-/* hypre_cuda_utils.h */
-#if defined(HYPRE_USING_CUDA)
-#ifdef __cplusplus
-extern "C++" {
-#endif
-dim3 hypre_GetDefaultCUDABlockDimension();
-
-dim3 hypre_GetDefaultCUDAGridDimension( HYPRE_Int n, const char *granularity, dim3 bDim );
-#ifdef __cplusplus
-}
-#endif
-
-HYPRE_Int hypreDevice_GetRowNnz(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int *d_diag_ia, HYPRE_Int *d_offd_ia, HYPRE_Int *d_rownnz);
-
-HYPRE_Int hypreDevice_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int job, HYPRE_Int has_offd, HYPRE_Int first_col, HYPRE_Int *d_col_map_offd_A, HYPRE_Int *d_diag_i, HYPRE_Int *d_diag_j, HYPRE_Complex *d_diag_a, HYPRE_Int *d_offd_i, HYPRE_Int *d_offd_j, HYPRE_Complex *d_offd_a, HYPRE_Int *d_ib, HYPRE_BigInt *d_jb, HYPRE_Complex *d_ab);
-
-HYPRE_Int hypreDevice_IntegerReduceSum(HYPRE_Int m, HYPRE_Int *d_i);
-
-HYPRE_Int hypreDevice_IntegerInclusiveScan(HYPRE_Int n, HYPRE_Int *d_i);
-
-HYPRE_Int hypreDevice_IntegerExclusiveScan(HYPRE_Int n, HYPRE_Int *d_i);
-
-HYPRE_Int* hypreDevice_CsrRowPtrsToIndices(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr);
-
-HYPRE_Int hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int *d_row_ptr, HYPRE_Int *d_row_ind);
-
-HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int *d_row_ptr, HYPRE_Int *d_row_num, HYPRE_Int *d_row_ind);
-
-HYPRE_Int* hypreDevice_CsrRowIndicesToPtrs(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ind);
-
-HYPRE_Int hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Real *y);
-
-HYPRE_Int hypreDevice_ScatterConstant(HYPRE_Int *x, HYPRE_Int n, HYPRE_Int *map, HYPRE_Int v);
-
-HYPRE_Int hypreDevice_IVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y);
-
-HYPRE_Int hypreDevice_DiagScaleVector(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data, HYPRE_Complex *x, HYPRE_Complex *y);
-
-HYPRE_Int hypreDevice_BigToSmallCopy(HYPRE_Int *tgt, const HYPRE_BigInt *src, HYPRE_Int size);
-
-/* gpuMem.c */
-void hypre_CudaCompileFlagCheck();
-
-#endif
-
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
 #ifndef HYPRE_CUDA_UTILS_H
 #define HYPRE_CUDA_UTILS_H
 
@@ -2198,6 +1256,8 @@ extern "C++" {
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include <assert.h>
+#include <curand.h>
+#include <cusparse.h>
 
 #include <thrust/execution_policy.h>
 #include <thrust/count.h>
@@ -2213,6 +1273,9 @@ extern "C++" {
 #include <thrust/scan.h>
 #include <thrust/fill.h>
 #include <thrust/adjacent_difference.h>
+#include <thrust/inner_product.h>
+
+using namespace thrust::placeholders;
 
 #define HYPRE_WARP_SIZE      32
 #define HYPRE_WARP_FULL_MASK 0xFFFFFFFF
@@ -2228,9 +1291,9 @@ extern "C++" {
    if ( gridsize.x  == 0 || gridsize.y  == 0 || gridsize.z  == 0 || \
         blocksize.x == 0 || blocksize.y == 0 || blocksize.z == 0 ) \
    { \
-      hypre_printf("Warning %s %d: Zero CUDA grid/block (%d %d %d) (%d %d %d)\n", \
+      /* hypre_printf("Warning %s %d: Zero CUDA grid/block (%d %d %d) (%d %d %d)\n", \
                    __FILE__, __LINE__,\
-                   gridsize.x, gridsize.y, gridsize.z, blocksize.x, blocksize.y, blocksize.z); \
+                   gridsize.x, gridsize.y, gridsize.z, blocksize.x, blocksize.y, blocksize.z); */ \
    } \
    else \
    { \
@@ -2241,6 +1304,31 @@ extern "C++" {
 #define HYPRE_CUDA_LAUNCH_SYNC(kernel_name, gridsize, blocksize, ...) \
     HYPRE_CUDA_LAUNCH_ASYNC(kernel_name, gridsize, blocksize, __VA_ARGS__) \
     cudaDeviceSynchronize();
+
+#define HYPRE_CURAND_CALL(call) do {                         \
+    curandStatus_t err = call;                               \
+    if (CURAND_STATUS_SUCCESS != err) {                      \
+       hypre_printf("CURAND ERROR (code = %d) at %s:%d\n",   \
+                    err, __FILE__, __LINE__);                \
+       exit(1);                                              \
+    } } while(0)
+
+#define HYPRE_CUDA_CALL(call) do {                           \
+    cudaError_t err = call;                                  \
+    if (cudaSuccess != err) {                                \
+       hypre_printf("CUDA ERROR (code = %d, %s) at %s:%d\n", \
+                    err, cudaGetErrorString(err),            \
+                    __FILE__, __LINE__);                     \
+       exit(1);                                              \
+    } } while(0)
+
+#define HYPRE_CUSPARSE_CALL(call) do {                       \
+    cusparseStatus_t err = call;                             \
+    if (CUSPARSE_STATUS_SUCCESS != err) {                    \
+       hypre_printf("CUSPARSE ERROR (code = %d) at %s:%d\n", \
+                    err, __FILE__, __LINE__);                \
+       exit(1);                                              \
+    } } while(0)
 
 /* return the number of threads in block */
 template <hypre_int dim>
@@ -2560,8 +1648,720 @@ hypre_int next_power_of_2(hypre_int n)
 }
 #endif
 
+/* for struct solvers */
+#define HYPRE_MIN_GPU_SIZE (131072)
+extern HYPRE_Int hypre_exec_policy;
+#define hypre_SetDeviceOn()  hypre_exec_policy = HYPRE_MEMORY_DEVICE
+#define hypre_SetDeviceOff() hypre_exec_policy = HYPRE_MEMORY_HOST
+
 #endif /* HYPRE_USING_CUDA */
 #endif /* #ifndef HYPRE_CUDA_UTILS_H */
+
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
+
+#ifdef USE_NVTX
+#include "nvToolsExt.h"
+#include "nvToolsExtCudaRt.h"
+
+static const uint32_t colors[] = { 0x0000ff00, 0x000000ff, 0x00ffff00, 0x00ff00ff, 0x0000ffff, 0x00ff0000, 0x00ffffff };
+static const int num_colors = sizeof(colors)/sizeof(uint32_t);
+
+#define PUSH_RANGE(name,cid) { \
+    int color_id = cid; \
+    color_id = color_id%num_colors;\
+    nvtxEventAttributes_t eventAttrib = {0}; \
+    eventAttrib.version = NVTX_VERSION; \
+    eventAttrib.size = NVTX_EVENT_ATTRIB_STRUCT_SIZE; \
+    eventAttrib.colorType = NVTX_COLOR_ARGB; \
+    eventAttrib.color = colors[color_id]; \
+    eventAttrib.messageType = NVTX_MESSAGE_TYPE_ASCII; \
+    eventAttrib.message.ascii = name; \
+    nvtxDomainRangePushEx(HYPRE_DOMAIN,&eventAttrib);	\
+}
+
+#define PUSH_RANGE_PAYLOAD(name,cid,load) {		\
+    int color_id = cid; \
+    color_id = color_id%num_colors;\
+    nvtxEventAttributes_t eventAttrib = {0}; \
+    eventAttrib.version = NVTX_VERSION; \
+    eventAttrib.size = NVTX_EVENT_ATTRIB_STRUCT_SIZE; \
+    eventAttrib.colorType = NVTX_COLOR_ARGB; \
+    eventAttrib.color = colors[color_id]; \
+    eventAttrib.messageType = NVTX_MESSAGE_TYPE_ASCII; \
+    eventAttrib.message.ascii = name; \
+    eventAttrib.payloadType = NVTX_PAYLOAD_TYPE_INT64; \
+    eventAttrib.payload.llValue = load; \
+    eventAttrib.category=1; \
+    nvtxDomainRangePushEx(HYPRE_DOMAIN,&eventAttrib); \
+}
+
+#define PUSH_RANGE_DOMAIN(name,cid,dId) {				\
+    int color_id = cid; \
+    color_id = color_id%num_colors;\
+    nvtxEventAttributes_t eventAttrib = {0}; \
+    eventAttrib.version = NVTX_VERSION; \
+    eventAttrib.size = NVTX_EVENT_ATTRIB_STRUCT_SIZE; \
+    eventAttrib.colorType = NVTX_COLOR_ARGB; \
+    eventAttrib.color = colors[color_id]; \
+    eventAttrib.messageType = NVTX_MESSAGE_TYPE_ASCII; \
+    eventAttrib.message.ascii = name; \
+    nvtxDomainRangePushEx(getdomain(dId),&eventAttrib);	\
+}
+
+#define POP_RANGE nvtxDomainRangePop(HYPRE_DOMAIN);
+#define POP_RANGE_DOMAIN(dId) {			\
+  nvtxDomainRangePop(getdomain(dId));		\
+  }
+#else
+#define PUSH_RANGE(name,cid)
+#define POP_RANGE
+#define PUSH_RANGE_PAYLOAD(name,cid,load)
+#define PUSH_RANGE_DOMAIN(name,cid,domainName)
+#endif
+
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
+#ifndef __GPUMEM_H__
+#define  __GPUMEM_H__
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+
+#include <cuda_runtime_api.h>
+nvtxDomainHandle_t getdomain(hypre_int i);
+cusparseHandle_t getCusparseHandle();
+
+/*
+ * Global struct for keeping HYPRE GPU Init state
+ */
+
+#define MAX_HGS_ELEMENTS 10
+struct hypre__global_struct
+{
+   hypre_int initd;
+   hypre_int device;
+   hypre_int device_count;
+   cusparseHandle_t cusparse_handle;
+   cusparseMatDescr_t cusparse_mat_descr;
+   cudaStream_t streams[MAX_HGS_ELEMENTS];
+   nvtxDomainHandle_t nvtx_domain;
+   hypre_int concurrent_managed_access;
+};
+
+extern struct hypre__global_struct hypre__global_handle ;
+
+/*
+ * Macros for accessing elements of the global handle
+ */
+
+#define HYPRE_DOMAIN  hypre__global_handle.nvtx_domain
+#define HYPRE_STREAM(index) (hypre__global_handle.streams[index])
+#define HYPRE_GPU_HANDLE hypre__global_handle.initd
+#define HYPRE_CUSPARSE_HANDLE hypre__global_handle.cusparse_handle
+#define HYPRE_DEVICE hypre__global_handle.device
+#define HYPRE_DEVICE_COUNT hypre__global_handle.device_count
+#define HYPRE_CUSPARSE_MAT_DESCR hypre__global_handle.cusparse_mat_descr
+
+#endif /* #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP) */
+
+
+#if defined(HYPRE_USING_DEVICE_OPENMP)
+
+#endif /* #if defined(HYPRE_USING_DEVICE_OPENMP) */
+
+#endif/* __GPUMEM_H__ */
+
+#if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && defined(HYPRE_USING_CUDA)
+
+#ifndef CUDART_VERSION
+#error CUDART_VERSION Undefined!
+#elif (CUDART_VERSION >= 9000)
+#define WARP_SHFL_DOWN(mask, var, delta)  __shfl_down_sync(mask, var, delta)
+#elif (CUDART_VERSION <= 8000)
+#define WARP_SHFL_DOWN(mask, var, delta)  __shfl_down(var, delta);
+#endif
+
+extern "C++" {
+
+extern void *cuda_reduce_buffer;
+
+template<typename T> void OneBlockReduce(T *d_arr, HYPRE_Int N, T *h_out);
+
+struct HYPRE_double4
+{
+   HYPRE_Real x,y,z,w;
+
+   __host__ __device__
+   HYPRE_double4() {}
+
+   __host__ __device__
+   HYPRE_double4(HYPRE_Real x1, HYPRE_Real x2, HYPRE_Real x3, HYPRE_Real x4)
+   {
+      x = x1;
+      y = x2;
+      z = x3;
+      w = x4;
+   }
+
+   __host__ __device__
+   void operator=(HYPRE_Real val)
+   {
+      x = y = z = w = val;
+   }
+
+   __host__ __device__
+   void operator+=(HYPRE_double4 rhs)
+   {
+      x += rhs.x;
+      y += rhs.y;
+      z += rhs.z;
+      w += rhs.w;
+   }
+
+};
+
+struct HYPRE_double6
+{
+   HYPRE_Real x,y,z,w,u,v;
+
+   __host__ __device__
+   HYPRE_double6() {}
+
+   __host__ __device__
+   HYPRE_double6(HYPRE_Real x1, HYPRE_Real x2, HYPRE_Real x3, HYPRE_Real x4,
+                 HYPRE_Real x5, HYPRE_Real x6)
+   {
+      x = x1;
+      y = x2;
+      z = x3;
+      w = x4;
+      u = x5;
+      v = x6;
+   }
+
+   __host__ __device__
+   void operator=(HYPRE_Real val)
+   {
+      x = y = z = w = u = v = val;
+   }
+
+   __host__ __device__
+   void operator+=(HYPRE_double6 rhs)
+   {
+      x += rhs.x;
+      y += rhs.y;
+      z += rhs.z;
+      w += rhs.w;
+      u += rhs.u;
+      v += rhs.v;
+   }
+
+};
+
+/* reduction within a warp */
+__inline__ __host__ __device__
+HYPRE_Real warpReduceSum(HYPRE_Real val)
+{
+#ifdef __CUDA_ARCH__
+  for (HYPRE_Int offset = warpSize/2; offset > 0; offset /= 2)
+  {
+    val += WARP_SHFL_DOWN(0xFFFFFFFF, val, offset);
+  }
+#endif
+  return val;
+}
+
+__inline__ __host__ __device__
+HYPRE_double4 warpReduceSum(HYPRE_double4 val) {
+#ifdef __CUDA_ARCH__
+  for (HYPRE_Int offset = warpSize / 2; offset > 0; offset /= 2)
+  {
+    val.x += WARP_SHFL_DOWN(0xFFFFFFFF, val.x, offset);
+    val.y += WARP_SHFL_DOWN(0xFFFFFFFF, val.y, offset);
+    val.z += WARP_SHFL_DOWN(0xFFFFFFFF, val.z, offset);
+    val.w += WARP_SHFL_DOWN(0xFFFFFFFF, val.w, offset);
+  }
+#endif
+  return val;
+}
+
+__inline__ __host__ __device__
+HYPRE_double6 warpReduceSum(HYPRE_double6 val) {
+#ifdef __CUDA_ARCH__
+  for (HYPRE_Int offset = warpSize / 2; offset > 0; offset /= 2)
+  {
+    val.x += WARP_SHFL_DOWN(0xFFFFFFFF, val.x, offset);
+    val.y += WARP_SHFL_DOWN(0xFFFFFFFF, val.y, offset);
+    val.z += WARP_SHFL_DOWN(0xFFFFFFFF, val.z, offset);
+    val.w += WARP_SHFL_DOWN(0xFFFFFFFF, val.w, offset);
+    val.u += WARP_SHFL_DOWN(0xFFFFFFFF, val.u, offset);
+    val.v += WARP_SHFL_DOWN(0xFFFFFFFF, val.v, offset);
+  }
+#endif
+  return val;
+}
+
+/* reduction within a block */
+template <typename T>
+__inline__ __host__ __device__
+T blockReduceSum(T val)
+{
+#ifdef __CUDA_ARCH__
+   //static __shared__ T shared[32]; // Shared mem for 32 partial sums
+   __shared__ T shared[32];        // Shared mem for 32 partial sums
+   HYPRE_Int lane = threadIdx.x % warpSize;
+   HYPRE_Int wid  = threadIdx.x / warpSize;
+
+   val = warpReduceSum(val);       // Each warp performs partial reduction
+
+   if (lane == 0)
+   {
+      shared[wid] = val;          // Write reduced value to shared memory
+   }
+
+   __syncthreads();               // Wait for all partial reductions
+
+   //read from shared memory only if that warp existed
+   if (threadIdx.x < blockDim.x / warpSize)
+   {
+      val = shared[lane];
+   }
+   else
+   {
+      val = 0.0;
+   }
+
+   if (wid == 0)
+   {
+      val = warpReduceSum(val); //Final reduce within first warp
+   }
+
+#endif
+   return val;
+}
+
+/* Reducer class */
+template <typename T>
+struct ReduceSum
+{
+   T init;                    /* initial value passed in */
+   mutable T __thread_sum;    /* place to hold local sum of a thread,
+                                 and partial sum of a block */
+   T *d_buf;                  /* place to store partial sum of a block */
+   HYPRE_Int nblocks;         /* number of blocks used in the first round */
+
+   /* constructor.
+    * val is the initial value (added to the reduced sum) */
+   __host__
+   ReduceSum(T val)
+   {
+      init = val;
+      __thread_sum = 0.0;
+
+      if (cuda_reduce_buffer == NULL)
+      {
+         /* allocate for the max size for reducing double6 type */
+         cuda_reduce_buffer = hypre_TAlloc(HYPRE_double6, 1024, HYPRE_MEMORY_DEVICE);
+      }
+
+      d_buf = (T*) cuda_reduce_buffer;
+   }
+
+   /* copy constructor */
+   __host__ __device__
+   ReduceSum(const ReduceSum<T>& other)
+   {
+      *this = other;
+   }
+
+   __host__ __device__
+   void BlockReduce() const
+   {
+#ifdef __CUDA_ARCH__
+      __thread_sum = blockReduceSum(__thread_sum);
+      if (threadIdx.x == 0)
+      {
+         d_buf[blockIdx.x] = __thread_sum;
+      }
+#endif
+   }
+
+   __host__ __device__
+   void operator+=(T val) const
+   {
+      __thread_sum += val;
+   }
+
+   /* we invoke the 2nd reduction at the time we want the sum from the reducer
+    * class */
+   __host__
+   operator T()
+   {
+      T val;
+      /* 2nd reduction with only *one* block */
+      OneBlockReduce(d_buf, nblocks, &val);
+      val += init;
+      //hypre_TFree(d_buf, HYPRE_MEMORY_DEVICE);
+      return val;
+   }
+
+   /* destructor */
+   __host__ __device__
+   ~ReduceSum<T>()
+   {
+   }
+};
+
+} // extern "C++"
+
+#endif
+
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
+
+/* amg_linklist.c */
+void hypre_dispose_elt ( hypre_LinkList element_ptr );
+void hypre_remove_point ( hypre_LinkList *LoL_head_ptr , hypre_LinkList *LoL_tail_ptr , HYPRE_Int measure , HYPRE_Int index , HYPRE_Int *lists , HYPRE_Int *where );
+hypre_LinkList hypre_create_elt ( HYPRE_Int Item );
+void hypre_enter_on_lists ( hypre_LinkList *LoL_head_ptr , hypre_LinkList *LoL_tail_ptr , HYPRE_Int measure , HYPRE_Int index , HYPRE_Int *lists , HYPRE_Int *where );
+
+/* binsearch.c */
+HYPRE_Int hypre_BinarySearch ( HYPRE_Int *list , HYPRE_Int value , HYPRE_Int list_length );
+HYPRE_Int hypre_BigBinarySearch(HYPRE_BigInt *list, HYPRE_BigInt value, HYPRE_Int list_length);
+HYPRE_Int hypre_BinarySearch2 ( HYPRE_Int *list , HYPRE_Int value , HYPRE_Int low , HYPRE_Int high , HYPRE_Int *spot );
+HYPRE_Int *hypre_LowerBound( HYPRE_Int *first, HYPRE_Int *last, HYPRE_Int value );
+HYPRE_BigInt *hypre_BigLowerBound( HYPRE_BigInt *first, HYPRE_BigInt *last, HYPRE_BigInt value );
+
+/* hypre_complex.c */
+#ifdef HYPRE_COMPLEX
+HYPRE_Complex hypre_conj( HYPRE_Complex value );
+HYPRE_Real    hypre_cabs( HYPRE_Complex value );
+HYPRE_Real    hypre_creal( HYPRE_Complex value );
+HYPRE_Real    hypre_cimag( HYPRE_Complex value );
+#else
+#define hypre_conj(value)  value
+#define hypre_cabs(value)  fabs(value)
+#define hypre_creal(value) value
+#define hypre_cimag(value) 0.0
+#endif
+
+/* hypre_general.c */
+void HYPRE_Init( hypre_int argc, char *argv[] );
+void HYPRE_Finalize();
+void hypre_GPUInit(hypre_int use_device);
+void hypre_GPUFinalize();
+
+/* hypre_printf.c */
+// #ifdef HYPRE_BIGINT
+HYPRE_Int hypre_printf( const char *format , ... );
+HYPRE_Int hypre_fprintf( FILE *stream , const char *format, ... );
+HYPRE_Int hypre_sprintf( char *s , const char *format, ... );
+HYPRE_Int hypre_scanf( const char *format , ... );
+HYPRE_Int hypre_fscanf( FILE *stream , const char *format, ... );
+HYPRE_Int hypre_sscanf( char *s , const char *format, ... );
+// #else
+// #define hypre_printf  printf
+// #define hypre_fprintf fprintf
+// #define hypre_sprintf sprintf
+// #define hypre_scanf   scanf
+// #define hypre_fscanf  fscanf
+// #define hypre_sscanf  sscanf
+// #endif
+
+/* hypre_qsort.c */
+void hypre_swap ( HYPRE_Int *v , HYPRE_Int i , HYPRE_Int j );
+void hypre_swap2 ( HYPRE_Int *v , HYPRE_Real *w , HYPRE_Int i , HYPRE_Int j );
+void hypre_BigSwap2 ( HYPRE_BigInt *v , HYPRE_Real *w , HYPRE_Int i , HYPRE_Int j );
+void hypre_swap2i ( HYPRE_Int *v , HYPRE_Int *w , HYPRE_Int i , HYPRE_Int j );
+void hypre_swap3i ( HYPRE_Int *v , HYPRE_Int *w , HYPRE_Int *z , HYPRE_Int i , HYPRE_Int j );
+void hypre_swap3_d ( HYPRE_Real *v , HYPRE_Int *w , HYPRE_Int *z , HYPRE_Int i , HYPRE_Int j );
+void hypre_BigSwap4_d ( HYPRE_Real *v , HYPRE_BigInt *w , HYPRE_Int *z , HYPRE_Int *y , HYPRE_Int i , HYPRE_Int j );
+void hypre_swap_d ( HYPRE_Real *v , HYPRE_Int i , HYPRE_Int j );
+void hypre_qsort0 ( HYPRE_Int *v , HYPRE_Int left , HYPRE_Int right );
+void hypre_qsort1 ( HYPRE_Int *v , HYPRE_Real *w , HYPRE_Int left , HYPRE_Int right );
+void hypre_BigQsort1 ( HYPRE_BigInt *v , HYPRE_Real *w , HYPRE_Int left , HYPRE_Int right );
+void hypre_qsort2i ( HYPRE_Int *v , HYPRE_Int *w , HYPRE_Int left , HYPRE_Int right );
+void hypre_qsort2 ( HYPRE_Int *v , HYPRE_Real *w , HYPRE_Int left , HYPRE_Int right );
+void hypre_qsort3i ( HYPRE_Int *v , HYPRE_Int *w , HYPRE_Int *z , HYPRE_Int left , HYPRE_Int right );
+void hypre_qsort3_abs ( HYPRE_Real *v , HYPRE_Int *w , HYPRE_Int *z , HYPRE_Int left , HYPRE_Int right );
+void hypre_BigQsort4_abs ( HYPRE_Real *v , HYPRE_BigInt *w , HYPRE_Int *z , HYPRE_Int *y , HYPRE_Int left , HYPRE_Int right );
+void hypre_qsort_abs ( HYPRE_Real *w , HYPRE_Int left , HYPRE_Int right );
+void hypre_BigSwapbi(HYPRE_BigInt  *v, HYPRE_Int  *w, HYPRE_Int  i, HYPRE_Int  j );
+void hypre_BigQsortbi( HYPRE_BigInt *v, HYPRE_Int *w, HYPRE_Int  left, HYPRE_Int  right );
+void hypre_BigSwapLoc(HYPRE_BigInt  *v, HYPRE_Int  *w, HYPRE_Int  i, HYPRE_Int  j );
+void hypre_BigQsortbLoc( HYPRE_BigInt *v, HYPRE_Int *w, HYPRE_Int  left, HYPRE_Int  right );
+void hypre_BigSwapb2i(HYPRE_BigInt  *v, HYPRE_Int  *w, HYPRE_Int  *z, HYPRE_Int  i, HYPRE_Int  j );
+void hypre_BigQsortb2i( HYPRE_BigInt *v, HYPRE_Int *w, HYPRE_Int *z, HYPRE_Int  left, HYPRE_Int  right );
+void hypre_BigSwap( HYPRE_BigInt *v, HYPRE_Int  i, HYPRE_Int  j );
+void hypre_BigQsort0( HYPRE_BigInt *v, HYPRE_Int  left, HYPRE_Int  right );
+
+/* qsplit.c */
+HYPRE_Int hypre_DoubleQuickSplit ( HYPRE_Real *values , HYPRE_Int *indices , HYPRE_Int list_length , HYPRE_Int NumberKept );
+
+/* random.c */
+/* HYPRE_CUDA_GLOBAL */ void hypre_SeedRand ( HYPRE_Int seed );
+/* HYPRE_CUDA_GLOBAL */ HYPRE_Int hypre_RandI ( void );
+/* HYPRE_CUDA_GLOBAL */ HYPRE_Real hypre_Rand ( void );
+
+/* hypre_prefix_sum.c */
+/**
+ * Assumed to be called within an omp region.
+ * Let x_i be the input of ith thread.
+ * The output of ith thread y_i = x_0 + x_1 + ... + x_{i-1}
+ * Additionally, sum = x_0 + x_1 + ... + x_{nthreads - 1}
+ * Note that always y_0 = 0
+ *
+ * @param workspace at least with length (nthreads+1)
+ *                  workspace[tid] will contain result for tid
+ *                  workspace[nthreads] will contain sum
+ */
+void hypre_prefix_sum(HYPRE_Int *in_out, HYPRE_Int *sum, HYPRE_Int *workspace);
+/**
+ * This version does prefix sum in pair.
+ * Useful when we prefix sum of diag and offd in tandem.
+ *
+ * @param worksapce at least with length 2*(nthreads+1)
+ *                  workspace[2*tid] and workspace[2*tid+1] will contain results for tid
+ *                  workspace[3*nthreads] and workspace[3*nthreads + 1] will contain sums
+ */
+void hypre_prefix_sum_pair(HYPRE_Int *in_out1, HYPRE_Int *sum1, HYPRE_Int *in_out2, HYPRE_Int *sum2, HYPRE_Int *workspace);
+/**
+ * @param workspace at least with length 3*(nthreads+1)
+ *                  workspace[3*tid:3*tid+3) will contain results for tid
+ */
+void hypre_prefix_sum_triple(HYPRE_Int *in_out1, HYPRE_Int *sum1, HYPRE_Int *in_out2, HYPRE_Int *sum2, HYPRE_Int *in_out3, HYPRE_Int *sum3, HYPRE_Int *workspace);
+
+/**
+ * n prefix-sums together.
+ * workspace[n*tid:n*(tid+1)) will contain results for tid
+ * workspace[nthreads*tid:nthreads*(tid+1)) will contain sums
+ *
+ * @param workspace at least with length n*(nthreads+1)
+ */
+void hypre_prefix_sum_multiple(HYPRE_Int *in_out, HYPRE_Int *sum, HYPRE_Int n, HYPRE_Int *workspace);
+
+/* hypre_merge_sort.c */
+/**
+ * Why merge sort?
+ * 1) Merge sort can take advantage of eliminating duplicates.
+ * 2) Merge sort is more efficiently parallelizable than qsort
+ */
+
+/**
+ * Out of place merge sort with duplicate elimination
+ * @ret number of unique elements
+ */
+HYPRE_Int hypre_merge_sort_unique(HYPRE_Int *in, HYPRE_Int *out, HYPRE_Int len);
+/**
+ * Out of place merge sort with duplicate elimination
+ *
+ * @param out pointer to output can be in or temp
+ * @ret number of unique elements
+ */
+HYPRE_Int hypre_merge_sort_unique2(HYPRE_Int *in, HYPRE_Int *temp, HYPRE_Int len, HYPRE_Int **out);
+
+void hypre_merge_sort(HYPRE_Int *in, HYPRE_Int *temp, HYPRE_Int len, HYPRE_Int **sorted);
+
+void hypre_union2(HYPRE_Int n1, HYPRE_BigInt *arr1, HYPRE_Int n2, HYPRE_BigInt *arr2, HYPRE_Int *n3, HYPRE_BigInt *arr3, HYPRE_Int *map1, HYPRE_Int *map2);
+
+/* hypre_hopscotch_hash.c */
+
+#ifdef HYPRE_USING_OPENMP
+
+/* Check if atomic operations are available to use concurrent hopscotch hash table */
+#if defined(__GNUC__) && defined(__GNUC_MINOR__) && defined(__GNUC_PATCHLEVEL__) && (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__) > 40100
+#define HYPRE_USING_ATOMIC
+//#elif defined _MSC_VER // JSP: haven't tested, so comment out for now
+//#define HYPRE_USING_ATOMIC
+//#elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L && !defined(__STDC_NO_ATOMICS__)
+// JSP: not many compilers have implemented this, so comment out for now
+//#define HYPRE_USING_ATOMIC
+//#include <stdatomic.h>
+#endif
+
+#endif // HYPRE_USING_OPENMP
+
+#ifdef HYPRE_HOPSCOTCH
+#ifdef HYPRE_USING_ATOMIC
+// concurrent hopscotch hashing is possible only with atomic supports
+#define HYPRE_CONCURRENT_HOPSCOTCH
+#endif
+#endif
+
+#ifdef HYPRE_CONCURRENT_HOPSCOTCH
+typedef struct {
+  HYPRE_Int volatile timestamp;
+  omp_lock_t         lock;
+} hypre_HopscotchSegment;
+#endif
+
+/**
+ * The current typical use case of unordered set is putting input sequence
+ * with lots of duplication (putting all colidx received from other ranks),
+ * followed by one sweep of enumeration.
+ * Since the capacity is set to the number of inputs, which is much larger
+ * than the number of unique elements, we optimize for initialization and
+ * enumeration whose time is proportional to the capacity.
+ * For initialization and enumeration, structure of array (SoA) is better
+ * for vectorization, cache line utilization, and so on.
+ */
+typedef struct
+{
+   HYPRE_Int  volatile              segmentMask;
+   HYPRE_Int  volatile              bucketMask;
+#ifdef HYPRE_CONCURRENT_HOPSCOTCH
+   hypre_HopscotchSegment* volatile segments;
+#endif
+   HYPRE_Int *volatile              key;
+   hypre_uint *volatile             hopInfo;
+   HYPRE_Int *volatile              hash;
+} hypre_UnorderedIntSet;
+
+typedef struct
+{
+   HYPRE_Int volatile            segmentMask;
+   HYPRE_Int volatile            bucketMask;
+#ifdef HYPRE_CONCURRENT_HOPSCOTCH
+   hypre_HopscotchSegment* volatile segments;
+#endif
+   HYPRE_BigInt *volatile           key;
+   hypre_uint *volatile             hopInfo;
+   HYPRE_BigInt *volatile           hash;
+} hypre_UnorderedBigIntSet;
+
+typedef struct
+{
+  hypre_uint volatile hopInfo;
+  HYPRE_Int  volatile hash;
+  HYPRE_Int  volatile key;
+  HYPRE_Int  volatile data;
+} hypre_HopscotchBucket;
+
+typedef struct
+{
+  hypre_uint volatile hopInfo;
+  HYPRE_BigInt  volatile hash;
+  HYPRE_BigInt  volatile key;
+  HYPRE_Int  volatile data;
+} hypre_BigHopscotchBucket;
+
+/**
+ * The current typical use case of unoredered map is putting input sequence
+ * with no duplication (inverse map of a bijective mapping) followed by
+ * lots of lookups.
+ * For lookup, array of structure (AoS) gives better cache line utilization.
+ */
+typedef struct
+{
+   HYPRE_Int  volatile              segmentMask;
+   HYPRE_Int  volatile              bucketMask;
+#ifdef HYPRE_CONCURRENT_HOPSCOTCH
+   hypre_HopscotchSegment* volatile segments;
+#endif
+   hypre_HopscotchBucket* volatile table;
+} hypre_UnorderedIntMap;
+
+typedef struct
+{
+   HYPRE_Int  volatile                segmentMask;
+   HYPRE_Int  volatile                bucketMask;
+#ifdef HYPRE_CONCURRENT_HOPSCOTCH
+   hypre_HopscotchSegment*   volatile segments;
+#endif
+   hypre_BigHopscotchBucket* volatile table;
+} hypre_UnorderedBigIntMap;
+
+/**
+ * Sort array "in" with length len and put result in array "out"
+ * "in" will be deallocated unless in == *out
+ * inverse_map is an inverse hash table s.t. inverse_map[i] = j iff (*out)[j] = i
+ */
+void hypre_sort_and_create_inverse_map(
+  HYPRE_Int *in, HYPRE_Int len, HYPRE_Int **out, hypre_UnorderedIntMap *inverse_map);
+
+#ifdef HYPRE_CONCURRENT_HOPSCOTCH
+void hypre_big_merge_sort(HYPRE_BigInt *in, HYPRE_BigInt *temp, HYPRE_Int len, HYPRE_BigInt **sorted);
+void hypre_big_sort_and_create_inverse_map(
+  HYPRE_BigInt *in, HYPRE_Int len, HYPRE_BigInt **out, hypre_UnorderedBigIntMap *inverse_map);
+#endif
+
+
+/* hypre_cuda_utils.c */
+#if defined(HYPRE_USING_CUDA)
+#ifdef __cplusplus
+extern "C++" {
+#endif
+dim3 hypre_GetDefaultCUDABlockDimension();
+
+dim3 hypre_GetDefaultCUDAGridDimension( HYPRE_Int n, const char *granularity, dim3 bDim );
+#ifdef __cplusplus
+}
+#endif
+
+HYPRE_Int hypreDevice_GetRowNnz(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int *d_diag_ia, HYPRE_Int *d_offd_ia, HYPRE_Int *d_rownnz);
+
+HYPRE_Int hypreDevice_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int job, HYPRE_Int has_offd, HYPRE_Int first_col, HYPRE_Int *d_col_map_offd_A, HYPRE_Int *d_diag_i, HYPRE_Int *d_diag_j, HYPRE_Complex *d_diag_a, HYPRE_Int *d_offd_i, HYPRE_Int *d_offd_j, HYPRE_Complex *d_offd_a, HYPRE_Int *d_ib, HYPRE_BigInt *d_jb, HYPRE_Complex *d_ab);
+
+HYPRE_Int hypreDevice_IntegerReduceSum(HYPRE_Int m, HYPRE_Int *d_i);
+
+HYPRE_Int hypreDevice_IntegerInclusiveScan(HYPRE_Int n, HYPRE_Int *d_i);
+
+HYPRE_Int hypreDevice_IntegerExclusiveScan(HYPRE_Int n, HYPRE_Int *d_i);
+
+HYPRE_Int* hypreDevice_CsrRowPtrsToIndices(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr);
+
+HYPRE_Int hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int *d_row_ptr, HYPRE_Int *d_row_ind);
+
+HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int *d_row_ptr, HYPRE_Int *d_row_num, HYPRE_Int *d_row_ind);
+
+HYPRE_Int* hypreDevice_CsrRowIndicesToPtrs(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ind);
+
+HYPRE_Int hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Real *y);
+
+HYPRE_Int hypreDevice_ScatterConstant(HYPRE_Int *x, HYPRE_Int n, HYPRE_Int *map, HYPRE_Int v);
+
+HYPRE_Int hypreDevice_IVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y);
+
+HYPRE_Int hypreDevice_DiagScaleVector(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data, HYPRE_Complex *x, HYPRE_Complex *y);
+
+HYPRE_Int hypreDevice_BigToSmallCopy(HYPRE_Int *tgt, const HYPRE_BigInt *src, HYPRE_Int size);
+
+HYPRE_Int pointerIsManaged(const void *ptr);
+
+/* gpuMem.c */
+
+/* gpuErrorCheck.c */
+void hypre_CudaCompileFlagCheck();
+void PrintPointerAttributes(const void *ptr);
+
+#endif
 
 
 #ifdef __cplusplus

@@ -57,10 +57,10 @@ FILES =\
  hypre_mpi_comm_f2c.c\
  hypre_error.c\
  F90_HYPRE_error.c\
+ hypre_omp_device.c\
  hypre_prefix_sum.c\
  hypre_merge_sort.c\
  hypre_hopscotch_hash.c\
- gpuErrorCheck.c\
  gpuMem.c\
  hypre_general.c\
  hypre_reducesum.c

@@ -39,6 +39,8 @@ HYPRE_Real    hypre_cimag( HYPRE_Complex value );
 /* hypre_general.c */
 void HYPRE_Init( hypre_int argc, char *argv[] );
 void HYPRE_Finalize();
+void hypre_GPUInit(hypre_int use_device);
+void hypre_GPUFinalize();
 
 /* hypre_printf.c */
 // #ifdef HYPRE_BIGINT
@@ -275,7 +277,7 @@ void hypre_big_sort_and_create_inverse_map(
 #endif
 
 
-/* hypre_cuda_utils.h */
+/* hypre_cuda_utils.c */
 #if defined(HYPRE_USING_CUDA)
 #ifdef __cplusplus
 extern "C++" {
@@ -315,8 +317,13 @@ HYPRE_Int hypreDevice_DiagScaleVector(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex
 
 HYPRE_Int hypreDevice_BigToSmallCopy(HYPRE_Int *tgt, const HYPRE_BigInt *src, HYPRE_Int size);
 
+HYPRE_Int pointerIsManaged(const void *ptr);
+
 /* gpuMem.c */
+
+/* gpuErrorCheck.c */
 void hypre_CudaCompileFlagCheck();
+void PrintPointerAttributes(const void *ptr);
 
 #endif
 

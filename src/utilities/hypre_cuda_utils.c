@@ -14,6 +14,84 @@
 
 #if defined(HYPRE_USING_CUDA)
 
+/* for struct solvers */
+HYPRE_Int hypre_exec_policy = HYPRE_MEMORY_DEVICE;
+
+__global__ void
+hypreCUDAKernel_CompileFlagSafetyCheck(HYPRE_Int *cuda_arch)
+{
+#ifdef __CUDA_ARCH__
+    cuda_arch[0] = __CUDA_ARCH__;
+#endif
+}
+
+void hypre_CudaCompileFlagCheck()
+{
+   hypre_int device;
+   HYPRE_CUDA_CALL( cudaGetDevice(&device) );
+
+   struct cudaDeviceProp props;
+   cudaGetDeviceProperties(&props, device);
+   HYPRE_Int cuda_arch_actual = props.major*100 + props.minor*10;
+
+   HYPRE_Int *cuda_arch = hypre_TAlloc(HYPRE_Int, 1, HYPRE_MEMORY_DEVICE);
+   HYPRE_Int h_cuda_arch;
+
+   dim3 gDim(1,1,1), bDim(1,1,1);
+   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_CompileFlagSafetyCheck, gDim, bDim, cuda_arch );
+
+   hypre_TMemcpy(&h_cuda_arch, cuda_arch, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+
+   if (h_cuda_arch != cuda_arch_actual)
+   {
+      hypre_printf("ERROR: Compile arch flags %d does not match actual device arch = sm_%d\n");
+   }
+
+   HYPRE_CUDA_CALL(cudaDeviceSynchronize());
+}
+
+void
+PrintPointerAttributes(const void *ptr)
+{
+   struct cudaPointerAttributes ptr_att;
+   if (cudaPointerGetAttributes(&ptr_att,ptr) != cudaSuccess)
+   {
+      cudaGetLastError();  // Required to reset error flag on device
+      fprintf(stderr,"PrintPointerAttributes:: Raw pointer %p\n",ptr);
+   }
+
+   if (ptr_att.isManaged)
+   {
+      fprintf(stderr,"PrintPointerAttributes:: Managed pointer\n");
+      fprintf(stderr,"Host address = %p, Device Address = %p\n",ptr_att.hostPointer, ptr_att.devicePointer);
+      if (ptr_att.memoryType==cudaMemoryTypeHost) fprintf(stderr,"Memory is located on host\n");
+      if (ptr_att.memoryType==cudaMemoryTypeDevice) fprintf(stderr,"Memory is located on device\n");
+      fprintf(stderr,"Device associated with this pointer is %d\n",ptr_att.device);
+   }
+   else
+   {
+      fprintf(stderr,"PrintPointerAttributes:: Non-Managed & non-raw pointer\n Probably pinned host pointer\n");
+      if (ptr_att.memoryType==cudaMemoryTypeHost)
+      {
+         fprintf(stderr,"Memory is located on host\n");
+      }
+      if (ptr_att.memoryType==cudaMemoryTypeDevice) {
+         fprintf(stderr,"Memory is located on device\n");
+      }
+   }
+}
+
+HYPRE_Int pointerIsManaged(const void *ptr)
+{
+  struct cudaPointerAttributes ptr_att;
+  if (cudaPointerGetAttributes(&ptr_att, ptr) != cudaSuccess)
+  {
+     cudaGetLastError();
+     return 0;
+  }
+  return ptr_att.isManaged;
+}
+
 dim3
 hypre_GetDefaultCUDABlockDimension()
 {

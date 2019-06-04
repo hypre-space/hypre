@@ -453,11 +453,6 @@ void hypre_SeqVectorUpdateHost(hypre_Vector *x);
 HYPRE_Int hypre_CSRMatrixMatvecOutOfPlaceOOMP3( HYPRE_Complex alpha, hypre_CSRMatrix *A, hypre_Vector *x, HYPRE_Complex beta, hypre_Vector *b, hypre_Vector *y, HYPRE_Int offset);
 
 #if defined(HYPRE_USING_CUDA)
-#include <curand.h>
-
-#define CURAND_CALL(x) do { if((x)!=CURAND_STATUS_SUCCESS) { \
-    printf("Error at %s:%d\n",__FILE__,__LINE__);\
-    exit(1);}} while(0)
 
 typedef struct
 {

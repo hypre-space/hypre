@@ -295,7 +295,7 @@ void csr_spmm_rownnz_cohen(HYPRE_Int M, HYPRE_Int K, HYPRE_Int N, HYPRE_Int *d_i
    curandGenerator_t gen = hypre_device_csr_handle->gen;
    //CURAND_CALL(curandSetGeneratorOrdering(gen, CURAND_ORDERING_PSEUDO_SEEDED));
    /* random V1: uniform --> exp */
-   CURAND_CALL(curandGenerateUniform(gen, d_V1, nsamples * N));
+   HYPRE_CURAND_CALL(curandGenerateUniform(gen, d_V1, nsamples * N));
    //  CURAND_CALL(curandGenerateUniformDouble(gen, d_V1, nsamples * N));
    gDim = (nsamples * N + bDim.z * HYPRE_WARP_SIZE - 1) / (bDim.z * HYPRE_WARP_SIZE);
    expdistfromuniform<<<gDim, bDim>>>(nsamples * N, d_V1);

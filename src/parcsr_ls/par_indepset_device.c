@@ -233,15 +233,15 @@ hypre_BoomerAMGIndepSetInitDevice( hypre_ParCSRMatrix *S,
    {
       curandGenerator_t gen = hypre_device_csr_handle->gen;
 
-      CURAND_CALL( curandSetPseudoRandomGeneratorSeed(gen, 2747 + my_id) );
+      HYPRE_CURAND_CALL( curandSetPseudoRandomGeneratorSeed(gen, 2747 + my_id) );
 
       if (sizeof(HYPRE_Real) == sizeof(hypre_double))
       {
-         CURAND_CALL( curandGenerateUniformDouble(gen, (hypre_double *) urand, num_rows_diag) );
+         HYPRE_CURAND_CALL( curandGenerateUniformDouble(gen, (hypre_double *) urand, num_rows_diag) );
       }
       else if (sizeof(HYPRE_Real) == sizeof(float))
       {
-         CURAND_CALL( curandGenerateUniform(gen, (float *) urand, num_rows_diag) );
+         HYPRE_CURAND_CALL( curandGenerateUniform(gen, (float *) urand, num_rows_diag) );
       }
    }
 

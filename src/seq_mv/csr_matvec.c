@@ -865,15 +865,15 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
      HYPRE_Int     *csc_j = hypre_TAlloc(HYPRE_Int,     A->num_nonzeros, HYPRE_MEMORY_DEVICE);
      HYPRE_Int     *csc_i = hypre_TAlloc(HYPRE_Int,     A->num_cols+1,   HYPRE_MEMORY_DEVICE);
 
-     cusparseErrchk( cusparseDcsr2csc(handle, A->num_rows, A->num_cols, A->num_nonzeros,
-                     A->data, A->i, A->j, csc_a, csc_j, csc_i,
-                     CUSPARSE_ACTION_NUMERIC, CUSPARSE_INDEX_BASE_ZERO) );
+     HYPRE_CUSPARSE_CALL( cusparseDcsr2csc(handle, A->num_rows, A->num_cols, A->num_nonzeros,
+                          A->data, A->i, A->j, csc_a, csc_j, csc_i,
+                          CUSPARSE_ACTION_NUMERIC, CUSPARSE_INDEX_BASE_ZERO) );
 
-     cusparseErrchk( cusparseDcsrmv(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                     A->num_cols, A->num_rows, A->num_nonzeros,
-                     &alpha, descr,
-                     csc_a, csc_i, csc_j,
-                     x->data, &beta, y->data) );
+     HYPRE_CUSPARSE_CALL( cusparseDcsrmv(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
+                          A->num_cols, A->num_rows, A->num_nonzeros,
+                          &alpha, descr,
+                          csc_a, csc_i, csc_j,
+                          x->data, &beta, y->data) );
 
      hypre_TFree(csc_a, HYPRE_MEMORY_DEVICE);
      hypre_TFree(csc_i, HYPRE_MEMORY_DEVICE);
@@ -881,12 +881,15 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
   }
   else
   {
-     cusparseErrchk( cusparseDcsrmv(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                     A->num_rows-offset, A->num_cols, A->num_nonzeros,
-                     &alpha, descr,
-                     A->data, A->i+offset, A->j,
-                     x->data, &beta, y->data+offset) );
+     HYPRE_CUSPARSE_CALL( cusparseDcsrmv(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
+                          A->num_rows-offset, A->num_cols, A->num_nonzeros,
+                          &alpha, descr,
+                          A->data, A->i+offset, A->j,
+                          x->data, &beta, y->data+offset) );
   }
+
+  HYPRE_CUDA_CALL( cudaStreamSynchronize(HYPRE_STREAM(4)) );
+
 /*
   if (!GetAsyncMode())
   {
@@ -975,16 +978,19 @@ hypre_CSRMatrixMatvecDeviceBIGINT( HYPRE_Complex    alpha,
 
   if (offset!=0) hypre_error_w_msg(HYPRE_ERROR_GENERIC, "WARNING:: Offset is not zero in hypre_CSRMatrixMatvecDevice \n");
 
-  cusparseErrchk(cusparseDcsrmv(handle ,
-                                CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                num_rows-offset, num_cols, num_nonzeros,
-                                &alpha, descr,
-                                A->data ,A->i_short+offset,A->j_short,
-                                x->data, &beta, y->data+offset));
+  HYPRE_CUSPARSE_CALL(cusparseDcsrmv(handle ,
+                                     CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                     num_rows-offset, num_cols, num_nonzeros,
+                                     &alpha, descr,
+                                     A->data ,A->i_short+offset,A->j_short,
+                                     x->data, &beta, y->data+offset));
 
-  if (!GetAsyncMode()){
-  hypre_CheckErrorDevice(cudaStreamSynchronize(s[4]));
+  /*
+  if (!GetAsyncMode())
+  {
+     hypre_CheckErrorDevice(cudaStreamSynchronize(s[4]));
   }
+  */
   //POP_RANGE;
 #endif
   return 0;

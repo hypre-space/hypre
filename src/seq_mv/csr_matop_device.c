@@ -435,9 +435,9 @@ hypre_DeviceCSRHandleCreate()
    handle->use_cusparse_spgemm         = 0;
 
    /* Create pseudo-random number generator */
-   CURAND_CALL(curandCreateGenerator(&handle->gen, CURAND_RNG_PSEUDO_DEFAULT));
+   HYPRE_CURAND_CALL(curandCreateGenerator(&handle->gen, CURAND_RNG_PSEUDO_DEFAULT));
    /* Set seed */
-   CURAND_CALL(curandSetPseudoRandomGeneratorSeed(handle->gen, 1234ULL));
+   HYPRE_CURAND_CALL(curandSetPseudoRandomGeneratorSeed(handle->gen, 1234ULL));
 
    return handle;
 }
@@ -447,7 +447,7 @@ hypre_DeviceCSRHandleDestroy(hypre_DeviceCSRHandle *handle)
 {
    if (handle->gen)
    {
-      CURAND_CALL(curandDestroyGenerator(handle->gen));
+      HYPRE_CURAND_CALL(curandDestroyGenerator(handle->gen));
    }
    hypre_TFree(handle, HYPRE_MEMORY_HOST);
 

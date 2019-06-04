@@ -22,6 +22,8 @@ extern "C++" {
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include <assert.h>
+#include <curand.h>
+#include <cusparse.h>
 
 #include <thrust/execution_policy.h>
 #include <thrust/count.h>
@@ -37,6 +39,9 @@ extern "C++" {
 #include <thrust/scan.h>
 #include <thrust/fill.h>
 #include <thrust/adjacent_difference.h>
+#include <thrust/inner_product.h>
+
+using namespace thrust::placeholders;
 
 #define HYPRE_WARP_SIZE      32
 #define HYPRE_WARP_FULL_MASK 0xFFFFFFFF
@@ -52,9 +57,9 @@ extern "C++" {
    if ( gridsize.x  == 0 || gridsize.y  == 0 || gridsize.z  == 0 || \
         blocksize.x == 0 || blocksize.y == 0 || blocksize.z == 0 ) \
    { \
-      hypre_printf("Warning %s %d: Zero CUDA grid/block (%d %d %d) (%d %d %d)\n", \
+      /* hypre_printf("Warning %s %d: Zero CUDA grid/block (%d %d %d) (%d %d %d)\n", \
                    __FILE__, __LINE__,\
-                   gridsize.x, gridsize.y, gridsize.z, blocksize.x, blocksize.y, blocksize.z); \
+                   gridsize.x, gridsize.y, gridsize.z, blocksize.x, blocksize.y, blocksize.z); */ \
    } \
    else \
    { \
@@ -65,6 +70,31 @@ extern "C++" {
 #define HYPRE_CUDA_LAUNCH_SYNC(kernel_name, gridsize, blocksize, ...) \
     HYPRE_CUDA_LAUNCH_ASYNC(kernel_name, gridsize, blocksize, __VA_ARGS__) \
     cudaDeviceSynchronize();
+
+#define HYPRE_CURAND_CALL(call) do {                         \
+    curandStatus_t err = call;                               \
+    if (CURAND_STATUS_SUCCESS != err) {                      \
+       hypre_printf("CURAND ERROR (code = %d) at %s:%d\n",   \
+                    err, __FILE__, __LINE__);                \
+       exit(1);                                              \
+    } } while(0)
+
+#define HYPRE_CUDA_CALL(call) do {                           \
+    cudaError_t err = call;                                  \
+    if (cudaSuccess != err) {                                \
+       hypre_printf("CUDA ERROR (code = %d, %s) at %s:%d\n", \
+                    err, cudaGetErrorString(err),            \
+                    __FILE__, __LINE__);                     \
+       exit(1);                                              \
+    } } while(0)
+
+#define HYPRE_CUSPARSE_CALL(call) do {                       \
+    cusparseStatus_t err = call;                             \
+    if (CUSPARSE_STATUS_SUCCESS != err) {                    \
+       hypre_printf("CUSPARSE ERROR (code = %d) at %s:%d\n", \
+                    err, __FILE__, __LINE__);                \
+       exit(1);                                              \
+    } } while(0)
 
 /* return the number of threads in block */
 template <hypre_int dim>
@@ -383,6 +413,12 @@ hypre_int next_power_of_2(hypre_int n)
 #ifdef __cplusplus
 }
 #endif
+
+/* for struct solvers */
+#define HYPRE_MIN_GPU_SIZE (131072)
+extern HYPRE_Int hypre_exec_policy;
+#define hypre_SetDeviceOn()  hypre_exec_policy = HYPRE_MEMORY_DEVICE
+#define hypre_SetDeviceOff() hypre_exec_policy = HYPRE_MEMORY_HOST
 
 #endif /* HYPRE_USING_CUDA */
 #endif /* #ifndef HYPRE_CUDA_UTILS_H */
