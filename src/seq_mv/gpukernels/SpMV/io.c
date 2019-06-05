@@ -1,109 +1,115 @@
-#include <spmv.h>
-extern "C" {
-#include <mmio.h>
-}
+#include "spmv.h"
+#include "mmio.h"
 #define MAX_LINE 200
 
 /*---------------------------------------------*
  *             READ COO Matrix Market          *
  *---------------------------------------------*/
-int read_coo_MM(struct coo_t *coo, char *matfile, int mmidx) 
-{
-  int idx = mmidx == 0;
-
+int read_coo_MM(const char *matfile, int idxin, int idxout, struct coo_t *Acoo) {
   MM_typecode matcode;
   FILE *p = fopen(matfile,"r");
+  int i;
   if (p == NULL) {
-    printf("Unable to open file %s\n", matfile);
-    exit(1);
+    printf("Unable to open mat file %s\n", matfile);
+    exit(-1);
   }
-/*----------- READ MM banner */
+  /*----------- READ MM banner */
   if (mm_read_banner(p, &matcode) != 0){
     printf("Could not process Matrix Market banner.\n");
-    exit(1);
+    return 1;
   }
   if (!mm_is_valid(matcode)){
     printf("Invalid Matrix Market file.\n");
-    exit(1);
+    return 1;
   }
-  if (!(mm_is_real(matcode) && mm_is_coordinate(matcode) 
-        && mm_is_sparse(matcode))) {
-    printf("Only sparse real-valued coordinate \
-    matrices are supported\n");
-    exit(1);
+  if ( !( (mm_is_real(matcode) || mm_is_integer(matcode)) && mm_is_coordinate(matcode)
+        && mm_is_sparse(matcode) ) ) {
+    printf("Only sparse real-valued/integer coordinate \
+        matrices are supported\n");
+    return 1;
   }
   int nrow, ncol, nnz, nnz2, k, j;
   char line[MAX_LINE];
-/*------------- Read size */
+  /*------------- Read size */
   if (mm_read_mtx_crd_size(p, &nrow, &ncol, &nnz) !=0) {
     printf("MM read size error !\n");
-    exit(1);
+    return 1;
   }
   if (nrow != ncol) {
     fprintf(stdout,"This is not a square matrix!\n");
-    exit(1);
+    return 1;
   }
-/*--------------------------------------
- * symmetric case : only L part stored,
- * so nnz2 := 2*nnz - nnz of diag,
- * so nnz2 <= 2*nnz 
- *-------------------------------------*/
-  if (mm_is_symmetric(matcode))
+  /*--------------------------------------
+   * symmetric case : only L part stored,
+   * so nnz2 := 2*nnz - nnz of diag,
+   * so nnz2 <= 2*nnz
+   *-------------------------------------*/
+  if (mm_is_symmetric(matcode)){
+    /* printf(" * * * *  matrix is symmetric * * * * \n"); */
     nnz2 = 2*nnz;
-  else
+  } else {
     nnz2 = nnz;
-/*-------- Allocate mem for COO */
-  coo->ir  = (int *)  malloc(nnz2 * sizeof(int));
-  coo->jc  = (int *)  malloc(nnz2 * sizeof(int));
-  coo->val = (REAL *) malloc(nnz2 * sizeof(REAL));
-/*-------- read line by line */
+  }
+  /*-------- Allocate mem for COO */
+  int* IR = (int *) malloc(nnz2 * sizeof(int));
+  int* JC = (int *) malloc(nnz2 * sizeof(int));
+  double* VAL = (double *) malloc(nnz2 * sizeof(double));
+  /*-------- read line by line */
   char *p1, *p2;
   for (k=0; k<nnz; k++) {
-    fgets(line, MAX_LINE, p);
+    if (fgets(line, MAX_LINE, p) == NULL) { return -1; }
     for( p1 = line; ' ' == *p1; p1++ );
-/*----------------- 1st entry - row index */
-    for( p2 = p1; ' ' != *p2; p2++ ); 
+    /*----------------- 1st entry - row index */
+    for( p2 = p1; ' ' != *p2; p2++ );
     *p2 = '\0';
-    double tmp1 = atof(p1);
-    //coo->ir[k] = atoi(p1);
-    coo->ir[k] = (int) tmp1 + idx;
-/*-------------- 2nd entry - column index */
+    float tmp1 = atof(p1);
+    //coo.ir[k] = atoi(p1);
+    IR[k] = (int) tmp1;
+    /*-------------- 2nd entry - column index */
     for( p1 = p2+1; ' ' == *p1; p1++ );
     for( p2 = p1; ' ' != *p2; p2++ );
     *p2 = '\0';
-    double tmp2 = atof(p1);
-    coo->jc[k] = (int) tmp2 + idx;
-    //coo->jc[k]  = atoi(p1);      
-/*------------- 3rd entry - nonzero entry */
+    float tmp2 = atof(p1);
+    JC[k] = (int) tmp2;
+    //coo.jc[k]  = atoi(p1);
+    /*------------- 3rd entry - nonzero entry */
     p1 = p2+1;
-    coo->val[k] = atof(p1); 
+    VAL[k] = atof(p1);
   }
-/*------------------ Symmetric case */
+  /*------------------ Symmetric case */
   j = nnz;
   if (mm_is_symmetric(matcode)) {
     for (k=0; k<nnz; k++)
-      if (coo->ir[k] != coo->jc[k]) {
-/*------------------ off-diag entry */
-        coo->ir[j] = coo->jc[k];
-        coo->jc[j] = coo->ir[k];
-        coo->val[j] = coo->val[k];
+      if (IR[k] != JC[k]) {
+        /*------------------ off-diag entry */
+        IR[j] = JC[k];
+        JC[j] = IR[k];
+        VAL[j] = VAL[k];
         j++;
       }
     if (j != nnz2) {
-      coo->ir  = (int *)realloc(coo->ir, j*sizeof(int));
-      coo->jc  = (int *)realloc(coo->jc, j*sizeof(int));
-      coo->val = (REAL*)realloc(coo->val,j*sizeof(REAL));
+      nnz2 = j;
     }
   }
-  coo->n = nrow;
-  coo->nnz = j;
-  printf("Matrix N = %d, NNZ = %d\n", nrow, j);
+  int offset = idxout - idxin;
+  if (offset) {
+    for (i=0; i<nnz2; i++) {
+      IR[i] += offset;
+      JC[i] += offset;
+    }
+  }
+  //  printf("nrow = %d, ncol = %d, nnz = %d\n", nrow, ncol, j);
   fclose(p);
-
+  Acoo->nrows = nrow;
+  Acoo->ncols = ncol;
+  Acoo->nnz = nnz2;
+  Acoo->ir = IR;
+  Acoo->jc = JC;
+  Acoo->val = VAL;
   return 0;
 }
 
-int computeidx(int nx, int ny, int nz, int ix, int iy, int iz, 
+int computeidx(int nx, int ny, int nz, int ix, int iy, int iz,
                int dx, int dy, int dz) {
    ix += dx;
    iy += dy;
@@ -116,17 +122,18 @@ int computeidx(int nx, int ny, int nz, int ix, int iy, int iz,
 }
 /**-----------------------------------------------------------------------
  *
- * @brief Laplacean Matrix generator 
+ * @brief Laplacean Matrix generator
  *
  * @param[in] nx  Number of points in x-direction
  * @param[in] ny  Number of points in y-direction
  * @param[in] nz  Number of points in z-direction
- * @param[out] *Acoo matrix in coordinate format. 
+ * @param[out] *Acoo matrix in coordinate format.
  *
  -----------------------------------------------------------------------**/
 int lapgen(int nx, int ny, int nz, struct coo_t *Acoo, int npts) {
   int n = nx * ny * nz;
-  Acoo->n = n;
+  Acoo->nrows = n;
+  Acoo->ncols = n;
 
   if (nz > 1) {
      /* 3D */
@@ -157,7 +164,7 @@ int lapgen(int nx, int ny, int nz, struct coo_t *Acoo, int npts) {
     int ix = ii - iz*nx*ny - iy*nx;
 
     int jj;
-    
+
     // front
     if ( (jj = computeidx(nx, ny, nz, ix, iy, iz, 0, 0, -1)) >= 0 ) {
       Acoo->ir[nnz] = ii;  Acoo->jc[nnz] = jj;  Acoo->val[nnz] = v;  nnz++;
@@ -273,12 +280,14 @@ int lapgen(int nx, int ny, int nz, struct coo_t *Acoo, int npts) {
   Acoo->nnz = nnz;
 
   printf("Lapcian Matrix N = %d, NNZ = %d\n", n, nnz);
-  
+
   // change to 1-based index
+  /*
   for (ii=0; ii<nnz; ii++) {
      Acoo->ir[ii] ++;
      Acoo->jc[ii] ++;
   }
+  */
 
   return 0;
 }
@@ -305,17 +314,14 @@ int findarg(const char *argname, ARG_TYPE type, void *val, int argc, char **argv
             outint = (int *) val;
             *outint = atoi(argv[i+1]);
             return 1;
-            break;
           case DOUBLE:
             outdouble = (double *) val;
             *outdouble = atof(argv[i+1]);
             return 1;
-            break;
           case STR:
             outchar = (char *) val;
             sprintf(outchar, "%s", argv[i+1]);
             return 1;
-            break;
           default:
             printf("unknown arg type\n");
         }

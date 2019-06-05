@@ -28,7 +28,8 @@
 /*---- sparse matrix data structure */
 /* COO format type */
 struct coo_t {
-  int n;
+  int nrows;
+  int ncols;
   int nnz;
   int *ir;
   int *jc;
@@ -36,31 +37,11 @@ struct coo_t {
 };
 /* CSR format type */
 struct csr_t {
-  int n;
-  int nnz;
+  int nrows;
+  int ncols;
   int *ia;
   int *ja;
   REAL *a;
-};
-/* JAD format type */
-struct jad_t {
-  int n;
-  int nnz;
-  int *ia;
-  int *ja;
-  REAL *a;
-  int njad;
-  int *perm;
-};
-/* DIA format type */
-#define MAXDIAG 100
-struct dia_t {
-  int n;
-  int nnz;
-  int ndiags;
-  int stride;
-  REAL *diags;
-  int *ioff;
 };
 
 /* types of user command-line input */
@@ -71,5 +52,5 @@ typedef enum {
   NA
 } ARG_TYPE;
 
-#include <protos.h>
+#include "protos.h"
 
