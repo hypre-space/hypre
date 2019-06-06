@@ -1375,7 +1375,7 @@ hypre_BoomerAMGPartialCycle( void              *amg_vdata,
            if (level == num_levels-1) cycle_param = 3;
            if (level == coarsest_level+1) Not_Finished = 0;
 
-           if (down_up_cycle == 2) Not_Finished = 0;
+           if (down_up_cycle > 1) Not_Finished = 0;
 
   #ifdef HYPRE_USING_CALIPER
            cali_set_int(iter_attr, level);  /* set the level for caliper here */
@@ -1418,6 +1418,8 @@ hypre_BoomerAMGPartialCycle( void              *amg_vdata,
 
            --level;
            cycle_param = 2;
+           
+           if (down_up_cycle > 1) Not_Finished = 0;
 
   #ifdef HYPRE_USING_CALIPER
            cali_set_int(iter_attr, level);  /* set the level for caliper here */
