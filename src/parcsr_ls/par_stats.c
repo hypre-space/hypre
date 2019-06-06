@@ -104,7 +104,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
 
 
    HYPRE_Int       i;
-   
+   HYPRE_Int	   ndigits;
 
    HYPRE_BigInt    coarse_size;
    HYPRE_Int       entries;
@@ -572,7 +572,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
           global_min_rsum = - gather_buff[2];
           global_max_rsum = gather_buff[3];
           
-          hypre_printf( "%2d %7b %8.0f  %0.3f  %4d %4d",
+          hypre_printf("%3d %7b %8.0f  %0.3f  %4d %4d",
                   level, fine_size, global_nonzeros, sparse, global_min_e, 
                   global_max_e);
           hypre_printf("  %4.1f  %10.3e  %10.3e\n", avg_entries,
@@ -606,7 +606,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
              global_max_rsum = hypre_max(global_max_rsum, gather_buff[j*4 +3]);
           }
 
-          hypre_printf( "%2d %7b %8.0f  %0.3f  %4d %4d",
+          hypre_printf("%3d %7b %8.0f  %0.3f  %4d %4d",
                   level, fine_size, global_nonzeros, sparse, global_min_e, 
                   global_max_e);
           hypre_printf("  %4.1f  %10.3e  %10.3e\n", avg_entries,
@@ -619,6 +619,16 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    }
 
        
+   if (block_mode)
+   {
+      ndigits = hypre_ndigits(hypre_ParCSRBlockMatrixGlobalNumRows(P_block_array[0]));
+   }
+   else
+   {
+      ndigits = hypre_ndigits(hypre_ParCSRMatrixGlobalNumRows(P_array[0]));
+   }
+   ndigits = hypre_max(5, ndigits);
+
    if (my_id == 0)
    {
       if (block_mode)
@@ -632,18 +642,17 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
         
       }
       
-      hypre_printf("                 entries/row    min     max");
-      hypre_printf("         row sums\n");
-      hypre_printf("lev  rows cols    min max  ");
-      hypre_printf("   weight   weight     min       max \n");
-      hypre_printf("=======================================");
-      hypre_printf("==========================\n");
+      hypre_printf("%*s ", (2*ndigits + 21), "entries/row");
+      hypre_printf("%10s %10s %19s\n", "min", "max", "row sums");
+      hypre_printf("lev %*s x %-*s min  max  avgW", ndigits, "rows", ndigits, "cols");
+      hypre_printf("%11s %11s %9s %11s\n", "weight", "weight", "min", "max");
+      for (i = 0; i < (70 + 2*ndigits); i++) hypre_printf("%s", "=");
+      hypre_printf("\n");
    }
-  
+
    /*-----------------------------------------------------
     *  Enter Statistics Loop
     *-----------------------------------------------------*/
-
 
    for (level = 0; level < num_levels-1; level++)
    {
@@ -854,10 +863,11 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
          global_min_wt = -gather_buff[4];
          global_max_wt = gather_buff[5];
 
-          hypre_printf( "%2d %5b x %-5b %3d %3d",
-                 level, fine_size, coarse_size,  global_min_e, global_max_e);
-         hypre_printf("  %10.3e %9.3e %9.3e %9.3e\n",
-                global_min_wt, global_max_wt, 
+         hypre_printf("%3d %*b x %-*b %3d  %3d",
+                level, ndigits, fine_size, ndigits, coarse_size,
+                global_min_e, global_max_e);
+         hypre_printf("  %4.1f  %10.3e  %10.3e  %10.3e  %10.3e\n",
+                avg_entries, global_min_wt, global_max_wt,
                 global_min_rsum, global_max_rsum);
       }
 
@@ -896,10 +906,11 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
             global_max_wt = hypre_max(global_max_wt, gather_buff[j*6+5]);
          }
          
-         hypre_printf( "%2d %5b x %-5b %3d %3d",
-                 level, fine_size, coarse_size,  global_min_e, global_max_e);
-         hypre_printf("  %10.3e %9.3e %9.3e %9.3e\n",
-                global_min_wt, global_max_wt, 
+         hypre_printf("%3d %*b x %-*b %3d  %3d",
+                level, ndigits, fine_size, ndigits, coarse_size, 
+                global_min_e, global_max_e);
+         hypre_printf("  %4.1f  %10.3e  %10.3e  %10.3e  %10.3e\n",
+                avg_entries, global_min_wt, global_max_wt, 
                 global_min_rsum, global_max_rsum);
       }
 
@@ -921,12 +932,12 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
  
    if (my_id == 0 )
    {
-      hypre_printf("\n\n     Complexity:    grid = %f\n",grid_cmplxty);
+      hypre_printf("\n\n");
+      hypre_printf("     Complexity:    grid = %f\n",grid_cmplxty);
       hypre_printf("                operator = %f\n",operat_cmplxty);
-      hypre_printf("                memory = %f\n",memory_cmplxty);
+      hypre_printf("                  memory = %f\n",memory_cmplxty);
+      hypre_printf("\n\n");
    }
-
-   if (my_id == 0) hypre_printf("\n\n");
 
    if (my_id == 0)
    { 
