@@ -104,7 +104,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
 
 
    HYPRE_Int       i;
-   HYPRE_Int	   ndigits;
+   HYPRE_Int	   ndigits[2];
 
    HYPRE_BigInt    coarse_size;
    HYPRE_Int       entries;
@@ -395,16 +395,34 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
       {
          hypre_printf( "\nOperator Matrix Information:\n\n");
       }
-      
-      hypre_printf("            nonzero         entries p");
-      hypre_printf("er row        row sums\n");
-      hypre_printf("lev   rows  entries  sparse  min  max   ");
-      hypre_printf("avg       min         max\n");
-      hypre_printf("=======================================");
-      hypre_printf("============================\n");
-
    }
-  
+
+   if (block_mode)
+   {
+      ndigits[0] = hypre_ndigits(hypre_ParCSRBlockMatrixGlobalNumRows(A_block_array[0]));
+      ndigits[1] = hypre_ndigits(hypre_ParCSRBlockMatrixDNumNonzeros(A_block_array[0]));
+   }
+   else
+   {
+      ndigits[0] = hypre_ndigits(hypre_ParCSRMatrixGlobalNumRows(A_array[0]));
+      ndigits[1] = hypre_ndigits(hypre_ParCSRMatrixDNumNonzeros(A_array[level]));
+   }
+   ndigits[0] = hypre_max(7, ndigits[0]);
+   ndigits[1] = hypre_max(8, ndigits[1]);
+
+   if(my_id == 0)
+   {
+      hypre_printf("%*s", (ndigits[0] + 13), "nonzero");
+      hypre_printf("%*s", (ndigits[1] + 15), "entries/row");
+      hypre_printf("%18s\n", "row sums");
+      hypre_printf("%s %*s ", "lev", ndigits[0], "rows");
+      hypre_printf("%*s", ndigits[1], "entries");
+      hypre_printf("%7s %5s %4s", "sparse", "min", "max");
+      hypre_printf("%6s %8s %11s\n", "avg", "min", "max");
+      for (i = 0; i < (53 + ndigits[0] + ndigits[1]); i++) hypre_printf("%s", "=");
+      hypre_printf("\n");
+   }
+
    /*-----------------------------------------------------
     *  Enter Statistics Loop
     *-----------------------------------------------------*/
@@ -572,9 +590,9 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
           global_min_rsum = - gather_buff[2];
           global_max_rsum = gather_buff[3];
           
-          hypre_printf("%3d %7b %8.0f  %0.3f  %4d %4d",
-                  level, fine_size, global_nonzeros, sparse, global_min_e, 
-                  global_max_e);
+          hypre_printf("%3d %*b %*.0f  %0.3f  %4d %4d",
+                  level, ndigits[0], fine_size, ndigits[1], global_nonzeros,
+                  sparse, global_min_e, global_max_e);
           hypre_printf("  %4.1f  %10.3e  %10.3e\n", avg_entries,
                  global_min_rsum, global_max_rsum);
        }
@@ -606,9 +624,9 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
              global_max_rsum = hypre_max(global_max_rsum, gather_buff[j*4 +3]);
           }
 
-          hypre_printf("%3d %7b %8.0f  %0.3f  %4d %4d",
-                  level, fine_size, global_nonzeros, sparse, global_min_e, 
-                  global_max_e);
+          hypre_printf("%3d %*b %*.0f  %0.3f  %4d %4d",
+                  level, ndigits[0], fine_size, ndigits[1], global_nonzeros,
+                  sparse, global_min_e, global_max_e);
           hypre_printf("  %4.1f  %10.3e  %10.3e\n", avg_entries,
                  global_min_rsum, global_max_rsum);
        }
@@ -621,13 +639,13 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
        
    if (block_mode)
    {
-      ndigits = hypre_ndigits(hypre_ParCSRBlockMatrixGlobalNumRows(P_block_array[0]));
+      ndigits[0] = hypre_ndigits(hypre_ParCSRBlockMatrixGlobalNumRows(P_block_array[0]));
    }
    else
    {
-      ndigits = hypre_ndigits(hypre_ParCSRMatrixGlobalNumRows(P_array[0]));
+      ndigits[0] = hypre_ndigits(hypre_ParCSRMatrixGlobalNumRows(P_array[0]));
    }
-   ndigits = hypre_max(5, ndigits);
+   ndigits[0] = hypre_max(5, ndigits[0]);
 
    if (my_id == 0)
    {
@@ -642,11 +660,11 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
         
       }
       
-      hypre_printf("%*s ", (2*ndigits + 21), "entries/row");
+      hypre_printf("%*s ", (2*ndigits[0] + 21), "entries/row");
       hypre_printf("%10s %10s %19s\n", "min", "max", "row sums");
-      hypre_printf("lev %*s x %-*s min  max  avgW", ndigits, "rows", ndigits, "cols");
+      hypre_printf("lev %*s x %-*s min  max  avgW", ndigits[0], "rows", ndigits[0], "cols");
       hypre_printf("%11s %11s %9s %11s\n", "weight", "weight", "min", "max");
-      for (i = 0; i < (70 + 2*ndigits); i++) hypre_printf("%s", "=");
+      for (i = 0; i < (70 + 2*ndigits[0]); i++) hypre_printf("%s", "=");
       hypre_printf("\n");
    }
 
@@ -864,7 +882,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
          global_max_wt = gather_buff[5];
 
          hypre_printf("%3d %*b x %-*b %3d  %3d",
-                level, ndigits, fine_size, ndigits, coarse_size,
+                level, ndigits[0], fine_size, ndigits[0], coarse_size,
                 global_min_e, global_max_e);
          hypre_printf("  %4.1f  %10.3e  %10.3e  %10.3e  %10.3e\n",
                 avg_entries, global_min_wt, global_max_wt,
@@ -907,10 +925,10 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
          }
          
          hypre_printf("%3d %*b x %-*b %3d  %3d",
-                level, ndigits, fine_size, ndigits, coarse_size, 
+                level, ndigits[0], fine_size, ndigits[0], coarse_size,
                 global_min_e, global_max_e);
          hypre_printf("  %4.1f  %10.3e  %10.3e  %10.3e  %10.3e\n",
-                avg_entries, global_min_wt, global_max_wt, 
+                avg_entries, global_min_wt, global_max_wt,
                 global_min_rsum, global_max_rsum);
       }
 
