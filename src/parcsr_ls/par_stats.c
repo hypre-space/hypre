@@ -744,7 +744,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
          
 
          }
-         avg_entries = ((HYPRE_Real) global_nonzeros) / ((HYPRE_Real) fine_size);
+         avg_entries = ((HYPRE_Real) (global_nonzeros - coarse_size)) / ((HYPRE_Real) (fine_size - coarse_size));
       }
       else 
       {
@@ -822,7 +822,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
             }
          
          }
-         avg_entries = ((HYPRE_Real) global_nonzeros) / ((HYPRE_Real) fine_size);
+         avg_entries = ((HYPRE_Real) (global_nonzeros - coarse_size)) / ((HYPRE_Real) (fine_size - coarse_size));
       }
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
