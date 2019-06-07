@@ -2,18 +2,50 @@
 #include <cuda_runtime.h>
 #include "cusparse.h"
 
-#if DOUBLEPRECISION
-texture<int2, 1> texRef;
-#else
-texture<REAL, 1> texRef;
-#endif
-
-
 __global__
-void csr_v_k(int n, int *d_ia, int *d_ja, REAL *d_a, REAL *d_y) {
+void csr_v_k_8(int n, int *d_ia, int *d_ja, REAL *d_a, REAL *d_x, REAL *d_y) {
 /*------------------------------------------------------------*
  *               CSR spmv-vector kernel
  *  shared memory reduction, texture memory fetching
+ *           1/4-Warp (8 threads) per row
+ *------------------------------------------------------------*/
+  // num of 1/4-warps
+  int nqw = gridDim.x*BLOCKDIM/8;
+  // 1/4 warp id
+  int qwid = (blockIdx.x*BLOCKDIM+threadIdx.x)/8;
+  // thread lane in each half warp
+  int lane = threadIdx.x & (8-1);
+  // 1/4 warp lane in each block
+  int qwlane = threadIdx.x/8;
+  // shared memory for patial result
+  volatile __shared__ REAL r[BLOCKDIM+8];
+  volatile __shared__ int startend[BLOCKDIM/8][2];
+  for (int row = qwid; row < n; row += nqw) {
+    // row start and end point
+    if (lane < 2)
+      startend[qwlane][lane] = d_ia[row+lane];
+    int p = startend[qwlane][0];
+    int q = startend[qwlane][1];
+    REAL sum = 0.0;
+    for (int i=p+lane; i<q; i+=8) {
+       sum += d_a[i] * d_x[d_ja[i]];
+    }
+    // parallel reduction
+    r[threadIdx.x] = sum;
+    r[threadIdx.x] = sum = sum + r[threadIdx.x+4];
+    r[threadIdx.x] = sum = sum + r[threadIdx.x+2];
+    r[threadIdx.x] = sum = sum + r[threadIdx.x+1];
+    if (lane == 0)
+      d_y[row] = r[threadIdx.x];
+  }
+}
+
+
+__global__
+void csr_v_k_16(int n, int *d_ia, int *d_ja, REAL *d_a, REAL *d_x, REAL *d_y) {
+/*------------------------------------------------------------*
+ *               CSR spmv-vector kernel
+ *              shared memory reduction
  *           Half-Warp (16 threads) per row
  *------------------------------------------------------------*/
   // num of half-warps
@@ -35,13 +67,7 @@ void csr_v_k(int n, int *d_ia, int *d_ja, REAL *d_a, REAL *d_y) {
     int q = startend[hwlane][1];
     REAL sum = 0.0;
     for (int i=p+lane; i<q; i+=HALFWARP) {
-#if DOUBLEPRECISION
-      int2 t = tex1Dfetch(texRef, d_ja[i]);
-      sum += d_a[i] * __hiloint2double(t.y, t.x);
-#else
-      REAL t = tex1Dfetch(texRef, d_ja[i]);
-      sum += d_a[i] * t;
-#endif
+      sum += d_a[i] * d_x[d_ja[i]];
     }
     // parallel reduction
     r[threadIdx.x] = sum;
@@ -52,6 +78,100 @@ void csr_v_k(int n, int *d_ia, int *d_ja, REAL *d_a, REAL *d_y) {
     if (lane == 0)
       d_y[row] = r[threadIdx.x];
   }
+}
+
+__global__
+void csr_v_k_32(int n, int *d_ia, int *d_ja, REAL *d_a, REAL *d_x, REAL *d_y) {
+   /*------------------------------------------------------------*
+    *               CSR spmv-vector kernel
+    *              shared memory reduction
+    *          FULL-Warp (32 threads) per row
+    *------------------------------------------------------------*/
+   // num of full-warps
+   int nw = gridDim.x*BLOCKDIM/WARP;
+   // full warp id
+   int wid = (blockIdx.x*BLOCKDIM+threadIdx.x)/WARP;
+   // thread lane in each full warp
+   int lane = threadIdx.x & (WARP-1);
+   // full warp lane in each block
+   int wlane = threadIdx.x/WARP;
+   // shared memory for patial result
+   volatile __shared__ REAL r[BLOCKDIM+16];
+   volatile __shared__ int startend[BLOCKDIM/WARP][2];
+   for (int row = wid; row < n; row += nw)
+   {
+      // row start and end point
+      if (lane < 2)
+      {
+         startend[wlane][lane] = d_ia[row+lane];
+      }
+      int p = startend[wlane][0];
+      int q = startend[wlane][1];
+      REAL sum = 0.0;
+      for (int i=p+lane; i<q; i+=WARP)
+      {
+         sum += d_a[i] * d_x[d_ja[i]];
+      }
+      // parallel reduction
+      r[threadIdx.x] = sum;
+      r[threadIdx.x] = sum = sum + r[threadIdx.x+16];
+      r[threadIdx.x] = sum = sum + r[threadIdx.x+8];
+      r[threadIdx.x] = sum = sum + r[threadIdx.x+4];
+      r[threadIdx.x] = sum = sum + r[threadIdx.x+2];
+      r[threadIdx.x] = sum = sum + r[threadIdx.x+1];
+      if (lane == 0)
+      {
+         d_y[row] = r[threadIdx.x];
+      }
+   }
+}
+
+
+template <int K, typename T>
+__global__
+void csr_v_k(int n, int *d_ia, int *d_ja, T *d_a, T *d_x, T *d_y) {
+   /*------------------------------------------------------------*
+    *               CSR spmv-vector kernel
+    *              shared memory reduction
+    *          FULL-Warp (32 threads) per row
+    *------------------------------------------------------------*/
+   // num of full-warps
+   int nw = gridDim.x*BLOCKDIM/K;
+   // full warp id
+   int wid = (blockIdx.x*BLOCKDIM+threadIdx.x)/K;
+   // thread lane in each full warp
+   int lane = threadIdx.x & (K-1);
+   // full warp lane in each block
+   int wlane = threadIdx.x/K;
+   // shared memory for patial result
+   volatile __shared__ T r[BLOCKDIM+K/2];
+   volatile __shared__ int startend[BLOCKDIM/K][2];
+   for (int row = wid; row < n; row += nw)
+   {
+      // row start and end point
+      if (lane < 2)
+      {
+         startend[wlane][lane] = d_ia[row+lane];
+      }
+      int p = startend[wlane][0];
+      int q = startend[wlane][1];
+      T sum = 0.0;
+      for (int i=p+lane; i<q; i+=K)
+      {
+         sum += d_a[i] * d_x[d_ja[i]];
+      }
+      // parallel reduction
+      r[threadIdx.x] = sum;
+#pragma unroll
+      for (int d = K/2; d > 0; d >>= 1)
+      {
+         r[threadIdx.x] = sum = sum + r[threadIdx.x+d];
+      }
+      if (lane == 0)
+      {
+         d_y[row] = r[threadIdx.x];
+      }
+   }
 }
 
 /*-------------------------------------------------------*/
@@ -76,14 +196,6 @@ void spmv_csr_vector(struct csr_t *csr, REAL *x, REAL *y) {
   cudaMemcpyHostToDevice);
   cudaMemcpy(d_x, x, n*sizeof(REAL),
   cudaMemcpyHostToDevice);
-/*--------- texture binding */
-  size_t offset;
-#if DOUBLEPRECISION
-  cudaBindTexture(&offset, texRef, d_x, n*sizeof(int2));
-#else
-  cudaBindTexture(&offset, texRef, d_x, n*sizeof(float));
-#endif
-  assert(offset == 0);
 /*-------- set spmv kernel */
 /*-------- num of half-warps per block */
   int hwb = BLOCKDIM/HALFWARP;
@@ -94,7 +206,7 @@ void spmv_csr_vector(struct csr_t *csr, REAL *x, REAL *y) {
   t1 = wall_timer();
   for (i=0; i<REPEAT; i++) {
     //cudaMemset((void *)d_y, 0, n*sizeof(REAL));
-    csr_v_k<<<gDim, bDim>>>(n, d_ia, d_ja, d_a, d_y);
+    csr_v_k<8, REAL> <<<gDim, bDim>>>(n, d_ia, d_ja, d_a, d_x, d_y);
   }
 /*-------- Barrier for GPU calls */
   cudaThreadSynchronize();
@@ -108,8 +220,6 @@ void spmv_csr_vector(struct csr_t *csr, REAL *x, REAL *y) {
 /*-------- copy y to host mem */
   cudaMemcpy(y, d_y, n*sizeof(REAL),
   cudaMemcpyDeviceToHost);
-/*--------- unbind texture */
-  cudaUnbindTexture(texRef);
 /*---------- CUDA free */
   cudaFree(d_ia);
   cudaFree(d_ja);
