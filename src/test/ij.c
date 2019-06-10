@@ -1920,9 +1920,9 @@ main( hypre_int argc,
          hypre_printf("  -ilu_type   20                   : NSH with ILU(k) variants \n");      
          hypre_printf("  -ilu_type   21                   : NSH with ILUT \n"); 
          hypre_printf("  -ilu_type   30                   : RAS with ILU(k) variants \n");      
-         hypre_printf("  -ilu_type   31                   : ddPQ + GMRES with ILUT \n");   
+         hypre_printf("  -ilu_type   31                   : RAS with ILUT \n");    
          hypre_printf("  -ilu_type   40                   : ddPQ + GMRES with ILU(k) variants \n");      
-         hypre_printf("  -ilu_type   41                   : RAS with ILUT \n");   
+         hypre_printf("  -ilu_type   41                   : ddPQ + GMRES with ILUT \n");               
          hypre_printf("  -ilu_lfil   <val>                : set level of fill (k) for ILU(k) = val\n");      
          hypre_printf("  -ilu_droptol   <val>             : set drop tolerance threshold for ILUT = val \n");      
          hypre_printf("  -ilu_max_row_nnz   <val>         : set max. num of nonzeros to keep per row = val \n");          

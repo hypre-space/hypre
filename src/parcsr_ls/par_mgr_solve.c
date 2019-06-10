@@ -214,7 +214,7 @@ hypre_MGRSolve( void               *mgr_vdata,
       wall_time = time_getWallclockSeconds();
       hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[0], U_array[0], beta, F_array[0], Vtemp);
       HYPRE_Real resnorm_gsmooth = hypre_ParVectorInnerProd(Vtemp, Vtemp);
-      HYPRE_Real conv_factor_gsmooth = resnorm_gsmooth;
+//      HYPRE_Real conv_factor_gsmooth = resnorm_gsmooth;
       if (global_smooth_type == 0)//block Jacobi smoother
 	    {
 	      for (i = 0;i < global_smooth_iters;i ++)
@@ -372,7 +372,7 @@ hypre_MGRFrelaxVcycle ( void   *Frelax_vdata, hypre_ParVector *f, hypre_ParVecto
   HYPRE_Int relax_type = 3;
   HYPRE_Int relax_weight = 1;
   HYPRE_Int omega = 1;
-  HYPRE_Int max_coarse_size = hypre_ParAMGDataMaxCoarseSize(Frelax_data);
+//  HYPRE_Int max_coarse_size = hypre_ParAMGDataMaxCoarseSize(Frelax_data);
 
   hypre_ParVector    **F_array = (Frelax_data) -> F_array;
   hypre_ParVector    **U_array = (Frelax_data) -> U_array;
@@ -494,7 +494,7 @@ hypre_MGRFrelaxVcycle ( void   *Frelax_vdata, hypre_ParVector *f, hypre_ParVecto
     }
     else if (cycle_param == 3) 
     {     
-      if((hypre_ParAMGDataUserCoarseRelaxType(Frelax_data) == 9))
+      if(hypre_ParAMGDataUserCoarseRelaxType(Frelax_data) == 9)
       {
          // solve the coarsest grid with Gaussian elimination
          hypre_GaussElimSolve(Frelax_data, level, 9);         

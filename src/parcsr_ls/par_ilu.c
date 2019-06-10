@@ -1153,8 +1153,8 @@ HYPRE_Int
 hypre_ILUGetPermddPQPre(HYPRE_Int n, HYPRE_Int nLU, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j, HYPRE_Real *A_diag_data, HYPRE_Real tol, HYPRE_Int *perm, HYPRE_Int *rperm,
                         HYPRE_Int *pperm_pre, HYPRE_Int *qperm_pre, HYPRE_Int *nB)
 {
-   HYPRE_Int   i, ii, nB_pre, k1, k2, index;
-   HYPRE_Real  gtol, value, max_value, norm;
+   HYPRE_Int   i, ii, nB_pre, k1, k2;
+   HYPRE_Real  gtol, max_value, norm;
    
    HYPRE_Int   *jcol, *jnnz;
    HYPRE_Real  *weight;
@@ -1222,7 +1222,7 @@ hypre_ILUGetPermddPQPre(HYPRE_Int n, HYPRE_Int nLU, HYPRE_Int *A_diag_i, HYPRE_I
 HYPRE_Int
 hypre_ILUGetPermddPQ(hypre_ParCSRMatrix *A, HYPRE_Int **io_pperm, HYPRE_Int **io_qperm, HYPRE_Real tol, HYPRE_Int *nB, HYPRE_Int *nI)
 {
-   HYPRE_Int         i, count, nB_pre, irow, jcol, nLU;
+   HYPRE_Int         i, nB_pre, irow, jcol, nLU;
    HYPRE_Int         *pperm, *qperm;
    HYPRE_Int         *rpperm, *rqperm, *pperm_pre, *qperm_pre;
    
@@ -1438,15 +1438,19 @@ hypre_ILUGetLocalPerm(hypre_ParCSRMatrix *A, HYPRE_Int **perm, HYPRE_Int *nLU)
    return hypre_error_flag;
 }
 
+#if 0
 /* Build the expanded matrix for RAS-1
  * A: input ParCSR matrix
  * E_i, E_j, E_data: information for external matrix
  * rperm: reverse permutation to build real index, rperm[old] = new
+ * 
+ * NOTE: Modified to avoid communicating BigInt arrays - DOK
  */
 HYPRE_Int
 hypre_ILUBuildRASExternalMatrix(hypre_ParCSRMatrix *A, HYPRE_Int *rperm, HYPRE_Int **E_i, HYPRE_Int **E_j, HYPRE_Real **E_data)
 {
-   HYPRE_Int                i, j, k, l, row, k1, k2, k3, lend, leno, col, l1, l2;
+   HYPRE_Int                i, i1, i2, j, jj, k, row, k1, k2, k3, lend, leno, col, l1, l2;
+   HYPRE_BigInt		    big_col;
    
    /* data objects for communication */
    MPI_Comm                 comm = hypre_ParCSRMatrixComm(A);
@@ -1456,7 +1460,7 @@ hypre_ILUBuildRASExternalMatrix(hypre_ParCSRMatrix *A, HYPRE_Int *rperm, HYPRE_I
    hypre_ParCSRCommHandle   *comm_handle_marker;
    hypre_ParCSRCommHandle   *comm_handle_j;
    hypre_ParCSRCommHandle   *comm_handle_data;
-   HYPRE_Int                *col_starts;
+   HYPRE_BigInt                *col_starts;
    HYPRE_Int                total_rows;
    HYPRE_Int                num_sends;
    HYPRE_Int                num_recvs;
@@ -1468,15 +1472,16 @@ hypre_ILUBuildRASExternalMatrix(hypre_ParCSRMatrix *A, HYPRE_Int *rperm, HYPRE_I
    HYPRE_Int                *send_count = NULL,*send_disp = NULL;
    HYPRE_Int                *send_count_offd = NULL;
    HYPRE_Int                *recv_count = NULL,*recv_disp = NULL,*recv_marker = NULL;
-   HYPRE_Int                *send_buf_int = NULL, *recv_buf_int = NULL;
+   HYPRE_Int                *send_buf_int = NULL;
+   HYPRE_Int		    *recv_buf_int = NULL;
    HYPRE_Real               *send_buf_real = NULL, *recv_buf_real = NULL;
    HYPRE_Int                *send_disp_comm = NULL, *recv_disp_comm = NULL;
    
    /* data objects for A */
    hypre_CSRMatrix          *A_diag = hypre_ParCSRMatrixDiag(A);
    hypre_CSRMatrix          *A_offd = hypre_ParCSRMatrixOffd(A);
-   HYPRE_Int                *A_col_starts = hypre_ParCSRMatrixColStarts(A);
-   HYPRE_Int                *A_offd_colmap = hypre_ParCSRMatrixColMapOffd(A);
+   HYPRE_BigInt             *A_col_starts = hypre_ParCSRMatrixColStarts(A);
+   HYPRE_BigInt             *A_offd_colmap = hypre_ParCSRMatrixColMapOffd(A);
    HYPRE_Real               *A_diag_data = hypre_CSRMatrixData(A_diag);
    HYPRE_Int                *A_diag_i = hypre_CSRMatrixI(A_diag);
    HYPRE_Int                *A_diag_j = hypre_CSRMatrixJ(A_diag);
@@ -1526,8 +1531,8 @@ hypre_ILUBuildRASExternalMatrix(hypre_ParCSRMatrix *A, HYPRE_Int *rperm, HYPRE_I
    /* 2: communication part 1 to get amount of send and recv */
    
    /* first we need to know the global start */ 
-   col_starts        = hypre_TAlloc(HYPRE_Int, num_procs + 1, HYPRE_MEMORY_HOST);
-   hypre_MPI_Allgather(A_col_starts+1,1,HYPRE_MPI_INT,col_starts+1,1,HYPRE_MPI_INT,comm);
+   col_starts        = hypre_TAlloc(HYPRE_BigInt, num_procs + 1, HYPRE_MEMORY_HOST);
+   hypre_MPI_Allgather(A_col_starts+1,1,HYPRE_MPI_BIG_INT,col_starts+1,1,HYPRE_MPI_BIG_INT,comm);
    col_starts[0]     = 0;
    
    send_disp[0]      = 0;
@@ -1566,8 +1571,8 @@ hypre_ILUBuildRASExternalMatrix(hypre_ParCSRMatrix *A, HYPRE_Int *rperm, HYPRE_I
          for( k = k1 ; k < k2 ; k ++ )
          {
             /* get real column number of this offdiagonal column */
-            col = A_offd_colmap[A_offd_j[k]];
-            if(col >= col_starts[proc_id] && col < col_starts[proc_id+1])
+            big_col = A_offd_colmap[A_offd_j[k]];
+            if(big_col >= col_starts[proc_id] && big_col < col_starts[proc_id+1])
             {
                /* this column is in diagonal range of proc_id
                 * everything in diagonal range need to be in the factorization
@@ -1582,7 +1587,7 @@ hypre_ILUBuildRASExternalMatrix(hypre_ParCSRMatrix *A, HYPRE_Int *rperm, HYPRE_I
       }
    }
    
-   /* 3: new communication to know how many we need to reveive for each external row
+   /* 3: new communication to know how many we need to receive for each external row
     * main communication, 11 is integer 
     */
    comm_handle_count    = hypre_ParCSRCommHandleCreate(11, comm_pkg, send_count, recv_count);
@@ -1643,9 +1648,9 @@ hypre_ILUBuildRASExternalMatrix(hypre_ParCSRMatrix *A, HYPRE_Int *rperm, HYPRE_I
                send_buf_real[lend] = A_diag_data[k];
                /* the diag part becomes offd for recv part, so update index 
                 * set up to global index
-                * set it to be nagetive
+                * set it to be negative
                 */
-               send_buf_int[lend++] = col + col_starts[my_id];
+               send_buf_int[lend++] = col;// + col_starts[my_id];
             }
          }
          
@@ -1654,15 +1659,15 @@ hypre_ILUBuildRASExternalMatrix(hypre_ParCSRMatrix *A, HYPRE_Int *rperm, HYPRE_I
          for( k = k1 ; k < k2 ; k ++ )
          {
             /* get real column number of this offdiagonal column */
-            col = A_offd_colmap[A_offd_j[k]];
-            if(col >= col_starts[proc_id] && col < col_starts[proc_id+1])
+            big_col = A_offd_colmap[A_offd_j[k]];
+            if(big_col >= col_starts[proc_id] && big_col < col_starts[proc_id+1])
             {
                /* this column is in diagonal range of proc_id
                 * everything in diagonal range need to be in the factorization
                 */
                send_buf_real[leno] = A_offd_data[k];
                /* the offd part becomes diagonal for recv part, so update index */
-               send_buf_int[leno++] = col - col_starts[proc_id];
+               send_buf_int[leno++] = (HYPRE_Int)(big_col - col_starts[proc_id]);
             }
          }
       }
@@ -1684,8 +1689,45 @@ hypre_ILUBuildRASExternalMatrix(hypre_ParCSRMatrix *A, HYPRE_Int *rperm, HYPRE_I
    hypre_ParCSRCommHandleDestroy(comm_handle_j);
    hypre_ParCSRCommHandleDestroy(comm_handle_data);
    
+   /* Update the index to be real index */
+   /* Dealing with diagonal part */
+   for(i = 0 ; i < m ; i++ )
+   {
+      k1 = recv_disp[i];
+      k2 = recv_disp[i] + recv_marker[i];
+      k3 = recv_disp[i+1];
+      for(j = k1 ; j < k2 ; j ++ )
+      {
+         recv_buf_int[j] = rperm[recv_buf_int[j]];
+      }
+   }
+   
+   /* Dealing with off-diagonal part */
+   for(i = 0 ; i < num_recvs ; i ++)
+   {
+      proc_id = hypre_ParCSRCommPkgRecvProc( comm_pkg_tmp, i);
+      i1 = hypre_ParCSRCommPkgRecvVecStart( comm_pkg_tmp, i );
+      i2 = hypre_ParCSRCommPkgRecvVecStart( comm_pkg_tmp, i + 1 );
+      for(j = i1 ; j < i2 ; j++)
+      {
+         k1 = recv_disp[j] + recv_marker[j];
+         k2 = recv_disp[j+1];
+
+         for(jj = k1 ; jj < k2 ; jj++)
+         {
+            /* Correct index to get actual global index */
+            big_col = recv_buf_int[jj] + col_starts[proc_id];
+            recv_buf_int[jj] = hypre_BigBinarySearch( A_offd_colmap, big_col, m) + n;
+         }
+      }
+   }
+   
+   /* Assign data */
+   *E_i     = recv_disp;
+   *E_j     = recv_buf_int;
+   *E_data  = recv_buf_real;
+
    /* 5: finish and free 
-    * free some of them first
     */ 
    
    hypre_TFree(send_disp_comm, HYPRE_MEMORY_HOST);
@@ -1697,32 +1739,150 @@ hypre_ILUBuildRASExternalMatrix(hypre_ParCSRMatrix *A, HYPRE_Int *rperm, HYPRE_I
    hypre_TFree(send_count_offd, HYPRE_MEMORY_HOST);
    hypre_TFree(recv_count, HYPRE_MEMORY_HOST);
    hypre_TFree(send_buf_int, HYPRE_MEMORY_HOST);
-   hypre_TFree(send_buf_real, HYPRE_MEMORY_HOST);
-   
-   *E_i     = recv_disp;
-   *E_j     = recv_buf_int;
-   *E_data  = recv_buf_real;
-   
-   /* Update the index to be real index */
-   for(i = 0 ; i < m ; i ++ )
-   {
-      k1 = recv_disp[i];
-      k2 = recv_disp[i] + recv_marker[i];
-      k3 = recv_disp[i+1];
-      for(j = k1 ; j < k2 ; j ++ )
-      {
-         recv_buf_int[j] = rperm[recv_buf_int[j]];
-      }
-      for(j = k2 ; j < k3 ; j ++)
-      {
-         col = recv_buf_int[j];
-         recv_buf_int[j] = hypre_BinarySearch( A_offd_colmap, col, m) + n;
-      }
-   }
-   
+   hypre_TFree(send_buf_real, HYPRE_MEMORY_HOST);   
    hypre_TFree(recv_marker, HYPRE_MEMORY_HOST);
+   
    return hypre_error_flag;
 }
+#else
+/* Build the expanded matrix for RAS-1
+ * A: input ParCSR matrix
+ * E_i, E_j, E_data: information for external matrix
+ * rperm: reverse permutation to build real index, rperm[old] = new
+ */
+HYPRE_Int
+hypre_ILUBuildRASExternalMatrix(hypre_ParCSRMatrix *A, HYPRE_Int *rperm, HYPRE_Int **E_i, HYPRE_Int **E_j, HYPRE_Real **E_data)
+{
+   HYPRE_Int                i, j, idx;
+   /* BIG INT*/ HYPRE_BigInt   big_col;
+   
+   /* data objects for communication */
+//   MPI_Comm                 comm = hypre_ParCSRMatrixComm(A);
+//   HYPRE_Int                my_id,num_procs;
+   
+   /* data objects for A */
+   hypre_CSRMatrix          *A_diag = hypre_ParCSRMatrixDiag(A);
+   hypre_CSRMatrix          *A_offd = hypre_ParCSRMatrixOffd(A);
+   /* BIG INT*/ HYPRE_BigInt   *A_col_starts = hypre_ParCSRMatrixColStarts(A);
+   /* BIG INT*/ HYPRE_BigInt   *A_offd_colmap = hypre_ParCSRMatrixColMapOffd(A);
+   HYPRE_Int                *A_diag_i = hypre_CSRMatrixI(A_diag);
+   HYPRE_Int                *A_offd_i = hypre_CSRMatrixI(A_offd);
+   
+   /* data objects for external A matrix */
+   hypre_CSRMatrix          *A_ext = NULL; // Need to check the new version of hypre_ParcsrGetExternalRows
+   HYPRE_Int                *A_ext_i = NULL; // # up to local offd cols, no need to be big int
+   /* BIG INT*/ HYPRE_BigInt   *A_ext_j = NULL; // Return global index, big int required
+   HYPRE_Real               *A_ext_data = NULL;
+   
+   /* data objects for output */
+   HYPRE_Int                E_nnz;
+   HYPRE_Int                *E_ext_i = NULL;
+   HYPRE_Int                *E_ext_j = NULL; // No need to use big int, local-index
+   HYPRE_Real               *E_ext_data = NULL;
+   
+   HYPRE_Int                E_init_alloc; //guess non-zeros for E before start
+   
+   /* size */
+   HYPRE_Int                n = hypre_CSRMatrixNumCols(A_diag);
+   HYPRE_Int                m = hypre_CSRMatrixNumCols(A_offd);
+   HYPRE_Int                A_diag_nnz = A_diag_i[n];
+   HYPRE_Int                A_offd_nnz = A_offd_i[n];
+   
+   /* 1: Set up phase and get external rows
+    * Use the HYPRE build-in function
+    */
+   
+   /* MPI stuff */
+   //hypre_MPI_Comm_size(comm, &num_procs);
+   //hypre_MPI_Comm_rank(comm, &my_id);
+   
+   /* Param of hypre_ParcsrGetExternalRows:
+    * hypre_ParCSRMatrix   *A          [in]  -> Input parcsr matrix.
+    * HYPRE_Int            indies_len  [in]  -> Input length of indices_len array
+    * HYPRE_Int            *indices    [in]  -> Input global indices of rows we want to get
+    * hypre_CSRMatrix      **A_ext     [out] -> Return the external CSR matrix.
+    * hypre_ParCSRCommPkg  commpkg_out [out] -> Return commpkg if set to a point. Use NULL here since we don't want it.
+    */
+   hypre_ParcsrGetExternalRows( A, m, A_offd_colmap, &A_ext, NULL );
+   
+   A_ext_i              = hypre_CSRMatrixI(A_ext);
+   /* BIG INT*/ A_ext_j = hypre_CSRMatrixBigJ(A_ext); // This should be big int since this is global index, use big_j in csr
+   A_ext_data           = hypre_CSRMatrixData(A_ext);
+   
+   /* guess memory we need to allocate to E_j */
+   E_init_alloc =  hypre_max( (HYPRE_Int) ( A_diag_nnz / (HYPRE_Real) n / (HYPRE_Real) n * (HYPRE_Real) m * (HYPRE_Real) m + A_offd_nnz), 1);
+   
+   /* Initial guess */
+   E_ext_i     = hypre_TAlloc(HYPRE_Int, m + 1 , HYPRE_MEMORY_HOST);
+   E_ext_j     = hypre_TAlloc(HYPRE_Int, E_init_alloc , HYPRE_MEMORY_HOST);
+   E_ext_data  = hypre_TAlloc(HYPRE_Real, E_init_alloc , HYPRE_MEMORY_HOST);
+   
+   /* 2: Discard unecessary cols
+    * Search A_ext_j, discard those cols not belong to current proc
+    * First check diag, and search in offd_col_map
+    */
+   
+   E_nnz       = 0;
+   E_ext_i[0]  = 0;
+   
+   for( i = 0 ;  i <= m ; i ++)
+   {
+      E_ext_i[i] = E_nnz;
+      for( j = A_ext_i[i] ; j < A_ext_i[i+1] ; j ++)
+      {
+         big_col = A_ext_j[j];
+         /* First check if that belons to the diagonal part */
+         if( big_col >= A_col_starts[0] && big_col < A_col_starts[1] )
+         {
+            /* this is a diagonal entry, rperm (map old to new) and shift it */
+            
+            /* Note here, the result of big_col - A_col_starts[0] in nolonger a big int */
+            idx = (HYPRE_Int)(big_col - A_col_starts[0]);
+            E_ext_j[E_nnz]       = rperm[idx];
+            E_ext_data[E_nnz++]  = A_ext_data[j];
+         }
+         /* If not, apply binary search to check if is offdiagonal */
+         else
+         {
+            /* big int search, result is not big int */            
+            E_ext_j[E_nnz] = hypre_BigBinarySearch( A_offd_colmap, big_col, m);
+            if( E_ext_j[E_nnz] >= 0)
+            {
+               /* this is an offdiagonal entry */
+               E_ext_j[E_nnz]      = E_ext_j[E_nnz] + n;
+               E_ext_data[E_nnz++] = A_ext_data[j];
+            }
+            else
+            {
+               /* skip capacity check */
+               continue;
+            }
+         }
+         /* capacity check, allocate new memory when full */
+         if(E_nnz >= E_init_alloc)
+         {
+            E_init_alloc   = E_init_alloc * EXPAND_FACT + 1;
+            E_ext_j        = hypre_TReAlloc(E_ext_j, HYPRE_Int, E_init_alloc, HYPRE_MEMORY_HOST);
+            E_ext_data     = hypre_TReAlloc(E_ext_data, HYPRE_Real, E_init_alloc, HYPRE_MEMORY_HOST);
+         }
+      }
+   }
+   E_ext_i[m] = E_nnz;
+   
+   /* 3: Free and finish up
+    * Free memory, set E_i, E_j and E_data
+    */
+    
+   *E_i     = E_ext_i;
+   *E_j     = E_ext_j;
+   *E_data  = E_ext_data;
+   
+   hypre_CSRMatrixDestroy(A_ext);
+   
+   return hypre_error_flag;
+   
+}
+#endif
 
 /* This function sort offdiagonal map as well as J array for offdiagonal part
  * A: The input CSR matrix
@@ -1733,7 +1893,7 @@ hypre_ILUSortOffdColmap(hypre_ParCSRMatrix *A)
    HYPRE_Int i;
    hypre_CSRMatrix *A_offd    = hypre_ParCSRMatrixOffd(A);
    HYPRE_Int *A_offd_j        = hypre_CSRMatrixJ(A_offd);
-   HYPRE_Int *A_offd_colmap   = hypre_ParCSRMatrixColMapOffd(A);
+   HYPRE_BigInt *A_offd_colmap   = hypre_ParCSRMatrixColMapOffd(A);
    HYPRE_Int len              = hypre_CSRMatrixNumCols(A_offd);
    HYPRE_Int nnz              = hypre_CSRMatrixNumNonzeros(A_offd);
    HYPRE_Int *perm            = hypre_TAlloc(HYPRE_Int,len,HYPRE_MEMORY_HOST);
@@ -2212,13 +2372,13 @@ hypre_ParCSRMatrixScale(hypre_ParCSRMatrix *A, HYPRE_Real scalar)
 /* Apply dropping to CSR matrix
  * A: the target CSR matrix
  * droptol: all entries have smaller absolute value than this will be dropped
- * max_row_nnz: max nonzoers allowed for each row, only largest max_row_nnz kept
+ * max_row_nnz: max nonzeros allowed for each row, only largest max_row_nnz kept
  * we NEVER drop diagonal entry if exists
  */
 HYPRE_Int
 hypre_CSRMatrixDropInplace(hypre_CSRMatrix *A, HYPRE_Real droptol, HYPRE_Int max_row_nnz)
 {
-   HYPRE_Int      i, j, k1, k2, has_diag;
+   HYPRE_Int      i, j, k1, k2;
    HYPRE_Int      *idx, len, drop_len;
    HYPRE_Real     *data, value, itol, norm;
    
@@ -2384,8 +2544,8 @@ hypre_ILUCSRMatrixInverseSelfPrecondMRGlobal(hypre_CSRMatrix *matA, hypre_CSRMat
                                                HYPRE_Real tol, HYPRE_Real eps_tol, HYPRE_Int max_row_nnz, HYPRE_Int max_iter, 
                                                HYPRE_Int print_level )
 {
-   HYPRE_Int         i, k1, k2, j;
-   HYPRE_Real        value, trace1, trace2, alpha, r_norm, z_norm;
+   HYPRE_Int         i, k1, k2;
+   HYPRE_Real        value, trace1, trace2, alpha, r_norm;
    
    /* martix A */
    HYPRE_Int         *A_i = hypre_CSRMatrixI(matA);

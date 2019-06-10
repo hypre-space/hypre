@@ -31,7 +31,7 @@ hypre_ILUSolve( void               *ilu_vdata,
                   hypre_ParVector    *u )
 {
    MPI_Comm             comm           = hypre_ParCSRMatrixComm(A);
-   HYPRE_Int            i;
+//   HYPRE_Int            i;
    
    hypre_ParILUData     *ilu_data      = (hypre_ParILUData*) ilu_vdata;
    
@@ -344,7 +344,7 @@ hypre_ILUSolveSchurGMRES(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
                   hypre_ParVector *rhs, hypre_ParVector *x, HYPRE_Int *u_end)
 {
    /* data objects for communication */
-   MPI_Comm          comm = hypre_ParCSRMatrixComm(A);
+//   MPI_Comm          comm = hypre_ParCSRMatrixComm(A);
    
    /* data objects for L and U */
    hypre_CSRMatrix   *L_diag = hypre_ParCSRMatrixDiag(L);
@@ -362,11 +362,11 @@ hypre_ILUSolveSchurGMRES(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
 
    HYPRE_Real        alpha;
    HYPRE_Real        beta;   
-   HYPRE_Int         i, j, k1, k2, k3, col;
+   HYPRE_Int         i, j, k1, k2, col;
    
    /* problem size */
    HYPRE_Int         n = hypre_CSRMatrixNumRows(L_diag);
-   HYPRE_Int         m = n - nLU;
+//   HYPRE_Int         m = n - nLU;
    
    /* other data objects for computation */
    hypre_Vector      *f_local;
@@ -504,7 +504,7 @@ hypre_ILUSolveSchurNSH(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
                   hypre_ParVector *rhs, hypre_ParVector *x, HYPRE_Int *u_end)
 {
    /* data objects for communication */
-   MPI_Comm          comm = hypre_ParCSRMatrixComm(A);
+//   MPI_Comm          comm = hypre_ParCSRMatrixComm(A);
    
    /* data objects for L and U */
    hypre_CSRMatrix   *L_diag = hypre_ParCSRMatrixDiag(L);
@@ -522,11 +522,11 @@ hypre_ILUSolveSchurNSH(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
 
    HYPRE_Real        alpha;
    HYPRE_Real        beta;   
-   HYPRE_Int         i, j, k1, k2, k3, col;
+   HYPRE_Int         i, j, k1, k2, col;
    
    /* problem size */
    HYPRE_Int         n = hypre_CSRMatrixNumRows(L_diag);
-   HYPRE_Int         m = n - nLU;
+//   HYPRE_Int         m = n - nLU;
    
    /* other data objects for computation */
    hypre_Vector      *f_local;
@@ -758,7 +758,7 @@ hypre_ILUSolveLURAS(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
    
    HYPRE_Int                  n = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(A));
    HYPRE_Int                  m = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A));
-   HYPRE_Int                  buffer_size;
+//   HYPRE_Int                  buffer_size;
    HYPRE_Int                  n_total = m + n;
    
    HYPRE_Int                  idx;
@@ -926,7 +926,7 @@ hypre_NSHSolve( void               *nsh_vdata,
                   hypre_ParVector    *u )
 {
    MPI_Comm             comm = hypre_ParCSRMatrixComm(A);
-   HYPRE_Int            i;
+//   HYPRE_Int            i;
    
    hypre_ParNSHData     *nsh_data = (hypre_ParNSHData*) nsh_vdata;
    
@@ -963,7 +963,7 @@ hypre_NSHSolve( void               *nsh_vdata,
    HYPRE_Int            Solve_err_flag;
    
    /* problem size */
-   HYPRE_Int            n = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
+//   HYPRE_Int            n = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
    
    /* begin */
    if(logging > 1)

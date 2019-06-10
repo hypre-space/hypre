@@ -47,7 +47,7 @@ hypre_ILUSetup( void               *ilu_vdata,
    HYPRE_Real           *matD                = hypre_ParILUDataMatD(ilu_data);   
    hypre_ParCSRMatrix   *matU                = hypre_ParILUDataMatU(ilu_data);
    hypre_ParCSRMatrix   *matS                = hypre_ParILUDataMatS(ilu_data);
-   hypre_ParCSRMatrix   *matM                = NULL;
+//   hypre_ParCSRMatrix   *matM                = NULL;
    HYPRE_Real           nnzS/* total nnz in S */;
    HYPRE_Int            nnzS_offd;
    HYPRE_Int            size_C/* total size of coarse grid */;
@@ -2813,7 +2813,7 @@ hypre_NSHSetup( void               *nsh_vdata,
    MPI_Comm             comm              = hypre_ParCSRMatrixComm(A);
    hypre_ParNSHData     *nsh_data         = (hypre_ParNSHData*) nsh_vdata;
 
-   HYPRE_Int            i;
+//   HYPRE_Int            i;
 // HYPRE_Int            num_threads;
 // HYPRE_Int            debug_flag = 0;
 
@@ -2824,7 +2824,7 @@ hypre_NSHSetup( void               *nsh_vdata,
    hypre_ParCSRMatrix   *matA             = hypre_ParNSHDataMatA(nsh_data);
    hypre_ParCSRMatrix   *matM             = hypre_ParNSHDataMatM(nsh_data);
    
-   HYPRE_Int            n                 = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
+//   HYPRE_Int            n                 = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
    HYPRE_Int            num_procs,  my_id;
 
    hypre_ParVector      *Utemp;
@@ -2959,17 +2959,17 @@ HYPRE_Int
 hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU, 
       hypre_ParCSRMatrix **Lptr, HYPRE_Real** Dptr, hypre_ParCSRMatrix **Uptr)
 {
-   HYPRE_Int                i, ii, j, k, k1, k2, k3, ctrU, ctrL, ctrS, lenl, lenu, jpiv, col, jpos;
+   HYPRE_Int                i, ii, j, k, k1, k2, ctrU, ctrL, lenl, lenu, jpiv, col, jpos;
    HYPRE_Int                *iw, *iL, *iU;
    HYPRE_Real               dd, t, dpiv, lxu, *wU, *wL;
    
    /* communication stuffs for S */
    MPI_Comm                 comm          = hypre_ParCSRMatrixComm(A);
-   HYPRE_Int                S_offd_nnz, S_offd_ncols;
+//   HYPRE_Int                S_offd_nnz, S_offd_ncols;
    hypre_ParCSRCommPkg      *comm_pkg;
-   hypre_ParCSRCommHandle   *comm_handle;
-   HYPRE_Int                num_sends, begin, end;
-   HYPRE_Int                *send_buf     = NULL;
+//   hypre_ParCSRCommHandle   *comm_handle;
+//   HYPRE_Int                num_sends, begin, end;
+//   HYPRE_Int                *send_buf     = NULL;
    
    /* data objects for A */
    hypre_CSRMatrix          *A_diag       = hypre_ParCSRMatrixDiag(A);
@@ -2983,7 +2983,7 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
    
    /* size of problem and external matrix */
    HYPRE_Int                n             =  hypre_CSRMatrixNumRows(A_diag);
-   HYPRE_Int                m             = n - nLU;
+//   HYPRE_Int                m             = n - nLU;
    HYPRE_Int                ext           = hypre_CSRMatrixNumCols(A_offd);
    HYPRE_Int                total_rows    = n + ext;
    HYPRE_Real               global_start, global_num_rows;
@@ -3615,7 +3615,7 @@ hypre_ILUSetupILUKRASSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_dia
    HYPRE_Int      *temp_L_diag_j, *temp_U_diag_j, *u_levels;
    HYPRE_Int      *iL, *iLev;
    HYPRE_Int      ii, i, j, k, ku, lena, lenl, lenu, lenh, ilev, lev, col, icol;
-   HYPRE_Int      m = n - nLU;
+//   HYPRE_Int      m = n - nLU;
    HYPRE_Int      total_rows = ext + n;
    
    /* memory management */
@@ -4134,7 +4134,7 @@ hypre_ILUSetupILUKRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HY
    {
       return hypre_ILUSetupILU0RAS(A,perm,nLU,Lptr,Dptr,Uptr);
    }
-   HYPRE_Int               i, ii, j, k, k1, k2, k3, kl, ku, jpiv, col, icol;
+   HYPRE_Int               i, ii, j, k, k1, k2, kl, ku, jpiv, col, icol;
    HYPRE_Int               *iw;
    MPI_Comm                comm           = hypre_ParCSRMatrixComm(A);
 
@@ -4163,7 +4163,7 @@ hypre_ILUSetupILUKRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HY
    
    /* size of problem and external matrix */
    HYPRE_Int               n              = hypre_CSRMatrixNumRows(A_diag);
-   HYPRE_Int               m              = n - nLU;
+//   HYPRE_Int               m              = n - nLU;
    HYPRE_Int               ext            = hypre_CSRMatrixNumCols(A_offd);
    HYPRE_Int               total_rows     = n + ext;
    HYPRE_Real              global_start, global_num_rows;
@@ -4177,8 +4177,8 @@ hypre_ILUSetupILUKRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HY
    
    /* communication */
    hypre_ParCSRCommPkg     *comm_pkg;
-   hypre_ParCSRCommHandle  *comm_handle;
-   HYPRE_Int               *send_buf      = NULL;
+//   hypre_ParCSRCommHandle  *comm_handle;
+//   HYPRE_Int               *send_buf      = NULL;
    
    /* reverse permutation array */
    HYPRE_Int               *rperm;
@@ -4685,8 +4685,8 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
     * iL = working array store the active col number
     */
    HYPRE_Real               local_nnz, total_nnz;
-   HYPRE_Int                i, ii, j, k, k1, k2, k3, k12, k22, kl, ku, col, icol, lenl, lenu, lenhu, lenhlr, lenhll, jpos, jrow;
-   HYPRE_Real               inorm, itolb, itolef, itols, dpiv, lxu;
+   HYPRE_Int                i, ii, j, k1, k2, k12, k22, kl, ku, col, icol, lenl, lenu, lenhu, lenhlr, lenhll, jpos, jrow;
+   HYPRE_Real               inorm, itolb, itolef, dpiv, lxu;
    HYPRE_Int                *iw,*iL;
    HYPRE_Real               *w;
    
@@ -4701,10 +4701,10 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
    /* communication stuffs for S */
    MPI_Comm                 comm          = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommPkg      *comm_pkg;
-   hypre_ParCSRCommHandle   *comm_handle;
+//   hypre_ParCSRCommHandle   *comm_handle;
    HYPRE_Int                *col_starts;
-   HYPRE_Int                num_sends;
-   HYPRE_Int                begin, end;
+//   HYPRE_Int                num_sends;
+//   HYPRE_Int                begin, end;
    
    /* data objects for A */
    hypre_CSRMatrix          *A_diag       = hypre_ParCSRMatrixDiag(A);
@@ -4731,7 +4731,7 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
    
    /* size of problem and external matrix */
    HYPRE_Int                n             = hypre_CSRMatrixNumRows(A_diag);
-   HYPRE_Int                m             = n - nLU;
+//   HYPRE_Int                m             = n - nLU;
    HYPRE_Int                ext           = hypre_CSRMatrixNumCols(A_offd);
    HYPRE_Int                total_rows    = n + ext;
    HYPRE_Real               global_start, global_num_rows;

@@ -770,7 +770,7 @@ hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix *A,
 
    hypre_ParCSRMatrix *P;
    HYPRE_BigInt	      *col_map_offd_P;
-   HYPRE_Int	      *tmp_map_offd;
+   HYPRE_Int	      *tmp_map_offd = NULL;
 
    HYPRE_Int          *CF_marker_offd;
    HYPRE_Int          *dof_func_offd = NULL;
