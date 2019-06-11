@@ -11,7 +11,7 @@
  ***********************************************************************EHEADER*/
 
 #include "seq_mv.h"
-#include "csr_sparse_device.h"
+#include "csr_spgemm_device.h"
 
 #if defined(HYPRE_USING_CUDA)
 
@@ -22,15 +22,13 @@ hypreDevice_CSRSpGemmCusparse(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
                               HYPRE_Int nnzB,
                               HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex *d_b,
                               HYPRE_Int *nnzC_out,
-                              HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_c_out,
-                              hypre_DeviceCSRSparseOpts *opts,
-                              hypre_DeviceCSRSparseHandle *handle)
+                              HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_c_out)
 {
    HYPRE_Int  *d_ic, *d_jc, baseC, nnzC;
    HYPRE_Int  *d_ja_sorted, *d_jb_sorted;
    HYPRE_Complex *d_c, *d_a_sorted, *d_b_sorted;
    double tt = 0.0;
-   HYPRE_Int do_timing = opts->do_timing;
+   HYPRE_Int do_timing = hypre_device_csr_handle->do_timing;
 
    if (do_timing)
    {
@@ -47,20 +45,20 @@ hypreDevice_CSRSpGemmCusparse(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    cusparseMatDescr_t descrA=0, descrB=0, descrC=0;
 
    /* initialize cusparse library */
-   cusparseErrchk( cusparseCreate(&cusparsehandle) );
+   HYPRE_CUSPARSE_CALL( cusparseCreate(&cusparsehandle) );
 
    /* create and setup matrix descriptor */
-   cusparseErrchk( cusparseCreateMatDescr(&descrA) );
-   cusparseErrchk( cusparseSetMatType(descrA, CUSPARSE_MATRIX_TYPE_GENERAL) );
-   cusparseErrchk( cusparseSetMatIndexBase(descrA, CUSPARSE_INDEX_BASE_ZERO) );
+   HYPRE_CUSPARSE_CALL( cusparseCreateMatDescr(&descrA) );
+   HYPRE_CUSPARSE_CALL( cusparseSetMatType(descrA, CUSPARSE_MATRIX_TYPE_GENERAL) );
+   HYPRE_CUSPARSE_CALL( cusparseSetMatIndexBase(descrA, CUSPARSE_INDEX_BASE_ZERO) );
 
-   cusparseErrchk( cusparseCreateMatDescr(&descrB) );
-   cusparseErrchk( cusparseSetMatType(descrB, CUSPARSE_MATRIX_TYPE_GENERAL) );
-   cusparseErrchk( cusparseSetMatIndexBase(descrB, CUSPARSE_INDEX_BASE_ZERO) );
+   HYPRE_CUSPARSE_CALL( cusparseCreateMatDescr(&descrB) );
+   HYPRE_CUSPARSE_CALL( cusparseSetMatType(descrB, CUSPARSE_MATRIX_TYPE_GENERAL) );
+   HYPRE_CUSPARSE_CALL( cusparseSetMatIndexBase(descrB, CUSPARSE_INDEX_BASE_ZERO) );
 
-   cusparseErrchk( cusparseCreateMatDescr(&descrC) );
-   cusparseErrchk( cusparseSetMatType(descrC, CUSPARSE_MATRIX_TYPE_GENERAL) );
-   cusparseErrchk( cusparseSetMatIndexBase(descrC, CUSPARSE_INDEX_BASE_ZERO) );
+   HYPRE_CUSPARSE_CALL( cusparseCreateMatDescr(&descrC) );
+   HYPRE_CUSPARSE_CALL( cusparseSetMatType(descrC, CUSPARSE_MATRIX_TYPE_GENERAL) );
+   HYPRE_CUSPARSE_CALL( cusparseSetMatIndexBase(descrC, CUSPARSE_INDEX_BASE_ZERO) );
 
    cusparseOperation_t transA = CUSPARSE_OPERATION_NON_TRANSPOSE;
    cusparseOperation_t transB = CUSPARSE_OPERATION_NON_TRANSPOSE;
@@ -75,36 +73,36 @@ hypreDevice_CSRSpGemmCusparse(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    size_t pBufferSizeInBytes = 0;
    void *pBuffer = NULL;
    HYPRE_Int *P = NULL;
-   cusparseErrchk( cusparseXcsrsort_bufferSizeExt(cusparsehandle, m, k, nnzA, d_ia, d_ja_sorted, &pBufferSizeInBytes) );
+   HYPRE_CUSPARSE_CALL( cusparseXcsrsort_bufferSizeExt(cusparsehandle, m, k, nnzA, d_ia, d_ja_sorted, &pBufferSizeInBytes) );
    pBuffer = hypre_TAlloc(char, pBufferSizeInBytes, HYPRE_MEMORY_DEVICE);
    P       = hypre_TAlloc(HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE);
-   cusparseErrchk( cusparseCreateIdentityPermutation(cusparsehandle, nnzA, P) );
-   cusparseErrchk( cusparseXcsrsort(cusparsehandle, m, k, nnzA, descrA, d_ia, d_ja_sorted, P, pBuffer) );
+   HYPRE_CUSPARSE_CALL( cusparseCreateIdentityPermutation(cusparsehandle, nnzA, P) );
+   HYPRE_CUSPARSE_CALL( cusparseXcsrsort(cusparsehandle, m, k, nnzA, descrA, d_ia, d_ja_sorted, P, pBuffer) );
    if (isDoublePrecision)
    {
-      cusparseErrchk( cusparseDgthr(cusparsehandle, nnzA, d_a, d_a_sorted, P, CUSPARSE_INDEX_BASE_ZERO) );
+      HYPRE_CUSPARSE_CALL( cusparseDgthr(cusparsehandle, nnzA, d_a, d_a_sorted, P, CUSPARSE_INDEX_BASE_ZERO) );
    }
    else if (isSinglePrecision)
    {
-      cusparseErrchk( cusparseSgthr(cusparsehandle, nnzA, (float *) d_a, (float *) d_a_sorted, P, CUSPARSE_INDEX_BASE_ZERO) );
+      HYPRE_CUSPARSE_CALL( cusparseSgthr(cusparsehandle, nnzA, (float *) d_a, (float *) d_a_sorted, P, CUSPARSE_INDEX_BASE_ZERO) );
    }
    hypre_TFree(pBuffer, HYPRE_MEMORY_DEVICE);
    hypre_TFree(P, HYPRE_MEMORY_DEVICE);
 
    // Sort B
    hypre_TMemcpy(d_jb_sorted, d_jb, HYPRE_Int, nnzB, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-   cusparseErrchk( cusparseXcsrsort_bufferSizeExt(cusparsehandle, k, n, nnzB, d_ib, d_jb_sorted, &pBufferSizeInBytes) );
+   HYPRE_CUSPARSE_CALL( cusparseXcsrsort_bufferSizeExt(cusparsehandle, k, n, nnzB, d_ib, d_jb_sorted, &pBufferSizeInBytes) );
    pBuffer = hypre_TAlloc(char, pBufferSizeInBytes, HYPRE_MEMORY_DEVICE);
    P       = hypre_TAlloc(HYPRE_Int, nnzB, HYPRE_MEMORY_DEVICE);
-   cusparseErrchk( cusparseCreateIdentityPermutation(cusparsehandle, nnzB, P) );
-   cusparseErrchk( cusparseXcsrsort(cusparsehandle, k, n, nnzB, descrB, d_ib, d_jb_sorted, P, pBuffer) );
+   HYPRE_CUSPARSE_CALL( cusparseCreateIdentityPermutation(cusparsehandle, nnzB, P) );
+   HYPRE_CUSPARSE_CALL( cusparseXcsrsort(cusparsehandle, k, n, nnzB, descrB, d_ib, d_jb_sorted, P, pBuffer) );
    if (isDoublePrecision)
    {
-      cusparseErrchk( cusparseDgthr(cusparsehandle, nnzB, d_b, d_b_sorted, P, CUSPARSE_INDEX_BASE_ZERO) );
+      HYPRE_CUSPARSE_CALL( cusparseDgthr(cusparsehandle, nnzB, d_b, d_b_sorted, P, CUSPARSE_INDEX_BASE_ZERO) );
    }
    else if (isSinglePrecision)
    {
-      cusparseErrchk( cusparseSgthr(cusparsehandle, nnzB, (float *) d_b, (float *) d_b_sorted, P, CUSPARSE_INDEX_BASE_ZERO) );
+      HYPRE_CUSPARSE_CALL( cusparseSgthr(cusparsehandle, nnzB, (float *) d_b, (float *) d_b_sorted, P, CUSPARSE_INDEX_BASE_ZERO) );
    }
 
    hypre_TFree(pBuffer, HYPRE_MEMORY_DEVICE);
@@ -112,12 +110,12 @@ hypreDevice_CSRSpGemmCusparse(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
 
    // nnzTotalDevHostPtr points to host memory
    HYPRE_Int *nnzTotalDevHostPtr = &nnzC;
-   cusparseErrchk( cusparseSetPointerMode(cusparsehandle, CUSPARSE_POINTER_MODE_HOST) );
+   HYPRE_CUSPARSE_CALL( cusparseSetPointerMode(cusparsehandle, CUSPARSE_POINTER_MODE_HOST) );
 
    d_ic = hypre_TAlloc(HYPRE_Int, m+1, HYPRE_MEMORY_DEVICE);
 
    //
-   cusparseErrchk(
+   HYPRE_CUSPARSE_CALL(
          cusparseXcsrgemmNnz(cusparsehandle, transA, transB,
                              m, n, k,
                              descrA, nnzA, d_ia, d_ja_sorted,
@@ -140,7 +138,7 @@ hypreDevice_CSRSpGemmCusparse(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
 
    if (isDoublePrecision)
    {
-      cusparseErrchk(
+      HYPRE_CUSPARSE_CALL(
             cusparseDcsrgemm(cusparsehandle, transA, transB, m, n, k,
                              descrA, nnzA, d_a_sorted, d_ia, d_ja_sorted,
                              descrB, nnzB, d_b_sorted, d_ib, d_jb_sorted,
@@ -148,7 +146,7 @@ hypreDevice_CSRSpGemmCusparse(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
             );
    } else if (isSinglePrecision)
    {
-      cusparseErrchk(
+      HYPRE_CUSPARSE_CALL(
             cusparseScsrgemm(cusparsehandle, transA, transB, m, n, k,
                              descrA, nnzA, (float *) d_a_sorted, d_ia, d_ja_sorted,
                              descrB, nnzB, (float *) d_b_sorted, d_ib, d_jb_sorted,
@@ -171,7 +169,7 @@ hypreDevice_CSRSpGemmCusparse(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
       cudaThreadSynchronize();
       tt = time_getWallclockSeconds() - tt;
       //printf("^^^^Cusparse time                                             %.2e\n", tt);
-      handle->spmm_cusparse_time += tt;
+      hypre_device_csr_handle->spmm_cusparse_time += tt;
    }
 
    return hypre_error_flag;

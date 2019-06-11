@@ -133,14 +133,12 @@ hypre_CSRMatrix*
 hypre_CSRMatrixAdd( hypre_CSRMatrix *A,
                     hypre_CSRMatrix *B)
 {
-   HYPRE_Int memory_locationA, memory_locationB;
+   HYPRE_Int exec = hypre_GetExecPolicy2( hypre_CSRMatrixMemoryLocation(A),
+                                          hypre_CSRMatrixMemoryLocation(B) );
 
-   memory_locationA = hypre_GetActualMemLocation(hypre_CSRMatrixMemoryLocation(A));
-   memory_locationB = hypre_GetActualMemLocation(hypre_CSRMatrixMemoryLocation(B));
+   hypre_assert(exec != HYPRE_EXEC_UNSET);
 
-   hypre_assert(memory_locationA == memory_locationB);
-
-   if (memory_locationA != HYPRE_MEMORY_DEVICE)
+   if (exec == HYPRE_EXEC_HOST)
    {
       return hypre_CSRMatrixAddHost(A,B);
    }
@@ -434,14 +432,12 @@ hypre_CSRMatrix*
 hypre_CSRMatrixMultiply( hypre_CSRMatrix *A,
                          hypre_CSRMatrix *B)
 {
-   HYPRE_Int memory_locationA, memory_locationB;
+   HYPRE_Int exec = hypre_GetExecPolicy2( hypre_CSRMatrixMemoryLocation(A),
+                                          hypre_CSRMatrixMemoryLocation(B) );
 
-   memory_locationA = hypre_GetActualMemLocation(hypre_CSRMatrixMemoryLocation(A));
-   memory_locationB = hypre_GetActualMemLocation(hypre_CSRMatrixMemoryLocation(B));
+   hypre_assert(exec != HYPRE_EXEC_UNSET);
 
-   hypre_assert(memory_locationA == memory_locationB);
-
-   if (memory_locationA != HYPRE_MEMORY_DEVICE)
+   if (exec == HYPRE_EXEC_HOST)
    {
       return hypre_CSRMatrixMultiplyHost(A,B);
    }
@@ -726,9 +722,11 @@ hypre_CSRMatrixTranspose(hypre_CSRMatrix  *A,
                          hypre_CSRMatrix **AT,
                          HYPRE_Int         data)
 {
-   HYPRE_Int memory_locationA = hypre_GetActualMemLocation(hypre_CSRMatrixMemoryLocation(A));
+   HYPRE_Int exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(A) );
 
-   if (memory_locationA != HYPRE_MEMORY_DEVICE)
+   hypre_assert(exec != HYPRE_EXEC_UNSET);
+
+   if (exec == HYPRE_EXEC_HOST)
    {
       return hypre_CSRMatrixTransposeHost(A, AT, data);
    }
@@ -956,7 +954,9 @@ HYPRE_Int hypre_CSRMatrixSplit(hypre_CSRMatrix  *Bs_ext,
    hypre_TFree(my_offd_array, HYPRE_MEMORY_HOST);
 
    Bext_diag = hypre_CSRMatrixCreate(num_rows_Bext, last_col_diag_B-first_col_diag_B+1, B_ext_diag_size);
+   hypre_CSRMatrixMemoryLocation(Bext_diag) = HYPRE_MEMORY_HOST;
    Bext_offd = hypre_CSRMatrixCreate(num_rows_Bext, num_cols_offd_C, B_ext_offd_size);
+   hypre_CSRMatrixMemoryLocation(Bext_offd) = HYPRE_MEMORY_HOST;
    hypre_CSRMatrixI(Bext_diag)    = B_ext_diag_i;
    hypre_CSRMatrixJ(Bext_diag)    = B_ext_diag_j;
    hypre_CSRMatrixData(Bext_diag) = B_ext_diag_data;

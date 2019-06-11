@@ -413,187 +413,9 @@ HYPRE_Int hypre_MPI_Info_free( hypre_MPI_Info *info );
  *
  * $Revision$
  ***********************************************************************EHEADER*/
+#ifndef HYPRE_OMP_DEVICE
+#define HYPRE_OMP_DEVICE
 
-/******************************************************************************
- *
- * Header file for memory management utilities
- *
- * The abstract memory model has a Host (think CPU) and a Device (think GPU) and
- * three basic types of memory management utilities:
- *
- *    1. Malloc(..., location)
- *             location=LOCATION_DEVICE - malloc memory on the device
- *             location=LOCATION_HOST   - malloc memory on the host
- *    2. MemCopy(..., method)
- *             method=HOST_TO_DEVICE    - copy from host to device
- *             method=DEVICE_TO_HOST    - copy from device to host
- *             method=DEVICE_TO_DEVICE  - copy from device to device
- *    3. SetExecutionMode
- *             location=LOCATION_DEVICE - execute on the device
- *             location=LOCATION_HOST   - execute on the host
- *
- * Although the abstract model does not explicitly reflect a managed memory
- * model (i.e., unified memory), it can support it.  Here is a summary of how
- * the abstract model would be mapped to specific hardware scenarios:
- *
- *    Not using a device, not using managed memory
- *       Malloc(..., location)
- *             location=LOCATION_DEVICE - host malloc          e.g., malloc
- *             location=LOCATION_HOST   - host malloc          e.g., malloc
- *       MemoryCopy(..., locTo,locFrom)
- *             locTo=LOCATION_HOST,   locFrom=LOCATION_DEVICE  - copy from host to host e.g., memcpy
- *             locTo=LOCATION_DEVICE, locFrom=LOCATION_HOST    - copy from host to host e.g., memcpy
- *             locTo=LOCATION_DEVICE, locFrom=LOCATION_DEVICE  - copy from host to host e.g., memcpy
- *       SetExecutionMode
- *             location=LOCATION_DEVICE - execute on the host
- *             location=LOCATION_HOST   - execute on the host
- *
- *    Using a device, not using managed memory
- *       Malloc(..., location)
- *             location=LOCATION_DEVICE - device malloc        e.g., cudaMalloc
- *             location=LOCATION_HOST   - host malloc          e.g., malloc
- *       MemoryCopy(..., locTo,locFrom)
- *             locTo=LOCATION_HOST,   locFrom=LOCATION_DEVICE  - copy from device to host e.g., cudaMemcpy
- *             locTo=LOCATION_DEVICE, locFrom=LOCATION_HOST    - copy from host to device e.g., cudaMemcpy
- *             locTo=LOCATION_DEVICE, locFrom=LOCATION_DEVICE  - copy from device to device e.g., cudaMemcpy
- *       SetExecutionMode
- *             location=LOCATION_DEVICE - execute on the device
- *             location=LOCATION_HOST   - execute on the host
- *
- *    Using a device, using managed memory
- *       Malloc(..., location)
- *             location=LOCATION_DEVICE - managed malloc        e.g., cudaMallocManaged
- *             location=LOCATION_HOST   - host malloc          e.g., malloc
- *       MemoryCopy(..., locTo,locFrom)
- *             locTo=LOCATION_HOST,   locFrom=LOCATION_DEVICE  - copy from device to host e.g., cudaMallocManaged
- *             locTo=LOCATION_DEVICE, locFrom=LOCATION_HOST    - copy from host to device e.g., cudaMallocManaged
- *             locTo=LOCATION_DEVICE, locFrom=LOCATION_DEVICE  - copy from device to device e.g., cudaMallocManaged
- *       SetExecutionMode
- *             location=LOCATION_DEVICE - execute on the device
- *             location=LOCATION_HOST   - execute on the host
- *
- * Questions:
- *
- *    1. prefetch?
- *
- *****************************************************************************/
-
-#ifndef hypre_MEMORY_HEADER
-#define hypre_MEMORY_HEADER
-
-#include <stdio.h>
-#include <stdlib.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#define HYPRE_MEMORY_UNSET         (-1)
-#define HYPRE_MEMORY_DEVICE        ( 0)
-#define HYPRE_MEMORY_HOST          ( 1)
-#define HYPRE_MEMORY_SHARED        ( 2)
-#define HYPRE_MEMORY_HOST_PINNED   ( 3)
-
-/*==================================================================
- *       default def of memory location selected based memory env
- *   +-------------------------------------------------------------+
- *   |                           |          HYPRE_MEMORY_*         |
- *   |        MEM \ LOC          | HOST | DEVICE | SHARED | PINNED |
- *   |---------------------------+---------------+-----------------|
- *   | HYPRE_USING_HOST_MEMORY   | HOST | HOST   | HOST   | HOST   |
- *   |---------------------------+---------------+-------- --------|
- *   | HYPRE_USING_DEVICE_MEMORY | HOST | DEVICE | DEVICE | PINNED |
- *   |---------------------------+---------------+-----------------|
- *   | HYPRE_USING_UNIFIED_MEMORY| HOST | DEVICE | SHARED | PINNED |
- *   +-------------------------------------------------------------+
- *==================================================================*/
-
-#if defined(HYPRE_USING_HOST_MEMORY)
-
-/* default memory model without device (host only) */
-#define HYPRE_MEMORY_HOST_ACT         HYPRE_MEMORY_HOST
-#define HYPRE_MEMORY_DEVICE_ACT       HYPRE_MEMORY_HOST
-#define HYPRE_MEMORY_SHARED_ACT       HYPRE_MEMORY_HOST
-#define HYPRE_MEMORY_HOST_PINNED_ACT  HYPRE_MEMORY_HOST
-
-#elif defined(HYPRE_USING_DEVICE_MEMORY)
-
-/* default memory model with device and without unified memory */
-#define HYPRE_MEMORY_HOST_ACT         HYPRE_MEMORY_HOST
-#define HYPRE_MEMORY_DEVICE_ACT       HYPRE_MEMORY_DEVICE
-#define HYPRE_MEMORY_SHARED_ACT       HYPRE_MEMORY_DEVICE
-#define HYPRE_MEMORY_HOST_PINNED_ACT  HYPRE_MEMORY_HOST_PINNED
-
-#elif defined(HYPRE_USING_UNIFIED_MEMORY)
-
-/* default memory model with device and with unified memory */
-#define HYPRE_MEMORY_HOST_ACT         HYPRE_MEMORY_HOST
-#define HYPRE_MEMORY_DEVICE_ACT       HYPRE_MEMORY_DEVICE
-#define HYPRE_MEMORY_SHARED_ACT       HYPRE_MEMORY_SHARED
-//#define HYPRE_MEMORY_SHARED_ACT       HYPRE_MEMORY_HOST
-#define HYPRE_MEMORY_HOST_PINNED_ACT  HYPRE_MEMORY_HOST_PINNED
-
-#else
-
-/* default */
-#define HYPRE_MEMORY_HOST_ACT         HYPRE_MEMORY_HOST
-#define HYPRE_MEMORY_DEVICE_ACT       HYPRE_MEMORY_HOST
-#define HYPRE_MEMORY_SHARED_ACT       HYPRE_MEMORY_HOST
-#define HYPRE_MEMORY_HOST_PINNED_ACT  HYPRE_MEMORY_HOST
-
-#endif
-
-/* the above definitions might be overridden to customize a memory location */
-/* #undef  HYPRE_MEMORY_HOST_ACT */
-/* #undef  HYPRE_MEMORY_DEVICE_ACT */
-/* #undef  HYPRE_MEMORY_SHARED_ACT */
-/* #undef  HYPRE_MEMORY_PINNED_ACT */
-/* #define HYPRE_MEMORY_HOST_ACT    HYPRE_MEMORY_? */
-/* #define HYPRE_MEMORY_DEVICE_ACT  HYPRE_MEMORY_? */
-/* #define HYPRE_MEMORY_SHARED_ACT  HYPRE_MEMORY_? */
-/* #define HYPRE_MEMORY_PINNED_ACT  HYPRE_MEMORY_? */
-
-/*-------------------------------------------------------
- * hypre_GetActualMemLocation
- *   return actual location based on the selected memory model
- *-------------------------------------------------------*/
-static inline HYPRE_Int
-hypre_GetActualMemLocation(HYPRE_Int location)
-{
-   if (location == HYPRE_MEMORY_HOST)
-   {
-      return HYPRE_MEMORY_HOST_ACT;
-   }
-
-   if (location == HYPRE_MEMORY_DEVICE)
-   {
-      return HYPRE_MEMORY_DEVICE_ACT;
-   }
-
-   if (location == HYPRE_MEMORY_SHARED)
-   {
-      return HYPRE_MEMORY_SHARED_ACT;
-   }
-
-   if (location == HYPRE_MEMORY_HOST_PINNED)
-   {
-      return HYPRE_MEMORY_HOST_PINNED_ACT;
-   }
-
-   return HYPRE_MEMORY_UNSET;
-}
-
-#define HYPRE_MEM_PAD_LEN 1
-
-/*
-#if defined(HYPRE_USING_CUDA)
-#define HYPRE_CUDA_GLOBAL __host__ __device__
-#else
-#define HYPRE_CUDA_GLOBAL
-#endif
-*/
-
-/* OpenMP 4.5 */
 #if defined(HYPRE_USING_DEVICE_OPENMP)
 
 #include "omp.h"
@@ -700,48 +522,285 @@ hypre__offload_flag: 0 == OK; 1 == WRONG
    } \
 }
 
-#endif /*  #if defined(HYPRE_USING_DEVICE_OPENMP) */
+HYPRE_Int HYPRE_OMPOffload(HYPRE_Int device, void *ptr, size_t num, const char *type1, const char *type2);
+HYPRE_Int HYPRE_OMPPtrIsMapped(void *p, HYPRE_Int device_num);
+HYPRE_Int HYPRE_OMPOffloadOn();
+HYPRE_Int HYPRE_OMPOffloadOff();
+HYPRE_Int HYPRE_OMPOffloadStatPrint();
 
-/*
-#define hypre_InitMemoryDebug(id)
-#define hypre_FinalizeMemoryDebug()
-*/
-//#define TRACK_MEMORY_ALLOCATIONS
-#if defined(TRACK_MEMORY_ALLOCATIONS)
+#define HYPRE_MIN_GPU_SIZE (131072)
 
-typedef struct {
-  char *file;
-  size_t size;
-  void *end;
-  HYPRE_Int line;
-  HYPRE_Int type;} pattr_t;
+#define hypre_SetDeviceOn() HYPRE_OMPOffloadOn()
+#define hypre_SetDeviceOff() HYPRE_OMPOffloadOff()
 
-pattr_t *patpush(void *ptr, pattr_t *ss);
+#endif /* HYPRE_USING_DEVICE_OPENMP */
+#endif /* HYPRE_OMP_DEVICE */
 
-#define hypre_TAlloc(type, count, location) \
-  ( (type *)hypre_MAllocIns((size_t)(sizeof(type) * (count)), location,__FILE__,__LINE__) )
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
 
-#define hypre_CTAlloc(type, count, location) \
-  ( (type *)hypre_CAllocIns((size_t)(count), (size_t)sizeof(type), location,__FILE__,__LINE__) )
+/******************************************************************************
+ *
+ * Header file for memory management utilities
+ *
+ * The abstract memory model has a Host (think CPU) and a Device (think GPU) and
+ * three basic types of memory management utilities:
+ *
+ *    1. Malloc(..., location)
+ *             location=LOCATION_DEVICE - malloc memory on the device
+ *             location=LOCATION_HOST   - malloc memory on the host
+ *    2. MemCopy(..., method)
+ *             method=HOST_TO_DEVICE    - copy from host to device
+ *             method=DEVICE_TO_HOST    - copy from device to host
+ *             method=DEVICE_TO_DEVICE  - copy from device to device
+ *    3. SetExecutionMode
+ *             location=LOCATION_DEVICE - execute on the device
+ *             location=LOCATION_HOST   - execute on the host
+ *
+ * Although the abstract model does not explicitly reflect a managed memory
+ * model (i.e., unified memory), it can support it.  Here is a summary of how
+ * the abstract model would be mapped to specific hardware scenarios:
+ *
+ *    Not using a device, not using managed memory
+ *       Malloc(..., location)
+ *             location=LOCATION_DEVICE - host malloc          e.g., malloc
+ *             location=LOCATION_HOST   - host malloc          e.g., malloc
+ *       MemoryCopy(..., locTo,locFrom)
+ *             locTo=LOCATION_HOST,   locFrom=LOCATION_DEVICE  - copy from host to host e.g., memcpy
+ *             locTo=LOCATION_DEVICE, locFrom=LOCATION_HOST    - copy from host to host e.g., memcpy
+ *             locTo=LOCATION_DEVICE, locFrom=LOCATION_DEVICE  - copy from host to host e.g., memcpy
+ *       SetExecutionMode
+ *             location=LOCATION_DEVICE - execute on the host
+ *             location=LOCATION_HOST   - execute on the host
+ *
+ *    Using a device, not using managed memory
+ *       Malloc(..., location)
+ *             location=LOCATION_DEVICE - device malloc        e.g., cudaMalloc
+ *             location=LOCATION_HOST   - host malloc          e.g., malloc
+ *       MemoryCopy(..., locTo,locFrom)
+ *             locTo=LOCATION_HOST,   locFrom=LOCATION_DEVICE  - copy from device to host e.g., cudaMemcpy
+ *             locTo=LOCATION_DEVICE, locFrom=LOCATION_HOST    - copy from host to device e.g., cudaMemcpy
+ *             locTo=LOCATION_DEVICE, locFrom=LOCATION_DEVICE  - copy from device to device e.g., cudaMemcpy
+ *       SetExecutionMode
+ *             location=LOCATION_DEVICE - execute on the device
+ *             location=LOCATION_HOST   - execute on the host
+ *
+ *    Using a device, using managed memory
+ *       Malloc(..., location)
+ *             location=LOCATION_DEVICE - managed malloc        e.g., cudaMallocManaged
+ *             location=LOCATION_HOST   - host malloc          e.g., malloc
+ *       MemoryCopy(..., locTo,locFrom)
+ *             locTo=LOCATION_HOST,   locFrom=LOCATION_DEVICE  - copy from device to host e.g., cudaMallocManaged
+ *             locTo=LOCATION_DEVICE, locFrom=LOCATION_HOST    - copy from host to device e.g., cudaMallocManaged
+ *             locTo=LOCATION_DEVICE, locFrom=LOCATION_DEVICE  - copy from device to device e.g., cudaMallocManaged
+ *       SetExecutionMode
+ *             location=LOCATION_DEVICE - execute on the device
+ *             location=LOCATION_HOST   - execute on the host
+ *
+ * Questions:
+ *
+ *    1. prefetch?
+ *
+ *****************************************************************************/
 
-#define hypre_TReAlloc(ptr, type, count, location) \
-  ( (type *)hypre_ReAllocIns((char *)ptr, (size_t)(sizeof(type) * (count)), location,__FILE__,__LINE__) )
+#ifndef hypre_MEMORY_HEADER
+#define hypre_MEMORY_HEADER
 
-void assert_check(void *ptr, char *file, HYPRE_Int line);
+#include <stdio.h>
+#include <stdlib.h>
 
-void assert_check_host(void *ptr, char *file, HYPRE_Int line);
+#ifdef __cplusplus
+extern "C" {
+#endif
 
+#define HYPRE_MEMORY_UNSET         (-1)
+#define HYPRE_MEMORY_DEVICE        ( 0)
+#define HYPRE_MEMORY_HOST          ( 1)
+#define HYPRE_MEMORY_SHARED        ( 2)
+#define HYPRE_MEMORY_HOST_PINNED   ( 3)
 
-#define ASSERT_MANAGED(ptr)\
-  ( assert_check((ptr),__FILE__,__LINE__))
+#define HYPRE_EXEC_UNSET           (-1)
+#define HYPRE_EXEC_DEVICE          ( 0)
+#define HYPRE_EXEC_HOST            ( 1)
 
-#define ASSERT_HOST(ptr)\
-  ( assert_check_host((ptr),__FILE__,__LINE__))
+/*==================================================================
+ *       default def of memory location selected based memory env
+ *   +-------------------------------------------------------------+
+ *   |                           |          HYPRE_MEMORY_*         |
+ *   |        MEM \ LOC          | HOST | DEVICE | SHARED | PINNED |
+ *   |---------------------------+---------------+-----------------|
+ *   | HYPRE_USING_HOST_MEMORY   | HOST | HOST   | HOST   | HOST   |
+ *   |---------------------------+---------------+-------- --------|
+ *   | HYPRE_USING_DEVICE_MEMORY | HOST | DEVICE | DEVICE | PINNED |
+ *   |---------------------------+---------------+-----------------|
+ *   | HYPRE_USING_UNIFIED_MEMORY| HOST | DEVICE | SHARED | PINNED |
+ *   +-------------------------------------------------------------+
+ *==================================================================*/
+
+#if defined(HYPRE_USING_HOST_MEMORY)
+
+/* default memory model without device (host only) */
+#define HYPRE_MEMORY_HOST_ACT         HYPRE_MEMORY_HOST
+#define HYPRE_MEMORY_DEVICE_ACT       HYPRE_MEMORY_HOST
+#define HYPRE_MEMORY_SHARED_ACT       HYPRE_MEMORY_HOST
+#define HYPRE_MEMORY_HOST_PINNED_ACT  HYPRE_MEMORY_HOST
+
+#elif defined(HYPRE_USING_DEVICE_MEMORY)
+
+/* default memory model with device and without unified memory */
+#define HYPRE_MEMORY_HOST_ACT         HYPRE_MEMORY_HOST
+#define HYPRE_MEMORY_DEVICE_ACT       HYPRE_MEMORY_DEVICE
+#define HYPRE_MEMORY_SHARED_ACT       HYPRE_MEMORY_DEVICE
+#define HYPRE_MEMORY_HOST_PINNED_ACT  HYPRE_MEMORY_HOST_PINNED
+
+#elif defined(HYPRE_USING_UNIFIED_MEMORY)
+
+/* default memory model with device and with unified memory */
+#define HYPRE_MEMORY_HOST_ACT         HYPRE_MEMORY_HOST
+#define HYPRE_MEMORY_DEVICE_ACT       HYPRE_MEMORY_DEVICE
+#define HYPRE_MEMORY_SHARED_ACT       HYPRE_MEMORY_SHARED
+//#define HYPRE_MEMORY_SHARED_ACT       HYPRE_MEMORY_HOST
+#define HYPRE_MEMORY_HOST_PINNED_ACT  HYPRE_MEMORY_HOST_PINNED
 
 #else
 
-#if 0
+/* default */
+#define HYPRE_MEMORY_HOST_ACT         HYPRE_MEMORY_HOST
+#define HYPRE_MEMORY_DEVICE_ACT       HYPRE_MEMORY_HOST
+#define HYPRE_MEMORY_SHARED_ACT       HYPRE_MEMORY_HOST
+#define HYPRE_MEMORY_HOST_PINNED_ACT  HYPRE_MEMORY_HOST
 
+#endif
+
+/* the above definitions might be overridden to customize
+ * memory locations */
+
+/* #undef  HYPRE_MEMORY_HOST_ACT */
+/* #undef  HYPRE_MEMORY_DEVICE_ACT */
+/* #undef  HYPRE_MEMORY_SHARED_ACT */
+/* #undef  HYPRE_MEMORY_PINNED_ACT */
+/* #define HYPRE_MEMORY_HOST_ACT    HYPRE_MEMORY_? */
+/* #define HYPRE_MEMORY_DEVICE_ACT  HYPRE_MEMORY_? */
+/* #define HYPRE_MEMORY_SHARED_ACT  HYPRE_MEMORY_? */
+/* #define HYPRE_MEMORY_PINNED_ACT  HYPRE_MEMORY_? */
+
+/*-------------------------------------------------------
+ * hypre_GetActualMemLocation
+ *   return actual location based on the selected memory model
+ *-------------------------------------------------------*/
+static inline HYPRE_Int
+hypre_GetActualMemLocation(HYPRE_Int location)
+{
+   if (location == HYPRE_MEMORY_HOST)
+   {
+      return HYPRE_MEMORY_HOST_ACT;
+   }
+
+   if (location == HYPRE_MEMORY_DEVICE)
+   {
+      return HYPRE_MEMORY_DEVICE_ACT;
+   }
+
+   if (location == HYPRE_MEMORY_SHARED)
+   {
+      return HYPRE_MEMORY_SHARED_ACT;
+   }
+
+   if (location == HYPRE_MEMORY_HOST_PINNED)
+   {
+      return HYPRE_MEMORY_HOST_PINNED_ACT;
+   }
+
+   return HYPRE_MEMORY_UNSET;
+}
+
+/*---------------------------------------------------
+ * hypre_GetExecPolicy
+ * Return execution policy based on memory locations
+ *---------------------------------------------------*/
+/* for unary operation */
+static inline HYPRE_Int
+hypre_GetExecPolicy1(HYPRE_Int location)
+{
+   HYPRE_Int exec = HYPRE_EXEC_UNSET;
+
+   location = hypre_GetActualMemLocation(location);
+
+   switch (location)
+   {
+      case HYPRE_MEMORY_HOST :
+      case HYPRE_MEMORY_HOST_PINNED :
+         exec = HYPRE_EXEC_HOST;
+         break;
+      case HYPRE_MEMORY_DEVICE :
+         exec = HYPRE_EXEC_DEVICE;
+         break;
+      case HYPRE_MEMORY_SHARED :
+         exec = HYPRE_EXEC_HOST;
+         break;
+   }
+
+   return exec;
+}
+
+/* for binary operation */
+static inline HYPRE_Int
+hypre_GetExecPolicy2(HYPRE_Int location1,
+                     HYPRE_Int location2)
+{
+   location1 = hypre_GetActualMemLocation(location1);
+   location2 = hypre_GetActualMemLocation(location2);
+
+   /* HOST_PINNED has the same exec policy as HOST */
+   if (location1 == HYPRE_MEMORY_HOST_PINNED)
+   {
+      location1 = HYPRE_MEMORY_HOST;
+   }
+
+   if (location2 == HYPRE_MEMORY_HOST_PINNED)
+   {
+      location2 = HYPRE_MEMORY_HOST;
+   }
+
+   /* no policy for these combinations */
+   if ( (location1 == HYPRE_MEMORY_HOST && location2 == HYPRE_MEMORY_DEVICE) ||
+        (location2 == HYPRE_MEMORY_HOST && location1 == HYPRE_MEMORY_DEVICE) )
+   {
+      return HYPRE_EXEC_UNSET;
+   }
+
+   /* policy for S-S can be HOST or DEVICE. Choose HOST by default */
+   if (location1 == HYPRE_MEMORY_SHARED && location2 == HYPRE_MEMORY_SHARED)
+   {
+      return HYPRE_EXEC_HOST;
+   }
+
+   if (location1 == HYPRE_MEMORY_HOST || location2 == HYPRE_MEMORY_HOST)
+   {
+      return HYPRE_EXEC_HOST;
+   }
+
+   if (location1 == HYPRE_MEMORY_DEVICE || location2 == HYPRE_MEMORY_DEVICE)
+   {
+      return HYPRE_EXEC_DEVICE;
+   }
+
+   return HYPRE_EXEC_UNSET;
+}
+
+#define HYPRE_MEM_PAD_LEN 1
+
+
+#if 0
 /* These Allocs are with printfs, for debug */
 #define hypre_TAlloc(type, count, location) \
 (\
@@ -777,8 +836,6 @@ void assert_check_host(void *ptr, char *file, HYPRE_Int line);
 
 #define hypre_TReAlloc(ptr, type, count, location) \
 ( (type *) hypre_ReAlloc((char *)ptr, (size_t)(sizeof(type) * (count)), location) )
-
-#endif
 
 #endif
 
@@ -1187,6 +1244,431 @@ void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, c
  * $Revision$
  ***********************************************************************EHEADER*/
 
+#ifndef HYPRE_CUDA_UTILS_H
+#define HYPRE_CUDA_UTILS_H
+
+#if defined(HYPRE_USING_CUDA)
+
+#ifdef __cplusplus
+extern "C++" {
+#endif
+
+#include <cuda.h>
+#include <cuda_runtime.h>
+#include <assert.h>
+#include <curand.h>
+#include <cusparse.h>
+
+#include <thrust/execution_policy.h>
+#include <thrust/count.h>
+#include <thrust/device_ptr.h>
+#include <thrust/unique.h>
+#include <thrust/sort.h>
+#include <thrust/binary_search.h>
+#include <thrust/iterator/constant_iterator.h>
+#include <thrust/iterator/counting_iterator.h>
+#include <thrust/transform.h>
+#include <thrust/functional.h>
+#include <thrust/gather.h>
+#include <thrust/scan.h>
+#include <thrust/fill.h>
+#include <thrust/adjacent_difference.h>
+#include <thrust/inner_product.h>
+
+using namespace thrust::placeholders;
+
+#define HYPRE_WARP_SIZE      32
+#define HYPRE_WARP_FULL_MASK 0xFFFFFFFF
+#define HYPRE_MAX_NUM_WARPS  (64 * 64 * 32)
+#define HYPRE_FLT_LARGE      1e30
+#define HYPRE_1D_BLOCK_SIZE  512
+
+/* macro for launching CUDA kernels */
+#define HYPRE_CUDA_LAUNCH HYPRE_CUDA_LAUNCH_ASYNC
+
+#define HYPRE_CUDA_LAUNCH_ASYNC(kernel_name, gridsize, blocksize, ...) \
+{ \
+   if ( gridsize.x  == 0 || gridsize.y  == 0 || gridsize.z  == 0 || \
+        blocksize.x == 0 || blocksize.y == 0 || blocksize.z == 0 ) \
+   { \
+      /* hypre_printf("Warning %s %d: Zero CUDA grid/block (%d %d %d) (%d %d %d)\n", \
+                   __FILE__, __LINE__,\
+                   gridsize.x, gridsize.y, gridsize.z, blocksize.x, blocksize.y, blocksize.z); */ \
+   } \
+   else \
+   { \
+      (kernel_name) <<< (gridsize), (blocksize) >>> (__VA_ARGS__); \
+   } \
+}
+
+#define HYPRE_CUDA_LAUNCH_SYNC(kernel_name, gridsize, blocksize, ...) \
+    HYPRE_CUDA_LAUNCH_ASYNC(kernel_name, gridsize, blocksize, __VA_ARGS__) \
+    cudaDeviceSynchronize();
+
+#define HYPRE_CURAND_CALL(call) do {                         \
+    curandStatus_t err = call;                               \
+    if (CURAND_STATUS_SUCCESS != err) {                      \
+       hypre_printf("CURAND ERROR (code = %d) at %s:%d\n",   \
+                    err, __FILE__, __LINE__);                \
+       exit(1);                                              \
+    } } while(0)
+
+#define HYPRE_CUDA_CALL(call) do {                           \
+    cudaError_t err = call;                                  \
+    if (cudaSuccess != err) {                                \
+       hypre_printf("CUDA ERROR (code = %d, %s) at %s:%d\n", \
+                    err, cudaGetErrorString(err),            \
+                    __FILE__, __LINE__);                     \
+       exit(1);                                              \
+    } } while(0)
+
+#define HYPRE_CUSPARSE_CALL(call) do {                       \
+    cusparseStatus_t err = call;                             \
+    if (CUSPARSE_STATUS_SUCCESS != err) {                    \
+       hypre_printf("CUSPARSE ERROR (code = %d) at %s:%d\n", \
+                    err, __FILE__, __LINE__);                \
+       exit(1);                                              \
+    } } while(0)
+
+/* return the number of threads in block */
+template <hypre_int dim>
+static __device__ __forceinline__
+hypre_int hypre_cuda_get_num_threads()
+{
+   switch (dim)
+   {
+      case 1:
+         return (blockDim.x);
+      case 2:
+         return (blockDim.x * blockDim.y);
+      case 3:
+         return (blockDim.x * blockDim.y * blockDim.z);
+   }
+
+   return -1;
+}
+
+/* return the flattened thread id in block */
+template <hypre_int dim>
+static __device__ __forceinline__
+hypre_int hypre_cuda_get_thread_id()
+{
+   switch (dim)
+   {
+      case 1:
+         return (threadIdx.x);
+      case 2:
+         return (threadIdx.y * blockDim.x + threadIdx.x);
+      case 3:
+         return (threadIdx.z * blockDim.x * blockDim.y + threadIdx.y * blockDim.x +
+                 threadIdx.x);
+   }
+
+   return -1;
+}
+
+/* return the number of warps in block  */
+template <hypre_int dim>
+static __device__ __forceinline__
+hypre_int hypre_cuda_get_num_warps()
+{
+   return hypre_cuda_get_num_threads<dim>() >> 5;
+}
+
+/* return the warp id in block */
+template <hypre_int dim>
+static __device__ __forceinline__
+hypre_int hypre_cuda_get_warp_id()
+{
+   return hypre_cuda_get_thread_id<dim>() >> 5;
+}
+
+/* return the thread lane id in warp */
+template <hypre_int dim>
+static __device__ __forceinline__
+hypre_int hypre_cuda_get_lane_id()
+{
+   return hypre_cuda_get_thread_id<dim>() & (HYPRE_WARP_SIZE-1);
+}
+
+/* return the num of blocks in grid */
+template <hypre_int dim>
+static __device__ __forceinline__
+hypre_int hypre_cuda_get_num_blocks()
+{
+   switch (dim)
+   {
+      case 1:
+         return (gridDim.x);
+      case 2:
+         return (gridDim.x * gridDim.y);
+      case 3:
+         return (gridDim.x * gridDim.y * gridDim.z);
+   }
+
+   return -1;
+}
+
+/* return the flattened block id in grid */
+template <hypre_int dim>
+static __device__ __forceinline__
+hypre_int hypre_cuda_get_block_id()
+{
+   switch (dim)
+   {
+      case 1:
+         return (blockIdx.x);
+      case 2:
+         return (blockIdx.y * gridDim.x + blockIdx.x);
+      case 3:
+         return (blockIdx.z * gridDim.x * gridDim.y + blockIdx.y * gridDim.x +
+                 blockIdx.x);
+   }
+
+   return -1;
+}
+
+/* return the number of threads in grid */
+template <hypre_int bdim, hypre_int gdim>
+static __device__ __forceinline__
+hypre_int hypre_cuda_get_grid_num_threads()
+{
+   return hypre_cuda_get_num_blocks<gdim>() * hypre_cuda_get_num_threads<bdim>();
+}
+
+/* return the flattened thread id in grid */
+template <hypre_int bdim, hypre_int gdim>
+static __device__ __forceinline__
+hypre_int hypre_cuda_get_grid_thread_id()
+{
+   return hypre_cuda_get_block_id<gdim>() * hypre_cuda_get_num_threads<bdim>() +
+          hypre_cuda_get_thread_id<bdim>();
+}
+
+/* return the number of warps in grid */
+template <hypre_int bdim, hypre_int gdim>
+static __device__ __forceinline__
+hypre_int hypre_cuda_get_grid_num_warps()
+{
+   return hypre_cuda_get_num_blocks<gdim>() * hypre_cuda_get_num_warps<bdim>();
+}
+
+/* return the flattened warp id in grid */
+template <hypre_int bdim, hypre_int gdim>
+static __device__ __forceinline__
+hypre_int hypre_cuda_get_grid_warp_id()
+{
+   return hypre_cuda_get_block_id<gdim>() * hypre_cuda_get_num_warps<bdim>() +
+          hypre_cuda_get_warp_id<bdim>();
+}
+
+#if CUDART_VERSION < 9000
+
+template <typename T>
+static __device__ __forceinline__
+T __shfl_sync(unsigned mask, T val, hypre_int src_line, hypre_int width=32)
+{
+   return __shfl(val, src_line, width);
+}
+
+template <typename T>
+static __device__ __forceinline__
+T __shfl_down_sync(unsigned mask, T val, unsigned delta, hypre_int width=32)
+{
+   return __shfl_down(val, delta, width);
+}
+
+template <typename T>
+static __device__ __forceinline__
+T __shfl_xor_sync(unsigned mask, T val, unsigned lanemask, hypre_int width=32)
+{
+   return __shfl_xor(val, lanemask, width);
+}
+
+template <typename T>
+static __device__ __forceinline__
+T __shfl_up_sync(unsigned mask, T val, unsigned delta, hypre_int width=32)
+{
+   return __shfl_up(val, delta, width);
+}
+
+static __device__ __forceinline__
+void __syncwarp()
+{
+}
+
+#endif
+
+template <typename T>
+static __device__ __forceinline__
+T read_only_load( const T *ptr )
+{
+   return __ldg( ptr );
+}
+
+template <typename T>
+static __device__ __forceinline__
+T warp_prefix_sum(hypre_int lane_id, T in, T &all_sum)
+{
+#pragma unroll
+   for (hypre_int d = 2; d <= 32; d <<= 1)
+   {
+      T t = __shfl_up_sync(HYPRE_WARP_FULL_MASK, in, d >> 1);
+      if ( (lane_id & (d - 1)) == d - 1 )
+      {
+         in += t;
+      }
+   }
+
+   all_sum = __shfl_sync(HYPRE_WARP_FULL_MASK, in, 31);
+
+   if (lane_id == 31)
+   {
+      in = 0;
+   }
+
+#pragma unroll
+   for (hypre_int d = 16; d > 0; d >>= 1)
+   {
+      T t = __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d);
+
+      if ( (lane_id & (d - 1)) == d - 1)
+      {
+         if ( (lane_id & (d << 1 - 1)) == (d << 1 - 1) )
+         {
+            in += t;
+         }
+         else
+         {
+            in = t;
+         }
+      }
+   }
+   return in;
+}
+
+template <typename T>
+static __device__ __forceinline__
+T warp_reduce_sum(T in)
+{
+#pragma unroll
+  for (hypre_int d = 16; d > 0; d >>= 1)
+  {
+    in += __shfl_down_sync(HYPRE_WARP_FULL_MASK, in, d);
+  }
+  return in;
+}
+
+template <typename T>
+static __device__ __forceinline__
+T warp_allreduce_sum(T in)
+{
+#pragma unroll
+  for (hypre_int d = 16; d > 0; d >>= 1)
+  {
+    in += __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d);
+  }
+  return in;
+}
+
+template <typename T>
+static __device__ __forceinline__
+T warp_reduce_max(T in)
+{
+#pragma unroll
+  for (hypre_int d = 16; d > 0; d >>= 1)
+  {
+    in = max(in, __shfl_down_sync(HYPRE_WARP_FULL_MASK, in, d));
+  }
+  return in;
+}
+
+template <typename T>
+static __device__ __forceinline__
+T warp_allreduce_max(T in)
+{
+#pragma unroll
+  for (hypre_int d = 16; d > 0; d >>= 1)
+  {
+    in = max(in, __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d));
+  }
+  return in;
+}
+
+template <typename T>
+static __device__ __forceinline__
+T warp_reduce_min(T in)
+{
+#pragma unroll
+  for (hypre_int d = 16; d > 0; d >>= 1)
+  {
+    in = min(in, __shfl_down_sync(HYPRE_WARP_FULL_MASK, in, d));
+  }
+  return in;
+}
+
+template <typename T>
+static __device__ __forceinline__
+T warp_allreduce_min(T in)
+{
+#pragma unroll
+  for (hypre_int d = 16; d > 0; d >>= 1)
+  {
+    in = min(in, __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d));
+  }
+  return in;
+}
+
+static __device__ __forceinline__
+hypre_int next_power_of_2(hypre_int n)
+{
+   if (n <= 0)
+   {
+      return 0;
+   }
+
+   /* if n is power of 2, return itself */
+   if ( (n & (n - 1)) == 0 )
+   {
+      return n;
+   }
+
+   n |= (n >>  1);
+   n |= (n >>  2);
+   n |= (n >>  4);
+   n |= (n >>  8);
+   n |= (n >> 16);
+   n ^= (n >>  1);
+   n  = (n <<  1);
+
+   return n;
+}
+
+#ifdef __cplusplus
+}
+#endif
+
+/* for struct solvers */
+#define HYPRE_MIN_GPU_SIZE (131072)
+extern HYPRE_Int hypre_exec_policy;
+#define hypre_SetDeviceOn()  hypre_exec_policy = HYPRE_MEMORY_DEVICE
+#define hypre_SetDeviceOff() hypre_exec_policy = HYPRE_MEMORY_HOST
+
+#endif /* HYPRE_USING_CUDA */
+#endif /* #ifndef HYPRE_CUDA_UTILS_H */
+
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
+
 #ifdef USE_NVTX
 #include "nvToolsExt.h"
 #include "nvToolsExtCudaRt.h"
@@ -1258,207 +1740,14 @@ static const int num_colors = sizeof(colors)/sizeof(uint32_t);
  *
  * $Revision$
  ***********************************************************************EHEADER*/
-
-#ifndef hypre_GPU_ERROR_HEADER
-#define hypre_GPU_ERROR_HEADER
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-
-//#include <cuda_runtime_api.h>
-#ifdef __cplusplus
-extern "C++" {
-#endif
-#include <cuda.h>
-#include <cuda_runtime.h>
-#ifdef __cplusplus
-}
-#endif
-
-#define hypre_CheckErrorDevice(err) CheckError(err,__FILE__, __FUNCTION__, __LINE__)
-#define CUDAMEMATTACHTYPE cudaMemAttachGlobal
-#define HYPRE_HOST_POINTER 0
-#define HYPRE_MANAGED_POINTER 1
-#define HYPRE_PINNED_POINTER 2
-#define HYPRE_DEVICE_POINTER 3
-#define HYPRE_UNDEFINED_POINTER1 4
-#define HYPRE_UNDEFINED_POINTER2 5
-
-void CheckError(cudaError_t const err, const char* file, char const* const fun, const HYPRE_Int line);
-void cudaSafeFree(void *ptr,int padding);
-hypre_int PrintPointerAttributes(const void *ptr);
-hypre_int PointerAttributes(const void *ptr);
-
-/* CUBLAS and CUSPARSE related */
-#ifndef __cusparseErrorCheck__
-#define __cusparseErrorCheck__
-
-/* MUST HAVE " extern "C++" " for C++ header cusparse.h, and the headers therein */
-#ifdef __cplusplus
-extern "C++" {
-#endif
-#include <cusparse.h>
-#ifdef __cplusplus
-}
-#endif
-#include <cublas_v2.h>
-#include <cuda_runtime_api.h>
-inline const char *cusparseErrorCheck(cusparseStatus_t error)
-{
-    switch (error)
-    {
-        case CUSPARSE_STATUS_SUCCESS:
-            return "CUSPARSE_STATUS_SUCCESS";
-
-        case CUSPARSE_STATUS_NOT_INITIALIZED:
-            return "CUSPARSE_STATUS_NOT_INITIALIZED";
-
-        case CUSPARSE_STATUS_ALLOC_FAILED:
-            return "CUSPARSE_STATUS_ALLOC_FAILED";
-
-        case CUSPARSE_STATUS_INVALID_VALUE:
-            return "CUSPARSE_STATUS_INVALID_VALUE";
-
-        case CUSPARSE_STATUS_ARCH_MISMATCH:
-            return "CUSPARSE_STATUS_ARCH_MISMATCH";
-
-        case CUSPARSE_STATUS_MAPPING_ERROR:
-            return "CUSPARSE_STATUS_MAPPING_ERROR";
-
-        case CUSPARSE_STATUS_EXECUTION_FAILED:
-            return "CUSPARSE_STATUS_EXECUTION_FAILED";
-
-        case CUSPARSE_STATUS_INTERNAL_ERROR:
-            return "CUSPARSE_STATUS_INTERNAL_ERROR";
-
-        case CUSPARSE_STATUS_MATRIX_TYPE_NOT_SUPPORTED:
-            return "CUSPARSE_STATUS_MATRIX_TYPE_NOT_SUPPORTED";
-        default:
-            return "Unknown error in cusparseErrorCheck";
-    }
-
-}
-
-inline const char *cublasErrorCheck(cublasStatus_t error)
-{
-    switch (error)
-    {
-        case CUBLAS_STATUS_SUCCESS:
-            return "CUBLAS_STATUS_SUCCESS";
-
-        case CUBLAS_STATUS_NOT_INITIALIZED:
-            return "CUBLAS_STATUS_NOT_INITIALIZED";
-
-        case CUBLAS_STATUS_ALLOC_FAILED:
-            return "CUBLAS_STATUS_ALLOC_FAILED";
-
-        case CUBLAS_STATUS_INVALID_VALUE:
-            return "CUBLAS_STATUS_INVALID_VALUE";
-
-        case CUBLAS_STATUS_ARCH_MISMATCH:
-            return "CUBLAS_STATUS_ARCH_MISMATCH";
-
-        case CUBLAS_STATUS_MAPPING_ERROR:
-            return "CUBLAS_STATUS_MAPPING_ERROR";
-
-        case CUBLAS_STATUS_EXECUTION_FAILED:
-            return "CUBLAS_STATUS_EXECUTION_FAILED";
-
-        case CUBLAS_STATUS_INTERNAL_ERROR:
-            return "CUBLAS_STATUS_INTERNAL_ERROR";
-
-        case CUBLAS_STATUS_NOT_SUPPORTED:
-            return "CUBLAS_STATUS_NOT_SUPPORTED";
-        case CUBLAS_STATUS_LICENSE_ERROR:
-	    return "CUBLAS_STATUS_LICENSE_ERROR";
-        default:
-	    return "Unknown error in cublasErrorCheck";
-    }
-}
-
-#define cusparseErrchk(ans) { cusparseAssert((ans), __FILE__, __LINE__); }
-inline void cusparseAssert(cusparseStatus_t code, const char *file, int line)
-{
-   if (code != CUSPARSE_STATUS_SUCCESS)
-   {
-     fprintf(stderr,"CUSPARSE ERROR  ( Code = %d) IN CUDA CALL line %d of file %s\n",code,line,file);
-     fprintf(stderr,"CUSPARSE ERROR : %s \n", cusparseErrorCheck(code));
-   }
-}
-
-#define cublasErrchk(ans){ cublasAssert((ans), __FILE__, __LINE__); }
-inline void cublasAssert(cublasStatus_t code, const char *file, int line)
-{
-   if (code != CUBLAS_STATUS_SUCCESS)
-   {
-     fprintf(stderr,"CUBLAS ERROR  ( Code = %d) IN CUDA CALL line %d of file %s\n",code,line,file);
-     fprintf(stderr,"CUBLAS ERROR : %s \n", cublasErrorCheck(code));
-   }
-}
-
-#endif // __cusparseErrorCheck__
-
-#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-
-#endif // hypre_GPU_ERROR_HEADER
-
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
 #ifndef __GPUMEM_H__
 #define  __GPUMEM_H__
 
-#if defined(HYPRE_USING_CUDA)
-#define HYPRE_MIN_GPU_SIZE (131072)
-extern HYPRE_Int hypre_exec_policy;
-#define hypre_SetDeviceOn()  hypre_exec_policy = HYPRE_MEMORY_DEVICE
-#define hypre_SetDeviceOff() hypre_exec_policy = HYPRE_MEMORY_HOST
-#endif /* #if defined(HYPRE_USING_CUDA) */
-
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 
-#define HYPRE_USE_MANAGED_SCALABLE 1
-#define HYPRE_GPU_USE_PINNED 1
-
 #include <cuda_runtime_api.h>
-void hypre_GPUInit(hypre_int use_device);
-void hypre_GPUFinalize();
-int VecScaleScalar(double *u, const double alpha,  int num_rows,cudaStream_t s);
-void VecCopy(double* tgt, const double* src, int size,cudaStream_t s);
-void VecSet(double* tgt, int size, double value, cudaStream_t s);
-void VecScale(double *u, double *v, double *l1_norm, int num_rows,cudaStream_t s);
-void VecScaleSplit(double *u, double *v, double *l1_norm, int num_rows,cudaStream_t s);
-void CudaCompileFlagCheck();
-void BigToSmallCopy(hypre_int *tgt, const HYPRE_Int *src, hypre_int size, cudaStream_t s);
-cudaStream_t getstreamOlde(hypre_int i);
 nvtxDomainHandle_t getdomain(hypre_int i);
-cudaEvent_t getevent(hypre_int i);
-void MemAdviseReadOnly(const void *ptr, hypre_int device);
-void MemAdviseUnSetReadOnly(const void *ptr, hypre_int device);
-void MemAdviseSetPrefLocDevice(const void *ptr, hypre_int device);
-void MemAdviseSetPrefLocHost(const void *ptr);
-void MemPrefetch(const void *ptr,hypre_int device,cudaStream_t stream);
-void MemPrefetchSized(const void *ptr,size_t size,hypre_int device,cudaStream_t stream);
-void MemPrefetchForce(const void *ptr,hypre_int device,cudaStream_t stream);
-cublasHandle_t getCublasHandle();
 cusparseHandle_t getCusparseHandle();
-hypre_int getsetasyncmode(hypre_int mode, hypre_int action);
-void SetAsyncMode(hypre_int mode);
-hypre_int GetAsyncMode();
-void branchStream(hypre_int i, hypre_int j);
-void joinStreams(hypre_int i, hypre_int j, hypre_int k);
-void affs(hypre_int myid);
-hypre_int getcore();
-hypre_int getnuma();
-hypre_int checkDeviceProps();
-hypre_int pointerIsManaged(const void *ptr);
 
 /*
  * Global struct for keeping HYPRE GPU Init state
@@ -1470,8 +1759,6 @@ struct hypre__global_struct
    hypre_int initd;
    hypre_int device;
    hypre_int device_count;
-   size_t memoryHWM;
-   cublasHandle_t cublas_handle;
    cusparseHandle_t cusparse_handle;
    cusparseMatDescr_t cusparse_mat_descr;
    cudaStream_t streams[MAX_HGS_ELEMENTS];
@@ -1488,46 +1775,15 @@ extern struct hypre__global_struct hypre__global_handle ;
 #define HYPRE_DOMAIN  hypre__global_handle.nvtx_domain
 #define HYPRE_STREAM(index) (hypre__global_handle.streams[index])
 #define HYPRE_GPU_HANDLE hypre__global_handle.initd
-#define HYPRE_CUBLAS_HANDLE hypre__global_handle.cublas_handle
 #define HYPRE_CUSPARSE_HANDLE hypre__global_handle.cusparse_handle
 #define HYPRE_DEVICE hypre__global_handle.device
 #define HYPRE_DEVICE_COUNT hypre__global_handle.device_count
 #define HYPRE_CUSPARSE_MAT_DESCR hypre__global_handle.cusparse_mat_descr
-#define HYPRE_GPU_CMA hypre__global_handle.concurrent_managed_access
-#define HYPRE_GPU_HWM hypre__global_handle.memoryHWM
-
-
-typedef struct node {
-  const void *ptr;
-  size_t size;
-  struct node *next;
-} node;
-size_t mempush(const void *ptr, size_t size, hypre_int action);
-node *memfind(node *head, const void *ptr);
-void memdel(node **head, node *found);
-void meminsert(node **head, const void *ptr,size_t size);
-void printlist(node *head,hypre_int nc);
-size_t memsize(const void *ptr);
 
 #endif /* #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP) */
 
 
 #if defined(HYPRE_USING_DEVICE_OPENMP)
-HYPRE_Int HYPRE_OMPOffload(HYPRE_Int device, void *ptr, size_t num,
-                           const char *type1, const char *type2);
-
-HYPRE_Int HYPRE_OMPPtrIsMapped(void *p, HYPRE_Int device_num);
-
-HYPRE_Int HYPRE_OMPOffloadOn();
-
-HYPRE_Int HYPRE_OMPOffloadOff();
-
-HYPRE_Int HYPRE_OMPOffloadStatPrint();
-
-#define HYPRE_MIN_GPU_SIZE (131072)
-
-#define hypre_SetDeviceOn() HYPRE_OMPOffloadOn()
-#define hypre_SetDeviceOff() HYPRE_OMPOffloadOff()
 
 #endif /* #if defined(HYPRE_USING_DEVICE_OPENMP) */
 
@@ -1819,6 +2075,8 @@ HYPRE_Real    hypre_cimag( HYPRE_Complex value );
 /* hypre_general.c */
 void HYPRE_Init( hypre_int argc, char *argv[] );
 void HYPRE_Finalize();
+void hypre_GPUInit(hypre_int use_device);
+void hypre_GPUFinalize();
 
 /* hypre_printf.c */
 // #ifdef HYPRE_BIGINT
@@ -2032,12 +2290,12 @@ typedef struct
 
 typedef struct
 {
-	HYPRE_Int  volatile              segmentMask;
-	HYPRE_Int  volatile              bucketMask;
+   HYPRE_Int  volatile                segmentMask;
+   HYPRE_Int  volatile                bucketMask;
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
-	hypre_HopscotchSegment*	volatile segments;
+   hypre_HopscotchSegment*   volatile segments;
 #endif
-	hypre_BigHopscotchBucket* volatile	 table;
+   hypre_BigHopscotchBucket* volatile table;
 } hypre_UnorderedBigIntMap;
 
 /**
@@ -2055,7 +2313,18 @@ void hypre_big_sort_and_create_inverse_map(
 #endif
 
 
-/* hypre_cuda_utils.h */
+/* hypre_cuda_utils.c */
+#if defined(HYPRE_USING_CUDA)
+#ifdef __cplusplus
+extern "C++" {
+#endif
+dim3 hypre_GetDefaultCUDABlockDimension();
+
+dim3 hypre_GetDefaultCUDAGridDimension( HYPRE_Int n, const char *granularity, dim3 bDim );
+#ifdef __cplusplus
+}
+#endif
+
 HYPRE_Int hypreDevice_GetRowNnz(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int *d_diag_ia, HYPRE_Int *d_offd_ia, HYPRE_Int *d_rownnz);
 
 HYPRE_Int hypreDevice_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int job, HYPRE_Int has_offd, HYPRE_Int first_col, HYPRE_Int *d_col_map_offd_A, HYPRE_Int *d_diag_i, HYPRE_Int *d_diag_j, HYPRE_Complex *d_diag_a, HYPRE_Int *d_offd_i, HYPRE_Int *d_offd_j, HYPRE_Complex *d_offd_a, HYPRE_Int *d_ib, HYPRE_BigInt *d_jb, HYPRE_Complex *d_ab);
@@ -2074,203 +2343,25 @@ HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int *
 
 HYPRE_Int* hypreDevice_CsrRowIndicesToPtrs(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ind);
 
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+HYPRE_Int hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Real *y);
 
-#ifndef HYPRE_CUDA_UTILS_H
-#define HYPRE_CUDA_UTILS_H
+HYPRE_Int hypreDevice_ScatterConstant(HYPRE_Int *x, HYPRE_Int n, HYPRE_Int *map, HYPRE_Int v);
 
-#if defined(HYPRE_USING_CUDA)
+HYPRE_Int hypreDevice_IVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y);
 
-#ifdef __cplusplus
-extern "C++" {
-#endif
+HYPRE_Int hypreDevice_DiagScaleVector(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data, HYPRE_Complex *x, HYPRE_Complex *y);
 
-#include <cuda.h>
-#include <cuda_runtime.h>
-#include <assert.h>
+HYPRE_Int hypreDevice_BigToSmallCopy(HYPRE_Int *tgt, const HYPRE_BigInt *src, HYPRE_Int size);
 
-#include <thrust/execution_policy.h>
-#include <thrust/count.h>
-#include <thrust/device_ptr.h>
-#include <thrust/unique.h>
-#include <thrust/sort.h>
-#include <thrust/binary_search.h>
-#include <thrust/iterator/constant_iterator.h>
-#include <thrust/iterator/counting_iterator.h>
-#include <thrust/transform.h>
-#include <thrust/functional.h>
-#include <thrust/gather.h>
-#include <thrust/scan.h>
-#include <thrust/fill.h>
-#include <thrust/adjacent_difference.h>
+HYPRE_Int pointerIsManaged(const void *ptr);
 
-#define HYPRE_WARP_SIZE      32
-#define HYPRE_WARP_FULL_MASK 0xFFFFFFFF
-#define HYPRE_MAX_NUM_WARPS  (64 * 64 * 32)
-#define HYPRE_FLT_LARGE      1e30
+/* gpuMem.c */
 
-#if CUDART_VERSION < 9000
-
-template <typename T>
-static __device__ __forceinline__
-T __shfl_sync(unsigned mask, T val, hypre_int src_line, hypre_int width=32)
-{
-   return __shfl(val, src_line, width);
-}
-
-template <typename T>
-static __device__ __forceinline__
-T __shfl_down_sync(unsigned mask, T val, unsigned delta, hypre_int width=32)
-{
-   return __shfl_down(val, delta, width);
-}
-
-template <typename T>
-static __device__ __forceinline__
-T __shfl_xor_sync(unsigned mask, T val, unsigned lanemask, hypre_int width=32)
-{
-   return __shfl_xor(val, lanemask, width);
-}
-
-template <typename T>
-static __device__ __forceinline__
-T __shfl_up_sync(unsigned mask, T val, unsigned delta, hypre_int width=32)
-{
-   return __shfl_up(val, delta, width);
-}
-
-static __device__ __forceinline__
-void __syncwarp()
-{
-}
+/* gpuErrorCheck.c */
+void hypre_CudaCompileFlagCheck();
+void PrintPointerAttributes(const void *ptr);
 
 #endif
-
-template <typename T>
-static __device__ __forceinline__
-T read_only_load( const T *ptr )
-{
-   return __ldg( ptr );
-}
-
-template <typename T>
-static __device__ __forceinline__
-T warp_prefix_sum(hypre_int lane_id, T in, T &all_sum)
-{
-#pragma unroll
-   for (hypre_int d = 2; d <= 32; d <<= 1)
-   {
-      T t = __shfl_up_sync(HYPRE_WARP_FULL_MASK, in, d >> 1);
-      if ( (lane_id & (d - 1)) == d - 1 )
-      {
-         in += t;
-      }
-   }
-
-   all_sum = __shfl_sync(HYPRE_WARP_FULL_MASK, in, 31);
-
-   if (lane_id == 31)
-   {
-      in = 0;
-   }
-
-#pragma unroll
-   for (hypre_int d = 16; d > 0; d >>= 1)
-   {
-      T t = __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d);
-
-      if ( (lane_id & (d - 1)) == d - 1)
-      {
-         if ( (lane_id & (d << 1 - 1)) == (d << 1 - 1) )
-         {
-            in += t;
-         }
-         else
-         {
-            in = t;
-         }
-      }
-   }
-   return in;
-}
-
-template <typename T>
-static __device__ __forceinline__
-T warp_reduce_sum(T in)
-{
-#pragma unroll
-  for (hypre_int d = 16; d > 0; d >>= 1)
-  {
-    in += __shfl_down_sync(HYPRE_WARP_FULL_MASK, in, d);
-  }
-  return in;
-}
-
-template <typename T>
-static __device__ __forceinline__
-T warp_allreduce_sum(T in)
-{
-#pragma unroll
-  for (hypre_int d = 16; d > 0; d >>= 1)
-  {
-    in += __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d);
-  }
-  return in;
-}
-
-template <typename T>
-static __device__ __forceinline__
-T warp_reduce_max(T in)
-{
-#pragma unroll
-  for (hypre_int d = 16; d > 0; d >>= 1)
-  {
-    in = max(in, __shfl_down_sync(HYPRE_WARP_FULL_MASK, in, d));
-  }
-  return in;
-}
-
-static __device__ __forceinline__
-hypre_int next_power_of_2(hypre_int n)
-{
-   if (n <= 0)
-   {
-      return 0;
-   }
-
-   /* if n is power of 2, return itself */
-   if ( (n & (n - 1)) == 0 )
-   {
-      return n;
-   }
-
-   n |= (n >>  1);
-   n |= (n >>  2);
-   n |= (n >>  4);
-   n |= (n >>  8);
-   n |= (n >> 16);
-   n ^= (n >>  1);
-   n  = (n <<  1);
-
-   return n;
-}
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* HYPRE_USING_CUDA */
-#endif /* #ifndef HYPRE_CUDA_UTILS_H */
 
 
 #ifdef __cplusplus

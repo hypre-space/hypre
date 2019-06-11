@@ -11,7 +11,7 @@
  ***********************************************************************EHEADER*/
 
 #include "seq_mv.h"
-#include "csr_sparse_device.h"
+#include "csr_spgemm_device.h"
 
 #if defined(HYPRE_USING_CUDA)
 

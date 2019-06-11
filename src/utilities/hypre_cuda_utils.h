@@ -22,6 +22,8 @@ extern "C++" {
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include <assert.h>
+#include <curand.h>
+#include <cusparse.h>
 
 #include <thrust/execution_policy.h>
 #include <thrust/count.h>
@@ -37,11 +39,194 @@ extern "C++" {
 #include <thrust/scan.h>
 #include <thrust/fill.h>
 #include <thrust/adjacent_difference.h>
+#include <thrust/inner_product.h>
+
+using namespace thrust::placeholders;
 
 #define HYPRE_WARP_SIZE      32
 #define HYPRE_WARP_FULL_MASK 0xFFFFFFFF
 #define HYPRE_MAX_NUM_WARPS  (64 * 64 * 32)
 #define HYPRE_FLT_LARGE      1e30
+#define HYPRE_1D_BLOCK_SIZE  512
+
+/* macro for launching CUDA kernels */
+#define HYPRE_CUDA_LAUNCH HYPRE_CUDA_LAUNCH_ASYNC
+
+#define HYPRE_CUDA_LAUNCH_ASYNC(kernel_name, gridsize, blocksize, ...) \
+{ \
+   if ( gridsize.x  == 0 || gridsize.y  == 0 || gridsize.z  == 0 || \
+        blocksize.x == 0 || blocksize.y == 0 || blocksize.z == 0 ) \
+   { \
+      /* hypre_printf("Warning %s %d: Zero CUDA grid/block (%d %d %d) (%d %d %d)\n", \
+                   __FILE__, __LINE__,\
+                   gridsize.x, gridsize.y, gridsize.z, blocksize.x, blocksize.y, blocksize.z); */ \
+   } \
+   else \
+   { \
+      (kernel_name) <<< (gridsize), (blocksize) >>> (__VA_ARGS__); \
+   } \
+}
+
+#define HYPRE_CUDA_LAUNCH_SYNC(kernel_name, gridsize, blocksize, ...) \
+    HYPRE_CUDA_LAUNCH_ASYNC(kernel_name, gridsize, blocksize, __VA_ARGS__) \
+    cudaDeviceSynchronize();
+
+#define HYPRE_CURAND_CALL(call) do {                         \
+    curandStatus_t err = call;                               \
+    if (CURAND_STATUS_SUCCESS != err) {                      \
+       hypre_printf("CURAND ERROR (code = %d) at %s:%d\n",   \
+                    err, __FILE__, __LINE__);                \
+       exit(1);                                              \
+    } } while(0)
+
+#define HYPRE_CUDA_CALL(call) do {                           \
+    cudaError_t err = call;                                  \
+    if (cudaSuccess != err) {                                \
+       hypre_printf("CUDA ERROR (code = %d, %s) at %s:%d\n", \
+                    err, cudaGetErrorString(err),            \
+                    __FILE__, __LINE__);                     \
+       exit(1);                                              \
+    } } while(0)
+
+#define HYPRE_CUSPARSE_CALL(call) do {                       \
+    cusparseStatus_t err = call;                             \
+    if (CUSPARSE_STATUS_SUCCESS != err) {                    \
+       hypre_printf("CUSPARSE ERROR (code = %d) at %s:%d\n", \
+                    err, __FILE__, __LINE__);                \
+       exit(1);                                              \
+    } } while(0)
+
+/* return the number of threads in block */
+template <hypre_int dim>
+static __device__ __forceinline__
+hypre_int hypre_cuda_get_num_threads()
+{
+   switch (dim)
+   {
+      case 1:
+         return (blockDim.x);
+      case 2:
+         return (blockDim.x * blockDim.y);
+      case 3:
+         return (blockDim.x * blockDim.y * blockDim.z);
+   }
+
+   return -1;
+}
+
+/* return the flattened thread id in block */
+template <hypre_int dim>
+static __device__ __forceinline__
+hypre_int hypre_cuda_get_thread_id()
+{
+   switch (dim)
+   {
+      case 1:
+         return (threadIdx.x);
+      case 2:
+         return (threadIdx.y * blockDim.x + threadIdx.x);
+      case 3:
+         return (threadIdx.z * blockDim.x * blockDim.y + threadIdx.y * blockDim.x +
+                 threadIdx.x);
+   }
+
+   return -1;
+}
+
+/* return the number of warps in block  */
+template <hypre_int dim>
+static __device__ __forceinline__
+hypre_int hypre_cuda_get_num_warps()
+{
+   return hypre_cuda_get_num_threads<dim>() >> 5;
+}
+
+/* return the warp id in block */
+template <hypre_int dim>
+static __device__ __forceinline__
+hypre_int hypre_cuda_get_warp_id()
+{
+   return hypre_cuda_get_thread_id<dim>() >> 5;
+}
+
+/* return the thread lane id in warp */
+template <hypre_int dim>
+static __device__ __forceinline__
+hypre_int hypre_cuda_get_lane_id()
+{
+   return hypre_cuda_get_thread_id<dim>() & (HYPRE_WARP_SIZE-1);
+}
+
+/* return the num of blocks in grid */
+template <hypre_int dim>
+static __device__ __forceinline__
+hypre_int hypre_cuda_get_num_blocks()
+{
+   switch (dim)
+   {
+      case 1:
+         return (gridDim.x);
+      case 2:
+         return (gridDim.x * gridDim.y);
+      case 3:
+         return (gridDim.x * gridDim.y * gridDim.z);
+   }
+
+   return -1;
+}
+
+/* return the flattened block id in grid */
+template <hypre_int dim>
+static __device__ __forceinline__
+hypre_int hypre_cuda_get_block_id()
+{
+   switch (dim)
+   {
+      case 1:
+         return (blockIdx.x);
+      case 2:
+         return (blockIdx.y * gridDim.x + blockIdx.x);
+      case 3:
+         return (blockIdx.z * gridDim.x * gridDim.y + blockIdx.y * gridDim.x +
+                 blockIdx.x);
+   }
+
+   return -1;
+}
+
+/* return the number of threads in grid */
+template <hypre_int bdim, hypre_int gdim>
+static __device__ __forceinline__
+hypre_int hypre_cuda_get_grid_num_threads()
+{
+   return hypre_cuda_get_num_blocks<gdim>() * hypre_cuda_get_num_threads<bdim>();
+}
+
+/* return the flattened thread id in grid */
+template <hypre_int bdim, hypre_int gdim>
+static __device__ __forceinline__
+hypre_int hypre_cuda_get_grid_thread_id()
+{
+   return hypre_cuda_get_block_id<gdim>() * hypre_cuda_get_num_threads<bdim>() +
+          hypre_cuda_get_thread_id<bdim>();
+}
+
+/* return the number of warps in grid */
+template <hypre_int bdim, hypre_int gdim>
+static __device__ __forceinline__
+hypre_int hypre_cuda_get_grid_num_warps()
+{
+   return hypre_cuda_get_num_blocks<gdim>() * hypre_cuda_get_num_warps<bdim>();
+}
+
+/* return the flattened warp id in grid */
+template <hypre_int bdim, hypre_int gdim>
+static __device__ __forceinline__
+hypre_int hypre_cuda_get_grid_warp_id()
+{
+   return hypre_cuda_get_block_id<gdim>() * hypre_cuda_get_num_warps<bdim>() +
+          hypre_cuda_get_warp_id<bdim>();
+}
 
 #if CUDART_VERSION < 9000
 
@@ -164,6 +349,42 @@ T warp_reduce_max(T in)
   return in;
 }
 
+template <typename T>
+static __device__ __forceinline__
+T warp_allreduce_max(T in)
+{
+#pragma unroll
+  for (hypre_int d = 16; d > 0; d >>= 1)
+  {
+    in = max(in, __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d));
+  }
+  return in;
+}
+
+template <typename T>
+static __device__ __forceinline__
+T warp_reduce_min(T in)
+{
+#pragma unroll
+  for (hypre_int d = 16; d > 0; d >>= 1)
+  {
+    in = min(in, __shfl_down_sync(HYPRE_WARP_FULL_MASK, in, d));
+  }
+  return in;
+}
+
+template <typename T>
+static __device__ __forceinline__
+T warp_allreduce_min(T in)
+{
+#pragma unroll
+  for (hypre_int d = 16; d > 0; d >>= 1)
+  {
+    in = min(in, __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d));
+  }
+  return in;
+}
+
 static __device__ __forceinline__
 hypre_int next_power_of_2(hypre_int n)
 {
@@ -192,6 +413,12 @@ hypre_int next_power_of_2(hypre_int n)
 #ifdef __cplusplus
 }
 #endif
+
+/* for struct solvers */
+#define HYPRE_MIN_GPU_SIZE (131072)
+extern HYPRE_Int hypre_exec_policy;
+#define hypre_SetDeviceOn()  hypre_exec_policy = HYPRE_MEMORY_DEVICE
+#define hypre_SetDeviceOff() hypre_exec_policy = HYPRE_MEMORY_HOST
 
 #endif /* HYPRE_USING_CUDA */
 #endif /* #ifndef HYPRE_CUDA_UTILS_H */

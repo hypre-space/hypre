@@ -144,7 +144,7 @@ hypre_ParVectorInitialize( hypre_ParVector *vector )
    }
    hypre_SeqVectorInitialize(hypre_ParVectorLocalVector(vector));
    hypre_ParVectorActualLocalSize(vector)
-	= hypre_VectorSize(hypre_ParVectorLocalVector(vector));
+      = hypre_VectorSize(hypre_ParVectorLocalVector(vector));
    return hypre_error_flag;
 }
 
@@ -692,7 +692,7 @@ hypre_ParVectorToVectorAll( hypre_ParVector *par_v )
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
 
-   local_size = (HYPRE_Int)(hypre_ParVectorLastIndex(par_v) - 
+   local_size = (HYPRE_Int)(hypre_ParVectorLastIndex(par_v) -
       hypre_ParVectorFirstIndex(par_v) + 1);
 
    /* determine procs which hold data of par_v and store ids in used_procs */
@@ -735,7 +735,7 @@ hypre_ParVectorToVectorAll( hypre_ParVector *par_v )
    hypre_DataExchangeList(num_contacts,
                           contact_proc_list, contact_send_buf,
                           contact_send_buf_starts, sizeof(HYPRE_Int),
-                          //0, &response_obj, 
+                          //0, &response_obj,
                           sizeof(HYPRE_Int), &response_obj,
                           max_response_size, 1,
                           comm, (void**) &response_recv_buf,

@@ -14,6 +14,123 @@
 
 #if defined(HYPRE_USING_CUDA)
 
+/* for struct solvers */
+HYPRE_Int hypre_exec_policy = HYPRE_MEMORY_DEVICE;
+
+__global__ void
+hypreCUDAKernel_CompileFlagSafetyCheck(HYPRE_Int *cuda_arch)
+{
+#ifdef __CUDA_ARCH__
+    cuda_arch[0] = __CUDA_ARCH__;
+#endif
+}
+
+void hypre_CudaCompileFlagCheck()
+{
+   hypre_int device;
+   HYPRE_CUDA_CALL( cudaGetDevice(&device) );
+
+   struct cudaDeviceProp props;
+   cudaGetDeviceProperties(&props, device);
+   HYPRE_Int cuda_arch_actual = props.major*100 + props.minor*10;
+
+   HYPRE_Int *cuda_arch = hypre_TAlloc(HYPRE_Int, 1, HYPRE_MEMORY_DEVICE);
+   HYPRE_Int h_cuda_arch;
+
+   dim3 gDim(1,1,1), bDim(1,1,1);
+   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_CompileFlagSafetyCheck, gDim, bDim, cuda_arch );
+
+   hypre_TMemcpy(&h_cuda_arch, cuda_arch, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+
+   if (h_cuda_arch != cuda_arch_actual)
+   {
+      hypre_printf("ERROR: Compile arch flags %d does not match actual device arch = sm_%d\n");
+   }
+
+   HYPRE_CUDA_CALL(cudaDeviceSynchronize());
+}
+
+void
+PrintPointerAttributes(const void *ptr)
+{
+   struct cudaPointerAttributes ptr_att;
+   if (cudaPointerGetAttributes(&ptr_att,ptr) != cudaSuccess)
+   {
+      cudaGetLastError();  // Required to reset error flag on device
+      fprintf(stderr,"PrintPointerAttributes:: Raw pointer %p\n",ptr);
+   }
+
+   if (ptr_att.isManaged)
+   {
+      fprintf(stderr,"PrintPointerAttributes:: Managed pointer\n");
+      fprintf(stderr,"Host address = %p, Device Address = %p\n",ptr_att.hostPointer, ptr_att.devicePointer);
+      if (ptr_att.memoryType==cudaMemoryTypeHost) fprintf(stderr,"Memory is located on host\n");
+      if (ptr_att.memoryType==cudaMemoryTypeDevice) fprintf(stderr,"Memory is located on device\n");
+      fprintf(stderr,"Device associated with this pointer is %d\n",ptr_att.device);
+   }
+   else
+   {
+      fprintf(stderr,"PrintPointerAttributes:: Non-Managed & non-raw pointer\n Probably pinned host pointer\n");
+      if (ptr_att.memoryType==cudaMemoryTypeHost)
+      {
+         fprintf(stderr,"Memory is located on host\n");
+      }
+      if (ptr_att.memoryType==cudaMemoryTypeDevice) {
+         fprintf(stderr,"Memory is located on device\n");
+      }
+   }
+}
+
+HYPRE_Int pointerIsManaged(const void *ptr)
+{
+  struct cudaPointerAttributes ptr_att;
+  if (cudaPointerGetAttributes(&ptr_att, ptr) != cudaSuccess)
+  {
+     cudaGetLastError();
+     return 0;
+  }
+  return ptr_att.isManaged;
+}
+
+dim3
+hypre_GetDefaultCUDABlockDimension()
+{
+   dim3 bDim(512, 1, 1);
+
+   return bDim;
+}
+
+dim3
+hypre_GetDefaultCUDAGridDimension( HYPRE_Int n,
+                                   const char *granularity,
+                                   dim3 bDim )
+{
+   HYPRE_Int num_blocks = 0;
+   HYPRE_Int num_threads_per_block = bDim.x * bDim.y * bDim.z;
+
+   if (granularity[0] == 't')
+   {
+      num_blocks = (n + num_threads_per_block - 1) / num_threads_per_block;
+   }
+   else if (granularity[0] == 'w')
+   {
+      HYPRE_Int num_warps_per_block = num_threads_per_block >> 5;
+
+      assert(num_warps_per_block * 32 == num_threads_per_block);
+
+      num_blocks = (n + num_warps_per_block - 1) / num_warps_per_block;
+   }
+   else
+   {
+      hypre_printf("Error %s %d: Unknown granularity !\n", __FILE__, __LINE__);
+      assert(0);
+   }
+
+   dim3 gDim(num_blocks, 1, 1);
+
+   return gDim;
+}
+
 /**
  * Get NNZ of each row in d_row_indices and stored the results in d_rownnz
  * All pointers are device pointers.
@@ -310,6 +427,165 @@ hypreDevice_CsrRowIndicesToPtrs_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_
                        thrust::counting_iterator<HYPRE_Int>(0),
                        thrust::counting_iterator<HYPRE_Int>(nrows+1),
                        d_row_ptr);
+
+   return hypre_error_flag;
+}
+
+/* x[map[i]] += y[i] */
+__global__ void
+hypreCUDAKernel_ScatterAdd(HYPRE_Int n, HYPRE_Real *x, HYPRE_Int *map, HYPRE_Real *y)
+{
+   HYPRE_Int global_thread_id = hypre_cuda_get_grid_thread_id<1,1>();
+
+   if (global_thread_id < n)
+   {
+      x[map[global_thread_id]] += y[global_thread_id];
+   }
+}
+
+/* Generalized x[map[i]] += y[i] where the same index may appear more
+ * than once in map
+ * Note: content in y will be destroyed */
+HYPRE_Int
+hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Real *y)
+{
+   HYPRE_Int *map2 = hypre_TAlloc(HYPRE_Int, ny, HYPRE_MEMORY_DEVICE);
+   HYPRE_Int *reduced_map = hypre_TAlloc(HYPRE_Int, ny, HYPRE_MEMORY_DEVICE);
+   HYPRE_Real *reduced_y = hypre_TAlloc(HYPRE_Real, ny, HYPRE_MEMORY_DEVICE);
+
+   hypre_TMemcpy(map2, map, HYPRE_Int, ny, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+
+   thrust::sort_by_key(thrust::device, map2, map2+ny, y);
+
+   thrust::pair<HYPRE_Int*, HYPRE_Real*> new_end =
+      thrust::reduce_by_key(thrust::device, map2, map2+ny, y, reduced_map, reduced_y);
+
+   HYPRE_Int reduced_n = new_end.first - reduced_map;
+
+   hypre_assert(reduced_n == new_end.second - reduced_y);
+
+   dim3 bDim = hypre_GetDefaultCUDABlockDimension();
+   dim3 gDim = hypre_GetDefaultCUDAGridDimension(reduced_n, "thread", bDim);
+
+   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_ScatterAdd, gDim, bDim,
+                      reduced_n, x, reduced_map, reduced_y );
+
+   hypre_TFree(map2, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(reduced_map, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(reduced_y, HYPRE_MEMORY_DEVICE);
+
+   return hypre_error_flag;
+}
+
+/* x[map[i]] = v */
+__global__ void
+hypreCUDAKernel_ScatterConstant(HYPRE_Int *x, HYPRE_Int n, HYPRE_Int *map, HYPRE_Int v)
+{
+   HYPRE_Int global_thread_id = hypre_cuda_get_grid_thread_id<1,1>();
+
+   if (global_thread_id < n)
+   {
+      x[map[global_thread_id]] = v;
+   }
+}
+
+/* x[map[i]] = v
+ * TODO: thrust? */
+HYPRE_Int
+hypreDevice_ScatterConstant(HYPRE_Int *x, HYPRE_Int n, HYPRE_Int *map, HYPRE_Int v)
+{
+   /* trivial case */
+   if (n <= 0)
+   {
+      return hypre_error_flag;
+   }
+
+   dim3 bDim = hypre_GetDefaultCUDABlockDimension();
+   dim3 gDim = hypre_GetDefaultCUDAGridDimension(n, "thread", bDim);
+
+   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_ScatterConstant, gDim, bDim, x, n, map, v );
+
+   return hypre_error_flag;
+}
+
+__global__ void
+hypreCUDAKernel_IVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y)
+{
+   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1,1>();
+
+   if (i < n)
+   {
+      y[i] += x[i] / a[i];
+   }
+}
+
+/* Inverse Vector AXPY: y[i] = x[i] / a[i] + y[i] */
+HYPRE_Int
+hypreDevice_IVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y)
+{
+   /* trivial case */
+   if (n <= 0)
+   {
+      return hypre_error_flag;
+   }
+
+   dim3 bDim = hypre_GetDefaultCUDABlockDimension();
+   dim3 gDim = hypre_GetDefaultCUDAGridDimension(n, "thread", bDim);
+
+   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_IVAXPY, gDim, bDim, n, a, x, y );
+
+   return hypre_error_flag;
+}
+
+__global__ void
+hypreCUDAKernel_DiagScaleVector(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data, HYPRE_Complex *x, HYPRE_Complex *y)
+{
+   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1,1>();
+
+   if (i < n)
+   {
+      y[i] = x[i] / A_data[A_i[i]];
+   }
+}
+
+/* y = diag(A) \ x. A_i[i] points to the ith diagonal entry of A */
+HYPRE_Int
+hypreDevice_DiagScaleVector(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data, HYPRE_Complex *x, HYPRE_Complex *y)
+{
+   /* trivial case */
+   if (n <= 0)
+   {
+      return hypre_error_flag;
+   }
+
+   dim3 bDim = hypre_GetDefaultCUDABlockDimension();
+   dim3 gDim = hypre_GetDefaultCUDAGridDimension(n, "thread", bDim);
+
+   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_DiagScaleVector, gDim, bDim, n, A_i, A_data, x, y );
+
+   return hypre_error_flag;
+}
+
+__global__ void
+hypreCUDAKernel_BigToSmallCopy(      HYPRE_Int*    __restrict__ tgt,
+                               const HYPRE_BigInt* __restrict__ src,
+                                     HYPRE_Int                  size)
+{
+   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1,1>();
+
+   if (i < size)
+   {
+      tgt[i] = src[i];
+   }
+}
+
+HYPRE_Int
+hypreDevice_BigToSmallCopy(HYPRE_Int *tgt, const HYPRE_BigInt *src, HYPRE_Int size)
+{
+   dim3 bDim = hypre_GetDefaultCUDABlockDimension();
+   dim3 gDim = hypre_GetDefaultCUDAGridDimension(size, "thread", bDim);
+
+   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_BigToSmallCopy, gDim, bDim, tgt, src, size);
 
    return hypre_error_flag;
 }

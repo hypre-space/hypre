@@ -10,7 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 #include "seq_mv.h"
-#include "csr_sparse_device.h"
 
 #if defined(HYPRE_USING_CUDA)
 
@@ -41,7 +40,7 @@ hypreDevice_CSRSpAdd(HYPRE_Int  ma,       HYPRE_Int   mb,        HYPRE_Int   n,
 
    hypre_double tt = 0.0, tm;
 
-   HYPRE_Int do_timing = hypre_device_sparse_opts->do_timing;
+   HYPRE_Int do_timing = hypre_device_csr_handle->do_timing;
 
    if (do_timing)
    {
@@ -95,7 +94,7 @@ hypreDevice_CSRSpAdd(HYPRE_Int  ma,       HYPRE_Int   mb,        HYPRE_Int   n,
       cudaThreadSynchronize();
       hypre_double tm_old = tm;
       tm = time_getWallclockSeconds();
-      hypre_device_sparse_handle->spadd_expansion_time += tm - tm_old;
+      hypre_device_csr_handle->spadd_expansion_time += tm - tm_old;
    }
 
    /* permutation vector */
@@ -139,7 +138,7 @@ hypreDevice_CSRSpAdd(HYPRE_Int  ma,       HYPRE_Int   mb,        HYPRE_Int   n,
       cudaThreadSynchronize();
       hypre_double tm_old = tm;
       tm = time_getWallclockSeconds();
-      hypre_device_sparse_handle->spadd_sorting_time += tm - tm_old;
+      hypre_device_csr_handle->spadd_sorting_time += tm - tm_old;
    }
 
    /* compress */
@@ -171,7 +170,7 @@ hypreDevice_CSRSpAdd(HYPRE_Int  ma,       HYPRE_Int   mb,        HYPRE_Int   n,
       cudaThreadSynchronize();
       hypre_double tm_old = tm;
       tm = time_getWallclockSeconds();
-      hypre_device_sparse_handle->spadd_compression_time += tm - tm_old;
+      hypre_device_csr_handle->spadd_compression_time += tm - tm_old;
    }
 
    /* convert into ic: row idx --> row ptrs */
@@ -188,7 +187,7 @@ hypreDevice_CSRSpAdd(HYPRE_Int  ma,       HYPRE_Int   mb,        HYPRE_Int   n,
       cudaThreadSynchronize();
       hypre_double tm_old = tm;
       tm = time_getWallclockSeconds();
-      hypre_device_sparse_handle->spadd_convert_ptr_time += tm - tm_old;
+      hypre_device_csr_handle->spadd_convert_ptr_time += tm - tm_old;
    }
 
    /*
@@ -211,7 +210,7 @@ hypreDevice_CSRSpAdd(HYPRE_Int  ma,       HYPRE_Int   mb,        HYPRE_Int   n,
    {
       cudaThreadSynchronize();
       tt = time_getWallclockSeconds() - tt;
-      hypre_device_sparse_handle->spadd_time += tt;
+      hypre_device_csr_handle->spadd_time += tt;
    }
 
    return hypre_error_flag;

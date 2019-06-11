@@ -114,28 +114,42 @@ typedef struct
  * Accessor macros: hypre_ParCSRCommPkg
  *--------------------------------------------------------------------------*/
 
-#define hypre_ParCSRCommPkgComm(comm_pkg)          (comm_pkg -> comm)
-
-#define hypre_ParCSRCommPkgNumSends(comm_pkg)      (comm_pkg -> num_sends)
-#define hypre_ParCSRCommPkgSendProcs(comm_pkg)     (comm_pkg -> send_procs)
-#define hypre_ParCSRCommPkgSendProc(comm_pkg, i)   (comm_pkg -> send_procs[i])
-#define hypre_ParCSRCommPkgSendMapStarts(comm_pkg) (comm_pkg -> send_map_starts)
-#define hypre_ParCSRCommPkgSendMapStart(comm_pkg,i)(comm_pkg -> send_map_starts[i])
-#define hypre_ParCSRCommPkgSendMapElmts(comm_pkg)  (comm_pkg -> send_map_elmts)
+#define hypre_ParCSRCommPkgComm(comm_pkg)               (comm_pkg -> comm)
+#define hypre_ParCSRCommPkgNumSends(comm_pkg)           (comm_pkg -> num_sends)
+#define hypre_ParCSRCommPkgSendProcs(comm_pkg)          (comm_pkg -> send_procs)
+#define hypre_ParCSRCommPkgSendProc(comm_pkg, i)        (comm_pkg -> send_procs[i])
+#define hypre_ParCSRCommPkgSendMapStarts(comm_pkg)      (comm_pkg -> send_map_starts)
+#define hypre_ParCSRCommPkgSendMapStart(comm_pkg,i)     (comm_pkg -> send_map_starts[i])
+#define hypre_ParCSRCommPkgSendMapElmts(comm_pkg)       (comm_pkg -> send_map_elmts)
 #define hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) (comm_pkg -> device_send_map_elmts)
-#define hypre_ParCSRCommPkgSendMapElmt(comm_pkg,i) (comm_pkg -> send_map_elmts[i])
+#define hypre_ParCSRCommPkgSendMapElmt(comm_pkg,i)      (comm_pkg -> send_map_elmts[i])
+#define hypre_ParCSRCommPkgNumRecvs(comm_pkg)           (comm_pkg -> num_recvs)
+#define hypre_ParCSRCommPkgRecvProcs(comm_pkg)          (comm_pkg -> recv_procs)
+#define hypre_ParCSRCommPkgRecvProc(comm_pkg, i)        (comm_pkg -> recv_procs[i])
+#define hypre_ParCSRCommPkgRecvVecStarts(comm_pkg)      (comm_pkg -> recv_vec_starts)
+#define hypre_ParCSRCommPkgRecvVecStart(comm_pkg,i)     (comm_pkg -> recv_vec_starts[i])
+#define hypre_ParCSRCommPkgSendMPITypes(comm_pkg)       (comm_pkg -> send_mpi_types)
+#define hypre_ParCSRCommPkgSendMPIType(comm_pkg,i)      (comm_pkg -> send_mpi_types[i])
+#define hypre_ParCSRCommPkgRecvMPITypes(comm_pkg)       (comm_pkg -> recv_mpi_types)
+#define hypre_ParCSRCommPkgRecvMPIType(comm_pkg,i)      (comm_pkg -> recv_mpi_types[i])
 
-#define hypre_ParCSRCommPkgNumRecvs(comm_pkg)      (comm_pkg -> num_recvs)
-#define hypre_ParCSRCommPkgRecvProcs(comm_pkg)     (comm_pkg -> recv_procs)
-#define hypre_ParCSRCommPkgRecvProc(comm_pkg, i)   (comm_pkg -> recv_procs[i])
-#define hypre_ParCSRCommPkgRecvVecStarts(comm_pkg) (comm_pkg -> recv_vec_starts)
-#define hypre_ParCSRCommPkgRecvVecStart(comm_pkg,i)(comm_pkg -> recv_vec_starts[i])
+static inline void
+hypre_ParCSRCommPkgCopySendMapElmtsToDevice(hypre_ParCSRCommPkg *comm_pkg)
+{
+   if (hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) == NULL)
+   {
+      HYPRE_Int num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+      hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) =
+         hypre_TAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                      HYPRE_MEMORY_DEVICE);
 
-#define hypre_ParCSRCommPkgSendMPITypes(comm_pkg)  (comm_pkg -> send_mpi_types)
-#define hypre_ParCSRCommPkgSendMPIType(comm_pkg,i) (comm_pkg -> send_mpi_types[i])
-
-#define hypre_ParCSRCommPkgRecvMPITypes(comm_pkg)  (comm_pkg -> recv_mpi_types)
-#define hypre_ParCSRCommPkgRecvMPIType(comm_pkg,i) (comm_pkg -> recv_mpi_types[i])
+      hypre_TMemcpy(hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+                    hypre_ParCSRCommPkgSendMapElmts(comm_pkg),
+                    HYPRE_Int,
+                    hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+   }
+}
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_ParCSRCommHandle
@@ -385,36 +399,35 @@ typedef struct hypre_ParCSRMatrix_struct
  * Accessor functions for the Parallel CSR Matrix structure
  *--------------------------------------------------------------------------*/
 
-#define hypre_ParCSRMatrixComm(matrix)            ((matrix) -> comm)
-#define hypre_ParCSRMatrixGlobalNumRows(matrix)   ((matrix) -> global_num_rows)
-#define hypre_ParCSRMatrixGlobalNumCols(matrix)   ((matrix) -> global_num_cols)
-#define hypre_ParCSRMatrixFirstRowIndex(matrix)   ((matrix) -> first_row_index)
-#define hypre_ParCSRMatrixFirstColDiag(matrix)    ((matrix) -> first_col_diag)
-#define hypre_ParCSRMatrixLastRowIndex(matrix)    ((matrix) -> last_row_index)
-#define hypre_ParCSRMatrixLastColDiag(matrix)     ((matrix) -> last_col_diag)
-#define hypre_ParCSRMatrixDiag(matrix)            ((matrix) -> diag)
-#define hypre_ParCSRMatrixOffd(matrix)            ((matrix) -> offd)
+#define hypre_ParCSRMatrixComm(matrix)             ((matrix) -> comm)
+#define hypre_ParCSRMatrixGlobalNumRows(matrix)    ((matrix) -> global_num_rows)
+#define hypre_ParCSRMatrixGlobalNumCols(matrix)    ((matrix) -> global_num_cols)
+#define hypre_ParCSRMatrixFirstRowIndex(matrix)    ((matrix) -> first_row_index)
+#define hypre_ParCSRMatrixFirstColDiag(matrix)     ((matrix) -> first_col_diag)
+#define hypre_ParCSRMatrixLastRowIndex(matrix)     ((matrix) -> last_row_index)
+#define hypre_ParCSRMatrixLastColDiag(matrix)      ((matrix) -> last_col_diag)
+#define hypre_ParCSRMatrixDiag(matrix)             ((matrix) -> diag)
+#define hypre_ParCSRMatrixOffd(matrix)             ((matrix) -> offd)
 #define hypre_ParCSRMatrixDiagT(matrix)            ((matrix) -> diagT)
 #define hypre_ParCSRMatrixOffdT(matrix)            ((matrix) -> offdT)
-#define hypre_ParCSRMatrixColMapOffd(matrix)      ((matrix) -> col_map_offd)
+#define hypre_ParCSRMatrixColMapOffd(matrix)       ((matrix) -> col_map_offd)
 #define hypre_ParCSRMatrixDeviceColMapOffd(matrix) ((matrix) -> device_col_map_offd)
-#define hypre_ParCSRMatrixRowStarts(matrix)       ((matrix) -> row_starts)
-#define hypre_ParCSRMatrixColStarts(matrix)       ((matrix) -> col_starts)
-#define hypre_ParCSRMatrixCommPkg(matrix)         ((matrix) -> comm_pkg)
-#define hypre_ParCSRMatrixCommPkgT(matrix)        ((matrix) -> comm_pkgT)
-#define hypre_ParCSRMatrixOwnsData(matrix)        ((matrix) -> owns_data)
-#define hypre_ParCSRMatrixOwnsRowStarts(matrix)   ((matrix) -> owns_row_starts)
-#define hypre_ParCSRMatrixOwnsColStarts(matrix)   ((matrix) -> owns_col_starts)
-#define hypre_ParCSRMatrixNumRows(matrix) \
-hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(matrix))
-#define hypre_ParCSRMatrixNumCols(matrix) \
-hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(matrix))
-#define hypre_ParCSRMatrixNumNonzeros(matrix)     ((matrix) -> num_nonzeros)
-#define hypre_ParCSRMatrixDNumNonzeros(matrix)    ((matrix) -> d_num_nonzeros)
-#define hypre_ParCSRMatrixRowindices(matrix)      ((matrix) -> rowindices)
-#define hypre_ParCSRMatrixRowvalues(matrix)       ((matrix) -> rowvalues)
-#define hypre_ParCSRMatrixGetrowactive(matrix)    ((matrix) -> getrowactive)
+#define hypre_ParCSRMatrixRowStarts(matrix)        ((matrix) -> row_starts)
+#define hypre_ParCSRMatrixColStarts(matrix)        ((matrix) -> col_starts)
+#define hypre_ParCSRMatrixCommPkg(matrix)          ((matrix) -> comm_pkg)
+#define hypre_ParCSRMatrixCommPkgT(matrix)         ((matrix) -> comm_pkgT)
+#define hypre_ParCSRMatrixOwnsData(matrix)         ((matrix) -> owns_data)
+#define hypre_ParCSRMatrixOwnsRowStarts(matrix)    ((matrix) -> owns_row_starts)
+#define hypre_ParCSRMatrixOwnsColStarts(matrix)    ((matrix) -> owns_col_starts)
+#define hypre_ParCSRMatrixNumNonzeros(matrix)      ((matrix) -> num_nonzeros)
+#define hypre_ParCSRMatrixDNumNonzeros(matrix)     ((matrix) -> d_num_nonzeros)
+#define hypre_ParCSRMatrixRowindices(matrix)       ((matrix) -> rowindices)
+#define hypre_ParCSRMatrixRowvalues(matrix)        ((matrix) -> rowvalues)
+#define hypre_ParCSRMatrixGetrowactive(matrix)     ((matrix) -> getrowactive)
 #define hypre_ParCSRMatrixAssumedPartition(matrix) ((matrix) -> assumed_partition)
+
+#define hypre_ParCSRMatrixNumRows(matrix) hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(matrix))
+#define hypre_ParCSRMatrixNumCols(matrix) hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(matrix))
 
 /*--------------------------------------------------------------------------
  * Parallel CSR Boolean Matrix

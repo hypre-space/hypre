@@ -11,7 +11,7 @@
  ***********************************************************************EHEADER*/
 
 #include "_hypre_utilities.h"
-#include "../seq_mv/csr_sparse_device.h"
+#include "../seq_mv/seq_mv.h"
 
 #if defined(HYPRE_USING_KOKKOS)
 #include <Kokkos_Core.hpp>
@@ -65,18 +65,7 @@ HYPRE_Init( hypre_int argc, char *argv[] )
 #endif
 
 #if defined(HYPRE_USING_CUDA)
-   hypre_device_sparse_opts = hypre_TAlloc(hypre_DeviceCSRSparseOpts, 1, HYPRE_MEMORY_HOST);
-   hypre_device_sparse_opts->rownnz_estimate_method      = 3; /* 1: naive overestimate
-                                                                 2: naive underestimate
-                                                                 3: Cohen's algorithm */
-   hypre_device_sparse_opts->spgemm_num_passes           = 3;
-   hypre_device_sparse_opts->rownnz_estimate_nsamples    = 32;
-   hypre_device_sparse_opts->rownnz_estimate_mult_factor = 1.5;
-   hypre_device_sparse_opts->hash_type                   = 'L';
-   hypre_device_sparse_opts->do_timing                   = 0;
-   hypre_device_sparse_opts->use_cusparse_spgemm         = 0;
-
-   hypre_device_sparse_handle = hypre_DeviceCSRSparseHandleCreate(hypre_device_sparse_opts);
+   hypre_device_csr_handle = hypre_DeviceCSRHandleCreate();
 #endif
 }
 
@@ -109,8 +98,104 @@ HYPRE_Finalize()
    hypre_TFree(global_recv_buffer, HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_CUDA)
-   hypre_TFree(hypre_device_sparse_opts, HYPRE_MEMORY_HOST);
-   hypre_DeviceCSRSparseHandleDestroy(hypre_device_sparse_handle);
+   hypre_DeviceCSRHandleDestroy(hypre_device_csr_handle);
 #endif
 }
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+/* Initialize GPU branch of Hypre AMG */
+/* use_device =-1 */
+/* Application passes device number it is using or -1 to let Hypre decide on which device to use */
+void hypre_GPUInit(hypre_int use_device)
+{
+   //char pciBusId[80];
+   HYPRE_Int myid, nproc;
+   hypre_int nDevices;
+
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &nproc);
+
+   if (!HYPRE_GPU_HANDLE)
+   {
+      HYPRE_GPU_HANDLE = 1;
+      HYPRE_DEVICE = 0;
+      HYPRE_CUDA_CALL(cudaGetDeviceCount(&nDevices));
+      HYPRE_DEVICE_COUNT = nDevices;
+
+      hypre_MPI_Comm node_comm;
+      hypre_MPI_Comm_split_type(hypre_MPI_COMM_WORLD, hypre_MPI_COMM_TYPE_SHARED, myid, MPI_INFO_NULL, &node_comm);
+      HYPRE_Int myNodeid, NodeSize;
+      hypre_MPI_Comm_rank(node_comm, &myNodeid);
+      hypre_MPI_Comm_size(node_comm, &NodeSize);
+      hypre_MPI_Comm_free(&node_comm);
+
+      if (use_device < 0)
+      {
+         HYPRE_DEVICE = myNodeid % nDevices;
+      }
+      else
+      {
+         HYPRE_DEVICE = use_device;
+      }
+
+      HYPRE_CUDA_CALL(cudaSetDevice(HYPRE_DEVICE));
+
+      hypre_int device_id;
+      HYPRE_CUDA_CALL(cudaGetDevice(&device_id));
+      printf("Proc [global %d/%d, local %d/%d] can see %d GPUs and is running on %d\n",
+              myid, nproc, myNodeid, NodeSize, nDevices, device_id);
+
+#if defined(HYPRE_USING_OPENMP_OFFLOAD) || defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
+      omp_set_default_device(HYPRE_DEVICE);
+      //printf("Set OMP Default device to %d \n",HYPRE_DEVICE);
+#endif
+
+      /* Create NVTX domain for all the nvtx calls in HYPRE */
+      HYPRE_DOMAIN=nvtxDomainCreateA("Hypre");
+
+      /* Initialize streams */
+      hypre_int jj;
+      for(jj=0;jj<MAX_HGS_ELEMENTS;jj++)
+      {
+         //HYPRE_CUDA_CALL(cudaStreamCreateWithFlags(&(HYPRE_STREAM(jj)),cudaStreamNonBlocking));
+         HYPRE_CUDA_CALL(cudaStreamCreateWithFlags(&(HYPRE_STREAM(jj)), cudaStreamDefault));
+      }
+
+      /* Initialize the library handles and streams */
+      HYPRE_CUSPARSE_CALL(cusparseCreate(&(HYPRE_CUSPARSE_HANDLE)));
+      HYPRE_CUSPARSE_CALL(cusparseSetStream(HYPRE_CUSPARSE_HANDLE, HYPRE_STREAM(4)));
+      //HYPRE_CUSPARSE_CALL(cusparseSetStream(HYPRE_CUSPARSE_HANDLE,0)); // Cusparse MxV happens in default stream
+      HYPRE_CUSPARSE_CALL(cusparseCreateMatDescr(&(HYPRE_CUSPARSE_MAT_DESCR)));
+      HYPRE_CUSPARSE_CALL(cusparseSetMatType(HYPRE_CUSPARSE_MAT_DESCR,CUSPARSE_MATRIX_TYPE_GENERAL));
+      HYPRE_CUSPARSE_CALL(cusparseSetMatIndexBase(HYPRE_CUSPARSE_MAT_DESCR,CUSPARSE_INDEX_BASE_ZERO));
+
+      //if (!checkDeviceProps()) hypre_printf("WARNING:: Concurrent memory access not allowed\n");
+
+      /* Check if the arch flags used for compiling the cuda kernels match the device */
+#if defined(HYPRE_USING_GPU)
+      hypre_CudaCompileFlagCheck();
+#endif
+   }
+}
+
+
+void hypre_GPUFinalize()
+{
+   HYPRE_CUSPARSE_CALL(cusparseDestroy(HYPRE_CUSPARSE_HANDLE));
+
+   /* Destroy streams */
+   hypre_int jj;
+   for(jj=0;jj<MAX_HGS_ELEMENTS;jj++)
+   {
+      HYPRE_CUDA_CALL(cudaStreamDestroy(HYPRE_STREAM(jj)));
+   }
+
+   cudaError_t cudaerr = cudaGetLastError() ;
+   if (cudaerr != cudaSuccess)
+   {
+      hypre_printf("CUDA error: %s\n",cudaGetErrorString(cudaerr));
+   }
+
+}
+#endif
 

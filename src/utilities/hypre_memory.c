@@ -23,23 +23,6 @@
 #undef HYPRE_USE_UMALLOC
 #endif
 
-/* global variables for device OpenMP */
-#if defined(HYPRE_USING_DEVICE_OPENMP)
-HYPRE_Int hypre__global_offload = 0;
-HYPRE_Int hypre__offload_device_num;
-HYPRE_Int hypre__offload_host_num;
-/* stats */
-size_t hypre__target_allc_count = 0;
-size_t hypre__target_free_count = 0;
-size_t hypre__target_allc_bytes = 0;
-size_t hypre__target_free_bytes = 0;
-
-size_t hypre__target_htod_count = 0;
-size_t hypre__target_dtoh_count = 0;
-size_t hypre__target_htod_bytes = 0;
-size_t hypre__target_dtoh_bytes = 0;
-#endif
-
 /******************************************************************************
  *
  * Helper routines
@@ -160,8 +143,8 @@ hypre_DeviceMalloc(size_t size, HYPRE_Int zeroinit)
    HYPRE_OMPOffload(hypre__offload_device_num, ptr, size, "enter", "alloc");
 #elif defined(HYPRE_USING_CUDA)
    /* cudaMalloc */
-   hypre_CheckErrorDevice( cudaMalloc(&ptr, size + sizeof(size_t)*HYPRE_MEM_PAD_LEN) );
-   hypre_CheckErrorDevice( cudaDeviceSynchronize() );
+   HYPRE_CUDA_CALL( cudaMalloc(&ptr, size + sizeof(size_t)*HYPRE_MEM_PAD_LEN) );
+   HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
    hypre_Memcpy(ptr, &size, sizeof(size_t), HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
    size_t *sp = (size_t*) ptr;
    ptr = (void*) (&sp[HYPRE_MEM_PAD_LEN]);
@@ -184,8 +167,8 @@ hypre_UnifiedMalloc(size_t size, HYPRE_Int zeroinit)
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    size_t count = size + sizeof(size_t)*HYPRE_MEM_PAD_LEN;
    /* with UM, managed memory alloc */
-   hypre_CheckErrorDevice( cudaMallocManaged(&ptr, count, CUDAMEMATTACHTYPE) );
-   hypre_CheckErrorDevice( cudaMemAdvise(ptr, count, cudaMemAdviseSetPreferredLocation, HYPRE_DEVICE) );
+   HYPRE_CUDA_CALL( cudaMallocManaged(&ptr, count, cudaMemAttachGlobal) );
+   HYPRE_CUDA_CALL( cudaMemAdvise(ptr, count, cudaMemAdviseSetPreferredLocation, HYPRE_DEVICE) );
    size_t *sp = (size_t*) ptr;
    sp[0] = size;
    ptr = (void*) (&sp[HYPRE_MEM_PAD_LEN]);
@@ -207,9 +190,9 @@ hypre_HostPinnedMalloc(size_t size, HYPRE_Int zeroinit)
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    /* TODO which one of the following two? */
-   /* hypre_CheckErrorDevice( cudaHostAlloc(&ptr,size + sizeof(size_t)*HYPRE_MEM_PAD_LEN,
+   /* HYPRE_CUDA_CALL( cudaHostAlloc(&ptr,size + sizeof(size_t)*HYPRE_MEM_PAD_LEN,
                                             cudaHostAllocMapped)); */
-   hypre_CheckErrorDevice( cudaMallocHost(&ptr, size + sizeof(size_t)*HYPRE_MEM_PAD_LEN) );
+   HYPRE_CUDA_CALL( cudaMallocHost(&ptr, size + sizeof(size_t)*HYPRE_MEM_PAD_LEN) );
    size_t *sp = (size_t*) ptr;
    sp[0] = size;
    ptr = (void*) (&sp[HYPRE_MEM_PAD_LEN]);
@@ -303,8 +286,8 @@ hypre_DeviceFree(void *ptr)
    size_t size = ((size_t *) ptr)[-HYPRE_MEM_PAD_LEN];
    HYPRE_OMPOffload(hypre__offload_device_num, ptr, size, "exit", "delete");
 #elif defined(HYPRE_USING_CUDA)
-   /* hypre_CheckErrorDevice(cudaFree((size_t *) ptr - HYPRE_MEM_PAD_LEN)); */
-   cudaSafeFree(ptr, HYPRE_MEM_PAD_LEN);
+   HYPRE_CUDA_CALL( cudaFree((size_t *) ptr - HYPRE_MEM_PAD_LEN) );
+   //cudaSafeFree(ptr, HYPRE_MEM_PAD_LEN);
 #endif
 }
 
@@ -313,8 +296,9 @@ hypre_UnifiedFree(void *ptr)
 {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    /* with UM, managed memory free */
-   /* cudaFree((size_t *) ptr - HYPRE_MEM_PAD_LEN); */
-   cudaSafeFree(ptr, HYPRE_MEM_PAD_LEN);
+   //HYPRE_CUDA_CALL( cudaFree((size_t *) ptr - HYPRE_MEM_PAD_LEN) );
+   cudaFree((size_t *) ptr - HYPRE_MEM_PAD_LEN);
+   //cudaSafeFree(ptr, HYPRE_MEM_PAD_LEN);
 #endif
 }
 
@@ -323,8 +307,8 @@ hypre_HostPinnedFree(void *ptr)
 {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    /* page-locked memory on the host */
-   /* cudaFreeHost((size_t *) ptr - HYPRE_MEM_PAD_LEN); */
-   cudaSafeFree(ptr, HYPRE_MEM_PAD_LEN);
+   HYPRE_CUDA_CALL( cudaFreeHost((size_t *) ptr - HYPRE_MEM_PAD_LEN) );
+   //cudaSafeFree(ptr, HYPRE_MEM_PAD_LEN);
 #endif
 }
 
@@ -519,6 +503,7 @@ hypre_Memcpy(void *dst, void *src, size_t size, HYPRE_Int loc_dst, HYPRE_Int loc
  * hypre_Memset
  * "Sets the first num bytes of the block of memory pointed by ptr to the specified value
  * (*** interpreted as an unsigned char ***)"
+ * http://www.cplusplus.com/reference/cstring/memset/
  *--------------------------------------------------------------------------*/
 void *
 hypre_Memset(void *ptr, HYPRE_Int value, size_t num, HYPRE_Int location)

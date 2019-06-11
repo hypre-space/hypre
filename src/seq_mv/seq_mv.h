@@ -215,10 +215,13 @@ typedef struct
 typedef struct
 {
    HYPRE_Complex  *data;
-   HYPRE_Int      size;
+   HYPRE_Int       size;
 
    /* Does the Vector create/destroy `data'? */
-   HYPRE_Int      owns_data;
+   HYPRE_Int       owns_data;
+
+   /* memory location of array data */
+   HYPRE_Int       memory_location;
 
    /* For multivectors...*/
    HYPRE_Int   num_vectors;  /* the above "size" is size of one vector */
@@ -244,13 +247,14 @@ typedef struct
  * Accessor functions for the Vector structure
  *--------------------------------------------------------------------------*/
 
-#define hypre_VectorData(vector)      ((vector) -> data)
-#define hypre_VectorSize(vector)      ((vector) -> size)
-#define hypre_VectorOwnsData(vector)  ((vector) -> owns_data)
-#define hypre_VectorNumVectors(vector) ((vector) -> num_vectors)
+#define hypre_VectorData(vector)                  ((vector) -> data)
+#define hypre_VectorSize(vector)                  ((vector) -> size)
+#define hypre_VectorOwnsData(vector)              ((vector) -> owns_data)
+#define hypre_VectorMemoryLocation(vector)        ((vector) -> memory_location)
+#define hypre_VectorNumVectors(vector)            ((vector) -> num_vectors)
 #define hypre_VectorMultiVecStorageMethod(vector) ((vector) -> multivec_storage_method)
-#define hypre_VectorVectorStride(vector) ((vector) -> vecstride )
-#define hypre_VectorIndexStride(vector) ((vector) -> idxstride )
+#define hypre_VectorVectorStride(vector)          ((vector) -> vecstride )
+#define hypre_VectorIndexStride(vector)           ((vector) -> idxstride )
 
 
 #endif
@@ -259,12 +263,6 @@ typedef struct
 #define hypre_GPUKERNELS_HEADER
 #ifdef HYPRE_USING_GPU
 #include <cuda_runtime_api.h>
-HYPRE_Int VecScaleScalar(HYPRE_Real *u, const HYPRE_Real alpha,  HYPRE_Int num_rows,cudaStream_t s);
-void DiagScaleVector(HYPRE_Real *x, HYPRE_Real *y, HYPRE_Real *A_data, HYPRE_Int *A_i, HYPRE_Int num_rows, cudaStream_t s);
-void VecCopy(HYPRE_Real* tgt, const HYPRE_Real* src, HYPRE_Int size,cudaStream_t s);
-void VecSet(HYPRE_Real* tgt, HYPRE_Int size, HYPRE_Real value, cudaStream_t s);
-void VecScale(HYPRE_Real *u, HYPRE_Real *v, HYPRE_Real *l1_norm, HYPRE_Int num_rows,cudaStream_t s);
-void VecScaleSplit(HYPRE_Real *u, HYPRE_Real *v, HYPRE_Real *l1_norm, HYPRE_Int num_rows,cudaStream_t s);
 void CudaCompileFlagCheck();
 void PackOnDevice(HYPRE_Complex *send_data,HYPRE_Complex *x_local_data, HYPRE_Int *send_map, HYPRE_Int begin, HYPRE_Int end,cudaStream_t s);
 #endif
@@ -290,6 +288,8 @@ hypre_CSRMatrix * hypre_CSRMatrixAddPartial( hypre_CSRMatrix *A, hypre_CSRMatrix
 hypre_CSRMatrix *hypre_CSRMatrixAddDevice ( hypre_CSRMatrix *A , hypre_CSRMatrix *B );
 
 hypre_CSRMatrix *hypre_CSRMatrixMultiplyDevice ( hypre_CSRMatrix *A , hypre_CSRMatrix *B );
+
+HYPRE_Int hypre_CSRMatrixColNNzRealDevice( hypre_CSRMatrix *A, HYPRE_Real *colnnz);
 
 HYPRE_Int hypre_CSRMatrixSplitDevice(hypre_CSRMatrix *B_ext, HYPRE_BigInt first_col_diag_B, HYPRE_BigInt last_col_diag_B, HYPRE_Int num_cols_offd_B, HYPRE_BigInt *col_map_offd_B, HYPRE_Int **map_B_to_C_ptr, HYPRE_Int *num_cols_offd_C_ptr, HYPRE_BigInt **col_map_offd_C_ptr, hypre_CSRMatrix **B_ext_diag_ptr, hypre_CSRMatrix **B_ext_offd_ptr);
 
@@ -334,7 +334,7 @@ HYPRE_Int hypre_CSRMatrixMatvec ( HYPRE_Complex alpha , hypre_CSRMatrix *A , hyp
 HYPRE_Int hypre_CSRMatrixMatvecT ( HYPRE_Complex alpha , hypre_CSRMatrix *A , hypre_Vector *x , HYPRE_Complex beta , hypre_Vector *y );
 HYPRE_Int hypre_CSRMatrixMatvec_FF ( HYPRE_Complex alpha , hypre_CSRMatrix *A , hypre_Vector *x , HYPRE_Complex beta , hypre_Vector *y , HYPRE_Int *CF_marker_x , HYPRE_Int *CF_marker_y , HYPRE_Int fpt );
 #ifdef HYPRE_USING_GPU
-HYPRE_Int hypre_CSRMatrixMatvecDevice( HYPRE_Complex alpha , hypre_CSRMatrix *A , hypre_Vector *x , HYPRE_Complex beta , hypre_Vector *b, hypre_Vector *y, HYPRE_Int offset );
+HYPRE_Int hypre_CSRMatrixMatvecDevice(HYPRE_Int trans, HYPRE_Complex alpha , hypre_CSRMatrix *A , hypre_Vector *x , HYPRE_Complex beta , hypre_Vector *b, hypre_Vector *y, HYPRE_Int offset );
 HYPRE_Int hypre_CSRMatrixMatvecDeviceBIGINT( HYPRE_Complex alpha , hypre_CSRMatrix *A , hypre_Vector *x , HYPRE_Complex beta , hypre_Vector *b, hypre_Vector *y, HYPRE_Int offset );
 #endif
 /* genpart.c */
@@ -407,6 +407,7 @@ HYPRE_Int hypre_MultiblockMatrixSetSubmatrix ( hypre_MultiblockMatrix *matrix , 
 hypre_Vector *hypre_SeqVectorCreate ( HYPRE_Int size );
 hypre_Vector *hypre_SeqMultiVectorCreate ( HYPRE_Int size , HYPRE_Int num_vectors );
 HYPRE_Int hypre_SeqVectorDestroy ( hypre_Vector *vector );
+HYPRE_Int hypre_SeqVectorInitialize_v2( hypre_Vector *vector, HYPRE_Int memory_location );
 HYPRE_Int hypre_SeqVectorInitialize ( hypre_Vector *vector );
 HYPRE_Int hypre_SeqVectorSetDataOwner ( hypre_Vector *vector , HYPRE_Int owns_data );
 hypre_Vector *hypre_SeqVectorRead ( char *file_name );
@@ -451,9 +452,80 @@ void hypre_SeqVectorUpdateHost(hypre_Vector *x);
 
 HYPRE_Int hypre_CSRMatrixMatvecOutOfPlaceOOMP3( HYPRE_Complex alpha, hypre_CSRMatrix *A, hypre_Vector *x, HYPRE_Complex beta, hypre_Vector *b, hypre_Vector *y, HYPRE_Int offset);
 
-HYPRE_Int hypreDevice_CSRSparseHandlePrint();
+#if defined(HYPRE_USING_CUDA)
 
-HYPRE_Int hypreDevice_CSRSparseHandleClearStats();
+typedef struct
+{
+   curandGenerator_t gen;
+
+   HYPRE_Int   do_timing;
+
+   /* spgemm options */
+   HYPRE_Int   use_cusparse_spgemm;
+   HYPRE_Int   spgemm_num_passes;
+   HYPRE_Int   rownnz_estimate_method;
+   HYPRE_Int   rownnz_estimate_nsamples;
+   float       rownnz_estimate_mult_factor;
+   char        hash_type;
+
+   /* spgemm stats */
+   size_t      ghash_size, ghash2_size;
+   HYPRE_Int   nnzC_gpu;
+
+   HYPRE_Real  rownnz_estimate_time;
+   HYPRE_Real  rownnz_estimate_curand_time;
+   size_t      rownnz_estimate_mem;
+
+   HYPRE_Real  spmm_create_hashtable_time;
+
+   HYPRE_Real  spmm_attempt1_time;
+   HYPRE_Real  spmm_post_attempt1_time;
+   HYPRE_Real  spmm_attempt2_time;
+   HYPRE_Real  spmm_post_attempt2_time;
+   size_t      spmm_attempt_mem;
+
+   HYPRE_Real  spmm_symbolic_time;
+   size_t      spmm_symbolic_mem;
+   HYPRE_Real  spmm_post_symbolic_time;
+   HYPRE_Real  spmm_numeric_time;
+   size_t      spmm_numeric_mem;
+   HYPRE_Real  spmm_post_numeric_time;
+
+   /* spadd stats */
+   HYPRE_Real  spadd_expansion_time;
+   HYPRE_Real  spadd_sorting_time;
+   HYPRE_Real  spadd_compression_time;
+   HYPRE_Real  spadd_convert_ptr_time;
+   HYPRE_Real  spadd_time;
+
+   /* sptrans stats */
+   HYPRE_Real  sptrans_expansion_time;
+   HYPRE_Real  sptrans_sorting_time;
+   HYPRE_Real  sptrans_rowptr_time;
+   HYPRE_Real  sptrans_time;
+
+   /* cusparse stats */
+   HYPRE_Real  spmm_cusparse_time;
+
+} hypre_DeviceCSRHandle;
+
+extern hypre_DeviceCSRHandle *hypre_device_csr_handle;
+
+HYPRE_Int hypreDevice_CSRSpAdd(HYPRE_Int ma, HYPRE_Int mb, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int nnzB, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_aa, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex *d_ab, HYPRE_Int *d_num_b, HYPRE_Int *nnzC_out, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_ac_out);
+
+HYPRE_Int hypreDevice_CSRSpTrans(HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_aa, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_ac_out, HYPRE_Int want_data);
+
+HYPRE_Int hypreDevice_CSRSpGemm(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int nnza, HYPRE_Int nnzb, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex *d_b, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_c_out, HYPRE_Int *nnzC);
+
+hypre_DeviceCSRHandle* hypre_DeviceCSRHandleCreate();
+
+HYPRE_Int hypre_DeviceCSRHandleDestroy(hypre_DeviceCSRHandle *handle);
+
+#endif
+
+HYPRE_Int hypreDevice_CSRHandlePrint();
+
+HYPRE_Int hypreDevice_CSRHandleClearStats();
 
 #ifdef __cplusplus
 }

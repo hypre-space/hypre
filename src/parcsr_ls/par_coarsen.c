@@ -972,14 +972,14 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
 
    if (!comm_pkg)
    {
-        use_commpkg_A = 1;
-        comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+      use_commpkg_A = 1;
+      comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    }
 
    if (!comm_pkg)
    {
-        hypre_MatvecCommPkgCreate(A);
-        comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+      hypre_MatvecCommPkgCreate(A);
+      comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    }
 
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
@@ -989,6 +989,7 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    jS = S_i[num_variables];
 
    ST = hypre_CSRMatrixCreate(num_variables, num_variables, jS);
+   hypre_CSRMatrixMemoryLocation(ST) = HYPRE_MEMORY_HOST;
    ST_i = hypre_CTAlloc(HYPRE_Int, num_variables+1, HYPRE_MEMORY_HOST);
    ST_j = hypre_CTAlloc(HYPRE_Int, jS, HYPRE_MEMORY_HOST);
    hypre_CSRMatrixI(ST) = ST_i;
@@ -1003,7 +1004,7 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
 
    for (i=0; i < jS; i++)
    {
-	 ST_i[S_j[i]+1]++;
+      ST_i[S_j[i]+1]++;
    }
    for (i=0; i < num_variables; i++)
    {
@@ -1013,9 +1014,9 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    {
       for (j=S_i[i]; j < S_i[i+1]; j++)
       {
-	 index = S_j[j];
-       	 ST_j[ST_i[index]] = i;
-       	 ST_i[index]++;
+         index = S_j[j];
+         ST_j[ST_i[index]] = i;
+         ST_i[index]++;
       }
    }
    for (i = num_variables; i > 0; i--)
@@ -2330,6 +2331,8 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
 
       /* stop the coarsening if nothing left to be coarsened */
       hypre_MPI_Allreduce(&big_graph_size, &global_graph_size, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM,comm);
+
+      /* if (my_id == 0) { hypre_printf("graph size %b\n", global_graph_size); } */
 
       if (global_graph_size == 0)
       {

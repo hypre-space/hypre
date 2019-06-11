@@ -17,9 +17,7 @@
  *****************************************************************************/
 
 #include "seq_mv.h"
-#ifdef HYPRE_USING_GPU
-#include "gpukernels.h"
-#endif
+
 #ifdef HYPRE_PROFILE
 HYPRE_Real hypre_profile_times[HYPRE_TIMER_ID_COUNT] = { 0 };
 #endif
@@ -113,7 +111,7 @@ hypre_CSRMatrixInitialize_v2( hypre_CSRMatrix *matrix, HYPRE_Int bigInit, HYPRE_
    hypre_CSRMatrixMemoryLocation(matrix) = memory_location;
 
    /* Caveat: for pre-existing i, j, data, their memory location must be guaranteed to be consistent with `memory_location'
-    * Otherwise, mismatches will exist inside parcsr and problems will be encountered when being used, and freed */
+    * Otherwise, mismatches will exist and problems will be encountered when being used, and freed */
 
    if ( !hypre_CSRMatrixData(matrix) && num_nonzeros )
    {
@@ -899,12 +897,12 @@ void hypre_CSRMatrixPrefetchToDevice(hypre_CSRMatrix *A){
     ASSERT_MANAGED(hypre_CSRMatrixI(A));
     ASSERT_MANAGED(hypre_CSRMatrixJ(A));
 #endif
-    hypre_CheckErrorDevice(cudaMemPrefetchAsync(hypre_CSRMatrixData(A),hypre_CSRMatrixNumNonzeros(A)*sizeof(HYPRE_Complex),HYPRE_DEVICE,HYPRE_STREAM(4)));
-    hypre_CheckErrorDevice(cudaMemPrefetchAsync(hypre_CSRMatrixI(A),(hypre_CSRMatrixNumRows(A)+1)*sizeof(HYPRE_Int),HYPRE_DEVICE,HYPRE_STREAM(5)));
-    hypre_CheckErrorDevice(cudaMemPrefetchAsync(hypre_CSRMatrixJ(A),hypre_CSRMatrixNumNonzeros(A)*sizeof(HYPRE_Int),HYPRE_DEVICE,HYPRE_STREAM(6)));
-    hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(4)));
-    hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(5)));
-    hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(6)));
+    HYPRE_CUDA_CALL(cudaMemPrefetchAsync(hypre_CSRMatrixData(A),hypre_CSRMatrixNumNonzeros(A)*sizeof(HYPRE_Complex),HYPRE_DEVICE,HYPRE_STREAM(4)));
+    HYPRE_CUDA_CALL(cudaMemPrefetchAsync(hypre_CSRMatrixI(A),(hypre_CSRMatrixNumRows(A)+1)*sizeof(HYPRE_Int),HYPRE_DEVICE,HYPRE_STREAM(5)));
+    HYPRE_CUDA_CALL(cudaMemPrefetchAsync(hypre_CSRMatrixJ(A),hypre_CSRMatrixNumNonzeros(A)*sizeof(HYPRE_Int),HYPRE_DEVICE,HYPRE_STREAM(6)));
+    HYPRE_CUDA_CALL(cudaStreamSynchronize(HYPRE_STREAM(4)));
+    HYPRE_CUDA_CALL(cudaStreamSynchronize(HYPRE_STREAM(5)));
+    HYPRE_CUDA_CALL(cudaStreamSynchronize(HYPRE_STREAM(6)));
 #ifdef HYPRE_USING_OPENMP_OFFLOAD
     A->on_device=0; // Should be 1 for CUDA code. 0 for OMP for now
 #else
@@ -924,12 +922,12 @@ void hypre_CSRMatrixPrefetchToDeviceBIGINT(hypre_CSRMatrix *A){
     ASSERT_MANAGED(hypre_CSRMatrixI(A));
     ASSERT_MANAGED(hypre_CSRMatrixJ(A));
 #endif
-    hypre_CheckErrorDevice(cudaMemPrefetchAsync(hypre_CSRMatrixData(A),hypre_CSRMatrixNumNonzeros(A)*sizeof(HYPRE_Complex),HYPRE_DEVICE,HYPRE_STREAM(4)));
-    hypre_CheckErrorDevice(cudaMemPrefetchAsync(hypre_CSRMatrixI(A),(hypre_CSRMatrixNumRows(A)+1)*sizeof(HYPRE_Int),HYPRE_DEVICE,HYPRE_STREAM(5)));
-    hypre_CheckErrorDevice(cudaMemPrefetchAsync(hypre_CSRMatrixJ(A),hypre_CSRMatrixNumNonzeros(A)*sizeof(HYPRE_Int),HYPRE_DEVICE,HYPRE_STREAM(6)));
-    hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(4)));
-    hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(5)));
-    hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(6)));
+    HYPRE_CUDA_CALL(cudaMemPrefetchAsync(hypre_CSRMatrixData(A),hypre_CSRMatrixNumNonzeros(A)*sizeof(HYPRE_Complex),HYPRE_DEVICE,HYPRE_STREAM(4)));
+    HYPRE_CUDA_CALL(cudaMemPrefetchAsync(hypre_CSRMatrixI(A),(hypre_CSRMatrixNumRows(A)+1)*sizeof(HYPRE_Int),HYPRE_DEVICE,HYPRE_STREAM(5)));
+    HYPRE_CUDA_CALL(cudaMemPrefetchAsync(hypre_CSRMatrixJ(A),hypre_CSRMatrixNumNonzeros(A)*sizeof(HYPRE_Int),HYPRE_DEVICE,HYPRE_STREAM(6)));
+    HYPRE_CUDA_CALL(cudaStreamSynchronize(HYPRE_STREAM(4)));
+    HYPRE_CUDA_CALL(cudaStreamSynchronize(HYPRE_STREAM(5)));
+    HYPRE_CUDA_CALL(cudaStreamSynchronize(HYPRE_STREAM(6)));
 #ifdef HYPRE_USING_OPENMP_OFFLOAD
     A->on_device=0; // Should be 1 for CUDA code. 0 for OMP for now
 #else
@@ -942,10 +940,10 @@ void hypre_CSRMatrixPrefetchToHost(hypre_CSRMatrix *A){
   //PUSH_RANGE("hypre_CSRMatrixPrefetchToDevice",0);
   if (A->on_device){
     A->on_device=0;
-    hypre_CheckErrorDevice(cudaMemPrefetchAsync(hypre_CSRMatrixData(A),hypre_CSRMatrixNumNonzeros(A)*sizeof(HYPRE_Complex),cudaCpuDeviceId,HYPRE_STREAM(4)));
-    hypre_CheckErrorDevice(cudaMemPrefetchAsync(hypre_CSRMatrixI(A),(hypre_CSRMatrixNumRows(A)+1)*sizeof(HYPRE_Int),cudaCpuDeviceId,HYPRE_STREAM(4)));
-    hypre_CheckErrorDevice(cudaMemPrefetchAsync(hypre_CSRMatrixJ(A),hypre_CSRMatrixNumNonzeros(A)*sizeof(HYPRE_Int),cudaCpuDeviceId,HYPRE_STREAM(4)));
-    hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(4)));
+    HYPRE_CUDA_CALL(cudaMemPrefetchAsync(hypre_CSRMatrixData(A),hypre_CSRMatrixNumNonzeros(A)*sizeof(HYPRE_Complex),cudaCpuDeviceId,HYPRE_STREAM(4)));
+    HYPRE_CUDA_CALL(cudaMemPrefetchAsync(hypre_CSRMatrixI(A),(hypre_CSRMatrixNumRows(A)+1)*sizeof(HYPRE_Int),cudaCpuDeviceId,HYPRE_STREAM(4)));
+    HYPRE_CUDA_CALL(cudaMemPrefetchAsync(hypre_CSRMatrixJ(A),hypre_CSRMatrixNumNonzeros(A)*sizeof(HYPRE_Int),cudaCpuDeviceId,HYPRE_STREAM(4)));
+    HYPRE_CUDA_CALL(cudaStreamSynchronize(HYPRE_STREAM(4)));
   }
   //POP_RANGE;
 }

@@ -15,7 +15,7 @@
  *- - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "seq_mv.h"
-#include "csr_sparse_device.h"
+#include "csr_spgemm_device.h"
 
 #if defined(HYPRE_USING_CUDA)
 
@@ -279,7 +279,7 @@ void cohen_rowest_kernel(HYPRE_Int nrow, HYPRE_Int *rowptr, HYPRE_Int *colidx, T
 }
 
 template <typename T, HYPRE_Int BDIMX, HYPRE_Int BDIMY, HYPRE_Int NUM_WARPS_PER_BLOCK, HYPRE_Int SHMEM_SIZE_PER_WARP>
-void csr_spmm_rownnz_cohen(HYPRE_Int M, HYPRE_Int K, HYPRE_Int N, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Int *d_low, HYPRE_Int *d_upp, HYPRE_Int *d_rc, HYPRE_Int nsamples, T mult_factor, hypre_DeviceCSRSparseHandle *handle, T *work)
+void csr_spmm_rownnz_cohen(HYPRE_Int M, HYPRE_Int K, HYPRE_Int N, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Int *d_low, HYPRE_Int *d_upp, HYPRE_Int *d_rc, HYPRE_Int nsamples, T mult_factor, T *work)
 {
    dim3 bDim(BDIMX, BDIMY, NUM_WARPS_PER_BLOCK);
    assert(bDim.x * bDim.y == HYPRE_WARP_SIZE);
@@ -292,10 +292,10 @@ void csr_spmm_rownnz_cohen(HYPRE_Int M, HYPRE_Int K, HYPRE_Int N, HYPRE_Int *d_i
    //d_V1 = hypre_TAlloc(T, nsamples*N, HYPRE_MEMORY_DEVICE);
    //d_V2 = hypre_TAlloc(T, nsamples*K, HYPRE_MEMORY_DEVICE);
 
-   curandGenerator_t gen = handle->gen;
+   curandGenerator_t gen = hypre_device_csr_handle->gen;
    //CURAND_CALL(curandSetGeneratorOrdering(gen, CURAND_ORDERING_PSEUDO_SEEDED));
    /* random V1: uniform --> exp */
-   CURAND_CALL(curandGenerateUniform(gen, d_V1, nsamples * N));
+   HYPRE_CURAND_CALL(curandGenerateUniform(gen, d_V1, nsamples * N));
    //  CURAND_CALL(curandGenerateUniformDouble(gen, d_V1, nsamples * N));
    gDim = (nsamples * N + bDim.z * HYPRE_WARP_SIZE - 1) / (bDim.z * HYPRE_WARP_SIZE);
    expdistfromuniform<<<gDim, bDim>>>(nsamples * N, d_V1);
@@ -321,8 +321,7 @@ void csr_spmm_rownnz_cohen(HYPRE_Int M, HYPRE_Int K, HYPRE_Int N, HYPRE_Int *d_i
 
 HYPRE_Int
 hypreDevice_CSRSpGemmRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
-                                    HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Int *d_rc,
-                                    hypre_DeviceCSRSparseOpts *opts, hypre_DeviceCSRSparseHandle *handle)
+                                    HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Int *d_rc)
 {
    const HYPRE_Int num_warps_per_block =  16;
    const HYPRE_Int shmem_size_per_warp = 128;
@@ -338,10 +337,10 @@ hypreDevice_CSRSpGemmRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    HYPRE_Real t1, t2;
    size_t mem_alloc = 0;
 
-   HYPRE_Int   row_est_mtd    = opts->rownnz_estimate_method;
-   HYPRE_Int   cohen_nsamples = opts->rownnz_estimate_nsamples;
-   float cohen_mult           = opts->rownnz_estimate_mult_factor;
-   HYPRE_Int   do_timing      = opts->do_timing;
+   HYPRE_Int   row_est_mtd    = hypre_device_csr_handle->rownnz_estimate_method;
+   HYPRE_Int   cohen_nsamples = hypre_device_csr_handle->rownnz_estimate_nsamples;
+   float cohen_mult           = hypre_device_csr_handle->rownnz_estimate_mult_factor;
+   HYPRE_Int   do_timing      = hypre_device_csr_handle->do_timing;
 
    if (do_timing)
    {
@@ -381,14 +380,14 @@ hypreDevice_CSRSpGemmRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
 
       /* Cohen's algorithm, stochastic approach */
       csr_spmm_rownnz_cohen<float, BDIMX, BDIMY, num_warps_per_block, shmem_size_per_warp>
-         (m, k, n, d_ia, d_ja, d_ib, d_jb, d_low, d_upp, d_rc, cohen_nsamples, cohen_mult, handle, (float *)work_mem);
+         (m, k, n, d_ia, d_ja, d_ib, d_jb, d_low, d_upp, d_rc, cohen_nsamples, cohen_mult, (float *)work_mem);
 
       //hypre_TFree(d_low_upp, HYPRE_MEMORY_DEVICE);
       hypre_TFree(work_mem_saved, HYPRE_MEMORY_DEVICE);
    }
    else
    {
-      printf("Unknown row nnz estimation method! \n");
+      printf("Unknown row nnz estimation method %d! \n", row_est_mtd);
       exit(-1);
    }
 
@@ -398,7 +397,7 @@ hypreDevice_CSRSpGemmRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
       t2 = time_getWallclockSeconds();
       //printf("^^^^Row nnz estimations time                              %.2e\n", t2 - t1);
 
-      handle->rownnz_estimate_time += t2 - t1;
+      hypre_device_csr_handle->rownnz_estimate_time += t2 - t1;
    }
 
    return hypre_error_flag;

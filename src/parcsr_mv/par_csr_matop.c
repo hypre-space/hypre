@@ -1632,6 +1632,7 @@ hypre_ParCSRMatrixExtractBExt_Overlap( hypre_ParCSRMatrix *B,
          );
 
    B_ext = hypre_CSRMatrixCreate(num_rows_B_ext,num_cols_B,num_nonzeros);
+   hypre_CSRMatrixMemoryLocation(B_ext) = HYPRE_MEMORY_HOST;
    hypre_CSRMatrixI(B_ext) = B_ext_i;
    hypre_CSRMatrixBigJ(B_ext) = B_ext_j;
    if (data) hypre_CSRMatrixData(B_ext) = B_ext_data;
@@ -1661,11 +1662,10 @@ hypre_ParCSRMatrixExtractBExt( hypre_ParCSRMatrix *B,
       hypre_TFree(send_data, HYPRE_MEMORY_HOST);
    }
 #else
-   HYPRE_Int memory_location = hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(B));
-
    hypre_assert( hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(B)) ==
                  hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixOffd(B)) );
-   hypre_assert( hypre_GetActualMemLocation(memory_location) != HYPRE_MEMORY_DEVICE );
+
+   hypre_assert( hypre_GetActualMemLocation(hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(B))) != HYPRE_MEMORY_DEVICE );
 
    hypre_CSRMatrix *B_ext;
    void            *request;
@@ -3160,7 +3160,7 @@ hypre_ParCSRMatrixAminvDB( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B,
    recv_vec_starts_C = hypre_CTAlloc(HYPRE_Int,  num_recvs_B+1, HYPRE_MEMORY_HOST);
    send_procs_C = hypre_CTAlloc(HYPRE_Int,  num_sends_B, HYPRE_MEMORY_HOST);
    send_map_starts_C = hypre_CTAlloc(HYPRE_Int,  num_sends_B+1, HYPRE_MEMORY_HOST);
-   send_map_elmts_C = hypre_CTAlloc(HYPRE_Int,  send_map_starts_B[num_sends_B], HYPRE_MEMORY_SHARED);
+   send_map_elmts_C = hypre_CTAlloc(HYPRE_Int,  send_map_starts_B[num_sends_B], HYPRE_MEMORY_HOST);
 
    for (i=0; i < num_recvs_B; i++)
       recv_procs_C[i] = recv_procs_B[i];
@@ -3479,8 +3479,8 @@ hypre_ParCSRMatrix *hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
       C_diag_i = hypre_CTAlloc(HYPRE_Int,  num_cols_diag_A+1, HYPRE_MEMORY_SHARED);
       C_offd_i = hypre_CTAlloc(HYPRE_Int,  num_cols_diag_A+1, HYPRE_MEMORY_SHARED);
 
-      C_diag_array = hypre_CTAlloc(HYPRE_Int,  max_num_threads, HYPRE_MEMORY_SHARED);
-      C_offd_array = hypre_CTAlloc(HYPRE_Int,  max_num_threads, HYPRE_MEMORY_SHARED);
+      C_diag_array = hypre_CTAlloc(HYPRE_Int,  max_num_threads, HYPRE_MEMORY_HOST);
+      C_offd_array = hypre_CTAlloc(HYPRE_Int,  max_num_threads, HYPRE_MEMORY_HOST);
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel
@@ -3671,8 +3671,8 @@ hypre_ParCSRMatrix *hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
          hypre_TFree(B_marker, HYPRE_MEMORY_HOST);
          hypre_TFree(B_marker_offd, HYPRE_MEMORY_HOST);
       } /*end parallel region */
-      hypre_TFree(C_diag_array, HYPRE_MEMORY_SHARED);
-      hypre_TFree(C_offd_array, HYPRE_MEMORY_SHARED);
+      hypre_TFree(C_diag_array, HYPRE_MEMORY_HOST);
+      hypre_TFree(C_offd_array, HYPRE_MEMORY_HOST);
    }
 
    /*C = hypre_ParCSRMatrixCreate(comm, n_cols_A, n_cols_B, col_starts_A,
@@ -4719,6 +4719,7 @@ hypre_ParcsrGetExternalRowsInit( hypre_ParCSRMatrix   *A,
 
    /* create A_ext */
    A_ext = hypre_CSRMatrixCreate(num_rows_recv, hypre_ParCSRMatrixGlobalNumCols(A), num_nnz_recv);
+   hypre_CSRMatrixMemoryLocation(A_ext) = HYPRE_MEMORY_HOST;
    hypre_CSRMatrixI   (A_ext) = recv_i;
    hypre_CSRMatrixBigJ(A_ext) = recv_j;
    hypre_CSRMatrixData(A_ext) = recv_a;
@@ -4736,9 +4737,8 @@ hypre_ParcsrGetExternalRowsInit( hypre_ParCSRMatrix   *A,
    hypre_TFree(send_i, HYPRE_MEMORY_HOST);
    hypre_TFree(send_i_offset, HYPRE_MEMORY_HOST);
 
-
    return hypre_error_flag;
-   }
+}
 
 hypre_CSRMatrix*
 hypre_ParcsrGetExternalRowsWait(void *vrequest)
@@ -4991,11 +4991,13 @@ hypre_ParcsrAdd( HYPRE_Complex alpha,
    hypre_CSRMatrixData(C_diag) = C_diag_a;
    hypre_CSRMatrixI(C_diag)    = C_diag_i;
    hypre_CSRMatrixJ(C_diag)    = C_diag_j;
+   hypre_CSRMatrixMemoryLocation(C_diag) = HYPRE_MEMORY_HOST;
 
    C_offd = hypre_ParCSRMatrixOffd(C);
    hypre_CSRMatrixData(C_offd) = C_offd_a;
    hypre_CSRMatrixI(C_offd)    = C_offd_i;
    hypre_CSRMatrixJ(C_offd)    = C_offd_j;
+   hypre_CSRMatrixMemoryLocation(C_offd) = HYPRE_MEMORY_HOST;
 
    hypre_ParCSRMatrixColMapOffd(C) = col_map_offd_C;
 
@@ -5140,6 +5142,7 @@ hypre_ExchangeExternalRowsInit( hypre_CSRMatrix      *B_ext,
 
    /* create CSR */
    B_int = hypre_CSRMatrixCreate(B_int_nrows, B_int_ncols, B_int_nnz);
+   hypre_CSRMatrixMemoryLocation(B_int) = HYPRE_MEMORY_HOST;
    hypre_CSRMatrixI(B_int)    = B_int_i;
    hypre_CSRMatrixBigJ(B_int) = B_int_j;
    hypre_CSRMatrixData(B_int) = B_int_data;
