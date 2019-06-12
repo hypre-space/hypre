@@ -6,6 +6,8 @@
 #include <string.h>
 #include <assert.h>
 #include <cuda.h>
+#include <curand.h>
+#include "../../seq_mv.h"
 
 #define min(a, b) (a) > (b) ? (b) : (a)
 #define max(a, b) (a) > (b) ? (a) : (b)

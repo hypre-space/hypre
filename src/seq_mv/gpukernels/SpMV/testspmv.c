@@ -36,6 +36,8 @@ int main (int argc, char **argv) {
   double e2, e3;
   struct coo_t coo;
   struct csr_t csr;
+  hypre_CSRMatrix hypre_csr;
+
   char fname[2048];
 /*-----------------------------------------*/
   flg = findarg("help", NA, NULL, argc, argv);

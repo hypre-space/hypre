@@ -1,5 +1,6 @@
 include ../../../config/Makefile.config
-CFLAGS+= -DDOUBLEPRECISION=1
+
+CFLAGS+= -DDOUBLEPRECISION=1 -I../../../hypre/include ${INCLUDES}
 OBJS2 = spmv.o io.o testspmv.o mmio.o format.o auxil.o #skit.o
 
 default: spmvD.ex

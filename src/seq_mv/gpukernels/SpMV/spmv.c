@@ -4,7 +4,7 @@
 
 
 __global__
-void csr_v_k_8(int n, int *d_ia, int *d_ja, REAL *d_a, REAL *d_x, REAL *d_y) 
+void csr_v_k_8(int n, int *d_ia, int *d_ja, REAL *d_a, REAL *d_x, REAL *d_y)
 {
    /*------------------------------------------------------------*
     *               CSR spmv-vector kernel
@@ -22,7 +22,7 @@ void csr_v_k_8(int n, int *d_ia, int *d_ja, REAL *d_a, REAL *d_x, REAL *d_y)
    // shared memory for patial result
    volatile __shared__ REAL r[BLOCKDIM+8];
    volatile __shared__ int startend[BLOCKDIM/8][2];
-   for (int row = qwid; row < n; row += nqw) 
+   for (int row = qwid; row < n; row += nqw)
    {
       // row start and end point
       if (lane < 2)
@@ -32,7 +32,7 @@ void csr_v_k_8(int n, int *d_ia, int *d_ja, REAL *d_a, REAL *d_x, REAL *d_y)
       int p = startend[qwlane][0];
       int q = startend[qwlane][1];
       REAL sum = 0.0;
-      for (int i=p+lane; i<q; i+=8) 
+      for (int i=p+lane; i<q; i+=8)
       {
          sum += d_a[i] * d_x[d_ja[i]];
       }
@@ -47,7 +47,8 @@ void csr_v_k_8(int n, int *d_ia, int *d_ja, REAL *d_a, REAL *d_x, REAL *d_y)
 }
 
 
-void csr_v_k_8_shuffle(int n, int *d_ia, int *d_ja, REAL *d_a, REAL *d_x, REAL *d_y) 
+__global__
+void csr_v_k_8_shuffle(int n, int *d_ia, int *d_ja, REAL *d_a, REAL *d_x, REAL *d_y)
 {
    /*------------------------------------------------------------*
     *               CSR spmv-vector kernel
@@ -65,7 +66,7 @@ void csr_v_k_8_shuffle(int n, int *d_ia, int *d_ja, REAL *d_a, REAL *d_x, REAL *
    // shared memory for patial result
    volatile __shared__ REAL r[BLOCKDIM+8];
    volatile __shared__ int startend[BLOCKDIM/8][2];
-   for (int row = qwid; row < n; row += nqw) 
+   for (int row = qwid; row < n; row += nqw)
    {
       // row start and end point
       if (lane < 2)
@@ -75,7 +76,7 @@ void csr_v_k_8_shuffle(int n, int *d_ia, int *d_ja, REAL *d_a, REAL *d_x, REAL *
       int p = startend[qwlane][0];
       int q = startend[qwlane][1];
       REAL sum = 0.0;
-      for (int i=p+lane; i<q; i+=8) 
+      for (int i=p+lane; i<q; i+=8)
       {
          sum += d_a[i] * d_x[d_ja[i]];
       }
@@ -89,14 +90,14 @@ void csr_v_k_8_shuffle(int n, int *d_ia, int *d_ja, REAL *d_a, REAL *d_x, REAL *
       {
          d_y[row] = r[threadIdx.x];
       }
-   } 
+   }
 }
-  
+
 
 
 
 __global__
-void csr_v_k_16(int n, int *d_ia, int *d_ja, REAL *d_a, REAL *d_x, REAL *d_y) 
+void csr_v_k_16(int n, int *d_ia, int *d_ja, REAL *d_a, REAL *d_x, REAL *d_y)
 {
    /*------------------------------------------------------------*
     *               CSR spmv-vector kernel
@@ -114,7 +115,7 @@ void csr_v_k_16(int n, int *d_ia, int *d_ja, REAL *d_a, REAL *d_x, REAL *d_y)
    // shared memory for patial result
    volatile __shared__ REAL r[BLOCKDIM+8];
    volatile __shared__ int startend[BLOCKDIM/HALFWARP][2];
-   for (int row = hwid; row < n; row += nhw) 
+   for (int row = hwid; row < n; row += nhw)
    {
       // row start and end point
       if (lane < 2)
@@ -124,7 +125,7 @@ void csr_v_k_16(int n, int *d_ia, int *d_ja, REAL *d_a, REAL *d_x, REAL *d_y)
       int p = startend[hwlane][0];
       int q = startend[hwlane][1];
       REAL sum = 0.0;
-      for (int i=p+lane; i<q; i+=HALFWARP) 
+      for (int i=p+lane; i<q; i+=HALFWARP)
       {
          sum += d_a[i] * d_x[d_ja[i]];
       }
@@ -144,7 +145,7 @@ void csr_v_k_16(int n, int *d_ia, int *d_ja, REAL *d_a, REAL *d_x, REAL *d_y)
 
 
 __global__
-void csr_v_k_16_shuffle(int n, int *d_ia, int *d_ja, REAL *d_a, REAL *d_x, REAL *d_y) 
+void csr_v_k_16_shuffle(int n, int *d_ia, int *d_ja, REAL *d_a, REAL *d_x, REAL *d_y)
 {
    /*------------------------------------------------------------*
     *               CSR spmv-vector kernel
@@ -160,9 +161,8 @@ void csr_v_k_16_shuffle(int n, int *d_ia, int *d_ja, REAL *d_a, REAL *d_x, REAL 
    // half warp lane in each block
    int hwlane = threadIdx.x/HALFWARP;
    // shared memory for patial result
-   volatile __shared__ REAL r[BLOCKDIM+8];
    volatile __shared__ int startend[BLOCKDIM/HALFWARP][2];
-   for (int row = hwid; row < n; row += nhw) 
+   for (int row = hwid; row < n; row += nhw)
    {
       // row start and end point
       if (lane < 2)
@@ -172,7 +172,7 @@ void csr_v_k_16_shuffle(int n, int *d_ia, int *d_ja, REAL *d_a, REAL *d_x, REAL 
       int p = startend[hwlane][0];
       int q = startend[hwlane][1];
       REAL sum = 0.0;
-      for (int i=p+lane; i<q; i+=HALFWARP) 
+      for (int i=p+lane; i<q; i+=HALFWARP)
       {
          sum += d_a[i] * d_x[d_ja[i]];
       }
@@ -180,17 +180,17 @@ void csr_v_k_16_shuffle(int n, int *d_ia, int *d_ja, REAL *d_a, REAL *d_x, REAL 
 #pragma unroll
       for (int d = HALFWARP/2; d > 0; d >>= 1)
       {
-         r[threadIdx.x] = sum += __shfl_down(sum, d);
+         sum += __shfl_down(sum, d);
       }
       if (lane == 0)
       {
-         d_y[row] = r[threadIdx.x];
+         d_y[row] = sum;
       }
    }
 }
 
 __global__
-void csr_v_k_32(int n, int *d_ia, int *d_ja, REAL *d_a, REAL *d_x, REAL *d_y) 
+void csr_v_k_32(int n, int *d_ia, int *d_ja, REAL *d_a, REAL *d_x, REAL *d_y)
 {
    /*------------------------------------------------------------*
     *               CSR spmv-vector kernel
@@ -238,7 +238,7 @@ void csr_v_k_32(int n, int *d_ia, int *d_ja, REAL *d_a, REAL *d_x, REAL *d_y)
 
 
 __global__
-void csr_v_k_32_shuffle(int n, int *d_ia, int *d_ja, REAL *d_a, REAL *d_x, REAL *d_y) 
+void csr_v_k_32_shuffle(int n, int *d_ia, int *d_ja, REAL *d_a, REAL *d_x, REAL *d_y)
 {
    /*------------------------------------------------------------*
     *               CSR spmv-vector kernel
@@ -285,10 +285,9 @@ void csr_v_k_32_shuffle(int n, int *d_ia, int *d_ja, REAL *d_a, REAL *d_x, REAL 
 
 
 //example
-
 template <int K, typename T>
 __global__
-void csr_v_k(int n, int *d_ia, int *d_ja, T *d_a, T *d_x, T *d_y) 
+void csr_v_k(int n, int *d_ia, int *d_ja, T *d_a, T *d_x, T *d_y)
 {
    /*------------------------------------------------------------*
     *               CSR spmv-vector kernel
@@ -338,9 +337,11 @@ void csr_v_k(int n, int *d_ia, int *d_ja, T *d_a, T *d_x, T *d_y)
 
 //example_shuffle
 
+//#define ROW_PTR_USE_SHARED
+
 template <int K, typename T>
 __global__
-void csr_v_k(int n, int *d_ia, int *d_ja, T *d_a, T *d_x, T *d_y) 
+void csr_v_k_shuffle(int n, int *d_ia, int *d_ja, T *d_a, T *d_x, T *d_y)
 {
    /*------------------------------------------------------------*
     *               CSR spmv-vector kernel
@@ -353,13 +354,15 @@ void csr_v_k(int n, int *d_ia, int *d_ja, T *d_a, T *d_x, T *d_y)
    int wid = (blockIdx.x*BLOCKDIM+threadIdx.x)/K;
    // thread lane in each full warp
    int lane = threadIdx.x & (K-1);
+   // shared memory for patial result
+#ifdef ROW_PTR_USE_SHARED
    // full warp lane in each block
    int wlane = threadIdx.x/K;
-   // shared memory for patial result
-   volatile __shared__ T r[BLOCKDIM+K/2];
    volatile __shared__ int startend[BLOCKDIM/K][2];
+#endif
    for (int row = wid; row < n; row += nw)
    {
+#ifdef ROW_PTR_USE_SHARED
       // row start and end point
       if (lane < 2)
       {
@@ -367,28 +370,36 @@ void csr_v_k(int n, int *d_ia, int *d_ja, T *d_a, T *d_x, T *d_y)
       }
       int p = startend[wlane][0];
       int q = startend[wlane][1];
+#else
+      int j, p, q;
+      if (lane < 2)
+      {
+         j = __ldg(&d_ia[row+lane]);
+      }
+      p = __shfl_sync(0xFFFFFFFF, j, 0, K);
+      q = __shfl_sync(0xFFFFFFFF, j, 1, K);
+#endif
       T sum = 0.0;
       for (int i=p+lane; i<q; i+=K)
       {
          sum += d_a[i] * d_x[d_ja[i]];
       }
       // parallel reduction
-      r[threadIdx.x] = sum;
 #pragma unroll
       for (int d = K/2; d > 0; d >>= 1)
       {
-         r[threadIdx.x] = sum += __shfl_down(sum, d);
+         sum += __shfl_down(sum, d);
       }
       if (lane == 0)
       {
-         d_y[row] = r[threadIdx.x];
+         d_y[row] = sum;
       }
    }
 }
 
 //example
 
-void spmv_csr_vector(struct csr_t *csr, REAL *x, REAL *y) 
+void spmv_csr_vector(struct csr_t *csr, REAL *x, REAL *y)
 {
    int *d_ia, *d_ja, i;
    REAL *d_a, *d_x, *d_y;
@@ -418,10 +429,10 @@ void spmv_csr_vector(struct csr_t *csr, REAL *x, REAL *y)
    //printf("CSR<<<%4d, %3d>>>  ",gDim,bDim);
    /*-------- start timing */
    t1 = wall_timer();
-   for (i=0; i<REPEAT; i++) 
+   for (i=0; i<REPEAT; i++)
    {
       //cudaMemset((void *)d_y, 0, n*sizeof(REAL));
-      csr_v_k<8, REAL> <<<gDim, bDim>>>(n, d_ia, d_ja, d_a, d_x, d_y);
+      csr_v_k_shuffle<32, REAL> <<<gDim, bDim>>>(n, d_ia, d_ja, d_a, d_x, d_y);
    }
    /*-------- Barrier for GPU calls */
    cudaThreadSynchronize();
@@ -444,24 +455,24 @@ void spmv_csr_vector(struct csr_t *csr, REAL *x, REAL *y)
 }
 
 /*-----------------------------------------------*/
-void cuda_init(int argc, char **argv) 
+void cuda_init(int argc, char **argv)
 {
    int deviceCount, dev;
    cudaGetDeviceCount(&deviceCount);
    printf("=========================================\n");
    if (deviceCount == 0)
-   {    
+   {
       printf("There is no device supporting CUDA\n");
    }
-   for (dev = 0; dev < deviceCount; ++dev) 
+   for (dev = 0; dev < deviceCount; ++dev)
    {
       cudaDeviceProp deviceProp;
       cudaGetDeviceProperties(&deviceProp, dev);
-      if (dev == 0) 
+      if (dev == 0)
       {
          if (deviceProp.major == 9999 && deviceProp.minor == 9999)
-         {  
-            printf("There is no device supporting CUDA.\n"); 
+         {
+            printf("There is no device supporting CUDA.\n");
          }
          else if (deviceCount == 1)
          {
@@ -486,16 +497,16 @@ void cuda_init(int argc, char **argv)
 }
 
 /*---------------------------------------------------*/
-void cuda_check_err() 
+void cuda_check_err()
 {
    cudaError_t cudaerr = cudaGetLastError() ;
    if (cudaerr != cudaSuccess)
-   {   
+   {
        printf("error: %s\n",cudaGetErrorString(cudaerr));
    }
 }
 
-void spmv_cusparse_csr(struct csr_t *csr, REAL *x, REAL *y) 
+void spmv_cusparse_csr(struct csr_t *csr, REAL *x, REAL *y)
 {
    int n = csr->nrows;
    int nnz = csr->ia[n];
@@ -525,14 +536,14 @@ void spmv_cusparse_csr(struct csr_t *csr, REAL *x, REAL *y)
 
    /* initialize cusparse library */
    status= cusparseCreate(&handle);
-   if (status != CUSPARSE_STATUS_SUCCESS) 
+   if (status != CUSPARSE_STATUS_SUCCESS)
    {
      printf("CUSPARSE Library initialization failed\n");
      exit(1);
    }
    /* create and setup matrix descriptor */
    status= cusparseCreateMatDescr(&descr);
-   if (status != CUSPARSE_STATUS_SUCCESS) 
+   if (status != CUSPARSE_STATUS_SUCCESS)
    {
      printf("Matrix descriptor initialization failed\n");
      exit(1);
@@ -541,7 +552,7 @@ void spmv_cusparse_csr(struct csr_t *csr, REAL *x, REAL *y)
    cusparseSetMatIndexBase(descr,CUSPARSE_INDEX_BASE_ZERO);
    /*-------- start timing */
    t1 = wall_timer();
-   for (i=0; i<REPEAT; i++) 
+   for (i=0; i<REPEAT; i++)
    {
 #if DOUBLEPRECISION
       status= cusparseDcsrmv(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, n, n, nnz,
@@ -552,7 +563,7 @@ void spmv_cusparse_csr(struct csr_t *csr, REAL *x, REAL *y)
       &done, descr, d_a, d_ia, d_ja,
       d_x, &dzero, d_y);
 #endif
-      if (status != CUSPARSE_STATUS_SUCCESS) 
+      if (status != CUSPARSE_STATUS_SUCCESS)
       {
          printf("Matrix-vector multiplication failed\n");
          exit(1);
@@ -586,7 +597,7 @@ void spmv_cusparse_csr(struct csr_t *csr, REAL *x, REAL *y)
    /* destroy handle */
    status = cusparseDestroy(handle);
    handle = 0;
-   if (status != CUSPARSE_STATUS_SUCCESS) 
+   if (status != CUSPARSE_STATUS_SUCCESS)
    {
       printf("CUSPARSE Library release of resources failed\n");
       exit(1);
