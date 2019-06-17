@@ -315,10 +315,10 @@ hypre_CSRMatrix *hypre_CSRMatrixClone ( hypre_CSRMatrix *A, HYPRE_Int copy_data 
 hypre_CSRMatrix *hypre_CSRMatrixClone_v2( hypre_CSRMatrix *A, HYPRE_Int copy_data, HYPRE_Int memory_location );
 hypre_CSRMatrix *hypre_CSRMatrixUnion ( hypre_CSRMatrix *A , hypre_CSRMatrix *B , HYPRE_BigInt *col_map_offd_A , HYPRE_BigInt *col_map_offd_B , HYPRE_BigInt **col_map_offd_C );
 #ifdef HYPRE_USING_UNIFIED_MEMORY
-void hypre_CSRMatrixPrefetchToDevice(hypre_CSRMatrix *A);
-void hypre_CSRMatrixPrefetchToDeviceBIGINT(hypre_CSRMatrix *A);
-void hypre_CSRMatrixPrefetchToHost(hypre_CSRMatrix *A);
-hypre_int hypre_CSRMatrixIsManaged(hypre_CSRMatrix *a);
+HYPRE_Int hypre_CSRMatrixPrefetch( hypre_CSRMatrix *A, HYPRE_Int to_location, HYPRE_Int stream_num = -1);
+//hypre_int hypre_CSRMatrixIsManaged(hypre_CSRMatrix *a);
+#else
+#define hypre_CSRMatrixPrefetch( hypre_CSRMatrix *A, HYPRE_Int to_location)
 #endif
 #ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
 void hypre_CSRMatrixMapToDevice(hypre_CSRMatrix *A);
@@ -417,7 +417,8 @@ HYPRE_Int hypre_SeqVectorSetRandomValues ( hypre_Vector *v , HYPRE_Int seed );
 HYPRE_Int hypre_SeqVectorCopy ( hypre_Vector *x , hypre_Vector *y );
 hypre_Vector *hypre_SeqVectorCloneDeep ( hypre_Vector *x );
 hypre_Vector *hypre_SeqVectorCloneShallow ( hypre_Vector *x );
-HYPRE_Int hypre_SeqVectorScale ( HYPRE_Complex alpha , hypre_Vector *y );
+HYPRE_Int hypre_SeqVectorScale( HYPRE_Complex alpha, hypre_Vector *y );
+
 HYPRE_Int hypre_SeqVectorAxpy ( HYPRE_Complex alpha , hypre_Vector *x , hypre_Vector *y );
 HYPRE_Real hypre_SeqVectorInnerProd ( hypre_Vector *x , hypre_Vector *y );
 HYPRE_Int hypre_SeqVectorMassInnerProd(hypre_Vector *x, hypre_Vector **y, HYPRE_Int k, HYPRE_Int unroll, HYPRE_Real *result);
@@ -429,19 +430,12 @@ HYPRE_Int hypre_SeqVectorMassDotpTwo8(hypre_Vector *x, hypre_Vector *y , hypre_V
 HYPRE_Int hypre_SeqVectorMassAxpy(HYPRE_Complex *alpha, hypre_Vector **x, hypre_Vector *y, HYPRE_Int k, HYPRE_Int unroll);
 HYPRE_Int hypre_SeqVectorMassAxpy4(HYPRE_Complex *alpha, hypre_Vector **x, hypre_Vector *y, HYPRE_Int k);
 HYPRE_Int hypre_SeqVectorMassAxpy8(HYPRE_Complex *alpha, hypre_Vector **x, hypre_Vector *y, HYPRE_Int k);
-HYPRE_Complex hypre_VectorSumElts ( hypre_Vector *vector );
+HYPRE_Complex hypre_SeqVectorSumElts ( hypre_Vector *vector );
 #ifdef HYPRE_USING_UNIFIED_MEMORY
-HYPRE_Complex hypre_VectorSumAbsElts ( hypre_Vector *vector );
-HYPRE_Int hypre_SeqVectorCopyDevice ( hypre_Vector *x , hypre_Vector *y );
-HYPRE_Int hypre_SeqVectorAxpyDevice( HYPRE_Complex alpha , hypre_Vector *x , hypre_Vector *y );
-HYPRE_Real hypre_SeqVectorInnerProdDevice ( hypre_Vector *x , hypre_Vector *y );
-/*void  hypre_SeqVectorMassInnerProdDevice ( hypre_Vector *x , hypre_Vector **y, HYPRE_Int k, HYPRE_Real * result);
-void hypre_SeqVectorMassAxpyDevice(HYPRE_Complex * alpha, hypre_Vector **x, hypre_Vector *y, HYPRE_Int k);*/
-
-void hypre_SeqVectorPrefetchToDevice(hypre_Vector *x);
-void hypre_SeqVectorPrefetchToHost(hypre_Vector *x);
-void hypre_SeqVectorPrefetchToDeviceInStream(hypre_Vector *x, HYPRE_Int index);
-hypre_int hypre_SeqVectorIsManaged(hypre_Vector *x);
+HYPRE_Int hypre_SeqVectorPrefetch(hypre_Vector *x, HYPRE_Int to_location, HYPRE_Int stream_num = -1);
+//hypre_int hypre_SeqVectorIsManaged(hypre_Vector *x);
+#else
+#define hypre_SeqVectorPrefetch( hypre_Vector *x, HYPRE_Int to_location)
 #endif
 #ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
 void hypre_SeqVectorMapToDevice(hypre_Vector *x);
@@ -454,78 +448,13 @@ HYPRE_Int hypre_CSRMatrixMatvecOutOfPlaceOOMP3( HYPRE_Complex alpha, hypre_CSRMa
 
 #if defined(HYPRE_USING_CUDA)
 
-typedef struct
-{
-   curandGenerator_t gen;
-
-   HYPRE_Int   do_timing;
-
-   /* spgemm options */
-   HYPRE_Int   use_cusparse_spgemm;
-   HYPRE_Int   spgemm_num_passes;
-   HYPRE_Int   rownnz_estimate_method;
-   HYPRE_Int   rownnz_estimate_nsamples;
-   float       rownnz_estimate_mult_factor;
-   char        hash_type;
-
-   /* spgemm stats */
-   size_t      ghash_size, ghash2_size;
-   HYPRE_Int   nnzC_gpu;
-
-   HYPRE_Real  rownnz_estimate_time;
-   HYPRE_Real  rownnz_estimate_curand_time;
-   size_t      rownnz_estimate_mem;
-
-   HYPRE_Real  spmm_create_hashtable_time;
-
-   HYPRE_Real  spmm_attempt1_time;
-   HYPRE_Real  spmm_post_attempt1_time;
-   HYPRE_Real  spmm_attempt2_time;
-   HYPRE_Real  spmm_post_attempt2_time;
-   size_t      spmm_attempt_mem;
-
-   HYPRE_Real  spmm_symbolic_time;
-   size_t      spmm_symbolic_mem;
-   HYPRE_Real  spmm_post_symbolic_time;
-   HYPRE_Real  spmm_numeric_time;
-   size_t      spmm_numeric_mem;
-   HYPRE_Real  spmm_post_numeric_time;
-
-   /* spadd stats */
-   HYPRE_Real  spadd_expansion_time;
-   HYPRE_Real  spadd_sorting_time;
-   HYPRE_Real  spadd_compression_time;
-   HYPRE_Real  spadd_convert_ptr_time;
-   HYPRE_Real  spadd_time;
-
-   /* sptrans stats */
-   HYPRE_Real  sptrans_expansion_time;
-   HYPRE_Real  sptrans_sorting_time;
-   HYPRE_Real  sptrans_rowptr_time;
-   HYPRE_Real  sptrans_time;
-
-   /* cusparse stats */
-   HYPRE_Real  spmm_cusparse_time;
-
-} hypre_DeviceCSRHandle;
-
-extern hypre_DeviceCSRHandle *hypre_device_csr_handle;
-
 HYPRE_Int hypreDevice_CSRSpAdd(HYPRE_Int ma, HYPRE_Int mb, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int nnzB, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_aa, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex *d_ab, HYPRE_Int *d_num_b, HYPRE_Int *nnzC_out, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_ac_out);
 
 HYPRE_Int hypreDevice_CSRSpTrans(HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_aa, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_ac_out, HYPRE_Int want_data);
 
 HYPRE_Int hypreDevice_CSRSpGemm(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int nnza, HYPRE_Int nnzb, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex *d_b, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_c_out, HYPRE_Int *nnzC);
 
-hypre_DeviceCSRHandle* hypre_DeviceCSRHandleCreate();
-
-HYPRE_Int hypre_DeviceCSRHandleDestroy(hypre_DeviceCSRHandle *handle);
-
 #endif
-
-HYPRE_Int hypreDevice_CSRHandlePrint();
-
-HYPRE_Int hypreDevice_CSRHandleClearStats();
 
 #ifdef __cplusplus
 }

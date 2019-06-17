@@ -41,7 +41,7 @@ extern "C" {
 # Structures and prototypes
 #===========================================================================
 
-cat general.h                  >> $INTERNAL_HEADER
+cat hypre_general.h            >> $INTERNAL_HEADER
 cat mpistubs.h                 >> $INTERNAL_HEADER
 cat hypre_smp.h                >> $INTERNAL_HEADER
 cat hypre_omp_device.h         >> $INTERNAL_HEADER
@@ -53,9 +53,9 @@ cat exchange_data.h            >> $INTERNAL_HEADER
 cat hypre_error.h              >> $INTERNAL_HEADER
 cat caliper_instrumentation.h  >> $INTERNAL_HEADER
 cat hypre_cuda_utils.h         >> $INTERNAL_HEADER
+cat hypre_handle.h             >> $INTERNAL_HEADER
 cat hypre_nvtx.h               >> $INTERNAL_HEADER
-cat gpuMem.h                   >> $INTERNAL_HEADER
-cat hypre_reducesum.h          >> $INTERNAL_HEADER
+cat hypre_cuda_reducer.h       >> $INTERNAL_HEADER
 cat protos.h                   >> $INTERNAL_HEADER
 
 #===========================================================================

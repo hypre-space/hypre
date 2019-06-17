@@ -105,7 +105,7 @@ hypre_BoomerAMGCreateSHost(hypre_ParCSRMatrix    *A,
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_CREATES] -= hypre_MPI_Wtime();
 #endif
-   PUSH_RANGE("CreateS",0)
+   //PUSH_RANGE("CreateS",0)
 
    MPI_Comm                 comm            = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
@@ -544,7 +544,7 @@ hypre_BoomerAMGCreateSHost(hypre_ParCSRMatrix    *A,
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_CREATES] += hypre_MPI_Wtime();
 #endif
-   POP_RANGE
+   //POP_RANGE
    return (ierr);
 }
 

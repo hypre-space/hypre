@@ -68,7 +68,7 @@ typedef double            hypre_double;
 #define hypre_pow2(i)  ( 1 << (i) )
 #endif
 
-#endif
+#endif /* hypre_GENERAL_HEADER */
 
 /*BHEADER**********************************************************************
  * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
@@ -413,8 +413,8 @@ HYPRE_Int hypre_MPI_Info_free( hypre_MPI_Info *info );
  *
  * $Revision$
  ***********************************************************************EHEADER*/
-#ifndef HYPRE_OMP_DEVICE
-#define HYPRE_OMP_DEVICE
+#ifndef HYPRE_OMP_DEVICE_H
+#define HYPRE_OMP_DEVICE_H
 
 #if defined(HYPRE_USING_DEVICE_OPENMP)
 
@@ -534,7 +534,7 @@ HYPRE_Int HYPRE_OMPOffloadStatPrint();
 #define hypre_SetDeviceOff() HYPRE_OMPOffloadOff()
 
 #endif /* HYPRE_USING_DEVICE_OPENMP */
-#endif /* HYPRE_OMP_DEVICE */
+#endif /* HYPRE_OMP_DEVICE_H */
 
 /*BHEADER**********************************************************************
  * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
@@ -826,6 +826,14 @@ hypre_GetExecPolicy2(HYPRE_Int location1,
 }\
 )
 
+#define hypre_TMemcpy(dst, src, type, count, locdst, locsrc) \
+( \
+{ \
+  printf("[%s:%d] TMemcpy %d to %d %.3f MB\n", __FILE__,__LINE__, locsrc, locdst, (size_t)(sizeof(type) * (count))/1024.0/1024.0); \
+  hypre_Memcpy((void *)(dst), (void *)(src), (size_t)(sizeof(type) * (count)), locdst, locsrc); \
+} \
+)
+
 #else
 
 #define hypre_TAlloc(type, count, location) \
@@ -837,13 +845,13 @@ hypre_GetExecPolicy2(HYPRE_Int location1,
 #define hypre_TReAlloc(ptr, type, count, location) \
 ( (type *) hypre_ReAlloc((char *)ptr, (size_t)(sizeof(type) * (count)), location) )
 
+#define hypre_TMemcpy(dst, src, type, count, locdst, locsrc) \
+(hypre_Memcpy((void *)(dst), (void *)(src), (size_t)(sizeof(type) * (count)), locdst, locsrc))
+
 #endif
 
 #define hypre_TFree(ptr, location) \
 ( hypre_Free((void *)ptr, location), ptr = NULL )
-
-#define hypre_TMemcpy(dst, src, type, count, locdst, locsrc) \
-(hypre_Memcpy((void *)(dst), (void *)(src), (size_t)(sizeof(type) * (count)), locdst, locsrc))
 
 /*--------------------------------------------------------------------------
  * Prototypes
@@ -1249,6 +1257,8 @@ void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, c
 
 #if defined(HYPRE_USING_CUDA)
 
+HYPRE_Int hypre_printf( const char *format , ... );
+
 #ifdef __cplusplus
 extern "C++" {
 #endif
@@ -1260,6 +1270,7 @@ extern "C++" {
 #include <cusparse.h>
 
 #include <thrust/execution_policy.h>
+#include <thrust/system/cuda/execution_policy.h>
 #include <thrust/count.h>
 #include <thrust/device_ptr.h>
 #include <thrust/unique.h>
@@ -1277,58 +1288,63 @@ extern "C++" {
 
 using namespace thrust::placeholders;
 
-#define HYPRE_WARP_SIZE      32
-#define HYPRE_WARP_FULL_MASK 0xFFFFFFFF
-#define HYPRE_MAX_NUM_WARPS  (64 * 64 * 32)
-#define HYPRE_FLT_LARGE      1e30
-#define HYPRE_1D_BLOCK_SIZE  512
+#define HYPRE_WARP_SIZE       32
+#define HYPRE_WARP_FULL_MASK  0xFFFFFFFF
+#define HYPRE_MAX_NUM_WARPS   (64 * 64 * 32)
+#define HYPRE_FLT_LARGE       1e30
+#define HYPRE_1D_BLOCK_SIZE   512
+#define HYPRE_MAX_NUM_STREAMS 10
 
-/* macro for launching CUDA kernels */
-#define HYPRE_CUDA_LAUNCH HYPRE_CUDA_LAUNCH_ASYNC
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ * macro for launching CUDA kernels, CUDA, Thrust, Cusparse, Curand calls
+ *                    NOTE: IN HYPRE'S DEFAULT STREAM
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ */
 
-#define HYPRE_CUDA_LAUNCH_ASYNC(kernel_name, gridsize, blocksize, ...) \
-{ \
-   if ( gridsize.x  == 0 || gridsize.y  == 0 || gridsize.z  == 0 || \
-        blocksize.x == 0 || blocksize.y == 0 || blocksize.z == 0 ) \
-   { \
-      /* hypre_printf("Warning %s %d: Zero CUDA grid/block (%d %d %d) (%d %d %d)\n", \
-                   __FILE__, __LINE__,\
-                   gridsize.x, gridsize.y, gridsize.z, blocksize.x, blocksize.y, blocksize.z); */ \
-   } \
-   else \
-   { \
-      (kernel_name) <<< (gridsize), (blocksize) >>> (__VA_ARGS__); \
-   } \
+#define HYPRE_CUDA_LAUNCH(kernel_name, gridsize, blocksize, ...)                                                   \
+{                                                                                                                  \
+   if ( gridsize.x  == 0 || gridsize.y  == 0 || gridsize.z  == 0 ||                                                \
+        blocksize.x == 0 || blocksize.y == 0 || blocksize.z == 0 )                                                 \
+   {                                                                                                               \
+      /* hypre_printf("Warning %s %d: Zero CUDA grid/block (%d %d %d) (%d %d %d)\n",                               \
+                   __FILE__, __LINE__,                                                                             \
+                   gridsize.x, gridsize.y, gridsize.z, blocksize.x, blocksize.y, blocksize.z); */                  \
+   }                                                                                                               \
+   else                                                                                                            \
+   {                                                                                                               \
+      (kernel_name) <<< (gridsize), (blocksize), 0, hypre_HandleCudaComputeStream(hypre_handle) >>> (__VA_ARGS__); \
+   }                                                                                                               \
 }
 
-#define HYPRE_CUDA_LAUNCH_SYNC(kernel_name, gridsize, blocksize, ...) \
-    HYPRE_CUDA_LAUNCH_ASYNC(kernel_name, gridsize, blocksize, __VA_ARGS__) \
-    cudaDeviceSynchronize();
 
-#define HYPRE_CURAND_CALL(call) do {                         \
-    curandStatus_t err = call;                               \
-    if (CURAND_STATUS_SUCCESS != err) {                      \
-       hypre_printf("CURAND ERROR (code = %d) at %s:%d\n",   \
-                    err, __FILE__, __LINE__);                \
-       exit(1);                                              \
-    } } while(0)
+#define HYPRE_THRUST_CALL(func_name, ...)                                                    \
+   thrust::func_name(                                                                        \
+   thrust::cuda::par.on(hypre_HandleCudaComputeStream(hypre_handle)), __VA_ARGS__);          \
 
-#define HYPRE_CUDA_CALL(call) do {                           \
-    cudaError_t err = call;                                  \
-    if (cudaSuccess != err) {                                \
-       hypre_printf("CUDA ERROR (code = %d, %s) at %s:%d\n", \
-                    err, cudaGetErrorString(err),            \
-                    __FILE__, __LINE__);                     \
-       exit(1);                                              \
-    } } while(0)
 
-#define HYPRE_CUSPARSE_CALL(call) do {                       \
-    cusparseStatus_t err = call;                             \
-    if (CUSPARSE_STATUS_SUCCESS != err) {                    \
-       hypre_printf("CUSPARSE ERROR (code = %d) at %s:%d\n", \
-                    err, __FILE__, __LINE__);                \
-       exit(1);                                              \
-    } } while(0)
+#define HYPRE_CUSPARSE_CALL(call) do {                                                       \
+   cusparseStatus_t err = call;                                                              \
+   if (CUSPARSE_STATUS_SUCCESS != err) {                                                     \
+      hypre_printf("CUSPARSE ERROR (code = %d) at %s:%d\n", err, __FILE__, __LINE__);        \
+      exit(1);                                                                               \
+   } } while(0)
+
+
+#define HYPRE_CURAND_CALL(call) do {                        \
+   curandStatus_t err = call;                               \
+   if (CURAND_STATUS_SUCCESS != err) {                      \
+      hypre_printf("CURAND ERROR (code = %d) at %s:%d\n",   \
+                   err, __FILE__, __LINE__);                \
+      exit(1);                                              \
+   } } while(0)
+
+
+#define HYPRE_CUDA_CALL(call) do {                                                                             \
+   cudaError_t err = call;                                                                                     \
+   if (cudaSuccess != err) {                                                                                   \
+      hypre_printf("CUDA ERROR (code = %d, %s) at %s:%d\n", err, cudaGetErrorString(err), __FILE__, __LINE__); \
+      exit(1);                                                                                                 \
+   } } while(0)
 
 /* return the number of threads in block */
 template <hypre_int dim>
@@ -1461,6 +1477,10 @@ hypre_int hypre_cuda_get_grid_warp_id()
    return hypre_cuda_get_block_id<gdim>() * hypre_cuda_get_num_warps<bdim>() +
           hypre_cuda_get_warp_id<bdim>();
 }
+
+#ifndef CUDART_VERSION
+#error CUDART_VERSION Undefined!
+#endif
 
 #if CUDART_VERSION < 9000
 
@@ -1669,64 +1689,204 @@ extern HYPRE_Int hypre_exec_policy;
  * $Revision$
  ***********************************************************************EHEADER*/
 
-#ifdef USE_NVTX
-#include "nvToolsExt.h"
-#include "nvToolsExtCudaRt.h"
+/******************************************************************************
+ *
+ * General structures and values
+ *
+ *****************************************************************************/
 
-static const uint32_t colors[] = { 0x0000ff00, 0x000000ff, 0x00ffff00, 0x00ff00ff, 0x0000ffff, 0x00ff0000, 0x00ffffff };
-static const int num_colors = sizeof(colors)/sizeof(uint32_t);
+#ifndef HYPRE_HANDLE_H
+#define HYPRE_HANDLE_H
 
-#define PUSH_RANGE(name,cid) { \
-    int color_id = cid; \
-    color_id = color_id%num_colors;\
-    nvtxEventAttributes_t eventAttrib = {0}; \
-    eventAttrib.version = NVTX_VERSION; \
-    eventAttrib.size = NVTX_EVENT_ATTRIB_STRUCT_SIZE; \
-    eventAttrib.colorType = NVTX_COLOR_ARGB; \
-    eventAttrib.color = colors[color_id]; \
-    eventAttrib.messageType = NVTX_MESSAGE_TYPE_ASCII; \
-    eventAttrib.message.ascii = name; \
-    nvtxDomainRangePushEx(HYPRE_DOMAIN,&eventAttrib);	\
+#if defined(HYPRE_USING_CUDA)
+#include <vector>
+#endif
+
+typedef struct
+{
+#if defined(HYPRE_USING_CUDA)
+   /* by default, hypre puts GPU computations in this stream
+    * Do not confuse with the default (null) CUDA stream */
+   HYPRE_Int cuda_device;
+   HYPRE_Int cuda_compute_stream_num;
+   HYPRE_Int cuda_prefetch_stream_num;
+   HYPRE_Int cuda_compute_stream_sync_default;
+   std::vector<HYPRE_Int> cuda_compute_stream_sync;
+   curandGenerator_t curand_gen;
+   cusparseHandle_t cusparse_handle;
+   cusparseMatDescr_t cusparse_mat_descr;
+   cudaStream_t cuda_streams[HYPRE_MAX_NUM_STREAMS];
+   /* work space for hypre's CUDA reducer */
+   void* cuda_reduce_buffer;
+   /* device spgemm options */
+   HYPRE_Int spgemm_use_cusparse;
+   HYPRE_Int spgemm_num_passes;
+   HYPRE_Int spgemm_rownnz_estimate_method;
+   HYPRE_Int spgemm_rownnz_estimate_nsamples;
+   float     spgemm_rownnz_estimate_mult_factor;
+   char      spgemm_hash_type;
+#endif
+} hypre_Handle;
+
+extern hypre_Handle *hypre_handle;
+
+/* accessor inline function to hypre_device_csr_handle */
+static inline HYPRE_Int &
+hypre_HandleCudaDevice(hypre_Handle *hypre_handle)
+{
+   return hypre_handle->cuda_device;
 }
 
-#define PUSH_RANGE_PAYLOAD(name,cid,load) {		\
-    int color_id = cid; \
-    color_id = color_id%num_colors;\
-    nvtxEventAttributes_t eventAttrib = {0}; \
-    eventAttrib.version = NVTX_VERSION; \
-    eventAttrib.size = NVTX_EVENT_ATTRIB_STRUCT_SIZE; \
-    eventAttrib.colorType = NVTX_COLOR_ARGB; \
-    eventAttrib.color = colors[color_id]; \
-    eventAttrib.messageType = NVTX_MESSAGE_TYPE_ASCII; \
-    eventAttrib.message.ascii = name; \
-    eventAttrib.payloadType = NVTX_PAYLOAD_TYPE_INT64; \
-    eventAttrib.payload.llValue = load; \
-    eventAttrib.category=1; \
-    nvtxDomainRangePushEx(HYPRE_DOMAIN,&eventAttrib); \
+static inline HYPRE_Int &
+hypre_HandleCudaComputeStreamNum(hypre_Handle *hypre_handle)
+{
+   return hypre_handle->cuda_compute_stream_num;
 }
 
-#define PUSH_RANGE_DOMAIN(name,cid,dId) {				\
-    int color_id = cid; \
-    color_id = color_id%num_colors;\
-    nvtxEventAttributes_t eventAttrib = {0}; \
-    eventAttrib.version = NVTX_VERSION; \
-    eventAttrib.size = NVTX_EVENT_ATTRIB_STRUCT_SIZE; \
-    eventAttrib.colorType = NVTX_COLOR_ARGB; \
-    eventAttrib.color = colors[color_id]; \
-    eventAttrib.messageType = NVTX_MESSAGE_TYPE_ASCII; \
-    eventAttrib.message.ascii = name; \
-    nvtxDomainRangePushEx(getdomain(dId),&eventAttrib);	\
+static inline HYPRE_Int &
+hypre_HandleCudaPrefetchStreamNum(hypre_Handle *hypre_handle)
+{
+   return hypre_handle->cuda_prefetch_stream_num;
 }
 
-#define POP_RANGE nvtxDomainRangePop(HYPRE_DOMAIN);
-#define POP_RANGE_DOMAIN(dId) {			\
-  nvtxDomainRangePop(getdomain(dId));		\
-  }
-#else
-#define PUSH_RANGE(name,cid)
-#define POP_RANGE
-#define PUSH_RANGE_PAYLOAD(name,cid,load)
-#define PUSH_RANGE_DOMAIN(name,cid,domainName)
+static inline HYPRE_Int &
+hypre_HandleCudaComputeStreamSyncDefault(hypre_Handle *hypre_handle)
+{
+   return hypre_handle->cuda_compute_stream_sync_default;
+}
+
+static inline std::vector<HYPRE_Int> &
+hypre_HandleCudaComputeStreamSync(hypre_Handle *hypre_handle)
+{
+   return hypre_handle->cuda_compute_stream_sync;
+}
+
+static inline void
+hypre_HandleCudaComputeStreamSyncPush(hypre_Handle *hypre_handle, HYPRE_Int sync)
+{
+   hypre_HandleCudaComputeStreamSync(hypre_handle).push_back(sync);
+}
+
+static inline void
+hypre_HandleCudaComputeStreamSyncPop(hypre_Handle *hypre_handle)
+{
+   hypre_HandleCudaComputeStreamSync(hypre_handle).pop_back();
+}
+
+static inline cudaStream_t
+hypre_HandleCudaStream(hypre_Handle *hypre_handle, HYPRE_Int i)
+{
+   cudaStream_t stream = 0;
+#if defined(HYPRE_USING_CUDA_STREAMS)
+   if (i >= HYPRE_MAX_NUM_STREAMS)
+   {
+      /* return the default stream, i.e., the NULL stream */
+      /*
+      hypre_printf("CUDA stream %d exceeds the max number %d\n",
+                   i, HYPRE_MAX_NUM_STREAMS);
+      */
+      return NULL;
+   }
+
+   if (hypre_handle->cuda_streams[i])
+   {
+      return hypre_handle->cuda_streams[i];
+   }
+
+   //HYPRE_CUDA_CALL(cudaStreamCreateWithFlags(&stream,cudaStreamNonBlocking));
+   HYPRE_CUDA_CALL(cudaStreamCreateWithFlags(&stream, cudaStreamDefault));
+
+   hypre_handle->cuda_streams[i] = stream;
+#endif
+
+   return stream;
+}
+
+static inline cudaStream_t
+hypre_HandleCudaComputeStream(hypre_Handle *hypre_handle)
+{
+   return hypre_HandleCudaStream(hypre_handle,
+                                 hypre_HandleCudaComputeStreamNum(hypre_handle));
+}
+
+static inline cudaStream_t
+hypre_HandleCudaPrefetchStream(hypre_Handle *hypre_handle)
+{
+   return hypre_HandleCudaStream(hypre_handle,
+                                 hypre_HandleCudaPrefetchStreamNum(hypre_handle));
+}
+
+static inline curandGenerator_t
+hypre_HandleCurandGenerator(hypre_Handle *hypre_handle)
+{
+   if (hypre_handle->curand_gen)
+   {
+      return hypre_handle->curand_gen;
+   }
+
+   curandGenerator_t gen;
+   HYPRE_CURAND_CALL( curandCreateGenerator(&gen, CURAND_RNG_PSEUDO_DEFAULT) );
+   HYPRE_CURAND_CALL( curandSetPseudoRandomGeneratorSeed(gen, 1234ULL) );
+
+   hypre_handle->curand_gen = gen;
+
+   return gen;
+}
+
+static inline cusparseHandle_t
+hypre_HandleCusparseHandle(hypre_Handle *hypre_handle)
+{
+   if (hypre_handle->cusparse_handle)
+   {
+      return hypre_handle->cusparse_handle;
+   }
+
+   cusparseHandle_t handle;
+   HYPRE_CUSPARSE_CALL( cusparseCreate(&handle) );
+
+   HYPRE_CUSPARSE_CALL( cusparseSetStream(handle, hypre_HandleCudaComputeStream(hypre_handle)) );
+
+   hypre_handle->cusparse_handle = handle;
+
+   return handle;
+}
+
+static inline cusparseMatDescr_t
+hypre_HandleCusparseMatDescr(hypre_Handle *hypre_handle)
+{
+   if (hypre_handle->cusparse_mat_descr)
+   {
+      return hypre_handle->cusparse_mat_descr;
+   }
+
+   cusparseMatDescr_t mat_descr;
+   HYPRE_CUSPARSE_CALL( cusparseCreateMatDescr(&mat_descr) );
+   HYPRE_CUSPARSE_CALL( cusparseSetMatType(mat_descr, CUSPARSE_MATRIX_TYPE_GENERAL) );
+   HYPRE_CUSPARSE_CALL( cusparseSetMatIndexBase(mat_descr, CUSPARSE_INDEX_BASE_ZERO) );
+
+   hypre_handle->cusparse_mat_descr = mat_descr;
+
+   return mat_descr;
+}
+
+hypre_Handle* hypre_HandleCreate();
+HYPRE_Int hypre_HandleDestroy(hypre_Handle *handle);
+
+/* synchronize the default stream */
+static inline HYPRE_Int
+hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle)
+{
+#if defined(HYPRE_USING_UNIFIED_MEMORY)
+   assert(!hypre_HandleCudaComputeStreamSync(hypre_handle).empty());
+
+   if ( hypre_HandleCudaComputeStreamSync(hypre_handle).back() )
+   {
+      HYPRE_CUDA_CALL( cudaStreamSynchronize(hypre_HandleCudaComputeStream(hypre_handle)) );
+   }
+#endif
+   return hypre_error_flag;
+}
+
 #endif
 
 /*BHEADER**********************************************************************
@@ -1740,68 +1900,63 @@ static const int num_colors = sizeof(colors)/sizeof(uint32_t);
  *
  * $Revision$
  ***********************************************************************EHEADER*/
-#ifndef __GPUMEM_H__
-#define  __GPUMEM_H__
+#ifndef HYPRE_NVTX_H
+#define HYPRE_NVTX_H
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#ifdef HYPRE_USING_NVTX
 
-#include <cuda_runtime_api.h>
-nvtxDomainHandle_t getdomain(hypre_int i);
-cusparseHandle_t getCusparseHandle();
+#include "nvToolsExt.h"
+#include "nvToolsExtCudaRt.h"
 
-/*
- * Global struct for keeping HYPRE GPU Init state
- */
+static const uint32_t colors[] = { 0x0000ff00, 0x000000ff, 0x00ffff00, 0x00ff00ff, 0x0000ffff, 0x00ff0000, 0x00ffffff };
+static const int num_colors = sizeof(colors)/sizeof(uint32_t);
 
-#define MAX_HGS_ELEMENTS 10
-struct hypre__global_struct
-{
-   hypre_int initd;
-   hypre_int device;
-   hypre_int device_count;
-   cusparseHandle_t cusparse_handle;
-   cusparseMatDescr_t cusparse_mat_descr;
-   cudaStream_t streams[MAX_HGS_ELEMENTS];
-   nvtxDomainHandle_t nvtx_domain;
-   hypre_int concurrent_managed_access;
-};
+#define PUSH_RANGE(name,cid) { \
+    hypre_int color_id = cid; \
+    color_id = color_id%num_colors;\
+    nvtxEventAttributes_t eventAttrib = {0}; \
+    eventAttrib.version = NVTX_VERSION; \
+    eventAttrib.size = NVTX_EVENT_ATTRIB_STRUCT_SIZE; \
+    eventAttrib.colorType = NVTX_COLOR_ARGB; \
+    eventAttrib.color = colors[color_id]; \
+    eventAttrib.messageType = NVTX_MESSAGE_TYPE_ASCII; \
+    eventAttrib.message.ascii = name; \
+    nvtxRangePushEx(&eventAttrib); \
+}
 
-extern struct hypre__global_struct hypre__global_handle ;
+#define POP_RANGE nvtxRangePop();
 
-/*
- * Macros for accessing elements of the global handle
- */
+#else /* HYPRE_USING_NVTX */
 
-#define HYPRE_DOMAIN  hypre__global_handle.nvtx_domain
-#define HYPRE_STREAM(index) (hypre__global_handle.streams[index])
-#define HYPRE_GPU_HANDLE hypre__global_handle.initd
-#define HYPRE_CUSPARSE_HANDLE hypre__global_handle.cusparse_handle
-#define HYPRE_DEVICE hypre__global_handle.device
-#define HYPRE_DEVICE_COUNT hypre__global_handle.device_count
-#define HYPRE_CUSPARSE_MAT_DESCR hypre__global_handle.cusparse_mat_descr
+#define PUSH_RANGE(name,cid)
+#define POP_RANGE
 
-#endif /* #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP) */
+#endif /* HYPRE_USING_NVTX */
 
+#endif /* HYPRE_NVTX_H */
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
 
-#if defined(HYPRE_USING_DEVICE_OPENMP)
+/* CUDA reducer class */
 
-#endif /* #if defined(HYPRE_USING_DEVICE_OPENMP) */
+#ifndef HYPRE_CUDA_REDUCER_H
+#define HYPRE_CUDA_REDUCER_H
 
-#endif/* __GPUMEM_H__ */
+#if defined(HYPRE_USING_CUDA)
+#if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS)
 
-#if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && defined(HYPRE_USING_CUDA)
-
-#ifndef CUDART_VERSION
-#error CUDART_VERSION Undefined!
-#elif (CUDART_VERSION >= 9000)
-#define WARP_SHFL_DOWN(mask, var, delta)  __shfl_down_sync(mask, var, delta)
-#elif (CUDART_VERSION <= 8000)
-#define WARP_SHFL_DOWN(mask, var, delta)  __shfl_down(var, delta);
-#endif
-
+#ifdef __cplusplus
 extern "C++" {
-
-extern void *cuda_reduce_buffer;
+#endif
 
 template<typename T> void OneBlockReduce(T *d_arr, HYPRE_Int N, T *h_out);
 
@@ -1883,7 +2038,7 @@ HYPRE_Real warpReduceSum(HYPRE_Real val)
 #ifdef __CUDA_ARCH__
   for (HYPRE_Int offset = warpSize/2; offset > 0; offset /= 2)
   {
-    val += WARP_SHFL_DOWN(0xFFFFFFFF, val, offset);
+    val += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val, offset);
   }
 #endif
   return val;
@@ -1894,10 +2049,10 @@ HYPRE_double4 warpReduceSum(HYPRE_double4 val) {
 #ifdef __CUDA_ARCH__
   for (HYPRE_Int offset = warpSize / 2; offset > 0; offset /= 2)
   {
-    val.x += WARP_SHFL_DOWN(0xFFFFFFFF, val.x, offset);
-    val.y += WARP_SHFL_DOWN(0xFFFFFFFF, val.y, offset);
-    val.z += WARP_SHFL_DOWN(0xFFFFFFFF, val.z, offset);
-    val.w += WARP_SHFL_DOWN(0xFFFFFFFF, val.w, offset);
+    val.x += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.x, offset);
+    val.y += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.y, offset);
+    val.z += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.z, offset);
+    val.w += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.w, offset);
   }
 #endif
   return val;
@@ -1908,12 +2063,12 @@ HYPRE_double6 warpReduceSum(HYPRE_double6 val) {
 #ifdef __CUDA_ARCH__
   for (HYPRE_Int offset = warpSize / 2; offset > 0; offset /= 2)
   {
-    val.x += WARP_SHFL_DOWN(0xFFFFFFFF, val.x, offset);
-    val.y += WARP_SHFL_DOWN(0xFFFFFFFF, val.y, offset);
-    val.z += WARP_SHFL_DOWN(0xFFFFFFFF, val.z, offset);
-    val.w += WARP_SHFL_DOWN(0xFFFFFFFF, val.w, offset);
-    val.u += WARP_SHFL_DOWN(0xFFFFFFFF, val.u, offset);
-    val.v += WARP_SHFL_DOWN(0xFFFFFFFF, val.v, offset);
+    val.x += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.x, offset);
+    val.y += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.y, offset);
+    val.z += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.z, offset);
+    val.w += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.w, offset);
+    val.u += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.u, offset);
+    val.v += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.v, offset);
   }
 #endif
   return val;
@@ -1927,8 +2082,10 @@ T blockReduceSum(T val)
 #ifdef __CUDA_ARCH__
    //static __shared__ T shared[32]; // Shared mem for 32 partial sums
    __shared__ T shared[32];        // Shared mem for 32 partial sums
-   HYPRE_Int lane = threadIdx.x % warpSize;
-   HYPRE_Int wid  = threadIdx.x / warpSize;
+   //HYPRE_Int lane = threadIdx.x % warpSize;
+   //HYPRE_Int wid  = threadIdx.x / warpSize;
+   HYPRE_Int lane = threadIdx.x & (warpSize - 1);
+   HYPRE_Int wid  = threadIdx.x >> 5;
 
    val = warpReduceSum(val);       // Each warp performs partial reduction
 
@@ -1958,6 +2115,23 @@ T blockReduceSum(T val)
    return val;
 }
 
+template<typename T>
+__global__ void
+OneBlockReduceKernel(T *arr, HYPRE_Int N)
+{
+   T sum;
+   sum = 0.0;
+   if (threadIdx.x < N)
+   {
+      sum = arr[threadIdx.x];
+   }
+   sum = blockReduceSum(sum);
+   if (threadIdx.x == 0)
+   {
+      arr[0] = sum;
+   }
+}
+
 /* Reducer class */
 template <typename T>
 struct ReduceSum
@@ -1965,24 +2139,27 @@ struct ReduceSum
    T init;                    /* initial value passed in */
    mutable T __thread_sum;    /* place to hold local sum of a thread,
                                  and partial sum of a block */
-   T *d_buf;                  /* place to store partial sum of a block */
-   HYPRE_Int nblocks;         /* number of blocks used in the first round */
+   T *d_buf;                  /* place to store partial sum within blocks
+                                 in the 1st round, used in the 2nd round */
+   HYPRE_Int nblocks;         /* number of blocks used in the 1st round */
 
-   /* constructor.
+   /* constructor
     * val is the initial value (added to the reduced sum) */
    __host__
    ReduceSum(T val)
    {
       init = val;
       __thread_sum = 0.0;
+      nblocks = -1;
 
-      if (cuda_reduce_buffer == NULL)
+      if (hypre_handle->cuda_reduce_buffer == NULL)
       {
          /* allocate for the max size for reducing double6 type */
-         cuda_reduce_buffer = hypre_TAlloc(HYPRE_double6, 1024, HYPRE_MEMORY_DEVICE);
+         hypre_handle->cuda_reduce_buffer =
+            hypre_TAlloc(HYPRE_double6, 1024, HYPRE_MEMORY_DEVICE);
       }
 
-      d_buf = (T*) cuda_reduce_buffer;
+      d_buf = (T*) hypre_handle->cuda_reduce_buffer;
    }
 
    /* copy constructor */
@@ -1992,6 +2169,7 @@ struct ReduceSum
       *this = other;
    }
 
+   /* reduction within blocks */
    __host__ __device__
    void BlockReduce() const
    {
@@ -2010,16 +2188,17 @@ struct ReduceSum
       __thread_sum += val;
    }
 
-   /* we invoke the 2nd reduction at the time we want the sum from the reducer
-    * class */
+   /* invoke the 2nd reduction at the time want the sum from the reducer */
    __host__
    operator T()
    {
       T val;
       /* 2nd reduction with only *one* block */
-      OneBlockReduce(d_buf, nblocks, &val);
+      assert(nblocks >= 0 && nblocks <= 1024);
+      OneBlockReduceKernel<<<1, 1024>>>(d_buf, nblocks);
+      hypre_TMemcpy(&val, d_buf, T, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
       val += init;
-      //hypre_TFree(d_buf, HYPRE_MEMORY_DEVICE);
+
       return val;
    }
 
@@ -2030,9 +2209,13 @@ struct ReduceSum
    }
 };
 
-} // extern "C++"
-
+#ifdef __cplusplus
+}
 #endif
+
+#endif /* #if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) */
+#endif /* #if defined(HYPRE_USING_CUDA) */
+#endif /* #ifndef HYPRE_CUDA_REDUCER_H */
 
 /*BHEADER**********************************************************************
  * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
@@ -2073,10 +2256,11 @@ HYPRE_Real    hypre_cimag( HYPRE_Complex value );
 #endif
 
 /* hypre_general.c */
-void HYPRE_Init( hypre_int argc, char *argv[] );
-void HYPRE_Finalize();
-void hypre_GPUInit(hypre_int use_device);
-void hypre_GPUFinalize();
+HYPRE_Int HYPRE_Init( hypre_int argc, char *argv[] );
+HYPRE_Int HYPRE_Finalize();
+HYPRE_Int hypre_GetDevice(hypre_Handle *hypre_handle);
+HYPRE_Int hypre_SetDevice(HYPRE_Int use_device, hypre_Handle *hypre_handle);
+HYPRE_Int hypre_SyncCudaDefaultStream(hypre_Handle *hypre_handle);
 
 /* hypre_printf.c */
 // #ifdef HYPRE_BIGINT

@@ -58,6 +58,8 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    HYPRE_Complex *x_tmp_data, **x_buf_data;
    HYPRE_Complex *x_local_data = hypre_VectorData(x_local);
 
+   hypre_HandleCudaComputeStreamSyncPush(hypre_handle, 0);
+
    /*---------------------------------------------------------------------
     *  Check for size compatibility.  ParMatvec returns ierr = 11 if
     *  length of X doesn't equal the number of columns of A,
@@ -136,6 +138,18 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    else
    {
       comm_handle = hypre_CTAlloc(hypre_ParCSRCommHandle*, num_vectors, HYPRE_MEMORY_HOST);
+#if defined(HYPRE_USING_CUDA)
+      if (num_vectors == 1)
+      {
+         if (!hypre_ParCSRCommPkgTmpData(comm_pkg))
+         {
+            hypre_ParCSRCommPkgTmpData(comm_pkg) =
+               hypre_TAlloc(HYPRE_Complex, num_cols_offd, HYPRE_MEMORY_DEVICE);
+         }
+         hypre_VectorData(x_tmp) = hypre_ParCSRCommPkgTmpData(comm_pkg);
+         hypre_SeqVectorSetDataOwner(x_tmp, 0);
+      }
+#endif
    }
 
    hypre_SeqVectorInitialize_v2(x_tmp, HYPRE_MEMORY_DEVICE);
@@ -145,11 +159,28 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    if (!use_persistent_comm)
    {
       x_buf_data = hypre_CTAlloc(HYPRE_Complex*, num_vectors, HYPRE_MEMORY_HOST);
+
+#if defined(HYPRE_USING_CUDA)
+      if (!hypre_ParCSRCommPkgBufData(comm_pkg))
+      {
+         hypre_ParCSRCommPkgBufData(comm_pkg) =
+            hypre_TAlloc(HYPRE_Complex, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                         HYPRE_MEMORY_DEVICE);
+      }
+#endif
+
       for ( jv = 0; jv < num_vectors; ++jv )
       {
-         x_buf_data[jv] = hypre_CTAlloc(HYPRE_Complex,
-                                        hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
-                                        HYPRE_MEMORY_DEVICE);
+#if defined(HYPRE_USING_CUDA)
+         if (jv == 0)
+         {
+            x_buf_data[0] = hypre_ParCSRCommPkgBufData(comm_pkg);
+            continue;
+         }
+#endif
+         x_buf_data[jv] = hypre_TAlloc(HYPRE_Complex,
+                                       hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                                       HYPRE_MEMORY_DEVICE);
       }
    }
 
@@ -164,15 +195,20 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
 #endif
 
 #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
-      /* pack send data on device */
+      hypre_SeqVectorPrefetch(x_local, HYPRE_MEMORY_DEVICE);
+
+      /* send_map_elmts on device */
       hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg);
 
-      thrust::gather(thrust::device,
-                     hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
-                     hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) +
-                     hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
-                     x_local_data,
-                     send_data);
+      /* pack send data on device */
+      HYPRE_THRUST_CALL( gather,
+                         hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+                         hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) +
+                         hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                         x_local_data,
+                         send_data );
+      /* no need to Sync: send_data is on device memory
+       * TODO: how about persistent comm? */
 #else // defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
       /* pack send data on host */
       HYPRE_Int begin = hypre_ParCSRCommPkgSendMapStart(comm_pkg, 0);
@@ -241,7 +277,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
 #endif
 
    /* overlapped local computation */
-   hypre_CSRMatrixMatvecOutOfPlace( alpha, diag, x_local, beta, b_local, y_local, 0);
+   hypre_CSRMatrixMatvecOutOfPlace( alpha, diag, x_local, beta, b_local, y_local, 0 );
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] -= hypre_MPI_Wtime();
@@ -284,10 +320,20 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    {
       for ( jv = 0; jv < num_vectors; ++jv )
       {
+#if defined(HYPRE_USING_CUDA)
+         if (jv == 0)
+         {
+            continue;
+         }
+#endif
          hypre_TFree(x_buf_data[jv], HYPRE_MEMORY_DEVICE);
       }
       hypre_TFree(x_buf_data, HYPRE_MEMORY_HOST);
    }
+
+   hypre_HandleCudaComputeStreamSyncPop(hypre_handle);
+
+   hypre_SyncCudaComputeStream(hypre_handle);
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] += hypre_MPI_Wtime();
@@ -372,6 +418,8 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
    HYPRE_BigInt x_size    = hypre_ParVectorGlobalSize(x);
    HYPRE_BigInt y_size    = hypre_ParVectorGlobalSize(y);
 
+   hypre_HandleCudaComputeStreamSyncPush(hypre_handle, 0);
+
    /*---------------------------------------------------------------------
     *  Check for size compatibility.  MatvecT returns ierr = 1 if
     *  length of X doesn't equal the number of rows of A,
@@ -448,6 +496,18 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
    else
    {
       comm_handle = hypre_CTAlloc(hypre_ParCSRCommHandle*, num_vectors, HYPRE_MEMORY_HOST);
+#if defined(HYPRE_USING_CUDA)
+      if (num_vectors == 1)
+      {
+         if (!hypre_ParCSRCommPkgTmpData(comm_pkg))
+         {
+            hypre_ParCSRCommPkgTmpData(comm_pkg) =
+               hypre_TAlloc(HYPRE_Complex, num_cols_offd, HYPRE_MEMORY_DEVICE);
+         }
+         hypre_VectorData(y_tmp) = hypre_ParCSRCommPkgTmpData(comm_pkg);
+         hypre_SeqVectorSetDataOwner(y_tmp, 0);
+      }
+#endif
    }
 
    hypre_SeqVectorInitialize_v2(y_tmp, HYPRE_MEMORY_DEVICE);
@@ -457,11 +517,28 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
    if (!use_persistent_comm)
    {
       y_buf_data = hypre_CTAlloc(HYPRE_Complex*, num_vectors, HYPRE_MEMORY_HOST);
+
+#if defined(HYPRE_USING_CUDA)
+      if (!hypre_ParCSRCommPkgBufData(comm_pkg))
+      {
+         hypre_ParCSRCommPkgBufData(comm_pkg) =
+            hypre_TAlloc(HYPRE_Complex, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                         HYPRE_MEMORY_DEVICE);
+      }
+#endif
+
       for ( jv = 0; jv < num_vectors; ++jv )
       {
-         y_buf_data[jv] = hypre_CTAlloc(HYPRE_Complex,
-                                        hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
-                                        HYPRE_MEMORY_DEVICE);
+#if defined(HYPRE_USING_CUDA)
+         if (jv == 0)
+         {
+            y_buf_data[0] = hypre_ParCSRCommPkgBufData(comm_pkg);
+            continue;
+         }
+#endif
+         y_buf_data[jv] = hypre_TAlloc(HYPRE_Complex,
+                                       hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                                       HYPRE_MEMORY_DEVICE);
       }
    }
 
@@ -566,9 +643,10 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
 #endif
 
 #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
-      /* unpack recv data on device */
+      /* send_map_elmts on device */
       hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg);
 
+      /* unpack recv data on device */
       hypreDevice_GenScatterAdd(y_local_data,
                                 hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                                 hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
@@ -608,10 +686,20 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
    {
       for ( jv = 0; jv < num_vectors; ++jv )
       {
+#if defined(HYPRE_USING_CUDA)
+         if (jv == 0)
+         {
+            continue;
+         }
+#endif
          hypre_TFree(y_buf_data[jv], HYPRE_MEMORY_DEVICE);
       }
       hypre_TFree(y_buf_data, HYPRE_MEMORY_HOST);
    }
+
+   hypre_HandleCudaComputeStreamSyncPop(hypre_handle);
+
+   hypre_SyncCudaComputeStream(hypre_handle);
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] += hypre_MPI_Wtime();
@@ -749,3 +837,4 @@ hypre_ParCSRMatrixMatvec_FF( HYPRE_Complex       alpha,
 
    return ierr;
 }
+

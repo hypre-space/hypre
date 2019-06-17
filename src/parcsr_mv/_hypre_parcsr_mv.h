@@ -83,6 +83,12 @@ typedef struct
 #ifdef HYPRE_USING_PERSISTENT_COMM
    hypre_ParCSRPersistentCommHandle *persistent_comm_handles[NUM_OF_COMM_PKG_JOB_TYPE];
 #endif
+
+   /* temporary memory for matvec. cudaMalloc is expensive. alloc once and reuse */
+#if defined(HYPRE_USING_CUDA)
+   HYPRE_Complex *tmp_data;
+   HYPRE_Complex *buf_data;
+#endif
 } hypre_ParCSRCommPkg;
 
 /*--------------------------------------------------------------------------
@@ -132,6 +138,11 @@ typedef struct
 #define hypre_ParCSRCommPkgSendMPIType(comm_pkg,i)      (comm_pkg -> send_mpi_types[i])
 #define hypre_ParCSRCommPkgRecvMPITypes(comm_pkg)       (comm_pkg -> recv_mpi_types)
 #define hypre_ParCSRCommPkgRecvMPIType(comm_pkg,i)      (comm_pkg -> recv_mpi_types[i])
+
+#if defined(HYPRE_USING_CUDA)
+#define hypre_ParCSRCommPkgTmpData(comm_pkg)           ((comm_pkg) -> tmp_data)
+#define hypre_ParCSRCommPkgBufData(comm_pkg)           ((comm_pkg) -> buf_data)
+#endif
 
 static inline void
 hypre_ParCSRCommPkgCopySendMapElmtsToDevice(hypre_ParCSRCommPkg *comm_pkg)
@@ -392,7 +403,6 @@ typedef struct hypre_ParCSRMatrix_struct
    hypre_IJAssumedPart  *assumed_partition; /* only populated if
                                               no_global_partition option is used
                                               (compile-time option)*/
-
 } hypre_ParCSRMatrix;
 
 /*--------------------------------------------------------------------------
@@ -897,7 +907,7 @@ hypre_ParCSRMatrix *hypre_ParCSRMatrixUnion ( hypre_ParCSRMatrix *A , hypre_ParC
 hypre_ParCSRMatrix* hypre_ParCSRMatrixClone ( hypre_ParCSRMatrix *A, HYPRE_Int copy_data );
 hypre_ParCSRMatrix* hypre_ParCSRMatrixClone_v2 ( hypre_ParCSRMatrix *A, HYPRE_Int copy_data, HYPRE_Int memory_location );
 #ifdef HYPRE_USING_GPU
-hypre_int hypre_ParCSRMatrixIsManaged(hypre_ParCSRMatrix *a);
+//hypre_int hypre_ParCSRMatrixIsManaged(hypre_ParCSRMatrix *a);
 #endif
 HYPRE_Int hypre_ParCSRMatrixDropSmallEntries( hypre_ParCSRMatrix *A, HYPRE_Real tol);
 HYPRE_Int hypre_ParcsrAdd( HYPRE_Complex alpha, hypre_ParCSRMatrix *A, HYPRE_Complex beta, hypre_ParCSRMatrix *B, hypre_ParCSRMatrix **Cout);

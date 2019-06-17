@@ -2325,6 +2325,7 @@ hypre_ParCSRMatrixDropSmallEntries( hypre_ParCSRMatrix *A,
    return hypre_error_flag;
 }
 
+/*
 #ifdef HYPRE_USING_UNIFIED_MEMORY
 hypre_int hypre_ParCSRMatrixIsManaged(hypre_ParCSRMatrix *a){
   if (hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(a)))
@@ -2333,3 +2334,4 @@ hypre_int hypre_ParCSRMatrixIsManaged(hypre_ParCSRMatrix *a){
     return hypre_CSRMatrixIsManaged(hypre_ParCSRMatrixDiag(a));
 }
 #endif
+*/

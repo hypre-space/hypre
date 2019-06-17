@@ -288,6 +288,14 @@ hypre_GetExecPolicy2(HYPRE_Int location1,
 }\
 )
 
+#define hypre_TMemcpy(dst, src, type, count, locdst, locsrc) \
+( \
+{ \
+  printf("[%s:%d] TMemcpy %d to %d %.3f MB\n", __FILE__,__LINE__, locsrc, locdst, (size_t)(sizeof(type) * (count))/1024.0/1024.0); \
+  hypre_Memcpy((void *)(dst), (void *)(src), (size_t)(sizeof(type) * (count)), locdst, locsrc); \
+} \
+)
+
 #else
 
 #define hypre_TAlloc(type, count, location) \
@@ -299,13 +307,13 @@ hypre_GetExecPolicy2(HYPRE_Int location1,
 #define hypre_TReAlloc(ptr, type, count, location) \
 ( (type *) hypre_ReAlloc((char *)ptr, (size_t)(sizeof(type) * (count)), location) )
 
+#define hypre_TMemcpy(dst, src, type, count, locdst, locsrc) \
+(hypre_Memcpy((void *)(dst), (void *)(src), (size_t)(sizeof(type) * (count)), locdst, locsrc))
+
 #endif
 
 #define hypre_TFree(ptr, location) \
 ( hypre_Free((void *)ptr, location), ptr = NULL )
-
-#define hypre_TMemcpy(dst, src, type, count, locdst, locsrc) \
-(hypre_Memcpy((void *)(dst), (void *)(src), (size_t)(sizeof(type) * (count)), locdst, locsrc))
 
 /*--------------------------------------------------------------------------
  * Prototypes

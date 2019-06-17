@@ -2349,8 +2349,8 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
           * Copy f into temporary vector.
           *-----------------------------------------------------------------*/
 #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
-         hypre_SeqVectorPrefetchToDevice(hypre_ParVectorLocalVector(Vtemp));
-         hypre_SeqVectorPrefetchToDevice(hypre_ParVectorLocalVector(f));
+         hypre_SeqVectorPrefetch(hypre_ParVectorLocalVector(Vtemp), HYPRE_MEMORY_DEVICE);
+         hypre_SeqVectorPrefetch(hypre_ParVectorLocalVector(f), HYPRE_MEMORY_DEVICE);
 #endif
          hypre_ParVectorCopy(f, Vtemp);
 
@@ -2358,17 +2358,17 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
           * Perform Matvec Vtemp=f-Au
           *-----------------------------------------------------------------*/
 
-            hypre_ParCSRMatrixMatvec(-relax_weight,A, u, relax_weight, Vtemp);
+         hypre_ParCSRMatrixMatvec(-relax_weight,A, u, relax_weight, Vtemp);
 #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
-            hypreDevice_IVAXPY(n, l1_norms, Vtemp_data, u_data);
+         hypreDevice_IVAXPY(n, l1_norms, Vtemp_data, u_data);
 #else
-            for (i = 0; i < n; i++)
-            {
-               /*-----------------------------------------------------------
-                * If diagonal is nonzero, relax point i; otherwise, skip it.
-                *-----------------------------------------------------------*/
-                  u_data[i] += Vtemp_data[i] / l1_norms[i];
-            }
+         for (i = 0; i < n; i++)
+         {
+            /*-----------------------------------------------------------
+             * If diagonal is nonzero, relax point i; otherwise, skip it.
+             *-----------------------------------------------------------*/
+            u_data[i] += Vtemp_data[i] / l1_norms[i];
+         }
 #endif
       }
       break;

@@ -778,6 +778,8 @@ with_no_global_partition
 enable_global_partition
 enable_fortran
 enable_unified_memory
+enable_cuda_streams
+enable_nvtx
 enable_gpu_aware_mpi
 with_LD
 with_LDFLAGS
@@ -1479,6 +1481,8 @@ Optional Features:
   --enable-fortran        Require a working Fortran compiler (default is YES).
   --enable-unified-memory Use unified memory for allocating the memory
                           (default is NO).
+  --enable-cuda-streams   Use CUDA streams (default is NO).
+  --enable-nvtx           Use NVTX (default is NO).
   --enable-gpu-aware-mpi  Use GPU memory aware MPI
 
 Optional Packages:
@@ -2641,6 +2645,8 @@ hypre_using_cuda=no
 hypre_using_gpu=no
 hypre_using_um=no
 hypre_gpu_mpi=no
+hypre_using_cuda_streams=no
+hypre_using_nvtx=no
 
 hypre_using_caliper=no
 hypre_user_gave_caliper_lib=no
@@ -2955,6 +2961,32 @@ if test "${enable_unified_memory+set}" = set; then :
  esac
 else
   hypre_using_um=no
+
+fi
+
+
+# Check whether --enable-cuda-streams was given.
+if test "${enable_cuda_streams+set}" = set; then :
+  enableval=$enable_cuda_streams; case "${enableval}" in
+    yes) hypre_using_cuda_streams=yes ;;
+    no)  hypre_using_cuda_streams=no ;;
+    *)   hypre_using_cuda_streams=no ;;
+ esac
+else
+  hypre_using_cuda_streams=no
+
+fi
+
+
+# Check whether --enable-nvtx was given.
+if test "${enable_nvtx+set}" = set; then :
+  enableval=$enable_nvtx; case "${enableval}" in
+    yes) hypre_using_nvtx=yes ;;
+    no)  hypre_using_nvtx=no ;;
+    *)   hypre_using_nvtx=no ;;
+ esac
+else
+  hypre_using_nvtx=no
 
 fi
 
@@ -8274,9 +8306,12 @@ $as_echo "#define HYPRE_USING_GPU 1" >>confdefs.h
 $as_echo "#define HYPRE_USING_CUDA 1" >>confdefs.h
 
 
-$as_echo "#define USE_NVTX 1" >>confdefs.h
+   if test "$hypre_using_nvtx" = "yes"
+   then
 
+$as_echo "#define HYPRE_USING_NVTX 1" >>confdefs.h
 
+   fi
       for ac_prog in nvcc
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
@@ -8337,7 +8372,11 @@ done
    CFLAGS=${CXXFLAGS}
    LDFLAGS="-ccbin=$NVCCBIN ${HYPRE_CUDA_GENCODE} -Xcompiler \"${LDFLAGS}\""
    HYPRE_CUDA_INCL="-I${HYPRE_CUDA_PATH}/include"
-   HYPRE_CUDA_LIBS="-L${HYPRE_CUDA_PATH}/lib64 -lcusparse -lcudart -lcurand -lnvToolsExt"
+   HYPRE_CUDA_LIBS="-L${HYPRE_CUDA_PATH}/lib64 -lcusparse -lcudart -lcurand"
+   if test "$hypre_using_nvtx" = "yes"
+   then
+      HYPRE_CUDA_LIBS+=" -lnvToolsExt"
+   fi
 fi
 
 if test "$hypre_using_um" != "yes"
@@ -8379,9 +8418,12 @@ fi
 
 if test "$hypre_using_device_openmp" = "yes"
 then
+   if test "$hypre_using_nvtx" = "yes"
+   then
 
-$as_echo "#define USE_NVTX 1" >>confdefs.h
+$as_echo "#define HYPRE_USING_NVTX 1" >>confdefs.h
 
+   fi
 
 $as_echo "#define HYPRE_USING_DEVICE_OPENMP 1" >>confdefs.h
 
@@ -8450,7 +8492,11 @@ done
    fi
 
    HYPRE_CUDA_INCL="-I${HYPRE_CUDA_PATH}/include"
-   HYPRE_CUDA_LIBS="-L${HYPRE_CUDA_PATH}/lib64 -lcusparse -lcudart -lnvToolsExt"
+   HYPRE_CUDA_LIBS="-L${HYPRE_CUDA_PATH}/lib64 -lcusparse -lcudart"
+   if test "$hypre_using_nvtx" = "yes"
+   then
+      HYPRE_CUDA_LIBS+=" -lnvToolsExt"
+   fi
 fi
 
 if test "$hypre_using_shared" = "yes"
@@ -8494,6 +8540,13 @@ then
       BUILD_CC_SHARED="${CC} ${SHARED_BUILD_FLAG}"
    fi
    BUILD_CXX_SHARED="${CXX} ${SHARED_BUILD_FLAG}"
+fi
+
+if test "x$hypre_using_cuda_streams" = "xyes"
+then
+
+$as_echo "#define HYPRE_USING_CUDA_STREAMS 1" >>confdefs.h
+
 fi
 
 if test "x$hypre_using_um" = "xyes"

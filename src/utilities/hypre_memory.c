@@ -168,7 +168,8 @@ hypre_UnifiedMalloc(size_t size, HYPRE_Int zeroinit)
    size_t count = size + sizeof(size_t)*HYPRE_MEM_PAD_LEN;
    /* with UM, managed memory alloc */
    HYPRE_CUDA_CALL( cudaMallocManaged(&ptr, count, cudaMemAttachGlobal) );
-   HYPRE_CUDA_CALL( cudaMemAdvise(ptr, count, cudaMemAdviseSetPreferredLocation, HYPRE_DEVICE) );
+   HYPRE_Int device = hypre_HandleCudaDevice(hypre_handle);
+   HYPRE_CUDA_CALL( cudaMemAdvise(ptr, count, cudaMemAdviseSetPreferredLocation, device) );
    size_t *sp = (size_t*) ptr;
    sp[0] = size;
    ptr = (void*) (&sp[HYPRE_MEM_PAD_LEN]);
@@ -429,6 +430,32 @@ hypre_Memcpy(void *dst, void *src, size_t size, HYPRE_Int loc_dst, HYPRE_Int loc
 
    loc_dst = hypre_GetActualMemLocation(loc_dst);
    loc_src = hypre_GetActualMemLocation(loc_src);
+
+   /* special uses for GPU shared memory prefetch */
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_UNIFIED_MEMORY)
+   if (dst == src && loc_src == HYPRE_MEMORY_SHARED)
+   {
+      /* src (== dst) must point to cuda unified memory */
+      //ASSERT_MANAGED(dst);
+
+      if (loc_dst == HYPRE_MEMORY_DEVICE)
+      {
+         HYPRE_CUDA_CALL(
+         cudaMemPrefetchAsync(src, size, hypre_HandleCudaDevice(hypre_handle),
+                              hypre_HandleCudaPrefetchStream(hypre_handle))
+         );
+      }
+      else if (loc_dst == HYPRE_MEMORY_HOST)
+      {
+         HYPRE_CUDA_CALL(
+         cudaMemPrefetchAsync(src, size, cudaCpuDeviceId,
+                              hypre_HandleCudaPrefetchStream(hypre_handle))
+         );
+      }
+
+      return;
+   }
+#endif
 
    /* 4 x 4 = 16 cases = 9 + 2 + 2 + 2 + 1 */
    /* 9: Host   <-- Host, Host   <-- Shared, Host   <-- Pinned,
