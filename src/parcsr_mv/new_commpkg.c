@@ -581,7 +581,7 @@ hypre_ParCSRCommPkgCreateApart
    hypre_ParCSRCommPkgSendMapStarts(comm_pkg) = send_map_starts;
    hypre_ParCSRCommPkgSendMapElmts (comm_pkg) = send_map_elmts;
 
-#if HYPRE_USING_NODE_AWARE_MPI
+#ifdef HYPRE_USING_NODE_AWARE_MPI
    hypre_ParCSRNAPinit(comm_pkg, first_col_diag, col_map_offd);
 #endif
 
@@ -626,11 +626,12 @@ hypre_NewCommPkgDestroy(hypre_ParCSRMatrix *parcsr_A)
       hypre_TFree(hypre_ParCSRCommPkgRecvVecStarts(comm_pkg), HYPRE_MEMORY_HOST);
    }
 
-#if HYPRE_USING_NODE_AWARE_MPI
-   if (hypre_ParCSRCommPkgSendMapStart(comm_pkg, hypre_ParCSRCommPkgNumSends(comm_pkg))) {
-      hypre_TFree(hypre_ParCSRCommPkgGlobalSendInds(comm_pkg), HYPRE_MEMORY_HOST);
+#ifdef HYPRE_USING_NODE_AWARE_MPI
+   hypre_TFree(hypre_ParCSRCommPkgGlobalSendInds(comm_pkg), HYPRE_MEMORY_HOST);
+   if (comm_pkg->nap_comm)
+   {
+      MPIX_NAPDestroy(&comm_pkg->nap_comm);
    }
-   MPIX_NAPDestroy(&comm_pkg->nap_comm);
 #endif
 
    hypre_TFree(comm_pkg, HYPRE_MEMORY_HOST);
