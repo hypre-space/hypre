@@ -25,6 +25,7 @@ C_COMPILE_FLAGS = \
  -I${HYPRE_BUILD_DIR}/include\
  $(SUPERLU_INCLUDE)\
  $(DSUPERLU_INCLUDE)\
+ -I/home/osborn9/install/parmetis-4.0.3-mpich/include\
  ${CINCLUDES}\
  ${CDEFS}
 
@@ -60,6 +61,8 @@ LFLAGS =\
  ${XLINK}\
  ${DSUPERLU_LIBS}\
  ${SUPERLU_LIBS}\
+ -L/home/osborn9/install/parmetis-4.0.3-mpich/lib -lparmetis\
+ -L/home/osborn9/install/parmetis-4.0.3-mpich/lib -lmetis\
  ${MPILIBFLAGS}\
  ${LAPACKLIBFLAGS}\
  ${BLASLIBFLAGS}\

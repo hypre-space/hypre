@@ -40,7 +40,7 @@ option(HYPRE_NO_GLOBAL_PARTITION  "Use assumed partition" ON)
 option(HYPRE_PRINT_ERRORS         "Print HYPRE errors" OFF)
 option(HYPRE_USING_OPENMP         "Use OpenMP" OFF)
 option(HYPRE_HOPSCOTCH            "Use hopscotch hashing with OpenMP" OFF)
-option(HAVE_DSUPERLU              "Enable SuperLU_Dist" OFF)
+option(HYPRE_USING_DSUPERLU       "Use TPL SuperLU_Dist" OFF)
 option(HYPRE_USING_FEI            "Use FEI" ON)
 option(HYPRE_USING_CALIPER        "Use Caliper" OFF)  # TODO: Finish this cmake feature
 option(HYPRE_BUILD_EXAMPLES       "Build examples" OFF)
@@ -91,7 +91,7 @@ set(TPL_LIBRARIES "")
 set(TPL_LINKER_FLAGS "")
 
 # Find DSUPERLU, if requested 
-if (HAVE_DSUPERLU)
+if (HYPRE_USING_DSUPERLU)
   if (NOT TPL_DSUPERLU_LIBRARIES)
     message(FATAL_ERROR "TPL_DSUPERLU_LIBRARIES option should be set for SuperLU_Dist support to be enabled.")
   endif()
@@ -106,7 +106,7 @@ if (HAVE_DSUPERLU)
     set(CMAKE_C_FLAGS "-I${dir} ${CMAKE_C_FLAGS}")
   endforeach()
 
-  message("-- Enabled support for DSUPERLU.")
+  message("-- Enabled support for using DSUPERLU.")
   set(DSUPERLU_FOUND TRUE)
   list(APPEND TPL_LIBRARIES ${TPL_DSUPERLU_LIBRARIES})
 endif()
@@ -117,7 +117,7 @@ if (TPL_DSUPERLU_INCLUDE_DIRS)
 endif ()
 
 if(DSUPERLU_FOUND)
-  set(HAVE_DSUPERLU TRUE)
+  set(HYPRE_USING_DSUPERLU TRUE)
 endif()
 
 
@@ -592,7 +592,7 @@ list (APPEND HYPRE_SOURCES
   parcsr_ls/par_lr_restr.c
 )
 
-if (HAVE_DSUPERLU)
+if (HYPRE_USING_DSUPERLU)
   list (APPEND HYPRE_SOURCES
     parcsr_ls/superlu.c)
 endif()

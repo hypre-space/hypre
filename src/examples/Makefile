@@ -11,7 +11,7 @@ HYPRE_DIR = ../hypre
 # Compiling and linking options
 ########################################################################
 COPTS     = -g -Wall
-CINCLUDES = -I$(HYPRE_DIR)/include
+CINCLUDES = -I$(HYPRE_DIR)/include -I/home/osborn9/install/superlu-dist-5.1.0/include -I/home/osborn9/install/superlu-5.2.1/include
 CDEFS     = -DHAVE_CONFIG_H -DHYPRE_TIMING
 CFLAGS    = $(COPTS) $(CINCLUDES) $(CDEFS)
 FOPTS     = -g
@@ -27,8 +27,8 @@ F90FLAGS = $(FFLAGS) $(IF90FLAGS)
 
 
 LINKOPTS  = $(COPTS)
-LIBS      = -L$(HYPRE_DIR)/lib -lHYPRE -lm
-LFLAGS    = $(LINKOPTS) $(LIBS) -lstdc++
+LIBS      = -L/home/osborn9/install/parmetis-4.0.3-mpich/lib -lmetis -L/home/osborn9/install/parmetis-4.0.3-mpich/lib -lparmetis -L/home/osborn9/install/superlu-dist-5.1.0/lib -lsuperlu_dist -L$(HYPRE_DIR)/lib -lHYPRE -lm -L/home/osborn9/install/superlu-5.2.1/lib64 -lsuperlu 
+LFLAGS    = $(LINKOPTS) $(LIBS) -fopenmp -lstdc++ -lblas -llapack
 LFLAGS_B =\
  -L${HYPRE_DIR}/lib\
  -lbHYPREClient-C\
