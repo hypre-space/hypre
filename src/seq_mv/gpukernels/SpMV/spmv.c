@@ -360,6 +360,7 @@ void csr_v_k_shuffle(int n, int *d_ia, int *d_ja, T *d_a, T *d_x, T *d_y)
       q = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 1, K);
       T sum = 0.0;
 #if VERSION == 1
+#pragma unroll(1)
       for (p += lane; __any_sync(HYPRE_WARP_FULL_MASK, p < q); p += K * 2)
       {
          if (p < q)
@@ -372,6 +373,7 @@ void csr_v_k_shuffle(int n, int *d_ia, int *d_ja, T *d_a, T *d_x, T *d_y)
          }
       }
 #elif VERSION == 2
+#pragma unroll(1)
       for (p += lane; __any_sync(HYPRE_WARP_FULL_MASK, p < q); p += K)
       {
          if (p < q)
@@ -380,6 +382,7 @@ void csr_v_k_shuffle(int n, int *d_ia, int *d_ja, T *d_a, T *d_x, T *d_y)
          }
       }
 #else
+#pragma unroll(1)
       for (p += lane;  p < q; p += K)
       {
          sum += read_only_load(&d_a[p]) * read_only_load(&d_x[read_only_load(&d_ja[p])]);
@@ -433,7 +436,7 @@ void spmv_csr_vector(struct csr_t *csr, REAL *x, REAL *y)
    for (i=0; i<REPEAT; i++)
    {
       //cudaMemset((void *)d_y, 0, n*sizeof(REAL));
-      csr_v_k_shuffle<4, REAL> <<<gDim, bDim>>>(n, d_ia, d_ja, d_a, d_x, d_y);
+      csr_v_k_shuffle<8, REAL> <<<gDim, bDim>>>(n, d_ia, d_ja, d_a, d_x, d_y);
    }
    /*-------- Barrier for GPU calls */
    cudaThreadSynchronize();

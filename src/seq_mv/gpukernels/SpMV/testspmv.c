@@ -6,7 +6,8 @@ void spmv_csr_cpu(struct csr_t *csr, REAL *x, REAL *y) {
 /*------------- CPU CSR SpMV kernel */
   double t1, t2;
   t1 = wall_timer();
-  for (int ii=0; ii<REPEAT; ii++) {
+  //for (int ii=0; ii<REPEAT; ii++) {
+  for (int ii=0; ii<1; ii++) {
     //memset(y, 0, csr->n*sizeof(REAL));
     #pragma omp parallel for schedule(static)
     for (int i=0; i<csr->nrows; i++) {
@@ -21,7 +22,7 @@ void spmv_csr_cpu(struct csr_t *csr, REAL *x, REAL *y) {
   printf("\n=== [CPU] CSR Kernel ===\n");
   //printf("  number of threads %d\n", omp_get_num_threads());
   printf("  %.2f ms, %.2f GFLOPS \n",
-  t2*1e3, 2*(csr->ia[csr->nrows])/t2/1e9*REPEAT);
+  t2*1e3, 2*(csr->ia[csr->nrows])/t2/1e9/**REPEAT*/);
 }
 
 /*-----------------------------------------*/
