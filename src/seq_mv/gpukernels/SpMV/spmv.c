@@ -3,6 +3,7 @@
 #include "cusparse.h"
 
 
+#if 0
 __global__
 void csr_v_k_8(int n, int *d_ia, int *d_ja, REAL *d_a, REAL *d_x, REAL *d_y)
 {
@@ -283,11 +284,11 @@ void csr_v_k_32_shuffle(int n, int *d_ia, int *d_ja, REAL *d_a, REAL *d_x, REAL 
    }
 }
 
+#endif
 
-//example
 template <int K, typename T>
 __global__
-void csr_v_k(int n, int *d_ia, int *d_ja, T *d_a, T *d_x, T *d_y)
+void csr_v_k_shared(int n, int *d_ia, int *d_ja, T *d_a, T *d_x, T *d_y)
 {
    /*------------------------------------------------------------*
     *               CSR spmv-vector kernel
@@ -333,12 +334,8 @@ void csr_v_k(int n, int *d_ia, int *d_ja, T *d_a, T *d_x, T *d_y)
    }
 }
 
-//example
 
-//example_shuffle
-
-//#define ROW_PTR_USE_SHARED
-
+/* K is the number of threads working on a single row. K = 2, 4, 8, 16, 32 */
 template <int K, typename T>
 __global__
 void csr_v_k_shuffle(int n, int *d_ia, int *d_ja, T *d_a, T *d_x, T *d_y)
@@ -346,49 +343,41 @@ void csr_v_k_shuffle(int n, int *d_ia, int *d_ja, T *d_a, T *d_x, T *d_y)
    /*------------------------------------------------------------*
     *               CSR spmv-vector kernel
     *              shared memory reduction
-    *            K-Warp  ( K threads) per row
+    *           (Group of K threads) per row
     *------------------------------------------------------------*/
-   // num of full-warps
-   int nw = gridDim.x*BLOCKDIM/K;
-   // full warp id
-   int wid = (blockIdx.x*BLOCKDIM+threadIdx.x)/K;
-   // thread lane in each full warp
-   int lane = threadIdx.x & (K-1);
-   // shared memory for patial result
-#ifdef ROW_PTR_USE_SHARED
-   // full warp lane in each block
-   int wlane = threadIdx.x/K;
-   volatile __shared__ int startend[BLOCKDIM/K][2];
-#endif
+   int nw = gridDim.x * (BLOCKDIM / K);
+   int wid = (blockIdx.x * BLOCKDIM + threadIdx.x) / K;
+   int lane = threadIdx.x & (K - 1);
    for (int row = wid; row < n; row += nw)
    {
-#ifdef ROW_PTR_USE_SHARED
-      // row start and end point
-      if (lane < 2)
-      {
-         startend[wlane][lane] = d_ia[row+lane];
-      }
-      int p = startend[wlane][0];
-      int q = startend[wlane][1];
-#else
       int j, p, q;
       if (lane < 2)
       {
-         j = __ldg(&d_ia[row+lane]);
+         j = read_only_load(&d_ia[row+lane]);
       }
-      p = __shfl_sync(0xFFFFFFFF, j, 0, K);
-      q = __shfl_sync(0xFFFFFFFF, j, 1, K);
-#endif
+      p = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 0, K);
+      q = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 1, K);
       T sum = 0.0;
-      for (int i=p+lane; i<q; i+=K)
+#if 0
+      for (int i = p + lane; i < q; i += K*2)
       {
-         sum += d_a[i] * d_x[d_ja[i]];
+         sum += read_only_load(&d_a[i]) * read_only_load(&d_x[read_only_load(&d_ja[i])]);
+         if (i + K < q)
+         {
+            sum += read_only_load(&d_a[i+K]) * read_only_load(&d_x[read_only_load(&d_ja[i+K])]);
+         }
       }
+#else
+      for (int i = p + lane; i < q; i += K)
+      {
+         sum += read_only_load(&d_a[i]) * read_only_load(&d_x[read_only_load(&d_ja[i])]);
+      }
+#endif
       // parallel reduction
 #pragma unroll
       for (int d = K/2; d > 0; d >>= 1)
       {
-         sum += __shfl_down(sum, d);
+         sum += __shfl_down_sync(HYPRE_WARP_FULL_MASK, sum, d);
       }
       if (lane == 0)
       {
@@ -432,7 +421,7 @@ void spmv_csr_vector(struct csr_t *csr, REAL *x, REAL *y)
    for (i=0; i<REPEAT; i++)
    {
       //cudaMemset((void *)d_y, 0, n*sizeof(REAL));
-      csr_v_k_shuffle<32, REAL> <<<gDim, bDim>>>(n, d_ia, d_ja, d_a, d_x, d_y);
+      csr_v_k_shuffle<16, REAL> <<<gDim, bDim>>>(n, d_ia, d_ja, d_a, d_x, d_y);
    }
    /*-------- Barrier for GPU calls */
    cudaThreadSynchronize();
