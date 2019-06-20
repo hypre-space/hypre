@@ -279,7 +279,7 @@ int lapgen(int nx, int ny, int nz, struct coo_t *Acoo, int npts) {
 
   Acoo->nnz = nnz;
 
-  printf("Lapcian Matrix N = %d, NNZ = %d\n", n, nnz);
+  printf("Lapcian Matrix N = %d, NNZ = %d, NNZ/N=%d\n", n, nnz, nnz/n );
 
   // change to 1-based index
   /*

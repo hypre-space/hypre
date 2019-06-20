@@ -27,16 +27,6 @@
 #define FORT(name) name ## _
 //#define FORT(name) name
 
-/*---- sparse matrix data structure */
-/* COO format type */
-struct coo_t {
-  int nrows;
-  int ncols;
-  int nnz;
-  int *ir;
-  int *jc;
-  REAL *val;
-};
 /* CSR format type */
 struct csr_t {
   int nrows;
@@ -53,6 +43,16 @@ typedef enum {
   STR,
   NA
 } ARG_TYPE;
+
+/* COO format type */
+struct coo_t {
+  int nrows;
+  int ncols;
+  int nnz;
+  int *ir;
+  int *jc;
+  REAL *val;
+};
 
 #include "protos.h"
 
