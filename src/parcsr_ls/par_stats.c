@@ -656,16 +656,18 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
 
    }
 
-
-   if (block_mode)
+   ndigits[0] = 5;
+   if ((num_levels - 1))
    {
-      ndigits[0] = hypre_ndigits(hypre_ParCSRBlockMatrixGlobalNumRows(P_block_array[0]));
+      if (block_mode)
+      {
+         ndigits[0] = hypre_max(hypre_ndigits(hypre_ParCSRBlockMatrixGlobalNumRows(P_block_array[0])), ndigits[0]);
+      }
+      else
+      {
+         ndigits[0] = hypre_max(hypre_ndigits(hypre_ParCSRMatrixGlobalNumRows(P_array[0])), ndigits[0]);
+      }
    }
-   else
-   {
-      ndigits[0] = hypre_ndigits(hypre_ParCSRMatrixGlobalNumRows(P_array[0]));
-   }
-   ndigits[0] = hypre_max(5, ndigits[0]);
 
    if (my_id == 0)
    {
