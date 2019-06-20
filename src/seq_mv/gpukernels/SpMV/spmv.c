@@ -334,6 +334,7 @@ void csr_v_k_shared(int n, int *d_ia, int *d_ja, T *d_a, T *d_x, T *d_y)
    }
 }
 
+#define VERSION 1
 
 /* K is the number of threads working on a single row. K = 2, 4, 8, 16, 32 */
 template <int K, typename T>
@@ -358,19 +359,30 @@ void csr_v_k_shuffle(int n, int *d_ia, int *d_ja, T *d_a, T *d_x, T *d_y)
       p = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 0, K);
       q = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 1, K);
       T sum = 0.0;
-#if 0
-      for (int i = p + lane; i < q; i += K*2)
+#if VERSION == 1
+      for (p += lane; __any_sync(HYPRE_WARP_FULL_MASK, p < q); p += K * 2)
       {
-         sum += read_only_load(&d_a[i]) * read_only_load(&d_x[read_only_load(&d_ja[i])]);
-         if (i + K < q)
+         if (p < q)
          {
-            sum += read_only_load(&d_a[i+K]) * read_only_load(&d_x[read_only_load(&d_ja[i+K])]);
+            sum += read_only_load(&d_a[p]) * read_only_load(&d_x[read_only_load(&d_ja[p])]);
+            if (p + K < q)
+            {
+               sum += read_only_load(&d_a[p+K]) * read_only_load(&d_x[read_only_load(&d_ja[p+K])]);
+            }
+         }
+      }
+#elif VERSION == 2
+      for (p += lane; __any_sync(HYPRE_WARP_FULL_MASK, p < q); p += K)
+      {
+         if (p < q)
+         {
+            sum += read_only_load(&d_a[p]) * read_only_load(&d_x[read_only_load(&d_ja[p])]);
          }
       }
 #else
-      for (int i = p + lane; i < q; i += K)
+      for (p += lane;  p < q; p += K)
       {
-         sum += read_only_load(&d_a[i]) * read_only_load(&d_x[read_only_load(&d_ja[i])]);
+         sum += read_only_load(&d_a[p]) * read_only_load(&d_x[read_only_load(&d_ja[p])]);
       }
 #endif
       // parallel reduction
@@ -421,7 +433,7 @@ void spmv_csr_vector(struct csr_t *csr, REAL *x, REAL *y)
    for (i=0; i<REPEAT; i++)
    {
       //cudaMemset((void *)d_y, 0, n*sizeof(REAL));
-      csr_v_k_shuffle<16, REAL> <<<gDim, bDim>>>(n, d_ia, d_ja, d_a, d_x, d_y);
+      csr_v_k_shuffle<4, REAL> <<<gDim, bDim>>>(n, d_ia, d_ja, d_a, d_x, d_y);
    }
    /*-------- Barrier for GPU calls */
    cudaThreadSynchronize();
