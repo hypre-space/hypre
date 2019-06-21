@@ -19,9 +19,6 @@ set srcdir=%cd%
 rem output directory is a subdirectory of rundir
 set outdir=%rundir%\machine-vs-pro.dir
 
-rem autotest log file
-set logfile=%rundir%\autotest-machine-vs-pro.log
-
 rem create clean output directory
 if exist %outdir% rmdir /s /q %outdir%
 mkdir %outdir%
@@ -29,8 +26,6 @@ mkdir %outdir%
 rem run the cmake.bat script from rundir in a subshell to avoid overwriting variables
 rem (i.e., use 'cmd /c')
 cd %rundir%
-
-@echo Test started at %time% on %date% > %logfile%
 
 cmd /c %scriptdir%\cmake.bat %srcdir% " "
 move %rundir%\cmake.dir %outdir%\cmake-default.dir
@@ -54,8 +49,6 @@ type NUL > machine-vs-pro.err
 for %%f in (%outdir%\*.err) do (
     if %%~zf gtr 0 @echo %%f >> machine-vs-pro.err
 )
-
-@echo Test finished at %time% on %date% >> %logfile%
 
 cd %rundir%
 
