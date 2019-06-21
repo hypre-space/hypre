@@ -4897,8 +4897,8 @@ hypre_MGRGetSubBlock( hypre_ParCSRMatrix   *A,
   {
     hypre_ParCSRMatrixColMapOffd(Ablock) = col_map_offd_Ablock;
     hypre_CSRMatrixNumCols(Ablock_offd) = num_cols_Ablock_offd;
+  	hypre_GetCommPkgRTFromCommPkgA(Ablock,A, fine_to_coarse_offd, tmp_map_offd);
   }
-  hypre_GetCommPkgRTFromCommPkgA(Ablock,A, fine_to_coarse_offd, tmp_map_offd);
 
   *A_block_ptr= Ablock;
 
@@ -5370,8 +5370,8 @@ hypre_MGRBuildAffNew( hypre_ParCSRMatrix   *A,
   {
     hypre_ParCSRMatrixColMapOffd(Aff) = col_map_offd_Aff;
     hypre_CSRMatrixNumCols(Aff_offd) = num_cols_Aff_offd;
+  	hypre_GetCommPkgRTFromCommPkgA(Aff,A, fine_to_coarse_offd, tmp_map_offd);
   }
-  hypre_GetCommPkgRTFromCommPkgA(Aff,A, fine_to_coarse_offd, tmp_map_offd);
 
   *A_ff_ptr = Aff;
 
