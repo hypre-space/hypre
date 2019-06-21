@@ -814,14 +814,14 @@ hypre_MGRSetup( void               *mgr_vdata,
         aff_solver[lev] = (HYPRE_Solver*) hypre_BoomerAMGCreate();
         hypre_BoomerAMGSetMaxIter(aff_solver[lev], 1);
         //hypre_BoomerAMGSetMaxLevels(aff_solver[lev], 4);
-        hypre_BoomerAMGSetRelaxOrder(aff_solver[lev], 1);
-        //hypre_BoomerAMGSetAggNumLevels(aff_solver[lev], 1);
-        //hypre_BoomerAMGSetNumSweeps(aff_solver[lev], 3);
+        //hypre_BoomerAMGSetRelaxOrder(aff_solver[lev], 1);
+        hypre_BoomerAMGSetAggNumLevels(aff_solver[lev], 1);
+        hypre_BoomerAMGSetNumSweeps(aff_solver[lev], 3);
         hypre_BoomerAMGSetPrintLevel(aff_solver[lev], 0);
         //hypre_BoomerAMGSetCoarsenType(aff_solver[lev], 6);
         //hypre_BoomerAMGSetRelaxType(aff_solver[lev], 3);
         //hypre_BoomerAMGSetCycleRelaxType(aff_solver[lev], 8, 3);
-        hypre_BoomerAMGSetNumFunctions(aff_solver[lev], 2);
+        hypre_BoomerAMGSetNumFunctions(aff_solver[lev], 3);
 
         fine_grid_solver_setup(aff_solver[lev], A_ff_ptr, F_fine_array[lev+1], U_fine_array[lev+1]);
       }

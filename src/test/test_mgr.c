@@ -260,7 +260,7 @@ main( hypre_int argc,
   mgr_cindexes = hypre_CTAlloc(HYPRE_Int*, mgr_nlevels, HYPRE_MEMORY_HOST);
   HYPRE_Int *lv1 = hypre_CTAlloc(HYPRE_Int, mgr_bsize, HYPRE_MEMORY_HOST);
   HYPRE_Int *lv2 = hypre_CTAlloc(HYPRE_Int, mgr_bsize, HYPRE_MEMORY_HOST);
-  lv1[0] = 1;
+  lv1[0] = 0;
   //lv1[1] = 2;
   //lv2[0] = 2;
   mgr_cindexes[0] = lv1;
@@ -276,7 +276,7 @@ main( hypre_int argc,
   //mgr_idx_array[1] = 52800;
 
   HYPRE_Int *mgr_level_frelax_method = hypre_CTAlloc(HYPRE_Int, mgr_nlevels, HYPRE_MEMORY_HOST);
-  mgr_level_frelax_method[0] = 99;
+  mgr_level_frelax_method[0] = 0;
   //mgr_level_frelax_method[1] = 1;
 
   mgr_frelax_num_functions = hypre_CTAlloc(HYPRE_Int, mgr_nlevels, HYPRE_MEMORY_HOST);
@@ -375,6 +375,10 @@ main( hypre_int argc,
     }
   }
 
+  if (myid == 0)
+  {
+    hypre_printf("Reading the system matrix\n");
+  }
   ierr = HYPRE_IJMatrixRead( argv[build_matrix_arg_index], comm,
                     HYPRE_PARCSR, &ij_A );
   if (ierr)
@@ -783,6 +787,7 @@ main( hypre_int argc,
   else if (solver_id == 73)
   {
     HYPRE_Solver mgr_solver_flow;
+    /*
     time_index = hypre_InitializeTiming("Compute A_ff_inv");
     hypre_BeginTiming(time_index);
     // setup A_ff block 
@@ -845,6 +850,7 @@ main( hypre_int argc,
 
     time_index = hypre_InitializeTiming("FlexGMRES Setup");
     hypre_BeginTiming(time_index);
+    */
  
     HYPRE_ParCSRFlexGMRESCreate(hypre_MPI_COMM_WORLD, &pcg_solver);
     HYPRE_FlexGMRESSetKDim(pcg_solver, k_dim);
@@ -888,6 +894,10 @@ main( hypre_int argc,
 
     mgr_num_cindexes = hypre_CTAlloc(HYPRE_Int, mgr_nlevels, HYPRE_MEMORY_HOST);
     mgr_num_cindexes[0] = 1;
+
+    hypre_TFree(mgr_coarse_grid_method, HYPRE_MEMORY_HOST);
+    mgr_coarse_grid_method = hypre_CTAlloc(HYPRE_Int, mgr_nlevels, HYPRE_MEMORY_HOST);
+    mgr_coarse_grid_method[0] = 1;
 
     //hypre_TFree(mgr_idx_array, HYPRE_MEMORY_HOST);
     HYPRE_Int *mgr_outer_idx_array = hypre_CTAlloc(HYPRE_Int, mgr_bsize, HYPRE_MEMORY_HOST);
