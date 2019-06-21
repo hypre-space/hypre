@@ -117,6 +117,39 @@ void csr_v_k_shuffle(int n, int *d_ia, int *d_ja, T *d_a, T *d_x, T *d_y)
    }
 }
 
+HYPRE_Int
+hypre_SeqCSRMatvecDevice(HYPRE_Int nrows, HYPRE_Int nnz,
+                         HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a,
+                         HYPRE_Complex *d_x, HYPRE_Complex *d_y)
+{
+   const HYPRE_Int rownnz = nnz / nrows;
+   const int bDim = BLOCKDIM;
+
+   if (rownnz >= 16)
+   {
+      const int num_groups_per_block = BLOCKDIM / 16;
+      const int gDim = (nrows + num_groups_per_block - 1) / num_groups_per_block;
+      //printf("  Number of Threads <%d*%d>\n",gDim,bDim);
+      csr_v_k_shuffle<16, REAL> <<<gDim, bDim>>>(nrows, d_ia, d_ja, d_a, d_x, d_y);
+   }
+   else if (rownnz >= 8)
+   {
+      const int num_groups_per_block = BLOCKDIM / 8;
+      const int gDim = (nrows + num_groups_per_block - 1) / num_groups_per_block;
+      //printf("  Number of Threads <%d*%d>\n",gDim,bDim);
+      csr_v_k_shuffle<8, REAL> <<<gDim, bDim>>>(nrows, d_ia, d_ja, d_a, d_x, d_y);
+   }
+   else
+   {
+      const int num_groups_per_block = BLOCKDIM / 4;
+      const int gDim = (nrows + num_groups_per_block - 1) / num_groups_per_block;
+      //printf("  Number of Threads <%d*%d>\n",gDim,bDim);
+      csr_v_k_shuffle<4, REAL> <<<gDim, bDim>>>(nrows, d_ia, d_ja, d_a, d_x, d_y);
+   }
+
+   return 0;
+}
+
 void spmv_csr_vector(struct csr_t *csr, REAL *x, REAL *y)
 {
    int *d_ia, *d_ja, i;
@@ -141,16 +174,13 @@ void spmv_csr_vector(struct csr_t *csr, REAL *x, REAL *y)
    cudaMemcpyHostToDevice);
    /*-------- set spmv kernel */
    /*-------- num of half-warps per block */
-   int hwb = BLOCKDIM/HALFWARP;
-   int gDim = min(MAXTHREADS/BLOCKDIM, (n+hwb-1)/hwb);
-   int bDim = BLOCKDIM;
    //printf("CSR<<<%4d, %3d>>>  ",gDim,bDim);
    /*-------- start timing */
    t1 = wall_timer();
    for (i=0; i<REPEAT; i++)
    {
       //cudaMemset((void *)d_y, 0, n*sizeof(REAL));
-      csr_v_k_shuffle<16, REAL> <<<gDim, bDim>>>(n, d_ia, d_ja, d_a, d_x, d_y);
+      hypre_SeqCSRMatvecDevice(n, nnz, d_ia, d_ja, d_a, d_x, d_y);
    }
    /*-------- Barrier for GPU calls */
    cudaThreadSynchronize();
@@ -158,7 +188,6 @@ void spmv_csr_vector(struct csr_t *csr, REAL *x, REAL *y)
    t2 = wall_timer()-t1;
 /*--------------------------------------------------*/
    printf("\n=== [GPU] CSR-vector Kernel ===\n");
-   printf("  Number of Threads <%d*%d>\n",gDim,bDim);
    printf("  %.2f ms, %.2f GFLOPS, ",
    t2*1e3,2*nnz/t2/1e9*REPEAT);
 /*-------- copy y to host mem */
