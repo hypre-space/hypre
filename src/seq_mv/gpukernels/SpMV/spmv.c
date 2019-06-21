@@ -62,22 +62,37 @@ void csr_v_k_shuffle(int n, int *d_ia, int *d_ja, T *d_a, T *d_x, T *d_y)
     *              shared memory reduction
     *           (Group of K threads) per row
     *------------------------------------------------------------*/
-   int nw = gridDim.x * (BLOCKDIM / K);
-   int wid = (blockIdx.x * BLOCKDIM + threadIdx.x) / K;
-   int lane = threadIdx.x & (K - 1);
-   for (int row = wid; row < n; row += nw)
+   const int grid_ngroups = gridDim.x * (BLOCKDIM / K);
+   int grid_group_id = (blockIdx.x * BLOCKDIM + threadIdx.x) / K;
+   const int group_lane = threadIdx.x & (K - 1);
+   const int warp_lane = threadIdx.x & (HYPRE_WARP_SIZE - 1);
+   const int warp_group_id = warp_lane / K;
+   const int warp_ngroups = HYPRE_WARP_SIZE / K;
+
+   for (; __any_sync(HYPRE_WARP_FULL_MASK, grid_group_id < n); grid_group_id += grid_ngroups)
    {
-      int j, p, q;
-      if (lane < 2)
+#if 0
+      int p = 0, q = 0;
+      if (grid_group_id < n && group_lane < 2)
       {
-         j = read_only_load(&d_ia[row+lane]);
+         p = read_only_load(&d_ia[grid_group_id+group_lane]);
       }
-      p = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 0, K);
-      q = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 1, K);
+      q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1, K);
+      p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0, K);
+#else
+      const int s = grid_group_id - warp_group_id + warp_lane;
+      int p = 0, q = 0;
+      if (s <= n && warp_lane <= warp_ngroups)
+      {
+         p = read_only_load(&d_ia[s]);
+      }
+      q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, warp_group_id+1);
+      p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, warp_group_id);
+#endif
       T sum = 0.0;
 #if VERSION == 1
 #pragma unroll(1)
-      for (p += lane; __any_sync(HYPRE_WARP_FULL_MASK, p < q); p += K * 2)
+      for (p += group_lane; __any_sync(HYPRE_WARP_FULL_MASK, p < q); p += K * 2)
       {
          if (p < q)
          {
@@ -90,7 +105,7 @@ void csr_v_k_shuffle(int n, int *d_ia, int *d_ja, T *d_a, T *d_x, T *d_y)
       }
 #elif VERSION == 2
 #pragma unroll(1)
-      for (p += lane; __any_sync(HYPRE_WARP_FULL_MASK, p < q); p += K)
+      for (p += group_lane; __any_sync(HYPRE_WARP_FULL_MASK, p < q); p += K)
       {
          if (p < q)
          {
@@ -99,7 +114,7 @@ void csr_v_k_shuffle(int n, int *d_ia, int *d_ja, T *d_a, T *d_x, T *d_y)
       }
 #else
 #pragma unroll(1)
-      for (p += lane;  p < q; p += K)
+      for (p += group_lane;  p < q; p += K)
       {
          sum += read_only_load(&d_a[p]) * read_only_load(&d_x[read_only_load(&d_ja[p])]);
       }
@@ -110,9 +125,9 @@ void csr_v_k_shuffle(int n, int *d_ia, int *d_ja, T *d_a, T *d_x, T *d_y)
       {
          sum += __shfl_down_sync(HYPRE_WARP_FULL_MASK, sum, d);
       }
-      if (lane == 0)
+      if (grid_group_id < n && group_lane == 0)
       {
-         d_y[row] = sum;
+         d_y[grid_group_id] = sum;
       }
    }
 }
@@ -122,29 +137,48 @@ hypre_SeqCSRMatvecDevice(HYPRE_Int nrows, HYPRE_Int nnz,
                          HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a,
                          HYPRE_Complex *d_x, HYPRE_Complex *d_y)
 {
-   const HYPRE_Int rownnz = nnz / nrows;
+   const HYPRE_Int rownnz = (nnz + nrows - 1) / nrows;
    const int bDim = BLOCKDIM;
 
-   if (rownnz >= 16)
+   if (rownnz >= 64)
    {
-      const int num_groups_per_block = BLOCKDIM / 16;
+      const int group_size = 32;
+      const int num_groups_per_block = BLOCKDIM / group_size;
       const int gDim = (nrows + num_groups_per_block - 1) / num_groups_per_block;
       //printf("  Number of Threads <%d*%d>\n",gDim,bDim);
-      csr_v_k_shuffle<16, REAL> <<<gDim, bDim>>>(nrows, d_ia, d_ja, d_a, d_x, d_y);
+      csr_v_k_shuffle<group_size, REAL> <<<gDim, bDim>>>(nrows, d_ia, d_ja, d_a, d_x, d_y);
+   }
+   else if (rownnz >= 32)
+   {
+      const int group_size = 16;
+      const int num_groups_per_block = BLOCKDIM / group_size;
+      const int gDim = (nrows + num_groups_per_block - 1) / num_groups_per_block;
+      //printf("  Number of Threads <%d*%d>\n",gDim,bDim);
+      csr_v_k_shuffle<group_size, REAL> <<<gDim, bDim>>>(nrows, d_ia, d_ja, d_a, d_x, d_y);
+   }
+   else if (rownnz >= 16)
+   {
+      const int group_size = 8;
+      const int num_groups_per_block = BLOCKDIM / group_size;
+      const int gDim = (nrows + num_groups_per_block - 1) / num_groups_per_block;
+      //printf("  Number of Threads <%d*%d>\n",gDim,bDim);
+      csr_v_k_shuffle<group_size, REAL> <<<gDim, bDim>>>(nrows, d_ia, d_ja, d_a, d_x, d_y);
    }
    else if (rownnz >= 8)
    {
-      const int num_groups_per_block = BLOCKDIM / 8;
+      const int group_size = 4;
+      const int num_groups_per_block = BLOCKDIM / group_size;
       const int gDim = (nrows + num_groups_per_block - 1) / num_groups_per_block;
       //printf("  Number of Threads <%d*%d>\n",gDim,bDim);
-      csr_v_k_shuffle<8, REAL> <<<gDim, bDim>>>(nrows, d_ia, d_ja, d_a, d_x, d_y);
+      csr_v_k_shuffle<group_size, REAL> <<<gDim, bDim>>>(nrows, d_ia, d_ja, d_a, d_x, d_y);
    }
    else
    {
-      const int num_groups_per_block = BLOCKDIM / 4;
+      const int group_size = 4;
+      const int num_groups_per_block = BLOCKDIM / group_size;
       const int gDim = (nrows + num_groups_per_block - 1) / num_groups_per_block;
       //printf("  Number of Threads <%d*%d>\n",gDim,bDim);
-      csr_v_k_shuffle<4, REAL> <<<gDim, bDim>>>(nrows, d_ia, d_ja, d_a, d_x, d_y);
+      csr_v_k_shuffle<group_size, REAL> <<<gDim, bDim>>>(nrows, d_ia, d_ja, d_a, d_x, d_y);
    }
 
    return 0;
