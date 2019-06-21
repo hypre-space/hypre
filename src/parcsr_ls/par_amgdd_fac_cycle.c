@@ -325,7 +325,8 @@ FAC_Restrict( hypre_ParCompGrid *compGrid_f, hypre_ParCompGrid *compGrid_c, HYPR
    {
       for (j = hypre_ParCompGridARowPtr(compGrid_f)[i]; j < hypre_ParCompGridARowPtr(compGrid_f)[i+1]; j++)
       {
-         hypre_ParCompGridS(compGrid_f)[i] += hypre_ParCompGridAData(compGrid_f)[j] * hypre_ParCompGridT(compGrid_f)[ hypre_ParCompGridAColInd(compGrid_f)[j] ];
+         if (hypre_ParCompGridAColInd(compGrid_f)[j] >= 0)
+            hypre_ParCompGridS(compGrid_f)[i] += hypre_ParCompGridAData(compGrid_f)[j] * hypre_ParCompGridT(compGrid_f)[ hypre_ParCompGridAColInd(compGrid_f)[j] ];
       }
    }
 

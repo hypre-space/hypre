@@ -11,7 +11,7 @@
  ***********************************************************************EHEADER*/
 
 #define TEST_RES_COMM 0
-#define DEBUGGING_MESSAGES 0
+#define DEBUGGING_MESSAGES 1
 
 #include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
@@ -492,6 +492,10 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
             {
                recv_buffer[i] = hypre_CTAlloc(HYPRE_Complex, recv_buffer_size[level][i], HYPRE_MEMORY_HOST );
                hypre_MPI_Irecv( recv_buffer[i], recv_buffer_size[level][i], HYPRE_MPI_COMPLEX, recv_procs[level][i], 3, comm, &requests[request_counter++]);
+            
+               // !!! Debug
+               printf("Rank %d, level %d, recv size %d\n", myid, level, recv_buffer_size[level][i]);
+
             }
          }
 
@@ -510,6 +514,11 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
             if (send_buffer_size[level][buffer_index])
             {
                hypre_MPI_Isend(send_buffer[buffer_index], send_buffer_size[level][buffer_index], HYPRE_MPI_COMPLEX, send_procs[level][i], 3, comm, &requests[request_counter++]);
+            
+
+               // !!! Debug
+               printf("Rank %d, level %d, send size %d\n", myid, level, send_buffer_size[level][buffer_index]);
+
             }
          }
 
