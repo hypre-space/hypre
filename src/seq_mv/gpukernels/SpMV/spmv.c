@@ -1,16 +1,15 @@
 #include "spmv.h"
 #include <cuda_runtime.h>
 #include "cusparse.h"
-#define FULL_MASK 0xffffffff
 
 template <int K, typename T>
 __global__
-void csr_v_k_shuffle(int n, int *d_ia, int *d_ja, T *d_a, T *d_x, T *d_y)
+void csr_v_k_shared(int n, int *d_ia, int *d_ja, T *d_a, T *d_x, T *d_y)
 {
    /*------------------------------------------------------------*
     *               CSR spmv-vector kernel
-    *              shuffle version reduction
-    *            K-Warp  ( K threads) per row
+    *              shared memory reduction
+    *              K threads-Warp  per row
     *------------------------------------------------------------*/
    // num of full-warps
    int nw = gridDim.x*BLOCKDIM/K;
@@ -18,15 +17,13 @@ void csr_v_k_shuffle(int n, int *d_ia, int *d_ja, T *d_a, T *d_x, T *d_y)
    int wid = (blockIdx.x*BLOCKDIM+threadIdx.x)/K;
    // thread lane in each full warp
    int lane = threadIdx.x & (K-1);
-   // shared memory for patial result
-#ifdef ROW_PTR_USE_SHARED
    // full warp lane in each block
    int wlane = threadIdx.x/K;
+   // shared memory for patial result
+   volatile __shared__ T r[BLOCKDIM+K/2];
    volatile __shared__ int startend[BLOCKDIM/K][2];
-#endif
    for (int row = wid; row < n; row += nw)
    {
-#ifdef ROW_PTR_USE_SHARED
       // row start and end point
       if (lane < 2)
       {
@@ -34,26 +31,84 @@ void csr_v_k_shuffle(int n, int *d_ia, int *d_ja, T *d_a, T *d_x, T *d_y)
       }
       int p = startend[wlane][0];
       int q = startend[wlane][1];
-#else
-      int j, p, q;
-      if (lane < 2)
-      {
-         j = __ldg(&d_ia[row+lane]);
-      }
-      p = __shfl_sync(0xFFFFFFFF, j, 0, K);
-      q = __shfl_sync(0xFFFFFFFF, j, 1, K);
-#endif
       T sum = 0.0;
       for (int i=p+lane; i<q; i+=K)
       {
          sum += d_a[i] * d_x[d_ja[i]];
       }
+      // parallel reduction
+      r[threadIdx.x] = sum;
+#pragma unroll
+      for (int d = K/2; d > 0; d >>= 1)
+      {
+         r[threadIdx.x] = sum = sum + r[threadIdx.x+d];
+      }
+      if (lane == 0)
+      {
+         d_y[row] = r[threadIdx.x];
+      }
+   }
+}
 
+#define VERSION 1
+
+/* K is the number of threads working on a single row. K = 2, 4, 8, 16, 32 */
+template <int K, typename T>
+__global__
+void csr_v_k_shuffle(int n, int *d_ia, int *d_ja, T *d_a, T *d_x, T *d_y)
+{
+   /*------------------------------------------------------------*
+    *               CSR spmv-vector kernel
+    *              shared memory reduction
+    *           (Group of K threads) per row
+    *------------------------------------------------------------*/
+   int nw = gridDim.x * (BLOCKDIM / K);
+   int wid = (blockIdx.x * BLOCKDIM + threadIdx.x) / K;
+   int lane = threadIdx.x & (K - 1);
+   for (int row = wid; row < n; row += nw)
+   {
+      int j, p, q;
+      if (lane < 2)
+      {
+         j = read_only_load(&d_ia[row+lane]);
+      }
+      p = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 0, K);
+      q = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 1, K);
+      T sum = 0.0;
+#if VERSION == 1
+#pragma unroll(1)
+      for (p += lane; __any_sync(HYPRE_WARP_FULL_MASK, p < q); p += K * 2)
+      {
+         if (p < q)
+         {
+            sum += read_only_load(&d_a[p]) * read_only_load(&d_x[read_only_load(&d_ja[p])]);
+            if (p + K < q)
+            {
+               sum += read_only_load(&d_a[p+K]) * read_only_load(&d_x[read_only_load(&d_ja[p+K])]);
+            }
+         }
+      }
+#elif VERSION == 2
+#pragma unroll(1)
+      for (p += lane; __any_sync(HYPRE_WARP_FULL_MASK, p < q); p += K)
+      {
+         if (p < q)
+         {
+            sum += read_only_load(&d_a[p]) * read_only_load(&d_x[read_only_load(&d_ja[p])]);
+         }
+      }
+#else
+#pragma unroll(1)
+      for (p += lane;  p < q; p += K)
+      {
+         sum += read_only_load(&d_a[p]) * read_only_load(&d_x[read_only_load(&d_ja[p])]);
+      }
+#endif
       // parallel reduction
 #pragma unroll
       for (int d = K/2; d > 0; d >>= 1)
       {
-         sum += __shfl_down_sync(FULL_MASK, sum, d, K);
+         sum += __shfl_down_sync(HYPRE_WARP_FULL_MASK, sum, d);
       }
       if (lane == 0)
       {
@@ -61,8 +116,6 @@ void csr_v_k_shuffle(int n, int *d_ia, int *d_ja, T *d_a, T *d_x, T *d_y)
       }
    }
 }
-
-
 
 void spmv_csr_vector(struct csr_t *csr, REAL *x, REAL *y)
 {
@@ -92,48 +145,17 @@ void spmv_csr_vector(struct csr_t *csr, REAL *x, REAL *y)
    int gDim = min(MAXTHREADS/BLOCKDIM, (n+hwb-1)/hwb);
    int bDim = BLOCKDIM;
    //printf("CSR<<<%4d, %3d>>>  ",gDim,bDim);
-   if(nnz/n>16)
+   /*-------- start timing */
+   t1 = wall_timer();
+   for (i=0; i<REPEAT; i++)
    {
-      /*-------- start timing */
-      t1 = wall_timer();
-      for (i=0; i<REPEAT; i++)
-      {
-         //cudaMemset((void *)d_y, 0, n*sizeof(REAL));
-         csr_v_k_shuffle<16, REAL> <<<gDim, bDim>>>(n, d_ia, d_ja, d_a, d_x, d_y);
-      }
-      /*-------- Barrier for GPU calls */
-      cudaThreadSynchronize();
-      /*-------- stop timing */
-      t2 = wall_timer()-t1;   
+      //cudaMemset((void *)d_y, 0, n*sizeof(REAL));
+      csr_v_k_shuffle<16, REAL> <<<gDim, bDim>>>(n, d_ia, d_ja, d_a, d_x, d_y);
    }
-   else if(nnz/n>8)
-   {
-      /*-------- start timing */
-      t1 = wall_timer();
-      for (i=0; i<REPEAT; i++)
-      {
-         //cudaMemset((void *)d_y, 0, n*sizeof(REAL));
-         csr_v_k_shuffle<8, REAL> <<<gDim, bDim>>>(n, d_ia, d_ja, d_a, d_x, d_y);
-      }
-      /*-------- Barrier for GPU calls */
-      cudaThreadSynchronize();
-      /*-------- stop timing */
-      t2 = wall_timer()-t1;
-   }
-   else
-   {
-      /*-------- start timing */
-      t1 = wall_timer();
-      for (i=0; i<REPEAT; i++)
-      {
-         //cudaMemset((void *)d_y, 0, n*sizeof(REAL));
-         csr_v_k_shuffle<4, REAL> <<<gDim, bDim>>>(n, d_ia, d_ja, d_a, d_x, d_y);
-      }
-      /*-------- Barrier for GPU calls */
-      cudaThreadSynchronize();
-      /*-------- stop timing */
-      t2 = wall_timer()-t1;
-   }
+   /*-------- Barrier for GPU calls */
+   cudaThreadSynchronize();
+   /*-------- stop timing */
+   t2 = wall_timer()-t1;
 /*--------------------------------------------------*/
    printf("\n=== [GPU] CSR-vector Kernel ===\n");
    printf("  Number of Threads <%d*%d>\n",gDim,bDim);
