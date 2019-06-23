@@ -339,9 +339,9 @@ hypre_ParCSRCommHandleCreate ( HYPRE_Int            job,
 
 #ifdef HYPRE_USING_NODE_AWARE_MPI
    NAPData *nap_data = NULL;
-   if (job > 100 && comm_pkg->nap_comm == NULL)
+   if (comm_pkg->nap_comm)
    {
-      job -= 100;
+      job += 100;
    }
 #endif
    if (job < 100)
