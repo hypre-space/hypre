@@ -1764,6 +1764,7 @@ fi
 if test "$hypre_using_node_aware_mpi" = "yes"
 then
    CC=${CXX}
+   LINK_CC=${LINK_CXX}
    CFLAGS+=" -std=c++11 "
    CXXFLAGS+=" -std=c++11 "
    AC_DEFINE(HYPRE_USING_NODE_AWARE_MPI, 1)
