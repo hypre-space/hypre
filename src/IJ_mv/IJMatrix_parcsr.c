@@ -1015,9 +1015,9 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix       *matrix,
                   }
                   else  /* insert into diag */
                   {
+                     col_j = (HYPRE_Int)(cols[indx]-col_0);
                      for (j=diag_i[row_local]; j < diag_indx; j++)
                      {
-                        col_j = (HYPRE_Int)(cols[indx]-col_0);
                         if (diag_j[j] == col_j)
                         {
                            diag_data[j] = values[indx];
@@ -1547,10 +1547,9 @@ hypre_IJMatrixAddToValuesParCSR( hypre_IJMatrix       *matrix,
                   }
                   else  /* insert into diag */
                   {
-                     HYPRE_Int col_j;
+                     HYPRE_Int col_j = (HYPRE_Int)( cols[indx] - col_0);
                      for (j=diag_i[row_local]; j < diag_indx; j++)
                      {
-                        col_j = (HYPRE_Int)( cols[indx] - col_0);
                         if (diag_j[j] == col_j)
                         {
                            diag_data[j] += values[indx];
