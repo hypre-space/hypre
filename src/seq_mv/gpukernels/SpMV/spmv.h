@@ -27,7 +27,7 @@
 #define FORT(name) name ## _
 //#define FORT(name) name
 
-/* CSR format type */
+/* CSR format type 
 struct csr_t {
   int nrows;
   int ncols;
@@ -35,6 +35,7 @@ struct csr_t {
   int *ja;
   REAL *a;
 };
+*/
 
 /* types of user command-line input */
 typedef enum {

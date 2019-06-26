@@ -4,7 +4,8 @@
 
 template <int K, typename T>
 __global__
-void csr_v_k_shared(int n, int *d_ia, int *d_ja, T *d_a, T *d_x, T *d_y)
+void csr_v_k_shared(int *d_ia, int *d_ja,
+REAL *d_a, REAL *d_x, REAL *d_y)
 {
    /*------------------------------------------------------------*
     *               CSR spmv-vector kernel
@@ -55,7 +56,8 @@ void csr_v_k_shared(int n, int *d_ia, int *d_ja, T *d_a, T *d_x, T *d_y)
 /* K is the number of threads working on a single row. K = 2, 4, 8, 16, 32 */
 template <int K, typename T>
 __global__
-void csr_v_k_shuffle(int n, int *d_ia, int *d_ja, T *d_a, T *d_x, T *d_y)
+void csr_v_k_shuffle(int *d_ia, int *d_ja,
+REAL *d_a, REAL *d_x, REAL *d_y)
 {
    /*------------------------------------------------------------*
     *               CSR spmv-vector kernel
@@ -184,12 +186,12 @@ hypre_SeqCSRMatvecDevice(HYPRE_Int nrows, HYPRE_Int nnz,
    return 0;
 }
 
-void spmv_csr_vector(struct csr_t *csr, REAL *x, REAL *y)
+void spmv_csr_vector( hypre_CSRMatrix *csr, REAL *x, REAL *y)
 {
-   int *d_ia, *d_ja, i;
+   HYPRE_Int *d_ia, *d_ja, i;
    REAL *d_a, *d_x, *d_y;
-   int n = csr->nrows;
-   int nnz = csr->ia[n];
+   HYPRE_Int n = csr->num_rows;
+   HYPRE_Int nnz = csr->num_nonzeros;
    double t1,t2;
    /*---------- Device Memory */
    cudaMalloc((void **)&d_ia, (n+1)*sizeof(int));
@@ -198,11 +200,11 @@ void spmv_csr_vector(struct csr_t *csr, REAL *x, REAL *y)
    cudaMalloc((void **)&d_x, n*sizeof(REAL));
    cudaMalloc((void **)&d_y, n*sizeof(REAL));
    /*---------- Memcpy */
-   cudaMemcpy(d_ia, csr->ia, (n+1)*sizeof(int),
+   cudaMemcpy(d_ia, csr->i, (n+1)*sizeof(int),
    cudaMemcpyHostToDevice);
-   cudaMemcpy(d_ja, csr->ja, nnz*sizeof(int),
+   cudaMemcpy(d_ja, csr->j, nnz*sizeof(int),
    cudaMemcpyHostToDevice);
-   cudaMemcpy(d_a, csr->a, nnz*sizeof(REAL),
+   cudaMemcpy(d_a, csr->data, nnz*sizeof(REAL),
    cudaMemcpyHostToDevice);
    cudaMemcpy(d_x, x, n*sizeof(REAL),
    cudaMemcpyHostToDevice);
@@ -287,12 +289,12 @@ void cuda_check_err()
    }
 }
 
-void spmv_cusparse_csr(struct csr_t *csr, REAL *x, REAL *y)
+void spmv_cusparse_csr(hypre_CSRMatrix *csr, REAL *x, REAL *y)
 {
-   int n = csr->nrows;
-   int nnz = csr->ia[n];
-   int *d_ia, *d_ja, i;
-   REAL *d_a, *d_x, *d_y;
+   HYPRE_Int n = csr->num_rows;
+   HYPRE_Int nnz = csr->num_nonzeros;
+   HYPRE_Int *d_ia, *d_ja, i;
+   HYPRE_Complex *d_a, *d_x, *d_y;
    double t1, t2;
    REAL done = 1.0, dzero = 0.0;
    /*------------------- allocate Device Memory */
@@ -302,11 +304,11 @@ void spmv_cusparse_csr(struct csr_t *csr, REAL *x, REAL *y)
    cudaMalloc((void **)&d_x, n*sizeof(REAL));
    cudaMalloc((void **)&d_y, n*sizeof(REAL));
    /*------------------- Memcpy */
-   cudaMemcpy(d_ia, csr->ia, (n+1)*sizeof(int),
+   cudaMemcpy(d_ia, csr->i, (n+1)*sizeof(int),
    cudaMemcpyHostToDevice);
-   cudaMemcpy(d_ja, csr->ja, nnz*sizeof(int),
+   cudaMemcpy(d_ja, csr->j, nnz*sizeof(int),
    cudaMemcpyHostToDevice);
-   cudaMemcpy(d_a, csr->a, nnz*sizeof(REAL),
+   cudaMemcpy(d_a, csr->data, nnz*sizeof(REAL),
    cudaMemcpyHostToDevice);
    cudaMemcpy(d_x, x, n*sizeof(REAL),
    cudaMemcpyHostToDevice);
@@ -384,4 +386,3 @@ void spmv_cusparse_csr(struct csr_t *csr, REAL *x, REAL *y)
       exit(1);
    }
 }
-
