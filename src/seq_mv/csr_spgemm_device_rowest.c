@@ -292,7 +292,7 @@ void csr_spmm_rownnz_cohen(HYPRE_Int M, HYPRE_Int K, HYPRE_Int N, HYPRE_Int *d_i
    //d_V1 = hypre_TAlloc(T, nsamples*N, HYPRE_MEMORY_DEVICE);
    //d_V2 = hypre_TAlloc(T, nsamples*K, HYPRE_MEMORY_DEVICE);
 
-   curandGenerator_t gen = hypre_handle->curand_gen;
+   curandGenerator_t gen = hypre_HandleCurandGenerator(hypre_handle);
    //CURAND_CALL(curandSetGeneratorOrdering(gen, CURAND_ORDERING_PSEUDO_SEEDED));
    /* random V1: uniform --> exp */
    HYPRE_CURAND_CALL(curandGenerateUniform(gen, d_V1, nsamples * N));

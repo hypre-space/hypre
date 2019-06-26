@@ -142,7 +142,7 @@ main( hypre_int argc,
    /* Initialize Hypre */
    HYPRE_Init(argc, argv);
 
-   hypre_SetNumThreads(20);
+   //hypre_SetNumThreads(20);
    hypre_printf("CPU #OMP THREADS %d\n", hypre_NumThreads());
 
    /*-----------------------------------------------------------
@@ -471,8 +471,6 @@ main( hypre_int argc,
    hypre_assert(errcode == 0);
    errcode = HYPRE_CSRMatrixDeviceSpGemmSetUseCusparse(use_cusparse);
    hypre_assert(errcode == 0);
-   errcode = HYPRE_CSRMatrixDeviceSpGemmSetDoTiming(1);
-   hypre_assert(errcode == 0);
 
    /*-----------------------------------------------------------
     * Set up matrix
@@ -646,7 +644,6 @@ main( hypre_int argc,
 
    //printf("done 1st GPU run\n");
 
-   hypreDevice_CSRHandleClearStats();
    time_index = hypre_InitializeTiming("Device Parcsr Matrix-by-Matrix, RAP2");
    hypre_BeginTiming(time_index);
 
@@ -655,10 +652,6 @@ main( hypre_int argc,
    if (mult_order == 0)
    {
       parcsr_Q_device  = hypre_ParCSRMatMat(parcsr_A_device, parcsr_P_device);
-
-      hypreDevice_CSRHandlePrint();
-      hypreDevice_CSRHandleClearStats();
-
       parcsr_AH_device = hypre_ParCSRTMatMatKT(parcsr_P_device, parcsr_Q_device, keepTranspose);
    }
    else
@@ -672,8 +665,6 @@ main( hypre_int argc,
    hypre_PrintTiming("Device Parcsr Matrix-by-Matrix, RAP2", hypre_MPI_COMM_WORLD);
    hypre_FinalizeTiming(time_index);
    hypre_ClearTiming();
-
-   hypreDevice_CSRHandlePrint();
 
    /*-----------------------------------------------------------
     * Verify results

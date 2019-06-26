@@ -1705,9 +1705,9 @@ extern HYPRE_Int hypre_exec_policy;
 typedef struct
 {
 #if defined(HYPRE_USING_CUDA)
-   /* by default, hypre puts GPU computations in this stream
-    * Do not confuse with the default (null) CUDA stream */
    HYPRE_Int cuda_device;
+   /* by default, hypre puts GPU computations in this stream
+    * Do not be confused with the default (null) CUDA stream */
    HYPRE_Int cuda_compute_stream_num;
    HYPRE_Int cuda_prefetch_stream_num;
    HYPRE_Int cuda_compute_stream_sync_default;
