@@ -2992,6 +2992,8 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
          hypre_ParCSRMatrixColMapOffd(par_matrix) = col_map_offd;
          hypre_CSRMatrixNumCols(offd) = num_cols_offd;
          hypre_TFree(tmp_j, HYPRE_MEMORY_HOST);
+         hypre_TFree(big_offd_j, HYPRE_MEMORY_HOST);
+         hypre_CSRMatrixBigJ(offd) = NULL;
       }
       hypre_IJMatrixAssembleFlag(matrix) = 1;
    }
