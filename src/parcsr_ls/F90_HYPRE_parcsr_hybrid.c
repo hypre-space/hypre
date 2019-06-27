@@ -390,6 +390,22 @@ hypre_F90_IFACE(hypre_parcsrhybridsettruncfacto, HYPRE_PARCSRHYBRIDSETTRUNCFACTO
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetPMaxElmts
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_parcsrhybridsetpmaxelmts, HYPRE_PARCSRHYBRIDSETPMAXELMTS)
+   (hypre_F90_Obj *solver,
+    hypre_F90_Int *p_max_elmts,
+    hypre_F90_Int *ierr)
+{
+   *ierr = (hypre_F90_Int)
+      (HYPRE_ParCSRHybridSetPMaxElmts(
+          hypre_F90_PassObj (HYPRE_Solver, solver),
+          hypre_F90_PassInt (p_max_elmts) ));
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParCSRHybridSetMaxLevels
  *--------------------------------------------------------------------------*/
 
@@ -438,6 +454,22 @@ hypre_F90_IFACE(hypre_parcsrhybridsetcoarsentyp, HYPRE_PARCSRHYBRIDSETCOARSENTYP
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetInterpType
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_parcsrhybridsetinterptyp, HYPRE_PARCSRHYBRIDSETINTERPTYP)
+   (hypre_F90_Obj *solver,
+    hypre_F90_Int *interp_type,
+    hypre_F90_Int *ierr)
+{
+   *ierr = (hypre_F90_Int)
+      (HYPRE_ParCSRHybridSetCoarsenType(
+          hypre_F90_PassObj (HYPRE_Solver, solver),
+          hypre_F90_PassInt (interp_type)  ));
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParCSRHybridSetCycleType
  *--------------------------------------------------------------------------*/
 
@@ -469,7 +501,7 @@ hypre_F90_IFACE(hypre_parcsrhybridsetnumgridswe, HYPRE_PARCSRHYBRIDSETNUMGRIDSWE
           hypre_F90_PassIntArray (num_grid_sweeps) ));
 }
 
-/*--------------------------------------------------------------------------
+/*------------------------------------------------------------------------
  * HYPRE_ParCSRHybridSetGridRelaxType
  *--------------------------------------------------------------------------*/
 
