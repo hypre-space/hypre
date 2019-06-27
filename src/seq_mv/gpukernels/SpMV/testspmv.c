@@ -2,7 +2,7 @@
 #include "spmv.h"
 
 /*----------------------------------------------------*/
-void spmv_csr_cpu(hypre_CSRMatrix *csr, REAL *x, REAL *y) {
+void spmv_csr_cpu(struct hypre_CSRMatrix *csr, REAL *x, REAL *y) {
 /*------------- CPU CSR SpMV kernel */
   double t1, t2;
   t1 = wall_timer();
@@ -36,7 +36,9 @@ int main (int argc, char **argv) {
   REAL *x, *y0, *y;
   double e2, e3;
   struct coo_t coo;
+  //struct csr_t csr;
   hypre_CSRMatrix csr;
+  hypre_CSRMatrix hypre_CSRMatrix; 
 
   char fname[2048];
 /*-----------------------------------------*/
@@ -76,7 +78,7 @@ int main (int argc, char **argv) {
 /*---------- CPU SpMV CSR kernel */
   spmv_csr_cpu(&csr, x, y0);
 /*---------- GPU SpMV CSR-vector kernel */
-  spmv_csr_vector(&csr, x, y);
+  spmv_csr_vector(&hypre_CSRMatrix, x, y);
   e2 = error_norm(y0, y, n);
   fprintf(stdout, "err norm %.2e\n", e2);
 /*---------- GPU SpMV CUSPARSE CSR kernel */
@@ -89,4 +91,3 @@ int main (int argc, char **argv) {
   FreeCOO(&coo);  FreeCSR(&csr);
   free(x);   free(y0);  free(y);
 }
-

@@ -4,8 +4,7 @@
 
 template <int K, typename T>
 __global__
-void csr_v_k_shared(int *d_ia, int *d_ja,
-REAL *d_a, REAL *d_x, REAL *d_y)
+void csr_v_k_shared(int n, int *d_ia, int *d_ja, T *d_a, T *d_x, T *d_y)
 {
    /*------------------------------------------------------------*
     *               CSR spmv-vector kernel
@@ -56,8 +55,7 @@ REAL *d_a, REAL *d_x, REAL *d_y)
 /* K is the number of threads working on a single row. K = 2, 4, 8, 16, 32 */
 template <int K, typename T>
 __global__
-void csr_v_k_shuffle(int *d_ia, int *d_ja,
-REAL *d_a, REAL *d_x, REAL *d_y)
+void csr_v_k_shuffle(int n, int *d_ia, int *d_ja, T *d_a, T *d_x, T *d_y)
 {
    /*------------------------------------------------------------*
     *               CSR spmv-vector kernel
@@ -186,12 +184,12 @@ hypre_SeqCSRMatvecDevice(HYPRE_Int nrows, HYPRE_Int nnz,
    return 0;
 }
 
-void spmv_csr_vector( hypre_CSRMatrix *csr, REAL *x, REAL *y)
+void spmv_csr_vector(hypre_CSRMatrix *csr, REAL *x, REAL *y)
 {
-   HYPRE_Int *d_ia, *d_ja, i;
+   int *d_ia, *d_ja, i;
    REAL *d_a, *d_x, *d_y;
-   HYPRE_Int n = csr->num_rows;
-   HYPRE_Int nnz = csr->num_nonzeros;
+   int n = csr->num_rows;
+   int nnz = csr->num_nonzeros;
    double t1,t2;
    /*---------- Device Memory */
    cudaMalloc((void **)&d_ia, (n+1)*sizeof(int));
@@ -291,10 +289,10 @@ void cuda_check_err()
 
 void spmv_cusparse_csr(hypre_CSRMatrix *csr, REAL *x, REAL *y)
 {
-   HYPRE_Int n = csr->num_rows;
-   HYPRE_Int nnz = csr->num_nonzeros;
-   HYPRE_Int *d_ia, *d_ja, i;
-   HYPRE_Complex *d_a, *d_x, *d_y;
+   int n = csr->num_rows;
+   int nnz = csr->num_nonzeros;
+   int *d_ia, *d_ja, i;
+   REAL *d_a, *d_x, *d_y;
    double t1, t2;
    REAL done = 1.0, dzero = 0.0;
    /*------------------- allocate Device Memory */
