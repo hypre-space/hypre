@@ -1,25 +1,31 @@
 #include "spmv.h"
 
-double wall_timer() {
+hypre_double wall_timer()
+{
   struct timeval tim;
   gettimeofday(&tim, NULL);
-  double t = tim.tv_sec + tim.tv_usec/1e6;
+  hypre_double t = tim.tv_sec + tim.tv_usec/1e6;
+
   return(t);
 }
 
 /*---------------------------------------------*/
-void print_header() {
-#if DOUBLEPRECISION
-    printf("\nTesting SpMV, DOUBLE precision\n");
-#else
-    printf("\nTesting SpMV, SINGLE precision\n");
-#endif
+void print_header()
+{
+   if (sizeof(HYPRE_Real) == sizeof(hypre_double))
+   {
+      printf("\nTesting SpMV, DOUBLE precision\n");
+   }
+   else if (sizeof(HYPRE_Real) == sizeof(float))
+   {
+      printf("\nTesting SpMV, SINGLE precision\n");
+   }
 }
 
 /*-----------------------------------------*/
-double error_norm(REAL *x, REAL *y, int n) {
-  int i;
-  double t, normz, normx;
+HYPRE_Real error_norm(HYPRE_Real *x, HYPRE_Real *y, HYPRE_Int n) {
+  HYPRE_Int i;
+  HYPRE_Real t, normz, normx;
   normx = normz = 0.0;
   for (i=0; i<n; i++) {
     t = x[i]-y[i];
@@ -37,14 +43,6 @@ void FreeCOO(struct coo_t *coo)
   free(coo->val);
 }
 
-/*---------------------------*/
-void FreeCSR(struct csr_t *csr)
-{
-  free(csr->a);
-  free(csr->ia);
-  free(csr->ja);
-}
-
 /**
  * @brief convert csr to csc
  * Assume input csr is 0-based index
@@ -60,10 +58,10 @@ void FreeCSR(struct csr_t *csr)
  * @param[out] iao Output row pointers
  * @param[out] jao Output column indices
  */
-void csrcsc(int OUTINDEX, const int nrow, const int ncol, int job,
-    double *a, int *ja, int *ia,
-    double *ao, int *jao, int *iao) {
-  int i,k;
+void csrcsc(HYPRE_Int OUTINDEX, const HYPRE_Int nrow, const HYPRE_Int ncol, HYPRE_Int job,
+            HYPRE_Real *a, HYPRE_Int *ja, HYPRE_Int *ia,
+            HYPRE_Real *ao, HYPRE_Int *jao, HYPRE_Int *iao) {
+  HYPRE_Int i,k;
   for (i=0; i<ncol+1; i++) {
     iao[i] = 0;
   }
@@ -80,7 +78,7 @@ void csrcsc(int OUTINDEX, const int nrow, const int ncol, int job,
   // now do the actual copying
   for (i=0; i<nrow; i++) {
     for (k=ia[i]; k<ia[i+1]; k++) {
-      int j = ja[k];
+      HYPRE_Int j = ja[k];
       if (job) {
         ao[iao[j]] = a[k];
       }
@@ -97,26 +95,54 @@ void csrcsc(int OUTINDEX, const int nrow, const int ncol, int job,
 /**
  * @brief  Sort each row of a csr by increasing column
  * order
- * By double transposition
+ * By Double transposition
  * @param[in] A Matrix to sort
  */
-void sortrow(struct csr_t *A) {
+void sortrow(hypre_CSRMatrix *A) {
   /*-------------------------------------------*/
-  int nrows = A->nrows;
-  int ncols = A->ncols;
-  int nnz = A->ia[nrows];
+  HYPRE_Int nrows = A->num_rows;
+  HYPRE_Int ncols = A->num_cols;
+  HYPRE_Int nnz = A->i[nrows];
   // work array
-  double *b;
-  int *jb, *ib;
-  b = (double *) malloc(nnz*sizeof(double));
-  jb = (int *) malloc(nnz*sizeof(int));
-  ib = (int *) malloc((ncols+1)*sizeof(int));
-  // double transposition
-  csrcsc(0, nrows, ncols, 1, A->a, A->ja, A->ia, b, jb, ib);
-  csrcsc(0, ncols, nrows, 1, b, jb, ib, A->a, A->ja, A->ia);
+  HYPRE_Real *b;
+  HYPRE_Int *jb, *ib;
+  b = (HYPRE_Real *) malloc(nnz*sizeof(HYPRE_Real));
+  jb = (HYPRE_Int *) malloc(nnz*sizeof(HYPRE_Int));
+  ib = (HYPRE_Int *) malloc((ncols+1)*sizeof(HYPRE_Int));
+  // Double transposition
+  csrcsc(0, nrows, ncols, 1, A->data, A->j, A->i, b, jb, ib);
+  csrcsc(0, ncols, nrows, 1, b, jb, ib, A->data, A->j, A->i);
   // free
   free(b);
   free(jb);
   free(ib);
+}
+
+void spmv_csr_cpu(hypre_CSRMatrix *csr, HYPRE_Real *x, HYPRE_Real *y)
+{
+   hypre_Vector *vx = hypre_SeqVectorCreate(csr->num_cols);
+   hypre_Vector *vy = hypre_SeqVectorCreate(csr->num_rows);
+   hypre_VectorMemoryLocation(vx) = HYPRE_MEMORY_HOST;
+   hypre_VectorMemoryLocation(vy) = HYPRE_MEMORY_HOST;
+   hypre_VectorOwnsData(vx) = 0;
+   hypre_VectorOwnsData(vy) = 0;
+   hypre_VectorData(vx) = x;
+   hypre_VectorData(vy) = y;
+
+   /*------------- CPU CSR SpMV kernel */
+   hypre_double t1, t2;
+   t1 = wall_timer();
+   for (HYPRE_Int ii=0; ii<REPEAT; ii++)
+   {
+      hypre_CSRMatrixMatvecOutOfPlaceHost(1.0, csr, vx, 0.0, vy, vy, 0);
+   }
+   t2 = wall_timer() - t1;
+   /*--------------------------------------------------*/
+   printf("\n=== [CPU] CSR Kernel ===\n");
+   printf("  %.2f ms, %.2f GFLOPS\n",
+         t2*1e3/REPEAT, 2*(csr->i[csr->num_rows])/t2/1e9*REPEAT);
+
+   hypre_SeqVectorDestroy(vx);
+   hypre_SeqVectorDestroy(vy);
 }
 

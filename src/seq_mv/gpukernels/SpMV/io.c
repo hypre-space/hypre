@@ -5,10 +5,10 @@
 /*---------------------------------------------*
  *             READ COO Matrix Market          *
  *---------------------------------------------*/
-int read_coo_MM(const char *matfile, int idxin, int idxout, struct coo_t *Acoo) {
+HYPRE_Int read_coo_MM(const char *matfile, HYPRE_Int idxin, HYPRE_Int idxout, struct coo_t *Acoo) {
   MM_typecode matcode;
   FILE *p = fopen(matfile,"r");
-  int i;
+  HYPRE_Int i;
   if (p == NULL) {
     printf("Unable to open mat file %s\n", matfile);
     exit(-1);
@@ -28,7 +28,7 @@ int read_coo_MM(const char *matfile, int idxin, int idxout, struct coo_t *Acoo) 
         matrices are supported\n");
     return 1;
   }
-  int nrow, ncol, nnz, nnz2, k, j;
+  HYPRE_Int nrow, ncol, nnz, nnz2, k, j;
   char line[MAX_LINE];
   /*------------- Read size */
   if (mm_read_mtx_crd_size(p, &nrow, &ncol, &nnz) !=0) {
@@ -51,9 +51,9 @@ int read_coo_MM(const char *matfile, int idxin, int idxout, struct coo_t *Acoo) 
     nnz2 = nnz;
   }
   /*-------- Allocate mem for COO */
-  int* IR = (int *) malloc(nnz2 * sizeof(int));
-  int* JC = (int *) malloc(nnz2 * sizeof(int));
-  double* VAL = (double *) malloc(nnz2 * sizeof(double));
+  HYPRE_Int* IR = (HYPRE_Int *) malloc(nnz2 * sizeof(HYPRE_Int));
+  HYPRE_Int* JC = (HYPRE_Int *) malloc(nnz2 * sizeof(HYPRE_Int));
+  HYPRE_Real* VAL = (HYPRE_Real *) malloc(nnz2 * sizeof(HYPRE_Real));
   /*-------- read line by line */
   char *p1, *p2;
   for (k=0; k<nnz; k++) {
@@ -64,13 +64,13 @@ int read_coo_MM(const char *matfile, int idxin, int idxout, struct coo_t *Acoo) 
     *p2 = '\0';
     float tmp1 = atof(p1);
     //coo.ir[k] = atoi(p1);
-    IR[k] = (int) tmp1;
+    IR[k] = (HYPRE_Int) tmp1;
     /*-------------- 2nd entry - column index */
     for( p1 = p2+1; ' ' == *p1; p1++ );
     for( p2 = p1; ' ' != *p2; p2++ );
     *p2 = '\0';
     float tmp2 = atof(p1);
-    JC[k] = (int) tmp2;
+    JC[k] = (HYPRE_Int) tmp2;
     //coo.jc[k]  = atoi(p1);
     /*------------- 3rd entry - nonzero entry */
     p1 = p2+1;
@@ -91,7 +91,7 @@ int read_coo_MM(const char *matfile, int idxin, int idxout, struct coo_t *Acoo) 
       nnz2 = j;
     }
   }
-  int offset = idxout - idxin;
+  HYPRE_Int offset = idxout - idxin;
   if (offset) {
     for (i=0; i<nnz2; i++) {
       IR[i] += offset;
@@ -109,8 +109,8 @@ int read_coo_MM(const char *matfile, int idxin, int idxout, struct coo_t *Acoo) 
   return 0;
 }
 
-int computeidx(int nx, int ny, int nz, int ix, int iy, int iz,
-               int dx, int dy, int dz) {
+HYPRE_Int computeidx(HYPRE_Int nx, HYPRE_Int ny, HYPRE_Int nz, HYPRE_Int ix, HYPRE_Int iy, HYPRE_Int iz,
+               HYPRE_Int dx, HYPRE_Int dy, HYPRE_Int dz) {
    ix += dx;
    iy += dy;
    iz += dz;
@@ -130,8 +130,8 @@ int computeidx(int nx, int ny, int nz, int ix, int iy, int iz,
  * @param[out] *Acoo matrix in coordinate format.
  *
  -----------------------------------------------------------------------**/
-int lapgen(int nx, int ny, int nz, struct coo_t *Acoo, int npts) {
-  int n = nx * ny * nz;
+HYPRE_Int lapgen(HYPRE_Int nx, HYPRE_Int ny, HYPRE_Int nz, struct coo_t *Acoo, HYPRE_Int npts) {
+  HYPRE_Int n = nx * ny * nz;
   Acoo->nrows = n;
   Acoo->ncols = n;
 
@@ -151,19 +151,19 @@ int lapgen(int nx, int ny, int nz, struct coo_t *Acoo, int npts) {
     }
   }
 
-  int nzmax = npts*n;
-  Acoo->ir = (int*) malloc(nzmax*sizeof(int));
-  Acoo->jc = (int*) malloc(nzmax*sizeof(int));
-  Acoo->val = (REAL *) malloc(nzmax*sizeof(REAL));
+  HYPRE_Int nzmax = npts*n;
+  Acoo->ir = (HYPRE_Int*) malloc(nzmax*sizeof(HYPRE_Int));
+  Acoo->jc = (HYPRE_Int*) malloc(nzmax*sizeof(HYPRE_Int));
+  Acoo->val = (HYPRE_Real *) malloc(nzmax*sizeof(HYPRE_Real));
 
-  int ii, nnz=0;
+  HYPRE_Int ii, nnz=0;
   for (ii=0; ii<n; ii++) {
-    double v = -1.0;
-    int iz = ii / (nx*ny);
-    int iy = (ii - iz*nx*ny) / nx;
-    int ix = ii - iz*nx*ny - iy*nx;
+    HYPRE_Real v = -1.0;
+    HYPRE_Int iz = ii / (nx*ny);
+    HYPRE_Int iy = (ii - iz*nx*ny) / nx;
+    HYPRE_Int ix = ii - iz*nx*ny - iy*nx;
 
-    int jj;
+    HYPRE_Int jj;
 
     // front
     if ( (jj = computeidx(nx, ny, nz, ix, iy, iz, 0, 0, -1)) >= 0 ) {
@@ -279,7 +279,7 @@ int lapgen(int nx, int ny, int nz, struct coo_t *Acoo, int npts) {
 
   Acoo->nnz = nnz;
 
-  printf("Lapcian Matrix N = %d, NNZ = %d, NNZ/N=%d\n", n, nnz, nnz/n );
+  printf("Lapcian Matrix N = %d, NNZ = %d, NNZ/N = %d\n", n, nnz, nnz/n );
 
   // change to 1-based index
   /*
@@ -293,11 +293,11 @@ int lapgen(int nx, int ny, int nz, struct coo_t *Acoo, int npts) {
 }
 
 // parse command-line input parameters
-int findarg(const char *argname, ARG_TYPE type, void *val, int argc, char **argv) {
-  int *outint;
-  double *outdouble;
+HYPRE_Int findarg(const char *argname, ARG_TYPE type, void *val, HYPRE_Int argc, char **argv) {
+  HYPRE_Int *outint;
+  hypre_double *outdouble;
   char *outchar;
-  int i;
+  HYPRE_Int i;
   for (i=0; i<argc; i++) {
     if (argv[i][0] != '-') {
       continue;
@@ -311,11 +311,11 @@ int findarg(const char *argname, ARG_TYPE type, void *val, int argc, char **argv
         }
         switch (type) {
           case INT:
-            outint = (int *) val;
+            outint = (HYPRE_Int *) val;
             *outint = atoi(argv[i+1]);
             return 1;
           case DOUBLE:
-            outdouble = (double *) val;
+            outdouble = (hypre_double *) val;
             *outdouble = atof(argv[i+1]);
             return 1;
           case STR:

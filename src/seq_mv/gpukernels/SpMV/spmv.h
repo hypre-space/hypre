@@ -13,30 +13,10 @@
 #define max(a, b) (a) > (b) ? (a) : (b)
 #define SEED 200
 #define REPEAT 100
-#define WARP 32
-#define HALFWARP 16
 #define BLOCKDIM 512
-#define MAXTHREADS (30*1024*60)
-
-#if DOUBLEPRECISION
-#define REAL double
-#else
-#define REAL float
-#endif
 
 #define FORT(name) name ## _
 //#define FORT(name) name
-
-/* CSR format type
-struct csr_t {
-  int nrows;
-  int ncols;
-  int *ia;
-  int *ja;
-  REAL *a;
-};
-*/ 
-
 
 /* types of user command-line input */
 typedef enum {
@@ -48,12 +28,12 @@ typedef enum {
 
 /* COO format type */
 struct coo_t {
-  int nrows;
-  int ncols;
-  int nnz;
-  int *ir;
-  int *jc;
-  REAL *val;
+  HYPRE_Int nrows;
+  HYPRE_Int ncols;
+  HYPRE_Int nnz;
+  HYPRE_Int *ir;
+  HYPRE_Int *jc;
+  HYPRE_Real *val;
 };
 
 #include "protos.h"

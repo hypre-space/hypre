@@ -327,6 +327,7 @@ void hypre_CSRMatrixUnMapFromDevice(hypre_CSRMatrix *A);
 #endif
 /* csr_matvec.c */
 // y[offset:end] = alpha*A[offset:end,:]*x + beta*b[offset:end]
+HYPRE_Int hypre_CSRMatrixMatvecOutOfPlaceHost ( HYPRE_Complex alpha , hypre_CSRMatrix *A , hypre_Vector *x , HYPRE_Complex beta , hypre_Vector *b, hypre_Vector *y, HYPRE_Int offset );
 HYPRE_Int hypre_CSRMatrixMatvecOutOfPlace ( HYPRE_Complex alpha , hypre_CSRMatrix *A , hypre_Vector *x , HYPRE_Complex beta , hypre_Vector *b, hypre_Vector *y, HYPRE_Int offset );
 HYPRE_Int hypre_CSRMatrixMatvecOutOfPlaceOOMP ( HYPRE_Complex alpha , hypre_CSRMatrix *A , hypre_Vector *x , HYPRE_Complex beta , hypre_Vector *b, hypre_Vector *y, HYPRE_Int offset );
 // y = alpha*A + beta*y
