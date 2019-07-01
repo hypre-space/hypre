@@ -367,6 +367,7 @@ int main (int argc, char *argv[])
 
       /* Clean up */
       HYPRE_StructPCGDestroy(solver);
+      HYPRE_StructSMGDestroy(precond);
    }
 
    if (solver_id == 1)
