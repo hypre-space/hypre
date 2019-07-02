@@ -12,8 +12,6 @@
 
 #define HYPRE_TIMING
 
-#include "parmetis.h"
-
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_utilities.h"
 #include "par_amg.h"
@@ -24,6 +22,9 @@
 #define DEBUGGING_MESSAGES 0 // if true, prints a bunch of messages to the screen to let you know where in the algorithm you are
 #define ENABLE_AGGLOMERATION 0 // if true, enable coarse level processor agglomeration, which requires linking with parmetis
 
+#if ENABLE_AGGLOMERATION
+#include "parmetis.h"
+#endif
 
 HYPRE_Int
 SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int level, HYPRE_Int *padding, HYPRE_Int num_ghost_layers, HYPRE_Int *communication_cost );
@@ -155,7 +156,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
    MPI_Comm 	      comm;
-   hypre_ParAMGData   *amg_data = amg_vdata;
+   hypre_ParAMGData   *amg_data = (hypre_ParAMGData*) amg_vdata;
 
    // If the underlying AMG data structure has not yet been set up, call BoomerAMGSetup()
    if (!hypre_ParAMGDataAArray(amg_data))

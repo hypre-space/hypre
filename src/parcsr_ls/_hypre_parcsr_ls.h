@@ -821,6 +821,7 @@ HYPRE_Int hypre_ParCSRSubspacePrec ( hypre_ParCSRMatrix *A0 , HYPRE_Int A0_relax
 HYPRE_Int hypre_AMSGetNumIterations ( void *solver , HYPRE_Int *num_iterations );
 HYPRE_Int hypre_AMSGetFinalRelativeResidualNorm ( void *solver , HYPRE_Real *rel_resid_norm );
 HYPRE_Int hypre_AMSProjectOutGradients ( void *solver , hypre_ParVector *x );
+HYPRE_Int hypre_AMSConstructDiscreteGradient ( hypre_ParCSRMatrix *A , hypre_ParVector *x_coord , HYPRE_Int *edge_vertex , HYPRE_Int edge_orientation , hypre_ParCSRMatrix **G_ptr );
 HYPRE_Int hypre_AMSFEISetup ( void *solver , hypre_ParCSRMatrix *A , hypre_ParVector *b , hypre_ParVector *x , HYPRE_Int num_vert , HYPRE_Int num_local_vert , HYPRE_BigInt *vert_number , HYPRE_Real *vert_coord , HYPRE_Int num_edges , HYPRE_Int *edge_vertex );
 HYPRE_Int hypre_AMSFEIDestroy ( void *solver );
 HYPRE_Int hypre_ParCSRComputeL1NormsThreads ( hypre_ParCSRMatrix *A , HYPRE_Int option , HYPRE_Int num_threads , HYPRE_Int *cf_marker , HYPRE_Real **l1_norm_ptr );
@@ -1452,6 +1453,8 @@ HYPRE_Int hypre_BoomerAMGSetFACNumRelax ( void *data, HYPRE_Int fac_num_relax );
 HYPRE_Int hypre_BoomerAMGGetFACNumRelax ( void *data, HYPRE_Int *fac_num_relax );
 HYPRE_Int hypre_BoomerAMGSetAMGDDPadding ( void *data , HYPRE_Int padding );
 HYPRE_Int hypre_BoomerAMGGetAMGDDPadding ( void *data , HYPRE_Int *padding );
+HYPRE_Int hypre_BoomerAMGSetAMGDDVariablePadding ( void *data , HYPRE_Int variable_padding );
+HYPRE_Int hypre_BoomerAMGGetAMGDDVariablePadding ( void *data , HYPRE_Int *variable_padding );
 HYPRE_Int hypre_BoomerAMGSetAMGDDNumGhostLayers ( void *data , HYPRE_Int num_ghost_layers );
 HYPRE_Int hypre_BoomerAMGGetAMGDDNumGhostLayers ( void *data , HYPRE_Int *num_ghost_layers );
 HYPRE_Int hypre_BoomerAMGSetAMGDDUseTransitionLevel ( void *data , HYPRE_Int use_transition_level );

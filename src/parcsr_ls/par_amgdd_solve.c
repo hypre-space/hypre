@@ -51,7 +51,7 @@ hypre_BoomerAMGDDSolve( void *amg_vdata,
    HYPRE_Real resid_nrm, resid_nrm_init, rhs_norm, relative_resid;
 
    // Get info from amg_data
-   hypre_ParAMGData   *amg_data = amg_vdata;
+   hypre_ParAMGData   *amg_data = (hypre_ParAMGData*) amg_vdata;
    HYPRE_Real tol = hypre_ParAMGDataTol(amg_data);
    HYPRE_Int min_iter = hypre_ParAMGDataMinIter(amg_data);
    HYPRE_Int max_iter = hypre_ParAMGDataMaxIter(amg_data);
@@ -168,7 +168,7 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata )
 
 	HYPRE_Int i,j,k,level;
    HYPRE_Int cycle_count = 0;
-	hypre_ParAMGData	*amg_data = amg_vdata;
+	hypre_ParAMGData	*amg_data = (hypre_ParAMGData*) amg_vdata;
 	hypre_ParCompGrid 	**compGrid = hypre_ParAMGDataCompGrid(amg_data);
   	HYPRE_Int num_levels = hypre_ParAMGDataNumLevels(amg_data);
    HYPRE_Int amgdd_start_level = hypre_ParAMGDataAMGDDStartLevel(amg_data);
@@ -281,7 +281,7 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata )
 HYPRE_Int
 AddSolution( void *amg_vdata )
 {
-	hypre_ParAMGData	*amg_data = amg_vdata;
+	hypre_ParAMGData	*amg_data = (hypre_ParAMGData*) amg_vdata;
    HYPRE_Int amgdd_start_level = hypre_ParAMGDataAMGDDStartLevel(amg_data);
 	HYPRE_Complex 		*u = hypre_VectorData( hypre_ParVectorLocalVector( hypre_ParAMGDataUArray(amg_data)[amgdd_start_level] ) );
 	hypre_ParCompGrid 	**compGrid = hypre_ParAMGDataCompGrid(amg_data);
@@ -321,7 +321,7 @@ ZeroInitialGuess( void *amg_vdata )
 	HYPRE_Int   myid;
 	hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
-	hypre_ParAMGData	*amg_data = amg_vdata;
+	hypre_ParAMGData	*amg_data = (hypre_ParAMGData*) amg_vdata;
    HYPRE_Int i;
 
    HYPRE_Int level;
@@ -349,7 +349,7 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
    #endif
 
    MPI_Comm          comm;
-   hypre_ParAMGData   *amg_data = amg_vdata;
+   hypre_ParAMGData   *amg_data = (hypre_ParAMGData*) amg_vdata;
    
    /* Data Structure variables */
 
@@ -612,7 +612,7 @@ hypre_BoomerAMGDDTimeResidualCommunication( void *amg_vdata, HYPRE_Int time_leve
    #endif
 
    MPI_Comm          comm;
-   hypre_ParAMGData   *amg_data = amg_vdata;
+   hypre_ParAMGData   *amg_data = (hypre_ParAMGData*) amg_vdata;
    
    /* Data Structure variables */
 

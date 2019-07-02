@@ -65,7 +65,7 @@ hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata, HYPRE_Int first_iteration )
    HYPRE_Int   myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
-   hypre_ParAMGData   *amg_data = amg_vdata;
+   hypre_ParAMGData   *amg_data = (hypre_ParAMGData*) amg_vdata;
    HYPRE_Int cycle_type = hypre_ParAMGDataFACCycleType(amg_data);
 
    if (cycle_type == 1 || cycle_type == 2) FAC_Cycle(amg_vdata, hypre_ParAMGDataAMGDDStartLevel(amg_data), cycle_type, first_iteration);
@@ -94,7 +94,7 @@ hypre_BoomerAMGDD_FAC_Cycle_timed( void *amg_vdata, HYPRE_Int time_part )
    HYPRE_Int   myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
-   hypre_ParAMGData   *amg_data = amg_vdata;
+   hypre_ParAMGData   *amg_data = (hypre_ParAMGData*) amg_vdata;
    HYPRE_Int cycle_type = hypre_ParAMGDataFACCycleType(amg_data);
 
    if (cycle_type == 1 || cycle_type == 2) FAC_Cycle_timed(amg_vdata, hypre_ParAMGDataAMGDDStartLevel(amg_data), cycle_type, time_part);
@@ -115,7 +115,7 @@ HYPRE_Int FAC_Cycle(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type, HYPR
    HYPRE_Int i, j; // loop variables
 
    // Get the AMG structure
-   hypre_ParAMGData   *amg_data = amg_vdata;
+   hypre_ParAMGData   *amg_data = (hypre_ParAMGData*) amg_vdata;
    HYPRE_Int num_levels = hypre_ParAMGDataNumLevels(amg_data);
    HYPRE_Int transition_level = hypre_ParCompGridCommPkgTransitionLevel(hypre_ParAMGDataCompGridCommPkg(amg_data));
    if (transition_level < 0) transition_level = num_levels;
@@ -162,7 +162,7 @@ HYPRE_Int FAC_FCycle(void *amg_vdata, HYPRE_Int first_iteration)
    HYPRE_Int level, i, j; // loop variables
 
    // Get the AMG structure
-   hypre_ParAMGData   *amg_data = amg_vdata;
+   hypre_ParAMGData   *amg_data = (hypre_ParAMGData*) amg_vdata;
    HYPRE_Int num_levels = hypre_ParAMGDataNumLevels(amg_data);
    HYPRE_Int transition_level = hypre_ParCompGridCommPkgTransitionLevel(hypre_ParAMGDataCompGridCommPkg(amg_data));
    if (transition_level < 0) transition_level = num_levels;
@@ -211,7 +211,7 @@ HYPRE_Int FAC_Cycle_timed(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type
    HYPRE_Int i, j; // loop variables
 
    // Get the AMG structure
-   hypre_ParAMGData   *amg_data = amg_vdata;
+   hypre_ParAMGData   *amg_data = (hypre_ParAMGData*) amg_vdata;
    HYPRE_Int num_levels = hypre_ParAMGDataNumLevels(amg_data);
    HYPRE_Int transition_level = hypre_ParCompGridCommPkgTransitionLevel(hypre_ParAMGDataCompGridCommPkg(amg_data));
    if (transition_level < 0) transition_level = num_levels;
@@ -256,7 +256,7 @@ HYPRE_Int FAC_FCycle_timed(void *amg_vdata, HYPRE_Int time_part)
    HYPRE_Int level, i, j; // loop variables
 
    // Get the AMG structure
-   hypre_ParAMGData   *amg_data = amg_vdata;
+   hypre_ParAMGData   *amg_data = (hypre_ParAMGData*) amg_vdata;
    HYPRE_Int num_levels = hypre_ParAMGDataNumLevels(amg_data);
    HYPRE_Int transition_level = hypre_ParCompGridCommPkgTransitionLevel(hypre_ParAMGDataCompGridCommPkg(amg_data));
    if (transition_level < 0) transition_level = num_levels;
