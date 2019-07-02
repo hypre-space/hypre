@@ -27,11 +27,11 @@ extern HYPRE_Int hypre_exec_policy;
 #include <cuda_runtime_api.h>
 void hypre_GPUInit(hypre_int use_device);
 void hypre_GPUFinalize();
-int VecScaleScalar(double *u, const double alpha,  int num_rows,cudaStream_t s);
-void VecCopy(double* tgt, const double* src, int size,cudaStream_t s);
-void VecSet(double* tgt, int size, double value, cudaStream_t s);
-void VecScale(double *u, double *v, double *l1_norm, int num_rows,cudaStream_t s);
-void VecScaleSplit(double *u, double *v, double *l1_norm, int num_rows,cudaStream_t s);
+int VecScaleScalar(HYPRE_Complex *u, const HYPRE_Complex alpha,  int num_rows,cudaStream_t s);
+void VecCopy(HYPRE_Complex* tgt, const HYPRE_Complex* src, int size,cudaStream_t s);
+void VecSet(HYPRE_Complex* tgt, int size, HYPRE_Complex value, cudaStream_t s);
+void VecScale(HYPRE_Complex *u, HYPRE_Complex *v, HYPRE_Complex *l1_norm, int num_rows,cudaStream_t s);
+void VecScaleSplit(HYPRE_Complex *u, HYPRE_Complex *v, HYPRE_Complex *l1_norm, int num_rows,cudaStream_t s);
 void CudaCompileFlagCheck();
 void BigToSmallCopy (hypre_int* tgt, const HYPRE_Int *src, hypre_int size, cudaStream_t s);
 cudaStream_t getstreamOlde(hypre_int i);

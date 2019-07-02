@@ -847,12 +847,21 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Complex    alpha,
   hypre_SeqVectorPrefetchToDevice(y);
 
   //if (offset!=0) hypre_printf("WARNING:: Offset is not zero in hypre_CSRMatrixMatvecDevice :: \n");
+#if defined(HYPRE_SINGLE)
+  cusparseErrchk(cusparseScsrmv(handle ,
+                 CUSPARSE_OPERATION_NON_TRANSPOSE,
+                 A->num_rows-offset, A->num_cols, A->num_nonzeros,
+                 &alpha, descr,
+                 A->data ,A->i+offset,A->j,
+                 x->data, &beta, y->data+offset));
+#else
   cusparseErrchk(cusparseDcsrmv(handle ,
                  CUSPARSE_OPERATION_NON_TRANSPOSE,
                  A->num_rows-offset, A->num_cols, A->num_nonzeros,
                  &alpha, descr,
                  A->data ,A->i+offset,A->j,
                  x->data, &beta, y->data+offset));
+#endif
 
   if (!GetAsyncMode()){
   hypre_CheckErrorDevice(cudaStreamSynchronize(s[4]));
@@ -941,12 +950,21 @@ hypre_CSRMatrixMatvecDeviceBIGINT( HYPRE_Complex    alpha,
 
   if (offset!=0) hypre_error_w_msg(HYPRE_ERROR_GENERIC, "WARNING:: Offset is not zero in hypre_CSRMatrixMatvecDevice \n");
 
+#if defined(HYPRE_SINGLE)
+  cusparseErrchk(cusparseScsrmv(handle ,
+                                CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                num_rows-offset, num_cols, num_nonzeros,
+                                &alpha, descr,
+                                A->data ,A->i_short+offset,A->j_short,
+                                x->data, &beta, y->data+offset));
+#else
   cusparseErrchk(cusparseDcsrmv(handle ,
                                 CUSPARSE_OPERATION_NON_TRANSPOSE,
                                 num_rows-offset, num_cols, num_nonzeros,
                                 &alpha, descr,
                                 A->data ,A->i_short+offset,A->j_short,
                                 x->data, &beta, y->data+offset));
+#endif
 
   if (!GetAsyncMode()){
   hypre_CheckErrorDevice(cudaStreamSynchronize(s[4]));

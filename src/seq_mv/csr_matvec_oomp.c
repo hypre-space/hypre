@@ -470,12 +470,21 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Complex    alpha,
 #ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
 #pragma omp target data use_device_ptr(A_data,x_data,y_data,A_i,A_j)
 #endif
+#if defined(HYPRE_SINGLE)
+   cusparseErrchk(cusparseScsrmv(handle ,
+                                 CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                 num_rows, num_cols, num_nnz,
+                                 &alpha, descr,
+                                 A_data ,A_i,A_j,
+                                 x_data, &beta, y_data));
+#else
    cusparseErrchk(cusparseDcsrmv(handle ,
                                  CUSPARSE_OPERATION_NON_TRANSPOSE,
                                  num_rows, num_cols, num_nnz,
                                  &alpha, descr,
                                  A_data ,A_i,A_j,
                                  x_data, &beta, y_data));
+#endif
    }
 
    hypre_CheckErrorDevice(cudaStreamSynchronize(s[4]));

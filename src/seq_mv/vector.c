@@ -1895,7 +1895,11 @@ hypre_SeqVectorAxpyDevice( HYPRE_Complex alpha,
     handle=getCublasHandle();
     firstcall=0;
   }
+  #if defined(HYPRE_SINGLE)
+  cublasErrchk(cublasSaxpy(handle,(HYPRE_Int)size,&alpha,x_data,1,y_data,1));
+  #else
   cublasErrchk(cublasDaxpy(handle,(HYPRE_Int)size,&alpha,x_data,1,y_data,1));
+  #endif
   hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(4)));
   POP_RANGE;
   return ierr;
@@ -1923,10 +1927,17 @@ HYPRE_Real   hypre_SeqVectorInnerProdDevice( hypre_Vector *x,
   //hypre_SeqVectorPrefetchToDevice(y);
   POP_RANGE;
   PUSH_RANGE_PAYLOAD("DEVDOT-ACTUAL",0,hypre_VectorSize(x));
+  #if defined(HYPRE_SINGLE)
+  /*stat=*/cublasSdot(handle, (HYPRE_Int)size,
+                  x_data, 1,
+                  y_data, 1,
+                  &result);
+  #else
   /*stat=*/cublasDdot(handle, (HYPRE_Int)size,
                   x_data, 1,
                   y_data, 1,
                   &result);
+  #endif
   hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(4)));
   POP_RANGE;
   POP_RANGE;
