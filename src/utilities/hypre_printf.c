@@ -116,6 +116,20 @@ free_format( char *newformat )
    return 0;
 }
 
+HYPRE_Int
+hypre_ndigits( HYPRE_BigInt number )
+{
+   HYPRE_Int     ndigits = 0;
+
+   while(number)
+   {
+      number /= 10;
+      ndigits++;
+   }
+
+   return ndigits;
+}
+
 /* printf functions */
 
 HYPRE_Int

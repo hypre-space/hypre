@@ -60,7 +60,7 @@ type NUL > cmake.err
 for %%f in (%outdir%\*.out) do (
     set sum=0
     for /f "tokens=1" %%i in ('findstr "Error(s)" %%f') do set /a sum+=%%i
-    if %sum% gtr 0 @echo %%f > cmake.err
+    if %sum% gtr 0 @echo %%f >> cmake.err
 )
 
 cd %rundir%
