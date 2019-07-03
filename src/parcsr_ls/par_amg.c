@@ -78,7 +78,6 @@ hypre_BoomerAMGCreate()
    HYPRE_Int    max_fac_iter;
    HYPRE_Int    fac_cycle_type;
    HYPRE_Int    fac_relax_type;
-   HYPRE_Int    fac_num_relax;
    HYPRE_Int    cycle_type;
 
    HYPRE_Int    converge_type;
@@ -206,7 +205,6 @@ hypre_BoomerAMGCreate()
    max_fac_iter = 20;
    fac_cycle_type = 0;
    fac_relax_type = 1;
-   fac_num_relax = 1;
    cycle_type = 1;
    converge_type = 0;
    tol = 1.0e-7;
@@ -316,6 +314,7 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetMaxIter(amg_data, max_iter);
    hypre_BoomerAMGSetMinFACIter(amg_data, min_fac_iter);
    hypre_BoomerAMGSetMaxFACIter(amg_data, max_fac_iter);
+   hypre_BoomerAMGSetFACCycleType(amg_data, fac_cycle_type);
    hypre_BoomerAMGSetFACRelaxType(amg_data, fac_relax_type);
    hypre_BoomerAMGSetFACTol(amg_data, fac_tol);
    hypre_BoomerAMGSetCycleType(amg_data, cycle_type);

@@ -112,7 +112,7 @@ HYPRE_Int FAC_Cycle(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type, HYPR
    HYPRE_Int   myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
-   HYPRE_Int i, j; // loop variables
+   HYPRE_Int i;
 
    // Get the AMG structure
    hypre_ParAMGData   *amg_data = (hypre_ParAMGData*) amg_vdata;
@@ -154,12 +154,11 @@ HYPRE_Int FAC_Cycle(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type, HYPR
 
 HYPRE_Int FAC_FCycle(void *amg_vdata, HYPRE_Int first_iteration)
 {
-   char filename[256];
    HYPRE_Int   myid, num_procs;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
 
-   HYPRE_Int level, i, j; // loop variables
+   HYPRE_Int level, i;
 
    // Get the AMG structure
    hypre_ParAMGData   *amg_data = (hypre_ParAMGData*) amg_vdata;
@@ -248,12 +247,11 @@ HYPRE_Int FAC_Cycle_timed(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type
 
 HYPRE_Int FAC_FCycle_timed(void *amg_vdata, HYPRE_Int time_part)
 {
-   char filename[256];
    HYPRE_Int   myid, num_procs;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
 
-   HYPRE_Int level, i, j; // loop variables
+   HYPRE_Int level, i;
 
    // Get the AMG structure
    hypre_ParAMGData   *amg_data = (hypre_ParAMGData*) amg_vdata;

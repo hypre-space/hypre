@@ -166,10 +166,9 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata )
 	HYPRE_Int   myid;
 	hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
-	HYPRE_Int i,j,k,level;
+	HYPRE_Int i,level;
    HYPRE_Int cycle_count = 0;
 	hypre_ParAMGData	*amg_data = (hypre_ParAMGData*) amg_vdata;
-	hypre_ParCompGrid 	**compGrid = hypre_ParAMGDataCompGrid(amg_data);
   	HYPRE_Int num_levels = hypre_ParAMGDataNumLevels(amg_data);
    HYPRE_Int amgdd_start_level = hypre_ParAMGDataAMGDDStartLevel(amg_data);
    HYPRE_Int min_fac_iter = hypre_ParAMGDataMinFACIter(amg_data);
@@ -356,7 +355,7 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
    // level counters, indices, and parameters
    HYPRE_Int                  num_levels, amgdd_start_level;
    HYPRE_Real                 alpha, beta;
-   HYPRE_Int                  level,i,j;
+   HYPRE_Int                  level,i;
 
    // info from amg
    hypre_ParCSRMatrix         **A_array;
@@ -624,9 +623,7 @@ hypre_BoomerAMGDDTimeResidualCommunication( void *amg_vdata, HYPRE_Int time_leve
    // info from amg
    hypre_ParCSRMatrix         **A_array;
    hypre_ParVector            **F_array;
-   hypre_ParVector            **U_array;
    hypre_ParCSRMatrix         **P_array;
-   hypre_ParVector            *Vtemp;
    HYPRE_Int                  *proc_first_index, *proc_last_index;
    HYPRE_Int                  *global_nodes;
    hypre_ParCompGrid          **compGrid;
@@ -660,8 +657,6 @@ hypre_BoomerAMGDDTimeResidualCommunication( void *amg_vdata, HYPRE_Int time_leve
    A_array = hypre_ParAMGDataAArray(amg_data);
    P_array = hypre_ParAMGDataPArray(amg_data);
    F_array = hypre_ParAMGDataFArray(amg_data);
-   U_array = hypre_ParAMGDataUArray(amg_data);
-   Vtemp = hypre_ParAMGDataVtemp(amg_data);
    num_levels = hypre_ParAMGDataNumLevels(amg_data);
    amgdd_start_level = hypre_ParAMGDataAMGDDStartLevel(amg_data);
    compGrid = hypre_ParAMGDataCompGrid(amg_data);

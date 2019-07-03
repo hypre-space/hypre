@@ -61,7 +61,6 @@ hypre_ParCompGridCreate ()
 HYPRE_Int
 hypre_ParCompGridDestroy ( hypre_ParCompGrid *compGrid )
 {
-   HYPRE_Int      i;
    
    if (hypre_ParCompGridOwnedBlockStarts(compGrid))
    {
@@ -300,7 +299,7 @@ hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, H
       delete_global_indices = 0;
    }
 
-   HYPRE_Int i,j,k,cnt,level;
+   HYPRE_Int level;
 
    // Clean up memory for things we don't need anymore
    for (level = 0; level < transition_level; level++)
@@ -373,7 +372,6 @@ hypre_ParCompGridResize ( hypre_ParCompGrid *compGrid, HYPRE_Int new_size, HYPRE
 {
    // This function reallocates memory to hold a comp grid of size new_size
    // num_nodes and mem_size are set to new_size. Use this when exact size of new comp grid is known.
-   HYPRE_Int      i;
 
    // Reallocate num nodes
    if (type == 0)
@@ -416,8 +414,8 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *nod
    // when nodes are added to a composite grid, global info is copied over, but local indices must be generated appropriately for all added nodes
    // this must be done on each level as info is added to correctly construct subsequent Psi_c grids
    // also done after each ghost layer is added
-   HYPRE_Int      level,i,j,k,l;
-   HYPRE_Int      row_size, global_index, coarse_global_index, local_index, insert_row_size;
+   HYPRE_Int      level,i,j,k;
+   HYPRE_Int      global_index, coarse_global_index, local_index;
 
    HYPRE_Int myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
@@ -525,7 +523,7 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *nod
 
 HYPRE_Int hypre_ParCompGridSetupLocalIndicesP( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int transition_level )
 {
-   HYPRE_Int                  i,j,level,global_index,first,last;
+   HYPRE_Int                  i,j,level,global_index;
 
    for (level = 0; level < transition_level-1; level++)
    {
@@ -595,8 +593,8 @@ hypre_ParCompGridDebugPrint ( hypre_ParCompGrid *compGrid, const char* filename 
    HYPRE_Int       A_mem_size = hypre_ParCompGridAMemSize(compGrid);
    HYPRE_Int       P_mem_size = hypre_ParCompGridPMemSize(compGrid);
 
-   HYPRE_Complex     *u = hypre_ParCompGridU(compGrid);
-   HYPRE_Complex     *f = hypre_ParCompGridF(compGrid);
+   // HYPRE_Complex     *u = hypre_ParCompGridU(compGrid);
+   // HYPRE_Complex     *f = hypre_ParCompGridF(compGrid);
 
    HYPRE_Int        *global_indices = hypre_ParCompGridGlobalIndices(compGrid);
    HYPRE_Int        *coarse_global_indices = hypre_ParCompGridCoarseGlobalIndices(compGrid);
@@ -610,7 +608,7 @@ hypre_ParCompGridDebugPrint ( hypre_ParCompGrid *compGrid, const char* filename 
    HYPRE_Int *P_colind = hypre_ParCompGridPColInd(compGrid);
    HYPRE_Complex *P_data = hypre_ParCompGridPData(compGrid);
 
-   HYPRE_Int         i,j;
+   HYPRE_Int         i;
 
    // Measure number of ghost nodes
    HYPRE_Int num_real = 0;
@@ -899,12 +897,10 @@ hypre_ParCompGridMatlabAMatrixDump( hypre_ParCompGrid *compGrid, const char* fil
    // Get composite grid information
    HYPRE_Int       num_nodes = hypre_ParCompGridNumNodes(compGrid);
 
-   HYPRE_Int                     *global_indices = hypre_ParCompGridGlobalIndices(compGrid);
-
    // Print info to given filename   
    FILE             *file;
    file = fopen(filename,"w");
-   HYPRE_Int i,j,row_size;
+   HYPRE_Int i,j;
 
    if (hypre_ParCompGridARowPtr(compGrid))
    {
@@ -930,12 +926,10 @@ hypre_ParCompGridMatlabPMatrixDump( hypre_ParCompGrid *compGrid, const char* fil
    // Get composite grid information
    HYPRE_Int       num_nodes = hypre_ParCompGridNumNodes(compGrid);
 
-   HYPRE_Int                     *global_indices = hypre_ParCompGridGlobalIndices(compGrid);
-
    // Print info to given filename   
    FILE             *file;
    file = fopen(filename,"w");
-   HYPRE_Int i,j,row_size;
+   HYPRE_Int i,j;
 
    if (hypre_ParCompGridPRowPtr(compGrid))
    {

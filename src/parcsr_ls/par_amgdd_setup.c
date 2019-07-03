@@ -149,8 +149,6 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    //             4: residual # messages, 5: residual comm volume,
    //             6: direct communication stencil for composite grid level ]
 
-   char filename[256];
-
    HYPRE_Int   myid, num_procs;
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
@@ -179,19 +177,13 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    HYPRE_Int                  num_ghost_layers;
    HYPRE_Int                  use_transition_level;
    HYPRE_Int                  transition_level;
-   HYPRE_Real                 alpha, beta;
-   HYPRE_Int                  level,i,j,k,l,cnt;
+   HYPRE_Int                  level,i,j,l;
    HYPRE_Int                  *num_psi_levels_send;
    HYPRE_Int                  *num_psi_levels_recv;
    HYPRE_Int                  *nodes_added_on_level;
 
    // info from amg setup
    hypre_ParCSRMatrix         **A_array;
-   hypre_ParVector            **F_array;
-   hypre_ParVector            **U_array;
-   hypre_ParCSRMatrix         **P_array;
-   hypre_ParVector            *Vtemp;
-   HYPRE_Int                  **CF_marker_array;
    HYPRE_Int                  *proc_first_index, *proc_last_index;
 
    // composite grids
@@ -222,11 +214,6 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
 
    // get info from amg
    A_array = hypre_ParAMGDataAArray(amg_data);
-   P_array = hypre_ParAMGDataPArray(amg_data);
-   F_array = hypre_ParAMGDataFArray(amg_data);
-   U_array = hypre_ParAMGDataUArray(amg_data);
-   Vtemp = hypre_ParAMGDataVtemp(amg_data);
-   CF_marker_array = hypre_ParAMGDataCFMarkerArray(amg_data);
    num_levels = hypre_ParAMGDataNumLevels(amg_data);
    amgdd_start_level = hypre_ParAMGDataAMGDDStartLevel(amg_data);
    if (amgdd_start_level >= num_levels) amgdd_start_level = num_levels-1;
@@ -255,8 +242,8 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    nodes_added_on_level = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
    for (level = 0; level < num_levels; level++)
    {
-      proc_first_index[level] = hypre_ParVectorFirstIndex(F_array[level]);
-      proc_last_index[level] = hypre_ParVectorLastIndex(F_array[level]);
+      proc_first_index[level] = hypre_ParVectorFirstIndex(hypre_ParAMGDataFArray(amg_data)[level]);
+      proc_last_index[level] = hypre_ParVectorLastIndex(hypre_ParAMGDataFArray(amg_data)[level]);
    }
 
    // Allocate space for some variables that store info on each level
@@ -323,18 +310,6 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    if (myid == 0) hypre_printf("  Done with transition level setup and comp grid initialization\n");
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
    #endif
-
-   // !!! Checking on memory consumption
-   HYPRE_Int init_dof_mem[num_levels];
-   HYPRE_Int init_A_mem[num_levels];
-   HYPRE_Int init_P_mem[num_levels];
-   for (level = 0; level < num_levels; level++)
-   {
-      init_dof_mem[level] = hypre_ParCompGridMemSize(compGrid[level]);
-      init_A_mem[level] = hypre_ParCompGridAMemSize(compGrid[level]);
-      init_P_mem[level] = hypre_ParCompGridPMemSize(compGrid[level]);
-      // printf("Rank %d, level %d, init mem_size = %d, init num_nodes = %d\n", myid, level, hypre_ParCompGridMemSize(compGrid[level]), hypre_ParCompGridNumNodes(compGrid[level]));
-   }
 
    // On each level, setup a long distance commPkg that has communication info for distance (eta + numGhostLayers)
    if (use_barriers) hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
@@ -419,14 +394,6 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
       }
       hypre_ParCompGridCommPkgDestroy(initCopyCompGridCommPkg);
 
-      // !!! Checking on memory consumption
-      for (level = 0; level < num_levels-1; level++)
-      {
-         init_dof_mem[level] = hypre_ParCompGridMemSize(compGrid[level]);
-         init_A_mem[level] = hypre_ParCompGridAMemSize(compGrid[level]);
-         init_P_mem[level] = hypre_ParCompGridPMemSize(compGrid[level]);
-         // printf("Rank %d, level %d, init mem_size = %d, init num_nodes = %d\n", myid, level, hypre_ParCompGridMemSize(compGrid[level]), hypre_ParCompGridNumNodes(compGrid[level]));
-      }
       hypre_TFree(local_stencil, HYPRE_MEMORY_HOST);
       hypre_TFree(global_stencil, HYPRE_MEMORY_HOST);
    }
@@ -434,6 +401,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    if (timers) hypre_EndTiming(timers[0]);
 
    #if DEBUG_COMP_GRID == 2
+   char filename[256];
    for (level = 0; level < num_levels; level++)
    {
       sprintf(filename, "outputs/AMG_hierarchy/A_rank%d_level%d.txt", myid, level);
@@ -944,8 +912,6 @@ SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGr
       HYPRE_Int *num_request_nodes = hypre_CTAlloc(HYPRE_Int, send_proc_array_size, HYPRE_MEMORY_HOST);
       HYPRE_Int **request_nodes = hypre_CTAlloc(HYPRE_Int*, send_proc_array_size, HYPRE_MEMORY_HOST);
 
-      FILE *file;
-      char filename[256];
       for (i = 0; i < padding[level] + num_ghost_layers - 1; i++)
       {
          FindNeighborProcessors(compGrid, A, &(add_flag), 
@@ -960,6 +926,8 @@ SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGr
       }
 
       #if DEBUG_PROC_NEIGHBORS
+      FILE *file;
+      char filename[256];
       for (j = 0; j < num_sends; j++)
       {
          sprintf(filename,"outputs/add_flag_level%d_proc%d_rank%d.txt", level, send_procs[j], myid);
@@ -1310,7 +1278,7 @@ RecursivelyFindNeighborNodes(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *com
    HYPRE_Int *request_nodes, HYPRE_Int *num_request_nodes
    , HYPRE_Int level, HYPRE_Int iteration, HYPRE_Int proc )
 {
-   HYPRE_Int         i,j,index,coarse_grid_index;
+   HYPRE_Int         i,j,index;
 
    HYPRE_Int   myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
@@ -1534,8 +1502,6 @@ PackCoarseLevels(hypre_ParAMGData *amg_data, HYPRE_Int fine_level, HYPRE_Int coa
       hypre_ParCSRMatrix *A = hypre_ParAMGDataAArray(amg_data)[level];
       hypre_ParCSRMatrix *P = NULL;
       if (level != num_levels-1) P = hypre_ParAMGDataPArray(amg_data)[level];
-      HYPRE_Int first_index = hypre_ParVectorFirstIndex(hypre_ParAMGDataUArray(amg_data)[level]);
-      HYPRE_Int last_index = hypre_ParVectorLastIndex(hypre_ParAMGDataUArray(amg_data)[level]);
       HYPRE_Int num_nodes = hypre_ParCSRMatrixNumRows(A);
       HYPRE_Int A_nnz = hypre_CSRMatrixNumNonzeros( hypre_ParCSRMatrixDiag(A) ) + hypre_CSRMatrixNumNonzeros( hypre_ParCSRMatrixOffd(A) );
       HYPRE_Int P_nnz = 0;
@@ -1632,7 +1598,7 @@ UnpackCoarseLevels(hypre_ParAMGData *amg_data, MPI_Comm comm, HYPRE_Int *recv_in
    hypre_MPI_Comm_size(comm, &num_procs);
 
    // Loop over levels and generate new global comp grids 
-   HYPRE_Int level,proc,i,j;
+   HYPRE_Int level,proc,i;
    HYPRE_Int num_levels = hypre_ParAMGDataNumLevels(amg_data);
 
    // Get the global number of nodes and number of nonzeros for the matrices (read in from buffer)
@@ -1836,6 +1802,7 @@ UnpackCoarseLevels(hypre_ParAMGData *amg_data, MPI_Comm comm, HYPRE_Int *recv_in
 HYPRE_Int
 AgglomerateProcessors(hypre_ParAMGData *amg_data, hypre_ParCompGridCommPkg *initCopyCompGridCommPkg, HYPRE_Int *padding, HYPRE_Int current_level, HYPRE_Int partition_size, HYPRE_Int *communication_cost)
 {
+   #if ENABLE_AGGLOMERATION
    HYPRE_Int myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
 
@@ -1861,12 +1828,7 @@ AgglomerateProcessors(hypre_ParAMGData *amg_data, hypre_ParCompGridCommPkg *init
 
    // Get the partitioning of the communication graph
    HYPRE_Int partition;
-   #if ENABLE_AGGLOMERATION
    partition = GetPartition(partition_size, compGridCommPkg, current_level, previous_local_comm, previous_global_comm);
-   #else
-   printf("Need to enable processor agglomeration.\n");
-   return 0;
-   #endif
 
    // Split the old communicator
    MPI_Comm local_comm;
@@ -1936,6 +1898,10 @@ AgglomerateProcessors(hypre_ParAMGData *amg_data, hypre_ParCompGridCommPkg *init
    hypre_TFree(proc_starts, HYPRE_MEMORY_HOST);
 
    return 0;
+   #else
+   printf("Need to enable processor agglomeration.\n");
+   return 0;
+   #endif
 }
 
 #if ENABLE_AGGLOMERATION
@@ -2925,7 +2891,7 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
    // level = [ num send nodes, [global indices] , [coarse global indices] , [A row sizes] , [A col ind] ]
 
    HYPRE_Int            level, i, j, k;
-   HYPRE_Int            num_psi_levels, row_size, offset, level_start, global_index, add_node_cnt;
+   HYPRE_Int            num_psi_levels, row_size, offset, level_start, add_node_cnt;
    // HYPRE_Int            *add_flag;
 
    HYPRE_Int myid;
@@ -3304,7 +3270,7 @@ UnpackSendFlagBuffer(HYPRE_Int *send_flag_buffer,
 HYPRE_Int
 CommunicateRemainingMatrixInfo(hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int *communication_cost, HYPRE_Int *num_resizes)
 {
-   HYPRE_Int outer_level,proc,part,level,i,j,cnt;
+   HYPRE_Int outer_level,proc,part,level,i,j;
    HYPRE_Int num_levels = hypre_ParCompGridCommPkgNumLevels(compGridCommPkg);
    HYPRE_Int transition_level = hypre_ParCompGridCommPkgTransitionLevel(compGridCommPkg);
    if (transition_level < 0) transition_level = num_levels;
@@ -4069,4 +4035,6 @@ HYPRE_Int CheckCompGridCommPkg(hypre_ParCompGridCommPkg *compGridCommPkg)
       hypre_TFree(requests, HYPRE_MEMORY_HOST);
       hypre_TFree(status, HYPRE_MEMORY_HOST);
    }
+
+   return 0;
 }
