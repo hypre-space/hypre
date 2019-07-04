@@ -497,7 +497,7 @@ FindNeighborProcessorsNew(hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A,
    }
 
    // Wait 
-   hypre_MPI_Waitall(send_proc_dofs.size() + request_proc_dofs.size(), requests, statuses);
+   hypre_MPI_Waitall(hypre_ParCSRCommPkgNumSends(commPkg) + request_proc_dofs.size(), requests, statuses);
    hypre_TFree(requests, HYPRE_MEMORY_HOST);
    hypre_TFree(statuses, HYPRE_MEMORY_HOST);
 
