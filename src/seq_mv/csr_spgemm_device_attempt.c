@@ -443,17 +443,7 @@ hypreDevice_CSRSpGemmWithRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    // for cases where one WARP works on a row
    HYPRE_Int gDim  = (m + bDim.z - 1) / bDim.z;
 
-   hypre_double t1 = 0, t2 = 0;
-   size_t mem_alloc = 0;
-
-   HYPRE_Int do_timing = hypre_device_csr_handle->do_timing;
-   char hash_type = hypre_device_csr_handle->hash_type;
-
-   if (do_timing)
-   {
-      cudaThreadSynchronize();
-      t1 = time_getWallclockSeconds();
-   }
+   char hash_type = hypre_handle->spgemm_hash_type;
 
    /* ---------------------------------------------------------------------------
     * build hash table
@@ -462,21 +452,6 @@ hypreDevice_CSRSpGemmWithRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    HYPRE_Complex *d_ghash_a;
    csr_spmm_create_hash_table(m, d_rc, NULL, shmem_hash_size, m,
                               &d_ghash_i, &d_ghash_j, &d_ghash_a, &ghash_size);
-   mem_alloc += (m + 1)*sizeof(HYPRE_Int) + ghash_size * (sizeof(HYPRE_Int) + sizeof(HYPRE_Complex));
-
-   if (do_timing)
-   {
-      cudaThreadSynchronize();
-      t2 = time_getWallclockSeconds();
-      //printf("^^^^create hash table time                                %.2e\n", t2 - t1);
-      hypre_device_csr_handle->spmm_create_hashtable_time += t2 - t1;
-   }
-
-   if (do_timing)
-   {
-      cudaThreadSynchronize();
-      t1 = time_getWallclockSeconds();
-   }
 
    size_t m_ul = m;
 
@@ -484,8 +459,6 @@ hypreDevice_CSRSpGemmWithRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    HYPRE_Int     *d_ghash2_i = hypre_TAlloc(HYPRE_Int,     m+1,                  HYPRE_MEMORY_DEVICE);
    HYPRE_Int     *d_js       = hypre_TAlloc(HYPRE_Int,     shmem_hash_size*m_ul, HYPRE_MEMORY_DEVICE);
    HYPRE_Complex *d_as       = hypre_TAlloc(HYPRE_Complex, shmem_hash_size*m_ul, HYPRE_MEMORY_DEVICE);
-
-   mem_alloc += (m+1)*sizeof(HYPRE_Int) + shmem_hash_size * m * (sizeof(HYPRE_Int) + sizeof(HYPRE_Complex));
 
    /* ---------------------------------------------------------------------------
     * 1st multiplication attempt:
@@ -514,20 +487,6 @@ hypreDevice_CSRSpGemmWithRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
       exit(0);
    }
 
-   if (do_timing)
-   {
-      cudaThreadSynchronize();
-      t2 = time_getWallclockSeconds();
-      //printf("^^^^1st multiplication attempt time                       %.2e\n", t2 - t1);
-      hypre_device_csr_handle->spmm_attempt1_time += t2 - t1;
-   }
-
-   if (do_timing)
-   {
-      cudaThreadSynchronize();
-      t1 = time_getWallclockSeconds();
-   }
-
    /* ---------------------------------------------------------------------------
     * build a secondary hash table for long rows
     * ---------------------------------------------------------------------------*/
@@ -535,25 +494,10 @@ hypreDevice_CSRSpGemmWithRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    HYPRE_Complex *d_ghash2_a;
 
    csr_spmm_create_ija(m, d_ghash2_i, &d_ghash2_j, &d_ghash2_a, &ghash2_size);
-   mem_alloc += ghash2_size * (sizeof(HYPRE_Int) + sizeof(HYPRE_Complex));
-
-   if (do_timing)
-   {
-      cudaThreadSynchronize();
-      t2 = time_getWallclockSeconds();
-      //printf("^^^^Postprocess time after 1st attempt                    %.2e\n", t2 - t1);
-      hypre_device_csr_handle->spmm_post_attempt1_time += t2 - t1;
-   }
 
    /* ---------------------------------------------------------------------------
     * 2nd multiplication attempt:
     * ---------------------------------------------------------------------------*/
-   if (do_timing)
-   {
-      cudaThreadSynchronize();
-      t1 = time_getWallclockSeconds();
-   }
-
    if (ghash2_size > 0)
    {
       if (hash_type == 'L')
@@ -581,20 +525,6 @@ hypreDevice_CSRSpGemmWithRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
       }
    }
 
-   if (do_timing)
-   {
-      cudaThreadSynchronize();
-      t2 = time_getWallclockSeconds();
-      //printf("^^^^2nd multiplication attempt time                       %.2e\n", t2 - t1);
-      hypre_device_csr_handle->spmm_attempt2_time += t2 - t1;
-   }
-
-   if (do_timing)
-   {
-      cudaThreadSynchronize();
-      t1 = time_getWallclockSeconds();
-   }
-
    HYPRE_Int nnzC_gpu, *d_jc;
    HYPRE_Complex *d_c;
    csr_spmm_create_ija(m, d_ic, &d_jc, &d_c, &nnzC_gpu);
@@ -611,19 +541,6 @@ hypreDevice_CSRSpGemmWithRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    hypre_TFree(d_ghash2_a, HYPRE_MEMORY_DEVICE);
    hypre_TFree(d_js,       HYPRE_MEMORY_DEVICE);
    hypre_TFree(d_as,       HYPRE_MEMORY_DEVICE);
-
-   if (do_timing)
-   {
-      cudaThreadSynchronize();
-      t2 = time_getWallclockSeconds();
-      //printf("^^^^Postprocess (copy to C) time after 2nd attempt        %.2e\n", t2 - t1);
-      hypre_device_csr_handle->spmm_post_attempt2_time += t2 - t1;
-   }
-
-   hypre_device_csr_handle->ghash_size  = ghash_size;
-   hypre_device_csr_handle->ghash2_size = ghash2_size;
-   hypre_device_csr_handle->nnzC_gpu    = nnzC_gpu;
-   hypre_device_csr_handle->spmm_attempt_mem = mem_alloc;
 
    *d_ic_out = d_ic;
    *d_jc_out = d_jc;

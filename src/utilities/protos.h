@@ -37,10 +37,11 @@ HYPRE_Real    hypre_cimag( HYPRE_Complex value );
 #endif
 
 /* hypre_general.c */
-void HYPRE_Init( hypre_int argc, char *argv[] );
-void HYPRE_Finalize();
-void hypre_GPUInit(hypre_int use_device);
-void hypre_GPUFinalize();
+HYPRE_Int HYPRE_Init( hypre_int argc, char *argv[] );
+HYPRE_Int HYPRE_Finalize();
+HYPRE_Int hypre_GetDevice(hypre_Handle *hypre_handle);
+HYPRE_Int hypre_SetDevice(HYPRE_Int use_device, hypre_Handle *hypre_handle);
+HYPRE_Int hypre_SyncCudaDefaultStream(hypre_Handle *hypre_handle);
 
 /* hypre_printf.c */
 // #ifdef HYPRE_BIGINT

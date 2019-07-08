@@ -91,7 +91,6 @@ HYPRE_Int HYPRE_CSRMatrixDeviceSpGemmSetRownnzEstimateNSamples( HYPRE_Int value 
 HYPRE_Int HYPRE_CSRMatrixDeviceSpGemmSetRownnzEstimateMultFactor( HYPRE_Real value );
 HYPRE_Int HYPRE_CSRMatrixDeviceSpGemmSetHashType( char value );
 HYPRE_Int HYPRE_CSRMatrixDeviceSpGemmSetUseCusparse( HYPRE_Int value );
-HYPRE_Int HYPRE_CSRMatrixDeviceSpGemmSetDoTiming( HYPRE_Int value );
 
 typedef enum HYPRE_TimerID
 {
@@ -135,6 +134,16 @@ typedef enum HYPRE_TimerID
    HYPRE_TIMER_ID_BEXT_S,
    HYPRE_TIMER_ID_RENUMBER_COLIDX_RAP,
    HYPRE_TIMER_ID_MERGE,
+
+   // csr matop
+   HYPRE_TIMER_ID_SPMM_ROWNNZ,
+   HYPRE_TIMER_ID_SPMM_ATTEMPT1,
+   HYPRE_TIMER_ID_SPMM_ATTEMPT2,
+   HYPRE_TIMER_ID_SPMM_SYMBOLIC,
+   HYPRE_TIMER_ID_SPMM_NUMERIC,
+   HYPRE_TIMER_ID_SPMM,
+   HYPRE_TIMER_ID_SPADD,
+   HYPRE_TIMER_ID_SPTRANS,
 
    HYPRE_TIMER_ID_COUNT
 } HYPRE_TimerID;

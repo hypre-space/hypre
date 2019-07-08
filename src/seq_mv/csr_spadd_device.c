@@ -38,15 +38,9 @@ hypreDevice_CSRSpAdd(HYPRE_Int  ma,       HYPRE_Int   mb,        HYPRE_Int   n,
       return hypre_error_flag;
    }
 
-   hypre_double tt = 0.0, tm;
-
-   HYPRE_Int do_timing = hypre_device_csr_handle->do_timing;
-
-   if (do_timing)
-   {
-      cudaThreadSynchronize();
-      tm = tt = time_getWallclockSeconds();
-   }
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_SPADD] -= hypre_MPI_Wtime();
+#endif
 
    /* expand */
    HYPRE_Int nnzT = nnzA + nnzB, nnzC;
@@ -89,14 +83,6 @@ hypreDevice_CSRSpAdd(HYPRE_Int  ma,       HYPRE_Int   mb,        HYPRE_Int   n,
       hypreDevice_CsrRowPtrsToIndices_v2(mb, d_ib, d_it + nnzA);
    }
 
-   if (do_timing)
-   {
-      cudaThreadSynchronize();
-      hypre_double tm_old = tm;
-      tm = time_getWallclockSeconds();
-      hypre_device_csr_handle->spadd_expansion_time += tm - tm_old;
-   }
-
    /* permutation vector */
    //d_pm = hypre_TAlloc(HYPRE_Int, nnzT, HYPRE_MEMORY_DEVICE);
    d_pm = (HYPRE_Int *) work_mem;
@@ -133,14 +119,6 @@ hypreDevice_CSRSpAdd(HYPRE_Int  ma,       HYPRE_Int   mb,        HYPRE_Int   n,
    thrust::gather(d_pm_ptr, d_pm_ptr + nnzT, d_jt_cp_ptr, d_jt_ptr);
    thrust::gather(d_pm_ptr, d_pm_ptr + nnzT, d_at_cp_ptr, d_at_ptr);
 
-   if (do_timing)
-   {
-      cudaThreadSynchronize();
-      hypre_double tm_old = tm;
-      tm = time_getWallclockSeconds();
-      hypre_device_csr_handle->spadd_sorting_time += tm - tm_old;
-   }
-
    /* compress */
    typedef thrust::tuple< thrust::device_ptr<HYPRE_Int>, thrust::device_ptr<HYPRE_Int> > IteratorTuple;
    typedef thrust::zip_iterator<IteratorTuple> ZipIterator;
@@ -165,14 +143,6 @@ hypreDevice_CSRSpAdd(HYPRE_Int  ma,       HYPRE_Int   mb,        HYPRE_Int   n,
    hypre_TMemcpy(d_jc, d_jt_cp, HYPRE_Int,     nnzC, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
    hypre_TMemcpy(d_ac, d_at_cp, HYPRE_Complex, nnzC, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
-   if (do_timing)
-   {
-      cudaThreadSynchronize();
-      hypre_double tm_old = tm;
-      tm = time_getWallclockSeconds();
-      hypre_device_csr_handle->spadd_compression_time += tm - tm_old;
-   }
-
    /* convert into ic: row idx --> row ptrs */
    d_ic = hypreDevice_CsrRowIndicesToPtrs(ma, nnzC, d_it_cp);
 
@@ -181,14 +151,6 @@ hypreDevice_CSRSpAdd(HYPRE_Int  ma,       HYPRE_Int   mb,        HYPRE_Int   n,
    hypre_TMemcpy(&tmp_nnzC, &d_ic[ma], HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    assert(nnzC == tmp_nnzC);
 #endif
-
-   if (do_timing)
-   {
-      cudaThreadSynchronize();
-      hypre_double tm_old = tm;
-      tm = time_getWallclockSeconds();
-      hypre_device_csr_handle->spadd_convert_ptr_time += tm - tm_old;
-   }
 
    /*
    hypre_TFree(d_it,    HYPRE_MEMORY_DEVICE);
@@ -206,12 +168,10 @@ hypreDevice_CSRSpAdd(HYPRE_Int  ma,       HYPRE_Int   mb,        HYPRE_Int   n,
    *d_jc_out = d_jc;
    *d_ac_out = d_ac;
 
-   if (do_timing)
-   {
-      cudaThreadSynchronize();
-      tt = time_getWallclockSeconds() - tt;
-      hypre_device_csr_handle->spadd_time += tt;
-   }
+#ifdef HYPRE_PROFILE
+   cudaThreadSynchronize();
+   hypre_profile_times[HYPRE_TIMER_ID_SPADD] += hypre_MPI_Wtime();
+#endif
 
    return hypre_error_flag;
 }

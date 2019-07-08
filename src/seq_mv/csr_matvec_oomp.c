@@ -29,6 +29,7 @@
  *--------------------------------------------------------------------------*/
 
 /* y[offset:end] = alpha*A[offset:end,:]*x + beta*b[offset:end] */
+#if 0
 HYPRE_Int
 hypre_CSRMatrixMatvecOutOfPlaceOOMP2( HYPRE_Complex    alpha,
                                  hypre_CSRMatrix *A,
@@ -315,6 +316,7 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP2( HYPRE_Complex    alpha,
 
    return ierr;
 }
+#endif
 
 HYPRE_Int
 hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Complex    alpha,
@@ -404,10 +406,10 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Complex    alpha,
 
 
 #ifdef HYPRE_USING_UNIFIED_MEMORY
-   hypre_CSRMatrixPrefetchToDevice(A);
-   hypre_SeqVectorPrefetchToDevice(x);
-   hypre_SeqVectorPrefetchToDevice(y);
-   if (b!=y) hypre_SeqVectorPrefetchToDevice(b);
+   hypre_CSRMatrixPrefetch(A, HYPRE_MEMORY_DEVICE);
+   hypre_SeqVectorPrefetch(x, HYPRE_MEMORY_DEVICE);
+   hypre_SeqVectorPrefetch(y, HYPRE_MEMORY_DEVICE);
+   if (b!=y) hypre_SeqVectorPrefetch(b, HYPRE_MEMORY_DEVICE);
 #endif
 
 #ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
@@ -516,6 +518,8 @@ UpdateDRC(y);
    //printf("DONE WITH OOMP\n");
    return ierr;
 }
+
+#if 0
 HYPRE_Int
 hypre_CSRMatrixMatvecOutOfPlaceOOMP3( HYPRE_Complex    alpha,
                                  hypre_CSRMatrix *A,
@@ -549,3 +553,4 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP3( HYPRE_Complex    alpha,
 /*   } */
 /* } */
 //#endif
+#endif

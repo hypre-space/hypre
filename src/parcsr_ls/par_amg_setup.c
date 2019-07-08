@@ -205,6 +205,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 #endif
 
 #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
+#if 0
    if ( hypre_ParAMGDataPrintLevel(amg_data) > 3 )
    {
       if (!hypre_ParCSRMatrixIsManaged(A))
@@ -222,6 +223,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          //exit(2);
       }
    }
+#endif
 #endif
 
    /*hypre_CSRMatrix *A_new;*/
@@ -2474,7 +2476,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          wall_time = time_getWallclockSeconds() - wall_time;
          hypre_printf("Proc = %d    Level = %d    Build Coarse Operator Time = %f\n",
                        my_id,level, wall_time);
-	 fflush(NULL);
+         fflush(NULL);
       }
 
       ++level;
@@ -2491,7 +2493,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       size = ((HYPRE_Real) fine_size )*.75;
       if (coarsen_type > 0 && coarse_size >= (HYPRE_BigInt) size)
       {
-	coarsen_type = 0;
+         coarsen_type = 0;
       }
 
 

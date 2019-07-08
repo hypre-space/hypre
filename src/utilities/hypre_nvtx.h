@@ -9,8 +9,11 @@
  *
  * $Revision$
  ***********************************************************************EHEADER*/
+#ifndef HYPRE_NVTX_H
+#define HYPRE_NVTX_H
 
-#ifdef USE_NVTX
+#ifdef HYPRE_USING_NVTX
+
 #include "nvToolsExt.h"
 #include "nvToolsExtCudaRt.h"
 
@@ -18,7 +21,7 @@ static const uint32_t colors[] = { 0x0000ff00, 0x000000ff, 0x00ffff00, 0x00ff00f
 static const int num_colors = sizeof(colors)/sizeof(uint32_t);
 
 #define PUSH_RANGE(name,cid) { \
-    int color_id = cid; \
+    hypre_int color_id = cid; \
     color_id = color_id%num_colors;\
     nvtxEventAttributes_t eventAttrib = {0}; \
     eventAttrib.version = NVTX_VERSION; \
@@ -27,46 +30,16 @@ static const int num_colors = sizeof(colors)/sizeof(uint32_t);
     eventAttrib.color = colors[color_id]; \
     eventAttrib.messageType = NVTX_MESSAGE_TYPE_ASCII; \
     eventAttrib.message.ascii = name; \
-    nvtxDomainRangePushEx(HYPRE_DOMAIN,&eventAttrib);	\
+    nvtxRangePushEx(&eventAttrib); \
 }
 
-#define PUSH_RANGE_PAYLOAD(name,cid,load) {		\
-    int color_id = cid; \
-    color_id = color_id%num_colors;\
-    nvtxEventAttributes_t eventAttrib = {0}; \
-    eventAttrib.version = NVTX_VERSION; \
-    eventAttrib.size = NVTX_EVENT_ATTRIB_STRUCT_SIZE; \
-    eventAttrib.colorType = NVTX_COLOR_ARGB; \
-    eventAttrib.color = colors[color_id]; \
-    eventAttrib.messageType = NVTX_MESSAGE_TYPE_ASCII; \
-    eventAttrib.message.ascii = name; \
-    eventAttrib.payloadType = NVTX_PAYLOAD_TYPE_INT64; \
-    eventAttrib.payload.llValue = load; \
-    eventAttrib.category=1; \
-    nvtxDomainRangePushEx(HYPRE_DOMAIN,&eventAttrib); \
-}
+#define POP_RANGE nvtxRangePop();
 
-#define PUSH_RANGE_DOMAIN(name,cid,dId) {				\
-    int color_id = cid; \
-    color_id = color_id%num_colors;\
-    nvtxEventAttributes_t eventAttrib = {0}; \
-    eventAttrib.version = NVTX_VERSION; \
-    eventAttrib.size = NVTX_EVENT_ATTRIB_STRUCT_SIZE; \
-    eventAttrib.colorType = NVTX_COLOR_ARGB; \
-    eventAttrib.color = colors[color_id]; \
-    eventAttrib.messageType = NVTX_MESSAGE_TYPE_ASCII; \
-    eventAttrib.message.ascii = name; \
-    nvtxDomainRangePushEx(getdomain(dId),&eventAttrib);	\
-}
+#else /* HYPRE_USING_NVTX */
 
-#define POP_RANGE nvtxDomainRangePop(HYPRE_DOMAIN);
-#define POP_RANGE_DOMAIN(dId) {			\
-  nvtxDomainRangePop(getdomain(dId));		\
-  }
-#else
 #define PUSH_RANGE(name,cid)
 #define POP_RANGE
-#define PUSH_RANGE_PAYLOAD(name,cid,load)
-#define PUSH_RANGE_DOMAIN(name,cid,domainName)
-#endif
 
+#endif /* HYPRE_USING_NVTX */
+
+#endif /* HYPRE_NVTX_H */

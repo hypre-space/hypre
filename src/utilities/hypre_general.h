@@ -51,5 +51,5 @@ typedef double            hypre_double;
 #define hypre_pow2(i)  ( 1 << (i) )
 #endif
 
-#endif
+#endif /* hypre_GENERAL_HEADER */
 

@@ -157,6 +157,8 @@ hypre_using_cuda=no
 hypre_using_gpu=no
 hypre_using_um=no
 hypre_gpu_mpi=no
+hypre_using_cuda_streams=no
+hypre_using_nvtx=no
 
 hypre_using_caliper=no
 hypre_user_gave_caliper_lib=no
@@ -378,6 +380,28 @@ AS_HELP_STRING([--enable-unified-memory],
     *)   hypre_using_um=no ;;
  esac],
 [hypre_using_um=no]
+)
+
+AC_ARG_ENABLE(cuda-streams,
+AS_HELP_STRING([--enable-cuda-streams],
+               [Use CUDA streams (default is NO).]),
+[case "${enableval}" in
+    yes) hypre_using_cuda_streams=yes ;;
+    no)  hypre_using_cuda_streams=no ;;
+    *)   hypre_using_cuda_streams=no ;;
+ esac],
+[hypre_using_cuda_streams=no]
+)
+
+AC_ARG_ENABLE(nvtx,
+AS_HELP_STRING([--enable-nvtx],
+               [Use NVTX (default is NO).]),
+[case "${enableval}" in
+    yes) hypre_using_nvtx=yes ;;
+    no)  hypre_using_nvtx=no ;;
+    *)   hypre_using_nvtx=no ;;
+ esac],
+[hypre_using_nvtx=no]
 )
 
 AC_ARG_ENABLE(gpu-aware-mpi,
@@ -1635,8 +1659,11 @@ then
    AC_DEFINE(HYPRE_USING_GPU, 1, [GPU being used])
 
    AC_DEFINE(HYPRE_USING_CUDA, 1, [CUDA being used])
-   AC_DEFINE(USE_NVTX, 1, [NVTX being used])
-
+   
+   if test "$hypre_using_nvtx" = "yes"
+   then
+      AC_DEFINE(HYPRE_USING_NVTX, 1, [NVTX being used])
+   fi
    dnl let CC/CXX and LINK be CUCC and let host compiler be CXX
    AC_CHECK_PROGS(CUCC, nvcc)
    NVCCBIN=${CXX}
@@ -1658,7 +1685,11 @@ then
    CFLAGS=${CXXFLAGS}
    LDFLAGS="-ccbin=$NVCCBIN ${HYPRE_CUDA_GENCODE} -Xcompiler \"${LDFLAGS}\""
    HYPRE_CUDA_INCL="-I${HYPRE_CUDA_PATH}/include"
-   HYPRE_CUDA_LIBS="-L${HYPRE_CUDA_PATH}/lib64 -lcusparse -lcudart -lcurand -lnvToolsExt"
+   HYPRE_CUDA_LIBS="-L${HYPRE_CUDA_PATH}/lib64 -lcusparse -lcudart -lcurand"
+   if test "$hypre_using_nvtx" = "yes"
+   then
+      HYPRE_CUDA_LIBS+=" -lnvToolsExt"
+   fi
 fi
 
 dnl *********************************************************************
@@ -1695,7 +1726,10 @@ fi
 
 if test "$hypre_using_device_openmp" = "yes"
 then
-   AC_DEFINE(USE_NVTX, 1, [NVTX being used])
+   if test "$hypre_using_nvtx" = "yes"
+   then
+      AC_DEFINE(HYPRE_USING_NVTX, 1, [NVTX being used])
+   fi
    AC_DEFINE(HYPRE_USING_DEVICE_OPENMP, 1, [Enable OpenMP (>=4.5) device directives])
    AC_DEFINE(HYPRE_DEVICE_OPENMP_ALLOC, 1, [Enable device OpenMP target alloc version])
    dnl AC_DEFINE(HYPRE_DEVICE_OPENMP_MAPPED, 1, [Enable device OpenMP target mapped version])
@@ -1720,7 +1754,11 @@ then
    fi
 
    HYPRE_CUDA_INCL="-I${HYPRE_CUDA_PATH}/include"
-   HYPRE_CUDA_LIBS="-L${HYPRE_CUDA_PATH}/lib64 -lcusparse -lcudart -lnvToolsExt"
+   HYPRE_CUDA_LIBS="-L${HYPRE_CUDA_PATH}/lib64 -lcusparse -lcudart"
+   if test "$hypre_using_nvtx" = "yes"
+   then
+      HYPRE_CUDA_LIBS+=" -lnvToolsExt"
+   fi
 fi
 
 dnl *********************************************************************
@@ -1769,6 +1807,11 @@ dnl   BUILD_F77_SHARED="${F77} ${SHARED_BUILD_FLAG}"
       BUILD_CC_SHARED="${CC} ${SHARED_BUILD_FLAG}"
    fi
    BUILD_CXX_SHARED="${CXX} ${SHARED_BUILD_FLAG}"
+fi
+
+if test "x$hypre_using_cuda_streams" = "xyes"
+then
+   AC_DEFINE([HYPRE_USING_CUDA_STREAMS],1,[HYPRE WITH CUDA STREAMS])
 fi
 
 dnl *********************************************************************

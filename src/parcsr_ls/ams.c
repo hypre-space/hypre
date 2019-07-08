@@ -61,7 +61,7 @@ HYPRE_Int hypre_ParCSRRelax(/* matrix to relax with */
    HYPRE_Real *u_data = hypre_VectorData(hypre_ParVectorLocalVector(u));
    HYPRE_Real *f_data = hypre_VectorData(hypre_ParVectorLocalVector(f));
    HYPRE_Real *v_data = hypre_VectorData(hypre_ParVectorLocalVector(v));
-   //printRC(hypre_ParVectorLocalVector(u),"STarting....");
+
    for (sweep = 0; sweep < relax_times; sweep++)
    {
       if (relax_type == 1) /* l1-scaled Jacobi */
@@ -69,27 +69,31 @@ HYPRE_Int hypre_ParCSRRelax(/* matrix to relax with */
          // PUSH_RANGE_PAYLOAD("RELAX",4,sweep);
          HYPRE_Int num_rows = hypre_ParCSRMatrixNumRows(A);
 #ifdef HYPRE_USING_UNIFIED_MEMORY
-         if (sweep==0)
+         if (sweep == 0)
          {
-            hypre_SeqVectorPrefetchToDevice(hypre_ParVectorLocalVector(v));
-            hypre_SeqVectorPrefetchToDevice(hypre_ParVectorLocalVector(f));
+            /* prefetch l1 norms */
+            hypre_TMemcpy(l1_norms, l1_norms, HYPRE_Real, num_rows,
+                          HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_SHARED);
          }
 #endif
-         //SyncVectorToHost(hypre_ParVectorLocalVector(v));
-         //SyncVectorToHost(hypre_ParVectorLocalVector(f));
-         hypre_ParVectorCopy(f,v);
+         hypre_HandleCudaComputeStreamSyncPush(hypre_handle, 0);
+
+         hypre_ParVectorCopy(f, v);
 
 #ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
-         SyncVectorToDevice(hypre_ParVectorLocalVector(v));
+         SyncVectorToDevice(hypre_ParVectorLocalVector(v)); // TODO NEED IT ???
 #endif
+
          hypre_ParCSRMatrixMatvec(-relax_weight, A, u, relax_weight, v);
 
-         //SyncVectorToHost(hypre_ParVectorLocalVector(v));
-         //SyncVectorToHost(hypre_ParVectorLocalVector(u));
-         //PUSH_RANGE_PAYLOAD("VECSCALE-RELAX",5,num_rows);
 #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
          hypreDevice_IVAXPY(num_rows, l1_norms, v_data, u_data);
-#else
+
+         hypre_HandleCudaComputeStreamSyncPop(hypre_handle);
+
+         hypre_SyncCudaComputeStream(hypre_handle);
+
+#else /* defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY) */
          HYPRE_Int i;
          /* u += w D^{-1}(f - A u), where D_ii = ||A(i,:)||_1 */
 #if defined(HYPRE_USING_OPENMP_OFFLOAD)
@@ -105,13 +109,11 @@ HYPRE_Int hypre_ParCSRRelax(/* matrix to relax with */
          {
             u_data[i] += v_data[i] / l1_norms[i];
          }
-#endif
+#endif /* defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY) */
+
 #ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
          UpdateDRC(hypre_ParVectorLocalVector(u));
 #endif
-         //printf("AMS.C DONE %d = %d \n",num_rows,num_teams*1024);
-         //POP_RANGE;
-         //POP_RANGE;
       }
       else if (relax_type == 2 || relax_type == 4) /* offd-l1-scaled block GS */
       {

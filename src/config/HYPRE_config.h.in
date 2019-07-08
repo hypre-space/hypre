@@ -138,7 +138,7 @@
 #undef HYPRE_USING_KOKKOS
 
 /* Define to 1 if using NVIDIA Tools Extension (NVTX) */
-#undef USE_NVTX
+#undef HYPRE_USING_NVTX
 
 /* FIXME: replace this with USING_CUDA */
 #undef HYPRE_USING_GPU
@@ -146,7 +146,8 @@
 /* Define to 1 if using GPU aware MPI */
 #undef HYPRE_WITH_GPU_AWARE_MPI
 
-
+/* Define to 1 if using CUDA streams */
+#undef HYPRE_USING_CUDA_STREAMS
 
 /* Define as follows to set the Fortran name mangling scheme:
  * 0 = unspecified

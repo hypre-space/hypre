@@ -292,7 +292,7 @@ void csr_spmm_rownnz_cohen(HYPRE_Int M, HYPRE_Int K, HYPRE_Int N, HYPRE_Int *d_i
    //d_V1 = hypre_TAlloc(T, nsamples*N, HYPRE_MEMORY_DEVICE);
    //d_V2 = hypre_TAlloc(T, nsamples*K, HYPRE_MEMORY_DEVICE);
 
-   curandGenerator_t gen = hypre_device_csr_handle->gen;
+   curandGenerator_t gen = hypre_HandleCurandGenerator(hypre_handle);
    //CURAND_CALL(curandSetGeneratorOrdering(gen, CURAND_ORDERING_PSEUDO_SEEDED));
    /* random V1: uniform --> exp */
    HYPRE_CURAND_CALL(curandGenerateUniform(gen, d_V1, nsamples * N));
@@ -323,6 +323,10 @@ HYPRE_Int
 hypreDevice_CSRSpGemmRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
                                     HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Int *d_rc)
 {
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_SPMM_ROWNNZ] -= hypre_MPI_Wtime();
+#endif
+
    const HYPRE_Int num_warps_per_block =  16;
    const HYPRE_Int shmem_size_per_warp = 128;
    const HYPRE_Int BDIMX               =   2;
@@ -334,19 +338,9 @@ hypreDevice_CSRSpGemmRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    // for cases where one WARP works on a row
    HYPRE_Int gDim = (m + bDim.z - 1) / bDim.z;
 
-   HYPRE_Real t1, t2;
-   size_t mem_alloc = 0;
-
-   HYPRE_Int   row_est_mtd    = hypre_device_csr_handle->rownnz_estimate_method;
-   HYPRE_Int   cohen_nsamples = hypre_device_csr_handle->rownnz_estimate_nsamples;
-   float cohen_mult           = hypre_device_csr_handle->rownnz_estimate_mult_factor;
-   HYPRE_Int   do_timing      = hypre_device_csr_handle->do_timing;
-
-   if (do_timing)
-   {
-      cudaThreadSynchronize();
-      t1 = time_getWallclockSeconds();
-   }
+   HYPRE_Int   row_est_mtd    = hypre_handle->spgemm_rownnz_estimate_method;
+   HYPRE_Int   cohen_nsamples = hypre_handle->spgemm_rownnz_estimate_nsamples;
+   float cohen_mult           = hypre_handle->spgemm_rownnz_estimate_mult_factor;
 
    if (row_est_mtd == 1)
    {
@@ -370,7 +364,6 @@ hypreDevice_CSRSpGemmRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
       //HYPRE_Int *d_low_upp = hypre_TAlloc(HYPRE_Int, 2 * m, HYPRE_MEMORY_DEVICE);
       HYPRE_Int *d_low_upp = (HYPRE_Int *) work_mem;
       work_mem += 2*m*sizeof(HYPRE_Int);
-      mem_alloc += cohen_nsamples*(n+k)*sizeof(float)+2*m*sizeof(HYPRE_Int);
 
       HYPRE_Int *d_low = d_low_upp;
       HYPRE_Int *d_upp = d_low_upp + m;
@@ -391,14 +384,10 @@ hypreDevice_CSRSpGemmRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
       exit(-1);
    }
 
-   if (do_timing)
-   {
-      cudaThreadSynchronize();
-      t2 = time_getWallclockSeconds();
-      //printf("^^^^Row nnz estimations time                              %.2e\n", t2 - t1);
-
-      hypre_device_csr_handle->rownnz_estimate_time += t2 - t1;
-   }
+#ifdef HYPRE_PROFILE
+   cudaThreadSynchronize();
+   hypre_profile_times[HYPRE_TIMER_ID_SPMM_ROWNNZ] += hypre_MPI_Wtime();
+#endif
 
    return hypre_error_flag;
 }

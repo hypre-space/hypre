@@ -248,6 +248,10 @@ void gpu_csr_spmm_rownnz_attempt(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
                                  HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Int *d_ib, HYPRE_Int *d_jb,
                                  HYPRE_Int *d_rc, HYPRE_Int *d_rf)
 {
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_SPMM_SYMBOLIC] -= hypre_MPI_Wtime();
+#endif
+
    const HYPRE_Int num_warps_per_block =  20;
    const HYPRE_Int shmem_hash_size     = 256;//512;
    const HYPRE_Int BDIMX               =   2;
@@ -262,17 +266,7 @@ void gpu_csr_spmm_rownnz_attempt(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    // number of active warps
    HYPRE_Int num_act_warps = min(bDim.z * gDim, m);
 
-   double t1 = 0, t2 = 0;
-   size_t mem_alloc = 0;
-
-   HYPRE_Int do_timing = hypre_device_csr_handle->do_timing;
-   char hash_type = hypre_device_csr_handle->hash_type;
-
-   if (do_timing)
-   {
-      cudaThreadSynchronize();
-      t1 = time_getWallclockSeconds();
-   }
+   char hash_type = hypre_handle->spgemm_hash_type;
 
    /* ---------------------------------------------------------------------------
     * build hash table (no values)
@@ -288,22 +282,6 @@ void gpu_csr_spmm_rownnz_attempt(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    }
    csr_spmm_create_hash_table(m, d_rc, d_act, shmem_hash_size, num_act_warps,
                               &d_ghash_i, &d_ghash_j, NULL, &ghash_size);
-
-   mem_alloc += (num_act_warps + 1)*sizeof(HYPRE_Int) + ghash_size * sizeof(HYPRE_Int);
-
-   if (do_timing)
-   {
-      cudaThreadSynchronize();
-      t2 = time_getWallclockSeconds();
-      //printf("^^^^create hash table time                                %.2e\n", t2 - t1);
-      hypre_device_csr_handle->spmm_create_hashtable_time += t2 - t1;
-   }
-
-   if (do_timing)
-   {
-      cudaThreadSynchronize();
-      t1 = time_getWallclockSeconds();
-   }
 
    /* ---------------------------------------------------------------------------
     * symbolic multiplication:
@@ -333,16 +311,10 @@ void gpu_csr_spmm_rownnz_attempt(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    hypre_TFree(d_ghash_i, HYPRE_MEMORY_DEVICE);
    hypre_TFree(d_ghash_j, HYPRE_MEMORY_DEVICE);
 
-   if (do_timing)
-   {
-      cudaThreadSynchronize();
-      t2 = time_getWallclockSeconds();
-      //printf("^^^^Symbolic multiplication time                          %.2e\n", t2 - t1);
-      hypre_device_csr_handle->spmm_symbolic_time += t2 - t1;
-   }
-
-   hypre_device_csr_handle->ghash_size = ghash_size;
-   hypre_device_csr_handle->spmm_symbolic_mem = mem_alloc;
+#ifdef HYPRE_PROFILE
+   cudaThreadSynchronize();
+   hypre_profile_times[HYPRE_TIMER_ID_SPMM_SYMBOLIC] += hypre_MPI_Wtime();
+#endif
 }
 
 HYPRE_Int
