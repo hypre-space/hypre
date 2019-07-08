@@ -4,9 +4,8 @@
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 #=============================================================================
-# This file chronicles user-level changes to hypre, beginning with the most
-# recent release.
-#=============================================================================
+# This file chronicles user-level changes, beginning with the most recent.
+# =============================================================================
 
 Version 2.16.0 released 2019/03/20
 
@@ -24,11 +23,15 @@ Version 2.16.0 released 2019/03/20
 
 - Various bug fixes.
 
+#====================================
+
 Version 2.15.1 released 2018/10/19
 
 - Added hypre version functions: HYPRE_Version(), HYPRE_VersionNumber()
 
 - Various bug fixes.
+
+#====================================
 
 Version 2.15.0 released 2018/09/21
 
@@ -46,6 +49,8 @@ Version 2.15.0 released 2018/09/21
 
 - Various bug fixes.
 
+#====================================
+
 Version 2.14.0 released 2018/03/16
 
 - New GPU release uses CUDA or OpenMP4.5.  AMG setup phase is not yet ported.
@@ -55,6 +60,8 @@ Version 2.14.0 released 2018/03/16
 - Added SuperLU_Dist as a coarse grid solver option.
 
 - Various bug fixes.
+
+#====================================
 
 Version 2.13.0 released 2017/10/20
 
@@ -74,6 +81,8 @@ Version 2.13.0 released 2017/10/20
 
 - Fixed Windows Visual Studio compile (version 2017)
 
+#====================================
+
 Version 2.12.1 released 2017/09/29
 
 - Added support for single and quad precision floating point numbers
@@ -82,11 +91,15 @@ Version 2.12.1 released 2017/09/29
 
 - Various bug fixes
 
+#====================================
+
 Version 2.12.0 released 2017/05/02
 
 - Added GPU support to hypre.  The Struct and SStruct code can use CUDA, RAJA,
   or KOKKOS.  The ParCSR code uses CUDA.  The BoomerAMG setup phase is not yet
   ported to the GPU.  This release uses unified memory.
+
+#====================================
 
 Version 2.11.2 released 2017/03/13
 
@@ -97,6 +110,8 @@ Version 2.11.2 released 2017/03/13
 - Added Caliper instrumentation
 
 - Various bug fixes
+
+#====================================
 
 Version 2.11.1 released 2016/06/09
 
@@ -114,6 +129,8 @@ Version 2.11.1 released 2016/06/09
 
 - Updated the AME and LOBPCG interfaces to work correctly with both absolute and
   relative tolerances.
+
+#====================================
 
 Version 2.11.0 released 2016/03/28
 
@@ -147,6 +164,8 @@ Version 2.11.0 released 2016/03/28
 
 - Removed Babel from the release
 
+#====================================
+
 Version 2.10.1 released 2015/09/11
 
 - Fixed various bugs in AMG and the IJ interface.
@@ -159,6 +178,8 @@ Version 2.10.1 released 2015/09/11
 - Replaced the function HYPRE_BoomerAMGSetNonGalerkTol, which sets parameters
   for the nonGalerkin version, with HYPRE_BoomerAMGSetNonGalerkinTol and
   HYPRE_BommerAMGSetLevelNonGalerkinTol
+
+#====================================
 
 Version 2.10.0b released 2015/01/22
 
