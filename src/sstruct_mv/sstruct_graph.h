@@ -36,7 +36,7 @@ typedef struct
    HYPRE_Int     to_var;
    HYPRE_Int     to_boxnum;      /* local box number */
    HYPRE_Int     to_proc;
-   HYPRE_BigInt  to_rank;
+   HYPRE_Int     to_rank;
 
 } hypre_SStructUEntry;
 
@@ -45,7 +45,7 @@ typedef struct
    HYPRE_Int            part;
    hypre_Index          index;
    HYPRE_Int            var;
-   HYPRE_BigInt         rank;
+   HYPRE_Int            rank;
    HYPRE_Int            nUentries;
    hypre_SStructUEntry *Uentries;
 
