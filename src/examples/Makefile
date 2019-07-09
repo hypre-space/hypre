@@ -59,7 +59,7 @@ LFLAGS90 =
 ########################################################################
 # List of all programs to be compiled
 ########################################################################
-ALLPROGS = ex1 ex2 ex3 ex4 ex5 ex5f ex6 ex7 ex8 ex9 ex10 ex11 ex12 ex12f \
+ALLPROGS = ex1 ex2 ex3 ex4 ex5 ex5f ex6 ex7 ex8 ex9 ex11 ex12 ex12f \
            ex13 ex14 ex15 ex16
 BIGINTPROGS = ex5big ex15big
 FORTRANPROGS = ex5f ex12f
