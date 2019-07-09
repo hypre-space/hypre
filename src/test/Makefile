@@ -74,7 +74,6 @@ HYPRE_DRIVERS =\
  zboxloop.c
 
 HYPRE_DRIVERS_CXX =\
- fei.cxx\
  cxx_ij.cxx\
  cxx_sstruct.cxx\
  cxx_struct.cxx
