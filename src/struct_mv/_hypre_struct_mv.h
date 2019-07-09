@@ -138,7 +138,7 @@ hypre_max(0, (hypre_BoxIMaxD(box, d) - hypre_BoxIMinD(box, d) + 1))
 #define hypre_CCBoxIndexRank(box, index) 0
 #define hypre_CCBoxIndexRank_noargs() 0
 #define hypre_CCBoxOffsetDistance(box, index) 0
-  
+
 /*----- Avoid using these Box macros -----*/
 
 #define hypre_BoxSizeX(box)    hypre_BoxSizeD(box, 0)
@@ -286,7 +286,7 @@ index[0] = hypre__i; index[1] = hypre__j; index[2] = hypre__k
    }\
    }\
 }
-  
+
 /*-----------------------------------*/
 
 #define hypre_BoxLoop1Begin(ndim, loop_size,\
@@ -319,7 +319,7 @@ index[0] = hypre__i; index[1] = hypre__j; index[2] = hypre__k
    }\
    }\
 }
-  
+
 /*-----------------------------------*/
 
 #define hypre_BoxLoop2Begin(ndim,loop_size,\
@@ -499,7 +499,7 @@ index[0] = hypre__i; index[1] = hypre__j; index[2] = hypre__k
 #ifndef hypre_ZBOX_HEADER
 #define hypre_ZBOX_HEADER
 
-#define ZYPRE_BOX_PRIVATE hypre__IN,hypre__JN,hypre__I,hypre__J,hypre__d,hypre__i,hypre__k
+#define ZYPRE_BOX_PRIVATE hypre__IN,hypre__JN,hypre__I,hypre__J,hypre__d,hypre__i
 
 /*--------------------------------------------------------------------------
  * BoxLoop macros:
@@ -1261,9 +1261,9 @@ typedef struct
 typedef struct hypre_StructGrid_struct
 {
    MPI_Comm             comm;
-                      
+
    HYPRE_Int            ndim;         /* Number of grid dimensions */
-                      
+
    hypre_BoxArray      *boxes;        /* Array of boxes in this process */
    HYPRE_Int           *ids;          /* Unique IDs for boxes */
    hypre_Index          max_distance; /* Neighborhood size - in each dimension*/
@@ -1275,7 +1275,7 @@ typedef struct hypre_StructGrid_struct
 
    hypre_Index          periodic;     /* Indicates if grid is periodic */
    HYPRE_Int            num_periods;  /* number of box set periods */
-   
+
    hypre_Index         *pshifts;      /* shifts of periodicity */
 
 
@@ -1283,7 +1283,7 @@ typedef struct hypre_StructGrid_struct
 
 
    HYPRE_Int            ghlocal_size; /* Number of vars in box including ghosts */
-   HYPRE_Int            num_ghost[2*HYPRE_MAXDIM]; /* ghost layer size */  
+   HYPRE_Int            num_ghost[2*HYPRE_MAXDIM]; /* ghost layer size */
 
    hypre_BoxManager    *boxman;
 
@@ -1297,6 +1297,7 @@ typedef struct hypre_StructGrid_struct
 #define hypre_StructGridNDim(grid)          ((grid) -> ndim)
 #define hypre_StructGridBoxes(grid)         ((grid) -> boxes)
 #define hypre_StructGridIDs(grid)           ((grid) -> ids)
+#define hypre_StructGridID(grid, i)         ((grid) -> ids[i])
 #define hypre_StructGridMaxDistance(grid)   ((grid) -> max_distance)
 #define hypre_StructGridBoundingBox(grid)   ((grid) -> bounding_box)
 #define hypre_StructGridLocalSize(grid)     ((grid) -> local_size)
@@ -1308,7 +1309,7 @@ typedef struct hypre_StructGrid_struct
 #define hypre_StructGridRefCount(grid)      ((grid) -> ref_count)
 #define hypre_StructGridGhlocalSize(grid)   ((grid) -> ghlocal_size)
 #define hypre_StructGridNumGhost(grid)      ((grid) -> num_ghost)
-#define hypre_StructGridBoxMan(grid)        ((grid) -> boxman) 
+#define hypre_StructGridBoxMan(grid)        ((grid) -> boxman)
 
 #define hypre_StructGridBox(grid, i) \
 (hypre_BoxArrayBox(hypre_StructGridBoxes(grid), i))
@@ -1321,12 +1322,11 @@ hypre_BoxNeighborsIDPeriod(hypre_StructGridNeighbors(grid))
 /*--------------------------------------------------------------------------
  * Looping macros:
  *--------------------------------------------------------------------------*/
- 
+
 #define hypre_ForStructGridBoxI(i, grid) \
 hypre_ForBoxI(i, hypre_StructGridBoxes(grid))
 
 #endif
-
 /*BHEADER**********************************************************************
  * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
@@ -2225,6 +2225,8 @@ HYPRE_Int hypre_CopyBox( hypre_Box *box1 , hypre_Box *box2 );
 hypre_Box *hypre_BoxClone ( hypre_Box *box );
 HYPRE_Int hypre_BoxVolume( hypre_Box *box );
 HYPRE_Real hypre_doubleBoxVolume( hypre_Box *box );
+HYPRE_Int hypre_BoxPartialVolume( hypre_Box *box, hypre_Index partial_volume);
+HYPRE_Int hypre_BoxNnodes( hypre_Box *box );
 HYPRE_Int hypre_IndexInBox ( hypre_Index index , hypre_Box *box );
 HYPRE_Int hypre_BoxGetSize ( hypre_Box *box , hypre_Index size );
 HYPRE_Int hypre_BoxGetStrideSize ( hypre_Box *box , hypre_Index stride , hypre_Index size );
@@ -2366,6 +2368,7 @@ HYPRE_Int hypre_StructGridAssemble ( hypre_StructGrid *grid );
 HYPRE_Int hypre_StructGridComputeBoxnums ( hypre_StructGrid *grid , HYPRE_Int nboxes , HYPRE_Int *boxnums , hypre_Index stride , HYPRE_Int *new_nboxes_ptr , HYPRE_Int **new_boxnums_ptr );
 HYPRE_Int hypre_GatherAllBoxes ( MPI_Comm comm , hypre_BoxArray *boxes , HYPRE_Int dim , hypre_BoxArray **all_boxes_ptr , HYPRE_Int **all_procs_ptr , HYPRE_Int *first_local_ptr );
 HYPRE_Int hypre_ComputeBoxnums ( hypre_BoxArray *boxes , HYPRE_Int *procs , HYPRE_Int **boxnums_ptr );
+HYPRE_Int hypre_StructGridPrintVTK( const char *filename, hypre_StructGrid *grid );
 HYPRE_Int hypre_StructGridPrint ( FILE *file , hypre_StructGrid *grid );
 HYPRE_Int hypre_StructGridRead ( MPI_Comm comm , FILE *file , hypre_StructGrid **grid_ptr );
 HYPRE_Int hypre_StructGridSetNumGhost ( hypre_StructGrid *grid , HYPRE_Int *num_ghost );
@@ -2489,7 +2492,6 @@ HYPRE_Int hypre_StructVectorPrint ( const char *filename , hypre_StructVector *v
 hypre_StructVector *hypre_StructVectorRead ( MPI_Comm comm , const char *filename , HYPRE_Int *num_ghost );
 HYPRE_Int hypre_StructVectorMaxValue ( hypre_StructVector *vector , HYPRE_Real *max_value , HYPRE_Int *max_index , hypre_Index max_xyz_index );
 hypre_StructVector *hypre_StructVectorClone ( hypre_StructVector *vector );
-
 
 #ifdef __cplusplus
 }

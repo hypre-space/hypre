@@ -55,10 +55,10 @@ hypre_StructGridCreate( MPI_Comm           comm,
    hypre_SetIndex(hypre_StructGridPeriodic(grid), 0);
    hypre_StructGridRefCount(grid)     = 1;
    hypre_StructGridBoxMan(grid)       = NULL;
-   
+
    hypre_StructGridNumPeriods(grid)   = 1;
    hypre_StructGridPShifts(grid)     = NULL;
-   
+
    hypre_StructGridGhlocalSize(grid)  = 0;
    for (i = 0; i < 2*HYPRE_MAXDIM; i++)
    {
@@ -93,7 +93,7 @@ hypre_StructGridRef( hypre_StructGrid  *grid,
  * hypre_StructGridDestroy
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_StructGridDestroy( hypre_StructGrid *grid )
 {
    if (grid)
@@ -120,7 +120,7 @@ hypre_StructGridDestroy( hypre_StructGrid *grid )
  * hypre_StructGridSetPeriodic
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_StructGridSetPeriodic( hypre_StructGrid  *grid,
                              hypre_Index        periodic)
 {
@@ -133,7 +133,7 @@ hypre_StructGridSetPeriodic( hypre_StructGrid  *grid,
  * hypre_StructGridSetExtents
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_StructGridSetExtents( hypre_StructGrid  *grid,
                             hypre_Index        ilower,
                             hypre_Index        iupper )
@@ -152,7 +152,7 @@ hypre_StructGridSetExtents( hypre_StructGrid  *grid,
  * hypre_StructGridSetBoxes
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_StructGridSetBoxes( hypre_StructGrid *grid,
                           hypre_BoxArray   *boxes )
 {
@@ -167,14 +167,14 @@ hypre_StructGridSetBoxes( hypre_StructGrid *grid,
  * hypre_StructGridSetBoundingBox
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_StructGridSetBoundingBox( hypre_StructGrid *grid,
                                 hypre_Box   *new_bb )
 {
 
    hypre_BoxDestroy(hypre_StructGridBoundingBox(grid));
    hypre_StructGridBoundingBox(grid) = hypre_BoxClone(new_bb);
-   
+
    return hypre_error_flag;
 }
 
@@ -182,7 +182,7 @@ hypre_StructGridSetBoundingBox( hypre_StructGrid *grid,
  * hypre_StructGridSetIDs
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_StructGridSetIDs( hypre_StructGrid *grid,
                         HYPRE_Int   *ids )
 {
@@ -196,7 +196,7 @@ hypre_StructGridSetIDs( hypre_StructGrid *grid,
  * hypre_StructGridSetBoxManager
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_StructGridSetBoxManager( hypre_StructGrid *grid,
                                hypre_BoxManager *boxman )
 {
@@ -211,7 +211,7 @@ hypre_StructGridSetBoxManager( hypre_StructGrid *grid,
  * hypre_StructGridSetMaxDistance
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_StructGridSetMaxDistance( hypre_StructGrid *grid,
                                 hypre_Index dist )
 {
@@ -223,7 +223,7 @@ hypre_StructGridSetMaxDistance( hypre_StructGrid *grid,
 /*--------------------------------------------------------------------------
  * New - hypre_StructGridAssemble
  * AHB 9/06
- * New assemble routine that uses the BoxManager structure 
+ * New assemble routine that uses the BoxManager structure
  *
  *   Notes:
  *   1. No longer need a different assemble for the assumed partition case
@@ -232,12 +232,12 @@ hypre_StructGridSetMaxDistance( hypre_StructGrid *grid,
  *
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_StructGridAssemble( hypre_StructGrid *grid )
 {
 
    HYPRE_Int d, k, p, i;
-   
+
    HYPRE_Int is_boxman;
    HYPRE_Int size, ghostsize;
    HYPRE_Int num_local_boxes;
@@ -246,18 +246,18 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
    HYPRE_Int max_nentries;
    HYPRE_Int info_size;
    HYPRE_Int num_periods;
-   
+
    HYPRE_Int *ids = NULL;
    HYPRE_Int  iperiodic, notcenter;
- 
+
    HYPRE_Int  sendbuf6[2*HYPRE_MAXDIM], recvbuf6[2*HYPRE_MAXDIM];
-         
+
    hypre_Box  *box;
    hypre_Box  *ghostbox;
    hypre_Box  *grow_box;
    hypre_Box  *periodic_box;
    hypre_Box  *result_box;
-  
+
    hypre_Index min_index, max_index, loop_size;
    hypre_Index *pshifts;
    hypre_IndexRef pshift;
@@ -271,9 +271,9 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
    hypre_IndexRef       max_distance = hypre_StructGridMaxDistance(grid);
    hypre_Box           *bounding_box = hypre_StructGridBoundingBox(grid);
    hypre_IndexRef       periodic     = hypre_StructGridPeriodic(grid);
-   hypre_BoxManager    *boxman       = hypre_StructGridBoxMan(grid); 
+   hypre_BoxManager    *boxman       = hypre_StructGridBoxMan(grid);
    HYPRE_Int           *numghost     = hypre_StructGridNumGhost(grid);
-   
+
    if (!time_index)
       time_index = hypre_InitializeTiming("StructGridAssemble");
 
@@ -290,11 +290,11 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
    {
       is_boxman = 0;
    }
-   else 
+   else
    {
       is_boxman = 1;
    }
-   
+
    /* are the ids known? (these may have been set in coarsen)  - if not we need
       to set them */
    if (hypre_StructGridIDs(grid) == NULL)
@@ -310,7 +310,7 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
    {
       ids = hypre_StructGridIDs(grid);
    }
-   
+
    /******** calculate the periodicity information ****************/
 
    box = hypre_BoxCreate(ndim);
@@ -353,7 +353,7 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
       hypre_BoxLoop0End();
    }
    hypre_BoxDestroy(box);
-   
+
    hypre_StructGridNumPeriods(grid) = num_periods;
    hypre_StructGridPShifts(grid)    = pshifts;
 
@@ -367,12 +367,12 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
    {
       box = hypre_BoxArrayBox(local_boxes, i);
       size +=  hypre_BoxVolume(box);
-  
+
       hypre_CopyBox(box, ghostbox);
-      hypre_BoxGrowByArray(ghostbox, numghost);    
-      ghostsize += hypre_BoxVolume(ghostbox); 
+      hypre_BoxGrowByArray(ghostbox, numghost);
+      ghostsize += hypre_BoxVolume(ghostbox);
    }
-   
+
    hypre_StructGridLocalSize(grid) = size;
    hypre_StructGridGhlocalSize(grid) = ghostsize;
    hypre_BoxDestroy(ghostbox);
@@ -393,7 +393,7 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
 
       bounding_box = hypre_BoxCreate(ndim);
 
-      if (num_local_boxes) 
+      if (num_local_boxes)
       {
          /* initialize min and max index*/
          box = hypre_BoxArrayBox(local_boxes, 0);
@@ -408,12 +408,12 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
             box = hypre_BoxArrayBox(local_boxes, i);
 
 
-            /* find min and max box extents */  
+            /* find min and max box extents */
             for (d = 0; d < ndim; d++)
             {
-               hypre_IndexD(min_index, d) = hypre_min( hypre_IndexD(min_index, d), 
+               hypre_IndexD(min_index, d) = hypre_min( hypre_IndexD(min_index, d),
                                                        hypre_BoxIMinD(box, d));
-               hypre_IndexD(max_index, d) = hypre_max( hypre_IndexD(max_index, d), 
+               hypre_IndexD(max_index, d) = hypre_max( hypre_IndexD(max_index, d),
                                                        hypre_BoxIMaxD(box, d));
             }
          }
@@ -423,7 +423,7 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
       }
       else /* no boxes owned*/
       {
-         /* initialize min and max */ 
+         /* initialize min and max */
          for (d = 0; d < ndim; d++)
          {
             hypre_BoxIMinD(bounding_box, d) =  hypre_pow2(30);
@@ -439,7 +439,7 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
 
       /* communication needed for the bounding box */
       /* pack buffer */
-      for (d = 0; d < ndim; d++) 
+      for (d = 0; d < ndim; d++)
       {
          sendbuf6[d] = hypre_BoxIMinD(bounding_box, d);
          sendbuf6[d+ndim] = -hypre_BoxIMaxD(bounding_box, d);
@@ -453,14 +453,14 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
          hypre_BoxIMaxD(bounding_box, d) = -recvbuf6[d+ndim];
       }
 
-      hypre_StructGridBoundingBox(grid) = bounding_box; 
+      hypre_StructGridBoundingBox(grid) = bounding_box;
 
       /*************** create a box manager *****************/
       max_nentries =  num_local_boxes + 20;
       info_size = 0; /* we don't need an info object */
-      hypre_BoxManCreate(max_nentries, info_size, ndim, bounding_box, 
+      hypre_BoxManCreate(max_nentries, info_size, ndim, bounding_box,
                          comm, &boxman);
-      
+
       /******** populate the box manager with my local boxes and gather neighbor
                 information  ******/
 
@@ -475,11 +475,11 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
          /* add entry for each local box (the id is the boxnum, and should be sequential */
          hypre_BoxManAddEntry( boxman, hypre_BoxIMin(box), hypre_BoxIMax(box),
                                myid, i, entry_info );
- 
+
          /* now expand box by max_distance or larger and gather entries */
          hypre_CopyBox(box, grow_box);
          hypre_BoxGrowByIndex(grow_box, max_distance);
-         hypre_BoxManGatherEntries(boxman, hypre_BoxIMin(grow_box), 
+         hypre_BoxManGatherEntries(boxman, hypre_BoxIMin(grow_box),
                                    hypre_BoxIMax(grow_box));
 
          /* now repeat for any periodic boxes - by shifting the grow_box*/
@@ -489,27 +489,27 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
             pshift = pshifts[k];
             hypre_BoxShiftPos(periodic_box, pshift);
 
-            /* see if the shifted box intersects the domain */  
-            hypre_IntersectBoxes(periodic_box, bounding_box, result_box);  
+            /* see if the shifted box intersects the domain */
+            hypre_IntersectBoxes(periodic_box, bounding_box, result_box);
             /* if so, call gather entries */
             if (hypre_BoxVolume(result_box) > 0)
             {
-               hypre_BoxManGatherEntries(boxman, hypre_BoxIMin(periodic_box), 
+               hypre_BoxManGatherEntries(boxman, hypre_BoxIMin(periodic_box),
                                          hypre_BoxIMax(periodic_box));
             }
          }
       }/* end of for each local box */
-      
+
       hypre_BoxDestroy(periodic_box);
       hypre_BoxDestroy(grow_box);
       hypre_BoxDestroy(result_box);
-      
+
    } /* end of if (!is_boxman) */
 
    /* boxman was created, but need to get additional neighbor info */
    else if ( hypre_IndexEqual(max_distance, 0, ndim) )
    {
-      /* pick a new max distance and set in grid*/  
+      /* pick a new max distance and set in grid*/
       hypre_SetIndex(hypre_StructGridMaxDistance(grid), 2);
       max_distance =  hypre_StructGridMaxDistance(grid);
 
@@ -521,11 +521,11 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
       hypre_ForBoxI(i, local_boxes)
       {
          box = hypre_BoxArrayBox(local_boxes, i);
-       
+
          /* now expand box by max_distance or larger and gather entries */
-         hypre_CopyBox(box ,grow_box);     
+         hypre_CopyBox(box ,grow_box);
          hypre_BoxGrowByIndex(grow_box, max_distance);
-         hypre_BoxManGatherEntries(boxman, hypre_BoxIMin(grow_box), 
+         hypre_BoxManGatherEntries(boxman, hypre_BoxIMin(grow_box),
                                    hypre_BoxIMax(grow_box));
 
          /* now repeat for any periodic boxes - by shifting the grow_box*/
@@ -535,26 +535,26 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
             pshift = pshifts[k];
             hypre_BoxShiftPos(periodic_box, pshift);
 
-            /* see if the shifted box intersects the domain */  
-            hypre_IntersectBoxes(periodic_box, bounding_box, result_box);  
+            /* see if the shifted box intersects the domain */
+            hypre_IntersectBoxes(periodic_box, bounding_box, result_box);
             /* if so, call gather entries */
             if (hypre_BoxVolume(result_box) > 0)
             {
-               hypre_BoxManGatherEntries(boxman, hypre_BoxIMin(periodic_box), 
+               hypre_BoxManGatherEntries(boxman, hypre_BoxIMin(periodic_box),
                                          hypre_BoxIMax(periodic_box));
             }
          }
       }/* end of for each local box */
-      
+
       hypre_BoxDestroy(periodic_box);
       hypre_BoxDestroy(grow_box);
       hypre_BoxDestroy(result_box);
    }
-   
+
    /***************Assemble the box manager *****************/
-   
+
    hypre_BoxManAssemble(boxman);
-   
+
    hypre_StructGridBoxMan(grid) = boxman;
 
    hypre_EndTiming(time_index);
@@ -634,9 +634,9 @@ hypre_GatherAllBoxes(MPI_Comm         comm,
    hypre_Box         *box;
    hypre_Index        imin;
    hypre_Index        imax;
-                     
+
    HYPRE_Int          num_all_procs, my_rank;
-                     
+
    HYPRE_Int         *sendbuf;
    HYPRE_Int          sendcount;
    HYPRE_Int         *recvbuf;
@@ -644,13 +644,13 @@ hypre_GatherAllBoxes(MPI_Comm         comm,
    HYPRE_Int         *displs;
    HYPRE_Int          recvbuf_size;
    HYPRE_Int          item_size;
-                     
+
    HYPRE_Int          i, p, b, d;
 
    /*-----------------------------------------------------
     * Accumulate the box info
     *-----------------------------------------------------*/
-   
+
    hypre_MPI_Comm_size(comm, &num_all_procs);
    hypre_MPI_Comm_rank(comm, &my_rank);
 
@@ -787,9 +787,316 @@ hypre_ComputeBoxnums(hypre_BoxArray *boxes,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_StructGridPrintVTK
+ *
+ * Notes (VPM):
+ *      1) hypre_BoxNnodes may overflow?. Use BigInt from future.
+ *      2) It assumes that coordinates can be represented as Int32.
+ *      3) This is intended for debugging purposes, binary data should be
+ *         used for large files.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructGridPrintVTK( const char       *filename,
+                          hypre_StructGrid *grid )
+{
+   MPI_Comm        comm = hypre_StructGridComm(grid);
+   HYPRE_Int       ndim = hypre_StructGridNDim(grid);
+   HYPRE_Int       my_id, num_procs, i, j, d, n[8];
+   HYPRE_Int       grid_nnodes, grid_volume;
+   HYPRE_Int       box_id, box_volume, offset_id;
+   char            vtkfile[80];
+   FILE            *fp;
+   hypre_Box       *box;
+   hypre_BoxArray  *boxes;
+   hypre_Index     index, coords, partial_volume, loop_size;
+   HYPRE_Int       growth_array[2*HYPRE_MAXDIM];
+   HYPRE_Int       shrink_array[2*HYPRE_MAXDIM];
+   HYPRE_Int       cell_type, cell_nnodes;
+
+   hypre_MPI_Comm_rank(comm, &my_id);
+   hypre_MPI_Comm_size(comm, &num_procs);
+
+   /* Compute total number of nodes of grid and its volume */
+   boxes = hypre_StructGridBoxes(grid);
+   grid_nnodes = 0; grid_volume = 0;
+   hypre_ForBoxI(i, boxes)
+   {
+      box = hypre_BoxArrayBox(boxes, i);
+      grid_nnodes += hypre_BoxNnodes(box);
+      grid_volume += hypre_BoxVolume(box);
+   }
+
+   /* Scan number of boxes */
+   hypre_MPI_Scan(&hypre_BoxArraySize(boxes), &offset_id, 1, HYPRE_MPI_INT, hypre_MPI_SUM, comm);
+
+   /* Temporary stuff */
+   for(d = 0; d < ndim; d++)
+   {
+      growth_array[2*d]   = 0;
+      growth_array[2*d+1] = 1;
+      shrink_array[2*d]   = 0;
+      shrink_array[2*d+1] = -1;
+   }
+
+   /* Set VTK cell type */
+   switch(ndim)
+   {
+      case 1:
+         cell_type   = 4;  /* VTK_POLY_LINE */
+         cell_nnodes = 2;
+         break;
+
+      case 2:
+         cell_type   = 8;  /* VTK_PIXEL */
+         cell_nnodes = 4;
+         break;
+
+      case 3:
+         cell_type   = 11; /* VTK_VOXEL */
+         cell_nnodes = 8;
+         break;
+
+      default:
+         return hypre_error_flag;
+         /* TODO: Handle Error */
+   }
+
+   /* Write VTK XML data file */
+   hypre_sprintf(vtkfile,"%s.vtu.%05d", filename, my_id);
+   fp = fopen(vtkfile, "w");
+   hypre_fprintf(fp, "<?xml version=\"1.0\"?>\n");
+   hypre_fprintf(fp, "<VTKFile type=\"UnstructuredGrid\" ");
+   hypre_fprintf(fp, "version=\"0.1\" ");
+   hypre_fprintf(fp, "byte_order=\"LittleEndian\">\n");
+   hypre_fprintf(fp, "\t<UnstructuredGrid>\n");
+   hypre_fprintf(fp, "\t\t<Piece NumberOfPoints=\"%d\" NumberOfCells=\"%d\">\n", grid_nnodes, grid_volume);
+   hypre_fprintf(fp, "\t\t\t<Points>\n");
+   hypre_fprintf(fp, "\t\t\t\t<DataArray type=\"Int32\" NumberOfComponents=\"3\" format=\"ascii\">\n");
+   switch(ndim)
+   {
+      case 1:
+         hypre_ForBoxI(i, boxes)
+         {
+            box = hypre_BoxArrayBox(boxes, i);
+            hypre_BoxGrowByArray(box, growth_array);
+
+            hypre_BoxGetSize(box, loop_size);
+            hypre_BoxLoop0Begin(ndim, loop_size);
+            hypre_BoxLoopSetOneBlock();
+            hypre_BoxLoop0For()
+            {
+               hypre_BoxLoopGetIndex(index);
+               hypre_AddIndexes(index, hypre_BoxIMin(box), ndim, coords);
+               hypre_fprintf(fp, "\t\t\t\t\t%d 0 0\n", coords[0]);
+            }
+            hypre_BoxLoop0End();
+
+            hypre_BoxGrowByArray(box, shrink_array);
+         }
+         break;
+
+      case 2:
+         hypre_ForBoxI(i, boxes)
+         {
+            box = hypre_BoxArrayBox(boxes, i);
+            hypre_BoxGrowByArray(box, growth_array);
+
+            hypre_BoxGetSize(box, loop_size);
+            hypre_BoxLoop0Begin(ndim, loop_size);
+            hypre_BoxLoopSetOneBlock();
+            hypre_BoxLoop0For()
+            {
+               hypre_BoxLoopGetIndex(index);
+               hypre_AddIndexes(index, hypre_BoxIMin(box), ndim, coords);
+               hypre_fprintf(fp, "\t\t\t\t\t%d %d 0\n", coords[0], coords[1]);
+            }
+            hypre_BoxLoop0End();
+
+            hypre_BoxGrowByArray(box, shrink_array);
+         }
+         break;
+
+      case 3:
+         hypre_ForBoxI(i, boxes)
+         {
+            box = hypre_BoxArrayBox(boxes, i);
+            hypre_BoxGrowByArray(box, growth_array);
+
+            hypre_BoxGetSize(box, loop_size);
+            hypre_BoxLoop0Begin(ndim, loop_size);
+            hypre_BoxLoopSetOneBlock();
+            hypre_BoxLoop0For()
+            {
+               hypre_BoxLoopGetIndex(index);
+               hypre_AddIndexes(index, hypre_BoxIMin(box), ndim, coords);
+               hypre_fprintf(fp, "\t\t\t\t\t%d %d %d\n", coords[0], coords[1], coords[2]);
+            }
+            hypre_BoxLoop0End();
+
+            hypre_BoxGrowByArray(box, shrink_array);
+         }
+         break;
+   }
+   hypre_fprintf(fp, "\t\t\t\t</DataArray>\n");
+   hypre_fprintf(fp, "\t\t\t</Points>\n");
+
+   hypre_fprintf(fp, "\t\t\t<Cells>\n");
+   hypre_fprintf(fp, "\t\t\t\t<DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\">\n");
+   switch(ndim)
+   {
+      case 1:
+         hypre_ForBoxI(i, boxes)
+         {
+            box = hypre_BoxArrayBox(boxes, i);
+            hypre_BoxGrowByArray(box, growth_array);
+            hypre_BoxPartialVolume(box, partial_volume);
+            hypre_BoxGrowByArray(box, shrink_array);
+
+            hypre_BoxGetSize(box, loop_size);
+            hypre_BoxLoop0Begin(ndim, loop_size);
+            hypre_BoxLoopSetOneBlock();
+            hypre_BoxLoop0For()
+            {
+               hypre_BoxLoopGetIndex(index);
+
+               n[0]  = hypre_BoxOffsetDistance(box, index);
+               n[1]  = n[0] + 1;
+
+               hypre_fprintf(fp, "\t\t\t\t\t%d %d\n", n[0], n[1]);
+            }
+            hypre_BoxLoop0End();
+         }
+         break;
+
+      case 2:
+         hypre_ForBoxI(i, boxes)
+         {
+            box = hypre_BoxArrayBox(boxes, i);
+            hypre_BoxGrowByArray(box, growth_array);
+            hypre_BoxPartialVolume(box, partial_volume);
+            hypre_BoxGrowByArray(box, shrink_array);
+
+            hypre_BoxGetSize(box, loop_size);
+            hypre_BoxLoop0Begin(ndim, loop_size);
+            hypre_BoxLoopSetOneBlock();
+            hypre_BoxLoop0For()
+            {
+               hypre_BoxLoopGetIndex(index);
+
+               n[0]  = hypre_BoxOffsetDistance(box, index) + hypre_IndexD(index, 1);
+               n[1]  = n[0] + 1;
+               n[2]  = n[0] + partial_volume[0];
+               n[3]  = n[2] + 1;
+
+               hypre_fprintf(fp, "\t\t\t\t\t");
+               hypre_fprintf(fp, "%d", n[0]);
+               for(j = 1; j < cell_nnodes; j++) hypre_fprintf(fp, " %d", n[j]);
+               hypre_fprintf(fp, "\n");
+            }
+            hypre_BoxLoop0End();
+         }
+         break;
+
+      case 3:
+         hypre_ForBoxI(i, boxes)
+         {
+            box = hypre_BoxArrayBox(boxes, i);
+            hypre_BoxGrowByArray(box, growth_array);
+            hypre_BoxPartialVolume(box, partial_volume);
+            hypre_BoxGrowByArray(box, shrink_array);
+
+            hypre_BoxGetSize(box, loop_size);
+            hypre_BoxLoop0Begin(ndim, loop_size);
+            hypre_BoxLoopSetOneBlock();
+            hypre_BoxLoop0For()
+            {
+               hypre_BoxLoopGetIndex(index);
+
+               n[0]  = hypre_BoxOffsetDistance(box, index);
+               n[0] += hypre_IndexD(index, 1);
+               n[0] += hypre_IndexD(index, 2)*(partial_volume[0] + hypre_BoxSizeD(box, 1));
+               n[1]  = n[0] + 1;
+               n[2]  = n[0] + partial_volume[0];
+               n[3]  = n[2] + 1;
+               n[4]  = n[0] + partial_volume[1];
+               n[5]  = n[4] + 1;
+               n[6]  = n[4] + partial_volume[0];
+               n[7]  = n[6] + 1;
+
+               hypre_fprintf(fp, "\t\t\t\t\t");
+               hypre_fprintf(fp, "%d", n[0]);
+               for(j = 1; j < cell_nnodes; j++) hypre_fprintf(fp, " %d", n[j]);
+               hypre_fprintf(fp, "\n");
+            }
+            hypre_BoxLoop0End();
+         }
+   }
+   hypre_fprintf(fp, "\t\t\t\t</DataArray>\n");
+   hypre_fprintf(fp, "\t\t\t\t<DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\">\n");
+   for(i = 1; i <= grid_volume; i++)
+   {
+      hypre_fprintf(fp, "\t\t\t\t\t%d\n", cell_nnodes*i);
+   }
+   hypre_fprintf(fp, "\t\t\t\t</DataArray>\n");
+   hypre_fprintf(fp, "\t\t\t\t<DataArray type=\"Int32\" Name=\"types\" format=\"ascii\">\n");
+   for(i = 0; i < grid_volume; i++)
+   {
+      hypre_fprintf(fp, "\t\t\t\t\t%d\n", cell_type);
+   }
+   hypre_fprintf(fp, "\t\t\t\t</DataArray>\n");
+   hypre_fprintf(fp, "\t\t\t</Cells>\n");
+   hypre_fprintf(fp, "\t\t\t<CellData>\n");
+   hypre_fprintf(fp, "\t\t\t\t<DataArray type=\"Int32\" Name=\"BoxID\" format=\"ascii\">\n");
+   hypre_ForBoxI(i, boxes)
+   {
+      box = hypre_BoxArrayBox(boxes, i);
+      box_id = hypre_StructGridID(grid, i);
+      box_volume = hypre_BoxVolume(box);
+      for(j = 0; j < box_volume; j++)
+      {
+         hypre_fprintf(fp, "\t\t\t\t\t%d\n", box_id + offset_id);
+      }
+   }
+   hypre_fprintf(fp, "\t\t\t\t</DataArray>\n");
+   hypre_fprintf(fp, "\t\t\t</CellData>\n");
+   hypre_fprintf(fp, "\t\t</Piece>\n");
+   hypre_fprintf(fp, "\t</UnstructuredGrid>\n");
+   hypre_fprintf(fp, "</VTKFile>");
+   fclose(fp);
+
+   /* Master process writes the parallel unstructured grid file */
+   if(my_id == 0)
+   {
+      hypre_sprintf(vtkfile,"%s.pvtu", filename);
+      fp = fopen(vtkfile, "w");
+      hypre_fprintf(fp, "<?xml version=\"1.0\"?>\n");
+      hypre_fprintf(fp, "<VTKFile type=\"PUnstructuredGrid\" ");
+      hypre_fprintf(fp, "version=\"0.1\" ");
+      hypre_fprintf(fp, "byte_order=\"LittleEndian\">\n");
+      hypre_fprintf(fp, "\t<PUnstructuredGrid GhostLevel=\"0\">\n");
+      hypre_fprintf(fp, "\t\t<PCellData Scalars=\"BoxID\">\n");
+      hypre_fprintf(fp, "\t\t\t<PDataArray type=\"Int32\" Name=\"BoxID\" format=\"ascii\"/>\n");
+      hypre_fprintf(fp, "\t\t</PCellData>\n");
+      hypre_fprintf(fp, "\t\t<PPoints>\n");
+      hypre_fprintf(fp, "\t\t\t<PDataArray type=\"Int32\" NumberOfComponents=\"3\" format=\"ascii\"/>\n");
+      hypre_fprintf(fp, "\t\t</PPoints>\n");
+      for(int i = 0; i < num_procs; i++)
+      {
+         hypre_fprintf(fp, "\t\t<Piece Source=\"%s.vtu.%05d\"/>\n", filename, i);
+      }
+      hypre_fprintf(fp, "\t</PUnstructuredGrid>\n");
+      hypre_fprintf(fp, "</VTKFile>\n");
+      fclose(fp);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_StructGridPrint
  *--------------------------------------------------------------------------*/
- 
+
 HYPRE_Int
 hypre_StructGridPrint( FILE             *file,
                        hypre_StructGrid *grid )
@@ -836,7 +1143,7 @@ hypre_StructGridPrint( FILE             *file,
 /*--------------------------------------------------------------------------
  * hypre_StructGridRead
  *--------------------------------------------------------------------------*/
- 
+
 HYPRE_Int
 hypre_StructGridRead( MPI_Comm           comm,
                       FILE              *file,
@@ -851,7 +1158,7 @@ hypre_StructGridRead( MPI_Comm           comm,
 
    HYPRE_Int         ndim;
    HYPRE_Int         num_boxes;
-               
+
    HYPRE_Int         i, d, idummy;
 
    hypre_fscanf(file, "%d\n", &ndim);
@@ -905,7 +1212,7 @@ HYPRE_Int
 hypre_StructGridSetNumGhost( hypre_StructGrid *grid, HYPRE_Int  *num_ghost )
 {
    HYPRE_Int  i, ndim = hypre_StructGridNDim(grid);
-  
+
    for (i = 0; i < 2*ndim; i++)
    {
       hypre_StructGridNumGhost(grid)[i] = num_ghost[i];

@@ -84,6 +84,12 @@ HYPRE_Int HYPRE_StructGridSetExtents(HYPRE_StructGrid  grid,
 HYPRE_Int HYPRE_StructGridAssemble(HYPRE_StructGrid grid);
 
 /**
+ * Prints a grid in VTK format
+ **/
+HYPRE_Int HYPRE_StructGridPrintVTK(const char       *filename,
+                                   HYPRE_StructGrid  grid);
+
+/**
  * Set the periodicity for the grid.
  *
  * The argument {\tt periodic} is an {\tt ndim}-dimensional integer array that
@@ -371,7 +377,7 @@ HYPRE_StructMatrixSetTranspose( HYPRE_StructMatrix  matrix,
                                 HYPRE_Int           transpose );
 
 /**
- * Set the ghost layer in the matrix 
+ * Set the ghost layer in the matrix
  **/
 HYPRE_Int HYPRE_StructMatrixSetNumGhost(HYPRE_StructMatrix  matrix,
                                         HYPRE_Int          *num_ghost);
@@ -590,4 +596,3 @@ HYPRE_Int HYPRE_CommPkgDestroy(HYPRE_CommPkg comm_pkg);
 #endif
 
 #endif
-

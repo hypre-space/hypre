@@ -97,6 +97,16 @@ HYPRE_StructGridAssemble( HYPRE_StructGrid grid )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_StructGridPrintVTK( const char       *filename,
+                          HYPRE_StructGrid  grid )
+{
+   return ( hypre_StructGridPrintVTK(filename, grid) );
+}
+
+/*---------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_StructGridSetNumGhost( HYPRE_StructGrid  grid,
                              HYPRE_Int        *num_ghost )
 {
@@ -115,7 +125,7 @@ HYPRE_StructGridCoarsen(HYPRE_StructGrid  grid,
 
    hypre_SetIndex(origin, 0);
    hypre_StructCoarsen(grid, origin, stride, 1, cgrid);
-   
+
    return hypre_error_flag;
 }
 
@@ -138,7 +148,6 @@ HYPRE_StructGridProjectBox(HYPRE_StructGrid  grid,
    hypre_CopyIndex(hypre_BoxIMin(box), ilower);
    hypre_CopyIndex(hypre_BoxIMax(box), iupper);
    hypre_BoxDestroy(box);
-   
+
    return hypre_error_flag;
 }
-
