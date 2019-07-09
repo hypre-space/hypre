@@ -123,7 +123,7 @@ hypre_max(0, (hypre_BoxIMaxD(box, d) - hypre_BoxIMinD(box, d) + 1))
 #define hypre_CCBoxIndexRank(box, index) 0
 #define hypre_CCBoxIndexRank_noargs() 0
 #define hypre_CCBoxOffsetDistance(box, index) 0
-  
+
 /*----- Avoid using these Box macros -----*/
 
 #define hypre_BoxSizeX(box)    hypre_BoxSizeD(box, 0)
@@ -271,7 +271,7 @@ index[0] = hypre__i; index[1] = hypre__j; index[2] = hypre__k
    }\
    }\
 }
-  
+
 /*-----------------------------------*/
 
 #define hypre_BoxLoop1Begin(ndim, loop_size,\
@@ -304,7 +304,7 @@ index[0] = hypre__i; index[1] = hypre__j; index[2] = hypre__k
    }\
    }\
 }
-  
+
 /*-----------------------------------*/
 
 #define hypre_BoxLoop2Begin(ndim,loop_size,\
@@ -484,7 +484,7 @@ index[0] = hypre__i; index[1] = hypre__j; index[2] = hypre__k
 #ifndef hypre_ZBOX_HEADER
 #define hypre_ZBOX_HEADER
 
-#define ZYPRE_BOX_PRIVATE hypre__IN,hypre__JN,hypre__I,hypre__J,hypre__d,hypre__i,hypre__k
+#define ZYPRE_BOX_PRIVATE hypre__IN,hypre__JN,hypre__I,hypre__J,hypre__d,hypre__i
 
 /*--------------------------------------------------------------------------
  * BoxLoop macros:
