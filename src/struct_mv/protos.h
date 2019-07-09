@@ -57,6 +57,8 @@ HYPRE_Int hypre_CopyBox( hypre_Box *box1 , hypre_Box *box2 );
 hypre_Box *hypre_BoxClone ( hypre_Box *box );
 HYPRE_Int hypre_BoxVolume( hypre_Box *box );
 HYPRE_Real hypre_doubleBoxVolume( hypre_Box *box );
+HYPRE_Int hypre_BoxPartialVolume( hypre_Box *box, hypre_Index partial_volume);
+HYPRE_Int hypre_BoxNnodes( hypre_Box *box );
 HYPRE_Int hypre_IndexInBox ( hypre_Index index , hypre_Box *box );
 HYPRE_Int hypre_BoxGetSize ( hypre_Box *box , hypre_Index size );
 HYPRE_Int hypre_BoxGetStrideSize ( hypre_Box *box , hypre_Index stride , hypre_Index size );
@@ -199,6 +201,7 @@ HYPRE_Int hypre_StructGridComputeBoxnums ( hypre_StructGrid *grid , HYPRE_Int nb
 HYPRE_Int hypre_GatherAllBoxes ( MPI_Comm comm , hypre_BoxArray *boxes , HYPRE_Int dim , hypre_BoxArray **all_boxes_ptr , HYPRE_Int **all_procs_ptr , HYPRE_Int *first_local_ptr );
 HYPRE_Int hypre_ComputeBoxnums ( hypre_BoxArray *boxes , HYPRE_Int *procs , HYPRE_Int **boxnums_ptr );
 HYPRE_Int hypre_StructGridPrint ( FILE *file , hypre_StructGrid *grid );
+//HYPRE_Int hypre_StructGridPrintVTK( const char *filename, hypre_StructGrid *grid );
 HYPRE_Int hypre_StructGridRead ( MPI_Comm comm , FILE *file , hypre_StructGrid **grid_ptr );
 HYPRE_Int hypre_StructGridSetNumGhost ( hypre_StructGrid *grid , HYPRE_Int *num_ghost );
 
@@ -321,4 +324,3 @@ HYPRE_Int hypre_StructVectorPrint ( const char *filename , hypre_StructVector *v
 hypre_StructVector *hypre_StructVectorRead ( MPI_Comm comm , const char *filename , HYPRE_Int *num_ghost );
 HYPRE_Int hypre_StructVectorMaxValue ( hypre_StructVector *vector , HYPRE_Real *max_value , HYPRE_Int *max_index , hypre_Index max_xyz_index );
 hypre_StructVector *hypre_StructVectorClone ( hypre_StructVector *vector );
-
