@@ -556,7 +556,7 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
    size *= hypre_VectorNumVectors(x);
 
 #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
-   thrust::transform(x_data, x_data + size, y_data, y_data, alpha * _1 + _2);
+   thrust::transform(thrust::device, x_data, x_data + size, y_data, y_data, alpha * _1 + _2);
 #else
 
 #if defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)

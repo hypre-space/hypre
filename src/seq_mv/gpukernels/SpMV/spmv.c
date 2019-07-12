@@ -1,4 +1,4 @@
-#include "spmv.h"
+#include "spkernels.h"
 #include <cuda_runtime.h>
 #include "cusparse.h"
 
@@ -12,16 +12,16 @@ void csr_v_k_shared(HYPRE_Int n, HYPRE_Int *d_ia, HYPRE_Int *d_ja, T *d_a, T *d_
     *              K threads-Warp  per row
     *------------------------------------------------------------*/
    // num of full-warps
-   HYPRE_Int nw = gridDim.x*BLOCKDIM/K;
+   HYPRE_Int nw = gridDim.x*SPMV_BLOCKDIM/K;
    // full warp id
-   HYPRE_Int wid = (blockIdx.x*BLOCKDIM+threadIdx.x)/K;
+   HYPRE_Int wid = (blockIdx.x*SPMV_BLOCKDIM+threadIdx.x)/K;
    // thread lane in each full warp
    HYPRE_Int lane = threadIdx.x & (K-1);
    // full warp lane in each block
    HYPRE_Int wlane = threadIdx.x/K;
    // shared memory for patial result
-   volatile __shared__ T r[BLOCKDIM+K/2];
-   volatile __shared__ HYPRE_Int startend[BLOCKDIM/K][2];
+   volatile __shared__ T r[SPMV_BLOCKDIM+K/2];
+   volatile __shared__ HYPRE_Int startend[SPMV_BLOCKDIM/K][2];
    for (HYPRE_Int row = wid; row < n; row += nw)
    {
       // row start and end point
@@ -62,8 +62,8 @@ void csr_v_k_shuffle(HYPRE_Int n, HYPRE_Int *d_ia, HYPRE_Int *d_ja, T *d_a, T *d
     *              shared memory reduction
     *           (Group of K threads) per row
     *------------------------------------------------------------*/
-   const HYPRE_Int grid_ngroups = gridDim.x * (BLOCKDIM / K);
-   HYPRE_Int grid_group_id = (blockIdx.x * BLOCKDIM + threadIdx.x) / K;
+   const HYPRE_Int grid_ngroups = gridDim.x * (SPMV_BLOCKDIM / K);
+   HYPRE_Int grid_group_id = (blockIdx.x * SPMV_BLOCKDIM + threadIdx.x) / K;
    const HYPRE_Int group_lane = threadIdx.x & (K - 1);
    const HYPRE_Int warp_lane = threadIdx.x & (HYPRE_WARP_SIZE - 1);
    const HYPRE_Int warp_group_id = warp_lane / K;
@@ -138,12 +138,12 @@ hypre_SeqCSRMatvecDevice(HYPRE_Int nrows, HYPRE_Int nnz,
                          HYPRE_Complex *d_x, HYPRE_Complex *d_y)
 {
    const HYPRE_Int rownnz = (nnz + nrows - 1) / nrows;
-   const HYPRE_Int bDim = BLOCKDIM;
+   const HYPRE_Int bDim = SPMV_BLOCKDIM;
 
    if (rownnz >= 64)
    {
       const HYPRE_Int group_size = 32;
-      const HYPRE_Int num_groups_per_block = BLOCKDIM / group_size;
+      const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;
       const HYPRE_Int gDim = (nrows + num_groups_per_block - 1) / num_groups_per_block;
       //printf("  Number of Threads <%d*%d>\n",gDim,bDim);
       csr_v_k_shuffle<group_size, HYPRE_Real> <<<gDim, bDim>>>(nrows, d_ia, d_ja, d_a, d_x, d_y);
@@ -151,7 +151,7 @@ hypre_SeqCSRMatvecDevice(HYPRE_Int nrows, HYPRE_Int nnz,
    else if (rownnz >= 32)
    {
       const HYPRE_Int group_size = 16;
-      const HYPRE_Int num_groups_per_block = BLOCKDIM / group_size;
+      const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;
       const HYPRE_Int gDim = (nrows + num_groups_per_block - 1) / num_groups_per_block;
       //printf("  Number of Threads <%d*%d>\n",gDim,bDim);
       csr_v_k_shuffle<group_size, HYPRE_Real> <<<gDim, bDim>>>(nrows, d_ia, d_ja, d_a, d_x, d_y);
@@ -159,7 +159,7 @@ hypre_SeqCSRMatvecDevice(HYPRE_Int nrows, HYPRE_Int nnz,
    else if (rownnz >= 16)
    {
       const HYPRE_Int group_size = 8;
-      const HYPRE_Int num_groups_per_block = BLOCKDIM / group_size;
+      const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;
       const HYPRE_Int gDim = (nrows + num_groups_per_block - 1) / num_groups_per_block;
       //printf("  Number of Threads <%d*%d>\n",gDim,bDim);
       csr_v_k_shuffle<group_size, HYPRE_Real> <<<gDim, bDim>>>(nrows, d_ia, d_ja, d_a, d_x, d_y);
@@ -167,7 +167,7 @@ hypre_SeqCSRMatvecDevice(HYPRE_Int nrows, HYPRE_Int nnz,
    else if (rownnz >= 8)
    {
       const HYPRE_Int group_size = 4;
-      const HYPRE_Int num_groups_per_block = BLOCKDIM / group_size;
+      const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;
       const HYPRE_Int gDim = (nrows + num_groups_per_block - 1) / num_groups_per_block;
       //printf("  Number of Threads <%d*%d>\n",gDim,bDim);
       csr_v_k_shuffle<group_size, HYPRE_Real> <<<gDim, bDim>>>(nrows, d_ia, d_ja, d_a, d_x, d_y);
@@ -175,7 +175,7 @@ hypre_SeqCSRMatvecDevice(HYPRE_Int nrows, HYPRE_Int nnz,
    else
    {
       const HYPRE_Int group_size = 4;
-      const HYPRE_Int num_groups_per_block = BLOCKDIM / group_size;
+      const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;
       const HYPRE_Int gDim = (nrows + num_groups_per_block - 1) / num_groups_per_block;
       //printf("  Number of Threads <%d*%d>\n",gDim,bDim);
       csr_v_k_shuffle<group_size, HYPRE_Real> <<<gDim, bDim>>>(nrows, d_ia, d_ja, d_a, d_x, d_y);
@@ -184,7 +184,7 @@ hypre_SeqCSRMatvecDevice(HYPRE_Int nrows, HYPRE_Int nnz,
    return 0;
 }
 
-void spmv_csr_vector(hypre_CSRMatrix *csr, HYPRE_Real *x, HYPRE_Real *y)
+void spmv_csr_vector(hypre_CSRMatrix *csr, HYPRE_Real *x, HYPRE_Real *y, HYPRE_Int REPEAT)
 {
    HYPRE_Int *d_ia, *d_ja, i;
    HYPRE_Real *d_a, *d_x, *d_y;
@@ -235,59 +235,7 @@ void spmv_csr_vector(hypre_CSRMatrix *csr, HYPRE_Real *x, HYPRE_Real *y)
    cudaFree(d_y);
 }
 
-/*-----------------------------------------------*/
-void cuda_init(HYPRE_Int argc, char **argv)
-{
-   HYPRE_Int deviceCount, dev;
-   cudaGetDeviceCount(&deviceCount);
-   printf("=========================================\n");
-   if (deviceCount == 0)
-   {
-      printf("There is no device supporting CUDA\n");
-   }
-   for (dev = 0; dev < deviceCount; ++dev)
-   {
-      cudaDeviceProp deviceProp;
-      cudaGetDeviceProperties(&deviceProp, dev);
-      if (dev == 0)
-      {
-         if (deviceProp.major == 9999 && deviceProp.minor == 9999)
-         {
-            printf("There is no device supporting CUDA.\n");
-         }
-         else if (deviceCount == 1)
-         {
-            printf("There is 1 device supporting CUDA\n");
-         }
-         else
-         {
-            printf("There are %d devices supporting CUDA\n", deviceCount);
-         }
-      }
-   printf("\nDevice %d: \"%s\"\n", dev, deviceProp.name);
-   printf("  Major revision number:          %d\n",deviceProp.major);
-   printf("  Minor revision number:          %d\n",deviceProp.minor);
-   printf("  Total amount of global memory:  %.2f GB\n",deviceProp.totalGlobalMem/1e9);
-   }
-   dev = 0;
-   cudaSetDevice(dev);
-   cudaDeviceProp deviceProp;
-   cudaGetDeviceProperties(&deviceProp, dev);
-   printf("\nRunning on Device %d: \"%s\"\n", dev, deviceProp.name);
-   printf("=========================================\n");
-}
-
-/*---------------------------------------------------*/
-void cuda_check_err()
-{
-   cudaError_t cudaerr = cudaGetLastError() ;
-   if (cudaerr != cudaSuccess)
-   {
-       printf("error: %s\n",cudaGetErrorString(cudaerr));
-   }
-}
-
-void spmv_cusparse_csr(hypre_CSRMatrix *csr, HYPRE_Real *x, HYPRE_Real *y)
+void spmv_cusparse_csr(hypre_CSRMatrix *csr, HYPRE_Real *x, HYPRE_Real *y, HYPRE_Int REPEAT)
 {
    HYPRE_Int n = csr->num_rows;
    HYPRE_Int nnz = csr->num_nonzeros;
@@ -302,28 +250,24 @@ void spmv_cusparse_csr(hypre_CSRMatrix *csr, HYPRE_Real *x, HYPRE_Real *y)
    cudaMalloc((void **)&d_x, n*sizeof(HYPRE_Real));
    cudaMalloc((void **)&d_y, n*sizeof(HYPRE_Real));
    /*------------------- Memcpy */
-   cudaMemcpy(d_ia, csr->i, (n+1)*sizeof(HYPRE_Int),
-   cudaMemcpyHostToDevice);
-   cudaMemcpy(d_ja, csr->j, nnz*sizeof(HYPRE_Int),
-   cudaMemcpyHostToDevice);
-   cudaMemcpy(d_a, csr->data, nnz*sizeof(HYPRE_Real),
-   cudaMemcpyHostToDevice);
-   cudaMemcpy(d_x, x, n*sizeof(HYPRE_Real),
-   cudaMemcpyHostToDevice);
+   cudaMemcpy(d_ia, csr->i, (n+1)*sizeof(HYPRE_Int), cudaMemcpyHostToDevice);
+   cudaMemcpy(d_ja, csr->j, nnz*sizeof(HYPRE_Int), cudaMemcpyHostToDevice);
+   cudaMemcpy(d_a, csr->data, nnz*sizeof(HYPRE_Real), cudaMemcpyHostToDevice);
+   cudaMemcpy(d_x, x, n*sizeof(HYPRE_Real), cudaMemcpyHostToDevice);
    /*-------------------- cusparse library*/
    cusparseStatus_t status;
    cusparseHandle_t handle=0;
    cusparseMatDescr_t descr=0;
 
    /* initialize cusparse library */
-   status= cusparseCreate(&handle);
+   status = cusparseCreate(&handle);
    if (status != CUSPARSE_STATUS_SUCCESS)
    {
      printf("CUSPARSE Library initialization failed\n");
      exit(1);
    }
    /* create and setup matrix descriptor */
-   status= cusparseCreateMatDescr(&descr);
+   status = cusparseCreateMatDescr(&descr);
    if (status != CUSPARSE_STATUS_SUCCESS)
    {
      printf("Matrix descriptor initialization failed\n");

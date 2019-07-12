@@ -1,4 +1,4 @@
-#include "spmv.h"
+#include "spkernels.h"
 #include "mmio.h"
 #define MAX_LINE 200
 

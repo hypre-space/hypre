@@ -12,11 +12,9 @@
 #define min(a, b) (a) > (b) ? (b) : (a)
 #define max(a, b) (a) > (b) ? (a) : (b)
 #define SEED 200
-#define REPEAT 100
-#define BLOCKDIM 512
 
-#define FORT(name) name ## _
-//#define FORT(name) name
+#define SPMV_BLOCKDIM 512
+#define SPTRSV_BLOCKDIM 1024
 
 /* types of user command-line input */
 typedef enum {
@@ -34,6 +32,20 @@ struct coo_t {
   HYPRE_Int *ir;
   HYPRE_Int *jc;
   HYPRE_Real *val;
+};
+
+struct level_t {
+  // L
+  HYPRE_Int nlevL;
+  HYPRE_Int *jlevL;
+  HYPRE_Int *ilevL;
+  // U
+  HYPRE_Int nlevU;
+  HYPRE_Int *jlevU;
+  HYPRE_Int *ilevU;
+  // level
+  HYPRE_Int *levL;
+  HYPRE_Int *levU;
 };
 
 #include "protos.h"

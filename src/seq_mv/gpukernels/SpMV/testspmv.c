@@ -1,5 +1,5 @@
 #include <omp.h>
-#include "spmv.h"
+#include "spkernels.h"
 
 /*-----------------------------------------*/
 HYPRE_Int main (HYPRE_Int argc, char **argv)
@@ -9,7 +9,7 @@ HYPRE_Int main (HYPRE_Int argc, char **argv)
     *     CPU CSR        kernel
     *     GPU CSR        kernel
     *-----------------------------------------*/
-   HYPRE_Int i, n, nx=32, ny=32, nz=32, npts=7, flg=0, mm=1;
+   HYPRE_Int i, n, nx=32, ny=32, nz=32, npts=7, flg=0, mm=1, REPEAT=100;
    HYPRE_Real *x, *y0, *y;
    HYPRE_Real e2, e3;
    struct coo_t coo;
@@ -24,6 +24,7 @@ HYPRE_Int main (HYPRE_Int argc, char **argv)
       return 0;
    }
    srand (SEED);
+   //srand(time(NULL));
    /*------------ Init GPU */
    cuda_init(argc, argv);
    /*------------ output header */
@@ -54,19 +55,19 @@ HYPRE_Int main (HYPRE_Int argc, char **argv)
    /*---------- convert COO to CSR */
    coo_to_csr(0, &coo, &csr);
    /*---------- CPU SpMV CSR kernel */
-   spmv_csr_cpu(csr, x, y0);
+   spmv_csr_cpu(csr, x, y0, REPEAT);
    /*---------- GPU SpMV CSR-vector kernel */
-   spmv_csr_vector(csr, x, y);
+   spmv_csr_vector(csr, x, y, REPEAT);
    e2 = error_norm(y0, y, n);
    fprintf(stdout, "err norm %.2e\n", e2);
    /*---------- GPU SpMV CUSPARSE CSR kernel */
-   spmv_cusparse_csr(csr, x, y);
+   spmv_cusparse_csr(csr, x, y, REPEAT);
    e3 = error_norm(y0, y, n);
    fprintf(stdout, "err norm %.2e\n", e3);
-   /*---------- check error */
-   cuda_check_err();
    /*---------- Done, free */
    hypre_CSRMatrixDestroy(csr);
    FreeCOO(&coo);
    free(x);   free(y0);  free(y);
+   /*---------- check error */
+   cuda_check_err();
 }

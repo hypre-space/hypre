@@ -1,4 +1,4 @@
-#include "spmv.h"
+#include "spkernels.h"
 
 /**
  * @brief convert coo to csr
