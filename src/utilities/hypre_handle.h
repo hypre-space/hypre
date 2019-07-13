@@ -57,43 +57,43 @@ typedef struct
 extern hypre_Handle *hypre_handle;
 
 hypre_Handle* hypre_HandleCreate();
-HYPRE_Int hypre_HandleDestroy(hypre_Handle *handle);
+HYPRE_Int hypre_HandleDestroy(hypre_Handle *hypre_handle_);
 
 /* accessor inline function to hypre_device_csr_handle */
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 static inline HYPRE_Int &
-hypre_HandleCudaDevice(hypre_Handle *hypre_handle)
+hypre_HandleCudaDevice(hypre_Handle *hypre_handle_)
 {
-   return hypre_handle->cuda_device;
+   return hypre_handle_->cuda_device;
 }
 
 static inline HYPRE_Int &
-hypre_HandleCudaComputeStreamNum(hypre_Handle *hypre_handle)
+hypre_HandleCudaComputeStreamNum(hypre_Handle *hypre_handle_)
 {
-   return hypre_handle->cuda_compute_stream_num;
+   return hypre_handle_->cuda_compute_stream_num;
 }
 
 static inline HYPRE_Int &
-hypre_HandleCudaPrefetchStreamNum(hypre_Handle *hypre_handle)
+hypre_HandleCudaPrefetchStreamNum(hypre_Handle *hypre_handle_)
 {
-   return hypre_handle->cuda_prefetch_stream_num;
+   return hypre_handle_->cuda_prefetch_stream_num;
 }
 
 static inline HYPRE_Int &
-hypre_HandleCudaComputeStreamSyncDefault(hypre_Handle *hypre_handle)
+hypre_HandleCudaComputeStreamSyncDefault(hypre_Handle *hypre_handle_)
 {
-   return hypre_handle->cuda_compute_stream_sync_default;
+   return hypre_handle_->cuda_compute_stream_sync_default;
 }
 
 static inline std::vector<HYPRE_Int> &
-hypre_HandleCudaComputeStreamSync(hypre_Handle *hypre_handle)
+hypre_HandleCudaComputeStreamSync(hypre_Handle *hypre_handle_)
 {
-   return hypre_handle->cuda_compute_stream_sync;
+   return hypre_handle_->cuda_compute_stream_sync;
 }
 
 static inline cudaStream_t
-hypre_HandleCudaStream(hypre_Handle *hypre_handle, HYPRE_Int i)
+hypre_HandleCudaStream(hypre_Handle *hypre_handle_, HYPRE_Int i)
 {
    cudaStream_t stream = 0;
 #if defined(HYPRE_USING_CUDA_STREAMS)
@@ -107,75 +107,75 @@ hypre_HandleCudaStream(hypre_Handle *hypre_handle, HYPRE_Int i)
       return NULL;
    }
 
-   if (hypre_handle->cuda_streams[i])
+   if (hypre_handle_->cuda_streams[i])
    {
-      return hypre_handle->cuda_streams[i];
+      return hypre_handle_->cuda_streams[i];
    }
 
    //HYPRE_CUDA_CALL(cudaStreamCreateWithFlags(&stream,cudaStreamNonBlocking));
    HYPRE_CUDA_CALL(cudaStreamCreateWithFlags(&stream, cudaStreamDefault));
 
-   hypre_handle->cuda_streams[i] = stream;
+   hypre_handle_->cuda_streams[i] = stream;
 #endif
 
    return stream;
 }
 
 static inline cudaStream_t
-hypre_HandleCudaComputeStream(hypre_Handle *hypre_handle)
+hypre_HandleCudaComputeStream(hypre_Handle *hypre_handle_)
 {
-   return hypre_HandleCudaStream(hypre_handle,
-                                 hypre_HandleCudaComputeStreamNum(hypre_handle));
+   return hypre_HandleCudaStream(hypre_handle_,
+                                 hypre_HandleCudaComputeStreamNum(hypre_handle_));
 }
 
 static inline cudaStream_t
-hypre_HandleCudaPrefetchStream(hypre_Handle *hypre_handle)
+hypre_HandleCudaPrefetchStream(hypre_Handle *hypre_handle_)
 {
-   return hypre_HandleCudaStream(hypre_handle,
-                                 hypre_HandleCudaPrefetchStreamNum(hypre_handle));
+   return hypre_HandleCudaStream(hypre_handle_,
+                                 hypre_HandleCudaPrefetchStreamNum(hypre_handle_));
 }
 
 static inline curandGenerator_t
-hypre_HandleCurandGenerator(hypre_Handle *hypre_handle)
+hypre_HandleCurandGenerator(hypre_Handle *hypre_handle_)
 {
-   if (hypre_handle->curand_gen)
+   if (hypre_handle_->curand_gen)
    {
-      return hypre_handle->curand_gen;
+      return hypre_handle_->curand_gen;
    }
 
    curandGenerator_t gen;
    HYPRE_CURAND_CALL( curandCreateGenerator(&gen, CURAND_RNG_PSEUDO_DEFAULT) );
    HYPRE_CURAND_CALL( curandSetPseudoRandomGeneratorSeed(gen, 1234ULL) );
 
-   hypre_handle->curand_gen = gen;
+   hypre_handle_->curand_gen = gen;
 
    return gen;
 }
 
 static inline cusparseHandle_t
-hypre_HandleCusparseHandle(hypre_Handle *hypre_handle)
+hypre_HandleCusparseHandle(hypre_Handle *hypre_handle_)
 {
-   if (hypre_handle->cusparse_handle)
+   if (hypre_handle_->cusparse_handle)
    {
-      return hypre_handle->cusparse_handle;
+      return hypre_handle_->cusparse_handle;
    }
 
    cusparseHandle_t handle;
    HYPRE_CUSPARSE_CALL( cusparseCreate(&handle) );
 
-   HYPRE_CUSPARSE_CALL( cusparseSetStream(handle, hypre_HandleCudaComputeStream(hypre_handle)) );
+   HYPRE_CUSPARSE_CALL( cusparseSetStream(handle, hypre_HandleCudaComputeStream(hypre_handle_)) );
 
-   hypre_handle->cusparse_handle = handle;
+   hypre_handle_->cusparse_handle = handle;
 
    return handle;
 }
 
 static inline cusparseMatDescr_t
-hypre_HandleCusparseMatDescr(hypre_Handle *hypre_handle)
+hypre_HandleCusparseMatDescr(hypre_Handle *hypre_handle_)
 {
-   if (hypre_handle->cusparse_mat_descr)
+   if (hypre_handle_->cusparse_mat_descr)
    {
-      return hypre_handle->cusparse_mat_descr;
+      return hypre_handle_->cusparse_mat_descr;
    }
 
    cusparseMatDescr_t mat_descr;
@@ -183,7 +183,7 @@ hypre_HandleCusparseMatDescr(hypre_Handle *hypre_handle)
    HYPRE_CUSPARSE_CALL( cusparseSetMatType(mat_descr, CUSPARSE_MATRIX_TYPE_GENERAL) );
    HYPRE_CUSPARSE_CALL( cusparseSetMatIndexBase(mat_descr, CUSPARSE_INDEX_BASE_ZERO) );
 
-   hypre_handle->cusparse_mat_descr = mat_descr;
+   hypre_handle_->cusparse_mat_descr = mat_descr;
 
    return mat_descr;
 }
@@ -191,32 +191,32 @@ hypre_HandleCusparseMatDescr(hypre_Handle *hypre_handle)
 #endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP) */
 
 static inline void
-hypre_HandleCudaComputeStreamSyncPush(hypre_Handle *hypre_handle, HYPRE_Int sync)
+hypre_HandleCudaComputeStreamSyncPush(hypre_Handle *hypre_handle_, HYPRE_Int sync)
 {
 #if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_UNIFIED_MEMORY)
-   hypre_HandleCudaComputeStreamSync(hypre_handle).push_back(sync);
+   hypre_HandleCudaComputeStreamSync(hypre_handle_).push_back(sync);
 #endif
 }
 
 static inline void
-hypre_HandleCudaComputeStreamSyncPop(hypre_Handle *hypre_handle)
+hypre_HandleCudaComputeStreamSyncPop(hypre_Handle *hypre_handle_)
 {
 #if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_UNIFIED_MEMORY)
-   hypre_HandleCudaComputeStreamSync(hypre_handle).pop_back();
+   hypre_HandleCudaComputeStreamSync(hypre_handle_).pop_back();
 #endif
 }
 
 /* synchronize the default stream */
 static inline HYPRE_Int
-hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle)
+hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle_)
 {
 #if defined(HYPRE_USING_UNIFIED_MEMORY)
 #if defined(HYPRE_USING_CUDA)
-   assert(!hypre_HandleCudaComputeStreamSync(hypre_handle).empty());
+   assert(!hypre_HandleCudaComputeStreamSync(hypre_handle_).empty());
 
-   if ( hypre_HandleCudaComputeStreamSync(hypre_handle).back() )
+   if ( hypre_HandleCudaComputeStreamSync(hypre_handle_).back() )
    {
-      HYPRE_CUDA_CALL( cudaStreamSynchronize(hypre_HandleCudaComputeStream(hypre_handle)) );
+      HYPRE_CUDA_CALL( cudaStreamSynchronize(hypre_HandleCudaComputeStream(hypre_handle_)) );
    }
 #endif
 #if defined(HYPRE_USING_DEVICE_OPENMP)
