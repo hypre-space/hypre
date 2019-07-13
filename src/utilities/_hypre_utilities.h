@@ -443,19 +443,15 @@ extern size_t hypre__target_dtoh_count;
 extern size_t hypre__target_htod_bytes;
 extern size_t hypre__target_dtoh_bytes;
 
-/* DEBUG MODE: check if offloading has effect
- * (it is turned on when configured with --enable-debug) */
-
-#ifdef HYPRE_OMP45_DEBUG
-/* if we ``enter'' an address, it should not exist in device [o.w NO EFFECT]
-   if we ``exit'' or ''update'' an address, it should exist in device [o.w ERROR]
-hypre__offload_flag: 0 == OK; 1 == WRONG
+/* CHECK MODE: check if offloading has effect (turned on when configured with --enable-debug)
+ * if we ``enter'' an address, it should not exist in device [o.w NO EFFECT]
+ * if we ``exit'' or ''update'' an address, it should exist in device [o.w ERROR]
+ * hypre__offload_flag: 0 == OK; 1 == WRONG
  */
-#define HYPRE_OFFLOAD_FLAG(devnum, hptr, type) \
-   HYPRE_Int hypre__offload_flag = (type[1] == 'n') == omp_target_is_present(hptr, devnum);
+#ifdef HYPRE_DEVICE_OPENMP_CHECK
+#define HYPRE_OFFLOAD_FLAG(devnum, hptr, type) HYPRE_Int hypre__offload_flag = (type[1] == 'n') == omp_target_is_present(hptr, devnum);
 #else
-#define HYPRE_OFFLOAD_FLAG(...) \
-   HYPRE_Int hypre__offload_flag = 0; /* non-debug mode, always OK */
+#define HYPRE_OFFLOAD_FLAG(...) HYPRE_Int hypre__offload_flag = 0; /* non-debug mode, always OK */
 #endif
 
 /* OMP 4.5 offloading macro */
@@ -474,7 +470,7 @@ hypre__offload_flag: 0 == OK; 1 == WRONG
    if (hypre__global_offload && hypre__offload_hptr != NULL) { \
       /* offloading offset and size (in datatype) */ \
       size_t hypre__offload_offset = offset, hypre__offload_size = count; \
-      /* in HYPRE_OMP45_DEBUG mode, we test if this offload has effect */ \
+      /* in the CHECK mode, we test if this offload has effect */ \
       HYPRE_OFFLOAD_FLAG(devnum, hypre__offload_hptr, type1) \
       if (hypre__offload_flag) { \
          printf("[!NO Effect! %s %d] device %d target: %6s %6s, data %p, [%ld:%ld]\n", __FILE__, __LINE__, devnum, type1, type2, (void *)hypre__offload_hptr, hypre__offload_offset, hypre__offload_size); exit(0); \
@@ -1255,7 +1251,7 @@ void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, c
 #ifndef HYPRE_CUDA_UTILS_H
 #define HYPRE_CUDA_UTILS_H
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 
 HYPRE_Int hypre_printf( const char *format , ... );
 
@@ -1269,6 +1265,7 @@ extern "C++" {
 #include <curand.h>
 #include <cusparse.h>
 
+#if defined(HYPRE_USING_CUDA)
 #include <thrust/execution_policy.h>
 #include <thrust/system/cuda/execution_policy.h>
 #include <thrust/count.h>
@@ -1285,8 +1282,8 @@ extern "C++" {
 #include <thrust/fill.h>
 #include <thrust/adjacent_difference.h>
 #include <thrust/inner_product.h>
-
 using namespace thrust::placeholders;
+#endif // #if defined(HYPRE_USING_CUDA)
 
 #define HYPRE_WARP_SIZE       32
 #define HYPRE_WARP_FULL_MASK  0xFFFFFFFF
@@ -1325,7 +1322,8 @@ using namespace thrust::placeholders;
 #define HYPRE_CUSPARSE_CALL(call) do {                                                       \
    cusparseStatus_t err = call;                                                              \
    if (CUSPARSE_STATUS_SUCCESS != err) {                                                     \
-      hypre_printf("CUSPARSE ERROR (code = %d) at %s:%d\n", err, __FILE__, __LINE__);        \
+      hypre_printf("CUSPARSE ERROR (code = %d, %d) at %s:%d\n",                              \
+            err, err == CUSPARSE_STATUS_EXECUTION_FAILED, __FILE__, __LINE__);                           \
       exit(1);                                                                               \
    } } while(0)
 
@@ -1346,6 +1344,7 @@ using namespace thrust::placeholders;
       exit(1);                                                                                                 \
    } } while(0)
 
+#if defined(HYPRE_USING_CUDA)
 /* return the number of threads in block */
 template <hypre_int dim>
 static __device__ __forceinline__
@@ -1664,15 +1663,19 @@ hypre_int next_power_of_2(hypre_int n)
    return n;
 }
 
+#endif // #if defined(HYPRE_USING_CUDA)
+
 #ifdef __cplusplus
 }
 #endif
 
+#if defined(HYPRE_USING_CUDA)
 /* for struct solvers */
 #define HYPRE_MIN_GPU_SIZE (131072)
 extern HYPRE_Int hypre_exec_policy;
 #define hypre_SetDeviceOn()  hypre_exec_policy = HYPRE_MEMORY_DEVICE
 #define hypre_SetDeviceOff() hypre_exec_policy = HYPRE_MEMORY_HOST
+#endif
 
 #endif /* HYPRE_USING_CUDA */
 #endif /* #ifndef HYPRE_CUDA_UTILS_H */
@@ -1698,13 +1701,18 @@ extern HYPRE_Int hypre_exec_policy;
 #ifndef HYPRE_HANDLE_H
 #define HYPRE_HANDLE_H
 
-#if defined(HYPRE_USING_CUDA)
+#ifdef __cplusplus
+extern "C++" {
+#endif
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 #include <vector>
 #endif
 
 typedef struct
 {
-#if defined(HYPRE_USING_CUDA)
+   HYPRE_Int hypre_error;
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_Int cuda_device;
    /* by default, hypre puts GPU computations in this stream
     * Do not be confused with the default (null) CUDA stream */
@@ -1730,7 +1738,12 @@ typedef struct
 
 extern hypre_Handle *hypre_handle;
 
+hypre_Handle* hypre_HandleCreate();
+HYPRE_Int hypre_HandleDestroy(hypre_Handle *handle);
+
 /* accessor inline function to hypre_device_csr_handle */
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 static inline HYPRE_Int &
 hypre_HandleCudaDevice(hypre_Handle *hypre_handle)
 {
@@ -1759,18 +1772,6 @@ static inline std::vector<HYPRE_Int> &
 hypre_HandleCudaComputeStreamSync(hypre_Handle *hypre_handle)
 {
    return hypre_handle->cuda_compute_stream_sync;
-}
-
-static inline void
-hypre_HandleCudaComputeStreamSyncPush(hypre_Handle *hypre_handle, HYPRE_Int sync)
-{
-   hypre_HandleCudaComputeStreamSync(hypre_handle).push_back(sync);
-}
-
-static inline void
-hypre_HandleCudaComputeStreamSyncPop(hypre_Handle *hypre_handle)
-{
-   hypre_HandleCudaComputeStreamSync(hypre_handle).pop_back();
 }
 
 static inline cudaStream_t
@@ -1869,14 +1870,30 @@ hypre_HandleCusparseMatDescr(hypre_Handle *hypre_handle)
    return mat_descr;
 }
 
-hypre_Handle* hypre_HandleCreate();
-HYPRE_Int hypre_HandleDestroy(hypre_Handle *handle);
+#endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP) */
+
+static inline void
+hypre_HandleCudaComputeStreamSyncPush(hypre_Handle *hypre_handle, HYPRE_Int sync)
+{
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_UNIFIED_MEMORY)
+   hypre_HandleCudaComputeStreamSync(hypre_handle).push_back(sync);
+#endif
+}
+
+static inline void
+hypre_HandleCudaComputeStreamSyncPop(hypre_Handle *hypre_handle)
+{
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_UNIFIED_MEMORY)
+   hypre_HandleCudaComputeStreamSync(hypre_handle).pop_back();
+#endif
+}
 
 /* synchronize the default stream */
 static inline HYPRE_Int
 hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle)
 {
 #if defined(HYPRE_USING_UNIFIED_MEMORY)
+#if defined(HYPRE_USING_CUDA)
    assert(!hypre_HandleCudaComputeStreamSync(hypre_handle).empty());
 
    if ( hypre_HandleCudaComputeStreamSync(hypre_handle).back() )
@@ -1884,8 +1901,16 @@ hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle)
       HYPRE_CUDA_CALL( cudaStreamSynchronize(hypre_HandleCudaComputeStream(hypre_handle)) );
    }
 #endif
+#if defined(HYPRE_USING_DEVICE_OPENMP)
+   HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
+#endif
+#endif /* #if defined(HYPRE_USING_UNIFIED_MEMORY) */
    return hypre_error_flag;
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 

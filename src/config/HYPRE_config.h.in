@@ -131,6 +131,9 @@
 /* Define to 1 if using OpenMP on device [target mapped version] */
 #undef HYPRE_DEVICE_OPENMP_MAPPED
 
+/* Define to 1 if strictly checking OpenMP offload directives */
+#undef HYPRE_DEVICE_OPENMP_CHECK
+
 /* Define to 1 if executing on host/device with RAJA */
 #undef HYPRE_USING_RAJA
 
@@ -140,8 +143,8 @@
 /* Define to 1 if using NVIDIA Tools Extension (NVTX) */
 #undef HYPRE_USING_NVTX
 
-/* FIXME: replace this with USING_CUDA */
-#undef HYPRE_USING_GPU
+/* Define to 1 if using cuSPARSE */
+#undef HYPRE_USING_CUSPARSE
 
 /* Define to 1 if using GPU aware MPI */
 #undef HYPRE_WITH_GPU_AWARE_MPI

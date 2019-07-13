@@ -19,13 +19,18 @@
 #ifndef HYPRE_HANDLE_H
 #define HYPRE_HANDLE_H
 
-#if defined(HYPRE_USING_CUDA)
+#ifdef __cplusplus
+extern "C++" {
+#endif
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 #include <vector>
 #endif
 
 typedef struct
 {
-#if defined(HYPRE_USING_CUDA)
+   HYPRE_Int hypre_error;
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_Int cuda_device;
    /* by default, hypre puts GPU computations in this stream
     * Do not be confused with the default (null) CUDA stream */
@@ -51,7 +56,12 @@ typedef struct
 
 extern hypre_Handle *hypre_handle;
 
+hypre_Handle* hypre_HandleCreate();
+HYPRE_Int hypre_HandleDestroy(hypre_Handle *handle);
+
 /* accessor inline function to hypre_device_csr_handle */
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 static inline HYPRE_Int &
 hypre_HandleCudaDevice(hypre_Handle *hypre_handle)
 {
@@ -80,18 +90,6 @@ static inline std::vector<HYPRE_Int> &
 hypre_HandleCudaComputeStreamSync(hypre_Handle *hypre_handle)
 {
    return hypre_handle->cuda_compute_stream_sync;
-}
-
-static inline void
-hypre_HandleCudaComputeStreamSyncPush(hypre_Handle *hypre_handle, HYPRE_Int sync)
-{
-   hypre_HandleCudaComputeStreamSync(hypre_handle).push_back(sync);
-}
-
-static inline void
-hypre_HandleCudaComputeStreamSyncPop(hypre_Handle *hypre_handle)
-{
-   hypre_HandleCudaComputeStreamSync(hypre_handle).pop_back();
 }
 
 static inline cudaStream_t
@@ -190,14 +188,30 @@ hypre_HandleCusparseMatDescr(hypre_Handle *hypre_handle)
    return mat_descr;
 }
 
-hypre_Handle* hypre_HandleCreate();
-HYPRE_Int hypre_HandleDestroy(hypre_Handle *handle);
+#endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP) */
+
+static inline void
+hypre_HandleCudaComputeStreamSyncPush(hypre_Handle *hypre_handle, HYPRE_Int sync)
+{
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_UNIFIED_MEMORY)
+   hypre_HandleCudaComputeStreamSync(hypre_handle).push_back(sync);
+#endif
+}
+
+static inline void
+hypre_HandleCudaComputeStreamSyncPop(hypre_Handle *hypre_handle)
+{
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_UNIFIED_MEMORY)
+   hypre_HandleCudaComputeStreamSync(hypre_handle).pop_back();
+#endif
+}
 
 /* synchronize the default stream */
 static inline HYPRE_Int
 hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle)
 {
 #if defined(HYPRE_USING_UNIFIED_MEMORY)
+#if defined(HYPRE_USING_CUDA)
    assert(!hypre_HandleCudaComputeStreamSync(hypre_handle).empty());
 
    if ( hypre_HandleCudaComputeStreamSync(hypre_handle).back() )
@@ -205,8 +219,16 @@ hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle)
       HYPRE_CUDA_CALL( cudaStreamSynchronize(hypre_HandleCudaComputeStream(hypre_handle)) );
    }
 #endif
+#if defined(HYPRE_USING_DEVICE_OPENMP)
+   HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
+#endif
+#endif /* #if defined(HYPRE_USING_UNIFIED_MEMORY) */
    return hypre_error_flag;
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 

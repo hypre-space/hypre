@@ -429,22 +429,5 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
    return C;
 }
 
-#else // #if defined(HYPRE_USING_CUDA)
-
-hypre_ParCSRMatrix*
-hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A,
-                          hypre_ParCSRMatrix  *B )
-{
-   return NULL;
-}
-
-hypre_ParCSRMatrix*
-hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
-                             hypre_ParCSRMatrix  *B,
-                             HYPRE_Int            keep_transpose)
-{
-   return NULL;
-}
-
 #endif // #if defined(HYPRE_USING_CUDA)
 

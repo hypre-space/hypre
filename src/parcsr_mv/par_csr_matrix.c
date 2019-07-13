@@ -1845,6 +1845,9 @@ hypre_ParCSRMatrixToCSRMatrixAll(hypre_ParCSRMatrix *par_matrix)
    num_nonzeros = matrix_i[num_rows];
 
    matrix = hypre_CSRMatrixCreate(num_rows, num_cols, num_nonzeros);
+
+   hypre_CSRMatrixMemoryLocation(matrix) = HYPRE_MEMORY_HOST;
+
    hypre_CSRMatrixI(matrix) = matrix_i;
    hypre_CSRMatrixInitialize(matrix);
    matrix_j = hypre_CSRMatrixJ(matrix);
@@ -1949,6 +1952,9 @@ hypre_ParCSRMatrixToCSRMatrixAll(hypre_ParCSRMatrix *par_matrix)
    num_nonzeros = matrix_i[num_rows];
 
    matrix = hypre_CSRMatrixCreate(num_rows, num_cols, num_nonzeros);
+
+   hypre_CSRMatrixMemoryLocation(matrix) = HYPRE_MEMORY_HOST;
+
    hypre_CSRMatrixI(matrix) = matrix_i;
    hypre_CSRMatrixInitialize(matrix);
    matrix_j = hypre_CSRMatrixJ(matrix);

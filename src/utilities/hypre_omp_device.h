@@ -39,19 +39,15 @@ extern size_t hypre__target_dtoh_count;
 extern size_t hypre__target_htod_bytes;
 extern size_t hypre__target_dtoh_bytes;
 
-/* DEBUG MODE: check if offloading has effect
- * (it is turned on when configured with --enable-debug) */
-
-#ifdef HYPRE_OMP45_DEBUG
-/* if we ``enter'' an address, it should not exist in device [o.w NO EFFECT]
-   if we ``exit'' or ''update'' an address, it should exist in device [o.w ERROR]
-hypre__offload_flag: 0 == OK; 1 == WRONG
+/* CHECK MODE: check if offloading has effect (turned on when configured with --enable-debug)
+ * if we ``enter'' an address, it should not exist in device [o.w NO EFFECT]
+ * if we ``exit'' or ''update'' an address, it should exist in device [o.w ERROR]
+ * hypre__offload_flag: 0 == OK; 1 == WRONG
  */
-#define HYPRE_OFFLOAD_FLAG(devnum, hptr, type) \
-   HYPRE_Int hypre__offload_flag = (type[1] == 'n') == omp_target_is_present(hptr, devnum);
+#ifdef HYPRE_DEVICE_OPENMP_CHECK
+#define HYPRE_OFFLOAD_FLAG(devnum, hptr, type) HYPRE_Int hypre__offload_flag = (type[1] == 'n') == omp_target_is_present(hptr, devnum);
 #else
-#define HYPRE_OFFLOAD_FLAG(...) \
-   HYPRE_Int hypre__offload_flag = 0; /* non-debug mode, always OK */
+#define HYPRE_OFFLOAD_FLAG(...) HYPRE_Int hypre__offload_flag = 0; /* non-debug mode, always OK */
 #endif
 
 /* OMP 4.5 offloading macro */
@@ -70,7 +66,7 @@ hypre__offload_flag: 0 == OK; 1 == WRONG
    if (hypre__global_offload && hypre__offload_hptr != NULL) { \
       /* offloading offset and size (in datatype) */ \
       size_t hypre__offload_offset = offset, hypre__offload_size = count; \
-      /* in HYPRE_OMP45_DEBUG mode, we test if this offload has effect */ \
+      /* in the CHECK mode, we test if this offload has effect */ \
       HYPRE_OFFLOAD_FLAG(devnum, hypre__offload_hptr, type1) \
       if (hypre__offload_flag) { \
          printf("[!NO Effect! %s %d] device %d target: %6s %6s, data %p, [%ld:%ld]\n", __FILE__, __LINE__, devnum, type1, type2, (void *)hypre__offload_hptr, hypre__offload_offset, hypre__offload_size); exit(0); \

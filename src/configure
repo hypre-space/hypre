@@ -1481,7 +1481,7 @@ Optional Features:
   --enable-fortran        Require a working Fortran compiler (default is YES).
   --enable-unified-memory Use unified memory for allocating the memory
                           (default is NO).
-  --enable-cuda-streams   Use CUDA streams (default is NO).
+  --enable-cuda-streams   Use CUDA streams (default is YES).
   --enable-nvtx           Use NVTX (default is NO).
   --enable-gpu-aware-mpi  Use GPU memory aware MPI
 
@@ -2970,10 +2970,10 @@ if test "${enable_cuda_streams+set}" = set; then :
   enableval=$enable_cuda_streams; case "${enableval}" in
     yes) hypre_using_cuda_streams=yes ;;
     no)  hypre_using_cuda_streams=no ;;
-    *)   hypre_using_cuda_streams=no ;;
+    *)   hypre_using_cuda_streams=yes ;;
  esac
 else
-  hypre_using_cuda_streams=no
+  hypre_using_cuda_streams=yes
 
 fi
 
@@ -8299,11 +8299,11 @@ fi
 if test "$hypre_user_chose_cuda" = "yes"
 then
 
-$as_echo "#define HYPRE_USING_GPU 1" >>confdefs.h
-
-
-
 $as_echo "#define HYPRE_USING_CUDA 1" >>confdefs.h
+
+
+
+$as_echo "#define HYPRE_USING_CUSPARSE 1" >>confdefs.h
 
 
    if test "$hypre_using_nvtx" = "yes"
@@ -8418,6 +8418,10 @@ fi
 
 if test "$hypre_using_device_openmp" = "yes"
 then
+
+$as_echo "#define HYPRE_USING_CUSPARSE 1" >>confdefs.h
+
+
    if test "$hypre_using_nvtx" = "yes"
    then
 
@@ -8429,6 +8433,7 @@ $as_echo "#define HYPRE_USING_DEVICE_OPENMP 1" >>confdefs.h
 
 
 $as_echo "#define HYPRE_DEVICE_OPENMP_ALLOC 1" >>confdefs.h
+
 
 
    for ac_prog in nvcc
@@ -8474,8 +8479,8 @@ fi
 done
 
 
-   CFLAGS="${CFLAGS} -DHYPRE_USING_CUSPARSE -DHYPRE_USING_OPENMP_OFFLOAD"
-   CXXFLAGS="${CXXFLAGS} -DHYPRE_USING_CUSPARSE -DHYPRE_USING_OPENMP_OFFLOAD"
+   CFLAGS="${CFLAGS}"
+   CXXFLAGS="${CXXFLAGS}"
 
    if test "$CC" = "clang-gpu" || test "$CC" = "mpiclang-gpu"
    then
@@ -8487,16 +8492,22 @@ done
    fi
    if test "$hypre_using_debug" = "yes"
    then
-      CFLAGS+=" -DHYPRE_OMP45_DEBUG"
-      CXXFLAGS+=" -DHYPRE_OMP45_DEBUG"
+
+$as_echo "#define HYPRE_DEVICE_OPENMP_CHECK 1" >>confdefs.h
+
    fi
 
    HYPRE_CUDA_INCL="-I${HYPRE_CUDA_PATH}/include"
-   HYPRE_CUDA_LIBS="-L${HYPRE_CUDA_PATH}/lib64 -lcusparse -lcudart"
+   HYPRE_CUDA_LIBS="-L${HYPRE_CUDA_PATH}/lib64 -lcusparse -lcudart -lcurand"
    if test "$hypre_using_nvtx" = "yes"
    then
       HYPRE_CUDA_LIBS+=" -lnvToolsExt"
    fi
+
+      CC=${CXX}
+   LINK_CC=${LINK_CXX}
+   CXXFLAGS="-x c++ ${CXXFLAGS}"
+   CFLAGS=${CXXFLAGS}
 fi
 
 if test "$hypre_using_shared" = "yes"

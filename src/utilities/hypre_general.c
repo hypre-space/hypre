@@ -24,12 +24,12 @@ hypre_HandleCreate()
    hypre_Handle *handle = hypre_CTAlloc(hypre_Handle, 1, HYPRE_MEMORY_HOST);
 
    /* set default options */
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    hypre_HandleCudaDevice(handle)                   = 0;
-   hypre_HandleCudaComputeStreamNum(handle)         = 4;
-   hypre_HandleCudaPrefetchStreamNum(handle)        = 4;
+   hypre_HandleCudaComputeStreamNum(handle)         = 0;
+   hypre_HandleCudaPrefetchStreamNum(handle)        = 1;
    hypre_HandleCudaComputeStreamSyncDefault(handle) = 1;
-   handle->spgemm_use_cusparse                      = 0; // TODO: accessor func
+   handle->spgemm_use_cusparse                      = 0; // TODO: accessor func #ifdef
    handle->spgemm_num_passes                        = 3;
    /* 1: naive overestimate, 2: naive underestimate, 3: Cohen's algorithm */
    handle->spgemm_rownnz_estimate_method            = 3;
@@ -48,6 +48,7 @@ hypre_HandleCreate()
 HYPRE_Int
 hypre_HandleDestroy(hypre_Handle *hypre_handle)
 {
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_Int i;
 
    hypre_TFree(hypre_handle->cuda_reduce_buffer, HYPRE_MEMORY_DEVICE);
@@ -74,6 +75,7 @@ hypre_HandleDestroy(hypre_Handle *hypre_handle)
          HYPRE_CUDA_CALL( cudaStreamDestroy(hypre_handle->cuda_streams[i]) );
       }
    }
+#endif
 
    hypre_TFree(hypre_handle, HYPRE_MEMORY_HOST);
 
@@ -100,7 +102,11 @@ hypre_SetDevice(HYPRE_Int use_device, hypre_Handle *hypre_handle)
    hypre_MPI_Comm_free(&node_comm);
 
    HYPRE_Int nDevices;
+#if defined(HYPRE_USING_CUDA)
    HYPRE_CUDA_CALL( cudaGetDeviceCount(&nDevices) );
+#else
+   nDevices = omp_get_num_devices();
+#endif
 
    if (use_device < 0)
    {
@@ -111,16 +117,16 @@ hypre_SetDevice(HYPRE_Int use_device, hypre_Handle *hypre_handle)
       device_id = use_device;
    }
 
+#if defined(HYPRE_USING_CUDA)
    HYPRE_CUDA_CALL( cudaSetDevice(device_id) );
+#else
+   omp_set_default_device(device_id);
+#endif
 
    hypre_HandleCudaDevice(hypre_handle) = device_id;
 
    hypre_printf("Proc [global %d/%d, local %d/%d] can see %d GPUs and is running on %d\n",
                  myid, nproc, myNodeid, NodeSize, nDevices, device_id);
-
-#if defined(HYPRE_USING_DEVICE_OPENMP)
-   omp_set_default_device(device_id);
-#endif
 
    return hypre_error_flag;
 }

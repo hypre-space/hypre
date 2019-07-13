@@ -329,9 +329,9 @@ hypre_ExchangeExternalRowsDeviceInit( hypre_CSRMatrix      *B_ext,
    HYPRE_Int      B_ext_ncols    = hypre_CSRMatrixNumCols(B_ext);
    HYPRE_Int      B_ext_nrows    = hypre_CSRMatrixNumRows(B_ext);
    HYPRE_Int      B_ext_nnz      = hypre_CSRMatrixNumNonzeros(B_ext);
-   HYPRE_Int     *B_ext_rownnz_d = hypre_TAlloc(HYPRE_Int,     B_ext_nrows + 1, HYPRE_MEMORY_DEVICE);
-   HYPRE_Int     *B_ext_rownnz_h = hypre_TAlloc(HYPRE_Int,     B_ext_nrows,     HYPRE_MEMORY_HOST);
-   HYPRE_Int     *B_ext_i_h      = hypre_TAlloc(HYPRE_Int,     B_ext_nrows + 1, HYPRE_MEMORY_HOST);
+   HYPRE_Int     *B_ext_rownnz_d = hypre_TAlloc(HYPRE_Int, B_ext_nrows + 1, HYPRE_MEMORY_DEVICE);
+   HYPRE_Int     *B_ext_rownnz_h = hypre_TAlloc(HYPRE_Int, B_ext_nrows,     HYPRE_MEMORY_HOST);
+   HYPRE_Int     *B_ext_i_h      = hypre_TAlloc(HYPRE_Int, B_ext_nrows + 1, HYPRE_MEMORY_HOST);
 
    hypre_assert(num_elmts_recv == B_ext_nrows);
 

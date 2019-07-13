@@ -214,14 +214,20 @@ hypre_ParCSRMatMat( hypre_ParCSRMatrix  *A,
 
    hypre_assert(exec != HYPRE_EXEC_UNSET);
 
+   hypre_ParCSRMatrix *C = NULL;
+
    if (exec == HYPRE_EXEC_HOST)
    {
-      return hypre_ParCSRMatMatHost(A,B);
+      C = hypre_ParCSRMatMatHost(A,B);
    }
+#if defined(HYPRE_USING_CUDA)
    else
    {
-      return hypre_ParCSRMatMatDevice(A,B);
+      C = hypre_ParCSRMatMatDevice(A,B);
    }
+#endif
+
+   return C;
 }
 
 /*--------------------------------------------------------------------------
@@ -455,14 +461,20 @@ hypre_ParCSRTMatMatKT( hypre_ParCSRMatrix  *A,
 
    hypre_assert(exec != HYPRE_EXEC_UNSET);
 
+   hypre_ParCSRMatrix *C = NULL;
+
    if (exec == HYPRE_EXEC_HOST)
    {
-      return hypre_ParCSRTMatMatKTHost(A, B, keep_transpose);
+      C = hypre_ParCSRTMatMatKTHost(A, B, keep_transpose);
    }
+#if defined(HYPRE_USING_CUDA)
    else
    {
-      return hypre_ParCSRTMatMatKTDevice(A, B, keep_transpose);
+      C = hypre_ParCSRTMatMatKTDevice(A, B, keep_transpose);
    }
+#endif
+
+   return C;
 }
 
 hypre_ParCSRMatrix*

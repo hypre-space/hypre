@@ -384,13 +384,13 @@ AS_HELP_STRING([--enable-unified-memory],
 
 AC_ARG_ENABLE(cuda-streams,
 AS_HELP_STRING([--enable-cuda-streams],
-               [Use CUDA streams (default is NO).]),
+               [Use CUDA streams (default is YES).]),
 [case "${enableval}" in
     yes) hypre_using_cuda_streams=yes ;;
     no)  hypre_using_cuda_streams=no ;;
-    *)   hypre_using_cuda_streams=no ;;
+    *)   hypre_using_cuda_streams=yes ;;
  esac],
-[hypre_using_cuda_streams=no]
+[hypre_using_cuda_streams=yes]
 )
 
 AC_ARG_ENABLE(nvtx,
@@ -1655,11 +1655,10 @@ dnl * Set cuda options
 dnl *********************************************************************
 if test "$hypre_user_chose_cuda" = "yes"
 then
-   dnl to delete
-   AC_DEFINE(HYPRE_USING_GPU, 1, [GPU being used])
-
    AC_DEFINE(HYPRE_USING_CUDA, 1, [CUDA being used])
-   
+
+   AC_DEFINE(HYPRE_USING_CUSPARSE, 1, [cuSPARSE being used])
+
    if test "$hypre_using_nvtx" = "yes"
    then
       AC_DEFINE(HYPRE_USING_NVTX, 1, [NVTX being used])
@@ -1726,18 +1725,21 @@ fi
 
 if test "$hypre_using_device_openmp" = "yes"
 then
+   AC_DEFINE(HYPRE_USING_CUSPARSE, 1, [cuSPARSE being used])
+
    if test "$hypre_using_nvtx" = "yes"
    then
       AC_DEFINE(HYPRE_USING_NVTX, 1, [NVTX being used])
    fi
    AC_DEFINE(HYPRE_USING_DEVICE_OPENMP, 1, [Enable OpenMP (>=4.5) device directives])
    AC_DEFINE(HYPRE_DEVICE_OPENMP_ALLOC, 1, [Enable device OpenMP target alloc version])
+
    dnl AC_DEFINE(HYPRE_DEVICE_OPENMP_MAPPED, 1, [Enable device OpenMP target mapped version])
 
    AC_CHECK_PROGS(CUCC, nvcc)
 
-   CFLAGS="${CFLAGS} -DHYPRE_USING_CUSPARSE -DHYPRE_USING_OPENMP_OFFLOAD"
-   CXXFLAGS="${CXXFLAGS} -DHYPRE_USING_CUSPARSE -DHYPRE_USING_OPENMP_OFFLOAD"
+   CFLAGS="${CFLAGS}"
+   CXXFLAGS="${CXXFLAGS}"
 
    if [test "$CC" = "clang-gpu" || test "$CC" = "mpiclang-gpu"]
    then
@@ -1749,16 +1751,21 @@ then
    fi
    if test "$hypre_using_debug" = "yes"
    then
-      CFLAGS+=" -DHYPRE_OMP45_DEBUG"
-      CXXFLAGS+=" -DHYPRE_OMP45_DEBUG"
+      AC_DEFINE(HYPRE_DEVICE_OPENMP_CHECK, 1, [Strictly checking OpenMP offload directives])
    fi
 
    HYPRE_CUDA_INCL="-I${HYPRE_CUDA_PATH}/include"
-   HYPRE_CUDA_LIBS="-L${HYPRE_CUDA_PATH}/lib64 -lcusparse -lcudart"
+   HYPRE_CUDA_LIBS="-L${HYPRE_CUDA_PATH}/lib64 -lcusparse -lcudart -lcurand"
    if test "$hypre_using_nvtx" = "yes"
    then
       HYPRE_CUDA_LIBS+=" -lnvToolsExt"
    fi
+
+   dnl let CC be CXX
+   CC=${CXX}
+   LINK_CC=${LINK_CXX}
+   CXXFLAGS="-x c++ ${CXXFLAGS}"
+   CFLAGS=${CXXFLAGS}
 fi
 
 dnl *********************************************************************

@@ -370,7 +370,7 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
             Ztemp_data = hypre_VectorData(Ztemp_local);
          }
 
-#ifdef HYPRE_USING_PERSISTENT_COMM
+#if defined(HYPRE_USING_PERSISTENT_COMM)
          // JSP: persistent comm can be similarly used for other smoothers
          hypre_ParCSRPersistentCommHandle *persistent_comm_handle;
 #endif
@@ -383,13 +383,12 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 
             num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
 
-#ifdef HYPRE_USING_PERSISTENT_COMM
+#if defined(HYPRE_USING_PERSISTENT_COMM)
             persistent_comm_handle = hypre_ParCSRCommPkgGetPersistentCommHandle(1, comm_pkg);
-            v_buf_data = (HYPRE_Real *)persistent_comm_handle->send_data;
-            Vext_data = (HYPRE_Real *)persistent_comm_handle->recv_data;
+            v_buf_data = (HYPRE_Real *) hypre_ParCSRCommHandleSendDataBuffer(persistent_comm_handle);
+            Vext_data  = (HYPRE_Real *) hypre_ParCSRCommHandleRecvDataBuffer(persistent_comm_handle);
 #else
-            v_buf_data = hypre_CTAlloc(HYPRE_Real,
-                                       hypre_ParCSRCommPkgSendMapStart(comm_pkg,  num_sends), HYPRE_MEMORY_HOST);
+            v_buf_data = hypre_CTAlloc(HYPRE_Real, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends), HYPRE_MEMORY_HOST);
 
             Vext_data = hypre_CTAlloc(HYPRE_Real, num_cols_offd, HYPRE_MEMORY_HOST);
 #endif
@@ -407,8 +406,7 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 #endif
             for (i = begin; i < end; i++)
             {
-               v_buf_data[i - begin]
-                  = u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,i)];
+               v_buf_data[i-begin] = u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,i)];
             }
 
 #ifdef HYPRE_PROFILE
@@ -416,18 +414,17 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
             hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] -= hypre_MPI_Wtime();
 #endif
 
-#ifdef HYPRE_USING_PERSISTENT_COMM
-            hypre_ParCSRPersistentCommHandleStart(persistent_comm_handle);
+#if defined(HYPRE_USING_PERSISTENT_COMM)
+            hypre_ParCSRPersistentCommHandleStart(persistent_comm_handle, HYPRE_MEMORY_HOST, v_buf_data);
 #else
-            comm_handle = hypre_ParCSRCommHandleCreate( 1, comm_pkg, v_buf_data,
-                                                        Vext_data);
+            comm_handle = hypre_ParCSRCommHandleCreate(1, comm_pkg, v_buf_data, Vext_data);
 #endif
 
             /*-----------------------------------------------------------------
              * Copy current approximation into temporary vector.
              *-----------------------------------------------------------------*/
-#ifdef HYPRE_USING_PERSISTENT_COMM
-            hypre_ParCSRPersistentCommHandleWait(persistent_comm_handle);
+#if defined(HYPRE_USING_PERSISTENT_COMM)
+            hypre_ParCSRPersistentCommHandleWait(persistent_comm_handle, HYPRE_MEMORY_HOST, Vext_data);
 #else
             hypre_ParCSRCommHandleDestroy(comm_handle);
 #endif
@@ -476,7 +473,6 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                     }
                     for (i = ns; i < ne; i++) /* interior points first */
                     {
-
                        /*-----------------------------------------------------------
                         * If diagonal is nonzero, relax point i; otherwise, skip it.
                         *-----------------------------------------------------------*/
@@ -2348,10 +2344,8 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
          /*-----------------------------------------------------------------
           * Copy f into temporary vector.
           *-----------------------------------------------------------------*/
-#if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
          hypre_SeqVectorPrefetch(hypre_ParVectorLocalVector(Vtemp), HYPRE_MEMORY_DEVICE);
          hypre_SeqVectorPrefetch(hypre_ParVectorLocalVector(f), HYPRE_MEMORY_DEVICE);
-#endif
          hypre_ParVectorCopy(f, Vtemp);
 
          /*-----------------------------------------------------------------
@@ -2359,7 +2353,7 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
           *-----------------------------------------------------------------*/
 
          hypre_ParCSRMatrixMatvec(-relax_weight,A, u, relax_weight, Vtemp);
-#if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
+#if defined(HYPRE_USING_CUDA)
          hypreDevice_IVAXPY(n, l1_norms, Vtemp_data, u_data);
 #else
          for (i = 0; i < n; i++)

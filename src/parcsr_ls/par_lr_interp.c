@@ -970,7 +970,6 @@ hypre_BoomerAMGBuildStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
 
    }
 
-
    return hypre_error_flag;
 }
 
@@ -1826,9 +1825,10 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
       hypre_TFree(fine_to_coarse_offd, HYPRE_MEMORY_HOST);
       hypre_TFree(CF_marker_offd, HYPRE_MEMORY_HOST);
       hypre_TFree(tmp_CF_marker_offd, HYPRE_MEMORY_HOST);
-      if(num_functions > 1)
+      if (num_functions > 1)
+      {
          hypre_TFree(dof_func_offd, HYPRE_MEMORY_HOST);
-
+      }
 
       hypre_MatvecCommPkgDestroy(extend_comm_pkg);
 
@@ -4907,7 +4907,7 @@ hypre_BoomerAMGBuildExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
    jj_counter_offd = start_indexing;
 
    /* Fine to coarse mapping */
-   if(num_procs > 1)
+   if (num_procs > 1)
    {
       hypre_big_insert_new_nodes(comm_pkg, extend_comm_pkg, fine_to_coarse,
                                  full_off_procNodes, my_first_cpt,
@@ -5229,6 +5229,9 @@ hypre_BoomerAMGBuildExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
    hypre_CSRMatrixJ(P_offd) = P_offd_j;
    hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
 
+   hypre_CSRMatrixMemoryLocation(P_diag) = HYPRE_MEMORY_HOST;
+   hypre_CSRMatrixMemoryLocation(P_offd) = HYPRE_MEMORY_HOST;
+
    /* Compress P, removing coefficients smaller than trunc_factor * Max */
    if (trunc_factor != 0.0 || max_elmts > 0)
    {
@@ -5270,13 +5273,13 @@ hypre_BoomerAMGBuildExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
       hypre_TFree(CF_marker_offd, HYPRE_MEMORY_HOST);
       hypre_TFree(tmp_CF_marker_offd, HYPRE_MEMORY_HOST);
       if(num_functions > 1)
+      {
          hypre_TFree(dof_func_offd, HYPRE_MEMORY_HOST);
-
+      }
 
       hypre_MatvecCommPkgDestroy(extend_comm_pkg);
-
-
    }
 
    return hypre_error_flag;
 }
+
