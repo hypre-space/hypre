@@ -1230,6 +1230,9 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
       {  stop = (n_fine/num_threads)*(my_thread_num+1); }
 
       /* loop over rows */
+      /* This loop counts the number of elements in P */
+      /* is done by counting the elmements in the index set C-hat */
+
       for (i = start; i < stop; i++)
       {
          P_diag_i[i] = jj_counter;
@@ -1238,6 +1241,7 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
 
          if (CF_marker[i] >= 0)
          {
+	    /* row in P corresponding to a coarse pt., will only require one element (1 on the diagonal). */
             jj_counter++;
             fine_to_coarse[i] = coarse_counter;
             coarse_counter++;

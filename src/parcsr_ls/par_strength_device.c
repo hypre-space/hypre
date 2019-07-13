@@ -176,8 +176,8 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
 
       comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data,
 	dof_func_offd);
-
       hypre_ParCSRCommHandleDestroy(comm_handle);
+
       hypre_TFree(int_buf_data, HYPRE_MEMORY_HOST);
       hypre_TMemcpy( dof_func_offd_dev, dof_func_offd, HYPRE_Int, num_cols_offd, HYPRE_MEMORY_DEVICE,
 		     HYPRE_MEMORY_HOST );
@@ -251,6 +251,7 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
    return (ierr);
 }
 
+/*-----------------------------------------------------------------------*/
  __global__ void hypre_BoomerAMGCreateS_dev1( HYPRE_Int nr_of_rows, HYPRE_Real max_row_sum, HYPRE_Real strength_threshold,
 					HYPRE_Real* A_diag_data, HYPRE_Int* A_diag_i, HYPRE_Int* A_diag_j,
 					HYPRE_Real* A_offd_data, HYPRE_Int* A_offd_i, HYPRE_Int* A_offd_j,
@@ -340,12 +341,7 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
 }
 
 
-//__global__ void hypre_prefix_sum_dev( HYPRE_Int nr_of_rows, HYPRE_Int* S_diag_i, HYPRE_Int* S_offd_i )
-//{
-//   thrust::exclusive_scan( thrust::device, &S_diag_i[0], &S_diag_i[nr_of_rows+1], &S_diag_i[0] );
-//   thrust::exclusive_scan( thrust::device, &S_offd_i[0], &S_offd_i[nr_of_rows+1], &S_offd_i[0] );
-//}
-
+/*-----------------------------------------------------------------------*/
 __global__ void hypre_BoomerAMGCreateS_dev2( HYPRE_Int nr_of_rows, HYPRE_Int* A_diag_i, HYPRE_Int* A_offd_i,
 					HYPRE_Int* S_diag_i, HYPRE_Int* S_diag_j, HYPRE_Int* S_temp_diag_j,
 					HYPRE_Int* S_offd_i, HYPRE_Int* S_offd_j, HYPRE_Int* S_temp_offd_j )
@@ -408,7 +404,8 @@ __global__ void hypre_BoomerAMGCreateS_dev2( HYPRE_Int nr_of_rows, HYPRE_Int* A_
 					HYPRE_Int* jS_diag, HYPRE_Int* jS_offd )
 {
    /*-----------------------------------------------------------------------*/
-   /*
+   /* Experimental version of _dev1, this one did not show any gain in performance, do not use ...
+
       Input: nr_of_rows - Number of rows in matrix (local in processor)
              A_diag_data, A_diag_i, A_diag_j - CSR representation of A_diag
              A_offd_data, A_offd_i, A_offd_j - CSR representation of A_offd
@@ -631,7 +628,7 @@ __global__ void hypre_BoomerAMGCreateS_dev2( HYPRE_Int nr_of_rows, HYPRE_Int* A_
 }
 
 
-
+/*-----------------------------------------------------------------------*/
  __global__ void hypre_BoomerAMGCreateS_dev1_mf( HYPRE_Int nr_of_rows, HYPRE_Real max_row_sum, HYPRE_Real strength_threshold,
 					HYPRE_Real* A_diag_data, HYPRE_Int* A_diag_i, HYPRE_Int* A_diag_j,
 					HYPRE_Real* A_offd_data, HYPRE_Int* A_offd_i, HYPRE_Int* A_offd_j,

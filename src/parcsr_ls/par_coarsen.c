@@ -2245,7 +2245,7 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
    }
    else
    {
-      CF_marker = hypre_CTAlloc(HYPRE_Int, num_variables, HYPRE_MEMORY_HOST);
+      CF_marker = hypre_CTAlloc(HYPRE_Int, num_variables, HYPRE_MEMORY_SHARED);
       cnt = 0;
       for (i = 0; i < num_variables; i++)
       {
