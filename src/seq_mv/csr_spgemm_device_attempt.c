@@ -45,7 +45,7 @@ hash_insert_attempt(         HYPRE_Int      HashSize,      /* capacity of the ha
       }
 
       /* try to insert key+1 into slot j */
-      HYPRE_Int old = atomicCAS((int*)(HashKeys+j), -1, key);
+      HYPRE_Int old = atomicCAS((HYPRE_Int*)(HashKeys+j), -1, key);
 
       if (old == -1)
       {

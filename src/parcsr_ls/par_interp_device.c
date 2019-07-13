@@ -1,6 +1,4 @@
 #include "_hypre_parcsr_ls.h"
-#include "_hypre_utilities.h"
-#include <cuda_runtime.h>
 
 // TODO
 #if 0 // comment out for now to pass regression tests
@@ -691,7 +689,7 @@ __global__ void hypre_BoomerAMGBuildDirInterp_dev5( HYPRE_Int P_offd_size,
 
 /*-----------------------------------------------------------------------*/
 /*
-   typedef thrust::zip_iterator<thrust::tuple<thrust::device_vector<int>::iterator,thrust::device_vector<int>::iterator > > ZIvec2Iterator;
+   typedef thrust::zip_iterator<thrust::tuple<thrust::device_vector<HYPRE_Int>::iterator,thrust::device_vector<HYPRE_Int>::iterator > > ZIvec2Iterator;
    struct compare_tuple
    {
       template<typename Tuple>
@@ -761,14 +759,14 @@ hypre_BoomerAMGInterpTruncationDevice( hypre_ParCSRMatrix *P,
    {
       if( !truncated )
       {
-	 /* If not previously truncated, set up P_aux_diag_i and P_aux_offd_i with full number of elements/row */
-	 P_aux_diag_i = hypre_CTAlloc(HYPRE_Int, n_fine+1, HYPRE_MEMORY_SHARED);
-	 P_aux_offd_i = hypre_CTAlloc(HYPRE_Int, n_fine+1, HYPRE_MEMORY_SHARED);
-	 hypre_BoomerAMGInterpTruncationDevice_dev2<<<grid,block >>>( n_fine, P_diag_i, P_offd_i, P_aux_diag_i, P_aux_offd_i );
+         /* If not previously truncated, set up P_aux_diag_i and P_aux_offd_i with full number of elements/row */
+         P_aux_diag_i = hypre_CTAlloc(HYPRE_Int, n_fine+1, HYPRE_MEMORY_SHARED);
+         P_aux_offd_i = hypre_CTAlloc(HYPRE_Int, n_fine+1, HYPRE_MEMORY_SHARED);
+         hypre_BoomerAMGInterpTruncationDevice_dev2<<<grid,block >>>( n_fine, P_diag_i, P_offd_i, P_aux_diag_i, P_aux_offd_i );
       }
       nel_per_row = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
-      thrust::transform(thrust::device,&P_aux_diag_i[0],&P_aux_diag_i[n_fine],&P_aux_offd_i[0],&nel_per_row[0],thrust::plus<int>() );
-      mx_row = thrust::reduce(thrust::device,&nel_per_row[0],&nel_per_row[n_fine],0,thrust::maximum<int>());
+      thrust::transform(thrust::device,&P_aux_diag_i[0],&P_aux_diag_i[n_fine],&P_aux_offd_i[0],&nel_per_row[0],thrust::plus<HYPRE_Int>() );
+      mx_row = thrust::reduce(thrust::device,&nel_per_row[0],&nel_per_row[n_fine],0,thrust::maximum<HYPRE_Int>());
       hypre_TFree(nel_per_row,HYPRE_MEMORY_DEVICE);
 
       /* Use zip_iterator to avoid creating help array nel_per_row */

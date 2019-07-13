@@ -96,7 +96,7 @@ hypre_SetDevice(HYPRE_Int use_device, hypre_Handle *hypre_handle)
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &nproc);
 
    hypre_MPI_Comm_split_type(hypre_MPI_COMM_WORLD, hypre_MPI_COMM_TYPE_SHARED,
-                             myid, MPI_INFO_NULL, &node_comm);
+                             myid, hypre_MPI_INFO_NULL, &node_comm);
    hypre_MPI_Comm_rank(node_comm, &myNodeid);
    hypre_MPI_Comm_size(node_comm, &NodeSize);
    hypre_MPI_Comm_free(&node_comm);
