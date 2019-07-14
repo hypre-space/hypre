@@ -413,140 +413,6 @@ HYPRE_Int hypre_MPI_Info_free( hypre_MPI_Info *info );
  *
  * $Revision$
  ***********************************************************************EHEADER*/
-#ifndef HYPRE_OMP_DEVICE
-#define HYPRE_OMP_DEVICE
-
-#if defined(HYPRE_USING_DEVICE_OPENMP)
-
-#include "omp.h"
-
-/* stringification:
- * _Pragma(string-literal), so we need to cast argument to a string
- * The three dots as last argument of the macro tells compiler that this is a variadic macro.
- * I.e. this is a macro that receives variable number of arguments.
- */
-#define HYPRE_STR(s...) #s
-#define HYPRE_XSTR(s...) HYPRE_STR(s)
-
-/* OpenMP 4.5 device memory management */
-extern HYPRE_Int hypre__global_offload;
-extern HYPRE_Int hypre__offload_device_num;
-extern HYPRE_Int hypre__offload_host_num;
-
-/* stats */
-extern size_t hypre__target_allc_count;
-extern size_t hypre__target_free_count;
-extern size_t hypre__target_allc_bytes;
-extern size_t hypre__target_free_bytes;
-extern size_t hypre__target_htod_count;
-extern size_t hypre__target_dtoh_count;
-extern size_t hypre__target_htod_bytes;
-extern size_t hypre__target_dtoh_bytes;
-
-/* DEBUG MODE: check if offloading has effect
- * (it is turned on when configured with --enable-debug) */
-
-#ifdef HYPRE_OMP45_DEBUG
-/* if we ``enter'' an address, it should not exist in device [o.w NO EFFECT]
-   if we ``exit'' or ''update'' an address, it should exist in device [o.w ERROR]
-hypre__offload_flag: 0 == OK; 1 == WRONG
- */
-#define HYPRE_OFFLOAD_FLAG(devnum, hptr, type) \
-   HYPRE_Int hypre__offload_flag = (type[1] == 'n') == omp_target_is_present(hptr, devnum);
-#else
-#define HYPRE_OFFLOAD_FLAG(...) \
-   HYPRE_Int hypre__offload_flag = 0; /* non-debug mode, always OK */
-#endif
-
-/* OMP 4.5 offloading macro */
-#define hypre_omp45_offload(devnum, hptr, datatype, offset, count, type1, type2) \
-{\
-   /* devnum: device number \
-    * hptr: host poiter \
-    * datatype \
-    * type1: ``e(n)ter'', ''e(x)it'', or ``u(p)date'' \
-    * type2: ``(a)lloc'', ``(t)o'', ``(d)elete'', ''(f)rom'' \
-    */ \
-   datatype *hypre__offload_hptr = (datatype *) hptr; \
-   /* if hypre__global_offload ==    0, or
-    *    hptr (host pointer)   == NULL,
-    *    this offload will be IGNORED */ \
-   if (hypre__global_offload && hypre__offload_hptr != NULL) { \
-      /* offloading offset and size (in datatype) */ \
-      size_t hypre__offload_offset = offset, hypre__offload_size = count; \
-      /* in HYPRE_OMP45_DEBUG mode, we test if this offload has effect */ \
-      HYPRE_OFFLOAD_FLAG(devnum, hypre__offload_hptr, type1) \
-      if (hypre__offload_flag) { \
-         printf("[!NO Effect! %s %d] device %d target: %6s %6s, data %p, [%ld:%ld]\n", __FILE__, __LINE__, devnum, type1, type2, (void *)hypre__offload_hptr, hypre__offload_offset, hypre__offload_size); exit(0); \
-      } else { \
-         size_t offload_bytes = count * sizeof(datatype); \
-         /* printf("[            %s %d] device %d target: %6s %6s, data %p, [%d:%d]\n", __FILE__, __LINE__, devnum, type1, type2, (void *)hypre__offload_hptr, hypre__offload_offset, hypre__offload_size); */ \
-         if (type1[1] == 'n' && type2[0] == 't') { \
-            /* enter to */\
-            hypre__target_allc_count ++; \
-            hypre__target_allc_bytes += offload_bytes; \
-            hypre__target_htod_count ++; \
-            hypre__target_htod_bytes += offload_bytes; \
-            _Pragma (HYPRE_XSTR(omp target enter data map(to:hypre__offload_hptr[hypre__offload_offset:hypre__offload_size]))) \
-         } else if (type1[1] == 'n' && type2[0] == 'a') { \
-            /* enter alloc */ \
-            hypre__target_allc_count ++; \
-            hypre__target_allc_bytes += offload_bytes; \
-            _Pragma (HYPRE_XSTR(omp target enter data map(alloc:hypre__offload_hptr[hypre__offload_offset:hypre__offload_size]))) \
-         } else if (type1[1] == 'x' && type2[0] == 'd') { \
-            /* exit delete */\
-            hypre__target_free_count ++; \
-            hypre__target_free_bytes += offload_bytes; \
-            _Pragma (HYPRE_XSTR(omp target exit data map(delete:hypre__offload_hptr[hypre__offload_offset:hypre__offload_size]))) \
-         } else if (type1[1] == 'x' && type2[0] == 'f') {\
-            /* exit from */ \
-            hypre__target_free_count ++; \
-            hypre__target_free_bytes += offload_bytes; \
-            hypre__target_dtoh_count ++; \
-            hypre__target_dtoh_bytes += offload_bytes; \
-            _Pragma (HYPRE_XSTR(omp target exit data map(from:hypre__offload_hptr[hypre__offload_offset:hypre__offload_size]))) \
-         } else if (type1[1] == 'p' && type2[0] == 't') { \
-            /* update to */ \
-            hypre__target_htod_count ++; \
-            hypre__target_htod_bytes += offload_bytes; \
-            _Pragma (HYPRE_XSTR(omp target update to(hypre__offload_hptr[hypre__offload_offset:hypre__offload_size]))) \
-         } else if (type1[1] == 'p' && type2[0] == 'f') {\
-            /* update from */ \
-            hypre__target_dtoh_count ++; \
-            hypre__target_dtoh_bytes += offload_bytes; \
-            _Pragma (HYPRE_XSTR(omp target update from(hypre__offload_hptr[hypre__offload_offset:hypre__offload_size]))) \
-         } else {\
-            printf("error: unrecognized offloading type combination!\n"); exit(-1); \
-         } \
-      } \
-   } \
-}
-
-HYPRE_Int HYPRE_OMPOffload(HYPRE_Int device, void *ptr, size_t num, const char *type1, const char *type2);
-HYPRE_Int HYPRE_OMPPtrIsMapped(void *p, HYPRE_Int device_num);
-HYPRE_Int HYPRE_OMPOffloadOn();
-HYPRE_Int HYPRE_OMPOffloadOff();
-HYPRE_Int HYPRE_OMPOffloadStatPrint();
-
-#define HYPRE_MIN_GPU_SIZE (131072)
-
-#define hypre_SetDeviceOn() HYPRE_OMPOffloadOn()
-#define hypre_SetDeviceOff() HYPRE_OMPOffloadOff()
-
-#endif /* HYPRE_USING_DEVICE_OPENMP */
-#endif /* HYPRE_OMP_DEVICE */
-
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
 
 /******************************************************************************
  *
@@ -2342,6 +2208,8 @@ HYPRE_Int hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int *d_row_p
 HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int *d_row_ptr, HYPRE_Int *d_row_num, HYPRE_Int *d_row_ind);
 
 HYPRE_Int* hypreDevice_CsrRowIndicesToPtrs(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ind);
+
+HYPRE_Int hypreDevice_CsrRowIndicesToPtrs_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ind, HYPRE_Int *d_row_ptr);
 
 HYPRE_Int hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Real *y);
 
