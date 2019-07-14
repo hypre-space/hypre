@@ -462,8 +462,6 @@ main( hypre_int argc,
    hypre_assert(errcode == 0);
    errcode = HYPRE_CSRMatrixDeviceSpGemmSetUseCusparse(use_cusparse);
    hypre_assert(errcode == 0);
-   errcode = HYPRE_CSRMatrixDeviceSpGemmSetDoTiming(1);
-   hypre_assert(errcode == 0);
 
    /*-----------------------------------------------------------
     * Set up matrix
@@ -555,6 +553,9 @@ main( hypre_int argc,
    hypre_ClearTiming();
 
    /* PMIS on DEVICE */
+   hypre_BoomerAMGCoarsenPMISDevice(parcsr_S_device, parcsr_A, 0, debug_flag, &d_CF_marker);
+   hypre_TFree(d_CF_marker, HYPRE_MEMORY_DEVICE);
+
    time_index = hypre_InitializeTiming("Device PMIS");
    hypre_BeginTiming(time_index);
 

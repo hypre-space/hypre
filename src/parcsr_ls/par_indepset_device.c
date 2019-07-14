@@ -231,7 +231,7 @@ hypre_BoomerAMGIndepSetInitDevice( hypre_ParCSRMatrix *S,
    }
    else
    {
-      curandGenerator_t gen = hypre_device_csr_handle->gen;
+      curandGenerator_t gen = hypre_HandleCurandGenerator(hypre_handle);
 
       HYPRE_CURAND_CALL( curandSetPseudoRandomGeneratorSeed(gen, 2747 + my_id) );
 

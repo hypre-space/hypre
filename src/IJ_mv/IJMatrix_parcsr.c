@@ -754,9 +754,9 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix       *matrix,
             size = diag_i[row_local+1] - diag_i[row_local] +
                    offd_i[row_local+1] - offd_i[row_local];
 
-            if (n > size)  /* >>>>> Should we change this and allow this? 
-				This could be same column index, i.e. only last
-				value is set, previous ones overwritten. <<<< */
+            if (n > size)  /* >>>>> Should we change this and allow this?
+                              This could be same column index, i.e. only last
+                              value is set, previous ones overwritten. <<<< */
             {
                hypre_error(HYPRE_ERROR_GENERIC);
                if (print_level)
@@ -967,9 +967,10 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix       *matrix,
                {
                   big_offd_j = hypre_CSRMatrixBigJ(offd);
                   offd_data = hypre_CSRMatrixData(offd);
-                  if (!big_offd_j) 
+                  if (!big_offd_j)
                   {
-                     big_offd_j = hypre_CTAlloc(HYPRE_BigInt, offd_i[hypre_CSRMatrixNumRows(offd)], HYPRE_MEMORY_HOST);
+                     big_offd_j = hypre_CTAlloc(HYPRE_BigInt, offd_i[hypre_CSRMatrixNumRows(offd)],
+                                                hypre_CSRMatrixMemoryLocation(offd));
                      hypre_CSRMatrixBigJ(offd) = big_offd_j;
                   }
                }
@@ -1222,12 +1223,12 @@ hypre_IJMatrixAddToValuesParCSR( hypre_IJMatrix       *matrix,
                offd_j = hypre_CSRMatrixJ(offd);
                offd_data = hypre_CSRMatrixData(offd);
             }
-            size = diag_i[row_local+1] - diag_i[row_local] + 
+            size = diag_i[row_local+1] - diag_i[row_local] +
                    offd_i[row_local+1] - offd_i[row_local];
 
-            if (n > size)  /* >>>>> Should we change this and allow this? 
-				This could be same column index, i.e. only last
-				value is set, previous ones overwritten. <<<< */
+            if (n > size)  /* >>>>> Should we change this and allow this?
+                              This could be same column index, i.e. only last
+                              value is set, previous ones overwritten. <<<< */
             {
                hypre_error(HYPRE_ERROR_GENERIC);
                if (print_level)
@@ -1499,9 +1500,10 @@ hypre_IJMatrixAddToValuesParCSR( hypre_IJMatrix       *matrix,
                {
                   big_offd_j = hypre_CSRMatrixBigJ(offd);
                   offd_data = hypre_CSRMatrixData(offd);
-                  if (!big_offd_j) 
+                  if (!big_offd_j)
                   {
-                     big_offd_j = hypre_CTAlloc(HYPRE_BigInt, offd_i[hypre_CSRMatrixNumRows(offd)], HYPRE_MEMORY_HOST);
+                     big_offd_j = hypre_CTAlloc(HYPRE_BigInt, offd_i[hypre_CSRMatrixNumRows(offd)],
+                                                hypre_CSRMatrixMemoryLocation(offd));
                      hypre_CSRMatrixBigJ(offd) = big_offd_j;
                   }
                }
@@ -3386,9 +3388,10 @@ hypre_IJMatrixSetValuesOMPParCSR( hypre_IJMatrix       *matrix,
          {
             offd_data = hypre_CSRMatrixData(offd);
             big_offd_j = hypre_CSRMatrixBigJ(offd);
-            if (!big_offd_j) 
+            if (!big_offd_j)
             {
-               big_offd_j = hypre_CTAlloc(HYPRE_BigInt, offd_i[hypre_CSRMatrixNumRows(offd)], HYPRE_MEMORY_HOST);
+               big_offd_j = hypre_CTAlloc(HYPRE_BigInt, offd_i[hypre_CSRMatrixNumRows(offd)],
+                                          hypre_CSRMatrixMemoryLocation(offd));
                hypre_CSRMatrixBigJ(offd) = big_offd_j;
             }
          }
@@ -4003,9 +4006,10 @@ hypre_IJMatrixAddToValuesOMPParCSR( hypre_IJMatrix       *matrix,
          {
             big_offd_j = hypre_CSRMatrixBigJ(offd);
             offd_data = hypre_CSRMatrixData(offd);
-            if (!big_offd_j) 
+            if (!big_offd_j)
             {
-               big_offd_j = hypre_CTAlloc(HYPRE_BigInt, offd_i[hypre_CSRMatrixNumRows(offd)], HYPRE_MEMORY_HOST);
+               big_offd_j = hypre_CTAlloc(HYPRE_BigInt, offd_i[hypre_CSRMatrixNumRows(offd)],
+                                          hypre_CSRMatrixMemoryLocation(offd));
                hypre_CSRMatrixBigJ(offd) = big_offd_j;
             }
          }

@@ -37,6 +37,7 @@ FILES =\
  csr_matop_device.c\
  csr_matrix.c\
  csr_matvec.c\
+ csr_matvec_oomp.c\
  csr_spadd_device.c\
  csr_spgemm_device.c\
  csr_spgemm_device_attempt.c\
@@ -54,7 +55,7 @@ FILES =\
  mapped_matrix.c\
  multiblock_matrix.c\
  vector.c\
- csr_matvec_oomp.c
+ vector_batched.c
 
 OBJS = ${FILES:.c=.o}
 #CUOBJS = ${FILES_NVCC:.cu=.o}

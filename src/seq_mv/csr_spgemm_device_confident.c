@@ -362,6 +362,10 @@ hypreDevice_CSRSpGemmWithRownnzUpperbound(HYPRE_Int   m,        HYPRE_Int   k,  
                                           HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_c_out,
                                           HYPRE_Int *nnzC)
 {
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_SPMM_NUMERIC] -= hypre_MPI_Wtime();
+#endif
+
    const HYPRE_Int num_warps_per_block =  20;
    const HYPRE_Int shmem_hash_size     = 128;
    const HYPRE_Int BDIMX               =   2;
@@ -378,17 +382,7 @@ hypreDevice_CSRSpGemmWithRownnzUpperbound(HYPRE_Int   m,        HYPRE_Int   k,  
    // number of active warps
    HYPRE_Int num_act_warps = min(bDim.z * gDim, m);
 
-   hypre_double t1 = 0, t2 = 0;
-   size_t mem_alloc = 0;
-
-   HYPRE_Int do_timing = hypre_device_csr_handle->do_timing;
-   char hash_type = hypre_device_csr_handle->hash_type;
-
-   if (do_timing)
-   {
-      cudaThreadSynchronize();
-      t1 = time_getWallclockSeconds();
-   }
+   char hash_type = hypre_handle->spgemm_hash_type;
 
    /* ---------------------------------------------------------------------------
     * build hash table
@@ -397,15 +391,6 @@ hypreDevice_CSRSpGemmWithRownnzUpperbound(HYPRE_Int   m,        HYPRE_Int   k,  
    HYPRE_Complex *d_ghash_a;
    csr_spmm_create_hash_table(m, d_rc, NULL, shmem_hash_size, num_act_warps,
                               &d_ghash_i, &d_ghash_j, &d_ghash_a, &ghash_size);
-   mem_alloc += (num_act_warps + 1)*sizeof(HYPRE_Int) + ghash_size * (sizeof(HYPRE_Int) + sizeof(HYPRE_Complex));
-
-   if (do_timing)
-   {
-      cudaThreadSynchronize();
-      t2 = time_getWallclockSeconds();
-      //printf("^^^^create hash table time                                %.2e\n", t2 - t1);
-      hypre_device_csr_handle->spmm_create_hashtable_time += t2 - t1;
-   }
 
    /* ---------------------------------------------------------------------------
     * numerical multiplication:
@@ -413,19 +398,12 @@ hypreDevice_CSRSpGemmWithRownnzUpperbound(HYPRE_Int   m,        HYPRE_Int   k,  
    HYPRE_Int *d_ic, *d_jc, nnzC_nume, *d_ic_new = NULL, *d_jc_new = NULL, nnzC_nume_new = -1;
    HYPRE_Complex *d_c, *d_c_new = NULL;
 
-   if (do_timing)
-   {
-      cudaThreadSynchronize();
-      t1 = time_getWallclockSeconds();
-   }
-
    /* if rc contains exact_rownnz: can allocate the final C directly;
       if rc contains upper bound : it is a temporary space that is more than enough to store C */
    csr_spmm_create_ija(m, d_rc, &d_ic, &d_jc, &d_c, &nnzC_nume);
 
    if (!exact_rownnz)
    {
-      mem_alloc += (m + 1)*sizeof(HYPRE_Int) + nnzC_nume * (sizeof(HYPRE_Int) + sizeof(HYPRE_Complex));
       d_ic_new = hypre_TAlloc(HYPRE_Int, m+1, HYPRE_MEMORY_DEVICE);
    }
 
@@ -509,40 +487,19 @@ hypreDevice_CSRSpGemmWithRownnzUpperbound(HYPRE_Int   m,        HYPRE_Int   k,  
       }
    }
 
-   if (do_timing)
-   {
-      cudaThreadSynchronize();
-      t2 = time_getWallclockSeconds();
-      //printf("^^^^Numeric multiplication time                           %.2e\n", t2 - t1);
-      hypre_device_csr_handle->spmm_numeric_time += t2 - t1;
-   }
-
-   if (do_timing)
-   {
-      cudaThreadSynchronize();
-      t1 = time_getWallclockSeconds();
-   }
-
    hypre_TFree(d_ghash_i, HYPRE_MEMORY_DEVICE);
    hypre_TFree(d_ghash_j, HYPRE_MEMORY_DEVICE);
    hypre_TFree(d_ghash_a, HYPRE_MEMORY_DEVICE);
-
-   if (do_timing)
-   {
-      cudaThreadSynchronize();
-      t2 = time_getWallclockSeconds();
-      //printf("^^^^Postprocess time after numerical                      %.2e\n", t2 - t1);
-      hypre_device_csr_handle->spmm_post_numeric_time += t2 - t1;
-   }
-
-   hypre_device_csr_handle->ghash_size = ghash_size;
-   hypre_device_csr_handle->nnzC_gpu  = nnzC_nume;
-   hypre_device_csr_handle->spmm_numeric_mem = mem_alloc;
 
    *d_ic_out = d_ic;
    *d_jc_out = d_jc;
    *d_c_out  = d_c;
    *nnzC     = nnzC_nume;
+
+#ifdef HYPRE_PROFILE
+   cudaThreadSynchronize();
+   hypre_profile_times[HYPRE_TIMER_ID_SPMM_NUMERIC] += hypre_MPI_Wtime();
+#endif
 
    return hypre_error_flag;
 }

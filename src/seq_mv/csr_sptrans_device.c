@@ -30,8 +30,10 @@ hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int    
       return hypre_error_flag;
    }
 
-   HYPRE_Int do_timing = hypre_device_csr_handle->do_timing;
-   hypre_double tt = 0.0, tm;
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_SPTRANS] -= hypre_MPI_Wtime();
+#endif
+
    HYPRE_Int *d_jt, *d_it, *d_pm, *d_ic, *d_jc;
    HYPRE_Complex *d_ac = NULL;
    HYPRE_Int *mem_work = hypre_TAlloc(HYPRE_Int, 3*nnzA, HYPRE_MEMORY_DEVICE);
@@ -47,12 +49,6 @@ hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int    
    //d_pm = hypre_TAlloc(HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE);
    d_pm = mem_work;
 
-   if (do_timing)
-   {
-      cudaThreadSynchronize();
-      tm = tt = time_getWallclockSeconds();
-   }
-
    /* expansion: A's row idx */
    //d_it = hypre_TAlloc(HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE);
    d_it = d_pm + nnzA;
@@ -63,14 +59,6 @@ hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int    
    d_jt = d_it + nnzA;
    hypre_TMemcpy(d_jt, d_ja, HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
-   if (do_timing)
-   {
-      cudaThreadSynchronize();
-      hypre_double tm_old = tm;
-      tm = time_getWallclockSeconds();
-      hypre_device_csr_handle->sptrans_expansion_time += tm - tm_old;
-   }
-
    /* sort: by col */
    thrust::sequence(thrust::device, d_pm, d_pm + nnzA);
    thrust::stable_sort_by_key(thrust::device, d_jt, d_jt + nnzA, d_pm);
@@ -78,14 +66,6 @@ hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int    
    if (want_data)
    {
       thrust::gather(thrust::device, d_pm, d_pm + nnzA, d_aa, d_ac);
-   }
-
-   if (do_timing)
-   {
-      cudaThreadSynchronize();
-      hypre_double tm_old = tm;
-      tm = time_getWallclockSeconds();
-      hypre_device_csr_handle->sptrans_sorting_time = tm - tm_old;
    }
 
    /* convert into ic: row idx --> row ptrs */
@@ -96,14 +76,6 @@ hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int    
    hypre_TMemcpy(&nnzC, &d_ic[n], HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    hypre_assert(nnzC == nnzA);
 #endif
-
-   if (do_timing)
-   {
-      cudaThreadSynchronize();
-      hypre_double tm_old = tm;
-      tm = time_getWallclockSeconds();
-      hypre_device_csr_handle->sptrans_rowptr_time += tm - tm_old;
-   }
 
    /*
    hypre_TFree(d_jt, HYPRE_MEMORY_DEVICE);
@@ -116,12 +88,10 @@ hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int    
    *d_jc_out = d_jc;
    *d_ac_out = d_ac;
 
-   if (do_timing)
-   {
-      cudaThreadSynchronize();
-      tt = time_getWallclockSeconds() - tt;
-      hypre_device_csr_handle->sptrans_time += tt;
-   }
+#ifdef HYPRE_PROFILE
+   cudaThreadSynchronize();
+   hypre_profile_times[HYPRE_TIMER_ID_SPTRANS] += hypre_MPI_Wtime();
+#endif
 
    return hypre_error_flag;
 }

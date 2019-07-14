@@ -1,9 +1,18 @@
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
+
 #include "_hypre_parcsr_ls.h"
-#include "_hypre_utilities.h"
 
 #if defined(HYPRE_USING_CUDA)
-
-#include <cuda_runtime.h>
 
  __global__ void hypre_BoomerAMGCreateS_dev1b( HYPRE_Int nr_of_rows, HYPRE_Real max_row_sum, HYPRE_Real strength_threshold,
 					HYPRE_Real* A_diag_data, HYPRE_Int* A_diag_i, HYPRE_Int* A_diag_j,
@@ -42,7 +51,7 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_CREATES] -= hypre_MPI_Wtime();
 #endif
-   PUSH_RANGE("CreateS_dev",0);
+   //PUSH_RANGE("CreateS_dev",0);
    MPI_Comm 	       comm            = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommPkg     *comm_pkg   = hypre_ParCSRMatrixCommPkg(A);
    hypre_ParCSRCommHandle  *comm_handle;
@@ -176,8 +185,8 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
 
       comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data,
 	dof_func_offd);
-
       hypre_ParCSRCommHandleDestroy(comm_handle);
+
       hypre_TFree(int_buf_data, HYPRE_MEMORY_HOST);
       hypre_TMemcpy( dof_func_offd_dev, dof_func_offd, HYPRE_Int, num_cols_offd, HYPRE_MEMORY_DEVICE,
 		     HYPRE_MEMORY_HOST );
@@ -247,10 +256,11 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_CREATES] += hypre_MPI_Wtime();
 #endif
-   POP_RANGE
+   //POP_RANGE
    return (ierr);
 }
 
+/*-----------------------------------------------------------------------*/
  __global__ void hypre_BoomerAMGCreateS_dev1( HYPRE_Int nr_of_rows, HYPRE_Real max_row_sum, HYPRE_Real strength_threshold,
 					HYPRE_Real* A_diag_data, HYPRE_Int* A_diag_i, HYPRE_Int* A_diag_j,
 					HYPRE_Real* A_offd_data, HYPRE_Int* A_offd_i, HYPRE_Int* A_offd_j,
@@ -340,12 +350,7 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
 }
 
 
-//__global__ void hypre_prefix_sum_dev( HYPRE_Int nr_of_rows, HYPRE_Int* S_diag_i, HYPRE_Int* S_offd_i )
-//{
-//   thrust::exclusive_scan( thrust::device, &S_diag_i[0], &S_diag_i[nr_of_rows+1], &S_diag_i[0] );
-//   thrust::exclusive_scan( thrust::device, &S_offd_i[0], &S_offd_i[nr_of_rows+1], &S_offd_i[0] );
-//}
-
+/*-----------------------------------------------------------------------*/
 __global__ void hypre_BoomerAMGCreateS_dev2( HYPRE_Int nr_of_rows, HYPRE_Int* A_diag_i, HYPRE_Int* A_offd_i,
 					HYPRE_Int* S_diag_i, HYPRE_Int* S_diag_j, HYPRE_Int* S_temp_diag_j,
 					HYPRE_Int* S_offd_i, HYPRE_Int* S_offd_j, HYPRE_Int* S_temp_offd_j )
@@ -408,7 +413,8 @@ __global__ void hypre_BoomerAMGCreateS_dev2( HYPRE_Int nr_of_rows, HYPRE_Int* A_
 					HYPRE_Int* jS_diag, HYPRE_Int* jS_offd )
 {
    /*-----------------------------------------------------------------------*/
-   /*
+   /* Experimental version of _dev1, this one did not show any gain in performance, do not use ...
+
       Input: nr_of_rows - Number of rows in matrix (local in processor)
              A_diag_data, A_diag_i, A_diag_j - CSR representation of A_diag
              A_offd_data, A_offd_i, A_offd_j - CSR representation of A_offd
@@ -631,7 +637,7 @@ __global__ void hypre_BoomerAMGCreateS_dev2( HYPRE_Int nr_of_rows, HYPRE_Int* A_
 }
 
 
-
+/*-----------------------------------------------------------------------*/
  __global__ void hypre_BoomerAMGCreateS_dev1_mf( HYPRE_Int nr_of_rows, HYPRE_Real max_row_sum, HYPRE_Real strength_threshold,
 					HYPRE_Real* A_diag_data, HYPRE_Int* A_diag_i, HYPRE_Int* A_diag_j,
 					HYPRE_Real* A_offd_data, HYPRE_Int* A_offd_i, HYPRE_Int* A_offd_j,
@@ -821,18 +827,5 @@ __global__ void hypre_BoomerAMGCreateS_dev2( HYPRE_Int nr_of_rows, HYPRE_Int* A_
    } /* for each variable */
 }
 
-#else
-
-HYPRE_Int
-hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
-                             HYPRE_Real             strength_threshold,
-                             HYPRE_Real             max_row_sum,
-                             HYPRE_Int              num_functions,
-                             HYPRE_Int             *dof_func,
-                             hypre_ParCSRMatrix   **S_ptr)
-{
-   return 0;
-}
-
-#endif
+#endif /* #if defined(HYPRE_USING_CUDA) */
 

@@ -27,14 +27,6 @@ hypreDevice_CSRSpGemmCusparse(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    HYPRE_Int  *d_ic, *d_jc, baseC, nnzC;
    HYPRE_Int  *d_ja_sorted, *d_jb_sorted;
    HYPRE_Complex *d_c, *d_a_sorted, *d_b_sorted;
-   double tt = 0.0;
-   HYPRE_Int do_timing = hypre_device_csr_handle->do_timing;
-
-   if (do_timing)
-   {
-      cudaThreadSynchronize();
-      tt = time_getWallclockSeconds();
-   }
 
    d_a_sorted  = hypre_TAlloc(HYPRE_Complex, nnzA, HYPRE_MEMORY_DEVICE);
    d_b_sorted  = hypre_TAlloc(HYPRE_Complex, nnzB, HYPRE_MEMORY_DEVICE);
@@ -163,14 +155,6 @@ hypreDevice_CSRSpGemmCusparse(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    hypre_TFree(d_b_sorted,  HYPRE_MEMORY_DEVICE);
    hypre_TFree(d_ja_sorted, HYPRE_MEMORY_DEVICE);
    hypre_TFree(d_jb_sorted, HYPRE_MEMORY_DEVICE);
-
-   if (do_timing)
-   {
-      cudaThreadSynchronize();
-      tt = time_getWallclockSeconds() - tt;
-      //printf("^^^^Cusparse time                                             %.2e\n", tt);
-      hypre_device_csr_handle->spmm_cusparse_time += tt;
-   }
 
    return hypre_error_flag;
 }

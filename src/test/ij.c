@@ -389,8 +389,16 @@ main( hypre_int argc,
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
+   time_index = hypre_InitializeTiming("Hypre init");
+   hypre_BeginTiming(time_index);
+
    /* Initialize Hypre */
    HYPRE_Init(argc, argv);
+
+   hypre_EndTiming(time_index);
+   hypre_PrintTiming("Hypre init times", hypre_MPI_COMM_WORLD);
+   hypre_FinalizeTiming(time_index);
+   hypre_ClearTiming();
 
    //omp_set_default_device(0);
    //nvtxDomainHandle_t domain = nvtxDomainCreateA("Domain_A");
@@ -3012,7 +3020,11 @@ main( hypre_int argc,
       time_index = hypre_InitializeTiming("BoomerAMG Solve");
       hypre_BeginTiming(time_index);
 
+      PUSH_RANGE("solve", 1)
+
       HYPRE_BoomerAMGSolve(amg_solver, parcsr_A, b, x);
+
+      POP_RANGE
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
@@ -3343,7 +3355,7 @@ main( hypre_int argc,
          /* use ParaSails preconditioner */
          if (myid == 0) hypre_printf("Solver: ParaSails-PCG\n");
 
-	 HYPRE_ParaSailsCreate(hypre_MPI_COMM_WORLD, &pcg_precond);
+         HYPRE_ParaSailsCreate(hypre_MPI_COMM_WORLD, &pcg_precond);
          HYPRE_ParaSailsSetParams(pcg_precond, sai_threshold, max_levels);
          HYPRE_ParaSailsSetFilter(pcg_precond, sai_filter);
          HYPRE_ParaSailsSetLogging(pcg_precond, poutdat);
@@ -3358,10 +3370,10 @@ main( hypre_int argc,
          /* use Schwarz preconditioner */
          if (myid == 0) hypre_printf("Solver: Schwarz-PCG\n");
 
-	 HYPRE_SchwarzCreate(&pcg_precond);
-	 HYPRE_SchwarzSetVariant(pcg_precond, variant);
-	 HYPRE_SchwarzSetOverlap(pcg_precond, overlap);
-	 HYPRE_SchwarzSetDomainType(pcg_precond, domain_type);
+         HYPRE_SchwarzCreate(&pcg_precond);
+         HYPRE_SchwarzSetVariant(pcg_precond, variant);
+         HYPRE_SchwarzSetOverlap(pcg_precond, overlap);
+         HYPRE_SchwarzSetDomainType(pcg_precond, domain_type);
          HYPRE_SchwarzSetRelaxWeight(pcg_precond, schwarz_rlx_weight);
          HYPRE_SchwarzSetNonSymm(pcg_precond, use_nonsymm_schwarz);
          HYPRE_PCGSetPrecond(pcg_solver,
@@ -3639,15 +3651,15 @@ main( hypre_int argc,
       }
       else if (solver_id == 8)
       {
-	 HYPRE_ParaSailsDestroy(pcg_precond);
+         HYPRE_ParaSailsDestroy(pcg_precond);
       }
       else if (solver_id == 12)
       {
-	 HYPRE_SchwarzDestroy(pcg_precond);
+         HYPRE_SchwarzDestroy(pcg_precond);
       }
       else if (solver_id == 14)
       {
-	 HYPRE_BoomerAMGDestroy(pcg_precond);
+         HYPRE_BoomerAMGDestroy(pcg_precond);
       }
       else if (solver_id == 43)
       {
