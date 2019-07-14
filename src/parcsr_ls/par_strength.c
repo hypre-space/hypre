@@ -83,17 +83,6 @@
 
   @see */
 
-/*--------------------------------------------------------------------------*/
-HYPRE_Int
-hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
-			     HYPRE_Real             strength_threshold,
-			     HYPRE_Real             max_row_sum,
-			     HYPRE_Int                    num_functions,
-			     HYPRE_Int                   *dof_func,
-			     hypre_ParCSRMatrix   **S_ptr);
-
-/*--------------------------------------------------------------------------*/
-
 HYPRE_Int
 hypre_BoomerAMGCreateSHost(hypre_ParCSRMatrix    *A,
                            HYPRE_Real             strength_threshold,
@@ -565,10 +554,12 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
    {
       return hypre_BoomerAMGCreateSHost(A,strength_threshold,max_row_sum,num_functions,dof_func,S_ptr);
    }
+#if defined(HYPRE_USING_CUDA)
    else
    {
       return hypre_BoomerAMGCreateSDevice(A,strength_threshold,max_row_sum,num_functions,dof_func,S_ptr);
    }
+#endif
 }
 
 

@@ -2671,3 +2671,4 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
 
    return (ierr);
 }
+

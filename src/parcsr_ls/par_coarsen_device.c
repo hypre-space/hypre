@@ -519,18 +519,6 @@ hypre_PMISCoarseningUpdateCFDevice( hypre_ParCSRMatrix  *S,               /* in 
    return hypre_error_flag;
 }
 
-#else // #if defined(HYPRE_USING_CUDA)
-
-HYPRE_Int
-hypre_BoomerAMGCoarsenPMISDevice( hypre_ParCSRMatrix *S,
-                                  hypre_ParCSRMatrix *A,
-                                  HYPRE_Int           CF_init,
-                                  HYPRE_Int           debug_flag,
-                                  HYPRE_Int         **CF_marker_ptr )
-{
-   return hypre_error_flag;
-}
-
 #endif // #if defined(HYPRE_USING_CUDA)
 
 
