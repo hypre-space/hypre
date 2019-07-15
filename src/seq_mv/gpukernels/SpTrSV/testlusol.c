@@ -11,10 +11,10 @@ int main(int argc, char *argv[])
     *  GPU L/U solve w/ sync-free        *
     *----------------------------------- */
    int i,n,nnz,nx=32, ny=32, nz=32, npts=7, flg=0, mm=1, dotest=0;
-   HYPRE_Real *h_b,*h_x0,*h_x1,*h_x2,*h_x3,*h_z;
+   HYPRE_Real *h_b,*h_x0,*h_x1,*h_x2,*h_x3,*h_x4,*h_z;
    struct coo_t h_coo;
    hypre_CSRMatrix *h_csr;
-   double e1,e2,e3;
+   double e1,e2,e3,e4;
    char fname[2048];
    int NTESTS = 10;
    int REP = 10;
@@ -81,12 +81,25 @@ int main(int argc, char *argv[])
    for (int i=0; i<NTESTS; i++)
    {
       memcpy(h_x1, h_z, n*sizeof(HYPRE_Real));
-      GaussSeidelRowLevSchd(h_csr, h_b, h_x1, 1, false);
+      GaussSeidelRowLevSchd<true>(h_csr, h_b, h_x1, 1, false);
       e1=error_norm(h_x0, h_x1, n);
       err = max(e1, err);
    }
    printf("err norm %.2e\n", err);
    free(h_x1);
+   /*------------ GPU L/U Solv w/ Dyn-Sched */
+   err = 0.0;
+   h_x4 = (HYPRE_Real *) malloc(n*sizeof(HYPRE_Real));
+   printf(" [GPU] G-S DYNR,       ");
+   for (int i=0; i<NTESTS; i++)
+   {
+      memcpy(h_x4, h_z, n*sizeof(HYPRE_Real));
+      GaussSeidelRowDynSchd<true>(h_csr, h_b, h_x4, 1, false);
+      e4=error_norm(h_x0, h_x4, n);
+      err = max(e4, err);
+   }
+   printf("err norm %.2e\n", err);
+   free(h_x4);
    /*----------- CUSPARSE-1 */
    err = 0.0;
    h_x2 = (HYPRE_Real *) malloc(n*sizeof(HYPRE_Real));
@@ -125,10 +138,17 @@ bench:
    /*------------ GPU L/U Solv w/ Lev-Sched R32 */
    h_x1 = (HYPRE_Real *) malloc(n*sizeof(HYPRE_Real));
    memcpy(h_x1, h_z, n*sizeof(HYPRE_Real));
-   GaussSeidelRowLevSchd(h_csr, h_b, h_x1, REP, true);
+   GaussSeidelRowLevSchd<false>(h_csr, h_b, h_x1, REP, true);
    e1=error_norm(h_x0, h_x1, n);
    printf("err norm %.2e\n", e1);
    free(h_x1);
+   /*------------ GPU L/U Solv w/ Dyn-Sched R32 */
+   h_x4 = (HYPRE_Real *) malloc(n*sizeof(HYPRE_Real));
+   memcpy(h_x4, h_z, n*sizeof(HYPRE_Real));
+   GaussSeidelRowDynSchd<false>(h_csr, h_b, h_x4, REP, true);
+   e4=error_norm(h_x0, h_x4, n);
+   printf("err norm %.2e\n", e4);
+   free(h_x4);
    /*----------- CUSPARSE-1 */
    h_x2 = (HYPRE_Real *) malloc(n*sizeof(HYPRE_Real));
    memcpy(h_x2, h_z, n*sizeof(HYPRE_Real));

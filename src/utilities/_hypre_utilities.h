@@ -125,84 +125,84 @@ extern "C" {
 #define MPI_BOTTOM  	    hypre_MPI_BOTTOM
 
 #define MPI_FLOAT           hypre_MPI_FLOAT
-#define MPI_DOUBLE          hypre_MPI_DOUBLE           
+#define MPI_DOUBLE          hypre_MPI_DOUBLE
 #define MPI_LONG_DOUBLE     hypre_MPI_LONG_DOUBLE
-#define MPI_INT             hypre_MPI_INT              
-#define MPI_LONG_LONG_INT   hypre_MPI_INT              
-#define MPI_CHAR            hypre_MPI_CHAR             
-#define MPI_LONG            hypre_MPI_LONG             
-#define MPI_BYTE            hypre_MPI_BYTE             
+#define MPI_INT             hypre_MPI_INT
+#define MPI_LONG_LONG_INT   hypre_MPI_INT
+#define MPI_CHAR            hypre_MPI_CHAR
+#define MPI_LONG            hypre_MPI_LONG
+#define MPI_BYTE            hypre_MPI_BYTE
 #define MPI_C_DOUBLE_COMPLEX hypre_MPI_COMPLEX
 
-#define MPI_SUM             hypre_MPI_SUM              
-#define MPI_MIN             hypre_MPI_MIN              
-#define MPI_MAX             hypre_MPI_MAX              
-#define MPI_LOR             hypre_MPI_LOR              
-#define MPI_LAND            hypre_MPI_LAND             
+#define MPI_SUM             hypre_MPI_SUM
+#define MPI_MIN             hypre_MPI_MIN
+#define MPI_MAX             hypre_MPI_MAX
+#define MPI_LOR             hypre_MPI_LOR
+#define MPI_LAND            hypre_MPI_LAND
 #define MPI_SUCCESS         hypre_MPI_SUCCESS
 #define MPI_STATUSES_IGNORE hypre_MPI_STATUSES_IGNORE
 
-#define MPI_UNDEFINED       hypre_MPI_UNDEFINED        
-#define MPI_REQUEST_NULL    hypre_MPI_REQUEST_NULL        
+#define MPI_UNDEFINED       hypre_MPI_UNDEFINED
+#define MPI_REQUEST_NULL    hypre_MPI_REQUEST_NULL
 #define MPI_INFO_NULL       hypre_MPI_INFO_NULL
-#define MPI_ANY_SOURCE      hypre_MPI_ANY_SOURCE        
+#define MPI_ANY_SOURCE      hypre_MPI_ANY_SOURCE
 #define MPI_ANY_TAG         hypre_MPI_ANY_TAG
 #define MPI_SOURCE          hypre_MPI_SOURCE
 #define MPI_TAG             hypre_MPI_TAG
 
-#define MPI_Init            hypre_MPI_Init             
-#define MPI_Finalize        hypre_MPI_Finalize         
-#define MPI_Abort           hypre_MPI_Abort         
-#define MPI_Wtime           hypre_MPI_Wtime            
-#define MPI_Wtick           hypre_MPI_Wtick            
-#define MPI_Barrier         hypre_MPI_Barrier          
-#define MPI_Comm_create     hypre_MPI_Comm_create      
-#define MPI_Comm_dup        hypre_MPI_Comm_dup         
+#define MPI_Init            hypre_MPI_Init
+#define MPI_Finalize        hypre_MPI_Finalize
+#define MPI_Abort           hypre_MPI_Abort
+#define MPI_Wtime           hypre_MPI_Wtime
+#define MPI_Wtick           hypre_MPI_Wtick
+#define MPI_Barrier         hypre_MPI_Barrier
+#define MPI_Comm_create     hypre_MPI_Comm_create
+#define MPI_Comm_dup        hypre_MPI_Comm_dup
 #define MPI_Comm_f2c        hypre_MPI_Comm_f2c
-#define MPI_Comm_group      hypre_MPI_Comm_group       
-#define MPI_Comm_size       hypre_MPI_Comm_size        
-#define MPI_Comm_rank       hypre_MPI_Comm_rank        
-#define MPI_Comm_free       hypre_MPI_Comm_free        
-#define MPI_Comm_split      hypre_MPI_Comm_split        
+#define MPI_Comm_group      hypre_MPI_Comm_group
+#define MPI_Comm_size       hypre_MPI_Comm_size
+#define MPI_Comm_rank       hypre_MPI_Comm_rank
+#define MPI_Comm_free       hypre_MPI_Comm_free
+#define MPI_Comm_split      hypre_MPI_Comm_split
 #define MPI_Comm_split_type hypre_MPI_Comm_split_type
-#define MPI_Group_incl      hypre_MPI_Group_incl       
-#define MPI_Group_free      hypre_MPI_Group_free        
-#define MPI_Address         hypre_MPI_Address        
-#define MPI_Get_count       hypre_MPI_Get_count        
-#define MPI_Alltoall        hypre_MPI_Alltoall        
-#define MPI_Allgather       hypre_MPI_Allgather        
-#define MPI_Allgatherv      hypre_MPI_Allgatherv       
-#define MPI_Gather          hypre_MPI_Gather       
-#define MPI_Gatherv         hypre_MPI_Gatherv       
-#define MPI_Scatter         hypre_MPI_Scatter       
-#define MPI_Scatterv        hypre_MPI_Scatterv       
-#define MPI_Bcast           hypre_MPI_Bcast            
-#define MPI_Send            hypre_MPI_Send             
-#define MPI_Recv            hypre_MPI_Recv             
-#define MPI_Isend           hypre_MPI_Isend            
-#define MPI_Irecv           hypre_MPI_Irecv            
-#define MPI_Send_init       hypre_MPI_Send_init             
-#define MPI_Recv_init       hypre_MPI_Recv_init             
-#define MPI_Irsend          hypre_MPI_Irsend             
-#define MPI_Startall        hypre_MPI_Startall             
-#define MPI_Probe           hypre_MPI_Probe             
-#define MPI_Iprobe          hypre_MPI_Iprobe             
-#define MPI_Test            hypre_MPI_Test             
+#define MPI_Group_incl      hypre_MPI_Group_incl
+#define MPI_Group_free      hypre_MPI_Group_free
+#define MPI_Address         hypre_MPI_Address
+#define MPI_Get_count       hypre_MPI_Get_count
+#define MPI_Alltoall        hypre_MPI_Alltoall
+#define MPI_Allgather       hypre_MPI_Allgather
+#define MPI_Allgatherv      hypre_MPI_Allgatherv
+#define MPI_Gather          hypre_MPI_Gather
+#define MPI_Gatherv         hypre_MPI_Gatherv
+#define MPI_Scatter         hypre_MPI_Scatter
+#define MPI_Scatterv        hypre_MPI_Scatterv
+#define MPI_Bcast           hypre_MPI_Bcast
+#define MPI_Send            hypre_MPI_Send
+#define MPI_Recv            hypre_MPI_Recv
+#define MPI_Isend           hypre_MPI_Isend
+#define MPI_Irecv           hypre_MPI_Irecv
+#define MPI_Send_init       hypre_MPI_Send_init
+#define MPI_Recv_init       hypre_MPI_Recv_init
+#define MPI_Irsend          hypre_MPI_Irsend
+#define MPI_Startall        hypre_MPI_Startall
+#define MPI_Probe           hypre_MPI_Probe
+#define MPI_Iprobe          hypre_MPI_Iprobe
+#define MPI_Test            hypre_MPI_Test
 #define MPI_Testall         hypre_MPI_Testall
-#define MPI_Wait            hypre_MPI_Wait             
-#define MPI_Waitall         hypre_MPI_Waitall          
-#define MPI_Waitany         hypre_MPI_Waitany          
-#define MPI_Allreduce       hypre_MPI_Allreduce        
-#define MPI_Reduce          hypre_MPI_Reduce        
-#define MPI_Scan            hypre_MPI_Scan        
-#define MPI_Request_free    hypre_MPI_Request_free        
-#define MPI_Type_contiguous hypre_MPI_Type_contiguous     
-#define MPI_Type_vector     hypre_MPI_Type_vector     
-#define MPI_Type_hvector    hypre_MPI_Type_hvector     
-#define MPI_Type_struct     hypre_MPI_Type_struct      
+#define MPI_Wait            hypre_MPI_Wait
+#define MPI_Waitall         hypre_MPI_Waitall
+#define MPI_Waitany         hypre_MPI_Waitany
+#define MPI_Allreduce       hypre_MPI_Allreduce
+#define MPI_Reduce          hypre_MPI_Reduce
+#define MPI_Scan            hypre_MPI_Scan
+#define MPI_Request_free    hypre_MPI_Request_free
+#define MPI_Type_contiguous hypre_MPI_Type_contiguous
+#define MPI_Type_vector     hypre_MPI_Type_vector
+#define MPI_Type_hvector    hypre_MPI_Type_hvector
+#define MPI_Type_struct     hypre_MPI_Type_struct
 #define MPI_Type_commit     hypre_MPI_Type_commit
-#define MPI_Type_free       hypre_MPI_Type_free        
-#define MPI_Op_free         hypre_MPI_Op_free        
+#define MPI_Type_free       hypre_MPI_Type_free
+#define MPI_Op_free         hypre_MPI_Op_free
 #define MPI_Op_create       hypre_MPI_Op_create
 #define MPI_User_function   hypre_MPI_User_function
 #define MPI_Info_create     hypre_MPI_Info_create
@@ -280,7 +280,7 @@ typedef MPI_User_function    hypre_MPI_User_function;
 #define  hypre_MPI_COMM_NULL          MPI_COMM_NULL
 #define  hypre_MPI_BOTTOM             MPI_BOTTOM
 #define  hypre_MPI_COMM_SELF          MPI_COMM_SELF
-#define  hypre_MPI_COMM_TYPE_SHARED   MPI_COMM_TYPE_SHARED 
+#define  hypre_MPI_COMM_TYPE_SHARED   MPI_COMM_TYPE_SHARED
 
 #define  hypre_MPI_FLOAT   MPI_FLOAT
 #define  hypre_MPI_DOUBLE  MPI_DOUBLE
@@ -302,10 +302,10 @@ typedef MPI_User_function    hypre_MPI_User_function;
 #define  hypre_MPI_SUCCESS MPI_SUCCESS
 #define  hypre_MPI_STATUSES_IGNORE MPI_STATUSES_IGNORE
 
-#define  hypre_MPI_UNDEFINED       MPI_UNDEFINED   
+#define  hypre_MPI_UNDEFINED       MPI_UNDEFINED
 #define  hypre_MPI_REQUEST_NULL    MPI_REQUEST_NULL
 #define  hypre_MPI_INFO_NULL       MPI_INFO_NULL
-#define  hypre_MPI_ANY_SOURCE      MPI_ANY_SOURCE  
+#define  hypre_MPI_ANY_SOURCE      MPI_ANY_SOURCE
 #define  hypre_MPI_ANY_TAG         MPI_ANY_TAG
 #define  hypre_MPI_SOURCE          MPI_SOURCE
 #define  hypre_MPI_TAG             MPI_TAG
@@ -1288,11 +1288,11 @@ extern "C++" {
 using namespace thrust::placeholders;
 #endif // #if defined(HYPRE_USING_CUDA)
 
-#define HYPRE_WARP_SIZE      32
-#define HYPRE_WARP_FULL_MASK 0xFFFFFFFF
-#define HYPRE_MAX_NUM_WARPS  (64 * 64 * 32)
-#define HYPRE_FLT_LARGE      1e30
-#define HYPRE_1D_BLOCK_SIZE  512
+#define HYPRE_WARP_SIZE       32
+#define HYPRE_WARP_FULL_MASK  0xFFFFFFFF
+#define HYPRE_MAX_NUM_WARPS   (64 * 64 * 32)
+#define HYPRE_FLT_LARGE       1e30
+#define HYPRE_1D_BLOCK_SIZE   512
 #define HYPRE_MAX_NUM_STREAMS 10
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1302,18 +1302,18 @@ using namespace thrust::placeholders;
  */
 
 #define HYPRE_CUDA_LAUNCH(kernel_name, gridsize, blocksize, ...)                                                   \
-{ \
-   if ( gridsize.x  == 0 || gridsize.y  == 0 || gridsize.z  == 0 || \
-        blocksize.x == 0 || blocksize.y == 0 || blocksize.z == 0 ) \
-   { \
-      /* hypre_printf("Warning %s %d: Zero CUDA grid/block (%d %d %d) (%d %d %d)\n", \
-                   __FILE__, __LINE__,\
-                   gridsize.x, gridsize.y, gridsize.z, blocksize.x, blocksize.y, blocksize.z); */ \
-   } \
-   else \
-   { \
+{                                                                                                                  \
+   if ( gridsize.x  == 0 || gridsize.y  == 0 || gridsize.z  == 0 ||                                                \
+        blocksize.x == 0 || blocksize.y == 0 || blocksize.z == 0 )                                                 \
+   {                                                                                                               \
+      /* hypre_printf("Warning %s %d: Zero CUDA grid/block (%d %d %d) (%d %d %d)\n",                               \
+                   __FILE__, __LINE__,                                                                             \
+                   gridsize.x, gridsize.y, gridsize.z, blocksize.x, blocksize.y, blocksize.z); */                  \
+   }                                                                                                               \
+   else                                                                                                            \
+   {                                                                                                               \
       (kernel_name) <<< (gridsize), (blocksize), 0, hypre_HandleCudaComputeStream(hypre_handle) >>> (__VA_ARGS__); \
-   } \
+   }                                                                                                               \
 }
 
 
@@ -1331,21 +1331,21 @@ using namespace thrust::placeholders;
    } } while(0)
 
 
-#define HYPRE_CURAND_CALL(call) do {                         \
-    curandStatus_t err = call;                               \
-    if (CURAND_STATUS_SUCCESS != err) {                      \
-       hypre_printf("CURAND ERROR (code = %d) at %s:%d\n",   \
-                    err, __FILE__, __LINE__);                \
-       exit(1);                                              \
-    } } while(0)
+#define HYPRE_CURAND_CALL(call) do {                        \
+   curandStatus_t err = call;                               \
+   if (CURAND_STATUS_SUCCESS != err) {                      \
+      hypre_printf("CURAND ERROR (code = %d) at %s:%d\n",   \
+                   err, __FILE__, __LINE__);                \
+      exit(1);                                              \
+   } } while(0)
 
 
-#define HYPRE_CUDA_CALL(call) do {                           \
-    cudaError_t err = call;                                  \
-    if (cudaSuccess != err) {                                \
+#define HYPRE_CUDA_CALL(call) do {                                                                             \
+   cudaError_t err = call;                                                                                     \
+   if (cudaSuccess != err) {                                                                                   \
       hypre_printf("CUDA ERROR (code = %d, %s) at %s:%d\n", err, cudaGetErrorString(err), __FILE__, __LINE__); \
-       exit(1);                                              \
-    } } while(0)
+      exit(1);                                                                                                 \
+   } } while(0)
 
 #if defined(HYPRE_USING_CUDA)
 /* return the number of threads in block */
@@ -2554,6 +2554,8 @@ HYPRE_Int hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int *d_row_p
 HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int *d_row_ptr, HYPRE_Int *d_row_num, HYPRE_Int *d_row_ind);
 
 HYPRE_Int* hypreDevice_CsrRowIndicesToPtrs(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ind);
+
+HYPRE_Int hypreDevice_CsrRowIndicesToPtrs_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ind, HYPRE_Int *d_row_ptr);
 
 HYPRE_Int hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Real *y);
 

@@ -19,19 +19,12 @@ void CudaFreeLev(struct level_t *h_lev);
 void makeLevel(hypre_CSRMatrix *, struct level_t *);
 void makeLevelCSR(int n, int *ia, int *ja, struct level_t *h_lev);
 void GaussSeidelCPU(int n, int nnz, HYPRE_Real *b, HYPRE_Real *x, hypre_CSRMatrix *csr, int, bool);
+template <bool TEST>
 HYPRE_Int GaussSeidelRowLevSchd(hypre_CSRMatrix *csr, HYPRE_Real *b, HYPRE_Real *x, int REPEAT, bool print);
-void luSolvLevR16(int n, int nnz, hypre_CSRMatrix *, HYPRE_Real *d_x, HYPRE_Real *d_b, int, bool);
-void luSolvLevR32(int n, int nnz, hypre_CSRMatrix *, HYPRE_Real *d_x, HYPRE_Real *d_b, int, bool);
-void luSolvLevC16(int n, int nnz, hypre_CSRMatrix *, HYPRE_Real *d_x, HYPRE_Real *d_b, int, bool);
-void luSolvLevC32(int n, int nnz, hypre_CSRMatrix *, HYPRE_Real *d_x, HYPRE_Real *d_b, int, bool);
+template <bool TEST>
+HYPRE_Int GaussSeidelRowDynSchd(hypre_CSRMatrix *csr, HYPRE_Real *b, HYPRE_Real *x, int REPEAT, bool print);
 double wall_timer();
 void GaussSeidel_cusparse1(hypre_CSRMatrix *csr, HYPRE_Real *b, HYPRE_Real *x, int, bool);
 void GaussSeidel_cusparse2(hypre_CSRMatrix *csr, HYPRE_Real *b, HYPRE_Real *x, int, bool);
-void CreateSyncfree(hypre_CSRMatrix *csr, struct syncfree_t *syncf);
-void FreeSyncfree(struct syncfree_t *syncf);
-void luSolvDYNR(int n, int nnz, hypre_CSRMatrix *csr,
-               HYPRE_Real *x, HYPRE_Real *b, int, bool);
 void allocLevel(int n, struct level_t *lev);
-void checktopo(int n, int *ib, int *jb, int *db, int *d_jlevL,
-               int *d_jlevU, int *d_dp);
 

@@ -5,12 +5,15 @@ __global__
 void hypreCUDAKernel_GaussSeidelRowLevSchd(T *b, T *x, T *a, int *ja, int *ia, int *jlev, int l1, int l2)
 {
    //const HYPRE_Int grid_ngroups = gridDim.x * (SPTRSV_BLOCKDIM / K);
-   HYPRE_Int grid_group_id = (blockIdx.x * SPTRSV_BLOCKDIM + threadIdx.x) / K + l1;
+   const HYPRE_Int grid_group_id = (blockIdx.x * SPTRSV_BLOCKDIM + threadIdx.x) / K + l1;
    const HYPRE_Int group_lane = threadIdx.x & (K - 1);
 
    if ( __any_sync(HYPRE_WARP_FULL_MASK, grid_group_id < l2) )
    {
       HYPRE_Int p = 0, q = 0, r = -1;
+      T sum = 0.0, diag = 0.0;
+      bool find_diag = false;
+
       if (grid_group_id < l2 && group_lane < 2)
       {
          r = read_only_load(&jlev[grid_group_id]);
@@ -20,9 +23,6 @@ void hypreCUDAKernel_GaussSeidelRowLevSchd(T *b, T *x, T *a, int *ja, int *ia, i
       q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1, K);
       p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0, K);
       r = __shfl_sync(HYPRE_WARP_FULL_MASK, r, 0, K);
-
-      T sum = 0.0, diag = 0.0;
-      bool find_diag = false;
 
       for (p += group_lane; __any_sync(HYPRE_WARP_FULL_MASK, p < q); p += K)
       {
@@ -64,6 +64,7 @@ hypreDevice_GaussSeidelRowLevSchd(HYPRE_Int n, HYPRE_Int nnz, HYPRE_Int *d_ia, H
 }
 */
 
+template <bool TEST>
 HYPRE_Int
 GaussSeidelRowLevSchd(hypre_CSRMatrix *csr, HYPRE_Real *b, HYPRE_Real *x, int REPEAT, bool print)
 {
@@ -102,6 +103,7 @@ GaussSeidelRowLevSchd(hypre_CSRMatrix *csr, HYPRE_Real *b, HYPRE_Real *x, int RE
       cudaMemcpy(d_jlevL, lev.jlevL, n*sizeof(int), cudaMemcpyHostToDevice);
       cudaMemcpy(d_jlevU, lev.jlevU, n*sizeof(int), cudaMemcpyHostToDevice);
    }
+   cudaThreadSynchronize();
    ta = wall_timer() - ta;
 
    /*------------------- solve */
@@ -132,8 +134,6 @@ GaussSeidelRowLevSchd(hypre_CSRMatrix *csr, HYPRE_Real *b, HYPRE_Real *x, int RE
          hypreCUDAKernel_GaussSeidelRowLevSchd<group_size> <<<gDim, bDim>>> (d_b, d_x, d_a, d_ja, d_ia, d_jlevU, l1, l2);
       }
    }
-
-   //Barrier for GPU calls
    cudaThreadSynchronize();
    t2 = wall_timer() - t1;
 
@@ -158,4 +158,5 @@ GaussSeidelRowLevSchd(hypre_CSRMatrix *csr, HYPRE_Real *b, HYPRE_Real *x, int RE
    return 0;
 }
 
-
+template HYPRE_Int GaussSeidelRowLevSchd<false>(hypre_CSRMatrix *csr, HYPRE_Real *b, HYPRE_Real *x, int REPEAT, bool print);
+template HYPRE_Int GaussSeidelRowLevSchd<true>(hypre_CSRMatrix *csr, HYPRE_Real *b, HYPRE_Real *x, int REPEAT, bool print);

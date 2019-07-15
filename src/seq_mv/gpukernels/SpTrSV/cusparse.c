@@ -144,9 +144,7 @@ GaussSeidel_cusparse1(hypre_CSRMatrix *csr, HYPRE_Real *b, HYPRE_Real *x, int RE
       exit(1);
    }
 
-   // Barrier for GPU calls
    cudaThreadSynchronize();
-
    ta = wall_timer() - t1;
 
    /* repeated solves */
@@ -239,7 +237,6 @@ GaussSeidel_cusparse1(hypre_CSRMatrix *csr, HYPRE_Real *b, HYPRE_Real *x, int RE
       cudaFree(d_r);
    }
 
-   //Barrier for GPU calls
    cudaThreadSynchronize();
    t2 = wall_timer() - t1;
    t2 /= REPEAT;
@@ -484,9 +481,7 @@ GaussSeidel_cusparse2(hypre_CSRMatrix *csr, HYPRE_Real *b, HYPRE_Real *x, int RE
       exit(1);
    }
 
-   // Barrier for GPU calls
    cudaThreadSynchronize();
-
    ta = wall_timer() - t1;
 
    /* repeated solves */
@@ -583,7 +578,6 @@ GaussSeidel_cusparse2(hypre_CSRMatrix *csr, HYPRE_Real *b, HYPRE_Real *x, int RE
       cudaFree(d_r);
    }
 
-   //Barrier for GPU calls
    cudaThreadSynchronize();
    t2 = wall_timer() - t1;
    t2 /= REPEAT;
