@@ -560,6 +560,8 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
       return hypre_BoomerAMGCreateSDevice(A,strength_threshold,max_row_sum,num_functions,dof_func,S_ptr);
    }
 #endif
+
+   return hypre_error_flag;
 }
 
 
