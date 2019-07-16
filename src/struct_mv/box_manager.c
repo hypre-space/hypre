@@ -168,6 +168,29 @@ hypre_BoxManEntryGetExtents ( hypre_BoxManEntry *entry,
 }
 
 /*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BoxManEntryGetStride ( hypre_BoxManEntry *entry,
+                             hypre_Index        stride)
+{
+   hypre_IndexRef  entry_imin = hypre_BoxManEntryIMin(entry);
+   hypre_IndexRef  entry_imax = hypre_BoxManEntryIMax(entry);
+   HYPRE_Int       ndim       = hypre_BoxManEntryNDim(entry);
+
+   HYPRE_Int  d;
+
+   stride[0] = 1;
+   for (d = 1; d < ndim; d++)
+   {
+      stride[d]  = hypre_IndexD(entry_imax, d-1) - hypre_IndexD(entry_imin, d-1) + 1;
+      stride[d] *= stride[d-1];
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * Warning: This does not copy the position or info!
  *--------------------------------------------------------------------------*/
 
