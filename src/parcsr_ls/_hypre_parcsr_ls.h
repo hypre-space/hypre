@@ -134,12 +134,6 @@ typedef struct
    HYPRE_Int       A_mem_size;
    HYPRE_Int       P_mem_size;
 
-   HYPRE_Complex     *u;
-   HYPRE_Complex     *f;
-   HYPRE_Complex     *t;
-   HYPRE_Complex     *s;
-   HYPRE_Complex     *temp;
-
    HYPRE_Int        *global_indices;
    HYPRE_Int        *coarse_global_indices; 
    HYPRE_Int        *coarse_local_indices;
@@ -153,7 +147,15 @@ typedef struct
    HYPRE_Int        *P_colind;
    HYPRE_Complex    *P_data;
 
+   hypre_CSRMatrix  *A;
+   hypre_CSRMatrix  *A_real;
+   hypre_CSRMatrix  *P;
 
+   hypre_Vector     *u;
+   hypre_Vector     *f;
+   hypre_Vector     *t;
+   hypre_Vector     *s;
+   hypre_Vector     *temp;
 
 } hypre_ParCompGrid;
 
@@ -183,6 +185,10 @@ typedef struct
 #define hypre_ParCompGridPRowPtr(compGrid)         ((compGrid) -> P_rowptr)
 #define hypre_ParCompGridPColInd(compGrid)         ((compGrid) -> P_colind)
 #define hypre_ParCompGridPData(compGrid)           ((compGrid) -> P_data)
+
+#define hypre_ParCompGridA(compGrid)               ((compGrid) -> A)
+#define hypre_ParCompGridAReal(compGrid)           ((compGrid) -> A_real)
+#define hypre_ParCompGridP(compGrid)               ((compGrid) -> P)
 
 #endif
 
@@ -1992,11 +1998,8 @@ HYPRE_Int hypre_ParCompGridGlobalIndicesDump( hypre_ParCompGrid *compGrid, const
 HYPRE_Int hypre_ParCompGridRealDofMarkerDump( hypre_ParCompGrid *compGrid, const char* filename);
 HYPRE_Int hypre_ParCompGridCoarseGlobalIndicesDump( hypre_ParCompGrid *compGrid, const char* filename);
 HYPRE_Int hypre_ParCompGridCoarseResidualMarkerDump( hypre_ParCompGrid *compGrid, const char* filename);
-HYPRE_Int hypre_ParCompGridUDump( hypre_ParCompGrid *compGrid, const char* filename);
-HYPRE_Int hypre_ParCompGridFDump( hypre_ParCompGrid *compGrid, const char* filename);
 HYPRE_Int hypre_ParCompGridMatlabAMatrixDump( hypre_ParCompGrid *compGrid, const char* filename);
 HYPRE_Int hypre_ParCompGridMatlabPMatrixDump( hypre_ParCompGrid *compGrid, const char* filename);
-HYPRE_Int hypre_ParCompGridPrintSolnRHS ( hypre_ParCompGrid *compGrid, const char* filename );
 hypre_ParCompGridCommPkg *hypre_ParCompGridCommPkgCreate ();
 HYPRE_Int hypre_ParCompGridCommPkgDestroy ( hypre_ParCompGridCommPkg *compGridCommPkg );
 hypre_ParCompGridCommPkg *hypre_ParCompGridCommPkgCopy ( hypre_ParCompGridCommPkg *compGridCommPkg );

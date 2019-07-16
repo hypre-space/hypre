@@ -112,12 +112,6 @@ typedef struct
    HYPRE_Int       A_mem_size;
    HYPRE_Int       P_mem_size;
 
-   HYPRE_Complex     *u;
-   HYPRE_Complex     *f;
-   HYPRE_Complex     *t;
-   HYPRE_Complex     *s;
-   HYPRE_Complex     *temp;
-
    HYPRE_Int        *global_indices;
    HYPRE_Int        *coarse_global_indices; 
    HYPRE_Int        *coarse_local_indices;
@@ -131,7 +125,15 @@ typedef struct
    HYPRE_Int        *P_colind;
    HYPRE_Complex    *P_data;
 
+   hypre_CSRMatrix  *A;
+   hypre_CSRMatrix  *A_real;
+   hypre_CSRMatrix  *P;
 
+   hypre_Vector     *u;
+   hypre_Vector     *f;
+   hypre_Vector     *t;
+   hypre_Vector     *s;
+   hypre_Vector     *temp;
 
 } hypre_ParCompGrid;
 
@@ -162,8 +164,8 @@ typedef struct
 #define hypre_ParCompGridPColInd(compGrid)         ((compGrid) -> P_colind)
 #define hypre_ParCompGridPData(compGrid)           ((compGrid) -> P_data)
 
-
-
-
+#define hypre_ParCompGridA(compGrid)               ((compGrid) -> A)
+#define hypre_ParCompGridAReal(compGrid)           ((compGrid) -> A_real)
+#define hypre_ParCompGridP(compGrid)               ((compGrid) -> P)
 
 #endif

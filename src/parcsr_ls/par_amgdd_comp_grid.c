@@ -55,6 +55,10 @@ hypre_ParCompGridCreate ()
    hypre_ParCompGridPColInd(compGrid) = NULL;
    hypre_ParCompGridPData(compGrid) = NULL;
 
+   hypre_ParCompGridA(compGrid) = NULL;
+   hypre_ParCompGridAReal(compGrid) = NULL;
+   hypre_ParCompGridP(compGrid) = NULL;
+
    return compGrid;
 }
 
@@ -69,27 +73,27 @@ hypre_ParCompGridDestroy ( hypre_ParCompGrid *compGrid )
 
    if (hypre_ParCompGridU(compGrid))
    {
-      hypre_TFree(hypre_ParCompGridU(compGrid), HYPRE_MEMORY_HOST);
+      hypre_SeqVectorDestroy(hypre_ParCompGridU(compGrid));
    }
 
    if (hypre_ParCompGridF(compGrid))
    {
-      hypre_TFree(hypre_ParCompGridF(compGrid), HYPRE_MEMORY_HOST);
+      hypre_SeqVectorDestroy(hypre_ParCompGridF(compGrid));
    }
 
    if (hypre_ParCompGridT(compGrid))
    {
-      hypre_TFree(hypre_ParCompGridT(compGrid), HYPRE_MEMORY_HOST);
+      hypre_SeqVectorDestroy(hypre_ParCompGridT(compGrid));
    }
 
    if (hypre_ParCompGridS(compGrid))
    {
-      hypre_TFree(hypre_ParCompGridS(compGrid), HYPRE_MEMORY_HOST);
+      hypre_SeqVectorDestroy(hypre_ParCompGridS(compGrid));
    }
 
    if (hypre_ParCompGridTemp(compGrid))
    {
-      hypre_TFree(hypre_ParCompGridTemp(compGrid), HYPRE_MEMORY_HOST);
+      hypre_SeqVectorDestroy(hypre_ParCompGridTemp(compGrid));
    }
 
    if (hypre_ParCompGridGlobalIndices(compGrid))
@@ -140,6 +144,21 @@ hypre_ParCompGridDestroy ( hypre_ParCompGrid *compGrid )
    if (hypre_ParCompGridPData(compGrid))
    {
       hypre_TFree(hypre_ParCompGridPData(compGrid), HYPRE_MEMORY_HOST);
+   }
+
+   if (hypre_ParCompGridA(compGrid))
+   {
+      hypre_CSRMatrixDestroy(hypre_ParCompGridA(compGrid));
+   }
+
+   if (hypre_ParCompGridAReal(compGrid))
+   {
+      hypre_CSRMatrixDestroy(hypre_ParCompGridAReal(compGrid));
+   }
+
+   if (hypre_ParCompGridP(compGrid))
+   {
+      hypre_CSRMatrixDestroy(hypre_ParCompGridP(compGrid));
    }
 
    hypre_TFree(compGrid, HYPRE_MEMORY_HOST);   
@@ -273,8 +292,6 @@ hypre_ParCompGridInitialize ( hypre_ParAMGData *amg_data, HYPRE_Int padding, HYP
    }
 
    // Set attributes for compGrid
-   hypre_ParCompGridU(compGrid) = hypre_CTAlloc(HYPRE_Complex, mem_size, HYPRE_MEMORY_HOST);
-   hypre_ParCompGridF(compGrid) = hypre_CTAlloc(HYPRE_Complex, mem_size, HYPRE_MEMORY_HOST);
    hypre_ParCompGridGlobalIndices(compGrid) = global_indices_comp;
    hypre_ParCompGridCoarseGlobalIndices(compGrid) = coarse_global_indices_comp;
    hypre_ParCompGridCoarseLocalIndices(compGrid) = coarse_local_indices_comp;
@@ -338,9 +355,6 @@ hypre_ParCompGridSetSize ( hypre_ParCompGrid *compGrid, HYPRE_Int num_nodes, HYP
    if (num_nodes > 0) over_allocation_factor = ceil(mem_size/num_nodes);
    hypre_ParCompGridAMemSize(compGrid) = A_nnz*over_allocation_factor;
    hypre_ParCompGridPMemSize(compGrid) = P_nnz*over_allocation_factor;
-
-   hypre_ParCompGridU(compGrid) = hypre_CTAlloc(HYPRE_Complex, mem_size, HYPRE_MEMORY_HOST);
-   hypre_ParCompGridF(compGrid) = hypre_CTAlloc(HYPRE_Complex, mem_size, HYPRE_MEMORY_HOST);
    
    hypre_ParCompGridARowPtr(compGrid) = hypre_CTAlloc(HYPRE_Int, mem_size+1, HYPRE_MEMORY_HOST);
    hypre_ParCompGridAColInd(compGrid) = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridAMemSize(compGrid), HYPRE_MEMORY_HOST);
@@ -377,8 +391,6 @@ hypre_ParCompGridResize ( hypre_ParCompGrid *compGrid, HYPRE_Int new_size, HYPRE
    if (type == 0)
    {
       // Re allocate to given size
-      hypre_ParCompGridU(compGrid) = hypre_TReAlloc(hypre_ParCompGridU(compGrid), HYPRE_Complex, new_size, HYPRE_MEMORY_HOST);
-      hypre_ParCompGridF(compGrid) = hypre_TReAlloc(hypre_ParCompGridF(compGrid), HYPRE_Complex, new_size, HYPRE_MEMORY_HOST);
       hypre_ParCompGridGlobalIndices(compGrid) = hypre_TReAlloc(hypre_ParCompGridGlobalIndices(compGrid), HYPRE_Int, new_size, HYPRE_MEMORY_HOST);
       hypre_ParCompGridARowPtr(compGrid) = hypre_TReAlloc(hypre_ParCompGridARowPtr(compGrid), HYPRE_Int, new_size+1, HYPRE_MEMORY_HOST);
       if (need_coarse_info)
@@ -593,9 +605,6 @@ hypre_ParCompGridDebugPrint ( hypre_ParCompGrid *compGrid, const char* filename 
    HYPRE_Int       A_mem_size = hypre_ParCompGridAMemSize(compGrid);
    HYPRE_Int       P_mem_size = hypre_ParCompGridPMemSize(compGrid);
 
-   // HYPRE_Complex     *u = hypre_ParCompGridU(compGrid);
-   // HYPRE_Complex     *f = hypre_ParCompGridF(compGrid);
-
    HYPRE_Int        *global_indices = hypre_ParCompGridGlobalIndices(compGrid);
    HYPRE_Int        *coarse_global_indices = hypre_ParCompGridCoarseGlobalIndices(compGrid);
    HYPRE_Int        *coarse_local_indices = hypre_ParCompGridCoarseLocalIndices(compGrid);
@@ -697,66 +706,6 @@ hypre_ParCompGridDebugPrint ( hypre_ParCompGrid *compGrid, const char* filename 
 
 }
 
-HYPRE_Int
-hypre_ParCompGridPrintSolnRHS ( hypre_ParCompGrid *compGrid, const char* filename )
-{
-   HYPRE_Int      myid;
-   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
-
-   // Get composite grid information
-   HYPRE_Int       num_nodes = hypre_ParCompGridNumNodes(compGrid);
-   HYPRE_Int       num_owned_nodes = hypre_ParCompGridOwnedBlockStarts(compGrid)[hypre_ParCompGridNumOwnedBlocks(compGrid)];
-
-   HYPRE_Complex     *u = hypre_ParCompGridU(compGrid);
-   HYPRE_Complex     *f = hypre_ParCompGridF(compGrid);
-
-   HYPRE_Int        *global_indices = hypre_ParCompGridGlobalIndices(compGrid);
-   HYPRE_Int        *coarse_global_indices = hypre_ParCompGridCoarseGlobalIndices(compGrid);
-   HYPRE_Int        *coarse_local_indices = hypre_ParCompGridCoarseLocalIndices(compGrid);
-
-   HYPRE_Int         i;
-
-   // Print info to given filename   
-   FILE             *file;
-   file = fopen(filename,"w");\
-   hypre_fprintf(file, "%d\n%d\n", num_nodes, num_owned_nodes);
-
-   for (i = 0; i < num_nodes; i++)
-   {
-      hypre_fprintf(file, "%e ", u[i]);
-   }
-   hypre_fprintf(file, "\n");
-   for (i = 0; i < num_nodes; i++)
-   {
-      hypre_fprintf(file, "%e ", f[i]);
-   }
-   hypre_fprintf(file, "\n");
-   for (i = 0; i < num_nodes; i++)
-   {
-      hypre_fprintf(file, "%d ", global_indices[i]);
-   }
-   if (coarse_global_indices)
-   {
-      hypre_fprintf(file, "\n");
-      for (i = 0; i < num_nodes; i++)
-      {
-         hypre_fprintf(file, "%d ", coarse_global_indices[i]);
-      }
-      hypre_fprintf(file, "\n");
-      for (i = 0; i < num_nodes; i++)
-      {
-         hypre_fprintf(file, "%d ", coarse_local_indices[i]);
-      }
-      hypre_fprintf(file, "\n");
-   }
-   hypre_fprintf(file, "\n");
-
-   fclose(file);
-
-   return 0;
-
-}
-
 HYPRE_Int 
 hypre_ParCompGridDumpSorted( hypre_ParCompGrid *compGrid, const char* filename)
 {
@@ -851,42 +800,6 @@ hypre_ParCompGridCoarseGlobalIndicesDump( hypre_ParCompGrid *compGrid, const cha
 
       fclose(file);
    }
-
-   return 0;
-}
-
-HYPRE_Int 
-hypre_ParCompGridUDump( hypre_ParCompGrid *compGrid, const char* filename)
-{
-   FILE             *file;
-   file = fopen(filename,"w");
-   HYPRE_Int i;
-
-   // Global indices
-   for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
-   {
-      hypre_fprintf(file, "%.14e\n", hypre_ParCompGridU(compGrid)[i]);
-   }
-
-   fclose(file);
-
-   return 0;
-}
-
-HYPRE_Int 
-hypre_ParCompGridFDump( hypre_ParCompGrid *compGrid, const char* filename)
-{
-   FILE             *file;
-   file = fopen(filename,"w");
-   HYPRE_Int i;
-
-   // Global indices
-   for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
-   {
-      hypre_fprintf(file, "%.14e\n", hypre_ParCompGridF(compGrid)[i]);
-   }
-
-   fclose(file);
 
    return 0;
 }

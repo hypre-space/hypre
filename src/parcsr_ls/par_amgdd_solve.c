@@ -20,8 +20,8 @@
 HYPRE_Int
 AddSolution( void *amg_vdata );
 
-HYPRE_Real
-GetCompositeResidual(hypre_ParCompGrid *compGrid);
+// HYPRE_Real
+// GetCompositeResidual(hypre_ParCompGrid *compGrid);
 
 HYPRE_Int
 ZeroInitialGuess( void *amg_vdata );
@@ -190,7 +190,7 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata )
 
    // Setup convergence tolerance info
    HYPRE_Real resid_nrm = 1.;
-   if (fac_tol != 0.) resid_nrm = GetCompositeResidual(hypre_ParAMGDataCompGrid(amg_data)[amgdd_start_level]);
+   // if (fac_tol != 0.) resid_nrm = GetCompositeResidual(hypre_ParAMGDataCompGrid(amg_data)[amgdd_start_level]);
    HYPRE_Real resid_nrm_init = resid_nrm;
    HYPRE_Real relative_resid = 1.;
    HYPRE_Real conv_fact = 0;
@@ -207,12 +207,8 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata )
    if (transition_level < 0) transition_level = num_levels;
    for (level = amgdd_start_level; level < transition_level; level++)
    {
-      if (!hypre_ParCompGridT( hypre_ParAMGDataCompGrid(amg_data)[level] )) 
-         hypre_ParCompGridT( hypre_ParAMGDataCompGrid(amg_data)[level] ) = hypre_CTAlloc(HYPRE_Complex, hypre_ParCompGridNumNodes(hypre_ParAMGDataCompGrid(amg_data)[level]), HYPRE_MEMORY_HOST);
-      else for (i = 0; i < hypre_ParCompGridNumNodes(hypre_ParAMGDataCompGrid(amg_data)[level]); i++) hypre_ParCompGridT( hypre_ParAMGDataCompGrid(amg_data)[level] )[i] = 0.0;
-      if (!hypre_ParCompGridS( hypre_ParAMGDataCompGrid(amg_data)[level] )) 
-         hypre_ParCompGridS( hypre_ParAMGDataCompGrid(amg_data)[level] ) = hypre_CTAlloc(HYPRE_Complex, hypre_ParCompGridNumNodes(hypre_ParAMGDataCompGrid(amg_data)[level]), HYPRE_MEMORY_HOST);
-      else for (i = 0; i < hypre_ParCompGridNumNodes(hypre_ParAMGDataCompGrid(amg_data)[level]); i++) hypre_ParCompGridS( hypre_ParAMGDataCompGrid(amg_data)[level] )[i] = 0.0;
+      hypre_SeqVectorSetConstantValues( hypre_ParCompGridT( hypre_ParAMGDataCompGrid(amg_data)[level] ), 0.0 );
+      hypre_SeqVectorSetConstantValues( hypre_ParCompGridS( hypre_ParAMGDataCompGrid(amg_data)[level] ), 0.0 );
    }
 
 	// Do the cycles
@@ -231,36 +227,40 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata )
    }
    else if (fac_tol > 0)
    {
-      while ( (relative_resid >= fac_tol || cycle_count < min_fac_iter) && cycle_count < max_fac_iter )
-      {
-         // Do FAC cycle
-   		hypre_BoomerAMGDD_FAC_Cycle( amg_vdata, first_iteration );
-         first_iteration = 0;
+      // !!! To do:
+      if (myid == 0) printf("fac_tol != 0 not yet implemented\n");
+    //   while ( (relative_resid >= fac_tol || cycle_count < min_fac_iter) && cycle_count < max_fac_iter )
+    //   {
+    //      // Do FAC cycle
+   	// 	hypre_BoomerAMGDD_FAC_Cycle( amg_vdata, first_iteration );
+    //      first_iteration = 0;
 
-         // Check convergence and up the cycle count
-         resid_nrm = GetCompositeResidual(hypre_ParAMGDataCompGrid(amg_data)[amgdd_start_level]);
-         relative_resid = resid_nrm / resid_nrm_init;
+    //      // Check convergence and up the cycle count
+    //      resid_nrm = GetCompositeResidual(hypre_ParAMGDataCompGrid(amg_data)[amgdd_start_level]);
+    //      relative_resid = resid_nrm / resid_nrm_init;
 
-         ++cycle_count;
-         hypre_ParAMGDataNumFACIterations(amg_data) = cycle_count;
-   	}
+    //      ++cycle_count;
+    //      hypre_ParAMGDataNumFACIterations(amg_data) = cycle_count;
+   	// }
    }
    else if (fac_tol < 0)
    {
-      fac_tol = -fac_tol;
-      while ( (conv_fact <= fac_tol || conv_fact >= 1.0 || cycle_count < min_fac_iter) && cycle_count < max_fac_iter )
-      {
-         // Do FAC cycle
-         hypre_BoomerAMGDD_FAC_Cycle( amg_vdata, first_iteration );
-         first_iteration = 0;
+      // !!! To do:
+      if (myid == 0) printf("fac_tol != 0 not yet implemented\n");
+      // fac_tol = -fac_tol;
+      // while ( (conv_fact <= fac_tol || conv_fact >= 1.0 || cycle_count < min_fac_iter) && cycle_count < max_fac_iter )
+      // {
+      //    // Do FAC cycle
+      //    hypre_BoomerAMGDD_FAC_Cycle( amg_vdata, first_iteration );
+      //    first_iteration = 0;
 
-         // Check convergence and up the cycle count
-         resid_nrm = GetCompositeResidual(hypre_ParAMGDataCompGrid(amg_data)[amgdd_start_level]);
-         conv_fact = resid_nrm / resid_nrm_init;
-         resid_nrm_init = resid_nrm;
-         ++cycle_count;
-         hypre_ParAMGDataNumFACIterations(amg_data) = cycle_count;
-      }
+      //    // Check convergence and up the cycle count
+      //    resid_nrm = GetCompositeResidual(hypre_ParAMGDataCompGrid(amg_data)[amgdd_start_level]);
+      //    conv_fact = resid_nrm / resid_nrm_init;
+      //    resid_nrm_init = resid_nrm;
+      //    ++cycle_count;
+      //    hypre_ParAMGDataNumFACIterations(amg_data) = cycle_count;
+      // }
    }
    
 
@@ -282,53 +282,44 @@ AddSolution( void *amg_vdata )
 {
 	hypre_ParAMGData	*amg_data = (hypre_ParAMGData*) amg_vdata;
    HYPRE_Int amgdd_start_level = hypre_ParAMGDataAMGDDStartLevel(amg_data);
-	HYPRE_Complex 		*u = hypre_VectorData( hypre_ParVectorLocalVector( hypre_ParAMGDataUArray(amg_data)[amgdd_start_level] ) );
 	hypre_ParCompGrid 	**compGrid = hypre_ParAMGDataCompGrid(amg_data);
-	HYPRE_Complex 		*u_comp = hypre_ParCompGridU(compGrid[amgdd_start_level]);
-	HYPRE_Int 			num_owned_nodes = hypre_ParCompGridOwnedBlockStarts(compGrid[amgdd_start_level])[hypre_ParCompGridNumOwnedBlocks(compGrid[amgdd_start_level])];
-	HYPRE_Int 			i;
 
-	for (i = 0; i < num_owned_nodes; i++) u[i] += u_comp[i];
+   hypre_SeqVectorAxpy( 1.0, hypre_ParCompGridU(compGrid[amgdd_start_level]), hypre_ParVectorLocalVector( hypre_ParAMGDataUArray(amg_data)[amgdd_start_level] ) );
 
 	return 0;
 }
 
-HYPRE_Real
-GetCompositeResidual(hypre_ParCompGrid *compGrid)
-{
-   HYPRE_Int i,j;
-   HYPRE_Real res_norm = 0.0;
-   for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
-   {
-      if (hypre_ParCompGridARowPtr(compGrid)[i+1] - hypre_ParCompGridARowPtr(compGrid)[i] > 0)
-      {
-         HYPRE_Real res = hypre_ParCompGridF(compGrid)[i];
-         for (j = hypre_ParCompGridARowPtr(compGrid)[i]; j < hypre_ParCompGridARowPtr(compGrid)[i+1]; j++)
-         {
-            res -= hypre_ParCompGridAData(compGrid)[j] * hypre_ParCompGridU(compGrid)[ hypre_ParCompGridAColInd(compGrid)[j] ];
-         }
-         res_norm += res*res;
-      }
-   }
+// HYPRE_Real
+// GetCompositeResidual(hypre_ParCompGrid *compGrid)
+// {
+//    HYPRE_Int i,j;
+//    HYPRE_Real res_norm = 0.0;
+//    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
+//    {
+//       if (hypre_ParCompGridARowPtr(compGrid)[i+1] - hypre_ParCompGridARowPtr(compGrid)[i] > 0)
+//       {
+//          HYPRE_Real res = hypre_ParCompGridF(compGrid)[i];
+//          for (j = hypre_ParCompGridARowPtr(compGrid)[i]; j < hypre_ParCompGridARowPtr(compGrid)[i+1]; j++)
+//          {
+//             res -= hypre_ParCompGridAData(compGrid)[j] * hypre_ParCompGridU(compGrid)[ hypre_ParCompGridAColInd(compGrid)[j] ];
+//          }
+//          res_norm += res*res;
+//       }
+//    }
 
-   return sqrt(res_norm);
-}
+//    return sqrt(res_norm);
+// }
 
 HYPRE_Int
 ZeroInitialGuess( void *amg_vdata )
 {
-	HYPRE_Int   myid;
-	hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
-
 	hypre_ParAMGData	*amg_data = (hypre_ParAMGData*) amg_vdata;
-   HYPRE_Int i;
 
    HYPRE_Int level;
    HYPRE_Int amgdd_start_level = hypre_ParAMGDataAMGDDStartLevel(amg_data);
    for (level = amgdd_start_level; level < hypre_ParAMGDataNumLevels(amg_data); level++)
    {
-      hypre_ParCompGrid    *compGrid = hypre_ParAMGDataCompGrid(amg_data)[level];
-      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++) hypre_ParCompGridU(compGrid)[i] = 0.0;
+      hypre_SeqVectorSetConstantValues( hypre_ParCompGridU(hypre_ParAMGDataCompGrid(amg_data)[level]), 0.0);
    }
 	
 	return 0;
@@ -457,7 +448,7 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
       residual_data = hypre_VectorData(residual_local);
       for (i = hypre_ParCompGridOwnedBlockStarts(compGrid[level])[local_myid]; i < hypre_ParCompGridOwnedBlockStarts(compGrid[level])[local_myid+1]; i++)
       {
-         hypre_ParCompGridF(compGrid[level])[i] = residual_data[i - hypre_ParCompGridOwnedBlockStarts(compGrid[level])[local_myid]];
+         hypre_VectorData(hypre_ParCompGridF(compGrid[level]))[i] = residual_data[i - hypre_ParCompGridOwnedBlockStarts(compGrid[level])[local_myid]];
       }
    }
 
@@ -476,7 +467,7 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
       hypre_MPI_Allgatherv(residual_data, 
          hypre_VectorSize(residual_local), 
          HYPRE_MPI_COMPLEX, 
-         hypre_ParCompGridF(compGrid[transition_level]), 
+         hypre_VectorData(hypre_ParCompGridF(compGrid[transition_level])), 
          hypre_ParCompGridCommPkgTransitionResRecvSizes(compGridCommPkg), 
          hypre_ParCompGridCommPkgTransitionResRecvDisps(compGridCommPkg), 
          HYPRE_MPI_COMPLEX, 
@@ -718,7 +709,7 @@ hypre_BoomerAMGDDTimeResidualCommunication( void *amg_vdata, HYPRE_Int time_leve
          residual_data = hypre_VectorData(residual_local);
          for (i = hypre_ParCompGridOwnedBlockStarts(compGrid[level])[local_myid]; i < hypre_ParCompGridOwnedBlockStarts(compGrid[level])[local_myid+1]; i++)
          {
-            hypre_ParCompGridF(compGrid[level])[i] = residual_data[i - hypre_ParCompGridOwnedBlockStarts(compGrid[level])[local_myid]];
+            hypre_VectorData(hypre_ParCompGridF(compGrid[level]))[i] = residual_data[i - hypre_ParCompGridOwnedBlockStarts(compGrid[level])[local_myid]];
          }
       }
       return 0;
@@ -739,7 +730,7 @@ hypre_BoomerAMGDDTimeResidualCommunication( void *amg_vdata, HYPRE_Int time_leve
       hypre_MPI_Allgatherv(residual_data, 
          hypre_VectorSize(residual_local), 
          HYPRE_MPI_COMPLEX, 
-         hypre_ParCompGridF(compGrid[transition_level]), 
+         hypre_VectorData(hypre_ParCompGridF(compGrid[transition_level])), 
          hypre_ParCompGridCommPkgTransitionResRecvSizes(compGridCommPkg), 
          hypre_ParCompGridCommPkgTransitionResRecvDisps(compGridCommPkg), 
          HYPRE_MPI_COMPLEX, 
@@ -873,7 +864,7 @@ PackResidualBuffer( HYPRE_Complex *send_buffer, HYPRE_Int **send_flag, HYPRE_Int
    {
       for (i = 0; i < num_send_nodes[level]; i++)
       {
-         send_buffer[cnt++] = hypre_ParCompGridF(compGrid[level])[ send_flag[level][i] ];
+         send_buffer[cnt++] = hypre_VectorData(hypre_ParCompGridF(compGrid[level]))[ send_flag[level][i] ];
       }
    }
 
@@ -891,7 +882,7 @@ UnpackResidualBuffer( HYPRE_Complex *recv_buffer, HYPRE_Int **recv_map, HYPRE_In
    {
       for (i = 0; i < num_recv_nodes[level]; i++) 
       {
-         hypre_ParCompGridF(compGrid[level])[ recv_map[level][i] ] = recv_buffer[cnt++];
+         hypre_VectorData(hypre_ParCompGridF(compGrid[level]))[ recv_map[level][i] ] = recv_buffer[cnt++];
       }
    }
 
@@ -942,7 +933,7 @@ TestResComm(hypre_ParAMGData *amg_data)
             for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
             {
                if (hypre_ParCompGridARowPtr(compGrid[level])[i+1] - hypre_ParCompGridARowPtr(compGrid[level])[i] > 0) 
-                  comp_res[cnt++] = hypre_ParCompGridF(compGrid[level])[i];
+                  comp_res[cnt++] = hypre_VectorData(hypre_ParCompGridF(compGrid[level]))[i];
             }
          }
          hypre_MPI_Bcast(comp_res, num_nodes, HYPRE_MPI_COMPLEX, proc, hypre_MPI_COMM_WORLD);
@@ -988,7 +979,7 @@ TestResComm(hypre_ParAMGData *amg_data)
 
          // Broadcast the composite residual
          HYPRE_Complex *comp_res;
-         if (myid == proc) comp_res = hypre_ParCompGridF(compGrid[transition_level]);
+         if (myid == proc) comp_res = hypre_VectorData(hypre_ParCompGridF(compGrid[transition_level]));
          else comp_res = hypre_CTAlloc(HYPRE_Complex, num_nodes, HYPRE_MEMORY_HOST);
          hypre_MPI_Bcast(comp_res, num_nodes, HYPRE_MPI_COMPLEX, proc, hypre_MPI_COMM_WORLD);
 
@@ -1058,7 +1049,7 @@ AgglomeratedProcessorsLocalResidualAllgather(hypre_ParAMGData *amg_data)
             if (i > level && hypre_ParCompGridCommPkgAggLocalComms(compGridCommPkg)[i]) break;
             HYPRE_Int start = hypre_ParCompGridOwnedBlockStarts(compGrid[i])[local_myid];
             HYPRE_Int finish = hypre_ParCompGridOwnedBlockStarts(compGrid[i])[local_myid+1];
-            for (j = start; j < finish; j++) sendbuf[cnt++] = hypre_ParCompGridF(compGrid[i])[j];
+            for (j = start; j < finish; j++) sendbuf[cnt++] = hypre_VectorData(hypre_ParCompGridF(compGrid[i]))[j];
          }
 
          // Do the allgather
@@ -1074,7 +1065,7 @@ AgglomeratedProcessorsLocalResidualAllgather(hypre_ParAMGData *amg_data)
                if (i > level && hypre_ParCompGridCommPkgAggLocalComms(compGridCommPkg)[i]) break;
                HYPRE_Int start = hypre_ParCompGridOwnedBlockStarts(compGrid[i])[proc];
                HYPRE_Int finish = hypre_ParCompGridOwnedBlockStarts(compGrid[i])[proc+1];
-               for (j = start; j < finish; j++) hypre_ParCompGridF(compGrid[i])[j] = recvbuf[cnt++];
+               for (j = start; j < finish; j++) hypre_VectorData(hypre_ParCompGridF(compGrid[i]))[j] = recvbuf[cnt++];
             }
          }
       }
