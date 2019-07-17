@@ -14,11 +14,12 @@
 
 #if defined(HYPRE_USING_CUDA)
 
+/* size of work = want_data ? 3*nnzA : nnzA */
 HYPRE_Int
 hypreDevice_CSRSpTrans_v2(HYPRE_Int   m,    HYPRE_Int  n,    HYPRE_Int      nnzA,
                           HYPRE_Int  *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_aa,
                           HYPRE_Int  *d_ic, HYPRE_Int *d_jc, HYPRE_Complex *d_ac,
-                          HYPRE_Int   want_data)
+                          HYPRE_Int   want_data, HYPRE_Int *work)
 {
    /* trivial case */
    if (nnzA == 0)
@@ -33,16 +34,13 @@ hypreDevice_CSRSpTrans_v2(HYPRE_Int   m,    HYPRE_Int  n,    HYPRE_Int      nnzA
 #endif
 
    HYPRE_Int *d_jt, *d_it, *d_pm;
-   size_t mem_size = want_data ? 3*nnzA : nnzA;
-   HYPRE_Int *mem_work = hypre_TAlloc(HYPRE_Int, mem_size, HYPRE_MEMORY_DEVICE);
 
    /* d_jt: a copy of col idx of A, d_ja */
-   d_jt = mem_work;
+   d_jt = work;
    hypre_TMemcpy(d_jt, d_ja, HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
-   /* d_it: row idx of A*/
+   /* d_it: row idx of A, expanded from row ptrs */
    d_it = want_data ? d_jt + nnzA : d_jc;
-   /* expanded from row ptrs */
    hypreDevice_CsrRowPtrsToIndices_v2(m, d_ia, d_it);
 
    if (want_data)
@@ -62,7 +60,7 @@ hypreDevice_CSRSpTrans_v2(HYPRE_Int   m,    HYPRE_Int  n,    HYPRE_Int      nnzA
       thrust::stable_sort_by_key(thrust::device, d_jt, d_jt + nnzA, d_jc);
    }
 
-   /* convert into ic: row idx --> row ptrs */
+   /* convert into ic: col idx --> col ptrs */
    hypreDevice_CsrRowIndicesToPtrs_v2(n, nnzA, d_jt, d_ic);
 
 #if DEBUG_MODE
@@ -70,8 +68,6 @@ hypreDevice_CSRSpTrans_v2(HYPRE_Int   m,    HYPRE_Int  n,    HYPRE_Int      nnzA
    hypre_TMemcpy(&nnzC, &d_ic[n], HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    hypre_assert(nnzC == nnzA);
 #endif
-
-   hypre_TFree(mem_work, HYPRE_MEMORY_DEVICE);
 
 #ifdef HYPRE_PROFILE
    cudaThreadSynchronize();
@@ -97,7 +93,13 @@ hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int    
       d_ac = hypre_TAlloc(HYPRE_Complex, nnzA, HYPRE_MEMORY_DEVICE);
    }
 
-   ierr = hypreDevice_CSRSpTrans_v2(m, n, nnzA, d_ia, d_ja, d_aa, d_ic, d_jc, d_ac, want_data);
+   size_t mem_size = want_data ? 3*nnzA : nnzA;
+   HYPRE_Int *work = hypre_TAlloc(HYPRE_Int, mem_size, HYPRE_MEMORY_DEVICE);
+
+   ierr = hypreDevice_CSRSpTrans_v2(m, n, nnzA, d_ia, d_ja, d_aa, d_ic, d_jc, d_ac,
+                                    want_data, work);
+
+   hypre_TFree(work, HYPRE_MEMORY_DEVICE);
 
    *d_ic_out = d_ic;
    *d_jc_out = d_jc;

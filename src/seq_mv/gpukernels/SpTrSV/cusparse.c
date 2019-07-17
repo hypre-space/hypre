@@ -7,7 +7,7 @@ GaussSeidel_cusparse1(hypre_CSRMatrix *csr, HYPRE_Real *b, HYPRE_Real *x, int RE
    int n = csr->num_rows;
    int nnz = csr->num_nonzeros;
    int *d_ia, *d_ja;
-   HYPRE_Real *d_a, *d_a_sorted, *d_b, *d_x;
+   HYPRE_Real *d_a, *d_a_sorted, *d_b, *d_x, *d_y, *d_r;
    double t1, t2, ta;
    HYPRE_Real done = 1.0, dmone = -1.0;
 
@@ -23,6 +23,8 @@ GaussSeidel_cusparse1(hypre_CSRMatrix *csr, HYPRE_Real *b, HYPRE_Real *x, int RE
    cudaMalloc((void **)&d_a_sorted, nnz*sizeof(HYPRE_Real));
    cudaMalloc((void **)&d_b, n*sizeof(HYPRE_Real));
    cudaMalloc((void **)&d_x, n*sizeof(HYPRE_Real));
+   cudaMalloc((void **)&d_r, n*sizeof(HYPRE_Real));
+   cudaMalloc((void **)&d_y, n*sizeof(HYPRE_Real));
 
    /*------------------- Memcpy */
    cudaMemcpy(d_ia, csr->i, (n+1)*sizeof(int), cudaMemcpyHostToDevice);
@@ -152,10 +154,6 @@ GaussSeidel_cusparse1(hypre_CSRMatrix *csr, HYPRE_Real *b, HYPRE_Real *x, int RE
 
    for (int j = 0; j < REPEAT; j++)
    {
-      HYPRE_Real *d_y, *d_r;
-      cudaMalloc((void **)&d_r, n*sizeof(HYPRE_Real));
-      cudaMalloc((void **)&d_y, n*sizeof(HYPRE_Real));
-
       if (isDoublePrecision)
       {
          // Forward G-S. r = b - A * x
@@ -232,9 +230,6 @@ GaussSeidel_cusparse1(hypre_CSRMatrix *csr, HYPRE_Real *b, HYPRE_Real *x, int RE
 
          cublasSaxpy(cublas_handle, n, (float *) &done, (float *) d_y, 1, (float *) d_x, 1);
       }
-
-      cudaFree(d_y);
-      cudaFree(d_r);
    }
 
    cudaThreadSynchronize();
@@ -256,6 +251,8 @@ GaussSeidel_cusparse1(hypre_CSRMatrix *csr, HYPRE_Real *b, HYPRE_Real *x, int RE
    cudaFree(d_a);
    cudaFree(d_b);
    cudaFree(d_x);
+   cudaFree(d_y);
+   cudaFree(d_r);
 
    /* destroy matrix descriptor */
    status = cusparseDestroyMatDescr(descr_L);
@@ -312,7 +309,7 @@ GaussSeidel_cusparse2(hypre_CSRMatrix *csr, HYPRE_Real *b, HYPRE_Real *x, int RE
    int n = csr->num_rows;
    int nnz = csr->num_nonzeros;
    int *d_ia, *d_ja;
-   HYPRE_Real *d_a, *d_a_sorted, *d_b, *d_x;
+   HYPRE_Real *d_a, *d_a_sorted, *d_b, *d_x, *d_y, *d_r;
    double t1, t2, ta;
    HYPRE_Real done = 1.0, dmone = -1.0;
 
@@ -328,6 +325,8 @@ GaussSeidel_cusparse2(hypre_CSRMatrix *csr, HYPRE_Real *b, HYPRE_Real *x, int RE
    cudaMalloc((void **)&d_a_sorted, nnz*sizeof(HYPRE_Real));
    cudaMalloc((void **)&d_b, n*sizeof(HYPRE_Real));
    cudaMalloc((void **)&d_x, n*sizeof(HYPRE_Real));
+   cudaMalloc((void **)&d_r, n*sizeof(HYPRE_Real));
+   cudaMalloc((void **)&d_y, n*sizeof(HYPRE_Real));
 
    /*------------------- Memcpy */
    cudaMemcpy(d_ia, csr->i, (n+1)*sizeof(int), cudaMemcpyHostToDevice);
@@ -489,10 +488,6 @@ GaussSeidel_cusparse2(hypre_CSRMatrix *csr, HYPRE_Real *b, HYPRE_Real *x, int RE
 
    for (int j = 0; j < REPEAT; j++)
    {
-      HYPRE_Real *d_y, *d_r;
-      cudaMalloc((void **)&d_r, n*sizeof(HYPRE_Real));
-      cudaMalloc((void **)&d_y, n*sizeof(HYPRE_Real));
-
       if (isDoublePrecision)
       {
          // Forward G-S. r = b - A * x
@@ -573,9 +568,6 @@ GaussSeidel_cusparse2(hypre_CSRMatrix *csr, HYPRE_Real *b, HYPRE_Real *x, int RE
 
          cublasSaxpy(cublas_handle, n, (float *) &done, (float *) d_y, 1, (float *) d_x, 1);
       }
-
-      cudaFree(d_y);
-      cudaFree(d_r);
    }
 
    cudaThreadSynchronize();
@@ -597,6 +589,8 @@ GaussSeidel_cusparse2(hypre_CSRMatrix *csr, HYPRE_Real *b, HYPRE_Real *x, int RE
    cudaFree(d_a);
    cudaFree(d_b);
    cudaFree(d_x);
+   cudaFree(d_y);
+   cudaFree(d_r);
    cudaFree(pBuffer_L);
    cudaFree(pBuffer_U);
 

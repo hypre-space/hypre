@@ -23,8 +23,10 @@ template <bool TEST>
 HYPRE_Int GaussSeidelRowLevSchd(hypre_CSRMatrix *csr, HYPRE_Real *b, HYPRE_Real *x, int REPEAT, bool print);
 template <bool TEST>
 HYPRE_Int GaussSeidelRowDynSchd(hypre_CSRMatrix *csr, HYPRE_Real *b, HYPRE_Real *x, int REPEAT, bool print);
+template <bool TEST>
+HYPRE_Int GaussSeidelColDynSchd(hypre_CSRMatrix *csr, HYPRE_Real *b, HYPRE_Real *x, int REPEAT, bool print);
 double wall_timer();
 void GaussSeidel_cusparse1(hypre_CSRMatrix *csr, HYPRE_Real *b, HYPRE_Real *x, int, bool);
 void GaussSeidel_cusparse2(hypre_CSRMatrix *csr, HYPRE_Real *b, HYPRE_Real *x, int, bool);
 void allocLevel(int n, struct level_t *lev);
-
+HYPRE_Int hypre_SeqCSRMatvecDevice(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a, HYPRE_Complex *d_x, HYPRE_Complex *d_y);

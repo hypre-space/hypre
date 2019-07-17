@@ -60,7 +60,9 @@ void hypreCUDAKernel_GaussSeidelRowDynSchd(HYPRE_Int n, T *b, T *x, T *a, HYPRE_
    const HYPRE_Int warp_lane = threadIdx.x & (HYPRE_WARP_SIZE - 1);
    // make dep volatile to tell compiler do not use cached value
    volatile HYPRE_Int *vdep = dep;
-   //volatile HYPRE_Complex *vb = b;
+   volatile T *vx = x;
+   __shared__ HYPRE_Int  sh_ind[SPTRSV_BLOCKDIM];
+   __shared__ T sh_val[SPTRSV_BLOCKDIM];
 
    if ( grid_warp_id >= n )
    {
@@ -84,13 +86,36 @@ void hypreCUDAKernel_GaussSeidelRowDynSchd(HYPRE_Int n, T *b, T *x, T *a, HYPRE_
    t = __shfl_sync(HYPRE_WARP_FULL_MASK, s, 1);
    s = __shfl_sync(HYPRE_WARP_FULL_MASK, s, 0);
 
+   p += warp_lane;
+   if (p < q)
+   {
+      sh_ind[threadIdx.x] = read_only_load(&ja[p]);
+      sh_val[threadIdx.x] = read_only_load(&a[p]);
+   }
+
    if (warp_lane == 0)
    {
       b_r = read_only_load(&b[r]);
       while (vdep[r] != 0);
    }
 
-   for (p += warp_lane; __any_sync(HYPRE_WARP_FULL_MASK, p < q); p += HYPRE_WARP_SIZE)
+   if (p < q)
+   {
+      const HYPRE_Int col = sh_ind[threadIdx.x];
+      const T v = sh_val[threadIdx.x];
+      if (col != r)
+      {
+         sum += v * vx[col];
+      }
+      else
+      {
+         diag = v;
+         find_diag = true;
+      }
+   }
+   p += HYPRE_WARP_SIZE;
+
+   for (/*p += warp_lane*/; __any_sync(HYPRE_WARP_FULL_MASK, p < q); p += HYPRE_WARP_SIZE)
    {
       if (p < q)
       {
@@ -98,7 +123,7 @@ void hypreCUDAKernel_GaussSeidelRowDynSchd(HYPRE_Int n, T *b, T *x, T *a, HYPRE_
          const T v = read_only_load(&a[p]);
          if (col != r)
          {
-            sum += v * x[col];
+            sum += v * vx[col];
          }
          else
          {
@@ -200,11 +225,8 @@ GaussSeidelRowDynSchd(hypre_CSRMatrix *csr, HYPRE_Real *b, HYPRE_Real *x, int RE
       const int bDim = SPTRSV_BLOCKDIM;
       hypreCUDAKernel_GSRowNumDep<HYPRE_WARP_SIZE> <<<gDim, bDim>>> (n, d_ia, d_ja, d_depL, d_depU);
 
-      /* convert a CSC */
-      cudaMemcpy(d_jt, d_ja, nnz*sizeof(int), cudaMemcpyDeviceToDevice);
-      hypreDevice_CsrRowPtrsToIndices_v2(n, d_ia, d_jb);
-      thrust::stable_sort_by_key(thrust::device, d_jt, d_jt + nnz, d_jb);
-      hypreDevice_CsrRowIndicesToPtrs_v2(n, nnz, d_jt, d_ib);
+      /* convert a CSC, no data */
+      hypreDevice_CSRSpTrans_v2(n, n, nnz, d_ia, d_ja, NULL, d_ib, d_jb, NULL, 0, d_jt);
    }
    cudaThreadSynchronize();
    ta = wall_timer() - ta;
@@ -254,7 +276,7 @@ GaussSeidelRowDynSchd(hypre_CSRMatrix *csr, HYPRE_Real *b, HYPRE_Real *x, int RE
 
    if (print)
    {
-      printf(" [GPU] G-S dynamic-scheduling, #lev in L %d, #lev in U %d\n", lev.nlevL, lev.nlevU);
+      printf(" [GPU] G-S R-dynamic-scheduling, #lev in L %d, #lev in U %d\n", lev.nlevL, lev.nlevU);
       printf("  time(s) = %.2e, Gflops = %-5.3f", t2/REPEAT, REPEAT*4*((nnz)/1e9)/t2);
       printf("  [analysis time %.2e (%.1e x T_sol)] ", ta/REPEAT, ta/t2);
    }
