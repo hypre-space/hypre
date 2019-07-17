@@ -844,20 +844,23 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
          else new_indices[i] = num_real_nodes + ghost_cnt++;
       }
 
-      // !!! Need to get new indices for coarse level as well in order to fix up P col indices... can just do this on the next level also
-
-
-
-
       HYPRE_Int A_nnz = hypre_ParCompGridARowPtr(compGrid[level])[num_nodes];
-      HYPRE_Int *new_A_rowPtr = hypre_CTAlloc(HYPRE_Int, num_nodes, HYPRE_MEMORY_SHARED);
+      HYPRE_Int *new_A_rowPtr = hypre_CTAlloc(HYPRE_Int, num_nodes+1, HYPRE_MEMORY_SHARED);
       HYPRE_Int *new_A_colInd = hypre_CTAlloc(HYPRE_Int, A_nnz, HYPRE_MEMORY_SHARED);
       HYPRE_Complex *new_A_data = hypre_CTAlloc(HYPRE_Complex, A_nnz, HYPRE_MEMORY_SHARED);
 
-      HYPRE_Int P_nnz = hypre_ParCompGridPRowPtr(compGrid[level])[num_nodes];
-      HYPRE_Int *new_P_rowPtr = hypre_CTAlloc(HYPRE_Int, num_nodes, HYPRE_MEMORY_SHARED);
-      HYPRE_Int *new_P_colInd = hypre_CTAlloc(HYPRE_Int, P_nnz, HYPRE_MEMORY_SHARED);
-      HYPRE_Complex *new_P_data = hypre_CTAlloc(HYPRE_Complex, P_nnz, HYPRE_MEMORY_SHARED);
+      HYPRE_Int P_nnz;
+      HYPRE_Int *new_P_rowPtr;
+      HYPRE_Int *new_P_colInd;
+      HYPRE_Complex *new_P_data;
+
+      if (level != num_levels-1)
+      {
+         P_nnz = hypre_ParCompGridPRowPtr(compGrid[level])[num_nodes];
+         new_P_rowPtr = hypre_CTAlloc(HYPRE_Int, num_nodes+1, HYPRE_MEMORY_SHARED);
+         new_P_colInd = hypre_CTAlloc(HYPRE_Int, P_nnz, HYPRE_MEMORY_SHARED);
+         new_P_data = hypre_CTAlloc(HYPRE_Complex, P_nnz, HYPRE_MEMORY_SHARED);
+      }
 
       HYPRE_Int A_cnt = 0;
       HYPRE_Int P_cnt = 0;
@@ -971,7 +974,8 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
 
       if (level != num_levels-1)
       {
-         hypre_ParCompGridP(compGrid[level]) = hypre_CSRMatrixCreate(num_nodes, num_nodes, P_nnz);
+         HYPRE_Int num_nodes_c = hypre_ParCompGridNumNodes(compGrid[level+1]);
+         hypre_ParCompGridP(compGrid[level]) = hypre_CSRMatrixCreate(num_nodes, num_nodes_c, P_nnz);
          hypre_CSRMatrixSetDataOwner(hypre_ParCompGridP(compGrid[level]) , 0);
          hypre_CSRMatrixI(hypre_ParCompGridP(compGrid[level])) = hypre_ParCompGridPRowPtr(compGrid[level]);
          hypre_CSRMatrixJ(hypre_ParCompGridP(compGrid[level])) = hypre_ParCompGridPColInd(compGrid[level]);

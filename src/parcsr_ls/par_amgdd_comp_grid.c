@@ -116,41 +116,6 @@ hypre_ParCompGridDestroy ( hypre_ParCompGrid *compGrid )
       hypre_TFree(hypre_ParCompGridCoarseLocalIndices(compGrid), HYPRE_MEMORY_HOST);
    }
 
-   if (hypre_ParCompGridARowPtr(compGrid))
-   {
-      hypre_TFree(hypre_ParCompGridARowPtr(compGrid), HYPRE_MEMORY_HOST);
-   }
-
-   if (hypre_ParCompGridAColInd(compGrid))
-   {
-      hypre_TFree(hypre_ParCompGridAColInd(compGrid), HYPRE_MEMORY_HOST);
-   }
-
-   if (hypre_ParCompGridAGlobalColInd(compGrid))
-   {
-      hypre_TFree(hypre_ParCompGridAGlobalColInd(compGrid), HYPRE_MEMORY_HOST);
-   }
-
-   if (hypre_ParCompGridAData(compGrid))
-   {
-      hypre_TFree(hypre_ParCompGridAData(compGrid), HYPRE_MEMORY_HOST);
-   }
-
-   if (hypre_ParCompGridPRowPtr(compGrid))
-   {
-      hypre_TFree(hypre_ParCompGridPRowPtr(compGrid), HYPRE_MEMORY_HOST);
-   }
-
-   if (hypre_ParCompGridPColInd(compGrid))
-   {
-      hypre_TFree(hypre_ParCompGridPColInd(compGrid), HYPRE_MEMORY_HOST);
-   }
-
-   if (hypre_ParCompGridPData(compGrid))
-   {
-      hypre_TFree(hypre_ParCompGridPData(compGrid), HYPRE_MEMORY_HOST);
-   }
-
    if (hypre_ParCompGridA(compGrid))
    {
       hypre_CSRMatrixDestroy(hypre_ParCompGridA(compGrid));

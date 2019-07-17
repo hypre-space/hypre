@@ -400,7 +400,7 @@ FAC_Jacobi( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int l
    hypre_SeqVectorPrefetchToDevice(hypre_ParCompGridF(compGrid));
    VecCopy(hypre_VectorData(hypre_ParCompGridTemp(compGrid)),hypre_VectorData(hypre_ParCompGridF(compGrid)),hypre_VectorSize(hypre_ParCompGridTemp(compGrid)),HYPRE_STREAM(4));
    #else
-   hypre_ParVectorCopy(hypre_ParCompGridF(compGrid),hypre_ParCompGridTemp(compGrid));
+   hypre_SeqVectorCopy(hypre_ParCompGridF(compGrid),hypre_ParCompGridTemp(compGrid));
    #endif
    /*-----------------------------------------------------------------
    * Perform Matvec Vtemp=f-Au

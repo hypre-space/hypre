@@ -284,7 +284,13 @@ AddSolution( void *amg_vdata )
    HYPRE_Int amgdd_start_level = hypre_ParAMGDataAMGDDStartLevel(amg_data);
 	hypre_ParCompGrid 	**compGrid = hypre_ParAMGDataCompGrid(amg_data);
 
-   hypre_SeqVectorAxpy( 1.0, hypre_ParCompGridU(compGrid[amgdd_start_level]), hypre_ParVectorLocalVector( hypre_ParAMGDataUArray(amg_data)[amgdd_start_level] ) );
+   hypre_Vector *owned_comp_u = hypre_SeqVectorCreate( hypre_VectorSize( hypre_ParVectorLocalVector( hypre_ParAMGDataUArray(amg_data)[amgdd_start_level] ) ) );
+   hypre_VectorData(owned_comp_u) = hypre_VectorData(hypre_ParCompGridU(compGrid[amgdd_start_level]));
+   hypre_SeqVectorSetDataOwner(owned_comp_u, 0);
+
+   hypre_SeqVectorAxpy( 1.0, owned_comp_u, hypre_ParVectorLocalVector( hypre_ParAMGDataUArray(amg_data)[amgdd_start_level] ) );
+
+   hypre_SeqVectorDestroy(owned_comp_u);
 
 	return 0;
 }
