@@ -864,12 +864,13 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
 
       HYPRE_Int A_cnt = 0;
       HYPRE_Int P_cnt = 0;
+      HYPRE_Int node_cnt = 0;
       // Real nodes
       for (i = 0; i < num_nodes; i++)
       {
          if (hypre_ParCompGridARowPtr(compGrid[level])[i+1] - hypre_ParCompGridARowPtr(compGrid[level])[i] > 0)
          {
-            new_A_rowPtr[i] = A_cnt;
+            new_A_rowPtr[node_cnt] = A_cnt;
             for (j = hypre_ParCompGridARowPtr(compGrid[level])[i]; j < hypre_ParCompGridARowPtr(compGrid[level])[i+1]; j++)
             {
                if (hypre_ParCompGridAColInd(compGrid[level])[j] >= 0)
@@ -882,7 +883,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
 
             if (level != num_levels-1)
             {
-               new_P_rowPtr[i] = P_cnt;
+               new_P_rowPtr[node_cnt] = P_cnt;
                for (j = hypre_ParCompGridPRowPtr(compGrid[level])[i]; j < hypre_ParCompGridPRowPtr(compGrid[level])[i+1]; j++)
                {
                   if (hypre_ParCompGridPColInd(compGrid[level])[j] >= 0)
@@ -893,6 +894,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
                   }
                }
             }
+            node_cnt++;
          }
       }
       // Ghost nodes
@@ -900,7 +902,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
       {
          if (hypre_ParCompGridARowPtr(compGrid[level])[i+1] - hypre_ParCompGridARowPtr(compGrid[level])[i] == 0)
          {
-            new_A_rowPtr[i] = A_cnt;
+            new_A_rowPtr[node_cnt] = A_cnt;
             for (j = hypre_ParCompGridARowPtr(compGrid[level])[i]; j < hypre_ParCompGridARowPtr(compGrid[level])[i+1]; j++)
             {
                if (hypre_ParCompGridAColInd(compGrid[level])[j] >= 0)
@@ -913,7 +915,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
 
             if (level != num_levels-1)
             {
-               new_P_rowPtr[i] = P_cnt;
+               new_P_rowPtr[node_cnt] = P_cnt;
                for (j = hypre_ParCompGridPRowPtr(compGrid[level])[i]; j < hypre_ParCompGridPRowPtr(compGrid[level])[i+1]; j++)
                {
                   if (hypre_ParCompGridPColInd(compGrid[level])[j] >= 0)
@@ -924,8 +926,11 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
                   }
                }
             }
+            node_cnt++;
          }
       }
+      new_A_rowPtr[num_nodes] = A_cnt;
+      if (level != num_levels-1) new_P_rowPtr[num_nodes] = P_cnt;
 
       // Fix up P col indices on previous level
       if (level != 0)
@@ -984,10 +989,6 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
 
       hypre_ParCompGridU(compGrid[level]) = hypre_SeqVectorCreate(num_nodes);
       hypre_SeqVectorInitialize(hypre_ParCompGridU(compGrid[level]));
-
-      // hypre_ParCompGridUReal(compGrid[level]) = hypre_SeqVectorCreate(num_real_nodes);
-      // hypre_VectorData(hypre_ParCompGridUReal(compGrid[level])) = hypre_VectorData(hypre_ParCompGridU(compGrid[level]));
-      // hypre_SeqVectorSetDataOwner(hypre_ParCompGridUReal(compGrid[level]), 0);
 
       hypre_ParCompGridF(compGrid[level]) = hypre_SeqVectorCreate(num_nodes);
       hypre_SeqVectorInitialize(hypre_ParCompGridF(compGrid[level]));
