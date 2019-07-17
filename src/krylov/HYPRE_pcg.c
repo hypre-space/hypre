@@ -352,6 +352,17 @@ HYPRE_PCGGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_PCGGetFinalResidualNorm
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_PCGGetFinalResidualNorm( HYPRE_Solver  solver,
+                               HYPRE_Real   *norm )
+{
+   return( hypre_PCGGetFinalResidualNorm( (void *) solver, norm ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_PCGGetResidual
  *--------------------------------------------------------------------------*/
 

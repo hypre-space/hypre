@@ -636,3 +636,14 @@ HYPRE_ParCSRHybridGetFinalRelativeResidualNorm( HYPRE_Solver solver,
 {
    return( hypre_AMGHybridGetFinalRelativeResidualNorm( (void *) solver, norm ) );
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridGetFinalResidualNorm
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParCSRHybridGetFinalResidualNorm( HYPRE_Solver solver,
+                                                HYPRE_Real  *norm    )
+{
+   return( hypre_AMGHybridGetFinalResidualNorm( (void *) solver, norm ) );
+}

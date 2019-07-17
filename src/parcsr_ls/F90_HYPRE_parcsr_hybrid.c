@@ -889,6 +889,22 @@ hypre_F90_IFACE(hypre_parcsrhybridgetfinalrelat, HYPRE_PARCSRHYBRIDGETFINALRELAT
           hypre_F90_PassObj (HYPRE_Solver, solver),
           hypre_F90_PassRealRef (norm) ));
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridGetFinalResidualNorm
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_parcsrhybridgetfinalresid, HYPRE_PARCSRHYBRIDGETFINALRESID)
+   (hypre_F90_Obj *solver,
+    hypre_F90_Real *norm,
+    hypre_F90_Int *ierr)
+{
+   *ierr = (hypre_F90_Int)
+      (HYPRE_ParCSRHybridGetFinalResidualNorm(
+          hypre_F90_PassObj (HYPRE_Solver, solver),
+          hypre_F90_PassRealRef (norm) ));
+}
     
 #ifdef __cplusplus
 }
