@@ -43,6 +43,7 @@ hypre_ParCompGridCreate ()
    hypre_ParCompGridT(compGrid) = NULL;
    hypre_ParCompGridS(compGrid) = NULL;
    hypre_ParCompGridTemp(compGrid) = NULL;
+   hypre_ParCompGridL1Norms(compGrid) = NULL;
    hypre_ParCompGridGlobalIndices(compGrid) = NULL;
    hypre_ParCompGridCoarseGlobalIndices(compGrid) = NULL;
    hypre_ParCompGridCoarseLocalIndices(compGrid) = NULL;
@@ -56,7 +57,6 @@ hypre_ParCompGridCreate ()
    hypre_ParCompGridPData(compGrid) = NULL;
 
    hypre_ParCompGridA(compGrid) = NULL;
-   hypre_ParCompGridAReal(compGrid) = NULL;
    hypre_ParCompGridP(compGrid) = NULL;
 
    return compGrid;
@@ -69,6 +69,11 @@ hypre_ParCompGridDestroy ( hypre_ParCompGrid *compGrid )
    if (hypre_ParCompGridOwnedBlockStarts(compGrid))
    {
       hypre_TFree(hypre_ParCompGridOwnedBlockStarts(compGrid), HYPRE_MEMORY_HOST);
+   }
+
+   if (hypre_ParCompGridL1Norms(compGrid))
+   {
+      hypre_TFree(hypre_ParCompGridL1Norms(compGrid), HYPRE_MEMORY_SHARED);
    }
 
    if (hypre_ParCompGridU(compGrid))
@@ -149,11 +154,6 @@ hypre_ParCompGridDestroy ( hypre_ParCompGrid *compGrid )
    if (hypre_ParCompGridA(compGrid))
    {
       hypre_CSRMatrixDestroy(hypre_ParCompGridA(compGrid));
-   }
-
-   if (hypre_ParCompGridAReal(compGrid))
-   {
-      hypre_CSRMatrixDestroy(hypre_ParCompGridAReal(compGrid));
    }
 
    if (hypre_ParCompGridP(compGrid))

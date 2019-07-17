@@ -969,12 +969,6 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
       hypre_CSRMatrixJ(hypre_ParCompGridA(compGrid[level])) = hypre_ParCompGridAColInd(compGrid[level]);
       hypre_CSRMatrixData(hypre_ParCompGridA(compGrid[level])) = hypre_ParCompGridAData(compGrid[level]);
 
-      hypre_ParCompGridAReal(compGrid[level]) = hypre_CSRMatrixCreate(num_real_nodes, num_nodes, A_real_nnz);
-      hypre_CSRMatrixSetDataOwner(hypre_ParCompGridAReal(compGrid[level]) , 0);
-      hypre_CSRMatrixI(hypre_ParCompGridAReal(compGrid[level])) = hypre_ParCompGridARowPtr(compGrid[level]);
-      hypre_CSRMatrixJ(hypre_ParCompGridAReal(compGrid[level])) = hypre_ParCompGridAColInd(compGrid[level]);
-      hypre_CSRMatrixData(hypre_ParCompGridAReal(compGrid[level])) = hypre_ParCompGridAData(compGrid[level]);
-
       if (level != num_levels-1)
       {
          hypre_ParCompGridP(compGrid[level]) = hypre_CSRMatrixCreate(num_nodes, num_nodes, P_nnz);
