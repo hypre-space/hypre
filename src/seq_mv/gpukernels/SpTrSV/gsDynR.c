@@ -52,8 +52,6 @@ void hypreCUDAKernel_GSRowNumDep(HYPRE_Int n, HYPRE_Int *ia, HYPRE_Int *ja, HYPR
    }
 }
 
-#define USE_SHARED 0
-
 template <char UPLO, typename T>
 __global__
 void hypreCUDAKernel_GaussSeidelRowDynSchd(HYPRE_Int n, T *b, T *x, T *a, HYPRE_Int *ja, HYPRE_Int *ia, HYPRE_Int *jb, HYPRE_Int *ib, HYPRE_Int *jlev, HYPRE_Int *dep)
@@ -63,7 +61,7 @@ void hypreCUDAKernel_GaussSeidelRowDynSchd(HYPRE_Int n, T *b, T *x, T *a, HYPRE_
    // make dep volatile to tell compiler do not use cached value
    volatile HYPRE_Int *vdep = dep;
    volatile T *vx = x;
-#if USE_SHARED
+#if __CUDA_ARCH__ < 700
    volatile __shared__ HYPRE_Int sh_ind[SPTRSV_BLOCKDIM];
    volatile __shared__ T sh_val[SPTRSV_BLOCKDIM];
 #else
@@ -96,7 +94,7 @@ void hypreCUDAKernel_GaussSeidelRowDynSchd(HYPRE_Int n, T *b, T *x, T *a, HYPRE_
    p += warp_lane;
    if (p < q)
    {
-#if USE_SHARED
+#if __CUDA_ARCH__ < 700
       sh_ind[threadIdx.x] = read_only_load(&ja[p]);
       sh_val[threadIdx.x] = read_only_load(&a[p]);
 #else
@@ -117,7 +115,7 @@ void hypreCUDAKernel_GaussSeidelRowDynSchd(HYPRE_Int n, T *b, T *x, T *a, HYPRE_
 
    if (p < q)
    {
-#if USE_SHARED
+#if __CUDA_ARCH__ < 700
       const HYPRE_Int col = sh_ind[threadIdx.x];
       const T v = sh_val[threadIdx.x];
 #else

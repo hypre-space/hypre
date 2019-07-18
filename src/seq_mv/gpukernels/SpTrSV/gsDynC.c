@@ -32,8 +32,13 @@ void hypreCUDAKernel_GaussSeidelColDynSchd(HYPRE_Int n, T *x, HYPRE_Int *jb, HYP
    // make dep volatile to tell compiler do not use cached value
    volatile HYPRE_Int *vdep = dep;
    volatile T *vx = x;
-   __shared__ HYPRE_Int  sh_ind[SPTRSV_BLOCKDIM];
-   __shared__ T sh_val[SPTRSV_BLOCKDIM];
+#if __CUDA_ARCH__ < 700
+   volatile __shared__ HYPRE_Int sh_ind[SPTRSV_BLOCKDIM];
+   volatile __shared__ T sh_val[SPTRSV_BLOCKDIM];
+#else
+   HYPRE_Int sh_ind;
+   T sh_val;
+#endif
 
    if ( grid_warp_id >= n )
    {
@@ -63,8 +68,13 @@ void hypreCUDAKernel_GaussSeidelColDynSchd(HYPRE_Int n, T *x, HYPRE_Int *jb, HYP
    p += warp_lane;
    if (p < q)
    {
+#if __CUDA_ARCH__ < 700
       sh_ind[threadIdx.x] = read_only_load(&jb[p]);
       sh_val[threadIdx.x] = read_only_load(&ab[p]);
+#else
+      sh_ind = read_only_load(&jb[p]);
+      sh_val = read_only_load(&ab[p]);
+#endif
    }
 
    T xr;
@@ -90,8 +100,13 @@ void hypreCUDAKernel_GaussSeidelColDynSchd(HYPRE_Int n, T *x, HYPRE_Int *jb, HYP
 
    if (p < q)
    {
+#if __CUDA_ARCH__ < 700
       const HYPRE_Int col = sh_ind[threadIdx.x];
       atomicAdd(&x[col], -xr * sh_val[threadIdx.x]);
+#else
+      const HYPRE_Int col = sh_ind;
+      atomicAdd(&x[col], -xr * sh_val);
+#endif
       __threadfence();
       atomicSub(&dep[col], 1);
    }
