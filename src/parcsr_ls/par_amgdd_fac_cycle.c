@@ -368,125 +368,60 @@ FAC_Relax( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int ty
 HYPRE_Int
 FAC_Jacobi( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int level )
 {
-   // HYPRE_Int i,j; 
+   HYPRE_Int i,j; 
    // HYPRE_Real relax_weight = hypre_ParAMGDataRelaxWeight(amg_data)[level];
+   HYPRE_Real relax_weight = 1.0;
 
-   // // Calculate l1_norms if necessary
-   // if (!hypre_ParCompGridL1Norms(compGrid))
-   // {
-   //    hypre_ParCompGridL1Norms(compGrid) = hypre_CTAlloc(HYPRE_Real, hypre_ParCompGridNumNodes(compGrid), HYPRE_MEMORY_SHARED);
-   //    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
-   //    {
-   //       for (j = hypre_ParCompGridARowPtr(compGrid)[i]; j < hypre_ParCompGridARowPtr(compGrid)[i+1]; j++)
-   //       {
-   //          hypre_ParCompGridL1Norms(compGrid)[i] += fabs(hypre_ParCompGridAData(compGrid)[j]);
-   //       }
-   //    }
-   // }
+   // Calculate l1_norms if necessary
+   if (!hypre_ParCompGridL1Norms(compGrid))
+   {
+      hypre_ParCompGridL1Norms(compGrid) = hypre_CTAlloc(HYPRE_Real, hypre_ParCompGridNumNodes(compGrid), HYPRE_MEMORY_SHARED);
+      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
+      {
+         for (j = hypre_ParCompGridARowPtr(compGrid)[i]; j < hypre_ParCompGridARowPtr(compGrid)[i+1]; j++)
+         {
+            // hypre_ParCompGridL1Norms(compGrid)[i] += fabs(hypre_ParCompGridAData(compGrid)[j]);
+            if (hypre_ParCompGridAColInd(compGrid)[j] == i) hypre_ParCompGridL1Norms(compGrid)[i] = hypre_ParCompGridAData(compGrid)[j];
+         }
+      }
+   }
 
-   // // Allocate temporary vector if necessary
-   // if (!hypre_ParCompGridTemp(compGrid))
-   // {      
-   //    hypre_ParCompGridTemp(compGrid) = hypre_SeqVectorCreate(hypre_ParCompGridNumNodes(compGrid));
-   //    hypre_SeqVectorInitialize(hypre_ParCompGridTemp(compGrid));
-   // }
-
-   // // !!! Adapted from par_relax case 7. A little different from what I'm used to for Jacobi... this is some kind of l1 scaled one where you do a matvec with full A (instead of A without diagonal)
-   // /*-----------------------------------------------------------------
-   // * Copy f into temporary vector.
-   // *-----------------------------------------------------------------*/
-   // #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
-   // hypre_SeqVectorPrefetchToDevice(hypre_ParCompGridTemp(compGrid));
-   // hypre_SeqVectorPrefetchToDevice(hypre_ParCompGridF(compGrid));
-   // VecCopy(hypre_VectorData(hypre_ParCompGridTemp(compGrid)),hypre_VectorData(hypre_ParCompGridF(compGrid)),hypre_VectorSize(hypre_ParCompGridTemp(compGrid)),HYPRE_STREAM(4));
-   // #else
-   // hypre_SeqVectorCopy(hypre_ParCompGridF(compGrid),hypre_ParCompGridTemp(compGrid));
-   // #endif
-   // /*-----------------------------------------------------------------
-   // * Perform Matvec Vtemp=f-Au
-   // *-----------------------------------------------------------------*/
-
-   // hypre_CSRMatrixMatvec(-relax_weight, hypre_ParCompGridA(compGrid), hypre_ParCompGridU(compGrid), relax_weight, hypre_ParCompGridTemp(compGrid));
-   // #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
-   // VecScale(hypre_VectorData(hypre_ParCompGridU(compGrid)),hypre_VectorData(hypre_ParCompGridTemp(compGrid)),hypre_ParCompGridL1Norms(compGrid),hypre_ParCompGridNumRealNodes(compGrid),HYPRE_STREAM(4));
-   // #else
-   // for (i = 0; i < hypre_ParCompGridNumRealNodes(compGrid); i++)
-   // {
-   //    /*-----------------------------------------------------------
-   //    * If diagonal is nonzero, relax point i; otherwise, skip it.
-   //    *-----------------------------------------------------------*/
-   //    hypre_VectorData(hypre_ParCompGridU(compGrid))[i] += hypre_VectorData(hypre_ParCompGridTemp(compGrid))[i] / hypre_ParCompGridL1Norms(compGrid)[i];
-   // }
-   // #endif
-
-
-
-
-
-   HYPRE_Int               i, j; // loop variables
-   HYPRE_Int               is_real;
-   HYPRE_Complex           diag; // placeholder for the diagonal of A
-   HYPRE_Complex           u_before;
-
-
-   // Temporary vector to calculate Jacobi sweep   
+   // Allocate temporary vector if necessary
    if (!hypre_ParCompGridTemp(compGrid))
    {      
       hypre_ParCompGridTemp(compGrid) = hypre_SeqVectorCreate(hypre_ParCompGridNumNodes(compGrid));
       hypre_SeqVectorInitialize(hypre_ParCompGridTemp(compGrid));
    }
 
-   // Do Jacobi relaxation on the real nodes
-   for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
+   // !!! Adapted from par_relax case 7. A little different from what I'm used to for Jacobi... this is some kind of l1 scaled one where you do a matvec with full A (instead of A without diagonal)
+   /*-----------------------------------------------------------------
+   * Copy f into temporary vector.
+   *-----------------------------------------------------------------*/
+   #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
+   hypre_SeqVectorPrefetchToDevice(hypre_ParCompGridTemp(compGrid));
+   hypre_SeqVectorPrefetchToDevice(hypre_ParCompGridF(compGrid));
+   VecCopy(hypre_VectorData(hypre_ParCompGridTemp(compGrid)),hypre_VectorData(hypre_ParCompGridF(compGrid)),hypre_VectorSize(hypre_ParCompGridTemp(compGrid)),HYPRE_STREAM(4));
+   #else
+   hypre_SeqVectorCopy(hypre_ParCompGridF(compGrid),hypre_ParCompGridTemp(compGrid));
+   #endif
+   /*-----------------------------------------------------------------
+   * Perform Matvec Vtemp=f-Au
+   *-----------------------------------------------------------------*/
+
+   hypre_CSRMatrixMatvec(-relax_weight, hypre_ParCompGridA(compGrid), hypre_ParCompGridU(compGrid), relax_weight, hypre_ParCompGridTemp(compGrid));
+   #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
+   VecScale(hypre_VectorData(hypre_ParCompGridU(compGrid)),hypre_VectorData(hypre_ParCompGridTemp(compGrid)),hypre_ParCompGridL1Norms(compGrid),hypre_ParCompGridNumRealNodes(compGrid),HYPRE_STREAM(4));
+   VecScale(hypre_VectorData(hypre_ParCompGridT(compGrid)),hypre_VectorData(hypre_ParCompGridTemp(compGrid)),hypre_ParCompGridL1Norms(compGrid),hypre_ParCompGridNumRealNodes(compGrid),HYPRE_STREAM(4));
+   #else
+   for (i = 0; i < hypre_ParCompGridNumRealNodes(compGrid); i++)
    {
-      if (hypre_ParCompGridARowPtr(compGrid)[i+1] - hypre_ParCompGridARowPtr(compGrid)[i] > 0)
-      {
-         // Initialize u as RHS
-         hypre_VectorData(hypre_ParCompGridTemp(compGrid))[i] = hypre_VectorData(hypre_ParCompGridF(compGrid))[i];
-         diag = 0.0;
-
-         // Loop over entries in A
-         for (j = hypre_ParCompGridARowPtr(compGrid)[i]; j < hypre_ParCompGridARowPtr(compGrid)[i+1]; j++)
-         {
-            #if DEBUG_FAC
-            if (hypre_ParCompGridAColInd(compGrid)[j] < 0) printf("Real node doesn't have its full stencil in A! row %d, entry %d\n",i,j);
-            #endif
-            // If this is the diagonal, store for later division
-            if (hypre_ParCompGridAColInd(compGrid)[j] == i) diag = hypre_ParCompGridAData(compGrid)[j];
-            // Else, subtract off A_ij*u_j
-            else
-            {
-               hypre_VectorData(hypre_ParCompGridTemp(compGrid))[i] -= hypre_ParCompGridAData(compGrid)[j] * hypre_VectorData(hypre_ParCompGridU(compGrid))[ hypre_ParCompGridAColInd(compGrid)[j] ];
-            }
-         }
-
-         // Divide by diagonal
-         if (diag == 0.0) printf("Tried to divide by zero diagonal!\n");
-         hypre_VectorData(hypre_ParCompGridTemp(compGrid))[i] /= diag;
-      }
+      hypre_VectorData(hypre_ParCompGridU(compGrid))[i] += hypre_VectorData(hypre_ParCompGridTemp(compGrid))[i] / hypre_ParCompGridL1Norms(compGrid)[i];
    }
-
-   // Copy over relaxed vector
-   for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
+   for (i = 0; i < hypre_ParCompGridNumRealNodes(compGrid); i++)
    {
-      if (hypre_ParCompGridARowPtr(compGrid)[i+1] - hypre_ParCompGridARowPtr(compGrid)[i] > 0)
-      {
-         u_before = hypre_VectorData(hypre_ParCompGridU(compGrid))[i];
-
-         hypre_VectorData(hypre_ParCompGridU(compGrid))[i] = hypre_VectorData(hypre_ParCompGridTemp(compGrid))[i];
-
-         // if (hypre_ParCompGridT(compGrid)) hypre_ParCompGridT(compGrid)[i] = hypre_ParCompGridT(compGrid)[i] - u_before;
-         if (hypre_VectorData(hypre_ParCompGridT(compGrid))) hypre_VectorData(hypre_ParCompGridT(compGrid))[i] += hypre_VectorData(hypre_ParCompGridTemp(compGrid))[i] - u_before;
-      }
+      hypre_VectorData(hypre_ParCompGridT(compGrid))[i] += hypre_VectorData(hypre_ParCompGridTemp(compGrid))[i] / hypre_ParCompGridL1Norms(compGrid)[i];
    }
-
-
-
-
-
-
-
-
+   #endif
 
    return 0;
 }

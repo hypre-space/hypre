@@ -461,9 +461,9 @@ hypre_CSRMatrixMatvecT( HYPRE_Complex    alpha,
 #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY) /* CUDA */
    PUSH_RANGE_PAYLOAD("MATVEC",0, hypre_CSRMatrixNumRows(A));
 #ifdef HYPRE_BIGINT
-   HYPRE_Int ierr = hypre_CSRMatrixMatvecDeviceBIGINT( alpha,A,x,beta,y,y,offset,1 );
+   HYPRE_Int ierr = hypre_CSRMatrixMatvecDeviceBIGINT( alpha,A,x,beta,y,y,0,1 );
 #else
-   HYPRE_Int ierr = hypre_CSRMatrixMatvecDevice( alpha,A,x,beta,y,y,offset,1 );
+   HYPRE_Int ierr = hypre_CSRMatrixMatvecDevice( alpha,A,x,beta,y,y,0,1 );
 #endif
    POP_RANGE;
 #else
@@ -860,31 +860,43 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Complex    alpha,
 
   //if (offset!=0) hypre_printf("WARNING:: Offset is not zero in hypre_CSRMatrixMatvecDevice :: \n");
 #if defined(HYPRE_SINGLE)
-  if (use_transpose) cusparseErrchk(cusparseScsrmv(handle ,
+   if (use_transpose)
+   {
+      cusparseErrchk(cusparseScsrmv(handle ,
                  CUSPARSE_OPERATION_TRANSPOSE,
                  A->num_rows-offset, A->num_cols, A->num_nonzeros,
                  &alpha, descr,
                  A->data ,A->i+offset,A->j,
                  x->data, &beta, y->data+offset));
-  else cusparseErrchk(cusparseScsrmv(handle ,
+   }
+   else
+   {
+   cusparseErrchk(cusparseScsrmv(handle ,
                  CUSPARSE_OPERATION_NON_TRANSPOSE,
                  A->num_rows-offset, A->num_cols, A->num_nonzeros,
                  &alpha, descr,
                  A->data ,A->i+offset,A->j,
                  x->data, &beta, y->data+offset));
+   }
 #else
-  if (use_transpose) cusparseErrchk(cusparseDcsrmv(handle ,
+  if (use_transpose)
+  {
+      cusparseErrchk(cusparseDcsrmv(handle ,
                  CUSPARSE_OPERATION_TRANSPOSE,
                  A->num_rows-offset, A->num_cols, A->num_nonzeros,
                  &alpha, descr,
                  A->data ,A->i+offset,A->j,
                  x->data, &beta, y->data+offset));
-    else cusparseErrchk(cusparseDcsrmv(handle ,
+   }
+   else
+   {
+      cusparseErrchk(cusparseDcsrmv(handle ,
                  CUSPARSE_OPERATION_NON_TRANSPOSE,
                  A->num_rows-offset, A->num_cols, A->num_nonzeros,
                  &alpha, descr,
                  A->data ,A->i+offset,A->j,
                  x->data, &beta, y->data+offset));
+   }
 #endif
 
   if (!GetAsyncMode()){
@@ -976,31 +988,43 @@ hypre_CSRMatrixMatvecDeviceBIGINT( HYPRE_Complex    alpha,
   if (offset!=0) hypre_error_w_msg(HYPRE_ERROR_GENERIC, "WARNING:: Offset is not zero in hypre_CSRMatrixMatvecDevice \n");
 
 #if defined(HYPRE_SINGLE)
-  if (use_transpose) cusparseErrchk(cusparseScsrmv(handle ,
+   if (use_transpose)
+   {
+      cusparseErrchk(cusparseScsrmv(handle ,
                                 CUSPARSE_OPERATION_TRANSPOSE,
                                 num_rows-offset, num_cols, num_nonzeros,
                                 &alpha, descr,
                                 A->data ,A->i_short+offset,A->j_short,
                                 x->data, &beta, y->data+offset));
-    else cusparseErrchk(cusparseScsrmv(handle ,
+   }
+   else 
+   {
+      cusparseErrchk(cusparseScsrmv(handle ,
                                 CUSPARSE_OPERATION_NON_TRANSPOSE,
                                 num_rows-offset, num_cols, num_nonzeros,
                                 &alpha, descr,
                                 A->data ,A->i_short+offset,A->j_short,
                                 x->data, &beta, y->data+offset));
+   }
 #else
-  if (use_transpose) cusparseErrchk(cusparseDcsrmv(handle ,
+   if (use_transpose)
+   {
+      cusparseErrchk(cusparseDcsrmv(handle ,
                                 CUSPARSE_OPERATION_TRANSPOSE,
                                 num_rows-offset, num_cols, num_nonzeros,
                                 &alpha, descr,
                                 A->data ,A->i_short+offset,A->j_short,
                                 x->data, &beta, y->data+offset));
-    else cusparseErrchk(cusparseDcsrmv(handle ,
+   }
+   else
+   {
+      cusparseErrchk(cusparseDcsrmv(handle ,
                                 CUSPARSE_OPERATION_NON_TRANSPOSE,
                                 num_rows-offset, num_cols, num_nonzeros,
                                 &alpha, descr,
                                 A->data ,A->i_short+offset,A->j_short,
                                 x->data, &beta, y->data+offset));
+   }
 #endif
 
   if (!GetAsyncMode()){
