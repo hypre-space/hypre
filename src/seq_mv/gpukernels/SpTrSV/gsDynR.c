@@ -61,8 +61,13 @@ void hypreCUDAKernel_GaussSeidelRowDynSchd(HYPRE_Int n, T *b, T *x, T *a, HYPRE_
    // make dep volatile to tell compiler do not use cached value
    volatile HYPRE_Int *vdep = dep;
    volatile T *vx = x;
-   __shared__ HYPRE_Int  sh_ind[SPTRSV_BLOCKDIM];
-   __shared__ T sh_val[SPTRSV_BLOCKDIM];
+#if 0
+   volatile __shared__ HYPRE_Int sh_ind[SPTRSV_BLOCKDIM];
+   volatile __shared__ T sh_val[SPTRSV_BLOCKDIM];
+#else
+   HYPRE_Int sh_ind;
+   T sh_val;
+#endif
 
    if ( grid_warp_id >= n )
    {
@@ -89,8 +94,13 @@ void hypreCUDAKernel_GaussSeidelRowDynSchd(HYPRE_Int n, T *b, T *x, T *a, HYPRE_
    p += warp_lane;
    if (p < q)
    {
+#if 0
       sh_ind[threadIdx.x] = read_only_load(&ja[p]);
       sh_val[threadIdx.x] = read_only_load(&a[p]);
+#else
+      sh_ind = read_only_load(&ja[p]);
+      sh_val = read_only_load(&a[p]);
+#endif
    }
 
    if (warp_lane == 0)
@@ -99,10 +109,19 @@ void hypreCUDAKernel_GaussSeidelRowDynSchd(HYPRE_Int n, T *b, T *x, T *a, HYPRE_
       while (vdep[r] != 0);
    }
 
+#if __CUDA_ARCH__ >= 700
+   __syncwarp();
+#endif
+
    if (p < q)
    {
+#if 0
       const HYPRE_Int col = sh_ind[threadIdx.x];
       const T v = sh_val[threadIdx.x];
+#else
+      const HYPRE_Int col = sh_ind;
+      const T v = sh_val;
+#endif
       if (col != r)
       {
          sum += v * vx[col];
@@ -115,7 +134,7 @@ void hypreCUDAKernel_GaussSeidelRowDynSchd(HYPRE_Int n, T *b, T *x, T *a, HYPRE_
    }
    p += HYPRE_WARP_SIZE;
 
-   for (/*p += warp_lane*/; __any_sync(HYPRE_WARP_FULL_MASK, p < q); p += HYPRE_WARP_SIZE)
+   for (; __any_sync(HYPRE_WARP_FULL_MASK, p < q); p += HYPRE_WARP_SIZE)
    {
       if (p < q)
       {
