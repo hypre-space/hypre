@@ -57,7 +57,9 @@ hypre_ParCompGridCreate ()
    hypre_ParCompGridPData(compGrid) = NULL;
 
    hypre_ParCompGridA(compGrid) = NULL;
+   hypre_ParCompGridAT(compGrid) = NULL;
    hypre_ParCompGridP(compGrid) = NULL;
+   hypre_ParCompGridR(compGrid) = NULL;
 
    return compGrid;
 }
@@ -124,6 +126,11 @@ hypre_ParCompGridDestroy ( hypre_ParCompGrid *compGrid )
    if (hypre_ParCompGridP(compGrid))
    {
       hypre_CSRMatrixDestroy(hypre_ParCompGridP(compGrid));
+   }
+
+   if (hypre_ParCompGridR(compGrid))
+   {
+      hypre_CSRMatrixDestroy(hypre_ParCompGridR(compGrid));
    }
 
    hypre_TFree(compGrid, HYPRE_MEMORY_HOST);   

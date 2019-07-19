@@ -41,9 +41,9 @@ hypre_CSRMatrixMatvecOutOfPlace( HYPRE_Complex    alpha,
 #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY) /* CUDA */
    PUSH_RANGE_PAYLOAD("MATVEC",0, hypre_CSRMatrixNumRows(A));
 #ifdef HYPRE_BIGINT
-   HYPRE_Int ierr = hypre_CSRMatrixMatvecDeviceBIGINT( alpha,A,x,beta,b,y,offset,0 );
+   HYPRE_Int ierr = hypre_CSRMatrixMatvecDeviceBIGINT( alpha,A,x,beta,b,y,offset );
 #else
-   HYPRE_Int ierr = hypre_CSRMatrixMatvecDevice( alpha,A,x,beta,b,y,offset,0 );
+   HYPRE_Int ierr = hypre_CSRMatrixMatvecDevice( alpha,A,x,beta,b,y,offset );
 #endif
    POP_RANGE;
 #elif defined(HYPRE_USING_OPENMP_OFFLOAD) /* OMP 4.5 */
@@ -458,16 +458,6 @@ hypre_CSRMatrixMatvecT( HYPRE_Complex    alpha,
                         hypre_Vector    *y     )
 {
 
-#if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY) /* CUDA */
-   PUSH_RANGE_PAYLOAD("MATVEC",0, hypre_CSRMatrixNumRows(A));
-#ifdef HYPRE_BIGINT
-   HYPRE_Int ierr = hypre_CSRMatrixMatvecDeviceBIGINT( alpha,A,x,beta,y,y,0,1 );
-#else
-   HYPRE_Int ierr = hypre_CSRMatrixMatvecDevice( alpha,A,x,beta,y,y,0,1 );
-#endif
-   POP_RANGE;
-#else
-
    HYPRE_Complex    *A_data    = hypre_CSRMatrixData(A);
    HYPRE_Int        *A_i       = hypre_CSRMatrixI(A);
    HYPRE_Int        *A_j       = hypre_CSRMatrixJ(A);
@@ -668,7 +658,7 @@ hypre_CSRMatrixMatvecT( HYPRE_Complex    alpha,
    }
 
    if (x == y) hypre_SeqVectorDestroy(x_tmp);
-#endif
+
    return ierr;
 }
 
@@ -806,8 +796,7 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Complex    alpha,
                              HYPRE_Complex    beta,
                              hypre_Vector    *b,
                              hypre_Vector    *y,
-                             HYPRE_Int        offset,
-                             HYPRE_Int        use_transpose )
+                             HYPRE_Int        offset )
 {
 #ifdef HYPRE_BIGINT
    hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ERROR: hypre_CSRMatvecDevice should not be called when bigint is enabled!");
@@ -860,43 +849,19 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Complex    alpha,
 
   //if (offset!=0) hypre_printf("WARNING:: Offset is not zero in hypre_CSRMatrixMatvecDevice :: \n");
 #if defined(HYPRE_SINGLE)
-   if (use_transpose)
-   {
-      cusparseErrchk(cusparseScsrmv(handle ,
-                 CUSPARSE_OPERATION_TRANSPOSE,
-                 A->num_rows-offset, A->num_cols, A->num_nonzeros,
-                 &alpha, descr,
-                 A->data ,A->i+offset,A->j,
-                 x->data, &beta, y->data+offset));
-   }
-   else
-   {
    cusparseErrchk(cusparseScsrmv(handle ,
                  CUSPARSE_OPERATION_NON_TRANSPOSE,
                  A->num_rows-offset, A->num_cols, A->num_nonzeros,
                  &alpha, descr,
                  A->data ,A->i+offset,A->j,
                  x->data, &beta, y->data+offset));
-   }
 #else
-  if (use_transpose)
-  {
-      cusparseErrchk(cusparseDcsrmv(handle ,
-                 CUSPARSE_OPERATION_TRANSPOSE,
-                 A->num_rows-offset, A->num_cols, A->num_nonzeros,
-                 &alpha, descr,
-                 A->data ,A->i+offset,A->j,
-                 x->data, &beta, y->data+offset));
-   }
-   else
-   {
-      cusparseErrchk(cusparseDcsrmv(handle ,
+   cusparseErrchk(cusparseDcsrmv(handle ,
                  CUSPARSE_OPERATION_NON_TRANSPOSE,
                  A->num_rows-offset, A->num_cols, A->num_nonzeros,
                  &alpha, descr,
                  A->data ,A->i+offset,A->j,
                  x->data, &beta, y->data+offset));
-   }
 #endif
 
   if (!GetAsyncMode()){
@@ -915,8 +880,7 @@ hypre_CSRMatrixMatvecDeviceBIGINT( HYPRE_Complex    alpha,
                        HYPRE_Complex    beta,
                        hypre_Vector    *b,
                        hypre_Vector    *y,
-                       HYPRE_Int offset,
-                       HYPRE_Int use_transpose )
+                       HYPRE_Int offset )
 {
 #ifdef HYPRE_BIGINT
   static cusparseHandle_t handle;
@@ -988,43 +952,19 @@ hypre_CSRMatrixMatvecDeviceBIGINT( HYPRE_Complex    alpha,
   if (offset!=0) hypre_error_w_msg(HYPRE_ERROR_GENERIC, "WARNING:: Offset is not zero in hypre_CSRMatrixMatvecDevice \n");
 
 #if defined(HYPRE_SINGLE)
-   if (use_transpose)
-   {
-      cusparseErrchk(cusparseScsrmv(handle ,
-                                CUSPARSE_OPERATION_TRANSPOSE,
-                                num_rows-offset, num_cols, num_nonzeros,
-                                &alpha, descr,
-                                A->data ,A->i_short+offset,A->j_short,
-                                x->data, &beta, y->data+offset));
-   }
-   else 
-   {
-      cusparseErrchk(cusparseScsrmv(handle ,
+   cusparseErrchk(cusparseScsrmv(handle ,
                                 CUSPARSE_OPERATION_NON_TRANSPOSE,
                                 num_rows-offset, num_cols, num_nonzeros,
                                 &alpha, descr,
                                 A->data ,A->i_short+offset,A->j_short,
                                 x->data, &beta, y->data+offset));
-   }
 #else
-   if (use_transpose)
-   {
-      cusparseErrchk(cusparseDcsrmv(handle ,
-                                CUSPARSE_OPERATION_TRANSPOSE,
-                                num_rows-offset, num_cols, num_nonzeros,
-                                &alpha, descr,
-                                A->data ,A->i_short+offset,A->j_short,
-                                x->data, &beta, y->data+offset));
-   }
-   else
-   {
-      cusparseErrchk(cusparseDcsrmv(handle ,
+   cusparseErrchk(cusparseDcsrmv(handle ,
                                 CUSPARSE_OPERATION_NON_TRANSPOSE,
                                 num_rows-offset, num_cols, num_nonzeros,
                                 &alpha, descr,
                                 A->data ,A->i_short+offset,A->j_short,
                                 x->data, &beta, y->data+offset));
-   }
 #endif
 
   if (!GetAsyncMode()){

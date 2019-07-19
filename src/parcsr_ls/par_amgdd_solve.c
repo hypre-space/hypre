@@ -515,7 +515,7 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
          {
             if (recv_buffer_size[level][i])
             {
-               recv_buffer[i] = hypre_CTAlloc(HYPRE_Complex, recv_buffer_size[level][i], HYPRE_MEMORY_HOST );
+               recv_buffer[i] = hypre_CTAlloc(HYPRE_Complex, recv_buffer_size[level][i], HYPRE_MEMORY_SHARED );
                hypre_MPI_Irecv( recv_buffer[i], recv_buffer_size[level][i], HYPRE_MPI_COMPLEX, recv_procs[level][i], 3, comm, &requests[request_counter++]);
             }
          }
@@ -525,7 +525,7 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
          {
             if (send_buffer_size[level][i])
             {
-               send_buffer[i] = hypre_CTAlloc(HYPRE_Complex, send_buffer_size[level][i], HYPRE_MEMORY_HOST);
+               send_buffer[i] = hypre_CTAlloc(HYPRE_Complex, send_buffer_size[level][i], HYPRE_MEMORY_SHARED);
                PackResidualBuffer(send_buffer[i], send_flag[level][i], num_send_nodes[level][i], compGrid, level, num_levels);
             }
          }
@@ -545,7 +545,7 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
          hypre_TFree(status, HYPRE_MEMORY_HOST);
          for (i = 0; i < num_partitions; i++)
          {
-            hypre_TFree(send_buffer[i], HYPRE_MEMORY_HOST);
+            hypre_TFree(send_buffer[i], HYPRE_MEMORY_SHARED);
          }
          hypre_TFree(send_buffer, HYPRE_MEMORY_HOST);
          
@@ -559,7 +559,7 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
          // clean up memory for this level
          for (i = 0; i < num_recv_procs; i++)
          {
-            hypre_TFree(recv_buffer[i], HYPRE_MEMORY_HOST);
+            hypre_TFree(recv_buffer[i], HYPRE_MEMORY_SHARED);
          }
          hypre_TFree(recv_buffer, HYPRE_MEMORY_HOST);
       }
@@ -780,7 +780,7 @@ hypre_BoomerAMGDDTimeResidualCommunication( void *amg_vdata, HYPRE_Int time_leve
             {
                if (recv_buffer_size[level][i])
                {
-                  recv_buffer[i] = hypre_CTAlloc(HYPRE_Complex, recv_buffer_size[level][i], HYPRE_MEMORY_HOST );
+                  recv_buffer[i] = hypre_CTAlloc(HYPRE_Complex, recv_buffer_size[level][i], HYPRE_MEMORY_SHARED );
                   hypre_MPI_Irecv( recv_buffer[i], recv_buffer_size[level][i], HYPRE_MPI_COMPLEX, recv_procs[level][i], 3, comm, &requests[request_counter++]);
                }
             }
@@ -790,7 +790,7 @@ hypre_BoomerAMGDDTimeResidualCommunication( void *amg_vdata, HYPRE_Int time_leve
             {
                if (send_buffer_size[level][i])
                {
-                  send_buffer[i] = hypre_CTAlloc(HYPRE_Complex, send_buffer_size[level][i], HYPRE_MEMORY_HOST);
+                  send_buffer[i] = hypre_CTAlloc(HYPRE_Complex, send_buffer_size[level][i], HYPRE_MEMORY_SHARED);
                   PackResidualBuffer(send_buffer[i], send_flag[level][i], num_send_nodes[level][i], compGrid, level, num_levels);
                }
             }
@@ -810,7 +810,7 @@ hypre_BoomerAMGDDTimeResidualCommunication( void *amg_vdata, HYPRE_Int time_leve
             hypre_TFree(status, HYPRE_MEMORY_HOST);
             for (i = 0; i < num_partitions; i++)
             {
-               hypre_TFree(send_buffer[i], HYPRE_MEMORY_HOST);
+               hypre_TFree(send_buffer[i], HYPRE_MEMORY_SHARED);
             }
             hypre_TFree(send_buffer, HYPRE_MEMORY_HOST);
             
@@ -824,7 +824,7 @@ hypre_BoomerAMGDDTimeResidualCommunication( void *amg_vdata, HYPRE_Int time_leve
             // clean up memory for this level
             for (i = 0; i < num_recv_procs; i++)
             {
-               hypre_TFree(recv_buffer[i], HYPRE_MEMORY_HOST);
+               hypre_TFree(recv_buffer[i], HYPRE_MEMORY_SHARED);
             }
             hypre_TFree(recv_buffer, HYPRE_MEMORY_HOST);
          }
@@ -868,10 +868,22 @@ PackResidualBuffer( HYPRE_Complex *send_buffer, HYPRE_Int **send_flag, HYPRE_Int
    // pack the send buffer
    for (level = current_level; level < num_levels; level++)
    {
+      // !!! Using the PackOnDevice() function causes some strange errors... not using for now
+      // #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
+      // if (num_send_nodes[level])
+      // {
+      //    PackOnDevice(&(send_buffer[cnt]), hypre_VectorData(hypre_ParCompGridF(compGrid[level])), send_flag[level], 0, num_send_nodes[level], HYPRE_STREAM(4));
+      //    hypre_CheckErrorDevice(cudaPeekAtLastError());
+      //    hypre_CheckErrorDevice(cudaDeviceSynchronize());
+      //    cnt += num_send_nodes[level];
+      // }
+      // #else
       for (i = 0; i < num_send_nodes[level]; i++)
       {
          send_buffer[cnt++] = hypre_VectorData(hypre_ParCompGridF(compGrid[level]))[ send_flag[level][i] ];
+
       }
+      // #endif
    }
 
    return 0;

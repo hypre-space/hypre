@@ -16,6 +16,7 @@
 #include "par_csr_block_matrix.h"	
 
 #define DEBUG_FAC 0
+#define DEBUGGING_MESSAGES 0
 
 // !!! Debug: 
 // int MISSING_P_CONNECTION;
@@ -127,11 +128,17 @@ HYPRE_Int FAC_Cycle(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type, HYPR
    hypre_ParCompGrid          **compGrid = hypre_ParAMGDataCompGrid(amg_data);
 
    // Relax on the real nodes
+   #if DEBUGGING_MESSAGES
+   printf("Rank %d, relax on level %d\n", myid, level);
+   #endif
    for (i = 0; i < numRelax[1]; i++) FAC_Relax( amg_data, compGrid[level], relax_type, level );
 
    // Restrict the residual at all fine points (real and ghost) and set residual at coarse points not under the fine grid
    if (level < transition_level)
    {
+      #if DEBUGGING_MESSAGES
+      printf("Rank %d, restrict on level %d\n", myid, level);
+      #endif
       FAC_Restrict( compGrid[level], compGrid[level+1], first_iteration );
       hypre_SeqVectorSetConstantValues( hypre_ParCompGridS(compGrid[level]), 0.0 );
       hypre_SeqVectorSetConstantValues( hypre_ParCompGridT(compGrid[level]), 0.0 );
@@ -139,16 +146,31 @@ HYPRE_Int FAC_Cycle(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type, HYPR
    else FAC_Simple_Restrict( compGrid[level], compGrid[level+1], level );
 
    //  Either solve on the coarse level or recurse
-   if (level+1 == num_levels-1) for (i = 0; i < 20; i++) FAC_Relax( amg_data, compGrid[num_levels-1], relax_type, num_levels-1 );
+   if (level+1 == num_levels-1)
+   {
+      #if DEBUGGING_MESSAGES
+      printf("Rank %d, coarse solve on level %d\n", myid, num_levels-1);
+      #endif
+      for (i = 0; i < 20; i++) FAC_Relax( amg_data, compGrid[num_levels-1], relax_type, num_levels-1 );
+   }
    else for (i = 0; i < cycle_type; i++)
    {
+      #if DEBUGGING_MESSAGES
+      printf("Rank %d, recurse on level %d\n", myid, level);
+      #endif
       FAC_Cycle(amg_vdata, level+1, cycle_type, first_iteration);
       first_iteration = 0;
    }
 
    // Interpolate up and relax
+   #if DEBUGGING_MESSAGES
+   printf("Rank %d, interpolate on level %d\n", myid, level);
+   #endif
    FAC_Interpolate( compGrid[level], compGrid[level+1] );
 
+   #if DEBUGGING_MESSAGES
+   printf("Rank %d, relax on level %d\n", myid, level);
+   #endif
    for (i = 0; i < numRelax[2]; i++) FAC_Relax( amg_data, compGrid[level], relax_type, level );
 
    return 0;
@@ -317,12 +339,14 @@ FAC_Restrict( hypre_ParCompGrid *compGrid_f, hypre_ParCompGrid *compGrid_c, HYPR
    if (!first_iteration) hypre_CSRMatrixMatvec(-1.0, hypre_ParCompGridA(compGrid_c), hypre_ParCompGridU(compGrid_c), 1.0, hypre_ParCompGridF(compGrid_c));
 
    // Get update: s_l <- A_lt_l + s_l (NOTE: I'm assuming here that A is symmetric and computing s_l <- A_l^Tt_l + s_l)
-   hypre_CSRMatrixMatvecT(1.0, hypre_ParCompGridA(compGrid_f), hypre_ParCompGridT(compGrid_f), 1.0, hypre_ParCompGridS(compGrid_f));   
+   // hypre_CSRMatrixMatvecT(1.0, hypre_ParCompGridA(compGrid_f), hypre_ParCompGridT(compGrid_f), 1.0, hypre_ParCompGridS(compGrid_f));
+   hypre_CSRMatrixMatvec(1.0, hypre_ParCompGridAT(compGrid_f), hypre_ParCompGridT(compGrid_f), 1.0, hypre_ParCompGridS(compGrid_f));
 
    // If we need to preserve the updates on the next level !!! Do we need this if statement? Implications? Still need to generally make sure transition level stuff still works...
    if (hypre_ParCompGridS(compGrid_c))
    {
-      hypre_CSRMatrixMatvecT(1.0, hypre_ParCompGridP(compGrid_f), hypre_ParCompGridS(compGrid_f), 0.0, hypre_ParCompGridS(compGrid_c));
+      // hypre_CSRMatrixMatvecT(1.0, hypre_ParCompGridP(compGrid_f), hypre_ParCompGridS(compGrid_f), 0.0, hypre_ParCompGridS(compGrid_c));
+      hypre_CSRMatrixMatvec(1.0, hypre_ParCompGridR(compGrid_f), hypre_ParCompGridS(compGrid_f), 0.0, hypre_ParCompGridS(compGrid_c));
 
       // Subtract restricted update from recalculated residual: f_{l+1} <- f_{l+1} - s_{l+1}
       hypre_SeqVectorAxpy(-1.0, hypre_ParCompGridS(compGrid_c), hypre_ParCompGridF(compGrid_c));
@@ -330,7 +354,8 @@ FAC_Restrict( hypre_ParCompGrid *compGrid_f, hypre_ParCompGrid *compGrid_c, HYPR
    else
    {
       // Restrict and subtract update from recalculated residual: f_{l+1} <- f_{l+1} - P_l^Ts_l
-      hypre_CSRMatrixMatvecT(-1.0, hypre_ParCompGridP(compGrid_f), hypre_ParCompGridS(compGrid_f), 1.0, hypre_ParCompGridF(compGrid_c));
+      // hypre_CSRMatrixMatvecT(-1.0, hypre_ParCompGridP(compGrid_f), hypre_ParCompGridS(compGrid_f), 1.0, hypre_ParCompGridF(compGrid_c));
+      hypre_CSRMatrixMatvec(-1.0, hypre_ParCompGridR(compGrid_f), hypre_ParCompGridS(compGrid_f), 1.0, hypre_ParCompGridF(compGrid_c));
    }
 
    // Zero out initial guess on coarse grid
@@ -349,7 +374,8 @@ FAC_Simple_Restrict( hypre_ParCompGrid *compGrid_f, hypre_ParCompGrid *compGrid_
       hypre_SeqVectorInitialize(hypre_ParCompGridTemp(compGrid_f));
    }
    hypre_CSRMatrixMatvecOutOfPlace(-1.0, hypre_ParCompGridA(compGrid_f), hypre_ParCompGridU(compGrid_f), 1.0, hypre_ParCompGridF(compGrid_f), hypre_ParCompGridTemp(compGrid_f), 0);
-   hypre_CSRMatrixMatvecT(1.0, hypre_ParCompGridP(compGrid_f), hypre_ParCompGridTemp(compGrid_f), 0.0, hypre_ParCompGridF(compGrid_c));
+   // hypre_CSRMatrixMatvecT(1.0, hypre_ParCompGridP(compGrid_f), hypre_ParCompGridTemp(compGrid_f), 0.0, hypre_ParCompGridF(compGrid_c));
+   hypre_CSRMatrixMatvec(1.0, hypre_ParCompGridR(compGrid_f), hypre_ParCompGridTemp(compGrid_f), 0.0, hypre_ParCompGridF(compGrid_c));
    
    // Zero out initial guess on coarse grid
    hypre_SeqVectorSetConstantValues(hypre_ParCompGridU(compGrid_c), 0.0);
