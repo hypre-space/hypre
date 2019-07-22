@@ -243,7 +243,7 @@ int main (int argc, char *argv[])
          }
       }
 
-      /* For each box, set any coefficients that reach ouside of the
+      /* For each box, set any coefficients that reach outside of the
          boundary to 0 */
       if (myid == 0)
       {
