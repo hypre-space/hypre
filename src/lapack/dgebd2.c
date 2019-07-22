@@ -1,3 +1,6 @@
+/* Copyright (c) 1992-2008 The University of Tennessee.  All rights reserved.
+ * See file COPYING in this directory for details. */
+
 #ifdef __cplusplus
 extern "C" {
 #endif

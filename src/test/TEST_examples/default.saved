@@ -361,54 +361,6 @@ Final L2 norm of residual: 4.903805e-09
 Iterations = 9
 Final Relative Residual Norm = 6.57147e-07
 
-# Output file: default.out.10
-***************************************************
-* Preconditioned Conjugate Gradient solver
-* maximum no. of iterations = 100
-* convergence tolerance     = 1.000000e-06
-*--------------------------------------------------
-AMG max levels   = 30
-AMG coarsen type = 10
-AMG measure type = 0
-AMG threshold    = 2.500000e-01
-AMG numsweeps    = 1
-AMG relax type   = 6
-AMG relax weight = 1.000000e+00
-AMG relax omega  = 1.000000e+00
-AMG system size  = 1
-AMG smooth type  = 0
-AMG smooth numlevels  = 0
-AMG smooth numsweeps  = 1
-AMG Schwarz variant = 0
-AMG Schwarz overlap = 1
-AMG Schwarz domain type = 2
-AMG Schwarz relax weight = 1.000000e+00
-***************************************************
-<b,b>: 6.829186e-05
-
-
-Iters       ||r||_2     conv.rate  ||r||_2/||b||_2
------    ------------   ---------  ------------
-    1    6.568705e-03    0.794868    7.948685e-01
-    2    2.229023e-03    0.339340    2.697305e-01
-    3    4.395103e-04    0.197176    5.318444e-02
-    4    6.154722e-05    0.140036    7.447730e-03
-    5    9.106693e-06    0.147963    1.101986e-03
-    6    1.448916e-06    0.159105    1.753310e-04
-    7    2.542814e-07    0.175498    3.077019e-05
-    8    3.559798e-08    0.139994    4.307655e-06
-    9    5.739829e-09    0.161240    6.945675e-07
-
-
-***************************************************
-*                Solver Statistics                *
-*-------------------------------------------------*
-** HYPRE preconditioner setup time = 1.199627e-02
-** HYPRE solution time             = 1.896429e-02
-** HYPRE total time                = 3.096056e-02
-** HYPRE number of iterations      = 9
-** HYPRE final residual norm       = 5.739829e-09
-***************************************************
 # Output file: default.out.11
   2   132 x 29      0    4   3.5   5.687e-03   5.328e-01   0.000e+00   1.000e+00
   3    29 x 4       1    4   2.7   6.881e-03   4.675e-01   7.079e-02   1.000e+00
