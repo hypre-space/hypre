@@ -1,9 +1,14 @@
+# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
 cmake_minimum_required (VERSION 2.8.8)
 project (hypre)
 
 # The version number.
-set (HYPRE_VERSION 2.16.0)
-set (HYPRE_DATE    2019/03/20)
+set (HYPRE_VERSION 2.17.0)
+set (HYPRE_DATE    2019/06/10)
 set (HYPRE_TIME    00:00:00)
 set (HYPRE_BUGS    hypre-support@llnl.gov)
 set (HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
@@ -37,7 +42,7 @@ option(HYPRE_PRINT_ERRORS         "Print HYPRE errors" OFF)
 option(HYPRE_USING_OPENMP         "Use OpenMP" OFF)
 option(HYPRE_HOPSCOTCH            "Use hopscotch hashing with OpenMP" OFF)
 option(HAVE_DSUPERLU              "required if using SuperLU_dist" OFF)
-option(HYPRE_USING_FEI            "Use FEI" ON)
+option(HYPRE_USING_FEI            "Use FEI" OFF)
 option(HYPRE_USING_CALIPER        "Use Caliper" OFF)  # TODO: Finish this cmake feature
 
 if (HYPRE_SHARED)

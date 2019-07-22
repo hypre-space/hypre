@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision: 2.14 $
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_parcsr_ls.h"
 #include "../HYPRE.h"
@@ -28,7 +23,7 @@ hypre_GrabSubArray(HYPRE_Int * indices,
                    HYPRE_Int start,
                    HYPRE_Int end,
                    HYPRE_BigInt * array,
-                   HYPRE_Int * output)
+                   HYPRE_BigInt * output)
 {
    HYPRE_Int i, length;
    length = end - start + 1;
@@ -78,10 +73,48 @@ void hypre_qsort2_abs( HYPRE_Int *v,
 HYPRE_Int
 hypre_IntersectTwoArrays(HYPRE_Int  *x,
                          HYPRE_Real *x_data,
-                         HYPRE_Int  x_length,
+                         HYPRE_Int   x_length,
                          HYPRE_Int  *y,
-                         HYPRE_Int  y_length,
+                         HYPRE_Int   y_length,
                          HYPRE_Int  *z,
+                         HYPRE_Real *output_x_data,
+                         HYPRE_Int  *intersect_length)
+{
+   HYPRE_Int x_index = 0;
+   HYPRE_Int y_index = 0;
+   *intersect_length = 0;
+
+   /* Compute Intersection, looping over each array */
+   while ( (x_index < x_length) && (y_index < y_length) )
+   {
+      if (x[x_index] > y[y_index])
+      {
+         y_index = y_index + 1;
+      }
+      else if (x[x_index] < y[y_index])
+      {
+         x_index = x_index + 1;
+      }
+      else
+      {
+         z[*intersect_length] = x[x_index];
+         output_x_data[*intersect_length] = x_data[x_index];
+         x_index = x_index + 1;
+         y_index = y_index + 1;
+         *intersect_length = *intersect_length + 1;
+      }
+   }
+
+   return 1;
+}
+
+HYPRE_Int
+hypre_IntersectTwoBigArrays(HYPRE_BigInt *x,
+                         HYPRE_Real *x_data,
+                         HYPRE_Int  x_length,
+                         HYPRE_BigInt *y,
+                         HYPRE_Int  y_length,
+                         HYPRE_BigInt *z,
                          HYPRE_Real *output_x_data,
                          HYPRE_Int  *intersect_length)
 {
@@ -283,7 +316,6 @@ hypre_BoomerAMG_MyCreateS(hypre_ParCSRMatrix  *A,
    S = hypre_ParCSRMatrixCreate(comm, global_num_vars, global_num_vars,
          row_starts, row_starts,
          num_cols_offd, num_nonzeros_diag, num_nonzeros_offd);
-
    /* row_starts is owned by A, col_starts = row_starts */
    hypre_ParCSRMatrixSetRowStartsOwner(S,0);
    S_diag = hypre_ParCSRMatrixDiag(S);
@@ -1225,9 +1257,9 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
 
    /* Lumping related variables */
    HYPRE_IJMatrix      ijmatrix;
-   HYPRE_Int           * Pattern_offd_indices          = NULL;
-   HYPRE_Int           * S_offd_indices                = NULL;
-   HYPRE_Int           * offd_intersection             = NULL;
+   HYPRE_BigInt        * Pattern_offd_indices          = NULL;
+   HYPRE_BigInt        * S_offd_indices                = NULL;
+   HYPRE_BigInt        * offd_intersection             = NULL;
    HYPRE_Real          * offd_intersection_data        = NULL;
    HYPRE_Int           * diag_intersection             = NULL;
    HYPRE_Real          * diag_intersection_data        = NULL;
@@ -1690,7 +1722,7 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
          if(Pattern_offd_indices_allocated_len < Pattern_offd_indices_len)
          {
             hypre_TFree(Pattern_offd_indices, HYPRE_MEMORY_HOST);
-            Pattern_offd_indices = hypre_CTAlloc(HYPRE_Int,  Pattern_offd_indices_len, HYPRE_MEMORY_HOST);
+            Pattern_offd_indices = hypre_CTAlloc(HYPRE_BigInt,  Pattern_offd_indices_len, HYPRE_MEMORY_HOST);
             Pattern_offd_indices_allocated_len = Pattern_offd_indices_len;
          }
          /* Grab sub array from col_map, corresponding to the slice of Pattern_offd_j */
@@ -1745,7 +1777,7 @@ else if( (col_indx_RAP < col_indx_Pattern) || has_row_ended)
    if(S_offd_indices_allocated_len < S_offd_indices_len)
    {
       hypre_TFree(S_offd_indices, HYPRE_MEMORY_HOST);
-      S_offd_indices = hypre_CTAlloc(HYPRE_Int,  S_offd_indices_len, HYPRE_MEMORY_HOST);
+      S_offd_indices = hypre_CTAlloc(HYPRE_BigInt,  S_offd_indices_len, HYPRE_MEMORY_HOST);
       S_offd_indices_allocated_len = S_offd_indices_len;
    }
    /* Grab sub array from col_map, corresponding to the slice of S_offd_j */
@@ -1761,13 +1793,13 @@ else if( (col_indx_RAP < col_indx_Pattern) || has_row_ended)
    {
       hypre_TFree(offd_intersection, HYPRE_MEMORY_HOST);
       hypre_TFree(offd_intersection_data, HYPRE_MEMORY_HOST);
-      offd_intersection = hypre_CTAlloc(HYPRE_Int,  cnt, HYPRE_MEMORY_HOST);
+      offd_intersection = hypre_CTAlloc(HYPRE_BigInt,  cnt, HYPRE_MEMORY_HOST);
       offd_intersection_data = hypre_CTAlloc(HYPRE_Real,  cnt, HYPRE_MEMORY_HOST);
       offd_intersection_allocated_len = cnt;
    }
    /* This intersection also tracks S_offd_data and assumes that
     * S_offd_indices is the first argument here */
-   hypre_IntersectTwoArrays(S_offd_indices,
+   hypre_IntersectTwoBigArrays(S_offd_indices,
          &(S_offd_data[ S_offd_i[col_indx_RAP] ]),
          S_offd_indices_len,
          Pattern_offd_indices,
@@ -2033,7 +2065,7 @@ if(num_cols_RAP_offd)
                if(S_offd_indices_allocated_len < S_offd_indices_len)
                {
                   hypre_TFree(S_offd_indices, HYPRE_MEMORY_HOST);
-                  S_offd_indices = hypre_CTAlloc(HYPRE_Int,  S_offd_indices_len, HYPRE_MEMORY_HOST);
+                  S_offd_indices = hypre_CTAlloc(HYPRE_BigInt,  S_offd_indices_len, HYPRE_MEMORY_HOST);
                   S_offd_indices_allocated_len = S_offd_indices_len;
                }
                /* Grab sub array from col_map, corresponding to the slice of S_ext_offd_j */
@@ -2049,11 +2081,11 @@ if(num_cols_RAP_offd)
                {
                   hypre_TFree(offd_intersection, HYPRE_MEMORY_HOST);
                   hypre_TFree(offd_intersection_data, HYPRE_MEMORY_HOST);
-                  offd_intersection = hypre_CTAlloc(HYPRE_Int,  cnt, HYPRE_MEMORY_HOST);
+                  offd_intersection = hypre_CTAlloc(HYPRE_BigInt,  cnt, HYPRE_MEMORY_HOST);
                   offd_intersection_data = hypre_CTAlloc(HYPRE_Real,  cnt, HYPRE_MEMORY_HOST);
                   offd_intersection_allocated_len = cnt;
                }
-               hypre_IntersectTwoArrays(S_offd_indices,
+               hypre_IntersectTwoBigArrays(S_offd_indices,
                      &(S_ext_offd_data[ S_ext_offd_i[row_indx_Sext] ]),
                      S_offd_indices_len,
                      Pattern_offd_indices,
