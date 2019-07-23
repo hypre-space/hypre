@@ -1670,6 +1670,7 @@ HYPRE_Int hypre_BoomerAMGCoarsenCR ( hypre_ParCSRMatrix *A , HYPRE_Int **CF_mark
 /* par_cycle.c */
 HYPRE_Int hypre_BoomerAMGCycle ( void *amg_vdata , hypre_ParVector **F_array , hypre_ParVector **U_array );
 HYPRE_Int hypre_BoomerAMGPartialCycle( void *amg_vdata, hypre_ParVector **F_array, hypre_ParVector **U_array, HYPRE_Int coarsest_level, HYPRE_Int down_up_cycle );
+HYPRE_Int hypre_BoomerAMGCycleTimed ( void *amg_vdata , hypre_ParVector **F_array , hypre_ParVector **U_array, HYPRE_Int time_part );
 
 /* par_difconv.c */
 HYPRE_ParCSRMatrix GenerateDifConv ( MPI_Comm comm , HYPRE_BigInt nx , HYPRE_BigInt ny , HYPRE_BigInt nz , HYPRE_Int P , HYPRE_Int Q , HYPRE_Int R , HYPRE_Int p , HYPRE_Int q , HYPRE_Int r , HYPRE_Real *value );

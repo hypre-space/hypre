@@ -2900,7 +2900,7 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
          }
          
          // Save the indices (in global index ordering) so I don't have to keep looping over all nodes in compGrid when I pack the buffer
-         send_flag[current_level][partition][level] = hypre_CTAlloc( HYPRE_Int, num_send_nodes[current_level][partition][level], HYPRE_MEMORY_HOST );
+         send_flag[current_level][partition][level] = hypre_CTAlloc( HYPRE_Int, num_send_nodes[current_level][partition][level], HYPRE_MEMORY_SHARED );
          cnt =  0;
 
          HYPRE_Int *insert_owned_positions = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumOwnedBlocks(compGrid[level])+1, HYPRE_MEMORY_HOST);
@@ -3151,7 +3151,7 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
       HYPRE_Int incoming_cnt = 0;
       HYPRE_Int *compGrid_dest = hypre_CTAlloc(HYPRE_Int, num_nonowned_nodes, HYPRE_MEMORY_HOST);
       // NOTE: Don't free incoming_dest because we set that as recv_map and use it outside this function
-      HYPRE_Int *incoming_dest = hypre_CTAlloc(HYPRE_Int, num_recv_nodes[current_level][buffer_number][level], HYPRE_MEMORY_HOST);
+      HYPRE_Int *incoming_dest = hypre_CTAlloc(HYPRE_Int, num_recv_nodes[current_level][buffer_number][level], HYPRE_MEMORY_SHARED);
 
       while (incoming_cnt < num_recv_nodes[current_level][buffer_number][level] && compGrid_cnt < num_nonowned_nodes)
       {
@@ -3453,7 +3453,7 @@ PackRecvMapSendBuffer(HYPRE_Int *recv_map_send_buffer,
                (*recv_buffer_size)++;
             }
          }
-         recv_map[level] = hypre_TReAlloc(recv_map[level], HYPRE_Int, num_recv_nodes[level], HYPRE_MEMORY_HOST);
+         recv_map[level] = hypre_TReAlloc(recv_map[level], HYPRE_Int, num_recv_nodes[level], HYPRE_MEMORY_SHARED);
       }
       // otherwise record that there were zero nodes on this level
       else recv_map_send_buffer[cnt++] = 0;
@@ -3487,7 +3487,7 @@ UnpackSendFlagBuffer(HYPRE_Int *send_flag_buffer,
          }
       }
       
-      send_flag[level] = hypre_TReAlloc(send_flag[level], HYPRE_Int, num_send_nodes[level], HYPRE_MEMORY_HOST);
+      send_flag[level] = hypre_TReAlloc(send_flag[level], HYPRE_Int, num_send_nodes[level], HYPRE_MEMORY_SHARED);
    }
 
    return 0;
@@ -3838,7 +3838,7 @@ FinalizeCompGridCommPkg(hypre_ParCompGridCommPkg *compGridCommPkg)
                   hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[outer_level][part][level][ num_send_nodes++ ] = hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[outer_level][part][level][i];
                }
             }
-            hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[outer_level][part][level] = hypre_TReAlloc(hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[outer_level][part][level], HYPRE_Int, num_send_nodes, HYPRE_MEMORY_HOST);
+            hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[outer_level][part][level] = hypre_TReAlloc(hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[outer_level][part][level], HYPRE_Int, num_send_nodes, HYPRE_MEMORY_SHARED);
             hypre_ParCompGridCommPkgNumSendNodes(compGridCommPkg)[outer_level][part][level] = num_send_nodes;
             send_buffer_size += num_send_nodes;
 
@@ -3850,7 +3850,7 @@ FinalizeCompGridCommPkg(hypre_ParCompGridCommPkg *compGridCommPkg)
                   hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[outer_level][part][level][ num_recv_nodes++ ] = hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[outer_level][part][level][i];
                }
             }
-            hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[outer_level][part][level] = hypre_TReAlloc(hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[outer_level][part][level], HYPRE_Int, num_recv_nodes, HYPRE_MEMORY_HOST);
+            hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[outer_level][part][level] = hypre_TReAlloc(hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[outer_level][part][level], HYPRE_Int, num_recv_nodes, HYPRE_MEMORY_SHARED);
             hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[outer_level][part][level] = num_recv_nodes;
             recv_buffer_size += num_recv_nodes;
          }

@@ -183,7 +183,7 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata )
 
 	// Form residual and do residual communication
    HYPRE_Int test_failed = 0;
-	test_failed = hypre_BoomerAMGDDResidualCommunication( amg_vdata );
+	test_failed = hypre_BoomerAMGDDResidualCommunication( amg_vdata ); // !!! HEY!!! Turn this back on
 
 	// Set zero initial guess for all comp grids on all levels
 	ZeroInitialGuess( amg_vdata );
@@ -201,8 +201,6 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata )
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
    #endif
 
-
-   // !!! New: initialize temp vectors to zero
    HYPRE_Int transition_level = hypre_ParCompGridCommPkgTransitionLevel(hypre_ParAMGDataCompGridCommPkg(amg_data));
    if (transition_level < 0) transition_level = num_levels;
    for (level = amgdd_start_level; level < transition_level; level++)
@@ -218,7 +216,7 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata )
       while ( cycle_count < max_fac_iter )
       {
          // Do FAC cycle
-         hypre_BoomerAMGDD_FAC_Cycle( amg_vdata, first_iteration );
+         hypre_BoomerAMGDD_FAC_Cycle( amg_vdata, first_iteration ); // !!! HEY!!! Turn this back on
          first_iteration = 0;
 
          ++cycle_count;
@@ -412,17 +410,6 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
    send_flag = hypre_ParCompGridCommPkgSendFlag(compGridCommPkg);
    recv_map = hypre_ParCompGridCommPkgRecvMap(compGridCommPkg);
 
-   // get first and last global indices on each level for this proc
-   proc_first_index = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
-   proc_last_index = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
-   global_nodes = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
-   for (level = 0; level < num_levels; level++)
-   {
-      proc_first_index[level] = hypre_ParVectorFirstIndex(F_array[level]);
-      proc_last_index[level] = hypre_ParVectorLastIndex(F_array[level]);
-      global_nodes[level] = hypre_ParCSRMatrixGlobalNumRows(A_array[level]);
-   }
-
    // Restrict residual down to all levels (or just to the transition level) and initialize composite grids
    for (level = amgdd_start_level; level < transition_level-1; level++)
    {
@@ -451,11 +438,13 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
 
       // Access the residual data
       residual_local = hypre_ParVectorLocalVector(F_array[level]);
-      residual_data = hypre_VectorData(residual_local);
-      for (i = hypre_ParCompGridOwnedBlockStarts(compGrid[level])[local_myid]; i < hypre_ParCompGridOwnedBlockStarts(compGrid[level])[local_myid+1]; i++)
-      {
-         hypre_VectorData(hypre_ParCompGridF(compGrid[level]))[i] = residual_data[i - hypre_ParCompGridOwnedBlockStarts(compGrid[level])[local_myid]];
-      }
+      hypre_Vector *owned_comp_f = hypre_SeqVectorCreate( hypre_VectorSize(residual_local) );
+      hypre_VectorData(owned_comp_f) = &(hypre_VectorData(hypre_ParCompGridF(compGrid[level]))[ hypre_ParCompGridOwnedBlockStarts(compGrid[level])[local_myid] ]);
+      hypre_SeqVectorSetDataOwner(owned_comp_f, 0);
+
+      hypre_SeqVectorCopy( residual_local, owned_comp_f);
+
+      hypre_SeqVectorDestroy(owned_comp_f);
    }
 
    #if DEBUGGING_MESSAGES
@@ -581,11 +570,6 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
    #if TEST_RES_COMM
    HYPRE_Int test_failed = TestResComm(amg_data);
    #endif
-
-   // Cleanup memory
-   hypre_TFree(proc_first_index, HYPRE_MEMORY_HOST);
-   hypre_TFree(proc_last_index, HYPRE_MEMORY_HOST);
-   hypre_TFree(global_nodes, HYPRE_MEMORY_HOST);
    
    #if TEST_RES_COMM
    return test_failed;
@@ -865,25 +849,29 @@ PackResidualBuffer( HYPRE_Complex *send_buffer, HYPRE_Int **send_flag, HYPRE_Int
 {
    HYPRE_Int                  level,i,cnt = 0;
 
+   HYPRE_Int myid, num_procs;
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
+
    // pack the send buffer
    for (level = current_level; level < num_levels; level++)
    {
       // !!! Using the PackOnDevice() function causes some strange errors... not using for now
-      // #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
-      // if (num_send_nodes[level])
-      // {
-      //    PackOnDevice(&(send_buffer[cnt]), hypre_VectorData(hypre_ParCompGridF(compGrid[level])), send_flag[level], 0, num_send_nodes[level], HYPRE_STREAM(4));
-      //    hypre_CheckErrorDevice(cudaPeekAtLastError());
-      //    hypre_CheckErrorDevice(cudaDeviceSynchronize());
-      //    cnt += num_send_nodes[level];
-      // }
-      // #else
+      #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
+      if (num_send_nodes[level])
+      {
+         // printf("Calling PackOnDevice() on rank %d, level %d, with cnt = %d, num_send_nodes = %d\n", myid, level, cnt, num_send_nodes[level]);
+         PackOnDevice(&(send_buffer[cnt]), hypre_VectorData(hypre_ParCompGridF(compGrid[level])), send_flag[level], 0, num_send_nodes[level], HYPRE_STREAM(4));
+         hypre_CheckErrorDevice(cudaPeekAtLastError());
+         hypre_CheckErrorDevice(cudaDeviceSynchronize());
+         cnt += num_send_nodes[level];
+      }
+      #else
       for (i = 0; i < num_send_nodes[level]; i++)
       {
          send_buffer[cnt++] = hypre_VectorData(hypre_ParCompGridF(compGrid[level]))[ send_flag[level][i] ];
-
       }
-      // #endif
+      #endif
    }
 
    return 0;
