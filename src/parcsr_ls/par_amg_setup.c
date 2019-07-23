@@ -2211,29 +2211,33 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          if (mult_addlvl > -1 && level >= mult_addlvl && level <= add_end)
          {
             HYPRE_Real *d_diag = NULL;
-            if (add_rlx == 0)
+
+            if (ns == 1)
             {
-               hypre_CSRMatrix *lvl_Adiag = hypre_ParCSRMatrixDiag(A_array[level]);
-               HYPRE_Int lvl_nrows = hypre_CSRMatrixNumRows(lvl_Adiag);
-               HYPRE_Int *lvl_i = hypre_CSRMatrixI(lvl_Adiag);
-               HYPRE_Real *lvl_data = hypre_CSRMatrixData(lvl_Adiag);
-               HYPRE_Real w_inv = 1.0/add_rlx_wt;
-               /*HYPRE_Real w_inv = 1.0/hypre_ParAMGDataRelaxWeight(amg_data)[level];*/
-               d_diag = hypre_CTAlloc(HYPRE_Real, lvl_nrows, HYPRE_MEMORY_SHARED);
-               for (i=0; i < lvl_nrows; i++)
+               if (add_rlx == 0)
                {
-                  d_diag[i] = lvl_data[lvl_i[i]]*w_inv;
-               }
-            }
-            else
-            {
-               if (num_threads == 1)
-               {
-                  hypre_ParCSRComputeL1Norms(A_array[level], 1, NULL, &d_diag);
+                  hypre_CSRMatrix *lvl_Adiag = hypre_ParCSRMatrixDiag(A_array[level]);
+                  HYPRE_Int lvl_nrows = hypre_CSRMatrixNumRows(lvl_Adiag);
+                  HYPRE_Int *lvl_i = hypre_CSRMatrixI(lvl_Adiag);
+                  HYPRE_Real *lvl_data = hypre_CSRMatrixData(lvl_Adiag);
+                  HYPRE_Real w_inv = 1.0/add_rlx_wt;
+                  /*HYPRE_Real w_inv = 1.0/hypre_ParAMGDataRelaxWeight(amg_data)[level];*/
+                  d_diag = hypre_CTAlloc(HYPRE_Real, lvl_nrows, HYPRE_MEMORY_HOST);
+                  for (i=0; i < lvl_nrows; i++)
+                  {
+                     d_diag[i] = lvl_data[lvl_i[i]]*w_inv;
+                  }
                }
                else
                {
-                  hypre_ParCSRComputeL1NormsThreads(A_array[level], 1, num_threads, NULL, &d_diag);
+                  if (num_threads == 1)
+                  {
+                     hypre_ParCSRComputeL1Norms(A_array[level], 1, NULL, &d_diag);
+                  }
+                  else
+                  {
+                     hypre_ParCSRComputeL1NormsThreads(A_array[level], 1, num_threads, NULL, &d_diag);
+                  }
                }
             }
 
@@ -2258,7 +2262,14 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                hypre_ParCSRMatrixOwnsColStarts(P) = 0;
                if (num_procs > 1) hypre_MatvecCommPkgCreate(A_H);
                /*hypre_ParCSRMatrixDestroy(P); */
-               hypre_TFree(d_diag, HYPRE_MEMORY_SHARED);
+               if (add_rlx == 0)
+               {
+                  hypre_TFree(d_diag, HYPRE_MEMORY_HOST);
+               }
+               else
+               {
+                  hypre_TFree(d_diag, HYPRE_MEMORY_SHARED);
+               }
                /* Set NonGalerkin drop tol on each level */
                if (level < nongalerk_num_tol) nongalerk_tol_l = nongalerk_tol[level];
                if (nongal_tol_array) nongalerk_tol_l = nongal_tol_array[level];
