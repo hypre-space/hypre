@@ -314,9 +314,12 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    // On each level, setup a long distance commPkg that has communication info for distance (eta + numGhostLayers)
    if (use_barriers) hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
    if (timers) hypre_BeginTiming(timers[0]);
-   for (level = amgdd_start_level; level < transition_level; level++)
+   if (num_procs > 1)
    {
-      SetupNearestProcessorNeighbors(A_array[level], compGrid[level], compGridCommPkg, level, padding, num_ghost_layers, communication_cost);  
+      for (level = amgdd_start_level; level < transition_level; level++)
+      {
+         SetupNearestProcessorNeighbors(A_array[level], compGrid[level], compGridCommPkg, level, padding, num_ghost_layers, communication_cost);  
+      }
    }
 
    #if DEBUGGING_MESSAGES
@@ -864,6 +867,20 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
             }
          }
       }
+
+
+      // If global indices are still around, transform these also
+      if (verify_amgdd)
+      {
+         HYPRE_Int *new_global_indices = hypre_CTAlloc(HYPRE_Int, num_nodes, HYPRE_MEMORY_HOST);
+         for (i = 0; i < num_nodes; i++)
+         {
+            new_global_indices[i] = hypre_ParCompGridGlobalIndices(compGrid[level])[ new_indices[i] ];
+         }
+         hypre_TFree(hypre_ParCompGridGlobalIndices(compGrid[level]), HYPRE_MEMORY_HOST);
+         hypre_ParCompGridGlobalIndices(compGrid[level]) = new_global_indices;
+      }
+
 
       HYPRE_Int A_nnz = hypre_ParCompGridARowPtr(compGrid[level])[num_nodes];
       HYPRE_Int *new_A_rowPtr = hypre_CTAlloc(HYPRE_Int, num_nodes+1, HYPRE_MEMORY_SHARED);

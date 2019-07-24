@@ -183,7 +183,7 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata )
 
 	// Form residual and do residual communication
    HYPRE_Int test_failed = 0;
-	test_failed = hypre_BoomerAMGDDResidualCommunication( amg_vdata ); // !!! HEY!!! Turn this back on
+	test_failed = hypre_BoomerAMGDDResidualCommunication( amg_vdata );
 
 	// Set zero initial guess for all comp grids on all levels
 	ZeroInitialGuess( amg_vdata );
@@ -216,7 +216,7 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata )
       while ( cycle_count < max_fac_iter )
       {
          // Do FAC cycle
-         hypre_BoomerAMGDD_FAC_Cycle( amg_vdata, first_iteration ); // !!! HEY!!! Turn this back on
+         hypre_BoomerAMGDD_FAC_Cycle( amg_vdata, first_iteration );
          first_iteration = 0;
 
          ++cycle_count;
@@ -436,6 +436,13 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
          hypre_MPI_Comm_rank(hypre_ParCompGridCommPkgAggLocalComms(compGridCommPkg)[level], &local_myid);
       }
 
+      // residual_local = hypre_ParVectorLocalVector(F_array[level]);
+      // hypre_SeqVectorPrefetchToDevice(x);
+      // hypre_SeqVectorPrefetchToDevice(y);
+      // VecCopy(hypre_VectorData(residual_local), 
+      //    &(hypre_VectorData(hypre_ParCompGridF(compGrid[level]))[ hypre_ParCompGridOwnedBlockStarts(compGrid[level])[local_myid] ]), 
+      //    hypre_VectorSize(residual_local), HYPRE_STREAM(4));
+
       // Access the residual data
       residual_local = hypre_ParVectorLocalVector(F_array[level]);
       hypre_Vector *owned_comp_f = hypre_SeqVectorCreate( hypre_VectorSize(residual_local) );
@@ -443,9 +450,10 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
       hypre_SeqVectorSetDataOwner(owned_comp_f, 0);
 
       hypre_SeqVectorCopy( residual_local, owned_comp_f);
-
+      
       hypre_SeqVectorDestroy(owned_comp_f);
    }
+   // cudaStreamSynchronize(HYPRE_STREAM(4));
 
    #if DEBUGGING_MESSAGES
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
@@ -696,11 +704,13 @@ hypre_BoomerAMGDDTimeResidualCommunication( void *amg_vdata, HYPRE_Int time_leve
 
          // Access the residual data
          residual_local = hypre_ParVectorLocalVector(F_array[level]);
-         residual_data = hypre_VectorData(residual_local);
-         for (i = hypre_ParCompGridOwnedBlockStarts(compGrid[level])[local_myid]; i < hypre_ParCompGridOwnedBlockStarts(compGrid[level])[local_myid+1]; i++)
-         {
-            hypre_VectorData(hypre_ParCompGridF(compGrid[level]))[i] = residual_data[i - hypre_ParCompGridOwnedBlockStarts(compGrid[level])[local_myid]];
-         }
+         hypre_Vector *owned_comp_f = hypre_SeqVectorCreate( hypre_VectorSize(residual_local) );
+         hypre_VectorData(owned_comp_f) = &(hypre_VectorData(hypre_ParCompGridF(compGrid[level]))[ hypre_ParCompGridOwnedBlockStarts(compGrid[level])[local_myid] ]);
+         hypre_SeqVectorSetDataOwner(owned_comp_f, 0);
+
+         hypre_SeqVectorCopy( residual_local, owned_comp_f);
+
+         hypre_SeqVectorDestroy(owned_comp_f);
       }
       return 0;
    }
@@ -853,26 +863,33 @@ PackResidualBuffer( HYPRE_Complex *send_buffer, HYPRE_Int **send_flag, HYPRE_Int
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
 
+   // #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
+   // cudaStream_t streams[num_levels];
+   // #endif
+
    // pack the send buffer
    for (level = current_level; level < num_levels; level++)
    {
-      // !!! Using the PackOnDevice() function causes some strange errors... not using for now
-      #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
-      if (num_send_nodes[level])
-      {
-         // printf("Calling PackOnDevice() on rank %d, level %d, with cnt = %d, num_send_nodes = %d\n", myid, level, cnt, num_send_nodes[level]);
-         PackOnDevice(&(send_buffer[cnt]), hypre_VectorData(hypre_ParCompGridF(compGrid[level])), send_flag[level], 0, num_send_nodes[level], HYPRE_STREAM(4));
-         hypre_CheckErrorDevice(cudaPeekAtLastError());
-         hypre_CheckErrorDevice(cudaDeviceSynchronize());
-         cnt += num_send_nodes[level];
-      }
-      #else
+      // #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
+      // if (num_send_nodes[level])
+      // {
+      //    cudaStreamCreate(&(streams[level]));
+      //    PackOnDevice(&(send_buffer[cnt]), hypre_VectorData(hypre_ParCompGridF(compGrid[level])), send_flag[level], 0, num_send_nodes[level], streams[level]);
+      //    cnt += num_send_nodes[level];
+      // }
+      // #else
       for (i = 0; i < num_send_nodes[level]; i++)
       {
          send_buffer[cnt++] = hypre_VectorData(hypre_ParCompGridF(compGrid[level]))[ send_flag[level][i] ];
       }
-      #endif
+      // #endif
    }
+
+   // #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
+   // hypre_CheckErrorDevice(cudaPeekAtLastError());
+   // hypre_CheckErrorDevice(cudaDeviceSynchronize());
+   // for (level = current_level; level < num_levels; level++) if (num_send_nodes[level]) cudaStreamDestroy(streams[level]);
+   // #endif
 
    return 0;
 
