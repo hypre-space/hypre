@@ -12,11 +12,53 @@
 
 #ifndef hypre_ParILU_DATA_HEADER
 #define hypre_ParILU_DATA_HEADER
+
+
+#ifdef HYPRE_USING_CUDA
+   /* define proto calls */
+   #define HYPRE_CUSPARSE_CALL(call) do {                   \
+   cusparseStatus_t err = call;                             \
+   if (CUSPARSE_STATUS_SUCCESS != err) {                    \
+      hypre_printf("CUSPARSE ERROR (code = %d) at %s:%d\n", \
+                   err, __FILE__, __LINE__);                \
+      exit(1);                                              \
+   } } while(0)
+   
+   #define HYPRE_CUDA_CALL(call) do {                       \
+   cudaError_t err = call;                                  \
+   if (cudaSuccess != err) {                                \
+      hypre_printf("CUDA ERROR (code = %d) at %s:%d\n",     \
+                   err, __FILE__, __LINE__);                \
+      exit(1);                                              \
+   } } while(0)
+#endif
+
 /*--------------------------------------------------------------------------
  * hypre_ParILUData
  *--------------------------------------------------------------------------*/
 typedef struct hypre_ParILUData_struct
 {
+#ifdef HYPRE_USING_CUDA
+   /* Data slots for cusparse-based ilu0 */
+   cusparseMatDescr_t      matL_des;//lower tri with ones on diagonal
+   cusparseMatDescr_t      matU_des;//upper tri
+   csrsv2Info_t            matBL_info;//ILU info for L of B block
+   csrsv2Info_t            matBU_info;//ILU info for U of B block
+   csrsv2Info_t            matSL_info;//ILU info for L of S block
+   csrsv2Info_t            matSU_info;//ILU info for U of S block
+   cusparseSolvePolicy_t   ilu_solve_policy;//Use/Don't use level
+   void                    *ilu_solve_buffer;//working array on device memory
+   
+   /* on GPU, we have to form E and F explicitly, since we don't have much control to it 
+    *  
+    */
+   hypre_CSRMatrix         *matBLU_d;//the matrix holding
+   hypre_CSRMatrix         *matE_d;
+   hypre_CSRMatrix         *matF_d;
+   hypre_ParVector         *Xtemp;
+   hypre_ParVector         *Ytemp;
+   HYPRE_Int               *A_diag_fake;//fake diagonal, used to pretend that the diagonal matrix is empty
+#endif
    //general data
    HYPRE_Int            global_solver;
    hypre_ParCSRMatrix   *matA;
@@ -90,6 +132,22 @@ typedef struct hypre_ParILUData_struct
    
 } hypre_ParILUData;
 
+#ifdef HYPRE_USING_CUDA
+   #define hypre_ParILUDataMatLMatrixDescription(ilu_data)     ((ilu_data) -> matL_des)
+   #define hypre_ParILUDataMatUMatrixDescription(ilu_data)     ((ilu_data) -> matU_des)
+   #define hypre_ParILUDataMatBLILUSolveInfo(ilu_data)         ((ilu_data) -> matBL_info)
+   #define hypre_ParILUDataMatBUILUSolveInfo(ilu_data)         ((ilu_data) -> matBU_info)
+   #define hypre_ParILUDataMatSLILUSolveInfo(ilu_data)         ((ilu_data) -> matSL_info)
+   #define hypre_ParILUDataMatSUILUSolveInfo(ilu_data)         ((ilu_data) -> matSU_info)
+   #define hypre_ParILUDataILUSolveBuffer(ilu_data)            ((ilu_data) -> ilu_solve_buffer)
+   #define hypre_ParILUDataILUSolvePolicy(ilu_data)            ((ilu_data) -> ilu_solve_policy)
+   #define hypre_ParILUDataMatBILUDevice(ilu_data)             ((ilu_data) -> matBLU_d)
+   #define hypre_ParILUDataMatEDevice(ilu_data)                ((ilu_data) -> matE_d)
+   #define hypre_ParILUDataMatFDevice(ilu_data)                ((ilu_data) -> matF_d)
+   #define hypre_ParILUDataXTemp(ilu_data)                     ((ilu_data) -> Xtemp)
+   #define hypre_ParILUDataYTemp(ilu_data)                     ((ilu_data) -> Ytemp)
+   #define hypre_ParILUDataMatAFakeDiagonal(ilu_data)          ((ilu_data) -> A_diag_fake)
+#endif
 #define hypre_ParILUDataGlobalSolver(ilu_data)                 ((ilu_data) -> global_solver)
 #define hypre_ParILUDataMatA(ilu_data)                         ((ilu_data) -> matA)
 #define hypre_ParILUDataMatL(ilu_data)                         ((ilu_data) -> matL)
@@ -248,3 +306,4 @@ typedef struct hypre_ParNSHData_struct
 #define DIVIDE_TOL 1e-32
 
 #endif
+

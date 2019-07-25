@@ -28,6 +28,23 @@ hypre_ILUCreate()
 
    ilu_data                            = hypre_CTAlloc(hypre_ParILUData,  1, HYPRE_MEMORY_HOST);
 
+#ifdef HYPRE_USING_CUDA
+   ((ilu_data) -> matL_des)            = NULL;
+   ((ilu_data) -> matU_des)            = NULL;
+   ((ilu_data) -> matBL_info)          = NULL;
+   ((ilu_data) -> matBU_info)          = NULL;
+   ((ilu_data) -> matSL_info)          = NULL;
+   ((ilu_data) -> matSU_info)          = NULL;
+   ((ilu_data) -> ilu_solve_buffer)    = NULL;
+   ((ilu_data) -> ilu_solve_policy)    = CUSPARSE_SOLVE_POLICY_USE_LEVEL;
+   ((ilu_data) -> matBLU_d)            = NULL;
+   ((ilu_data) -> matE_d)              = NULL;
+   ((ilu_data) -> matF_d)              = NULL;
+   ((ilu_data) -> Xtemp)               = NULL;
+   ((ilu_data) -> Ytemp)               = NULL;
+   ((ilu_data) -> A_diag_fake)         = NULL;
+#endif
+
    /* general data */
    (ilu_data -> global_solver)         = 0;
    (ilu_data -> matA)                  = NULL;
@@ -89,7 +106,75 @@ hypre_ILUCreate()
 HYPRE_Int
 hypre_ILUDestroy( void *data )
 {
-  hypre_ParILUData * ilu_data = (hypre_ParILUData*) data;
+   hypre_ParILUData * ilu_data = (hypre_ParILUData*) data;
+
+#ifdef HYPRE_USING_CUDA
+   if((ilu_data) -> ilu_solve_buffer)
+   {
+      hypre_TFree((ilu_data) -> ilu_solve_buffer, HYPRE_MEMORY_DEVICE);
+      (ilu_data) -> ilu_solve_buffer = NULL;
+   }
+   if((ilu_data) -> matL_des)
+   {
+      HYPRE_CUSPARSE_CALL( (cusparseDestroyMatDescr((ilu_data) -> matL_des)) );
+      (ilu_data) -> matL_des = NULL;
+   }
+   if((ilu_data) -> matU_des)
+   {
+      HYPRE_CUSPARSE_CALL( (cusparseDestroyMatDescr((ilu_data) -> matU_des)) );
+      (ilu_data) -> matU_des = NULL;
+   }
+   if((ilu_data) -> matBL_info)
+   {
+      HYPRE_CUSPARSE_CALL( (cusparseDestroyCsrsv2Info((ilu_data) -> matBL_info)) );
+      (ilu_data) -> matBL_info = NULL;
+   }
+   if((ilu_data) -> matBU_info)
+   {
+      HYPRE_CUSPARSE_CALL( (cusparseDestroyCsrsv2Info((ilu_data) -> matBU_info)) );
+      (ilu_data) -> matBU_info = NULL;
+   }
+   if((ilu_data) -> matSL_info)
+   {
+      HYPRE_CUSPARSE_CALL( (cusparseDestroyCsrsv2Info((ilu_data) -> matSL_info)) );
+      (ilu_data) -> matSL_info = NULL;
+   }
+   if((ilu_data) -> matSU_info)
+   {
+      HYPRE_CUSPARSE_CALL( (cusparseDestroyCsrsv2Info((ilu_data) -> matSU_info)) );
+      (ilu_data) -> matSU_info = NULL;
+   }
+   if((ilu_data) -> matBLU_d)
+   {
+      hypre_CSRMatrixDestroy( (ilu_data) -> matBLU_d );
+      (ilu_data) -> matBLU_d = NULL;
+   }
+   if((ilu_data) -> matE_d)
+   {
+      hypre_CSRMatrixDestroy( (ilu_data) -> matE_d );
+      (ilu_data) -> matE_d = NULL;
+   }
+   if((ilu_data) -> matF_d)
+   {
+      hypre_CSRMatrixDestroy( (ilu_data) -> matF_d );
+      (ilu_data) -> matF_d = NULL;
+   }
+   if((ilu_data -> Xtemp))
+   {
+      hypre_ParVectorDestroy( (ilu_data -> Xtemp) );
+      (ilu_data -> Xtemp) = NULL;
+   }
+   if((ilu_data -> Ytemp))
+   {
+      hypre_ParVectorDestroy( (ilu_data -> Ytemp) );
+      (ilu_data -> Ytemp) = NULL;
+   }
+   if((ilu_data -> A_diag_fake))
+   {
+      hypre_TFree( (ilu_data -> A_diag_fake), HYPRE_MEMORY_SHARED);
+      (ilu_data -> A_diag_fake) = NULL;
+   }
+#endif
  
   /* final residual vector */
   if((ilu_data -> residual))
@@ -160,7 +245,7 @@ hypre_ILUDestroy( void *data )
   }
   if(ilu_data -> matD)
   {
-    hypre_TFree((ilu_data -> matD), HYPRE_MEMORY_HOST);
+    hypre_TFree((ilu_data -> matD), HYPRE_MEMORY_SHARED);
     (ilu_data -> matD) = NULL;
   }
   if(ilu_data -> matS)
@@ -186,7 +271,14 @@ hypre_ILUDestroy( void *data )
   {
      switch(ilu_data -> ilu_type){
       case 10: case 11: case 40: case 41:
-         HYPRE_ILUDestroy(ilu_data -> schur_precond); //ILU as precond for Schur
+#ifdef HYPRE_USING_CUDA
+         if(ilu_data -> ilu_type != 10 || ilu_data -> lfil != 0)
+         {
+#endif
+            HYPRE_ILUDestroy(ilu_data -> schur_precond); //ILU as precond for Schur
+#ifdef HYPRE_USING_CUDA
+         }
+#endif
          break;
       default:
          break;
@@ -655,56 +747,81 @@ hypre_ILUWriteSolverParams(void *ilu_vdata)
    hypre_printf("ILU factorization type: %d : ", (ilu_data -> ilu_type));
    switch(ilu_data -> ilu_type){
       case 0: 
-              hypre_printf("Block Jacobi with ILU(%d) \n", (ilu_data -> lfil));
-              hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
+#ifdef HYPRE_USING_CUDA
+            if( hypre_ParILUDataLfil(ilu_data) == 0 )
+            {
+               hypre_printf("Block Jacobi with GPU-accelerated ILU0 \n");
+               hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
+            }
+            else
+            {
+#endif
+               hypre_printf("Block Jacobi with ILU(%d) \n", (ilu_data -> lfil));
+               hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
+#ifdef HYPRE_USING_CUDA
+            }
+#endif
          break;
       case 1: 
-              hypre_printf("Block Jacobi with ILUT \n");
-              hypre_printf("drop tolerance for B = %e, E&F = %e, S = %e \n", hypre_ParILUDataDroptol(ilu_data)[0],hypre_ParILUDataDroptol(ilu_data)[1],hypre_ParILUDataDroptol(ilu_data)[2]);
-              hypre_printf("Max nnz per row = %d \n", (ilu_data -> maxRowNnz));
-              hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
+            hypre_printf("Block Jacobi with ILUT \n");
+            hypre_printf("drop tolerance for B = %e, E&F = %e, S = %e \n", hypre_ParILUDataDroptol(ilu_data)[0],hypre_ParILUDataDroptol(ilu_data)[1],hypre_ParILUDataDroptol(ilu_data)[2]);
+            hypre_printf("Max nnz per row = %d \n", (ilu_data -> maxRowNnz));
+            hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
          break;
       case 10: 
-              hypre_printf("ILU-GMRES with ILU(%d) \n", (ilu_data -> lfil));
-              hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
+#ifdef HYPRE_USING_CUDA
+            if( hypre_ParILUDataLfil(ilu_data) == 0 )
+            {
+               hypre_printf("ILU-GMRES with GPU-accelerated ILU0 \n");
+               hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
+            }
+            else
+            {
+#endif
+               hypre_printf("ILU-GMRES with ILU(%d) \n", (ilu_data -> lfil));
+               hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
+#ifdef HYPRE_USING_CUDA
+            }
+#endif
          break;
       case 11: 
-              hypre_printf("ILU-GMRES with ILUT \n");
-              hypre_printf("drop tolerance for B = %e, E&F = %e, S = %e \n", hypre_ParILUDataDroptol(ilu_data)[0],hypre_ParILUDataDroptol(ilu_data)[1],hypre_ParILUDataDroptol(ilu_data)[2]);
-              hypre_printf("Max nnz per row = %d \n", (ilu_data -> maxRowNnz));
-              hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
+            hypre_printf("ILU-GMRES with ILUT \n");
+            hypre_printf("drop tolerance for B = %e, E&F = %e, S = %e \n", hypre_ParILUDataDroptol(ilu_data)[0],hypre_ParILUDataDroptol(ilu_data)[1],hypre_ParILUDataDroptol(ilu_data)[2]);
+            hypre_printf("Max nnz per row = %d \n", (ilu_data -> maxRowNnz));
+            hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
          break;
       case 20: 
-              hypre_printf("Newton–Schulz–Hotelling with ILU(%d) \n", (ilu_data -> lfil));
-              hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
+            hypre_printf("Newton–Schulz–Hotelling with ILU(%d) \n", (ilu_data -> lfil));
+            hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
          break;
       case 21: 
-              hypre_printf("Newton–Schulz–Hotelling with ILUT \n");
-              hypre_printf("drop tolerance for B = %e, E&F = %e, S = %e \n", hypre_ParILUDataDroptol(ilu_data)[0],hypre_ParILUDataDroptol(ilu_data)[1],hypre_ParILUDataDroptol(ilu_data)[2]);
-              hypre_printf("Max nnz per row = %d \n", (ilu_data -> maxRowNnz));
-              hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
+            hypre_printf("Newton–Schulz–Hotelling with ILUT \n");
+            hypre_printf("drop tolerance for B = %e, E&F = %e, S = %e \n", hypre_ParILUDataDroptol(ilu_data)[0],hypre_ParILUDataDroptol(ilu_data)[1],hypre_ParILUDataDroptol(ilu_data)[2]);
+            hypre_printf("Max nnz per row = %d \n", (ilu_data -> maxRowNnz));
+            hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
          break; 
       case 30:
-              hypre_printf("RAS with ILU(%d) \n", (ilu_data -> lfil));
-              hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
+            hypre_printf("RAS with ILU(%d) \n", (ilu_data -> lfil));
+            hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
          break;
       case 31: 
-              hypre_printf("RAS with ILUT \n");
-              hypre_printf("drop tolerance for B = %e, E&F = %e, S = %e \n", hypre_ParILUDataDroptol(ilu_data)[0],hypre_ParILUDataDroptol(ilu_data)[1],hypre_ParILUDataDroptol(ilu_data)[2]);
-              hypre_printf("Max nnz per row = %d \n", (ilu_data -> maxRowNnz));
-              hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
+            hypre_printf("RAS with ILUT \n");
+            hypre_printf("drop tolerance for B = %e, E&F = %e, S = %e \n", hypre_ParILUDataDroptol(ilu_data)[0],hypre_ParILUDataDroptol(ilu_data)[1],hypre_ParILUDataDroptol(ilu_data)[2]);
+            hypre_printf("Max nnz per row = %d \n", (ilu_data -> maxRowNnz));
+            hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
          break;
       case 40:
-              hypre_printf("ddPQ-ILU-GMRES with ILU(%d) \n", (ilu_data -> lfil));
-              hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
+            hypre_printf("ddPQ-ILU-GMRES with ILU(%d) \n", (ilu_data -> lfil));
+            hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
          break;
       case 41: 
-              hypre_printf("ddPQ-ILU-GMRES with ILUT \n");
-              hypre_printf("drop tolerance for B = %e, E&F = %e, S = %e \n", hypre_ParILUDataDroptol(ilu_data)[0],hypre_ParILUDataDroptol(ilu_data)[1],hypre_ParILUDataDroptol(ilu_data)[2]);
-              hypre_printf("Max nnz per row = %d \n", (ilu_data -> maxRowNnz));
-              hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
+            hypre_printf("ddPQ-ILU-GMRES with ILUT \n");
+            hypre_printf("drop tolerance for B = %e, E&F = %e, S = %e \n", hypre_ParILUDataDroptol(ilu_data)[0],hypre_ParILUDataDroptol(ilu_data)[1],hypre_ParILUDataDroptol(ilu_data)[2]);
+            hypre_printf("Max nnz per row = %d \n", (ilu_data -> maxRowNnz));
+            hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
          break;
-      default: hypre_printf("Unknown type \n");
+      default: 
+            hypre_printf("Unknown type \n");
          break;
    }
      
@@ -2402,12 +2519,12 @@ hypre_CSRMatrixDropInplace(hypre_CSRMatrix *A, HYPRE_Real droptol, HYPRE_Int max
    /* setup */
    capacity = nnzA*0.3+1;
    ctrA = 0;
-   new_i = hypre_TAlloc(HYPRE_Int, n+1, HYPRE_MEMORY_HOST);
-   new_j = hypre_TAlloc(HYPRE_Int, capacity, HYPRE_MEMORY_HOST);
-   new_data = hypre_TAlloc(HYPRE_Real, capacity, HYPRE_MEMORY_HOST);
+   new_i = hypre_TAlloc(HYPRE_Int, n+1, HYPRE_MEMORY_SHARED);
+   new_j = hypre_TAlloc(HYPRE_Int, capacity, HYPRE_MEMORY_SHARED);
+   new_data = hypre_TAlloc(HYPRE_Real, capacity, HYPRE_MEMORY_SHARED);
    
-   idx = hypre_TAlloc(HYPRE_Int, m, HYPRE_MEMORY_HOST);
-   data = hypre_TAlloc(HYPRE_Real, m, HYPRE_MEMORY_HOST);
+   idx = hypre_TAlloc(HYPRE_Int, m, HYPRE_MEMORY_SHARED);
+   data = hypre_TAlloc(HYPRE_Real, m, HYPRE_MEMORY_SHARED);
    
    /* start of main loop */
    new_i[0] = 0;
@@ -2460,11 +2577,11 @@ hypre_CSRMatrixDropInplace(hypre_CSRMatrix *A, HYPRE_Real droptol, HYPRE_Int max
          while(ctrA + drop_len > capacity)
          {
             capacity = capacity * EXPAND_FACT + 1;
-            new_j = hypre_TReAlloc(new_j, HYPRE_Int, capacity, HYPRE_MEMORY_HOST);
-            new_data = hypre_TReAlloc(new_data, HYPRE_Real, capacity, HYPRE_MEMORY_HOST);
+            new_j = hypre_TReAlloc(new_j, HYPRE_Int, capacity, HYPRE_MEMORY_SHARED);
+            new_data = hypre_TReAlloc(new_data, HYPRE_Real, capacity, HYPRE_MEMORY_SHARED);
          }
-         hypre_TMemcpy( new_j + ctrA, idx,HYPRE_Int, drop_len, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-         hypre_TMemcpy( new_data + ctrA, data,HYPRE_Real, drop_len, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy( new_j + ctrA, idx,HYPRE_Int, drop_len, HYPRE_MEMORY_SHARED, HYPRE_MEMORY_SHARED);
+         hypre_TMemcpy( new_data + ctrA, data,HYPRE_Real, drop_len, HYPRE_MEMORY_SHARED, HYPRE_MEMORY_SHARED);
          ctrA += drop_len;
          new_i[i+1] = ctrA;
       }
@@ -2499,11 +2616,11 @@ hypre_CSRMatrixDropInplace(hypre_CSRMatrix *A, HYPRE_Real droptol, HYPRE_Int max
          while(ctrA + drop_len > capacity)
          {
             capacity = capacity * EXPAND_FACT + 1;
-            new_j = hypre_TReAlloc(new_j, HYPRE_Int, capacity, HYPRE_MEMORY_HOST);
-            new_data = hypre_TReAlloc(new_data, HYPRE_Real, capacity, HYPRE_MEMORY_HOST);
+            new_j = hypre_TReAlloc(new_j, HYPRE_Int, capacity, HYPRE_MEMORY_SHARED);
+            new_data = hypre_TReAlloc(new_data, HYPRE_Real, capacity, HYPRE_MEMORY_SHARED);
          }
-         hypre_TMemcpy( new_j + ctrA, idx,HYPRE_Int, drop_len, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-         hypre_TMemcpy( new_data + ctrA, data,HYPRE_Real, drop_len, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy( new_j + ctrA, idx,HYPRE_Int, drop_len, HYPRE_MEMORY_SHARED, HYPRE_MEMORY_SHARED);
+         hypre_TMemcpy( new_data + ctrA, data,HYPRE_Real, drop_len, HYPRE_MEMORY_SHARED, HYPRE_MEMORY_SHARED);
          ctrA += drop_len;
          new_i[i+1] = ctrA;
       }
@@ -2511,9 +2628,9 @@ hypre_CSRMatrixDropInplace(hypre_CSRMatrix *A, HYPRE_Real droptol, HYPRE_Int max
    /* destory data if A own them */
    if(hypre_CSRMatrixOwnsData(A))
    {
-      hypre_TFree(A_i, HYPRE_MEMORY_HOST);
-      hypre_TFree(A_j, HYPRE_MEMORY_HOST);
-      hypre_TFree(A_data, HYPRE_MEMORY_HOST);
+      hypre_TFree(A_i, HYPRE_MEMORY_SHARED);
+      hypre_TFree(A_j, HYPRE_MEMORY_SHARED);
+      hypre_TFree(A_data, HYPRE_MEMORY_SHARED);
    }
    
    hypre_CSRMatrixI(A) = new_i;
@@ -2522,8 +2639,8 @@ hypre_CSRMatrixDropInplace(hypre_CSRMatrix *A, HYPRE_Real droptol, HYPRE_Int max
    hypre_CSRMatrixNumNonzeros(A) = ctrA;
    hypre_CSRMatrixOwnsData(A) = 1;
    
-   hypre_TFree(idx, HYPRE_MEMORY_HOST);
-   hypre_TFree(data, HYPRE_MEMORY_HOST);
+   hypre_TFree(idx, HYPRE_MEMORY_SHARED);
+   hypre_TFree(data, HYPRE_MEMORY_SHARED);
    
    return hypre_error_flag;
 }
@@ -2582,14 +2699,14 @@ hypre_ILUCSRMatrixInverseSelfPrecondMRGlobal(hypre_CSRMatrix *matA, hypre_CSRMat
    
    /* create initial guess and matrix I */
    matM = hypre_CSRMatrixCreate(n,n,n);
-   M_i = hypre_TAlloc(HYPRE_Int, n+1, HYPRE_MEMORY_HOST);
-   M_j = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
-   M_data = hypre_TAlloc(HYPRE_Real, n, HYPRE_MEMORY_HOST);
+   M_i = hypre_TAlloc(HYPRE_Int, n+1, HYPRE_MEMORY_SHARED);
+   M_j = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_SHARED);
+   M_data = hypre_TAlloc(HYPRE_Real, n, HYPRE_MEMORY_SHARED);
    
    matI = hypre_CSRMatrixCreate(n,n,n);
-   I_i = hypre_TAlloc(HYPRE_Int, n+1, HYPRE_MEMORY_HOST);
-   I_j = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
-   I_data = hypre_TAlloc(HYPRE_Real, n, HYPRE_MEMORY_HOST);
+   I_i = hypre_TAlloc(HYPRE_Int, n+1, HYPRE_MEMORY_SHARED);
+   I_j = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_SHARED);
+   I_data = hypre_TAlloc(HYPRE_Real, n, HYPRE_MEMORY_SHARED);
    
    /* now loop to create initial guess */
    M_i[0] = 0;
@@ -2765,7 +2882,7 @@ hypre_ILUParCSRInverseNSH(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix **M, HYPRE_R
    /* setup */
    hypre_MPI_Comm_rank(comm, &myid);
    
-   M_offd_i = hypre_TAlloc(HYPRE_Int, n+1, HYPRE_MEMORY_HOST);
+   M_offd_i = hypre_TAlloc(HYPRE_Int, n+1, HYPRE_MEMORY_SHARED);
    
    if(mr_col_version)
    {
@@ -2881,3 +2998,4 @@ hypre_ILUParCSRInverseNSH(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix **M, HYPRE_R
    
    return hypre_error_flag;
 }
+
