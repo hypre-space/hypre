@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2015,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -4567,14 +4562,6 @@ hypre_MGRGetSubBlock( hypre_ParCSRMatrix   *A,
                         CF_marker_offd);
   hypre_ParCSRCommHandleDestroy(comm_handle);
 
-  if (debug_flag==4)
-  {
-    wall_time = time_getWallclockSeconds() - wall_time;
-    hypre_printf("Proc = %d     Interp: Comm 1 CF_marker =    %f\n",
-           my_id, wall_time);
-    fflush(NULL);
-  }
-
   /*-----------------------------------------------------------------------
    *  First Pass: Determine size of Ablock and fill in fine_to_coarse mapping.
    *-----------------------------------------------------------------------*/
@@ -4698,21 +4685,11 @@ hypre_MGRGetSubBlock( hypre_ParCSRMatrix   *A,
   jj_counter = start_indexing;
   jj_counter_offd = start_indexing;
 
-  if (debug_flag==4)
-  {
-    wall_time = time_getWallclockSeconds() - wall_time;
-    hypre_printf("Proc = %d     Interp: Internal work 1 =     %f\n",
-           my_id, wall_time);
-    fflush(NULL);
-  }
-
   //-----------------------------------------------------------------------
   //  Send and receive fine_to_coarse info.
   //-----------------------------------------------------------------------
 
   if (debug_flag==4) wall_time = time_getWallclockSeconds();
-
-  fine_to_coarse_offd = hypre_CTAlloc(HYPRE_Int, num_cols_A_offd, HYPRE_MEMORY_HOST);
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i,j,ns,ne,size,rest,coarse_shift) HYPRE_SMP_SCHEDULE
@@ -4735,28 +4712,6 @@ hypre_MGRGetSubBlock( hypre_ParCSRMatrix   *A,
     }
     for (i = ns; i < ne; i++)
       fine_to_coarse[i] += my_first_col_cpt+coarse_shift;
-  }
-
-  index = 0;
-  for (i = 0; i < num_sends; i++)
-  {
-    start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-    for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
-      int_buf_data[index++]
-        = fine_to_coarse[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
-  }
-
-  comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data,
-                        fine_to_coarse_offd);
-
-  hypre_ParCSRCommHandleDestroy(comm_handle);
-
-  if (debug_flag==4)
-  {
-    wall_time = time_getWallclockSeconds() - wall_time;
-    hypre_printf("Proc = %d     Interp: Comm 4 FineToCoarse = %f\n",
-           my_id, wall_time);
-    fflush(NULL);
   }
 
   if (debug_flag==4) wall_time = time_getWallclockSeconds();
@@ -4898,7 +4853,8 @@ hypre_MGRGetSubBlock( hypre_ParCSRMatrix   *A,
     hypre_ParCSRMatrixColMapOffd(Ablock) = col_map_offd_Ablock;
     hypre_CSRMatrixNumCols(Ablock_offd) = num_cols_Ablock_offd;
   }
-  hypre_GetCommPkgRTFromCommPkgA(Ablock,A, fine_to_coarse_offd, tmp_map_offd);
+  
+  hypre_GetCommPkgRTFromCommPkgA(Ablock,A, fine_to_coarse, tmp_map_offd);
 
   *A_block_ptr= Ablock;
 
@@ -4906,7 +4862,6 @@ hypre_MGRGetSubBlock( hypre_ParCSRMatrix   *A,
   hypre_TFree(CF_marker_offd, HYPRE_MEMORY_HOST);
   hypre_TFree(int_buf_data, HYPRE_MEMORY_HOST);
   hypre_TFree(fine_to_coarse, HYPRE_MEMORY_HOST);
-  hypre_TFree(fine_to_coarse_offd, HYPRE_MEMORY_HOST);
   hypre_TFree(coarse_counter, HYPRE_MEMORY_HOST);
   hypre_TFree(col_coarse_counter, HYPRE_MEMORY_HOST);
   hypre_TFree(jj_count, HYPRE_MEMORY_HOST);
@@ -4971,7 +4926,6 @@ hypre_MGRBuildAffNew( hypre_ParCSRMatrix   *A,
   HYPRE_Int              n_fine = hypre_CSRMatrixNumRows(A_diag);
 
   HYPRE_Int             *fine_to_coarse;
-  HYPRE_Int             *fine_to_coarse_offd;
   HYPRE_Int             *coarse_counter;
   HYPRE_Int              coarse_shift;
   HYPRE_Int              total_global_cpts;
@@ -5050,14 +5004,6 @@ hypre_MGRBuildAffNew( hypre_ParCSRMatrix   *A,
   comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data,
                         CF_marker_offd);
   hypre_ParCSRCommHandleDestroy(comm_handle);
-
-  if (debug_flag==4)
-  {
-    wall_time = time_getWallclockSeconds() - wall_time;
-    hypre_printf("Proc = %d     Interp: Comm 1 CF_marker =    %f\n",
-           my_id, wall_time);
-    fflush(NULL);
-  }
 
   /*-----------------------------------------------------------------------
    *  First Pass: Determine size of Aff and fill in fine_to_coarse mapping.
@@ -5174,21 +5120,11 @@ hypre_MGRBuildAffNew( hypre_ParCSRMatrix   *A,
   jj_counter = start_indexing;
   jj_counter_offd = start_indexing;
 
-  if (debug_flag==4)
-  {
-    wall_time = time_getWallclockSeconds() - wall_time;
-    hypre_printf("Proc = %d     Interp: Internal work 1 =     %f\n",
-           my_id, wall_time);
-    fflush(NULL);
-  }
-
   //-----------------------------------------------------------------------
   //  Send and receive fine_to_coarse info.
   //-----------------------------------------------------------------------
 
   if (debug_flag==4) wall_time = time_getWallclockSeconds();
-
-  fine_to_coarse_offd = hypre_CTAlloc(HYPRE_Int, num_cols_A_offd, HYPRE_MEMORY_HOST);
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i,j,ns,ne,size,rest,coarse_shift) HYPRE_SMP_SCHEDULE
@@ -5211,28 +5147,6 @@ hypre_MGRBuildAffNew( hypre_ParCSRMatrix   *A,
     }
     for (i = ns; i < ne; i++)
       fine_to_coarse[i] += my_first_cpt+coarse_shift;
-  }
-
-  index = 0;
-  for (i = 0; i < num_sends; i++)
-  {
-    start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-    for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
-      int_buf_data[index++]
-        = fine_to_coarse[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
-  }
-
-  comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data,
-                        fine_to_coarse_offd);
-
-  hypre_ParCSRCommHandleDestroy(comm_handle);
-
-  if (debug_flag==4)
-  {
-    wall_time = time_getWallclockSeconds() - wall_time;
-    hypre_printf("Proc = %d     Interp: Comm 4 FineToCoarse = %f\n",
-           my_id, wall_time);
-    fflush(NULL);
   }
 
   if (debug_flag==4) wall_time = time_getWallclockSeconds();
@@ -5371,7 +5285,8 @@ hypre_MGRBuildAffNew( hypre_ParCSRMatrix   *A,
     hypre_ParCSRMatrixColMapOffd(Aff) = col_map_offd_Aff;
     hypre_CSRMatrixNumCols(Aff_offd) = num_cols_Aff_offd;
   }
-  hypre_GetCommPkgRTFromCommPkgA(Aff,A, fine_to_coarse_offd, tmp_map_offd);
+
+  hypre_GetCommPkgRTFromCommPkgA(Aff,A, fine_to_coarse, tmp_map_offd);
 
   *A_ff_ptr = Aff;
 
@@ -5380,7 +5295,6 @@ hypre_MGRBuildAffNew( hypre_ParCSRMatrix   *A,
   hypre_TFree(CF_marker_copy, HYPRE_MEMORY_HOST);
   hypre_TFree(int_buf_data, HYPRE_MEMORY_HOST);
   hypre_TFree(fine_to_coarse, HYPRE_MEMORY_HOST);
-  hypre_TFree(fine_to_coarse_offd, HYPRE_MEMORY_HOST);
   hypre_TFree(coarse_counter, HYPRE_MEMORY_HOST);
   hypre_TFree(jj_count, HYPRE_MEMORY_HOST);
   hypre_TFree(jj_count_offd, HYPRE_MEMORY_HOST);

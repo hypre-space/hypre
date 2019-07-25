@@ -15,17 +15,12 @@
 extern "C" {
 #endif
 
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -70,17 +65,12 @@ typedef double            hypre_double;
 
 #endif
 
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -384,17 +374,12 @@ HYPRE_Int hypre_MPI_Info_free( hypre_MPI_Info *info );
 
 #endif
 
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #ifndef HYPRE_SMP_HEADER
 #define HYPRE_SMP_HEADER
@@ -402,17 +387,12 @@ HYPRE_Int hypre_MPI_Info_free( hypre_MPI_Info *info );
 
 #define HYPRE_SMP_SCHEDULE schedule(static)
 
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -798,17 +778,12 @@ void hypre_FreeDML( char *ptr , char *file , HYPRE_Int line );
 
 #endif
 
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #ifndef hypre_THREADING_HEADER
 #define hypre_THREADING_HEADER
@@ -831,17 +806,12 @@ void hypre_GetSimpleThreadPartition( HYPRE_Int *begin, HYPRE_Int *end, HYPRE_Int
 
 #endif
 
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -953,17 +923,12 @@ HYPRE_Int hypre_PrintTiming( const char *heading , MPI_Comm comm );
 
 #endif
 
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -1000,17 +965,12 @@ typedef hypre_ListElement  *hypre_LinkList;
 
 #endif
 
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #ifndef hypre_EXCHANGE_DATA_HEADER
 #define hypre_EXCHANGE_DATA_HEADER
@@ -1061,17 +1021,12 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
 
 #endif /* end of header */
 
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #ifndef hypre_ERROR_HEADER
 #define hypre_ERROR_HEADER
@@ -1099,17 +1054,12 @@ void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, c
 
 #endif
 
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -1138,17 +1088,12 @@ void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, c
 
 #endif /* CALIPER_INSTRUMENTATION_HEADER */
 
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #ifdef USE_NVTX
 #include "nvToolsExt.h"
@@ -1210,17 +1155,12 @@ static const int num_colors = sizeof(colors)/sizeof(uint32_t);
 #define PUSH_RANGE_DOMAIN(name,cid,domainName)
 #endif
 
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #ifndef hypre_GPU_ERROR_HEADER
 #define hypre_GPU_ERROR_HEADER
@@ -1364,17 +1304,13 @@ inline void cublasAssert(cublasStatus_t code, const char *file, int line)
 
 #endif // hypre_GPU_ERROR_HEADER
 
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 #ifndef __GPUMEM_H__
 #define  __GPUMEM_H__
 
@@ -1495,6 +1431,13 @@ HYPRE_Int HYPRE_OMPOffloadStatPrint();
 #endif /* #if defined(HYPRE_USING_DEVICE_OPENMP) */
 
 #endif/* __GPUMEM_H__ */
+
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && defined(HYPRE_USING_CUDA)
 
@@ -1741,17 +1684,12 @@ struct ReduceSum
 
 #endif
 
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /* amg_linklist.c */
 void hypre_dispose_elt ( hypre_LinkList element_ptr );
@@ -1785,6 +1723,7 @@ void HYPRE_Finalize();
 
 /* hypre_printf.c */
 // #ifdef HYPRE_BIGINT
+HYPRE_Int hypre_ndigits( HYPRE_BigInt number );
 HYPRE_Int hypre_printf( const char *format , ... );
 HYPRE_Int hypre_fprintf( FILE *stream , const char *format, ... );
 HYPRE_Int hypre_sprintf( char *s , const char *format, ... );
@@ -2017,7 +1956,6 @@ void hypre_big_merge_sort(HYPRE_BigInt *in, HYPRE_BigInt *temp, HYPRE_Int len, H
 void hypre_big_sort_and_create_inverse_map(
   HYPRE_BigInt *in, HYPRE_Int len, HYPRE_BigInt **out, hypre_UnorderedBigIntMap *inverse_map);
 #endif
-
 
 #ifdef __cplusplus
 }
