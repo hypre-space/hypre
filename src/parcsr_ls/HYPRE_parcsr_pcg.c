@@ -40,7 +40,7 @@ HYPRE_ParCSRPCGCreate( MPI_Comm comm, HYPRE_Solver *solver )
  * HYPRE_ParCSRPCGDestroy
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_ParCSRPCGDestroy( HYPRE_Solver solver )
 {
    return( hypre_PCGDestroy( (void *) solver ) );
@@ -50,7 +50,7 @@ HYPRE_ParCSRPCGDestroy( HYPRE_Solver solver )
  * HYPRE_ParCSRPCGSetup
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_ParCSRPCGSetup( HYPRE_Solver solver,
                       HYPRE_ParCSRMatrix A,
                       HYPRE_ParVector b,
@@ -66,7 +66,7 @@ HYPRE_ParCSRPCGSetup( HYPRE_Solver solver,
  * HYPRE_ParCSRPCGSolve
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_ParCSRPCGSolve( HYPRE_Solver solver,
                       HYPRE_ParCSRMatrix A,
                       HYPRE_ParVector b,
@@ -231,8 +231,8 @@ HYPRE_ParCSRPCGGetResidual( HYPRE_Solver  solver,
 /*--------------------------------------------------------------------------
  * HYPRE_ParCSRDiagScaleSetup
  *--------------------------------------------------------------------------*/
- 
-HYPRE_Int 
+
+HYPRE_Int
 HYPRE_ParCSRDiagScaleSetup( HYPRE_Solver solver,
                             HYPRE_ParCSRMatrix A,
                             HYPRE_ParVector y,
@@ -240,12 +240,12 @@ HYPRE_ParCSRDiagScaleSetup( HYPRE_Solver solver,
 {
    return 0;
 }
- 
+
 /*--------------------------------------------------------------------------
  * HYPRE_ParCSRDiagScale
  *--------------------------------------------------------------------------*/
- 
-HYPRE_Int 
+
+HYPRE_Int
 HYPRE_ParCSRDiagScale( HYPRE_Solver solver,
                        HYPRE_ParCSRMatrix HA,
                        HYPRE_ParVector Hy,
@@ -260,36 +260,32 @@ HYPRE_ParCSRDiagScale( HYPRE_Solver solver,
    HYPRE_Int *A_i = hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(A));
    HYPRE_Int local_size = hypre_VectorSize(hypre_ParVectorLocalVector(x));
    HYPRE_Int ierr = 0;
-#if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
-   DiagScaleVector(x_data, y_data, A_data, A_i, local_size, HYPRE_STREAM(4));
-#elif defined(HYPRE_USING_DEVICE_OPENMP) && defined(HYPRE_USING_UNIFIED_MEMORY)
+#if defined(HYPRE_USING_CUDA)
+   hypreDevice_DiagScaleVector(local_size, A_i, A_data, y_data, x_data);
+   //hypre_SyncCudaComputeStream(hypre_handle);
+#else /* #if defined(HYPRE_USING_CUDA) */
    HYPRE_Int i;
-#pragma omp target teams  distribute  parallel for private(i) is_device_ptr(x_data,y_data,A_data,A_i)
-   for (i=0; i < local_size; i++)
-   {
-      x_data[i] = y_data[i]/A_data[A_i[i]];
-   } 
-#else
-   HYPRE_Int i;
-#if defined(HYPRE_USING_OPENMP)
+#if defined(HYPRE_USING_DEVICE_OPENMP)
+#pragma omp target teams distribute parallel for private(i) is_device_ptr(x_data,y_data,A_data,A_i)
+#elif defined(HYPRE_USING_OPENMP)
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
    for (i=0; i < local_size; i++)
    {
       x_data[i] = y_data[i]/A_data[A_i[i]];
-   } 
-#endif
- 
+   }
+#endif /* #if defined(HYPRE_USING_CUDA) */
+
    return ierr;
 }
 
 /*--------------------------------------------------------------------------
  * HYPRE_ParCSRSymPrecondSetup
  *--------------------------------------------------------------------------*/
- 
+
 /*
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_ParCSRSymPrecondSetup( HYPRE_Solver solver,
                              HYPRE_ParCSRMatrix A,
                              HYPRE_ParVector b,
@@ -322,7 +318,7 @@ HYPRE_ParCSRSymPrecondSetup( HYPRE_Solver solver,
    for (i=0; i < hypre_VectorSize(hypre_ParVectorLocalVector(x)); i++)
    {
 	x_data[i] = y_data[i]/A_data[A_i[i]];
-   } 
- 
+   }
+
    return ierr;
 } */

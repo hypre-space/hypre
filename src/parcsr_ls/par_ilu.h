@@ -13,26 +13,6 @@
 #ifndef hypre_ParILU_DATA_HEADER
 #define hypre_ParILU_DATA_HEADER
 
-
-#ifdef HYPRE_USING_CUDA
-   /* define proto calls */
-   #define HYPRE_CUSPARSE_CALL(call) do {                   \
-   cusparseStatus_t err = call;                             \
-   if (CUSPARSE_STATUS_SUCCESS != err) {                    \
-      hypre_printf("CUSPARSE ERROR (code = %d) at %s:%d\n", \
-                   err, __FILE__, __LINE__);                \
-      exit(1);                                              \
-   } } while(0)
-   
-   #define HYPRE_CUDA_CALL(call) do {                       \
-   cudaError_t err = call;                                  \
-   if (cudaSuccess != err) {                                \
-      hypre_printf("CUDA ERROR (code = %d) at %s:%d\n",     \
-                   err, __FILE__, __LINE__);                \
-      exit(1);                                              \
-   } } while(0)
-#endif
-
 /*--------------------------------------------------------------------------
  * hypre_ParILUData
  *--------------------------------------------------------------------------*/

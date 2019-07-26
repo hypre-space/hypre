@@ -24,8 +24,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
                    hypre_ParVector    *f,
                    hypre_ParVector    *u         )
 {
-
-   MPI_Comm 	      comm = hypre_ParCSRMatrixComm(A);   
+   MPI_Comm            comm = hypre_ParCSRMatrixComm(A);
 
    hypre_ParAMGData   *amg_data = (hypre_ParAMGData*) amg_vdata;
 
@@ -40,7 +39,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    HYPRE_Real   tol;
 
    HYPRE_Int block_mode;
-   
+
 
    hypre_ParCSRMatrix **A_array;
    hypre_ParVector    **F_array;
@@ -82,7 +81,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    hypre_ParVector  *Residual;
 
    HYPRE_ANNOTATION_BEGIN("BoomerAMG.solve");
-   hypre_MPI_Comm_size(comm, &num_procs);   
+   hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm,&my_id);
 
    amg_print_level    = hypre_ParAMGDataPrintLevel(amg_data);
@@ -109,16 +108,16 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
 
    block_mode = hypre_ParAMGDataBlockMode(amg_data);
 
-   A_block_array          = hypre_ParAMGDataABlockArray(amg_data);
+   A_block_array = hypre_ParAMGDataABlockArray(amg_data);
 
 
-/*   Vtemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[0]),
-                                 hypre_ParCSRMatrixGlobalNumRows(A_array[0]),
-                                 hypre_ParCSRMatrixRowStarts(A_array[0]));
-   hypre_ParVectorInitialize(Vtemp);
-   hypre_ParVectorSetPartitioningOwner(Vtemp,0);
-   hypre_ParAMGDataVtemp(amg_data) = Vtemp;
-*/
+   /*   Vtemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[0]),
+        hypre_ParCSRMatrixGlobalNumRows(A_array[0]),
+        hypre_ParCSRMatrixRowStarts(A_array[0]));
+        hypre_ParVectorInitialize(Vtemp);
+        hypre_ParVectorSetPartitioningOwner(Vtemp,0);
+        hypre_ParAMGDataVtemp(amg_data) = Vtemp;
+        */
    Vtemp = hypre_ParAMGDataVtemp(amg_data);
 
    /*-----------------------------------------------------------------------
@@ -127,7 +126,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
 
 
    if (my_id == 0 && amg_print_level > 1)
-      hypre_BoomerAMGWriteSolverParams(amg_data); 
+      hypre_BoomerAMGWriteSolverParams(amg_data);
 
    /*-----------------------------------------------------------------------
     *    Initialize the solver error flag and assorted bookkeeping variables
@@ -146,142 +145,148 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
     *-----------------------------------------------------------------------*/
 
    if (my_id == 0 && amg_print_level > 1 && tol > 0.)
-     hypre_printf("\n\nAMG SOLUTION INFO:\n");
+      hypre_printf("\n\nAMG SOLUTION INFO:\n");
 
 
    /*-----------------------------------------------------------------------
-    *    Compute initial fine-grid residual and print 
+    *    Compute initial fine-grid residual and print
     *-----------------------------------------------------------------------*/
 
    if (amg_print_level > 1 || amg_logging > 1 || tol > 0.)
    {
-     if ( amg_logging > 1 ) {
-        hypre_ParVectorCopy(F_array[0], Residual );
-        if (tol > 0)
-	   hypre_ParCSRMatrixMatvec(alpha, A_array[0], U_array[0], beta, Residual );
-        resid_nrm = sqrt(hypre_ParVectorInnerProd( Residual, Residual ));
-     }
-     else {
-        hypre_ParVectorCopy(F_array[0], Vtemp);
-        if (tol > 0)
-           hypre_ParCSRMatrixMatvec(alpha, A_array[0], U_array[0], beta, Vtemp);
-        resid_nrm = sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
-     }
+      if ( amg_logging > 1 )
+      {
+         hypre_ParVectorCopy(F_array[0], Residual );
+         if (tol > 0)
+         {
+            hypre_ParCSRMatrixMatvec(alpha, A_array[0], U_array[0], beta, Residual );
+         }
+         resid_nrm = sqrt(hypre_ParVectorInnerProd( Residual, Residual ));
+      }
+      else
+      {
+         hypre_ParVectorCopy(F_array[0], Vtemp);
+         if (tol > 0)
+         {
+            hypre_ParCSRMatrixMatvec(alpha, A_array[0], U_array[0], beta, Vtemp);
+         }
+         resid_nrm = sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
+      }
 
-     /* Since it is does not diminish performance, attempt to return an error flag
-        and notify users when they supply bad input. */
-     if (resid_nrm != 0.) ieee_check = resid_nrm/resid_nrm; /* INF -> NaN conversion */
-     if (ieee_check != ieee_check)
-     {
-        /* ...INFs or NaNs in input can make ieee_check a NaN.  This test
-           for ieee_check self-equality works on all IEEE-compliant compilers/
-           machines, c.f. page 8 of "Lecture Notes on the Status of IEEE 754"
-           by W. Kahan, May 31, 1996.  Currently (July 2002) this paper may be
-           found at http://HTTP.CS.Berkeley.EDU/~wkahan/ieee754status/IEEE754.PDF */
-        if (amg_print_level > 0)
-        {
-          hypre_printf("\n\nERROR detected by Hypre ...  BEGIN\n");
-          hypre_printf("ERROR -- hypre_BoomerAMGSolve: INFs and/or NaNs detected in input.\n");
-          hypre_printf("User probably placed non-numerics in supplied A, x_0, or b.\n");
-          hypre_printf("ERROR detected by Hypre ...  END\n\n\n");
-        }
-        hypre_error(HYPRE_ERROR_GENERIC);
-        HYPRE_ANNOTATION_END("BoomerAMG.solve");
-        return hypre_error_flag;
-     }
+      /* Since it is does not diminish performance, attempt to return an error flag
+         and notify users when they supply bad input. */
+      if (resid_nrm != 0.) ieee_check = resid_nrm/resid_nrm; /* INF -> NaN conversion */
+      if (ieee_check != ieee_check)
+      {
+         /* ...INFs or NaNs in input can make ieee_check a NaN.  This test
+            for ieee_check self-equality works on all IEEE-compliant compilers/
+            machines, c.f. page 8 of "Lecture Notes on the Status of IEEE 754"
+            by W. Kahan, May 31, 1996.  Currently (July 2002) this paper may be
+            found at http://HTTP.CS.Berkeley.EDU/~wkahan/ieee754status/IEEE754.PDF */
+         if (amg_print_level > 0)
+         {
+            hypre_printf("\n\nERROR detected by Hypre ...  BEGIN\n");
+            hypre_printf("ERROR -- hypre_BoomerAMGSolve: INFs and/or NaNs detected in input.\n");
+            hypre_printf("User probably placed non-numerics in supplied A, x_0, or b.\n");
+            hypre_printf("ERROR detected by Hypre ...  END\n\n\n");
+         }
+         hypre_error(HYPRE_ERROR_GENERIC);
+         HYPRE_ANNOTATION_END("BoomerAMG.solve");
+         return hypre_error_flag;
+      }
 
-     /* r0 */
-     resid_nrm_init = resid_nrm;
+      /* r0 */
+      resid_nrm_init = resid_nrm;
 
-     if (0 == converge_type)
-     {
-        rhs_norm = sqrt(hypre_ParVectorInnerProd(f, f));
-        if (rhs_norm)
-        {
-           relative_resid = resid_nrm_init / rhs_norm;
-        }
-        else
-        {
-           relative_resid = resid_nrm_init;
-        }
-     }
-     else
-     {
-        /* converge_type != 0, test convergence with ||r|| / ||r0|| */
-        relative_resid = 1.0;
-     }
+      if (0 == converge_type)
+      {
+         rhs_norm = sqrt(hypre_ParVectorInnerProd(f, f));
+         if (rhs_norm)
+         {
+            relative_resid = resid_nrm_init / rhs_norm;
+         }
+         else
+         {
+            relative_resid = resid_nrm_init;
+         }
+      }
+      else
+      {
+         /* converge_type != 0, test convergence with ||r|| / ||r0|| */
+         relative_resid = 1.0;
+      }
    }
    else
    {
-     relative_resid = 1.;
+      relative_resid = 1.;
    }
 
    if (my_id == 0 && amg_print_level > 1)
-   {     
+   {
       hypre_printf("                                            relative\n");
       hypre_printf("               residual        factor       residual\n");
       hypre_printf("               --------        ------       --------\n");
       hypre_printf("    Initial    %e                 %e\n", resid_nrm_init,
-                   relative_resid);
+            relative_resid);
    }
 
    /*-----------------------------------------------------------------------
     *    Main V-cycle loop
     *-----------------------------------------------------------------------*/
-   
+
    while ( (relative_resid >= tol || cycle_count < min_iter) && cycle_count < max_iter )
    {
       hypre_ParAMGDataCycleOpCount(amg_data) = 0;
       /* Op count only needed for one cycle */
-      if ((additive < 0 || additive >= num_levels) 
-	   && (mult_additive < 0 || mult_additive >= num_levels)
-	   && (simple < 0 || simple >= num_levels) )
-         hypre_BoomerAMGCycle(amg_data, F_array, U_array); 
+      if ((additive < 0 || additive >= num_levels)
+            && (mult_additive < 0 || mult_additive >= num_levels)
+            && (simple < 0 || simple >= num_levels) )
+         hypre_BoomerAMGCycle(amg_data, F_array, U_array);
       else
-         hypre_BoomerAMGAdditiveCycle(amg_data); 
+         hypre_BoomerAMGAdditiveCycle(amg_data);
       /*---------------------------------------------------------------
        *    Compute  fine-grid residual and residual norm
        *----------------------------------------------------------------*/
 
       if (amg_print_level > 1 || amg_logging > 1 || tol > 0.)
       {
-        old_resid = resid_nrm;
+         old_resid = resid_nrm;
 
-        if ( amg_logging > 1 ) {
-           hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[0], U_array[0], beta, F_array[0], Residual );
-           resid_nrm = sqrt(hypre_ParVectorInnerProd( Residual, Residual ));
-        }
-        else {
-           hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[0], U_array[0], beta, F_array[0], Vtemp);
-           resid_nrm = sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
-        }
+         if ( amg_logging > 1 ) {
+            hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[0], U_array[0], beta, F_array[0], Residual );
+            resid_nrm = sqrt(hypre_ParVectorInnerProd( Residual, Residual ));
+         }
+         else {
+            hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[0], U_array[0], beta, F_array[0], Vtemp);
+            resid_nrm = sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
+         }
 
-        if (old_resid) 
-        {
-           conv_factor = resid_nrm / old_resid;
-        }
-        else 
-        {
-           conv_factor = resid_nrm;
-        }
+         if (old_resid)
+         {
+            conv_factor = resid_nrm / old_resid;
+         }
+         else
+         {
+            conv_factor = resid_nrm;
+         }
 
-        if (0 == converge_type)
-        {
-           if (rhs_norm)
-           {
-              relative_resid = resid_nrm / rhs_norm;
-           }
-           else
-           {
-              relative_resid = resid_nrm;
-           }
-        }
-        else
-        {
-           relative_resid = resid_nrm / resid_nrm_init;
-        }
+         if (0 == converge_type)
+         {
+            if (rhs_norm)
+            {
+               relative_resid = resid_nrm / rhs_norm;
+            }
+            else
+            {
+               relative_resid = resid_nrm;
+            }
+         }
+         else
+         {
+            relative_resid = resid_nrm / resid_nrm_init;
+         }
 
-        hypre_ParAMGDataRelativeResidualNorm(amg_data) = relative_resid;
+         hypre_ParAMGDataRelativeResidualNorm(amg_data) = relative_resid;
       }
 
       ++cycle_count;
@@ -292,9 +297,9 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
 #endif
 
       if (my_id == 0 && amg_print_level > 1)
-      { 
+      {
          hypre_printf("    Cycle %2d   %e    %f     %e \n", cycle_count,
-                      resid_nrm, conv_factor, relative_resid);
+               resid_nrm, conv_factor, relative_resid);
       }
    }
 
@@ -308,12 +313,12 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
     *    Compute closing statistics
     *-----------------------------------------------------------------------*/
 
-   if (cycle_count > 0 && resid_nrm_init) 
-     conv_factor = pow((resid_nrm/resid_nrm_init),(1.0/(HYPRE_Real) cycle_count));
+   if (cycle_count > 0 && resid_nrm_init)
+      conv_factor = pow((resid_nrm/resid_nrm_init),(1.0/(HYPRE_Real) cycle_count));
    else
-     conv_factor = 1.;
+      conv_factor = 1.;
 
-   if (amg_print_level > 1) 
+   if (amg_print_level > 1)
    {
       num_coeffs       = hypre_CTAlloc(HYPRE_Real,  num_levels, HYPRE_MEMORY_HOST);
       num_variables    = hypre_CTAlloc(HYPRE_Real,  num_levels, HYPRE_MEMORY_HOST);
@@ -339,7 +344,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
             num_variables[j] = (HYPRE_Real) hypre_ParCSRMatrixGlobalNumRows(A_array[j]);
          }
       }
-   
+
 
       for (j=0;j<hypre_ParAMGDataNumLevels(amg_data);j++)
       {
@@ -376,7 +381,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
       hypre_TFree(num_variables, HYPRE_MEMORY_HOST);
    }
    HYPRE_ANNOTATION_END("BoomerAMG.solve");
-   
+
    return hypre_error_flag;
 }
 

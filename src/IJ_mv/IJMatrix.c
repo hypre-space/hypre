@@ -20,7 +20,7 @@
  *--------------------------------------------------------------------------*/
 
 /**
-Returns a pointer to the row partitioning 
+Returns a pointer to the row partitioning
 
 @return integer error code
 @param IJMatrix [IN]
@@ -29,7 +29,7 @@ The ijmatrix to be pointed to.
 
 HYPRE_Int
 hypre_IJMatrixGetRowPartitioning( HYPRE_IJMatrix matrix ,
-				  HYPRE_BigInt **row_partitioning )
+                                  HYPRE_BigInt **row_partitioning )
 {
    hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
 
@@ -63,7 +63,7 @@ The ijmatrix to be pointed to.
 
 HYPRE_Int
 hypre_IJMatrixGetColPartitioning( HYPRE_IJMatrix matrix ,
-				  HYPRE_BigInt **col_partitioning )
+                                  HYPRE_BigInt **col_partitioning )
 {
    hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
 
@@ -87,8 +87,8 @@ hypre_IJMatrixGetColPartitioning( HYPRE_IJMatrix matrix ,
  * hypre_IJMatrixSetObject
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
-hypre_IJMatrixSetObject( HYPRE_IJMatrix  matrix, 
+HYPRE_Int
+hypre_IJMatrixSetObject( HYPRE_IJMatrix  matrix,
                          void           *object )
 {
    hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;

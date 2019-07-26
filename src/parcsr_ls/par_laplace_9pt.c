@@ -25,12 +25,12 @@ GenerateLaplacian9pt( MPI_Comm comm,
    hypre_CSRMatrix *diag;
    hypre_CSRMatrix *offd;
 
-   HYPRE_Int  *diag_i;
-   HYPRE_Int  *diag_j;
+   HYPRE_Int    *diag_i;
+   HYPRE_Int    *diag_j;
    HYPRE_Real *diag_data;
 
-   HYPRE_Int  *offd_i;
-   HYPRE_Int  *offd_j;
+   HYPRE_Int    *offd_i;
+   HYPRE_Int    *offd_j;
    HYPRE_Real *offd_data;
 
    HYPRE_BigInt *global_part;
@@ -169,7 +169,7 @@ GenerateLaplacian9pt( MPI_Comm comm,
 	       }
             }
          }
-         if (ix > nx_part[p] ) 
+         if (ix > nx_part[p]) 
             diag_i[cnt]++;
          else
          {
@@ -190,7 +190,7 @@ GenerateLaplacian9pt( MPI_Comm comm,
          if (iy+1 < ny_part[q+1]) 
          {
             diag_i[cnt]++;
-	    if (ix > nx_part[p] )
+	    if (ix > nx_part[p])
 	    {
 	       diag_i[cnt]++;
 	    }
@@ -254,7 +254,7 @@ GenerateLaplacian9pt( MPI_Comm comm,
       {
          diag_j[cnt] = row_index;
          diag_data[cnt++] = value[0];
-         if (iy > ny_part[q] ) 
+         if (iy > ny_part[q]) 
          {
 	    if (ix > nx_part[p])
 	    {

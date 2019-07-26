@@ -17,7 +17,7 @@
 
 #include <HYPRE_config.h>
 
-#include "general.h"
+#include "hypre_general.h"
 
 #include "HYPRE.h"
 #include "HYPRE_utilities.h"
@@ -34,8 +34,8 @@
  * HYPRE_ConvertPETScMatrixToDistributedMatrix
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
-HYPRE_ConvertPETScMatrixToDistributedMatrix( 
+HYPRE_Int
+HYPRE_ConvertPETScMatrixToDistributedMatrix(
                  Mat PETSc_matrix,
                  HYPRE_DistributedMatrix *DistributedMatrix )
 {

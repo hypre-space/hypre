@@ -1081,6 +1081,8 @@ hypre_ILUSolveCusparseLU(hypre_ParCSRMatrix *A, cusparseMatDescr_t matL_des, cus
    alpha = -1.0;
    beta = 1.0;
    
+   cusparseHandle_t handle = hypre_HandleCusparseHandle(hypre_handle);
+   
    /* Initialize Utemp to zero. 
     * This is necessary for correctness, when we use optimized 
     * vector operations in the case where sizeof(L, D or U) < sizeof(A)
@@ -1096,13 +1098,13 @@ hypre_ILUSolveCusparseLU(hypre_ParCSRMatrix *A, cusparseMatDescr_t matL_des, cus
    if(isDoublePrecision)
    {
       /* L solve - Forward solve */
-      HYPRE_CUSPARSE_CALL(cusparseDcsrsv2_solve(HYPRE_CUSPARSE_HANDLE, CUSPARSE_OPERATION_NON_TRANSPOSE, 
+      HYPRE_CUSPARSE_CALL(cusparseDcsrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, 
                                                 n, nnz, (double *) &beta, matL_des,
                                                 (double *) LU_data, LU_i, LU_j, matL_info, 
                                                 (double *) utemp_data, (double *) ftemp_data, ilu_solve_policy, ilu_solve_buffer));
       
       /* U solve - Backward substitution */
-      HYPRE_CUSPARSE_CALL(cusparseDcsrsv2_solve(HYPRE_CUSPARSE_HANDLE, CUSPARSE_OPERATION_NON_TRANSPOSE, 
+      HYPRE_CUSPARSE_CALL(cusparseDcsrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, 
                                                 n, nnz, (double *) &beta, matU_des,
                                                 (double *) LU_data, LU_i, LU_j, matU_info, 
                                                 (double *) ftemp_data, (double *) utemp_data, ilu_solve_policy, ilu_solve_buffer));
@@ -1110,13 +1112,13 @@ hypre_ILUSolveCusparseLU(hypre_ParCSRMatrix *A, cusparseMatDescr_t matL_des, cus
    else if(isSinglePrecision)
    {
       /* L solve - Forward solve */
-      HYPRE_CUSPARSE_CALL(cusparseScsrsv2_solve(HYPRE_CUSPARSE_HANDLE, CUSPARSE_OPERATION_NON_TRANSPOSE, 
+      HYPRE_CUSPARSE_CALL(cusparseScsrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, 
                                                 n, nnz, (float *) &beta, matL_des,
                                                 (float *) LU_data, LU_i, LU_j, matL_info, 
                                                 (float *) utemp_data, (float *) ftemp_data, ilu_solve_policy, ilu_solve_buffer));
       
       /* U solve - Backward substitution */
-      HYPRE_CUSPARSE_CALL(cusparseScsrsv2_solve(HYPRE_CUSPARSE_HANDLE, CUSPARSE_OPERATION_NON_TRANSPOSE, 
+      HYPRE_CUSPARSE_CALL(cusparseScsrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, 
                                                 n, nnz, (float *) &beta, matU_des,
                                                 (float *) LU_data, LU_i, LU_j, matU_info, 
                                                 (float *) ftemp_data, (float *) utemp_data, ilu_solve_policy, ilu_solve_buffer));
@@ -1229,6 +1231,9 @@ hypre_ILUSolveCusparseSchurGMRES(hypre_ParCSRMatrix *A, hypre_ParVector *f,
    
    hypre_assert(isDoublePrecision || isSinglePrecision);
    
+   cusparseHandle_t handle = hypre_HandleCusparseHandle(hypre_handle);
+   cusparseMatDescr_t descr = hypre_HandleCusparseMatDescr(hypre_handle);
+   
    /* compute residual */
    hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A, u, beta, f, ftemp);
    
@@ -1246,7 +1251,7 @@ hypre_ILUSolveCusparseSchurGMRES(hypre_ParCSRMatrix *A, hypre_ParVector *f,
       if(isDoublePrecision)
       {
          /* L solve - Forward solve */
-         HYPRE_CUSPARSE_CALL(cusparseDcsrsv2_solve(HYPRE_CUSPARSE_HANDLE, CUSPARSE_OPERATION_NON_TRANSPOSE, 
+         HYPRE_CUSPARSE_CALL(cusparseDcsrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, 
                                                    nLU, BLU_nnz, (double *) &beta, matL_des,
                                                    (double *) BLU_data, BLU_i, BLU_j, matBL_info, 
                                                    (double *) utemp_data, (double *) ftemp_data, ilu_solve_policy, ilu_solve_buffer));
@@ -1254,7 +1259,7 @@ hypre_ILUSolveCusparseSchurGMRES(hypre_ParCSRMatrix *A, hypre_ParVector *f,
       else if(isSinglePrecision)
       {
          /* L solve - Forward solve */
-         HYPRE_CUSPARSE_CALL(cusparseScsrsv2_solve(HYPRE_CUSPARSE_HANDLE, CUSPARSE_OPERATION_NON_TRANSPOSE, 
+         HYPRE_CUSPARSE_CALL(cusparseScsrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, 
                                                    nLU, BLU_nnz, (float *) &beta, matL_des,
                                                    (float *) BLU_data, BLU_i, BLU_j, matBL_info, 
                                                    (float *) utemp_data, (float *) ftemp_data, ilu_solve_policy, ilu_solve_buffer));
@@ -1269,13 +1274,13 @@ hypre_ILUSolveCusparseSchurGMRES(hypre_ParCSRMatrix *A, hypre_ParVector *f,
       /* HYPRE_CSRMATVEC NOT WOKRING!!! */
       if(isDoublePrecision)
       {
-         cusparseDcsrmv(HYPRE_CUSPARSE_HANDLE, CUSPARSE_OPERATION_NON_TRANSPOSE, m, nLU, E_nnz, (double *) &alpha,
-                  HYPRE_CUSPARSE_MAT_DESCR, (double *) E_data, E_i, E_j, (double *) ftemp_data, (double *) &beta, (double *) utemp_data + nLU);
+         cusparseDcsrmv(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, m, nLU, E_nnz, (double *) &alpha,
+                  descr, (double *) E_data, E_i, E_j, (double *) ftemp_data, (double *) &beta, (double *) utemp_data + nLU);
       }
       else if(isSinglePrecision)
       {
-         cusparseScsrmv(HYPRE_CUSPARSE_HANDLE, CUSPARSE_OPERATION_NON_TRANSPOSE, m, nLU, E_nnz, (float *) &alpha,
-                  HYPRE_CUSPARSE_MAT_DESCR, (float *) E_data, E_i, E_j, (float *) ftemp_data, (float *) &beta, (float *) utemp_data + nLU);
+         cusparseScsrmv(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, m, nLU, E_nnz, (float *) &alpha,
+                  descr, (float *) E_data, E_i, E_j, (float *) ftemp_data, (float *) &beta, (float *) utemp_data + nLU);
       }
    }
    
@@ -1294,13 +1299,13 @@ hypre_ILUSolveCusparseSchurGMRES(hypre_ParCSRMatrix *A, hypre_ParVector *f,
       if(isDoublePrecision)
       {
          /* L solve */
-         HYPRE_CUSPARSE_CALL(cusparseDcsrsv2_solve(HYPRE_CUSPARSE_HANDLE, CUSPARSE_OPERATION_NON_TRANSPOSE, 
+         HYPRE_CUSPARSE_CALL(cusparseDcsrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, 
                                                    m, SLU_nnz, (double *) &beta, matL_des,
                                                    (double *) SLU_data, SLU_i, SLU_j, matSL_info, 
                                                    (double *) utemp_data + nLU, (double *) ftemp_data + nLU, ilu_solve_policy, ilu_solve_buffer));
                                                    
          /* U solve */
-         HYPRE_CUSPARSE_CALL(cusparseDcsrsv2_solve(HYPRE_CUSPARSE_HANDLE, CUSPARSE_OPERATION_NON_TRANSPOSE, 
+         HYPRE_CUSPARSE_CALL(cusparseDcsrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, 
                                                    m, SLU_nnz, (double *) &beta, matU_des,
                                                    (double *) SLU_data, SLU_i, SLU_j, matSU_info, 
                                                    (double *) ftemp_data + nLU, (double *) rhs_data, ilu_solve_policy, ilu_solve_buffer));
@@ -1308,13 +1313,13 @@ hypre_ILUSolveCusparseSchurGMRES(hypre_ParCSRMatrix *A, hypre_ParVector *f,
       else if(isSinglePrecision)
       {
          /* L solve */
-         HYPRE_CUSPARSE_CALL(cusparseScsrsv2_solve(HYPRE_CUSPARSE_HANDLE, CUSPARSE_OPERATION_NON_TRANSPOSE, 
+         HYPRE_CUSPARSE_CALL(cusparseScsrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, 
                                                    m, SLU_nnz, (float *) &beta, matL_des,
                                                    (float *) SLU_data, SLU_i, SLU_j, matSL_info, 
                                                    (float *) utemp_data + nLU, (float *) ftemp_data + nLU, ilu_solve_policy, ilu_solve_buffer));
          
          /* U solve */
-         HYPRE_CUSPARSE_CALL(cusparseScsrsv2_solve(HYPRE_CUSPARSE_HANDLE, CUSPARSE_OPERATION_NON_TRANSPOSE, 
+         HYPRE_CUSPARSE_CALL(cusparseScsrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, 
                                                    m, SLU_nnz, (float *) &beta, matU_des,
                                                    (float *) SLU_data, SLU_i, SLU_j, matSU_info, 
                                                    (float *) ftemp_data + nLU, (float *) rhs_data, ilu_solve_policy, ilu_solve_buffer));
@@ -1336,13 +1341,13 @@ hypre_ILUSolveCusparseSchurGMRES(hypre_ParCSRMatrix *A, hypre_ParVector *f,
       /* HYPRE_CSRMATVEC NOT WOKRING!!! */
       if(isDoublePrecision)
       {
-         cusparseDcsrmv(HYPRE_CUSPARSE_HANDLE, CUSPARSE_OPERATION_NON_TRANSPOSE, m, nLU, F_nnz, (double *) &alpha,
-                  HYPRE_CUSPARSE_MAT_DESCR, (double *) F_data, F_i, F_j, (double *) x_data, (double *) &beta, (double *) ftemp_data);
+         cusparseDcsrmv(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, m, nLU, F_nnz, (double *) &alpha,
+                  descr, (double *) F_data, F_i, F_j, (double *) x_data, (double *) &beta, (double *) ftemp_data);
       }
       else if(isSinglePrecision)
       {
-         cusparseScsrmv(HYPRE_CUSPARSE_HANDLE, CUSPARSE_OPERATION_NON_TRANSPOSE, m, nLU, F_nnz, (float *) &alpha,
-                  HYPRE_CUSPARSE_MAT_DESCR, (float *) F_data, F_i, F_j, (float *) x_data, (float *) &beta, (float *) ftemp_data);
+         cusparseScsrmv(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, m, nLU, F_nnz, (float *) &alpha,
+                  descr, (float *) F_data, F_i, F_j, (float *) x_data, (float *) &beta, (float *) ftemp_data);
       }
       
       /* 5th need to solve UBi*ui = zi */
@@ -1351,7 +1356,7 @@ hypre_ILUSolveCusparseSchurGMRES(hypre_ParCSRMatrix *A, hypre_ParVector *f,
       if(isDoublePrecision)
       {
          /* L solve - Forward solve */
-         HYPRE_CUSPARSE_CALL(cusparseDcsrsv2_solve(HYPRE_CUSPARSE_HANDLE, CUSPARSE_OPERATION_NON_TRANSPOSE, 
+         HYPRE_CUSPARSE_CALL(cusparseDcsrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, 
                                                    nLU, BLU_nnz, (double *) &beta, matU_des,
                                                    (double *) BLU_data, BLU_i, BLU_j, matBU_info, 
                                                    (double *) ftemp_data, (double *) utemp_data, ilu_solve_policy, ilu_solve_buffer));
@@ -1359,7 +1364,7 @@ hypre_ILUSolveCusparseSchurGMRES(hypre_ParCSRMatrix *A, hypre_ParVector *f,
       else if(isSinglePrecision)
       {
          /* L solve - Forward solve */
-         HYPRE_CUSPARSE_CALL(cusparseScsrsv2_solve(HYPRE_CUSPARSE_HANDLE, CUSPARSE_OPERATION_NON_TRANSPOSE, 
+         HYPRE_CUSPARSE_CALL(cusparseScsrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, 
                                                    nLU, BLU_nnz, (float *) &beta, matU_des,
                                                    (float *) BLU_data, BLU_i, BLU_j, matBU_info, 
                                                    (float *) ftemp_data, (float *) utemp_data, ilu_solve_policy, ilu_solve_buffer));

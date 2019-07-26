@@ -282,6 +282,7 @@ list (APPEND HYPRE_SOURCES
   seq_mv/mapped_matrix.c
   seq_mv/multiblock_matrix.c
   seq_mv/vector.c
+  seq_mv/vector_batched.c
 )
 
 # Headers and sources: parcsr_mv
@@ -310,6 +311,7 @@ list (APPEND HYPRE_SOURCES
   parcsr_mv/par_csr_matvec.c
   parcsr_mv/par_vector.c
   parcsr_mv/par_make_system.c
+  parcsr_mv/par_csr_triplemat.c
 )
 
 # Headers and sources: parcsr_block_mv

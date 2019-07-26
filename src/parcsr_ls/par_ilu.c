@@ -1920,7 +1920,8 @@ hypre_ILUBuildRASExternalMatrix(hypre_ParCSRMatrix *A, HYPRE_Int *rperm, HYPRE_I
     * hypre_CSRMatrix      **A_ext     [out] -> Return the external CSR matrix.
     * hypre_ParCSRCommPkg  commpkg_out [out] -> Return commpkg if set to a point. Use NULL here since we don't want it.
     */
-   hypre_ParcsrGetExternalRows( A, m, A_offd_colmap, &A_ext, NULL );
+   //hypre_ParcsrGetExternalRows( A, m, A_offd_colmap, &A_ext, NULL );
+   A_ext = hypre_ParCSRMatrixExtractBExt(A, A, 1);
    
    A_ext_i              = hypre_CSRMatrixI(A_ext);
    /* BIG INT*/ A_ext_j = hypre_CSRMatrixBigJ(A_ext); // This should be big int since this is global index, use big_j in csr

@@ -45,6 +45,12 @@ hypre_GetThreadNum( )
    return my_thread_num;
 }
 
+void
+hypre_SetNumThreads(HYPRE_Int nt)
+{
+   omp_set_num_threads(nt);
+}
+
 #endif
 
 /* This next function must be called from within a parallel region! */

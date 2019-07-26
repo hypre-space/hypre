@@ -38,12 +38,12 @@ HYPRE_Int  hypre_BoomerAMGRelaxIF( hypre_ParCSRMatrix *A,
       if (cycle_type < 2)
       {
          relax_points[0] = 1;
-	 relax_points[1] = -1;
+         relax_points[1] = -1;
       }
       else
       {
-	 relax_points[0] = -1;
-	 relax_points[1] = 1;
+         relax_points[0] = -1;
+         relax_points[1] = 1;
       }
 
       for (i=0; i < 2; i++)
@@ -56,9 +56,9 @@ HYPRE_Int  hypre_BoomerAMGRelaxIF( hypre_ParCSRMatrix *A,
                                                omega,
                                                l1_norms,
                                                u,
-                                               Vtemp, 
-                                               Ztemp); 
-      
+                                               Vtemp,
+                                               Ztemp);
+
    }
    else
    {
@@ -71,8 +71,8 @@ HYPRE_Int  hypre_BoomerAMGRelaxIF( hypre_ParCSRMatrix *A,
                                             omega,
                                             l1_norms,
                                             u,
-                                            Vtemp, 
-                                            Ztemp); 
+                                            Vtemp,
+                                            Ztemp);
    }
 
    return Solve_err_flag;
