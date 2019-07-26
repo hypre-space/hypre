@@ -112,6 +112,35 @@ extern "C"{
   }
 }
 
+extern "C"{
+  __global__
+  void  UnpackOnDeviceKernel(const HYPRE_Complex* __restrict__ recv_data, HYPRE_Complex* __restrict__ x_local_data, const HYPRE_Int* __restrict__ recv_map, HYPRE_Int begin, HYPRE_Int end){
+    HYPRE_Int i = begin+blockIdx.x * blockDim.x + threadIdx.x;
+    if (i<end){
+      x_local_data[recv_map[i]]=recv_data[i-begin];
+    }
+  }
+  void UnpackOnDevice(HYPRE_Complex *recv_data,HYPRE_Complex *x_local_data, HYPRE_Int *recv_map, HYPRE_Int begin, HYPRE_Int end,cudaStream_t s){
+    if ((end-begin)<=0) return;
+    HYPRE_Int tpb=64;
+    HYPRE_Int num_blocks=(end-begin)/tpb+1;
+#ifdef CATCH_LAUNCH_ERRORS
+    hypre_CheckErrorDevice(cudaPeekAtLastError());
+    hypre_CheckErrorDevice(cudaDeviceSynchronize());
+#endif
+    UnpackOnDeviceKernel<<<num_blocks,tpb,0,s>>>(recv_data,x_local_data,recv_map,begin,end);
+#ifdef CATCH_LAUNCH_ERRORS
+    hypre_CheckErrorDevice(cudaPeekAtLastError());
+    hypre_CheckErrorDevice(cudaDeviceSynchronize());
+#endif
+    PUSH_RANGE("PACK_PREFETCH",1);
+#ifndef HYPRE_GPU_USE_PINNED
+    MemPrefetchSized((void*)recv_data,(end-begin)*sizeof(HYPRE_Complex),cudaCpuDeviceId,s);
+#endif
+    POP_RANGE;
+    //hypre_CheckErrorDevice(cudaStreamSynchronize(s));
+  }
+}
   // Scale vector by scalar
 
 extern "C"{

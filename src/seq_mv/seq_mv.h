@@ -263,6 +263,7 @@ void VecScale(HYPRE_Complex *u, HYPRE_Complex *v, HYPRE_Complex *l1_norm, HYPRE_
 void VecScaleSplit(HYPRE_Complex *u, HYPRE_Complex *v, HYPRE_Complex *l1_norm, HYPRE_Int num_rows,cudaStream_t s);
 void CudaCompileFlagCheck();
 void PackOnDevice(HYPRE_Complex *send_data,HYPRE_Complex *x_local_data, HYPRE_Int *send_map, HYPRE_Int begin, HYPRE_Int end,cudaStream_t s);
+void UnpackOnDevice(HYPRE_Complex *recv_data,HYPRE_Complex *x_local_data, HYPRE_Int *recv_map, HYPRE_Int begin, HYPRE_Int end,cudaStream_t s);
 #endif
 #endif
 

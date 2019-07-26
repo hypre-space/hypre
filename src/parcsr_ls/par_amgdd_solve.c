@@ -709,56 +709,59 @@ hypre_BoomerAMGDDTimeResidualCommunication( void *amg_vdata, HYPRE_Int time_leve
    Start from coarsest level and work up to finest */
    for (level = transition_level - 1; level >= amgdd_start_level; level--)
    {
-      // Get some communication info
-      comm = hypre_ParCSRMatrixComm(A_array[level]);
-      num_send_procs = hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[level];
-      num_recv_procs = hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg)[level];
-      num_partitions = hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg)[level];
-
-      if ( num_send_procs || num_recv_procs ) // If there are any owned nodes on this level
+      if (level == time_level)
       {
-         // allocate space for the buffers, buffer sizes, requests and status, psiComposite_send, psiComposite_recv, send and recv maps
-         recv_buffer = hypre_CTAlloc(HYPRE_Complex, recv_map_starts[level][num_recv_procs], HYPRE_MEMORY_SHARED);
-         send_buffer = hypre_CTAlloc(HYPRE_Complex, send_map_starts[level][num_partitions], HYPRE_MEMORY_SHARED);
-         request_counter = 0;
-         requests = hypre_CTAlloc(hypre_MPI_Request, num_send_procs + num_recv_procs, HYPRE_MEMORY_HOST );
-         status = hypre_CTAlloc(hypre_MPI_Status, num_send_procs + num_recv_procs, HYPRE_MEMORY_HOST );
+         // Get some communication info
+         comm = hypre_ParCSRMatrixComm(A_array[level]);
+         num_send_procs = hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[level];
+         num_recv_procs = hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg)[level];
+         num_partitions = hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg)[level];
 
-         // allocate space for the receive buffers and post the receives
-         for (i = 0; i < num_recv_procs; i++)
+         if ( num_send_procs || num_recv_procs ) // If there are any owned nodes on this level
          {
-            HYPRE_Int recv_buffer_size = recv_map_starts[level][i+1] - recv_map_starts[level][i];
-            hypre_MPI_Irecv(&(recv_buffer[ recv_map_starts[level][i] ]), recv_buffer_size, HYPRE_MPI_COMPLEX, recv_procs[level][i], 3, comm, &requests[request_counter++]);
+            // allocate space for the buffers, buffer sizes, requests and status, psiComposite_send, psiComposite_recv, send and recv maps
+            recv_buffer = hypre_CTAlloc(HYPRE_Complex, recv_map_starts[level][num_recv_procs], HYPRE_MEMORY_SHARED);
+            send_buffer = hypre_CTAlloc(HYPRE_Complex, send_map_starts[level][num_partitions], HYPRE_MEMORY_SHARED);
+            request_counter = 0;
+            requests = hypre_CTAlloc(hypre_MPI_Request, num_send_procs + num_recv_procs, HYPRE_MEMORY_HOST );
+            status = hypre_CTAlloc(hypre_MPI_Status, num_send_procs + num_recv_procs, HYPRE_MEMORY_HOST );
+
+            // allocate space for the receive buffers and post the receives
+            for (i = 0; i < num_recv_procs; i++)
+            {
+               HYPRE_Int recv_buffer_size = recv_map_starts[level][i+1] - recv_map_starts[level][i];
+               hypre_MPI_Irecv(&(recv_buffer[ recv_map_starts[level][i] ]), recv_buffer_size, HYPRE_MPI_COMPLEX, recv_procs[level][i], 3, comm, &requests[request_counter++]);
+            }
+
+            // pack and send the buffers
+            PackResidualBuffer(send_buffer, send_map_elmts[level], send_map_starts[level][num_partitions], hypre_VectorData(hypre_ParCompGridF(compGrid[0])));
+
+            for (i = 0; i < num_send_procs; i++)
+            {
+               HYPRE_Int buffer_index = hypre_ParCompGridCommPkgSendProcPartitions(compGridCommPkg)[level][i];
+               HYPRE_Int send_buffer_size = send_map_starts[level][buffer_index+1] - send_map_starts[level][buffer_index];
+               hypre_MPI_Isend(&(send_buffer[ send_map_starts[level][buffer_index] ]), send_buffer_size, HYPRE_MPI_COMPLEX, send_procs[level][i], 3, comm, &requests[request_counter++]);
+            }
+
+            // wait for buffers to be received
+            hypre_MPI_Waitall( request_counter, requests, status );
+
+            hypre_TFree(requests, HYPRE_MEMORY_HOST);
+            hypre_TFree(status, HYPRE_MEMORY_HOST);
+            hypre_TFree(send_buffer, HYPRE_MEMORY_SHARED);
+            
+            UnpackResidualBuffer(recv_buffer, recv_map_elmts[level], recv_map_starts[level][num_recv_procs], hypre_VectorData(hypre_ParCompGridF(compGrid[0])));
+
+            // clean up memory for this level
+            hypre_TFree(recv_buffer, HYPRE_MEMORY_SHARED);
          }
 
-         // pack and send the buffers
-         PackResidualBuffer(send_buffer, send_map_elmts[level], send_map_starts[level][num_partitions], hypre_VectorData(hypre_ParCompGridF(compGrid[0])));
-
-         for (i = 0; i < num_send_procs; i++)
-         {
-            HYPRE_Int buffer_index = hypre_ParCompGridCommPkgSendProcPartitions(compGridCommPkg)[level][i];
-            HYPRE_Int send_buffer_size = send_map_starts[level][buffer_index+1] - send_map_starts[level][buffer_index];
-            hypre_MPI_Isend(&(send_buffer[ send_map_starts[level][buffer_index] ]), send_buffer_size, HYPRE_MPI_COMPLEX, send_procs[level][i], 3, comm, &requests[request_counter++]);
-         }
-
-         // wait for buffers to be received
-         hypre_MPI_Waitall( request_counter, requests, status );
-
-         hypre_TFree(requests, HYPRE_MEMORY_HOST);
-         hypre_TFree(status, HYPRE_MEMORY_HOST);
-         hypre_TFree(send_buffer, HYPRE_MEMORY_SHARED);
-         
-         UnpackResidualBuffer(recv_buffer, recv_map_elmts[level], recv_map_starts[level][num_recv_procs], hypre_VectorData(hypre_ParCompGridF(compGrid[0])));
-
-         // clean up memory for this level
-         hypre_TFree(recv_buffer, HYPRE_MEMORY_SHARED);
+         #if DEBUGGING_MESSAGES
+         hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+         if (myid == 0) hypre_printf("   Finished residual communication on level %d on all ranks\n", level);
+         hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+         #endif
       }
-
-      #if DEBUGGING_MESSAGES
-      hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
-      if (myid == 0) hypre_printf("   Finished residual communication on level %d on all ranks\n", level);
-      hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
-      #endif
 
    }
 
@@ -802,8 +805,14 @@ PackResidualBuffer( HYPRE_Complex *send_buffer, HYPRE_Int *send_map_elmts, HYPRE
 HYPRE_Int
 UnpackResidualBuffer( HYPRE_Complex *recv_buffer, HYPRE_Int *recv_map_elmts, HYPRE_Int end, HYPRE_Complex *f_data )
 {
+   #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
+   UnpackOnDevice(recv_buffer, f_data, recv_map_elmts, 0, end, HYPRE_STREAM(4));
+   hypre_CheckErrorDevice(cudaPeekAtLastError());
+   hypre_CheckErrorDevice(cudaDeviceSynchronize());
+   #else
    HYPRE_Int i;
    for (i = 0; i < end; i++) f_data[ recv_map_elmts[i] ] = recv_buffer[i];
+   #endif
 
    return 0;
 }
