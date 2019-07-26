@@ -1,4 +1,9 @@
 @echo off
+rem Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+rem HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+rem
+rem SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
 setlocal
 
 rem This script can be run from anywhere
@@ -60,7 +65,7 @@ type NUL > cmake.err
 for %%f in (%outdir%\*.out) do (
     set sum=0
     for /f "tokens=1" %%i in ('findstr "Error(s)" %%f') do set /a sum+=%%i
-    if %sum% gtr 0 @echo %%f > cmake.err
+    if %sum% gtr 0 @echo %%f >> cmake.err
 )
 
 cd %rundir%

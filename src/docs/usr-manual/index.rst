@@ -1,3 +1,8 @@
+.. Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+   HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+
+   SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
 .. hypre documentation master file, created by
    sphinx-quickstart on Fri Nov 17 15:46:25 2017.
    You can adapt this file completely to your liking, but it should at least
