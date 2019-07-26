@@ -49,8 +49,10 @@ typedef struct
    HYPRE_Int         **partitions; // list of neighbor partitions
    HYPRE_Int         **send_proc_partitions; // list of which partition each send proc belongs to
    HYPRE_Int         ***partition_ranks; // list of ranks that belong to each partition in partitions
-   HYPRE_Int         **send_map_starts; // send map starts from comm pkg of A^eta on each level
-   HYPRE_Int         **send_map_elmts; // send map elmts from comm pkg of A^eta on each level
+   HYPRE_Int         **send_map_starts; // send map starts from comm pkg of A^eta on each level later used as send map starts for full residual communication
+   HYPRE_Int         **send_map_elmts; // send map elmts from comm pkg of A^eta on each level later used as send map elmts for full residual communication
+   HYPRE_Int         **recv_map_starts; // recv map starts for full residual communication
+   HYPRE_Int         **recv_map_elmts; // recv map elmts for full residual communication
    HYPRE_Int         **ghost_marker; // marks send elmts as ghost or real dofs for the associated processor
 
 	HYPRE_Int 			**send_buffer_size; // size of send buffer on each level for each proc
@@ -83,6 +85,8 @@ typedef struct
  #define hypre_ParCompGridCommPkgPartitionRanks(compGridCommPkg)               ((compGridCommPkg) -> partition_ranks)
  #define hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)           ((compGridCommPkg) -> send_map_starts)
  #define hypre_ParCompGridCommPkgSendMapElmts(compGridCommPkg)           ((compGridCommPkg) -> send_map_elmts)
+ #define hypre_ParCompGridCommPkgRecvMapStarts(compGridCommPkg)           ((compGridCommPkg) -> recv_map_starts)
+ #define hypre_ParCompGridCommPkgRecvMapElmts(compGridCommPkg)           ((compGridCommPkg) -> recv_map_elmts)
  #define hypre_ParCompGridCommPkgGhostMarker(compGridCommPkg)           ((compGridCommPkg) -> ghost_marker)
  #define hypre_ParCompGridCommPkgSendBufferSize(compGridCommPkg)		((compGridCommPkg) -> send_buffer_size)
  #define hypre_ParCompGridCommPkgRecvBufferSize(compGridCommPkg)		((compGridCommPkg) -> recv_buffer_size)
