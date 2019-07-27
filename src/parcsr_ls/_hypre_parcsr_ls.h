@@ -663,24 +663,6 @@ HYPRE_Int hypre_BlockTridiagSetAMGNumSweeps ( void *data , HYPRE_Int nsweeps );
 HYPRE_Int hypre_BlockTridiagSetAMGRelaxType ( void *data , HYPRE_Int relax_type );
 HYPRE_Int hypre_BlockTridiagSetPrintLevel ( void *data , HYPRE_Int print_level );
 
-/* csr_gmres.c */
-HYPRE_Int hypre_KrylovFree( void *ptr );
-HYPRE_Int hypre_KrylovCommInfo( void *A, HYPRE_Int *my_id, HYPRE_Int *num_procs);
-void *    hypre_KrylovCreateVector( void *vvector );
-void *    hypre_KrylovCreateVectorArray(HYPRE_Int n, void *vvector );
-HYPRE_Int hypre_KrylovDestroyVector( void *vvector );
-void *    hypre_KrylovMatvecCreate( void   *A, void   *x );
-HYPRE_Int hypre_KrylovMatvec( void *matvec_data, HYPRE_Complex  alpha, void   *A, void   *x, HYPRE_Complex  beta, void   *y );
-HYPRE_Int hypre_KrylovMatvecT( void *matvec_data, HYPRE_Complex  alpha, void   *A, void   *x, HYPRE_Complex  beta, void   *y );
-HYPRE_Int hypre_KrylovMatvecDestroy( void *matvec_data );
-HYPRE_Real hypre_KrylovInnerProd( void *x, void *y );
-HYPRE_Int  hypre_KrylovCopyVector( void *x, void *y );
-HYPRE_Int  hypre_KrylovClearVector( void *x );
-HYPRE_Int  hypre_KrylovScaleVector( HYPRE_Complex  alpha, void   *x );
-HYPRE_Int  hypre_KrylovAxpy( HYPRE_Complex alpha, void   *x, void   *y );
-HYPRE_Int  hypre_KrylovIdentitySetup( void *vdata, void *A, void *b, void *x );
-HYPRE_Int  hypre_KrylovIdentity( void *vdata, void *A, void *b, void *x );
-
 /* driver.c */
 HYPRE_Int BuildParFromFile ( HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 HYPRE_Int BuildParLaplacian ( HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix *A_ptr );

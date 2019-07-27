@@ -40,7 +40,6 @@ HEADERS =\
 FILES =\
  amg_hybrid.c\
  aux_interp.c\
- csr_gmres.c\
  F90_hypre_laplace.c\
  F90_HYPRE_parcsr_amg.c\
  F90_HYPRE_parcsr_bicgstab.c\
