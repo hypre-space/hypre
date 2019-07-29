@@ -54,6 +54,21 @@ FAC_Jacobi( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int l
 HYPRE_Int
 FAC_GaussSeidel( hypre_ParCompGrid *compGrid );
 
+
+
+
+HYPRE_Int
+FAC_JacobiOld( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int level );
+
+HYPRE_Int
+FAC_InterpolateOld( hypre_ParCompGrid *compGrid_f, hypre_ParCompGrid *compGrid_c );
+
+HYPRE_Int
+FAC_RestrictOld( hypre_ParCompGrid *compGrid_f, hypre_ParCompGrid *compGrid_c, HYPRE_Int first_iteration );
+
+
+
+
 HYPRE_Int
 hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata, HYPRE_Int first_iteration )
 {
@@ -139,7 +154,7 @@ HYPRE_Int FAC_Cycle(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type, HYPR
       #if DEBUGGING_MESSAGES
       printf("Rank %d, restrict on level %d\n", myid, level);
       #endif
-      FAC_Restrict( compGrid[level], compGrid[level+1], first_iteration );
+      FAC_RestrictOld( compGrid[level], compGrid[level+1], first_iteration );
       hypre_SeqVectorSetConstantValues( hypre_ParCompGridS(compGrid[level]), 0.0 );
       hypre_SeqVectorSetConstantValues( hypre_ParCompGridT(compGrid[level]), 0.0 );
    }
@@ -166,7 +181,7 @@ HYPRE_Int FAC_Cycle(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type, HYPR
    #if DEBUGGING_MESSAGES
    printf("Rank %d, interpolate on level %d\n", myid, level);
    #endif
-   FAC_Interpolate( compGrid[level], compGrid[level+1] );
+   FAC_InterpolateOld( compGrid[level], compGrid[level+1] );
 
    #if DEBUGGING_MESSAGES
    printf("Rank %d, relax on level %d\n", myid, level);
@@ -384,7 +399,7 @@ FAC_Simple_Restrict( hypre_ParCompGrid *compGrid_f, hypre_ParCompGrid *compGrid_
 HYPRE_Int
 FAC_Relax( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int type, HYPRE_Int level )
 {
-   if (type == 0) FAC_Jacobi(amg_data, compGrid, level);
+   if (type == 0) FAC_JacobiOld(amg_data, compGrid, level);
    else if (type == 1) FAC_GaussSeidel(compGrid);
 	return 0;
 }
@@ -552,6 +567,176 @@ FAC_GaussSeidel( hypre_ParCompGrid *compGrid )
          if (hypre_ParCompGridT(compGrid)) hypre_VectorData(hypre_ParCompGridT(compGrid))[i] += hypre_VectorData(hypre_ParCompGridU(compGrid))[i] - u_before;
       }
    }
+
+   return 0;
+}
+
+
+
+
+
+
+HYPRE_Int 
+FAC_JacobiOld( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int level )
+{
+   HYPRE_Int               i, j; // loop variables
+   HYPRE_Int               is_real;
+   HYPRE_Complex           diag; // placeholder for the diagonal of A
+   HYPRE_Complex           u_before;
+
+
+   // Allocate temporary vector if necessary
+   if (!hypre_ParCompGridTemp(compGrid))
+   {      
+      hypre_ParCompGridTemp(compGrid) = hypre_SeqVectorCreate(hypre_ParCompGridNumNodes(compGrid));
+      hypre_SeqVectorInitialize(hypre_ParCompGridTemp(compGrid));
+   }
+
+
+   // Do Jacobi relaxation on the real nodes
+   for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
+   {
+      if (hypre_ParCompGridARowPtr(compGrid)[i+1] - hypre_ParCompGridARowPtr(compGrid)[i] > 0)
+      {
+         // Initialize u as RHS
+         hypre_VectorData(hypre_ParCompGridTemp(compGrid))[i] = hypre_VectorData(hypre_ParCompGridF(compGrid))[i];
+         diag = 0.0;
+
+         // Loop over entries in A
+         for (j = hypre_ParCompGridARowPtr(compGrid)[i]; j < hypre_ParCompGridARowPtr(compGrid)[i+1]; j++)
+         {
+            #if DEBUG_FAC
+            if (hypre_ParCompGridAColInd(compGrid)[j] < 0) printf("Real node doesn't have its full stencil in A! row %d, entry %d\n",i,j);
+            #endif
+            // If this is the diagonal, store for later division
+            if (hypre_ParCompGridAColInd(compGrid)[j] == i) diag = hypre_ParCompGridAData(compGrid)[j];
+            // Else, subtract off A_ij*u_j
+            else
+            {
+               hypre_VectorData(hypre_ParCompGridTemp(compGrid))[i] -= hypre_ParCompGridAData(compGrid)[j] * hypre_VectorData(hypre_ParCompGridU(compGrid))[ hypre_ParCompGridAColInd(compGrid)[j] ];
+            }
+         }
+
+         // Divide by diagonal
+         if (diag == 0.0) printf("Tried to divide by zero diagonal!\n");
+         hypre_VectorData(hypre_ParCompGridTemp(compGrid))[i] /= diag;
+      }
+   }
+
+   // Copy over relaxed vector
+   for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
+   {
+      if (hypre_ParCompGridARowPtr(compGrid)[i+1] - hypre_ParCompGridARowPtr(compGrid)[i] > 0)
+      {
+         u_before = hypre_VectorData(hypre_ParCompGridU(compGrid))[i];
+
+         hypre_VectorData(hypre_ParCompGridU(compGrid))[i] = hypre_VectorData(hypre_ParCompGridTemp(compGrid))[i];
+
+         // if (hypre_ParCompGridT(compGrid)) hypre_ParCompGridT(compGrid)[i] = hypre_ParCompGridT(compGrid)[i] - u_before;
+         if (hypre_ParCompGridT(compGrid)) hypre_VectorData(hypre_ParCompGridT(compGrid))[i] += hypre_VectorData(hypre_ParCompGridTemp(compGrid))[i] - u_before;
+      }
+   }
+
+   return 0;
+}
+
+HYPRE_Int
+FAC_InterpolateOld( hypre_ParCompGrid *compGrid_f, hypre_ParCompGrid *compGrid_c )
+{
+   HYPRE_Int               i, j; // loop variables
+
+   // Loop over nodes on the fine grid
+   for (i = 0; i < hypre_ParCompGridNumNodes(compGrid_f); i++)
+   {
+      // Loop over entries in row of P
+      for (j = hypre_ParCompGridPRowPtr(compGrid_f)[i]; j < hypre_ParCompGridPRowPtr(compGrid_f)[i+1]; j++)
+      {
+         // Update fine grid solution with coarse FAC_projection
+         if (hypre_ParCompGridPColInd(compGrid_f)[j] >= 0)
+         {
+            hypre_VectorData(hypre_ParCompGridU(compGrid_f))[i] += hypre_ParCompGridPData(compGrid_f)[j] * hypre_VectorData(hypre_ParCompGridU(compGrid_c))[ hypre_ParCompGridPColInd(compGrid_f)[j] ];
+         }
+         // !!! Debug
+         // else MISSING_P_CONNECTION = 1;
+      }
+   }
+   return 0;
+}
+
+HYPRE_Int
+FAC_RestrictOld( hypre_ParCompGrid *compGrid_f, hypre_ParCompGrid *compGrid_c, HYPRE_Int first_iteration )
+{
+   char filename[256];
+   HYPRE_Int   myid;
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+
+   HYPRE_Int               i, j, k; // loop variables
+
+   // Recalculate residual on coarse grid
+   if (!first_iteration)
+   {
+      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid_c); i++)
+      {
+         for (j = hypre_ParCompGridARowPtr(compGrid_c)[i]; j < hypre_ParCompGridARowPtr(compGrid_c)[i+1]; j++)
+         {
+            if (hypre_ParCompGridAColInd(compGrid_c)[j] >= 0) 
+            {
+               hypre_VectorData(hypre_ParCompGridF(compGrid_c))[i] -= hypre_ParCompGridAData(compGrid_c)[j] * hypre_VectorData(hypre_ParCompGridU(compGrid_c))[ hypre_ParCompGridAColInd(compGrid_c)[j] ];   
+            }
+         }
+      }
+   }
+
+   // Get update: s_l <- A_lt_l + s_l (NOTE: I'm assuming here that A is symmetric and computing s_l <- A_l^Tt_l + s_l)
+   for (i = 0; i < hypre_ParCompGridNumNodes(compGrid_f); i++)
+   {
+      for (j = hypre_ParCompGridARowPtr(compGrid_f)[i]; j < hypre_ParCompGridARowPtr(compGrid_f)[i+1]; j++)
+      {
+         hypre_VectorData(hypre_ParCompGridS(compGrid_f))[ hypre_ParCompGridAColInd(compGrid_f)[j] ] += hypre_ParCompGridAData(compGrid_f)[j] * hypre_VectorData(hypre_ParCompGridT(compGrid_f))[i];
+      }
+   }
+
+   // If we need to preserve the updates on the next level
+   if (hypre_VectorData(hypre_ParCompGridS(compGrid_c)) )
+   {
+      // Zero out coarse grid update: s_{l+1} <- 0
+      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid_c); i++) hypre_VectorData(hypre_ParCompGridS(compGrid_c))[i] = 0.0;
+
+      // Restrict update: s_{l+1} <- P_l^Ts_l
+      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid_f); i++)
+      {
+         for (j = hypre_ParCompGridPRowPtr(compGrid_f)[i]; j < hypre_ParCompGridPRowPtr(compGrid_f)[i+1]; j++)
+         {
+            if (hypre_ParCompGridPColInd(compGrid_f)[j] >= 0)
+            {
+               hypre_VectorData(hypre_ParCompGridS(compGrid_c))[ hypre_ParCompGridPColInd(compGrid_f)[j] ] += hypre_ParCompGridPData(compGrid_f)[j] * hypre_VectorData(hypre_ParCompGridS(compGrid_f))[i];
+            }
+         }
+      }
+
+      // Subtract restricted update from recalculated residual: f_{l+1} <- f_{l+1} - s_{l+1}
+      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid_c); i++)
+      {
+         hypre_VectorData(hypre_ParCompGridF(compGrid_c))[i] -= hypre_VectorData(hypre_ParCompGridS(compGrid_c))[i];
+      }
+   }
+   else
+   {
+      // Restrict and subtract update from recalculated residual: f_{l+1} <- f_{l+1} - P_l^Ts_l
+      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid_f); i++)
+      {
+         for (j = hypre_ParCompGridPRowPtr(compGrid_f)[i]; j < hypre_ParCompGridPRowPtr(compGrid_f)[i+1]; j++)
+         {
+            if (hypre_ParCompGridPColInd(compGrid_f)[j] >= 0)
+            {
+               hypre_VectorData(hypre_ParCompGridF(compGrid_c))[ hypre_ParCompGridPColInd(compGrid_f)[j] ] -= hypre_ParCompGridPData(compGrid_f)[j] * hypre_VectorData(hypre_ParCompGridS(compGrid_f))[i];
+            }
+         }
+      }
+   }
+
+   // Zero out initial guess on coarse grid
+   for (i = 0; i < hypre_ParCompGridNumNodes(compGrid_c); i++) hypre_VectorData(hypre_ParCompGridU(compGrid_c))[i] = 0.0;
 
    return 0;
 }
