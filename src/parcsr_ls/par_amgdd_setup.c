@@ -146,8 +146,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    // communication_cost = [ [level 0], [level 1], ..., [level L] ]
    // [level] = [ 0: preprocesing # messages, 1: preprocessing comm volume, 
    //             2: setup # messages, 3: setup comm volume, 
-   //             4: residual # messages, 5: residual comm volume,
-   //             6: direct communication stencil for composite grid level ]
+   //             4: residual # messages, 5: residual comm volume ]
 
    HYPRE_Int   myid, num_procs;
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
@@ -489,8 +488,8 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
             hypre_MPI_Isend(&(send_buffer_size[level][buffer_index]), 1, HYPRE_MPI_INT, hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level][i], 0, comm, &(requests[request_counter++]));
             if (communication_cost)
             {
-               communication_cost[level*7 + 2]++;
-               communication_cost[level*7 + 3] += sizeof(HYPRE_Int);
+               communication_cost[level*6 + 2]++;
+               communication_cost[level*6 + 3] += sizeof(HYPRE_Int);
             }
          }
 
@@ -524,8 +523,8 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
             hypre_MPI_Isend(send_buffer[buffer_index], send_buffer_size[level][buffer_index], HYPRE_MPI_INT, hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level][i], 1, comm, &(requests[request_counter++]));
             if (communication_cost)
             {
-               communication_cost[level*7 + 2]++;
-               communication_cost[level*7 + 3] += send_buffer_size[level][i]*sizeof(HYPRE_Int);
+               communication_cost[level*6 + 2]++;
+               communication_cost[level*6 + 3] += send_buffer_size[level][i]*sizeof(HYPRE_Int);
             }
          }
 
@@ -577,8 +576,8 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
             hypre_MPI_Isend( recv_map_send_buffer[buffer_index], recv_map_send_buffer_size[buffer_index], HYPRE_MPI_INT, hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level][i], 2, comm, &(requests[request_counter++]));
             if (communication_cost)
             {
-               communication_cost[level*7 + 2]++;
-               communication_cost[level*7 + 3] += recv_map_send_buffer_size[i]*sizeof(HYPRE_Int);
+               communication_cost[level*6 + 2]++;
+               communication_cost[level*6 + 3] += recv_map_send_buffer_size[i]*sizeof(HYPRE_Int);
             }
          }
 
@@ -712,63 +711,6 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    #endif 
 
    if (timers) hypre_EndTiming(timers[5]);
-
-   // Count up the cost for subsequent residual communications
-   if (communication_cost)
-   {
-      for (level = 0; level < transition_level; level++)
-      {
-         for (i = 0; i < hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[level]; i++)
-         {
-            HYPRE_Int buffer_index = hypre_ParCompGridCommPkgSendProcPartitions(compGridCommPkg)[level][i];
-            communication_cost[level*7 + 5] += hypre_ParCompGridCommPkgSendBufferSize(compGridCommPkg)[level][buffer_index]*sizeof(HYPRE_Complex);
-            if (hypre_ParCompGridCommPkgSendBufferSize(compGridCommPkg)[level][buffer_index]) communication_cost[level*7 + 4]++;
-         }
-         if (hypre_ParCompGridCommPkgAggLocalComms(compGridCommPkg)[level])
-         {
-            HYPRE_Int local_myid, local_num_procs;
-            hypre_MPI_Comm_rank(hypre_ParCompGridCommPkgAggLocalComms(compGridCommPkg)[level], &local_myid);
-            hypre_MPI_Comm_size(hypre_ParCompGridCommPkgAggLocalComms(compGridCommPkg)[level], &local_num_procs);
-            communication_cost[level*7 + 4] += log(local_num_procs)/log(2);
-            for (i = level; i < transition_level; i++)
-            {
-               if (i > level && hypre_ParCompGridCommPkgAggLocalComms(compGridCommPkg)[i]) break;
-               communication_cost[i*7 + 5] += sizeof(HYPRE_Complex)*(local_num_procs-1)*(hypre_ParCompGridOwnedBlockStarts(compGrid[i])[local_myid+1] - hypre_ParCompGridOwnedBlockStarts(compGrid[i])[local_myid]);
-            }
-         }
-      }
-      // Figure out direct communication stencils on each level
-      HYPRE_Int *global_partition_info = hypre_CTAlloc(HYPRE_Int, num_procs*transition_level, HYPRE_MEMORY_HOST);
-      hypre_MPI_Allgather(proc_first_index, transition_level, HYPRE_MPI_INT, global_partition_info, transition_level, HYPRE_MPI_INT, hypre_MPI_COMM_WORLD);
-      HYPRE_Int **global_partition = hypre_CTAlloc(HYPRE_Int*, transition_level, HYPRE_MEMORY_HOST);
-      for (level = 0; level < transition_level; level++)
-      {
-         global_partition[level] = hypre_CTAlloc(HYPRE_Int, num_procs+1, HYPRE_MEMORY_HOST);
-         for (i = 0; i < num_procs; i++) global_partition[level][i] = global_partition_info[i*transition_level + level];
-         global_partition[level][num_procs] = hypre_ParCSRMatrixGlobalNumRows(hypre_ParAMGDataAArray(amg_data)[level]);
-      }
-      hypre_TFree(global_partition_info, HYPRE_MEMORY_HOST);
-      for (level = 0; level < transition_level; level++)
-      {
-         HYPRE_Int *original_owning_procs = hypre_CTAlloc(HYPRE_Int, num_procs, HYPRE_MEMORY_HOST);
-         for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
-         {
-            for (j = 0; j < num_procs; j++)
-            {
-               if (hypre_ParCompGridGlobalIndices(compGrid[level])[i] >= global_partition[level][j] && hypre_ParCompGridGlobalIndices(compGrid[level])[i] < global_partition[level][j+1])
-               {
-                  original_owning_procs[j] = 1;
-                  break;
-               }
-            }
-         }
-         for (i = 0; i < num_procs; i++) communication_cost[level*7 + 6] += original_owning_procs[i];
-         hypre_TFree(original_owning_procs, HYPRE_MEMORY_HOST);
-      }
-      if (transition_level != num_levels) communication_cost[transition_level*7 + 6] += num_procs;
-      for (level = 0; level < transition_level; level++) hypre_TFree(global_partition[level], HYPRE_MEMORY_HOST);
-      hypre_TFree(global_partition, HYPRE_MEMORY_HOST);
-   }
 
    // Finalize the comp grid structures
    hypre_ParCompGridFinalize(compGrid, num_levels, transition_level, verify_amgdd);
@@ -1058,6 +1000,49 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
 
    // Finalize the send flag and the recv
    FinalizeCompGridCommPkg(compGridCommPkg, compGrid);
+
+
+
+
+
+
+
+
+
+
+   // Count up the cost for subsequent residual communications
+   if (communication_cost)
+   {
+      for (level = 0; level < transition_level; level++)
+      {
+         communication_cost[level*6 + 5] += hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[level][ hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg)[level] ]*sizeof(HYPRE_Complex);
+         communication_cost[level*6 + 4] += hypre_ParCompGridCommPkgNumPartitions(compGridCommPkg)[level];
+
+         if (hypre_ParCompGridCommPkgAggLocalComms(compGridCommPkg)[level])
+         {
+            HYPRE_Int local_myid, local_num_procs;
+            hypre_MPI_Comm_rank(hypre_ParCompGridCommPkgAggLocalComms(compGridCommPkg)[level], &local_myid);
+            hypre_MPI_Comm_size(hypre_ParCompGridCommPkgAggLocalComms(compGridCommPkg)[level], &local_num_procs);
+            communication_cost[level*6 + 4] += log(local_num_procs)/log(2);
+            for (i = level; i < transition_level; i++)
+            {
+               if (i > level && hypre_ParCompGridCommPkgAggLocalComms(compGridCommPkg)[i]) break;
+               communication_cost[i*6 + 5] += sizeof(HYPRE_Complex)*(local_num_procs-1)*(hypre_ParCompGridOwnedBlockStarts(compGrid[i])[local_myid+1] - hypre_ParCompGridOwnedBlockStarts(compGrid[i])[local_myid]);
+            }
+         }
+      }
+   }
+
+
+
+
+
+
+
+
+
+
+
 
    // Cleanup memory
    hypre_TFree(num_resizes, HYPRE_MEMORY_HOST);
@@ -1357,8 +1342,8 @@ FindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A, HYPR
       hypre_MPI_Isend(&send_size, 1, HYPRE_MPI_INT, (*send_procs)[i], 4, hypre_MPI_COMM_WORLD, &(requests[request_cnt++]));
       if (communication_cost)
       {
-         communication_cost[level*7 + 0]++;
-         communication_cost[level*7 + 1] += sizeof(HYPRE_Int);
+         communication_cost[level*6 + 0]++;
+         communication_cost[level*6 + 1] += sizeof(HYPRE_Int);
       }
    }
 
@@ -1402,8 +1387,8 @@ FindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A, HYPR
       hypre_MPI_Isend(send_buffer, send_size, HYPRE_MPI_INT, (*send_procs)[i], 5, hypre_MPI_COMM_WORLD, &(requests[request_cnt++]));
       if (communication_cost)
       {
-         communication_cost[level*7 + 0]++;
-         communication_cost[level*7 + 1] += send_size*sizeof(HYPRE_Int);
+         communication_cost[level*6 + 0]++;
+         communication_cost[level*6 + 1] += send_size*sizeof(HYPRE_Int);
       }
    }
 
@@ -1631,8 +1616,8 @@ AllgatherCoarseLevels(hypre_ParAMGData *amg_data, MPI_Comm comm, HYPRE_Int fine_
    hypre_MPI_Allgather(buffer_sizes, 2, HYPRE_MPI_INT, global_buffer_sizes, 2, HYPRE_MPI_INT, comm);
    if (communication_cost)
    {
-      communication_cost[fine_level*7 + 2] += log(num_procs)/log(2);
-      communication_cost[fine_level*7 + 3] += 2*sizeof(HYPRE_Int)*(num_procs-1);
+      communication_cost[fine_level*6 + 2] += log(num_procs)/log(2);
+      communication_cost[fine_level*6 + 3] += 2*sizeof(HYPRE_Int)*(num_procs-1);
    }
 
    // Setup sizes and displacements for following Allgatherv calls
@@ -1661,10 +1646,10 @@ AllgatherCoarseLevels(hypre_ParAMGData *amg_data, MPI_Comm comm, HYPRE_Int fine_
    hypre_MPI_Allgatherv(send_complex_buffer, buffer_sizes[1], HYPRE_MPI_COMPLEX, recv_complex_buffer, complex_sizes, complex_disps, HYPRE_MPI_COMPLEX, comm);
    if (communication_cost)
    {
-      communication_cost[fine_level*7 + 2] += 2*log(num_procs)/log(2);
-      communication_cost[fine_level*7 + 3] += (num_procs-1)*sizeof(HYPRE_Int)*buffer_sizes[0] + (num_procs-1)*sizeof(HYPRE_Complex)*buffer_sizes[1];
-      communication_cost[fine_level*7 + 4] += log(num_procs)/log(2);
-      communication_cost[fine_level*7 + 5] += (num_procs-1)*sizeof(HYPRE_Complex)*hypre_ParCSRMatrixNumRows(hypre_ParAMGDataAArray(amg_data)[fine_level]);
+      communication_cost[fine_level*6 + 2] += 2*log(num_procs)/log(2);
+      communication_cost[fine_level*6 + 3] += (num_procs-1)*sizeof(HYPRE_Int)*buffer_sizes[0] + (num_procs-1)*sizeof(HYPRE_Complex)*buffer_sizes[1];
+      communication_cost[fine_level*6 + 4] += log(num_procs)/log(2);
+      communication_cost[fine_level*6 + 5] += (num_procs-1)*sizeof(HYPRE_Complex)*hypre_ParCSRMatrixNumRows(hypre_ParAMGDataAArray(amg_data)[fine_level]);
    }
 
    // Unpack the recv buffer and generate the comp grid structures for the coarse levels
@@ -2254,8 +2239,8 @@ GetNeighborPartitionInfo(hypre_ParAMGData *amg_data,
       // max_num_comm_procs *= 2; // !!! Check this: I have seen a case where setting max num comm procs using only the above allreduce is not sufficient since the number of send procs may be larger due to varying partition sizes (may need to send to )
       if (communication_cost)
       {
-         communication_cost[level*7] += log(local_num_procs)/log(2);
-         communication_cost[level*7 + 1] += sizeof(HYPRE_Int)*(local_num_procs-1);
+         communication_cost[level*6] += log(local_num_procs)/log(2);
+         communication_cost[level*6 + 1] += sizeof(HYPRE_Int)*(local_num_procs-1);
       }
 
       HYPRE_Int num_comm_partitions = 0;
@@ -2302,8 +2287,8 @@ GetNeighborPartitionInfo(hypre_ParAMGData *amg_data,
             hypre_MPI_Isend(&(send_buffer_sizes[i]), 1, HYPRE_MPI_INT, comm_procs[i], 8, hypre_MPI_COMM_WORLD, &(requests[cnt++]));
             if (communication_cost)
             {
-               communication_cost[level*7]++;
-               communication_cost[level*7 + 1] += sizeof(HYPRE_Int);
+               communication_cost[level*6]++;
+               communication_cost[level*6 + 1] += sizeof(HYPRE_Int);
             }
             send_buffers[i] = hypre_CTAlloc(HYPRE_Int, send_buffer_sizes[i], HYPRE_MEMORY_HOST);
          }
@@ -2331,8 +2316,8 @@ GetNeighborPartitionInfo(hypre_ParAMGData *amg_data,
             hypre_MPI_Isend(send_buffers[i], send_buffer_sizes[i], HYPRE_MPI_INT, comm_procs[i], 9, hypre_MPI_COMM_WORLD, &(requests[cnt++]));
             if (communication_cost)
             {
-               communication_cost[level*7]++;
-               communication_cost[level*7 + 1] += sizeof(HYPRE_Int)*send_buffer_sizes[i];
+               communication_cost[level*6]++;
+               communication_cost[level*6 + 1] += sizeof(HYPRE_Int)*send_buffer_sizes[i];
             }
          }
          
@@ -2530,8 +2515,8 @@ AllgatherCommunicationInfo(hypre_ParAMGData *amg_data, HYPRE_Int level, MPI_Comm
    hypre_MPI_Allgather(&buffer_size, 1, HYPRE_MPI_INT, recvcounts, 1, HYPRE_MPI_INT, comm);
    if (communication_cost)
    {
-      communication_cost[level*7] += log(num_procs)/log(2);
-      communication_cost[level*7 + 1] += sizeof(HYPRE_Int)*(num_procs-1);
+      communication_cost[level*6] += log(num_procs)/log(2);
+      communication_cost[level*6 + 1] += sizeof(HYPRE_Int)*(num_procs-1);
    }
 
    // Setup the displs
@@ -2563,8 +2548,8 @@ AllgatherCommunicationInfo(hypre_ParAMGData *amg_data, HYPRE_Int level, MPI_Comm
    hypre_MPI_Allgatherv(send_buffer, buffer_size, HYPRE_MPI_INT, recv_buffer, recvcounts, displs, HYPRE_MPI_INT, comm);
    if (communication_cost)
    {
-      communication_cost[level*7] += log(num_procs)/log(2);
-      communication_cost[level*7 + 1] += sizeof(HYPRE_Int)*(buffer_size)*(num_procs-1);
+      communication_cost[level*6] += log(num_procs)/log(2);
+      communication_cost[level*6 + 1] += sizeof(HYPRE_Int)*(buffer_size)*(num_procs-1);
    }
    hypre_TFree(send_buffer, HYPRE_MEMORY_HOST);
    hypre_TFree(recvcounts, HYPRE_MEMORY_HOST);
@@ -3613,8 +3598,8 @@ CommunicateRemainingMatrixInfo(hypre_ParCompGrid **compGrid, hypre_ParCompGridCo
             
             if (communication_cost)
             {
-               communication_cost[outer_level*7 + 2]++;
-               communication_cost[outer_level*7 + 3] += 2*sizeof(HYPRE_Int);
+               communication_cost[outer_level*6 + 2]++;
+               communication_cost[outer_level*6 + 3] += 2*sizeof(HYPRE_Int);
             }
          }
 
@@ -3692,8 +3677,8 @@ CommunicateRemainingMatrixInfo(hypre_ParCompGrid **compGrid, hypre_ParCompGridCo
             hypre_MPI_Isend(complex_send_buffers[buffer_index], send_sizes[2*buffer_index+1], HYPRE_MPI_COMPLEX, send_procs[proc], 3, hypre_MPI_COMM_WORLD, &(buf_requests[request_cnt++]));
             if (communication_cost)
             {
-               communication_cost[outer_level*7 + 2] += 2;
-               communication_cost[outer_level*7 + 3] += send_sizes[2*proc]*sizeof(HYPRE_Int) + send_sizes[2*proc+1]*sizeof(HYPRE_Complex);
+               communication_cost[outer_level*6 + 2] += 2;
+               communication_cost[outer_level*6 + 3] += send_sizes[2*proc]*sizeof(HYPRE_Int) + send_sizes[2*proc+1]*sizeof(HYPRE_Complex);
             }
          }
 
