@@ -333,7 +333,7 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
    {
       /* Array P_marker has length equal to the number of A's offd columns+1, and will */
       /* store a translation code from A_offd's local column numbers to P_offd's local column numbers */
-      /* Example: if A_offd has 5 columns, locally 0,1,..,5, and points 1 and 4 are coarse points, then
+      /* Example: if A_offd has 6 columns, locally 0,1,..,5, and points 1 and 4 are coarse points, then
          P_marker=[0,1,0,0,1,0,0], */
 
       /* First,  set P_marker[i] to 1 if A's column i is also present in P, otherwise P_marker[i] is 0 */
@@ -364,8 +364,14 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
       
       hypre_BoomerAMGBuildDirInterp_dev4<<<grid,block>>>( num_cols_A_offd, P_marker, tmp_map_offd );
 
-      cudaDeviceSynchronize();      
+      if (num_cols_P_offd)
+      {
+	 col_map_offd_P = hypre_CTAlloc(HYPRE_BigInt, num_cols_P_offd, HYPRE_MEMORY_SHARED);
+	 hypre_ParCSRMatrixColMapOffd(P) = col_map_offd_P;
+	 hypre_CSRMatrixNumCols(P_offd) = num_cols_P_offd;
+      }
 
+      cudaDeviceSynchronize();      
       hypre_TFree(P_marker, HYPRE_MEMORY_DEVICE);
    }
 
@@ -373,12 +379,6 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
    /*   for (i=0; i < n_fine; i++)
 	if (CF_marker[i] == -3) CF_marker[i] = -1; */
 
-   if (num_cols_P_offd)
-   {
-      col_map_offd_P = hypre_CTAlloc(HYPRE_BigInt, num_cols_P_offd, HYPRE_MEMORY_SHARED);
-      hypre_ParCSRMatrixColMapOffd(P) = col_map_offd_P;
-      hypre_CSRMatrixNumCols(P_offd) = num_cols_P_offd;
-   }
 
 /* 8. P_offd_j now has a 0,1,2,3... local column index enumeration. */
 /*    tmp_map_offd contains the index mapping from P's offd local columns to A's offd local columns.*/
@@ -674,6 +674,9 @@ __global__ void hypre_BoomerAMGBuildDirInterp_dev4( HYPRE_Int num_cols_A_offd,
 __global__ void hypre_BoomerAMGBuildDirInterp_dev5( HYPRE_Int P_offd_size,
 						    HYPRE_Int* P_offd_j, 
 						    HYPRE_Int* P_marker )
+/*
+     set P_marker[i] to 1 if A's column i is also present in P, otherwise P_marker[i] is 0 
+ */
 {
    HYPRE_Int myid= threadIdx.x + blockIdx.x * blockDim.x, i;
    const HYPRE_Int nthreads = gridDim.x * blockDim.x;
@@ -981,7 +984,7 @@ __global__ void hypre_BoomerAMGInterpTruncationDevice_dev3( HYPRE_Int   num_rows
       if( nel > max_elements )
       {
   /* 1. Save row sum before truncation, for rescaling below */
-	 row_sum = 0;
+         row_sum = 0;
 	 for (ind = P_diag_i[i]; ind < P_diag_i[i]+P_aux_diag_i[i]; ind++)
 	    row_sum += P_diag_data[ind];
 	 for (ind = P_offd_i[i]; ind < P_offd_i[i]+P_aux_offd_i[i]; ind++)
