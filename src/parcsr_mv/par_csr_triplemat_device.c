@@ -12,9 +12,6 @@
 
 #include "_hypre_parcsr_mv.h"
 
-#include "_hypre_utilities.h"
-#include "../parcsr_mv/_hypre_parcsr_mv.h"
-
 #if defined(HYPRE_USING_CUDA)
 
 hypre_ParCSRMatrix*
@@ -31,7 +28,6 @@ hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Int        num_rows_diag_A = hypre_CSRMatrixNumRows(A_diag);
 
    hypre_CSRMatrix *B_diag = hypre_ParCSRMatrixDiag(B);
-
    hypre_CSRMatrix *B_offd = hypre_ParCSRMatrixOffd(B);
    /* HYPRE_BigInt       *col_map_offd_B = hypre_ParCSRMatrixColMapOffd(B); */
 
@@ -427,23 +423,6 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
    }
 
    return C;
-}
-
-#else // #if defined(HYPRE_USING_CUDA)
-
-hypre_ParCSRMatrix*
-hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A,
-                          hypre_ParCSRMatrix  *B )
-{
-   return NULL;
-}
-
-hypre_ParCSRMatrix*
-hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
-                             hypre_ParCSRMatrix  *B,
-                             HYPRE_Int            keep_transpose)
-{
-   return NULL;
 }
 
 #endif // #if defined(HYPRE_USING_CUDA)

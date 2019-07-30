@@ -1,9 +1,18 @@
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
+
 #include "_hypre_parcsr_ls.h"
-#include "_hypre_utilities.h"
 
 #if defined(HYPRE_USING_CUDA)
-
-#include <cuda_runtime.h>
 
  __global__ void hypre_BoomerAMGCreateS_dev1b( HYPRE_Int nr_of_rows, HYPRE_Real max_row_sum, HYPRE_Real strength_threshold,
 					HYPRE_Real* A_diag_data, HYPRE_Int* A_diag_i, HYPRE_Int* A_diag_j,
@@ -818,18 +827,5 @@ __global__ void hypre_BoomerAMGCreateS_dev2( HYPRE_Int nr_of_rows, HYPRE_Int* A_
    } /* for each variable */
 }
 
-#else
-
-HYPRE_Int
-hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
-                             HYPRE_Real             strength_threshold,
-                             HYPRE_Real             max_row_sum,
-                             HYPRE_Int              num_functions,
-                             HYPRE_Int             *dof_func,
-                             hypre_ParCSRMatrix   **S_ptr)
-{
-   return 0;
-}
-
-#endif
+#endif /* #if defined(HYPRE_USING_CUDA) */
 

@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -432,12 +427,10 @@ hypre_Memcpy(void *dst, void *src, size_t size, HYPRE_Int loc_dst, HYPRE_Int loc
    loc_src = hypre_GetActualMemLocation(loc_src);
 
    /* special uses for GPU shared memory prefetch */
-#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_UNIFIED_MEMORY)
-   if (dst == src && loc_src == HYPRE_MEMORY_SHARED)
+#if defined(HYPRE_USING_UNIFIED_MEMORY)
+   if ( dst == src && loc_src == HYPRE_MEMORY_SHARED && (loc_dst == HYPRE_MEMORY_DEVICE || loc_dst == HYPRE_MEMORY_HOST) )
    {
       /* src (== dst) must point to cuda unified memory */
-      //ASSERT_MANAGED(dst);
-
       if (loc_dst == HYPRE_MEMORY_DEVICE)
       {
          HYPRE_CUDA_CALL(
@@ -452,6 +445,8 @@ hypre_Memcpy(void *dst, void *src, size_t size, HYPRE_Int loc_dst, HYPRE_Int loc
                               hypre_HandleCudaPrefetchStream(hypre_handle))
          );
       }
+
+      HYPRE_CUDA_CALL( cudaStreamSynchronize(hypre_HandleCudaPrefetchStream(hypre_handle)) );
 
       return;
    }
@@ -473,7 +468,7 @@ hypre_Memcpy(void *dst, void *src, size_t size, HYPRE_Int loc_dst, HYPRE_Int loc
    if (loc_dst == HYPRE_MEMORY_SHARED || loc_src == HYPRE_MEMORY_SHARED)
    {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-      cudaMemcpy(dst, src, size, cudaMemcpyDeviceToDevice);
+      HYPRE_CUDA_CALL( cudaMemcpy(dst, src, size, cudaMemcpyDeviceToDevice) );
 #endif
       return;
    }
@@ -487,7 +482,7 @@ hypre_Memcpy(void *dst, void *src, size_t size, HYPRE_Int loc_dst, HYPRE_Int loc
       memcpy(dst, src, size);
       HYPRE_OMPOffload(hypre__offload_device_num, dst, size, "update", "to");
 #elif defined(HYPRE_USING_CUDA)
-      cudaMemcpy(dst, src, size, cudaMemcpyHostToDevice);
+      HYPRE_CUDA_CALL( cudaMemcpy(dst, src, size, cudaMemcpyHostToDevice) );
 #endif
       return;
    }
@@ -502,7 +497,7 @@ hypre_Memcpy(void *dst, void *src, size_t size, HYPRE_Int loc_dst, HYPRE_Int loc
       HYPRE_OMPOffload(hypre__offload_device_num, src, size, "update", "from");
       memcpy(dst, src, size);
 #elif defined(HYPRE_USING_CUDA)
-      cudaMemcpy( dst, src, size, cudaMemcpyDeviceToHost);
+      HYPRE_CUDA_CALL( cudaMemcpy( dst, src, size, cudaMemcpyDeviceToHost) );
 #endif
       return;
    }
@@ -518,7 +513,7 @@ hypre_Memcpy(void *dst, void *src, size_t size, HYPRE_Int loc_dst, HYPRE_Int loc
       memcpy(dst, src, size);
       HYPRE_OMPOffload(hypre__offload_device_num, dst, size, "update", "to");
 #elif defined(HYPRE_USING_CUDA)
-      cudaMemcpy(dst, src, size, cudaMemcpyDeviceToDevice);
+      HYPRE_CUDA_CALL( cudaMemcpy(dst, src, size, cudaMemcpyDeviceToDevice) );
 #endif
       return;
    }

@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include <HYPRE_config.h>
 
@@ -28,21 +23,6 @@ extern "C" {
 #endif
 
 typedef struct { HYPRE_Int prev; HYPRE_Int next; } Link;
-
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
 
 #ifndef hypre_ParAMG_DATA_HEADER
 #define hypre_ParAMG_DATA_HEADER
@@ -130,11 +110,11 @@ typedef struct
    hypre_ParVector    **U_array;
    hypre_ParCSRMatrix **P_array;
    hypre_ParCSRMatrix **R_array;
-   HYPRE_Int                **CF_marker_array;
-   HYPRE_Int                **dof_func_array;
-   HYPRE_Int                **dof_point_array;
-   HYPRE_Int                **point_dof_map_array;
-   HYPRE_Int                  num_levels;
+   HYPRE_Int          **CF_marker_array;
+   HYPRE_Int          **dof_func_array;
+   HYPRE_Int          **dof_point_array;
+   HYPRE_Int          **point_dof_map_array;
+   HYPRE_Int            num_levels;
    HYPRE_Real         **l1_norms;
 
 
@@ -146,32 +126,32 @@ typedef struct
    HYPRE_Int block_mode;
 
    /* data for more complex smoothers */
-   HYPRE_Int                  smooth_num_levels;
-   HYPRE_Int                  smooth_type;
+   HYPRE_Int            smooth_num_levels;
+   HYPRE_Int            smooth_type;
    HYPRE_Solver        *smoother;
-   HYPRE_Int			smooth_num_sweeps;
-   HYPRE_Int                  schw_variant;
-   HYPRE_Int                  schw_overlap;
-   HYPRE_Int                  schw_domain_type;
-   HYPRE_Real		schwarz_rlx_weight;
-   HYPRE_Int                  schwarz_use_nonsymm;
-   HYPRE_Int			ps_sym;
-   HYPRE_Int			ps_level;
-   HYPRE_Int			pi_max_nz_per_row;
-   HYPRE_Int			eu_level;
-   HYPRE_Int			eu_bj;
-   HYPRE_Real		ps_threshold;
-   HYPRE_Real		ps_filter;
-   HYPRE_Real		pi_drop_tol;
-   HYPRE_Real		eu_sparse_A;
-   char		       *euclidfile;
+   HYPRE_Int            smooth_num_sweeps;
+   HYPRE_Int            schw_variant;
+   HYPRE_Int            schw_overlap;
+   HYPRE_Int            schw_domain_type;
+   HYPRE_Real           schwarz_rlx_weight;
+   HYPRE_Int            schwarz_use_nonsymm;
+   HYPRE_Int            ps_sym;
+   HYPRE_Int            ps_level;
+   HYPRE_Int            pi_max_nz_per_row;
+   HYPRE_Int            eu_level;
+   HYPRE_Int            eu_bj;
+   HYPRE_Real           ps_threshold;
+   HYPRE_Real           ps_filter;
+   HYPRE_Real           pi_drop_tol;
+   HYPRE_Real           eu_sparse_A;
+   char                *euclidfile;
 
    HYPRE_Real          *max_eig_est;
    HYPRE_Real          *min_eig_est;
-   HYPRE_Int           cheby_eig_est;
+   HYPRE_Int            cheby_eig_est;
    HYPRE_Int            cheby_order;
-   HYPRE_Int           cheby_variant;
-   HYPRE_Int           cheby_scale;
+   HYPRE_Int            cheby_variant;
+   HYPRE_Int            cheby_scale;
    HYPRE_Real           cheby_fraction;
    HYPRE_Real         **cheby_ds;
    HYPRE_Real         **cheby_coefs;
@@ -192,8 +172,8 @@ typedef struct
    hypre_ParVector   *Ztemp;
 
    /* fields used by GSMG and LS interpolation */
-   HYPRE_Int                 gsmg;        /* nonzero indicates use of GSMG */
-   HYPRE_Int                 num_samples; /* number of sample vectors */
+   HYPRE_Int          gsmg;        /* nonzero indicates use of GSMG */
+   HYPRE_Int          num_samples; /* number of sample vectors */
 
    /* log info */
    HYPRE_Int      logging;
@@ -259,6 +239,7 @@ typedef struct
 
    HYPRE_Int rap2;
    HYPRE_Int keepTranspose;
+   HYPRE_Int modularized_matmat;
 /* information for preserving indexes as coarse grid points */
    HYPRE_Int C_point_keep_level;
    HYPRE_Int num_C_point_marker;
@@ -280,8 +261,7 @@ typedef struct
 
 #define hypre_ParAMGDataRestriction(amg_data) ((amg_data)->restr_par)
 #define hypre_ParAMGDataMaxLevels(amg_data) ((amg_data)->max_levels)
-#define hypre_ParAMGDataStrongThreshold(amg_data) \
-((amg_data)->strong_threshold)
+#define hypre_ParAMGDataStrongThreshold(amg_data) ((amg_data)->strong_threshold)
 #define hypre_ParAMGDataMaxRowSum(amg_data) ((amg_data)->max_row_sum)
 #define hypre_ParAMGDataTruncFactor(amg_data) ((amg_data)->trunc_factor)
 #define hypre_ParAMGDataAggTruncFactor(amg_data) ((amg_data)->agg_trunc_factor)
@@ -307,10 +287,10 @@ typedef struct
 #define hypre_ParAMGDataISType(amg_data) ((amg_data)->IS_type)
 #define hypre_ParAMGDataCRUseCG(amg_data) ((amg_data)->CR_use_CG)
 #define hypre_ParAMGDataL1Norms(amg_data) ((amg_data)->l1_norms)
- #define hypre_ParAMGDataCGCIts(amg_data) ((amg_data)->cgc_its)
- #define hypre_ParAMGDataMaxCoarseSize(amg_data) ((amg_data)->max_coarse_size)
- #define hypre_ParAMGDataMinCoarseSize(amg_data) ((amg_data)->min_coarse_size)
- #define hypre_ParAMGDataSeqThreshold(amg_data) ((amg_data)->seq_threshold)
+#define hypre_ParAMGDataCGCIts(amg_data) ((amg_data)->cgc_its)
+#define hypre_ParAMGDataMaxCoarseSize(amg_data) ((amg_data)->max_coarse_size)
+#define hypre_ParAMGDataMinCoarseSize(amg_data) ((amg_data)->min_coarse_size)
+#define hypre_ParAMGDataSeqThreshold(amg_data) ((amg_data)->seq_threshold)
 
 /* solve params */
 
@@ -480,6 +460,7 @@ typedef struct
 
 #define hypre_ParAMGDataRAP2(amg_data) ((amg_data)->rap2)
 #define hypre_ParAMGDataKeepTranspose(amg_data) ((amg_data)->keepTranspose)
+#define hypre_ParAMGDataModularizedMatMat(amg_data) ((amg_data)->modularized_matmat)
 
 /*indices for the dof which will keep coarsening to the coarse level */
 #define hypre_ParAMGDataCPointKeepMarkerArray(amg_data) ((amg_data)-> C_point_marker_array)
@@ -1510,9 +1491,10 @@ HYPRE_Int hypre_BoomerAMGCreateScalarCFS ( hypre_ParCSRMatrix *SN , HYPRE_Int *C
 HYPRE_Int hypre_BoomerAMGCreateScalarCF ( HYPRE_Int *CFN_marker , HYPRE_Int num_functions , HYPRE_Int num_nodes , HYPRE_Int **dof_func_ptr , HYPRE_Int **CF_marker_ptr );
 
 /* par_nongalerkin.c */
-HYPRE_Int hypre_GrabSubArray ( HYPRE_Int *indices , HYPRE_Int start , HYPRE_Int end , HYPRE_BigInt *array , HYPRE_Int *output );
+HYPRE_Int hypre_GrabSubArray ( HYPRE_Int *indices , HYPRE_Int start , HYPRE_Int end , HYPRE_BigInt *array , HYPRE_BigInt *output );
 void hypre_qsort2_abs ( HYPRE_Int *v , HYPRE_Real *w , HYPRE_Int left , HYPRE_Int right );
 HYPRE_Int hypre_IntersectTwoArrays ( HYPRE_Int *x , HYPRE_Real *x_data , HYPRE_Int x_length , HYPRE_Int *y , HYPRE_Int y_length , HYPRE_Int *z , HYPRE_Real *output_x_data , HYPRE_Int *intersect_length );
+HYPRE_Int hypre_IntersectTwoBigArrays ( HYPRE_BigInt *x , HYPRE_Real *x_data , HYPRE_Int x_length , HYPRE_BigInt *y , HYPRE_Int y_length , HYPRE_BigInt *z , HYPRE_Real *output_x_data , HYPRE_Int *intersect_length );
 HYPRE_Int hypre_SortedCopyParCSRData ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *B );
 HYPRE_Int hypre_BoomerAMG_MyCreateS ( hypre_ParCSRMatrix *A , HYPRE_Real strength_threshold , HYPRE_Real max_row_sum , HYPRE_Int num_functions , HYPRE_Int *dof_func , hypre_ParCSRMatrix **S_ptr );
 HYPRE_Int hypre_BoomerAMGCreateSFromCFMarker(hypre_ParCSRMatrix    *A, HYPRE_Real strength_threshold, HYPRE_Real max_row_sum, HYPRE_Int *CF_marker, HYPRE_Int SMRK, hypre_ParCSRMatrix    **S_ptr);
@@ -1586,6 +1568,7 @@ HYPRE_Int hypre_BoomerAMGCreateSCommPkg ( hypre_ParCSRMatrix *A , hypre_ParCSRMa
 HYPRE_Int hypre_BoomerAMGCreate2ndS ( hypre_ParCSRMatrix *S , HYPRE_Int *CF_marker , HYPRE_Int num_paths , HYPRE_BigInt *coarse_row_starts , hypre_ParCSRMatrix **C_ptr );
 HYPRE_Int hypre_BoomerAMGCorrectCFMarker ( HYPRE_Int *CF_marker , HYPRE_Int num_var , HYPRE_Int *new_CF_marker );
 HYPRE_Int hypre_BoomerAMGCorrectCFMarker2 ( HYPRE_Int *CF_marker , HYPRE_Int num_var , HYPRE_Int *new_CF_marker );
+HYPRE_Int hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix *A, HYPRE_Real strength_threshold, HYPRE_Real max_row_sum, HYPRE_Int num_functions, HYPRE_Int *dof_func, hypre_ParCSRMatrix **S_ptr);
 
 /* par_sv_interp.c */
 HYPRE_Int hypre_BoomerAMGSmoothInterpVectors ( hypre_ParCSRMatrix *A , HYPRE_Int num_smooth_vecs , hypre_ParVector **smooth_vecs , HYPRE_Int smooth_steps );

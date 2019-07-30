@@ -1,14 +1,10 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 #ifndef hypre_MV_HEADER
 #define hypre_MV_HEADER
 
@@ -65,13 +61,6 @@ typedef struct
    /* memory location of arrays i, j, data */
    HYPRE_Int      memory_location;
 
-#ifdef HYPRE_USING_UNIFIED_MEMORY
-   /* Flag to keeping track of prefetching */
-   HYPRE_Int on_device;
-#endif
-#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
-   HYPRE_Int mapped;
-#endif
 //#ifdef HYPRE_BIGINT
 //   hypre_int *i_short, *j_short;
 //#endif
@@ -232,15 +221,6 @@ typedef struct
       With rowwise storage, vj[i] = data[ j + num_vectors*i] */
    HYPRE_Int  vecstride, idxstride;
    /* ... so vj[i] = data[ j*vecstride + i*idxstride ] regardless of row_storage.*/
-#ifdef HYPRE_USING_GPU
-   HYPRE_Int on_device;
-#endif
-#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
-   HYPRE_Int mapped;
-   HYPRE_Int drc; /* device ref count */
-   HYPRE_Int hrc; /* host ref count */
-#endif
-
 } hypre_Vector;
 
 /*--------------------------------------------------------------------------
@@ -259,15 +239,6 @@ typedef struct
 
 #endif
 
-#ifndef hypre_GPUKERNELS_HEADER
-#define hypre_GPUKERNELS_HEADER
-#ifdef HYPRE_USING_GPU
-#include <cuda_runtime_api.h>
-void CudaCompileFlagCheck();
-void PackOnDevice(HYPRE_Complex *send_data,HYPRE_Complex *x_local_data, HYPRE_Int *send_map, HYPRE_Int begin, HYPRE_Int end,cudaStream_t s);
-#endif
-#endif
-
 /* csr_matop.c */
 hypre_CSRMatrix *hypre_CSRMatrixAddHost ( hypre_CSRMatrix *A , hypre_CSRMatrix *B );
 hypre_CSRMatrix *hypre_CSRMatrixAdd ( hypre_CSRMatrix *A , hypre_CSRMatrix *B );
@@ -276,7 +247,6 @@ hypre_CSRMatrix *hypre_CSRMatrixMultiplyHost ( hypre_CSRMatrix *A , hypre_CSRMat
 hypre_CSRMatrix *hypre_CSRMatrixMultiply ( hypre_CSRMatrix *A , hypre_CSRMatrix *B );
 hypre_CSRMatrix *hypre_CSRMatrixDeleteZeros ( hypre_CSRMatrix *A , HYPRE_Real tol );
 HYPRE_Int hypre_CSRMatrixTransposeHost ( hypre_CSRMatrix *A , hypre_CSRMatrix **AT , HYPRE_Int data );
-HYPRE_Int hypre_CSRMatrixTransposeDevice ( hypre_CSRMatrix *A , hypre_CSRMatrix **AT , HYPRE_Int data );
 HYPRE_Int hypre_CSRMatrixTranspose ( hypre_CSRMatrix *A , hypre_CSRMatrix **AT , HYPRE_Int data );
 HYPRE_Int hypre_CSRMatrixReorder ( hypre_CSRMatrix *A );
 HYPRE_Complex hypre_CSRMatrixSumElts ( hypre_CSRMatrix *A );
@@ -285,15 +255,14 @@ HYPRE_Int hypre_CSRMatrixSplit(hypre_CSRMatrix *Bs_ext, HYPRE_BigInt first_col_d
 hypre_CSRMatrix * hypre_CSRMatrixAddPartial( hypre_CSRMatrix *A, hypre_CSRMatrix *B, HYPRE_Int *row_nums);
 
 /* csr_matop_device.c */
+#if defined(HYPRE_USING_CUDA)
 hypre_CSRMatrix *hypre_CSRMatrixAddDevice ( hypre_CSRMatrix *A , hypre_CSRMatrix *B );
-
 hypre_CSRMatrix *hypre_CSRMatrixMultiplyDevice ( hypre_CSRMatrix *A , hypre_CSRMatrix *B );
-
-HYPRE_Int hypre_CSRMatrixColNNzRealDevice( hypre_CSRMatrix *A, HYPRE_Real *colnnz);
-
 HYPRE_Int hypre_CSRMatrixSplitDevice(hypre_CSRMatrix *B_ext, HYPRE_BigInt first_col_diag_B, HYPRE_BigInt last_col_diag_B, HYPRE_Int num_cols_offd_B, HYPRE_BigInt *col_map_offd_B, HYPRE_Int **map_B_to_C_ptr, HYPRE_Int *num_cols_offd_C_ptr, HYPRE_BigInt **col_map_offd_C_ptr, hypre_CSRMatrix **B_ext_diag_ptr, hypre_CSRMatrix **B_ext_offd_ptr);
-
+HYPRE_Int hypre_CSRMatrixTransposeDevice ( hypre_CSRMatrix *A , hypre_CSRMatrix **AT , HYPRE_Int data );
 hypre_CSRMatrix* hypre_CSRMatrixAddPartialDevice( hypre_CSRMatrix *A, hypre_CSRMatrix *B, HYPRE_Int *row_nums);
+HYPRE_Int hypre_CSRMatrixColNNzRealDevice( hypre_CSRMatrix *A, HYPRE_Real *colnnz);
+#endif
 
 /* csr_matrix.c */
 hypre_CSRMatrix *hypre_CSRMatrixCreate ( HYPRE_Int num_rows , HYPRE_Int num_cols , HYPRE_Int num_nonzeros );
@@ -314,26 +283,18 @@ HYPRE_Int hypre_CSRMatrixCopy ( hypre_CSRMatrix *A , hypre_CSRMatrix *B , HYPRE_
 hypre_CSRMatrix *hypre_CSRMatrixClone ( hypre_CSRMatrix *A, HYPRE_Int copy_data );
 hypre_CSRMatrix *hypre_CSRMatrixClone_v2( hypre_CSRMatrix *A, HYPRE_Int copy_data, HYPRE_Int memory_location );
 hypre_CSRMatrix *hypre_CSRMatrixUnion ( hypre_CSRMatrix *A , hypre_CSRMatrix *B , HYPRE_BigInt *col_map_offd_A , HYPRE_BigInt *col_map_offd_B , HYPRE_BigInt **col_map_offd_C );
-#ifdef HYPRE_USING_UNIFIED_MEMORY
-HYPRE_Int hypre_CSRMatrixPrefetch( hypre_CSRMatrix *A, HYPRE_Int to_location, HYPRE_Int stream_num = -1);
+HYPRE_Int hypre_CSRMatrixPrefetch( hypre_CSRMatrix *A, HYPRE_Int to_location);
 //hypre_int hypre_CSRMatrixIsManaged(hypre_CSRMatrix *a);
-#else
-#define hypre_CSRMatrixPrefetch( hypre_CSRMatrix *A, HYPRE_Int to_location)
-#endif
-#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
-void hypre_CSRMatrixMapToDevice(hypre_CSRMatrix *A);
-void hypre_CSRMatrixUpdateToDevice(hypre_CSRMatrix *A);
-void hypre_CSRMatrixUnMapFromDevice(hypre_CSRMatrix *A);
-#endif
+
 /* csr_matvec.c */
 // y[offset:end] = alpha*A[offset:end,:]*x + beta*b[offset:end]
 HYPRE_Int hypre_CSRMatrixMatvecOutOfPlace ( HYPRE_Complex alpha , hypre_CSRMatrix *A , hypre_Vector *x , HYPRE_Complex beta , hypre_Vector *b, hypre_Vector *y, HYPRE_Int offset );
-HYPRE_Int hypre_CSRMatrixMatvecOutOfPlaceOOMP ( HYPRE_Complex alpha , hypre_CSRMatrix *A , hypre_Vector *x , HYPRE_Complex beta , hypre_Vector *b, hypre_Vector *y, HYPRE_Int offset );
+HYPRE_Int hypre_CSRMatrixMatvecOutOfPlaceOOMP (HYPRE_Int trans, HYPRE_Complex alpha , hypre_CSRMatrix *A , hypre_Vector *x , HYPRE_Complex beta , hypre_Vector *b, hypre_Vector *y, HYPRE_Int offset );
 // y = alpha*A + beta*y
 HYPRE_Int hypre_CSRMatrixMatvec ( HYPRE_Complex alpha , hypre_CSRMatrix *A , hypre_Vector *x , HYPRE_Complex beta , hypre_Vector *y );
 HYPRE_Int hypre_CSRMatrixMatvecT ( HYPRE_Complex alpha , hypre_CSRMatrix *A , hypre_Vector *x , HYPRE_Complex beta , hypre_Vector *y );
 HYPRE_Int hypre_CSRMatrixMatvec_FF ( HYPRE_Complex alpha , hypre_CSRMatrix *A , hypre_Vector *x , HYPRE_Complex beta , hypre_Vector *y , HYPRE_Int *CF_marker_x , HYPRE_Int *CF_marker_y , HYPRE_Int fpt );
-#ifdef HYPRE_USING_GPU
+#ifdef HYPRE_USING_CUDA
 HYPRE_Int hypre_CSRMatrixMatvecDevice(HYPRE_Int trans, HYPRE_Complex alpha , hypre_CSRMatrix *A , hypre_Vector *x , HYPRE_Complex beta , hypre_Vector *b, hypre_Vector *y, HYPRE_Int offset );
 HYPRE_Int hypre_CSRMatrixMatvecDeviceBIGINT( HYPRE_Complex alpha , hypre_CSRMatrix *A , hypre_Vector *x , HYPRE_Complex beta , hypre_Vector *b, hypre_Vector *y, HYPRE_Int offset );
 #endif
@@ -431,20 +392,10 @@ HYPRE_Int hypre_SeqVectorMassAxpy(HYPRE_Complex *alpha, hypre_Vector **x, hypre_
 HYPRE_Int hypre_SeqVectorMassAxpy4(HYPRE_Complex *alpha, hypre_Vector **x, hypre_Vector *y, HYPRE_Int k);
 HYPRE_Int hypre_SeqVectorMassAxpy8(HYPRE_Complex *alpha, hypre_Vector **x, hypre_Vector *y, HYPRE_Int k);
 HYPRE_Complex hypre_SeqVectorSumElts ( hypre_Vector *vector );
-#ifdef HYPRE_USING_UNIFIED_MEMORY
-HYPRE_Int hypre_SeqVectorPrefetch(hypre_Vector *x, HYPRE_Int to_location, HYPRE_Int stream_num = -1);
+HYPRE_Int hypre_SeqVectorPrefetch(hypre_Vector *x, HYPRE_Int to_location);
 //hypre_int hypre_SeqVectorIsManaged(hypre_Vector *x);
-#else
-#define hypre_SeqVectorPrefetch( hypre_Vector *x, HYPRE_Int to_location)
-#endif
-#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
-void hypre_SeqVectorMapToDevice(hypre_Vector *x);
-void hypre_SeqVectorUnMapFromDevice(hypre_Vector *x);
-void hypre_SeqVectorUpdateDevice(hypre_Vector *x);
-void hypre_SeqVectorUpdateHost(hypre_Vector *x);
-#endif
 
-HYPRE_Int hypre_CSRMatrixMatvecOutOfPlaceOOMP3( HYPRE_Complex alpha, hypre_CSRMatrix *A, hypre_Vector *x, HYPRE_Complex beta, hypre_Vector *b, hypre_Vector *y, HYPRE_Int offset);
+//HYPRE_Int hypre_CSRMatrixMatvecOutOfPlaceOOMP3( HYPRE_Complex alpha, hypre_CSRMatrix *A, hypre_Vector *x, HYPRE_Complex beta, hypre_Vector *b, hypre_Vector *y, HYPRE_Int offset);
 
 #if defined(HYPRE_USING_CUDA)
 
@@ -460,27 +411,5 @@ HYPRE_Int hypreDevice_CSRSpGemm(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int
 }
 #endif
 
-#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
-inline void UpdateHRC(hypre_Vector *v){
-  v->hrc++;
-}
-inline void UpdateDRC(hypre_Vector *v){
-  v->drc++;
-}
-inline void SetHRC(hypre_Vector *v){
-  v->hrc=v->drc;
-}
-inline void SetDRC(hypre_Vector *v){
-  v->drc=v->hrc;
-}
-inline void SyncVectorToDevice(hypre_Vector *v){
-  if (v->hrc>v->drc) hypre_SeqVectorUpdateDevice(v);
-}
-inline void SyncVectorToHost(hypre_Vector *v){
-  if (v->drc>v->hrc) hypre_SeqVectorUpdateHost(v);
-}
-#endif
-
-void printRC(hypre_Vector *x,char *id);
-#endif
+#endif /* #ifndef hypre_MV_HEADER */
 

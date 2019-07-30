@@ -1,9 +1,12 @@
+# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
 
 project(HYPRE_FEI C CXX)
 
-include_directories(fei-base)
 include_directories(fei-hypre)
-include_directories(ml/src/include)
 
 # option(HYPRE_USING_SUPERLU "Use internal SuperLU routines" ON)
 # option(HYPRE_USING_MLI     "Use MLI" ON)

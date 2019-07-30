@@ -1,18 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -59,24 +50,20 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 
    HYPRE_Real   *Ztemp_data;
    HYPRE_Real   *Ptemp_data;
-   HYPRE_Int     **CF_marker_array;
+   HYPRE_Int   **CF_marker_array;
    /* HYPRE_Int     **unknown_map_array;
    HYPRE_Int     **point_map_array;
    HYPRE_Int     **v_at_point_array; */
-
    HYPRE_Real    cycle_op_count;
-   HYPRE_Int       cycle_type;
-   HYPRE_Int       num_levels;
-   HYPRE_Int       max_levels;
-
+   HYPRE_Int     cycle_type;
+   HYPRE_Int     num_levels;
+   HYPRE_Int     max_levels;
    HYPRE_Real   *num_coeffs;
-   HYPRE_Int      *num_grid_sweeps;
-   HYPRE_Int      *grid_relax_type;
-   HYPRE_Int     **grid_relax_points;
-
+   HYPRE_Int    *num_grid_sweeps;
+   HYPRE_Int    *grid_relax_type;
+   HYPRE_Int   **grid_relax_points;
    HYPRE_Int     block_mode;
-
-   HYPRE_Int      cheby_order;
+   HYPRE_Int     cheby_order;
 
  /* Local variables  */
    HYPRE_Int      *lev_counter;
@@ -104,9 +91,6 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    HYPRE_Int       smooth_type;
    HYPRE_Int       smooth_num_levels;
    HYPRE_Int       my_id;
-#if !( defined(HYPRE_USING_GPU)|| defined(HYPRE_USING_OPENMP_OFFLOAD) || defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD) )
-   HYPRE_Int       num_threads = hypre_NumThreads();
-#endif
    HYPRE_Int       restri_type;
    HYPRE_Real      alpha;
    HYPRE_Real    **l1_norms = NULL;
@@ -449,8 +433,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                   }
                   else /* not CF - so use through AMS */
                   {
-#if defined(HYPRE_USING_GPU)|| defined(HYPRE_USING_OPENMP_OFFLOAD) || defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
-                     //printf("par_cycle.c 3 %d\n",level);
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
                      hypre_ParCSRRelax(A_array[level],
                                        Aux_F,
                                        1,
@@ -461,9 +444,8 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                                        Aux_U,
                                        Vtemp,
                                        Ztemp);
-                     //printf("par_cycle.c 3 done %d\n",level);
 #else
-                     if (num_threads == 1)
+                     if ( hypre_NumThreads() == 1 )
                      {
                         hypre_ParCSRRelax(A_array[level],
                                           Aux_F,

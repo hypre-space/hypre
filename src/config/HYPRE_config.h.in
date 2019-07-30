@@ -1,15 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /* config/HYPRE_config.h.in.  Generated from configure.in by autoheader.  */
 
@@ -131,6 +125,9 @@
 /* Define to 1 if using OpenMP on device [target mapped version] */
 #undef HYPRE_DEVICE_OPENMP_MAPPED
 
+/* Define to 1 if strictly checking OpenMP offload directives */
+#undef HYPRE_DEVICE_OPENMP_CHECK
+
 /* Define to 1 if executing on host/device with RAJA */
 #undef HYPRE_USING_RAJA
 
@@ -140,8 +137,8 @@
 /* Define to 1 if using NVIDIA Tools Extension (NVTX) */
 #undef HYPRE_USING_NVTX
 
-/* FIXME: replace this with USING_CUDA */
-#undef HYPRE_USING_GPU
+/* Define to 1 if using cuSPARSE */
+#undef HYPRE_USING_CUSPARSE
 
 /* Define to 1 if using GPU aware MPI */
 #undef HYPRE_WITH_GPU_AWARE_MPI

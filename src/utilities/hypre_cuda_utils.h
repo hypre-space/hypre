@@ -13,7 +13,7 @@
 #ifndef HYPRE_CUDA_UTILS_H
 #define HYPRE_CUDA_UTILS_H
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 
 HYPRE_Int hypre_printf( const char *format , ... );
 
@@ -27,6 +27,7 @@ extern "C++" {
 #include <curand.h>
 #include <cusparse.h>
 
+#if defined(HYPRE_USING_CUDA)
 #include <thrust/execution_policy.h>
 #include <thrust/system/cuda/execution_policy.h>
 #include <thrust/count.h>
@@ -43,8 +44,8 @@ extern "C++" {
 #include <thrust/fill.h>
 #include <thrust/adjacent_difference.h>
 #include <thrust/inner_product.h>
-
 using namespace thrust::placeholders;
+#endif // #if defined(HYPRE_USING_CUDA)
 
 #define HYPRE_WARP_SIZE       32
 #define HYPRE_WARP_FULL_MASK  0xFFFFFFFF
@@ -83,7 +84,8 @@ using namespace thrust::placeholders;
 #define HYPRE_CUSPARSE_CALL(call) do {                                                       \
    cusparseStatus_t err = call;                                                              \
    if (CUSPARSE_STATUS_SUCCESS != err) {                                                     \
-      hypre_printf("CUSPARSE ERROR (code = %d) at %s:%d\n", err, __FILE__, __LINE__);        \
+      hypre_printf("CUSPARSE ERROR (code = %d, %d) at %s:%d\n",                              \
+            err, err == CUSPARSE_STATUS_EXECUTION_FAILED, __FILE__, __LINE__);                           \
       exit(1);                                                                               \
    } } while(0)
 
@@ -104,6 +106,7 @@ using namespace thrust::placeholders;
       exit(1);                                                                                                 \
    } } while(0)
 
+#if defined(HYPRE_USING_CUDA)
 /* return the number of threads in block */
 template <hypre_int dim>
 static __device__ __forceinline__
@@ -422,15 +425,19 @@ hypre_int next_power_of_2(hypre_int n)
    return n;
 }
 
+#endif // #if defined(HYPRE_USING_CUDA)
+
 #ifdef __cplusplus
 }
 #endif
 
+#if defined(HYPRE_USING_CUDA)
 /* for struct solvers */
 #define HYPRE_MIN_GPU_SIZE (131072)
 extern HYPRE_Int hypre_exec_policy;
 #define hypre_SetDeviceOn()  hypre_exec_policy = HYPRE_MEMORY_DEVICE
 #define hypre_SetDeviceOff() hypre_exec_policy = HYPRE_MEMORY_HOST
+#endif
 
 #endif /* HYPRE_USING_CUDA */
 #endif /* #ifndef HYPRE_CUDA_UTILS_H */

@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -138,14 +133,20 @@ hypre_CSRMatrixAdd( hypre_CSRMatrix *A,
 
    hypre_assert(exec != HYPRE_EXEC_UNSET);
 
+   hypre_CSRMatrix *C = NULL;
+
    if (exec == HYPRE_EXEC_HOST)
    {
-      return hypre_CSRMatrixAddHost(A,B);
+      C = hypre_CSRMatrixAddHost(A,B);
    }
+#if defined(HYPRE_USING_CUDA)
    else
    {
-      return hypre_CSRMatrixAddDevice(A,B);
+      C = hypre_CSRMatrixAddDevice(A,B);
    }
+#endif
+
+   return C;
 }
 
 /*--------------------------------------------------------------------------
@@ -158,7 +159,7 @@ hypre_CSRMatrixAdd( hypre_CSRMatrix *A,
 
 hypre_CSRMatrix *
 hypre_CSRMatrixBigAdd( hypre_CSRMatrix *A,
-                    hypre_CSRMatrix *B )
+                       hypre_CSRMatrix *B )
 {
    HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
    HYPRE_Int        *A_i      = hypre_CSRMatrixI(A);
@@ -437,14 +438,20 @@ hypre_CSRMatrixMultiply( hypre_CSRMatrix *A,
 
    hypre_assert(exec != HYPRE_EXEC_UNSET);
 
+   hypre_CSRMatrix *C = NULL;
+
    if (exec == HYPRE_EXEC_HOST)
    {
-      return hypre_CSRMatrixMultiplyHost(A,B);
+      C = hypre_CSRMatrixMultiplyHost(A,B);
    }
+#if defined(HYPRE_USING_CUDA)
    else
    {
-      return hypre_CSRMatrixMultiplyDevice(A,B);
+      C = hypre_CSRMatrixMultiplyDevice(A,B);
    }
+#endif
+
+   return C;
 }
 
 hypre_CSRMatrix *
@@ -726,14 +733,20 @@ hypre_CSRMatrixTranspose(hypre_CSRMatrix  *A,
 
    hypre_assert(exec != HYPRE_EXEC_UNSET);
 
+   HYPRE_Int ierr = 0;
+
    if (exec == HYPRE_EXEC_HOST)
    {
-      return hypre_CSRMatrixTransposeHost(A, AT, data);
+      ierr = hypre_CSRMatrixTransposeHost(A, AT, data);
    }
+#if defined(HYPRE_USING_CUDA)
    else
    {
-      return hypre_CSRMatrixTransposeDevice(A, AT, data);
+      ierr = hypre_CSRMatrixTransposeDevice(A, AT, data);
    }
+#endif
+
+   return ierr;
 }
 
 HYPRE_Int hypre_CSRMatrixSplit(hypre_CSRMatrix  *Bs_ext,

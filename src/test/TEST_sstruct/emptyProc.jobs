@@ -1,3 +1,8 @@
+# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
 #=============================================================================
 # sstruct: Run 3d problem with one proc empty. Two types of tests:
 # struct solvers and sys_pfmg require the first part to be full

@@ -15,17 +15,12 @@
 extern "C" {
 #endif
 
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -70,17 +65,12 @@ typedef double            hypre_double;
 
 #endif /* hypre_GENERAL_HEADER */
 
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -125,83 +115,84 @@ extern "C" {
 #define MPI_BOTTOM  	    hypre_MPI_BOTTOM
 
 #define MPI_FLOAT           hypre_MPI_FLOAT
-#define MPI_DOUBLE          hypre_MPI_DOUBLE           
+#define MPI_DOUBLE          hypre_MPI_DOUBLE
 #define MPI_LONG_DOUBLE     hypre_MPI_LONG_DOUBLE
-#define MPI_INT             hypre_MPI_INT              
-#define MPI_LONG_LONG_INT   hypre_MPI_INT              
-#define MPI_CHAR            hypre_MPI_CHAR             
-#define MPI_LONG            hypre_MPI_LONG             
-#define MPI_BYTE            hypre_MPI_BYTE             
+#define MPI_INT             hypre_MPI_INT
+#define MPI_LONG_LONG_INT   hypre_MPI_INT
+#define MPI_CHAR            hypre_MPI_CHAR
+#define MPI_LONG            hypre_MPI_LONG
+#define MPI_BYTE            hypre_MPI_BYTE
 #define MPI_C_DOUBLE_COMPLEX hypre_MPI_COMPLEX
 
-#define MPI_SUM             hypre_MPI_SUM              
-#define MPI_MIN             hypre_MPI_MIN              
-#define MPI_MAX             hypre_MPI_MAX              
-#define MPI_LOR             hypre_MPI_LOR              
-#define MPI_LAND            hypre_MPI_LAND             
+#define MPI_SUM             hypre_MPI_SUM
+#define MPI_MIN             hypre_MPI_MIN
+#define MPI_MAX             hypre_MPI_MAX
+#define MPI_LOR             hypre_MPI_LOR
+#define MPI_LAND            hypre_MPI_LAND
 #define MPI_SUCCESS         hypre_MPI_SUCCESS
 #define MPI_STATUSES_IGNORE hypre_MPI_STATUSES_IGNORE
 
-#define MPI_UNDEFINED       hypre_MPI_UNDEFINED        
-#define MPI_REQUEST_NULL    hypre_MPI_REQUEST_NULL        
-#define MPI_ANY_SOURCE      hypre_MPI_ANY_SOURCE        
+#define MPI_UNDEFINED       hypre_MPI_UNDEFINED
+#define MPI_REQUEST_NULL    hypre_MPI_REQUEST_NULL
+#define MPI_INFO_NULL       hypre_MPI_INFO_NULL
+#define MPI_ANY_SOURCE      hypre_MPI_ANY_SOURCE
 #define MPI_ANY_TAG         hypre_MPI_ANY_TAG
 #define MPI_SOURCE          hypre_MPI_SOURCE
 #define MPI_TAG             hypre_MPI_TAG
 
-#define MPI_Init            hypre_MPI_Init             
-#define MPI_Finalize        hypre_MPI_Finalize         
-#define MPI_Abort           hypre_MPI_Abort         
-#define MPI_Wtime           hypre_MPI_Wtime            
-#define MPI_Wtick           hypre_MPI_Wtick            
-#define MPI_Barrier         hypre_MPI_Barrier          
-#define MPI_Comm_create     hypre_MPI_Comm_create      
-#define MPI_Comm_dup        hypre_MPI_Comm_dup         
+#define MPI_Init            hypre_MPI_Init
+#define MPI_Finalize        hypre_MPI_Finalize
+#define MPI_Abort           hypre_MPI_Abort
+#define MPI_Wtime           hypre_MPI_Wtime
+#define MPI_Wtick           hypre_MPI_Wtick
+#define MPI_Barrier         hypre_MPI_Barrier
+#define MPI_Comm_create     hypre_MPI_Comm_create
+#define MPI_Comm_dup        hypre_MPI_Comm_dup
 #define MPI_Comm_f2c        hypre_MPI_Comm_f2c
-#define MPI_Comm_group      hypre_MPI_Comm_group       
-#define MPI_Comm_size       hypre_MPI_Comm_size        
-#define MPI_Comm_rank       hypre_MPI_Comm_rank        
-#define MPI_Comm_free       hypre_MPI_Comm_free        
-#define MPI_Comm_split      hypre_MPI_Comm_split        
+#define MPI_Comm_group      hypre_MPI_Comm_group
+#define MPI_Comm_size       hypre_MPI_Comm_size
+#define MPI_Comm_rank       hypre_MPI_Comm_rank
+#define MPI_Comm_free       hypre_MPI_Comm_free
+#define MPI_Comm_split      hypre_MPI_Comm_split
 #define MPI_Comm_split_type hypre_MPI_Comm_split_type
-#define MPI_Group_incl      hypre_MPI_Group_incl       
-#define MPI_Group_free      hypre_MPI_Group_free        
-#define MPI_Address         hypre_MPI_Address        
-#define MPI_Get_count       hypre_MPI_Get_count        
-#define MPI_Alltoall        hypre_MPI_Alltoall        
-#define MPI_Allgather       hypre_MPI_Allgather        
-#define MPI_Allgatherv      hypre_MPI_Allgatherv       
-#define MPI_Gather          hypre_MPI_Gather       
-#define MPI_Gatherv         hypre_MPI_Gatherv       
-#define MPI_Scatter         hypre_MPI_Scatter       
-#define MPI_Scatterv        hypre_MPI_Scatterv       
-#define MPI_Bcast           hypre_MPI_Bcast            
-#define MPI_Send            hypre_MPI_Send             
-#define MPI_Recv            hypre_MPI_Recv             
-#define MPI_Isend           hypre_MPI_Isend            
-#define MPI_Irecv           hypre_MPI_Irecv            
-#define MPI_Send_init       hypre_MPI_Send_init             
-#define MPI_Recv_init       hypre_MPI_Recv_init             
-#define MPI_Irsend          hypre_MPI_Irsend             
-#define MPI_Startall        hypre_MPI_Startall             
-#define MPI_Probe           hypre_MPI_Probe             
-#define MPI_Iprobe          hypre_MPI_Iprobe             
-#define MPI_Test            hypre_MPI_Test             
+#define MPI_Group_incl      hypre_MPI_Group_incl
+#define MPI_Group_free      hypre_MPI_Group_free
+#define MPI_Address         hypre_MPI_Address
+#define MPI_Get_count       hypre_MPI_Get_count
+#define MPI_Alltoall        hypre_MPI_Alltoall
+#define MPI_Allgather       hypre_MPI_Allgather
+#define MPI_Allgatherv      hypre_MPI_Allgatherv
+#define MPI_Gather          hypre_MPI_Gather
+#define MPI_Gatherv         hypre_MPI_Gatherv
+#define MPI_Scatter         hypre_MPI_Scatter
+#define MPI_Scatterv        hypre_MPI_Scatterv
+#define MPI_Bcast           hypre_MPI_Bcast
+#define MPI_Send            hypre_MPI_Send
+#define MPI_Recv            hypre_MPI_Recv
+#define MPI_Isend           hypre_MPI_Isend
+#define MPI_Irecv           hypre_MPI_Irecv
+#define MPI_Send_init       hypre_MPI_Send_init
+#define MPI_Recv_init       hypre_MPI_Recv_init
+#define MPI_Irsend          hypre_MPI_Irsend
+#define MPI_Startall        hypre_MPI_Startall
+#define MPI_Probe           hypre_MPI_Probe
+#define MPI_Iprobe          hypre_MPI_Iprobe
+#define MPI_Test            hypre_MPI_Test
 #define MPI_Testall         hypre_MPI_Testall
-#define MPI_Wait            hypre_MPI_Wait             
-#define MPI_Waitall         hypre_MPI_Waitall          
-#define MPI_Waitany         hypre_MPI_Waitany          
-#define MPI_Allreduce       hypre_MPI_Allreduce        
-#define MPI_Reduce          hypre_MPI_Reduce        
-#define MPI_Scan            hypre_MPI_Scan        
-#define MPI_Request_free    hypre_MPI_Request_free        
-#define MPI_Type_contiguous hypre_MPI_Type_contiguous     
-#define MPI_Type_vector     hypre_MPI_Type_vector     
-#define MPI_Type_hvector    hypre_MPI_Type_hvector     
-#define MPI_Type_struct     hypre_MPI_Type_struct      
+#define MPI_Wait            hypre_MPI_Wait
+#define MPI_Waitall         hypre_MPI_Waitall
+#define MPI_Waitany         hypre_MPI_Waitany
+#define MPI_Allreduce       hypre_MPI_Allreduce
+#define MPI_Reduce          hypre_MPI_Reduce
+#define MPI_Scan            hypre_MPI_Scan
+#define MPI_Request_free    hypre_MPI_Request_free
+#define MPI_Type_contiguous hypre_MPI_Type_contiguous
+#define MPI_Type_vector     hypre_MPI_Type_vector
+#define MPI_Type_hvector    hypre_MPI_Type_hvector
+#define MPI_Type_struct     hypre_MPI_Type_struct
 #define MPI_Type_commit     hypre_MPI_Type_commit
-#define MPI_Type_free       hypre_MPI_Type_free        
-#define MPI_Op_free         hypre_MPI_Op_free        
+#define MPI_Type_free       hypre_MPI_Type_free
+#define MPI_Op_free         hypre_MPI_Op_free
 #define MPI_Op_create       hypre_MPI_Op_create
 #define MPI_User_function   hypre_MPI_User_function
 #define MPI_Info_create     hypre_MPI_Info_create
@@ -255,6 +246,7 @@ typedef HYPRE_Int  hypre_MPI_Info;
 
 #define  hypre_MPI_UNDEFINED -9999
 #define  hypre_MPI_REQUEST_NULL  0
+#define  hypre_MPI_INFO_NULL     0
 #define  hypre_MPI_ANY_SOURCE    1
 #define  hypre_MPI_ANY_TAG       1
 
@@ -278,7 +270,7 @@ typedef MPI_User_function    hypre_MPI_User_function;
 #define  hypre_MPI_COMM_NULL          MPI_COMM_NULL
 #define  hypre_MPI_BOTTOM             MPI_BOTTOM
 #define  hypre_MPI_COMM_SELF          MPI_COMM_SELF
-#define  hypre_MPI_COMM_TYPE_SHARED   MPI_COMM_TYPE_SHARED 
+#define  hypre_MPI_COMM_TYPE_SHARED   MPI_COMM_TYPE_SHARED
 
 #define  hypre_MPI_FLOAT   MPI_FLOAT
 #define  hypre_MPI_DOUBLE  MPI_DOUBLE
@@ -300,9 +292,10 @@ typedef MPI_User_function    hypre_MPI_User_function;
 #define  hypre_MPI_SUCCESS MPI_SUCCESS
 #define  hypre_MPI_STATUSES_IGNORE MPI_STATUSES_IGNORE
 
-#define  hypre_MPI_UNDEFINED       MPI_UNDEFINED   
+#define  hypre_MPI_UNDEFINED       MPI_UNDEFINED
 #define  hypre_MPI_REQUEST_NULL    MPI_REQUEST_NULL
-#define  hypre_MPI_ANY_SOURCE      MPI_ANY_SOURCE  
+#define  hypre_MPI_INFO_NULL       MPI_INFO_NULL
+#define  hypre_MPI_ANY_SOURCE      MPI_ANY_SOURCE
 #define  hypre_MPI_ANY_TAG         MPI_ANY_TAG
 #define  hypre_MPI_SOURCE          MPI_SOURCE
 #define  hypre_MPI_TAG             MPI_TAG
@@ -384,17 +377,12 @@ HYPRE_Int hypre_MPI_Info_free( hypre_MPI_Info *info );
 
 #endif
 
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #ifndef HYPRE_SMP_HEADER
 #define HYPRE_SMP_HEADER
@@ -443,19 +431,15 @@ extern size_t hypre__target_dtoh_count;
 extern size_t hypre__target_htod_bytes;
 extern size_t hypre__target_dtoh_bytes;
 
-/* DEBUG MODE: check if offloading has effect
- * (it is turned on when configured with --enable-debug) */
-
-#ifdef HYPRE_OMP45_DEBUG
-/* if we ``enter'' an address, it should not exist in device [o.w NO EFFECT]
-   if we ``exit'' or ''update'' an address, it should exist in device [o.w ERROR]
-hypre__offload_flag: 0 == OK; 1 == WRONG
+/* CHECK MODE: check if offloading has effect (turned on when configured with --enable-debug)
+ * if we ``enter'' an address, it should not exist in device [o.w NO EFFECT]
+ * if we ``exit'' or ''update'' an address, it should exist in device [o.w ERROR]
+ * hypre__offload_flag: 0 == OK; 1 == WRONG
  */
-#define HYPRE_OFFLOAD_FLAG(devnum, hptr, type) \
-   HYPRE_Int hypre__offload_flag = (type[1] == 'n') == omp_target_is_present(hptr, devnum);
+#ifdef HYPRE_DEVICE_OPENMP_CHECK
+#define HYPRE_OFFLOAD_FLAG(devnum, hptr, type) HYPRE_Int hypre__offload_flag = (type[1] == 'n') == omp_target_is_present(hptr, devnum);
 #else
-#define HYPRE_OFFLOAD_FLAG(...) \
-   HYPRE_Int hypre__offload_flag = 0; /* non-debug mode, always OK */
+#define HYPRE_OFFLOAD_FLAG(...) HYPRE_Int hypre__offload_flag = 0; /* non-debug mode, always OK */
 #endif
 
 /* OMP 4.5 offloading macro */
@@ -474,7 +458,7 @@ hypre__offload_flag: 0 == OK; 1 == WRONG
    if (hypre__global_offload && hypre__offload_hptr != NULL) { \
       /* offloading offset and size (in datatype) */ \
       size_t hypre__offload_offset = offset, hypre__offload_size = count; \
-      /* in HYPRE_OMP45_DEBUG mode, we test if this offload has effect */ \
+      /* in the CHECK mode, we test if this offload has effect */ \
       HYPRE_OFFLOAD_FLAG(devnum, hypre__offload_hptr, type1) \
       if (hypre__offload_flag) { \
          printf("[!NO Effect! %s %d] device %d target: %6s %6s, data %p, [%ld:%ld]\n", __FILE__, __LINE__, devnum, type1, type2, (void *)hypre__offload_hptr, hypre__offload_offset, hypre__offload_size); exit(0); \
@@ -536,17 +520,12 @@ HYPRE_Int HYPRE_OMPOffloadStatPrint();
 #endif /* HYPRE_USING_DEVICE_OPENMP */
 #endif /* HYPRE_OMP_DEVICE_H */
 
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -898,17 +877,12 @@ void hypre_FreeDML( char *ptr , char *file , HYPRE_Int line );
 
 #endif
 
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #ifndef hypre_THREADING_HEADER
 #define hypre_THREADING_HEADER
@@ -933,17 +907,12 @@ void hypre_GetSimpleThreadPartition( HYPRE_Int *begin, HYPRE_Int *end, HYPRE_Int
 
 #endif
 
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -1055,17 +1024,12 @@ HYPRE_Int hypre_PrintTiming( const char *heading , MPI_Comm comm );
 
 #endif
 
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -1102,17 +1066,12 @@ typedef hypre_ListElement  *hypre_LinkList;
 
 #endif
 
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #ifndef hypre_EXCHANGE_DATA_HEADER
 #define hypre_EXCHANGE_DATA_HEADER
@@ -1163,17 +1122,12 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
 
 #endif /* end of header */
 
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #ifndef hypre_ERROR_HEADER
 #define hypre_ERROR_HEADER
@@ -1201,17 +1155,12 @@ void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, c
 
 #endif
 
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -1255,7 +1204,7 @@ void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, c
 #ifndef HYPRE_CUDA_UTILS_H
 #define HYPRE_CUDA_UTILS_H
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 
 HYPRE_Int hypre_printf( const char *format , ... );
 
@@ -1269,6 +1218,7 @@ extern "C++" {
 #include <curand.h>
 #include <cusparse.h>
 
+#if defined(HYPRE_USING_CUDA)
 #include <thrust/execution_policy.h>
 #include <thrust/system/cuda/execution_policy.h>
 #include <thrust/count.h>
@@ -1285,8 +1235,8 @@ extern "C++" {
 #include <thrust/fill.h>
 #include <thrust/adjacent_difference.h>
 #include <thrust/inner_product.h>
-
 using namespace thrust::placeholders;
+#endif // #if defined(HYPRE_USING_CUDA)
 
 #define HYPRE_WARP_SIZE       32
 #define HYPRE_WARP_FULL_MASK  0xFFFFFFFF
@@ -1325,7 +1275,8 @@ using namespace thrust::placeholders;
 #define HYPRE_CUSPARSE_CALL(call) do {                                                       \
    cusparseStatus_t err = call;                                                              \
    if (CUSPARSE_STATUS_SUCCESS != err) {                                                     \
-      hypre_printf("CUSPARSE ERROR (code = %d) at %s:%d\n", err, __FILE__, __LINE__);        \
+      hypre_printf("CUSPARSE ERROR (code = %d, %d) at %s:%d\n",                              \
+            err, err == CUSPARSE_STATUS_EXECUTION_FAILED, __FILE__, __LINE__);                           \
       exit(1);                                                                               \
    } } while(0)
 
@@ -1346,6 +1297,7 @@ using namespace thrust::placeholders;
       exit(1);                                                                                                 \
    } } while(0)
 
+#if defined(HYPRE_USING_CUDA)
 /* return the number of threads in block */
 template <hypre_int dim>
 static __device__ __forceinline__
@@ -1664,15 +1616,19 @@ hypre_int next_power_of_2(hypre_int n)
    return n;
 }
 
+#endif // #if defined(HYPRE_USING_CUDA)
+
 #ifdef __cplusplus
 }
 #endif
 
+#if defined(HYPRE_USING_CUDA)
 /* for struct solvers */
 #define HYPRE_MIN_GPU_SIZE (131072)
 extern HYPRE_Int hypre_exec_policy;
 #define hypre_SetDeviceOn()  hypre_exec_policy = HYPRE_MEMORY_DEVICE
 #define hypre_SetDeviceOff() hypre_exec_policy = HYPRE_MEMORY_HOST
+#endif
 
 #endif /* HYPRE_USING_CUDA */
 #endif /* #ifndef HYPRE_CUDA_UTILS_H */
@@ -1698,13 +1654,18 @@ extern HYPRE_Int hypre_exec_policy;
 #ifndef HYPRE_HANDLE_H
 #define HYPRE_HANDLE_H
 
-#if defined(HYPRE_USING_CUDA)
+#ifdef __cplusplus
+extern "C++" {
+#endif
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 #include <vector>
 #endif
 
 typedef struct
 {
-#if defined(HYPRE_USING_CUDA)
+   HYPRE_Int hypre_error;
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_Int cuda_device;
    /* by default, hypre puts GPU computations in this stream
     * Do not be confused with the default (null) CUDA stream */
@@ -1730,51 +1691,44 @@ typedef struct
 
 extern hypre_Handle *hypre_handle;
 
+hypre_Handle* hypre_HandleCreate();
+HYPRE_Int hypre_HandleDestroy(hypre_Handle *hypre_handle_);
+
 /* accessor inline function to hypre_device_csr_handle */
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 static inline HYPRE_Int &
-hypre_HandleCudaDevice(hypre_Handle *hypre_handle)
+hypre_HandleCudaDevice(hypre_Handle *hypre_handle_)
 {
-   return hypre_handle->cuda_device;
+   return hypre_handle_->cuda_device;
 }
 
 static inline HYPRE_Int &
-hypre_HandleCudaComputeStreamNum(hypre_Handle *hypre_handle)
+hypre_HandleCudaComputeStreamNum(hypre_Handle *hypre_handle_)
 {
-   return hypre_handle->cuda_compute_stream_num;
+   return hypre_handle_->cuda_compute_stream_num;
 }
 
 static inline HYPRE_Int &
-hypre_HandleCudaPrefetchStreamNum(hypre_Handle *hypre_handle)
+hypre_HandleCudaPrefetchStreamNum(hypre_Handle *hypre_handle_)
 {
-   return hypre_handle->cuda_prefetch_stream_num;
+   return hypre_handle_->cuda_prefetch_stream_num;
 }
 
 static inline HYPRE_Int &
-hypre_HandleCudaComputeStreamSyncDefault(hypre_Handle *hypre_handle)
+hypre_HandleCudaComputeStreamSyncDefault(hypre_Handle *hypre_handle_)
 {
-   return hypre_handle->cuda_compute_stream_sync_default;
+   return hypre_handle_->cuda_compute_stream_sync_default;
 }
 
 static inline std::vector<HYPRE_Int> &
-hypre_HandleCudaComputeStreamSync(hypre_Handle *hypre_handle)
+hypre_HandleCudaComputeStreamSync(hypre_Handle *hypre_handle_)
 {
-   return hypre_handle->cuda_compute_stream_sync;
-}
-
-static inline void
-hypre_HandleCudaComputeStreamSyncPush(hypre_Handle *hypre_handle, HYPRE_Int sync)
-{
-   hypre_HandleCudaComputeStreamSync(hypre_handle).push_back(sync);
-}
-
-static inline void
-hypre_HandleCudaComputeStreamSyncPop(hypre_Handle *hypre_handle)
-{
-   hypre_HandleCudaComputeStreamSync(hypre_handle).pop_back();
+   return hypre_handle_->cuda_compute_stream_sync;
 }
 
 static inline cudaStream_t
-hypre_HandleCudaStream(hypre_Handle *hypre_handle, HYPRE_Int i)
+hypre_HandleCudaStream(hypre_Handle *hypre_handle_, HYPRE_Int i)
 {
    cudaStream_t stream = 0;
 #if defined(HYPRE_USING_CUDA_STREAMS)
@@ -1788,75 +1742,75 @@ hypre_HandleCudaStream(hypre_Handle *hypre_handle, HYPRE_Int i)
       return NULL;
    }
 
-   if (hypre_handle->cuda_streams[i])
+   if (hypre_handle_->cuda_streams[i])
    {
-      return hypre_handle->cuda_streams[i];
+      return hypre_handle_->cuda_streams[i];
    }
 
    //HYPRE_CUDA_CALL(cudaStreamCreateWithFlags(&stream,cudaStreamNonBlocking));
    HYPRE_CUDA_CALL(cudaStreamCreateWithFlags(&stream, cudaStreamDefault));
 
-   hypre_handle->cuda_streams[i] = stream;
+   hypre_handle_->cuda_streams[i] = stream;
 #endif
 
    return stream;
 }
 
 static inline cudaStream_t
-hypre_HandleCudaComputeStream(hypre_Handle *hypre_handle)
+hypre_HandleCudaComputeStream(hypre_Handle *hypre_handle_)
 {
-   return hypre_HandleCudaStream(hypre_handle,
-                                 hypre_HandleCudaComputeStreamNum(hypre_handle));
+   return hypre_HandleCudaStream(hypre_handle_,
+                                 hypre_HandleCudaComputeStreamNum(hypre_handle_));
 }
 
 static inline cudaStream_t
-hypre_HandleCudaPrefetchStream(hypre_Handle *hypre_handle)
+hypre_HandleCudaPrefetchStream(hypre_Handle *hypre_handle_)
 {
-   return hypre_HandleCudaStream(hypre_handle,
-                                 hypre_HandleCudaPrefetchStreamNum(hypre_handle));
+   return hypre_HandleCudaStream(hypre_handle_,
+                                 hypre_HandleCudaPrefetchStreamNum(hypre_handle_));
 }
 
 static inline curandGenerator_t
-hypre_HandleCurandGenerator(hypre_Handle *hypre_handle)
+hypre_HandleCurandGenerator(hypre_Handle *hypre_handle_)
 {
-   if (hypre_handle->curand_gen)
+   if (hypre_handle_->curand_gen)
    {
-      return hypre_handle->curand_gen;
+      return hypre_handle_->curand_gen;
    }
 
    curandGenerator_t gen;
    HYPRE_CURAND_CALL( curandCreateGenerator(&gen, CURAND_RNG_PSEUDO_DEFAULT) );
    HYPRE_CURAND_CALL( curandSetPseudoRandomGeneratorSeed(gen, 1234ULL) );
 
-   hypre_handle->curand_gen = gen;
+   hypre_handle_->curand_gen = gen;
 
    return gen;
 }
 
 static inline cusparseHandle_t
-hypre_HandleCusparseHandle(hypre_Handle *hypre_handle)
+hypre_HandleCusparseHandle(hypre_Handle *hypre_handle_)
 {
-   if (hypre_handle->cusparse_handle)
+   if (hypre_handle_->cusparse_handle)
    {
-      return hypre_handle->cusparse_handle;
+      return hypre_handle_->cusparse_handle;
    }
 
    cusparseHandle_t handle;
    HYPRE_CUSPARSE_CALL( cusparseCreate(&handle) );
 
-   HYPRE_CUSPARSE_CALL( cusparseSetStream(handle, hypre_HandleCudaComputeStream(hypre_handle)) );
+   HYPRE_CUSPARSE_CALL( cusparseSetStream(handle, hypre_HandleCudaComputeStream(hypre_handle_)) );
 
-   hypre_handle->cusparse_handle = handle;
+   hypre_handle_->cusparse_handle = handle;
 
    return handle;
 }
 
 static inline cusparseMatDescr_t
-hypre_HandleCusparseMatDescr(hypre_Handle *hypre_handle)
+hypre_HandleCusparseMatDescr(hypre_Handle *hypre_handle_)
 {
-   if (hypre_handle->cusparse_mat_descr)
+   if (hypre_handle_->cusparse_mat_descr)
    {
-      return hypre_handle->cusparse_mat_descr;
+      return hypre_handle_->cusparse_mat_descr;
    }
 
    cusparseMatDescr_t mat_descr;
@@ -1864,42 +1818,62 @@ hypre_HandleCusparseMatDescr(hypre_Handle *hypre_handle)
    HYPRE_CUSPARSE_CALL( cusparseSetMatType(mat_descr, CUSPARSE_MATRIX_TYPE_GENERAL) );
    HYPRE_CUSPARSE_CALL( cusparseSetMatIndexBase(mat_descr, CUSPARSE_INDEX_BASE_ZERO) );
 
-   hypre_handle->cusparse_mat_descr = mat_descr;
+   hypre_handle_->cusparse_mat_descr = mat_descr;
 
    return mat_descr;
 }
 
-hypre_Handle* hypre_HandleCreate();
-HYPRE_Int hypre_HandleDestroy(hypre_Handle *handle);
+#endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP) */
+
+static inline void
+hypre_HandleCudaComputeStreamSyncPush(hypre_Handle *hypre_handle_, HYPRE_Int sync)
+{
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_UNIFIED_MEMORY)
+   hypre_HandleCudaComputeStreamSync(hypre_handle_).push_back(sync);
+#endif
+}
+
+static inline void
+hypre_HandleCudaComputeStreamSyncPop(hypre_Handle *hypre_handle_)
+{
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_UNIFIED_MEMORY)
+   hypre_HandleCudaComputeStreamSync(hypre_handle_).pop_back();
+#endif
+}
 
 /* synchronize the default stream */
 static inline HYPRE_Int
-hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle)
+hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle_)
 {
 #if defined(HYPRE_USING_UNIFIED_MEMORY)
-   assert(!hypre_HandleCudaComputeStreamSync(hypre_handle).empty());
+#if defined(HYPRE_USING_CUDA)
+   assert(!hypre_HandleCudaComputeStreamSync(hypre_handle_).empty());
 
-   if ( hypre_HandleCudaComputeStreamSync(hypre_handle).back() )
+   if ( hypre_HandleCudaComputeStreamSync(hypre_handle_).back() )
    {
-      HYPRE_CUDA_CALL( cudaStreamSynchronize(hypre_HandleCudaComputeStream(hypre_handle)) );
+      HYPRE_CUDA_CALL( cudaStreamSynchronize(hypre_HandleCudaComputeStream(hypre_handle_)) );
    }
 #endif
+#if defined(HYPRE_USING_DEVICE_OPENMP)
+   HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
+#endif
+#endif /* #if defined(HYPRE_USING_UNIFIED_MEMORY) */
    return hypre_error_flag;
 }
 
+#ifdef __cplusplus
+}
 #endif
 
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+#endif
+
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 #ifndef HYPRE_NVTX_H
 #define HYPRE_NVTX_H
 
@@ -1909,7 +1883,7 @@ hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle)
 #include "nvToolsExtCudaRt.h"
 
 static const uint32_t colors[] = { 0x0000ff00, 0x000000ff, 0x00ffff00, 0x00ff00ff, 0x0000ffff, 0x00ff0000, 0x00ffffff };
-static const int num_colors = sizeof(colors)/sizeof(uint32_t);
+static const hypre_int num_colors = sizeof(colors)/sizeof(uint32_t);
 
 #define PUSH_RANGE(name,cid) { \
     hypre_int color_id = cid; \
@@ -1934,17 +1908,12 @@ static const int num_colors = sizeof(colors)/sizeof(uint32_t);
 #endif /* HYPRE_USING_NVTX */
 
 #endif /* HYPRE_NVTX_H */
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /* CUDA reducer class */
 
@@ -2217,17 +2186,12 @@ struct ReduceSum
 #endif /* #if defined(HYPRE_USING_CUDA) */
 #endif /* #ifndef HYPRE_CUDA_REDUCER_H */
 
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /* amg_linklist.c */
 void hypre_dispose_elt ( hypre_LinkList element_ptr );
@@ -2264,6 +2228,7 @@ HYPRE_Int hypre_SyncCudaDefaultStream(hypre_Handle *hypre_handle);
 
 /* hypre_printf.c */
 // #ifdef HYPRE_BIGINT
+HYPRE_Int hypre_ndigits( HYPRE_BigInt number );
 HYPRE_Int hypre_printf( const char *format , ... );
 HYPRE_Int hypre_fprintf( FILE *stream , const char *format, ... );
 HYPRE_Int hypre_sprintf( char *s , const char *format, ... );
@@ -2492,8 +2457,7 @@ void hypre_sort_and_create_inverse_map(
 
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
 void hypre_big_merge_sort(HYPRE_BigInt *in, HYPRE_BigInt *temp, HYPRE_Int len, HYPRE_BigInt **sorted);
-void hypre_big_sort_and_create_inverse_map(
-  HYPRE_BigInt *in, HYPRE_Int len, HYPRE_BigInt **out, hypre_UnorderedBigIntMap *inverse_map);
+void hypre_big_sort_and_create_inverse_map(HYPRE_BigInt *in, HYPRE_Int len, HYPRE_BigInt **out, hypre_UnorderedBigIntMap *inverse_map);
 #endif
 
 

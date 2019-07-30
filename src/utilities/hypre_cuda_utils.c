@@ -43,7 +43,7 @@ void hypre_CudaCompileFlagCheck()
 
    if (h_cuda_arch != cuda_arch_actual)
    {
-      hypre_printf("ERROR: Compile arch flags %d does not match actual device arch = sm_%d\n");
+      hypre_printf("ERROR: Compile arch flags %d does not match actual device arch = sm_%d\n", h_cuda_arch, cuda_arch_actual);
    }
 
    HYPRE_CUDA_CALL(cudaDeviceSynchronize());
