@@ -37,6 +37,8 @@ typedef struct hypre_ParILUData_struct
    hypre_CSRMatrix         *matF_d;
    hypre_ParVector         *Xtemp;
    hypre_ParVector         *Ytemp;
+   hypre_Vector            *Ftemp_upper;
+   hypre_Vector            *Utemp_lower;
    HYPRE_Int               *A_diag_fake;//fake diagonal, used to pretend that the diagonal matrix is empty
 #endif
    //general data
@@ -126,6 +128,8 @@ typedef struct hypre_ParILUData_struct
    #define hypre_ParILUDataMatFDevice(ilu_data)                ((ilu_data) -> matF_d)
    #define hypre_ParILUDataXTemp(ilu_data)                     ((ilu_data) -> Xtemp)
    #define hypre_ParILUDataYTemp(ilu_data)                     ((ilu_data) -> Ytemp)
+   #define hypre_ParILUDataFTempUpper(ilu_data)                ((ilu_data) -> Ftemp_upper)
+   #define hypre_ParILUDataUTempLower(ilu_data)                ((ilu_data) -> Utemp_lower)
    #define hypre_ParILUDataMatAFakeDiagonal(ilu_data)          ((ilu_data) -> A_diag_fake)
 #endif
 #define hypre_ParILUDataGlobalSolver(ilu_data)                 ((ilu_data) -> global_solver)
