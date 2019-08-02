@@ -634,8 +634,8 @@ HYPRE_Int hypre_ParCSRSubspacePrec ( hypre_ParCSRMatrix *A0 , HYPRE_Int A0_relax
 HYPRE_Int hypre_AMSGetNumIterations ( void *solver , HYPRE_Int *num_iterations );
 HYPRE_Int hypre_AMSGetFinalRelativeResidualNorm ( void *solver , HYPRE_Real *rel_resid_norm );
 HYPRE_Int hypre_AMSProjectOutGradients ( void *solver , hypre_ParVector *x );
-HYPRE_Int hypre_AMSConstructDiscreteGradient ( hypre_ParCSRMatrix *A , hypre_ParVector *x_coord , HYPRE_Int *edge_vertex , HYPRE_Int edge_orientation , hypre_ParCSRMatrix **G_ptr );
-HYPRE_Int hypre_AMSFEISetup ( void *solver , hypre_ParCSRMatrix *A , hypre_ParVector *b , hypre_ParVector *x , HYPRE_Int num_vert , HYPRE_Int num_local_vert , HYPRE_BigInt *vert_number , HYPRE_Real *vert_coord , HYPRE_Int num_edges , HYPRE_Int *edge_vertex );
+HYPRE_Int hypre_AMSConstructDiscreteGradient ( hypre_ParCSRMatrix *A , hypre_ParVector *x_coord , HYPRE_BigInt *edge_vertex , HYPRE_Int edge_orientation , hypre_ParCSRMatrix **G_ptr );
+HYPRE_Int hypre_AMSFEISetup ( void *solver , hypre_ParCSRMatrix *A , hypre_ParVector *b , hypre_ParVector *x , HYPRE_Int num_vert , HYPRE_Int num_local_vert , HYPRE_BigInt *vert_number , HYPRE_Real *vert_coord , HYPRE_Int num_edges , HYPRE_BigInt *edge_vertex );
 HYPRE_Int hypre_AMSFEIDestroy ( void *solver );
 HYPRE_Int hypre_ParCSRComputeL1NormsThreads ( hypre_ParCSRMatrix *A , HYPRE_Int option , HYPRE_Int num_threads , HYPRE_Int *cf_marker , HYPRE_Real **l1_norm_ptr );
 HYPRE_Int hypre_ParCSRRelaxThreads ( hypre_ParCSRMatrix *A , hypre_ParVector *f , HYPRE_Int relax_type , HYPRE_Int relax_times , HYPRE_Real *l1_norms , HYPRE_Real relax_weight , HYPRE_Real omega , hypre_ParVector *u , hypre_ParVector *Vtemp , hypre_ParVector *z );
@@ -740,8 +740,8 @@ HYPRE_Int HYPRE_AMSSetBetaAMGCoarseRelaxType ( HYPRE_Solver solver , HYPRE_Int b
 HYPRE_Int HYPRE_AMSGetNumIterations ( HYPRE_Solver solver , HYPRE_Int *num_iterations );
 HYPRE_Int HYPRE_AMSGetFinalRelativeResidualNorm ( HYPRE_Solver solver , HYPRE_Real *rel_resid_norm );
 HYPRE_Int HYPRE_AMSProjectOutGradients ( HYPRE_Solver solver , HYPRE_ParVector x );
-HYPRE_Int HYPRE_AMSConstructDiscreteGradient ( HYPRE_ParCSRMatrix A , HYPRE_ParVector x_coord , HYPRE_Int *edge_vertex , HYPRE_Int edge_orientation , HYPRE_ParCSRMatrix *G );
-HYPRE_Int HYPRE_AMSFEISetup ( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x , HYPRE_Int *EdgeNodeList_ , HYPRE_BigInt *NodeNumbers_ , HYPRE_Int numEdges_ , HYPRE_Int numLocalNodes_ , HYPRE_Int numNodes_ , HYPRE_Real *NodalCoord_ );
+HYPRE_Int HYPRE_AMSConstructDiscreteGradient ( HYPRE_ParCSRMatrix A , HYPRE_ParVector x_coord , HYPRE_BigInt *edge_vertex , HYPRE_Int edge_orientation , HYPRE_ParCSRMatrix *G );
+HYPRE_Int HYPRE_AMSFEISetup ( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x , HYPRE_BigInt *EdgeNodeList_ , HYPRE_BigInt *NodeNumbers_ , HYPRE_Int numEdges_ , HYPRE_Int numLocalNodes_ , HYPRE_Int numNodes_ , HYPRE_Real *NodalCoord_ );
 HYPRE_Int HYPRE_AMSFEIDestroy ( HYPRE_Solver solver );
 
 /* HYPRE_parcsr_amg.c */
