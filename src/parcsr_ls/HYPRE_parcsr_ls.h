@@ -562,6 +562,7 @@ HYPRE_Int HYPRE_BoomerAMGSetCycleType(HYPRE_Solver solver,
 HYPRE_Int
 HYPRE_BoomerAMGSetFCycle( HYPRE_Solver solver,
                           HYPRE_Int    fcycle  );
+
 /**
  * (Optional) Defines use of an additive V(1,1)-cycle using the
  * classical additive method starting at level 'addlvl'.
@@ -771,8 +772,8 @@ HYPRE_Int HYPRE_BoomerAMGSetRelaxOrder(HYPRE_Solver  solver,
 /*
  * (Optional) Defines in which order the points are relaxed.
  *
- * Note: For some applications HYPRE\_BoomerAMGSetRelaxOrder may be
- * useful instead.
+ * Note: This routine will be phased out!!!!
+ * Use HYPRE\_BoomerAMGSetRelaxOrder instead.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetGridRelaxPoints(HYPRE_Solver   solver,
                                             HYPRE_Int    **grid_relax_points);
@@ -1082,7 +1083,7 @@ HYPRE_Int HYPRE_BoomerAMGSetEuBJ(HYPRE_Solver solver,
  * The default is 0.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetRestriction(HYPRE_Solver solver,
-                                        HYPRE_Real   restr_par);
+                                        HYPRE_Int   restr_par);
 
 /**
  * (Optional) Assumes the matrix is triangular in some ordering
@@ -1229,6 +1230,7 @@ HYPRE_Int HYPRE_BoomerAMGSetCpointsToKeep(HYPRE_Solver solver,
  **/
 HYPRE_Int HYPRE_BoomerAMGSetSabs (HYPRE_Solver solver,
                                   HYPRE_Int Sabs );
+
 /*@}*/
 
 /*--------------------------------------------------------------------------

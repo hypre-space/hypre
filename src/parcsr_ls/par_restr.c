@@ -13,21 +13,8 @@
 #define EPSILON 1e-18
 #define EPSIMAC 1e-16
 
-static void fgmresT(HYPRE_Int n,
-                    HYPRE_Complex *A,
-                    HYPRE_Complex *b,
-                    HYPRE_Real tol,
-                    HYPRE_Int kdim,
-                    HYPRE_Complex *x,
-                    HYPRE_Real *relres,
-                    HYPRE_Int *iter,
-                    HYPRE_Int job);
-
-static void ordered_GS(const HYPRE_Complex L[],
-                       const HYPRE_Complex rhs[],
-                             HYPRE_Complex x[],
-                       const HYPRE_Int n);
-
+void hypre_fgmresT(HYPRE_Int n, HYPRE_Complex *A, HYPRE_Complex *b, HYPRE_Real tol, HYPRE_Int kdim, HYPRE_Complex *x, HYPRE_Real *relres, HYPRE_Int *iter, HYPRE_Int job);
+void hypre_ordered_GS(const HYPRE_Complex L[], const HYPRE_Complex rhs[], HYPRE_Complex x[], const HYPRE_Int n);
 
 HYPRE_Int
 hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
@@ -550,7 +537,7 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
       {
          if (is_triangular)
          {
-            ordered_GS(DAi, Dbi, Dxi, local_size);
+            hypre_ordered_GS(DAi, Dbi, Dxi, local_size);
 #if AIR_DEBUG
             HYPRE_Real alp = -1.0, err;
             colmaj_mvT(DAi, Dxi, TMPd, local_size);
@@ -843,16 +830,16 @@ static inline void colmaj_mvT(HYPRE_Complex *A, HYPRE_Complex *x, HYPRE_Complex 
 }
 
 // TODO : need to initialize and de-initialize GMRES
-
-static void fgmresT(HYPRE_Int n,
-                    HYPRE_Complex *A,
-                    HYPRE_Complex *b,
-                    HYPRE_Real tol,
-                    HYPRE_Int kdim,
-                    HYPRE_Complex *x,
-                    HYPRE_Real *relres,
-                    HYPRE_Int *iter,
-                    HYPRE_Int job) {
+void hypre_fgmresT(HYPRE_Int n,
+                   HYPRE_Complex *A,
+                   HYPRE_Complex *b,
+                   HYPRE_Real tol,
+                   HYPRE_Int kdim,
+                   HYPRE_Complex *x,
+                   HYPRE_Real *relres,
+                   HYPRE_Int *iter,
+                   HYPRE_Int job)
+{
 
    HYPRE_Int one=1, i, j, k;
    static HYPRE_Complex *V=NULL, *Z=NULL, *H=NULL, *c=NULL, *s=NULL, *rs=NULL;
@@ -976,10 +963,10 @@ static void fgmresT(HYPRE_Int n,
 
 /* Ordered Gauss Seidel on A^T in column major format. Since we are
  * solving A^T, equivalent to solving A in row major format. */
-static void ordered_GS(const HYPRE_Complex L[],
-                       const HYPRE_Complex rhs[],
-                             HYPRE_Complex x[],
-                       const HYPRE_Int n)
+void hypre_ordered_GS(const HYPRE_Complex L[],
+                      const HYPRE_Complex rhs[],
+                      HYPRE_Complex x[],
+                      const HYPRE_Int n)
 {
    // Get triangular ordering of L^T in col major as ordering of L in row major
    HYPRE_Int ordering[n];
@@ -987,20 +974,26 @@ static void ordered_GS(const HYPRE_Complex L[],
 
    // Ordered Gauss-Seidel iteration
    HYPRE_Int i, col;
-   for (i=0; i<n; i++) {
+   for (i=0; i<n; i++)
+   {
       HYPRE_Int row = ordering[i];
       HYPRE_Complex temp = rhs[row];
-      for (col=0; col<n; col++) {
-         if (col != row) {
+      for (col = 0; col < n; col++)
+      {
+         if (col != row)
+         {
             temp -= L[row*n+col] * x[col];   // row-major
          }
       }
       HYPRE_Complex diag = L[row*n + row];
-      if (fabs(diag) < 1e-12) {
+      if (fabs(diag) < 1e-12)
+      {
          x[row] = 0.0;
       }
-      else{
+      else
+      {
          x[row] = temp / diag;
       }
    }
 }
+

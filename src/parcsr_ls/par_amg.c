@@ -772,7 +772,7 @@ hypre_BoomerAMGDestroy( void *data )
 
 HYPRE_Int
 hypre_BoomerAMGSetRestriction( void *data,
-                               HYPRE_Real   restr_par )
+                               HYPRE_Int   restr_par )
 {
    hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
 
@@ -785,10 +785,10 @@ hypre_BoomerAMGSetRestriction( void *data,
    /* RL: currently, only 0: R = P^T
     *                     1: AIR
     *                     2: AIR-2
-    *                     1.5: a special version of AIR-2 with less communication cost
-    *                     k(k>=3): Neumann AIR of degree k-3
+    *                     15: a special version of AIR-2 with less communication cost
+    *                     k(k>=3,k!=15): Neumann AIR of degree k-3
     */
-   if (restr_par < 0.0)
+   if (restr_par < 0)
    {
       hypre_error_in_arg(2);
       return hypre_error_flag;

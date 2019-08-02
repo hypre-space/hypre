@@ -63,7 +63,7 @@ typedef struct
    HYPRE_Int      agg_interp_type;
    HYPRE_Int      agg_P_max_elmts;
    HYPRE_Int      agg_P12_max_elmts;
-   HYPRE_Real     restr_par;
+   HYPRE_Int      restr_par;
    HYPRE_Int      is_triangular;
    HYPRE_Int      gmres_switch;
    HYPRE_Int      agg_num_levels;
@@ -750,7 +750,7 @@ HYPRE_Int HYPRE_BoomerAMGDestroy ( HYPRE_Solver solver );
 HYPRE_Int HYPRE_BoomerAMGSetup ( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x );
 HYPRE_Int HYPRE_BoomerAMGSolve ( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x );
 HYPRE_Int HYPRE_BoomerAMGSolveT ( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x );
-HYPRE_Int HYPRE_BoomerAMGSetRestriction ( HYPRE_Solver solver , HYPRE_Real restr_par );
+HYPRE_Int HYPRE_BoomerAMGSetRestriction ( HYPRE_Solver solver , HYPRE_Int restr_par );
 HYPRE_Int HYPRE_BoomerAMGSetIsTriangular ( HYPRE_Solver solver , HYPRE_Int is_triangular );
 HYPRE_Int HYPRE_BoomerAMGSetGMRESSwitchR ( HYPRE_Solver solver , HYPRE_Int gmres_switch );
 HYPRE_Int HYPRE_BoomerAMGSetMaxLevels ( HYPRE_Solver solver , HYPRE_Int max_levels );
@@ -1212,7 +1212,7 @@ HYPRE_Int hypre_CreateDinv ( void *amg_vdata );
 /* par_amg.c */
 void *hypre_BoomerAMGCreate ( void );
 HYPRE_Int hypre_BoomerAMGDestroy ( void *data );
-HYPRE_Int hypre_BoomerAMGSetRestriction ( void *data , HYPRE_Real restr_par );
+HYPRE_Int hypre_BoomerAMGSetRestriction ( void *data , HYPRE_Int restr_par );
 HYPRE_Int hypre_BoomerAMGSetIsTriangular ( void *data , HYPRE_Int is_triangular );
 HYPRE_Int hypre_BoomerAMGSetGMRESSwitchR ( void *data , HYPRE_Int gmres_switch );
 HYPRE_Int hypre_BoomerAMGSetMaxLevels ( void *data , HYPRE_Int max_levels );

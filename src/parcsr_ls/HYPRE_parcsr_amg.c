@@ -92,7 +92,7 @@ HYPRE_BoomerAMGSolveT( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_BoomerAMGSetRestriction( HYPRE_Solver solver,
-                               HYPRE_Real   restr_par  )
+                               HYPRE_Int    restr_par  )
 {
    return( hypre_BoomerAMGSetRestriction( (void *) solver, restr_par ) );
 }
@@ -758,6 +758,9 @@ HYPRE_BoomerAMGSetRelaxOrder( HYPRE_Solver  solver,
 
 /*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetGridRelaxPoints
+ * DEPRECATED.  There are memory management problems associated with the
+ * use of a user-supplied array (who releases it?).
+ * Ulrike Yang suspects that nobody uses this function.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int

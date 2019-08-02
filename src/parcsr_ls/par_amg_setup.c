@@ -59,7 +59,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Real           trunc_factor, jacobi_trunc_threshold;
    HYPRE_Real           agg_trunc_factor, agg_P12_trunc_factor;
    HYPRE_Real           S_commpkg_switch;
-   HYPRE_Real  		CR_rate;
+   HYPRE_Real           CR_rate;
    HYPRE_Int            relax_order;
    HYPRE_Int            max_levels;
    HYPRE_Int            amg_logging;
@@ -153,8 +153,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Int     eu_bj;
    HYPRE_Real    eu_sparse_A;
 
-   HYPRE_Int interp_type;
-   HYPRE_Real restri_type;
+   HYPRE_Int interp_type, restri_type;
    HYPRE_Int post_interp_type;  /* what to do after computing the interpolation matrix
                                    0 for nothing, 1 for a Jacobi step */
 
@@ -837,7 +836,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       if (level >= nodal_levels)
       {
          nodal = 0;
-         num_functions = 1;
       }
 
       if (block_mode)
@@ -1000,7 +998,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
 
             /* for AIR, need absolute value SOC: use a different threshold */
-            if (restri_type > 0.0 && restri_type < 3.0)
+            if (restri_type)
             {
                HYPRE_Real           strong_thresholdR;
                strong_thresholdR = hypre_ParAMGDataStrongThresholdR(amg_data);
@@ -1066,6 +1064,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                         NULL,NULL,CR_use_CG,SCR);
                hypre_ParCSRMatrixDestroy(SCR);
             }
+#if DEBUG
             else if (coarsen_type == 999)
             {
                /* RL_DEBUG: read C/F splitting from files */
@@ -1122,6 +1121,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                }
                fclose(fp);
             }
+#endif
             else if (coarsen_type)
             {
                hypre_BoomerAMGCoarsenRuge(S, A_array[level],
@@ -1666,7 +1666,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   CF_marker[i] = CF_marker[i] > 0 ? 1 : -1;
                }
 
-               if (restri_type == 1.0) /* distance-1 AIR */
+               if (restri_type == 1) /* distance-1 AIR */
                {
                   hypre_BoomerAMGBuildRestrAIR(A_array[level], CF_marker,
                                                Sabs, coarse_pnts_global, 1, NULL,
@@ -1674,12 +1674,12 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                                col_offd_Sabs_to_A, &R,
                                                is_triangular, gmres_switch );
                }
-               else if (restri_type > 1.0 && restri_type < 3.0) /* distance-2 AIR */
+               else if (restri_type == 2 || restri_type == 15) /* distance-2, 1.5 AIR */
                {
                   hypre_BoomerAMGBuildRestrDist2AIR(A_array[level], CF_marker,
                                                     Sabs, coarse_pnts_global, 1, NULL,
                                                     filter_thresholdR, debug_flag,
-                                                    col_offd_Sabs_to_A, &R, restri_type < 2.0,
+                                                    col_offd_Sabs_to_A, &R, restri_type == 15,
                                                     is_triangular, gmres_switch);
                }
                else

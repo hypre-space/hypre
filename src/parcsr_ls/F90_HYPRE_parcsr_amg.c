@@ -113,13 +113,13 @@ hypre_F90_IFACE(hypre_boomeramgsolvet, HYPRE_BOOMERAMGSOLVET)
 void
 hypre_F90_IFACE(hypre_boomeramgsetrestriction, HYPRE_BOOMERAMGSETRESTRICTION)
    ( hypre_F90_Obj *solver,
-     hypre_F90_Real *restr_par,
+     hypre_F90_Int *restr_par,
      hypre_F90_Int *ierr       )
 {
    *ierr = (hypre_F90_Int)
       ( HYPRE_BoomerAMGSetRestriction(
            hypre_F90_PassObj (HYPRE_Solver, solver),
-           hypre_F90_PassReal (restr_par) ) );
+           hypre_F90_PassInt (restr_par) ) );
 }
 
 /*--------------------------------------------------------------------------

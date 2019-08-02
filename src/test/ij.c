@@ -287,7 +287,7 @@ main( hypre_int argc,
    HYPRE_Int      interp_type  = 6; /* default value */
    HYPRE_Int      post_interp_type  = 0; /* default value */
    /* RL: restriction */
-   HYPRE_Real      restri_type = 0.;
+   HYPRE_Int      restri_type = 0;
    /* aggressive coarsening */
    HYPRE_Int      agg_interp_type  = 4; /* default value */
    HYPRE_Int      agg_P_max_elmts  = 0; /* default value */
@@ -375,7 +375,7 @@ main( hypre_int argc,
    HYPRE_Int i_indx, j_indx, num_rows;
    HYPRE_Real *data = NULL;
 
-   HYPRE_Real air = 0.;
+   HYPRE_Int air = 0;
    HYPRE_Int **grid_relax_points = NULL;
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -864,7 +864,7 @@ main( hypre_int argc,
       else if ( strcmp(argv[arg_index], "-restritype") == 0 )
       {
          arg_index++;
-         restri_type  = atof(argv[arg_index++]);
+         restri_type  = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-help") == 0 )
       {
@@ -1512,7 +1512,7 @@ main( hypre_int argc,
       else if ( strcmp(argv[arg_index], "-AIR") == 0 )
       {
          arg_index++;
-         air = atof(argv[arg_index++]);
+         air = atoi(argv[arg_index++]);
       }
       else
       {

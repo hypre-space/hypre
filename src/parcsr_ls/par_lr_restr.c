@@ -24,20 +24,8 @@ HYPRE_Int AIR_MAX_SOL_SIZE = 0;
 #define EPSILON 1e-18
 #define EPSIMAC 1e-16
 
-static void fgmresT(HYPRE_Int n,
-                    HYPRE_Complex *A,
-                    HYPRE_Complex *b,
-                    HYPRE_Real tol,
-                    HYPRE_Int kdim,
-                    HYPRE_Complex *x,
-                    HYPRE_Real *relres,
-                    HYPRE_Int *iter,
-                    HYPRE_Int job);
-
-static void ordered_GS(const HYPRE_Complex L[],
-                       const HYPRE_Complex rhs[],
-                             HYPRE_Complex x[],
-                       const HYPRE_Int n);
+void hypre_fgmresT(HYPRE_Int n, HYPRE_Complex *A, HYPRE_Complex *b, HYPRE_Real tol, HYPRE_Int kdim, HYPRE_Complex *x, HYPRE_Real *relres, HYPRE_Int *iter, HYPRE_Int job);
+void hypre_ordered_GS(const HYPRE_Complex L[], const HYPRE_Complex rhs[], HYPRE_Complex x[], const HYPRE_Int n);
 
 /*
 HYPRE_Real air_time0 = 0.0;
@@ -47,7 +35,6 @@ HYPRE_Real air_time2 = 0.0;
 HYPRE_Real air_time3 = 0.0;
 HYPRE_Real air_time4 = 0.0;
 */
-
 
 HYPRE_Int
 hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
@@ -990,8 +977,9 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
 
    // Allocate memory for GMRES if it will be used
    HYPRE_Int kdim_max = hypre_min(gmresAi_maxit, local_max_size);
-   if (gmres_switch < local_max_size) {
-      fgmresT(local_max_size, NULL, NULL, 0.0, kdim_max, NULL, NULL, NULL, -1);
+   if (gmres_switch < local_max_size)
+   {
+      hypre_fgmresT(local_max_size, NULL, NULL, 0.0, kdim_max, NULL, NULL, NULL, -1);
    }
 
 #if AIR_DEBUG
@@ -1359,7 +1347,7 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
       if (local_size > 0)
       {
          if (is_triangular) {
-            ordered_GS(DAi, Dbi, Dxi, local_size);
+            hypre_ordered_GS(DAi, Dbi, Dxi, local_size);
 #if AIR_DEBUG
             HYPRE_Real alp = -1.0, err;
             colmaj_mvT(DAi, Dxi, TMPd, local_size);
@@ -1413,8 +1401,8 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
             HYPRE_Int  gmresAi_niter;
             HYPRE_Int kdim = hypre_min(gmresAi_maxit, local_size);
 
-            fgmresT(local_size, DAi, Dbi, gmresAi_tol, kdim, Dxi,
-                    &gmresAi_res, &gmresAi_niter, 0);
+            hypre_fgmresT(local_size, DAi, Dbi, gmresAi_tol, kdim, Dxi,
+                          &gmresAi_res, &gmresAi_niter, 0);
 
             if (gmresAi_res > gmresAi_tol)
             {
@@ -1657,8 +1645,9 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
    hypre_TFree(RRi, HYPRE_MEMORY_HOST);
    hypre_TFree(KKi, HYPRE_MEMORY_HOST);
 
-   if (gmres_switch < local_max_size) {
-      fgmresT(0, NULL, NULL, 0.0, 0, NULL, NULL, NULL, -2);
+   if (gmres_switch < local_max_size)
+   {
+      hypre_fgmresT(0, NULL, NULL, 0.0, 0, NULL, NULL, NULL, -2);
    }
 
    /*
@@ -1668,190 +1657,6 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
 
    return 0;
 }
-
-
-/* Compute matvec A^Tx = y, where A is stored in column major form. */
-// This can also probably be accomplished with BLAS
-static inline void colmaj_mvT(HYPRE_Complex *A, HYPRE_Complex *x, HYPRE_Complex *y, HYPRE_Int n)
-{
-   memset(y, 0, n*sizeof(HYPRE_Complex));
-   HYPRE_Int i, j;
-   for (i = 0; i < n; i++)
-   {
-      HYPRE_Int row0 = i*n;
-      for (j = 0; j < n; j++)
-      {
-         y[i] += x[j] * A[row0 + j];
-      }
-   }
-}
-
-static void fgmresT(HYPRE_Int n,
-                    HYPRE_Complex *A,
-                    HYPRE_Complex *b,
-                    HYPRE_Real tol,
-                    HYPRE_Int kdim,
-                    HYPRE_Complex *x,
-                    HYPRE_Real *relres,
-                    HYPRE_Int *iter,
-                    HYPRE_Int job) {
-
-   HYPRE_Int one=1, i, j, k;
-   static HYPRE_Complex *V=NULL, *Z=NULL, *H=NULL, *c=NULL, *s=NULL, *rs=NULL;
-   HYPRE_Complex *v, *z, *w;
-   HYPRE_Real t, normr, normr0, tolr;
-
-   if (job == -1)
-   {
-      V  = hypre_TAlloc(HYPRE_Complex, n*(kdim+1),    HYPRE_MEMORY_HOST);
-      /* Z  = hypre_TAlloc(HYPRE_Complex, n*kdim,        HYPRE_MEMORY_HOST); */
-      /* XXX NO PRECOND */
-      Z = V;
-      H  = hypre_TAlloc(HYPRE_Complex, (kdim+1)*kdim, HYPRE_MEMORY_HOST);
-      c  = hypre_TAlloc(HYPRE_Complex, kdim,          HYPRE_MEMORY_HOST);
-      s  = hypre_TAlloc(HYPRE_Complex, kdim,          HYPRE_MEMORY_HOST);
-      rs = hypre_TAlloc(HYPRE_Complex, kdim+1,        HYPRE_MEMORY_HOST);
-      return;
-   }
-   else if (job == -2)
-   {
-      hypre_TFree(V,  HYPRE_MEMORY_HOST);
-      /* hypre_TFree(Z,  HYPRE_MEMORY_HOST); */
-      Z = NULL;
-      hypre_TFree(H,  HYPRE_MEMORY_HOST);
-      hypre_TFree(c,  HYPRE_MEMORY_HOST);
-      hypre_TFree(s,  HYPRE_MEMORY_HOST);
-      hypre_TFree(rs, HYPRE_MEMORY_HOST);
-      return;
-   }
-
-   /* XXX: x_0 is all ZERO !!! so r0 = b */
-   v = V;
-   memcpy(v, b, n*sizeof(HYPRE_Complex));
-   normr0 = sqrt(hypre_ddot(&n, v, &one, v, &one));
-
-   if (normr0 < EPSIMAC)
-   {
-      return;
-   }
-
-   tolr = tol * normr0;
-
-   rs[0] = normr0;
-   t = 1.0 / normr0;
-   hypre_dscal(&n, &t, v, &one);
-   i = 0;
-   while (i < kdim)
-   {
-      i++;
-      // zi = M^{-1} * vi;
-      v = V + (i-1) * n;
-      z = Z + (i-1) * n;
-      /* XXX NO PRECOND */
-      /* memcpy(z, v, n*sizeof(HYPRE_Complex)); */
-      // w = v_{i+1} = A * zi
-      w = V + i * n;
-      colmaj_mvT(A, z, w, n);
-      // modified Gram-schmidt
-      for (j = 0; j < i; j++)
-      {
-         v = V + j * n;
-         H[j+(i-1)*kdim] = t = hypre_ddot(&n, v, &one, w, &one);
-         t = -t;
-         hypre_daxpy(&n, &t, v, &one, w, &one);
-      }
-      H[i+(i-1)*kdim] = t = sqrt(hypre_ddot(&n, w, &one, w, &one));
-      if (fabs(t) > EPSILON)
-      {
-         t = 1.0 / t;
-         hypre_dscal(&n, &t, w, &one);
-      }
-      // Least square problem of H
-      for (j = 1; j < i; j++)
-      {
-         t = H[j-1+(i-1)*kdim];
-         H[j-1+(i-1)*kdim] =  c[j-1]*t + s[j-1]*H[j+(i-1)*kdim];
-         H[j+(i-1)*kdim]   = -s[j-1]*t + c[j-1]*H[j+(i-1)*kdim];
-      }
-      HYPRE_Complex hii  = H[i-1+(i-1)*kdim];
-      HYPRE_Complex hii1 = H[i+(i-1)*kdim];
-      HYPRE_Complex gam = sqrt(hii*hii + hii1*hii1);
-
-      if (fabs(gam) < EPSILON)
-      {
-         gam = EPSIMAC;
-      }
-      c[i-1] = hii / gam;
-      s[i-1] = hii1 / gam;
-      rs[i]   = -s[i-1] * rs[i-1];
-      rs[i-1] =  c[i-1] * rs[i-1];
-      // residue norm
-      H[i-1+(i-1)*kdim] = c[i-1]*hii + s[i-1]*hii1;
-      normr = fabs(rs[i]);
-      if (normr <= tolr)
-      {
-         break;
-      }
-   }
-
-   // solve the upper triangular system
-   rs[i-1] /= H[i-1+(i-1)*kdim];
-   for (k = i-2; k >= 0; k--)
-   {
-      for (j = k+1; j < i; j++)
-      {
-         rs[k] -= H[k+j*kdim]*rs[j];
-      }
-      rs[k] /= H[k+k*kdim];
-   }
-   // get solution
-   for (j = 0; j < i; j++)
-   {
-      z = Z + j * n;
-      hypre_daxpy(&n, rs+j, z, &one, x, &one);
-   }
-
-   *relres = normr / normr0;
-   *iter = i;
-}
-
-
-/* Ordered Gauss Seidel on A^T in column major format. Since we are
- * solving A^T, equivalent to solving A in row major format. */
-static void ordered_GS(const HYPRE_Complex L[],
-                       const HYPRE_Complex rhs[],
-                             HYPRE_Complex x[],
-                       const HYPRE_Int n)
-{
-   // Get triangular ordering of L^T in col major as ordering of L in row major
-   HYPRE_Int ordering[n];
-   hypre_dense_topo_sort(L, ordering, n, 0);
-
-   // Ordered Gauss-Seidel iteration
-   HYPRE_Int i, col;
-   for (i=0; i<n; i++)
-   {
-      HYPRE_Int row = ordering[i];
-      HYPRE_Complex temp = rhs[row];
-      for (col=0; col<n; col++)
-      {
-         if (col != row)
-         {
-            temp -= L[row*n+col] * x[col];   // row-major
-         }
-      }
-      HYPRE_Complex diag = L[row*n + row];
-      if (fabs(diag) < 1e-12)
-      {
-         x[row] = 0.0;
-      }
-      else
-      {
-         x[row] = temp / diag;
-      }
-   }
-}
-
 
 HYPRE_Int
 hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
