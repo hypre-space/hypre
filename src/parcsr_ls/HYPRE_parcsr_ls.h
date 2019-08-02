@@ -1898,7 +1898,7 @@ HYPRE_Int HYPRE_AMSProjectOutGradients(HYPRE_Solver    solver,
  **/
 HYPRE_Int HYPRE_AMSConstructDiscreteGradient(HYPRE_ParCSRMatrix  A,
                                              HYPRE_ParVector     x_coord,
-                                             HYPRE_Int          *edge_vertex,
+                                             HYPRE_BigInt       *edge_vertex,
                                              HYPRE_Int           edge_orientation,
                                              HYPRE_ParCSRMatrix *G);
 
