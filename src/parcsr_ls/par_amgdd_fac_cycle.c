@@ -115,7 +115,7 @@ HYPRE_Int FAC_Cycle(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type, HYPR
    if (hypre_ParCompGridT(compGrid[level])) for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++) hypre_ParCompGridT(compGrid[level])[i] = 0.0;
 
    //  Either solve on the coarse level or recurse
-   if (level+1 == num_levels-1) for (i = 0; i < 20; i++) FAC_Relax( compGrid[num_levels-1], relax_type );
+   if (level+1 == num_levels-1) for (i = 0; i < numRelax[3]; i++) FAC_Relax( compGrid[num_levels-1], relax_type );
    else for (i = 0; i < cycle_type; i++)
    {
       FAC_Cycle(amg_vdata, level+1, cycle_type, first_iteration);
@@ -166,7 +166,7 @@ HYPRE_Int FAC_FCycle(void *amg_vdata, HYPRE_Int first_iteration)
    }
 
    //  ... solve on coarsest level ...
-   for (i = 0; i < 20; i++) FAC_Relax( compGrid[num_levels-1], relax_type );
+   for (i = 0; i < numRelax[3]; i++) FAC_Relax( compGrid[num_levels-1], relax_type );
 
    // ... and work back up to the finest
    for (level = num_levels - 2; level > -1; level--)
@@ -213,7 +213,7 @@ HYPRE_Int FAC_Cycle_timed(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type
    if (hypre_ParCompGridT(compGrid[level])) for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++) hypre_ParCompGridT(compGrid[level])[i] = 0.0;
 
    //  Either solve on the coarse level or recurse
-   if (level+1 == num_levels-1) for (i = 0; i < 20; i++) FAC_Relax( compGrid[num_levels-1], relax_type );
+   if (level+1 == num_levels-1) for (i = 0; i < numRelax[3]; i++) FAC_Relax( compGrid[num_levels-1], relax_type );
    else for (i = 0; i < cycle_type; i++) FAC_Cycle_timed(amg_vdata, level+1, cycle_type, time_part);
 
    // Project up and relax
@@ -260,7 +260,7 @@ HYPRE_Int FAC_FCycle_timed(void *amg_vdata, HYPRE_Int time_part)
    }
 
    //  ... solve on coarsest level ...
-   if (time_part == 1) for (i = 0; i < 20; i++) FAC_Relax( compGrid[num_levels-1], relax_type );
+   if (time_part == 1) for (i = 0; i < numRelax[3]; i++) FAC_Relax( compGrid[num_levels-1], relax_type );
 
    // ... and work back up to the finest
    for (level = num_levels - 2; level > -1; level--)

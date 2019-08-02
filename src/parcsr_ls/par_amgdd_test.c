@@ -195,10 +195,9 @@ SetRelaxMarker(hypre_ParCompGrid *compGrid, hypre_ParVector *relax_marker, HYPRE
   {
     for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
     {
-      // if (hypre_ParCompGridRealDofMarker(compGrid)) is_real = hypre_ParCompGridRealDofMarker(compGrid)[i];
-      // else is_real = 1;
-      // if (is_real) num_nodes++;
-      if (hypre_ParCompGridARowPtr(compGrid)[i+1] - hypre_ParCompGridARowPtr(compGrid)[i] > 0) num_nodes++;
+      if (hypre_ParCompGridRealDofMarker(compGrid)) is_real = hypre_ParCompGridRealDofMarker(compGrid)[i];
+      else is_real = 1;
+      if (is_real) num_nodes++;
     }
   }
   hypre_MPI_Bcast(&num_nodes, 1, HYPRE_MPI_INT, proc, hypre_MPI_COMM_WORLD);
@@ -210,10 +209,9 @@ SetRelaxMarker(hypre_ParCompGrid *compGrid, hypre_ParVector *relax_marker, HYPRE
     HYPRE_Int cnt = 0;
     for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
     {
-      // if (hypre_ParCompGridRealDofMarker(compGrid)) is_real = hypre_ParCompGridRealDofMarker(compGrid)[i];
-      // else is_real = 1;
-      // if (is_real) global_indices[cnt++] = hypre_ParCompGridGlobalIndices(compGrid)[i];
-      if (hypre_ParCompGridARowPtr(compGrid)[i+1] - hypre_ParCompGridARowPtr(compGrid)[i] > 0) global_indices[cnt++] = hypre_ParCompGridGlobalIndices(compGrid)[i];
+      if (hypre_ParCompGridRealDofMarker(compGrid)) is_real = hypre_ParCompGridRealDofMarker(compGrid)[i];
+      else is_real = 1;
+      if (is_real) global_indices[cnt++] = hypre_ParCompGridGlobalIndices(compGrid)[i];
     }
   }
   hypre_MPI_Bcast(global_indices, num_nodes, HYPRE_MPI_INT, proc, hypre_MPI_COMM_WORLD);
