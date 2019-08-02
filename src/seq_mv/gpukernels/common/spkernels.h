@@ -37,12 +37,16 @@ struct coo_t {
 struct level_t {
   // L
   HYPRE_Int nlevL;
+  HYPRE_Int num_klevL;
   HYPRE_Int *jlevL;
   HYPRE_Int *ilevL;
+  HYPRE_Int *klevL;
   // U
   HYPRE_Int nlevU;
+  HYPRE_Int num_klevU;
   HYPRE_Int *jlevU;
   HYPRE_Int *ilevU;
+  HYPRE_Int *klevU;
   // level
   HYPRE_Int *levL;
   HYPRE_Int *levU;

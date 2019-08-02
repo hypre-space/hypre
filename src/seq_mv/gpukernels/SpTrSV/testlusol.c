@@ -100,6 +100,7 @@ int main(int argc, char *argv[])
    }
    printf("err norm %.2e\n", err);
    free(h_x4);
+exit(0);
    /*------------ GPU L/U Solv w/ Col Dyn-Sched */
    err = 0.0;
    h_x5 = (HYPRE_Real *) malloc(n*sizeof(HYPRE_Real));
