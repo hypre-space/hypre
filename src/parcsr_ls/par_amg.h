@@ -42,7 +42,7 @@ typedef struct
    HYPRE_Int      agg_interp_type;
    HYPRE_Int      agg_P_max_elmts;
    HYPRE_Int      agg_P12_max_elmts;
-   HYPRE_Real     restr_par;
+   HYPRE_Int      restr_par;
    HYPRE_Int      is_triangular;
    HYPRE_Int      gmres_switch;
    HYPRE_Int      agg_num_levels;
@@ -245,8 +245,7 @@ typedef struct
 
 #define hypre_ParAMGDataRestriction(amg_data) ((amg_data)->restr_par)
 #define hypre_ParAMGDataIsTriangular(amg_data) ((amg_data)->is_triangular)
-#define hypre_ParAMGDataGMRESSwitchR(amg_data) ((amg_data)->gmres_switch
-)
+#define hypre_ParAMGDataGMRESSwitchR(amg_data) ((amg_data)->gmres_switch)
 #define hypre_ParAMGDataMaxLevels(amg_data) ((amg_data)->max_levels)
 #define hypre_ParAMGDataStrongThreshold(amg_data) \
 ((amg_data)->strong_threshold)

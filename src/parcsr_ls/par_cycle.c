@@ -599,7 +599,8 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 
       --lev_counter[level];
 
-      if ( level != num_levels-1 && lev_counter[level] >= 0 )
+      //if ( level != num_levels-1 && lev_counter[level] >= 0 )
+      if ( lev_counter[level] >= 0 && level != num_levels-1  )
       {
          /*---------------------------------------------------------------
           * Visit coarser level next.

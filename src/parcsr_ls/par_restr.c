@@ -298,7 +298,7 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
    HYPRE_Int kdim_max = hypre_min(gmresAi_maxit, local_max_size);
    if (gmres_switch < local_max_size)
    {
-      fgmresT(local_max_size, NULL, NULL, 0.0, kdim_max, NULL, NULL, NULL, -1);
+      hypre_fgmresT(local_max_size, NULL, NULL, 0.0, kdim_max, NULL, NULL, NULL, -1);
    }
 
 #if AIR_DEBUG
@@ -591,8 +591,8 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
             HYPRE_Int  gmresAi_niter;
             HYPRE_Int kdim = hypre_min(gmresAi_maxit, local_size);
 
-            fgmresT(local_size, DAi, Dbi, gmresAi_tol, kdim, Dxi,
-                    &gmresAi_res, &gmresAi_niter, 0);
+            hypre_fgmresT(local_size, DAi, Dbi, gmresAi_tol, kdim, Dxi,
+                          &gmresAi_res, &gmresAi_niter, 0);
 
             if (gmresAi_res > gmresAi_tol)
             {
@@ -805,8 +805,9 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
       hypre_CSRMatrixDestroy(A_ext);
    }
 
-   if (gmres_switch < local_max_size) {
-      fgmresT(0, NULL, NULL, 0.0, 0, NULL, NULL, NULL, -2);
+   if (gmres_switch < local_max_size)
+   {
+      hypre_fgmresT(0, NULL, NULL, 0.0, 0, NULL, NULL, NULL, -2);
    }
 
    return 0;

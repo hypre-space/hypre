@@ -67,7 +67,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    HYPRE_Int      num_levels;
    HYPRE_Int      coarsen_type;
    HYPRE_Int      interp_type;
-   HYPRE_Real     restri_type;
+   HYPRE_Int      restri_type;
    HYPRE_Int      agg_interp_type;
    HYPRE_Int      measure_type;
    HYPRE_Int      agg_num_levels;
@@ -95,7 +95,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
 
 
    HYPRE_Int       i;
-   HYPRE_Int	   ndigits[4];
+   HYPRE_Int       ndigits[4];
 
    HYPRE_BigInt    coarse_size;
    HYPRE_Int       entries;
@@ -370,21 +370,21 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
          hypre_printf(" Interpolation = one-point interpolation \n");
       }
 
-      if (restri_type == 1.0)
+      if (restri_type == 1)
       {
          hypre_printf(" Restriction = local approximate ideal restriction (AIR-1)\n");
       }
-      else if (restri_type == 2.0)
+      else if (restri_type == 2)
       {
          hypre_printf(" Restriction = local approximate ideal restriction (AIR-2)\n");
       }
-      else if (restri_type == 1.5)
+      else if (restri_type == 15)
       {
          hypre_printf(" Restriction = local approximate ideal restriction (AIR-1.5)\n");
       }
-      else if (restri_type >= 3.0)
+      else if (restri_type >= 3)
       {
-         hypre_printf(" Restriction = local approximate ideal restriction (Neumann AIR-%.1f)\n", restri_type-3.0);
+         hypre_printf(" Restriction = local approximate ideal restriction (Neumann AIR-%.1f)\n", restri_type-3);
       }
 
       if (block_mode)
