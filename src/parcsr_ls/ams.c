@@ -2155,9 +2155,9 @@ HYPRE_Int hypre_AMSSetup(void *solver,
 
          hypre_CSRMatrixDestroy(A_local);
          hypre_CSRMatrixDestroy(B_local);
-         hypre_CSRMatrixDestroy(C_local);
+         hypre_CSRMatrixDestroy(C_local);*/
 
-         hypre_ParCSRMatrixDestroy(A); */
+         hypre_ParCSRMatrixDestroy(A); 
 
          *C_ptr = C;
       }
