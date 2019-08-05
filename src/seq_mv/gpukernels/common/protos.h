@@ -24,6 +24,8 @@ HYPRE_Int GaussSeidelRowLevSchd(hypre_CSRMatrix *csr, HYPRE_Real *b, HYPRE_Real 
 template <bool TEST>
 HYPRE_Int GaussSeidelRowDynSchd(hypre_CSRMatrix *csr, HYPRE_Real *b, HYPRE_Real *x, int REPEAT, bool print);
 template <bool TEST>
+HYPRE_Int GaussSeidelRowDynSchd_v2(hypre_CSRMatrix *csr, HYPRE_Real *b, HYPRE_Real *x, int REPEAT, bool print);
+template <bool TEST>
 HYPRE_Int GaussSeidelColDynSchd(hypre_CSRMatrix *csr, HYPRE_Real *b, HYPRE_Real *x, int REPEAT, bool print);
 double wall_timer();
 void GaussSeidel_cusparse1(hypre_CSRMatrix *csr, HYPRE_Real *b, HYPRE_Real *x, int, bool);

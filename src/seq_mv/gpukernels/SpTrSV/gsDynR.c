@@ -75,7 +75,7 @@ void hypreCUDAKernel_GaussSeidelRowDynSchd(HYPRE_Int n, T *b, T *x, T *a, HYPRE_
    }
 
    HYPRE_Int p = 0, q = 0, r = -1, s = 0, t = 0;
-   T sum = 0.0, diag = 0.0, b_r;
+   T sum = 0.0, diag = 0.0;
    bool find_diag = false;
 
    if (warp_lane < 2)
@@ -105,7 +105,7 @@ void hypreCUDAKernel_GaussSeidelRowDynSchd(HYPRE_Int n, T *b, T *x, T *a, HYPRE_
 
    if (warp_lane == 0)
    {
-      b_r = read_only_load(&b[r]);
+      sum = read_only_load(&b[r]);
       while (vdep[r] != 0);
    }
 
@@ -124,7 +124,7 @@ void hypreCUDAKernel_GaussSeidelRowDynSchd(HYPRE_Int n, T *b, T *x, T *a, HYPRE_
 #endif
       if (col != r)
       {
-         sum += v * vx[col];
+         sum -= v * vx[col];
       }
       else
       {
@@ -142,7 +142,7 @@ void hypreCUDAKernel_GaussSeidelRowDynSchd(HYPRE_Int n, T *b, T *x, T *a, HYPRE_
          const T v = read_only_load(&a[p]);
          if (col != r)
          {
-            sum += v * vx[col];
+            sum -= v * vx[col];
          }
          else
          {
@@ -159,11 +159,9 @@ void hypreCUDAKernel_GaussSeidelRowDynSchd(HYPRE_Int n, T *b, T *x, T *a, HYPRE_
       sum += __shfl_xor_sync(HYPRE_WARP_FULL_MASK, sum, d);
    }
 
-   b_r = __shfl_sync(HYPRE_WARP_FULL_MASK, b_r, 0);
-
    if (find_diag)
    {
-      x[r] = (b_r - sum) / diag;
+      x[r] = sum / diag;
       __threadfence();
    }
 
