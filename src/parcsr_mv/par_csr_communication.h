@@ -43,18 +43,18 @@ typedef struct
 {
    MPI_Comm               comm;
 
-   HYPRE_Int                    num_sends;
-   HYPRE_Int                   *send_procs;
-   HYPRE_Int			 *send_map_starts;
-   HYPRE_Int			 *send_map_elmts;
+   HYPRE_Int              num_sends;
+   HYPRE_Int             *send_procs;
+   HYPRE_Int             *send_map_starts;
+   HYPRE_Int             *send_map_elmts;
 
-   HYPRE_Int                    num_recvs;
-   HYPRE_Int                   *recv_procs;
-   HYPRE_Int                   *recv_vec_starts;
+   HYPRE_Int              num_recvs;
+   HYPRE_Int             *recv_procs;
+   HYPRE_Int             *recv_vec_starts;
 
    /* remote communication information */
-   hypre_MPI_Datatype          *send_mpi_types;
-   hypre_MPI_Datatype          *recv_mpi_types;
+   hypre_MPI_Datatype    *send_mpi_types;
+   hypre_MPI_Datatype    *recv_mpi_types;
 
 #ifdef HYPRE_USING_PERSISTENT_COMM
    hypre_ParCSRPersistentCommHandle *persistent_comm_handles[NUM_OF_COMM_PKG_JOB_TYPE];
@@ -68,8 +68,8 @@ typedef struct
 typedef struct
 {
    hypre_ParCSRCommPkg  *comm_pkg;
-   void 	  *send_data;
-   void 	  *recv_data;
+   void                 *send_data;
+   void                 *recv_data;
 
    HYPRE_Int             num_requests;
    hypre_MPI_Request    *requests;
@@ -79,9 +79,9 @@ typedef struct
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_ParCSRCommPkg
  *--------------------------------------------------------------------------*/
- 
+
 #define hypre_ParCSRCommPkgComm(comm_pkg)          (comm_pkg -> comm)
-                                               
+
 #define hypre_ParCSRCommPkgNumSends(comm_pkg)      (comm_pkg -> num_sends)
 #define hypre_ParCSRCommPkgSendProcs(comm_pkg)     (comm_pkg -> send_procs)
 #define hypre_ParCSRCommPkgSendProc(comm_pkg, i)   (comm_pkg -> send_procs[i])
@@ -105,7 +105,7 @@ typedef struct
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_ParCSRCommHandle
  *--------------------------------------------------------------------------*/
- 
+
 #define hypre_ParCSRCommHandleCommPkg(comm_handle)     (comm_handle -> comm_pkg)
 #define hypre_ParCSRCommHandleSendData(comm_handle)    (comm_handle -> send_data)
 #define hypre_ParCSRCommHandleRecvData(comm_handle)    (comm_handle -> recv_data)

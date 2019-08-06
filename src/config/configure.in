@@ -150,6 +150,8 @@ hypre_user_gave_caliper_inc=no
 
 hypre_found_cuda=no
 
+hypre_using_node_aware_mpi=no
+
 dnl *********************************************************************
 dnl * Initialize flag-check variables
 dnl *********************************************************************
@@ -631,6 +633,27 @@ AS_HELP_STRING([--with-MPI-flags=FLAGS],
 [MPIFLAGS=""]
 )
 
+dnl ***** Node Aware MPI
+AC_ARG_WITH(node-aware-mpi,
+AS_HELP_STRING([--with-node-aware-mpi],
+               [Use Node Aware MPI (default is NO).]),
+[case "$withval" in
+    yes) hypre_using_node_aware_mpi=yes;;
+    no)  hypre_using_node_aware_mpi=no ;;
+    *)   hypre_using_node_aware_mpi=no ;;
+ esac],
+[hypre_using_node_aware_mpi=no]
+)
+
+AC_ARG_WITH(node-aware-mpi-include,
+AS_HELP_STRING([--with-node-aware-mpi-include=DIR],
+               [User specifies that nap_comm.hpp is in DIR.]),
+[for nap_dir in $withval; do
+    HYPRE_NAP_INCLUDE="$HYPRE_NAP_INCLUDE -I$nap_dir"
+ done;
+ hypre_using_node_aware_mpi=yes]
+)
+
 dnl ***** BLAS
 
 AC_ARG_WITH(blas-lib,
@@ -1104,7 +1127,7 @@ then
       then
          AC_CHECK_PROGS(CC, [mpixlc-gpu mpiclang-gpu])
       fi
-
+      
       if test "$hypre_using_openmp" = "yes"
       then
          AC_CHECK_PROGS(CC, [mpxlc mpixlc_r mpixlc mpiicc mpigcc mpicc mpipgcc])
@@ -1240,6 +1263,11 @@ dnl   if test "$hypre_using_mpi" != "no"
 dnl   then
       AC_DEFINE(HYPRE_NO_GLOBAL_PARTITION, 1)
 dnl   fi
+fi
+
+if test "$hypre_using_node_aware_mpi" = "yes"
+then
+   AC_DEFINE(HYPRE_USING_NODE_AWARE_MPI, 1)
 fi
 
 dnl *********************************************************************
@@ -1553,17 +1581,17 @@ then
 
    if test "$hypre_using_cuda" != "yes"
    then
-      if [test "$CXX" = "mpixlC" || test "$CXX" = "xlC_r"]
-      then 
+   if [test "$CXX" = "mpixlC" || test "$CXX" = "xlC_r"]
+   then 
          CXXFLAGS="${CXXFLAGS} -+ -std=c++11"
-      fi
    fi
+   	fi
 
    dnl let CC be CXX 
-   CC=${CXX}
+	   CC=${CXX}
    LINK_CC=${LINK_CXX}
    CFLAGS=${CXXFLAGS}
-fi
+	fi
 
 dnl *********************************************************************
 dnl * Set kokkos options
@@ -1574,18 +1602,18 @@ then
    AC_DEFINE(HYPRE_USING_KOKKOS, 1, [KOKKOS being used])
 
    if test "$hypre_using_cuda" != "yes"
-   then
-      if [test "$CXX" = "mpixlC" || test "$CXX" = "xlC_r"]
-      then 
+then
+   if [test "$CXX" = "mpixlC" || test "$CXX" = "xlC_r"]
+   then 
          CXXFLAGS="${CXXFLAGS} -+ -std=c++11"
-      fi
    fi
+      fi
 
    dnl let CC be CXX 
-   CC=${CXX}
+         CC=${CXX}
    LINK_CC=${LINK_CXX}
    CFLAGS=${CXXFLAGS}
-fi
+      fi   
 
 dnl *********************************************************************
 dnl * Set cuda options
@@ -1625,19 +1653,19 @@ fi
 dnl *********************************************************************
 dnl * Set unified memory options
 dnl *********************************************************************
-if test "$hypre_using_um" != "yes"
-then
+   if test "$hypre_using_um" != "yes"
+   then
    dnl Without UM
    if test "$hypre_user_chose_cuda" = "yes"
    then
       AC_MSG_NOTICE([***********************************************************])
-      AC_MSG_NOTICE([Configuring with --with-cuda=yes without unified memory.]) 
-      AC_MSG_NOTICE([It only works for struct interface.])
-      AC_MSG_NOTICE([Use --enable-unified-memory to compile with unified memory.])
+       	AC_MSG_NOTICE([Configuring with --with-cuda=yes without unified memory.]) 
+	AC_MSG_NOTICE([It only works for struct interface.])
+	AC_MSG_NOTICE([Use --enable-unified-memory to compile with unified memory.])
       AC_MSG_NOTICE([***********************************************************])
    fi
    if test "$hypre_using_device_openmp" = "yes"
-   then
+then
       AC_MSG_NOTICE([***********************************************************])
       AC_MSG_NOTICE([Configuring with --with-device-openmp=yes without unified memory.]) 
       AC_MSG_NOTICE([It only works for struct interface.])
@@ -1668,11 +1696,11 @@ then
 
    if [test "$CC" = "clang-gpu" || test "$CC" = "mpiclang-gpu"]
    then
-      CFLAGS+=" -fopenmp-nonaliased-maps"
+     CFLAGS+=" -fopenmp-nonaliased-maps"
    fi
    if [test "$CXX" = "clang++-gpu" || test "$CXX" = "mpiclang++-gpu"]
    then
-      CXXFLAGS+=" -fopenmp-nonaliased-maps"
+     CXXFLAGS+=" -fopenmp-nonaliased-maps"
    fi
    if test "$hypre_using_debug" = "yes"
    then
@@ -1833,6 +1861,11 @@ AC_SUBST(HYPRE_DISTRIBUTED_LS_DIR)
 AC_SUBST(HYPRE_EUCLID_FILES)
 AC_SUBST(HYPRE_PARASAILS_FILES)
 AC_SUBST(HYPRE_PILUT_FILES)
+
+dnl *********************************************************************
+dnl * Node_Aware_MPI
+dnl *********************************************************************
+AC_SUBST(HYPRE_NAP_INCLUDE)
 
 dnl *********************************************************************
 dnl * FEI-related files, libraries and directories

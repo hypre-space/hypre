@@ -67,6 +67,9 @@
 /* Define to 1 if an MPI library is found */
 #undef HYPRE_HAVE_MPI
 
+/* Define to 1 if Node Aware MPI library is used */
+#undef HYPRE_USING_NODE_AWARE_MPI
+
 /* Define to 1 if the routine MPI_Comm_f2c is found */
 #undef HYPRE_HAVE_MPI_COMM_F2C
 

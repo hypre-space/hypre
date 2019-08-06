@@ -49,7 +49,7 @@ hypre_ParCSRMatrixCreate( MPI_Comm comm,
    HYPRE_Int  num_procs, my_id;
    HYPRE_Int local_num_rows, local_num_cols;
    HYPRE_BigInt first_row_index, first_col_diag;
-   
+
    matrix = hypre_CTAlloc(hypre_ParCSRMatrix, 1, HYPRE_MEMORY_HOST);
 
    hypre_MPI_Comm_rank(comm,&my_id);
@@ -57,8 +57,8 @@ hypre_ParCSRMatrixCreate( MPI_Comm comm,
 
    if (!row_starts)
    {
-    
-#ifdef HYPRE_NO_GLOBAL_PARTITION  
+
+#ifdef HYPRE_NO_GLOBAL_PARTITION
       hypre_GenerateLocalPartitioning(global_num_rows, num_procs, my_id,
                                       &row_starts);
 #else
@@ -73,7 +73,7 @@ hypre_ParCSRMatrixCreate( MPI_Comm comm,
       }
       else
       {
-#ifdef HYPRE_NO_GLOBAL_PARTITION   
+#ifdef HYPRE_NO_GLOBAL_PARTITION
          hypre_GenerateLocalPartitioning(global_num_cols, num_procs, my_id,
                                          &col_starts);
 #else
@@ -83,7 +83,7 @@ hypre_ParCSRMatrixCreate( MPI_Comm comm,
    }
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
-   /* row_starts[0] is start of local rows.  row_starts[1] is start of next 
+   /* row_starts[0] is start of local rows.  row_starts[1] is start of next
       processor's rows */
    first_row_index = row_starts[0];
    local_num_rows = row_starts[1]-first_row_index ;
@@ -107,13 +107,15 @@ hypre_ParCSRMatrixCreate( MPI_Comm comm,
    hypre_ParCSRMatrixGlobalNumCols(matrix) = global_num_cols;
    hypre_ParCSRMatrixFirstRowIndex(matrix) = first_row_index;
    hypre_ParCSRMatrixFirstColDiag(matrix) = first_col_diag;
- 
+
    hypre_ParCSRMatrixLastRowIndex(matrix) = first_row_index + local_num_rows - 1;
    hypre_ParCSRMatrixLastColDiag(matrix) = first_col_diag + local_num_cols - 1;
 
    hypre_ParCSRMatrixColMapOffd(matrix) = NULL;
+   hypre_ParCSRMatrixProcOrdering(matrix) = NULL;
 
    hypre_ParCSRMatrixAssumedPartition(matrix) = NULL;
+   hypre_ParCSRMatrixOwnsAssumedPartition(matrix) = 1;
 
    /* When NO_GLOBAL_PARTITION is set we could make these null, instead
       of leaving the range.  If that change is made, then when this create
@@ -131,10 +133,16 @@ hypre_ParCSRMatrixCreate( MPI_Comm comm,
    hypre_ParCSRMatrixOwnsRowStarts(matrix) = 1;
    hypre_ParCSRMatrixOwnsColStarts(matrix) = 1;
    if (row_starts == col_starts)
+   {
       hypre_ParCSRMatrixOwnsColStarts(matrix) = 0;
+   }
    hypre_ParCSRMatrixRowindices(matrix) = NULL;
    hypre_ParCSRMatrixRowvalues(matrix) = NULL;
    hypre_ParCSRMatrixGetrowactive(matrix) = 0;
+
+   matrix->bdiaginv = NULL;
+   matrix->bdiaginv_comm_pkg = NULL;
+   matrix->bdiag_size = -1;
 
    return matrix;
 }
@@ -143,7 +151,7 @@ hypre_ParCSRMatrixCreate( MPI_Comm comm,
  * hypre_ParCSRMatrixDestroy
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_ParCSRMatrixDestroy( hypre_ParCSRMatrix *matrix )
 {
    if (matrix)
@@ -162,7 +170,7 @@ hypre_ParCSRMatrixDestroy( hypre_ParCSRMatrix *matrix )
          }
          if (hypre_ParCSRMatrixColMapOffd(matrix))
          {
-	        /*ASSERT_HOST(hypre_ParCSRMatrixColMapOffd(matrix));*/
+            /*ASSERT_HOST(hypre_ParCSRMatrixColMapOffd(matrix));*/
             hypre_TFree(hypre_ParCSRMatrixColMapOffd(matrix), HYPRE_MEMORY_HOST);
          }
          if (hypre_ParCSRMatrixCommPkg(matrix))
@@ -178,8 +186,21 @@ hypre_ParCSRMatrixDestroy( hypre_ParCSRMatrix *matrix )
       hypre_TFree(hypre_ParCSRMatrixRowindices(matrix), HYPRE_MEMORY_HOST);
       hypre_TFree(hypre_ParCSRMatrixRowvalues(matrix), HYPRE_MEMORY_HOST);
 
-      if (hypre_ParCSRMatrixAssumedPartition(matrix))
+      if ( hypre_ParCSRMatrixAssumedPartition(matrix) && hypre_ParCSRMatrixOwnsAssumedPartition(matrix) )
+      {
          hypre_AssumedPartitionDestroy(hypre_ParCSRMatrixAssumedPartition(matrix));
+      }
+
+      if ( hypre_ParCSRMatrixProcOrdering(matrix) )
+      {
+         hypre_TFree(hypre_ParCSRMatrixProcOrdering(matrix), HYPRE_MEMORY_HOST);
+      }
+
+      hypre_TFree(matrix->bdiaginv, HYPRE_MEMORY_HOST);
+      if (matrix->bdiaginv_comm_pkg)
+      {
+         hypre_MatvecCommPkgDestroy(matrix->bdiaginv_comm_pkg);
+      }
 
       hypre_TFree(matrix, HYPRE_MEMORY_HOST);
    }
@@ -191,7 +212,7 @@ hypre_ParCSRMatrixDestroy( hypre_ParCSRMatrix *matrix )
  * hypre_ParCSRMatrixInitialize
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_ParCSRMatrixInitialize( hypre_ParCSRMatrix *matrix )
 {
    if (!matrix)
@@ -202,9 +223,9 @@ hypre_ParCSRMatrixInitialize( hypre_ParCSRMatrix *matrix )
 
    hypre_CSRMatrixInitialize(hypre_ParCSRMatrixDiag(matrix));
    hypre_CSRMatrixInitialize(hypre_ParCSRMatrixOffd(matrix));
-   hypre_ParCSRMatrixColMapOffd(matrix) = 
-      hypre_CTAlloc(HYPRE_BigInt, hypre_CSRMatrixNumCols(
-                       hypre_ParCSRMatrixOffd(matrix)), HYPRE_MEMORY_HOST);
+   hypre_ParCSRMatrixColMapOffd(matrix) =
+   hypre_CTAlloc(HYPRE_BigInt, hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(matrix)),
+                 HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }
@@ -213,7 +234,7 @@ hypre_ParCSRMatrixInitialize( hypre_ParCSRMatrix *matrix )
  * hypre_ParCSRMatrixBigInitialize
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_ParCSRMatrixBigInitialize( hypre_ParCSRMatrix *matrix )
 {
    if (!matrix)
@@ -224,7 +245,7 @@ hypre_ParCSRMatrixBigInitialize( hypre_ParCSRMatrix *matrix )
 
    hypre_CSRMatrixInitialize(hypre_ParCSRMatrixDiag(matrix));
    hypre_CSRMatrixBigInitialize(hypre_ParCSRMatrixOffd(matrix));
-   hypre_ParCSRMatrixColMapOffd(matrix) = 
+   hypre_ParCSRMatrixColMapOffd(matrix) =
       hypre_CTAlloc(HYPRE_BigInt, hypre_CSRMatrixNumCols(
                        hypre_ParCSRMatrixOffd(matrix)), HYPRE_MEMORY_HOST);
 
@@ -235,7 +256,7 @@ hypre_ParCSRMatrixBigInitialize( hypre_ParCSRMatrix *matrix )
  * hypre_ParCSRMatrixSetNumNonzeros
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_ParCSRMatrixSetNumNonzeros( hypre_ParCSRMatrix *matrix )
 {
    MPI_Comm comm;
@@ -269,7 +290,7 @@ hypre_ParCSRMatrixSetNumNonzeros( hypre_ParCSRMatrix *matrix )
  * hypre_ParCSRMatrixSetDNumNonzeros
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_ParCSRMatrixSetDNumNonzeros( hypre_ParCSRMatrix *matrix )
 {
    MPI_Comm comm;
@@ -291,7 +312,7 @@ hypre_ParCSRMatrixSetDNumNonzeros( hypre_ParCSRMatrix *matrix )
    offd = hypre_ParCSRMatrixOffd(matrix);
    offd_i = hypre_CSRMatrixI(offd);
    local_num_rows = hypre_CSRMatrixNumRows(diag);
-   local_num_nonzeros = (HYPRE_Real) diag_i[local_num_rows] 
+   local_num_nonzeros = (HYPRE_Real) diag_i[local_num_rows]
       + (HYPRE_Real) offd_i[local_num_rows];
    hypre_MPI_Allreduce(&local_num_nonzeros, &total_num_nonzeros, 1,
                        HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
@@ -303,7 +324,7 @@ hypre_ParCSRMatrixSetDNumNonzeros( hypre_ParCSRMatrix *matrix )
  * hypre_ParCSRMatrixSetDataOwner
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_ParCSRMatrixSetDataOwner( hypre_ParCSRMatrix *matrix,
                                 HYPRE_Int              owns_data )
 {
@@ -322,7 +343,7 @@ hypre_ParCSRMatrixSetDataOwner( hypre_ParCSRMatrix *matrix,
  * hypre_ParCSRMatrixSetRowStartsOwner
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_ParCSRMatrixSetRowStartsOwner( hypre_ParCSRMatrix *matrix,
                                      HYPRE_Int owns_row_starts )
 {
@@ -341,7 +362,7 @@ hypre_ParCSRMatrixSetRowStartsOwner( hypre_ParCSRMatrix *matrix,
  * hypre_ParCSRMatrixSetColStartsOwner
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_ParCSRMatrixSetColStartsOwner( hypre_ParCSRMatrix *matrix,
                                      HYPRE_Int owns_col_starts )
 {
@@ -415,7 +436,7 @@ hypre_ParCSRMatrixRead( MPI_Comm    comm,
 
    for (i=0; i < num_cols_offd; i++)
       hypre_fscanf(fp, "%b", &col_map_offd[i]);
-        
+
    fclose(fp);
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
@@ -455,9 +476,9 @@ hypre_ParCSRMatrixRead( MPI_Comm    comm,
       offd = hypre_CSRMatrixCreate(local_num_rows,0,0);
       hypre_CSRMatrixInitialize(offd);
    }
-        
+
    matrix = hypre_CTAlloc(hypre_ParCSRMatrix, 1, HYPRE_MEMORY_HOST);
-   
+
    hypre_ParCSRMatrixComm(matrix) = comm;
    hypre_ParCSRMatrixGlobalNumRows(matrix) = global_num_rows;
    hypre_ParCSRMatrixGlobalNumCols(matrix) = global_num_cols;
@@ -499,7 +520,7 @@ hypre_ParCSRMatrixRead( MPI_Comm    comm,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParCSRMatrixPrint( hypre_ParCSRMatrix *matrix, 
+hypre_ParCSRMatrixPrint( hypre_ParCSRMatrix *matrix,
                          const char         *file_name )
 {
    MPI_Comm comm;
@@ -535,14 +556,14 @@ hypre_ParCSRMatrixPrint( hypre_ParCSRMatrix *matrix,
 
    hypre_MPI_Comm_rank(comm, &my_id);
    hypre_MPI_Comm_size(comm, &num_procs);
-   
+
    hypre_sprintf(new_file_d,"%s.D.%d",file_name,my_id);
    hypre_sprintf(new_file_o,"%s.O.%d",file_name,my_id);
    hypre_sprintf(new_file_info,"%s.INFO.%d",file_name,my_id);
    hypre_CSRMatrixPrint(hypre_ParCSRMatrixDiag(matrix),new_file_d);
    if (num_cols_offd != 0)
       hypre_CSRMatrixPrint(hypre_ParCSRMatrixOffd(matrix),new_file_o);
-  
+
    fp = fopen(new_file_info, "w");
    hypre_fprintf(fp, "%b\n", global_num_rows);
    hypre_fprintf(fp, "%b\n", global_num_cols);
@@ -570,7 +591,7 @@ hypre_ParCSRMatrixPrint( hypre_ParCSRMatrix *matrix,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParCSRMatrixPrintIJ( const hypre_ParCSRMatrix *matrix, 
+hypre_ParCSRMatrixPrintIJ( const hypre_ParCSRMatrix *matrix,
                            const HYPRE_Int           base_i,
                            const HYPRE_Int           base_j,
                            const char               *filename )
@@ -613,7 +634,7 @@ hypre_ParCSRMatrixPrintIJ( const hypre_ParCSRMatrix *matrix,
    col_starts      = hypre_ParCSRMatrixColStarts(matrix);
    hypre_MPI_Comm_rank(comm, &myid);
    hypre_MPI_Comm_size(comm, &num_procs);
-   
+
    hypre_sprintf(new_filename,"%s.%05d", filename, myid);
 
    if ((file = fopen(new_filename, "w")) == NULL)
@@ -703,7 +724,7 @@ hypre_ParCSRMatrixReadIJ( MPI_Comm             comm,
                           const char          *filename,
                           HYPRE_Int           *base_i_ptr,
                           HYPRE_Int           *base_j_ptr,
-                          hypre_ParCSRMatrix **matrix_ptr) 
+                          hypre_ParCSRMatrix **matrix_ptr)
 {
    HYPRE_BigInt        global_num_rows;
    HYPRE_BigInt        global_num_cols;
@@ -738,7 +759,7 @@ hypre_ParCSRMatrixReadIJ( MPI_Comm             comm,
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &myid);
-   
+
    hypre_sprintf(new_filename,"%s.%05d", filename, myid);
 
    if ((file = fopen(new_filename, "r")) == NULL)
@@ -765,7 +786,7 @@ hypre_ParCSRMatrixReadIJ( MPI_Comm             comm,
    equal = 1;
    for (i = 0; i <= num_procs; i++)
    {
-      row_starts[i] -= big_base_i;      
+      row_starts[i] -= big_base_i;
       col_starts[i] -= big_base_j;
       if (row_starts[i] != col_starts[i]) equal = 0;
    }
@@ -779,7 +800,7 @@ hypre_ParCSRMatrixReadIJ( MPI_Comm             comm,
                                      row_starts, col_starts, num_cols_offd,
                                      num_nonzeros_diag, num_nonzeros_offd);
    hypre_ParCSRMatrixInitialize(matrix);
- 
+
    diag = hypre_ParCSRMatrixDiag(matrix);
    offd = hypre_ParCSRMatrixOffd(matrix);
 
@@ -806,7 +827,7 @@ hypre_ParCSRMatrixReadIJ( MPI_Comm             comm,
    {
       /* read values */
       hypre_fscanf(file, "%b %b %le", &I, &J, &data);
-      i2 = (HYPRE_Int)(I-big_base_i-first_row_index);       
+      i2 = (HYPRE_Int)(I-big_base_i-first_row_index);
       J -= big_base_j;
       if (i2 > row_cnt)
       {
@@ -816,12 +837,12 @@ hypre_ParCSRMatrixReadIJ( MPI_Comm             comm,
       }
       if (J < first_col_diag || J > last_col_diag)
       {
-         tmp_j[offd_cnt] = J;       
+         tmp_j[offd_cnt] = J;
          offd_data[offd_cnt++] = data;
       }
-      else       
+      else
       {
-         diag_j[diag_cnt] = (HYPRE_Int)(J - first_col_diag);       
+         diag_j[diag_cnt] = (HYPRE_Int)(J - first_col_diag);
          diag_data[diag_cnt++] = data;
       }
    }
@@ -870,7 +891,7 @@ hypre_ParCSRMatrixReadIJ( MPI_Comm             comm,
          }
       }
    }
-          
+
    *base_i_ptr = base_i;
    *base_j_ptr = base_j;
    *matrix_ptr = matrix;
@@ -884,13 +905,13 @@ hypre_ParCSRMatrixReadIJ( MPI_Comm             comm,
  * "End" is actually the row number of the last row on this processor.
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_ParCSRMatrixGetLocalRange( hypre_ParCSRMatrix *matrix,
                                  HYPRE_BigInt       *row_start,
                                  HYPRE_BigInt       *row_end,
                                  HYPRE_BigInt       *col_start,
                                  HYPRE_BigInt       *col_end )
-{  
+{
    HYPRE_Int my_id;
 
    if (!matrix)
@@ -935,18 +956,18 @@ hypre_ParCSRMatrixGetLocalRange( hypre_ParCSRMatrix *matrix,
  * AJC 4/99.
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_ParCSRMatrixGetRow( hypre_ParCSRMatrix  *mat,
                           HYPRE_BigInt         row,
                           HYPRE_Int           *size,
                           HYPRE_BigInt       **col_ind,
                           HYPRE_Complex      **values )
-{  
+{
    HYPRE_Int my_id;
    HYPRE_BigInt row_start, row_end;
    hypre_CSRMatrix *Aa;
    hypre_CSRMatrix *Ba;
-   
+
    if (!mat)
    {
       hypre_error_in_arg(1);
@@ -954,7 +975,7 @@ hypre_ParCSRMatrixGetRow( hypre_ParCSRMatrix  *mat,
    }
    Aa = (hypre_CSRMatrix *) hypre_ParCSRMatrixDiag(mat);
    Ba = (hypre_CSRMatrix *) hypre_ParCSRMatrixOffd(mat);
-   
+
    if (hypre_ParCSRMatrixGetrowactive(mat)) return(-1);
 
    hypre_MPI_Comm_rank( hypre_ParCSRMatrixComm(mat), &my_id );
@@ -971,7 +992,7 @@ hypre_ParCSRMatrixGetRow( hypre_ParCSRMatrix  *mat,
 
    /* if buffer is not allocated and some information is requested,
       allocate buffer */
-   if (!hypre_ParCSRMatrixRowvalues(mat) && ( col_ind || values )) 
+   if (!hypre_ParCSRMatrixRowvalues(mat) && ( col_ind || values ))
    {
       /*
         allocate enough space to hold information from the longest row.
@@ -981,13 +1002,13 @@ hypre_ParCSRMatrixGetRow( hypre_ParCSRMatrix  *mat,
       HYPRE_Int     m = row_end-row_start;
 
       for ( i=0; i<m; i++ ) {
-         tmp = hypre_CSRMatrixI(Aa)[i+1] - hypre_CSRMatrixI(Aa)[i] + 
+         tmp = hypre_CSRMatrixI(Aa)[i+1] - hypre_CSRMatrixI(Aa)[i] +
             hypre_CSRMatrixI(Ba)[i+1] - hypre_CSRMatrixI(Ba)[i];
          if (max < tmp) { max = tmp; }
       }
 
-      hypre_ParCSRMatrixRowvalues(mat) = (HYPRE_Complex *) hypre_CTAlloc( HYPRE_Complex, max , HYPRE_MEMORY_HOST); 
-      hypre_ParCSRMatrixRowindices(mat) = (HYPRE_BigInt *) hypre_CTAlloc( HYPRE_BigInt, max , HYPRE_MEMORY_HOST); 
+      hypre_ParCSRMatrixRowvalues(mat) = (HYPRE_Complex *) hypre_CTAlloc( HYPRE_Complex, max , HYPRE_MEMORY_HOST);
+      hypre_ParCSRMatrixRowindices(mat) = (HYPRE_BigInt *) hypre_CTAlloc( HYPRE_BigInt, max , HYPRE_MEMORY_HOST);
    }
 
    /* Copy from dual sequential matrices into buffer */
@@ -1039,10 +1060,10 @@ hypre_ParCSRMatrixGetRow( hypre_ParCSRMatrix  *mat,
                }
                for ( i=0; i<nzA; i++ )     idx_p[imark+i] = cstart + cworkA[i];
                for ( i=imark; i<nzB; i++ ) idx_p[nzA+i]   = cmap[cworkB[i]];
-            } 
-         } 
+            }
+         }
          else {
-            if (col_ind) *col_ind = 0; 
+            if (col_ind) *col_ind = 0;
             if (values)   *values   = 0;
          }
       }
@@ -1057,13 +1078,13 @@ hypre_ParCSRMatrixGetRow( hypre_ParCSRMatrix  *mat,
  * hypre_ParCSRMatrixRestoreRow
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_ParCSRMatrixRestoreRow( hypre_ParCSRMatrix *matrix,
                               HYPRE_BigInt        row,
                               HYPRE_Int          *size,
                               HYPRE_BigInt      **col_ind,
                               HYPRE_Complex     **values )
-{  
+{
    if (!hypre_ParCSRMatrixGetrowactive(matrix))
    {
       hypre_error(HYPRE_ERROR_GENERIC);
@@ -1080,7 +1101,7 @@ hypre_ParCSRMatrixRestoreRow( hypre_ParCSRMatrix *matrix,
  * generates a ParCSRMatrix distributed across the processors in comm
  * from a CSRMatrix on proc 0 .
  *
- * This shouldn't be used with the HYPRE_NO_GLOBAL_PARTITON option 
+ * This shouldn't be used with the HYPRE_NO_GLOBAL_PARTITON option
  *
  *--------------------------------------------------------------------------*/
 
@@ -1099,11 +1120,11 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm         comm,
    HYPRE_Int           num_procs, my_id;
    HYPRE_Int          *local_num_nonzeros=NULL;
    HYPRE_Int           num_nonzeros;
-  
+
    HYPRE_Complex      *a_data;
    HYPRE_Int          *a_i;
    HYPRE_Int          *a_j;
-  
+
    hypre_CSRMatrix    *local_A;
 
    hypre_MPI_Request  *requests;
@@ -1120,19 +1141,19 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm         comm,
    hypre_MPI_Comm_size(comm, &num_procs);
 
    global_data = hypre_CTAlloc(HYPRE_BigInt, 2*num_procs+6, HYPRE_MEMORY_HOST);
-   if (my_id == 0) 
+   if (my_id == 0)
    {
       global_size = 3;
-      if (row_starts) 
+      if (row_starts)
       {
          if (col_starts)
          {
             if (col_starts != row_starts)
             {
-               /* contains code for what to expect, 
+               /* contains code for what to expect,
                   if 0:  row_starts = col_starts, only row_starts given
                   if 1: only row_starts given, col_starts = NULL
-                  if 2: both row_starts and col_starts given 
+                  if 2: both row_starts and col_starts given
                   if 3: only col_starts given, row_starts = NULL */
                global_data[3] = 2;
                global_size = (HYPRE_BigInt)(2*num_procs+6);
@@ -1157,7 +1178,7 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm         comm,
                global_data[i+4] = row_starts[i];
          }
       }
-      else 
+      else
       {
          if (col_starts)
          {
@@ -1230,9 +1251,9 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm         comm,
    {
       local_num_nonzeros = hypre_CTAlloc(HYPRE_Int,  num_procs, HYPRE_MEMORY_HOST);
       for (i=0; i < num_procs-1; i++)
-         local_num_nonzeros[i] = a_i[(HYPRE_Int)row_starts[i+1]] 
+         local_num_nonzeros[i] = a_i[(HYPRE_Int)row_starts[i+1]]
             - a_i[(HYPRE_Int)row_starts[i]];
-      local_num_nonzeros[num_procs-1] = a_i[(HYPRE_Int)global_num_rows] 
+      local_num_nonzeros[num_procs-1] = a_i[(HYPRE_Int)global_num_rows]
          - a_i[(HYPRE_Int)row_starts[num_procs-1]];
    }
    hypre_MPI_Scatter(local_num_nonzeros,1,HYPRE_MPI_INT,&num_nonzeros,1,
@@ -1250,7 +1271,7 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm         comm,
       for (i=1; i < num_procs; i++)
       {
          ind = a_i[(HYPRE_Int)row_starts[i]];
-         hypre_BuildCSRMatrixMPIDataType(local_num_nonzeros[i], 
+         hypre_BuildCSRMatrixMPIDataType(local_num_nonzeros[i],
                                          local_num_rows[i],
                                          &a_data[ind],
                                          &a_i[(HYPRE_Int)row_starts[i]],
@@ -1272,7 +1293,7 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm         comm,
    else
    {
       hypre_CSRMatrixInitialize(local_A);
-      hypre_BuildCSRMatrixMPIDataType(num_nonzeros, 
+      hypre_BuildCSRMatrixMPIDataType(num_nonzeros,
                                       local_num_rows[my_id],
                                       hypre_CSRMatrixData(local_A),
                                       hypre_CSRMatrixI(local_A),
@@ -1289,11 +1310,11 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm         comm,
 
    /* set pointers back to NULL before destroying */
    if (my_id == 0)
-   {      
+   {
       hypre_CSRMatrixData(local_A) = NULL;
       hypre_CSRMatrixI(local_A) = NULL;
-      hypre_CSRMatrixJ(local_A) = NULL; 
-   }      
+      hypre_CSRMatrixJ(local_A) = NULL;
+   }
    hypre_CSRMatrixDestroy(local_A);
    hypre_TFree(local_num_rows, HYPRE_MEMORY_HOST);
    hypre_TFree(csr_matrix_datatypes, HYPRE_MEMORY_HOST);
@@ -1343,14 +1364,14 @@ GenerateDiagAndOffd(hypre_CSRMatrix *A,
 
       for (i=0; i < num_cols; i++)
          marker[i] = 0;
-        
+
       jo = 0;
       jd = 0;
       for (i=0; i < num_rows; i++)
       {
          offd_i[i] = jo;
          diag_i[i] = jd;
-   
+
          for (j=a_i[i]-first_elmt; j < a_i[i+1]-first_elmt; j++)
             if (a_j[j] < first_col_diag || a_j[j] > last_col_diag)
             {
@@ -1410,7 +1431,7 @@ GenerateDiagAndOffd(hypre_CSRMatrix *A,
       }
       hypre_TFree(marker, HYPRE_MEMORY_HOST);
    }
-   else 
+   else
    {
       hypre_CSRMatrixNumNonzeros(diag) = num_nonzeros;
       hypre_CSRMatrixInitialize(diag);
@@ -1434,7 +1455,7 @@ GenerateDiagAndOffd(hypre_CSRMatrix *A,
       hypre_CSRMatrixNumCols(offd) = 0;
       hypre_CSRMatrixI(offd) = offd_i;
    }
-   
+
    return hypre_error_flag;
 }
 
@@ -1452,14 +1473,14 @@ hypre_MergeDiagAndOffd(hypre_ParCSRMatrix *par_matrix)
 
    HYPRE_Int          *diag_i = hypre_CSRMatrixI(diag);
    HYPRE_Int          *diag_j = hypre_CSRMatrixJ(diag);
-   HYPRE_Complex      *diag_data = hypre_CSRMatrixData(diag);
+   HYPRE_Complex       *diag_data = hypre_CSRMatrixData(diag);
    HYPRE_Int          *offd_i = hypre_CSRMatrixI(offd);
    HYPRE_Int          *offd_j = hypre_CSRMatrixJ(offd);
-   HYPRE_Complex      *offd_data = hypre_CSRMatrixData(offd);
+   HYPRE_Complex       *offd_data = hypre_CSRMatrixData(offd);
 
    HYPRE_Int          *matrix_i;
    HYPRE_BigInt       *matrix_j;
-   HYPRE_Complex      *matrix_data;
+   HYPRE_Complex       *matrix_data;
 
    HYPRE_Int          num_nonzeros, i, j;
    HYPRE_Int          count;
@@ -1535,11 +1556,11 @@ hypre_ParCSRMatrixToCSRMatrixAll(hypre_ParCSRMatrix *par_matrix)
    HYPRE_Int *matrix_i;
    HYPRE_Int *matrix_j;
    HYPRE_Complex *matrix_data;
-  
+
    HYPRE_Int *local_matrix_i;
    HYPRE_Int *local_matrix_j;
    HYPRE_Complex *local_matrix_data;
-  
+
    HYPRE_Int i, j;
    HYPRE_Int local_num_rows;
    HYPRE_Int local_num_nonzeros;
@@ -1559,7 +1580,7 @@ hypre_ParCSRMatrixToCSRMatrixAll(hypre_ParCSRMatrix *par_matrix)
 #ifdef HYPRE_NO_GLOBAL_PARTITION
 
    HYPRE_Int *new_vec_starts;
-   
+
    HYPRE_Int num_contacts;
    HYPRE_Int contact_proc_list[1];
    HYPRE_Int contact_send_buf[1];
@@ -1569,12 +1590,12 @@ hypre_ParCSRMatrixToCSRMatrixAll(hypre_ParCSRMatrix *par_matrix)
    HYPRE_Int *response_recv_buf_starts = NULL;
    hypre_DataExchangeResponse response_obj;
    hypre_ProcListElements send_proc_obj;
-   
+
    HYPRE_Int *send_info = NULL;
    hypre_MPI_Status  status1;
    HYPRE_Int count, tag1 = 11112, tag2 = 22223, tag3 = 33334;
    HYPRE_Int start;
-   
+
 #endif
 
    hypre_MPI_Comm_size(comm, &num_procs);
@@ -1582,9 +1603,9 @@ hypre_ParCSRMatrixToCSRMatrixAll(hypre_ParCSRMatrix *par_matrix)
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
 
-   local_num_rows = (HYPRE_Int)(hypre_ParCSRMatrixLastRowIndex(par_matrix)  - 
+   local_num_rows = (HYPRE_Int)(hypre_ParCSRMatrixLastRowIndex(par_matrix)  -
       hypre_ParCSRMatrixFirstRowIndex(par_matrix) + 1);
-   
+
 
    local_matrix = hypre_MergeDiagAndOffd(par_matrix); /* creates matrix */
    hypre_CSRMatrixBigJtoJ(local_matrix); /* copies big_j to j */
@@ -1592,7 +1613,7 @@ hypre_ParCSRMatrixToCSRMatrixAll(hypre_ParCSRMatrix *par_matrix)
    local_matrix_j = hypre_CSRMatrixJ(local_matrix);
    local_matrix_data = hypre_CSRMatrixData(local_matrix);
 
- 
+
    /* determine procs that have vector data and store their ids in used_procs */
    /* we need to do an exchange data for this.  If I own row then I will contact
       processor 0 with the endpoint of my local range */
@@ -1604,7 +1625,7 @@ hypre_ParCSRMatrixToCSRMatrixAll(hypre_ParCSRMatrix *par_matrix)
       contact_send_buf[0] =  (HYPRE_Int)hypre_ParCSRMatrixLastRowIndex(par_matrix);
       contact_send_buf_starts[0] = 0;
       contact_send_buf_starts[1] = 1;
-      
+
    }
    else
    {
@@ -1618,7 +1639,7 @@ hypre_ParCSRMatrixToCSRMatrixAll(hypre_ParCSRMatrix *par_matrix)
    send_proc_obj.storage_length = 10;
    send_proc_obj.id = hypre_CTAlloc(HYPRE_Int,  send_proc_obj.storage_length, HYPRE_MEMORY_HOST);
    send_proc_obj.vec_starts =
-      hypre_CTAlloc(HYPRE_Int,  send_proc_obj.storage_length + 1, HYPRE_MEMORY_HOST); 
+      hypre_CTAlloc(HYPRE_Int,  send_proc_obj.storage_length + 1, HYPRE_MEMORY_HOST);
    send_proc_obj.vec_starts[0] = 0;
    send_proc_obj.element_storage_length = 10;
    send_proc_obj.elements =
@@ -1628,33 +1649,33 @@ hypre_ParCSRMatrixToCSRMatrixAll(hypre_ParCSRMatrix *par_matrix)
    response_obj.fill_response = hypre_FillResponseParToCSRMatrix;
    response_obj.data1 = NULL;
    response_obj.data2 = &send_proc_obj; /*this is where we keep info from contacts*/
-  
-   
-   hypre_DataExchangeList(num_contacts, 
-                          contact_proc_list, contact_send_buf, 
-                          contact_send_buf_starts, sizeof(HYPRE_Int), 
-                          sizeof(HYPRE_Int), &response_obj, 
+
+
+   hypre_DataExchangeList(num_contacts,
+                          contact_proc_list, contact_send_buf,
+                          contact_send_buf_starts, sizeof(HYPRE_Int),
+                          sizeof(HYPRE_Int), &response_obj,
                           max_response_size, 1,
-                          comm, (void**) &response_recv_buf,       
+                          comm, (void**) &response_recv_buf,
                           &response_recv_buf_starts);
-   
+
    /* now processor 0 should have a list of ranges for processors that have rows -
       these are in send_proc_obj - it needs to create the new list of processors
       and also an array of vec starts - and send to those who own row*/
    if (my_id)
    {
-      if (local_num_rows)      
+      if (local_num_rows)
       {
-         /* look for a message from processor 0 */         
+         /* look for a message from processor 0 */
          hypre_MPI_Probe(0, tag1, comm, &status1);
          hypre_MPI_Get_count(&status1, HYPRE_MPI_INT, &count);
-         
+
          send_info = hypre_CTAlloc(HYPRE_Int,  count, HYPRE_MEMORY_HOST);
          hypre_MPI_Recv(send_info, count, HYPRE_MPI_INT, 0, tag1, comm, &status1);
 
-         /* now unpack */  
+         /* now unpack */
          num_types = send_info[0];
-         used_procs =  hypre_CTAlloc(HYPRE_Int,  num_types, HYPRE_MEMORY_HOST);  
+         used_procs =  hypre_CTAlloc(HYPRE_Int,  num_types, HYPRE_MEMORY_HOST);
          new_vec_starts = hypre_CTAlloc(HYPRE_Int,  num_types+1, HYPRE_MEMORY_HOST);
 
          for (i=1; i<= num_types; i++)
@@ -1687,9 +1708,9 @@ hypre_ParCSRMatrixToCSRMatrixAll(hypre_ParCSRMatrix *par_matrix)
    else /* my_id ==0 */
    {
       num_types = send_proc_obj.length;
-      used_procs =  hypre_CTAlloc(HYPRE_Int,  num_types, HYPRE_MEMORY_HOST);  
+      used_procs =  hypre_CTAlloc(HYPRE_Int,  num_types, HYPRE_MEMORY_HOST);
       new_vec_starts = hypre_CTAlloc(HYPRE_Int,  num_types+1, HYPRE_MEMORY_HOST);
-      
+
       new_vec_starts[0] = 0;
       for (i=0; i< num_types; i++)
       {
@@ -1719,7 +1740,7 @@ hypre_ParCSRMatrixToCSRMatrixAll(hypre_ParCSRMatrix *par_matrix)
       {
          start = 1;
       }
-      
+
       for (i=start; i < num_types; i++)
       {
          hypre_MPI_Isend(send_info, count, HYPRE_MPI_INT, used_procs[i], tag1,
@@ -1739,8 +1760,8 @@ hypre_ParCSRMatrixToCSRMatrixAll(hypre_ParCSRMatrix *par_matrix)
    if(response_recv_buf_starts) hypre_TFree(response_recv_buf_starts, HYPRE_MEMORY_HOST);
 
    /* now proc 0 can exit if it has no rows */
-   if (!local_num_rows) 
-   { 
+   if (!local_num_rows)
+   {
       if (hypre_CSRMatrixOwnsData(local_matrix))
          hypre_CSRMatrixDestroy(local_matrix);
       else
@@ -1806,7 +1827,7 @@ hypre_ParCSRMatrixToCSRMatrixAll(hypre_ParCSRMatrix *par_matrix)
    {
       proc_id = used_procs[i];
       start_index = matrix_i[(HYPRE_Int)new_vec_starts[i]];
-      num_data = matrix_i[(HYPRE_Int)new_vec_starts[i+1]] - start_index; 
+      num_data = matrix_i[(HYPRE_Int)new_vec_starts[i+1]] - start_index;
       hypre_MPI_Irecv(&matrix_data[start_index], num_data, HYPRE_MPI_COMPLEX,
                       used_procs[i], tag1, comm, &requests[j++]);
       hypre_MPI_Irecv(&matrix_j[start_index], num_data, HYPRE_MPI_INT,
@@ -1825,16 +1846,16 @@ hypre_ParCSRMatrixToCSRMatrixAll(hypre_ParCSRMatrix *par_matrix)
    hypre_MPI_Waitall(num_requests, requests, status);
 
    hypre_TFree(new_vec_starts, HYPRE_MEMORY_HOST);
-   
+
 #else
 
    local_num_rows = (HYPRE_Int)(row_starts[my_id+1] - row_starts[my_id]);
 
    /* if my_id contains no data, return NULL */
- 
+
    if (!local_num_rows)
       return NULL;
- 
+
    local_matrix = hypre_MergeDiagAndOffd(par_matrix);
    hypre_CSRMatrixBigJtoJ(local_matrix); /* copies big_j to j */
    local_matrix_i = hypre_CSRMatrixI(local_matrix);
@@ -1910,7 +1931,7 @@ hypre_ParCSRMatrixToCSRMatrixAll(hypre_ParCSRMatrix *par_matrix)
    {
       proc_id = used_procs[i];
       start_index = matrix_i[(HYPRE_Int)row_starts[proc_id]];
-      num_data = matrix_i[(HYPRE_Int)row_starts[proc_id+1]] - start_index; 
+      num_data = matrix_i[(HYPRE_Int)row_starts[proc_id+1]] - start_index;
       hypre_MPI_Irecv(&matrix_data[start_index], num_data, HYPRE_MPI_COMPLEX,
                       used_procs[i], 0, comm, &requests[j++]);
       hypre_MPI_Irecv(&matrix_j[start_index], num_data, HYPRE_MPI_INT,
@@ -1956,7 +1977,7 @@ hypre_ParCSRMatrixToCSRMatrixAll(hypre_ParCSRMatrix *par_matrix)
 
    return matrix;
 }
-    
+
 /*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixCopy,
  * copies B to A,
@@ -1964,9 +1985,9 @@ hypre_ParCSRMatrixToCSRMatrixAll(hypre_ParCSRMatrix *par_matrix)
  * the routine does not check whether the dimensions of A and B are compatible
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_ParCSRMatrixCopy( hypre_ParCSRMatrix *A,
-                        hypre_ParCSRMatrix *B, 
+                        hypre_ParCSRMatrix *B,
                         HYPRE_Int copy_data )
 {
    hypre_CSRMatrix *A_diag;
@@ -2005,7 +2026,7 @@ hypre_ParCSRMatrixCopy( hypre_ParCSRMatrix *A,
    }
    for (i = 0; i < num_cols_offd; i++)
       col_map_offd_B[i] = col_map_offd_A[i];
-        
+
    return hypre_error_flag;
 }
 /*--------------------------------------------------------------------
@@ -2015,12 +2036,12 @@ hypre_ParCSRMatrixCopy( hypre_ParCSRMatrix *A,
  *--------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_FillResponseParToCSRMatrix( void       *p_recv_contact_buf, 
+hypre_FillResponseParToCSRMatrix( void       *p_recv_contact_buf,
                                   HYPRE_Int   contact_size,
                                   HYPRE_Int   contact_proc,
-                                  void       *ro, 
+                                  void       *ro,
                                   MPI_Comm    comm,
-                                  void      **p_send_response_buf, 
+                                  void      **p_send_response_buf,
                                   HYPRE_Int *response_message_size )
 {
    HYPRE_Int    myid;
@@ -2028,9 +2049,9 @@ hypre_FillResponseParToCSRMatrix( void       *p_recv_contact_buf,
 
    HYPRE_BigInt    *recv_contact_buf = (HYPRE_BigInt * ) p_recv_contact_buf;
 
-   hypre_DataExchangeResponse  *response_obj = (hypre_DataExchangeResponse*)ro;  
+   hypre_DataExchangeResponse  *response_obj = (hypre_DataExchangeResponse*)ro;
 
-   hypre_ProcListElements      *send_proc_obj = (hypre_ProcListElements*)response_obj->data2;   
+   hypre_ProcListElements      *send_proc_obj = (hypre_ProcListElements*)response_obj->data2;
 
    hypre_MPI_Comm_rank(comm, &myid );
 
@@ -2038,40 +2059,40 @@ hypre_FillResponseParToCSRMatrix( void       *p_recv_contact_buf,
    if (send_proc_obj->length == send_proc_obj->storage_length)
    {
       send_proc_obj->storage_length +=10; /*add space for 10 more processors*/
-      send_proc_obj->id = hypre_TReAlloc(send_proc_obj->id, HYPRE_Int,  
+      send_proc_obj->id = hypre_TReAlloc(send_proc_obj->id, HYPRE_Int,
                                          send_proc_obj->storage_length, HYPRE_MEMORY_HOST);
       send_proc_obj->vec_starts =
-         hypre_TReAlloc(send_proc_obj->vec_starts, HYPRE_Int,  
+         hypre_TReAlloc(send_proc_obj->vec_starts, HYPRE_Int,
                         send_proc_obj->storage_length + 1, HYPRE_MEMORY_HOST);
    }
-  
-   /*initialize*/ 
+
+   /*initialize*/
    count = send_proc_obj->length;
    index = send_proc_obj->vec_starts[count]; /*this is the number of elements*/
 
-   /*send proc*/ 
-   send_proc_obj->id[count] = contact_proc; 
+   /*send proc*/
+   send_proc_obj->id[count] = contact_proc;
 
    /*do we need more storage for the elements?*/
    if (send_proc_obj->element_storage_length < index + contact_size)
    {
-      elength = hypre_max(contact_size, 10);   
+      elength = hypre_max(contact_size, 10);
       elength += index;
-      send_proc_obj->elements = hypre_TReAlloc(send_proc_obj->elements,  
+      send_proc_obj->elements = hypre_TReAlloc(send_proc_obj->elements,
                                                HYPRE_BigInt,  elength, HYPRE_MEMORY_HOST);
-      send_proc_obj->element_storage_length = elength; 
+      send_proc_obj->element_storage_length = elength;
    }
    /*populate send_proc_obj*/
-   for (i=0; i< contact_size; i++) 
-   { 
+   for (i=0; i< contact_size; i++)
+   {
       send_proc_obj->elements[index++] = recv_contact_buf[i];
    }
    send_proc_obj->vec_starts[count+1] = index;
    send_proc_obj->length++;
 
    /*output - no message to return (confirmation) */
-   *response_message_size = 0; 
-   
+   *response_message_size = 0;
+
    return hypre_error_flag;
 }
 
@@ -2185,12 +2206,15 @@ hypre_ParCSRMatrix * hypre_ParCSRMatrixUnion( hypre_ParCSRMatrix * A,
 }
 
 
+/* drop the entries that are not on the diagonal and smaller than
+ * its row norm: type 1: 1-norm, 2: 2-norm, -1: infinity norm */
 HYPRE_Int
 hypre_ParCSRMatrixDropSmallEntries( hypre_ParCSRMatrix *A,
-                                    HYPRE_Real tol)
+                                    HYPRE_Real tol,
+                                    HYPRE_Int type)
 {
    HYPRE_Int i, j, k, nnz_diag, nnz_offd, A_diag_i_i, A_offd_i_i;
-   
+
    MPI_Comm         comm     = hypre_ParCSRMatrixComm(A);
    /* diag part of A */
    hypre_CSRMatrix *A_diag   = hypre_ParCSRMatrixDiag(A);
@@ -2198,21 +2222,22 @@ hypre_ParCSRMatrixDropSmallEntries( hypre_ParCSRMatrix *A,
    HYPRE_Int       *A_diag_i = hypre_CSRMatrixI(A_diag);
    HYPRE_Int       *A_diag_j = hypre_CSRMatrixJ(A_diag);
    /* off-diag part of A */
-   hypre_CSRMatrix *A_offd   = hypre_ParCSRMatrixOffd(A);   
+   hypre_CSRMatrix *A_offd   = hypre_ParCSRMatrixOffd(A);
    HYPRE_Real      *A_offd_a = hypre_CSRMatrixData(A_offd);
    HYPRE_Int       *A_offd_i = hypre_CSRMatrixI(A_offd);
    HYPRE_Int       *A_offd_j = hypre_CSRMatrixJ(A_offd);
-   
+
    HYPRE_Int  num_cols_A_offd = hypre_CSRMatrixNumCols(A_offd);
    HYPRE_BigInt *col_map_offd_A  = hypre_ParCSRMatrixColMapOffd(A);
    HYPRE_Int *marker_offd = NULL;
- 
+
+   HYPRE_BigInt first_row  = hypre_ParCSRMatrixFirstRowIndex(A);
    HYPRE_Int nrow_local = hypre_CSRMatrixNumRows(A_diag);
    HYPRE_Int my_id, num_procs;
    /* MPI size and rank*/
-   hypre_MPI_Comm_size(comm, &num_procs);   
+   hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
-   
+
    if (tol <= 0.0)
    {
       return hypre_error_flag;
@@ -2224,30 +2249,55 @@ hypre_ParCSRMatrixDropSmallEntries( hypre_ParCSRMatrix *A,
    for (i = 0; i < nrow_local; i++)
    {
       /* compute row norm */
-      HYPRE_Real row_2nrm = 0.0;
+      HYPRE_Real row_nrm = 0.0;
       for (j = A_diag_i_i; j < A_diag_i[i+1]; j++)
       {
          HYPRE_Complex v = A_diag_a[j];
-         row_2nrm += v*v;
+         if (type == 1)
+         {
+            row_nrm += fabs(v);
+         }
+         else if (type == 2)
+         {
+            row_nrm += v*v;
+         }
+         else
+         {
+            row_nrm = hypre_max(row_nrm, fabs(v));
+         }
       }
       if (num_procs > 1)
       {
          for (j = A_offd_i_i; j < A_offd_i[i+1]; j++)
          {
             HYPRE_Complex v = A_offd_a[j];
-            row_2nrm += v*v;
+            if (type == 1)
+            {
+               row_nrm += fabs(v);
+            }
+            else if (type == 2)
+            {
+               row_nrm += v*v;
+            }
+            else
+            {
+               row_nrm = hypre_max(row_nrm, fabs(v));
+            }
          }
       }
 
-      row_2nrm = sqrt(row_2nrm);
+      if (type == 2)
+      {
+         row_nrm = sqrt(row_nrm);
+      }
 
       /* drop small entries based on tol and row norm */
       for (j = A_diag_i_i; j < A_diag_i[i+1]; j++)
       {
+         HYPRE_Int     col = A_diag_j[j];
          HYPRE_Complex val = A_diag_a[j];
-         if (fabs(val) >= tol * row_2nrm)
+         if (i == col || fabs(val) >= tol * row_nrm)
          {
-            HYPRE_Int col = A_diag_j[j];
             A_diag_j[nnz_diag] = col;
             A_diag_a[nnz_diag] = val;
             nnz_diag ++;
@@ -2257,10 +2307,12 @@ hypre_ParCSRMatrixDropSmallEntries( hypre_ParCSRMatrix *A,
       {
          for (j = A_offd_i_i; j < A_offd_i[i+1]; j++)
          {
+            HYPRE_Int     col = A_offd_j[j];
             HYPRE_Complex val = A_offd_a[j];
-            if (fabs(val) >= tol * row_2nrm)
+            /* in normal cases: diagonal entry should not
+             * appear in A_offd (but this can still be possible) */
+            if (i + first_row == col_map_offd_A[col] || fabs(val) >= tol * row_nrm)
             {
-               HYPRE_Int col = A_offd_j[j];
                if (0 == marker_offd[col])
                {
                   marker_offd[col] = 1;
@@ -2276,7 +2328,7 @@ hypre_ParCSRMatrixDropSmallEntries( hypre_ParCSRMatrix *A,
       A_diag_i[i+1] = nnz_diag;
       A_offd_i[i+1] = nnz_offd;
    }
-   
+
    hypre_CSRMatrixNumNonzeros(A_diag) = nnz_diag;
    hypre_CSRMatrixNumNonzeros(A_offd) = nnz_offd;
    hypre_ParCSRMatrixSetNumNonzeros(A);
@@ -2313,6 +2365,6 @@ hypre_int hypre_ParCSRMatrixIsManaged(hypre_ParCSRMatrix *a){
   if (hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(a)))
     return ((hypre_CSRMatrixIsManaged(hypre_ParCSRMatrixDiag(a))) && (hypre_CSRMatrixIsManaged(hypre_ParCSRMatrixOffd(a))));
   else
-    return hypre_CSRMatrixIsManaged(hypre_ParCSRMatrixDiag(a)); 
+    return hypre_CSRMatrixIsManaged(hypre_ParCSRMatrixDiag(a));
 }
 #endif

@@ -94,9 +94,9 @@ typedef struct
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_ParCSRCommPkg
  *--------------------------------------------------------------------------*/
- 
+
 #define hypre_ParCSRCommPkgComm(comm_pkg)          (comm_pkg -> comm)
-                                               
+
 #define hypre_ParCSRCommPkgNumSends(comm_pkg)      (comm_pkg -> num_sends)
 #define hypre_ParCSRCommPkgSendProcs(comm_pkg)     (comm_pkg -> send_procs)
 #define hypre_ParCSRCommPkgSendProc(comm_pkg, i)   (comm_pkg -> send_procs[i])
@@ -120,7 +120,7 @@ typedef struct
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_ParCSRCommHandle
  *--------------------------------------------------------------------------*/
- 
+
 #define hypre_ParCSRCommHandleCommPkg(comm_handle)     (comm_handle -> comm_pkg)
 #define hypre_ParCSRCommHandleSendData(comm_handle)    (comm_handle -> send_data)
 #define hypre_ParCSRCommHandleRecvData(comm_handle)    (comm_handle -> recv_data)
@@ -155,15 +155,15 @@ typedef struct
 typedef struct
 {
    HYPRE_Int       length;
-   HYPRE_Int       storage_length; 
+   HYPRE_Int       storage_length;
    HYPRE_Int      *id;
    HYPRE_Int      *vec_starts;
-   HYPRE_Int       element_storage_length; 
+   HYPRE_Int       element_storage_length;
    HYPRE_BigInt   *elements;
    HYPRE_Real     *d_elements; /* Is this used anywhere? */
    void           *v_elements;
-   
-}  hypre_ProcListElements;   
+
+}  hypre_ProcListElements;
 
 #endif /* hypre_NEW_COMMPKG */
 
@@ -193,10 +193,10 @@ typedef struct hypre_ParVector_struct
    HYPRE_BigInt          first_index;
    HYPRE_BigInt          last_index;
    HYPRE_BigInt         *partitioning;
-   /* stores actual length of data in local vector to allow memory 
+   /* stores actual length of data in local vector to allow memory
     * manipulations for temporary vectors*/
-   HYPRE_Int             actual_local_size; 
-   hypre_Vector         *local_vector; 
+   HYPRE_Int             actual_local_size;
+   hypre_Vector         *local_vector;
 
    /* Does the Vector create/destroy `data'? */
    HYPRE_Int             owns_data;
@@ -257,7 +257,7 @@ typedef struct hypre_ParCSRMatrix_struct
    HYPRE_BigInt          global_num_cols;
    HYPRE_BigInt          first_row_index;
    HYPRE_BigInt          first_col_diag;
-   /* need to know entire local range in case row_starts and col_starts 
+   /* need to know entire local range in case row_starts and col_starts
       are null  (i.e., bgl) AHB 6/05*/
    HYPRE_BigInt          last_row_index;
    HYPRE_BigInt          last_col_diag;
@@ -269,19 +269,19 @@ typedef struct hypre_ParCSRMatrix_struct
    HYPRE_BigInt         *col_map_offd; 
         /* maps columns of offd to global columns */
    HYPRE_BigInt         *row_starts; 
-        /* array of length num_procs+1, row_starts[i] contains the 
-           global number of the first row on proc i,  
+        /* array of length num_procs+1, row_starts[i] contains the
+           global number of the first row on proc i,
            first_row_index = row_starts[my_id],
            row_starts[num_procs] = global_num_rows */
    HYPRE_BigInt         *col_starts;
-        /* array of length num_procs+1, col_starts[i] contains the 
-           global number of the first column of diag on proc i,  
+        /* array of length num_procs+1, col_starts[i] contains the
+           global number of the first column of diag on proc i,
            first_col_diag = col_starts[my_id],
            col_starts[num_procs] = global_num_cols */
 
    hypre_ParCSRCommPkg  *comm_pkg;
    hypre_ParCSRCommPkg  *comm_pkgT;
-   
+
    /* Does the ParCSRMatrix create/destroy `diag', `offd', `col_map_offd'? */
    HYPRE_Int             owns_data;
    /* Does the ParCSRMatrix create/destroy `row_starts', `col_starts'? */
@@ -299,6 +299,15 @@ typedef struct hypre_ParCSRMatrix_struct
    hypre_IJAssumedPart  *assumed_partition; /* only populated if
                                               no_global_partition option is used
                                               (compile-time option)*/
+   HYPRE_Int             owns_assumed_partition;
+   /* Array to store ordering of local diagonal block to relax. In particular,
+   used for triangulr matrices that are not ordered to be triangular. */
+   HYPRE_Int            *proc_ordering;
+
+   /* Save block diagonal inverse */
+   HYPRE_Int             bdiag_size;
+   HYPRE_Complex        *bdiaginv;
+   hypre_ParCSRCommPkg  *bdiaginv_comm_pkg;
 
 } hypre_ParCSRMatrix;
 
@@ -335,6 +344,8 @@ hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(matrix))
 #define hypre_ParCSRMatrixRowvalues(matrix)       ((matrix) -> rowvalues)
 #define hypre_ParCSRMatrixGetrowactive(matrix)    ((matrix) -> getrowactive)
 #define hypre_ParCSRMatrixAssumedPartition(matrix) ((matrix) -> assumed_partition)
+#define hypre_ParCSRMatrixOwnsAssumedPartition(matrix)   ((matrix) -> owns_assumed_partition)
+#define hypre_ParCSRMatrixProcOrdering(matrix)    ((matrix) -> proc_ordering)
 
 /*--------------------------------------------------------------------------
  * Parallel CSR Boolean Matrix
@@ -466,8 +477,8 @@ typedef struct
   HYPRE_Int *inprocessor;
 
   /* receiving in idof from different (in)processors; ---------------------- */
-  HYPRE_Int *num_idofs_inprocessor; 
-  HYPRE_Int **idof_inprocessor; 
+  HYPRE_Int *num_idofs_inprocessor;
+  HYPRE_Int **idof_inprocessor;
 
   /* symmetric information: ----------------------------------------------- */
   /* this can be replaces by CSR format: ---------------------------------- */
@@ -517,7 +528,7 @@ typedef struct
 #define hypre_ParChordMatrixNumRdofs(matrix)    ((matrix) -> num_rdofs)
 
 #define hypre_ParChordMatrixFirstindexIdof(matrix) ((matrix) -> firstindex_idof)
-#define hypre_ParChordMatrixFirstindexRdof(matrix) ((matrix) -> firstindex_rdof) 
+#define hypre_ParChordMatrixFirstindexRdof(matrix) ((matrix) -> firstindex_rdof)
 
 /* participation of rdof in different processors; ---------- */
 
@@ -711,9 +722,11 @@ void hypre_ParCSRPersistentCommHandleWait(hypre_ParCSRPersistentCommHandle *comm
 
 HYPRE_Int hypre_ParcsrGetExternalRows( hypre_ParCSRMatrix *A, HYPRE_Int indices_len, HYPRE_BigInt *indices, hypre_CSRMatrix **A_ext, hypre_ParCSRCommPkg **commpkg_out);
 
-HYPRE_Int hypre_ParvecBdiagInvScal( hypre_ParVector *b, HYPRE_Int blockSize, hypre_ParVector **bs, HYPRE_Complex *bdiaginv, hypre_ParCSRCommPkg *comm_pkg);
+HYPRE_Int hypre_ParvecBdiagInvScal( hypre_ParVector *b, HYPRE_Int blockSize, hypre_ParVector **bs, hypre_ParCSRMatrix *A);
 
-HYPRE_Int hypre_ParcsrBdiagInvScal( hypre_ParCSRMatrix *A, HYPRE_Int blockSize, hypre_ParCSRMatrix **As, HYPRE_Complex **bdiaginv, hypre_ParCSRCommPkg **commpkg_out);
+HYPRE_Int hypre_ParcsrBdiagInvScal( hypre_ParCSRMatrix *A, HYPRE_Int blockSize, hypre_ParCSRMatrix **As);
+
+HYPRE_Int hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, HYPRE_Int *cpts_starts, const char *job, hypre_ParCSRMatrix **B_ptr, HYPRE_Real strength_thresh);
 
 HYPRE_Int hypre_ParcsrAdd( HYPRE_Complex alpha, hypre_ParCSRMatrix *A, HYPRE_Complex beta, hypre_ParCSRMatrix *B, hypre_ParCSRMatrix **Cout);
 
@@ -724,7 +737,7 @@ void hypre_ParMatScaleDiagInv_F ( hypre_ParCSRMatrix *C , hypre_ParCSRMatrix *A 
 hypre_ParCSRMatrix *hypre_ParMatMinus_F ( hypre_ParCSRMatrix *P , hypre_ParCSRMatrix *C , HYPRE_Int *CF_marker );
 void hypre_ParCSRMatrixZero_F ( hypre_ParCSRMatrix *P , HYPRE_Int *CF_marker );
 void hypre_ParCSRMatrixCopy_C ( hypre_ParCSRMatrix *P , hypre_ParCSRMatrix *C , HYPRE_Int *CF_marker );
-//void hypre_ParCSRMatrixDropEntries ( hypre_ParCSRMatrix *C , hypre_ParCSRMatrix *P , HYPRE_Int *CF_marker );
+void hypre_ParCSRMatrixDropEntries ( hypre_ParCSRMatrix *C , hypre_ParCSRMatrix *P , HYPRE_Int *CF_marker );
 
 /* par_csr_matrix.c */
 hypre_ParCSRMatrix *hypre_ParCSRMatrixCreate ( MPI_Comm comm , HYPRE_BigInt global_num_rows , HYPRE_BigInt global_num_cols , HYPRE_BigInt *row_starts , HYPRE_BigInt *col_starts , HYPRE_Int num_cols_offd , HYPRE_Int num_nonzeros_diag , HYPRE_Int num_nonzeros_offd );
@@ -753,7 +766,7 @@ hypre_ParCSRMatrix *hypre_ParCSRMatrixUnion ( hypre_ParCSRMatrix *A , hypre_ParC
 #ifdef HYPRE_USING_GPU
 hypre_int hypre_ParCSRMatrixIsManaged(hypre_ParCSRMatrix *a);
 #endif
-HYPRE_Int hypre_ParCSRMatrixDropSmallEntries( hypre_ParCSRMatrix *A, HYPRE_Real tol);
+HYPRE_Int hypre_ParCSRMatrixDropSmallEntries( hypre_ParCSRMatrix *A, HYPRE_Real tol, HYPRE_Int type);
 
 /* par_csr_matvec.c */
 // y = alpha*A*x + beta*b
