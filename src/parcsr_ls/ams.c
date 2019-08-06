@@ -2125,7 +2125,7 @@ HYPRE_Int hypre_AMSSetup(void *solver,
             for (i = 0; i < nnzB; i++)
                if (fabs(dataB[i]) > lfactor)
                   lfactor = fabs(dataB[i]);
-            lfactor *= 1e-10; 
+            lfactor *= 1e-10;
             hypre_MPI_Allreduce(&lfactor, &factor, 1, HYPRE_MPI_REAL, hypre_MPI_MAX,
                                 hypre_ParCSRMatrixComm(A));
             for (i = 0; i < nnz; i++)
@@ -2155,9 +2155,10 @@ HYPRE_Int hypre_AMSSetup(void *solver,
 
          hypre_CSRMatrixDestroy(A_local);
          hypre_CSRMatrixDestroy(B_local);
-         hypre_CSRMatrixDestroy(C_local);*/
+         hypre_CSRMatrixDestroy(C_local);
+         */
 
-         hypre_ParCSRMatrixDestroy(A); 
+         hypre_ParCSRMatrixDestroy(A);
 
          *C_ptr = C;
       }
@@ -2524,7 +2525,7 @@ HYPRE_Int hypre_AMSSetup(void *solver,
                hypre_ParCSRMatrixDestroy(Gt);
 
                /* hypre_ParCSRMatrixAdd(GGt, A, &ams_data -> A); */
-               hypre_ParcsrAdd(1.0, GGt, 1.0, ams_data -> A, &ApGGt); 
+               hypre_ParcsrAdd(1.0, GGt, 1.0, ams_data -> A, &ApGGt);
                /*{
                   hypre_ParCSRMatrix *A = GGt;
                   hypre_ParCSRMatrix *B = ams_data -> A;
