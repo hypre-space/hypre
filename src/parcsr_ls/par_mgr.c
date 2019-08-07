@@ -3969,7 +3969,7 @@ hypre_MGRSetFSolver( void  *mgr_vdata,
       aff_solver = hypre_CTAlloc(HYPRE_Solver*, max_num_coarse_levels, HYPRE_MEMORY_HOST);
 
    assert(level < max_num_coarse_levels);
-   aff_solver[level] = fsolver;
+   aff_solver[level] = (HYPRE_Solver *) fsolver;
 
    (mgr_data -> fine_grid_solver_solve) = fine_grid_solver_solve;
    (mgr_data -> fine_grid_solver_setup) = fine_grid_solver_setup;
