@@ -1,18 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -39,9 +30,9 @@ HYPRE_ParCSRGMRESDestroy( HYPRE_Solver solver )
 
 HYPRE_Int 
 HYPRE_GMRESSetup( HYPRE_Solver solver,
-                        HYPRE_Matrix A,
-                        HYPRE_Vector b,
-                        HYPRE_Vector x      )
+                  HYPRE_Matrix A,
+                  HYPRE_Vector b,
+                  HYPRE_Vector x      )
 {
    return( hypre_GMRESSetup( solver,
                              A,
@@ -55,9 +46,9 @@ HYPRE_GMRESSetup( HYPRE_Solver solver,
 
 HYPRE_Int 
 HYPRE_GMRESSolve( HYPRE_Solver solver,
-                        HYPRE_Matrix A,
-                        HYPRE_Vector b,
-                        HYPRE_Vector x      )
+                  HYPRE_Matrix A,
+                  HYPRE_Vector b,
+                  HYPRE_Vector x      )
 {
    return( hypre_GMRESSolve( solver,
                              A,
@@ -232,9 +223,9 @@ HYPRE_GMRESGetSkipRealResidualCheck( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_GMRESSetPrecond( HYPRE_Solver          solver,
-                             HYPRE_PtrToSolverFcn  precond,
-                             HYPRE_PtrToSolverFcn  precond_setup,
-                             HYPRE_Solver          precond_solver )
+                       HYPRE_PtrToSolverFcn  precond,
+                       HYPRE_PtrToSolverFcn  precond_setup,
+                       HYPRE_Solver          precond_solver )
 {
    return( hypre_GMRESSetPrecond( (void *) solver,
                                   (HYPRE_Int (*)(void*, void*, void*, void*))precond,

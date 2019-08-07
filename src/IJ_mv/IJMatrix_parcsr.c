@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -969,7 +964,7 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix       *matrix,
                   offd_data = hypre_CSRMatrixData(offd);
                   if (!big_offd_j) 
                   {
-                     big_offd_j = hypre_CTAlloc(HYPRE_BigInt, offd_i[hypre_CSRMatrixNumRows(offd)], HYPRE_MEMORY_HOST);
+                     big_offd_j = hypre_CTAlloc(HYPRE_BigInt, offd_i[hypre_CSRMatrixNumRows(offd)], HYPRE_MEMORY_SHARED);
                      hypre_CSRMatrixBigJ(offd) = big_offd_j;
                   }
                }
@@ -1015,9 +1010,9 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix       *matrix,
                   }
                   else  /* insert into diag */
                   {
+                     col_j = (HYPRE_Int)(cols[indx]-col_0);
                      for (j=diag_i[row_local]; j < diag_indx; j++)
                      {
-                        col_j = (HYPRE_Int)(cols[indx]-col_0);
                         if (diag_j[j] == col_j)
                         {
                            diag_data[j] = values[indx];
@@ -1501,7 +1496,7 @@ hypre_IJMatrixAddToValuesParCSR( hypre_IJMatrix       *matrix,
                   offd_data = hypre_CSRMatrixData(offd);
                   if (!big_offd_j) 
                   {
-                     big_offd_j = hypre_CTAlloc(HYPRE_BigInt, offd_i[hypre_CSRMatrixNumRows(offd)], HYPRE_MEMORY_HOST);
+                     big_offd_j = hypre_CTAlloc(HYPRE_BigInt, offd_i[hypre_CSRMatrixNumRows(offd)], HYPRE_MEMORY_SHARED);
                      hypre_CSRMatrixBigJ(offd) = big_offd_j;
                   }
                }
@@ -1547,10 +1542,9 @@ hypre_IJMatrixAddToValuesParCSR( hypre_IJMatrix       *matrix,
                   }
                   else  /* insert into diag */
                   {
-                     HYPRE_Int col_j;
+                     HYPRE_Int col_j = (HYPRE_Int)( cols[indx] - col_0);
                      for (j=diag_i[row_local]; j < diag_indx; j++)
                      {
-                        col_j = (HYPRE_Int)( cols[indx] - col_0);
                         if (diag_j[j] == col_j)
                         {
                            diag_data[j] += values[indx];
@@ -2993,6 +2987,8 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
          hypre_ParCSRMatrixColMapOffd(par_matrix) = col_map_offd;
          hypre_CSRMatrixNumCols(offd) = num_cols_offd;
          hypre_TFree(tmp_j, HYPRE_MEMORY_HOST);
+         hypre_TFree(big_offd_j, HYPRE_MEMORY_SHARED);
+         hypre_CSRMatrixBigJ(offd) = NULL;
       }
       hypre_IJMatrixAssembleFlag(matrix) = 1;
    }
@@ -3002,18 +2998,6 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
 
    return hypre_error_flag;
 }
-
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
 
 /******************************************************************************
  *
@@ -3388,7 +3372,7 @@ hypre_IJMatrixSetValuesOMPParCSR( hypre_IJMatrix       *matrix,
             big_offd_j = hypre_CSRMatrixBigJ(offd);
             if (!big_offd_j) 
             {
-               big_offd_j = hypre_CTAlloc(HYPRE_BigInt, offd_i[hypre_CSRMatrixNumRows(offd)], HYPRE_MEMORY_HOST);
+               big_offd_j = hypre_CTAlloc(HYPRE_BigInt, offd_i[hypre_CSRMatrixNumRows(offd)], HYPRE_MEMORY_SHARED);
                hypre_CSRMatrixBigJ(offd) = big_offd_j;
             }
          }
@@ -4005,7 +3989,7 @@ hypre_IJMatrixAddToValuesOMPParCSR( hypre_IJMatrix       *matrix,
             offd_data = hypre_CSRMatrixData(offd);
             if (!big_offd_j) 
             {
-               big_offd_j = hypre_CTAlloc(HYPRE_BigInt, offd_i[hypre_CSRMatrixNumRows(offd)], HYPRE_MEMORY_HOST);
+               big_offd_j = hypre_CTAlloc(HYPRE_BigInt, offd_i[hypre_CSRMatrixNumRows(offd)], HYPRE_MEMORY_SHARED);
                hypre_CSRMatrixBigJ(offd) = big_offd_j;
             }
          }

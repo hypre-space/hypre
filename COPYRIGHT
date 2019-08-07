@@ -1,35 +1,40 @@
 
-COPYRIGHT
+Intellectual Property Notice
+----------------------------
 
-The following copyright applies to each file in the HYPRE distribution, unless
-otherwise stated in the file:
+HYPRE is licensed under the Apache License, Version 2.0 (see LICENSE-APACHE or
+http://www.apache.org/licenses/LICENSE-2.0) or the MIT license (see LICENSE-MIT
+or http://opensource.org/licenses/MIT), at your option.
 
-Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
-Produced at the Lawrence Livermore National Laboratory under
-Contract No. DE-AC52-07NA27344 with the DOE.
+Copyrights and patents in the HYPRE project are retained by contributors.
+No copyright assignment is required to contribute to HYPRE.
 
-This file is part of HYPRE.
-
-
-LICENSE
-
-HYPRE is free software; you can redistribute it and/or modify it under the
-terms of the GNU Lesser General Public License (as published by the Free
-Software Foundation) version 2.1 dated February 1999.
-
-HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU Lesser
-General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public License along
-with this library (file COPYING.LESSER); if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+HYPRE's original open source license was LGPL-2.1.  Consent from contributors
+was received and documented before relicensing to Apache-2.0/MIT.
 
 
-CONTACT INFORMATION
+SPDX usage
+----------
 
-The HYPRE team can be contacted at hypre-support@llnl.gov.  The software is
-released under UCRL_CODE_222953.  Please see http://www.llnl.gov/CASC/hypre for
-more information and source code availability.
+Individual files contain SPDX tags instead of the full license text.
+This enables machine processing of license information based on the SPDX
+License Identifiers that are available here: https://spdx.org/licenses/
+
+Files that are dual-licensed as Apache-2.0 OR MIT contain the following
+text in the license header:
+
+    SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
+
+External Software
+-----------------
+
+External software in hypre is covered by various permissive licenses.  A summary
+listing follows.  See the license included with the software for full details.
+
+Directory: src/blas
+License: University of Tennessee
+
+Directory: src/lapack
+License: University of Tennessee
 

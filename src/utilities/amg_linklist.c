@@ -1,16 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /***************************************************************************
  *
@@ -34,7 +27,7 @@
  **************************************************************/
 void hypre_dispose_elt ( hypre_LinkList element_ptr )
 {
-   hypre_TFree ( element_ptr, HYPRE_MEMORY_HOST);
+   hypre_TFree(element_ptr, HYPRE_MEMORY_HOST);
 }
 
 
@@ -46,30 +39,29 @@ void hypre_dispose_elt ( hypre_LinkList element_ptr )
  ****************************************************************/
 void 
 hypre_remove_point(hypre_LinkList   *LoL_head_ptr, 
-             hypre_LinkList   *LoL_tail_ptr, 
-             HYPRE_Int                 measure,
-             HYPRE_Int                 index, 
-             HYPRE_Int                *lists, 
-             HYPRE_Int                *where)
+             hypre_LinkList         *LoL_tail_ptr, 
+             HYPRE_Int               measure,
+             HYPRE_Int               index, 
+             HYPRE_Int              *lists, 
+             HYPRE_Int              *where)
 
 {
-   hypre_LinkList   LoL_head = *LoL_head_ptr;
-   hypre_LinkList   LoL_tail = *LoL_tail_ptr;
-   hypre_LinkList   list_ptr;
+   hypre_LinkList  LoL_head = *LoL_head_ptr;
+   hypre_LinkList  LoL_tail = *LoL_tail_ptr;
+   hypre_LinkList  list_ptr;
 
    list_ptr =  LoL_head;
 
-   
    do
    {
       if (measure == list_ptr->data)
       {
 
-                          /* point to be removed is only point on list,
-                             which must be destroyed */
+         /* point to be removed is only point on list,
+            which must be destroyed */
          if (list_ptr->head == index && list_ptr->tail == index)
          {
-                            /* removing only list, so num_left better be 0! */
+            /* removing only list, so num_left better be 0! */
             if (list_ptr == LoL_head && list_ptr == LoL_tail)
             {
                LoL_head = NULL;
@@ -85,7 +77,7 @@ hypre_remove_point(hypre_LinkList   *LoL_head_ptr,
                list_ptr -> next_elt -> prev_elt = NULL;
                LoL_head = list_ptr->next_elt;
                hypre_dispose_elt(list_ptr);
-               
+
                *LoL_head_ptr = LoL_head;
                *LoL_tail_ptr = LoL_tail;
                return;
@@ -105,7 +97,7 @@ hypre_remove_point(hypre_LinkList   *LoL_head_ptr,
                list_ptr -> next_elt -> prev_elt = list_ptr -> prev_elt;
                list_ptr -> prev_elt -> next_elt = list_ptr -> next_elt;
                hypre_dispose_elt(list_ptr);
-               
+
                *LoL_head_ptr = LoL_head;
                *LoL_tail_ptr = LoL_tail;
                return;
@@ -132,7 +124,9 @@ hypre_remove_point(hypre_LinkList   *LoL_head_ptr,
       }
       list_ptr = list_ptr -> next_elt;
    } while (list_ptr != NULL);
+
    hypre_error_w_msg(HYPRE_ERROR_GENERIC,"No such list!\n");
+
    return ;
 }
 
@@ -143,43 +137,40 @@ hypre_remove_point(hypre_LinkList   *LoL_head_ptr,
  *****************************************************************/
 hypre_LinkList hypre_create_elt( HYPRE_Int Item )
 {
-    hypre_LinkList   new_elt_ptr;
- 
-    /* Allocate memory space for the new node. 
-     * return with error if no space available
-     */
+   hypre_LinkList   new_elt_ptr;
 
-    if ( (new_elt_ptr = hypre_TAlloc(hypre_ListElement, 1, HYPRE_MEMORY_HOST)) == NULL)
-    {
-       hypre_error_w_msg(HYPRE_ERROR_GENERIC,"\n create_elt: malloc failed \n\n");
-    }
-    else 
+   /* Allocate memory space for the new node. 
+    * return with error if no space available
+    */
+   if ( (new_elt_ptr = hypre_TAlloc(hypre_ListElement, 1, HYPRE_MEMORY_HOST)) == NULL)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"\n create_elt: malloc failed \n\n");
+   }
+   else 
+      /* new_elt_ptr = hypre_CTAlloc(hypre_LinkList, 1); */
+   {
+      new_elt_ptr -> data = Item;
+      new_elt_ptr -> next_elt = NULL;
+      new_elt_ptr -> prev_elt = NULL;
+      new_elt_ptr -> head = hypre_LIST_TAIL;
+      new_elt_ptr -> tail = hypre_LIST_HEAD;
+   }
 
-       /*   new_elt_ptr = hypre_CTAlloc(hypre_LinkList, 1); */
-
-    {
-       new_elt_ptr -> data = Item;
-       new_elt_ptr -> next_elt = NULL;
-       new_elt_ptr -> prev_elt = NULL;
-       new_elt_ptr -> head = hypre_LIST_TAIL;
-       new_elt_ptr -> tail = hypre_LIST_HEAD;
-    }
-
-    return (new_elt_ptr);
+   return (new_elt_ptr);
 }
 
 /*****************************************************************
  * 
- * enter_on_lists   places point in new list
+ * enter_on_lists  places point in new list
  *
  ****************************************************************/
 void 
 hypre_enter_on_lists(hypre_LinkList   *LoL_head_ptr, 
-               hypre_LinkList   *LoL_tail_ptr, 
-               HYPRE_Int                 measure,
-               HYPRE_Int                 index, 
-               HYPRE_Int                *lists, 
-               HYPRE_Int                *where)
+                     hypre_LinkList   *LoL_tail_ptr, 
+                     HYPRE_Int         measure,
+                     HYPRE_Int         index, 
+                     HYPRE_Int        *lists, 
+                     HYPRE_Int        *where)
 {
    hypre_LinkList   LoL_head = *LoL_head_ptr;
    hypre_LinkList   LoL_tail = *LoL_tail_ptr;
@@ -206,63 +197,63 @@ hypre_enter_on_lists(hypre_LinkList   *LoL_head_ptr,
       return;
    }
    else
- {
-   do
    {
-      if (measure > list_ptr->data)
+      do
       {
-         new_ptr = hypre_create_elt(measure);
-         new_ptr->head = index;
-         new_ptr->tail = index;
-         lists[index] = hypre_LIST_TAIL;
-         where[index] = hypre_LIST_HEAD;
-
-         if ( list_ptr->prev_elt != NULL)
-         { 
-            new_ptr->prev_elt            = list_ptr->prev_elt;
-            list_ptr->prev_elt->next_elt = new_ptr;   
-            list_ptr->prev_elt           = new_ptr;
-            new_ptr->next_elt            = list_ptr;
-         }
-         else
+         if (measure > list_ptr->data)
          {
-            new_ptr->next_elt  = list_ptr;
-            list_ptr->prev_elt = new_ptr;
-            new_ptr->prev_elt  = NULL;
-            LoL_head = new_ptr;
+            new_ptr = hypre_create_elt(measure);
+            new_ptr->head = index;
+            new_ptr->tail = index;
+            lists[index] = hypre_LIST_TAIL;
+            where[index] = hypre_LIST_HEAD;
+
+            if ( list_ptr->prev_elt != NULL)
+            { 
+               new_ptr->prev_elt            = list_ptr->prev_elt;
+               list_ptr->prev_elt->next_elt = new_ptr;   
+               list_ptr->prev_elt           = new_ptr;
+               new_ptr->next_elt            = list_ptr;
+            }
+            else
+            {
+               new_ptr->next_elt  = list_ptr;
+               list_ptr->prev_elt = new_ptr;
+               new_ptr->prev_elt  = NULL;
+               LoL_head = new_ptr;
+            }
+
+            *LoL_head_ptr = LoL_head;
+            *LoL_tail_ptr = LoL_tail; 
+            return;
+         }
+         else if (measure == list_ptr->data)
+         {
+            old_tail = list_ptr->tail;
+            lists[old_tail] = index;
+            where[index] = old_tail;
+            lists[index] = hypre_LIST_TAIL;
+            list_ptr->tail = index;
+            return;
          }
 
-         *LoL_head_ptr = LoL_head;
-         *LoL_tail_ptr = LoL_tail; 
-         return;
-      }
-      else if (measure == list_ptr->data)
-      {
-         old_tail = list_ptr->tail;
-         lists[old_tail] = index;
-         where[index] = old_tail;
-         lists[index] = hypre_LIST_TAIL;
-         list_ptr->tail = index;
-         return;
-      }
-      
-      list_ptr = list_ptr->next_elt;
-   } while (list_ptr != NULL);
+         list_ptr = list_ptr->next_elt;
+      } while (list_ptr != NULL);
 
-   new_ptr = hypre_create_elt(measure);   
-   new_ptr->head = index;
-   new_ptr->tail = index;
-   lists[index] = hypre_LIST_TAIL;
-   where[index] = hypre_LIST_HEAD;
-   LoL_tail->next_elt = new_ptr;
-   new_ptr->prev_elt = LoL_tail;
-   new_ptr->next_elt = NULL;
-   LoL_tail = new_ptr;
+      new_ptr = hypre_create_elt(measure);   
+      new_ptr->head = index;
+      new_ptr->tail = index;
+      lists[index] = hypre_LIST_TAIL;
+      where[index] = hypre_LIST_HEAD;
+      LoL_tail->next_elt = new_ptr;
+      new_ptr->prev_elt = LoL_tail;
+      new_ptr->next_elt = NULL;
+      LoL_tail = new_ptr;
 
-   *LoL_head_ptr = LoL_head;
-   *LoL_tail_ptr = LoL_tail;
-   return;
- }
+      *LoL_head_ptr = LoL_head;
+      *LoL_tail_ptr = LoL_tail;
+
+      return;
+   }
 }
-
 

@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -49,10 +44,12 @@ typedef struct hypre_ParCSRMatrix_struct
    HYPRE_BigInt         *col_map_offd; 
         /* maps columns of offd to global columns */
    HYPRE_BigInt         *row_starts; 
-        /* array of length num_procs+1, row_starts[i] contains the 
-           global number of the first row on proc i,  
-           first_row_index = row_starts[my_id],
-           row_starts[num_procs] = global_num_rows */
+        /* array of length 2 giving the glboal index of the first row
+           on this processor, and 1+index of the final row on this
+           processor. If –enable-global-partition is used, then array
+           is length num_procs+1, and row_starts[i] contains the 
+           global number of the first row on proc i, first_row_index =
+           row_starts[my_id], row_starts[num_procs] = global_num_rows */
    HYPRE_BigInt         *col_starts;
         /* array of length num_procs+1, col_starts[i] contains the 
            global number of the first column of diag on proc i,  
@@ -79,6 +76,10 @@ typedef struct hypre_ParCSRMatrix_struct
    hypre_IJAssumedPart  *assumed_partition; /* only populated if
                                               no_global_partition option is used
                                               (compile-time option)*/
+
+   /* Array to store ordering of local diagonal block to relax. In particular,
+   used for triangulr matrices that are not ordered to be triangular. */
+   HYPRE_Int            *proc_ordering;
 
 } hypre_ParCSRMatrix;
 
@@ -115,6 +116,7 @@ hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(matrix))
 #define hypre_ParCSRMatrixRowvalues(matrix)       ((matrix) -> rowvalues)
 #define hypre_ParCSRMatrixGetrowactive(matrix)    ((matrix) -> getrowactive)
 #define hypre_ParCSRMatrixAssumedPartition(matrix) ((matrix) -> assumed_partition)
+#define hypre_ParCSRMatrixProcOrdering(matrix)    ((matrix) -> proc_ordering)
 
 /*--------------------------------------------------------------------------
  * Parallel CSR Boolean Matrix
