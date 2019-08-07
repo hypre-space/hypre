@@ -69,11 +69,15 @@ hypre_ILUSetup( void               *ilu_vdata,
    hypre_ParCSRMatrix   *matU                = hypre_ParILUDataMatU(ilu_data);
    hypre_ParCSRMatrix   *matS                = hypre_ParILUDataMatS(ilu_data);
 //   hypre_ParCSRMatrix   *matM                = NULL;
-   HYPRE_Real           nnzS/* total nnz in S */;
+   HYPRE_Int            nnzBEF;
+   HYPRE_Int            nnzG;/* g stands for global */
+   HYPRE_Real           nnzS;/* total nnz in S */
    HYPRE_Int            nnzS_offd;
    HYPRE_Int            size_C/* total size of coarse grid */;
    
    HYPRE_Int            n                    = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
+   /* reordering option */
+   HYPRE_Int            perm_opt;
    //HYPRE_Int            m;/* m = n-LU */
    HYPRE_Int            num_procs,  my_id;
 
@@ -329,19 +333,26 @@ hypre_ILUSetup( void               *ilu_vdata,
    // create perm arary if necessary
    if(perm == NULL)
    {
+      /* default to use local RCM */
+      perm_opt = 1;
+      if(fill_level == 0 && ilu_type % 10)
+      {
+         /* if ILU0 is used, no RCM is needed */
+         perm_opt = 0;
+      }
       switch(ilu_type)
       {
          case 10: case 11: case 20: case 21: case 30: case 31: /* symmetric */
-            hypre_ILUGetPerm(matA, &perm, &nLU);
+            hypre_ILUGetPerm(matA, &perm, &nLU, perm_opt);
             break;
          case 40: case 41:/* ddPQ */
-            hypre_ILUGetPermddPQ(matA, &perm, &qperm, tol_ddPQ, &nLU, &nI);
+            hypre_ILUGetPermddPQ(matA, &perm, &qperm, tol_ddPQ, &nLU, &nI, perm_opt);
             break;
          case 0: case 1:
-            hypre_ILUGetLocalPerm(matA, &perm, &nLU);
+            hypre_ILUGetLocalPerm(matA, &perm, &nLU, perm_opt);
             break;
          default:
-            hypre_ILUGetPerm(matA, &perm, &nLU);
+            hypre_ILUGetLocalPerm(matA, &perm, &nLU, perm_opt);
             break;
       }
    }
@@ -666,13 +677,14 @@ hypre_ILUSetup( void               *ilu_vdata,
    hypre_ParILUDataQPerm(ilu_data)              = qperm;
    hypre_ParILUDataNLU(ilu_data)                = nLU;
    hypre_ParILUDataNI(ilu_data)                 = nI;
-   hypre_ParILUDataUEnd(ilu_data)            = u_end;
-   hypre_ParILUDataUExt(ilu_data)            = uext;
-   hypre_ParILUDataFExt(ilu_data)            = fext;
+   hypre_ParILUDataUEnd(ilu_data)               = u_end;
+   hypre_ParILUDataUExt(ilu_data)               = uext;
+   hypre_ParILUDataFExt(ilu_data)               = fext;
       
    /* compute operator complexity */
    hypre_ParCSRMatrixSetDNumNonzeros(matA);
    nnzS = 0.0;
+   nnzBEF = 0;
    /* size_C is the size of global coarse grid, upper left part */
    size_C = hypre_ParCSRMatrixGlobalNumRows(matA);
    /* switch to compute complexity */
@@ -680,11 +692,33 @@ hypre_ILUSetup( void               *ilu_vdata,
 #ifdef HYPRE_USING_CUDA
    if(ilu_type == 0 && fill_level == 0)
    {
-      (ilu_data -> operator_complexity) =  0.0;
+      /* The nnz is for sure 1.0 in this case */
+      (ilu_data -> operator_complexity) =  1.0;
    }
    else if(ilu_type == 10 && fill_level == 0)
    {
-      (ilu_data -> operator_complexity) =  0.0;
+      /* The nnz is the sum of different parts */
+      if(matBLU_d)
+      {
+         nnzBEF  += hypre_CSRMatrixNumNonzeros(matBLU_d);
+      }
+      if(matE_d)
+      {
+         nnzBEF  += hypre_CSRMatrixNumNonzeros(matE_d);
+      }
+      if(matF_d)
+      {
+         nnzBEF  += hypre_CSRMatrixNumNonzeros(matF_d);
+      }
+      hypre_MPI_Allreduce(&nnzBEF, &nnzG, 1, HYPRE_MPI_INT, hypre_MPI_SUM, comm);
+      if(matS)
+      {
+         hypre_ParCSRMatrixSetDNumNonzeros(matS);
+         nnzS = hypre_ParCSRMatrixDNumNonzeros(matS);
+         /* if we have Schur system need to reduce it from size_C */
+      }
+      (ilu_data -> operator_complexity) =  ((HYPRE_Real)nnzG + nnzS) / 
+                                           hypre_ParCSRMatrixDNumNonzeros(matA);
    }
    else
    {

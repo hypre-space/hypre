@@ -1342,14 +1342,13 @@ hypre_ILUGetPermddPQPre(HYPRE_Int n, HYPRE_Int nLU, HYPRE_Int *A_diag_i, HYPRE_I
  * A: the input matrix
  * pperm: row permutation
  * qperm: col permutation
- * nLU: the size of internal block
  * nB: the size of B block
  * nI: number of interial nodes
  * tol: the dropping tolorance for ddPQ
  */
 
 HYPRE_Int
-hypre_ILUGetPermddPQ(hypre_ParCSRMatrix *A, HYPRE_Int **io_pperm, HYPRE_Int **io_qperm, HYPRE_Real tol, HYPRE_Int *nB, HYPRE_Int *nI)
+hypre_ILUGetPermddPQ(hypre_ParCSRMatrix *A, HYPRE_Int **io_pperm, HYPRE_Int **io_qperm, HYPRE_Real tol, HYPRE_Int *nB, HYPRE_Int *nI, HYPRE_Int opt)
 {
    HYPRE_Int         i, nB_pre, irow, jcol, nLU;
    HYPRE_Int         *pperm, *qperm;
@@ -1374,7 +1373,7 @@ hypre_ILUGetPermddPQ(hypre_ParCSRMatrix *A, HYPRE_Int **io_pperm, HYPRE_Int **io
    
    /* 2: Find interial nodes first
     */
-   hypre_ILUGetPerm( A, &pperm, &nLU);
+   hypre_ILUGetPerm( A, &pperm, &nLU, opt);
    *nI = nLU;
    
    /* 3: Pre selection on interial nodes
@@ -1452,6 +1451,21 @@ hypre_ILUGetPermddPQ(hypre_ParCSRMatrix *A, HYPRE_Int **io_pperm, HYPRE_Int **io
    /* Finishing up and free
     */
    
+   switch(opt)
+   {
+      case 0:
+         /* no RCM in this case */
+         break;
+      case 1:
+         /* RCM */
+         hypre_ParILUCSRRCM( hypre_ParCSRMatrixDiag(A), 0, nLU, &pperm, &qperm, 1);
+         break;
+      default:
+         /* RCM */
+         hypre_ParILUCSRRCM( hypre_ParCSRMatrixDiag(A), 0, nLU, &pperm, &qperm, 1);
+         break;
+   }
+   
    *nB = nLU;
    *io_pperm = pperm;
    *io_qperm = qperm;
@@ -1472,7 +1486,7 @@ hypre_ILUGetPermddPQ(hypre_ParCSRMatrix *A, HYPRE_Int **io_pperm, HYPRE_Int **io
  * nLU: number of interial nodes
  */
 HYPRE_Int
-hypre_ILUGetPerm(hypre_ParCSRMatrix *A, HYPRE_Int **perm, HYPRE_Int *nLU)
+hypre_ILUGetPerm(hypre_ParCSRMatrix *A, HYPRE_Int **perm, HYPRE_Int *nLU, HYPRE_Int opt)
 {
    /* get basic information of A */
    HYPRE_Int            n = hypre_ParCSRMatrixNumRows(A);
@@ -1530,7 +1544,20 @@ hypre_ILUGetPerm(hypre_ParCSRMatrix *A, HYPRE_Int **perm, HYPRE_Int *nLU)
          }
       }
    }
-   
+   switch(opt)
+   {
+      case 0:
+         /* no RCM in this case */
+         break;
+      case 1:
+         /* RCM */
+         hypre_ParILUCSRRCM( hypre_ParCSRMatrixDiag(A), 0, first, &temp_perm, &temp_perm, 1);
+         break;
+      default:
+         /* RCM */
+         hypre_ParILUCSRRCM( hypre_ParCSRMatrixDiag(A), 0, first, &temp_perm, &temp_perm, 1);
+         break;
+   }
    /* set out values */
    *nLU = first;
    if((*perm) != NULL) hypre_TFree(*perm,HYPRE_MEMORY_SHARED);
@@ -1547,7 +1574,7 @@ hypre_ILUGetPerm(hypre_ParCSRMatrix *A, HYPRE_Int **perm, HYPRE_Int *nLU)
  * nLU: number of interior nodes
  */
 HYPRE_Int
-hypre_ILUGetLocalPerm(hypre_ParCSRMatrix *A, HYPRE_Int **perm, HYPRE_Int *nLU)
+hypre_ILUGetLocalPerm(hypre_ParCSRMatrix *A, HYPRE_Int **perm, HYPRE_Int *nLU, HYPRE_Int opt)
 {
    /* get basic information of A */
    HYPRE_Int            n = hypre_ParCSRMatrixNumRows(A);
@@ -1559,7 +1586,20 @@ hypre_ILUGetLocalPerm(hypre_ParCSRMatrix *A, HYPRE_Int **perm, HYPRE_Int *nLU)
    {
       temp_perm[i] = i;
    }
-
+   switch(opt)
+   {
+      case 0:
+         /* no RCM in this case */
+         break;
+      case 1:
+         /* RCM */
+         hypre_ParILUCSRRCM( hypre_ParCSRMatrixDiag(A), 0, n, &temp_perm, &temp_perm, 1);
+         break;
+      default:
+         /* RCM */
+         hypre_ParILUCSRRCM( hypre_ParCSRMatrixDiag(A), 0, n, &temp_perm, &temp_perm, 1);
+         break;
+   }
    *nLU = n;
    if((*perm) != NULL) hypre_TFree(*perm,HYPRE_MEMORY_SHARED);
    *perm = temp_perm;
@@ -2134,7 +2174,7 @@ hypre_ParILUCusparseSchurGMRESMatvec( void   *matvec_data,
                        HYPRE_Complex  beta,
                        void   *y           )
 {
-   /* Lightly different, for this new matvec, the diagonal of the original matrix
+   /* Slightly different, for this new matvec, the diagonal of the original matrix
     * is the LU factorization. Thus, the matvec is done in an different way
     * |IS_1 E_12 E_13|
     * |E_21 IS_2 E_23| = S
@@ -2257,6 +2297,474 @@ hypre_ParILUCusparseSchurGMRESMatvecDestroy( void *matvec_data )
 }
 
 #endif
+
+/*--------------------------------------------------------------------------
+ * hypre_ParILUCSRRCM
+ *--------------------------------------------------------------------------*/
+
+/* This function computes the RCM ordering of a sub matrix of 
+ * sparse matrix B = A(perm,perm)
+ * For nonsymmetrix problem, is the RCM ordering of B + B'
+ * A: The input CSR matrix
+ * start:      the start position of the submatrix in B
+ * end:        the end position of the submatrix in B ( exclude end, [start,end) )
+ * permp:      pointer to the row permutation array such that B = A(perm, perm)
+ *             point to NULL if you want to work directly on A
+ *             on return, permp will point to the new permutation where
+ *             in [start, end) the matrix will reordered
+ * qpermp:     pointer to the col permutation array such that B = A(perm, perm)
+ *             point to NULL or equal to permp if you want symmetric order
+ *             on return, qpermp will point to the new permutation where
+ *             in [start, end) the matrix will reordered
+ * sym:        set to nonzero to work on A only, otherwise A + A'
+ *             WARNING: if you are use non-symmetric reordering, that is,
+ *             different row and col reordering, the result A might be non-symmetrix.
+ *             be careful if you are using non-symmetric reordering
+ */
+HYPRE_Int
+hypre_ParILUCSRRCM( hypre_CSRMatrix *A, HYPRE_Int start, HYPRE_Int end, 
+                     HYPRE_Int **permp, HYPRE_Int **qpermp, HYPRE_Int sym)
+{
+   HYPRE_Int               i, j, row, col, r1, r2;
+   
+   HYPRE_Int               num_nodes      = end - start;
+   HYPRE_Int               n              = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int               ncol           = hypre_CSRMatrixNumCols(A);
+   HYPRE_Int               *A_i           = hypre_CSRMatrixI(A);
+   HYPRE_Int               *A_j           = hypre_CSRMatrixJ(A);
+   HYPRE_Int               A_nnz          = hypre_CSRMatrixNumNonzeros(A);
+   hypre_CSRMatrix         *G             = NULL;
+   HYPRE_Int               *G_i           = NULL;
+   HYPRE_Int               *G_j           = NULL;
+   HYPRE_Int               *G_perm        = NULL;
+   HYPRE_Int               G_nnz;
+   HYPRE_Int               G_capacity;
+   HYPRE_Int               *perm_temp     = NULL;
+   HYPRE_Int               *perm          = *permp;
+   HYPRE_Int               *qperm         = *qpermp;
+   HYPRE_Int               *rqperm        = NULL;
+   
+   /* 1: Preprosessing 
+    * Check error in input, set some parameters
+    */
+   if(num_nodes <= 0)
+   {
+      /* don't do this if we are too small */
+      return hypre_error_flag;
+   }
+   if(n!=ncol || end > n || start < 0)
+   {
+      /* don't do this if the input has error */
+      printf("Error input, abort RCM\n");
+      return hypre_error_flag;
+   }
+   if(!perm)
+   {
+      /* create permutation array if we don't have one yet */
+      perm = hypre_TAlloc( HYPRE_Int, n, HYPRE_MEMORY_SHARED);
+      for(i = 0 ; i < n ; i ++)
+      {
+         perm[i] = i;
+      }
+   }
+   if(!qperm)
+   {
+      /* symmetric reordering, just point it to row reordering */
+      qperm = perm;
+   }
+   rqperm = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
+   for(i = 0 ; i < n ; i ++)
+   {
+      rqperm[qperm[i]] = i;
+   }
+   /* 2: Build Graph
+    * Build Graph for RCM ordering
+    */
+   G = hypre_CSRMatrixCreate(num_nodes, num_nodes, 0);
+   hypre_CSRMatrixInitialize(G);
+   hypre_CSRMatrixSetDataOwner(G, 1);
+   G_i = hypre_CSRMatrixI(G);
+   if(sym)
+   {
+      /* Directly use A */
+      G_nnz = 0;
+      G_capacity = hypre_max(A_nnz * n * n / num_nodes / num_nodes - num_nodes, 1);
+      G_j = hypre_TAlloc(HYPRE_Int, G_capacity, HYPRE_MEMORY_SHARED);
+      for(i = 0 ; i < num_nodes ; i ++)
+      {
+         G_i[i] = G_nnz;
+         row = perm[i + start];
+         r1 = A_i[row];
+         r2 = A_i[row+1];
+         for(j = r1 ; j < r2 ; j ++)
+         {
+            col = rqperm[A_j[j]];
+            if(col != row && col >= start && col < end)
+            {
+               /* this is an entry in G */
+               G_j[G_nnz++] = col - start;
+               if(G_nnz >= G_capacity)
+               {
+                  G_capacity = G_capacity * EXPAND_FACT + 1;         
+                  G_j = hypre_TReAlloc(G_j, HYPRE_Int, G_capacity, HYPRE_MEMORY_SHARED);
+               }
+            }
+         }
+      }
+      G_i[num_nodes] = G_nnz;
+      if(G_nnz == 0)
+      {
+         //G has only diagonal, no need to do any kind of RCM
+         hypre_TFree(G_j, HYPRE_MEMORY_SHARED);
+         hypre_TFree(rqperm, HYPRE_MEMORY_HOST);
+         *permp   = perm;
+         *qpermp  = qperm;
+         hypre_CSRMatrixDestroy(G);
+         return hypre_error_flag;
+      }
+      hypre_CSRMatrixJ(G) = G_j;
+      hypre_CSRMatrixNumNonzeros(G) = G_nnz;
+   }
+   else
+   {
+      /* Use A + A' */
+   }
+   
+   /* 3: Build Graph
+    * Build RCM
+    */
+   /* no need to be shared, but perm should be shared */
+   G_perm = hypre_TAlloc(HYPRE_Int, num_nodes, HYPRE_MEMORY_HOST);
+   hypre_ParILUCSRRCMOrder( G, G_perm);
+   
+   /* 4: Post processing
+    * Free, set value, return
+    */
+    
+   /* update to new index */
+   perm_temp = hypre_TAlloc(HYPRE_Int, num_nodes, HYPRE_MEMORY_HOST);
+   for( i = 0 ; i < num_nodes ; i ++)
+   {
+      perm_temp[i] = perm[i + start];
+   } 
+   for( i = 0 ; i < num_nodes ; i ++)
+   {
+      perm[i+start] = perm_temp[G_perm[i]];
+   } 
+   if(perm != qperm)
+   {
+      for( i = 0 ; i < num_nodes ; i ++)
+      {
+         perm_temp[i] = qperm[i + start];
+      } 
+      for( i = 0 ; i < num_nodes ; i ++)
+      {
+         qperm[i+start] = perm_temp[G_perm[i]];
+      } 
+   }
+   *permp   = perm;
+   *qpermp  = qperm;
+   hypre_CSRMatrixDestroy(G);
+   
+   hypre_TFree(G_perm, HYPRE_MEMORY_HOST);
+   hypre_TFree(perm_temp, HYPRE_MEMORY_HOST);
+   hypre_TFree(rqperm, HYPRE_MEMORY_HOST);
+   
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ParILUCSRRCMOrder
+ *--------------------------------------------------------------------------*/
+
+/* This function actually does the RCM ordering of a symmetrix csr matrix (entire)
+ * A: the csr matrix, A_data is not needed
+ * perm: the permutation array, space should be allocated outside
+ */
+HYPRE_Int
+hypre_ParILUCSRRCMOrder( hypre_CSRMatrix *A, HYPRE_Int *perm)
+{
+   HYPRE_Int      i, root;
+   HYPRE_Int      *degree     = NULL;
+   HYPRE_Int      *order      = NULL;
+   HYPRE_Int      *marker     = NULL;
+   HYPRE_Int      *A_i        = hypre_CSRMatrixI(A);
+   HYPRE_Int      n           = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int      current_num;
+   /* get the degree for each node */
+   degree = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
+   order = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
+   marker = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
+   for(i = 0 ; i < n ; i ++)
+   {
+      degree[i] = A_i[i+1] - A_i[i];
+      order[i] = i;
+      marker[i] = -1;
+   }
+   /* sort based on degree */
+   hypre_qsort2i(degree, order, 0, n-1);
+   
+   /* start RCM loop */
+   current_num = 0;
+   for( i = 0 ; i < n ; i ++)
+   {
+      root = order[i];
+      if(marker[root] < 0)
+      {
+         /* This is a new connect component */
+         hypre_ParILUCSRRCMFindPPNode(A, &root, marker);
+         
+         /* Numbering of this component */
+         hypre_ParILUCSRRCMNumbering(A, root, marker, perm, &current_num);
+      }
+   }
+   
+   /* free */
+   hypre_TFree(degree, HYPRE_MEMORY_HOST);
+   hypre_TFree(order, HYPRE_MEMORY_HOST);
+   hypre_TFree(marker, HYPRE_MEMORY_HOST);
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ParILUCSRRCMFindPPNode
+ *--------------------------------------------------------------------------*/
+
+/* This function find a pseudo-peripheral node start from root
+ * A: the csr matrix, A_data is not needed
+ * rootp: pointer to the root, on return will be a end of the pseudo-peripheral
+ * marker: the marker array for unvisited node
+ */
+HYPRE_Int
+hypre_ParILUCSRRCMFindPPNode( hypre_CSRMatrix *A, HYPRE_Int *rootp, HYPRE_Int *marker)
+{
+   HYPRE_Int      i, r1, r2, row, min_degree, lev_degree, nlev, newnlev;
+   
+   HYPRE_Int      root           = *rootp;
+   HYPRE_Int      n              = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int      *A_i           = hypre_CSRMatrixI(A);
+   /* at most n levels */
+   HYPRE_Int      *level_i       = hypre_TAlloc(HYPRE_Int, n+1, HYPRE_MEMORY_HOST);
+   HYPRE_Int      *level_j       = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
+   
+   /* build initial level structure from root */
+   hypre_ParILUCSRRCMBuildLevel( A, root, marker, level_i, level_j, &newnlev);
+   
+   nlev  = newnlev - 1;
+   while(nlev < newnlev)
+   {
+      nlev = newnlev;
+      r1 =  level_i[nlev-1];
+      r2 =  level_i[nlev];
+      min_degree = n;
+      for(i = r1 ; i < r2 ; i ++)
+      {
+         /* select the last level, pick min-degree node */
+         row = level_j[i];
+         lev_degree = A_i[row+1] - A_i[row];
+         if(min_degree > lev_degree)
+         {
+            min_degree = lev_degree;
+            root = row;
+         }
+      }
+      hypre_ParILUCSRRCMBuildLevel( A, root, marker, level_i, level_j, &newnlev);
+   }
+   
+   *rootp = root;
+   /* free */
+   hypre_TFree(level_i, HYPRE_MEMORY_HOST);
+   hypre_TFree(level_j, HYPRE_MEMORY_HOST);
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ParILUCSRRCMFindPPNode
+ *--------------------------------------------------------------------------*/
+
+/* This function build level structure start from root
+ * A: the csr matrix, A_data is not needed
+ * root: pointer to the root
+ * marker: the marker array for unvisited node
+ * level_i: points to the start/end of position on level_j, similar to CSR Matrix
+ * level_j: store node number on each level
+ * nlevp: return the number of level on this level structure
+ */
+HYPRE_Int
+hypre_ParILUCSRRCMBuildLevel(hypre_CSRMatrix *A, HYPRE_Int root, HYPRE_Int *marker,
+                              HYPRE_Int *level_i, HYPRE_Int *level_j, HYPRE_Int *nlevp)
+{
+   HYPRE_Int      i, j, l1, l2, l_current, r1, r2, rowi, rowj, nlev;
+   HYPRE_Int      *A_i = hypre_CSRMatrixI(A);
+   HYPRE_Int      *A_j = hypre_CSRMatrixJ(A);
+   
+   /* set first level first */
+   level_i[0] = 0;
+   level_j[0] = root;
+   marker[root] = 0;
+   nlev = 1;
+   l1 = 0;
+   l2 = 1;
+   l_current = l2;
+   
+   //explore nbhds of all nodes in current level
+   while(l2 > l1)
+   {
+      level_i[nlev++] = l2;
+      /* loop through last level */
+      for(i = l1 ; i < l2 ; i ++)
+      {
+         /* the node to explore */
+         rowi = level_j[i];
+         r1 = A_i[rowi];
+         r2 = A_i[rowi + 1];
+         for(j = r1 ; j < r2 ; j ++)
+         {
+            rowj = A_j[j];
+            if( marker[rowj] < 0 )
+            {
+               /* Aha, an unmarked row */
+               marker[rowj] = 0;
+               level_j[l_current++] = rowj;
+            }
+         }
+      }
+      l1 = l2;
+      l2 = l_current;
+   }
+   /* after this we always have a "ghost" last level */
+   nlev --;
+   
+   /* reset marker */
+   for(i = 0 ; i < l2 ; i ++)
+   {
+      marker[level_j[i]] = -1;
+   }
+   
+   *nlevp = nlev;
+   
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ParILUCSRRCMNumbering
+ *--------------------------------------------------------------------------*/
+
+/* This function generate numbering for a connect component
+ * A: the csr matrix, A_data is not needed
+ * root: pointer to the root
+ * marker: the marker array for unvisited node
+ * perm: permutation array
+ * current_nump: number of nodes already have a perm value
+ */
+
+HYPRE_Int
+hypre_ParILUCSRRCMNumbering(hypre_CSRMatrix *A, HYPRE_Int root, HYPRE_Int *marker, HYPRE_Int *perm, HYPRE_Int *current_nump)
+{
+    HYPRE_Int        i, j, l1, l2, r1, r2, rowi, rowj, row_start, row_end;
+    HYPRE_Int        *A_i        = hypre_CSRMatrixI(A);
+    HYPRE_Int        *A_j        = hypre_CSRMatrixJ(A);
+    HYPRE_Int        current_num = *current_nump;
+    
+    
+    marker[root]        = 0;
+    l1                  = current_num;
+    perm[current_num++] = root;
+    l2                  = current_num;
+    
+    while(l2 > l1)
+    {
+       /* loop through all nodes is current level */
+       for(i = l1 ; i < l2 ; i ++)
+       {
+          rowi = perm[i];
+          r1 = A_i[rowi];
+          r2 = A_i[rowi+1];
+          row_start = current_num;
+          for(j = r1 ; j < r2 ; j ++)
+          {
+             rowj = A_j[j];
+             if(marker[rowj] < 0)
+             {
+                /* save the degree in marker and add it to perm */
+                marker[rowj] = A_i[rowj+1] - A_i[rowj];
+                perm[current_num++] = rowj;
+             }
+          }
+          row_end = current_num;
+          hypre_ParILUCSRRCMQsort(perm, row_start, row_end-1, marker);
+       }
+       l1 = l2;
+       l2 = current_num;
+    }
+    
+    //reverse
+    hypre_ParILUCSRRCMReverse(perm, *current_nump, current_num-1);
+    *current_nump = current_num;
+    return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ParILUCSRRCMQsort
+ *--------------------------------------------------------------------------*/
+
+/* This qsort is very specified, not worth to put into utilities
+ * Sort a part of array perm based on degree value (ascend)
+ * That is, if degree[perm[i]] < degree[perm[j]], we should have i < j
+ * perm: the perm array
+ * start: start in perm
+ * end: end in perm
+ * degree: degree array
+ */
+
+HYPRE_Int
+hypre_ParILUCSRRCMQsort(HYPRE_Int *perm, HYPRE_Int start, HYPRE_Int end, HYPRE_Int *degree)
+{
+    
+    HYPRE_Int i, mid;
+    if(start >= end)
+    {
+        return hypre_error_flag;
+    }
+    
+    hypre_swap(perm, start, (start + end) / 2);
+    mid = start;
+    //loop to split
+    for(i = start + 1 ; i <= end ; i ++)
+    {
+        if(degree[perm[i]] < degree[perm[start]])
+        {
+            hypre_swap(perm, ++mid, i);
+        }
+    }
+    hypre_swap(perm, start, mid);
+    hypre_ParILUCSRRCMQsort(perm, mid+1, end, degree);
+    hypre_ParILUCSRRCMQsort(perm, start, mid-1, degree);
+    return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ParILUCSRRCMReverse
+ *--------------------------------------------------------------------------*/
+
+/* Last step in RCM, reverse it
+ * perm: perm array
+ * srart: start position
+ * end: end position
+ */
+
+HYPRE_Int 
+hypre_ParILUCSRRCMReverse(HYPRE_Int *perm, HYPRE_Int start, HYPRE_Int end)
+{
+    HYPRE_Int     i, j;
+    HYPRE_Int     mid = (start + end + 1) / 2;
+    
+    for(i = start, j = end ; i < mid ; i ++, j--)
+    {
+        hypre_swap(perm, i, j);
+    }
+    return hypre_error_flag;
+}
 
 /* NSH create and solve and help functions */
 

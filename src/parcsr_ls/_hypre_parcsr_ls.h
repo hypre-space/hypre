@@ -1787,12 +1787,19 @@ HYPRE_Int hypre_quickSortIR (HYPRE_Int *a, HYPRE_Real *b, HYPRE_Int *iw, const H
 HYPRE_Int hypre_ILUSortOffdColmap(hypre_ParCSRMatrix *A);
 HYPRE_Int hypre_ILUMaxRabs(HYPRE_Real *array_data, HYPRE_Int *array_j, HYPRE_Int start, HYPRE_Int end, HYPRE_Int nLU, HYPRE_Int *rperm, HYPRE_Real *value, HYPRE_Int *index, HYPRE_Real *l1_norm, HYPRE_Int *nnz);
 HYPRE_Int hypre_ILUGetPermddPQPre(HYPRE_Int n, HYPRE_Int nLU, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j, HYPRE_Real *A_diag_data, HYPRE_Real tol, HYPRE_Int *perm, HYPRE_Int *rperm, HYPRE_Int *pperm_pre, HYPRE_Int *qperm_pre, HYPRE_Int *nB);
-HYPRE_Int hypre_ILUGetPermddPQ(hypre_ParCSRMatrix *A, HYPRE_Int **pperm, HYPRE_Int **qperm, HYPRE_Real tol, HYPRE_Int *nB, HYPRE_Int *nI);
-HYPRE_Int hypre_ILUGetPerm(hypre_ParCSRMatrix *A, HYPRE_Int **perm, HYPRE_Int *nLU);
-HYPRE_Int hypre_ILUGetNoPrem(hypre_ParCSRMatrix *A, HYPRE_Int **perm, HYPRE_Int *nLU);
+HYPRE_Int hypre_ILUGetPermddPQ(hypre_ParCSRMatrix *A, HYPRE_Int **pperm, HYPRE_Int **qperm, HYPRE_Real tol, HYPRE_Int *nB, HYPRE_Int *nI, HYPRE_Int opt);
+HYPRE_Int hypre_ILUGetPerm(hypre_ParCSRMatrix *A, HYPRE_Int **perm, HYPRE_Int *nLU, HYPRE_Int opt);
+HYPRE_Int hypre_ILUGetLocalPerm(hypre_ParCSRMatrix *A, HYPRE_Int **perm, HYPRE_Int *nLU, HYPRE_Int opt);
 HYPRE_Int hypre_ILUWriteSolverParams(void *ilu_vdata);
 HYPRE_Int hypre_ILUBuildRASExternalMatrix(hypre_ParCSRMatrix *A, HYPRE_Int *rperm, HYPRE_Int **E_i, HYPRE_Int **E_j, HYPRE_Real **E_data);
 HYPRE_Int hypre_ILUSetupILU0(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qperm, HYPRE_Int nLU, HYPRE_Int nI, hypre_ParCSRMatrix **Lptr, HYPRE_Real** Dptr, hypre_ParCSRMatrix **Uptr, hypre_ParCSRMatrix **Sptr, HYPRE_Int **u_end);
+HYPRE_Int hypre_ParILUCSRRCM( hypre_CSRMatrix *A, HYPRE_Int start, HYPRE_Int end, HYPRE_Int **permp, HYPRE_Int **qpermp, HYPRE_Int sym);
+HYPRE_Int hypre_ParILUCSRRCMOrder( hypre_CSRMatrix *A, HYPRE_Int *perm);
+HYPRE_Int hypre_ParILUCSRRCMFindPPNode( hypre_CSRMatrix *A, HYPRE_Int *rootp, HYPRE_Int *marker);
+HYPRE_Int hypre_ParILUCSRRCMBuildLevel(hypre_CSRMatrix *A, HYPRE_Int root, HYPRE_Int *marker, HYPRE_Int *level_i, HYPRE_Int *level_j, HYPRE_Int *nlevp);
+HYPRE_Int hypre_ParILUCSRRCMNumbering(hypre_CSRMatrix *A, HYPRE_Int root, HYPRE_Int *marker, HYPRE_Int *perm, HYPRE_Int *current_nump);
+HYPRE_Int hypre_ParILUCSRRCMQsort(HYPRE_Int *perm, HYPRE_Int start, HYPRE_Int end, HYPRE_Int *degree);
+HYPRE_Int hypre_ParILUCSRRCMReverse(HYPRE_Int *perm, HYPRE_Int start, HYPRE_Int end);
 #ifdef HYPRE_USING_CUDA
 HYPRE_Int hypre_ParILUCusparseExtractDiagonalCSR(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *rqperm, hypre_CSRMatrix **A_diagp);
 HYPRE_Int hypre_ParILUCusparseILUExtractEBFC(hypre_CSRMatrix *A_diag, HYPRE_Int nLU, hypre_CSRMatrix **Bp, hypre_CSRMatrix **Cp, hypre_CSRMatrix **Ep, hypre_CSRMatrix **Fp);
@@ -1819,7 +1826,6 @@ HYPRE_Int hypre_ILUSolveLU(hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParV
 HYPRE_Int hypre_ILUSolveSchurGMRES(hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u, HYPRE_Int *perm, HYPRE_Int *qperm, HYPRE_Int nLU, hypre_ParCSRMatrix *L, HYPRE_Real* D, hypre_ParCSRMatrix *U, hypre_ParCSRMatrix *S, hypre_ParVector *ftemp, hypre_ParVector *utemp, HYPRE_Solver schur_solver, HYPRE_Solver schur_precond, hypre_ParVector *rhs, hypre_ParVector *x, HYPRE_Int *u_end);
 HYPRE_Int hypre_ILUSolveSchurNSH(hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u, HYPRE_Int *perm, HYPRE_Int nLU, hypre_ParCSRMatrix *L, HYPRE_Real* D, hypre_ParCSRMatrix *U, hypre_ParCSRMatrix *S, hypre_ParVector *ftemp, hypre_ParVector *utemp, HYPRE_Solver schur_solver, hypre_ParVector *rhs, hypre_ParVector *x, HYPRE_Int *u_end);
 HYPRE_Int hypre_ILUSolveLURAS(hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u, HYPRE_Int *perm, hypre_ParCSRMatrix *L, HYPRE_Real* D, hypre_ParCSRMatrix *U, hypre_ParVector *ftemp, hypre_ParVector *utemp, HYPRE_Real *fext, HYPRE_Real *uext);
-HYPRE_Int hypre_ILUGetLocalPerm(hypre_ParCSRMatrix *A, HYPRE_Int **perm, HYPRE_Int *nLU);
 HYPRE_Int hypre_ILUSetSchurNSHDropThreshold( void *ilu_vdata, HYPRE_Real threshold);
 HYPRE_Int hypre_ILUSetSchurNSHDropThresholdArray( void *ilu_vdata, HYPRE_Real *threshold);
 // Newton-Schultz-Hotelling (NSH) functions
