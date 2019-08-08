@@ -813,6 +813,7 @@ hypre_StructGridPrintVTK( const char       *filename,
    HYPRE_Int       growth_array[2*HYPRE_MAXDIM];
    HYPRE_Int       shrink_array[2*HYPRE_MAXDIM];
    HYPRE_Int       cell_type, cell_nnodes;
+   HYPRE_Int       offset;
 
    hypre_MPI_Comm_rank(comm, &my_id);
    hypre_MPI_Comm_size(comm, &num_procs);
@@ -829,6 +830,7 @@ hypre_StructGridPrintVTK( const char       *filename,
 
    /* Scan number of boxes */
    hypre_MPI_Scan(&hypre_BoxArraySize(boxes), &offset_id, 1, HYPRE_MPI_INT, hypre_MPI_SUM, comm);
+   offset_id = offset_id - hypre_BoxArraySize(boxes);
 
    /* Temporary stuff */
    for(d = 0; d < ndim; d++)
@@ -943,6 +945,7 @@ hypre_StructGridPrintVTK( const char       *filename,
 
    hypre_fprintf(fp, "\t\t\t<Cells>\n");
    hypre_fprintf(fp, "\t\t\t\t<DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\">\n");
+   offset = 0;
    switch(ndim)
    {
       case 1:
@@ -960,12 +963,14 @@ hypre_StructGridPrintVTK( const char       *filename,
             {
                hypre_BoxLoopGetIndex(index);
 
-               n[0]  = hypre_BoxOffsetDistance(box, index);
+               n[0]  = hypre_BoxOffsetDistance(box, index) + offset;
                n[1]  = n[0] + 1;
 
                hypre_fprintf(fp, "\t\t\t\t\t%d %d\n", n[0], n[1]);
             }
             hypre_BoxLoop0End();
+
+            offset += partial_volume[0];
          }
          break;
 
@@ -984,7 +989,7 @@ hypre_StructGridPrintVTK( const char       *filename,
             {
                hypre_BoxLoopGetIndex(index);
 
-               n[0]  = hypre_BoxOffsetDistance(box, index) + hypre_IndexD(index, 1);
+               n[0]  = hypre_BoxOffsetDistance(box, index) + hypre_IndexD(index, 1) + offset;
                n[1]  = n[0] + 1;
                n[2]  = n[0] + partial_volume[0];
                n[3]  = n[2] + 1;
@@ -995,6 +1000,8 @@ hypre_StructGridPrintVTK( const char       *filename,
                hypre_fprintf(fp, "\n");
             }
             hypre_BoxLoop0End();
+
+            offset += partial_volume[1];
          }
          break;
 
@@ -1013,7 +1020,7 @@ hypre_StructGridPrintVTK( const char       *filename,
             {
                hypre_BoxLoopGetIndex(index);
 
-               n[0]  = hypre_BoxOffsetDistance(box, index);
+               n[0]  = hypre_BoxOffsetDistance(box, index) + offset;
                n[0] += hypre_IndexD(index, 1);
                n[0] += hypre_IndexD(index, 2)*(partial_volume[0] + hypre_BoxSizeD(box, 1));
                n[1]  = n[0] + 1;
@@ -1030,6 +1037,8 @@ hypre_StructGridPrintVTK( const char       *filename,
                hypre_fprintf(fp, "\n");
             }
             hypre_BoxLoop0End();
+
+            offset += partial_volume[2];
          }
    }
    hypre_fprintf(fp, "\t\t\t\t</DataArray>\n");
