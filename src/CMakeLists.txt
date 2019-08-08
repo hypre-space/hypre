@@ -13,11 +13,13 @@ set (HYPRE_TIME    00:00:00)
 set (HYPRE_BUGS    hypre-support@llnl.gov)
 set (HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
 
+message(STATUS ${hypre_SOURCE_DIR})
+message(STATUS ${CMAKE_CURRENT_BINARY_DIR})
 if (${hypre_SOURCE_DIR} STREQUAL ${hypre_BINARY_DIR})
   message(FATAL_ERROR "In-place build not allowed! Please use a separate build directory. See the Users Manual or INSTALL file for details.")
 endif ()
 
-# Set cmake module path (where Find.. files are located)
+# Set cmake module path 
 set(CMAKE_MODULE_PATH ${hypre_SOURCE_DIR}/cmake) 
 include(hypre_CMakeUtilities)
 
@@ -34,8 +36,10 @@ set (CMAKE_BUILD_TYPE "${HYPRE_BUILD_TYPE}" CACHE INTERNAL "" FORCE)
 # Configuration options
 option(HYPRE_SHARED               "Build a shared library" OFF)
 option(HYPRE_BIGINT               "Use long long int for HYPRE_Int" OFF)
+option(HYPRE_MIXEDINT             "Use long long int for HYPRE_BigInt, int for HYPRE_INT" OFF)
 option(HYPRE_SINGLE               "Use float for HYPRE_Real" OFF)
 option(HYPRE_LONG_DOUBLE          "Use long double for HYPRE_Real" OFF)
+option(HYPRE_COMPLEX              "Use complex values" OFF)
 option(HYPRE_SEQUENTIAL           "Compile without MPI" OFF)
 option(HYPRE_TIMING               "Use HYPRE timing routines" OFF)
 option(HYPRE_USING_HYPRE_BLAS     "Use internal BLAS library" ON)
@@ -43,40 +47,48 @@ option(HYPRE_USING_HYPRE_LAPACK   "Use internal LAPACK library" ON)
 option(HYPRE_USING_PERSISTENT_COMM "Use persistent communication" OFF)
 option(HYPRE_NO_GLOBAL_PARTITION  "Use assumed partition" ON)
 option(HYPRE_PRINT_ERRORS         "Print HYPRE errors" OFF)
-option(HYPRE_USING_OPENMP         "Use OpenMP" OFF)
-option(HYPRE_HOPSCOTCH            "Use hopscotch hashing with OpenMP" OFF)
-option(HYPRE_USING_DSUPERLU       "Use TPL SuperLU_Dist" OFF)
-option(HYPRE_USING_FEI            "Use FEI" OFF)
-option(HYPRE_USING_CALIPER        "Use Caliper" OFF)  # TODO: Finish this cmake feature
+
+option(HYPRE_WITH_OPENMP          "Use OpenMP" OFF)
+option(HYPRE_WITH_HOPSCOTCH       "Use hopscotch hashing with OpenMP" OFF)
+option(HYPRE_WITH_DSUPERLU        "Use TPL SuperLU_Dist" OFF)
+option(HYPRE_ENABLE_FEI           "Use FEI" OFF) # TODO: Add this cmake feature
+option(HYPRE_WITH_CALIPER         "Use Caliper" OFF)  # TODO: Finish this cmake feature
 option(HYPRE_BUILD_EXAMPLES       "Build examples" OFF)
+option(HYPRE_BUILD_TESTS          "Build tests" OFF)
 
 option(TPL_DSUPERLU_LIBRARIES     "List of absolute paths to SuperLU_Dist link libraries [].")
 option(TPL_DSUPERLU_INCLUDE_DIRS  "List of absolute paths to SuperLU_Dist include directories [].")
 
-if (HYPRE_SHARED)
+# Set config name values
+if (HYPRE_WITH_OPENMP)
+  set (HYPRE_USING_OPENMP ON CACHE BOOL "" FORCE)
+endif()
+
+if (HYPRE_WITH_HOPSCOTCH)
+  set (HYPRE_HOPSCOTCH ON CACHE BOOL "" FORCE)
+endif()
+
+if (HYPRE_WITH_DSUPERLU)
+  set (HYPRE_USING_DSUPERLU ON CACHE BOOL "" FORCE)
+endif()
+
+if (HYPRE_ENABLE_FEI)
+  set (HYPRE_USING_FEI ON CACHE BOOL "" FORCE)
+endif()
+
+if (HYPRE_WITH_CALIPER)
+  set (HYPRE_USING_CALIPER ON CACHE BOOL "" FORCE)
+endif()
+
+if (HYPRE_SHARED OR HYPRE_BIGINT OR HYPRE_SINGLE OR HYPRE_LONG_DOUBLE)
   # FEI doesn't currently compile with shared
-  set (HYPRE_USING_FEI OFF CACHE BOOL "" FORCE)
-endif ()
-
-if (HYPRE_BIGINT)
-  set (HYPRE_USING_FEI OFF CACHE BOOL "" FORCE)
-endif ()
-
-if (HYPRE_SINGLE)
-  set (HYPRE_USING_FEI OFF CACHE BOOL "" FORCE)
-endif ()
-
-if (HYPRE_LONG_DOUBLE)
   set (HYPRE_USING_FEI OFF CACHE BOOL "" FORCE)
 endif ()
 
 if (HYPRE_SEQUENTIAL)
   set (HYPRE_NO_GLOBAL_PARTITION OFF CACHE BOOL "" FORCE)
+  set (HYPRE_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 endif ()
-
-#   --with-fei              Use internal FEI routines.
-#   --with-superlu          Use internal SuperLU routines.
-#   --with-mli              Use MLI
 
 # Headers and sources
 set (HYPRE_HEADERS "")
@@ -98,11 +110,11 @@ set(TPL_LINKER_FLAGS "")
 # Find DSUPERLU, if requested 
 if (HYPRE_USING_DSUPERLU)
   if (NOT TPL_DSUPERLU_LIBRARIES)
-    message(FATAL_ERROR "TPL_DSUPERLU_LIBRARIES option should be set for SuperLU_Dist support to be enabled.")
+    message(FATAL_ERROR "TPL_DSUPERLU_LIBRARIES option should be set for SuperLU_Dist support.")
   endif()
 
   if (NOT TPL_DSUPERLU_INCLUDE_DIRS)
-    message(FATAL_ERROR "TPL_DSUPERLU_INCLUDE_DIRS option be set for SuperLU_Dist support to be enabled.")
+    message(FATAL_ERROR "TPL_DSUPERLU_INCLUDE_DIRS option be set for SuperLU_Dist support.")
   endif()
   foreach(dir ${TPL_DSUPERLU_INCLUDE_DIRS})
     if (NOT EXISTS ${dir})
@@ -110,13 +122,11 @@ if (HYPRE_USING_DSUPERLU)
     endif()
     set(CMAKE_C_FLAGS "-I${dir} ${CMAKE_C_FLAGS}")
   endforeach()
-
   message("-- Enabled support for using DSUPERLU.")
   set(DSUPERLU_FOUND TRUE)
-  list(APPEND TPL_LIBRARIES ${TPL_DSUPERLU_LIBRARIES})
+  list(APPEND TPL_LIBRARIES ${TPL_DSUPERLU_LIBRARIES} stdc++)
 endif()
 
-# Build the TPL_LIBRARIES LIST
 if (TPL_DSUPERLU_INCLUDE_DIRS)
   include_directories(${TPL_DSUPERLU_INCLUDE_DIRS})  
 endif ()
@@ -852,10 +862,12 @@ if (NOT HYPRE_SEQUENTIAL)
   if ((MPI_C_FOUND) AND (NOT CMAKE_C_COMPILER STREQUAL MPI_C_COMPILER))
     include_directories (${MPI_C_INCLUDE_PATH})
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${MPI_C_COMPILE_FLAGS}")
+    list(APPEND TPL_LIBRARIES ${MPI_C_LIBRARIES})
   endif ()
   if ((MPI_CXX_FOUND) AND (NOT CMAKE_CXX_COMPILER STREQUAL MPI_CXX_COMPILER))
     include_directories (${MPI_CXX_INCLUDE_PATH})
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MPI_CXX_COMPILE_FLAGS}")
+    list(APPEND TPL_LIBRARIES ${MPI_CXX_LIBRARIES})
   endif ()
 endif (NOT HYPRE_SEQUENTIAL)
 
@@ -908,27 +920,18 @@ if (HYPRE_BUILD_EXAMPLES)
   add_subdirectory(examples)
 endif()
 
+# Build the test directory, if requested
+if (HYPRE_BUILD_TESTS)
+  add_subdirectory(test)
+endif()
+
 # Cleanup the TPL list
 list(REMOVE_DUPLICATES TPL_LIBRARIES)
 
-add_library (HYPRE ${HYPRE_SOURCES} ${FEI_LIBS})
+add_library (HYPRE ${HYPRE_SOURCES} ${HYPRE_HEADERS} ${FEI_LIBS})
 
 target_link_libraries(HYPRE PUBLIC ${TPL_LIBRARIES})
 
 install (TARGETS HYPRE DESTINATION lib)
 install (FILES ${HYPRE_HEADERS} DESTINATION include)
 
-# add_subdirectory (test EXCLUDE_FROM_ALL)
- 
-# # does this system provide the log and exp functions?
-# include (${CMAKE_ROOT}/Modules/CheckFunctionExists.cmake)
-#  
-# check_function_exists (log HAVE_LOG)
-# check_function_exists (exp HAVE_EXP)
- 
-# # add the MathFunctions library?
-# if (USE_MYMATH)
-#   include_directories ("${PROJECT_SOURCE_DIR}/MathFunctions")
-#   add_subdirectory (MathFunctions)
-#   set (EXTRA_LIBS ${EXTRA_LIBS} MathFunctions)
-# endif (USE_MYMATH)

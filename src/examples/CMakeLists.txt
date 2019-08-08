@@ -10,6 +10,12 @@ list(APPEND EXAMPLE_SRCS
   ex9.c
   ex11.c
   ex12.c
+  ex13.c
+  ex14.c
+  ex15.c
+  ex16.c
+  ex17.c
+  ex18.c
 )
 
 if (HYPRE_BIGINT)
@@ -25,5 +31,5 @@ if (HYPRE_COMPLEX)
   )
 endif()
 
-add_hypre_c_executables(EXAMPLE_SRCS)
+add_hypre_executables(EXAMPLE_SRCS)
 
