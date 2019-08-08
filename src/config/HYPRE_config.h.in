@@ -168,7 +168,7 @@
 #undef HYPRE_USING_CALIPER
 
 /* Define to 1 if using SuperLU */
-#undef HYPRE_USING_SUPERLU
+#undef HAVE_SUPERLU
 
 /* Define to 1 if using DSuperLU */
 #undef HYPRE_USING_DSUPERLU

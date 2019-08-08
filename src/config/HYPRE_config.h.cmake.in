@@ -29,6 +29,12 @@
 /* Define to be the max dimension size (must be at least 3) */
 #define HYPRE_MAXDIM 3
 
+/* Use persistent communication */
+#cmakedefine HYPRE_USING_PERSISTENT_COMM
+
+/* Use hopscotch hashing */
+#cmakedefine HYPRE_HOPSCOTCH
+
 /* Compile without MPI */
 #cmakedefine HYPRE_SEQUENTIAL
 
@@ -54,7 +60,10 @@
 #cmakedefine HYPRE_USING_CALIPER
 
 /* Use SuperLU_Dist */
-#cmakedefine HAVE_DSUPERLU
+#cmakedefine HYPRE_USING_DSUPERLU
+
+/* Use SuperLU */
+#cmakedefine HAVE_SUPERLU
 
 /* #undef HYPRE_HAVE_MPI */
 /* #undef HYPRE_HAVE_MPI_COMM_F2C */

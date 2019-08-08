@@ -25,7 +25,7 @@
  * Distributed SUPERLU include files
  *-------------------------------------------------------------------------*/
 
-#ifdef HAVE_DSUPERLU
+#ifdef HYPRE_USING_DSUPERLU
 #include "superlu_ddefs.h"
 
 typedef struct HYPRE_LSI_DSuperLU_Struct
