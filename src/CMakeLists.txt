@@ -13,8 +13,6 @@ set (HYPRE_TIME    00:00:00)
 set (HYPRE_BUGS    hypre-support@llnl.gov)
 set (HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
 
-message(STATUS ${hypre_SOURCE_DIR})
-message(STATUS ${CMAKE_CURRENT_BINARY_DIR})
 if (${hypre_SOURCE_DIR} STREQUAL ${hypre_BINARY_DIR})
   message(FATAL_ERROR "In-place build not allowed! Please use a separate build directory. See the Users Manual or INSTALL file for details.")
 endif ()
@@ -74,6 +72,7 @@ endif()
 
 if (HYPRE_ENABLE_FEI)
   set (HYPRE_USING_FEI ON CACHE BOOL "" FORCE)
+  message(WARNING "CMake support for FEI is not complete!")
 endif()
 
 if (HYPRE_WITH_CALIPER)

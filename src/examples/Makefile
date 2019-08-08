@@ -32,8 +32,8 @@ F90FLAGS = $(FFLAGS) $(IF90FLAGS)
 
 
 LINKOPTS  = $(COPTS)
-LIBS      = -L$(HYPRE_DIR)/lib -lHYPRE -lm 
-LFLAGS    = $(LINKOPTS) $(LIBS) -lstdc++ 
+LIBS      = -L$(HYPRE_DIR)/lib -lHYPRE -lm
+LFLAGS    = $(LINKOPTS) $(LIBS) -lstdc++
 LFLAGS_B =\
  -L${HYPRE_DIR}/lib\
  -lbHYPREClient-C\
