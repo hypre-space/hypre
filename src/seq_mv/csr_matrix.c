@@ -86,7 +86,7 @@ hypre_CSRMatrixDestroy( hypre_CSRMatrix *matrix )
          hypre_CSRMatrixJ(matrix)    = NULL;
          hypre_CSRMatrixBigJ(matrix)    = NULL;
       }
-       hypre_TFree(matrix, HYPRE_MEMORY_HOST);
+      hypre_TFree(matrix, HYPRE_MEMORY_HOST);
       matrix = NULL;
    }
 
@@ -393,6 +393,64 @@ hypre_CSRMatrixPrint( hypre_CSRMatrix *matrix,
    else
    {
       hypre_fprintf(fp, "Warning: No matrix data!\n");
+   }
+
+   fclose(fp);
+
+   return ierr;
+}
+
+
+/*--------------------------------------------------------------------------
+ * hypre_CSRMatrixPrintCOO: print a CSRMatrix in coordinate format
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+hypre_CSRMatrixPrintCOO( hypre_CSRMatrix *matrix,
+                         char            *file_name )
+{
+   FILE    *fp;
+
+   HYPRE_Complex *matrix_data;
+   HYPRE_Int     *matrix_i;
+   HYPRE_Int     *matrix_j;
+   HYPRE_Int      num_rows;
+
+   HYPRE_Int      file_base = 1;
+
+   HYPRE_Int      j, k;
+
+   HYPRE_Int      ierr = 0;
+
+   /*----------------------------------------------------------
+    * Print the matrix data
+    *----------------------------------------------------------*/
+
+   matrix_data = hypre_CSRMatrixData(matrix);
+   matrix_i    = hypre_CSRMatrixI(matrix);
+   matrix_j    = hypre_CSRMatrixJ(matrix);
+   num_rows    = hypre_CSRMatrixNumRows(matrix);
+
+   fp = fopen(file_name, "w");
+
+   hypre_fprintf(fp, "%d\n", num_rows);
+
+   for (j = 0; j < num_rows; j++)
+   {
+      for (k = matrix_i[j]; k < matrix_i[j+1]; k++)
+      {
+         if (!matrix_data)
+         {
+            hypre_fprintf(fp, "%d   %d \n", j+file_base, matrix_j[k]+file_base);
+         }
+         else
+         {
+#ifdef HYPRE_COMPLEX
+#else
+            hypre_fprintf(fp, "%d   %d     %.15e\n", j+file_base, matrix_j[k]+file_base,
+                          matrix_data[k]);
+#endif
+         }
+      }
    }
 
    fclose(fp);

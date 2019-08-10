@@ -655,6 +655,7 @@ HYPRE_FEI_HYPRE_FILES
 HYPRE_FEI_SUBDIRS
 HYPRE_FEI_BASE_DIR
 HYPRE_FEI_SRC_DIR
+HYPRE_NAP_INCLUDE
 HYPRE_PILUT_FILES
 HYPRE_PARASAILS_FILES
 HYPRE_EUCLID_FILES
@@ -786,6 +787,8 @@ with_MPI_include
 with_MPI_libs
 with_MPI_lib_dirs
 with_MPI_flags
+with_node_aware_mpi
+with_node_aware_mpi_include
 with_blas_lib
 with_blas_libs
 with_blas_lib_dirs
@@ -1524,6 +1527,9 @@ Optional Packages:
                           autosearch for other MPI information. May be used
                           with the other three MPI options or alone in
                           conjunction with the automatic MPI search.
+  --with-node-aware-mpi   Use Node Aware MPI (default is NO).
+  --with-node-aware-mpi-include=DIR
+                          User specifies that nap_comm.hpp is in DIR.
   --with-blas-lib=LIBS    LIBS is space-separated linkable list (enclosed in
                           quotes) of libraries needed for BLAS. OK to use -L
                           and -l flags in the list
@@ -2632,6 +2638,8 @@ hypre_user_gave_caliper_inc=no
 
 hypre_found_cuda=no
 
+hypre_using_node_aware_mpi=no
+
 hypre_blas_lib_old_style=no
 hypre_blas_lib_dir_old_style=no
 hypre_lapack_lib_old_style=no
@@ -3313,6 +3321,31 @@ if test "${with_MPI_flags+set}" = set; then :
  esac
 else
   MPIFLAGS=""
+
+fi
+
+
+
+# Check whether --with-node-aware-mpi was given.
+if test "${with_node_aware_mpi+set}" = set; then :
+  withval=$with_node_aware_mpi; case "$withval" in
+    yes) hypre_using_node_aware_mpi=yes;;
+    no)  hypre_using_node_aware_mpi=no ;;
+    *)   hypre_using_node_aware_mpi=no ;;
+ esac
+else
+  hypre_using_node_aware_mpi=no
+
+fi
+
+
+
+# Check whether --with-node-aware-mpi-include was given.
+if test "${with_node_aware_mpi_include+set}" = set; then :
+  withval=$with_node_aware_mpi_include; for nap_dir in $withval; do
+    HYPRE_NAP_INCLUDE="$HYPRE_NAP_INCLUDE -I$nap_dir"
+ done;
+ hypre_using_node_aware_mpi=yes
 
 fi
 
@@ -7106,6 +7139,12 @@ then
 
 fi
 
+if test "$hypre_using_node_aware_mpi" = "yes"
+then
+   $as_echo "#define HYPRE_USING_NODE_AWARE_MPI 1" >>confdefs.h
+
+fi
+
 if test "$hypre_user_chose_blas" = "yes"
 then
    for blas_lib in $BLASLIBS; do
@@ -8188,16 +8227,16 @@ $as_echo "#define HYPRE_USING_RAJA 1" >>confdefs.h
 
    if test "$hypre_using_cuda" != "yes"
    then
-      if test "$CXX" = "mpixlC" || test "$CXX" = "xlC_r"
-      then
+   if test "$CXX" = "mpixlC" || test "$CXX" = "xlC_r"
+   then
          CXXFLAGS="${CXXFLAGS} -+ -std=c++11"
-      fi
    fi
+   	fi
 
-      CC=${CXX}
+   	   CC=${CXX}
    LINK_CC=${LINK_CXX}
    CFLAGS=${CXXFLAGS}
-fi
+	fi
 
 if test "x$hypre_user_chose_kokkos" = "xyes"
 then
@@ -8207,17 +8246,17 @@ $as_echo "#define HYPRE_USING_KOKKOS 1" >>confdefs.h
 
 
    if test "$hypre_using_cuda" != "yes"
+then
+   if test "$CXX" = "mpixlC" || test "$CXX" = "xlC_r"
    then
-      if test "$CXX" = "mpixlC" || test "$CXX" = "xlC_r"
-      then
          CXXFLAGS="${CXXFLAGS} -+ -std=c++11"
-      fi
    fi
+      fi
 
-      CC=${CXX}
+            CC=${CXX}
    LINK_CC=${LINK_CXX}
    CFLAGS=${CXXFLAGS}
-fi
+      fi
 
 if test "$hypre_user_chose_cuda" = "yes"
 then
@@ -8295,23 +8334,23 @@ done
    HYPRE_CUDA_LIBS="-L${HYPRE_CUDA_PATH}/lib64 -lcusparse -lcudart -lcublas -lnvToolsExt"
 fi
 
-if test "$hypre_using_um" != "yes"
-then
+   if test "$hypre_using_um" != "yes"
+   then
       if test "$hypre_user_chose_cuda" = "yes"
    then
       { $as_echo "$as_me:${as_lineno-$LINENO}: ***********************************************************" >&5
 $as_echo "$as_me: ***********************************************************" >&6;}
-      { $as_echo "$as_me:${as_lineno-$LINENO}: Configuring with --with-cuda=yes without unified memory." >&5
+       	{ $as_echo "$as_me:${as_lineno-$LINENO}: Configuring with --with-cuda=yes without unified memory." >&5
 $as_echo "$as_me: Configuring with --with-cuda=yes without unified memory." >&6;}
-      { $as_echo "$as_me:${as_lineno-$LINENO}: It only works for struct interface." >&5
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: It only works for struct interface." >&5
 $as_echo "$as_me: It only works for struct interface." >&6;}
-      { $as_echo "$as_me:${as_lineno-$LINENO}: Use --enable-unified-memory to compile with unified memory." >&5
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: Use --enable-unified-memory to compile with unified memory." >&5
 $as_echo "$as_me: Use --enable-unified-memory to compile with unified memory." >&6;}
       { $as_echo "$as_me:${as_lineno-$LINENO}: ***********************************************************" >&5
 $as_echo "$as_me: ***********************************************************" >&6;}
    fi
    if test "$hypre_using_device_openmp" = "yes"
-   then
+then
       { $as_echo "$as_me:${as_lineno-$LINENO}: ***********************************************************" >&5
 $as_echo "$as_me: ***********************************************************" >&6;}
       { $as_echo "$as_me:${as_lineno-$LINENO}: Configuring with --with-device-openmp=yes without unified memory." >&5
@@ -8392,11 +8431,11 @@ done
 
    if test "$CC" = "clang-gpu" || test "$CC" = "mpiclang-gpu"
    then
-      CFLAGS+=" -fopenmp-nonaliased-maps"
+     CFLAGS+=" -fopenmp-nonaliased-maps"
    fi
    if test "$CXX" = "clang++-gpu" || test "$CXX" = "mpiclang++-gpu"
    then
-      CXXFLAGS+=" -fopenmp-nonaliased-maps"
+     CXXFLAGS+=" -fopenmp-nonaliased-maps"
    fi
    if test "$hypre_using_debug" = "yes"
    then
@@ -8577,6 +8616,8 @@ $as_echo "$HYPRE_ARCH" >&6; }
          fi
          ;;
    esac
+
+
 
 
 

@@ -13,7 +13,6 @@
 
 #include "_hypre_parcsr_ls.h"
 
-
 /*--------------------------------------------------------------------------
  * hypre_BoomerAMGRelax
  *--------------------------------------------------------------------------*/
@@ -38,12 +37,12 @@ HYPRE_Int  hypre_BoomerAMGRelaxIF( hypre_ParCSRMatrix *A,
       if (cycle_type < 2)
       {
          relax_points[0] = 1;
-	 relax_points[1] = -1;
+         relax_points[1] = -1;
       }
       else
       {
-	 relax_points[0] = -1;
-	 relax_points[1] = 1;
+         relax_points[0] = -1;
+         relax_points[1] = 1;
       }
 
       for (i=0; i < 2; i++)

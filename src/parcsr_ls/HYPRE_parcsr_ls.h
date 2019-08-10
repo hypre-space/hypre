@@ -227,10 +227,19 @@ HYPRE_Int HYPRE_BoomerAMGSetMaxLevels(HYPRE_Solver solver,
  * (Optional) Sets AMG strength threshold. The default is 0.25.
  * For 2d Laplace operators, 0.25 is a good value, for 3d Laplace
  * operators, 0.5 or 0.6 is a better value. For elasticity problems,
- * a large strength threshold, such as 0.9, is often better.
+ * a large strength threshold, such as 0.9, is often better. The
+ * strong threshold for R is strong connections used in building an
+ * approximate ideal restriction, and the filter threshold for R a
+ * threshold to eliminate small entries from R after building it.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetStrongThreshold(HYPRE_Solver solver,
                                             HYPRE_Real   strong_threshold);
+
+HYPRE_Int HYPRE_BoomerAMGSetStrongThresholdR(HYPRE_Solver solver,
+                                             HYPRE_Real   strong_threshold);
+
+HYPRE_Int HYPRE_BoomerAMGSetFilterThresholdR(HYPRE_Solver solver,
+                                             HYPRE_Real   filter_threshold);
 
 /**
  * (Optional) Defines the largest strength threshold for which 
@@ -546,6 +555,13 @@ HYPRE_Int HYPRE_BoomerAMGSetNumSamples(HYPRE_Solver solver,
  **/
 HYPRE_Int HYPRE_BoomerAMGSetCycleType(HYPRE_Solver solver,
                                       HYPRE_Int    cycle_type);
+/**
+ * (Optional) Specifies the use of Full multigrid cycle.
+ * The default is 0.
+ **/
+HYPRE_Int
+HYPRE_BoomerAMGSetFCycle( HYPRE_Solver solver,
+                          HYPRE_Int    fcycle  );
 
 /**
  * (Optional) Defines use of an additive V(1,1)-cycle using the
@@ -1071,6 +1087,23 @@ HYPRE_Int HYPRE_BoomerAMGSetRestriction(HYPRE_Solver solver,
                                         HYPRE_Int    restr_par);
 
 /**
+ * (Optional) Assumes the matrix is triangular in some ordering
+ * to speed up the setup time of approximate ideal restriction.
+ *
+ * The default is 0.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetIsTriangular(HYPRE_Solver solver,
+                                         HYPRE_Int   is_triangular);
+
+/**
+ * (Optional) Set local problem size at which GMRES is used over
+ * a direct solve in approximating ideal restriction.
+ * The default is 0.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetGMRESSwitchR(HYPRE_Solver solver,
+                                         HYPRE_Int   gmres_switch);
+
+/**
  * (Optional) Defines the drop tolerance for the A-matrices 
  * from the 2nd level of AMG.
  * The default is 0.
@@ -1078,6 +1111,12 @@ HYPRE_Int HYPRE_BoomerAMGSetRestriction(HYPRE_Solver solver,
 HYPRE_Int
 HYPRE_BoomerAMGSetADropTol( HYPRE_Solver  solver, 
                             HYPRE_Real    A_drop_tol  );
+
+/* drop the entries that are not on the diagonal and smaller than
+ * its row norm: type 1: 1-norm, 2: 2-norm, -1: infinity norm */
+HYPRE_Int
+HYPRE_BoomerAMGSetADropType( HYPRE_Solver  solver,
+                             HYPRE_Int     A_drop_type  );
 
 /*
  * (Optional) Name of file to which BoomerAMG will print;
@@ -1183,9 +1222,15 @@ HYPRE_Int HYPRE_BoomerAMGSetDSLUThreshold (HYPRE_Solver solver,
  * @param cpt_coarse_index [IN] indexes of C points to be kept
  **/
 HYPRE_Int HYPRE_BoomerAMGSetCpointsToKeep(HYPRE_Solver solver,
-            HYPRE_Int  cpt_coarse_level,
-            HYPRE_Int  num_cpt_coarse,
-            HYPRE_Int *cpt_coarse_index);
+				HYPRE_Int  cpt_coarse_level,
+				HYPRE_Int  num_cpt_coarse,
+				HYPRE_Int *cpt_coarse_index);
+/*
+ * (Optional) if Sabs equals 1, the strength of connection test is based
+ * on the absolute value of the matrix coefficients
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetSabs (HYPRE_Solver solver,
+                                  HYPRE_Int Sabs );
 
 /*@}*/
 
@@ -1899,7 +1944,7 @@ HYPRE_Int HYPRE_AMSProjectOutGradients(HYPRE_Solver    solver,
  **/
 HYPRE_Int HYPRE_AMSConstructDiscreteGradient(HYPRE_ParCSRMatrix  A,
                                              HYPRE_ParVector     x_coord,
-                                             HYPRE_Int          *edge_vertex,
+                                             HYPRE_BigInt       *edge_vertex,
                                              HYPRE_Int           edge_orientation,
                                              HYPRE_ParCSRMatrix *G);
 
@@ -2231,6 +2276,18 @@ HYPRE_Int HYPRE_ParCSRDiagScaleSetup(HYPRE_Solver       solver,
  * Solve routine for diagonal preconditioning.
  **/
 HYPRE_Int HYPRE_ParCSRDiagScale(HYPRE_Solver       solver,
+                                HYPRE_ParCSRMatrix HA,
+                                HYPRE_ParVector    Hy,
+                                HYPRE_ParVector    Hx);
+
+/* Setup routine for on-processor triangular solve as preconditioning. */
+HYPRE_Int HYPRE_ParCSROnProcTriSetup(HYPRE_Solver       solver,
+                                     HYPRE_ParCSRMatrix HA,
+                                     HYPRE_ParVector    Hy,
+                                     HYPRE_ParVector    Hx);
+
+/* Solve routine for on-processor triangular solve as preconditioning. */
+HYPRE_Int HYPRE_ParCSROnProcTriSolve(HYPRE_Solver       solver,
                                 HYPRE_ParCSRMatrix HA,
                                 HYPRE_ParVector    Hy,
                                 HYPRE_ParVector    Hx);
@@ -3262,7 +3319,7 @@ HYPRE_Int HYPRE_ParCSRCGNRGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
-   
+	
 /**
  * @name ParCSR MGR Solver
  *
@@ -3413,7 +3470,7 @@ HYPRE_MGRSetBlockSize( HYPRE_Solver solver, HYPRE_Int bsize );
  **/
 HYPRE_Int
 HYPRE_MGRSetReservedCoarseNodes( HYPRE_Solver solver, HYPRE_Int reserved_coarse_size, HYPRE_Int *reserved_coarse_nodes );
-   
+	
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetRelaxType
  *--------------------------------------------------------------------------*/
@@ -3643,7 +3700,7 @@ HYPRE_MGRSetMaxGlobalsmoothIters( HYPRE_Solver solver, HYPRE_Int smooth_iter );
 
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetGlobalsmoothType
- *--------------------------------------------------------------------------*/   
+ *--------------------------------------------------------------------------*/	
 /**
  * (Optional) Determines type of global smoother.
  * Options for {\tt smooth\_type} are:

@@ -57,6 +57,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 
    HYPRE_Real    cycle_op_count;
    HYPRE_Int       cycle_type;
+   HYPRE_Int       fcycle, fcycle_lev;
    HYPRE_Int       num_levels;
    HYPRE_Int       max_levels;
 
@@ -129,6 +130,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    num_levels        = hypre_ParAMGDataNumLevels(amg_data);
    max_levels        = hypre_ParAMGDataMaxLevels(amg_data);
    cycle_type        = hypre_ParAMGDataCycleType(amg_data);
+   fcycle            = hypre_ParAMGDataFCycle(amg_data);
 
    A_block_array     = hypre_ParAMGDataABlockArray(amg_data);
    P_block_array     = hypre_ParAMGDataPBlockArray(amg_data);
@@ -205,8 +207,17 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    lev_counter[0] = 1;
    for (k = 1; k < num_levels; ++k)
    {
+      if (fcycle)
+      {
+         lev_counter[k] = 1;
+
+      }
+      else
+      {
       lev_counter[k] = cycle_type;
    }
+   }
+   fcycle_lev = num_levels - 2;
 
    level = 0;
    cycle_param = 1;
@@ -390,7 +401,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                                  (HYPRE_ParVector) Vtemp,
                                  (HYPRE_ParVector) Utemp);
                  hypre_ParVectorAxpy(relax_weight[level],Utemp,Aux_U);
-	      }
+              }
               else if (smooth_num_levels > level &&
 	               (smooth_type == 5 || smooth_type == 15))
 	      {
@@ -400,7 +411,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                                  (HYPRE_ParVector) Aux_U);
 	      }
               else if (smooth_num_levels > level &&
-			(smooth_type == 6 || smooth_type == 16))
+                    (smooth_type == 6 || smooth_type == 16))
               {
                  HYPRE_SchwarzSolve(smoother[level],
                                  (HYPRE_ParCSRMatrix) A_array[level],
@@ -466,7 +477,6 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                                        Aux_U,
                                        Vtemp,
                                        Ztemp);
-
                     else
                        hypre_ParCSRRelaxThreads(A_array[level],
                                               Aux_F,
@@ -599,7 +609,6 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 
       if (lev_counter[level] >= 0 && level != num_levels-1)
       {
-
          /*---------------------------------------------------------------
           * Visit coarser level next.
           * Compute residual using hypre_ParCSRMatrixMatvec.
@@ -678,7 +687,6 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
           * Interpolate and add correction using hypre_ParCSRMatrixMatvec.
           * Reset counters and cycling parameters for finer level.
           *--------------------------------------------------------------*/
-
          fine_grid = level - 1;
          coarse_grid = level;
          alpha = 1.0;
@@ -699,6 +707,13 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          }
 
          --level;
+
+         if (fcycle && fcycle_lev == level)
+         {
+            lev_counter[level] = hypre_max(lev_counter[level], 1);
+            fcycle_lev --;
+         }
+
          cycle_param = 2;
 
 #ifdef HYPRE_USING_CALIPER
@@ -722,9 +737,10 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    if (smooth_num_levels > 0)
    {
      if (smooth_type == 7 || smooth_type == 8 || smooth_type == 9 ||
-	smooth_type == 17 || smooth_type == 18 || smooth_type == 19 )
+         smooth_type == 17 || smooth_type == 18 || smooth_type == 19 )
         hypre_ParVectorDestroy(Utemp);
    }
    //printf("HYPRE_BoomerAMGCycle END\n");
    return(Solve_err_flag);
 }
+

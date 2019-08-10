@@ -32,6 +32,9 @@ hypre_BoomerAMGCreate()
    HYPRE_Int    max_coarse_size;
    HYPRE_Int    min_coarse_size;
    HYPRE_Real   strong_threshold;
+   HYPRE_Real   strong_threshold_R;
+   HYPRE_Real   filter_threshold_R;
+   HYPRE_Int    Sabs;
    HYPRE_Real   max_row_sum;
    HYPRE_Real   trunc_factor;
    HYPRE_Real   agg_trunc_factor;
@@ -41,6 +44,7 @@ hypre_BoomerAMGCreate()
    HYPRE_Real   CR_rate;
    HYPRE_Real   CR_strong_th;
    HYPRE_Real   A_drop_tol;
+   HYPRE_Int    A_drop_type;
    HYPRE_Int    interp_type;
    HYPRE_Int    sep_weight;
    HYPRE_Int    coarsen_type;
@@ -65,6 +69,7 @@ hypre_BoomerAMGCreate()
    /* solve params */
    HYPRE_Int    min_iter;
    HYPRE_Int    max_iter;
+   HYPRE_Int    fcycle;
    HYPRE_Int    cycle_type;
 
    HYPRE_Int    converge_type;
@@ -133,6 +138,9 @@ hypre_BoomerAMGCreate()
    seq_threshold = 0;
    redundant = 0;
    strong_threshold = 0.25;
+   strong_threshold_R = 0.25;
+   filter_threshold_R = 0.0;
+   Sabs = 0;
    max_row_sum = 0.9;
    trunc_factor = 0.0;
    agg_trunc_factor = 0.0;
@@ -160,6 +168,7 @@ hypre_BoomerAMGCreate()
    CR_rate = 0.7;
    CR_strong_th = 0;
    A_drop_tol = 0.0;
+   A_drop_type = -1;
    IS_type = 1;
    CR_use_CG = 0;
    cgc_its = 1;
@@ -187,6 +196,7 @@ hypre_BoomerAMGCreate()
    /* solve params */
    min_iter  = 0;
    max_iter  = 20;
+   fcycle = 0;
    cycle_type = 1;
    converge_type = 0;
    tol = 1.0e-7;
@@ -246,6 +256,9 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetMaxCoarseSize(amg_data, max_coarse_size);
    hypre_BoomerAMGSetMinCoarseSize(amg_data, min_coarse_size);
    hypre_BoomerAMGSetStrongThreshold(amg_data, strong_threshold);
+   hypre_BoomerAMGSetStrongThresholdR(amg_data, strong_threshold_R);
+   hypre_BoomerAMGSetFilterThresholdR(amg_data, filter_threshold_R);
+   hypre_BoomerAMGSetSabs(amg_data, Sabs);
    hypre_BoomerAMGSetMaxRowSum(amg_data, max_row_sum);
    hypre_BoomerAMGSetTruncFactor(amg_data, trunc_factor);
    hypre_BoomerAMGSetAggTruncFactor(amg_data, agg_trunc_factor);
@@ -272,6 +285,7 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetCRRate(amg_data, CR_rate);
    hypre_BoomerAMGSetCRStrongTh(amg_data, CR_strong_th);
    hypre_BoomerAMGSetADropTol(amg_data, A_drop_tol);
+   hypre_BoomerAMGSetADropType(amg_data, A_drop_type);
    hypre_BoomerAMGSetISType(amg_data, IS_type);
    hypre_BoomerAMGSetCRUseCG(amg_data, CR_use_CG);
    hypre_BoomerAMGSetCGCIts(amg_data, cgc_its);
@@ -294,6 +308,7 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetMinIter(amg_data, min_iter);
    hypre_BoomerAMGSetMaxIter(amg_data, max_iter);
    hypre_BoomerAMGSetCycleType(amg_data, cycle_type);
+   hypre_BoomerAMGSetFCycle(amg_data, fcycle);
    hypre_BoomerAMGSetConvergeType(amg_data, converge_type);
    hypre_BoomerAMGSetTol(amg_data, tol);
    hypre_BoomerAMGSetNumSweeps(amg_data, num_sweeps);
@@ -336,6 +351,8 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetPrintFileName(amg_data, log_file_name);
    hypre_BoomerAMGSetDebugFlag(amg_data, debug_flag);
    hypre_BoomerAMGSetRestriction(amg_data, 0);
+   hypre_BoomerAMGSetIsTriangular(amg_data, 0);
+   hypre_BoomerAMGSetGMRESSwitchR(amg_data, 64);
 
    hypre_BoomerAMGSetGSMG(amg_data, 0);
    hypre_BoomerAMGSetNumSamples(amg_data, 0);
@@ -774,7 +791,9 @@ hypre_BoomerAMGSetRestriction( void *data,
 
    /* RL: currently, only 0: R = P^T
     *                     1: AIR
-    *                    >1: AIR-2
+    *                     2: AIR-2
+    *                     15: a special version of AIR-2 with less communication cost
+    *                     k(k>=3,k!=15): Neumann AIR of degree k-3
     */
    if (restr_par < 0)
    {
@@ -783,6 +802,40 @@ hypre_BoomerAMGSetRestriction( void *data,
    }
 
    hypre_ParAMGDataRestriction(amg_data) = restr_par;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGSetIsTriangular(void *data,
+                               HYPRE_Int is_triangular )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   hypre_ParAMGDataIsTriangular(amg_data) = is_triangular;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGSetGMRESSwitchR(void *data,
+                               HYPRE_Int gmres_switch )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   hypre_ParAMGDataGMRESSwitchR(amg_data) = gmres_switch;
 
    return hypre_error_flag;
 }
@@ -1057,6 +1110,103 @@ hypre_BoomerAMGGetStrongThreshold( void     *data,
    }
 
    *strong_threshold = hypre_ParAMGDataStrongThreshold(amg_data);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGSetStrongThresholdR( void         *data,
+                                    HYPRE_Real    strong_threshold )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if (strong_threshold < 0 || strong_threshold > 1)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   hypre_ParAMGDataStrongThresholdR(amg_data) = strong_threshold;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGGetStrongThresholdR( void       *data,
+                                    HYPRE_Real *strong_threshold )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   *strong_threshold = hypre_ParAMGDataStrongThresholdR(amg_data);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGSetFilterThresholdR( void         *data,
+                                    HYPRE_Real    filter_threshold )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if (filter_threshold < 0 || filter_threshold > 1)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   hypre_ParAMGDataFilterThresholdR(amg_data) = filter_threshold;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGGetFilterThresholdR( void       *data,
+                                    HYPRE_Real *filter_threshold )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   *filter_threshold = hypre_ParAMGDataFilterThresholdR(amg_data);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGSetSabs( void         *data,
+                        HYPRE_Int     Sabs )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   hypre_ParAMGDataSabs(amg_data) = Sabs != 0;
 
    return hypre_error_flag;
 }
@@ -1566,6 +1716,40 @@ hypre_BoomerAMGGetCycleType( void  *data,
    }
 
    *cycle_type = hypre_ParAMGDataCycleType(amg_data);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGSetFCycle( void     *data,
+                          HYPRE_Int fcycle )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   hypre_ParAMGDataFCycle(amg_data) = fcycle != 0;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGGetFCycle( void      *data,
+                          HYPRE_Int *fcycle )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   *fcycle = hypre_ParAMGDataFCycle(amg_data);
 
    return hypre_error_flag;
 }
@@ -3095,6 +3279,21 @@ hypre_BoomerAMGSetADropTol( void     *data,
    return hypre_error_flag;
 }
 
+HYPRE_Int
+hypre_BoomerAMGSetADropType( void      *data,
+                             HYPRE_Int  A_drop_type )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   hypre_ParAMGDataADropType(amg_data) = A_drop_type;
+
+   return hypre_error_flag;
+}
 /*--------------------------------------------------------------------------
  * Indicates which independent set algorithm is used for CR
  *--------------------------------------------------------------------------*/

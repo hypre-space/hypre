@@ -17,7 +17,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    
+
 /*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGCreate
  *--------------------------------------------------------------------------*/
@@ -36,7 +36,7 @@ hypre_F90_IFACE(hypre_boomeramgcreate, HYPRE_BOOMERAMGCREATE)
  * HYPRE_BoomerAMGDestroy
  *--------------------------------------------------------------------------*/
 
-void 
+void
 hypre_F90_IFACE(hypre_boomeramgdestroy, HYPRE_BOOMERAMGDESTROY)
    ( hypre_F90_Obj *solver,
      hypre_F90_Int *ierr    )
@@ -50,7 +50,7 @@ hypre_F90_IFACE(hypre_boomeramgdestroy, HYPRE_BOOMERAMGDESTROY)
  * HYPRE_BoomerAMGSetup
  *--------------------------------------------------------------------------*/
 
-void 
+void
 hypre_F90_IFACE(hypre_boomeramgsetup, HYPRE_BOOMERAMGSETUP)
    ( hypre_F90_Obj *solver,
      hypre_F90_Obj *A,
@@ -70,7 +70,7 @@ hypre_F90_IFACE(hypre_boomeramgsetup, HYPRE_BOOMERAMGSETUP)
  * HYPRE_BoomerAMGSolve
  *--------------------------------------------------------------------------*/
 
-void 
+void
 hypre_F90_IFACE(hypre_boomeramgsolve, HYPRE_BOOMERAMGSOLVE)
    ( hypre_F90_Obj *solver,
      hypre_F90_Obj *A,
@@ -90,7 +90,7 @@ hypre_F90_IFACE(hypre_boomeramgsolve, HYPRE_BOOMERAMGSOLVE)
  * HYPRE_BoomerAMGSolveT
  *--------------------------------------------------------------------------*/
 
-void 
+void
 hypre_F90_IFACE(hypre_boomeramgsolvet, HYPRE_BOOMERAMGSOLVET)
    ( hypre_F90_Obj *solver,
      hypre_F90_Obj *A,
@@ -912,7 +912,7 @@ void
 hypre_F90_IFACE(hypre_boomeramgsetlevelouterwt, HYPRE_BOOMERAMGSETLEVELOUTERWT)
    ( hypre_F90_Obj *solver,
      hypre_F90_Real *outer_wt,
-     hypre_F90_Int *level,                                    
+     hypre_F90_Int *level,
      hypre_F90_Int *ierr          )
 {
    *ierr = (hypre_F90_Int)
@@ -2100,7 +2100,7 @@ hypre_F90_IFACE(hypre_boomeramgsetnumsamples, HYPRE_BOOMERAMGSETNUMSAMPLES)
 /*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetCGCIts
  *--------------------------------------------------------------------------*/
-                                                                    
+
 void
 hypre_F90_IFACE(hypre_boomeramgsetcgcits, HYPRE_BOOMERAMGSETCGCITS)
    ( hypre_F90_Obj *solver,

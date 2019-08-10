@@ -920,9 +920,18 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    HYPRE_Int        f_pnt = F_PT;
    HYPRE_Real	    wall_time;
 
-   if (coarsen_type < 0) coarsen_type = -coarsen_type;
-   if (measure_type == 1 || measure_type == 4) meas_type = 1;
-   if (measure_type == 4 || measure_type == 3) agg_2 = 1;
+   if (coarsen_type < 0)
+   {
+      coarsen_type = -coarsen_type;
+   }
+   if (measure_type == 1 || measure_type == 4)
+   {
+      meas_type = 1;
+   }
+   if (measure_type == 4 || measure_type == 3)
+   {
+      agg_2 = 1;
+   }
 
    /*-------------------------------------------------------
     * Initialize the C/F marker, LoL_head, LoL_tail  arrays
@@ -975,7 +984,10 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
 
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
 
-   if (num_cols_offd) S_offd_j = hypre_CSRMatrixJ(S_offd);
+   if (num_cols_offd)
+   {
+      S_offd_j = hypre_CSRMatrixJ(S_offd);
+   }
 
    jS = S_i[num_variables];
 
@@ -990,8 +1002,9 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
     *----------------------------------------------------------*/
 
    for (i=0; i <= num_variables; i++)
+   {
       ST_i[i] = 0;
- 
+   }
    for (i=0; i < jS; i++)
    {
 	 ST_i[S_j[i]+1]++;
@@ -1044,8 +1057,7 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
       coarsen_type = 11;
    }
 
-   if ((meas_type || (coarsen_type != 1 && coarsen_type != 11)) 
-		&& num_procs > 1)
+   if ((meas_type || (coarsen_type != 1 && coarsen_type != 11)) && num_procs > 1)
    {
       if (use_commpkg_A)
          S_ext      = hypre_ParCSRMatrixExtractBExt(S,A,0);
@@ -1087,11 +1099,13 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    num_left = 0;
    for (j = 0; j < num_variables; j++)
    {
-      if ((S_i[j+1]-S_i[j])== 0 &&
-		(S_offd_i[j+1]-S_offd_i[j]) == 0)
+      if (S_i[j+1]-S_i[j] == 0 && S_offd_i[j+1]-S_offd_i[j] == 0)
       {
          CF_marker[j] = SF_PT;
-         if (agg_2) CF_marker[j] = SC_PT;
+         if (agg_2)
+         {
+            CF_marker[j] = SC_PT;
+         }
          measure_array[j] = 0;
       }
       else
@@ -1112,8 +1126,12 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
          }
          else
          {
-	    if (measure < 0) hypre_error_w_msg(HYPRE_ERROR_GENERIC,"negative measure!\n");
-            /*if (measure < 0) hypre_printf("negative measure!\n");*/
+            if (measure < 0)
+            {
+               hypre_error_w_msg(HYPRE_ERROR_GENERIC,"negative measure!\n");
+               /*if (measure < 0) hypre_printf("negative measure!\n");*/
+            }
+
             CF_marker[j] = f_pnt;
             for (k = S_i[j]; k < S_i[j+1]; k++)
             {
@@ -1124,8 +1142,10 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
                   {
                      new_meas = measure_array[nabor];
 	             if (new_meas > 0)
+                     {
                         hypre_remove_point(&LoL_head, &LoL_tail, new_meas, 
                                nabor, lists, where);
+                     }
 
                      new_meas = ++(measure_array[nabor]);
                      hypre_enter_on_lists(&LoL_head, &LoL_tail, new_meas,
@@ -1213,8 +1233,10 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
             measure_array[nabor] = --measure;
 	
 	    if (measure > 0)
+            {
                hypre_enter_on_lists(&LoL_head, &LoL_tail, measure, nabor, 
 				lists, where);
+            }
 	    else
 	    {
                CF_marker[nabor] = F_PT;
@@ -1256,13 +1278,20 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    hypre_TFree(LoL_tail, HYPRE_MEMORY_HOST);
 
    for (i=0; i < num_variables; i++)
-      if (CF_marker[i] == SC_PT) CF_marker[i] = C_PT;
+   {
+      if (CF_marker[i] == SC_PT)
+      {
+         CF_marker[i] = C_PT;
+      }
+   }
 
    if (coarsen_type == 11)
    {
       *CF_marker_ptr = CF_marker;
       if (meas_type && num_procs > 1)
+      {
    	hypre_CSRMatrixDestroy(S_ext); 
+      }
       return 0;
    }
 
@@ -1298,13 +1327,16 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
       {
         start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
         for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
-                int_buf_data[index++]
-                 = CF_marker[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
+         {
+            int_buf_data[index++] = CF_marker[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
+         }
       }
     
       if (num_procs > 1)
       {
-         comm_handle = hypre_ParCSRCommHandleCreate(11, comm_pkg, int_buf_data, CF_marker_offd);
+         comm_handle = hypre_ParCSRCommHandleCreate(11, comm_pkg, int_buf_data,
+                                                    CF_marker_offd);
+
          hypre_ParCSRCommHandleDestroy(comm_handle);
       }
     
@@ -1527,8 +1559,8 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
       if (debug_flag == 3) wall_time = time_getWallclockSeconds();
 
       CF_marker_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_offd, HYPRE_MEMORY_HOST);
-      int_buf_data = hypre_CTAlloc(HYPRE_Int,  hypre_ParCSRCommPkgSendMapStart(comm_pkg, 
-                                                num_sends), HYPRE_MEMORY_HOST);
+      int_buf_data = hypre_CTAlloc(HYPRE_Int,  hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                                   HYPRE_MEMORY_HOST);
 
       /*------------------------------------------------
        * Exchange boundary data for CF_marker
@@ -1889,9 +1921,10 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
       hypre_TFree(ci_array, HYPRE_MEMORY_HOST);
    /*} */   
    hypre_TFree(graph_array, HYPRE_MEMORY_HOST);
-   if ((meas_type || (coarsen_type != 1 && coarsen_type != 11)) 
-		&& num_procs > 1)
+   if ( (meas_type || (coarsen_type != 1 && coarsen_type != 11)) && num_procs > 1 )
+   {
    	hypre_CSRMatrixDestroy(S_ext); 
+   }
    
    *CF_marker_ptr   = CF_marker;
    

@@ -341,7 +341,7 @@ HYPRE_Int HYPRE_AMSProjectOutGradients(HYPRE_Solver solver,
 
 HYPRE_Int HYPRE_AMSConstructDiscreteGradient(HYPRE_ParCSRMatrix A,
                                              HYPRE_ParVector x_coord,
-                                             HYPRE_Int *edge_vertex,
+                                             HYPRE_BigInt *edge_vertex,
                                              HYPRE_Int edge_orientation,
                                              HYPRE_ParCSRMatrix *G)
 {
@@ -360,7 +360,7 @@ HYPRE_Int HYPRE_AMSFEISetup(HYPRE_Solver solver,
                             HYPRE_ParCSRMatrix A,
                             HYPRE_ParVector b,
                             HYPRE_ParVector x,
-                            HYPRE_Int *EdgeNodeList_,
+                            HYPRE_BigInt *EdgeNodeList_,
                             HYPRE_BigInt *NodeNumbers_,
                             HYPRE_Int numEdges_,
                             HYPRE_Int numLocalNodes_,
