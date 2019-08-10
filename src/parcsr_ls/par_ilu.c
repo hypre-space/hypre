@@ -2836,8 +2836,8 @@ hypre_ILUParCSRInverseNSH(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix **M, HYPRE_R
       
       /* apply dropping */
       //hypre_ParCSRMatrixNormFro(MAM, &norm);
-      /* this function has already built with norm */
-      hypre_ParCSRMatrixDropSmallEntries(MAM, droptol[1]);
+      /* drop small entries based on 2-norm */
+      hypre_ParCSRMatrixDropSmallEntries(MAM, droptol[1], 2);
       
       /* update Mj+1 = 2Mj - MjAMj 
        * the result holds it own start/end data!

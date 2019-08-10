@@ -701,6 +701,10 @@ hypre_MGRSetup( void               *mgr_vdata,
            
     if(use_air)
     {
+     HYPRE_Real   filter_thresholdR = 0.0;
+     HYPRE_Int     gmres_switch = 64;
+     HYPRE_Int     is_triangular = 0;
+      
       /* for AIR, need absolute value SOC */
 
       hypre_BoomerAMGCreateSabs(A_array[lev], strong_threshold, 1.0, 
@@ -723,17 +727,17 @@ hypre_MGRSetup( void               *mgr_vdata,
       {
         hypre_BoomerAMGBuildRestrAIR(A_array[lev], CF_marker_array[lev], 
                           ST, coarse_pnts_global, 1, 
-                          dof_func_buff, 
-                          debug_flag, trunc_factor, max_elmts, 
-                          col_offd_ST_to_AT, &RT );
+                          dof_func_buff, filter_thresholdR,
+                          debug_flag, col_offd_ST_to_AT, &RT,
+                          is_triangular, gmres_switch);
       }
-      else /* distance-2 AIR */
+      else /* distance-1.5 AIR - distance 2 locally and distance 1 across procs. */
       {
         hypre_BoomerAMGBuildRestrDist2AIR(A_array[lev], CF_marker_array[lev], 
                             ST, coarse_pnts_global, 1, 
-                            dof_func_buff, 
-                            debug_flag, trunc_factor, max_elmts, 
-                            col_offd_ST_to_AT, &RT );
+                            dof_func_buff, debug_flag, filter_thresholdR,
+                            col_offd_ST_to_AT, &RT, 
+                            1, is_triangular, gmres_switch );
       }
 
       RT_array[lev] = RT;

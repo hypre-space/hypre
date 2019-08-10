@@ -2366,7 +2366,9 @@ hypre_ParCSRMatrixDropSmallEntries( hypre_ParCSRMatrix *A,
  * tol: relative tolerance or truncation factor for dropping small terms
  * max_row_elmts: maximum number of (largest) nonzero elements to keep. 
  * rescale: Boolean on whether or not to scale resulting matrix. Scaling for 
- * each row satisfies: sum(nonzero values before dropping)/ sum(nonzero values after dropping).
+ * each row satisfies: sum(nonzero values before dropping)/ sum(nonzero values after dropping), 
+ * this way, the application of the truncated matrix on a constant vector is the same as that of 
+ * the original matrix.
  * nrm_type: type of norm used for dropping with tol. 
  * -- 0 = infinity-norm
  * -- 1 = 1-norm
@@ -2556,7 +2558,7 @@ hypre_ParCSRMatrixTruncate(hypre_ParCSRMatrix *A,
             }
             /* scale row of A */
 
-            if ((scale != 0.) && rescale)
+            if (rescale && (scale != 0.))
             {
                if (scale != row_sum)
                {
@@ -2679,7 +2681,7 @@ hypre_ParCSRMatrixTruncate(hypre_ParCSRMatrix *A,
                   num_lost_offd -= cnt_offd-A_offd_i[i];
 
                   /* scale row of A */
-                  if ((scale != 0.) && rescale)
+                  if (rescale && (scale != 0.))
                   {
                      if (scale != row_sum)
                      {
