@@ -749,7 +749,8 @@ hypre_ILUSetup( void               *ilu_vdata,
       }
       
       (ilu_data -> operator_complexity) =  ((HYPRE_Real)size_C + nnzS +
-                                          hypre_ParCSRMatrixDNumNonzeros(matL)) / 
+                                          hypre_ParCSRMatrixDNumNonzeros(matL) +
+                                          hypre_ParCSRMatrixDNumNonzeros(matU))/ 
                                           hypre_ParCSRMatrixDNumNonzeros(matA);
 #ifdef HYPRE_USING_CUDA
    }

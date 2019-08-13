@@ -1288,9 +1288,9 @@ hypre_ILUGetPermddPQPre(HYPRE_Int n, HYPRE_Int nLU, HYPRE_Int *A_diag_i, HYPRE_I
    HYPRE_Int   *jcol, *jnnz;
    HYPRE_Real  *weight;
    
-   weight      = hypre_TAlloc(HYPRE_Real, nLU, HYPRE_MEMORY_HOST);
-   jcol        = hypre_TAlloc(HYPRE_Int, nLU, HYPRE_MEMORY_HOST);
-   jnnz        = hypre_TAlloc(HYPRE_Int, nLU, HYPRE_MEMORY_HOST);
+   weight      = hypre_TAlloc(HYPRE_Real, nLU + 1, HYPRE_MEMORY_HOST);
+   jcol        = hypre_TAlloc(HYPRE_Int, nLU + 1, HYPRE_MEMORY_HOST);
+   jnnz        = hypre_TAlloc(HYPRE_Int, nLU + 1, HYPRE_MEMORY_HOST);
    
    max_value   = -1.0;
    /* first need to build gtol */
@@ -1373,7 +1373,7 @@ hypre_ILUGetPermddPQ(hypre_ParCSRMatrix *A, HYPRE_Int **io_pperm, HYPRE_Int **io
    
    /* 2: Find interial nodes first
     */
-   hypre_ILUGetPerm( A, &pperm, &nLU, opt);
+   hypre_ILUGetPerm( A, &pperm, &nLU, 0);
    *nI = nLU;
    
    /* 3: Pre selection on interial nodes
@@ -1458,11 +1458,11 @@ hypre_ILUGetPermddPQ(hypre_ParCSRMatrix *A, HYPRE_Int **io_pperm, HYPRE_Int **io
          break;
       case 1:
          /* RCM */
-         hypre_ParILUCSRRCM( hypre_ParCSRMatrixDiag(A), 0, nLU, &pperm, &qperm, 1);
+         hypre_ParILUCSRRCM( hypre_ParCSRMatrixDiag(A), 0, nLU, &pperm, &qperm, 0);
          break;
       default:
          /* RCM */
-         hypre_ParILUCSRRCM( hypre_ParCSRMatrixDiag(A), 0, nLU, &pperm, &qperm, 1);
+         hypre_ParILUCSRRCM( hypre_ParCSRMatrixDiag(A), 0, nLU, &pperm, &qperm, 0);
          break;
    }
    
@@ -2332,10 +2332,15 @@ hypre_ParILUCSRRCM( hypre_CSRMatrix *A, HYPRE_Int start, HYPRE_Int end,
    HYPRE_Int               ncol           = hypre_CSRMatrixNumCols(A);
    HYPRE_Int               *A_i           = hypre_CSRMatrixI(A);
    HYPRE_Int               *A_j           = hypre_CSRMatrixJ(A);
+   hypre_CSRMatrix         *GT            = NULL;
+   hypre_CSRMatrix         *GGT           = NULL;
+   HYPRE_Int               *AAT_i         = NULL;
+   HYPRE_Int               *AAT_j         = NULL;
    HYPRE_Int               A_nnz          = hypre_CSRMatrixNumNonzeros(A);
    hypre_CSRMatrix         *G             = NULL;
    HYPRE_Int               *G_i           = NULL;
    HYPRE_Int               *G_j           = NULL;
+   HYPRE_Real              *G_data           = NULL;
    HYPRE_Int               *G_perm        = NULL;
    HYPRE_Int               G_nnz;
    HYPRE_Int               G_capacity;
@@ -2428,6 +2433,53 @@ hypre_ParILUCSRRCM( hypre_CSRMatrix *A, HYPRE_Int start, HYPRE_Int end,
    else
    {
       /* Use A + A' */
+      G_nnz = 0;
+      G_capacity = hypre_max(A_nnz * n * n / num_nodes / num_nodes - num_nodes, 1);
+      G_j = hypre_TAlloc(HYPRE_Int, G_capacity, HYPRE_MEMORY_SHARED);
+      for(i = 0 ; i < num_nodes ; i ++)
+      {
+         G_i[i] = G_nnz;
+         row = perm[i + start];
+         r1 = A_i[row];
+         r2 = A_i[row+1];
+         for(j = r1 ; j < r2 ; j ++)
+         {
+            col = rqperm[A_j[j]];
+            if(col != row && col >= start && col < end)
+            {
+               /* this is an entry in G */
+               G_j[G_nnz++] = col - start;
+               if(G_nnz >= G_capacity)
+               {
+                  G_capacity = G_capacity * EXPAND_FACT + 1;         
+                  G_j = hypre_TReAlloc(G_j, HYPRE_Int, G_capacity, HYPRE_MEMORY_SHARED);
+               }
+            }
+         }
+      }
+      G_i[num_nodes] = G_nnz;
+      if(G_nnz == 0)
+      {
+         //G has only diagonal, no need to do any kind of RCM
+         hypre_TFree(G_j, HYPRE_MEMORY_SHARED);
+         hypre_TFree(rqperm, HYPRE_MEMORY_HOST);
+         *permp   = perm;
+         *qpermp  = qperm;
+         hypre_CSRMatrixDestroy(G);
+         return hypre_error_flag;
+      }
+      hypre_CSRMatrixJ(G) = G_j;
+      G_data = hypre_CTAlloc(HYPRE_Real, G_nnz, HYPRE_MEMORY_SHARED);
+      hypre_CSRMatrixData(G) = G_data;
+      hypre_CSRMatrixNumNonzeros(G) = G_nnz;
+      
+      /* now sum G with G' */
+      hypre_CSRMatrixTranspose(G, &GT, 1);
+      GGT = hypre_CSRMatrixAdd(G, GT);
+      hypre_CSRMatrixDestroy(G);
+      hypre_CSRMatrixDestroy(GT);
+      G = GGT;
+      GGT = NULL;
    }
    
    /* 3: Build Graph
