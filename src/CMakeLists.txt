@@ -4,6 +4,10 @@
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 cmake_minimum_required (VERSION 2.8.8)
+if (POLICY CMP0074)
+   cmake_policy(SET CMP0074 NEW) 
+endif (POLICY CMP0074)
+
 project (hypre)
 
 # The version number.
