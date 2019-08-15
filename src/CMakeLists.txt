@@ -22,7 +22,7 @@ if (${hypre_SOURCE_DIR} STREQUAL ${hypre_BINARY_DIR})
 endif ()
 
 # Set cmake module path 
-set(CMAKE_MODULE_PATH ${hypre_SOURCE_DIR}/cmake) 
+set(CMAKE_MODULE_PATH ${hypre_SOURCE_DIR}/config/cmake) 
 include(hypre_CMakeUtilities)
 
 # Set default installation directory, but provide a means for users to change
