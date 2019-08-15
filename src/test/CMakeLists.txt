@@ -9,7 +9,7 @@ if (MSVC)
   add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif ()
 
-list(APPEND TEST_SRCS
+set(TEST_SRCS
   ij.c
   sstruct.c
   struct.c

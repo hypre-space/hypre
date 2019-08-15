@@ -3,7 +3,7 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
-list(APPEND EXAMPLE_SRCS
+set(EXAMPLE_SRCS
   ex1.c
   ex2.c
   ex3.c
