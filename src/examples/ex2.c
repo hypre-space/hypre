@@ -1,3 +1,10 @@
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 /*
    Example 2
 
@@ -285,7 +292,7 @@ int main (int argc, char *argv[])
          }
       }
 
-      /* For each box, set any coefficients that reach ouside of the
+      /* For each box, set any coefficients that reach outside of the
          boundary to 0 */
       if (myid == 0)
       {

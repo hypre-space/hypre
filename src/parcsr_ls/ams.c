@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_parcsr_ls.h"
 #include "float.h"
@@ -2080,9 +2075,30 @@ HYPRE_Int hypre_AMSSetup(void *solver,
          hypre_ParCSRMatrix *A = hypre_ParMatmul(ams_data -> G0, G0t);
          hypre_ParCSRMatrix *B = Aorig;
          hypre_ParCSRMatrix **C_ptr = &ams_data -> A;
-
          hypre_ParCSRMatrix *C;
-         hypre_CSRMatrix *A_local, *B_local, *C_local, *C_tmp;
+         HYPRE_Real factor, lfactor;
+         /* scale (penalize) G0 G0^T before adding it to the matrix */
+         {
+            HYPRE_Int i;
+            HYPRE_Int B_num_rows = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(B));
+            HYPRE_Real *B_diag_data = hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(B));
+            HYPRE_Real *B_offd_data = hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(B));
+            HYPRE_Int *B_diag_i = hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(B));
+            HYPRE_Int *B_offd_i = hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(B));
+            lfactor = -1;
+            for (i = 0; i < B_diag_i[B_num_rows]; i++)
+               if (fabs(B_diag_data[i]) > lfactor)
+                  lfactor = fabs(B_diag_data[i]);
+            for (i = 0; i < B_offd_i[B_num_rows]; i++)
+               if (fabs(B_offd_data[i]) > lfactor)
+                  lfactor = fabs(B_offd_data[i]);
+            lfactor *= 1e-10; /* scaling factor: max|A_ij|*1e-10 */
+            hypre_MPI_Allreduce(&lfactor, &factor, 1, HYPRE_MPI_REAL, hypre_MPI_MAX,
+                                hypre_ParCSRMatrixComm(A));
+         }
+         hypre_ParcsrAdd(factor, A, 1.0, B, &C);
+
+         /*hypre_CSRMatrix *A_local, *B_local, *C_local, *C_tmp;
 
          MPI_Comm comm = hypre_ParCSRMatrixComm(A);
          HYPRE_BigInt global_num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
@@ -2097,9 +2113,9 @@ HYPRE_Int hypre_AMSSetup(void *solver,
          HYPRE_Int B_num_nonzeros_offd = hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(B));
 
          A_local = hypre_MergeDiagAndOffd(A);
-         B_local = hypre_MergeDiagAndOffd(B);
+         B_local = hypre_MergeDiagAndOffd(B);*/
          /* scale (penalize) G0 G0^T before adding it to the matrix */
-         {
+         /*{
             HYPRE_Int i, nnz = hypre_CSRMatrixNumNonzeros(A_local);
             HYPRE_Real *data = hypre_CSRMatrixData(A_local);
             HYPRE_Real *dataB = hypre_CSRMatrixData(B_local);
@@ -2109,15 +2125,14 @@ HYPRE_Int hypre_AMSSetup(void *solver,
             for (i = 0; i < nnzB; i++)
                if (fabs(dataB[i]) > lfactor)
                   lfactor = fabs(dataB[i]);
-            lfactor *= 1e-10; /* scaling factor: max|A_ij|*1e-10 */
+            lfactor *= 1e-10;
             hypre_MPI_Allreduce(&lfactor, &factor, 1, HYPRE_MPI_REAL, hypre_MPI_MAX,
                                 hypre_ParCSRMatrixComm(A));
             for (i = 0; i < nnz; i++)
                data[i] *= factor;
          }
          C_tmp = hypre_CSRMatrixBigAdd(A_local, B_local);
-         hypre_CSRMatrixBigJtoJ(C_tmp);
-         C_local = hypre_CSRMatrixDeleteZeros(C_tmp,0.0);
+         C_local = hypre_CSRMatrixBigDeleteZeros(C_tmp,0.0);
          if (C_local)
             hypre_CSRMatrixDestroy(C_tmp);
          else
@@ -2141,6 +2156,7 @@ HYPRE_Int hypre_AMSSetup(void *solver,
          hypre_CSRMatrixDestroy(A_local);
          hypre_CSRMatrixDestroy(B_local);
          hypre_CSRMatrixDestroy(C_local);
+         */
 
          hypre_ParCSRMatrixDestroy(A);
 
@@ -2509,7 +2525,8 @@ HYPRE_Int hypre_AMSSetup(void *solver,
                hypre_ParCSRMatrixDestroy(Gt);
 
                /* hypre_ParCSRMatrixAdd(GGt, A, &ams_data -> A); */
-               {
+               hypre_ParcsrAdd(1.0, GGt, 1.0, ams_data -> A, &ApGGt);
+               /*{
                   hypre_ParCSRMatrix *A = GGt;
                   hypre_ParCSRMatrix *B = ams_data -> A;
                   hypre_ParCSRMatrix **C_ptr = &ApGGt;
@@ -2531,7 +2548,8 @@ HYPRE_Int hypre_AMSSetup(void *solver,
 
                   A_local = hypre_MergeDiagAndOffd(A);
                   B_local = hypre_MergeDiagAndOffd(B);
-                  C_local = hypre_CSRMatrixAdd(A_local, B_local);
+                  C_local = hypre_CSRMatrixBigAdd(A_local, B_local);
+                  hypre_CSRMatrixBigJtoJ(C_local);
 
                   C = hypre_ParCSRMatrixCreate (comm,
                                                 global_num_rows,
@@ -2552,7 +2570,7 @@ HYPRE_Int hypre_AMSSetup(void *solver,
                   hypre_CSRMatrixDestroy(C_local);
 
                   *C_ptr = C;
-               }
+               }*/
 
                hypre_ParCSRMatrixDestroy(GGt);
 
@@ -3045,7 +3063,7 @@ HYPRE_Int hypre_AMSProjectOutGradients(void *solver,
 
 HYPRE_Int hypre_AMSConstructDiscreteGradient(hypre_ParCSRMatrix *A,
                                              hypre_ParVector *x_coord,
-                                             HYPRE_Int *edge_vertex,
+                                             HYPRE_BigInt *edge_vertex,
                                              HYPRE_Int edge_orientation,
                                              hypre_ParCSRMatrix **G_ptr)
 {
@@ -3100,7 +3118,7 @@ HYPRE_Int hypre_AMSConstructDiscreteGradient(hypre_ParCSRMatrix *A,
 
 
       hypre_CSRMatrixI(local) = I;
-      hypre_CSRMatrixJ(local) = edge_vertex;
+      hypre_CSRMatrixBigJ(local) = edge_vertex;
       hypre_CSRMatrixData(local) = data;
 
       hypre_CSRMatrixRownnz(local) = NULL;
@@ -3130,6 +3148,7 @@ HYPRE_Int hypre_AMSConstructDiscreteGradient(hypre_ParCSRMatrix *A,
       hypre_ParCSRMatrixOwnsRowStarts(G) = 1;
       hypre_ParCSRMatrixOwnsColStarts(G) = 1;
 
+      hypre_CSRMatrixBigJtoJ(local);
       GenerateDiagAndOffd(local, G,
                           hypre_ParVectorFirstIndex(x_coord),
                           hypre_ParVectorLastIndex(x_coord));
@@ -3143,7 +3162,6 @@ HYPRE_Int hypre_AMSConstructDiscreteGradient(hypre_ParCSRMatrix *A,
       }
 
       /* Free the local matrix */
-      hypre_CSRMatrixJ(local) = NULL;
       hypre_CSRMatrixDestroy(local);
    }
 
@@ -3185,7 +3203,7 @@ HYPRE_Int hypre_AMSFEISetup(void *solver,
                             HYPRE_BigInt *vert_number,
                             HYPRE_Real *vert_coord,
                             HYPRE_Int num_edges,
-                            HYPRE_Int *edge_vertex)
+                            HYPRE_BigInt *edge_vertex)
 {
    hypre_AMSData *ams_data = (hypre_AMSData *) solver;
 
@@ -3199,7 +3217,6 @@ HYPRE_Int hypre_AMSFEISetup(void *solver,
    HYPRE_BigInt *vert_part, num_global_vert;
    HYPRE_BigInt vert_start, vert_end;
    HYPRE_BigInt big_local_vert = (HYPRE_BigInt) num_local_vert;
-   HYPRE_BigInt *big_edge_vertex;
 
    /* Find the processor partitioning of the vertices */
 #ifdef HYPRE_NO_GLOBAL_PARTITION
@@ -3253,9 +3270,8 @@ HYPRE_Int hypre_AMSFEISetup(void *solver,
    }
 
    /* Change vertex numbers from local to global */
-   big_edge_vertex = hypre_CTAlloc(HYPRE_BigInt, 2*num_edges, HYPRE_MEMORY_HOST);
    for (i = 0; i < 2*num_edges; i++)
-      big_edge_vertex[i] = vert_number[edge_vertex[i]];
+      edge_vertex[i] = vert_number[edge_vertex[i]];
 
    /* Construct the local part of G based on edge_vertex */
    {
@@ -3277,7 +3293,7 @@ HYPRE_Int hypre_AMSFEISetup(void *solver,
       }
 
       hypre_CSRMatrixI(local) = I;
-      hypre_CSRMatrixBigJ(local) = big_edge_vertex;
+      hypre_CSRMatrixBigJ(local) = edge_vertex;
       hypre_CSRMatrixData(local) = data;
 
       hypre_CSRMatrixRownnz(local) = NULL;
@@ -3293,13 +3309,12 @@ HYPRE_Int hypre_AMSFEISetup(void *solver,
       hypre_ParCSRMatrixOwnsRowStarts(G) = 0;
       hypre_ParCSRMatrixOwnsColStarts(G) = 1;
 
+      hypre_CSRMatrixBigJtoJ(local);
       GenerateDiagAndOffd(local, G, vert_start, vert_end);
 
-      hypre_CSRMatrixJ(local) = NULL;
+      //hypre_CSRMatrixJ(local) = NULL;
       hypre_CSRMatrixDestroy(local);
    }
-
-   hypre_TFree(big_edge_vertex, HYPRE_MEMORY_HOST);
 
    ams_data -> G = G;
 

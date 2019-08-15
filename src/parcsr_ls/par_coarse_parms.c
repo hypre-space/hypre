@@ -1,17 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -61,12 +53,12 @@
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_BoomerAMGCoarseParms(MPI_Comm comm,
-		           HYPRE_Int      local_num_variables,
-		           HYPRE_Int      num_functions,
-		           HYPRE_Int     *dof_func,
-		           HYPRE_Int     *CF_marker, 
-                      	   HYPRE_Int    **coarse_dof_func_ptr, 
+hypre_BoomerAMGCoarseParms(MPI_Comm    comm,
+                           HYPRE_Int   local_num_variables,
+                           HYPRE_Int   num_functions,
+                           HYPRE_Int  *dof_func,
+                           HYPRE_Int  *CF_marker,
+                           HYPRE_Int **coarse_dof_func_ptr,
                       	   HYPRE_BigInt **coarse_pnts_global_ptr) 
 {
 #ifdef HYPRE_PROFILE
