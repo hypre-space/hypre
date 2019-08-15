@@ -2526,6 +2526,33 @@ hypre_ParILUCSRRCM( hypre_CSRMatrix *A, HYPRE_Int start, HYPRE_Int end,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_ParILUCSRRCMMindegree
+ *--------------------------------------------------------------------------*/
+ 
+/* This function find the unvisited node with the minimum degree
+ */
+HYPRE_Int
+hypre_ParILUCSRRCMMindegree(HYPRE_Int n, HYPRE_Int *degree, HYPRE_Int *marker, HYPRE_Int *rootp)
+{
+   HYPRE_Int i;
+   HYPRE_Int min_degree = n+1;
+   HYPRE_Int root = 0;
+   for(i = 0 ; i < n ; i ++)
+   {
+      if(marker[i] < 0)
+      {
+         if(degree[i] < min_degree)
+         {
+            root = i;
+            min_degree = degree[i];
+         }
+      }
+   }
+   *rootp = root;
+   return 0;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_ParILUCSRRCMOrder
  *--------------------------------------------------------------------------*/
 
@@ -2538,42 +2565,33 @@ hypre_ParILUCSRRCMOrder( hypre_CSRMatrix *A, HYPRE_Int *perm)
 {
    HYPRE_Int      i, root;
    HYPRE_Int      *degree     = NULL;
-   HYPRE_Int      *order      = NULL;
    HYPRE_Int      *marker     = NULL;
    HYPRE_Int      *A_i        = hypre_CSRMatrixI(A);
    HYPRE_Int      n           = hypre_CSRMatrixNumRows(A);
    HYPRE_Int      current_num;
    /* get the degree for each node */
    degree = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
-   order = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
    marker = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
    for(i = 0 ; i < n ; i ++)
    {
       degree[i] = A_i[i+1] - A_i[i];
-      order[i] = i;
       marker[i] = -1;
    }
-   /* sort based on degree */
-   hypre_qsort2i(degree, order, 0, n-1);
    
    /* start RCM loop */
    current_num = 0;
-   for( i = 0 ; i < n ; i ++)
+   while(current_num < n)
    {
-      root = order[i];
-      if(marker[root] < 0)
-      {
-         /* This is a new connect component */
-         hypre_ParILUCSRRCMFindPPNode(A, &root, marker);
+      hypre_ParILUCSRRCMMindegree( n, degree, marker, &root);
+      /* This is a new connect component */
+      hypre_ParILUCSRRCMFindPPNode(A, &root, marker);
          
-         /* Numbering of this component */
-         hypre_ParILUCSRRCMNumbering(A, root, marker, perm, &current_num);
-      }
+      /* Numbering of this component */
+      hypre_ParILUCSRRCMNumbering(A, root, marker, perm, &current_num);
    }
    
    /* free */
    hypre_TFree(degree, HYPRE_MEMORY_HOST);
-   hypre_TFree(order, HYPRE_MEMORY_HOST);
    hypre_TFree(marker, HYPRE_MEMORY_HOST);
    return hypre_error_flag;
 }

@@ -335,11 +335,6 @@ hypre_ILUSetup( void               *ilu_vdata,
    {
       /* default to use local RCM */
       perm_opt = 1;
-      if(fill_level == 0 && ilu_type % 10)
-      {
-         /* if ILU0 is used, no RCM is needed */
-         perm_opt = 0;
-      }
       switch(ilu_type)
       {
          case 10: case 11: case 20: case 21: case 30: case 31: /* symmetric */

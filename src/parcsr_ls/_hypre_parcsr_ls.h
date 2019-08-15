@@ -1793,6 +1793,7 @@ HYPRE_Int hypre_ILUGetLocalPerm(hypre_ParCSRMatrix *A, HYPRE_Int **perm, HYPRE_I
 HYPRE_Int hypre_ILUWriteSolverParams(void *ilu_vdata);
 HYPRE_Int hypre_ILUBuildRASExternalMatrix(hypre_ParCSRMatrix *A, HYPRE_Int *rperm, HYPRE_Int **E_i, HYPRE_Int **E_j, HYPRE_Real **E_data);
 HYPRE_Int hypre_ILUSetupILU0(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qperm, HYPRE_Int nLU, HYPRE_Int nI, hypre_ParCSRMatrix **Lptr, HYPRE_Real** Dptr, hypre_ParCSRMatrix **Uptr, hypre_ParCSRMatrix **Sptr, HYPRE_Int **u_end);
+HYPRE_Int hypre_ParILUCSRRCMMindegree(HYPRE_Int n, HYPRE_Int *degree, HYPRE_Int *marker, HYPRE_Int *rootp);
 HYPRE_Int hypre_ParILUCSRRCM( hypre_CSRMatrix *A, HYPRE_Int start, HYPRE_Int end, HYPRE_Int **permp, HYPRE_Int **qpermp, HYPRE_Int sym);
 HYPRE_Int hypre_ParILUCSRRCMOrder( hypre_CSRMatrix *A, HYPRE_Int *perm);
 HYPRE_Int hypre_ParILUCSRRCMFindPPNode( hypre_CSRMatrix *A, HYPRE_Int *rootp, HYPRE_Int *marker);
