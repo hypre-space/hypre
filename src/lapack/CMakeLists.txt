@@ -52,6 +52,7 @@ set(SRCS
   dorgbr.c
   dorgl2.c
   dorglq.c
+  dorgql.c
   dorgqr.c
   dorgtr.c
   dorm2r.c

@@ -36,32 +36,79 @@ set (HYPRE_BUILD_TYPE "Release" CACHE STRING
 set (CMAKE_BUILD_TYPE "${HYPRE_BUILD_TYPE}" CACHE INTERNAL "" FORCE)
 
 # Configuration options
-option(HYPRE_SHARED               "Build a shared library" OFF)
-option(HYPRE_BIGINT               "Use long long int for HYPRE_Int" OFF)
-option(HYPRE_MIXEDINT             "Use long long int for HYPRE_BigInt, int for HYPRE_INT" OFF)
-option(HYPRE_SINGLE               "Use float for HYPRE_Real" OFF)
-option(HYPRE_LONG_DOUBLE          "Use long double for HYPRE_Real" OFF)
-option(HYPRE_COMPLEX              "Use complex values" OFF)
-option(HYPRE_SEQUENTIAL           "Compile without MPI" OFF)
-option(HYPRE_TIMING               "Use HYPRE timing routines" OFF)
-option(HYPRE_USING_HYPRE_BLAS     "Use internal BLAS library" ON)
-option(HYPRE_USING_HYPRE_LAPACK   "Use internal LAPACK library" ON)
-option(HYPRE_USING_PERSISTENT_COMM "Use persistent communication" OFF)
-option(HYPRE_NO_GLOBAL_PARTITION  "Use assumed partition" ON)
-option(HYPRE_PRINT_ERRORS         "Print HYPRE errors" OFF)
+option(HYPRE_ENABLE_SHARED           "Build a shared library" OFF)
+option(HYPRE_ENABLE_BIGINT           "Use long long int for HYPRE_Int" OFF)
+option(HYPRE_ENABLE_MIXEDINT         "Use long long int for HYPRE_BigInt, int for HYPRE_INT" OFF)
+option(HYPRE_ENABLE_SINGLE           "Use float for HYPRE_Real" OFF)
+option(HYPRE_ENABLE_LONG_DOUBLE      "Use long double for HYPRE_Real" OFF)
+option(HYPRE_ENABLE_COMPLEX          "Use complex values" OFF)
+option(HYPRE_ENABLE_HYPRE_BLAS       "Use internal BLAS library" ON)
+option(HYPRE_ENABLE_HYPRE_LAPACK     "Use internal LAPACK library" ON)
+option(HYPRE_ENABLE_PERSISTENT_COMM  "Use persistent communication" OFF)
+option(HYPRE_ENABLE_GLOBAL_PARTITION "Use global partitioning" OFF)
+option(HYPRE_ENABLE_FEI              "Use FEI" OFF) # TODO: Add this cmake feature
+option(HYPRE_WITH_MPI                "Compile with MPI" ON)
+option(HYPRE_WITH_OPENMP             "Use OpenMP" OFF)
+option(HYPRE_WITH_HOPSCOTCH          "Use hopscotch hashing with OpenMP" OFF)
+option(HYPRE_WITH_DSUPERLU           "Use TPL SuperLU_Dist" OFF)
+option(HYPRE_WITH_CALIPER            "Use Caliper" OFF)  # TODO: Finish this cmake feature
+option(HYPRE_PRINT_ERRORS            "Print HYPRE errors" OFF)
+option(HYPRE_TIMING                  "Use HYPRE timing routines" OFF)
+option(HYPRE_BUILD_EXAMPLES          "Build examples" OFF)
+option(HYPRE_BUILD_TESTS             "Build tests" OFF)
 
-option(HYPRE_WITH_OPENMP          "Use OpenMP" OFF)
-option(HYPRE_WITH_HOPSCOTCH       "Use hopscotch hashing with OpenMP" OFF)
-option(HYPRE_WITH_DSUPERLU        "Use TPL SuperLU_Dist" OFF)
-option(HYPRE_ENABLE_FEI           "Use FEI" OFF) # TODO: Add this cmake feature
-option(HYPRE_WITH_CALIPER         "Use Caliper" OFF)  # TODO: Finish this cmake feature
-option(HYPRE_BUILD_EXAMPLES       "Build examples" OFF)
-option(HYPRE_BUILD_TESTS          "Build tests" OFF)
-
-option(TPL_DSUPERLU_LIBRARIES     "List of absolute paths to SuperLU_Dist link libraries [].")
-option(TPL_DSUPERLU_INCLUDE_DIRS  "List of absolute paths to SuperLU_Dist include directories [].")
+option(TPL_DSUPERLU_LIBRARIES        "List of absolute paths to SuperLU_Dist link libraries [].")
+option(TPL_DSUPERLU_INCLUDE_DIRS     "List of absolute paths to SuperLU_Dist include directories [].")
 
 # Set config name values
+if (HYPRE_ENABLE_SHARED)
+  set(HYPRE_SHARED ON CACHE BOOL "" FORCE)
+endif()
+
+if (HYPRE_ENABLE_BIGINT)
+  set(HYPRE_BIGINT ON CACHE BOOL "" FORCE)
+endif()
+
+if (HYPRE_ENABLE_MIXEDINT)
+  set(HYPRE_MIXEDINT ON CACHE BOOL "" FORCE)
+endif()
+
+if (HYPRE_ENABLE_SINGLE)
+  set(HYPRE_SINGLE ON CACHE BOOL "" FORCE)
+endif()
+
+if (HYPRE_ENABLE_LONG_DOUBLE)
+  set(HYPRE_LONG_DOUBLE ON CACHE BOOL "" FORCE)
+endif()
+
+if (HYPRE_ENABLE_COMPLEX)
+  set(HYPRE_COMPLEX ON CACHE BOOL "" FORCE)
+endif()
+
+if (HYPRE_ENABLE_HYPRE_BLAS)
+  set(HYPRE_USING_HYPRE_BLAS ON CACHE BOOL "" FORCE)
+endif()
+
+if (HYPRE_ENABLE_HYPRE_LAPACK)
+  set(HYPRE_USING_HYPRE_LAPACK ON CACHE BOOL "" FORCE)
+endif()
+
+if (HYPRE_ENABLE_PERSISTENT_COMM)
+  set(HYPRE_USING_PERSISTENT_COMM ON CACHE BOOL "" FORCE)
+endif()
+
+if (HYPRE_ENABLE_GLOBAL_PARTITION)
+  set(HYPRE_NO_GLOBAL_PARTITION OFF CACHE BOOL "" FORCE)
+elseif()
+  set(HYPRE_NO_GLOBAL_PARTITION ON CACHE BOOL "" FORCE)
+endif()
+
+if (HYPRE_WITH_MPI)
+  set(HYPRE_SEQUENTIAL OFF CACHE BOOL "" FORCE)
+elseif()
+  set(HYPRE_SEQUENTIAL ON CACHE BOOL "" FORCE)
+endif()
+
 if (HYPRE_WITH_OPENMP)
   set (HYPRE_USING_OPENMP ON CACHE BOOL "" FORCE)
 endif()
@@ -112,6 +159,25 @@ set(TPL_LIBRARIES "")
 # This is a list of linker flags to be used with TPLs for all targets
 set(TPL_LINKER_FLAGS "")
 
+# Headers and sources: blas
+if (HYPRE_USING_HYPRE_BLAS)
+  add_subdirectory(blas) 
+else()
+  # Find system blas
+  find_package(BLAS REQUIRED)
+  list(APPEND TPL_LIBRARIES ${BLAS_LIBRARIES})
+  set(CMAKE_C_FLAGS "-DUSE_VENDOR_BLAS ${CMAKE_C_FLAGS}")
+endif()
+
+# Headers and sources: lapack
+if (HYPRE_USING_HYPRE_LAPACK)
+  add_subdirectory(lapack) 
+else()
+  # Find system lapack
+  find_package(LAPACK REQUIRED)
+  list(APPEND TPL_LIBRARIES ${LAPACK_LIBRARIES})
+endif()
+
 # Find DSUPERLU, if requested 
 if (HYPRE_USING_DSUPERLU)
   if (NOT TPL_DSUPERLU_LIBRARIES)
@@ -140,25 +206,6 @@ if(DSUPERLU_FOUND)
   set(HYPRE_USING_DSUPERLU TRUE)
 endif()
 
-
-# Headers and sources: blas
-if (HYPRE_USING_HYPRE_BLAS)
-  add_subdirectory(blas) 
-else()
-  # Find system blas
-  find_package(BLAS REQUIRED)
-  list(APPEND TPL_LIBRARIES ${BLAS_LIBRARIES})
-  set(CMAKE_C_FLAGS "-DUSE_VENDOR_BLAS ${CMAKE_C_FLAGS}")
-endif()
-
-# Headers and sources: lapack
-if (HYPRE_USING_HYPRE_LAPACK)
-  add_subdirectory(lapack) 
-else()
-  # Find system lapack
-  find_package(LAPACK REQUIRED)
-  list(APPEND TPL_LIBRARIES ${LAPACK_LIBRARIES})
-endif()
 
 # Headers and sources: remaining subdirectories
 set(HYPRE_DIRS utilities multivector krylov seq_mv parcsr_mv parcsr_block_mv distributed_matrix IJ_mv matrix_matrix distributed_ls parcsr_ls struct_mv struct_ls sstruct_mv sstruct_ls)
