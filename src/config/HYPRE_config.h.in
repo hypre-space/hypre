@@ -171,7 +171,7 @@
 #undef HAVE_SUPERLU
 
 /* Define to 1 if using DSuperLU */
-#undef HAVE_DSUPERLU
+#undef HYPRE_USING_DSUPERLU
 
 /* Define to 1 if using MLI */
 #undef HAVE_MLI

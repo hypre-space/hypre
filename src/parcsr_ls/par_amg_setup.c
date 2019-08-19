@@ -196,7 +196,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Real    wall_time;   /* for debugging instrumentation */
    HYPRE_Int      add_end;
 
-#ifdef HAVE_DSUPERLU
+#ifdef HYPRE_USING_DSUPERLU
    HYPRE_Int dslu_threshold = hypre_ParAMGDataDSLUThreshold(amg_data);
 #endif
 
@@ -2542,7 +2542,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
       {
          HYPRE_Int max_thresh = hypre_max(coarse_threshold, seq_threshold);
-#ifdef HAVE_DSUPERLU
+#ifdef HYPRE_USING_DSUPERLU
          max_thresh = hypre_max(max_thresh, dslu_threshold);
 #endif
          if ( (level == max_levels-1) || (coarse_size <= (HYPRE_BigInt) max_thresh) )
@@ -2558,7 +2558,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       hypre_seqAMGSetup( amg_data, level, coarse_threshold);
 
    }
-#ifdef HAVE_DSUPERLU
+#ifdef HYPRE_USING_DSUPERLU
    else if (  ((dslu_threshold >= coarse_threshold) && (coarse_size > (HYPRE_BigInt)coarse_threshold) && (level != max_levels-1)))
    {
       HYPRE_Solver dslu_solver;
