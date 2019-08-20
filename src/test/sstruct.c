@@ -2208,7 +2208,7 @@ PrintUsage( char *progname,
       hypre_printf("                        78 - Flexible GMRES with diagonal scaling\n");
       hypre_printf("                        80 - Flexible GMRES with BoomerAMG precond\n");
       hypre_printf("                        90 - LGMRES with BoomerAMG precond\n");
-      hypre_printf("                        120- PCG with hybrid precond\n");
+      hypre_printf("                        120- ParCSRHybrid with DSCG/BoomerAMG precond\n");
       hypre_printf("                        150- AMS solver\n");
       hypre_printf("                        200- Struct SMG\n");
       hypre_printf("                        201- Struct PFMG\n");
@@ -2242,6 +2242,10 @@ PrintUsage( char *progname,
       hypre_printf("  -rhsfromcosine     : solution is cosine function (default)\n");
       hypre_printf("  -rhsone            : rhs is vector with unit components\n");
       hypre_printf("  -tol <val>         : convergence tolerance (default 1e-6)\n");
+      hypre_printf("  -solver_type <ID>  : Solver type for Hybrid\n");
+      hypre_printf("                        1 - PCG (default)\n");
+      hypre_printf("                        2 - GMRES\n");
+      hypre_printf("                        3 - BiCGSTAB (only ParCSRHybrid)\n");
       hypre_printf("  -v <n_pre> <n_post>: SysPFMG and Struct- # of pre and post relax\n");
       hypre_printf("  -skip <s>          : SysPFMG and Struct- skip relaxation (0 or 1)\n");
       hypre_printf("  -rap <r>           : Struct- coarse grid operator type\n");
@@ -2255,9 +2259,6 @@ PrintUsage( char *progname,
       hypre_printf("                        3 - R/B Gauss-Seidel (nonsymmetric)\n");
       hypre_printf("  -w <jacobi_weight> : jacobi weight\n");
       hypre_printf("  -jump <num>        : Struct- num levels to jump in SparseMSG\n");
-      hypre_printf("  -solver_type <ID>  : Struct- solver type for Hybrid\n");
-      hypre_printf("                        1 - PCG (default)\n");
-      hypre_printf("                        2 - GMRES\n");
       hypre_printf("  -cf <cf>           : Struct- convergence factor for Hybrid\n");
       hypre_printf("  -crtdim <tdim>     : Struct- cyclic reduction tdim\n");
       hypre_printf("  -cri <ix> <iy> <iz>: Struct- cyclic reduction base_index\n");
@@ -3744,6 +3745,7 @@ main( hypre_int argc,
       HYPRE_PCGSetTwoNorm( (HYPRE_Solver) solver, 1 );
       HYPRE_PCGSetRelChange( (HYPRE_Solver) solver, 0 );
       HYPRE_PCGSetPrintLevel( (HYPRE_Solver) solver, 1 );
+      HYPRE_PCGSetRecomputeResidual( (HYPRE_Solver) solver, 1);
 
       if ((solver_id == 10) || (solver_id == 11))
       {
@@ -4225,6 +4227,7 @@ main( hypre_int argc,
       HYPRE_PCGSetTwoNorm( par_solver, 1 );
       HYPRE_PCGSetRelChange( par_solver, 0 );
       HYPRE_PCGSetPrintLevel( par_solver, 1 );
+      HYPRE_PCGSetRecomputeResidual( (HYPRE_Solver) par_solver, 1);
 
       if (solver_id == 20)
       {
@@ -4854,6 +4857,8 @@ main( hypre_int argc,
       HYPRE_ParCSRHybridSetRelChange(par_solver, 0);
       HYPRE_ParCSRHybridSetPrintLevel(par_solver,1);
       HYPRE_ParCSRHybridSetLogging(par_solver,1);
+      HYPRE_ParCSRHybridSetSolverType(par_solver, solver_type);
+      HYPRE_ParCSRHybridSetRecomputeResidual(par_solver, 1);
       HYPRE_ParCSRHybridSetup(par_solver,par_A,par_b,par_x);
 
       hypre_EndTiming(time_index);
@@ -5106,6 +5111,7 @@ main( hypre_int argc,
       HYPRE_PCGSetTwoNorm( (HYPRE_Solver)struct_solver, 1 );
       HYPRE_PCGSetRelChange( (HYPRE_Solver)struct_solver, 0 );
       HYPRE_PCGSetPrintLevel( (HYPRE_Solver)struct_solver, 1 );
+      HYPRE_PCGSetRecomputeResidual( (HYPRE_Solver)struct_solver, 1);
 
       if (solver_id == 210)
       {
@@ -5264,6 +5270,7 @@ main( hypre_int argc,
       HYPRE_StructHybridSetPrintLevel(struct_solver, 1);
       HYPRE_StructHybridSetLogging(struct_solver, 1);
       HYPRE_StructHybridSetSolverType(struct_solver, solver_type);
+      HYPRE_StructHybridSetRecomputeResidual(struct_solver, 1);
 
       if (solver_id == 220)
       {
@@ -5720,6 +5727,80 @@ main( hypre_int argc,
       hypre_printf("Final Relative Residual Norm = %e\n", final_res_norm);
       hypre_printf("\n");
    }
+
+   /*-----------------------------------------------------------
+    * Verify GetBoxValues()
+    *-----------------------------------------------------------*/
+
+#if 0
+   {
+      HYPRE_SStructVector   xnew;
+      HYPRE_ParVector       par_xnew;
+      HYPRE_StructVector    sxnew;
+      HYPRE_Real            rnorm, bnorm;
+
+      HYPRE_SStructVectorCreate(hypre_MPI_COMM_WORLD, grid, &xnew);
+      HYPRE_SStructVectorSetObjectType(xnew, object_type);
+      HYPRE_SStructVectorInitialize(xnew);
+
+      /* get/set replicated shared data */
+      values = hypre_TAlloc(HYPRE_Real,  data.max_boxsize, HYPRE_MEMORY_HOST);
+      for (part = 0; part < data.nparts; part++)
+      {
+         pdata = data.pdata[part];
+         for (var = 0; var < pdata.nvars; var++)
+         {
+            for (box = 0; box < pdata.nboxes; box++)
+            {
+               GetVariableBox(pdata.ilowers[box], pdata.iuppers[box],
+                              pdata.vartypes[var], ilower, iupper);
+               HYPRE_SStructVectorGetBoxValues(x, part, ilower, iupper,
+                                               var, values);
+               HYPRE_SStructVectorSetBoxValues(xnew, part, ilower, iupper,
+                                               var, values);
+            }
+         }
+      }
+      hypre_TFree(values, HYPRE_MEMORY_HOST);
+
+      HYPRE_SStructVectorAssemble(xnew);
+
+      /* Compute residual norm - this if/else is due to a bug in SStructMatvec */
+      if (object_type == HYPRE_SSTRUCT)
+      {
+         HYPRE_SStructInnerProd(b, b, &bnorm);
+         hypre_SStructMatvec(-1.0, A, xnew, 1.0, b);
+         HYPRE_SStructInnerProd(b, b, &rnorm);
+      }
+      else if (object_type == HYPRE_PARCSR)
+      {
+         bnorm = hypre_ParVectorInnerProd(par_b, par_b);
+         HYPRE_SStructVectorGetObject(xnew, (void **) &par_xnew);
+         HYPRE_ParCSRMatrixMatvec(-1.0, par_A, par_xnew, 1.0, par_b );
+         rnorm = hypre_ParVectorInnerProd(par_b, par_b);
+      }
+      else if (object_type == HYPRE_STRUCT)
+      {
+         bnorm = hypre_StructInnerProd(sb, sb);
+         HYPRE_SStructVectorGetObject(xnew, (void **) &sxnew);
+         hypre_StructMatvec(-1.0, sA, sxnew, 1.0, sb);
+         rnorm = hypre_StructInnerProd(sb, sb);
+      }
+      bnorm = sqrt(bnorm);
+      rnorm = sqrt(rnorm);
+
+      if (myid == 0)
+      {
+         hypre_printf("\n");
+         hypre_printf("solver relnorm = %16.14e\n", final_res_norm);
+         hypre_printf("check  relnorm = %16.14e, bnorm = %16.14e, rnorm = %16.14e\n",
+                      (rnorm/bnorm), bnorm, rnorm);
+         hypre_printf("\n");
+      }
+
+      HYPRE_SStructVectorDestroy(xnew);
+   }
+#endif
 
    /*-----------------------------------------------------------
     * Finalize things

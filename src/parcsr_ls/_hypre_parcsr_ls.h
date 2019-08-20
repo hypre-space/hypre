@@ -547,6 +547,10 @@ HYPRE_Int hypre_AMGHybridSetDSCGMaxIter ( void *AMGhybrid_vdata , HYPRE_Int dscg
 HYPRE_Int hypre_AMGHybridSetPCGMaxIter ( void *AMGhybrid_vdata , HYPRE_Int pcg_max_its );
 HYPRE_Int hypre_AMGHybridSetSetupType ( void *AMGhybrid_vdata , HYPRE_Int setup_type );
 HYPRE_Int hypre_AMGHybridSetSolverType ( void *AMGhybrid_vdata , HYPRE_Int solver_type );
+HYPRE_Int hypre_AMGHybridSetRecomputeResidual ( void *AMGhybrid_vdata , HYPRE_Int recompute_residual );
+HYPRE_Int hypre_AMGHybridGetRecomputeResidual ( void *AMGhybrid_vdata , HYPRE_Int *recompute_residual );
+HYPRE_Int hypre_AMGHybridSetRecomputeResidualP ( void *AMGhybrid_vdata , HYPRE_Int recompute_residual_p );
+HYPRE_Int hypre_AMGHybridGetRecomputeResidualP ( void *AMGhybrid_vdata , HYPRE_Int *recompute_residual_p );
 HYPRE_Int hypre_AMGHybridSetKDim ( void *AMGhybrid_vdata , HYPRE_Int k_dim );
 HYPRE_Int hypre_AMGHybridSetStopCrit ( void *AMGhybrid_vdata , HYPRE_Int stop_crit );
 HYPRE_Int hypre_AMGHybridSetTwoNorm ( void *AMGhybrid_vdata , HYPRE_Int two_norm );
