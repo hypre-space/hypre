@@ -37,7 +37,7 @@ src_dir=`cd $1; pwd`
 shift
 
 # Parse the rest of the command line
-copts=""
+copts="-DHYPRE_BUILD_TESTS=ON"
 mopts=""
 ropts=""
 eopts=""
@@ -74,7 +74,6 @@ src_dir=`pwd`
 # Clean up the cmbuild directories (do it from src_dir as a precaution)
 cd $src_dir
 rm -fr `echo cmbuild/* | sed 's/[^ ]*README.txt//g'`
-rm -fr `echo test/cmbuild/* | sed 's/[^ ]*README.txt//g'`
 
 # Clean up the previous install
 cd $src_dir
@@ -86,10 +85,9 @@ cmake $copts ..
 make $mopts install
 
 # Make
-cd $src_dir/test/cmbuild
-cmake ..
+cd $src_dir/cmbuild/test
 make $mopts
-mv -f $drivers ..
+mv -f $drivers ../../test
 
 cd $test_dir
 
@@ -114,7 +112,6 @@ done
 # Clean up
 cd $src_dir
 rm -fr `echo cmbuild/* | sed 's/[^ ]*README.txt//g'`
-rm -fr `echo test/cmbuild/* | sed 's/[^ ]*README.txt//g'`
 rm -fr hypre
 ( cd $src_dir/test; rm -f $drivers; ./cleantest.sh )
 
