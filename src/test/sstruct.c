@@ -2246,6 +2246,7 @@ PrintUsage( char *progname,
       hypre_printf("                        1 - PCG (default)\n");
       hypre_printf("                        2 - GMRES\n");
       hypre_printf("                        3 - BiCGSTAB (only ParCSRHybrid)\n");
+      hypre_printf("  -recompute <bool>  : Recompute residual in PCG?\n");
       hypre_printf("  -v <n_pre> <n_post>: SysPFMG and Struct- # of pre and post relax\n");
       hypre_printf("  -skip <s>          : SysPFMG and Struct- skip relaxation (0 or 1)\n");
       hypre_printf("  -rap <r>           : Struct- coarse grid operator type\n");
@@ -2372,6 +2373,7 @@ main( hypre_int argc,
    HYPRE_Int             usr_jacobi_weight;
    HYPRE_Int             jump;
    HYPRE_Int             solver_type;
+   HYPRE_Int             recompute_res;
 
    HYPRE_Real            cf_tol;
 
@@ -2481,6 +2483,7 @@ main( hypre_int argc,
    usr_jacobi_weight= 0;
    jump  = 0;
    solver_type = 1;
+   recompute_res = 0;   /* What should be the default here? */
    cf_tol = 0.90;
 
    nparts = global_data.nparts;
@@ -2651,6 +2654,11 @@ main( hypre_int argc,
       {
          arg_index++;
          solver_type = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-recompute") == 0 )
+      {
+         arg_index++;
+         recompute_res = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-cf") == 0 )
       {
@@ -3745,7 +3753,7 @@ main( hypre_int argc,
       HYPRE_PCGSetTwoNorm( (HYPRE_Solver) solver, 1 );
       HYPRE_PCGSetRelChange( (HYPRE_Solver) solver, 0 );
       HYPRE_PCGSetPrintLevel( (HYPRE_Solver) solver, 1 );
-      HYPRE_PCGSetRecomputeResidual( (HYPRE_Solver) solver, 1);
+      HYPRE_PCGSetRecomputeResidual( (HYPRE_Solver) solver, recompute_res);
 
       if ((solver_id == 10) || (solver_id == 11))
       {
@@ -4227,7 +4235,7 @@ main( hypre_int argc,
       HYPRE_PCGSetTwoNorm( par_solver, 1 );
       HYPRE_PCGSetRelChange( par_solver, 0 );
       HYPRE_PCGSetPrintLevel( par_solver, 1 );
-      HYPRE_PCGSetRecomputeResidual( (HYPRE_Solver) par_solver, 1);
+      HYPRE_PCGSetRecomputeResidual( (HYPRE_Solver) par_solver, recompute_res);
 
       if (solver_id == 20)
       {
@@ -4858,7 +4866,7 @@ main( hypre_int argc,
       HYPRE_ParCSRHybridSetPrintLevel(par_solver,1);
       HYPRE_ParCSRHybridSetLogging(par_solver,1);
       HYPRE_ParCSRHybridSetSolverType(par_solver, solver_type);
-      HYPRE_ParCSRHybridSetRecomputeResidual(par_solver, 1);
+      HYPRE_ParCSRHybridSetRecomputeResidual(par_solver, recompute_res);
       HYPRE_ParCSRHybridSetup(par_solver,par_A,par_b,par_x);
 
       hypre_EndTiming(time_index);
@@ -5111,7 +5119,7 @@ main( hypre_int argc,
       HYPRE_PCGSetTwoNorm( (HYPRE_Solver)struct_solver, 1 );
       HYPRE_PCGSetRelChange( (HYPRE_Solver)struct_solver, 0 );
       HYPRE_PCGSetPrintLevel( (HYPRE_Solver)struct_solver, 1 );
-      HYPRE_PCGSetRecomputeResidual( (HYPRE_Solver)struct_solver, 1);
+      HYPRE_PCGSetRecomputeResidual( (HYPRE_Solver)struct_solver, recompute_res);
 
       if (solver_id == 210)
       {
@@ -5270,7 +5278,7 @@ main( hypre_int argc,
       HYPRE_StructHybridSetPrintLevel(struct_solver, 1);
       HYPRE_StructHybridSetLogging(struct_solver, 1);
       HYPRE_StructHybridSetSolverType(struct_solver, solver_type);
-      HYPRE_StructHybridSetRecomputeResidual(struct_solver, 1);
+      HYPRE_StructHybridSetRecomputeResidual(struct_solver, recompute_res);
 
       if (solver_id == 220)
       {
