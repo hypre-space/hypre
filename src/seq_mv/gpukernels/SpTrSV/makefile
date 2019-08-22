@@ -6,7 +6,7 @@ include ../../../config/Makefile.config
 CFLAGS+= -g -I../../../hypre/include -I../common ${INCLUDES}
 
 OBJS = testlusol.o ../common/io.o ../common/mmio.o ../common/auxil.o ../common/format.o \
-       level.o gsLevR.o gsDynR.o gsDynR_2.o gsDynC.o cusparse.o ../SpMV/spmv.o
+       level.o gsLevR.o gsLevC.o gsDynR.o gsGSF.o gsDynR_2.o gsDynC.o cusparse.o ../SpMV/spmv.o
 
 default: lusol.ex
 lusol.ex: $(OBJS)

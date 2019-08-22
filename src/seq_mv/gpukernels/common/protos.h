@@ -22,11 +22,14 @@ void GaussSeidelCPU(int n, int nnz, HYPRE_Real *b, HYPRE_Real *x, hypre_CSRMatri
 template <bool TEST>
 HYPRE_Int GaussSeidelRowLevSchd(hypre_CSRMatrix *csr, HYPRE_Real *b, HYPRE_Real *x, int REPEAT, bool print);
 template <bool TEST>
+HYPRE_Int GaussSeidelColLevSchd(hypre_CSRMatrix *csr, HYPRE_Real *b, HYPRE_Real *x, int REPEAT, bool print);
+template <bool TEST>
 HYPRE_Int GaussSeidelRowDynSchd(hypre_CSRMatrix *csr, HYPRE_Real *b, HYPRE_Real *x, int REPEAT, bool print);
 template <bool TEST>
 HYPRE_Int GaussSeidelRowDynSchd_v2(hypre_CSRMatrix *csr, HYPRE_Real *b, HYPRE_Real *x, int REPEAT, bool print);
 template <bool TEST>
 HYPRE_Int GaussSeidelColDynSchd(hypre_CSRMatrix *csr, HYPRE_Real *b, HYPRE_Real *x, int REPEAT, bool print);
+HYPRE_Int GaussSeidelColGSF(hypre_CSRMatrix *csr, HYPRE_Real *b, HYPRE_Real *x, int REPEAT, bool print);
 double wall_timer();
 void GaussSeidel_cusparse1(hypre_CSRMatrix *csr, HYPRE_Real *b, HYPRE_Real *x, int, bool);
 void GaussSeidel_cusparse2(hypre_CSRMatrix *csr, HYPRE_Real *b, HYPRE_Real *x, int, bool);

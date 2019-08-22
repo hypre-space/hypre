@@ -11,10 +11,10 @@ int main(int argc, char *argv[])
     *  GPU L/U solve w/ sync-free        *
     *----------------------------------- */
    int i,n,nnz,nx=32, ny=32, nz=32, npts=7, flg=0, mm=1, dotest=0;
-   HYPRE_Real *h_b,*h_x0,*h_x1,*h_x2,*h_x3,*h_x4,*h_x5,*h_x6,*h_z;
+   HYPRE_Real *h_b,*h_x0,*h_x1,*h_x2,*h_x3,*h_x4,*h_x5,*h_x6,*h_x7,*h_x8,*h_z;
    struct coo_t h_coo;
    hypre_CSRMatrix *h_csr;
-   double e1,e2,e3,e4,e5,e6;
+   double e1,e2,e3,e4,e5,e6,e7,e8;
    char fname[2048];
    int NTESTS = 10;
    int REP = 10;
@@ -87,6 +87,19 @@ int main(int argc, char *argv[])
    }
    printf("err norm %.2e\n", err);
    free(h_x1);
+   /*------------ GPU L/U Solv w/ Lev-Sched C32 */
+   err = 0.0;
+   h_x7 = (HYPRE_Real *) malloc(n*sizeof(HYPRE_Real));
+   printf(" [GPU] G-S LEVC,       ");
+   for (int i=0; i<NTESTS; i++)
+   {
+      memcpy(h_x7, h_z, n*sizeof(HYPRE_Real));
+      GaussSeidelColLevSchd<true>(h_csr, h_b, h_x7, 1, false);
+      e7=error_norm(h_x0, h_x7, n);
+      err = max(e7, err);
+   }
+   printf("err norm %.2e\n", err);
+   free(h_x7);
    /*------------ GPU L/U Solv w/ Row Dyn-Sched */
    err = 0.0;
    h_x4 = (HYPRE_Real *) malloc(n*sizeof(HYPRE_Real));
@@ -168,6 +181,13 @@ bench:
    e1=error_norm(h_x0, h_x1, n);
    printf("err norm %.2e\n", e1);
    free(h_x1);
+   /*------------ GPU L/U Solv w/ Lev-Sched C32 */
+   h_x7 = (HYPRE_Real *) malloc(n*sizeof(HYPRE_Real));
+   memcpy(h_x7, h_z, n*sizeof(HYPRE_Real));
+   GaussSeidelColLevSchd<false>(h_csr, h_b, h_x7, REP, true);
+   e7=error_norm(h_x0, h_x7, n);
+   printf("err norm %.2e\n", e7);
+   free(h_x7);
    /*------------ GPU L/U Solv w/ Dyn-Sched R */
    h_x4 = (HYPRE_Real *) malloc(n*sizeof(HYPRE_Real));
    memcpy(h_x4, h_z, n*sizeof(HYPRE_Real));
@@ -203,6 +223,13 @@ bench:
    e3=error_norm(h_x0, h_x3, n);
    printf("err norm %.2e\n", e3);
    free(h_x3);
+   /*----------- GSF */
+   h_x8 = (HYPRE_Real *) malloc(n*sizeof(HYPRE_Real));
+   memcpy(h_x8, h_z, n*sizeof(HYPRE_Real));
+   GaussSeidelColGSF(h_csr, h_b, h_x8, REP, true);
+   e8=error_norm(h_x0, h_x8, n);
+   printf("err norm %.2e\n", e8);
+   free(h_x8);
    /*----------- Done free */
    hypre_CSRMatrixDestroy(h_csr);
    FreeCOO(&h_coo);

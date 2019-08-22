@@ -251,7 +251,7 @@ GaussSeidelRowLevSchd(hypre_CSRMatrix *csr, HYPRE_Real *b, HYPRE_Real *x, HYPRE_
 
    if (print)
    {
-      printf(" [GPU] G-S level-scheduling, #lev in L %d, #lev in U %d\n", lev.nlevL, lev.nlevU);
+      printf(" [GPU] G-S R-level-scheduling, #lev in L %d, #lev in U %d\n", lev.nlevL, lev.nlevU);
       printf("  time(s) = %.2e, Gflops = %-5.3f", t2/REPEAT, REPEAT*4*((nnz)/1e9)/t2);
       printf("  [analysis time %.2e (%.1e x T_sol)] ", ta/REPEAT, ta/t2);
    }
