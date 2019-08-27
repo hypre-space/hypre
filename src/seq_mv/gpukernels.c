@@ -46,6 +46,36 @@ extern "C"{
   }
 }
 
+extern "C"{
+  __global__
+  void VecComponentwiseScaleKernel(HYPRE_Complex *__restrict__ u, const HYPRE_Real *__restrict__ v, const hypre_int num_rows){
+    HYPRE_Int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i<num_rows){
+      u[i]*=v[i];
+  }
+  }
+}
+
+extern "C"{
+  void VecComponentwiseScale(HYPRE_Complex *u, HYPRE_Real *v, hypre_int num_rows,cudaStream_t s){
+    PUSH_RANGE_PAYLOAD("VECCOMPONENTWISESCALE",1,num_rows);
+    const HYPRE_Int tpb=64;
+    HYPRE_Int num_blocks=num_rows/tpb+1;
+#ifdef CATCH_LAUNCH_ERRORS
+    hypre_CheckErrorDevice(cudaPeekAtLastError());
+    hypre_CheckErrorDevice(cudaDeviceSynchronize());
+#endif
+    MemPrefetchSized(v,num_rows*sizeof(HYPRE_Real),HYPRE_DEVICE,s);
+    VecComponentwiseScaleKernel<<<num_blocks,tpb,0,s>>>(u,v,num_rows);
+#ifdef CATCH_LAUNCH_ERRORS
+    hypre_CheckErrorDevice(cudaPeekAtLastError());
+    hypre_CheckErrorDevice(cudaDeviceSynchronize());
+#endif
+    hypre_CheckErrorDevice(cudaStreamSynchronize(s));
+    POP_RANGE;
+  }
+}
+
 
 extern "C"{
 

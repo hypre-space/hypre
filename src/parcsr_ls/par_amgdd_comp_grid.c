@@ -43,6 +43,7 @@ hypre_ParCompGridCreate ()
    hypre_ParCompGridT(compGrid) = NULL;
    hypre_ParCompGridS(compGrid) = NULL;
    hypre_ParCompGridTemp(compGrid) = NULL;
+   hypre_ParCompGridTemp2(compGrid) = NULL;
    hypre_ParCompGridL1Norms(compGrid) = NULL;
    hypre_ParCompGridGlobalIndices(compGrid) = NULL;
    hypre_ParCompGridCoarseGlobalIndices(compGrid) = NULL;
@@ -101,6 +102,11 @@ hypre_ParCompGridDestroy ( hypre_ParCompGrid *compGrid )
    if (hypre_ParCompGridTemp(compGrid))
    {
       hypre_SeqVectorDestroy(hypre_ParCompGridTemp(compGrid));
+   }
+
+   if (hypre_ParCompGridTemp2(compGrid))
+   {
+      hypre_SeqVectorDestroy(hypre_ParCompGridTemp2(compGrid));
    }
 
    if (hypre_ParCompGridGlobalIndices(compGrid))

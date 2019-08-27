@@ -260,6 +260,7 @@ void DiagScaleVector(HYPRE_Complex *x, HYPRE_Complex *y, HYPRE_Complex *A_data, 
 void VecCopy(HYPRE_Complex* tgt, const HYPRE_Complex* src, HYPRE_Int size,cudaStream_t s);
 void VecSet(HYPRE_Complex* tgt, HYPRE_Int size, HYPRE_Complex value, cudaStream_t s);
 void VecScale(HYPRE_Complex *u, HYPRE_Complex *v, HYPRE_Complex *l1_norm, HYPRE_Int num_rows,cudaStream_t s);
+void VecComponentwiseScale(HYPRE_Complex *u, HYPRE_Real *v, hypre_int num_rows,cudaStream_t s);
 void VecScaleSplit(HYPRE_Complex *u, HYPRE_Complex *v, HYPRE_Complex *l1_norm, HYPRE_Int num_rows,cudaStream_t s);
 void CudaCompileFlagCheck();
 void PackOnDevice(HYPRE_Complex *send_data,HYPRE_Complex *x_local_data, HYPRE_Int *send_map, HYPRE_Int begin, HYPRE_Int end,cudaStream_t s);

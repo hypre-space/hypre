@@ -139,6 +139,8 @@ typedef struct
    hypre_Vector     *t;
    hypre_Vector     *s;
    hypre_Vector     *temp;
+   hypre_Vector     *temp2;
+   hypre_Vector     *temp3;
 
    HYPRE_Real       *l1_norms;
 
@@ -160,6 +162,8 @@ typedef struct
 #define hypre_ParCompGridT(compGrid)           ((compGrid) -> t)
 #define hypre_ParCompGridS(compGrid)           ((compGrid) -> s)
 #define hypre_ParCompGridTemp(compGrid)        ((compGrid) -> temp)
+#define hypre_ParCompGridTemp2(compGrid)        ((compGrid) -> temp2)
+#define hypre_ParCompGridTemp3(compGrid)        ((compGrid) -> temp3)
 #define hypre_ParCompGridGlobalIndices(compGrid)           ((compGrid) -> global_indices)
 #define hypre_ParCompGridCoarseGlobalIndices(compGrid)           ((compGrid) -> coarse_global_indices)
 #define hypre_ParCompGridCoarseLocalIndices(compGrid)           ((compGrid) -> coarse_local_indices)

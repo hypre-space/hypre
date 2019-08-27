@@ -49,6 +49,9 @@ HYPRE_Int
 FAC_GaussSeidel( hypre_ParCompGrid *compGrid );
 
 HYPRE_Int
+FAC_Cheby( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int level );
+
+HYPRE_Int
 hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata, HYPRE_Int first_iteration )
 {
    HYPRE_Int   myid;
@@ -364,6 +367,7 @@ FAC_Relax( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int ty
 {
    if (type == 0) FAC_Jacobi(amg_data, compGrid, level);
    else if (type == 1) FAC_GaussSeidel(compGrid);
+   else if (type == 2) FAC_Cheby(amg_data, compGrid, level);
 	return 0;
 }
 
@@ -371,8 +375,7 @@ HYPRE_Int
 FAC_Jacobi( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int level )
 {
    HYPRE_Int i,j; 
-   // HYPRE_Real relax_weight = hypre_ParAMGDataRelaxWeight(amg_data)[level];
-   HYPRE_Real relax_weight = 1.0;
+   HYPRE_Real relax_weight = hypre_ParAMGDataRelaxWeight(amg_data)[level];
 
    // Calculate l1_norms if necessary
    if (!hypre_ParCompGridL1Norms(compGrid))
@@ -406,10 +409,10 @@ FAC_Jacobi( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int l
    #else
    hypre_SeqVectorCopy(hypre_ParCompGridF(compGrid),hypre_ParCompGridTemp(compGrid));
    #endif
-   hypre_CSRMatrixMatvec(-relax_weight, hypre_ParCompGridA(compGrid), hypre_ParCompGridU(compGrid), relax_weight, hypre_ParCompGridTemp  (compGrid));
+   hypre_CSRMatrixMatvec(-relax_weight, hypre_ParCompGridA(compGrid), hypre_ParCompGridU(compGrid), relax_weight, hypre_ParCompGridTemp(compGrid));
    #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
    VecScale(hypre_VectorData(hypre_ParCompGridU(compGrid)),hypre_VectorData(hypre_ParCompGridTemp(compGrid)),hypre_ParCompGridL1Norms(compGrid),hypre_ParCompGridNumRealNodes(compGrid),HYPRE_STREAM(4));
-   VecScale(hypre_VectorData(hypre_ParCompGridT(compGrid)),hypre_VectorData(hypre_ParCompGridTemp(compGrid)),hypre_ParCompGridL1Norms(compGrid),hypre_ParCompGridNumRealNodes(compGrid),HYPRE_STREAM(4)); // !!! Put back
+   VecScale(hypre_VectorData(hypre_ParCompGridT(compGrid)),hypre_VectorData(hypre_ParCompGridTemp(compGrid)),hypre_ParCompGridL1Norms(compGrid),hypre_ParCompGridNumRealNodes(compGrid),HYPRE_STREAM(4));
    #else
    for (i = 0; i < hypre_ParCompGridNumRealNodes(compGrid); i++)
    {
@@ -468,3 +471,137 @@ FAC_GaussSeidel( hypre_ParCompGrid *compGrid )
 
    return 0;
 }
+
+HYPRE_Int 
+FAC_Cheby( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int level )
+{
+   HYPRE_Real    *coefs = hypre_ParAMGDataChebyCoefs(amg_data)[level];
+   HYPRE_Int     scale = hypre_ParAMGDataChebyScale(amg_data);
+   HYPRE_Int     order = hypre_ParAMGDataChebyOrder(amg_data);
+
+   HYPRE_Int i,j;
+   
+   HYPRE_Int cheby_order;
+
+   /* u = u + p(A)r */
+
+   if (order > 4)
+      order = 4;
+   if (order < 1)
+      order = 1;
+
+   /* we are using the order of p(A) */
+   cheby_order = order -1;
+   
+   hypre_CSRMatrix *A = hypre_ParCompGridA(compGrid);
+   hypre_Vector *u = hypre_ParCompGridU(compGrid);
+   hypre_Vector *t = hypre_ParCompGridT(compGrid);
+   hypre_Vector *f = hypre_ParCompGridF(compGrid);
+
+
+
+   // !!! NOTE: is this correct??? If I'm doing a bunch of matvecs that include the ghost dofs, is that right?
+   // I think this is fine for now because I don't store the rows associated with ghost dofs, so their values shouldn't change at all, but this may change in a later version.
+
+
+
+   // Calculate diagonal scaling values if necessary
+   if (!hypre_ParCompGridL1Norms(compGrid) && scale)
+   {
+      hypre_ParCompGridL1Norms(compGrid) = hypre_CTAlloc(HYPRE_Real, hypre_ParCompGridNumNodes(compGrid), HYPRE_MEMORY_SHARED);
+      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
+      {
+         for (j = hypre_ParCompGridARowPtr(compGrid)[i]; j < hypre_ParCompGridARowPtr(compGrid)[i+1]; j++)
+         {
+            if (hypre_ParCompGridAColInd(compGrid)[j] == i) hypre_ParCompGridL1Norms(compGrid)[i] = 1.0/sqrt(hypre_ParCompGridAData(compGrid)[j]);
+         }
+      }
+   }
+
+   // Setup temporary/auxiliary vectors
+   if (!hypre_ParCompGridTemp(compGrid))
+   {      
+      hypre_ParCompGridTemp(compGrid) = hypre_SeqVectorCreate(hypre_ParCompGridNumNodes(compGrid));
+      hypre_SeqVectorInitialize(hypre_ParCompGridTemp(compGrid));
+   }
+   hypre_Vector *r = hypre_ParCompGridTemp(compGrid);
+   if (!hypre_ParCompGridTemp2(compGrid))
+   {      
+      hypre_ParCompGridTemp2(compGrid) = hypre_SeqVectorCreate(hypre_ParCompGridNumNodes(compGrid));
+      hypre_SeqVectorInitialize(hypre_ParCompGridTemp2(compGrid));
+   }
+   hypre_Vector *u_before = hypre_ParCompGridTemp2(compGrid);
+   if (!hypre_ParCompGridTemp3(compGrid))
+   {      
+      hypre_ParCompGridTemp3(compGrid) = hypre_SeqVectorCreate(hypre_ParCompGridNumNodes(compGrid));
+      hypre_SeqVectorInitialize(hypre_ParCompGridTemp3(compGrid));
+   }
+   hypre_Vector *v = hypre_ParCompGridTemp3(compGrid);
+
+   hypre_SeqVectorCopy(u, u_before);
+
+   if (!scale)
+   {
+      /* get residual: r = f - A*u */
+      hypre_SeqVectorCopy(f, r); 
+      hypre_CSRMatrixMatvec(-1.0, A, u, 1.0, r);
+
+      hypre_SeqVectorCopy(r, u);
+      hypre_SeqVectorScale(coefs[cheby_order], u);
+
+      for (i = cheby_order - 1; i >= 0; i--) 
+      {
+         hypre_CSRMatrixMatvec(1.0, A, u, 0.0, v);
+
+         hypre_SeqVectorAxpy(coefs[i], r, v);
+         hypre_SeqVectorCopy(v, u);
+      }
+   }
+   else /* scaling! */
+   {      
+    /* get scaled residual: r = D^(-1/2)f -
+       * D^(-1/2)A*u */
+      hypre_SeqVectorCopy(f, r); 
+      hypre_CSRMatrixMatvec(-1.0, A, u, 1.0, r);
+      VecComponentwiseScale(hypre_VectorData(r), hypre_ParCompGridL1Norms(compGrid), hypre_ParCompGridNumNodes(compGrid), HYPRE_STREAM(4));
+
+      /* save original u, then start 
+         the iteration by multiplying r by the cheby coef.*/
+      hypre_SeqVectorCopy(u, u_before);
+      hypre_SeqVectorCopy(r, u);
+      hypre_SeqVectorScale(coefs[cheby_order], u);
+
+      /* now do the other coefficients */   
+      for (i = cheby_order - 1; i >= 0; i--) 
+      {
+         /* v = D^(-1/2)AD^(-1/2)u */
+         VecComponentwiseScale(hypre_VectorData(u), hypre_ParCompGridL1Norms(compGrid), hypre_ParCompGridNumNodes(compGrid), HYPRE_STREAM(4));
+         hypre_CSRMatrixMatvec(1.0, A, u, 0.0, v);
+         VecComponentwiseScale(hypre_VectorData(v), hypre_ParCompGridL1Norms(compGrid), hypre_ParCompGridNumNodes(compGrid), HYPRE_STREAM(4));
+
+         /* u_new = coef*r + v*/
+         hypre_SeqVectorAxpy(coefs[i], r, v);
+         hypre_SeqVectorCopy(v, u);         
+      } /* end of cheby_order loop */
+
+      /* now we have to scale u_data before adding it to u_orig*/
+      VecComponentwiseScale(hypre_VectorData(u), hypre_ParCompGridL1Norms(compGrid), hypre_ParCompGridNumNodes(compGrid), HYPRE_STREAM(4));
+
+   }/* end of scaling code */
+
+
+   // Update only over real dofs by adjusting size of vectors
+   hypre_VectorSize(u) = hypre_ParCompGridNumRealNodes(compGrid);
+   hypre_VectorSize(t) = hypre_ParCompGridNumRealNodes(compGrid);
+   hypre_VectorSize(u_before) = hypre_ParCompGridNumRealNodes(compGrid);
+
+   hypre_SeqVectorAxpy(1.0, u, t);
+   hypre_SeqVectorAxpy(1.0, u_before, u);
+  
+   hypre_VectorSize(u) = hypre_ParCompGridNumNodes(compGrid);
+   hypre_VectorSize(t) = hypre_ParCompGridNumNodes(compGrid);
+   hypre_VectorSize(u_before) = hypre_ParCompGridNumNodes(compGrid);
+
+   return hypre_error_flag;
+}
+
