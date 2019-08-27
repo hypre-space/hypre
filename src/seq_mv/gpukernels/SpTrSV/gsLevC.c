@@ -8,7 +8,7 @@ __global__
 void hypreCUDAKernel_OneBlockGaussSeidelColLevSchd(T *x, HYPRE_Int *jb, HYPRE_Int *ib, T *ab, HYPRE_Int *db, HYPRE_Int *jlev, HYPRE_Int *ilev, HYPRE_Int l1, HYPRE_Int l2_k2, HYPRE_Int k1, HYPRE_Int k2)
 {
    //const HYPRE_Int grid_ngroups = gridDim.x * (SPTRSV_BLOCKDIM / K);
-   const HYPRE_Int grid_group_id = (blockIdx.x * SPTRSV_BLOCKDIM + threadIdx.x) >> 5;
+   const HYPRE_Int grid_group_id = (blockIdx.x * SPTRSV_BLOCKDIM + threadIdx.x) / K;
    const HYPRE_Int group_lane = threadIdx.x & (K - 1);
    HYPRE_Int l2;
 
@@ -78,7 +78,7 @@ __global__
 void hypreCUDAKernel_GaussSeidelColLevSchd(T *x, HYPRE_Int *jb, HYPRE_Int *ib, T *ab, HYPRE_Int *db, HYPRE_Int *jlev, HYPRE_Int l1, HYPRE_Int l2)
 {
    //const HYPRE_Int grid_ngroups = gridDim.x * (SPTRSV_BLOCKDIM / K);
-   const HYPRE_Int grid_group_id = ( (blockIdx.x * SPTRSV_BLOCKDIM + threadIdx.x) >> 5 ) + l1;
+   const HYPRE_Int grid_group_id = ( (blockIdx.x * SPTRSV_BLOCKDIM + threadIdx.x) / K ) + l1;
    const HYPRE_Int group_lane = threadIdx.x & (K - 1);
 
    if ( __any_sync(HYPRE_WARP_FULL_MASK, grid_group_id < l2) )
@@ -194,14 +194,13 @@ GaussSeidelColLevSchd(hypre_CSRMatrix *csr, HYPRE_Real *b, HYPRE_Real *x, int RE
       {
          HYPRE_Int k1 = lev.klevL[i];
          HYPRE_Int k2 = lev.klevL[i+1];
-         const HYPRE_Int group_size = 32;
+         const HYPRE_Int group_size = LEV_GROUP_SIZE;
 
          HYPRE_Int l1 = lev.ilevL[k1];
          HYPRE_Int l2 = lev.ilevL[k2];
 
          if (k2 == k1 + 1)
          {
-            const HYPRE_Int group_size = 32;
             const HYPRE_Int num_groups_per_block = bDim / group_size;
             const HYPRE_Int gDim = (l2 - l1 + num_groups_per_block - 1) / num_groups_per_block;
             hypreCUDAKernel_GaussSeidelColLevSchd<'L', group_size> <<<gDim, bDim>>>
@@ -223,14 +222,13 @@ GaussSeidelColLevSchd(hypre_CSRMatrix *csr, HYPRE_Real *b, HYPRE_Real *x, int RE
       {
          HYPRE_Int k1 = lev.klevU[i];
          HYPRE_Int k2 = lev.klevU[i+1];
-         const HYPRE_Int group_size = 32;
+         const HYPRE_Int group_size = LEV_GROUP_SIZE;
 
          HYPRE_Int l1 = lev.ilevU[k1];
          HYPRE_Int l2 = lev.ilevU[k2];
 
          if (k2 == k1 + 1)
          {
-            const HYPRE_Int group_size = 32;
             const HYPRE_Int num_groups_per_block = bDim / group_size;
             const HYPRE_Int gDim = (l2 - l1 + num_groups_per_block - 1) / num_groups_per_block;
             hypreCUDAKernel_GaussSeidelColLevSchd<'U', group_size> <<<gDim, bDim>>>

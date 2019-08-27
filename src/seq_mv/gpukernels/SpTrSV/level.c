@@ -75,7 +75,7 @@ void makeLevelCSR(int n, int *ia, int *ja, struct level_t *h_lev)
       int l1 = h_lev->ilevL[i];
       int l2 = h_lev->ilevL[i+1];
       const int bDim = SPTRSV_BLOCKDIM;
-      const HYPRE_Int group_size = 32;
+      const HYPRE_Int group_size = LEV_GROUP_SIZE;
       const HYPRE_Int num_groups_per_block = bDim / group_size;
       const HYPRE_Int gDim = (l2 - l1 + num_groups_per_block - 1) / num_groups_per_block;
       if (i == 0 || gDim > 1 || pre_gDim > 1)
@@ -97,7 +97,7 @@ void makeLevelCSR(int n, int *ia, int *ja, struct level_t *h_lev)
       int l1 = h_lev->ilevL[i];
       int l2 = h_lev->ilevL[i+1];
       const int bDim = SPTRSV_BLOCKDIM;
-      const HYPRE_Int group_size = 32;
+      const HYPRE_Int group_size = LEV_GROUP_SIZE;
       const HYPRE_Int num_groups_per_block = bDim / group_size;
       const HYPRE_Int gDim = (l2 - l1 + num_groups_per_block - 1) / num_groups_per_block;
       if (gDim == 1)
@@ -167,7 +167,7 @@ void makeLevelCSR(int n, int *ia, int *ja, struct level_t *h_lev)
       int l1 = h_lev->ilevU[i];
       int l2 = h_lev->ilevU[i+1];
       const int bDim = SPTRSV_BLOCKDIM;
-      const HYPRE_Int group_size = 32;
+      const HYPRE_Int group_size = LEV_GROUP_SIZE;
       const HYPRE_Int num_groups_per_block = bDim / group_size;
       const HYPRE_Int gDim = (l2 - l1 + num_groups_per_block - 1) / num_groups_per_block;
       if (i == 0 || gDim > 1 || pre_gDim > 1)
@@ -189,7 +189,7 @@ void makeLevelCSR(int n, int *ia, int *ja, struct level_t *h_lev)
       int l1 = h_lev->ilevL[i];
       int l2 = h_lev->ilevL[i+1];
       const int bDim = SPTRSV_BLOCKDIM;
-      const HYPRE_Int group_size = 32;
+      const HYPRE_Int group_size = LEV_GROUP_SIZE;
       const HYPRE_Int num_groups_per_block = bDim / group_size;
       const HYPRE_Int gDim = (l2 - l1 + num_groups_per_block - 1) / num_groups_per_block;
       if (gDim == 1)

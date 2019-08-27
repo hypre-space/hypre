@@ -200,14 +200,13 @@ GaussSeidelRowLevSchd(hypre_CSRMatrix *csr, HYPRE_Real *b, HYPRE_Real *x, HYPRE_
       {
          HYPRE_Int k1 = lev.klevL[i];
          HYPRE_Int k2 = lev.klevL[i+1];
-         const HYPRE_Int group_size = 32;
+         const HYPRE_Int group_size = LEV_GROUP_SIZE;
 
          HYPRE_Int l1 = lev.ilevL[k1];
          HYPRE_Int l2 = lev.ilevL[k2];
 
          if (k2 == k1 + 1)
          {
-            const HYPRE_Int group_size = 32;
             const HYPRE_Int num_groups_per_block = bDim / group_size;
             const HYPRE_Int gDim = (l2 - l1 + num_groups_per_block - 1) / num_groups_per_block;
             hypreCUDAKernel_GaussSeidelRowLevSchd<group_size> <<<gDim, bDim>>>
@@ -225,14 +224,13 @@ GaussSeidelRowLevSchd(hypre_CSRMatrix *csr, HYPRE_Real *b, HYPRE_Real *x, HYPRE_
       {
          HYPRE_Int k1 = lev.klevU[i];
          HYPRE_Int k2 = lev.klevU[i+1];
-         const HYPRE_Int group_size = 32;
+         const HYPRE_Int group_size = LEV_GROUP_SIZE;
 
          HYPRE_Int l1 = lev.ilevU[k1];
          HYPRE_Int l2 = lev.ilevU[k2];
 
          if (k2 == k1 + 1)
          {
-            const HYPRE_Int group_size = 32;
             const HYPRE_Int num_groups_per_block = bDim / group_size;
             const HYPRE_Int gDim = (l2 - l1 + num_groups_per_block - 1) / num_groups_per_block;
             hypreCUDAKernel_GaussSeidelRowLevSchd<group_size> <<<gDim, bDim>>>

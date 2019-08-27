@@ -16,6 +16,9 @@
 #define SPMV_BLOCKDIM 512
 #define SPTRSV_BLOCKDIM 1024
 
+//TODO
+#define LEV_GROUP_SIZE 8
+
 /* types of user command-line input */
 typedef enum {
   INT,
