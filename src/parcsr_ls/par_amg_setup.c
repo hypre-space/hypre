@@ -1331,7 +1331,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             {
                // !!! Debug
                if (coarse_size == 0) printf("No coarse grid. Coarse solver set to relaxation. setup line 1333.\n");
-               if (coarse_size == 0) printf("Coarse grid same as fine grid. Coarse solver set to relaxation. setup line 1334.\n");
+               if (coarse_size == fine_size) printf("Coarse grid same as fine grid. Coarse solver set to relaxation. setup line 1334.\n");
                
 
                HYPRE_Int *num_grid_sweeps = hypre_ParAMGDataNumGridSweeps(amg_data);
@@ -1986,7 +1986,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       {
          // !!! Debug
          if (coarse_size == 0) printf("No coarse grid. Coarse solver set to relaxation. setup line 1988.\n");
-         if (coarse_size == 0) printf("Coarse grid same as fine grid. Coarse solver set to relaxation. setup line 1989.\n");
+         if (coarse_size == fine_size) printf("Coarse grid same as fine grid. Coarse solver set to relaxation. setup line 1989.\n");
 
          HYPRE_Int     *num_grid_sweeps =
             hypre_ParAMGDataNumGridSweeps(amg_data);
