@@ -143,6 +143,7 @@ typedef struct
    hypre_Vector     *temp3;
 
    HYPRE_Real       *l1_norms;
+   int              *cf_marker_array;
 
 } hypre_ParCompGrid;
 
@@ -181,5 +182,6 @@ typedef struct
 #define hypre_ParCompGridR(compGrid)               ((compGrid) -> R)
 
 #define hypre_ParCompGridL1Norms(compGrid)         ((compGrid) -> l1_norms)
+#define hypre_ParCompGridCFMarkerArray(compGrid)         ((compGrid) -> cf_marker_array)
 
 #endif

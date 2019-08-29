@@ -52,6 +52,9 @@ HYPRE_Int
 FAC_Cheby( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int level );
 
 HYPRE_Int
+FAC_CFL1Jacobi( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int level );
+
+HYPRE_Int
 hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata, HYPRE_Int first_iteration )
 {
    HYPRE_Int   myid;
@@ -213,7 +216,7 @@ HYPRE_Int FAC_Cycle_timed(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type
    HYPRE_Int   myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
-   HYPRE_Int i, j; // loop variables
+   HYPRE_Int i; // loop variables
 
    // Get the AMG structure
    hypre_ParAMGData   *amg_data = (hypre_ParAMGData*) amg_vdata;
@@ -377,7 +380,7 @@ FAC_Jacobi( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int l
    HYPRE_Int i,j; 
    HYPRE_Real relax_weight = hypre_ParAMGDataRelaxWeight(amg_data)[level];
 
-   // Calculate l1_norms if necessary
+   // Calculate l1_norms if necessary (right now, I'm just using this vector for the diagonal of A and doing straight ahead Jacobi)
    if (!hypre_ParCompGridL1Norms(compGrid))
    {
       hypre_ParCompGridL1Norms(compGrid) = hypre_CTAlloc(HYPRE_Real, hypre_ParCompGridNumNodes(compGrid), HYPRE_MEMORY_SHARED);
@@ -398,18 +401,11 @@ FAC_Jacobi( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int l
       hypre_SeqVectorInitialize(hypre_ParCompGridTemp(compGrid));
    }
 
-   // !!! Adapted from par_relax case 7. Right now, I'm doing straight ahead unweighted Jacobi.
-   /*-----------------------------------------------------------------
-   * Copy f into temporary vector.
-   *-----------------------------------------------------------------*/
-   #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
-   hypre_SeqVectorPrefetchToDevice(hypre_ParCompGridTemp(compGrid));
-   hypre_SeqVectorPrefetchToDevice(hypre_ParCompGridF(compGrid));
-   VecCopy(hypre_VectorData(hypre_ParCompGridTemp(compGrid)),hypre_VectorData(hypre_ParCompGridF(compGrid)),hypre_VectorSize(hypre_ParCompGridF(compGrid)),HYPRE_STREAM(4));
-   #else
+
    hypre_SeqVectorCopy(hypre_ParCompGridF(compGrid),hypre_ParCompGridTemp(compGrid));
-   #endif
+   
    hypre_CSRMatrixMatvec(-relax_weight, hypre_ParCompGridA(compGrid), hypre_ParCompGridU(compGrid), relax_weight, hypre_ParCompGridTemp(compGrid));
+   
    #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
    VecScale(hypre_VectorData(hypre_ParCompGridU(compGrid)),hypre_VectorData(hypre_ParCompGridTemp(compGrid)),hypre_ParCompGridL1Norms(compGrid),hypre_ParCompGridNumRealNodes(compGrid),HYPRE_STREAM(4));
    VecScale(hypre_VectorData(hypre_ParCompGridT(compGrid)),hypre_VectorData(hypre_ParCompGridTemp(compGrid)),hypre_ParCompGridL1Norms(compGrid),hypre_ParCompGridNumRealNodes(compGrid),HYPRE_STREAM(4));
@@ -431,7 +427,6 @@ HYPRE_Int
 FAC_GaussSeidel( hypre_ParCompGrid *compGrid )
 {
    HYPRE_Int               i, j; // loop variables
-   HYPRE_Int               is_real;
    HYPRE_Complex           diag; // placeholder for the diagonal of A
    HYPRE_Complex           u_before;
 
@@ -475,6 +470,9 @@ FAC_GaussSeidel( hypre_ParCompGrid *compGrid )
 HYPRE_Int 
 FAC_Cheby( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int level )
 {
+   // !!! NOTE: is this correct??? If I'm doing a bunch of matvecs that include the ghost dofs, is that right?
+   // I think this is fine for now because I don't store the rows associated with ghost dofs, so their values shouldn't change at all, but this may change in a later version.
+
    HYPRE_Real    *coefs = hypre_ParAMGDataChebyCoefs(amg_data)[level];
    HYPRE_Int     scale = hypre_ParAMGDataChebyScale(amg_data);
    HYPRE_Int     order = hypre_ParAMGDataChebyOrder(amg_data);
@@ -483,27 +481,17 @@ FAC_Cheby( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int le
    
    HYPRE_Int cheby_order;
 
-   /* u = u + p(A)r */
-
    if (order > 4)
       order = 4;
    if (order < 1)
       order = 1;
 
-   /* we are using the order of p(A) */
    cheby_order = order -1;
    
    hypre_CSRMatrix *A = hypre_ParCompGridA(compGrid);
    hypre_Vector *u = hypre_ParCompGridU(compGrid);
    hypre_Vector *t = hypre_ParCompGridT(compGrid);
    hypre_Vector *f = hypre_ParCompGridF(compGrid);
-
-
-
-   // !!! NOTE: is this correct??? If I'm doing a bunch of matvecs that include the ghost dofs, is that right?
-   // I think this is fine for now because I don't store the rows associated with ghost dofs, so their values shouldn't change at all, but this may change in a later version.
-
-
 
    // Calculate diagonal scaling values if necessary
    if (!hypre_ParCompGridL1Norms(compGrid) && scale)
@@ -605,3 +593,120 @@ FAC_Cheby( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int le
    return hypre_error_flag;
 }
 
+HYPRE_Int
+FAC_CFL1Jacobi( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int level )
+{
+   HYPRE_Int            i, j;
+
+   // Calculate l1_norms if necessary
+   if (!hypre_ParCompGridL1Norms(compGrid))
+   {
+      hypre_ParCompGridL1Norms(compGrid) = hypre_CTAlloc(HYPRE_Real, hypre_ParCompGridNumNodes(compGrid), HYPRE_MEMORY_SHARED);
+      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
+      {
+         for (j = hypre_ParCompGridARowPtr(compGrid)[i]; j < hypre_ParCompGridARowPtr(compGrid)[i+1]; j++)
+         {
+            hypre_ParCompGridL1Norms(compGrid)[i] += fabs(hypre_ParCompGridAData(compGrid)[j]);
+            // if (hypre_ParCompGridAColInd(compGrid)[j] == i) hypre_ParCompGridL1Norms(compGrid)[i] = hypre_ParCompGridAData(compGrid)[j];
+         }
+      }
+   }
+
+#if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
+   // cusparseDbsrxmv(cusparseHandle_t         handle,
+   //              cusparseDirection_t      dir,
+   //              cusparseOperation_t      trans,
+   //              int                      sizeOfMask,
+   //              int                      mb,
+   //              int                      nb,
+   //              int                      nnzb,
+   //              const double*            alpha,
+   //              const cusparseMatDescr_t descr,
+   //              const double*            bsrVal,
+   //              const int*               bsrMaskPtr,
+   //              const int*               bsrRowPtr,
+   //              const int*               bsrEndPtr,
+   //              const int*               bsrColInd,
+   //              int                      blockDim,
+   //              const double*            x,
+   //              const double*            beta,
+   //              double*                  y)
+
+#else
+
+   HYPRE_Int             n = hypre_CSRMatrixNumRows(hypre_ParCompGridA(compGrid));
+
+   HYPRE_Complex  *A_data = hypre_CSRMatrixData(hypre_ParCompGridA(compGrid));
+   HYPRE_Int  *A_i = hypre_CSRMatrixI(hypre_ParCompGridA(compGrid));
+   HYPRE_Int  *A_j = hypre_CSRMatrixJ(hypre_ParCompGridA(compGrid));
+
+   HYPRE_Real     *u_data  = hypre_VectorData(hypre_ParCompGridU(compGrid));
+   HYPRE_Real     *f_data  = hypre_VectorData(hypre_ParCompGridF(compGrid));
+   HYPRE_Real     *Vtemp_data = hypre_VectorData(hypre_ParCompGridTemp(compGrid));
+
+   HYPRE_Real     *l1_norms = hypre_ParCompGridL1Norms(compGrid);
+
+   HYPRE_Real    res;
+
+   /*-----------------------------------------------------------------
+   * Copy current approximation into temporary vector.
+   *-----------------------------------------------------------------*/
+
+   #ifdef HYPRE_USING_OPENMP
+   #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+   #endif
+   for (i = 0; i < n; i++)
+   {
+      Vtemp_data[i] = u_data[i];
+   }
+
+   /*-----------------------------------------------------------------
+   * Relax only C or F points as determined by relax_points.
+   *-----------------------------------------------------------------*/
+
+   #ifdef HYPRE_USING_OPENMP
+   #pragma omp parallel for private(i,j,res) HYPRE_SMP_SCHEDULE
+   #endif
+   for (i = 0; i < n; i++)
+   {
+      /*-----------------------------------------------------------
+      * If i is of the right type ( C or F ) and diagonal is
+      * nonzero, relax point i; otherwise, skip it.
+      *-----------------------------------------------------------*/
+
+      if (cf_marker[i] == 1)
+      {
+         res = f_data[i];
+         for (j = A_i[i]; j < A_i[i+1]; j++)
+         {
+            res -= A_data[j] * Vtemp_data[A_j[j]];
+         }
+         u_data[i] += (relax_weight * res)/l1_norms[i];
+      }
+   }
+
+   #ifdef HYPRE_USING_OPENMP
+   #pragma omp parallel for private(i,j,res) HYPRE_SMP_SCHEDULE
+   #endif
+   for (i = 0; i < n; i++)
+   {
+      /*-----------------------------------------------------------
+      * If i is of the right type ( C or F ) and diagonal is
+      * nonzero, relax point i; otherwise, skip it.
+      *-----------------------------------------------------------*/
+
+      if (cf_marker[i] == 0)
+      {
+         res = f_data[i];
+         for (j = A_i[i]; j < A_i[i+1]; j++)
+         {
+            res -= A_data[j] * Vtemp_data[A_j[j]];
+         }
+         u_data[i] += (relax_weight * res)/l1_norms[i];
+      }
+   }
+
+#endif
+
+   return 0;
+}
