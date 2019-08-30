@@ -655,12 +655,13 @@ FAC_CFL1Jacobi( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_I
 
 #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
    // Setup c and f point masks
-   static int num_c_points = 0;
-   static int num_f_points = 0;
    if (!hypre_ParCompGridCMask(compGrid))
    {
+      int num_c_points = 0;
+      int num_f_points = 0;
       for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++) if (hypre_ParCompGridCFMarkerArray(compGrid)[i]) num_c_points++;
       num_f_points = hypre_ParCompGridNumNodes(compGrid) - num_c_points;
+      hypre_ParCompGridNumCPoints(compGrid) = num_c_points;
       hypre_ParCompGridCMask(compGrid) = hypre_CTAlloc(int, num_c_points, HYPRE_MEMORY_SHARED);
       hypre_ParCompGridFMask(compGrid) = hypre_CTAlloc(int, num_f_points, HYPRE_MEMORY_SHARED);
       int c_cnt = 0, f_cnt = 0;
@@ -679,7 +680,7 @@ FAC_CFL1Jacobi( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_I
    {
       handle=getCusparseHandle();
 
-      status= cusparseCreateMatDescr(&descr);
+      cusparseStatus_t status= cusparseCreateMatDescr(&descr);
       if (status != CUSPARSE_STATUS_SUCCESS) {
          hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ERROR:: Matrix descriptor initialization failed\n");
          return hypre_error_flag;
@@ -691,51 +692,53 @@ FAC_CFL1Jacobi( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_I
       FirstCall=0;
    }
    hypre_SeqVectorCopy(hypre_ParCompGridF(compGrid), hypre_ParCompGridTemp(compGrid));
+   double alpha = -relax_weight;
+   double beta = relax_weight;
    if (relax_set)
    {
       cusparseDbsrxmv(handle,
                 CUSPARSE_DIRECTION_ROW,
                 CUSPARSE_OPERATION_NON_TRANSPOSE,
-                num_c_points,
+                hypre_ParCompGridNumCPoints(compGrid),
                 hypre_CSRMatrixNumRows(hypre_ParCompGridA(compGrid)),
                 hypre_CSRMatrixNumCols(hypre_ParCompGridA(compGrid)),
                 hypre_CSRMatrixNumNonzeros(hypre_ParCompGridA(compGrid)),
-                -relax_weight,
+                &alpha,
                 descr,
                 hypre_CSRMatrixData(hypre_ParCompGridA(compGrid)),
                 hypre_ParCompGridCMask(compGrid),
-                hypre_CSRMatrixI(hypre_ParCompGridA(compGrid))[0],
+                hypre_CSRMatrixI(hypre_ParCompGridA(compGrid)),
                 &(hypre_CSRMatrixI(hypre_ParCompGridA(compGrid))[1]),
                 hypre_CSRMatrixJ(hypre_ParCompGridA(compGrid)),
                 1,
                 hypre_VectorData(hypre_ParCompGridU(compGrid)),
-                relax_weight,
+                &beta,
                 hypre_VectorData(hypre_ParCompGridTemp(compGrid)));
-      VecScale(hypre_VectorData(hypre_ParCompGridU(compGrid)),hypre_VectorData(hypre_ParCompGridTemp(compGrid)),hypre_ParCompGridL1Norms(compGrid),hypre_ParCompGridCFMarkerArray(compGrid),1,hypre_ParCompGridNumRealNodes(compGrid),HYPRE_STREAM(4));
-      VecScale(hypre_VectorData(hypre_ParCompGridT(compGrid)),hypre_VectorData(hypre_ParCompGridTemp(compGrid)),hypre_ParCompGridL1Norms(compGrid),hypre_ParCompGridCFMarkerArray(compGrid),1,hypre_ParCompGridNumRealNodes(compGrid),HYPRE_STREAM(4));
+      VecScaleMasked(hypre_VectorData(hypre_ParCompGridU(compGrid)),hypre_VectorData(hypre_ParCompGridTemp(compGrid)),hypre_ParCompGridL1Norms(compGrid),hypre_ParCompGridCFMarkerArray(compGrid),1,hypre_ParCompGridNumRealNodes(compGrid),HYPRE_STREAM(4));
+      VecScaleMasked(hypre_VectorData(hypre_ParCompGridT(compGrid)),hypre_VectorData(hypre_ParCompGridTemp(compGrid)),hypre_ParCompGridL1Norms(compGrid),hypre_ParCompGridCFMarkerArray(compGrid),1,hypre_ParCompGridNumRealNodes(compGrid),HYPRE_STREAM(4));
    }
    else
    {
       cusparseDbsrxmv(handle,
                 CUSPARSE_DIRECTION_ROW,
                 CUSPARSE_OPERATION_NON_TRANSPOSE,
-                num_c_points,
+                hypre_ParCompGridNumNodes(compGrid) - hypre_ParCompGridNumCPoints(compGrid),
                 hypre_CSRMatrixNumRows(hypre_ParCompGridA(compGrid)),
                 hypre_CSRMatrixNumCols(hypre_ParCompGridA(compGrid)),
                 hypre_CSRMatrixNumNonzeros(hypre_ParCompGridA(compGrid)),
-                -relax_weight,
+                &alpha,
                 descr,
                 hypre_CSRMatrixData(hypre_ParCompGridA(compGrid)),
                 hypre_ParCompGridFMask(compGrid),
-                hypre_CSRMatrixI(hypre_ParCompGridA(compGrid))[0],
+                hypre_CSRMatrixI(hypre_ParCompGridA(compGrid)),
                 &(hypre_CSRMatrixI(hypre_ParCompGridA(compGrid))[1]),
                 hypre_CSRMatrixJ(hypre_ParCompGridA(compGrid)),
                 1,
                 hypre_VectorData(hypre_ParCompGridU(compGrid)),
-                relax_weight,
+                &beta,
                 hypre_VectorData(hypre_ParCompGridTemp(compGrid)));
-      VecScale(hypre_VectorData(hypre_ParCompGridU(compGrid)),hypre_VectorData(hypre_ParCompGridTemp(compGrid)),hypre_ParCompGridL1Norms(compGrid),hypre_ParCompGridCFMarkerArray(compGrid),0,hypre_ParCompGridNumRealNodes(compGrid),HYPRE_STREAM(4));
-      VecScale(hypre_VectorData(hypre_ParCompGridT(compGrid)),hypre_VectorData(hypre_ParCompGridTemp(compGrid)),hypre_ParCompGridL1Norms(compGrid),hypre_ParCompGridCFMarkerArray(compGrid),0,hypre_ParCompGridNumRealNodes(compGrid),HYPRE_STREAM(4));
+      VecScaleMasked(hypre_VectorData(hypre_ParCompGridU(compGrid)),hypre_VectorData(hypre_ParCompGridTemp(compGrid)),hypre_ParCompGridL1Norms(compGrid),hypre_ParCompGridCFMarkerArray(compGrid),0,hypre_ParCompGridNumRealNodes(compGrid),HYPRE_STREAM(4));
+      VecScaleMasked(hypre_VectorData(hypre_ParCompGridT(compGrid)),hypre_VectorData(hypre_ParCompGridTemp(compGrid)),hypre_ParCompGridL1Norms(compGrid),hypre_ParCompGridCFMarkerArray(compGrid),0,hypre_ParCompGridNumRealNodes(compGrid),HYPRE_STREAM(4));
    }
 
 #else

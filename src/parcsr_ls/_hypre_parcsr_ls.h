@@ -134,6 +134,7 @@ typedef struct
    HYPRE_Int       num_owned_blocks; // number of blocks of owned nodes
    HYPRE_Int       *owned_block_starts; // start positions for the blocks of owned nodes
    HYPRE_Int       num_real_nodes; // number of real nodes
+   HYPRE_Int       num_c_points; // number of C points
    HYPRE_Int       mem_size;
    HYPRE_Int       A_mem_size;
    HYPRE_Int       P_mem_size;
@@ -179,6 +180,7 @@ typedef struct
 #define hypre_ParCompGridNumOwnedBlocks(compGrid)           ((compGrid) -> num_owned_blocks)
 #define hypre_ParCompGridOwnedBlockStarts(compGrid)           ((compGrid) -> owned_block_starts)
 #define hypre_ParCompGridNumRealNodes(compGrid)           ((compGrid) -> num_real_nodes)
+#define hypre_ParCompGridNumCPoints(compGrid)           ((compGrid) -> num_c_points)
 #define hypre_ParCompGridMemSize(compGrid)           ((compGrid) -> mem_size)
 #define hypre_ParCompGridAMemSize(compGrid)           ((compGrid) -> A_mem_size)
 #define hypre_ParCompGridPMemSize(compGrid)           ((compGrid) -> P_mem_size)

@@ -35,6 +35,7 @@ hypre_ParCompGridCreate ()
    hypre_ParCompGridNumOwnedBlocks(compGrid) = 0;
    hypre_ParCompGridOwnedBlockStarts(compGrid) = NULL;
    hypre_ParCompGridNumRealNodes(compGrid) = 0;
+   hypre_ParCompGridNumCPoints(compGrid) = 0;
    hypre_ParCompGridMemSize(compGrid) = 0;
    hypre_ParCompGridAMemSize(compGrid) = 0;
    hypre_ParCompGridPMemSize(compGrid) = 0;   
