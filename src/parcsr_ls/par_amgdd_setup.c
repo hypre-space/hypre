@@ -664,6 +664,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
       hypre_printf("TestCompGrids1 failed!\n");
       test_failed = 1;
    }
+   else hypre_printf("TestCompGrids1 success\n");
    #endif
 
    // store communication info in compGridCommPkg
@@ -725,6 +726,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
       hypre_printf("TestCompGrids2 failed!\n");
       test_failed = 1;
    }
+   else hypre_printf("TestCompGrids2 success\n");
    #endif
 
    #if DEBUG_COMP_GRID == 2

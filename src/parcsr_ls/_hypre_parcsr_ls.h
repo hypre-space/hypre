@@ -165,7 +165,9 @@ typedef struct
    hypre_Vector     *temp3;
 
    HYPRE_Real       *l1_norms;
-   int              *cf_marker_array;
+   HYPRE_Int        *cf_marker_array;
+   int              *c_mask;
+   int              *f_mask;
 
 } hypre_ParCompGrid;
 
@@ -205,6 +207,8 @@ typedef struct
 
 #define hypre_ParCompGridL1Norms(compGrid)         ((compGrid) -> l1_norms)
 #define hypre_ParCompGridCFMarkerArray(compGrid)         ((compGrid) -> cf_marker_array)
+#define hypre_ParCompGridCMask(compGrid)         ((compGrid) -> c_mask)
+#define hypre_ParCompGridFMask(compGrid)         ((compGrid) -> f_mask)
 
 #endif
 

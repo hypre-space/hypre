@@ -46,6 +46,8 @@ hypre_ParCompGridCreate ()
    hypre_ParCompGridTemp2(compGrid) = NULL;
    hypre_ParCompGridL1Norms(compGrid) = NULL;
    hypre_ParCompGridCFMarkerArray(compGrid) = NULL;
+   hypre_ParCompGridCMask(compGrid) = NULL;
+   hypre_ParCompGridFMask(compGrid) = NULL;
    hypre_ParCompGridGlobalIndices(compGrid) = NULL;
    hypre_ParCompGridCoarseGlobalIndices(compGrid) = NULL;
    hypre_ParCompGridCoarseLocalIndices(compGrid) = NULL;
@@ -83,6 +85,16 @@ hypre_ParCompGridDestroy ( hypre_ParCompGrid *compGrid )
    if (hypre_ParCompGridCFMarkerArray(compGrid))
    {
       hypre_TFree(hypre_ParCompGridCFMarkerArray(compGrid), HYPRE_MEMORY_SHARED);
+   }
+
+   if (hypre_ParCompGridCMask(compGrid))
+   {
+      hypre_TFree(hypre_ParCompGridCMask(compGrid), HYPRE_MEMORY_SHARED);
+   }
+
+   if (hypre_ParCompGridFMask(compGrid))
+   {
+      hypre_TFree(hypre_ParCompGridFMask(compGrid), HYPRE_MEMORY_SHARED);
    }
 
    if (hypre_ParCompGridU(compGrid))
@@ -344,7 +356,6 @@ hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPk
          }
       }
 
-
       // If global indices are still needed, transform these also
       if (debug)
       {
@@ -357,6 +368,17 @@ hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPk
          hypre_ParCompGridGlobalIndices(compGrid[level]) = new_global_indices;
       }
 
+      // Setup cf marker array in correct ordering
+      hypre_ParCompGridCFMarkerArray(compGrid[level]) = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumNodes(compGrid[level]), HYPRE_MEMORY_SHARED);
+      if (hypre_ParCompGridCoarseLocalIndices(compGrid[level]))
+      {
+         for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
+         {
+            if (hypre_ParCompGridCoarseLocalIndices(compGrid[level])[i] >= 0) hypre_ParCompGridCFMarkerArray(compGrid[level])[ new_indices[i] ] = 1;
+         }
+         hypre_TFree(hypre_ParCompGridCoarseLocalIndices(compGrid[level]), HYPRE_MEMORY_HOST);
+         hypre_ParCompGridCoarseLocalIndices(compGrid[level]) = NULL;
+      }
 
       HYPRE_Int A_nnz = hypre_ParCompGridARowPtr(compGrid[level])[num_nodes];
       HYPRE_Int *new_A_rowPtr = hypre_CTAlloc(HYPRE_Int, num_nodes+1, HYPRE_MEMORY_SHARED);
@@ -548,12 +570,6 @@ hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPk
       }
       if (hypre_ParCompGridCoarseLocalIndices(compGrid[level]))
       {
-         hypre_ParCompGridCFMarkerArray(compGrid[level]) = hypre_CTAlloc(int, hypre_ParCompGridNumNodes(compGrid[level]), HYPRE_MEMORY_SHARED);
-         for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
-         {
-            if (hypre_ParCompGridCoarseLocalIndices(compGrid[level]) < 0) hypre_ParCompGridCFMarkerArray(compGrid[level])[i] = 0;
-            else hypre_ParCompGridCFMarkerArray(compGrid[level])[i] = 1;
-         }
          hypre_TFree(hypre_ParCompGridCoarseLocalIndices(compGrid[level]), HYPRE_MEMORY_HOST);
          hypre_ParCompGridCoarseLocalIndices(compGrid[level]) = NULL;
       }

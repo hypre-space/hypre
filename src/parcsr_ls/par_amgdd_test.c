@@ -1148,7 +1148,7 @@ TestBoomerAMGCycle( void              *amg_vdata,
               /* need to do CF - so can't use the AMS one */
               HYPRE_Int i;
               HYPRE_Int loc_relax_points[2];
-              if (cycle_type < 2)
+              if (cycle_param < 2)
               {
                 loc_relax_points[0] = 1;
                 loc_relax_points[1] = -1;

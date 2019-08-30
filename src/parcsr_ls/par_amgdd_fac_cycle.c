@@ -40,7 +40,7 @@ HYPRE_Int
 FAC_Simple_Restrict( hypre_ParCompGrid *compGrid_f, hypre_ParCompGrid *compGrid_c );
 
 HYPRE_Int
-FAC_Relax( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int type, HYPRE_Int level );
+FAC_Relax( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int type, HYPRE_Int level, HYPRE_Int cycle_param );
 
 HYPRE_Int
 FAC_Jacobi( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int level );
@@ -52,7 +52,7 @@ HYPRE_Int
 FAC_Cheby( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int level );
 
 HYPRE_Int
-FAC_CFL1Jacobi( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int level );
+FAC_CFL1Jacobi( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int level, HYPRE_Int relax_set );
 
 HYPRE_Int
 hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata, HYPRE_Int first_iteration )
@@ -115,7 +115,7 @@ HYPRE_Int FAC_Cycle(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type, HYPR
    #if DEBUGGING_MESSAGES
    printf("Rank %d, relax on level %d\n", myid, level);
    #endif
-   for (i = 0; i < numRelax[1]; i++) FAC_Relax( amg_data, compGrid[level], relax_type, level );
+   for (i = 0; i < numRelax[1]; i++) FAC_Relax( amg_data, compGrid[level], relax_type, level, 1 );
 
    // Restrict the residual at all fine points (real and ghost) and set residual at coarse points not under the fine grid
    if (level < transition_level)
@@ -135,7 +135,7 @@ HYPRE_Int FAC_Cycle(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type, HYPR
       #if DEBUGGING_MESSAGES
       printf("Rank %d, coarse solve on level %d\n", myid, num_levels-1);
       #endif
-      for (i = 0; i < numRelax[3]; i++) FAC_Relax( amg_data, compGrid[num_levels-1], relax_type, num_levels-1 );
+      for (i = 0; i < numRelax[3]; i++) FAC_Relax( amg_data, compGrid[num_levels-1], relax_type, num_levels-1, 3 );
    }
    else for (i = 0; i < cycle_type; i++)
    {
@@ -155,7 +155,7 @@ HYPRE_Int FAC_Cycle(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type, HYPR
    #if DEBUGGING_MESSAGES
    printf("Rank %d, relax on level %d\n", myid, level);
    #endif
-   for (i = 0; i < numRelax[2]; i++) FAC_Relax( amg_data, compGrid[level], relax_type, level );
+   for (i = 0; i < numRelax[2]; i++) FAC_Relax( amg_data, compGrid[level], relax_type, level, 2 );
 
    return 0;
 }
@@ -196,7 +196,7 @@ HYPRE_Int FAC_FCycle(void *amg_vdata, HYPRE_Int first_iteration)
    }
 
    //  ... solve on coarsest level ...
-   for (i = 0; i < numRelax[3]; i++) FAC_Relax( amg_data, compGrid[num_levels-1], relax_type, num_levels-1 );
+   for (i = 0; i < numRelax[3]; i++) FAC_Relax( amg_data, compGrid[num_levels-1], relax_type, num_levels-1, 3 );
 
    // ... and work back up to the finest
    for (level = num_levels - 2; level > hypre_ParAMGDataAMGDDStartLevel(amg_data)-1; level--)
@@ -230,7 +230,7 @@ HYPRE_Int FAC_Cycle_timed(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type
    hypre_ParCompGrid          **compGrid = hypre_ParAMGDataCompGrid(amg_data);
 
    // Relax on the real nodes
-   if (time_part == 1) for (i = 0; i < numRelax[1]; i++) FAC_Relax( amg_data, compGrid[level], relax_type, level );
+   if (time_part == 1) for (i = 0; i < numRelax[1]; i++) FAC_Relax( amg_data, compGrid[level], relax_type, level, 1 );
 
    // Restrict the residual at all fine points (real and ghost) and set residual at coarse points not under the fine grid
    if (time_part == 2)
@@ -245,13 +245,13 @@ HYPRE_Int FAC_Cycle_timed(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type
    }
 
    //  Either solve on the coarse level or recurse
-   if (level+1 == num_levels-1) for (i = 0; i < numRelax[3]; i++) FAC_Relax( amg_data, compGrid[num_levels-1], relax_type, num_levels-1 );
+   if (level+1 == num_levels-1) for (i = 0; i < numRelax[3]; i++) FAC_Relax( amg_data, compGrid[num_levels-1], relax_type, num_levels-1, 3 );
    else for (i = 0; i < cycle_type; i++) FAC_Cycle_timed(amg_vdata, level+1, cycle_type, time_part);
 
    // Interpolate up and relax
    if (time_part == 3) FAC_Interpolate( compGrid[level], compGrid[level+1] );
 
-   if (time_part == 1) for (i = 0; i < numRelax[2]; i++) FAC_Relax( amg_data, compGrid[level], relax_type, level );
+   if (time_part == 1) for (i = 0; i < numRelax[2]; i++) FAC_Relax( amg_data, compGrid[level], relax_type, level, 2 );
 
    return 0;
 }
@@ -292,7 +292,7 @@ HYPRE_Int FAC_FCycle_timed(void *amg_vdata, HYPRE_Int time_part)
    }
 
    //  ... solve on coarsest level ...
-   if (time_part == 1) for (i = 0; i < numRelax[3]; i++) FAC_Relax( amg_data, compGrid[num_levels-1], relax_type, level );
+   if (time_part == 1) for (i = 0; i < numRelax[3]; i++) FAC_Relax( amg_data, compGrid[num_levels-1], relax_type, level, 3 );
 
    // ... and work back up to the finest
    for (level = num_levels - 2; level > hypre_ParAMGDataAMGDDStartLevel(amg_data)-1; level--)
@@ -366,12 +366,26 @@ FAC_Simple_Restrict( hypre_ParCompGrid *compGrid_f, hypre_ParCompGrid *compGrid_
 }
 
 HYPRE_Int
-FAC_Relax( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int type, HYPRE_Int level )
+FAC_Relax( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int type, HYPRE_Int level, HYPRE_Int cycle_param )
 {
    if (type == 0) FAC_Jacobi(amg_data, compGrid, level);
    else if (type == 1) FAC_GaussSeidel(compGrid);
    else if (type == 2) FAC_Cheby(amg_data, compGrid, level);
-	return 0;
+	else if (type == 3)
+   {
+      if (cycle_param == 1)
+      {
+         FAC_CFL1Jacobi(amg_data, compGrid, level, 1); 
+         FAC_CFL1Jacobi(amg_data, compGrid, level, 0);
+      }
+      else if (cycle_param == 2)
+      {
+         FAC_CFL1Jacobi(amg_data, compGrid, level, 0);
+         FAC_CFL1Jacobi(amg_data, compGrid, level, 1);
+      }
+      else FAC_CFL1Jacobi(amg_data, compGrid, level, 0);
+   }
+   return 0;
 }
 
 HYPRE_Int
@@ -551,7 +565,11 @@ FAC_Cheby( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int le
        * D^(-1/2)A*u */
       hypre_SeqVectorCopy(f, r); 
       hypre_CSRMatrixMatvec(-1.0, A, u, 1.0, r);
+      #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
       VecComponentwiseScale(hypre_VectorData(r), hypre_ParCompGridL1Norms(compGrid), hypre_ParCompGridNumNodes(compGrid), HYPRE_STREAM(4));
+      #else
+      for (j = 0; j < hypre_ParCompGridNumNodes(compGrid); j++) hypre_VectorData(r)[j] *= hypre_ParCompGridL1Norms(compGrid)[j];
+      #endif
 
       /* save original u, then start 
          the iteration by multiplying r by the cheby coef.*/
@@ -563,9 +581,17 @@ FAC_Cheby( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int le
       for (i = cheby_order - 1; i >= 0; i--) 
       {
          /* v = D^(-1/2)AD^(-1/2)u */
+         #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
          VecComponentwiseScale(hypre_VectorData(u), hypre_ParCompGridL1Norms(compGrid), hypre_ParCompGridNumNodes(compGrid), HYPRE_STREAM(4));
+         #else
+         for (j = 0; j < hypre_ParCompGridNumNodes(compGrid); j++) hypre_VectorData(u)[j] *= hypre_ParCompGridL1Norms(compGrid)[j];
+         #endif
          hypre_CSRMatrixMatvec(1.0, A, u, 0.0, v);
+         #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
          VecComponentwiseScale(hypre_VectorData(v), hypre_ParCompGridL1Norms(compGrid), hypre_ParCompGridNumNodes(compGrid), HYPRE_STREAM(4));
+         #else
+         for (j = 0; j < hypre_ParCompGridNumNodes(compGrid); j++) hypre_VectorData(v)[j] *= hypre_ParCompGridL1Norms(compGrid)[j];
+         #endif
 
          /* u_new = coef*r + v*/
          hypre_SeqVectorAxpy(coefs[i], r, v);
@@ -573,7 +599,11 @@ FAC_Cheby( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int le
       } /* end of cheby_order loop */
 
       /* now we have to scale u_data before adding it to u_orig*/
+      #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
       VecComponentwiseScale(hypre_VectorData(u), hypre_ParCompGridL1Norms(compGrid), hypre_ParCompGridNumNodes(compGrid), HYPRE_STREAM(4));
+      #else
+      for (j = 0; j < hypre_ParCompGridNumNodes(compGrid); j++) hypre_VectorData(u)[j] *= hypre_ParCompGridL1Norms(compGrid)[j];
+      #endif
 
    }/* end of scaling code */
 
@@ -594,9 +624,12 @@ FAC_Cheby( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int le
 }
 
 HYPRE_Int
-FAC_CFL1Jacobi( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int level )
+FAC_CFL1Jacobi( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int level, HYPRE_Int relax_set )
 {
    HYPRE_Int            i, j;
+
+   HYPRE_Int myid;
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
 
    // Calculate l1_norms if necessary
    if (!hypre_ParCompGridL1Norms(compGrid))
@@ -604,47 +637,96 @@ FAC_CFL1Jacobi( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_I
       hypre_ParCompGridL1Norms(compGrid) = hypre_CTAlloc(HYPRE_Real, hypre_ParCompGridNumNodes(compGrid), HYPRE_MEMORY_SHARED);
       for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
       {
+         HYPRE_Int cf_diag = hypre_ParCompGridCFMarkerArray(compGrid)[i];
          for (j = hypre_ParCompGridARowPtr(compGrid)[i]; j < hypre_ParCompGridARowPtr(compGrid)[i+1]; j++)
          {
-            hypre_ParCompGridL1Norms(compGrid)[i] += fabs(hypre_ParCompGridAData(compGrid)[j]);
-            // if (hypre_ParCompGridAColInd(compGrid)[j] == i) hypre_ParCompGridL1Norms(compGrid)[i] = hypre_ParCompGridAData(compGrid)[j];
+            if (hypre_ParCompGridCFMarkerArray(compGrid)[ hypre_ParCompGridAColInd(compGrid)[j] ] == cf_diag) 
+            {
+               hypre_ParCompGridL1Norms(compGrid)[i] += fabs(hypre_ParCompGridAData(compGrid)[j]);
+            }
          }
       }
+   }   
+   // Setup temporary/auxiliary vectors
+   if (!hypre_ParCompGridTemp(compGrid))
+   {      
+      hypre_ParCompGridTemp(compGrid) = hypre_SeqVectorCreate(hypre_ParCompGridNumNodes(compGrid));
+      hypre_SeqVectorInitialize(hypre_ParCompGridTemp(compGrid));
    }
 
 #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
-   // cusparseDbsrxmv(cusparseHandle_t         handle,
-   //              cusparseDirection_t      dir,
-   //              cusparseOperation_t      trans,
-   //              int                      sizeOfMask,
-   //              int                      mb,
-   //              int                      nb,
-   //              int                      nnzb,
-   //              const double*            alpha,
-   //              const cusparseMatDescr_t descr,
-   //              const double*            bsrVal,
-   //              const int*               bsrMaskPtr,
-   //              const int*               bsrRowPtr,
-   //              const int*               bsrEndPtr,
-   //              const int*               bsrColInd,
-   //              int                      blockDim,
-   //              const double*            x,
-   //              const double*            beta,
-   //              double*                  y)
+   // Setup c and f point masks
+   static int num_c_points = 0;
+   static int num_f_points = 0;
+   if (!hypre_ParCompGridCMask(compGrid))
+   {
+      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++) if (hypre_ParCompGridCFMarkerArray(compGrid)[i]) num_c_points++;
+      num_f_points = hypre_ParCompGridNumNodes(compGrid) - num_c_points;
+      hypre_ParCompGridCMask(compGrid) = hypre_CTAlloc(int, num_c_points, HYPRE_MEMORY_SHARED);
+      hypre_ParCompGridFMask(compGrid) = hypre_CTAlloc(int, num_f_points, HYPRE_MEMORY_SHARED);
+      int c_cnt = 0, f_cnt = 0;
+      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
+      {
+         if (hypre_ParCompGridCFMarkerArray(compGrid)[i]) hypre_ParCompGridCMask(compGrid)[c_cnt++] = i;
+         else hypre_ParCompGridFMask(compGrid)[f_cnt++] = i;
+      }
+   }
+   // Get cusparse handle and setup bsr matrix
+   static cusparseHandle_t handle;
+   static cusparseMatDescr_t descr;
+   static HYPRE_Int FirstCall=1;
+
+   if (FirstCall)
+   {
+      handle=getCusparseHandle();
+
+      status= cusparseCreateMatDescr(&descr);
+      if (status != CUSPARSE_STATUS_SUCCESS) {
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ERROR:: Matrix descriptor initialization failed\n");
+         return hypre_error_flag;
+      }
+
+      cusparseSetMatType(descr,CUSPARSE_MATRIX_TYPE_GENERAL);
+      cusparseSetMatIndexBase(descr,CUSPARSE_INDEX_BASE_ZERO);
+
+      FirstCall=0;
+   }
+   cusparseDbsrxmv(cusparseHandle_t         handle,
+                cusparseDirection_t      dir,
+                cusparseOperation_t      trans,
+                int                      sizeOfMask,
+                int                      mb,
+                int                      nb,
+                int                      nnzb,
+                const double*            alpha,
+                const cusparseMatDescr_t descr,
+                const double*            bsrVal,
+                const int*               bsrMaskPtr,
+                const int*               bsrRowPtr,
+                const int*               bsrEndPtr,
+                const int*               bsrColInd,
+                int                      blockDim,
+                const double*            x,
+                const double*            beta,
+                double*                  y)
 
 #else
 
-   HYPRE_Int             n = hypre_CSRMatrixNumRows(hypre_ParCompGridA(compGrid));
+   HYPRE_Int             n = hypre_ParCompGridNumRealNodes(compGrid);
 
    HYPRE_Complex  *A_data = hypre_CSRMatrixData(hypre_ParCompGridA(compGrid));
    HYPRE_Int  *A_i = hypre_CSRMatrixI(hypre_ParCompGridA(compGrid));
    HYPRE_Int  *A_j = hypre_CSRMatrixJ(hypre_ParCompGridA(compGrid));
 
-   HYPRE_Real     *u_data  = hypre_VectorData(hypre_ParCompGridU(compGrid));
-   HYPRE_Real     *f_data  = hypre_VectorData(hypre_ParCompGridF(compGrid));
-   HYPRE_Real     *Vtemp_data = hypre_VectorData(hypre_ParCompGridTemp(compGrid));
+   HYPRE_Complex     *u_data  = hypre_VectorData(hypre_ParCompGridU(compGrid));
+   HYPRE_Complex     *f_data  = hypre_VectorData(hypre_ParCompGridF(compGrid));
+   HYPRE_Complex     *Vtemp_data = hypre_VectorData(hypre_ParCompGridTemp(compGrid));
+   HYPRE_Complex     *t_data = hypre_VectorData(hypre_ParCompGridT(compGrid));
 
    HYPRE_Real     *l1_norms = hypre_ParCompGridL1Norms(compGrid);
+   HYPRE_Int      *cf_marker = hypre_ParCompGridCFMarkerArray(compGrid);
+
+   HYPRE_Real relax_weight = hypre_ParAMGDataRelaxWeight(amg_data)[level];
 
    HYPRE_Real    res;
 
@@ -669,12 +751,7 @@ FAC_CFL1Jacobi( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_I
    #endif
    for (i = 0; i < n; i++)
    {
-      /*-----------------------------------------------------------
-      * If i is of the right type ( C or F ) and diagonal is
-      * nonzero, relax point i; otherwise, skip it.
-      *-----------------------------------------------------------*/
-
-      if (cf_marker[i] == 1)
+      if (cf_marker[i] == relax_set)
       {
          res = f_data[i];
          for (j = A_i[i]; j < A_i[i+1]; j++)
@@ -682,27 +759,7 @@ FAC_CFL1Jacobi( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_I
             res -= A_data[j] * Vtemp_data[A_j[j]];
          }
          u_data[i] += (relax_weight * res)/l1_norms[i];
-      }
-   }
-
-   #ifdef HYPRE_USING_OPENMP
-   #pragma omp parallel for private(i,j,res) HYPRE_SMP_SCHEDULE
-   #endif
-   for (i = 0; i < n; i++)
-   {
-      /*-----------------------------------------------------------
-      * If i is of the right type ( C or F ) and diagonal is
-      * nonzero, relax point i; otherwise, skip it.
-      *-----------------------------------------------------------*/
-
-      if (cf_marker[i] == 0)
-      {
-         res = f_data[i];
-         for (j = A_i[i]; j < A_i[i+1]; j++)
-         {
-            res -= A_data[j] * Vtemp_data[A_j[j]];
-         }
-         u_data[i] += (relax_weight * res)/l1_norms[i];
+         t_data[i] += u_data[i] - Vtemp_data[i];
       }
    }
 
