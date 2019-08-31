@@ -366,6 +366,7 @@ main( hypre_int argc,
    /* hypre_ILU options */
    HYPRE_Int ilu_type = 0;
    HYPRE_Int ilu_lfil = 0;
+   HYPRE_Int ilu_sm_max_iter = 1;
    HYPRE_Real ilu_droptol = 1.0e-02;
    HYPRE_Int ilu_max_row_nnz = 1000;
    HYPRE_Int ilu_schur_max_iter = 3;
@@ -1023,6 +1024,11 @@ main( hypre_int argc,
       {                /* ilu_type */
          arg_index++;        
          ilu_type = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-ilu_sm_max_iter") == 0 )
+      {                /* number of iteration when applied as a smoother */
+         arg_index++;        
+         ilu_sm_max_iter = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-ilu_lfil") == 0 )
       {                /* level of fill */
@@ -1931,6 +1937,7 @@ main( hypre_int argc,
          hypre_printf("  -ilu_max_row_nnz   <val>         : set max. num of nonzeros to keep per row = val \n");          
          hypre_printf("  -ilu_schur_max_iter   <val>      : set max. num of iteration for GMRES/NSH Schur = val \n");
          hypre_printf("  -ilu_nsh_droptol   <val>         : set drop tolerance threshold for NSH = val \n");
+         hypre_printf("  -ilu_sm_max_iter   <val>         : set number of iterations when applied as a smmother in AMG = val \n");
          /* end ILU options */
       }
 
@@ -3009,6 +3016,12 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetEuLevel(amg_solver, eu_level);
       HYPRE_BoomerAMGSetEuBJ(amg_solver, eu_bj);
       HYPRE_BoomerAMGSetEuSparseA(amg_solver, eu_sparse_A);
+      HYPRE_BoomerAMGSetILUType(amg_solver, ilu_type);
+      HYPRE_BoomerAMGSetILULevel(amg_solver, ilu_lfil);
+      HYPRE_BoomerAMGSetILUDroptol(amg_solver, ilu_droptol);
+      HYPRE_BoomerAMGSetILUMaxRowNnz(amg_solver, ilu_max_row_nnz);
+      HYPRE_BoomerAMGSetILUMaxIter(amg_solver, ilu_sm_max_iter);
+      
       HYPRE_BoomerAMGSetNumFunctions(amg_solver, num_functions);
       HYPRE_BoomerAMGSetAggNumLevels(amg_solver, agg_num_levels);
       HYPRE_BoomerAMGSetAggInterpType(amg_solver, agg_interp_type);

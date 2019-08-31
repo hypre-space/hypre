@@ -1054,6 +1054,42 @@ HYPRE_Int HYPRE_BoomerAMGSetEuSparseA(HYPRE_Solver solver,
 HYPRE_Int HYPRE_BoomerAMGSetEuBJ(HYPRE_Solver solver,
                                  HYPRE_Int    eu_bj);
 
+
+/**
+ * Defines type of ILU smoother to use
+ * For further explanation see description of ILU.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetILUType( HYPRE_Solver  solver,
+                        HYPRE_Int	      ilu_type);
+
+/**
+ * Defines level k for ILU(k) smoother
+ * For further explanation see description of ILU.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetILULevel( HYPRE_Solver  solver,
+                        HYPRE_Int	      ilu_lfil);
+
+/**
+ * Defines max row nonzeros for ILUT smoother
+ * For further explanation see description of ILU.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetILUMaxRowNnz( HYPRE_Solver  solver,
+                        HYPRE_Int	      ilu_max_row_nnz);
+
+/**
+ * Defines number of iterations for ILU smoother on each level
+ * For further explanation see description of ILU.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetILUMaxIter( HYPRE_Solver  solver,
+                        HYPRE_Int	      ilu_max_iter);
+
+/**
+ * Defines drop tolorance for iLUT smoother
+ * For further explanation see description of ILU.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetILUDroptol( HYPRE_Solver  solver,
+                        HYPRE_Real	      ilu_droptol);
+
 /**
  * (Optional) Defines which parallel restriction operator is used.
  * There are the following options for restr\_type: 

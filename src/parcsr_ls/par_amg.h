@@ -119,10 +119,15 @@ typedef struct
    HYPRE_Int			pi_max_nz_per_row;
    HYPRE_Int			eu_level;
    HYPRE_Int			eu_bj;
+   HYPRE_Int			ilu_lfil;
+   HYPRE_Int			ilu_type;
+   HYPRE_Int			ilu_max_row_nnz;
+   HYPRE_Int			ilu_max_iter;
    HYPRE_Real		ps_threshold;
    HYPRE_Real		ps_filter;
    HYPRE_Real		pi_drop_tol;
    HYPRE_Real		eu_sparse_A;
+   HYPRE_Real		ilu_droptol;
    char		       *euclidfile;
 
    HYPRE_Real          *max_eig_est;
@@ -268,10 +273,10 @@ typedef struct
 #define hypre_ParAMGDataISType(amg_data) ((amg_data)->IS_type)
 #define hypre_ParAMGDataCRUseCG(amg_data) ((amg_data)->CR_use_CG)
 #define hypre_ParAMGDataL1Norms(amg_data) ((amg_data)->l1_norms)
- #define hypre_ParAMGDataCGCIts(amg_data) ((amg_data)->cgc_its)
- #define hypre_ParAMGDataMaxCoarseSize(amg_data) ((amg_data)->max_coarse_size)
- #define hypre_ParAMGDataMinCoarseSize(amg_data) ((amg_data)->min_coarse_size)
- #define hypre_ParAMGDataSeqThreshold(amg_data) ((amg_data)->seq_threshold)
+#define hypre_ParAMGDataCGCIts(amg_data) ((amg_data)->cgc_its)
+#define hypre_ParAMGDataMaxCoarseSize(amg_data) ((amg_data)->max_coarse_size)
+#define hypre_ParAMGDataMinCoarseSize(amg_data) ((amg_data)->min_coarse_size)
+#define hypre_ParAMGDataSeqThreshold(amg_data) ((amg_data)->seq_threshold)
 
 /* solve params */
 
@@ -340,6 +345,11 @@ typedef struct
 #define hypre_ParAMGDataEuLevel(amg_data) ((amg_data)->eu_level)	
 #define hypre_ParAMGDataEuSparseA(amg_data) ((amg_data)->eu_sparse_A)
 #define hypre_ParAMGDataEuBJ(amg_data) ((amg_data)->eu_bj)
+#define hypre_ParAMGDataILUType(amg_data) ((amg_data)->ilu_type)
+#define hypre_ParAMGDataILULevel(amg_data) ((amg_data)->ilu_lfil)
+#define hypre_ParAMGDataILUMaxRowNnz(amg_data) ((amg_data)->ilu_max_row_nnz)
+#define hypre_ParAMGDataILUDroptol(amg_data) ((amg_data)->ilu_droptol)
+#define hypre_ParAMGDataILUMaxIter(amg_data) ((amg_data)->ilu_max_iter)
 
 #define hypre_ParAMGDataMaxEigEst(amg_data) ((amg_data)->max_eig_est)	
 #define hypre_ParAMGDataMinEigEst(amg_data) ((amg_data)->min_eig_est)	

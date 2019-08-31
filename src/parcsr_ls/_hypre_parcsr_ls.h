@@ -140,10 +140,15 @@ typedef struct
    HYPRE_Int            pi_max_nz_per_row;
    HYPRE_Int            eu_level;
    HYPRE_Int            eu_bj;
+   HYPRE_Int			ilu_lfil;
+   HYPRE_Int			ilu_type;
+   HYPRE_Int			ilu_max_row_nnz;
+   HYPRE_Int			ilu_max_iter;
    HYPRE_Real           ps_threshold;
    HYPRE_Real           ps_filter;
    HYPRE_Real           pi_drop_tol;
    HYPRE_Real           eu_sparse_A;
+   HYPRE_Real			ilu_droptol;
    char                *euclidfile;
 
    HYPRE_Real          *max_eig_est;
@@ -358,6 +363,11 @@ typedef struct
 #define hypre_ParAMGDataEuLevel(amg_data) ((amg_data)->eu_level)
 #define hypre_ParAMGDataEuSparseA(amg_data) ((amg_data)->eu_sparse_A)
 #define hypre_ParAMGDataEuBJ(amg_data) ((amg_data)->eu_bj)
+#define hypre_ParAMGDataILUType(amg_data) ((amg_data)->ilu_type)
+#define hypre_ParAMGDataILULevel(amg_data) ((amg_data)->ilu_lfil)
+#define hypre_ParAMGDataILUMaxRowNnz(amg_data) ((amg_data)->ilu_max_row_nnz)
+#define hypre_ParAMGDataILUDroptol(amg_data) ((amg_data)->ilu_droptol)
+#define hypre_ParAMGDataILUMaxIter(amg_data) ((amg_data)->ilu_max_iter)
 
 #define hypre_ParAMGDataMaxEigEst(amg_data) ((amg_data)->max_eig_est)
 #define hypre_ParAMGDataMinEigEst(amg_data) ((amg_data)->min_eig_est)
@@ -830,6 +840,11 @@ HYPRE_Int HYPRE_BoomerAMGSetEuclidFile ( HYPRE_Solver solver , char *euclidfile 
 HYPRE_Int HYPRE_BoomerAMGSetEuLevel ( HYPRE_Solver solver , HYPRE_Int eu_level );
 HYPRE_Int HYPRE_BoomerAMGSetEuSparseA ( HYPRE_Solver solver , HYPRE_Real eu_sparse_A );
 HYPRE_Int HYPRE_BoomerAMGSetEuBJ ( HYPRE_Solver solver , HYPRE_Int eu_bj );
+HYPRE_Int HYPRE_BoomerAMGSetILUType( HYPRE_Solver solver, HYPRE_Int ilu_type);
+HYPRE_Int HYPRE_BoomerAMGSetILULevel( HYPRE_Solver solver, HYPRE_Int ilu_lfil);
+HYPRE_Int HYPRE_BoomerAMGSetILUMaxRowNnz( HYPRE_Solver  solver, HYPRE_Int ilu_max_row_nnz);
+HYPRE_Int HYPRE_BoomerAMGSetILUMaxIter( HYPRE_Solver solver, HYPRE_Int ilu_max_iter);
+HYPRE_Int HYPRE_BoomerAMGSetILUDroptol( HYPRE_Solver solver, HYPRE_Real ilu_droptol);
 HYPRE_Int HYPRE_BoomerAMGSetNumFunctions ( HYPRE_Solver solver , HYPRE_Int num_functions );
 HYPRE_Int HYPRE_BoomerAMGGetNumFunctions ( HYPRE_Solver solver , HYPRE_Int *num_functions );
 HYPRE_Int HYPRE_BoomerAMGSetNodal ( HYPRE_Solver solver , HYPRE_Int nodal );
@@ -1324,6 +1339,11 @@ HYPRE_Int hypre_BoomerAMGSetEuclidFile ( void *data , char *euclidfile );
 HYPRE_Int hypre_BoomerAMGSetEuLevel ( void *data , HYPRE_Int eu_level );
 HYPRE_Int hypre_BoomerAMGSetEuSparseA ( void *data , HYPRE_Real eu_sparse_A );
 HYPRE_Int hypre_BoomerAMGSetEuBJ ( void *data , HYPRE_Int eu_bj );
+HYPRE_Int hypre_BoomerAMGSetILUTyoe( void *data, HYPRE_Int ilu_type);
+HYPRE_Int hypre_BoomerAMGSetILULevel( void *data, HYPRE_Int ilu_lfil);
+HYPRE_Int hypre_BoomerAMGSetILUDroptol( void *data, HYPRE_Real ilu_droptol);
+HYPRE_Int hypre_BoomerAMGSetILUMaxIter( void *data, HYPRE_Int ilu_max_iter);
+HYPRE_Int hypre_BoomerAMGSetILUMaxRowNnz( void *data, HYPRE_Int ilu_max_row_nnz);
 HYPRE_Int hypre_BoomerAMGSetChebyOrder ( void *data , HYPRE_Int order );
 HYPRE_Int hypre_BoomerAMGSetChebyFraction ( void *data , HYPRE_Real ratio );
 HYPRE_Int hypre_BoomerAMGSetChebyEigEst ( void *data , HYPRE_Int eig_est );

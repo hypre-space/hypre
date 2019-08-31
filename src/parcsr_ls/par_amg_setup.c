@@ -146,6 +146,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Real    thresh;
    HYPRE_Real    filter;
    HYPRE_Real    drop_tol;
+   HYPRE_Real	  ilu_droptol;
+   HYPRE_Int     ilu_type;
+   HYPRE_Int     ilu_lfil;
+   HYPRE_Int     ilu_max_row_nnz;
+   HYPRE_Int     ilu_max_iter;
    HYPRE_Int	     max_nz_per_row;
    char     *euclidfile;
    HYPRE_Int	     eu_level;
@@ -247,6 +252,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    nlevel = hypre_ParAMGDataLevel(amg_data);
    filter = hypre_ParAMGDataFilter(amg_data);
    thresh = hypre_ParAMGDataThreshold(amg_data);
+   ilu_type = hypre_ParAMGDataILUType(amg_data);
+   ilu_lfil = hypre_ParAMGDataILULevel(amg_data);
+   ilu_droptol = hypre_ParAMGDataILUDroptol(amg_data);
+   ilu_max_row_nnz = hypre_ParAMGDataILUMaxRowNnz(amg_data);
+   ilu_max_iter = hypre_ParAMGDataILUMaxIter(amg_data);
    drop_tol = hypre_ParAMGDataDropTol(amg_data);
    max_nz_per_row = hypre_ParAMGDataMaxNzPerRow(amg_data);
    euclidfile = hypre_ParAMGDataEuclidFile(amg_data);
@@ -2965,21 +2975,15 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
      }
      else if ((smooth_type == 5 || smooth_type == 15) && smooth_num_levels > j)
      {
-        HYPRE_ILUCreate( &smoother[j]);
-        if (eu_bj)
-        {
-           HYPRE_ILUSetType(smoother[j],0);
-           HYPRE_ILUSetMaxIter(smoother[j],1);
-        }
-        else
-        {
-           HYPRE_ILUSetType(smoother[j],30);
-           HYPRE_ILUSetMaxIter(smoother[j],1);
-        }
-        HYPRE_ILUSetLogging(smoother[j],0);
-        HYPRE_ILUSetPrintLevel(smoother[j],0);
-        HYPRE_ILUSetLevelOfFill(smoother[j],eu_level); 
-        HYPRE_ILUSetup(smoother[j],
+         HYPRE_ILUCreate( &smoother[j]);
+         HYPRE_ILUSetType(smoother[j], ilu_type);
+         HYPRE_ILUSetMaxIter(smoother[j],ilu_max_iter);
+         HYPRE_ILUSetLogging(smoother[j],0);
+         HYPRE_ILUSetPrintLevel(smoother[j],0);
+         HYPRE_ILUSetLevelOfFill(smoother[j],ilu_lfil); 
+         HYPRE_ILUSetMaxNnzPerRow(smoother[j], ilu_max_row_nnz);
+         HYPRE_ILUSetDropThreshold(smoother[j],ilu_droptol); 
+         HYPRE_ILUSetup(smoother[j],
                           (HYPRE_ParCSRMatrix) A_array[j],
                           (HYPRE_ParVector) F_array[j],
                           (HYPRE_ParVector) U_array[j]); 
