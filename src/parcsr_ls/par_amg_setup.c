@@ -526,7 +526,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       {
          for (i=0; i < old_num_levels; i++)
             if (hypre_ParAMGDataL1Norms(amg_data)[i])
-              hypre_TFree(hypre_ParAMGDataL1Norms(amg_data)[i], HYPRE_MEMORY_HOST);
+              hypre_TFree(hypre_ParAMGDataL1Norms(amg_data)[i], HYPRE_MEMORY_SHARED);
          hypre_TFree(hypre_ParAMGDataL1Norms(amg_data), HYPRE_MEMORY_HOST);
       }
       if (smooth_num_levels && smoother)
@@ -749,6 +749,12 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
        hypre_ParVectorInitialize(Ztemp);
        hypre_ParVectorSetPartitioningOwner(Ztemp,0);
        hypre_ParAMGDataZtemp(amg_data) = Ztemp;
+       Rtemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[0]),
+                      hypre_ParCSRMatrixGlobalNumRows(A_array[0]),
+                      hypre_ParCSRMatrixRowStarts(A_array[0]));
+       hypre_ParVectorInitialize(Rtemp);
+       hypre_ParVectorSetPartitioningOwner(Rtemp,0);
+       hypre_ParAMGDataRtemp(amg_data) = Rtemp;
 
    }
    else if (num_threads > 1)

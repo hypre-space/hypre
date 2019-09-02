@@ -1650,7 +1650,7 @@ HYPRE_Int hypre_Bisection ( HYPRE_Int n , HYPRE_Real *diag , HYPRE_Real *offd , 
 
 /* par_cheby.c */
 HYPRE_Int hypre_ParCSRRelax_Cheby_Setup ( hypre_ParCSRMatrix *A , HYPRE_Real max_eig , HYPRE_Real min_eig , HYPRE_Real fraction , HYPRE_Int order , HYPRE_Int scale , HYPRE_Int variant , HYPRE_Real **coefs_ptr , HYPRE_Real **ds_ptr );
-HYPRE_Int hypre_ParCSRRelax_Cheby_Solve ( hypre_ParCSRMatrix *A , hypre_ParVector *f , HYPRE_Real *ds_data , HYPRE_Real *coefs , HYPRE_Int order , HYPRE_Int scale , HYPRE_Int variant , hypre_ParVector *u , hypre_ParVector *v , hypre_ParVector *r );
+HYPRE_Int hypre_ParCSRRelax_Cheby_Solve ( hypre_ParCSRMatrix *A , hypre_ParVector *f , HYPRE_Real *ds_data , HYPRE_Real *coefs , HYPRE_Int order , HYPRE_Int scale , HYPRE_Int variant , hypre_ParVector *u , hypre_ParVector *orig_u , hypre_ParVector *v , hypre_ParVector *r );
 
 /* par_coarsen.c */
 HYPRE_Int hypre_BoomerAMGCoarsen ( hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , HYPRE_Int CF_init , HYPRE_Int debug_flag , HYPRE_Int **CF_marker_ptr );

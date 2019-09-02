@@ -573,7 +573,6 @@ FAC_Cheby( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int le
 
       /* save original u, then start 
          the iteration by multiplying r by the cheby coef.*/
-      hypre_SeqVectorCopy(u, u_before);
       hypre_SeqVectorCopy(r, u);
       hypre_SeqVectorScale(coefs[cheby_order], u);
 
