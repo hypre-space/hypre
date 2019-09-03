@@ -1,7 +1,7 @@
 #include "_hypre_parcsr_ls.h"
 
 // TODO
-#if 0 // comment out for now to pass regression tests
+#if 1 // comment out for now to pass regression tests
 
 //nvlink warning : Stack size for entry function '_Z42hypre_BoomerAMGInterpTruncationDevice_dev3iPiS_PdS_S_S0_S_S_i' cannot be statically determined ??? What's wrong???
 
@@ -89,6 +89,10 @@ __device__ void hypre_qsort2abs_dev( HYPRE_Int *v,
 				     HYPRE_Real *w,
 				     HYPRE_Int  left,
 				     HYPRE_Int  right );
+
+__device__ void hypre_isort2abs_dev( HYPRE_Int  *v,
+                                     HYPRE_Real *w,
+                                     HYPRE_Int  n );
 
 /*---------------------------------------------------------------------------
  * hypre_BoomerAMGBuildDirInterp
@@ -994,9 +998,11 @@ __global__ void hypre_BoomerAMGInterpTruncationDevice_dev3( HYPRE_Int   num_rows
 	    row_sum += P_offd_data[ind];
 
 	 /* Sort in place, avoid allocation of extra array */
+         hypre_isort2abs_dev(&P_diag_j[i], &P_diag_data[i], P_aux_diag_i[i] );
+         hypre_isort2abs_dev(&P_offd_j[i], &P_offd_data[i], P_aux_offd_i[i] );
 	 /* The routine hypre_qsort2abs(v,w,i0,i1) sorts (v,w) in decreasing order w.r.t w */
-	 hypre_qsort2abs_dev(&P_diag_j[i], &P_diag_data[i], 0, P_aux_diag_i[i]-1 );
-	 hypre_qsort2abs_dev(&P_offd_j[i], &P_offd_data[i], 0, P_aux_offd_i[i]-1 );
+         /*	 hypre_qsort2abs_dev(&P_diag_j[i], &P_diag_data[i], 0, P_aux_diag_i[i]-1 );
+         	 hypre_qsort2abs_dev(&P_offd_j[i], &P_offd_data[i], 0, P_aux_offd_i[i]-1 );*/
 
   /* 2. Retain the max_elements largest elements, only index of last element
         needs to be computed, since data is now sorted                        */
@@ -1126,6 +1132,7 @@ __device__ void hypre_swap2_dev(HYPRE_Int  *v,
 
 /*-----------------------------------------------------------------------*/
 /* sort both v and w, in place, but based only on entries in w */
+/* Sorts in decreasing order */
 __device__ void hypre_qsort2abs_dev( HYPRE_Int *v,
 				     HYPRE_Real *w,
 				     HYPRE_Int  left,
@@ -1144,6 +1151,32 @@ __device__ void hypre_qsort2abs_dev( HYPRE_Int *v,
    hypre_swap2_dev(v, w, left, last);
    hypre_qsort2abs_dev(v, w, left, last-1);
    hypre_qsort2abs_dev(v, w, last+1, right);
+}
+
+/*-----------------------------------------------------------------------*/
+/* sort both v and w, in place, but based only on entries in w 
+   Sorts in decreasing order, insertion sort, slower than quicksort 
+   but avoids compiler warning message on stack size limit unknown. */
+__device__ void hypre_isort2abs_dev( HYPRE_Int  *v,
+                                     HYPRE_Real *w,
+                                     HYPRE_Int  n )
+{
+   HYPRE_Int i, j, y;
+   HYPRE_Real x;
+   for( i=1 ; i < n ; i++ )
+   {
+      x = w[i];
+      y = v[i];
+      j = i-1;
+      while( j >= 0 && fabs(w[j]) < fabs(x) )
+      {
+         w[j+1] = w[j];
+         v[j+1] = v[j];
+         j--;
+      }
+      w[j+1] = x;
+      v[j+1] = y;
+   }
 }
 
 #endif
