@@ -1960,7 +1960,7 @@ hypre_BoomerAMGBuildInterpHE( hypre_ParCSRMatrix   *A,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_BoomerAMGBuildDirInterp( hypre_ParCSRMatrix   *A,
+hypre_BoomerAMGBuildDirInterpHost( hypre_ParCSRMatrix   *A,
                          HYPRE_Int                  *CF_marker,
                          hypre_ParCSRMatrix         *S,
                          HYPRE_BigInt               *num_cpts_global,
@@ -2674,6 +2674,41 @@ hypre_BoomerAMGBuildDirInterp( hypre_ParCSRMatrix   *A,
    return hypre_error_flag;  
 
 }            
+
+HYPRE_Int
+hypre_BoomerAMGBuildDirInterp( hypre_ParCSRMatrix   *A,
+                         HYPRE_Int                  *CF_marker,
+                         hypre_ParCSRMatrix         *S,
+                         HYPRE_BigInt               *num_cpts_global,
+                         HYPRE_Int                   num_functions,
+                         HYPRE_Int                  *dof_func,
+                         HYPRE_Int                   debug_flag,
+                         HYPRE_Real                  trunc_factor,
+                         HYPRE_Int		     max_elmts,
+                         HYPRE_Int 		    *col_offd_S_to_A,
+                         hypre_ParCSRMatrix        **P_ptr)
+{
+   HYPRE_Int exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(A)) );
+
+   hypre_assert(exec != HYPRE_EXEC_UNSET);
+
+   HYPRE_Int ierr = 0;
+
+   if (exec == HYPRE_EXEC_HOST)
+   {
+      ierr = hypre_BoomerAMGBuildDirInterpHost(A,CF_marker,S,num_cpts_global,num_functions,dof_func,
+                                               debug_flag,trunc_factor,max_elmts,col_offd_S_to_A, P_ptr);
+   }
+#if defined(HYPRE_USING_CUDA)
+   else
+   {
+      ierr = hypre_BoomerAMGBuildDirInterpDevice(A,CF_marker,S,num_cpts_global,num_functions,dof_func,
+                                               debug_flag,trunc_factor,max_elmts,col_offd_S_to_A, P_ptr);
+   }
+#endif
+
+   return ierr;
+}
 
 
 HYPRE_Int
