@@ -260,7 +260,7 @@ void DiagScaleVector(HYPRE_Complex *x, HYPRE_Complex *y, HYPRE_Complex *A_data, 
 void VecCopy(HYPRE_Complex* tgt, const HYPRE_Complex* src, HYPRE_Int size,cudaStream_t s);
 void VecSet(HYPRE_Complex* tgt, HYPRE_Int size, HYPRE_Complex value, cudaStream_t s);
 void VecScale(HYPRE_Complex *u, HYPRE_Complex *v, HYPRE_Complex *l1_norm, HYPRE_Int num_rows,cudaStream_t s);
-void VecScaleMasked(HYPRE_Complex *u, HYPRE_Complex *v, HYPRE_Complex *l1_norm, HYPRE_Int *mask, HYPRE_Int mask_val, hypre_int num_rows,cudaStream_t s);
+void VecScaleMasked(HYPRE_Complex *u, HYPRE_Complex *v, HYPRE_Complex *l1_norm, HYPRE_Int *mask, HYPRE_Int mask_size, cudaStream_t s);
 void VecComponentwiseScale(HYPRE_Complex *u, HYPRE_Real *v, hypre_int num_rows,cudaStream_t s);
 void VecScaleSplit(HYPRE_Complex *u, HYPRE_Complex *v, HYPRE_Complex *l1_norm, HYPRE_Int num_rows,cudaStream_t s);
 void CudaCompileFlagCheck();

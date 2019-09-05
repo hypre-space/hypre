@@ -658,13 +658,13 @@ FAC_CFL1Jacobi( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_I
    {
       int num_c_points = 0;
       int num_f_points = 0;
-      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++) if (hypre_ParCompGridCFMarkerArray(compGrid)[i]) num_c_points++;
-      num_f_points = hypre_ParCompGridNumNodes(compGrid) - num_c_points;
+      for (i = 0; i < hypre_ParCompGridNumRealNodes(compGrid); i++) if (hypre_ParCompGridCFMarkerArray(compGrid)[i]) num_c_points++;
+      num_f_points = hypre_ParCompGridNumRealNodes(compGrid) - num_c_points;
       hypre_ParCompGridNumCPoints(compGrid) = num_c_points;
       hypre_ParCompGridCMask(compGrid) = hypre_CTAlloc(int, num_c_points, HYPRE_MEMORY_SHARED);
       hypre_ParCompGridFMask(compGrid) = hypre_CTAlloc(int, num_f_points, HYPRE_MEMORY_SHARED);
       int c_cnt = 0, f_cnt = 0;
-      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
+      for (i = 0; i < hypre_ParCompGridNumRealNodes(compGrid); i++)
       {
          if (hypre_ParCompGridCFMarkerArray(compGrid)[i]) hypre_ParCompGridCMask(compGrid)[c_cnt++] = i;
          else hypre_ParCompGridFMask(compGrid)[f_cnt++] = i;
@@ -713,15 +713,15 @@ FAC_CFL1Jacobi( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_I
                 hypre_VectorData(hypre_ParCompGridU(compGrid)),
                 &beta,
                 hypre_VectorData(hypre_ParCompGridTemp(compGrid)));
-      VecScaleMasked(hypre_VectorData(hypre_ParCompGridU(compGrid)),hypre_VectorData(hypre_ParCompGridTemp(compGrid)),hypre_ParCompGridL1Norms(compGrid),hypre_ParCompGridCFMarkerArray(compGrid),1,hypre_ParCompGridNumRealNodes(compGrid),HYPRE_STREAM(4));
-      VecScaleMasked(hypre_VectorData(hypre_ParCompGridT(compGrid)),hypre_VectorData(hypre_ParCompGridTemp(compGrid)),hypre_ParCompGridL1Norms(compGrid),hypre_ParCompGridCFMarkerArray(compGrid),1,hypre_ParCompGridNumRealNodes(compGrid),HYPRE_STREAM(4));
+      VecScaleMasked(hypre_VectorData(hypre_ParCompGridU(compGrid)),hypre_VectorData(hypre_ParCompGridTemp(compGrid)),hypre_ParCompGridL1Norms(compGrid),hypre_ParCompGridCMask(compGrid),hypre_ParCompGridNumCPoints(compGrid),HYPRE_STREAM(4));
+      VecScaleMasked(hypre_VectorData(hypre_ParCompGridT(compGrid)),hypre_VectorData(hypre_ParCompGridTemp(compGrid)),hypre_ParCompGridL1Norms(compGrid),hypre_ParCompGridCMask(compGrid),hypre_ParCompGridNumCPoints(compGrid),HYPRE_STREAM(4));
    }
    else
    {
       cusparseDbsrxmv(handle,
                 CUSPARSE_DIRECTION_ROW,
                 CUSPARSE_OPERATION_NON_TRANSPOSE,
-                hypre_ParCompGridNumNodes(compGrid) - hypre_ParCompGridNumCPoints(compGrid),
+                hypre_ParCompGridNumRealNodes(compGrid) - hypre_ParCompGridNumCPoints(compGrid),
                 hypre_CSRMatrixNumRows(hypre_ParCompGridA(compGrid)),
                 hypre_CSRMatrixNumCols(hypre_ParCompGridA(compGrid)),
                 hypre_CSRMatrixNumNonzeros(hypre_ParCompGridA(compGrid)),
@@ -736,8 +736,8 @@ FAC_CFL1Jacobi( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_I
                 hypre_VectorData(hypre_ParCompGridU(compGrid)),
                 &beta,
                 hypre_VectorData(hypre_ParCompGridTemp(compGrid)));
-      VecScaleMasked(hypre_VectorData(hypre_ParCompGridU(compGrid)),hypre_VectorData(hypre_ParCompGridTemp(compGrid)),hypre_ParCompGridL1Norms(compGrid),hypre_ParCompGridCFMarkerArray(compGrid),0,hypre_ParCompGridNumRealNodes(compGrid),HYPRE_STREAM(4));
-      VecScaleMasked(hypre_VectorData(hypre_ParCompGridT(compGrid)),hypre_VectorData(hypre_ParCompGridTemp(compGrid)),hypre_ParCompGridL1Norms(compGrid),hypre_ParCompGridCFMarkerArray(compGrid),0,hypre_ParCompGridNumRealNodes(compGrid),HYPRE_STREAM(4));
+      VecScaleMasked(hypre_VectorData(hypre_ParCompGridU(compGrid)),hypre_VectorData(hypre_ParCompGridTemp(compGrid)),hypre_ParCompGridL1Norms(compGrid),hypre_ParCompGridFMask(compGrid),hypre_ParCompGridNumRealNodes(compGrid) - hypre_ParCompGridNumCPoints(compGrid),HYPRE_STREAM(4));
+      VecScaleMasked(hypre_VectorData(hypre_ParCompGridT(compGrid)),hypre_VectorData(hypre_ParCompGridTemp(compGrid)),hypre_ParCompGridL1Norms(compGrid),hypre_ParCompGridFMask(compGrid),hypre_ParCompGridNumRealNodes(compGrid) - hypre_ParCompGridNumCPoints(compGrid),HYPRE_STREAM(4));
    }
 
 #else

@@ -992,7 +992,7 @@ HYPRE_Int  hypre_ParCSRRelax_L1_Jacobi( hypre_ParCSRMatrix *A,
 {
 
 
-    MPI_Comm	   comm = hypre_ParCSRMatrixComm(A);
+    MPI_Comm     comm = hypre_ParCSRMatrixComm(A);
     hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
     HYPRE_Real     *A_diag_data  = hypre_CSRMatrixData(A_diag);
     HYPRE_Int            *A_diag_i     = hypre_CSRMatrixI(A_diag);
@@ -1015,17 +1015,17 @@ HYPRE_Int  hypre_ParCSRRelax_L1_Jacobi( hypre_ParCSRMatrix *A,
 
     hypre_Vector   *Vtemp_local = hypre_ParVectorLocalVector(Vtemp);
     HYPRE_Real     *Vtemp_data = hypre_VectorData(Vtemp_local);
-    HYPRE_Real 	   *Vext_data = NULL;
-    HYPRE_Real 	   *v_buf_data;
+    HYPRE_Real     *Vext_data = NULL;
+    HYPRE_Real     *v_buf_data;
 
     HYPRE_Int            i, j;
     HYPRE_Int            ii, jj;
-    HYPRE_Int		   num_sends;
-    HYPRE_Int		   index, start;
-    HYPRE_Int		   num_procs, my_id ;
+    HYPRE_Int      num_sends;
+    HYPRE_Int      index, start;
+    HYPRE_Int      num_procs, my_id ;
 
     HYPRE_Real     zero = 0.0;
-    HYPRE_Real	   res;
+    HYPRE_Real     res;
 
 
     hypre_MPI_Comm_size(comm,&num_procs);
@@ -1081,6 +1081,8 @@ HYPRE_Int  hypre_ParCSRRelax_L1_Jacobi( hypre_ParCSRMatrix *A,
      * Relax all points.
      *-----------------------------------------------------------------*/
 
+    printf("myid = %d, relax_points = %d\n", my_id, relax_points);
+
     if (relax_points == 0)
     {
 #ifdef HYPRE_USING_OPENMP
@@ -1118,6 +1120,12 @@ HYPRE_Int  hypre_ParCSRRelax_L1_Jacobi( hypre_ParCSRMatrix *A,
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i,ii,jj,res) HYPRE_SMP_SCHEDULE
 #endif
+            // !!! Debug
+                if (my_id == 0 && relax_points == 1)
+                {
+                  printf("Vtemp = \n");
+                }
+
        for (i = 0; i < n; i++)
        {
 
@@ -1135,6 +1143,15 @@ HYPRE_Int  hypre_ParCSRRelax_L1_Jacobi( hypre_ParCSRMatrix *A,
                 ii = A_diag_j[jj];
                 res -= A_diag_data[jj] * Vtemp_data[ii];
              }
+
+             
+                if (my_id == 0 && relax_points == 1)
+                {
+                  printf("%f\n", res*relax_weight);
+                }
+             
+
+
              for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
              {
                 ii = A_offd_j[jj];
@@ -1148,6 +1165,181 @@ HYPRE_Int  hypre_ParCSRRelax_L1_Jacobi( hypre_ParCSRMatrix *A,
     {
        hypre_TFree(Vext_data, HYPRE_MEMORY_HOST);
        hypre_TFree(v_buf_data, HYPRE_MEMORY_HOST);
+    }
+
+    return 0;
+
+}
+
+HYPRE_Int  hypre_ParCSRRelax_L1_Jacobi_Device( hypre_ParCSRMatrix *A,
+                                  hypre_ParVector    *f,
+                                  int                *mask,
+                                  HYPRE_Int                 num_relax_points,
+                                  HYPRE_Int                 relax_points,
+                                  HYPRE_Real          relax_weight,
+                                  HYPRE_Real         *l1_norms,
+                                  hypre_ParVector    *u,
+                                  hypre_ParVector    *Vtemp )
+
+{
+
+
+    MPI_Comm     comm = hypre_ParCSRMatrixComm(A);
+    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
+    hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
+    hypre_ParCSRCommPkg  *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+    hypre_ParCSRCommHandle *comm_handle;
+
+    HYPRE_Int             n       = hypre_CSRMatrixNumRows(A_diag);
+    HYPRE_Int             num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
+
+    hypre_Vector   *u_local = hypre_ParVectorLocalVector(u);
+    HYPRE_Real     *u_data  = hypre_VectorData(u_local);
+
+    hypre_Vector   *f_local = hypre_ParVectorLocalVector(f);
+    HYPRE_Real     *f_data  = hypre_VectorData(f_local);
+
+    hypre_Vector   *Vtemp_local = hypre_ParVectorLocalVector(Vtemp);
+    HYPRE_Real     *Vtemp_data = hypre_VectorData(Vtemp_local);
+    HYPRE_Real     *u_ext_data = NULL;
+    HYPRE_Real     *u_buf_data;
+
+    HYPRE_Int            i, j;
+    HYPRE_Int            ii, jj;
+    HYPRE_Int      num_sends;
+    HYPRE_Int      index, start;
+    HYPRE_Int      num_procs, my_id ;
+
+    HYPRE_Real     zero = 0.0;
+    HYPRE_Real     res;
+
+
+    hypre_MPI_Comm_size(comm,&num_procs);
+    hypre_MPI_Comm_rank(comm,&my_id);
+
+    if (num_procs > 1)
+    {
+       num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+
+       u_buf_data = hypre_CTAlloc(HYPRE_Complex,
+                                  hypre_ParCSRCommPkgSendMapStart(comm_pkg,  num_sends), HYPRE_MEMORY_SHARED);
+
+       u_ext_data = hypre_CTAlloc(HYPRE_Complex, num_cols_offd, HYPRE_MEMORY_SHARED);
+
+       #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
+       HYPRE_Int begin = hypre_ParCSRCommPkgSendMapStart(comm_pkg, 0);
+       HYPRE_Int end   = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
+       PackOnDevice((HYPRE_Complex*)u_buf_data,u_data,hypre_ParCSRCommPkgSendMapElmts(comm_pkg),begin,end,HYPRE_STREAM(4));
+       #else
+       index = 0;
+       for (i = 0; i < num_sends; i++)
+       {
+          start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+          for (j=start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
+             u_buf_data[index++]
+                = u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
+       }
+       #endif
+
+       comm_handle = hypre_ParCSRCommHandleCreate( 1, comm_pkg, u_buf_data,
+                                                   u_ext_data);
+       hypre_ParCSRCommHandleDestroy(comm_handle);
+       comm_handle = NULL;
+    }
+
+    /*-----------------------------------------------------------------
+     * Relax all points.
+     *-----------------------------------------------------------------*/
+
+    if (relax_points == 0)
+    {
+         PUSH_RANGE("RELAX",4);
+         hypre_ParVectorCopy(f, Vtemp);
+         hypre_ParCSRMatrixMatvec(-relax_weight,A, u, relax_weight, Vtemp);
+         VecScale(u_data,Vtemp_data,l1_norms,n,HYPRE_STREAM(4));
+    }
+
+    /*-----------------------------------------------------------------
+     * Relax only C or F points as determined by relax_points.
+     *-----------------------------------------------------------------*/
+    else
+    {
+      // Get cusparse handle and setup bsr matrix
+      static cusparseHandle_t handle;
+      static cusparseMatDescr_t descr;
+      static HYPRE_Int FirstCall=1;
+
+      if (FirstCall)
+      {
+        handle=getCusparseHandle();
+
+        cusparseStatus_t status= cusparseCreateMatDescr(&descr);
+        if (status != CUSPARSE_STATUS_SUCCESS) {
+           hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ERROR:: Matrix descriptor initialization failed\n");
+           return hypre_error_flag;
+        }
+
+        cusparseSetMatType(descr,CUSPARSE_MATRIX_TYPE_GENERAL);
+        cusparseSetMatIndexBase(descr,CUSPARSE_INDEX_BASE_ZERO);
+
+        FirstCall=0;
+      }
+      hypre_ParVectorCopy(f, Vtemp);
+      double alpha = -relax_weight;
+      double beta = relax_weight;
+      cusparseDbsrxmv(handle,
+                CUSPARSE_DIRECTION_ROW,
+                CUSPARSE_OPERATION_NON_TRANSPOSE,
+                num_relax_points,
+                hypre_CSRMatrixNumRows(A_diag),
+                hypre_CSRMatrixNumCols(A_diag),
+                hypre_CSRMatrixNumNonzeros(A_diag),
+                &alpha,
+                descr,
+                hypre_CSRMatrixData(A_diag),
+                mask,
+                hypre_CSRMatrixI(A_diag),
+                &(hypre_CSRMatrixI(A_diag)[1]),
+                hypre_CSRMatrixJ(A_diag),
+                1,
+                u_data,
+                &beta,
+                Vtemp_data);
+      if (my_id == 0 && relax_points == 1)
+      {
+        printf("V_temp = \n");
+        for (i = 0; i < n; i++) printf("%f\n", Vtemp_data[i]);
+      }
+      if (num_cols_offd) cusparseDbsrxmv(handle,
+                CUSPARSE_DIRECTION_ROW,
+                CUSPARSE_OPERATION_NON_TRANSPOSE,
+                num_relax_points,
+                hypre_CSRMatrixNumRows(A_offd),
+                hypre_CSRMatrixNumCols(A_offd),
+                hypre_CSRMatrixNumNonzeros(A_offd),
+                &alpha,
+                descr,
+                hypre_CSRMatrixData(A_offd),
+                mask,
+                hypre_CSRMatrixI(A_offd),
+                &(hypre_CSRMatrixI(A_offd)[1]),
+                hypre_CSRMatrixJ(A_offd),
+                1,
+                u_ext_data,
+                &beta,
+                Vtemp_data);
+
+      if (my_id == 0 && relax_points == 1)
+      {
+        printf("V_temp = \n");
+        for (i = 0; i < n; i++) printf("%f\n", Vtemp_data[i]);
+      }
+      VecScaleMasked(u_data,Vtemp_data,l1_norms,mask,num_relax_points,HYPRE_STREAM(4));
+    }
+    if (num_procs > 1)
+    {
+       hypre_TFree(u_ext_data, HYPRE_MEMORY_SHARED);
+       hypre_TFree(u_buf_data, HYPRE_MEMORY_SHARED);
     }
 
     return 0;

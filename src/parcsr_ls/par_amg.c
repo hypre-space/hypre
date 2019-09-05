@@ -379,6 +379,9 @@ hypre_BoomerAMGCreate()
    hypre_ParAMGDataPArray(amg_data) = NULL;
    hypre_ParAMGDataRArray(amg_data) = NULL;
    hypre_ParAMGDataCFMarkerArray(amg_data) = NULL;
+   hypre_ParAMGDataLocalNumCPoints(amg_data) = NULL;
+   hypre_ParAMGDataLocalCPointMask(amg_data) = NULL;
+   hypre_ParAMGDataLocalFPointMask(amg_data) = NULL;
    hypre_ParAMGDataVtemp(amg_data)  = NULL;
    hypre_ParAMGDataRtemp(amg_data)  = NULL;
    hypre_ParAMGDataPtemp(amg_data)  = NULL;
@@ -582,6 +585,17 @@ hypre_BoomerAMGDestroy( void *data )
         }
    }
 
+   if (hypre_ParAMGDataLocalCPointMask(amg_data))
+   {
+      for (i = 1; i < num_levels; i++)  
+      {
+         if (hypre_ParAMGDataLocalCPointMask(amg_data)[i-1])
+            hypre_TFree(hypre_ParAMGDataLocalCPointMask(amg_data)[i-1], HYPRE_MEMORY_SHARED);
+         if (hypre_ParAMGDataLocalFPointMask(amg_data)[i-1])
+            hypre_TFree(hypre_ParAMGDataLocalFPointMask(amg_data)[i-1], HYPRE_MEMORY_SHARED);
+      }
+   }
+
    if (hypre_ParAMGDataLambda(amg_data))
       hypre_ParCSRMatrixDestroy(hypre_ParAMGDataLambda(amg_data));
 
@@ -645,6 +659,13 @@ hypre_BoomerAMGDestroy( void *data )
    hypre_TFree(hypre_ParAMGDataPBlockArray(amg_data), HYPRE_MEMORY_HOST);
    hypre_TFree(hypre_ParAMGDataPArray(amg_data), HYPRE_MEMORY_HOST);
    hypre_TFree(hypre_ParAMGDataCFMarkerArray(amg_data), HYPRE_MEMORY_HOST);
+   if (hypre_ParAMGDataLocalNumCPoints(amg_data))
+      hypre_TFree(hypre_ParAMGDataLocalNumCPoints(amg_data), HYPRE_MEMORY_HOST);
+   if (hypre_ParAMGDataLocalCPointMask(amg_data))
+      hypre_TFree(hypre_ParAMGDataLocalCPointMask(amg_data), HYPRE_MEMORY_HOST);
+   if (hypre_ParAMGDataLocalFPointMask(amg_data))
+      hypre_TFree(hypre_ParAMGDataLocalFPointMask(amg_data), HYPRE_MEMORY_HOST);
+
 
    if (hypre_ParAMGDataRtemp(amg_data))
       hypre_ParVectorDestroy(hypre_ParAMGDataRtemp(amg_data));

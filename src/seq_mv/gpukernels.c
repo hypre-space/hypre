@@ -48,25 +48,25 @@ extern "C"{
 
 extern "C"{
   __global__
-  void VecScaleMaskedKernel(HYPRE_Complex *__restrict__ u, const HYPRE_Complex *__restrict__ v, const HYPRE_Complex * __restrict__ l1_norm, const HYPRE_Int *mask, const HYPRE_Int mask_val, hypre_int num_rows){
+  void VecScaleMaskedKernel(HYPRE_Complex *__restrict__ u, const HYPRE_Complex *__restrict__ v, const HYPRE_Complex * __restrict__ l1_norm, const HYPRE_Int *mask, hypre_int mask_size){
     HYPRE_Int i = blockIdx.x * blockDim.x + threadIdx.x;
-    if (i<num_rows && mask[i] == mask_val){
-      u[i]+=v[i]/l1_norm[i];
+    if (i<mask_size){
+      u[mask[i]]+=v[mask[i]]/l1_norm[mask[i]];
   }
   }
 }
 
 extern "C"{
-  void VecScaleMasked(HYPRE_Complex *u, HYPRE_Complex *v, HYPRE_Complex *l1_norm, HYPRE_Int *mask, HYPRE_Int mask_val, hypre_int num_rows,cudaStream_t s){
-    PUSH_RANGE_PAYLOAD("VECSCALEMASKED",1,num_rows);
+  void VecScaleMasked(HYPRE_Complex *u, HYPRE_Complex *v, HYPRE_Complex *l1_norm, HYPRE_Int *mask, hypre_int mask_size,cudaStream_t s){
+    PUSH_RANGE_PAYLOAD("VECSCALEMASKED",1,mask_size);
     const HYPRE_Int tpb=64;
-    HYPRE_Int num_blocks=num_rows/tpb+1;
+    HYPRE_Int num_blocks=mask_size/tpb+1;
 #ifdef CATCH_LAUNCH_ERRORS
     hypre_CheckErrorDevice(cudaPeekAtLastError());
     hypre_CheckErrorDevice(cudaDeviceSynchronize());
 #endif
-    MemPrefetchSized(l1_norm,num_rows*sizeof(HYPRE_Complex),HYPRE_DEVICE,s);
-    VecScaleMaskedKernel<<<num_blocks,tpb,0,s>>>(u,v,l1_norm,mask,mask_val,num_rows);
+    MemPrefetchSized(l1_norm,mask_size*sizeof(HYPRE_Complex),HYPRE_DEVICE,s);
+    VecScaleMaskedKernel<<<num_blocks,tpb,0,s>>>(u,v,l1_norm,mask,mask_size);
 #ifdef CATCH_LAUNCH_ERRORS
     hypre_CheckErrorDevice(cudaPeekAtLastError());
     hypre_CheckErrorDevice(cudaDeviceSynchronize());
