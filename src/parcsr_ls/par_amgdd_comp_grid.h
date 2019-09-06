@@ -148,6 +148,8 @@ typedef struct
    int              *c_mask;
    int              *f_mask;
 
+   HYPRE_Real       *cheby_coeffs;
+
 } hypre_ParCompGrid;
 
 /*--------------------------------------------------------------------------
@@ -189,5 +191,7 @@ typedef struct
 #define hypre_ParCompGridCFMarkerArray(compGrid)         ((compGrid) -> cf_marker_array)
 #define hypre_ParCompGridCMask(compGrid)         ((compGrid) -> c_mask)
 #define hypre_ParCompGridFMask(compGrid)         ((compGrid) -> f_mask)
+
+#define hypre_ParCompGridChebyCoeffs(compGrid)         ((compGrid) -> cheby_coeffs)
 
 #endif

@@ -49,6 +49,7 @@ hypre_ParCompGridCreate ()
    hypre_ParCompGridCFMarkerArray(compGrid) = NULL;
    hypre_ParCompGridCMask(compGrid) = NULL;
    hypre_ParCompGridFMask(compGrid) = NULL;
+   hypre_ParCompGridChebyCoeffs(compGrid) = NULL;
    hypre_ParCompGridGlobalIndices(compGrid) = NULL;
    hypre_ParCompGridCoarseGlobalIndices(compGrid) = NULL;
    hypre_ParCompGridCoarseLocalIndices(compGrid) = NULL;
@@ -96,6 +97,11 @@ hypre_ParCompGridDestroy ( hypre_ParCompGrid *compGrid )
    if (hypre_ParCompGridFMask(compGrid))
    {
       hypre_TFree(hypre_ParCompGridFMask(compGrid), HYPRE_MEMORY_SHARED);
+   }
+
+   if (hypre_ParCompGridChebyCoeffs(compGrid))
+   {
+      hypre_TFree(hypre_ParCompGridChebyCoeffs(compGrid), HYPRE_MEMORY_SHARED);
    }
 
    if (hypre_ParCompGridU(compGrid))

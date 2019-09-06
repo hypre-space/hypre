@@ -495,12 +495,19 @@ FAC_Cheby( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int le
    // !!! NOTE: is this correct??? If I'm doing a bunch of matvecs that include the ghost dofs, is that right?
    // I think this is fine for now because I don't store the rows associated with ghost dofs, so their values shouldn't change at all, but this may change in a later version.
 
-   HYPRE_Real    *coefs = hypre_ParAMGDataChebyCoefs(amg_data)[level];
+
+
+   HYPRE_Int i,j;
+
+   hypre_CSRMatrix *A = hypre_ParCompGridA(compGrid);
+   hypre_Vector *u = hypre_ParCompGridU(compGrid);
+   hypre_Vector *t = hypre_ParCompGridT(compGrid);
+   hypre_Vector *f = hypre_ParCompGridF(compGrid);
+
+   HYPRE_Real    *coefs = hypre_ParCompGridChebyCoeffs(compGrid);
    HYPRE_Int     scale = hypre_ParAMGDataChebyScale(amg_data);
    HYPRE_Int     order = hypre_ParAMGDataChebyOrder(amg_data);
 
-   HYPRE_Int i,j;
-   
    HYPRE_Int cheby_order;
 
    if (order > 4)
@@ -509,11 +516,74 @@ FAC_Cheby( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int le
       order = 1;
 
    cheby_order = order -1;
-   
-   hypre_CSRMatrix *A = hypre_ParCompGridA(compGrid);
-   hypre_Vector *u = hypre_ParCompGridU(compGrid);
-   hypre_Vector *t = hypre_ParCompGridT(compGrid);
-   hypre_Vector *f = hypre_ParCompGridF(compGrid);
+
+   // Setup chebyshev coefficients if necessary
+   if (!coefs)
+   {
+      // Select submatrix of real to real connections
+      HYPRE_Int nnz = 0;
+      for (i = 0; i < hypre_ParCompGridNumRealNodes(compGrid); i++)
+      {
+         for (j = hypre_CSRMatrixI(A)[i]; j < hypre_CSRMatrixI(A)[i+1]; j++)
+         {
+            if (hypre_CSRMatrixJ(A)[j] < hypre_ParCompGridNumRealNodes(compGrid)) nnz++;
+         }
+      }
+      HYPRE_Int *A_real_i = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumRealNodes(compGrid)+1, HYPRE_MEMORY_SHARED);
+      HYPRE_Int *A_real_j = hypre_CTAlloc(HYPRE_Int, nnz, HYPRE_MEMORY_SHARED);
+      HYPRE_Complex *A_real_data = hypre_CTAlloc(HYPRE_Complex, nnz, HYPRE_MEMORY_SHARED);
+      nnz = 0;
+      for (i = 0; i < hypre_ParCompGridNumRealNodes(compGrid); i++)
+      {
+         for (j = hypre_CSRMatrixI(A)[i]; j < hypre_CSRMatrixI(A)[i+1]; j++)
+         {
+            if (hypre_CSRMatrixJ(A)[j] < hypre_ParCompGridNumRealNodes(compGrid))
+            {
+               A_real_j[nnz] = hypre_CSRMatrixJ(A)[j];
+               A_real_data[nnz] = hypre_CSRMatrixData(A)[j];
+               nnz++;
+            }
+         }
+         A_real_i[i+1] = nnz;
+      }
+
+      HYPRE_BigInt *row_starts = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
+      row_starts[0] = 0;
+      row_starts[1] = hypre_ParCompGridNumRealNodes(compGrid);
+      hypre_ParCSRMatrix *A_real = hypre_ParCSRMatrixCreate( MPI_COMM_SELF,
+                          (HYPRE_BigInt) hypre_ParCompGridNumRealNodes(compGrid),
+                          (HYPRE_BigInt) hypre_ParCompGridNumRealNodes(compGrid),
+                          row_starts,
+                          NULL,
+                          0,
+                          nnz,
+                          0 );
+      hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(A_real)) = A_real_i;
+      hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(A_real)) = A_real_j;
+      hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(A_real)) = A_real_data;
+      hypre_CSRMatrixInitialize(hypre_ParCSRMatrixOffd(A_real));
+      hypre_ParCSRMatrixColMapOffd(A_real) = hypre_CTAlloc(HYPRE_BigInt, 0, HYPRE_MEMORY_HOST);
+
+      HYPRE_Real max_eig, min_eig = 0;
+
+      if (hypre_ParAMGDataChebyEigEst(amg_data)) hypre_ParCSRMaxEigEstimateCG(A_real, scale, hypre_ParAMGDataChebyEigEst(amg_data), &max_eig, &min_eig);
+      else hypre_ParCSRMaxEigEstimate(A_real, scale, &max_eig);
+
+      HYPRE_Real *dummy_ptr;
+      hypre_ParCSRRelax_Cheby_Setup(hypre_ParAMGDataAArray(amg_data)[level], 
+                            max_eig,      
+                            min_eig,     
+                            hypre_ParAMGDataChebyFraction(amg_data),   
+                            order,
+                            0,
+                            hypre_ParAMGDataChebyVariant(amg_data),           
+                            &coefs,
+                            &dummy_ptr);
+
+      hypre_ParCompGridChebyCoeffs(compGrid) = coefs;
+
+      hypre_ParCSRMatrixDestroy(A_real);
+   }
 
    // Calculate diagonal scaling values if necessary
    if (!hypre_ParCompGridL1Norms(compGrid) && scale)
@@ -523,7 +593,11 @@ FAC_Cheby( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int le
       {
          for (j = hypre_ParCompGridARowPtr(compGrid)[i]; j < hypre_ParCompGridARowPtr(compGrid)[i+1]; j++)
          {
-            if (hypre_ParCompGridAColInd(compGrid)[j] == i) hypre_ParCompGridL1Norms(compGrid)[i] = 1.0/sqrt(hypre_ParCompGridAData(compGrid)[j]);
+            if (hypre_ParCompGridAColInd(compGrid)[j] == i)
+            {
+               hypre_ParCompGridL1Norms(compGrid)[i] = 1.0/sqrt(hypre_ParCompGridAData(compGrid)[j]);
+               break;
+            }
          }
       }
    }
