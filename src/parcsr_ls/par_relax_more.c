@@ -1081,8 +1081,6 @@ HYPRE_Int  hypre_ParCSRRelax_L1_Jacobi( hypre_ParCSRMatrix *A,
      * Relax all points.
      *-----------------------------------------------------------------*/
 
-    printf("myid = %d, relax_points = %d\n", my_id, relax_points);
-
     if (relax_points == 0)
     {
 #ifdef HYPRE_USING_OPENMP
@@ -1120,11 +1118,6 @@ HYPRE_Int  hypre_ParCSRRelax_L1_Jacobi( hypre_ParCSRMatrix *A,
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i,ii,jj,res) HYPRE_SMP_SCHEDULE
 #endif
-            // !!! Debug
-                if (my_id == 0 && relax_points == 1)
-                {
-                  printf("Vtemp = \n");
-                }
 
        for (i = 0; i < n; i++)
        {
@@ -1143,15 +1136,6 @@ HYPRE_Int  hypre_ParCSRRelax_L1_Jacobi( hypre_ParCSRMatrix *A,
                 ii = A_diag_j[jj];
                 res -= A_diag_data[jj] * Vtemp_data[ii];
              }
-
-             
-                if (my_id == 0 && relax_points == 1)
-                {
-                  printf("%f\n", res*relax_weight);
-                }
-             
-
-
              for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
              {
                 ii = A_offd_j[jj];
@@ -1183,6 +1167,7 @@ HYPRE_Int  hypre_ParCSRRelax_L1_Jacobi_Device( hypre_ParCSRMatrix *A,
 
 {
 
+#if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
 
     MPI_Comm     comm = hypre_ParCSRMatrixComm(A);
     hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
@@ -1226,20 +1211,11 @@ HYPRE_Int  hypre_ParCSRRelax_L1_Jacobi_Device( hypre_ParCSRMatrix *A,
 
        u_ext_data = hypre_CTAlloc(HYPRE_Complex, num_cols_offd, HYPRE_MEMORY_SHARED);
 
-       #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
        HYPRE_Int begin = hypre_ParCSRCommPkgSendMapStart(comm_pkg, 0);
        HYPRE_Int end   = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
        PackOnDevice((HYPRE_Complex*)u_buf_data,u_data,hypre_ParCSRCommPkgSendMapElmts(comm_pkg),begin,end,HYPRE_STREAM(4));
-       #else
-       index = 0;
-       for (i = 0; i < num_sends; i++)
-       {
-          start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-          for (j=start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
-             u_buf_data[index++]
-                = u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
-       }
-       #endif
+       hypre_CheckErrorDevice(cudaPeekAtLastError());
+       hypre_CheckErrorDevice(cudaDeviceSynchronize());
 
        comm_handle = hypre_ParCSRCommHandleCreate( 1, comm_pkg, u_buf_data,
                                                    u_ext_data);
@@ -1287,7 +1263,7 @@ HYPRE_Int  hypre_ParCSRRelax_L1_Jacobi_Device( hypre_ParCSRMatrix *A,
       hypre_ParVectorCopy(f, Vtemp);
       double alpha = -relax_weight;
       double beta = relax_weight;
-      cusparseDbsrxmv(handle,
+      cusparseErrchk(cusparseDbsrxmv(handle,
                 CUSPARSE_DIRECTION_ROW,
                 CUSPARSE_OPERATION_NON_TRANSPOSE,
                 num_relax_points,
@@ -1304,13 +1280,11 @@ HYPRE_Int  hypre_ParCSRRelax_L1_Jacobi_Device( hypre_ParCSRMatrix *A,
                 1,
                 u_data,
                 &beta,
-                Vtemp_data);
-      if (my_id == 0 && relax_points == 1)
+                Vtemp_data));
+      cudaDeviceSynchronize();
+      if (num_cols_offd)
       {
-        printf("V_temp = \n");
-        for (i = 0; i < n; i++) printf("%f\n", Vtemp_data[i]);
-      }
-      if (num_cols_offd) cusparseDbsrxmv(handle,
+        cusparseErrchk(cusparseDbsrxmv(handle,
                 CUSPARSE_DIRECTION_ROW,
                 CUSPARSE_OPERATION_NON_TRANSPOSE,
                 num_relax_points,
@@ -1327,12 +1301,8 @@ HYPRE_Int  hypre_ParCSRRelax_L1_Jacobi_Device( hypre_ParCSRMatrix *A,
                 1,
                 u_ext_data,
                 &beta,
-                Vtemp_data);
-
-      if (my_id == 0 && relax_points == 1)
-      {
-        printf("V_temp = \n");
-        for (i = 0; i < n; i++) printf("%f\n", Vtemp_data[i]);
+                Vtemp_data));
+        cudaDeviceSynchronize();
       }
       VecScaleMasked(u_data,Vtemp_data,l1_norms,mask,num_relax_points,HYPRE_STREAM(4));
     }
@@ -1341,9 +1311,9 @@ HYPRE_Int  hypre_ParCSRRelax_L1_Jacobi_Device( hypre_ParCSRMatrix *A,
        hypre_TFree(u_ext_data, HYPRE_MEMORY_SHARED);
        hypre_TFree(u_buf_data, HYPRE_MEMORY_SHARED);
     }
-
+    
     return 0;
-
+#endif
 }
 
 

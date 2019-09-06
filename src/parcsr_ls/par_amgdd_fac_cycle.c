@@ -368,6 +368,14 @@ FAC_Simple_Restrict( hypre_ParCompGrid *compGrid_f, hypre_ParCompGrid *compGrid_
 HYPRE_Int
 FAC_Relax( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int type, HYPRE_Int level, HYPRE_Int cycle_param )
 {
+   #if DEBUG_FAC
+   if (cycle_param == 3)
+   {
+      FAC_Jacobi(amg_data, compGrid, level);
+      return 0;
+   }
+   #endif
+
    if (type == 0) FAC_Jacobi(amg_data, compGrid, level);
    else if (type == 1) FAC_GaussSeidel(compGrid);
    else if (type == 2) FAC_Cheby(amg_data, compGrid, level);
@@ -713,8 +721,12 @@ FAC_CFL1Jacobi( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_I
                 hypre_VectorData(hypre_ParCompGridU(compGrid)),
                 &beta,
                 hypre_VectorData(hypre_ParCompGridTemp(compGrid)));
+      hypre_CheckErrorDevice(cudaPeekAtLastError());
+      hypre_CheckErrorDevice(cudaDeviceSynchronize());
       VecScaleMasked(hypre_VectorData(hypre_ParCompGridU(compGrid)),hypre_VectorData(hypre_ParCompGridTemp(compGrid)),hypre_ParCompGridL1Norms(compGrid),hypre_ParCompGridCMask(compGrid),hypre_ParCompGridNumCPoints(compGrid),HYPRE_STREAM(4));
       VecScaleMasked(hypre_VectorData(hypre_ParCompGridT(compGrid)),hypre_VectorData(hypre_ParCompGridTemp(compGrid)),hypre_ParCompGridL1Norms(compGrid),hypre_ParCompGridCMask(compGrid),hypre_ParCompGridNumCPoints(compGrid),HYPRE_STREAM(4));
+      hypre_CheckErrorDevice(cudaPeekAtLastError());
+      hypre_CheckErrorDevice(cudaDeviceSynchronize());
    }
    else
    {
@@ -736,13 +748,15 @@ FAC_CFL1Jacobi( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_I
                 hypre_VectorData(hypre_ParCompGridU(compGrid)),
                 &beta,
                 hypre_VectorData(hypre_ParCompGridTemp(compGrid)));
+      hypre_CheckErrorDevice(cudaPeekAtLastError());
+      hypre_CheckErrorDevice(cudaDeviceSynchronize());
       VecScaleMasked(hypre_VectorData(hypre_ParCompGridU(compGrid)),hypre_VectorData(hypre_ParCompGridTemp(compGrid)),hypre_ParCompGridL1Norms(compGrid),hypre_ParCompGridFMask(compGrid),hypre_ParCompGridNumRealNodes(compGrid) - hypre_ParCompGridNumCPoints(compGrid),HYPRE_STREAM(4));
       VecScaleMasked(hypre_VectorData(hypre_ParCompGridT(compGrid)),hypre_VectorData(hypre_ParCompGridTemp(compGrid)),hypre_ParCompGridL1Norms(compGrid),hypre_ParCompGridFMask(compGrid),hypre_ParCompGridNumRealNodes(compGrid) - hypre_ParCompGridNumCPoints(compGrid),HYPRE_STREAM(4));
+      hypre_CheckErrorDevice(cudaPeekAtLastError());
+      hypre_CheckErrorDevice(cudaDeviceSynchronize());
    }
 
 #else
-
-   HYPRE_Int             n = hypre_ParCompGridNumRealNodes(compGrid);
 
    HYPRE_Complex  *A_data = hypre_CSRMatrixData(hypre_ParCompGridA(compGrid));
    HYPRE_Int  *A_i = hypre_CSRMatrixI(hypre_ParCompGridA(compGrid));
@@ -765,7 +779,7 @@ FAC_CFL1Jacobi( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_I
    #ifdef HYPRE_USING_OPENMP
    #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
    #endif
-   for (i = 0; i < n; i++)
+   for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
    {
       Vtemp_data[i] = u_data[i];
    }
@@ -777,7 +791,7 @@ FAC_CFL1Jacobi( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_I
    #ifdef HYPRE_USING_OPENMP
    #pragma omp parallel for private(i,j,res) HYPRE_SMP_SCHEDULE
    #endif
-   for (i = 0; i < n; i++)
+   for (i = 0; i < hypre_ParCompGridNumRealNodes(compGrid); i++)
    {
       if (cf_marker[i] == relax_set)
       {
