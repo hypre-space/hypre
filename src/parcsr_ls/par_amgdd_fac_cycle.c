@@ -495,6 +495,8 @@ FAC_Cheby( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int le
    // !!! NOTE: is this correct??? If I'm doing a bunch of matvecs that include the ghost dofs, is that right?
    // I think this is fine for now because I don't store the rows associated with ghost dofs, so their values shouldn't change at all, but this may change in a later version.
 
+   HYPRE_Int   myid;
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
 
    HYPRE_Int i,j;
@@ -505,6 +507,7 @@ FAC_Cheby( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int le
    hypre_Vector *f = hypre_ParCompGridF(compGrid);
 
    HYPRE_Real    *coefs = hypre_ParCompGridChebyCoeffs(compGrid);
+   // HYPRE_Real    *coefs = hypre_ParAMGDataChebyCoefs(amg_data)[level];
    HYPRE_Int     scale = hypre_ParAMGDataChebyScale(amg_data);
    HYPRE_Int     order = hypre_ParAMGDataChebyOrder(amg_data);
 

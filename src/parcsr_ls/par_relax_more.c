@@ -139,6 +139,7 @@ HYPRE_Int hypre_ParCSRMaxEigEstimateCG(hypre_ParCSRMatrix *A, /* matrix to relax
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
    HYPRE_Real      *A_diag_data  = hypre_CSRMatrixData(A_diag);
    HYPRE_Int       *A_diag_i     = hypre_CSRMatrixI(A_diag);
+   HYPRE_Int       *A_diag_j     = hypre_CSRMatrixJ(A_diag);
 
 
    /* check the size of A - don't iterate more than the size */
@@ -205,8 +206,15 @@ HYPRE_Int hypre_ParCSRMaxEigEstimateCG(hypre_ParCSRMatrix *A, /* matrix to relax
     {
        for (i = 0; i < local_size; i++)
        {
-          diag = A_diag_data[A_diag_i[i]];
-          ds_data[i] = 1/sqrt(diag);
+        for (j = A_diag_i[i]; j < A_diag_i[i+1]; j++)
+        {
+          if (A_diag_j[j] == i)
+          {
+            diag = A_diag_data[j];
+            break;
+          }
+        }
+        ds_data[i] = 1/sqrt(diag);
        }
 
     }
