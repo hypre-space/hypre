@@ -1686,9 +1686,9 @@ main( hypre_int argc,
          hypre_printf("       60=DS-FlexGMRES         61=AMG-FlexGMRES     \n");
 	 hypre_printf("       70=MGR             71=MGR-PCG  \n");
 	 hypre_printf("       72=MGR-FlexGMRES  73=MGR-BICGSTAB  \n");
+	 hypre_printf("       74=MGR-COGMRES  \n");	 
 	 hypre_printf("       80=ILU      81=ILU-GMRES  \n");	 
 	 hypre_printf("       82=ILU-FlexGMRES  \n");	 
-	 hypre_printf("       74=MGR-COGMRES  \n");
          hypre_printf("\n");
          hypre_printf("  -cljp                 : CLJP coarsening \n");
          hypre_printf("  -cljp1                : CLJP coarsening, fixed random \n");

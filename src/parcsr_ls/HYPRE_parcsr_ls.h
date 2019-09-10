@@ -3929,6 +3929,22 @@ HYPRE_Int
 HYPRE_ILUSetType( HYPRE_Solver solver, HYPRE_Int ilu_type );
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ILUSetLocalReordering
+ *--------------------------------------------------------------------------*/
+/**
+ * Set the type of reordering for the local matrix.
+ * Options for {\tt reordering\_type} are:
+ *
+ * \begin{tabular}{|c|l|} \hline
+ * 0 & No reordering \\
+ * 1 & RCM (default) \\
+ * \hline
+ * \end{tabular}  
+ **/
+HYPRE_Int
+HYPRE_ILUSetLocalReordering( HYPRE_Solver solver, HYPRE_Int reordering_type );
+
+/*--------------------------------------------------------------------------
  * HYPRE_ILUSetPrintLevel
  *--------------------------------------------------------------------------*/
 /**

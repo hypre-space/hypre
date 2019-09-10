@@ -88,6 +88,9 @@ typedef struct hypre_ParILUData_struct
    HYPRE_Int            sp_max_iter;/* max precond iter or max MR iteration */
    HYPRE_Real           sp_tol;
    
+   /* local reordering */
+   HYPRE_Int 	reordering_type;
+   
 } hypre_ParILUData;
 
 #define hypre_ParILUDataGlobalSolver(ilu_data)                 ((ilu_data) -> global_solver)
@@ -129,6 +132,7 @@ typedef struct hypre_ParILUData_struct
 #define hypre_ParILUDataSchurPrecond(ilu_data)                 ((ilu_data) -> schur_precond)
 #define hypre_ParILUDataRhs(ilu_data)                          ((ilu_data) -> rhs)
 #define hypre_ParILUDataX(ilu_data)                            ((ilu_data) -> x)
+#define hypre_ParILUDataReorderingType(ilu_data)                            ((ilu_data) -> reordering_type)
 /* Schur System */
 #define hypre_ParILUDataSchurGMRESKDim(ilu_data)               ((ilu_data) -> ss_kDim)
 #define hypre_ParILUDataSchurNSHMaxNumIter(ilu_data)           ((ilu_data) -> ss_kDim)
