@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /* HYPRE_sstruct_graph.c */
 HYPRE_Int HYPRE_SStructGraphCreate ( MPI_Comm comm , HYPRE_SStructGrid grid , HYPRE_SStructGraph *graph_ptr );
@@ -94,7 +89,7 @@ HYPRE_Int hypre_SStructCopy ( hypre_SStructVector *x , hypre_SStructVector *y );
 
 /* sstruct_graph.c */
 HYPRE_Int hypre_SStructGraphRef ( hypre_SStructGraph *graph , hypre_SStructGraph **graph_ref );
-HYPRE_Int hypre_SStructGraphGetUVEntryRank( hypre_SStructGraph *graph , HYPRE_Int part , HYPRE_Int var , hypre_Index index, HYPRE_Int *rank );
+HYPRE_Int hypre_SStructGraphGetUVEntryRank( hypre_SStructGraph *graph , HYPRE_Int part , HYPRE_Int var , hypre_Index index, HYPRE_BigInt *rank );
 HYPRE_Int hypre_SStructGraphFindBoxEndpt ( hypre_SStructGraph *graph , HYPRE_Int part , HYPRE_Int var , HYPRE_Int proc , HYPRE_Int endpt , HYPRE_Int boxi );
 HYPRE_Int hypre_SStructGraphFindSGridEndpts ( hypre_SStructGraph *graph , HYPRE_Int part , HYPRE_Int var , HYPRE_Int proc , HYPRE_Int endpt , HYPRE_Int *endpts );
 
@@ -116,8 +111,8 @@ HYPRE_Int hypre_SStructGridFindNborBoxManEntry ( hypre_SStructGrid *grid , HYPRE
 HYPRE_Int hypre_SStructGridBoxProcFindBoxManEntry ( hypre_SStructGrid *grid , HYPRE_Int part , HYPRE_Int var , HYPRE_Int box , HYPRE_Int proc , hypre_BoxManEntry **entry_ptr );
 HYPRE_Int hypre_SStructBoxManEntryGetCSRstrides ( hypre_BoxManEntry *entry , hypre_Index strides );
 HYPRE_Int hypre_SStructBoxManEntryGetGhstrides ( hypre_BoxManEntry *entry , hypre_Index strides );
-HYPRE_Int hypre_SStructBoxManEntryGetGlobalCSRank ( hypre_BoxManEntry *entry , hypre_Index index , HYPRE_Int *rank_ptr );
-HYPRE_Int hypre_SStructBoxManEntryGetGlobalGhrank ( hypre_BoxManEntry *entry , hypre_Index index , HYPRE_Int *rank_ptr );
+HYPRE_Int hypre_SStructBoxManEntryGetGlobalCSRank ( hypre_BoxManEntry *entry , hypre_Index index , HYPRE_BigInt *rank_ptr );
+HYPRE_Int hypre_SStructBoxManEntryGetGlobalGhrank ( hypre_BoxManEntry *entry , hypre_Index index , HYPRE_BigInt *rank_ptr );
 HYPRE_Int hypre_SStructBoxManEntryGetProcess ( hypre_BoxManEntry *entry , HYPRE_Int *proc_ptr );
 HYPRE_Int hypre_SStructBoxManEntryGetBoxnum ( hypre_BoxManEntry *entry , HYPRE_Int *id_ptr );
 HYPRE_Int hypre_SStructBoxManEntryGetPart ( hypre_BoxManEntry *entry , HYPRE_Int part , HYPRE_Int *part_ptr );
@@ -127,7 +122,7 @@ HYPRE_Int hypre_SStructNborIndexToIndex( hypre_Index nbor_index , hypre_Index ro
 HYPRE_Int hypre_SStructNborBoxToBox ( hypre_Box *nbor_box , hypre_Index root , hypre_Index nbor_root , hypre_Index coord , hypre_Index dir );
 HYPRE_Int hypre_SStructVarToNborVar ( hypre_SStructGrid *grid , HYPRE_Int part , HYPRE_Int var , HYPRE_Int *coord , HYPRE_Int *nbor_var_ptr );
 HYPRE_Int hypre_SStructGridSetNumGhost ( hypre_SStructGrid *grid , HYPRE_Int *num_ghost );
-HYPRE_Int hypre_SStructBoxManEntryGetGlobalRank ( hypre_BoxManEntry *entry , hypre_Index index , HYPRE_Int *rank_ptr , HYPRE_Int type );
+HYPRE_Int hypre_SStructBoxManEntryGetGlobalRank ( hypre_BoxManEntry *entry , hypre_Index index , HYPRE_BigInt *rank_ptr , HYPRE_Int type );
 HYPRE_Int hypre_SStructBoxManEntryGetStrides ( hypre_BoxManEntry *entry , hypre_Index strides , HYPRE_Int type );
 HYPRE_Int hypre_SStructBoxNumMap ( hypre_SStructGrid *grid , HYPRE_Int part , HYPRE_Int boxnum , HYPRE_Int **num_varboxes_ptr , HYPRE_Int ***map_ptr );
 HYPRE_Int hypre_SStructCellGridBoxNumMap ( hypre_SStructGrid *grid , HYPRE_Int part , HYPRE_Int ***num_varboxes_ptr , HYPRE_Int ****map_ptr );

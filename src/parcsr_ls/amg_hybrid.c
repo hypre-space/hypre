@@ -1,17 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -35,6 +27,8 @@ typedef struct
    HYPRE_Int             two_norm;
    HYPRE_Int             stop_crit;
    HYPRE_Int             rel_change;
+   HYPRE_Int             recompute_residual;
+   HYPRE_Int             recompute_residual_p;
    HYPRE_Int             solver_type;
    HYPRE_Int             k_dim;
 
@@ -400,6 +394,78 @@ hypre_AMGHybridSetSolverType( void   *AMGhybrid_vdata,
    }
 
    (AMGhybrid_data -> solver_type) = solver_type;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_AMGHybridSetRecomputeResidual
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_AMGHybridSetRecomputeResidual( void      *AMGhybrid_vdata,
+                                     HYPRE_Int  recompute_residual )
+{
+   hypre_AMGHybridData *AMGhybrid_data = (hypre_AMGHybridData *)AMGhybrid_vdata;
+   if (!AMGhybrid_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   (AMGhybrid_data -> recompute_residual) = recompute_residual;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_AMGHybridGetRecomputeResidual( void      *AMGhybrid_vdata,
+                                     HYPRE_Int *recompute_residual )
+{
+   hypre_AMGHybridData *AMGhybrid_data = (hypre_AMGHybridData *)AMGhybrid_vdata;
+   if (!AMGhybrid_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   *recompute_residual = (AMGhybrid_data -> recompute_residual);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_AMGHybridSetRecomputeResidualP
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_AMGHybridSetRecomputeResidualP( void      *AMGhybrid_vdata,
+                                      HYPRE_Int  recompute_residual_p )
+{
+   hypre_AMGHybridData *AMGhybrid_data = (hypre_AMGHybridData *)AMGhybrid_vdata;
+   if (!AMGhybrid_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   (AMGhybrid_data -> recompute_residual_p) = recompute_residual_p;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_AMGHybridGetRecomputeResidualP( void      *AMGhybrid_vdata,
+                                      HYPRE_Int *recompute_residual_p )
+{
+   hypre_AMGHybridData *AMGhybrid_data = (hypre_AMGHybridData *)AMGhybrid_vdata;
+   if (!AMGhybrid_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   *recompute_residual_p = (AMGhybrid_data -> recompute_residual_p);
 
    return hypre_error_flag;
 }
@@ -1555,6 +1621,8 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
    HYPRE_Int          two_norm;
    HYPRE_Int          stop_crit;
    HYPRE_Int          rel_change;
+   HYPRE_Int          recompute_residual;
+   HYPRE_Int          recompute_residual_p;
    HYPRE_Int          logging;
    HYPRE_Int          print_level;
    HYPRE_Int          setup_type;
@@ -1636,6 +1704,8 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
    two_norm       = (AMGhybrid_data -> two_norm);
    stop_crit      = (AMGhybrid_data -> stop_crit);
    rel_change     = (AMGhybrid_data -> rel_change);
+   recompute_residual   = (AMGhybrid_data -> recompute_residual);
+   recompute_residual_p = (AMGhybrid_data -> recompute_residual_p);
    logging        = (AMGhybrid_data -> logging);
    print_level    = (AMGhybrid_data -> print_level);
    setup_type     = (AMGhybrid_data -> setup_type);
@@ -1726,6 +1796,8 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
       hypre_PCGSetTwoNorm(pcg_solver, two_norm);
       hypre_PCGSetStopCrit(pcg_solver, stop_crit);
       hypre_PCGSetRelChange(pcg_solver, rel_change);
+      hypre_PCGSetRecomputeResidual(pcg_solver, recompute_residual);
+      hypre_PCGSetRecomputeResidualP(pcg_solver, recompute_residual_p);
       hypre_PCGSetLogging(pcg_solver, logging);
       hypre_PCGSetPrintLevel(pcg_solver, sol_print_level);
       hypre_PCGSetHybrid(pcg_solver,-1);

@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_parcsr_ls.h"
 
@@ -46,7 +41,7 @@ HYPRE_ParCSRGMRESCreate( MPI_Comm comm, HYPRE_Solver *solver )
  * HYPRE_ParCSRGMRESDestroy
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_ParCSRGMRESDestroy( HYPRE_Solver solver )
 {
    return( hypre_GMRESDestroy( (void *) solver ) );
@@ -56,7 +51,7 @@ HYPRE_ParCSRGMRESDestroy( HYPRE_Solver solver )
  * HYPRE_ParCSRGMRESSetup
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_ParCSRGMRESSetup( HYPRE_Solver solver,
                         HYPRE_ParCSRMatrix A,
                         HYPRE_ParVector b,
@@ -72,7 +67,7 @@ HYPRE_ParCSRGMRESSetup( HYPRE_Solver solver,
  * HYPRE_ParCSRGMRESSolve
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_ParCSRGMRESSolve( HYPRE_Solver solver,
                         HYPRE_ParCSRMatrix A,
                         HYPRE_ParVector b,
@@ -225,8 +220,52 @@ HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_ParCSRGMRESGetResidual( HYPRE_Solver solver, 
+HYPRE_ParCSRGMRESGetResidual( HYPRE_Solver solver,
                               HYPRE_ParVector *residual   )
 {
    return( HYPRE_GMRESGetResidual( solver, (void *) residual ) );
 }
+
+/*--------------------------------------------------------------------------
+ * Setup routine for on-processor triangular solve as preconditioning.
+ *--------------------------------------------------------------------------*/
+HYPRE_Int HYPRE_ParCSROnProcTriSetup(HYPRE_Solver       solver,
+                                     HYPRE_ParCSRMatrix HA,
+                                     HYPRE_ParVector    Hy,
+                                     HYPRE_ParVector    Hx)
+{
+   hypre_ParCSRMatrix *A = (hypre_ParCSRMatrix *) HA;
+
+   // Check for and get topological ordering of matrix
+   if (!hypre_ParCSRMatrixProcOrdering(A))
+   {
+      hypre_CSRMatrix *A_diag  = hypre_ParCSRMatrixDiag(A);
+      HYPRE_Real *A_diag_data  = hypre_CSRMatrixData(A_diag);
+      HYPRE_Int *A_diag_i      = hypre_CSRMatrixI(A_diag);
+      HYPRE_Int *A_diag_j      = hypre_CSRMatrixJ(A_diag);
+      HYPRE_Int n              = hypre_CSRMatrixNumRows(A_diag);
+      HYPRE_Int *proc_ordering = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
+      hypre_topo_sort(A_diag_i, A_diag_j, A_diag_data, proc_ordering, n);
+      hypre_ParCSRMatrixProcOrdering(A) = proc_ordering;
+   }
+
+   return 0;
+}
+
+
+/*--------------------------------------------------------------------------
+ * Solve routine for on-processor triangular solve as preconditioning.
+ *--------------------------------------------------------------------------*/
+HYPRE_Int HYPRE_ParCSROnProcTriSolve(HYPRE_Solver       solver,
+                                     HYPRE_ParCSRMatrix HA,
+                                     HYPRE_ParVector    Hy,
+                                     HYPRE_ParVector    Hx)
+{
+   hypre_ParCSRMatrix *A = (hypre_ParCSRMatrix *) HA;
+   hypre_ParVector    *y = (hypre_ParVector *) Hy;
+   hypre_ParVector    *x = (hypre_ParVector *) Hx;
+   HYPRE_Int ierr = 0;
+   ierr = hypre_BoomerAMGRelax(A,y,NULL,10,0,1,1,NULL,x,NULL,NULL);
+   return ierr;
+}
+

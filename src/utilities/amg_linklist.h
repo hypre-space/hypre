@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -29,15 +24,15 @@ extern "C" {
 
 struct double_linked_list
 {
-       HYPRE_Int                        data;
-       struct double_linked_list *next_elt;
-       struct double_linked_list *prev_elt;
-       HYPRE_Int                        head;
-       HYPRE_Int                        tail;
+   HYPRE_Int                  data;
+   struct double_linked_list *next_elt;
+   struct double_linked_list *prev_elt;
+   HYPRE_Int                  head;
+   HYPRE_Int                  tail;
 };
 
 typedef struct double_linked_list hypre_ListElement;
-typedef hypre_ListElement  *hypre_LinkList;  
+typedef hypre_ListElement *hypre_LinkList;  
 
 #ifdef __cplusplus
 }

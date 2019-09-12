@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -82,6 +77,7 @@ main( hypre_int argc,
    HYPRE_Real          conx, cony, conz;
    HYPRE_Int           solver_id;
    HYPRE_Int           solver_type;
+   HYPRE_Int           recompute_res;
 
    /*HYPRE_Real          dxyz[3];*/
 
@@ -236,6 +232,7 @@ main( hypre_int argc,
 
    solver_id = 0;
    solver_type = 1;
+   recompute_res = 0;   /* What should be the default here? */
 
    istart[0] = -3;
    istart[1] = -3;
@@ -404,6 +401,11 @@ main( hypre_int argc,
       {
          arg_index++;
          solver_type = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-recompute") == 0 )
+      {
+         arg_index++;
+         recompute_res = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-cf") == 0 )
       {
@@ -583,6 +585,7 @@ main( hypre_int argc,
       hypre_printf("  -solver_type <ID>   : solver type for Hybrid\n");
       hypre_printf("                        1 - PCG (default)\n");
       hypre_printf("                        2 - GMRES\n");
+      hypre_printf("  -recompute <bool>   : Recompute residual in PCG?\n");
       hypre_printf("  -cf <cf>            : convergence factor for Hybrid\n");
       hypre_printf("\n");
 
@@ -2206,6 +2209,7 @@ main( hypre_int argc,
          HYPRE_StructHybridSetPrintLevel(solver, 1);
          HYPRE_StructHybridSetLogging(solver, 1);
          HYPRE_StructHybridSetSolverType(solver, solver_type);
+         HYPRE_StructHybridSetRecomputeResidual(solver, recompute_res);
 
          if (solver_id == 20)
          {
