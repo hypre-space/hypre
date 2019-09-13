@@ -972,10 +972,12 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             }
             else /* standard AMG or unknown approach */
             {
+               /*               printf("Level = %d, threshold=%g row_sum=%g\n",level,strong_threshold,max_row_sum);
+               printf("num_functions = %d, first_func=%p \n",num_functions,dof_func_array[level]);
+               printf("matrix pointers A %p S %p \n",A_array[level],S);*/
                hypre_BoomerAMGCreateS(A_array[level],
                                       strong_threshold, max_row_sum,
                                       num_functions, dof_func_array[level], &S);
-
                col_offd_S_to_A = NULL;
                if (strong_threshold > S_commpkg_switch)
                   hypre_BoomerAMGCreateSCommPkg(A_array[level],S,

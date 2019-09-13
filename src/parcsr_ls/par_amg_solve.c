@@ -165,6 +165,8 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
       }
       else
       {
+         //         hypre_ParVectorPrint( F_array[0],"F_array");
+         //         hypre_ParVectorPrint( Vtemp,"Vtemp");
          hypre_ParVectorCopy(F_array[0], Vtemp);
          if (tol > 0)
          {

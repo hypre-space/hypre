@@ -702,12 +702,18 @@ hypre_GetActualMemLocation(HYPRE_Int location)
    return HYPRE_MEMORY_UNSET;
 }
 
+ 
+   //extern HYPRE_Int hypre_exec_policy2;
+
+void hypre_SetExecPolicy( HYPRE_Int policy );
+HYPRE_Int hypre_GetExecPolicy1(HYPRE_Int location);
+   
+/* for unary operation */
 /*---------------------------------------------------
  * hypre_GetExecPolicy
  * Return execution policy based on memory locations
  *---------------------------------------------------*/
-/* for unary operation */
-static inline HYPRE_Int
+/*static inline HYPRE_Int
 hypre_GetExecPolicy1(HYPRE_Int location)
 {
    HYPRE_Int exec = HYPRE_EXEC_UNSET;
@@ -724,13 +730,14 @@ hypre_GetExecPolicy1(HYPRE_Int location)
          exec = HYPRE_EXEC_DEVICE;
          break;
       case HYPRE_MEMORY_SHARED :
-         exec = HYPRE_EXEC_HOST;
+         exec = hypre_exec_policy2;
+         //         exec = HYPRE_EXEC_HOST;
          break;
    }
 
    return exec;
 }
-
+*/
 /* for binary operation */
 static inline HYPRE_Int
 hypre_GetExecPolicy2(HYPRE_Int location1,

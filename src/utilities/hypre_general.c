@@ -11,6 +11,38 @@
 #include <Kokkos_Core.hpp>
 #endif
 
+HYPRE_Int hypre_exec_policy2 = HYPRE_EXEC_HOST;
+
+void hypre_SetExecPolicy( HYPRE_Int policy )
+{
+   if( policy == HYPRE_EXEC_HOST || policy==HYPRE_EXEC_DEVICE)
+      hypre_exec_policy2 = policy;
+}
+HYPRE_Int hypre_GetExecPolicy1(HYPRE_Int location)
+{
+   HYPRE_Int exec = HYPRE_EXEC_UNSET;
+
+   location = hypre_GetActualMemLocation(location);
+
+   switch (location)
+   {
+      case HYPRE_MEMORY_HOST :
+      case HYPRE_MEMORY_HOST_PINNED :
+         exec = HYPRE_EXEC_HOST;
+         break;
+      case HYPRE_MEMORY_DEVICE :
+         exec = HYPRE_EXEC_DEVICE;
+         break;
+      case HYPRE_MEMORY_SHARED :
+         exec = hypre_exec_policy2;
+         //         exec = HYPRE_EXEC_HOST;
+         break;
+   }
+
+   return exec;
+}
+
+
 hypre_Handle *hypre_handle = NULL;
 
 hypre_Handle*

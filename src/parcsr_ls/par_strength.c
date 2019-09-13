@@ -546,11 +546,13 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
 
    if (exec == HYPRE_EXEC_HOST)
    {
+      /*      printf(" createS Host \n");*/
       ierr = hypre_BoomerAMGCreateSHost(A,strength_threshold,max_row_sum,num_functions,dof_func,S_ptr);
    }
 #if defined(HYPRE_USING_CUDA)
    else
    {
+      /*      printf(" createS Device \n");*/
       ierr = hypre_BoomerAMGCreateSDevice(A,strength_threshold,max_row_sum,num_functions,dof_func,S_ptr);
    }
 #endif

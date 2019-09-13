@@ -170,7 +170,7 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
    }
 
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-   if (num_functions > 1)
+   if (num_functions > 1 )
    {
       int_buf_data = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg,
 						num_sends), HYPRE_MEMORY_HOST);
@@ -182,14 +182,13 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
 		int_buf_data[index++]
 		 = dof_func[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
       }
-
       comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data,
-	dof_func_offd);
+                                                     dof_func_offd);
       hypre_ParCSRCommHandleDestroy(comm_handle);
 
       hypre_TFree(int_buf_data, HYPRE_MEMORY_HOST);
       hypre_TMemcpy( dof_func_offd_dev, dof_func_offd, HYPRE_Int, num_cols_offd, HYPRE_MEMORY_DEVICE,
-		     HYPRE_MEMORY_HOST );
+                     HYPRE_MEMORY_HOST );
       dof_func_dev = hypre_CTAlloc(HYPRE_Int,  num_variables, HYPRE_MEMORY_DEVICE);
       hypre_TMemcpy( dof_func_dev, dof_func, HYPRE_Int, num_variables, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST );
    }
@@ -247,11 +246,18 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
    *S_ptr        = S;
 
    /*   hypre_TFree(prefix_sum_workspace, HYPRE_MEMORY_HOST);*/
-   hypre_TFree(dof_func_offd, HYPRE_MEMORY_HOST);
+   if( num_cols_offd >0 && num_functions > 1 )
+   {
+      hypre_TFree(dof_func_offd, HYPRE_MEMORY_HOST);
+      hypre_TFree(dof_func_offd_dev, HYPRE_MEMORY_DEVICE);
+   }
+   if( num_functions > 1 )
+      hypre_TFree(dof_func_dev, HYPRE_MEMORY_DEVICE);
+
    hypre_TFree(S_temp_diag_j, HYPRE_MEMORY_SHARED);
-   hypre_TFree(S_temp_offd_j, HYPRE_MEMORY_SHARED);
-   hypre_TFree(dof_func_dev, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(dof_func_offd_dev, HYPRE_MEMORY_DEVICE);
+   if( num_cols_offd > 0 )
+      hypre_TFree(S_temp_offd_j, HYPRE_MEMORY_SHARED);
+
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_CREATES] += hypre_MPI_Wtime();

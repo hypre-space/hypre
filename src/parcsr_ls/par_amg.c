@@ -444,14 +444,15 @@ hypre_BoomerAMGDestroy( void *data )
    MPI_Comm new_comm = hypre_ParAMGDataNewComm(amg_data);
    HYPRE_Int i;
    HYPRE_Int *grid_relax_type = hypre_ParAMGDataGridRelaxType(amg_data);
-
+   /*   HYPRE_Int myid, prproc=2;*/
    HYPRE_ANNOTATION_BEGIN("BoomerAMG.destroy");
+
+   /*   hypre_MPI_Comm_rank(MPI_COMM_WORLD,&myid);   */
 
 #ifdef HAVE_DSUPERLU
    if (hypre_ParAMGDataDSLUThreshold(amg_data) > 0)
       hypre_SLUDistDestroy(hypre_ParAMGDataDSLUSolver(amg_data));
 #endif
-
    if (hypre_ParAMGDataMaxEigEst(amg_data))
    {
       hypre_TFree(hypre_ParAMGDataMaxEigEst(amg_data), HYPRE_MEMORY_HOST);
@@ -649,6 +650,7 @@ hypre_BoomerAMGDestroy( void *data )
       hypre_TFree(hypre_ParAMGDataPointDofMapArray(amg_data), HYPRE_MEMORY_HOST);
       hypre_ParAMGDataPointDofMapArray(amg_data) = NULL;
    }
+
    if (smooth_num_levels)
    {
       if (hypre_ParAMGDataSmoothType(amg_data) == 7)

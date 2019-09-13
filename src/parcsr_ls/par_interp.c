@@ -2244,18 +2244,18 @@ hypre_BoomerAMGBuildDirInterpHost( hypre_ParCSRMatrix   *A,
 
    P_diag_size = jj_counter;
 
-   P_diag_i    = hypre_CTAlloc(HYPRE_Int,  n_fine+1, HYPRE_MEMORY_HOST);
-   P_diag_j    = hypre_CTAlloc(HYPRE_Int,  P_diag_size, HYPRE_MEMORY_HOST);
-   P_diag_data = hypre_CTAlloc(HYPRE_Real,  P_diag_size, HYPRE_MEMORY_HOST);
+   P_diag_i    = hypre_CTAlloc(HYPRE_Int,  n_fine+1, HYPRE_MEMORY_SHARED);
+   P_diag_j    = hypre_CTAlloc(HYPRE_Int,  P_diag_size, HYPRE_MEMORY_SHARED);
+   P_diag_data = hypre_CTAlloc(HYPRE_Real,  P_diag_size, HYPRE_MEMORY_SHARED);
 
    P_diag_i[n_fine] = jj_counter; 
 
 
    P_offd_size = jj_counter_offd;
 
-   P_offd_i    = hypre_CTAlloc(HYPRE_Int,  n_fine+1, HYPRE_MEMORY_HOST);
-   P_offd_j    = hypre_CTAlloc(HYPRE_Int,  P_offd_size, HYPRE_MEMORY_HOST);
-   P_offd_data = hypre_CTAlloc(HYPRE_Real,  P_offd_size, HYPRE_MEMORY_HOST);
+   P_offd_i    = hypre_CTAlloc(HYPRE_Int,  n_fine+1, HYPRE_MEMORY_SHARED);
+   P_offd_j    = hypre_CTAlloc(HYPRE_Int,  P_offd_size, HYPRE_MEMORY_SHARED);
+   P_offd_data = hypre_CTAlloc(HYPRE_Real,  P_offd_size, HYPRE_MEMORY_SHARED);
 
    /*-----------------------------------------------------------------------
     *  Intialize some stuff.
@@ -2696,14 +2696,18 @@ hypre_BoomerAMGBuildDirInterp( hypre_ParCSRMatrix   *A,
 
    if (exec == HYPRE_EXEC_HOST)
    {
+      /*      printf(" dir interp Host\n");*/
       ierr = hypre_BoomerAMGBuildDirInterpHost(A,CF_marker,S,num_cpts_global,num_functions,dof_func,
                                                debug_flag,trunc_factor,max_elmts,col_offd_S_to_A, P_ptr);
+      /*      printf(" done dir interp Host\n");*/
    }
 #if defined(HYPRE_USING_CUDA)
    else
    {
+      /*      printf(" dir interp Device\n");*/
       ierr = hypre_BoomerAMGBuildDirInterpDevice(A,CF_marker,S,num_cpts_global,num_functions,dof_func,
                                                debug_flag,trunc_factor,max_elmts,col_offd_S_to_A, P_ptr);
+      /*      printf(" done dir interp Device\n");*/
    }
 #endif
 

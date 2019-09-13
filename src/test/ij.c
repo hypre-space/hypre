@@ -394,6 +394,9 @@ main( hypre_int argc,
    hypre_PrintTiming("Hypre init times", hypre_MPI_COMM_WORLD);
    hypre_FinalizeTiming(time_index);
    hypre_ClearTiming();
+#ifdef HYPRE_USING_CUDA
+   hypre_SetExecPolicy(HYPRE_EXEC_DEVICE);
+#endif
 
    //omp_set_default_device(0);
    //nvtxDomainHandle_t domain = nvtxDomainCreateA("Domain_A");
@@ -1009,6 +1012,16 @@ main( hypre_int argc,
          mgr_num_restrict_sweeps = atoi(argv[arg_index++]);
       }
       /* end mgr options */
+      else if ( strcmp(argv[arg_index], "-exec_host") == 0 )
+      {
+         arg_index++;
+         hypre_SetExecPolicy(HYPRE_EXEC_HOST);
+      }
+      else if ( strcmp(argv[arg_index], "-exec_device") == 0 )
+      {
+         arg_index++;
+         hypre_SetExecPolicy(HYPRE_EXEC_DEVICE);
+      }
       else
       {
          arg_index++;
@@ -2207,7 +2220,6 @@ main( hypre_int argc,
    /*-----------------------------------------------------------
     * Set up the interp vector
     *-----------------------------------------------------------*/
-
    if ( build_rbm)
    {
       char new_file_name[80];
@@ -3016,9 +3028,7 @@ main( hypre_int argc,
       hypre_BeginTiming(time_index);
 
       PUSH_RANGE("solve", 1)
-
       HYPRE_BoomerAMGSolve(amg_solver, parcsr_A, b, x);
-
       POP_RANGE
 
       hypre_EndTiming(time_index);
