@@ -12,6 +12,14 @@
 #include "HYPRE_struct_mv.h"
 #include "_hypre_utilities.h"
 
+/* stringification:
+ * _Pragma(string-literal), so we need to cast argument to a string
+ * The three dots as last argument of the macro tells compiler that this is a variadic macro.
+ * I.e. this is a macro that receives variable number of arguments.
+ */
+#define HYPRE_STR(s...) #s
+#define HYPRE_XSTR(s...) HYPRE_STR(s)
+
 #if defined(HYPRE_USING_RAJA)
 /******************************************************************************
  * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
@@ -1174,13 +1182,6 @@ else                                                            \
 
 #include "omp.h"
 
-/* stringification:
- * _Pragma(string-literal), so we need to cast argument to a string
- * The three dots as last argument of the macro tells compiler that this is a variadic macro. 
- * I.e. this is a macro that receives variable number of arguments. 
- */
-#define HYPRE_STR(s...) #s
-#define HYPRE_XSTR(s...) HYPRE_STR(s)
 /* concatenation:
  */
 #define HYPRE_CONCAT2(x, y) x ## _ ## y
@@ -1750,9 +1751,9 @@ hypre__J = hypre__thread;  i1 = i2 = 0; \
 #ifdef HYPRE_USING_OPENMP
 #define HYPRE_BOX_REDUCTION 
 #ifdef WIN32
-#define Pragma(x) __pragma(#x)
+#define Pragma(x) __pragma(HYPRE_XSTR(x))
 #else
-#define Pragma(x) _Pragma(#x)
+#define Pragma(x) _Pragma(HYPRE_XSTR(x))
 #endif
 #define OMP1 Pragma(omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_BOX_REDUCTION HYPRE_SMP_SCHEDULE)
 #else
