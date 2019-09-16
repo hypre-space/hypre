@@ -780,6 +780,9 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
       }
    }
 
+   // Setup extra info for specific relaxation methods
+   hypre_ParCompGridSetupRelax(amg_data);
+
    // Cleanup memory
    hypre_TFree(num_resizes, HYPRE_MEMORY_HOST);
    hypre_TFree(nodes_added_on_level, HYPRE_MEMORY_HOST);

@@ -520,109 +520,9 @@ FAC_Cheby( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int le
 
    cheby_order = order -1;
 
-   // Setup chebyshev coefficients if necessary
-   if (!coefs)
-   {
-      // Select submatrix of real to real connections
-      HYPRE_Int nnz = 0;
-      for (i = 0; i < hypre_ParCompGridNumRealNodes(compGrid); i++)
-      {
-         for (j = hypre_CSRMatrixI(A)[i]; j < hypre_CSRMatrixI(A)[i+1]; j++)
-         {
-            if (hypre_CSRMatrixJ(A)[j] < hypre_ParCompGridNumRealNodes(compGrid)) nnz++;
-         }
-      }
-      HYPRE_Int *A_real_i = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumRealNodes(compGrid)+1, HYPRE_MEMORY_SHARED);
-      HYPRE_Int *A_real_j = hypre_CTAlloc(HYPRE_Int, nnz, HYPRE_MEMORY_SHARED);
-      HYPRE_Complex *A_real_data = hypre_CTAlloc(HYPRE_Complex, nnz, HYPRE_MEMORY_SHARED);
-      nnz = 0;
-      for (i = 0; i < hypre_ParCompGridNumRealNodes(compGrid); i++)
-      {
-         for (j = hypre_CSRMatrixI(A)[i]; j < hypre_CSRMatrixI(A)[i+1]; j++)
-         {
-            if (hypre_CSRMatrixJ(A)[j] < hypre_ParCompGridNumRealNodes(compGrid))
-            {
-               A_real_j[nnz] = hypre_CSRMatrixJ(A)[j];
-               A_real_data[nnz] = hypre_CSRMatrixData(A)[j];
-               nnz++;
-            }
-         }
-         A_real_i[i+1] = nnz;
-      }
-
-      HYPRE_BigInt *row_starts = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-      row_starts[0] = 0;
-      row_starts[1] = hypre_ParCompGridNumRealNodes(compGrid);
-      hypre_ParCSRMatrix *A_real = hypre_ParCSRMatrixCreate( MPI_COMM_SELF,
-                          (HYPRE_BigInt) hypre_ParCompGridNumRealNodes(compGrid),
-                          (HYPRE_BigInt) hypre_ParCompGridNumRealNodes(compGrid),
-                          row_starts,
-                          NULL,
-                          0,
-                          nnz,
-                          0 );
-      hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(A_real)) = A_real_i;
-      hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(A_real)) = A_real_j;
-      hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(A_real)) = A_real_data;
-      hypre_CSRMatrixInitialize(hypre_ParCSRMatrixOffd(A_real));
-      hypre_ParCSRMatrixColMapOffd(A_real) = hypre_CTAlloc(HYPRE_BigInt, 0, HYPRE_MEMORY_HOST);
-
-      HYPRE_Real max_eig, min_eig = 0;
-
-      if (hypre_ParAMGDataChebyEigEst(amg_data)) hypre_ParCSRMaxEigEstimateCG(A_real, scale, hypre_ParAMGDataChebyEigEst(amg_data), &max_eig, &min_eig);
-      else hypre_ParCSRMaxEigEstimate(A_real, scale, &max_eig);
-
-      HYPRE_Real *dummy_ptr;
-      hypre_ParCSRRelax_Cheby_Setup(hypre_ParAMGDataAArray(amg_data)[level], 
-                            max_eig,      
-                            min_eig,     
-                            hypre_ParAMGDataChebyFraction(amg_data),   
-                            order,
-                            0,
-                            hypre_ParAMGDataChebyVariant(amg_data),           
-                            &coefs,
-                            &dummy_ptr);
-
-      hypre_ParCompGridChebyCoeffs(compGrid) = coefs;
-
-      hypre_ParCSRMatrixDestroy(A_real);
-   }
-
-   // Calculate diagonal scaling values if necessary
-   if (!hypre_ParCompGridL1Norms(compGrid) && scale)
-   {
-      hypre_ParCompGridL1Norms(compGrid) = hypre_CTAlloc(HYPRE_Real, hypre_ParCompGridNumNodes(compGrid), HYPRE_MEMORY_SHARED);
-      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
-      {
-         for (j = hypre_ParCompGridARowPtr(compGrid)[i]; j < hypre_ParCompGridARowPtr(compGrid)[i+1]; j++)
-         {
-            if (hypre_ParCompGridAColInd(compGrid)[j] == i)
-            {
-               hypre_ParCompGridL1Norms(compGrid)[i] = 1.0/sqrt(hypre_ParCompGridAData(compGrid)[j]);
-               break;
-            }
-         }
-      }
-   }
-
-   // Setup temporary/auxiliary vectors
-   if (!hypre_ParCompGridTemp(compGrid))
-   {      
-      hypre_ParCompGridTemp(compGrid) = hypre_SeqVectorCreate(hypre_ParCompGridNumNodes(compGrid));
-      hypre_SeqVectorInitialize(hypre_ParCompGridTemp(compGrid));
-   }
+   // Get temporary/auxiliary vectors
    hypre_Vector *r = hypre_ParCompGridTemp(compGrid);
-   if (!hypre_ParCompGridTemp2(compGrid))
-   {      
-      hypre_ParCompGridTemp2(compGrid) = hypre_SeqVectorCreate(hypre_ParCompGridNumNodes(compGrid));
-      hypre_SeqVectorInitialize(hypre_ParCompGridTemp2(compGrid));
-   }
    hypre_Vector *u_before = hypre_ParCompGridTemp2(compGrid);
-   if (!hypre_ParCompGridTemp3(compGrid))
-   {      
-      hypre_ParCompGridTemp3(compGrid) = hypre_SeqVectorCreate(hypre_ParCompGridNumNodes(compGrid));
-      hypre_SeqVectorInitialize(hypre_ParCompGridTemp3(compGrid));
-   }
    hypre_Vector *v = hypre_ParCompGridTemp3(compGrid);
 
    hypre_SeqVectorCopy(u, u_before);
@@ -714,47 +614,8 @@ FAC_CFL1Jacobi( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_I
 
    HYPRE_Real relax_weight = hypre_ParAMGDataRelaxWeight(amg_data)[level];
 
-   // Calculate l1_norms if necessary
-   if (!hypre_ParCompGridL1Norms(compGrid))
-   {
-      hypre_ParCompGridL1Norms(compGrid) = hypre_CTAlloc(HYPRE_Real, hypre_ParCompGridNumNodes(compGrid), HYPRE_MEMORY_SHARED);
-      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
-      {
-         HYPRE_Int cf_diag = hypre_ParCompGridCFMarkerArray(compGrid)[i];
-         for (j = hypre_ParCompGridARowPtr(compGrid)[i]; j < hypre_ParCompGridARowPtr(compGrid)[i+1]; j++)
-         {
-            if (hypre_ParCompGridCFMarkerArray(compGrid)[ hypre_ParCompGridAColInd(compGrid)[j] ] == cf_diag) 
-            {
-               hypre_ParCompGridL1Norms(compGrid)[i] += fabs(hypre_ParCompGridAData(compGrid)[j]);
-            }
-         }
-      }
-   }   
-   // Setup temporary/auxiliary vectors
-   if (!hypre_ParCompGridTemp(compGrid))
-   {      
-      hypre_ParCompGridTemp(compGrid) = hypre_SeqVectorCreate(hypre_ParCompGridNumNodes(compGrid));
-      hypre_SeqVectorInitialize(hypre_ParCompGridTemp(compGrid));
-   }
-
 #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
-   // Setup c and f point masks
-   if (!hypre_ParCompGridCMask(compGrid))
-   {
-      int num_c_points = 0;
-      int num_f_points = 0;
-      for (i = 0; i < hypre_ParCompGridNumRealNodes(compGrid); i++) if (hypre_ParCompGridCFMarkerArray(compGrid)[i]) num_c_points++;
-      num_f_points = hypre_ParCompGridNumRealNodes(compGrid) - num_c_points;
-      hypre_ParCompGridNumCPoints(compGrid) = num_c_points;
-      hypre_ParCompGridCMask(compGrid) = hypre_CTAlloc(int, num_c_points, HYPRE_MEMORY_SHARED);
-      hypre_ParCompGridFMask(compGrid) = hypre_CTAlloc(int, num_f_points, HYPRE_MEMORY_SHARED);
-      int c_cnt = 0, f_cnt = 0;
-      for (i = 0; i < hypre_ParCompGridNumRealNodes(compGrid); i++)
-      {
-         if (hypre_ParCompGridCFMarkerArray(compGrid)[i]) hypre_ParCompGridCMask(compGrid)[c_cnt++] = i;
-         else hypre_ParCompGridFMask(compGrid)[f_cnt++] = i;
-      }
-   }
+
    // Get cusparse handle and setup bsr matrix
    static cusparseHandle_t handle;
    static cusparseMatDescr_t descr;
