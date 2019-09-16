@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -22,7 +17,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    
+
 /*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGCreate
  *--------------------------------------------------------------------------*/
@@ -41,7 +36,7 @@ hypre_F90_IFACE(hypre_boomeramgcreate, HYPRE_BOOMERAMGCREATE)
  * HYPRE_BoomerAMGDestroy
  *--------------------------------------------------------------------------*/
 
-void 
+void
 hypre_F90_IFACE(hypre_boomeramgdestroy, HYPRE_BOOMERAMGDESTROY)
    ( hypre_F90_Obj *solver,
      hypre_F90_Int *ierr    )
@@ -55,7 +50,7 @@ hypre_F90_IFACE(hypre_boomeramgdestroy, HYPRE_BOOMERAMGDESTROY)
  * HYPRE_BoomerAMGSetup
  *--------------------------------------------------------------------------*/
 
-void 
+void
 hypre_F90_IFACE(hypre_boomeramgsetup, HYPRE_BOOMERAMGSETUP)
    ( hypre_F90_Obj *solver,
      hypre_F90_Obj *A,
@@ -75,7 +70,7 @@ hypre_F90_IFACE(hypre_boomeramgsetup, HYPRE_BOOMERAMGSETUP)
  * HYPRE_BoomerAMGSolve
  *--------------------------------------------------------------------------*/
 
-void 
+void
 hypre_F90_IFACE(hypre_boomeramgsolve, HYPRE_BOOMERAMGSOLVE)
    ( hypre_F90_Obj *solver,
      hypre_F90_Obj *A,
@@ -95,7 +90,7 @@ hypre_F90_IFACE(hypre_boomeramgsolve, HYPRE_BOOMERAMGSOLVE)
  * HYPRE_BoomerAMGSolveT
  *--------------------------------------------------------------------------*/
 
-void 
+void
 hypre_F90_IFACE(hypre_boomeramgsolvet, HYPRE_BOOMERAMGSOLVET)
    ( hypre_F90_Obj *solver,
      hypre_F90_Obj *A,
@@ -917,7 +912,7 @@ void
 hypre_F90_IFACE(hypre_boomeramgsetlevelouterwt, HYPRE_BOOMERAMGSETLEVELOUTERWT)
    ( hypre_F90_Obj *solver,
      hypre_F90_Real *outer_wt,
-     hypre_F90_Int *level,                                    
+     hypre_F90_Int *level,
      hypre_F90_Int *ierr          )
 {
    *ierr = (hypre_F90_Int)
@@ -2002,7 +1997,7 @@ hypre_F90_IFACE(hypre_boomeramgsetseqthrshold, HYPRE_BOOMERAMGSETSEQTHRSHOLD)
            hypre_F90_PassInt (seq_th) ) );
 }
 
-#ifdef HAVE_DSUPERLU
+#ifdef HYPRE_USING_DSUPERLU
 /*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetDSLUThreshold
  *--------------------------------------------------------------------------*/
@@ -2105,7 +2100,7 @@ hypre_F90_IFACE(hypre_boomeramgsetnumsamples, HYPRE_BOOMERAMGSETNUMSAMPLES)
 /*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetCGCIts
  *--------------------------------------------------------------------------*/
-                                                                    
+
 void
 hypre_F90_IFACE(hypre_boomeramgsetcgcits, HYPRE_BOOMERAMGSETCGCITS)
    ( hypre_F90_Obj *solver,

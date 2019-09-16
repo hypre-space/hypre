@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_parcsr_ls.h"
 #include "float.h"
@@ -295,7 +290,7 @@ HYPRE_Int hypre_AMESetup(void *esolver)
          }
       }
 
-      hypre_ParCSRMatrixTranspose(ams_data -> G, &Gt, 1);
+      hypre_ParCSRMatrixTranspose(ams_data->G, &Gt, 1);
 
       /* Use a Matvec communication to find which of the edges
          connected to local vertices are on the boundary */
@@ -311,9 +306,10 @@ HYPRE_Int hypre_AMESetup(void *esolver)
          comm_pkg = hypre_ParCSRMatrixCommPkg(Gt);
 
          num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-         int_buf_data = hypre_CTAlloc(HYPRE_Int, 
-                                      hypre_ParCSRCommPkgSendMapStart(comm_pkg, 
-                                                                      num_sends), HYPRE_MEMORY_HOST);
+         int_buf_data = hypre_CTAlloc(
+               HYPRE_Int,
+               hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+               HYPRE_MEMORY_HOST );
          index = 0;
          for (i = 0; i < num_sends; i++)
          {

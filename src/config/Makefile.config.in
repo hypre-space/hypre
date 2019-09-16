@@ -1,14 +1,7 @@
-#BHEADER**********************************************************************
-# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
-# Produced at the Lawrence Livermore National Laboratory.
-# This file is part of HYPRE.  See file COPYRIGHT for details.
+# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
-# HYPRE is free software; you can redistribute it and/or modify it under the
-# terms of the GNU Lesser General Public License (as published by the Free
-# Software Foundation) version 2.1 dated February 1999.
-#
-# $Revision$
-#EHEADER**********************************************************************
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 ###############################################################################
 ##  All configurable variables are defined in the file named Makefile.config.in
@@ -92,7 +85,7 @@ LDFLAGS = @LDFLAGS@
 LIBS    = @LIBS@ @CALIPER_LIBS@ @HYPRE_CUDA_LIBS@ @RAJA_LIBS@ @KOKKOS_LIBS@
 FLIBS   = @FLIBS@
 
-INCLUDES = @CALIPER_INCLUDE@ @HYPRE_RAJA_INCLUDE@ @HYPRE_KOKKOS_INCLUDE@ @HYPRE_CUDA_INCL@
+INCLUDES = @CALIPER_INCLUDE@ @HYPRE_RAJA_INCLUDE@ @HYPRE_KOKKOS_INCLUDE@ @HYPRE_CUDA_INCL@ @HYPRE_NAP_INCLUDE@
 
 ##################################################################
 ##  LAPACK Library Flags 
@@ -113,6 +106,11 @@ MPIINCLUDE = @MPIINCLUDE@
 MPILIBDIRS = @MPILIBDIRS@
 MPILIBS    = @MPILIBS@
 MPIFLAGS   = @MPIFLAGS@
+
+##################################################################
+##  Node Aware MPI options
+##################################################################
+HYPRE_NAP_INCLUDE = @HYPRE_NAP_INCLUDE@
 
 ##################################################################
 ##  CUDA options
@@ -166,6 +164,7 @@ HYPRE_RAJA_LIB          = @HYPRE_RAJA_LIB@
 ##################################################################
 ##  kokkos options
 ##################################################################
+HYPRE_KOKKOS_SRC_DIR    = @HYPRE_KOKKOS_SRC_DIR@
 HYPRE_KOKKOS_LIB_DIR    = @HYPRE_KOKKOS_LIB_DIR@
 HYPRE_KOKKOS_INCLUDE    = @HYPRE_KOKKOS_INCLUDE@
 HYPRE_KOKKOS_LIB        = @HYPRE_KOKKOS_LIB@

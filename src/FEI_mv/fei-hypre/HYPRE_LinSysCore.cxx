@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- *********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 //***************************************************************************
 // system includes
@@ -567,7 +562,7 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
       else if ( HYPreconID_ == HYSYSPDE )
          HYPRE_ParCSRSysPDEDestroy( HYPrecon_ );
 #endif
-#ifdef HAVE_DSUPERLU
+#ifdef HYPRE_USING_DSUPERLU
       else if ( HYPreconID_ == HYDSLU )
          HYPRE_LSI_DSuperLUDestroy(HYPrecon_);
 #endif
@@ -4160,7 +4155,7 @@ void HYPRE_LinSysCore::selectSolver(char* name)
    else if ( !strcmp(name, "dsuperlu") )
    {
       strcpy( HYSolverName_, name );
-#ifdef HAVE_DSUPERLU
+#ifdef HYPRE_USING_DSUPERLU
       HYSolverID_ = HYDSUPERLU;
 #else
       printf("HYPRE_LinSysCore:: DSuperLU not available.\n");
@@ -4303,7 +4298,7 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
       else if (HYPreconID_ == HYSYSPDE)
          HYPRE_ParCSRSysPDEDestroy(HYPrecon_);
 #endif
-#ifdef HAVE_DSUPERLU
+#ifdef HYPRE_USING_DSUPERLU
       else if (HYPreconID_ == HYDSLU)
          HYPRE_LSI_DSuperLUDestroy(HYPrecon_);
 #endif
@@ -4430,7 +4425,7 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
       HYPreconID_ = HYSYSPDE;
    }
 #endif
-#ifdef HAVE_DSUPERLU
+#ifdef HYPRE_USING_DSUPERLU
    else if (!strcmp(name, "dsuperlu"))
    {
       strcpy(HYPreconName_, name);
@@ -4538,7 +4533,7 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
 #endif
          break;
       case HYDSLU :
-#ifdef HAVE_DSUPERLU
+#ifdef HYPRE_USING_DSUPERLU
          HYPRE_LSI_DSuperLUCreate(comm_, &HYPrecon_);
 #else
          printf("HYPRE_LSC::selectPreconditioner-DSUPERLU unsupported.\n");
@@ -5756,7 +5751,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
          //----------------------------------------------------------------
 
       case HYDSUPERLU :
-#ifdef HAVE_DSUPERLU
+#ifdef HYPRE_USING_DSUPERLU
          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
          {
             printf("***************************************************\n");

@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -344,38 +339,48 @@ hypre_PrefixSumInt(HYPRE_Int   nvals,
    nthreads = hypre_NumThreads();
    bsize = (nvals + nthreads - 1) / nthreads; /* This distributes the remainder */
 
-   /* Compute preliminary partial sums (in parallel) within each interval */
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE
-#endif
-   for (j = 0; j < nvals; j += bsize)
+   if (nvals < nthreads || bsize == 1)
    {
-      HYPRE_Int  i, n = hypre_min((j+bsize), nvals);
-
       sums[0] = 0;
-      for (i = j+1; i < n; i++)
-      {
-         sums[i] = sums[i-1] + vals[i-1];
-      }
+      for (j=1; j < nvals; j++)
+         sums[j] += sums[j-1] + vals[j-1];
    }
-
-   /* Compute final partial sums (in serial) for the first entry of every interval */
-   for (j = bsize; j < nvals; j += bsize)
+   else
    {
-      sums[j] = sums[j-bsize] + sums[j-1] + vals[j-1];
-   }
-
-   /* Compute final partial sums (in parallel) for the remaining entries */
+   
+      /* Compute preliminary partial sums (in parallel) within each interval */
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE
 #endif
-   for (j = bsize; j < nvals; j += bsize)
-   {
-      HYPRE_Int  i, n = hypre_min((j+bsize), nvals);
-
-      for (i = j+1; i < n; i++)
+      for (j = 0; j < nvals; j += bsize)
       {
-         sums[i] += sums[j];
+         HYPRE_Int  i, n = hypre_min((j+bsize), nvals);
+   
+         sums[0] = 0;
+         for (i = j+1; i < n; i++)
+         {
+            sums[i] = sums[i-1] + vals[i-1];
+         }
+      }
+   
+      /* Compute final partial sums (in serial) for the first entry of every interval */
+      for (j = bsize; j < nvals; j += bsize)
+      {
+         sums[j] = sums[j-bsize] + sums[j-1] + vals[j-1];
+      }
+   
+      /* Compute final partial sums (in parallel) for the remaining entries */
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE
+#endif
+      for (j = bsize; j < nvals; j += bsize)
+      {
+         HYPRE_Int  i, n = hypre_min((j+bsize), nvals);
+   
+         for (i = j+1; i < n; i++)
+         {
+            sums[i] += sums[j];
+         }
       }
    }
 
