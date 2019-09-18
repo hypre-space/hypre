@@ -2055,6 +2055,9 @@ HYPRE_Int hypre_BoomerAMGDDTestSolve( void *amg_vdata, hypre_ParCSRMatrix *A, hy
 HYPRE_Int hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata, HYPRE_Int first_iteration );
 HYPRE_Int hypre_BoomerAMGDD_FAC_Cycle_timed( void *amg_vdata, HYPRE_Int time_part );
 
+/* tridiagonal_solve.cxx */
+HYPRE_Int TridiagonalSolve( hypre_CSRMatrix *A, hypre_Vector *x, hypre_Vector *b );
+
 /* par_amgdd_comp_grid.c */
 hypre_ParCompGrid *hypre_ParCompGridCreate ();
 HYPRE_Int hypre_ParCompGridDestroy ( hypre_ParCompGrid *compGrid );
