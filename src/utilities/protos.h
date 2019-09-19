@@ -37,6 +37,9 @@ HYPRE_Int HYPRE_Finalize();
 HYPRE_Int hypre_GetDevice(hypre_Handle *hypre_handle);
 HYPRE_Int hypre_SetDevice(HYPRE_Int use_device, hypre_Handle *hypre_handle);
 HYPRE_Int hypre_SyncCudaDefaultStream(hypre_Handle *hypre_handle);
+void hypre_SetExecPolicy( HYPRE_Int policy );
+HYPRE_Int hypre_GetExecPolicy1(HYPRE_Int location);
+HYPRE_Int hypre_GetExecPolicy2(HYPRE_Int location1, HYPRE_Int location2);
 
 /* hypre_printf.c */
 // #ifdef HYPRE_BIGINT

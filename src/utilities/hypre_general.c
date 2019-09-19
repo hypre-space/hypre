@@ -15,10 +15,19 @@ HYPRE_Int hypre_exec_policy2 = HYPRE_EXEC_HOST;
 
 void hypre_SetExecPolicy( HYPRE_Int policy )
 {
-   if( policy == HYPRE_EXEC_HOST || policy==HYPRE_EXEC_DEVICE)
+   if ( policy == HYPRE_EXEC_HOST || policy == HYPRE_EXEC_DEVICE)
+   {
       hypre_exec_policy2 = policy;
+   }
 }
-HYPRE_Int hypre_GetExecPolicy1(HYPRE_Int location)
+
+/*---------------------------------------------------
+ * hypre_GetExecPolicy
+ * Return execution policy based on memory locations
+ *---------------------------------------------------*/
+/* for unary operation */
+HYPRE_Int
+hypre_GetExecPolicy1(HYPRE_Int location)
 {
    HYPRE_Int exec = HYPRE_EXEC_UNSET;
 
@@ -35,13 +44,58 @@ HYPRE_Int hypre_GetExecPolicy1(HYPRE_Int location)
          break;
       case HYPRE_MEMORY_SHARED :
          exec = hypre_exec_policy2;
-         //         exec = HYPRE_EXEC_HOST;
+         //exec = HYPRE_EXEC_HOST;
          break;
    }
 
    return exec;
 }
 
+/* for binary operation */
+HYPRE_Int
+hypre_GetExecPolicy2(HYPRE_Int location1,
+                     HYPRE_Int location2)
+{
+   location1 = hypre_GetActualMemLocation(location1);
+   location2 = hypre_GetActualMemLocation(location2);
+
+   /* HOST_PINNED has the same exec policy as HOST */
+   if (location1 == HYPRE_MEMORY_HOST_PINNED)
+   {
+      location1 = HYPRE_MEMORY_HOST;
+   }
+
+   if (location2 == HYPRE_MEMORY_HOST_PINNED)
+   {
+      location2 = HYPRE_MEMORY_HOST;
+   }
+
+   /* no policy for these combinations */
+   if ( (location1 == HYPRE_MEMORY_HOST && location2 == HYPRE_MEMORY_DEVICE) ||
+        (location2 == HYPRE_MEMORY_HOST && location1 == HYPRE_MEMORY_DEVICE) )
+   {
+      return HYPRE_EXEC_UNSET;
+   }
+
+   /* policy for S-S can be HOST or DEVICE. Choose HOST by default */
+   if (location1 == HYPRE_MEMORY_SHARED && location2 == HYPRE_MEMORY_SHARED)
+   {
+      return hypre_exec_policy2;
+      //return HYPRE_EXEC_HOST;
+   }
+
+   if (location1 == HYPRE_MEMORY_HOST || location2 == HYPRE_MEMORY_HOST)
+   {
+      return HYPRE_EXEC_HOST;
+   }
+
+   if (location1 == HYPRE_MEMORY_DEVICE || location2 == HYPRE_MEMORY_DEVICE)
+   {
+      return HYPRE_EXEC_DEVICE;
+   }
+
+   return HYPRE_EXEC_UNSET;
+}
 
 hypre_Handle *hypre_handle = NULL;
 

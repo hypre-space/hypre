@@ -4042,8 +4042,8 @@ hypre_BoomerAMGSetNonGalerkTol( void   *data,
 }
 
 HYPRE_Int
-hypre_BoomerAMGSetRAP2( void   *data,
-                            HYPRE_Int   rap2)
+hypre_BoomerAMGSetRAP2( void      *data,
+                        HYPRE_Int  rap2 )
 {
   hypre_ParAMGData *amg_data = (hypre_ParAMGData*) data;
 
@@ -4051,6 +4051,16 @@ hypre_BoomerAMGSetRAP2( void   *data,
   return hypre_error_flag;
 }
 
+
+HYPRE_Int
+hypre_BoomerAMGSetModuleRAP2( void      *data,
+                              HYPRE_Int  mod_rap2 )
+{
+  hypre_ParAMGData *amg_data = (hypre_ParAMGData*) data;
+
+  hypre_ParAMGDataModularizedMatMat(amg_data) = mod_rap2;
+  return hypre_error_flag;
+}
 
 HYPRE_Int
 hypre_BoomerAMGSetKeepTranspose( void   *data,

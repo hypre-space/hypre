@@ -171,6 +171,11 @@ hypre_ParCSRMatrixDestroy( hypre_ParCSRMatrix *matrix )
             hypre_TFree(hypre_ParCSRMatrixColMapOffd(matrix), HYPRE_MEMORY_HOST);
          }
 
+         if (hypre_ParCSRMatrixDeviceColMapOffd(matrix))
+         {
+            hypre_TFree(hypre_ParCSRMatrixDeviceColMapOffd(matrix), HYPRE_MEMORY_DEVICE);
+         }
+
          if (hypre_ParCSRMatrixCommPkg(matrix))
          {
             hypre_MatvecCommPkgDestroy(hypre_ParCSRMatrixCommPkg(matrix));

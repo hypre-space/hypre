@@ -226,6 +226,7 @@ main( hypre_int argc,
    HYPRE_Real add_trunc_factor = 0;
 
    HYPRE_Int    rap2=0;
+   HYPRE_Int    mod_rap2=0;
    HYPRE_Int    keepTranspose = 0;
 #ifdef HAVE_DSUPERLU
    HYPRE_Int    dslu_threshold = -1;
@@ -395,7 +396,8 @@ main( hypre_int argc,
    hypre_FinalizeTiming(time_index);
    hypre_ClearTiming();
 #ifdef HYPRE_USING_CUDA
-   hypre_SetExecPolicy(HYPRE_EXEC_DEVICE);
+   //hypre_SetExecPolicy(HYPRE_EXEC_DEVICE);
+   hypre_SetExecPolicy(HYPRE_EXEC_HOST);
 #endif
 
    //omp_set_default_device(0);
@@ -1474,6 +1476,11 @@ main( hypre_int argc,
       {
          arg_index++;
          rap2  = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-mod_rap2") == 0 )
+      {
+         arg_index++;
+         mod_rap2  = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-keepT") == 0 )
       {
@@ -2990,6 +2997,7 @@ main( hypre_int argc,
 
       HYPRE_BoomerAMGSetMaxIter(amg_solver, mg_max_iter);
       HYPRE_BoomerAMGSetRAP2(amg_solver, rap2);
+      HYPRE_BoomerAMGSetModuleRAP2(amg_solver, mod_rap2);
       HYPRE_BoomerAMGSetKeepTranspose(amg_solver, keepTranspose);
 #ifdef HAVE_DSUPERLU
       HYPRE_BoomerAMGSetDSLUThreshold(amg_solver, dslu_threshold);
@@ -3151,6 +3159,7 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetMultAddPMaxElmts(amg_solver, add_P_max_elmts);
       HYPRE_BoomerAMGSetMultAddTruncFactor(amg_solver, add_trunc_factor);
       HYPRE_BoomerAMGSetRAP2(amg_solver, rap2);
+      HYPRE_BoomerAMGSetModuleRAP2(amg_solver, mod_rap2);
       HYPRE_BoomerAMGSetKeepTranspose(amg_solver, keepTranspose);
       if (nongalerk_tol)
       {
@@ -3320,6 +3329,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetMultAddPMaxElmts(pcg_precond, add_P_max_elmts);
          HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
          HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
+         HYPRE_BoomerAMGSetModuleRAP2(pcg_precond, mod_rap2);
          HYPRE_BoomerAMGSetKeepTranspose(pcg_precond, keepTranspose);
 #ifdef HAVE_DSUPERLU
          HYPRE_BoomerAMGSetDSLUThreshold(pcg_precond, dslu_threshold);
@@ -3480,6 +3490,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetMultAddPMaxElmts(pcg_precond, add_P_max_elmts);
          HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
          HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
+         HYPRE_BoomerAMGSetModuleRAP2(pcg_precond, mod_rap2);
          HYPRE_BoomerAMGSetKeepTranspose(pcg_precond, keepTranspose);
 #ifdef HAVE_DSUPERLU
          HYPRE_BoomerAMGSetDSLUThreshold(pcg_precond, dslu_threshold);
@@ -4703,6 +4714,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetMultAddPMaxElmts(pcg_precond, add_P_max_elmts);
          HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
          HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
+         HYPRE_BoomerAMGSetModuleRAP2(pcg_precond, mod_rap2);
          HYPRE_BoomerAMGSetKeepTranspose(pcg_precond, keepTranspose);
 #ifdef HAVE_DSUPERLU
          HYPRE_BoomerAMGSetDSLUThreshold(pcg_precond, dslu_threshold);
@@ -4853,6 +4865,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetMultAddPMaxElmts(pcg_precond, add_P_max_elmts);
          HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
          HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
+         HYPRE_BoomerAMGSetModuleRAP2(pcg_precond, mod_rap2);
          HYPRE_BoomerAMGSetKeepTranspose(pcg_precond, keepTranspose);
 #ifdef HAVE_DSUPERLU
          HYPRE_BoomerAMGSetDSLUThreshold(pcg_precond, dslu_threshold);
@@ -5102,6 +5115,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetMultAddPMaxElmts(pcg_precond, add_P_max_elmts);
          HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
          HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
+         HYPRE_BoomerAMGSetModuleRAP2(pcg_precond, mod_rap2);
          HYPRE_BoomerAMGSetKeepTranspose(pcg_precond, keepTranspose);
 #ifdef HAVE_DSUPERLU
          HYPRE_BoomerAMGSetDSLUThreshold(pcg_precond, dslu_threshold);
@@ -5282,6 +5296,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetMultAddPMaxElmts(pcg_precond, add_P_max_elmts);
          HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
          HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
+         HYPRE_BoomerAMGSetModuleRAP2(pcg_precond, mod_rap2);
          HYPRE_BoomerAMGSetKeepTranspose(pcg_precond, keepTranspose);
 #ifdef HAVE_DSUPERLU
          HYPRE_BoomerAMGSetDSLUThreshold(pcg_precond, dslu_threshold);
@@ -5580,6 +5595,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetMultAddPMaxElmts(pcg_precond, add_P_max_elmts);
          HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
          HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
+         HYPRE_BoomerAMGSetModuleRAP2(pcg_precond, mod_rap2);
          HYPRE_BoomerAMGSetKeepTranspose(pcg_precond, keepTranspose);
 #ifdef HAVE_DSUPERLU
          HYPRE_BoomerAMGSetDSLUThreshold(pcg_precond, dslu_threshold);
@@ -5922,6 +5938,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetMultAddPMaxElmts(pcg_precond, add_P_max_elmts);
          HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
          HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
+         HYPRE_BoomerAMGSetModuleRAP2(pcg_precond, mod_rap2);
          HYPRE_BoomerAMGSetKeepTranspose(pcg_precond, keepTranspose);
 #ifdef HAVE_DSUPERLU
          HYPRE_BoomerAMGSetDSLUThreshold(pcg_precond, dslu_threshold);
@@ -6218,6 +6235,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetMultAddPMaxElmts(pcg_precond, add_P_max_elmts);
          HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
          HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
+         HYPRE_BoomerAMGSetModuleRAP2(pcg_precond, mod_rap2);
          HYPRE_BoomerAMGSetKeepTranspose(pcg_precond, keepTranspose);
 #ifdef HAVE_DSUPERLU
          HYPRE_BoomerAMGSetDSLUThreshold(pcg_precond, dslu_threshold);
