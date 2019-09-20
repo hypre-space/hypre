@@ -1591,6 +1591,7 @@ typedef struct
 {
    HYPRE_Int hypre_error;
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+   HYPRE_Int default_exec_policy;
    HYPRE_Int cuda_device;
    /* by default, hypre puts GPU computations in this stream
     * Do not be confused with the default (null) CUDA stream */
@@ -1622,6 +1623,12 @@ HYPRE_Int hypre_HandleDestroy(hypre_Handle *hypre_handle_);
 /* accessor inline function to hypre_device_csr_handle */
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+static inline HYPRE_Int &
+hypre_HandleDefaultExecPolicy(hypre_Handle *hypre_handle_)
+{
+   return hypre_handle_->default_exec_policy;
+}
+
 static inline HYPRE_Int &
 hypre_HandleCudaDevice(hypre_Handle *hypre_handle_)
 {

@@ -416,5 +416,66 @@ hypre_CSRMatrixColNNzRealDevice( hypre_CSRMatrix  *A,
    return hypre_error_flag;
 }
 
+__global__ void
+hypreCUDAKernel_CSRMoveDiagFirst( HYPRE_Int      nrows,
+                                  HYPRE_Int     *ia,
+                                  HYPRE_Int     *ja,
+                                  HYPRE_Complex *aa )
+{
+   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1,1>();
+
+   if (row >= nrows)
+   {
+      return;
+   }
+
+   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int i, p, q;
+
+   if (lane < 2)
+   {
+      p = read_only_load(ia + row + lane);
+   }
+   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
+   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+
+   for (i = p + lane + 1; __any_sync(HYPRE_WARP_FULL_MASK, i < q); i += HYPRE_WARP_SIZE)
+   {
+      hypre_int find_diag = i < q && ja[i] == row;
+
+      if (find_diag)
+      {
+         ja[i] = ja[p];
+         ja[p] = row;
+         HYPRE_Complex tmp = aa[p];
+         aa[p] = aa[i];
+         aa[i] = tmp;
+      }
+
+      if ( __any_sync(HYPRE_WARP_FULL_MASK, find_diag) )
+      {
+         break;
+      }
+   }
+}
+
+HYPRE_Int
+hypre_CSRMatrixMoveDiagFirstDevice( hypre_CSRMatrix  *A )
+{
+   HYPRE_Int      nrows  = hypre_CSRMatrixNumRows(A);
+   HYPRE_Complex *A_data = hypre_CSRMatrixData(A);
+   HYPRE_Int     *A_i    = hypre_CSRMatrixI(A);
+   HYPRE_Int     *A_j    = hypre_CSRMatrixJ(A);
+   dim3 bDim, gDim;
+
+   bDim = hypre_GetDefaultCUDABlockDimension();
+   gDim = hypre_GetDefaultCUDAGridDimension(nrows, "warp", bDim);
+
+   HYPRE_CUDA_LAUNCH(hypreCUDAKernel_CSRMoveDiagFirst, gDim, bDim,
+                     nrows, A_i, A_j, A_data);
+
+   return hypre_error_flag;
+}
+
 #endif /* HYPRE_USING_CUDA */
 

@@ -2665,15 +2665,6 @@ hypre_BoomerAMGCoarsenPMISHost( hypre_ParCSRMatrix    *S,
    return (ierr);
 }
 
-#ifdef HYPRE_USING_CUDA
-HYPRE_Int
-hypre_BoomerAMGCoarsenPMISDevice( hypre_ParCSRMatrix    *S,
-                        hypre_ParCSRMatrix    *A,
-                        HYPRE_Int                    CF_init,
-                        HYPRE_Int                    debug_flag,
-                        HYPRE_Int                  **CF_marker_ptr);
-#endif
-
 HYPRE_Int
 hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
                         hypre_ParCSRMatrix    *A,
@@ -2681,6 +2672,10 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
                         HYPRE_Int                    debug_flag,
                         HYPRE_Int                  **CF_marker_ptr)
 {
+#if defined(HYPRE_USING_CUDA)
+   hypre_SetExecPolicy(HYPRE_EXEC_DEVICE);
+#endif
+
    HYPRE_Int exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(A)) );
 
    hypre_assert(exec != HYPRE_EXEC_UNSET);
@@ -2698,6 +2693,10 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
       /*      printf(" coarsen PMIS Device \n");*/
       ierr = hypre_BoomerAMGCoarsenPMISDevice( S, A, CF_init, debug_flag, CF_marker_ptr );
    }
+#endif
+
+#if defined(HYPRE_USING_CUDA)
+   hypre_SetExecPolicy(HYPRE_EXEC_HOST);
 #endif
 
    return ierr;

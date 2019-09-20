@@ -11,14 +11,14 @@
 #include <Kokkos_Core.hpp>
 #endif
 
-HYPRE_Int hypre_exec_policy2 = HYPRE_EXEC_HOST;
-
 void hypre_SetExecPolicy( HYPRE_Int policy )
 {
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    if ( policy == HYPRE_EXEC_HOST || policy == HYPRE_EXEC_DEVICE)
    {
-      hypre_exec_policy2 = policy;
+      hypre_HandleDefaultExecPolicy(hypre_handle) = policy;
    }
+#endif
 }
 
 /*---------------------------------------------------
@@ -36,16 +36,19 @@ hypre_GetExecPolicy1(HYPRE_Int location)
    switch (location)
    {
       case HYPRE_MEMORY_HOST :
+         exec = HYPRE_EXEC_HOST;
+         break;
       case HYPRE_MEMORY_HOST_PINNED :
          exec = HYPRE_EXEC_HOST;
          break;
       case HYPRE_MEMORY_DEVICE :
          exec = HYPRE_EXEC_DEVICE;
          break;
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
       case HYPRE_MEMORY_SHARED :
-         exec = hypre_exec_policy2;
-         //exec = HYPRE_EXEC_HOST;
+         exec = hypre_HandleDefaultExecPolicy(hypre_handle);
          break;
+#endif
    }
 
    return exec;
@@ -77,12 +80,13 @@ hypre_GetExecPolicy2(HYPRE_Int location1,
       return HYPRE_EXEC_UNSET;
    }
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    /* policy for S-S can be HOST or DEVICE. Choose HOST by default */
    if (location1 == HYPRE_MEMORY_SHARED && location2 == HYPRE_MEMORY_SHARED)
    {
-      return hypre_exec_policy2;
-      //return HYPRE_EXEC_HOST;
+      return hypre_HandleDefaultExecPolicy(hypre_handle);
    }
+#endif
 
    if (location1 == HYPRE_MEMORY_HOST || location2 == HYPRE_MEMORY_HOST)
    {
@@ -106,6 +110,7 @@ hypre_HandleCreate()
 
    /* set default options */
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+   hypre_HandleDefaultExecPolicy(handle)            = HYPRE_EXEC_HOST;
    hypre_HandleCudaDevice(handle)                   = 0;
    hypre_HandleCudaComputeStreamNum(handle)         = 0;
    hypre_HandleCudaPrefetchStreamNum(handle)        = 1;

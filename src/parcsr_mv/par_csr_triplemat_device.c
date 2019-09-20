@@ -422,6 +422,9 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
                     HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    }
 
+   /* Move the diagonal entry to the first of each row */
+   hypre_CSRMatrixMoveDiagFirstDevice(C_diag);
+
    return C;
 }
 
