@@ -12,14 +12,6 @@
 #include "HYPRE_struct_mv.h"
 #include "_hypre_utilities.h"
 
-/* stringification:
- * _Pragma(string-literal), so we need to cast argument to a string
- * The three dots as last argument of the macro tells compiler that this is a variadic macro. 
- * I.e. this is a macro that receives variable number of arguments. 
- */
-#define HYPRE_STR(...) #__VA_ARGS__
-#define HYPRE_XSTR(...) HYPRE_STR(__VA_ARGS__)
-
 #if defined(HYPRE_USING_RAJA)
 /******************************************************************************
  * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other

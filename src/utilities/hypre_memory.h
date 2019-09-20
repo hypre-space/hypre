@@ -75,6 +75,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/* stringification:
+ * _Pragma(string-literal), so we need to cast argument to a string
+ * The three dots as last argument of the macro tells compiler that this is a variadic macro.
+ * I.e. this is a macro that receives variable number of arguments.
+ */
+#define HYPRE_STR(...) #__VA_ARGS__
+#define HYPRE_XSTR(...) HYPRE_STR(__VA_ARGS__)
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -157,14 +165,6 @@ extern "C" {
 #if defined(HYPRE_USING_DEVICE_OPENMP)
 
 #include "omp.h"
-
-/* stringification:
- * _Pragma(string-literal), so we need to cast argument to a string
- * The three dots as last argument of the macro tells compiler that this is a variadic macro.
- * I.e. this is a macro that receives variable number of arguments.
- */
-#define HYPRE_STR(s...) #s
-#define HYPRE_XSTR(s...) HYPRE_STR(s)
 
 /* OpenMP 4.5 device memory management */
 extern HYPRE_Int hypre__global_offload;
