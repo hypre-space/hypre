@@ -1205,6 +1205,13 @@ HYPRE_Int HYPRE_BoomerAMGSetCoordDim (HYPRE_Solver solver,
  **/
 HYPRE_Int HYPRE_BoomerAMGSetCoordinates (HYPRE_Solver  solver,
                                          float        *coordinates);
+
+/*
+ * HYPRE_BoomerAMGGetGridHierarchy
+ **/
+HYPRE_Int HYPRE_BoomerAMGGetGridHierarchy(HYPRE_Solver solver, 
+                                                  HYPRE_Int *cgrid );
+
 #ifdef HAVE_DSUPERLU
 /*
  * HYPRE_BoomerAMGSetDSLUThreshold

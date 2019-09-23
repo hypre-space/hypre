@@ -887,6 +887,7 @@ HYPRE_Int HYPRE_BoomerAMGSetPlotGrids ( HYPRE_Solver solver , HYPRE_Int plotgrid
 HYPRE_Int HYPRE_BoomerAMGSetPlotFileName ( HYPRE_Solver solver , const char *plotfilename );
 HYPRE_Int HYPRE_BoomerAMGSetCoordDim ( HYPRE_Solver solver , HYPRE_Int coorddim );
 HYPRE_Int HYPRE_BoomerAMGSetCoordinates ( HYPRE_Solver solver , float *coordinates );
+HYPRE_Int HYPRE_BoomerAMGGetGridHierarchy(HYPRE_Solver solver, HYPRE_Int *cgrid );
 HYPRE_Int HYPRE_BoomerAMGSetChebyOrder ( HYPRE_Solver solver , HYPRE_Int order );
 HYPRE_Int HYPRE_BoomerAMGSetChebyFraction ( HYPRE_Solver solver , HYPRE_Real ratio );
 HYPRE_Int HYPRE_BoomerAMGSetChebyEigEst ( HYPRE_Solver solver , HYPRE_Int eig_est );
