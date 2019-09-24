@@ -2808,10 +2808,10 @@ HYPRE_Int
 hypre_BoomerAMGGetGridHierarchy( void       *data,
                               HYPRE_Int *cgrid )
 {
-   HYPRE_Int *wbuff, *cbuff, *tmp;
-   HYPRE_Int local_size, lev_size, i, j, level, num_levels;
+   HYPRE_Int *ibuff, *wbuff, *cbuff, *tmp;
+   HYPRE_Int local_size, lev_size, i, j, level, num_levels, block_mode;
    HYPRE_Int          **CF_marker_array;   
-   hypre_ParCSRMatrix **A_array;   
+   
    hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
    if (!amg_data)
    {
@@ -2822,47 +2822,94 @@ hypre_BoomerAMGGetGridHierarchy( void       *data,
    {
       hypre_error_in_arg(2);
       return hypre_error_flag;
-   }   
-   A_array = hypre_ParAMGDataAArray(amg_data);   
-   if(A_array == NULL)
-   {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Invalid AMG data. AMG setup has not been called!!\n");
-      return hypre_error_flag;   
    }
-
-   CF_marker_array = hypre_ParAMGDataCFMarkerArray(amg_data);
-
-   // get local size and allocate some memory
-   local_size = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[0]));   
-//   local_size = hypre_ParAMGDataNumVariables(amg_data);
-   wbuff  = hypre_CTAlloc(HYPRE_Int, (2 * local_size), HYPRE_MEMORY_HOST);
-   cbuff  = wbuff + local_size;
    
-   num_levels = hypre_ParAMGDataNumLevels(amg_data);
-   for (level = (num_levels - 2); level >= 0; level--)
+   block_mode = hypre_ParAMGDataBlockMode(amg_data);
+   
+   if( block_mode)
    {
-      /* swap pointers */
-      tmp = wbuff;
-      wbuff = cbuff;
-      cbuff = tmp;
-
-      lev_size = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[level]));
-      
-      for (i = 0, j = 0; i < lev_size; i++)
+      hypre_ParCSRBlockMatrix **A_block_array;  
+      A_block_array = hypre_ParAMGDataABlockArray(amg_data);   
+      if(A_block_array == NULL)
       {
-         /* if a C-point */
-         cbuff[i] = 0;
-         if (CF_marker_array[level][i] > -1)
-         {
-            cbuff[i] = wbuff[j] + 1;
-            j++;
-         }
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Invalid AMG data. AMG setup has not been called!!\n");
+         return hypre_error_flag;   
       }
+
+      CF_marker_array = hypre_ParAMGDataCFMarkerArray(amg_data);
+
+      // get local size and allocate some memory
+      local_size = hypre_CSRMatrixNumRows(hypre_ParCSRBlockMatrixDiag(A_block_array[0]));   
+      ibuff  = hypre_CTAlloc(HYPRE_Int, (2 * local_size), HYPRE_MEMORY_HOST);
+      wbuff  = ibuff;
+      cbuff  = ibuff + local_size;
+   
+      num_levels = hypre_ParAMGDataNumLevels(amg_data);
+      for (level = (num_levels - 2); level >= 0; level--)
+      {
+         /* swap pointers */
+         tmp = wbuff;
+         wbuff = cbuff;
+         cbuff = tmp;
+
+         lev_size = hypre_CSRMatrixNumRows(hypre_ParCSRBlockMatrixDiag(A_block_array[level]));
+      
+         for (i = 0, j = 0; i < lev_size; i++)
+         {
+            /* if a C-point */
+            cbuff[i] = 0;
+            if (CF_marker_array[level][i] > -1)
+            {
+               cbuff[i] = wbuff[j] + 1;
+               j++;
+            }
+         }
+      }      
+   }
+   else
+   {
+      hypre_ParCSRMatrix **A_array;  
+      A_array = hypre_ParAMGDataAArray(amg_data);   
+      if(A_array == NULL)
+      {
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Invalid AMG data. AMG setup has not been called!!\n");
+         return hypre_error_flag;   
+      }
+
+      CF_marker_array = hypre_ParAMGDataCFMarkerArray(amg_data);
+
+      // get local size and allocate some memory
+      local_size = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[0]));   
+      wbuff  = hypre_CTAlloc(HYPRE_Int, (2 * local_size), HYPRE_MEMORY_HOST);
+      cbuff  = wbuff + local_size;
+   
+      num_levels = hypre_ParAMGDataNumLevels(amg_data);
+      for (level = (num_levels - 2); level >= 0; level--)
+      {
+         /* swap pointers */
+         tmp = wbuff;
+         wbuff = cbuff;
+         cbuff = tmp;
+
+         lev_size = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[level]));
+      
+         for (i = 0, j = 0; i < lev_size; i++)
+         {
+            /* if a C-point */
+            cbuff[i] = 0;
+            if (CF_marker_array[level][i] > -1)
+            {
+               cbuff[i] = wbuff[j] + 1;
+               j++;
+            }
+         }
+      }          
    }
    // copy hierarchy into user provided array
    hypre_TMemcpy(cgrid, cbuff, HYPRE_Int, local_size, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
    // free memory
-   hypre_TFree(wbuff, HYPRE_MEMORY_HOST);   
+   hypre_TFree(ibuff, HYPRE_MEMORY_HOST);  
+        
    return hypre_error_flag;
 }                              
 
