@@ -22,8 +22,7 @@ void csr_spmm_create_ija(HYPRE_Int m, HYPRE_Int *d_i, HYPRE_Int **d_j, HYPRE_Com
 {
    cudaMemset(d_i, 0, sizeof(HYPRE_Int));
    /* make ghash pointers by prefix scan */
-   thrust::device_ptr<HYPRE_Int> d_i_ptr = thrust::device_pointer_cast(d_i);
-   thrust::inclusive_scan(d_i_ptr, d_i_ptr + m + 1, d_i_ptr);
+   HYPRE_THRUST_CALL(inclusive_scan, d_i, d_i + m + 1, d_i);
    /* total size */
    cudaMemcpy(nnz, d_i + m, sizeof(HYPRE_Int), cudaMemcpyDeviceToHost);
    if (d_j)
@@ -42,9 +41,7 @@ void csr_spmm_create_ija(HYPRE_Int m, HYPRE_Int *d_c, HYPRE_Int **d_i, HYPRE_Int
    *d_i = hypre_TAlloc(HYPRE_Int, m+1, HYPRE_MEMORY_DEVICE);
    cudaMemset(*d_i, 0, sizeof(HYPRE_Int));
    /* make ghash pointers by prefix scan */
-   thrust::device_ptr<HYPRE_Int> d_c_ptr = thrust::device_pointer_cast(d_c);
-   thrust::device_ptr<HYPRE_Int> d_i_ptr = thrust::device_pointer_cast(*d_i);
-   thrust::inclusive_scan(d_c_ptr, d_c_ptr + m, d_i_ptr + 1);
+   HYPRE_THRUST_CALL(inclusive_scan, d_c, d_c + m, *d_i + 1);
    /* total size */
    cudaMemcpy(nnz, (*d_i) + m, sizeof(HYPRE_Int), cudaMemcpyDeviceToHost);
    if (d_j)

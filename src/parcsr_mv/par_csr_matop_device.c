@@ -364,7 +364,7 @@ hypre_ExchangeExternalRowsDeviceInit( hypre_CSRMatrix      *B_ext,
     * B_ext_rownnz contains the number of elements of row j
     * (to be determined through send_map_elmnts on the receiving end)
     *--------------------------------------------------------------------------*/
-   thrust::adjacent_difference(thrust::device, B_ext_i_d, B_ext_i_d + B_ext_nrows + 1, B_ext_rownnz_d);
+   HYPRE_THRUST_CALL(adjacent_difference, B_ext_i_d, B_ext_i_d + B_ext_nrows + 1, B_ext_rownnz_d);
    hypre_TMemcpy(B_ext_rownnz_h, B_ext_rownnz_d + 1, HYPRE_Int, B_ext_nrows,
                  HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 

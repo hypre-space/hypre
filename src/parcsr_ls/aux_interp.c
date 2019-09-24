@@ -18,7 +18,7 @@
    OUT_marker
 
    offd nodes from comm_pkg take up first chunk of CF_marker_offd, offd
-   nodes from extend_comm_pkg take up the second chunk 0f CF_marker_offd. */
+   nodes from extend_comm_pkg take up the second chunk of CF_marker_offd. */
 
 
 

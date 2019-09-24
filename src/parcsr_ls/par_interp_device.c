@@ -274,10 +274,10 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
                                                        col_offd_S_to_A, fine_to_coarse );
 
  /* The scans will transform P_diag_i and P_offd_i to the CSR I-vectors */
-   thrust::exclusive_scan( thrust::device, &P_diag_i[0], &P_diag_i[n_fine+1], &P_diag_i[0] );
-   thrust::exclusive_scan( thrust::device, &P_offd_i[0], &P_offd_i[n_fine+1], &P_offd_i[0] );
+   HYPRE_THRUST_CALL(exclusive_scan, &P_diag_i[0], &P_diag_i[n_fine+1], &P_diag_i[0] );
+   HYPRE_THRUST_CALL(exclusive_scan, &P_offd_i[0], &P_offd_i[n_fine+1], &P_offd_i[0] );
 /* The scan will make fine_to_coarse[i] for i a coarse point hold a coarse point index in the range from 0 to n_coarse-1 */
-   thrust::exclusive_scan( thrust::device, &fine_to_coarse[0], &fine_to_coarse[n_fine], &fine_to_coarse[0] );
+   HYPRE_THRUST_CALL(exclusive_scan, &fine_to_coarse[0], &fine_to_coarse[n_fine], &fine_to_coarse[0] );
 
 /* 4. Compute the CSR arrays P_diag_j, P_diag_data, P_offd_j, and P_offd_data */
 /*    P_diag_i and P_offd_i are now known, first allocate the remaining CSR arrays of P */
@@ -353,17 +353,17 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
          P_marker=[0,1,0,0,1,0,0], */
 
       /* First,  set P_marker[i] to 1 if A's column i is also present in P, otherwise P_marker[i] is 0 */
-      HYPRE_Int *P_marker = hypre_CTAlloc(HYPRE_Int,  num_cols_A_offd+1, HYPRE_MEMORY_DEVICE);
+      HYPRE_Int *P_marker = hypre_CTAlloc(HYPRE_Int, num_cols_A_offd+1, HYPRE_MEMORY_DEVICE);
       hypre_BoomerAMGBuildDirInterp_dev5<<<grid,block>>>( P_offd_size, P_offd_j, P_marker );
 
       /* Secondly, the sum over P_marker gives the number of different columns in P's offd part */
-      num_cols_P_offd = thrust::reduce(thrust::device,&P_marker[0],&P_marker[num_cols_A_offd]);
+      num_cols_P_offd = HYPRE_THRUST_CALL(reduce, &P_marker[0], &P_marker[num_cols_A_offd]);
 
       /* Because P's columns correspond to P_marker[i]=1 (and =0 otherwise), the scan below will return  */
       /* an enumeration of P's columns 0,1,... at the corresponding locations in P_marker. */
       /* P_marker[num_cols_A_offd] will contain num_cols_P_offd, so sum reduction above could  */
       /* have been replaced by reading the last element of P_marker. */
-      thrust::exclusive_scan( thrust::device, &P_marker[0], &P_marker[num_cols_A_offd+1], &P_marker[0] );
+      HYPRE_THRUST_CALL(exclusive_scan, &P_marker[0], &P_marker[num_cols_A_offd+1], &P_marker[0] );
       /* Example: P_marker becomes [0,0,1,1,1,2] so that P_marker[1]=0, P_marker[4]=1  */
 
       /* Do the re-enumeration, P_offd_j are mapped, using P_marker as map  */
@@ -784,8 +784,8 @@ hypre_BoomerAMGInterpTruncationDevice( hypre_ParCSRMatrix *P,
          hypre_BoomerAMGInterpTruncationDevice_dev2<<<grid,block >>>( n_fine, P_diag_i, P_offd_i, P_aux_diag_i, P_aux_offd_i );
       }
       nel_per_row = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
-      thrust::transform(thrust::device,&P_aux_diag_i[0],&P_aux_diag_i[n_fine],&P_aux_offd_i[0],&nel_per_row[0],thrust::plus<HYPRE_Int>() );
-      mx_row = thrust::reduce(thrust::device,&nel_per_row[0],&nel_per_row[n_fine],0,thrust::maximum<HYPRE_Int>());
+      HYPRE_THRUST_CALL(transform,&P_aux_diag_i[0],&P_aux_diag_i[n_fine],&P_aux_offd_i[0],&nel_per_row[0],thrust::plus<HYPRE_Int>() );
+      mx_row = HYPRE_THRUST_CALL(reduce,&nel_per_row[0],&nel_per_row[n_fine],0,thrust::maximum<HYPRE_Int>());
       hypre_TFree(nel_per_row,HYPRE_MEMORY_DEVICE);
 
       /* Use zip_iterator to avoid creating help array nel_per_row */
@@ -808,9 +808,9 @@ hypre_BoomerAMGInterpTruncationDevice( hypre_ParCSRMatrix *P,
    {
       cudaDeviceSynchronize();
     /* Matrix has been truncated, reshuffle it into shorter arrays */
-      thrust::exclusive_scan(thrust::device,&P_aux_diag_i[0],&P_aux_diag_i[n_fine+1],&P_aux_diag_i[0]);
+      HYPRE_THRUST_CALL(exclusive_scan, &P_aux_diag_i[0],&P_aux_diag_i[n_fine+1],&P_aux_diag_i[0]);
       P_diag_size = P_aux_diag_i[n_fine];
-      thrust::exclusive_scan(thrust::device,&P_aux_offd_i[0],&P_aux_offd_i[n_fine+1],&P_aux_offd_i[0]);
+      HYPRE_THRUST_CALL(exclusive_scan, &P_aux_offd_i[0],&P_aux_offd_i[n_fine+1],&P_aux_offd_i[0]);
       P_offd_size = P_aux_offd_i[n_fine];
 
       P_diag_j_new    = hypre_CTAlloc(HYPRE_Int,  P_diag_size, HYPRE_MEMORY_SHARED);

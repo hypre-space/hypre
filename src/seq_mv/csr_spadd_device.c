@@ -62,10 +62,6 @@ hypreDevice_CSRSpAdd(HYPRE_Int  ma,       HYPRE_Int   mb,        HYPRE_Int   n,
    d_at = (HYPRE_Complex *) work_mem;
    work_mem += sizeof(HYPRE_Complex) * nnzT2;
 
-   thrust::device_ptr<HYPRE_Int>     d_it_ptr = thrust::device_pointer_cast(d_it);
-   thrust::device_ptr<HYPRE_Int>     d_jt_ptr = thrust::device_pointer_cast(d_jt);
-   thrust::device_ptr<HYPRE_Complex> d_at_ptr = thrust::device_pointer_cast(d_at);
-
    /* expansion */
    hypre_TMemcpy(d_jt,        d_ja, HYPRE_Int,     nnzA,  HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
    hypre_TMemcpy(d_jt + nnzA, d_jb, HYPRE_Int,     nnzB,  HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
@@ -87,7 +83,6 @@ hypreDevice_CSRSpAdd(HYPRE_Int  ma,       HYPRE_Int   mb,        HYPRE_Int   n,
    //d_pm = hypre_TAlloc(HYPRE_Int, nnzT, HYPRE_MEMORY_DEVICE);
    d_pm = (HYPRE_Int *) work_mem;
    work_mem += sizeof(HYPRE_Int) * nnzT2;
-   thrust::device_ptr<HYPRE_Int>d_pm_ptr = thrust::device_pointer_cast(d_pm);
 
    /* make copy of (it, jt, at), since gather cannot be done in-place */
    //d_it_cp = hypre_TAlloc(HYPRE_Int,     nnzT, HYPRE_MEMORY_DEVICE);
@@ -102,39 +97,35 @@ hypreDevice_CSRSpAdd(HYPRE_Int  ma,       HYPRE_Int   mb,        HYPRE_Int   n,
 
    hypre_assert(work_mem - work_mem_saved == (5*sizeof(HYPRE_Int)+2*sizeof(HYPRE_Complex))*nnzT2);
 
-   thrust::device_ptr<HYPRE_Int>     d_it_cp_ptr = thrust::device_pointer_cast(d_it_cp);
-   thrust::device_ptr<HYPRE_Int>     d_jt_cp_ptr = thrust::device_pointer_cast(d_jt_cp);
-   thrust::device_ptr<HYPRE_Complex> d_at_cp_ptr = thrust::device_pointer_cast(d_at_cp);
-
    hypre_TMemcpy(d_it_cp, d_it, HYPRE_Int,     nnzT, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
    hypre_TMemcpy(d_jt_cp, d_jt, HYPRE_Int,     nnzT, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
    hypre_TMemcpy(d_at_cp, d_at, HYPRE_Complex, nnzT, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
    /* sort: lexicographical order (row, col) */
-   thrust::sequence(d_pm_ptr, d_pm_ptr + nnzT);
-   thrust::stable_sort_by_key(d_jt_ptr, d_jt_ptr + nnzT, d_pm_ptr);
-   thrust::gather(d_pm_ptr, d_pm_ptr + nnzT, d_it_cp_ptr, d_it_ptr);
+   HYPRE_THRUST_CALL(sequence, d_pm, d_pm + nnzT);
+   HYPRE_THRUST_CALL(stable_sort_by_key, d_jt, d_jt + nnzT, d_pm);
+   HYPRE_THRUST_CALL(gather, d_pm, d_pm + nnzT, d_it_cp, d_it);
 
-   thrust::stable_sort_by_key(d_it_ptr, d_it_ptr + nnzT, d_pm_ptr);
-   thrust::gather(d_pm_ptr, d_pm_ptr + nnzT, d_jt_cp_ptr, d_jt_ptr);
-   thrust::gather(d_pm_ptr, d_pm_ptr + nnzT, d_at_cp_ptr, d_at_ptr);
+   HYPRE_THRUST_CALL(stable_sort_by_key, d_it, d_it + nnzT, d_pm);
+   HYPRE_THRUST_CALL(gather, d_pm, d_pm + nnzT, d_jt_cp, d_jt);
+   HYPRE_THRUST_CALL(gather, d_pm, d_pm + nnzT, d_at_cp, d_at);
 
    /* compress */
    typedef thrust::tuple< thrust::device_ptr<HYPRE_Int>, thrust::device_ptr<HYPRE_Int> > IteratorTuple;
    typedef thrust::zip_iterator<IteratorTuple> ZipIterator;
 
    thrust::pair< ZipIterator, thrust::device_ptr<HYPRE_Complex> > new_end =
-      thrust::reduce_by_key (
-      thrust::make_zip_iterator(thrust::make_tuple(d_it_ptr       , d_jt_ptr       )),
-      thrust::make_zip_iterator(thrust::make_tuple(d_it_ptr + nnzT, d_jt_ptr + nnzT)),
-      d_at_ptr,
-      thrust::make_zip_iterator(thrust::make_tuple(d_it_cp_ptr,     d_jt_cp_ptr)),
-      d_at_cp_ptr,
+      HYPRE_THRUST_CALL(reduce_by_key,
+      thrust::make_zip_iterator(thrust::make_tuple(d_it       , d_jt       )),
+      thrust::make_zip_iterator(thrust::make_tuple(d_it + nnzT, d_jt + nnzT)),
+      d_at,
+      thrust::make_zip_iterator(thrust::make_tuple(d_it_cp,     d_jt_cp)),
+      d_at_cp,
       thrust::equal_to< thrust::tuple<HYPRE_Int, HYPRE_Int> >()
    );
 
    /* returns end: so nnz = end - start */
-   nnzC = new_end.second - d_at_cp_ptr;
+   nnzC = new_end.second - thrust::device_pointer_cast(d_at_cp);
 
    /* allocate final C */
    d_jc = hypre_TAlloc(HYPRE_Int,     nnzC, HYPRE_MEMORY_DEVICE);
