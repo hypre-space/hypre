@@ -1822,7 +1822,7 @@ HYPRE_BoomerAMGSetKeepTranspose (HYPRE_Solver solver,
    return (hypre_BoomerAMGSetKeepTranspose ( (void *) solver, keepTranspose ) );
 }
 
-#ifdef HAVE_DSUPERLU
+#ifdef HYPRE_USING_DSUPERLU
 /*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetDSLUThreshold
  *--------------------------------------------------------------------------*/

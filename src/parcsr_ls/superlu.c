@@ -8,7 +8,7 @@
 #include "_hypre_parcsr_ls.h"
 #include <math.h>
 
-#ifdef HAVE_DSUPERLU
+#ifdef HYPRE_USING_DSUPERLU
 /*#include "superlu.h"*/
 
 #include <math.h>
