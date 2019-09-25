@@ -538,6 +538,10 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
                        HYPRE_Int             *dof_func,
                        hypre_ParCSRMatrix   **S_ptr)
 {
+#if defined(HYPRE_USING_CUDA)
+   hypre_SetExecPolicy(HYPRE_EXEC_DEVICE);
+#endif
+
    HYPRE_Int exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(A)) );
 
    hypre_assert(exec != HYPRE_EXEC_UNSET);
@@ -555,6 +559,10 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
       /*      printf(" createS Device \n");*/
       ierr = hypre_BoomerAMGCreateSDevice(A,strength_threshold,max_row_sum,num_functions,dof_func,S_ptr);
    }
+#endif
+
+#if defined(HYPRE_USING_CUDA)
+   hypre_SetExecPolicy(HYPRE_EXEC_HOST);
 #endif
 
    return ierr;

@@ -144,7 +144,7 @@ hypre_CSRMatrixPrint2(AB_offd_host, NULL);
        * NOTE: cannot adjust the cols of B_offd (which needs less work) beforehand, unless want to change B */
       AB_offd_num_nonzeros = hypre_CSRMatrixNumNonzeros(AB_offd);
       AB_offd_j = hypre_CSRMatrixJ(AB_offd);
-      thrust::gather(thrust::device, AB_offd_j, AB_offd_j + AB_offd_num_nonzeros, map_B_to_C, AB_offd_j);
+      HYPRE_THRUST_CALL(gather, AB_offd_j, AB_offd_j + AB_offd_num_nonzeros, map_B_to_C, AB_offd_j);
 
       hypre_TFree(map_B_to_C, HYPRE_MEMORY_DEVICE);
 
@@ -370,8 +370,8 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
       /* adjust C_tmp_offd cols indices and number of cols of this matrix
        * NOTE: cannot adjust the cols of B_offd (which needs less work) beforehand, unless want to change B */
       C_tmp_offd_j = hypre_CSRMatrixJ(C_tmp_offd);
-      thrust::gather(thrust::device, C_tmp_offd_j, C_tmp_offd_j + hypre_CSRMatrixNumNonzeros(C_tmp_offd),
-                     map_B_to_C, C_tmp_offd_j);
+      HYPRE_THRUST_CALL(gather, C_tmp_offd_j, C_tmp_offd_j + hypre_CSRMatrixNumNonzeros(C_tmp_offd),
+                        map_B_to_C, C_tmp_offd_j);
       hypre_TFree(map_B_to_C, HYPRE_MEMORY_DEVICE);
       hypre_CSRMatrixNumCols(C_tmp_offd) = num_cols_offd_C;
 
@@ -421,6 +421,9 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
       hypre_TMemcpy(hypre_ParCSRMatrixColMapOffd(C), col_map_offd_C, HYPRE_BigInt, num_cols_offd_C,
                     HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    }
+
+   /* Move the diagonal entry to the first of each row */
+   hypre_CSRMatrixMoveDiagFirstDevice(C_diag);
 
    return C;
 }

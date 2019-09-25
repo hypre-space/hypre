@@ -1591,6 +1591,7 @@ typedef struct
 {
    HYPRE_Int hypre_error;
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+   HYPRE_Int default_exec_policy;
    HYPRE_Int cuda_device;
    /* by default, hypre puts GPU computations in this stream
     * Do not be confused with the default (null) CUDA stream */
@@ -1622,6 +1623,12 @@ HYPRE_Int hypre_HandleDestroy(hypre_Handle *hypre_handle_);
 /* accessor inline function to hypre_device_csr_handle */
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+static inline HYPRE_Int &
+hypre_HandleDefaultExecPolicy(hypre_Handle *hypre_handle_)
+{
+   return hypre_handle_->default_exec_policy;
+}
+
 static inline HYPRE_Int &
 hypre_HandleCudaDevice(hypre_Handle *hypre_handle_)
 {
@@ -2186,6 +2193,7 @@ void hypre_qsort1 ( HYPRE_Int *v , HYPRE_Real *w , HYPRE_Int left , HYPRE_Int ri
 void hypre_BigQsort1 ( HYPRE_BigInt *v , HYPRE_Real *w , HYPRE_Int left , HYPRE_Int right );
 void hypre_qsort2i ( HYPRE_Int *v , HYPRE_Int *w , HYPRE_Int left , HYPRE_Int right );
 void hypre_qsort2 ( HYPRE_Int *v , HYPRE_Real *w , HYPRE_Int left , HYPRE_Int right );
+void hypre_qsort2abs( HYPRE_Int *v, HYPRE_Real *w, HYPRE_Int left, HYPRE_Int right );
 void hypre_qsort3i ( HYPRE_Int *v , HYPRE_Int *w , HYPRE_Int *z , HYPRE_Int left , HYPRE_Int right );
 void hypre_qsort3_abs ( HYPRE_Real *v , HYPRE_Int *w , HYPRE_Int *z , HYPRE_Int left , HYPRE_Int right );
 void hypre_BigQsort4_abs ( HYPRE_Real *v , HYPRE_BigInt *w , HYPRE_Int *z , HYPRE_Int *y , HYPRE_Int left , HYPRE_Int right );

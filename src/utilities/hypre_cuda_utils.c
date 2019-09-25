@@ -290,15 +290,13 @@ hypreDevice_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int 
 HYPRE_Int
 hypreDevice_IntegerReduceSum(HYPRE_Int n, HYPRE_Int *d_i)
 {
-   thrust::device_ptr<HYPRE_Int> d_i_ptr = thrust::device_pointer_cast(d_i);
-   return thrust::reduce(d_i_ptr, d_i_ptr + n);
+   return HYPRE_THRUST_CALL(reduce, d_i, d_i + n);
 }
 
 HYPRE_Int
 hypreDevice_IntegerInclusiveScan(HYPRE_Int n, HYPRE_Int *d_i)
 {
-   thrust::device_ptr<HYPRE_Int> d_i_ptr = thrust::device_pointer_cast(d_i);
-   thrust::inclusive_scan(d_i_ptr, d_i_ptr + n, d_i_ptr);
+   HYPRE_THRUST_CALL(inclusive_scan, d_i, d_i + n, d_i);
 
    return hypre_error_flag;
 }
@@ -306,8 +304,7 @@ hypreDevice_IntegerInclusiveScan(HYPRE_Int n, HYPRE_Int *d_i)
 HYPRE_Int
 hypreDevice_IntegerExclusiveScan(HYPRE_Int n, HYPRE_Int *d_i)
 {
-   thrust::device_ptr<HYPRE_Int> d_i_ptr = thrust::device_pointer_cast(d_i);
-   thrust::exclusive_scan(d_i_ptr, d_i_ptr + n, d_i_ptr);
+   HYPRE_THRUST_CALL(exclusive_scan, d_i, d_i + n, d_i);
 
    return hypre_error_flag;
 }
@@ -409,11 +406,11 @@ hypreDevice_CsrRowIndicesToPtrs(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row
 {
    HYPRE_Int *d_row_ptr = hypre_TAlloc(HYPRE_Int, nrows+1, HYPRE_MEMORY_DEVICE);
 
-   thrust::lower_bound(thrust::device,
-                       d_row_ind, d_row_ind + nnz,
-                       thrust::counting_iterator<HYPRE_Int>(0),
-                       thrust::counting_iterator<HYPRE_Int>(nrows+1),
-                       d_row_ptr);
+   HYPRE_THRUST_CALL( lower_bound,
+                      d_row_ind, d_row_ind + nnz,
+                      thrust::counting_iterator<HYPRE_Int>(0),
+                      thrust::counting_iterator<HYPRE_Int>(nrows+1),
+                      d_row_ptr);
 
    return d_row_ptr;
 }
@@ -421,11 +418,11 @@ hypreDevice_CsrRowIndicesToPtrs(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row
 HYPRE_Int
 hypreDevice_CsrRowIndicesToPtrs_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ind, HYPRE_Int *d_row_ptr)
 {
-   thrust::lower_bound(thrust::device,
-                       d_row_ind, d_row_ind + nnz,
-                       thrust::counting_iterator<HYPRE_Int>(0),
-                       thrust::counting_iterator<HYPRE_Int>(nrows+1),
-                       d_row_ptr);
+   HYPRE_THRUST_CALL( lower_bound,
+                      d_row_ind, d_row_ind + nnz,
+                      thrust::counting_iterator<HYPRE_Int>(0),
+                      thrust::counting_iterator<HYPRE_Int>(nrows+1),
+                      d_row_ptr);
 
    return hypre_error_flag;
 }
@@ -454,10 +451,10 @@ hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Rea
 
    hypre_TMemcpy(map2, map, HYPRE_Int, ny, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
-   thrust::sort_by_key(thrust::device, map2, map2+ny, y);
+   HYPRE_THRUST_CALL(sort_by_key, map2, map2+ny, y);
 
    thrust::pair<HYPRE_Int*, HYPRE_Real*> new_end =
-      thrust::reduce_by_key(thrust::device, map2, map2+ny, y, reduced_map, reduced_y);
+      HYPRE_THRUST_CALL(reduce_by_key, map2, map2+ny, y, reduced_map, reduced_y);
 
    HYPRE_Int reduced_n = new_end.first - reduced_map;
 

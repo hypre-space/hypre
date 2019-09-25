@@ -395,6 +395,7 @@ main( hypre_int argc,
    hypre_PrintTiming("Hypre init times", hypre_MPI_COMM_WORLD);
    hypre_FinalizeTiming(time_index);
    hypre_ClearTiming();
+
 #ifdef HYPRE_USING_CUDA
    //hypre_SetExecPolicy(HYPRE_EXEC_DEVICE);
    hypre_SetExecPolicy(HYPRE_EXEC_HOST);

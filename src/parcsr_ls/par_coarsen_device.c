@@ -134,12 +134,12 @@ hypre_BoomerAMGCoarsenPMISDevice( hypre_ParCSRMatrix    *S,
                                        CF_marker_diag, CF_marker_offd, comm_pkg, (HYPRE_Int *) send_buf);
 
          /* sync CF_marker_offd */
-         thrust::gather(thrust::device,
-                        hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
-                        hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) +
-                        hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
-                        CF_marker_diag,
-                        (HYPRE_Int *) send_buf);
+         HYPRE_THRUST_CALL( gather,
+                            hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+                            hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) +
+                            hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                            CF_marker_diag,
+                            (HYPRE_Int *) send_buf );
 
          comm_handle = hypre_ParCSRCommHandleCreate_v2(11, comm_pkg,
                                                        HYPRE_MEMORY_DEVICE, (HYPRE_Int *) send_buf,
@@ -158,9 +158,9 @@ hypre_BoomerAMGCoarsenPMISDevice( hypre_ParCSRMatrix    *S,
                                          (HYPRE_Int *)send_buf);
 
       /* Update graph_diag. Remove the nodes with CF_marker_diag != 0 */
-      thrust::gather(thrust::device, graph_diag, graph_diag + graph_diag_size, CF_marker_diag, diag_iwork);
+      HYPRE_THRUST_CALL(gather, graph_diag, graph_diag + graph_diag_size, CF_marker_diag, diag_iwork);
 
-      HYPRE_Int *new_end = thrust::remove_if(thrust::device, graph_diag, graph_diag + graph_diag_size,
+      HYPRE_Int *new_end = HYPRE_THRUST_CALL(remove_if, graph_diag, graph_diag + graph_diag_size,
                                              diag_iwork, thrust::identity<HYPRE_Int>());
 
       graph_diag_size = new_end - graph_diag;
@@ -172,7 +172,7 @@ hypre_BoomerAMGCoarsenPMISDevice( hypre_ParCSRMatrix    *S,
    *CF_marker_ptr = hypre_CTAlloc(HYPRE_Int, num_cols_diag, HYPRE_MEMORY_HOST);
    hypre_TMemcpy( *CF_marker_ptr, CF_marker_diag, HYPRE_Int, num_cols_diag, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE );
    hypre_TFree(CF_marker_diag,HYPRE_MEMORY_DEVICE);
-   
+
    hypre_TFree(measure_diag,   HYPRE_MEMORY_DEVICE);
    hypre_TFree(measure_offd,   HYPRE_MEMORY_DEVICE);
    hypre_TFree(graph_diag,     HYPRE_MEMORY_DEVICE);
@@ -326,12 +326,12 @@ hypre_PMISCoarseningInitDevice( hypre_ParCSRMatrix  *S,               /* in */
       (num_rows_diag, CF_init, S_diag_i, S_offd_i, measure_diag, CF_marker_diag);
 
    /* communicate for measure_offd */
-   thrust::gather(thrust::device,
-                  hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
-                  hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) +
-                  hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
-                  measure_diag,
-                  real_send_buf);
+   HYPRE_THRUST_CALL(gather,
+                     hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+                     hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) +
+                     hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                     measure_diag,
+                     real_send_buf);
 
    comm_handle = hypre_ParCSRCommHandleCreate_v2(1, comm_pkg,
                                                  HYPRE_MEMORY_DEVICE, real_send_buf,
@@ -341,12 +341,12 @@ hypre_PMISCoarseningInitDevice( hypre_ParCSRMatrix  *S,               /* in */
 
    /* graph_diag consists points with CF_marker_diag == 0 */
    new_end =
-   thrust::remove_copy_if(thrust::device,
-                          thrust::make_counting_iterator(0),
-                          thrust::make_counting_iterator(num_rows_diag),
-                          CF_marker_diag,
-                          graph_diag,
-                          thrust::identity<HYPRE_Int>());
+   HYPRE_THRUST_CALL(remove_copy_if,
+                     thrust::make_counting_iterator(0),
+                     thrust::make_counting_iterator(num_rows_diag),
+                     CF_marker_diag,
+                     graph_diag,
+                     thrust::identity<HYPRE_Int>());
 
    *graph_diag_size = new_end - graph_diag;
 
@@ -491,12 +491,12 @@ hypre_PMISCoarseningUpdateCFDevice( hypre_ParCSRMatrix  *S,               /* in 
    hypre_ParCSRCommHandle *comm_handle;
 
    /* communicate for measure_offd */
-   thrust::gather(thrust::device,
-                  hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
-                  hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) +
-                  hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
-                  measure_diag,
-                  real_send_buf);
+   HYPRE_THRUST_CALL(gather,
+                     hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+                     hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) +
+                     hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                     measure_diag,
+                     real_send_buf);
 
    comm_handle = hypre_ParCSRCommHandleCreate_v2(1, comm_pkg,
                                                  HYPRE_MEMORY_DEVICE, real_send_buf,
@@ -507,7 +507,7 @@ hypre_PMISCoarseningUpdateCFDevice( hypre_ParCSRMatrix  *S,               /* in 
 #if 0
    /* now communicate CF_marker to CF_marker_offd, to make
       sure that new external F points are known on this processor */
-   thrust::gather(thrust::device,
+   HYPRE_THRUST_CALL(gather,
                   hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
                   hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) +
                   hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),

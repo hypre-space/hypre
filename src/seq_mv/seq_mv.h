@@ -262,6 +262,7 @@ HYPRE_Int hypre_CSRMatrixSplitDevice(hypre_CSRMatrix *B_ext, HYPRE_BigInt first_
 HYPRE_Int hypre_CSRMatrixTransposeDevice ( hypre_CSRMatrix *A , hypre_CSRMatrix **AT , HYPRE_Int data );
 hypre_CSRMatrix* hypre_CSRMatrixAddPartialDevice( hypre_CSRMatrix *A, hypre_CSRMatrix *B, HYPRE_Int *row_nums);
 HYPRE_Int hypre_CSRMatrixColNNzRealDevice( hypre_CSRMatrix *A, HYPRE_Real *colnnz);
+HYPRE_Int hypre_CSRMatrixMoveDiagFirstDevice( hypre_CSRMatrix  *A );
 #endif
 
 /* csr_matrix.c */

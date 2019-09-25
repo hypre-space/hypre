@@ -246,7 +246,7 @@ hypre_BoomerAMGIndepSetInitDevice( hypre_ParCSRMatrix *S,
    }
 
    thrust::plus<HYPRE_Real> op;
-   thrust::transform(thrust::device, measure_array, measure_array + num_rows_diag,
+   HYPRE_THRUST_CALL(transform, measure_array, measure_array + num_rows_diag,
                      urand, measure_array, op);
 
    hypre_TFree(urand, HYPRE_MEMORY_DEVICE);
