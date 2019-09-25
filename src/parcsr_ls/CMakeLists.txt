@@ -52,7 +52,6 @@ set(SRCS
   par_amgdd_comp_grid.c
   par_amgdd_solve.c
   par_amgdd_fac_cycle.c
-  tridiagonal_solver.cu
   par_amgdd_setup.c
   par_amgdd_test.c
   par_amg_setup.c
