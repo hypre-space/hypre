@@ -464,6 +464,14 @@ HYPRE_Int hypre_MPI_Info_free( hypre_MPI_Info *info );
 #include <stdio.h>
 #include <stdlib.h>
 
+/* stringification:
+ * _Pragma(string-literal), so we need to cast argument to a string
+ * The three dots as last argument of the macro tells compiler that this is a variadic macro.
+ * I.e. this is a macro that receives variable number of arguments.
+ */
+#define HYPRE_STR(...) #__VA_ARGS__
+#define HYPRE_XSTR(...) HYPRE_STR(__VA_ARGS__)
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -546,14 +554,6 @@ extern "C" {
 #if defined(HYPRE_USING_DEVICE_OPENMP)
 
 #include "omp.h"
-
-/* stringification:
- * _Pragma(string-literal), so we need to cast argument to a string
- * The three dots as last argument of the macro tells compiler that this is a variadic macro.
- * I.e. this is a macro that receives variable number of arguments.
- */
-#define HYPRE_STR(s...) #s
-#define HYPRE_XSTR(s...) HYPRE_STR(s)
 
 /* OpenMP 4.5 device memory management */
 extern HYPRE_Int hypre__global_offload;
@@ -1699,7 +1699,7 @@ void hypre_enter_on_lists ( hypre_LinkList *LoL_head_ptr , hypre_LinkList *LoL_t
 
 /* binsearch.c */
 HYPRE_Int hypre_BinarySearch ( HYPRE_Int *list , HYPRE_Int value , HYPRE_Int list_length );
-HYPRE_Int hypre_BigBinarySearch(HYPRE_BigInt *list, HYPRE_BigInt value, HYPRE_Int list_length);
+HYPRE_Int hypre_BigBinarySearch ( HYPRE_BigInt *list , HYPRE_BigInt value , HYPRE_Int list_length );
 HYPRE_Int hypre_BinarySearch2 ( HYPRE_Int *list , HYPRE_Int value , HYPRE_Int low , HYPRE_Int high , HYPRE_Int *spot );
 HYPRE_Int *hypre_LowerBound( HYPRE_Int *first, HYPRE_Int *last, HYPRE_Int value );
 HYPRE_BigInt *hypre_BigLowerBound( HYPRE_BigInt *first, HYPRE_BigInt *last, HYPRE_BigInt value );
@@ -1957,6 +1957,7 @@ void hypre_big_merge_sort(HYPRE_BigInt *in, HYPRE_BigInt *temp, HYPRE_Int len, H
 void hypre_big_sort_and_create_inverse_map(
   HYPRE_BigInt *in, HYPRE_Int len, HYPRE_BigInt **out, hypre_UnorderedBigIntMap *inverse_map);
 #endif
+
 
 #ifdef __cplusplus
 }

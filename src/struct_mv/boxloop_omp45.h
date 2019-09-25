@@ -20,13 +20,6 @@
 
 #include "omp.h"
 
-/* stringification:
- * _Pragma(string-literal), so we need to cast argument to a string
- * The three dots as last argument of the macro tells compiler that this is a variadic macro. 
- * I.e. this is a macro that receives variable number of arguments. 
- */
-#define HYPRE_STR(s...) #s
-#define HYPRE_XSTR(s...) HYPRE_STR(s)
 /* concatenation:
  */
 #define HYPRE_CONCAT2(x, y) x ## _ ## y
@@ -36,7 +29,7 @@
 #define HYPRE_XCONCAT3(x, y, z) HYPRE_CONCAT3(x, y, z)
 
 /* if use OMP 4.5 default team size and number of teams */
-#define AUTO_OMP_TEAM 
+#define AUTO_OMP_TEAM
 
 #ifndef AUTO_OMP_TEAM
 /* omp team size (aka. gpu block size) */
@@ -46,21 +39,21 @@
 #endif
 
 //#define HYPRE_BOXLOOP_ENTRY_PRINT hypre_printf("%s %s %d\n", __FILE__, __func__, __LINE__);
-#define HYPRE_BOXLOOP_ENTRY_PRINT 
+#define HYPRE_BOXLOOP_ENTRY_PRINT
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
    BOX LOOPS [TEAM DISTRIBUTE VERSION]
    !!! NOTE: THIS CODE ONLY WORKS FOR DIM <= 3 !!!
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
 /*
-#define hypre_BoxLoop0For() 
-#define hypre_BoxLoop1For(i1) 
-#define hypre_BoxLoop2For(i1, i2) 
-#define hypre_BoxLoop3For(i1, i2, i3) 
-#define hypre_BoxLoop4For(i1, i2, i3, i4) 
+#define hypre_BoxLoop0For()
+#define hypre_BoxLoop1For(i1)
+#define hypre_BoxLoop2For(i1, i2)
+#define hypre_BoxLoop3For(i1, i2, i3)
+#define hypre_BoxLoop4For(i1, i2, i3, i4)
 */
-#define hypre_BoxLoopGetIndex    zypre_BoxLoopGetIndex  
-#define hypre_BoxLoopSetOneBlock() ; 
+#define hypre_BoxLoopGetIndex    zypre_BoxLoopGetIndex
+#define hypre_BoxLoopSetOneBlock() ;
 #define hypre_BoxLoopBlock()       0
 
 #define hypre_BoxLoop0Begin  zypre_omp4_dist_BoxLoop0Begin
@@ -138,16 +131,16 @@ HYPRE_Int HYPRE_XCONCAT3(hypre__stride,0,k), HYPRE_XCONCAT3(hypre__stride,1,k), 
  * map clause
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
 #define MAP_CLAUSE0
-#define MAP_CLAUSE1 
-#define MAP_CLAUSE2 
-#define MAP_CLAUSE3 
-#define MAP_CLAUSE4 
+#define MAP_CLAUSE1
+#define MAP_CLAUSE2
+#define MAP_CLAUSE3
+#define MAP_CLAUSE4
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * if clause
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
 #define IF_CLAUSE if (hypre__global_offload && hypre__tot > 0)
-//#define IF_CLAUSE 
+//#define IF_CLAUSE
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * is_device_ptr clause
@@ -155,7 +148,7 @@ HYPRE_Int HYPRE_XCONCAT3(hypre__stride,0,k), HYPRE_XCONCAT3(hypre__stride,1,k), 
 #if defined(HYPRE_DEVICE_OPENMP_ALLOC)
 #define IS_DEVICE_CLAUSE DEVICE_VAR
 #else
-#define IS_DEVICE_CLAUSE 
+#define IS_DEVICE_CLAUSE
 #endif
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -369,7 +362,7 @@ hypre__I_1 = hypre__I_2 = hypre__I_3 = hypre__I_4 = 1;  hypre__J = hypre__thread
    for (HYPRE_Int hypre__thread = 0; hypre__thread < hypre__tot; hypre__thread++) \
    {\
       zypre_omp4_BoxLoopSet3(i1, i2, i3)
-      
+
 #if 0
 #define zypre_omp4_dist_BoxLoop3_SAME_STRIDE_Begin(ndim, loop_size, \
       dbox1, start1, stride1, i1, \
@@ -387,7 +380,7 @@ hypre__I_1 = hypre__I_2 = hypre__I_3 = hypre__I_4 = 1;  hypre__J = hypre__thread
    {\
       zypre_omp4_BoxLoopSet3_SAME_STRIDE(i1, i2, o2, i3)
 #endif
- 
+
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * BoxLoop 4
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/

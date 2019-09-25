@@ -21,9 +21,9 @@
 #ifdef HYPRE_USING_OPENMP
 #define HYPRE_BOX_REDUCTION 
 #ifdef WIN32
-#define Pragma(x) __pragma(#x)
+#define Pragma(x) __pragma(HYPRE_XSTR(x))
 #else
-#define Pragma(x) _Pragma(#x)
+#define Pragma(x) _Pragma(HYPRE_XSTR(x))
 #endif
 #define OMP1 Pragma(omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_BOX_REDUCTION HYPRE_SMP_SCHEDULE)
 #else
