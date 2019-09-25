@@ -225,8 +225,8 @@ main( hypre_int argc,
    HYPRE_Int add_P_max_elmts = 0;
    HYPRE_Real add_trunc_factor = 0;
 
-   HYPRE_Int    rap2=0;
-   HYPRE_Int    mod_rap2=0;
+   HYPRE_Int    rap2=1;
+   HYPRE_Int    mod_rap2=1;
    HYPRE_Int    keepTranspose = 0;
 #ifdef HAVE_DSUPERLU
    HYPRE_Int    dslu_threshold = -1;

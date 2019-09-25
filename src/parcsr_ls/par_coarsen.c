@@ -1927,11 +1927,18 @@ hypre_BoomerAMGCoarsenFalgout( hypre_ParCSRMatrix    *S,
 }
 
 HYPRE_Int
+hypre_BoomerAMGCoarsenPMISHost( hypre_ParCSRMatrix *S,
+                                hypre_ParCSRMatrix *A,
+                                HYPRE_Int           CF_init,
+                                HYPRE_Int           debug_flag,
+                                HYPRE_Int         **CF_marker_ptr);
+
+HYPRE_Int
 hypre_BoomerAMGCoarsenHMIS( hypre_ParCSRMatrix    *S,
                             hypre_ParCSRMatrix    *A,
-                            HYPRE_Int                    measure_type,
-                            HYPRE_Int                    debug_flag,
-                            HYPRE_Int                  **CF_marker_ptr)
+                            HYPRE_Int              measure_type,
+                            HYPRE_Int              debug_flag,
+                            HYPRE_Int            **CF_marker_ptr)
 {
    HYPRE_Int              ierr = 0;
 
@@ -1942,7 +1949,7 @@ hypre_BoomerAMGCoarsenHMIS( hypre_ParCSRMatrix    *S,
    ierr += hypre_BoomerAMGCoarsenRuge (S, A, measure_type, 10, debug_flag,
                                 CF_marker_ptr);
 
-   ierr += hypre_BoomerAMGCoarsenPMIS (S, A, 1, debug_flag,
+   ierr += hypre_BoomerAMGCoarsenPMISHost (S, A, 1, debug_flag,
                                 CF_marker_ptr);
 
    return (ierr);

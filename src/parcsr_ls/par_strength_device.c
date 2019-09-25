@@ -111,11 +111,13 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
     * to "unaccounted-for" dependence.
     *----------------------------------------------------------------*/
 
-   num_nonzeros_diag = A_diag_i[num_variables];
+   //   num_nonzeros_diag = A_diag_i[num_variables];
+   num_nonzeros_diag = hypre_CSRMatrixNumNonzeros(A_diag);
    num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
 
    A_offd_i = hypre_CSRMatrixI(A_offd);
-   num_nonzeros_offd = A_offd_i[num_variables];
+   //   num_nonzeros_offd = A_offd_i[num_variables];
+   num_nonzeros_offd = hypre_CSRMatrixNumNonzeros(A_offd);
 
    S = hypre_ParCSRMatrixCreate(comm, global_num_vars, global_num_vars,
 			row_starts, row_starts,

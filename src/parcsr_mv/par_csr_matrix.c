@@ -290,10 +290,10 @@ hypre_ParCSRMatrixSetNumNonzeros( hypre_ParCSRMatrix *matrix )
 {
    MPI_Comm comm;
    hypre_CSRMatrix *diag;
-   HYPRE_Int *diag_i;
+   /*   HYPRE_Int *diag_i;*/
    hypre_CSRMatrix *offd;
-   HYPRE_Int *offd_i;
-   HYPRE_Int local_num_rows;
+   /*   HYPRE_Int *offd_i;*/
+   /*   HYPRE_Int local_num_rows;*/
    HYPRE_BigInt total_num_nonzeros;
    HYPRE_BigInt local_num_nonzeros;
    if (!matrix)
@@ -303,12 +303,12 @@ hypre_ParCSRMatrixSetNumNonzeros( hypre_ParCSRMatrix *matrix )
    }
    comm = hypre_ParCSRMatrixComm(matrix);
    diag = hypre_ParCSRMatrixDiag(matrix);
-   diag_i = hypre_CSRMatrixI(diag);
+   /*   diag_i = hypre_CSRMatrixI(diag);*/
    offd = hypre_ParCSRMatrixOffd(matrix);
-   offd_i = hypre_CSRMatrixI(offd);
-   local_num_rows = hypre_CSRMatrixNumRows(diag);
-
-   local_num_nonzeros = (HYPRE_BigInt)(diag_i[local_num_rows] + offd_i[local_num_rows]);
+   /*   offd_i = hypre_CSRMatrixI(offd);*/
+   /*   local_num_rows = hypre_CSRMatrixNumRows(diag);*/
+   /*   local_num_nonzeros = (HYPRE_BigInt)(diag_i[local_num_rows] + offd_i[local_num_rows]);*/
+   local_num_nonzeros = (HYPRE_BigInt)(hypre_CSRMatrixNumNonzeros(diag)+hypre_CSRMatrixNumNonzeros(offd));
    hypre_MPI_Allreduce(&local_num_nonzeros, &total_num_nonzeros, 1, HYPRE_MPI_BIG_INT,
                        hypre_MPI_SUM, comm);
    hypre_ParCSRMatrixNumNonzeros(matrix) = total_num_nonzeros;
@@ -337,13 +337,16 @@ hypre_ParCSRMatrixSetDNumNonzeros( hypre_ParCSRMatrix *matrix )
    }
    comm = hypre_ParCSRMatrixComm(matrix);
    diag = hypre_ParCSRMatrixDiag(matrix);
-   diag_i = hypre_CSRMatrixI(diag);
+   /*   diag_i = hypre_CSRMatrixI(diag);*/
    offd = hypre_ParCSRMatrixOffd(matrix);
-   offd_i = hypre_CSRMatrixI(offd);
+   /*   offd_i = hypre_CSRMatrixI(offd);*/
 
-   local_num_rows = hypre_CSRMatrixNumRows(diag);
-   local_num_nonzeros  = diag_i[local_num_rows];
-   local_num_nonzeros += offd_i[local_num_rows];
+   /*   local_num_rows = hypre_CSRMatrixNumRows(diag);*/
+
+   /*   local_num_nonzeros  = diag_i[local_num_rows];
+        local_num_nonzeros += offd_i[local_num_rows];*/
+   local_num_nonzeros   = hypre_CSRMatrixNumNonzeros(diag);
+   local_num_nonzeros  += hypre_CSRMatrixNumNonzeros(offd);
 
    hypre_MPI_Allreduce(&local_num_nonzeros, &total_num_nonzeros, 1,
                        HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
