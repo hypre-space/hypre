@@ -30,9 +30,9 @@ HYPRE_ParCSRGMRESDestroy( HYPRE_Solver solver )
 
 HYPRE_Int 
 HYPRE_GMRESSetup( HYPRE_Solver solver,
-                        HYPRE_Matrix A,
-                        HYPRE_Vector b,
-                        HYPRE_Vector x      )
+                  HYPRE_Matrix A,
+                  HYPRE_Vector b,
+                  HYPRE_Vector x      )
 {
    return( hypre_GMRESSetup( solver,
                              A,
@@ -46,9 +46,9 @@ HYPRE_GMRESSetup( HYPRE_Solver solver,
 
 HYPRE_Int 
 HYPRE_GMRESSolve( HYPRE_Solver solver,
-                        HYPRE_Matrix A,
-                        HYPRE_Vector b,
-                        HYPRE_Vector x      )
+                  HYPRE_Matrix A,
+                  HYPRE_Vector b,
+                  HYPRE_Vector x      )
 {
    return( hypre_GMRESSolve( solver,
                              A,
@@ -223,9 +223,9 @@ HYPRE_GMRESGetSkipRealResidualCheck( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_GMRESSetPrecond( HYPRE_Solver          solver,
-                             HYPRE_PtrToSolverFcn  precond,
-                             HYPRE_PtrToSolverFcn  precond_setup,
-                             HYPRE_Solver          precond_solver )
+                       HYPRE_PtrToSolverFcn  precond,
+                       HYPRE_PtrToSolverFcn  precond_setup,
+                       HYPRE_Solver          precond_solver )
 {
    return( hypre_GMRESSetPrecond( (void *) solver,
                                   (HYPRE_Int (*)(void*, void*, void*, void*))precond,

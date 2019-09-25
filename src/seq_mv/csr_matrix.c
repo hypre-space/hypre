@@ -316,7 +316,6 @@ hypre_CSRMatrixRead( char *file_name )
    /*----------------------------------------------------------
     * Read in the data
     *----------------------------------------------------------*/
-
    fp = fopen(file_name, "r");
 
    hypre_fscanf(fp, "%d", &num_rows);
