@@ -3,16 +3,12 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
-# !!! Moved up the required version number for including Christoph's tridiagonal stuff
-cmake_minimum_required(VERSION 3.14)
-
-
+cmake_minimum_required (VERSION 2.8.8)
 if (POLICY CMP0074)
    cmake_policy(SET CMP0074 NEW) 
 endif (POLICY CMP0074)
 
-# !!! New: added CXX and CUDA as languages below
-project (hypre LANGUAGES C CXX CUDA)
+project (hypre)
 
 # The version number.
 set (HYPRE_VERSION 2.17.0)
@@ -39,34 +35,6 @@ set (HYPRE_BUILD_TYPE "Release" CACHE STRING
   "Optimization flags: set to Debug, Release, RelWithDebInfo, or MinSizeRel")
 set (CMAKE_BUILD_TYPE "${HYPRE_BUILD_TYPE}" CACHE INTERNAL "" FORCE)
 
-
-
-
-
-
-# !!! New: trying to integrate Christoph's tridiagonal solver
-# Define build options for CPU and CUDA target architectures.
-find_package(CMakeshift 3.4 REQUIRED)
-find_package(Eigen3 REQUIRED)
-find_package(optional-lite REQUIRED)
-find_package(gsl-lite REQUIRED)
-find_package(cuda-api-wrappers REQUIRED)
-find_package(OpenMP REQUIRED)
-find_package(string-helper REQUIRED)
-find_package(tridigpu REQUIRED)
-find_package(asterios REQUIRED)
-
-include_directories(/home/nfs/wmitchell/install/include)
-
-include(CMakeshift/TargetArchitecture)
-
-
-
-
-
-
-
-
 # Configuration options
 option(HYPRE_ENABLE_SHARED           "Build a shared library" OFF)
 option(HYPRE_ENABLE_BIGINT           "Use long long int for HYPRE_Int" OFF)
@@ -78,8 +46,6 @@ option(HYPRE_ENABLE_HYPRE_BLAS       "Use internal BLAS library" ON)
 option(HYPRE_ENABLE_HYPRE_LAPACK     "Use internal LAPACK library" ON)
 option(HYPRE_ENABLE_PERSISTENT_COMM  "Use persistent communication" OFF)
 option(HYPRE_ENABLE_GLOBAL_PARTITION "Use global partitioning" OFF)
-option(HYPRE_ENABLE_UNIFIED_MEMORY   "Use unified memory" OFF)
-option(HYPRE_WITH_CUDA               "Use CUDA" OFF)
 option(HYPRE_ENABLE_FEI              "Use FEI" OFF) # TODO: Add this cmake feature
 option(HYPRE_WITH_MPI                "Compile with MPI" ON)
 option(HYPRE_WITH_OPENMP             "Use OpenMP" OFF)
@@ -135,14 +101,6 @@ if (HYPRE_ENABLE_GLOBAL_PARTITION)
   set(HYPRE_NO_GLOBAL_PARTITION OFF CACHE BOOL "" FORCE)
 elseif()
   set(HYPRE_NO_GLOBAL_PARTITION ON CACHE BOOL "" FORCE)
-endif()
-
-if (HYPRE_ENABLE_UNIFIED_MEMORY)
-  set(HYPRE_USING_UNIFIED_MEMORY ON CACHE BOOL "" FORCE)
-endif()
-
-if (HYPRE_WITH_CUDA)
-  set(HYPRE_USING_GPU ON CACHE BOOL "" FORCE)
 endif()
 
 if (HYPRE_WITH_MPI)
@@ -352,17 +310,5 @@ add_library (HYPRE ${HYPRE_SOURCES} ${HYPRE_HEADERS} ${FEI_LIBS})
 
 target_link_libraries(HYPRE PUBLIC ${TPL_LIBRARIES})
 
-
-
-
-target_link_libraries(HYPRE
-    PUBLIC
-        tridigpu
-        asterios
-    )
-
-
-
 install (TARGETS HYPRE DESTINATION lib)
 install (FILES ${HYPRE_HEADERS} DESTINATION include)
-
