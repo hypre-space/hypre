@@ -2729,8 +2729,8 @@ hypre_BoomerAMGBuildDirInterp( hypre_ParCSRMatrix   *A,
 
 HYPRE_Int
 hypre_BoomerAMGInterpTruncation( hypre_ParCSRMatrix *P,
-                 HYPRE_Real trunc_factor,
-                 HYPRE_Int max_elmts)
+                                 HYPRE_Real          trunc_factor,
+                                 HYPRE_Int           max_elmts)
 {
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_INTERP_TRUNC] -= hypre_MPI_Wtime();
@@ -2785,56 +2785,63 @@ hypre_BoomerAMGInterpTruncation( hypre_ParCSRMatrix *P,
    cum_lost_per_thread = hypre_CTAlloc(HYPRE_Int,  max_num_threads[0], HYPRE_MEMORY_HOST);
    num_lost_per_thread = hypre_CTAlloc(HYPRE_Int,  max_num_threads[0], HYPRE_MEMORY_HOST);
    num_lost_offd_per_thread = hypre_CTAlloc(HYPRE_Int,  max_num_threads[0], HYPRE_MEMORY_HOST);
-   for(i=0; i < max_num_threads[0]; i++)
+   for (i=0; i < max_num_threads[0]; i++)
    {
-       num_lost_per_thread[i] = 0;
-       num_lost_offd_per_thread[i] = 0;
+      num_lost_per_thread[i] = 0;
+      num_lost_offd_per_thread[i] = 0;
    }
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel private(i,my_thread_num,num_threads,max_coef,j,start_j,row_sum,scale,num_lost,now_checking,next_open,num_lost_offd,now_checking_offd,next_open_offd,start,stop,cnt_diag,cnt_offd,num_elmts,cnt)
 #endif
    {
-       my_thread_num = hypre_GetThreadNum();
-       num_threads = hypre_NumActiveThreads();
+      my_thread_num = hypre_GetThreadNum();
+      num_threads = hypre_NumActiveThreads();
 
-       /* Compute each thread's range of rows to truncate and compress.  Note,
-        * that i, j and data are all compressed as entries are dropped, but
-        * that the compression only occurs locally over each thread's row
-        * range.  P_diag_i is only made globally consistent at the end of this
-        * routine.  During the dropping phases, P_diag_i[stop] will point to
-        * the start of the next thread's row range.  */
+      /* Compute each thread's range of rows to truncate and compress.  Note,
+       * that i, j and data are all compressed as entries are dropped, but
+       * that the compression only occurs locally over each thread's row
+       * range.  P_diag_i is only made globally consistent at the end of this
+       * routine.  During the dropping phases, P_diag_i[stop] will point to
+       * the start of the next thread's row range.  */
 
-       /* my row range */
-       start = (n_fine/num_threads)*my_thread_num;
-       if (my_thread_num == num_threads-1)
-       {  stop = n_fine; }
-       else
-       {  stop = (n_fine/num_threads)*(my_thread_num+1); }
+      /* my row range */
+      start = (n_fine/num_threads)*my_thread_num;
+      if (my_thread_num == num_threads-1)
+      {
+         stop = n_fine;
+      }
+      else
+      {
+         stop = (n_fine/num_threads)*(my_thread_num+1);
+      }
 
+      /*
+       * Truncate based on truncation tolerance
+       */
+      if (trunc_factor > 0)
+      {
+         num_lost = 0;
+         num_lost_offd = 0;
 
-       /*
-        * Truncate based on truncation tolerance
-        */
-       if (trunc_factor > 0)
-       {
-          num_lost = 0;
-          num_lost_offd = 0;
+         next_open = P_diag_i[start];
+         now_checking = P_diag_i[start];
+         next_open_offd = P_offd_i[start];;
+         now_checking_offd = P_offd_i[start];;
 
-          next_open = P_diag_i[start];
-          now_checking = P_diag_i[start];
-          next_open_offd = P_offd_i[start];;
-          now_checking_offd = P_offd_i[start];;
-
-          for (i = start; i < stop; i++)
-          {
+         for (i = start; i < stop; i++)
+         {
             max_coef = 0;
             for (j = P_diag_i[i]; j < P_diag_i[i+1]; j++)
+            {
                max_coef = (max_coef < fabs(P_diag_data[j])) ?
-                      fabs(P_diag_data[j]) : max_coef;
+                  fabs(P_diag_data[j]) : max_coef;
+            }
             for (j = P_offd_i[i]; j < P_offd_i[i+1]; j++)
+            {
                max_coef = (max_coef < fabs(P_offd_data[j])) ?
-                      fabs(P_offd_data[j]) : max_coef;
+                  fabs(P_offd_data[j]) : max_coef;
+            }
             max_coef *= trunc_factor;
 
             start_j = P_diag_i[i];
@@ -2884,81 +2891,88 @@ hypre_BoomerAMGInterpTruncation( hypre_ParCSRMatrix *P,
             {
                if (scale != row_sum)
                {
-                   scale = row_sum/scale;
-                   for (j = P_diag_i[i]; j < (P_diag_i[i+1]-num_lost); j++)
-                          P_diag_data[j] *= scale;
-                   for (j = P_offd_i[i]; j < (P_offd_i[i+1]-num_lost_offd); j++)
-                          P_offd_data[j] *= scale;
+                  scale = row_sum/scale;
+                  for (j = P_diag_i[i]; j < (P_diag_i[i+1]-num_lost); j++)
+                  {
+                     P_diag_data[j] *= scale;
+                  }
+                  for (j = P_offd_i[i]; j < (P_offd_i[i+1]-num_lost_offd); j++)
+                  {
+                     P_offd_data[j] *= scale;
+                  }
                }
             }
-          } /* end loop for (i = 0; i < n_fine; i++) */
+         } /* end loop for (i = 0; i < n_fine; i++) */
 
-          /* store number of dropped elements and number of threads */
-          if(my_thread_num == 0)
-          {   max_num_threads[0] = num_threads; }
-          num_lost_per_thread[my_thread_num] = num_lost;
-          num_lost_offd_per_thread[my_thread_num] = num_lost_offd;
+         /* store number of dropped elements and number of threads */
+         if (my_thread_num == 0)
+         {
+            max_num_threads[0] = num_threads;
+         }
+         num_lost_per_thread[my_thread_num] = num_lost;
+         num_lost_offd_per_thread[my_thread_num] = num_lost_offd;
 
-       } /* end if (trunc_factor > 0) */
+      } /* end if (trunc_factor > 0) */
 
+      /*
+       * Truncate based on capping the nnz per row
+       *
+       */
+      if (max_elmts > 0)
+      {
+         HYPRE_Int P_mxnum, cnt1, last_index, last_index_offd;
+         HYPRE_Int *P_aux_j;
+         HYPRE_Real *P_aux_data;
 
-       /*
-        * Truncate based on capping the nnz per row
-        *
-        */
-       if (max_elmts > 0)
-       {
-           HYPRE_Int P_mxnum, cnt1, last_index, last_index_offd;
-           HYPRE_Int *P_aux_j;
-           HYPRE_Real *P_aux_data;
+         /* find maximum row length locally over this row range */
+         P_mxnum = 0;
+         for (i=start; i<stop; i++)
+         {
+            /* Note P_diag_i[stop] is the starting point for the next thread
+             * in j and data, not the stop point for this thread */
+            last_index = P_diag_i[i+1];
+            last_index_offd = P_offd_i[i+1];
+            if (i == stop-1)
+            {
+               last_index -= num_lost_per_thread[my_thread_num];
+               last_index_offd -= num_lost_offd_per_thread[my_thread_num];
+            }
+            cnt1 = last_index-P_diag_i[i] + last_index_offd-P_offd_i[i];
+            if (cnt1 > P_mxnum)
+            {
+               P_mxnum = cnt1;
+            }
+         }
 
-           /* find maximum row length locally over this row range */
-           P_mxnum = 0;
-           for (i=start; i<stop; i++)
-           {
-              /* Note P_diag_i[stop] is the starting point for the next thread
-               * in j and data, not the stop point for this thread */
-              last_index = P_diag_i[i+1];
-              last_index_offd = P_offd_i[i+1];
-              if(i == stop-1)
-              {
+         /* Some rows exceed max_elmts, and require truncation.  Essentially,
+          * each thread truncates and compresses its range of rows locally. */
+         if (P_mxnum > max_elmts)
+         {
+            num_lost = 0;
+            num_lost_offd = 0;
+
+            /* two temporary arrays to hold row i for temporary operations */
+            P_aux_j = hypre_CTAlloc(HYPRE_Int,  P_mxnum, HYPRE_MEMORY_HOST);
+            P_aux_data = hypre_CTAlloc(HYPRE_Real,  P_mxnum, HYPRE_MEMORY_HOST);
+            cnt_diag = P_diag_i[start];
+            cnt_offd = P_offd_i[start];
+
+            for (i = start; i < stop; i++)
+            {
+               /* Note P_diag_i[stop] is the starting point for the next thread
+                * in j and data, not the stop point for this thread */
+               last_index = P_diag_i[i+1];
+               last_index_offd = P_offd_i[i+1];
+               if (i == stop-1)
+               {
                   last_index -= num_lost_per_thread[my_thread_num];
                   last_index_offd -= num_lost_offd_per_thread[my_thread_num];
-              }
-              cnt1 = last_index-P_diag_i[i] + last_index_offd-P_offd_i[i];
-              if (cnt1 > P_mxnum) P_mxnum = cnt1;
-           }
+               }
 
-           /* Some rows exceed max_elmts, and require truncation.  Essentially,
-            * each thread truncates and compresses its range of rows locally. */
-           if (P_mxnum > max_elmts)
-           {
-
-               num_lost = 0;
-               num_lost_offd = 0;
-
-               /* two temporary arrays to hold row i for temporary operations */
-               P_aux_j = hypre_CTAlloc(HYPRE_Int,  P_mxnum, HYPRE_MEMORY_HOST);
-               P_aux_data = hypre_CTAlloc(HYPRE_Real,  P_mxnum, HYPRE_MEMORY_HOST);
-               cnt_diag = P_diag_i[start];
-               cnt_offd = P_offd_i[start];
-
-               for (i = start; i < stop; i++)
+               row_sum = 0;
+               num_elmts = last_index-P_diag_i[i] + last_index_offd-P_offd_i[i];
+               if (max_elmts < num_elmts)
                {
-                /* Note P_diag_i[stop] is the starting point for the next thread
-                 * in j and data, not the stop point for this thread */
-                last_index = P_diag_i[i+1];
-                last_index_offd = P_offd_i[i+1];
-                if(i == stop-1)
-                {
-                    last_index -= num_lost_per_thread[my_thread_num];
-                    last_index_offd -= num_lost_offd_per_thread[my_thread_num];
-                }
-
-                row_sum = 0;
-                num_elmts = last_index-P_diag_i[i] + last_index_offd-P_offd_i[i];
-                if (max_elmts < num_elmts)
-                {
                   /* copy both diagonal and off-diag parts of row i to _aux_ arrays */
                   cnt = 0;
                   for (j = P_diag_i[i]; j < last_index; j++)
@@ -3009,18 +3023,20 @@ hypre_BoomerAMGInterpTruncation( hypre_ParCSRMatrix *P,
                      {
                         scale = row_sum/scale;
                         for (j = P_diag_i[i]; j < cnt_diag; j++)
-                               P_diag_data[j] *= scale;
+                        {
+                           P_diag_data[j] *= scale;
+                        }
                         for (j = P_offd_i[i]; j < cnt_offd; j++)
-                               P_offd_data[j] *= scale;
+                        {
+                           P_offd_data[j] *= scale;
+                        }
                      }
                   }
-                }  /* end if (max_elmts < num_elmts) */
-
-                else
-                {
+               }  /* end if (max_elmts < num_elmts) */
+               else
+               {
                   /* nothing dropped from this row, but still have to shift entries back
                    * by the number dropped so far */
-
                   if (P_diag_i[i] != cnt_diag)
                   {
                      start_j = P_diag_i[i];
@@ -3032,7 +3048,9 @@ hypre_BoomerAMGInterpTruncation( hypre_ParCSRMatrix *P,
                      }
                   }
                   else
+                  {
                      cnt_diag += last_index-P_diag_i[i];
+                  }
 
                   if (P_offd_i[i] != cnt_offd)
                   {
@@ -3045,185 +3063,199 @@ hypre_BoomerAMGInterpTruncation( hypre_ParCSRMatrix *P,
                      }
                   }
                   else
+                  {
                      cnt_offd += last_index_offd-P_offd_i[i];
-                }
-               } /* end for (i = 0; i < n_fine; i++) */
+                  }
+               }
+            } /* end for (i = 0; i < n_fine; i++) */
 
-               num_lost_per_thread[my_thread_num] += num_lost;
-               num_lost_offd_per_thread[my_thread_num] += num_lost_offd;
-               hypre_TFree(P_aux_j, HYPRE_MEMORY_HOST);
-               hypre_TFree(P_aux_data, HYPRE_MEMORY_HOST);
+            num_lost_per_thread[my_thread_num] += num_lost;
+            num_lost_offd_per_thread[my_thread_num] += num_lost_offd;
+            hypre_TFree(P_aux_j, HYPRE_MEMORY_HOST);
+            hypre_TFree(P_aux_data, HYPRE_MEMORY_HOST);
 
-           } /* end if (P_mxnum > max_elmts) */
-       } /* end if (max_elmts > 0) */
+         } /* end if (P_mxnum > max_elmts) */
+      } /* end if (max_elmts > 0) */
 
 
-       /* Sum up num_lost_global */
+      /* Sum up num_lost_global */
 #ifdef HYPRE_USING_OPENMP
 #pragma omp barrier
 #endif
-       if(my_thread_num == 0)
-       {
-           num_lost_global = 0;
-           num_lost_global_offd = 0;
-           for(i = 0; i < max_num_threads[0]; i++)
-           {
-               num_lost_global += num_lost_per_thread[i];
-               num_lost_global_offd += num_lost_offd_per_thread[i];
-           }
-       }
+      if (my_thread_num == 0)
+      {
+         num_lost_global = 0;
+         num_lost_global_offd = 0;
+         for (i = 0; i < max_num_threads[0]; i++)
+         {
+            num_lost_global += num_lost_per_thread[i];
+            num_lost_global_offd += num_lost_offd_per_thread[i];
+         }
+      }
 #ifdef HYPRE_USING_OPENMP
 #pragma omp barrier
 #endif
 
-       /*
-        * Synchronize and create new diag data structures
-        */
-       if (num_lost_global)
-       {
-          /* Each thread has it's own locally compressed CSR matrix from rows start
-           * to stop.  Now, we have to copy each thread's chunk into the new
-           * process-wide CSR data structures
+      /*
+       * Synchronize and create new diag data structures
+       */
+      if (num_lost_global)
+      {
+         /* Each thread has it's own locally compressed CSR matrix from rows start
+          * to stop.  Now, we have to copy each thread's chunk into the new
+          * process-wide CSR data structures
           *
           * First, we compute the new process-wide number of nonzeros (i.e.,
           * P_diag_size), and compute cum_lost_per_thread[k] so that this
           * entry holds the cumulative sum of entries dropped up to and
           * including thread k. */
-          if(my_thread_num == 0)
-          {
-              P_diag_size = P_diag_i[n_fine];
+         if (my_thread_num == 0)
+         {
+            P_diag_size = P_diag_i[n_fine];
 
-              for(i = 0; i < max_num_threads[0]; i++)
-              {
-                  P_diag_size -= num_lost_per_thread[i];
-                  if(i > 0)
-                  {   cum_lost_per_thread[i] = num_lost_per_thread[i] + cum_lost_per_thread[i-1]; }
-                  else
-                  {   cum_lost_per_thread[i] = num_lost_per_thread[i]; }
-              }
+            for (i = 0; i < max_num_threads[0]; i++)
+            {
+               P_diag_size -= num_lost_per_thread[i];
+               if (i > 0)
+               {
+                  cum_lost_per_thread[i] = num_lost_per_thread[i] + cum_lost_per_thread[i-1];
+               }
+               else
+               {
+                  cum_lost_per_thread[i] = num_lost_per_thread[i];
+               }
+            }
 
-              P_diag_j_new = hypre_CTAlloc(HYPRE_Int, P_diag_size, HYPRE_MEMORY_SHARED);
-              P_diag_data_new = hypre_CTAlloc(HYPRE_Real, P_diag_size, HYPRE_MEMORY_SHARED);
-          }
+            P_diag_j_new = hypre_CTAlloc(HYPRE_Int, P_diag_size, HYPRE_MEMORY_SHARED);
+            P_diag_data_new = hypre_CTAlloc(HYPRE_Real, P_diag_size, HYPRE_MEMORY_SHARED);
+         }
 #ifdef HYPRE_USING_OPENMP
 #pragma omp barrier
 #endif
 
-          /* points to next open spot in new data structures for this thread */
-          if(my_thread_num == 0)
-          {  next_open = 0; }
-          else
-          {
-              /* remember, cum_lost_per_thread[k] stores the num dropped up to and
-               * including thread k */
-              next_open = P_diag_i[start] - cum_lost_per_thread[my_thread_num-1];
-          }
-          /* copy the j and data arrays over */
-          for(i = P_diag_i[start]; i < P_diag_i[stop] - num_lost_per_thread[my_thread_num]; i++)
-          {
-              P_diag_j_new[next_open] = P_diag_j[i];
-              P_diag_data_new[next_open] = P_diag_data[i];
-              next_open += 1;
-          }
+         /* points to next open spot in new data structures for this thread */
+         if (my_thread_num == 0)
+         {
+            next_open = 0;
+         }
+         else
+         {
+            /* remember, cum_lost_per_thread[k] stores the num dropped up to and
+             * including thread k */
+            next_open = P_diag_i[start] - cum_lost_per_thread[my_thread_num-1];
+         }
+         /* copy the j and data arrays over */
+         for (i = P_diag_i[start]; i < P_diag_i[stop] - num_lost_per_thread[my_thread_num]; i++)
+         {
+            P_diag_j_new[next_open] = P_diag_j[i];
+            P_diag_data_new[next_open] = P_diag_data[i];
+            next_open += 1;
+         }
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp barrier
 #endif
-          /* update P_diag_i with number of dropped entries by all lower ranked
-           * threads */
-          if(my_thread_num > 0)
-          {
-              for(i=start; i<stop; i++)
-              {
-                  P_diag_i[i] -= cum_lost_per_thread[my_thread_num-1];
-              }
-          }
+         /* update P_diag_i with number of dropped entries by all lower ranked
+          * threads */
+         if (my_thread_num > 0)
+         {
+            for (i=start; i<stop; i++)
+            {
+               P_diag_i[i] -= cum_lost_per_thread[my_thread_num-1];
+            }
+         }
 
-          if(my_thread_num == 0)
-          {
-              /* Set last entry */
-              P_diag_i[n_fine] = P_diag_size ;
+         if (my_thread_num == 0)
+         {
+            /* Set last entry */
+            P_diag_i[n_fine] = P_diag_size ;
 
-              hypre_TFree(P_diag_j, HYPRE_MEMORY_SHARED);
-              hypre_TFree(P_diag_data, HYPRE_MEMORY_SHARED);
-              hypre_CSRMatrixJ(P_diag) = P_diag_j_new;
-              hypre_CSRMatrixData(P_diag) = P_diag_data_new;
-              hypre_CSRMatrixNumNonzeros(P_diag) = P_diag_size;
-          }
-       }
+            hypre_TFree(P_diag_j, HYPRE_MEMORY_SHARED);
+            hypre_TFree(P_diag_data, HYPRE_MEMORY_SHARED);
+            hypre_CSRMatrixJ(P_diag) = P_diag_j_new;
+            hypre_CSRMatrixData(P_diag) = P_diag_data_new;
+            hypre_CSRMatrixNumNonzeros(P_diag) = P_diag_size;
+         }
+      }
 
 
-       /*
-        * Synchronize and create new offd data structures
-        */
+      /*
+       * Synchronize and create new offd data structures
+       */
 #ifdef HYPRE_USING_OPENMP
 #pragma omp barrier
 #endif
-       if (num_lost_global_offd)
-       {
-          /* Repeat process for off-diagonal */
-          if(my_thread_num == 0)
-          {
-              P_offd_size = P_offd_i[n_fine];
-              for(i = 0; i < max_num_threads[0]; i++)
-              {
-                  P_offd_size -= num_lost_offd_per_thread[i];
-                  if(i > 0)
-                  {   cum_lost_per_thread[i] = num_lost_offd_per_thread[i] + cum_lost_per_thread[i-1]; }
-                  else
-                  {   cum_lost_per_thread[i] = num_lost_offd_per_thread[i]; }
-              }
+      if (num_lost_global_offd)
+      {
+         /* Repeat process for off-diagonal */
+         if (my_thread_num == 0)
+         {
+            P_offd_size = P_offd_i[n_fine];
+            for (i = 0; i < max_num_threads[0]; i++)
+            {
+               P_offd_size -= num_lost_offd_per_thread[i];
+               if (i > 0)
+               {
+                  cum_lost_per_thread[i] = num_lost_offd_per_thread[i] + cum_lost_per_thread[i-1];
+               }
+               else
+               {
+                  cum_lost_per_thread[i] = num_lost_offd_per_thread[i];
+               }
+            }
 
-              P_offd_j_new = hypre_CTAlloc(HYPRE_Int, P_offd_size, HYPRE_MEMORY_SHARED);
-              P_offd_data_new = hypre_CTAlloc(HYPRE_Real, P_offd_size, HYPRE_MEMORY_SHARED);
-          }
+            P_offd_j_new = hypre_CTAlloc(HYPRE_Int, P_offd_size, HYPRE_MEMORY_SHARED);
+            P_offd_data_new = hypre_CTAlloc(HYPRE_Real, P_offd_size, HYPRE_MEMORY_SHARED);
+         }
 #ifdef HYPRE_USING_OPENMP
 #pragma omp barrier
 #endif
 
-          /* points to next open spot in new data structures for this thread */
-          if(my_thread_num == 0)
-          {  next_open = 0; }
-          else
-          {
-              /* remember, cum_lost_per_thread[k] stores the num dropped up to and
-               * including thread k */
-              next_open = P_offd_i[start] - cum_lost_per_thread[my_thread_num-1];
-          }
+         /* points to next open spot in new data structures for this thread */
+         if (my_thread_num == 0)
+         {
+            next_open = 0;
+         }
+         else
+         {
+            /* remember, cum_lost_per_thread[k] stores the num dropped up to and
+             * including thread k */
+            next_open = P_offd_i[start] - cum_lost_per_thread[my_thread_num-1];
+         }
 
-          /* copy the j and data arrays over */
-          for(i = P_offd_i[start]; i < P_offd_i[stop] - num_lost_offd_per_thread[my_thread_num]; i++)
-          {
-              P_offd_j_new[next_open] = P_offd_j[i];
-              P_offd_data_new[next_open] = P_offd_data[i];
-              next_open += 1;
-          }
+         /* copy the j and data arrays over */
+         for (i = P_offd_i[start]; i < P_offd_i[stop] - num_lost_offd_per_thread[my_thread_num]; i++)
+         {
+            P_offd_j_new[next_open] = P_offd_j[i];
+            P_offd_data_new[next_open] = P_offd_data[i];
+            next_open += 1;
+         }
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp barrier
 #endif
-          /* update P_offd_i with number of dropped entries by all lower ranked
-           * threads */
-          if(my_thread_num > 0)
-          {
-              for(i=start; i<stop; i++)
-              {
-                  P_offd_i[i] -= cum_lost_per_thread[my_thread_num-1];
-              }
-          }
+         /* update P_offd_i with number of dropped entries by all lower ranked
+          * threads */
+         if (my_thread_num > 0)
+         {
+            for (i=start; i<stop; i++)
+            {
+               P_offd_i[i] -= cum_lost_per_thread[my_thread_num-1];
+            }
+         }
 
-          if(my_thread_num == 0)
-          {
-              /* Set last entry */
-              P_offd_i[n_fine] = P_offd_size ;
+         if (my_thread_num == 0)
+         {
+            /* Set last entry */
+            P_offd_i[n_fine] = P_offd_size ;
 
-              hypre_TFree(P_offd_j, HYPRE_MEMORY_SHARED);
-              hypre_TFree(P_offd_data, HYPRE_MEMORY_SHARED);
-              hypre_CSRMatrixJ(P_offd) = P_offd_j_new;
-              hypre_CSRMatrixData(P_offd) = P_offd_data_new;
-              hypre_CSRMatrixNumNonzeros(P_offd) = P_offd_size;
-          }
-       }
+            hypre_TFree(P_offd_j, HYPRE_MEMORY_SHARED);
+            hypre_TFree(P_offd_data, HYPRE_MEMORY_SHARED);
+            hypre_CSRMatrixJ(P_offd) = P_offd_j_new;
+            hypre_CSRMatrixData(P_offd) = P_offd_data_new;
+            hypre_CSRMatrixNumNonzeros(P_offd) = P_offd_size;
+         }
+      }
 
    } /* end parallel region */
 
@@ -3238,29 +3270,6 @@ hypre_BoomerAMGInterpTruncation( hypre_ParCSRMatrix *P,
 
    return ierr;
 }
-
-/* sort both v and w, in place, but based only on entries in w */
-void hypre_qsort2abs( HYPRE_Int *v,
-             HYPRE_Real *w,
-             HYPRE_Int  left,
-             HYPRE_Int  right )
-{
-   HYPRE_Int i, last;
-   if (left >= right)
-      return;
-   hypre_swap2( v, w, left, (left+right)/2);
-   last = left;
-   for (i = left+1; i <= right; i++)
-      if (fabs(w[i]) > fabs(w[left]))
-      {
-         hypre_swap2(v, w, ++last, i);
-      }
-   hypre_swap2(v, w, left, last);
-   hypre_qsort2abs(v, w, left, last-1);
-   hypre_qsort2abs(v, w, last+1, right);
-}
-
-
 
 
 /*---------------------------------------------------------------------------
@@ -4367,7 +4376,7 @@ hypre_BoomerAMGTruncandBuild( hypre_ParCSRMatrix   *P,
    }
 
    index = 0;
-   for(i = 0; i < new_num_cols_offd; i++)
+   for (i = 0; i < new_num_cols_offd; i++)
    {
        while (P_marker[index] == 0) index++;
 

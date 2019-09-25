@@ -309,6 +309,7 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
 
    diag = warp_allreduce_sum(diag);
 
+   /* sign of diag */
    const HYPRE_Int sdiag = diag > 0.0 ? 1 : -1;
 
    /* compute scaling factor and row sum */
@@ -324,7 +325,8 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
    }
 
    /* compute row of S */
-   HYPRE_Int all_weak = fabs(row_sum) > fabs(diag) * max_row_sum && max_row_sum < 1.0;
+   HYPRE_Int all_weak = max_row_sum < 1.0 && fabs(row_sum) > fabs(diag) * max_row_sum;
+   const HYPRE_Real thresh = sdiag * strength_threshold * row_scale;
 
    for (HYPRE_Int i = p_diag + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < q_diag); i += HYPRE_WARP_SIZE)
    {
@@ -333,7 +335,7 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
          const HYPRE_Int cond = all_weak == 0 && diag_pos != i &&
                                 ( num_functions == 1 || read_only_load(&dof_func[row]) ==
                                                         read_only_load(&dof_func[read_only_load(&A_diag_j[i])]) ) &&
-                                sdiag * read_only_load(&A_diag_data[i]) < sdiag * strength_threshold * row_scale;
+                                sdiag * read_only_load(&A_diag_data[i]) < thresh;
          S_temp_diag_j[i] = cond * (1 + read_only_load(&A_diag_j[i])) - 1;
          row_nnz_diag += cond;
       }
@@ -346,7 +348,7 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
          const HYPRE_Int cond = all_weak == 0 &&
                                 ( num_functions == 1 || read_only_load(&dof_func[row]) ==
                                                         read_only_load(&dof_func_offd[read_only_load(&A_offd_j[i])]) ) &&
-                                sdiag * read_only_load(&A_offd_data[i]) < sdiag * strength_threshold * row_scale;
+                                sdiag * read_only_load(&A_offd_data[i]) < thresh;
          S_temp_offd_j[i] = cond * (1 + read_only_load(&A_offd_j[i])) - 1;
          row_nnz_offd += cond;
       }

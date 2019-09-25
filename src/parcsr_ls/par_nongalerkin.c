@@ -34,28 +34,6 @@ hypre_GrabSubArray(HYPRE_Int * indices,
    return 0;
 }
 
-/*   Quick Sort based on magnitude on w (HYPRE_Real), move v */
-void hypre_qsort2_abs( HYPRE_Int *v,
-                      HYPRE_Real *w,
-                      HYPRE_Int  left,
-                      HYPRE_Int  right )
-{
-   HYPRE_Int i, last;
-
-   if (left >= right)
-      return;
-   hypre_swap2( v, w, left, (left+right)/2);
-   last = left;
-   for (i = left+1; i <= right; i++)
-      if (fabs(w[i]) < fabs(w[left]))
-      {
-         hypre_swap2(v, w, ++last, i);
-      }
-   hypre_swap2(v, w, left, last);
-   hypre_qsort2_abs(v, w, left, last-1);
-   hypre_qsort2_abs(v, w, last+1, right);
-}
-
 /* Compute the intersection of x and y, placing
  * the intersection in z.  Additionally, the array
  * x_data is associated with x, i.e., the entries
