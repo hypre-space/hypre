@@ -1204,7 +1204,7 @@ HYPRE_Int HYPRE_BoomerAMGSetCoordDim (HYPRE_Solver solver,
  **/
 HYPRE_Int HYPRE_BoomerAMGSetCoordinates (HYPRE_Solver  solver,
                                          float        *coordinates);
-#ifdef HAVE_DSUPERLU
+#ifdef HYPRE_USING_DSUPERLU
 /*
  * HYPRE_BoomerAMGSetDSLUThreshold
  **/
@@ -2772,6 +2772,36 @@ HYPRE_Int HYPRE_ParCSRHybridSetSetupType(HYPRE_Solver solver,
  **/
 HYPRE_Int HYPRE_ParCSRHybridSetSolverType(HYPRE_Solver solver,
                                           HYPRE_Int    solver_type);
+
+/**
+ * (Optional) Set recompute residual (don't rely on 3-term recurrence).
+ **/
+HYPRE_Int
+HYPRE_ParCSRHybridSetRecomputeResidual( HYPRE_Solver  solver,
+                                        HYPRE_Int     recompute_residual );
+
+/**
+ * (Optional) Get recompute residual option.
+ **/
+HYPRE_Int
+HYPRE_ParCSRHybridGetRecomputeResidual( HYPRE_Solver  solver,
+                                        HYPRE_Int    *recompute_residual );
+
+/**
+ * (Optional) Set recompute residual period (don't rely on 3-term recurrence).
+ *
+ * Recomputes residual after every specified number of iterations.
+ **/
+HYPRE_Int
+HYPRE_ParCSRHybridSetRecomputeResidualP( HYPRE_Solver  solver,
+                                         HYPRE_Int     recompute_residual_p );
+
+/**
+ * (Optional) Get recompute residual period option.
+ **/
+HYPRE_Int
+HYPRE_ParCSRHybridGetRecomputeResidualP( HYPRE_Solver  solver,
+                                         HYPRE_Int    *recompute_residual_p );
 
 /**
  * Set the Krylov dimension for restarted GMRES.

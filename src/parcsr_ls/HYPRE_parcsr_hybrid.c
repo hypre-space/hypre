@@ -142,6 +142,40 @@ HYPRE_ParCSRHybridSetSolverType( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParCSRHybridSetRecomputeResidual( HYPRE_Solver  solver,
+                                        HYPRE_Int     recompute_residual )
+{
+   return( hypre_AMGHybridSetRecomputeResidual( (void *) solver, recompute_residual ) );
+}
+
+HYPRE_Int
+HYPRE_ParCSRHybridGetRecomputeResidual( HYPRE_Solver  solver,
+                                        HYPRE_Int    *recompute_residual )
+{
+   return( hypre_AMGHybridGetRecomputeResidual( (void *) solver, recompute_residual ) );
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParCSRHybridSetRecomputeResidualP( HYPRE_Solver  solver,
+                                         HYPRE_Int     recompute_residual_p )
+{
+   return( hypre_AMGHybridSetRecomputeResidualP( (void *) solver, recompute_residual_p ) );
+}
+
+HYPRE_Int
+HYPRE_ParCSRHybridGetRecomputeResidualP( HYPRE_Solver  solver,
+                                         HYPRE_Int    *recompute_residual_p )
+{
+   return( hypre_AMGHybridGetRecomputeResidualP( (void *) solver, recompute_residual_p ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParCSRHybridSetKDim
  *--------------------------------------------------------------------------*/
 

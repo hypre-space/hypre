@@ -151,6 +151,40 @@ HYPRE_StructHybridSetSolverType( HYPRE_StructSolver solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_StructHybridSetRecomputeResidual( HYPRE_StructSolver  solver,
+                                        HYPRE_Int           recompute_residual )
+{
+   return( hypre_HybridSetRecomputeResidual( (void *) solver, recompute_residual ) );
+}
+
+HYPRE_Int
+HYPRE_StructHybridGetRecomputeResidual( HYPRE_StructSolver  solver,
+                                        HYPRE_Int          *recompute_residual )
+{
+   return( hypre_HybridGetRecomputeResidual( (void *) solver, recompute_residual ) );
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructHybridSetRecomputeResidualP( HYPRE_StructSolver  solver,
+                                         HYPRE_Int           recompute_residual_p )
+{
+   return( hypre_HybridSetRecomputeResidualP( (void *) solver, recompute_residual_p ) );
+}
+
+HYPRE_Int
+HYPRE_StructHybridGetRecomputeResidualP( HYPRE_StructSolver  solver,
+                                         HYPRE_Int          *recompute_residual_p )
+{
+   return( hypre_HybridGetRecomputeResidualP( (void *) solver, recompute_residual_p ) );
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_StructHybridSetKDim( HYPRE_StructSolver solver,
                            HYPRE_Int          k_dim    )
 {

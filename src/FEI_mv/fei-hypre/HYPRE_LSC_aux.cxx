@@ -2136,7 +2136,7 @@ void HYPRE_LinSysCore::setupPCGPrecon()
            break;
 
       case HYDSLU :
-#ifdef HAVE_DSUPERLU
+#ifdef HYPRE_USING_DSUPERLU
            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
               printf("DSuperLU preconditioning\n");
            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
@@ -2559,7 +2559,7 @@ void HYPRE_LinSysCore::setupGMRESPrecon()
            break;
 
       case HYDSLU :
-#ifdef HAVE_DSUPERLU
+#ifdef HYPRE_USING_DSUPERLU
            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
               printf("DSuperLU preconditioning\n");
            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
@@ -2827,7 +2827,7 @@ void HYPRE_LinSysCore::setupFGMRESPrecon()
            break;
 
       case HYDSLU :
-#ifdef HAVE_DSUPERLU
+#ifdef HYPRE_USING_DSUPERLU
            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
               printf("DSuperLU preconditioning\n");
            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
@@ -3079,7 +3079,7 @@ void HYPRE_LinSysCore::setupBiCGSTABPrecon()
            break;
 
       case HYDSLU :
-#ifdef HAVE_DSUPERLU
+#ifdef HYPRE_USING_DSUPERLU
            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
               printf("DSuperLU preconditioning\n");
            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
@@ -3332,7 +3332,7 @@ void HYPRE_LinSysCore::setupBiCGSTABLPrecon()
            break;
 
       case HYDSLU :
-#ifdef HAVE_DSUPERLU
+#ifdef HYPRE_USING_DSUPERLU
            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
               printf("DSuperLU preconditioning\n");
            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
@@ -3581,7 +3581,7 @@ void HYPRE_LinSysCore::setupTFQmrPrecon()
            break;
 
       case HYDSLU :
-#ifdef HAVE_DSUPERLU
+#ifdef HYPRE_USING_DSUPERLU
            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
               printf("DSuperLU preconditioning\n");
            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
@@ -3830,7 +3830,7 @@ void HYPRE_LinSysCore::setupBiCGSPrecon()
            break;
 
       case HYDSLU :
-#ifdef HAVE_DSUPERLU
+#ifdef HYPRE_USING_DSUPERLU
            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
               printf("DSuperLU preconditioning\n");
            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
@@ -5015,7 +5015,7 @@ double HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
 double HYPRE_LinSysCore::solveUsingDSuperLU(int& status)
 {
    double rnorm=1.0;
-#ifdef HAVE_DSUPERLU
+#ifdef HYPRE_USING_DSUPERLU
    int                ierr;
    HYPRE_ParCSRMatrix A_csr;
    HYPRE_ParVector    x_csr, b_csr, r_csr;

@@ -948,7 +948,37 @@ HYPRE_Int HYPRE_StructHybridSetRelChange(HYPRE_StructSolver solver,
  * \end{tabular}
  **/
 HYPRE_Int HYPRE_StructHybridSetSolverType(HYPRE_StructSolver solver,
-                                    HYPRE_Int          solver_type);
+                                          HYPRE_Int          solver_type);
+
+/**
+ * (Optional) Set recompute residual (don't rely on 3-term recurrence).
+ **/
+HYPRE_Int
+HYPRE_StructHybridSetRecomputeResidual( HYPRE_StructSolver  solver,
+                                        HYPRE_Int           recompute_residual );
+
+/**
+ * (Optional) Get recompute residual option.
+ **/
+HYPRE_Int
+HYPRE_StructHybridGetRecomputeResidual( HYPRE_StructSolver  solver,
+                                        HYPRE_Int          *recompute_residual );
+
+/**
+ * (Optional) Set recompute residual period (don't rely on 3-term recurrence).
+ *
+ * Recomputes residual after every specified number of iterations.
+ **/
+HYPRE_Int
+HYPRE_StructHybridSetRecomputeResidualP( HYPRE_StructSolver  solver,
+                                         HYPRE_Int           recompute_residual_p );
+
+/**
+ * (Optional) Get recompute residual period option.
+ **/
+HYPRE_Int
+HYPRE_StructHybridGetRecomputeResidualP( HYPRE_StructSolver  solver,
+                                         HYPRE_Int          *recompute_residual_p );
 
 /**
  * (Optional) Set the maximum size of the Krylov space when using GMRES.

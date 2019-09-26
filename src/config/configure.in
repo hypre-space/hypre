@@ -892,7 +892,7 @@ AS_HELP_STRING([--with-dsuperlu],
 )
 
 AS_IF([test "x$with_dsuperlu" = "xyes"],
-      [AC_DEFINE(HAVE_DSUPERLU, 1, [Have external DSuperLU library.])],
+      [AC_DEFINE(HYPRE_USING_DSUPERLU, 1, [Have external DSuperLU library.])],
       [])
 
 AC_ARG_WITH(dsuperlu-include,
