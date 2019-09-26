@@ -230,9 +230,9 @@ main( hypre_int argc,
    HYPRE_Real add_trunc_factor = 0;
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   HYPRE_Int    rap2=1;
-   HYPRE_Int    mod_rap2=1;
-   HYPRE_Int    keepTranspose = 1;
+   HYPRE_Int    rap2=0;
+   HYPRE_Int    mod_rap2=0;
+   HYPRE_Int    keepTranspose = 0;
 #else
    HYPRE_Int    rap2=0;
    HYPRE_Int    mod_rap2=0;
