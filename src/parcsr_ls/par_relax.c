@@ -57,7 +57,7 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 
    hypre_Vector   *Vtemp_local;
    HYPRE_Real     *Vtemp_data;
-   if (relax_type != 10) 
+   if (relax_type != 10)
    {
       Vtemp_local = hypre_ParVectorLocalVector(Vtemp);
       Vtemp_data = hypre_VectorData(Vtemp_local);
@@ -133,7 +133,7 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
     *     relax_type = 29-> Direct solve: use gaussian elimination & BLAS
     *                       (with pivoting) (old version)
     *-----------------------------------------------------------------------*/
-   
+
    switch (relax_type)
    {
       case 0: /* Weighted Jacobi */
@@ -372,7 +372,7 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
       break;
 
       /* Hybrid: Jacobi off-processor, Gauss-Seidel on-processor (forward loop) */
-      case 3: 
+      case 3:
       {
          if (num_threads > 1)
          {
@@ -3061,37 +3061,37 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
       break;
 
       /* Hybrid: Jacobi off-processor, ordered Gauss-Seidel on-processor */
-      case 10: 
+      case 10:
       {
          if (num_threads > 1)
          {
             Ztemp_local = hypre_ParVectorLocalVector(Ztemp);
             Ztemp_data = hypre_VectorData(Ztemp_local);
          }
-         
+
 #ifdef HYPRE_USING_PERSISTENT_COMM
          // JSP: persistent comm can be similarly used for other smoothers
          hypre_ParCSRPersistentCommHandle *persistent_comm_handle;
 #endif
-         
+
          if (num_procs > 1)
          {
 #ifdef HYPRE_PROFILE
             hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] -= hypre_MPI_Wtime();
 #endif
             num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-            
+
 #ifdef HYPRE_USING_PERSISTENT_COMM
             persistent_comm_handle = hypre_ParCSRCommPkgGetPersistentCommHandle(1, comm_pkg);
-            v_buf_data = (HYPRE_Real *)persistent_comm_handle->send_data;
-            Vext_data = (HYPRE_Real *)persistent_comm_handle->recv_data;
+            v_buf_data = (HYPRE_Real *) hypre_ParCSRCommHandleSendDataBuffer(persistent_comm_handle);
+            Vext_data  = (HYPRE_Real *) hypre_ParCSRCommHandleRecvDataBuffer(persistent_comm_handle);
 #else
-            v_buf_data = hypre_CTAlloc(HYPRE_Real,  
+            v_buf_data = hypre_CTAlloc(HYPRE_Real,
                                        hypre_ParCSRCommPkgSendMapStart(comm_pkg,  num_sends), HYPRE_MEMORY_HOST);
-            
+
             Vext_data = hypre_CTAlloc(HYPRE_Real, num_cols_offd, HYPRE_MEMORY_HOST);
 #endif
-            
+
             if (num_cols_offd)
             {
                A_offd_j = hypre_CSRMatrixJ(A_offd);
@@ -3108,24 +3108,23 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                v_buf_data[i - begin]
                   = u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,i)];
             }
-            
+
 #ifdef HYPRE_PROFILE
             hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] += hypre_MPI_Wtime();
             hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] -= hypre_MPI_Wtime();
 #endif
 
 #ifdef HYPRE_USING_PERSISTENT_COMM
-            hypre_ParCSRPersistentCommHandleStart(persistent_comm_handle);
+            hypre_ParCSRPersistentCommHandleStart(persistent_comm_handle, HYPRE_MEMORY_HOST, v_buf_data);
 #else
-            comm_handle = hypre_ParCSRCommHandleCreate( 1, comm_pkg, v_buf_data, 
-                                                        Vext_data);
+            comm_handle = hypre_ParCSRCommHandleCreate( 1, comm_pkg, v_buf_data, Vext_data);
 #endif
-            
+
             /*-----------------------------------------------------------------
              * Copy current approximation into temporary vector.
              *-----------------------------------------------------------------*/
 #ifdef HYPRE_USING_PERSISTENT_COMM
-            hypre_ParCSRPersistentCommHandleWait(persistent_comm_handle);
+            hypre_ParCSRPersistentCommHandleWait(persistent_comm_handle, HYPRE_MEMORY_HOST, Vext_data);
 #else
             hypre_ParCSRCommHandleDestroy(comm_handle);
 #endif
@@ -3273,7 +3272,7 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                       * If row is of the right type ( C or F ) and diagonal is
                       * nonzero, relax point row; otherwise, skip it.
                       *-----------------------------------------------------------*/
-                     if (cf_marker[row] == relax_points 
+                     if (cf_marker[row] == relax_points
                          && A_diag_data[A_diag_i[row]] != zero)
                      {
                         res = f_data[row];
@@ -3292,8 +3291,8 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                         }
                         u_data[row] = res / A_diag_data[A_diag_i[row]];
                      }
-                  }     
-               }     
+                  }
+               }
             }
             else
             {
@@ -3304,7 +3303,7 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                    * If row is of the right type ( C or F ) and diagonal is
                    * nonzero, relax point row; otherwise, skip it.
                    *-----------------------------------------------------------*/
-                  if (cf_marker[row] == relax_points 
+                  if (cf_marker[row] == relax_points
                       && A_diag_data[A_diag_i[row]] != zero)
                   {
                      res = f_data[row];
@@ -3320,7 +3319,7 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                      }
                      u_data[row] = res / A_diag_data[A_diag_i[row]];
                   }
-               }     
+               }
             }
          }
 

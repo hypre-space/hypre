@@ -1502,14 +1502,16 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                                           dof_func_array[level], debug_flag, agg_P12_trunc_factor,
                                                           agg_P12_max_elmts, col_offd_S_to_A, &P2);
                   }
+
                   if (hypre_ParAMGDataModularizedMatMat(amg_data))
                   {
                      P = hypre_ParCSRMatMat(P1, P2);
                   }
                   else
                   {
-                     P = hypre_ParMatmul(P1,P2);
+                     P = hypre_ParMatmul(P1, P2);
                   }
+
                   hypre_BoomerAMGInterpTruncation(P, agg_trunc_factor,
                                                   agg_P_max_elmts);
                   hypre_MatvecCommPkgCreate(P);
@@ -2286,7 +2288,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                else
                {
                   hypre_ParCSRComputeL1NormsThreads(A_array[level], 1, num_threads, NULL, &d_diag);
-               }                                  
+               }
             }
 
             if (ns == 1)
@@ -2408,7 +2410,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                {
                   if (hypre_ParAMGDataModularizedMatMat(amg_data))
                   {
-                     A_H = hypre_ParCSRMatrixRAPKT(P, A_array[level], 
+                     A_H = hypre_ParCSRMatrixRAPKT(P, A_array[level],
                                                    P, keepTranspose);
                   }
                   else

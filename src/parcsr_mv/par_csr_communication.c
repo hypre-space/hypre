@@ -43,10 +43,7 @@ static CommPkgJobType getJobTypeOf(HYPRE_Int job)
  * and CommHandle owns the buffer
  */
 hypre_ParCSRPersistentCommHandle*
-hypre_ParCSRPersistentCommHandleCreate( HYPRE_Int job,
-                                        hypre_ParCSRCommPkg *comm_pkg,
-                                        void *send_data,
-                                        void *recv_data)
+hypre_ParCSRPersistentCommHandleCreate( HYPRE_Int job, hypre_ParCSRCommPkg *comm_pkg )
 {
    HYPRE_Int i;
    size_t num_bytes_send, num_bytes_recv;

@@ -229,9 +229,15 @@ main( hypre_int argc,
    HYPRE_Int add_P_max_elmts = 0;
    HYPRE_Real add_trunc_factor = 0;
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+   HYPRE_Int    rap2=1;
+   HYPRE_Int    mod_rap2=1;
+   HYPRE_Int    keepTranspose = 1;
+#else
    HYPRE_Int    rap2=0;
    HYPRE_Int    mod_rap2=0;
    HYPRE_Int    keepTranspose = 0;
+#endif
 #ifdef HYPRE_USING_DSUPERLU
    HYPRE_Int    dslu_threshold = -1;
 #endif

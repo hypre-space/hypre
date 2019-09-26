@@ -2676,13 +2676,13 @@ CF_marker, CF_marker_offd: initialize CF_marker
 
 HYPRE_Int
 hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
-                        hypre_ParCSRMatrix    *A,
-                        HYPRE_Int                    CF_init,
-                        HYPRE_Int                    debug_flag,
-                        HYPRE_Int                  **CF_marker_ptr)
+                            hypre_ParCSRMatrix    *A,
+                            HYPRE_Int              CF_init,
+                            HYPRE_Int              debug_flag,
+                            HYPRE_Int            **CF_marker_ptr)
 {
 #if defined(HYPRE_USING_CUDA)
-   hypre_SetExecPolicy(HYPRE_EXEC_DEVICE);
+   //hypre_SetExecPolicy(HYPRE_EXEC_DEVICE);
 #endif
 
    HYPRE_Int exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(A)) );
@@ -2705,7 +2705,7 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
 #endif
 
 #if defined(HYPRE_USING_CUDA)
-   hypre_SetExecPolicy(HYPRE_EXEC_HOST);
+   //hypre_SetExecPolicy(HYPRE_EXEC_HOST);
 #endif
 
    return ierr;

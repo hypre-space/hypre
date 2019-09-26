@@ -210,7 +210,7 @@ hypre_ParCSRMatMat( hypre_ParCSRMatrix  *A,
                     hypre_ParCSRMatrix  *B )
 {
 #if defined(HYPRE_USING_CUDA)
-   hypre_SetExecPolicy(HYPRE_EXEC_DEVICE);
+   //hypre_SetExecPolicy(HYPRE_EXEC_DEVICE);
 #endif
 
    HYPRE_Int exec = hypre_GetExecPolicy2( hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(A)),
@@ -232,11 +232,13 @@ hypre_ParCSRMatMat( hypre_ParCSRMatrix  *A,
 #endif
 
 #if defined(HYPRE_USING_CUDA)
-   hypre_SetExecPolicy(HYPRE_EXEC_HOST);
+   //hypre_SetExecPolicy(HYPRE_EXEC_HOST);
 #endif
 
-   /*
+   // TODO
 #if defined(HYPRE_USING_CUDA)
+   if (hypre_GetActualMemLocation(hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(C))) == HYPRE_MEMORY_DEVICE)
+   {
    hypre_CSRMatrix *C_diag = hypre_CSRMatrixClone(hypre_ParCSRMatrixDiag(C), 1);
    hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(C));
    hypre_ParCSRMatrixDiag(C) = C_diag;
@@ -244,8 +246,8 @@ hypre_ParCSRMatMat( hypre_ParCSRMatrix  *A,
    hypre_CSRMatrix *C_offd = hypre_CSRMatrixClone(hypre_ParCSRMatrixOffd(C), 1);
    hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(C));
    hypre_ParCSRMatrixOffd(C) = C_offd;
+   }
 #endif
-   */
 
    return C;
 }
@@ -477,7 +479,7 @@ hypre_ParCSRTMatMatKT( hypre_ParCSRMatrix  *A,
                        HYPRE_Int            keep_transpose)
 {
 #if defined(HYPRE_USING_CUDA)
-   hypre_SetExecPolicy(HYPRE_EXEC_DEVICE);
+   //hypre_SetExecPolicy(HYPRE_EXEC_DEVICE);
 #endif
 
    HYPRE_Int exec = hypre_GetExecPolicy2( hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(A)),
@@ -499,10 +501,12 @@ hypre_ParCSRTMatMatKT( hypre_ParCSRMatrix  *A,
 #endif
 
 #if defined(HYPRE_USING_CUDA)
-   hypre_SetExecPolicy(HYPRE_EXEC_HOST);
+   //hypre_SetExecPolicy(HYPRE_EXEC_HOST);
 #endif
 
 #if defined(HYPRE_USING_CUDA)
+   if (hypre_GetActualMemLocation(hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(C))) == HYPRE_MEMORY_DEVICE)
+   {
    hypre_CSRMatrix *C_diag = hypre_CSRMatrixClone(hypre_ParCSRMatrixDiag(C), 1);
    hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(C));
    hypre_ParCSRMatrixDiag(C) = C_diag;
@@ -510,6 +514,7 @@ hypre_ParCSRTMatMatKT( hypre_ParCSRMatrix  *A,
    hypre_CSRMatrix *C_offd = hypre_CSRMatrixClone(hypre_ParCSRMatrixOffd(C), 1);
    hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(C));
    hypre_ParCSRMatrixOffd(C) = C_offd;
+   }
 #endif
 
    return C;
