@@ -21,7 +21,7 @@ HEADERS =\
  exchange_data.h\
  fortran.h\
  fortran_matrix.h\
- general.h\
+ hypre_general.h\
  hypre_memory.h\
  HYPRE_utilities.h\
  mpistubs.h\
@@ -30,6 +30,7 @@ HEADERS =\
  _hypre_utilities.h
 
 FILES =\
+ F90_HYPRE_error.c\
  HYPRE_version.c\
  amg_linklist.c\
  binsearch.c\
@@ -37,7 +38,15 @@ FILES =\
  fortran_matrix.c\
  hypre_ap.c\
  hypre_complex.c\
+ hypre_cuda_utils.c\
+ hypre_error.c\
+ hypre_general.c\
+ hypre_hopscotch_hash.c\
  hypre_memory.c\
+ hypre_merge_sort.c\
+ hypre_mpi_comm_f2c.c\
+ hypre_omp_device.c\
+ hypre_prefix_sum.c\
  hypre_printf.c\
  hypre_qsort.c\
  mpistubs.c\
@@ -45,17 +54,7 @@ FILES =\
  random.c\
  threading.c\
  timer.c\
- timing.c\
- hypre_mpi_comm_f2c.c\
- hypre_error.c\
- F90_HYPRE_error.c\
- hypre_prefix_sum.c\
- hypre_merge_sort.c\
- hypre_hopscotch_hash.c\
- gpuErrorCheck.c\
- gpuMem.c\
- hypre_general.c\
- hypre_reducesum.c
+ timing.c
 
 OBJS = ${FILES:.c=.o}
 

@@ -32,7 +32,7 @@ typedef struct hypre_ParCSRMatrix_struct
    HYPRE_BigInt          global_num_cols;
    HYPRE_BigInt          first_row_index;
    HYPRE_BigInt          first_col_diag;
-   /* need to know entire local range in case row_starts and col_starts 
+   /* need to know entire local range in case row_starts and col_starts
       are null  (i.e., bgl) AHB 6/05*/
    HYPRE_BigInt          last_row_index;
    HYPRE_BigInt          last_col_diag;
@@ -40,10 +40,11 @@ typedef struct hypre_ParCSRMatrix_struct
    hypre_CSRMatrix      *diag;
    hypre_CSRMatrix      *offd;
    hypre_CSRMatrix      *diagT, *offdT;
-        /* JSP: transposed matrices are created lazily and optional */
-   HYPRE_BigInt         *col_map_offd; 
-        /* maps columns of offd to global columns */
-   HYPRE_BigInt         *row_starts; 
+   /* JSP: transposed matrices are created lazily and optional */
+   HYPRE_BigInt         *col_map_offd;
+   HYPRE_BigInt         *device_col_map_offd;
+   /* maps columns of offd to global columns */
+   HYPRE_BigInt         *row_starts;
         /* array of length 2 giving the glboal index of the first row
            on this processor, and 1+index of the final row on this
            processor. If –enable-global-partition is used, then array
@@ -51,14 +52,14 @@ typedef struct hypre_ParCSRMatrix_struct
            global number of the first row on proc i, first_row_index =
            row_starts[my_id], row_starts[num_procs] = global_num_rows */
    HYPRE_BigInt         *col_starts;
-        /* array of length num_procs+1, col_starts[i] contains the 
-           global number of the first column of diag on proc i,  
-           first_col_diag = col_starts[my_id],
-           col_starts[num_procs] = global_num_cols */
+   /* array of length num_procs+1, col_starts[i] contains the
+      global number of the first column of diag on proc i,
+      first_col_diag = col_starts[my_id],
+      col_starts[num_procs] = global_num_cols */
 
    hypre_ParCSRCommPkg  *comm_pkg;
    hypre_ParCSRCommPkg  *comm_pkgT;
-   
+
    /* Does the ParCSRMatrix create/destroy `diag', `offd', `col_map_offd'? */
    HYPRE_Int             owns_data;
    /* Does the ParCSRMatrix create/destroy `row_starts', `col_starts'? */
@@ -99,6 +100,7 @@ typedef struct hypre_ParCSRMatrix_struct
 #define hypre_ParCSRMatrixDiagT(matrix)            ((matrix) -> diagT)
 #define hypre_ParCSRMatrixOffdT(matrix)            ((matrix) -> offdT)
 #define hypre_ParCSRMatrixColMapOffd(matrix)      ((matrix) -> col_map_offd)
+#define hypre_ParCSRMatrixDeviceColMapOffd(matrix) ((matrix) -> device_col_map_offd)
 #define hypre_ParCSRMatrixRowStarts(matrix)       ((matrix) -> row_starts)
 #define hypre_ParCSRMatrixColStarts(matrix)       ((matrix) -> col_starts)
 #define hypre_ParCSRMatrixCommPkg(matrix)         ((matrix) -> comm_pkg)
@@ -133,8 +135,8 @@ typedef struct
    HYPRE_BigInt            last_col_diag;
    hypre_CSRBooleanMatrix *diag;
    hypre_CSRBooleanMatrix *offd;
-   HYPRE_BigInt           *col_map_offd; 
-   HYPRE_BigInt           *row_starts; 
+   HYPRE_BigInt           *col_map_offd;
+   HYPRE_BigInt           *row_starts;
    HYPRE_BigInt           *col_starts;
    hypre_ParCSRCommPkg    *comm_pkg;
    hypre_ParCSRCommPkg    *comm_pkgT;

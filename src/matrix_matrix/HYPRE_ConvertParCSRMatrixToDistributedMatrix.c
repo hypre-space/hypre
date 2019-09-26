@@ -17,7 +17,7 @@
 
 #include <HYPRE_config.h>
 
-#include "general.h"
+#include "hypre_general.h"
 
 #include "_hypre_utilities.h"
 #include "HYPRE.h"
@@ -33,8 +33,8 @@
  * HYPRE_ConvertParCSRMatrixToDistributedMatrix
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
-HYPRE_ConvertParCSRMatrixToDistributedMatrix( 
+HYPRE_Int
+HYPRE_ConvertParCSRMatrixToDistributedMatrix(
    HYPRE_ParCSRMatrix parcsr_matrix,
    HYPRE_DistributedMatrix *DistributedMatrix )
 {
@@ -51,7 +51,7 @@ HYPRE_ConvertParCSRMatrixToDistributedMatrix(
    if (!parcsr_matrix)
    {
       hypre_error(HYPRE_ERROR_ARG);
-      return hypre_error_flag; 
+      return hypre_error_flag;
    }
 
    HYPRE_ParCSRMatrixGetComm( parcsr_matrix, &comm);
@@ -63,7 +63,7 @@ HYPRE_ConvertParCSRMatrixToDistributedMatrix(
    HYPRE_DistributedMatrixInitialize( *DistributedMatrix );
 
    HYPRE_DistributedMatrixSetLocalStorage( *DistributedMatrix, parcsr_matrix );
-   
+
 
    HYPRE_ParCSRMatrixGetDims( parcsr_matrix, &M, &N);
    HYPRE_DistributedMatrixSetDims( *DistributedMatrix, M, N);
@@ -75,6 +75,6 @@ HYPRE_ConvertParCSRMatrixToDistributedMatrix(
    /* hypre_FinalizeTiming( timer ); */
 #endif
 
-   return hypre_error_flag; 
+   return hypre_error_flag;
 }
 

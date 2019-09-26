@@ -31,24 +31,29 @@
 
 HYPRE_Int
 hypre_BoomerAMGIndepSetInit( hypre_ParCSRMatrix *S,
-                             HYPRE_Real         *measure_array ,
+                             HYPRE_Real         *measure_array,
                              HYPRE_Int           seq_rand)
 {
    hypre_CSRMatrix *S_diag = hypre_ParCSRMatrixDiag(S);
    MPI_Comm         comm = hypre_ParCSRMatrixComm(S);
-   HYPRE_Int              S_num_nodes = hypre_CSRMatrixNumRows(S_diag);
-   HYPRE_BigInt           big_i;
-   HYPRE_Int              i, my_id;
-   HYPRE_Int              ierr = 0;
+   HYPRE_Int        S_num_nodes = hypre_CSRMatrixNumRows(S_diag);
+   HYPRE_BigInt     big_i;
+   HYPRE_Int        i, my_id;
+   HYPRE_Int        ierr = 0;
 
    hypre_MPI_Comm_rank(comm,&my_id);
-   i = 2747+my_id;
-   if (seq_rand) i = 2747;
+   i = 2747 + my_id;
+   if (seq_rand)
+   {
+      i = 2747;
+   }
    hypre_SeedRand(i);
    if (seq_rand)
    {
       for (big_i = 0; big_i < hypre_ParCSRMatrixFirstRowIndex(S); big_i++)
-	hypre_Rand(); 
+      {
+         hypre_Rand();
+      }
    }
    for (i = 0; i < S_num_nodes; i++)
    {
@@ -106,16 +111,16 @@ hypre_BoomerAMGIndepSet( hypre_ParCSRMatrix *S,
                          HYPRE_Int          *IS_marker,
                          HYPRE_Int          *IS_marker_offd     )
 {
-   hypre_CSRMatrix *S_diag      = hypre_ParCSRMatrixDiag(S);
-   HYPRE_Int       *S_diag_i    = hypre_CSRMatrixI(S_diag);
-   HYPRE_Int       *S_diag_j    = hypre_CSRMatrixJ(S_diag);
-   hypre_CSRMatrix *S_offd      = hypre_ParCSRMatrixOffd(S);
-   HYPRE_Int       *S_offd_i    = hypre_CSRMatrixI(S_offd);
+   hypre_CSRMatrix *S_diag   = hypre_ParCSRMatrixDiag(S);
+   HYPRE_Int       *S_diag_i = hypre_CSRMatrixI(S_diag);
+   HYPRE_Int       *S_diag_j = hypre_CSRMatrixJ(S_diag);
+   hypre_CSRMatrix *S_offd   = hypre_ParCSRMatrixOffd(S);
+   HYPRE_Int       *S_offd_i = hypre_CSRMatrixI(S_offd);
    HYPRE_Int       *S_offd_j = NULL;
 
-   HYPRE_Int	    local_num_vars = hypre_CSRMatrixNumRows(S_diag);
+   HYPRE_Int        local_num_vars = hypre_CSRMatrixNumRows(S_diag);
    HYPRE_Int        i, j, ig, jS, jj;
-                   
+
    /*-------------------------------------------------------
     * Initialize IS_marker by putting all nodes in
     * the independent set.
@@ -123,7 +128,7 @@ hypre_BoomerAMGIndepSet( hypre_ParCSRMatrix *S,
 
    if (hypre_CSRMatrixNumCols(S_offd))
    {
-	S_offd_j = hypre_CSRMatrixJ(S_offd);
+      S_offd_j = hypre_CSRMatrixJ(S_offd);
    }
 
    for (ig = 0; ig < graph_array_size; ig++)
@@ -155,11 +160,14 @@ hypre_BoomerAMGIndepSet( hypre_ParCSRMatrix *S,
          for (jS = S_diag_i[i]; jS < S_diag_i[i+1]; jS++)
          {
             j = S_diag_j[jS];
-	    if (j < 0) j = -j-1;
-            
+            if (j < 0)
+            {
+               j = -j-1;
+            }
+
             /* only consider valid graph edges */
             /* if ( (measure_array[j] > 1) && (S_diag_data[jS]) ) */
-            if (measure_array[j] > 1) 
+            if (measure_array[j] > 1)
             {
                if (measure_array[i] > measure_array[j])
                {
@@ -174,12 +182,15 @@ hypre_BoomerAMGIndepSet( hypre_ParCSRMatrix *S,
          for (jS = S_offd_i[i]; jS < S_offd_i[i+1]; jS++)
          {
             jj = S_offd_j[jS];
-            if (jj < 0) jj = -jj-1;
+            if (jj < 0)
+            {
+               jj = -jj-1;
+            }
             j = local_num_vars+jj;
-            
+
             /* only consider valid graph edges */
             /* if ( (measure_array[j] > 1) && (S_offd_data[jS]) ) */
-            if (measure_array[j] > 1) 
+            if (measure_array[j] > 1)
             {
                if (measure_array[i] > measure_array[j])
                {
@@ -193,7 +204,7 @@ hypre_BoomerAMGIndepSet( hypre_ParCSRMatrix *S,
          }
       }
    }
-            
+
    return hypre_error_flag;
 }
-         
+

@@ -12,9 +12,7 @@
  *****************************************************************************/
 
 #include "seq_mv.h"
-#ifdef HYPRE_USING_GPU
-#include "gpukernels.h"
-#endif
+
 #ifdef HYPRE_PROFILE
 HYPRE_Real hypre_profile_times[HYPRE_TIMER_ID_COUNT] = { 0 };
 #endif
@@ -30,64 +28,53 @@ hypre_CSRMatrixCreate( HYPRE_Int num_rows,
 {
    hypre_CSRMatrix  *matrix;
 
-   matrix =  hypre_CTAlloc(hypre_CSRMatrix,  1, HYPRE_MEMORY_HOST);
+   matrix = hypre_CTAlloc(hypre_CSRMatrix, 1, HYPRE_MEMORY_HOST);
 
-   hypre_CSRMatrixData(matrix) = NULL;
-   hypre_CSRMatrixI(matrix)    = NULL;
-   hypre_CSRMatrixJ(matrix)    = NULL;
-   hypre_CSRMatrixBigJ(matrix)   = NULL;
-   hypre_CSRMatrixRownnz(matrix) = NULL;
-   hypre_CSRMatrixNumRows(matrix) = num_rows;
-   hypre_CSRMatrixNumCols(matrix) = num_cols;
-   hypre_CSRMatrixNumNonzeros(matrix) = num_nonzeros;
+   hypre_CSRMatrixData(matrix)           = NULL;
+   hypre_CSRMatrixI(matrix)              = NULL;
+   hypre_CSRMatrixJ(matrix)              = NULL;
+   hypre_CSRMatrixBigJ(matrix)           = NULL;
+   hypre_CSRMatrixRownnz(matrix)         = NULL;
+   hypre_CSRMatrixNumRows(matrix)        = num_rows;
+   hypre_CSRMatrixNumCols(matrix)        = num_cols;
+   hypre_CSRMatrixNumNonzeros(matrix)    = num_nonzeros;
+   hypre_CSRMatrixMemoryLocation(matrix) = HYPRE_MEMORY_SHARED; /* HYPRE_MEMORY_UNSET; */ /* TODO !!! */
 
    /* set defaults */
-   hypre_CSRMatrixOwnsData(matrix) = 1;
+   hypre_CSRMatrixOwnsData(matrix)  = 1;
    hypre_CSRMatrixNumRownnz(matrix) = num_rows;
 
-#ifdef HYPRE_USING_UNIFIED_MEMORY
-   matrix->on_device=0;
-#endif
-#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
-   matrix->mapped=-1;
-#endif
 #ifdef HYPRE_BIGINT
    matrix->i_short=NULL;
    matrix->j_short=NULL;
 #endif
    return matrix;
 }
+
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixDestroy
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_CSRMatrixDestroy( hypre_CSRMatrix *matrix )
 {
-   HYPRE_Int  ierr=0;
+   HYPRE_Int ierr = 0;
 
    if (matrix)
    {
-#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
-     hypre_CSRMatrixUnMapFromDevice(matrix);
-#endif
-      hypre_TFree(hypre_CSRMatrixI(matrix), HYPRE_MEMORY_SHARED);
-      hypre_CSRMatrixI(matrix)    = NULL;
-      if (hypre_CSRMatrixRownnz(matrix))
-         hypre_TFree(hypre_CSRMatrixRownnz(matrix), HYPRE_MEMORY_SHARED);
+      HYPRE_Int memory_location = hypre_CSRMatrixMemoryLocation(matrix);
+
+      hypre_TFree(hypre_CSRMatrixI(matrix),      memory_location);
+      hypre_TFree(hypre_CSRMatrixRownnz(matrix), memory_location);
+
       if ( hypre_CSRMatrixOwnsData(matrix) )
       {
-         hypre_TFree(hypre_CSRMatrixData(matrix), HYPRE_MEMORY_SHARED);
-         if (hypre_CSRMatrixJ(matrix))
-            hypre_TFree(hypre_CSRMatrixJ(matrix), HYPRE_MEMORY_SHARED);
-         if (hypre_CSRMatrixBigJ(matrix))
-            hypre_TFree(hypre_CSRMatrixBigJ(matrix), HYPRE_MEMORY_SHARED);
-         hypre_CSRMatrixData(matrix) = NULL;
-         hypre_CSRMatrixJ(matrix)    = NULL;
-         hypre_CSRMatrixBigJ(matrix)    = NULL;
+         hypre_TFree(hypre_CSRMatrixData(matrix), memory_location);
+         hypre_TFree(hypre_CSRMatrixJ(matrix),    memory_location);
+         hypre_TFree(hypre_CSRMatrixBigJ(matrix), memory_location);
       }
+
       hypre_TFree(matrix, HYPRE_MEMORY_HOST);
-      matrix = NULL;
    }
 
    return ierr;
@@ -97,26 +84,67 @@ hypre_CSRMatrixDestroy( hypre_CSRMatrix *matrix )
  * hypre_CSRMatrixInitialize
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
-hypre_CSRMatrixInitialize( hypre_CSRMatrix *matrix )
+HYPRE_Int
+hypre_CSRMatrixInitialize_v2( hypre_CSRMatrix *matrix, HYPRE_Int bigInit, HYPRE_Int memory_location )
 {
    HYPRE_Int  num_rows     = hypre_CSRMatrixNumRows(matrix);
    HYPRE_Int  num_nonzeros = hypre_CSRMatrixNumNonzeros(matrix);
-/*   HYPRE_Int  num_rownnz = hypre_CSRMatrixNumRownnz(matrix); */
+   /* HYPRE_Int  num_rownnz = hypre_CSRMatrixNumRownnz(matrix); */
 
-   HYPRE_Int  ierr=0;
+   HYPRE_Int ierr = 0;
 
-   if ( ! hypre_CSRMatrixData(matrix) && num_nonzeros )
-      hypre_CSRMatrixData(matrix) = hypre_CTAlloc(HYPRE_Complex,  num_nonzeros, HYPRE_MEMORY_SHARED);
-   else {
+   hypre_CSRMatrixMemoryLocation(matrix) = memory_location;
+
+   /* Caveat: for pre-existing i, j, data, their memory location must be guaranteed to be consistent with `memory_location'
+    * Otherwise, mismatches will exist and problems will be encountered when being used, and freed */
+
+   if ( !hypre_CSRMatrixData(matrix) && num_nonzeros )
+   {
+      hypre_CSRMatrixData(matrix) = hypre_CTAlloc(HYPRE_Complex, num_nonzeros, memory_location);
+   }
+   /*
+   else
+   {
      //if (PointerAttributes(hypre_CSRMatrixData(matrix))==HYPRE_HOST_POINTER) printf("MATREIX INITIAL WITH JHOST DATA\n");
    }
-   if ( ! hypre_CSRMatrixI(matrix) )
-      hypre_CSRMatrixI(matrix)    = hypre_CTAlloc(HYPRE_Int,  num_rows + 1, HYPRE_MEMORY_SHARED);
-/*   if ( ! hypre_CSRMatrixRownnz(matrix) )
-     hypre_CSRMatrixRownnz(matrix)    = hypre_CTAlloc(HYPRE_Int,  num_rownnz, HYPRE_MEMORY_SHARED);*/
-   if ( ! hypre_CSRMatrixJ(matrix) && num_nonzeros )
-      hypre_CSRMatrixJ(matrix)    = hypre_CTAlloc(HYPRE_Int,  num_nonzeros, HYPRE_MEMORY_SHARED);
+   */
+
+   if ( !hypre_CSRMatrixI(matrix) )
+   {
+      hypre_CSRMatrixI(matrix) = hypre_CTAlloc(HYPRE_Int, num_rows + 1, memory_location);
+   }
+
+   /*
+   if (!hypre_CSRMatrixRownnz(matrix))
+   {
+      hypre_CSRMatrixRownnz(matrix) = hypre_CTAlloc(HYPRE_Int,  num_rownnz, memory_location);
+   }
+   */
+
+   if (bigInit)
+   {
+      if ( !hypre_CSRMatrixBigJ(matrix) && num_nonzeros )
+      {
+         hypre_CSRMatrixBigJ(matrix) = hypre_CTAlloc(HYPRE_BigInt, num_nonzeros, memory_location);
+      }
+   }
+   else
+   {
+      if ( !hypre_CSRMatrixJ(matrix) && num_nonzeros )
+      {
+         hypre_CSRMatrixJ(matrix) = hypre_CTAlloc(HYPRE_Int, num_nonzeros, memory_location);
+      }
+   }
+
+   return ierr;
+}
+
+HYPRE_Int
+hypre_CSRMatrixInitialize( hypre_CSRMatrix *matrix )
+{
+   HYPRE_Int ierr;
+
+   ierr = hypre_CSRMatrixInitialize_v2( matrix, 0, hypre_CSRMatrixMemoryLocation(matrix) );
 
    return ierr;
 }
@@ -125,26 +153,12 @@ hypre_CSRMatrixInitialize( hypre_CSRMatrix *matrix )
  * hypre_CSRMatrixBigInitialize
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_CSRMatrixBigInitialize( hypre_CSRMatrix *matrix )
 {
-   HYPRE_Int  num_rows     = hypre_CSRMatrixNumRows(matrix);
-   HYPRE_Int  num_nonzeros = hypre_CSRMatrixNumNonzeros(matrix);
-/*   HYPRE_Int  num_rownnz = hypre_CSRMatrixNumRownnz(matrix); */
+   HYPRE_Int ierr;
 
-   HYPRE_Int  ierr=0;
-
-   if ( ! hypre_CSRMatrixData(matrix) && num_nonzeros )
-      hypre_CSRMatrixData(matrix) = hypre_CTAlloc(HYPRE_Complex,  num_nonzeros, HYPRE_MEMORY_SHARED);
-   else {
-     //if (PointerAttributes(hypre_CSRMatrixData(matrix))==HYPRE_HOST_POINTER) printf("MATREIX INITIAL WITH JHOST DATA\n");
-   }
-   if ( ! hypre_CSRMatrixI(matrix) )
-      hypre_CSRMatrixI(matrix)    = hypre_CTAlloc(HYPRE_Int,  num_rows + 1, HYPRE_MEMORY_SHARED);
-/*   if ( ! hypre_CSRMatrixRownnz(matrix) )
-     hypre_CSRMatrixRownnz(matrix)    = hypre_CTAlloc(HYPRE_Int,  num_rownnz, HYPRE_MEMORY_SHARED);*/
-   if ( ! hypre_CSRMatrixBigJ(matrix) && num_nonzeros )
-      hypre_CSRMatrixBigJ(matrix)    = hypre_CTAlloc(HYPRE_BigInt,  num_nonzeros, HYPRE_MEMORY_SHARED);
+   ierr = hypre_CSRMatrixInitialize_v2( matrix, 1, hypre_CSRMatrixMemoryLocation(matrix) );
 
    return ierr;
 }
@@ -153,22 +167,24 @@ hypre_CSRMatrixBigInitialize( hypre_CSRMatrix *matrix )
  * hypre_CSRMatrixBigJtoJ
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_CSRMatrixBigJtoJ( hypre_CSRMatrix *matrix )
 {
-   HYPRE_Int  num_nonzeros = hypre_CSRMatrixNumNonzeros(matrix);
-   HYPRE_BigInt  *matrix_big_j = hypre_CSRMatrixBigJ(matrix);
-   HYPRE_Int  *matrix_j = NULL; 
-   HYPRE_Int  i;
+   HYPRE_Int     num_nonzeros = hypre_CSRMatrixNumNonzeros(matrix);
+   HYPRE_BigInt *matrix_big_j = hypre_CSRMatrixBigJ(matrix);
+   HYPRE_Int    *matrix_j = NULL;
+   HYPRE_Int     i;
 /*   HYPRE_Int  num_rownnz = hypre_CSRMatrixNumRownnz(matrix); */
 
    HYPRE_Int  ierr=0;
 
    if (num_nonzeros && matrix_big_j )
    {
-      matrix_j = hypre_CTAlloc(HYPRE_Int,  num_nonzeros, HYPRE_MEMORY_SHARED);
+      matrix_j = hypre_CTAlloc(HYPRE_Int, num_nonzeros, HYPRE_MEMORY_SHARED);
       for (i=0; i < num_nonzeros; i++)
-        matrix_j[i] = (HYPRE_Int) matrix_big_j[i];
+      {
+         matrix_j[i] = (HYPRE_Int) matrix_big_j[i];
+      }
       hypre_CSRMatrixJ(matrix) = matrix_j;
       hypre_TFree(matrix_big_j, HYPRE_MEMORY_SHARED);
       hypre_CSRMatrixBigJ(matrix) = NULL;
@@ -181,12 +197,12 @@ hypre_CSRMatrixBigJtoJ( hypre_CSRMatrix *matrix )
  * hypre_CSRMatrixJtoBigJ
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_CSRMatrixJtoBigJ( hypre_CSRMatrix *matrix )
 {
-   HYPRE_Int  num_nonzeros = hypre_CSRMatrixNumNonzeros(matrix);
-   HYPRE_Int  *matrix_j = hypre_CSRMatrixJ(matrix);
-   HYPRE_BigInt  *matrix_big_j = NULL;
+   HYPRE_Int     num_nonzeros = hypre_CSRMatrixNumNonzeros(matrix);
+   HYPRE_Int    *matrix_j = hypre_CSRMatrixJ(matrix);
+   HYPRE_BigInt *matrix_big_j = NULL;
    HYPRE_Int  i;
 /*   HYPRE_Int  num_rownnz = hypre_CSRMatrixNumRownnz(matrix); */
 
@@ -196,7 +212,9 @@ hypre_CSRMatrixJtoBigJ( hypre_CSRMatrix *matrix )
    {
       matrix_big_j = hypre_CTAlloc(HYPRE_BigInt,  num_nonzeros, HYPRE_MEMORY_SHARED);
       for (i=0; i < num_nonzeros; i++)
-        matrix_big_j[i] = (HYPRE_BigInt) matrix_j[i];
+      {
+         matrix_big_j[i] = (HYPRE_BigInt) matrix_j[i];
+      }
       hypre_CSRMatrixBigJ(matrix) = matrix_big_j;
       hypre_TFree(matrix_j, HYPRE_MEMORY_SHARED);
       hypre_CSRMatrixJ(matrix) = NULL;
@@ -209,11 +227,11 @@ hypre_CSRMatrixJtoBigJ( hypre_CSRMatrix *matrix )
  * hypre_CSRMatrixSetDataOwner
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_CSRMatrixSetDataOwner( hypre_CSRMatrix *matrix,
-                             HYPRE_Int              owns_data )
+                             HYPRE_Int        owns_data )
 {
-   HYPRE_Int    ierr=0;
+   HYPRE_Int ierr = 0;
 
    hypre_CSRMatrixOwnsData(matrix) = owns_data;
 
@@ -232,23 +250,26 @@ hypre_CSRMatrixSetDataOwner( hypre_CSRMatrix *matrix,
 HYPRE_Int
 hypre_CSRMatrixSetRownnz( hypre_CSRMatrix *matrix )
 {
-   HYPRE_Int    ierr=0;
+   HYPRE_Int  ierr = 0;
    HYPRE_Int  num_rows = hypre_CSRMatrixNumRows(matrix);
    HYPRE_Int  *A_i = hypre_CSRMatrixI(matrix);
    HYPRE_Int  *Arownnz;
 
    HYPRE_Int i, adiag;
-   HYPRE_Int irownnz=0;
+   HYPRE_Int irownnz = 0;
 
-   for (i=0; i < num_rows; i++)
+   for (i = 0; i < num_rows; i++)
    {
-      adiag = (A_i[i+1] - A_i[i]);
-      if(adiag > 0) irownnz++;
+      adiag = A_i[i+1] - A_i[i];
+      if(adiag > 0)
+      {
+         irownnz++;
+      }
    }
 
    hypre_CSRMatrixNumRownnz(matrix) = irownnz;
 
-   if ((irownnz == 0) || (irownnz == num_rows))
+   if (irownnz == 0 || irownnz == num_rows)
    {
       hypre_CSRMatrixRownnz(matrix) = NULL;
    }
@@ -256,13 +277,17 @@ hypre_CSRMatrixSetRownnz( hypre_CSRMatrix *matrix )
    {
       Arownnz = hypre_CTAlloc(HYPRE_Int,  irownnz, HYPRE_MEMORY_SHARED);
       irownnz = 0;
-      for (i=0; i < num_rows; i++)
+      for (i = 0; i < num_rows; i++)
       {
-         adiag = A_i[i+1]-A_i[i];
-         if(adiag > 0) Arownnz[irownnz++] = i;
+         adiag = A_i[i+1] - A_i[i];
+         if(adiag > 0)
+         {
+            Arownnz[irownnz++] = i;
+         }
       }
       hypre_CSRMatrixRownnz(matrix) = Arownnz;
    }
+
    return ierr;
 }
 
@@ -285,7 +310,7 @@ hypre_CSRMatrixRead( char *file_name )
    HYPRE_Int      max_col = 0;
 
    HYPRE_Int      file_base = 1;
-   
+
    HYPRE_Int      j;
 
    /*----------------------------------------------------------
@@ -340,7 +365,7 @@ hypre_CSRMatrixRead( char *file_name )
 
 HYPRE_Int
 hypre_CSRMatrixPrint( hypre_CSRMatrix *matrix,
-                      char            *file_name )
+                      const char      *file_name )
 {
    FILE    *fp;
 
@@ -348,9 +373,9 @@ hypre_CSRMatrixPrint( hypre_CSRMatrix *matrix,
    HYPRE_Int     *matrix_i;
    HYPRE_Int     *matrix_j;
    HYPRE_Int      num_rows;
-   
+
    HYPRE_Int      file_base = 1;
-   
+
    HYPRE_Int      j;
 
    HYPRE_Int      ierr = 0;
@@ -400,24 +425,23 @@ hypre_CSRMatrixPrint( hypre_CSRMatrix *matrix,
    return ierr;
 }
 
-
-/*--------------------------------------------------------------------------
- * hypre_CSRMatrixPrintCOO: print a CSRMatrix in coordinate format
- *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_CSRMatrixPrintCOO( hypre_CSRMatrix *matrix,
-                         char            *file_name )
+hypre_CSRMatrixPrintMM( hypre_CSRMatrix *matrix,
+                        HYPRE_Int        basei,
+                        HYPRE_Int        basej,
+                        HYPRE_Int        trans,
+                        const char      *file_name )
 {
    FILE    *fp;
 
    HYPRE_Complex *matrix_data;
    HYPRE_Int     *matrix_i;
    HYPRE_Int     *matrix_j;
-   HYPRE_Int      num_rows;
+   HYPRE_Int      num_rows, num_cols;
 
-   HYPRE_Int      file_base = 1;
+   /* HYPRE_Int      file_base = 1; */
 
-   HYPRE_Int      j, k;
+   HYPRE_Int      j,k;
 
    HYPRE_Int      ierr = 0;
 
@@ -429,33 +453,58 @@ hypre_CSRMatrixPrintCOO( hypre_CSRMatrix *matrix,
    matrix_i    = hypre_CSRMatrixI(matrix);
    matrix_j    = hypre_CSRMatrixJ(matrix);
    num_rows    = hypre_CSRMatrixNumRows(matrix);
+   num_cols    = hypre_CSRMatrixNumCols(matrix);
 
-   fp = fopen(file_name, "w");
+   if (file_name)
+   {
+      fp = fopen(file_name, "w");
+   }
+   else
+   {
+      fp = stdout;
+   }
 
-   hypre_fprintf(fp, "%d\n", num_rows);
+   hypre_fprintf(fp, "%%%%MatrixMarket matrix coordinate real general\n");
+
+   hypre_assert(matrix_i[num_rows] == hypre_CSRMatrixNumNonzeros(matrix));
+
+   if (!trans)
+   {
+      hypre_fprintf(fp, "%d %d %d\n", num_rows, num_cols, hypre_CSRMatrixNumNonzeros(matrix));
+   }
+   else
+   {
+      hypre_fprintf(fp, "%d %d %d\n", num_cols, num_rows, hypre_CSRMatrixNumNonzeros(matrix));
+   }
 
    for (j = 0; j < num_rows; j++)
    {
       for (k = matrix_i[j]; k < matrix_i[j+1]; k++)
       {
-         if (!matrix_data)
+         if (!trans)
          {
-            hypre_fprintf(fp, "%d   %d \n", j+file_base, matrix_j[k]+file_base);
+            hypre_fprintf(fp, "%d %d %.15e\n", j + basei, matrix_j[k] + basej, matrix_data[k]);
          }
          else
          {
-#ifdef HYPRE_COMPLEX
-#else
-            hypre_fprintf(fp, "%d   %d     %.15e\n", j+file_base, matrix_j[k]+file_base,
-                          matrix_data[k]);
-#endif
+            hypre_fprintf(fp, "%d %d %.15e\n", matrix_j[k] + basej, j + basei, matrix_data[k]);
          }
       }
    }
 
-   fclose(fp);
+   if (file_name)
+   {
+      fclose(fp);
+   }
 
    return ierr;
+}
+
+HYPRE_Int
+hypre_CSRMatrixPrint2( hypre_CSRMatrix *matrix,
+                       const char      *file_name )
+{
+   return hypre_CSRMatrixPrintMM(matrix, 0, 0, 0, file_name);
 }
 
 /*--------------------------------------------------------------------------
@@ -537,90 +586,82 @@ hypre_CSRMatrixPrintHB( hypre_CSRMatrix *matrix_input,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_CSRMatrixCopy:
- * copys A to B, 
+ * hypre_CSRMatrixCopy: copy A to B,
  * if copy_data = 0 only the structure of A is copied to B.
- * the routine does not check if the dimensions of A and B match !!! 
+ * the routine does not check if the dimensions/sparsity of A and B match !!!
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_CSRMatrixCopy( hypre_CSRMatrix *A, hypre_CSRMatrix *B, HYPRE_Int copy_data )
 {
-   HYPRE_Int      ierr=0;
-   HYPRE_Int      num_rows = hypre_CSRMatrixNumRows(A);
-   HYPRE_Int     *A_i = hypre_CSRMatrixI(A);
-   HYPRE_Int     *A_j = hypre_CSRMatrixJ(A);
-   HYPRE_Complex *A_data;
-   HYPRE_Int     *B_i = hypre_CSRMatrixI(B);
-   HYPRE_Int     *B_j = hypre_CSRMatrixJ(B);
-   HYPRE_Complex *B_data;
+   HYPRE_Int ierr = 0;
+   HYPRE_Int num_rows = hypre_CSRMatrixNumRows(A);
    HYPRE_Int num_nonzeros = hypre_CSRMatrixNumNonzeros(A);
 
-   HYPRE_Int i, j;
+   HYPRE_Int     *A_i    = hypre_CSRMatrixI(A);
+   HYPRE_Int     *A_j    = hypre_CSRMatrixJ(A);
+   HYPRE_BigInt  *A_bigj = hypre_CSRMatrixBigJ(A);
+   HYPRE_Complex *A_data;
 
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-#endif
-   for (i=0; i <= num_rows; i++)
+   HYPRE_Int     *B_i    = hypre_CSRMatrixI(B);
+   HYPRE_Int     *B_j    = hypre_CSRMatrixJ(B);
+   HYPRE_BigInt  *B_bigj = hypre_CSRMatrixBigJ(B);
+   HYPRE_Complex *B_data;
+
+   HYPRE_Int memlocA = hypre_CSRMatrixMemoryLocation(A);
+   HYPRE_Int memlocB = hypre_CSRMatrixMemoryLocation(B);
+
+   hypre_TMemcpy(B_i, A_i, HYPRE_Int, num_rows + 1, memlocB, memlocA);
+
+   if (A_j && B_j)
    {
-      B_i[i] = A_i[i];
+      hypre_TMemcpy(B_j, A_j, HYPRE_Int, num_nonzeros, memlocB, memlocA);
    }
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE
-#endif
-   for (j = 0; j < num_nonzeros; ++j)
+
+   if (A_bigj && B_bigj)
    {
-      B_j[j] = A_j[j];
+      hypre_TMemcpy(B_bigj, A_bigj, HYPRE_BigInt, num_nonzeros, memlocB, memlocA);
    }
 
    if (copy_data)
    {
       A_data = hypre_CSRMatrixData(A);
       B_data = hypre_CSRMatrixData(B);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE
-#endif
-      for (j=0; j < num_nonzeros; j++)
-      {
-         B_data[j] = A_data[j];
-      }
+      hypre_TMemcpy(B_data, A_data, HYPRE_Complex, num_nonzeros, memlocB, memlocA);
    }
+
    return ierr;
 }
 
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixClone
  * Creates and returns a new copy of the argument, A.
- * Data is not copied, only structural information is reproduced.
  * Copying is a deep copy in that no pointers are copied; new arrays are
  * created where necessary.
  *--------------------------------------------------------------------------*/
 
-hypre_CSRMatrix * hypre_CSRMatrixClone( hypre_CSRMatrix * A )
+hypre_CSRMatrix*
+hypre_CSRMatrixClone_v2( hypre_CSRMatrix *A, HYPRE_Int copy_data, HYPRE_Int memory_location )
 {
-   HYPRE_Int num_rows = hypre_CSRMatrixNumRows( A );
-   HYPRE_Int num_cols = hypre_CSRMatrixNumCols( A );
+   HYPRE_Int num_rows = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int num_cols = hypre_CSRMatrixNumCols(A);
    HYPRE_Int num_nonzeros = hypre_CSRMatrixNumNonzeros( A );
-   hypre_CSRMatrix * B = hypre_CSRMatrixCreate( num_rows, num_cols, num_nonzeros );
-   HYPRE_Int * A_i;
-   HYPRE_Int * A_j;
-   HYPRE_Int * B_i;
-   HYPRE_Int * B_j;
-   HYPRE_Int i, j;
 
-   hypre_CSRMatrixInitialize( B );
+   hypre_CSRMatrix *B = hypre_CSRMatrixCreate( num_rows, num_cols, num_nonzeros );
 
-   A_i = hypre_CSRMatrixI(A);
-   A_j = hypre_CSRMatrixJ(A);
-   B_i = hypre_CSRMatrixI(B);
-   B_j = hypre_CSRMatrixJ(B);
+   HYPRE_Int bigInit = hypre_CSRMatrixBigJ(A) != NULL;
 
-   for ( i=0; i<num_rows+1; ++i )  B_i[i] = A_i[i];
-   for ( j=0; j<num_nonzeros; ++j )  B_j[j] = A_j[j];
-   hypre_CSRMatrixNumRownnz(B) =  hypre_CSRMatrixNumRownnz(A);
-   if ( hypre_CSRMatrixRownnz(A) ) hypre_CSRMatrixSetRownnz( B );
+   hypre_CSRMatrixInitialize_v2(B, bigInit, memory_location);
+
+   hypre_CSRMatrixCopy(A, B, copy_data);
 
    return B;
+}
+
+hypre_CSRMatrix*
+hypre_CSRMatrixClone( hypre_CSRMatrix *A, HYPRE_Int copy_data )
+{
+   return hypre_CSRMatrixClone_v2(A, copy_data, HYPRE_MEMORY_SHARED);
 }
 
 /*--------------------------------------------------------------------------
@@ -640,9 +681,12 @@ hypre_CSRMatrix * hypre_CSRMatrixClone( hypre_CSRMatrix * A )
  * The nonzeros of a computed row are NOT necessarily in any particular order.
  *--------------------------------------------------------------------------*/
 
-hypre_CSRMatrix * hypre_CSRMatrixUnion(
-   hypre_CSRMatrix *A, hypre_CSRMatrix *B,
-   HYPRE_BigInt *col_map_offd_A, HYPRE_BigInt *col_map_offd_B, HYPRE_BigInt **col_map_offd_C )
+hypre_CSRMatrix*
+hypre_CSRMatrixUnion( hypre_CSRMatrix *A,
+                      hypre_CSRMatrix *B,
+                      HYPRE_BigInt *col_map_offd_A,
+                      HYPRE_BigInt *col_map_offd_B,
+                      HYPRE_BigInt **col_map_offd_C )
 {
    HYPRE_Int num_rows = hypre_CSRMatrixNumRows( A );
    HYPRE_Int num_cols_A = hypre_CSRMatrixNumCols( A );
@@ -829,120 +873,41 @@ HYPRE_Int hypre_CSRMatrixGetLoadBalancedPartitionEnd(hypre_CSRMatrix *A)
 {
    return hypre_CSRMatrixGetLoadBalancedPartitionBoundary(A, hypre_GetThreadNum() + 1);
 }
+
+HYPRE_Int
+hypre_CSRMatrixPrefetch( hypre_CSRMatrix *A, HYPRE_Int to_location )
+{
+   HYPRE_Int      ierr = 0;
+
 #ifdef HYPRE_USING_UNIFIED_MEMORY
-void hypre_CSRMatrixPrefetchToDevice(hypre_CSRMatrix *A){
-  if (hypre_CSRMatrixNumNonzeros(A)==0) return;
+   if (hypre_GetActualMemLocation(hypre_CSRMatrixMemoryLocation(A)) != HYPRE_MEMORY_SHARED)
+   {
+      return 1;
+   }
 
-  PUSH_RANGE_PAYLOAD("hypre_CSRMatrixPrefetchToDevice",0,hypre_CSRMatrixNumNonzeros(A));
-  if ((!A->on_device)&&(hypre_CSRMatrixNumNonzeros(A)>8192)){
-    //printf("Pointer type %d value = %p\n",PointerAttributes((hypre_CSRMatrixI(A))),hypre_CSRMatrixI(A));
-#if defined(TRACK_MEMORY_ALLOCATIONS)
-    ASSERT_MANAGED(hypre_CSRMatrixData(A));
-    ASSERT_MANAGED(hypre_CSRMatrixI(A));
-    ASSERT_MANAGED(hypre_CSRMatrixJ(A));
-#endif
-    hypre_CheckErrorDevice(cudaMemPrefetchAsync(hypre_CSRMatrixData(A),hypre_CSRMatrixNumNonzeros(A)*sizeof(HYPRE_Complex),HYPRE_DEVICE,HYPRE_STREAM(4)));
-    hypre_CheckErrorDevice(cudaMemPrefetchAsync(hypre_CSRMatrixI(A),(hypre_CSRMatrixNumRows(A)+1)*sizeof(HYPRE_Int),HYPRE_DEVICE,HYPRE_STREAM(5)));
-    hypre_CheckErrorDevice(cudaMemPrefetchAsync(hypre_CSRMatrixJ(A),hypre_CSRMatrixNumNonzeros(A)*sizeof(HYPRE_Int),HYPRE_DEVICE,HYPRE_STREAM(6)));
-    hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(4)));
-    hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(5)));
-    hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(6)));
-#ifdef HYPRE_USING_OPENMP_OFFLOAD
-    A->on_device=0; // Should be 1 for CUDA code. 0 for OMP for now
-#else
-    A->on_device=1;
-#endif
-  }
-  POP_RANGE;
-}
-void hypre_CSRMatrixPrefetchToDeviceBIGINT(hypre_CSRMatrix *A){
-  if (hypre_CSRMatrixNumNonzeros(A)==0) return;
+   HYPRE_Complex *data = hypre_CSRMatrixData(A);
+   HYPRE_Int     *ia   = hypre_CSRMatrixI(A);
+   HYPRE_Int     *ja   = hypre_CSRMatrixJ(A);
+   HYPRE_Int      nrow = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int      nnzA = hypre_CSRMatrixNumNonzeros(A);
 
-  PUSH_RANGE_PAYLOAD("hypre_CSRMatrixPrefetchToDevice",0,hypre_CSRMatrixNumNonzeros(A));
-  if ((!A->on_device)&&(hypre_CSRMatrixNumNonzeros(A)>8192)){
-    //printf("Pointer type %d value = %p\n",PointerAttributes((hypre_CSRMatrixI(A))),hypre_CSRMatrixI(A));
-#if defined(TRACK_MEMORY_ALLOCATIONS)
-    ASSERT_MANAGED(hypre_CSRMatrixData(A));
-    ASSERT_MANAGED(hypre_CSRMatrixI(A));
-    ASSERT_MANAGED(hypre_CSRMatrixJ(A));
+   /* speical use of TMemcpy for prefetch */
+   hypre_TMemcpy(data, data, HYPRE_Complex, nnzA, to_location, HYPRE_MEMORY_SHARED);
+   //hypre_HandleCudaPrefetchStreamNum(hypre_handle) ++;
+   hypre_TMemcpy(ia, ia, HYPRE_Int, nrow+1, to_location, HYPRE_MEMORY_SHARED);
+   //hypre_HandleCudaPrefetchStreamNum(hypre_handle) ++;
+   hypre_TMemcpy(ja, ja, HYPRE_Int, nnzA, to_location, HYPRE_MEMORY_SHARED);
 #endif
-    hypre_CheckErrorDevice(cudaMemPrefetchAsync(hypre_CSRMatrixData(A),hypre_CSRMatrixNumNonzeros(A)*sizeof(HYPRE_Complex),HYPRE_DEVICE,HYPRE_STREAM(4)));
-    hypre_CheckErrorDevice(cudaMemPrefetchAsync(hypre_CSRMatrixI(A),(hypre_CSRMatrixNumRows(A)+1)*sizeof(HYPRE_Int),HYPRE_DEVICE,HYPRE_STREAM(5)));
-    hypre_CheckErrorDevice(cudaMemPrefetchAsync(hypre_CSRMatrixJ(A),hypre_CSRMatrixNumNonzeros(A)*sizeof(HYPRE_Int),HYPRE_DEVICE,HYPRE_STREAM(6)));
-    hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(4)));
-    hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(5)));
-    hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(6)));
-#ifdef HYPRE_USING_OPENMP_OFFLOAD
-    A->on_device=0; // Should be 1 for CUDA code. 0 for OMP for now
-#else
-    A->on_device=1;
-#endif
-  }
-  POP_RANGE;
-}
-void hypre_CSRMatrixPrefetchToHost(hypre_CSRMatrix *A){
-  PUSH_RANGE("hypre_CSRMatrixPrefetchToDevice",0);
-  if (A->on_device){
-    A->on_device=0;
-    hypre_CheckErrorDevice(cudaMemPrefetchAsync(hypre_CSRMatrixData(A),hypre_CSRMatrixNumNonzeros(A)*sizeof(HYPRE_Complex),cudaCpuDeviceId,HYPRE_STREAM(4)));
-    hypre_CheckErrorDevice(cudaMemPrefetchAsync(hypre_CSRMatrixI(A),(hypre_CSRMatrixNumRows(A)+1)*sizeof(HYPRE_Int),cudaCpuDeviceId,HYPRE_STREAM(4)));
-    hypre_CheckErrorDevice(cudaMemPrefetchAsync(hypre_CSRMatrixJ(A),hypre_CSRMatrixNumNonzeros(A)*sizeof(HYPRE_Int),cudaCpuDeviceId,HYPRE_STREAM(4)));
-    hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(4)));
-  }
-  POP_RANGE;
-}
-hypre_int hypre_CSRMatrixIsManaged(hypre_CSRMatrix *a){
-  return ((pointerIsManaged((void*)hypre_CSRMatrixData(a))) 
-	  && (pointerIsManaged((void*)hypre_CSRMatrixI(a)))
-	  && (pointerIsManaged((void*)hypre_CSRMatrixJ(a))));
-}
-#endif
-#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
-void hypre_CSRMatrixMapToDevice(hypre_CSRMatrix *A){
-  if (A==NULL) return;
-  HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
-  HYPRE_Int        *A_i      = hypre_CSRMatrixI(A);
-  HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
-  HYPRE_Int         num_rows = hypre_CSRMatrixNumRows(A);
-  HYPRE_Int         num_cols = hypre_CSRMatrixNumCols(A);
-  HYPRE_Int         nnz  = hypre_CSRMatrixNumNonzeros(A); 
-  //printf("MAPPED %p sizes = %d %d \n",A,nnz,num_rows);
 
-#pragma omp target enter data map(to:A[0:0])
-#pragma omp target enter data map(alloc:A_data[:nnz]) if (nnz>0)
-#pragma omp target enter data map(alloc:A_i[:num_rows+1]) if (num_rows>0)
-#pragma omp target enter data map(alloc:A_j[:nnz]) if (nnz>0)
-  A->mapped=0;
+   return ierr;
 }
-void hypre_CSRMatrixUpdateToDevice(hypre_CSRMatrix *A){
-  if (A==NULL) return;
-  HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
-  HYPRE_Int        *A_i      = hypre_CSRMatrixI(A);
-  HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
-  HYPRE_Int         num_rows = hypre_CSRMatrixNumRows(A);
-  HYPRE_Int         num_cols = hypre_CSRMatrixNumCols(A);
-  HYPRE_Int         nnz  = hypre_CSRMatrixNumNonzeros(A); 
-  //printf("Updating MAtrix...%p \n",A);
-  //#pragma omp target update device(0) to(A[0:0])
-  //printf("Updating MAtrix data...%p %d\n",A_data,nnz);
-#pragma omp target update device(0) to(A_data[:nnz]) if (nnz>0)
-  //printf("Updating MAtrix I ...%p %d\n",A_i,num_rows);
-#pragma omp target update device(0) to(A_i[:num_rows+1]) if (num_rows>0)
-  //printf("Updating MAtrix J ...%p %d\n",A_j,nnz);
-#pragma omp target update device(0) to(A_j[:nnz]) if (nnz>0)
-  A->mapped=1;
-  //printf("Done \n");
+
+/*
+HYPRE_Int hypre_CSRMatrixIsManaged(hypre_CSRMatrix *a)
+{
+  return ( (pointerIsManaged((void*)hypre_CSRMatrixData(a))) &&
+           (pointerIsManaged((void*)hypre_CSRMatrixI(a))) &&
+           (pointerIsManaged((void*)hypre_CSRMatrixJ(a))) );
 }
-void hypre_CSRMatrixUnMapFromDevice(hypre_CSRMatrix *A){
-  HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
-  HYPRE_Int        *A_i      = hypre_CSRMatrixI(A);
-  HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
-  HYPRE_Int         num_rows = hypre_CSRMatrixNumRows(A);
-  HYPRE_Int         num_cols = hypre_CSRMatrixNumCols(A);
-  HYPRE_Int         nnz  = hypre_CSRMatrixNumNonzeros(A); 
-  //#pragma omp target exit data map(delete:A[0:0])
-#pragma omp target exit data map(delete:A_data[0:nnz]) if (nnz>0)
-#pragma omp target exit data map(delete:A_i[0:num_rows+1]) if (num_rows>0)
-#pragma omp target exit data map(delete:A_j[0:nnz]) if (nnz>0)
-}
-#endif
+*/
+

@@ -91,6 +91,11 @@ co="--with-device-openmp --enable-debug --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsup
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $rost
 ./renametest.sh basic $output_dir/basic-deviceomp-nonum-debug-struct
 
+# CUDA with UM without MPI
+#co="--with-cuda --enable-unified-memory --without-MPI --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
+#./test.sh basic.sh $src_dir -co: $co -mo: $mo
+#./renametest.sh basic $output_dir/basic-cuda-um-without-MPI
+
 # Echo to stderr all nonempty error files in $output_dir
 for errfile in $( find $output_dir ! -size 0 -name "*.err" )
 do

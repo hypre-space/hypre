@@ -135,22 +135,22 @@ typedef struct
    HYPRE_Int            smooth_num_levels;
    HYPRE_Int            smooth_type;
    HYPRE_Solver        *smoother;
-   HYPRE_Int		smooth_num_sweeps;
+   HYPRE_Int            smooth_num_sweeps;
    HYPRE_Int            schw_variant;
    HYPRE_Int            schw_overlap;
    HYPRE_Int            schw_domain_type;
-   HYPRE_Real		schwarz_rlx_weight;
+   HYPRE_Real           schwarz_rlx_weight;
    HYPRE_Int            schwarz_use_nonsymm;
-   HYPRE_Int		ps_sym;
-   HYPRE_Int		ps_level;
-   HYPRE_Int		pi_max_nz_per_row;
-   HYPRE_Int		eu_level;
-   HYPRE_Int		eu_bj;
-   HYPRE_Real		ps_threshold;
-   HYPRE_Real		ps_filter;
-   HYPRE_Real		pi_drop_tol;
-   HYPRE_Real		eu_sparse_A;
-   char		       *euclidfile;
+   HYPRE_Int            ps_sym;
+   HYPRE_Int            ps_level;
+   HYPRE_Int            pi_max_nz_per_row;
+   HYPRE_Int            eu_level;
+   HYPRE_Int            eu_bj;
+   HYPRE_Real           ps_threshold;
+   HYPRE_Real           ps_filter;
+   HYPRE_Real           pi_drop_tol;
+   HYPRE_Real           eu_sparse_A;
+   char                *euclidfile;
 
    HYPRE_Real          *max_eig_est;
    HYPRE_Real          *min_eig_est;
@@ -178,8 +178,8 @@ typedef struct
    hypre_ParVector   *Ztemp;
 
    /* fields used by GSMG and LS interpolation */
-   HYPRE_Int                 gsmg;        /* nonzero indicates use of GSMG */
-   HYPRE_Int                 num_samples; /* number of sample vectors */
+   HYPRE_Int          gsmg;        /* nonzero indicates use of GSMG */
+   HYPRE_Int          num_samples; /* number of sample vectors */
 
    /* log info */
    HYPRE_Int      logging;
@@ -246,7 +246,7 @@ typedef struct
    /* Use 2 mat-mat-muls instead of triple product*/
    HYPRE_Int rap2;
    HYPRE_Int keepTranspose;
-
+   HYPRE_Int modularized_matmat;
    /* information for preserving indexes as coarse grid points */
    HYPRE_Int C_point_keep_level;
    HYPRE_Int num_C_point_marker;
@@ -270,7 +270,7 @@ typedef struct
 #define hypre_ParAMGDataIsTriangular(amg_data) ((amg_data)->is_triangular)
 #define hypre_ParAMGDataGMRESSwitchR(amg_data) ((amg_data)->gmres_switch)
 #define hypre_ParAMGDataMaxLevels(amg_data) ((amg_data)->max_levels)
-#define hypre_ParAMGDataStrongThreshold(amg_data)((amg_data)->strong_threshold)
+#define hypre_ParAMGDataStrongThreshold(amg_data) ((amg_data)->strong_threshold)
 #define hypre_ParAMGDataStrongThresholdR(amg_data)((amg_data)->strong_thresholdR)
 #define hypre_ParAMGDataFilterThresholdR(amg_data)((amg_data)->filter_thresholdR)
 #define hypre_ParAMGDataSabs(amg_data) (amg_data->Sabs)
@@ -475,6 +475,7 @@ typedef struct
 
 #define hypre_ParAMGDataRAP2(amg_data) ((amg_data)->rap2)
 #define hypre_ParAMGDataKeepTranspose(amg_data) ((amg_data)->keepTranspose)
+#define hypre_ParAMGDataModularizedMatMat(amg_data) ((amg_data)->modularized_matmat)
 
 /*indices for the dof which will keep coarsening to the coarse level */
 #define hypre_ParAMGDataCPointKeepMarkerArray(amg_data) ((amg_data)-> C_point_marker_array)
@@ -914,6 +915,7 @@ HYPRE_Int HYPRE_BoomerAMGSetNonGalerkinTol ( HYPRE_Solver solver , HYPRE_Real no
 HYPRE_Int HYPRE_BoomerAMGSetLevelNonGalerkinTol ( HYPRE_Solver solver , HYPRE_Real nongalerkin_tol , HYPRE_Int level );
 HYPRE_Int HYPRE_BoomerAMGSetNonGalerkTol ( HYPRE_Solver solver , HYPRE_Int nongalerk_num_tol , HYPRE_Real *nongalerk_tol );
 HYPRE_Int HYPRE_BoomerAMGSetRAP2 ( HYPRE_Solver solver , HYPRE_Int rap2 );
+HYPRE_Int HYPRE_BoomerAMGSetModuleRAP2 ( HYPRE_Solver solver , HYPRE_Int mod_rap2 );
 HYPRE_Int HYPRE_BoomerAMGSetKeepTranspose ( HYPRE_Solver solver , HYPRE_Int keepTranspose );
 #ifdef HYPRE_USING_DSUPERLU
 HYPRE_Int HYPRE_BoomerAMGSetDSLUThreshold ( HYPRE_Solver solver , HYPRE_Int slu_threshold );
@@ -1388,6 +1390,7 @@ HYPRE_Int hypre_BoomerAMGSetNonGalerkinTol ( void *data , HYPRE_Real nongalerkin
 HYPRE_Int hypre_BoomerAMGSetLevelNonGalerkinTol ( void *data , HYPRE_Real nongalerkin_tol , HYPRE_Int level );
 HYPRE_Int hypre_BoomerAMGSetNonGalerkTol ( void *data , HYPRE_Int nongalerk_num_tol , HYPRE_Real *nongalerk_tol );
 HYPRE_Int hypre_BoomerAMGSetRAP2 ( void *data , HYPRE_Int rap2 );
+HYPRE_Int hypre_BoomerAMGSetModuleRAP2 ( void *data , HYPRE_Int mod_rap2 );
 HYPRE_Int hypre_BoomerAMGSetKeepTranspose ( void *data , HYPRE_Int keepTranspose );
 #ifdef HYPRE_USING_DSUPERLU
 HYPRE_Int hypre_BoomerAMGSetDSLUThreshold ( void *data , HYPRE_Int slu_threshold );
@@ -1429,6 +1432,11 @@ HYPRE_Int hypre_BoomerAMGCoarsenFalgout ( hypre_ParCSRMatrix *S , hypre_ParCSRMa
 HYPRE_Int hypre_BoomerAMGCoarsenHMIS ( hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , HYPRE_Int measure_type , HYPRE_Int debug_flag , HYPRE_Int **CF_marker_ptr );
 HYPRE_Int hypre_BoomerAMGCoarsenPMIS ( hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , HYPRE_Int CF_init , HYPRE_Int debug_flag , HYPRE_Int **CF_marker_ptr );
 
+HYPRE_Int hypre_BoomerAMGCoarsenPMISDevice( hypre_ParCSRMatrix *S, hypre_ParCSRMatrix *A, HYPRE_Int CF_init, HYPRE_Int debug_flag, HYPRE_Int **CF_marker_ptr );
+
+/* par_coarsen_device.c */
+HYPRE_Int hypre_GetGlobalMeasureDevice( hypre_ParCSRMatrix *S, hypre_ParCSRCommPkg *comm_pkg, HYPRE_Int CF_init, HYPRE_Int aug_rand, HYPRE_Real *measure_diag, HYPRE_Real *measure_offd, HYPRE_Real *real_send_buf );
+
 /* par_coarse_parms.c */
 HYPRE_Int hypre_BoomerAMGCoarseParms ( MPI_Comm comm , HYPRE_Int local_num_variables , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int *CF_marker , HYPRE_Int **coarse_dof_func_ptr , HYPRE_BigInt **coarse_pnts_global_ptr );
 
@@ -1460,7 +1468,6 @@ HYPRE_Int hypre_BoomerAMGCycle ( void *amg_vdata , hypre_ParVector **F_array , h
 HYPRE_ParCSRMatrix GenerateDifConv ( MPI_Comm comm , HYPRE_BigInt nx , HYPRE_BigInt ny , HYPRE_BigInt nz , HYPRE_Int P , HYPRE_Int Q , HYPRE_Int R , HYPRE_Int p , HYPRE_Int q , HYPRE_Int r , HYPRE_Real *value );
 
 /* par_gsmg.c */
-HYPRE_Int hypre_ParCSRMatrixClone ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix **Sp , HYPRE_Int copy_data );
 HYPRE_Int hypre_ParCSRMatrixFillSmooth ( HYPRE_Int nsamples , HYPRE_Real *samples , hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , HYPRE_Int num_functions , HYPRE_Int *dof_func );
 HYPRE_Real hypre_ParCSRMatrixChooseThresh ( hypre_ParCSRMatrix *S );
 HYPRE_Int hypre_ParCSRMatrixThreshold ( hypre_ParCSRMatrix *A , HYPRE_Real thresh );
@@ -1475,12 +1482,19 @@ HYPRE_Int hypre_BoomerAMGBuildInterpGSMG ( hypre_ParCSRMatrix *A , HYPRE_Int *CF
 HYPRE_Int hypre_BoomerAMGIndepSetInit ( hypre_ParCSRMatrix *S , HYPRE_Real *measure_array , HYPRE_Int seq_rand );
 HYPRE_Int hypre_BoomerAMGIndepSet ( hypre_ParCSRMatrix *S , HYPRE_Real *measure_array , HYPRE_Int *graph_array , HYPRE_Int graph_array_size , HYPRE_Int *graph_array_offd , HYPRE_Int graph_array_offd_size , HYPRE_Int *IS_marker , HYPRE_Int *IS_marker_offd );
 
+HYPRE_Int hypre_BoomerAMGIndepSetInitDevice( hypre_ParCSRMatrix *S, HYPRE_Real *measure_array, HYPRE_Int aug_rand);
+
+HYPRE_Int hypre_BoomerAMGIndepSetDevice( hypre_ParCSRMatrix *S, HYPRE_Real *measure_diag, HYPRE_Real *measure_offd, HYPRE_Int graph_diag_size, HYPRE_Int *graph_diag, HYPRE_Int *IS_marker_diag, HYPRE_Int *IS_marker_offd, hypre_ParCSRCommPkg *comm_pkg, HYPRE_Int *int_send_buf );
+
 /* par_interp.c */
 HYPRE_Int hypre_BoomerAMGBuildInterp ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_marker , hypre_ParCSRMatrix *S , HYPRE_BigInt *num_cpts_global , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int debug_flag , HYPRE_Real trunc_factor , HYPRE_Int max_elmts , HYPRE_Int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
 HYPRE_Int hypre_BoomerAMGBuildInterpHE ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_marker , hypre_ParCSRMatrix *S , HYPRE_BigInt *num_cpts_global , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int debug_flag , HYPRE_Real trunc_factor , HYPRE_Int max_elmts , HYPRE_Int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
 HYPRE_Int hypre_BoomerAMGBuildDirInterp ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_marker , hypre_ParCSRMatrix *S , HYPRE_BigInt *num_cpts_global , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int debug_flag , HYPRE_Real trunc_factor , HYPRE_Int max_elmts , HYPRE_Int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
-HYPRE_Int hypre_BoomerAMGInterpTruncation ( hypre_ParCSRMatrix *P , HYPRE_Real trunc_factor , HYPRE_Int max_elmts );
-void hypre_qsort2abs ( HYPRE_Int *v , HYPRE_Real *w , HYPRE_Int left , HYPRE_Int right );
+HYPRE_Int hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker , hypre_ParCSRMatrix *S , HYPRE_BigInt *num_cpts_global , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int debug_flag , HYPRE_Real trunc_factor , HYPRE_Int max_elmts , HYPRE_Int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
+
+HYPRE_Int hypre_BoomerAMGInterpTruncation ( hypre_ParCSRMatrix *P, HYPRE_Real trunc_factor, HYPRE_Int max_elmts );
+HYPRE_Int hypre_BoomerAMGInterpTruncationDevice( hypre_ParCSRMatrix *P, HYPRE_Real trunc_factor, HYPRE_Int max_elmts );
+
 HYPRE_Int hypre_BoomerAMGBuildInterpModUnk ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_marker , hypre_ParCSRMatrix *S , HYPRE_BigInt *num_cpts_global , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int debug_flag , HYPRE_Real trunc_factor , HYPRE_Int max_elmts , HYPRE_Int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
 HYPRE_Int hypre_BoomerAMGTruncandBuild ( hypre_ParCSRMatrix *P , HYPRE_Real trunc_factor , HYPRE_Int max_elmts );
 hypre_ParCSRMatrix *hypre_CreateC ( hypre_ParCSRMatrix *A , HYPRE_Real w );
@@ -1525,7 +1539,6 @@ HYPRE_Int hypre_BoomerAMGCreateScalarCF ( HYPRE_Int *CFN_marker , HYPRE_Int num_
 
 /* par_nongalerkin.c */
 HYPRE_Int hypre_GrabSubArray ( HYPRE_Int *indices , HYPRE_Int start , HYPRE_Int end , HYPRE_BigInt *array , HYPRE_BigInt *output );
-void hypre_qsort2_abs ( HYPRE_Int *v , HYPRE_Real *w , HYPRE_Int left , HYPRE_Int right );
 HYPRE_Int hypre_IntersectTwoArrays ( HYPRE_Int *x , HYPRE_Real *x_data , HYPRE_Int x_length , HYPRE_Int *y , HYPRE_Int y_length , HYPRE_Int *z , HYPRE_Real *output_x_data , HYPRE_Int *intersect_length );
 HYPRE_Int hypre_IntersectTwoBigArrays ( HYPRE_BigInt *x , HYPRE_Real *x_data , HYPRE_Int x_length , HYPRE_BigInt *y , HYPRE_Int y_length , HYPRE_BigInt *z , HYPRE_Real *output_x_data , HYPRE_Int *intersect_length );
 HYPRE_Int hypre_SortedCopyParCSRData ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *B );
@@ -1542,7 +1555,6 @@ hypre_ParCSRMatrix * hypre_NonGalerkinSparsityPattern(hypre_ParCSRMatrix *R_IAP,
 HYPRE_Int hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr, hypre_ParCSRMatrix *AP, HYPRE_Real strong_threshold, HYPRE_Real max_row_sum, HYPRE_Int num_functions, HYPRE_Int * dof_func_value, HYPRE_Real S_commpkg_switch, HYPRE_Int * CF_marker, HYPRE_Real droptol, HYPRE_Int sym_collapse, HYPRE_Real lump_percent, HYPRE_Int collapse_beta );
 
 /* par_rap.c */
-hypre_CSRMatrix *hypre_ExchangeRAPData ( hypre_CSRMatrix *RAP_int , hypre_ParCSRCommPkg *comm_pkg_RT );
 HYPRE_Int hypre_BoomerAMGBuildCoarseOperator ( hypre_ParCSRMatrix *RT , hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *P , hypre_ParCSRMatrix **RAP_ptr );
 HYPRE_Int hypre_BoomerAMGBuildCoarseOperatorKT ( hypre_ParCSRMatrix *RT , hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *P , HYPRE_Int keepTranspose, hypre_ParCSRMatrix **RAP_ptr );
 
@@ -1602,6 +1614,7 @@ HYPRE_Int hypre_BoomerAMGCreateSCommPkg ( hypre_ParCSRMatrix *A , hypre_ParCSRMa
 HYPRE_Int hypre_BoomerAMGCreate2ndS ( hypre_ParCSRMatrix *S , HYPRE_Int *CF_marker , HYPRE_Int num_paths , HYPRE_BigInt *coarse_row_starts , hypre_ParCSRMatrix **C_ptr );
 HYPRE_Int hypre_BoomerAMGCorrectCFMarker ( HYPRE_Int *CF_marker , HYPRE_Int num_var , HYPRE_Int *new_CF_marker );
 HYPRE_Int hypre_BoomerAMGCorrectCFMarker2 ( HYPRE_Int *CF_marker , HYPRE_Int num_var , HYPRE_Int *new_CF_marker );
+HYPRE_Int hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix *A, HYPRE_Real strength_threshold, HYPRE_Real max_row_sum, HYPRE_Int num_functions, HYPRE_Int *dof_func, hypre_ParCSRMatrix **S_ptr);
 
 /* par_sv_interp.c */
 HYPRE_Int hypre_BoomerAMGSmoothInterpVectors ( hypre_ParCSRMatrix *A , HYPRE_Int num_smooth_vecs , hypre_ParVector **smooth_vecs , HYPRE_Int smooth_steps );
