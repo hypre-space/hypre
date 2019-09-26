@@ -503,12 +503,12 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
          // pack and send the buffers
          PackResidualBuffer(send_buffer, send_map_elmts[level], send_map_starts[level][num_partitions], hypre_VectorData(hypre_ParCompGridF(compGrid[0])));
          
-         for (i = 0; i < num_send_procs; i++)
+	 for (i = 0; i < num_send_procs; i++)
          {
             HYPRE_Int buffer_index = hypre_ParCompGridCommPkgSendProcPartitions(compGridCommPkg)[level][i];
             HYPRE_Int send_buffer_size = send_map_starts[level][buffer_index+1] - send_map_starts[level][buffer_index];
             hypre_MPI_Isend(&(send_buffer[ send_map_starts[level][buffer_index] ]), send_buffer_size, HYPRE_MPI_COMPLEX, send_procs[level][i], 3, comm, &requests[request_counter++]);
-         }
+	 } 
 
          // wait for buffers to be received
          hypre_MPI_Waitall( request_counter, requests, status );
