@@ -1,6 +1,7 @@
 ./AUTOTEST/.*.out
 ./AUTOTEST/.*.fil
 ./AUTOTEST/.*.err
+./AUTOTEST/.*.log
 ./src/test/struct_migrate
 ./src/test/maxwell_unscaled
 ./src/test/sstruct_fac
