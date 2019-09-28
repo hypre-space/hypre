@@ -61,7 +61,6 @@ HYPRE_Int hypre_ParCSRRelax(/* matrix to relax with */
    {
       if (relax_type == 1) /* l1-scaled Jacobi */
       {
-         // PUSH_RANGE_PAYLOAD("RELAX",4,sweep);
          HYPRE_Int num_rows = hypre_ParCSRMatrixNumRows(A);
 #ifdef HYPRE_USING_UNIFIED_MEMORY
          if (sweep == 0)

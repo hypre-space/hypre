@@ -446,7 +446,7 @@ hypre_Memcpy(void *dst, void *src, size_t size, HYPRE_Int loc_dst, HYPRE_Int loc
          );
       }
 
-      HYPRE_CUDA_CALL( cudaStreamSynchronize(hypre_HandleCudaPrefetchStream(hypre_handle)) );
+      /* HYPRE_CUDA_CALL( cudaStreamSynchronize(hypre_HandleCudaPrefetchStream(hypre_handle)) ); */
 
       return;
    }

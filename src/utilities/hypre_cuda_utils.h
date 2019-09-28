@@ -20,6 +20,7 @@ extern "C++" {
 #include <cuda_runtime.h>
 #include <assert.h>
 #include <curand.h>
+#include <cublas_v2.h>
 #include <cusparse.h>
 
 #if defined(HYPRE_USING_CUDA)
@@ -75,12 +76,19 @@ using namespace thrust::placeholders;
    thrust::func_name(                                                                        \
    thrust::cuda::par.on(hypre_HandleCudaComputeStream(hypre_handle)), __VA_ARGS__);          \
 
+#define HYPRE_CUBLAS_CALL(call) do {                                                         \
+   cublasStatus_t err = call;                                                                \
+   if (CUBLAS_STATUS_SUCCESS != err) {                                                       \
+      hypre_printf("CUBLAS ERROR (code = %d, %d) at %s:%d\n",                                \
+            err, err == CUBLAS_STATUS_EXECUTION_FAILED, __FILE__, __LINE__);                 \
+      exit(1);                                                                               \
+   } } while(0)
 
 #define HYPRE_CUSPARSE_CALL(call) do {                                                       \
    cusparseStatus_t err = call;                                                              \
    if (CUSPARSE_STATUS_SUCCESS != err) {                                                     \
       hypre_printf("CUSPARSE ERROR (code = %d, %d) at %s:%d\n",                              \
-            err, err == CUSPARSE_STATUS_EXECUTION_FAILED, __FILE__, __LINE__);                           \
+            err, err == CUSPARSE_STATUS_EXECUTION_FAILED, __FILE__, __LINE__);               \
       exit(1);                                                                               \
    } } while(0)
 

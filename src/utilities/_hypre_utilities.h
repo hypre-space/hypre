@@ -1132,6 +1132,7 @@ extern "C++" {
 #include <cuda_runtime.h>
 #include <assert.h>
 #include <curand.h>
+#include <cublas_v2.h>
 #include <cusparse.h>
 
 #if defined(HYPRE_USING_CUDA)
@@ -1187,12 +1188,19 @@ using namespace thrust::placeholders;
    thrust::func_name(                                                                        \
    thrust::cuda::par.on(hypre_HandleCudaComputeStream(hypre_handle)), __VA_ARGS__);          \
 
+#define HYPRE_CUBLAS_CALL(call) do {                                                         \
+   cublasStatus_t err = call;                                                                \
+   if (CUBLAS_STATUS_SUCCESS != err) {                                                       \
+      hypre_printf("CUBLAS ERROR (code = %d, %d) at %s:%d\n",                                \
+            err, err == CUBLAS_STATUS_EXECUTION_FAILED, __FILE__, __LINE__);                 \
+      exit(1);                                                                               \
+   } } while(0)
 
 #define HYPRE_CUSPARSE_CALL(call) do {                                                       \
    cusparseStatus_t err = call;                                                              \
    if (CUSPARSE_STATUS_SUCCESS != err) {                                                     \
       hypre_printf("CUSPARSE ERROR (code = %d, %d) at %s:%d\n",                              \
-            err, err == CUSPARSE_STATUS_EXECUTION_FAILED, __FILE__, __LINE__);                           \
+            err, err == CUSPARSE_STATUS_EXECUTION_FAILED, __FILE__, __LINE__);               \
       exit(1);                                                                               \
    } } while(0)
 
@@ -1586,6 +1594,7 @@ typedef struct
    HYPRE_Int cuda_compute_stream_sync_default;
    std::vector<HYPRE_Int> cuda_compute_stream_sync;
    curandGenerator_t curand_gen;
+   cublasHandle_t cublas_handle;
    cusparseHandle_t cusparse_handle;
    cusparseMatDescr_t cusparse_mat_descr;
    cudaStream_t cuda_streams[HYPRE_MAX_NUM_STREAMS];
@@ -1699,10 +1708,29 @@ hypre_HandleCurandGenerator(hypre_Handle *hypre_handle_)
    curandGenerator_t gen;
    HYPRE_CURAND_CALL( curandCreateGenerator(&gen, CURAND_RNG_PSEUDO_DEFAULT) );
    HYPRE_CURAND_CALL( curandSetPseudoRandomGeneratorSeed(gen, 1234ULL) );
+   HYPRE_CURAND_CALL( curandSetStream(gen, hypre_HandleCudaComputeStream(hypre_handle_)) );
 
    hypre_handle_->curand_gen = gen;
 
    return gen;
+}
+
+static inline cublasHandle_t
+hypre_HandleCublasHandle(hypre_Handle *hypre_handle_)
+{
+   if (hypre_handle_->cublas_handle)
+   {
+      return hypre_handle_->cublas_handle;
+   }
+
+   cublasHandle_t handle;
+   HYPRE_CUBLAS_CALL( cublasCreate(&handle) );
+
+   HYPRE_CUBLAS_CALL( cublasSetStream(handle, hypre_HandleCudaComputeStream(hypre_handle_)) );
+
+   hypre_handle_->cublas_handle = handle;
+
+   return handle;
 }
 
 static inline cusparseHandle_t

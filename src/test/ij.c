@@ -232,7 +232,7 @@ main( hypre_int argc,
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_Int    rap2=0;
    HYPRE_Int    mod_rap2=0;
-   HYPRE_Int    keepTranspose = 0;
+   HYPRE_Int    keepTranspose = 1;
 #else
    HYPRE_Int    rap2=0;
    HYPRE_Int    mod_rap2=0;
