@@ -147,7 +147,7 @@ hypre_int hypre_cuda_get_thread_id()
    return -1;
 }
 
-/* return the number of warps in block  */
+/* return the number of warps in block */
 template <hypre_int dim>
 static __device__ __forceinline__
 hypre_int hypre_cuda_get_num_warps()

@@ -240,7 +240,9 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
             hypre_ParVectorActualLocalSize(Utemp) = actual_local_size;
          }
          else
+         {
             hypre_ParVectorInitialize(Utemp);
+         }
       }
    }
 
@@ -277,10 +279,10 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
             hypre_ParVectorSetConstantValues(Ztemp,0);
             alpha = -1.0;
             beta = 1.0;
-            //printf("par_cycle.c 1 %d\n",level);
+
             hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[level],
                                                U_array[level], beta, F_array[level], Rtemp);
-            //printf("par_cycle.c 1 Done\n");
+
             cg_num_sweep = hypre_ParAMGDataSmoothNumSweeps(amg_data);
             num_sweep = num_grid_sweeps[cycle_param];
             Aux_U = Ztemp;
@@ -304,7 +306,10 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          /* TK: Use the user relax type (instead of 0) to allow for setting a
            convergent smoother (e.g. in the solution of singular problems). */
          relax_type = hypre_ParAMGDataUserRelaxType(amg_data);
-         if (relax_type == -1) relax_type = 6;
+         if (relax_type == -1)
+         {
+            relax_type = 6;
+         }
       }
 
       if (l1_norms != NULL)
@@ -412,8 +417,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                                      (HYPRE_ParVector) Aux_F,
                                      (HYPRE_ParVector) Aux_U);
                }
-               /*else if (relax_type == 99)*/
-               else if (relax_type == 9 || relax_type == 99)
+               else if (relax_type == 9 || relax_type == 99 || relax_type == 199)
                { /* Gaussian elimination */
                   hypre_GaussElimSolve(amg_data, level, relax_type);
                }

@@ -118,6 +118,9 @@ HYPRE_Int hypre_dtrsv ( const char *uplo , const char *trans , const char *diag 
 /* idamax.c */
 HYPRE_Int hypre_idamax ( HYPRE_Int *n , HYPRE_Real *dx , HYPRE_Int *incx );
 
+/* dgemv_device.c */
+HYPRE_Int hypre_dgemv_device(HYPRE_Int m, HYPRE_Int n, HYPRE_Int lda, HYPRE_Real *a, HYPRE_Real *x, HYPRE_Real *y);
+
 #ifdef __cplusplus
 }
 #endif

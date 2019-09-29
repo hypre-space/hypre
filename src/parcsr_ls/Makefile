@@ -92,6 +92,7 @@ FILES =\
  par_cycle.c\
  par_add_cycle.c\
  par_difconv.c\
+ par_gauss_elim.c\
  par_gsmg.c\
  par_indepset.c\
  par_indepset_device.c\
