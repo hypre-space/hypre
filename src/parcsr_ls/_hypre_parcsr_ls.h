@@ -335,6 +335,7 @@ typedef struct
    HYPRE_Int                 amgdd_agglomeration_max_num_levels;
    HYPRE_Int                 amgdd_agglomeration_threshold;
    HYPRE_Int                 amgdd_agglomeration_partition_size;
+   HYPRE_Int                 amgdd_num_global_relax;
    hypre_ParCompGrid       **compGrid;
    hypre_ParCompGridCommPkg *compGridCommPkg;
 
@@ -616,6 +617,7 @@ typedef struct
 #define hypre_ParAMGDataAMGDDAgglomerationMaxNumLevels(amg_data) ((amg_data)->amgdd_agglomeration_max_num_levels)
 #define hypre_ParAMGDataAMGDDAgglomerationThreshold(amg_data) ((amg_data)->amgdd_agglomeration_threshold)
 #define hypre_ParAMGDataAMGDDAgglomerationPartitionSize(amg_data) ((amg_data)->amgdd_agglomeration_partition_size)
+#define hypre_ParAMGDataAMGDDNumGlobalRelax(amg_data) ((amg_data)->amgdd_num_global_relax)
 #define hypre_ParAMGDataCompGrid(amg_data) ((amg_data)->compGrid)
 #define hypre_ParAMGDataCompGridCommPkg(amg_data) ((amg_data)->compGridCommPkg)
 
