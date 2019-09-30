@@ -511,7 +511,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                                                 cheby_order, scale,
                                                 variant, Aux_U, Vtemp, Ztemp );
                }
-               else if (relax_type ==17)
+               else if (relax_type == 17)
                {
                   //printf("Proc %d: level %d, n %d, CF %p\n", my_id, level, local_size, CF_marker_array[level]);
                   if (level == num_levels - 1)

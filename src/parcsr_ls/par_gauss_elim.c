@@ -87,7 +87,7 @@ HYPRE_Int hypre_GaussElimSetup (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
 
       hypre_ParAMGDataBVec(amg_data) = hypre_CTAlloc(HYPRE_Real, global_num_rows, HYPRE_MEMORY_HOST);
 
-      A_mat_local_size = global_num_rows*num_rows;
+      A_mat_local_size = global_num_rows * num_rows;
       A_mat_local = hypre_CTAlloc(HYPRE_Real, A_mat_local_size,                HYPRE_MEMORY_HOST);
       A_mat       = hypre_CTAlloc(HYPRE_Real, global_num_rows*global_num_rows, HYPRE_MEMORY_HOST);
 
@@ -131,7 +131,7 @@ HYPRE_Int hypre_GaussElimSetup (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
       else if (relax_type == 199)
       {
          HYPRE_Real *AT_mat = hypre_TAlloc(HYPRE_Real, global_num_rows*global_num_rows, HYPRE_MEMORY_HOST);
-         HYPRE_Real *Ainv   = hypre_TAlloc(HYPRE_Real, global_num_rows*global_num_rows, HYPRE_MEMORY_DEVICE);
+         HYPRE_Real *Ainv   = hypre_TAlloc(HYPRE_Real, num_rows*global_num_rows,        HYPRE_MEMORY_HOST);
          for (i = 0; i < global_num_rows; i++)
          {
             for (jj = 0; jj < global_num_rows; jj++)
@@ -151,8 +151,13 @@ HYPRE_Int hypre_GaussElimSetup (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
          hypre_dgetri(&global_num_rows, AT_mat, &global_num_rows, ipiv, work, &lwork, &info);
          hypre_assert(info == 0);
 
-         hypre_TMemcpy(Ainv, AT_mat, HYPRE_Real, global_num_rows*global_num_rows,
-                       HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+         for (i = 0; i < global_num_rows; i++)
+         {
+            for (jj = 0; jj < num_rows; jj++)
+            {
+               Ainv[i*num_rows+jj] = AT_mat[i*global_num_rows+jj+first_row_index];
+            }
+         }
 
          hypre_TFree(ipiv,   HYPRE_MEMORY_HOST);
          hypre_TFree(A_mat,  HYPRE_MEMORY_HOST);
@@ -204,26 +209,49 @@ HYPRE_Int hypre_GaussElimSolve (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
       MPI_Comm new_comm = hypre_ParAMGDataNewComm(amg_data);
       hypre_ParVector *f = hypre_ParAMGDataFArray(amg_data)[level];
       hypre_ParVector *u = hypre_ParAMGDataUArray(amg_data)[level];
+      HYPRE_Real *b_vec  = hypre_ParAMGDataBVec(amg_data);
       HYPRE_Real *f_data = hypre_VectorData(hypre_ParVectorLocalVector(f));
       HYPRE_Real *u_data = hypre_VectorData(hypre_ParVectorLocalVector(u));
       HYPRE_Int *comm_info = hypre_ParAMGDataCommInfo(amg_data);
       HYPRE_Int *displs, *info;
       HYPRE_Int n_global = (HYPRE_Int) hypre_ParCSRMatrixGlobalNumRows(A);
       HYPRE_Int new_num_procs;
-      HYPRE_Int first_index = (HYPRE_Int) hypre_ParCSRMatrixFirstRowIndex(A);
+      HYPRE_Int first_row_index = (HYPRE_Int) hypre_ParCSRMatrixFirstRowIndex(A);
+      HYPRE_Int one_i = 1;
 
       hypre_MPI_Comm_size(new_comm, &new_num_procs);
       info = &comm_info[0];
       displs = &comm_info[new_num_procs];
 
+      HYPRE_Int memory_location = hypre_GetActualMemLocation(hypre_CSRMatrixMemoryLocation(A_diag));
+      HYPRE_Real *f_data_host, *u_data_host;
+
+      if (memory_location != HYPRE_MEMORY_HOST)
+      {
+         f_data_host = hypre_TAlloc(HYPRE_Real, n, HYPRE_MEMORY_HOST);
+         u_data_host = hypre_TAlloc(HYPRE_Real, n, HYPRE_MEMORY_HOST);
+
+         hypre_TMemcpy(f_data_host, f_data, HYPRE_Real, n, HYPRE_MEMORY_HOST, memory_location);
+      }
+      else
+      {
+         f_data_host = f_data;
+         u_data_host = u_data;
+      }
+
+      hypre_MPI_Allgatherv (f_data_host, n, HYPRE_MPI_REAL, b_vec, info,
+                            displs, HYPRE_MPI_REAL, new_comm);
+
+      if (f_data_host != f_data)
+      {
+         hypre_TFree(f_data_host, HYPRE_MEMORY_HOST);
+      }
+
       if (relax_type == 9 || relax_type == 19)
       {
          HYPRE_Real *A_mat = hypre_ParAMGDataAMat(amg_data);
-         HYPRE_Real *b_vec = hypre_ParAMGDataBVec(amg_data);
          HYPRE_Real *A_tmp;
-         HYPRE_Int one_i = 1, i, my_info;
-
-         hypre_MPI_Allgatherv ( f_data, n, HYPRE_MPI_REAL, b_vec, info, displs, HYPRE_MPI_REAL, new_comm );
+         HYPRE_Int   i, my_info;
 
          A_tmp = hypre_CTAlloc(HYPRE_Real, n_global*n_global, HYPRE_MEMORY_HOST);
          for (i = 0; i < n_global*n_global; i++)
@@ -250,7 +278,7 @@ HYPRE_Int hypre_GaussElimSolve (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
 
          for (i = 0; i < n; i++)
          {
-            u_data[i] = b_vec[first_index+i];
+            u_data_host[i] = b_vec[first_row_index+i];
          }
 
          hypre_TFree(A_tmp, HYPRE_MEMORY_HOST);
@@ -259,7 +287,15 @@ HYPRE_Int hypre_GaussElimSolve (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
       {
          HYPRE_Real *Ainv = hypre_ParAMGDataAInv(amg_data);
 
-         hypre_dgemv_device(n, n_global, n_global, Ainv + first_index, f_data, u_data);
+         char cN = 'N';
+         HYPRE_Real one = 1.0, zero = 0.0;
+         hypre_dgemv(&cN, &n, &n_global, &one, Ainv, &n, b_vec, &one_i, &zero, u_data_host, &one_i);
+      }
+
+      if (u_data_host != u_data)
+      {
+         hypre_TMemcpy(u_data, u_data_host, HYPRE_Real, n, memory_location, HYPRE_MEMORY_HOST);
+         hypre_TFree(u_data_host, HYPRE_MEMORY_HOST);
       }
    }
 
@@ -275,3 +311,73 @@ HYPRE_Int hypre_GaussElimSolve (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
    return hypre_error_flag;
 }
 
+#if 0
+#include "HYPRE_config.h"
+#ifndef HYPRE_SEQUENTIAL
+#define HYPRE_SEQUENTIAL
+#endif
+#include "_hypre_utilities.h"
+#include "_hypre_blas.h"
+
+#if defined(HYPRE_USING_CUDA)
+
+#define BLOCK_SIZE 512
+
+__global__ void
+hypreCUDAKernel_dgemv(HYPRE_Int   m,
+                      HYPRE_Int   n,
+                      HYPRE_Int   lda,
+                      HYPRE_Real *a,
+                      HYPRE_Real *x,
+                      HYPRE_Real *y)
+{
+   __shared__ HYPRE_Real sh_x[BLOCK_SIZE];
+
+   HYPRE_Int row = hypre_cuda_get_grid_thread_id<1,1>();
+   HYPRE_Int tid = hypre_cuda_get_thread_id<1>();
+
+   HYPRE_Real y_row = 0.0;
+
+   for (HYPRE_Int k = 0; k < n; k += BLOCK_SIZE)
+   {
+      if (k + tid < n)
+      {
+         sh_x[tid] = read_only_load(&x[k+tid]);
+      }
+
+      __syncthreads();
+
+      if (row < m)
+      {
+#pragma unroll
+         for (HYPRE_Int j = 0; j < BLOCK_SIZE; j++)
+         {
+            const HYPRE_Int col = k + j;
+            if (col < n)
+            {
+               y_row += a[row + col*lda] * sh_x[j];
+            }
+         }
+      }
+
+      __syncthreads();
+   }
+
+   if (row < m)
+   {
+      y[row] = y_row;
+   }
+}
+
+HYPRE_Int hypre_dgemv_device(HYPRE_Int m, HYPRE_Int n, HYPRE_Int lda, HYPRE_Real *a, HYPRE_Real *x, HYPRE_Real *y)
+{
+   dim3 bDim(BLOCK_SIZE, 1, 1);
+   dim3 gDim = hypre_GetDefaultCUDAGridDimension(m, "thread", bDim);
+
+   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_dgemv, gDim, bDim, m, n, lda, a, x, y );
+
+   return hypre_error_flag;
+}
+
+#endif
+#endif

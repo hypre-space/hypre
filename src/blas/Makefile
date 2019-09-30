@@ -37,8 +37,7 @@ BLAS_FILES = \
  f2c.c\
  idamax.c\
  lsame.c\
- xerbla.c\
- dgemv_device.c
+ xerbla.c
 
 OBJS = ${BLAS_FILES:.c=.o}
 

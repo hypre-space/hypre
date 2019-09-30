@@ -763,7 +763,7 @@ hypre_BoomerAMGDestroy( void *data )
    }
 
    if (hypre_ParAMGDataAMat(amg_data)) hypre_TFree(hypre_ParAMGDataAMat(amg_data), HYPRE_MEMORY_HOST);
-   if (hypre_ParAMGDataAInv(amg_data)) hypre_TFree(hypre_ParAMGDataAInv(amg_data), HYPRE_MEMORY_DEVICE);
+   if (hypre_ParAMGDataAInv(amg_data)) hypre_TFree(hypre_ParAMGDataAInv(amg_data), HYPRE_MEMORY_HOST);
    if (hypre_ParAMGDataBVec(amg_data)) hypre_TFree(hypre_ParAMGDataBVec(amg_data), HYPRE_MEMORY_HOST);
    if (hypre_ParAMGDataCommInfo(amg_data)) hypre_TFree(hypre_ParAMGDataCommInfo(amg_data), HYPRE_MEMORY_HOST);
 

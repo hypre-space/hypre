@@ -490,7 +490,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
       if (hypre_ParAMGDataAInv(amg_data))
       {
-         hypre_TFree(hypre_ParAMGDataAInv(amg_data), HYPRE_MEMORY_DEVICE);
+         hypre_TFree(hypre_ParAMGDataAInv(amg_data), HYPRE_MEMORY_HOST);
          hypre_ParAMGDataAInv(amg_data) = NULL;
       }
 
