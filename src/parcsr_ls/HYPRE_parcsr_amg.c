@@ -92,9 +92,31 @@ HYPRE_BoomerAMGSolveT( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_BoomerAMGSetRestriction( HYPRE_Solver solver,
-                               HYPRE_Int          restr_par  )
+                               HYPRE_Int    restr_par  )
 {
    return( hypre_BoomerAMGSetRestriction( (void *) solver, restr_par ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetIsTriangular
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetIsTriangular( HYPRE_Solver solver,
+                                HYPRE_Int    is_triangular  )
+{
+   return( hypre_BoomerAMGSetIsTriangular( (void *) solver, is_triangular ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetGMRESSwitchR
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetGMRESSwitchR( HYPRE_Solver solver,
+                                HYPRE_Int    gmres_switch  )
+{
+   return( hypre_BoomerAMGSetGMRESSwitchR( (void *) solver, gmres_switch ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -205,6 +227,47 @@ HYPRE_BoomerAMGGetStrongThreshold( HYPRE_Solver solver,
 {
    return( hypre_BoomerAMGGetStrongThreshold( (void *) solver,
                                               strong_threshold ) );
+}
+
+HYPRE_Int
+HYPRE_BoomerAMGSetStrongThresholdR( HYPRE_Solver solver,
+                                    HYPRE_Real   strong_threshold  )
+{
+   return( hypre_BoomerAMGSetStrongThresholdR( (void *) solver,
+                                              strong_threshold ) );
+}
+
+HYPRE_Int
+HYPRE_BoomerAMGGetStrongThresholdR( HYPRE_Solver solver,
+                                    HYPRE_Real * strong_threshold  )
+{
+   return( hypre_BoomerAMGGetStrongThresholdR( (void *) solver,
+                                              strong_threshold ) );
+}
+
+HYPRE_Int
+HYPRE_BoomerAMGSetFilterThresholdR( HYPRE_Solver solver,
+                                    HYPRE_Real   filter_threshold  )
+{
+   return( hypre_BoomerAMGSetFilterThresholdR( (void *) solver,
+                                              filter_threshold ) );
+}
+
+HYPRE_Int
+HYPRE_BoomerAMGGetFilterThresholdR( HYPRE_Solver solver,
+                                    HYPRE_Real * filter_threshold  )
+{
+   return( hypre_BoomerAMGGetFilterThresholdR( (void *) solver,
+                                              filter_threshold ) );
+}
+
+
+HYPRE_Int
+HYPRE_BoomerAMGSetSabs( HYPRE_Solver solver,
+                        HYPRE_Int    Sabs  )
+{
+   return( hypre_BoomerAMGSetSabs( (void *) solver,
+                                   Sabs ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -449,6 +512,24 @@ HYPRE_BoomerAMGGetCycleType( HYPRE_Solver solver,
                              HYPRE_Int        * cycle_type  )
 {
    return( hypre_BoomerAMGGetCycleType( (void *) solver, cycle_type ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetFCycle, HYPRE_BoomerAMGGetFCycle
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetFCycle( HYPRE_Solver solver,
+                          HYPRE_Int    fcycle  )
+{
+   return( hypre_BoomerAMGSetFCycle( (void *) solver, fcycle ) );
+}
+
+HYPRE_Int
+HYPRE_BoomerAMGGetFCycle( HYPRE_Solver solver,
+                          HYPRE_Int   *fcycle  )
+{
+   return( hypre_BoomerAMGGetFCycle( (void *) solver, fcycle ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -1367,9 +1448,16 @@ HYPRE_BoomerAMGSetCRStrongTh( HYPRE_Solver  solver,
 
 HYPRE_Int
 HYPRE_BoomerAMGSetADropTol( HYPRE_Solver  solver,
-                         HYPRE_Real    A_drop_tol  )
+                            HYPRE_Real    A_drop_tol  )
 {
    return( hypre_BoomerAMGSetADropTol( (void *) solver, A_drop_tol ) );
+}
+
+HYPRE_Int
+HYPRE_BoomerAMGSetADropType( HYPRE_Solver  solver,
+                             HYPRE_Int     A_drop_type  )
+{
+   return( hypre_BoomerAMGSetADropType( (void *) solver, A_drop_type ) );
 }
 /*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetISType
@@ -1734,7 +1822,7 @@ HYPRE_BoomerAMGSetKeepTranspose (HYPRE_Solver solver,
    return (hypre_BoomerAMGSetKeepTranspose ( (void *) solver, keepTranspose ) );
 }
 
-#ifdef HAVE_DSUPERLU
+#ifdef HYPRE_USING_DSUPERLU
 /*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetDSLUThreshold
  *--------------------------------------------------------------------------*/

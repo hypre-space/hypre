@@ -217,6 +217,7 @@ hypre_ParCSRPersistentCommHandleCreate( HYPRE_Int job, hypre_ParCSRCommPkg *comm
    return ( comm_handle );
 }
 
+
 hypre_ParCSRPersistentCommHandle*
 hypre_ParCSRCommPkgGetPersistentCommHandle( HYPRE_Int job, hypre_ParCSRCommPkg *comm_pkg )
 {
@@ -904,10 +905,11 @@ hypre_MatvecCommPkgCreate ( hypre_ParCSRMatrix *A )
    HYPRE_Int  num_cols_offd   = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A));
 #ifdef HYPRE_NO_GLOBAL_PARTITION
    HYPRE_BigInt  global_num_cols = hypre_ParCSRMatrixGlobalNumCols(A);
-   /* Create the assumed partition */
+   /* Create the assumed partition and should own it */
    if  (hypre_ParCSRMatrixAssumedPartition(A) == NULL)
    {
       hypre_ParCSRMatrixCreateAssumedPartition(A);
+      hypre_ParCSRMatrixOwnsAssumedPartition(A) = 1;
    }
    hypre_IJAssumedPart *apart = hypre_ParCSRMatrixAssumedPartition(A);
 #else
@@ -979,9 +981,8 @@ hypre_MatvecCommPkgDestroy( hypre_ParCSRCommPkg *comm_pkg )
 /* AHB 11/06 : alternate to the extend function below - creates a
  * second comm pkg based on indices - this makes it easier to use the
  * global partition
- * RL: reanmed and moved it here
- * RL: changed the interface
- * */
+ * RL: renamed and moved it here
+ */
 HYPRE_Int
 hypre_ParCSRFindExtendCommPkg(MPI_Comm              comm,
                               HYPRE_BigInt          global_num,
@@ -1065,3 +1066,4 @@ hypre_BuildCSRJDataType( HYPRE_Int num_nonzeros,
 
    return hypre_error_flag;
 }
+

@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #ifndef HYPRE_CUDA_UTILS_H
 #define HYPRE_CUDA_UTILS_H
@@ -25,6 +20,7 @@ extern "C++" {
 #include <cuda_runtime.h>
 #include <assert.h>
 #include <curand.h>
+#include <cublas_v2.h>
 #include <cusparse.h>
 
 #if defined(HYPRE_USING_CUDA)
@@ -80,12 +76,19 @@ using namespace thrust::placeholders;
    thrust::func_name(                                                                        \
    thrust::cuda::par.on(hypre_HandleCudaComputeStream(hypre_handle)), __VA_ARGS__);          \
 
+#define HYPRE_CUBLAS_CALL(call) do {                                                         \
+   cublasStatus_t err = call;                                                                \
+   if (CUBLAS_STATUS_SUCCESS != err) {                                                       \
+      hypre_printf("CUBLAS ERROR (code = %d, %d) at %s:%d\n",                                \
+            err, err == CUBLAS_STATUS_EXECUTION_FAILED, __FILE__, __LINE__);                 \
+      exit(1);                                                                               \
+   } } while(0)
 
 #define HYPRE_CUSPARSE_CALL(call) do {                                                       \
    cusparseStatus_t err = call;                                                              \
    if (CUSPARSE_STATUS_SUCCESS != err) {                                                     \
       hypre_printf("CUSPARSE ERROR (code = %d, %d) at %s:%d\n",                              \
-            err, err == CUSPARSE_STATUS_EXECUTION_FAILED, __FILE__, __LINE__);                           \
+            err, err == CUSPARSE_STATUS_EXECUTION_FAILED, __FILE__, __LINE__);               \
       exit(1);                                                                               \
    } } while(0)
 
@@ -144,7 +147,7 @@ hypre_int hypre_cuda_get_thread_id()
    return -1;
 }
 
-/* return the number of warps in block  */
+/* return the number of warps in block */
 template <hypre_int dim>
 static __device__ __forceinline__
 hypre_int hypre_cuda_get_num_warps()

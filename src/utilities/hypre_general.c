@@ -126,7 +126,23 @@ hypre_HandleCreate()
    hypre_HandleCudaComputeStreamSync(handle).clear();
    hypre_HandleCudaComputeStreamSyncPush( handle,
          hypre_HandleCudaComputeStreamSyncDefault(handle) );
+
+   /* these are put here to include the cost of initialization in Hypre_Init;
+    * Alternatively, they can be done at the first use */
+   hypre_HandleCudaComputeStream(handle);
+   hypre_HandleCudaPrefetchStream(handle);
+
+#if defined(HYPRE_USING_CUBLAS)
+   hypre_HandleCublasHandle(handle);
 #endif
+#if defined(HYPRE_USING_CUSPARSE)
+   hypre_HandleCusparseHandle(handle);
+   hypre_HandleCusparseMatDescr(handle);
+#endif
+#if defined(HYPRE_USING_CURAND)
+   hypre_HandleCurandGenerator(handle);
+#endif
+#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 
    return handle;
 }
@@ -139,11 +155,21 @@ hypre_HandleDestroy(hypre_Handle *hypre_handle_)
 
    hypre_TFree(hypre_handle_->cuda_reduce_buffer, HYPRE_MEMORY_DEVICE);
 
+#if defined(HYPRE_USING_CURAND)
    if (hypre_handle_->curand_gen)
    {
       HYPRE_CURAND_CALL( curandDestroyGenerator(hypre_handle_->curand_gen) );
    }
+#endif
 
+#if defined(HYPRE_USING_CUBLAS)
+   if (hypre_handle_->cublas_handle)
+   {
+      HYPRE_CUBLAS_CALL( cublasDestroy(hypre_handle_->cublas_handle) );
+   }
+#endif
+
+#if defined(HYPRE_USING_CUSPARSE)
    if (hypre_handle_->cusparse_handle)
    {
       HYPRE_CUSPARSE_CALL( cusparseDestroy(hypre_handle_->cusparse_handle) );
@@ -153,6 +179,7 @@ hypre_HandleDestroy(hypre_Handle *hypre_handle_)
    {
       HYPRE_CUSPARSE_CALL( cusparseDestroyMatDescr(hypre_handle_->cusparse_mat_descr) );
    }
+#endif
 
    for (i = 0; i < HYPRE_MAX_NUM_STREAMS; i++)
    {

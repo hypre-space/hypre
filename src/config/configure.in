@@ -48,8 +48,8 @@ dnl * Set package information so it only has to be modified in one place
 dnl *********************************************************************
 
 m4_define([M4_HYPRE_NAME],    [hypre])
-m4_define([M4_HYPRE_VERSION], [2.17.0])
-m4_define([M4_HYPRE_DATE],    [2019/06/10])
+m4_define([M4_HYPRE_VERSION], [2.18.0])
+m4_define([M4_HYPRE_DATE],    [2019/09/27])
 m4_define([M4_HYPRE_TIME],    [00:00:00])
 m4_define([M4_HYPRE_BUGS],    [hypre-support@llnl.gov])
 m4_define([M4_HYPRE_SRCDIR],  [`pwd`])
@@ -146,12 +146,17 @@ hypre_using_um=no
 hypre_gpu_mpi=no
 hypre_using_cuda_streams=no
 hypre_using_nvtx=no
+hypre_using_cusparse=yes
+hypre_using_cublas=no
+hypre_using_curand=yes
 
 hypre_using_caliper=no
 hypre_user_gave_caliper_lib=no
 hypre_user_gave_caliper_inc=no
 
 hypre_found_cuda=no
+
+hypre_using_node_aware_mpi=no
 
 dnl *********************************************************************
 dnl * Initialize flag-check variables
@@ -389,6 +394,39 @@ AS_HELP_STRING([--enable-nvtx],
     *)   hypre_using_nvtx=no ;;
  esac],
 [hypre_using_nvtx=no]
+)
+
+AC_ARG_ENABLE(cusparse,
+AS_HELP_STRING([--enable-cusparse],
+               [Use cuSPARSE (default is YES).]),
+[case "${enableval}" in
+    yes) hypre_using_cusparse=yes ;;
+    no)  hypre_using_cusparse=no ;;
+    *)   hypre_using_cusparse=yes ;;
+ esac],
+[hypre_using_cusparse=yes]
+)
+
+AC_ARG_ENABLE(cublas,
+AS_HELP_STRING([--enable-cublas],
+               [Use cuBLAS (default is NO).]),
+[case "${enableval}" in
+    yes) hypre_using_cublas=yes ;;
+    no)  hypre_using_cublas=no ;;
+    *)   hypre_using_cublas=no ;;
+ esac],
+[hypre_using_cublas=no]
+)
+
+AC_ARG_ENABLE(curand,
+AS_HELP_STRING([--enable-curand],
+               [Use cuRAND (default is YES).]),
+[case "${enableval}" in
+    yes) hypre_using_curand=yes ;;
+    no)  hypre_using_curand=no ;;
+    *)   hypre_using_curand=yes ;;
+ esac],
+[hypre_using_curand=yes]
 )
 
 AC_ARG_ENABLE(gpu-aware-mpi,
@@ -667,6 +705,27 @@ AS_HELP_STRING([--with-MPI-flags=FLAGS],
 [MPIFLAGS=""]
 )
 
+dnl ***** Node Aware MPI
+AC_ARG_WITH(node-aware-mpi,
+AS_HELP_STRING([--with-node-aware-mpi],
+               [Use Node Aware MPI (default is NO).]),
+[case "$withval" in
+    yes) hypre_using_node_aware_mpi=yes;;
+    no)  hypre_using_node_aware_mpi=no ;;
+    *)   hypre_using_node_aware_mpi=no ;;
+ esac],
+[hypre_using_node_aware_mpi=no]
+)
+
+AC_ARG_WITH(node-aware-mpi-include,
+AS_HELP_STRING([--with-node-aware-mpi-include=DIR],
+               [User specifies that nap_comm.hpp is in DIR.]),
+[for nap_dir in $withval; do
+    HYPRE_NAP_INCLUDE="$HYPRE_NAP_INCLUDE -I$nap_dir"
+ done;
+ hypre_using_node_aware_mpi=yes]
+)
+
 dnl ***** BLAS
 
 AC_ARG_WITH(blas-lib,
@@ -905,7 +964,7 @@ AS_HELP_STRING([--with-dsuperlu],
 )
 
 AS_IF([test "x$with_dsuperlu" = "xyes"],
-      [AC_DEFINE(HAVE_DSUPERLU, 1, [Have external DSuperLU library.])],
+      [AC_DEFINE(HYPRE_USING_DSUPERLU, 1, [Have external DSuperLU library.])],
       [])
 
 AC_ARG_WITH(dsuperlu-include,
@@ -1278,6 +1337,11 @@ dnl   then
 dnl   fi
 fi
 
+if test "$hypre_using_node_aware_mpi" = "yes"
+then
+   AC_DEFINE(HYPRE_USING_NODE_AWARE_MPI, 1)
+fi
+
 dnl *********************************************************************
 dnl * Define appropriate variables if user set blas to either essl or dxml
 dnl *********************************************************************
@@ -1636,6 +1700,22 @@ then
    then
       AC_DEFINE(HYPRE_USING_NVTX, 1, [NVTX being used])
    fi
+
+   if test "$hypre_using_cusparse" = "yes"
+   then
+      AC_DEFINE(HYPRE_USING_CUSPARSE, 1, [CUSPARSE being used])
+   fi
+
+   if test "$hypre_using_cublas" = "yes"
+   then
+      AC_DEFINE(HYPRE_USING_CUBLAS, 1, [CUBLAS being used])
+   fi
+
+   if test "$hypre_using_curand" = "yes"
+   then
+      AC_DEFINE(HYPRE_USING_CURAND, 1, [CURAND being used])
+   fi
+
    dnl let CC/CXX and LINK be CUCC and let host compiler be CXX
    AC_CHECK_PROGS(CUCC, nvcc)
    NVCCBIN=${CXX}
@@ -1661,10 +1741,25 @@ then
    CFLAGS=${CXXFLAGS}
    LDFLAGS="-ccbin=$NVCCBIN ${HYPRE_CUDA_GENCODE} -Xcompiler \"${LDFLAGS}\""
    HYPRE_CUDA_INCL="-I${HYPRE_CUDA_PATH}/include"
-   HYPRE_CUDA_LIBS="-L${HYPRE_CUDA_PATH}/lib64 -lcusparse -lcudart -lcurand"
+   HYPRE_CUDA_LIBS="-L${HYPRE_CUDA_PATH}/lib64 -lcudart"
    if test "$hypre_using_nvtx" = "yes"
    then
       HYPRE_CUDA_LIBS+=" -lnvToolsExt"
+   fi
+
+   if test "$hypre_using_cusparse" = "yes"
+   then
+      HYPRE_CUDA_LIBS+=" -lcusparse"
+   fi
+
+   if test "$hypre_using_cublas" = "yes"
+   then
+      HYPRE_CUDA_LIBS+=" -lcublas"
+   fi
+
+   if test "$hypre_using_curand" = "yes"
+   then
+      HYPRE_CUDA_LIBS+=" -lcurand"
    fi
 fi
 
@@ -1904,6 +1999,11 @@ AC_SUBST(HYPRE_DISTRIBUTED_LS_DIR)
 AC_SUBST(HYPRE_EUCLID_FILES)
 AC_SUBST(HYPRE_PARASAILS_FILES)
 AC_SUBST(HYPRE_PILUT_FILES)
+
+dnl *********************************************************************
+dnl * Node_Aware_MPI
+dnl *********************************************************************
+AC_SUBST(HYPRE_NAP_INCLUDE)
 
 dnl *********************************************************************
 dnl * FEI-related files, libraries and directories

@@ -41,20 +41,20 @@ typedef struct
 
 typedef struct
 {
-   MPI_Comm                     comm;
+   MPI_Comm               comm;
 
-   HYPRE_Int                    num_sends;
-   HYPRE_Int                   *send_procs;
-   HYPRE_Int                   *send_map_starts;
-   HYPRE_Int                   *send_map_elmts;
+   HYPRE_Int              num_sends;
+   HYPRE_Int             *send_procs;
+   HYPRE_Int             *send_map_starts;
+   HYPRE_Int             *send_map_elmts;
 
-   HYPRE_Int                    num_recvs;
-   HYPRE_Int                   *recv_procs;
-   HYPRE_Int                   *recv_vec_starts;
+   HYPRE_Int              num_recvs;
+   HYPRE_Int             *recv_procs;
+   HYPRE_Int             *recv_vec_starts;
 
    /* remote communication information */
-   hypre_MPI_Datatype          *send_mpi_types;
-   hypre_MPI_Datatype          *recv_mpi_types;
+   hypre_MPI_Datatype    *send_mpi_types;
+   hypre_MPI_Datatype    *recv_mpi_types;
 
 #ifdef HYPRE_USING_PERSISTENT_COMM
    hypre_ParCSRPersistentCommHandle *persistent_comm_handles[NUM_OF_COMM_PKG_JOB_TYPE];

@@ -390,136 +390,6 @@ HYPRE_Int hypre_MPI_Info_free( hypre_MPI_Info *info );
 
 #define HYPRE_SMP_SCHEDULE schedule(static)
 
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-#ifndef HYPRE_OMP_DEVICE_H
-#define HYPRE_OMP_DEVICE_H
-
-#if defined(HYPRE_USING_DEVICE_OPENMP)
-
-#include "omp.h"
-
-/* stringification:
- * _Pragma(string-literal), so we need to cast argument to a string
- * The three dots as last argument of the macro tells compiler that this is a variadic macro.
- * I.e. this is a macro that receives variable number of arguments.
- */
-#define HYPRE_STR(s...) #s
-#define HYPRE_XSTR(s...) HYPRE_STR(s)
-
-/* OpenMP 4.5 device memory management */
-extern HYPRE_Int hypre__global_offload;
-extern HYPRE_Int hypre__offload_device_num;
-extern HYPRE_Int hypre__offload_host_num;
-
-/* stats */
-extern size_t hypre__target_allc_count;
-extern size_t hypre__target_free_count;
-extern size_t hypre__target_allc_bytes;
-extern size_t hypre__target_free_bytes;
-extern size_t hypre__target_htod_count;
-extern size_t hypre__target_dtoh_count;
-extern size_t hypre__target_htod_bytes;
-extern size_t hypre__target_dtoh_bytes;
-
-/* CHECK MODE: check if offloading has effect (turned on when configured with --enable-debug)
- * if we ``enter'' an address, it should not exist in device [o.w NO EFFECT]
- * if we ``exit'' or ''update'' an address, it should exist in device [o.w ERROR]
- * hypre__offload_flag: 0 == OK; 1 == WRONG
- */
-#ifdef HYPRE_DEVICE_OPENMP_CHECK
-#define HYPRE_OFFLOAD_FLAG(devnum, hptr, type) HYPRE_Int hypre__offload_flag = (type[1] == 'n') == omp_target_is_present(hptr, devnum);
-#else
-#define HYPRE_OFFLOAD_FLAG(...) HYPRE_Int hypre__offload_flag = 0; /* non-debug mode, always OK */
-#endif
-
-/* OMP 4.5 offloading macro */
-#define hypre_omp45_offload(devnum, hptr, datatype, offset, count, type1, type2) \
-{\
-   /* devnum: device number \
-    * hptr: host poiter \
-    * datatype \
-    * type1: ``e(n)ter'', ''e(x)it'', or ``u(p)date'' \
-    * type2: ``(a)lloc'', ``(t)o'', ``(d)elete'', ''(f)rom'' \
-    */ \
-   datatype *hypre__offload_hptr = (datatype *) hptr; \
-   /* if hypre__global_offload ==    0, or
-    *    hptr (host pointer)   == NULL,
-    *    this offload will be IGNORED */ \
-   if (hypre__global_offload && hypre__offload_hptr != NULL) { \
-      /* offloading offset and size (in datatype) */ \
-      size_t hypre__offload_offset = offset, hypre__offload_size = count; \
-      /* in the CHECK mode, we test if this offload has effect */ \
-      HYPRE_OFFLOAD_FLAG(devnum, hypre__offload_hptr, type1) \
-      if (hypre__offload_flag) { \
-         printf("[!NO Effect! %s %d] device %d target: %6s %6s, data %p, [%ld:%ld]\n", __FILE__, __LINE__, devnum, type1, type2, (void *)hypre__offload_hptr, hypre__offload_offset, hypre__offload_size); exit(0); \
-      } else { \
-         size_t offload_bytes = count * sizeof(datatype); \
-         /* printf("[            %s %d] device %d target: %6s %6s, data %p, [%d:%d]\n", __FILE__, __LINE__, devnum, type1, type2, (void *)hypre__offload_hptr, hypre__offload_offset, hypre__offload_size); */ \
-         if (type1[1] == 'n' && type2[0] == 't') { \
-            /* enter to */\
-            hypre__target_allc_count ++; \
-            hypre__target_allc_bytes += offload_bytes; \
-            hypre__target_htod_count ++; \
-            hypre__target_htod_bytes += offload_bytes; \
-            _Pragma (HYPRE_XSTR(omp target enter data map(to:hypre__offload_hptr[hypre__offload_offset:hypre__offload_size]))) \
-         } else if (type1[1] == 'n' && type2[0] == 'a') { \
-            /* enter alloc */ \
-            hypre__target_allc_count ++; \
-            hypre__target_allc_bytes += offload_bytes; \
-            _Pragma (HYPRE_XSTR(omp target enter data map(alloc:hypre__offload_hptr[hypre__offload_offset:hypre__offload_size]))) \
-         } else if (type1[1] == 'x' && type2[0] == 'd') { \
-            /* exit delete */\
-            hypre__target_free_count ++; \
-            hypre__target_free_bytes += offload_bytes; \
-            _Pragma (HYPRE_XSTR(omp target exit data map(delete:hypre__offload_hptr[hypre__offload_offset:hypre__offload_size]))) \
-         } else if (type1[1] == 'x' && type2[0] == 'f') {\
-            /* exit from */ \
-            hypre__target_free_count ++; \
-            hypre__target_free_bytes += offload_bytes; \
-            hypre__target_dtoh_count ++; \
-            hypre__target_dtoh_bytes += offload_bytes; \
-            _Pragma (HYPRE_XSTR(omp target exit data map(from:hypre__offload_hptr[hypre__offload_offset:hypre__offload_size]))) \
-         } else if (type1[1] == 'p' && type2[0] == 't') { \
-            /* update to */ \
-            hypre__target_htod_count ++; \
-            hypre__target_htod_bytes += offload_bytes; \
-            _Pragma (HYPRE_XSTR(omp target update to(hypre__offload_hptr[hypre__offload_offset:hypre__offload_size]))) \
-         } else if (type1[1] == 'p' && type2[0] == 'f') {\
-            /* update from */ \
-            hypre__target_dtoh_count ++; \
-            hypre__target_dtoh_bytes += offload_bytes; \
-            _Pragma (HYPRE_XSTR(omp target update from(hypre__offload_hptr[hypre__offload_offset:hypre__offload_size]))) \
-         } else {\
-            printf("error: unrecognized offloading type combination!\n"); exit(-1); \
-         } \
-      } \
-   } \
-}
-
-HYPRE_Int HYPRE_OMPOffload(HYPRE_Int device, void *ptr, size_t num, const char *type1, const char *type2);
-HYPRE_Int HYPRE_OMPPtrIsMapped(void *p, HYPRE_Int device_num);
-HYPRE_Int HYPRE_OMPOffloadOn();
-HYPRE_Int HYPRE_OMPOffloadOff();
-HYPRE_Int HYPRE_OMPOffloadStatPrint();
-
-#define HYPRE_MIN_GPU_SIZE (131072)
-
-#define hypre_SetDeviceOn() HYPRE_OMPOffloadOn()
-#define hypre_SetDeviceOff() HYPRE_OMPOffloadOff()
-
-#endif /* HYPRE_USING_DEVICE_OPENMP */
-#endif /* HYPRE_OMP_DEVICE_H */
-
 /******************************************************************************
  * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
@@ -596,6 +466,14 @@ HYPRE_Int HYPRE_OMPOffloadStatPrint();
 
 #include <stdio.h>
 #include <stdlib.h>
+
+/* stringification:
+ * _Pragma(string-literal), so we need to cast argument to a string
+ * The three dots as last argument of the macro tells compiler that this is a variadic macro.
+ * I.e. this is a macro that receives variable number of arguments.
+ */
+#define HYPRE_STR(...) #__VA_ARGS__
+#define HYPRE_XSTR(...) HYPRE_STR(__VA_ARGS__)
 
 #ifdef __cplusplus
 extern "C" {
@@ -809,6 +687,124 @@ void hypre_FreeDML( char *ptr , char *file , HYPRE_Int line );
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+#ifndef HYPRE_OMP_DEVICE_H
+#define HYPRE_OMP_DEVICE_H
+
+#if defined(HYPRE_USING_DEVICE_OPENMP)
+
+#include "omp.h"
+
+/* OpenMP 4.5 device memory management */
+extern HYPRE_Int hypre__global_offload;
+extern HYPRE_Int hypre__offload_device_num;
+extern HYPRE_Int hypre__offload_host_num;
+
+/* stats */
+extern size_t hypre__target_allc_count;
+extern size_t hypre__target_free_count;
+extern size_t hypre__target_allc_bytes;
+extern size_t hypre__target_free_bytes;
+extern size_t hypre__target_htod_count;
+extern size_t hypre__target_dtoh_count;
+extern size_t hypre__target_htod_bytes;
+extern size_t hypre__target_dtoh_bytes;
+
+/* CHECK MODE: check if offloading has effect (turned on when configured with --enable-debug)
+ * if we ``enter'' an address, it should not exist in device [o.w NO EFFECT]
+ * if we ``exit'' or ''update'' an address, it should exist in device [o.w ERROR]
+ * hypre__offload_flag: 0 == OK; 1 == WRONG
+ */
+#ifdef HYPRE_DEVICE_OPENMP_CHECK
+#define HYPRE_OFFLOAD_FLAG(devnum, hptr, type) HYPRE_Int hypre__offload_flag = (type[1] == 'n') == omp_target_is_present(hptr, devnum);
+#else
+#define HYPRE_OFFLOAD_FLAG(...) HYPRE_Int hypre__offload_flag = 0; /* non-debug mode, always OK */
+#endif
+
+/* OMP 4.5 offloading macro */
+#define hypre_omp45_offload(devnum, hptr, datatype, offset, count, type1, type2) \
+{\
+   /* devnum: device number \
+    * hptr: host poiter \
+    * datatype \
+    * type1: ``e(n)ter'', ''e(x)it'', or ``u(p)date'' \
+    * type2: ``(a)lloc'', ``(t)o'', ``(d)elete'', ''(f)rom'' \
+    */ \
+   datatype *hypre__offload_hptr = (datatype *) hptr; \
+   /* if hypre__global_offload ==    0, or
+    *    hptr (host pointer)   == NULL,
+    *    this offload will be IGNORED */ \
+   if (hypre__global_offload && hypre__offload_hptr != NULL) { \
+      /* offloading offset and size (in datatype) */ \
+      size_t hypre__offload_offset = offset, hypre__offload_size = count; \
+      /* in the CHECK mode, we test if this offload has effect */ \
+      HYPRE_OFFLOAD_FLAG(devnum, hypre__offload_hptr, type1) \
+      if (hypre__offload_flag) { \
+         printf("[!NO Effect! %s %d] device %d target: %6s %6s, data %p, [%ld:%ld]\n", __FILE__, __LINE__, devnum, type1, type2, (void *)hypre__offload_hptr, hypre__offload_offset, hypre__offload_size); exit(0); \
+      } else { \
+         size_t offload_bytes = count * sizeof(datatype); \
+         /* printf("[            %s %d] device %d target: %6s %6s, data %p, [%d:%d]\n", __FILE__, __LINE__, devnum, type1, type2, (void *)hypre__offload_hptr, hypre__offload_offset, hypre__offload_size); */ \
+         if (type1[1] == 'n' && type2[0] == 't') { \
+            /* enter to */\
+            hypre__target_allc_count ++; \
+            hypre__target_allc_bytes += offload_bytes; \
+            hypre__target_htod_count ++; \
+            hypre__target_htod_bytes += offload_bytes; \
+            _Pragma (HYPRE_XSTR(omp target enter data map(to:hypre__offload_hptr[hypre__offload_offset:hypre__offload_size]))) \
+         } else if (type1[1] == 'n' && type2[0] == 'a') { \
+            /* enter alloc */ \
+            hypre__target_allc_count ++; \
+            hypre__target_allc_bytes += offload_bytes; \
+            _Pragma (HYPRE_XSTR(omp target enter data map(alloc:hypre__offload_hptr[hypre__offload_offset:hypre__offload_size]))) \
+         } else if (type1[1] == 'x' && type2[0] == 'd') { \
+            /* exit delete */\
+            hypre__target_free_count ++; \
+            hypre__target_free_bytes += offload_bytes; \
+            _Pragma (HYPRE_XSTR(omp target exit data map(delete:hypre__offload_hptr[hypre__offload_offset:hypre__offload_size]))) \
+         } else if (type1[1] == 'x' && type2[0] == 'f') {\
+            /* exit from */ \
+            hypre__target_free_count ++; \
+            hypre__target_free_bytes += offload_bytes; \
+            hypre__target_dtoh_count ++; \
+            hypre__target_dtoh_bytes += offload_bytes; \
+            _Pragma (HYPRE_XSTR(omp target exit data map(from:hypre__offload_hptr[hypre__offload_offset:hypre__offload_size]))) \
+         } else if (type1[1] == 'p' && type2[0] == 't') { \
+            /* update to */ \
+            hypre__target_htod_count ++; \
+            hypre__target_htod_bytes += offload_bytes; \
+            _Pragma (HYPRE_XSTR(omp target update to(hypre__offload_hptr[hypre__offload_offset:hypre__offload_size]))) \
+         } else if (type1[1] == 'p' && type2[0] == 'f') {\
+            /* update from */ \
+            hypre__target_dtoh_count ++; \
+            hypre__target_dtoh_bytes += offload_bytes; \
+            _Pragma (HYPRE_XSTR(omp target update from(hypre__offload_hptr[hypre__offload_offset:hypre__offload_size]))) \
+         } else {\
+            printf("error: unrecognized offloading type combination!\n"); exit(-1); \
+         } \
+      } \
+   } \
+}
+
+HYPRE_Int HYPRE_OMPOffload(HYPRE_Int device, void *ptr, size_t num, const char *type1, const char *type2);
+HYPRE_Int HYPRE_OMPPtrIsMapped(void *p, HYPRE_Int device_num);
+HYPRE_Int HYPRE_OMPOffloadOn();
+HYPRE_Int HYPRE_OMPOffloadOff();
+HYPRE_Int HYPRE_OMPOffloadStatPrint();
+
+#define HYPRE_MIN_GPU_SIZE (131072)
+
+#define hypre_SetDeviceOn() HYPRE_OMPOffloadOn()
+#define hypre_SetDeviceOff() HYPRE_OMPOffloadOff()
+
+#endif /* HYPRE_USING_DEVICE_OPENMP */
+#endif /* HYPRE_OMP_DEVICE_H */
+
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 #ifndef hypre_THREADING_HEADER
 #define hypre_THREADING_HEADER
 
@@ -975,15 +971,15 @@ extern "C" {
 
 struct double_linked_list
 {
-       HYPRE_Int                        data;
-       struct double_linked_list *next_elt;
-       struct double_linked_list *prev_elt;
-       HYPRE_Int                        head;
-       HYPRE_Int                        tail;
+   HYPRE_Int                  data;
+   struct double_linked_list *next_elt;
+   struct double_linked_list *prev_elt;
+   HYPRE_Int                  head;
+   HYPRE_Int                  tail;
 };
 
 typedef struct double_linked_list hypre_ListElement;
-typedef hypre_ListElement  *hypre_LinkList;  
+typedef hypre_ListElement *hypre_LinkList;  
 
 #ifdef __cplusplus
 }
@@ -1114,17 +1110,12 @@ void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, c
 
 #endif /* CALIPER_INSTRUMENTATION_HEADER */
 
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #ifndef HYPRE_CUDA_UTILS_H
 #define HYPRE_CUDA_UTILS_H
@@ -1141,6 +1132,7 @@ extern "C++" {
 #include <cuda_runtime.h>
 #include <assert.h>
 #include <curand.h>
+#include <cublas_v2.h>
 #include <cusparse.h>
 
 #if defined(HYPRE_USING_CUDA)
@@ -1196,12 +1188,19 @@ using namespace thrust::placeholders;
    thrust::func_name(                                                                        \
    thrust::cuda::par.on(hypre_HandleCudaComputeStream(hypre_handle)), __VA_ARGS__);          \
 
+#define HYPRE_CUBLAS_CALL(call) do {                                                         \
+   cublasStatus_t err = call;                                                                \
+   if (CUBLAS_STATUS_SUCCESS != err) {                                                       \
+      hypre_printf("CUBLAS ERROR (code = %d, %d) at %s:%d\n",                                \
+            err, err == CUBLAS_STATUS_EXECUTION_FAILED, __FILE__, __LINE__);                 \
+      exit(1);                                                                               \
+   } } while(0)
 
 #define HYPRE_CUSPARSE_CALL(call) do {                                                       \
    cusparseStatus_t err = call;                                                              \
    if (CUSPARSE_STATUS_SUCCESS != err) {                                                     \
       hypre_printf("CUSPARSE ERROR (code = %d, %d) at %s:%d\n",                              \
-            err, err == CUSPARSE_STATUS_EXECUTION_FAILED, __FILE__, __LINE__);                           \
+            err, err == CUSPARSE_STATUS_EXECUTION_FAILED, __FILE__, __LINE__);               \
       exit(1);                                                                               \
    } } while(0)
 
@@ -1558,17 +1557,12 @@ extern HYPRE_Int hypre_exec_policy;
 #endif /* HYPRE_USING_CUDA */
 #endif /* #ifndef HYPRE_CUDA_UTILS_H */
 
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -1600,6 +1594,7 @@ typedef struct
    HYPRE_Int cuda_compute_stream_sync_default;
    std::vector<HYPRE_Int> cuda_compute_stream_sync;
    curandGenerator_t curand_gen;
+   cublasHandle_t cublas_handle;
    cusparseHandle_t cusparse_handle;
    cusparseMatDescr_t cusparse_mat_descr;
    cudaStream_t cuda_streams[HYPRE_MAX_NUM_STREAMS];
@@ -1713,10 +1708,29 @@ hypre_HandleCurandGenerator(hypre_Handle *hypre_handle_)
    curandGenerator_t gen;
    HYPRE_CURAND_CALL( curandCreateGenerator(&gen, CURAND_RNG_PSEUDO_DEFAULT) );
    HYPRE_CURAND_CALL( curandSetPseudoRandomGeneratorSeed(gen, 1234ULL) );
+   HYPRE_CURAND_CALL( curandSetStream(gen, hypre_HandleCudaComputeStream(hypre_handle_)) );
 
    hypre_handle_->curand_gen = gen;
 
    return gen;
+}
+
+static inline cublasHandle_t
+hypre_HandleCublasHandle(hypre_Handle *hypre_handle_)
+{
+   if (hypre_handle_->cublas_handle)
+   {
+      return hypre_handle_->cublas_handle;
+   }
+
+   cublasHandle_t handle;
+   HYPRE_CUBLAS_CALL( cublasCreate(&handle) );
+
+   HYPRE_CUBLAS_CALL( cublasSetStream(handle, hypre_HandleCudaComputeStream(hypre_handle_)) );
+
+   hypre_handle_->cublas_handle = handle;
+
+   return handle;
 }
 
 static inline cusparseHandle_t
@@ -2206,6 +2220,8 @@ void hypre_BigSwapb2i(HYPRE_BigInt  *v, HYPRE_Int  *w, HYPRE_Int  *z, HYPRE_Int 
 void hypre_BigQsortb2i( HYPRE_BigInt *v, HYPRE_Int *w, HYPRE_Int *z, HYPRE_Int  left, HYPRE_Int  right );
 void hypre_BigSwap( HYPRE_BigInt *v, HYPRE_Int  i, HYPRE_Int  j );
 void hypre_BigQsort0( HYPRE_BigInt *v, HYPRE_Int  left, HYPRE_Int  right );
+void hypre_topo_sort(const HYPRE_Int *row_ptr, const HYPRE_Int *col_inds, const HYPRE_Complex *data, HYPRE_Int *ordering, HYPRE_Int n);
+void hypre_dense_topo_sort(const HYPRE_Complex *L, HYPRE_Int *ordering, HYPRE_Int n, HYPRE_Int is_col_major);
 
 /* qsplit.c */
 HYPRE_Int hypre_DoubleQuickSplit ( HYPRE_Real *values , HYPRE_Int *indices , HYPRE_Int list_length , HYPRE_Int NumberKept );
