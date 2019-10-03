@@ -1429,12 +1429,28 @@ hypre_SStructGridFindBoxManEntry( hypre_SStructGrid  *grid,
                                   HYPRE_Int           var,
                                   hypre_BoxManEntry **entry_ptr )
 {
-   HYPRE_Int nentries;
+   hypre_BoxManager   *boxman   = hypre_SStructGridBoxManager(grid, part, var);
+   hypre_Box          *bbox     = hypre_BoxManBoundingBox(boxman);
+   hypre_SStructPGrid *pgrid    = hypre_SStructGridPGrid(grid, part);
+   HYPRE_Int           ndim     = hypre_SStructPGridNDim(pgrid);
+   hypre_IndexRef      periodic = hypre_SStructPGridPeriodic(pgrid);
 
+   HYPRE_Int           nentries, d;
    hypre_BoxManEntry **entries;
-   
-   hypre_BoxManIntersect (  hypre_SStructGridBoxManager(grid, part, var),
-                            index, index, &entries, &nentries);
+
+   /* handle periodic parts */
+   for (d = 0; d < ndim; ++d)
+   {
+     if ( hypre_IndexD(periodic, d) )
+     {
+        while ( hypre_IndexD(index, d) < hypre_BoxIMinD(bbox, d) )
+          hypre_IndexD(index, d) += hypre_IndexD(periodic, d);
+        while ( hypre_IndexD(index, d) > hypre_BoxIMaxD(bbox, d) )
+          hypre_IndexD(index, d) -= hypre_IndexD(periodic, d);
+     }
+   }
+
+   hypre_BoxManIntersect(boxman, index, index, &entries, &nentries);
 
    /* we should only get a single entry returned */
    if (nentries > 1)

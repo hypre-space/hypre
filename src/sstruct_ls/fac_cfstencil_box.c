@@ -63,6 +63,8 @@ hypre_CF_StenBox( hypre_Box              *fgrid_box,
    * should be adjusted so that the flooring of the MapFineToCoarse does not
    * introduce extra coarse nodes in the coarsened box. Only the lower bound
    * needs to be adjusted.
+   * The upper bound has to be adjusted if its index is negative - i.e. periodic
+   * grids
    *--------------------------------------------------------------------------*/
    hypre_CopyBox(fgrid_box, &contracted_box);
    for (i= 0; i< ndim; i++)
@@ -70,7 +72,12 @@ hypre_CF_StenBox( hypre_Box              *fgrid_box,
       remainder= hypre_BoxIMin(&contracted_box)[i] % rfactors[i];
       if (remainder)
       {
-          hypre_BoxIMin(&contracted_box)[i]+= rfactors[i] - remainder;
+          hypre_BoxIMin(&contracted_box)[i]+= rfactors[i] - hypre_abs(remainder);
+      }
+      remainder= hypre_BoxIMax(&contracted_box)[i] % rfactors[i];
+      if (remainder)
+      {
+          hypre_BoxIMax(&contracted_box)[i] -= hypre_abs( remainder );
       }
    }
 

@@ -340,6 +340,7 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
    HYPRE_Int                 to_proc;
    HYPRE_BigInt              Uverank, rank;
    hypre_BoxManEntry        *boxman_entry;
+   HYPRE_Int                *num_ghost;
                          
    HYPRE_Int                 nprocs, myproc;
    HYPRE_Int                 part, var;
@@ -360,7 +361,6 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
    void                      *info;
    hypre_Box                 *bbox, *new_box;
    hypre_Box               ***new_gboxes, *new_gbox;
-   HYPRE_Int                 *num_ghost;
 
    /*---------------------------------------------------------
     *  If AP, then may need to redo the box managers
@@ -573,13 +573,14 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
          Uveoffsets[part][var] = Uvesize;
          sgrid = hypre_SStructPGridSGrid(pgrid, var);
          boxes = hypre_StructGridBoxes(sgrid);
+         num_ghost = hypre_StructGridNumGhost(sgrid);
          hypre_ForBoxI(i, boxes)
          {
             box = hypre_BoxArrayBox(boxes, i);
             vol = 1;
             for (d = 0; d < ndim; d++)
             {
-               vol *= (hypre_BoxSizeD(box, d) + 2);
+               vol *= (hypre_BoxSizeD(box, d) + num_ghost[2*d] + num_ghost[2*d+1]);
             }
             Uvesize += vol;
          }

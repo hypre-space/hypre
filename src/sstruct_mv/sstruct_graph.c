@@ -41,24 +41,35 @@ hypre_SStructGraphGetUVEntryRank( hypre_SStructGraph    *graph,
                                   hypre_Index            index,
                                   HYPRE_BigInt          *rank )
 {
-   HYPRE_Int              ndim  = hypre_SStructGraphNDim(graph);
-   hypre_SStructGrid     *grid  = hypre_SStructGraphGrid(graph);
-   hypre_SStructPGrid    *pgrid = hypre_SStructGridPGrid(grid, part);
-   hypre_StructGrid      *sgrid = hypre_SStructPGridSGrid(pgrid, var);
-   hypre_BoxArray        *boxes = hypre_StructGridBoxes(sgrid);
+   HYPRE_Int              ndim      = hypre_SStructGraphNDim(graph);
+   hypre_SStructGrid     *grid      = hypre_SStructGraphGrid(graph);
+   hypre_SStructPGrid    *pgrid     = hypre_SStructGridPGrid(grid, part);
+   hypre_StructGrid      *sgrid     = hypre_SStructPGridSGrid(pgrid, var);
+   hypre_IndexRef         periodic  = hypre_SStructPGridPeriodic(pgrid);
+   hypre_BoxArray        *boxes     = hypre_StructGridBoxes(sgrid);
+   HYPRE_Int             *num_ghost = hypre_StructGridNumGhost(sgrid);
    hypre_Box             *box;
-   HYPRE_Int              i, d, vol, found;
+   HYPRE_Int              i, d, vol, found, found_ghost, ghost_rank;
 
 
    *rank = hypre_SStructGraphUVEOffset(graph, part, var);
+   ghost_rank = -1;
    hypre_ForBoxI(i, boxes)
    {
       box = hypre_BoxArrayBox(boxes, i);
       found = 1;
+      found_ghost = 0;
       for (d = 0; d < ndim; d++)
       {
-         if ( (hypre_IndexD(index, d) < (hypre_BoxIMinD(box, d)-1)) ||
-              (hypre_IndexD(index, d) > (hypre_BoxIMaxD(box, d)+1)) )
+         if ( hypre_IndexD(periodic, d) )
+         {
+            while (hypre_IndexD(index, d) < hypre_BoxIMinD(box, d))
+              hypre_IndexD(index, d) += hypre_IndexD(periodic, d);
+            while (hypre_IndexD(index, d) > hypre_BoxIMaxD(box, d))
+              hypre_IndexD(index, d) -= hypre_IndexD(periodic, d);
+         }
+         if ( (hypre_IndexD(index, d) < (hypre_BoxIMinD(box, d)-num_ghost[2*d])) ||
+              (hypre_IndexD(index, d) > (hypre_BoxIMaxD(box, d)+num_ghost[2*d+1])) )
          {
             /* not in this box */
             found = 0;
@@ -67,28 +78,45 @@ hypre_SStructGraphGetUVEntryRank( hypre_SStructGraph    *graph,
       }
       if (found)
       {
-         vol = 0;
-         for (d = (ndim-1); d > -1; d--)
-         {
-            vol = vol*(hypre_BoxSizeD(box, d) + 2) +
-               (hypre_IndexD(index, d) - hypre_BoxIMinD(box, d) + 1);
-         }
-         *rank += (HYPRE_BigInt)vol;
-         return hypre_error_flag;
-      }
-      else
-      {
-         vol = 1;
          for (d = 0; d < ndim; d++)
          {
-            vol *= (hypre_BoxSizeD(box, d) + 2);
+           if ( (hypre_IndexD(index, d) < (hypre_BoxIMinD(box, d))) ||
+                (hypre_IndexD(index, d) > (hypre_BoxIMaxD(box, d))) )
+           {
+              /* not in this box */
+              found_ghost = 1;
+              break;
+           }
          }
-         *rank += (HYPRE_BigInt)vol;
+
+        vol = 0;
+        for (d = (ndim-1); d > -1; d--)
+        {
+          // FIXME vol = vol*(hypre_BoxSizeD(box, d) + 2) +
+          vol = vol*(hypre_BoxSizeD(box, d) + num_ghost[2*d] + num_ghost[2*d+1]) +
+             (hypre_IndexD(index, d) - hypre_BoxIMinD(box, d) + num_ghost[2*d]);
+        }
+        if ( found_ghost )
+        {
+          ghost_rank = *rank + (HYPRE_BigInt)vol;
+        }
+        else
+        {
+          *rank += vol;
+          return hypre_error_flag;
+        }
       }
+
+      vol = 1;
+      for (d = 0; d < ndim; d++)
+      {
+        vol *= (hypre_BoxSizeD(box, d) + num_ghost[2*d] + num_ghost[2*d+1]);
+      }
+      *rank += (HYPRE_BigInt)vol;
    }
 
    /* a value of -1 indicates that the index was not found */
-   *rank = -1;
+   *rank = ghost_rank;
 
    return hypre_error_flag;
 }

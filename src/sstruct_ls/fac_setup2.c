@@ -200,6 +200,9 @@ hypre_FacSetup2( void                 *fac_vdata,
                                         hypre_SStructPGridNVars(pgrid), 
                                         hypre_SStructPGridVarTypes(pgrid) );
 
+         HYPRE_SStructGridSetPeriodic ( grid_level[level], part_fine,
+                                        hypre_SStructPGridPeriodic(pgrid) );
+
          /*-----------------------------------------------------------------------
           * Create the coarsest level grid if A has only 1 level
           *-----------------------------------------------------------------------*/
@@ -215,6 +218,9 @@ hypre_FacSetup2( void                 *fac_vdata,
             HYPRE_SStructGridSetVariables( grid_level[level], part_crse,
                                            hypre_SStructPGridNVars(pgrid),
                                            hypre_SStructPGridVarTypes(pgrid) );
+
+            HYPRE_SStructGridSetPeriodic ( grid_level[level], part_crse,
+                                           hypre_SStructPGridPeriodic(pgrid) );
          }
       }
 
@@ -249,9 +255,15 @@ hypre_FacSetup2( void                 *fac_vdata,
                                         hypre_SStructPGridNVars(pgrid), 
                                         hypre_SStructPGridVarTypes(pgrid) );
 
+         HYPRE_SStructGridSetPeriodic ( grid_level[level], part_crse,
+                                        hypre_SStructPGridPeriodic(pgrid) );
+
          HYPRE_SStructGridSetVariables( grid_level[level-1], part_fine, 
                                         hypre_SStructPGridNVars(pgrid), 
                                         hypre_SStructPGridVarTypes(pgrid) );
+
+         HYPRE_SStructGridSetPeriodic ( grid_level[level-1], part_fine,
+                                        hypre_SStructPGridPeriodic(pgrid) );
 
          /* coarsest SStructGrid */
          if (level == 1)
@@ -259,6 +271,9 @@ hypre_FacSetup2( void                 *fac_vdata,
             HYPRE_SStructGridSetVariables( grid_level[level-1], part_crse, 
                                            hypre_SStructPGridNVars(pgrid), 
                                            hypre_SStructPGridVarTypes(pgrid) );
+
+            HYPRE_SStructGridSetPeriodic ( grid_level[level-1], part_crse,
+                                           hypre_SStructPGridPeriodic(pgrid) );
          }
       }
 
@@ -352,18 +367,25 @@ hypre_FacSetup2( void                 *fac_vdata,
          hypre_CopyIndex(hypre_SStructUEntryToIndex(Uentry), to_index);
          to_var  =  hypre_SStructUEntryToVar(Uentry);
 
-         if ( part_to_level[part] >= part_to_level[to_part] )
+         if ( part_to_level[part] > part_to_level[to_part] )
          {
             level        = part_to_level[part];
             level_part   = part_fine;
             level_topart = part_crse;
          }
-         else
+         else if ( part_to_level[part] < part_to_level[to_part] )
          {
             level        = part_to_level[to_part];
             level_part   = part_crse;
             level_topart = part_fine;
          }
+         else
+         {
+            level        = part_to_level[part];
+            level_part   = part_fine;
+            level_topart = part_fine;
+         }
+
          nrows[level]++;
 
          HYPRE_SStructGraphAddEntries(graph_level[level], level_part, index,

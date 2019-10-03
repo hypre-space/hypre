@@ -2504,7 +2504,8 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
 
          data_space = hypre_StructMatrixDataSpace(crse_smatrix);
          cdata_space_ranks= hypre_CTAlloc(HYPRE_Int,  cbox_array_size, HYPRE_MEMORY_HOST);
-         cdata_space_ranks[0]= 0;
+         if (cbox_array_size)
+            cdata_space_ranks[0]= 0;
          for (i= 1; i< cbox_array_size; i++)
          {
             cdata_space_ranks[i]= cdata_space_ranks[i-1]+

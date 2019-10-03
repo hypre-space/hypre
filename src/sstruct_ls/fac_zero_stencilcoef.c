@@ -43,10 +43,19 @@ hypre_FacZeroCFSten( hypre_SStructPMatrix *Af,
    hypre_SStructPGrid    *p_cgrid;
 
    hypre_Box              fgrid_box;
-   hypre_StructGrid      *cgrid;
+   hypre_StructGrid      *cgrid, *fgrid;
    hypre_BoxArray        *cgrid_boxes;
    hypre_Box             *cgrid_box;
    hypre_Box              scaled_box;
+
+   hypre_IndexRef         pshift;
+   hypre_BoxArray        *periodic_boxes;
+   hypre_Box             *periodic_box;
+   HYPRE_Int              nperiodic_boxes;
+
+   hypre_BoxManEntry    **offset_entries;
+   hypre_Box              offset_box;
+   HYPRE_Int              noffset_entries;
 
    hypre_Box             *shift_ibox;
 
@@ -79,6 +88,7 @@ hypre_FacZeroCFSten( hypre_SStructPMatrix *Af,
 
    hypre_BoxInit(&fgrid_box, ndim);
    hypre_BoxInit(&scaled_box, ndim);
+   hypre_BoxInit(&offset_box, ndim);
 
    hypre_ClearIndex(zero_index);
    hypre_ClearIndex(stride);
@@ -100,6 +110,7 @@ hypre_FacZeroCFSten( hypre_SStructPMatrix *Af,
 
    for (var1= 0; var1< nvars; var1++)
    {
+      fgrid= hypre_SStructPGridSGrid(hypre_SStructPMatrixPGrid(Af), var1);
       cgrid= hypre_SStructPGridSGrid(hypre_SStructPMatrixPGrid(Ac), var1);
       cgrid_boxes= hypre_StructGridBoxes(cgrid);
 
@@ -127,6 +138,39 @@ hypre_FacZeroCFSten( hypre_SStructPMatrix *Af,
          hypre_BoxManIntersect(fboxman, hypre_BoxIMin(&scaled_box),
                                hypre_BoxIMax(&scaled_box), &boxman_entries,
                                &nboxman_entries);
+
+         // handle periodic parts
+
+         // container for periodic boxes overlapping scaled_box with all periodic offset
+         periodic_boxes = hypre_BoxArrayCreate(0, ndim);
+         nperiodic_boxes = 0;
+
+         // compute period range required for covering scaled_box
+         for (j= 1; j<hypre_StructGridNumPeriods(fgrid); j++) // first index is no shift!
+         {
+             pshift = hypre_StructGridPShift(fgrid, j);
+             hypre_AddIndexes(hypre_BoxIMin(&scaled_box), pshift, ndim,
+                              hypre_BoxIMin(&offset_box));
+             hypre_AddIndexes(hypre_BoxIMax(&scaled_box), pshift, ndim,
+                              hypre_BoxIMax(&offset_box));
+
+             hypre_BoxManIntersect(fboxman, hypre_BoxIMin(&offset_box),
+                                   hypre_BoxIMax(&offset_box), &offset_entries,
+                                   &noffset_entries);
+
+             hypre_BoxArraySetSize(periodic_boxes, nperiodic_boxes + noffset_entries);
+
+             for (i=0; i<noffset_entries; ++i)
+             {
+                periodic_box = hypre_BoxArrayBox(periodic_boxes, nperiodic_boxes++);
+                hypre_SubtractIndexes(hypre_BoxManEntryIMin(offset_entries[i]), pshift, ndim,
+                                      hypre_BoxIMin(periodic_box));
+                hypre_SubtractIndexes(hypre_BoxManEntryIMax(offset_entries[i]), pshift, ndim,
+                                      hypre_BoxIMax(periodic_box));
+             }
+
+             hypre_TFree(offset_entries, HYPRE_MEMORY_HOST);
+         }
 
          for (var2= 0; var2< nvars; var2++)
          {
@@ -158,6 +202,33 @@ hypre_FacZeroCFSten( hypre_SStructPMatrix *Af,
                         hypre_BoxSetExtents(&fgrid_box, ilower, iupper);
 
                         shift_ibox= hypre_CF_StenBox(&fgrid_box, cgrid_box, stencil_shape,
+                                                     refine_factors, ndim);
+
+                        if ( hypre_BoxVolume(shift_ibox) )
+                        {
+                           ac_ptr= hypre_StructMatrixExtractPointerByIndex(smatrix,
+                                                                           ci,
+                                                                           stencil_shape);
+                           hypre_BoxGetSize(shift_ibox, loop_size);
+
+#define DEVICE_VAR is_device_ptr(ac_ptr)
+                           hypre_BoxLoop1Begin(ndim, loop_size,
+                                               ac_dbox, hypre_BoxIMin(shift_ibox),
+                                               stride, iac);
+                           {
+                              ac_ptr[iac] = 0.0;
+                           }
+                           hypre_BoxLoop1End(iac);
+#undef DEVICE_VAR
+                        }   /* if ( hypre_BoxVolume(shift_ibox) ) */
+
+                        hypre_BoxDestroy(shift_ibox);
+
+                     }  /* for (j= 0; j< nboxman_entries; j++) */
+                     /* look for connecting periodic fboxes that must be zeroed. */
+                     for (j= 0; j< nperiodic_boxes; j++)
+                     {
+                        shift_ibox= hypre_CF_StenBox(hypre_BoxArrayBox(periodic_boxes,j), cgrid_box, stencil_shape,
                                                      refine_factors, ndim);
 
                         if ( hypre_BoxVolume(shift_ibox) )
@@ -229,6 +300,14 @@ hypre_FacZeroFCSten( hypre_SStructPMatrix  *A,
    hypre_Box             *fgrid_box;
    hypre_Box              scaled_box;
 
+   hypre_IndexRef         pshift;
+   hypre_BoxArray        *periodic_boxes;
+   hypre_Box             *periodic_box;
+   HYPRE_Int              nperiodic_boxes;
+
+   hypre_BoxManEntry    **offset_entries;
+   hypre_Box              offset_box;
+   HYPRE_Int              noffset_entries;
 
    hypre_BoxArray        *intersect_boxes, *tmp_box_array1, *tmp_box_array2;
 
@@ -264,6 +343,7 @@ hypre_FacZeroFCSten( hypre_SStructPMatrix  *A,
 
    hypre_BoxInit(&scaled_box, ndim);
    hypre_BoxInit(&shift_ibox, ndim);
+   hypre_BoxInit(&offset_box, ndim);
    hypre_BoxInit(&intersect_box, ndim);
 
    hypre_ClearIndex(stride);
@@ -298,6 +378,39 @@ hypre_FacZeroFCSten( hypre_SStructPMatrix  *A,
          hypre_BoxManIntersect(fboxman, hypre_BoxIMin(&scaled_box),
                                hypre_BoxIMax(&scaled_box), &boxman_entries,
                                &nboxman_entries);
+
+         // handle periodic parts
+
+         // container for periodic boxes overlapping scaled_box with all periodic offset
+         periodic_boxes = hypre_BoxArrayCreate(0, ndim);
+         nperiodic_boxes = 0;
+
+         // compute period range required for covering scaled_box
+         for (j= 1; j<hypre_StructGridNumPeriods(fgrid); j++) // first index is no shift!
+         {
+             pshift = hypre_StructGridPShift(fgrid, j);
+             hypre_AddIndexes(hypre_BoxIMin(&scaled_box), pshift, ndim,
+                              hypre_BoxIMin(&offset_box));
+             hypre_AddIndexes(hypre_BoxIMax(&scaled_box), pshift, ndim,
+                              hypre_BoxIMax(&offset_box));
+
+             hypre_BoxManIntersect(fboxman, hypre_BoxIMin(&offset_box),
+                                   hypre_BoxIMax(&offset_box), &offset_entries,
+                                   &noffset_entries);
+
+             hypre_BoxArraySetSize(periodic_boxes, nperiodic_boxes + noffset_entries);
+
+             for (i=0; i<noffset_entries; ++i)
+             {
+                periodic_box = hypre_BoxArrayBox(periodic_boxes, nperiodic_boxes++);
+                hypre_SubtractIndexes(hypre_BoxManEntryIMin(offset_entries[i]), pshift, ndim,
+                                      hypre_BoxIMin(periodic_box));
+                hypre_SubtractIndexes(hypre_BoxManEntryIMax(offset_entries[i]), pshift, ndim,
+                                      hypre_BoxIMax(periodic_box));
+             }
+
+             hypre_TFree(offset_entries, HYPRE_MEMORY_HOST);
+         }
 
          for (var2= 0; var2< nvars; var2++)
          {
@@ -371,6 +484,25 @@ hypre_FacZeroFCSten( hypre_SStructPMatrix  *A,
                            }
                         }
                      }   /* for (j= 0; j< nboxman_entries; j++) */
+
+                     for (j= 0; j< nperiodic_boxes; j++)
+                     {
+                           hypre_IntersectBoxes(&shift_ibox, hypre_BoxArrayBox(periodic_boxes,j), &intersect_box);
+
+                           if ( hypre_BoxVolume(&intersect_box) )
+                           {
+                              hypre_CopyBox(&intersect_box,
+                                            hypre_BoxArrayBox(tmp_box_array1, 0));
+
+                              tmp_box_array2= hypre_BoxArrayCreate(0, ndim);
+
+                              hypre_SubtractBoxArrays(intersect_boxes,
+                                                      tmp_box_array1,
+                                                      tmp_box_array2);
+
+                              hypre_BoxArrayDestroy(tmp_box_array2);
+                           }
+                     }   /* for (j= 0; j< nperiodic_boxes; j++) */
 
                      /*-----------------------------------------------------------
                       * intersect_boxes now has the shifted extents for the

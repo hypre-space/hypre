@@ -135,9 +135,8 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
    hypre_SStructPVector     *recv_cvectors;
    hypre_SStructPGrid       *recv_cgrid;
    HYPRE_Int               **recv_boxnum_map;
-   hypre_SStructGrid        *temp_grid;
 
-   hypre_SStructPGrid       *pgrid;
+   hypre_SStructPGrid       *crse_pgrid, *fine_pgrid;
 
    hypre_SStructPVector     *ef= hypre_SStructVectorPVector(e, part_fine);
    hypre_StructVector       *e_var, *s_rc, *s_cvector;
@@ -153,25 +152,25 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
    HYPRE_Int              ***recv_processes;
    HYPRE_Int              ***recv_remote_boxnums;
 
-   hypre_BoxArray           *boxarray;
+   hypre_BoxArray           *crse_boxarray, *fine_boxarray, *boxarray;
    hypre_BoxArray           *tmp_boxarray, *intersect_boxes;
-   hypre_Box                 box, scaled_box;
+   hypre_Box                 box, cbox, fbox, fine_cbox, crse_fbox;
    HYPRE_Int              ***own_cboxnums;
 
-   hypre_BoxManager         *boxman1;
-   hypre_BoxManEntry       **boxman_entries;
+   hypre_BoxManager         *crse_boxman, *fine_boxman;
+   hypre_BoxManEntry       **boxman_entries, *crse_entry, *fine_entry;
    HYPRE_Int                 nboxman_entries;
 
    HYPRE_Int                 nvars= hypre_SStructPVectorNVars(ef);
    HYPRE_Int                 vars;
 
-   hypre_Index               zero_index, index;
-   hypre_Index               ilower, iupper;
+   hypre_Index               zero_index, one_index, cindex;
    HYPRE_Int                *num_ghost;
 
-   HYPRE_Int                 ndim, i, j, k, fi, ci;
-   HYPRE_Int                 cnt1, cnt2;
-   HYPRE_Int                 proc, myproc, tot_procs;
+   HYPRE_Int                 ndim, i, j, k, fi, ci, ri;
+   HYPRE_Int                 cnt;
+   HYPRE_Int                 *recv_nboxes;
+   HYPRE_Int                 crse_proc, fine_proc, myproc, tot_procs;
    HYPRE_Int                 num_values;
 
    HYPRE_Real              **weights;
@@ -181,11 +180,25 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myproc);
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &tot_procs);
 
-   ndim= hypre_SStructPGridNDim(hypre_SStructPVectorPGrid(ef));
+   crse_pgrid= hypre_SStructPVectorPGrid(ec);
+   fine_pgrid= hypre_SStructPVectorPGrid(ef);
+
+   ndim= hypre_SStructPGridNDim(fine_pgrid);
+
    hypre_SetIndex3(zero_index, 0, 0, 0);
+   hypre_ClearIndex(cindex);
+   hypre_ClearIndex(one_index);
+   for(i= 0; i < ndim; i++)
+   {
+       cindex[i]= rfactors[i] - 1;
+       one_index[i]= 1;
+   }
 
    hypre_BoxInit(&box, ndim);
-   hypre_BoxInit(&scaled_box, ndim);
+   hypre_BoxInit(&cbox, ndim);
+   hypre_BoxInit(&fbox, ndim);
+   hypre_BoxInit(&fine_cbox, ndim);
+   hypre_BoxInit(&crse_fbox, ndim);
 
    /*------------------------------------------------------------------------
     * Intralevel communication structures-
@@ -224,84 +237,28 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
     * for cbox.
     *
     * Algorithm for own_boxes (fullwgted boxes on this processor): For each
-    * fbox, coarsen it and boxmap intersect it with cmap.
+    * cbox on this processor and for each coarsen fbox on this processor, use 
+    * their intersection when non-empty.
     *   (cmap_intersect boxes on myproc)= ownboxes
     * for this fbox.
     *
-    * Algorithm for recv_box: For each fbox, coarsen it and boxmap intersect
-    * it with cmap.
+    * Algorithm for recv_box: For each cbox off this processor and for each
+    * coarsen fbox on this processor, use their intersection when non-empty
     *   (cmap_intersect boxes off_proc)= unstretched recv_boxes.
     * These boxes are stretched by one in each direction so that the ghostlayer
     * is also communicated. However, the recv_grid will consists of the
     * unstretched boxes so that overlapping does not occur.
+    *
+    * Algorithm for send_boxes: For each cbox on this processorand for each
+    * coarsen fbox off this processor, use their intersection when non-empty
+    *   (intersect crse_boxes off-proc)= send_boxes for this cbox.
+    * Note that the send_boxes will be stretched to include the ghostlayers.
+    * This guarantees that all the data required for linear interpolation
+    * will be on the processor. Also, note that the remote_boxnums are
+    * with respect to the recv_cgrid box numbering.
     *--------------------------------------------------------------------------*/
+
    identity_arrayboxes= hypre_CTAlloc(hypre_BoxArrayArray *,  nvars, HYPRE_MEMORY_HOST);
-
-   pgrid= hypre_SStructPVectorPGrid(ec);
-   hypre_ClearIndex(index);
-   for (i= 0; i< ndim; i++)
-   {
-      index[i]= rfactors[i]-1;
-   }
-
-   tmp_boxarray = hypre_BoxArrayCreate(0, ndim);
-   for (vars= 0; vars< nvars; vars++)
-   {
-      boxman1= hypre_SStructGridBoxManager(hypre_SStructVectorGrid(e),
-                                           part_fine, vars);
-      boxarray= hypre_StructGridBoxes(hypre_SStructPGridSGrid(pgrid, vars));
-      identity_arrayboxes[vars]= hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxarray), ndim);
-
-      hypre_ForBoxI(ci, boxarray)
-      {
-         box= *hypre_BoxArrayBox(boxarray, ci);
-         hypre_AppendBox(&box,
-                         hypre_BoxArrayArrayBoxArray(identity_arrayboxes[vars], ci));
-
-         hypre_StructMapCoarseToFine(hypre_BoxIMin(&box), zero_index,
-                                     rfactors, hypre_BoxIMin(&scaled_box));
-         hypre_StructMapCoarseToFine(hypre_BoxIMax(&box), index,
-                                     rfactors, hypre_BoxIMax(&scaled_box));
-
-         hypre_BoxManIntersect(boxman1, hypre_BoxIMin(&scaled_box),
-                               hypre_BoxIMax(&scaled_box), &boxman_entries,
-                               &nboxman_entries);
-
-         intersect_boxes= hypre_BoxArrayCreate(0, ndim);
-         for (i= 0; i< nboxman_entries; i++)
-         {
-            hypre_BoxManEntryGetExtents(boxman_entries[i], ilower, iupper);
-            hypre_BoxSetExtents(&box, ilower, iupper);
-            hypre_IntersectBoxes(&box, &scaled_box, &box);
-
-            /* contract this refined box so that only the coarse nodes on this
-               processor will be subtracted. */
-            for (j= 0; j< ndim; j++)
-            {
-               k= hypre_BoxIMin(&box)[j] % rfactors[j];
-               if (k)
-               {
-                  hypre_BoxIMin(&box)[j]+= rfactors[j] - k;
-               }
-            }
-
-            hypre_StructMapFineToCoarse(hypre_BoxIMin(&box), zero_index,
-                                        rfactors, hypre_BoxIMin(&box));
-            hypre_StructMapFineToCoarse(hypre_BoxIMax(&box), zero_index,
-                                        rfactors, hypre_BoxIMax(&box));
-            hypre_AppendBox(&box, intersect_boxes);
-         }
-
-         hypre_SubtractBoxArrays(hypre_BoxArrayArrayBoxArray(identity_arrayboxes[vars], ci),
-                                 intersect_boxes, tmp_boxarray);
-         hypre_MinUnionBoxes(hypre_BoxArrayArrayBoxArray(identity_arrayboxes[vars], ci));
-
-         hypre_TFree(boxman_entries, HYPRE_MEMORY_HOST);
-         hypre_BoxArrayDestroy(intersect_boxes);
-      }
-   }
-   hypre_BoxArrayDestroy(tmp_boxarray);
-   fac_interp_data -> identity_arrayboxes= identity_arrayboxes;
 
    /*--------------------------------------------------------------------------
     * fboxes are coarsened. For each coarsened fbox, we need a boxarray of
@@ -310,33 +267,48 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
    ownboxes= hypre_CTAlloc(hypre_BoxArrayArray *,  nvars, HYPRE_MEMORY_HOST);
    own_cboxnums= hypre_CTAlloc(HYPRE_Int **,  nvars, HYPRE_MEMORY_HOST);
 
+   recv_boxnum_map= hypre_CTAlloc(HYPRE_Int *,  nvars, HYPRE_MEMORY_HOST);
+
+   send_boxes= hypre_CTAlloc(hypre_BoxArrayArray *,  nvars, HYPRE_MEMORY_HOST);
    recv_boxes= hypre_CTAlloc(hypre_BoxArrayArray *,  nvars, HYPRE_MEMORY_HOST);
+
+   send_processes= hypre_CTAlloc(HYPRE_Int **,  nvars, HYPRE_MEMORY_HOST);
    recv_processes= hypre_CTAlloc(HYPRE_Int **,  nvars, HYPRE_MEMORY_HOST);
 
+   send_remote_boxnums= hypre_CTAlloc(HYPRE_Int **,  nvars, HYPRE_MEMORY_HOST);
    /* dummy pointer for CommInfoCreate */
    recv_remote_boxnums= hypre_CTAlloc(HYPRE_Int **,  nvars, HYPRE_MEMORY_HOST);
-   hypre_ClearIndex(index);
-   for (i= 0; i< ndim; i++)
+
+   hypre_SStructPGridCreate(hypre_SStructPVectorComm(ec), ndim, &recv_cgrid);
+
+   /*-------------------------------------------------------------------
+    * send boxes:
+    * On this proc local box_nums may not be the same as the local box_nums
+    * on the remote proc recv_cgrid. We need to count the boxes recieved
+    * from all procs.
+    *-------------------------------------------------------------------*/
+   recv_nboxes= hypre_CTAlloc(HYPRE_Int,  tot_procs, HYPRE_MEMORY_HOST);
+
+   tmp_boxarray = hypre_BoxArrayCreate(0, ndim);
+   for(vars= 0; vars< nvars; vars++)
    {
-      index[i]= 1;
-   }
+      crse_boxman= hypre_SStructGridBoxManager(hypre_SStructVectorGrid(e),
+                                               part_crse, vars);
+      fine_boxman= hypre_SStructGridBoxManager(hypre_SStructVectorGrid(e),
+                                               part_fine, vars);
 
-   for (vars= 0; vars< nvars; vars++)
-   {
-      boxman1= hypre_SStructGridBoxManager(hypre_SStructVectorGrid(e),
-                                           part_crse, vars);
-      pgrid= hypre_SStructPVectorPGrid(ef);
-      boxarray= hypre_StructGridBoxes(hypre_SStructPGridSGrid(pgrid, vars));
+      crse_boxarray= hypre_StructGridBoxes(hypre_SStructPGridSGrid(crse_pgrid, vars));
+      identity_arrayboxes[vars]= hypre_BoxArrayArrayCreate(hypre_BoxArraySize(crse_boxarray), ndim);
 
-      ownboxes[vars] = hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxarray), ndim);
-      own_cboxnums[vars]= hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArraySize(boxarray), HYPRE_MEMORY_HOST);
-      recv_boxes[vars]    = hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxarray), ndim);
-      recv_processes[vars]= hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArraySize(boxarray), HYPRE_MEMORY_HOST);
-      recv_remote_boxnums[vars]= hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArraySize(boxarray), HYPRE_MEMORY_HOST);
+      fine_boxarray= hypre_StructGridBoxes(hypre_SStructPGridSGrid(fine_pgrid, vars));
+      ownboxes[vars]= hypre_BoxArrayArrayCreate(hypre_BoxArraySize(fine_boxarray), ndim);
+      own_cboxnums[vars]= hypre_CTAlloc(HYPRE_Int *, hypre_BoxArraySize(fine_boxarray), HYPRE_MEMORY_HOST);
 
-      hypre_ForBoxI(fi, boxarray)
+      recv_boxnum_map[vars]= hypre_CTAlloc(HYPRE_Int, hypre_BoxArraySize(fine_boxarray), HYPRE_MEMORY_HOST);
+
+      hypre_ForBoxI(fi, fine_boxarray)
       {
-         box= *hypre_BoxArrayBox(boxarray, fi);
+         fbox= *hypre_BoxArrayBox(fine_boxarray, fi);
 
          /*--------------------------------------------------------------------
           * Adjust this box so that only the coarse nodes inside the fine box
@@ -344,255 +316,247 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
           *--------------------------------------------------------------------*/
          for (j= 0; j< ndim; j++)
          {
-            k= hypre_BoxIMin(&box)[j] % rfactors[j];
+            k= hypre_BoxIMin(&fbox)[j] % rfactors[j];
             if (k)
             {
-               hypre_BoxIMin(&box)[j]+= rfactors[j] - k;
+               hypre_BoxIMin(&fbox)[j]+= rfactors[j] - k;
             }
          }
 
-         hypre_StructMapFineToCoarse(hypre_BoxIMin(&box), zero_index,
-                                     rfactors, hypre_BoxIMin(&scaled_box));
-         hypre_StructMapFineToCoarse(hypre_BoxIMax(&box), zero_index,
-                                     rfactors, hypre_BoxIMax(&scaled_box));
+         hypre_StructMapFineToCoarse(hypre_BoxIMin(&fbox), zero_index,
+                                     rfactors, hypre_BoxIMin(&crse_fbox));
+         hypre_StructMapFineToCoarse(hypre_BoxIMax(&fbox), zero_index,
+                                     rfactors, hypre_BoxIMax(&crse_fbox));
 
-         hypre_BoxManIntersect(boxman1, hypre_BoxIMin(&scaled_box),
-                               hypre_BoxIMax(&scaled_box), &boxman_entries, &nboxman_entries);
+         hypre_BoxManIntersect(crse_boxman, hypre_BoxIMin(&crse_fbox),
+                               hypre_BoxIMax(&crse_fbox), &boxman_entries,
+                               &nboxman_entries);
 
-         cnt1= 0; cnt2= 0;
-         for (i= 0; i< nboxman_entries; i++)
+         cnt= 0;
+         for(i= 0; i< nboxman_entries; i++)
          {
-            hypre_SStructBoxManEntryGetProcess(boxman_entries[i], &proc);
-            if (proc == myproc)
+            hypre_SStructBoxManEntryGetProcess(boxman_entries[i], &crse_proc);
+            if(crse_proc== myproc)
             {
-               cnt1++;
+               cnt++;
             }
             else
             {
-               cnt2++;
+               recv_boxnum_map[vars][recv_nboxes[myproc]]= fi;
+               recv_nboxes[myproc]++;
             }
          }
 
-         own_cboxnums[vars][fi]  = hypre_CTAlloc(HYPRE_Int,  cnt1, HYPRE_MEMORY_HOST);
-         recv_processes[vars][fi]= hypre_CTAlloc(HYPRE_Int,  cnt2, HYPRE_MEMORY_HOST);
-         recv_remote_boxnums[vars][fi]= hypre_CTAlloc(HYPRE_Int ,  cnt2, HYPRE_MEMORY_HOST);
+         hypre_TFree(boxman_entries, HYPRE_MEMORY_HOST);
 
-         cnt1= 0; cnt2= 0;
-         for (i= 0; i< nboxman_entries; i++)
+         own_cboxnums[vars][fi]= hypre_CTAlloc(HYPRE_Int, cnt, HYPRE_MEMORY_HOST);
+      }
+
+      recv_boxnum_map[vars]= hypre_TReAlloc(recv_boxnum_map[vars], HYPRE_Int, recv_nboxes[myproc], HYPRE_MEMORY_HOST);
+
+      if (recv_nboxes[myproc])
+      {
+         /*------------------------------------------------------------------------
+          * hypre_CommPkgCreate is expecting the size of theese containers to be the
+          * same as the boxes in the recv_data_space (recv_cgrid)
+          *------------------------------------------------------------------------*/
+         recv_boxes[vars]= hypre_BoxArrayArrayCreate(recv_nboxes[myproc], ndim);
+         recv_processes[vars]= hypre_CTAlloc(HYPRE_Int *,  recv_nboxes[myproc], HYPRE_MEMORY_HOST);
+         recv_remote_boxnums[vars]= hypre_CTAlloc(HYPRE_Int *,  recv_nboxes[myproc], HYPRE_MEMORY_HOST);
+
+         HYPRE_Int ri;
+         for(ri=0; ri<recv_nboxes[myproc]; ri++)
          {
-            hypre_BoxManEntryGetExtents(boxman_entries[i], ilower, iupper);
-            hypre_BoxSetExtents(&box, ilower, iupper);
-            hypre_IntersectBoxes(&box, &scaled_box, &box);
+            recv_processes[vars][ri]= hypre_CTAlloc(HYPRE_Int,  1, HYPRE_MEMORY_HOST);
+            recv_remote_boxnums[vars][ri]= hypre_CTAlloc(HYPRE_Int,  1, HYPRE_MEMORY_HOST);
+         }
+      }
+      else
+      {
+         /*------------------------------------------------------------------------
+          * When there are no boxes to communicate, set the temp_grid to have a
+          * box of size zero. This is needed so that this SStructGrid can be
+          * assembled.
+          *------------------------------------------------------------------------*/
+         recv_boxes[vars]= hypre_BoxArrayArrayCreate(1, ndim);
+         recv_processes[vars]= hypre_CTAlloc(HYPRE_Int *, 1, HYPRE_MEMORY_HOST);
+         recv_remote_boxnums[vars]=  hypre_CTAlloc(HYPRE_Int *, 1, HYPRE_MEMORY_HOST);
+         recv_processes[vars][0]= NULL;
+         recv_remote_boxnums[vars][0]= NULL;
 
-            hypre_SStructBoxManEntryGetProcess(boxman_entries[i], &proc);
-            if (proc == myproc)
-            {
-               hypre_AppendBox(&box,
-                               hypre_BoxArrayArrayBoxArray(ownboxes[vars], fi));
-               hypre_SStructBoxManEntryGetBoxnum(boxman_entries[i],
-                                                 &own_cboxnums[vars][fi][cnt1]);
-               cnt1++;
-            }
-            else
-            {
-               /* extend the box so all the required data for interpolation is recvd. */
-               hypre_SubtractIndexes(hypre_BoxIMin(&box), index, 3,
-                                     hypre_BoxIMin(&box));
-               hypre_AddIndexes(hypre_BoxIMax(&box), index, 3, hypre_BoxIMax(&box));
+         /* min_index > max_index so that the box has volume zero. */
+         hypre_SStructPGridSetExtents(recv_cgrid, one_index, zero_index);
+      }
 
-               hypre_AppendBox(&box,
-                               hypre_BoxArrayArrayBoxArray(recv_boxes[vars], fi));
-               recv_processes[vars][fi][cnt2]= proc;
-               cnt2++;
+      crse_boxarray= hypre_StructGridBoxes(hypre_SStructPGridSGrid(crse_pgrid, vars));
+
+      send_boxes[vars]= hypre_BoxArrayArrayCreate(hypre_BoxArraySize(crse_boxarray), ndim);
+      send_processes[vars]= hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArraySize(crse_boxarray), HYPRE_MEMORY_HOST);
+      send_remote_boxnums[vars]= hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArraySize(crse_boxarray), HYPRE_MEMORY_HOST);
+
+      hypre_ForBoxI(ci, crse_boxarray)
+      {
+         cbox= *hypre_BoxArrayBox(crse_boxarray, ci);
+
+         hypre_StructMapCoarseToFine(hypre_BoxIMin(&cbox), zero_index,
+                                     rfactors, hypre_BoxIMin(&fine_cbox));
+         hypre_StructMapCoarseToFine(hypre_BoxIMax(&cbox), cindex,
+                                     rfactors, hypre_BoxIMax(&fine_cbox));
+
+         hypre_BoxManIntersect(fine_boxman, hypre_BoxIMin(&fine_cbox),
+                               hypre_BoxIMax(&fine_cbox), &boxman_entries,
+                               &nboxman_entries);
+
+         cnt= 0;
+         for(i= 0; i < nboxman_entries; i++)
+         {
+            hypre_SStructBoxManEntryGetProcess(boxman_entries[i], &fine_proc);
+            if(fine_proc != myproc)
+            {
+               cnt++;
             }
          }
          hypre_TFree(boxman_entries, HYPRE_MEMORY_HOST);
-      }  /* hypre_ForBoxI(fi, boxarray) */
-   }     /* for (vars= 0; vars< nvars; vars++) */
+
+         send_processes[vars][ci]= hypre_CTAlloc(HYPRE_Int, cnt, HYPRE_MEMORY_HOST);
+         send_remote_boxnums[vars][ci]=  hypre_CTAlloc(HYPRE_Int, cnt, HYPRE_MEMORY_HOST);
+      }
+
+      ri= 0;
+      crse_entry= hypre_BoxManEntries(crse_boxman);
+      for(i= 0; i< hypre_BoxManNEntries(crse_boxman); i++)
+      {
+         crse_proc= hypre_BoxManEntryProc(crse_entry);
+         hypre_SStructBoxManEntryGetBoxnum(crse_entry, &ci);
+         hypre_BoxSetExtents(&cbox, hypre_BoxManEntryIMin(crse_entry),
+                             hypre_BoxManEntryIMax(crse_entry));
+         if(crse_proc == myproc)
+         {
+            hypre_AppendBox(&cbox,
+                            hypre_BoxArrayArrayBoxArray(identity_arrayboxes[vars], ci));
+
+            intersect_boxes= hypre_BoxArrayCreate(0, ndim);
+            fine_entry= hypre_BoxManEntries(fine_boxman);
+            for(j= 0; j< hypre_BoxManNEntries(fine_boxman); j++)
+            {
+               fine_proc= hypre_BoxManEntryProc(fine_entry);
+               hypre_SStructBoxManEntryGetBoxnum(fine_entry, &fi);
+               hypre_BoxSetExtents(&fbox, hypre_BoxManEntryIMin(fine_entry),
+                                   hypre_BoxManEntryIMax(fine_entry));
+
+               hypre_StructMapFineToCoarse(hypre_BoxIMin(&fbox), zero_index,
+                                           rfactors, hypre_BoxIMin(&crse_fbox));
+               hypre_StructMapFineToCoarse(hypre_BoxIMax(&fbox), zero_index,
+                                           rfactors, hypre_BoxIMax(&crse_fbox));
+
+               hypre_IntersectBoxes(&crse_fbox, &cbox, &box);
+
+               if(hypre_BoxVolume(&box))
+               {
+                  /* fbox refines cbox */
+                  hypre_AppendBox(&box, intersect_boxes);
+
+                  if(fine_proc== myproc)
+                  {
+                     boxarray= hypre_BoxArrayArrayBoxArray(ownboxes[vars], fi);
+                     k= hypre_BoxArraySize(boxarray);
+
+                     hypre_AppendBox(&box, boxarray);
+                     own_cboxnums[vars][fi][k]= ci;
+                  }
+                  else
+                  {
+                     boxarray= hypre_BoxArrayArrayBoxArray(send_boxes[vars], ci);
+                     k= hypre_BoxArraySize(boxarray);
+
+                     /* extend the box so all the required data for interpolation is recvd. */
+                     hypre_SubtractIndexes(hypre_BoxIMin(&box), one_index, 3, hypre_BoxIMin(&box));
+                     hypre_AddIndexes(hypre_BoxIMax(&box), one_index, 3, hypre_BoxIMax(&box));
+
+                     hypre_AppendBox(&box, boxarray);
+                     send_processes[vars][ci][k]= fine_proc;
+                     send_remote_boxnums[vars][ci][k]= recv_nboxes[fine_proc]++;
+                  }
+               }
+
+               fine_entry++;
+            }
+            hypre_SubtractBoxArrays(hypre_BoxArrayArrayBoxArray(identity_arrayboxes[vars], ci),
+                                    intersect_boxes, tmp_boxarray);
+            hypre_MinUnionBoxes(hypre_BoxArrayArrayBoxArray(identity_arrayboxes[vars], ci));
+
+            hypre_BoxArrayDestroy(intersect_boxes);
+         }
+         else
+         {
+            fine_entry= hypre_BoxManEntries(fine_boxman);
+            for(j= 0; j< hypre_BoxManNEntries(fine_boxman); j++)
+            {
+               fine_proc= hypre_BoxManEntryProc(fine_entry);
+//                hypre_SStructBoxManEntryGetBoxnum(fine_entry, &fi);
+               hypre_BoxSetExtents(&fbox, hypre_BoxManEntryIMin(fine_entry),
+                                   hypre_BoxManEntryIMax(fine_entry));
+
+               hypre_StructMapFineToCoarse(hypre_BoxIMin(&fbox), zero_index,
+                                           rfactors, hypre_BoxIMin(&crse_fbox));
+               hypre_StructMapFineToCoarse(hypre_BoxIMax(&fbox), zero_index,
+                                           rfactors, hypre_BoxIMax(&crse_fbox));
+
+               hypre_IntersectBoxes(&crse_fbox, &cbox, &box);
+
+               if(hypre_BoxVolume(&box))
+               {
+                  /* fbox refines cbox */
+                  if(fine_proc == myproc)
+                  {
+                     boxarray= hypre_BoxArrayArrayBoxArray(recv_boxes[vars], ri);
+                     k= hypre_BoxArraySize(boxarray);
+                     assert (k==0);
+
+                     hypre_SStructPGridSetExtents(recv_cgrid, hypre_BoxIMin(&box), hypre_BoxIMax(&box));
+
+                     /* extend the box so all the required data for interpolation is recvd. */
+                     hypre_SubtractIndexes(hypre_BoxIMin(&box), one_index, 3, hypre_BoxIMin(&box));
+                     hypre_AddIndexes(hypre_BoxIMax(&box), one_index, 3, hypre_BoxIMax(&box));
+
+                     hypre_AppendBox(&box, boxarray);
+                     recv_processes[vars][ri][k]= crse_proc;
+                     ri++;
+                  }
+                  else if(fine_proc != crse_proc)
+                  {
+                     recv_nboxes[fine_proc]++;
+                  }
+               }
+
+               fine_entry++;
+            }
+         }
+
+         crse_entry++;
+      }
+   }
+   hypre_BoxArrayDestroy(tmp_boxarray);
+
+   hypre_SStructPGridSetVariables(recv_cgrid, nvars,
+                                  hypre_SStructPGridVarTypes(fine_pgrid));
+   hypre_SStructPGridAssemble(recv_cgrid);
+
+   hypre_SStructPVectorCreate(hypre_SStructPGridComm(recv_cgrid), recv_cgrid,
+                                &recv_cvectors);
+   hypre_SStructPVectorInitialize(recv_cvectors);
+   hypre_SStructPVectorAssemble(recv_cvectors);
+
+   (fac_interp_data -> identity_arrayboxes)= identity_arrayboxes;
 
    (fac_interp_data -> ownboxes)= ownboxes;
    (fac_interp_data -> own_cboxnums)= own_cboxnums;
 
-   /*--------------------------------------------------------------------------
-    * With the recv'ed boxes form a SStructPGrid and a SStructGrid. The
-    * SStructGrid is needed to generate a box_manager (so that a local box ordering
-    * for the remote_boxnums are obtained). Record the recv_boxnum/fbox_num
-    * mapping. That is, we interpolate a recv_box l to a fine box m, generally
-    * l != m since the recv_grid and fgrid do not agree.
-    *--------------------------------------------------------------------------*/
-   HYPRE_SStructGridCreate(hypre_SStructPVectorComm(ec),
-                           ndim, 1, &temp_grid);
-   hypre_SStructPGridCreate(hypre_SStructPVectorComm(ec), ndim, &recv_cgrid);
-   recv_boxnum_map= hypre_CTAlloc(HYPRE_Int *,  nvars, HYPRE_MEMORY_HOST);
-
-   cnt2= 0;
-   hypre_ClearIndex(index);
-   for (i= 0; i< ndim; i++)
-   {
-      index[i]= 1;
-   }
-   for (vars= 0; vars< nvars; vars++)
-   {
-      cnt1= 0;
-      hypre_ForBoxArrayI(i, recv_boxes[vars])
-      {
-         boxarray= hypre_BoxArrayArrayBoxArray(recv_boxes[vars], i);
-         cnt1+= hypre_BoxArraySize(boxarray);
-      }
-      recv_boxnum_map[vars]= hypre_CTAlloc(HYPRE_Int,  cnt1, HYPRE_MEMORY_HOST);
-
-      cnt1= 0;
-      hypre_ForBoxArrayI(i, recv_boxes[vars])
-      {
-         boxarray= hypre_BoxArrayArrayBoxArray(recv_boxes[vars], i);
-         hypre_ForBoxI(j, boxarray)
-         {
-            box= *hypre_BoxArrayBox(boxarray, j);
-
-            /* contract the box its actual size. */
-            hypre_AddIndexes(hypre_BoxIMin(&box), index, 3, hypre_BoxIMin(&box));
-            hypre_SubtractIndexes(hypre_BoxIMax(&box), index, 3,
-                                  hypre_BoxIMax(&box));
-
-            hypre_SStructPGridSetExtents(recv_cgrid,
-                                         hypre_BoxIMin(&box),
-                                         hypre_BoxIMax(&box));
-
-            HYPRE_SStructGridSetExtents(temp_grid, 0,
-                                        hypre_BoxIMin(&box),
-                                        hypre_BoxIMax(&box));
-
-            recv_boxnum_map[vars][cnt1]= i; /* record the fbox num. i */
-            cnt1++;
-            cnt2++;
-         }
-      }
-   }
-
-   /*------------------------------------------------------------------------
-    * When there are no boxes to communicate, set the temp_grid to have a
-    * box of size zero. This is needed so that this SStructGrid can be
-    * assembled. This is done only when this only one processor.
-    *------------------------------------------------------------------------*/
-   if (cnt2 == 0)
-   {
-      /* min_index > max_index so that the box has volume zero. */
-      hypre_BoxSetExtents(&box, index, zero_index);
-      hypre_SStructPGridSetExtents(recv_cgrid,
-                                   hypre_BoxIMin(&box),
-                                   hypre_BoxIMax(&box));
-
-      HYPRE_SStructGridSetExtents(temp_grid, 0,
-                                  hypre_BoxIMin(&box),
-                                  hypre_BoxIMax(&box));
-   }
-
-   HYPRE_SStructGridSetVariables(temp_grid, 0,
-                                 hypre_SStructPGridNVars(pgrid),
-                                 hypre_SStructPGridVarTypes(pgrid));
-   HYPRE_SStructGridAssemble(temp_grid);
-   hypre_SStructPGridSetVariables(recv_cgrid, nvars,
-                                  hypre_SStructPGridVarTypes(pgrid) );
-   hypre_SStructPGridAssemble(recv_cgrid);
-
-   hypre_SStructPVectorCreate(hypre_SStructPGridComm(recv_cgrid), recv_cgrid,
-                              &recv_cvectors);
-   hypre_SStructPVectorInitialize(recv_cvectors);
-   hypre_SStructPVectorAssemble(recv_cvectors);
-
-   fac_interp_data -> recv_cvectors  = recv_cvectors;
-   fac_interp_data -> recv_boxnum_map= recv_boxnum_map;
+   (fac_interp_data -> recv_cvectors)= recv_cvectors;
+   (fac_interp_data -> recv_boxnum_map)= recv_boxnum_map;
 
    /* pgrid recv_cgrid no longer needed. */
    hypre_SStructPGridDestroy(recv_cgrid);
-
-   /*------------------------------------------------------------------------
-    * Send_boxes.
-    * Algorithm for send_boxes: For each cbox on this processor, box_map
-    * intersect it with temp_grid's map.
-    *   (intersection boxes off-proc)= send_boxes for this cbox.
-    * Note that the send_boxes will be stretched to include the ghostlayers.
-    * This guarantees that all the data required for linear interpolation
-    * will be on the processor. Also, note that the remote_boxnums are
-    * with respect to the recv_cgrid box numbering.
-    *--------------------------------------------------------------------------*/
-   send_boxes= hypre_CTAlloc(hypre_BoxArrayArray *,  nvars, HYPRE_MEMORY_HOST);
-   send_processes= hypre_CTAlloc(HYPRE_Int **,  nvars, HYPRE_MEMORY_HOST);
-   send_remote_boxnums= hypre_CTAlloc(HYPRE_Int **,  nvars, HYPRE_MEMORY_HOST);
-
-   hypre_ClearIndex(index);
-   for (i= 0; i< ndim; i++)
-   {
-      index[i]= 1;
-   }
-   for (vars= 0; vars< nvars; vars++)
-   {
-      /*-------------------------------------------------------------------
-       * send boxes: intersect with temp_grid that has all the recv boxes-
-       * These local box_nums may not be the same as the local box_nums of
-       * the coarse grid.
-       *-------------------------------------------------------------------*/
-      boxman1= hypre_SStructGridBoxManager(temp_grid, 0, vars);
-      pgrid= hypre_SStructPVectorPGrid(ec);
-      boxarray= hypre_StructGridBoxes(hypre_SStructPGridSGrid(pgrid, vars));
-
-      send_boxes[vars]= hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxarray), ndim);
-      send_processes[vars]= hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArraySize(boxarray), HYPRE_MEMORY_HOST);
-      send_remote_boxnums[vars]= hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArraySize(boxarray), HYPRE_MEMORY_HOST);
-
-      hypre_ForBoxI(ci, boxarray)
-      {
-         box= *hypre_BoxArrayBox(boxarray, ci);
-         hypre_BoxSetExtents(&scaled_box, hypre_BoxIMin(&box), hypre_BoxIMax(&box));
-
-         hypre_BoxManIntersect(boxman1, hypre_BoxIMin(&scaled_box),
-                               hypre_BoxIMax(&scaled_box), &boxman_entries, &nboxman_entries);
-
-         cnt1= 0;
-         for (i= 0; i< nboxman_entries; i++)
-         {
-            hypre_SStructBoxManEntryGetProcess(boxman_entries[i], &proc);
-            if (proc != myproc)
-            {
-               cnt1++;
-            }
-         }
-         send_processes[vars][ci]     = hypre_CTAlloc(HYPRE_Int,  cnt1, HYPRE_MEMORY_HOST);
-         send_remote_boxnums[vars][ci]= hypre_CTAlloc(HYPRE_Int,  cnt1, HYPRE_MEMORY_HOST);
-
-         cnt1= 0;
-         for (i= 0; i< nboxman_entries; i++)
-         {
-            hypre_BoxManEntryGetExtents(boxman_entries[i], ilower, iupper);
-            hypre_BoxSetExtents(&box, ilower, iupper);
-            hypre_IntersectBoxes(&box, &scaled_box, &box);
-
-            hypre_SStructBoxManEntryGetProcess(boxman_entries[i], &proc);
-            if (proc != myproc)
-            {
-               /* strech the box */
-               hypre_SubtractIndexes(hypre_BoxIMin(&box), index, 3,
-                                     hypre_BoxIMin(&box));
-               hypre_AddIndexes(hypre_BoxIMax(&box), index, 3, hypre_BoxIMax(&box));
-
-               hypre_AppendBox(&box,
-                               hypre_BoxArrayArrayBoxArray(send_boxes[vars], ci));
-
-               send_processes[vars][ci][cnt1]= proc;
-               hypre_SStructBoxManEntryGetBoxnum(
-                  boxman_entries[i], &send_remote_boxnums[vars][ci][cnt1]);
-               cnt1++;
-            }
-         }
-
-         hypre_TFree(boxman_entries, HYPRE_MEMORY_HOST);
-      }  /* hypre_ForBoxI(ci, boxarray) */
-   }    /* for (vars= 0; vars< nvars; vars++) */
-
-   /*--------------------------------------------------------------------------
-    * Can disgard temp_grid now- only needed it's box_man info,
-    *--------------------------------------------------------------------------*/
-   HYPRE_SStructGridDestroy(temp_grid);
 
    /*--------------------------------------------------------------------------
     * Can create the interlevel_comm.
@@ -621,6 +585,7 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
                           &interlevel_comm[vars]);
       hypre_CommInfoDestroy(comm_info);
    }
+   hypre_TFree(recv_nboxes, HYPRE_MEMORY_HOST);
    hypre_TFree(send_boxes, HYPRE_MEMORY_HOST);
    hypre_TFree(recv_boxes, HYPRE_MEMORY_HOST);
    hypre_TFree(send_processes, HYPRE_MEMORY_HOST);

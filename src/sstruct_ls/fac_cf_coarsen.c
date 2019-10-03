@@ -94,6 +94,9 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
    HYPRE_Real            **a_ptrs;
    hypre_Box              *A_dbox;
 
+   HYPRE_Int               ghlocal_size;
+   HYPRE_Int              *is_row_done;
+
    HYPRE_Int               part_crse= level-1;
    HYPRE_Int               part_fine= level;
  
@@ -109,6 +112,7 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
    hypre_Box              *cgrid_box;
    hypre_Index             node_extents;
    hypre_Index             stridec, stridef;
+   hypre_IndexRef          pshift;
 
    hypre_BoxArrayArray    *cinterface_arrays;
    hypre_BoxArray         *cinterface_array;
@@ -304,6 +308,10 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
          smatrix_var = hypre_SStructPMatrixSMatrix(A_pmatrix, var1, var1);
 
          a_ptrs   = hypre_TAlloc(HYPRE_Real *,  stencil_size, HYPRE_MEMORY_HOST);
+
+         ghlocal_size = hypre_StructGridGhlocalSize( hypre_StructMatrixGrid(smatrix_var) );
+         is_row_done = hypre_CTAlloc(HYPRE_Int,  ghlocal_size, HYPRE_MEMORY_HOST);
+
          hypre_ForBoxI(ci, cgrid_boxes)
          {
             cgrid_box= hypre_BoxArrayBox(cgrid_boxes, ci);
@@ -339,7 +347,10 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
 
                   hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                             A_dbox, node_extents, stridec, iA);
+                  if (!is_row_done[iA])
                   {
+                     is_row_done[iA] = 1;
+
                      zypre_BoxLoopGetIndex(lindex);
                      for (i= 0; i< stencil_size; i++)
                      {
@@ -413,22 +424,30 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
                               cols[i] = hypre_SStructUVEntryToRank(Uventry, temp1[i]);
                          
                               /* determine the stencil connection pattern */
-                              hypre_StructMapFineToCoarse(
-                                 hypre_SStructUVEntryToIndex(Uventry, temp1[i]),
-                                 zero_index, stridef, index2);
-                              hypre_SubtractIndexes(index2, index_temp,
-                                                    ndim, index1);
-                              MapStencilRank(index1, temp2[i]);
-
-                              /* zero off this stencil connection into the fbox */
-                              if (temp2[i] < max_stencil_size)
+                              /* check periodicity as well */
+                              for (j=0; j<hypre_StructGridNumPeriods(cgrid); j++)
                               {
-                                 j= rank_stencils[temp2[i]];
-                                 if (j >= 0)
+                                 pshift = hypre_StructGridPShift(cgrid, j);
+                                 hypre_AddIndexes(hypre_SStructUVEntryToIndex(Uventry, temp1[i]),
+                                                  pshift, ndim, index2);
+
+                                 hypre_StructMapFineToCoarse(index2, zero_index,
+                                                             stridef, index2);
+                                 hypre_SubtractIndexes(index2, index_temp,
+                                                       ndim, index1);
+                                 MapStencilRank(index1, temp2[i]);
+
+                                 /* zero off this stencil connection into the fbox */
+                                 if (0 <= temp2[i] && temp2[i] < max_stencil_size)
                                  {
-                                    a_ptrs[j][iA]= 0.0;
+                                    j= rank_stencils[temp2[i]];
+                                    if (j >= 0)
+                                    {
+                                       a_ptrs[j][iA]= 0.0;
+                                    }
                                  }
-                              }
+                                 break; // no need to look other periodicities
+                              } /* for (j=0; j<hypre_StructGridNumPeriods(fgrid); j++) */
                            }  /* for (i= 0; i< cnt1; i++) */
 
                            hypre_TFree(temp1, HYPRE_MEMORY_HOST);
@@ -446,7 +465,7 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
                            /* compute the connection to the coarsened fine box */
                            for (i= 0; i< cnt1; i++)
                            {
-                              if (temp2[i] < max_stencil_size)
+                              if (0 <= temp2[i] && temp2[i] < max_stencil_size)
                               {
                                  j= rank_stencils[temp2[i]];
                                  if (j >= 0)
@@ -476,6 +495,7 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
          }        /* hypre_ForBoxI(ci, cgrid_boxes) */
 
          hypre_TFree(a_ptrs, HYPRE_MEMORY_HOST);
+         hypre_TFree(is_row_done, HYPRE_MEMORY_HOST);
          hypre_TFree(stencil_ranks, HYPRE_MEMORY_HOST);
          hypre_TFree(rank_stencils, HYPRE_MEMORY_HOST);
       }   /* if (stencils != NULL) */
