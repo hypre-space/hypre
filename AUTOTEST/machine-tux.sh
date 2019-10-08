@@ -39,7 +39,7 @@ shift
 # Organizing the tests from "fast" to "slow"
 
 # Check license header info
-( cd $src_dir; make distclean )
+#( cd $src_dir; make distclean )
 ./test.sh check-license.sh $src_dir/..
 mv -f check-license.??? $output_dir
 
