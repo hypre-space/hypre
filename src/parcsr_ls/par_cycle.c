@@ -167,18 +167,22 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    num_coeffs = hypre_CTAlloc(HYPRE_Real,  num_levels, HYPRE_MEMORY_HOST);
    num_coeffs[0]    = hypre_ParCSRMatrixDNumNonzeros(A_array[0]);
    comm = hypre_ParCSRMatrixComm(A_array[0]);
-   hypre_MPI_Comm_rank(comm,&my_id);
+   hypre_MPI_Comm_rank(comm, &my_id);
 
    if (block_mode)
    {
       for (j = 1; j < num_levels; j++)
+      {
          num_coeffs[j] = hypre_ParCSRBlockMatrixNumNonzeros(A_block_array[j]);
+      }
 
    }
    else
    {
       for (j = 1; j < num_levels; j++)
+      {
          num_coeffs[j] = hypre_ParCSRMatrixDNumNonzeros(A_array[j]);
+      }
    }
 
    /*---------------------------------------------------------------------
@@ -240,7 +244,9 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
             hypre_ParVectorActualLocalSize(Utemp) = actual_local_size;
          }
          else
+         {
             hypre_ParVectorInitialize(Utemp);
+         }
       }
    }
 
@@ -348,7 +354,9 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                else
                {
                   if (old_version)
+                  {
                      relax_points = grid_relax_points[cycle_param][j];
+                  }
                   relax_local = relax_order;
                }
 
@@ -372,10 +380,10 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                {
                   cycle_op_count += num_coeffs[level];
                }
+
                /*-----------------------------------------------
                 Choose Smoother
                 -----------------------------------------------*/
-
                if (smooth_num_levels > level &&
                      (smooth_type == 7 || smooth_type == 8 ||
                       smooth_type == 9 || smooth_type == 19 ||
@@ -388,20 +396,26 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                   hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[level],
                                                      U_array[level], beta, Aux_F, Vtemp);
                   if (smooth_type == 8 || smooth_type == 18)
+                  {
                      HYPRE_ParCSRParaSailsSolve(smoother[level],
                                                 (HYPRE_ParCSRMatrix) A_array[level],
                                                 (HYPRE_ParVector) Vtemp,
                                                 (HYPRE_ParVector) Utemp);
+                  }
                   else if (smooth_type == 7 || smooth_type == 17)
+                  {
                      HYPRE_ParCSRPilutSolve(smoother[level],
                                             (HYPRE_ParCSRMatrix) A_array[level],
                                             (HYPRE_ParVector) Vtemp,
                                             (HYPRE_ParVector) Utemp);
+                  }
                   else if (smooth_type == 9 || smooth_type == 19)
+                  {
                      HYPRE_EuclidSolve(smoother[level],
                                        (HYPRE_ParCSRMatrix) A_array[level],
                                        (HYPRE_ParVector) Vtemp,
                                        (HYPRE_ParVector) Utemp);
+                  }
                   hypre_ParVectorAxpy(relax_weight[level],Utemp,Aux_U);
                }
                else if (smooth_num_levels > level &&
@@ -492,11 +506,13 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                else if (relax_type == 15)
                {  /* CG */
                   if (j ==0) /* do num sweep iterations of CG */
+                  {
                      hypre_ParCSRRelax_CG( smoother[level],
                                            A_array[level],
                                            Aux_F,
                                            Aux_U,
                                            num_sweep);
+                  }
                }
                else if (relax_type == 16)
                { /* scaled Chebyshev */
@@ -507,7 +523,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                                                 cheby_order, scale,
                                                 variant, Aux_U, Vtemp, Ztemp );
                }
-               else if (relax_type ==17)
+               else if (relax_type == 17)
                {
                   //printf("Proc %d: level %d, n %d, CF %p\n", my_id, level, local_size, CF_marker_array[level]);
                   if (level == num_levels - 1)
@@ -576,19 +592,25 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                }
 
                if (Solve_err_flag != 0)
+               {
                   return(Solve_err_flag);
+               }
             }
             if  (smooth_num_levels > level && smooth_type > 9)
             {
                gammaold = gamma;
                gamma = hypre_ParVectorInnerProd(Rtemp,Ztemp);
                if (jj == 0)
+               {
                   hypre_ParVectorCopy(Ztemp,Ptemp);
+               }
                else
                {
                   beta = gamma/gammaold;
                   for (i=0; i < local_size; i++)
+                  {
                      Ptemp_data[i] = Ztemp_data[i] + beta*Ptemp_data[i];
+                  }
                }
 
                hypre_ParCSRMatrixMatvec(1.0,A_array[level],Ptemp,0.0,Vtemp);
@@ -724,13 +746,16 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 
    hypre_TFree(lev_counter, HYPRE_MEMORY_HOST);
    hypre_TFree(num_coeffs, HYPRE_MEMORY_HOST);
+
    if (smooth_num_levels > 0)
    {
-      if (smooth_type == 7 || smooth_type == 8 || smooth_type == 9 ||
+      if (smooth_type ==  7 || smooth_type ==  8 || smooth_type ==  9 ||
           smooth_type == 17 || smooth_type == 18 || smooth_type == 19 )
+      {
          hypre_ParVectorDestroy(Utemp);
+      }
    }
-   //printf("HYPRE_BoomerAMGCycle END\n");
+
    return(Solve_err_flag);
 }
 
