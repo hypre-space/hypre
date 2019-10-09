@@ -42,6 +42,8 @@ void hypre_CudaCompileFlagCheck()
    }
 
    HYPRE_CUDA_CALL(cudaDeviceSynchronize());
+
+   hypre_TFree(cuda_arch, HYPRE_MEMORY_DEVICE);
 }
 
 void
@@ -239,7 +241,15 @@ hypreCUDAKernel_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_
    p = bstart - istart;
    for (i = istart + lane_id; i < iend; i += HYPRE_WARP_SIZE)
    {
-      d_jb[p+i] = d_col_map_offd_A[read_only_load(d_offd_j + i)];
+      if (d_col_map_offd_A)
+      {
+         d_jb[p+i] = d_col_map_offd_A[read_only_load(d_offd_j + i)];
+      }
+      else
+      {
+         d_jb[p+i] = -1 - read_only_load(d_offd_j + i);
+      }
+
       if (d_ab)
       {
          d_ab[p+i] = read_only_load(d_offd_a + i);
@@ -250,7 +260,8 @@ hypreCUDAKernel_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_
 
 /* B = A(row_indices, :) */
 /* d_ib is input that contains row ptrs, of length (nrows + 1) or nrow (without the last entry, nnz) */
-/* special case: if d_row_indices == NULL, it means d_row_indices=[0,1,...,nrows-1] */
+/* special case: if d_row_indices == NULL, it means d_row_indices=[0,1,...,nrows-1]
+ * if col_map_offd_A == NULL, use (-1 - d_offd_j) as column id*/
 HYPRE_Int
 hypreDevice_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int job, HYPRE_Int has_offd,
                            HYPRE_BigInt first_col, HYPRE_BigInt *d_col_map_offd_A,
@@ -580,6 +591,33 @@ hypreDevice_BigToSmallCopy(HYPRE_Int *tgt, const HYPRE_BigInt *src, HYPRE_Int si
 
    return hypre_error_flag;
 }
+
+
+/* https://github.com/OrangeOwlSolutions/Thrust/blob/master/Sort_by_key_with_tuple_key.cu */
+/* opt: 0, (a,b) <= (a',b') if and only if a < a' or (a = a' and  b  <=  b')
+ *      1, (a,b) <= (a',b') if and only if a < a' or (a = a' and |b| >= |b'|)
+ */
+template <typename T1, typename T2, typename T3>
+HYPRE_Int
+hypreDevice_StableSortByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *vals, HYPRE_Int opt)
+{
+   auto begin_keys = thrust::make_zip_iterator(thrust::make_tuple(keys1,     keys2));
+   auto end_keys   = thrust::make_zip_iterator(thrust::make_tuple(keys1 + N, keys2 + N));
+
+   if (opt == 0)
+   {
+      HYPRE_THRUST_CALL(stable_sort_by_key, begin_keys, end_keys, vals, TupleComp1<T1,T2>());
+   }
+   else if (opt == 1)
+   {
+      HYPRE_THRUST_CALL(stable_sort_by_key, begin_keys, end_keys, vals, TupleComp2<T1,T2>());
+   }
+
+   return hypre_error_flag;
+}
+
+template HYPRE_Int hypreDevice_StableSortByTupleKey(HYPRE_Int N, HYPRE_Int *keys1, HYPRE_Int  *keys2, HYPRE_Int *vals, HYPRE_Int opt);
+template HYPRE_Int hypreDevice_StableSortByTupleKey(HYPRE_Int N, HYPRE_Int *keys1, HYPRE_Real *keys2, HYPRE_Int *vals, HYPRE_Int opt);
 
 #endif // #if defined(HYPRE_USING_CUDA)
 
