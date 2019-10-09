@@ -1669,7 +1669,7 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
 HYPRE_Int
 hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
                                      HYPRE_Int            *CF_marker,
-                                     HYPRE_Int            *num_cpts_global,
+                                     HYPRE_BigInt         *num_cpts_global,
                                      HYPRE_Int             num_functions,
                                      HYPRE_Int            *dof_func,
                                      HYPRE_Int             NeumannDeg,
