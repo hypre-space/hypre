@@ -242,12 +242,12 @@ HYPRE_Init( hypre_int argc, char *argv[] )
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    hypre_SetDevice(-1, hypre_handle);
-#endif
 
    /* To include the cost of creating streams/cudahandles in HYPRE_Init */
    /* If not here, will be done at the first use */
    hypre_HandleCudaComputeStream(hypre_handle);
    hypre_HandleCudaPrefetchStream(hypre_handle);
+#endif
 
 #if defined(HYPRE_USING_CUBLAS)
    hypre_HandleCublasHandle(hypre_handle);
