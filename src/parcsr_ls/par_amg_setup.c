@@ -2692,14 +2692,20 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    else if (grid_relax_type[3] == 9 || grid_relax_type[3] == 99)  /*use of Gaussian elimination on coarsest level */
    {
       if (coarse_size <= coarse_threshold)
+      {
          hypre_GaussElimSetup(amg_data, level, grid_relax_type[3]);
+      }
       else
+      {
          grid_relax_type[3] = grid_relax_type[1];
+      }
    }
    else if (grid_relax_type[3] == 19 || grid_relax_type[3] == 98)  /*use of Gaussian elimination on coarsest level */
    {
       if (coarse_size > coarse_threshold)
+      {
          grid_relax_type[3] = grid_relax_type[1];
+      }
    }
 
    if (level > 0)
