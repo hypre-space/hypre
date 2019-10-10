@@ -575,7 +575,7 @@ void hypre_merge_lists (HYPRE_Int *list1, HYPRE_Int* list2, hypre_int *np1, hypr
       len1 = list1[1];
       len2 = list2[1];
       list2[1] = len1+len2;
-      if ((hypre_int)(list2[1]) > *np1+2)
+      if ((hypre_int)(list2[1]) > *np1+2) // RL:???
       {
          printf("segfault in MPI User function merge_list\n");
       }
