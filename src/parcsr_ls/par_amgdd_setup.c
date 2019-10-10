@@ -276,7 +276,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
 
    // If needed, find the transition level and initialize comp grids above and below the transition as appropriate
    if (use_barriers) hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
-   if (timers) hypre_BeginTiming(timers[8]);
+   if (timers) hypre_BeginTiming(timers[0]);
    if (use_transition_level)
    {
       transition_level = FindTransitionLevel(amg_data);
@@ -302,7 +302,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
          hypre_ParCompGridInitialize( amg_data, padding[level], level );
       }   
    }
-   if (timers) hypre_EndTiming(timers[8]);
+   if (timers) hypre_EndTiming(timers[0]);
 
    #if DEBUGGING_MESSAGES
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
@@ -312,7 +312,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
 
    // On each level, setup a long distance commPkg that has communication info for distance (eta + numGhostLayers)
    if (use_barriers) hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
-   if (timers) hypre_BeginTiming(timers[0]);
+   if (timers) hypre_BeginTiming(timers[1]);
    if (num_procs > 1)
    {
       for (level = amgdd_start_level; level < transition_level; level++)
@@ -400,7 +400,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
       hypre_TFree(global_stencil, HYPRE_MEMORY_HOST);
    }
 
-   if (timers) hypre_EndTiming(timers[0]);
+   if (timers) hypre_EndTiming(timers[1]);
 
    #if DEBUG_COMP_GRID == 2
    char filename[256];
@@ -457,7 +457,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
          recv_map_send_buffer_size = hypre_CTAlloc(HYPRE_Int, num_neighbor_partitions, HYPRE_MEMORY_HOST);
 
          if (use_barriers) hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
-         if (timers) hypre_BeginTiming(timers[1]);
+         if (timers) hypre_BeginTiming(timers[2]);
 
          // pack send buffers
          for (i = 0; i < num_neighbor_partitions; i++)
@@ -469,10 +469,10 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
                                              num_ghost_layers );
          }
 
-         if (timers) hypre_EndTiming(timers[1]);
+         if (timers) hypre_EndTiming(timers[2]);
 
          if (use_barriers) hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
-         if (timers) hypre_BeginTiming(timers[2]);
+         if (timers) hypre_BeginTiming(timers[3]);
 
          // post the receives for the buffer size
          for (i = 0; i < num_recv_procs; i++)
@@ -502,11 +502,6 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
          requests = hypre_CTAlloc(hypre_MPI_Request, num_send_procs + num_recv_procs, HYPRE_MEMORY_HOST );
          status = hypre_CTAlloc(hypre_MPI_Status, num_send_procs + num_recv_procs, HYPRE_MEMORY_HOST );
          request_counter = 0;
-
-         if (timers) hypre_EndTiming(timers[2]);
-
-         if (use_barriers) hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
-         if (timers) hypre_BeginTiming(timers[3]);
 
          // Communicate buffers 
          // allocate space for the receive buffers and post the receives
@@ -634,7 +629,6 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
             hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
             hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
             hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
-            hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
          }
       }
       #if DEBUGGING_MESSAGES
@@ -751,12 +745,20 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
    #endif
 
+   if (use_barriers) hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   if (timers) hypre_BeginTiming(timers[8]);
+
    // Finalize the comp grid structures
    hypre_ParCompGridFinalize(compGrid, compGridCommPkg, num_levels, transition_level, verify_amgdd);
 
    // Finalize the send flag and the recv
    FinalizeCompGridCommPkg(compGridCommPkg, compGrid);
    
+   // Setup extra info for specific relaxation methods
+   hypre_ParCompGridSetupRelax(amg_data);
+
+   if (timers) hypre_EndTiming(timers[8]);
+
    // Count up the cost for subsequent residual communications
    if (communication_cost)
    {
@@ -779,9 +781,6 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
          }
       }
    }
-
-   // Setup extra info for specific relaxation methods
-   hypre_ParCompGridSetupRelax(amg_data);
 
    // Cleanup memory
    hypre_TFree(num_resizes, HYPRE_MEMORY_HOST);
