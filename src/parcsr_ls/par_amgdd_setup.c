@@ -2654,7 +2654,8 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
          for (i = 0; i < hypre_ParCompGridNumOwnedBlocks(compGrid[level]); i++)
          {
             HYPRE_Int nodes_this_block = hypre_ParCompGridOwnedBlockStarts(compGrid[level])[i+1] - hypre_ParCompGridOwnedBlockStarts(compGrid[level])[i];
-            if (nodes_this_block)
+            if (nodes_this_block && hypre_ParCompGridNumNodes(compGrid[level]) > num_owned_nodes)
+            // if (nodes_this_block)
             {
                HYPRE_Int first_owned = hypre_ParCompGridGlobalIndices(compGrid[level])[ hypre_ParCompGridOwnedBlockStarts(compGrid[level])[i] ];
                HYPRE_Int last_owned = hypre_ParCompGridGlobalIndices(compGrid[level])[ hypre_ParCompGridOwnedBlockStarts(compGrid[level])[i+1] - 1 ];
@@ -2676,6 +2677,7 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
          // Generate the send_flag in global index ordering
          for (i = 0; i < hypre_ParCompGridNumOwnedBlocks(compGrid[level]); i++)
          {
+            // Non-owned dofs before the owned dofs
             for (j = insert_owned_positions[i]; j < insert_owned_positions[i+1]; j++)
             {
                if (add_flag[level][j] > num_ghost_layers)
@@ -2683,6 +2685,7 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
                else if (add_flag[level][j] > 0)
                   send_flag[current_level][partition][level][cnt++] = -(j+1);
             }
+            // Owned dofs
             for (j = hypre_ParCompGridOwnedBlockStarts(compGrid[level])[i]; j < hypre_ParCompGridOwnedBlockStarts(compGrid[level])[i+1]; j++)
             {
                if (add_flag[level][j] > num_ghost_layers)
@@ -2691,6 +2694,7 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
                   send_flag[current_level][partition][level][cnt++] = -(j+1);
             }
          }
+         // Non-owned dofs after the owned dofs
          for (j = insert_owned_positions[hypre_ParCompGridNumOwnedBlocks(compGrid[level])]; j < hypre_ParCompGridNumNodes(compGrid[level]); j++)
          {
                if (add_flag[level][j] > num_ghost_layers)
