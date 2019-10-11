@@ -746,9 +746,9 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix       *matrix,
             size = diag_i[row_local+1] - diag_i[row_local] +
                    offd_i[row_local+1] - offd_i[row_local];
 
-            if (n > size)  /* >>>>> Should we change this and allow this?
+            if (n > size)  /* Should we change this and allow this?
                               This could be same column index, i.e. only last
-                              value is set, previous ones overwritten. <<<< */
+                              value is set, previous ones overwritten. */
             {
                hypre_error(HYPRE_ERROR_GENERIC);
                if (print_level)
@@ -1218,9 +1218,9 @@ hypre_IJMatrixAddToValuesParCSR( hypre_IJMatrix       *matrix,
             size = diag_i[row_local+1] - diag_i[row_local] +
                    offd_i[row_local+1] - offd_i[row_local];
 
-            if (n > size)  /* >>>>> Should we change this and allow this?
+            if (n > size)  /* Should we change this and allow this?
                               This could be same column index, i.e. only last
-                              value is set, previous ones overwritten. <<<< */
+                              value is set, previous ones overwritten. */
             {
                hypre_error(HYPRE_ERROR_GENERIC);
                if (print_level)
@@ -2417,7 +2417,7 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix,
          recv_data_ptr = (void *) ((char *)recv_data_ptr + obj_size_bytes);
          indx++;
 
-         /* col indices */ /* Need to check this again !!!! >>>>>>> */
+         /* col indices */ /* Need to check this again !!!! */
          if (big_int_size == obj_size_bytes)
          {
             col_ptr = (HYPRE_BigInt *) recv_data_ptr;

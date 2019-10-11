@@ -362,9 +362,10 @@ hypre_BoomerAMGInterpTruncationDevice( hypre_ParCSRMatrix *P, HYPRE_Real trunc_f
       /* truncate with trunc_factor, return number of remaining elements/row in P_aux_diag_i and P_aux_offd_i */
       P_aux_diag_i = hypre_CTAlloc(HYPRE_Int, n_fine+1, HYPRE_MEMORY_SHARED);
       P_aux_offd_i = hypre_CTAlloc(HYPRE_Int, n_fine+1, HYPRE_MEMORY_SHARED);
-      hypre_BoomerAMGInterpTruncationDevice_dev1<<<grid,block>>>( n_fine, P_diag_i, P_diag_j, P_diag_data,
-            P_offd_i, P_offd_j, P_offd_data,
-            P_aux_diag_i, P_aux_offd_i, trunc_factor);
+      HYPRE_CUDA_LAUNCH( hypre_BoomerAMGInterpTruncationDevice_dev1, grid, block,
+                         n_fine, P_diag_i, P_diag_j, P_diag_data,
+                         P_offd_i, P_offd_j, P_offd_data,
+                         P_aux_diag_i, P_aux_offd_i, trunc_factor );
       truncated = true;
    }
 
@@ -375,7 +376,8 @@ hypre_BoomerAMGInterpTruncationDevice( hypre_ParCSRMatrix *P, HYPRE_Real trunc_f
          /* If not previously truncated, set up P_aux_diag_i and P_aux_offd_i with full number of elements/row */
          P_aux_diag_i = hypre_CTAlloc(HYPRE_Int, n_fine+1, HYPRE_MEMORY_SHARED);
          P_aux_offd_i = hypre_CTAlloc(HYPRE_Int, n_fine+1, HYPRE_MEMORY_SHARED);
-         hypre_BoomerAMGInterpTruncationDevice_dev2<<<grid,block >>>( n_fine, P_diag_i, P_offd_i, P_aux_diag_i, P_aux_offd_i );
+         HYPRE_CUDA_LAUNCH( hypre_BoomerAMGInterpTruncationDevice_dev2, grid,block,
+                            n_fine, P_diag_i, P_offd_i, P_aux_diag_i, P_aux_offd_i );
       }
       nel_per_row = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
       HYPRE_THRUST_CALL(transform,&P_aux_diag_i[0],&P_aux_diag_i[n_fine],&P_aux_offd_i[0],&nel_per_row[0],thrust::plus<HYPRE_Int>() );
@@ -391,9 +393,10 @@ hypre_BoomerAMGInterpTruncationDevice( hypre_ParCSRMatrix *P, HYPRE_Real trunc_f
       if( mx_row > max_elmts )
       {
        /* Truncate with respect to maximum number of elements per row */
-         hypre_BoomerAMGInterpTruncationDevice_dev3<<<grid,block>>>( n_fine, P_diag_i, P_diag_j, P_diag_data,
-               P_offd_i, P_offd_j, P_offd_data, P_aux_diag_i,
-               P_aux_offd_i, max_elmts );
+         HYPRE_CUDA_LAUNCH( hypre_BoomerAMGInterpTruncationDevice_dev3, grid, block,
+                            n_fine, P_diag_i, P_diag_j, P_diag_data,
+                            P_offd_i, P_offd_j, P_offd_data, P_aux_diag_i,
+                            P_aux_offd_i, max_elmts );
          truncated = true;
       }
    }
@@ -412,10 +415,11 @@ hypre_BoomerAMGInterpTruncationDevice( hypre_ParCSRMatrix *P, HYPRE_Real trunc_f
       P_offd_j_new    = hypre_CTAlloc(HYPRE_Int,  P_offd_size, HYPRE_MEMORY_SHARED);
       P_offd_data_new = hypre_CTAlloc(HYPRE_Real, P_offd_size, HYPRE_MEMORY_SHARED);
 
-      hypre_BoomerAMGInterpTruncationDevice_dev4<<<grid,block>>>( n_fine, P_diag_i, P_diag_j, P_diag_data, P_aux_diag_i,
-            P_diag_j_new, P_diag_data_new,
-            P_offd_i, P_offd_j, P_offd_data, P_aux_offd_i,
-            P_offd_j_new, P_offd_data_new );
+      HYPRE_CUDA_LAUNCH( hypre_BoomerAMGInterpTruncationDevice_dev4, grid,block,
+                         n_fine, P_diag_i, P_diag_j, P_diag_data, P_aux_diag_i,
+                         P_diag_j_new, P_diag_data_new,
+                         P_offd_i, P_offd_j, P_offd_data, P_aux_offd_i,
+                         P_offd_j_new, P_offd_data_new );
       cudaDeviceSynchronize();
 
       //      P_diag_i[n_fine] = P_diag_size ;

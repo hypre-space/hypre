@@ -162,8 +162,8 @@ HYPRE_Int
 hypreDevice_GetRowNnz(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int *d_diag_ia, HYPRE_Int *d_offd_ia,
                       HYPRE_Int *d_rownnz)
 {
-   HYPRE_Int bDim = 512;
-   HYPRE_Int gDim = (nrows + bDim - 1) / bDim;
+   const dim3 bDim = hypre_GetDefaultCUDABlockDimension();
+   const dim3 gDim = hypre_GetDefaultCUDAGridDimension(nrows, "thread", bDim);
 
    /* trivial case */
    if (nrows <= 0)
@@ -171,7 +171,7 @@ hypreDevice_GetRowNnz(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int *d_di
       return hypre_error_flag;
    }
 
-   hypreCUDAKernel_GetRowNnz<<<gDim, bDim>>>(nrows, d_row_indices, d_diag_ia, d_offd_ia, d_rownnz);
+   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_GetRowNnz, gDim, bDim, nrows, d_row_indices, d_diag_ia, d_offd_ia, d_rownnz );
 
    return hypre_error_flag;
 }
@@ -276,8 +276,8 @@ hypreDevice_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int 
    }
 
    HYPRE_Int num_warps_per_block = 16;
-   dim3 bDim(HYPRE_WARP_SIZE, num_warps_per_block);
-   HYPRE_Int gDim = (nrows + num_warps_per_block - 1) / num_warps_per_block;
+   const dim3 bDim(HYPRE_WARP_SIZE, num_warps_per_block);
+   const dim3 gDim((nrows + num_warps_per_block - 1) / num_warps_per_block);
 
    /*
    if (job == 2)
@@ -285,10 +285,11 @@ hypreDevice_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int 
    }
    */
 
-   hypreCUDAKernel_CopyParCSRRows<<<gDim, bDim>>> (nrows, d_row_indices, has_offd, first_col, d_col_map_offd_A,
-                                                   d_diag_i, d_diag_j, d_diag_a,
-                                                   d_offd_i, d_offd_j, d_offd_a,
-                                                   d_ib, d_jb, d_ab);
+   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_CopyParCSRRows, gDim, bDim,
+                      nrows, d_row_indices, has_offd, first_col, d_col_map_offd_A,
+                      d_diag_i, d_diag_j, d_diag_a,
+                      d_offd_i, d_offd_j, d_offd_a,
+                      d_ib, d_jb, d_ab );
 
    return hypre_error_flag;
 }
@@ -363,10 +364,11 @@ hypreDevice_CsrRowPtrsToIndices(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row
    HYPRE_Int *d_row_ind = hypre_TAlloc(HYPRE_Int, nnz, HYPRE_MEMORY_DEVICE);
 
    HYPRE_Int num_warps_per_block = 16;
-   dim3 bDim(HYPRE_WARP_SIZE, num_warps_per_block);
-   HYPRE_Int gDim = (nrows + num_warps_per_block - 1) / num_warps_per_block;
+   const dim3 bDim(HYPRE_WARP_SIZE, num_warps_per_block);
+   const dim3 gDim((nrows + num_warps_per_block - 1) / num_warps_per_block);
 
-   hypreCUDAKernel_CsrRowPtrsToIndices<<<gDim, bDim>>> (nrows, d_row_ptr, NULL, d_row_ind);
+   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_CsrRowPtrsToIndices, gDim, bDim,
+                      nrows, d_row_ptr, NULL, d_row_ind );
 
    return d_row_ind;
 }
@@ -381,10 +383,11 @@ hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int *d_row_ptr, HYPRE_
    }
 
    HYPRE_Int num_warps_per_block = 16;
-   dim3 bDim(HYPRE_WARP_SIZE, num_warps_per_block);
-   HYPRE_Int gDim = (nrows + num_warps_per_block - 1) / num_warps_per_block;
+   const dim3 bDim(HYPRE_WARP_SIZE, num_warps_per_block);
+   const dim3 gDim((nrows + num_warps_per_block - 1) / num_warps_per_block);
 
-   hypreCUDAKernel_CsrRowPtrsToIndices<<<gDim, bDim>>> (nrows, d_row_ptr, NULL, d_row_ind);
+   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_CsrRowPtrsToIndices, gDim, bDim,
+                      nrows, d_row_ptr, NULL, d_row_ind );
 
    return hypre_error_flag;
 }
@@ -399,10 +402,11 @@ hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int *d_row_ptr,
    }
 
    HYPRE_Int num_warps_per_block = 16;
-   dim3 bDim(HYPRE_WARP_SIZE, num_warps_per_block);
-   HYPRE_Int gDim = (nrows + num_warps_per_block - 1) / num_warps_per_block;
+   const dim3 bDim(HYPRE_WARP_SIZE, num_warps_per_block);
+   const dim3 gDim((nrows + num_warps_per_block - 1) / num_warps_per_block);
 
-   hypreCUDAKernel_CsrRowPtrsToIndices<<<gDim, bDim>>> (nrows, d_row_ptr, d_row_num, d_row_ind);
+   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_CsrRowPtrsToIndices, gDim, bDim,
+                      nrows, d_row_ptr, d_row_num, d_row_ind );
 
    return hypre_error_flag;
 }

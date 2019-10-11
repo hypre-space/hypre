@@ -2212,7 +2212,8 @@ struct ReduceSum
       T val;
       /* 2nd reduction with only *one* block */
       assert(nblocks >= 0 && nblocks <= 1024);
-      OneBlockReduceKernel<<<1, 1024>>>(d_buf, nblocks);
+      const dim3 gDim(1), bDim(1024);
+      HYPRE_CUDA_LAUNCH( OneBlockReduceKernel, gDim, bDim, d_buf, nblocks );
       hypre_TMemcpy(&val, d_buf, T, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
       val += init;
 

@@ -573,7 +573,7 @@ hypre_Memset(void *ptr, HYPRE_Int value, size_t num, HYPRE_Int location)
          memset(ptr, value, num);
          HYPRE_OMPOffload(hypre__offload_device_num, ptr, num, "update", "to");
 #elif defined(HYPRE_USING_CUDA)
-         cudaMemset(ptr, value, num);
+         HYPRE_CUDA_CALL( cudaMemset(ptr, value, num) );
 #endif
          break;
       case HYPRE_MEMORY_SHARED :
