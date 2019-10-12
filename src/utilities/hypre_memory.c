@@ -595,10 +595,10 @@ hypre_GetMemoryLocation(const void *ptr, HYPRE_Int *memory_location)
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    struct cudaPointerAttributes attr;
-   const cudaError_t err = cudaPointerGetAttributes(&attr, ptr);
    *memory_location = HYPRE_MEMORY_UNSET;
-#if (CUDA_VERSION >= 10000)
-   HYPRE_CUDA_CALL( err );
+
+#if (CUDART_VERSION >= 10000)
+   HYPRE_CUDA_CALL( cudaPointerGetAttributes(&attr, ptr) );
    if (attr.type == cudaMemoryTypeUnregistered)
    {
       *memory_location = HYPRE_MEMORY_HOST;
@@ -616,6 +616,7 @@ hypre_GetMemoryLocation(const void *ptr, HYPRE_Int *memory_location)
       *memory_location = HYPRE_MEMORY_SHARED;
    }
 #else
+   cudaError_t err = cudaPointerGetAttributes(&attr, ptr);
    if (err != cudaSuccess)
    {
       ierr = 1;
@@ -641,6 +642,7 @@ hypre_GetMemoryLocation(const void *ptr, HYPRE_Int *memory_location)
       *memory_location = HYPRE_MEMORY_HOST_PINNED;
    }
 #endif
+
 #else /* #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP) */
    *memory_location = HYPRE_MEMORY_HOST;
 #endif
