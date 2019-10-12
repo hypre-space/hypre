@@ -835,7 +835,7 @@ void ReductionBoxLoopforall(HYPRE_Int policy, HYPRE_Int length, LOOP_BODY Reduct
                    length, BLOCKSIZE, gridSize);
       */
       const dim3 gDim(gridSize), bDim(BLOCKSIZE);
-      HYPRE_CUDA_LAUNCH( reductionforall_kernel, gDim, gDim, ReductionLoop, length );
+      HYPRE_CUDA_LAUNCH( reductionforall_kernel, gDim, bDim, ReductionLoop, length );
    }
 }
 
