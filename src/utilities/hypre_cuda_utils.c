@@ -46,48 +46,6 @@ void hypre_CudaCompileFlagCheck()
    hypre_TFree(cuda_arch, HYPRE_MEMORY_DEVICE);
 }
 
-void
-PrintPointerAttributes(const void *ptr)
-{
-   struct cudaPointerAttributes ptr_att;
-   if (cudaPointerGetAttributes(&ptr_att,ptr) != cudaSuccess)
-   {
-      cudaGetLastError();  // Required to reset error flag on device
-      fprintf(stderr,"PrintPointerAttributes:: Raw pointer %p\n",ptr);
-   }
-
-   if (ptr_att.isManaged)
-   {
-      fprintf(stderr,"PrintPointerAttributes:: Managed pointer\n");
-      fprintf(stderr,"Host address = %p, Device Address = %p\n",ptr_att.hostPointer, ptr_att.devicePointer);
-      if (ptr_att.memoryType==cudaMemoryTypeHost) fprintf(stderr,"Memory is located on host\n");
-      if (ptr_att.memoryType==cudaMemoryTypeDevice) fprintf(stderr,"Memory is located on device\n");
-      fprintf(stderr,"Device associated with this pointer is %d\n",ptr_att.device);
-   }
-   else
-   {
-      fprintf(stderr,"PrintPointerAttributes:: Non-Managed & non-raw pointer\n Probably pinned host pointer\n");
-      if (ptr_att.memoryType==cudaMemoryTypeHost)
-      {
-         fprintf(stderr,"Memory is located on host\n");
-      }
-      if (ptr_att.memoryType==cudaMemoryTypeDevice) {
-         fprintf(stderr,"Memory is located on device\n");
-      }
-   }
-}
-
-HYPRE_Int pointerIsManaged(const void *ptr)
-{
-  struct cudaPointerAttributes ptr_att;
-  if (cudaPointerGetAttributes(&ptr_att, ptr) != cudaSuccess)
-  {
-     cudaGetLastError();
-     return 0;
-  }
-  return ptr_att.isManaged;
-}
-
 dim3
 hypre_GetDefaultCUDABlockDimension()
 {

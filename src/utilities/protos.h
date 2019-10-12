@@ -324,13 +324,7 @@ HYPRE_Int hypreDevice_DiagScaleVector(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex
 
 HYPRE_Int hypreDevice_BigToSmallCopy(HYPRE_Int *tgt, const HYPRE_BigInt *src, HYPRE_Int size);
 
-HYPRE_Int pointerIsManaged(const void *ptr);
-
-/* gpuMem.c */
-
-/* gpuErrorCheck.c */
 void hypre_CudaCompileFlagCheck();
-void PrintPointerAttributes(const void *ptr);
 
 #endif
 
