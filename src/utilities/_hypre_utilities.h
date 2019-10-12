@@ -646,7 +646,6 @@ void * hypre_ReAlloc(void *ptr, size_t size, HYPRE_Int location);
 void   hypre_Memcpy(void *dst, void *src, size_t size, HYPRE_Int loc_dst, HYPRE_Int loc_src);
 void * hypre_Memset(void *ptr, HYPRE_Int value, size_t num, HYPRE_Int location);
 void   hypre_Free(void *ptr, HYPRE_Int location);
-
 HYPRE_Int hypre_GetMemoryLocation(const void *ptr, HYPRE_Int *memory_location);
 
 /* memory_dmalloc.c */
@@ -1118,6 +1117,14 @@ extern "C++" {
 #include <cublas_v2.h>
 #include <cusparse.h>
 
+#ifndef CUDART_VERSION
+#error CUDART_VERSION Undefined!
+#endif
+
+#ifndef CUDA_VERSION
+#error CUDA_VERSION Undefined!
+#endif
+
 #if defined(HYPRE_USING_CUDA)
 #include <thrust/execution_policy.h>
 #include <thrust/system/cuda/execution_policy.h>
@@ -1337,11 +1344,7 @@ hypre_int hypre_cuda_get_grid_warp_id()
           hypre_cuda_get_warp_id<bdim>();
 }
 
-#ifndef CUDART_VERSION
-#error CUDART_VERSION Undefined!
-#endif
-
-#if CUDART_VERSION < 9000
+#if CUDA_VERSION < 9000
 
 template <typename T>
 static __device__ __forceinline__

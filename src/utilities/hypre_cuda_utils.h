@@ -23,6 +23,14 @@ extern "C++" {
 #include <cublas_v2.h>
 #include <cusparse.h>
 
+#ifndef CUDART_VERSION
+#error CUDART_VERSION Undefined!
+#endif
+
+#ifndef CUDA_VERSION
+#error CUDA_VERSION Undefined!
+#endif
+
 #if defined(HYPRE_USING_CUDA)
 #include <thrust/execution_policy.h>
 #include <thrust/system/cuda/execution_policy.h>
@@ -242,11 +250,7 @@ hypre_int hypre_cuda_get_grid_warp_id()
           hypre_cuda_get_warp_id<bdim>();
 }
 
-#ifndef CUDART_VERSION
-#error CUDART_VERSION Undefined!
-#endif
-
-#if CUDART_VERSION < 9000
+#if CUDA_VERSION < 9000
 
 template <typename T>
 static __device__ __forceinline__
