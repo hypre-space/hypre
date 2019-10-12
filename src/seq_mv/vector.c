@@ -638,6 +638,5 @@ hypre_SeqVectorPrefetch( hypre_Vector *x, HYPRE_Int to_location)
 
 //hypre_int hypre_SeqVectorIsManaged(hypre_Vector *x)
 //{
-//   return pointerIsManaged((void*)hypre_VectorData(x));
 //}
 
