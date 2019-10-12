@@ -139,43 +139,8 @@ hypre_BoomerAMGInterpTruncationDevice( hypre_ParCSRMatrix *P, HYPRE_Real trunc_f
    hypre_TMemcpy(P_a,            P_diag_a, HYPRE_Real, nnz_diag, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
    hypre_TMemcpy(P_a + nnz_diag, P_offd_a, HYPRE_Real, nnz_offd, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
-   /*
-   printf("Proc %d: %d %d %d\n", my_id, nnz_diag, nnz_offd, nnz_P);
-   if (my_id == 0)
-   {
-   HYPRE_Int  *tmp = hypre_TAlloc(HYPRE_Int,  nnz_P, HYPRE_MEMORY_HOST);
-   HYPRE_Real *tmd = hypre_TAlloc(HYPRE_Real, nnz_P, HYPRE_MEMORY_HOST);
-   int i;
-   hypre_TMemcpy(tmp, P_i, HYPRE_Int, nnz_P, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-   for (i = 0; i < nnz_P; i++) printf(" %4d", tmp[i]); printf("\n");
-   hypre_TMemcpy(tmp, P_j, HYPRE_Int, nnz_P, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-   for (i = 0; i < nnz_P; i++) printf(" %4d", tmp[i]); printf("\n");
-   hypre_TMemcpy(tmd, P_a, HYPRE_Real, nnz_P, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-   for (i = 0; i < nnz_P; i++) printf(" %.2f", tmd[i]); printf("\n");
-   cudaDeviceSynchronize();
-   printf("\n\n");
-   }
-   */
-
    /* sort rows based on (rowind, abs(P_a)) */
    hypreDevice_StableSortByTupleKey(nnz_P, P_i, P_a, P_j, 1);
-
-   /*
-   if (my_id == 0)
-   {
-   HYPRE_Int  *tmp = hypre_TAlloc(HYPRE_Int,  nnz_P, HYPRE_MEMORY_HOST);
-   HYPRE_Real *tmd = hypre_TAlloc(HYPRE_Real, nnz_P, HYPRE_MEMORY_HOST);
-   int i;
-   hypre_TMemcpy(tmp, P_i, HYPRE_Int, nnz_P, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-   for (i = 0; i < nnz_P; i++) printf(" %4d", tmp[i]); printf("\n");
-   hypre_TMemcpy(tmp, P_j, HYPRE_Int, nnz_P, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-   for (i = 0; i < nnz_P; i++) printf(" %4d", tmp[i]); printf("\n");
-   hypre_TMemcpy(tmd, P_a, HYPRE_Real, nnz_P, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-   for (i = 0; i < nnz_P; i++) printf(" %.2f", tmd[i]); printf("\n");
-   cudaDeviceSynchronize();
-   printf("\n\n");
-   }
-   */
 
    hypreDevice_CsrRowIndicesToPtrs_v2(nrows, nnz_P, P_i, P_rowptr);
 
