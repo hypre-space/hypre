@@ -42,48 +42,8 @@ void hypre_CudaCompileFlagCheck()
    }
 
    HYPRE_CUDA_CALL(cudaDeviceSynchronize());
-}
 
-void
-PrintPointerAttributes(const void *ptr)
-{
-   struct cudaPointerAttributes ptr_att;
-   if (cudaPointerGetAttributes(&ptr_att,ptr) != cudaSuccess)
-   {
-      cudaGetLastError();  // Required to reset error flag on device
-      fprintf(stderr,"PrintPointerAttributes:: Raw pointer %p\n",ptr);
-   }
-
-   if (ptr_att.isManaged)
-   {
-      fprintf(stderr,"PrintPointerAttributes:: Managed pointer\n");
-      fprintf(stderr,"Host address = %p, Device Address = %p\n",ptr_att.hostPointer, ptr_att.devicePointer);
-      if (ptr_att.memoryType==cudaMemoryTypeHost) fprintf(stderr,"Memory is located on host\n");
-      if (ptr_att.memoryType==cudaMemoryTypeDevice) fprintf(stderr,"Memory is located on device\n");
-      fprintf(stderr,"Device associated with this pointer is %d\n",ptr_att.device);
-   }
-   else
-   {
-      fprintf(stderr,"PrintPointerAttributes:: Non-Managed & non-raw pointer\n Probably pinned host pointer\n");
-      if (ptr_att.memoryType==cudaMemoryTypeHost)
-      {
-         fprintf(stderr,"Memory is located on host\n");
-      }
-      if (ptr_att.memoryType==cudaMemoryTypeDevice) {
-         fprintf(stderr,"Memory is located on device\n");
-      }
-   }
-}
-
-HYPRE_Int pointerIsManaged(const void *ptr)
-{
-  struct cudaPointerAttributes ptr_att;
-  if (cudaPointerGetAttributes(&ptr_att, ptr) != cudaSuccess)
-  {
-     cudaGetLastError();
-     return 0;
-  }
-  return ptr_att.isManaged;
+   hypre_TFree(cuda_arch, HYPRE_MEMORY_DEVICE);
 }
 
 dim3
@@ -160,8 +120,8 @@ HYPRE_Int
 hypreDevice_GetRowNnz(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int *d_diag_ia, HYPRE_Int *d_offd_ia,
                       HYPRE_Int *d_rownnz)
 {
-   HYPRE_Int bDim = 512;
-   HYPRE_Int gDim = (nrows + bDim - 1) / bDim;
+   const dim3 bDim = hypre_GetDefaultCUDABlockDimension();
+   const dim3 gDim = hypre_GetDefaultCUDAGridDimension(nrows, "thread", bDim);
 
    /* trivial case */
    if (nrows <= 0)
@@ -169,7 +129,7 @@ hypreDevice_GetRowNnz(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int *d_di
       return hypre_error_flag;
    }
 
-   hypreCUDAKernel_GetRowNnz<<<gDim, bDim>>>(nrows, d_row_indices, d_diag_ia, d_offd_ia, d_rownnz);
+   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_GetRowNnz, gDim, bDim, nrows, d_row_indices, d_diag_ia, d_offd_ia, d_rownnz );
 
    return hypre_error_flag;
 }
@@ -239,7 +199,15 @@ hypreCUDAKernel_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_
    p = bstart - istart;
    for (i = istart + lane_id; i < iend; i += HYPRE_WARP_SIZE)
    {
-      d_jb[p+i] = d_col_map_offd_A[read_only_load(d_offd_j + i)];
+      if (d_col_map_offd_A)
+      {
+         d_jb[p+i] = d_col_map_offd_A[read_only_load(d_offd_j + i)];
+      }
+      else
+      {
+         d_jb[p+i] = -1 - read_only_load(d_offd_j + i);
+      }
+
       if (d_ab)
       {
          d_ab[p+i] = read_only_load(d_offd_a + i);
@@ -250,7 +218,8 @@ hypreCUDAKernel_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_
 
 /* B = A(row_indices, :) */
 /* d_ib is input that contains row ptrs, of length (nrows + 1) or nrow (without the last entry, nnz) */
-/* special case: if d_row_indices == NULL, it means d_row_indices=[0,1,...,nrows-1] */
+/* special case: if d_row_indices == NULL, it means d_row_indices=[0,1,...,nrows-1]
+ * if col_map_offd_A == NULL, use (-1 - d_offd_j) as column id*/
 HYPRE_Int
 hypreDevice_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int job, HYPRE_Int has_offd,
                            HYPRE_BigInt first_col, HYPRE_BigInt *d_col_map_offd_A,
@@ -265,8 +234,8 @@ hypreDevice_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int 
    }
 
    HYPRE_Int num_warps_per_block = 16;
-   dim3 bDim(HYPRE_WARP_SIZE, num_warps_per_block);
-   HYPRE_Int gDim = (nrows + num_warps_per_block - 1) / num_warps_per_block;
+   const dim3 bDim(HYPRE_WARP_SIZE, num_warps_per_block);
+   const dim3 gDim((nrows + num_warps_per_block - 1) / num_warps_per_block);
 
    /*
    if (job == 2)
@@ -274,10 +243,11 @@ hypreDevice_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int 
    }
    */
 
-   hypreCUDAKernel_CopyParCSRRows<<<gDim, bDim>>> (nrows, d_row_indices, has_offd, first_col, d_col_map_offd_A,
-                                                   d_diag_i, d_diag_j, d_diag_a,
-                                                   d_offd_i, d_offd_j, d_offd_a,
-                                                   d_ib, d_jb, d_ab);
+   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_CopyParCSRRows, gDim, bDim,
+                      nrows, d_row_indices, has_offd, first_col, d_col_map_offd_A,
+                      d_diag_i, d_diag_j, d_diag_a,
+                      d_offd_i, d_offd_j, d_offd_a,
+                      d_ib, d_jb, d_ab );
 
    return hypre_error_flag;
 }
@@ -352,10 +322,11 @@ hypreDevice_CsrRowPtrsToIndices(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row
    HYPRE_Int *d_row_ind = hypre_TAlloc(HYPRE_Int, nnz, HYPRE_MEMORY_DEVICE);
 
    HYPRE_Int num_warps_per_block = 16;
-   dim3 bDim(HYPRE_WARP_SIZE, num_warps_per_block);
-   HYPRE_Int gDim = (nrows + num_warps_per_block - 1) / num_warps_per_block;
+   const dim3 bDim(HYPRE_WARP_SIZE, num_warps_per_block);
+   const dim3 gDim((nrows + num_warps_per_block - 1) / num_warps_per_block);
 
-   hypreCUDAKernel_CsrRowPtrsToIndices<<<gDim, bDim>>> (nrows, d_row_ptr, NULL, d_row_ind);
+   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_CsrRowPtrsToIndices, gDim, bDim,
+                      nrows, d_row_ptr, NULL, d_row_ind );
 
    return d_row_ind;
 }
@@ -370,10 +341,11 @@ hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int *d_row_ptr, HYPRE_
    }
 
    HYPRE_Int num_warps_per_block = 16;
-   dim3 bDim(HYPRE_WARP_SIZE, num_warps_per_block);
-   HYPRE_Int gDim = (nrows + num_warps_per_block - 1) / num_warps_per_block;
+   const dim3 bDim(HYPRE_WARP_SIZE, num_warps_per_block);
+   const dim3 gDim((nrows + num_warps_per_block - 1) / num_warps_per_block);
 
-   hypreCUDAKernel_CsrRowPtrsToIndices<<<gDim, bDim>>> (nrows, d_row_ptr, NULL, d_row_ind);
+   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_CsrRowPtrsToIndices, gDim, bDim,
+                      nrows, d_row_ptr, NULL, d_row_ind );
 
    return hypre_error_flag;
 }
@@ -388,10 +360,11 @@ hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int *d_row_ptr,
    }
 
    HYPRE_Int num_warps_per_block = 16;
-   dim3 bDim(HYPRE_WARP_SIZE, num_warps_per_block);
-   HYPRE_Int gDim = (nrows + num_warps_per_block - 1) / num_warps_per_block;
+   const dim3 bDim(HYPRE_WARP_SIZE, num_warps_per_block);
+   const dim3 gDim((nrows + num_warps_per_block - 1) / num_warps_per_block);
 
-   hypreCUDAKernel_CsrRowPtrsToIndices<<<gDim, bDim>>> (nrows, d_row_ptr, d_row_num, d_row_ind);
+   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_CsrRowPtrsToIndices, gDim, bDim,
+                      nrows, d_row_ptr, d_row_num, d_row_ind );
 
    return hypre_error_flag;
 }
@@ -580,6 +553,33 @@ hypreDevice_BigToSmallCopy(HYPRE_Int *tgt, const HYPRE_BigInt *src, HYPRE_Int si
 
    return hypre_error_flag;
 }
+
+
+/* https://github.com/OrangeOwlSolutions/Thrust/blob/master/Sort_by_key_with_tuple_key.cu */
+/* opt: 0, (a,b) <= (a',b') if and only if a < a' or (a = a' and  b  <=  b')
+ *      1, (a,b) <= (a',b') if and only if a < a' or (a = a' and |b| >= |b'|)
+ */
+template <typename T1, typename T2, typename T3>
+HYPRE_Int
+hypreDevice_StableSortByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *vals, HYPRE_Int opt)
+{
+   auto begin_keys = thrust::make_zip_iterator(thrust::make_tuple(keys1,     keys2));
+   auto end_keys   = thrust::make_zip_iterator(thrust::make_tuple(keys1 + N, keys2 + N));
+
+   if (opt == 0)
+   {
+      HYPRE_THRUST_CALL(stable_sort_by_key, begin_keys, end_keys, vals, TupleComp1<T1,T2>());
+   }
+   else if (opt == 1)
+   {
+      HYPRE_THRUST_CALL(stable_sort_by_key, begin_keys, end_keys, vals, TupleComp2<T1,T2>());
+   }
+
+   return hypre_error_flag;
+}
+
+template HYPRE_Int hypreDevice_StableSortByTupleKey(HYPRE_Int N, HYPRE_Int *keys1, HYPRE_Int  *keys2, HYPRE_Int *vals, HYPRE_Int opt);
+template HYPRE_Int hypreDevice_StableSortByTupleKey(HYPRE_Int N, HYPRE_Int *keys1, HYPRE_Real *keys2, HYPRE_Int *vals, HYPRE_Int opt);
 
 #endif // #if defined(HYPRE_USING_CUDA)
 

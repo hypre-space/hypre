@@ -905,9 +905,6 @@ hypre_CSRMatrixPrefetch( hypre_CSRMatrix *A, HYPRE_Int to_location )
 /*
 HYPRE_Int hypre_CSRMatrixIsManaged(hypre_CSRMatrix *a)
 {
-  return ( (pointerIsManaged((void*)hypre_CSRMatrixData(a))) &&
-           (pointerIsManaged((void*)hypre_CSRMatrixI(a))) &&
-           (pointerIsManaged((void*)hypre_CSRMatrixJ(a))) );
 }
 */
 

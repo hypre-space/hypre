@@ -185,6 +185,8 @@ HYPRE_Int hypre_GaussElimSetup (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
       }
    }
 
+   hypre_ParAMGDataGSSetup(amg_data) = 1;
+
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_GS_ELIM_SETUP] += hypre_MPI_Wtime();
 #endif
@@ -203,6 +205,11 @@ HYPRE_Int hypre_GaussElimSolve (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
    HYPRE_Int n = hypre_CSRMatrixNumRows(A_diag);
    HYPRE_Int error_flag = 0;
+
+   if (hypre_ParAMGDataGSSetup(amg_data) == 0)
+   {
+      hypre_GaussElimSetup(amg_data, level, relax_type);
+   }
 
    if (n)
    {
@@ -310,6 +317,36 @@ HYPRE_Int hypre_GaussElimSolve (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
 
    return hypre_error_flag;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #if 0
 #include "HYPRE_config.h"

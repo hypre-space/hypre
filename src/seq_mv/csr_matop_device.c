@@ -16,30 +16,6 @@
 
 #if defined(HYPRE_USING_CUDA)
 
-struct in_range
-{
-   HYPRE_Int low, up;
-
-   in_range(HYPRE_Int low_, HYPRE_Int up_) { low = low_; up = up_; }
-
-   __host__ __device__ bool operator()(const HYPRE_Int &x)
-   {
-      return (x >= low && x <= up);
-   }
-};
-
-struct out_of_range
-{
-   HYPRE_Int low, up;
-
-   out_of_range(HYPRE_Int low_, HYPRE_Int up_) { low = low_; up = up_; }
-
-   __host__ __device__ bool operator()(const HYPRE_Int &x)
-   {
-      return (x < low || x > up);
-   }
-};
-
 hypre_CSRMatrix*
 hypre_CSRMatrixAddDevice ( hypre_CSRMatrix *A,
                            hypre_CSRMatrix *B )

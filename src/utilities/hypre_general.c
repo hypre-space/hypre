@@ -124,24 +124,7 @@ hypre_HandleCreate()
    handle->spgemm_hash_type                         = 'L';
 
    hypre_HandleCudaComputeStreamSync(handle).clear();
-   hypre_HandleCudaComputeStreamSyncPush( handle,
-         hypre_HandleCudaComputeStreamSyncDefault(handle) );
-
-   /* these are put here to include the cost of initialization in Hypre_Init;
-    * Alternatively, they can be done at the first use */
-   hypre_HandleCudaComputeStream(handle);
-   hypre_HandleCudaPrefetchStream(handle);
-
-#if defined(HYPRE_USING_CUBLAS)
-   hypre_HandleCublasHandle(handle);
-#endif
-#if defined(HYPRE_USING_CUSPARSE)
-   hypre_HandleCusparseHandle(handle);
-   hypre_HandleCusparseMatDescr(handle);
-#endif
-#if defined(HYPRE_USING_CURAND)
-   hypre_HandleCurandGenerator(handle);
-#endif
+   hypre_HandleCudaComputeStreamSyncPush( handle, hypre_HandleCudaComputeStreamSyncDefault(handle) );
 #endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 
    return handle;
@@ -255,27 +238,33 @@ hypre_SetDevice(HYPRE_Int use_device, hypre_Handle *hypre_handle_)
 HYPRE_Int
 HYPRE_Init( hypre_int argc, char *argv[] )
 {
-#if defined(HYPRE_USING_KOKKOS)
-   /*
-   Kokkos::InitArguments args;
-   args.num_threads = 10;
-   Kokkos::initialize (args);
-   */
-   Kokkos::initialize (argc, argv);
-#endif
-
    hypre_handle = hypre_HandleCreate();
 
-#if defined(HYPRE_USING_DEVICE_OPENMP) || defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    hypre_SetDevice(-1, hypre_handle);
+
+   /* To include the cost of creating streams/cudahandles in HYPRE_Init */
+   /* If not here, will be done at the first use */
+   hypre_HandleCudaComputeStream(hypre_handle);
+   hypre_HandleCudaPrefetchStream(hypre_handle);
 #endif
 
-   /* if not done in Hypre_Init, will be done in the first use */
-   /*
-   hypre_HandleCudaComputeStream(hypre_handle);
+#if defined(HYPRE_USING_CUBLAS)
+   hypre_HandleCublasHandle(hypre_handle);
+#endif
+
+#if defined(HYPRE_USING_CUSPARSE)
    hypre_HandleCusparseHandle(hypre_handle);
    hypre_HandleCusparseMatDescr(hypre_handle);
-   */
+#endif
+
+#if defined(HYPRE_USING_CURAND)
+   hypre_HandleCurandGenerator(hypre_handle);
+#endif
+
+#if defined(HYPRE_USING_KOKKOS)
+   Kokkos::initialize (argc, argv);
+#endif
 
    /* Check if cuda arch flags in compiling match the device */
 #if defined(HYPRE_USING_CUDA)

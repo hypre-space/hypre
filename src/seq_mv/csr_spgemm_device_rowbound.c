@@ -257,9 +257,9 @@ void gpu_csr_spmm_rownnz_attempt(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    assert(bDim.x * bDim.y == HYPRE_WARP_SIZE);
    // for cases where one WARP works on a row
    HYPRE_Int num_warps = min(m, HYPRE_MAX_NUM_WARPS);
-   HYPRE_Int gDim = (num_warps + bDim.z - 1) / bDim.z;
+   dim3 gDim( (num_warps + bDim.z - 1) / bDim.z );
    // number of active warps
-   HYPRE_Int num_act_warps = min(bDim.z * gDim, m);
+   HYPRE_Int num_act_warps = min(bDim.z * gDim.x, m);
 
    char hash_type = hypre_handle->spgemm_hash_type;
 
@@ -284,18 +284,18 @@ void gpu_csr_spmm_rownnz_attempt(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
     * ---------------------------------------------------------------------------*/
    if (hash_type == 'L')
    {
-      csr_spmm_symbolic<num_warps_per_block, shmem_hash_size, ATTEMPT, 'L'> <<<gDim, bDim>>>
-         (m, /*k, n,*/ d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf);
+      HYPRE_CUDA_LAUNCH( (csr_spmm_symbolic<num_warps_per_block, shmem_hash_size, ATTEMPT, 'L'>), gDim, bDim,
+                         m, /*k, n,*/ d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
    }
    else if (hash_type == 'Q')
    {
-      csr_spmm_symbolic<num_warps_per_block, shmem_hash_size, ATTEMPT, 'Q'> <<<gDim, bDim>>>
-         (m, /*k, n,*/ d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf);
+      HYPRE_CUDA_LAUNCH( (csr_spmm_symbolic<num_warps_per_block, shmem_hash_size, ATTEMPT, 'Q'>), gDim, bDim,
+                         m, /*k, n,*/ d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
    }
    else if (hash_type == 'D')
    {
-      csr_spmm_symbolic<num_warps_per_block, shmem_hash_size, ATTEMPT, 'D'> <<<gDim, bDim>>>
-         (m, /*k, n,*/ d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf);
+      HYPRE_CUDA_LAUNCH( (csr_spmm_symbolic<num_warps_per_block, shmem_hash_size, ATTEMPT, 'D'>), gDim, bDim,
+                         m, /*k, n,*/ d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
    }
    else
    {

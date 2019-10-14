@@ -23,6 +23,14 @@ extern "C++" {
 #include <cublas_v2.h>
 #include <cusparse.h>
 
+#ifndef CUDART_VERSION
+#error CUDART_VERSION Undefined!
+#endif
+
+#ifndef CUDA_VERSION
+#error CUDA_VERSION Undefined!
+#endif
+
 #if defined(HYPRE_USING_CUDA)
 #include <thrust/execution_policy.h>
 #include <thrust/system/cuda/execution_policy.h>
@@ -242,11 +250,7 @@ hypre_int hypre_cuda_get_grid_warp_id()
           hypre_cuda_get_warp_id<bdim>();
 }
 
-#ifndef CUDART_VERSION
-#error CUDART_VERSION Undefined!
-#endif
-
-#if CUDART_VERSION < 9000
+#if CUDA_VERSION < 9000
 
 template <typename T>
 static __device__ __forceinline__
@@ -428,11 +432,113 @@ hypre_int next_power_of_2(hypre_int n)
    return n;
 }
 
+template<typename T>
+struct absolute_value : public thrust::unary_function<T,T>
+{
+  __host__ __device__ T operator()(const T &x) const
+  {
+    return x < T(0) ? -x : x;
+  }
+};
+
+
+template<typename T1, typename T2>
+struct TupleComp1
+{
+   typedef thrust::tuple<T1, T2> Tuple;
+
+   __host__ __device__ bool operator()(const Tuple& t1, const Tuple& t2)
+   {
+      if (thrust::get<0>(t1) < thrust::get<0>(t2))
+      {
+         return true;
+      }
+      if (thrust::get<0>(t1) > thrust::get<0>(t2))
+      {
+         return false;
+      }
+      return thrust::get<1>(t1) < thrust::get<1>(t2);
+   }
+};
+
+
+template<typename T1, typename T2>
+struct TupleComp2
+{
+   typedef thrust::tuple<T1, T2> Tuple;
+
+   __host__ __device__ bool operator()(const Tuple& t1, const Tuple& t2)
+   {
+      if (thrust::get<0>(t1) < thrust::get<0>(t2))
+      {
+         return true;
+      }
+      if (thrust::get<0>(t1) > thrust::get<0>(t2))
+      {
+         return false;
+      }
+      return hypre_abs(thrust::get<1>(t1)) > hypre_abs(thrust::get<1>(t2));
+   }
+};
+
 #endif // #if defined(HYPRE_USING_CUDA)
 
 #ifdef __cplusplus
 }
 #endif
+
+struct is_negative
+{
+   __host__ __device__ bool operator()(const HYPRE_Int &x)
+   {
+      return (x < 0);
+   }
+};
+
+struct is_nonnegative
+{
+   __host__ __device__ bool operator()(const HYPRE_Int &x)
+   {
+      return (x >= 0);
+   }
+};
+
+struct in_range
+{
+   HYPRE_Int low, up;
+
+   in_range(HYPRE_Int low_, HYPRE_Int up_) { low = low_; up = up_; }
+
+   __host__ __device__ bool operator()(const HYPRE_Int &x)
+   {
+      return (x >= low && x <= up);
+   }
+};
+
+struct out_of_range
+{
+   HYPRE_Int low, up;
+
+   out_of_range(HYPRE_Int low_, HYPRE_Int up_) { low = low_; up = up_; }
+
+   __host__ __device__ bool operator()(const HYPRE_Int &x)
+   {
+      return (x < low || x > up);
+   }
+};
+
+struct less_than
+{
+   HYPRE_Int val;
+
+   less_than(HYPRE_Int val_) { val = val_; }
+
+   __host__ __device__ bool operator()(const HYPRE_Int &x)
+   {
+      return (x < val);
+   }
+};
+
 
 #if defined(HYPRE_USING_CUDA)
 /* for struct solvers */

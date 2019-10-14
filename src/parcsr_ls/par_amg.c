@@ -419,6 +419,7 @@ hypre_BoomerAMGCreate()
    hypre_ParAMGDataNewComm(amg_data) = hypre_MPI_COMM_NULL;
 
    /* for Gaussian elimination coarse grid solve */
+   hypre_ParAMGDataGSSetup(amg_data) = 0;
    hypre_ParAMGDataAMat(amg_data) = NULL;
    hypre_ParAMGDataAInv(amg_data) = NULL;
    hypre_ParAMGDataBVec(amg_data) = NULL;

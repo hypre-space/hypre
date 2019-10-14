@@ -254,7 +254,7 @@ hypre_ParVector
    hypre_sprintf(new_file_name,"%s.%d",file_name,my_id);
    hypre_ParVectorLocalVector(par_vector) = hypre_SeqVectorRead(new_file_name);
 
-   /* multivector code not written yet >>> */
+   /* multivector code not written yet */
    hypre_assert( hypre_ParVectorNumVectors(par_vector) == 1 );
 
    return par_vector;
@@ -592,7 +592,7 @@ hypre_VectorToParVector ( MPI_Comm      comm,
    local_data = hypre_VectorData(local_vector);
    vecstride = hypre_VectorVectorStride(local_vector);
    idxstride = hypre_VectorIndexStride(local_vector);
-   /* <<< so far the only implemented multivector StorageMethod is 0 <<< */
+   /* so far the only implemented multivector StorageMethod is 0 */
    hypre_assert( idxstride==1 );
 
    if (my_id == 0)
@@ -970,7 +970,7 @@ hypre_ParVectorPrintIJ( hypre_ParVector *vector,
    global_size  = hypre_ParVectorGlobalSize(vector);
    partitioning = hypre_ParVectorPartitioning(vector);
 
-   /* multivector code not written yet >>> */
+   /* multivector code not written yet */
    hypre_assert( hypre_ParVectorNumVectors(vector) == 1 );
    if ( hypre_ParVectorNumVectors(vector) != 1 ) hypre_error_in_arg(1);
 
@@ -1102,7 +1102,7 @@ hypre_ParVectorReadIJ( MPI_Comm          comm,
    *base_j_ptr = base_j;
    *vector_ptr = vector;
 
-   /* multivector code not written yet >>> */
+   /* multivector code not written yet */
    hypre_assert( hypre_ParVectorNumVectors(vector) == 1 );
    if ( hypre_ParVectorNumVectors(vector) != 1 ) hypre_error(HYPRE_ERROR_GENERIC);
 

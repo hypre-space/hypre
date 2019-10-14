@@ -248,31 +248,13 @@ hypre_GetActualMemLocation(HYPRE_Int location)
  *--------------------------------------------------------------------------*/
 
 /* hypre_memory.c */
-#if 0
-char *hypre_CAllocIns( size_t count ,  size_t elt_size , HYPRE_Int location,char *file, HYPRE_Int line);
-char *hypre_ReAllocIns( char *ptr ,  size_t size , HYPRE_Int location,char *file, HYPRE_Int line);
-char *hypre_MAllocIns( size_t size , HYPRE_Int location,char *file,HYPRE_Int line);
-char *hypre_MAllocPinned( size_t size );
-#else
 void * hypre_MAlloc(size_t size, HYPRE_Int location);
 void * hypre_CAlloc( size_t count, size_t elt_size, HYPRE_Int location);
 void * hypre_ReAlloc(void *ptr, size_t size, HYPRE_Int location);
 void   hypre_Memcpy(void *dst, void *src, size_t size, HYPRE_Int loc_dst, HYPRE_Int loc_src);
 void * hypre_Memset(void *ptr, HYPRE_Int value, size_t num, HYPRE_Int location);
 void   hypre_Free(void *ptr, HYPRE_Int location);
-#endif
-/*
-char *hypre_CAllocHost( size_t count,size_t elt_size );
-char *hypre_MAllocHost( size_t size );
-char *hypre_ReAllocHost( char   *ptr,size_t  size );
-void hypre_FreeHost( char *ptr );
-char *hypre_SharedMAlloc ( size_t size );
-char *hypre_SharedCAlloc ( size_t count , size_t elt_size );
-char *hypre_SharedReAlloc ( char *ptr , size_t size );
-void hypre_SharedFree ( char *ptr );
-void hypre_MemcpyAsync( char *dst, char *src, size_t size, HYPRE_Int locdst, HYPRE_Int locsrc );
-HYPRE_Real *hypre_IncrementSharedDataPtr ( HYPRE_Real *ptr , size_t size );
-*/
+HYPRE_Int hypre_GetMemoryLocation(const void *ptr, HYPRE_Int *memory_location);
 
 /* memory_dmalloc.c */
 HYPRE_Int hypre_InitMemoryDebugDML( HYPRE_Int id );

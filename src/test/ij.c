@@ -3063,6 +3063,10 @@ main( hypre_int argc,
 
       HYPRE_BoomerAMGSetup(amg_solver, parcsr_A, b, x);
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+      cudaDeviceSynchronize();
+#endif
+
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
@@ -3071,9 +3075,13 @@ main( hypre_int argc,
       time_index = hypre_InitializeTiming("BoomerAMG Solve");
       hypre_BeginTiming(time_index);
 
-      PUSH_RANGE("solve", 1)
+      //PUSH_RANGE("solve", 1)
       HYPRE_BoomerAMGSolve(amg_solver, parcsr_A, b, x);
-      POP_RANGE
+      //POP_RANGE
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+      cudaDeviceSynchronize();
+#endif
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);

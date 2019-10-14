@@ -17,13 +17,6 @@ __global__ void hypre_BoomerAMGCreateS_rowcount( HYPRE_Int nr_of_rows,
                                                  HYPRE_Int num_functions, HYPRE_Int* dof_func, HYPRE_Int* dof_func_offd,
                                                  HYPRE_Int* jS_diag, HYPRE_Int* jS_offd );
 
-struct is_nonnegative
-{
-   __host__ __device__ bool operator()(const HYPRE_Int &x)
-   {
-      return (x >= 0);
-   }
-};
 
 /*- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
 HYPRE_Int

@@ -178,7 +178,7 @@ hypre_SeqVectorRead( char *file_name )
 
    fclose(fp);
 
-   /* multivector code not written yet >>> */
+   /* multivector code not written yet */
    hypre_assert( hypre_VectorNumVectors(vector) == 1 );
 
    return vector;
@@ -638,6 +638,5 @@ hypre_SeqVectorPrefetch( hypre_Vector *x, HYPRE_Int to_location)
 
 //hypre_int hypre_SeqVectorIsManaged(hypre_Vector *x)
 //{
-//   return pointerIsManaged((void*)hypre_VectorData(x));
 //}
 

@@ -317,8 +317,8 @@ hypre_PMISCoarseningInitDevice( hypre_ParCSRMatrix  *S,               /* in */
    HYPRE_Int *new_end;
 
    /* init CF_marker_diag and measure_diag: remove some special nodes */
-   hypreCUDAKernel_PMISCoarseningInit<<<gDim, bDim>>>
-      (num_rows_diag, CF_init, S_diag_i, S_offd_i, measure_diag, CF_marker_diag);
+   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_PMISCoarseningInit, gDim, bDim,
+                      num_rows_diag, CF_init, S_diag_i, S_offd_i, measure_diag, CF_marker_diag );
 
    /* communicate for measure_offd */
    HYPRE_THRUST_CALL(gather,
