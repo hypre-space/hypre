@@ -1,35 +1,35 @@
-c     Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
-c     HYPRE Project Developers. See the top-level COPYRIGHT file for details.
-c
-c     SPDX-License-Identifier: (Apache-2.0 OR MIT)
+!     Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+!     HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+!
+!     SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
-c
-c   Example 5
-c
-c   Interface:    Linear-Algebraic (IJ), Fortran (77) version
-c
-c   Compile with: make ex5f
-c
-c   Sample run:   mpirun -np 4 ex5f
-c
-c   Description:  This example solves the 2-D
-c                 Laplacian problem with zero boundary conditions
-c                 on an nxn grid.  The number of unknowns is N=n^2.
-c                 The standard 5-point stencil is used, and we solve
-c                 for the interior nodes only.
-c
-c                 This example solves the same problem as Example 3.
-c                 Available solvers are AMG, PCG, and PCG with AMG,
-c                 and PCG with ParaSails    
-c
-c
-c                 Notes: for PCG, GMRES and BiCGStab, precond_id means:
-c                        0 - do not set up a preconditioner
-c                        1 - set up a ds preconditioner
-c                        2 - set up an amg preconditioner
-c                        3 - set up a pilut preconditioner
-c                        4 - set up a ParaSails preconditioner
-c
+!
+!   Example 5
+!
+!   Interface:    Linear-Algebraic (IJ), Fortran (77) version
+!
+!   Compile with: make ex5f
+!
+!   Sample run:   mpirun -np 4 ex5f
+!
+!   Description:  This example solves the 2-D
+!                 Laplacian problem with zero boundary conditions
+!                 on an nxn grid.  The number of unknowns is N=n^2.
+!                 The standard 5-point stencil is used, and we solve
+!                 for the interior nodes only.
+!
+!                 This example solves the same problem as Example 3.
+!                 Available solvers are AMG, PCG, and PCG with AMG,
+!                 and PCG with ParaSails    
+!
+!
+!                 Notes: for PCG, GMRES and BiCGStab, precond_id means:
+!                        0 - do not set up a preconditioner
+!                        1 - set up a ds preconditioner
+!                        2 - set up an amg preconditioner
+!                        3 - set up a pilut preconditioner
+!                        4 - set up a ParaSails preconditioner
+!
 
       program ex5f
 
@@ -43,7 +43,7 @@ c
 
       parameter  (MAX_LOCAL_SIZE=123000)
 
-c     the following is from HYPRE.c
+!     the following is from HYPRE.c
       parameter  (HYPRE_PARCSR=5555)
 
       integer    ierr
@@ -72,35 +72,35 @@ c     the following is from HYPRE.c
       integer*8  solver
       integer*8  precond
  
-c-----------------------------------------------------------------------
-c     Initialize MPI
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!     Initialize MPI
+!-----------------------------------------------------------------------
 
       call MPI_INIT(ierr)
       call MPI_COMM_RANK(MPI_COMM_WORLD, myid, ierr)
       call MPI_COMM_SIZE(MPI_COMM_WORLD, num_procs, ierr)
       mpi_comm = MPI_COMM_WORLD
 
-c   Default problem parameters
+!   Default problem parameters
       n = 33
       solver_id = 0
       print_solution  = 0
       tol = 1.0d-7
 
-c   The input section not implemented yet.
+!   The input section not implemented yet.
 
-c   Preliminaries: want at least one processor per row
+!   Preliminaries: want at least one processor per row
       if ( n*n .lt. num_procs ) then
          n = int(sqrt(real(num_procs))) + 1
       endif
-c     ng = global no. rows, h = mesh size      
+!     ng = global no. rows, h = mesh size      
       ng = n*n
       h = 1.0d0/(n+1)
       h2 = h*h
 
-c     Each processor knows only of its own rows - the range is denoted by ilower
-c     and upper.  Here we partition the rows. We account for the fact that
-c     N may not divide evenly by the number of processors.
+!     Each processor knows only of its own rows - the range is denoted by ilower
+!     and upper.  Here we partition the rows. We account for the fact that
+!     N may not divide evenly by the number of processors.
       local_size = ng/num_procs
       extra = ng - local_size*num_procs
 
@@ -111,85 +111,85 @@ c     N may not divide evenly by the number of processors.
       iupper = iupper + min(myid+1, extra)
       iupper = iupper - 1
 
-c     How many rows do I have?
+!     How many rows do I have?
       local_size = iupper - ilower + 1
 
-c     Create the matrix.
-c     Note that this is a square matrix, so we indicate the row partition
-c     size twice (since number of rows = number of cols)
+!     Create the matrix.
+!     Note that this is a square matrix, so we indicate the row partition
+!     size twice (since number of rows = number of cols)
       call HYPRE_IJMatrixCreate(mpi_comm, ilower,
      1     iupper, ilower, iupper, A, ierr)
 
 
-c     Choose a parallel csr format storage (see the User's Manual)
+!     Choose a parallel csr format storage (see the User's Manual)
       call HYPRE_IJMatrixSetObjectType(A, HYPRE_PARCSR, ierr)
 
-c     Initialize before setting coefficients
+!     Initialize before setting coefficients
       call HYPRE_IJMatrixInitialize(A, ierr)
 
 
-c     Now go through my local rows and set the matrix entries.
-c     Each row has at most 5 entries. For example, if n=3:
-c
-c      A = [M -I 0; -I M -I; 0 -I M]
-c      M = [4 -1 0; -1 4 -1; 0 -1 4]
-c
-c     Note that here we are setting one row at a time, though
-c     one could set all the rows together (see the User's Manual).
+!     Now go through my local rows and set the matrix entries.
+!     Each row has at most 5 entries. For example, if n=3:
+!
+!      A = [M -I 0; -I M -I; 0 -I M]
+!      M = [4 -1 0; -1 4 -1; 0 -1 4]
+!
+!     Note that here we are setting one row at a time, though
+!     one could set all the rows together (see the User's Manual).
 
 
       do i = ilower, iupper
          nnz = 1
          
 
-c        The left identity block:position i-n
+!        The left identity block:position i-n
          if ( (i-n) .ge. 0 ) then
 	    cols(nnz) = i-n
 	    values(nnz) = -1.0d0
 	    nnz = nnz + 1
          endif
 
-c         The left -1: position i-1
+!         The left -1: position i-1
          if ( mod(i,n).ne.0 ) then
             cols(nnz) = i-1
             values(nnz) = -1.0d0
             nnz = nnz + 1
          endif
 
-c        Set the diagonal: position i
+!        Set the diagonal: position i
          cols(nnz) = i
          values(nnz) = 4.0d0
          nnz = nnz + 1
 
-c        The right -1: position i+1
+!        The right -1: position i+1
          if ( mod((i+1),n) .ne. 0 ) then
             cols(nnz) = i+1
             values(nnz) = -1.0d0
             nnz = nnz + 1
          endif
 
-c        The right identity block:position i+n
+!        The right identity block:position i+n
          if ( (i+n) .lt. ng ) then
             cols(nnz) = i+n
             values(nnz) = -1.0d0
             nnz = nnz + 1
          endif
 
-c        Set the values for row i
+!        Set the values for row i
          call HYPRE_IJMatrixSetValues(
      1        A, 1, nnz-1, i, cols, values, ierr)
 
       enddo
 
 
-c     Assemble after setting the coefficients
+!     Assemble after setting the coefficients
       call HYPRE_IJMatrixAssemble(A, ierr)
 
-c     Get parcsr matrix object
+!     Get parcsr matrix object
       call HYPRE_IJMatrixGetObject(A, parcsr_A, ierr)
 
 
-c     Create the rhs and solution
+!     Create the rhs and solution
       call HYPRE_IJVectorCreate(mpi_comm,
      1     ilower, iupper, b, ierr)
       call HYPRE_IJVectorSetObjectType(b, HYPRE_PARCSR, ierr)
@@ -201,7 +201,7 @@ c     Create the rhs and solution
       call HYPRE_IJVectorInitialize(x, ierr)
 
 
-c     Set the rhs values to h^2 and the solution to zero
+!     Set the rhs values to h^2 and the solution to zero
       do i = 1, local_size
          rhs_values(i) = h2
          x_values(i) = 0.0
@@ -216,46 +216,46 @@ c     Set the rhs values to h^2 and the solution to zero
       call HYPRE_IJVectorAssemble(b, ierr)
       call HYPRE_IJVectorAssemble(x, ierr)
 
-c get the x and b objects
+! get the x and b objects
 
       call HYPRE_IJVectorGetObject(b, par_b, ierr)
       call HYPRE_IJVectorGetObject(x, par_x, ierr)
 
 
-c     Choose a solver and solve the system
+!     Choose a solver and solve the system
 
-c     AMG
+!     AMG
       if ( solver_id .eq. 0 ) then
 
-c        Create solver
+!        Create solver
          call HYPRE_BoomerAMGCreate(solver, ierr)
 
 
-c        Set some parameters (See Reference Manual for more parameters)
+!        Set some parameters (See Reference Manual for more parameters)
 
-c        print solve info + parameters 
+!        print solve info + parameters 
          call HYPRE_BoomerAMGSetPrintLevel(solver, 3, ierr)  
-c        old defaults, Falgout coarsening, mod. class. interpolation
+!        old defaults, Falgout coarsening, mod. class. interpolation
          call HYPRE_BoomerAMGSetOldDefault(solver, ierr) 
-c        G-S/Jacobi hybrid relaxation 
+!        G-S/Jacobi hybrid relaxation 
          call HYPRE_BoomerAMGSetRelaxType(solver, 3, ierr)     
-c        C/F relaxation 
+!        C/F relaxation 
          call HYPRE_BoomerAMGSetRelaxOrder(solver, 1, ierr)     
-c        Sweeeps on each level
+!        Sweeeps on each level
          call HYPRE_BoomerAMGSetNumSweeps(solver, 1, ierr)  
-c         maximum number of levels 
+!         maximum number of levels 
          call HYPRE_BoomerAMGSetMaxLevels(solver, 20, ierr) 
-c        conv. tolerance
+!        conv. tolerance
          call HYPRE_BoomerAMGSetTol(solver, 1.0d-7, ierr)    
 
-c        Now setup and solve!
+!        Now setup and solve!
          call HYPRE_BoomerAMGSetup(
      1        solver, parcsr_A, par_b, par_x, ierr)
          call HYPRE_BoomerAMGSolve(
      1        solver, parcsr_A, par_b, par_x, ierr)
 
 
-c        Run info - needed logging turned on 
+!        Run info - needed logging turned on 
          call HYPRE_BoomerAMGGetNumIterations(solver, num_iterations, 
      1        ierr)
          call HYPRE_BoomerAMGGetFinalReltvRes(solver, final_res_norm,
@@ -270,38 +270,38 @@ c        Run info - needed logging turned on
             print *
          endif
          
-c        Destroy solver
+!        Destroy solver
          call HYPRE_BoomerAMGDestroy(solver, ierr)
 
-c     PCG (with DS)
+!     PCG (with DS)
       elseif ( solver_id .eq. 50 ) then  
          
 
-c        Create solver
+!        Create solver
          call HYPRE_ParCSRPCGCreate(MPI_COMM_WORLD, solver, ierr)
 
-c        Set some parameters (See Reference Manual for more parameters) 
+!        Set some parameters (See Reference Manual for more parameters) 
          call HYPRE_ParCSRPCGSetMaxIter(solver, 1000, ierr)
          call HYPRE_ParCSRPCGSetTol(solver, 1.0d-7, ierr)
          call HYPRE_ParCSRPCGSetTwoNorm(solver, 1, ierr)
          call HYPRE_ParCSRPCGSetPrintLevel(solver, 2, ierr)
          call HYPRE_ParCSRPCGSetLogging(solver, 1, ierr)
 
-c        set ds (diagonal scaling) as the pcg preconditioner 
+!        set ds (diagonal scaling) as the pcg preconditioner 
          precond_id = 1
          call HYPRE_ParCSRPCGSetPrecond(solver, precond_id,
      1        precond, ierr)
 
 
 
-c        Now setup and solve!
+!        Now setup and solve!
          call HYPRE_ParCSRPCGSetup(solver, parcsr_A, par_b,
      &                            par_x, ierr)
          call HYPRE_ParCSRPCGSolve(solver, parcsr_A, par_b,
      &                            par_x, ierr)
 
 
-c        Run info - needed logging turned on 
+!        Run info - needed logging turned on 
 
         call HYPRE_ParCSRPCGGetNumIterations(solver, num_iterations,
      &                                       ierr)
@@ -315,59 +315,59 @@ c        Run info - needed logging turned on
             print *
          endif
 
-c       Destroy solver 
+!       Destroy solver 
         call HYPRE_ParCSRPCGDestroy(solver, ierr)
 
 
-c     PCG with AMG preconditioner
+!     PCG with AMG preconditioner
       elseif ( solver_id == 1 ) then
      
-c        Create solver
+!        Create solver
          call HYPRE_ParCSRPCGCreate(MPI_COMM_WORLD, solver, ierr)
 
-c        Set some parameters (See Reference Manual for more parameters) 
+!        Set some parameters (See Reference Manual for more parameters) 
          call HYPRE_ParCSRPCGSetMaxIter(solver, 1000, ierr)
          call HYPRE_ParCSRPCGSetTol(solver, 1.0d-7, ierr)
          call HYPRE_ParCSRPCGSetTwoNorm(solver, 1, ierr)
          call HYPRE_ParCSRPCGSetPrintLevel(solver, 2, ierr)
          call HYPRE_ParCSRPCGSetLogging(solver, 1, ierr)
 
-c        Now set up the AMG preconditioner and specify any parameters
+!        Now set up the AMG preconditioner and specify any parameters
 
          call HYPRE_BoomerAMGCreate(precond, ierr)
 
 
-c        Set some parameters (See Reference Manual for more parameters)
+!        Set some parameters (See Reference Manual for more parameters)
 
-c        print less solver info since a preconditioner
+!        print less solver info since a preconditioner
          call HYPRE_BoomerAMGSetPrintLevel(precond, 1, ierr); 
-c        Falgout coarsening
+!        Falgout coarsening
          call HYPRE_BoomerAMGSetCoarsenType(precond, 6, ierr) 
-c        old defaults
+!        old defaults
          call HYPRE_BoomerAMGSetOldDefault(precond, ierr) 
-c        SYMMETRIC G-S/Jacobi hybrid relaxation 
+!        SYMMETRIC G-S/Jacobi hybrid relaxation 
          call HYPRE_BoomerAMGSetRelaxType(precond, 6, ierr)     
-c        Sweeeps on each level
+!        Sweeeps on each level
          call HYPRE_BoomerAMGSetNumSweeps(precond, 1, ierr)  
-c        conv. tolerance
+!        conv. tolerance
          call HYPRE_BoomerAMGSetTol(precond, 0.0d0, ierr)     
-c        do only one iteration! 
+!        do only one iteration! 
          call HYPRE_BoomerAMGSetMaxIter(precond, 1, ierr)
 
-c        set amg as the pcg preconditioner
+!        set amg as the pcg preconditioner
          precond_id = 2
          call HYPRE_ParCSRPCGSetPrecond(solver, precond_id,
      1        precond, ierr)
 
 
-c        Now setup and solve!
+!        Now setup and solve!
          call HYPRE_ParCSRPCGSetup(solver, parcsr_A, par_b,
      1                            par_x, ierr)
          call HYPRE_ParCSRPCGSolve(solver, parcsr_A, par_b,
      1                            par_x, ierr)
 
 
-c        Run info - needed logging turned on 
+!        Run info - needed logging turned on 
 
         call HYPRE_ParCSRPCGGetNumIterations(solver, num_iterations,
      1                                       ierr)
@@ -381,45 +381,45 @@ c        Run info - needed logging turned on
             print *
          endif
 
-c       Destroy precond and solver
+!       Destroy precond and solver
 
         call HYPRE_BoomerAMGDestroy(precond, ierr)
         call HYPRE_ParCSRPCGDestroy(solver, ierr)
 
-c     PCG with ParaSails
+!     PCG with ParaSails
       elseif ( solver_id .eq. 8 ) then
 
-c        Create solver
+!        Create solver
          call HYPRE_ParCSRPCGCreate(MPI_COMM_WORLD, solver, ierr)
 
-c        Set some parameters (See Reference Manual for more parameters) 
+!        Set some parameters (See Reference Manual for more parameters) 
          call HYPRE_ParCSRPCGSetMaxIter(solver, 1000, ierr)
          call HYPRE_ParCSRPCGSetTol(solver, 1.0d-7, ierr)
          call HYPRE_ParCSRPCGSetTwoNorm(solver, 1, ierr)
          call HYPRE_ParCSRPCGSetPrintLevel(solver, 2, ierr)
          call HYPRE_ParCSRPCGSetLogging(solver, 1, ierr)
 
-c        Now set up the Parasails preconditioner and specify any parameters
+!        Now set up the Parasails preconditioner and specify any parameters
          call HYPRE_ParaSailsCreate(MPI_COMM_WORLD, precond,ierr)
          call HYPRE_ParaSailsSetParams(precond, 0.1d0, 1, ierr)
          call HYPRE_ParaSailsSetFilter(precond, 0.05d0, ierr)
          call HYPRE_ParaSailsSetSym(precond, 1, ierr)
          call HYPRE_ParaSailsSetLogging(precond, 3, ierr)
 
-c        set parsails as the pcg preconditioner
+!        set parsails as the pcg preconditioner
          precond_id = 4
          call HYPRE_ParCSRPCGSetPrecond(solver, precond_id,
      1        precond, ierr)
 
 
-c        Now setup and solve!
+!        Now setup and solve!
          call HYPRE_ParCSRPCGSetup(solver, parcsr_A, par_b,
      1                            par_x, ierr)
          call HYPRE_ParCSRPCGSolve(solver, parcsr_A, par_b,
      1                            par_x, ierr)
 
 
-c        Run info - needed logging turned on 
+!        Run info - needed logging turned on 
 
         call HYPRE_ParCSRPCGGetNumIterations(solver, num_iterations,
      1                                       ierr)
@@ -433,7 +433,7 @@ c        Run info - needed logging turned on
             print *
          endif
 
-c       Destroy precond and solver
+!       Destroy precond and solver
 
         call HYPRE_ParaSailsDestroy(precond, ierr)
         call HYPRE_ParCSRPCGDestroy(solver, ierr)
@@ -447,19 +447,19 @@ c       Destroy precond and solver
 
 
 
-c     Print the solution
+!     Print the solution
       if ( print_solution .ne. 0 ) then
          call HYPRE_IJVectorPrint(x, "ij.out.x", ierr)
       endif
 
-c     Clean up
+!     Clean up
 
       call HYPRE_IJMatrixDestroy(A, ierr)
       call HYPRE_IJVectorDestroy(b, ierr)
       call HYPRE_IJVectorDestroy(x, ierr)
 
 
-c     Finalize MPI
+!     Finalize MPI
       call MPI_Finalize(ierr)
 
       stop
