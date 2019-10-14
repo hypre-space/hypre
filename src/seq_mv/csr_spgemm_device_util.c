@@ -95,7 +95,7 @@ csr_spmm_create_hash_table(HYPRE_Int m, HYPRE_Int *d_rc, HYPRE_Int *d_rf, HYPRE_
    const HYPRE_Int BDIMY               =   8;
 
    dim3 bDim(BDIMX, BDIMY, num_warps_per_block);
-   HYPRE_Int gDim = (m + bDim.z * HYPRE_WARP_SIZE - 1) / (bDim.z * HYPRE_WARP_SIZE);
+   dim3 gDim( (m + bDim.z * HYPRE_WARP_SIZE - 1) / (bDim.z * HYPRE_WARP_SIZE) );
 
    assert(num_ghash <= m);
 
@@ -103,12 +103,12 @@ csr_spmm_create_hash_table(HYPRE_Int m, HYPRE_Int *d_rc, HYPRE_Int *d_rf, HYPRE_
 
    if (num_ghash == m)
    {
-      csr_spmm_get_ghash_size<<<gDim, bDim>>>(m, d_rc, d_rf, (*d_ghash_i) + 1, SHMEM_HASH_SIZE);
+      HYPRE_CUDA_LAUNCH( csr_spmm_get_ghash_size, gDim, bDim, m, d_rc, d_rf, (*d_ghash_i) + 1, SHMEM_HASH_SIZE );
    }
    else
    {
       cudaMemset(*d_ghash_i, 0, (num_ghash + 1) * sizeof(HYPRE_Int));
-      csr_spmm_get_ghash_size<<<gDim, bDim>>>(m, num_ghash, d_rc, d_rf, (*d_ghash_i) + 1, SHMEM_HASH_SIZE);
+      HYPRE_CUDA_LAUNCH( csr_spmm_get_ghash_size, gDim, bDim, m, num_ghash, d_rc, d_rf, (*d_ghash_i) + 1, SHMEM_HASH_SIZE );
    }
 
    csr_spmm_create_ija(num_ghash, *d_ghash_i, d_ghash_j, d_ghash_a, ghash_size);

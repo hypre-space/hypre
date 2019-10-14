@@ -124,9 +124,8 @@ hypre_HandleCreate()
    handle->spgemm_hash_type                         = 'L';
 
    hypre_HandleCudaComputeStreamSync(handle).clear();
-   hypre_HandleCudaComputeStreamSyncPush( handle,
-         hypre_HandleCudaComputeStreamSyncDefault(handle) );
-#endif
+   hypre_HandleCudaComputeStreamSyncPush( handle, hypre_HandleCudaComputeStreamSyncDefault(handle) );
+#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 
    return handle;
 }
@@ -139,11 +138,21 @@ hypre_HandleDestroy(hypre_Handle *hypre_handle_)
 
    hypre_TFree(hypre_handle_->cuda_reduce_buffer, HYPRE_MEMORY_DEVICE);
 
+#if defined(HYPRE_USING_CURAND)
    if (hypre_handle_->curand_gen)
    {
       HYPRE_CURAND_CALL( curandDestroyGenerator(hypre_handle_->curand_gen) );
    }
+#endif
 
+#if defined(HYPRE_USING_CUBLAS)
+   if (hypre_handle_->cublas_handle)
+   {
+      HYPRE_CUBLAS_CALL( cublasDestroy(hypre_handle_->cublas_handle) );
+   }
+#endif
+
+#if defined(HYPRE_USING_CUSPARSE)
    if (hypre_handle_->cusparse_handle)
    {
       HYPRE_CUSPARSE_CALL( cusparseDestroy(hypre_handle_->cusparse_handle) );
@@ -153,6 +162,7 @@ hypre_HandleDestroy(hypre_Handle *hypre_handle_)
    {
       HYPRE_CUSPARSE_CALL( cusparseDestroyMatDescr(hypre_handle_->cusparse_mat_descr) );
    }
+#endif
 
    for (i = 0; i < HYPRE_MAX_NUM_STREAMS; i++)
    {
@@ -228,27 +238,33 @@ hypre_SetDevice(HYPRE_Int use_device, hypre_Handle *hypre_handle_)
 HYPRE_Int
 HYPRE_Init( hypre_int argc, char *argv[] )
 {
-#if defined(HYPRE_USING_KOKKOS)
-   /*
-   Kokkos::InitArguments args;
-   args.num_threads = 10;
-   Kokkos::initialize (args);
-   */
-   Kokkos::initialize (argc, argv);
-#endif
-
    hypre_handle = hypre_HandleCreate();
 
-#if defined(HYPRE_USING_DEVICE_OPENMP) || defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    hypre_SetDevice(-1, hypre_handle);
+
+   /* To include the cost of creating streams/cudahandles in HYPRE_Init */
+   /* If not here, will be done at the first use */
+   hypre_HandleCudaComputeStream(hypre_handle);
+   hypre_HandleCudaPrefetchStream(hypre_handle);
 #endif
 
-   /* if not done in Hypre_Init, will be done in the first use */
-   /*
-   hypre_HandleCudaComputeStream(hypre_handle);
+#if defined(HYPRE_USING_CUBLAS)
+   hypre_HandleCublasHandle(hypre_handle);
+#endif
+
+#if defined(HYPRE_USING_CUSPARSE)
    hypre_HandleCusparseHandle(hypre_handle);
    hypre_HandleCusparseMatDescr(hypre_handle);
-   */
+#endif
+
+#if defined(HYPRE_USING_CURAND)
+   hypre_HandleCurandGenerator(hypre_handle);
+#endif
+
+#if defined(HYPRE_USING_KOKKOS)
+   Kokkos::initialize (argc, argv);
+#endif
 
    /* Check if cuda arch flags in compiling match the device */
 #if defined(HYPRE_USING_CUDA)

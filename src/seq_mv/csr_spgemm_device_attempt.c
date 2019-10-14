@@ -436,7 +436,7 @@ hypreDevice_CSRSpGemmWithRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    hypre_assert(bDim.x * bDim.y == HYPRE_WARP_SIZE);
 
    // for cases where one WARP works on a row
-   HYPRE_Int gDim  = (m + bDim.z - 1) / bDim.z;
+   dim3 gDim( (m + bDim.z - 1) / bDim.z );
 
    char hash_type = hypre_handle->spgemm_hash_type;
 
@@ -460,21 +460,21 @@ hypreDevice_CSRSpGemmWithRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
     * ---------------------------------------------------------------------------*/
    if (hash_type == 'L')
    {
-      csr_spmm_attempt<num_warps_per_block, shmem_hash_size, 1, 'L'> <<<gDim, bDim>>>
-         (m, /*k, n,*/ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_js, d_as, d_ghash_i, d_ghash_j, d_ghash_a,
-          d_ic + 1, d_ghash2_i + 1);
+      HYPRE_CUDA_LAUNCH( (csr_spmm_attempt<num_warps_per_block, shmem_hash_size, 1, 'L'>), gDim, bDim,
+                         m, /*k, n,*/ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_js, d_as, d_ghash_i, d_ghash_j, d_ghash_a,
+                         d_ic + 1, d_ghash2_i + 1 );
    }
    else if (hash_type == 'Q')
    {
-      csr_spmm_attempt<num_warps_per_block, shmem_hash_size, 1, 'Q'> <<<gDim, bDim>>>
-         (m, /*k, n,*/ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_js, d_as, d_ghash_i, d_ghash_j, d_ghash_a,
-          d_ic + 1, d_ghash2_i + 1);
+      HYPRE_CUDA_LAUNCH( (csr_spmm_attempt<num_warps_per_block, shmem_hash_size, 1, 'Q'>), gDim, bDim,
+                         m, /*k, n,*/ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_js, d_as, d_ghash_i, d_ghash_j, d_ghash_a,
+                         d_ic + 1, d_ghash2_i + 1);
    }
    else if (hash_type == 'D')
    {
-      csr_spmm_attempt<num_warps_per_block, shmem_hash_size, 1, 'D'> <<<gDim, bDim>>>
-         (m, /*k, n,*/ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_js, d_as, d_ghash_i, d_ghash_j, d_ghash_a,
-          d_ic + 1, d_ghash2_i + 1);
+      HYPRE_CUDA_LAUNCH( (csr_spmm_attempt<num_warps_per_block, shmem_hash_size, 1, 'D'>), gDim, bDim,
+                         m, /*k, n,*/ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_js, d_as, d_ghash_i, d_ghash_j, d_ghash_a,
+                         d_ic + 1, d_ghash2_i + 1 );
    }
    else
    {
@@ -497,21 +497,21 @@ hypreDevice_CSRSpGemmWithRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    {
       if (hash_type == 'L')
       {
-         csr_spmm_attempt<num_warps_per_block, shmem_hash_size, 2, 'L'> <<<gDim, bDim>>>
-            (m, /*k, n,*/ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_js, d_as, d_ghash2_i, d_ghash2_j, d_ghash2_a,
-             d_ic + 1, NULL);
+         HYPRE_CUDA_LAUNCH( (csr_spmm_attempt<num_warps_per_block, shmem_hash_size, 2, 'L'>), gDim, bDim,
+                            m, /*k, n,*/ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_js, d_as, d_ghash2_i, d_ghash2_j, d_ghash2_a,
+                            d_ic + 1, NULL );
       }
       else if (hash_type == 'Q')
       {
-         csr_spmm_attempt<num_warps_per_block, shmem_hash_size, 2, 'Q'> <<<gDim, bDim>>>
-            (m, /*k, n,*/ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_js, d_as, d_ghash2_i, d_ghash2_j, d_ghash2_a,
-             d_ic + 1, NULL);
+         HYPRE_CUDA_LAUNCH( (csr_spmm_attempt<num_warps_per_block, shmem_hash_size, 2, 'Q'>), gDim, bDim,
+                            m, /*k, n,*/ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_js, d_as, d_ghash2_i, d_ghash2_j, d_ghash2_a,
+                            d_ic + 1, NULL);
       }
       else if (hash_type == 'D')
       {
-         csr_spmm_attempt<num_warps_per_block, shmem_hash_size, 2, 'D'> <<<gDim, bDim>>>
-            (m, /*k, n,*/ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_js, d_as, d_ghash2_i, d_ghash2_j, d_ghash2_a,
-             d_ic + 1, NULL);
+         HYPRE_CUDA_LAUNCH( (csr_spmm_attempt<num_warps_per_block, shmem_hash_size, 2, 'D'>), gDim, bDim,
+                            m, /*k, n,*/ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_js, d_as, d_ghash2_i, d_ghash2_j, d_ghash2_a,
+                            d_ic + 1, NULL);
       }
       else
       {
@@ -524,9 +524,9 @@ hypreDevice_CSRSpGemmWithRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    HYPRE_Complex *d_c;
    csr_spmm_create_ija(m, d_ic, &d_jc, &d_c, &nnzC_gpu);
 
-   copy_from_hash_into_C<num_warps_per_block, shmem_hash_size> <<<gDim, bDim>>>
-      (m, d_js, d_as, d_ghash_i, d_ghash_j, d_ghash_a, d_ghash2_i, d_ghash2_j, d_ghash2_a,
-       d_ic, d_jc, d_c);
+   HYPRE_CUDA_LAUNCH( (copy_from_hash_into_C<num_warps_per_block, shmem_hash_size>), gDim, bDim,
+                      m, d_js, d_as, d_ghash_i, d_ghash_j, d_ghash_a, d_ghash2_i, d_ghash2_j, d_ghash2_a,
+                      d_ic, d_jc, d_c);
 
    hypre_TFree(d_ghash_i,  HYPRE_MEMORY_DEVICE);
    hypre_TFree(d_ghash_j,  HYPRE_MEMORY_DEVICE);

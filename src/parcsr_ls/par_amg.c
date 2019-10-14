@@ -419,7 +419,9 @@ hypre_BoomerAMGCreate()
    hypre_ParAMGDataNewComm(amg_data) = hypre_MPI_COMM_NULL;
 
    /* for Gaussian elimination coarse grid solve */
+   hypre_ParAMGDataGSSetup(amg_data) = 0;
    hypre_ParAMGDataAMat(amg_data) = NULL;
+   hypre_ParAMGDataAInv(amg_data) = NULL;
    hypre_ParAMGDataBVec(amg_data) = NULL;
    hypre_ParAMGDataCommInfo(amg_data) = NULL;
 
@@ -762,6 +764,7 @@ hypre_BoomerAMGDestroy( void *data )
    }
 
    if (hypre_ParAMGDataAMat(amg_data)) hypre_TFree(hypre_ParAMGDataAMat(amg_data), HYPRE_MEMORY_HOST);
+   if (hypre_ParAMGDataAInv(amg_data)) hypre_TFree(hypre_ParAMGDataAInv(amg_data), HYPRE_MEMORY_HOST);
    if (hypre_ParAMGDataBVec(amg_data)) hypre_TFree(hypre_ParAMGDataBVec(amg_data), HYPRE_MEMORY_HOST);
    if (hypre_ParAMGDataCommInfo(amg_data)) hypre_TFree(hypre_ParAMGDataCommInfo(amg_data), HYPRE_MEMORY_HOST);
 
@@ -2048,14 +2051,18 @@ hypre_BoomerAMGSetCycleRelaxType( void     *data,
    {
       grid_relax_type = hypre_CTAlloc(HYPRE_Int, 4, HYPRE_MEMORY_HOST);
       for (i=0; i < 3; i++)
+      {
          grid_relax_type[i] = 3;
+      }
       grid_relax_type[3] = 9;
       hypre_ParAMGDataGridRelaxType(amg_data) = grid_relax_type;
    }
 
    hypre_ParAMGDataGridRelaxType(amg_data)[k] = relax_type;
    if (k == 3)
+   {
       hypre_ParAMGDataUserCoarseRelaxType(amg_data) = relax_type;
+   }
 
    return hypre_error_flag;
 }

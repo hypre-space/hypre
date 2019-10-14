@@ -155,8 +155,8 @@ hypre_MatTCommPkgCreate_core (
    HYPRE_BigInt col, kc;
    HYPRE_Int * recv_sz_buf;
    HYPRE_Int * row_marker;
-   
-   hypre_MPI_Comm_size(comm, &num_procs);  
+
+   hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
 
    info = hypre_CTAlloc(HYPRE_Int,  num_procs, HYPRE_MEMORY_HOST);
@@ -221,8 +221,8 @@ hypre_MatTCommPkgCreate_core (
 
    num_recvs=num_procs-1;
    local_info = num_procs + num_cols_offd + num_cols_diag;
-			
-   hypre_MPI_Allgather(&local_info, 1, HYPRE_MPI_INT, info, 1, HYPRE_MPI_INT, comm); 
+
+   hypre_MPI_Allgather(&local_info, 1, HYPRE_MPI_INT, info, 1, HYPRE_MPI_INT, comm);
 
 /* ----------------------------------------------------------------------
  * generate information to be send: tmp contains for each recv_proc:
@@ -233,8 +233,8 @@ hypre_MatTCommPkgCreate_core (
    displs = hypre_CTAlloc(HYPRE_Int,  num_procs+1, HYPRE_MEMORY_HOST);
    displs[0] = 0;
    for (i=1; i < num_procs+1; i++)
-	displs[i] = displs[i-1]+info[i-1]; 
-   recv_buf = hypre_CTAlloc(HYPRE_BigInt,  displs[num_procs], HYPRE_MEMORY_HOST); 
+	displs[i] = displs[i-1]+info[i-1];
+   recv_buf = hypre_CTAlloc(HYPRE_BigInt,  displs[num_procs], HYPRE_MEMORY_HOST);
    tmp = hypre_CTAlloc(HYPRE_BigInt,  local_info, HYPRE_MEMORY_HOST);
 
    j = 0;
@@ -242,13 +242,13 @@ hypre_MatTCommPkgCreate_core (
       j2 = j++;
       tmp[j2] = 0;
       for (k=0; k < num_cols_offd; k++)
-         if (col_map_offd[k] >= col_starts[i] && 
+         if (col_map_offd[k] >= col_starts[i] &&
              col_map_offd[k] < col_starts[i+1]) {
             tmp[j++] = col_map_offd[k];
             ++(tmp[j2]);
          };
       for (k=0; k < num_cols_diag; k++)
-         if ( (HYPRE_BigInt)k+first_col_diag >= col_starts[i] && 
+         if ( (HYPRE_BigInt)k+first_col_diag >= col_starts[i] &&
               (HYPRE_BigInt)k+first_col_diag < col_starts[i+1] ) {
             tmp[j++] = (HYPRE_BigInt)k + first_col_diag;
             ++(tmp[j2]);
@@ -256,16 +256,16 @@ hypre_MatTCommPkgCreate_core (
    }
 
    hypre_MPI_Allgatherv(tmp,local_info,HYPRE_MPI_BIG_INT,recv_buf,info,displs,HYPRE_MPI_INT,comm);
-	
+
 
 /* ----------------------------------------------------------------------
  * determine send_procs and actual elements to be send (in send_map_elmts)
- * and send_map_starts whose i-th entry points to the beginning of the 
+ * and send_map_starts whose i-th entry points to the beginning of the
  * elements to be send to proc. i
  * ---------------------------------------------------------------------*/
 /* Meanings of arrays being set here, more verbosely stated:
    send_procs: processors p to send to
-   send_map_starts: for each p, gives range of indices in send_map_elmts; 
+   send_map_starts: for each p, gives range of indices in send_map_elmts;
    send_map_elmts:  Each element is a send_map_elmts[i], with i in a range given
      by send_map_starts[p..p+1], for some p. This element is is the global
      column number for a column in the offd block of p which is to be multiplied
@@ -282,9 +282,9 @@ hypre_MatTCommPkgCreate_core (
    send_map_starts = hypre_CTAlloc(HYPRE_Int,  num_sends+1, HYPRE_MEMORY_HOST);
    send_map_elmts = hypre_CTAlloc(HYPRE_Int,  num_elmts, HYPRE_MEMORY_HOST);
    row_marker = hypre_CTAlloc(HYPRE_Int, num_rows_diag, HYPRE_MEMORY_HOST);
- 
+
    index = 0;
-   index2 = 0; 
+   index2 = 0;
    send_map_starts[0] = 0;
    for (i=0; i < num_procs; i++) {
       send_map_starts[index+1] = send_map_starts[index];
@@ -307,7 +307,7 @@ hypre_MatTCommPkgCreate_core (
                      send_map_elmts[index2++] = col - offset; */
                   /* Plan to send all of my rows which use this column... */
                   hypre_RowsWithColumn( &rowmin, &rowmax, col,
-                                  num_rows_diag, 
+                                  num_rows_diag,
                                   firstColDiag, colMapOffd,
                                   mat_i_diag, mat_j_diag, mat_i_offd, mat_j_offd
                      );
@@ -325,7 +325,7 @@ hypre_MatTCommPkgCreate_core (
                if ( kc+first_col_diag==col && i!=my_id ) {
                / * this processor has the same column as proc. i (but is different) * /
                   pmatch = 1;
-/ * this would be right if we could send columns, but we can't ... >>> * /
+/ * this would be right if we could send columns, but we can't ... * /
                   send_procs[index] = i;
                   ++send_map_starts[index+1];
                   send_map_elmts[index2++] = col - offset;
@@ -339,12 +339,12 @@ hypre_MatTCommPkgCreate_core (
                   /* this processor has the same column as proc. i (but is different) */
                   pmatch = 1;
                   send_procs[index] = i;
-/* this would be right if we could send columns, but we can't ... >>> 
+/* this would be right if we could send columns, but we can't ...
                   ++send_map_starts[index+1];
                   send_map_elmts[index2++] = col - offset;*/
                   /* Plan to send all of my rows which use this column... */
                   hypre_RowsWithColumn( &rowmin, &rowmax, col,
-                                  num_rows_diag, 
+                                  num_rows_diag,
                                   firstColDiag, colMapOffd,
                                   mat_i_diag, mat_j_diag, mat_i_offd, mat_j_offd
                      );
@@ -400,7 +400,7 @@ hypre_MatTCommPkgCreate_core (
       displs[p+1] = displs[p] + all_num_sends3[p];
    };
    recv_sz_buf = hypre_CTAlloc( HYPRE_Int,  displs[num_procs] , HYPRE_MEMORY_HOST);
-   
+
    /* scatter-gather size of row info to send, and proc. to send to */
    index = 0;
    for ( i=0; i<num_sends; ++i ) {
@@ -472,14 +472,14 @@ hypre_MatTCommPkgCreate_core (
  * generates a special comm_pkg for A - for use in multiplying by its
  * transpose, A * A^T
  * if no row and/or column partitioning is given, the routine determines
- * them with MPE_Decomp1d 
+ * them with MPE_Decomp1d
  * ---------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_MatTCommPkgCreate ( hypre_ParCSRMatrix *A)
 {
    hypre_ParCSRCommPkg	*comm_pkg;
-   
+
    MPI_Comm             comm = hypre_ParCSRMatrixComm(A);
 /*   hypre_MPI_Datatype         *recv_mpi_types;
    hypre_MPI_Datatype         *send_mpi_types;
@@ -491,7 +491,7 @@ hypre_MatTCommPkgCreate ( hypre_ParCSRMatrix *A)
    HYPRE_Int			num_recvs;
    HYPRE_Int			*recv_procs;
    HYPRE_Int			*recv_vec_starts;
-   
+
    HYPRE_BigInt  *col_map_offd = hypre_ParCSRMatrixColMapOffd(A);
    HYPRE_BigInt  first_col_diag = hypre_ParCSRMatrixFirstColDiag(A);
    HYPRE_BigInt  *col_starts = hypre_ParCSRMatrixColStarts(A);

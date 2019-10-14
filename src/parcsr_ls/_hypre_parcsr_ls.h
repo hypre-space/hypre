@@ -224,9 +224,10 @@ typedef struct
    MPI_Comm   new_comm;
 
    /* store matrix, vector and communication info for Gaussian elimination */
-   HYPRE_Real *A_mat;
+   HYPRE_Int   gs_setup;
+   HYPRE_Real *A_mat, *A_inv;
    HYPRE_Real *b_vec;
-   HYPRE_Int *comm_info;
+   HYPRE_Int  *comm_info;
 
    /* information for multiplication with Lambda - additive AMG */
    HYPRE_Int      additive;
@@ -448,7 +449,9 @@ typedef struct
 #define hypre_ParAMGDataRedundant(amg_data) ((amg_data)->redundant)
 #define hypre_ParAMGDataParticipate(amg_data) ((amg_data)->participate)
 
+#define hypre_ParAMGDataGSSetup(amg_data) ((amg_data)->gs_setup)
 #define hypre_ParAMGDataAMat(amg_data) ((amg_data)->A_mat)
+#define hypre_ParAMGDataAInv(amg_data) ((amg_data)->A_inv)
 #define hypre_ParAMGDataBVec(amg_data) ((amg_data)->b_vec)
 #define hypre_ParAMGDataCommInfo(amg_data) ((amg_data)->comm_info)
 

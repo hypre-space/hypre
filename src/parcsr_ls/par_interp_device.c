@@ -215,11 +215,13 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
       grid.x = limit;
    grid.y = 1;
    grid.z = 1;
-   hypre_BoomerAMGBuildDirInterp_dev1<<<grid,block>>>( n_fine, S_diag_i, S_diag_j, S_offd_i, S_offd_j,
-                                                       A_offd_i, A_offd_j,
-                                                       CF_marker_dev, CF_marker_offd, num_functions,
-                                                       dof_func, dof_func_offd, P_diag_i, P_offd_i,
-                                                       col_offd_S_to_A, fine_to_coarse );
+
+   HYPRE_CUDA_LAUNCH( hypre_BoomerAMGBuildDirInterp_dev1, grid, block,
+                      n_fine, S_diag_i, S_diag_j, S_offd_i, S_offd_j,
+                      A_offd_i, A_offd_j,
+                      CF_marker_dev, CF_marker_offd, num_functions,
+                      dof_func, dof_func_offd, P_diag_i, P_offd_i,
+                      col_offd_S_to_A, fine_to_coarse );
 
  /* The scans will transform P_diag_i and P_offd_i to the CSR I-vectors */
    HYPRE_THRUST_CALL(exclusive_scan, &P_diag_i[0], &P_diag_i[n_fine+1], &P_diag_i[0] );
@@ -238,14 +240,15 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
    P_offd_j    = hypre_CTAlloc(HYPRE_Int,  P_offd_size, HYPRE_MEMORY_SHARED);
    P_offd_data = hypre_CTAlloc(HYPRE_Real, P_offd_size, HYPRE_MEMORY_SHARED);
 
-   hypre_BoomerAMGBuildDirInterp_dev2<<<grid,block>>>( n_fine, A_diag_i, A_diag_j, A_diag_data,
-         A_offd_i, A_offd_j, A_offd_data,
-         S_diag_i, S_diag_j, S_offd_i, S_offd_j,
-         CF_marker_dev, CF_marker_offd,
-         num_functions, dof_func, dof_func_offd,
-         P_diag_i, P_diag_j, P_diag_data,
-         P_offd_i, P_offd_j, P_offd_data,
-         col_offd_S_to_A, fine_to_coarse );
+   HYPRE_CUDA_LAUNCH( hypre_BoomerAMGBuildDirInterp_dev2, grid, block,
+                      n_fine, A_diag_i, A_diag_j, A_diag_data,
+                      A_offd_i, A_offd_j, A_offd_data,
+                      S_diag_i, S_diag_j, S_offd_i, S_offd_j,
+                      CF_marker_dev, CF_marker_offd,
+                      num_functions, dof_func, dof_func_offd,
+                      P_diag_i, P_diag_j, P_diag_data,
+                      P_offd_i, P_offd_j, P_offd_data,
+                      col_offd_S_to_A, fine_to_coarse );
    cudaDeviceSynchronize();
 
 /* 5. Construct the result as a ParCSRMatrix. At this point, P's column indices */
@@ -302,7 +305,8 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
 
       /* First,  set P_marker[i] to 1 if A's column i is also present in P, otherwise P_marker[i] is 0 */
       HYPRE_Int *P_marker = hypre_CTAlloc(HYPRE_Int, num_cols_A_offd+1, HYPRE_MEMORY_DEVICE);
-      hypre_BoomerAMGBuildDirInterp_dev5<<<grid,block>>>( P_offd_size, P_offd_j, P_marker );
+      HYPRE_CUDA_LAUNCH( hypre_BoomerAMGBuildDirInterp_dev5, grid, block,
+                         P_offd_size, P_offd_j, P_marker );
 
       /* Secondly, the sum over P_marker gives the number of different columns in P's offd part */
       num_cols_P_offd = HYPRE_THRUST_CALL(reduce, &P_marker[0], &P_marker[num_cols_A_offd]);
@@ -315,7 +319,8 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
       /* Example: P_marker becomes [0,0,1,1,1,2] so that P_marker[1]=0, P_marker[4]=1  */
 
       /* Do the re-enumeration, P_offd_j are mapped, using P_marker as map  */
-      hypre_BoomerAMGBuildDirInterp_dev3<<<grid,block>>>( P_offd_size, P_offd_j, P_marker );
+      HYPRE_CUDA_LAUNCH( hypre_BoomerAMGBuildDirInterp_dev3, grid, block,
+                         P_offd_size, P_offd_j, P_marker );
 
       /* Create and define array tmp_map_offd. This array is the inverse of the P_marker mapping, */
       /* Example: num_cols_P_offd=2, tmp_map_offd[0] = 1, tmp_map_offd[1]=4  */
@@ -326,7 +331,8 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
       if( grid.x > limit )
          grid.x = limit;
 
-      hypre_BoomerAMGBuildDirInterp_dev4<<<grid,block>>>( num_cols_A_offd, P_marker, tmp_map_offd );
+      HYPRE_CUDA_LAUNCH( hypre_BoomerAMGBuildDirInterp_dev4, grid, block,
+                         num_cols_A_offd, P_marker, tmp_map_offd );
 
       if (num_cols_P_offd)
       {

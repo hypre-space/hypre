@@ -178,7 +178,7 @@ hypre_SeqVectorRead( char *file_name )
 
    fclose(fp);
 
-   /* multivector code not written yet >>> */
+   /* multivector code not written yet */
    hypre_assert( hypre_VectorNumVectors(vector) == 1 );
 
    return vector;
@@ -360,7 +360,11 @@ hypre_SeqVectorCopy( hypre_Vector *x,
    size *= hypre_VectorNumVectors(x);
 
 #if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUBLAS)
+   HYPRE_CUBLAS_CALL( cublasDcopy(hypre_HandleCublasHandle(hypre_handle), size, x_data, 1, y_data, 1) );
+#else
    HYPRE_THRUST_CALL( copy_n, x_data, size, y_data );
+#endif
 #else
    HYPRE_Int i;
 #if defined(HYPRE_USING_DEVICE_OPENMP)
@@ -449,7 +453,11 @@ hypre_SeqVectorScale( HYPRE_Complex alpha,
    hypre_SeqVectorPrefetch(y, HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUBLAS)
+   HYPRE_CUBLAS_CALL( cublasDscal(hypre_HandleCublasHandle(hypre_handle), size, &alpha, y_data, 1) );
+#else
    HYPRE_THRUST_CALL( transform, y_data, y_data + size, y_data, alpha * _1 );
+#endif
 #else
    HYPRE_Int i;
 #if defined(HYPRE_USING_DEVICE_OPENMP)
@@ -497,7 +505,11 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
    hypre_SeqVectorPrefetch(y, HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUBLAS)
+   HYPRE_CUBLAS_CALL( cublasDaxpy(hypre_HandleCublasHandle(hypre_handle), size, &alpha, x_data, 1, y_data, 1) );
+#else
    HYPRE_THRUST_CALL( transform, x_data, x_data + size, y_data, y_data, alpha * _1 + _2 );
+#endif
 #else
    HYPRE_Int i;
 #if defined(HYPRE_USING_DEVICE_OPENMP)
@@ -545,7 +557,11 @@ hypre_SeqVectorInnerProd( hypre_Vector *x,
 
 #if defined(HYPRE_USING_CUDA)
 #ifndef HYPRE_COMPLEX
+#if defined(HYPRE_USING_CUBLAS)
+   HYPRE_CUBLAS_CALL( cublasDdot(hypre_HandleCublasHandle(hypre_handle), size, x_data, 1, y_data, 1, &result) );
+#else
    result = HYPRE_THRUST_CALL( inner_product, x_data, x_data + size, y_data, 0.0 );
+#endif
 #else
    /* TODO */
 #error "Complex inner product"
@@ -622,6 +638,5 @@ hypre_SeqVectorPrefetch( hypre_Vector *x, HYPRE_Int to_location)
 
 //hypre_int hypre_SeqVectorIsManaged(hypre_Vector *x)
 //{
-//   return pointerIsManaged((void*)hypre_VectorData(x));
 //}
 

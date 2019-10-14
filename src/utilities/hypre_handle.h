@@ -35,6 +35,7 @@ typedef struct
    HYPRE_Int cuda_compute_stream_sync_default;
    std::vector<HYPRE_Int> cuda_compute_stream_sync;
    curandGenerator_t curand_gen;
+   cublasHandle_t cublas_handle;
    cusparseHandle_t cusparse_handle;
    cusparseMatDescr_t cusparse_mat_descr;
    cudaStream_t cuda_streams[HYPRE_MAX_NUM_STREAMS];
@@ -148,10 +149,29 @@ hypre_HandleCurandGenerator(hypre_Handle *hypre_handle_)
    curandGenerator_t gen;
    HYPRE_CURAND_CALL( curandCreateGenerator(&gen, CURAND_RNG_PSEUDO_DEFAULT) );
    HYPRE_CURAND_CALL( curandSetPseudoRandomGeneratorSeed(gen, 1234ULL) );
+   HYPRE_CURAND_CALL( curandSetStream(gen, hypre_HandleCudaComputeStream(hypre_handle_)) );
 
    hypre_handle_->curand_gen = gen;
 
    return gen;
+}
+
+static inline cublasHandle_t
+hypre_HandleCublasHandle(hypre_Handle *hypre_handle_)
+{
+   if (hypre_handle_->cublas_handle)
+   {
+      return hypre_handle_->cublas_handle;
+   }
+
+   cublasHandle_t handle;
+   HYPRE_CUBLAS_CALL( cublasCreate(&handle) );
+
+   HYPRE_CUBLAS_CALL( cublasSetStream(handle, hypre_HandleCudaComputeStream(hypre_handle_)) );
+
+   hypre_handle_->cublas_handle = handle;
+
+   return handle;
 }
 
 static inline cusparseHandle_t

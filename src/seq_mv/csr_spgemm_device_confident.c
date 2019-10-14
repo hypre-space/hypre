@@ -373,9 +373,9 @@ hypreDevice_CSRSpGemmWithRownnzUpperbound(HYPRE_Int   m,        HYPRE_Int   k,  
 
    // for cases where one WARP works on a row
    HYPRE_Int num_warps = min(m, HYPRE_MAX_NUM_WARPS);
-   HYPRE_Int gDim = (num_warps + bDim.z - 1) / bDim.z;
+   dim3 gDim( (num_warps + bDim.z - 1) / bDim.z );
    // number of active warps
-   HYPRE_Int num_act_warps = min(bDim.z * gDim, m);
+   HYPRE_Int num_act_warps = min(bDim.z * gDim.x, m);
 
    char hash_type = hypre_handle->spgemm_hash_type;
 
@@ -412,42 +412,42 @@ hypreDevice_CSRSpGemmWithRownnzUpperbound(HYPRE_Int   m,        HYPRE_Int   k,  
    {
       if (hash_type == 'L')
       {
-         csr_spmm_numeric<num_warps_per_block, shmem_hash_size, 0, 'L'> <<<gDim, bDim>>>
-            (m, /* k, n, */ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, d_ic_new + 1,
-             d_ghash_i, d_ghash_j, d_ghash_a);
+         HYPRE_CUDA_LAUNCH( (csr_spmm_numeric<num_warps_per_block, shmem_hash_size, 0, 'L'>), gDim, bDim,
+                            m, /* k, n, */ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, d_ic_new + 1,
+                            d_ghash_i, d_ghash_j, d_ghash_a );
       }
       else if (hash_type == 'Q')
       {
-         csr_spmm_numeric<num_warps_per_block, shmem_hash_size, 0, 'Q'> <<<gDim, bDim>>>
-            (m, /* k, n, */ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, d_ic_new + 1,
-             d_ghash_i, d_ghash_j, d_ghash_a);
+         HYPRE_CUDA_LAUNCH( (csr_spmm_numeric<num_warps_per_block, shmem_hash_size, 0, 'Q'>), gDim, bDim,
+                            m, /* k, n, */ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, d_ic_new + 1,
+                            d_ghash_i, d_ghash_j, d_ghash_a );
       }
       else if (hash_type == 'D')
       {
-         csr_spmm_numeric<num_warps_per_block, shmem_hash_size, 0, 'D'> <<<gDim, bDim>>>
-            (m, /* k, n, */ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, d_ic_new + 1,
-             d_ghash_i, d_ghash_j, d_ghash_a);
+         HYPRE_CUDA_LAUNCH( (csr_spmm_numeric<num_warps_per_block, shmem_hash_size, 0, 'D'>), gDim, bDim,
+                            m, /* k, n, */ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, d_ic_new + 1,
+                            d_ghash_i, d_ghash_j, d_ghash_a );
       }
    }
    else
    {
       if (hash_type == 'L')
       {
-         csr_spmm_numeric<num_warps_per_block, shmem_hash_size, 1, 'L'> <<<gDim, bDim>>>
-            (m, /* k, n, */ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, d_ic_new + 1,
-             d_ghash_i, d_ghash_j, d_ghash_a);
+         HYPRE_CUDA_LAUNCH( (csr_spmm_numeric<num_warps_per_block, shmem_hash_size, 1, 'L'>), gDim, bDim,
+                            m, /* k, n, */ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, d_ic_new + 1,
+                            d_ghash_i, d_ghash_j, d_ghash_a );
       }
       else if (hash_type == 'Q')
       {
-         csr_spmm_numeric<num_warps_per_block, shmem_hash_size, 1, 'Q'> <<<gDim, bDim>>>
-            (m, /* k, n, */ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, d_ic_new + 1,
-             d_ghash_i, d_ghash_j, d_ghash_a);
+         HYPRE_CUDA_LAUNCH( (csr_spmm_numeric<num_warps_per_block, shmem_hash_size, 1, 'Q'>), gDim, bDim,
+                            m, /* k, n, */ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, d_ic_new + 1,
+                            d_ghash_i, d_ghash_j, d_ghash_a );
       }
       else if (hash_type == 'D')
       {
-         csr_spmm_numeric<num_warps_per_block, shmem_hash_size, 1, 'D'> <<<gDim, bDim>>>
-            (m, /* k, n, */ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, d_ic_new + 1,
-             d_ghash_i, d_ghash_j, d_ghash_a);
+         HYPRE_CUDA_LAUNCH( (csr_spmm_numeric<num_warps_per_block, shmem_hash_size, 1, 'D'>), gDim, bDim,
+                            m, /* k, n, */ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, d_ic_new + 1,
+                            d_ghash_i, d_ghash_j, d_ghash_a );
       }
    }
 
@@ -461,9 +461,9 @@ hypreDevice_CSRSpGemmWithRownnzUpperbound(HYPRE_Int   m,        HYPRE_Int   k,  
       if (nnzC_nume_new < nnzC_nume)
       {
          /* copy to the final C */
-         gDim = (m + bDim.z - 1) / bDim.z;
-         copy_from_Cext_into_C<num_warps_per_block> <<<gDim, bDim>>>
-            (m, d_ic, d_jc, d_c, d_ic_new, d_jc_new, d_c_new);
+         dim3 gDim( (m + bDim.z - 1) / bDim.z );
+         HYPRE_CUDA_LAUNCH( (copy_from_Cext_into_C<num_warps_per_block>), gDim, bDim,
+                            m, d_ic, d_jc, d_c, d_ic_new, d_jc_new, d_c_new );
 
          hypre_TFree(d_ic, HYPRE_MEMORY_DEVICE);
          hypre_TFree(d_jc, HYPRE_MEMORY_DEVICE);

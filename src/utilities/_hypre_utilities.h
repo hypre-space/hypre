@@ -640,31 +640,13 @@ hypre_GetActualMemLocation(HYPRE_Int location)
  *--------------------------------------------------------------------------*/
 
 /* hypre_memory.c */
-#if 0
-char *hypre_CAllocIns( size_t count ,  size_t elt_size , HYPRE_Int location,char *file, HYPRE_Int line);
-char *hypre_ReAllocIns( char *ptr ,  size_t size , HYPRE_Int location,char *file, HYPRE_Int line);
-char *hypre_MAllocIns( size_t size , HYPRE_Int location,char *file,HYPRE_Int line);
-char *hypre_MAllocPinned( size_t size );
-#else
 void * hypre_MAlloc(size_t size, HYPRE_Int location);
 void * hypre_CAlloc( size_t count, size_t elt_size, HYPRE_Int location);
 void * hypre_ReAlloc(void *ptr, size_t size, HYPRE_Int location);
 void   hypre_Memcpy(void *dst, void *src, size_t size, HYPRE_Int loc_dst, HYPRE_Int loc_src);
 void * hypre_Memset(void *ptr, HYPRE_Int value, size_t num, HYPRE_Int location);
 void   hypre_Free(void *ptr, HYPRE_Int location);
-#endif
-/*
-char *hypre_CAllocHost( size_t count,size_t elt_size );
-char *hypre_MAllocHost( size_t size );
-char *hypre_ReAllocHost( char   *ptr,size_t  size );
-void hypre_FreeHost( char *ptr );
-char *hypre_SharedMAlloc ( size_t size );
-char *hypre_SharedCAlloc ( size_t count , size_t elt_size );
-char *hypre_SharedReAlloc ( char *ptr , size_t size );
-void hypre_SharedFree ( char *ptr );
-void hypre_MemcpyAsync( char *dst, char *src, size_t size, HYPRE_Int locdst, HYPRE_Int locsrc );
-HYPRE_Real *hypre_IncrementSharedDataPtr ( HYPRE_Real *ptr , size_t size );
-*/
+HYPRE_Int hypre_GetMemoryLocation(const void *ptr, HYPRE_Int *memory_location);
 
 /* memory_dmalloc.c */
 HYPRE_Int hypre_InitMemoryDebugDML( HYPRE_Int id );
@@ -1132,7 +1114,16 @@ extern "C++" {
 #include <cuda_runtime.h>
 #include <assert.h>
 #include <curand.h>
+#include <cublas_v2.h>
 #include <cusparse.h>
+
+#ifndef CUDART_VERSION
+#error CUDART_VERSION Undefined!
+#endif
+
+#ifndef CUDA_VERSION
+#error CUDA_VERSION Undefined!
+#endif
 
 #if defined(HYPRE_USING_CUDA)
 #include <thrust/execution_policy.h>
@@ -1187,12 +1178,19 @@ using namespace thrust::placeholders;
    thrust::func_name(                                                                        \
    thrust::cuda::par.on(hypre_HandleCudaComputeStream(hypre_handle)), __VA_ARGS__);          \
 
+#define HYPRE_CUBLAS_CALL(call) do {                                                         \
+   cublasStatus_t err = call;                                                                \
+   if (CUBLAS_STATUS_SUCCESS != err) {                                                       \
+      hypre_printf("CUBLAS ERROR (code = %d, %d) at %s:%d\n",                                \
+            err, err == CUBLAS_STATUS_EXECUTION_FAILED, __FILE__, __LINE__);                 \
+      exit(1);                                                                               \
+   } } while(0)
 
 #define HYPRE_CUSPARSE_CALL(call) do {                                                       \
    cusparseStatus_t err = call;                                                              \
    if (CUSPARSE_STATUS_SUCCESS != err) {                                                     \
       hypre_printf("CUSPARSE ERROR (code = %d, %d) at %s:%d\n",                              \
-            err, err == CUSPARSE_STATUS_EXECUTION_FAILED, __FILE__, __LINE__);                           \
+            err, err == CUSPARSE_STATUS_EXECUTION_FAILED, __FILE__, __LINE__);               \
       exit(1);                                                                               \
    } } while(0)
 
@@ -1251,7 +1249,7 @@ hypre_int hypre_cuda_get_thread_id()
    return -1;
 }
 
-/* return the number of warps in block  */
+/* return the number of warps in block */
 template <hypre_int dim>
 static __device__ __forceinline__
 hypre_int hypre_cuda_get_num_warps()
@@ -1346,11 +1344,7 @@ hypre_int hypre_cuda_get_grid_warp_id()
           hypre_cuda_get_warp_id<bdim>();
 }
 
-#ifndef CUDART_VERSION
-#error CUDART_VERSION Undefined!
-#endif
-
-#if CUDART_VERSION < 9000
+#if CUDA_VERSION < 9000
 
 template <typename T>
 static __device__ __forceinline__
@@ -1532,11 +1526,113 @@ hypre_int next_power_of_2(hypre_int n)
    return n;
 }
 
+template<typename T>
+struct absolute_value : public thrust::unary_function<T,T>
+{
+  __host__ __device__ T operator()(const T &x) const
+  {
+    return x < T(0) ? -x : x;
+  }
+};
+
+
+template<typename T1, typename T2>
+struct TupleComp1
+{
+   typedef thrust::tuple<T1, T2> Tuple;
+
+   __host__ __device__ bool operator()(const Tuple& t1, const Tuple& t2)
+   {
+      if (thrust::get<0>(t1) < thrust::get<0>(t2))
+      {
+         return true;
+      }
+      if (thrust::get<0>(t1) > thrust::get<0>(t2))
+      {
+         return false;
+      }
+      return thrust::get<1>(t1) < thrust::get<1>(t2);
+   }
+};
+
+
+template<typename T1, typename T2>
+struct TupleComp2
+{
+   typedef thrust::tuple<T1, T2> Tuple;
+
+   __host__ __device__ bool operator()(const Tuple& t1, const Tuple& t2)
+   {
+      if (thrust::get<0>(t1) < thrust::get<0>(t2))
+      {
+         return true;
+      }
+      if (thrust::get<0>(t1) > thrust::get<0>(t2))
+      {
+         return false;
+      }
+      return hypre_abs(thrust::get<1>(t1)) > hypre_abs(thrust::get<1>(t2));
+   }
+};
+
 #endif // #if defined(HYPRE_USING_CUDA)
 
 #ifdef __cplusplus
 }
 #endif
+
+struct is_negative
+{
+   __host__ __device__ bool operator()(const HYPRE_Int &x)
+   {
+      return (x < 0);
+   }
+};
+
+struct is_nonnegative
+{
+   __host__ __device__ bool operator()(const HYPRE_Int &x)
+   {
+      return (x >= 0);
+   }
+};
+
+struct in_range
+{
+   HYPRE_Int low, up;
+
+   in_range(HYPRE_Int low_, HYPRE_Int up_) { low = low_; up = up_; }
+
+   __host__ __device__ bool operator()(const HYPRE_Int &x)
+   {
+      return (x >= low && x <= up);
+   }
+};
+
+struct out_of_range
+{
+   HYPRE_Int low, up;
+
+   out_of_range(HYPRE_Int low_, HYPRE_Int up_) { low = low_; up = up_; }
+
+   __host__ __device__ bool operator()(const HYPRE_Int &x)
+   {
+      return (x < low || x > up);
+   }
+};
+
+struct less_than
+{
+   HYPRE_Int val;
+
+   less_than(HYPRE_Int val_) { val = val_; }
+
+   __host__ __device__ bool operator()(const HYPRE_Int &x)
+   {
+      return (x < val);
+   }
+};
+
 
 #if defined(HYPRE_USING_CUDA)
 /* for struct solvers */
@@ -1586,6 +1682,7 @@ typedef struct
    HYPRE_Int cuda_compute_stream_sync_default;
    std::vector<HYPRE_Int> cuda_compute_stream_sync;
    curandGenerator_t curand_gen;
+   cublasHandle_t cublas_handle;
    cusparseHandle_t cusparse_handle;
    cusparseMatDescr_t cusparse_mat_descr;
    cudaStream_t cuda_streams[HYPRE_MAX_NUM_STREAMS];
@@ -1699,10 +1796,29 @@ hypre_HandleCurandGenerator(hypre_Handle *hypre_handle_)
    curandGenerator_t gen;
    HYPRE_CURAND_CALL( curandCreateGenerator(&gen, CURAND_RNG_PSEUDO_DEFAULT) );
    HYPRE_CURAND_CALL( curandSetPseudoRandomGeneratorSeed(gen, 1234ULL) );
+   HYPRE_CURAND_CALL( curandSetStream(gen, hypre_HandleCudaComputeStream(hypre_handle_)) );
 
    hypre_handle_->curand_gen = gen;
 
    return gen;
+}
+
+static inline cublasHandle_t
+hypre_HandleCublasHandle(hypre_Handle *hypre_handle_)
+{
+   if (hypre_handle_->cublas_handle)
+   {
+      return hypre_handle_->cublas_handle;
+   }
+
+   cublasHandle_t handle;
+   HYPRE_CUBLAS_CALL( cublasCreate(&handle) );
+
+   HYPRE_CUBLAS_CALL( cublasSetStream(handle, hypre_HandleCudaComputeStream(hypre_handle_)) );
+
+   hypre_handle_->cublas_handle = handle;
+
+   return handle;
 }
 
 static inline cusparseHandle_t
@@ -2082,7 +2198,8 @@ struct ReduceSum
       T val;
       /* 2nd reduction with only *one* block */
       assert(nblocks >= 0 && nblocks <= 1024);
-      OneBlockReduceKernel<<<1, 1024>>>(d_buf, nblocks);
+      const dim3 gDim(1), bDim(1024);
+      HYPRE_CUDA_LAUNCH( OneBlockReduceKernel, gDim, bDim, d_buf, nblocks );
       hypre_TMemcpy(&val, d_buf, T, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
       val += init;
 
@@ -2393,6 +2510,9 @@ extern "C++" {
 dim3 hypre_GetDefaultCUDABlockDimension();
 
 dim3 hypre_GetDefaultCUDAGridDimension( HYPRE_Int n, const char *granularity, dim3 bDim );
+
+template <typename T1, typename T2, typename T3> HYPRE_Int hypreDevice_StableSortByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *vals, HYPRE_Int opt);
+
 #ifdef __cplusplus
 }
 #endif
@@ -2415,6 +2535,8 @@ HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int *
 
 HYPRE_Int* hypreDevice_CsrRowIndicesToPtrs(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ind);
 
+HYPRE_Int hypreDevice_CsrRowIndicesToPtrs_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ind, HYPRE_Int *d_row_ptr);
+
 HYPRE_Int hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Real *y);
 
 HYPRE_Int hypreDevice_ScatterConstant(HYPRE_Int *x, HYPRE_Int n, HYPRE_Int *map, HYPRE_Int v);
@@ -2425,13 +2547,7 @@ HYPRE_Int hypreDevice_DiagScaleVector(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex
 
 HYPRE_Int hypreDevice_BigToSmallCopy(HYPRE_Int *tgt, const HYPRE_BigInt *src, HYPRE_Int size);
 
-HYPRE_Int pointerIsManaged(const void *ptr);
-
-/* gpuMem.c */
-
-/* gpuErrorCheck.c */
 void hypre_CudaCompileFlagCheck();
-void PrintPointerAttributes(const void *ptr);
 
 #endif
 

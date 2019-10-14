@@ -446,7 +446,7 @@ hypre_Memcpy(void *dst, void *src, size_t size, HYPRE_Int loc_dst, HYPRE_Int loc
          );
       }
 
-      HYPRE_CUDA_CALL( cudaStreamSynchronize(hypre_HandleCudaPrefetchStream(hypre_handle)) );
+      /* HYPRE_CUDA_CALL( cudaStreamSynchronize(hypre_HandleCudaPrefetchStream(hypre_handle)) ); */
 
       return;
    }
@@ -573,7 +573,7 @@ hypre_Memset(void *ptr, HYPRE_Int value, size_t num, HYPRE_Int location)
          memset(ptr, value, num);
          HYPRE_OMPOffload(hypre__offload_device_num, ptr, num, "update", "to");
 #elif defined(HYPRE_USING_CUDA)
-         cudaMemset(ptr, value, num);
+         HYPRE_CUDA_CALL( cudaMemset(ptr, value, num) );
 #endif
          break;
       case HYPRE_MEMORY_SHARED :
@@ -586,5 +586,67 @@ hypre_Memset(void *ptr, HYPRE_Int value, size_t num, HYPRE_Int location)
    }
 
    return ptr;
+}
+
+HYPRE_Int
+hypre_GetMemoryLocation(const void *ptr, HYPRE_Int *memory_location)
+{
+   HYPRE_Int ierr = 0;
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+   struct cudaPointerAttributes attr;
+   *memory_location = HYPRE_MEMORY_UNSET;
+
+#if (CUDART_VERSION >= 10000)
+   HYPRE_CUDA_CALL( cudaPointerGetAttributes(&attr, ptr) );
+   if (attr.type == cudaMemoryTypeUnregistered)
+   {
+      *memory_location = HYPRE_MEMORY_HOST;
+   }
+   else if (attr.type == cudaMemoryTypeHost)
+   {
+      *memory_location = HYPRE_MEMORY_HOST_PINNED;
+   }
+   else if (attr.type == cudaMemoryTypeDevice)
+   {
+      *memory_location = HYPRE_MEMORY_DEVICE;
+   }
+   else if (attr.type == cudaMemoryTypeManaged)
+   {
+      *memory_location = HYPRE_MEMORY_SHARED;
+   }
+#else
+   cudaError_t err = cudaPointerGetAttributes(&attr, ptr);
+   if (err != cudaSuccess)
+   {
+      ierr = 1;
+
+      /* clear the error */
+      cudaGetLastError();
+
+      if (err == cudaErrorInvalidValue)
+      {
+         *memory_location = HYPRE_MEMORY_HOST;
+      }
+   }
+   else if (attr.isManaged)
+   {
+      *memory_location = HYPRE_MEMORY_SHARED;
+   }
+   else if (attr.memoryType == cudaMemoryTypeDevice)
+   {
+      *memory_location = HYPRE_MEMORY_DEVICE;
+   }
+   else if (attr.memoryType == cudaMemoryTypeHost)
+   {
+      *memory_location = HYPRE_MEMORY_HOST_PINNED;
+   }
+#endif
+
+#else /* #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP) */
+   *memory_location = HYPRE_MEMORY_HOST;
+#endif
+
+   return ierr;
 }
 
