@@ -38,6 +38,11 @@ shift
 
 # Organizing the tests from "fast" to "slow"
 
+# Check license header info
+#( cd $src_dir; make distclean )
+./test.sh check-license.sh $src_dir/..
+mv -f check-license.??? $output_dir
+
 # Check for 'int', 'double', and 'MPI_'
 ./test.sh check-int.sh $src_dir
 mv -f check-int.??? $output_dir

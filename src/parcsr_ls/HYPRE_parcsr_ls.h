@@ -1084,7 +1084,7 @@ HYPRE_Int HYPRE_BoomerAMGSetEuBJ(HYPRE_Solver solver,
  * The default is 0.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetRestriction(HYPRE_Solver solver,
-                                        HYPRE_Int   restr_par);
+                                        HYPRE_Int    restr_par);
 
 /**
  * (Optional) Assumes the matrix is triangular in some ordering
@@ -1173,7 +1173,14 @@ HYPRE_Int HYPRE_BoomerAMGInitGridRelaxation(HYPRE_Int    **num_grid_sweeps_ptr,
  * replaced by two matrix products.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetRAP2(HYPRE_Solver solver,
-                                      HYPRE_Int    rap2);
+                                 HYPRE_Int    rap2);
+
+/**
+ * (Optional) If mod_rap2 not equal 0, the triple matrix product RAP is
+ * replaced by two matrix products with modularized kernels
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetModuleRAP2(HYPRE_Solver solver,
+                                       HYPRE_Int    mod_rap2);
 
 /**
  * (Optional) If set to 1, the local interpolation transposes will

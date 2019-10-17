@@ -43,6 +43,7 @@
 #ifndef hypre_HOPSCOTCH_HASH_HEADER
 #define hypre_HOPSCOTCH_HASH_HEADER
 
+#include <strings.h>
 #include <stdio.h>
 #include <limits.h>
 #include <assert.h>
@@ -55,7 +56,6 @@
 #include "_hypre_utilities.h"
 
 // Potentially architecture specific features used here:
-// __builtin_ffs
 // __sync_val_compare_and_swap
 
 #ifdef __cplusplus
@@ -128,8 +128,7 @@ static inline HYPRE_Int hypre_fetch_and_add(HYPRE_Int *ptr, HYPRE_Int value)
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
 static inline HYPRE_Int first_lsb_bit_indx(hypre_uint x) 
 {
-  if (0 == x) return -1;
-  return __builtin_ffs(x) - 1;
+  return ffs(x) - 1;
 }
 #endif
 /**

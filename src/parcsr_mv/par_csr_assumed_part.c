@@ -300,6 +300,41 @@ hypre_LocateAssummedPartition(MPI_Comm comm, HYPRE_BigInt row_start, HYPRE_BigIn
 
 
    return hypre_error_flag;
+
+
+}
+
+
+hypre_IJAssumedPart*
+hypre_AssumedPartitionCreate(MPI_Comm comm,
+                             HYPRE_Int global_num,
+                             HYPRE_Int start,
+                             HYPRE_Int end)
+{
+   hypre_IJAssumedPart *apart;
+   HYPRE_Int myid;
+
+   hypre_MPI_Comm_rank(comm, &myid );
+
+   /* allocate space */
+   apart = hypre_CTAlloc(hypre_IJAssumedPart, 1, HYPRE_MEMORY_HOST);
+
+
+   hypre_GetAssumedPartitionRowRange( comm, myid, 0, global_num,
+                                      &(apart->row_start), &(apart->row_end));
+
+   /*allocate some space for the partition of the assumed partition */
+   apart->length = 0;
+   /*room for 10 owners of the assumed partition*/
+   apart->storage_length = 10; /*need to be >=1 */
+   apart->proc_list = hypre_TAlloc(HYPRE_Int,  apart->storage_length, HYPRE_MEMORY_HOST);
+   apart->row_start_list = hypre_TAlloc(HYPRE_BigInt,  apart->storage_length, HYPRE_MEMORY_HOST);
+   apart->row_end_list = hypre_TAlloc(HYPRE_BigInt,  apart->storage_length, HYPRE_MEMORY_HOST);
+
+   /* now we want to reconcile our actual partition with the assumed partition */
+   hypre_LocateAssummedPartition(comm, start, end, 0, global_num, apart, myid);
+
+   return apart;
 }
 
 /*--------------------------------------------------------------------
@@ -313,7 +348,7 @@ HYPRE_Int
 hypre_ParCSRMatrixCreateAssumedPartition( hypre_ParCSRMatrix *matrix)
 {
    HYPRE_BigInt global_num_cols;
-   HYPRE_Int myid;
+   /* HYPRE_Int myid; */
    HYPRE_BigInt  row_start=0, row_end=0, col_start = 0, col_end = 0;
 
    MPI_Comm   comm;
@@ -325,29 +360,11 @@ hypre_ParCSRMatrixCreateAssumedPartition( hypre_ParCSRMatrix *matrix)
 
    /* find out my actualy range of rows and columns */
    hypre_ParCSRMatrixGetLocalRange( matrix,
-                                    &row_start, &row_end ,
+                                    &row_start, &row_end, /* these two are not used */
                                     &col_start, &col_end );
-   hypre_MPI_Comm_rank(comm, &myid );
-
-   /* allocate space */
-   apart = hypre_CTAlloc(hypre_IJAssumedPart, 1, HYPRE_MEMORY_HOST);
-
-  /* get my assumed partitioning  - we want partitioning of the vector that the
+   /* get my assumed partitioning  - we want partitioning of the vector that the
       matrix multiplies - so we use the col start and end */
-   hypre_GetAssumedPartitionRowRange( comm, myid, 0, global_num_cols,
-                                      &(apart->row_start), &(apart->row_end));
-
-  /*allocate some space for the partition of the assumed partition */
-    apart->length = 0;
-    /*room for 10 owners of the assumed partition*/
-    apart->storage_length = 10; /*need to be >=1 */
-    apart->proc_list = hypre_TAlloc(HYPRE_Int,  apart->storage_length, HYPRE_MEMORY_HOST);
-    apart->row_start_list = hypre_TAlloc(HYPRE_BigInt,  apart->storage_length, HYPRE_MEMORY_HOST);
-    apart->row_end_list = hypre_TAlloc(HYPRE_BigInt,  apart->storage_length, HYPRE_MEMORY_HOST);
-
-
-    /* now we want to reconcile our actual partition with the assumed partition */
-    hypre_LocateAssummedPartition(comm, col_start, col_end, 0, global_num_cols, apart, myid);
+   apart = hypre_AssumedPartitionCreate(comm, global_num_cols, col_start, col_end);
 
     /* this partition will be saved in the matrix data structure until the matrix is destroyed */
     hypre_ParCSRMatrixAssumedPartition(matrix) = apart;

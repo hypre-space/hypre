@@ -307,6 +307,9 @@ hypre_BoomerAMG_MyCreateS(hypre_ParCSRMatrix  *A,
     S_diag_j = hypre_CSRMatrixJ(S_diag);
     S_diag_data = hypre_CSRMatrixData(S_diag);
     S_offd_i = hypre_CSRMatrixI(S_offd);
+
+   hypre_CSRMatrixMemoryLocation(S_diag) = HYPRE_MEMORY_HOST;
+   hypre_CSRMatrixMemoryLocation(S_offd) = HYPRE_MEMORY_HOST;
     
     dof_func_offd = NULL;
     

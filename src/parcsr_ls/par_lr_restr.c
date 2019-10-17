@@ -574,7 +574,15 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
     *- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
    /* we will create TWO commPkg: one for row lengths and one for row data,
     * similar to what we have done above for SF_i, SF_j */
-   hypre_ParCSRFindExtendCommPkg(A, FF2_offd_len, FF2_offd, &comm_pkg_FF2_i);
+   hypre_ParCSRFindExtendCommPkg(comm,
+                                 hypre_ParCSRMatrixGlobalNumCols(A),
+                                 hypre_ParCSRMatrixFirstColDiag(A),
+                                 hypre_CSRMatrixNumCols(A_diag),
+                                 hypre_ParCSRMatrixColStarts(A),
+                                 hypre_ParCSRMatrixAssumedPartition(A),
+                                 FF2_offd_len,
+                                 FF2_offd,
+                                 &comm_pkg_FF2_i);
    /* number of sends (#procs) */
    num_sends_FF2 = hypre_ParCSRCommPkgNumSends(comm_pkg_FF2_i);
    /* number of rows to send */
@@ -703,7 +711,7 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
    A_offd_FF2 = hypre_CSRMatrixCreate(recv_FF2_ilen, recv_FF2_ilen,
                                       recv_FF2_jlen);
 
-   hypre_CSRMatrixI (A_offd_FF2) = recv_FF2_i;
+   hypre_CSRMatrixI   (A_offd_FF2) = recv_FF2_i;
    hypre_CSRMatrixBigJ (A_offd_FF2) = recv_FF2_j;
    hypre_CSRMatrixData(A_offd_FF2) = recv_FF2_a;
 
@@ -1661,7 +1669,7 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
 HYPRE_Int
 hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
                                      HYPRE_Int            *CF_marker,
-                                     HYPRE_Int            *num_cpts_global,
+                                     HYPRE_BigInt         *num_cpts_global,
                                      HYPRE_Int             num_functions,
                                      HYPRE_Int            *dof_func,
                                      HYPRE_Int             NeumannDeg,

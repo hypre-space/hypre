@@ -276,7 +276,6 @@ void hypre_qsort2i( HYPRE_Int *v,
 
 /*   sort on w (HYPRE_Real), move v (AB 11/04) */
 
-
 void hypre_qsort2( HYPRE_Int *v,
 	     HYPRE_Real *w,
              HYPRE_Int  left,
@@ -285,14 +284,18 @@ void hypre_qsort2( HYPRE_Int *v,
    HYPRE_Int i, last;
 
    if (left >= right)
+   {
       return;
+   }
    hypre_swap2( v, w, left, (left+right)/2);
    last = left;
    for (i = left+1; i <= right; i++)
+   {
       if (w[i] < w[left])
       {
          hypre_swap2(v, w, ++last, i);
       }
+   }
    hypre_swap2(v, w, left, last);
    hypre_qsort2(v, w, left, last-1);
    hypre_qsort2(v, w, last+1, right);
@@ -312,10 +315,12 @@ void hypre_qsort2_abs( HYPRE_Int *v,
    hypre_swap2( v, w, left, (left+right)/2);
    last = left;
    for (i = left+1; i <= right; i++)
+   {
       if (fabs(w[i]) > fabs(w[left]))
       {
          hypre_swap2(v, w, ++last, i);
       }
+   }
    hypre_swap2(v, w, left, last);
    hypre_qsort2_abs(v, w, left, last-1);
    hypre_qsort2_abs(v, w, last+1, right);

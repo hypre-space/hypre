@@ -8,7 +8,7 @@
 #ifndef MACROS_H
 #define MACROS_H
 
-#include "../../utilities/general.h"
+#include "../../utilities/hypre_general.h"
 #include "../../utilities/fortran.h"
 
 /*
@@ -98,7 +98,7 @@
 #endif
 
 /*********************************************************************
-* Utility Macros 
+* Utility Macros
 **********************************************************************/
 /* MPI and Cray native timers. Note MPI uses doubles while Cray uses longs */
 #if MACHINE_IS_CRAY

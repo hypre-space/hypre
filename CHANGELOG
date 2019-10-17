@@ -7,7 +7,26 @@
 # This file chronicles user-level changes, beginning with the most recent.
 # =============================================================================
 
-Version 2.17.0 released 2019/06/10
+Version 2.18.1 released 2019/10/15
+
+- Various bug fixes.
+
+#====================================
+
+Version 2.18.0 released 2019/09/27
+
+- Ported BoomerAMG setup to run on GPUs.  Only a subset of setup phase features
+  are currently available.
+
+- Updated CMake to support more of the features available in configure/make.
+
+- Added RecomputeResidual options to several hybrid solvers.
+
+- Various bug fixes.
+
+#====================================
+
+Version 2.17.0 released 2019/07/10
 
 - Changed open source license to dual MIT/Apache-2.0
 

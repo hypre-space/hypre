@@ -29,6 +29,7 @@ set(SRCS
   par_csr_matvec.c
   par_vector.c
   par_make_system.c
+  par_csr_triplemat.c
 )
   
 convert_filenames_to_full_paths(HDRS)

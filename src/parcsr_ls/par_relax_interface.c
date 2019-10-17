@@ -55,9 +55,9 @@ HYPRE_Int  hypre_BoomerAMGRelaxIF( hypre_ParCSRMatrix *A,
                                                omega,
                                                l1_norms,
                                                u,
-                                               Vtemp, 
-                                               Ztemp); 
-      
+                                               Vtemp,
+                                               Ztemp);
+
    }
    else
    {
@@ -70,8 +70,8 @@ HYPRE_Int  hypre_BoomerAMGRelaxIF( hypre_ParCSRMatrix *A,
                                             omega,
                                             l1_norms,
                                             u,
-                                            Vtemp, 
-                                            Ztemp); 
+                                            Vtemp,
+                                            Ztemp);
    }
 
    return Solve_err_flag;

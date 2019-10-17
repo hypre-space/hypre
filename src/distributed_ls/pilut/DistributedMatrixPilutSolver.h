@@ -9,7 +9,7 @@
 #define _DISTRIBUTED_MATRIX_PILUT_SOLVER_HEADER
 
 #include "HYPRE_config.h"
-#include "general.h"
+#include "hypre_general.h"
 #include "_hypre_utilities.h"
 /*
 #ifdef HYPRE_DEBUG

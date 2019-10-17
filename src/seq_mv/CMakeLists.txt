@@ -20,6 +20,7 @@ set(SRCS
   mapped_matrix.c
   multiblock_matrix.c
   vector.c
+  vector_batched.c
 )
   
 convert_filenames_to_full_paths(HDRS)
