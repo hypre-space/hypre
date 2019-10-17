@@ -1665,51 +1665,9 @@ extern HYPRE_Int hypre_exec_policy;
 extern "C++" {
 #endif
 
-<<<<<<< HEAD
-#define HYPRE_USE_MANAGED_SCALABLE 1
-#define HYPRE_GPU_USE_PINNED 1
-
-#include <cuda_runtime_api.h>
-void hypre_GPUInit(hypre_int use_device);
-void hypre_GPUFinalize();
-int VecScaleScalar(double *u, const double alpha,  int num_rows,cudaStream_t s);
-void VecCopy(double* tgt, const double* src, int size,cudaStream_t s);
-void VecSet(double* tgt, int size, double value, cudaStream_t s);
-void VecScale(double *u, double *v, double *l1_norm, int num_rows,cudaStream_t s);
-void VecScaleSplit(double *u, double *v, double *l1_norm, int num_rows,cudaStream_t s);
-void CudaCompileFlagCheck();
-void BigToSmallCopy(hypre_int *tgt, const HYPRE_Int* src, hypre_int size, cudaStream_t s);
-cudaStream_t getstreamOlde(hypre_int i);
-nvtxDomainHandle_t getdomain(hypre_int i);
-cudaEvent_t getevent(hypre_int i);
-void MemAdviseReadOnly(const void *ptr, hypre_int device);
-void MemAdviseUnSetReadOnly(const void *ptr, hypre_int device);
-void MemAdviseSetPrefLocDevice(const void *ptr, hypre_int device);
-void MemAdviseSetPrefLocHost(const void *ptr);
-void MemPrefetch(const void *ptr,hypre_int device,cudaStream_t stream);
-void MemPrefetchSized(const void *ptr,size_t size,hypre_int device,cudaStream_t stream);
-void MemPrefetchForce(const void *ptr,hypre_int device,cudaStream_t stream);
-cublasHandle_t getCublasHandle();
-cusparseHandle_t getCusparseHandle();
-hypre_int getsetasyncmode(hypre_int mode, hypre_int action);
-void SetAsyncMode(hypre_int mode);
-hypre_int GetAsyncMode();
-void branchStream(hypre_int i, hypre_int j);
-void joinStreams(hypre_int i, hypre_int j, hypre_int k);
-void affs(hypre_int myid);
-hypre_int getcore();
-hypre_int getnuma();
-hypre_int checkDeviceProps();
-hypre_int pointerIsManaged(const void *ptr);
-
-/*
- * Global struct for keeping HYPRE GPU Init state
- */
-=======
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 #include <vector>
 #endif
->>>>>>> master
 
 typedef struct
 {
@@ -2041,12 +1999,12 @@ struct HYPRE_double4
 struct HYPRE_double6
 {
    HYPRE_Real x,y,z,w,u,v;
- 
+
    __host__ __device__
    HYPRE_double6() {}
 
    __host__ __device__
-   HYPRE_double6(HYPRE_Real x1, HYPRE_Real x2, HYPRE_Real x3, HYPRE_Real x4, 
+   HYPRE_double6(HYPRE_Real x1, HYPRE_Real x2, HYPRE_Real x3, HYPRE_Real x4,
                  HYPRE_Real x5, HYPRE_Real x6)
    {
       x = x1;
@@ -2122,7 +2080,7 @@ HYPRE_double6 warpReduceSum(HYPRE_double6 val) {
 /* reduction within a block */
 template <typename T>
 __inline__ __host__ __device__
-T blockReduceSum(T val) 
+T blockReduceSum(T val)
 {
 #ifdef __CUDA_ARCH__
    //static __shared__ T shared[32]; // Shared mem for 32 partial sums
@@ -2208,7 +2166,7 @@ struct ReduceSum
    }
 
    /* copy constructor */
-   __host__ __device__ 
+   __host__ __device__
    ReduceSum(const ReduceSum<T>& other)
    {
       *this = other;
@@ -2221,13 +2179,13 @@ struct ReduceSum
 #ifdef __CUDA_ARCH__
       __thread_sum = blockReduceSum(__thread_sum);
       if (threadIdx.x == 0)
-      {                                   
+      {
          d_buf[blockIdx.x] = __thread_sum;
       }
 #endif
    }
-   
-   __host__ __device__ 
+
+   __host__ __device__
    void operator+=(T val) const
    {
       __thread_sum += val;
@@ -2249,7 +2207,7 @@ struct ReduceSum
    }
 
    /* destructor */
-   __host__ __device__ 
+   __host__ __device__
    ~ReduceSum<T>()
    {
    }
@@ -2278,7 +2236,7 @@ void hypre_enter_on_lists ( hypre_LinkList *LoL_head_ptr , hypre_LinkList *LoL_t
 
 /* binsearch.c */
 HYPRE_Int hypre_BinarySearch ( HYPRE_Int *list , HYPRE_Int value , HYPRE_Int list_length );
-HYPRE_Int hypre_BigBinarySearch(HYPRE_BigInt *list, HYPRE_BigInt value, HYPRE_Int list_length);
+HYPRE_Int hypre_BigBinarySearch ( HYPRE_BigInt *list , HYPRE_BigInt value , HYPRE_Int list_length );
 HYPRE_Int hypre_BinarySearch2 ( HYPRE_Int *list , HYPRE_Int value , HYPRE_Int low , HYPRE_Int high , HYPRE_Int *spot );
 HYPRE_Int *hypre_LowerBound( HYPRE_Int *first, HYPRE_Int *last, HYPRE_Int value );
 HYPRE_BigInt *hypre_BigLowerBound( HYPRE_BigInt *first, HYPRE_BigInt *last, HYPRE_BigInt value );
@@ -2338,14 +2296,9 @@ void hypre_qsort1 ( HYPRE_Int *v , HYPRE_Real *w , HYPRE_Int left , HYPRE_Int ri
 void hypre_BigQsort1 ( HYPRE_BigInt *v , HYPRE_Real *w , HYPRE_Int left , HYPRE_Int right );
 void hypre_qsort2i ( HYPRE_Int *v , HYPRE_Int *w , HYPRE_Int left , HYPRE_Int right );
 void hypre_qsort2 ( HYPRE_Int *v , HYPRE_Real *w , HYPRE_Int left , HYPRE_Int right );
-<<<<<<< HEAD
 void hypre_qsort2_abs ( HYPRE_Int *v , HYPRE_Real *w , HYPRE_Int left , HYPRE_Int right );
-=======
-void hypre_qsort2abs( HYPRE_Int *v, HYPRE_Real *w, HYPRE_Int left, HYPRE_Int right );
->>>>>>> master
 void hypre_qsort3i ( HYPRE_Int *v , HYPRE_Int *w , HYPRE_Int *z , HYPRE_Int left , HYPRE_Int right );
 void hypre_qsort3_abs ( HYPRE_Real *v , HYPRE_Int *w , HYPRE_Int *z , HYPRE_Int left , HYPRE_Int right );
-void hypre_qsort3 ( HYPRE_Real *v , HYPRE_Int *w , HYPRE_Int *z , HYPRE_Int left , HYPRE_Int right );
 void hypre_BigQsort4_abs ( HYPRE_Real *v , HYPRE_BigInt *w , HYPRE_Int *z , HYPRE_Int *y , HYPRE_Int left , HYPRE_Int right );
 void hypre_qsort_abs ( HYPRE_Real *w , HYPRE_Int left , HYPRE_Int right );
 void hypre_BigSwapbi(HYPRE_BigInt  *v, HYPRE_Int  *w, HYPRE_Int  i, HYPRE_Int  j );
@@ -2471,20 +2424,14 @@ typedef struct {
  */
 typedef struct
 {
-	HYPRE_Int  volatile              segmentMask;
-	HYPRE_Int  volatile              bucketMask;
+   HYPRE_Int  volatile              segmentMask;
+   HYPRE_Int  volatile              bucketMask;
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
-	hypre_HopscotchSegment* volatile segments;
+   hypre_HopscotchSegment* volatile segments;
 #endif
-<<<<<<< HEAD
-  HYPRE_Int *volatile              key;
-  hypre_uint *volatile             hopInfo;
-	HYPRE_Int *volatile	             hash;
-=======
    HYPRE_Int *volatile              key;
    hypre_uint *volatile             hopInfo;
-   HYPRE_Int *volatile              hash;
->>>>>>> master
+   HYPRE_Int *volatile	            hash;
 } hypre_UnorderedIntSet;
 
 typedef struct
@@ -2523,22 +2470,22 @@ typedef struct
  */
 typedef struct
 {
-   HYPRE_Int  volatile              segmentMask;
-   HYPRE_Int  volatile              bucketMask;
+	HYPRE_Int  volatile              segmentMask;
+	HYPRE_Int  volatile              bucketMask;
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
-   hypre_HopscotchSegment* volatile segments;
+	hypre_HopscotchSegment*	volatile segments;
 #endif
-   hypre_HopscotchBucket* volatile table;
+	hypre_HopscotchBucket* volatile	 table;
 } hypre_UnorderedIntMap;
 
 typedef struct
 {
-   HYPRE_Int  volatile                segmentMask;
-   HYPRE_Int  volatile                bucketMask;
+	HYPRE_Int  volatile              segmentMask;
+	HYPRE_Int  volatile              bucketMask;
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
-   hypre_HopscotchSegment*   volatile segments;
+	hypre_HopscotchSegment*	volatile segments;
 #endif
-   hypre_BigHopscotchBucket* volatile table;
+	hypre_BigHopscotchBucket* volatile	 table;
 } hypre_UnorderedBigIntMap;
 
 /**
