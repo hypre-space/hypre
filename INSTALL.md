@@ -82,3 +82,12 @@ appropriate, then reconfigure/generate:
   type `c` then `q`.
 
 - Windows VS: Change options, then click on 'Configure' then 'Generate'.
+
+
+ABI Compatibility
+=================
+
+The hypre team currently does nothing to ensure application binary interface
+(ABI) compatibility.  As a result, all releases (major, minor, or patch) should
+be treated as incompatible.
+
