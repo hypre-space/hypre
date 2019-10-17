@@ -2379,7 +2379,6 @@ hypre_ParCSRMatrixDropSmallEntries( hypre_ParCSRMatrix *A,
    return hypre_error_flag;
 }
 
-<<<<<<< HEAD
 /* Perform dual truncation of ParCSR matrix. 
  * This code is adapted from original BoomerAMGInterpTruncate()
  * A: parCSR matrix to be modified
@@ -2937,10 +2936,7 @@ hypre_ParCSRMatrixTruncate(hypre_ParCSRMatrix *A,
    return ierr;
 }
 
-
-=======
 /*
->>>>>>> master
 #ifdef HYPRE_USING_UNIFIED_MEMORY
 hypre_int hypre_ParCSRMatrixIsManaged(hypre_ParCSRMatrix *a){
   if (hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(a)))
