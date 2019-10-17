@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -16,7 +11,7 @@
  *
  *****************************************************************************/
 
-//#if defined(HYPRE_USE_MANAGED)
+//#if defined(HYPRE_USING_UNIFIED_MEMORY)
 
 #include "seq_mv.h"
 #include <assert.h>
@@ -38,19 +33,16 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP2( HYPRE_Complex    alpha,
                                  hypre_Vector    *y,
                                  HYPRE_Int        offset     )
 {
-  printf("CALLING OOOMP MATVE\n");
+   /* printf("CALLING OOOMP MATVE\n"); */
 #ifdef HYPRE_PROFILE
    HYPRE_Real time_begin = hypre_MPI_Wtime();
 #endif
-#ifdef HYPRE_USE_GPU
+
+#if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
    PUSH_RANGE_PAYLOAD("MATVEC_OOMP",0, hypre_CSRMatrixNumRows(A));
-   HYPRE_Int ret=hypre_CSRMatrixMatvecDevice( alpha,A,x,beta,b,y,offset);
+   HYPRE_Int ierr = hypre_CSRMatrixMatvecDevice( alpha,A,x,beta,b,y,offset );
    POP_RANGE;
-  return ret;
-#ifdef HYPRE_PROFILE
-   hypre_profile_times[HYPRE_TIMER_ID_MATVEC] += hypre_MPI_Wtime() - time_begin;
-#endif
-#endif
+#else
    HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
    HYPRE_Int        *A_i      = hypre_CSRMatrixI(A) + offset;
    HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
@@ -84,7 +76,7 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP2( HYPRE_Complex    alpha,
    HYPRE_Real        xpar=0.7;
 
    HYPRE_Int         ierr = 0;
-   hypre_Vector	    *x_tmp = NULL;
+   hypre_Vector     *x_tmp = NULL;
 
    /*---------------------------------------------------------------------
     *  Check for size compatibility.  Matvec returns ierr = 1 if
@@ -92,11 +84,11 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP2( HYPRE_Complex    alpha,
     *  ierr = 2 if the length of Y doesn't equal the number of rows
     *  of A, and ierr = 3 if both are true.
     *
-    *  Because temporary vectors are often used in Matvec, none of 
+    *  Because temporary vectors are often used in Matvec, none of
     *  these conditions terminates processing, and the ierr flag
     *  is informational only.
     *--------------------------------------------------------------------*/
- 
+
    hypre_assert( num_vectors == hypre_VectorNumVectors(y) );
    hypre_assert( num_vectors == hypre_VectorNumVectors(b) );
 
@@ -117,14 +109,14 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP2( HYPRE_Complex    alpha,
    {
      if (y_data!=b_data){
 #ifdef HYPRE_USING_OPENMP_OFFLOAD
-       printf("Sub loop 0\n");
+       //printf("Sub loop 0\n");
 #pragma omp target teams  distribute  parallel for num_teams(NUM_TEAMS) thread_limit(NUM_THREADS) is_device_ptr(y_data,b_data)
 #endif
        for (i = 0; i < num_rows*num_vectors; i++)
          y_data[i] = beta*b_data[i];
      } else {
 #ifdef HYPRE_USING_OPENMP_OFFLOAD
-       printf("Sub loop 1\n");
+       //printf("Sub loop 1\n");
 #pragma omp target teams  distribute  parallel for num_teams(NUM_TEAMS) thread_limit(NUM_THREADS) is_device_ptr(y_data)
 #endif
        for (i = 0; i < num_rows*num_vectors; i++)
@@ -146,9 +138,9 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP2( HYPRE_Complex    alpha,
    /*-----------------------------------------------------------------------
     * y = (beta/alpha)*y
     *-----------------------------------------------------------------------*/
-   
+
    temp = beta / alpha;
-   
+
 /* use rownnz pointer to do the A*x multiplication  when num_rownnz is smaller than num_rows */
 
    if (num_rownnz < xpar*(num_rows) || num_vectors > 1)
@@ -156,13 +148,13 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP2( HYPRE_Complex    alpha,
       /*-----------------------------------------------------------------------
        * y = (beta/alpha)*y
        *-----------------------------------------------------------------------*/
-     
+
       if (temp != 1.0)
       {
          if (temp == 0.0)
          {
 #ifdef HYPRE_USING_OPENMP_OFFLOAD
-	   printf("Sub loop 2\n");
+            //printf("Sub loop 2\n");
 #pragma omp target teams  distribute  parallel for num_teams(NUM_TEAMS) thread_limit(NUM_THREADS) is_device_ptr(y_data)
 #endif
             for (i = 0; i < num_rows*num_vectors; i++)
@@ -170,36 +162,36 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP2( HYPRE_Complex    alpha,
          }
          else
          {
-	   if (y_data!=b_data){
+            if (y_data!=b_data){
 #ifdef HYPRE_USING_OPENMP_OFFLOAD
-	     printf("Sub loop 3\n");
+               //printf("Sub loop 3\n");
 #pragma omp target teams  distribute  parallel for num_teams(NUM_TEAMS) thread_limit(NUM_THREADS) is_device_ptr(y_data,b_data)
 #endif
             for (i = 0; i < num_rows*num_vectors; i++)
                y_data[i] = b_data[i]*temp;
-	    
-	 } else {
+
+            } else {
 #ifdef HYPRE_USING_OPENMP_OFFLOAD
-	     printf("Sub loop 4\n");
+               //printf("Sub loop 4\n");
 #pragma omp target teams  distribute  parallel for num_teams(NUM_TEAMS) thread_limit(NUM_THREADS) is_device_ptr(y_data)
 #endif
-	   for (i = 0; i < num_rows*num_vectors; i++)
-               y_data[i] = y_data[i]*temp;
+               for (i = 0; i < num_rows*num_vectors; i++)
+                  y_data[i] = y_data[i]*temp;
          }
-	   
-	 }
+
+         }
       }
       else
-	{
-	  if (y_data!=b_data){
+      {
+         if (y_data!=b_data){
 #ifdef HYPRE_USING_OPENMP_OFFLOAD
-	    printf("Sub loop 5\n");
+            //printf("Sub loop 5\n");
 #pragma omp target teams  distribute  parallel for num_teams(NUM_TEAMS) thread_limit(NUM_THREADS) is_device_ptr(y_data)
 #endif
-	    for (i = 0; i < num_rows*num_vectors; i++)
-	      y_data[i] = b_data[i];
-	  } 
-	}
+            for (i = 0; i < num_rows*num_vectors; i++)
+               y_data[i] = b_data[i];
+         }
+      }
 
 
       /*-----------------------------------------------------------------
@@ -209,7 +201,7 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP2( HYPRE_Complex    alpha,
       if (num_rownnz < xpar*(num_rows))
       {
 #ifdef HYPRE_USING_OPENMP_OFFLOAD
-	printf("Sub loop 6\n");
+         //printf("Sub loop 6\n");
 #pragma omp target teams  distribute  parallel for private(i,j,jj,m,tempx) num_teams(NUM_TEAMS) thread_limit(NUM_THREADS) is_device_ptr(y_data,A_data,x_data,A_i,A_j)
 #endif
          for (i = 0; i < num_rownnz; i++)
@@ -233,7 +225,7 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP2( HYPRE_Complex    alpha,
                for ( j=0; j<num_vectors; ++j )
                {
                   tempx = 0;
-                  for (jj = A_i[m]; jj < A_i[m+1]; jj++) 
+                  for (jj = A_i[m]; jj < A_i[m+1]; jj++)
                      tempx +=  A_data[jj] * x_data[ j*vecstride_x + A_j[jj]*idxstride_x ];
                   y_data[ j*vecstride_y + m*idxstride_y] += tempx;
                }
@@ -242,7 +234,7 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP2( HYPRE_Complex    alpha,
       else // num_vectors > 1
       {
 #ifdef HYPRE_USING_OPENMP_OFFLOAD
-	printf("Sub loop 7\n");
+         //printf("Sub loop 7\n");
 #pragma omp target teams  distribute  parallel for private(i,j,jj,m,tempx) num_teams(NUM_TEAMS) thread_limit(NUM_THREADS) is_device_ptr(y_data,A_data,x_data,A_i,A_j)
 #endif
          for (i = 0; i < num_rows; i++)
@@ -266,55 +258,59 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP2( HYPRE_Complex    alpha,
       if (alpha != 1.0)
       {
 #ifdef HYPRE_USING_OPENMP_OFFLOAD
-	printf("Alph!=1 loop 0\n");
+         //printf("Alph!=1 loop 0\n");
 #pragma omp target teams  distribute  parallel for private(i) num_teams(NUM_TEAMS) thread_limit(NUM_THREADS) is_device_ptr(y_data)
 #endif
          for (i = 0; i < num_rows*num_vectors; i++)
-	   y_data[i] *= alpha; // WHAT is going on here ?
+            y_data[i] *= alpha; // WHAT is going on here ?
       }
    }
    else
    { // JSP: this is currently the only path optimized
-     
+
      if (y_data!=b_data){
- 
+
 #ifdef HYPRE_USING_OPENMP_OFFLOAD
-       printf("Main work loop 1\n");
+       //printf("Main work loop 1\n");
 #pragma omp target teams  distribute  parallel for private(i,j,jj,m,tempx) num_teams(NUM_TEAMS) thread_limit(NUM_THREADS) is_device_ptr(y_data,A_data,x_data,A_i,A_j)
 #endif
        for(i=0;i<num_rows;i++)
-	 {
-	   y_data[i]=beta*b_data[i];
-	   HYPRE_Complex temp = 0.0;
-	 for (jj = A_i[i]; jj < A_i[i+1]; jj++)
-	   temp += A_data[jj] * x_data[A_j[jj]];
-	 y_data[i] += alpha*temp;
-	 //y_data[i] *= alpha;
-	 }
+       {
+          y_data[i]=beta*b_data[i];
+          HYPRE_Complex temp = 0.0;
+          for (jj = A_i[i]; jj < A_i[i+1]; jj++)
+             temp += A_data[jj] * x_data[A_j[jj]];
+          y_data[i] += alpha*temp;
+          //y_data[i] *= alpha;
+       }
      } else {
-		 /*printf("Main work loop 2 %d offset = %d alpha =%lf beta = %lf \n",num_rows,offset,alpha,beta);*/
+        /*printf("Main work loop 2 %d offset = %d alpha =%lf beta = %lf \n",num_rows,offset,alpha,beta);*/
 #ifdef HYPRE_USING_OPENMP_OFFLOAD22
 #pragma omp target teams  distribute  parallel for private(i,j,jj,tempx) num_teams(NUM_TEAMS) thread_limit(NUM_THREADS) is_device_ptr(y_data,A_data,x_data,A_i,A_j)
 #endif
        for(i=0;i<num_rows;i++)
-	 {
-	   //y_data[i]=beta*y_data[i];
-	   HYPRE_Complex tempx = 0.0;
-	   for (jj = A_i[i]; jj < A_i[i+1]; jj++)
-	     tempx += A_data[jj] * x_data[A_j[jj]];
-	   y_data[i] = alpha*tempx+beta*y_data[i];
+       {
+          //y_data[i]=beta*y_data[i];
+          HYPRE_Complex tempx = 0.0;
+          for (jj = A_i[i]; jj < A_i[i+1]; jj++)
+             tempx += A_data[jj] * x_data[A_j[jj]];
+          y_data[i] = alpha*tempx+beta*y_data[i];
        //y_data[i] *= alpha;
-	 }
+       }
      }
-       
+
    }
    if (x == y) hypre_SeqVectorDestroy(x_tmp);
+
+#endif /* defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY) */
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_MATVEC] += hypre_MPI_Wtime() - time_begin;
 #endif
+
    return ierr;
 }
+
 HYPRE_Int
 hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Complex    alpha,
                                  hypre_CSRMatrix *A,
@@ -353,7 +349,7 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Complex    alpha,
    HYPRE_Int         vecstride_b = hypre_VectorVectorStride(b);*/
    HYPRE_Int         idxstride_x = hypre_VectorIndexStride(x);
    HYPRE_Int         vecstride_x = hypre_VectorVectorStride(x);
- 
+
    HYPRE_Real        xpar=0.7;
 #endif
    HYPRE_Complex    *x_data = hypre_VectorData(x);
@@ -361,11 +357,11 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Complex    alpha,
    HYPRE_Complex    *y_data = hypre_VectorData(y) + offset;
 
    HYPRE_Int         ierr = 0;
-   hypre_Vector	    *x_tmp = NULL;
+   hypre_Vector     *x_tmp = NULL;
 
    if (offset!=0) {
-     fprintf(stderr,"WARNING :: NON ZERO OFFSET\n OPENMP version with no-zero offset not tested\n");
-     exit(2);
+     hypre_error_w_msg(HYPRE_ERROR_GENERIC,"WARNING :: NON ZERO OFFSET\n OPENMP version with no-zero offset not tested\n");
+     return hypre_error_flag;
    }
 
 
@@ -380,16 +376,16 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Complex    alpha,
     PUSH_RANGE("FIRST_CALL",4);
 
     handle=getCusparseHandle();
-    
-    status= cusparseCreateMatDescr(&descr); 
+
+    status= cusparseCreateMatDescr(&descr);
     if (status != CUSPARSE_STATUS_SUCCESS) {
-      printf("ERROR:: Matrix descriptor initialization failed\n");
-      exit(2);
-    } 
-    
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ERROR:: Matrix descriptor initialization failed\n");
+      return hypre_error_flag;
+    }
+
     cusparseSetMatType(descr,CUSPARSE_MATRIX_TYPE_GENERAL);
     cusparseSetMatIndexBase(descr,CUSPARSE_INDEX_BASE_ZERO);
-    
+
     FirstCall=0;
     hypre_int jj;
     for(jj=0;jj<5;jj++)
@@ -402,7 +398,7 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Complex    alpha,
 #endif
 
 
-#ifdef HYPRE_USE_MANAGED
+#ifdef HYPRE_USING_UNIFIED_MEMORY
    hypre_CSRMatrixPrefetchToDevice(A);
    hypre_SeqVectorPrefetchToDevice(x);
    hypre_SeqVectorPrefetchToDevice(y);
@@ -416,7 +412,7 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Complex    alpha,
      //printf("MAPPING %p \n",A);
      hypre_CSRMatrixUpdateToDevice(A);
      //printf("DONE MAPPING %p \n",A);
-     
+
    }
    //printf("Mapping X::");
    if (!x->mapped) hypre_SeqVectorMapToDevice(x);
@@ -424,12 +420,12 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Complex    alpha,
    //printf("Mapping Y::");
    if (!y->mapped) hypre_SeqVectorMapToDevice(y);
    else SyncVectorToDevice(y);
-   
+
    if (b!=y){
      if(!b->mapped)  {
        //printf("Mapping B::");
        hypre_SeqVectorMapToDevice(b);
-     } else 
+     } else
        SyncVectorToDevice(b);
    }
 #endif
@@ -437,7 +433,7 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Complex    alpha,
    if (x == y)
    {
 #ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
-     fprintf(stderr,"WARNING:: x_tmp is not mapped in Mapped OMP Offload version\n");
+     hypre_error_w_msg(HYPRE_ERROR_GENERIC,"WARNING:: x_tmp is not mapped in Mapped OMP Offload version\n");
 #endif
      x_tmp = hypre_SeqVectorCloneDeep(x);
      x_data = hypre_VectorData(x_tmp);
@@ -446,7 +442,7 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Complex    alpha,
 
 
 #ifdef HYPRE_USING_CUSPARSE
-   
+
 #if defined(TRACK_MEMORY_ALLOCATIONS)
    ASSERT_MANAGED(A_data);
    ASSERT_MANAGED(A_i);
@@ -469,14 +465,23 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Complex    alpha,
 #ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
 #pragma omp target data use_device_ptr(A_data,x_data,y_data,A_i,A_j)
 #endif
+#if defined(HYPRE_SINGLE)
+   cusparseErrchk(cusparseScsrmv(handle ,
+                                 CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                 num_rows, num_cols, num_nnz,
+                                 &alpha, descr,
+                                 A_data ,A_i,A_j,
+                                 x_data, &beta, y_data));
+#else
    cusparseErrchk(cusparseDcsrmv(handle ,
-				 CUSPARSE_OPERATION_NON_TRANSPOSE, 
-				 num_rows, num_cols, num_nnz,
-				 &alpha, descr,
-				 A_data ,A_i,A_j,
-				 x_data, &beta, y_data));
+                                 CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                 num_rows, num_cols, num_nnz,
+                                 &alpha, descr,
+                                 A_data ,A_i,A_j,
+                                 x_data, &beta, y_data));
+#endif
    }
-  
+
    hypre_CheckErrorDevice(cudaStreamSynchronize(s[4]));
 #else
 #ifdef HYPRE_USING_OPENMP_OFFLOAD
@@ -496,7 +501,7 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Complex    alpha,
        HYPRE_Complex tempx = 0.0;
        HYPRE_Int jj;
        for (jj = A_i[i]; jj < A_i[i+1]; jj++){
-	 tempx += A_data[jj] * x_data[A_j[jj]];
+          tempx += A_data[jj] * x_data[A_j[jj]];
        }
        y_data[i] = alpha*tempx+beta*b_data[i];
      }
@@ -525,11 +530,13 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP3( HYPRE_Complex    alpha,
                                  HYPRE_Int        offset     )
 {
   return 0;
+  /*
   hypre_CSRMatrixMatvecOutOfPlaceOOMP(alpha,A,x,beta,b,y,offset);
-#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD 
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
   hypre_SeqVectorUpdateHost(y);
 #endif
   return 0;
+  */
 }
 /* HYPRE_Int hypre_CSRMatrixSortHost(hypre_CSRMatrix *A){ */
 /*   HYPRE_Int      ierr=0; */

@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_Euclid.h"
 
@@ -30,7 +25,7 @@ Parser_dh   parser_dh = NULL;   /* for setting/getting runtime options */
 TimeLog_dh  tlog_dh = NULL;     /* internal timing  functionality */
 Mem_dh      mem_dh = NULL;      /* memory management */
 FILE        *logFile = NULL;
-#if defined(HYPRE_USE_RAJA) || defined(HYPRE_USE_KOKKOS) || defined(HYPRE_USE_CUDA)
+#if defined(HYPRE_USING_RAJA) || defined(HYPRE_USING_KOKKOS) || defined(HYPRE_USING_CUDA)
 #else
 char        msgBuf_dh[MSG_BUF_SIZE_DH]; /* for internal use */
 #endif

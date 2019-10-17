@@ -1,17 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -70,8 +62,8 @@ hypre_DistributedMatrixPrintPETSc( hypre_DistributedMatrix *matrix )
 
 HYPRE_Int 
 hypre_DistributedMatrixGetLocalRangePETSc( hypre_DistributedMatrix *matrix,
-                             HYPRE_Int *start,
-                             HYPRE_Int *end )
+                             HYPRE_BigInt *start,
+                             HYPRE_BigInt *end )
 {
    HYPRE_Int ierr=0;
 #ifdef PETSC_AVAILABLE
@@ -101,9 +93,9 @@ hypre_DistributedMatrixGetLocalRangePETSc( hypre_DistributedMatrix *matrix,
 
 HYPRE_Int 
 hypre_DistributedMatrixGetRowPETSc( hypre_DistributedMatrix *matrix,
-                             HYPRE_Int row,
+                             HYPRE_BigInt row,
                              HYPRE_Int *size,
-                             HYPRE_Int **col_ind,
+                             HYPRE_BigInt **col_ind,
                              HYPRE_Real **values )
 {
    HYPRE_Int ierr=0;
@@ -124,9 +116,9 @@ hypre_DistributedMatrixGetRowPETSc( hypre_DistributedMatrix *matrix,
 
 HYPRE_Int 
 hypre_DistributedMatrixRestoreRowPETSc( hypre_DistributedMatrix *matrix,
-                             HYPRE_Int row,
+                             HYPRE_BigInt row,
                              HYPRE_Int *size,
-                             HYPRE_Int **col_ind,
+                             HYPRE_BigInt **col_ind,
                              HYPRE_Real **values )
 {
    HYPRE_Int ierr=0;

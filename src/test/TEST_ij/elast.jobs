@@ -1,21 +1,8 @@
 #!/bin/sh
-#BHEADER**********************************************************************
-# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
-# Produced at the Lawrence Livermore National Laboratory.
-# This file is part of HYPRE.  See file COPYRIGHT for details.
+# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
-# HYPRE is free software; you can redistribute it and/or modify it under the
-# terms of the GNU Lesser General Public License (as published by the Free
-# Software Foundation) version 2.1 dated February 1999.
-#
-# $Revision$
-#EHEADER**********************************************************************
-
-
-
-
-
-
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 #=============================================================================
 # ij: Run 2D elasticity problem with different interpolation operators
@@ -43,7 +30,7 @@ mpirun -np 2  ./ij -fromfile A -rbm 3 rbm -nf 2 -interpvecvar 3 -nodal 6 -rlx 6 
 mpirun -np 2  ./ij -fromfile A -nf 2 -rlx 6 -solver 1  > elast.out.7
 mpirun -np 2  ./ij -fromfile A -nf 2 -rlx 6 -solver 1 -nodal 4 > elast.out.8
 mpirun -np 2  ./ij -fromfile A -rbm 1 rbm -nf 2 -interpvecvar 2 -Qmx 2 -nodal 1 -rlx 6 -solver 1 > elast.out.9
-mpirun -np 2  ./ij -fromfile A -nf 2 -rlx 26 -interptype 10 -solver 1 > elast.out.9
-mpirun -np 2  ./ij -fromfile A -nf 2 -rlx 26 -interptype 11 -solver 1 > elast.out.9
+mpirun -np 2  ./ij -fromfile A -nf 2 -rlx 26 -interptype 10 -solver 1 > elast.out.10
+mpirun -np 2  ./ij -fromfile A -nf 2 -rlx 26 -interptype 11 -solver 1 > elast.out.11
 
 

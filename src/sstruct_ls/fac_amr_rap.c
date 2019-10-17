@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_sstruct_ls.h" 
 #include "fac.h"
@@ -77,7 +72,8 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
    hypre_Index                  ilower;
 
    HYPRE_Real                  *values;
-   HYPRE_Int                   *ncols, *rows, *cols, tot_cols;
+   HYPRE_Int                   *ncols, tot_cols;
+   HYPRE_BigInt                *rows, *cols;
 
    hypre_SStructStencil        *stencils;
    hypre_Index                  stencil_shape, loop_size;
@@ -107,7 +103,7 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
     * the same.
     *--------------------------------------------------------------------------*/
    ncols= hypre_CTAlloc(HYPRE_Int,  nUventries, HYPRE_MEMORY_HOST);
-   rows = hypre_CTAlloc(HYPRE_Int,  nUventries, HYPRE_MEMORY_HOST);
+   rows = hypre_CTAlloc(HYPRE_BigInt,  nUventries, HYPRE_MEMORY_HOST);
 
    tot_cols= 0;
    for (i= 0; i< nUventries; i++)
@@ -115,7 +111,7 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
       Uventry= Uventries[iUventries[i]];
       tot_cols+= hypre_SStructUVEntryNUEntries(Uventry);
    }
-   cols = hypre_CTAlloc(HYPRE_Int,  tot_cols, HYPRE_MEMORY_HOST);
+   cols = hypre_CTAlloc(HYPRE_BigInt,  tot_cols, HYPRE_MEMORY_HOST);
 
    k    = 0;
    for (i= 0; i< nUventries; i++)
@@ -140,7 +136,7 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
    HYPRE_IJMatrixGetValues(ij_A, nUventries, ncols, rows, cols, values);
 
    HYPRE_IJMatrixSetValues(hypre_SStructMatrixIJMatrix(fac_A), nUventries,
-                           ncols, (const HYPRE_Int *) rows, (const HYPRE_Int *) cols,
+                           ncols, (const HYPRE_BigInt *) rows, (const HYPRE_BigInt *) cols,
                            (const HYPRE_Real *) values);
    hypre_TFree(ncols, HYPRE_MEMORY_HOST);
    hypre_TFree(rows, HYPRE_MEMORY_HOST);
@@ -215,7 +211,6 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
                                                                             i,
                                                                             stencil_shape);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(fac_smatrix_vals,smatrix_vals)
                   hypre_BoxLoop2Begin(ndim, loop_size, 
                                       smatrix_dbox, ilower, stride, iA,
@@ -225,7 +220,6 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
                   }
                   hypre_BoxLoop2End(iA, iAc);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
 
                }  /* for (j = 0; j < stencil_size; j++) */
             }     /* hypre_ForBoxI(i, grid_boxes) */
@@ -272,7 +266,6 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
                                                                             i,
                                                                             stencil_shape);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(fac_smatrix_vals,smatrix_vals)
                   hypre_BoxLoop2Begin(ndim, loop_size, 
                                       smatrix_dbox, ilower, stride, iA,
@@ -282,7 +275,6 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
                   }
                   hypre_BoxLoop2End(iA, iAc);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
 
                }  /* for (k = 0; k< stencil_size; k++) */
             }      /* hypre_ForBoxI(j, own_composite_cbox) */
@@ -410,7 +402,6 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
                                                              cbox,
                                                              stencil_shape);
       
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(fac_smatrix_vals,smatrix_vals)
                   hypre_BoxLoop2Begin(ndim, loop_size,
                                       smatrix_dbox, ilower, stride, iA,
@@ -420,7 +411,6 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
                   }
                   hypre_BoxLoop2End(iA, iAc);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
 
                }  /* for (k = 0; k < stencil_size; k++) */
             }     /* hypre_ForBoxI(j, cgrid_boxes) */

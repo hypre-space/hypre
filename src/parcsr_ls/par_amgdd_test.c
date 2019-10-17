@@ -1143,10 +1143,79 @@ TestBoomerAMGCycle( void              *amg_vdata,
           {   /* L1 - Jacobi*/
             if (relax_order == 1 && cycle_param < 3)
             {
+                  #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
+                  // Setup the masks if necessary
+                  if (!hypre_ParAMGDataLocalCPointMask(amg_data))
+                  {
+                    hypre_ParAMGDataLocalNumCPoints(amg_data) = hypre_CTAlloc(HYPRE_Int, num_levels,  HYPRE_MEMORY_HOST);
+                    hypre_ParAMGDataLocalCPointMask(amg_data) = hypre_CTAlloc(int*, num_levels, HYPRE_MEMORY_HOST);
+                    hypre_ParAMGDataLocalFPointMask(amg_data) = hypre_CTAlloc(int*, num_levels, HYPRE_MEMORY_HOST);
+                  }
+                  if (!hypre_ParAMGDataLocalCPointMask(amg_data)[level])
+                  {
+                    int num_c_points = 0;
+                    int num_f_points = 0;
+                    for (i = 0; i < hypre_ParCSRMatrixNumRows(hypre_ParAMGDataAArray(amg_data)[level]); i++) 
+                      if (CF_marker_array[level][i] == 1) num_c_points++;
+                    num_f_points = hypre_ParCSRMatrixNumRows(hypre_ParAMGDataAArray(amg_data)[level]) - num_c_points;
+                    hypre_ParAMGDataLocalNumCPoints(amg_data)[level] = num_c_points;
+                    hypre_ParAMGDataLocalCPointMask(amg_data)[level] = hypre_CTAlloc(int, num_c_points, HYPRE_MEMORY_SHARED);
+                    hypre_ParAMGDataLocalFPointMask(amg_data)[level] = hypre_CTAlloc(int, num_f_points, HYPRE_MEMORY_SHARED);
+                    int c_cnt = 0, f_cnt = 0;
+                    for (i = 0; i < hypre_ParCSRMatrixNumRows(hypre_ParAMGDataAArray(amg_data)[level]); i++)
+                    {
+                       if (CF_marker_array[level][i] == 1) hypre_ParAMGDataLocalCPointMask(amg_data)[level][c_cnt++] = i;
+                       else hypre_ParAMGDataLocalFPointMask(amg_data)[level][f_cnt++] = i;
+                    }
+                  }
+                  // Call either CF or FC Jacobi
+                  if (cycle_param < 2)
+                  {
+                       hypre_ParCSRRelax_L1_Jacobi_Device(A_array[level],
+                                                 Aux_F,
+                                                 hypre_ParAMGDataLocalCPointMask(amg_data)[level],
+                                                 hypre_ParAMGDataLocalNumCPoints(amg_data)[level],
+                                                 1,
+                                                 relax_weight[level],
+                                                 l1_norms[level],
+                                                 Aux_U,
+                                                 Vtemp);
+                       hypre_ParCSRRelax_L1_Jacobi_Device(A_array[level],
+                                                 Aux_F,
+                                                 hypre_ParAMGDataLocalFPointMask(amg_data)[level],
+                                                 hypre_ParCSRMatrixNumRows(hypre_ParAMGDataAArray(amg_data)[level]) - hypre_ParAMGDataLocalNumCPoints(amg_data)[level],
+                                                 -1,
+                                                 relax_weight[level],
+                                                 l1_norms[level],
+                                                 Aux_U,
+                                                 Vtemp);
+                  }
+                  else
+                  {
+                       hypre_ParCSRRelax_L1_Jacobi_Device(A_array[level],
+                                                 Aux_F,
+                                                 hypre_ParAMGDataLocalFPointMask(amg_data)[level],
+                                                 hypre_ParCSRMatrixNumRows(hypre_ParAMGDataAArray(amg_data)[level]) - hypre_ParAMGDataLocalNumCPoints(amg_data)[level],
+                                                 -1,
+                                                 relax_weight[level],
+                                                 l1_norms[level],
+                                                 Aux_U,
+                                                 Vtemp);
+                       hypre_ParCSRRelax_L1_Jacobi_Device(A_array[level],
+                                                 Aux_F,
+                                                 hypre_ParAMGDataLocalCPointMask(amg_data)[level],
+                                                 hypre_ParAMGDataLocalNumCPoints(amg_data)[level],
+                                                 1,
+                                                 relax_weight[level],
+                                                 l1_norms[level],
+                                                 Aux_U,
+                                                 Vtemp);
+                  }
+                  #else
               /* need to do CF - so can't use the AMS one */
               HYPRE_Int i;
               HYPRE_Int loc_relax_points[2];
-              if (cycle_type < 2)
+              if (cycle_param < 2)
               {
                 loc_relax_points[0] = 1;
                 loc_relax_points[1] = -1;
@@ -1165,6 +1234,7 @@ TestBoomerAMGCycle( void              *amg_vdata,
                                            l1_norms[level],
                                            Aux_U,
                                          Vtemp);
+                  #endif
             }
             else /* not CF - so use through AMS */
             {
@@ -1224,7 +1294,7 @@ TestBoomerAMGCycle( void              *amg_vdata,
             hypre_ParCSRRelax_Cheby_Solve(A_array[level], Aux_F,
                              ds[level], coefs[level],
                              cheby_order, scale,
-                             variant, Aux_U, Vtemp, Ztemp );
+                             variant, Aux_U, Ztemp, Vtemp, Rtemp );
           }
           else if (relax_type ==17)
           {

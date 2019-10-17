@@ -1,21 +1,12 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_struct_ls.h"
 #include "temp_multivector.h"
-
-#if defined(HYPRE_USE_OMP45)
-#include "__omp45_random.h"
-#endif
 
 HYPRE_Int 
 hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
@@ -53,24 +44,33 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
       vp = hypre_StructVectorBoxData(vector, i);
  
       hypre_BoxGetSize(box, loop_size);
-#if defined(HYPRE_MEMORY_GPU)
-      hypre_newBoxLoopInit(hypre_StructVectorNDim(vector),loop_size);
-      HYPRE_Real *rand_host = hypre_TAlloc(HYPRE_Real, hypre__tot, HYPRE_MEMORY_HOST);
-      HYPRE_Real *rand_device = hypre_TAlloc(HYPRE_Real, hypre__tot, HYPRE_MEMORY_DEVICE);
-      HYPRE_Int  idx = 0;
+      
+      /* TODO: generate on host and copy to device. FIX? */
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+      HYPRE_Int loop_n = 1, ii;
+      for (ii = 0; ii < hypre_StructVectorNDim(vector); ii++)
+      {
+         loop_n *= loop_size[ii];
+      }
+      
+      HYPRE_Real *rand_host   = hypre_TAlloc(HYPRE_Real, loop_n, HYPRE_MEMORY_HOST);
+      HYPRE_Real *rand_device = hypre_TAlloc(HYPRE_Real, loop_n, HYPRE_MEMORY_DEVICE);
+      
+      ii = 0;
       hypre_SerialBoxLoop0Begin(hypre_StructVectorNDim(vector),loop_size)
       {
-	 rand_host[idx++] = 2.0*hypre_Rand() - 1.0;
+	 rand_host[ii++] = 2.0*hypre_Rand() - 1.0;
       }
       hypre_SerialBoxLoop0End()
-      hypre_TMemcpy(rand_device, rand_host, HYPRE_Real, hypre__tot, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(rand_device, rand_host, HYPRE_Real, loop_n, 
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
 #endif
-#undef DEVICE_VAR
-#define DEVICE_VAR is_device_ptr(vp)
+
+#define DEVICE_VAR is_device_ptr(vp, rand_device)
       hypre_BoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
                           v_data_box, start, unit_stride, vi);
       {
-#if defined(HYPRE_MEMORY_GPU)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 	 vp[vi] = rand_device[idx];
 #else
 	 vp[vi] = 2.0*hypre_Rand() - 1.0;
@@ -78,8 +78,8 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
       }
       hypre_BoxLoop1End(vi);
 #undef DEVICE_VAR
-#define DEVICE_VAR
-#if defined(HYPRE_MEMORY_GPU)
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
       hypre_TFree(rand_device, HYPRE_MEMORY_DEVICE);
       hypre_TFree(rand_host, HYPRE_MEMORY_HOST);
 #endif

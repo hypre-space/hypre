@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -289,7 +284,6 @@ hypre_RedBlackGS( void               *relax_vdata,
                }
 
                hypre_RedBlackLoopInit();
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(xp,bp,Ap)
                hypre_RedBlackLoopBegin(ni,nj,nk,redblack,
                                        Astart,Ani,Anj,Ai,
@@ -300,7 +294,6 @@ hypre_RedBlackGS( void               *relax_vdata,
                }
                hypre_RedBlackLoopEnd();
 #undef DEVICE_VAR
-#define DEVICE_VAR 
             }
          }
       }
@@ -415,7 +408,6 @@ hypre_RedBlackGS( void               *relax_vdata,
                {
                   case 7:
                      hypre_RedBlackLoopInit();
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(xp,bp,Ap0,Ap1,Ap2,Ap3,Ap4,Ap5,Ap)
                      hypre_RedBlackLoopBegin(ni,nj,nk,redblack,
                                              Astart,Ani,Anj,Ai,
@@ -433,12 +425,10 @@ hypre_RedBlackGS( void               *relax_vdata,
                      }
                      hypre_RedBlackLoopEnd();
 #undef DEVICE_VAR
-#define DEVICE_VAR 
                      break;
 
                   case 5:
                      hypre_RedBlackLoopInit();
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(xp,bp,Ap0,Ap1,Ap2,Ap3,Ap)
                      hypre_RedBlackLoopBegin(ni,nj,nk,redblack,
                                              Astart,Ani,Anj,Ai,
@@ -454,12 +444,10 @@ hypre_RedBlackGS( void               *relax_vdata,
                      }
                      hypre_RedBlackLoopEnd();
 #undef DEVICE_VAR
-#define DEVICE_VAR 
                      break;
 
                   case 3:
                      hypre_RedBlackLoopInit();
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(xp,bp,Ap0,Ap1,Ap)
                      hypre_RedBlackLoopBegin(ni,nj,nk,redblack,
                                              Astart,Ani,Anj,Ai,
@@ -473,7 +461,6 @@ hypre_RedBlackGS( void               *relax_vdata,
                      }
                      hypre_RedBlackLoopEnd();
 #undef DEVICE_VAR
-#define DEVICE_VAR 
 
                      break;
                }

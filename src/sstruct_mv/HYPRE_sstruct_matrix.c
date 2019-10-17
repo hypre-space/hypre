@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -452,8 +447,8 @@ HYPRE_SStructMatrixSetBoxValues( HYPRE_SStructMatrix  matrix,
                                  HYPRE_Int           *entries,
                                  HYPRE_Complex       *values )
 {
-   hypre_SStructMatrixSetBoxValues(matrix, part, ilower, iupper, var,
-                                   nentries, entries, values, 0);
+   HYPRE_SStructMatrixSetBoxValues2(matrix, part, ilower, iupper, var, nentries, entries,
+                                    ilower, iupper, values);
 
    return hypre_error_flag;
 }
@@ -471,8 +466,8 @@ HYPRE_SStructMatrixAddToBoxValues( HYPRE_SStructMatrix  matrix,
                                    HYPRE_Int           *entries,
                                    HYPRE_Complex       *values )
 {
-   hypre_SStructMatrixSetBoxValues(matrix, part, ilower, iupper, var,
-                                   nentries, entries, values, 1);
+   HYPRE_SStructMatrixAddToBoxValues2(matrix, part, ilower, iupper, var, nentries, entries,
+                                      ilower, iupper, values);
 
    return hypre_error_flag;
 }
@@ -490,8 +485,125 @@ HYPRE_SStructMatrixGetBoxValues( HYPRE_SStructMatrix  matrix,
                                  HYPRE_Int           *entries,
                                  HYPRE_Complex       *values )
 {
-   hypre_SStructMatrixSetBoxValues(matrix, part, ilower, iupper, var,
-                                   nentries, entries, values, -1);
+   HYPRE_SStructMatrixGetBoxValues2(matrix, part, ilower, iupper, var, nentries, entries,
+                                    ilower, iupper, values);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructMatrixSetBoxValues2( HYPRE_SStructMatrix  matrix,
+                                  HYPRE_Int            part,
+                                  HYPRE_Int           *ilower,
+                                  HYPRE_Int           *iupper,
+                                  HYPRE_Int            var,
+                                  HYPRE_Int            nentries,
+                                  HYPRE_Int           *entries,
+                                  HYPRE_Int           *vilower,
+                                  HYPRE_Int           *viupper,
+                                  HYPRE_Complex       *values )
+{
+   hypre_Box  *set_box, *value_box;
+   HYPRE_Int   d, ndim = hypre_SStructMatrixNDim(matrix);
+
+   /* This creates boxes with zeroed-out extents */
+   set_box = hypre_BoxCreate(ndim);
+   value_box = hypre_BoxCreate(ndim);
+
+   for (d = 0; d < ndim; d++)
+   {
+      hypre_BoxIMinD(set_box, d) = ilower[d];
+      hypre_BoxIMaxD(set_box, d) = iupper[d];
+      hypre_BoxIMinD(value_box, d) = vilower[d];
+      hypre_BoxIMaxD(value_box, d) = viupper[d];
+   }
+
+   hypre_SStructMatrixSetBoxValues(matrix, part, set_box, var, nentries, entries,
+                                   value_box, values, 0);
+
+   hypre_BoxDestroy(set_box);
+   hypre_BoxDestroy(value_box);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int 
+HYPRE_SStructMatrixAddToBoxValues2( HYPRE_SStructMatrix  matrix,
+                                    HYPRE_Int            part,
+                                    HYPRE_Int           *ilower,
+                                    HYPRE_Int           *iupper,
+                                    HYPRE_Int            var,
+                                    HYPRE_Int            nentries,
+                                    HYPRE_Int           *entries,
+                                    HYPRE_Int           *vilower,
+                                    HYPRE_Int           *viupper,
+                                    HYPRE_Complex       *values )
+{
+   hypre_Box  *set_box, *value_box;
+   HYPRE_Int   d, ndim = hypre_SStructMatrixNDim(matrix);
+
+   /* This creates boxes with zeroed-out extents */
+   set_box = hypre_BoxCreate(ndim);
+   value_box = hypre_BoxCreate(ndim);
+
+   for (d = 0; d < ndim; d++)
+   {
+      hypre_BoxIMinD(set_box, d) = ilower[d];
+      hypre_BoxIMaxD(set_box, d) = iupper[d];
+      hypre_BoxIMinD(value_box, d) = vilower[d];
+      hypre_BoxIMaxD(value_box, d) = viupper[d];
+   }
+
+   hypre_SStructMatrixSetBoxValues(matrix, part, set_box, var, nentries, entries,
+                                   value_box, values, 1);
+
+   hypre_BoxDestroy(set_box);
+   hypre_BoxDestroy(value_box);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructMatrixGetBoxValues2( HYPRE_SStructMatrix  matrix,
+                                  HYPRE_Int            part,
+                                  HYPRE_Int           *ilower,
+                                  HYPRE_Int           *iupper,
+                                  HYPRE_Int            var,
+                                  HYPRE_Int            nentries,
+                                  HYPRE_Int           *entries,
+                                  HYPRE_Int           *vilower,
+                                  HYPRE_Int           *viupper,
+                                  HYPRE_Complex       *values )
+{
+   hypre_Box  *set_box, *value_box;
+   HYPRE_Int   d, ndim = hypre_SStructMatrixNDim(matrix);
+
+   /* This creates boxes with zeroed-out extents */
+   set_box = hypre_BoxCreate(ndim);
+   value_box = hypre_BoxCreate(ndim);
+
+   for (d = 0; d < ndim; d++)
+   {
+      hypre_BoxIMinD(set_box, d) = ilower[d];
+      hypre_BoxIMaxD(set_box, d) = iupper[d];
+      hypre_BoxIMinD(value_box, d) = vilower[d];
+      hypre_BoxIMaxD(value_box, d) = viupper[d];
+   }
+
+   hypre_SStructMatrixSetBoxValues(matrix, part, set_box, var, nentries, entries,
+                                   value_box, values, -1);
+
+   hypre_BoxDestroy(set_box);
+   hypre_BoxDestroy(value_box);
 
    return hypre_error_flag;
 }

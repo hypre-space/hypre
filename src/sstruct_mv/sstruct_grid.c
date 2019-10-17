@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -727,7 +722,7 @@ hypre_SStructGridAssembleNborBoxManagers( hypre_SStructGrid *grid )
    hypre_Box                   *nbor_box, *box, *int_box, *ghbox;
    HYPRE_Int                   *coord, *dir;
    hypre_Index                  imin0, imin1;
-   HYPRE_Int                    nbor_offset, nbor_ghoffset;
+   HYPRE_BigInt                 nbor_offset, nbor_ghoffset;
    HYPRE_Int                    nbor_proc, nbor_boxnum, nbor_part, nbor_var;
    hypre_IndexRef               pshift;
    HYPRE_Int                    num_periods, k;
@@ -1618,14 +1613,15 @@ hypre_SStructBoxManEntryGetGhstrides( hypre_BoxManEntry *entry,
 HYPRE_Int
 hypre_SStructBoxManEntryGetGlobalCSRank( hypre_BoxManEntry *entry,
                                          hypre_Index        index,
-                                         HYPRE_Int         *rank_ptr )
+                                         HYPRE_BigInt      *rank_ptr )
 {
    HYPRE_Int                ndim = hypre_BoxManEntryNDim(entry);
    hypre_SStructBoxManInfo *entry_info;
    hypre_Index              imin;
    hypre_Index              imax;
    hypre_Index              strides;
-   HYPRE_Int                offset, d;
+   HYPRE_BigInt             offset;
+   HYPRE_Int                d;
 
    hypre_BoxManEntryGetInfo(entry, (void **) &entry_info);
    hypre_BoxManEntryGetExtents(entry, imin, imax);
@@ -1636,7 +1632,7 @@ hypre_SStructBoxManEntryGetGlobalCSRank( hypre_BoxManEntry *entry,
    *rank_ptr = offset;
    for (d = 0; d < ndim; d++)
    {
-      *rank_ptr += (hypre_IndexD(index, d) - hypre_IndexD(imin, d)) * strides[d];
+      *rank_ptr += (HYPRE_BigInt)((hypre_IndexD(index, d) - hypre_IndexD(imin, d)) * strides[d]);
    }
 
    return hypre_error_flag;
@@ -1651,14 +1647,14 @@ hypre_SStructBoxManEntryGetGlobalCSRank( hypre_BoxManEntry *entry,
 HYPRE_Int
 hypre_SStructBoxManEntryGetGlobalGhrank( hypre_BoxManEntry *entry,
                                          hypre_Index        index,
-                                         HYPRE_Int         *rank_ptr )
+                                         HYPRE_BigInt      *rank_ptr )
 {
    HYPRE_Int                 ndim = hypre_BoxManEntryNDim(entry);
    hypre_SStructBoxManInfo  *entry_info;
    hypre_Index               imin;
    hypre_Index               imax;
    hypre_Index               ghstrides;
-   HYPRE_Int                 ghoffset;
+   HYPRE_BigInt              ghoffset;
    HYPRE_Int                 *numghost = hypre_BoxManEntryNumGhost(entry);
    HYPRE_Int                 d;
    HYPRE_Int                 info_type;
@@ -1686,7 +1682,7 @@ hypre_SStructBoxManEntryGetGlobalGhrank( hypre_BoxManEntry *entry,
    *rank_ptr = ghoffset;
    for (d = 0; d < ndim; d++)
    {
-      *rank_ptr += (hypre_IndexD(index, d) - hypre_IndexD(imin, d)) * ghstrides[d];
+      *rank_ptr += (HYPRE_BigInt)((hypre_IndexD(index, d) - hypre_IndexD(imin, d)) * ghstrides[d]);
    }
 
    return hypre_error_flag;
@@ -1953,7 +1949,7 @@ hypre_SStructGridSetNumGhost( hypre_SStructGrid  *grid, HYPRE_Int *num_ghost )
 HYPRE_Int
 hypre_SStructBoxManEntryGetGlobalRank( hypre_BoxManEntry *entry,
                                        hypre_Index        index,
-                                       HYPRE_Int          *rank_ptr,
+                                       HYPRE_BigInt      *rank_ptr,
                                        HYPRE_Int          type)
 {
    if (type == HYPRE_PARCSR)

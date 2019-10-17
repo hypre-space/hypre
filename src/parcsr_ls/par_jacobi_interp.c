@@ -1,15 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
@@ -83,7 +77,7 @@ void hypre_BoomerAMGJacobiInterp_1( hypre_ParCSRMatrix * A,
    hypre_CSRMatrix *P_diag = hypre_ParCSRMatrixDiag(*P);
    /*hypre_CSRMatrix *P_offd = hypre_ParCSRMatrixOffd(*P);
    HYPRE_Real      *P_diag_data = hypre_CSRMatrixData(P_diag);*/
-   HYPRE_Int             *P_diag_i = hypre_CSRMatrixI(P_diag);
+   HYPRE_Int       *P_diag_i = hypre_CSRMatrixI(P_diag);
    /*HYPRE_Int             *P_diag_j = hypre_CSRMatrixJ(P_diag);
    HYPRE_Real      *P_offd_data = hypre_CSRMatrixData(P_offd);
    HYPRE_Int             *P_offd_i = hypre_CSRMatrixI(P_offd);
@@ -405,13 +399,13 @@ void hypre_BoomerAMGTruncateInterp( hypre_ParCSRMatrix *P,
    hypre_CSRMatrix *P_diag = hypre_ParCSRMatrixDiag(P);
    hypre_CSRMatrix *P_offd = hypre_ParCSRMatrixOffd(P);
    HYPRE_Real      *P_diag_data = hypre_CSRMatrixData(P_diag);
-   HYPRE_Int             *P_diag_i = hypre_CSRMatrixI(P_diag);
-   HYPRE_Int             *P_diag_j = hypre_CSRMatrixJ(P_diag);
+   HYPRE_Int       *P_diag_i = hypre_CSRMatrixI(P_diag);
+   HYPRE_Int       *P_diag_j = hypre_CSRMatrixJ(P_diag);
    HYPRE_Real      *P_offd_data = hypre_CSRMatrixData(P_offd);
-   HYPRE_Int             *P_offd_i = hypre_CSRMatrixI(P_offd);
-   HYPRE_Int             *P_offd_j = hypre_CSRMatrixJ(P_offd);
-   HYPRE_Int             *new_P_diag_i;
-   HYPRE_Int             *new_P_offd_i;
+   HYPRE_Int       *P_offd_i = hypre_CSRMatrixI(P_offd);
+   HYPRE_Int       *P_offd_j = hypre_CSRMatrixJ(P_offd);
+   HYPRE_Int       *new_P_diag_i;
+   HYPRE_Int       *new_P_offd_i;
    HYPRE_Int	num_rows_diag_P = hypre_CSRMatrixNumRows(P_diag);
    HYPRE_Int	num_rows_offd_P = hypre_CSRMatrixNumRows(P_offd);
    HYPRE_Int num_nonzeros_diag = hypre_CSRMatrixNumNonzeros(P_diag);

@@ -1,16 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -38,7 +31,7 @@ typedef struct hypre_StructGrid_struct
    hypre_Box           *bounding_box; /* Bounding box around grid */
 
    HYPRE_Int            local_size;   /* Number of grid points locally */
-   HYPRE_Int            global_size;  /* Total number of grid points */
+   HYPRE_BigInt         global_size;  /* Total number of grid points */
 
    hypre_Index          periodic;     /* Indicates if grid is periodic */
    HYPRE_Int            num_periods;  /* number of box set periods */
@@ -53,7 +46,7 @@ typedef struct hypre_StructGrid_struct
    HYPRE_Int            num_ghost[2*HYPRE_MAXDIM]; /* ghost layer size */  
 
    hypre_BoxManager    *boxman;
-#if defined(HYPRE_USE_CUDA) 
+#if defined(HYPRE_USING_CUDA) 
    HYPRE_Int            data_location;
 #endif
 } hypre_StructGrid;
@@ -86,7 +79,7 @@ typedef struct hypre_StructGrid_struct
 
 #define hypre_StructGridIDPeriod(grid) \
 hypre_BoxNeighborsIDPeriod(hypre_StructGridNeighbors(grid))
-#if defined(HYPRE_USE_CUDA) 
+#if defined(HYPRE_USING_CUDA) 
 #define hypre_StructGridDataLocation(grid)        ((grid) -> data_location)
 #endif
 /*--------------------------------------------------------------------------

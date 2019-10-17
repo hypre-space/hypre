@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_struct_ls.h"
 #include "smg.h"
@@ -564,7 +559,6 @@ hypre_SMG3BuildRAPSym( hypre_StructMatrix *A,
 
             hypre_BoxGetSize(cgrid_box, loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(rap_bs,rb,a_cs,pa,rap_bw,a_cw,rap_bc,a_bc,a_cc,rap_be,a_ce,rap_bn,a_cn,rap_cs,pb,ra,rap_cw,rap_cc,a_ac)
             hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                                 PT_dbox,  cstart, stridec, iP,
@@ -613,7 +607,6 @@ hypre_SMG3BuildRAPSym( hypre_StructMatrix *A,
             }
             hypre_BoxLoop4End(iP, iR, iA, iAc);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
 
             break;
 
@@ -629,7 +622,6 @@ hypre_SMG3BuildRAPSym( hypre_StructMatrix *A,
 
             hypre_BoxGetSize(cgrid_box, loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(rap_bs,rb,a_cs,pa,a_bs,rap_bw,a_cw,a_bw,rap_bc,a_bc,a_cc,rap_be,a_ce,a_be,rap_bn,a_cn,a_bn,rap_cs,pb,ra,a_as,rap_cw,a_aw,rap_cc,a_ac)
             hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                                 PT_dbox,  cstart, stridec, iP,
@@ -694,7 +686,6 @@ hypre_SMG3BuildRAPSym( hypre_StructMatrix *A,
             }
             hypre_BoxLoop4End(iP, iR, iA, iAc);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
 
             break;
 
@@ -711,7 +702,6 @@ hypre_SMG3BuildRAPSym( hypre_StructMatrix *A,
 
             hypre_BoxGetSize(cgrid_box, loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(rap_bsw,rb,a_csw,pa,rap_bs,a_cs,a_bs,rap_bse,a_cse,rap_bw,a_cw,a_bw,rap_bc,a_bc,a_cc,rap_be,a_ce,a_be,rap_bnw,a_cnw,rap_bn,a_cn,a_bn,rap_bne,a_cne,rap_csw,pb,ra,rap_cs,a_as,rap_cse,rap_cw,a_aw,rap_cc,a_ac)
             hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                                 PT_dbox,  cstart, stridec, iP,
@@ -798,7 +788,6 @@ hypre_SMG3BuildRAPSym( hypre_StructMatrix *A,
             }
             hypre_BoxLoop4End(iP, iR, iA, iAc);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
 
             break;
 
@@ -815,7 +804,6 @@ hypre_SMG3BuildRAPSym( hypre_StructMatrix *A,
 
             hypre_BoxGetSize(cgrid_box, loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(rap_bsw,rb,a_csw,pa,a_bsw,rap_bs,a_cs,a_bs,rap_bse,a_cse,a_bse,rap_bw,a_cw,a_bw,rap_bc,a_bc,a_cc,rap_be,a_ce,a_be,rap_bnw,a_cnw,a_bnw,rap_bn,a_cn,a_bn,rap_bne,a_cne,a_bne,rap_csw,pb,ra,a_asw,rap_cs,a_as,rap_cse,a_ase,rap_cw,a_aw,rap_cc,a_ac)
             hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                                 PT_dbox,  cstart, stridec, iP,
@@ -918,7 +906,6 @@ hypre_SMG3BuildRAPSym( hypre_StructMatrix *A,
             }
             hypre_BoxLoop4End(iP, iR, iA, iAc);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
 
             break;
 
@@ -1271,7 +1258,6 @@ hypre_SMG3BuildRAPNoSym( hypre_StructMatrix *A,
 
             hypre_BoxGetSize(cgrid_box, loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(rap_an,ra,a_cn,pb,rap_ae,a_ce,rap_ac,a_ac,a_cc,rap_aw,a_cw,rap_as,a_cs,rap_cn,rb,pa,rap_ce)
             hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                                 PT_dbox,  cstart, stridec, iP,
@@ -1312,7 +1298,6 @@ hypre_SMG3BuildRAPNoSym( hypre_StructMatrix *A,
             }
             hypre_BoxLoop4End(iP, iR, iA, iAc);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
 
             break;
 
@@ -1327,7 +1312,6 @@ hypre_SMG3BuildRAPNoSym( hypre_StructMatrix *A,
 
             hypre_BoxGetSize(cgrid_box, loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(rap_an,ra,a_cn,pb,a_an,rap_ae,a_ce,a_ae,rap_ac,a_ac,a_cc,rap_aw,a_cw,a_aw,rap_as,a_cs,a_as,rap_cn,rb,pa,a_bn,rap_ce,a_be)
             hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                                 PT_dbox,  cstart, stridec, iP,
@@ -1384,7 +1368,6 @@ hypre_SMG3BuildRAPNoSym( hypre_StructMatrix *A,
             }
             hypre_BoxLoop4End(iP, iR, iA, iAc);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
 
             break;
 
@@ -1402,7 +1385,6 @@ hypre_SMG3BuildRAPNoSym( hypre_StructMatrix *A,
 
             hypre_BoxGetSize(cgrid_box, loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(rap_ane,ra,a_cne,pb,rap_an,a_cn,a_an,rap_anw,a_cnw,rap_ae,a_ce,a_ae,rap_ac,a_ac,a_cc,rap_aw,a_cw,a_aw,rap_ase,a_cse,rap_as,a_cs,a_as,rap_asw,a_csw,rap_cne,rb,pa,rap_cn,a_bn,rap_cnw,rap_ce,a_be)
             hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                                 PT_dbox,  cstart, stridec, iP,
@@ -1481,7 +1463,6 @@ hypre_SMG3BuildRAPNoSym( hypre_StructMatrix *A,
             }
             hypre_BoxLoop4End(iP, iR, iA, iAc);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
 
             break;
 
@@ -1498,7 +1479,6 @@ hypre_SMG3BuildRAPNoSym( hypre_StructMatrix *A,
 
             hypre_BoxGetSize(cgrid_box, loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(rap_ane,ra,a_cne,pb,a_ane,rap_an,a_cn,a_an,rap_anw,a_cnw,a_anw,rap_ae,a_ce,a_ae,rap_ac,a_ac,a_cc,rap_aw,a_cw,a_aw,rap_ase,a_cse,a_ase,rap_as,a_cs,a_as,rap_asw,a_csw,a_asw,rap_cne,rb,pa,a_bne,rap_cn,a_bn,rap_cnw,a_bnw,rap_ce,a_be)
             hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                                 PT_dbox,  cstart, stridec, iP,
@@ -1594,7 +1574,6 @@ hypre_SMG3BuildRAPNoSym( hypre_StructMatrix *A,
             }
             hypre_BoxLoop4End(iP, iR, iA, iAc);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
 
             break;
 
@@ -1728,7 +1707,6 @@ hypre_SMG3RAPPeriodicSym( hypre_StructMatrix *RAP,
 
          hypre_BoxGetSize(cgrid_box, loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(rap_cc,rap_bc,rap_cw,rap_bw,rap_be,rap_cs,rap_bs,rap_bn)
          hypre_BoxLoop1Begin(hypre_StructMatrixNDim(RAP), loop_size,
                              RAP_dbox,  cstart, stridec, iAc);
@@ -1742,9 +1720,7 @@ hypre_SMG3RAPPeriodicSym( hypre_StructMatrix *RAP,
          }
          hypre_BoxLoop1End(iAc);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(rap_bc,rap_bw,rap_be,rap_bs,rap_bn)
          hypre_BoxLoop1Begin(hypre_StructMatrixNDim(RAP), loop_size,
                              RAP_dbox,  cstart, stridec, iAc);
@@ -1757,7 +1733,6 @@ hypre_SMG3RAPPeriodicSym( hypre_StructMatrix *RAP,
          }
          hypre_BoxLoop1End(iAc);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
 
          /*-----------------------------------------------------------------
           * Collapse additional entries for 27 point operator.
@@ -1767,7 +1742,6 @@ hypre_SMG3RAPPeriodicSym( hypre_StructMatrix *RAP,
          {
             hypre_BoxGetSize(cgrid_box, loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(rap_csw,rap_bsw,rap_bne,rap_cse,rap_bse,rap_bnw)
             hypre_BoxLoop1Begin(hypre_StructMatrixNDim(RAP), loop_size,
                                 RAP_dbox,  cstart, stridec, iAc);
@@ -1782,9 +1756,7 @@ hypre_SMG3RAPPeriodicSym( hypre_StructMatrix *RAP,
             }
             hypre_BoxLoop1End(iAc);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(rap_bsw,rap_bse,rap_bnw,rap_bne)
             hypre_BoxLoop1Begin(hypre_StructMatrixNDim(RAP), loop_size,
                                 RAP_dbox,  cstart, stridec, iAc);
@@ -1796,7 +1768,6 @@ hypre_SMG3RAPPeriodicSym( hypre_StructMatrix *RAP,
             }
             hypre_BoxLoop1End(iAc);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
          }
 
       } /* end ForBoxI */
@@ -1960,7 +1931,6 @@ hypre_SMG3RAPPeriodicNoSym( hypre_StructMatrix *RAP,
 
          hypre_BoxGetSize(cgrid_box, loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(rap_cc,rap_bc,rap_ac,rap_cw,rap_bw,rap_aw,rap_ce,rap_be,rap_ae,rap_cs,rap_bs,rap_as,rap_cn,rap_bn,rap_an)
          hypre_BoxLoop1Begin(hypre_StructMatrixNDim(RAP), loop_size,
                              RAP_dbox,  cstart, stridec, iAc);
@@ -1987,7 +1957,6 @@ hypre_SMG3RAPPeriodicNoSym( hypre_StructMatrix *RAP,
          }
          hypre_BoxLoop1End(iAc);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
 
          /*-----------------------------------------------------------------
           * Collapse additional entries for 27 point operator.
@@ -1997,7 +1966,6 @@ hypre_SMG3RAPPeriodicNoSym( hypre_StructMatrix *RAP,
          {
             hypre_BoxGetSize(cgrid_box, loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(rap_csw,rap_bsw,rap_asw,rap_cse,rap_bse,rap_ase,rap_cnw,rap_bnw,rap_anw,rap_cne,rap_bne,rap_ane)
             hypre_BoxLoop1Begin(hypre_StructMatrixNDim(RAP), loop_size,
                                 RAP_dbox,  cstart, stridec, iAc);
@@ -2020,7 +1988,6 @@ hypre_SMG3RAPPeriodicNoSym( hypre_StructMatrix *RAP,
             }
             hypre_BoxLoop1End(iAc);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
          }
 
       } /* end ForBoxI */

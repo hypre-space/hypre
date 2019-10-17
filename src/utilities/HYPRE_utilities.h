@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -33,22 +28,26 @@
 extern "C" {
 #endif
 
-/* 
- * Before a version of HYPRE goes out the door, increment the version
- * number and check in this file (for CVS to substitute the Date).
- */
-#define HYPRE_Version() "HYPRE_RELEASE_NAME Date Compiled: " __DATE__ " " __TIME__
-
 /*--------------------------------------------------------------------------
  * Big int stuff
  *--------------------------------------------------------------------------*/
 
 #if defined(HYPRE_BIGINT)
+typedef long long int HYPRE_BigInt;
 typedef long long int HYPRE_Int;
+#define HYPRE_MPI_BIG_INT MPI_LONG_LONG_INT
 #define HYPRE_MPI_INT MPI_LONG_LONG_INT
+ 
+#elif defined(HYPRE_MIXEDINT)
+typedef long long int HYPRE_BigInt;
+typedef int HYPRE_Int;
+#define HYPRE_MPI_BIG_INT MPI_LONG_LONG_INT
+#define HYPRE_MPI_INT MPI_INT
 
 #else /* default */
+typedef int HYPRE_BigInt;
 typedef int HYPRE_Int;
+#define HYPRE_MPI_BIG_INT MPI_INT
 #define HYPRE_MPI_INT MPI_INT
 #endif
 
@@ -132,6 +131,30 @@ HYPRE_Int HYPRE_ClearAllErrors();
 
 /* Clears the given error code from the hypre error flag */
 HYPRE_Int HYPRE_ClearError(HYPRE_Int hypre_error_code);
+
+/*--------------------------------------------------------------------------
+ * HYPRE Version routines
+ *--------------------------------------------------------------------------*/
+
+/* RDF: This macro is used by the FEI code.  Want to eventually remove. */
+#define HYPRE_VERSION "HYPRE_RELEASE_NAME Date Compiled: " __DATE__ " " __TIME__
+
+/**
+ * Allocates and returns a string with version number information in it.
+ **/
+HYPRE_Int
+HYPRE_Version( char **version_ptr );
+
+/**
+ * Returns version number information in integer form.  Use 'NULL' for values
+ * not needed.  The argument {\tt single} is a single sortable integer
+ * representation of the release number.
+ **/
+HYPRE_Int
+HYPRE_VersionNumber( HYPRE_Int  *major_ptr,
+                     HYPRE_Int  *minor_ptr,
+                     HYPRE_Int  *patch_ptr,
+                     HYPRE_Int  *single_ptr );
 
 /*--------------------------------------------------------------------------
  * HYPRE AP user functions

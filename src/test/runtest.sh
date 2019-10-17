@@ -1,4 +1,9 @@
 #!/bin/sh
+# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
 
 # global variables
 BatchMode=0
@@ -28,7 +33,8 @@ function usage
    printf "    -h|-help       prints this usage information and exits\n"
    printf "    -mpi <prefix>  MPI run prefix; default is 'mpirun -np'\n"
    printf "    -nthreads <n>  use 'n' OpenMP threads\n"
-   printf "    -tol <tol>     use relative tolerance 'tol' to compare numeric test values\n"
+   printf "    -rtol <tol>    use relative tolerance 'tol' to compare numeric test values\n"
+   printf "    -atol <tol>    use absolute tolerance 'tol' to compare numeric test values\n"
    printf "    -valgrind      use valgrind memory checker\n"
    printf "    -mpibind       use mpibind\n"
    printf "    -n|-norun      turn off execute mode, echo what would be run\n"
@@ -184,7 +190,7 @@ function CheckPath
                ExecFileNames="$ExecFileNames $EXECFILE"
                return 0
             else
-		echo $EXECFILE
+               echo $EXECFILE
                echo "Cannot find executable!!!"
                return 1
             fi
@@ -362,11 +368,12 @@ function ExecuteTest
    StartDir=$1
    WorkingDir=$2
    InputFile=$3
-   CONVTOL=$4
+   RTOL=$4
+   ATOL=$5
    SavePWD=`pwd`
    cd $WorkingDir
    (cat $InputFile.err.* > $InputFile.err)
-   (./$InputFile.sh $CONVTOL   >> $InputFile.err 2>> $InputFile.err)
+   (./$InputFile.sh $RTOL $ATOL   >> $InputFile.err 2>> $InputFile.err)
    cd $SavePWD
 }
 
@@ -431,7 +438,6 @@ function StartCrunch
 
 # main
 # Set default check tolerance
-CONVTOL=0.0
 while [ "$*" ]
 do
    case $1 in
@@ -449,9 +455,14 @@ do
          NumThreads=$1
          shift
          ;;
-      -tol)
+      -rtol)
          shift
-         CONVTOL=$1
+         RTOL=$1
+         shift
+         ;;
+      -atol)
+         shift
+         ATOL=$1
          shift
          ;;
       -valgrind)
@@ -505,7 +516,7 @@ do
                      RunPrefix=$MPIRunPrefix
                   fi
 
-                  StartCrunch $CurDir $DirPart $FilePart $CONVTOL
+                  StartCrunch $CurDir $DirPart $FilePart $RTOL $ATOL
                else
                   printf "%s: test command file %s/%s.jobs does not exist\n" \
                      $0 $DirPart $FilePart
@@ -545,11 +556,11 @@ do
   do
     if (egrep -f runtest.filters $errfile > /dev/null) ; then
         original=`dirname $errfile`/`basename $errfile .err`.fil
-	echo "This file contains the original copy of $errfile before filtering" > $original
-	cat $errfile >> $original
-	mv $errfile $errfile.tmp
-	egrep -v -f runtest.filters $errfile.tmp > $errfile
-	rm -f $errfile.tmp
+        echo "This file contains the original copy of $errfile before filtering" > $original
+        cat $errfile >> $original
+        mv $errfile $errfile.tmp
+        egrep -v -f runtest.filters $errfile.tmp > $errfile
+        rm -f $errfile.tmp
     fi
   done
 done

@@ -1,15 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #ifndef HYPRE_PARCSR_LS_HEADER
 #define HYPRE_PARCSR_LS_HEADER
@@ -561,6 +555,13 @@ HYPRE_Int HYPRE_BoomerAMGSetNumSamples(HYPRE_Solver solver,
  **/
 HYPRE_Int HYPRE_BoomerAMGSetCycleType(HYPRE_Solver solver,
                                       HYPRE_Int    cycle_type);
+/**
+ * (Optional) Specifies the use of Full multigrid cycle.
+ * The default is 0.
+ **/
+HYPRE_Int
+HYPRE_BoomerAMGSetFCycle( HYPRE_Solver solver,
+                          HYPRE_Int    fcycle  );
 
 /**
  * (Optional) Defines use of an additive V(1,1)-cycle using the
@@ -771,8 +772,8 @@ HYPRE_Int HYPRE_BoomerAMGSetRelaxOrder(HYPRE_Solver  solver,
 /*
  * (Optional) Defines in which order the points are relaxed.
  *
- * Note: For some applications HYPRE\_BoomerAMGSetRelaxOrder may be
- * useful instead.
+ * Note: This routine will be phased out!!!!
+ * Use HYPRE\_BoomerAMGSetRelaxOrder instead.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetGridRelaxPoints(HYPRE_Solver   solver,
                                             HYPRE_Int    **grid_relax_points);
@@ -1082,7 +1083,24 @@ HYPRE_Int HYPRE_BoomerAMGSetEuBJ(HYPRE_Solver solver,
  * The default is 0.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetRestriction(HYPRE_Solver solver,
-                                        HYPRE_Real   restr_par);
+                                        HYPRE_Int   restr_par);
+
+/**
+ * (Optional) Assumes the matrix is triangular in some ordering
+ * to speed up the setup time of approximate ideal restriction.
+ *
+ * The default is 0.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetIsTriangular(HYPRE_Solver solver,
+                                         HYPRE_Int   is_triangular);
+
+/**
+ * (Optional) Set local problem size at which GMRES is used over
+ * a direct solve in approximating ideal restriction.
+ * The default is 0.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetGMRESSwitchR(HYPRE_Solver solver,
+                                         HYPRE_Int   gmres_switch);
 
 /**
  * (Optional) Defines the drop tolerance for the A-matrices
@@ -1186,7 +1204,7 @@ HYPRE_Int HYPRE_BoomerAMGSetCoordDim (HYPRE_Solver solver,
  **/
 HYPRE_Int HYPRE_BoomerAMGSetCoordinates (HYPRE_Solver  solver,
                                          float        *coordinates);
-#ifdef HAVE_DSUPERLU
+#ifdef HYPRE_USING_DSUPERLU
 /*
  * HYPRE_BoomerAMGSetDSLUThreshold
  **/
@@ -1212,6 +1230,7 @@ HYPRE_Int HYPRE_BoomerAMGSetCpointsToKeep(HYPRE_Solver solver,
  **/
 HYPRE_Int HYPRE_BoomerAMGSetSabs (HYPRE_Solver solver,
                                   HYPRE_Int Sabs );
+
 /*@}*/
 
 /*--------------------------------------------------------------------------
@@ -1924,7 +1943,7 @@ HYPRE_Int HYPRE_AMSProjectOutGradients(HYPRE_Solver    solver,
  **/
 HYPRE_Int HYPRE_AMSConstructDiscreteGradient(HYPRE_ParCSRMatrix  A,
                                              HYPRE_ParVector     x_coord,
-                                             HYPRE_Int          *edge_vertex,
+                                             HYPRE_BigInt       *edge_vertex,
                                              HYPRE_Int           edge_orientation,
                                              HYPRE_ParCSRMatrix *G);
 
@@ -2238,6 +2257,11 @@ HYPRE_Int HYPRE_ParCSRPCGGetNumIterations(HYPRE_Solver  solver,
 
 HYPRE_Int HYPRE_ParCSRPCGGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
                                                       HYPRE_Real   *norm);
+/**
+ * Returns the residual.
+ **/
+HYPRE_Int HYPRE_ParCSRPCGGetResidual(HYPRE_Solver     solver,
+                                     HYPRE_ParVector *residual);
 
 /**
  * Setup routine for diagonal preconditioning.
@@ -2344,6 +2368,91 @@ HYPRE_Int HYPRE_ParCSRGMRESGetNumIterations(HYPRE_Solver  solver,
 
 HYPRE_Int HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
                                                         HYPRE_Real   *norm);
+/**
+ * Returns the residual.
+ **/
+HYPRE_Int HYPRE_ParCSRGMRESGetResidual(HYPRE_Solver     solver,
+                                     HYPRE_ParVector *residual);
+
+
+/* ParCSR CO-GMRES, author: KS */
+
+/**
+ * Create a solver object.
+ **/
+HYPRE_Int HYPRE_ParCSRCOGMRESCreate(MPI_Comm      comm,
+                                  HYPRE_Solver *solver);
+
+/**
+ * Destroy a solver object.
+ **/
+HYPRE_Int HYPRE_ParCSRCOGMRESDestroy(HYPRE_Solver solver);
+
+HYPRE_Int HYPRE_ParCSRCOGMRESSetup(HYPRE_Solver       solver,
+                                 HYPRE_ParCSRMatrix A,
+                                 HYPRE_ParVector    b,
+                                 HYPRE_ParVector    x);
+
+HYPRE_Int HYPRE_ParCSRCOGMRESSolve(HYPRE_Solver       solver,
+                                 HYPRE_ParCSRMatrix A,
+                                 HYPRE_ParVector    b,
+                                 HYPRE_ParVector    x);
+
+HYPRE_Int HYPRE_ParCSRCOGMRESSetKDim(HYPRE_Solver solver,
+                                   HYPRE_Int    k_dim);
+
+HYPRE_Int HYPRE_ParCSRCOGMRESSetUnroll(HYPRE_Solver solver,
+                                   HYPRE_Int    unroll);
+
+HYPRE_Int HYPRE_ParCSRCOGMRESSetCGS(HYPRE_Solver solver,
+                                   HYPRE_Int    cgs);
+
+HYPRE_Int HYPRE_ParCSRCOGMRESSetTol(HYPRE_Solver solver,
+                                  HYPRE_Real   tol);
+
+HYPRE_Int HYPRE_ParCSRCOGMRESSetAbsoluteTol(HYPRE_Solver solver,
+                                          HYPRE_Real   a_tol);
+
+/*
+ * RE-VISIT
+ **/
+HYPRE_Int HYPRE_ParCSRCOGMRESSetMinIter(HYPRE_Solver solver,
+                                      HYPRE_Int    min_iter);
+
+HYPRE_Int HYPRE_ParCSRCOGMRESSetMaxIter(HYPRE_Solver solver,
+                                      HYPRE_Int    max_iter);
+
+HYPRE_Int HYPRE_ParCSRCOGMRESSetPrecond(HYPRE_Solver             solver,
+                                      HYPRE_PtrToParSolverFcn  precond,
+                                      HYPRE_PtrToParSolverFcn  precond_setup,
+                                      HYPRE_Solver             precond_solver);
+
+HYPRE_Int HYPRE_ParCSRCOGMRESGetPrecond(HYPRE_Solver  solver,
+                                      HYPRE_Solver *precond_data);
+
+HYPRE_Int HYPRE_ParCSRCOGMRESSetLogging(HYPRE_Solver solver,
+                                      HYPRE_Int    logging);
+
+HYPRE_Int HYPRE_ParCSRCOGMRESSetPrintLevel(HYPRE_Solver solver,
+                                         HYPRE_Int    print_level);
+
+HYPRE_Int HYPRE_ParCSRCOGMRESGetNumIterations(HYPRE_Solver  solver,
+                                            HYPRE_Int    *num_iterations);
+
+HYPRE_Int HYPRE_ParCSRCOGMRESGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
+                                                        HYPRE_Real   *norm);
+/**
+ * Returns the residual.
+ **/
+HYPRE_Int HYPRE_ParCSRCOGMRESGetResidual(HYPRE_Solver     solver,
+                                     HYPRE_ParVector *residual);
+
+
+
+
+/* end of parCSR CO-GMRES */
+
+
 
 /*@}*/
 
@@ -2417,6 +2526,10 @@ HYPRE_Int HYPRE_ParCSRFlexGMRESGetNumIterations(HYPRE_Solver  solver,
 
 HYPRE_Int HYPRE_ParCSRFlexGMRESGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
                                                             HYPRE_Real   *norm);
+
+HYPRE_Int HYPRE_ParCSRFlexGMRESGetResidual(HYPRE_Solver     solver,
+                                     HYPRE_ParVector *residual);
+
 
 HYPRE_Int HYPRE_ParCSRFlexGMRESSetModifyPC( HYPRE_Solver           solver,
                                             HYPRE_PtrToModifyPCFcn modify_pc);
@@ -2495,6 +2608,9 @@ HYPRE_Int HYPRE_ParCSRLGMRESGetNumIterations(HYPRE_Solver  solver,
 HYPRE_Int HYPRE_ParCSRLGMRESGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
                                                          HYPRE_Real   *norm);
 
+HYPRE_Int HYPRE_ParCSRLGMRESGetResidual(HYPRE_Solver     solver,
+                                     HYPRE_ParVector *residual);
+
 /*@}*/
 
 /*--------------------------------------------------------------------------
@@ -2563,6 +2679,9 @@ HYPRE_Int HYPRE_ParCSRBiCGSTABGetNumIterations(HYPRE_Solver  solver,
 
 HYPRE_Int HYPRE_ParCSRBiCGSTABGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
                                                            HYPRE_Real   *norm);
+
+HYPRE_Int HYPRE_ParCSRBiCGSTABGetResidual(HYPRE_Solver     solver,
+                                     HYPRE_ParVector *residual);
 
 /*@}*/
 
@@ -2653,6 +2772,36 @@ HYPRE_Int HYPRE_ParCSRHybridSetSetupType(HYPRE_Solver solver,
  **/
 HYPRE_Int HYPRE_ParCSRHybridSetSolverType(HYPRE_Solver solver,
                                           HYPRE_Int    solver_type);
+
+/**
+ * (Optional) Set recompute residual (don't rely on 3-term recurrence).
+ **/
+HYPRE_Int
+HYPRE_ParCSRHybridSetRecomputeResidual( HYPRE_Solver  solver,
+                                        HYPRE_Int     recompute_residual );
+
+/**
+ * (Optional) Get recompute residual option.
+ **/
+HYPRE_Int
+HYPRE_ParCSRHybridGetRecomputeResidual( HYPRE_Solver  solver,
+                                        HYPRE_Int    *recompute_residual );
+
+/**
+ * (Optional) Set recompute residual period (don't rely on 3-term recurrence).
+ *
+ * Recomputes residual after every specified number of iterations.
+ **/
+HYPRE_Int
+HYPRE_ParCSRHybridSetRecomputeResidualP( HYPRE_Solver  solver,
+                                         HYPRE_Int     recompute_residual_p );
+
+/**
+ * (Optional) Get recompute residual period option.
+ **/
+HYPRE_Int
+HYPRE_ParCSRHybridGetRecomputeResidualP( HYPRE_Solver  solver,
+                                         HYPRE_Int    *recompute_residual_p );
 
 /**
  * Set the Krylov dimension for restarted GMRES.
@@ -3048,6 +3197,25 @@ HYPRE_ParCSRHybridSetDofFunc(HYPRE_Solver  solver,
 HYPRE_Int
 HYPRE_ParCSRHybridSetNodal(HYPRE_Solver solver,
                            HYPRE_Int    nodal);
+
+/**
+ * (Optional) Sets whether to store local transposed interpolation
+ * The default is 0 (don't store).
+ **/
+HYPRE_Int
+HYPRE_ParCSRHybridSetKeepTranspose(HYPRE_Solver solver,
+                           HYPRE_Int    keepT);
+
+/**
+ * (Optional) Sets whether to use non-Galerkin option
+ * The default is no non-Galerkin option
+ * num_levels sets the number of levels where to use it
+ * nongalerkin_tol contains the tolerances for <num_levels> levels
+ **/
+HYPRE_Int
+HYPRE_ParCSRHybridSetNonGalerkinTol(HYPRE_Solver solver,
+                           HYPRE_Int   num_levels,
+                           HYPRE_Real *nongalerkin_tol);
 
 /**
  * Retrieves the total number of iterations.
@@ -3540,9 +3708,9 @@ HYPRE_MGRGetFinalRelativeResidualNorm(  HYPRE_Solver solver, HYPRE_Real *res_nor
  *--------------------------------------------------------------------------*/
 
 HYPRE_ParCSRMatrix GenerateLaplacian(MPI_Comm    comm,
-                                     HYPRE_Int   nx,
-                                     HYPRE_Int   ny,
-                                     HYPRE_Int   nz,
+                                     HYPRE_BigInt   nx,
+                                     HYPRE_BigInt   ny,
+                                     HYPRE_BigInt   nz,
                                      HYPRE_Int   P,
                                      HYPRE_Int   Q,
                                      HYPRE_Int   R,
@@ -3552,9 +3720,9 @@ HYPRE_ParCSRMatrix GenerateLaplacian(MPI_Comm    comm,
                                      HYPRE_Real *value);
 
 HYPRE_ParCSRMatrix GenerateLaplacian27pt(MPI_Comm    comm,
-                                         HYPRE_Int   nx,
-                                         HYPRE_Int   ny,
-                                         HYPRE_Int   nz,
+                                         HYPRE_BigInt   nx,
+                                         HYPRE_BigInt   ny,
+                                         HYPRE_BigInt   nz,
                                          HYPRE_Int   P,
                                          HYPRE_Int   Q,
                                          HYPRE_Int   R,
@@ -3564,8 +3732,8 @@ HYPRE_ParCSRMatrix GenerateLaplacian27pt(MPI_Comm    comm,
                                          HYPRE_Real *value);
 
 HYPRE_ParCSRMatrix GenerateLaplacian9pt(MPI_Comm    comm,
-                                        HYPRE_Int   nx,
-                                        HYPRE_Int   ny,
+                                        HYPRE_BigInt   nx,
+                                        HYPRE_BigInt   ny,
                                         HYPRE_Int   P,
                                         HYPRE_Int   Q,
                                         HYPRE_Int   p,
@@ -3573,9 +3741,9 @@ HYPRE_ParCSRMatrix GenerateLaplacian9pt(MPI_Comm    comm,
                                         HYPRE_Real *value);
 
 HYPRE_ParCSRMatrix GenerateDifConv(MPI_Comm    comm,
-                                   HYPRE_Int   nx,
-                                   HYPRE_Int   ny,
-                                   HYPRE_Int   nz,
+                                   HYPRE_BigInt   nx,
+                                   HYPRE_BigInt   ny,
+                                   HYPRE_BigInt   nz,
                                    HYPRE_Int   P,
                                    HYPRE_Int   Q,
                                    HYPRE_Int   R,
@@ -3586,8 +3754,8 @@ HYPRE_ParCSRMatrix GenerateDifConv(MPI_Comm    comm,
 
 HYPRE_ParCSRMatrix
 GenerateRotate7pt(MPI_Comm   comm,
-                  HYPRE_Int  nx,
-                  HYPRE_Int  ny,
+                  HYPRE_BigInt  nx,
+                  HYPRE_BigInt  ny,
                   HYPRE_Int  P,
                   HYPRE_Int  Q,
                   HYPRE_Int  p,
@@ -3597,9 +3765,9 @@ GenerateRotate7pt(MPI_Comm   comm,
 
 HYPRE_ParCSRMatrix
 GenerateVarDifConv(MPI_Comm         comm,
-                   HYPRE_Int        nx,
-                   HYPRE_Int        ny,
-                   HYPRE_Int        nz,
+                   HYPRE_BigInt        nx,
+                   HYPRE_BigInt        ny,
+                   HYPRE_BigInt        nz,
                    HYPRE_Int        P,
                    HYPRE_Int        Q,
                    HYPRE_Int        R,
@@ -3611,9 +3779,9 @@ GenerateVarDifConv(MPI_Comm         comm,
 
 HYPRE_ParCSRMatrix
 GenerateRSVarDifConv(MPI_Comm         comm,
-                     HYPRE_Int        nx,
-                     HYPRE_Int        ny,
-                     HYPRE_Int        nz,
+                     HYPRE_BigInt        nx,
+                     HYPRE_BigInt        ny,
+                     HYPRE_BigInt        nz,
                      HYPRE_Int        P,
                      HYPRE_Int        Q,
                      HYPRE_Int        R,
@@ -3626,9 +3794,9 @@ GenerateRSVarDifConv(MPI_Comm         comm,
 
 float*
 GenerateCoordinates(MPI_Comm  comm,
-                    HYPRE_Int nx,
-                    HYPRE_Int ny,
-                    HYPRE_Int nz,
+                    HYPRE_BigInt nx,
+                    HYPRE_BigInt ny,
+                    HYPRE_BigInt nz,
                     HYPRE_Int P,
                     HYPRE_Int Q,
                     HYPRE_Int R,

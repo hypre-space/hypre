@@ -1,14 +1,7 @@
-#BHEADER**********************************************************************
-# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
-# Produced at the Lawrence Livermore National Laboratory.
-# This file is part of HYPRE.  See file COPYRIGHT for details.
+# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
-# HYPRE is free software; you can redistribute it and/or modify it under the
-# terms of the GNU Lesser General Public License (as published by the Free
-# Software Foundation) version 2.1 dated February 1999.
-#
-# $Revision$
-#EHEADER**********************************************************************
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 default: all
 
@@ -37,7 +30,6 @@ HYPRE_IJ_DIRS =\
  distributed_matrix\
  IJ_mv\
  matrix_matrix\
- distributed_ls\
  parcsr_ls
 
 #These are the directories for the structured interface
@@ -49,6 +41,9 @@ HYPRE_STRUCT_DIRS =\
 HYPRE_SSTRUCT_DIRS =\
  sstruct_mv\
  sstruct_ls
+
+#These are the directories for the distributed_ls codes
+HYPRE_DISTRIBUTED_LS_DIRS = ${HYPRE_DISTRIBUTED_LS_DIR}
 
 #These are the directories for the FEI
 HYPRE_FEI_DIRS = ${HYPRE_FEI_SRC_DIR}
@@ -73,6 +68,7 @@ HYPRE_DIRS =\
  ${HYPRE_IJ_DIRS}\
  ${HYPRE_STRUCT_DIRS}\
  ${HYPRE_SSTRUCT_DIRS}\
+ ${HYPRE_DISTRIBUTED_LS_DIRS}\
  ${HYPRE_FEI_DIRS}\
  ${HYPRE_LIBS_DIRS}
 

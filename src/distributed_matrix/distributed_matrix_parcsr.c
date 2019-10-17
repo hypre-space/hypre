@@ -1,17 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -73,10 +65,10 @@ hypre_DistributedMatrixPrintParCSR( hypre_DistributedMatrix *matrix )
 
 HYPRE_Int 
 hypre_DistributedMatrixGetLocalRangeParCSR( hypre_DistributedMatrix *matrix,
-                             HYPRE_Int *row_start,
-                             HYPRE_Int *row_end,
-                             HYPRE_Int *col_start,
-                             HYPRE_Int *col_end )
+                             HYPRE_BigInt *row_start,
+                             HYPRE_BigInt *row_end,
+                             HYPRE_BigInt *col_start,
+                             HYPRE_BigInt *col_end )
 {
    HYPRE_Int ierr=0;
    HYPRE_ParCSRMatrix Parcsr_matrix = (HYPRE_ParCSRMatrix) hypre_DistributedMatrixLocalStorage(matrix);
@@ -96,9 +88,9 @@ hypre_DistributedMatrixGetLocalRangeParCSR( hypre_DistributedMatrix *matrix,
 
 HYPRE_Int 
 hypre_DistributedMatrixGetRowParCSR( hypre_DistributedMatrix *matrix,
-                             HYPRE_Int row,
+                             HYPRE_BigInt row,
                              HYPRE_Int *size,
-                             HYPRE_Int **col_ind,
+                             HYPRE_BigInt **col_ind,
                              HYPRE_Real **values )
 {
    HYPRE_Int ierr = 0;
@@ -117,9 +109,9 @@ hypre_DistributedMatrixGetRowParCSR( hypre_DistributedMatrix *matrix,
 
 HYPRE_Int 
 hypre_DistributedMatrixRestoreRowParCSR( hypre_DistributedMatrix *matrix,
-                             HYPRE_Int row,
+                             HYPRE_BigInt row,
                              HYPRE_Int *size,
-                             HYPRE_Int **col_ind,
+                             HYPRE_BigInt **col_ind,
                              HYPRE_Real **values )
 {
    HYPRE_Int ierr;

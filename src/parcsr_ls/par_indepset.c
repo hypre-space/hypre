@@ -1,17 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -39,12 +31,13 @@
 
 HYPRE_Int
 hypre_BoomerAMGIndepSetInit( hypre_ParCSRMatrix *S,
-                          HYPRE_Real         *measure_array ,
-                          HYPRE_Int   seq_rand)
+                             HYPRE_Real         *measure_array ,
+                             HYPRE_Int           seq_rand)
 {
    hypre_CSRMatrix *S_diag = hypre_ParCSRMatrixDiag(S);
    MPI_Comm         comm = hypre_ParCSRMatrixComm(S);
    HYPRE_Int              S_num_nodes = hypre_CSRMatrixNumRows(S_diag);
+   HYPRE_BigInt           big_i;
    HYPRE_Int              i, my_id;
    HYPRE_Int              ierr = 0;
 
@@ -54,7 +47,7 @@ hypre_BoomerAMGIndepSetInit( hypre_ParCSRMatrix *S,
    hypre_SeedRand(i);
    if (seq_rand)
    {
-      for (i = 0; i < hypre_ParCSRMatrixFirstRowIndex(S); i++)
+      for (big_i = 0; big_i < hypre_ParCSRMatrixFirstRowIndex(S); big_i++)
 	hypre_Rand(); 
    }
    for (i = 0; i < S_num_nodes; i++)
@@ -105,26 +98,24 @@ hypre_BoomerAMGIndepSetInit( hypre_ParCSRMatrix *S,
 
 HYPRE_Int
 hypre_BoomerAMGIndepSet( hypre_ParCSRMatrix *S,
-                      HYPRE_Real         *measure_array,
-                      HYPRE_Int                *graph_array,
-                      HYPRE_Int                 graph_array_size,
-                      HYPRE_Int                *graph_array_offd,
-                      HYPRE_Int                 graph_array_offd_size,
-                      HYPRE_Int                *IS_marker,
-                      HYPRE_Int                *IS_marker_offd     )
+                         HYPRE_Real         *measure_array,
+                         HYPRE_Int          *graph_array,
+                         HYPRE_Int           graph_array_size,
+                         HYPRE_Int          *graph_array_offd,
+                         HYPRE_Int           graph_array_offd_size,
+                         HYPRE_Int          *IS_marker,
+                         HYPRE_Int          *IS_marker_offd     )
 {
    hypre_CSRMatrix *S_diag      = hypre_ParCSRMatrixDiag(S);
-   HYPRE_Int             *S_diag_i    = hypre_CSRMatrixI(S_diag);
-   HYPRE_Int             *S_diag_j    = hypre_CSRMatrixJ(S_diag);
+   HYPRE_Int       *S_diag_i    = hypre_CSRMatrixI(S_diag);
+   HYPRE_Int       *S_diag_j    = hypre_CSRMatrixJ(S_diag);
    hypre_CSRMatrix *S_offd      = hypre_ParCSRMatrixOffd(S);
-   HYPRE_Int             *S_offd_i    = hypre_CSRMatrixI(S_offd);
-   HYPRE_Int             *S_offd_j = NULL;
+   HYPRE_Int       *S_offd_i    = hypre_CSRMatrixI(S_offd);
+   HYPRE_Int       *S_offd_j = NULL;
 
-   HYPRE_Int		    local_num_vars = hypre_CSRMatrixNumRows(S_diag);
-   HYPRE_Int              i, j, ig, jS, jj;
+   HYPRE_Int	    local_num_vars = hypre_CSRMatrixNumRows(S_diag);
+   HYPRE_Int        i, j, ig, jS, jj;
                    
-   HYPRE_Int              ierr = 0;
-
    /*-------------------------------------------------------
     * Initialize IS_marker by putting all nodes in
     * the independent set.
@@ -203,6 +194,6 @@ hypre_BoomerAMGIndepSet( hypre_ParCSRMatrix *S,
       }
    }
             
-   return (ierr);
+   return hypre_error_flag;
 }
          

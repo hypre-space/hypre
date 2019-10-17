@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -39,6 +34,7 @@ typedef struct
   HYPRE_Complex    *data;
   HYPRE_Int        *i;
   HYPRE_Int        *j;
+  HYPRE_BigInt     *big_j;
   HYPRE_Int         block_size;
   HYPRE_Int         num_rows;
   HYPRE_Int         num_cols;
@@ -54,6 +50,7 @@ typedef struct
 #define hypre_CSRBlockMatrixData(matrix)         ((matrix) -> data)
 #define hypre_CSRBlockMatrixI(matrix)            ((matrix) -> i)
 #define hypre_CSRBlockMatrixJ(matrix)            ((matrix) -> j)
+#define hypre_CSRBlockMatrixBigJ(matrix)         ((matrix) -> big_j)
 #define hypre_CSRBlockMatrixBlockSize(matrix)    ((matrix) -> block_size)
 #define hypre_CSRBlockMatrixNumRows(matrix)      ((matrix) -> num_rows)
 #define hypre_CSRBlockMatrixNumCols(matrix)      ((matrix) -> num_cols)
@@ -68,6 +65,7 @@ hypre_CSRBlockMatrix
       *hypre_CSRBlockMatrixCreate(HYPRE_Int, HYPRE_Int, HYPRE_Int, HYPRE_Int);
 HYPRE_Int hypre_CSRBlockMatrixDestroy(hypre_CSRBlockMatrix *);
 HYPRE_Int hypre_CSRBlockMatrixInitialize(hypre_CSRBlockMatrix *);
+HYPRE_Int hypre_CSRBlockMatrixBigInitialize(hypre_CSRBlockMatrix *);
 HYPRE_Int hypre_CSRBlockMatrixSetDataOwner(hypre_CSRBlockMatrix *, HYPRE_Int);
 hypre_CSRMatrix 
       *hypre_CSRBlockMatrixCompress(hypre_CSRBlockMatrix *);

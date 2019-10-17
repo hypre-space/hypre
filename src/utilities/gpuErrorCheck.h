@@ -1,19 +1,14 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #ifndef hypre_GPU_ERROR_HEADER
 #define hypre_GPU_ERROR_HEADER
 
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USE_OMP45)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 
 //#include <cuda_runtime_api.h>
 #ifdef __cplusplus
@@ -27,7 +22,6 @@ extern "C++" {
 
 #define hypre_CheckErrorDevice(err) CheckError(err,__FILE__, __FUNCTION__, __LINE__)
 #define CUDAMEMATTACHTYPE cudaMemAttachGlobal
-#define MEM_PAD_LEN 1
 #define HYPRE_HOST_POINTER 0
 #define HYPRE_MANAGED_POINTER 1
 #define HYPRE_PINNED_POINTER 2
@@ -40,15 +34,11 @@ void cudaSafeFree(void *ptr,int padding);
 hypre_int PrintPointerAttributes(const void *ptr);
 hypre_int PointerAttributes(const void *ptr);
 
-#endif 
-
 /* CUBLAS and CUSPARSE related */
-#if defined(HYPRE_USE_GPU) || defined(HYPRE_USING_CUSPARSE)
-
 #ifndef __cusparseErrorCheck__
 #define __cusparseErrorCheck__
 
-/* MUST HAVE extern C++ for C++ cusparse.h and the headers therein */
+/* MUST HAVE " extern "C++" " for C++ header cusparse.h, and the headers therein */
 #ifdef __cplusplus
 extern "C++" {
 #endif
@@ -129,7 +119,6 @@ inline const char *cublasErrorCheck(cublasStatus_t error)
         default:
 	    return "Unknown error in cublasErrorCheck";
     }
-
 }
 
 #define cusparseErrchk(ans) { cusparseAssert((ans), __FILE__, __LINE__); }
@@ -151,7 +140,10 @@ inline void cublasAssert(cublasStatus_t code, const char *file, int line)
      fprintf(stderr,"CUBLAS ERROR : %s \n", cublasErrorCheck(code));
    }
 }
+
 #endif // __cusparseErrorCheck__
-#endif // defined(HYPRE_USE_GPU)
+
+#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 
 #endif // hypre_GPU_ERROR_HEADER
+

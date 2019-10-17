@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include <HYPRE_config.h>
 #include "_hypre_utilities.h"
@@ -25,7 +20,7 @@ hypre_ExchangeRAPBlockData(hypre_CSRBlockMatrix *RAP_int,
                            hypre_ParCSRCommPkg *comm_pkg_RT, HYPRE_Int block_size)
 {
    HYPRE_Int     *RAP_int_i;
-   HYPRE_Int     *RAP_int_j = NULL;
+   HYPRE_BigInt  *RAP_int_j = NULL;
    HYPRE_Complex *RAP_int_data = NULL;
    HYPRE_Int     num_cols = 0;
 
@@ -42,7 +37,7 @@ hypre_ExchangeRAPBlockData(hypre_CSRBlockMatrix *RAP_int,
    hypre_CSRBlockMatrix *RAP_ext;
 
    HYPRE_Int     *RAP_ext_i;
-   HYPRE_Int     *RAP_ext_j = NULL;
+   HYPRE_BigInt  *RAP_ext_j = NULL;
    HYPRE_Complex *RAP_ext_data = NULL;
 
    hypre_ParCSRCommHandle *comm_handle = NULL;
@@ -64,9 +59,6 @@ hypre_ExchangeRAPBlockData(hypre_CSRBlockMatrix *RAP_int,
    RAP_ext_i = hypre_CTAlloc(HYPRE_Int,  send_map_starts[num_sends]+1, HYPRE_MEMORY_HOST);
    jdata_recv_vec_starts = hypre_CTAlloc(HYPRE_Int,  num_recvs+1, HYPRE_MEMORY_HOST);
    jdata_send_map_starts = hypre_CTAlloc(HYPRE_Int,  num_sends+1, HYPRE_MEMORY_HOST);
- 
-
-
 
 /*--------------------------------------------------------------------------
  * recompute RAP_int_i so that RAP_int_i[j+1] contains the number of
@@ -77,7 +69,7 @@ hypre_ExchangeRAPBlockData(hypre_CSRBlockMatrix *RAP_int,
    if (num_recvs)
    {
       RAP_int_i = hypre_CSRBlockMatrixI(RAP_int);
-      RAP_int_j = hypre_CSRBlockMatrixJ(RAP_int);
+      RAP_int_j = hypre_CSRBlockMatrixBigJ(RAP_int);
       RAP_int_data = hypre_CSRBlockMatrixData(RAP_int);
       num_cols = hypre_CSRBlockMatrixNumCols(RAP_int);
    }
@@ -125,7 +117,7 @@ hypre_ExchangeRAPBlockData(hypre_CSRBlockMatrix *RAP_int,
    num_nonzeros = RAP_ext_i[num_rows];
    if (num_nonzeros)
    {
-      RAP_ext_j = hypre_CTAlloc(HYPRE_Int,  num_nonzeros, HYPRE_MEMORY_HOST);
+      RAP_ext_j = hypre_CTAlloc(HYPRE_BigInt,  num_nonzeros, HYPRE_MEMORY_HOST);
       RAP_ext_data = hypre_CTAlloc(HYPRE_Complex,  num_nonzeros*bnnz, HYPRE_MEMORY_HOST);
    }
 
@@ -142,7 +134,7 @@ hypre_ExchangeRAPBlockData(hypre_CSRBlockMatrix *RAP_int,
    hypre_ParCSRBlockCommHandleDestroy(comm_handle);
    comm_handle = NULL;
 
-   comm_handle = hypre_ParCSRCommHandleCreate(11,tmp_comm_pkg,RAP_int_j,
+   comm_handle = hypre_ParCSRCommHandleCreate(21,tmp_comm_pkg,RAP_int_j,
                                               RAP_ext_j);
    RAP_ext = hypre_CSRBlockMatrixCreate(block_size,num_rows,num_cols,
                                         num_nonzeros);
@@ -150,7 +142,7 @@ hypre_ExchangeRAPBlockData(hypre_CSRBlockMatrix *RAP_int,
    hypre_CSRBlockMatrixI(RAP_ext) = RAP_ext_i;
    if (num_nonzeros)
    {
-      hypre_CSRBlockMatrixJ(RAP_ext) = RAP_ext_j;
+      hypre_CSRBlockMatrixBigJ(RAP_ext) = RAP_ext_j;
       hypre_CSRBlockMatrixData(RAP_ext) = RAP_ext_data;
    }
 
@@ -210,33 +202,33 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
    HYPRE_Int             *P_diag_j = hypre_CSRBlockMatrixJ(P_diag);
 
    hypre_CSRBlockMatrix *P_offd = hypre_ParCSRBlockMatrixOffd(P);
-   HYPRE_Int             *col_map_offd_P = hypre_ParCSRBlockMatrixColMapOffd(P);
+   HYPRE_BigInt          *col_map_offd_P = hypre_ParCSRBlockMatrixColMapOffd(P);
    
    HYPRE_Complex         *P_offd_data = hypre_CSRBlockMatrixData(P_offd);
    HYPRE_Int             *P_offd_i = hypre_CSRBlockMatrixI(P_offd);
    HYPRE_Int             *P_offd_j = hypre_CSRBlockMatrixJ(P_offd);
 
-   HYPRE_Int  first_col_diag_P = hypre_ParCSRBlockMatrixFirstColDiag(P);
-   HYPRE_Int  last_col_diag_P;
+   HYPRE_BigInt  first_col_diag_P = hypre_ParCSRBlockMatrixFirstColDiag(P);
+   HYPRE_BigInt  last_col_diag_P;
    HYPRE_Int  num_cols_diag_P = hypre_CSRBlockMatrixNumCols(P_diag);
    HYPRE_Int  num_cols_offd_P = hypre_CSRBlockMatrixNumCols(P_offd);
-   HYPRE_Int *coarse_partitioning = hypre_ParCSRBlockMatrixColStarts(P);
-   HYPRE_Int *row_starts, *col_starts;
+   HYPRE_BigInt *coarse_partitioning = hypre_ParCSRBlockMatrixColStarts(P);
+   HYPRE_BigInt *row_starts, *col_starts;
 
    hypre_ParCSRBlockMatrix *RAP;
-   HYPRE_Int                     *col_map_offd_RAP;
+   HYPRE_BigInt            *col_map_offd_RAP;
 
    hypre_CSRBlockMatrix *RAP_int = NULL;
 
    HYPRE_Complex         *RAP_int_data;
    HYPRE_Int             *RAP_int_i;
-   HYPRE_Int             *RAP_int_j;
+   HYPRE_BigInt          *RAP_int_j;
 
    hypre_CSRBlockMatrix *RAP_ext;
 
    HYPRE_Complex         *RAP_ext_data;
    HYPRE_Int             *RAP_ext_i;
-   HYPRE_Int             *RAP_ext_j;
+   HYPRE_BigInt          *RAP_ext_j;
 
    hypre_CSRBlockMatrix *RAP_diag;
 
@@ -276,7 +268,7 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
    
    HYPRE_Complex         *Ps_ext_data;
    HYPRE_Int             *Ps_ext_i;
-   HYPRE_Int             *Ps_ext_j;
+   HYPRE_BigInt          *Ps_ext_j;
 
    HYPRE_Complex         *P_ext_diag_data;
    HYPRE_Int             *P_ext_diag_i;
@@ -286,7 +278,7 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
    HYPRE_Int             *P_ext_offd_i;
    HYPRE_Int             *P_ext_offd_j;
 
-   HYPRE_Int             *col_map_offd_Pext;
+   HYPRE_BigInt          *col_map_offd_Pext;
    HYPRE_Int             *map_P_to_Pext;
    HYPRE_Int             *map_P_to_RAP;
    HYPRE_Int             *map_Pext_to_RAP;
@@ -295,15 +287,16 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
    HYPRE_Int            **P_mark_array;
    HYPRE_Int            **A_mark_array;
    HYPRE_Int             *A_marker;
-   HYPRE_Int             *temp;
+   HYPRE_BigInt          *temp = NULL;
 
    HYPRE_Int              n_coarse;
    HYPRE_Int              num_cols_offd_Pext = 0;
    
    HYPRE_Int              ic, i, j, k, bnnz, kk;
    HYPRE_Int              i1, i2, i3, ii, ns, ne, size, rest;
-   HYPRE_Int              cnt, cnt_offd, cnt_diag, value;
+   HYPRE_Int              cnt, cnt_offd, cnt_diag;
    HYPRE_Int              jj1, jj2, jj3, jcol;
+   HYPRE_BigInt           value;
    
    HYPRE_Int             *jj_count, *jj_cnt_diag, *jj_cnt_offd;
    HYPRE_Int              jj_counter, jj_count_diag, jj_count_offd;
@@ -371,14 +364,14 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
       Ps_ext = hypre_ParCSRBlockMatrixExtractBExt(P,A,1);
       Ps_ext_data = hypre_CSRBlockMatrixData(Ps_ext);
       Ps_ext_i    = hypre_CSRBlockMatrixI(Ps_ext);
-      Ps_ext_j    = hypre_CSRBlockMatrixJ(Ps_ext);
+      Ps_ext_j    = hypre_CSRBlockMatrixBigJ(Ps_ext);
    }
 
    P_ext_diag_i = hypre_CTAlloc(HYPRE_Int, num_cols_offd_A+1, HYPRE_MEMORY_HOST);
    P_ext_offd_i = hypre_CTAlloc(HYPRE_Int, num_cols_offd_A+1, HYPRE_MEMORY_HOST);
    P_ext_diag_size = 0;
    P_ext_offd_size = 0;
-   last_col_diag_P = first_col_diag_P + num_cols_diag_P - 1;
+   last_col_diag_P = first_col_diag_P + (HYPRE_BigInt)num_cols_diag_P - 1;
 
    for (i=0; i < num_cols_offd_A; i++)
    {
@@ -410,37 +403,31 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
       for (j=Ps_ext_i[i]; j < Ps_ext_i[i+1]; j++)
          if (Ps_ext_j[j] < first_col_diag_P || Ps_ext_j[j] > last_col_diag_P)
          {
-            P_ext_offd_j[cnt_offd] = Ps_ext_j[j];
+            Ps_ext_j[cnt_offd] = Ps_ext_j[j];
             for (kk = 0; kk < bnnz; kk++)
                P_ext_offd_data[cnt_offd*bnnz+kk] = Ps_ext_data[j*bnnz+kk];
             cnt_offd++;
          }
          else
          {
-            P_ext_diag_j[cnt_diag] = Ps_ext_j[j] - first_col_diag_P;
+            P_ext_diag_j[cnt_diag] = (HYPRE_Int)(Ps_ext_j[j] - first_col_diag_P);
             for (kk = 0; kk < bnnz; kk++)
                P_ext_diag_data[cnt_diag*bnnz+kk] = Ps_ext_data[j*bnnz+kk];
             cnt_diag++;
          }
    }
-   if (num_procs > 1) 
-   {
-      hypre_CSRBlockMatrixDestroy(Ps_ext);
-      Ps_ext = NULL;
-   }
-
    if (P_ext_offd_size || num_cols_offd_P)
    {
-      temp = hypre_CTAlloc(HYPRE_Int,  P_ext_offd_size+num_cols_offd_P, HYPRE_MEMORY_HOST);
+      temp = hypre_CTAlloc(HYPRE_BigInt,  P_ext_offd_size+num_cols_offd_P, HYPRE_MEMORY_HOST);
       for (i=0; i < P_ext_offd_size; i++)
-         temp[i] = P_ext_offd_j[i];
+         temp[i] = Ps_ext_j[i];
       cnt = P_ext_offd_size;
       for (i=0; i < num_cols_offd_P; i++)
          temp[cnt++] = col_map_offd_P[i];
    }
    if (cnt)
    {
-      hypre_qsort0(temp, 0, cnt-1);
+      hypre_BigQsort0(temp, 0, cnt-1);
 
       num_cols_offd_Pext = 1;
       value = temp[0];
@@ -455,7 +442,7 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
    }
  
    if (num_cols_offd_Pext)
-      col_map_offd_Pext = hypre_CTAlloc(HYPRE_Int, num_cols_offd_Pext, HYPRE_MEMORY_HOST);
+      col_map_offd_Pext = hypre_CTAlloc(HYPRE_BigInt, num_cols_offd_Pext, HYPRE_MEMORY_HOST);
 
    for (i=0; i < num_cols_offd_Pext; i++)
       col_map_offd_Pext[i] = temp[i];
@@ -464,8 +451,8 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
       hypre_TFree(temp, HYPRE_MEMORY_HOST);
 
    for (i=0 ; i < P_ext_offd_size; i++)
-      P_ext_offd_j[i] = hypre_BinarySearch(col_map_offd_Pext,
-                                           P_ext_offd_j[i],
+      P_ext_offd_j[i] = hypre_BigBinarySearch(col_map_offd_Pext,
+                                           Ps_ext_j[i],
                                            num_cols_offd_Pext);
    if (num_cols_offd_P)
    {
@@ -478,6 +465,12 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
             map_P_to_Pext[cnt++] = i;
             if (cnt == num_cols_offd_P) break;
          }
+   }
+
+   if (num_procs > 1) 
+   {
+      hypre_CSRBlockMatrixDestroy(Ps_ext);
+      Ps_ext = NULL;
    }
 
    /*-----------------------------------------------------------------------
@@ -690,7 +683,7 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
       RAP_size = jj_count[num_threads-1];
       RAP_int_i = hypre_CTAlloc(HYPRE_Int,  num_cols_offd_RT+1, HYPRE_MEMORY_HOST);
       RAP_int_data = hypre_CTAlloc(HYPRE_Complex,  RAP_size*bnnz, HYPRE_MEMORY_HOST);
-      RAP_int_j    = hypre_CTAlloc(HYPRE_Int,  RAP_size, HYPRE_MEMORY_HOST);
+      RAP_int_j    = hypre_CTAlloc(HYPRE_BigInt,  RAP_size, HYPRE_MEMORY_HOST);
       RAP_int_i[num_cols_offd_RT] = RAP_size;
 
       /*-----------------------------------------------------------------------
@@ -917,7 +910,7 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
                            ind = jj_counter * bnnz;
                            for (kk = 0; kk < bnnz; kk++)
                               RAP_int_data[ind++] = r_a_p_products[kk];
-                           RAP_int_j[jj_counter] = i3 + first_col_diag_P;
+                           RAP_int_j[jj_counter] = (HYPRE_BigInt)i3 + first_col_diag_P;
                            jj_counter++;
                         }
                         else
@@ -998,7 +991,7 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
       RAP_int = hypre_CSRBlockMatrixCreate(block_size,num_cols_offd_RT,
                                            num_rows_offd_RT,RAP_size);
       hypre_CSRBlockMatrixI(RAP_int) = RAP_int_i;
-      hypre_CSRBlockMatrixJ(RAP_int) = RAP_int_j;
+      hypre_CSRBlockMatrixBigJ(RAP_int) = RAP_int_j;
       hypre_CSRBlockMatrixData(RAP_int) = RAP_int_data;
       hypre_TFree(jj_count, HYPRE_MEMORY_HOST);
    }
@@ -1008,7 +1001,7 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
    {
       RAP_ext = hypre_ExchangeRAPBlockData(RAP_int,comm_pkg_RT, block_size);
       RAP_ext_i = hypre_CSRBlockMatrixI(RAP_ext);
-      RAP_ext_j = hypre_CSRBlockMatrixJ(RAP_ext);
+      RAP_ext_j = hypre_CSRBlockMatrixBigJ(RAP_ext);
       RAP_ext_data = hypre_CSRBlockMatrixData(RAP_ext);
       RAP_ext_size = RAP_ext_i[hypre_CSRBlockMatrixNumRows(RAP_ext)];
    }
@@ -1022,7 +1015,7 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
    RAP_offd_i = hypre_CTAlloc(HYPRE_Int,  num_cols_diag_P+1, HYPRE_MEMORY_HOST);
 
    first_col_diag_RAP = first_col_diag_P;
-   last_col_diag_RAP = first_col_diag_P + num_cols_diag_P - 1;
+   last_col_diag_RAP = first_col_diag_P + (HYPRE_BigInt)num_cols_diag_P - 1;
 
    /*-----------------------------------------------------------------------
     *  check for new nonzero columns in RAP_offd generated through RAP_ext
@@ -1030,7 +1023,7 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
 
    if (RAP_ext_size || num_cols_offd_Pext)
    {
-      temp = hypre_CTAlloc(HYPRE_Int, RAP_ext_size+num_cols_offd_Pext, HYPRE_MEMORY_HOST);
+      temp = hypre_CTAlloc(HYPRE_BigInt, RAP_ext_size+num_cols_offd_Pext, HYPRE_MEMORY_HOST);
       cnt = 0;
       for (i=0; i < RAP_ext_size; i++)
          if (RAP_ext_j[i] < first_col_diag_RAP 
@@ -1041,7 +1034,7 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
 
       if (cnt)
       {
-         hypre_qsort0(temp,0,cnt-1);
+         hypre_BigQsort0(temp,0,cnt-1);
          value = temp[0];
          num_cols_offd_RAP = 1;
          for (i=1; i < cnt; i++)
@@ -1056,7 +1049,7 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
 
       /* now evaluate col_map_offd_RAP */
       if (num_cols_offd_RAP)
-         col_map_offd_RAP = hypre_CTAlloc(HYPRE_Int,  num_cols_offd_RAP, HYPRE_MEMORY_HOST);
+         col_map_offd_RAP = hypre_CTAlloc(HYPRE_BigInt,  num_cols_offd_RAP, HYPRE_MEMORY_HOST);
 
       for (i=0 ; i < num_cols_offd_RAP; i++)
          col_map_offd_RAP[i] = temp[i];
@@ -1097,8 +1090,8 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
    for (i=0; i < RAP_ext_size; i++)
       if (RAP_ext_j[i] < first_col_diag_RAP 
           || RAP_ext_j[i] > last_col_diag_RAP)
-         RAP_ext_j[i] = num_cols_diag_P
-            + hypre_BinarySearch(col_map_offd_RAP,
+         RAP_ext_j[i] = (HYPRE_BigInt)(num_cols_diag_P)
+            + hypre_BigBinarySearch(col_map_offd_RAP,
                                  RAP_ext_j[i],num_cols_offd_RAP);
       else
          RAP_ext_j[i] -= first_col_diag_RAP;
@@ -1164,7 +1157,7 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
                {
                   for (k=RAP_ext_i[j]; k < RAP_ext_i[j+1]; k++)
                   {
-                     jcol = RAP_ext_j[k];
+                     jcol = (HYPRE_Int)RAP_ext_j[k];
                      if (jcol < num_cols_diag_P)
                      {
                         if (P_marker[jcol] < jj_row_begin_diag)
@@ -1442,7 +1435,7 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
                {
                   for (k=RAP_ext_i[j]; k < RAP_ext_i[j+1]; k++)
                   {
-                     jcol = RAP_ext_j[k];
+                     jcol = (HYPRE_Int)RAP_ext_j[k];
                      if (jcol < num_cols_diag_P)
                      {
                         if (P_marker[jcol] < jj_row_begin_diag)
@@ -1744,13 +1737,13 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
 
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
-   row_starts = hypre_CTAlloc(HYPRE_Int,  2, HYPRE_MEMORY_HOST);
-   col_starts = hypre_CTAlloc(HYPRE_Int,  2, HYPRE_MEMORY_HOST);
+   row_starts = hypre_CTAlloc(HYPRE_BigInt,  2, HYPRE_MEMORY_HOST);
+   col_starts = hypre_CTAlloc(HYPRE_BigInt,  2, HYPRE_MEMORY_HOST);
    for (i = 0; i <= 1; i++) 
       row_starts[i] = col_starts[i] = coarse_partitioning[i];
 #else
-   row_starts = hypre_CTAlloc(HYPRE_Int,  num_procs+1, HYPRE_MEMORY_HOST);
-   col_starts = hypre_CTAlloc(HYPRE_Int,  num_procs+1, HYPRE_MEMORY_HOST);
+   row_starts = hypre_CTAlloc(HYPRE_BigInt,  num_procs+1, HYPRE_MEMORY_HOST);
+   col_starts = hypre_CTAlloc(HYPRE_BigInt,  num_procs+1, HYPRE_MEMORY_HOST);
    for (i = 0; i <= num_procs; i++) 
       row_starts[i] = col_starts[i] = coarse_partitioning[i];
 #endif

@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -35,6 +30,7 @@ hypre_CSRBlockMatrixCreate(HYPRE_Int block_size,
    hypre_CSRBlockMatrixData(matrix) = NULL;
    hypre_CSRBlockMatrixI(matrix)    = NULL;
    hypre_CSRBlockMatrixJ(matrix)    = NULL;
+   hypre_CSRBlockMatrixBigJ(matrix)    = NULL;
    hypre_CSRBlockMatrixBlockSize(matrix) = block_size;
    hypre_CSRBlockMatrixNumRows(matrix) = num_rows;
    hypre_CSRBlockMatrixNumCols(matrix) = num_cols;
@@ -62,6 +58,7 @@ hypre_CSRBlockMatrixDestroy(hypre_CSRBlockMatrix *matrix)
       {
          hypre_TFree(hypre_CSRBlockMatrixData(matrix), HYPRE_MEMORY_HOST);
          hypre_TFree(hypre_CSRBlockMatrixJ(matrix), HYPRE_MEMORY_HOST);
+         hypre_TFree(hypre_CSRBlockMatrixBigJ(matrix), HYPRE_MEMORY_HOST);
       }
       hypre_TFree(matrix, HYPRE_MEMORY_HOST);
    }
@@ -85,6 +82,8 @@ hypre_CSRBlockMatrixInitialize(hypre_CSRBlockMatrix *matrix)
       hypre_TFree(hypre_CSRBlockMatrixI(matrix), HYPRE_MEMORY_HOST);
    if ( ! hypre_CSRBlockMatrixJ(matrix) )
       hypre_TFree(hypre_CSRBlockMatrixJ(matrix), HYPRE_MEMORY_HOST);
+   if ( ! hypre_CSRBlockMatrixBigJ(matrix) )
+      hypre_TFree(hypre_CSRBlockMatrixBigJ(matrix), HYPRE_MEMORY_HOST);
    if ( ! hypre_CSRBlockMatrixData(matrix) )
       hypre_TFree(hypre_CSRBlockMatrixData(matrix), HYPRE_MEMORY_HOST);
 
@@ -93,6 +92,37 @@ hypre_CSRBlockMatrixInitialize(hypre_CSRBlockMatrix *matrix)
    if (nnz) hypre_CSRBlockMatrixData(matrix) = hypre_CTAlloc(HYPRE_Complex,  nnz, HYPRE_MEMORY_HOST);
    else     hypre_CSRBlockMatrixData(matrix) = NULL;
    if (nnz) hypre_CSRBlockMatrixJ(matrix) = hypre_CTAlloc(HYPRE_Int, num_nonzeros, HYPRE_MEMORY_HOST);
+   else     hypre_CSRBlockMatrixJ(matrix) = NULL;
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_CSRBlockMatrixBigInitialize
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int 
+hypre_CSRBlockMatrixBigInitialize(hypre_CSRBlockMatrix *matrix)
+{
+   HYPRE_Int block_size   = hypre_CSRBlockMatrixBlockSize(matrix);
+   HYPRE_Int num_rows     = hypre_CSRBlockMatrixNumRows(matrix);
+   HYPRE_Int num_nonzeros = hypre_CSRBlockMatrixNumNonzeros(matrix);
+   HYPRE_Int ierr=0, nnz;
+
+   if ( ! hypre_CSRBlockMatrixI(matrix) )
+      hypre_TFree(hypre_CSRBlockMatrixI(matrix), HYPRE_MEMORY_HOST);
+   if ( ! hypre_CSRBlockMatrixJ(matrix) )
+      hypre_TFree(hypre_CSRBlockMatrixJ(matrix), HYPRE_MEMORY_HOST);
+   if ( ! hypre_CSRBlockMatrixBigJ(matrix) )
+      hypre_TFree(hypre_CSRBlockMatrixBigJ(matrix), HYPRE_MEMORY_HOST);
+   if ( ! hypre_CSRBlockMatrixData(matrix) )
+      hypre_TFree(hypre_CSRBlockMatrixData(matrix), HYPRE_MEMORY_HOST);
+
+   nnz = num_nonzeros * block_size * block_size;
+   hypre_CSRBlockMatrixI(matrix) = hypre_CTAlloc(HYPRE_Int,  num_rows + 1, HYPRE_MEMORY_HOST);
+   if (nnz) hypre_CSRBlockMatrixData(matrix) = hypre_CTAlloc(HYPRE_Complex,  nnz, HYPRE_MEMORY_HOST);
+   else     hypre_CSRBlockMatrixData(matrix) = NULL;
+   if (nnz) hypre_CSRBlockMatrixBigJ(matrix) = hypre_CTAlloc(HYPRE_BigInt, num_nonzeros, HYPRE_MEMORY_HOST);
    else     hypre_CSRBlockMatrixJ(matrix) = NULL;
 
    return ierr;

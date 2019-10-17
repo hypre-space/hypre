@@ -1,19 +1,10 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
-
-
-
- 
 #include "seq_mv.h"
  
 /*--------------------------------------------------------------------------
@@ -24,24 +15,22 @@
  Thus each of the vectors of the multivector will get the same data distribution. */
 
 HYPRE_Int
-hypre_GeneratePartitioning(HYPRE_Int length, HYPRE_Int num_procs, HYPRE_Int **part_ptr)
+hypre_GeneratePartitioning(HYPRE_BigInt length, HYPRE_Int num_procs, HYPRE_BigInt **part_ptr)
 {
    HYPRE_Int ierr = 0;
-   HYPRE_Int *part;
+   HYPRE_BigInt *part;
    HYPRE_Int size, rest;
    HYPRE_Int i;
 
-
-   part = hypre_CTAlloc(HYPRE_Int,  num_procs+1, HYPRE_MEMORY_HOST);
-   size = length / num_procs;
-   rest = length - size*num_procs;
+   part = hypre_CTAlloc(HYPRE_BigInt,  num_procs+1, HYPRE_MEMORY_HOST);
+   size = (HYPRE_Int)(length / (HYPRE_BigInt)num_procs);
+   rest = (HYPRE_Int)(length - (HYPRE_BigInt)(size*num_procs));
    part[0] = 0;
    for (i=0; i < num_procs; i++)
    {
-	part[i+1] = part[i]+size;
+	part[i+1] = part[i]+(HYPRE_BigInt)size;
 	if (i < rest) part[i+1]++;
    }
-
 
    *part_ptr = part;
    return ierr;
@@ -53,25 +42,25 @@ hypre_GeneratePartitioning(HYPRE_Int length, HYPRE_Int num_procs, HYPRE_Int **pa
    to do this it requires the processor id as well AHB 6/05*/
 
 HYPRE_Int
-hypre_GenerateLocalPartitioning(HYPRE_Int length, HYPRE_Int num_procs, HYPRE_Int myid, HYPRE_Int **part_ptr)
+hypre_GenerateLocalPartitioning(HYPRE_BigInt length, HYPRE_Int num_procs, HYPRE_Int myid, HYPRE_BigInt **part_ptr)
 {
 
 
    HYPRE_Int ierr = 0;
-   HYPRE_Int *part;
+   HYPRE_BigInt *part;
    HYPRE_Int size, rest;
 
-   part = hypre_CTAlloc(HYPRE_Int,  2, HYPRE_MEMORY_HOST);
-   size = length /num_procs;
-   rest = length - size*num_procs;
+   part = hypre_CTAlloc(HYPRE_BigInt,  2, HYPRE_MEMORY_HOST);
+   size = (HYPRE_Int)(length / (HYPRE_BigInt)num_procs);
+   rest = (HYPRE_Int)(length - (HYPRE_BigInt)(size*num_procs));
 
    /* first row I own */
-   part[0] = size*myid;
-   part[0] += hypre_min(myid, rest);
+   part[0] = (HYPRE_BigInt)(size*myid);
+   part[0] += (HYPRE_BigInt)(hypre_min(myid, rest));
    
    /* last row I own */
-   part[1] =  size*(myid+1);
-   part[1] += hypre_min(myid+1, rest);
+   part[1] =  (HYPRE_BigInt)(size*(myid+1));
+   part[1] += (HYPRE_BigInt)(hypre_min(myid+1, rest));
    part[1] = part[1] - 1;
 
    /* add 1 to last row since this is for "starts" vector */

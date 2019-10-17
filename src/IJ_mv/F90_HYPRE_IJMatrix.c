@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -30,20 +25,20 @@ extern "C" {
 void
 hypre_F90_IFACE(hypre_ijmatrixcreate, HYPRE_IJMATRIXCREATE)
    ( hypre_F90_Comm *comm,
-     hypre_F90_Int *ilower,
-     hypre_F90_Int *iupper,
-     hypre_F90_Int *jlower,
-     hypre_F90_Int *jupper,
+     hypre_F90_BigInt *ilower,
+     hypre_F90_BigInt *iupper,
+     hypre_F90_BigInt *jlower,
+     hypre_F90_BigInt *jupper,
      hypre_F90_Obj *matrix,
      hypre_F90_Int *ierr    )
 {
    *ierr = (hypre_F90_Int)
       ( HYPRE_IJMatrixCreate(
            hypre_F90_PassComm (comm),
-           hypre_F90_PassInt (ilower),
-           hypre_F90_PassInt (iupper),
-           hypre_F90_PassInt (jlower),
-           hypre_F90_PassInt (jupper),
+           hypre_F90_PassBigInt (ilower),
+           hypre_F90_PassBigInt (iupper),
+           hypre_F90_PassBigInt (jlower),
+           hypre_F90_PassBigInt (jupper),
            hypre_F90_PassObjRef (HYPRE_IJMatrix, matrix) ) );
 }
 
@@ -84,8 +79,8 @@ hypre_F90_IFACE(hypre_ijmatrixsetvalues, HYPRE_IJMATRIXSETVALUES)
    ( hypre_F90_Obj *matrix,
      hypre_F90_Int *nrows,
      hypre_F90_IntArray *ncols,
-     hypre_F90_IntArray *rows,
-     hypre_F90_IntArray *cols,
+     hypre_F90_BigIntArray *rows,
+     hypre_F90_BigIntArray *cols,
      hypre_F90_ComplexArray *values,
      hypre_F90_Int *ierr    )
 {
@@ -94,8 +89,8 @@ hypre_F90_IFACE(hypre_ijmatrixsetvalues, HYPRE_IJMATRIXSETVALUES)
            hypre_F90_PassObj (HYPRE_IJMatrix, matrix),
            hypre_F90_PassInt (nrows),
            hypre_F90_PassIntArray (ncols),
-           hypre_F90_PassIntArray (rows),
-           hypre_F90_PassIntArray (cols),
+           hypre_F90_PassBigIntArray (rows),
+           hypre_F90_PassBigIntArray (cols),
            hypre_F90_PassComplexArray (values)  ) );
 
 }
@@ -126,8 +121,8 @@ hypre_F90_IFACE(hypre_ijmatrixaddtovalues, HYPRE_IJMATRIXADDTOVALUES)
    ( hypre_F90_Obj *matrix,
      hypre_F90_Int *nrows,
      hypre_F90_IntArray *ncols,
-     hypre_F90_IntArray *rows,
-     hypre_F90_IntArray *cols,
+     hypre_F90_BigIntArray *rows,
+     hypre_F90_BigIntArray *cols,
      hypre_F90_ComplexArray *values,
      hypre_F90_Int *ierr    )
 {
@@ -136,8 +131,8 @@ hypre_F90_IFACE(hypre_ijmatrixaddtovalues, HYPRE_IJMATRIXADDTOVALUES)
            hypre_F90_PassObj (HYPRE_IJMatrix, matrix),
            hypre_F90_PassInt (nrows),
            hypre_F90_PassIntArray (ncols),
-           hypre_F90_PassIntArray (rows),
-           hypre_F90_PassIntArray (cols),
+           hypre_F90_PassBigIntArray (rows),
+           hypre_F90_PassBigIntArray (cols),
            hypre_F90_PassComplexArray (values)  ) );
 
 }
@@ -164,7 +159,7 @@ void
 hypre_F90_IFACE(hypre_ijmatrixgetrowcounts, HYPRE_IJMATRIXGETROWCOUNTS)
    ( hypre_F90_Obj *matrix,
      hypre_F90_Int *nrows,
-     hypre_F90_IntArray *rows,
+     hypre_F90_BigIntArray *rows,
      hypre_F90_IntArray *ncols,
      hypre_F90_Int *ierr    )
 {
@@ -172,7 +167,7 @@ hypre_F90_IFACE(hypre_ijmatrixgetrowcounts, HYPRE_IJMATRIXGETROWCOUNTS)
       ( HYPRE_IJMatrixGetRowCounts(
            hypre_F90_PassObj (HYPRE_IJMatrix, matrix),
            hypre_F90_PassInt (nrows),
-           hypre_F90_PassIntArray (rows),
+           hypre_F90_PassBigIntArray (rows),
            hypre_F90_PassIntArray (ncols) ) );
 }
 
@@ -185,8 +180,8 @@ hypre_F90_IFACE(hypre_ijmatrixgetvalues, HYPRE_IJMATRIXGETVALUES)
    ( hypre_F90_Obj *matrix,
      hypre_F90_Int *nrows,
      hypre_F90_IntArray *ncols,
-     hypre_F90_IntArray *rows,
-     hypre_F90_IntArray *cols,
+     hypre_F90_BigIntArray *rows,
+     hypre_F90_BigIntArray *cols,
      hypre_F90_ComplexArray *values,
      hypre_F90_Int *ierr    )
 {
@@ -195,8 +190,8 @@ hypre_F90_IFACE(hypre_ijmatrixgetvalues, HYPRE_IJMATRIXGETVALUES)
            hypre_F90_PassObj (HYPRE_IJMatrix, matrix),
            hypre_F90_PassInt (nrows),
            hypre_F90_PassIntArray (ncols),
-           hypre_F90_PassIntArray (rows),
-           hypre_F90_PassIntArray (cols),
+           hypre_F90_PassBigIntArray (rows),
+           hypre_F90_PassBigIntArray (cols),
            hypre_F90_PassComplexArray (values)  ) );
 
 }
@@ -240,19 +235,19 @@ hypre_F90_IFACE(hypre_ijmatrixgetobjecttype, HYPRE_IJMATRIXGETOBJECTTYPE)
 void 
 hypre_F90_IFACE(hypre_ijmatrixgetlocalrange, HYPRE_IJMATRIXGETLOCALRANGE)
    ( hypre_F90_Obj *matrix,
-     hypre_F90_Int *ilower,
-     hypre_F90_Int *iupper,
-     hypre_F90_Int *jlower,
-     hypre_F90_Int *jupper,
+     hypre_F90_BigInt *ilower,
+     hypre_F90_BigInt *iupper,
+     hypre_F90_BigInt *jlower,
+     hypre_F90_BigInt *jupper,
      hypre_F90_Int *ierr    )
 {
    *ierr = (hypre_F90_Int)
       ( HYPRE_IJMatrixGetLocalRange(
            hypre_F90_PassObj (HYPRE_IJMatrix, matrix),
-           hypre_F90_PassIntRef (ilower),
-           hypre_F90_PassIntRef (iupper),
-           hypre_F90_PassIntRef (jlower),
-           hypre_F90_PassIntRef (jupper) ) );
+           hypre_F90_PassBigIntRef (ilower),
+           hypre_F90_PassBigIntRef (iupper),
+           hypre_F90_PassBigIntRef (jlower),
+           hypre_F90_PassBigIntRef (jupper) ) );
 }
 
 /*--------------------------------------------------------------------------

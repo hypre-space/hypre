@@ -1,7 +1,14 @@
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 #include "_hypre_parcsr_ls.h"
 #include <math.h>
 
-#ifdef HAVE_DSUPERLU
+#ifdef HYPRE_USING_DSUPERLU
 /*#include "superlu.h"*/
 
 #include <math.h>
@@ -12,7 +19,7 @@
 
 typedef struct 
 {
-   HYPRE_Int global_num_rows;
+   HYPRE_BigInt global_num_rows;
    SuperMatrix A_dslu;
    HYPRE_Real *berr;
    LUstruct_t dslu_data_LU;
@@ -29,7 +36,7 @@ hypre_DSLUData;
 HYPRE_Int hypre_SLUDistSetup( HYPRE_Solver *solver, hypre_ParCSRMatrix *A, HYPRE_Int print_level)
 {
       /* Par Data Structure variables */
-   HYPRE_Int global_num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
+   HYPRE_BigInt global_num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
    MPI_Comm           comm = hypre_ParCSRMatrixComm(A);
    hypre_CSRMatrix *A_local;
    HYPRE_Int num_rows;
@@ -56,12 +63,12 @@ HYPRE_Int hypre_SLUDistSetup( HYPRE_Solver *solver, hypre_ParCSRMatrix *A, HYPRE
             num_rows,
             hypre_ParCSRMatrixFirstRowIndex(A),
             hypre_CSRMatrixData(A_local),
-            hypre_CSRMatrixJ(A_local),hypre_CSRMatrixI(A_local),
+            hypre_CSRMatrixBigJ(A_local),hypre_CSRMatrixI(A_local),
             SLU_NR_loc, SLU_D, SLU_GE);
 
    hypre_CSRMatrixData(A_local) = NULL;
    hypre_CSRMatrixI(A_local) = NULL;
-   hypre_CSRMatrixJ(A_local) = NULL;
+   hypre_CSRMatrixBigJ(A_local) = NULL;
    hypre_CSRMatrixDestroy(A_local);
 
    /*Create process grid */
@@ -73,7 +80,7 @@ HYPRE_Int hypre_SLUDistSetup( HYPRE_Solver *solver, hypre_ParCSRMatrix *A, HYPRE
       prows -= 1;
       pcols = num_procs/prows;
    }
-   hypre_printf(" prows %d pcols %d\n", prows, pcols);
+   //hypre_printf(" prows %d pcols %d\n", prows, pcols);
 
    superlu_gridinit(comm, prows, pcols, &(dslu_data->dslu_data_grid));
 
@@ -96,7 +103,7 @@ HYPRE_Int hypre_SLUDistSetup( HYPRE_Solver *solver, hypre_ParCSRMatrix *A, HYPRE
 
    dslu_data->berr = hypre_CTAlloc(HYPRE_Real, 1, HYPRE_MEMORY_HOST);
    dslu_data->berr[0] = 0.0;
-
+   
    pdgssvx(&(dslu_data->dslu_options), &(dslu_data->A_dslu), 
       &(dslu_data->dslu_ScalePermstruct), NULL, num_rows, nrhs, 
       &(dslu_data->dslu_data_grid), &(dslu_data->dslu_data_LU), 

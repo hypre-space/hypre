@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  * OpenMP Problems
@@ -127,7 +122,7 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
    HYPRE_Int               trueV = 1;
    HYPRE_Int               found;
    HYPRE_Int              *stencil_ranks, *rank_stencils;
-   HYPRE_Int               rank, startrank;
+   HYPRE_BigInt            rank, startrank;
    HYPRE_Real             *vals;
 
    HYPRE_Int               i, j;
@@ -141,7 +136,8 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
    HYPRE_Int               nUentries, cnt1;
    HYPRE_Int               box_array_size;
 
-   HYPRE_Int              *ncols, *rows, *cols;
+   HYPRE_Int              *ncols;
+   HYPRE_BigInt           *rows, *cols;
    
    HYPRE_Int              *temp1, *temp2;
 
@@ -405,8 +401,8 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
                            }
 
                            ncols= hypre_TAlloc(HYPRE_Int,  cnt1, HYPRE_MEMORY_HOST);
-                           rows = hypre_TAlloc(HYPRE_Int,  cnt1, HYPRE_MEMORY_HOST);
-                           cols = hypre_TAlloc(HYPRE_Int,  cnt1, HYPRE_MEMORY_HOST);
+                           rows = hypre_TAlloc(HYPRE_BigInt,  cnt1, HYPRE_MEMORY_HOST);
+                           cols = hypre_TAlloc(HYPRE_BigInt,  cnt1, HYPRE_MEMORY_HOST);
                            temp2= hypre_TAlloc(HYPRE_Int,  cnt1, HYPRE_MEMORY_HOST);
                            vals = hypre_CTAlloc(HYPRE_Real,  cnt1, HYPRE_MEMORY_HOST);
 

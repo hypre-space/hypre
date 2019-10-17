@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -92,7 +87,7 @@
    /*cudaDeviceSynchronize();*/ \
 }
 
-#define HYPRE_BOX_REDUCTION 
+#define HYPRE_BOX_REDUCTION
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * host code: declare variables used in the box loop
@@ -157,8 +152,7 @@ HYPRE_Int HYPRE_XCONCAT3(hypre__stride,0,k), HYPRE_XCONCAT3(hypre__stride,1,k), 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * is_device_ptr clause
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
-#define DEVICE_VAR 
-#if defined(HYPRE_USE_OMP45_TARGET_ALLOC)
+#if defined(HYPRE_DEVICE_OPENMP_ALLOC)
 #define IS_DEVICE_CLAUSE DEVICE_VAR
 #else
 #define IS_DEVICE_CLAUSE 
@@ -183,9 +177,9 @@ hypre__J /= HYPRE_XCONCAT2(hypre__loop_size,j); \
 
 
 #define zypre_omp4_BoxLoopSet1(i1) \
-HYPRE_Int hypre__I_1, hypre__i, hypre__i_1, hypre__J, i1; \
+HYPRE_Int hypre__I_1, hypre__i, hypre__i_1, hypre__J, i1, idx; \
 /* HYPRE_Int hypre__id_0, hypre__id_1, hypre__id_2; */ \
-hypre__I_1 = 1;  hypre__J = hypre__thread;  i1 = 0; \
+hypre__I_1 = 1;  idx = hypre__J = hypre__thread;  i1 = 0; \
 /*if (hypre__ndim > 0)*/ { zypre_omp4_BoxLoopSet1Body(0, i1) } \
   if (hypre__ndim > 1)   { zypre_omp4_BoxLoopSet1Body(1, i1) } \
   if (hypre__ndim > 2)   { zypre_omp4_BoxLoopSet1Body(2, i1) }
@@ -561,4 +555,20 @@ hypre__J = hypre__thread;  i1 = i2 = 0; \
   index[2] = hypre__id_2;
 #endif
 
+/* Reduction */
+#define hypre_BoxLoop1ReductionBegin(ndim, loop_size, dbox1, start1, stride1, i1, reducesum) \
+        hypre_BoxLoop1Begin(ndim, loop_size, dbox1, start1, stride1, i1)
+
+#define hypre_BoxLoop1ReductionEnd(i1, reducesum) \
+        hypre_BoxLoop1End(i1)
+
+#define hypre_BoxLoop2ReductionBegin(ndim, loop_size, dbox1, start1, stride1, i1, \
+                                                      dbox2, start2, stride2, i2, reducesum) \
+        hypre_BoxLoop2Begin(ndim, loop_size, dbox1, start1, stride1, i1, \
+                                             dbox2, start2, stride2, i2)
+
+#define hypre_BoxLoop2ReductionEnd(i1, i2, reducesum) \
+        hypre_BoxLoop2End(i1, i2)
+
 #endif
+

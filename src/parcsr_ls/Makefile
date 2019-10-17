@@ -1,14 +1,7 @@
-#BHEADER**********************************************************************
-# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
-# Produced at the Lawrence Livermore National Laboratory.
-# This file is part of HYPRE.  See file COPYRIGHT for details.
+# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
-# HYPRE is free software; you can redistribute it and/or modify it under the
-# terms of the GNU Lesser General Public License (as published by the Free
-# Software Foundation) version 2.1 dated February 1999.
-#
-# $Revision$
-#EHEADER**********************************************************************
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 include ../config/Makefile.config
 
@@ -42,12 +35,12 @@ HEADERS =\
  block_tridiag.h\
  Common.h\
  par_amg.h\
+ par_amgdd_comp_grid.h\
  schwarz.h
 
 FILES =\
  amg_hybrid.c\
  aux_interp.c\
- csr_gmres.c\
  F90_hypre_laplace.c\
  F90_HYPRE_parcsr_amg.c\
  F90_HYPRE_parcsr_bicgstab.c\
@@ -55,6 +48,7 @@ FILES =\
  F90_HYPRE_parcsr_cgnr.c\
  F90_HYPRE_parcsr_Euclid.c\
  F90_HYPRE_parcsr_gmres.c\
+ F90_HYPRE_parcsr_cogmres.c\
  F90_HYPRE_parcsr_flexgmres.c\
  F90_HYPRE_parcsr_lgmres.c\
  F90_HYPRE_parcsr_hybrid.c\
@@ -71,6 +65,7 @@ FILES =\
  HYPRE_parcsr_cgnr.c\
  HYPRE_parcsr_Euclid.c\
  HYPRE_parcsr_gmres.c\
+ HYPRE_parcsr_cogmres.c\
  HYPRE_parcsr_flexgmres.c\
  HYPRE_parcsr_lgmres.c\
  HYPRE_parcsr_hybrid.c\
@@ -107,9 +102,9 @@ FILES =\
  par_interp.c\
  par_jacobi_interp.c\
  par_multi_interp.c\
+ par_laplace.c\
  par_laplace_27pt.c\
  par_laplace_9pt.c\
- par_laplace.c\
  par_lr_interp.c\
  par_mgr.c\
  par_mgr_setup.c\
@@ -119,8 +114,6 @@ FILES =\
  par_rap.c\
  par_rap_communication.c\
  par_rotate_7pt.c\
- par_vardifconv.c\
- par_vardifconv_rs.c\
  par_relax.c\
  par_relax_more.c\
  par_relax_interface.c\
@@ -130,6 +123,8 @@ FILES =\
  par_strength.c\
  par_sv_interp.c\
  par_sv_interp_ln.c\
+ par_vardifconv.c\
+ par_vardifconv_rs.c\
  partial.c\
  pcg_par.c\
  schwarz.c\
@@ -148,7 +143,7 @@ OBJSC = ${FILES:.c=.o}
 OBJSCXX = ${FILESCXX:.cxx=.o}
 OBJS = ${OBJSC} ${OBJSCXX}
 
-SONAME = libHYPRE_parcsr_ls-${HYPRE_RELEASE_VERSION}.so
+SONAME = libHYPRE_parcsr_ls-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
 ##################################################################
 # Targets
@@ -180,7 +175,7 @@ libHYPRE_parcsr_ls.a: ${OBJS}
 	${AR} $@ ${OBJS}
 	${RANLIB} $@
 
-libHYPRE_parcsr_ls.so: ${OBJS}
+libHYPRE_parcsr_ls.so libHYPRE_parcsr_ls.dylib: ${OBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
 	ln -s ${SONAME} $@

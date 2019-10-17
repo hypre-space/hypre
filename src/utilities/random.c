@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -38,11 +33,12 @@
 
 #include "_hypre_utilities.h"
 
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
-__managed__ __device__  static HYPRE_Int Seed = 13579;
-#else
-static HYPRE_Int Seed = 13579;
+/*
+#if defined(HYPRE_USING_CUDA)
+__managed__ __device__
 #endif
+*/
+static HYPRE_Int Seed = 13579;
 
 /*-------------------------------------------------------------------------------
  * Static global variable: Seed
@@ -59,8 +55,8 @@ static HYPRE_Int Seed = 13579;
  *
  * @param seed an HYPRE_Int containing the seed for the RNG.
  *--------------------------------------------------------------------------*/
-HYPRE_CUDA_GLOBAL
-void  hypre_SeedRand( HYPRE_Int seed )
+/* HYPRE_CUDA_GLOBAL */
+void hypre_SeedRand( HYPRE_Int seed )
 {
    /* RL: seed must be between 1 and 2^31-2 */
    if (seed < 1) 
@@ -81,8 +77,8 @@ void  hypre_SeedRand( HYPRE_Int seed )
  *
  * @return a HYPRE_Int between (0, 2147483647]
  *--------------------------------------------------------------------------*/
-HYPRE_CUDA_GLOBAL
-HYPRE_Int  hypre_RandI()
+/* HYPRE_CUDA_GLOBAL */
+HYPRE_Int hypre_RandI()
 {
    HYPRE_Int  low, high, test;
    high = Seed / q;
@@ -107,8 +103,8 @@ HYPRE_Int  hypre_RandI()
  * @return a HYPRE_Real containing the next number in the sequence divided by
  * 2147483647 so that the numbers are in (0, 1].
  *--------------------------------------------------------------------------*/
-HYPRE_CUDA_GLOBAL
-HYPRE_Real  hypre_Rand()
+/* HYPRE_CUDA_GLOBAL */
+HYPRE_Real hypre_Rand()
 {
   return ((HYPRE_Real)(hypre_RandI()) / m);
 }

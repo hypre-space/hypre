@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_utilities.h"
 #include <stdarg.h>
@@ -30,6 +25,7 @@ new_format( const char *format,
    const char *fp;
    char       *newformat, *nfp;
    HYPRE_Int   newformatlen;
+   HYPRE_Int   copychar;
    HYPRE_Int   foundpercent = 0;
 
    newformatlen = 2*strlen(format)+1; /* worst case is all %d's to %lld's */
@@ -38,6 +34,7 @@ new_format( const char *format,
    nfp = newformat;
    for (fp = format; *fp != '\0'; fp++)
    {
+      copychar = 1;
       if (*fp == '%')
       {
          foundpercent = 1;
@@ -54,6 +51,13 @@ new_format( const char *format,
          }
          switch(*fp)
          {
+            case 'b': /* used for BigInt type in hypre */
+#if defined(HYPRE_BIGINT) || defined(HYPRE_MIXEDINT)
+               *nfp = 'l'; nfp++;
+               *nfp = 'l'; nfp++;
+#endif
+               *nfp = 'd'; nfp++; copychar = 0;
+               foundpercent = 0; break;
             case 'd':
             case 'i':
 #if defined(HYPRE_BIGINT)
@@ -85,7 +89,10 @@ new_format( const char *format,
                foundpercent = 0; break;
          }
       }
-      *nfp = *fp; nfp++;
+      if (copychar)
+      {
+         *nfp = *fp; nfp++;
+      }
    }
    *nfp = *fp;
 
@@ -102,6 +109,20 @@ free_format( char *newformat )
    hypre_TFree(newformat, HYPRE_MEMORY_HOST);
 
    return 0;
+}
+
+HYPRE_Int
+hypre_ndigits( HYPRE_BigInt number )
+{
+   HYPRE_Int     ndigits = 0;
+
+   while(number)
+   {
+      number /= 10;
+      ndigits++;
+   }
+
+   return ndigits;
 }
 
 /* printf functions */

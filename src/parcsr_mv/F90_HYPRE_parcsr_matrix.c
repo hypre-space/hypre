@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -30,10 +25,10 @@ extern "C" {
 void
 hypre_F90_IFACE(hypre_parcsrmatrixcreate, HYPRE_PARCSRMATRIXCREATE)
    ( hypre_F90_Comm *comm,
-     hypre_F90_Int *global_num_rows,
-     hypre_F90_Int *global_num_cols,
-     hypre_F90_IntArray *row_starts,
-     hypre_F90_IntArray *col_starts,
+     hypre_F90_BigInt *global_num_rows,
+     hypre_F90_BigInt *global_num_cols,
+     hypre_F90_BigIntArray *row_starts,
+     hypre_F90_BigIntArray *col_starts,
      hypre_F90_Int *num_cols_offd,
      hypre_F90_Int *num_nonzeros_diag,
      hypre_F90_Int *num_nonzeros_offd,
@@ -43,10 +38,10 @@ hypre_F90_IFACE(hypre_parcsrmatrixcreate, HYPRE_PARCSRMATRIXCREATE)
    *ierr = (hypre_F90_Int)
       ( HYPRE_ParCSRMatrixCreate(
            hypre_F90_PassComm (comm),
-           hypre_F90_PassInt (global_num_rows),
-           hypre_F90_PassInt (global_num_cols),
-           hypre_F90_PassIntArray (row_starts),
-           hypre_F90_PassIntArray (col_starts),
+           hypre_F90_PassBigInt (global_num_rows),
+           hypre_F90_PassBigInt (global_num_cols),
+           hypre_F90_PassBigIntArray (row_starts),
+           hypre_F90_PassBigIntArray (col_starts),
            hypre_F90_PassInt (num_cols_offd),
            hypre_F90_PassInt (num_nonzeros_diag),
            hypre_F90_PassInt (num_nonzeros_offd),
@@ -153,15 +148,15 @@ hypre_F90_IFACE(hypre_parcsrmatrixgetcomm, HYPRE_PARCSRMATRIXGETCOMM)
 void 
 hypre_F90_IFACE(hypre_parcsrmatrixgetdims, HYPRE_PARCSRMATRIXGETDIMS)
    ( hypre_F90_Obj *matrix,
-     hypre_F90_Int *M,
-     hypre_F90_Int *N,
+     hypre_F90_BigInt *M,
+     hypre_F90_BigInt *N,
      hypre_F90_Int *ierr    )
 {
    *ierr = (hypre_F90_Int)
       ( HYPRE_ParCSRMatrixGetDims(
            hypre_F90_PassObj (HYPRE_ParCSRMatrix, matrix),
-           hypre_F90_PassIntRef (M),
-           hypre_F90_PassIntRef (N)       ) );
+           hypre_F90_PassBigIntRef (M),
+           hypre_F90_PassBigIntRef (N)       ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -178,7 +173,7 @@ hypre_F90_IFACE(hypre_parcsrmatrixgetrowpartiti, HYPRE_PARCSRMATRIXGETROWPARTITI
 
    *ierr = (hypre_F90_Int) HYPRE_ParCSRMatrixGetRowPartitioning(
       hypre_F90_PassObj (HYPRE_ParCSRMatrix, matrix),
-      (HYPRE_Int **)    &row_partitioning  );
+      (HYPRE_BigInt **)    &row_partitioning  );
 
    *row_partitioning_ptr = (hypre_F90_Obj) row_partitioning;
 }
@@ -197,7 +192,7 @@ hypre_F90_IFACE(hypre_parcsrmatrixgetcolpartiti, HYPRE_PARCSRMATRIXGETCOLPARTITI
 
    *ierr = (hypre_F90_Int) HYPRE_ParCSRMatrixGetColPartitioning(
       hypre_F90_PassObj (HYPRE_ParCSRMatrix, matrix),
-      (HYPRE_Int **)    &col_partitioning  );
+      (HYPRE_BigInt **)    &col_partitioning  );
 
    *col_partitioning_ptr = (hypre_F90_Obj) col_partitioning;
 }
@@ -209,19 +204,19 @@ hypre_F90_IFACE(hypre_parcsrmatrixgetcolpartiti, HYPRE_PARCSRMATRIXGETCOLPARTITI
 void 
 hypre_F90_IFACE(hypre_parcsrmatrixgetlocalrange, HYPRE_PARCSRMATRIXGETLOCALRANGE)
    ( hypre_F90_Obj *matrix,
-     hypre_F90_Int *row_start,
-     hypre_F90_Int *row_end,
-     hypre_F90_Int *col_start,
-     hypre_F90_Int *col_end,
+     hypre_F90_BigInt *row_start,
+     hypre_F90_BigInt *row_end,
+     hypre_F90_BigInt *col_start,
+     hypre_F90_BigInt *col_end,
      hypre_F90_Int *ierr    )
 {
    *ierr = (hypre_F90_Int)
       ( HYPRE_ParCSRMatrixGetLocalRange(
            hypre_F90_PassObj (HYPRE_ParCSRMatrix, matrix),
-           hypre_F90_PassIntRef (row_start),
-           hypre_F90_PassIntRef (row_end),
-           hypre_F90_PassIntRef (col_start),
-           hypre_F90_PassIntRef (col_end)) );
+           hypre_F90_PassBigIntRef (row_start),
+           hypre_F90_PassBigIntRef (row_end),
+           hypre_F90_PassBigIntRef (col_start),
+           hypre_F90_PassBigIntRef (col_end)) );
 }
 
 /*--------------------------------------------------------------------------
@@ -231,7 +226,7 @@ hypre_F90_IFACE(hypre_parcsrmatrixgetlocalrange, HYPRE_PARCSRMATRIXGETLOCALRANGE
 void
 hypre_F90_IFACE(hypre_parcsrmatrixgetrow, HYPRE_PARCSRMATRIXGETROW)
    ( hypre_F90_Obj *matrix,
-     hypre_F90_Int *row,
+     hypre_F90_BigInt *row,
      hypre_F90_Int *size,
      hypre_F90_Obj *col_ind_ptr,
      hypre_F90_Obj *values_ptr,
@@ -242,9 +237,9 @@ hypre_F90_IFACE(hypre_parcsrmatrixgetrow, HYPRE_PARCSRMATRIXGETROW)
 
    *ierr = (hypre_F90_Int) HYPRE_ParCSRMatrixGetRow(
       hypre_F90_PassObj      (HYPRE_ParCSRMatrix, matrix),
-      hypre_F90_PassInt      (row),
+      hypre_F90_PassBigInt      (row),
       hypre_F90_PassIntRef (size),
-      (HYPRE_Int **)         &col_ind,
+      (HYPRE_BigInt **)         &col_ind,
       (HYPRE_Complex **)            &values );
 
    *col_ind_ptr = (hypre_F90_Obj) col_ind;
@@ -258,7 +253,7 @@ hypre_F90_IFACE(hypre_parcsrmatrixgetrow, HYPRE_PARCSRMATRIXGETROW)
 void
 hypre_F90_IFACE(hypre_parcsrmatrixrestorerow, HYPRE_PARCSRMATRIXRESTOREROW)
    ( hypre_F90_Obj *matrix,
-     hypre_F90_Int *row,
+     hypre_F90_BigInt *row,
      hypre_F90_Int *size,
      hypre_F90_Obj *col_ind_ptr,
      hypre_F90_Obj *values_ptr,
@@ -269,9 +264,9 @@ hypre_F90_IFACE(hypre_parcsrmatrixrestorerow, HYPRE_PARCSRMATRIXRESTOREROW)
 
    *ierr = (hypre_F90_Int) HYPRE_ParCSRMatrixRestoreRow(
       hypre_F90_PassObj      (HYPRE_ParCSRMatrix, matrix),
-      hypre_F90_PassInt      (row),
+      hypre_F90_PassBigInt      (row),
       hypre_F90_PassIntRef (size),
-      (HYPRE_Int **)         &col_ind,
+      (HYPRE_BigInt **)         &col_ind,
       (HYPRE_Complex **)            &values );
 
    *col_ind_ptr = (hypre_F90_Obj) col_ind;
@@ -286,8 +281,8 @@ void
 hypre_F90_IFACE(hypre_csrmatrixtoparcsrmatrix, HYPRE_CSRMATRIXTOPARCSRMATRIX)
    (hypre_F90_Comm *comm,
     hypre_F90_Obj *A_CSR,
-    hypre_F90_IntArray *row_partitioning,  
-    hypre_F90_IntArray *col_partitioning,  
+    hypre_F90_BigIntArray *row_partitioning,  
+    hypre_F90_BigIntArray *col_partitioning,  
     hypre_F90_Obj *matrix,
     hypre_F90_Int *ierr   )
 {
@@ -296,8 +291,8 @@ hypre_F90_IFACE(hypre_csrmatrixtoparcsrmatrix, HYPRE_CSRMATRIXTOPARCSRMATRIX)
       ( HYPRE_CSRMatrixToParCSRMatrix(
            hypre_F90_PassComm (comm),
            hypre_F90_PassObj (HYPRE_CSRMatrix, A_CSR),
-           hypre_F90_PassIntArray (row_partitioning),
-           hypre_F90_PassIntArray (col_partitioning),
+           hypre_F90_PassBigIntArray (row_partitioning),
+           hypre_F90_PassBigIntArray (col_partitioning),
            hypre_F90_PassObjRef (HYPRE_ParCSRMatrix, matrix) ) );
 }
 

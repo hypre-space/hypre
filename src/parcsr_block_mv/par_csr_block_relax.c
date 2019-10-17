@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_parcsr_block_mv.h"
 
@@ -27,10 +22,10 @@ HYPRE_Int gselim_piv(HYPRE_Real *A, HYPRE_Real *x, HYPRE_Int n);
 
 HYPRE_Int  hypre_BoomerAMGBlockRelaxIF( hypre_ParCSRBlockMatrix *A,
                                         hypre_ParVector    *f,
-                                        HYPRE_Int                *cf_marker,
-                                        HYPRE_Int                 relax_type,
-                                        HYPRE_Int                 relax_order,
-                                        HYPRE_Int                 cycle_type,
+                                        HYPRE_Int          *cf_marker,
+                                        HYPRE_Int           relax_type,
+                                        HYPRE_Int           relax_order,
+                                        HYPRE_Int           cycle_type,
                                         HYPRE_Real          relax_weight,
                                         HYPRE_Real          omega,
                                         hypre_ParVector    *u,
@@ -93,9 +88,9 @@ HYPRE_Int  hypre_BoomerAMGBlockRelaxIF( hypre_ParCSRBlockMatrix *A,
  *--------------------------------------------------------------------------*/
 HYPRE_Int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
                                       hypre_ParVector    *f,
-                                      HYPRE_Int                *cf_marker,
-                                      HYPRE_Int                 relax_type,
-                                      HYPRE_Int                 relax_points,
+                                      HYPRE_Int          *cf_marker,
+                                      HYPRE_Int           relax_type,
+                                      HYPRE_Int           relax_points,
                                       HYPRE_Real          relax_weight,
                                       HYPRE_Real          omega,
                                       hypre_ParVector    *u,
@@ -109,13 +104,13 @@ HYPRE_Int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
 
    hypre_CSRBlockMatrix *A_diag       = hypre_ParCSRBlockMatrixDiag(A);
    HYPRE_Real           *A_diag_data  = hypre_CSRBlockMatrixData(A_diag);
-   HYPRE_Int                  *A_diag_i     = hypre_CSRBlockMatrixI(A_diag);
-   HYPRE_Int                  *A_diag_j     = hypre_CSRBlockMatrixJ(A_diag);
+   HYPRE_Int            *A_diag_i     = hypre_CSRBlockMatrixI(A_diag);
+   HYPRE_Int            *A_diag_j     = hypre_CSRBlockMatrixJ(A_diag);
 
    hypre_CSRBlockMatrix *A_offd       = hypre_ParCSRBlockMatrixOffd(A);
-   HYPRE_Int                  *A_offd_i     = hypre_CSRBlockMatrixI(A_offd);
+   HYPRE_Int            *A_offd_i     = hypre_CSRBlockMatrixI(A_offd);
    HYPRE_Real           *A_offd_data  = hypre_CSRBlockMatrixData(A_offd);
-   HYPRE_Int                  *A_offd_j     = hypre_CSRBlockMatrixJ(A_offd);
+   HYPRE_Int            *A_offd_j     = hypre_CSRBlockMatrixJ(A_offd);
 
    hypre_ParCSRCommPkg    *comm_pkg = hypre_ParCSRBlockMatrixCommPkg(A);
    hypre_ParCSRCommHandle *comm_handle;
@@ -123,10 +118,10 @@ HYPRE_Int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
    HYPRE_Int             block_size = hypre_CSRBlockMatrixBlockSize(A_diag);
    HYPRE_Int             bnnz = block_size*block_size;
 
-   HYPRE_Int             n_global;
+   HYPRE_BigInt          n_global;
    HYPRE_Int             n             = hypre_CSRBlockMatrixNumRows(A_diag);
    HYPRE_Int             num_cols_offd = hypre_CSRBlockMatrixNumCols(A_offd);
-   HYPRE_Int               first_index = hypre_ParVectorFirstIndex(u);
+   HYPRE_BigInt          first_index = hypre_ParVectorFirstIndex(u);
    
    hypre_Vector   *u_local = hypre_ParVectorLocalVector(u);
    HYPRE_Real     *u_data  = hypre_VectorData(u_local);
@@ -141,16 +136,16 @@ HYPRE_Int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
    
    HYPRE_Real     *tmp_data;
 
-   HYPRE_Int            size, rest, ne, ns;
+   HYPRE_Int       size, rest, ne, ns;
    
 
-   HYPRE_Int             i, j, k;
-   HYPRE_Int             ii, jj;
+   HYPRE_Int       i, j, k;
+   HYPRE_Int       ii, jj;
 
-   HYPRE_Int             relax_error = 0;
-   HYPRE_Int               num_sends;
-   HYPRE_Int               index, start;
-   HYPRE_Int               num_procs, num_threads, my_id;
+   HYPRE_Int       relax_error = 0;
+   HYPRE_Int       num_sends;
+   HYPRE_Int       index, start;
+   HYPRE_Int       num_procs, num_threads, my_id;
  
    HYPRE_Real      *res_vec, *out_vec, *tmp_vec;
    HYPRE_Real      *res0_vec, *res2_vec;
@@ -2042,6 +2037,7 @@ HYPRE_Int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
          
          A_ParCSR =  hypre_ParCSRBlockMatrixConvertToParCSRMatrix(A);
          n_global = hypre_ParCSRMatrixGlobalNumRows(A_ParCSR);
+         HYPRE_Int n_small = (HYPRE_Int) n_global; /* we expect n_global to be small at this point */
 
          /*  Generate CSR matrix from ParCSRMatrix A */
 
@@ -2063,23 +2059,23 @@ HYPRE_Int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
             A_CSR_data = hypre_CSRMatrixData(A_CSR);
             f_vector_data = hypre_VectorData(f_vector);
 
-            A_mat = hypre_CTAlloc(HYPRE_Real,  n_global*n_global, HYPRE_MEMORY_HOST);
-            b_vec = hypre_CTAlloc(HYPRE_Real,  n_global, HYPRE_MEMORY_HOST);    
+            A_mat = hypre_CTAlloc(HYPRE_Real,  n_small*n_small, HYPRE_MEMORY_HOST);
+            b_vec = hypre_CTAlloc(HYPRE_Real,  n_small, HYPRE_MEMORY_HOST);    
 
             /*  Load CSR matrix into A_mat. */
 
 
-            for (i = 0; i < n_global; i++)
+            for (i = 0; i < n_small; i++)
             {
                for (jj = A_CSR_i[i]; jj < A_CSR_i[i+1]; jj++)
                {
                   column = A_CSR_j[jj];
-                  A_mat[i*n_global+column] = A_CSR_data[jj];
+                  A_mat[i*n_small+column] = A_CSR_data[jj];
                }
                b_vec[i] = f_vector_data[i];
             }
 
-            relax_error = gselim_piv(A_mat,b_vec,n_global); 
+            relax_error = gselim_piv(A_mat,b_vec,n_small); 
 
             /* should check the relax error */           
 

@@ -1,17 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -32,16 +24,16 @@ hypre_ParCSRMatrixScaledNorm( hypre_ParCSRMatrix *A, HYPRE_Real *scnorm)
    hypre_ParCSRCommPkg	*comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    MPI_Comm		 comm = hypre_ParCSRMatrixComm(A);
    hypre_CSRMatrix      *diag   = hypre_ParCSRMatrixDiag(A);
-   HYPRE_Int			*diag_i = hypre_CSRMatrixI(diag);
-   HYPRE_Int			*diag_j = hypre_CSRMatrixJ(diag);
+   HYPRE_Int		*diag_i = hypre_CSRMatrixI(diag);
+   HYPRE_Int		*diag_j = hypre_CSRMatrixJ(diag);
    HYPRE_Real		*diag_data = hypre_CSRMatrixData(diag);
    hypre_CSRMatrix      *offd   = hypre_ParCSRMatrixOffd(A);
-   HYPRE_Int			*offd_i = hypre_CSRMatrixI(offd);
-   HYPRE_Int			*offd_j = hypre_CSRMatrixJ(offd);
+   HYPRE_Int		*offd_i = hypre_CSRMatrixI(offd);
+   HYPRE_Int		*offd_j = hypre_CSRMatrixJ(offd);
    HYPRE_Real		*offd_data = hypre_CSRMatrixData(offd);
-   HYPRE_Int         		 global_num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
-   HYPRE_Int	                *row_starts = hypre_ParCSRMatrixRowStarts(A);
-   HYPRE_Int			 num_rows = hypre_CSRMatrixNumRows(diag);
+   HYPRE_BigInt     	 global_num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
+   HYPRE_BigInt	        *row_starts = hypre_ParCSRMatrixRowStarts(A);
+   HYPRE_Int		 num_rows = hypre_CSRMatrixNumRows(diag);
 
    hypre_ParVector      *dinvsqrt;
    HYPRE_Real		*dis_data;

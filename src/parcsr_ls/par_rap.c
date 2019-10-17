@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_utilities.h"
@@ -61,8 +56,8 @@ hypre_ExchangeRAPData( hypre_CSRMatrix *RAP_int,
                        hypre_ParCSRCommPkg *comm_pkg_RT)
 {
    HYPRE_Int     *RAP_int_i;
-   HYPRE_Int     *RAP_int_j = NULL;
-   HYPRE_Real  *RAP_int_data = NULL;
+   HYPRE_BigInt  *RAP_int_j = NULL;
+   HYPRE_Real    *RAP_int_data = NULL;
    HYPRE_Int     num_cols = 0;
 
    MPI_Comm comm = hypre_ParCSRCommPkgComm(comm_pkg_RT);
@@ -76,7 +71,7 @@ hypre_ExchangeRAPData( hypre_CSRMatrix *RAP_int,
    hypre_CSRMatrix *RAP_ext;
 
    HYPRE_Int     *RAP_ext_i;
-   HYPRE_Int     *RAP_ext_j = NULL;
+   HYPRE_BigInt  *RAP_ext_j = NULL;
    HYPRE_Real  *RAP_ext_data = NULL;
 
    hypre_ParCSRCommHandle *comm_handle = NULL;
@@ -105,7 +100,7 @@ hypre_ExchangeRAPData( hypre_CSRMatrix *RAP_int,
    if (num_recvs)
    {
         RAP_int_i = hypre_CSRMatrixI(RAP_int);
-        RAP_int_j = hypre_CSRMatrixJ(RAP_int);
+        RAP_int_j = hypre_CSRMatrixBigJ(RAP_int);
         RAP_int_data = hypre_CSRMatrixData(RAP_int);
         num_cols = hypre_CSRMatrixNumCols(RAP_int);
    }
@@ -156,8 +151,8 @@ hypre_ExchangeRAPData( hypre_CSRMatrix *RAP_int,
    num_nonzeros = RAP_ext_i[num_rows];
    if (num_nonzeros)
    {
-      RAP_ext_j = hypre_TAlloc(HYPRE_Int,  num_nonzeros, HYPRE_MEMORY_HOST);
-      RAP_ext_data = hypre_TAlloc(HYPRE_Real,  num_nonzeros, HYPRE_MEMORY_HOST);
+      RAP_ext_j = hypre_TAlloc(HYPRE_BigInt, num_nonzeros, HYPRE_MEMORY_HOST);
+      RAP_ext_data = hypre_TAlloc(HYPRE_Real, num_nonzeros, HYPRE_MEMORY_HOST);
    }
 
    for (i=0; i < num_sends+1; i++)
@@ -173,14 +168,14 @@ hypre_ExchangeRAPData( hypre_CSRMatrix *RAP_int,
    hypre_ParCSRCommHandleDestroy(comm_handle);
    comm_handle = NULL;
 
-   comm_handle = hypre_ParCSRCommHandleCreate(11,tmp_comm_pkg,RAP_int_j,
+   comm_handle = hypre_ParCSRCommHandleCreate(21,tmp_comm_pkg,RAP_int_j,
                                         RAP_ext_j);
    RAP_ext = hypre_CSRMatrixCreate(num_rows,num_cols,num_nonzeros);
 
    hypre_CSRMatrixI(RAP_ext) = RAP_ext_i;
    if (num_nonzeros)
    {
-      hypre_CSRMatrixJ(RAP_ext) = RAP_ext_j;
+      hypre_CSRMatrixBigJ(RAP_ext) = RAP_ext_j;
       hypre_CSRMatrixData(RAP_ext) = RAP_ext_data;
    }
 
@@ -224,26 +219,26 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
 
    hypre_CSRMatrix *RT_diag = hypre_ParCSRMatrixDiag(RT);
    hypre_CSRMatrix *RT_offd = hypre_ParCSRMatrixOffd(RT);
-   HYPRE_Int             num_cols_diag_RT = hypre_CSRMatrixNumCols(RT_diag);
-   HYPRE_Int             num_cols_offd_RT = hypre_CSRMatrixNumCols(RT_offd);
-   HYPRE_Int             num_rows_offd_RT = hypre_CSRMatrixNumRows(RT_offd);
+   HYPRE_Int        num_cols_diag_RT = hypre_CSRMatrixNumCols(RT_diag);
+   HYPRE_Int        num_cols_offd_RT = hypre_CSRMatrixNumCols(RT_offd);
+   HYPRE_Int        num_rows_offd_RT = hypre_CSRMatrixNumRows(RT_offd);
    hypre_ParCSRCommPkg   *comm_pkg_RT = hypre_ParCSRMatrixCommPkg(RT);
-   HYPRE_Int             num_recvs_RT = 0;
-   HYPRE_Int             num_sends_RT = 0;
-   HYPRE_Int             *send_map_starts_RT;
-   HYPRE_Int             *send_map_elmts_RT;
+   HYPRE_Int        num_recvs_RT = 0;
+   HYPRE_Int        num_sends_RT = 0;
+   HYPRE_Int       *send_map_starts_RT;
+   HYPRE_Int       *send_map_elmts_RT;
 
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
    
    HYPRE_Real      *A_diag_data = hypre_CSRMatrixData(A_diag);
-   HYPRE_Int             *A_diag_i = hypre_CSRMatrixI(A_diag);
-   HYPRE_Int             *A_diag_j = hypre_CSRMatrixJ(A_diag);
+   HYPRE_Int       *A_diag_i = hypre_CSRMatrixI(A_diag);
+   HYPRE_Int       *A_diag_j = hypre_CSRMatrixJ(A_diag);
 
    hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
    
    HYPRE_Real      *A_offd_data = hypre_CSRMatrixData(A_offd);
-   HYPRE_Int             *A_offd_i = hypre_CSRMatrixI(A_offd);
-   HYPRE_Int             *A_offd_j = hypre_CSRMatrixJ(A_offd);
+   HYPRE_Int       *A_offd_i = hypre_CSRMatrixI(A_offd);
+   HYPRE_Int       *A_offd_j = hypre_CSRMatrixJ(A_offd);
 
    HYPRE_Int  num_cols_diag_A = hypre_CSRMatrixNumCols(A_diag);
    HYPRE_Int  num_cols_offd_A = hypre_CSRMatrixNumCols(A_offd);
@@ -251,72 +246,72 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
    hypre_CSRMatrix *P_diag = hypre_ParCSRMatrixDiag(P);
    
    HYPRE_Real      *P_diag_data = hypre_CSRMatrixData(P_diag);
-   HYPRE_Int             *P_diag_i = hypre_CSRMatrixI(P_diag);
-   HYPRE_Int             *P_diag_j = hypre_CSRMatrixJ(P_diag);
+   HYPRE_Int       *P_diag_i = hypre_CSRMatrixI(P_diag);
+   HYPRE_Int       *P_diag_j = hypre_CSRMatrixJ(P_diag);
 
    hypre_CSRMatrix *P_offd = hypre_ParCSRMatrixOffd(P);
-   HYPRE_Int             *col_map_offd_P = hypre_ParCSRMatrixColMapOffd(P);
+   HYPRE_BigInt    *col_map_offd_P = hypre_ParCSRMatrixColMapOffd(P);
    
    HYPRE_Real      *P_offd_data = hypre_CSRMatrixData(P_offd);
-   HYPRE_Int             *P_offd_i = hypre_CSRMatrixI(P_offd);
-   HYPRE_Int             *P_offd_j = hypre_CSRMatrixJ(P_offd);
+   HYPRE_Int       *P_offd_i = hypre_CSRMatrixI(P_offd);
+   HYPRE_Int       *P_offd_j = hypre_CSRMatrixJ(P_offd);
 
-   HYPRE_Int  first_col_diag_P = hypre_ParCSRMatrixFirstColDiag(P);
-   HYPRE_Int  last_col_diag_P;
+   HYPRE_BigInt  first_col_diag_P = hypre_ParCSRMatrixFirstColDiag(P);
+   HYPRE_BigInt  last_col_diag_P;
    HYPRE_Int  num_cols_diag_P = hypre_CSRMatrixNumCols(P_diag);
    HYPRE_Int  num_cols_offd_P = hypre_CSRMatrixNumCols(P_offd);
-   HYPRE_Int *coarse_partitioning = hypre_ParCSRMatrixColStarts(P);
-   HYPRE_Int *RT_partitioning = hypre_ParCSRMatrixColStarts(RT);
+   HYPRE_BigInt *coarse_partitioning = hypre_ParCSRMatrixColStarts(P);
+   HYPRE_BigInt *RT_partitioning = hypre_ParCSRMatrixColStarts(RT);
 
    hypre_ParCSRMatrix *RAP;
-   HYPRE_Int                *col_map_offd_RAP = NULL;
-   HYPRE_Int                *new_col_map_offd_RAP = NULL;
+   HYPRE_BigInt       *col_map_offd_RAP = NULL;
+   HYPRE_BigInt       *new_col_map_offd_RAP = NULL;
 
    hypre_CSRMatrix *RAP_int = NULL;
 
    HYPRE_Real      *RAP_int_data;
-   HYPRE_Int             *RAP_int_i;
-   HYPRE_Int             *RAP_int_j;
+   HYPRE_Int       *RAP_int_i;
+   HYPRE_BigInt    *RAP_int_j;
 
    hypre_CSRMatrix *RAP_ext;
 
    HYPRE_Real      *RAP_ext_data = NULL;
-   HYPRE_Int             *RAP_ext_i = NULL;
-   HYPRE_Int             *RAP_ext_j = NULL;
+   HYPRE_Int       *RAP_ext_i = NULL;
+   HYPRE_BigInt    *RAP_ext_j = NULL;
 
    hypre_CSRMatrix *RAP_diag;
 
    HYPRE_Real      *RAP_diag_data;
-   HYPRE_Int             *RAP_diag_i;
-   HYPRE_Int             *RAP_diag_j;
+   HYPRE_Int       *RAP_diag_i;
+   HYPRE_Int       *RAP_diag_j;
 
    hypre_CSRMatrix *RAP_offd;
 
    HYPRE_Real      *RAP_offd_data = NULL;
-   HYPRE_Int             *RAP_offd_i = NULL;
-   HYPRE_Int             *RAP_offd_j = NULL;
+   HYPRE_Int       *RAP_offd_i = NULL;
+   HYPRE_Int       *RAP_offd_j = NULL;
 
-   HYPRE_Int              RAP_size;
-   HYPRE_Int              RAP_ext_size;
-   HYPRE_Int              RAP_diag_size;
-   HYPRE_Int              RAP_offd_size;
-   HYPRE_Int              P_ext_diag_size;
-   HYPRE_Int              P_ext_offd_size;
-   HYPRE_Int              first_col_diag_RAP;
-   HYPRE_Int              last_col_diag_RAP;
-   HYPRE_Int              num_cols_offd_RAP = 0;
+   HYPRE_Int        RAP_size;
+   HYPRE_Int        RAP_ext_size;
+   HYPRE_Int        RAP_diag_size;
+   HYPRE_Int        RAP_offd_size;
+   HYPRE_Int        P_ext_diag_size;
+   HYPRE_Int        P_ext_offd_size;
+   HYPRE_BigInt     first_col_diag_RAP;
+   HYPRE_BigInt     last_col_diag_RAP;
+   HYPRE_Int        num_cols_offd_RAP = 0;
    
    hypre_CSRMatrix *R_diag;
    
    HYPRE_Real      *R_diag_data;
-   HYPRE_Int             *R_diag_i;
-   HYPRE_Int             *R_diag_j;
+   HYPRE_Int       *R_diag_i;
+   HYPRE_Int       *R_diag_j;
 
    hypre_CSRMatrix *R_offd;
    
    HYPRE_Real      *R_offd_data;
-   HYPRE_Int             *R_offd_i;
-   HYPRE_Int             *R_offd_j;
+   HYPRE_Int       *R_offd_i;
+   HYPRE_Int       *R_offd_j;
 
    HYPRE_Real *RA_diag_data_array = NULL;
    HYPRE_Int *RA_diag_j_array = NULL;
@@ -326,44 +321,45 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
    hypre_CSRMatrix *Ps_ext;
    
    HYPRE_Real      *Ps_ext_data;
-   HYPRE_Int             *Ps_ext_i;
-   HYPRE_Int             *Ps_ext_j;
+   HYPRE_Int       *Ps_ext_i;
+   HYPRE_BigInt    *Ps_ext_j;
 
    HYPRE_Real      *P_ext_diag_data = NULL;
-   HYPRE_Int             *P_ext_diag_i = NULL;
-   HYPRE_Int             *P_ext_diag_j = NULL;
+   HYPRE_Int       *P_ext_diag_i = NULL;
+   HYPRE_Int       *P_ext_diag_j = NULL;
 
    HYPRE_Real      *P_ext_offd_data = NULL;
-   HYPRE_Int             *P_ext_offd_i = NULL;
-   HYPRE_Int             *P_ext_offd_j = NULL;
+   HYPRE_Int       *P_ext_offd_i = NULL;
+   HYPRE_Int       *P_ext_offd_j = NULL;
+   HYPRE_BigInt    *P_big_offd_j = NULL;
 
-   HYPRE_Int             *col_map_offd_Pext;
-   HYPRE_Int             *map_P_to_Pext = NULL;
-   HYPRE_Int             *map_P_to_RAP = NULL;
-   HYPRE_Int             *map_Pext_to_RAP = NULL;
+   HYPRE_BigInt    *col_map_offd_Pext;
+   HYPRE_Int       *map_P_to_Pext = NULL;
+   HYPRE_Int       *map_P_to_RAP = NULL;
+   HYPRE_Int       *map_Pext_to_RAP = NULL;
 
-   HYPRE_Int             *P_marker;
-   HYPRE_Int            **P_mark_array;
-   HYPRE_Int            **A_mark_array;
-   HYPRE_Int             *A_marker;
-   HYPRE_Int             *temp;
+   HYPRE_Int       *P_marker;
+   HYPRE_Int      **P_mark_array;
+   HYPRE_Int      **A_mark_array;
+   HYPRE_Int       *A_marker;
+   HYPRE_BigInt    *temp;
 
-   HYPRE_Int              n_coarse, n_coarse_RT;
-   HYPRE_Int              square = 1;
-   HYPRE_Int              num_cols_offd_Pext = 0;
+   HYPRE_BigInt     n_coarse, n_coarse_RT;
+   HYPRE_Int        square = 1;
+   HYPRE_Int        num_cols_offd_Pext = 0;
    
-   HYPRE_Int              ic, i, j, k;
-   HYPRE_Int              i1, i2, i3, ii, ns, ne, size, rest;
-   HYPRE_Int              cnt = 0; /*value; */
-   HYPRE_Int              jj1, jj2, jj3, jcol;
+   HYPRE_Int        ic, i, j, k;
+   HYPRE_Int        i1, i2, i3, ii, ns, ne, size, rest;
+   HYPRE_Int        cnt = 0; /*value; */
+   HYPRE_Int        jj1, jj2, jj3, jcol;
    
-   HYPRE_Int             *jj_count, *jj_cnt_diag, *jj_cnt_offd;
-   HYPRE_Int              jj_counter, jj_count_diag, jj_count_offd;
-   HYPRE_Int              jj_row_begining, jj_row_begin_diag, jj_row_begin_offd;
-   HYPRE_Int              start_indexing = 0; /* start indexing for RAP_data at 0 */
-   HYPRE_Int              num_nz_cols_A;
-   HYPRE_Int              num_procs;
-   HYPRE_Int              num_threads;
+   HYPRE_Int       *jj_count, *jj_cnt_diag, *jj_cnt_offd;
+   HYPRE_Int        jj_counter, jj_count_diag, jj_count_offd;
+   HYPRE_Int        jj_row_begining, jj_row_begin_diag, jj_row_begin_offd;
+   HYPRE_Int        start_indexing = 0; /* start indexing for RAP_data at 0 */
+   HYPRE_Int        num_nz_cols_A;
+   HYPRE_Int        num_procs;
+   HYPRE_Int        num_threads;
 
    HYPRE_Real       r_entry;
    HYPRE_Real       r_a_product;
@@ -489,7 +485,7 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
          send_map_elmts_RT_aggregated[offset] = i;
       }
    }
-#endif /* HYPRE_CONCURRENT_HOPSCOTCH */
+#endif  /* HYPRE_CONCURRENT_HOPSCOTCH */
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_RENUMBER_COLIDX] -= hypre_MPI_Wtime();
@@ -501,7 +497,7 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
         Ps_ext = hypre_ParCSRMatrixExtractBExt(P,A,1);
         Ps_ext_data = hypre_CSRMatrixData(Ps_ext);
         Ps_ext_i    = hypre_CSRMatrixI(Ps_ext);
-        Ps_ext_j    = hypre_CSRMatrixJ(Ps_ext);
+        Ps_ext_j    = hypre_CSRMatrixBigJ(Ps_ext);
    }
 
    P_ext_diag_i = hypre_TAlloc(HYPRE_Int, num_cols_offd_A+1, HYPRE_MEMORY_HOST);
@@ -510,14 +506,14 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
    P_ext_offd_i[0] = 0;
    P_ext_diag_size = 0;
    P_ext_offd_size = 0;
-   last_col_diag_P = first_col_diag_P + num_cols_diag_P - 1;
+   last_col_diag_P = first_col_diag_P + (HYPRE_BigInt) num_cols_diag_P - 1;
 
    /*HYPRE_Int prefix_sum_workspace[2*(num_threads + 1)];*/
    prefix_sum_workspace = hypre_TAlloc(HYPRE_Int,  2*(num_threads + 1), HYPRE_MEMORY_HOST);
 
-#ifdef HYPRE_USING_OPENMP
+#ifdef HYPRE_USING_OPENMP 
 #pragma omp parallel private(i,j)
-#endif
+#endif /* This threading causes problem, maybe the prefix_sum in combination with BigInt? */
    {
       HYPRE_Int i_begin, i_end;
       hypre_GetSimpleThreadPartition(&i_begin, &i_end, num_cols_offd_A);
@@ -548,7 +544,9 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
          if (P_ext_offd_size)
          {
             P_ext_offd_j = hypre_CTAlloc(HYPRE_Int,  P_ext_offd_size, HYPRE_MEMORY_HOST);
+            P_big_offd_j = hypre_CTAlloc(HYPRE_BigInt,  P_ext_offd_size, HYPRE_MEMORY_HOST);
             P_ext_offd_data = hypre_CTAlloc(HYPRE_Real,  P_ext_offd_size, HYPRE_MEMORY_HOST);
+            //temp = hypre_CTAlloc(HYPRE_BigInt,  P_ext_offd_size+num_cols_offd_P, HYPRE_MEMORY_HOST);
          }
       }
 #ifdef HYPRE_USING_OPENMP
@@ -559,14 +557,17 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
       {
          for (j=Ps_ext_i[i]; j < Ps_ext_i[i+1]; j++)
          {
-            if (Ps_ext_j[j] < first_col_diag_P || Ps_ext_j[j] > last_col_diag_P)
+            HYPRE_BigInt value = Ps_ext_j[j];
+            if (value < first_col_diag_P || value > last_col_diag_P)
             {
-               P_ext_offd_j[P_ext_offd_size_private] = Ps_ext_j[j];
+               //Ps_ext_j[P_ext_offd_size_private] = value;
+               //temp[P_ext_offd_size_private] = value;
+               P_big_offd_j[P_ext_offd_size_private] = value;
                P_ext_offd_data[P_ext_offd_size_private++] = Ps_ext_data[j];
             }
             else
             {
-               P_ext_diag_j[P_ext_diag_size_private] = Ps_ext_j[j] - first_col_diag_P;
+               P_ext_diag_j[P_ext_diag_size_private] = (HYPRE_Int)(Ps_ext_j[j] - first_col_diag_P);
                P_ext_diag_data[P_ext_diag_size_private++] = Ps_ext_data[j];
             }
          }
@@ -581,56 +582,60 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
       hypre_CSRMatrixDestroy(Ps_ext);
       Ps_ext = NULL;
    }
-
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
    if (P_ext_offd_size || num_cols_offd_P)
    {
-      hypre_UnorderedIntSet found_set;
-      hypre_UnorderedIntSetCreate(&found_set, P_ext_offd_size + num_cols_offd_P, 16*hypre_NumThreads());
+      hypre_UnorderedBigIntSet found_set;
+      hypre_UnorderedBigIntSetCreate(&found_set, P_ext_offd_size + num_cols_offd_P, 16*hypre_NumThreads());
 
 #pragma omp parallel private(i)
       {
 #pragma omp for HYPRE_SMP_SCHEDULE
          for (i = 0; i < P_ext_offd_size; i++)
          {
-            hypre_UnorderedIntSetPut(&found_set, P_ext_offd_j[i]);
+            //hypre_UnorderedBigIntSetPut(&found_set, Ps_ext_j[i]);
+            hypre_UnorderedBigIntSetPut(&found_set, P_big_offd_j[i]);
          }
 
 #pragma omp for HYPRE_SMP_SCHEDULE
          for (i = 0; i < num_cols_offd_P; i++)
          {
-            hypre_UnorderedIntSetPut(&found_set, col_map_offd_P[i]);
+            hypre_UnorderedBigIntSetPut(&found_set, col_map_offd_P[i]);
          }
-      } /* omp parallel */
+      }  /* omp parallel */
 
-      temp = hypre_UnorderedIntSetCopyToArray(&found_set, &num_cols_offd_Pext);
-      hypre_UnorderedIntSetDestroy(&found_set);
+ /* Warning on getting temp right !!!!! */
 
-      hypre_UnorderedIntMap col_map_offd_Pext_inverse;
-      hypre_sort_and_create_inverse_map(temp, num_cols_offd_Pext, &col_map_offd_Pext, &col_map_offd_Pext_inverse);
+      temp = hypre_UnorderedBigIntSetCopyToArray(&found_set, &num_cols_offd_Pext);
+      hypre_UnorderedBigIntSetDestroy(&found_set);
+
+      hypre_UnorderedBigIntMap col_map_offd_Pext_inverse;
+      hypre_big_sort_and_create_inverse_map(temp, num_cols_offd_Pext, &col_map_offd_Pext, &col_map_offd_Pext_inverse);
 
 #pragma omp parallel for HYPRE_SMP_SCHEDULE
       for (i=0 ; i < P_ext_offd_size; i++)
-         P_ext_offd_j[i] = hypre_UnorderedIntMapGet(&col_map_offd_Pext_inverse, P_ext_offd_j[i]);
-      if (num_cols_offd_Pext) hypre_UnorderedIntMapDestroy(&col_map_offd_Pext_inverse);
+         //Ps_ext_j[i] = hypre_UnorderedBigIntMapGet(&col_map_offd_Pext_inverse, Ps_ext_j[i]);
+         P_ext_offd_j[i] = hypre_UnorderedBigIntMapGet(&col_map_offd_Pext_inverse, P_big_offd_j[i]);
+      if (num_cols_offd_Pext) hypre_UnorderedBigIntMapDestroy(&col_map_offd_Pext_inverse);
    }
 #else /* !HYPRE_CONCURRENT_HOPSCOTCH */
    if (P_ext_offd_size || num_cols_offd_P)
    {
-      temp = hypre_CTAlloc(HYPRE_Int,  P_ext_offd_size+num_cols_offd_P, HYPRE_MEMORY_HOST);
+      temp = hypre_CTAlloc(HYPRE_BigInt,  P_ext_offd_size+num_cols_offd_P, HYPRE_MEMORY_HOST);
       for (i=0; i < P_ext_offd_size; i++)
-         temp[i] = P_ext_offd_j[i];
+         //Ps_ext_j[i] = temp[i]; 
+         //temp[i] = Ps_ext_j[i]; 
+         temp[i] = P_big_offd_j[i]; 
       cnt = P_ext_offd_size;
       for (i=0; i < num_cols_offd_P; i++)
          temp[cnt++] = col_map_offd_P[i];
    }
    if (cnt)
    {
-      HYPRE_Int value;
-      hypre_qsort0(temp, 0, cnt-1);
+      hypre_BigQsort0(temp, 0, cnt-1);
 
       num_cols_offd_Pext = 1;
-      value = temp[0];
+      HYPRE_BigInt value = temp[0];
       for (i=1; i < cnt; i++)
       {
          if (temp[i] > value)
@@ -642,7 +647,7 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
    }
  
    if (num_cols_offd_Pext)
-        col_map_offd_Pext = hypre_CTAlloc(HYPRE_Int, num_cols_offd_Pext, HYPRE_MEMORY_HOST);
+        col_map_offd_Pext = hypre_CTAlloc(HYPRE_BigInt, num_cols_offd_Pext, HYPRE_MEMORY_HOST);
 
    for (i=0; i < num_cols_offd_Pext; i++)
       col_map_offd_Pext[i] = temp[i];
@@ -650,11 +655,22 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
    if (P_ext_offd_size || num_cols_offd_P)
       hypre_TFree(temp, HYPRE_MEMORY_HOST);
 
+   /*if (P_ext_offd_size)
+      P_ext_offd_j = hypre_CTAlloc(HYPRE_Int,  P_ext_offd_size, HYPRE_MEMORY_HOST);*/
    for (i=0 ; i < P_ext_offd_size; i++)
-      P_ext_offd_j[i] = hypre_BinarySearch(col_map_offd_Pext,
-                                           P_ext_offd_j[i],
+      P_ext_offd_j[i] = hypre_BigBinarySearch(col_map_offd_Pext,
+                                           //Ps_ext_j[i],
+                                           P_big_offd_j[i],
                                            num_cols_offd_Pext);
 #endif /* !HYPRE_CONCURRENT_HOPSCOTCH */
+
+   if (P_ext_offd_size)
+      hypre_TFree(P_big_offd_j, HYPRE_MEMORY_HOST);
+   /*if (num_procs > 1) 
+   {
+      hypre_CSRMatrixDestroy(Ps_ext);
+      Ps_ext = NULL;
+   }*/
 
    if (num_cols_offd_P)
    {
@@ -885,7 +901,7 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
    RAP_size = jj_count[num_threads-1];
    RAP_int_i = hypre_CTAlloc(HYPRE_Int,  num_cols_offd_RT+1, HYPRE_MEMORY_HOST);
    RAP_int_data = hypre_CTAlloc(HYPRE_Real,  RAP_size, HYPRE_MEMORY_HOST);
-   RAP_int_j    = hypre_CTAlloc(HYPRE_Int,  RAP_size, HYPRE_MEMORY_HOST);
+   RAP_int_j    = hypre_CTAlloc(HYPRE_BigInt,  RAP_size, HYPRE_MEMORY_HOST);
 
    RAP_int_i[num_cols_offd_RT] = RAP_size;
 
@@ -991,7 +1007,7 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
                   {
                      P_marker[i3] = jj_counter;
                      RAP_int_data[jj_counter] = r_a_p_product;
-                     RAP_int_j[jj_counter] = i3 + first_col_diag_P;
+                     RAP_int_j[jj_counter] = (HYPRE_BigInt)i3 + first_col_diag_P;
                      jj_counter++;
                   }
                   else
@@ -1090,7 +1106,7 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
                   {
                      P_marker[i3] = jj_counter;
                      RAP_int_data[jj_counter] = r_a_p_product;
-                     RAP_int_j[jj_counter] = i3 + first_col_diag_P;
+                     RAP_int_j[jj_counter] = (HYPRE_BigInt)i3 + first_col_diag_P;
                      jj_counter++;
                   }
                   else
@@ -1154,7 +1170,7 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
 
    RAP_int = hypre_CSRMatrixCreate(num_cols_offd_RT,num_rows_offd_RT,RAP_size);
    hypre_CSRMatrixI(RAP_int) = RAP_int_i;
-   hypre_CSRMatrixJ(RAP_int) = RAP_int_j;
+   hypre_CSRMatrixBigJ(RAP_int) = RAP_int_j;
    hypre_CSRMatrixData(RAP_int) = RAP_int_data;
    hypre_TFree(jj_count, HYPRE_MEMORY_HOST);
   }
@@ -1169,7 +1185,7 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
    {
         RAP_ext = hypre_ExchangeRAPData(RAP_int,comm_pkg_RT);
         RAP_ext_i = hypre_CSRMatrixI(RAP_ext);
-        RAP_ext_j = hypre_CSRMatrixJ(RAP_ext);
+        RAP_ext_j = hypre_CSRMatrixBigJ(RAP_ext);
         RAP_ext_data = hypre_CSRMatrixData(RAP_ext);
         RAP_ext_size = RAP_ext_i[hypre_CSRMatrixNumRows(RAP_ext)];
    }
@@ -1190,11 +1206,11 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
     *-----------------------------------------------------------------------*/
 
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
-   hypre_UnorderedIntMap col_map_offd_RAP_inverse;
+   hypre_UnorderedBigIntMap col_map_offd_RAP_inverse;
    if (RAP_ext_size || num_cols_offd_Pext)
    {
-      hypre_UnorderedIntSet found_set;
-      hypre_UnorderedIntSetCreate(&found_set, 2*(RAP_ext_size + num_cols_offd_Pext), 16*hypre_NumThreads());
+      hypre_UnorderedBigIntSet found_set;
+      hypre_UnorderedBigIntSetCreate(&found_set, 2*(RAP_ext_size + num_cols_offd_Pext), 16*hypre_NumThreads());
       cnt = 0;
 
 #pragma omp parallel private(i)
@@ -1204,25 +1220,24 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
          {
             if (RAP_ext_j[i] < first_col_diag_RAP 
                            || RAP_ext_j[i] > last_col_diag_RAP)
-               hypre_UnorderedIntSetPut(&found_set, RAP_ext_j[i]);
+               hypre_UnorderedBigIntSetPut(&found_set, RAP_ext_j[i]);
          }
 
 #pragma omp for HYPRE_SMP_SCHEDULE
          for (i = 0; i < num_cols_offd_Pext; i++)
          {
-            hypre_UnorderedIntSetPut(&found_set, col_map_offd_Pext[i]);
+            hypre_UnorderedBigIntSetPut(&found_set, col_map_offd_Pext[i]);
          }
       } /* omp parallel */
 
-      temp = hypre_UnorderedIntSetCopyToArray(&found_set, &num_cols_offd_RAP);
-      hypre_UnorderedIntSetDestroy(&found_set);
-      hypre_sort_and_create_inverse_map(temp, num_cols_offd_RAP, &col_map_offd_RAP, &col_map_offd_RAP_inverse);
-      // num_cols_offd_RAP <= RAP_ext_size + num_cols_offd_Pext
+      temp = hypre_UnorderedBigIntSetCopyToArray(&found_set, &num_cols_offd_RAP);
+      hypre_UnorderedBigIntSetDestroy(&found_set);
+      hypre_big_sort_and_create_inverse_map(temp, num_cols_offd_RAP, &col_map_offd_RAP, &col_map_offd_RAP_inverse);
    }
 #else /* !HYPRE_CONCURRENT_HOPSCOTCH */
    if (RAP_ext_size || num_cols_offd_Pext)
    {
-      temp = hypre_CTAlloc(HYPRE_Int, RAP_ext_size+num_cols_offd_Pext, HYPRE_MEMORY_HOST);
+      temp = hypre_CTAlloc(HYPRE_BigInt, RAP_ext_size+num_cols_offd_Pext, HYPRE_MEMORY_HOST);
       cnt = 0;
       for (i=0; i < RAP_ext_size; i++)
          if (RAP_ext_j[i] < first_col_diag_RAP 
@@ -1234,9 +1249,8 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
 
       if (cnt)
       {
-         HYPRE_Int value;
-         hypre_qsort0(temp,0,cnt-1);
-         value = temp[0];
+         hypre_BigQsort0(temp,0,cnt-1);
+         HYPRE_BigInt value = temp[0];
          num_cols_offd_RAP = 1;
          for (i=1; i < cnt; i++)
          {
@@ -1250,7 +1264,7 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
 
    /* now evaluate col_map_offd_RAP */
       if (num_cols_offd_RAP)
-         col_map_offd_RAP = hypre_CTAlloc(HYPRE_Int,  num_cols_offd_RAP, HYPRE_MEMORY_HOST);
+         col_map_offd_RAP = hypre_CTAlloc(HYPRE_BigInt,  num_cols_offd_RAP, HYPRE_MEMORY_HOST);
 
       for (i=0 ; i < num_cols_offd_RAP; i++)
          col_map_offd_RAP[i] = temp[i];
@@ -1295,19 +1309,18 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
    for (i=0; i < RAP_ext_size; i++)
       if (RAP_ext_j[i] < first_col_diag_RAP 
                         || RAP_ext_j[i] > last_col_diag_RAP)
-            RAP_ext_j[i] = num_cols_diag_P
+            RAP_ext_j[i] = (HYPRE_BigInt)num_cols_diag_P
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
-                                + hypre_UnorderedIntMapGet(&col_map_offd_RAP_inverse, RAP_ext_j[i]);
+               +(HYPRE_BigInt)hypre_UnorderedBigIntMapGet(&col_map_offd_RAP_inverse, RAP_ext_j[i]);
 #else
-                                + hypre_BinarySearch(col_map_offd_RAP,
-                                                RAP_ext_j[i],num_cols_offd_RAP);
+               +(HYPRE_BigInt)hypre_BigBinarySearch(col_map_offd_RAP, RAP_ext_j[i],num_cols_offd_RAP);
 #endif
       else
             RAP_ext_j[i] -= first_col_diag_RAP;
 
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
    if (num_cols_offd_RAP)
-      hypre_UnorderedIntMapDestroy(&col_map_offd_RAP_inverse);
+      hypre_UnorderedBigIntMapDestroy(&col_map_offd_RAP_inverse);
 #endif
 
 #ifdef HYPRE_PROFILE
@@ -1385,7 +1398,7 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
               HYPRE_Int jj = send_map_elmts_RT_aggregated[j];
               for (k=RAP_ext_i[jj]; k < RAP_ext_i[jj+1]; k++)
               {
-                 jcol = RAP_ext_j[k];
+                 jcol = (HYPRE_Int)RAP_ext_j[k];
                  if (jcol < num_cols_diag_P)
                  {
                       if (P_marker[jcol] < jj_row_begin_diag)
@@ -1413,7 +1426,7 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
             {
                 for (k=RAP_ext_i[j]; k < RAP_ext_i[j+1]; k++)
                 {
-                   jcol = RAP_ext_j[k];
+                   jcol = (HYPRE_Int) RAP_ext_j[k];
                    if (jcol < num_cols_diag_P)
                    {
                         if (P_marker[jcol] < jj_row_begin_diag)
@@ -1731,7 +1744,7 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
               HYPRE_Int jj = send_map_elmts_RT_aggregated[j];
               for (k=RAP_ext_i[jj]; k < RAP_ext_i[jj+1]; k++)
               {
-                 jcol = RAP_ext_j[k];
+                 jcol = (HYPRE_Int)RAP_ext_j[k];
                  if (jcol < num_cols_diag_P)
                  {
                       if (P_marker[jcol] < jj_row_begin_diag)
@@ -1772,7 +1785,7 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
             {
                 for (k=RAP_ext_i[j]; k < RAP_ext_i[j+1]; k++)
                 {
-                   jcol = RAP_ext_j[k];
+                   jcol = (HYPRE_Int)RAP_ext_j[k];
                    if (jcol < num_cols_diag_P)
                    {
                         if (P_marker[jcol] < jj_row_begin_diag)
@@ -2052,7 +2065,7 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
 
    if (jj_count_offd < num_cols_offd_RAP)
    {
-      new_col_map_offd_RAP = hypre_CTAlloc(HYPRE_Int, jj_count_offd, HYPRE_MEMORY_HOST);
+      new_col_map_offd_RAP = hypre_CTAlloc(HYPRE_BigInt, jj_count_offd, HYPRE_MEMORY_HOST);
       jj_counter = 0;
       for (i=0; i < num_cols_offd_RAP; i++)
          if (!P_marker[i]) 

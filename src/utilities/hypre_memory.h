@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -17,7 +12,7 @@
  * The abstract memory model has a Host (think CPU) and a Device (think GPU) and
  * three basic types of memory management utilities:
  *
- *    1. Malloc(..., location) 
+ *    1. Malloc(..., location)
  *             location=LOCATION_DEVICE - malloc memory on the device
  *             location=LOCATION_HOST   - malloc memory on the host
  *    2. MemCopy(..., method)
@@ -33,7 +28,7 @@
  * the abstract model would be mapped to specific hardware scenarios:
  *
  *    Not using a device, not using managed memory
- *       Malloc(..., location) 
+ *       Malloc(..., location)
  *             location=LOCATION_DEVICE - host malloc          e.g., malloc
  *             location=LOCATION_HOST   - host malloc          e.g., malloc
  *       MemoryCopy(..., locTo,locFrom)
@@ -42,10 +37,10 @@
  *             locTo=LOCATION_DEVICE, locFrom=LOCATION_DEVICE  - copy from host to host e.g., memcpy
  *       SetExecutionMode
  *             location=LOCATION_DEVICE - execute on the host
- *             location=LOCATION_HOST   - execute on the host    
+ *             location=LOCATION_HOST   - execute on the host
  *
  *    Using a device, not using managed memory
- *       Malloc(..., location) 
+ *       Malloc(..., location)
  *             location=LOCATION_DEVICE - device malloc        e.g., cudaMalloc
  *             location=LOCATION_HOST   - host malloc          e.g., malloc
  *       MemoryCopy(..., locTo,locFrom)
@@ -54,10 +49,10 @@
  *             locTo=LOCATION_DEVICE, locFrom=LOCATION_DEVICE  - copy from device to device e.g., cudaMemcpy
  *       SetExecutionMode
  *             location=LOCATION_DEVICE - execute on the device
- *             location=LOCATION_HOST   - execute on the host 
+ *             location=LOCATION_HOST   - execute on the host
  *
  *    Using a device, using managed memory
- *       Malloc(..., location) 
+ *       Malloc(..., location)
  *             location=LOCATION_DEVICE - managed malloc        e.g., cudaMallocManaged
  *             location=LOCATION_HOST   - host malloc          e.g., malloc
  *       MemoryCopy(..., locTo,locFrom)
@@ -66,7 +61,7 @@
  *             locTo=LOCATION_DEVICE, locFrom=LOCATION_DEVICE  - copy from device to device e.g., cudaMallocManaged
  *       SetExecutionMode
  *             location=LOCATION_DEVICE - execute on the device
- *             location=LOCATION_HOST   - execute on the host 
+ *             location=LOCATION_HOST   - execute on the host
  *
  * Questions:
  *
@@ -90,26 +85,88 @@ extern "C" {
 #define HYPRE_MEMORY_SHARED        ( 2)
 #define HYPRE_MEMORY_HOST_PINNED   ( 3)
 
-#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_CUDA)
-#define HYPRE_CUDA_GLOBAL __host__ __device__
+/*==================================================================
+ *       default def of memory location selected based memory env
+ *   +-------------------------------------------------------------+
+ *   |                           |          HYPRE_MEMORY_*         |
+ *   |        MEM \ LOC          | HOST | DEVICE | SHARED | PINNED |
+ *   |---------------------------+---------------+-----------------|
+ *   | HYPRE_USING_HOST_MEMORY   | HOST | HOST   | HOST   | HOST   |
+ *   |---------------------------+---------------+-------- --------|
+ *   | HYPRE_USING_DEVICE_MEMORY | HOST | DEVICE | DEVICE | PINNED |
+ *   |---------------------------+---------------+-----------------|
+ *   | HYPRE_USING_UNIFIED_MEMORY| HOST | DEVICE | SHARED | PINNED |
+ *   +-------------------------------------------------------------+
+ *==================================================================*/
+
+#if defined(HYPRE_USING_HOST_MEMORY)
+
+/* default memory model without device (host only) */
+#define HYPRE_MEMORY_HOST_ACT         HYPRE_MEMORY_HOST
+#define HYPRE_MEMORY_DEVICE_ACT       HYPRE_MEMORY_HOST
+#define HYPRE_MEMORY_SHARED_ACT       HYPRE_MEMORY_HOST
+#define HYPRE_MEMORY_HOST_PINNED_ACT  HYPRE_MEMORY_HOST
+
+#elif defined(HYPRE_USING_DEVICE_MEMORY)
+
+/* default memory model with device and without unified memory */
+#define HYPRE_MEMORY_HOST_ACT         HYPRE_MEMORY_HOST
+#define HYPRE_MEMORY_DEVICE_ACT       HYPRE_MEMORY_DEVICE
+#define HYPRE_MEMORY_SHARED_ACT       HYPRE_MEMORY_DEVICE
+#define HYPRE_MEMORY_HOST_PINNED_ACT  HYPRE_MEMORY_HOST_PINNED
+
+#elif defined(HYPRE_USING_UNIFIED_MEMORY)
+
+/* default memory model with device and with unified memory */
+#define HYPRE_MEMORY_HOST_ACT         HYPRE_MEMORY_HOST
+#define HYPRE_MEMORY_DEVICE_ACT       HYPRE_MEMORY_DEVICE
+#define HYPRE_MEMORY_SHARED_ACT       HYPRE_MEMORY_SHARED
+#define HYPRE_MEMORY_HOST_PINNED_ACT  HYPRE_MEMORY_HOST_PINNED
+
 #else
-#define HYPRE_CUDA_GLOBAL 
+
+/* default */
+#define HYPRE_MEMORY_HOST_ACT         HYPRE_MEMORY_HOST
+#define HYPRE_MEMORY_DEVICE_ACT       HYPRE_MEMORY_HOST
+#define HYPRE_MEMORY_SHARED_ACT       HYPRE_MEMORY_HOST
+#define HYPRE_MEMORY_HOST_PINNED_ACT  HYPRE_MEMORY_HOST
+
 #endif
 
+/* the above definitions might be overridden to customize a memory location */
+/* #undef  HYPRE_MEMORY_HOST_ACT */
+/* #undef  HYPRE_MEMORY_DEVICE_ACT */
+/* #undef  HYPRE_MEMORY_SHARED_ACT */
+/* #undef  HYPRE_MEMORY_PINNED_ACT */
+/* #define HYPRE_MEMORY_HOST_ACT    HYPRE_MEMORY_? */
+/* #define HYPRE_MEMORY_DEVICE_ACT  HYPRE_MEMORY_? */
+/* #define HYPRE_MEMORY_SHARED_ACT  HYPRE_MEMORY_? */
+/* #define HYPRE_MEMORY_PINNED_ACT  HYPRE_MEMORY_? */
+
+#define HYPRE_MEM_PAD_LEN 1
+
+/*
+#if defined(HYPRE_USING_CUDA)
+#define HYPRE_CUDA_GLOBAL __host__ __device__
+#else
+#define HYPRE_CUDA_GLOBAL
+#endif
+*/
+
 /* OpenMP 4.5 */
-#if defined(HYPRE_USE_OMP45)
+#if defined(HYPRE_USING_DEVICE_OPENMP)
 
 #include "omp.h"
-  
+
 /* stringification:
  * _Pragma(string-literal), so we need to cast argument to a string
- * The three dots as last argument of the macro tells compiler that this is a variadic macro. 
- * I.e. this is a macro that receives variable number of arguments. 
+ * The three dots as last argument of the macro tells compiler that this is a variadic macro.
+ * I.e. this is a macro that receives variable number of arguments.
  */
 #define HYPRE_STR(s...) #s
 #define HYPRE_XSTR(s...) HYPRE_STR(s)
 
-/* OpenMP 4.5 GPU memory management */
+/* OpenMP 4.5 device memory management */
 extern HYPRE_Int hypre__global_offload;
 extern HYPRE_Int hypre__offload_device_num;
 extern HYPRE_Int hypre__offload_host_num;
@@ -124,17 +181,17 @@ extern size_t hypre__target_dtoh_count;
 extern size_t hypre__target_htod_bytes;
 extern size_t hypre__target_dtoh_bytes;
 
-/* DEBUG MODE: check if offloading has effect 
+/* DEBUG MODE: check if offloading has effect
  * (it is turned on when configured with --enable-debug) */
 
 #ifdef HYPRE_OMP45_DEBUG
-/* if we ``enter'' an address, it should not exist in device [o.w NO EFFECT] 
+/* if we ``enter'' an address, it should not exist in device [o.w NO EFFECT]
    if we ``exit'' or ''update'' an address, it should exist in device [o.w ERROR]
 hypre__offload_flag: 0 == OK; 1 == WRONG
  */
 #define HYPRE_OFFLOAD_FLAG(devnum, hptr, type) \
    HYPRE_Int hypre__offload_flag = (type[1] == 'n') == omp_target_is_present(hptr, devnum);
-#else 
+#else
 #define HYPRE_OFFLOAD_FLAG(...) \
    HYPRE_Int hypre__offload_flag = 0; /* non-debug mode, always OK */
 #endif
@@ -150,7 +207,7 @@ hypre__offload_flag: 0 == OK; 1 == WRONG
     */ \
    datatype *hypre__offload_hptr = (datatype *) hptr; \
    /* if hypre__global_offload ==    0, or
-    *    hptr (host pointer)   == NULL, 
+    *    hptr (host pointer)   == NULL,
     *    this offload will be IGNORED */ \
    if (hypre__global_offload && hypre__offload_hptr != NULL) { \
       /* offloading offset and size (in datatype) */ \
@@ -203,14 +260,12 @@ hypre__offload_flag: 0 == OK; 1 == WRONG
    } \
 }
 
-#endif // OMP45
+#endif /*  #if defined(HYPRE_USING_DEVICE_OPENMP) */
 
 /*
 #define hypre_InitMemoryDebug(id)
 #define hypre_FinalizeMemoryDebug()
 */
-
-
 //#define TRACK_MEMORY_ALLOCATIONS
 #if defined(TRACK_MEMORY_ALLOCATIONS)
 
@@ -316,7 +371,7 @@ char *hypre_SharedMAlloc ( size_t size );
 char *hypre_SharedCAlloc ( size_t count , size_t elt_size );
 char *hypre_SharedReAlloc ( char *ptr , size_t size );
 void hypre_SharedFree ( char *ptr );
-void hypre_MemcpyAsync( char *dst, char *src, size_t size, HYPRE_Int locdst, HYPRE_Int locsrc );	
+void hypre_MemcpyAsync( char *dst, char *src, size_t size, HYPRE_Int locdst, HYPRE_Int locsrc );
 HYPRE_Real *hypre_IncrementSharedDataPtr ( HYPRE_Real *ptr , size_t size );
 */
 

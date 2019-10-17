@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_struct_ls.h"
 
@@ -29,7 +24,7 @@ typedef struct
    hypre_ComputePkg    *compute_pkg;
 
    HYPRE_Int            time_index;
-   HYPRE_Int            flops;
+   HYPRE_BigInt         flops;
 
 } hypre_SMGResidualData;
 
@@ -113,7 +108,7 @@ hypre_SMGResidualSetup( void               *residual_vdata,
 
    (residual_data -> flops) =
       (hypre_StructMatrixGlobalSize(A) + hypre_StructVectorGlobalSize(x)) /
-      (hypre_IndexX(base_stride) *
+      (HYPRE_BigInt)(hypre_IndexX(base_stride) *
        hypre_IndexY(base_stride) *
        hypre_IndexZ(base_stride)  );
 
@@ -224,7 +219,6 @@ hypre_SMGResidual( void               *residual_vdata,
 
                hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(rp,bp)
                hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                                    b_data_box, start, base_stride, bi,
@@ -234,7 +228,6 @@ hypre_SMGResidual( void               *residual_vdata,
                }
                hypre_BoxLoop2End(bi, ri);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
             }
          }
          break;
@@ -595,7 +588,6 @@ hypre_SMGResidual( void               *residual_vdata,
    
                   hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(rp,Ap0,xp0)
                   hypre_BoxLoop3Begin(hypre_StructMatrixNDim(A), loop_size,
                                       A_data_box, start, base_stride, Ai,
@@ -609,7 +601,6 @@ hypre_SMGResidual( void               *residual_vdata,
                   }
                   hypre_BoxLoop3End(Ai, xi, ri);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
 
                   break;
 
@@ -617,7 +608,6 @@ hypre_SMGResidual( void               *residual_vdata,
 
                   hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(rp,Ap0,xp0,Ap1,xp1,Ap2,xp2)
                   hypre_BoxLoop3Begin(hypre_StructMatrixNDim(A), loop_size,
                                       A_data_box, start, base_stride, Ai,
@@ -633,7 +623,6 @@ hypre_SMGResidual( void               *residual_vdata,
                   }
                   hypre_BoxLoop3End(Ai, xi, ri);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
 
                   break;
 
@@ -641,7 +630,6 @@ hypre_SMGResidual( void               *residual_vdata,
 
                   hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(rp,Ap0,xp0,Ap1,xp1,Ap2,xp2,Ap3,xp3,Ap4,xp4)
                   hypre_BoxLoop3Begin(hypre_StructMatrixNDim(A), loop_size,
                                       A_data_box, start, base_stride, Ai,
@@ -659,7 +647,6 @@ hypre_SMGResidual( void               *residual_vdata,
                   }
                   hypre_BoxLoop3End(Ai, xi, ri);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
 
                   break;
 
@@ -667,7 +654,6 @@ hypre_SMGResidual( void               *residual_vdata,
 
                   hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(rp,Ap0,xp0,Ap1,xp1,Ap2,xp2,Ap3,xp3,Ap4,xp4,Ap5,xp5,Ap6,xp6)
                   hypre_BoxLoop3Begin(hypre_StructMatrixNDim(A), loop_size,
                                       A_data_box, start, base_stride, Ai,
@@ -687,7 +673,6 @@ hypre_SMGResidual( void               *residual_vdata,
                   }
                   hypre_BoxLoop3End(Ai, xi, ri);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
 
                   break;
 
@@ -695,7 +680,6 @@ hypre_SMGResidual( void               *residual_vdata,
 
                   hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(rp,Ap0,xp0,Ap1,xp1,Ap2,xp2,Ap3,xp3,Ap4,xp4,Ap5,xp5,Ap6,xp6,Ap7,xp7,Ap8,xp8)
                   hypre_BoxLoop3Begin(hypre_StructMatrixNDim(A), loop_size,
                                       A_data_box, start, base_stride, Ai,
@@ -717,7 +701,6 @@ hypre_SMGResidual( void               *residual_vdata,
                   }
                   hypre_BoxLoop3End(Ai, xi, ri);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
 
                   break;
 
@@ -725,7 +708,6 @@ hypre_SMGResidual( void               *residual_vdata,
 
                   hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(rp,Ap0,xp0,Ap1,xp1,Ap2,xp2,Ap3,xp3,Ap4,xp4,Ap5,xp5,Ap6,xp6,Ap7,xp7,Ap8,xp8,Ap9,xp9,Ap10,xp10,Ap11,xp11,Ap12,xp12,Ap13,xp13,Ap14,xp14)
                   hypre_BoxLoop3Begin(hypre_StructMatrixNDim(A), loop_size,
                                       A_data_box, start, base_stride, Ai,
@@ -753,7 +735,6 @@ hypre_SMGResidual( void               *residual_vdata,
                   }
                   hypre_BoxLoop3End(Ai, xi, ri);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
 
                   break;
 
@@ -761,7 +742,6 @@ hypre_SMGResidual( void               *residual_vdata,
 
                   hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(rp,Ap0,xp0,Ap1,xp1,Ap2,xp2,Ap3,xp3,Ap4,xp4,Ap5,xp5,Ap6,xp6,Ap7,xp7,Ap8,xp8,Ap9,xp9,Ap10,xp10,Ap11,xp11,Ap12,xp12,Ap13,xp13,Ap14,xp14,Ap15,xp15,Ap16,xp16,Ap17,xp17,Ap18,xp18)
                   hypre_BoxLoop3Begin(hypre_StructMatrixNDim(A), loop_size,
                                       A_data_box, start, base_stride, Ai,
@@ -793,7 +773,6 @@ hypre_SMGResidual( void               *residual_vdata,
                   }
                   hypre_BoxLoop3End(Ai, xi, ri);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
    
                   break;
    
@@ -801,7 +780,6 @@ hypre_SMGResidual( void               *residual_vdata,
 
                   hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(rp,Ap0,xp0,Ap1,xp1,Ap2,xp2,Ap3,xp3,Ap4,xp4,Ap5,xp5,Ap6,xp6,Ap7,xp7,Ap8,xp8,Ap9,xp9,Ap10,xp10,Ap11,xp11,Ap12,xp12,Ap13,xp13,Ap14,xp14,Ap15,xp15,Ap16,xp16,Ap17,xp17,Ap18,xp18,Ap19,xp19,Ap20,xp20,Ap21,xp21,Ap22,xp22,Ap23,xp23,Ap24,xp24,Ap25,xp25,Ap26,xp26)
                   hypre_BoxLoop3Begin(hypre_StructMatrixNDim(A), loop_size,
                                       A_data_box, start, base_stride, Ai,
@@ -841,7 +819,6 @@ hypre_SMGResidual( void               *residual_vdata,
                   }
                   hypre_BoxLoop3End(Ai, xi, ri);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
    
                   break;
 
@@ -856,7 +833,6 @@ hypre_SMGResidual( void               *residual_vdata,
                      hypre_BoxGetStrideSize(compute_box, base_stride,
                                             loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(rp,Ap0,xp0)
                      hypre_BoxLoop3Begin(hypre_StructMatrixNDim(A), loop_size,
                                          A_data_box, start, base_stride, Ai,
@@ -867,7 +843,6 @@ hypre_SMGResidual( void               *residual_vdata,
                      }
                      hypre_BoxLoop3End(Ai, xi, ri);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
                   }
             }
          }

@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_struct_ls.h"
 #include "pfmg.h"
@@ -124,7 +119,7 @@ hypre_PFMGSetupRAPOp( hypre_StructMatrix *R,
 
    hypre_StructMatrix    *Ac_tmp;
 
-#if defined(HYPRE_USE_CUDA)
+#if defined(HYPRE_USING_CUDA)
    HYPRE_Int data_location_A = hypre_StructGridDataLocation(hypre_StructMatrixGrid(A));
    HYPRE_Int data_location_Ac = hypre_StructGridDataLocation(hypre_StructMatrixGrid(Ac));
    HYPRE_Int constant_coefficient = hypre_StructMatrixConstantCoefficient(Ac);
@@ -202,7 +197,7 @@ hypre_PFMGSetupRAPOp( hypre_StructMatrix *R,
    
    hypre_StructMatrixAssemble(Ac_tmp);
 
-#if defined(HYPRE_USE_CUDA)   
+#if defined(HYPRE_USING_CUDA)   
    if ( data_location_A != data_location_Ac )
    {
      if (constant_coefficient == 0)

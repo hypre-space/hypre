@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -30,18 +25,19 @@
 
 HYPRE_Int
 hypre_IJVectorCreatePar(hypre_IJVector *vector,
-                        HYPRE_Int      *IJpartitioning)
+                        HYPRE_BigInt   *IJpartitioning)
 {
    MPI_Comm comm = hypre_IJVectorComm(vector);
 
-   HYPRE_Int num_procs, jmin, global_n, *partitioning, j;
+   HYPRE_Int num_procs, j;
+   HYPRE_BigInt global_n, *partitioning, jmin;
    hypre_MPI_Comm_size(comm, &num_procs);
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
    jmin = hypre_IJVectorGlobalFirstRow(vector);
    global_n = hypre_IJVectorGlobalNumRows(vector);
 
-   partitioning = hypre_CTAlloc(HYPRE_Int,  2, HYPRE_MEMORY_HOST); 
+   partitioning = hypre_CTAlloc(HYPRE_BigInt,  2, HYPRE_MEMORY_HOST); 
 
    /* Shift to zero-based partitioning for ParVector object */
    for (j = 0; j < 2; j++) 
@@ -51,7 +47,7 @@ hypre_IJVectorCreatePar(hypre_IJVector *vector,
    jmin = IJpartitioning[0];
    global_n = IJpartitioning[num_procs] - jmin;
 
-   partitioning = hypre_CTAlloc(HYPRE_Int,  num_procs+1, HYPRE_MEMORY_HOST); 
+   partitioning = hypre_CTAlloc(HYPRE_BigInt,  num_procs+1, HYPRE_MEMORY_HOST); 
 
    /* Shift to zero-based partitioning for ParVector object */
    for (j = 0; j < num_procs+1; j++) 
@@ -60,7 +56,7 @@ hypre_IJVectorCreatePar(hypre_IJVector *vector,
 #endif
 
    hypre_IJVectorObject(vector) =
-      hypre_ParVectorCreate(comm, global_n, (HYPRE_Int *) partitioning); 
+      hypre_ParVectorCreate(comm, global_n, (HYPRE_BigInt *) partitioning); 
 
    return hypre_error_flag;
 }
@@ -90,9 +86,9 @@ hypre_IJVectorDestroyPar(hypre_IJVector *vector)
 HYPRE_Int
 hypre_IJVectorInitializePar(hypre_IJVector *vector)
 {
-	hypre_ParVector *par_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
-	hypre_AuxParVector *aux_vector = (hypre_AuxParVector*) hypre_IJVectorTranslator(vector);
-   HYPRE_Int *partitioning = hypre_ParVectorPartitioning(par_vector);
+   hypre_ParVector *par_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
+   hypre_AuxParVector *aux_vector = (hypre_AuxParVector*) hypre_IJVectorTranslator(vector);
+   HYPRE_BigInt *partitioning = hypre_ParVectorPartitioning(par_vector);
    hypre_Vector *local_vector = hypre_ParVectorLocalVector(par_vector);
    HYPRE_Int my_id;
    HYPRE_Int print_level = hypre_IJVectorPrintLevel(vector);
@@ -113,9 +109,9 @@ hypre_IJVectorInitializePar(hypre_IJVector *vector)
    }
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
-   hypre_VectorSize(local_vector) = partitioning[1] - partitioning[0];
+   hypre_VectorSize(local_vector) = (HYPRE_Int)(partitioning[1] - partitioning[0]);
 #else
-   hypre_VectorSize(local_vector) = partitioning[my_id+1] - partitioning[my_id];
+   hypre_VectorSize(local_vector) = (HYPRE_Int)(partitioning[my_id+1] - partitioning[my_id]);
 #endif
 
    hypre_ParVectorInitialize(par_vector);
@@ -166,7 +162,7 @@ HYPRE_Int
 hypre_IJVectorDistributePar(hypre_IJVector  *vector,
 			    const HYPRE_Int *vec_starts)
 {
-	hypre_ParVector *old_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
+   hypre_ParVector *old_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
    hypre_ParVector *par_vector;
    HYPRE_Int print_level = hypre_IJVectorPrintLevel(vector);
    
@@ -184,7 +180,7 @@ hypre_IJVectorDistributePar(hypre_IJVector  *vector,
 
    par_vector = hypre_VectorToParVector(hypre_ParVectorComm(old_vector),
 		                        hypre_ParVectorLocalVector(old_vector),
-                                        (HYPRE_Int *)vec_starts);
+                                        (HYPRE_BigInt *)vec_starts);
    if (!par_vector)
    {
       if (print_level)
@@ -215,12 +211,13 @@ HYPRE_Int
 hypre_IJVectorZeroValuesPar(hypre_IJVector *vector)
 {
    HYPRE_Int my_id;
-   HYPRE_Int i, vec_start, vec_stop;
+   HYPRE_Int i;
+   HYPRE_BigInt vec_start, vec_stop;
    HYPRE_Complex *data;
 
    hypre_ParVector *par_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
    MPI_Comm comm = hypre_IJVectorComm(vector);
-   HYPRE_Int *partitioning;
+   HYPRE_BigInt *partitioning;
    hypre_Vector *local_vector;
    HYPRE_Int print_level = hypre_IJVectorPrintLevel(vector);
 
@@ -289,7 +286,7 @@ hypre_IJVectorZeroValuesPar(hypre_IJVector *vector)
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
-   for (i = 0; i < vec_stop - vec_start; i++)
+   for (i = 0; i < (HYPRE_Int)(vec_stop - vec_start); i++)
       data[i] = 0.;
   
    return hypre_error_flag;
@@ -306,17 +303,17 @@ hypre_IJVectorZeroValuesPar(hypre_IJVector *vector)
 HYPRE_Int
 hypre_IJVectorSetValuesPar(hypre_IJVector       *vector,
                            HYPRE_Int             num_values,
-                           const HYPRE_Int      *indices,
+                           const HYPRE_BigInt   *indices,
                            const HYPRE_Complex  *values)
 {
    HYPRE_Int my_id;
-   HYPRE_Int i, j, vec_start, vec_stop;
+   HYPRE_Int j, k;
+   HYPRE_BigInt i, vec_start, vec_stop;
    HYPRE_Complex *data;
    HYPRE_Int print_level = hypre_IJVectorPrintLevel(vector);
 
-   HYPRE_Int *IJpartitioning = hypre_IJVectorPartitioning(vector);
+   HYPRE_BigInt *IJpartitioning = hypre_IJVectorPartitioning(vector);
    hypre_ParVector *par_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
-   hypre_AuxParVector *aux_vector = (hypre_AuxParVector*) hypre_IJVectorTranslator(vector);
    MPI_Comm comm = hypre_IJVectorComm(vector);
    hypre_Vector *local_vector;
 
@@ -392,44 +389,26 @@ hypre_IJVectorSetValuesPar(hypre_IJVector       *vector,
 
    if (indices)
    {
-      HYPRE_Int current_num_elmts
-         = hypre_AuxParVectorCurrentNumElmts(aux_vector);
-      HYPRE_Int *off_proc_i = hypre_AuxParVectorOffProcI(aux_vector);
-      HYPRE_Int cancel_indx = hypre_AuxParVectorCancelIndx(aux_vector);
-      HYPRE_Int ii;
-
       for (j = 0; j < num_values; j++)
       {
 	 i = indices[j];
-	 if (i < vec_start || i > vec_stop)
+	 if (i >= vec_start && i <= vec_stop)
          {
-            for (ii = 0; ii < current_num_elmts; ii++)
-	    {
-	       if (i == off_proc_i[ii])
-	       {
-		  off_proc_i[ii] = -1;
-		  cancel_indx++;
-               }
-            }
-            hypre_AuxParVectorCancelIndx(aux_vector) = cancel_indx;
-         }
-         else /* local values are inserted into the vector */
-         {
-            i -= vec_start;
-            data[i] = values[j];
+            k = (HYPRE_Int)( i- vec_start);
+            data[k] = values[j];
          }
       } 
    }
    else 
    {
-      if (num_values > vec_stop - vec_start + 1)
+      if (num_values > (HYPRE_Int)(vec_stop - vec_start) + 1)
       {
          if (print_level)
          {
             hypre_printf("Warning! Indices beyond local range  not identified!\n ");
             hypre_printf("Off processor values have been ignored!\n");
          }
-	 num_values = vec_stop - vec_start +1;
+	 num_values = (HYPRE_Int)(vec_stop - vec_start) +1;
       }
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE
@@ -452,7 +431,7 @@ hypre_IJVectorSetValuesPar(hypre_IJVector       *vector,
 HYPRE_Int
 hypre_IJVectorAddToValuesPar(hypre_IJVector       *vector,
                              HYPRE_Int             num_values,
-                             const HYPRE_Int      *indices,
+                             const HYPRE_BigInt   *indices,
                              const HYPRE_Complex  *values)
 {
    HYPRE_Int my_id;
@@ -460,7 +439,7 @@ hypre_IJVectorAddToValuesPar(hypre_IJVector       *vector,
    HYPRE_Complex *data;
    HYPRE_Int print_level = hypre_IJVectorPrintLevel(vector);
 
-   HYPRE_Int *IJpartitioning = hypre_IJVectorPartitioning(vector);
+   HYPRE_BigInt *IJpartitioning = hypre_IJVectorPartitioning(vector);
    hypre_ParVector *par_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
    hypre_AuxParVector *aux_vector = (hypre_AuxParVector*) hypre_IJVectorTranslator(vector);
    MPI_Comm comm = hypre_IJVectorComm(vector);
@@ -537,8 +516,9 @@ hypre_IJVectorAddToValuesPar(hypre_IJVector       *vector,
          = hypre_AuxParVectorCurrentNumElmts(aux_vector);
       HYPRE_Int max_off_proc_elmts
          = hypre_AuxParVectorMaxOffProcElmts(aux_vector);
-      HYPRE_Int *off_proc_i = hypre_AuxParVectorOffProcI(aux_vector);
+      HYPRE_BigInt *off_proc_i = hypre_AuxParVectorOffProcI(aux_vector);
       HYPRE_Complex *off_proc_data = hypre_AuxParVectorOffProcData(aux_vector);
+      HYPRE_Int k;
 
       for (j = 0; j < num_values; j++)
       {
@@ -553,7 +533,7 @@ hypre_IJVectorAddToValuesPar(hypre_IJVector       *vector,
                hypre_AuxParVectorMaxOffProcElmts(aux_vector) =
                   max_off_proc_elmts;
                hypre_AuxParVectorOffProcI(aux_vector)
-                  = hypre_CTAlloc(HYPRE_Int, max_off_proc_elmts, HYPRE_MEMORY_HOST);
+                  = hypre_CTAlloc(HYPRE_BigInt, max_off_proc_elmts, HYPRE_MEMORY_HOST);
                hypre_AuxParVectorOffProcData(aux_vector)
                   = hypre_CTAlloc(HYPRE_Complex, max_off_proc_elmts, HYPRE_MEMORY_HOST);
                off_proc_i = hypre_AuxParVectorOffProcI(aux_vector);
@@ -562,7 +542,7 @@ hypre_IJVectorAddToValuesPar(hypre_IJVector       *vector,
             else if (current_num_elmts + 1 > max_off_proc_elmts)
             {
                max_off_proc_elmts += 10;
-               off_proc_i = hypre_TReAlloc(off_proc_i, HYPRE_Int, max_off_proc_elmts, HYPRE_MEMORY_HOST);
+               off_proc_i = hypre_TReAlloc(off_proc_i, HYPRE_BigInt, max_off_proc_elmts, HYPRE_MEMORY_HOST);
                off_proc_data = hypre_TReAlloc(off_proc_data, HYPRE_Complex, 
                                               max_off_proc_elmts, HYPRE_MEMORY_HOST);
                hypre_AuxParVectorMaxOffProcElmts(aux_vector)
@@ -576,21 +556,21 @@ hypre_IJVectorAddToValuesPar(hypre_IJVector       *vector,
          }
          else /* local values are added to the vector */
          {
-            i -= vec_start;
-            data[i] += values[j];
+            k = (HYPRE_Int)(i - vec_start);
+            data[k] += values[j];
          }
       } 
    }
    else 
    {
-      if (num_values > vec_stop - vec_start + 1)
+      if (num_values > (HYPRE_Int)(vec_stop - vec_start) + 1)
       {
          if (print_level)
          {
             hypre_printf("Warning! Indices beyond local range  not identified!\n ");
             hypre_printf("Off processor values have been ignored!\n");
          }
-	 num_values = vec_stop - vec_start +1;
+	 num_values = (HYPRE_Int)(vec_stop - vec_start) +1;
       }
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE
@@ -613,10 +593,10 @@ hypre_IJVectorAddToValuesPar(hypre_IJVector       *vector,
 HYPRE_Int
 hypre_IJVectorAssemblePar(hypre_IJVector *vector)
 {
-   HYPRE_Int *IJpartitioning = hypre_IJVectorPartitioning(vector);
+   HYPRE_BigInt *IJpartitioning = hypre_IJVectorPartitioning(vector);
    hypre_ParVector *par_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
    hypre_AuxParVector *aux_vector = (hypre_AuxParVector*) hypre_IJVectorTranslator(vector);
-   HYPRE_Int *partitioning;
+   HYPRE_BigInt *partitioning;
    MPI_Comm comm = hypre_IJVectorComm(vector);
    HYPRE_Int print_level = hypre_IJVectorPrintLevel(vector);
 
@@ -656,27 +636,9 @@ hypre_IJVectorAssemblePar(hypre_IJVector *vector)
    {
       HYPRE_Int off_proc_elmts, current_num_elmts;
       HYPRE_Int max_off_proc_elmts;
-      HYPRE_Int *off_proc_i;
+      HYPRE_BigInt *off_proc_i;
       HYPRE_Complex *off_proc_data;
-      HYPRE_Int cancel_indx = hypre_AuxParVectorCancelIndx(aux_vector);
-      HYPRE_Int current_i, ii;
       current_num_elmts = hypre_AuxParVectorCurrentNumElmts(aux_vector);
-      if (cancel_indx)
-      {
-         off_proc_i=hypre_AuxParVectorOffProcI(aux_vector);
-         off_proc_data=hypre_AuxParVectorOffProcData(aux_vector);
-         current_i = 0;
-	 for (ii=0; ii < current_num_elmts; ii++) 
-         {
-            if (off_proc_i[ii] != -1)
-	    {
-	       off_proc_i[current_i] = off_proc_i[ii];
-	       off_proc_data[current_i++] = off_proc_data[ii];
-	    }
-         }
-         hypre_AuxParVectorCurrentNumElmts(aux_vector) = current_i;
-         current_num_elmts = current_i;
-      }
       hypre_MPI_Allreduce(&current_num_elmts,&off_proc_elmts,1,HYPRE_MPI_INT,
                           hypre_MPI_SUM,comm);
       if (off_proc_elmts)
@@ -707,15 +669,16 @@ hypre_IJVectorAssemblePar(hypre_IJVector *vector)
 HYPRE_Int
 hypre_IJVectorGetValuesPar(hypre_IJVector  *vector,
                            HYPRE_Int        num_values,
-                           const HYPRE_Int *indices,
+                           const HYPRE_BigInt *indices,
                            HYPRE_Complex   *values)
 {
    HYPRE_Int my_id;
-   HYPRE_Int i, j, vec_start, vec_stop;
+   HYPRE_Int j,  k;
+   HYPRE_BigInt i, vec_start, vec_stop;
    HYPRE_Complex *data;
    HYPRE_Int ierr = 0;
 
-   HYPRE_Int *IJpartitioning = hypre_IJVectorPartitioning(vector);
+   HYPRE_BigInt *IJpartitioning = hypre_IJVectorPartitioning(vector);
    hypre_ParVector *par_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
    MPI_Comm comm = hypre_IJVectorComm(vector);
    hypre_Vector *local_vector;
@@ -819,13 +782,13 @@ hypre_IJVectorGetValuesPar(hypre_IJVector  *vector,
 #endif
       for (j = 0; j < num_values; j++)
       {
-         i = indices[j] - vec_start;
-         values[j] = data[i];
+         k = (HYPRE_Int)(indices[j] - vec_start);
+         values[j] = data[k];
       }
    }
    else
    {
-     if (num_values > (vec_stop-vec_start))
+     if (num_values > (HYPRE_Int)(vec_stop-vec_start))
      {
         hypre_error_in_arg(2);
         return hypre_error_flag;
@@ -854,30 +817,31 @@ HYPRE_Int
 hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector, 
    				      HYPRE_Int       max_off_proc_elmts,
    				      HYPRE_Int       current_num_elmts,
-   				      HYPRE_Int      *off_proc_i,
+   				      HYPRE_BigInt   *off_proc_i,
    			     	      HYPRE_Complex  *off_proc_data)
 {
    MPI_Comm comm = hypre_IJVectorComm(vector);
    hypre_ParVector *par_vector = ( hypre_ParVector *) hypre_IJVectorObject(vector);
    hypre_MPI_Request *requests = NULL;
    hypre_MPI_Status *status = NULL;
-   HYPRE_Int i, j, j2, row;
-   HYPRE_Int iii, indx, ip, first_index;
+   HYPRE_Int i, j, j2;
+   HYPRE_Int iii, indx, ip;
+   HYPRE_BigInt row, first_index;
    HYPRE_Int proc_id, num_procs, my_id;
    HYPRE_Int num_sends, num_sends2;
    HYPRE_Int num_recvs;
    HYPRE_Int num_requests;
    HYPRE_Int vec_start, vec_len;
    HYPRE_Int *send_procs;
-   HYPRE_Int *send_i;
+   HYPRE_BigInt *send_i;
    HYPRE_Int *send_map_starts;
    HYPRE_Int *recv_procs;
-   HYPRE_Int *recv_i;
+   HYPRE_BigInt *recv_i;
    HYPRE_Int *recv_vec_starts;
    HYPRE_Int *info;
    HYPRE_Int *int_buffer;
    HYPRE_Int *proc_id_mem;
-   HYPRE_Int *partitioning;
+   HYPRE_BigInt *partitioning;
    HYPRE_Int *displs;
    HYPRE_Int *recv_buf;
    HYPRE_Complex *send_data;
@@ -973,9 +937,9 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
    /* send_i contains for each send proc 
       indices, send_data contains corresponding values */
       
-   send_i = hypre_CTAlloc(HYPRE_Int, send_map_starts[num_sends], HYPRE_MEMORY_HOST);
+   send_i = hypre_CTAlloc(HYPRE_BigInt, send_map_starts[num_sends], HYPRE_MEMORY_HOST);
    send_data = hypre_CTAlloc(HYPRE_Complex, send_map_starts[num_sends], HYPRE_MEMORY_HOST);
-   recv_i = hypre_CTAlloc(HYPRE_Int, recv_vec_starts[num_recvs], HYPRE_MEMORY_HOST);
+   recv_i = hypre_CTAlloc(HYPRE_BigInt, recv_vec_starts[num_recvs], HYPRE_MEMORY_HOST);
    recv_data = hypre_CTAlloc(HYPRE_Complex, recv_vec_starts[num_recvs], HYPRE_MEMORY_HOST);
     
    for (i=0; i < current_num_elmts; i++)
@@ -1007,7 +971,7 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
       vec_start = recv_vec_starts[i];
       vec_len = recv_vec_starts[i+1] - vec_start;
       ip = recv_procs[i];
-      hypre_MPI_Irecv(&recv_i[vec_start], vec_len, HYPRE_MPI_INT,
+      hypre_MPI_Irecv(&recv_i[vec_start], vec_len, HYPRE_MPI_BIG_INT,
                       ip, 0, comm, &requests[j++]);
    }
 
@@ -1016,7 +980,7 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
       vec_start = send_map_starts[i];
       vec_len = send_map_starts[i+1] - vec_start;
       ip = send_procs[i];
-      hypre_MPI_Isend(&send_i[vec_start], vec_len, HYPRE_MPI_INT,
+      hypre_MPI_Isend(&send_i[vec_start], vec_len, HYPRE_MPI_BIG_INT,
                       ip, 0, comm, &requests[j++]);
    }
   
@@ -1060,7 +1024,7 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
    for (i=0; i < recv_vec_starts[num_recvs]; i++)
    {
       row = recv_i[i];
-      j = row - first_index;
+      j = (HYPRE_Int)(row - first_index);
       data[j] += recv_data[i];
    }
 
@@ -1079,32 +1043,35 @@ HYPRE_Int
 hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector, 
    				      HYPRE_Int       max_off_proc_elmts,
    				      HYPRE_Int       current_num_elmts,
-   				      HYPRE_Int      *off_proc_i,
+   				      HYPRE_BigInt   *off_proc_i,
    			     	      HYPRE_Complex  *off_proc_data)
 {
-   HYPRE_Int myid, global_num_rows;
-   HYPRE_Int global_first_row;
+   HYPRE_Int myid;
+   HYPRE_BigInt global_first_row, global_num_rows;
    HYPRE_Int i, j, in, k;
    HYPRE_Int proc_id, last_proc, prev_id, tmp_id;
    HYPRE_Int max_response_size;
    HYPRE_Int ex_num_contacts = 0;
-   HYPRE_Int range_start, range_end;
+   HYPRE_BigInt range_start, range_end;
    HYPRE_Int storage;
    HYPRE_Int indx;
-   HYPRE_Int row, num_ranges, row_count;
+   HYPRE_BigInt row;
+   HYPRE_Int num_ranges, row_count;
    HYPRE_Int num_recvs;
-   HYPRE_Int counter, upper_bound;
+   HYPRE_Int counter;
+   HYPRE_BigInt upper_bound;
    HYPRE_Int num_real_procs;
    
-   HYPRE_Int *row_list=NULL;
+   HYPRE_BigInt *row_list=NULL;
    HYPRE_Int *a_proc_id=NULL, *orig_order=NULL;
    HYPRE_Int *real_proc_id = NULL, *us_real_proc_id = NULL;
    HYPRE_Int *ex_contact_procs = NULL, *ex_contact_vec_starts = NULL;
    HYPRE_Int *recv_starts=NULL;
-   HYPRE_Int *response_buf = NULL, *response_buf_starts=NULL;
+   HYPRE_BigInt *response_buf = NULL;
+   HYPRE_Int *response_buf_starts=NULL;
    HYPRE_Int *num_rows_per_proc = NULL;
    HYPRE_Int  tmp_int;
-   HYPRE_Int  obj_size_bytes, int_size, complex_size;
+   HYPRE_Int  obj_size_bytes, big_int_size, complex_size;
    HYPRE_Int  first_index;
 
    void *void_contact_buf = NULL;
@@ -1112,7 +1079,7 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
    void *recv_data_ptr;
 
    HYPRE_Complex tmp_complex;
-   HYPRE_Int *ex_contact_buf=NULL;
+   HYPRE_BigInt *ex_contact_buf=NULL;
    HYPRE_Complex *vector_data;
    HYPRE_Complex value;
    
@@ -1141,7 +1108,7 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
    a_proc_id = hypre_CTAlloc(HYPRE_Int,  current_num_elmts, HYPRE_MEMORY_HOST);
    orig_order =  hypre_CTAlloc(HYPRE_Int,  current_num_elmts, HYPRE_MEMORY_HOST);
    real_proc_id = hypre_CTAlloc(HYPRE_Int,  current_num_elmts, HYPRE_MEMORY_HOST);
-   row_list =   hypre_CTAlloc(HYPRE_Int,  current_num_elmts, HYPRE_MEMORY_HOST);
+   row_list =   hypre_CTAlloc(HYPRE_BigInt,  current_num_elmts, HYPRE_MEMORY_HOST);
 
    if (current_num_elmts > 0)
    {
@@ -1158,7 +1125,7 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
       /* now we need to find the actual order of each row  - sort on row -
          this will result in proc ids sorted also...*/
       
-      hypre_qsort3i(row_list, a_proc_id, orig_order, 0, current_num_elmts -1);
+      hypre_BigQsortb2i(row_list, a_proc_id, orig_order, 0, current_num_elmts -1);
 
       /* calculate the number of contacts */
       ex_num_contacts = 1;
@@ -1180,7 +1147,7 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
 
    ex_contact_procs = hypre_CTAlloc(HYPRE_Int,  ex_num_contacts, HYPRE_MEMORY_HOST);
    ex_contact_vec_starts =  hypre_CTAlloc(HYPRE_Int,  ex_num_contacts+1, HYPRE_MEMORY_HOST);
-   ex_contact_buf =  hypre_CTAlloc(HYPRE_Int,  ex_num_contacts*2, HYPRE_MEMORY_HOST);
+   ex_contact_buf =  hypre_CTAlloc(HYPRE_BigInt,  ex_num_contacts*2, HYPRE_MEMORY_HOST);
 
    counter = 0;
    range_end = -1;
@@ -1220,8 +1187,8 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
    max_response_size = 6;  /* 6 means we can fit 3 ranges*/
    
    hypre_DataExchangeList(ex_num_contacts, ex_contact_procs, 
-                          ex_contact_buf, ex_contact_vec_starts, sizeof(HYPRE_Int), 
-                          sizeof(HYPRE_Int), &response_obj1, max_response_size, 4, 
+                          ex_contact_buf, ex_contact_vec_starts, sizeof(HYPRE_BigInt), 
+                          sizeof(HYPRE_BigInt), &response_obj1, max_response_size, 4, 
                           comm, (void**) &response_buf, &response_buf_starts);
 
    /* now response_buf contains a proc_id followed by an upper bound for the
@@ -1248,7 +1215,7 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
    {
       upper_bound = response_buf[i*2+1];
       counter = 0;
-      tmp_id = response_buf[i*2];
+      tmp_id = (HYPRE_Int)response_buf[i*2];
       
       /* loop through row_list entries - counting how many are in the range */
       while (j < current_num_elmts && row_list[j] <= upper_bound)     
@@ -1273,10 +1240,10 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
    /* first find out how many elements to send per proc - so we can do
       storage */
  
-   int_size = sizeof(HYPRE_Int);
    complex_size = sizeof(HYPRE_Complex);
+   big_int_size = sizeof(HYPRE_BigInt);
    
-   obj_size_bytes = hypre_max(int_size, complex_size);
+   obj_size_bytes = hypre_max(big_int_size, complex_size);
     
    ex_contact_procs = hypre_CTAlloc(HYPRE_Int,  num_real_procs, HYPRE_MEMORY_HOST);
    num_rows_per_proc = hypre_CTAlloc(HYPRE_Int,  num_real_procs, HYPRE_MEMORY_HOST);
@@ -1358,7 +1325,7 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
          in++;
       }
       /* add row # */   
-      hypre_TMemcpy( index_ptr,  &row,  HYPRE_Int,1 , HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy( index_ptr,  &row,  HYPRE_BigInt,1 , HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
       index_ptr = (void *) ((char *) index_ptr + obj_size_bytes);
       in++;
 
@@ -1457,7 +1424,7 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
       for (j=0; j < row_count; j++) /* for each row: unpack info */
       {
          /* row # */
-		  hypre_TMemcpy( &row,  recv_data_ptr, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+	 hypre_TMemcpy( &row,  recv_data_ptr, HYPRE_BigInt, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
          recv_data_ptr = (void *) ((char *)recv_data_ptr + obj_size_bytes);
          indx++;
 
@@ -1466,7 +1433,7 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
          recv_data_ptr = (void *) ((char *)recv_data_ptr + obj_size_bytes);
          indx++;
 
-         k = row - first_index - global_first_row;
+         k = (HYPRE_Int)(row - first_index - global_first_row);
          vector_data[k] += value;
       }
    }

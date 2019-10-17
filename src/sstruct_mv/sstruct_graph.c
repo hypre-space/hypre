@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -44,7 +39,7 @@ hypre_SStructGraphGetUVEntryRank( hypre_SStructGraph    *graph,
                                   HYPRE_Int              part,
                                   HYPRE_Int              var,
                                   hypre_Index            index,
-                                  HYPRE_Int             *rank )
+                                  HYPRE_BigInt          *rank )
 {
    HYPRE_Int              ndim  = hypre_SStructGraphNDim(graph);
    hypre_SStructGrid     *grid  = hypre_SStructGraphGrid(graph);
@@ -78,7 +73,7 @@ hypre_SStructGraphGetUVEntryRank( hypre_SStructGraph    *graph,
             vol = vol*(hypre_BoxSizeD(box, d) + 2) +
                (hypre_IndexD(index, d) - hypre_BoxIMinD(box, d) + 1);
          }
-         *rank += vol;
+         *rank += (HYPRE_BigInt)vol;
          return hypre_error_flag;
       }
       else
@@ -88,7 +83,7 @@ hypre_SStructGraphGetUVEntryRank( hypre_SStructGraph    *graph,
          {
             vol *= (hypre_BoxSizeD(box, d) + 2);
          }
-         *rank += vol;
+         *rank += (HYPRE_BigInt)vol;
       }
    }
 
@@ -121,7 +116,7 @@ hypre_SStructGraphFindBoxEndpt(hypre_SStructGraph    *graph,
    hypre_BoxManEntry     *boxman_entry;
    hypre_StructGrid      *sgrid;
    hypre_Box             *box;
-   HYPRE_Int              rank;
+   HYPRE_BigInt           rank;
 
    /* Should we be checking the neighbor box manager also ?*/
 

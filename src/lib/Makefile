@@ -1,23 +1,16 @@
-#BHEADER**********************************************************************
-# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
-# Produced at the Lawrence Livermore National Laboratory.
-# This file is part of HYPRE.  See file COPYRIGHT for details.
+# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
-# HYPRE is free software; you can redistribute it and/or modify it under the
-# terms of the GNU Lesser General Public License (as published by the Free
-# Software Foundation) version 2.1 dated February 1999.
-#
-# $Revision$
-#EHEADER**********************************************************************
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 include ../config/Makefile.config
 
 FEIHYPREFILES = ${HYPRE_FEI_HYPRE_FILES}
 FEMLIFILES = ${HYPRE_FEI_FEMLI_FILES}
 IJMVFILES = ${HYPRE_SRC_TOP_DIR}/IJ_mv/*.o
-EUCLIDFILES = ${HYPRE_SRC_TOP_DIR}/distributed_ls/Euclid/*.o
-PARASAILSFILES = ${HYPRE_SRC_TOP_DIR}/distributed_ls/ParaSails/*.o
-PILUTFILES = ${HYPRE_SRC_TOP_DIR}/distributed_ls/pilut/*.o
+EUCLIDFILES = ${HYPRE_EUCLID_FILES}
+PARASAILSFILES = ${HYPRE_PARASAILS_FILES}
+PILUTFILES = ${HYPRE_PILUT_FILES}
 DISTMATRIXFILES = ${HYPRE_SRC_TOP_DIR}/distributed_matrix/*.o
 KRYLOVFILES = ${HYPRE_SRC_TOP_DIR}/krylov/*.o
 MATMATFILES = ${HYPRE_SRC_TOP_DIR}/matrix_matrix/*.o
@@ -57,8 +50,8 @@ $(UTILITIESFILES)\
 $(BLASFILES)\
 $(LAPACKFILES)
 
-SONAME = libHYPRE-${HYPRE_RELEASE_VERSION}.so
-SOLIBS = ${MPILIBDIRS} ${MPILIBS} ${LAPACKLIBDIRS} ${LAPACKLIBS}\
+SONAME = libHYPRE-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
+SOLIBS = ${DSUPERLU_LIBS} ${MPILIBDIRS} ${MPILIBS} ${LAPACKLIBDIRS} ${LAPACKLIBS}\
  ${BLASLIBDIRS} ${BLASLIBS} ${LIBS} ${FLIBS}
 
 
@@ -104,7 +97,7 @@ libHYPRE.a: ${FILES_HYPRE}
 	${AR} $@ $(UTILITIESFILES) $(BLASFILES) $(LAPACKFILES)
 	${RANLIB} $@
 
-libHYPRE.so: ${FILES_HYPRE}
+libHYPRE.so libHYPRE.dylib: ${FILES_HYPRE}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${FILES_HYPRE} ${SOLIBS} ${SHARED_SET_SONAME}${SONAME} ${SHARED_OPTIONS} ${LDFLAGS}
 	ln -s ${SONAME} $@

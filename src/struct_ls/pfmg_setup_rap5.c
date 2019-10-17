@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_struct_ls.h"
 #include "pfmg.h"
@@ -340,7 +335,6 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
       {
          hypre_BoxGetSize(cgrid_box, loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(rap_cb,a_cb,pa,rap_ca,a_ca,pb,a_cw,a_ce,rap_cw,rap_ce,rap_cc,a_cc)
          hypre_BoxLoop3Begin(hypre_StructMatrixNDim(A), loop_size,
                              P_dbox, cstart, stridec, iP,
@@ -377,7 +371,6 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
          }
          hypre_BoxLoop3End(iP, iA, iAc);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
       }
 
       else if ( constant_coefficient==1 )
@@ -403,7 +396,6 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
 
          hypre_BoxGetSize(cgrid_box, loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(rap_cc,a_cc)
          hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                              A_dbox, fstart, stridef, iA,
@@ -413,7 +405,6 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
          }
          hypre_BoxLoop2End(iA, iAc);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
 
          hypre_CopyBox(cgrid_box, fcbox);
          hypre_StructMapCoarseToFine(hypre_BoxIMin(fcbox), cindex, cstride,
@@ -438,7 +429,6 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
             hypre_BoxGetSize(bdy_box, loop_size);
             bfstart = hypre_BoxIMin(bdy_box);
             hypre_StructMapFineToCoarse(bfstart, cindex, cstride, bcstart);
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(rap_cc,a_cc)
             hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                                 A_dbox, bfstart, stridef, iA,
@@ -448,7 +438,6 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
             }
             hypre_BoxLoop2End(iA, iAc);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
          }
       }
 

@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -85,6 +80,7 @@ hypre_BiCGSTABCreate( hypre_BiCGSTABFunctions * bicgstab_functions )
    (bicgstab_data -> precond_data)   = NULL;
    (bicgstab_data -> logging)        = 0;
    (bicgstab_data -> print_level)    = 0;
+   (bicgstab_data -> hybrid)         = 0;
    (bicgstab_data -> p)              = NULL;
    (bicgstab_data -> q)              = NULL;
    (bicgstab_data -> r)              = NULL;
@@ -180,8 +176,9 @@ hypre_BiCGSTABSetup( void *bicgstab_vdata,
  
    if ((bicgstab_data->logging)>0 || (bicgstab_data->print_level) > 0)
    {
-      if ((bicgstab_data -> norms) == NULL)
-         (bicgstab_data -> norms) = hypre_CTAlloc(HYPRE_Real,  max_iter + 1, HYPRE_MEMORY_HOST);
+      if ((bicgstab_data -> norms) != NULL)
+         hypre_TFree (bicgstab_data -> norms, HYPRE_MEMORY_HOST);
+      (bicgstab_data -> norms) = hypre_CTAlloc(HYPRE_Real,  max_iter + 1, HYPRE_MEMORY_HOST);
    }
    if ((bicgstab_data -> print_level) > 0)
    {
@@ -208,6 +205,7 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
    HYPRE_Int               min_iter     = (bicgstab_data -> min_iter);
    HYPRE_Int 		     max_iter     = (bicgstab_data -> max_iter);
    HYPRE_Int 		     stop_crit    = (bicgstab_data -> stop_crit);
+   HYPRE_Int 		     hybrid    = (bicgstab_data -> hybrid);
    HYPRE_Real 	     r_tol     = (bicgstab_data -> tol);
    HYPRE_Real 	     cf_tol       = (bicgstab_data -> cf_tol);
    void             *matvec_data  = (bicgstab_data -> matvec_data);
@@ -409,10 +407,10 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
       	temp = (*(bicgstab_functions->InnerProd))(r0,q);
       	if (fabs(temp) >= epsmac)
 	   alpha = res/temp;
-	else
+	else 
 	{
-	   hypre_printf("BiCGSTAB broke down!! divide by near zero\n");
-	   return(1);
+	   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"BiCGSTAB broke down!! divide by near zero\n");
+	   return hypre_error_flag;
 	}
 	(*(bicgstab_functions->Axpy))(alpha,v,x);
 	(*(bicgstab_functions->Axpy))(-alpha,q,r);
@@ -434,32 +432,32 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
 	{
 	   norms[iter] = r_norm;
 	}
-    if (print_level > 0 && my_id == 0)
-    {
-        if (b_norm > 0.0)
-           hypre_printf("% 5d    %e    %f   %e\n", iter, norms[iter],
+        if (print_level > 0 && my_id == 0)
+        {
+           if (b_norm > 0.0)
+              hypre_printf("% 5d    %e    %f   %e\n", iter, norms[iter],
                       norms[iter]/norms[iter-1], norms[iter]/b_norm);
-        else
-           hypre_printf("% 5d    %e    %f\n", iter, norms[iter],
+           else
+              hypre_printf("% 5d    %e    %f\n", iter, norms[iter],
 		                             norms[iter]/norms[iter-1]);
 	}
     /* check for convergence, evaluate actual residual */
 	if (r_norm <= epsilon && iter >= min_iter) 
-    {
+        {
 	   (*(bicgstab_functions->CopyVector))(b,r);
            (*(bicgstab_functions->Matvec))(matvec_data,-1.0,A,x,1.0,r);
 	   r_norm = sqrt((*(bicgstab_functions->InnerProd))(r,r));
 	   if (r_norm <= epsilon)
-       {
-           if (print_level > 0 && my_id == 0)
            {
-              hypre_printf("\n\n");
-              hypre_printf("Final L2 norm of residual: %e\n\n", r_norm);
-           }
-           (bicgstab_data -> converged) = 1;
-           break;
+              if (print_level > 0 && my_id == 0)
+              {
+                 hypre_printf("\n\n");
+                 hypre_printf("Final L2 norm of residual: %e\n\n", r_norm);
+              }
+              (bicgstab_data -> converged) = 1;
+              break;
+          }
        }
-    }
     /*--------------------------------------------------------------------
      * Optional test to see if adequate progress is being made.
      * The average convergence factor is recorded and compared
@@ -467,35 +465,35 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
      * intended to pay more attention to the test when an accurate
      * estimate for average convergence factor is available.
      *--------------------------------------------------------------------*/
-    if (cf_tol > 0.0)
-    {
-       cf_ave_0 = cf_ave_1;
-       cf_ave_1 = pow( r_norm / r_norm_0, 1.0/(2.0*iter));
+       if (cf_tol > 0.0)
+       {
+          cf_ave_0 = cf_ave_1;
+          cf_ave_1 = pow( r_norm / r_norm_0, 1.0/(2.0*iter));
 
-       weight   = fabs(cf_ave_1 - cf_ave_0);
-       weight   = weight / hypre_max(cf_ave_1, cf_ave_0);
-       weight   = 1.0 - weight;
-       if (weight * cf_ave_1 > cf_tol) break;
-    }
+          weight   = fabs(cf_ave_1 - cf_ave_0);
+          weight   = weight / hypre_max(cf_ave_1, cf_ave_0);
+          weight   = 1.0 - weight;
+          if (weight * cf_ave_1 > cf_tol) break;
+       }
 
-      	if (fabs(res) >= epsmac)
-           beta = 1.0/res;
-	else
-	{
-	   hypre_printf("BiCGSTAB broke down!! res=0 \n");
-	   return(2);
-	}
-        res = (*(bicgstab_functions->InnerProd))(r0,r);
-        beta *= res;    
-	(*(bicgstab_functions->Axpy))(-gamma,q,p);
-      	if (fabs(gamma) >= epsmac)
+       if (fabs(res) >= epsmac)
+          beta = 1.0/res;
+       else
+       {
+	  hypre_error_w_msg(HYPRE_ERROR_GENERIC,"BiCGSTAB broke down!! res=0 \n");
+	  return hypre_error_flag;
+       }
+       res = (*(bicgstab_functions->InnerProd))(r0,r);
+       beta *= res;    
+       (*(bicgstab_functions->Axpy))(-gamma,q,p);
+       if (fabs(gamma) >= epsmac)
            (*(bicgstab_functions->ScaleVector))((beta*alpha/gamma),p);
-	else
-	{
-	   hypre_printf("BiCGSTAB broke down!! gamma=0 \n");
-	   return(3);
-	}
-	(*(bicgstab_functions->Axpy))(1.0,r,p);
+       else
+       {
+	  hypre_error_w_msg(HYPRE_ERROR_GENERIC,"BiCGSTAB broke down!! gamma=0 \n");
+	  return hypre_error_flag;
+       }
+       (*(bicgstab_functions->Axpy))(1.0,r,p);
    } /* end while loop */
     
    (bicgstab_data -> num_iterations) = iter;
@@ -504,7 +502,7 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
    if (b_norm == 0.0)
       (bicgstab_data -> rel_residual_norm) = r_norm;
 
-   if (iter >= max_iter && r_norm > epsilon) hypre_error(HYPRE_ERROR_CONV);
+   if (iter >= max_iter && r_norm > epsilon && epsilon > 0 && hybrid != -1) hypre_error(HYPRE_ERROR_CONV);
 
 
    return hypre_error_flag;
@@ -646,6 +644,17 @@ hypre_BiCGSTABSetLogging( void *bicgstab_vdata,
 	hypre_BiCGSTABData *bicgstab_data = (hypre_BiCGSTABData  *)bicgstab_vdata;
  
    (bicgstab_data -> logging) = logging;
+ 
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BiCGSTABSetHybrid( void *bicgstab_vdata,
+                       HYPRE_Int   logging)
+{
+	hypre_BiCGSTABData *bicgstab_data = (hypre_BiCGSTABData  *)bicgstab_vdata;
+ 
+   (bicgstab_data -> hybrid) = logging;
  
    return hypre_error_flag;
 }

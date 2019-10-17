@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #ifndef hypre_STRUCT_LS_HEADER
 #define hypre_STRUCT_LS_HEADER
@@ -63,6 +58,10 @@ HYPRE_Int hypre_HybridSetTwoNorm ( void *hybrid_vdata , HYPRE_Int two_norm );
 HYPRE_Int hypre_HybridSetStopCrit ( void *hybrid_vdata , HYPRE_Int stop_crit );
 HYPRE_Int hypre_HybridSetRelChange ( void *hybrid_vdata , HYPRE_Int rel_change );
 HYPRE_Int hypre_HybridSetSolverType ( void *hybrid_vdata , HYPRE_Int solver_type );
+HYPRE_Int hypre_HybridSetRecomputeResidual( void *hybrid_vdata , HYPRE_Int recompute_residual );
+HYPRE_Int hypre_HybridGetRecomputeResidual( void *hybrid_vdata , HYPRE_Int *recompute_residual );
+HYPRE_Int hypre_HybridSetRecomputeResidualP( void *hybrid_vdata , HYPRE_Int recompute_residual_p );
+HYPRE_Int hypre_HybridGetRecomputeResidualP( void *hybrid_vdata , HYPRE_Int *recompute_residual_p );
 HYPRE_Int hypre_HybridSetKDim ( void *hybrid_vdata , HYPRE_Int k_dim );
 HYPRE_Int hypre_HybridSetPrecond ( void *pcg_vdata , HYPRE_Int (*pcg_precond_solve )(void*, void*, void*, void*), HYPRE_Int (*pcg_precond_setup )(void*, void*, void*, void*), void *pcg_precond );
 HYPRE_Int hypre_HybridSetLogging ( void *hybrid_vdata , HYPRE_Int logging );

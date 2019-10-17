@@ -1,0 +1,30 @@
+<a href="ex3.c.html"><h2>Example 3</h2></a>
+<p>
+This code solves a system corresponding to a discretization
+of the Laplace equation with zero boundary conditions on the
+unit square. The domain is split into an N x N processor grid.
+Thus, the given number of processors should be a perfect square.
+Each processor's piece of the grid has n x n cells with n x n
+nodes connected by the standard 5-point stencil. Note that the
+struct interface assumes a cell-centered grid, and, therefore,
+the nodes are not shared.  This example demonstrates more
+features than the previous two struct examples (Example 1 and
+Example 2).  Two solvers are available.
+<p>
+To incorporate the boundary conditions, we do the following:
+Let x_i and x_b be the interior and boundary parts of the
+solution vector x. We can split the matrix A as
+<p>
+<center> A = [A_ii A_ib; A_bi A_bb]. </center>
+<p>
+Let u_0 be the Dirichlet B.C.  We can simply say that x_b = u_0.
+If b_i is the right-hand side, then we just need to solve in
+the interior:
+<p>
+<center> A_ii x_i = b_i - A_ib u_0. </center>
+<p>
+For this partitcular example, u_0 = 0, so we are just solving
+A_ii x_i = b_i.
+<p>
+We recommend viewing examples 1 and 2 before viewing this
+example.

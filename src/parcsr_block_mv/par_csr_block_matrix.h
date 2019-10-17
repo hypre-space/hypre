@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -37,26 +32,26 @@ typedef struct
 {
    MPI_Comm             comm;
 
-   HYPRE_Int                    global_num_rows;
-   HYPRE_Int                    global_num_cols;
-   HYPRE_Int                    first_row_index;
-   HYPRE_Int                    first_col_diag;
+   HYPRE_BigInt         global_num_rows;
+   HYPRE_BigInt         global_num_cols;
+   HYPRE_BigInt         first_row_index;
+   HYPRE_BigInt         first_col_diag;
 
  /* need to know entire local range in case row_starts and col_starts 
     are null */ 
-   HYPRE_Int                  last_row_index;
-   HYPRE_Int                  last_col_diag;
+   HYPRE_BigInt         last_row_index;
+   HYPRE_BigInt         last_col_diag;
 
    hypre_CSRBlockMatrix *diag;
    hypre_CSRBlockMatrix *offd;
-   HYPRE_Int                    *col_map_offd; 
+   HYPRE_BigInt         *col_map_offd; 
         /* maps columns of offd to global columns */
-   HYPRE_Int                    *row_starts; 
+   HYPRE_BigInt         *row_starts; 
         /* array of length num_procs+1, row_starts[i] contains the 
            global number of the first row on proc i,  
            first_row_index = row_starts[my_id],
            row_starts[num_procs] = global_num_rows */
-   HYPRE_Int                    *col_starts;
+   HYPRE_BigInt         *col_starts;
         /* array of length num_procs+1, col_starts[i] contains the 
            global number of the first column of diag on proc i,  
            first_col_diag = col_starts[my_id],
@@ -71,7 +66,7 @@ typedef struct
    HYPRE_Int      owns_row_starts;
    HYPRE_Int      owns_col_starts;
 
-   HYPRE_Int      num_nonzeros;
+   HYPRE_BigInt   num_nonzeros;
    HYPRE_Real     d_num_nonzeros;
 
    /* Buffers used by GetRow to hold row currently being accessed. AJC, 4/99 */
@@ -123,8 +118,8 @@ hypre_ParCSRBlockMatrixExtractBExt(hypre_ParCSRBlockMatrix *B,
                                    hypre_ParCSRBlockMatrix *A, HYPRE_Int data);
 
 hypre_ParCSRBlockMatrix *
-hypre_ParCSRBlockMatrixCreate(MPI_Comm comm, HYPRE_Int block_size, HYPRE_Int global_num_rows,
-                              HYPRE_Int global_num_cols, HYPRE_Int *row_starts, HYPRE_Int *col_starts,
+hypre_ParCSRBlockMatrixCreate(MPI_Comm comm, HYPRE_Int block_size, HYPRE_BigInt global_num_rows,
+                              HYPRE_BigInt global_num_cols, HYPRE_BigInt *row_starts, HYPRE_BigInt *col_starts,
                               HYPRE_Int num_cols_offd, HYPRE_Int num_nonzeros_diag,
                               HYPRE_Int num_nonzeros_offd);
 
@@ -137,7 +132,7 @@ HYPRE_Int
 hypre_BoomerAMGBuildBlockInterp( hypre_ParCSRBlockMatrix    *A,
                                  HYPRE_Int                  *CF_marker,
                                  hypre_ParCSRMatrix         *S,
-                                 HYPRE_Int                  *num_cpts_global,
+                                 HYPRE_BigInt               *num_cpts_global,
                                  HYPRE_Int                   num_functions,
                                  HYPRE_Int                  *dof_func,
                                  HYPRE_Int                   debug_flag,
@@ -153,7 +148,7 @@ HYPRE_Int
 hypre_BoomerAMGBuildBlockInterpRV( hypre_ParCSRBlockMatrix   *A,
                                    HYPRE_Int                 *CF_marker,
                                    hypre_ParCSRMatrix        *S,
-                                   HYPRE_Int                 *num_cpts_global,
+                                   HYPRE_BigInt              *num_cpts_global,
                                    HYPRE_Int                  num_functions,
                                    HYPRE_Int                 *dof_func,
                                    HYPRE_Int                  debug_flag,
@@ -166,7 +161,7 @@ HYPRE_Int
 hypre_BoomerAMGBuildBlockInterpRV2( hypre_ParCSRBlockMatrix    *A,
                                     HYPRE_Int                  *CF_marker,
                                     hypre_ParCSRMatrix         *S,
-                                    HYPRE_Int                  *num_cpts_global,
+                                    HYPRE_BigInt               *num_cpts_global,
                                     HYPRE_Int                   num_functions,
                                     HYPRE_Int                  *dof_func,
                                     HYPRE_Int                   debug_flag,
@@ -178,7 +173,7 @@ HYPRE_Int
 hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix  *A,
                                      HYPRE_Int                *CF_marker,
                                      hypre_ParCSRMatrix       *S,
-                                     HYPRE_Int                *num_cpts_global,
+                                     HYPRE_BigInt             *num_cpts_global,
                                      HYPRE_Int                 num_functions,
                                      HYPRE_Int                *dof_func,
                                      HYPRE_Int                 debug_flag,
@@ -197,7 +192,7 @@ HYPRE_Int
 hypre_BoomerAMGBuildBlockDirInterp( hypre_ParCSRBlockMatrix   *A,
                                     HYPRE_Int                 *CF_marker,
                                     hypre_ParCSRMatrix        *S,
-                                    HYPRE_Int                 *num_cpts_global,
+                                    HYPRE_BigInt              *num_cpts_global,
                                     HYPRE_Int                  num_functions,
                                     HYPRE_Int                 *dof_func,
                                     HYPRE_Int                  debug_flag,
@@ -232,7 +227,8 @@ HYPRE_Int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
 HYPRE_Int
 hypre_GetCommPkgBlockRTFromCommPkgBlockA( hypre_ParCSRBlockMatrix *RT,
                                           hypre_ParCSRBlockMatrix *A,
-                                          HYPRE_Int *fine_to_coarse_offd);
+                                          HYPRE_Int *tmp_map_offd,
+                                          HYPRE_BigInt *fine_to_coarse_offd);
    
 
 hypre_ParCSRCommHandle *
@@ -285,8 +281,8 @@ hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix    *A,
    
 hypre_ParVector *
 hypre_ParVectorCreateFromBlock(MPI_Comm comm,
-                               HYPRE_Int p_global_size, 
-                               HYPRE_Int *p_partitioning, HYPRE_Int block_size);
+                               HYPRE_BigInt p_global_size, 
+                               HYPRE_BigInt *p_partitioning, HYPRE_Int block_size);
    
 HYPRE_Int
 hypre_ParCSRBlockMatrixMatvec(HYPRE_Complex alpha, hypre_ParCSRBlockMatrix *A,

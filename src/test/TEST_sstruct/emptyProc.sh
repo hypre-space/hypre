@@ -1,29 +1,13 @@
 #!/bin/sh
-#BHEADER**********************************************************************
-# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
-# Produced at the Lawrence Livermore National Laboratory.
-# This file is part of HYPRE.  See file COPYRIGHT for details.
+# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
-# HYPRE is free software; you can redistribute it and/or modify it under the
-# terms of the GNU Lesser General Public License (as published by the Free
-# Software Foundation) version 2.1 dated February 1999.
-#
-# $Revision$
-#EHEADER**********************************************************************
-
-
-
-
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 TNAME=`basename $0 .sh`
-CONVTOL=$1
+RTOL=$1
+ATOL=$2
 
-# Set default check tolerance
-if [ x$CONVTOL = "x" ];
-then
-    CONVTOL=0.0
-fi
-#echo "tol = $CONVTOL"
 #=============================================================================
 # sstruct: Test various empty proc problems
 #=============================================================================
@@ -39,7 +23,7 @@ for i in $TNUMS
 do
   tail -3 ${TNAME}.out.${i}  > ${TNAME}.testdata
   tail -3 ${TNAME}.out.1${i} > ${TNAME}.testdata.temp
-  (../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $CONVTOL) >&2
+  (../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $RTOL $ATOL) >&2
 done
 
 #=============================================================================
@@ -61,7 +45,7 @@ if [ "$OUT_COUNT" != "$SAVED_COUNT" ]; then
 fi
 
 if [ -z $HYPRE_NO_SAVED ]; then
-   (../runcheck.sh ${TNAME}.out ${TNAME}.saved $CONVTOL) >&2
+   (../runcheck.sh ${TNAME}.out ${TNAME}.saved $RTOL $ATOL) >&2
 fi
 
 #=============================================================================

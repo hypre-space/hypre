@@ -1,14 +1,7 @@
-#BHEADER**********************************************************************
-# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
-# Produced at the Lawrence Livermore National Laboratory.
-# This file is part of HYPRE.  See file COPYRIGHT for details.
+# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
-# HYPRE is free software; you can redistribute it and/or modify it under the
-# terms of the GNU Lesser General Public License (as published by the Free
-# Software Foundation) version 2.1 dated February 1999.
-#
-# $Revision$
-#EHEADER**********************************************************************
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 default:all
 
@@ -49,9 +42,15 @@ LAPACKLIBFLAGS = ${LAPACKLIBDIRS} ${LAPACKLIBS}
 BLASLIBFLAGS = ${BLASLIBDIRS} ${BLASLIBS}
 LIBFLAGS = ${LDFLAGS} ${LIBS}
 
+ifeq (${LINK_CC}, nvcc)
+   XLINK = -Xlinker=-rpath,${HYPRE_BUILD_DIR}/lib
+else
+   XLINK = -Wl,-rpath,${HYPRE_BUILD_DIR}/lib
+endif
+
 LFLAGS =\
- -L${HYPRE_BUILD_DIR}/lib\
- -lHYPRE\
+ -L${HYPRE_BUILD_DIR}/lib -lHYPRE\
+ ${XLINK}\
  ${DSUPERLU_LIBS}\
  ${SUPERLU_LIBS}\
  ${MPILIBFLAGS}\
@@ -75,7 +74,6 @@ HYPRE_DRIVERS =\
  zboxloop.c
 
 HYPRE_DRIVERS_CXX =\
- fei.cxx\
  cxx_ij.cxx\
  cxx_sstruct.cxx\
  cxx_struct.cxx

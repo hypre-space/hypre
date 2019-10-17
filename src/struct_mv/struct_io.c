@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -46,7 +41,7 @@ hypre_PrintBoxArrayData( FILE            *file,
    /*----------------------------------------
     * Print data
     *----------------------------------------*/
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_OMP45)
+#if HYPRE_MEMORY_DEVICE_ACT == HYPRE_MEMORY_DEVICE
    HYPRE_Complex   *data_host_saved;
    HYPRE_Int tot_size = 0;
    hypre_ForBoxI(i, data_space)
@@ -103,7 +98,7 @@ hypre_PrintBoxArrayData( FILE            *file,
       data_host += num_values*data_box_volume;
    }
 
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_OMP45)
+#if HYPRE_MEMORY_DEVICE_ACT == HYPRE_MEMORY_DEVICE
    hypre_TFree(data_host_saved, HYPRE_MEMORY_HOST);
 #endif
    

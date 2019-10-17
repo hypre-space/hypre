@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -1295,8 +1290,8 @@ main( hypre_int argc,
    Index                *refine;
    Index                *distribute;
    Index                *block;
-   HYPRE_Int                   solver_id;
-   HYPRE_Int                   print_system;
+   HYPRE_Int             solver_id;
+   HYPRE_Int             print_system;
                         
    HYPRE_SStructGrid     grid;
    HYPRE_SStructStencil *stencils;
@@ -1332,12 +1327,11 @@ main( hypre_int argc,
 
    /* Initialize MPI */
    hypre_MPI_Init(&argc, &argv);
-
-   /* GPU Init stuff inside */
-   hypre_init();
-
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+
+   /* Initialize Hypre */
+   HYPRE_Init(argc, argv);
 
    /*-----------------------------------------------------------
     * Read input file
@@ -1898,11 +1892,12 @@ main( hypre_int argc,
    hypre_TFree(distribute, HYPRE_MEMORY_HOST);
    hypre_TFree(block, HYPRE_MEMORY_HOST);
 
-   /* GPU finalize stuff inside */
-   hypre_finalize();
+   /* Finalize Hypre */
+   HYPRE_Finalize();
 
    /* Finalize MPI */
    hypre_MPI_Finalize();
 
    return (0);
 }
+

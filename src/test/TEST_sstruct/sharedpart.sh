@@ -1,26 +1,12 @@
 #!/bin/sh
-#BHEADER**********************************************************************
-# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
-# Produced at the Lawrence Livermore National Laboratory.
-# This file is part of HYPRE.  See file COPYRIGHT for details.
+# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
-# HYPRE is free software; you can redistribute it and/or modify it under the
-# terms of the GNU Lesser General Public License (as published by the Free
-# Software Foundation) version 2.1 dated February 1999.
-#
-# $Revision$
-#EHEADER**********************************************************************
-
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 TNAME=`basename $0 .sh`
-CONVTOL=$1
-
-# Set default check tolerance
-if [ x$CONVTOL = "x" ];
-then
-    CONVTOL=0.0
-fi
-#echo "tol = $CONVTOL"
+RTOL=$1
+ATOL=$2
 
 #=============================================================================
 #=============================================================================
@@ -30,7 +16,7 @@ tail -3 ${TNAME}.out.0 > ${TNAME}.testdata
 for i in 1 2 3
 do
    tail -3 ${TNAME}.out.$i > ${TNAME}.testdata.temp
-   (../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $CONVTOL) >&2
+   (../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $RTOL $ATOL) >&2
 done
 
 #=============================================================================
@@ -38,7 +24,7 @@ done
 
 tail -3 ${TNAME}.out.10 > ${TNAME}.testdata
 tail -3 ${TNAME}.out.11 > ${TNAME}.testdata.temp
-(../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $CONVTOL) >&2
+(../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $RTOL $ATOL) >&2
 
 #=============================================================================
 # compare with baseline case
@@ -72,7 +58,7 @@ if [ "$OUT_COUNT" != "$SAVED_COUNT" ]; then
 fi
 
 if [ -z $HYPRE_NO_SAVED ]; then
-   (../runcheck.sh ${TNAME}.out ${TNAME}.saved $CONVTOL) >&2
+   (../runcheck.sh ${TNAME}.out ${TNAME}.saved $RTOL $ATOL) >&2
 fi
 
 #=============================================================================

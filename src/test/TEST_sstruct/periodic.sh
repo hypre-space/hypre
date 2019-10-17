@@ -1,26 +1,12 @@
 #!/bin/sh
-#BHEADER**********************************************************************
-# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
-# Produced at the Lawrence Livermore National Laboratory.
-# This file is part of HYPRE.  See file COPYRIGHT for details.
+# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
-# HYPRE is free software; you can redistribute it and/or modify it under the
-# terms of the GNU Lesser General Public License (as published by the Free
-# Software Foundation) version 2.1 dated February 1999.
-#
-# $Revision$
-#EHEADER**********************************************************************
-
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 TNAME=`basename $0 .sh`
-CONVTOL=$1
-
-# Set default check tolerance
-if [ x$CONVTOL = "x" ];
-then
-    CONVTOL=0.0
-fi
-#echo "tol = $CONVTOL"
+RTOL=$1
+ATOL=$2
 
 #=============================================================================
 # Check SetNeighborBox for ${TNAME} problems (2D)
@@ -28,7 +14,7 @@ fi
 
 tail -3 ${TNAME}.out.20 > ${TNAME}.testdata
 tail -3 ${TNAME}.out.21 > ${TNAME}.testdata.temp
-(../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $CONVTOL) >&2
+(../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $RTOL $ATOL) >&2
 
 #=============================================================================
 # Check SetNeighborBox for ${TNAME} problems (3D)
@@ -36,7 +22,7 @@ tail -3 ${TNAME}.out.21 > ${TNAME}.testdata.temp
 
 tail -3 ${TNAME}.out.30 > ${TNAME}.testdata
 tail -3 ${TNAME}.out.31 > ${TNAME}.testdata.temp
-(../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $CONVTOL) >&2
+(../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $RTOL $ATOL) >&2
 
 #=============================================================================
 # Check SysPFMG for power-of-two and non-power-of-two systems
@@ -44,15 +30,15 @@ tail -3 ${TNAME}.out.31 > ${TNAME}.testdata.temp
 
 tail -3 ${TNAME}.out.40 > ${TNAME}.testdata
 tail -3 ${TNAME}.out.41 > ${TNAME}.testdata.temp
-(../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $CONVTOL) >&2
+(../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $RTOL $ATOL) >&2
 tail -3 ${TNAME}.out.42 > ${TNAME}.testdata.temp
-(../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $CONVTOL) >&2
+(../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $RTOL $ATOL) >&2
 
 tail -3 ${TNAME}.out.50 > ${TNAME}.testdata
 tail -3 ${TNAME}.out.51 > ${TNAME}.testdata.temp
-(../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $CONVTOL) >&2
+(../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $RTOL $ATOL) >&2
 tail -3 ${TNAME}.out.52 > ${TNAME}.testdata.temp
-(../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $CONVTOL) >&2
+(../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $RTOL $ATOL) >&2
 
 #=============================================================================
 # Check PFMG, SMG, and SysPFMG for problems with period larger than the grid
@@ -61,15 +47,15 @@ tail -3 ${TNAME}.out.52 > ${TNAME}.testdata.temp
 # First check that sstruct and struct are the same here
 tail -3 ${TNAME}.out.60 > ${TNAME}.testdata
 tail -3 ${TNAME}.out.61 > ${TNAME}.testdata.temp
-(../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $CONVTOL) >&2
+(../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $RTOL $ATOL) >&2
 tail -3 ${TNAME}.out.62 > ${TNAME}.testdata
 tail -3 ${TNAME}.out.63 > ${TNAME}.testdata.temp
-(../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $CONVTOL) >&2
+(../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $RTOL $ATOL) >&2
 
 # Also check that PFMG and SysPFMG are the same
 tail -3 ${TNAME}.out.66 > ${TNAME}.testdata
 tail -3 ${TNAME}.out.67 > ${TNAME}.testdata.temp
-(../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $CONVTOL) >&2
+(../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $RTOL $ATOL) >&2
 
 #=============================================================================
 # Check that reverse communication used to AddValues still works
@@ -84,7 +70,7 @@ TNUM="81 82 83 84 85"
 for i in $TNUM
 do
   tail -3 ${TNAME}.out.$i > ${TNAME}.testdata.temp
-  (../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $CONVTOL) >&2
+  (../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $RTOL $ATOL) >&2
 done
 
 tail -3 ${TNAME}.out.90 > ${TNAME}.testdata
@@ -92,7 +78,7 @@ TNUM="91 92 93 94 95"
 for i in $TNUM
 do
   tail -3 ${TNAME}.out.$i > ${TNAME}.testdata.temp
-  (../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $CONVTOL) >&2
+  (../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $RTOL $ATOL) >&2
 done
 
 #=============================================================================
@@ -126,7 +112,7 @@ if [ "$OUT_COUNT" != "$SAVED_COUNT" ]; then
 fi
 
 if [ -z $HYPRE_NO_SAVED ]; then
-    (../runcheck.sh ${TNAME}.out ${TNAME}.saved $CONVTOL) >&2
+   (../runcheck.sh ${TNAME}.out ${TNAME}.saved $RTOL $ATOL) >&2
 fi
 
 #=============================================================================

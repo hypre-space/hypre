@@ -1,25 +1,16 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #ifndef hypre_ParAMG_DATA_HEADER
 #define hypre_ParAMG_DATA_HEADER
 
 #define CUMNUMIT
 
-#include "par_csr_block_matrix.h"
+#include "../parcsr_block_mv/par_csr_block_matrix.h"
 
 
 /*--------------------------------------------------------------------------
@@ -31,17 +22,17 @@ typedef struct
 
    /* setup params */
    HYPRE_Int      max_levels;
-   HYPRE_Real   strong_threshold;
-   HYPRE_Real   max_row_sum;
-   HYPRE_Real   trunc_factor;
-   HYPRE_Real   agg_trunc_factor;
-   HYPRE_Real   agg_P12_trunc_factor;
-   HYPRE_Real   jacobi_trunc_threshold;
-   HYPRE_Real   S_commpkg_switch;
-   HYPRE_Real   CR_rate;
-   HYPRE_Real   CR_strong_th;
-   HYPRE_Real   A_drop_tol;
-   HYPRE_Int    A_drop_type;
+   HYPRE_Real     strong_threshold;
+   HYPRE_Real     max_row_sum;
+   HYPRE_Real     trunc_factor;
+   HYPRE_Real     agg_trunc_factor;
+   HYPRE_Real     agg_P12_trunc_factor;
+   HYPRE_Real     jacobi_trunc_threshold;
+   HYPRE_Real     S_commpkg_switch;
+   HYPRE_Real     CR_rate;
+   HYPRE_Real     CR_strong_th;
+   HYPRE_Real     A_drop_tol;
+   HYPRE_Int      A_drop_type;
    HYPRE_Int      measure_type;
    HYPRE_Int      setup_type;
    HYPRE_Int      coarsen_type;
@@ -51,7 +42,9 @@ typedef struct
    HYPRE_Int      agg_interp_type;
    HYPRE_Int      agg_P_max_elmts;
    HYPRE_Int      agg_P12_max_elmts;
-   HYPRE_Real     restr_par;
+   HYPRE_Int      restr_par;
+   HYPRE_Int      is_triangular;
+   HYPRE_Int      gmres_switch;
    HYPRE_Int      agg_num_levels;
    HYPRE_Int      num_paths;
    HYPRE_Int      post_interp_type;
@@ -78,10 +71,10 @@ typedef struct
    HYPRE_Int      user_num_sweeps;
    HYPRE_Real     user_relax_weight;
    HYPRE_Real     outer_wt;
-   HYPRE_Real  *relax_weight;
-   HYPRE_Real  *omega;
-   HYPRE_Int    converge_type;
-   HYPRE_Real   tol;
+   HYPRE_Real    *relax_weight;
+   HYPRE_Real    *omega;
+   HYPRE_Int      converge_type;
+   HYPRE_Real     tol;
 
    /* problem data */
    hypre_ParCSRMatrix  *A;
@@ -101,14 +94,18 @@ typedef struct
    hypre_ParVector    **U_array;
    hypre_ParCSRMatrix **P_array;
    hypre_ParCSRMatrix **R_array;
-   HYPRE_Int                **CF_marker_array;
-   HYPRE_Int                **dof_func_array;
-   HYPRE_Int                **dof_point_array;
-   HYPRE_Int                **point_dof_map_array;
-   HYPRE_Int                  num_levels;
+   HYPRE_Int          **CF_marker_array;
+   HYPRE_Int          *local_num_c_points;
+   int          **local_c_point_mask;
+   int          **local_f_point_mask;
+   HYPRE_Int          **dof_func_array;
+   HYPRE_Int          **dof_point_array;
+   HYPRE_Int          **point_dof_map_array;
+   HYPRE_Int            num_levels;
    HYPRE_Real         **l1_norms;
 
    /* composide grid data for AMG-DD */
+   HYPRE_Int                 amgdd_start_level;
    HYPRE_Int                 min_fac_iter;
    HYPRE_Int                 max_fac_iter;
    HYPRE_Real                fac_tol;
@@ -122,6 +119,7 @@ typedef struct
    HYPRE_Int                 amgdd_agglomeration_max_num_levels;
    HYPRE_Int                 amgdd_agglomeration_threshold;
    HYPRE_Int                 amgdd_agglomeration_partition_size;
+   HYPRE_Int                 amgdd_num_global_relax;
    hypre_ParCompGrid       **compGrid;
    hypre_ParCompGridCommPkg *compGridCommPkg;
 
@@ -133,41 +131,41 @@ typedef struct
    HYPRE_Int block_mode;
 
    /* data for more complex smoothers */
-   HYPRE_Int                  smooth_num_levels;
-   HYPRE_Int                  smooth_type;
-   HYPRE_Solver        *smoother;
-   HYPRE_Int			smooth_num_sweeps;
-   HYPRE_Int                  schw_variant;
-   HYPRE_Int                  schw_overlap;
-   HYPRE_Int                  schw_domain_type;
-   HYPRE_Real		schwarz_rlx_weight;
-   HYPRE_Int                  schwarz_use_nonsymm;
-   HYPRE_Int			ps_sym;
-   HYPRE_Int			ps_level;
-   HYPRE_Int			pi_max_nz_per_row;
-   HYPRE_Int			eu_level;
-   HYPRE_Int			eu_bj;
-   HYPRE_Real		ps_threshold;
-   HYPRE_Real		ps_filter;
-   HYPRE_Real		pi_drop_tol;
-   HYPRE_Real		eu_sparse_A;
-   char		       *euclidfile;
+   HYPRE_Int           smooth_num_levels;
+   HYPRE_Int           smooth_type;
+   HYPRE_Solver       *smoother;
+   HYPRE_Int           smooth_num_sweeps;
+   HYPRE_Int           schw_variant;
+   HYPRE_Int           schw_overlap;
+   HYPRE_Int           schw_domain_type;
+   HYPRE_Real          schwarz_rlx_weight;
+   HYPRE_Int           schwarz_use_nonsymm;
+   HYPRE_Int           ps_sym;
+   HYPRE_Int           ps_level;
+   HYPRE_Int           pi_max_nz_per_row;
+   HYPRE_Int           eu_level;
+   HYPRE_Int           eu_bj;
+   HYPRE_Real          ps_threshold;
+   HYPRE_Real          ps_filter;
+   HYPRE_Real          pi_drop_tol;
+   HYPRE_Real          eu_sparse_A;
+   char               *euclidfile;
 
-   HYPRE_Real          *max_eig_est;
-   HYPRE_Real          *min_eig_est;
-   HYPRE_Int            cheby_eig_est;
-   HYPRE_Int            cheby_order;
-   HYPRE_Int            cheby_variant;
-   HYPRE_Int            cheby_scale;
-   HYPRE_Real           cheby_fraction;
-   HYPRE_Real         **cheby_ds;
-   HYPRE_Real         **cheby_coefs;
+   HYPRE_Real         *max_eig_est;
+   HYPRE_Real         *min_eig_est;
+   HYPRE_Int           cheby_eig_est;
+   HYPRE_Int           cheby_order;
+   HYPRE_Int           cheby_variant;
+   HYPRE_Int           cheby_scale;
+   HYPRE_Real          cheby_fraction;
+   HYPRE_Real        **cheby_ds;
+   HYPRE_Real        **cheby_coefs;
 
    /* data needed for non-Galerkin option */
-   HYPRE_Int           nongalerk_num_tol;
-   HYPRE_Real         *nongalerk_tol;
-   HYPRE_Real          nongalerkin_tol;
-   HYPRE_Real         *nongal_tol_array;
+   HYPRE_Int            nongalerk_num_tol;
+   HYPRE_Real          *nongalerk_tol;
+   HYPRE_Real           nongalerkin_tol;
+   HYPRE_Real          *nongal_tol_array;
 
    /* data generated in the solve phase */
    hypre_ParVector   *Vtemp;
@@ -179,8 +177,8 @@ typedef struct
    hypre_ParVector   *Ztemp;
 
    /* fields used by GSMG and LS interpolation */
-   HYPRE_Int                 gsmg;        /* nonzero indicates use of GSMG */
-   HYPRE_Int                 num_samples; /* number of sample vectors */
+   HYPRE_Int          gsmg;        /* nonzero indicates use of GSMG */
+   HYPRE_Int          num_samples; /* number of sample vectors */
 
    /* log info */
    HYPRE_Int      logging;
@@ -189,46 +187,46 @@ typedef struct
 #ifdef CUMNUMIT
    HYPRE_Int      cum_num_iterations;
 #endif
-   HYPRE_Real   rel_resid_norm;
+   HYPRE_Real     rel_resid_norm;
    hypre_ParVector *residual; /* available if logging>1 */
 
    /* output params */
    HYPRE_Int      print_level;
-   char     log_file_name[256];
+   char           log_file_name[256];
    HYPRE_Int      debug_flag;
 
    /* whether to print the constructed coarse grids BM Oct 22, 2006 */
    HYPRE_Int      plot_grids;
-   char     plot_filename[251];
+   char           plot_filename[251];
 
    /* coordinate data BM Oct 17, 2006 */
    HYPRE_Int      coorddim;
-   float    *coordinates;
+   float         *coordinates;
 
    /* data for fitting vectors in interpolation */
    HYPRE_Int               num_interp_vectors;
    HYPRE_Int               num_levels_interp_vectors; /* not set by user */
-   hypre_ParVector **interp_vectors;
-   hypre_ParVector ***interp_vectors_array;
+   hypre_ParVector       **interp_vectors;
+   hypre_ParVector       ***interp_vectors_array;
    HYPRE_Int               interp_vec_variant;
    HYPRE_Int               interp_vec_first_level;
-   HYPRE_Real        interp_vectors_abs_q_trunc;
+   HYPRE_Real              interp_vectors_abs_q_trunc;
    HYPRE_Int               interp_vectors_q_max;
    HYPRE_Int               interp_refine;
    HYPRE_Int               smooth_interp_vectors;
-   HYPRE_Real       *expandp_weights; /* currently not set by user */
+   HYPRE_Real             *expandp_weights; /* currently not set by user */
 
    /* enable redundant coarse grid solve */
-   HYPRE_Solver   coarse_solver;
+   HYPRE_Solver         coarse_solver;
    hypre_ParCSRMatrix  *A_coarse;
-   hypre_ParVector  *f_coarse;
-   hypre_ParVector  *u_coarse;
-   MPI_Comm   new_comm;
+   hypre_ParVector     *f_coarse;
+   hypre_ParVector     *u_coarse;
+   MPI_Comm             new_comm;
 
    /* store matrix, vector and communication info for Gaussian elimination */
    HYPRE_Real *A_mat;
    HYPRE_Real *b_vec;
-   HYPRE_Int *comm_info;
+   HYPRE_Int  *comm_info;
 
    /* information for multiplication with Lambda - additive AMG */
    HYPRE_Int      additive;
@@ -250,11 +248,11 @@ typedef struct
    HYPRE_Int keepTranspose;
 
    /* information for preserving indeces as coarse grid points */
-   HYPRE_Int C_point_coarse_level;
-   HYPRE_Int num_C_point_marker;
-   HYPRE_Int   **C_point_marker_array;
+   HYPRE_Int   C_point_coarse_level;
+   HYPRE_Int   num_C_point_marker;
+   HYPRE_Int **C_point_marker_array;
 
-#ifdef HAVE_DSUPERLU
+#ifdef HYPRE_USING_DSUPERLU
  /* Parameters and data for SuperLU_Dist */
    HYPRE_Int dslu_threshold;
    HYPRE_Solver dslu_solver;
@@ -269,6 +267,8 @@ typedef struct
 /* setup params */
 
 #define hypre_ParAMGDataRestriction(amg_data) ((amg_data)->restr_par)
+#define hypre_ParAMGDataIsTriangular(amg_data) ((amg_data)->is_triangular)
+#define hypre_ParAMGDataGMRESSwitchR(amg_data) ((amg_data)->gmres_switch)
 #define hypre_ParAMGDataMaxLevels(amg_data) ((amg_data)->max_levels)
 #define hypre_ParAMGDataStrongThreshold(amg_data) \
 ((amg_data)->strong_threshold)
@@ -336,6 +336,9 @@ typedef struct
 
 /* data generated by the setup phase */
 #define hypre_ParAMGDataCFMarkerArray(amg_data) ((amg_data)-> CF_marker_array)
+#define hypre_ParAMGDataLocalNumCPoints(amg_data) ((amg_data)-> local_num_c_points)
+#define hypre_ParAMGDataLocalCPointMask(amg_data) ((amg_data)-> local_c_point_mask)
+#define hypre_ParAMGDataLocalFPointMask(amg_data) ((amg_data)-> local_f_point_mask)
 #define hypre_ParAMGDataCPointMarkerArray(amg_data) ((amg_data)-> C_point_marker_array)
 #define hypre_ParAMGDataAArray(amg_data) ((amg_data)->A_array)
 #define hypre_ParAMGDataFArray(amg_data) ((amg_data)->F_array)
@@ -382,6 +385,7 @@ typedef struct
 #define hypre_ParAMGDataChebyCoefs(amg_data) ((amg_data)->cheby_coefs)
 
 /* composite grid data */
+#define hypre_ParAMGDataAMGDDStartLevel(amg_data) ((amg_data)->amgdd_start_level)
 #define hypre_ParAMGDataMinFACIter(amg_data) ((amg_data)->min_fac_iter)
 #define hypre_ParAMGDataMaxFACIter(amg_data) ((amg_data)->max_fac_iter)
 #define hypre_ParAMGDataFACTol(amg_data) ((amg_data)->fac_tol)
@@ -395,6 +399,7 @@ typedef struct
 #define hypre_ParAMGDataAMGDDAgglomerationMaxNumLevels(amg_data) ((amg_data)->amgdd_agglomeration_max_num_levels)
 #define hypre_ParAMGDataAMGDDAgglomerationThreshold(amg_data) ((amg_data)->amgdd_agglomeration_threshold)
 #define hypre_ParAMGDataAMGDDAgglomerationPartitionSize(amg_data) ((amg_data)->amgdd_agglomeration_partition_size)
+#define hypre_ParAMGDataAMGDDNumGlobalRelax(amg_data) ((amg_data)->amgdd_num_global_relax)
 #define hypre_ParAMGDataCompGrid(amg_data) ((amg_data)->compGrid)
 #define hypre_ParAMGDataCompGridCommPkg(amg_data) ((amg_data)->compGridCommPkg)
 
@@ -404,7 +409,6 @@ typedef struct
 #define hypre_ParAMGDataRBlockArray(amg_data) ((amg_data)->R_block_array)
 
 #define hypre_ParAMGDataBlockMode(amg_data) ((amg_data)->block_mode)
-
 
 /* data generated in the solve phase */
 #define hypre_ParAMGDataVtemp(amg_data) ((amg_data)->Vtemp)
@@ -441,7 +445,6 @@ typedef struct
 /* coordinates BM Oct 17, 2006 */
 #define hypre_ParAMGDataCoordDim(amg_data) ((amg_data)->coorddim)
 #define hypre_ParAMGDataCoordinates(amg_data) ((amg_data)->coordinates)
-
 
 #define hypre_ParAMGNumInterpVectors(amg_data) ((amg_data)->num_interp_vectors)
 #define hypre_ParAMGNumLevelsInterpVectors(amg_data) ((amg_data)->num_levels_interp_vectors)
@@ -496,7 +499,7 @@ typedef struct
 #define hypre_ParAMGDataCPointKeepLevel(amg_data) ((amg_data)-> C_point_keep_level)
 #define hypre_ParAMGDataNumCPointKeep(amg_data) ((amg_data)-> num_C_point_marker)
 
-#ifdef HAVE_DSUPERLU
+#ifdef HYPRE_USING_DSUPERLU
  /* Parameters and data for SuperLU_Dist */
 #define hypre_ParAMGDataDSLUThreshold(amg_data) ((amg_data)->dslu_threshold)
 #define hypre_ParAMGDataDSLUSolver(amg_data) ((amg_data)->dslu_solver)

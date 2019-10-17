@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_sstruct_ls.h"
 #include "fac.h"
@@ -171,7 +166,6 @@ hypre_FacZeroCFSten( hypre_SStructPMatrix *Af,
                                                                            stencil_shape);
                            hypre_BoxGetSize(shift_ibox, loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(ac_ptr)
                            hypre_BoxLoop1Begin(ndim, loop_size,
                                                ac_dbox, hypre_BoxIMin(shift_ibox),
@@ -181,7 +175,6 @@ hypre_FacZeroCFSten( hypre_SStructPMatrix *Af,
                            }
                            hypre_BoxLoop1End(iac);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
                         }   /* if ( hypre_BoxVolume(shift_ibox) ) */
 
                         hypre_BoxDestroy(shift_ibox);
@@ -396,7 +389,6 @@ hypre_FacZeroFCSten( hypre_SStructPMatrix  *A,
 
                         hypre_BoxGetSize(&intersect_box, loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(a_ptr)
                         hypre_BoxLoop1Begin(ndim, loop_size,
                                             a_dbox, hypre_BoxIMin(&intersect_box),
@@ -406,7 +398,6 @@ hypre_FacZeroFCSten( hypre_SStructPMatrix  *A,
                         }
                         hypre_BoxLoop1End(ia);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
 
                      }  /* hypre_ForBoxI(fj, intersect_boxes) */
 

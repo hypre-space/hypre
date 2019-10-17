@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_parcsr_ls.h"
 #include "Common.h"
@@ -2971,20 +2966,20 @@ hypre_ParAMGCreateDomainDof(hypre_ParCSRMatrix   *A,
    HYPRE_Int *a_diag_j = hypre_CSRMatrixJ(A_diag);
    HYPRE_Real *a_diag_data = hypre_CSRMatrixData(A_diag);
    HYPRE_Int num_variables = hypre_CSRMatrixNumRows(A_diag);
-   HYPRE_Int first_col_diag = hypre_ParCSRMatrixFirstColDiag(A);
-   HYPRE_Int col_0 = first_col_diag -1 ;
-   HYPRE_Int col_n = first_col_diag + num_variables;
+   HYPRE_BigInt first_col_diag = hypre_ParCSRMatrixFirstColDiag(A);
+   HYPRE_BigInt col_0 = first_col_diag -1 ;
+   HYPRE_BigInt col_n = first_col_diag + (HYPRE_BigInt)num_variables;
 
    hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
    HYPRE_Int *a_offd_i = hypre_CSRMatrixI(A_offd);
    HYPRE_Int *a_offd_j = hypre_CSRMatrixJ(A_offd);
    HYPRE_Real *a_offd_data = hypre_CSRMatrixData(A_offd);
    HYPRE_Int num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
-   HYPRE_Int *col_map_offd = hypre_ParCSRMatrixColMapOffd(A);
+   HYPRE_BigInt *col_map_offd = hypre_ParCSRMatrixColMapOffd(A);
 
    hypre_CSRMatrix *A_ext;
    HYPRE_Int *a_ext_i;
-   HYPRE_Int *a_ext_j;
+   HYPRE_BigInt *a_ext_j;
    HYPRE_Real *a_ext_data;
 
    /* HYPRE_Int *i_dof_to_accept_weight; */
@@ -3001,7 +2996,7 @@ hypre_ParAMGCreateDomainDof(hypre_ParCSRMatrix   *A,
    HYPRE_Int *recv_vec_starts = NULL;
 
    HYPRE_Int ierr = 0;
-   HYPRE_Int i,j,k, jj,  l_loc, i_loc, j_loc;
+   HYPRE_Int i,j,k, l_loc, i_loc, j_loc;
    HYPRE_Int i_dof;
    HYPRE_Int nf;
    HYPRE_Int *i_local_to_global;
@@ -3345,7 +3340,7 @@ hypre_ParAMGCreateDomainDof(hypre_ParCSRMatrix   *A,
    {
       A_ext = hypre_ParCSRMatrixExtractBExt(A,A,1);
       a_ext_i = hypre_CSRMatrixI(A_ext);
-      a_ext_j = hypre_CSRMatrixJ(A_ext);
+      a_ext_j = hypre_CSRMatrixBigJ(A_ext);
       a_ext_data = hypre_CSRMatrixData(A_ext);
    }
    else
@@ -3400,22 +3395,24 @@ hypre_ParAMGCreateDomainDof(hypre_ParCSRMatrix   *A,
          }
          else
          {
+            HYPRE_BigInt jj;
+            HYPRE_Int j2;
             i_dof -= num_variables;
             for (j=a_ext_i[i_dof]; j < a_ext_i[i_dof+1]; j++)
             {
                jj = a_ext_j[j];
                if (jj > col_0 && jj < col_n)
                {
-                  jj = jj - first_col_diag;
+                  j2 = (HYPRE_Int)(jj - first_col_diag);
                }
                else
                {
-                  jj = hypre_BinarySearch(col_map_offd,jj,num_cols_offd);
-                  if (jj > -1) jj += num_variables;
+                  j2 = hypre_BigBinarySearch(col_map_offd,jj,num_cols_offd);
+                  if (j2 > -1) j2 += num_variables;
                }
-               if (jj > -1)
+               if (j2 > -1)
                {
-                  j_loc = i_global_to_local[jj];
+                  j_loc = i_global_to_local[j2];
                   if (j_loc >=0)
                      AE[i_loc + j_loc * local_dof_counter] = a_ext_data[j];
                }
@@ -3544,7 +3541,7 @@ hypre_ParGenerateHybridScale(hypre_ParCSRMatrix *A,
 {
    hypre_CSRMatrix *A_ext;
    HYPRE_Int *A_ext_i;
-   HYPRE_Int *A_ext_j;
+   HYPRE_BigInt *A_ext_j;
    HYPRE_Real *A_ext_data;
 
    hypre_CSRMatrix *A_boundary;
@@ -3555,7 +3552,7 @@ hypre_ParGenerateHybridScale(hypre_ParCSRMatrix *A,
    HYPRE_Int num_domains = hypre_CSRMatrixNumRows(domain_structure);
    HYPRE_Int *i_domain_dof = hypre_CSRMatrixI(domain_structure);
    HYPRE_Int *j_domain_dof = hypre_CSRMatrixJ(domain_structure);
-   HYPRE_Int i, j, j_col;
+   HYPRE_Int i, j, jj;
    HYPRE_Real *scale;
    HYPRE_Real *scale_ext;
    HYPRE_Real *scale_int;
@@ -3568,14 +3565,14 @@ hypre_ParGenerateHybridScale(hypre_ParCSRMatrix *A,
 
    HYPRE_Int num_variables = hypre_ParCSRMatrixNumRows(A);
    HYPRE_Int num_cols_offd = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A));
-   HYPRE_Int jj, j_loc, index, start;
-   HYPRE_Int col_0, col_n;
-   HYPRE_Int *col_map_offd = hypre_ParCSRMatrixColMapOffd(A);
+   HYPRE_Int j_loc, index, start;
+   HYPRE_BigInt col_0, col_n;
+   HYPRE_BigInt *col_map_offd = hypre_ParCSRMatrixColMapOffd(A);
 
    hypre_ParCSRCommHandle *comm_handle;
 
    col_0 = hypre_ParCSRMatrixFirstColDiag(A)-1;
-   col_n = col_0+num_variables;
+   col_n = col_0+(HYPRE_Int)num_variables;
 
    A_boundary = NULL;
 
@@ -3625,7 +3622,7 @@ hypre_ParGenerateHybridScale(hypre_ParCSRMatrix *A,
       A_ext = hypre_ParCSRMatrixExtractBExt(A,A,1);
       A_ext_i = hypre_CSRMatrixI(A_ext);
       A_boundary_i = hypre_CTAlloc(HYPRE_Int, num_cols_offd+1, HYPRE_MEMORY_HOST);
-      A_ext_j = hypre_CSRMatrixJ(A_ext);
+      A_ext_j = hypre_CSRMatrixBigJ(A_ext);
       A_ext_data = hypre_CSRMatrixData(A_ext);
       /* compress A_ext to contain only local data and
          necessary boundary points*/
@@ -3635,6 +3632,7 @@ hypre_ParGenerateHybridScale(hypre_ParCSRMatrix *A,
          A_boundary_i[i] = index;
          for (j = A_ext_i[i]; j < A_ext_i[i+1]; j++)
          {
+            HYPRE_BigInt j_col;
             j_col = A_ext_j[j];
             if (j_col > col_0 && j_col < col_n)
             {
@@ -3643,7 +3641,7 @@ hypre_ParGenerateHybridScale(hypre_ParCSRMatrix *A,
             }
             else
             {
-               jj = hypre_BinarySearch(col_map_offd,j_col,num_cols_offd);
+               jj = hypre_BigBinarySearch(col_map_offd,j_col,num_cols_offd);
                if (jj > -1 && (scale_ext[jj] > 0))
                {
                   A_ext_j[j] = num_variables+jj;
@@ -3672,7 +3670,7 @@ hypre_ParGenerateHybridScale(hypre_ParCSRMatrix *A,
       {
          if (A_ext_j[i] > -1)
          {
-            A_boundary_j[index] = A_ext_j[i];
+            A_boundary_j[index] = (HYPRE_Int)A_ext_j[i];
             A_boundary_data[index] = A_ext_data[i];
             index++;
          }

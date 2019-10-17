@@ -1,18 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_parcsr_ls.h"
 
@@ -350,7 +341,7 @@ HYPRE_Int HYPRE_AMSProjectOutGradients(HYPRE_Solver solver,
 
 HYPRE_Int HYPRE_AMSConstructDiscreteGradient(HYPRE_ParCSRMatrix A,
                                              HYPRE_ParVector x_coord,
-                                             HYPRE_Int *edge_vertex,
+                                             HYPRE_BigInt *edge_vertex,
                                              HYPRE_Int edge_orientation,
                                              HYPRE_ParCSRMatrix *G)
 {
@@ -369,8 +360,8 @@ HYPRE_Int HYPRE_AMSFEISetup(HYPRE_Solver solver,
                             HYPRE_ParCSRMatrix A,
                             HYPRE_ParVector b,
                             HYPRE_ParVector x,
-                            HYPRE_Int *EdgeNodeList_,
-                            HYPRE_Int *NodeNumbers_,
+                            HYPRE_BigInt *EdgeNodeList_,
+                            HYPRE_BigInt *NodeNumbers_,
                             HYPRE_Int numEdges_,
                             HYPRE_Int numLocalNodes_,
                             HYPRE_Int numNodes_,

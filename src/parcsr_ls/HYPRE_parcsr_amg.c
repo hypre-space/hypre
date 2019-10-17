@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_parcsr_ls.h"
 
@@ -97,9 +92,31 @@ HYPRE_BoomerAMGSolveT( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_BoomerAMGSetRestriction( HYPRE_Solver solver,
-                               HYPRE_Real   restr_par  )
+                               HYPRE_Int    restr_par  )
 {
    return( hypre_BoomerAMGSetRestriction( (void *) solver, restr_par ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetIsTriangular
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetIsTriangular( HYPRE_Solver solver,
+                                HYPRE_Int    is_triangular  )
+{
+   return( hypre_BoomerAMGSetIsTriangular( (void *) solver, is_triangular ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetGMRESSwitchR
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetGMRESSwitchR( HYPRE_Solver solver,
+                                HYPRE_Int    gmres_switch  )
+{
+   return( hypre_BoomerAMGSetGMRESSwitchR( (void *) solver, gmres_switch ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -660,6 +677,24 @@ HYPRE_BoomerAMGGetCycleType( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetFCycle, HYPRE_BoomerAMGGetFCycle
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetFCycle( HYPRE_Solver solver,
+                          HYPRE_Int    fcycle  )
+{
+   return( hypre_BoomerAMGSetFCycle( (void *) solver, fcycle ) );
+}
+
+HYPRE_Int
+HYPRE_BoomerAMGGetFCycle( HYPRE_Solver solver,
+                          HYPRE_Int   *fcycle  )
+{
+   return( hypre_BoomerAMGGetFCycle( (void *) solver, fcycle ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetConvergeType, HYPRE_BoomerAMGGetConvergeType
  *--------------------------------------------------------------------------*/
 
@@ -885,6 +920,9 @@ HYPRE_BoomerAMGSetRelaxOrder( HYPRE_Solver  solver,
 
 /*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetGridRelaxPoints
+ * DEPRECATED.  There are memory management problems associated with the
+ * use of a user-supplied array (who releases it?).
+ * Ulrike Yang suspects that nobody uses this function.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -1946,7 +1984,7 @@ HYPRE_BoomerAMGSetKeepTranspose (HYPRE_Solver solver,
    return (hypre_BoomerAMGSetKeepTranspose ( (void *) solver, keepTranspose ) );
 }
 
-#ifdef HAVE_DSUPERLU
+#ifdef HYPRE_USING_DSUPERLU
 /*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetDSLUThreshold
  *--------------------------------------------------------------------------*/

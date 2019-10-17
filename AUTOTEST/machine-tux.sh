@@ -1,15 +1,8 @@
 #!/bin/sh
-#BHEADER**********************************************************************
-# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
-# Produced at the Lawrence Livermore National Laboratory.
-# This file is part of HYPRE.  See file COPYRIGHT for details.
+# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
-# HYPRE is free software; you can redistribute it and/or modify it under the
-# terms of the GNU Lesser General Public License (as published by the Free
-# Software Foundation) version 2.1 dated February 1999.
-#
-# $Revision$
-#EHEADER**********************************************************************
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 testname=`basename $0 .sh`
 
@@ -24,7 +17,7 @@ case $1 in
 
    where: -h|-help   prints this usage information and exits
           {src_dir}  is the hypre source directory
-          
+
 
    This script runs a number of tests suitable for the tux machines.
 
@@ -55,22 +48,28 @@ mv -f check-mpi.??? $output_dir
 
 # Basic build and run tests
 mo="-j test"
-ro="-ams -ij -sstruct -struct"
+ro="-ams -ij -sstruct -struct -lobpcg"
 eo=""
 
 co=""
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic-default
 
-# Test linking for different languages (depends on previous compile test)
+# Test linking for different languages
+co=""
+./test.sh configure.sh $src_dir $co
+./test.sh make.sh $src_dir $mo
 link_opts="all++ all77"
 for opt in $link_opts
 do
    output_subdir=$output_dir/link$opt
    mkdir -p $output_subdir
+   cp -r configure.??? make.??? $output_subdir
    ./test.sh link.sh $src_dir $opt
    mv -f link.??? $output_subdir
 done
+rm -rf configure.??? make.???
+( cd $src_dir; make distclean )
 
 co="--without-MPI"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
@@ -110,7 +109,7 @@ RO="-fac"
 ./renametest.sh basic $output_dir/basic-debug2
 
 co="--with-openmp"
-RO="-ams -ij -sstruct -struct -rt -D HYPRE_NO_SAVED -nthreads 2"
+RO="-ams -ij -sstruct -struct -lobpcg -rt -D HYPRE_NO_SAVED -nthreads 2"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $RO
 ./renametest.sh basic $output_dir/basic--with-openmp
 
@@ -140,7 +139,7 @@ co="--enable-debug --enable-global-partition"
 
 # CMake build and run tests
 mo="-j"
-ro="-ams -ij -sstruct -struct"
+ro="-ams -ij -sstruct -struct -lobpcg"
 eo=""
 
 co=""

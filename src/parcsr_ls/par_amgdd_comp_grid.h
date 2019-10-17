@@ -49,8 +49,10 @@ typedef struct
    HYPRE_Int         **send_partitions; // list of neighbor partitions
    HYPRE_Int         **send_proc_partitions; // list of which partition each send proc belongs to
    HYPRE_Int         ***send_partition_ranks; // list of ranks that belong to each partition in partitions
-   HYPRE_Int         **send_map_starts; // send map starts from comm pkg of A^eta on each level
-   HYPRE_Int         **send_map_elmts; // send map elmts from comm pkg of A^eta on each level
+   HYPRE_Int         **send_map_starts; // send map starts from comm pkg of A^eta on each level later used as send map starts for full residual communication
+   HYPRE_Int         **send_map_elmts; // send map elmts from comm pkg of A^eta on each level later used as send map elmts for full residual communication
+   HYPRE_Int         **recv_map_starts; // recv map starts for full residual communication
+   HYPRE_Int         **recv_map_elmts; // recv map elmts for full residual communication
    HYPRE_Int         **ghost_marker; // marks send elmts as ghost or real dofs for the associated processor
 
 	HYPRE_Int 			**send_buffer_size; // size of send buffer on each level for each proc
@@ -82,7 +84,9 @@ typedef struct
  #define hypre_ParCompGridCommPkgSendProcPartitions(compGridCommPkg)           ((compGridCommPkg) -> send_proc_partitions)
  #define hypre_ParCompGridCommPkgSendPartitionRanks(compGridCommPkg)               ((compGridCommPkg) -> send_partition_ranks)
  #define hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)           ((compGridCommPkg) -> send_map_starts)
- #define hypre_ParCompGridCommPkgSendMapElmts(compGridCommPkg)           ((compGridCommPkg) -> send_map_elmts)
+ #define hypre_ParCompGridCommPkgSendMapElmts(compGridCommPkg)            ((compGridCommPkg) -> send_map_elmts)
+ #define hypre_ParCompGridCommPkgRecvMapStarts(compGridCommPkg)           ((compGridCommPkg) -> recv_map_starts)
+ #define hypre_ParCompGridCommPkgRecvMapElmts(compGridCommPkg)           ((compGridCommPkg) -> recv_map_elmts)
  #define hypre_ParCompGridCommPkgGhostMarker(compGridCommPkg)           ((compGridCommPkg) -> ghost_marker)
  #define hypre_ParCompGridCommPkgSendBufferSize(compGridCommPkg)		((compGridCommPkg) -> send_buffer_size)
  #define hypre_ParCompGridCommPkgRecvBufferSize(compGridCommPkg)		((compGridCommPkg) -> recv_buffer_size)
@@ -108,17 +112,12 @@ typedef struct
    HYPRE_Int       num_owned_blocks; // number of blocks of owned nodes
    HYPRE_Int       *owned_block_starts; // start positions for the blocks of owned nodes
    HYPRE_Int       num_real_nodes; // number of real nodes
+   HYPRE_Int       num_c_points; // number of C points
    HYPRE_Int		 mem_size;
    HYPRE_Int       A_mem_size;
    HYPRE_Int       P_mem_size;
 
-   HYPRE_Complex     *u;
-   HYPRE_Complex     *f;
-   HYPRE_Complex     *t;
-   HYPRE_Complex     *s;
-   HYPRE_Complex     *temp;
-
-   HYPRE_Int        *global_indices; // This also encodes whether a dof is real or ghost (negative indices are ghost)
+   HYPRE_Int        *global_indices;
    HYPRE_Int        *coarse_global_indices; 
    HYPRE_Int        *coarse_local_indices;
    HYPRE_Int        *real_dof_marker;
@@ -132,7 +131,25 @@ typedef struct
    HYPRE_Int        *P_colind;
    HYPRE_Complex    *P_data;
 
+   hypre_CSRMatrix  *A;
+   hypre_CSRMatrix  *AT;
+   hypre_CSRMatrix  *P;
+   hypre_CSRMatrix  *R;
 
+   hypre_Vector     *u;
+   hypre_Vector     *f;
+   hypre_Vector     *t;
+   hypre_Vector     *s;
+   hypre_Vector     *temp;
+   hypre_Vector     *temp2;
+   hypre_Vector     *temp3;
+
+   HYPRE_Real       *l1_norms;
+   HYPRE_Int        *cf_marker_array;
+   int              *c_mask;
+   int              *f_mask;
+
+   HYPRE_Real       *cheby_coeffs;
 
 } hypre_ParCompGrid;
 
@@ -144,6 +161,7 @@ typedef struct
 #define hypre_ParCompGridNumOwnedBlocks(compGrid)           ((compGrid) -> num_owned_blocks)
 #define hypre_ParCompGridOwnedBlockStarts(compGrid)           ((compGrid) -> owned_block_starts)
 #define hypre_ParCompGridNumRealNodes(compGrid)           ((compGrid) -> num_real_nodes)
+#define hypre_ParCompGridNumCPoints(compGrid)           ((compGrid) -> num_c_points)
 #define hypre_ParCompGridMemSize(compGrid)           ((compGrid) -> mem_size)
 #define hypre_ParCompGridAMemSize(compGrid)           ((compGrid) -> A_mem_size)
 #define hypre_ParCompGridPMemSize(compGrid)           ((compGrid) -> P_mem_size)
@@ -152,6 +170,8 @@ typedef struct
 #define hypre_ParCompGridT(compGrid)           ((compGrid) -> t)
 #define hypre_ParCompGridS(compGrid)           ((compGrid) -> s)
 #define hypre_ParCompGridTemp(compGrid)        ((compGrid) -> temp)
+#define hypre_ParCompGridTemp2(compGrid)        ((compGrid) -> temp2)
+#define hypre_ParCompGridTemp3(compGrid)        ((compGrid) -> temp3)
 #define hypre_ParCompGridGlobalIndices(compGrid)           ((compGrid) -> global_indices)
 #define hypre_ParCompGridCoarseGlobalIndices(compGrid)           ((compGrid) -> coarse_global_indices)
 #define hypre_ParCompGridCoarseLocalIndices(compGrid)           ((compGrid) -> coarse_local_indices)
@@ -164,8 +184,16 @@ typedef struct
 #define hypre_ParCompGridPColInd(compGrid)         ((compGrid) -> P_colind)
 #define hypre_ParCompGridPData(compGrid)           ((compGrid) -> P_data)
 
+#define hypre_ParCompGridA(compGrid)               ((compGrid) -> A)
+#define hypre_ParCompGridAT(compGrid)               ((compGrid) -> AT)
+#define hypre_ParCompGridP(compGrid)               ((compGrid) -> P)
+#define hypre_ParCompGridR(compGrid)               ((compGrid) -> R)
 
+#define hypre_ParCompGridL1Norms(compGrid)         ((compGrid) -> l1_norms)
+#define hypre_ParCompGridCFMarkerArray(compGrid)         ((compGrid) -> cf_marker_array)
+#define hypre_ParCompGridCMask(compGrid)         ((compGrid) -> c_mask)
+#define hypre_ParCompGridFMask(compGrid)         ((compGrid) -> f_mask)
 
-
+#define hypre_ParCompGridChebyCoeffs(compGrid)         ((compGrid) -> cheby_coeffs)
 
 #endif

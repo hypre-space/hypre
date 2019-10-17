@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -30,15 +25,15 @@ extern "C" {
 void
 hypre_F90_IFACE(hypre_parvectorcreate, HYPRE_PARVECTORCREATE)
    ( hypre_F90_Comm *comm,
-     hypre_F90_Int *global_size,
-     hypre_F90_IntArray *partitioning,
+     hypre_F90_BigInt *global_size,
+     hypre_F90_BigIntArray *partitioning,
      hypre_F90_Obj *vector,
      hypre_F90_Int *ierr )
 {
    *ierr = (hypre_F90_Int) HYPRE_ParVectorCreate(
       hypre_F90_PassComm (comm),
-      hypre_F90_PassInt (global_size),
-      hypre_F90_PassIntArray (partitioning),
+      hypre_F90_PassBigInt (global_size),
+      hypre_F90_PassBigIntArray (partitioning),
       hypre_F90_PassObjRef (HYPRE_ParVector, vector) );
 
 }
@@ -50,16 +45,16 @@ hypre_F90_IFACE(hypre_parvectorcreate, HYPRE_PARVECTORCREATE)
 void
 hypre_F90_IFACE(hypre_parmultivectorcreate, HYPRE_PARMULTIVECTORCREATE)
    ( hypre_F90_Comm *comm,
-     hypre_F90_Int *global_size,
-     hypre_F90_IntArray *partitioning,
+     hypre_F90_BigInt *global_size,
+     hypre_F90_BigIntArray *partitioning,
      hypre_F90_Int *number_vectors,
      hypre_F90_Obj *vector,
      hypre_F90_Int *ierr          )
 {
    *ierr = (hypre_F90_Int) HYPRE_ParMultiVectorCreate(
       hypre_F90_PassComm (comm),
-      hypre_F90_PassInt (global_size),
-      hypre_F90_PassIntArray (partitioning),
+      hypre_F90_PassBigInt (global_size),
+      hypre_F90_PassBigIntArray (partitioning),
       hypre_F90_PassInt (number_vectors),
       hypre_F90_PassObjRef (HYPRE_ParVector, vector) );
 

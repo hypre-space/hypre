@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_struct_ls.h"
 #include "smg.h"
@@ -43,7 +38,7 @@ hypre_SMGCreate( MPI_Comm  comm )
 
    /* initialize */
    (smg_data -> num_levels) = -1;
-#if defined(HYPRE_USE_CUDA)
+#if defined(HYPRE_USING_CUDA)
    (smg_data -> devicelevel) = 200;
 #endif
    return (void *) smg_data;
@@ -493,7 +488,6 @@ hypre_SMGSetStructVectorConstantValues( hypre_StructVector *vector,
 
       hypre_BoxGetStrideSize(box, stride, loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(vp)
       hypre_BoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
                           v_data_box, start, stride, vi);
@@ -502,7 +496,6 @@ hypre_SMGSetStructVectorConstantValues( hypre_StructVector *vector,
       }
       hypre_BoxLoop1End(vi);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
    }
 
    return hypre_error_flag;
@@ -522,7 +515,7 @@ hypre_StructSMGSetMaxLevel( void   *smg_vdata,
    return hypre_error_flag;
 }
 
-#if defined(HYPRE_USE_CUDA)
+#if defined(HYPRE_USING_CUDA)
 HYPRE_Int
 hypre_StructSMGSetDeviceLevel( void   *smg_vdata,
 			       HYPRE_Int   device_level  )

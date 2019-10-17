@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #ifndef hypre_SSTRUCT_LS_HEADER
 #define hypre_SSTRUCT_LS_HEADER
@@ -31,21 +26,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
 
 /*--------------------------------------------------------------------------
  * hypre_SStructOwnInfo data structure
@@ -84,21 +64,6 @@ typedef struct
 ((own_data) -> own_composite_size)
 
 #endif
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
-
 /*--------------------------------------------------------------------------
  * hypre_SStructRecvInfo data structure
  *--------------------------------------------------------------------------*/
@@ -116,21 +81,6 @@ typedef struct
 } hypre_SStructRecvInfoData;
 
 #endif
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
-
 /*--------------------------------------------------------------------------
  * hypre_SStructSendInfo data structure
  *--------------------------------------------------------------------------*/
@@ -149,21 +99,6 @@ typedef struct
 } hypre_SStructSendInfoData;
 
 #endif
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
-
 typedef struct
 {
     hypre_IJMatrix    *Face_iedge;
@@ -174,21 +109,6 @@ typedef struct
     hypre_IJMatrix    *Element_Edge;
                                                                                                                             
 } hypre_PTopology;
-
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
 
 /******************************************************************************
  *
@@ -289,27 +209,12 @@ typedef struct
 } hypre_MaxwellData;
 
 #endif
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
-
 typedef struct
 {
    HYPRE_Int row;
                                                                                                                                     
    HYPRE_Int ncols;
-   HYPRE_Int      *cols;
+   HYPRE_BigInt *cols;
    HYPRE_Real   *data;
                                                                                                                                     
 } hypre_MaxwellOffProcRow;
@@ -650,7 +555,7 @@ HYPRE_Int hypre_SeqVectorZeroBCValues ( hypre_Vector *v , HYPRE_Int *rows , HYPR
 
 /* nd1_amge_interpolation.c */
 HYPRE_Int hypre_ND1AMGeInterpolation ( hypre_ParCSRMatrix *Aee , hypre_ParCSRMatrix *ELEM_idof , hypre_ParCSRMatrix *FACE_idof , hypre_ParCSRMatrix *EDGE_idof , hypre_ParCSRMatrix *ELEM_FACE , hypre_ParCSRMatrix *ELEM_EDGE , HYPRE_Int num_OffProcRows , hypre_MaxwellOffProcRow **OffProcRows , hypre_IJMatrix *IJ_dof_DOF );
-HYPRE_Int hypre_HarmonicExtension ( hypre_CSRMatrix *A , hypre_CSRMatrix *P , HYPRE_Int num_DOF , HYPRE_Int *DOF , HYPRE_Int num_idof , HYPRE_Int *idof , HYPRE_Int num_bdof , HYPRE_Int *bdof );
+HYPRE_Int hypre_HarmonicExtension ( hypre_CSRMatrix *A , hypre_CSRMatrix *P , HYPRE_Int num_DOF , HYPRE_BigInt *DOF , HYPRE_Int num_idof , HYPRE_BigInt *idof , HYPRE_Int num_bdof , HYPRE_BigInt *bdof );
 
 /* node_relax.c */
 void *hypre_NodeRelaxCreate ( MPI_Comm comm );

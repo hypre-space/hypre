@@ -1,14 +1,7 @@
-cBHEADER**********************************************************************
-c Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
-c Produced at the Lawrence Livermore National Laboratory.
-c This file is part of HYPRE.  See file COPYRIGHT for details.
+c     Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+c     HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 c
-c HYPRE is free software; you can redistribute it and/or modify it under the
-c terms of the GNU Lesser General Public License (as published by the Free
-c Software Foundation) version 2.1 dated February 1999.
-c
-c $Revision$
-cEHEADER**********************************************************************
+c     SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 c*****************************************************************************
 c HYPRE_IJMatrix Fortran interface

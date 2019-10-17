@@ -1,17 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /*--------------------------------------------------------------------------
  * hypre_RedBlackGSData data structure
@@ -42,9 +34,8 @@ typedef struct
 
 } hypre_RedBlackGSData;
 
-#ifdef HYPRE_USE_RAJA
+#ifdef HYPRE_USING_RAJA
 
-#define HYPRE_REDBLACK_PRIVATE hypre__global_error
 #define hypre_RedBlackLoopInit()
 #define hypre_RedBlackLoopBegin(ni,nj,nk,redblack,\
 				Astart,Ani,Anj,Ai,	\
@@ -52,7 +43,7 @@ typedef struct
 				xstart,xni,xnj,xi)	\
 {					  \
     HYPRE_Int hypre__tot = nk*nj*((ni+1)/2);				\
-    forall< hypre_exec_policy >(0, hypre__tot, [=] RAJA_DEVICE (HYPRE_Int idx) \
+    forall< hypre_raja_exec_policy >(RangeSegment(0, hypre__tot), [=] hypre_RAJA_DEVICE (HYPRE_Int idx) \
     {									\
         HYPRE_Int idx_local = idx;					\
 	HYPRE_Int ii,jj,kk,Ai,bi,xi;					\
@@ -80,7 +71,7 @@ typedef struct
 				xstart,xni,xnj,xi)	\
 {					  \
     HYPRE_Int hypre__tot = nk*nj*((ni+1)/2);				\
-    forall< hypre_exec_policy >(0, hypre__tot, [=] RAJA_DEVICE (HYPRE_Int idx) \
+    forall< hypre_raja_exec_policy >(RangeSegment(0, hypre__tot), [=] hypre_RAJA_DEVICE (HYPRE_Int idx) \
     {									\
         HYPRE_Int idx_local = idx;					\
 	HYPRE_Int ii,jj,kk,bi,xi;					\
@@ -102,9 +93,8 @@ typedef struct
      hypre_fence();					\
 }
 
-#elif defined(HYPRE_USE_KOKKOS)
+#elif defined(HYPRE_USING_KOKKOS)
 
-#define HYPRE_REDBLACK_PRIVATE hypre__global_error
 #define hypre_RedBlackLoopInit()
 #define hypre_RedBlackLoopBegin(ni,nj,nk,redblack,\
 				Astart,Ani,Anj,Ai,	\
@@ -162,9 +152,8 @@ typedef struct
      hypre_fence();					\
 }  
 
-#elif defined(HYPRE_USE_CUDA)
+#elif defined(HYPRE_USING_CUDA)
 
-#define HYPRE_REDBLACK_PRIVATE hypre__global_error
 #define hypre_RedBlackLoopInit()
 #define hypre_RedBlackLoopBegin(ni,nj,nk,redblack,\
 				Astart,Ani,Anj,Ai,	\
@@ -220,7 +209,7 @@ typedef struct
      });						\
 }
 
-#elif defined(HYPRE_USE_OMP45) 
+#elif defined(HYPRE_USING_DEVICE_OPENMP)
 
 /* BEGIN OF OMP 4.5 */
 /* #define IF_CLAUSE if (hypre__global_offload) */
@@ -363,3 +352,4 @@ typedef struct
    }\
 }
 #endif
+

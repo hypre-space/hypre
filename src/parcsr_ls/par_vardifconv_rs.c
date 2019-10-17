@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_parcsr_ls.h"
  
@@ -27,9 +22,9 @@ static HYPRE_Real rs_l = 3.0;
 
 HYPRE_ParCSRMatrix 
 GenerateRSVarDifConv( MPI_Comm comm,
-                 HYPRE_Int      nx,
-                 HYPRE_Int      ny,
-                 HYPRE_Int      nz, 
+                 HYPRE_BigInt   nx,
+                 HYPRE_BigInt   ny,
+                 HYPRE_BigInt   nz, 
                  HYPRE_Int      P,
                  HYPRE_Int      Q,
                  HYPRE_Int      R,
@@ -53,24 +48,25 @@ GenerateRSVarDifConv( MPI_Comm comm,
 
    HYPRE_Int    *offd_i;
    HYPRE_Int    *offd_j;
+   HYPRE_BigInt *big_offd_j;
    HYPRE_Real *offd_data;
 
-   HYPRE_Int *global_part;
-   HYPRE_Int ix, iy, iz;
+   HYPRE_BigInt *global_part;
+   HYPRE_BigInt ix, iy, iz;
    HYPRE_Int cnt, o_cnt;
    HYPRE_Int local_num_rows; 
-   HYPRE_Int *col_map_offd;
+   HYPRE_BigInt *col_map_offd;
    HYPRE_Int row_index;
    HYPRE_Int i,j;
 
    HYPRE_Int nx_local, ny_local, nz_local;
-   HYPRE_Int nx_size, ny_size, nz_size;
    HYPRE_Int num_cols_offd;
-   HYPRE_Int grid_size;
+   HYPRE_BigInt grid_size;
 
-   HYPRE_Int *nx_part;
-   HYPRE_Int *ny_part;
-   HYPRE_Int *nz_part;
+
+   HYPRE_BigInt *nx_part;
+   HYPRE_BigInt *ny_part;
+   HYPRE_BigInt *nz_part;
 
    HYPRE_Int num_procs, my_id;
    HYPRE_Int P_busy, Q_busy, R_busy;
@@ -94,33 +90,44 @@ GenerateRSVarDifConv( MPI_Comm comm,
    hypre_GeneratePartitioning(ny,Q,&ny_part);
    hypre_GeneratePartitioning(nz,R,&nz_part);
 
-   global_part = hypre_CTAlloc(HYPRE_Int, P*Q*R+1, HYPRE_MEMORY_HOST);
+   nx_local = (HYPRE_Int)(nx_part[p+1] - nx_part[p]);
+   ny_local = (HYPRE_Int)(ny_part[q+1] - ny_part[q]);
+   nz_local = (HYPRE_Int)(nz_part[r+1] - nz_part[r]);
+
+   local_num_rows = nx_local*ny_local*nz_local;
+
+
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+
+   global_part = hypre_CTAlloc(HYPRE_BigInt,2,HYPRE_MEMORY_HOST);
+   global_part[0] = nz_part[r]*nx*ny+(ny_part[q]*nx+nx_part[p]*ny_local)*nz_local;
+   global_part[1] = global_part[0] + (HYPRE_BigInt)local_num_rows;
+
+#else
+   HYPRE_Int nx_size, ny_size, nz_size;
+   HYPRE_Int jx, jy, jz;
+
+   global_part = hypre_CTAlloc(HYPRE_BigInt, P*Q*R+1, HYPRE_MEMORY_HOST);
 
    global_part[0] = 0;
    cnt = 1;
-   for (iz = 0; iz < R; iz++)
+   for (jz = 0; jz < R; jz++)
    {
-      nz_size = nz_part[iz+1]-nz_part[iz];
-      for (iy = 0; iy < Q; iy++)
+      nz_size = (HYPRE_Int)(nz_part[jz+1]-nz_part[jz]);
+      for (jy = 0; jy < Q; jy++)
       {
-         ny_size = ny_part[iy+1]-ny_part[iy];
-         for (ix = 0; ix < P; ix++)
+         ny_size = (HYPRE_Int)(ny_part[jy+1]-ny_part[jy]);
+         for (jx = 0; jx < P; jx++)
          {
-            nx_size = nx_part[ix+1] - nx_part[ix];
+            nx_size = (HYPRE_Int)(nx_part[jx+1] - nx_part[jx]);
             global_part[cnt] = global_part[cnt-1];
-            global_part[cnt++] += nx_size*ny_size*nz_size;
+            global_part[cnt++] += (HYPRE_BigInt)(nx_size*ny_size*nz_size);
          }
       }
    }
 
-   nx_local = nx_part[p+1] - nx_part[p];
-   ny_local = ny_part[q+1] - ny_part[q];
-   nz_local = nz_part[r+1] - nz_part[r];
+#endif
 
-   my_id = r*(P*Q) + q*P + p;
-   num_procs = P*Q*R;
-
-   local_num_rows = nx_local*ny_local*nz_local;
    diag_i = hypre_CTAlloc(HYPRE_Int,  local_num_rows+1, HYPRE_MEMORY_HOST);
    offd_i = hypre_CTAlloc(HYPRE_Int,  local_num_rows+1, HYPRE_MEMORY_HOST);
    rhs_data = hypre_CTAlloc(HYPRE_Real,  local_num_rows, HYPRE_MEMORY_HOST);
@@ -139,7 +146,7 @@ GenerateRSVarDifConv( MPI_Comm comm,
 
    if (!local_num_rows) num_cols_offd = 0;
 
-   col_map_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_offd, HYPRE_MEMORY_HOST);
+   col_map_offd = hypre_CTAlloc(HYPRE_BigInt,  num_cols_offd, HYPRE_MEMORY_HOST);
 
    hhx = 1.0/(HYPRE_Real)(nx+1);
    hhy = 1.0/(HYPRE_Real)(ny+1);
@@ -223,6 +230,7 @@ GenerateRSVarDifConv( MPI_Comm comm,
 
    if (num_procs > 1)
    {
+      big_offd_j = hypre_CTAlloc(HYPRE_BigInt,  offd_i[local_num_rows], HYPRE_MEMORY_HOST);
       offd_j = hypre_CTAlloc(HYPRE_Int,  offd_i[local_num_rows], HYPRE_MEMORY_HOST);
       offd_data = hypre_CTAlloc(HYPRE_Real,  offd_i[local_num_rows], HYPRE_MEMORY_HOST);
    }
@@ -322,8 +330,8 @@ GenerateRSVarDifConv( MPI_Comm comm,
             {
                if (iz) 
                {
-                  offd_j[o_cnt] = hypre_map(ix,iy,iz-1,p,q,r-1,P,Q,R,
-                                            nx_part,ny_part,nz_part,global_part);
+                  big_offd_j[o_cnt] = hypre_map(ix,iy,iz-1,p,q,r-1,nx,ny,
+                                            nx_part,ny_part,nz_part);
                   offd_data[o_cnt++] = cfm + ffm;
                }
             }
@@ -337,8 +345,8 @@ GenerateRSVarDifConv( MPI_Comm comm,
             {
                if (iy) 
                {
-                  offd_j[o_cnt] = hypre_map(ix,iy-1,iz,p,q-1,r,P,Q,R,
-                                            nx_part,ny_part,nz_part,global_part);
+                  big_offd_j[o_cnt] = hypre_map(ix,iy-1,iz,p,q-1,r,nx,ny,
+                                            nx_part,ny_part,nz_part);
                   offd_data[o_cnt++] = bfm + efm;
                }
             }
@@ -352,8 +360,8 @@ GenerateRSVarDifConv( MPI_Comm comm,
             {
                if (ix) 
                {
-                  offd_j[o_cnt] = hypre_map(ix-1,iy,iz,p-1,q,r,P,Q,R,
-                                            nx_part,ny_part,nz_part,global_part);
+                  big_offd_j[o_cnt] = hypre_map(ix-1,iy,iz,p-1,q,r,nx,ny,
+                                            nx_part,ny_part,nz_part);
                   offd_data[o_cnt++] = afm + dfm;
                }
             }
@@ -367,8 +375,8 @@ GenerateRSVarDifConv( MPI_Comm comm,
             {
                if (ix+1 < nx) 
                {
-                  offd_j[o_cnt] = hypre_map(ix+1,iy,iz,p+1,q,r,P,Q,R,
-                                            nx_part,ny_part,nz_part,global_part);
+                  big_offd_j[o_cnt] = hypre_map(ix+1,iy,iz,p+1,q,r,nx,ny,
+                                            nx_part,ny_part,nz_part);
                   offd_data[o_cnt++] = afp + dfp;
                }
             }
@@ -382,8 +390,8 @@ GenerateRSVarDifConv( MPI_Comm comm,
             {
                if (iy+1 < ny) 
                {
-                  offd_j[o_cnt] = hypre_map(ix,iy+1,iz,p,q+1,r,P,Q,R,
-                                            nx_part,ny_part,nz_part,global_part);
+                  big_offd_j[o_cnt] = hypre_map(ix,iy+1,iz,p,q+1,r,nx,ny,
+                                            nx_part,ny_part,nz_part);
                   offd_data[o_cnt++] = bfp + efp;
                }
             }
@@ -397,8 +405,8 @@ GenerateRSVarDifConv( MPI_Comm comm,
             {
                if (iz+1 < nz) 
                {
-                  offd_j[o_cnt] = hypre_map(ix,iy,iz+1,p,q,r+1,P,Q,R,
-                                            nx_part,ny_part,nz_part,global_part);
+                  big_offd_j[o_cnt] = hypre_map(ix,iy,iz+1,p,q,r+1,nx,ny,
+                                            nx_part,ny_part,nz_part);
                   offd_data[o_cnt++] = cfp + ffp;
                }
             }
@@ -411,32 +419,19 @@ GenerateRSVarDifConv( MPI_Comm comm,
    if (num_procs > 1)
    {
       for (i=0; i < num_cols_offd; i++)
-         col_map_offd[i] = offd_j[i];
+         col_map_offd[i] = big_offd_j[i];
    	
-      hypre_qsort0(col_map_offd, 0, num_cols_offd-1);
+      hypre_BigQsort0(col_map_offd, 0, num_cols_offd-1);
 
       for (i=0; i < num_cols_offd; i++)
          for (j=0; j < num_cols_offd; j++)
-            if (offd_j[i] == col_map_offd[j])
+            if (big_offd_j[i] == col_map_offd[j])
             {
                offd_j[i] = j;
                break;
             }
+      hypre_TFree(big_offd_j, HYPRE_MEMORY_HOST);
    }
-
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-/* ideally we would use less storage earlier in this function, but this is fine
-   for testing */
-   {
-      HYPRE_Int tmp1, tmp2;
-      tmp1 = global_part[my_id];
-      tmp2 = global_part[my_id + 1];
-      hypre_TFree(global_part, HYPRE_MEMORY_HOST);
-      global_part = hypre_CTAlloc(HYPRE_Int,  2, HYPRE_MEMORY_HOST);
-      global_part[0] = tmp1;
-      global_part[1] = tmp2;
-   }
-#endif
 
    par_rhs = hypre_ParVectorCreate(comm, grid_size, global_part);
    hypre_ParVectorOwnsPartitioning(par_rhs) = 0;

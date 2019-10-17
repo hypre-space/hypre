@@ -1,3 +1,10 @@
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 #include "_hypre_parcsr_ls.h"
 #include "Common.h"
 #include "_hypre_blas.h"
@@ -87,7 +94,7 @@ HYPRE_Int hypre_BoomerAMGFitInterpVectors( hypre_ParCSRMatrix *A,
    HYPRE_Int        P_diag_size = P_diag_i[num_rows_P];
    HYPRE_Int        P_offd_size = P_offd_i[num_rows_P];
    HYPRE_Int        num_cols_P_offd = hypre_CSRMatrixNumCols(P_offd);
-   HYPRE_Int       *col_map_offd_P;
+   HYPRE_BigInt    *col_map_offd_P = NULL;
 
    hypre_CSRMatrix  *A_offd = hypre_ParCSRMatrixOffd(A);
    HYPRE_Int         num_cols_A_offd = hypre_CSRMatrixNumCols(A_offd);
@@ -484,6 +491,7 @@ HYPRE_Int hypre_BoomerAMGFitInterpVectors( hypre_ParCSRMatrix *A,
       /* if truncation occurred, we need to re-do the col_map_offd... */
       if (tmp_int != P_offd_size)
       {
+         HYPRE_Int *tmp_map_offd; 
          num_cols_P_offd = 0;
          P_marker = hypre_CTAlloc(HYPRE_Int,  num_cols_A_offd, HYPRE_MEMORY_HOST);
 
@@ -501,16 +509,17 @@ HYPRE_Int hypre_BoomerAMGFitInterpVectors( hypre_ParCSRMatrix *A,
             }
          }
 
-         col_map_offd_P = hypre_CTAlloc(HYPRE_Int,  num_cols_P_offd, HYPRE_MEMORY_HOST);
+         col_map_offd_P = hypre_CTAlloc(HYPRE_BigInt, num_cols_P_offd, HYPRE_MEMORY_HOST);
+         tmp_map_offd = hypre_CTAlloc(HYPRE_Int, num_cols_P_offd, HYPRE_MEMORY_HOST);
 
          index = 0;
          for (i=0; i < num_cols_P_offd; i++)
          {
             while (P_marker[index]==0) index++;
-            col_map_offd_P[i] = index++;
+            tmp_map_offd[i] = index++;
          }
          for (i=0; i < P_offd_size; i++)
-            P_offd_j[i] = hypre_BinarySearch(col_map_offd_P,
+            P_offd_j[i] = hypre_BinarySearch(tmp_map_offd,
                                              P_offd_j[i],
                                              num_cols_P_offd);
          hypre_TFree(P_marker, HYPRE_MEMORY_HOST); 
@@ -524,7 +533,7 @@ HYPRE_Int hypre_BoomerAMGFitInterpVectors( hypre_ParCSRMatrix *A,
          /* destroy the old and get a new commpkg....*/
          hypre_MatvecCommPkgDestroy(comm_pkg);
          hypre_MatvecCommPkgCreate ( *P );
-
+         hypre_TFree(tmp_map_offd);
 
       }/*end re-do col_map_offd */
       

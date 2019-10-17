@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /* see exchange_data.README for additional information */
 /* AHB 6/04 */
@@ -346,7 +341,7 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
          post_size = response_message_size - max_response_size; 
          if (post_size > 0) /*we will need to send the extra information later */   
          {
-            /*hypre_printf("myid = %d, post_size = %d\n", myid, post_size);*/
+            // hypre_printf("!!!!!!!        myid = %d, post_size = %d          !!!!!!!!!!!!\n", myid, post_size);
 
             if (post_array_size == post_array_storage)
              

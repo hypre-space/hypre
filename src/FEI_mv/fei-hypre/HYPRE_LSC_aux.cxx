@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- *********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 //***************************************************************************
 // This file holds the other functions for HYPRE_LinSysCore
@@ -2141,7 +2136,7 @@ void HYPRE_LinSysCore::setupPCGPrecon()
            break;
 
       case HYDSLU :
-#ifdef HAVE_DSUPERLU
+#ifdef HYPRE_USING_DSUPERLU
            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
               printf("DSuperLU preconditioning\n");
            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
@@ -2564,7 +2559,7 @@ void HYPRE_LinSysCore::setupGMRESPrecon()
            break;
 
       case HYDSLU :
-#ifdef HAVE_DSUPERLU
+#ifdef HYPRE_USING_DSUPERLU
            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
               printf("DSuperLU preconditioning\n");
            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
@@ -2832,7 +2827,7 @@ void HYPRE_LinSysCore::setupFGMRESPrecon()
            break;
 
       case HYDSLU :
-#ifdef HAVE_DSUPERLU
+#ifdef HYPRE_USING_DSUPERLU
            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
               printf("DSuperLU preconditioning\n");
            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
@@ -3084,7 +3079,7 @@ void HYPRE_LinSysCore::setupBiCGSTABPrecon()
            break;
 
       case HYDSLU :
-#ifdef HAVE_DSUPERLU
+#ifdef HYPRE_USING_DSUPERLU
            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
               printf("DSuperLU preconditioning\n");
            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
@@ -3337,7 +3332,7 @@ void HYPRE_LinSysCore::setupBiCGSTABLPrecon()
            break;
 
       case HYDSLU :
-#ifdef HAVE_DSUPERLU
+#ifdef HYPRE_USING_DSUPERLU
            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
               printf("DSuperLU preconditioning\n");
            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
@@ -3586,7 +3581,7 @@ void HYPRE_LinSysCore::setupTFQmrPrecon()
            break;
 
       case HYDSLU :
-#ifdef HAVE_DSUPERLU
+#ifdef HYPRE_USING_DSUPERLU
            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
               printf("DSuperLU preconditioning\n");
            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
@@ -3835,7 +3830,7 @@ void HYPRE_LinSysCore::setupBiCGSPrecon()
            break;
 
       case HYDSLU :
-#ifdef HAVE_DSUPERLU
+#ifdef HYPRE_USING_DSUPERLU
            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
               printf("DSuperLU preconditioning\n");
            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
@@ -5020,7 +5015,7 @@ double HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
 double HYPRE_LinSysCore::solveUsingDSuperLU(int& status)
 {
    double rnorm=1.0;
-#ifdef HAVE_DSUPERLU
+#ifdef HYPRE_USING_DSUPERLU
    int                ierr;
    HYPRE_ParCSRMatrix A_csr;
    HYPRE_ParVector    x_csr, b_csr, r_csr;
@@ -5335,7 +5330,7 @@ char *HYPRE_LinSysCore::getVersion()
 {
    static char extVersion[100];
    char        hypre[200], hypreVersion[50], ctmp[50];
-   sprintf(hypre, "%s", HYPRE_Version());
+   sprintf(hypre, "%s", HYPRE_VERSION);
    sscanf(hypre, "%s %s", ctmp, hypreVersion);
    sprintf(extVersion, "%s-%s", HYPRE_FEI_Version(), hypreVersion);
    return extVersion;

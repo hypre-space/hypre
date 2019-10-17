@@ -1,16 +1,15 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_utilities.h"
+
+#if defined(HYPRE_USING_KOKKOS)
+#include <Kokkos_Core.hpp>
+#endif
 
 /******************************************************************************
  *
@@ -19,32 +18,34 @@
  *****************************************************************************/
 
 void
-hypre_init()
+HYPRE_Init( hypre_int argc, char *argv[] )
 {
    /*
    HYPRE_Int  num_procs, myid;
-   
+
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
    */
-
-#if defined(HYPRE_USE_KOKKOS)
+#if defined(HYPRE_USING_KOKKOS)
+   /*
    Kokkos::InitArguments args;
    args.num_threads = 10;
    Kokkos::initialize (args);
+   */
+   Kokkos::initialize (argc, argv);
 #endif
 
-#if defined(HYPRE_USE_CUDA)
-   initCudaReductionMemBlock();
-#endif
-
-#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED)
+#if defined(HYPRE_USING_UNIFIED_MEMORY)
    hypre_GPUInit(-1);
 #endif
 
    /* hypre_InitMemoryDebug(myid); */
 
-#ifdef HYPRE_USE_OMP45
+#if defined(HYPRE_USING_DEVICE_OPENMP)
+   /*
+   hypre__offload_device_num = omp_get_initial_device();
+   hypre__offload_host_num   = omp_get_initial_device();
+   */
    HYPRE_OMPOffloadOn();
 #endif
 }
@@ -55,19 +56,32 @@ hypre_init()
  *
  *****************************************************************************/
 
+/* declared in "struct_communication.c" */
+extern HYPRE_Complex *global_recv_buffer, *global_send_buffer;
+extern HYPRE_Int      global_recv_size, global_send_size;
+
 void
-hypre_finalize()
+HYPRE_Finalize()
 {
-#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED)
+#if defined(HYPRE_USING_UNIFIED_MEMORY)
    hypre_GPUFinalize();
 #endif
 
-#if defined(HYPRE_USE_KOKKOS)
+#if defined(HYPRE_USING_KOKKOS)
    Kokkos::finalize ();
 #endif
 
-#if defined(HYPRE_USE_CUDA)
-   freeCudaReductionMemBlock();
+#if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && defined(HYPRE_USING_CUDA)
+   hypre_TFree(cuda_reduce_buffer, HYPRE_MEMORY_DEVICE);
 #endif
+
+   if (global_send_buffer)
+   {
+     hypre_TFree(global_send_buffer, HYPRE_MEMORY_DEVICE);
+   }
+   if (global_recv_buffer)
+   {
+     hypre_TFree(global_recv_buffer, HYPRE_MEMORY_DEVICE);
+   }
 }
 

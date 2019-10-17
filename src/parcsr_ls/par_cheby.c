@@ -1,4 +1,11 @@
 /******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
+/******************************************************************************
  *
  * Chebyshev setup and solve
  *
@@ -42,8 +49,8 @@ HYPRE_Int hypre_ParCSRRelax_Cheby_Setup(hypre_ParCSRMatrix *A, /* matrix to rela
                             HYPRE_Real **ds_ptr)   /* initial/updated approximation */
 {
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
-   HYPRE_Real     *A_diag_data  = hypre_CSRMatrixData(A_diag);
-   HYPRE_Int            *A_diag_i     = hypre_CSRMatrixI(A_diag);
+   HYPRE_Real      *A_diag_data  = hypre_CSRMatrixData(A_diag);
+   HYPRE_Int       *A_diag_i     = hypre_CSRMatrixI(A_diag);
 
    HYPRE_Real theta, delta;
    
@@ -163,7 +170,7 @@ HYPRE_Int hypre_ParCSRRelax_Cheby_Setup(hypre_ParCSRMatrix *A, /* matrix to rela
    if (scale)
    {
       /*grab 1/sqrt(diagonal) */
-      ds_data = hypre_CTAlloc(HYPRE_Real,  num_rows, HYPRE_MEMORY_HOST);
+      ds_data = hypre_CTAlloc(HYPRE_Real,  num_rows, HYPRE_MEMORY_SHARED);
       
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(j,diag) HYPRE_SMP_SCHEDULE 
@@ -188,27 +195,23 @@ HYPRE_Int hypre_ParCSRRelax_Cheby_Solve(hypre_ParCSRMatrix *A, /* matrix to rela
                             HYPRE_Int scale,            /* scale by diagonal?*/
                             HYPRE_Int variant,           
                             hypre_ParVector *u,   /* initial/updated approximation */
+                            hypre_ParVector *orig_u,   /* temporary vector to store u before update */
                             hypre_ParVector *v    /* temporary vector */,
                             hypre_ParVector *r    /*another temp vector */  )
 {
-   hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
-   HYPRE_Real *u_data = hypre_VectorData(hypre_ParVectorLocalVector(u));
-   HYPRE_Real *f_data = hypre_VectorData(hypre_ParVectorLocalVector(f));
-   HYPRE_Real *v_data = hypre_VectorData(hypre_ParVectorLocalVector(v));
-
-   HYPRE_Real  *r_data = hypre_VectorData(hypre_ParVectorLocalVector(r));
-
    HYPRE_Int i, j;
-   HYPRE_Int num_rows = hypre_CSRMatrixNumRows(A_diag);
+   HYPRE_Int num_rows = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
+
+   // Make sure temporary vectors are set to the correct size to avoid errors
+   HYPRE_Int orig_u_size = hypre_VectorSize(hypre_ParVectorLocalVector(orig_u));
+   HYPRE_Int v_size = hypre_VectorSize(hypre_ParVectorLocalVector(v));
+   HYPRE_Int r_size = hypre_VectorSize(hypre_ParVectorLocalVector(r));
+   hypre_VectorSize(hypre_ParVectorLocalVector(orig_u)) = hypre_VectorSize(hypre_ParVectorLocalVector(u));
+   hypre_VectorSize(hypre_ParVectorLocalVector(v)) = hypre_VectorSize(hypre_ParVectorLocalVector(u));
+   hypre_VectorSize(hypre_ParVectorLocalVector(r)) = hypre_VectorSize(hypre_ParVectorLocalVector(u));
+
  
-   HYPRE_Real mult;
-   HYPRE_Real *orig_u;
-   
    HYPRE_Int cheby_order;
-
-   HYPRE_Real  *tmp_data;
-
-   hypre_ParVector    *tmp_vec;
 
    /* u = u + p(A)r */
 
@@ -219,8 +222,8 @@ HYPRE_Int hypre_ParCSRRelax_Cheby_Solve(hypre_ParCSRMatrix *A, /* matrix to rela
 
    /* we are using the order of p(A) */
    cheby_order = order -1;
-   
-   orig_u = hypre_CTAlloc(HYPRE_Real,  num_rows, HYPRE_MEMORY_HOST);
+
+   hypre_ParVectorCopy(u, orig_u);
 
    if (!scale)
    {
@@ -228,111 +231,71 @@ HYPRE_Int hypre_ParCSRRelax_Cheby_Solve(hypre_ParCSRMatrix *A, /* matrix to rela
       hypre_ParVectorCopy(f, r); 
       hypre_ParCSRMatrixMatvec(-1.0, A, u, 1.0, r);
 
-      for ( i = 0; i < num_rows; i++ ) 
-      {
-         orig_u[i] = u_data[i];
-         u_data[i] = r_data[i] * coefs[cheby_order]; 
-      }
-      for (i = cheby_order - 1; i >= 0; i-- ) 
+      hypre_ParVectorCopy(r, u);
+      hypre_ParVectorScale(coefs[cheby_order], u);
+
+      for (i = cheby_order - 1; i >= 0; i--) 
       {
          hypre_ParCSRMatrixMatvec(1.0, A, u, 0.0, v);
-         mult = coefs[i];
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE 
-#endif
-         for ( j = 0; j < num_rows; j++ )
-         {
-            u_data[j] = mult * r_data[j] + v_data[j];
-         }
-      }
 
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE 
-#endif
-      for ( i = 0; i < num_rows; i++ ) 
-      {
-         u_data[i] = orig_u[i] + u_data[i];
+         hypre_ParVectorAxpy(coefs[i], r, v);
+         hypre_ParVectorCopy(v, u);
       }
    }
    else /* scaling! */
-   {
-      
-      /*grab 1/sqrt(diagonal) */
-      
-      tmp_vec = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
-                                      hypre_ParCSRMatrixGlobalNumRows(A),
-                                      hypre_ParCSRMatrixRowStarts(A));
-      hypre_ParVectorInitialize(tmp_vec);
-      hypre_ParVectorSetPartitioningOwner(tmp_vec,0);
-      tmp_data = hypre_VectorData(hypre_ParVectorLocalVector(tmp_vec));
-
-    /* get ds_data and get scaled residual: r = D^(-1/2)f -
+   {      
+    /* get scaled residual: r = D^(-1/2)f -
        * D^(-1/2)A*u */
-
-      hypre_ParCSRMatrixMatvec(-1.0, A, u, 0.0, tmp_vec);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE 
-#endif
-      for ( j = 0; j < num_rows; j++ ) 
-      {
-         r_data[j] = ds_data[j] * (f_data[j] + tmp_data[j]);
-      }
+      hypre_ParVectorCopy(f, r); 
+      hypre_ParCSRMatrixMatvec(-1.0, A, u, 1.0, r);
+      #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
+      VecComponentwiseScale(hypre_VectorData(hypre_ParVectorLocalVector(r)), ds_data, num_rows, HYPRE_STREAM(4));
+      #else
+      for (j = 0; j < num_rows; j++) hypre_VectorData(hypre_ParVectorLocalVector(r))[j] *= ds_data[j];
+      #endif
 
       /* save original u, then start 
          the iteration by multiplying r by the cheby coef.*/
-
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE 
-#endif
-      for ( j = 0; j < num_rows; j++ ) 
-      {
-         orig_u[j] = u_data[j]; /* orig, unscaled u */
-
-         u_data[j] = r_data[j] * coefs[cheby_order]; 
-      }
+      hypre_ParVectorCopy(r, u);
+      hypre_ParVectorScale(coefs[cheby_order], u);
 
       /* now do the other coefficients */   
-      for (i = cheby_order - 1; i >= 0; i-- ) 
+      for (i = cheby_order - 1; i >= 0; i--) 
       {
          /* v = D^(-1/2)AD^(-1/2)u */
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE 
-#endif
-         for ( j = 0; j < num_rows; j++ )
-         {
-            tmp_data[j]  =  ds_data[j] * u_data[j];
-         }
-         hypre_ParCSRMatrixMatvec(1.0, A, tmp_vec, 0.0, v);
+         #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
+         VecComponentwiseScale(hypre_VectorData(hypre_ParVectorLocalVector(u)), ds_data, num_rows, HYPRE_STREAM(4));
+         #else
+         for (j = 0; j < num_rows; j++) hypre_VectorData(hypre_ParVectorLocalVector(u))[j] *= ds_data[j];
+         #endif
+         hypre_ParCSRMatrixMatvec(1.0, A, u, 0.0, v);
+         #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
+         VecComponentwiseScale(hypre_VectorData(hypre_ParVectorLocalVector(v)), ds_data, num_rows, HYPRE_STREAM(4));
+         #else
+         for (j = 0; j < num_rows; j++) hypre_VectorData(hypre_ParVectorLocalVector(v))[j] *= ds_data[j];
+         #endif
 
          /* u_new = coef*r + v*/
-         mult = coefs[i];
-
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE 
-#endif
-         for ( j = 0; j < num_rows; j++ )
-         {
-            u_data[j] = mult * r_data[j] + ds_data[j]*v_data[j];
-         }
-         
+         hypre_ParVectorAxpy(coefs[i], r, v);
+         hypre_ParVectorCopy(v, u);         
       } /* end of cheby_order loop */
 
       /* now we have to scale u_data before adding it to u_orig*/
-
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE 
-#endif
-      for ( j = 0; j < num_rows; j++ ) 
-      {
-         u_data[j] = orig_u[j] + ds_data[j]*u_data[j];
-      }
-   
-      hypre_ParVectorDestroy(tmp_vec);  
+      #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
+      VecComponentwiseScale(hypre_VectorData(hypre_ParVectorLocalVector(u)), ds_data, num_rows, HYPRE_STREAM(4));
+      #else
+      for (j = 0; j < num_rows; j++) hypre_VectorData(hypre_ParVectorLocalVector(u))[j] *= ds_data[j];
+      #endif
 
    }/* end of scaling code */
 
-   hypre_TFree(orig_u, HYPRE_MEMORY_HOST);
+   hypre_ParVectorAxpy(1.0, orig_u, u);
   
+   // Set sizes for temporary vectors back to initial
+   hypre_VectorSize(hypre_ParVectorLocalVector(orig_u)) = orig_u_size;
+   hypre_VectorSize(hypre_ParVectorLocalVector(v)) = v_size;
+   hypre_VectorSize(hypre_ParVectorLocalVector(r)) = r_size;
+
    return hypre_error_flag;
 }
 
