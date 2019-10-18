@@ -8,6 +8,7 @@ include ../config/Makefile.config
 ## Euclid specific macros taken from distributed_ls/Euclid
 
 CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
+CXXINCLUDES=${INCLUDES} ${MPIINCLUDE}
 
 C_COMPILE_FLAGS =\
  -I..\
@@ -27,6 +28,25 @@ C_COMPILE_FLAGS =\
  -I$(srcdir)/../parcsr_block_mv\
  $(DSUPERLU_INCLUDE)\
  ${CINCLUDES}
+
+CXX_COMPILE_FLAGS =\
+ -I..\
+ -I../distributed_ls/Euclid\
+ -I$(srcdir)\
+ -I$(srcdir)/..\
+ -I$(srcdir)/../blas\
+ -I$(srcdir)/../lapack\
+ -I$(srcdir)/../multivector\
+ -I$(srcdir)/../utilities\
+ -I$(srcdir)/../krylov\
+ -I$(srcdir)/../seq_mv\
+ -I$(srcdir)/../parcsr_mv\
+ -I$(srcdir)/../distributed_matrix\
+ -I$(srcdir)/../matrix_matrix\
+ -I$(srcdir)/../IJ_mv\
+ -I$(srcdir)/../parcsr_block_mv\
+ $(DSUPERLU_INCLUDE)\
+ ${CXXINCLUDES}
 
 HEADERS =\
  HYPRE_parcsr_ls.h\
