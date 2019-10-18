@@ -132,7 +132,7 @@ typedef struct
    HYPRE_Complex    *P_data;
 
    hypre_CSRMatrix  *A;
-   hypre_CSRMatrix  *AT;
+   hypre_CSRMatrix  *A_real;
    hypre_CSRMatrix  *P;
    hypre_CSRMatrix  *R;
 
@@ -185,7 +185,7 @@ typedef struct
 #define hypre_ParCompGridPData(compGrid)           ((compGrid) -> P_data)
 
 #define hypre_ParCompGridA(compGrid)               ((compGrid) -> A)
-#define hypre_ParCompGridAT(compGrid)               ((compGrid) -> AT)
+#define hypre_ParCompGridAReal(compGrid)               ((compGrid) -> A_real)
 #define hypre_ParCompGridP(compGrid)               ((compGrid) -> P)
 #define hypre_ParCompGridR(compGrid)               ((compGrid) -> R)
 

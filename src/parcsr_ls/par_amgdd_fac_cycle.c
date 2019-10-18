@@ -320,9 +320,8 @@ FAC_Restrict( hypre_ParCompGrid *compGrid_f, hypre_ParCompGrid *compGrid_c, HYPR
    // Recalculate residual on coarse grid
    if (!first_iteration) hypre_CSRMatrixMatvec(-1.0, hypre_ParCompGridA(compGrid_c), hypre_ParCompGridU(compGrid_c), 1.0, hypre_ParCompGridF(compGrid_c));
 
-   // Get update: s_l <- A_lt_l + s_l (NOTE: I'm assuming here that A is symmetric and computing s_l <- A_l^Tt_l + s_l)
-   // hypre_CSRMatrixMatvecT(1.0, hypre_ParCompGridA(compGrid_f), hypre_ParCompGridT(compGrid_f), 1.0, hypre_ParCompGridS(compGrid_f));
-   hypre_CSRMatrixMatvec(1.0, hypre_ParCompGridAT(compGrid_f), hypre_ParCompGridT(compGrid_f), 1.0, hypre_ParCompGridS(compGrid_f));
+   // Get update: s_l <- A_lt_l + s_l 
+   hypre_CSRMatrixMatvec(1.0, hypre_ParCompGridA(compGrid_f), hypre_ParCompGridT(compGrid_f), 1.0, hypre_ParCompGridS(compGrid_f));
 
    // If we need to preserve the updates on the next level !!! Do we need this if statement? Implications? Still need to generally make sure transition level stuff still works...
    if (hypre_ParCompGridS(compGrid_c))
@@ -419,14 +418,14 @@ FAC_Jacobi( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int l
    // Allocate temporary vector if necessary
    if (!hypre_ParCompGridTemp(compGrid))
    {      
-      hypre_ParCompGridTemp(compGrid) = hypre_SeqVectorCreate(hypre_ParCompGridNumNodes(compGrid));
+      hypre_ParCompGridTemp(compGrid) = hypre_SeqVectorCreate(hypre_ParCompGridNumRealNodes(compGrid));
       hypre_SeqVectorInitialize(hypre_ParCompGridTemp(compGrid));
    }
 
 
    hypre_SeqVectorCopy(hypre_ParCompGridF(compGrid),hypre_ParCompGridTemp(compGrid));
    
-   hypre_CSRMatrixMatvec(-relax_weight, hypre_ParCompGridA(compGrid), hypre_ParCompGridU(compGrid), relax_weight, hypre_ParCompGridTemp(compGrid));
+   hypre_CSRMatrixMatvec(-relax_weight, hypre_ParCompGridAReal(compGrid), hypre_ParCompGridU(compGrid), relax_weight, hypre_ParCompGridTemp(compGrid));
    
    #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
    VecScale(hypre_VectorData(hypre_ParCompGridU(compGrid)),hypre_VectorData(hypre_ParCompGridTemp(compGrid)),hypre_ParCompGridL1Norms(compGrid),hypre_ParCompGridNumRealNodes(compGrid),HYPRE_STREAM(4));
@@ -498,7 +497,10 @@ FAC_Cheby( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int le
 
    HYPRE_Int i,j;
 
-   hypre_CSRMatrix *A = hypre_ParCompGridA(compGrid);
+   HYPRE_Int num_nodes = hypre_ParCompGridNumNodes(compGrid);
+   HYPRE_Int num_real_nodes = hypre_ParCompGridNumRealNodes(compGrid);
+
+   hypre_CSRMatrix *A = hypre_ParCompGridAReal(compGrid);
    hypre_Vector *u = hypre_ParCompGridU(compGrid);
    hypre_Vector *t = hypre_ParCompGridT(compGrid);
    hypre_Vector *f = hypre_ParCompGridF(compGrid);
@@ -518,17 +520,17 @@ FAC_Cheby( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int le
    cheby_order = order -1;
 
    // Get temporary/auxiliary vectors
-   hypre_Vector *r = hypre_ParCompGridTemp(compGrid);
-   hypre_Vector *u_update = hypre_ParCompGridTemp2(compGrid);
-   hypre_Vector *v = hypre_ParCompGridTemp3(compGrid);
+   hypre_Vector *r = hypre_ParCompGridTemp(compGrid); // length = num real 
+   hypre_Vector *u_update = hypre_ParCompGridTemp2(compGrid); // length = num nodes
+   hypre_Vector *v = hypre_ParCompGridTemp3(compGrid); // length = num real
 
-   hypre_SeqVectorCopy(u, u_update);
+   // hypre_SeqVectorCopy(u, u_update);
 
    if (!scale)
    {
       /* get residual: r = f - A*u */
-      hypre_SeqVectorCopy(f, r); 
-      hypre_CSRMatrixMatvec(-1.0, A, u_update, 1.0, r);
+      hypre_SeqVectorCopy(f, r);
+      hypre_CSRMatrixMatvec(-1.0, A, u, 1.0, r);
 
       hypre_SeqVectorCopy(r, u_update);
       hypre_SeqVectorScale(coefs[cheby_order], u_update);
@@ -546,11 +548,11 @@ FAC_Cheby( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int le
     /* get scaled residual: r = D^(-1/2)f -
        * D^(-1/2)A*u */
       hypre_SeqVectorCopy(f, r); 
-      hypre_CSRMatrixMatvec(-1.0, A, u_update, 1.0, r);
+      hypre_CSRMatrixMatvec(-1.0, A, u, 1.0, r);
       #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
-      VecComponentwiseScale(hypre_VectorData(r), hypre_ParCompGridL1Norms(compGrid), hypre_ParCompGridNumNodes(compGrid), HYPRE_STREAM(4));
+      VecComponentwiseScale(hypre_VectorData(r), hypre_ParCompGridL1Norms(compGrid), num_real_nodes, HYPRE_STREAM(4));
       #else
-      for (j = 0; j < hypre_ParCompGridNumNodes(compGrid); j++) hypre_VectorData(r)[j] *= hypre_ParCompGridL1Norms(compGrid)[j];
+      for (j = 0; j < num_real_nodes; j++) hypre_VectorData(r)[j] *= hypre_ParCompGridL1Norms(compGrid)[j];
       #endif
 
       /* save original u, then start 
@@ -563,15 +565,15 @@ FAC_Cheby( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int le
       {
          /* v = D^(-1/2)AD^(-1/2)u */
          #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
-         VecComponentwiseScale(hypre_VectorData(u_update), hypre_ParCompGridL1Norms(compGrid), hypre_ParCompGridNumNodes(compGrid), HYPRE_STREAM(4));
+         VecComponentwiseScale(hypre_VectorData(u_update), hypre_ParCompGridL1Norms(compGrid), num_real_nodes, HYPRE_STREAM(4));
          #else
-         for (j = 0; j < hypre_ParCompGridNumNodes(compGrid); j++) hypre_VectorData(u_update)[j] *= hypre_ParCompGridL1Norms(compGrid)[j];
+         for (j = 0; j < num_real_nodes; j++) hypre_VectorData(u_update)[j] *= hypre_ParCompGridL1Norms(compGrid)[j];
          #endif
          hypre_CSRMatrixMatvec(1.0, A, u_update, 0.0, v);
          #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
-         VecComponentwiseScale(hypre_VectorData(v), hypre_ParCompGridL1Norms(compGrid), hypre_ParCompGridNumNodes(compGrid), HYPRE_STREAM(4));
+         VecComponentwiseScale(hypre_VectorData(v), hypre_ParCompGridL1Norms(compGrid), num_real_nodes, HYPRE_STREAM(4));
          #else
-         for (j = 0; j < hypre_ParCompGridNumNodes(compGrid); j++) hypre_VectorData(v)[j] *= hypre_ParCompGridL1Norms(compGrid)[j];
+         for (j = 0; j < num_real_nodes; j++) hypre_VectorData(v)[j] *= hypre_ParCompGridL1Norms(compGrid)[j];
          #endif
 
          /* u_new = coef*r + v*/
@@ -581,25 +583,25 @@ FAC_Cheby( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int le
 
       /* now we have to scale u_data before adding it to u_orig*/
       #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
-      VecComponentwiseScale(hypre_VectorData(u_update), hypre_ParCompGridL1Norms(compGrid), hypre_ParCompGridNumNodes(compGrid), HYPRE_STREAM(4));
+      VecComponentwiseScale(hypre_VectorData(u_update), hypre_ParCompGridL1Norms(compGrid), num_real_nodes, HYPRE_STREAM(4));
       #else
-      for (j = 0; j < hypre_ParCompGridNumNodes(compGrid); j++) hypre_VectorData(u_update)[j] *= hypre_ParCompGridL1Norms(compGrid)[j];
+      for (j = 0; j < num_real_nodes; j++) hypre_VectorData(u_update)[j] *= hypre_ParCompGridL1Norms(compGrid)[j];
       #endif
 
    }/* end of scaling code */
 
 
    // Update only over real dofs by adjusting size of vectors
-   hypre_VectorSize(u) = hypre_ParCompGridNumRealNodes(compGrid);
-   hypre_VectorSize(t) = hypre_ParCompGridNumRealNodes(compGrid);
-   hypre_VectorSize(u_update) = hypre_ParCompGridNumRealNodes(compGrid);
+   hypre_VectorSize(u) = num_real_nodes;
+   hypre_VectorSize(t) = num_real_nodes;
+   hypre_VectorSize(u_update) = num_real_nodes;
 
    hypre_SeqVectorAxpy(1.0, u_update, t);
    hypre_SeqVectorAxpy(1.0, u_update, u);
   
-   hypre_VectorSize(u) = hypre_ParCompGridNumNodes(compGrid);
-   hypre_VectorSize(t) = hypre_ParCompGridNumNodes(compGrid);
-   hypre_VectorSize(u_update) = hypre_ParCompGridNumNodes(compGrid);
+   hypre_VectorSize(u) = num_nodes;
+   hypre_VectorSize(t) = num_nodes;
+   hypre_VectorSize(u_update) = num_nodes;
 
    return hypre_error_flag;
 }

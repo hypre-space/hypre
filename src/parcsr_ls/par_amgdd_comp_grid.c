@@ -64,7 +64,7 @@ hypre_ParCompGridCreate ()
    hypre_ParCompGridPData(compGrid) = NULL;
 
    hypre_ParCompGridA(compGrid) = NULL;
-   hypre_ParCompGridAT(compGrid) = NULL;
+   hypre_ParCompGridAReal(compGrid) = NULL;
    hypre_ParCompGridP(compGrid) = NULL;
    hypre_ParCompGridR(compGrid) = NULL;
 
@@ -409,13 +409,13 @@ hypre_ParCompGridSetupRelax( hypre_ParAMGData *amg_data )
          }
 
          // Setup temporary/auxiliary vectors
-         hypre_ParCompGridTemp(compGrid) = hypre_SeqVectorCreate(hypre_ParCompGridNumNodes(compGrid));
+         hypre_ParCompGridTemp(compGrid) = hypre_SeqVectorCreate(hypre_ParCompGridNumRealNodes(compGrid));
          hypre_SeqVectorInitialize(hypre_ParCompGridTemp(compGrid));
 
          hypre_ParCompGridTemp2(compGrid) = hypre_SeqVectorCreate(hypre_ParCompGridNumNodes(compGrid));
          hypre_SeqVectorInitialize(hypre_ParCompGridTemp2(compGrid));
 
-         hypre_ParCompGridTemp3(compGrid) = hypre_SeqVectorCreate(hypre_ParCompGridNumNodes(compGrid));
+         hypre_ParCompGridTemp3(compGrid) = hypre_SeqVectorCreate(hypre_ParCompGridNumRealNodes(compGrid));
          hypre_SeqVectorInitialize(hypre_ParCompGridTemp3(compGrid));
       }
       if (hypre_ParAMGDataFACRelaxType(amg_data) == 3)
@@ -661,13 +661,20 @@ hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPk
    for (level = 0; level < num_levels; level++)
    {
       HYPRE_Int num_nodes = hypre_ParCompGridNumNodes(compGrid[level]);
+      HYPRE_Int num_real_nodes = hypre_ParCompGridNumRealNodes(compGrid[level]);
       total_num_nodes += num_nodes;
       HYPRE_Int A_nnz = hypre_ParCompGridARowPtr(compGrid[level])[num_nodes];
+      HYPRE_Int A_real_nnz = hypre_ParCompGridARowPtr(compGrid[level])[num_real_nodes];
       
       hypre_ParCompGridA(compGrid[level]) = hypre_CSRMatrixCreate(num_nodes, num_nodes, A_nnz);
       hypre_CSRMatrixI(hypre_ParCompGridA(compGrid[level])) = hypre_ParCompGridARowPtr(compGrid[level]);
       hypre_CSRMatrixJ(hypre_ParCompGridA(compGrid[level])) = hypre_ParCompGridAColInd(compGrid[level]);
       hypre_CSRMatrixData(hypre_ParCompGridA(compGrid[level])) = hypre_ParCompGridAData(compGrid[level]);
+
+      hypre_ParCompGridAReal(compGrid[level]) = hypre_CSRMatrixCreate(num_real_nodes, num_nodes, A_real_nnz);
+      hypre_CSRMatrixI(hypre_ParCompGridAReal(compGrid[level])) = hypre_ParCompGridARowPtr(compGrid[level]);
+      hypre_CSRMatrixJ(hypre_ParCompGridAReal(compGrid[level])) = hypre_ParCompGridAColInd(compGrid[level]);
+      hypre_CSRMatrixData(hypre_ParCompGridAReal(compGrid[level])) = hypre_ParCompGridAData(compGrid[level]);
 
       if (level != num_levels-1)
       {
@@ -679,7 +686,6 @@ hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPk
          hypre_CSRMatrixData(hypre_ParCompGridP(compGrid[level])) = hypre_ParCompGridPData(compGrid[level]);
 
          hypre_CSRMatrixTranspose(hypre_ParCompGridP(compGrid[level]), &hypre_ParCompGridR(compGrid[level]), 1);
-         hypre_CSRMatrixTranspose(hypre_ParCompGridA(compGrid[level]), &hypre_ParCompGridAT(compGrid[level]), 1);
       }
 
       hypre_ParCompGridU(compGrid[level]) = hypre_SeqVectorCreate(num_nodes);
