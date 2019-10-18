@@ -11,7 +11,7 @@
  ***********************************************************************EHEADER*/
 
 #define TEST_RES_COMM 0
-#define DEBUGGING_MESSAGES 1
+#define DEBUGGING_MESSAGES 0
 
 #include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
@@ -527,12 +527,6 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
 
       if ( num_send_procs || num_recv_procs ) // If there are any owned nodes on this level
       {
-
-
-         // !!! Debug
-         // printf("Rank %d, level %d, num_recv_procs = %d, num_send_procs = %d, num_send_partitions = %d\n", myid, level, num_recv_procs, num_send_procs, num_send_partitions);
-         // printf("Rank %d, recv buffer size = %d, send buffer size = %d\n", myid, recv_map_starts[level][num_recv_procs], send_map_starts[level][num_send_partitions]);
-
          // allocate space for the buffers, buffer sizes, requests and status, psiComposite_send, psiComposite_recv, send and recv maps
          recv_buffer = hypre_CTAlloc(HYPRE_Complex, recv_map_starts[level][num_recv_procs], HYPRE_MEMORY_SHARED);
          send_buffer = hypre_CTAlloc(HYPRE_Complex, send_map_starts[level][num_send_partitions], HYPRE_MEMORY_SHARED);
@@ -545,10 +539,6 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
          {
             HYPRE_Int recv_buffer_size = recv_map_starts[level][i+1] - recv_map_starts[level][i];
             if (recv_buffer_size) hypre_MPI_Irecv(&(recv_buffer[ recv_map_starts[level][i] ]), recv_buffer_size, HYPRE_MPI_COMPLEX, recv_procs[level][i], 3, comm, &requests[request_counter++]);
-
-            // !!! Debug
-            if (level == 0) printf("Recv: %d -> %d : %d i = %d\n", recv_procs[level][i], myid, recv_buffer_size, i);
-
          }
 
          // pack and send the buffers
@@ -559,10 +549,6 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
             HYPRE_Int buffer_index = hypre_ParCompGridCommPkgSendProcPartitions(compGridCommPkg)[level][i];
             HYPRE_Int send_buffer_size = send_map_starts[level][buffer_index+1] - send_map_starts[level][buffer_index];
             if (send_buffer_size) hypre_MPI_Isend(&(send_buffer[ send_map_starts[level][buffer_index] ]), send_buffer_size, HYPRE_MPI_COMPLEX, send_procs[level][i], 3, comm, &requests[request_counter++]);
-         
-            // !!! Debug
-            if (level == 0) printf("Send: %d -> %d : %d , buffer_index = %d\n", myid, send_procs[level][i], send_buffer_size, buffer_index);
-
          }
 
          // wait for buffers to be received
