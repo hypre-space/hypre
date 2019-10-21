@@ -24,116 +24,91 @@ SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGr
 #ifdef __cplusplus
 }
 
-HYPRE_Int 
-FindNeighborProcessors(hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A, 
-   map<HYPRE_Int, map<HYPRE_Int, HYPRE_Int> > &send_proc_dofs, 
-   map<HYPRE_Int, set<HYPRE_Int> > &starting_dofs, 
-   set<HYPRE_Int> &recv_procs,
-   HYPRE_Int level, HYPRE_Int *communication_cost);
+HYPRE_Int
+GetDofRecvProc(HYPRE_Int dof_index, HYPRE_Int neighbor_global_index, hypre_ParCSRMatrix *A)
+{
+   HYPRE_Int *colmap = hypre_ParCSRMatrixColMapOffd(A);
+   HYPRE_Int *offdRowPtr = hypre_CSRMatrixI( hypre_ParCSRMatrixOffd(A) );
+   HYPRE_Int offdColIndex = -1;
+
+   // Get the appropriate column index in the offd part of A
+   for (HYPRE_Int i = offdRowPtr[dof_index]; i < offdRowPtr[dof_index+1]; i++)
+   {
+      if (colmap[ hypre_CSRMatrixJ( hypre_ParCSRMatrixOffd(A) )[i] ] == neighbor_global_index)
+      {
+         offdColIndex = hypre_CSRMatrixJ( hypre_ParCSRMatrixOffd(A) )[i];
+      }
+   }
+
+   // Use that column index to find which processor this dof is received from
+   hypre_ParCSRCommPkg *commPkg = hypre_ParCSRMatrixCommPkg(A);
+   HYPRE_Int recv_proc = -1;
+   for (HYPRE_Int i = 0; i < hypre_ParCSRCommPkgNumRecvs(commPkg); i++)
+   {
+      if (offdColIndex >= hypre_ParCSRCommPkgRecvVecStart(commPkg,i) && offdColIndex < hypre_ParCSRCommPkgRecvVecStart(commPkg,i+1)) 
+         recv_proc = hypre_ParCSRCommPkgRecvProc(commPkg,i);
+   }
+
+   return recv_proc;
+}
 
 HYPRE_Int
 RecursivelyFindNeighborNodes(HYPRE_Int dof_index, HYPRE_Int distance, hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A,
    map<HYPRE_Int, HYPRE_Int> &send_dofs, 
-   map< HYPRE_Int, map<HYPRE_Int, map<HYPRE_Int, HYPRE_Int> > > &request_proc_dofs, HYPRE_Int destination_proc );
-
-HYPRE_Int
-GetDofRecvProc(HYPRE_Int dof_index, HYPRE_Int neighbor_global_index, hypre_ParCSRMatrix *A);
-
-
-HYPRE_Int
-SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int level, HYPRE_Int *padding, HYPRE_Int num_ghost_layers, HYPRE_Int *communication_cost )
+   map< HYPRE_Int, map<HYPRE_Int, map<HYPRE_Int, HYPRE_Int> > > &request_proc_dofs, HYPRE_Int destination_proc )
 {
-   HYPRE_Int               i,j,cnt;
-   HYPRE_Int               num_nodes = hypre_ParCSRMatrixNumRows(A);
-   hypre_ParCSRCommPkg     *commPkg = hypre_ParCSRMatrixCommPkg(A);
-   HYPRE_Int               start,finish;
+   HYPRE_Int         i,j;
 
-   HYPRE_Int   myid, num_procs;
-   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
-   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
-
-   // Get the default (distance 1) number of send and recv procs
-   HYPRE_Int      num_sends = hypre_ParCSRCommPkgNumSends(commPkg);
-   HYPRE_Int      num_recvs = hypre_ParCSRCommPkgNumRecvs(commPkg);
-
-   // If num_sends and num_recvs are zero, then simply note that in compGridCommPkg and we are done
-   if (num_sends == 0 && num_recvs == 0)
+   // Look at neighbors
+   for (i = hypre_ParCompGridARowPtr(compGrid)[dof_index]; i < hypre_ParCompGridARowPtr(compGrid)[dof_index+1]; i++)
    {
-      hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[level] = 0;
-      hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg)[level] = 0;
-      hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg)[level] = 0;
-   }
-   else
-   {
-      // Initialize send_proc_dofs and the starting_dofs (this is how we will track nodes to send to each proc until routine finishes)
-      map<HYPRE_Int, map<HYPRE_Int, HYPRE_Int> > send_proc_dofs; // send_proc_dofs[send_proc] = send_dofs, send_dofs[dof_index] = distance value
-      map<HYPRE_Int, set<HYPRE_Int> > starting_dofs; // starting_dofs[send_proc] = vector of starting dofs for searching through stencil
-      for (i = 0; i < num_sends; i++)
+      // Get the index of the neighbor
+      HYPRE_Int neighbor_index = hypre_ParCompGridAColInd(compGrid)[i];
+
+      // If the neighbor info is available on this proc
+      if (neighbor_index >= 0)
       {
-         send_proc_dofs[hypre_ParCSRCommPkgSendProc(commPkg,i)]; // initialize the send procs as the keys in the outer map
-         starting_dofs[hypre_ParCSRCommPkgSendProc(commPkg,i)];
-         start = hypre_ParCSRCommPkgSendMapStart(commPkg,i);
-         finish = hypre_ParCSRCommPkgSendMapStart(commPkg,i+1);
-         for (j = start; j < finish; j++)
+         // And if we still need to visit this index (note that send_dofs[neighbor_index] = distance means we have already added all distance-1 neighbors of index)
+         
+         // See whether this dof is in the send dofs
+         auto neighbor_dof = send_dofs.find(neighbor_index);
+         if (neighbor_dof == send_dofs.end())
          {
-            send_proc_dofs[hypre_ParCSRCommPkgSendProc(commPkg,i)][hypre_ParCSRCommPkgSendMapElmt(commPkg,j)] = padding[level] + num_ghost_layers;
-            starting_dofs[hypre_ParCSRCommPkgSendProc(commPkg,i)].insert(hypre_ParCSRCommPkgSendMapElmt(commPkg,j));
+            // If neighbor dof isn't in the send dofs, add it with appropriate distance and recurse
+            send_dofs[neighbor_index] = distance;
+            if (distance-1 > 0) RecursivelyFindNeighborNodes(neighbor_index, distance-1, compGrid, A, send_dofs, request_proc_dofs, destination_proc);
+         }
+         else if (neighbor_dof->second < distance)
+         {
+            // If neighbor dof is in the send dofs, but at smaller distance, also need to update distance and recurse
+            send_dofs[neighbor_index] = distance;
+            if (distance-1 > 0) RecursivelyFindNeighborNodes(neighbor_index, distance-1, compGrid, A, send_dofs, request_proc_dofs, destination_proc);
          }
       }
+      // otherwise note this as a request dof
+      else
+      {
+         HYPRE_Int neighbor_global_index = hypre_ParCompGridAGlobalColInd(compGrid)[i];
 
-      //Initialize the recv_procs
-      set<HYPRE_Int> recv_procs;
-      for (i = 0; i < num_recvs; i++) recv_procs.insert( hypre_ParCSRCommPkgRecvProc(commPkg,i) );
+         HYPRE_Int recv_proc = GetDofRecvProc(dof_index, neighbor_global_index, A);
 
-      // Iteratively communicate with longer and longer distance neighbors to grow the communication stencils
-      for (i = 0; i < padding[level] + num_ghost_layers - 1; i++)
-      {
-         FindNeighborProcessors(compGrid, A, send_proc_dofs, starting_dofs, recv_procs, level, communication_cost);
-      }
-   
-      // Use send_proc_dofs and recv_procs to generate relevant info for CompGridCommPkg
-      // Set the number of send and recv procs
-      hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[level] = send_proc_dofs.size();
-      hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg)[level] = recv_procs.size();
-      hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg)[level] = send_proc_dofs.size();
-      // Setup the list of send procs, partitions, and proc partitions, and count up the total number of send elmts
-      HYPRE_Int total_send_elmts = 0;
-      hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level] = hypre_CTAlloc(HYPRE_Int, send_proc_dofs.size(), HYPRE_MEMORY_HOST);
-      hypre_ParCompGridCommPkgSendPartitions(compGridCommPkg)[level] = hypre_CTAlloc(HYPRE_Int, send_proc_dofs.size(), HYPRE_MEMORY_HOST);
-      hypre_ParCompGridCommPkgSendProcPartitions(compGridCommPkg)[level] = hypre_CTAlloc(HYPRE_Int, send_proc_dofs.size(), HYPRE_MEMORY_HOST);
-      cnt = 0;
-      for (auto send_proc_it = send_proc_dofs.begin(); send_proc_it != send_proc_dofs.end(); ++send_proc_it)
-      {
-         hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level][cnt] = send_proc_it->first;
-         hypre_ParCompGridCommPkgSendPartitions(compGridCommPkg)[level][cnt] = send_proc_it->first;
-         hypre_ParCompGridCommPkgSendProcPartitions(compGridCommPkg)[level][cnt] = cnt;
-         total_send_elmts += send_proc_it->second.size();
-         cnt++;
-      }
-      // Setup the list of recv procs
-      hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[level] = hypre_CTAlloc(HYPRE_Int, recv_procs.size(), HYPRE_MEMORY_HOST);
-      cnt = 0;
-      for (auto recv_proc_it = recv_procs.begin(); recv_proc_it != recv_procs.end(); ++recv_proc_it)
-      {
-         hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[level][cnt++] = *recv_proc_it;
-      }
-      // Setup the send map elmts, starts, and ghost marker
-      hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[level] = hypre_CTAlloc(HYPRE_Int, send_proc_dofs.size() + 1, HYPRE_MEMORY_HOST);
-      hypre_ParCompGridCommPkgSendMapElmts(compGridCommPkg)[level] = hypre_CTAlloc(HYPRE_Int, total_send_elmts, HYPRE_MEMORY_HOST);
-      hypre_ParCompGridCommPkgGhostMarker(compGridCommPkg)[level] = hypre_CTAlloc(HYPRE_Int, total_send_elmts, HYPRE_MEMORY_HOST);
-      HYPRE_Int proc_cnt = 0;
-      cnt = 0;
-      for (auto send_proc_it = send_proc_dofs.begin(); send_proc_it != send_proc_dofs.end(); ++send_proc_it)
-      {
-         hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[level][proc_cnt++] = cnt;
-         for (auto dof_it = send_proc_it->second.begin(); dof_it != send_proc_it->second.end(); ++dof_it)
+         // If request proc isn't the destination proc
+         if (recv_proc != destination_proc)
          {
-            hypre_ParCompGridCommPkgSendMapElmts(compGridCommPkg)[level][cnt] = dof_it->first;
-            if (dof_it->second <= num_ghost_layers) hypre_ParCompGridCommPkgGhostMarker(compGridCommPkg)[level][cnt] = 1;
-            cnt++;
+            // Check whether we have already requested this node 
+            auto req_dof = request_proc_dofs[recv_proc][destination_proc].find(neighbor_global_index);
+            if (req_dof == request_proc_dofs[recv_proc][destination_proc].end())
+            {
+               // If this hasn't yet been requested, add it
+               request_proc_dofs[recv_proc][destination_proc][neighbor_global_index] = distance;
+            }
+            else if (req_dof->second < distance)
+            {
+               // If reqest is already there, but at smaller distance, update the distance
+               request_proc_dofs[recv_proc][destination_proc][neighbor_global_index] = distance;
+            }
          }
       }
-      hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[level][send_proc_dofs.size()] = total_send_elmts;
    }
 
    return 0;
@@ -390,94 +365,102 @@ FindNeighborProcessors(hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A,
 }
 
 HYPRE_Int
-RecursivelyFindNeighborNodes(HYPRE_Int dof_index, HYPRE_Int distance, hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A,
-   map<HYPRE_Int, HYPRE_Int> &send_dofs, 
-   map< HYPRE_Int, map<HYPRE_Int, map<HYPRE_Int, HYPRE_Int> > > &request_proc_dofs, HYPRE_Int destination_proc )
+SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int level, HYPRE_Int *padding, HYPRE_Int num_ghost_layers, HYPRE_Int *communication_cost )
 {
-   HYPRE_Int         i,j;
+   HYPRE_Int               i,j,cnt;
+   HYPRE_Int               num_nodes = hypre_ParCSRMatrixNumRows(A);
+   hypre_ParCSRCommPkg     *commPkg = hypre_ParCSRMatrixCommPkg(A);
+   HYPRE_Int               start,finish;
 
-   // Look at neighbors
-   for (i = hypre_ParCompGridARowPtr(compGrid)[dof_index]; i < hypre_ParCompGridARowPtr(compGrid)[dof_index+1]; i++)
+   HYPRE_Int   myid, num_procs;
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+
+   // Get the default (distance 1) number of send and recv procs
+   HYPRE_Int      num_sends = hypre_ParCSRCommPkgNumSends(commPkg);
+   HYPRE_Int      num_recvs = hypre_ParCSRCommPkgNumRecvs(commPkg);
+
+   // If num_sends and num_recvs are zero, then simply note that in compGridCommPkg and we are done
+   if (num_sends == 0 && num_recvs == 0)
    {
-      // Get the index of the neighbor
-      HYPRE_Int neighbor_index = hypre_ParCompGridAColInd(compGrid)[i];
-
-      // If the neighbor info is available on this proc
-      if (neighbor_index >= 0)
+      hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[level] = 0;
+      hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg)[level] = 0;
+      hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg)[level] = 0;
+   }
+   else
+   {
+      // Initialize send_proc_dofs and the starting_dofs (this is how we will track nodes to send to each proc until routine finishes)
+      map<HYPRE_Int, map<HYPRE_Int, HYPRE_Int> > send_proc_dofs; // send_proc_dofs[send_proc] = send_dofs, send_dofs[dof_index] = distance value
+      map<HYPRE_Int, set<HYPRE_Int> > starting_dofs; // starting_dofs[send_proc] = vector of starting dofs for searching through stencil
+      for (i = 0; i < num_sends; i++)
       {
-         // And if we still need to visit this index (note that send_dofs[neighbor_index] = distance means we have already added all distance-1 neighbors of index)
-         
-         // See whether this dof is in the send dofs
-         auto neighbor_dof = send_dofs.find(neighbor_index);
-         if (neighbor_dof == send_dofs.end())
+         send_proc_dofs[hypre_ParCSRCommPkgSendProc(commPkg,i)]; // initialize the send procs as the keys in the outer map
+         starting_dofs[hypre_ParCSRCommPkgSendProc(commPkg,i)];
+         start = hypre_ParCSRCommPkgSendMapStart(commPkg,i);
+         finish = hypre_ParCSRCommPkgSendMapStart(commPkg,i+1);
+         for (j = start; j < finish; j++)
          {
-            // If neighbor dof isn't in the send dofs, add it with appropriate distance and recurse
-            send_dofs[neighbor_index] = distance;
-            if (distance-1 > 0) RecursivelyFindNeighborNodes(neighbor_index, distance-1, compGrid, A, send_dofs, request_proc_dofs, destination_proc);
-         }
-         else if (neighbor_dof->second < distance)
-         {
-            // If neighbor dof is in the send dofs, but at smaller distance, also need to update distance and recurse
-            send_dofs[neighbor_index] = distance;
-            if (distance-1 > 0) RecursivelyFindNeighborNodes(neighbor_index, distance-1, compGrid, A, send_dofs, request_proc_dofs, destination_proc);
+            send_proc_dofs[hypre_ParCSRCommPkgSendProc(commPkg,i)][hypre_ParCSRCommPkgSendMapElmt(commPkg,j)] = padding[level] + num_ghost_layers;
+            starting_dofs[hypre_ParCSRCommPkgSendProc(commPkg,i)].insert(hypre_ParCSRCommPkgSendMapElmt(commPkg,j));
          }
       }
-      // otherwise note this as a request dof
-      else
+
+      //Initialize the recv_procs
+      set<HYPRE_Int> recv_procs;
+      for (i = 0; i < num_recvs; i++) recv_procs.insert( hypre_ParCSRCommPkgRecvProc(commPkg,i) );
+
+      // Iteratively communicate with longer and longer distance neighbors to grow the communication stencils
+      for (i = 0; i < padding[level] + num_ghost_layers - 1; i++)
       {
-         HYPRE_Int neighbor_global_index = hypre_ParCompGridAGlobalColInd(compGrid)[i];
-
-         HYPRE_Int recv_proc = GetDofRecvProc(dof_index, neighbor_global_index, A);
-
-         // If request proc isn't the destination proc
-         if (recv_proc != destination_proc)
+         FindNeighborProcessors(compGrid, A, send_proc_dofs, starting_dofs, recv_procs, level, communication_cost);
+      }
+   
+      // Use send_proc_dofs and recv_procs to generate relevant info for CompGridCommPkg
+      // Set the number of send and recv procs
+      hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[level] = send_proc_dofs.size();
+      hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg)[level] = recv_procs.size();
+      hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg)[level] = send_proc_dofs.size();
+      // Setup the list of send procs, partitions, and proc partitions, and count up the total number of send elmts
+      HYPRE_Int total_send_elmts = 0;
+      hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level] = hypre_CTAlloc(HYPRE_Int, send_proc_dofs.size(), HYPRE_MEMORY_HOST);
+      hypre_ParCompGridCommPkgSendPartitions(compGridCommPkg)[level] = hypre_CTAlloc(HYPRE_Int, send_proc_dofs.size(), HYPRE_MEMORY_HOST);
+      hypre_ParCompGridCommPkgSendProcPartitions(compGridCommPkg)[level] = hypre_CTAlloc(HYPRE_Int, send_proc_dofs.size(), HYPRE_MEMORY_HOST);
+      cnt = 0;
+      for (auto send_proc_it = send_proc_dofs.begin(); send_proc_it != send_proc_dofs.end(); ++send_proc_it)
+      {
+         hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level][cnt] = send_proc_it->first;
+         hypre_ParCompGridCommPkgSendPartitions(compGridCommPkg)[level][cnt] = send_proc_it->first;
+         hypre_ParCompGridCommPkgSendProcPartitions(compGridCommPkg)[level][cnt] = cnt;
+         total_send_elmts += send_proc_it->second.size();
+         cnt++;
+      }
+      // Setup the list of recv procs
+      hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[level] = hypre_CTAlloc(HYPRE_Int, recv_procs.size(), HYPRE_MEMORY_HOST);
+      cnt = 0;
+      for (auto recv_proc_it = recv_procs.begin(); recv_proc_it != recv_procs.end(); ++recv_proc_it)
+      {
+         hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[level][cnt++] = *recv_proc_it;
+      }
+      // Setup the send map elmts, starts, and ghost marker
+      hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[level] = hypre_CTAlloc(HYPRE_Int, send_proc_dofs.size() + 1, HYPRE_MEMORY_HOST);
+      hypre_ParCompGridCommPkgSendMapElmts(compGridCommPkg)[level] = hypre_CTAlloc(HYPRE_Int, total_send_elmts, HYPRE_MEMORY_HOST);
+      hypre_ParCompGridCommPkgGhostMarker(compGridCommPkg)[level] = hypre_CTAlloc(HYPRE_Int, total_send_elmts, HYPRE_MEMORY_HOST);
+      HYPRE_Int proc_cnt = 0;
+      cnt = 0;
+      for (auto send_proc_it = send_proc_dofs.begin(); send_proc_it != send_proc_dofs.end(); ++send_proc_it)
+      {
+         hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[level][proc_cnt++] = cnt;
+         for (auto dof_it = send_proc_it->second.begin(); dof_it != send_proc_it->second.end(); ++dof_it)
          {
-            // Check whether we have already requested this node 
-            auto req_dof = request_proc_dofs[recv_proc][destination_proc].find(neighbor_global_index);
-            if (req_dof == request_proc_dofs[recv_proc][destination_proc].end())
-            {
-               // If this hasn't yet been requested, add it
-               request_proc_dofs[recv_proc][destination_proc][neighbor_global_index] = distance;
-            }
-            else if (req_dof->second < distance)
-            {
-               // If reqest is already there, but at smaller distance, update the distance
-               request_proc_dofs[recv_proc][destination_proc][neighbor_global_index] = distance;
-            }
+            hypre_ParCompGridCommPkgSendMapElmts(compGridCommPkg)[level][cnt] = dof_it->first;
+            if (dof_it->second <= num_ghost_layers) hypre_ParCompGridCommPkgGhostMarker(compGridCommPkg)[level][cnt] = 1;
+            cnt++;
          }
       }
+      hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[level][send_proc_dofs.size()] = total_send_elmts;
    }
 
    return 0;
 }
-
-HYPRE_Int
-GetDofRecvProc(HYPRE_Int dof_index, HYPRE_Int neighbor_global_index, hypre_ParCSRMatrix *A)
-{
-   HYPRE_Int *colmap = hypre_ParCSRMatrixColMapOffd(A);
-   HYPRE_Int *offdRowPtr = hypre_CSRMatrixI( hypre_ParCSRMatrixOffd(A) );
-   HYPRE_Int offdColIndex = -1;
-
-   // Get the appropriate column index in the offd part of A
-   for (HYPRE_Int i = offdRowPtr[dof_index]; i < offdRowPtr[dof_index+1]; i++)
-   {
-      if (colmap[ hypre_CSRMatrixJ( hypre_ParCSRMatrixOffd(A) )[i] ] == neighbor_global_index)
-      {
-         offdColIndex = hypre_CSRMatrixJ( hypre_ParCSRMatrixOffd(A) )[i];
-      }
-   }
-
-   // Use that column index to find which processor this dof is received from
-   hypre_ParCSRCommPkg *commPkg = hypre_ParCSRMatrixCommPkg(A);
-   HYPRE_Int recv_proc = -1;
-   for (HYPRE_Int i = 0; i < hypre_ParCSRCommPkgNumRecvs(commPkg); i++)
-   {
-      if (offdColIndex >= hypre_ParCSRCommPkgRecvVecStart(commPkg,i) && offdColIndex < hypre_ParCSRCommPkgRecvVecStart(commPkg,i+1)) 
-         recv_proc = hypre_ParCSRCommPkgRecvProc(commPkg,i);
-   }
-
-   return recv_proc;
-}
-
 
 #endif

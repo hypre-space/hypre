@@ -16,7 +16,6 @@
 #include "_hypre_utilities.h"
 #include "par_amg.h"
 #include "par_csr_block_matrix.h"
-#include "par_amgdd_helpers.cxx"
 
 #define DEBUG_COMP_GRID 0 // if true, runs some tests, prints out what is stored in the comp grids for each processor to a file
 #define DEBUG_PROC_NEIGHBORS 0 // if true, dumps info on the add flag structures that determine nearest processor neighbors 
