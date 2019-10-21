@@ -267,7 +267,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
       AllgatherCoarseLevels(amg_data, hypre_MPI_COMM_WORLD, transition_level, num_levels, communication_cost, 0, padding);
 
       // Initialize composite grids above the transition level
-      for (level = 0; level < transition_level; level++)
+      for (level = amgdd_start_level; level < transition_level; level++)
       {
          compGrid[level] = hypre_ParCompGridCreate();
          hypre_ParCompGridInitialize( amg_data, padding[level], level );
@@ -277,7 +277,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    else
    {
       transition_level = num_levels;
-      for (level = 0; level < num_levels; level++)
+      for (level = amgdd_start_level; level < num_levels; level++)
       {
          compGrid[level] = hypre_ParCompGridCreate();
          hypre_ParCompGridInitialize( amg_data, padding[level], level );
@@ -294,10 +294,9 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    // On each level, setup a long distance commPkg that has communication info for distance (eta + numGhostLayers)
    if (use_barriers) hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
    if (timers) hypre_BeginTiming(timers[0]);
-   for (level = 0; level < transition_level; level++)
+   for (level = amgdd_start_level; level < transition_level; level++)
    {
-      // SetupNearestProcessorNeighbors(A_array[level], compGrid[level], compGridCommPkg, level, padding, num_ghost_layers, communication_cost); 
-      SetupNearestProcessorNeighborsNew(A_array[level], compGrid[level], compGridCommPkg, level, padding, num_ghost_layers, communication_cost);  
+      SetupNearestProcessorNeighbors(A_array[level], compGrid[level], compGridCommPkg, level, padding, num_ghost_layers, communication_cost);  
    }
 
    #if DEBUGGING_MESSAGES

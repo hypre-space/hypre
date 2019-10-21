@@ -102,7 +102,7 @@ hypre_ParCompGridDestroy ( hypre_ParCompGrid *compGrid )
 
    if (hypre_ParCompGridChebyCoeffs(compGrid))
    {
-      hypre_TFree(hypre_ParCompGridChebyCoeffs(compGrid), HYPRE_MEMORY_SHARED);
+      hypre_TFree(hypre_ParCompGridChebyCoeffs(compGrid), HYPRE_MEMORY_HOST);
    }
 
    if (hypre_ParCompGridU(compGrid))

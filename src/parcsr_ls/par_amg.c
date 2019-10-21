@@ -810,7 +810,7 @@ hypre_BoomerAMGDestroy( void *data )
    // get rid of comp grids
    if (hypre_ParAMGDataCompGrid(amg_data))
    {
-      for (i = 0; i < num_levels; i++)
+      for (i = hypre_ParAMGDataAMGDDStartLevel(amg_data); i < num_levels; i++)
       {
          hypre_ParCompGridDestroy(hypre_ParAMGDataCompGrid(amg_data)[i]);
       }
