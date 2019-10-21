@@ -88,7 +88,7 @@ SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGr
       // Iteratively communicate with longer and longer distance neighbors to grow the communication stencils
       for (i = 0; i < padding[level] + num_ghost_layers - 1; i++)
       {
-         FindNeighborProcessorsNew(compGrid, A, send_proc_dofs, starting_dofs, recv_procs, level, communication_cost);
+         FindNeighborProcessors(compGrid, A, send_proc_dofs, starting_dofs, recv_procs, level, communication_cost);
       }
    
       // Use send_proc_dofs and recv_procs to generate relevant info for CompGridCommPkg
@@ -165,7 +165,7 @@ FindNeighborProcessors(hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A,
       {
          HYPRE_Int dof_index = *dof_it;
          HYPRE_Int distance = send_proc_dofs[destination_proc][dof_index];
-         RecursivelyFindNeighborNodesNew(dof_index, distance-1, compGrid, A, send_proc_dofs[destination_proc], request_proc_dofs, destination_proc);
+         RecursivelyFindNeighborNodes(dof_index, distance-1, compGrid, A, send_proc_dofs[destination_proc], request_proc_dofs, destination_proc);
       }
    }
    // Clear the list of starting dofs
