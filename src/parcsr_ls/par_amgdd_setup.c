@@ -86,7 +86,7 @@ HYPRE_Int
 UnpackSendFlagBuffer(HYPRE_Int *send_flag_buffer, HYPRE_Int **send_flag, HYPRE_Int *num_send_nodes, HYPRE_Int *send_buffer_size, HYPRE_Int current_level, HYPRE_Int num_levels);
 
 HYPRE_Int
-CommunicateRemainingMatrixInfo(hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int *communication_cost, HYPRE_Int *num_resizes);
+CommunicateRemainingMatrixInfo(hypre_ParAMGData* amg_data, hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int *communication_cost, HYPRE_Int *num_resizes);
 
 HYPRE_Int
 FinalizeCompGridCommPkg(hypre_ParCompGridCommPkg *compGridCommPkg, hypre_ParCompGrid **compGrid);
@@ -555,7 +555,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
          if (use_barriers) hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
          if (timers) hypre_BeginTiming(timers[5]);
 
-         hypre_ParCompGridSetupLocalIndices(compGrid, nodes_added_on_level, transition_level);
+         hypre_ParCompGridSetupLocalIndices(compGrid, nodes_added_on_level, amgdd_start_level, transition_level);
 
          // Zero out nodes_added_on_level
          for (i = level; i < num_levels; i++) nodes_added_on_level[i] = 0;
@@ -659,7 +659,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    #endif 
 
    // Communicate data for A and all info for P
-   CommunicateRemainingMatrixInfo(compGrid, compGridCommPkg, communication_cost, num_resizes);
+   CommunicateRemainingMatrixInfo(amg_data, compGrid, compGridCommPkg, communication_cost, num_resizes);
 
    #if DEBUGGING_MESSAGES
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
@@ -673,7 +673,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    if (timers) hypre_BeginTiming(timers[5]);
 
    // Setup the local indices for P
-   hypre_ParCompGridSetupLocalIndicesP(compGrid, num_levels, transition_level);
+   hypre_ParCompGridSetupLocalIndicesP(compGrid, amgdd_start_level, transition_level);
 
    #if DEBUGGING_MESSAGES
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
@@ -2730,10 +2730,11 @@ UnpackSendFlagBuffer(HYPRE_Int *send_flag_buffer,
 
 
 HYPRE_Int
-CommunicateRemainingMatrixInfo(hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int *communication_cost, HYPRE_Int *num_resizes)
+CommunicateRemainingMatrixInfo(hypre_ParAMGData* amg_data, hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int *communication_cost, HYPRE_Int *num_resizes)
 {
    HYPRE_Int outer_level,proc,part,level,i,j;
    HYPRE_Int num_levels = hypre_ParCompGridCommPkgNumLevels(compGridCommPkg);
+   HYPRE_Int amgdd_start_level = hypre_ParAMGDataAMGDDStartLevel(amg_data);
    HYPRE_Int transition_level = hypre_ParCompGridCommPkgTransitionLevel(compGridCommPkg);
    if (transition_level < 0) transition_level = num_levels;
 
@@ -2743,7 +2744,7 @@ CommunicateRemainingMatrixInfo(hypre_ParCompGrid **compGrid, hypre_ParCompGridCo
 
    HYPRE_Int ***temp_PColInd = hypre_CTAlloc(HYPRE_Int**, transition_level, HYPRE_MEMORY_HOST);
    HYPRE_Complex ***temp_PData = hypre_CTAlloc(HYPRE_Complex**, transition_level, HYPRE_MEMORY_HOST);
-   for (outer_level = 0; outer_level < transition_level; outer_level++)
+   for (outer_level = amgdd_start_level; outer_level < transition_level; outer_level++)
    {
       HYPRE_Int num_owned_nodes = hypre_ParCompGridOwnedBlockStarts(compGrid[outer_level])[hypre_ParCompGridNumOwnedBlocks(compGrid[outer_level])];
       temp_PColInd[outer_level] = hypre_CTAlloc(HYPRE_Int*, hypre_ParCompGridNumNodes(compGrid[outer_level])
@@ -2759,7 +2760,7 @@ CommunicateRemainingMatrixInfo(hypre_ParCompGrid **compGrid, hypre_ParCompGridCo
          hypre_ParCompGridPRowPtr(compGrid[level])[0] = 0;
    }
 
-   for (outer_level = transition_level-1; outer_level >= 0; outer_level--)
+   for (outer_level = transition_level-1; outer_level >= amgdd_start_level; outer_level--)
    {
       // Get send/recv info from the comp grid comm pkg
       HYPRE_Int num_send_procs = hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[outer_level];

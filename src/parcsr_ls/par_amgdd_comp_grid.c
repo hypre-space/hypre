@@ -823,7 +823,7 @@ hypre_ParCompGridResize ( hypre_ParCompGrid *compGrid, HYPRE_Int new_size, HYPRE
 }
 
 HYPRE_Int 
-hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *nodes_added_on_level, HYPRE_Int transition_level )
+hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *nodes_added_on_level, HYPRE_Int start_level, HYPRE_Int transition_level )
 {
    // when nodes are added to a composite grid, global info is copied over, but local indices must be generated appropriately for all added nodes
    // this must be done on each level as info is added to correctly construct subsequent Psi_c grids
@@ -835,7 +835,7 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *nod
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
 
 
-   for (level = 0; level < transition_level; level++)
+   for (level = start_level; level < transition_level; level++)
    {
       // If we have added nodes on this level
       if (nodes_added_on_level[level])
@@ -919,11 +919,11 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *nod
    return 0;
 }
 
-HYPRE_Int hypre_ParCompGridSetupLocalIndicesP( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int transition_level )
+HYPRE_Int hypre_ParCompGridSetupLocalIndicesP( hypre_ParCompGrid **compGrid, HYPRE_Int start_level, HYPRE_Int transition_level )
 {
    HYPRE_Int                  i,j,level,global_index;
 
-   for (level = 0; level < transition_level-1; level++)
+   for (level = start_level; level < transition_level-1; level++)
    {
       HYPRE_Int num_owned_blocks = hypre_ParCompGridNumOwnedBlocks(compGrid[level+1]);
 
