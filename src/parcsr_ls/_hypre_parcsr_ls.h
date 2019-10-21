@@ -1321,6 +1321,7 @@ HYPRE_Int hypre_BoomerAMGSetPlotGrids ( void *data , HYPRE_Int plotgrids );
 HYPRE_Int hypre_BoomerAMGSetPlotFileName ( void *data , const char *plot_file_name );
 HYPRE_Int hypre_BoomerAMGSetCoordDim ( void *data , HYPRE_Int coorddim );
 HYPRE_Int hypre_BoomerAMGSetCoordinates ( void *data , float *coordinates );
+HYPRE_Int hypre_BoomerAMGGetGridHierarchy(void *data, HYPRE_Int *cgrid );
 HYPRE_Int hypre_BoomerAMGSetNumFunctions ( void *data , HYPRE_Int num_functions );
 HYPRE_Int hypre_BoomerAMGGetNumFunctions ( void *data , HYPRE_Int *num_functions );
 HYPRE_Int hypre_BoomerAMGSetNodal ( void *data , HYPRE_Int nodal );

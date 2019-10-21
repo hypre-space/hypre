@@ -53,7 +53,7 @@ hypre_ILUSetup( void               *ilu_vdata,
    HYPRE_Int            size_C/* total size of coarse grid */;
    
    HYPRE_Int            n                    = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
-   HYPRE_Int            m;/* m = n-LU */
+//   HYPRE_Int            m;/* m = n-LU */
    /* reordering option */
    HYPRE_Int            reordering_type = hypre_ParILUDataReorderingType(ilu_data);
    HYPRE_Int            num_procs,  my_id;
@@ -234,7 +234,7 @@ hypre_ILUSetup( void               *ilu_vdata,
             break;
       }
    }
-   m = n - nLU;
+//   m = n - nLU;
    /* factorization */
    switch(ilu_type)
    {

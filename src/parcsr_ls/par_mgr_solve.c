@@ -171,7 +171,7 @@ hypre_MGRSolve( void               *mgr_vdata,
 
     init_resnorm = resnorm;
     rhs_norm = sqrt(hypre_ParVectorInnerProd(f, f));
-    if (rhs_norm)
+    if (rhs_norm > HYPRE_REAL_EPSILON)
     {
       rel_resnorm = init_resnorm / rhs_norm;
     }
@@ -207,12 +207,12 @@ hypre_MGRSolve( void               *mgr_vdata,
     if (global_smooth_iters)
     {
       wall_time = time_getWallclockSeconds();
-      hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[0], U_array[0], beta, F_array[0], Vtemp);
-      HYPRE_Real resnorm_gsmooth = hypre_ParVectorInnerProd(Vtemp, Vtemp);
-//      HYPRE_Real conv_factor_gsmooth = resnorm_gsmooth;
+/** DEBUG: **/
+//      hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[0], U_array[0], beta, F_array[0], Vtemp);
+//      HYPRE_Real resnorm_gsmooth = hypre_ParVectorInnerProd(Vtemp, Vtemp);
       if (global_smooth_type == 0)//block Jacobi smoother
-	    {
-	      for (i = 0;i < global_smooth_iters;i ++)
+      {
+	for (i = 0;i < global_smooth_iters;i ++)
         {
           if (set_c_points_method == 0)
           {
@@ -224,36 +224,33 @@ hypre_MGRSolve( void               *mgr_vdata,
           }
         }
       }
-	    else if ((global_smooth_type > 0) && (global_smooth_type < 7))
-	    {
+      else if ((global_smooth_type > 0) && (global_smooth_type < 7))
+      {
           for (i = 0;i < global_smooth_iters;i ++)
           {
 		      hypre_BoomerAMGRelax(A_array[0], F_array[0], NULL, global_smooth_type-1, 0, 1.0, 0.0, NULL, U_array[0], Vtemp, NULL);
-	      }
-	      }
-	    else if (global_smooth_type == 8)//EUCLID ILU smoother
-	    {
+          }
+      }
+      else if (global_smooth_type == 8)//EUCLID ILU smoother
+      {
         for (i = 0;i < global_smooth_iters;i ++)
-	      {
-	        // compute residual
+        {
+          // compute residual
           hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[0], U_array[0], beta, F_array[0], Vtemp);	
           // solve    
-		      HYPRE_EuclidSolve( (mgr_data -> global_smoother),A_array[0],Vtemp,Utemp);
-		      // update solution
+          HYPRE_EuclidSolve( (mgr_data -> global_smoother),A_array[0],Vtemp,Utemp);
+          // update solution
           hypre_ParVectorAxpy(beta, Utemp, U_array[0]);				
         }
       }
       else if (global_smooth_type == 16) // HYPRE ILU
       {
-        // compute residual
-        hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[0], U_array[0], beta, F_array[0], Vtemp);
         // solve
-        HYPRE_ILUSolve(mgr_data -> global_smoother, A_array[0], Vtemp, U_array[0]);
-        // update solution
-        hypre_ParVectorAxpy(beta, Utemp, U_array[0]);       
+        HYPRE_ILUSolve(mgr_data -> global_smoother, A_array[0], F_array[0], U_array[0]);      
       }
-      hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[0], U_array[0], beta, F_array[0], Vtemp);
-      resnorm_gsmooth = hypre_ParVectorInnerProd(Vtemp, Vtemp);
+/** DEBUG: **/
+//      hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[0], U_array[0], beta, F_array[0], Vtemp);
+//      resnorm_gsmooth = hypre_ParVectorInnerProd(Vtemp, Vtemp);
       //if (my_id == 0) hypre_printf("Global smoothing convergence factor: %1.2f\n", resnorm_gsmooth/conv_factor_gsmooth);
       wall_time = time_getWallclockSeconds() - wall_time;
       //if (my_id == 0) hypre_printf("Global smoother solve: %f\n", wall_time);
@@ -289,7 +286,7 @@ hypre_MGRSolve( void               *mgr_vdata,
 
       if (old_resnorm) conv_factor = resnorm / old_resnorm;
       else conv_factor = resnorm;
-      if (rhs_norm)
+      if (rhs_norm > HYPRE_REAL_EPSILON)
       {
         rel_resnorm = resnorm / rhs_norm;
       }

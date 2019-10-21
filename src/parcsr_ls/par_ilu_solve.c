@@ -171,7 +171,7 @@ hypre_ILUSolve( void               *ilu_vdata,
 
       init_resnorm = resnorm;
       rhs_norm = sqrt(hypre_ParVectorInnerProd(f, f));
-      if (rhs_norm)
+      if (rhs_norm > HYPRE_REAL_EPSILON)
       {
          rel_resnorm = init_resnorm / rhs_norm;
       }
@@ -259,7 +259,7 @@ hypre_ILUSolve( void               *ilu_vdata,
 
         if (old_resnorm) conv_factor = resnorm / old_resnorm;
         else conv_factor = resnorm;
-        if (rhs_norm)
+        if (rhs_norm > HYPRE_REAL_EPSILON)
         {
            rel_resnorm = resnorm / rhs_norm;
         }
@@ -369,8 +369,8 @@ hypre_ILUSolveSchurGMRES(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
 //   HYPRE_Int         m = n - nLU;
    
    /* other data objects for computation */
-   hypre_Vector      *f_local;
-   HYPRE_Real        *f_data;
+//   hypre_Vector      *f_local;
+//   HYPRE_Real        *f_data;
    hypre_Vector      *rhs_local;
    HYPRE_Real        *rhs_data;
    hypre_Vector      *x_local;
@@ -386,8 +386,8 @@ hypre_ILUSolveSchurGMRES(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
    /* 1st need to solve LBi*xi = fi  
     * L solve, solve xi put in u_temp upper 
     */
-   f_local = hypre_ParVectorLocalVector(f);
-   f_data = hypre_VectorData(f_local);
+//   f_local = hypre_ParVectorLocalVector(f);
+//   f_data = hypre_VectorData(f_local);
    /* now update with L to solve */
    for(i = 0 ; i < nLU ; i ++)
    {
@@ -529,8 +529,8 @@ hypre_ILUSolveSchurNSH(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
 //   HYPRE_Int         m = n - nLU;
    
    /* other data objects for computation */
-   hypre_Vector      *f_local;
-   HYPRE_Real        *f_data;
+//   hypre_Vector      *f_local;
+//   HYPRE_Real        *f_data;
    hypre_Vector      *rhs_local;
    HYPRE_Real        *rhs_data;
    hypre_Vector      *x_local;
@@ -546,8 +546,8 @@ hypre_ILUSolveSchurNSH(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
    /* 1st need to solve LBi*xi = fi  
     * L solve, solve xi put in u_temp upper 
     */
-   f_local = hypre_ParVectorLocalVector(f);
-   f_data = hypre_VectorData(f_local);
+//   f_local = hypre_ParVectorLocalVector(f);
+//   f_data = hypre_VectorData(f_local);
    /* now update with L to solve */
    for(i = 0 ; i < nLU ; i ++)
    {
@@ -1049,7 +1049,7 @@ hypre_NSHSolve( void               *nsh_vdata,
 
       init_resnorm = resnorm;
       rhs_norm = sqrt(hypre_ParVectorInnerProd(f, f));
-      if (rhs_norm)
+      if (rhs_norm > HYPRE_REAL_EPSILON)
       {
          rel_resnorm = init_resnorm / rhs_norm;
       }
@@ -1114,7 +1114,7 @@ hypre_NSHSolve( void               *nsh_vdata,
 
         if (old_resnorm) conv_factor = resnorm / old_resnorm;
         else conv_factor = resnorm;
-        if (rhs_norm)
+        if (rhs_norm > HYPRE_REAL_EPSILON)
         {
            rel_resnorm = resnorm / rhs_norm;
         }
