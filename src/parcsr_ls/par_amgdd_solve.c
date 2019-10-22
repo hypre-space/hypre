@@ -457,7 +457,7 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
       if ( hypre_ParAMGDataRestriction(amg_data) ) hypre_ParCSRMatrixMatvec(1.0, R_array[level], F_array[level], 0.0, F_array[level+1]);
       else hypre_ParCSRMatrixMatvecT(1.0, R_array[level], F_array[level], 0.0, F_array[level+1]);
    }
-   if (transition_level != num_levels)
+   if (transition_level != num_levels && transition_level != 0)
    {
       if ( hypre_ParAMGDataRestriction(amg_data) ) hypre_ParCSRMatrixMatvec(1.0, R_array[transition_level-1], F_array[transition_level-1], 0.0, F_array[transition_level]);
       else hypre_ParCSRMatrixMatvecT(1.0, R_array[transition_level-1], F_array[transition_level-1], 0.0, F_array[transition_level]);
@@ -542,7 +542,7 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
          }
 
          // pack and send the buffers
-         PackResidualBuffer(send_buffer, send_map_elmts[level], send_map_starts[level][num_send_partitions], hypre_VectorData(hypre_ParCompGridF(compGrid[0])));
+         PackResidualBuffer(send_buffer, send_map_elmts[level], send_map_starts[level][num_send_partitions], hypre_VectorData(hypre_ParCompGridF(compGrid[amgdd_start_level])));
          
          for (i = 0; i < num_send_procs; i++)
          {
@@ -558,7 +558,7 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
          hypre_TFree(status, HYPRE_MEMORY_HOST);
          hypre_TFree(send_buffer, HYPRE_MEMORY_SHARED);
 
-         UnpackResidualBuffer(recv_buffer, recv_map_elmts[level], recv_map_starts[level][num_recv_procs], hypre_VectorData(hypre_ParCompGridF(compGrid[0])));
+         UnpackResidualBuffer(recv_buffer, recv_map_elmts[level], recv_map_starts[level][num_recv_procs], hypre_VectorData(hypre_ParCompGridF(compGrid[amgdd_start_level])));
 
          // clean up memory for this level
          hypre_TFree(recv_buffer, HYPRE_MEMORY_SHARED);
@@ -775,7 +775,7 @@ hypre_BoomerAMGDDTimeResidualCommunication( void *amg_vdata, HYPRE_Int time_leve
             }
 
             // pack and send the buffers
-            PackResidualBuffer(send_buffer, send_map_elmts[level], send_map_starts[level][num_send_partitions], hypre_VectorData(hypre_ParCompGridF(compGrid[0])));
+            PackResidualBuffer(send_buffer, send_map_elmts[level], send_map_starts[level][num_send_partitions], hypre_VectorData(hypre_ParCompGridF(compGrid[amgdd_start_level])));
 
             for (i = 0; i < num_send_procs; i++)
             {
@@ -791,7 +791,7 @@ hypre_BoomerAMGDDTimeResidualCommunication( void *amg_vdata, HYPRE_Int time_leve
             hypre_TFree(status, HYPRE_MEMORY_HOST);
             hypre_TFree(send_buffer, HYPRE_MEMORY_SHARED);
             
-            UnpackResidualBuffer(recv_buffer, recv_map_elmts[level], recv_map_starts[level][num_recv_procs], hypre_VectorData(hypre_ParCompGridF(compGrid[0])));
+            UnpackResidualBuffer(recv_buffer, recv_map_elmts[level], recv_map_starts[level][num_recv_procs], hypre_VectorData(hypre_ParCompGridF(compGrid[amgdd_start_level])));
 
             // clean up memory for this level
             hypre_TFree(recv_buffer, HYPRE_MEMORY_SHARED);

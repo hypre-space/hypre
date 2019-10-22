@@ -89,7 +89,7 @@ HYPRE_Int
 CommunicateRemainingMatrixInfo(hypre_ParAMGData* amg_data, hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int *communication_cost, HYPRE_Int *num_resizes);
 
 HYPRE_Int
-FinalizeCompGridCommPkg(hypre_ParCompGridCommPkg *compGridCommPkg, hypre_ParCompGrid **compGrid);
+FinalizeCompGridCommPkg(hypre_ParAMGData* amg_data, hypre_ParCompGridCommPkg *compGridCommPkg, hypre_ParCompGrid **compGrid);
 
 HYPRE_Int
 TestCompGrids1(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int transition_level, HYPRE_Int *padding, HYPRE_Int num_ghost_layers, HYPRE_Int current_level, HYPRE_Int check_ghost_info);
@@ -260,6 +260,10 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    if (use_transition_level)
    {
       transition_level = FindTransitionLevel(amg_data);
+
+      // !!! Debug
+      if (myid == 0) printf("transition_level = %d\n", transition_level);
+
       hypre_ParCompGridCommPkgTransitionLevel(compGridCommPkg) = transition_level;
       // if (myid == 0) hypre_printf("transition_level = %d\n", transition_level);
       // Do all gather so that all processors own the coarsest levels of the AMG hierarchy
@@ -713,7 +717,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    if (timers) hypre_BeginTiming(timers[8]);
 
    // Finalize the comp grid structures
-   hypre_ParCompGridFinalize(compGrid, compGridCommPkg, num_levels, transition_level, verify_amgdd);
+   hypre_ParCompGridFinalize(compGrid, compGridCommPkg, amgdd_start_level, transition_level, verify_amgdd);
 
    #if DEBUGGING_MESSAGES
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
@@ -722,7 +726,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    #endif
 
    // Finalize the send flag and the recv
-   FinalizeCompGridCommPkg(compGridCommPkg, compGrid);
+   FinalizeCompGridCommPkg(amg_data, compGridCommPkg, compGrid);
    
    #if DEBUGGING_MESSAGES
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
@@ -789,14 +793,12 @@ FindTransitionLevel(hypre_ParAMGData *amg_data)
    // Transition level set as a prescribed level
    if (use_transition_level > 0) global_transition = use_transition_level;
    
-   // Transition level is the finest level such that the global grid size stored is less than a quarter the size of the fine grid patch
+   // Transition level is the finest level such that the global grid size stored is less than the amount of data sent on the fine grid
    if (use_transition_level < 0)
    {
-      // HYPRE_Int fine_grid_patch = hypre_ParCSRMatrixNumRows(hypre_ParAMGDataAArray(amg_data)[0]);
       HYPRE_Int fine_grid_num_sends = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(hypre_ParAMGDataAArray(amg_data)[0]));
-      for (i = 0; i < num_levels; i++)
+      for (i = hypre_ParAMGDataAMGDDStartLevel(amg_data); i < num_levels; i++)
       {
-         // if ( hypre_ParCSRMatrixGlobalNumRows(hypre_ParAMGDataAArray(amg_data)[i]) < (fine_grid_patch/4) )
          if ( hypre_ParCSRMatrixGlobalNumRows(hypre_ParAMGDataAArray(amg_data)[i]) < fine_grid_num_sends )
          {
             local_transition = i;
@@ -805,8 +807,6 @@ FindTransitionLevel(hypre_ParAMGData *amg_data)
       }
       hypre_MPI_Allreduce(&local_transition, &global_transition, 1, HYPRE_MPI_INT, MPI_MAX, hypre_MPI_COMM_WORLD);
    }
-   
-   if (global_transition > hypre_ParAMGDataAMGDDStartLevel(amg_data)) global_transition = hypre_ParAMGDataAMGDDStartLevel(amg_data);
 
    return global_transition;
 }
@@ -2754,7 +2754,7 @@ CommunicateRemainingMatrixInfo(hypre_ParAMGData* amg_data, hypre_ParCompGrid **c
    }
 
    // If no owned nodes, need to initialize start of PRowPtr
-   for (level = 0; level < num_levels-1; level++)
+   for (level = amgdd_start_level; level < num_levels-1; level++)
    {
       if (!hypre_ParCompGridOwnedBlockStarts(compGrid[level])[hypre_ParCompGridNumOwnedBlocks(compGrid[level])])
          hypre_ParCompGridPRowPtr(compGrid[level])[0] = 0;
@@ -2992,7 +2992,7 @@ CommunicateRemainingMatrixInfo(hypre_ParAMGData* amg_data, hypre_ParCompGrid **c
    }
 
    // Fix up P
-   for (level = 0; level < transition_level; level++)
+   for (level = amgdd_start_level; level < transition_level; level++)
    {
       if (level != num_levels-1)
       {
@@ -3023,7 +3023,7 @@ CommunicateRemainingMatrixInfo(hypre_ParAMGData* amg_data, hypre_ParCompGrid **c
          }
       }
    }
-   for (level = 0; level < transition_level; level++)
+   for (level = amgdd_start_level; level < transition_level; level++)
    {
       HYPRE_Int num_owned_nodes = hypre_ParCompGridOwnedBlockStarts(compGrid[level])[hypre_ParCompGridNumOwnedBlocks(compGrid[level])];
       for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]) - num_owned_nodes; i++)
@@ -3041,17 +3041,20 @@ CommunicateRemainingMatrixInfo(hypre_ParAMGData* amg_data, hypre_ParCompGrid **c
 }
 
 HYPRE_Int
-FinalizeCompGridCommPkg(hypre_ParCompGridCommPkg *compGridCommPkg, hypre_ParCompGrid **compGrid)
+FinalizeCompGridCommPkg(hypre_ParAMGData* amg_data, hypre_ParCompGridCommPkg *compGridCommPkg, hypre_ParCompGrid **compGrid)
 {
    HYPRE_Int myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
 
    HYPRE_Int outer_level, part, proc, level, i;
-   HYPRE_Int num_levels = hypre_ParCompGridCommPkgNumLevels(compGridCommPkg);
+   HYPRE_Int num_levels = hypre_ParAMGDataNumLevels(amg_data);
+   HYPRE_Int amgdd_start_level = hypre_ParAMGDataAMGDDStartLevel(amg_data);
+   HYPRE_Int transition_level = hypre_ParCompGridCommPkgTransitionLevel(compGridCommPkg);
+   if (transition_level < 0) transition_level = num_levels;
 
    HYPRE_Int total_num_nodes = 0;
    HYPRE_Int *offsets = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
-   for (level = 0; level < num_levels; level++)
+   for (level = amgdd_start_level; level < num_levels; level++)
    {
       offsets[level] = total_num_nodes;
       total_num_nodes += hypre_ParCompGridNumNodes(compGrid[level]);
@@ -3062,7 +3065,7 @@ FinalizeCompGridCommPkg(hypre_ParCompGridCommPkg *compGridCommPkg, hypre_ParComp
    if (!hypre_ParCompGridCommPkgRecvMapStarts(compGridCommPkg)) hypre_ParCompGridCommPkgRecvMapStarts(compGridCommPkg) = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
    if (!hypre_ParCompGridCommPkgRecvMapElmts(compGridCommPkg)) hypre_ParCompGridCommPkgRecvMapElmts(compGridCommPkg) = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
 
-   for (outer_level = 0; outer_level < num_levels; outer_level++)
+   for (outer_level = amgdd_start_level; outer_level < transition_level; outer_level++)
    {
       // Finalize send info
       HYPRE_Int num_send_partitions = hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg)[outer_level];

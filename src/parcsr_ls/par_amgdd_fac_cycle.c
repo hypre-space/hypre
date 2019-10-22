@@ -429,15 +429,18 @@ FAC_Jacobi( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int l
    
    #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
    VecScale(hypre_VectorData(hypre_ParCompGridU(compGrid)),hypre_VectorData(hypre_ParCompGridTemp(compGrid)),hypre_ParCompGridL1Norms(compGrid),hypre_ParCompGridNumRealNodes(compGrid),HYPRE_STREAM(4));
-   VecScale(hypre_VectorData(hypre_ParCompGridT(compGrid)),hypre_VectorData(hypre_ParCompGridTemp(compGrid)),hypre_ParCompGridL1Norms(compGrid),hypre_ParCompGridNumRealNodes(compGrid),HYPRE_STREAM(4));
+   if (hypre_ParCompGridT(compGrid)) VecScale(hypre_VectorData(hypre_ParCompGridT(compGrid)),hypre_VectorData(hypre_ParCompGridTemp(compGrid)),hypre_ParCompGridL1Norms(compGrid),hypre_ParCompGridNumRealNodes(compGrid),HYPRE_STREAM(4));
    #else
    for (i = 0; i < hypre_ParCompGridNumRealNodes(compGrid); i++)
    {
       hypre_VectorData(hypre_ParCompGridU(compGrid))[i] += hypre_VectorData(hypre_ParCompGridTemp(compGrid))[i] / hypre_ParCompGridL1Norms(compGrid)[i];
    }
-   for (i = 0; i < hypre_ParCompGridNumRealNodes(compGrid); i++)
+   if (hypre_ParCompGridT(compGrid))
    {
-      hypre_VectorData(hypre_ParCompGridT(compGrid))[i] += hypre_VectorData(hypre_ParCompGridTemp(compGrid))[i] / hypre_ParCompGridL1Norms(compGrid)[i];
+      for (i = 0; i < hypre_ParCompGridNumRealNodes(compGrid); i++)
+      {
+         hypre_VectorData(hypre_ParCompGridT(compGrid))[i] += hypre_VectorData(hypre_ParCompGridTemp(compGrid))[i] / hypre_ParCompGridL1Norms(compGrid)[i];
+      }
    }
    #endif
 
@@ -593,14 +596,14 @@ FAC_Cheby( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int le
 
    // Update only over real dofs by adjusting size of vectors
    hypre_VectorSize(u) = num_real_nodes;
-   hypre_VectorSize(t) = num_real_nodes;
+   if (t) hypre_VectorSize(t) = num_real_nodes;
    hypre_VectorSize(u_update) = num_real_nodes;
 
-   hypre_SeqVectorAxpy(1.0, u_update, t);
+   if (t) hypre_SeqVectorAxpy(1.0, u_update, t);
    hypre_SeqVectorAxpy(1.0, u_update, u);
   
    hypre_VectorSize(u) = num_nodes;
-   hypre_VectorSize(t) = num_nodes;
+   if (t) hypre_VectorSize(t) = num_nodes;
    hypre_VectorSize(u_update) = num_nodes;
 
    return hypre_error_flag;
@@ -661,7 +664,7 @@ FAC_CFL1Jacobi( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_I
       hypre_CheckErrorDevice(cudaPeekAtLastError());
       hypre_CheckErrorDevice(cudaDeviceSynchronize());
       VecScaleMasked(hypre_VectorData(hypre_ParCompGridU(compGrid)),hypre_VectorData(hypre_ParCompGridTemp(compGrid)),hypre_ParCompGridL1Norms(compGrid),hypre_ParCompGridCMask(compGrid),hypre_ParCompGridNumCPoints(compGrid),HYPRE_STREAM(4));
-      VecScaleMasked(hypre_VectorData(hypre_ParCompGridT(compGrid)),hypre_VectorData(hypre_ParCompGridTemp(compGrid)),hypre_ParCompGridL1Norms(compGrid),hypre_ParCompGridCMask(compGrid),hypre_ParCompGridNumCPoints(compGrid),HYPRE_STREAM(4));
+      if (hypre_ParCompGridT(compGrid)) VecScaleMasked(hypre_VectorData(hypre_ParCompGridT(compGrid)),hypre_VectorData(hypre_ParCompGridTemp(compGrid)),hypre_ParCompGridL1Norms(compGrid),hypre_ParCompGridCMask(compGrid),hypre_ParCompGridNumCPoints(compGrid),HYPRE_STREAM(4));
       hypre_CheckErrorDevice(cudaPeekAtLastError());
       hypre_CheckErrorDevice(cudaDeviceSynchronize());
    }
@@ -688,7 +691,7 @@ FAC_CFL1Jacobi( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_I
       hypre_CheckErrorDevice(cudaPeekAtLastError());
       hypre_CheckErrorDevice(cudaDeviceSynchronize());
       VecScaleMasked(hypre_VectorData(hypre_ParCompGridU(compGrid)),hypre_VectorData(hypre_ParCompGridTemp(compGrid)),hypre_ParCompGridL1Norms(compGrid),hypre_ParCompGridFMask(compGrid),hypre_ParCompGridNumRealNodes(compGrid) - hypre_ParCompGridNumCPoints(compGrid),HYPRE_STREAM(4));
-      VecScaleMasked(hypre_VectorData(hypre_ParCompGridT(compGrid)),hypre_VectorData(hypre_ParCompGridTemp(compGrid)),hypre_ParCompGridL1Norms(compGrid),hypre_ParCompGridFMask(compGrid),hypre_ParCompGridNumRealNodes(compGrid) - hypre_ParCompGridNumCPoints(compGrid),HYPRE_STREAM(4));
+      if (hypre_ParCompGridT(compGrid)) VecScaleMasked(hypre_VectorData(hypre_ParCompGridT(compGrid)),hypre_VectorData(hypre_ParCompGridTemp(compGrid)),hypre_ParCompGridL1Norms(compGrid),hypre_ParCompGridFMask(compGrid),hypre_ParCompGridNumRealNodes(compGrid) - hypre_ParCompGridNumCPoints(compGrid),HYPRE_STREAM(4));
       hypre_CheckErrorDevice(cudaPeekAtLastError());
       hypre_CheckErrorDevice(cudaDeviceSynchronize());
    }
@@ -702,7 +705,8 @@ FAC_CFL1Jacobi( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_I
    HYPRE_Complex     *u_data  = hypre_VectorData(hypre_ParCompGridU(compGrid));
    HYPRE_Complex     *f_data  = hypre_VectorData(hypre_ParCompGridF(compGrid));
    HYPRE_Complex     *Vtemp_data = hypre_VectorData(hypre_ParCompGridTemp(compGrid));
-   HYPRE_Complex     *t_data = hypre_VectorData(hypre_ParCompGridT(compGrid));
+   HYPRE_Complex     *t_data = NULL;
+   if (hypre_ParCompGridT(compGrid)) t_data = hypre_VectorData(hypre_ParCompGridT(compGrid));
 
    HYPRE_Real     *l1_norms = hypre_ParCompGridL1Norms(compGrid);
    HYPRE_Int      *cf_marker = hypre_ParCompGridCFMarkerArray(compGrid);
@@ -738,7 +742,7 @@ FAC_CFL1Jacobi( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_I
             res -= A_data[j] * Vtemp_data[A_j[j]];
          }
          u_data[i] += (relax_weight * res)/l1_norms[i];
-         t_data[i] += u_data[i] - Vtemp_data[i];
+         if (t_data) t_data[i] += u_data[i] - Vtemp_data[i];
       }
    }
 

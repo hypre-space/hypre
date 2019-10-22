@@ -318,7 +318,7 @@ hypre_ParCompGridSetupRelax( hypre_ParAMGData *amg_data )
 {
    HYPRE_Int level, i, j;
 
-   for (level = 0; level < hypre_ParAMGDataNumLevels(amg_data); level++)
+   for (level = hypre_ParAMGDataAMGDDStartLevel(amg_data); level < hypre_ParAMGDataNumLevels(amg_data); level++)
    {
       hypre_ParCompGrid *compGrid = hypre_ParAMGDataCompGrid(amg_data)[level];
 
@@ -461,12 +461,13 @@ hypre_ParCompGridSetupRelax( hypre_ParAMGData *amg_data )
 }
 
 HYPRE_Int
-hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int num_levels, HYPRE_Int transition_level, HYPRE_Int debug )
+hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int start_level, HYPRE_Int transition_level, HYPRE_Int debug )
 {
    HYPRE_Int level, i, j;
+   HYPRE_Int num_levels = hypre_ParCompGridCommPkgNumLevels(compGridCommPkg);
 
    // Post process to remove -1 entries from matrices and reorder !!! Is there a more efficient way here? 
-   for (level = 0; level < num_levels; level++)
+   for (level = start_level; level < transition_level; level++)
    {
       HYPRE_Int num_nodes = hypre_ParCompGridNumNodes(compGrid[level]);
       HYPRE_Int num_real_nodes = 0;
@@ -627,7 +628,7 @@ hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPk
       if (level != num_levels-1) new_P_rowPtr[num_nodes] = P_cnt;
 
       // Fix up P col indices on previous level
-      if (level != 0)
+      if (level != start_level)
       {
          for (i = 0; i < hypre_ParCompGridPRowPtr(compGrid[level-1])[ hypre_ParCompGridNumNodes(compGrid[level-1]) ]; i++)
          {
@@ -658,7 +659,7 @@ hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPk
 
    // Setup vectors and matrices
    HYPRE_Int total_num_nodes = 0;
-   for (level = 0; level < num_levels; level++)
+   for (level = start_level; level < num_levels; level++)
    {
       HYPRE_Int num_nodes = hypre_ParCompGridNumNodes(compGrid[level]);
       HYPRE_Int num_real_nodes = hypre_ParCompGridNumRealNodes(compGrid[level]);
@@ -691,11 +692,14 @@ hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPk
       hypre_ParCompGridU(compGrid[level]) = hypre_SeqVectorCreate(num_nodes);
       hypre_SeqVectorInitialize(hypre_ParCompGridU(compGrid[level]));
 
-      hypre_ParCompGridS(compGrid[level]) = hypre_SeqVectorCreate(num_nodes);
-      hypre_SeqVectorInitialize(hypre_ParCompGridS(compGrid[level]));
+      if (level < transition_level)
+      {
+         hypre_ParCompGridS(compGrid[level]) = hypre_SeqVectorCreate(num_nodes);
+         hypre_SeqVectorInitialize(hypre_ParCompGridS(compGrid[level]));
 
-      hypre_ParCompGridT(compGrid[level]) = hypre_SeqVectorCreate(num_nodes);
-      hypre_SeqVectorInitialize(hypre_ParCompGridT(compGrid[level]));
+         hypre_ParCompGridT(compGrid[level]) = hypre_SeqVectorCreate(num_nodes);
+         hypre_SeqVectorInitialize(hypre_ParCompGridT(compGrid[level]));
+      }
    }
 
    // Allocate space for the rhs vectors, compGridF, as one big block of memory for better access when packing/unpack communication buffers
@@ -703,7 +707,7 @@ hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPk
 
    total_num_nodes = 0;
 
-   for (level = 0; level < num_levels; level++)
+   for (level = start_level; level < num_levels; level++)
    {
       HYPRE_Int num_nodes = hypre_ParCompGridNumNodes(compGrid[level]);
 
@@ -715,7 +719,7 @@ hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPk
    }
 
    // Clean up memory for things we don't need anymore
-   for (level = 0; level < transition_level; level++)
+   for (level = start_level; level < num_levels; level++)
    {
       if (hypre_ParCompGridRealDofMarker(compGrid[level]))
       {
