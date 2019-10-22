@@ -927,7 +927,7 @@ PackCoarseLevels(hypre_ParAMGData *amg_data, HYPRE_Int fine_level, HYPRE_Int coa
    //                [level],                                  global index finish,
    //                [level],                                  A nnz,
    //                ...    ,                                  P nnz,
-   //                [level] ] (coarse_level - 1)             ([coarse global indices]), (if desired)
+   //                [level] ] (coarse_level - 1)              [coarse global indices OR cf marker]
    //                                                          [A row sizes]
    //                                                          [A col indices]
    //                                                          [P row sizes]
@@ -956,7 +956,7 @@ PackCoarseLevels(hypre_ParAMGData *amg_data, HYPRE_Int fine_level, HYPRE_Int coa
       // Increment the buffer size appropriately
       buffer_sizes[0] += 3;
       buffer_sizes[0] += num_nodes + A_nnz;
-      if (agglomerating_levels && level != coarse_level-1) buffer_sizes[0] += num_nodes;
+      if (level != coarse_level-1) buffer_sizes[0] += num_nodes;
       if (level != num_levels-1) buffer_sizes[0] += 1 + num_nodes + P_nnz;
       buffer_sizes[1] += A_nnz + P_nnz;
    }
@@ -991,6 +991,10 @@ PackCoarseLevels(hypre_ParAMGData *amg_data, HYPRE_Int fine_level, HYPRE_Int coa
          {
             hypre_ParCompGrid *compGrid = hypre_ParAMGDataCompGrid(amg_data)[level];
             for (i = 0; i < num_nodes; i++) (*int_buffer)[int_cnt++] = hypre_ParCompGridCoarseGlobalIndices(compGrid)[i];
+         }
+         else
+         {
+            for (i = 0; i < num_nodes; i++) (*int_buffer)[int_cnt++] = hypre_ParAMGDataCFMarkerArray(amg_data)[level][i];
          }
       }
       // Save the matrix data for this level
@@ -1083,7 +1087,7 @@ UnpackCoarseLevels(hypre_ParAMGData *amg_data, MPI_Comm comm, HYPRE_Int *recv_in
          if (level != num_levels-1) global_P_nnz[level - fine_level] += P_nnz;
 
          // Increment counter appropriately
-         if (agglomerating_levels && level != coarse_level-1) int_cnt += num_nodes;
+         if (level != coarse_level-1) int_cnt += num_nodes;
          int_cnt += num_nodes + A_nnz;
          if (level != num_levels-1) int_cnt += num_nodes + P_nnz;
       }
@@ -1108,6 +1112,7 @@ UnpackCoarseLevels(hypre_ParAMGData *amg_data, MPI_Comm comm, HYPRE_Int *recv_in
       else
       {
          hypre_ParCompGridSetSize(compGrid, global_num_nodes[level - fine_level], global_num_nodes[level - fine_level], global_A_nnz[level - fine_level], global_P_nnz[level - fine_level], 0);
+         hypre_ParCompGridCFMarkerArray(compGrid) = hypre_CTAlloc(HYPRE_Int, global_num_nodes[level - fine_level], HYPRE_MEMORY_SHARED);
          hypre_ParCompGridNumOwnedBlocks(compGrid) = 1;
          if (hypre_ParCompGridOwnedBlockStarts(compGrid)) hypre_TFree(hypre_ParCompGridOwnedBlockStarts(compGrid), HYPRE_MEMORY_HOST);
          hypre_ParCompGridOwnedBlockStarts(compGrid) = hypre_CTAlloc(HYPRE_Int, 2, HYPRE_MEMORY_HOST);
@@ -1163,11 +1168,19 @@ UnpackCoarseLevels(hypre_ParAMGData *amg_data, MPI_Comm comm, HYPRE_Int *recv_in
             // Setup the global indices
             for (i = 0; i < num_nodes; i++) hypre_ParCompGridGlobalIndices(compGrid)[globalRowCnt++ - 1] = i + first_index;
             globalRowCnt = globalRowCnt_start[level - fine_level];
+         }
 
             // If necessary, read in coarse grid indices
-            if (level != coarse_level-1)
+         if (level != coarse_level-1)
+         {
+            if (agglomerating_levels)
             {
                for (i = 0; i < num_nodes; i++) hypre_ParCompGridCoarseGlobalIndices(compGrid)[globalRowCnt++ - 1] = recv_int_buffer[int_cnt++];
+              globalRowCnt = globalRowCnt_start[level - fine_level];
+            }
+            else
+            {
+               for (i = 0; i < num_nodes; i++) if (recv_int_buffer[int_cnt++] == 1) hypre_ParCompGridCFMarkerArray(compGrid)[globalRowCnt++ - 1] = 1;
                globalRowCnt = globalRowCnt_start[level - fine_level];
             }
          }
