@@ -787,14 +787,11 @@ main( hypre_int argc,
   else if (solver_id == 73)
   {
     HYPRE_Solver mgr_solver_flow;
-    /*
-    time_index = hypre_InitializeTiming("Compute A_ff_inv");
-    hypre_BeginTiming(time_index);
+
     // setup A_ff block 
-    hypre_ParCSRMatrix *A_ff;
-    hypre_ParCSRMatrix *A_ff_inv;
-    hypre_ParVector *F_vector;
-    hypre_ParVector *U_vector;
+    hypre_ParCSRMatrix *A_ff = NULL;
+    hypre_ParVector *F_vector = NULL;
+    hypre_ParVector *U_vector = NULL;
     HYPRE_Solver aff_solver;
     HYPRE_Int nloc = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(parcsr_A));
     HYPRE_Int *CF_marker = hypre_CTAlloc(HYPRE_Int, nloc, HYPRE_MEMORY_HOST);
@@ -811,34 +808,24 @@ main( hypre_int argc,
       }
     }
     HYPRE_MGRBuildAffNew(parcsr_A, CF_marker, 0, &A_ff);
-    //hypre_MGRApproximateInverse(A_ff, &A_ff_inv);
     hypre_TFree(CF_marker, HYPRE_MEMORY_HOST);
-
-    hypre_EndTiming(time_index);
-    hypre_PrintTiming("Compute A_ff_inv times", hypre_MPI_COMM_WORLD);
+    //time_index = hypre_InitializeTiming("Compute A_ff_inv");
+    //hypre_BeginTiming(time_index);
+    //hypre_ParCSRMatrix *A_ff_inv = NULL;
+    //hypre_MGRApproximateInverse(A_ff, &A_ff_inv);
+    //hypre_EndTiming(time_index);
+    //hypre_PrintTiming("Compute A_ff_inv times", hypre_MPI_COMM_WORLD);
     hypre_FinalizeTiming(time_index);
     hypre_ClearTiming();
 
-    F_vector = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_ff),
-                    hypre_ParCSRMatrixGlobalNumRows(A_ff),
-                    hypre_ParCSRMatrixRowStarts(A_ff));
-    hypre_ParVectorInitialize(F_vector);
-    hypre_ParVectorSetPartitioningOwner(F_vector,0);
-
-    U_vector = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_ff),
-                    hypre_ParCSRMatrixGlobalNumRows(A_ff),
-                    hypre_ParCSRMatrixRowStarts(A_ff));
-    hypre_ParVectorInitialize(U_vector);
-    hypre_ParVectorSetPartitioningOwner(U_vector,0);
-
-    time_index = hypre_InitializeTiming("AMG for UU block");
+    time_index = hypre_InitializeTiming("AMG setup for UU block");
     hypre_BeginTiming(time_index);
     HYPRE_BoomerAMGCreate(&aff_solver); 
     HYPRE_BoomerAMGSetPrintLevel(aff_solver, 0);
-    //HYPRE_BoomerAMGSetRelaxOrder(aff_solver, 1);
+    HYPRE_BoomerAMGSetRelaxOrder(aff_solver, 1);
     HYPRE_BoomerAMGSetMaxIter(aff_solver, 1);
     HYPRE_BoomerAMGSetNumFunctions(aff_solver, 3);
-    //HYPRE_BoomerAMGSetAggNumLevels(aff_solver, 1);
+    HYPRE_BoomerAMGSetAggNumLevels(aff_solver, 1);
 
     // setup
     HYPRE_BoomerAMGSetup(aff_solver, A_ff, F_vector, U_vector);
@@ -850,7 +837,6 @@ main( hypre_int argc,
 
     time_index = hypre_InitializeTiming("FlexGMRES Setup");
     hypre_BeginTiming(time_index);
-    */
  
     HYPRE_ParCSRFlexGMRESCreate(hypre_MPI_COMM_WORLD, &pcg_solver);
     HYPRE_FlexGMRESSetKDim(pcg_solver, k_dim);
@@ -940,15 +926,14 @@ main( hypre_int argc,
     /* set max iterations */
     HYPRE_MGRSetMaxIter(pcg_precond, 1);
     //HYPRE_MGRSetTol(pcg_precond, pc_tol);
-    //HYPRE_MGRSetUseDiagApproximation(pcg_precond, 1);
     HYPRE_MGRSetCoarseGridMethod(pcg_precond, mgr_coarse_grid_method);
 
     HYPRE_MGRSetGlobalsmoothType(pcg_precond, mgr_gsmooth_type);
     HYPRE_MGRSetMaxGlobalsmoothIters( pcg_precond, mgr_num_gsmooth_sweeps );   
     hypre_MGRPrintCoarseSystem( pcg_precond, 0 );
 
-    // set fine grid solver
-    //HYPRE_MGRSetFSolver(pcg_precond, 0, HYPRE_BoomerAMGSolve, HYPRE_BoomerAMGSetup, aff_solver);
+    // set fine grid solver, already setup above
+    HYPRE_MGRSetFSolver(pcg_precond, HYPRE_BoomerAMGSolve, HYPRE_BoomerAMGSetup, aff_solver);
 
     // Set the A_ff_inv for constructing P
     //hypre_MGRSetAffInv(pcg_precond, A_ff_inv);
@@ -971,6 +956,7 @@ main( hypre_int argc,
     mgr_num_relax_sweeps = 1;
     mgr_interp_type = 2;
     use_block_cf = 0;
+    mgr_non_c_to_f = 0;
 
     int flow_size = 2*(mgr_idx_array[2] - mgr_idx_array[1]);
     HYPRE_Int *flow_size_array = hypre_CTAlloc(HYPRE_Int, num_procs, HYPRE_MEMORY_HOST);
@@ -1016,6 +1002,8 @@ main( hypre_int argc,
     /* set max iterations */
     HYPRE_MGRSetMaxIter(mgr_solver_flow, 1);
     HYPRE_MGRSetTol(mgr_solver_flow, pc_tol);
+    /* set coarse grid method, non-Galerkin will keep the stencil for interleaved ordering */
+    HYPRE_MGRSetCoarseGridMethod(mgr_solver_flow, mgr_coarse_grid_method);
 
     HYPRE_MGRSetGlobalsmoothType(mgr_solver_flow, mgr_gsmooth_type);
     HYPRE_MGRSetMaxGlobalsmoothIters( mgr_solver_flow, mgr_num_gsmooth_sweeps );   
@@ -1042,11 +1030,9 @@ main( hypre_int argc,
     /* set the MGR coarse solver. Comment out to use default CG solver in MGR */
     //HYPRE_MGRSetCoarseSolver( pcg_precond, (HYPRE_PtrToParSolverFcn)HYPRE_GMRESSolve, (HYPRE_PtrToParSolverFcn)HYPRE_GMRESSetup, gmres_flow);
     HYPRE_MGRSetCoarseSolver( pcg_precond, (HYPRE_PtrToParSolverFcn)HYPRE_MGRSolve, (HYPRE_PtrToParSolverFcn)HYPRE_MGRSetup, mgr_solver_flow);
-    //HYPRE_MGRSetCoarseSolver( pcg_precond, (HYPRE_PtrToParSolverFcn)HYPRE_FlexGMRESSolve, (HYPRE_PtrToParSolverFcn)HYPRE_FlexGMRESSetup, aux_solver); 
   
     /* setup MGR-PCG solver */
     HYPRE_FlexGMRESSetMaxIter(pcg_solver, mg_max_iter);
-    //HYPRE_FlexGMRESSetPrecondGetFunction(pcg_solver, (HYPRE_PtrToSolverFcn) HYPRE_MGRGetCoarseGridConvergenceFactor);
     HYPRE_FlexGMRESSetPrecond(pcg_solver,
         (HYPRE_PtrToSolverFcn) HYPRE_MGRSolve,
         (HYPRE_PtrToSolverFcn) HYPRE_MGRSetup,
@@ -1117,10 +1103,12 @@ main( hypre_int argc,
       mgr_cindexes = NULL;
     }
     */
+    HYPRE_BoomerAMGDestroy(aff_solver);
     HYPRE_BoomerAMGDestroy(amg_solver);
     HYPRE_MGRDestroy(mgr_solver_flow);
     HYPRE_MGRDestroy(pcg_precond);
     HYPRE_ParCSRGMRESDestroy(gmres_flow);
+    HYPRE_ParCSRMatrixDestroy(A_ff);
 
     // Print out solver summary
     if (myid == 0)

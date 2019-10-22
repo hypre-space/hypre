@@ -627,7 +627,6 @@ hypre_MGRSetup( void               *mgr_vdata,
   (mgr_data -> U_fine_array) = U_fine_array;
   (mgr_data -> aff_solver) = aff_solver;
   (mgr_data -> A_ff_array) = A_ff_array;
-  //aff_solver = (mgr_data -> aff_solver);
 
   /* begin coarsening loop */
   num_coarsening_levs = max_num_coarse_levels;
@@ -762,25 +761,18 @@ hypre_MGRSetup( void               *mgr_vdata,
     }
     else
     {
-      /* Build AT (transpose A) */
-      hypre_ParCSRMatrixTranspose(A_array[lev], &AT, 1);
-
-      /* Build new strength matrix */
-      hypre_BoomerAMGCreateS(AT, strong_threshold, max_row_sum, 1, NULL, &ST);
-      /* use appropriate communication package for Strength matrix */
-      if (strong_threshold > S_commpkg_switch)
-        hypre_BoomerAMGCreateSCommPkg(AT, ST, &col_offd_ST_to_AT);
-
-      num_restrict_sweeps = (mgr_data -> num_restrict_sweeps); /* restriction */
-      hypre_MGRBuildInterp(AT, CF_marker_array[lev], ST, coarse_pnts_global, 1, dof_func_buff,
-        debug_flag, trunc_factor, max_elmts, col_offd_ST_to_AT, &RT, restrict_type[lev], num_restrict_sweeps);
+      hypre_MGRBuildRestrict(A_array[lev], CF_marker_array[lev], coarse_pnts_global, 1, dof_func_buff,
+        debug_flag, trunc_factor, max_elmts, S_commpkg_switch, strong_threshold, max_row_sum, &RT,
+        restrict_type[lev], num_restrict_sweeps);
                       
       RT_array[lev] = RT;
 
       /* Compute RAP for next level */
       if (use_non_galerkin_cg[lev] != 0)
       {
-        hypre_MGRComputeNonGalerkinCoarseGrid(A_array[lev], 2, 0, 0, CF_marker_array[lev], &RAP_ptr);
+        HYPRE_Int keep_stencil = (set_c_points_method == 1 ? 0 : 1);
+        hypre_MGRComputeNonGalerkinCoarseGrid(A_array[lev], P, RT, 2/*hypre_max(block_size - lev - 1, 1)*/,
+          /* ordering */0, /* method */ 0, max_elmts, keep_stencil, CF_marker_array[lev], &RAP_ptr);
         hypre_ParCSRMatrixOwnsColStarts(RAP_ptr) = 0;
         hypre_ParCSRMatrixOwnsColStarts(P_array[lev]) = 0;
         hypre_ParCSRMatrixOwnsRowStarts(RT) = 0;
@@ -827,7 +819,22 @@ hypre_MGRSetup( void               *mgr_vdata,
       }
       else
       {
-        fine_grid_solver_setup(aff_solver[lev], A_ff_ptr, F_fine_array[lev+1], U_fine_array[lev+1]);
+        A_ff_ptr = ((hypre_ParAMGData*)aff_solver[lev])->A_array[0];
+
+        F_fine_array[lev+1] =
+        hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_ff_ptr),
+                       hypre_ParCSRMatrixGlobalNumRows(A_ff_ptr),
+                       hypre_ParCSRMatrixRowStarts(A_ff_ptr));
+        hypre_ParVectorInitialize(F_fine_array[lev+1]);
+        hypre_ParVectorSetPartitioningOwner(F_fine_array[lev+1],0);
+
+        U_fine_array[lev+1] =
+        hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_ff_ptr),
+                       hypre_ParCSRMatrixGlobalNumRows(A_ff_ptr),
+                       hypre_ParCSRMatrixRowStarts(A_ff_ptr));
+        hypre_ParVectorInitialize(U_fine_array[lev+1]);
+        hypre_ParVectorSetPartitioningOwner(U_fine_array[lev+1],0);
+        A_ff_array[lev] = A_ff_ptr;
       }
     }
           

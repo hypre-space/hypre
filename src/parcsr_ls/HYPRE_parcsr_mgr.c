@@ -106,13 +106,11 @@ HYPRE_MGRSetNonCpointsToFpoints( HYPRE_Solver solver, HYPRE_Int nonCptToFptFlag)
 
 HYPRE_Int
 HYPRE_MGRSetFSolver(HYPRE_Solver          solver,
-                             HYPRE_Int    level,
-                             HYPRE_PtrToParSolverFcn  fine_grid_solver_solve,
-                             HYPRE_PtrToParSolverFcn  fine_grid_solver_setup,
-                             HYPRE_Solver          fsolver )
+                    HYPRE_PtrToParSolverFcn  fine_grid_solver_solve,
+                    HYPRE_PtrToParSolverFcn  fine_grid_solver_setup,
+                    HYPRE_Solver          fsolver )
 {
    return( hypre_MGRSetFSolver( (void *) solver,
-                     level,
                      (HYPRE_Int (*)(void*, void*, void*, void*)) fine_grid_solver_solve,
                      (HYPRE_Int (*)(void*, void*, void*, void*)) fine_grid_solver_setup,
                      (void *) fsolver ) );

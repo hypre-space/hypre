@@ -3655,7 +3655,6 @@ HYPRE_MGRSetNumInterpSweeps( HYPRE_Solver solver, HYPRE_Int nsweeps );
 
 
 HYPRE_Int HYPRE_MGRSetFSolver(HYPRE_Solver          solver,
-                             HYPRE_Int level,
                              HYPRE_PtrToParSolverFcn  fine_grid_solver_solve,
                              HYPRE_PtrToParSolverFcn  fine_grid_solver_setup,
                              HYPRE_Solver          fsolver );
