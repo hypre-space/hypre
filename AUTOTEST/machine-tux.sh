@@ -135,7 +135,7 @@ co="--enable-bigint --enable-debug"
 ./renametest.sh basic $output_dir/basic--enable-bigint
 
 co="--enable-mixedint --enable-debug"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
+./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic--enable-mixedint
 
 co="--enable-debug --with-print-errors"
