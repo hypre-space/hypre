@@ -296,7 +296,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
 
    // On each level, setup a long distance commPkg that has communication info for distance (eta + numGhostLayers)
    if (use_barriers) hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
-   if (timers) hypre_BeginTiming(timers[0]);
+   if (timers) hypre_BeginTiming(timers[1]);
    for (level = amgdd_start_level; level < transition_level; level++)
    {
       SetupNearestProcessorNeighbors(A_array[level], compGrid[level], compGridCommPkg, level, padding, num_ghost_layers, communication_cost);  
@@ -436,7 +436,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
          recv_map_send_buffer_size = hypre_CTAlloc(HYPRE_Int, num_recv_procs, HYPRE_MEMORY_HOST);
 
          if (use_barriers) hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
-         if (timers) hypre_BeginTiming(timers[1]);
+         if (timers) hypre_BeginTiming(timers[2]);
 
          // pack send buffers
          for (i = 0; i < num_send_partitions; i++)
