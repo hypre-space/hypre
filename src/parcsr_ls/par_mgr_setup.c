@@ -652,20 +652,17 @@ hypre_MGRSetup( void               *mgr_vdata,
     /* Coarsen: Build CF_marker array based on rows of A */
     cflag = ((last_level || setNonCpointToF));
     hypre_MGRCoarsen(S, A_array[lev], level_coarse_size[lev], level_coarse_indexes[lev],debug_flag, &CF_marker_array[lev], cflag);
+
     /*
-    if (lev == 0)
+    char fname[256];
+    sprintf(fname,"CF_marker_lvl_%d_new.%05d", lev, my_id);
+    FILE* fout;
+    fout = fopen(fname,"w");
+    for (i=0; i < nloc; i++)
     {
-      char fname[256];
-      sprintf(fname,"CF_marker.%05d", my_id);
-      FILE* fout;
-      fout = fopen(fname,"w");
-      for (i=0; i < nloc; i++)
-      {
-        fprintf(fout, "%d %d\n", i, CF_marker_array[lev][i]);
-      }
-      fclose(fout);
+      fprintf(fout, "%d %d\n", i, CF_marker_array[lev][i]);
     }
-    MPI_Barrier(comm);
+    fclose(fout);
     */
 
     /* Get global coarse sizes. Note that we assume num_functions = 1
@@ -841,14 +838,15 @@ hypre_MGRSetup( void               *mgr_vdata,
     /* Update coarse level indexes for next levels */
     if (lev < num_coarsening_levs - 1) 
     {
-      // first mark indexes to be updated
-      for(i=0; i<level_coarse_size[lev+1]; i++)
-      {
-        CF_marker_array[lev][level_coarse_indexes[lev+1][i]] = S_CMRK;
-      }
-      // next: loop over levels to update indexes
       for(i=lev+1; i<max_num_coarse_levels; i++)
       {
+        // first mark indexes to be updated
+        for(j=0; j<level_coarse_size[i]; j++)
+        {
+          CF_marker_array[lev][level_coarse_indexes[i][j]] = S_CMRK;
+        }
+
+        // next: loop over levels to update indexes
         nc = 0;
         index_i = 0;
         for(j=0; j<nloc; j++)
@@ -858,13 +856,15 @@ hypre_MGRSetup( void               *mgr_vdata,
           {
             level_coarse_indexes[i][index_i++] = nc++;
           }
-          if(index_i == level_coarse_size[i]) break;
+          //if(index_i == level_coarse_size[i]) break;
         }
-      }
-      // then: reset previously marked indexes
-      for(i=0; i<level_coarse_size[lev]; i++)
-      {
-        CF_marker_array[lev][level_coarse_indexes[lev][i]] = CMRK;
+        hypre_assert(index_i == level_coarse_size[i]);
+
+        // then: reset previously marked indexes
+        for(j=0; j<level_coarse_size[lev]; j++)
+        {
+          CF_marker_array[lev][level_coarse_indexes[lev][j]] = CMRK;
+        }
       }
     }
     // update reserved coarse indexes to be kept to coarsest level
