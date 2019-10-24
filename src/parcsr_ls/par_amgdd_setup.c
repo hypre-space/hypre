@@ -203,12 +203,12 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
 
    // Figure out padding on each level
    padding = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
-   if (variable_padding > num_levels) variable_padding = num_levels;
+   if (variable_padding > num_levels - amgdd_start_level) variable_padding = num_levels - amgdd_start_level;
    if (variable_padding)
    {
       // padding[0] = 1;
-      for (level = 0; level < variable_padding; level++) padding[level] = 0;
-      for (level = variable_padding; level < num_levels; level++) padding[level] = pad;
+      for (level = amgdd_start_level; level < amgdd_start_level + variable_padding; level++) padding[level] = pad;
+      for (level = amgdd_start_level + variable_padding; level < num_levels; level++) padding[level] = 1;
    }
    else
    {
@@ -413,6 +413,10 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
       num_recv_procs = hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg)[level];
       num_send_partitions = hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg)[level];
 
+      // !!! Debug:
+      printf("Rank %d, level %d, num_send_procs = %d, num_recv_procs = %d, num_send_partitions = %d\n", myid, level, num_send_procs, num_recv_procs, num_send_partitions);
+
+
       if ( num_send_procs || num_recv_procs ) // If there are any owned nodes on this level
       {
          // allocate space for the buffers, buffer sizes, requests and status, psiComposite_send, psiComposite_recv, send and recv maps
@@ -538,16 +542,16 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
          for (i = 0; i < num_send_procs; i++)
          {
             // !!! Check send_flag_buffer_size (make sure not overallocated)
-            send_flag_buffer[i] = hypre_CTAlloc(HYPRE_Int, send_flag_buffer_size[i], HYPRE_MEMORY_HOST);
-            hypre_MPI_Irecv( send_flag_buffer[i], send_flag_buffer_size[i], HYPRE_MPI_INT, hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level][i], 2, comm, &(requests[request_counter++]));
+            HYPRE_Int buffer_index = hypre_ParCompGridCommPkgSendProcPartitions(compGridCommPkg)[level][i];
+            send_flag_buffer[buffer_index] = hypre_CTAlloc(HYPRE_Int, send_flag_buffer_size[buffer_index], HYPRE_MEMORY_HOST);
+            hypre_MPI_Irecv( send_flag_buffer[buffer_index], send_flag_buffer_size[buffer_index], HYPRE_MPI_INT, hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level][buffer_index], 2, comm, &(requests[request_counter++]));
          }
 
          // send the recv_map_send_buffer's
          for (i = 0; i < num_recv_procs; i++)
          {
-            HYPRE_Int buffer_index = hypre_ParCompGridCommPkgSendProcPartitions(compGridCommPkg)[level][i];
             // !!! Check recv_map_send_buffer_size (make sure not overallocated)
-            hypre_MPI_Isend( recv_map_send_buffer[buffer_index], recv_map_send_buffer_size[buffer_index], HYPRE_MPI_INT, hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[level][i], 2, comm, &(requests[request_counter++]));
+            hypre_MPI_Isend( recv_map_send_buffer[i], recv_map_send_buffer_size[i], HYPRE_MPI_INT, hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[level][i], 2, comm, &(requests[request_counter++]));
             if (communication_cost)
             {
                communication_cost[level*6 + 2]++;
@@ -742,7 +746,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    // Count up the cost for subsequent residual communications
    if (communication_cost)
    {
-      for (level = 0; level < transition_level; level++)
+      for (level = amgdd_start_level; level < transition_level; level++)
       {
          communication_cost[level*6 + 5] += hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[level][ hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg)[level] ]*sizeof(HYPRE_Complex);
          communication_cost[level*6 + 4] += hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg)[level];

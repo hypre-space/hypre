@@ -257,8 +257,8 @@ FindNeighborProcessors(hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A,
       hypre_MPI_Isend(&(send_sizes[cnt]), 1, HYPRE_MPI_INT, req_proc_it->first, 4, hypre_MPI_COMM_WORLD, &(requests[request_cnt++]));
       if (communication_cost)
       {
-         communication_cost[level*7 + 0]++;
-         communication_cost[level*7 + 1] += sizeof(HYPRE_Int);
+         communication_cost[level*6 + 0]++;
+         communication_cost[level*6 + 1] += sizeof(HYPRE_Int);
       }
       cnt++;
    }
@@ -300,8 +300,8 @@ FindNeighborProcessors(hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A,
       hypre_MPI_Isend(send_buffers[cnt], send_sizes[cnt], HYPRE_MPI_INT, req_proc_it->first, 5, hypre_MPI_COMM_WORLD, &(requests[request_cnt++]));
       if (communication_cost)
       {
-         communication_cost[level*7 + 0]++;
-         communication_cost[level*7 + 1] += send_sizes[cnt]*sizeof(HYPRE_Int);
+         communication_cost[level*6 + 0]++;
+         communication_cost[level*6 + 1] += send_sizes[cnt]*sizeof(HYPRE_Int);
       }
       cnt++;
    }

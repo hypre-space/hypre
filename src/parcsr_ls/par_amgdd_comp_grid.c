@@ -463,6 +463,12 @@ hypre_ParCompGridSetupRelax( hypre_ParAMGData *amg_data )
 HYPRE_Int
 hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int start_level, HYPRE_Int transition_level, HYPRE_Int debug )
 {
+
+   // !!! Debug
+   HYPRE_Int myid;
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+
+
    HYPRE_Int level, i, j;
    HYPRE_Int num_levels = hypre_ParCompGridCommPkgNumLevels(compGridCommPkg);
 
@@ -490,7 +496,7 @@ hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPk
 
       // Transform indices in send_flag and recv_map
       HYPRE_Int outer_level;
-      for (outer_level = 0; outer_level < num_levels; outer_level++)
+      for (outer_level = start_level; outer_level < num_levels; outer_level++)
       {
          HYPRE_Int num_send_partitions = hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg)[outer_level];
          HYPRE_Int part;
@@ -504,6 +510,16 @@ hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPk
                   hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[outer_level][part][level][i] = new_indices[hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[outer_level][part][level][i]];
                }
             }
+         }
+         HYPRE_Int num_recv_procs = hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg)[outer_level];
+         HYPRE_Int proc;
+
+
+         // !!! Debug:
+         printf("Rank %d, level %d, num_recv_procs = %d, num_send_partitions = %d\n", myid, outer_level, num_recv_procs, num_send_partitions);
+
+         for (proc = 0; proc < num_recv_procs; proc++)
+         {
             HYPRE_Int num_recv_nodes = hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[outer_level][part][level];
             for (i = 0; i < num_recv_nodes; i++)
             {
