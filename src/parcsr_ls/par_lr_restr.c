@@ -1698,18 +1698,18 @@ hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
    HYPRE_Complex      *R_offd_a;
    HYPRE_Int       *R_offd_i;
    HYPRE_Int       *R_offd_j;
-   HYPRE_Int       *col_map_offd_R;
+   HYPRE_BigInt    *col_map_offd_R;
 
    HYPRE_Int        i, j, j1, i1, ic,
                     num_cols_offd_R;
    HYPRE_Int        my_id, num_procs;
-   HYPRE_Int        total_global_cpts/*, my_first_cpt*/;
+   HYPRE_BigInt     total_global_cpts/*, my_first_cpt*/;
    HYPRE_Int        nnz_diag, nnz_offd, cnt_diag, cnt_offd;
-   HYPRE_Int       *send_buf_i;
+   HYPRE_BigInt       *send_buf_i;
 
    /* local size */
    HYPRE_Int n_fine = hypre_CSRMatrixNumRows(A_diag);
-   HYPRE_Int col_start = hypre_ParCSRMatrixFirstRowIndex(A);
+   HYPRE_BigInt col_start = hypre_ParCSRMatrixFirstRowIndex(A);
 
    /* MPI size and rank*/
    hypre_MPI_Comm_size(comm, &num_procs);
@@ -1722,7 +1722,7 @@ hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
    {
       total_global_cpts = num_cpts_global[1];
    }
-   hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_INT, num_procs-1, comm);
+   hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
 #else
    /*my_first_cpt = num_cpts_global[my_id];*/
    total_global_cpts = num_cpts_global[num_procs];
@@ -1898,7 +1898,7 @@ hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
    HYPRE_Int       *Z_offd_j = hypre_CSRMatrixJ(Z_offd);
    HYPRE_Int        num_cols_offd_Z = hypre_CSRMatrixNumCols(Z_offd);
    /*
-   HYPRE_Int       *col_map_offd_Z  = hypre_ParCSRMatrixColMapOffd(Z);
+   HYPRE_BigInt       *col_map_offd_Z  = hypre_ParCSRMatrixColMapOffd(Z);
    */
    /* send and recv diagonal entries (wrt Z) */
    HYPRE_Complex *diag_entries_offd = hypre_TAlloc(HYPRE_Complex, num_cols_offd_Z, HYPRE_MEMORY_HOST);
@@ -1914,13 +1914,13 @@ hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
    hypre_ParCSRCommHandleDestroy(comm_handle);
 
    /* send and recv Fmap (wrt Z): global */
-   HYPRE_Int *Fmap_offd_global = hypre_TAlloc(HYPRE_Int, num_cols_offd_Z, HYPRE_MEMORY_HOST);
-   send_buf_i = hypre_TAlloc(HYPRE_Int, num_elems_send_Z, HYPRE_MEMORY_HOST);
+   HYPRE_BigInt *Fmap_offd_global = hypre_TAlloc(HYPRE_BigInt, num_cols_offd_Z, HYPRE_MEMORY_HOST);
+   send_buf_i = hypre_TAlloc(HYPRE_BigInt, num_elems_send_Z, HYPRE_MEMORY_HOST);
    for (i = 0; i < num_elems_send_Z; i++)
    {
       send_buf_i[i] = Fmap[hypre_ParCSRCommPkgSendMapElmt(comm_pkg_Z, i)] + col_start;
    }
-   comm_handle = hypre_ParCSRCommHandleCreate(11, comm_pkg_Z, send_buf_i, Fmap_offd_global);
+   comm_handle = hypre_ParCSRCommHandleCreate(21, comm_pkg_Z, send_buf_i, Fmap_offd_global);
    hypre_ParCSRCommHandleDestroy(comm_handle);
 
    nnz_diag = hypre_CSRMatrixNumNonzeros(Z_diag) + n_cpts;
