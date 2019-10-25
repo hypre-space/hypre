@@ -366,6 +366,8 @@ hypre_BoomerAMGCreate()
    hypre_ParAMGDataAMGDDAgglomerationMaxNumLevels(amg_data) = 100;
    hypre_ParAMGDataAMGDDAgglomerationThreshold(amg_data) = 4;
    hypre_ParAMGDataAMGDDAgglomerationPartitionSize(amg_data) = 2;
+   hypre_ParAMGDataAMGDDNumGlobalRelax(amg_data) = 0;
+   hypre_ParAMGDataAMGDDCorrectionStep(amg_data) = 0.0;
    hypre_ParAMGDataCompGrid(amg_data) = NULL;
    hypre_ParAMGDataCompGridCommPkg(amg_data) = NULL;
 

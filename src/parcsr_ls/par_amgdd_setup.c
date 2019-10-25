@@ -413,10 +413,6 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
       num_recv_procs = hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg)[level];
       num_send_partitions = hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg)[level];
 
-      // !!! Debug:
-      printf("Rank %d, level %d, num_send_procs = %d, num_recv_procs = %d, num_send_partitions = %d\n", myid, level, num_send_procs, num_recv_procs, num_send_partitions);
-
-
       if ( num_send_procs || num_recv_procs ) // If there are any owned nodes on this level
       {
          // allocate space for the buffers, buffer sizes, requests and status, psiComposite_send, psiComposite_recv, send and recv maps
