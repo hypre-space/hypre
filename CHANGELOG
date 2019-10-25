@@ -7,6 +7,12 @@
 # This file chronicles user-level changes, beginning with the most recent.
 # =============================================================================
 
+Version 2.18.2 released 2019/10/28
+
+- Fixed mixedint bugs.
+
+#====================================
+
 Version 2.18.1 released 2019/10/15
 
 - Various bug fixes.
