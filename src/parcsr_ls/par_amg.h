@@ -121,6 +121,7 @@ typedef struct
    HYPRE_Int                 amgdd_agglomeration_partition_size;
    HYPRE_Int                 amgdd_num_global_relax;
    HYPRE_Real                amgdd_correction_step;
+   hypre_ParVector          *amgdd_correction_vector;
    hypre_ParCompGrid       **compGrid;
    hypre_ParCompGridCommPkg *compGridCommPkg;
 
@@ -402,6 +403,7 @@ typedef struct
 #define hypre_ParAMGDataAMGDDAgglomerationPartitionSize(amg_data) ((amg_data)->amgdd_agglomeration_partition_size)
 #define hypre_ParAMGDataAMGDDNumGlobalRelax(amg_data) ((amg_data)->amgdd_num_global_relax)
 #define hypre_ParAMGDataAMGDDCorrectionStep(amg_data) ((amg_data)->amgdd_correction_step)
+#define hypre_ParAMGDataAMGDDCorrectionVector(amg_data) ((amg_data)->amgdd_correction_vector)
 #define hypre_ParAMGDataCompGrid(amg_data) ((amg_data)->compGrid)
 #define hypre_ParAMGDataCompGridCommPkg(amg_data) ((amg_data)->compGridCommPkg)
 
