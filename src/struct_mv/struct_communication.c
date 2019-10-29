@@ -826,7 +826,7 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
    if (num_sends > 0)
    {
       size = hypre_CommPkgSendBufsize(comm_pkg);
-      send_buffers[0] =  hypre_TAlloc(HYPRE_Complex,  size, HYPRE_MEMORY_HOST);
+      send_buffers[0] =  hypre_CTAlloc(HYPRE_Complex,  size, HYPRE_MEMORY_HOST);
       for (i = 1; i < num_sends; i++)
       {
          comm_type = hypre_CommPkgSendType(comm_pkg, i-1);
