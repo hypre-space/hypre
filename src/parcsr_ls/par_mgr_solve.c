@@ -626,7 +626,7 @@ hypre_MGRCycle( void               *mgr_vdata,
         {
           hypre_printf("Warning!!! Coarse grid solve diverges. Factor = %1.2e\n", convergence_factor_cg);
         }
-        if (/*mgr_data -> print_level > 2 &&*/ my_id == 0)
+        if ((mgr_data -> print_level) > 1 && my_id == 0)
         {
           hypre_printf("Coarse grid V-cycle convergence factor: %5f\n", convergence_factor_cg);
         }

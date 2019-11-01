@@ -3515,6 +3515,18 @@ HYPRE_MGRSetBlockSize( HYPRE_Solver solver, HYPRE_Int bsize );
 HYPRE_Int
 HYPRE_MGRSetReservedCoarseNodes( HYPRE_Solver solver, HYPRE_Int reserved_coarse_size, HYPRE_Int *reserved_coarse_nodes );
 
+/* (Optional) Set the level for reducing the reserved Cpoints before the coarse
+ * grid solve. This is necessary for some applications, such as phase transitions.
+ * The default is 0 (no reduction, i.e. keep the reserved cpoints in the coarse grid solve).
+ * The default setup for the reduction is as follows:
+ * interp_type = 2
+ * restrict_type = 0
+ * F-relax method = 99
+ * Galerkin coarse grid
+**/
+HYPRE_Int
+HYPRE_MGRSetReservedCpointsLevelToKeep( HYPRE_Solver solver, HYPRE_Int level);
+
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetRelaxType
  *--------------------------------------------------------------------------*/

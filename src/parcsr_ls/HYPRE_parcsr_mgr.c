@@ -166,6 +166,15 @@ HYPRE_MGRSetReservedCoarseNodes( HYPRE_Solver solver, HYPRE_Int reserved_coarse_
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_MGRSetReservedCpointsLevelToKeep
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_MGRSetReservedCpointsLevelToKeep( HYPRE_Solver solver, HYPRE_Int level)
+{
+   return hypre_MGRSetReservedCpointsLevelToKeep((void *) solver, level);
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_MGRSetRestrictType
  *--------------------------------------------------------------------------*/
 HYPRE_Int

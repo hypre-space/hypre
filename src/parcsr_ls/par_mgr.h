@@ -14,7 +14,6 @@ typedef struct
 {
   // block data
   HYPRE_Int  block_size;
-  HYPRE_Int  num_coarse_indexes;
   HYPRE_Int  *block_num_coarse_indexes;
   HYPRE_Int  **block_cf_marker;
 
@@ -116,6 +115,10 @@ typedef struct
 
   /* how to set C points */
   HYPRE_Int   set_c_points_method;
+
+  /* reduce reserved C-points before coarse grid solve? */
+  /* this might be necessary for some applications, e.g. phase transitions */
+  HYPRE_Int   lvl_to_keep_cpoints;
 
   HYPRE_Real  cg_convergence_factor;
 
