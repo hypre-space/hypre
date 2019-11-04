@@ -1916,7 +1916,7 @@ hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix    *A,
   hypre_ParCSRMatrix *A_h;
   hypre_ParCSRMatrix *A_h_correction;
   HYPRE_Int  max_elmts = Pmax;
-  HYPRE_Real wall_time = 0.;
+//  HYPRE_Real wall_time = 0.;
   hypre_ParCSRMatrix *P_mod = NULL;
 
   HYPRE_Int my_id;
