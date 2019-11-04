@@ -45,7 +45,7 @@ typedef struct hypre_ParCSRMatrix_struct
    HYPRE_BigInt         *device_col_map_offd;
    /* maps columns of offd to global columns */
    HYPRE_BigInt         *row_starts;
-        /* array of length 2 giving the glboal index of the first row
+        /* array of length 2 giving the global index of the first row
            on this processor, and 1+index of the final row on this
            processor. If –enable-global-partition is used, then array
            is length num_procs+1, and row_starts[i] contains the 

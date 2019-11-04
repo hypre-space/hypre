@@ -215,25 +215,25 @@ hypre_ILUSolve( void               *ilu_vdata,
       /* Do one solve on LUe=r */
       switch(ilu_type){
       case 0: case 1: 
-         hypre_ILUSolveLU(matA, f, u, perm, n, matL, matD, matU, Utemp, Ftemp); //BJ
+         hypre_ILUSolveLU(matA, F_array, U_array, perm, n, matL, matD, matU, Utemp, Ftemp); //BJ
          break;
       case 10: case 11: 
-         hypre_ILUSolveSchurGMRES(matA, f, u, perm, perm, nLU, matL, matD, matU, matS, 
+         hypre_ILUSolveSchurGMRES(matA, F_array, U_array, perm, perm, nLU, matL, matD, matU, matS, 
                            Utemp, Ftemp, schur_solver, schur_precond, rhs, x, u_end); //GMRES
          break;
       case 20: case 21:
-         hypre_ILUSolveSchurNSH(matA, f, u, perm, nLU, matL, matD, matU, matS, 
+         hypre_ILUSolveSchurNSH(matA, F_array, U_array, perm, nLU, matL, matD, matU, matS, 
                            Utemp, Ftemp, schur_solver, rhs, x, u_end); //MR+NSH
          break;
       case 30: case 31:
-         hypre_ILUSolveLURAS(matA, f, u, perm, matL, matD, matU, Utemp, Utemp, fext, uext); //RAS
+         hypre_ILUSolveLURAS(matA, F_array, U_array, perm, matL, matD, matU, Utemp, Utemp, fext, uext); //RAS
          break;
       case 40: case 41: 
-         hypre_ILUSolveSchurGMRES(matA, f, u, perm, qperm, nLU, matL, matD, matU, matS, 
+         hypre_ILUSolveSchurGMRES(matA, F_array, U_array, perm, qperm, nLU, matL, matD, matU, matS, 
                            Utemp, Ftemp, schur_solver, schur_precond, rhs, x, u_end); //GMRES
          break;
       default: 
-         hypre_ILUSolveLU(matA, f, u, perm, n, matL, matD, matU, Utemp, Ftemp); //BJ
+         hypre_ILUSolveLU(matA, F_array, U_array, perm, n, matL, matD, matU, Utemp, Ftemp); //BJ
          break;
 
         }
@@ -419,6 +419,8 @@ hypre_ILUSolveSchurGMRES(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
     */
    if(S)
    {
+      /*initialize solution to zero for residual equation */
+      hypre_ParVectorSetConstantValues(x, 0.0);
       /* setup vectors for solve */
       rhs_local   = hypre_ParVectorLocalVector(rhs);
       rhs_data    = hypre_VectorData(rhs_local);
@@ -575,10 +577,12 @@ hypre_ILUSolveSchurNSH(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
    /* 3rd need to solve global Schur Complement Sy = g'
     * for now only solve the local system
     * solve y put in u_temp lower
-    * only solve whe S is not NULL 
+    * only solve when S is not NULL 
     */
    if(S)
    {
+      /*initialize solution to zero for residual equation */
+      hypre_ParVectorSetConstantValues(x, 0.0);
       /* setup vectors for solve */
       rhs_local   = hypre_ParVectorLocalVector(rhs);
       rhs_data    = hypre_VectorData(rhs_local);
