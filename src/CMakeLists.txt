@@ -11,8 +11,8 @@ endif (POLICY CMP0074)
 project (hypre)
 
 # The version number.
-set (HYPRE_VERSION 2.18.0)
-set (HYPRE_DATE    2019/09/27)
+set (HYPRE_VERSION 2.18.2)
+set (HYPRE_DATE    2019/10/28)
 set (HYPRE_TIME    00:00:00)
 set (HYPRE_BUGS    hypre-support@llnl.gov)
 set (HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
