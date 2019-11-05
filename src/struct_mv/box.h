@@ -121,7 +121,7 @@ hypre_max(0, (hypre_BoxIMaxD(box, d) - hypre_BoxIMinD(box, d) + 1))
 #define hypre_CCBoxIndexRank(box, index) 0
 #define hypre_CCBoxIndexRank_noargs() 0
 #define hypre_CCBoxOffsetDistance(box, index) 0
-
+  
 /*----- Avoid using these Box macros -----*/
 
 #define hypre_BoxSizeX(box)    hypre_BoxSizeD(box, 0)

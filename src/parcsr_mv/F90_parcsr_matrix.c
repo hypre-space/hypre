@@ -17,12 +17,12 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+    
 /*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixGlobalNumRows
  *--------------------------------------------------------------------------*/
 
-void
+void 
 hypre_F90_IFACE(hypre_parcsrmatrixglobalnumrows, HYPRE_PARCSRMATRIXGLOBALNUMROWS)
    ( hypre_F90_Obj *matrix,
      hypre_F90_BigInt *num_rows,
@@ -39,7 +39,7 @@ hypre_F90_IFACE(hypre_parcsrmatrixglobalnumrows, HYPRE_PARCSRMATRIXGLOBALNUMROWS
  * hypre_ParCSRMatrixRowStarts
  *--------------------------------------------------------------------------*/
 
-void
+void 
 hypre_F90_IFACE(hypre_parcsrmatrixrowstarts, HYPRE_PARCSRMATRIXROWSTARTS)
    ( hypre_F90_Obj *matrix,
      hypre_F90_Obj *row_starts,

@@ -46,7 +46,7 @@ hypre_F90_IFACE(hypre_ijmatrixcreate, HYPRE_IJMATRIXCREATE)
  * HYPRE_IJMatrixDestroy
  *--------------------------------------------------------------------------*/
 
-void
+void 
 hypre_F90_IFACE(hypre_ijmatrixdestroy, HYPRE_IJMATRIXDESTROY)
    ( hypre_F90_Obj *matrix,
      hypre_F90_Int *ierr    )
@@ -141,7 +141,7 @@ hypre_F90_IFACE(hypre_ijmatrixaddtovalues, HYPRE_IJMATRIXADDTOVALUES)
  * HYPRE_IJMatrixAssemble
  *--------------------------------------------------------------------------*/
 
-void
+void 
 hypre_F90_IFACE(hypre_ijmatrixassemble, HYPRE_IJMATRIXASSEMBLE)
    ( hypre_F90_Obj *matrix,
      hypre_F90_Int *ierr    )
@@ -154,7 +154,7 @@ hypre_F90_IFACE(hypre_ijmatrixassemble, HYPRE_IJMATRIXASSEMBLE)
 /*--------------------------------------------------------------------------
  * HYPRE_IJMatrixGetRowCounts
  *--------------------------------------------------------------------------*/
-
+ 
 void
 hypre_F90_IFACE(hypre_ijmatrixgetrowcounts, HYPRE_IJMATRIXGETROWCOUNTS)
    ( hypre_F90_Obj *matrix,
@@ -200,7 +200,7 @@ hypre_F90_IFACE(hypre_ijmatrixgetvalues, HYPRE_IJMATRIXGETVALUES)
  * HYPRE_IJMatrixSetObjectType
  *--------------------------------------------------------------------------*/
 
-void
+void 
 hypre_F90_IFACE(hypre_ijmatrixsetobjecttype, HYPRE_IJMATRIXSETOBJECTTYPE)
    ( hypre_F90_Obj *matrix,
      hypre_F90_Int *type,
@@ -216,7 +216,7 @@ hypre_F90_IFACE(hypre_ijmatrixsetobjecttype, HYPRE_IJMATRIXSETOBJECTTYPE)
  * HYPRE_IJMatrixGetObjectType
  *--------------------------------------------------------------------------*/
 
-void
+void 
 hypre_F90_IFACE(hypre_ijmatrixgetobjecttype, HYPRE_IJMATRIXGETOBJECTTYPE)
    ( hypre_F90_Obj *matrix,
      hypre_F90_Int *type,
@@ -232,7 +232,7 @@ hypre_F90_IFACE(hypre_ijmatrixgetobjecttype, HYPRE_IJMATRIXGETOBJECTTYPE)
  * HYPRE_IJMatrixGetLocalRange
  *--------------------------------------------------------------------------*/
 
-void
+void 
 hypre_F90_IFACE(hypre_ijmatrixgetlocalrange, HYPRE_IJMATRIXGETLOCALRANGE)
    ( hypre_F90_Obj *matrix,
      hypre_F90_BigInt *ilower,
@@ -254,7 +254,7 @@ hypre_F90_IFACE(hypre_ijmatrixgetlocalrange, HYPRE_IJMATRIXGETLOCALRANGE)
  * HYPRE_IJMatrixGetObject
  *--------------------------------------------------------------------------*/
 
-void
+void 
 hypre_F90_IFACE(hypre_ijmatrixgetobject, HYPRE_IJMATRIXGETOBJECT)
    ( hypre_F90_Obj *matrix,
      hypre_F90_Obj *object,
@@ -269,7 +269,7 @@ hypre_F90_IFACE(hypre_ijmatrixgetobject, HYPRE_IJMATRIXGETOBJECT)
 /*--------------------------------------------------------------------------
  * HYPRE_IJMatrixSetRowSizes
  *--------------------------------------------------------------------------*/
-
+ 
 void
 hypre_F90_IFACE(hypre_ijmatrixsetrowsizes, HYPRE_IJMATRIXSETROWSIZES)
    ( hypre_F90_Obj *matrix,
@@ -286,7 +286,7 @@ hypre_F90_IFACE(hypre_ijmatrixsetrowsizes, HYPRE_IJMATRIXSETROWSIZES)
 /*--------------------------------------------------------------------------
  * HYPRE_IJMatrixSetDiagOffdSizes
  *--------------------------------------------------------------------------*/
-
+ 
 void
 hypre_F90_IFACE(hypre_ijmatrixsetdiagoffdsizes, HYPRE_IJMATRIXSETDIAGOFFDSIZES)
    ( hypre_F90_Obj *matrix,
@@ -304,14 +304,14 @@ hypre_F90_IFACE(hypre_ijmatrixsetdiagoffdsizes, HYPRE_IJMATRIXSETDIAGOFFDSIZES)
 /*--------------------------------------------------------------------------
  * HYPRE_IJMatrixSetMaxOffProcElmts
  *--------------------------------------------------------------------------*/
-
+ 
 void
 hypre_F90_IFACE(hypre_ijmatrixsetmaxoffprocelmt, HYPRE_IJMATRIXSETMAXOFFPROCELMT)
    ( hypre_F90_Obj *matrix,
      hypre_F90_Int *max_off_proc_elmts,
      hypre_F90_Int *ierr        )
 {
-   *ierr = (hypre_F90_Int)
+   *ierr = (hypre_F90_Int) 
       ( HYPRE_IJMatrixSetMaxOffProcElmts(
            hypre_F90_PassObj (HYPRE_IJMatrix, matrix),
            hypre_F90_PassInt (max_off_proc_elmts) ) );
@@ -321,7 +321,7 @@ hypre_F90_IFACE(hypre_ijmatrixsetmaxoffprocelmt, HYPRE_IJMATRIXSETMAXOFFPROCELMT
  * HYPRE_IJMatrixRead
  *--------------------------------------------------------------------------*/
 
-void
+void 
 hypre_F90_IFACE(hypre_ijmatrixread, HYPRE_IJMATRIXREAD)
    ( char     *filename,
      hypre_F90_Comm *comm,
@@ -341,7 +341,7 @@ hypre_F90_IFACE(hypre_ijmatrixread, HYPRE_IJMATRIXREAD)
  * HYPRE_IJMatrixPrint
  *--------------------------------------------------------------------------*/
 
-void
+void 
 hypre_F90_IFACE(hypre_ijmatrixprint, HYPRE_IJMATRIXPRINT)
    ( hypre_F90_Obj *matrix,
      char     *filename,

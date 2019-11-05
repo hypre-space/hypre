@@ -11,7 +11,7 @@ extern int MLI_Smoother_Apply_Schwarz(void *smoother_obj,hypre_ParCSRMatrix *A,
                                         hypre_ParVector *f,hypre_ParVector *u);
 
 /******************************************************************************
- * Schwarz relaxation scheme
+ * Schwarz relaxation scheme 
  *****************************************************************************/
 
 typedef struct MLI_Smoother_Schwarz_Struct
@@ -25,7 +25,7 @@ typedef struct MLI_Smoother_Schwarz_Struct
  * MLI_Smoother_Create_Schwarz
  *--------------------------------------------------------------------------*/
 
-int MLI_Smoother_Create_Schwarz(void **smoother_obj)
+int MLI_Smoother_Create_Schwarz(void **smoother_obj) 
 {
    MLI_Smoother_Schwarz *smoother;
 
@@ -51,10 +51,10 @@ int MLI_Smoother_Destroy_Schwarz(void *smoother_obj)
  * MLI_Smoother_Setup_Schwarz
  *--------------------------------------------------------------------------*/
 
-int MLI_Smoother_Setup_Schwarz(void *smoother_obj,
-                               int (**smoother_func)(void *smoother_obj,
+int MLI_Smoother_Setup_Schwarz(void *smoother_obj, 
+                               int (**smoother_func)(void *smoother_obj, 
                                 hypre_ParCSRMatrix *A,hypre_ParVector *f,
-                                hypre_ParVector *u), hypre_ParCSRMatrix *A,
+                                hypre_ParVector *u), hypre_ParCSRMatrix *A, 
 {
    int                    *partition, mypid, start_row, end_row;
    int                    row, row_length, *col_indices;
@@ -69,7 +69,7 @@ int MLI_Smoother_Setup_Schwarz(void *smoother_obj,
     *-----------------------------------------------------------------*/
 
    comm = hypre_ParCSRMatrixComm(A);
-   MPI_Comm_rank(comm,&mypid);
+   MPI_Comm_rank(comm,&mypid);  
    HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) A, &partition);
    start_row = partition[mypid];
    end_row   = partition[mypid+1] - 1;
@@ -137,7 +137,7 @@ int MLI_Smoother_Apply_ParaSails(void *smoother_obj, hypre_ParCSRMatrix *A,
     * fetch machine and smoother parameters
     *-----------------------------------------------------------------*/
 
-   MPI_Comm_size(comm,&num_procs);
+   MPI_Comm_size(comm,&num_procs);  
    smoother      = (MLI_Smoother_ParaSails *) smoother_obj;
    A             = smoother->Amat;
    comm          = hypre_ParCSRMatrixComm(A);
@@ -181,12 +181,12 @@ int MLI_Smoother_Apply_ParaSails(void *smoother_obj, hypre_ParCSRMatrix *A,
    }
 
    /*-----------------------------------------------------------------
-    * clean up
+    * clean up 
     *-----------------------------------------------------------------*/
 
    hypre_TFree( tmp_data , HYPRE_MEMORY_HOST);
 
-   return(relax_error);
+   return(relax_error); 
 }
 
 /*--------------------------------------------------------------------------
@@ -212,7 +212,7 @@ int MLI_Smoother_Apply_ParaSailsTrans(void *smoother_obj,hypre_ParCSRMatrix *A,
     * fetch machine and smoother parameters
     *-----------------------------------------------------------------*/
 
-   MPI_Comm_size(comm,&num_procs);
+   MPI_Comm_size(comm,&num_procs);  
    smoother      = (MLI_Smoother_ParaSails *) smoother_obj;
    A             = smoother->Amat;
    comm          = hypre_ParCSRMatrixComm(A);
@@ -256,12 +256,12 @@ int MLI_Smoother_Apply_ParaSailsTrans(void *smoother_obj,hypre_ParCSRMatrix *A,
    }
 
    /*-----------------------------------------------------------------
-    * clean up
+    * clean up 
     *-----------------------------------------------------------------*/
 
    hypre_TFree( tmp_data , HYPRE_MEMORY_HOST);
 
-   return(relax_error);
+   return(relax_error); 
 }
 #endif
 

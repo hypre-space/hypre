@@ -573,11 +573,11 @@ int hypre_FlexGMRESModifyPCAMGExample(void *precond_data, int iterations,
 
    if (rel_residual_norm > .1)
    {
-      HYPRE_BoomerAMGSetNumSweeps((HYPRE_Solver)precond_data, 10);
+	   HYPRE_BoomerAMGSetNumSweeps((HYPRE_Solver)precond_data, 10);
    }
    else
    {
-      HYPRE_BoomerAMGSetNumSweeps((HYPRE_Solver)precond_data, 1);
+	   HYPRE_BoomerAMGSetNumSweeps((HYPRE_Solver)precond_data, 1);
    }
 
 

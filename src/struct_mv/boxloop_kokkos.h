@@ -346,7 +346,7 @@ struct ColumnSums
 
 #define hypre_newBoxLoopGetIndex(index)\
   index[0] = hypre_IndexD(local_idx, 0); index[1] = hypre_IndexD(local_idx, 1); index[2] = hypre_IndexD(local_idx, 2);
-
+  
 #define hypre_BoxLoopGetIndex    zypre_BoxLoopGetIndex
 #define hypre_BoxLoopSetOneBlock hypre_newBoxLoopSetOneBlock
 #define hypre_BoxLoopBlock()       0

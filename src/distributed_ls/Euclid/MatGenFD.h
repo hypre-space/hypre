@@ -51,15 +51,15 @@ Misc.
 /* #include "euclid_common.h" */
 
 struct _matgenfd {
-  bool allocateMem;
+  bool allocateMem; 
         /* If true, memory is allocated when run() is called, in which case
          * the caller is responsible for calling FREE_DH for the rp, cval,
          * aval, and rhs arrays.  If false, caller is assumed to have
-         * allocated memory when run is called.
+         * allocated memory when run is called.  
          * Default is "true"
          */
   HYPRE_Int px, py, pz;  /* Processor graph dimensions */
-  bool threeD;
+  bool threeD;  
   HYPRE_Int m;           /* number of matrix rows in local matrix */
   HYPRE_Int cc;          /* Dimension of each processor's subgrid */
   HYPRE_Real hh;       /* Grid spacing; this is constant,  equal to 1.0/(px*cc-1) */
@@ -68,7 +68,7 @@ struct _matgenfd {
   HYPRE_Real stencil[8];
 
 
-  /* derivative coefficients; a,b,c are 2nd derivatives,
+  /* derivative coefficients; a,b,c are 2nd derivatives, 
    * c,d,e are 1st derivatives; f,g,h not currently used.
    */
   HYPRE_Real a, b, c, d, e, f, g, h;
@@ -80,7 +80,7 @@ struct _matgenfd {
   HYPRE_Real bcX1, bcX2;
   HYPRE_Real bcY1, bcY2;
   HYPRE_Real bcZ1, bcZ2;
-
+                
   /* The following return coefficients; default is konstant() */
   HYPRE_Real (*A)(HYPRE_Real coeff, HYPRE_Real x, HYPRE_Real y, HYPRE_Real z);
   HYPRE_Real (*B)(HYPRE_Real coeff, HYPRE_Real x, HYPRE_Real y, HYPRE_Real z);
@@ -130,7 +130,7 @@ extern HYPRE_Real box_1(HYPRE_Real coeff, HYPRE_Real x, HYPRE_Real y, HYPRE_Real
   /* -bd2 is diffusion coeff outside box;
      -bd1 is diffusion coeff inside box.
   */
-
+     
 
 
 extern HYPRE_Real box_2(HYPRE_Real coeff, HYPRE_Real x, HYPRE_Real y, HYPRE_Real z);

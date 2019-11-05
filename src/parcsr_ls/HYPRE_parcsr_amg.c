@@ -802,7 +802,7 @@ HYPRE_BoomerAMGSetRelaxWt( HYPRE_Solver  solver,
 HYPRE_Int
 HYPRE_BoomerAMGSetLevelRelaxWt( HYPRE_Solver  solver,
                                 HYPRE_Real    relax_wt,
-                                HYPRE_Int     level  )
+				HYPRE_Int 	      level  )
 {
    return( hypre_BoomerAMGSetLevelRelaxWt( (void *) solver, relax_wt, level ) );
 }
@@ -836,7 +836,7 @@ HYPRE_BoomerAMGSetOuterWt( HYPRE_Solver  solver,
 HYPRE_Int
 HYPRE_BoomerAMGSetLevelOuterWt( HYPRE_Solver  solver,
                                 HYPRE_Real    outer_wt,
-                                HYPRE_Int     level  )
+				HYPRE_Int 	      level  )
 {
    return( hypre_BoomerAMGSetLevelOuterWt( (void *) solver, outer_wt, level ) );
 }
@@ -1200,7 +1200,7 @@ HYPRE_BoomerAMGSetEuSparseA( HYPRE_Solver  solver,
 
 HYPRE_Int
 HYPRE_BoomerAMGSetEuBJ( HYPRE_Solver  solver,
-                        HYPRE_Int     eu_bj)
+                        HYPRE_Int	      eu_bj)
 {
    return( hypre_BoomerAMGSetEuBJ( (void *) solver, eu_bj ) );
 }

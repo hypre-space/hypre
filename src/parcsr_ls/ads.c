@@ -101,7 +101,7 @@ void * hypre_ADSCreate()
 
 HYPRE_Int hypre_ADSDestroy(void *solver)
 {
-   hypre_ADSData *ads_data = (hypre_ADSData *) solver;
+	hypre_ADSData *ads_data = (hypre_ADSData *) solver;
 
    if (!ads_data)
    {

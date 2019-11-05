@@ -12,7 +12,7 @@
  *
  ******************************************************************************/
 
-#include "_hypre_sstruct_ls.h"
+#include "_hypre_sstruct_ls.h" 
 #include "fac.h"
 
 #define MapStencilRank(stencil, rank)           \
@@ -57,10 +57,10 @@
    }
 
 /*--------------------------------------------------------------------------
- * hypre_AMR_CFCoarsen: Coarsens the CF interface to get the stencils
+ * hypre_AMR_CFCoarsen: Coarsens the CF interface to get the stencils 
  * reaching into a coarsened fbox. Also sets the centre coefficient of CF
- * interface nodes to have "preserved" row sum.
- *
+ * interface nodes to have "preserved" row sum. 
+ * 
  * On entry, fac_A already has all the coefficient values of the cgrid
  * chunks that are not underlying a fbox.  Note that A & fac_A have the
  * same grid & graph. Therefore, we will use A's grid & graph.
@@ -72,7 +72,7 @@ HYPRE_Int
 hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
                      hypre_SStructMatrix  *   fac_A,
                      hypre_Index              refine_factors,
-                     HYPRE_Int                level )
+                     HYPRE_Int                level ) 
 
 {
    MPI_Comm                comm       = hypre_SStructMatrixComm(A);
@@ -96,7 +96,7 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
 
    HYPRE_Int               part_crse= level-1;
    HYPRE_Int               part_fine= level;
-
+ 
    hypre_BoxManager       *fboxman;
    hypre_BoxManEntry     **boxman_entries, *boxman_entry;
    HYPRE_Int               nboxman_entries;
@@ -126,7 +126,7 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
    HYPRE_Real             *vals;
 
    HYPRE_Int               i, j;
-   HYPRE_Int               nvars, var1;
+   HYPRE_Int               nvars, var1; 
 
    hypre_Index             lindex, zero_index;
    hypre_Index             index1, index2;
@@ -138,7 +138,7 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
 
    HYPRE_Int              *ncols;
    HYPRE_BigInt           *rows, *cols;
-
+   
    HYPRE_Int              *temp1, *temp2;
 
    HYPRE_Int               myid;
@@ -148,9 +148,9 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
 
    hypre_BoxInit(&refined_box, ndim);
    hypre_BoxInit(&boxman_entry_box, ndim);
-
+   
    /*--------------------------------------------------------------------------
-    *  Task: Coarsen the CF interface connections of A into fac_A so that
+    *  Task: Coarsen the CF interface connections of A into fac_A so that 
     *  fac_A will have the stencil coefficients extending into a coarsened
     *  fbox. The centre coefficient is constructed to preserve the row sum.
     *--------------------------------------------------------------------------*/
@@ -179,7 +179,7 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
 
    /*--------------------------------------------------------------------------
     *  Determine the c/f interface index boxes: fgrid_cinterface_extents.
-    *  These are between fpart= level and cpart= (level-1). The
+    *  These are between fpart= level and cpart= (level-1). The 
     *  fgrid_cinterface_extents are indexed by cboxes, but fboxes that
     *  abutt a given cbox must be considered. Moreover, for each fbox,
     *  we can have a c/f interface from a number of different stencil
@@ -204,8 +204,8 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
       stencils= hypre_SStructPMatrixSStencil(A_pmatrix, var1, var1);
 
       cgrid= hypre_SStructPGridSGrid(hypre_SStructPMatrixPGrid(A_pmatrix), var1);
-      cgrid_boxes= hypre_StructGridBoxes(cgrid);
-      fgrid_cinterface_extents[var1]= hypre_TAlloc(hypre_BoxArrayArray *,
+      cgrid_boxes= hypre_StructGridBoxes(cgrid); 
+      fgrid_cinterface_extents[var1]= hypre_TAlloc(hypre_BoxArrayArray *,  
                                                    hypre_BoxArraySize(cgrid_boxes), HYPRE_MEMORY_HOST);
 
       hypre_ForBoxI(ci, cgrid_boxes)
@@ -258,7 +258,7 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
    /*--------------------------------------------------------------------------
     *  STEP 1:
     *        ADJUST THE ENTRIES ALONG THE C/F BOXES SO THAT THE COARSENED
-    *        C/F CONNECTION HAS THE APPROPRIATE ROW SUM.
+    *        C/F CONNECTION HAS THE APPROPRIATE ROW SUM. 
     *        WE ARE ASSUMING ONLY LIKE VARIABLES COUPLE.
     *--------------------------------------------------------------------------*/
    for (var1= 0; var1< nvars; var1++)
@@ -297,7 +297,7 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
             hypre_CopyIndex(hypre_StructStencilElement(stencils, i), stencil_shape_i);
             MapStencilRank(stencil_shape_i, j);
             stencil_ranks[i]= j;
-            rank_stencils[stencil_ranks[i]] = i;
+            rank_stencils[stencil_ranks[i]] = i;            
          }
          centre= rank_stencils[0];
 
@@ -353,7 +353,7 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
                       * Search for unstructured connections for this coarse node. Need
                       * to compute the index of the node. We will "collapse" the
                       * unstructured connections to the appropriate stencil entry. Thus
-                      * we need to serch for the stencil entry.
+                      * we need to serch for the stencil entry. 
                       *-----------------------------------------------------------------*/
                      index_temp[0]= node_extents[0] + lindex[0];
                      index_temp[1]= node_extents[1] + lindex[1];
@@ -384,7 +384,7 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
                         if (Uventry != NULL)
                         {
                            nUentries= hypre_SStructUVEntryNUEntries(Uventry);
-
+                              
                            /*-----------------------------------------------------------
                             * extract only the connections to level part_fine and the
                             * correct variable.
@@ -393,7 +393,7 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
                            cnt1= 0;
                            for (i=0; i< nUentries; i++)
                            {
-                              if (hypre_SStructUVEntryToPart(Uventry, i) == part_fine
+                              if (hypre_SStructUVEntryToPart(Uventry, i) == part_fine 
                                   &&  hypre_SStructUVEntryToVar(Uventry, i) == var1)
                               {
                                  temp1[cnt1++]= i;
@@ -411,7 +411,7 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
                               ncols[i]= 1;
                               rows[i] = rank;
                               cols[i] = hypre_SStructUVEntryToRank(Uventry, temp1[i]);
-
+                         
                               /* determine the stencil connection pattern */
                               hypre_StructMapFineToCoarse(
                                  hypre_SStructUVEntryToIndex(Uventry, temp1[i]),

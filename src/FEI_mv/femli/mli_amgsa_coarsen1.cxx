@@ -27,7 +27,7 @@
 #include "mli_utils.h"
 #include "mli_solver.h"
 #include "mli_solver_sgs.h"
-
+ 
 // *********************************************************************
 // local defines
 // ---------------------------------------------------------------------
@@ -39,9 +39,9 @@
 
 #define habs(x) ((x > 0 ) ? x : -(x))
 
-// *********************************************************************
-// Purpose   : Given Amat and aggregation information, create the
-//             corresponding Pmat using the local aggregation scheme
+// ********************************************************************* 
+// Purpose   : Given Amat and aggregation information, create the 
+//             corresponding Pmat using the local aggregation scheme 
 // ---------------------------------------------------------------------
 
 double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
@@ -90,7 +90,7 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
    AGlobalNRows = partition[numProcs];
    ALocalNRows  = AEndRow - AStartRow + 1;
    free( partition );
-   if ( AGlobalNRows < minCoarseSize_ )
+   if ( AGlobalNRows < minCoarseSize_ ) 
    {
       if ( mypid == 0 && outputLevel_ > 2 )
       {
@@ -133,7 +133,7 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
    if ( initAggr == NULL )
    {
       blkSize = currNodeDofs_;
-      if (blkSize > 1 && scalar_ == 0)
+      if (blkSize > 1 && scalar_ == 0) 
       {
          MLI_Matrix_Compress(mli_Amat, blkSize, &mli_A2mat);
          if ( saLabels_ != NULL && saLabels_[currLevel_] != NULL )
@@ -144,7 +144,7 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
          }
          else localLabels = NULL;
       }
-      else
+      else 
       {
          mli_A2mat = mli_Amat;
          if ( saLabels_ != NULL && saLabels_[currLevel_] != NULL )
@@ -172,32 +172,32 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
     * perform coarsening (If aggregate information is not given, then
     * if dimension of A is small enough and hybrid is on, switch to
     * global coarsening.  Otherwise if the scheme is local, do local
-    * coarsening).
+    * coarsening). 
     *-----------------------------------------------------------------*/
-
-   if ( initAggr == NULL )
+  
+   if ( initAggr == NULL ) 
    {
       GGlobalNRows = hypre_ParCSRMatrixGlobalNumRows(A2mat);
-      if ( GGlobalNRows <= minAggrSize_*numProcs )
+      if ( GGlobalNRows <= minAggrSize_*numProcs ) 
       {
          formGlobalGraph(A2mat, &Gmat);
          coarsenGlobal(Gmat, &naggr, &node2aggr);
          hypre_ParCSRMatrixDestroy(Gmat);
       }
-      else if ( GGlobalNRows > minAggrSize_*numProcs )
+      else if ( GGlobalNRows > minAggrSize_*numProcs ) 
       {
          formLocalGraph(A2mat, &Gmat, localLabels);
          coarsenLocal(Gmat, &naggr, &node2aggr);
          hypre_ParCSRMatrixDestroy(Gmat);
       }
-      if ( blkSize > 1 && scalar_ == 0 )
+      if ( blkSize > 1 && scalar_ == 0 ) 
       {
          if ( saLabels_ != NULL && saLabels_[currLevel_] != NULL )
             if (localLabels != NULL) delete [] localLabels;
          if (mli_A2mat != NULL) delete mli_A2mat;
       }
    }
-   else
+   else 
    {
       blkSize = currNodeDofs_;
       naggr = initCount;
@@ -206,12 +206,12 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
    }
 
    /*-----------------------------------------------------------------
-    * create global P
+    * create global P 
     *-----------------------------------------------------------------*/
 
-   if ( (initAggr == NULL) & (numSmoothVec_ == 0) )
+   if ( (initAggr == NULL) & (numSmoothVec_ == 0) ) 
    {
-      if ( GGlobalNRows <= minAggrSize_*numProcs )
+      if ( GGlobalNRows <= minAggrSize_*numProcs ) 
       {
          genPGlobal(Amat, Pmat_out, naggr, node2aggr);
          if (node2aggr != NULL) delete [] node2aggr;
@@ -258,7 +258,7 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
       delete [] node2aggr;
    }
    else eqn2aggr = node2aggr;
-
+ 
    /*-----------------------------------------------------------------
     * construct the next set of labels for the next level
     *-----------------------------------------------------------------*/
@@ -267,7 +267,7 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
    {
       if ( (currLevel_+1) < maxLevels_ )
       {
-         if ( saLabels_[currLevel_+1] != NULL )
+         if ( saLabels_[currLevel_+1] != NULL ) 
             delete [] saLabels_[currLevel_+1];
          saLabels_[currLevel_+1] = new int[PLocalNCols];
          for ( i = 0; i < PLocalNCols; i++ ) saLabels_[currLevel_+1][i] = -1;
@@ -276,12 +276,12 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
             for ( j = 0; j < ALocalNRows; j++ )
                if ( eqn2aggr[j] == i ) break;
             for ( k = 0; k < nullspaceDim_; k++ )
-               saLabels_[currLevel_+1][i*nullspaceDim_+k] =
+               saLabels_[currLevel_+1][i*nullspaceDim_+k] = 
                                               saLabels_[currLevel_][j];
          }
-         for ( i = 0; i < PLocalNCols; i++ )
+         for ( i = 0; i < PLocalNCols; i++ ) 
             if ( saLabels_[currLevel_+1][i] < 0 ||
-                 saLabels_[currLevel_+1][i] >= naggr )
+                 saLabels_[currLevel_+1][i] >= naggr ) 
                printf("saLabels[%d][%d] = %d (%d)\n",currLevel_+1,i,
                       saLabels_[currLevel_+1][i], naggr);
       }
@@ -291,7 +291,7 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
     * compute smoothing factor for the prolongation smoother
     *-----------------------------------------------------------------*/
 
-   if ( (currLevel_ >= SPLevel_ && Pweight_ != 0.0) ||
+   if ( (currLevel_ >= SPLevel_ && Pweight_ != 0.0) || 
         !strcmp(preSmoother_, "MLS") ||
         !strcmp(postSmoother_, "MLS"))
    {
@@ -315,7 +315,7 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
       smoothTwice(mli_Amat);
 
    /*-----------------------------------------------------------------
-    * create a compact form for the null space vectors
+    * create a compact form for the null space vectors 
     * (get ready to perform QR on them)
     *-----------------------------------------------------------------*/
 
@@ -362,13 +362,13 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
       for ( irow = 0; irow < PLocalNRows; irow++ )
          if ( eqn2aggr[irow] >= 0 ) aggCntArray[eqn2aggr[irow]]++;
       maxAggSize = 0;
-      for ( i = 0; i < naggr; i++ )
+      for ( i = 0; i < naggr; i++ ) 
          if (aggCntArray[i] > maxAggSize) maxAggSize = aggCntArray[i];
 
       /* ------ register which equation is in which aggregate ------ */
 
       aggIndArray = new int*[naggr];
-      for ( i = 0; i < naggr; i++ )
+      for ( i = 0; i < naggr; i++ ) 
       {
          aggIndArray[i] = new int[aggCntArray[i]];
          aggCntArray[i] = 0;
@@ -384,11 +384,11 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
 
       qArray  = new double[maxAggSize * nullspaceDim_];
       rArray  = new double[nullspaceDim_ * nullspaceDim_];
-      newNull = new double[naggr*nullspaceDim_*nullspaceDim_];
+      newNull = new double[naggr*nullspaceDim_*nullspaceDim_]; 
 
       /* ------ perform QR on each aggregate ------ */
 
-      for ( i = 0; i < naggr; i++ )
+      for ( i = 0; i < naggr; i++ ) 
       {
          aggSize = aggCntArray[i];
 
@@ -400,13 +400,13 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
             printf("            aggr size is %d\n", aggSize);
             exit(1);
          }
-
+          
          /* ------ put data into the temporary array ------ */
 
-         for ( j = 0; j < aggSize; j++ )
+         for ( j = 0; j < aggSize; j++ ) 
          {
-            for ( k = 0; k < nullspaceDim_; k++ )
-               qArray[aggSize*k+j] = P_vecs[k][aggIndArray[i][j]];
+            for ( k = 0; k < nullspaceDim_; k++ ) 
+               qArray[aggSize*k+j] = P_vecs[k][aggIndArray[i][j]]; 
          }
 
          /* ------ call QR function ------ */
@@ -414,10 +414,10 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
 #if 0
          if ( mypid == 0 && i == 0)
          {
-            for ( j = 0; j < aggSize; j++ )
+            for ( j = 0; j < aggSize; j++ ) 
             {
                printf("%5d : (size=%d)\n", aggIndArray[i][j], aggSize);
-               for ( k = 0; k < nullspaceDim_; k++ )
+               for ( k = 0; k < nullspaceDim_; k++ ) 
                   printf("%10.3e ", qArray[aggSize*k+j]);
                printf("\n");
             }
@@ -425,7 +425,7 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
 #endif
          if ( currLevel_ < (numLevels_-1) )
          {
-            info = MLI_Utils_QR(qArray, rArray, aggSize, nullspaceDim_);
+            info = MLI_Utils_QR(qArray, rArray, aggSize, nullspaceDim_); 
             if (info != 0)
             {
                printf("%4d : Aggregation WARNING : QR returns non-zero for\n",
@@ -433,18 +433,18 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
                printf("  aggregate %d, size = %d, info = %d\n",i,aggSize,info);
 #if 0
 /*
-               for ( j = 0; j < aggSize; j++ )
+               for ( j = 0; j < aggSize; j++ ) 
                {
-                  for ( k = 0; k < nullspaceDim_; k++ )
-                     qArray[aggSize*k+j] = P_vecs[k][aggIndArray[i][j]];
+                  for ( k = 0; k < nullspaceDim_; k++ ) 
+                     qArray[aggSize*k+j] = P_vecs[k][aggIndArray[i][j]]; 
                }
 */
                printf("PArray : \n");
-               for ( j = 0; j < aggSize; j++ )
+               for ( j = 0; j < aggSize; j++ ) 
                {
                   index = aggIndArray[i][j];;
                   printf("%5d : ", index);
-                  for ( k = 0; k < nullspaceDim_; k++ )
+                  for ( k = 0; k < nullspaceDim_; k++ ) 
                      printf("%16.8e ", P_vecs[k][index]);
                   printf("\n");
                }
@@ -460,13 +460,13 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
          }
          else
          {
-            for ( k = 0; k < nullspaceDim_; k++ )
+            for ( k = 0; k < nullspaceDim_; k++ ) 
             {
                dtemp = 0.0;
-               for ( j = 0; j < aggSize; j++ )
+               for ( j = 0; j < aggSize; j++ ) 
                   dtemp += qArray[aggSize*k+j] * qArray[aggSize*k+j];
                dtemp = 1.0 / sqrt(dtemp);
-               for ( j = 0; j < aggSize; j++ )
+               for ( j = 0; j < aggSize; j++ ) 
                   qArray[aggSize*k+j] *= dtemp;
             }
          }
@@ -475,7 +475,7 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
 
          for ( j = 0; j < nullspaceDim_; j++ )
             for ( k = 0; k < nullspaceDim_; k++ )
-               newNull[i*nullspaceDim_+j+k*naggr*nullspaceDim_] =
+               newNull[i*nullspaceDim_+j+k*naggr*nullspaceDim_] = 
                          rArray[j+nullspaceDim_*k];
 
          /* ------ put the P to P_vecs ------ */
@@ -487,7 +487,7 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
                index = aggIndArray[i][j];
                P_vecs[k][index] = qArray[ k*aggSize + j ];
             }
-         }
+         } 
       }
       for ( i = 0; i < naggr; i++ ) delete [] aggIndArray[i];
       delete [] aggIndArray;
@@ -508,13 +508,13 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
       for ( irow = 0; irow < PLocalNRows; irow++ )
          if ( eqn2aggr[irow] >= 0 ) aggCntArray[eqn2aggr[irow]]++;
       maxAggSize = 0;
-      for ( i = 0; i < naggr; i++ )
+      for ( i = 0; i < naggr; i++ ) 
          if (aggCntArray[i] > maxAggSize) maxAggSize = aggCntArray[i];
 
       /* ------ register which equation is in which aggregate ------ */
 
       aggIndArray = new int*[naggr];
-      for ( i = 0; i < naggr; i++ )
+      for ( i = 0; i < naggr; i++ ) 
       {
          aggIndArray[i] = new int[aggCntArray[i]];
          aggCntArray[i] = 0;
@@ -535,7 +535,7 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
       sArray  = new double[MIN(maxAggSize, numSmoothVec_)];
       vtArray = new double[MIN(maxAggSize, numSmoothVec_) * numSmoothVec_];
       workArray = new double[5*(maxAggSize + numSmoothVec_)];
-      newNull = new double[naggr*nullspaceDim_*numSmoothVec_];
+      newNull = new double[naggr*nullspaceDim_*numSmoothVec_]; 
 
 #if 0
       // print members of each aggregate
@@ -551,7 +551,7 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
 
       /* ------ perform SVD on each aggregate ------ */
 
-      for ( i = 0; i < naggr; i++ )
+      for ( i = 0; i < naggr; i++ ) 
       {
          aggSize = aggCntArray[i];
 
@@ -563,13 +563,13 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
             printf("            aggr size is %d\n", aggSize);
             exit(1);
          }
-
+          
          /* ------ put data into the temporary array ------ */
 
-         for ( k = 0; k < numSmoothVec_; k++ )
+         for ( k = 0; k < numSmoothVec_; k++ ) 
          {
-            for ( j = 0; j < aggSize; j++ )
-               uArray[aggSize*k+j] =
+            for ( j = 0; j < aggSize; j++ ) 
+               uArray[aggSize*k+j] = 
                    nullspaceVec_[PLocalNRows*k+aggIndArray[i][j]];
          }
 
@@ -582,8 +582,8 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
 
          /* ------ call SVD function ------ */
 
-         info = MLI_Utils_SVD(uArray, sArray, vtArray, workArray,
-             aggSize, numSmoothVec_, 5*(maxAggSize + numSmoothVec_));
+         info = MLI_Utils_SVD(uArray, sArray, vtArray, workArray, 
+             aggSize, numSmoothVec_, 5*(maxAggSize + numSmoothVec_)); 
 
          if (info != 0)
          {
@@ -603,7 +603,7 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
 
          for ( k = 0; k < numSmoothVec_; k++ )
             for ( j = 0; j < nullspaceDim_; j++ )
-               newNull[i*nullspaceDim_ + j + k*naggr*nullspaceDim_] =
+               newNull[i*nullspaceDim_ + j + k*naggr*nullspaceDim_] = 
                          sArray[j] * vtArray[j+MIN(aggSize, numSmoothVec_)*k];
 
          /* ------ store into P_vecs ------ */
@@ -615,7 +615,7 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
                index = aggIndArray[i][j];
                P_vecs[k][index] = uArray[ k*aggSize + j ];
             }
-         }
+         } 
       }
       for ( i = 0; i < naggr; i++ ) delete [] aggIndArray[i];
       delete [] aggIndArray;
@@ -644,7 +644,7 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
    if ( currLevel_ < SPLevel_ || Pweight_ == 0.0 )
    {
       /*--------------------------------------------------------------
-       * create and initialize Pmat
+       * create and initialize Pmat 
        *--------------------------------------------------------------*/
 
       rowLengths = new int[PLocalNRows];
@@ -655,7 +655,7 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
       delete [] rowLengths;
 
       /*-----------------------------------------------------------------
-       * load and assemble Pmat
+       * load and assemble Pmat 
        *-----------------------------------------------------------------*/
 
       colInd = new int[nullspaceDim_];
@@ -674,8 +674,8 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
                }
             }
             rowNum = PStartRow + irow;
-            HYPRE_IJMatrixSetValues(IJPmat, 1, &nzcnt,
-                             (const int *) &rowNum, (const int *) colInd,
+            HYPRE_IJMatrixSetValues(IJPmat, 1, &nzcnt, 
+                             (const int *) &rowNum, (const int *) colInd, 
                              (const double *) colVal);
          }
       }
@@ -721,8 +721,8 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
                }
             }
             rowNum = PStartRow + irow;
-            HYPRE_IJMatrixSetValues(IJPmat, 1, &nzcnt,
-                             (const int *) &rowNum, (const int *) colInd,
+            HYPRE_IJMatrixSetValues(IJPmat, 1, &nzcnt, 
+                             (const int *) &rowNum, (const int *) colInd, 
                              (const double *) colVal);
          }
       }
@@ -734,7 +734,7 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
       delete [] colInd;
       delete [] colVal;
       Pmat = hypre_ParMatmul( Jmat, Pmat2);
-      hypre_ParCSRMatrixOwnsRowStarts(Jmat) = 0;
+      hypre_ParCSRMatrixOwnsRowStarts(Jmat) = 0; 
       hypre_ParCSRMatrixOwnsColStarts(Pmat2) = 0;
       hypre_ParCSRMatrixDestroy(Pmat2);
       delete mli_Jmat;
@@ -749,30 +749,30 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
     *-----------------------------------------------------------------*/
 
    if ( P_cols != NULL ) delete [] P_cols;
-   if ( P_vecs != NULL )
+   if ( P_vecs != NULL ) 
    {
-      for (i = 0; i < nullspaceDim_; i++)
+      for (i = 0; i < nullspaceDim_; i++) 
          if ( P_vecs[i] != NULL ) delete [] P_vecs[i];
       delete [] P_vecs;
    }
    delete [] eqn2aggr;
 
    /*-----------------------------------------------------------------
-    * set up and return the Pmat
+    * set up and return the Pmat 
     *-----------------------------------------------------------------*/
 
    funcPtr = new MLI_Function();
    MLI_Utils_HypreParCSRMatrixGetDestroyFunc(funcPtr);
-   sprintf(paramString, "HYPRE_ParCSR" );
+   sprintf(paramString, "HYPRE_ParCSR" ); 
    mli_Pmat = new MLI_Matrix( Pmat, paramString, funcPtr );
    (*Pmat_out) = mli_Pmat;
    delete funcPtr;
    return maxEigen;
 }
 
-// *********************************************************************
-// Purpose   : Given Amat and aggregation information, create the
-//             corresponding Pmat using the global aggregation scheme
+// ********************************************************************* 
+// Purpose   : Given Amat and aggregation information, create the 
+//             corresponding Pmat using the global aggregation scheme 
 // ---------------------------------------------------------------------
 
 double MLI_Method_AMGSA::genPGlobal(hypre_ParCSRMatrix *Amat,
@@ -798,7 +798,7 @@ double MLI_Method_AMGSA::genPGlobal(hypre_ParCSRMatrix *Amat,
    comm = hypre_ParCSRMatrixComm(Amat);
    MPI_Comm_rank(comm,&mypid);
    MPI_Comm_size(comm,&nprocs);
-   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) Amat,
+   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) Amat, 
                                         &partition);
    PStartRow   = partition[mypid];
    PLocalNRows = partition[mypid+1] - PStartRow;
@@ -806,14 +806,14 @@ double MLI_Method_AMGSA::genPGlobal(hypre_ParCSRMatrix *Amat,
    if ( nAggr > 0 ) aggrCnt = new int[nAggr];
    for ( irow = 0; irow < nAggr; irow++ ) aggrCnt[irow] = -1;
    for ( irow = 0; irow < nprocs; irow++ )
-      if ( aggrCnt[aggrMap[irow]] == -1 ) aggrCnt[aggrMap[irow]] = irow;
+      if ( aggrCnt[aggrMap[irow]] == -1 ) aggrCnt[aggrMap[irow]] = irow; 
    PStartCol = 0;
    for ( irow = 0; irow < mypid; irow++ )
       if ( aggrCnt[aggrMap[irow]] == irow ) PStartCol += nullspaceDim_;
    if ( aggrCnt[aggrMap[mypid]] == mypid ) PLocalNCols = nullspaceDim_;
    else                                    PLocalNCols = 0;
    if ( nAggr > 0 ) delete [] aggrCnt;
-
+      
    /*-----------------------------------------------------------------
     * initialize P matrix
     *-----------------------------------------------------------------*/
@@ -871,14 +871,14 @@ double MLI_Method_AMGSA::genPGlobal(hypre_ParCSRMatrix *Amat,
       for ( jcol = 0; jcol < nullspaceDim_; jcol++ )
       {
          dtemp = nullspaceVec_[jcol*PLocalNRows+irow];
-         if ( dtemp != 0.0 )
+	 if ( dtemp != 0.0 )
          {
             colInd[nzcnt] = aggrMap[mypid] * nullspaceDim_ + jcol;
             colVal[nzcnt++] = dtemp * accum[jcol];
          }
       }
       rowInd = PStartRow + irow;
-      HYPRE_IJMatrixSetValues(IJPmat, 1, &nzcnt, (const int *) &rowInd,
+      HYPRE_IJMatrixSetValues(IJPmat, 1, &nzcnt, (const int *) &rowInd, 
                               (const int *) colInd, (const double *) colVal);
    }
    delete [] colInd;
@@ -931,7 +931,7 @@ int MLI_Method_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
    comm = hypre_ParCSRMatrixComm(hypre_graph);
    MPI_Comm_rank(comm,&mypid);
    MPI_Comm_size(comm,&numProcs);
-   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) hypre_graph,
+   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) hypre_graph, 
                                         &partition);
    startRow = partition[mypid];
    endRow   = partition[mypid+1] - 1;
@@ -953,14 +953,14 @@ int MLI_Method_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
       node2aggr = new int[localNRows];
       aggrSizes = new int[localNRows];
       nodeStat  = new int[localNRows];
-      for ( irow = 0; irow < localNRows; irow++ )
+      for ( irow = 0; irow < localNRows; irow++ ) 
       {
          aggrSizes[irow] = 0;
          node2aggr[irow] = -1;
          nodeStat[irow] = MLI_METHOD_AMGSA_READY;
          rowNum = startRow + irow;
          hypre_ParCSRMatrixGetRow(hypre_graph,rowNum,&rowLeng,NULL,NULL);
-         if (rowLeng <= 0)
+         if (rowLeng <= 0) 
          {
             nodeStat[irow] = MLI_METHOD_AMGSA_NOTSELECTED;
             nNotSelected++;
@@ -1072,7 +1072,7 @@ int MLI_Method_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
             nodeStat[irow] = MLI_METHOD_AMGSA_SELECTED;
             nSelected++;
          }
-      }
+      } 
    }
    itmp[0] = naggr;
    itmp[1] = nSelected;
@@ -1104,7 +1104,7 @@ int MLI_Method_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
                   if ( nodeStat[colNum] == MLI_METHOD_AMGSA_READY ) count++;
                }
             }
-            if ( count > 1 && count >= minAggrSize_ )
+            if ( count > 1 && count >= minAggrSize_ ) 
             {
                node2aggr[irow]  = naggr;
                nodeStat[irow]  = MLI_METHOD_AMGSA_SELECTED;
@@ -1197,7 +1197,7 @@ int MLI_Method_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
             nUndone--;
             nSelected++;
             icol++;
-            if ( icol >= minAggrSize_ && naggr < count-1 )
+            if ( icol >= minAggrSize_ && naggr < count-1 ) 
             {
                icol = 0;
                naggr++;
@@ -1233,7 +1233,7 @@ int MLI_Method_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
             for ( icol = 0; icol < rowLeng; icol++ )
             {
                colNum = cols[icol];
-               printf("ERROR : neighbor of unselected node %9d = %9d\n",
+               printf("ERROR : neighbor of unselected node %9d = %9d\n", 
                      rowNum, colNum);
             }
          }
@@ -1242,11 +1242,11 @@ int MLI_Method_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
    }
 
    /*-----------------------------------------------------------------
-    * clean up and initialize the output arrays
+    * clean up and initialize the output arrays 
     *-----------------------------------------------------------------*/
 
-   if ( localNRows > 0 ) delete [] aggrSizes;
-   if ( localNRows > 0 ) delete [] nodeStat;
+   if ( localNRows > 0 ) delete [] aggrSizes; 
+   if ( localNRows > 0 ) delete [] nodeStat; 
    if ( localNRows == 1 && naggr == 0 )
    {
       node2aggr[0] = 0;
@@ -1283,13 +1283,13 @@ int MLI_Method_AMGSA::coarsenGlobal(hypre_ParCSRMatrix *Gmat,
    MPI_Comm_rank(comm, &mypid);
    MPI_Comm_size(comm, &nprocs);
 
-   commGraphI = new int[nprocs+1];
+   commGraphI = new int[nprocs+1]; 
    recvCounts = new int[nprocs];
    MPI_Allgather(&nRecvs, 1, MPI_INT, recvCounts, 1, MPI_INT, comm);
    commGraphI[0] = 0;
    for ( i = 1; i <= nprocs; i++ )
       commGraphI[i] = commGraphI[i-1] + recvCounts[i-1];
-   commGraphJ = new int[commGraphI[nprocs]];
+   commGraphJ = new int[commGraphI[nprocs]]; 
    MPI_Allgatherv(recvProcs, nRecvs, MPI_INT, commGraphJ,
                   recvCounts, commGraphI, MPI_INT, comm);
    delete [] recvCounts;
@@ -1315,7 +1315,7 @@ int MLI_Method_AMGSA::coarsenGlobal(hypre_ParCSRMatrix *Gmat,
          }
          if ( aggrCnts[nAggr] >= minAggrSize_ )
          {
-            aggrInds[i] = nAggr;
+            aggrInds[i] = nAggr; 
             for ( j = commGraphI[i]; j < commGraphI[i+1]; j++ )
             {
                pIndex = commGraphJ[j];
@@ -1341,7 +1341,7 @@ int MLI_Method_AMGSA::coarsenGlobal(hypre_ParCSRMatrix *Gmat,
    }
    if ( outputLevel_ > 2 && mypid == 0 )
    {
-      printf("\tMETHOD_AMGSA::coarsenGlobal - nAggr = %d\n", nAggr);
+      printf("\tMETHOD_AMGSA::coarsenGlobal - nAggr = %d\n", nAggr); 
    }
    if ( mypid == 0 && outputLevel_ > 1 )
    {
@@ -1406,7 +1406,7 @@ int MLI_Method_AMGSA::formLocalGraph( hypre_ParCSRMatrix *Amat,
          jj = 1;
          for ( i = 1; i < AdiagNRows/currNodeDofs_; i++ )
             if (partition[i] != partition[i-1]) jj++;
-         if ( jj * currNodeDofs_ < AdiagNRows/2 )
+         if ( jj * currNodeDofs_ < AdiagNRows/2 ) 
          {
             for ( i = 0; i < AdiagNRows; i++ )
                saLabels_[currLevel_][i] = 0;
@@ -1418,9 +1418,9 @@ int MLI_Method_AMGSA::formLocalGraph( hypre_ParCSRMatrix *Amat,
       }
    }
 #endif
-
+   
    /*-----------------------------------------------------------------
-    * construct the diagonal array (diagData)
+    * construct the diagonal array (diagData) 
     *-----------------------------------------------------------------*/
 
    if ( threshold_ > 0.0 )
@@ -1489,7 +1489,7 @@ int MLI_Method_AMGSA::formLocalGraph( hypre_ParCSRMatrix *Amat,
             }
          }
       }
-      else
+      else 
       {
          for (j = AdiagRPtr[irow]; j < AdiagRPtr[irow+1]; j++)
          {
@@ -1536,7 +1536,7 @@ int MLI_Method_AMGSA::formLocalGraph( hypre_ParCSRMatrix *Amat,
                if ( dcomp1 > 0.0 )
                {
                   dcomp2 = habs(diagData[irow] * diagData[jj]);
-                  if ( (dcomp1 >= epsilon * dcomp2) && (labeli == labelj) )
+                  if ( (dcomp1 >= epsilon * dcomp2) && (labeli == labelj) ) 
                   {
                      colVal[length] = dcomp1 / dcomp2;
                      colInd[length++] = jj + startRow;
@@ -1545,7 +1545,7 @@ int MLI_Method_AMGSA::formLocalGraph( hypre_ParCSRMatrix *Amat,
             }
          }
       }
-      else
+      else 
       {
          for (j = AdiagRPtr[irow]; j < AdiagRPtr[irow+1]; j++)
          {
@@ -1554,7 +1554,7 @@ int MLI_Method_AMGSA::formLocalGraph( hypre_ParCSRMatrix *Amat,
             else                       labelj = 0;
             if ( jj != irow )
             {
-               if (AdiagVals[j] != 0.0 && (labeli == labelj))
+               if (AdiagVals[j] != 0.0 && (labeli == labelj)) 
                {
                   colVal[length] = AdiagVals[j];
                   colInd[length++] = jj + startRow;
@@ -1562,7 +1562,7 @@ int MLI_Method_AMGSA::formLocalGraph( hypre_ParCSRMatrix *Amat,
             }
          }
       }
-      HYPRE_IJMatrixSetValues(IJGraph, 1, &length, (const int *) &index,
+      HYPRE_IJMatrixSetValues(IJGraph, 1, &length, (const int *) &index, 
                               (const int *) colInd, (const double *) colVal);
    }
    ierr = HYPRE_IJMatrixAssemble(IJGraph);
@@ -1622,7 +1622,7 @@ int MLI_Method_AMGSA::formGlobalGraph( hypre_ParCSRMatrix *Amat,
    AOffdI = hypre_CSRMatrixI(AOffd);
    AOffdJ = hypre_CSRMatrixJ(AOffd);
    AOffdA = hypre_CSRMatrixData(AOffd);
-
+   
    /*-----------------------------------------------------------------
     * initialize the graph
     *-----------------------------------------------------------------*/
@@ -1676,7 +1676,7 @@ int MLI_Method_AMGSA::formGlobalGraph( hypre_ParCSRMatrix *Amat,
       for (jcol = ADiagI[irow]; jcol < ADiagI[irow+1]; jcol++)
       {
          cInd = ADiagJ[jcol];
-         if ( cInd != irow && ADiagA[jcol] != 0.0)
+         if ( cInd != irow && ADiagA[jcol] != 0.0) 
          {
             colVal[length] = ADiagA[jcol];
             colInd[length++] = cInd + startRow;
@@ -1687,14 +1687,14 @@ int MLI_Method_AMGSA::formGlobalGraph( hypre_ParCSRMatrix *Amat,
          for (jcol = AOffdI[irow]; jcol < AOffdI[irow+1]; jcol++)
          {
             cInd = AOffdJ[jcol];
-            if ( AOffdA[jcol] != 0.0)
+            if ( AOffdA[jcol] != 0.0) 
             {
                colVal[length] = AOffdA[jcol];
                colInd[length++] = colMapOffd[cInd];
             }
          }
       }
-      HYPRE_IJMatrixSetValues(IJGraph, 1, &length, (const int *) &index,
+      HYPRE_IJMatrixSetValues(IJGraph, 1, &length, (const int *) &index, 
                               (const int *) colInd, (const double *) colVal);
    }
    ierr = HYPRE_IJMatrixAssemble(IJGraph);

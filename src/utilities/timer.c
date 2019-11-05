@@ -6,9 +6,9 @@
  ******************************************************************************/
 
 /*
- * File: timer.c
- * Author: Scott Kohn (skohn@llnl.gov)
- * Description: somewhat portable timing routines for C++, C, and Fortran
+ * File:	timer.c
+ * Author:	Scott Kohn (skohn@llnl.gov)
+ * Description:	somewhat portable timing routines for C++, C, and Fortran
  *
  * If TIMER_USE_MPI is defined, then the MPI timers are used to get
  * wallclock seconds, since we assume that the MPI timers have better

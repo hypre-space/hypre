@@ -37,7 +37,7 @@ struct _subdomain_dh {
 
   HYPRE_Int *beg_row;   /* global ordering of first local row owned by P_i */
   HYPRE_Int *beg_rowP;  /* global ordering of first local row owned by P_i after
-                     subdomain reordering
+                     subdomain reordering 
                    */
   HYPRE_Int *row_count; /* P_i owns row_count[i] local rows */
   HYPRE_Int *bdry_count; /* bdry_count[i] of P_i's rows are boundary rows */
@@ -67,7 +67,7 @@ extern void SubdomainGraph_dhDestroy(SubdomainGraph_dh s);
 
 extern void SubdomainGraph_dhInit(SubdomainGraph_dh s, HYPRE_Int blocks, bool bj, void *A);
   /* Partitions matrix A into the specified number of blocks,
-     if there is a single MPI task; for mpi use, "blocks" must be the same
+     if there is a single MPI task; for mpi use, "blocks" must be the same 
      as the number of mpi tasks; for sequential, it may vary.
      On completion, the subdomain graph will be fully formed,
      (all fields valid); o2n_row[] and n2o_col[] will be permutations

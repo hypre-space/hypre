@@ -6,7 +6,7 @@
  ******************************************************************************/
 
 #ifdef __cplusplus
-#define REGISTER
+#define REGISTER 
 #else
 #define REGISTER register
 #endif
@@ -20,13 +20,13 @@
  * The MTHREShold is where we stop finding a better median.
  */
 
-#include <stdlib.h> /* only for type declarations */
-#include <stdio.h>  /* only for type declarations */
+#include <stdlib.h>			/* only for type declarations */
+#include <stdio.h>			/* only for type declarations */
 
 #include "ilu.h"
 
-#define THRESH  1 /* threshold for insertion */
-#define MTHRESH 6 /* threshold for median */
+#define		THRESH		1	/* threshold for insertion */
+#define		MTHRESH		6	/* threshold for median */
 
 static void siqst(HYPRE_Int *, HYPRE_Int *);
 static void sdqst(HYPRE_Int *, HYPRE_Int *);
@@ -58,7 +58,7 @@ void hypre_sincsort_fast(HYPRE_Int n, HYPRE_Int *base)
     siqst(base, max);
     hi = base + THRESH;
   }
-  else
+  else 
     hi = max;
 
 
@@ -85,10 +85,10 @@ void hypre_sincsort_fast(HYPRE_Int n, HYPRE_Int *base)
     while (*(--hi) > *min);
     if ((hi += 1) != min) {
       for (lo = min + 1; --lo >= min;) {
-         c = *lo;
-         for (i = j = lo; (j -= 1) >= hi; i = j)
-            *i = *j;
-         *i = c;
+	c = *lo;
+	for (i = j = lo; (j -= 1) >= hi; i = j)
+	   *i = *j;
+	*i = c;
       }
     }
   }
@@ -122,7 +122,7 @@ static void siqst(HYPRE_Int *base, HYPRE_Int *max)
   HYPRE_Int lo;
   HYPRE_Int hi;
 
-  lo = max - base; /* number of elements as shorts */
+  lo = max - base;		/* number of elements as shorts */
   do {
     /* At the top here, lo is the number of characters of elements in the
        current partition.  (Which should be max - base). Find the median
@@ -141,7 +141,7 @@ static void siqst(HYPRE_Int *base, HYPRE_Int *max)
           j = tmp;
       }
 
-      if (j != mid) {  /* SWAP */
+      if (j != mid) {  /* SWAP */ 
         c = *mid;
         *mid = *j;
         *j = c;
@@ -157,19 +157,19 @@ static void siqst(HYPRE_Int *base, HYPRE_Int *max)
           j--;
           continue;
         }
-        tmp = i + 1; /* value of i after swap */
-        if (i == mid) /* j <-> mid, new mid is j */
+        tmp = i + 1;	/* value of i after swap */
+        if (i == mid) 	/* j <-> mid, new mid is j */
           mid = jj = j;
-        else /* i <-> j */
+        else 		/* i <-> j */
           jj = j--;
         goto swap;
       }
 
-      if (i == mid)
-         break;
-      else {/* i <-> mid, new mid is i */
+      if (i == mid) 
+	break;
+      else {		/* i <-> mid, new mid is i */
         jj = mid;
-        tmp = mid = i;/* value of i after swap */
+        tmp = mid = i;	/* value of i after swap */
         j--;
       }
 swap:
@@ -201,7 +201,7 @@ swap:
 
 
 /*************************************************************************
-* A decreasing sort of HYPRE_Int ints
+* A decreasing sort of HYPRE_Int ints 
 **************************************************************************/
 void hypre_sdecsort_fast(HYPRE_Int n, HYPRE_Int *base)
 {
@@ -222,7 +222,7 @@ void hypre_sdecsort_fast(HYPRE_Int n, HYPRE_Int *base)
     sdqst(base, max);
     hi = base + THRESH;
   }
-  else
+  else 
     hi = max;
 
 
@@ -249,10 +249,10 @@ void hypre_sdecsort_fast(HYPRE_Int n, HYPRE_Int *base)
     while (*(--hi) < *min);
     if ((hi += 1) != min) {
       for (lo = min + 1; --lo >= min;) {
-         c = *lo;
-         for (i = j = lo; (j -= 1) >= hi; i = j)
-            *i = *j;
-         *i = c;
+	c = *lo;
+	for (i = j = lo; (j -= 1) >= hi; i = j)
+	   *i = *j;
+	*i = c;
       }
     }
   }
@@ -271,7 +271,7 @@ static void sdqst(HYPRE_Int *base, HYPRE_Int *max)
   HYPRE_Int lo;
   HYPRE_Int hi;
 
-  lo = max - base;/* number of elements as shorts */
+  lo = max - base;		/* number of elements as shorts */
   do {
     /* At the top here, lo is the number of characters of elements in the
        current partition.  (Which should be max - base). Find the median
@@ -290,7 +290,7 @@ static void sdqst(HYPRE_Int *base, HYPRE_Int *max)
           j = tmp;
       }
 
-      if (j != mid) {  /* SWAP */
+      if (j != mid) {  /* SWAP */ 
         c = *mid;
         *mid = *j;
         *j = c;
@@ -306,19 +306,19 @@ static void sdqst(HYPRE_Int *base, HYPRE_Int *max)
           j--;
           continue;
         }
-        tmp = i + 1;/* value of i after swap */
-        if (i == mid) /* j <-> mid, new mid is j */
+        tmp = i + 1;	/* value of i after swap */
+        if (i == mid) 	/* j <-> mid, new mid is j */
           mid = jj = j;
-        else /* i <-> j */
+        else 		/* i <-> j */
           jj = j--;
         goto swap;
       }
 
-      if (i == mid)
-         break;
-      else {/* i <-> mid, new mid is i */
+      if (i == mid) 
+	break;
+      else {		/* i <-> mid, new mid is i */
         jj = mid;
-        tmp = mid = i;/* value of i after swap */
+        tmp = mid = i;	/* value of i after swap */
         j--;
       }
 swap:

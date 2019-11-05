@@ -39,11 +39,11 @@
 **************************************************************************/
 HYPRE_Int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
              FactorMatType *ldu,
-             ReduceMatType *rmat, HYPRE_Int maxnz, HYPRE_Real tol,
+	     ReduceMatType *rmat, HYPRE_Int maxnz, HYPRE_Real tol, 
              hypre_PilutSolverGlobals *globals)
 {
   HYPRE_Int i, ii, j, k, kk, l, m, ierr, diag_present;
-  HYPRE_Int *perm, *iperm,
+  HYPRE_Int *perm, *iperm, 
           *usrowptr, *uerowptr, *ucolind;
   HYPRE_Int row_size, *col_ind;
   HYPRE_Real *values, *uvalues, *dvalues, *nrm2s;
@@ -153,7 +153,7 @@ HYPRE_Int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
     /* if (ierr) return(ierr); */
 
     for (lastjr=1, lastlr=0, j=0, diag_present=0; j<row_size; j++) {
-      if (iperm[ col_ind[j] - firstrow ] < iperm[i])
+      if (iperm[ col_ind[j] - firstrow ] < iperm[i]) 
         lr[lastlr++] = iperm[ col_ind[j]-firstrow]; /* Copy the L elements separately */
 
       if (col_ind[j] != i+firstrow) { /* Off-diagonal element */
@@ -193,7 +193,7 @@ HYPRE_Int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
       w[jr[k]] = mult;
 
       if (fabs(mult) < rtol)
-         continue;/* First drop test */
+        continue;	/* First drop test */
 
       for (l=usrowptr[kk]; l<uerowptr[kk]; l++) {
         m = jr[ucolind[l]];
@@ -202,7 +202,7 @@ HYPRE_Int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
           continue;  /* Don't add fill if the element is too small */
 
         if (m == -1) {  /* Create fill */
-          if (iperm[ucolind[l]-firstrow] < iperm[i])
+          if (iperm[ucolind[l]-firstrow] < iperm[i]) 
             lr[lastlr++] = iperm[ucolind[l]-firstrow]; /* Copy the L elements separately */
 
           jr[ucolind[l]] = lastjr;
@@ -252,8 +252,8 @@ HYPRE_Int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
 
     for (lastjr=1, lastlr=0, j=0, diag_present=0; j<row_size; j++) {
       if (col_ind[j] >= firstrow  &&
-            col_ind[j] < lastrow    &&
-            iperm[col_ind[j]-firstrow] < nlocal)
+	  col_ind[j] < lastrow    &&
+	  iperm[col_ind[j]-firstrow] < nlocal) 
         lr[lastlr++] = iperm[col_ind[j]-firstrow]; /* Copy the L elements separately */
 
       if (col_ind[j] != i+firstrow) { /* Off-diagonal element */
@@ -289,7 +289,7 @@ HYPRE_Int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
       w[jr[k]] = mult;
 
       if (fabs(mult) < rtol)
-         continue;/* First drop test */
+        continue;	/* First drop test */
 
       for (l=usrowptr[kk]; l<uerowptr[kk]; l++) {
         m = jr[ucolind[l]];
@@ -298,8 +298,8 @@ HYPRE_Int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
           continue;  /* Don't add fill if the element is too small */
 
         if (m == -1) {  /* Create fill */
-           hypre_CheckBounds(firstrow, ucolind[l], lastrow, globals);
-          if (iperm[ucolind[l]-firstrow] < nlocal)
+	  hypre_CheckBounds(firstrow, ucolind[l], lastrow, globals);
+          if (iperm[ucolind[l]-firstrow] < nlocal) 
             lr[lastlr++] = iperm[ucolind[l]-firstrow]; /* Copy the L elements separately */
 
           jr[ucolind[l]] = lastjr;
@@ -313,8 +313,8 @@ HYPRE_Int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
 
     /* Apply 2nd dropping rule -- forms partial L and rmat */
     hypre_SecondDropUpdate(maxnz, MAX(3*maxnz, row_size),
-          rtol, i+firstrow,
-          nlocal, perm, iperm, ldu, rmat, globals);
+		     rtol, i+firstrow,
+		     nlocal, perm, iperm, ldu, rmat, globals);
   }
 
 #ifdef HYPRE_TIMING
@@ -343,10 +343,10 @@ HYPRE_Int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
 * It takes a vector that marks rows as being forced to not be in the interior.
 * For full generality this would also mark them in the map, but it doesn't.
 **************************************************************************/
-HYPRE_Int hypre_SelectInterior( HYPRE_Int local_num_rows,
-                    HYPRE_DistributedMatrix matrix,
+HYPRE_Int hypre_SelectInterior( HYPRE_Int local_num_rows, 
+                    HYPRE_DistributedMatrix matrix, 
                     HYPRE_Int *external_rows,
-                    HYPRE_Int *newperm, HYPRE_Int *newiperm,
+		    HYPRE_Int *newperm, HYPRE_Int *newiperm, 
                     hypre_PilutSolverGlobals *globals )
 {
   HYPRE_Int nbnd, nlocal, i, j;
@@ -358,7 +358,7 @@ HYPRE_Int hypre_SelectInterior( HYPRE_Int local_num_rows,
    * permuting interior rows first then boundary nodes. */
   nbnd = 0;
   nlocal = 0;
-  for (i=0; i<local_num_rows; i++)
+  for (i=0; i<local_num_rows; i++) 
   {
     if (external_rows[i])
     {
@@ -371,9 +371,9 @@ HYPRE_Int hypre_SelectInterior( HYPRE_Int local_num_rows,
                &col_ind, &values);
       /* if (ierr) return(ierr); */
 
-      for (j=0, break_loop=0; ( j<row_size )&& (break_loop == 0); j++)
+      for (j=0, break_loop=0; ( j<row_size )&& (break_loop == 0); j++) 
       {
-        if (col_ind[j] < firstrow || col_ind[j] >= lastrow)
+        if (col_ind[j] < firstrow || col_ind[j] >= lastrow) 
         {
           newperm[local_num_rows-nbnd-1] = i;
           newiperm[i] = local_num_rows-nbnd-1;
@@ -385,7 +385,7 @@ HYPRE_Int hypre_SelectInterior( HYPRE_Int local_num_rows,
       HYPRE_DistributedMatrixRestoreRow( matrix, firstrow+i, &row_size,
                &col_ind, &values);
 
-      if ( break_loop == 0 )
+      if ( break_loop == 0 ) 
       {
         newperm[nlocal] = i;
         newiperm[i] = nlocal;
@@ -403,10 +403,10 @@ HYPRE_Int hypre_SelectInterior( HYPRE_Int local_num_rows,
 *   Produces a vector of length n that marks the union of the nonzero
 *   structure of all locally stored rows, not including locally stored columns.
 **************************************************************************/
-HYPRE_Int hypre_FindStructuralUnion( HYPRE_DistributedMatrix matrix,
+HYPRE_Int hypre_FindStructuralUnion( HYPRE_DistributedMatrix matrix, 
                     HYPRE_Int **structural_union,
                     hypre_PilutSolverGlobals *globals )
-{
+{ 
   HYPRE_Int ierr=0, i, j, row_size, *col_ind;
 
   /* Allocate and clear structural_union vector */
@@ -423,7 +423,7 @@ HYPRE_Int hypre_FindStructuralUnion( HYPRE_DistributedMatrix matrix,
     /* Loop through nonzeros in this row */
     for ( j=0; j<row_size; j++)
     {
-      if (col_ind[j] < firstrow || col_ind[j] >= lastrow)
+      if (col_ind[j] < firstrow || col_ind[j] >= lastrow) 
       {
         (*structural_union)[ col_ind[j] ] = 1;
       }
@@ -451,13 +451,13 @@ HYPRE_Int hypre_FindStructuralUnion( HYPRE_DistributedMatrix matrix,
 HYPRE_Int hypre_ExchangeStructuralUnions( DataDistType *ddist,
                     HYPRE_Int **structural_union,
                     hypre_PilutSolverGlobals *globals )
-{
+{ 
   HYPRE_Int ierr=0, *recv_unions;
 
   /* allocate space for receiving unions */
   recv_unions = hypre_CTAlloc( HYPRE_Int,  nrows , HYPRE_MEMORY_HOST);
 
-  hypre_MPI_Allreduce( *structural_union, recv_unions, nrows,
+  hypre_MPI_Allreduce( *structural_union, recv_unions, nrows, 
                  HYPRE_MPI_INT, hypre_MPI_LOR, pilut_comm );
 
   /* free and reallocate structural union so that is of local size */
@@ -474,12 +474,12 @@ HYPRE_Int hypre_ExchangeStructuralUnions( DataDistType *ddist,
 
 
 /*************************************************************************
-* This function applies the second droping rule where maxnz elements
+* This function applies the second droping rule where maxnz elements 
 * greater than tol are kept. The elements are stored into LDU.
 **************************************************************************/
 void hypre_SecondDrop(HYPRE_Int maxnz, HYPRE_Real tol, HYPRE_Int row,
-      HYPRE_Int *perm, HYPRE_Int *iperm,
-      FactorMatType *ldu, hypre_PilutSolverGlobals *globals)
+		HYPRE_Int *perm, HYPRE_Int *iperm,
+		FactorMatType *ldu, hypre_PilutSolverGlobals *globals)
 {
   HYPRE_Int i, j;
   HYPRE_Int diag, lrow;
@@ -487,7 +487,7 @@ void hypre_SecondDrop(HYPRE_Int maxnz, HYPRE_Real tol, HYPRE_Int row,
   HYPRE_Real dtmp;
 
   /* Reset the jr array, it is not needed any more */
-  for (i=0; i<lastjr; i++)
+  for (i=0; i<lastjr; i++) 
     jr[jw[i]] = -1;
 
   lrow = row-firstrow;
@@ -495,7 +495,7 @@ void hypre_SecondDrop(HYPRE_Int maxnz, HYPRE_Real tol, HYPRE_Int row,
 
   /* Deal with the diagonal element first */
   assert(jw[0] == row);
-  if (w[0] != 0.0)
+  if (w[0] != 0.0) 
     ldu->dvalues[lrow] = 1.0/w[0];
   else { /* zero pivot */
     hypre_printf("Zero pivot in row %d, adding e to proceed!\n", row);
@@ -563,9 +563,9 @@ void hypre_SecondDrop(HYPRE_Int maxnz, HYPRE_Real tol, HYPRE_Int row,
 
   /* Now, I want to keep maxnz elements of L. Go and extract them */
 
-  hypre_DoubleQuickSplit( w, jw, last, maxnz );
+  hypre_DoubleQuickSplit( w, jw, last, maxnz ); 
   /* if (ierr) return; */
-  for ( j= hypre_max(0,last-maxnz); j< last; j++ )
+  for ( j= hypre_max(0,last-maxnz); j< last; j++ ) 
   {
      ldu->lcolind[ldu->lerowptr[lrow]] = jw[ j ];
      ldu->lvalues[ldu->lerowptr[lrow]++] = w[ j ];
@@ -573,7 +573,7 @@ void hypre_SecondDrop(HYPRE_Int maxnz, HYPRE_Real tol, HYPRE_Int row,
 
 
   /* This was the previous insertion sort that was replaced with
-     the QuickSplit routine above. AJC, 5/00
+     the QuickSplit routine above. AJC, 5/00 
   for (nz=0; nz<maxnz && last>0; nz++) {
     for (max=0, j=1; j<last; j++) {
       if (fabs(w[j]) > fabs(w[max]))
@@ -591,9 +591,9 @@ void hypre_SecondDrop(HYPRE_Int maxnz, HYPRE_Real tol, HYPRE_Int row,
 
 
   /* Now, I want to keep maxnz elements of U. Go and extract them */
-  hypre_DoubleQuickSplit( w+first, jw+first, lastjr-first, maxnz );
+  hypre_DoubleQuickSplit( w+first, jw+first, lastjr-first, maxnz ); 
   /* if (ierr) return; */
-  for ( j=hypre_max(first, lastjr-maxnz); j< lastjr; j++ )
+  for ( j=hypre_max(first, lastjr-maxnz); j< lastjr; j++ ) 
   {
      ldu->ucolind[ldu->uerowptr[lrow]] = jw[ j ];
      ldu->uvalues[ldu->uerowptr[lrow]++] = w[ j ];
@@ -601,7 +601,7 @@ void hypre_SecondDrop(HYPRE_Int maxnz, HYPRE_Real tol, HYPRE_Int row,
 
   /*
      This was the previous insertion sort that was replaced with
-     the QuickSplit routine above. AJC, 5/00
+     the QuickSplit routine above. AJC, 5/00 
   for (nz=0; nz<maxnz && lastjr>first; nz++) {
     for (max=first, j=first+1; j<lastjr; j++) {
       if (fabs(w[j]) > fabs(w[max]))
@@ -627,13 +627,13 @@ void hypre_SecondDrop(HYPRE_Int maxnz, HYPRE_Real tol, HYPRE_Int row,
 
 
 /*************************************************************************
-* This function applyies the second droping rule whre maxnz elements
+* This function applyies the second droping rule whre maxnz elements 
 * greater than tol are kept. The elements are stored into L and the Rmat.
-* This version keeps only maxnzkeep
+* This version keeps only maxnzkeep 
 **************************************************************************/
 void hypre_SecondDropUpdate(HYPRE_Int maxnz, HYPRE_Int maxnzkeep, HYPRE_Real tol, HYPRE_Int row,
-      HYPRE_Int nlocal, HYPRE_Int *perm, HYPRE_Int *iperm,
-      FactorMatType *ldu, ReduceMatType *rmat,
+		      HYPRE_Int nlocal, HYPRE_Int *perm, HYPRE_Int *iperm, 
+		      FactorMatType *ldu, ReduceMatType *rmat,
                       hypre_PilutSolverGlobals *globals )
 {
   HYPRE_Int i, j, nl;
@@ -643,7 +643,7 @@ void hypre_SecondDropUpdate(HYPRE_Int maxnz, HYPRE_Int maxnzkeep, HYPRE_Real tol
 
 
   /* Reset the jr array, it is not needed any more */
-  for (i=0; i<lastjr; i++)
+  for (i=0; i<lastjr; i++) 
     jr[jw[i]] = -1;
 
   lrow = row-firstrow;
@@ -670,14 +670,14 @@ void hypre_SecondDropUpdate(HYPRE_Int maxnz, HYPRE_Int maxnzkeep, HYPRE_Real tol
     last = 1, first = lastjr-1;
     while (1) {
       while (last < first         &&     /* and [last] is L */
-            jw[last] >= firstrow &&
-            jw[last] < lastrow   &&
-            iperm[jw[last]-firstrow] < nlocal)
+	     jw[last] >= firstrow &&
+	     jw[last] < lastrow   &&
+	     iperm[jw[last]-firstrow] < nlocal)
         last++;
       while (last < first            &&  /* and [first] is not L */
-            !(jw[first] >= firstrow &&
-               jw[first] < lastrow   &&
-               iperm[jw[first]-firstrow] < nlocal))
+	     !(jw[first] >= firstrow &&
+	       jw[first] < lastrow   &&
+	       iperm[jw[first]-firstrow] < nlocal))
         first--;
 
       if (last < first) {
@@ -688,8 +688,8 @@ void hypre_SecondDropUpdate(HYPRE_Int maxnz, HYPRE_Int maxnzkeep, HYPRE_Real tol
 
       if (last == first) {
         if (jw[last] >= firstrow &&
-              jw[last] < lastrow   &&
-              iperm[jw[last]-firstrow] < nlocal) {
+	    jw[last] < lastrow   &&
+	    iperm[jw[last]-firstrow] < nlocal) {
           first++;
           last++;
         }
@@ -716,9 +716,9 @@ void hypre_SecondDropUpdate(HYPRE_Int maxnz, HYPRE_Int maxnzkeep, HYPRE_Real tol
 
 
   /* Keep large maxnz elements of L */
-  hypre_DoubleQuickSplit( w+1, jw+1, last-1, maxnz );
+  hypre_DoubleQuickSplit( w+1, jw+1, last-1, maxnz ); 
   /* if (ierr) return; */
-  for ( j= hypre_max(1,last-maxnz); j< last; j++ )
+  for ( j= hypre_max(1,last-maxnz); j< last; j++ ) 
   {
      ldu->lcolind[ldu->lerowptr[lrow]] = jw[ j ];
      ldu->lvalues[ldu->lerowptr[lrow]++] = w[ j ];
@@ -726,7 +726,7 @@ void hypre_SecondDropUpdate(HYPRE_Int maxnz, HYPRE_Int maxnzkeep, HYPRE_Real tol
 
 
   /* This was the previous insertion sort that was replaced with
-     the QuickSplit routine above. AJC, 5/00
+     the QuickSplit routine above. AJC, 5/00 
   for (nz=0; nz<maxnz && last>1; nz++) {
     for (max=1, j=2; j<last; j++) {
       if (fabs(w[j]) > fabs(w[max]))

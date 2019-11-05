@@ -25,7 +25,7 @@
  * HYPRE_PCGSetup
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int
+HYPRE_Int 
 HYPRE_PCGSetup( HYPRE_Solver solver,
                 HYPRE_Matrix A,
                 HYPRE_Vector b,
@@ -41,7 +41,7 @@ HYPRE_PCGSetup( HYPRE_Solver solver,
  * HYPRE_PCGSolve
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int
+HYPRE_Int 
 HYPRE_PCGSolve( HYPRE_Solver solver,
                 HYPRE_Matrix A,
                 HYPRE_Vector b,
@@ -264,7 +264,7 @@ HYPRE_PCGSetPrecond( HYPRE_Solver         solver,
 {
    return( hypre_PCGSetPrecond( (void *) solver,
                                 (HYPRE_Int (*)(void*, void*, void*, void*))precond,
-                                (HYPRE_Int (*)(void*, void*, void*, void*))precond_setup,
+								(HYPRE_Int (*)(void*, void*, void*, void*))precond_setup,
                                 (void *) precond_solver ) );
 }
 

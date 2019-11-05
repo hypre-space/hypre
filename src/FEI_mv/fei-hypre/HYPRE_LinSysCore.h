@@ -67,7 +67,7 @@ enum HYpreconID {HYIDENTITY,HYDIAGONAL,HYPILUT,HYPARASAILS,HYBOOMERAMG,HYML,
 // substructure definition
 // -------------------------------------------------------------------------
 
-typedef struct
+typedef struct 
 {
    int    *EdgeNodeList_;
    int    *NodeNumbers_;
@@ -83,7 +83,7 @@ typedef struct
 
 class HYPRE_LinSysCore
 #ifndef NOFEI
-           : public LinearSystemCore
+           : public LinearSystemCore 
 #endif
 {
  public:
@@ -202,7 +202,7 @@ class HYPRE_LinSysCore
    // Obtain the coefficients and indices for a row of the matrix.
    // ----------------------------------------------------------------------
 
-   int getMatrixRow(int row, double* coefs, int* indices, int len,
+   int getMatrixRow(int row, double* coefs, int* indices, int len, 
                     int& rowLength);
 
    // ----------------------------------------------------------------------
@@ -230,7 +230,7 @@ class HYPRE_LinSysCore
    // ----------------------------------------------------------------------
 
    int matrixLoadComplete();
-
+   
    // ----------------------------------------------------------------------
    // Pass nodal data that probably doesn't mean anything to the FEI
    // implementation, but may mean something to the linear solver. Examples:
@@ -246,10 +246,10 @@ class HYPRE_LinSysCore
 
    int enforceEssentialBC(int* globalEqn,double* alpha,double* gamma,int len);
 
-   int enforceRemoteEssBCs(int numEqns, int* globalEqns, int** colIndices,
+   int enforceRemoteEssBCs(int numEqns, int* globalEqns, int** colIndices, 
                            int* colIndLen, double** coefs);
 
-   int enforceOtherBC(int* globalEqn, double* alpha, double* beta,
+   int enforceOtherBC(int* globalEqn, double* alpha, double* beta, 
                       double* gamma, int len);
 
    // ----------------------------------------------------------------------
@@ -295,7 +295,7 @@ class HYPRE_LinSysCore
 
 #ifndef NOFEI
    int sumInMatrix(double scalar, const Data& data);
-#endif
+#endif 
 
    // ----------------------------------------------------------------------
    // get/setRHSVectorPtr:
@@ -304,7 +304,7 @@ class HYPRE_LinSysCore
 
 #ifndef NOFEI
    int getRHSVectorPtr(Data& data);
-#endif
+#endif 
 
    // ----------------------------------------------------------------------
    // copyInRHSVector/copyOutRHSVector/sumInRHSVector:
@@ -315,7 +315,7 @@ class HYPRE_LinSysCore
    int copyInRHSVector(double scalar, const Data& data);
    int copyOutRHSVector(double scalar, Data& data);
    int sumInRHSVector(double scalar, const Data& data);
-#endif
+#endif 
 
    // ----------------------------------------------------------------------
    // destroyMatrixData/destroyVectorData:
@@ -325,7 +325,7 @@ class HYPRE_LinSysCore
 #ifndef NOFEI
    int destroyMatrixData(Data& data);
    int destroyVectorData(Data& data);
-#endif
+#endif 
 
    // ----------------------------------------------------------------------
    // functions for managing multiple rhs vectors
@@ -422,8 +422,8 @@ class HYPRE_LinSysCore
    void   FE_initElemNodeList(int elemID, int nNodesPerElem, int *nodeIDs);
    void   FE_initSharedNodes(int nShared, int *sharedIDs, int *sharedPLengs,
                              int **sharedProcs);
-   void   FE_initComplete();
-   void   FE_loadElemMatrix(int elemID, int nNodes, int *elemNodeList,
+   void   FE_initComplete(); 
+   void   FE_loadElemMatrix(int elemID, int nNodes, int *elemNodeList, 
                             int matDim, double **elemMat);
 
  private: //functions
@@ -474,9 +474,9 @@ class HYPRE_LinSysCore
    void   buildSchurReducedRHS();
    void   buildSchurInitialGuess();
    double buildSchurReducedSoln();
-   void   computeAConjProjection(HYPRE_ParCSRMatrix A_csr, HYPRE_ParVector x,
+   void   computeAConjProjection(HYPRE_ParCSRMatrix A_csr, HYPRE_ParVector x, 
                                  HYPRE_ParVector b);
-   void   computeMinResProjection(HYPRE_ParCSRMatrix A_csr, HYPRE_ParVector x,
+   void   computeMinResProjection(HYPRE_ParCSRMatrix A_csr, HYPRE_ParVector x, 
                                   HYPRE_ParVector b);
    void   addToAConjProjectionSpace(HYPRE_IJVector x, HYPRE_IJVector b);
    void   addToMinResProjectionSpace(HYPRE_IJVector x, HYPRE_IJVector b);
@@ -587,7 +587,7 @@ class HYPRE_LinSysCore
    int             projectionScheme_;
    int             projectSize_;
    int             projectCurrSize_;
-   double          **projectionMatrix_;
+   double          **projectionMatrix_; 
    int             normalEqnFlag_;
    void            *slideObj_;
 
@@ -749,8 +749,8 @@ class HYPRE_LinSysCore
    // ML Maxwell variables
    // ----------------------------------------------------------------------
 
-   HYPRE_ParCSRMatrix  maxwellANN_;           // Maxwell nodal matrix
-   HYPRE_ParCSRMatrix  maxwellGEN_;           // Maxwell gradient matrix
+   HYPRE_ParCSRMatrix  maxwellANN_;           // Maxwell nodal matrix 
+   HYPRE_ParCSRMatrix  maxwellGEN_;           // Maxwell gradient matrix 
 
    // ----------------------------------------------------------------------
    // temporary functions for testing purposes

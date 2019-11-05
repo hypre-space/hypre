@@ -28,7 +28,7 @@ HYPRE_ParCSRCOGMRESCreate( MPI_Comm comm, HYPRE_Solver *solver )
          hypre_ParKrylovCreateVectorArray,
          hypre_ParKrylovDestroyVector, hypre_ParKrylovMatvecCreate,
          hypre_ParKrylovMatvec, hypre_ParKrylovMatvecDestroy,
-         hypre_ParKrylovInnerProd, hypre_ParKrylovMassInnerProd,
+         hypre_ParKrylovInnerProd, hypre_ParKrylovMassInnerProd, 
          hypre_ParKrylovMassDotpTwo, hypre_ParKrylovCopyVector,
          //hypre_ParKrylovCopyVector,
          hypre_ParKrylovClearVector,
@@ -43,7 +43,7 @@ HYPRE_ParCSRCOGMRESCreate( MPI_Comm comm, HYPRE_Solver *solver )
  * HYPRE_ParCSRCOGMRESDestroy
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int
+HYPRE_Int 
 HYPRE_ParCSRCOGMRESDestroy( HYPRE_Solver solver )
 {
    return( hypre_COGMRESDestroy( (void *) solver ) );
@@ -53,7 +53,7 @@ HYPRE_ParCSRCOGMRESDestroy( HYPRE_Solver solver )
  * HYPRE_ParCSRCOGMRESSetup
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int
+HYPRE_Int 
 HYPRE_ParCSRCOGMRESSetup( HYPRE_Solver solver,
                         HYPRE_ParCSRMatrix A,
                         HYPRE_ParVector b,
@@ -69,7 +69,7 @@ HYPRE_ParCSRCOGMRESSetup( HYPRE_Solver solver,
  * HYPRE_ParCSRCOGMRESSolve
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int
+HYPRE_Int 
 HYPRE_ParCSRCOGMRESSolve( HYPRE_Solver solver,
                         HYPRE_ParCSRMatrix A,
                         HYPRE_ParVector b,

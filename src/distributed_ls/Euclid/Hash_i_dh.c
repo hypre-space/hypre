@@ -63,8 +63,8 @@ void Hash_i_dhCreate(Hash_i_dh *h, HYPRE_Int sizeIN)
   struct _hash_i_dh* tmp;
 
   size = DEFAULT_TABLE_SIZE;
-  if (sizeIN == -1) {
-    sizeIN = size = DEFAULT_TABLE_SIZE;
+  if (sizeIN == -1) { 
+    sizeIN = size = DEFAULT_TABLE_SIZE; 
   }
   tmp = (struct _hash_i_dh*)MALLOC_DH( sizeof(struct _hash_i_dh)); CHECK_V_ERROR;
   *h = tmp;
@@ -146,7 +146,7 @@ HYPRE_Int Hash_i_dhLookup(Hash_i_dh h, HYPRE_Int key)
         retval = data[idx].data;
         break;
       }
-    }
+    } 
   }
   END_FUNC_VAL(retval)
 }
@@ -216,11 +216,11 @@ void Hash_i_dhInsert(Hash_i_dh h, HYPRE_Int key, HYPRE_Int dataIN)
 void rehash_private(Hash_i_dh h)
 {
   START_FUNC_DH
-  HYPRE_Int i,
-      old_size = h->size,
+  HYPRE_Int i, 
+      old_size = h->size, 
       new_size = old_size*2,
       oldCurMark = h->curMark;
-  Hash_i_Record *oldData = h->data,
+  Hash_i_Record *oldData = h->data, 
                  *newData;
 
   hypre_sprintf(msgBuf_dh, "rehashing; old_size= %i, new_size= %i", old_size, new_size);
@@ -239,7 +239,7 @@ void rehash_private(Hash_i_dh h)
   h->count = 0;
   h->curMark = 0;
 
-  for (i=h->count; i<new_size; ++i) {
+  for (i=h->count; i<new_size; ++i) { 
     newData[i].key = -1;
     newData[i].mark = -1;
   }
@@ -253,7 +253,7 @@ void rehash_private(Hash_i_dh h)
       Hash_i_dhInsert(h, oldData[i].key, oldData[i].data); CHECK_V_ERROR;
     }
   }
-
+   
   FREE_DH(oldData); CHECK_V_ERROR;
   END_FUNC_DH
 }

@@ -22,7 +22,7 @@ typedef struct hypre_StructStencil_struct
 {
    hypre_Index   *shape;   /* Description of a stencil's shape */
    HYPRE_Int      size;    /* Number of stencil coefficients */
-
+                
    HYPRE_Int      ndim;    /* Number of dimensions */
 
    HYPRE_Int      ref_count;

@@ -6,11 +6,11 @@
  ******************************************************************************/
 
 /*
-    Euclid employs a global object:
+    Euclid employs a global object: 
 
         TimeLog_dh timlog_dh;
 
-    for recording timing information.
+    for recording timing information.  
 */
 
 #ifndef TIMELOG_DH_DH

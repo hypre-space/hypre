@@ -999,7 +999,7 @@ HYPRE_Int  hypre_ParCSRRelax_L1_Jacobi( hypre_ParCSRMatrix *A,
 {
 
 
-    MPI_Comm         comm = hypre_ParCSRMatrixComm(A);
+    MPI_Comm	   comm = hypre_ParCSRMatrixComm(A);
     hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
     HYPRE_Real     *A_diag_data  = hypre_CSRMatrixData(A_diag);
     HYPRE_Int            *A_diag_i     = hypre_CSRMatrixI(A_diag);
@@ -1022,17 +1022,17 @@ HYPRE_Int  hypre_ParCSRRelax_L1_Jacobi( hypre_ParCSRMatrix *A,
 
     hypre_Vector   *Vtemp_local = hypre_ParVectorLocalVector(Vtemp);
     HYPRE_Real     *Vtemp_data = hypre_VectorData(Vtemp_local);
-    HYPRE_Real     *Vext_data = NULL;
-    HYPRE_Real     *v_buf_data;
+    HYPRE_Real 	   *Vext_data = NULL;
+    HYPRE_Real 	   *v_buf_data;
 
     HYPRE_Int            i, j;
     HYPRE_Int            ii, jj;
-    HYPRE_Int            num_sends;
-    HYPRE_Int            index, start;
-    HYPRE_Int            num_procs, my_id ;
+    HYPRE_Int		   num_sends;
+    HYPRE_Int		   index, start;
+    HYPRE_Int		   num_procs, my_id ;
 
     HYPRE_Real     zero = 0.0;
-    HYPRE_Real     res;
+    HYPRE_Real	   res;
 
 
     hypre_MPI_Comm_size(comm,&num_procs);

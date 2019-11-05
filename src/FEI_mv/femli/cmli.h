@@ -147,7 +147,7 @@ int MLI_FEDataGetNodeFaceMatrix(CMLI_FEData *, MPI_Comm, void **mat);
 /* constructor and destructor for a "C" MLI matrix object           */
 /* ---------------------------------------------------------------- */
 
-CMLI_Matrix *MLI_MatrixCreate(void *matrix, char *name,
+CMLI_Matrix *MLI_MatrixCreate(void *matrix, char *name, 
                               MLI_Function *destroy_func);
 
 int MLI_MatrixDestroy( CMLI_Matrix *matrix );
@@ -156,7 +156,7 @@ int MLI_MatrixDestroy( CMLI_Matrix *matrix );
 /* constructor and destructor for a "C" MLI vector object           */
 /* ---------------------------------------------------------------- */
 
-CMLI_Vector *MLI_VectorCreate(void *vector,const char *name,
+CMLI_Vector *MLI_VectorCreate(void *vector,const char *name, 
                               MLI_Function *destroy_func);
 
 int MLI_VectorDestroy(CMLI_Vector *vector);
@@ -191,7 +191,7 @@ CMLI_Method *MLI_MethodCreate(char *name, MPI_Comm comm);
 
 int MLI_MethodDestroy(CMLI_Method *method);
 
-int MLI_MethodSetParams(CMLI_Method *cmethod, char *name,
+int MLI_MethodSetParams(CMLI_Method *cmethod, char *name, 
                         int argc, char **argv);
 
 #ifdef __cplusplus

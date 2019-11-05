@@ -17,7 +17,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+    
 /*--------------------------------------------------------------------------
  * HYPRE_StructSMGCreate
  *--------------------------------------------------------------------------*/
@@ -52,7 +52,7 @@ hypre_F90_IFACE(hypre_structsmgdestroy, HYPRE_STRUCTSMGDESTROY)
  * HYPRE_StructSMGSetup
  *--------------------------------------------------------------------------*/
 
-void
+void 
 hypre_F90_IFACE(hypre_structsmgsetup, HYPRE_STRUCTSMGSETUP)
    ( hypre_F90_Obj *solver,
      hypre_F90_Obj *A,
@@ -72,7 +72,7 @@ hypre_F90_IFACE(hypre_structsmgsetup, HYPRE_STRUCTSMGSETUP)
  * HYPRE_StructSMGSolve
  *--------------------------------------------------------------------------*/
 
-void
+void 
 hypre_F90_IFACE(hypre_structsmgsolve, HYPRE_STRUCTSMGSOLVE)
    ( hypre_F90_Obj *solver,
      hypre_F90_Obj *A,
@@ -203,7 +203,7 @@ hypre_F90_IFACE(hypre_structsmggetrelchange, HYPRE_STRUCTSMGGETRELCHANGE)
 /*--------------------------------------------------------------------------
  * HYPRE_StructSMGSetZeroGuess, HYPRE_StructSMGGetZeroGuess
  *--------------------------------------------------------------------------*/
-
+ 
 void
 hypre_F90_IFACE(hypre_structsmgsetzeroguess, HYPRE_STRUCTSMGSETZEROGUESS)
    ( hypre_F90_Obj *solver,
@@ -213,7 +213,7 @@ hypre_F90_IFACE(hypre_structsmgsetzeroguess, HYPRE_STRUCTSMGSETZEROGUESS)
       ( HYPRE_StructSMGSetZeroGuess(
            hypre_F90_PassObj (HYPRE_StructSolver, solver) ) );
 }
-
+ 
 void
 hypre_F90_IFACE(hypre_structsmggetzeroguess, HYPRE_STRUCTSMGGETZEROGUESS)
    ( hypre_F90_Obj *solver,
@@ -229,7 +229,7 @@ hypre_F90_IFACE(hypre_structsmggetzeroguess, HYPRE_STRUCTSMGGETZEROGUESS)
 /*--------------------------------------------------------------------------
  * HYPRE_StructSMGSetNonZeroGuess
  *--------------------------------------------------------------------------*/
-
+ 
 void
 hypre_F90_IFACE(hypre_structsmgsetnonzeroguess, HYPRE_STRUCTSMGSETNONZEROGUESS)
    ( hypre_F90_Obj *solver,
@@ -244,7 +244,7 @@ hypre_F90_IFACE(hypre_structsmgsetnonzeroguess, HYPRE_STRUCTSMGSETNONZEROGUESS)
 /*--------------------------------------------------------------------------
  * HYPRE_StructSMGSetNumPreRelax, HYPRE_StructSMGGetNumPreRelax
  *
- * Note that we require at least 1 pre-relax sweep.
+ * Note that we require at least 1 pre-relax sweep. 
  *--------------------------------------------------------------------------*/
 
 void

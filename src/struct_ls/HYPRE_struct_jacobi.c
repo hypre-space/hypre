@@ -22,7 +22,7 @@ HYPRE_StructJacobiCreate( MPI_Comm            comm,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int
+HYPRE_Int 
 HYPRE_StructJacobiDestroy( HYPRE_StructSolver solver )
 {
    return( hypre_JacobiDestroy( (void *) solver ) );
@@ -31,7 +31,7 @@ HYPRE_StructJacobiDestroy( HYPRE_StructSolver solver )
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int
+HYPRE_Int 
 HYPRE_StructJacobiSetup( HYPRE_StructSolver solver,
                          HYPRE_StructMatrix A,
                          HYPRE_StructVector b,
@@ -46,7 +46,7 @@ HYPRE_StructJacobiSetup( HYPRE_StructSolver solver,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int
+HYPRE_Int 
 HYPRE_StructJacobiSolve( HYPRE_StructSolver solver,
                          HYPRE_StructMatrix A,
                          HYPRE_StructVector b,
@@ -100,7 +100,7 @@ HYPRE_StructJacobiGetMaxIter( HYPRE_StructSolver solver,
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
-
+ 
 HYPRE_Int
 HYPRE_StructJacobiSetZeroGuess( HYPRE_StructSolver solver )
 {
@@ -109,7 +109,7 @@ HYPRE_StructJacobiSetZeroGuess( HYPRE_StructSolver solver )
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
-
+ 
 HYPRE_Int
 HYPRE_StructJacobiGetZeroGuess( HYPRE_StructSolver solver,
                                 HYPRE_Int * zeroguess )
@@ -119,7 +119,7 @@ HYPRE_StructJacobiGetZeroGuess( HYPRE_StructSolver solver,
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
-
+ 
 HYPRE_Int
 HYPRE_StructJacobiSetNonZeroGuess( HYPRE_StructSolver solver )
 {

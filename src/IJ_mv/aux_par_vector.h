@@ -22,11 +22,11 @@
 
 typedef struct
 {
-   HYPRE_Int        max_off_proc_elmts; /* length of off processor stash for
+   HYPRE_Int	    max_off_proc_elmts; /* length of off processor stash for
                                            SetValues and AddToValues*/
-   HYPRE_Int        current_num_elmts;  /* current no. of elements stored in stash */
-   HYPRE_BigInt    *off_proc_i;         /* contains column indices */
-   HYPRE_Complex   *off_proc_data;      /* contains corresponding data */
+   HYPRE_Int	    current_num_elmts; /* current no. of elements stored in stash */
+   HYPRE_BigInt    *off_proc_i; /* contains column indices */
+   HYPRE_Complex   *off_proc_data; /* contains corresponding data */
 } hypre_AuxParVector;
 
 /*--------------------------------------------------------------------------

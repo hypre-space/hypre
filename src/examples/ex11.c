@@ -176,9 +176,9 @@ int main (int argc, char *argv[])
          /* The left identity block:position i-n */
          if ((i-n)>=0)
          {
-            cols[nnz] = i-n;
-            values[nnz] = -1.0;
-            nnz++;
+	    cols[nnz] = i-n;
+	    values[nnz] = -1.0;
+	    nnz++;
          }
 
          /* The left -1: position i-1 */
@@ -273,7 +273,7 @@ int main (int argc, char *argv[])
 
       /* eigenvectors - get a pointer */
       {
-         mv_TempMultiVector* tmp = (mv_TempMultiVector*) mv_MultiVectorGetData(eigenvectors);
+		  mv_TempMultiVector* tmp = (mv_TempMultiVector*) mv_MultiVectorGetData(eigenvectors);
          pvx = (HYPRE_ParVector*)(tmp -> vector);
       }
 

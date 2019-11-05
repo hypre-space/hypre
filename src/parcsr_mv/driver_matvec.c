@@ -6,11 +6,11 @@
  ******************************************************************************/
 
 #include "_hypre_parcsr_mv.h"
-
+ 
 /*--------------------------------------------------------------------------
- * Test driver for unstructured matrix interface
+ * Test driver for unstructured matrix interface 
  *--------------------------------------------------------------------------*/
-
+ 
 HYPRE_Int
 main( HYPRE_Int   argc,
       char *argv[] )
@@ -27,14 +27,14 @@ main( HYPRE_Int   argc,
    hypre_ParVector     *y2;
 
    HYPRE_Int          num_procs, my_id;
-   HYPRE_Int          local_size;
-   HYPRE_BigInt       global_num_rows;
-   HYPRE_BigInt       global_num_cols;
-   HYPRE_BigInt       first_index;
-   HYPRE_Int          i, ierr=0;
-   HYPRE_Complex     *data, *data2;
-   HYPRE_BigInt      *row_starts, *col_starts;
-   char file_name[80];
+   HYPRE_Int		local_size;
+   HYPRE_BigInt		global_num_rows;
+   HYPRE_BigInt		global_num_cols;
+   HYPRE_BigInt		first_index;
+   HYPRE_Int 		i, ierr=0;
+   HYPRE_Complex 	*data, *data2;
+   HYPRE_BigInt		*row_starts, *col_starts;
+   char		file_name[80];
    /* Initialize MPI */
    hypre_MPI_Init(&argc, &argv);
 
@@ -42,11 +42,11 @@ main( HYPRE_Int   argc,
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &my_id);
 
    hypre_printf(" my_id: %d num_procs: %d\n", my_id, num_procs);
-
-   if (my_id == 0)
+ 
+   if (my_id == 0) 
    {
-      matrix = hypre_CSRMatrixRead("input");
-      hypre_printf(" read input\n");
+	matrix = hypre_CSRMatrixRead("input");
+   	hypre_printf(" read input\n");
    }
 /*   row_starts = hypre_CTAlloc(HYPRE_Int,4);
    col_starts = hypre_CTAlloc(HYPRE_Int, 4, HYPRE_MEMORY_HOST);
@@ -60,9 +60,9 @@ main( HYPRE_Int   argc,
    col_starts[3] = 9;
 */
    row_starts = NULL;
-   col_starts = NULL;
-   par_matrix = hypre_CSRMatrixToParCSRMatrix(hypre_MPI_COMM_WORLD, matrix,
-         row_starts, col_starts);
+   col_starts = NULL; 
+   par_matrix = hypre_CSRMatrixToParCSRMatrix(hypre_MPI_COMM_WORLD, matrix, 
+		row_starts, col_starts);
    hypre_printf(" converted\n");
 
    matrix1 = hypre_ParCSRMatrixToCSRMatrixAll(par_matrix);
@@ -78,7 +78,7 @@ main( HYPRE_Int   argc,
    global_num_cols = hypre_ParCSRMatrixGlobalNumCols(par_matrix);
    hypre_printf(" global_num_cols %d\n", global_num_cols);
    global_num_rows = hypre_ParCSRMatrixGlobalNumRows(par_matrix);
-
+ 
    col_starts = hypre_ParCSRMatrixColStarts(par_matrix);
    first_index = col_starts[my_id];
    local_size = (HYPRE_Int)(col_starts[my_id+1] - first_index);
@@ -88,7 +88,7 @@ main( HYPRE_Int   argc,
    hypre_ParVectorInitialize(x);
    x_local = hypre_ParVectorLocalVector(x);
    data = hypre_VectorData(x_local);
-
+ 
    for (i=0; i < local_size; i++)
         data[i] = (HYPRE_Int)first_index+i+1;
    x2 = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD,global_num_cols,col_starts);
@@ -109,7 +109,7 @@ main( HYPRE_Int   argc,
    hypre_ParVectorInitialize(y2);
    y2_local = hypre_ParVectorLocalVector(y2);
    data2 = hypre_VectorData(y2_local);
-
+ 
    for (i=0; i < local_size; i++)
         data2[i] = (HYPRE_Int)first_index+i+1;
 
@@ -126,7 +126,7 @@ main( HYPRE_Int   argc,
    ierr = hypre_ParCSRMatrixMatvecT ( 1.0, par_matrix, y2, 1.0, x2);
    hypre_printf(" did matvecT %d\n", ierr);
 
-   hypre_ParVectorPrint(x2, "transp");
+   hypre_ParVectorPrint(x2, "transp"); 
 
    hypre_ParCSRMatrixDestroy(par_matrix);
    hypre_ParVectorDestroy(x);

@@ -29,7 +29,7 @@ HYPRE_StructSparseMSGCreate( MPI_Comm comm, HYPRE_StructSolver *solver )
  * HYPRE_StructSparseMSGDestroy
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int
+HYPRE_Int 
 HYPRE_StructSparseMSGDestroy( HYPRE_StructSolver solver )
 {
    return( hypre_SparseMSGDestroy( (void *) solver ) );
@@ -39,7 +39,7 @@ HYPRE_StructSparseMSGDestroy( HYPRE_StructSolver solver )
  * HYPRE_StructSparseMSGSetup
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int
+HYPRE_Int 
 HYPRE_StructSparseMSGSetup( HYPRE_StructSolver solver,
                        HYPRE_StructMatrix A,
                        HYPRE_StructVector b,
@@ -55,7 +55,7 @@ HYPRE_StructSparseMSGSetup( HYPRE_StructSolver solver,
  * HYPRE_StructSparseMSGSolve
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int
+HYPRE_Int 
 HYPRE_StructSparseMSGSolve( HYPRE_StructSolver solver,
                        HYPRE_StructMatrix A,
                        HYPRE_StructVector b,
@@ -114,7 +114,7 @@ HYPRE_StructSparseMSGSetRelChange( HYPRE_StructSolver solver,
 /*--------------------------------------------------------------------------
  * HYPRE_StructSparseMSGSetZeroGuess
  *--------------------------------------------------------------------------*/
-
+ 
 HYPRE_Int
 HYPRE_StructSparseMSGSetZeroGuess( HYPRE_StructSolver solver )
 {
@@ -124,7 +124,7 @@ HYPRE_StructSparseMSGSetZeroGuess( HYPRE_StructSolver solver )
 /*--------------------------------------------------------------------------
  * HYPRE_StructSparseMSGSetNonZeroGuess
  *--------------------------------------------------------------------------*/
-
+ 
 HYPRE_Int
 HYPRE_StructSparseMSGSetNonZeroGuess( HYPRE_StructSolver solver )
 {

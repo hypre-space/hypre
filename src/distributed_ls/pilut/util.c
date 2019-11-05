@@ -35,7 +35,7 @@ HYPRE_Int hypre_ExtractMinLR( hypre_PilutSolverGlobals *globals )
 
   /* Remove it */
   lastlr-- ;
-  if (j < lastlr)
+  if (j < lastlr) 
     lr[j] = lr[lastlr];
 
   return i;
@@ -68,7 +68,7 @@ void hypre_IdxIncSort(HYPRE_Int n, HYPRE_Int *idx, HYPRE_Real *val)
 
 
 /*************************************************************************
-* This function sort an (idx,val) array in decreasing abs val
+* This function sort an (idx,val) array in decreasing abs val 
 **************************************************************************/
 void hypre_ValDecSort(HYPRE_Int n, HYPRE_Int *idx, HYPRE_Real *val)
 {
@@ -95,7 +95,7 @@ void hypre_ValDecSort(HYPRE_Int n, HYPRE_Int *idx, HYPRE_Real *val)
 
 
 /*************************************************************************
-* This function takes an (idx, val) array and compacts it so that every
+* This function takes an (idx, val) array and compacts it so that every 
 * entry with idx[] = -1, gets removed. It returns the new count
 **************************************************************************/
 HYPRE_Int hypre_CompactIdx(HYPRE_Int n, HYPRE_Int *idx, HYPRE_Real *val)
@@ -134,7 +134,7 @@ void hypre_PrintIdxVal(HYPRE_Int n, HYPRE_Int *idx, HYPRE_Real *val)
   HYPRE_Int i;
 
   hypre_printf("%3d ", n);
-  for (i=0; i<n; i++)
+  for (i=0; i<n; i++) 
     hypre_printf("(%3d, %3.1e) ", idx[i], val[i]);
   hypre_printf("\n");
 
@@ -162,7 +162,7 @@ HYPRE_Int hypre_DecKeyValueCmp(const void *v1, const void *v2)
 **************************************************************************/
 void hypre_SortKeyValueNodesDec(KeyValueType *nodes, HYPRE_Int n)
 {
-   hypre_tex_qsort((char *)nodes, (size_t)n, (size_t)sizeof(KeyValueType), (HYPRE_Int (*) (char*,char*))hypre_DecKeyValueCmp);
+	hypre_tex_qsort((char *)nodes, (size_t)n, (size_t)sizeof(KeyValueType), (HYPRE_Int (*) (char*,char*))hypre_DecKeyValueCmp);
 }
 
 

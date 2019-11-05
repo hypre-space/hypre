@@ -223,9 +223,9 @@ void hypre_qsort1( HYPRE_Int  *v,
  *--------------------------------------------------------------------------*/
 
 void hypre_BigQsort1( HYPRE_BigInt *v,
-                      HYPRE_Real *w,
-                      HYPRE_Int  left,
-                      HYPRE_Int  right )
+	     HYPRE_Real *w,
+             HYPRE_Int  left,
+             HYPRE_Int  right )
 {
    HYPRE_Int i, last;
 
@@ -628,7 +628,7 @@ static void hypre_search_row(HYPRE_Int row,
                       HYPRE_Int *order_ind)
 {
    // If this row has not been visited, call recursive DFS on nonzero
-   // column entries
+   // column entries 
    if (!visited[row])
    {
       HYPRE_Int j;

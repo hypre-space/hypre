@@ -17,7 +17,7 @@
  *--------------------------------------------------------------------------*/
 /* to do, not trivial */
 /*
-HYPRE_Int
+HYPRE_Int 
 HYPRE_ParCSRCOGMRESDestroy( HYPRE_Solver solver )
 {
    return( hypre_COGMRESDestroy( (void *) solver ) );
@@ -28,7 +28,7 @@ HYPRE_ParCSRCOGMRESDestroy( HYPRE_Solver solver )
  * HYPRE_COGMRESSetup
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int
+HYPRE_Int 
 HYPRE_COGMRESSetup( HYPRE_Solver solver,
                         HYPRE_Matrix A,
                         HYPRE_Vector b,
@@ -44,7 +44,7 @@ HYPRE_COGMRESSetup( HYPRE_Solver solver,
  * HYPRE_COGMRESSolve
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int
+HYPRE_Int 
 HYPRE_COGMRESSolve( HYPRE_Solver solver,
                         HYPRE_Matrix A,
                         HYPRE_Vector b,
@@ -212,9 +212,9 @@ HYPRE_COGMRESSetPrecond( HYPRE_Solver          solver,
                              HYPRE_Solver          precond_solver )
 {
    return( hypre_COGMRESSetPrecond( (void *) solver,
-            (HYPRE_Int (*)(void*, void*, void*, void*))precond,
-            (HYPRE_Int (*)(void*, void*, void*, void*))precond_setup,
-            (void *) precond_solver ) );
+									  (HYPRE_Int (*)(void*, void*, void*, void*))precond,
+									  (HYPRE_Int (*)(void*, void*, void*, void*))precond_setup,
+									  (void *) precond_solver ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -312,13 +312,13 @@ HYPRE_Int HYPRE_COGMRESGetResidual( HYPRE_Solver solver, void *residual )
 /*--------------------------------------------------------------------------
  * HYPRE_COGMRESSetModifyPC
  *--------------------------------------------------------------------------*/
-
+ 
 
 HYPRE_Int HYPRE_COGMRESSetModifyPC( HYPRE_Solver  solver,
              HYPRE_Int (*modify_pc)(HYPRE_Solver, HYPRE_Int, HYPRE_Real) )
 {
    return hypre_COGMRESSetModifyPC( (void *) solver, (HYPRE_Int(*)(void*, HYPRE_Int, HYPRE_Real))modify_pc);
-
+   
 }
 
 

@@ -22,7 +22,7 @@
 /*************************************************************************
 * This function is the entry point of the hypre_ILUT factorization
 **************************************************************************/
-HYPRE_Int hypre_ILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix, FactorMatType *ldu,
+HYPRE_Int hypre_ILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix, FactorMatType *ldu, 
           HYPRE_Int maxnz, HYPRE_Real tol, hypre_PilutSolverGlobals *globals )
 {
   HYPRE_Int i, ierr;
@@ -133,7 +133,7 @@ HYPRE_Int hypre_ILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix, Factor
   }
 #endif
 
-  /*hypre_free_multi(rmat.rmat_rnz, rmat.rmat_rrowlen,
+  /*hypre_free_multi(rmat.rmat_rnz, rmat.rmat_rrowlen, 
              rmat.rmat_rcolind, rmat.rmat_rvalues, -1);*/
   hypre_TFree(rmat.rmat_rnz, HYPRE_MEMORY_HOST);
   hypre_TFree(rmat.rmat_rrowlen, HYPRE_MEMORY_HOST);
@@ -145,7 +145,7 @@ HYPRE_Int hypre_ILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix, Factor
 
 
 /*************************************************************************
-* This function computes the 2 norms of the rows and adds them into the
+* This function computes the 2 norms of the rows and adds them into the 
 * nrm2s array ... Changed to "Add" by AJC, Dec 22 1997.
 **************************************************************************/
 void hypre_ComputeAdd2Nrms(HYPRE_Int num_rows, HYPRE_Int *rowptr, HYPRE_Real *values, HYPRE_Real *nrm2s)

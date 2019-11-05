@@ -40,10 +40,10 @@ void Numbering_dhCreate(Numbering_dh *numb)
 void Numbering_dhDestroy(Numbering_dh numb)
 {
   START_FUNC_DH
-  if (numb->global_to_local != NULL) {
-    Hash_i_dhDestroy(numb->global_to_local); CHECK_V_ERROR;
+  if (numb->global_to_local != NULL) { 
+    Hash_i_dhDestroy(numb->global_to_local); CHECK_V_ERROR; 
   }
-  if (numb->idx_ext != NULL) {
+  if (numb->idx_ext != NULL) { 
     FREE_DH(numb->idx_ext); CHECK_V_ERROR;
   }
   FREE_DH(numb); CHECK_V_ERROR;
@@ -52,8 +52,8 @@ void Numbering_dhDestroy(Numbering_dh numb)
 
 
 /*
-The internal indices are numbered 0 to nlocal-1 so they do not
-need to be sorted.  The external indices are sorted so that
+The internal indices are numbered 0 to nlocal-1 so they do not 
+need to be sorted.  The external indices are sorted so that 
 the indices from a given processor are stored contiguously.
 Then in the matvec, no reordering of the data is needed.
 */
@@ -85,8 +85,8 @@ void Numbering_dhSetup(Numbering_dh numb, Mat_dh mat)
 
   global_to_local_hash = numb->global_to_local;
   idx_ext = numb->idx_ext = (HYPRE_Int*)MALLOC_DH(size*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-
-  /* find all external indices; at the end of this block,
+  
+  /* find all external indices; at the end of this block, 
      idx_ext[] will contain an unsorted list of external indices.
    */
   len = mat->rp[m];
@@ -149,7 +149,7 @@ void Numbering_dhSetup(Numbering_dh numb, Mat_dh mat)
 
 #undef __FUNC__
 #define __FUNC__ "Numbering_dhGlobalToLocal"
-void Numbering_dhGlobalToLocal(Numbering_dh numb, HYPRE_Int len,
+void Numbering_dhGlobalToLocal(Numbering_dh numb, HYPRE_Int len, 
                                       HYPRE_Int *global, HYPRE_Int *local)
 {
   START_FUNC_DH
@@ -172,7 +172,7 @@ void Numbering_dhGlobalToLocal(Numbering_dh numb, HYPRE_Int len,
       } else {
         local[i] = data;
       }
-    }
+    } 
   }
   END_FUNC_DH
 }

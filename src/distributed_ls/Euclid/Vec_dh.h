@@ -22,7 +22,7 @@ extern void Vec_dhInit(Vec_dh v, HYPRE_Int size);
 
 extern void Vec_dhDuplicate(Vec_dh v, Vec_dh *out);
         /* creates vec and allocates storage, but neither
-         * initializes nor copies values
+         * initializes nor copies values 
          */
 
 extern void Vec_dhCopy(Vec_dh x, Vec_dh y);
@@ -38,5 +38,5 @@ extern void Vec_dhSetRand(Vec_dh v);
 extern void Vec_dhRead(Vec_dh *v, HYPRE_Int ignore, char *filename);
 extern void Vec_dhReadBIN(Vec_dh *v, char *filename);
 extern void Vec_dhPrint(Vec_dh v, SubdomainGraph_dh sg, char *filename);
-extern void Vec_dhPrintBIN(Vec_dh v, SubdomainGraph_dh sg, char *filename);
+extern void Vec_dhPrintBIN(Vec_dh v, SubdomainGraph_dh sg, char *filename); 
 #endif

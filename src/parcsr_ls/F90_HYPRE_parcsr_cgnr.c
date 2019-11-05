@@ -17,7 +17,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+    
 /*--------------------------------------------------------------------------
  * HYPRE_ParCSRCGNRCreate
  *--------------------------------------------------------------------------*/
@@ -39,7 +39,7 @@ hypre_F90_IFACE(hypre_parcsrcgnrcreate, HYPRE_PARCSRCGNRCREATE)
  * HYPRE_ParCSRCGNRDestroy
  *--------------------------------------------------------------------------*/
 
-void
+void 
 hypre_F90_IFACE(hypre_parcsrcgnrdestroy, HYPRE_PARCSRCGNRDESTROY)
    ( hypre_F90_Obj *solver,
      hypre_F90_Int *ierr    )
@@ -53,7 +53,7 @@ hypre_F90_IFACE(hypre_parcsrcgnrdestroy, HYPRE_PARCSRCGNRDESTROY)
  * HYPRE_ParCSRCGNRSetup
  *--------------------------------------------------------------------------*/
 
-void
+void 
 hypre_F90_IFACE(hypre_parcsrcgnrsetup, HYPRE_PARCSRCGNRSETUP)
    ( hypre_F90_Obj *solver,
      hypre_F90_Obj *A,
@@ -73,7 +73,7 @@ hypre_F90_IFACE(hypre_parcsrcgnrsetup, HYPRE_PARCSRCGNRSETUP)
  * HYPRE_ParCSRCGNRSolve
  *--------------------------------------------------------------------------*/
 
-void
+void 
 hypre_F90_IFACE(hypre_parcsrcgnrsolve, HYPRE_PARCSRCGNRSOLVE)
    ( hypre_F90_Obj *solver,
      hypre_F90_Obj *A,
@@ -296,7 +296,7 @@ hypre_F90_IFACE(hypre_parcsrcgnrgetfinalrelativ, HYPRE_PARCSRCGNRGETFINALRELATIV
            hypre_F90_PassObj (HYPRE_Solver, solver),
            hypre_F90_PassRealRef (norm)     ) );
 }
-
+    
 #ifdef __cplusplus
 }
 #endif

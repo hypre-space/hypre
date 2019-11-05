@@ -8,7 +8,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+    
 /******************************************************************************
  * Definitions of IJMatrix Fortran interface routines
  *****************************************************************************/
@@ -148,7 +148,7 @@ extern void hypre_F90_NAME(fhypre_ijvectorread, FHYPRE_IJVECTORREAD)
         hypre_F90_NAME(fhypre_ijvectorprint, FHYPRE_IJVECTORPRINT)
 extern void hypre_F90_NAME(fhypre_ijvectorprint, FHYPRE_IJVECTORPRINT)
                       (hypre_F90_Obj *, const char *);
-
+    
 #ifdef __cplusplus
 }
 #endif

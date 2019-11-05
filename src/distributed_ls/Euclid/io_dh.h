@@ -6,7 +6,7 @@
  ******************************************************************************/
 
 /*
-   Note: this module contains functionality for reading/writing
+   Note: this module contains functionality for reading/writing 
          Euclid's binary io format, and opening and closing files.
          Additional io can be found in in mat_dh_private, which contains
          private functions for reading/writing various matrix and
@@ -33,7 +33,7 @@ bool isSmallEndian();
 
 /* seq only ?? */
 extern void io_dh_print_ebin_mat_private(HYPRE_Int m, HYPRE_Int beg_row,
-                                HYPRE_Int *rp, HYPRE_Int *cval, HYPRE_Real *aval,
+                                HYPRE_Int *rp, HYPRE_Int *cval, HYPRE_Real *aval, 
                            HYPRE_Int *n2o, HYPRE_Int *o2n, Hash_i_dh hash, char *filename);
 
 /* seq only ?? */

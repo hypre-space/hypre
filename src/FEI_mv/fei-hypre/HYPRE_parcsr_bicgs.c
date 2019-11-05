@@ -96,15 +96,15 @@ int HYPRE_ParCSRBiCGSSetStopCrit( HYPRE_Solver solver, int stop_crit )
 
 int HYPRE_ParCSRBiCGSSetPrecond( HYPRE_Solver  solver,
           int (*precond)      (HYPRE_Solver sol, HYPRE_ParCSRMatrix matrix,
-             HYPRE_ParVector b, HYPRE_ParVector x),
+			       HYPRE_ParVector b, HYPRE_ParVector x),
           int (*precond_setup)(HYPRE_Solver sol, HYPRE_ParCSRMatrix matrix,
-             HYPRE_ParVector b, HYPRE_ParVector x),
+			       HYPRE_ParVector b, HYPRE_ParVector x),
           void               *precond_data )
 {
    return( hypre_BiCGSSetPrecond( (void *) solver,
-            (HYPRE_Int (*)(void*,void*,void*,void*))precond,
-            (HYPRE_Int (*)(void*,void*,void*,void*))precond_setup,
-            precond_data ) );
+								  (HYPRE_Int (*)(void*,void*,void*,void*))precond,
+								  (HYPRE_Int (*)(void*,void*,void*,void*))precond_setup,
+								  precond_data ) );
 }
 
 /*--------------------------------------------------------------------------

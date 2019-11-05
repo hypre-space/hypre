@@ -15,10 +15,10 @@
 
 struct _timeLog_dh {
   HYPRE_Int first;
-  HYPRE_Int last;
+  HYPRE_Int last; 
   HYPRE_Real time[MAX_TIME_MARKS];
   char   desc[MAX_TIME_MARKS][MAX_DESC_LENGTH];
-  Timer_dh timer;
+  Timer_dh timer; 
 };
 
 #undef __FUNC__
@@ -40,7 +40,7 @@ void TimeLog_dhCreate(TimeLog_dh *t)
 void TimeLog_dhDestroy(TimeLog_dh t)
 {
   START_FUNC_DH
-  Timer_dhDestroy(t->timer);
+  Timer_dhDestroy(t->timer); 
   FREE_DH(t);
   END_FUNC_DH
 }
@@ -127,11 +127,11 @@ void TimeLog_dhPrint(TimeLog_dh t, FILE *fp, bool allPrint)
       hypre_fprintf(fp, "\n   self     max     min\n");
       for (i=0; i<t->last; ++i) {
         hypre_fprintf(fp, "%7.3f %7.3f %7.3f   #%s\n", t->time[i],
-                                timeMax[i], timeMin[i],
+                                timeMax[i], timeMin[i], 
                                 t->desc[i]);
       }
       fflush(fp);
-    }
+    } 
   } /* if (fp != NULL) */
   END_FUNC_DH
 }

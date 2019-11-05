@@ -17,7 +17,7 @@
  *--------------------------------------------------------------------------*/
 /* to do, not trivial */
 /*
-HYPRE_Int
+HYPRE_Int 
 HYPRE_ParCSRLGMRESDestroy( HYPRE_Solver solver )
 {
    return( hypre_LGMRESDestroy( (void *) solver ) );
@@ -28,7 +28,7 @@ HYPRE_ParCSRLGMRESDestroy( HYPRE_Solver solver )
  * HYPRE_LGMRESSetup
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int
+HYPRE_Int 
 HYPRE_LGMRESSetup( HYPRE_Solver solver,
                         HYPRE_Matrix A,
                         HYPRE_Vector b,
@@ -44,7 +44,7 @@ HYPRE_LGMRESSetup( HYPRE_Solver solver,
  * HYPRE_LGMRESSolve
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int
+HYPRE_Int 
 HYPRE_LGMRESSolve( HYPRE_Solver solver,
                         HYPRE_Matrix A,
                         HYPRE_Vector b,
@@ -193,9 +193,9 @@ HYPRE_LGMRESSetPrecond( HYPRE_Solver          solver,
                              HYPRE_Solver          precond_solver )
 {
    return( hypre_LGMRESSetPrecond( (void *) solver,
-            (HYPRE_Int (*)(void*, void*, void*, void*))precond,
-            (HYPRE_Int (*)(void*, void*, void*, void*))precond_setup,
-            (void *) precond_solver ) );
+								   (HYPRE_Int (*)(void*, void*, void*, void*))precond,
+								   (HYPRE_Int (*)(void*, void*, void*, void*))precond_setup,
+								   (void *) precond_solver ) );
 }
 
 /*--------------------------------------------------------------------------

@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
-/****************************************************************************/
+/****************************************************************************/ 
 /* data structures for local matrix and ml object                           */
 /*--------------------------------------------------------------------------*/
 
@@ -28,7 +28,7 @@ typedef struct
     int *partition;
 }
 MLMaxwell_Context;
-
+    
 typedef struct
 {
     MPI_Comm comm;
@@ -57,7 +57,7 @@ typedef struct
     MLMaxwell_Context *Ann_contxt;
     void              **node_args;
     void              **edge_args;
-}
+} 
 MLMaxwell_Link;
 
 #endif

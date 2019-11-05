@@ -6,11 +6,11 @@
  ******************************************************************************/
 
 #include "_hypre_parcsr_mv.h"
-
+ 
 /*--------------------------------------------------------------------------
- * Test driver for Boolean matrix multiplication, C=A*B .
+ * Test driver for Boolean matrix multiplication, C=A*B . 
  *--------------------------------------------------------------------------*/
-
+ 
 HYPRE_Int
 main( HYPRE_Int   argc,
       char *argv[] )
@@ -34,20 +34,20 @@ main( HYPRE_Int   argc,
 
    if (my_id == 0)
    {
-      As = hypre_CSRBooleanMatrixRead("inpr");
-      a_nrows = hypre_CSRBooleanMatrix_Get_NRows( As );
-      a_ncols = hypre_CSRBooleanMatrix_Get_NCols( As );
-      hypre_printf(" read input A(%i,%i)\n",a_nrows,a_ncols);
-      Bs = hypre_CSRBooleanMatrixRead("input");
-      b_nrows = hypre_CSRBooleanMatrix_Get_NRows( Bs );
-      b_ncols = hypre_CSRBooleanMatrix_Get_NCols( Bs );
-      hypre_printf(" read input B(%i,%i)\n",b_nrows,b_ncols);
-      if ( a_ncols != b_nrows ) {
-         hypre_printf( "incompatible matrix dimensions! (%i,%i)*(%i,%i)\n",
-               a_nrows,a_ncols,b_nrows,b_ncols );
-         exit(1);
-      }
-
+   	As = hypre_CSRBooleanMatrixRead("inpr");
+        a_nrows = hypre_CSRBooleanMatrix_Get_NRows( As );
+        a_ncols = hypre_CSRBooleanMatrix_Get_NCols( As );
+   	hypre_printf(" read input A(%i,%i)\n",a_nrows,a_ncols);
+   	Bs = hypre_CSRBooleanMatrixRead("input");
+        b_nrows = hypre_CSRBooleanMatrix_Get_NRows( Bs );
+        b_ncols = hypre_CSRBooleanMatrix_Get_NCols( Bs );
+   	hypre_printf(" read input B(%i,%i)\n",b_nrows,b_ncols);
+        if ( a_ncols != b_nrows ) {
+           hypre_printf( "incompatible matrix dimensions! (%i,%i)*(%i,%i)\n",
+                   a_nrows,a_ncols,b_nrows,b_ncols );
+           exit(1);
+        }
+        
    }
    A = hypre_CSRBooleanMatrixToParCSRBooleanMatrix
       (hypre_MPI_COMM_WORLD, As, row_starts, col_starts);
@@ -65,8 +65,8 @@ main( HYPRE_Int   argc,
 
    if (my_id == 0)
    {
-      hypre_CSRBooleanMatrixDestroy(As);
-      hypre_CSRBooleanMatrixDestroy(Bs);
+	hypre_CSRBooleanMatrixDestroy(As);
+   	hypre_CSRBooleanMatrixDestroy(Bs);
    }
    hypre_ParCSRBooleanMatrixDestroy(A);
    hypre_ParCSRBooleanMatrixDestroy(B);

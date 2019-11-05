@@ -35,7 +35,7 @@
 
 #if ( !defined(FAKE_MPI) && defined(USING_MPI) && \
       !defined(HYPRE_MODE) && !defined(PETSC_MODE) )
-#include <mpi.h>
+#include <mpi.h> 
 #endif
 
 #if defined(FAKE_MPI)
@@ -54,8 +54,8 @@
 
 /* #include "macros_dh.h" */ /* macros for error checking, etc */
 
-/*-----------------------------------------------------------
- *  Euclid classes
+/*----------------------------------------------------------- 
+ *  Euclid classes 
  *-----------------------------------------------------------*/
 typedef struct _matgenfd*           MatGenFD;
 typedef struct _subdomain_dh*       SubdomainGraph_dh;
@@ -98,7 +98,7 @@ typedef HYPRE_Int bool;
 
 /* ------------------------------------------------------------------
  * Globally scoped variables, error handling functions, etc.
- * These are all defined in /src/globalObjects.c
+ * These are all defined in /src/globalObjects.c 
  * ------------------------------------------------------------------*/
 extern Parser_dh   parser_dh;  /* for setting/getting runtime options */
 extern TimeLog_dh  tlog_dh;    /* internal timing  functionality */
@@ -106,7 +106,7 @@ extern Mem_dh      mem_dh;     /* memory management */
 extern FILE        *logFile;
 extern HYPRE_Int         np_dh;     /* number of processors and subdomains */
 extern HYPRE_Int         myid_dh;   /* rank of this processor (and subdomain) */
-extern MPI_Comm    comm_dh;
+extern MPI_Comm    comm_dh; 
 
 
 extern bool ignoreMe;    /* used to stop compiler complaints */
@@ -134,8 +134,8 @@ extern void  printErrorMsg(FILE *fp);
 extern char  msgBuf_dh[MSG_BUF_SIZE_DH];
 
 /* Each processor (may) open a logfile.
- * The bools are switches for controlling the amount of informational
- * output, and where it gets written to.  Function trace logging is only
+ * The bools are switches for controlling the amount of informational 
+ * output, and where it gets written to.  Function trace logging is only 
  * enabled when compiled with the debugging (-g) option.
  */
 extern void openLogfile_dh(HYPRE_Int argc, char *argv[]);
@@ -152,7 +152,7 @@ extern void printFunctionStack(FILE *fp);
 
 extern void EuclidInitialize(HYPRE_Int argc, char *argv[], char *help); /* instantiates global objects */
 extern void EuclidFinalize();    /* deletes global objects */
-extern bool EuclidIsInitialized();
+extern bool EuclidIsInitialized(); 
 extern void printf_dh(char *fmt, ...);
 extern void fprintf_dh(FILE *fp, char *fmt, ...);
 

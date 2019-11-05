@@ -38,7 +38,7 @@
  * HYPRE_ParCSRPilutCreate
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int
+HYPRE_Int 
 HYPRE_ParCSRPilutCreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
 #ifdef HYPRE_MIXEDINT
@@ -46,10 +46,10 @@ HYPRE_ParCSRPilutCreate( MPI_Comm comm, HYPRE_Solver *solver )
    return hypre_error_flag;
 #else
 
-   HYPRE_NewDistributedMatrixPilutSolver( comm, NULL,
+   HYPRE_NewDistributedMatrixPilutSolver( comm, NULL, 
             (HYPRE_DistributedMatrixPilutSolver *) solver);
 
-   HYPRE_DistributedMatrixPilutSolverInitialize(
+   HYPRE_DistributedMatrixPilutSolverInitialize( 
       (HYPRE_DistributedMatrixPilutSolver) solver );
 
    return hypre_error_flag;
@@ -60,7 +60,7 @@ HYPRE_ParCSRPilutCreate( MPI_Comm comm, HYPRE_Solver *solver )
  * HYPRE_ParCSRPilutDestroy
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int
+HYPRE_Int 
 HYPRE_ParCSRPilutDestroy( HYPRE_Solver solver )
 {
 #ifdef HYPRE_MIXEDINT
@@ -83,7 +83,7 @@ HYPRE_ParCSRPilutDestroy( HYPRE_Solver solver )
  * HYPRE_ParCSRPilutSetup
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int
+HYPRE_Int 
 HYPRE_ParCSRPilutSetup( HYPRE_Solver solver,
                    HYPRE_ParCSRMatrix A,
                    HYPRE_ParVector b,
@@ -95,7 +95,7 @@ HYPRE_ParCSRPilutSetup( HYPRE_Solver solver,
 #else
 
    HYPRE_DistributedMatrix matrix;
-   HYPRE_DistributedMatrixPilutSolver distributed_solver =
+   HYPRE_DistributedMatrixPilutSolver distributed_solver = 
       (HYPRE_DistributedMatrixPilutSolver) solver;
 
    HYPRE_ConvertParCSRMatrixToDistributedMatrix(
@@ -113,7 +113,7 @@ HYPRE_ParCSRPilutSetup( HYPRE_Solver solver,
  * HYPRE_ParCSRPilutSolve
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int
+HYPRE_Int 
 HYPRE_ParCSRPilutSolve( HYPRE_Solver solver,
                    HYPRE_ParCSRMatrix A,
                    HYPRE_ParVector b,

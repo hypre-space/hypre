@@ -17,7 +17,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+    
 /*--------------------------------------------------------------------------
  * HYPRE_StructGridCreate
  *--------------------------------------------------------------------------*/
@@ -113,7 +113,7 @@ hypre_F90_IFACE(hypre_structgridsetnumghost, HYPRE_STRUCTGRIDSETNUMGHOST)
            hypre_F90_PassObj (HYPRE_StructGrid, grid),
            hypre_F90_PassIntArray (num_ghost)) );
 }
-
+    
 #ifdef __cplusplus
 }
 #endif

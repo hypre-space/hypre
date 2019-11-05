@@ -17,11 +17,11 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+    
 /*--------------------------------------------------------------------------
  * HYPRE_ParCSRMatrixCreate
  *--------------------------------------------------------------------------*/
-
+    
 void
 hypre_F90_IFACE(hypre_parcsrmatrixcreate, HYPRE_PARCSRMATRIXCREATE)
    ( hypre_F90_Comm *comm,
@@ -52,7 +52,7 @@ hypre_F90_IFACE(hypre_parcsrmatrixcreate, HYPRE_PARCSRMATRIXCREATE)
  * HYPRE_ParCSRMatrixDestroy
  *--------------------------------------------------------------------------*/
 
-void
+void 
 hypre_F90_IFACE(hypre_parcsrmatrixdestroy, HYPRE_PARCSRMATRIXDESTROY)
    ( hypre_F90_Obj *matrix,
      hypre_F90_Int *ierr    )
@@ -80,7 +80,7 @@ hypre_F90_IFACE(hypre_parcsrmatrixinitialize, HYPRE_PARCSRMATRIXINITIALIZE)
  * HYPRE_ParCSRMatrixRead
  *--------------------------------------------------------------------------*/
 
-void
+void 
 hypre_F90_IFACE(hypre_parcsrmatrixread, HYPRE_PARCSRMATRIXREAD)
    ( hypre_F90_Comm *comm,
      char     *file_name,
@@ -129,7 +129,7 @@ hypre_F90_IFACE(hypre_parcsrmatrixprint, HYPRE_PARCSRMATRIXPRINT)
  * HYPRE_ParCSRMatrixGetComm
  *--------------------------------------------------------------------------*/
 
-void
+void 
 hypre_F90_IFACE(hypre_parcsrmatrixgetcomm, HYPRE_PARCSRMATRIXGETCOMM)
    ( hypre_F90_Obj *matrix,
      hypre_F90_Comm *comm,
@@ -145,7 +145,7 @@ hypre_F90_IFACE(hypre_parcsrmatrixgetcomm, HYPRE_PARCSRMATRIXGETCOMM)
  * HYPRE_ParCSRMatrixGetDims
  *--------------------------------------------------------------------------*/
 
-void
+void 
 hypre_F90_IFACE(hypre_parcsrmatrixgetdims, HYPRE_PARCSRMATRIXGETDIMS)
    ( hypre_F90_Obj *matrix,
      hypre_F90_BigInt *M,
@@ -162,7 +162,7 @@ hypre_F90_IFACE(hypre_parcsrmatrixgetdims, HYPRE_PARCSRMATRIXGETDIMS)
 /*--------------------------------------------------------------------------
  * HYPRE_ParCSRMatrixGetRowPartitioning
  *--------------------------------------------------------------------------*/
-
+ 
 void
 hypre_F90_IFACE(hypre_parcsrmatrixgetrowpartiti, HYPRE_PARCSRMATRIXGETROWPARTITI)
    ( hypre_F90_Obj *matrix,
@@ -181,7 +181,7 @@ hypre_F90_IFACE(hypre_parcsrmatrixgetrowpartiti, HYPRE_PARCSRMATRIXGETROWPARTITI
 /*--------------------------------------------------------------------------
  * HYPRE_ParCSRMatrixGetColPartitioning
  *--------------------------------------------------------------------------*/
-
+ 
 void
 hypre_F90_IFACE(hypre_parcsrmatrixgetcolpartiti, HYPRE_PARCSRMATRIXGETCOLPARTITI)
    ( hypre_F90_Obj *matrix,
@@ -201,7 +201,7 @@ hypre_F90_IFACE(hypre_parcsrmatrixgetcolpartiti, HYPRE_PARCSRMATRIXGETCOLPARTITI
  * HYPRE_ParCSRMatrixGetLocalRange
  *--------------------------------------------------------------------------*/
 
-void
+void 
 hypre_F90_IFACE(hypre_parcsrmatrixgetlocalrange, HYPRE_PARCSRMATRIXGETLOCALRANGE)
    ( hypre_F90_Obj *matrix,
      hypre_F90_BigInt *row_start,
@@ -222,7 +222,7 @@ hypre_F90_IFACE(hypre_parcsrmatrixgetlocalrange, HYPRE_PARCSRMATRIXGETLOCALRANGE
 /*--------------------------------------------------------------------------
  * HYPRE_ParCSRMatrixGetRow
  *--------------------------------------------------------------------------*/
-
+ 
 void
 hypre_F90_IFACE(hypre_parcsrmatrixgetrow, HYPRE_PARCSRMATRIXGETROW)
    ( hypre_F90_Obj *matrix,
@@ -259,7 +259,7 @@ hypre_F90_IFACE(hypre_parcsrmatrixrestorerow, HYPRE_PARCSRMATRIXRESTOREROW)
      hypre_F90_Obj *values_ptr,
      hypre_F90_Int *ierr )
 {
-   HYPRE_Int *col_ind;
+   HYPRE_Int *col_ind;  
    HYPRE_Complex    *values;
 
    *ierr = (hypre_F90_Int) HYPRE_ParCSRMatrixRestoreRow(
@@ -281,8 +281,8 @@ void
 hypre_F90_IFACE(hypre_csrmatrixtoparcsrmatrix, HYPRE_CSRMATRIXTOPARCSRMATRIX)
    (hypre_F90_Comm *comm,
     hypre_F90_Obj *A_CSR,
-    hypre_F90_BigIntArray *row_partitioning,
-    hypre_F90_BigIntArray *col_partitioning,
+    hypre_F90_BigIntArray *row_partitioning,  
+    hypre_F90_BigIntArray *col_partitioning,  
     hypre_F90_Obj *matrix,
     hypre_F90_Int *ierr   )
 {
@@ -325,7 +325,7 @@ hypre_F90_IFACE(hypre_parcsrmatrixmatvec, HYPRE_PARCSRMATRIXMATVEC)
      hypre_F90_Obj *A,
      hypre_F90_Obj *x,
      hypre_F90_Complex *beta,
-     hypre_F90_Obj *y,
+     hypre_F90_Obj *y,  
      hypre_F90_Int *ierr   )
 {
 
@@ -360,7 +360,7 @@ hypre_F90_IFACE(hypre_parcsrmatrixmatvect, HYPRE_PARCSRMATRIXMATVECT)
            hypre_F90_PassComplex (beta),
            hypre_F90_PassObj (HYPRE_ParVector, y)      ) );
 }
-
+    
 #ifdef __cplusplus
 }
 #endif

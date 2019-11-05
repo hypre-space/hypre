@@ -19,7 +19,7 @@
 #include "mli_matrix.h"
 
 /**************************************************************************
- * functions
+ * functions 
  *-----------------------------------------------------------------------*/
 
 void MLI_FEDataConstructElemNodeMatrix(MPI_Comm, MLI_FEData*, MLI_Matrix**);

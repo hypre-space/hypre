@@ -6,7 +6,7 @@
 !-----------------------------------------------------------------------
 ! Test driver for structured matrix interface (structured storage)
 !-----------------------------------------------------------------------
-
+ 
 !-----------------------------------------------------------------------
 ! Standard 7-point laplacian in 3D with grid and anisotropy determined
 ! as user settings.
@@ -37,7 +37,7 @@
 
       integer             num_iterations
       double precision    final_res_norm
-
+                     
 !     HYPRE_StructMatrix  A
 !     HYPRE_StructVector  b
 !     HYPRE_StructVector  x
@@ -126,7 +126,7 @@
 !-----------------------------------------------------------------------
 !     Read options
 !-----------------------------------------------------------------------
-
+ 
 !     open( 5, file='struct_linear_solver.in', status='old')
 !
 !     read( 5, *) dim
@@ -264,7 +264,7 @@
                enddo
             enddo
          enddo
-      endif
+      endif 
 
       call HYPRE_StructGridCreate(MPI_COMM_WORLD, dim, grid, ierr)
       do ib=1,nblocks
@@ -282,9 +282,9 @@
          offsets(1,2) =  0
       elseif (dim .eq. 2) then
          offsets(1,1) = -1
-         offsets(2,1) =  0
+         offsets(2,1) =  0 
          offsets(1,2) =  0
-         offsets(2,2) = -1
+         offsets(2,2) = -1 
          offsets(1,3) =  0
          offsets(2,3) =  0
       elseif (dim .eq. 3) then
@@ -293,7 +293,7 @@
          offsets(3,1) =  0
          offsets(1,2) =  0
          offsets(2,2) = -1
-         offsets(3,2) =  0
+         offsets(3,2) =  0 
          offsets(1,3) =  0
          offsets(2,3) =  0
          offsets(3,3) = -1
@@ -301,8 +301,8 @@
          offsets(2,4) =  0
          offsets(3,4) =  0
       endif
-
-      call HYPRE_StructStencilCreate(dim, (dim+1), stencil, ierr)
+ 
+      call HYPRE_StructStencilCreate(dim, (dim+1), stencil, ierr) 
       do s=1,dim+1
          call HYPRE_StructStencilSetElement(stencil, (s - 1),
      & offsets(1,s), ierr)
@@ -316,7 +316,7 @@
          A_num_ghost(2*i - 1) = 1
          A_num_ghost(2*i) = 1
       enddo
-
+ 
       call HYPRE_StructMatrixCreate(MPI_COMM_WORLD, grid, stencil,
      & A, ierr)
       call HYPRE_StructMatrixSetSymmetric(A, 1, ierr)
@@ -404,7 +404,7 @@
       call HYPRE_StructVectorAssemble(x, ierr)
 !     call HYPRE_StructVectorPrint(x, zero, ierr)
 !     call HYPRE_StructVectorPrint("driver.out.x0", x, zero, ierr)
-
+ 
 !-----------------------------------------------------------------------
 !     Solve the linear system
 !-----------------------------------------------------------------------

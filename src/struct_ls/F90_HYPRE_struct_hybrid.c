@@ -11,7 +11,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+    
 /*--------------------------------------------------------------------------
  * HYPRE_StructHybridCreate
  *--------------------------------------------------------------------------*/
@@ -205,7 +205,7 @@ hypre_F90_IFACE(hypre_structhybridsetrelchange, HYPRE_STRUCTHYBRIDSETRELCHANGE)
      hypre_F90_Int *rel_change,
      hypre_F90_Int *ierr       )
 {
-   *ierr = (hypre_F90_Int)
+   *ierr = (hypre_F90_Int) 
       ( HYPRE_StructHybridSetRelChange(
            hypre_F90_PassObj (HYPRE_StructSolver, solver),
            hypre_F90_PassInt (rel_change)  ) );
@@ -379,7 +379,7 @@ hypre_F90_IFACE(hypre_structhybridgetfinalrelat, HYPRE_STRUCTHYBRIDGETFINALRELAT
            hypre_F90_PassObj (HYPRE_StructSolver, solver),
            hypre_F90_PassRealRef (norm)    ) );
 }
-
+    
 #ifdef __cplusplus
 }
 #endif

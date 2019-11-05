@@ -8,10 +8,10 @@
 typedef struct
 {
    HYPRE_BigInt row;
-
+                                                                                                                                    
    HYPRE_Int ncols;
    HYPRE_BigInt      *cols;
    HYPRE_Real   *data;
-
+                                                                                                                                    
 } hypre_MaxwellOffProcRow;
 

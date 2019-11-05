@@ -23,16 +23,16 @@ hypre_StructCopy( hypre_StructVector *x,
 {
    hypre_Box       *x_data_box;
    hypre_Box       *y_data_box;
-
+                   
    HYPRE_Complex   *xp;
    HYPRE_Complex   *yp;
-
+                   
    hypre_BoxArray  *boxes;
    hypre_Box       *box;
    hypre_Index      loop_size;
    hypre_IndexRef   start;
    hypre_Index      unit_stride;
-
+                   
    HYPRE_Int        i;
 
    hypre_SetIndex(unit_stride, 1);
@@ -73,7 +73,7 @@ hypre_StructCopy( hypre_StructVector *x,
 
 HYPRE_Int
 hypre_StructPartialCopy( hypre_StructVector  *x,
-                         hypre_StructVector  *y,
+                         hypre_StructVector  *y,    
                          hypre_BoxArrayArray *array_boxes )
 {
    hypre_Box       *x_data_box;

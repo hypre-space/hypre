@@ -11,13 +11,13 @@
 #include "../parcsr_ls/_hypre_parcsr_ls.h"
 #include "../krylov/krylov.h"
 #include "par_csr_block_matrix.h"
-
+ 
 extern HYPRE_Int MyBuildParLaplacian9pt(HYPRE_ParCSRMatrix  *A_ptr);
 
 /*--------------------------------------------------------------------------
- * Test driver for unstructured matrix interface
+ * Test driver for unstructured matrix interface 
  *--------------------------------------------------------------------------*/
-
+ 
 HYPRE_Int main( HYPRE_Int   argc, char *argv[] )
 {
    hypre_ParCSRMatrix      *par_matrix, *g_matrix, **submatrices;
@@ -288,8 +288,8 @@ HYPRE_Int main( HYPRE_Int   argc, char *argv[] )
    diag_i = hypre_CSRBlockMatrixI(A_diag);
    diag_j = hypre_CSRBlockMatrixJ(A_diag);
    diag_d = hypre_CSRBlockMatrixData(A_diag);
-   for (ii = 0; ii < hypre_ParCSRMatrixNumRows(par_matrix); ii++)
-      for (jj = diag_i[ii]; jj < diag_i[ii+1]; jj++)
+   for (ii = 0; ii < hypre_ParCSRMatrixNumRows(par_matrix); ii++) 
+      for (jj = diag_i[ii]; jj < diag_i[ii+1]; jj++) 
          hypre_printf("A %4d %4d = %e\n",ii,diag_j[jj],diag_d[jj]);
 
    diag = hypre_ParCSRBlockMatrixDiag(rap_matrix);
@@ -298,10 +298,10 @@ HYPRE_Int main( HYPRE_Int   argc, char *argv[] )
    diag_d = hypre_CSRBlockMatrixData(diag);
    hypre_printf("RAP block size = %d\n",hypre_ParCSRBlockMatrixBlockSize(rap_matrix));
    hypre_printf("RAP num rows   = %d\n",hypre_ParCSRBlockMatrixNumRows(rap_matrix));
-   for (ii = 0; ii < hypre_ParCSRBlockMatrixNumRows(rap_matrix); ii++)
-      for (row = 0; row < block_size; row++)
-         for (jj = diag_i[ii]; jj < diag_i[ii+1]; jj++)
-            for (col = 0; col < block_size; col++)
+   for (ii = 0; ii < hypre_ParCSRBlockMatrixNumRows(rap_matrix); ii++) 
+      for (row = 0; row < block_size; row++) 
+         for (jj = diag_i[ii]; jj < diag_i[ii+1]; jj++) 
+            for (col = 0; col < block_size; col++) 
                hypre_printf("RAP %4d %4d = %e\n",ii*block_size+row,
                    diag_j[jj]*block_size+col,diag_d[(jj+row)*block_size+col]);
    offd = hypre_ParCSRBlockMatrixOffd(rap_matrix);
@@ -310,10 +310,10 @@ HYPRE_Int main( HYPRE_Int   argc, char *argv[] )
    offd_d = hypre_CSRBlockMatrixData(offd);
    if (num_cols_offd)
    {
-      for (ii = 0; ii < hypre_ParCSRBlockMatrixNumRows(rap_matrix); ii++)
-         for (row = 0; row < block_size; row++)
-            for (jj = offd_i[ii]; jj < offd_i[ii+1]; jj++)
-               for (col = 0; col < block_size; col++)
+      for (ii = 0; ii < hypre_ParCSRBlockMatrixNumRows(rap_matrix); ii++) 
+         for (row = 0; row < block_size; row++) 
+            for (jj = offd_i[ii]; jj < offd_i[ii+1]; jj++) 
+               for (col = 0; col < block_size; col++) 
                   hypre_printf("RAPOFFD %4d %4d = %e\n",ii*block_size+row,
                      offd_j[jj]*block_size+col,offd_d[(jj+row)*block_size+col]);
    }
@@ -361,8 +361,8 @@ HYPRE_Int main( HYPRE_Int   argc, char *argv[] )
       row_starts[1] = col_starts[1] = global_num_rows;
       num_cols_offd = 0;
       num_nonzeros_offd = 0;
-      par_matrix = hypre_ParCSRMatrixCreate(hypre_MPI_COMM_WORLD,global_num_rows,
-                      global_num_rows, row_starts, col_starts, num_cols_offd,
+      par_matrix = hypre_ParCSRMatrixCreate(hypre_MPI_COMM_WORLD,global_num_rows, 
+                      global_num_rows, row_starts, col_starts, num_cols_offd, 
                       num_nonzeros_diag, num_nonzeros_offd);
       A_diag = hypre_ParCSRMatrixDiag(par_matrix);
       hypre_CSRMatrixI(A_diag) = diag_i;
@@ -374,7 +374,7 @@ HYPRE_Int main( HYPRE_Int   argc, char *argv[] )
       /* --------------------------------------------- */
 
       fp = fopen("Gmat", "r");
-      hypre_fscanf(fp, "%d %d %d", &global_num_rows, &global_num_cols,
+      hypre_fscanf(fp, "%d %d %d", &global_num_rows, &global_num_cols, 
              &num_nonzeros_diag);
       diag_i = hypre_TAlloc(HYPRE_Int, (global_num_rows+1) , HYPRE_MEMORY_HOST);
       diag_j = hypre_TAlloc(HYPRE_Int, num_nonzeros_diag , HYPRE_MEMORY_HOST);
@@ -403,8 +403,8 @@ HYPRE_Int main( HYPRE_Int   argc, char *argv[] )
       col_starts[1] = global_num_cols;
       num_cols_offd = 0;
       num_nonzeros_offd = 0;
-      g_matrix = hypre_ParCSRMatrixCreate(hypre_MPI_COMM_WORLD,global_num_rows,
-                      global_num_cols, row_starts, col_starts, num_cols_offd,
+      g_matrix = hypre_ParCSRMatrixCreate(hypre_MPI_COMM_WORLD,global_num_rows, 
+                      global_num_cols, row_starts, col_starts, num_cols_offd, 
                       num_nonzeros_diag, num_nonzeros_offd);
       A_diag = hypre_ParCSRMatrixDiag(g_matrix);
       hypre_CSRMatrixI(A_diag) = diag_i;
@@ -416,7 +416,7 @@ HYPRE_Int main( HYPRE_Int   argc, char *argv[] )
       /* --------------------------------------------- */
 
       hypre_ParCSRMatrixGenSpanningTree(g_matrix, &indices, 0);
-      submatrices = (hypre_ParCSRMatrix **)
+      submatrices = (hypre_ParCSRMatrix **) 
                     hypre_TAlloc(hypre_ParCSRMatrix*, 4, HYPRE_MEMORY_HOST);
       hypre_ParCSRMatrixExtractSubmatrices(par_matrix, indices, &submatrices);
    }
@@ -444,7 +444,7 @@ HYPRE_Int main( HYPRE_Int   argc, char *argv[] )
       /* for (ii = 0; ii < local_size/2; ii++) index_set[jj++] = ii * 2; */
       for (ii = 0; ii < local_size/2; ii++) index_set[jj++] = ii;
       HYPRE_BlockTridiagSetIndexSet(precon, jj, index_set);
-      HYPRE_GMRESSetPrecond(gmres_solver,
+      HYPRE_GMRESSetPrecond(gmres_solver, 
                          (HYPRE_PtrToSolverFcn) HYPRE_BlockTridiagSolve,
                          (HYPRE_PtrToSolverFcn) HYPRE_BlockTridiagSetup,
                          precon);
@@ -483,7 +483,7 @@ HYPRE_Int main( HYPRE_Int   argc, char *argv[] )
  * Build standard 9-point laplacian in 2D with grid and anisotropy.
  * Parameters given in command line.
  *----------------------------------------------------------------------*/
-
+                                                                                       
 HYPRE_Int MyBuildParLaplacian9pt(HYPRE_ParCSRMatrix  *A_ptr)
 {
    HYPRE_Int                 nx, ny;

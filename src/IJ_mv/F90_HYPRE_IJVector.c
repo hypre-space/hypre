@@ -17,7 +17,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+    
 /*--------------------------------------------------------------------------
  * HYPRE_IJVectorCreate
  *--------------------------------------------------------------------------*/
@@ -34,7 +34,7 @@ hypre_F90_IFACE(hypre_ijvectorcreate, HYPRE_IJVECTORCREATE)
       ( HYPRE_IJVectorCreate(
            hypre_F90_PassComm (comm),
            hypre_F90_PassBigInt (jlower),
-           hypre_F90_PassBigInt (jupper),
+           hypre_F90_PassBigInt (jupper), 
            hypre_F90_PassObjRef (HYPRE_IJVector, vector)  ) );
 }
 
@@ -42,7 +42,7 @@ hypre_F90_IFACE(hypre_ijvectorcreate, HYPRE_IJVECTORCREATE)
  * HYPRE_IJVectorDestroy
  *--------------------------------------------------------------------------*/
 
-void
+void 
 hypre_F90_IFACE(hypre_ijvectordestroy, HYPRE_IJVECTORDESTROY)
    ( hypre_F90_Obj *vector,
      hypre_F90_Int *ierr    )
@@ -144,13 +144,13 @@ hypre_F90_IFACE(hypre_ijvectorgetvalues, HYPRE_IJVECTORGETVALUES)
  * HYPRE_IJVectorSetMaxOffProcElmts
  *--------------------------------------------------------------------------*/
 
-void
+void 
 hypre_F90_IFACE(hypre_ijvectorsetmaxoffprocelmt, HYPRE_IJVECTORSETMAXOFFPROCELMT)
    ( hypre_F90_Obj *vector,
      hypre_F90_Int *max_off_proc_elmts,
      hypre_F90_Int *ierr    )
 {
-   *ierr = (hypre_F90_Int)
+   *ierr = (hypre_F90_Int) 
       ( HYPRE_IJVectorSetMaxOffProcElmts(
            hypre_F90_PassObj (HYPRE_IJVector, vector),
            hypre_F90_PassInt (max_off_proc_elmts) ) );
@@ -160,7 +160,7 @@ hypre_F90_IFACE(hypre_ijvectorsetmaxoffprocelmt, HYPRE_IJVECTORSETMAXOFFPROCELMT
  * HYPRE_IJVectorSetObjectType
  *--------------------------------------------------------------------------*/
 
-void
+void 
 hypre_F90_IFACE(hypre_ijvectorsetobjecttype, HYPRE_IJVECTORSETOBJECTTYPE)
    ( hypre_F90_Obj *vector,
      hypre_F90_Int *type,

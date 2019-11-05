@@ -15,7 +15,7 @@
 #define __MLIMATRIXH__
 
 /*--------------------------------------------------------------------------
- * include files
+ * include files 
  *--------------------------------------------------------------------------*/
 
 #include "_hypre_utilities.h"
@@ -43,7 +43,7 @@ public :
    ~MLI_Matrix();
    void       setSubMatrixEqnList(int leng, int *list);
    void       *getMatrix();
-   void       *takeMatrix();
+   void	      *takeMatrix();
    char       *getName();
    int        apply(double, MLI_Vector *, double, MLI_Vector *, MLI_Vector *);
    MLI_Vector *createVector();
@@ -56,7 +56,7 @@ extern int MLI_Matrix_FormJacobi(MLI_Matrix *A, double alpha, MLI_Matrix **J);
 extern int MLI_Matrix_Compress(MLI_Matrix *A, int blksize, MLI_Matrix **A2);
 extern int MLI_Matrix_GetSubMatrix(MLI_Matrix *A, int nRows, int *rowIndices,
                       int *newNRows, double **newAA);
-extern int MLI_Matrix_GetOverlappedMatrix(MLI_Matrix *, int *offNRows,
+extern int MLI_Matrix_GetOverlappedMatrix(MLI_Matrix *, int *offNRows, 
                       int **offRowLengs, int **offCols, double **offVals);
 #endif
 

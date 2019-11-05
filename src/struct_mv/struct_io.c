@@ -27,14 +27,14 @@ hypre_PrintBoxArrayData( FILE            *file,
 {
    hypre_Box       *box;
    hypre_Box       *data_box;
-
+                   
    HYPRE_Int        data_box_volume;
-
+                   
    hypre_Index      loop_size;
    hypre_IndexRef   start;
    hypre_Index      stride;
    hypre_Index      index;
-
+                   
    HYPRE_Int        i, j, d;
    HYPRE_Complex    value;
    HYPRE_Complex   *data_host;
@@ -57,7 +57,7 @@ hypre_PrintBoxArrayData( FILE            *file,
 #else
    data_host = data;
 #endif
-
+ 
    hypre_SetIndex(stride, 1);
 
    hypre_ForBoxI(i, box_array)
@@ -69,7 +69,7 @@ hypre_PrintBoxArrayData( FILE            *file,
       data_box_volume = hypre_BoxVolume(data_box);
 
       hypre_BoxGetSize(box, loop_size);
-
+ 
       hypre_SerialBoxLoop1Begin(dim, loop_size,
                                 data_box, start, stride, datai);
       {
@@ -101,7 +101,7 @@ hypre_PrintBoxArrayData( FILE            *file,
 #if HYPRE_MEMORY_DEVICE_ACT == HYPRE_MEMORY_DEVICE
    hypre_TFree(data_host_saved, HYPRE_MEMORY_HOST);
 #endif
-
+   
    return hypre_error_flag;
 }
 
@@ -124,14 +124,14 @@ hypre_PrintCCVDBoxArrayData( FILE            *file,
 {
    hypre_Box       *box;
    hypre_Box       *data_box;
-
+                   
    HYPRE_Int        data_box_volume;
-
+                   
    hypre_Index      loop_size;
    hypre_IndexRef   start;
    hypre_Index      stride;
    hypre_Index      index;
-
+                   
    HYPRE_Int        i, j, d;
    HYPRE_Complex    value;
 
@@ -156,7 +156,7 @@ hypre_PrintCCVDBoxArrayData( FILE            *file,
       }
       ++data;
    }
-
+   
 
    /* Then each box has a variable, diagonal, part of the matrix: */
    hypre_ForBoxI(i, box_array)
@@ -170,7 +170,7 @@ hypre_PrintCCVDBoxArrayData( FILE            *file,
       hypre_BoxGetSize(box, loop_size);
 
       hypre_SerialBoxLoop1Begin(dim, loop_size,
-            data_box, start, stride, datai);
+				data_box, start, stride, datai);
       {
          /* Print line of the form: "%d: (%d, %d, %d; %d) %.14e\n" */
          hypre_BoxLoopGetIndex(index);
@@ -209,7 +209,7 @@ hypre_PrintCCBoxArrayData( FILE            *file,
                            HYPRE_Complex   *data       )
 {
    HYPRE_Int        datai;
-
+                   
    HYPRE_Int        i, j;
    HYPRE_Complex    value;
 
@@ -252,13 +252,13 @@ hypre_ReadBoxArrayData( FILE            *file,
 {
    hypre_Box       *box;
    hypre_Box       *data_box;
-
+                   
    HYPRE_Int        data_box_volume;
-
+                   
    hypre_Index      loop_size;
    hypre_IndexRef   start;
    hypre_Index      stride;
-
+                   
    HYPRE_Int        i, j, d, idummy;
 
    /*----------------------------------------
@@ -316,13 +316,13 @@ hypre_ReadBoxArrayData_CC( FILE            *file,
 {
    hypre_Box       *box;
    hypre_Box       *data_box;
-
+                   
    HYPRE_Int        data_box_volume, constant_stencil_size;
-
+                   
    hypre_Index      loop_size;
    hypre_IndexRef   start;
    hypre_Index      stride;
-
+                   
    HYPRE_Int        i, j, d, idummy;
 
    /*----------------------------------------

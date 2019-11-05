@@ -138,7 +138,7 @@ HYPRE_SStructFACZeroAMRMatrixData( HYPRE_SStructMatrix  A,
 {
     return( hypre_ZeroAMRMatrixData(A, part_crse, rfactors) );
 }
-
+                                                                                                                                                             
 /*--------------------------------------------------------------------------
  * HYPRE_SStructFACZeroAMRVectorData
  *--------------------------------------------------------------------------*/

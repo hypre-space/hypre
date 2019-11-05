@@ -17,7 +17,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+    
 /*--------------------------------------------------------------------------
  * HYPRE_ParCSRGMRESCreate
  *--------------------------------------------------------------------------*/
@@ -38,7 +38,7 @@ hypre_F90_IFACE(hypre_parcsrgmrescreate, HYPRE_PARCSRGMRESCREATE)
  * HYPRE_ParCSRGMRESDestroy
  *--------------------------------------------------------------------------*/
 
-void
+void 
 hypre_F90_IFACE(hypre_parcsrgmresdestroy, HYPRE_PARCSRGMRESDESTROY)
    ( hypre_F90_Obj *solver,
      hypre_F90_Int *ierr    )
@@ -52,7 +52,7 @@ hypre_F90_IFACE(hypre_parcsrgmresdestroy, HYPRE_PARCSRGMRESDESTROY)
  * HYPRE_ParCSRGMRESSetup
  *--------------------------------------------------------------------------*/
 
-void
+void 
 hypre_F90_IFACE(hypre_parcsrgmressetup, HYPRE_PARCSRGMRESSETUP)
    ( hypre_F90_Obj *solver,
      hypre_F90_Obj *A,
@@ -72,7 +72,7 @@ hypre_F90_IFACE(hypre_parcsrgmressetup, HYPRE_PARCSRGMRESSETUP)
  * HYPRE_ParCSRGMRESSolve
  *--------------------------------------------------------------------------*/
 
-void
+void 
 hypre_F90_IFACE(hypre_parcsrgmressolve, HYPRE_PARCSRGMRESSOLVE)
    ( hypre_F90_Obj *solver,
      hypre_F90_Obj *A,
@@ -243,7 +243,7 @@ hypre_F90_IFACE(hypre_parcsrgmressetprecond, HYPRE_PARCSRGMRESSETPRECOND)
               HYPRE_ParCSRParaSailsSolve,
               HYPRE_ParCSRParaSailsSetup,
               (HYPRE_Solver)       *precond_solver ) );
-   }
+   } 
    else if (*precond_id == 5)
    {
       *ierr = (hypre_F90_Int)
@@ -252,7 +252,7 @@ hypre_F90_IFACE(hypre_parcsrgmressetprecond, HYPRE_PARCSRGMRESSETPRECOND)
               HYPRE_EuclidSolve,
               HYPRE_EuclidSetup,
               (HYPRE_Solver)       *precond_solver ) );
-   }
+   } 
    else
    {
       *ierr = -1;
@@ -339,7 +339,7 @@ hypre_F90_IFACE(hypre_parcsrgmresgetfinalrelati, HYPRE_PARCSRGMRESGETFINALRELATI
            hypre_F90_PassObj (HYPRE_Solver, solver),
            hypre_F90_PassRealRef (norm)    ) );
 }
-
+    
 #ifdef __cplusplus
 }
 #endif

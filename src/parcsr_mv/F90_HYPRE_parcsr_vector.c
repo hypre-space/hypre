@@ -17,7 +17,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+    
 /*--------------------------------------------------------------------------
  * HYPRE_ParVectorCreate
  *--------------------------------------------------------------------------*/
@@ -64,7 +64,7 @@ hypre_F90_IFACE(hypre_parmultivectorcreate, HYPRE_PARMULTIVECTORCREATE)
  * HYPRE_ParVectorDestroy
  *--------------------------------------------------------------------------*/
 
-void
+void 
 hypre_F90_IFACE(hypre_parvectordestroy, HYPRE_PARVECTORDESTROY)
    ( hypre_F90_Obj *vector,
      hypre_F90_Int *ierr    )
@@ -92,7 +92,7 @@ hypre_F90_IFACE(hypre_parvectorinitialize, HYPRE_PARVECTORINITIALIZE)
  * HYPRE_ParVectorRead
  *--------------------------------------------------------------------------*/
 
-void
+void 
 hypre_F90_IFACE(hypre_parvectorread, HYPRE_PARVECTORREAD)
    ( hypre_F90_Comm *comm,
      hypre_F90_Obj *vector,
@@ -252,7 +252,7 @@ hypre_F90_IFACE(hypre_parvectorinnerprod, HYPRE_PARVECTORINNERPROD)
            hypre_F90_PassObj (HYPRE_ParVector, y),
            hypre_F90_PassRealRef (prod) ) );
 }
-
+    
 #ifdef __cplusplus
 }
 #endif

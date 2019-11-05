@@ -7,7 +7,7 @@
 
 /******************************************************************************
  *
- * Utility functions
+ * Utility functions 
  *
  *****************************************************************************/
 
@@ -26,7 +26,7 @@ typedef struct MLI_Function_Struct MLI_Function;
  * structure for m-Jacobi preconditioner
  *----------------------------------------------------------------------*/
 
-typedef struct
+typedef struct 
 {
    MPI_Comm comm_;
    int      degree_;
@@ -73,41 +73,41 @@ int    MLI_Utils_QR(double *Q, double *R, int nrows, int ncols);
 int    MLI_Utils_SVD(double *uArray, double *sArray, double *vtArray,
                  double *workArray, int m, int n, int workLen);
 int    MLI_Utils_singular_vectors(int n, double *uArray);
-int    MLI_Utils_ComputeLowEnergyLanczos(hypre_ParCSRMatrix *A,
+int    MLI_Utils_ComputeLowEnergyLanczos(hypre_ParCSRMatrix *A, 
                  int maxIter, int num_vecs_to_return, double *le_vectors);
-int    MLI_Utils_HypreMatrixReadTuminFormat(char *filename, MPI_Comm comm,
+int    MLI_Utils_HypreMatrixReadTuminFormat(char *filename, MPI_Comm comm, 
                  int blksize, void **mat, int flag, double **scaleVec);
-int    MLI_Utils_HypreMatrixReadIJAFormat(char *filename, MPI_Comm comm,
+int    MLI_Utils_HypreMatrixReadIJAFormat(char *filename, MPI_Comm comm, 
                  int blksize, void **mat, int flag, double **scaleVec);
-int    MLI_Utils_HypreParMatrixReadIJAFormat(char *filename, MPI_Comm comm,
+int    MLI_Utils_HypreParMatrixReadIJAFormat(char *filename, MPI_Comm comm, 
                  void **mat, int flag, double **scaleVec);
-int    MLI_Utils_HypreMatrixReadHBFormat(char *filename, MPI_Comm comm,
+int    MLI_Utils_HypreMatrixReadHBFormat(char *filename, MPI_Comm comm, 
                  void **mat);
 int    MLI_Utils_DoubleVectorRead(char *, MPI_Comm, int, int, double *vec);
 int    MLI_Utils_DoubleParVectorRead(char *, MPI_Comm, int, int, double *vec);
-int    MLI_Utils_ParCSRMLISetup(HYPRE_Solver, HYPRE_ParCSRMatrix,
+int    MLI_Utils_ParCSRMLISetup(HYPRE_Solver, HYPRE_ParCSRMatrix, 
                                 HYPRE_ParVector, HYPRE_ParVector);
-int    MLI_Utils_ParCSRMLISolve(HYPRE_Solver, HYPRE_ParCSRMatrix,
+int    MLI_Utils_ParCSRMLISolve(HYPRE_Solver, HYPRE_ParCSRMatrix, 
                                 HYPRE_ParVector, HYPRE_ParVector);
 int    MLI_Utils_mJacobiCreate(MPI_Comm, HYPRE_Solver *);
 int    MLI_Utils_mJacobiDestroy(HYPRE_Solver);
 int    MLI_Utils_mJacobiSetParams(HYPRE_Solver, int);
-int    MLI_Utils_mJacobiSetup(HYPRE_Solver, HYPRE_ParCSRMatrix,
+int    MLI_Utils_mJacobiSetup(HYPRE_Solver, HYPRE_ParCSRMatrix, 
                               HYPRE_ParVector, HYPRE_ParVector);
-int    MLI_Utils_mJacobiSolve(HYPRE_Solver, HYPRE_ParCSRMatrix,
+int    MLI_Utils_mJacobiSolve(HYPRE_Solver, HYPRE_ParCSRMatrix, 
                               HYPRE_ParVector, HYPRE_ParVector);
-int    MLI_Utils_HyprePCGSolve(CMLI *, HYPRE_Matrix, HYPRE_Vector,
+int    MLI_Utils_HyprePCGSolve(CMLI *, HYPRE_Matrix, HYPRE_Vector, 
                                HYPRE_Vector);
-int    MLI_Utils_HypreGMRESSolve(void *, HYPRE_Matrix, HYPRE_Vector,
+int    MLI_Utils_HypreGMRESSolve(void *, HYPRE_Matrix, HYPRE_Vector, 
                                  HYPRE_Vector, char *);
-int    MLI_Utils_HypreBiCGSTABSolve(CMLI *, HYPRE_Matrix, HYPRE_Vector,
+int    MLI_Utils_HypreBiCGSTABSolve(CMLI *, HYPRE_Matrix, HYPRE_Vector, 
                                     HYPRE_Vector);
 int    MLI_Utils_BinarySearch(int, int *, int);
 int    MLI_Utils_IntQSort2(int *, int *, int, int);
 int    MLI_Utils_IntQSort2a(int *, double *, int, int);
 int    MLI_Utils_DbleQSort2a(double *, int *, int, int);
 int    MLI_Utils_IntMergeSort(int nlist, int *listLengs, int **lists,
-                              int **list2, int *newNList, int **newList);
+                              int **list2, int *newNList, int **newList); 
 int    MLI_Utils_DenseMatrixInverse(double **Amat, int ndim, double ***Bmat);
 int    MLI_Utils_DenseMatvec(double **Amat, int ndim, double *x, double *Ax);
 

@@ -21,7 +21,7 @@ HYPRE_SStructSysPFMGCreate( MPI_Comm comm, HYPRE_SStructSolver *solver )
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int
+HYPRE_Int 
 HYPRE_SStructSysPFMGDestroy( HYPRE_SStructSolver solver )
 {
    return( hypre_SysPFMGDestroy( (void *) solver ) );
@@ -30,7 +30,7 @@ HYPRE_SStructSysPFMGDestroy( HYPRE_SStructSolver solver )
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int
+HYPRE_Int 
 HYPRE_SStructSysPFMGSetup( HYPRE_SStructSolver  solver,
                            HYPRE_SStructMatrix A,
                            HYPRE_SStructVector b,
@@ -45,7 +45,7 @@ HYPRE_SStructSysPFMGSetup( HYPRE_SStructSolver  solver,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int
+HYPRE_Int 
 HYPRE_SStructSysPFMGSolve( HYPRE_SStructSolver solver,
                            HYPRE_SStructMatrix A,
                            HYPRE_SStructVector b,
@@ -89,7 +89,7 @@ HYPRE_SStructSysPFMGSetRelChange( HYPRE_SStructSolver solver,
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
-
+ 
 HYPRE_Int
 HYPRE_SStructSysPFMGSetZeroGuess( HYPRE_SStructSolver solver )
 {
@@ -98,7 +98,7 @@ HYPRE_SStructSysPFMGSetZeroGuess( HYPRE_SStructSolver solver )
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
-
+ 
 HYPRE_Int
 HYPRE_SStructSysPFMGSetNonZeroGuess( HYPRE_SStructSolver solver )
 {
@@ -117,7 +117,7 @@ HYPRE_SStructSysPFMGSetRelaxType( HYPRE_SStructSolver solver,
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
-
+                                                                                                                                                               
 HYPRE_Int
 HYPRE_SStructSysPFMGSetJacobiWeight(HYPRE_SStructSolver solver,
                                     HYPRE_Real          weight)

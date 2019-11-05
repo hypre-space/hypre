@@ -226,8 +226,8 @@ hypre_sscanf( char *s, const char *format, ...)
 }
 
 // #else
-//
+// 
 // /* this is used only to eliminate compiler warnings */
 // HYPRE_Int hypre_printf_empty;
-//
+// 
 // #endif

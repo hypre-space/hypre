@@ -126,7 +126,7 @@ hypre_int main (hypre_int argc, char *argv[])
 
    /* Initialize Hypre */
    HYPRE_Init(argc, argv);
-
+   
    /* Set defaults */
    solver_id = 3;
    maxit = 100;
@@ -750,7 +750,7 @@ hypre_int main (hypre_int argc, char *argv[])
 
    if (zero_cond)
       HYPRE_ParVectorDestroy(interior_nodes);
-
+   
    /* Finalize Hypre */
    HYPRE_Finalize();
 

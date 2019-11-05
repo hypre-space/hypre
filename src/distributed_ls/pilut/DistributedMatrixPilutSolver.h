@@ -36,13 +36,13 @@ MPI_Comm hypre_MPI_communicator;
 HYPRE_Int mype, npes;
 HYPRE_Real _secpertick;
 HYPRE_Int Mfactor;
-HYPRE_Int *jr, *jw, lastjr, *lr, lastlr;/* Work space */
-HYPRE_Real *w;                          /* Work space */
-HYPRE_Int firstrow, lastrow;            /* Matrix distribution parameters */
+HYPRE_Int *jr, *jw, lastjr, *lr, lastlr;	/* Work space */
+HYPRE_Real *w;				/* Work space */
+HYPRE_Int firstrow, lastrow;			/* Matrix distribution parameters */
 timer SerTmr, ParTmr;
 HYPRE_Int nrows, lnrows, ndone, ntogo, nleft; /* Various values used throught out */
 HYPRE_Int maxnz;
-HYPRE_Int *map;                               /* Map used for marking rows in the set */
+HYPRE_Int *map;			        /* Map used for marking rows in the set */
 
 HYPRE_Int *vrowdist;
 

@@ -21,7 +21,7 @@ typedef struct
 {
     HYPRE_BigInt *ind;
     HYPRE_Real *val;
-}
+} 
 RowBuf;
 #endif
 
@@ -31,7 +31,7 @@ RowBuf;
 
   /* matrix must be set before calling this function*/
 
-HYPRE_Int
+HYPRE_Int 
 hypre_InitializeDistributedMatrixISIS(hypre_DistributedMatrix *dm)
 {
 #ifdef ISIS_AVAILABLE
@@ -41,7 +41,7 @@ hypre_InitializeDistributedMatrixISIS(hypre_DistributedMatrix *dm)
 
    HYPRE_BigInt num_rows = mat->getMap().n();
    HYPRE_BigInt num_cols = mat->getMap().n();
-
+   
    hypre_DistributedMatrixM(dm) = num_rows;
    hypre_DistributedMatrixN(dm) = num_cols;
 
@@ -61,7 +61,7 @@ hypre_InitializeDistributedMatrixISIS(hypre_DistributedMatrix *dm)
  * hypre_FreeDistributedMatrixISIS
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int
+HYPRE_Int 
 hypre_FreeDistributedMatrixISIS( hypre_DistributedMatrix *dm)
 {
 #ifdef ISIS_AVAILABLE
@@ -79,7 +79,7 @@ hypre_FreeDistributedMatrixISIS( hypre_DistributedMatrix *dm)
  * hypre_PrintDistributedMatrixISIS
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int
+HYPRE_Int 
 hypre_PrintDistributedMatrixISIS( hypre_DistributedMatrix *matrix )
 {
 #ifdef ISIS_AVAILABLE
@@ -93,7 +93,7 @@ hypre_PrintDistributedMatrixISIS( hypre_DistributedMatrix *matrix )
  * hypre_GetDistributedMatrixLocalRangeISIS
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int
+HYPRE_Int 
 hypre_GetDistributedMatrixLocalRangeISIS( hypre_DistributedMatrix *dm,
                              HYPRE_BigInt *start,
                              HYPRE_BigInt *end )
@@ -103,7 +103,7 @@ hypre_GetDistributedMatrixLocalRangeISIS( hypre_DistributedMatrix *dm,
 
    *start = mat->getMap().startRow() - 1;  /* convert to 0-based */
    *end = mat->getMap().endRow(); /* endRow actually returns 1 less */
-
+   
    cout << "LocalRangeISIS " << *start << "  " << *end << endl;
 #endif
    return 0;
@@ -113,10 +113,10 @@ hypre_GetDistributedMatrixLocalRangeISIS( hypre_DistributedMatrix *dm,
  * hypre_GetDistributedMatrixRowISIS
  *--------------------------------------------------------------------------*/
 
-/* semantics: buffers returned will be overwritten on next call to
+/* semantics: buffers returned will be overwritten on next call to 
  this get function */
 
-HYPRE_Int
+HYPRE_Int 
 hypre_GetDistributedMatrixRowISIS( hypre_DistributedMatrix *dm,
                              HYPRE_BigInt row,
                              HYPRE_Int *size,
@@ -140,15 +140,15 @@ hypre_GetDistributedMatrixRowISIS( hypre_DistributedMatrix *dm,
 
        for (i=0, p=rowbuf->ind; i<temp; i++, p++)
        {
-          if (*p == row+1)
-             found = 1;
+	   if (*p == row+1) 
+	       found = 1;
        }
 
        if (!found)
        {
-          rowbuf->ind[temp] = row+1;
-          rowbuf->val[temp] = 1.; /* pick a value */
-          temp++;
+	   rowbuf->ind[temp] = row+1;
+	   rowbuf->val[temp] = 1.; /* pick a value */
+	   temp++;
        }
    }
 #endif
@@ -163,7 +163,7 @@ hypre_GetDistributedMatrixRowISIS( hypre_DistributedMatrix *dm,
 
        /* need to convert to 0-based indexing for output */
        for (i=0, p=*col_ind; i<temp; i++, p++)
-          (*p)--;
+	   (*p)--;
    }
 
    if (values != NULL)
@@ -181,7 +181,7 @@ hypre_GetDistributedMatrixRowISIS( hypre_DistributedMatrix *dm,
  * hypre_RestoreDistributedMatrixRowISIS
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int
+HYPRE_Int 
 hypre_RestoreDistributedMatrixRowISIS( hypre_DistributedMatrix *dm,
                              HYPRE_BigInt row,
                              HYPRE_Int *size,

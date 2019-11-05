@@ -90,7 +90,7 @@ main(int argc, char **argv)
    {
       fprintf(fp, "%16.8e %16.8e %16.8e %16.8e %16.8e %16.8e\n",
               nodalCoord[i*3],nodalCoord[i*3+1],nodalCoord[i*3+2],
-              eVec[i*3+vecNum*nrows], eVec[i*3+1+vecNum*nrows],
+              eVec[i*3+vecNum*nrows], eVec[i*3+1+vecNum*nrows], 
               eVec[i*3+2+vecNum*nrows]);
    }
    fprintf(fp, "\n");

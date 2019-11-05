@@ -59,7 +59,7 @@ HYPRE_SuperLU;
 #endif
 
 /***************************************************************************
- * HYPRE_ParCSR_SuperLUCreate - Return a SuperLU object "solver".
+ * HYPRE_ParCSR_SuperLUCreate - Return a SuperLU object "solver".  
  *--------------------------------------------------------------------------*/
 
 int HYPRE_ParCSR_SuperLUCreate( MPI_Comm comm, HYPRE_Solver *solver )
@@ -67,7 +67,7 @@ int HYPRE_ParCSR_SuperLUCreate( MPI_Comm comm, HYPRE_Solver *solver )
 #ifdef HAVE_SUPERLU
    int           nprocs;
    HYPRE_SuperLU *sluPtr;
-
+   
    MPI_Comm_size(comm, &nprocs);
    if ( nprocs > 1 )
    {
@@ -110,7 +110,7 @@ int HYPRE_ParCSR_SuperLUDestroy( HYPRE_Solver solver )
 }
 
 /***************************************************************************
- * HYPRE_ParCSR_SuperLUSetOutputLevel - Set debug level
+ * HYPRE_ParCSR_SuperLUSetOutputLevel - Set debug level 
  *--------------------------------------------------------------------------*/
 
 int HYPRE_ParCSR_SuperLUSetOutputLevel(HYPRE_Solver solver, int level)
@@ -214,7 +214,7 @@ int HYPRE_ParCSR_SuperLUSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
    /* ---------------------------------------------------------------- */
    /* create SuperMatrix                                                */
    /* ---------------------------------------------------------------- */
-
+                                                                                
    dCreate_CompCol_Matrix(&sluAmat,nrows,nrows,cscJ[nrows],cscA,cscI,
                           cscJ, SLU_NC, SLU_D, SLU_GE);
    etree   = hypre_TAlloc(int, nrows , HYPRE_MEMORY_HOST);
@@ -282,7 +282,7 @@ int HYPRE_ParCSR_SuperLUSolve(HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
 
    xData = hypre_VectorData(hypre_ParVectorLocalVector((hypre_ParVector *)x));
    bData = hypre_VectorData(hypre_ParVectorLocalVector((hypre_ParVector *)b));
-   nrows = hypre_ParVectorGlobalSize((hypre_ParVector *)x);
+   nrows = hypre_ParVectorGlobalSize((hypre_ParVector *)x); 
    for (i = 0; i < nrows; i++) xData[i] = bData[i];
 
    /* ---------------------------------------------------------------- */
@@ -297,7 +297,7 @@ int HYPRE_ParCSR_SuperLUSolve(HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
 
    trans = NOTRANS;
    StatInit(&slu_stat);
-   dgstrs (trans, &(sluPtr->SLU_Lmat), &(sluPtr->SLU_Umat),
+   dgstrs (trans, &(sluPtr->SLU_Lmat), &(sluPtr->SLU_Umat), 
            sluPtr->permC_, sluPtr->permR_, &B, &slu_stat, &info);
    Destroy_SuperMatrix_Store(&B);
    StatFree(&slu_stat);

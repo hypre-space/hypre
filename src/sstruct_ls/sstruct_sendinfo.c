@@ -9,7 +9,7 @@
 
 /*--------------------------------------------------------------------------
  * hypre_SStructSendInfo: Given a fgrid, coarsen each fbox and find the
- * coarsened boxes that must be sent, the procs that they must be sent to,
+ * coarsened boxes that must be sent, the procs that they must be sent to, 
  * and the remote boxnums of these sendboxes.
  *--------------------------------------------------------------------------*/
 
@@ -44,13 +44,13 @@ hypre_SStructSendInfo( hypre_StructGrid      *fgrid,
    hypre_BoxInit(&cbox, ndim);
    hypre_BoxInit(&boxman_entry_box, ndim);
 
-   hypre_ClearIndex(index);
+   hypre_ClearIndex(index); 
    hypre_MPI_Comm_rank(comm, &myproc);
 
    sendinfo_data= hypre_CTAlloc(hypre_SStructSendInfoData,  1, HYPRE_MEMORY_HOST);
 
    /*------------------------------------------------------------------------
-    * Create the structured sendbox patterns.
+    * Create the structured sendbox patterns. 
     *
     *   send_boxes are obtained by intersecting this proc's fgrid boxes
     *   with cgrid's box_man. Intersecting BoxManEntries not on this proc
@@ -108,15 +108,15 @@ hypre_SStructSendInfo( hypre_StructGrid      *fgrid,
           if (proc != myproc)
           {
              send_processes[i][cnt]     = proc;
-             hypre_SStructBoxManEntryGetBoxnum(boxman_entries[j],
+             hypre_SStructBoxManEntryGetBoxnum(boxman_entries[j], 
                                             &send_remote_boxnums[i][cnt]);
-             hypre_AppendBox(&boxman_entry_box,
+             hypre_AppendBox(&boxman_entry_box, 
                               hypre_BoxArrayArrayBoxArray(send_boxes, i));
              cnt++;
           }
-      }
+      } 
       hypre_TFree(boxman_entries, HYPRE_MEMORY_HOST);
-   }  /* hypre_ForBoxI(i, grid_boxes) */
+   }  /* hypre_ForBoxI(i, grid_boxes) */ 
 
    hypre_BoxDestroy(intersect_box);
 

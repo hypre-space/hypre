@@ -88,7 +88,7 @@ void hypre_ParChordMatrix_RowStarts(
    if ( my_id>0 )
       hypre_MPI_Recv( lastlens, 2, HYPRE_MPI_INT, my_id-1, 0, comm, status );
    if ( my_id<num_procs-1 )
-      hypre_MPI_Waitall( 1, request, status);
+	hypre_MPI_Waitall( 1, request, status);
    if ( my_id>0 )
       hypre_assert( (*row_starts)[my_id] == (*row_starts)[my_id-1] + (HYPRE_BigInt)lastlens[0] );
    hypre_TFree( request , HYPRE_MEMORY_HOST);

@@ -344,7 +344,7 @@ HYPRE_Int HYPRE_StructMatrixSetConstantEntries( HYPRE_StructMatrix matrix,
                                                 HYPRE_Int         *entries );
 
 /**
- * Set the ghost layer in the matrix
+ * Set the ghost layer in the matrix 
  **/
 HYPRE_Int HYPRE_StructMatrixSetNumGhost(HYPRE_StructMatrix  matrix,
                                         HYPRE_Int          *num_ghost);

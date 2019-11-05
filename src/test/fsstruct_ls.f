@@ -236,11 +236,11 @@
       integer fnumiter
       integer*8 fsolver
 
-      call HYPRE_SStructBiCGSTABGetNumIter(fsolver, fnumiter,
+      call HYPRE_SStructBiCGSTABGetNumIter(fsolver, fnumiter, 
      1                                     ierr)
 
       if(ierr .ne. 0) then
-         print *, 'fhypre_sstructbicgstabgetnumiterations error = ',
+         print *, 'fhypre_sstructbicgstabgetnumiterations error = ', 
      1                                          ierr
       endif
 
@@ -471,7 +471,7 @@
 !--------------------------------------------------------------------------
 ! HYPRE_SStructGMRESSetPrecond
 !--------------------------------------------------------------------------
-      subroutine fhypre_sstructgmressetprecond(fsolver, fprecond_id,
+      subroutine fhypre_sstructgmressetprecond(fsolver, fprecond_id, 
      1                                         fprecond)
 
       integer ierr
@@ -835,7 +835,7 @@
 !--------------------------------------------------------------------------
 ! HYPRE_SStructFACSetMaxLevels
 !--------------------------------------------------------------------------
-      subroutine fhypre_sstructfacsetmaxlevels(fsolver, fmaxlevels)
+      subroutine fhypre_sstructfacsetmaxlevels(fsolver, fmaxlevels) 
 
       integer ierr
       integer*8 fsolver
@@ -854,7 +854,7 @@
 !--------------------------------------------------------------------------
 ! HYPRE_SStructFACSetMaxIter
 !--------------------------------------------------------------------------
-      subroutine fhypre_sstructfacsetmaxiter(fsolver, fmaxiter)
+      subroutine fhypre_sstructfacsetmaxiter(fsolver, fmaxiter) 
 
       integer ierr
       integer*8 fsolver
@@ -873,7 +873,7 @@
 !--------------------------------------------------------------------------
 ! HYPRE_SStructFACSetRelChange
 !--------------------------------------------------------------------------
-      subroutine fhypre_sstructfacsetrelchange(fsolver, frelchange)
+      subroutine fhypre_sstructfacsetrelchange(fsolver, frelchange) 
 
       integer ierr
       integer*8 fsolver
@@ -892,7 +892,7 @@
 !--------------------------------------------------------------------------
 ! HYPRE_SStructFACSetZeroGuess
 !--------------------------------------------------------------------------
-      subroutine fhypre_sstructfacsetzeroguess(fsolver)
+      subroutine fhypre_sstructfacsetzeroguess(fsolver) 
 
       integer ierr
       integer*8 fsolver
@@ -910,7 +910,7 @@
 !--------------------------------------------------------------------------
 ! HYPRE_SStructFACSetNonZeroGuess
 !--------------------------------------------------------------------------
-      subroutine fhypre_sstructfacsetnonzerogues(fsolver)
+      subroutine fhypre_sstructfacsetnonzerogues(fsolver) 
 
       integer ierr
       integer*8 fsolver
@@ -928,7 +928,7 @@
 !--------------------------------------------------------------------------
 ! HYPRE_SStructFACSetRelaxType
 !--------------------------------------------------------------------------
-      subroutine fhypre_sstructfacsetrelaxtype(fsolver, frelaxtype)
+      subroutine fhypre_sstructfacsetrelaxtype(fsolver, frelaxtype) 
 
       integer ierr
       integer*8 fsolver
@@ -947,7 +947,7 @@
 !--------------------------------------------------------------------------
 ! HYPRE_SStructFACSetNumPreRelax
 !--------------------------------------------------------------------------
-      subroutine fhypre_sstructfacsetnumprerelax(fsolver, fnumprerelax)
+      subroutine fhypre_sstructfacsetnumprerelax(fsolver, fnumprerelax) 
 
       integer ierr
       integer*8 fsolver
@@ -967,7 +967,7 @@
 ! HYPRE_SStructFACSetNumPostRelax
 !--------------------------------------------------------------------------
       subroutine fhypre_sstructfacsetnumpostrela(fsolver,
-     1                                            fnumpostrelax)
+     1                                            fnumpostrelax) 
 
       integer ierr
       integer*8 fsolver
@@ -987,7 +987,7 @@
 ! HYPRE_SStructFACSetCoarseSolverType
 !--------------------------------------------------------------------------
       subroutine fhypre_sstructfacsetcoarsesolve(fsolver,
-     1                                            fcsolvertype)
+     1                                            fcsolvertype) 
 
       integer ierr
       integer*8 fsolver
@@ -1800,7 +1800,7 @@
 !--------------------------------------------------------------------------
 ! HYPRE_SStructSysPFMGSetNumPreRelax
 !--------------------------------------------------------------------------
-      subroutine fhypre_sstructsyspfmgsetnumprer(fsolver,
+      subroutine fhypre_sstructsyspfmgsetnumprer(fsolver, 
      1                                            fnum_pre_relax)
 
       integer ierr
@@ -1821,7 +1821,7 @@
 !--------------------------------------------------------------------------
 ! HYPRE_SStructSysPFMGSetNumPostRelax
 !--------------------------------------------------------------------------
-      subroutine fhypre_sstructsyspfmgsetnumpost(fsolver,
+      subroutine fhypre_sstructsyspfmgsetnumpost(fsolver, 
      1                                            fnum_post_relax)
 
       integer ierr
@@ -2185,7 +2185,7 @@
       integer*8 fsolver
       integer frel_change
 
-      call HYPRE_SStructMaxwellSetRelChang(fsolver, frel_change, ierr)
+      call HYPRE_SStructMaxwellSetRelChang(fsolver, frel_change, ierr) 
 
       if(ierr .ne. 0) then
          print *, 'fhypre_sstructmaxwellsetrelchange = ', ierr
@@ -2198,14 +2198,14 @@
 !*--------------------------------------------------------------------------
 !* HYPRE_SStructMaxwellSetNumPreRelax
 !*--------------------------------------------------------------------------
-      subroutine fhypre_sstructmaxwellsetnumprer (fsolver,
+      subroutine fhypre_sstructmaxwellsetnumprer (fsolver, 
      1                                            fnum_pre_relax)
 
       integer ierr
       integer*8 fsolver
       integer fnum_pre_relax
 
-      call HYPRE_SStructMaxwellSetNumPreRe(fsolver, fnum_pre_relax,
+      call HYPRE_SStructMaxwellSetNumPreRe(fsolver, fnum_pre_relax, 
      1                                     ierr)
 
       if(ierr .ne. 0) then
@@ -2219,7 +2219,7 @@
 !*--------------------------------------------------------------------------
 !* HYPRE_SStructMaxwellSetNumPostRelax
 !*--------------------------------------------------------------------------
-      subroutine fhypre_sstructmaxwellsetnumpost (fsolver,
+      subroutine fhypre_sstructmaxwellsetnumpost (fsolver, 
      1                                            fnum_post_relax)
 
       integer ierr
@@ -2265,7 +2265,7 @@
       integer*8 fsolver
       integer flogging
 
-      call HYPRE_SStructMaxwellSetPrintLev(fsolver, fprint_level,
+      call HYPRE_SStructMaxwellSetPrintLev(fsolver, fprint_level, 
      1                                     ierr)
 
       if(ierr .ne. 0) then
@@ -2298,14 +2298,14 @@
 !*--------------------------------------------------------------------------
 !* HYPRE_SStructMaxwellGetNumIterations
 !*--------------------------------------------------------------------------
-      subroutine fhypre_sstructmaxwellgetnumiter (fsolver,
+      subroutine fhypre_sstructmaxwellgetnumiter (fsolver, 
      1                                            fnum_iterations)
 
       integer ierr
       integer*8 fsolver
       integer fnum_iterations
 
-      call HYPRE_SStructMaxwellGetNumItera(fsolver,
+      call HYPRE_SStructMaxwellGetNumItera(fsolver, 
      1                                     fnum_iterations, ierr)
 
       if(ierr .ne. 0) then
@@ -2328,7 +2328,7 @@
       call HYPRE_SStructMaxwellGetFinalRel(fsolver, fnorm, ierr)
 
       if(ierr .ne. 0) then
-         print *,
+         print *, 
      1      'fhypre_sstructmaxwellgetfinalrelativeresidualnorm = ', ierr
       endif
 
@@ -2340,7 +2340,7 @@
 !* HYPRE_SStructMaxwellPhysBdy
 !*--------------------------------------------------------------------------
       subroutine fhypre_sstructmaxwellphysbdy (fgrid_l, fnum_levels,
-     1                                         frfactors,
+     1                                         frfactors, 
      2                                         fBdryRanks_ptr,
      3                                         fBdryRanksCnt_ptr)
 
@@ -2352,7 +2352,7 @@
       integer fnum_levels
 
       call HYPRE_SStructMaxwellPhysBdy(fgrid_l, fnum_levels, frfactors,
-     1                                 fBdryRanks_ptr,
+     1                                 fBdryRanks_ptr, 
      2                                 fBdryRanksCnt_ptr, ierr)
 
       if(ierr .ne. 0) then
@@ -2373,7 +2373,7 @@
       integer*8 frows
       integer*8 fnrows
 
-      call HYPRE_SStructMaxwellEliminateRo(fparA, fnrows, frows,
+      call HYPRE_SStructMaxwellEliminateRo(fparA, fnrows, frows, 
      1                                         ierr)
 
       if(ierr .ne. 0) then

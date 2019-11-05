@@ -11,7 +11,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+    
 /*
   Function:  hypre_ParCSRMatrixEliminateRowsCols
 

@@ -19,19 +19,19 @@
 typedef struct
 {
    MPI_Comm                comm;
-
+                       
    HYPRE_Real              tol;                /* not yet used */
    HYPRE_Int               max_iter;
    HYPRE_Int               rel_change;         /* not yet used */
    HYPRE_Int               zero_guess;
    HYPRE_Real              weight;
-
+                         
    HYPRE_Int               num_nodesets;
    HYPRE_Int              *nodeset_sizes;
    HYPRE_Int              *nodeset_ranks;
    hypre_Index            *nodeset_strides;
    hypre_Index           **nodeset_indices;
-
+                       
    hypre_SStructPMatrix   *A;
    hypre_SStructPVector   *b;
    hypre_SStructPVector   *x;
@@ -53,7 +53,7 @@ typedef struct
    HYPRE_Real            *x_loc;
    */
 
-   /* pointers for vector and matrix data */
+   /* pointers for vector and matrix data */    
    HYPRE_Real          **Ap;
    HYPRE_Real          **bp;
    HYPRE_Real          **xp;
@@ -207,7 +207,7 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
    hypre_Index            diag_index;
    hypre_IndexRef         stride;
    hypre_IndexRef         index;
-
+                       
    hypre_StructGrid      *sgrid;
 
    hypre_StructStencil   *sstencil;
@@ -274,7 +274,7 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
          }
          else
          {
-            diag_rank[vi][vj] = -1;
+            diag_rank[vi][vj] = -1; 
          }
       }
    }
@@ -301,10 +301,10 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
    sgrid = hypre_StructMatrixGrid(hypre_SStructPMatrixSMatrix(A, 0, 0));
    dim = hypre_StructStencilNDim(hypre_SStructPMatrixSStencil(A, 0, 0));
 
-   compute_pkgs = hypre_CTAlloc(hypre_ComputePkg *, num_nodesets,
+   compute_pkgs = hypre_CTAlloc(hypre_ComputePkg *, num_nodesets, 
                                 HYPRE_MEMORY_HOST);
 
-   svec_compute_pkgs = hypre_CTAlloc(hypre_ComputePkg **, num_nodesets,
+   svec_compute_pkgs = hypre_CTAlloc(hypre_ComputePkg **, num_nodesets, 
                                      HYPRE_MEMORY_HOST);
 
    comm_handle = hypre_CTAlloc(hypre_CommHandle *, nvars, HYPRE_MEMORY_HOST);
@@ -359,7 +359,7 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
                }
             }
          }
-         sstencil_union_shape = hypre_CTAlloc(hypre_Index,
+         sstencil_union_shape = hypre_CTAlloc(hypre_Index, 
                                               sstencil_union_count, HYPRE_MEMORY_HOST);
          sstencil_union_count = 0;
          if (vi == -1)
@@ -402,7 +402,7 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
             }
          }
 
-         sstencil_union = hypre_StructStencilCreate(dim, sstencil_union_count,
+         sstencil_union = hypre_StructStencilCreate(dim, sstencil_union_count, 
                                                     sstencil_union_shape);
 
 
@@ -439,26 +439,26 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
                for (m = 0; m < nodeset_sizes[p]; m++)
                {
                   index  = nodeset_indices[p][m];
-
+   
                   for (j = 0; j < box_a_size; j++)
                   {
                      box = hypre_BoxArrayBox(box_a, j);
                      new_box = hypre_BoxArrayBox(new_box_a, k);
-
+                     
                      hypre_CopyBox(box, new_box);
                      hypre_ProjectBox(new_box, index, stride);
-
+                     
                      k++;
                   }
                }
             }
-
+   
             switch(compute_i)
             {
                case 0:
                   hypre_ComputeInfoIndtBoxes(compute_info) = new_box_aa;
                   break;
-
+   
                case 1:
                   hypre_ComputeInfoDeptBoxes(compute_info) = new_box_aa;
                   break;
@@ -481,14 +481,14 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
                                    hypre_SStructPVectorSVector(x, vi)),
                                    1, sgrid, &svec_compute_pkgs[p][vi]);
          }
-
+   
          hypre_BoxArrayArrayDestroy(orig_indt_boxes);
          hypre_BoxArrayArrayDestroy(orig_dept_boxes);
 
          hypre_StructStencilDestroy(sstencil_union);
       }
    }
-
+   
    /*----------------------------------------------------------
     * Set up the relax data structure
     *----------------------------------------------------------*/
@@ -511,7 +511,7 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
    (relax_data -> comm_handle) = comm_handle;
 
    /*-----------------------------------------------------
-    * Compute flops
+    * Compute flops 
     *-----------------------------------------------------*/
 
    scale = 0.0;
@@ -557,11 +557,11 @@ hypre_NodeRelax(  void                 *relax_vdata,
 
    hypre_ComputePkg      *compute_pkg;
    hypre_ComputePkg      *svec_compute_pkg;
-
+                        
    hypre_BoxArrayArray   *compute_box_aa;
    hypre_BoxArray        *compute_box_a;
    hypre_Box             *compute_box;
-
+                        
    hypre_Box             *A_data_box;
    hypre_Box             *b_data_box;
    hypre_Box             *x_data_box;
@@ -596,11 +596,11 @@ hypre_NodeRelax(  void                 *relax_vdata,
    hypre_IndexRef         stride;
    hypre_IndexRef         start;
    hypre_Index            loop_size;
-
+                        
    hypre_StructStencil   *stencil;
    hypre_Index           *stencil_shape;
    HYPRE_Int              stencil_size;
-
+                        
    HYPRE_Int              iter, p, compute_i, i, j, si;
    HYPRE_Int              nodeset;
 
@@ -741,9 +741,9 @@ hypre_NodeRelax(  void                 *relax_vdata,
                   }
 
                   /*------------------------------------------------
-                   * Invert intra-nodal coupling
+                   * Invert intra-nodal coupling 
                    *----------------------------------------------*/
-                  hypre_gselim(A_loc, x_loc, nvars, err);
+		  hypre_gselim(A_loc, x_loc, nvars, err);
                   /*------------------------------------------------
                    * Copy solution from local storage.
                    *----------------------------------------------*/
@@ -842,8 +842,8 @@ hypre_NodeRelax(  void                 *relax_vdata,
 
 #define DEVICE_VAR is_device_ptr(tp,bp)
                hypre_BoxLoop2Begin(ndim, loop_size,
-                                   b_data_box, start, stride, bi,
-                                   t_data_box, start, stride, ti);
+		  		   b_data_box, start, stride, bi,
+		  		   t_data_box, start, stride, ti);
                {
                   HYPRE_Int vi;
                   /* Copy rhs into temp vector */
@@ -873,7 +873,7 @@ hypre_NodeRelax(  void                 *relax_vdata,
                            if (si != diag_rank[vi][vj])
                            {
                               HYPRE_Real *Apij = hypre_StructMatrixBoxData(A_block, i, si);
-                              HYPRE_Real *xpj  = hypre_StructVectorBoxData(x_block, i) +
+                              HYPRE_Real *xpj  = hypre_StructVectorBoxData(x_block, i) + 
                                                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[si]);
                               HYPRE_Real *tpi  = h_tp[vi];
 
@@ -925,7 +925,7 @@ hypre_NodeRelax(  void                 *relax_vdata,
                   */
                   HYPRE_Real A_loc[HYPRE_MAXVARS * HYPRE_MAXVARS];
                   HYPRE_Real x_loc[HYPRE_MAXVARS];
-
+                  
                   /*------------------------------------------------
                    * Copy rhs and matrix for diagonal coupling
                    * (intra-nodal) into local storage.
@@ -944,7 +944,7 @@ hypre_NodeRelax(  void                 *relax_vdata,
                   /*------------------------------------------------
                    * Invert intra-nodal coupling
                    *----------------------------------------------*/
-                  hypre_gselim(A_loc, x_loc, nvars, err);
+		  hypre_gselim(A_loc, x_loc, nvars, err);
                   /*------------------------------------------------
                    * Copy solution from local storage.
                    *----------------------------------------------*/
@@ -974,7 +974,7 @@ hypre_NodeRelax(  void                 *relax_vdata,
       p    = (p + 1) % num_nodesets;
       iter = iter + (p == 0);
    }
-
+   
    (relax_data -> num_iterations) = iter;
 
    /*-----------------------------------------------------------------------

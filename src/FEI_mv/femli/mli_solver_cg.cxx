@@ -95,7 +95,7 @@ int MLI_Solver_CG::setup(MLI_Matrix *Amat_in)
    switch( baseMethod_ )
    {
       case MLI_SOLVER_JACOBI_ID : sprintf(paramString, "Jacobi");
-                                  baseSolver_ =
+                                  baseSolver_ = 
                                      new MLI_Solver_Jacobi(paramString);
                                   sprintf(paramString, "numSweeps");
                                   numSweeps = 1;
@@ -106,7 +106,7 @@ int MLI_Solver_CG::setup(MLI_Matrix *Amat_in)
                                   baseSolver_->setParams(paramString,1,argv);
                                   break;
       case MLI_SOLVER_BJACOBI_ID: sprintf(paramString, "BJacobi");
-                                  baseSolver_ =
+                                  baseSolver_ = 
                                      new MLI_Solver_BJacobi(paramString);
                                   sprintf(paramString, "numSweeps");
                                   numSweeps = 1;
@@ -114,7 +114,7 @@ int MLI_Solver_CG::setup(MLI_Matrix *Amat_in)
                                   baseSolver_->setParams(paramString,1,argv);
                                   break;
       case MLI_SOLVER_SGS_ID :    sprintf(paramString, "HSGS");
-                                  baseSolver_ =
+                                  baseSolver_ = 
                                      new MLI_Solver_HSGS(paramString);
                                   sprintf(paramString, "numSweeps");
                                   numSweeps = 1;
@@ -122,7 +122,7 @@ int MLI_Solver_CG::setup(MLI_Matrix *Amat_in)
                                   baseSolver_->setParams(paramString,1,argv);
                                   break;
       case MLI_SOLVER_BSGS_ID :   sprintf(paramString, "BSGS");
-                                  baseSolver_ =
+                                  baseSolver_ = 
                                      new MLI_Solver_BSGS(paramString);
                                   sprintf(paramString, "numSweeps");
                                   numSweeps = 1;
@@ -130,11 +130,11 @@ int MLI_Solver_CG::setup(MLI_Matrix *Amat_in)
                                   baseSolver_->setParams(paramString,1,argv);
                                   break;
       case MLI_SOLVER_AMG_ID :    sprintf(paramString, "AMG");
-                                  baseSolver_ =
+                                  baseSolver_ = 
                                      new MLI_Solver_AMG(paramString);
                                   break;
       case MLI_SOLVER_MLI_ID :    sprintf(paramString, "MLI");
-                                  baseSolver_ =
+                                  baseSolver_ = 
                                      new MLI_Solver_MLI(paramString);
                                   break;
       case MLI_SOLVER_ILU_ID:     iluDecomposition();
@@ -143,7 +143,7 @@ int MLI_Solver_CG::setup(MLI_Matrix *Amat_in)
                 exit(1);
    }
    if (baseMethod_ != MLI_SOLVER_ILU_ID) baseSolver_->setup(Amat_);
-
+ 
    /*-----------------------------------------------------------------
     * build auxiliary vectors
     *-----------------------------------------------------------------*/
@@ -181,7 +181,7 @@ int MLI_Solver_CG::solve(MLI_Vector *f_in, MLI_Vector *u_in)
    A          = (hypre_ParCSRMatrix *) Amat_->getMatrix();
    ADiag      = hypre_ParCSRMatrixDiag(A);
    localNRows = hypre_CSRMatrixNumRows(ADiag);
-
+   
    /*-----------------------------------------------------------------
     * fetch local vectors
     *-----------------------------------------------------------------*/
@@ -235,7 +235,7 @@ int MLI_Solver_CG::solve(MLI_Vector *f_in, MLI_Vector *u_in)
    }
 
    /*-----------------------------------------------------------------
-    * set up for outer iterations
+    * set up for outer iterations 
     *-----------------------------------------------------------------*/
 
    if ( tolerance_ != 0.0 ) rnorm = sqrt(hypre_ParVectorInnerProd(r, r));
@@ -251,7 +251,7 @@ int MLI_Solver_CG::solve(MLI_Vector *f_in, MLI_Vector *u_in)
    /*-----------------------------------------------------------------
     * Perform iterations
     *-----------------------------------------------------------------*/
-
+ 
    iter = 0;
    rho  = 0.0;
    while ( iter < maxIterations_ && rnorm > tolerance_ )
@@ -259,7 +259,7 @@ int MLI_Solver_CG::solve(MLI_Vector *f_in, MLI_Vector *u_in)
       iter++;
       hypre_ParVectorSetConstantValues(z, 0.0);
       strcpy(paramString, "zeroInitialGuess");
-      if (baseMethod_ != MLI_SOLVER_ILU_ID)
+      if (baseMethod_ != MLI_SOLVER_ILU_ID) 
          baseSolver_->setParams( paramString, 0, NULL );
       strcpy( paramString, "HYPRE_ParVector" );
       zVecLocal = new MLI_Vector( (void *) z, paramString, NULL);
@@ -268,7 +268,7 @@ int MLI_Solver_CG::solve(MLI_Vector *f_in, MLI_Vector *u_in)
       else               baseSolver_->solve( rVecLocal, zVecLocal );
       rhom1 = rho;
       rho   = hypre_ParVectorInnerProd(r, z);
-      if ( iter == 1 )
+      if ( iter == 1 ) 
       {
          beta = 0.0;
          hypre_ParVectorCopy(z, p);
@@ -280,7 +280,7 @@ int MLI_Solver_CG::solve(MLI_Vector *f_in, MLI_Vector *u_in)
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
-         for ( i = 0; i < localNRows; i++ )
+         for ( i = 0; i < localNRows; i++ ) 
             pData[i] = beta * pData[i] + zData[i];
 
       }
@@ -293,7 +293,7 @@ int MLI_Solver_CG::solve(MLI_Vector *f_in, MLI_Vector *u_in)
          for ( i = 0; i < localNRows; i++ ) u2Data[i] += alpha * pData[i];
 
       hypre_ParVectorAxpy(-alpha, ap, r); /* r = r - alpha ap */
-      if (tolerance_ != 0.0 && maxIterations_ > 1)
+      if (tolerance_ != 0.0 && maxIterations_ > 1) 
          rnorm = sqrt(hypre_ParVectorInnerProd(r, r));
    }
 
@@ -307,7 +307,7 @@ int MLI_Solver_CG::solve(MLI_Vector *f_in, MLI_Vector *u_in)
       for ( i = 0; i < shortNRows; i++ ) uData[i] = u2Data[i];
       delete [] u2Data;
    }
-   return(0);
+   return(0); 
 }
 
 /******************************************************************************
@@ -342,7 +342,7 @@ int MLI_Solver_CG::setParams( char *paramString, int argc, char **argv )
    }
    else if ( !strcmp(param1, "relaxWeight") )
    {
-      if ( argc != 2 && argc != 1 )
+      if ( argc != 2 && argc != 1 ) 
       {
          printf("MLI_Solver_CG::setParams ERROR : needs 1 or 2 args.\n");
          return 1;
@@ -353,7 +353,7 @@ int MLI_Solver_CG::setParams( char *paramString, int argc, char **argv )
    else if ( !strcmp(param1, "baseMethod") )
    {
       sscanf(paramString, "%s %s", param1, param2);
-      if ( !strcmp(param2, "Jacobi") )
+      if ( !strcmp(param2, "Jacobi") ) 
          baseMethod_ = MLI_SOLVER_JACOBI_ID;
       else if ( !strcmp(param2, "BJacobi") )
          baseMethod_ = MLI_SOLVER_BJACOBI_ID;
@@ -375,8 +375,8 @@ int MLI_Solver_CG::setParams( char *paramString, int argc, char **argv )
    {
       if ( argc != 1 )
       {
-         printf("MLI_Solver_CG::setParams ERROR : needs 1 arg.\n");
-         return 1;
+       	 printf("MLI_Solver_CG::setParams ERROR : needs 1 arg.\n");
+	 return 1;
       }
       HYPRE_IJVector auxVec;
       PSmat_ = (MLI_Matrix *) argv[0];
@@ -428,7 +428,7 @@ int MLI_Solver_CG::setParams( char *paramString, int argc, char **argv )
       AComm_ = *(MPI_Comm *) argv[6];
    }
    else
-   {
+   {   
       printf("MLI_Solver_CG::setParams - parameter not recognized.\n");
       printf("                Params = %s\n", paramString);
       return 1;
@@ -437,7 +437,7 @@ int MLI_Solver_CG::setParams( char *paramString, int argc, char **argv )
 }
 
 /******************************************************************************
- * ilu decomposition
+ * ilu decomposition 
  *---------------------------------------------------------------------------*/
 
 int MLI_Solver_CG::iluDecomposition()
@@ -524,7 +524,7 @@ int MLI_Solver_CG::iluDecomposition()
 }
 
 /******************************************************************************
- * ilu solve
+ * ilu solve 
  *---------------------------------------------------------------------------*/
 
 int MLI_Solver_CG::iluSolve(double *inData, double *outData)

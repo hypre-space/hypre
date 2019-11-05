@@ -15,7 +15,7 @@
 #define __MLIMETHODH__
 
 /****************************************************************************
- * defines and include files
+ * defines and include files 
  *--------------------------------------------------------------------------*/
 
 #define MLI_METHOD_AMGSA_ID     701
@@ -50,7 +50,7 @@ public :
    virtual int getParams(char *name, int *argc, char *argv[]);
 
    char     *getName();
-   int      setName( char *in_name );
+   int      setName( char *in_name );                                      
    int      setID( int in_id );
    int      getID();
    MPI_Comm getComm();

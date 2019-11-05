@@ -71,8 +71,8 @@ class HYPRE_LSI_Uzawa
    int                *procA22Sizes_;
    HYPRE_Solver       A11Solver_;        // solver for A11 matrix
    HYPRE_Solver       A11Precond_;       // preconditioner for A11 matrix
-   HYPRE_Solver       S22Solver_;        // solver for S12
-   HYPRE_Solver       S22Precond_;       // preconditioner for S12
+   HYPRE_Solver       S22Solver_;        // solver for S12 
+   HYPRE_Solver       S22Precond_;       // preconditioner for S12 
    HYPRE_Uzawa_PARAMS A11Params_;
    HYPRE_Uzawa_PARAMS S22Params_;
 
@@ -93,7 +93,7 @@ class HYPRE_LSI_Uzawa
    int    buildBlockMatrices();
    int    buildA11A12Mat();
    int    buildS22Mat();
-   int    setupSolver(HYPRE_Solver *,HYPRE_ParCSRMatrix, HYPRE_ParVector,
+   int    setupSolver(HYPRE_Solver *,HYPRE_ParCSRMatrix, HYPRE_ParVector, 
                       HYPRE_ParVector, HYPRE_Solver, HYPRE_Uzawa_PARAMS);
    int    setupPrecon(HYPRE_Solver *,HYPRE_ParCSRMatrix,HYPRE_Uzawa_PARAMS);
 };

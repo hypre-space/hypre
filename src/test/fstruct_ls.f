@@ -1180,7 +1180,7 @@
 !***********************************************************************
 !     fhypre_structpcgsetprecond
 !***********************************************************************
-      subroutine fhypre_structpcgsetprecond(fsolver, fprecond_id,
+      subroutine fhypre_structpcgsetprecond(fsolver, fprecond_id, 
      1                                      fprecond)
       integer ierr
       integer fprecond_id
@@ -1199,7 +1199,7 @@
 !***********************************************************************
 !     fhypre_structpcgsetlogging
 !***********************************************************************
-      subroutine fhypre_structpcgsetlogging(fsolver, flogging)
+      subroutine fhypre_structpcgsetlogging(fsolver, flogging) 
       integer ierr
       integer flogging
       integer*8 fsolver
@@ -1215,7 +1215,7 @@
 !***********************************************************************
 !     fhypre_structpcgsetprintlevel
 !***********************************************************************
-      subroutine fhypre_structpcgsetprintlevel(fsolver, fprntlvl)
+      subroutine fhypre_structpcgsetprintlevel(fsolver, fprntlvl) 
       integer ierr
       integer fprntlvl
       integer*8 fsolver

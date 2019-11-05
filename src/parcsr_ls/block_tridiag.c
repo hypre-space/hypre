@@ -116,7 +116,7 @@ HYPRE_Int hypre_BlockTridiagDestroy(void *data)
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_BlockTridiagSetup(void *data, hypre_ParCSRMatrix *A,
-                            hypre_ParVector *b, hypre_ParVector *x)
+                            hypre_ParVector *b, hypre_ParVector *x) 
 {
    HYPRE_Int                i, j, *index_set1, print_level, nsweeps, relax_type;
    HYPRE_Int                nrows, nrows1, nrows2, start1, start2, *index_set2;
@@ -140,8 +140,8 @@ HYPRE_Int hypre_BlockTridiagSetup(void *data, hypre_ParCSRMatrix *A,
    index_set2[0] = nrows2;
    count = 1;
    for (i = 0; i < index_set1[1]; i++) index_set2[count++] = i;
-   for (i = 1; i < nrows1; i++)
-      for (j = index_set1[i]+1; j < index_set1[i+1]; j++)
+   for (i = 1; i < nrows1; i++) 
+      for (j = index_set1[i]+1; j < index_set1[i+1]; j++) 
          index_set2[count++] = j;
    for (i = index_set1[nrows1]+1; i < nrows; i++) index_set2[count++] = i;
 
@@ -149,7 +149,7 @@ HYPRE_Int hypre_BlockTridiagSetup(void *data, hypre_ParCSRMatrix *A,
    hypre_ParCSRMatrixExtractSubmatrices(A, index_set1, &submatrices);
 
    nrows1 = hypre_ParCSRMatrixNumRows(submatrices[0]);
-   nrows2 = hypre_ParCSRMatrixNumRows(submatrices[3]);
+   nrows2 = hypre_ParCSRMatrixNumRows(submatrices[3]); 
    start1 = hypre_ParCSRMatrixFirstRowIndex(submatrices[0]);
    start2 = hypre_ParCSRMatrixFirstRowIndex(submatrices[3]);
    HYPRE_IJVectorCreate(comm, start1, start1+nrows1-1, &ij_u1);
@@ -230,7 +230,7 @@ HYPRE_Int hypre_BlockTridiagSetup(void *data, hypre_ParCSRMatrix *A,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_BlockTridiagSolve(void *data, hypre_ParCSRMatrix *A,
-                            hypre_ParVector *b, hypre_ParVector *x)
+                            hypre_ParVector *b, hypre_ParVector *x) 
 {
    HYPRE_Int                i, ind, nrows1, nrows2, *index_set1, *index_set2;
    HYPRE_Real         *ffv, *uuv, *f1v, *f2v, *u1v, *u2v;
@@ -238,7 +238,7 @@ HYPRE_Int hypre_BlockTridiagSolve(void *data, hypre_ParCSRMatrix *A,
    hypre_ParVector    *F1, *U1, *F2, *U2;
    HYPRE_Solver       precon1, precon2;
    hypre_BlockTridiagData *b_data = (hypre_BlockTridiagData *) data;
-
+ 
    index_set1 = b_data->index_set1;
    index_set2 = b_data->index_set2;
    nrows1  = index_set1[0];
@@ -264,7 +264,7 @@ HYPRE_Int hypre_BlockTridiagSolve(void *data, hypre_ParCSRMatrix *A,
       f1v[i] = ffv[ind];
       u1v[i] = 0.0;
    }
-   HYPRE_BoomerAMGSolve(precon1, A11, (HYPRE_ParVector) F1,
+   HYPRE_BoomerAMGSolve(precon1, A11, (HYPRE_ParVector) F1, 
                         (HYPRE_ParVector) U1);
    for (i = 0; i < nrows2; i++)
    {
@@ -274,7 +274,7 @@ HYPRE_Int hypre_BlockTridiagSolve(void *data, hypre_ParCSRMatrix *A,
    }
    HYPRE_ParCSRMatrixMatvec(-1.0,A21,(HYPRE_ParVector) U1,1.0,
                             (HYPRE_ParVector) F2);
-   HYPRE_BoomerAMGSolve(precon2, A22, (HYPRE_ParVector) F2,
+   HYPRE_BoomerAMGSolve(precon2, A22, (HYPRE_ParVector) F2, 
                         (HYPRE_ParVector) U2);
    for (i = 0; i < nrows1; i++)
    {
@@ -312,7 +312,7 @@ HYPRE_Int hypre_BlockTridiagSetIndexSet(void *data, HYPRE_Int n, HYPRE_Int *inds
 
 HYPRE_Int hypre_BlockTridiagSetAMGStrengthThreshold(void *data, HYPRE_Real thresh)
 {
-   hypre_BlockTridiagData *b_data = (hypre_BlockTridiagData *) data;
+	hypre_BlockTridiagData *b_data = (hypre_BlockTridiagData *) data;
    b_data->threshold = thresh;
    return (0);
 }

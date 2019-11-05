@@ -101,7 +101,7 @@ HYPRE_Int HYPRE_AMESetTol(HYPRE_Solver esolver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int HYPRE_AMESetRTol(HYPRE_Solver esolver,
-                           HYPRE_Real tol)
+			   HYPRE_Real tol)
 {
    return hypre_AMESetRTol((void *) esolver, tol);
 }

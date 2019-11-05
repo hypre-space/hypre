@@ -23,7 +23,7 @@ typedef struct
   HYPRE_Int    (*ScaleVector)   ( HYPRE_Complex alpha, void *x );
   HYPRE_Int    (*Axpy)          ( HYPRE_Complex alpha, void *x, void *y );
   HYPRE_Int    (*VectorSize)    (void * vector);
-
+  
   /* multivector operations */
   /* do we need the following entry? */
   void*  (*CreateMultiVector)  ( void*, HYPRE_Int n, void *vector );

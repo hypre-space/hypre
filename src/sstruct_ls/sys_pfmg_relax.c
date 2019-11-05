@@ -39,7 +39,7 @@ hypre_SysPFMGRelaxCreate( MPI_Comm  comm )
 HYPRE_Int
 hypre_SysPFMGRelaxDestroy( void *sys_pfmg_relax_vdata )
 {
-   hypre_SysPFMGRelaxData *sys_pfmg_relax_data = (hypre_SysPFMGRelaxData *)sys_pfmg_relax_vdata;
+	hypre_SysPFMGRelaxData *sys_pfmg_relax_data = (hypre_SysPFMGRelaxData *)sys_pfmg_relax_vdata;
 
    if (sys_pfmg_relax_data)
    {
@@ -155,7 +155,7 @@ hypre_SysPFMGRelaxSetJacobiWeight(void  *sys_pfmg_relax_vdata,
                                   HYPRE_Real weight)
 {
    hypre_SysPFMGRelaxData *sys_pfmg_relax_data = (hypre_SysPFMGRelaxData *)sys_pfmg_relax_vdata;
-
+                                                                                                                                     
    (sys_pfmg_relax_data -> jacobi_weight)    = weight;
 
    return hypre_error_flag;

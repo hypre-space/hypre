@@ -11,7 +11,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+    
 /*--------------------------------------------------------------------------
  * HYPRE_StructPFMGCreate
  *--------------------------------------------------------------------------*/
@@ -32,7 +32,7 @@ hypre_F90_IFACE(hypre_structpfmgcreate, HYPRE_STRUCTPFMGCREATE)
  * HYPRE_StructPFMGDestroy
  *--------------------------------------------------------------------------*/
 
-void
+void 
 hypre_F90_IFACE(hypre_structpfmgdestroy, HYPRE_STRUCTPFMGDESTROY)
    ( hypre_F90_Obj *solver,
      hypre_F90_Int *ierr   )
@@ -46,7 +46,7 @@ hypre_F90_IFACE(hypre_structpfmgdestroy, HYPRE_STRUCTPFMGDESTROY)
  * HYPRE_StructPFMGSetup
  *--------------------------------------------------------------------------*/
 
-void
+void 
 hypre_F90_IFACE(hypre_structpfmgsetup, HYPRE_STRUCTPFMGSETUP)
    ( hypre_F90_Obj *solver,
      hypre_F90_Obj *A,
@@ -66,7 +66,7 @@ hypre_F90_IFACE(hypre_structpfmgsetup, HYPRE_STRUCTPFMGSETUP)
  * HYPRE_StructPFMGSolve
  *--------------------------------------------------------------------------*/
 
-void
+void 
 hypre_F90_IFACE(hypre_structpfmgsolve, HYPRE_STRUCTPFMGSOLVE)
    ( hypre_F90_Obj *solver,
      hypre_F90_Obj *A,
@@ -197,7 +197,7 @@ hypre_F90_IFACE(hypre_structpfmggetrelchange, HYPRE_STRUCTPFMGGETRELCHANGE)
 /*--------------------------------------------------------------------------
  * HYPRE_StructPFMGSetZeroGuess, HYPRE_StructPFMGGetZeroGuess
  *--------------------------------------------------------------------------*/
-
+ 
 void
 hypre_F90_IFACE(hypre_structpfmgsetzeroguess, HYPRE_STRUCTPFMGSETZEROGUESS)
    ( hypre_F90_Obj *solver,
@@ -207,7 +207,7 @@ hypre_F90_IFACE(hypre_structpfmgsetzeroguess, HYPRE_STRUCTPFMGSETZEROGUESS)
       ( HYPRE_StructPFMGSetZeroGuess(
            hypre_F90_PassObj (HYPRE_StructSolver, solver) ) );
 }
-
+ 
 void
 hypre_F90_IFACE(hypre_structpfmggetzeroguess, HYPRE_STRUCTPFMGGETZEROGUESS)
    ( hypre_F90_Obj *solver,
@@ -223,7 +223,7 @@ hypre_F90_IFACE(hypre_structpfmggetzeroguess, HYPRE_STRUCTPFMGGETZEROGUESS)
 /*--------------------------------------------------------------------------
  * HYPRE_StructPFMGSetNonZeroGuess
  *--------------------------------------------------------------------------*/
-
+ 
 void
 hypre_F90_IFACE(hypre_structpfmgsetnonzeroguess, HYPRE_STRUCTPFMGSETNONZEROGUESS)
    ( hypre_F90_Obj *solver,
@@ -492,7 +492,7 @@ hypre_F90_IFACE(hypre_structpfmggetfinalrelativ, HYPRE_STRUCTPFMGGETFINALRELATIV
            hypre_F90_PassObj (HYPRE_StructSolver, solver),
            hypre_F90_PassRealRef (norm)   ) );
 }
-
+    
 #ifdef __cplusplus
 }
 #endif

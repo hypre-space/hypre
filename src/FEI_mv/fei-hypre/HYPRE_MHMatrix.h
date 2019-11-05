@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
-/****************************************************************************/
+/****************************************************************************/ 
 /* data structures  for local matrix                                        */
 /*--------------------------------------------------------------------------*/
 
@@ -43,7 +43,7 @@ typedef struct
     int         *partition;
 }
 MH_Context;
-
+    
 typedef struct
 {
     MPI_Comm     comm;
@@ -65,7 +65,7 @@ typedef struct
     ML_AMG       *ml_amg;
 #endif
     MH_Context   *contxt;
-}
+} 
 MH_Link;
 
 #endif

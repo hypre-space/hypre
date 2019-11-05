@@ -17,7 +17,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+    
 /*--------------------------------------------------------------------------
  * HYPRE_SchwarzCreate
  *--------------------------------------------------------------------------*/
@@ -113,7 +113,7 @@ hypre_F90_IFACE(hypre_schwarzsetoverlap, HYPRE_SCHWARZSETOVERLAP)
 {
    *ierr = (hypre_F90_Int)
       ( HYPRE_SchwarzSetOverlap(
-           hypre_F90_PassObj (HYPRE_Solver, solver),
+           hypre_F90_PassObj (HYPRE_Solver, solver), 
            hypre_F90_PassInt (overlap)));
 }
 

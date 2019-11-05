@@ -41,7 +41,7 @@ HYPRE_ParCSRFlexGMRESCreate( MPI_Comm comm, HYPRE_Solver *solver )
  * HYPRE_ParCSRFlexGMRESDestroy
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int
+HYPRE_Int 
 HYPRE_ParCSRFlexGMRESDestroy( HYPRE_Solver solver )
 {
    return( hypre_FlexGMRESDestroy( (void *) solver ) );
@@ -51,7 +51,7 @@ HYPRE_ParCSRFlexGMRESDestroy( HYPRE_Solver solver )
  * HYPRE_ParCSRFlexGMRESSetup
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int
+HYPRE_Int 
 HYPRE_ParCSRFlexGMRESSetup( HYPRE_Solver solver,
                             HYPRE_ParCSRMatrix A,
                             HYPRE_ParVector b,
@@ -67,7 +67,7 @@ HYPRE_ParCSRFlexGMRESSetup( HYPRE_Solver solver,
  * HYPRE_ParCSRFlexGMRESSolve
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int
+HYPRE_Int 
 HYPRE_ParCSRFlexGMRESSolve( HYPRE_Solver solver,
                             HYPRE_ParCSRMatrix A,
                             HYPRE_ParVector b,
@@ -217,7 +217,7 @@ HYPRE_ParCSRFlexGMRESGetResidual( HYPRE_Solver  solver,
 /*--------------------------------------------------------------------------
  * HYPRE_ParCSRFlexGMRESSetModifyPC
  *--------------------------------------------------------------------------*/
-
+ 
 HYPRE_Int HYPRE_ParCSRFlexGMRESSetModifyPC( HYPRE_Solver  solver,
                                             HYPRE_PtrToModifyPCFcn modify_pc)
 

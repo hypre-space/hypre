@@ -11,7 +11,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+    
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
@@ -30,7 +30,7 @@ hypre_F90_IFACE(hypre_structcycredcreate, HYPRE_STRUCTCYCREDCREATE)
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-void
+void 
 hypre_F90_IFACE(hypre_structcycreddestroy, HYPRE_STRUCTCYCREDDESTROY)
    ( hypre_F90_Obj *solver,
      hypre_F90_Int *ierr   )
@@ -43,7 +43,7 @@ hypre_F90_IFACE(hypre_structcycreddestroy, HYPRE_STRUCTCYCREDDESTROY)
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-void
+void 
 hypre_F90_IFACE(hypre_structcycredsetup, HYPRE_STRUCTCYCREDSETUP)
    ( hypre_F90_Obj *solver,
      hypre_F90_Obj *A,
@@ -62,7 +62,7 @@ hypre_F90_IFACE(hypre_structcycredsetup, HYPRE_STRUCTCYCREDSETUP)
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-void
+void 
 hypre_F90_IFACE(hypre_structcycredsolve, HYPRE_STRUCTCYCREDSOLVE)
    ( hypre_F90_Obj *solver,
      hypre_F90_Obj *A,
@@ -111,7 +111,7 @@ hypre_F90_IFACE(hypre_structcycredsetbase, HYPRE_STRUCTCYCREDSETBASE)
            hypre_F90_PassIntArray (base_index),
            hypre_F90_PassIntArray (base_stride) ) );
 }
-
+    
 #ifdef __cplusplus
 }
 #endif

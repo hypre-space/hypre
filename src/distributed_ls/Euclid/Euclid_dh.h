@@ -22,7 +22,7 @@
  *             Mat_dhSolve, and is in src/Mat_dh.c
  *
  * Users should only need to call functions with names of the form
- * Euclid_dhXXX (public functions).
+ * Euclid_dhXXX (public functions). 
  *
  * Some of the functions whose names are of the form XXX_private_XXX,
  * as could easily be static functions; similarly, the enums and
@@ -85,21 +85,21 @@ enum{ SOLVE_START_T,
 #define STATS_BINS 10
 enum{ NZA_STATS,       /* cumulative nonzeros for all systems solved */
       NZF_STATS,       /* cumulative nonzeros for all systems solved */
-      NZA_USED_STATS,  /* cumulative nonzeros NOT dropped by sparseA */
+      NZA_USED_STATS,  /* cumulative nonzeros NOT dropped by sparseA */ 
       NZA_RATIO_STATS  /* NZA_USED_STATS/NZA_STATS, over all processors */
     };
 
 
-/* primary data structure: this is monstrously long; but it works.
+/* primary data structure: this is monstrously long; but it works. 
    Users must ensure the following fields are initialized prior
    to calling Euclid_dhSetup(): m, n, beg_row, A
 */
 struct _mpi_interface_dh {
   bool isSetup;
 
-  HYPRE_Real rho_init;
-  HYPRE_Real rho_final;
-    /* Memory allocation for factor; will initially allocate space for
+  HYPRE_Real rho_init;  
+  HYPRE_Real rho_final;  
+    /* Memory allocation for factor; will initially allocate space for 
        rho_init*nzA nonzeros; rho_final is computed after factorization,
        and is the minimum that rho_init whoulc have been to avoid
        memory reallocation; rho_final is a maximum across all processors.
@@ -110,7 +110,7 @@ struct _mpi_interface_dh {
   HYPRE_Real *rhs;   /* used for debugging; this vector is not owned! */
   void *A;       /*  PETSc, HYPRE, Euclid, or other matrix object. */
   Factor_dh F;   /* data structure for the factor, F = L+U-I */
-  SubdomainGraph_dh sg;
+  SubdomainGraph_dh sg; 
 
   REAL_DH *scale;      /* row scaling vector */
   bool    isScaled;    /* set at runtime, turns scaling on or off */
@@ -151,9 +151,9 @@ struct _mpi_interface_dh {
   bool timingsWereReduced;
   bool   printStats; /* if true, on 2nd and subsequent calls to Setup,
                         calls Euclid_dhPrintStatsShorter().  Intent is to
-                        print out stats for each setup phase when
+                        print out stats for each setup phase when 
                         using Euclid, e.g, for nonlinear solves.
                      */
-};
+}; 
 
 #endif /*  #ifndef EUCLID_MPI_INTERFACE_DH */

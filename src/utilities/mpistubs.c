@@ -182,7 +182,7 @@ hypre_MPI_Allgather( void               *sendbuf,
          HYPRE_Int *csendbuf = (HYPRE_Int *)sendbuf;
          for (i = 0; i < sendcount; i++)
          {
-            crecvbuf[i] = csendbuf[i];
+	    crecvbuf[i] = csendbuf[i];
          }
       }
       break;
@@ -193,7 +193,7 @@ hypre_MPI_Allgather( void               *sendbuf,
          double *csendbuf = (double *)sendbuf;
          for (i = 0; i < sendcount; i++)
          {
-            crecvbuf[i] = csendbuf[i];
+	    crecvbuf[i] = csendbuf[i];
          }
       }
       break;
@@ -204,7 +204,7 @@ hypre_MPI_Allgather( void               *sendbuf,
          char *csendbuf = (char *)sendbuf;
          for (i = 0; i < sendcount; i++)
          {
-            crecvbuf[i] = csendbuf[i];
+	    crecvbuf[i] = csendbuf[i];
          }
       }
       break;
@@ -221,7 +221,7 @@ hypre_MPI_Allgather( void               *sendbuf,
          HYPRE_Real *csendbuf = (HYPRE_Real *)sendbuf;
          for (i = 0; i < sendcount; i++)
          {
-            crecvbuf[i] = csendbuf[i];
+	    crecvbuf[i] = csendbuf[i];
          }
       }
       break;
@@ -232,7 +232,7 @@ hypre_MPI_Allgather( void               *sendbuf,
          HYPRE_Complex *csendbuf = (HYPRE_Complex *)sendbuf;
          for (i = 0; i < sendcount; i++)
          {
-            crecvbuf[i] = csendbuf[i];
+	    crecvbuf[i] = csendbuf[i];
          }
       }
       break;

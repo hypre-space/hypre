@@ -48,7 +48,7 @@ hypre_DistributedMatrixCreate( MPI_Comm     context  )
  * hypre_DistributedMatrixDestroy
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int
+HYPRE_Int 
 hypre_DistributedMatrixDestroy( hypre_DistributedMatrix *matrix )
 {
 
@@ -73,7 +73,7 @@ hypre_DistributedMatrixDestroy( hypre_DistributedMatrix *matrix )
  * hypre_DistributedMatrixLimitedDestroy
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int
+HYPRE_Int 
 hypre_DistributedMatrixLimitedDestroy( hypre_DistributedMatrix *matrix )
 {
 
@@ -87,7 +87,7 @@ hypre_DistributedMatrixLimitedDestroy( hypre_DistributedMatrix *matrix )
  * hypre_DistributedMatrixInitialize
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int
+HYPRE_Int 
 hypre_DistributedMatrixInitialize( hypre_DistributedMatrix *matrix )
 {
    HYPRE_Int ierr = 0;
@@ -108,11 +108,11 @@ hypre_DistributedMatrixInitialize( hypre_DistributedMatrix *matrix )
  * hypre_DistributedMatrixAssemble
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int
+HYPRE_Int 
 hypre_DistributedMatrixAssemble( hypre_DistributedMatrix *matrix )
 {
 
-   if(
+   if( 
        (hypre_DistributedMatrixLocalStorageType(matrix) != HYPRE_PETSC )
     && (hypre_DistributedMatrixLocalStorageType(matrix) != HYPRE_ISIS )
     && (hypre_DistributedMatrixLocalStorageType(matrix) != HYPRE_PARCSR )
@@ -138,9 +138,9 @@ hypre_DistributedMatrixAssemble( hypre_DistributedMatrix *matrix )
  * hypre_DistributedMatrixSetLocalStorageType
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int
+HYPRE_Int 
 hypre_DistributedMatrixSetLocalStorageType( hypre_DistributedMatrix *matrix,
-      HYPRE_Int                type   )
+				 HYPRE_Int                type   )
 {
    HYPRE_Int ierr=0;
 
@@ -153,7 +153,7 @@ hypre_DistributedMatrixSetLocalStorageType( hypre_DistributedMatrix *matrix,
  * hypre_DistributedMatrixGetLocalStorageType
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int
+HYPRE_Int 
 hypre_DistributedMatrixGetLocalStorageType( hypre_DistributedMatrix *matrix  )
 {
    HYPRE_Int ierr=0;
@@ -167,9 +167,9 @@ hypre_DistributedMatrixGetLocalStorageType( hypre_DistributedMatrix *matrix  )
  * hypre_DistributedMatrixSetLocalStorage
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int
+HYPRE_Int 
 hypre_DistributedMatrixSetLocalStorage( hypre_DistributedMatrix *matrix,
-      void                  *local_storage  )
+				 void                  *local_storage  )
 {
    HYPRE_Int ierr=0;
 
@@ -194,9 +194,9 @@ hypre_DistributedMatrixGetLocalStorage( hypre_DistributedMatrix *matrix  )
  * hypre_DistributedMatrixSetTranslator
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int
+HYPRE_Int 
 hypre_DistributedMatrixSetTranslator( hypre_DistributedMatrix *matrix,
-      void                  *translator  )
+				 void                  *translator  )
 {
    hypre_DistributedMatrixTranslator(matrix) = translator;
 
@@ -218,9 +218,9 @@ hypre_DistributedMatrixGetTranslator( hypre_DistributedMatrix *matrix  )
  * hypre_DistributedMatrixSetAuxiliaryData
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int
+HYPRE_Int 
 hypre_DistributedMatrixSetAuxiliaryData( hypre_DistributedMatrix *matrix,
-      void                  *auxiliary_data  )
+				 void                  *auxiliary_data  )
 {
    hypre_DistributedMatrixAuxiliaryData(matrix) = auxiliary_data;
 
@@ -246,7 +246,7 @@ hypre_DistributedMatrixGetAuxiliaryData( hypre_DistributedMatrix *matrix  )
  * hypre_DistributedMatrixPrint
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int
+HYPRE_Int 
 hypre_DistributedMatrixPrint( hypre_DistributedMatrix *matrix )
 {
    if ( hypre_DistributedMatrixLocalStorageType(matrix) == HYPRE_PETSC )
@@ -263,7 +263,7 @@ hypre_DistributedMatrixPrint( hypre_DistributedMatrix *matrix )
  * hypre_DistributedMatrixGetLocalRange
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int
+HYPRE_Int 
 hypre_DistributedMatrixGetLocalRange( hypre_DistributedMatrix *matrix,
                              HYPRE_BigInt *row_start,
                              HYPRE_BigInt *row_end,
@@ -284,7 +284,7 @@ hypre_DistributedMatrixGetLocalRange( hypre_DistributedMatrix *matrix,
  * hypre_DistributedMatrixGetRow
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int
+HYPRE_Int 
 hypre_DistributedMatrixGetRow( hypre_DistributedMatrix *matrix,
                              HYPRE_BigInt row,
                              HYPRE_Int *size,
@@ -320,7 +320,7 @@ hypre_DistributedMatrixGetRow( hypre_DistributedMatrix *matrix,
  * hypre_DistributedMatrixRestoreRow
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int
+HYPRE_Int 
 hypre_DistributedMatrixRestoreRow( hypre_DistributedMatrix *matrix,
                              HYPRE_BigInt row,
                              HYPRE_Int *size,

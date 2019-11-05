@@ -117,7 +117,7 @@ hypre_StructInterpAssemble( hypre_StructMatrix  *A,
    {
       hypre_CommPkgDestroy(comm_pkg);
    }
-
+   
    hypre_CommPkgCreate(comm_info,
                        hypre_StructMatrixDataSpace(P),
                        hypre_StructMatrixDataSpace(P),
@@ -130,7 +130,7 @@ hypre_StructInterpAssemble( hypre_StructMatrix  *A,
    hypre_InitializeCommunication(comm_pkg,
                                  hypre_StructMatrixStencilData(P)[0],//hypre_StructMatrixData(P),
                                  hypre_StructMatrixStencilData(P)[0],//hypre_StructMatrixData(P),
-                                 0, 0,
+				 0, 0,
                                  &comm_handle);
    hypre_FinalizeCommunication(comm_handle);
 

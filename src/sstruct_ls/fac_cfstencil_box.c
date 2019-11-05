@@ -48,7 +48,7 @@ hypre_CF_StenBox( hypre_Box              *fgrid_box,
 
    hypre_BoxInit(&coarsen_box, ndim);
    hypre_BoxInit(&contracted_box, ndim);
-   hypre_BoxInit(&extended_box, ndim);
+   hypre_BoxInit(&extended_box, ndim); 
    hypre_BoxInit(&intersect_box, ndim);
    hypre_BoxInit(&shift_cbox, ndim);
    hypre_BoxInit(&shift_ibox, ndim);

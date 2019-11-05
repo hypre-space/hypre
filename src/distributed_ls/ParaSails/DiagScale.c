@@ -27,7 +27,7 @@ HYPRE_Int FindNumReplies(MPI_Comm comm, HYPRE_Int *replies_list);
 
 /*--------------------------------------------------------------------------
  * ExchangeDiagEntries - Given a list of indices of diagonal entries required
- * by this processor, "reqind" of length "reqlen", return a list of
+ * by this processor, "reqind" of length "reqlen", return a list of 
  * corresponding diagonal entries, "diags".  Used internally only by
  * DiagScaleCreate.
  *
@@ -37,12 +37,12 @@ HYPRE_Int FindNumReplies(MPI_Comm comm, HYPRE_Int *replies_list);
  * reqind - list of indices (input)
  * diags  - corresponding list of diagonal entries (output)
  * num_requests - number of requests (output)
- * requests - request handles, used to check that all responses are back
+ * requests - request handles, used to check that all responses are back 
  *            (output)
  * replies_list - array that indicates who we sent message to (output)
  *--------------------------------------------------------------------------*/
 
-static void ExchangeDiagEntries(MPI_Comm comm, Matrix *mat, HYPRE_Int reqlen,
+static void ExchangeDiagEntries(MPI_Comm comm, Matrix *mat, HYPRE_Int reqlen, 
   HYPRE_Int *reqind, HYPRE_Real *diags, HYPRE_Int *num_requests, hypre_MPI_Request *requests,
   HYPRE_Int *replies_list)
 {
@@ -68,8 +68,8 @@ static void ExchangeDiagEntries(MPI_Comm comm, Matrix *mat, HYPRE_Int reqlen,
         }
 
         /* Post receive for diagonal values */
-        hypre_MPI_Irecv(&diags[i], j-i, hypre_MPI_REAL, this_pe, DIAG_VALS_TAG,
-              comm, &requests[*num_requests]);
+        hypre_MPI_Irecv(&diags[i], j-i, hypre_MPI_REAL, this_pe, DIAG_VALS_TAG, 
+	    comm, &requests[*num_requests]);
 
         /* Request rows in reqind[i..j-1] */
         hypre_MPI_Isend(&reqind[i], j-i, HYPRE_MPI_INT, this_pe, DIAG_INDS_TAG,
@@ -77,22 +77,22 @@ static void ExchangeDiagEntries(MPI_Comm comm, Matrix *mat, HYPRE_Int reqlen,
         hypre_MPI_Request_free(&request);
         (*num_requests)++;
 
-        if (replies_list != NULL)
-           replies_list[this_pe] = 1;
+	if (replies_list != NULL)
+	    replies_list[this_pe] = 1;
     }
 }
 
 /*--------------------------------------------------------------------------
  * ExchangeDiagEntriesServer - Receive requests for diagonal entries and
  * send replies.  Used internally only by DiagScaleCreate.
- *
+ * 
  * comm   - MPI communicator (input)
  * mat    - matrix used to map row and column numbers to processors (input)
  * local_diags - local diagonal entries (input)
  * num_requests - number of requests to be received (input)
  *--------------------------------------------------------------------------*/
 
-static void ExchangeDiagEntriesServer(MPI_Comm comm, Matrix *mat,
+static void ExchangeDiagEntriesServer(MPI_Comm comm, Matrix *mat, 
   HYPRE_Real *local_diags, HYPRE_Int num_requests, Mem *mem, hypre_MPI_Request *requests)
 {
     hypre_MPI_Status status;
@@ -107,23 +107,23 @@ static void ExchangeDiagEntriesServer(MPI_Comm comm, Matrix *mat,
     {
         hypre_MPI_Probe(hypre_MPI_ANY_SOURCE, DIAG_INDS_TAG, comm, &status);
         source = status.hypre_MPI_SOURCE;
-        hypre_MPI_Get_count(&status, HYPRE_MPI_INT, &count);
+	hypre_MPI_Get_count(&status, HYPRE_MPI_INT, &count);
 
         recvbuf = (HYPRE_Int *) MemAlloc(mem, count*sizeof(HYPRE_Int));
         sendbuf = (HYPRE_Real *) MemAlloc(mem, count*sizeof(HYPRE_Real));
 
         /*hypre_MPI_Recv(recvbuf, count, HYPRE_MPI_INT, hypre_MPI_ANY_SOURCE, */
-        hypre_MPI_Recv(recvbuf, count, HYPRE_MPI_INT, source,
-              DIAG_INDS_TAG, comm, &status);
+        hypre_MPI_Recv(recvbuf, count, HYPRE_MPI_INT, source, 
+	    DIAG_INDS_TAG, comm, &status);
         source = status.hypre_MPI_SOURCE;
 
-        /* Construct reply message of diagonal entries in sendbuf */
+	/* Construct reply message of diagonal entries in sendbuf */
         for (j=0; j<count; j++)
-           sendbuf[j] = local_diags[recvbuf[j] - mat->beg_row];
+	    sendbuf[j] = local_diags[recvbuf[j] - mat->beg_row];
 
-        /* Use ready-mode send, since receives already posted */
-        hypre_MPI_Irsend(sendbuf, count, hypre_MPI_REAL, source,
-              DIAG_VALS_TAG, comm, &requests[i]);
+	/* Use ready-mode send, since receives already posted */
+	hypre_MPI_Irsend(sendbuf, count, hypre_MPI_REAL, source, 
+	    DIAG_VALS_TAG, comm, &requests[i]);
     }
 }
 
@@ -147,13 +147,13 @@ DiagScale *DiagScaleCreate(Matrix *A, Numbering *numb)
     DiagScale *p = hypre_TAlloc(DiagScale, 1, HYPRE_MEMORY_HOST);
 
     /* Storage for local diagonal entries */
-    p->local_diags = (HYPRE_Real *)
+    p->local_diags = (HYPRE_Real *) 
         hypre_TAlloc(HYPRE_Real, (A->end_row - A->beg_row + 1) , HYPRE_MEMORY_HOST);
 
     /* Extract the local diagonal entries */
     for (row=0; row<=A->end_row - A->beg_row; row++)
     {
-       MatrixGetRow(A, row, &len, &ind, &val);
+	MatrixGetRow(A, row, &len, &ind, &val);
 
         p->local_diags[row] = 1.0; /* in case no diag entry */
 
@@ -188,7 +188,7 @@ DiagScale *DiagScaleCreate(Matrix *A, Numbering *numb)
     statuses = hypre_TAlloc(hypre_MPI_Status, npes , HYPRE_MEMORY_HOST);
     replies_list = hypre_CTAlloc(HYPRE_Int, npes, HYPRE_MEMORY_HOST);
 
-    ExchangeDiagEntries(A->comm, A, len, ind, p->ext_diags, &num_requests,
+    ExchangeDiagEntries(A->comm, A, len, ind, p->ext_diags, &num_requests, 
         requests, replies_list);
 
     num_replies = FindNumReplies(A->comm, replies_list);
@@ -200,7 +200,7 @@ DiagScale *DiagScaleCreate(Matrix *A, Numbering *numb)
         requests2 = hypre_TAlloc(hypre_MPI_Request, num_replies , HYPRE_MEMORY_HOST);
 
     ExchangeDiagEntriesServer(A->comm, A, p->local_diags, num_replies,
-          mem, requests2);
+	mem, requests2);
 
     /* Wait for all replies */
     hypre_MPI_Waitall(num_requests, requests, statuses);
@@ -215,7 +215,7 @@ DiagScale *DiagScaleCreate(Matrix *A, Numbering *numb)
     if (len)
         temp = hypre_TAlloc(HYPRE_Real, len , HYPRE_MEMORY_HOST);
     for (j=0; j<len; j++)
-       temp[ind[j]-p->offset] = p->ext_diags[j];
+	temp[ind[j]-p->offset] = p->ext_diags[j];
 
     free(ind);
     free(p->ext_diags);

@@ -9,7 +9,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+	
 /******************************************************************************
  *  Definitions of sstruct fortran interface routines
  *****************************************************************************/
@@ -729,28 +729,28 @@ extern void hypre_F90_NAME(fhypre_sstructmaxwellprintloggi, FHYPRE_SSTRUCTMAXWEL
                           (hypre_F90_Obj *, HYPRE_Int *);
 
 #define HYPRE_SStructMaxwellGetNumIterations \
-        hypre_F90_NAME(fhypre_sstructmaxwellgetnumiter, FHYPRE_SSTRUCTMAXWELLGETNUMITER)
-extern void hypre_F90_NAME(fhypre_sstructmaxwellgetnumiter, FHYPRE_SSTRUCTMAXWELLGETNUMITER)
+        hypre_F90_NAME(fhypre_sstructmaxwellgetnumiter, FHYPRE_SSTRUCTMAXWELLGETNUMITER) 
+extern void hypre_F90_NAME(fhypre_sstructmaxwellgetnumiter, FHYPRE_SSTRUCTMAXWELLGETNUMITER) 
                           (hypre_F90_Obj *, HYPRE_Int *);
 
 #define HYPRE_SStructMaxwellGetFinalRelativeResidualNorm \
-        hypre_F90_NAME(fhypre_sstructmaxwellgetfinalre, FHYPRE_SSTRUCTMAXWELLGETFINALRE)
-extern void hypre_F90_NAME(fhypre_sstructmaxwellgetfinalre, FHYPRE_SSTRUCTMAXWELLGETFINALRE)
+        hypre_F90_NAME(fhypre_sstructmaxwellgetfinalre, FHYPRE_SSTRUCTMAXWELLGETFINALRE) 
+extern void hypre_F90_NAME(fhypre_sstructmaxwellgetfinalre, FHYPRE_SSTRUCTMAXWELLGETFINALRE) 
                           (hypre_F90_Obj *, HYPRE_Real *);
 
 #define HYPRE_SStructMaxwellPhysBdy \
-        hypre_F90_NAME(fhypre_sstructmaxwellphysbdy, FHYPRE_SSTRUCTMAXWELLPHYSBDY)
-extern void hypre_F90_NAME(fhypre_sstructmaxwellphysbdy, FHYPRE_SSTRUCTMAXWELLPHYSBDY)
+        hypre_F90_NAME(fhypre_sstructmaxwellphysbdy, FHYPRE_SSTRUCTMAXWELLPHYSBDY) 
+extern void hypre_F90_NAME(fhypre_sstructmaxwellphysbdy, FHYPRE_SSTRUCTMAXWELLPHYSBDY) 
                           (hypre_F90_Obj *, HYPRE_Int *, HYPRE_Int *, HYPRE_Int *, HYPRE_Int *);
 
 #define HYPRE_SStructMaxwellEliminateRowsCols \
-        hypre_F90_NAME(fhypre_sstructmaxwelleliminater, FHYPRE_SSTRUCTMAXWELLELIMINATER)
-extern void hypre_F90_NAME(fhypre_sstructmaxwelleliminater, FHYPRE_SSTRUCTMAXWELLELIMINATER)
+        hypre_F90_NAME(fhypre_sstructmaxwelleliminater, FHYPRE_SSTRUCTMAXWELLELIMINATER) 
+extern void hypre_F90_NAME(fhypre_sstructmaxwelleliminater, FHYPRE_SSTRUCTMAXWELLELIMINATER) 
                           (hypre_F90_Obj *, HYPRE_Int *, HYPRE_Int *);
 
 #define HYPRE_SStructMaxwellZeroVector \
-        hypre_F90_NAME(fhypre_sstructmaxwellzerovector, FHYPRE_SSTRUCTMAXWELLZEROVECTOR)
-extern void hypre_F90_NAME(fhypre_sstructmaxwellzerovector, FHYPRE_SSTRUCTMAXWELLZEROVECTOR)
+        hypre_F90_NAME(fhypre_sstructmaxwellzerovector, FHYPRE_SSTRUCTMAXWELLZEROVECTOR) 
+extern void hypre_F90_NAME(fhypre_sstructmaxwellzerovector, FHYPRE_SSTRUCTMAXWELLZEROVECTOR) 
                           (hypre_F90_Obj *, HYPRE_Int *, HYPRE_Int *);
 
 #ifdef __cplusplus

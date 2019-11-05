@@ -23,7 +23,7 @@ typedef struct
    HYPRE_Int     part;
    hypre_Index   index;
    HYPRE_Int     var;
-   HYPRE_Int     to_part;
+   HYPRE_Int     to_part;     
    hypre_Index   to_index;
    HYPRE_Int     to_var;
 

@@ -39,12 +39,12 @@ MLI_Solver_GMRES::~MLI_Solver_GMRES()
 {
    int i;
    if ( rVec_  != NULL ) delete rVec_;
-   if ( pVec_  != NULL )
+   if ( pVec_  != NULL ) 
    {
       for (i = 0; i < KDim_+1; i++) delete pVec_[i];
       delete [] pVec_;
    }
-   if ( zVec_  != NULL )
+   if ( zVec_  != NULL ) 
    {
       for (i = 0; i < KDim_+1; i++) delete zVec_[i];
       delete [] zVec_;
@@ -76,7 +76,7 @@ int MLI_Solver_GMRES::setup(MLI_Matrix *Amat_in)
    switch( baseMethod_ )
    {
       case MLI_SOLVER_JACOBI_ID : sprintf(paramString, "Jacobi");
-                                  baseSolver_ =
+                                  baseSolver_ = 
                                      new MLI_Solver_Jacobi(paramString);
                                   sprintf(paramString, "numSweeps");
                                   numSweeps = 1;
@@ -87,7 +87,7 @@ int MLI_Solver_GMRES::setup(MLI_Matrix *Amat_in)
                                   baseSolver_->setParams(paramString,1,argv);
                                   break;
       case MLI_SOLVER_BJACOBI_ID: sprintf(paramString, "BJacobi");
-                                  baseSolver_ =
+                                  baseSolver_ = 
                                      new MLI_Solver_BJacobi(paramString);
                                   sprintf(paramString, "numSweeps");
                                   numSweeps = 1;
@@ -95,7 +95,7 @@ int MLI_Solver_GMRES::setup(MLI_Matrix *Amat_in)
                                   baseSolver_->setParams(paramString,1,argv);
                                   break;
       case MLI_SOLVER_SGS_ID :    sprintf(paramString, "HSGS");
-                                  baseSolver_ =
+                                  baseSolver_ = 
                                      new MLI_Solver_HSGS(paramString);
                                   sprintf(paramString, "numSweeps");
                                   numSweeps = 1;
@@ -103,7 +103,7 @@ int MLI_Solver_GMRES::setup(MLI_Matrix *Amat_in)
                                   baseSolver_->setParams(paramString,1,argv);
                                   break;
       case MLI_SOLVER_BSGS_ID :   sprintf(paramString, "BSGS");
-                                  baseSolver_ =
+                                  baseSolver_ = 
                                      new MLI_Solver_BSGS(paramString);
                                   sprintf(paramString, "numSweeps");
                                   numSweeps = 1;
@@ -111,25 +111,25 @@ int MLI_Solver_GMRES::setup(MLI_Matrix *Amat_in)
                                   baseSolver_->setParams(paramString,1,argv);
                                   break;
       case MLI_SOLVER_MLI_ID :    sprintf(paramString, "MLI");
-                                  baseSolver_ =
+                                  baseSolver_ = 
                                      new MLI_Solver_BSGS(paramString);
                                   break;
       default : printf("MLI_Solver_GMRES ERROR : no base method.\n");
                 exit(1);
    }
    baseSolver_->setup(Amat_);
-
+ 
    /*-----------------------------------------------------------------
     * destroy previously allocated auxiliary vectors
     *-----------------------------------------------------------------*/
 
    if ( rVec_ != NULL ) delete rVec_;
-   if ( pVec_ != NULL )
+   if ( pVec_ != NULL ) 
    {
       for (i = 0; i < KDim_+1; i++) delete pVec_[i];
       delete [] pVec_;
    }
-   if ( zVec_  != NULL )
+   if ( zVec_  != NULL ) 
    {
       for (i = 0; i < KDim_+1; i++) delete zVec_[i];
       delete [] zVec_;
@@ -158,9 +158,9 @@ int MLI_Solver_GMRES::solve(MLI_Vector *b_in, MLI_Vector *u_in)
 {
    hypre_ParCSRMatrix *A;
    hypre_ParVector    *b, *u, *r, **p, **z;
-   int                 i, j, k, ierr = 0, iter, mypid;
+   int	              i, j, k, ierr = 0, iter, mypid;
    double             *rs, **hh, *c, *s, t, zero=0.0;
-   double             epsilon, gamma1, rnorm, epsmac = 1.e-16;
+   double             epsilon, gamma1, rnorm, epsmac = 1.e-16; 
    char               paramString[100];
    MPI_Comm           comm;
 
@@ -173,24 +173,24 @@ int MLI_Solver_GMRES::solve(MLI_Vector *b_in, MLI_Vector *u_in)
    u = (hypre_ParVector *) u_in->getVector();
    HYPRE_ParCSRMatrixGetComm((HYPRE_ParCSRMatrix) A, &comm);
    MPI_Comm_rank(comm, &mypid);
-
+   
    /*-----------------------------------------------------------------
     * fetch other auxiliary vectors
     *-----------------------------------------------------------------*/
 
    r  = (hypre_ParVector *) rVec_->getVector();
-   p  = hypre_TAlloc(hypre_ParVector *,  (KDim_+1), HYPRE_MEMORY_HOST);
-   z  = hypre_TAlloc(hypre_ParVector *,  (KDim_+1), HYPRE_MEMORY_HOST);
+   p  = hypre_TAlloc(hypre_ParVector *,  (KDim_+1), HYPRE_MEMORY_HOST); 
+   z  = hypre_TAlloc(hypre_ParVector *,  (KDim_+1), HYPRE_MEMORY_HOST); 
    for ( i = 0; i <= KDim_; i++ )
       p[i] = (hypre_ParVector *) pVec_[i]->getVector();
    for ( i = 0; i <= KDim_; i++ )
       z[i] = (hypre_ParVector *) zVec_[i]->getVector();
 
-   rs = new double[KDim_+1];
-   c  = new double[KDim_];
-   s  = new double[KDim_];
-   hh = new double*[KDim_+1];
-   for (i=0; i < KDim_+1; i++) hh[i] = new double[KDim_];
+   rs = new double[KDim_+1]; 
+   c  = new double[KDim_]; 
+   s  = new double[KDim_]; 
+   hh = new double*[KDim_+1]; 
+   for (i=0; i < KDim_+1; i++) hh[i] = new double[KDim_]; 
 
    /*-----------------------------------------------------------------
     * compute initial rnorm
@@ -207,7 +207,7 @@ int MLI_Solver_GMRES::solve(MLI_Vector *b_in, MLI_Vector *u_in)
    /*-----------------------------------------------------------------
     * Perform iterations
     *-----------------------------------------------------------------*/
-
+ 
    hypre_ParVectorCopy(r,p[0]);
    iter = 0;
    strcpy( paramString, "zeroInitialGuess" );
@@ -220,7 +220,7 @@ int MLI_Solver_GMRES::solve(MLI_Vector *b_in, MLI_Vector *u_in)
          ierr = 0;
          return ierr;
       }
-      if (rnorm <= epsilon && iter > 0)
+      if (rnorm <= epsilon && iter > 0) 
       {
          hypre_ParVectorCopy(b,r);
          hypre_ParCSRMatrixMatvec(-1.0, A, u, 1.0, r);
@@ -248,7 +248,7 @@ int MLI_Solver_GMRES::solve(MLI_Vector *b_in, MLI_Vector *u_in)
             hypre_ParVectorAxpy(-hh[j][i-1],p[j],p[i]);
          }
          t = sqrt(hypre_ParVectorInnerProd(p[i],p[i]));
-         hh[i][i-1] = t;
+         hh[i][i-1] = t;	
          if (t != 0.0)
          {
             t = 1.0/t;
@@ -260,7 +260,7 @@ int MLI_Solver_GMRES::solve(MLI_Vector *b_in, MLI_Vector *u_in)
          for (j = 1; j < i; j++)
          {
             t = hh[j-1][i-1];
-            hh[j-1][i-1] = c[j-1]*t + s[j-1]*hh[j][i-1];
+            hh[j-1][i-1] = c[j-1]*t + s[j-1]*hh[j][i-1];		
             hh[j][i-1] = -s[j-1]*t + c[j-1]*hh[j][i-1];
          }
          gamma1 = sqrt(hh[i-1][i-1]*hh[i-1][i-1] + hh[i][i-1]*hh[i][i-1]);
@@ -277,7 +277,7 @@ int MLI_Solver_GMRES::solve(MLI_Vector *b_in, MLI_Vector *u_in)
       }
 
       /* now compute solution, first solve upper triangular system */
-
+	
       rs[i-1] = rs[i-1]/hh[i-1][i-1];
       for (k = i-2; k >= 0; k--)
       {
@@ -286,7 +286,7 @@ int MLI_Solver_GMRES::solve(MLI_Vector *b_in, MLI_Vector *u_in)
          rs[k] = t/hh[k][k];
       }
 
-
+	
       for (j = 0; j < i; j++) hypre_ParVectorAxpy(rs[j], z[j], u);
 
       /* check for convergence, evaluate actual residual */
@@ -299,7 +299,7 @@ int MLI_Solver_GMRES::solve(MLI_Vector *b_in, MLI_Vector *u_in)
    }
 
    /*-----------------------------------------------------------------
-    * clean up
+    * clean up 
     *-----------------------------------------------------------------*/
 
    delete [] c;
@@ -309,7 +309,7 @@ int MLI_Solver_GMRES::solve(MLI_Vector *b_in, MLI_Vector *u_in)
    delete [] hh;
    free(p);
    free(z);
-   return(0);
+   return(0); 
 }
 
 /******************************************************************************
@@ -338,7 +338,7 @@ int MLI_Solver_GMRES::setParams( char *paramString, int argc, char **argv )
    }
    else if ( !strcmp(param1, "relaxWeight") )
    {
-      if ( argc != 2 && argc != 1 )
+      if ( argc != 2 && argc != 1 ) 
       {
          printf("MLI_Solver_GMRES::setParams ERROR : needs 1 or 2 args.\n");
          return 1;
@@ -349,7 +349,7 @@ int MLI_Solver_GMRES::setParams( char *paramString, int argc, char **argv )
    else if ( !strcmp(param1, "baseMethod") )
    {
       sscanf(paramString, "%s %s", param1, param2);
-      if ( !strcmp(param2, "Jacobi") )
+      if ( !strcmp(param2, "Jacobi") ) 
          baseMethod_ = MLI_SOLVER_JACOBI_ID;
       else if ( !strcmp(param2, "BJacobi") )
          baseMethod_ = MLI_SOLVER_BJACOBI_ID;
@@ -364,7 +364,7 @@ int MLI_Solver_GMRES::setParams( char *paramString, int argc, char **argv )
       return 0;
    }
    else
-   {
+   {   
       printf("MLI_Solver_GMRES::setParams - parameter not recognized.\n");
       printf("                Params = %s\n", paramString);
       return 1;

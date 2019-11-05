@@ -7,18 +7,18 @@
 
 /***************************************************************************
   Module:  FEI_HYPRE_impl.h
-  Purpose: local implementation of the FEI/LSC
+  Purpose: local implementation of the FEI/LSC 
  ***************************************************************************/
 
 #ifndef __FEI_HYPRE_IMPL_H__
 #define __FEI_HYPRE_IMPL_H__
 
 /**************************************************************************
- definition of the class to capture the FEI information
+ definition of the class to capture the FEI information 
 ---------------------------------------------------------------------------*/
 
 class FEI_HYPRE_Elem_Block {
-
+ 
    int    blockID_;
    int    numElems_;
    int    nodeDOF_;
@@ -52,7 +52,7 @@ public :
    int    resetRHSVectors(double s);
    int    resetSolnVectors(double s);
 
-   int    loadElemInfo(int elemID, int *elemNodeList, double **elemStiff,
+   int    loadElemInfo(int elemID, int *elemNodeList, double **elemStiff,   
                        double *elemRHS);
    int    loadElemMatrix(int elemID, int *elemNodeList, double **elemStiff);
    int    loadElemRHS(int elemID, double *elemRHS);
@@ -61,10 +61,10 @@ public :
 };
 
 /**************************************************************************
- definition of the class to capture the FEI information
+ definition of the class to capture the FEI information 
 ---------------------------------------------------------------------------*/
 
-class FEI_HYPRE_Impl
+class FEI_HYPRE_Impl 
 {
    MPI_Comm mpiComm_;
    int      mypid_;
@@ -136,16 +136,16 @@ public :
 
    int  initFields(int numFields, int *fieldSizes, int *fieldIDs);
 
-   int  initElemBlock(int elemBlockID, int numElements,
-                      int numNodesPerElement, int *numFieldsPerNode,
-                      int **nodalFieldIDs, int numElemDOFFieldsPerElement,
+   int  initElemBlock(int elemBlockID, int numElements, 
+                      int numNodesPerElement, int *numFieldsPerNode, 
+                      int **nodalFieldIDs, int numElemDOFFieldsPerElement, 
                       int *elemDOFFieldIDs, int interleaveStrategy);
 
-   int  initElem(int elemBlockID, int elemID, int *elemConn)
+   int  initElem(int elemBlockID, int elemID, int *elemConn) 
                       {(void) elemBlockID; (void) elemID; (void) elemConn;
                        return 0;}
 
-   int  initSharedNodes(int nShared, int *sharedIDs, int *sharedLeng,
+   int  initSharedNodes(int nShared, int *sharedIDs, int *sharedLeng, 
                         int **sharedProcs);
 
    int  initComplete() {return 0;}
@@ -158,13 +158,13 @@ public :
 
    int  resetInitialGuess(double s);
 
-   int  loadNodeBCs(int nNodes, int *nodeIDs, int fieldID, double **alpha,
+   int  loadNodeBCs(int nNodes, int *nodeIDs, int fieldID, double **alpha, 
                     double **beta, double **gamma);
 
-   int  sumInElem(int elemBlock, int elemID, int *elemConn,
+   int  sumInElem(int elemBlock, int elemID, int *elemConn, 
                   double **elemStiff, double *elemLoad, int elemFormat);
 
-   int  sumInElemMatrix(int elemBlock, int elemID, int* elemConn,
+   int  sumInElemMatrix(int elemBlock, int elemID, int* elemConn, 
                         double **elemStiffness, int elemFormat);
 
    int  sumInElemRHS(int elemBlock, int elemID, int *elemConn,

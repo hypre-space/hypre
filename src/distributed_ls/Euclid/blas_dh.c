@@ -16,21 +16,21 @@ void matvec_euclid_seq(HYPRE_Int n, HYPRE_Int *rp, HYPRE_Int *cval, HYPRE_Real *
   HYPRE_Int i, j;
   HYPRE_Int from, to, col;
   HYPRE_Real sum;
-
+ 
   if (np_dh > 1) SET_V_ERROR("only for sequential case!\n");
 
 #ifdef USING_OPENMP_DH
 #pragma omp parallel private(j, col, sum, from, to) \
                 default(shared) \
-                firstprivate(n, rp, cval, aval, x, y)
+                firstprivate(n, rp, cval, aval, x, y) 
 #endif
   {
 #ifdef USING_OPENMP_DH
-#pragma omp for schedule(static)
+#pragma omp for schedule(static)       
 #endif
       for (i=0; i<n; ++i) {
         sum = 0.0;
-        from = rp[i];
+        from = rp[i]; 
         to = rp[i+1];
         for (j=from; j<to; ++j) {
           col = cval[j];
@@ -51,7 +51,7 @@ void Axpy(HYPRE_Int n, HYPRE_Real alpha, HYPRE_Real *x, HYPRE_Real *y)
 
 #ifdef USING_OPENMP_DH
 #pragma omp parallel for schedule(static) firstprivate(alpha, x, y) \
-             private(i)
+             private(i) 
 #endif
   for (i=0; i<n; ++i) {
     y[i] = alpha*x[i] + y[i];

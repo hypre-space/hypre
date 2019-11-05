@@ -31,7 +31,7 @@
 //  Moran Tzafrir
 //  Tel-Aviv University
 //
-//  Date: July 15, 2008.
+//  Date: July 15, 2008.  
 //
 ////////////////////////////////////////////////////////////////////////////////
 // Programmer : Moran Tzafrir (MoranTza@gmail.com)
@@ -126,7 +126,7 @@ static inline HYPRE_Int hypre_fetch_and_add(HYPRE_Int *ptr, HYPRE_Int value)
 
 // Small Utilities ..........................................................
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
-static inline HYPRE_Int first_lsb_bit_indx(hypre_uint x)
+static inline HYPRE_Int first_lsb_bit_indx(hypre_uint x) 
 {
   return ffs(x) - 1;
 }
@@ -209,7 +209,7 @@ static inline HYPRE_BigInt hypre_BigHash(HYPRE_BigInt input)
       hypre_printf("hash(%lld) = %d\n", h64, HYPRE_HOPSCOTCH_HASH_EMPTY);
       assert(HYPRE_HOPSCOTCH_HASH_EMPTY != h64);
     }
-#endif
+#endif 
 
     return h64;
 }
@@ -260,7 +260,7 @@ static inline HYPRE_Int hypre_Hash(HYPRE_Int input)
       hypre_printf("hash(%lld) = %d\n", h64, HYPRE_HOPSCOTCH_HASH_EMPTY);
       assert(HYPRE_HOPSCOTCH_HASH_EMPTY != h64);
     }
-#endif
+#endif 
 
     return h64;
 }
@@ -315,7 +315,7 @@ static inline void hypre_UnorderedIntSetFindCloserFreeBucket( hypre_UnorderedInt
     {
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
       hypre_HopscotchSegment*  move_segment = &(s->segments[move_bucket & s->segmentMask]);
-
+      
       if(start_seg != move_segment)
         omp_set_lock(&move_segment->lock);
 #endif
@@ -352,7 +352,7 @@ static inline void hypre_UnorderedIntSetFindCloserFreeBucket( hypre_UnorderedInt
     }
     ++move_bucket;
   }
-  *free_bucket = -1;
+  *free_bucket = -1; 
   *free_dist = 0;
 }
 
@@ -383,7 +383,7 @@ static inline void hypre_UnorderedBigIntSetFindCloserFreeBucket( hypre_Unordered
     {
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
       hypre_HopscotchSegment*  move_segment = &(s->segments[move_bucket & s->segmentMask]);
-
+      
       if(start_seg != move_segment)
         omp_set_lock(&move_segment->lock);
 #endif
@@ -420,7 +420,7 @@ static inline void hypre_UnorderedBigIntSetFindCloserFreeBucket( hypre_Unordered
     }
     ++move_bucket;
   }
-  *free_bucket = -1;
+  *free_bucket = -1; 
   *free_dist = 0;
 }
 
@@ -451,7 +451,7 @@ static inline void hypre_UnorderedIntMapFindCloserFreeBucket( hypre_UnorderedInt
     {
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
       hypre_HopscotchSegment* move_segment = &(m->segments[(move_bucket - m->table) & m->segmentMask]);
-
+      
       if (start_seg != move_segment)
         omp_set_lock(&move_segment->lock);
 #endif
@@ -489,7 +489,7 @@ static inline void hypre_UnorderedIntMapFindCloserFreeBucket( hypre_UnorderedInt
     }
     ++move_bucket;
   }
-  *free_bucket = NULL;
+  *free_bucket = NULL; 
   *free_dist = 0;
 }
 
@@ -520,7 +520,7 @@ static inline void hypre_UnorderedBigIntMapFindCloserFreeBucket( hypre_Unordered
     {
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
       hypre_HopscotchSegment* move_segment = &(m->segments[(move_bucket - m->table) & m->segmentMask]);
-
+      
       if (start_seg != move_segment)
         omp_set_lock(&move_segment->lock);
 #endif
@@ -558,7 +558,7 @@ static inline void hypre_UnorderedBigIntMapFindCloserFreeBucket( hypre_Unordered
     }
     ++move_bucket;
   }
-  *free_bucket = NULL;
+  *free_bucket = NULL; 
   *free_dist = 0;
 }
 
@@ -615,7 +615,7 @@ static inline HYPRE_Int hypre_UnorderedIntSetContains( hypre_UnorderedIntSet *s,
     if (hash == s->hash[currElm] && key == s->key[currElm])
       return 1;
     hopInfo &= ~(1U << i);
-  }
+  } 
 
   if (segment->timestamp == startTimestamp)
     return 0;
@@ -662,7 +662,7 @@ static inline HYPRE_Int hypre_UnorderedBigIntSetContains( hypre_UnorderedBigIntS
     if (hash == s->hash[currElm] && key == s->key[currElm])
       return 1;
     hopInfo &= ~(1U << i);
-  }
+  } 
 
   if (segment->timestamp == startTimestamp)
     return 0;
@@ -710,7 +710,7 @@ static inline HYPRE_Int hypre_UnorderedIntMapGet( hypre_UnorderedIntMap *m,
     if (hash == currElm->hash && key == currElm->key)
       return currElm->data;
     hopInfo &= ~(1U << i);
-  }
+  } 
 
   if (segment->timestamp == startTimestamp)
     return -1;
@@ -756,7 +756,7 @@ static inline HYPRE_Int hypre_UnorderedBigIntMapGet( hypre_UnorderedBigIntMap *m
     if (hash == currElm->hash && key == currElm->key)
       return currElm->data;
     hopInfo &= ~(1U << i);
-  }
+  } 
 
   if (segment->timestamp == startTimestamp)
     return -1;
@@ -786,7 +786,7 @@ static inline HYPRE_Int hypre_UnorderedIntSetSize(hypre_UnorderedIntSet *s)
     }
   }
   return counter;
-}
+}   
 
 static inline HYPRE_Int hypre_UnorderedBigIntSetSize(hypre_UnorderedBigIntSet *s)
 {
@@ -801,7 +801,7 @@ static inline HYPRE_Int hypre_UnorderedBigIntSetSize(hypre_UnorderedBigIntSet *s
     }
   }
   return counter;
-}
+}   
 
 static inline HYPRE_Int hypre_UnorderedIntMapSize(hypre_UnorderedIntMap *m)
 {

@@ -30,7 +30,7 @@ HYPRE_StructBiCGSTABCreate( MPI_Comm comm, HYPRE_StructSolver *solver )
 
 /*==========================================================================*/
 
-HYPRE_Int
+HYPRE_Int 
 HYPRE_StructBiCGSTABDestroy( HYPRE_StructSolver solver )
 {
    return( hypre_BiCGSTABDestroy( (void *) solver ) );
@@ -38,7 +38,7 @@ HYPRE_StructBiCGSTABDestroy( HYPRE_StructSolver solver )
 
 /*==========================================================================*/
 
-HYPRE_Int
+HYPRE_Int 
 HYPRE_StructBiCGSTABSetup( HYPRE_StructSolver solver,
                            HYPRE_StructMatrix A,
                            HYPRE_StructVector b,
@@ -52,7 +52,7 @@ HYPRE_StructBiCGSTABSetup( HYPRE_StructSolver solver,
 
 /*==========================================================================*/
 
-HYPRE_Int
+HYPRE_Int 
 HYPRE_StructBiCGSTABSolve( HYPRE_StructSolver solver,
                            HYPRE_StructMatrix A,
                            HYPRE_StructVector b,

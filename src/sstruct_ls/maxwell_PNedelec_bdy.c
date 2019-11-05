@@ -64,7 +64,7 @@ hypre_Maxwell_PNedelec_Bdy( hypre_StructGrid       *cell_grid,
 
       for (i= 0; i< ndim; i++)
       {
-         hypre_BoxBoundaryDG(box, cell_grid,
+         hypre_BoxBoundaryDG(box, cell_grid, 
                              hypre_BoxArrayArrayBoxArray(cellgrid_bdry, 2*i),
                              hypre_BoxArrayArrayBoxArray(cellgrid_bdry, 2*i+1),
                              i);
@@ -84,17 +84,17 @@ hypre_Maxwell_PNedelec_Bdy( hypre_StructGrid       *cell_grid,
      /* There are boundary boxes. Every variable of pgrid will have some */
       if (bdy)
       {
-         bdry[j]= hypre_TAlloc(hypre_BoxArrayArray *,  nvars+1, HYPRE_MEMORY_HOST);
-
+         bdry[j]= hypre_TAlloc(hypre_BoxArrayArray *,  nvars+1, HYPRE_MEMORY_HOST); 
+        
         /* keep the cell-centred boxarrayarray of boundaries */
-         bdry[j][0]= hypre_BoxArrayArrayDuplicate(cellgrid_bdry);
+         bdry[j][0]= hypre_BoxArrayArrayDuplicate(cellgrid_bdry); 
 
          k= 2*(ndim-1);  /* 3-d requires 4 boundary faces to be checked */
          for (i= 0; i< nvars; i++)
          {
             bdry[j][i+1]= hypre_BoxArrayArrayCreate(k, ndim); /* one for +/- directions */
          }
-
+   
          for (i= 0; i< nvars; i++)
          {
             t= vartypes[i];
@@ -111,13 +111,13 @@ hypre_Maxwell_PNedelec_Bdy( hypre_StructGrid       *cell_grid,
                      hypre_ForBoxI(k, box_array)
                      {
                         bdy_box= hypre_BoxArrayBox(box_array, k);
-
+                   
                        /* bdry boxes */
                         hypre_CopyIndex(hypre_BoxIMin(bdy_box), lower);
                         hypre_CopyIndex(hypre_BoxIMax(bdy_box), upper);
                         hypre_SubtractIndexes(lower, varoffset, ndim, lower);
                         hypre_SubtractIndexes(upper, varoffset, ndim, upper);
-
+  
                         hypre_BoxSetExtents(shifted_box, lower, upper);
                         hypre_AppendBox(shifted_box, box_array2);
                      }
@@ -134,7 +134,7 @@ hypre_Maxwell_PNedelec_Bdy( hypre_StructGrid       *cell_grid,
                        /* bdry boxes */
                         hypre_CopyIndex(hypre_BoxIMin(bdy_box), lower);
                         hypre_CopyIndex(hypre_BoxIMax(bdy_box), upper);
-
+                                                                                                         
                         hypre_BoxSetExtents(shifted_box, lower, upper);
                         hypre_AppendBox(shifted_box, box_array2);
                      }
@@ -152,13 +152,13 @@ hypre_Maxwell_PNedelec_Bdy( hypre_StructGrid       *cell_grid,
                      hypre_ForBoxI(k, box_array)
                      {
                         bdy_box= hypre_BoxArrayBox(box_array, k);
-
+                   
                        /* bdry boxes */
                         hypre_CopyIndex(hypre_BoxIMin(bdy_box), lower);
                         hypre_CopyIndex(hypre_BoxIMax(bdy_box), upper);
                         hypre_SubtractIndexes(lower, varoffset, ndim, lower);
                         hypre_SubtractIndexes(upper, varoffset, ndim, upper);
-
+  
                         hypre_BoxSetExtents(shifted_box, lower, upper);
                         hypre_AppendBox(shifted_box, box_array2);
                      }
@@ -171,7 +171,7 @@ hypre_Maxwell_PNedelec_Bdy( hypre_StructGrid       *cell_grid,
                      hypre_ForBoxI(k, box_array)
                      {
                         bdy_box= hypre_BoxArrayBox(box_array, k);
-
+                                                                                                         
                        /* bdry boxes */
                         hypre_CopyIndex(hypre_BoxIMin(bdy_box), lower);
                         hypre_CopyIndex(hypre_BoxIMax(bdy_box), upper);
@@ -193,13 +193,13 @@ hypre_Maxwell_PNedelec_Bdy( hypre_StructGrid       *cell_grid,
                      hypre_ForBoxI(k, box_array)
                      {
                         bdy_box= hypre_BoxArrayBox(box_array, k);
-
+                   
                        /* bdry boxes */
                         hypre_CopyIndex(hypre_BoxIMin(bdy_box), lower);
                         hypre_CopyIndex(hypre_BoxIMax(bdy_box), upper);
                         hypre_SubtractIndexes(lower, varoffset, ndim, lower);
                         hypre_SubtractIndexes(upper, kshift, ndim, upper);
-
+  
                         hypre_BoxSetExtents(shifted_box, lower, upper);
                         hypre_AppendBox(shifted_box, box_array2);
                      }
@@ -212,12 +212,12 @@ hypre_Maxwell_PNedelec_Bdy( hypre_StructGrid       *cell_grid,
                      hypre_ForBoxI(k, box_array)
                      {
                         bdy_box= hypre_BoxArrayBox(box_array, k);
-
+                   
                        /* bdry boxes */
                         hypre_CopyIndex(hypre_BoxIMin(bdy_box), lower);
                         hypre_CopyIndex(hypre_BoxIMax(bdy_box), upper);
                         hypre_SubtractIndexes(lower, jshift, ndim, lower);
-
+  
                         hypre_BoxSetExtents(shifted_box, lower, upper);
                         hypre_AppendBox(shifted_box, box_array2);
                      }
@@ -230,18 +230,18 @@ hypre_Maxwell_PNedelec_Bdy( hypre_StructGrid       *cell_grid,
                      hypre_ForBoxI(k, box_array)
                      {
                         bdy_box= hypre_BoxArrayBox(box_array, k);
-
+                                                                                                                        
                        /* bdry boxes */
                         hypre_CopyIndex(hypre_BoxIMin(bdy_box), lower);
                         hypre_CopyIndex(hypre_BoxIMax(bdy_box), upper);
                         hypre_SubtractIndexes(lower, varoffset, ndim, lower);
                         hypre_SubtractIndexes(upper, jshift, ndim, upper);
-
+                                                                                                                        
                         hypre_BoxSetExtents(shifted_box, lower, upper);
                         hypre_AppendBox(shifted_box, box_array2);
                      }
                   }
-
+                                                                                                                        
                   if (flag[3]) /* boundary j= upper yface*/
                   {
                      box_array = hypre_BoxArrayArrayBoxArray(cellgrid_bdry, 3);
@@ -254,7 +254,7 @@ hypre_Maxwell_PNedelec_Bdy( hypre_StructGrid       *cell_grid,
                         hypre_CopyIndex(hypre_BoxIMin(bdy_box), lower);
                         hypre_CopyIndex(hypre_BoxIMax(bdy_box), upper);
                         hypre_SubtractIndexes(lower, kshift, ndim, lower);
-
+                                                                                                                        
                         hypre_BoxSetExtents(shifted_box, lower, upper);
                         hypre_AppendBox(shifted_box, box_array2);
                      }
@@ -277,12 +277,12 @@ hypre_Maxwell_PNedelec_Bdy( hypre_StructGrid       *cell_grid,
                         hypre_CopyIndex(hypre_BoxIMax(bdy_box), upper);
                         hypre_SubtractIndexes(lower, varoffset, ndim, lower);
                         hypre_SubtractIndexes(upper, kshift, ndim, upper);
-
+                                                                                                                        
                         hypre_BoxSetExtents(shifted_box, lower, upper);
                         hypre_AppendBox(shifted_box, box_array2);
                      }
                   }
-
+                                                                                                                        
                   if (flag[5]) /* boundary k= upper zface*/
                   {
                      box_array = hypre_BoxArrayArrayBoxArray(cellgrid_bdry, 5);
@@ -295,12 +295,12 @@ hypre_Maxwell_PNedelec_Bdy( hypre_StructGrid       *cell_grid,
                         hypre_CopyIndex(hypre_BoxIMin(bdy_box), lower);
                         hypre_CopyIndex(hypre_BoxIMax(bdy_box), upper);
                         hypre_SubtractIndexes(lower, ishift, ndim, lower);
-
+                                                                                                                        
                         hypre_BoxSetExtents(shifted_box, lower, upper);
                         hypre_AppendBox(shifted_box, box_array2);
                      }
                   }
-
+                                                                                                                        
                   if (flag[0]) /* boundary i= lower xface*/
                   {
                      box_array = hypre_BoxArrayArrayBoxArray(cellgrid_bdry, 0);
@@ -314,12 +314,12 @@ hypre_Maxwell_PNedelec_Bdy( hypre_StructGrid       *cell_grid,
                         hypre_CopyIndex(hypre_BoxIMax(bdy_box), upper);
                         hypre_SubtractIndexes(lower, varoffset, ndim, lower);
                         hypre_SubtractIndexes(upper, ishift, ndim, upper);
-
+                                                                                                                        
                         hypre_BoxSetExtents(shifted_box, lower, upper);
                         hypre_AppendBox(shifted_box, box_array2);
                      }
                   }
-
+                                                                                                                        
                   if (flag[1]) /* boundary i= upper xface*/
                   {
                      box_array = hypre_BoxArrayArrayBoxArray(cellgrid_bdry, 1);
@@ -327,7 +327,7 @@ hypre_Maxwell_PNedelec_Bdy( hypre_StructGrid       *cell_grid,
                      hypre_ForBoxI(k, box_array)
                      {
                         bdy_box= hypre_BoxArrayBox(box_array, k);
-
+                                                                                                                        
                        /* bdry boxes */
                         hypre_CopyIndex(hypre_BoxIMin(bdy_box), lower);
                         hypre_CopyIndex(hypre_BoxIMax(bdy_box), upper);
@@ -350,7 +350,7 @@ hypre_Maxwell_PNedelec_Bdy( hypre_StructGrid       *cell_grid,
                       hypre_ForBoxI(k, box_array)
                       {
                          bdy_box= hypre_BoxArrayBox(box_array, k);
-
+                                                                                                                        
                         /* bdry boxes */
                          hypre_CopyIndex(hypre_BoxIMin(bdy_box), lower);
                          hypre_CopyIndex(hypre_BoxIMax(bdy_box), upper);
@@ -427,14 +427,14 @@ hypre_Maxwell_PNedelec_Bdy( hypre_StructGrid       *cell_grid,
       {
         /* make an empty ptr of boxarrayarrays to avoid memory leaks when
            destroying bdry later. */
-         bdry[j]= hypre_TAlloc(hypre_BoxArrayArray *,  nvars+1, HYPRE_MEMORY_HOST);
+         bdry[j]= hypre_TAlloc(hypre_BoxArrayArray *,  nvars+1, HYPRE_MEMORY_HOST); 
          for (i= 0; i< nvars+1; i++)
          {
             bdry[j][i]= hypre_BoxArrayArrayCreate(0, ndim);
          }
       }
 
-      hypre_BoxArrayArrayDestroy(cellgrid_bdry);
+      hypre_BoxArrayArrayDestroy(cellgrid_bdry); 
       hypre_TFree(flag, HYPRE_MEMORY_HOST);
    }  /* hypre_ForBoxI(j, cell_boxes) */
 

@@ -16,7 +16,7 @@
 ! HYPRE_SStructGraphCreate
 !-------------------------------------------------------------------------
       subroutine fhypre_sstructgraphcreate(fcomm, fgrid, fgraphptr)
-
+     
       integer ierr
       integer fcomm
       integer*8 fgrid
@@ -36,7 +36,7 @@
 ! HYPRE_SStructGraphDestroy
 !--------------------------------------------------------------------------
       subroutine fhypre_sstructgraphdestroy(fgraph)
-
+      
       integer ierr
       integer*8 fgraph
 
@@ -53,7 +53,7 @@
 !--------------------------------------------------------------------------
 ! HYPRE_SStructGraphSetStencil
 !--------------------------------------------------------------------------
-      subroutine fhypre_sstructgraphsetstencil(fgraph, fpart, fvar,
+      subroutine fhypre_sstructgraphsetstencil(fgraph, fpart, fvar, 
      1                                         fstencil)
 
       integer ierr
@@ -62,7 +62,7 @@
       integer*8 fgraph
       integer*8 fstencil
 
-      call HYPRE_SStructGraphSetStencil(fgraph, fpart, fvar, fstencil,
+      call HYPRE_SStructGraphSetStencil(fgraph, fpart, fvar, fstencil, 
      1                                  ierr)
 
       if (ierr .ne. 0) then
@@ -77,7 +77,7 @@
 !  HYPRE_SStructGraphAddEntries-
 !    THIS IS FOR A NON-OVERLAPPING GRID GRAPH.
 !--------------------------------------------------------------------------
-      subroutine fhypre_sstructgraphaddentries(fgraph, fpart, findex,
+      subroutine fhypre_sstructgraphaddentries(fgraph, fpart, findex, 
      1                                         fvar, fto_part,
      1                                         fto_index, fto_var)
 
@@ -91,7 +91,7 @@
       integer*8 fgraph
 
       call HYPRE_SStructGraphAddEntries(fgraph, fpart, findex, fvar,
-     1                                  fto_part, fto_index, fto_var,
+     1                                  fto_part, fto_index, fto_var, 
      2                                  ierr)
 
       if (ierr .ne. 0) then
@@ -106,7 +106,7 @@
 !  HYPRE_SStructGraphAssemble
 !--------------------------------------------------------------------------
       subroutine fhypre_sstructgraphassemble(fgraph)
-
+     
       integer ierr
       integer*8 fgraph
 
@@ -124,7 +124,7 @@
 !  HYPRE_SStructGraphSetObjectType
 !--------------------------------------------------------------------------
       subroutine fhypre_sstructgraphsetobjecttyp(fgraph, ftype)
-
+                                                 
       integer ierr
       integer ftype
       integer*8 fgraph
@@ -150,14 +150,14 @@
 !--------------------------------------------------------------------------
       subroutine fhypre_sstructgridcreate(fcomm, fndim, fnparts,
      1                                    fgridptr)
-
+                                         
       integer ierr
       integer fcomm
       integer fndim
       integer fnparts
       integer*8 fgridptr
 
-      call HYPRE_SStructGridCreate(fcomm, fndim, fnparts, fgridptr,
+      call HYPRE_SStructGridCreate(fcomm, fndim, fnparts, fgridptr, 
      1                             ierr)
 
       if (ierr .ne. 0) then
@@ -189,7 +189,7 @@
 !--------------------------------------------------------------------------
 !   HYPRE_SStructGridSetExtents
 !--------------------------------------------------------------------------
-      subroutine fhypre_sstructgridsetextents(fgrid, fpart, filower,
+      subroutine fhypre_sstructgridsetextents(fgrid, fpart, filower, 
      1                                        fiupper)
 
       integer ierr
@@ -198,7 +198,7 @@
       integer fiupper
       integer*8 fgrid
 
-      call HYPRE_SStructGridSetExtents(fgrid, fpart, filower, fiupper,
+      call HYPRE_SStructGridSetExtents(fgrid, fpart, filower, fiupper, 
      1                                 ierr)
 
       if (ierr .ne. 0) then
@@ -212,7 +212,7 @@
 !--------------------------------------------------------------------------
 !   HYPRE_SStructGridSetVariables
 !--------------------------------------------------------------------------
-      subroutine fhypre_sstructgridsetvariables(fgrid, fpart, fnvars,
+      subroutine fhypre_sstructgridsetvariables(fgrid, fpart, fnvars, 
      1                                          fvartypes)
 
       integer ierr
@@ -221,7 +221,7 @@
       integer*8 fgrid
       integer*8 fvartypes
 
-      call HYPRE_SStructGridSetVariables(fgrid, fpart, fnvars,
+      call HYPRE_SStructGridSetVariables(fgrid, fpart, fnvars, 
      1                                   fvartypes, ierr)
 
       if (ierr .ne. 0) then
@@ -275,7 +275,7 @@
       integer findex_map
       integer*8 fgrid
 
-      call HYPRE_SStructGridSetNeighborBox(fgrid, fpart, filower,
+      call HYPRE_SStructGridSetNeighborBox(fgrid, fpart, filower, 
      1                                     fiupper, fnbor_part,
      2                                     fnbor_ilower, fnbor_iupper,
      3                                     findex_map, ierr)
@@ -335,7 +335,7 @@
       integer fnumghost
       integer*8 fgrid
 
-      call HYPRE_SStructGridSetNumGhost(fgrid, fnum_ghost, ierr)
+      call HYPRE_SStructGridSetNumGhost(fgrid, fnum_ghost, ierr)       
 
       if (ierr .ne. 0) then
          print *, ' fhypre_sstructgridsetnumghost error = ', ierr
@@ -410,8 +410,8 @@
 !--------------------------------------------------------------------------
 !   HYPRE_SStructMatrixSetValues
 !--------------------------------------------------------------------------
-      subroutine fhypre_sstructmatrixsetvalues(fmatrix, fpart, findex,
-     1                                         fvar, fnentries,
+      subroutine fhypre_sstructmatrixsetvalues(fmatrix, fpart, findex, 
+     1                                         fvar, fnentries, 
      2                                         fentries, fvalues)
 
       integer ierr
@@ -423,8 +423,8 @@
       integer*8 fmatrix
       double precision fvalues
 
-      call HYPRE_SStructMatrixSetValues(fmatrix, fpart, findex, fvar,
-     1                                  fnentries, fentries, fvalues,
+      call HYPRE_SStructMatrixSetValues(fmatrix, fpart, findex, fvar, 
+     1                                  fnentries, fentries, fvalues, 
      2                                  ierr)
 
       if (ierr .ne. 0) then
@@ -438,9 +438,9 @@
 !--------------------------------------------------------------------------
 !   HYPRE_SStructMatrixSetBoxValues
 !--------------------------------------------------------------------------
-      subroutine fhypre_sstructmatrixsetboxvalue(fmatrix, fpart,
-     1                                            filower, fiupper,
-     2                                            fvar, fnentries,
+      subroutine fhypre_sstructmatrixsetboxvalue(fmatrix, fpart, 
+     1                                            filower, fiupper, 
+     2                                            fvar, fnentries, 
      3                                            fentries, fvalues)
 
       integer ierr
@@ -453,8 +453,8 @@
       integer*8 fmatrix
       double precision fvalues
 
-      call HYPRE_SStructMatrixSetBoxValues(fmatrix, fpart, filower,
-     1                                     fiupper, fvar, fnentries,
+      call HYPRE_SStructMatrixSetBoxValues(fmatrix, fpart, filower, 
+     1                                     fiupper, fvar, fnentries, 
      2                                     fentries, fvalues, ierr)
 
       if (ierr .ne. 0) then
@@ -468,8 +468,8 @@
 !--------------------------------------------------------------------------
 !   HYPRE_SStructMatrixGetValues
 !--------------------------------------------------------------------------
-      subroutine fhypre_sstructmatrixgetvalues(fmatrix, fpart, findex,
-     1                                         fvar, fnentries,
+      subroutine fhypre_sstructmatrixgetvalues(fmatrix, fpart, findex, 
+     1                                         fvar, fnentries, 
      2                                         fentries, fvalues)
 
       integer ierr
@@ -481,8 +481,8 @@
       integer*8 fmatrix
       double precision fvalues
 
-      call HYPRE_SStructMatrixGetValues(fmatrix, fpart, findex, fvar,
-     1                                  fnentries, fentries, fvalues,
+      call HYPRE_SStructMatrixGetValues(fmatrix, fpart, findex, fvar, 
+     1                                  fnentries, fentries, fvalues, 
      2                                  ierr)
 
       if (ierr .ne. 0) then
@@ -496,8 +496,8 @@
 !--------------------------------------------------------------------------
 !   HYPRE_SStructMatrixGetBoxValues
 !--------------------------------------------------------------------------
-      subroutine fhypre_sstructmatrixgetboxvalue(fmatrix, fpart,
-     1                                            filower, fiupper,
+      subroutine fhypre_sstructmatrixgetboxvalue(fmatrix, fpart, 
+     1                                            filower, fiupper, 
      2                                            fvar, fnentries,
      3                                            fentries, fvalues)
       integer ierr
@@ -510,8 +510,8 @@
       integer*8 fmatrix
       double precision fvalues
 
-      call HYPRE_SStructMatrixGetBoxValues(fmatrix, fpart, filower,
-     1                                     fiupper, fvar, fnentries,
+      call HYPRE_SStructMatrixGetBoxValues(fmatrix, fpart, filower, 
+     1                                     fiupper, fvar, fnentries, 
      2                                     fentries, fvalues, ierr)
 
       if (ierr .ne. 0) then
@@ -526,7 +526,7 @@
 !   HYPRE_SStructMatrixAddToValues
 !--------------------------------------------------------------------------
       subroutine fhypre_sstructmatrixaddtovalues(fmatrix, fpart, findex,
-     1                                           fvar, fnentries,
+     1                                           fvar, fnentries, 
      2                                           fentries, fvalues)
 
       integer ierr
@@ -538,8 +538,8 @@
       integer*8 fmatrix
       double precision fvalues
 
-      call HYPRE_SStructMatrixAddToValues(fmatrix, fpart, findex, fvar,
-     1                                    fnentries, fentries, fvalues,
+      call HYPRE_SStructMatrixAddToValues(fmatrix, fpart, findex, fvar, 
+     1                                    fnentries, fentries, fvalues, 
      2                                    ierr)
 
       if (ierr .ne. 0) then
@@ -553,9 +553,9 @@
 !--------------------------------------------------------------------------
 !   HYPRE_SStructMatrixAddToBoxValues
 !--------------------------------------------------------------------------
-      subroutine fhypre_sstructmatrixaddtoboxval(fmatrix, fpart,
+      subroutine fhypre_sstructmatrixaddtoboxval(fmatrix, fpart, 
      1                                             filower, fiupper,
-     2                                             fvar, fnentries,
+     2                                             fvar, fnentries, 
      3                                             fentries, fvalues)
       integer ierr
       integer fpart
@@ -567,8 +567,8 @@
       integer*8 fmatrix
       double precision fvalues
 
-      call HYPRE_SStructMatrixAddToBoxValu(fmatrix, fpart, filower,
-     1                                       fiupper, fvar, fnentries,
+      call HYPRE_SStructMatrixAddToBoxValu(fmatrix, fpart, filower, 
+     1                                       fiupper, fvar, fnentries, 
      2                                       fentries, fvalues, ierr)
 
       if (ierr .ne. 0) then
@@ -610,7 +610,7 @@
       integer fsymmetric
       integer*8 fmatrix
 
-      call HYPRE_SStructMatrixSetSymmetric(fmatrix, fpart, fvar,
+      call HYPRE_SStructMatrixSetSymmetric(fmatrix, fpart, fvar, 
      1                                     fto_var, fsymmetric, ierr)
 
       if (ierr .ne. 0) then
@@ -786,7 +786,7 @@
 !--------------------------------------------------------------------------
 !  HYPRE_SStructStencilSetEntry
 !--------------------------------------------------------------------------
-      subroutine fhypre_sstructstencilsetentry(fstencil, fentry,
+      subroutine fhypre_sstructstencilsetentry(fstencil, fentry, 
      1                                         foffset, fvar)
 
       integer ierr
@@ -857,7 +857,7 @@
 
       integer ierr
       integer*8 fvector
-
+   
       call HYPRE_SStructVectorInitialize(fvector, ierr)
 
       if (ierr .ne. 0) then
@@ -871,7 +871,7 @@
 !--------------------------------------------------------------------------
 !   HYPRE_SStructVectorSetValues
 !--------------------------------------------------------------------------
-      subroutine fhypre_sstructvectorsetvalues(fvector, fpart, findex,
+      subroutine fhypre_sstructvectorsetvalues(fvector, fpart, findex, 
      1                                         fvar, fvalue)
 
       integer ierr
@@ -896,7 +896,7 @@
 !   HYPRE_SStructVectorSetBoxValues
 !--------------------------------------------------------------------------
       subroutine fhypre_sstructvectorsetboxvalue(fvector, fpart,
-     1                                            filower, fiupper,
+     1                                            filower, fiupper, 
      2                                            fvar, fvalues)
 
       integer ierr
@@ -907,7 +907,7 @@
       integer*8 fvector
       double precision fvalues
 
-      call HYPRE_SStructVectorSetBoxValues(fvector, fpart, filower,
+      call HYPRE_SStructVectorSetBoxValues(fvector, fpart, filower, 
      1                                     fiupper, fvar, fvalues, ierr)
 
       if (ierr .ne. 0) then
@@ -931,7 +931,7 @@
       integer*8 fvector
       double precision fvalue
 
-      call HYPRE_SStructVectorAddToValues(fvector, fpart, findex, fvar,
+      call HYPRE_SStructVectorAddToValues(fvector, fpart, findex, fvar, 
      1                                    fvalue, ierr)
 
       if (ierr .ne. 0) then
@@ -946,7 +946,7 @@
 !   HYPRE_SStructVectorAddToBoxValues
 !--------------------------------------------------------------------------
       subroutine fhypre_sstructvectoraddtoboxval(fvector, fpart,
-     1                                            filower, fiupper,
+     1                                            filower, fiupper, 
      2                                            fvar, fvalues)
       integer ierr
       integer fpart
@@ -1007,7 +1007,7 @@
 !--------------------------------------------------------------------------
 !   HYPRE_SStructVectorGetValues
 !--------------------------------------------------------------------------
-      subroutine fhypre_sstructvectorgetvalues(fvector, fpart, findex,
+      subroutine fhypre_sstructvectorgetvalues(fvector, fpart, findex, 
      1                                         fvar, fvalue)
 
       integer ierr
@@ -1017,7 +1017,7 @@
       integer*8 fvector
       double precision fvalue
 
-      call HYPRE_SStructVectorGetValues(fvector, fpart, findex, fvar,
+      call HYPRE_SStructVectorGetValues(fvector, fpart, findex, fvar, 
      1                                  fvalue, ierr)
 
       if (ierr .ne. 0) then
@@ -1031,8 +1031,8 @@
 !--------------------------------------------------------------------------
 !   HYPRE_SStructVectorGetBoxValues
 !--------------------------------------------------------------------------
-      subroutine fhypre_sstructvectorgetboxvalue(fvector, fpart,
-     1                                            filower, fiupper,
+      subroutine fhypre_sstructvectorgetboxvalue(fvector, fpart, 
+     1                                            filower, fiupper, 
      2                                            fvar, fvalues)
 
       integer ierr

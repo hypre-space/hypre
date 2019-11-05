@@ -7,7 +7,7 @@
 ! GenerateLaplacian
 !--------------------------------------------------------------------------
       subroutine fhypre_generatelaplacian(fcom, fnx, fny, fnz,
-     1                                    fcapp, fcapq, fcapr,
+     1                                    fcapp, fcapq, fcapr, 
      1                                    fp, fq, fr,
      2                                    fvalue, fmatrix)
 
@@ -85,7 +85,7 @@
 
 !--------------------------------------------------------------------------
 ! HYPRE_BoomerAMGSolve
-!--------------------------------------------------------------------------
+!-------------------------------------------------------------------------- 
       subroutine fhypre_boomeramgsolve(fsolver, fA, fb, fx)
 
       integer ierr
@@ -327,7 +327,7 @@
       subroutine fhypre_boomeramgsetminiter(fsolver, fminiter)
 
       integer ierr
-      integer fminiter
+      integer fminiter  
       integer*8 fsolver
 
       call HYPRE_BoomerAMGSetMinIter(fsolver, fminiter, ierr)
@@ -345,7 +345,7 @@
       subroutine fhypre_boomeramgsetmaxiter(fsolver, fmaxiter)
 
       integer ierr
-      integer fmaxiter
+      integer fmaxiter  
       integer*8 fsolver
 
       call HYPRE_BoomerAMGSetMaxIter(fsolver, fmaxiter, ierr)
@@ -363,7 +363,7 @@
       subroutine fhypre_boomeramggetmaxiter(fsolver, fmaxiter)
 
       integer ierr
-      integer fmaxiter
+      integer fmaxiter  
       integer*8 fsolver
 
       call HYPRE_BoomerAMGGetMaxIter(fsolver, fmaxiter, ierr)
@@ -611,8 +611,8 @@
       integer*8 fgridrelax
       integer*8 frelaxwt
 
-      call HYPRE_BoomerAMGInitGridRelaxatn(fnumsweeps, fgridtype,
-     1                                       fgridrelax, fcoarsen,
+      call HYPRE_BoomerAMGInitGridRelaxatn(fnumsweeps, fgridtype, 
+     1                                       fgridrelax, fcoarsen, 
      2                                       frelaxwt, fmaxlvl, ierr)
 
       if(ierr .ne. 0) then
@@ -658,7 +658,7 @@
       if(ierr .ne. 0) then
          print *, 'fhypre_boomeramgsetrelaxtype error: ', ierr
       endif
-
+ 
       return
       end
 
@@ -673,7 +673,7 @@
       integer fk
       integer*8 fsolver
 
-      call HYPRE_BoomerAMGSetCycleRelaxType(fsolver, fk, frelaxtype,
+      call HYPRE_BoomerAMGSetCycleRelaxType(fsolver, fk, frelaxtype, 
      1                                      ierr)
 
       if(ierr .ne. 0) then
@@ -694,7 +694,7 @@
       integer fk
       integer*8 fsolver
 
-      call HYPRE_BoomerAMGGetCycleRelaxType(fsolver, fk, frelaxtype,
+      call HYPRE_BoomerAMGGetCycleRelaxType(fsolver, fk, frelaxtype, 
      1                                      ierr)
 
       if(ierr .ne. 0) then
@@ -708,7 +708,7 @@
 ! HYPRE_BoomerAMGSetRelaxOrder
 !--------------------------------------------------------------------------
       subroutine fhypre_boomeramgsetrelaxorder(fsolver, frlxorder)
-
+     
       integer ierr
       integer frlxorder
       integer*8 fsolver
@@ -726,7 +726,7 @@
 ! HYPRE_BoomerAMGSetRelaxWt
 !--------------------------------------------------------------------------
       subroutine fhypre_boomeramgsetrelaxwt(fsolver, frelaxwt)
-
+     
       integer ierr
       integer*8 fsolver
       double precision frelaxwt
@@ -743,7 +743,7 @@
 !--------------------------------------------------------------------------
 ! HYPRE_BoomerAMGSetLevelRelaxWt
 !--------------------------------------------------------------------------
-      subroutine fhypre_boomeramgsetlevelrelaxwt(fsolver, frelaxwt,
+      subroutine fhypre_boomeramgsetlevelrelaxwt(fsolver, frelaxwt, 
      1                                           flevel)
 
       integer ierr
@@ -765,7 +765,7 @@
 ! HYPRE_BoomerAMGSetOuterWt
 !--------------------------------------------------------------------------
       subroutine fhypre_boomeramgsetouterwt(fsolver, fouterwt)
-
+     
       integer ierr
       integer*8 fsolver
       double precision fouterwt
@@ -782,7 +782,7 @@
 !--------------------------------------------------------------------------
 ! HYPRE_BoomerAMGSetLevelOuterWt
 !--------------------------------------------------------------------------
-      subroutine fhypre_boomeramgsetlevelouterwt(fsolver, fouterwt,
+      subroutine fhypre_boomeramgsetlevelouterwt(fsolver, fouterwt, 
      1                                           flevel)
 
       integer ierr
@@ -803,7 +803,7 @@
 !--------------------------------------------------------------------------
 ! HYPRE_BoomerAMGSetSmoothType
 !--------------------------------------------------------------------------
-      subroutine fhypre_boomeramgsetsmoothtype(fsolver, fsmooth)
+      subroutine fhypre_boomeramgsetsmoothtype(fsolver, fsmooth) 
 
       integer ierr
       integer fsmooth
@@ -821,7 +821,7 @@
 !--------------------------------------------------------------------------
 ! HYPRE_BoomerAMGGetSmoothType
 !--------------------------------------------------------------------------
-      subroutine fhypre_boomeramggetsmoothtype(fsolver, fsmooth)
+      subroutine fhypre_boomeramggetsmoothtype(fsolver, fsmooth) 
 
       integer ierr
       integer fsmooth
@@ -839,7 +839,7 @@
 !--------------------------------------------------------------------------
 ! HYPRE_BoomerAMGSetSmoothNumLvls
 !--------------------------------------------------------------------------
-      subroutine fhypre_boomeramgsetsmoothnumlvl(fsolver, fsmooth)
+      subroutine fhypre_boomeramgsetsmoothnumlvl(fsolver, fsmooth) 
 
       integer ierr
       integer fsmooth
@@ -857,7 +857,7 @@
 !--------------------------------------------------------------------------
 ! HYPRE_BoomerAMGGetSmoothNumLvls
 !--------------------------------------------------------------------------
-      subroutine fhypre_boomeramggetsmoothnumlvl(fsolver, fsmooth)
+      subroutine fhypre_boomeramggetsmoothnumlvl(fsolver, fsmooth) 
 
       integer ierr
       integer fsmooth
@@ -875,7 +875,7 @@
 !--------------------------------------------------------------------------
 ! HYPRE_BoomerAMGSetSmoothNumSwps
 !--------------------------------------------------------------------------
-      subroutine fhypre_boomeramgsetsmoothnumswp(fsolver, fsmooth)
+      subroutine fhypre_boomeramgsetsmoothnumswp(fsolver, fsmooth) 
 
       integer ierr
       integer fsmooth
@@ -893,7 +893,7 @@
 !--------------------------------------------------------------------------
 ! HYPRE_BoomerAMGGetSmoothNumSwps
 !--------------------------------------------------------------------------
-      subroutine fhypre_boomeramggetsmoothnumswp(fsolver, fsmooth)
+      subroutine fhypre_boomeramggetsmoothnumswp(fsolver, fsmooth) 
 
       integer ierr
       integer fsmooth
@@ -1522,7 +1522,7 @@
 
 !--------------------------------------------------------------------------
 ! HYPRE_ParCSRBiCGSTABDestroy
-!--------------------------------------------------------------------------
+!-------------------------------------------------------------------------- 
       subroutine fhypre_parcsrbicgstabdestroy(fsolver)
 
       integer ierr
@@ -1539,7 +1539,7 @@
 
 !--------------------------------------------------------------------------
 ! HYPRE_ParCSRBiCGSTABSetup
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------- 
       subroutine fhypre_parcsrbicgstabsetup(fsolver, fA, fb, fx)
 
       integer ierr
@@ -1559,9 +1559,9 @@
 
 !--------------------------------------------------------------------------
 ! HYPRE_ParCSRBiCGSTABSolve
-!--------------------------------------------------------------------------
+!-------------------------------------------------------------------------- 
       subroutine fhypre_parcsrbicgstabsolve(fsolver, fA, fb, fx)
-
+     
       integer ierr
       integer*8 fsolver
       integer*8 fA
@@ -1652,15 +1652,15 @@
 !-------------------------------------------------------------------------
 ! HYPRE_ParCSRBiCGSTABSetPrecond
 !--------------------------------------------------------------------------
-      subroutine fhypre_parcsrbicgstabsetprecond(fsolver, fprecond_id,
-     1                                           fprecond)
+      subroutine fhypre_parcsrbicgstabsetprecond(fsolver, fprecond_id, 
+     1                                           fprecond)       
 
       integer ierr
       integer fprecond_id
       integer*8 fsolver
       integer*8 fprecond
 
-      call HYPRE_ParCSRBiCGSTABSetPrecond(fsolver, fprecond_id,
+      call HYPRE_ParCSRBiCGSTABSetPrecond(fsolver, fprecond_id, 
      1                                    fprecond, ierr)
 
       if(ierr .ne. 0) then
@@ -1674,7 +1674,7 @@
 ! HYPRE_ParCSRBiCGSTABGetPrecond
 !-------------------------------------------------------------------------
       subroutine fhypre_parcsrbicgstabgetprecond(fsolver, fprecond)
-
+      
       integer ierr
       integer*8 fsolver
       integer*8 fprecond
@@ -1950,7 +1950,7 @@
 
 !-------------------------------------------------------------------------
 ! HYPRE_ParCSRCGNRDestroy
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------- 
       subroutine fhypre_parcsrcgnrdestroy(fsolver)
 
       integer ierr
@@ -1967,7 +1967,7 @@
 
 !-------------------------------------------------------------------------
 ! HYPRE_ParCSRCGNRSetup
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------- 
       subroutine fhypre_parcsrcgnrsetup(fsolver, fA, fb, fx)
 
       integer ierr
@@ -2025,7 +2025,7 @@
 ! HYPRE_ParCSRCGNRSetMinIter
 !-------------------------------------------------------------------------
       subroutine fhypre_parcsrcgnrsetminiter(fsolver, fminiter)
-
+ 
       integer ierr
       integer fminiter
       integer*8 fsolver
@@ -2043,7 +2043,7 @@
 ! HYPRE_ParCSRCGNRSetMaxIter
 !-------------------------------------------------------------------------
       subroutine fhypre_parcsrcgnrsetmaxiter(fsolver, fmaxiter)
-
+ 
       integer ierr
       integer fmaxiter
       integer*8 fsolver
@@ -2061,7 +2061,7 @@
 ! HYPRE_ParCSRCGNRSetStopCrit
 !-------------------------------------------------------------------------
       subroutine fhypre_parcsrcgnrsetstopcri(fsolver, fstopcrit)
-
+ 
       integer ierr
       integer fstopcrit
       integer*8 fsolver
@@ -2078,7 +2078,7 @@
 !-------------------------------------------------------------------------
 ! HYPRE_ParCSRCGNRSetPrecond
 !-------------------------------------------------------------------------
-      subroutine fhypre_parcsrcgnrsetprecond(fsolver, fprecond_id,
+      subroutine fhypre_parcsrcgnrsetprecond(fsolver, fprecond_id, 
      1                                       fprecond)
 
       integer ierr
@@ -2086,7 +2086,7 @@
       integer*8 fsolver
       integer*8 fprecond
 
-      call HYPRE_ParCSRCGNRSetPrecond(fsolver, fprecond_id, fprecond,
+      call HYPRE_ParCSRCGNRSetPrecond(fsolver, fprecond_id, fprecond, 
      1                                ierr)
 
       if(ierr .ne. 0) then
@@ -2304,7 +2304,7 @@
 
 !-------------------------------------------------------------------------
 ! HYPRE_ParCSRGMRESDestroy
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------- 
       subroutine fhypre_parcsrgmresdestroy(fsolver)
 
       integer ierr
@@ -2321,7 +2321,7 @@
 
 !-------------------------------------------------------------------------
 ! HYPRE_ParCSRGMRESSetup
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------- 
       subroutine fhypre_parcsrgmressetup(fsolver, fA, fb, fx)
 
       integer ierr
@@ -2452,7 +2452,7 @@
 !-------------------------------------------------------------------------
 ! HYPRE_ParCSRGMRESSetPrecond
 !-------------------------------------------------------------------------
-      subroutine fhypre_parcsrgmressetprecond(fsolver, fprecond_id,
+      subroutine fhypre_parcsrgmressetprecond(fsolver, fprecond_id, 
      1                                        fprecond)
 
       integer ierr
@@ -2462,7 +2462,7 @@
 
       call HYPRE_ParCSRGMRESSetPrecond(fsolver, fprecond_id, fprecond,
      1                                 ierr)
-
+     
       if(ierr .ne. 0) then
          print *, 'fhypre_parcsrgmressetprecond error: ', ierr
       endif
@@ -2801,7 +2801,7 @@
 !-------------------------------------------------------------------------
 ! HYPRE_ParCSRHybridSetPrecond
 !-------------------------------------------------------------------------
-      subroutine fhypre_parcsrhybridsetprecond(fsolver, fpreid,
+      subroutine fhypre_parcsrhybridsetprecond(fsolver, fpreid, 
      1                                         fpresolver)
 
       integer ierr
@@ -3298,11 +3298,11 @@
       integer  fnorm
       integer*8 fsolver
 
-      call HYPRE_ParCSRHybridGetFinalRelat(fsolver,
+      call HYPRE_ParCSRHybridGetFinalRelat(fsolver, 
      1                                     fnorm, ierr)
 
       if(ierr .ne. 0) then
-         print *,
+         print *, 
      1        'fhypre_parcsrhybridgetfinalrelativeresidualnorm error: ',
      1                                                    ierr
       endif
@@ -3547,7 +3547,7 @@
 
 !-------------------------------------------------------------------------
 ! HYPRE_ParaSailsSetup
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------- 
       subroutine fhypre_parasailssetup(fsolver, fA, fb, fx)
 
       integer ierr
@@ -3556,7 +3556,7 @@
       integer*8 fb
       integer*8 fx
 
-      call HYPRE_ParaSailsSetup(fsolver, fA, fb, fx, ierr)
+      call HYPRE_ParaSailsSetup(fsolver, fA, fb, fx, ierr) 
 
       if(ierr .ne. 0) then
          print *, 'fhypre_parasailssetup error: ', ierr
@@ -3567,7 +3567,7 @@
 
 !-------------------------------------------------------------------------
 ! HYPRE_ParaSailsSolve
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------- 
       subroutine fhypre_parasailssolve(fsolver, fA, fb, fx)
 
       integer ierr
@@ -3576,7 +3576,7 @@
       integer*8 fb
       integer*8 fx
 
-      call HYPRE_ParaSailsSolve(fsolver, fA, fb, fx, ierr)
+      call HYPRE_ParaSailsSolve(fsolver, fA, fb, fx, ierr) 
 
       if(ierr .ne. 0) then
          print *, 'fhypre_parasailssolve error: ', ierr
@@ -3595,7 +3595,7 @@
       integer*8 fsolver
       double precision fthresh
 
-      call HYPRE_ParaSailsSetParams(fsolver, fthresh, fnlevels, ierr)
+      call HYPRE_ParaSailsSetParams(fsolver, fthresh, fnlevels, ierr) 
 
       if(ierr .ne. 0) then
          print *, 'fhypre_parasailssetparams error: ', ierr
@@ -3613,7 +3613,7 @@
       integer*8 fsolver
       double precision fthresh
 
-      call HYPRE_ParaSailsSetThresh(fsolver, fthresh, ierr)
+      call HYPRE_ParaSailsSetThresh(fsolver, fthresh, ierr) 
 
       if(ierr .ne. 0) then
          print *, 'fhypre_parasailssetthresh error: ', ierr
@@ -3631,7 +3631,7 @@
       integer*8 fsolver
       double precision fthresh
 
-      call HYPRE_ParaSailsGetThresh(fsolver, fthresh, ierr)
+      call HYPRE_ParaSailsGetThresh(fsolver, fthresh, ierr) 
 
       if(ierr .ne. 0) then
          print *, 'fhypre_parasailsgetthresh error: ', ierr
@@ -3649,7 +3649,7 @@
       integer fnlevels
       integer*8 fsolver
 
-      call HYPRE_ParaSailsSetNlevels(fsolver, fnlevels, ierr)
+      call HYPRE_ParaSailsSetNlevels(fsolver, fnlevels, ierr) 
 
       if(ierr .ne. 0) then
          print *, 'fhypre_parasailssetnlevels error: ', ierr
@@ -3667,7 +3667,7 @@
       integer fnlevels
       integer*8 fsolver
 
-      call HYPRE_ParaSailsGetNlevels(fsolver, fnlevels, ierr)
+      call HYPRE_ParaSailsGetNlevels(fsolver, fnlevels, ierr) 
 
       if(ierr .ne. 0) then
          print *, 'fhypre_parasailsgetnlevels error: ', ierr
@@ -3685,7 +3685,7 @@
       integer*8 fsolver
       double precision ffilter
 
-      call HYPRE_ParaSailsSetFilter(fsolver, ffilter, ierr)
+      call HYPRE_ParaSailsSetFilter(fsolver, ffilter, ierr) 
 
       if(ierr .ne. 0) then
          print *, 'fhypre_parasailssetfilter error: ', ierr
@@ -3703,7 +3703,7 @@
       integer*8 fsolver
       double precision ffilter
 
-      call HYPRE_ParaSailsGetFilter(fsolver, ffilter, ierr)
+      call HYPRE_ParaSailsGetFilter(fsolver, ffilter, ierr) 
 
       if(ierr .ne. 0) then
          print *, 'fhypre_parasailsgetfilter error: ', ierr
@@ -3834,7 +3834,7 @@
       if(ierr .ne. 0) then
          print *, 'fhypre_parasailssetlogging error: ', ierr
       endif
-
+      
       return
       end
 
@@ -3852,7 +3852,7 @@
       if(ierr .ne. 0) then
          print *, 'fhypre_parasailsgetlogging error: ', ierr
       endif
-
+      
       return
       end
 
@@ -4026,7 +4026,7 @@
 !-------------------------------------------------------------------------
 ! HYPRE_ParCSRPCGSetPrecond
 !-------------------------------------------------------------------------
-      subroutine fhypre_parcsrpcgsetprecond(fsolver, fprecond_id,
+      subroutine fhypre_parcsrpcgsetprecond(fsolver, fprecond_id, 
      1                                      fprecond)
 
       integer ierr
@@ -4034,7 +4034,7 @@
       integer*8 fsolver
       integer*8 fprecond
 
-      call HYPRE_ParCSRPCGSetPrecond(fsolver, fprecond_id, fprecond,
+      call HYPRE_ParCSRPCGSetPrecond(fsolver, fprecond_id, fprecond, 
      1                              ierr)
 
       if(ierr .ne. 0) then
@@ -4214,7 +4214,7 @@
 
 !-------------------------------------------------------------------------
 ! HYPRE_ParCSRPilutSolve
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------- 
       subroutine fhypre_parcsrpilutsolve(fsolver, fA, fb, fx)
 
       integer ierr
@@ -4272,7 +4272,7 @@
 ! HYPRE_ParCSRPilutSetFacRowSize
 !--------------------------------------------------------------------------
       subroutine fhypre_parcsrpilutsetfacrowsize(fsolver, fsize)
-
+      
       integer ierr
       integer fsize
       integer*8 fsolver
@@ -4344,7 +4344,7 @@
 
 !-------------------------------------------------------------------------
 ! HYPRE_SchwarzSolve
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------- 
       subroutine fhypre_schwarzsolve(fsolver, fA, fb, fx)
 
       integer ierr
@@ -4364,7 +4364,7 @@
 
 !-------------------------------------------------------------------------
 ! HYPRE_SchwarzSetVariant
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------- 
       subroutine fhypre_schwarzsetvariant(fsolver, fvariant)
 
       integer ierr
@@ -4382,7 +4382,7 @@
 
 !-------------------------------------------------------------------------
 ! HYPRE_SchwarzSetOverlap
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------- 
       subroutine fhypre_schwarzsetoverlap(fsolver, foverlap)
 
       integer ierr
@@ -4400,7 +4400,7 @@
 
 !-------------------------------------------------------------------------
 ! HYPRE_SchwarzSetDomainType
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------- 
       subroutine fhypre_schwarzsetdomaintype(fsolver, fdomaint)
 
       integer ierr
@@ -4418,7 +4418,7 @@
 
 !-------------------------------------------------------------------------
 ! HYPRE_SchwarzSetDomainStructure
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------- 
       subroutine fhypre_schwarzsetdomainstructur(fsolver, fdomains)
 
       integer ierr
@@ -4436,7 +4436,7 @@
 
 !-------------------------------------------------------------------------
 ! HYPRE_SchwarzSetNumFunctions
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------- 
       subroutine fhypre_schwarzsetnumfunctions(fsolver, fnumfncs)
 
       integer ierr
@@ -4454,7 +4454,7 @@
 
 !-------------------------------------------------------------------------
 ! HYPRE_SchwarzSetRelaxWeight
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------- 
       subroutine fhypre_schwarzsetrelaxweight(fsolver, frlxwt)
 
       integer ierr
@@ -4472,7 +4472,7 @@
 
 !-------------------------------------------------------------------------
 ! HYPRE_SchwarzSetDofFunc
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------- 
       subroutine fhypre_schwarzsetdoffunc(fsolver, fdofnc)
 
       integer ierr

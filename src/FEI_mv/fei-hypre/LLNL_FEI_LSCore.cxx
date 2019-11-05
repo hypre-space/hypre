@@ -19,25 +19,25 @@
 #include "LLNL_FEI_LSCore.h"
 
 /**************************************************************************
- Constructor
+ Constructor 
  -------------------------------------------------------------------------*/
 LLNL_FEI_LSCore::LLNL_FEI_LSCore(SolverLib_t solverLib)
-{
+{ 
    lsc_ = NULL;
 
-   switch (solverLib)
+   switch (solverLib) 
    {
       case HYPRE:
            lsc_ = HYPRE_base_create(MPI_COMM_WORLD );
            if ( lsc_ == NULL ) printf("problem building HYPRE\n");
-           break;
+           break;                                                                                                                              
       default:
            printf("unable to determine library type in LLNL_FEI_LSCore.");
    }
 }
 
 /**************************************************************************
- destructor
+ destructor 
  -------------------------------------------------------------------------*/
 LLNL_FEI_LSCore::~LLNL_FEI_LSCore()
 {
@@ -45,7 +45,7 @@ LLNL_FEI_LSCore::~LLNL_FEI_LSCore()
 }
 
 /**************************************************************************
- direct access to LSC functions
+ direct access to LSC functions 
  -------------------------------------------------------------------------*/
 int LLNL_FEI_LSCore::setGlobalOffsets(int leng, int *nodeOffsets,
                                   int *eqnOffsets, int *blkEqnOffsets)
@@ -54,7 +54,7 @@ int LLNL_FEI_LSCore::setGlobalOffsets(int leng, int *nodeOffsets,
 }
 
 /**************************************************************************
- direct access to LSC functions
+ direct access to LSC functions 
  -------------------------------------------------------------------------*/
 int LLNL_FEI_LSCore::setMatrixStructure(int **ptColIndices, int *ptRowLengths,
                  int **blkColIndices,int *blkRowLengths,int *ptRowsPerBlkRow)
@@ -64,27 +64,27 @@ int LLNL_FEI_LSCore::setMatrixStructure(int **ptColIndices, int *ptRowLengths,
 }
 
 /**************************************************************************
- direct access to LSC functions
+ direct access to LSC functions 
  -------------------------------------------------------------------------*/
-int LLNL_FEI_LSCore::sumIntoSystemMatrix(int nRows, const int *rows,
-      int nCols, const int* cols,
-      const double* const* vals)
+int LLNL_FEI_LSCore::sumIntoSystemMatrix(int nRows, const int *rows, 
+				     int nCols, const int* cols,
+				     const double* const* vals)
 {
    return(lsc_->sumIntoSystemMatrix(nRows,rows,nCols,cols,vals));
 }
 
 /**************************************************************************
- direct access to LSC functions
+ direct access to LSC functions 
  -------------------------------------------------------------------------*/
-int LLNL_FEI_LSCore::putIntoSystemMatrix(int nRows, const int *rows,
-      int nCols, const int* cols,
-      const double* const* vals)
+int LLNL_FEI_LSCore::putIntoSystemMatrix(int nRows, const int *rows, 
+				     int nCols, const int* cols,
+				     const double* const* vals)
 {
    return(lsc_->putIntoSystemMatrix(nRows,rows,nCols,cols,vals));
 }
 
 /**************************************************************************
- direct access to LSC functions
+ direct access to LSC functions 
  -------------------------------------------------------------------------*/
 int LLNL_FEI_LSCore::matrixLoadComplete()
 {
@@ -92,34 +92,34 @@ int LLNL_FEI_LSCore::matrixLoadComplete()
 }
 
 /**************************************************************************
- direct access to LSC functions
+ direct access to LSC functions 
  -------------------------------------------------------------------------*/
-int LLNL_FEI_LSCore::sumIntoRHSVector(int num, const double *vals,
+int LLNL_FEI_LSCore::sumIntoRHSVector(int num, const double *vals, 
                                   const int *indices)
 {
    return(lsc_->sumIntoRHSVector(num, vals, indices));
 }
 
 /**************************************************************************
- direct access to LSC functions
+ direct access to LSC functions 
  -------------------------------------------------------------------------*/
-int LLNL_FEI_LSCore::putIntoRHSVector(int num, const double *vals,
+int LLNL_FEI_LSCore::putIntoRHSVector(int num, const double *vals, 
                                   const int *indices)
 {
    return(lsc_->putIntoRHSVector(num, vals, indices));
 }
 
 /**************************************************************************
- direct access to LSC functions
+ direct access to LSC functions 
  -------------------------------------------------------------------------*/
 int LLNL_FEI_LSCore::putInitialGuess(const int *eqnNumbers,
-      const double *values, int len)
+				 const double *values, int len)
 {
    return(lsc_->putInitialGuess(eqnNumbers, values, len));
 }
 
 /**************************************************************************
- direct access to LSC functions
+ direct access to LSC functions 
  -------------------------------------------------------------------------*/
 int LLNL_FEI_LSCore::parameters( int nParams, char **params)
 {
@@ -127,7 +127,7 @@ int LLNL_FEI_LSCore::parameters( int nParams, char **params)
 }
 
 /**************************************************************************
- direct access to LSC functions
+ direct access to LSC functions 
  -------------------------------------------------------------------------*/
 int LLNL_FEI_LSCore::solve( int *status, int *iterations)
 {
@@ -135,7 +135,7 @@ int LLNL_FEI_LSCore::solve( int *status, int *iterations)
 }
 
 /**************************************************************************
- direct access to LSC functions
+ direct access to LSC functions 
  -------------------------------------------------------------------------*/
 int LLNL_FEI_LSCore::formResidual( double* values, int leng)
 {
@@ -143,7 +143,7 @@ int LLNL_FEI_LSCore::formResidual( double* values, int leng)
 }
 
 /**************************************************************************
- direct access to LSC functions
+ direct access to LSC functions 
  -------------------------------------------------------------------------*/
 int LLNL_FEI_LSCore::getSolution( double *answers, int leng)
 {
@@ -151,7 +151,7 @@ int LLNL_FEI_LSCore::getSolution( double *answers, int leng)
 }
 
 /**************************************************************************
- direct access to LSC functions
+ direct access to LSC functions 
  -------------------------------------------------------------------------*/
 int LLNL_FEI_LSCore::getSolnEntry( int eqnNum, double *answers)
 {

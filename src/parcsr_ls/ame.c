@@ -63,7 +63,7 @@ void * hypre_AMECreate()
 
 HYPRE_Int hypre_AMEDestroy(void *esolver)
 {
-   hypre_AMEData *ame_data = (hypre_AMEData *) esolver;
+	hypre_AMEData *ame_data = (hypre_AMEData *) esolver;
    hypre_AMSData *ams_data;
    mv_InterfaceInterpreter* interpreter;
    mv_MultiVectorPtr eigenvectors;
@@ -196,7 +196,7 @@ HYPRE_Int hypre_AMESetTol(void *esolver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_AMESetRTol(void *esolver,
-                           HYPRE_Real tol)
+			   HYPRE_Real tol)
 {
    hypre_AMEData *ame_data = (hypre_AMEData *) esolver;
    ame_data -> rtol = tol;

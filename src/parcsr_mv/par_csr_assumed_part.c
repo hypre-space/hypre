@@ -160,7 +160,7 @@ hypre_LocateAssummedPartition(MPI_Comm comm, HYPRE_BigInt row_start, HYPRE_BigIn
             CONTACT(contact_list_length, 1) = tmp_row_start;  /* start row */
             CONTACT(contact_list_length, 2) = tmp_row_end;  /*end row */
             contact_list_length++;
-            owner_start++; /*processors are sequential */
+            owner_start++; /*processors are seqential */
         }
       }
    }

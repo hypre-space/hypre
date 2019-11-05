@@ -30,7 +30,7 @@
 //extern int  hypre_FGMRESSetTol(void *, double);
 //extern int  hypre_FGMRESSetMaxIter(void *, int);
 //extern int  hypre_FGMRESSetStopCrit(void *, double);
-//extern int  hypre_FGMRESSetPrecond(void *, int (*precond)(void*,void*,void*,void*),
+//extern int  hypre_FGMRESSetPrecond(void *, int (*precond)(void*,void*,void*,void*), 
 //                                 int (*precond_setup)(void*,void*,void*,void*),void *precond_data);
 //extern int  hypre_FGMRESGetPrecond(void *, HYPRE_Solver *);
 //extern int  hypre_FGMRESSetLogging(void *, int);
@@ -128,15 +128,15 @@ int HYPRE_ParCSRFGMRESSetStopCrit( HYPRE_Solver solver, int stop_crit )
 
 int HYPRE_ParCSRFGMRESSetPrecond( HYPRE_Solver  solver,
           int (*precond)(HYPRE_Solver sol, HYPRE_ParCSRMatrix matrix,
-             HYPRE_ParVector b, HYPRE_ParVector x),
+			HYPRE_ParVector b, HYPRE_ParVector x),
           int (*precond_setup)(HYPRE_Solver sol, HYPRE_ParCSRMatrix matrix,
-             HYPRE_ParVector b, HYPRE_ParVector x),
+			       HYPRE_ParVector b, HYPRE_ParVector x),
           void *precond_data )
 {
    return( hypre_FGMRESSetPrecond( (void *) solver,
                                    (HYPRE_Int (*)(void*,void*,void*,void*))precond,
-                                   (HYPRE_Int (*)(void*,void*,void*,void*))precond_setup,
-                                   precond_data ) );
+								   (HYPRE_Int (*)(void*,void*,void*,void*))precond_setup,
+								   precond_data ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -174,6 +174,6 @@ int HYPRE_ParCSRFGMRESGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
 int HYPRE_ParCSRFGMRESUpdatePrecondTolerance( HYPRE_Solver  solver,
           int (*update_tol)(HYPRE_Solver sol, double ) )
 {
-   return( hypre_FGMRESUpdatePrecondTolerance(solver,(int(*) (int*, double)) update_tol) );
+	return( hypre_FGMRESUpdatePrecondTolerance(solver,(int(*) (int*, double)) update_tol) );
 }
 

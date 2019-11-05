@@ -36,9 +36,9 @@ extern int HYPRE_ParCSRTFQmrSetStopCrit( HYPRE_Solver solver, int stop_crit );
 
 extern int HYPRE_ParCSRTFQmrSetPrecond( HYPRE_Solver  solver,
           int (*precond)      (HYPRE_Solver sol, HYPRE_ParCSRMatrix matrix,
-             HYPRE_ParVector b, HYPRE_ParVector x),
+			       HYPRE_ParVector b, HYPRE_ParVector x),
           int (*precond_setup)(HYPRE_Solver sol, HYPRE_ParCSRMatrix matrix,
-             HYPRE_ParVector b, HYPRE_ParVector x),
+			       HYPRE_ParVector b, HYPRE_ParVector x),
           void               *precond_data );
 
 extern int HYPRE_ParCSRTFQmrSetLogging( HYPRE_Solver solver, int logging);
