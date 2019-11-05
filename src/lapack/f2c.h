@@ -182,7 +182,6 @@ struct Vardesc {   /* for Namelist */
    ftnlen *dims;
    HYPRE_Int  type;
 };
-
 typedef struct Vardesc Vardesc;
 
 struct Namelist {
@@ -266,4 +265,3 @@ typedef doublereal E_f;   /* real function with -R not specified */
 #undef vax
 #endif
 #endif
-

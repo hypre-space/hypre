@@ -22,85 +22,83 @@ extern "C" {
 
 integer s_cmp(char *a0,const char *b0, ftnlen la, ftnlen lb)
 {
-REGISTER unsigned char *a, *aend, *b, *bend;
-a = (unsigned char *)a0;
-b = (unsigned char *)b0;
-aend = a + la;
-bend = b + lb;
+   REGISTER unsigned char *a, *aend, *b, *bend;
+   a = (unsigned char *)a0;
+   b = (unsigned char *)b0;
+   aend = a + la;
+   bend = b + lb;
 
-if(la <= lb)
-{
-   while(a < aend)
-      if(*a != *b)
-         return( *a - *b );
-      else
-      { ++a; ++b; }
+   if(la <= lb)
+   {
+      while(a < aend)
+         if(*a != *b)
+            return( *a - *b );
+         else
+         { ++a; ++b; }
 
-   while(b < bend)
-      if(*b != ' ')
-         return( ' ' - *b );
-      else
-         ++b;
-}
+      while(b < bend)
+         if(*b != ' ')
+            return( ' ' - *b );
+         else ++b;
+   }
 
-else
-{
-   while(b < bend)
-      if(*a == *b)
-      { ++a; ++b; }
-      else
-         return( *a - *b );
-   while(a < aend)
-      if(*a != ' ')
-         return(*a - ' ');
-      else
-         ++a;
-}
-return(0);
+   else
+   {
+      while(b < bend)
+         if(*a == *b)
+         { ++a; ++b; }
+         else
+            return( *a - *b );
+      while(a < aend)
+         if(*a != ' ')
+            return(*a - ' ');
+         else ++a;
+   }
+   return(0);
 }
 
 /* assign strings:  a = b */
 
 integer s_copy(char *a,const char *b, ftnlen la, ftnlen lb)
 {
-REGISTER char *aend, *bend;
+   REGISTER char *aend, *bend;
 
-aend = a + la;
+   aend = a + la;
 
-if(la <= lb)
-   while(a < aend)
-      *a++ = *b++;
+   if(la <= lb)
+      while(a < aend)
+         *a++ = *b++;
 
-else
-{
-   bend = (char*)b + lb;
-   while(b < bend)
-      *a++ = *b++;
-   while(a < aend)
-      *a++ = ' ';
-}
-return(0);
+   else
+   {
+      bend = (char*)b + lb;
+      while(b < bend)
+         *a++ = *b++;
+      while(a < aend)
+         *a++ = ' ';
+   }
+   return(0);
 }
 
 integer s_cat(char *lp, char *rpp[], ftnlen rnp[], ftnlen *np, ftnlen ll)
 {
-ftnlen i, n, nc;
-char *f__rp;
+   ftnlen i, n, nc;
+   char *f__rp;
 
-n = (integer)*np;
-for(i = 0 ; i < n ; ++i)
-{
-   nc = ll;
-   if(rnp[i] < nc)
-      nc = rnp[i];
-   ll -= nc;
-   f__rp = rpp[i];
-   while(--nc >= 0)
-      *lp++ = *f__rp++;
-}
-while(--ll >= 0)
-   *lp++ = ' ';
-return 0;
+   n = (integer)*np;
+   for(i = 0 ; i < n ; ++i)
+   {
+      nc = ll;
+      if(rnp[i] < nc)
+         nc = rnp[i];
+      ll -= nc;
+      f__rp = rpp[i];
+      while(--nc >= 0)
+         *lp++ = *f__rp++;
+   }
+   while(--ll >= 0)
+      *lp++ = ' ';
+   return 0;
 }
 
 #define log10e 0.43429448190325182765
@@ -109,20 +107,20 @@ return 0;
 #include "math.h"
 doublereal d_lg10(doublereal *x)
 {
-return( log10e * log(*x) );
+   return( log10e * log(*x) );
 }
 
 doublereal d_sign(doublereal *a, doublereal *b)
 {
-doublereal x;
-x = (*a >= 0 ? *a : - *a);
-return( *b >= 0 ? x : -x);
+   doublereal x;
+   x = (*a >= 0 ? *a : - *a);
+   return( *b >= 0 ? x : -x);
 }
 
 doublereal pow_di(doublereal *ap, integer *bp)
 {
-doublereal pow, x;
-integer n;
+   doublereal pow, x;
+   integer n;
 
 pow = 1;
 x = *ap;
@@ -152,7 +150,7 @@ return(pow);
 #include "math.h"
 doublereal pow_dd(doublereal *ap, doublereal *bp)
 {
-return(pow(*ap, *bp) );
+   return(pow(*ap, *bp) );
 }
 
 #ifdef __cplusplus
