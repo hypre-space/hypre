@@ -6,7 +6,7 @@
 !-----------------------------------------------------------------------
 ! Test driver for unstructured matrix-vector interface
 !-----------------------------------------------------------------------
- 
+
       program test
 
       implicit none
@@ -82,7 +82,7 @@
 !-----------------------------------------------------------------------
 !     Read options
 !-----------------------------------------------------------------------
- 
+
 !     open( 5, file='parcsr_matrix_vector.in', status='old')
 !
 !     read( 5, *) dim
@@ -258,11 +258,11 @@
       matfile(7) = '.'
       matfile(8) = 'A'
       matfile(9) = char(0)
-   
+
       call HYPRE_IJMatrixPrint(A, matfile, ierr)
 
       if (ierr .ne. 0) write(6,*) 'Matrix print failed'
-  
+
 !-----------------------------------------------------------------------
 !     "RHS vector" test
 !-----------------------------------------------------------------------
@@ -271,15 +271,15 @@
      &                            last_local_row, b, ierr)
 
         if (ierr .ne. 0) write(6,*) 'RHS vector creation failed'
-  
+
         call HYPRE_IJVectorSetObjectType(b, HYPRE_PARCSR, ierr)
 
         if (ierr .ne. 0) write(6,*) 'RHS vector object set failed'
-  
+
         call HYPRE_IJVectorInitialize(b, ierr)
 
         if (ierr .ne. 0) write(6,*) 'RHS vector initialization failed'
-  
+
 ! Set up a Dirichlet 0 problem
         do i = 1, last_local_row - first_local_row + 1
           indices(i) = first_local_row - 1 + i
@@ -297,7 +297,7 @@
         vecfile(7) = '.'
         vecfile(8) = 'b'
         vecfile(9) = char(0)
-   
+
         call HYPRE_IJVectorPrint(b, vecfile, ierr)
 
         if (ierr .ne. 0) write(6,*) 'RHS vector print failed'
@@ -317,9 +317,9 @@
 
       call HYPRE_IJVectorGetValues(b,
      &  last_local_row - first_local_row + 1, indices, bvals, ierr)
-  
+
       if (ierr .ne. 0) write(6,*) 'RHS vector value retrieval failed'
-  
+
 !     Set about to modify every other component of b, by adding the
 !     negative of the component
 
@@ -332,7 +332,7 @@
      &   1 + (last_local_row - first_local_row)/2, indices, vals, ierr)
 
       if (ierr .ne. 0) write(6,*) 'RHS vector value addition failed'
-  
+
       do i = 1, last_local_row - first_local_row + 1
         indices(i) = first_local_row - 1 + i
       enddo
@@ -341,12 +341,12 @@
      &  last_local_row - first_local_row + 1, indices, bvals, ierr)
 
       if (ierr .ne. 0) write(6,*) 'RHS vector value retrieval failed'
-  
+
       sum = 0.
       do i = 1, last_local_row - first_local_row + 1, 2
         sum = sum + bvals(i)
       enddo
-  
+
       if (sum .ne. 0.) write(6,*) 'RHS vector value addition error'
 
 !-----------------------------------------------------------------------
@@ -356,16 +356,16 @@
      &                          last_local_col, x, ierr)
 
       if (ierr .ne. 0) write(6,*) 'Solution vector creation failed'
-  
+
       call HYPRE_IJVectorSetObjectType(x, HYPRE_PARCSR, ierr)
 
       if (ierr .ne. 0) write(6,*) 'Solution vector object set failed'
-  
+
       call HYPRE_IJVectorInitialize(x, ierr)
 
       if (ierr .ne. 0) write(6,*) 'Solution vector initialization',
      &                            ' failed'
-  
+
       do i = 1, last_local_col - first_local_col + 1
           indices(i) = first_local_col - 1 + i
           vals(i) = 0.
@@ -375,7 +375,7 @@
      &  last_local_col - first_local_col + 1, indices, vals, ierr)
 
       if (ierr .ne. 0) write(6,*) 'Solution vector value set failed'
-  
+
       vecfile(1)  = 'm'
       vecfile(2)  = 'v'
       vecfile(3)  = '.'
@@ -385,11 +385,11 @@
       vecfile(7)  = '.'
       vecfile(8)  = 'x'
       vecfile(9) = char(0)
-   
+
       call HYPRE_IJVectorPrint(x, vecfile, ierr)
 
       if (ierr .ne. 0) write(6,*) 'Solution vector print failed'
-  
+
       indices(1) = last_local_col
       indices(2) = first_local_col
       vals(1) = -99.
@@ -399,7 +399,7 @@
 
       if (ierr .ne. 0) write(6,*) 'Solution vector value addition',
      &                            ' failed'
-  
+
       do i = 1, last_local_col - first_local_col + 1
         indices(i) = first_local_col - 1 + i
       enddo
@@ -409,7 +409,7 @@
 
       if (ierr .ne. 0) write(6,*) 'Solution vector value retrieval',
      &                            ' failed'
-  
+
       if (xvals(1) .ne. -45.)
      &   write(6,*) 'Solution vector value addition error,',
      &              ' first_local_col'

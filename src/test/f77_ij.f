@@ -6,7 +6,7 @@
 !-----------------------------------------------------------------------
 ! Test driver for unstructured matrix interface (structured storage)
 !-----------------------------------------------------------------------
- 
+
 !-----------------------------------------------------------------------
 ! Standard 7-point laplacian in 3D with grid and anisotropy determined
 ! as user settings.
@@ -52,7 +52,7 @@
       double precision    tol, pc_tol, convtol
       parameter           (pc_tol = 0.0)
       double precision    final_res_norm
-                     
+
 ! parameters for BoomerAMG
       integer             hybrid, coarsen_type, measure_type
       integer             cycle_type
@@ -132,7 +132,7 @@
 !-----------------------------------------------------------------------
 !     Read options
 !-----------------------------------------------------------------------
- 
+
 !     open( 5, file='parcsr_linear_solver.in', status='old')
 !
 !     read( 5, *) dim
@@ -201,7 +201,7 @@
 !       write(6,*) 'What drop tolerance?  <0 do not drop'
         read(5,*) drop_tol
       endif
- 
+
 !     write(6,*) 'What relative residual norm tolerance?'
       read(5,*) tol
 
@@ -327,7 +327,7 @@
       matfile(11) = '.'
       matfile(12) = 'A'
       matfile(13) = char(0)
-   
+
       call HYPRE_IJMatrixPrint(A, matfile, ierr)
 
       call hypre_ParCSRMatrixRowStarts(A_storage, row_starts, ierr)
@@ -374,7 +374,7 @@
         vecfile(11) = '.'
         vecfile(12) = 'b'
         vecfile(13) = char(0)
-   
+
         call HYPRE_IJVectorPrint(b, vecfile, ierr)
 
       endif
@@ -407,7 +407,7 @@
       vecfile(12) = 'x'
       vecfile(13) = '0'
       vecfile(14) = char(0)
-   
+
       call HYPRE_IJVectorPrint(x, vecfile, ierr)
 
 !-----------------------------------------------------------------------
@@ -490,8 +490,8 @@
      &                         x_storage, ierr)
         call HYPRE_BoomerAMGSolve(solver, A_storage, b_storage,
      &                         x_storage, ierr)
-        call HYPRE_BoomerAMGGetNumIterations(solver, num_iterations, 
-     &						ierr)
+        call HYPRE_BoomerAMGGetNumIterations(solver, num_iterations,
+     &                         ierr)
         call HYPRE_BoomerAMGGetFinalReltvRes(solver, final_res_norm,
      &                                       ierr)
         call HYPRE_BoomerAMGDestroy(solver, ierr)
@@ -543,8 +543,8 @@
           call HYPRE_BoomerAMGSetTol(precond, pc_tol, ierr)
           call HYPRE_BoomerAMGSetCoarsenType(precond,
      &                                    (hybrid*coarsen_type), ierr)
-          call HYPRE_BoomerAMGSetMeasureType(precond, measure_type, 
-     &						ierr)
+          call HYPRE_BoomerAMGSetMeasureType(precond, measure_type,
+     &                                       ierr)
           call HYPRE_BoomerAMGSetStrongThrshld(precond,
      &                                        strong_threshold, ierr)
           call HYPRE_BoomerAMGSetTruncFactor(precond, trunc_factor,
@@ -580,7 +580,7 @@
      &                                     precond, ierr)
 
           call HYPRE_BoomerAMGSetSetupType(precond,setup_type,ierr)
-          
+
         else if (solver_id .eq. 7) then
 
           print *, 'Solver: Pilut-GMRES'
@@ -588,7 +588,7 @@
           precond_id = 3
 
           call HYPRE_ParCSRPilutCreate(MPI_COMM_WORLD,
-     &                                 precond, ierr) 
+     &                                 precond, ierr)
 
           if (ierr .ne. 0) write(6,*) 'ParCSRPilutCreate error'
 
@@ -662,7 +662,7 @@
         call HYPRE_ParCSRPCGSetTwoNorm(solver, one, ierr)
         call HYPRE_ParCSRPCGSetRelChange(solver, zero, ierr)
         call HYPRE_ParCSRPCGSetPrintLevel(solver, one, ierr)
-  
+
         if (solver_id .eq. 2) then
 
           print *, 'Solver: DS-PCG'
@@ -695,7 +695,7 @@
           call HYPRE_BoomerAMGSetCoarsenType(precond,
      &                                       (hybrid*coarsen_type),
      &                                       ierr)
-          call HYPRE_BoomerAMGSetMeasureType(precond, measure_type, 
+          call HYPRE_BoomerAMGSetMeasureType(precond, measure_type,
      &                                       ierr)
           call HYPRE_BoomerAMGSetStrongThrshld(precond,
      &                                         strong_threshold,
@@ -780,7 +780,7 @@
           call HYPRE_ParCSRCGNRSetPrecond(solver, precond_id,
      &                                    precond, ierr)
 
-        else if (solver_id .eq. 5) then 
+        else if (solver_id .eq. 5) then
 
           print *, 'Solver: AMG-CGNR'
 
@@ -802,7 +802,7 @@
           call HYPRE_BoomerAMGSetCoarsenType(precond,
      &                                       (hybrid*coarsen_type),
      &                                       ierr)
-          call HYPRE_BoomerAMGSetMeasureType(precond, measure_type, 
+          call HYPRE_BoomerAMGSetMeasureType(precond, measure_type,
      &                                       ierr)
           call HYPRE_BoomerAMGSetStrongThrshld(precond,
      &                                         strong_threshold, ierr)
@@ -860,7 +860,7 @@
 
         if (solver_id .eq. 5) then
           call HYPRE_BoomerAMGDestroy(precond, ierr)
-        endif 
+        endif
 
         call HYPRE_ParCSRCGNRDestroy(solver, ierr)
 
@@ -907,7 +907,7 @@
           call HYPRE_BoomerAMGSetCoarsenType(precond,
      &                                       (hybrid*coarsen_type),
      &                                       ierr)
-          call HYPRE_BoomerAMGSetMeasureType(precond, measure_type, 
+          call HYPRE_BoomerAMGSetMeasureType(precond, measure_type,
      &                                       ierr)
           call HYPRE_BoomerAMGSetStrongThrshld(precond,
      &                                         strong_threshold,
@@ -992,7 +992,7 @@
       vecfile(11) = '.'
       vecfile(12) = 'x'
       vecfile(13) = char(0)
-   
+
       call HYPRE_IJVectorPrint(x, vecfile, ierr)
 
       if (myid .eq. 0) then

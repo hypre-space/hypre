@@ -174,7 +174,7 @@
 !******************************************
 !      fhypre_structmatrixcreate
 !******************************************
-      subroutine fhypre_structmatrixcreate(fcomm, fgrid, fstencil, 
+      subroutine fhypre_structmatrixcreate(fcomm, fgrid, fstencil,
      1                                     fmatrix)
       integer ierr
       integer fcomm
@@ -224,7 +224,7 @@
 !******************************************
 !      fhypre_structmatrixsetvalues
 !******************************************
-      subroutine fhypre_structmatrixsetvalues(fmatrix, fgridindx, 
+      subroutine fhypre_structmatrixsetvalues(fmatrix, fgridindx,
      1                                        fnumsindx, fsindx, fvals)
       integer ierr
       integer fgridindx(*)
@@ -233,7 +233,7 @@
       double precision fvals(*)
       integer*8 fmatrix
 
-      call HYPRE_StructMatrixSetValues(fmatrix, fgridindx, fnumsindx, 
+      call HYPRE_StructMatrixSetValues(fmatrix, fgridindx, fnumsindx,
      1                                 fsindx, fvals, ierr)
       if (ierr .ne. 0) then
          print *, 'fhypre_structmatrixsetvalues: error = ', ierr
@@ -321,7 +321,7 @@
       double precision fvals(*)
       integer*8 fmatrix
 
-      call HYPRE_StructMatrixSetConstantVa(fmatrix, fnumsindx, 
+      call HYPRE_StructMatrixSetConstantVa(fmatrix, fnumsindx,
      1                                         fsindx, fvals, ierr)
       if (ierr .ne. 0) then
          print *, 'fhypre_structmatrixsetconstantvalues: error = ', ierr
@@ -388,7 +388,7 @@
       double precision fvals(*)
       integer*8 fmatrix
 
-      call HYPRE_StructMatrixSetConstantVa(fmatrix, fnumsindx, 
+      call HYPRE_StructMatrixSetConstantVa(fmatrix, fnumsindx,
      1                                         fsindx, fvals, ierr)
       if (ierr .ne. 0) then
          print *, 'fhypre_structmatrixaddtoconstantvalues: error = ',
@@ -624,7 +624,7 @@
 !******************************************
 !      fhypre_structvectoraddtoboxvalues
 !******************************************
-      subroutine fhypre_structvectoraddtoboxvalu(fvector, flower, 
+      subroutine fhypre_structvectoraddtoboxvalu(fvector, flower,
      1                                             fupper, fvals)
       integer ierr
       integer flower(*)
@@ -678,7 +678,7 @@
 !******************************************
 !      fhypre_structvectorgetboxvalues
 !******************************************
-      subroutine fhypre_structvectorgetboxvalues(fvector, flower, 
+      subroutine fhypre_structvectorgetboxvalues(fvector, flower,
      1                                           fupper, fvals)
       integer ierr
       integer flower(*)
@@ -745,7 +745,7 @@
 !******************************************
 !      fhypre_structvectorgetmigratecommpkg
 !******************************************
-      subroutine fhypre_structvectorgetmigrateco(ffromvec, ftovec, 
+      subroutine fhypre_structvectorgetmigrateco(ffromvec, ftovec,
      1                                                fcommpkg)
       integer ierr
       integer*8 ffromvec
