@@ -19,7 +19,7 @@
 #define HYPRE_NEWBOXLOOP_HEADER
 
 #ifdef HYPRE_USING_OPENMP
-#define HYPRE_BOX_REDUCTION 
+#define HYPRE_BOX_REDUCTION
 #ifdef WIN32
 #define Pragma(x) __pragma(HYPRE_XSTR(x))
 #else

@@ -160,7 +160,7 @@ void *hypre_mymalloc(HYPRE_Int nbytes,const char *msg)
 
 
 /*************************************************************************
-* This function is my wrapper around free, allows multiple pointers    
+* This function is my wrapper around free, allows multiple pointers
 **************************************************************************/
 #if 0
 void hypre_free_multi(void *ptr1,...)
@@ -182,8 +182,8 @@ void hypre_free_multi(void *ptr1,...)
 
   va_end(plist);
 
-}    
-#endif        
+}
+#endif
 
 /*************************************************************************
 * The following function copies an HYPRE_Int (HYPRE_Int) array

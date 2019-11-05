@@ -38,10 +38,10 @@ extern int HYPRE_ParCSRBiCGSTABLSetStopCrit( HYPRE_Solver solver, int stop_crit 
 
 extern int HYPRE_ParCSRBiCGSTABLSetPrecond( HYPRE_Solver  solver,
           int (*precond)      (HYPRE_Solver sol, HYPRE_ParCSRMatrix matrix,
-			       HYPRE_ParVector b, HYPRE_ParVector x),
+                               HYPRE_ParVector b, HYPRE_ParVector x),
           int (*precond_setup)(HYPRE_Solver sol, HYPRE_ParCSRMatrix matrix,
-			       HYPRE_ParVector b, HYPRE_ParVector x),
-          void               *precond_data );
+                               HYPRE_ParVector b, HYPRE_ParVector x),
+          void                *precond_data );
 
 extern int HYPRE_ParCSRBiCGSTABLSetLogging( HYPRE_Solver solver, int logging);
 
@@ -49,7 +49,7 @@ extern int HYPRE_ParCSRBiCGSTABLGetNumIterations(HYPRE_Solver solver,
                                                  int *num_iterations);
 
 extern int HYPRE_ParCSRBiCGSTABLGetFinalRelativeResidualNorm(HYPRE_Solver solver,
-                                                       double *norm );
+                                                             double *norm );
 
 #ifdef __cplusplus
 }

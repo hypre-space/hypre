@@ -62,19 +62,19 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
    hypre_F90_Obj solver, precond;
 
    hypre_F90_Obj long_temp_COMM;
-        HYPRE_Int temp_COMM;
-        HYPRE_Int precond_id;
+   HYPRE_Int temp_COMM;
+   HYPRE_Int precond_id;
 
-        HYPRE_Int one = 1;
-        HYPRE_Int two = 2;
-        HYPRE_Int three = 3;
-        HYPRE_Int six = 6;
-        HYPRE_Int twenty = 20;
-        HYPRE_Int thousand = 1000;
-        HYPRE_Int hypre_type = HYPRE_PARCSR;
+   HYPRE_Int one = 1;
+   HYPRE_Int two = 2;
+   HYPRE_Int three = 3;
+   HYPRE_Int six = 6;
+   HYPRE_Int twenty = 20;
+   HYPRE_Int thousand = 1000;
+   HYPRE_Int hypre_type = HYPRE_PARCSR;
 
-     HYPRE_Real oo1 = 1.e-3;
-     HYPRE_Real tol = 1.e-7;
+   HYPRE_Real oo1 = 1.e-3;
+   HYPRE_Real tol = 1.e-7;
 #else
    HYPRE_IJMatrix A;
    HYPRE_ParCSRMatrix parcsr_A;
@@ -206,7 +206,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
 
       Note that here we are setting one row at a time, though
       one could set all the rows together (see the User's Manual).
-   */
+      */
    {
       HYPRE_Int nnz;
       HYPRE_Real values[5];
@@ -219,9 +219,9 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
          /* The left identity block:position i-n */
          if ((i-n)>=0)
          {
-	    cols[nnz] = i-n;
-	    values[nnz] = -1.0;
-	    nnz++;
+            cols[nnz] = i-n;
+            values[nnz] = -1.0;
+            nnz++;
          }
 
          /* The left -1: position i-1 */
@@ -515,7 +515,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       HYPRE_ParCSRPCGSetPrecond(&solver, &precond_id, &precond);
 #else
       HYPRE_PCGSetPrecond(solver, (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
-                          (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup, precond);
+            (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup, precond);
 #endif
 
       /* Now setup and solve! */
@@ -610,7 +610,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       HYPRE_ParCSRPCGSetPrecond(&solver, &precond_id, &precond);
 #else
       HYPRE_PCGSetPrecond(solver, (HYPRE_PtrToSolverFcn) HYPRE_ParaSailsSolve,
-                          (HYPRE_PtrToSolverFcn) HYPRE_ParaSailsSetup, precond);
+            (HYPRE_PtrToSolverFcn) HYPRE_ParaSailsSetup, precond);
 #endif
 
       /* Now setup and solve! */

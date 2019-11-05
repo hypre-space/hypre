@@ -17,7 +17,7 @@
  * HYPRE_MappedMatrixCreate
  *--------------------------------------------------------------------------*/
 
-HYPRE_MappedMatrix 
+HYPRE_MappedMatrix
 HYPRE_MappedMatrixCreate( )
 {
    return ( (HYPRE_MappedMatrix)
@@ -28,7 +28,7 @@ HYPRE_MappedMatrixCreate( )
  * HYPRE_MappedMatrixDestroy
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_MappedMatrixDestroy( HYPRE_MappedMatrix matrix )
 {
    return( hypre_MappedMatrixDestroy( (hypre_MappedMatrix *) matrix ) );
@@ -38,7 +38,7 @@ HYPRE_MappedMatrixDestroy( HYPRE_MappedMatrix matrix )
  * HYPRE_MappedMatrixLimitedDestroy
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_MappedMatrixLimitedDestroy( HYPRE_MappedMatrix matrix )
 {
    return( hypre_MappedMatrixLimitedDestroy( (hypre_MappedMatrix *) matrix ) );
@@ -59,7 +59,7 @@ HYPRE_MappedMatrixInitialize( HYPRE_MappedMatrix matrix )
  * HYPRE_MappedMatrixAssemble
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_MappedMatrixAssemble( HYPRE_MappedMatrix matrix )
 {
    return( hypre_MappedMatrixAssemble( (hypre_MappedMatrix *) matrix ) );
@@ -71,7 +71,7 @@ HYPRE_MappedMatrixAssemble( HYPRE_MappedMatrix matrix )
  * HYPRE_MappedMatrixPrint
  *--------------------------------------------------------------------------*/
 
-void 
+void
 HYPRE_MappedMatrixPrint( HYPRE_MappedMatrix matrix )
 {
    hypre_MappedMatrixPrint( (hypre_MappedMatrix *) matrix );

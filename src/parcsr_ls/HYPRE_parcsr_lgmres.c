@@ -41,7 +41,7 @@ HYPRE_ParCSRLGMRESCreate( MPI_Comm comm, HYPRE_Solver *solver )
  * HYPRE_ParCSRLGMRESDestroy
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_ParCSRLGMRESDestroy( HYPRE_Solver solver )
 {
    return( hypre_LGMRESDestroy( (void *) solver ) );
@@ -51,7 +51,7 @@ HYPRE_ParCSRLGMRESDestroy( HYPRE_Solver solver )
  * HYPRE_ParCSRLGMRESSetup
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_ParCSRLGMRESSetup( HYPRE_Solver solver,
                          HYPRE_ParCSRMatrix A,
                          HYPRE_ParVector b,
@@ -67,7 +67,7 @@ HYPRE_ParCSRLGMRESSetup( HYPRE_Solver solver,
  * HYPRE_ParCSRLGMRESSolve
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_ParCSRLGMRESSolve( HYPRE_Solver solver,
                          HYPRE_ParCSRMatrix A,
                          HYPRE_ParVector b,

@@ -15,7 +15,7 @@
 #define __MLIMAPPERH__
 
 /*--------------------------------------------------------------------------
- * include files 
+ * include files
  *--------------------------------------------------------------------------*/
 
 #include <string.h>
@@ -39,7 +39,7 @@ public :
    int   adjustMapOffset(MPI_Comm comm, int *procNRows, int *procOffsets);
    int   getMap(int nItems, int *itemList, int *mapList);
    int   setParams(char *param_string, int argc, char **argv);
- 
+
 };
 
 #endif

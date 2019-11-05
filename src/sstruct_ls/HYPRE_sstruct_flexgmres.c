@@ -34,7 +34,7 @@ HYPRE_SStructFlexGMRESCreate( MPI_Comm             comm,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_SStructFlexGMRESDestroy( HYPRE_SStructSolver solver )
 {
    return( hypre_FlexGMRESDestroy( (void *) solver ) );
@@ -43,7 +43,7 @@ HYPRE_SStructFlexGMRESDestroy( HYPRE_SStructSolver solver )
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_SStructFlexGMRESSetup( HYPRE_SStructSolver solver,
                              HYPRE_SStructMatrix A,
                              HYPRE_SStructVector b,
@@ -58,7 +58,7 @@ HYPRE_SStructFlexGMRESSetup( HYPRE_SStructSolver solver,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_SStructFlexGMRESSolve( HYPRE_SStructSolver solver,
                              HYPRE_SStructMatrix A,
                              HYPRE_SStructVector b,
@@ -189,7 +189,7 @@ HYPRE_SStructFlexGMRESGetResidual( HYPRE_SStructSolver  solver,
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
- 
+
 
 HYPRE_Int HYPRE_SStructFlexGMRESSetModifyPC( HYPRE_SStructSolver  solver,
                                              HYPRE_PtrToModifyPCFcn modify_pc)
@@ -197,6 +197,6 @@ HYPRE_Int HYPRE_SStructFlexGMRESSetModifyPC( HYPRE_SStructSolver  solver,
 {
    return ( HYPRE_FlexGMRESSetModifyPC( (HYPRE_Solver) solver,
                                         (HYPRE_PtrToModifyPCFcn) modify_pc));
-   
+
 }
 

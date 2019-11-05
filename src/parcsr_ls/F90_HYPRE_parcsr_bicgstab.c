@@ -17,7 +17,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    
+
 /*--------------------------------------------------------------------------
  * HYPRE_ParCSRBiCGSTABCreate
  *--------------------------------------------------------------------------*/
@@ -38,7 +38,7 @@ hypre_F90_IFACE(hypre_parcsrbicgstabcreate, HYPRE_PARCSRBICGSTABCREATE)
  * HYPRE_ParCSRBiCGSTABDestroy
  *--------------------------------------------------------------------------*/
 
-void 
+void
 hypre_F90_IFACE(hypre_parcsrbicgstabdestroy, HYPRE_PARCSRBICGSTABDESTROY)
    ( hypre_F90_Obj *solver,
      hypre_F90_Int *ierr    )
@@ -52,7 +52,7 @@ hypre_F90_IFACE(hypre_parcsrbicgstabdestroy, HYPRE_PARCSRBICGSTABDESTROY)
  * HYPRE_ParCSRBiCGSTABSetup
  *--------------------------------------------------------------------------*/
 
-void 
+void
 hypre_F90_IFACE(hypre_parcsrbicgstabsetup, HYPRE_PARCSRBICGSTABSETUP)
    ( hypre_F90_Obj *solver,
      hypre_F90_Obj *A,
@@ -72,7 +72,7 @@ hypre_F90_IFACE(hypre_parcsrbicgstabsetup, HYPRE_PARCSRBICGSTABSETUP)
  * HYPRE_ParCSRBiCGSTABSolve
  *--------------------------------------------------------------------------*/
 
-void 
+void
 hypre_F90_IFACE(hypre_parcsrbicgstabsolve, HYPRE_PARCSRBICGSTABSOLVE)
    ( hypre_F90_Obj *solver,
      hypre_F90_Obj *A,
@@ -237,7 +237,7 @@ hypre_F90_IFACE(hypre_parcsrbicgstabsetprecond, HYPRE_PARCSRBICGSTABSETPRECOND)
               hypre_F90_PassObj (HYPRE_Solver, solver),
               HYPRE_EuclidSolve,
               HYPRE_EuclidSetup,
-			  (HYPRE_Solver)      *precond_solver ) );
+              (HYPRE_Solver)      *precond_solver ) );
    }
    else
    {
@@ -325,7 +325,7 @@ hypre_F90_IFACE(hypre_parcsrbicgstabgetfinalrel, HYPRE_PARCSRBICGSTABGETFINALREL
            hypre_F90_PassObj (HYPRE_Solver, solver),
            hypre_F90_PassRealRef (norm)    ) );
 }
-    
+
 #ifdef __cplusplus
 }
 #endif

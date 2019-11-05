@@ -17,4 +17,4 @@ HYPRE_Int HYPRE_DistributedMatrixPilutSolverSetDropTolerance (HYPRE_DistributedM
 HYPRE_Int HYPRE_DistributedMatrixPilutSolverSetMaxIts (HYPRE_DistributedMatrixPilutSolver in_ptr , HYPRE_Int its );
 HYPRE_Int HYPRE_DistributedMatrixPilutSolverSetup (HYPRE_DistributedMatrixPilutSolver in_ptr );
 HYPRE_Int HYPRE_DistributedMatrixPilutSolverSolve (HYPRE_DistributedMatrixPilutSolver in_ptr , HYPRE_Real *x , HYPRE_Real *b );
- 
+

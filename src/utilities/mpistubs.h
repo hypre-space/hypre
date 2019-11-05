@@ -45,7 +45,7 @@ extern "C" {
 #define MPI_COMM_SELF        hypre_MPI_COMM_SELF
 #define MPI_COMM_TYPE_SHARED hypre_MPI_COMM_TYPE_SHARED
 
-#define MPI_BOTTOM  	    hypre_MPI_BOTTOM
+#define MPI_BOTTOM           hypre_MPI_BOTTOM
 
 #define MPI_FLOAT           hypre_MPI_FLOAT
 #define MPI_DOUBLE          hypre_MPI_DOUBLE

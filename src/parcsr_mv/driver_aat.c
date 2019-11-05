@@ -5,12 +5,12 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
-#include "_hypre_parcsr_mv.h" 
- 
+#include "_hypre_parcsr_mv.h"
+
 /*--------------------------------------------------------------------------
  * Test driver for unstructured matrix interface , A * A^T
  *--------------------------------------------------------------------------*/
- 
+
 HYPRE_Int
 main( HYPRE_Int   argc,
       char *argv[] )
@@ -31,11 +31,11 @@ main( HYPRE_Int   argc,
 
    if (my_id == 0)
    {
-   	As = hypre_CSRMatrixRead("inpr");
-   	hypre_printf(" read input A\n");
+      As = hypre_CSRMatrixRead("inpr");
+      hypre_printf(" read input A\n");
    }
    A = hypre_CSRMatrixToParCSRMatrix(hypre_MPI_COMM_WORLD, As, row_starts,
-	col_starts);
+         col_starts);
    row_starts = hypre_ParCSRMatrixRowStarts(A);
    col_starts = hypre_ParCSRMatrixColStarts(A);
 
@@ -47,7 +47,7 @@ main( HYPRE_Int   argc,
 
    if (my_id == 0)
    {
-	hypre_CSRMatrixDestroy(As);
+      hypre_CSRMatrixDestroy(As);
    }
    hypre_ParCSRMatrixDestroy(A);
    hypre_ParCSRMatrixDestroy(C);

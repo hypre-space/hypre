@@ -203,7 +203,7 @@ HYPRE_Int HYPRE_StructPFMGSetMaxIter(HYPRE_StructSolver solver,
 /**
  * (Optional) Set maximum number of multigrid grid levels.
  **/
-HYPRE_Int HYPRE_StructPFMGSetMaxLevels(HYPRE_StructSolver solver, 
+HYPRE_Int HYPRE_StructPFMGSetMaxLevels(HYPRE_StructSolver solver,
                                  HYPRE_Int          max_levels);
 
 /**
@@ -320,8 +320,8 @@ HYPRE_Int HYPRE_StructPFMGGetFinalRelativeResidualNorm(HYPRE_StructSolver  solve
 #if defined(HYPRE_USING_CUDA)
 HYPRE_Int
 HYPRE_StructPFMGSetDeviceLevel( HYPRE_StructSolver  solver,
-				HYPRE_Int   device_level  );
-#endif  
+                                HYPRE_Int   device_level  );
+#endif
 /*@}*/
 
 /*--------------------------------------------------------------------------
@@ -442,7 +442,7 @@ HYPRE_Int HYPRE_StructSMGGetFinalRelativeResidualNorm(HYPRE_StructSolver  solver
 #if defined(HYPRE_USING_CUDA)
 HYPRE_Int
 HYPRE_StructSMGSetDeviceLevel( HYPRE_StructSolver  solver,
-			       HYPRE_Int   device_level  );
+                               HYPRE_Int   device_level  );
 #endif
 
 /*@}*/
@@ -763,7 +763,7 @@ HYPRE_Int HYPRE_StructLGMRESSetTol(HYPRE_StructSolver solver,
 
 HYPRE_Int HYPRE_StructLGMRESSetAbsoluteTol(HYPRE_StructSolver solver,
                                      HYPRE_Real         tol);
-   
+
 HYPRE_Int HYPRE_StructLGMRESSetMaxIter(HYPRE_StructSolver solver,
                                  HYPRE_Int          max_iter);
 

@@ -15,7 +15,7 @@
  *       {
  *          1) refine cbox and boxman_intersect with fboxman
  *          2) loop over intersection boxes
- *                3) coarsen and contract (only the coarse nodes on this 
+ *                3) coarsen and contract (only the coarse nodes on this
  *                   processor) and zero data.
  *       }
  *
@@ -25,7 +25,7 @@ HYPRE_Int
 hypre_FacZeroCData( void                 *fac_vdata,
                     hypre_SStructMatrix  *A )
 {
-	hypre_FACData         *fac_data      =  (hypre_FACData*)fac_vdata;
+   hypre_FACData         *fac_data      =  (hypre_FACData*)fac_vdata;
 
    hypre_SStructGrid     *grid;
    hypre_SStructPGrid    *p_cgrid;
@@ -48,7 +48,7 @@ hypre_FacZeroCData( void                 *fac_vdata,
    hypre_Index           *refine_factors;
    hypre_Index            temp_index;
    hypre_Index            ilower, iupper;
-  
+
    HYPRE_Int              max_level     =  fac_data -> max_levels;
    HYPRE_Int             *level_to_part =  fac_data -> level_to_part;
 
@@ -61,7 +61,7 @@ hypre_FacZeroCData( void                 *fac_vdata,
    HYPRE_Int              ci, i, j, rem, intersect_size;
 
    HYPRE_Real            *values;
- 
+
    HYPRE_Int              ierr = 0;
 
    hypre_BoxInit(&scaled_box, ndim);
@@ -73,7 +73,7 @@ hypre_FacZeroCData( void                 *fac_vdata,
 
       grid          = (fac_data -> grid_level[level]);
       refine_factors= &(fac_data -> refine_factors[level]);
-      
+
       p_cgrid= hypre_SStructGridPGrid(grid, part_crse);
       nvars  = hypre_SStructPGridNVars(p_cgrid);
 
@@ -140,13 +140,13 @@ hypre_FacZeroCData( void                 *fac_vdata,
                    for (j= 0; j< stencil_size; j++)
                    {
                       HYPRE_SStructMatrixSetBoxValues(fac_data -> A_level[level],
-                                                      part_crse, 
+                                                      part_crse,
                                                       hypre_BoxIMin(&intersect_box),
                                                       hypre_BoxIMax(&intersect_box),
                                                       var, 1, &j, values);
 
                       HYPRE_SStructMatrixSetBoxValues(A,
-                                                      level_to_part[level-1], 
+                                                      level_to_part[level-1],
                                                       hypre_BoxIMin(&intersect_box),
                                                       hypre_BoxIMax(&intersect_box),
                                                       var, 1, &j, values);

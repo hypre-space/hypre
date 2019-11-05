@@ -17,7 +17,7 @@
  *--------------------------------------------------------------------------*/
 /* to do, not trivial */
 /*
-HYPRE_Int 
+HYPRE_Int
 HYPRE_ParCSRFlexGMRESDestroy( HYPRE_Solver solver )
 {
    return( hypre_FlexGMRESDestroy( (void *) solver ) );
@@ -28,7 +28,7 @@ HYPRE_ParCSRFlexGMRESDestroy( HYPRE_Solver solver )
  * HYPRE_FlexGMRESSetup
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_FlexGMRESSetup( HYPRE_Solver solver,
                         HYPRE_Matrix A,
                         HYPRE_Vector b,
@@ -44,7 +44,7 @@ HYPRE_FlexGMRESSetup( HYPRE_Solver solver,
  * HYPRE_FlexGMRESSolve
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_FlexGMRESSolve( HYPRE_Solver solver,
                         HYPRE_Matrix A,
                         HYPRE_Vector b,
@@ -176,9 +176,9 @@ HYPRE_FlexGMRESSetPrecond( HYPRE_Solver          solver,
                              HYPRE_Solver          precond_solver )
 {
    return( hypre_FlexGMRESSetPrecond( (void *) solver,
-									  (HYPRE_Int (*)(void*, void*, void*, void*))precond,
-									  (HYPRE_Int (*)(void*, void*, void*, void*))precond_setup,
-									  (void *) precond_solver ) );
+            (HYPRE_Int (*)(void*, void*, void*, void*))precond,
+            (HYPRE_Int (*)(void*, void*, void*, void*))precond_setup,
+            (void *) precond_solver ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -275,14 +275,14 @@ HYPRE_Int HYPRE_FlexGMRESGetResidual( HYPRE_Solver solver, void *residual )
 /*--------------------------------------------------------------------------
  * HYPRE_FlexGMRESSetModifyPC
  *--------------------------------------------------------------------------*/
- 
+
 
 HYPRE_Int HYPRE_FlexGMRESSetModifyPC( HYPRE_Solver  solver,
                                 HYPRE_Int (*modify_pc)(HYPRE_Solver, HYPRE_Int, HYPRE_Real) )
 
 {
-	return hypre_FlexGMRESSetModifyPC( (void *) solver, (HYPRE_Int(*)(void*, HYPRE_Int, HYPRE_Real))modify_pc);
-   
+   return hypre_FlexGMRESSetModifyPC( (void *) solver, (HYPRE_Int(*)(void*, HYPRE_Int, HYPRE_Real))modify_pc);
+
 }
 
 

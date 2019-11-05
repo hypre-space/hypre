@@ -30,13 +30,13 @@
 #include "IJ_mv/HYPRE_IJ_mv.h"
 
 /* Local routine prototypes */
-HYPRE_Int HYPRE_IJMatrixSetLocalStorageType(HYPRE_IJMatrix ij_matrix, 
+HYPRE_Int HYPRE_IJMatrixSetLocalStorageType(HYPRE_IJMatrix ij_matrix,
                                       HYPRE_Int local_storage_type );
 
-HYPRE_Int HYPRE_IJMatrixSetLocalSize(HYPRE_IJMatrix ij_matrix, 
+HYPRE_Int HYPRE_IJMatrixSetLocalSize(HYPRE_IJMatrix ij_matrix,
                                HYPRE_Int row, HYPRE_Int col );
 
-HYPRE_Int HYPRE_IJMatrixInsertRow( HYPRE_IJMatrix ij_matrix, 
+HYPRE_Int HYPRE_IJMatrixInsertRow( HYPRE_IJMatrix ij_matrix,
                              HYPRE_Int size, HYPRE_BigInt i, HYPRE_BigInt *col_ind,
                              HYPRE_Real *values );
 
@@ -49,9 +49,9 @@ distributed_matrix and putting them into the IJMatrix. This routine does not
 effect the distributed matrix. In essence, it makes a copy of the input matrix
 in another format. NOTE: because this routine makes a copy and is not just
 a simple conversion, it is memory-expensive and should only be used in
-low-memory requirement situations (such as unit-testing code). 
+low-memory requirement situations (such as unit-testing code).
 */
-HYPRE_Int 
+HYPRE_Int
 HYPRE_BuildIJMatrixFromDistributedMatrix(
                  HYPRE_DistributedMatrix DistributedMatrix,
                  HYPRE_IJMatrix *ij_matrix,
@@ -74,7 +74,7 @@ HYPRE_BuildIJMatrixFromDistributedMatrix(
    comm = HYPRE_DistributedMatrixGetContext( DistributedMatrix );
    ierr = HYPRE_DistributedMatrixGetDims( DistributedMatrix, &M, &N );
 
-   ierr = HYPRE_DistributedMatrixGetLocalRange( DistributedMatrix, 
+   ierr = HYPRE_DistributedMatrixGetLocalRange( DistributedMatrix,
              &first_local_row, &last_local_row ,
              &first_local_col, &last_local_col );
 
@@ -82,11 +82,11 @@ HYPRE_BuildIJMatrixFromDistributedMatrix(
                                 first_local_col, last_local_col,
                                 ij_matrix );
 
-   ierr = HYPRE_IJMatrixSetLocalStorageType( 
+   ierr = HYPRE_IJMatrixSetLocalStorageType(
                  *ij_matrix, local_storage_type );
    /* if(ierr) return(ierr); */
 
-   ierr = HYPRE_IJMatrixSetLocalSize( *ij_matrix, 
+   ierr = HYPRE_IJMatrixSetLocalSize( *ij_matrix,
                 last_local_row-first_local_row+1,
                 last_local_col-first_local_col+1 );
 

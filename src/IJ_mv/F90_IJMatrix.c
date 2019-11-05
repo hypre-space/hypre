@@ -17,12 +17,12 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    
+
 /*--------------------------------------------------------------------------
  * hypre_IJMatrixSetObject
  *--------------------------------------------------------------------------*/
 
-void 
+void
 hypre_F90_IFACE(hypre_ijmatrixsetobject, HYPRE_IJMATRIXSETOBJECT)
    ( hypre_F90_Obj *matrix,
      hypre_F90_Obj *object,

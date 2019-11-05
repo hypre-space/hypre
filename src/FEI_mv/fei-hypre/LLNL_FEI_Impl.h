@@ -7,7 +7,7 @@
 
 /***************************************************************************
   Module:  LLNL_FEI_Impl.h
-  Purpose: custom implementation of the FEI 
+  Purpose: custom implementation of the FEI
  ***************************************************************************/
 
 #ifndef _LLNL_FEI_IMPL_H_
@@ -21,7 +21,7 @@
 #include "LLNL_FEI_Matrix.h"
 
 /**************************************************************************
- definition of the class to capture the FEI information 
+ definition of the class to capture the FEI information
 ---------------------------------------------------------------------------*/
 
 class LLNL_FEI_Impl
@@ -47,20 +47,20 @@ public :
    inline int initFields(int numFields, int *fieldSizes, int *fieldIDs)
                   {return feiPtr_->initFields(numFields,fieldSizes,fieldIDs);}
 
-   inline int initElemBlock(int elemBlockID, int numElements, 
-                   int numNodesPerElement, int *numFieldsPerNode, 
-                   int **nodalFieldIDs, int numElemDOFFieldsPerElement, 
+   inline int initElemBlock(int elemBlockID, int numElements,
+                   int numNodesPerElement, int *numFieldsPerNode,
+                   int **nodalFieldIDs, int numElemDOFFieldsPerElement,
                    int *elemDOFFieldIDs, int interleaveStrategy)
-                  {return feiPtr_->initElemBlock(elemBlockID, numElements, 
-                   numNodesPerElement, numFieldsPerNode, nodalFieldIDs, 
-                   numElemDOFFieldsPerElement, elemDOFFieldIDs, 
+                  {return feiPtr_->initElemBlock(elemBlockID, numElements,
+                   numNodesPerElement, numFieldsPerNode, nodalFieldIDs,
+                   numElemDOFFieldsPerElement, elemDOFFieldIDs,
                    interleaveStrategy);}
 
-   inline int initElem(int elemBlockID, int elemID, int *elemConn) 
+   inline int initElem(int elemBlockID, int elemID, int *elemConn)
                   {(void) elemBlockID; (void) elemID; (void) elemConn;
                    return 0;}
 
-   inline int initSharedNodes(int nShared, int *sharedIDs, int *sharedLeng, 
+   inline int initSharedNodes(int nShared, int *sharedIDs, int *sharedLeng,
                    int **sharedProcs)
                   {return feiPtr_->initSharedNodes(nShared,sharedIDs,
                                        sharedLeng,sharedProcs);}
@@ -73,20 +73,20 @@ public :
 
    inline int resetRHSVector(double s) {return feiPtr_->resetRHSVector(s);}
 
-   inline int resetInitialGuess(double s) 
+   inline int resetInitialGuess(double s)
                   {return feiPtr_->resetInitialGuess(s);}
 
-   inline int loadNodeBCs(int nNodes, int *nodeIDs, int fieldID, 
+   inline int loadNodeBCs(int nNodes, int *nodeIDs, int fieldID,
                    double **alpha, double **beta, double **gamma)
                   {return feiPtr_->loadNodeBCs(nNodes,nodeIDs,fieldID,
                                        alpha,beta,gamma);}
 
-   inline int sumInElem(int elemBlock, int elemID, int *elemConn, 
+   inline int sumInElem(int elemBlock, int elemID, int *elemConn,
                    double **elemStiff, double *elemLoad, int elemFormat)
                   {return feiPtr_->sumInElem(elemBlock,elemID,elemConn,
                                        elemStiff,elemLoad,elemFormat);}
 
-   inline int sumInElemMatrix(int elemBlock, int elemID, int* elemConn, 
+   inline int sumInElemMatrix(int elemBlock, int elemID, int* elemConn,
                    double **elemStiffness, int elemFormat)
                   {return feiPtr_->sumInElemMatrix(elemBlock,elemID,
                                        elemConn,elemStiffness,elemFormat);}
@@ -100,7 +100,7 @@ public :
 
    int solve(int *status);
 
-   inline int iterations(int *iterTaken) 
+   inline int iterations(int *iterTaken)
                   {return solverPtr_->iterations(iterTaken);}
 
    int residualNorm(int whichNorm, int numFields, int* fieldIDs,
@@ -122,7 +122,7 @@ public :
                    int *CRID)
                   {return feiPtr_->initCRMult(CRListLen,CRNodeList,
                    CRFieldList,CRID);}
-   inline int loadCRMult(int CRID, int CRListLen, int *CRNodeList, 
+   inline int loadCRMult(int CRID, int CRListLen, int *CRNodeList,
                    int *CRFieldList, double *CRWeightList, double CRValue)
                   {return feiPtr_->loadCRMult(CRID,CRListLen,CRNodeList,
                    CRFieldList,CRWeightList,CRValue);}

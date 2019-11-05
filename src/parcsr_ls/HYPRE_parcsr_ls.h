@@ -1228,9 +1228,9 @@ HYPRE_Int HYPRE_BoomerAMGSetDSLUThreshold (HYPRE_Solver solver,
  * @param cpt_coarse_index [IN] indexes of C points to be kept
  **/
 HYPRE_Int HYPRE_BoomerAMGSetCpointsToKeep(HYPRE_Solver solver,
-				HYPRE_Int  cpt_coarse_level,
-				HYPRE_Int  num_cpt_coarse,
-				HYPRE_Int *cpt_coarse_index);
+                                          HYPRE_Int  cpt_coarse_level,
+                                          HYPRE_Int  num_cpt_coarse,
+                                          HYPRE_Int *cpt_coarse_index);
 /*
  * (Optional) if Sabs equals 1, the strength of connection test is based
  * on the absolute value of the matrix coefficients

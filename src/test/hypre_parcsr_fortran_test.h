@@ -8,7 +8,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    
+
 /******************************************************************************
  * Definitions of ParCSR Fortran interface routines
  *****************************************************************************/
@@ -81,7 +81,7 @@ extern void hypre_F90_NAME(fhypre_csrmatrixtoparcsrmatrix, FHYPRE_CSRMATRIXTOPAR
 #define HYPRE_ParCSRMatrixMatvec  \
         hypre_F90_NAME(fhypre_parcsrmatrixmatvec, FHYPRE_PARCSRMATRIXMATVEC)
 extern void hypre_F90_NAME(fhypre_parcsrmatrixmatvec, FHYPRE_PARCSRMATRIXMATVEC)
-                      (HYPRE_Real *, hypre_F90_Obj *, hypre_F90_Obj *, HYPRE_Real *, hypre_F90_Obj *);  
+                      (HYPRE_Real *, hypre_F90_Obj *, hypre_F90_Obj *, HYPRE_Real *, hypre_F90_Obj *);
 
 #define HYPRE_ParCSRMatrixMatvecT  \
         hypre_F90_NAME(fhypre_parcsrmatrixmatvect, FHYPRE_PARCSRMATRIXMATVECT)
@@ -655,54 +655,54 @@ extern void hypre_F90_NAME(fhypre_parcsrbicgstabgetfinalre, FHYPRE_PARCSRBICGSTA
 
 
 #define HYPRE_BlockTridiagCreate  \
-	hypre_F90_NAME(fhypre_blocktridiagcreate, FHYPRE_BLOCKTRIDIAGCREATE)
+hypre_F90_NAME(fhypre_blocktridiagcreate, FHYPRE_BLOCKTRIDIAGCREATE)
 extern void hypre_F90_NAME(fhypre_blocktridiagcreate, FHYPRE_BLOCKTRIDIAGCREATE)
                       (hypre_F90_Obj *);
 
 #define HYPRE_BlockTridiagDestroy  \
-	hypre_F90_NAME(fhypre_blocktridiagdestroy, FHYPRE_BLOCKTRIDIAGDESTROY)
+hypre_F90_NAME(fhypre_blocktridiagdestroy, FHYPRE_BLOCKTRIDIAGDESTROY)
 extern void hypre_F90_NAME(fhypre_blocktridiagdestroy, FHYPRE_BLOCKTRIDIAGDESTROY)
                       (hypre_F90_Obj *);
 
 #define HYPRE_BlockTridiagSetup  \
-	hypre_F90_NAME(fhypre_blocktridiagsetup, FHYPRE_BLOCKTRIDIAGSETUP)
+hypre_F90_NAME(fhypre_blocktridiagsetup, FHYPRE_BLOCKTRIDIAGSETUP)
 extern void hypre_F90_NAME(fhypre_blocktridiagsetup, FHYPRE_BLOCKTRIDIAGSETUP)
                       (hypre_F90_Obj *, hypre_F90_Obj *, hypre_F90_Obj *, hypre_F90_Obj *);
 
 #define HYPRE_BlockTridiagSolve  \
-	hypre_F90_NAME(fhypre_blocktridiagsolve, FHYPRE_BLOCKTRIDIAGSOLVE)
+hypre_F90_NAME(fhypre_blocktridiagsolve, FHYPRE_BLOCKTRIDIAGSOLVE)
 extern void hypre_F90_NAME(fhypre_blocktridiagsolve, FHYPRE_BLOCKTRIDIAGSOLVE)
                       (hypre_F90_Obj *, hypre_F90_Obj *, hypre_F90_Obj *, hypre_F90_Obj *);
 
 #define HYPRE_BlockTridiagSetIndexSet  \
-	hypre_F90_NAME(fhypre_blocktridiagsetindexset, FHYPRE_BLOCKTRIDIAGSETINDEXSET)
+hypre_F90_NAME(fhypre_blocktridiagsetindexset, FHYPRE_BLOCKTRIDIAGSETINDEXSET)
 extern void hypre_F90_NAME(fhypre_blocktridiagsetindexset, FHYPRE_BLOCKTRIDIAGSETINDEXSET)
                       (hypre_F90_Obj *, HYPRE_Int *, HYPRE_Int *);
 
 #define HYPRE_BlockTridiagSetAMGStrengthThreshold  \
-	hypre_F90_NAME(fhypre_blocktridiagsetamgstreng, FHYPRE_BLOCKTRIDIAGSETAMGSTRENG)
+hypre_F90_NAME(fhypre_blocktridiagsetamgstreng, FHYPRE_BLOCKTRIDIAGSETAMGSTRENG)
 extern void hypre_F90_NAME(fhypre_blocktridiagsetamgstreng, FHYPRE_BLOCKTRIDIAGSETAMGSTRENG)
                       (hypre_F90_Obj *, HYPRE_Real *);
 
 #define HYPRE_BlockTridiagSetAMGNumSweeps  \
-	hypre_F90_NAME(fhypre_blocktridiagsetamgnumswe, FHYPRE_BLOCKTRIDIAGSETAMGNUMSWE)
+hypre_F90_NAME(fhypre_blocktridiagsetamgnumswe, FHYPRE_BLOCKTRIDIAGSETAMGNUMSWE)
 extern void hypre_F90_NAME(fhypre_blocktridiagsetamgnumswe, FHYPRE_BLOCKTRIDIAGSETAMGNUMSWE)
                       (hypre_F90_Obj *, HYPRE_Int *);
 
 #define HYPRE_BlockTridiagSetAMGRelaxType  \
-	hypre_F90_NAME(fhypre_blocktridiagsetamgrelaxt, FHYPRE_BLOCKTRIDIAGSETAMGRELAXT)
+hypre_F90_NAME(fhypre_blocktridiagsetamgrelaxt, FHYPRE_BLOCKTRIDIAGSETAMGRELAXT)
 extern void hypre_F90_NAME(fhypre_blocktridiagsetamgrelaxt, FHYPRE_BLOCKTRIDIAGSETAMGRELAXT)
                       (hypre_F90_Obj *, HYPRE_Int *);
 
 #define HYPRE_BlockTridiagSetPrintLevel  \
-	hypre_F90_NAME(fhypre_blocktridiagsetprintleve, FHYPRE_BLOCKTRIDIAGSETPRINTLEVE)
+hypre_F90_NAME(fhypre_blocktridiagsetprintleve, FHYPRE_BLOCKTRIDIAGSETPRINTLEVE)
 extern void hypre_F90_NAME(fhypre_blocktridiagsetprintleve, FHYPRE_BLOCKTRIDIAGSETPRINTLEVE)
                       (hypre_F90_Obj *, HYPRE_Int *);
 
 
 
 #define HYPRE_ParCSRCGNRCreate  \
-	hypre_F90_NAME(fhypre_parcsrcgnrcreate, FHYPRE_PARCSRCGNRCREATE)
+hypre_F90_NAME(fhypre_parcsrcgnrcreate, FHYPRE_PARCSRCGNRCREATE)
 extern void hypre_F90_NAME(fhypre_parcsrcgnrcreate, FHYPRE_PARCSRCGNRCREATE)
                       (HYPRE_Int *, hypre_F90_Obj *);
 

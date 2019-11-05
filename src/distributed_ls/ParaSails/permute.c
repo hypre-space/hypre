@@ -29,9 +29,9 @@ HYPRE_Int permute(FILE *permfile, FILE *infile, FILE *outfile)
     HYPRE_Int oldrow, k;
 
     /* skip the comment section */
-    do 
+    do
     {
-        if (fgets(line, MM_MAX_LINE_LENGTH, infile) == NULL) 
+        if (fgets(line, MM_MAX_LINE_LENGTH, infile) == NULL)
             return -1;
     }
     while (line[0] == '%');
@@ -44,7 +44,7 @@ HYPRE_Int permute(FILE *permfile, FILE *infile, FILE *outfile)
     ptr = hypre_TAlloc(HYPRE_Int, (M+1) , HYPRE_MEMORY_HOST);
     ind = hypre_TAlloc(HYPRE_Int, nnz , HYPRE_MEMORY_HOST);
     val = hypre_TAlloc(HYPRE_Real, nnz , HYPRE_MEMORY_HOST);
-    
+
     /* read the entire matrix */
     k = 0;
     ptr[0] = 0;
@@ -53,13 +53,13 @@ HYPRE_Int permute(FILE *permfile, FILE *infile, FILE *outfile)
     while (ret != EOF)
     {
         if (row != oldrow)
-	{
-	    /* set beginning of new row */
-	    ptr[oldrow] = k;
-	    oldrow = row;
-	}
+        {
+           /* set beginning of new row */
+           ptr[oldrow] = k;
+           oldrow = row;
+        }
 
-	k++;
+        k++;
         ret = hypre_fscanf(infile, "%d %d %lf", &row, &ind[k], &val[k]);
     }
     /* set end of last row */
@@ -103,7 +103,7 @@ main(HYPRE_Int argc, char *argv[])
 
     ret = permute(permfile, infile, outfile);
     if (ret)
-	hypre_printf("Permutation failed\n");
+       hypre_printf("Permutation failed\n");
 
     fclose(permfile);
     fclose(infile);

@@ -17,7 +17,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    
+
 HYPRE_Int hypre_ParVectorSize( void *x );
 HYPRE_Int aux_maskCount( HYPRE_Int n, hypre_F90_Int *mask );
 void aux_indexFromMask( HYPRE_Int n, hypre_F90_Int *mask, hypre_F90_Int *index );
@@ -97,7 +97,7 @@ hypre_F90_IFACE(hypre_parcsrmultivectorprint, HYPRE_PARCSRMULTIVECTORPRINT)
 {
    *ierr = (hypre_F90_Int)
       ( hypre_ParCSRMultiVectorPrint(
-           (void *)       x, 
+           (void *)       x,
            (char *) file));
 }
 

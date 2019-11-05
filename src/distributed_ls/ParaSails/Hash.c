@@ -11,8 +11,8 @@
  *
  * We allow rehashing the data into a larger or smaller table, and thus
  * allow a data item (an integer, but a pointer would be more general)
- * to be stored with each key in the table.  (If we only return the 
- * storage location of the key in the table (the implied index), then 
+ * to be stored with each key in the table.  (If we only return the
+ * storage location of the key in the table (the implied index), then
  * rehashing would change the implied indices.)
  *
  * The modulus function is used as the hash function.
@@ -65,7 +65,7 @@ void HashDestroy(Hash *h)
 }
 
 /*--------------------------------------------------------------------------
- * HashLookup - Look up the "key" in hash table "h" and return the data 
+ * HashLookup - Look up the "key" in hash table "h" and return the data
  * associated with the key, or return HASH_NOTFOUND.
  *--------------------------------------------------------------------------*/
 
@@ -107,7 +107,7 @@ void HashInsert(Hash *h, HYPRE_Int key, HYPRE_Int data)
         {
             assert(h->num < h->size);
 
-	    h->keys[h->num++] = key;
+            h->keys[h->num++] = key;
             h->table[loc] = key;
             break;
         }
@@ -129,8 +129,8 @@ void HashRehash(Hash *oldHash, Hash *newHash)
 
     for (i=0; i<oldHash->num; i++)
     {
-	data = HashLookup(oldHash, oldHash->keys[i]);
-	HashInsert(newHash, oldHash->keys[i], data);
+       data = HashLookup(oldHash, oldHash->keys[i]);
+       HashInsert(newHash, oldHash->keys[i], data);
     }
 }
 
@@ -145,7 +145,7 @@ void HashReset(Hash *h)
     h->num = 0;
     p = h->table;
     for (i=0; i<h->size; i++)
-	*p++ = HASH_EMPTY;
+       *p++ = HASH_EMPTY;
 }
 
 /*--------------------------------------------------------------------------
@@ -162,10 +162,10 @@ void HashPrint(Hash *h)
     p = h->table;
     for (i=0; i<lines; i++)
     {
-	for (j=0; j<38; j++)
-	    hypre_printf("%d ", ((*p++ == HASH_EMPTY) ? 0 : 1));
-	    /*hypre_printf("%d ", *p++);*/
-	hypre_printf("\n");
+       for (j=0; j<38; j++)
+          hypre_printf("%d ", ((*p++ == HASH_EMPTY) ? 0 : 1));
+       /*hypre_printf("%d ", *p++);*/
+       hypre_printf("\n");
     }
 }
 

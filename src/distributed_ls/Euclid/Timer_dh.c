@@ -29,7 +29,7 @@ void Timer_dhCreate(Timer_dh *t)
 #if defined(EUCLID_TIMING)
   hypre_sprintf(msgBuf_dh, "using EUCLID_TIMING; _SC_CLK_TCK = %i", (HYPRE_Int)tmp->sc_clk_tck);
   SET_INFO(msgBuf_dh);
-#elif defined(hypre_MPI_TIMING) 
+#elif defined(hypre_MPI_TIMING)
   SET_INFO("using MPI timing")
 #else
   SET_INFO("using JUNK timing")
@@ -47,7 +47,7 @@ void Timer_dhDestroy(Timer_dh t)
 }
 
 /*-------------------------------------------------------------------------------
- * EUCLID_TIMING timing methods; these use times() to record 
+ * EUCLID_TIMING timing methods; these use times() to record
  * both wall and cpu time.
  *-------------------------------------------------------------------------------*/
 
@@ -108,12 +108,12 @@ HYPRE_Real Timer_dhReadUsage(Timer_dh t)
   START_FUNC_DH
   HYPRE_Real cpu = Timer_dhReadCPU(t);
   HYPRE_Real wall = Timer_dhReadWall(t);
-  HYPRE_Real retval = 100.0*cpu/wall; 
+  HYPRE_Real retval = 100.0*cpu/wall;
   END_FUNC_VAL(retval);
 }
 
 /*-------------------------------------------------------------------------------
- * Parallel timing functions; these use hypre_MPI_Wtime() to record 
+ * Parallel timing functions; these use hypre_MPI_Wtime() to record
  * wall-clock time only.
  *-------------------------------------------------------------------------------*/
 

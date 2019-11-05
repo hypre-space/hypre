@@ -59,7 +59,7 @@ extern void hypre_F90_NAME(fhypre_structgridassemble, FHYPRE_STRUCTGRIDASSEMBLE)
         hypre_F90_NAME(fhypre_structgridsetnumghost, FHYPRE_STRUCTGRIDSETNUMGHOST)
 extern void hypre_F90_NAME(fhypre_structgridsetnumghost, fhypre_structsetgridnumghost)
                           (hypre_F90_Obj *, HYPRE_Int *);
-        
+
 
 
 #define HYPRE_StructMatrixCreate \
@@ -146,7 +146,7 @@ extern void hypre_F90_NAME(fhypre_structmatrixprint, FHYPRE_STRUCTMATRIXPRINT)
 hypre_F90_NAME(fhypre_structmatrixmatvec, FHYPRE_STRUCTMATRIXMATVEC)
 extern void hypre_F90_NAME(fhypre_structmatrixmatvec, FHYPRE_STRUCTMATRIXMATVEC)
                           (HYPRE_Int *, hypre_F90_Obj *, hypre_F90_Obj *, HYPRE_Int *, hypre_F90_Obj *);
- 
+
 
 
 #define HYPRE_StructVectorCreate \
@@ -156,7 +156,7 @@ extern void hypre_F90_NAME(fhypre_structvectorcreate, FHYPRE_STRUCTVECTORCREATE)
 
 #define HYPRE_StructVectorDestroy \
         hypre_F90_NAME(fhypre_structvectordestroy, FHYPRE_STRUCTVECTORDESTROY)
-extern void hypre_F90_NAME(fhypre_structvectordestroy, FHYPRE_STRUCTVECTORDESTROY) 
+extern void hypre_F90_NAME(fhypre_structvectordestroy, FHYPRE_STRUCTVECTORDESTROY)
                           (hypre_F90_Obj *);
 
 #define HYPRE_StructVectorInitialize \
@@ -238,7 +238,7 @@ extern void hypre_F90_NAME(fhypre_commpkgdestroy, FHYPRE_COMMPKGDESTROY)
         hypre_F90_NAME(fhypre_structvectorprint, FHYPRE_STRUCTVECTORPRINT)
 extern void hypre_F90_NAME(fhypre_structvectorprint, FHYPRE_STRUCTVECTORPRINT)
                           (hypre_F90_Obj *, HYPRE_Int *);
- 
+
 
 #define HYPRE_StructBiCGSTABCreate \
         hypre_F90_NAME(fhypre_structbicgstabcreate, FHYPRE_STRUCTBICGSTABCREATE)
@@ -436,7 +436,7 @@ extern void hypre_F90_NAME(fhypre_structhybridsetrelchange, FHYPRE_STRUCTHYBRIDS
 
 #define HYPRE_StructHybridSetPrecond \
         hypre_F90_NAME(fhypre_structhybridsetprecond, FHYPRE_STRUCTHYBRIDSETPRECOND)
-extern void hypre_F90_NAME(fhypre_structhybridsetprecond, FHYPRE_STRUCTHYBRIDSETPRECOND) 
+extern void hypre_F90_NAME(fhypre_structhybridsetprecond, FHYPRE_STRUCTHYBRIDSETPRECOND)
                           (hypre_F90_Obj *, HYPRE_Int *, hypre_F90_Obj *);
 
 #define HYPRE_StructHybridSetLogging \
@@ -572,7 +572,7 @@ extern void hypre_F90_NAME(fhypre_structpcgdestroy, FHYPRE_STRUCTPCGDESTROY)
 
 #define HYPRE_StructPCGSetup \
         hypre_F90_NAME(fhypre_structpcgsetup, FHYPRE_STRUCTPCGSETUP)
-extern void hypre_F90_NAME(fhypre_structpcgsetup, FHYPRE_STRUCTPCGSETUP) 
+extern void hypre_F90_NAME(fhypre_structpcgsetup, FHYPRE_STRUCTPCGSETUP)
                           (hypre_F90_Obj *, hypre_F90_Obj *, hypre_F90_Obj *, hypre_F90_Obj *);
 
 #define HYPRE_StructPCGSolve \

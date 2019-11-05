@@ -41,7 +41,7 @@ HYPRE_ParCSRCGNRCreate( MPI_Comm comm, HYPRE_Solver *solver )
  * HYPRE_ParCSRCGNRDestroy
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_ParCSRCGNRDestroy( HYPRE_Solver solver )
 {
    return( hypre_CGNRDestroy( (void *) solver ) );
@@ -51,7 +51,7 @@ HYPRE_ParCSRCGNRDestroy( HYPRE_Solver solver )
  * HYPRE_ParCSRCGNRSetup
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_ParCSRCGNRSetup( HYPRE_Solver solver,
                        HYPRE_ParCSRMatrix A,
                        HYPRE_ParVector b,
@@ -67,7 +67,7 @@ HYPRE_ParCSRCGNRSetup( HYPRE_Solver solver,
  * HYPRE_ParCSRCGNRSolve
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_ParCSRCGNRSolve( HYPRE_Solver solver,
                        HYPRE_ParCSRMatrix A,
                        HYPRE_ParVector b,

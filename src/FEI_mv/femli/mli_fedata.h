@@ -11,7 +11,7 @@
 #include "_hypre_utilities.h"
 #include "mli_febase.h"
 
-/****************************************************************************/ 
+/****************************************************************************/
 /* data structures for Finite element grid information                      */
 /*--------------------------------------------------------------------------*/
 
@@ -105,7 +105,7 @@ class MLI_FEData : public MLI_FEBase
    */
 
    void          *USR_FEGridObj_;
-   int           (*USR_computeShapeFuncInterpolant)(void*, int eGlobalID, 
+   int           (*USR_computeShapeFuncInterpolant)(void*, int eGlobalID,
                        int nNodes, const double *coord, double *coef);
    int           (*USR_getElemMatrix)(void*, int eGlobalID, int sMatDim,
                        double *stiffMat);
@@ -152,7 +152,7 @@ public :
                        const int * const *procLists);
 
    int initElemBlockFaceLists(int nElems, int nFaces,
-                              const int* const *fGlobalIDLists); 
+                              const int* const *fGlobalIDLists);
 
    int initFaceBlockNodeLists(int nFaces, const int *fGlobalIDs,
                               int nNodes, const int * const *nGlobalIDLists);
@@ -182,13 +182,13 @@ public :
 
    int loadElemBlockParentIDs(int nElems, const int *pGlobalIDs);
 
-   int loadElemBlockLoads(int nElems, int loadDim, 
+   int loadElemBlockLoads(int nElems, int loadDim,
                           const double* const *elemLoads);
 
-   int loadElemBlockSolutions(int nElems, int solDim, 
+   int loadElemBlockSolutions(int nElems, int solDim,
                               const double* const *elemSols);
 
-   int loadElemBCs(int nElems, const int *eGlobalIDs, int elemDOF, 
+   int loadElemBCs(int nElems, const int *eGlobalIDs, int elemDOF,
                    const char* const *BCFlags, const double *const *bcVals);
 
    // -------------------------------------------------------------------------
@@ -197,7 +197,7 @@ public :
 
    int loadElemMatrix(int eGlobalID, int sMatDim, const double *stiffMat);
 
-   int loadElemNullSpace(int eGlobalID, int nNSpace, int sMatDim, 
+   int loadElemNullSpace(int eGlobalID, int nNSpace, int sMatDim,
                          const double *nSpace);
 
    int loadElemLoad(int eGlobalID, int sMatDim, const double *elemLoad);
@@ -211,7 +211,7 @@ public :
    // load node boundary conditions
    // =========================================================================
 
-   int loadNodeBCs(int nNodes, const int *nGlobalIDs, int nodeDOF, 
+   int loadNodeBCs(int nNodes, const int *nGlobalIDs, int nodeDOF,
                    const char *const *BCFlags, const double* const *bcVals);
 
    // =========================================================================
@@ -240,7 +240,7 @@ public :
 
    int getElemBlockGlobalIDs(int nElems, int *eGlobalIDs);
 
-   int getElemNumNodes(int& nNodes); 
+   int getElemNumNodes(int& nNodes);
 
    int getElemBlockNodeLists(int nElems,int nNodes,int **nGlobalIDLists);
 
@@ -250,7 +250,7 @@ public :
 
    int getElemBlockNullSpaceSizes(int nElems, int *dimsNS);
 
-   int getElemBlockNullSpaces(int nElems, const int *dimsNS, int sMatDim, 
+   int getElemBlockNullSpaces(int nElems, const int *dimsNS, int sMatDim,
                               double **nullSpaces);
 
    int getElemBlockVolumes(int nElems, double *elemVols);
@@ -267,7 +267,7 @@ public :
 
    int getElemMatrix(int eGlobalID, int sMatDim, double *elemMat);
 
-   int getElemNullSpaceSize(int eGlobalID, int &dimNS); 
+   int getElemNullSpaceSize(int eGlobalID, int &dimNS);
 
    int getElemNullSpace(int eGlobalID, int dimNS, int sMatDim, double *nSpace);
 
@@ -275,13 +275,13 @@ public :
 
    int getElemMaterial(int eGlobalID, int& elemMat);
 
-   int getElemParentID(int eGlobalID, int& pGlobalID); 
+   int getElemParentID(int eGlobalID, int& pGlobalID);
 
-   int getElemFaceList(int eGlobalID, int nFaces, int *fGlobalIDs); 
+   int getElemFaceList(int eGlobalID, int nFaces, int *fGlobalIDs);
 
    int getNumBCElems(int& nElems);
 
-   int getElemBCs(int nElems, int *eGlobalIDs, int eDOFs, char **fieldFlag, 
+   int getElemBCs(int nElems, int *eGlobalIDs, int eDOFs, char **fieldFlag,
                   double **BCVals);
 
    // =========================================================================
@@ -292,19 +292,19 @@ public :
 
    int getNodeBlockGlobalIDs(int nNodes, int *nGlobalIDs);
 
-   int getNodeNumFields(int &numFields); 
+   int getNodeNumFields(int &numFields);
 
-   int getNodeFieldIDs(int numFields, int *fieldIDs); 
+   int getNodeFieldIDs(int numFields, int *fieldIDs);
 
    int getNodeBlockCoordinates(int nNodes, int spaceDim, double *coordinates);
 
    int getNumBCNodes(int& nNodes);
 
-   int getNodeBCs(int nNodes, int *nGlobalIDs, int nDOFs, char **fieldFlag, 
+   int getNodeBCs(int nNodes, int *nGlobalIDs, int nDOFs, char **fieldFlag,
                   double **BCVals);
 
-   int getNumSharedNodes(int& nNodes); 
-    
+   int getNumSharedNodes(int& nNodes);
+
    int getSharedNodeNumProcs(int nNodes, int *nGlobalIDs, int *numProcs);
 
    int getSharedNodeProcs(int nNodes, int *numProcs, int **procList);
@@ -317,13 +317,13 @@ public :
 
    int getFaceBlockGlobalIDs(int nFaces, int *fGlobalIDs);
 
-   int getNumSharedFaces(int& nFaces); 
+   int getNumSharedFaces(int& nFaces);
 
    int getSharedFaceNumProcs(int nFaces, int *fGlobalIDs, int *numProcs);
 
    int getSharedFaceProcs(int nFaces, int *numProcs, int **procList);
 
-   int getFaceNumNodes(int &nNodes); 
+   int getFaceNumNodes(int &nNodes);
 
    int getFaceBlockNodeLists(int nFaces, int nNodesPerFace,
                              int **nGlobalIDLists);
@@ -335,10 +335,10 @@ public :
    // -------------------------------------------------------------------------
 
    int loadFunc_computeShapeFuncInterpolant(void *object, int (*func) (void *,
-                   int eGlobalID,int nNodes,const double *coord, double *coef)); 
+                   int eGlobalID,int nNodes,const double *coord, double *coef));
 
-   int getShapeFuncInterpolant(int eGlobalID, int nNodes, const double *coord, 
-                               double *coef); 
+   int getShapeFuncInterpolant(int eGlobalID, int nNodes, const double *coord,
+                               double *coef);
 
    // -------------------------------------------------------------------------
    // other functions

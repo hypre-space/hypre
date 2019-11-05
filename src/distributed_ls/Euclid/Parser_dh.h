@@ -17,8 +17,8 @@ extern bool Parser_dhHasSwitch(Parser_dh p,const char *in);
 extern bool Parser_dhReadString(Parser_dh p, char *in, char **out);
 extern bool Parser_dhReadInt(Parser_dh p, char *in, HYPRE_Int *out);
 extern bool Parser_dhReadDouble(Parser_dh p, char *in, HYPRE_Real *out);
-  /* if the flag (char *in) is found, these four return 
-     true and set "out" accordingly.  If not found, they return 
+  /* if the flag (char *in) is found, these four return
+     true and set "out" accordingly.  If not found, they return
      false, and "out" is unaltered.
    */
 
@@ -38,14 +38,14 @@ extern void Parser_dhInit(Parser_dh p, HYPRE_Int argc, char *argv[]);
   /* Init enters <flag,value> pairs in its internal database in
      the following order:
 
-       (1)   $PCPACK_DIR/options_database  
+       (1)   $PCPACK_DIR/options_database
        (2)   "database" in local directory, if the file exists
        (3)   "pathname/foo" if argv[] contains a pair of entries:
                -db_filename pathname/foo
        (4)   flag,value pairs from the command line (ie, argv)
 
       If a flag already exists, its value is updated if it is
-      encountered a second time.  
+      encountered a second time.
 
       WARNING! to enter a negative value, you must use two dashes, e.g:
                       -myvalue  --0.1

@@ -7,7 +7,7 @@ extern "C" {
 
 /* dnrm2.f -- translated by f2c (version 19960315).
    You must link the resulting object file with the libraries:
-	-lf2c -lm   (in that order)
+   -lf2c -lm   (in that order)
 */
 
 #include "f2c.h"
@@ -70,7 +70,7 @@ doublereal dnrm2_(integer*n,doublereal* dx,integer* incx)
 /*     values for cutlo and cuthi.. */
 /*     from the environmental parameters listed in the imsl converter */
 /*     document the limiting values are as follows.. */
-/*     cutlo, s.p.   u/eps = 2**(-102) for  honeywell.  close seconds are 
+/*     cutlo, s.p.   u/eps = 2**(-102) for  honeywell.  close seconds are
 */
 /*                   univac and dec at 2**(-103) */
 /*                   thus cutlo = 2**(-51) = 4.44089e-16 */
@@ -83,7 +83,7 @@ doublereal dnrm2_(integer*n,doublereal* dx,integer* incx)
 /*     data cutlo, cuthi / 4.441e-16,  1.304e19 / */
 
     if (*n > 0 && *incx > 0) {
-	goto L10;
+       goto L10;
     }
     ret_val = zero;
     goto L300;
@@ -96,14 +96,14 @@ L10:
 /*                                                 begin main loop */
 L20:
     switch ((integer)next) {
-	case 0: goto L30;
-	case 1: goto L50;
-	case 2: goto L70;
-	case 3: goto L110;
+       case 0: goto L30;
+       case 1: goto L50;
+       case 2: goto L70;
+       case 3: goto L110;
     }
 L30:
     if ((d__1 = dx[i__], abs(d__1)) > cutlo) {
-	goto L85;
+       goto L85;
     }
     next = 1;
     xmax = zero;
@@ -112,10 +112,10 @@ L30:
 
 L50:
     if (dx[i__] == zero) {
-	goto L200;
+       goto L200;
     }
     if ((d__1 = dx[i__], abs(d__1)) > cutlo) {
-	goto L85;
+       goto L85;
     }
 
 /*                                prepare for phase 2. */
@@ -137,16 +137,16 @@ L105:
 
 L70:
     if ((d__1 = dx[i__], abs(d__1)) > cutlo) {
-	goto L75;
+       goto L75;
     }
 
 /*                     common code for phases 2 and 4. */
-/*                     in phase 4 sum is large.  scale to avoid overflow. 
+/*                     in phase 4 sum is large.  scale to avoid overflow.
 */
 
 L110:
     if ((d__1 = dx[i__], abs(d__1)) <= xmax) {
-	goto L115;
+       goto L115;
     }
 /* Computing 2nd power */
     d__1 = xmax / dx[i__];
@@ -177,13 +177,13 @@ L85:
 
     i__1 = *n;
     for (j = ix; j <= i__1; ++j) {
-	if ((d__1 = dx[i__], abs(d__1)) >= hitest) {
-	    goto L100;
-	}
+       if ((d__1 = dx[i__], abs(d__1)) >= hitest) {
+          goto L100;
+       }
 /* Computing 2nd power */
-	d__1 = dx[i__];
-	sum += d__1 * d__1;
-	i__ += *incx;
+       d__1 = dx[i__];
+       sum += d__1 * d__1;
+       i__ += *incx;
 /* L95: */
     }
     ret_val = sqrt(sum);
@@ -193,7 +193,7 @@ L200:
     ++ix;
     i__ += *incx;
     if (ix <= *n) {
-	goto L20;
+       goto L20;
     }
 
 /*              end of main loop. */

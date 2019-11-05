@@ -33,7 +33,7 @@
             } \
             dh_EndFunc(__FUNC__, 1); \
             EuclidFinalize(); \
-            PetscFinalize(); 
+            PetscFinalize();
 
 
 
@@ -54,7 +54,7 @@
             } \
             dh_EndFunc(__FUNC__, 1); \
             EuclidFinalize(); \
-            hypre_MPI_Finalize(); 
+            hypre_MPI_Finalize();
 
 /* --------------------------- SEQUENTIAL_MODE ------------------------ */
 
@@ -75,7 +75,7 @@
             } \
             dh_EndFunc(__FUNC__, 1); \
             EuclidFinalize(); \
-            hypre_MPI_Finalize(); 
+            hypre_MPI_Finalize();
 
 #endif
 

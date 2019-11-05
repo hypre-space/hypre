@@ -34,7 +34,7 @@ hypre_StructKrylovFree( void *ptr )
 void *
 hypre_StructKrylovCreateVector( void *vvector )
 {
-	hypre_StructVector *vector = (hypre_StructVector *)vvector;
+   hypre_StructVector *vector = (hypre_StructVector *)vvector;
    hypre_StructVector *new_vector;
    HYPRE_Int          *num_ghost= hypre_StructVectorNumGhost(vector);
 
@@ -130,7 +130,7 @@ hypre_StructKrylovMatvecDestroy( void *matvec_data )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Real
-hypre_StructKrylovInnerProd( void *x, 
+hypre_StructKrylovInnerProd( void *x,
                              void *y )
 {
    return ( hypre_StructInnerProd( (hypre_StructVector *) x,
@@ -142,7 +142,7 @@ hypre_StructKrylovInnerProd( void *x,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructKrylovCopyVector( void *x, 
+hypre_StructKrylovCopyVector( void *x,
                               void *y )
 {
    return ( hypre_StructCopy( (hypre_StructVector *) x,

@@ -37,8 +37,8 @@
             hypre_MPI_Abort(comm_dh, -1); \
           }
 
-  /* What is best to do here?  
-   * What is HYPRE's error checking strategy?  
+  /* What is best to do here?
+   * What is HYPRE's error checking strategy?
    * The shadow knows . . .
    *
    * Note: HYPRE_EUCLID_ERRCHKA macro is only used within this file.
@@ -62,7 +62,7 @@
 
 
 /*--------------------------------------------------------------------------
- * debugging: if ENABLE_EUCLID_LOGGING is defined, each MPI task will open 
+ * debugging: if ENABLE_EUCLID_LOGGING is defined, each MPI task will open
  * "logFile.id" for writing; also, function-call tracing is operational
  * (ie, you can set logFuncsToFile = true, logFuncsToSterr = true).
  *
@@ -80,12 +80,12 @@
 
 
 /*--------------------------------------------------------------------------
- * HYPRE_EuclidCreate - Return a Euclid "solver".  
+ * HYPRE_EuclidCreate - Return a Euclid "solver".
  *--------------------------------------------------------------------------*/
 
 #undef __FUNC__
 #define __FUNC__ "HYPRE_EuclidCreate"
-HYPRE_Int 
+HYPRE_Int
 HYPRE_EuclidCreate( MPI_Comm comm,
                     HYPRE_Solver *solver )
 {
@@ -95,13 +95,13 @@ HYPRE_EuclidCreate( MPI_Comm comm,
 #else
 
   START_FUNC_DH
-  Euclid_dh eu; 
+  Euclid_dh eu;
 
-  /*----------------------------------------------------------- 
+  /*-----------------------------------------------------------
    * create a few global objects (yuck!) for Euclid's use;
-   * these  are all pointers, are initially NULL, and are be set 
+   * these  are all pointers, are initially NULL, and are be set
    * back to NULL in HYPRE_EuclidDestroy()
-   * Global objects are defined in 
+   * Global objects are defined in
    * src/distributed_ls/Euclid/src/globalObjects.c
    *-----------------------------------------------------------*/
 
@@ -126,7 +126,7 @@ HYPRE_EuclidCreate( MPI_Comm comm,
   }
   Parser_dhInit(parser_dh, 0, NULL); HYPRE_EUCLID_ERRCHKA;
 
-  /*----------------------------------------------------------- 
+  /*-----------------------------------------------------------
    * create and return a Euclid object
    *-----------------------------------------------------------*/
   Euclid_dhCreate(&eu); HYPRE_EUCLID_ERRCHKA;
@@ -142,7 +142,7 @@ HYPRE_EuclidCreate( MPI_Comm comm,
 
 #undef __FUNC__
 #define __FUNC__ "HYPRE_EuclidDestroy"
-HYPRE_Int 
+HYPRE_Int
 HYPRE_EuclidDestroy( HYPRE_Solver solver )
 {
 #ifdef HYPRE_MIXEDINT
@@ -156,7 +156,7 @@ HYPRE_EuclidDestroy( HYPRE_Solver solver )
   bool printStats = false;
   bool logging = eu->logging;
 
-  /*---------------------------------------------------------------- 
+  /*----------------------------------------------------------------
      this block is for printing test data; this is used
      for diffing in autotests.
    *---------------------------------------------------------------- */
@@ -174,12 +174,12 @@ HYPRE_EuclidDestroy( HYPRE_Solver solver )
     fp = openFile_dh(fnamePtr, "w"); HYPRE_EUCLID_ERRCHKA;
     Euclid_dhPrintTestData(eu, fp); HYPRE_EUCLID_ERRCHKA;
     closeFile_dh(fp); HYPRE_EUCLID_ERRCHKA;
-   
+
     printf_dh("\n@@@@@ Euclid test data was printed to file: %s\n\n", fnamePtr);
   }
 
 
-  /*---------------------------------------------------------------- 
+  /*----------------------------------------------------------------
      determine which of Euclid's internal reports to print
    *----------------------------------------------------------------*/
   if (logging) {
@@ -195,8 +195,8 @@ HYPRE_EuclidDestroy( HYPRE_Solver solver )
     }
   }
 
-  /*------------------------------------------------------------------ 
-     print Euclid's internal report, then destroy the Euclid object 
+  /*------------------------------------------------------------------
+     print Euclid's internal report, then destroy the Euclid object
    *------------------------------------------------------------------ */
   if (printStats) {
     Euclid_dhPrintHypreReport(eu, stdout); HYPRE_EUCLID_ERRCHKA;
@@ -204,8 +204,8 @@ HYPRE_EuclidDestroy( HYPRE_Solver solver )
   Euclid_dhDestroy(eu); HYPRE_EUCLID_ERRCHKA;
 
 
-  /*------------------------------------------------------------------ 
-     destroy all remaining Euclid library objects 
+  /*------------------------------------------------------------------
+     destroy all remaining Euclid library objects
      (except the memory object)
    *------------------------------------------------------------------ */
   /*if (parser_dh != NULL) { dah 3/16/06  */
@@ -220,14 +220,14 @@ HYPRE_EuclidDestroy( HYPRE_Solver solver )
     tlog_dh = NULL;
   }
 
-  /*------------------------------------------------------------------ 
-     optionally print Euclid's memory report, 
+  /*------------------------------------------------------------------
+     optionally print Euclid's memory report,
      then destroy the memory object.
    *------------------------------------------------------------------ */
   /*if (mem_dh != NULL) {  dah 3/16/06  */
   if (mem_dh != NULL && ref_counter == 0) {
-    if (printMemReport) { 
-      Mem_dhPrint(mem_dh, stdout, false); HYPRE_EUCLID_ERRCHKA; 
+    if (printMemReport) {
+      Mem_dhPrint(mem_dh, stdout, false); HYPRE_EUCLID_ERRCHKA;
     }
     Mem_dhDestroy(mem_dh);  HYPRE_EUCLID_ERRCHKA;
     mem_dh = NULL;
@@ -247,7 +247,7 @@ HYPRE_EuclidDestroy( HYPRE_Solver solver )
 
 #undef __FUNC__
 #define __FUNC__ "HYPRE_EuclidSetup"
-HYPRE_Int 
+HYPRE_Int
 HYPRE_EuclidSetup( HYPRE_Solver solver,
                    HYPRE_ParCSRMatrix A,
                    HYPRE_ParVector b,
@@ -299,7 +299,7 @@ for testing!
 
 #undef __FUNC__
 #define __FUNC__ "HYPRE_EuclidSolve"
-HYPRE_Int 
+HYPRE_Int
 HYPRE_EuclidSolve( HYPRE_Solver solver,
                    HYPRE_ParCSRMatrix A,
                    HYPRE_ParVector bb,
@@ -323,13 +323,13 @@ HYPRE_EuclidSolve( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
- * Insert command line (flag, value) pairs in Euclid's 
+ * Insert command line (flag, value) pairs in Euclid's
  *--------------------------------------------------------------------------*/
 
 #undef __FUNC__
 #define __FUNC__ "HYPRE_EuclidSetParams"
 HYPRE_Int
-HYPRE_EuclidSetParams(HYPRE_Solver solver, 
+HYPRE_EuclidSetParams(HYPRE_Solver solver,
                       HYPRE_Int argc,
                       char *argv[] )
 {
@@ -354,7 +354,7 @@ HYPRE_EuclidSetParams(HYPRE_Solver solver,
 #undef __FUNC__
 #define __FUNC__ "HYPRE_EuclidSetParamsFromFile"
 HYPRE_Int
-HYPRE_EuclidSetParamsFromFile(HYPRE_Solver solver, 
+HYPRE_EuclidSetParamsFromFile(HYPRE_Solver solver,
                               char *filename )
 {
 #ifdef HYPRE_MIXEDINT
@@ -369,7 +369,7 @@ HYPRE_EuclidSetParamsFromFile(HYPRE_Solver solver,
 }
 
 HYPRE_Int
-HYPRE_EuclidSetLevel(HYPRE_Solver solver, 
+HYPRE_EuclidSetLevel(HYPRE_Solver solver,
                      HYPRE_Int level)
 {
 #ifdef HYPRE_MIXEDINT
@@ -386,7 +386,7 @@ HYPRE_EuclidSetLevel(HYPRE_Solver solver,
 }
 
 HYPRE_Int
-HYPRE_EuclidSetBJ(HYPRE_Solver solver, 
+HYPRE_EuclidSetBJ(HYPRE_Solver solver,
                   HYPRE_Int bj)
 {
 #ifdef HYPRE_MIXEDINT
@@ -403,7 +403,7 @@ HYPRE_EuclidSetBJ(HYPRE_Solver solver,
 }
 
 HYPRE_Int
-HYPRE_EuclidSetStats(HYPRE_Solver solver, 
+HYPRE_EuclidSetStats(HYPRE_Solver solver,
                      HYPRE_Int eu_stats)
 {
 #ifdef HYPRE_MIXEDINT
@@ -420,7 +420,7 @@ HYPRE_EuclidSetStats(HYPRE_Solver solver,
 }
 
 HYPRE_Int
-HYPRE_EuclidSetMem(HYPRE_Solver solver, 
+HYPRE_EuclidSetMem(HYPRE_Solver solver,
                    HYPRE_Int eu_mem)
 {
 #ifdef HYPRE_MIXEDINT
@@ -437,7 +437,7 @@ HYPRE_EuclidSetMem(HYPRE_Solver solver,
 }
 
 HYPRE_Int
-HYPRE_EuclidSetSparseA(HYPRE_Solver solver, 
+HYPRE_EuclidSetSparseA(HYPRE_Solver solver,
                        HYPRE_Real sparse_A)
 {
 #ifdef HYPRE_MIXEDINT
@@ -448,14 +448,14 @@ HYPRE_EuclidSetSparseA(HYPRE_Solver solver,
   char str_sparse_A[256];
   START_FUNC_DH
   hypre_sprintf(str_sparse_A,"%f",sparse_A);
-  Parser_dhInsert(parser_dh, "-sparseA", str_sparse_A); 
+  Parser_dhInsert(parser_dh, "-sparseA", str_sparse_A);
   HYPRE_EUCLID_ERRCHKA;
   END_FUNC_VAL(0)
 #endif
 }
 
 HYPRE_Int
-HYPRE_EuclidSetRowScale(HYPRE_Solver solver, 
+HYPRE_EuclidSetRowScale(HYPRE_Solver solver,
                         HYPRE_Int row_scale)
 {
 #ifdef HYPRE_MIXEDINT
@@ -466,14 +466,14 @@ HYPRE_EuclidSetRowScale(HYPRE_Solver solver,
   char str_row_scale[8];
   START_FUNC_DH
   hypre_sprintf(str_row_scale,"%d",row_scale);
-  Parser_dhInsert(parser_dh, "-rowScale", str_row_scale); 
+  Parser_dhInsert(parser_dh, "-rowScale", str_row_scale);
   HYPRE_EUCLID_ERRCHKA;
   END_FUNC_VAL(0)
 #endif
 }
 
 HYPRE_Int
-HYPRE_EuclidSetILUT(HYPRE_Solver solver, 
+HYPRE_EuclidSetILUT(HYPRE_Solver solver,
                     HYPRE_Real ilut)
 {
 #ifdef HYPRE_MIXEDINT

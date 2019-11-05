@@ -69,7 +69,7 @@ hypre_SMGResidualSetup( void               *residual_vdata,
 
    hypre_StructGrid       *grid;
    hypre_StructStencil    *stencil;
-                       
+
    hypre_BoxArray         *base_points;
    hypre_ComputeInfo      *compute_info;
    hypre_ComputePkg       *compute_pkg;
@@ -135,29 +135,29 @@ hypre_SMGResidual( void               *residual_vdata,
    hypre_ComputePkg       *compute_pkg = (residual_data -> compute_pkg);
 
    hypre_CommHandle       *comm_handle;
-                       
+
    hypre_BoxArrayArray    *compute_box_aa;
    hypre_BoxArray         *compute_box_a;
    hypre_Box              *compute_box;
-                       
+
    hypre_Box              *A_data_box;
    hypre_Box              *x_data_box;
    hypre_Box              *b_data_box;
    hypre_Box              *r_data_box;
-                       
+
    HYPRE_Int               Ai;
    HYPRE_Int               xi;
    HYPRE_Int               bi;
    HYPRE_Int               ri;
-                         
+
    HYPRE_Real             *Ap0;
    HYPRE_Real             *xp0;
    HYPRE_Real             *bp;
    HYPRE_Real             *rp;
-                       
+
    hypre_Index             loop_size;
    hypre_IndexRef          start;
-                       
+
    hypre_StructStencil    *stencil;
    hypre_Index            *stencil_shape;
    HYPRE_Int               stencil_size;
@@ -585,7 +585,7 @@ hypre_SMGResidual( void               *residual_vdata,
             {
 
                case 1:
-   
+
                   hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
 
 #define DEVICE_VAR is_device_ptr(rp,Ap0,xp0)
@@ -614,7 +614,7 @@ hypre_SMGResidual( void               *residual_vdata,
                                       x_data_box, start, base_stride, xi,
                                       r_data_box, start, base_stride, ri);
                   {
- 
+
                      rp[ri] = rp[ri]
                         - Ap0[Ai] * xp0[xi]
                         - Ap1[Ai] * xp1[xi]
@@ -636,7 +636,7 @@ hypre_SMGResidual( void               *residual_vdata,
                                       x_data_box, start, base_stride, xi,
                                       r_data_box, start, base_stride, ri);
                   {
- 
+
                      rp[ri] = rp[ri]
                         - Ap0[Ai] * xp0[xi]
                         - Ap1[Ai] * xp1[xi]
@@ -686,7 +686,7 @@ hypre_SMGResidual( void               *residual_vdata,
                                       x_data_box, start, base_stride, xi,
                                       r_data_box, start, base_stride, ri);
                   {
-   
+
                      rp[ri] = rp[ri]
                         - Ap0[Ai] * xp0[xi]
                         - Ap1[Ai] * xp1[xi]
@@ -697,7 +697,7 @@ hypre_SMGResidual( void               *residual_vdata,
                         - Ap6[Ai] * xp6[xi]
                         - Ap7[Ai] * xp7[xi]
                         - Ap8[Ai] * xp8[xi];
-   
+
                   }
                   hypre_BoxLoop3End(Ai, xi, ri);
 #undef DEVICE_VAR
@@ -714,7 +714,7 @@ hypre_SMGResidual( void               *residual_vdata,
                                       x_data_box, start, base_stride, xi,
                                       r_data_box, start, base_stride, ri);
                   {
-   
+
                      rp[ri] = rp[ri]
                         - Ap0[Ai] * xp0[xi]
                         - Ap1[Ai] * xp1[xi]
@@ -748,7 +748,7 @@ hypre_SMGResidual( void               *residual_vdata,
                                       x_data_box, start, base_stride, xi,
                                       r_data_box, start, base_stride, ri);
                   {
-   
+
                      rp[ri] = rp[ri]
                         - Ap0[Ai] * xp0[xi]
                         - Ap1[Ai] * xp1[xi]
@@ -769,13 +769,13 @@ hypre_SMGResidual( void               *residual_vdata,
                         - Ap16[Ai] * xp16[xi]
                         - Ap17[Ai] * xp17[xi]
                         - Ap18[Ai] * xp18[xi];
-   
+
                   }
                   hypre_BoxLoop3End(Ai, xi, ri);
 #undef DEVICE_VAR
-   
+
                   break;
-   
+
                case 27:
 
                   hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
@@ -786,7 +786,7 @@ hypre_SMGResidual( void               *residual_vdata,
                                       x_data_box, start, base_stride, xi,
                                       r_data_box, start, base_stride, ri);
                   {
-   
+
                      rp[ri] = rp[ri]
                         - Ap0[Ai] * xp0[xi]
                         - Ap1[Ai] * xp1[xi]
@@ -819,7 +819,7 @@ hypre_SMGResidual( void               *residual_vdata,
                   }
                   hypre_BoxLoop3End(Ai, xi, ri);
 #undef DEVICE_VAR
-   
+
                   break;
 
                default:
@@ -848,7 +848,7 @@ hypre_SMGResidual( void               *residual_vdata,
          }
       }
    }
-   
+
    /*-----------------------------------------------------------------------
     * Return
     *-----------------------------------------------------------------------*/
@@ -862,7 +862,7 @@ hypre_SMGResidual( void               *residual_vdata,
 /*--------------------------------------------------------------------------
  * hypre_SMGResidualSetBase
  *--------------------------------------------------------------------------*/
- 
+
 HYPRE_Int
 hypre_SMGResidualSetBase( void        *residual_vdata,
                           hypre_Index  base_index,
@@ -871,7 +871,7 @@ hypre_SMGResidualSetBase( void        *residual_vdata,
    hypre_SMGResidualData *residual_data = residual_vdata;
    HYPRE_Int              d;
    HYPRE_Int              ierr = 0;
- 
+
    for (d = 0; d < 3; d++)
    {
       hypre_IndexD((residual_data -> base_index),  d)
@@ -879,7 +879,7 @@ hypre_SMGResidualSetBase( void        *residual_vdata,
       hypre_IndexD((residual_data -> base_stride), d)
          = hypre_IndexD(base_stride, d);
    }
- 
+
    return ierr;
 }
 

@@ -25,8 +25,8 @@
 
 #else
 
-#define HYPRE_ANNOTATION_BEGIN( str ) 
-#define HYPRE_ANNOTATION_END( str ) 
+#define HYPRE_ANNOTATION_BEGIN( str )
+#define HYPRE_ANNOTATION_END( str )
 
 #endif
 

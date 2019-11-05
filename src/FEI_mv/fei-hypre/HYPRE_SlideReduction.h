@@ -60,9 +60,9 @@ class HYPRE_SlideReduction
    int    setScaleMatrix();
    int    setBlockMinNorm(double norm);
 
-   int    getMatrixNumRows(); 
+   int    getMatrixNumRows();
    double *getMatrixDiagonal();
-   int    getReducedMatrix(HYPRE_IJMatrix *mat); 
+   int    getReducedMatrix(HYPRE_IJMatrix *mat);
    int    getReducedRHSVector(HYPRE_IJVector *rhs);
    int    getReducedSolnVector(HYPRE_IJVector *sol);
    int    getReducedAuxVector(HYPRE_IJVector *auxV);

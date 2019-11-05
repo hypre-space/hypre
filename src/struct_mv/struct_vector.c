@@ -613,8 +613,8 @@ hypre_StructVectorSetNumGhost( hypre_StructVector *vector,
 
 HYPRE_Int
 hypre_StructVectorSetDataSize(hypre_StructVector *vector,
-			      HYPRE_Int          *data_size,
-			      HYPRE_Int          *data_host_size)
+                              HYPRE_Int          *data_size,
+                              HYPRE_Int          *data_host_size)
 {
 #if defined(HYPRE_USING_CUDA)
    hypre_StructGrid     *grid = hypre_StructVectorGrid(vector);
@@ -792,7 +792,7 @@ hypre_StructVectorSetFunctionValues( hypre_StructVector *vector,
       k = hypre_IndexD(start, 2);
 
       hypre_SerialBoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
-				v_data_box, start, unit_stride, vi)
+            v_data_box, start, unit_stride, vi)
       {
          vp[vi] = fcn(i, j, k);
          i++;
@@ -1189,7 +1189,7 @@ hypre_StructVector *
 hypre_StructVectorClone(
    hypre_StructVector *x)
 {
-   MPI_Comm		comm = hypre_StructVectorComm(x);
+   MPI_Comm             comm = hypre_StructVectorComm(x);
    hypre_StructGrid    *grid = hypre_StructVectorGrid(x);
    hypre_BoxArray      *data_space = hypre_StructVectorDataSpace(x);
    HYPRE_Int           *data_indices = hypre_StructVectorDataIndices(x);

@@ -8,18 +8,18 @@
 #include "_hypre_Euclid.h"
 /* #include "Parser_dh.h" */
 /* #include "Mem_dh.h" */
- 
+
 typedef struct _optionsNode OptionsNode;
 
 struct _parser_dh {
-  OptionsNode *head;  
-  OptionsNode *tail;  
+  OptionsNode *head;
+  OptionsNode *tail;
 };
 
 struct _optionsNode {
   char *name;
   char *value;
-  OptionsNode *next;  
+  OptionsNode *next;
 };
 
 static bool find(Parser_dh p,const char *option, OptionsNode** ptr);
@@ -32,7 +32,7 @@ void Parser_dhCreate(Parser_dh *p)
 {
   START_FUNC_DH
   OptionsNode *ptr;
- 
+
   /* allocate storage for object */
   struct _parser_dh* tmp = (struct _parser_dh*)MALLOC_DH(sizeof(struct _parser_dh)); CHECK_V_ERROR;
   *p = tmp;
@@ -84,9 +84,9 @@ void Parser_dhUpdateFromFile(Parser_dh p,const char *filename)
     SET_INFO(msgBuf_dh);
     while (!feof(fp)) {
       if (fgets(line, 80, fp) == NULL) break;
-      if (line[0] != '#') { 
+      if (line[0] != '#') {
         if (hypre_sscanf(line, "%s %s", name, value) != 2) break;
-        Parser_dhInsert(p, name, value);   
+        Parser_dhInsert(p, name, value);
       }
     }
     fclose(fp);
@@ -111,7 +111,7 @@ void Parser_dhInit(Parser_dh p, HYPRE_Int argc, char *argv[])
 
   /* attempt to update from specified file */
   for (j=1; j<argc; ++j) {
-    if (strcmp(argv[j],"-db_filename") == 0) {  
+    if (strcmp(argv[j],"-db_filename") == 0) {
        ++j;
       if (j < argc) {
         Parser_dhUpdateFromFile(p, argv[j]); CHECK_V_ERROR;
@@ -217,7 +217,7 @@ bool Parser_dhReadString(Parser_dh p,const char* in, char **out)
   if (p != NULL && find(p,in,&node)) {
     *out = node->value;
     optionExists = true;
-  } 
+  }
   END_FUNC_VAL_2(optionExists)
 }
 
@@ -241,8 +241,8 @@ void Parser_dhPrint(Parser_dh p, FILE *fp, bool allPrint)
         hypre_fprintf(fp, "   %s  %s\n", ptr->name, ptr->value);
         fflush(fp);
         ptr = ptr->next;
-      } 
-    } 
+      }
+    }
     hypre_fprintf(fp, "\n");
     fflush(fp);
   }
@@ -281,7 +281,7 @@ void Parser_dhInsert(Parser_dh p,const char *option,const char *value)
     node->value = (char*)MALLOC_DH(length*sizeof(char)); CHECK_V_ERROR;
     strcpy(node->value, value);
     node->next = NULL;
-  } 
+  }
 
 PARSER_NOT_INITED:
       ;

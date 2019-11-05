@@ -32,7 +32,7 @@ typedef struct
                                               data */
 
    void         *local_storage;            /* Structure for storing local portion */
-   HYPRE_Int   	 local_storage_type;       /* Indicates the type of "local storage" */
+   HYPRE_Int     local_storage_type;       /* Indicates the type of "local storage" */
    void         *translator;               /* optional storage_type specfic structure
                                               for holding additional local info */
 #ifdef HYPRE_TIMING

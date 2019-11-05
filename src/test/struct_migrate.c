@@ -21,7 +21,7 @@ HYPRE_Int AddValuesVector( hypre_StructGrid   *grid,
 /*--------------------------------------------------------------------------
  * Test driver for structured matrix interface (structured storage)
  *--------------------------------------------------------------------------*/
- 
+
 /*----------------------------------------------------------------------
  * Standard 7-point laplacian in 3D with grid and anisotropy determined
  * as command line arguments.  Do `driver -help' for usage info.
@@ -69,7 +69,7 @@ main( hypre_int argc,
    /*-----------------------------------------------------------
     * Set defaults
     *-----------------------------------------------------------*/
- 
+
    dim = 3;
 
    nx = 2;
@@ -91,7 +91,7 @@ main( hypre_int argc,
    /*-----------------------------------------------------------
     * Parse command line
     *-----------------------------------------------------------*/
- 
+
    print_usage = 0;
    arg_index = 1;
    while (arg_index < argc)
@@ -148,7 +148,7 @@ main( hypre_int argc,
    /*-----------------------------------------------------------
     * Print usage info
     *-----------------------------------------------------------*/
- 
+
    if ( (print_usage) && (myid == 0) )
    {
       hypre_printf("\n");
@@ -191,7 +191,7 @@ main( hypre_int argc,
    /*-----------------------------------------------------------
     * Print driver parameters
     *-----------------------------------------------------------*/
- 
+
    if (myid == 0)
    {
       hypre_printf("Running with these driver parameters:\n");
@@ -378,7 +378,7 @@ main( hypre_int argc,
 
    HYPRE_StructGridDestroy(from_grid);
    HYPRE_StructGridDestroy(to_grid);
-   
+
    for (i = 0; i < nblocks; i++)
    {
       hypre_TFree(ilower[i], HYPRE_MEMORY_HOST);
@@ -436,7 +436,7 @@ AddValuesVector( hypre_StructGrid   *grid,
       }
       hypre_LoopEnd();
 #undef DEVICE_VAR
-	
+
       ilower = hypre_BoxIMin(box);
       iupper = hypre_BoxIMax(box);
       HYPRE_StructVectorSetBoxValues(vector, ilower, iupper, values);

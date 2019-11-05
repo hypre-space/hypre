@@ -25,7 +25,7 @@
 
 typedef struct
 {
-	HYPRE_Int    (*Precond)(void*,void*,void*,void*);
+   HYPRE_Int    (*Precond)(void*,void*,void*,void*);
    HYPRE_Int    (*PrecondSetup)(void*,void*,void*,void*);
 
 } hypre_LOBPCGPrecond;
@@ -120,7 +120,7 @@ lobpcg_clean( lobpcg_Data* data )
 HYPRE_Int
 hypre_LOBPCGDestroy( void *pcg_vdata )
 {
-	hypre_LOBPCGData      *pcg_data      = (hypre_LOBPCGData*)pcg_vdata;
+   hypre_LOBPCGData      *pcg_data      = (hypre_LOBPCGData*)pcg_vdata;
 
    if (pcg_data) {
       HYPRE_MatvecFunctions * mv = pcg_data->matvecFunctions;
@@ -136,7 +136,7 @@ hypre_LOBPCGDestroy( void *pcg_vdata )
          (*(mv->MatvecDestroy))(pcg_data->matvecDataT);
          pcg_data->matvecDataT = NULL;
       }
-    
+
       lobpcg_clean( &(pcg_data->lobpcgData) );
 
       hypre_TFree( pcg_vdata , HYPRE_MEMORY_HOST);
@@ -209,48 +209,48 @@ hypre_LOBPCGSetupT( void *pcg_vdata, void *T, void *x )
 HYPRE_Int
 hypre_LOBPCGSetTol( void* pcg_vdata, HYPRE_Real tol )
 {
-   hypre_LOBPCGData *pcg_data	= (hypre_LOBPCGData*)pcg_vdata;
+   hypre_LOBPCGData *pcg_data = (hypre_LOBPCGData*)pcg_vdata;
 
    lobpcg_absoluteTolerance(pcg_data->lobpcgData) = tol;
- 
+
    return hypre_error_flag;
 }
 
 HYPRE_Int
 hypre_LOBPCGSetRTol( void* pcg_vdata, HYPRE_Real tol )
 {
-   hypre_LOBPCGData *pcg_data	= (hypre_LOBPCGData*) pcg_vdata;
+   hypre_LOBPCGData *pcg_data = (hypre_LOBPCGData*) pcg_vdata;
 
    lobpcg_relativeTolerance(pcg_data->lobpcgData) = tol;
- 
+
    return hypre_error_flag;
 }
 
 HYPRE_Int
 hypre_LOBPCGSetMaxIter( void* pcg_vdata, HYPRE_Int max_iter  )
 {
-   hypre_LOBPCGData *pcg_data	= (hypre_LOBPCGData*)pcg_vdata;
- 
+   hypre_LOBPCGData *pcg_data = (hypre_LOBPCGData*)pcg_vdata;
+
    lobpcg_maxIterations(pcg_data->lobpcgData) = max_iter;
- 
+
    return hypre_error_flag;
 }
 
 HYPRE_Int
 hypre_LOBPCGSetPrecondUsageMode( void* pcg_vdata, HYPRE_Int mode  )
 {
-   hypre_LOBPCGData *pcg_data	= (hypre_LOBPCGData*)pcg_vdata;
- 
+   hypre_LOBPCGData *pcg_data = (hypre_LOBPCGData*)pcg_vdata;
+
    lobpcg_precondUsageMode(pcg_data->lobpcgData) = mode;
- 
+
    return hypre_error_flag;
 }
 
 HYPRE_Int
 hypre_LOBPCGGetPrecond( void         *pcg_vdata,
-			HYPRE_Solver *precond_data_ptr )
+      HYPRE_Solver *precond_data_ptr )
 {
-   hypre_LOBPCGData*	pcg_data	= (hypre_LOBPCGData*)pcg_vdata;
+   hypre_LOBPCGData* pcg_data = (hypre_LOBPCGData*)pcg_vdata;
 
    *precond_data_ptr = (HYPRE_Solver)(pcg_data -> precondData);
 
@@ -259,16 +259,16 @@ hypre_LOBPCGGetPrecond( void         *pcg_vdata,
 
 HYPRE_Int
 hypre_LOBPCGSetPrecond( void  *pcg_vdata,
-						HYPRE_Int  (*precond)(void*,void*,void*,void*),
-						HYPRE_Int  (*precond_setup)(void*,void*,void*,void*),
-			void  *precond_data )
+      HYPRE_Int  (*precond)(void*,void*,void*,void*),
+      HYPRE_Int  (*precond_setup)(void*,void*,void*,void*),
+      void  *precond_data )
 {
    hypre_LOBPCGData* pcg_data = (hypre_LOBPCGData*)pcg_vdata;
- 
+
    (pcg_data->precondFunctions).Precond      = precond;
    (pcg_data->precondFunctions).PrecondSetup = precond_setup;
    (pcg_data->precondData)                   = precond_data;
- 
+
    return hypre_error_flag;
 }
 
@@ -276,9 +276,9 @@ HYPRE_Int
 hypre_LOBPCGSetPrintLevel( void *pcg_vdata, HYPRE_Int level )
 {
    hypre_LOBPCGData *pcg_data = (hypre_LOBPCGData*)pcg_vdata;
- 
+
    lobpcg_verbosityLevel(pcg_data->lobpcgData) = level;
- 
+
    return hypre_error_flag;
 }
 
@@ -298,7 +298,7 @@ hypre_LOBPCGPreconditioner( void *vdata, void* x, void* y )
       (*(ii->ClearVector))(y);
    else
       (*(ii->CopyVector))(x,y);
-  
+
    if ( data->T == NULL )
       precond(data->precondData, data->A, x, y);
    else
@@ -310,7 +310,7 @@ hypre_LOBPCGOperatorA( void *pcg_vdata, void* x, void* y )
 {
    hypre_LOBPCGData*           pcg_data    = (hypre_LOBPCGData*)pcg_vdata;
    HYPRE_MatvecFunctions * mv = pcg_data->matvecFunctions;
-   void*	              	      matvec_data = (pcg_data -> matvecData);
+   void*              matvec_data = (pcg_data -> matvecData);
 
    (*(mv->Matvec))(matvec_data, 1.0, pcg_data->A, x, 0.0, y);
 }
@@ -330,7 +330,7 @@ hypre_LOBPCGOperatorB( void *pcg_vdata, void* x, void* y )
       /*
         (*(ii->ScaleVector))(2.0, y);
       */
- 
+
       return;
    }
 
@@ -341,8 +341,8 @@ void
 hypre_LOBPCGMultiPreconditioner( void *data, void * x, void*  y )
 {
    hypre_LOBPCGData *pcg_data = (hypre_LOBPCGData*)data;
-   mv_InterfaceInterpreter* ii = pcg_data->interpreter; 
-  
+   mv_InterfaceInterpreter* ii = pcg_data->interpreter;
+
    ii->Eval( hypre_LOBPCGPreconditioner, data, x, y );
 }
 
@@ -351,7 +351,7 @@ hypre_LOBPCGMultiOperatorA( void *data, void * x, void*  y )
 {
    hypre_LOBPCGData *pcg_data = (hypre_LOBPCGData*)data;
    mv_InterfaceInterpreter* ii = pcg_data->interpreter;
-  
+
    ii->Eval( hypre_LOBPCGOperatorA, data, x, y );
 }
 
@@ -360,20 +360,20 @@ hypre_LOBPCGMultiOperatorB( void *data, void * x, void*  y )
 {
    hypre_LOBPCGData *pcg_data = (hypre_LOBPCGData*)data;
    mv_InterfaceInterpreter* ii = pcg_data->interpreter;
-  
+
    ii->Eval( hypre_LOBPCGOperatorB, data, x, y );
 }
 
 HYPRE_Int
-hypre_LOBPCGSolve( void *vdata, 
-		   mv_MultiVectorPtr con, 
-		   mv_MultiVectorPtr vec, 
-		   HYPRE_Real* val )
+hypre_LOBPCGSolve( void *vdata,
+      mv_MultiVectorPtr con,
+      mv_MultiVectorPtr vec,
+      HYPRE_Real* val )
 {
    hypre_LOBPCGData* data = (hypre_LOBPCGData*)vdata;
    HYPRE_Int (*precond)(void*,void*,void*,void*) = (data->precondFunctions).Precond;
    void* opB = data->B;
-  
+
    void (*prec)( void*, void*, void* );
    void (*operatorA)( void*, void*, void* );
    void (*operatorB)( void*, void*, void* );
@@ -381,20 +381,20 @@ hypre_LOBPCGSolve( void *vdata,
    HYPRE_Int maxit = lobpcg_maxIterations(data->lobpcgData);
    HYPRE_Int verb  = lobpcg_verbosityLevel(data->lobpcgData);
 
-   HYPRE_Int n	= mv_MultiVectorWidth( vec );
+   HYPRE_Int n = mv_MultiVectorWidth( vec );
    lobpcg_BLASLAPACKFunctions blap_fn;
-   
+
    utilities_FortranMatrix* lambdaHistory;
    utilities_FortranMatrix* residuals;
    utilities_FortranMatrix* residualsHistory;
-  
-   lambdaHistory	= lobpcg_eigenvaluesHistory(data->lobpcgData);
+
+   lambdaHistory = lobpcg_eigenvaluesHistory(data->lobpcgData);
    residuals = lobpcg_residualNorms(data->lobpcgData);
    residualsHistory = lobpcg_residualNormsHistory(data->lobpcgData);
 
-   utilities_FortranMatrixAllocateData( n, maxit + 1,	lambdaHistory );
-   utilities_FortranMatrixAllocateData( n, 1,		residuals );
-   utilities_FortranMatrixAllocateData( n, maxit + 1,	residualsHistory );
+   utilities_FortranMatrixAllocateData( n, maxit + 1, lambdaHistory );
+   utilities_FortranMatrixAllocateData( n, 1,         residuals );
+   utilities_FortranMatrixAllocateData( n, maxit + 1, residualsHistory );
 
    if ( precond != NULL )
       prec = hypre_LOBPCGMultiPreconditioner;
@@ -410,16 +410,16 @@ hypre_LOBPCGSolve( void *vdata,
 
    blap_fn.dsygv = dsygv_interface;
    blap_fn.dpotrf = dpotrf_interface;
-  
-   lobpcg_solve( vec, 
-                 vdata, operatorA, 
+
+   lobpcg_solve( vec,
+                 vdata, operatorA,
                  vdata, operatorB,
                  vdata, prec,
                  con,
                  blap_fn,
                  lobpcg_tolerance(data->lobpcgData), maxit, verb,
                  &(lobpcg_iterationNumber(data->lobpcgData)),
-                 val, 
+                 val,
                  utilities_FortranMatrixValues(lambdaHistory),
                  utilities_FortranMatrixGlobalHeight(lambdaHistory),
                  utilities_FortranMatrixValues(residuals),
@@ -433,21 +433,21 @@ hypre_LOBPCGSolve( void *vdata,
 utilities_FortranMatrix*
 hypre_LOBPCGResidualNorms( void *vdata )
 {
-   hypre_LOBPCGData *data = (hypre_LOBPCGData*)vdata; 
+   hypre_LOBPCGData *data = (hypre_LOBPCGData*)vdata;
    return (lobpcg_residualNorms(data->lobpcgData));
 }
 
 utilities_FortranMatrix*
 hypre_LOBPCGResidualNormsHistory( void *vdata )
 {
-   hypre_LOBPCGData *data = (hypre_LOBPCGData*)vdata; 
+   hypre_LOBPCGData *data = (hypre_LOBPCGData*)vdata;
    return (lobpcg_residualNormsHistory(data->lobpcgData));
 }
 
 utilities_FortranMatrix*
 hypre_LOBPCGEigenvaluesHistory( void *vdata )
 {
-   hypre_LOBPCGData *data = (hypre_LOBPCGData*)vdata; 
+   hypre_LOBPCGData *data = (hypre_LOBPCGData*)vdata;
    return (lobpcg_eigenvaluesHistory(data->lobpcgData));
 }
 
@@ -460,7 +460,7 @@ hypre_LOBPCGIterations( void* vdata )
 
 
 HYPRE_Int
-HYPRE_LOBPCGCreate( mv_InterfaceInterpreter* ii, HYPRE_MatvecFunctions* mv, 
+HYPRE_LOBPCGCreate( mv_InterfaceInterpreter* ii, HYPRE_MatvecFunctions* mv,
                     HYPRE_Solver* solver )
 {
    hypre_LOBPCGData *pcg_data;
@@ -475,12 +475,12 @@ HYPRE_LOBPCGCreate( mv_InterfaceInterpreter* ii, HYPRE_MatvecFunctions* mv,
    (pcg_data->interpreter)               = ii;
    pcg_data->matvecFunctions             = mv;
 
-   (pcg_data->matvecData)	       	= NULL;
-   (pcg_data->B)	       			= NULL;
-   (pcg_data->matvecDataB)	       	= NULL;
-   (pcg_data->T)	       			= NULL;
-   (pcg_data->matvecDataT)	       	= NULL;
-   (pcg_data->precondData)	       	= NULL;
+   (pcg_data->matvecData)                = NULL;
+   (pcg_data->B)                         = NULL;
+   (pcg_data->matvecDataB)               = NULL;
+   (pcg_data->T)                         = NULL;
+   (pcg_data->matvecDataT)               = NULL;
+   (pcg_data->precondData)               = NULL;
 
    lobpcg_initialize( &(pcg_data->lobpcgData) );
 
@@ -489,13 +489,13 @@ HYPRE_LOBPCGCreate( mv_InterfaceInterpreter* ii, HYPRE_MatvecFunctions* mv,
    return hypre_error_flag;
 }
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_LOBPCGDestroy( HYPRE_Solver solver )
 {
    return( hypre_LOBPCGDestroy( (void *) solver ) );
 }
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_LOBPCGSetup( HYPRE_Solver solver,
                    HYPRE_Matrix A,
                    HYPRE_Vector b,
@@ -504,7 +504,7 @@ HYPRE_LOBPCGSetup( HYPRE_Solver solver,
    return( hypre_LOBPCGSetup( solver, A, b, x ) );
 }
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_LOBPCGSetupB( HYPRE_Solver solver,
                     HYPRE_Matrix B,
                     HYPRE_Vector x      )
@@ -512,7 +512,7 @@ HYPRE_LOBPCGSetupB( HYPRE_Solver solver,
    return( hypre_LOBPCGSetupB( solver, B, x ) );
 }
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_LOBPCGSetupT( HYPRE_Solver solver,
                     HYPRE_Matrix T,
                     HYPRE_Vector x      )
@@ -520,9 +520,9 @@ HYPRE_LOBPCGSetupT( HYPRE_Solver solver,
    return( hypre_LOBPCGSetupT( solver, T, x ) );
 }
 
-HYPRE_Int 
-HYPRE_LOBPCGSolve( HYPRE_Solver solver, mv_MultiVectorPtr con, 
-		   mv_MultiVectorPtr vec, HYPRE_Real* val )
+HYPRE_Int
+HYPRE_LOBPCGSolve( HYPRE_Solver solver, mv_MultiVectorPtr con,
+      mv_MultiVectorPtr vec, HYPRE_Real* val )
 {
    return( hypre_LOBPCGSolve( (void *) solver, con, vec, val ) );
 }
@@ -559,7 +559,7 @@ HYPRE_LOBPCGSetPrecond( HYPRE_Solver         solver,
 {
    return( hypre_LOBPCGSetPrecond( (void *) solver,
                                    (HYPRE_Int (*)(void*, void*, void*, void*))precond,
-								   (HYPRE_Int (*)(void*, void*, void*, void*))precond_setup,
+                                   (HYPRE_Int (*)(void*, void*, void*, void*))precond_setup,
                                    (void *) precond_solver ) );
 }
 

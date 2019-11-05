@@ -18,7 +18,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    
+
 /*--------------------------------------------------------------------------
  * HYPRE_BlockTridiagCreate
  *--------------------------------------------------------------------------*/
@@ -58,9 +58,9 @@ hypre_F90_IFACE(hypre_blocktridiagsetup, HYPRE_BLOCKTRIDIAGSETUP)
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int) HYPRE_BlockTridiagSetup(
-      hypre_F90_PassObj (HYPRE_Solver, solver), 
+      hypre_F90_PassObj (HYPRE_Solver, solver),
       hypre_F90_PassObj (HYPRE_ParCSRMatrix, A),
-      hypre_F90_PassObj (HYPRE_ParVector, b), 
+      hypre_F90_PassObj (HYPRE_ParVector, b),
       hypre_F90_PassObj (HYPRE_ParVector, x));
 }
 
@@ -77,9 +77,9 @@ hypre_F90_IFACE(hypre_blocktridiagsolve, HYPRE_BLOCKTRIDIAGSOLVE)
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int) HYPRE_BlockTridiagSolve(
-      hypre_F90_PassObj (HYPRE_Solver, solver), 
+      hypre_F90_PassObj (HYPRE_Solver, solver),
       hypre_F90_PassObj (HYPRE_ParCSRMatrix, A),
-      hypre_F90_PassObj (HYPRE_ParVector, b), 
+      hypre_F90_PassObj (HYPRE_ParVector, b),
       hypre_F90_PassObj (HYPRE_ParVector, x));
 }
 
@@ -96,7 +96,7 @@ hypre_F90_IFACE(hypre_blocktridiagsetindexset, HYPRE_BLOCKTRIDIAGSETINDEXSET)
 {
    *ierr = (hypre_F90_Int) HYPRE_BlockTridiagSetIndexSet(
       hypre_F90_PassObj (HYPRE_Solver, solver),
-      hypre_F90_PassInt (n), 
+      hypre_F90_PassInt (n),
       hypre_F90_PassIntArray (inds));
 }
 
@@ -159,7 +159,7 @@ hypre_F90_IFACE(hypre_blocktridiagsetprintlevel, HYPRE_BLOCKTRIDIAGSETPRINTLEVEL
       hypre_F90_PassObj (HYPRE_Solver, solver),
       hypre_F90_PassInt (print_level));
 }
-    
+
 #ifdef __cplusplus
 }
 #endif

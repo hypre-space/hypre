@@ -8,7 +8,7 @@
 #ifndef __MLIFEBASEH__
 #define __MLIFEBASEH__
 
-/****************************************************************************/ 
+/****************************************************************************/
 /* class definition for abstract finite element structure                   */
 /* (The design of this class attempts to follow the FEI 2.0 (Sandia) as     */
 /*  closely as possible.  Functions related to matrix and solver            */
@@ -16,7 +16,7 @@
 /*  information (e.g. nodal coordinates, face information) have been added) */
 /*--------------------------------------------------------------------------*/
 
-class MLI_FEBase 
+class MLI_FEBase
 {
 public :
 
@@ -37,35 +37,35 @@ public :
    virtual int setOrderOfFE(int feOrder);
 
    // =========================================================================
-   // initialization functions 
+   // initialization functions
    // =========================================================================
 
    virtual int setCurrentElemBlockID(int blockID);
 
-   virtual int initFields(int numFields, const int *fieldSizes, 
-                          const int *fieldIDs); 
+   virtual int initFields(int numFields, const int *fieldSizes,
+                          const int *fieldIDs);
 
-   virtual int initElemBlock(int nElems, int nNodesPerElem, 
+   virtual int initElemBlock(int nElems, int nNodesPerElem,
                              int nodeNumFields, const int *nodeFieldIDs,
                              int elemNumFields, const int *elemFieldIDs);
 
    virtual int initElemNodeList(int elemID,int elemNNodes,const int *nodeIDs,
                         int spaceDim, const double *coord);
 
-   virtual int initElemBlockNodeLists(int nElems, const int *eGlobalIDs, 
+   virtual int initElemBlockNodeLists(int nElems, const int *eGlobalIDs,
                        int nNodesPerElem, const int* const *nGlobalIDLists,
                        int spaceDim, const double* const *coord);
 
-   virtual int initSharedNodes(int nNodes, const int *nGlobalIDs, 
+   virtual int initSharedNodes(int nNodes, const int *nGlobalIDs,
                    const int *numProcs, const int * const *procLists);
 
-   virtual int initElemBlockFaceLists(int nElems, int nFaces, 
+   virtual int initElemBlockFaceLists(int nElems, int nFaces,
                                       const int* const *fGlobalIDLists);
 
-   virtual int initFaceBlockNodeLists(int nFaces, const int *fGlobalIDs, 
+   virtual int initFaceBlockNodeLists(int nFaces, const int *fGlobalIDs,
                        int nNodes, const int * const *nGlobalIDLists);
 
-   virtual int initSharedFaces(int nFaces, const int *fGlobalIDs, 
+   virtual int initSharedFaces(int nFaces, const int *fGlobalIDs,
                        const int *numProcs, const int* const *procLists);
 
    virtual int initComplete();
@@ -74,49 +74,49 @@ public :
    // load element information
    // =========================================================================
 
-   virtual int loadElemBlockMatrices(int nElems, int sMatDim, 
+   virtual int loadElemBlockMatrices(int nElems, int sMatDim,
                                      const double* const *stiffMat);
 
-   virtual int loadElemBlockNullSpaces(int nElems, const int *nNSpace, 
-                            int sMatDim, const double* const *nSpace); 
+   virtual int loadElemBlockNullSpaces(int nElems, const int *nNSpace,
+                            int sMatDim, const double* const *nSpace);
 
-   virtual int loadElemBlockVolumes(int nElems, const double *elemVols); 
+   virtual int loadElemBlockVolumes(int nElems, const double *elemVols);
 
    virtual int loadElemBlockMaterials(int nElems, const int *elemMaterial);
 
    virtual int loadElemBlockParentIDs(int nElems, const int *pGlobalIDs);
 
-   virtual int loadElemBlockLoads(int nElems, int loadDim, 
+   virtual int loadElemBlockLoads(int nElems, int loadDim,
                                   const double* const *elemLoads);
 
    virtual int loadElemBlockSolutions(int nElems, int solDim,
                                      const double* const *elemSols);
 
-   virtual int loadElemBCs(int nElems, const int *eGlobalIDs, 
-                           int elemDOF, const char *const *BCFlags, 
+   virtual int loadElemBCs(int nElems, const int *eGlobalIDs,
+                           int elemDOF, const char *const *BCFlags,
                            const double *const *bcVals);
 
-   virtual int loadElemMatrix(int eGlobalID, int sMatDim, 
+   virtual int loadElemMatrix(int eGlobalID, int sMatDim,
                               const double *stiffMat);
 
-   virtual int loadElemNullSpace(int eGlobalID, int nNSpace, int sMatDim, 
+   virtual int loadElemNullSpace(int eGlobalID, int nNSpace, int sMatDim,
                                  const double *nSpace);
 
-   virtual int loadElemLoad(int eGlobalID, int sMatDim, 
+   virtual int loadElemLoad(int eGlobalID, int sMatDim,
                             const double *elemLoad);
 
-   virtual int loadElemSolution(int eGlobalID, int sMatDim, 
+   virtual int loadElemSolution(int eGlobalID, int sMatDim,
                                 const double *elemSol);
 
-   virtual int loadFunc_getElemMatrix(void *object, 
+   virtual int loadFunc_getElemMatrix(void *object,
                 int (*func)(void*,int eGlobalID,int sMatDim,double *stiffMat));
 
    // =========================================================================
    // load node boundary conditions and share nodes
    // =========================================================================
 
-   virtual int loadNodeBCs(int nNodes, const int *nGlobalIDs, 
-                           int nodeDOF, const char *const *BCFlags, 
+   virtual int loadNodeBCs(int nNodes, const int *nGlobalIDs,
+                           int nodeDOF, const char *const *BCFlags,
                            const double * const *bcVals);
 
    // =========================================================================
@@ -145,7 +145,7 @@ public :
 
    virtual int getElemNumNodes(int& nNodes);
 
-   virtual int getElemBlockNodeLists(int nElems, int nNodes, 
+   virtual int getElemBlockNodeLists(int nElems, int nNodes,
                                     int **nGlobalIDLists);
 
    virtual int getElemMatrixDim(int &sMatDim);
@@ -154,7 +154,7 @@ public :
 
    virtual int getElemBlockNullSpaceSizes(int nElems, int *dimsNS);
 
-   virtual int getElemBlockNullSpaces(int nElems, const int *dimsNS, 
+   virtual int getElemBlockNullSpaces(int nElems, const int *dimsNS,
                                       int sMatDim, double **nullSpaces);
 
    virtual int getElemBlockVolumes(int nElems, double *elemVols);
@@ -165,7 +165,7 @@ public :
 
    virtual int getElemNumFaces(int& nFaces);
 
-   virtual int getElemBlockFaceLists(int nElems, int nFaces, 
+   virtual int getElemBlockFaceLists(int nElems, int nFaces,
                                      int **fGlobalIDLists);
 
    virtual int getElemNodeList(int eGlobalID, int nNodes, int *nGlobalIDs);
@@ -174,7 +174,7 @@ public :
 
    virtual int getElemNullSpaceSize(int eGlobalID, int &dimNS);
 
-   virtual int getElemNullSpace(int eGlobalID, int dimNS, 
+   virtual int getElemNullSpace(int eGlobalID, int dimNS,
                                 int sMatDim, double *nSpace);
 
    virtual int getElemVolume(int eGlobalID, double& elemVol);
@@ -187,14 +187,14 @@ public :
 
    virtual int getNumBCElems(int& nElems);
 
-   virtual int getElemBCs(int nElems, int *eGlobalIDs, int eDOFs, 
+   virtual int getElemBCs(int nElems, int *eGlobalIDs, int eDOFs,
                           char **BCFlags, double **BCVals);
 
    // =========================================================================
    // get node information
    // =========================================================================
 
-   virtual int getNumNodes(int& nNodes); 
+   virtual int getNumNodes(int& nNodes);
 
    virtual int getNodeBlockGlobalIDs(int nNodes, int *nGlobalIDs);
 
@@ -207,15 +207,15 @@ public :
 
    virtual int getNumBCNodes(int& nNodes);
 
-   virtual int getNodeBCs(int nNodes, int *nGlobalIDs, 
+   virtual int getNodeBCs(int nNodes, int *nGlobalIDs,
                           int nDOFs, char **BCFlags, double **BCVals);
 
    virtual int getNumSharedNodes(int& nNodes);
-    
-   virtual int getSharedNodeNumProcs(int nNodes, int *nGlobalIDs, 
+
+   virtual int getSharedNodeNumProcs(int nNodes, int *nGlobalIDs,
                                      int *numProcs);
 
-   virtual int getSharedNodeProcs(int nNodes, int *numProcs, 
+   virtual int getSharedNodeProcs(int nNodes, int *numProcs,
                                   int **procList);
 
    // =========================================================================
@@ -228,7 +228,7 @@ public :
 
    virtual int getNumSharedFaces(int& nFaces);
 
-   virtual int getSharedFaceNumProcs(int nFaces, int *fGlobalIDs,  
+   virtual int getSharedFaceNumProcs(int nFaces, int *fGlobalIDs,
                                      int *numProcs);
 
    virtual int getSharedFaceProcs(int nFaces, int *numProcs, int **procList);
@@ -244,11 +244,11 @@ public :
    // shape function information
    // -------------------------------------------------------------------------
 
-   virtual int loadFunc_computeShapeFuncInterpolant(void *object, 
+   virtual int loadFunc_computeShapeFuncInterpolant(void *object,
                    int (*func) (void *,int elemID,int nNodes,const double *coor,
                    double *coef));
 
-   virtual int getShapeFuncInterpolant(int eGlobalID, int nNodes, 
+   virtual int getShapeFuncInterpolant(int eGlobalID, int nNodes,
                                        const double *coord, double *coef);
 
    // -------------------------------------------------------------------------

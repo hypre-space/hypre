@@ -17,7 +17,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    
+
 /*--------------------------------------------------------------------------
  *    HYPRE_ParCSRHybridCreate
  *--------------------------------------------------------------------------*/
@@ -301,7 +301,7 @@ hypre_F90_IFACE(hypre_parcsrhybridsetprecond, HYPRE_PARCSRHYBRIDSETPRECOND)
    else
    {
       *ierr = -1;
-   }    
+   }
 }
 
 /*--------------------------------------------------------------------------
@@ -889,7 +889,7 @@ hypre_F90_IFACE(hypre_parcsrhybridgetfinalrelat, HYPRE_PARCSRHYBRIDGETFINALRELAT
           hypre_F90_PassObj (HYPRE_Solver, solver),
           hypre_F90_PassRealRef (norm) ));
 }
-    
+
 #ifdef __cplusplus
 }
 #endif

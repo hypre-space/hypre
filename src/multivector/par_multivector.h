@@ -21,23 +21,23 @@ extern "C" {
 #endif
 
 /*--------------------------------------------------------------------------
- * hypre_ParMultiVector 
+ * hypre_ParMultiVector
  *--------------------------------------------------------------------------*/
 
 typedef struct
 {
-   MPI_Comm	      comm;
+   MPI_Comm                 comm;
    HYPRE_Int                global_size;
    HYPRE_Int                first_index;
-   HYPRE_Int      	      *partitioning;
-   HYPRE_Int      	      owns_data;
-   HYPRE_Int      	      owns_partitioning;
-   HYPRE_Int      	      num_vectors;
-   hypre_Multivector  *local_vector; 
+   HYPRE_Int               *partitioning;
+   HYPRE_Int                owns_data;
+   HYPRE_Int                owns_partitioning;
+   HYPRE_Int                num_vectors;
+   hypre_Multivector       *local_vector;
 
 /* using mask on "parallel" level seems to be inconvenient, so i (IL) moved it to
-       "sequential" level. Also i now store it as a number of active indices and an array of 
-       active indices. hypre_ParMultiVectorSetMask converts user-provided "(1,1,0,1,...)" mask 
+       "sequential" level. Also i now store it as a number of active indices and an array of
+       active indices. hypre_ParMultiVectorSetMask converts user-provided "(1,1,0,1,...)" mask
        to the format above.
    HYPRE_Int                *mask;
 */
@@ -59,7 +59,7 @@ typedef struct
 #define hypre_ParMultiVectorOwnsPartitioning(vector) ((vector) -> owns_partitioning)
 #define hypre_ParMultiVectorNumVectors(vector)       ((vector) -> num_vectors)
 
-/* field "mask" moved to "sequential" level, see structure above 
+/* field "mask" moved to "sequential" level, see structure above
 #define hypre_ParMultiVectorMask(vector)             ((vector) -> mask)
 */
 
@@ -79,24 +79,24 @@ HYPRE_Int hypre_ParMultiVectorAxpy(HYPRE_Complex, hypre_ParMultiVector *,
                              hypre_ParMultiVector *);
 
 HYPRE_Int hypre_ParMultiVectorByDiag(  hypre_ParMultiVector *x,
-                                 HYPRE_Int                *mask, 
+                                 HYPRE_Int                *mask,
                                  HYPRE_Int                n,
                                  HYPRE_Complex      *alpha,
                                  hypre_ParMultiVector *y);
-                                 
-HYPRE_Int hypre_ParMultiVectorInnerProd(hypre_ParMultiVector *, 
+
+HYPRE_Int hypre_ParMultiVectorInnerProd(hypre_ParMultiVector *,
                                       hypre_ParMultiVector *, HYPRE_Real *, HYPRE_Real *);
-HYPRE_Int hypre_ParMultiVectorInnerProdDiag(hypre_ParMultiVector *, 
+HYPRE_Int hypre_ParMultiVectorInnerProdDiag(hypre_ParMultiVector *,
                                       hypre_ParMultiVector *, HYPRE_Real *, HYPRE_Real *);
 HYPRE_Int
 hypre_ParMultiVectorCopyWithoutMask(hypre_ParMultiVector *x, hypre_ParMultiVector *y);
 HYPRE_Int
-hypre_ParMultiVectorByMatrix(hypre_ParMultiVector *x, HYPRE_Int rGHeight, HYPRE_Int rHeight, 
+hypre_ParMultiVectorByMatrix(hypre_ParMultiVector *x, HYPRE_Int rGHeight, HYPRE_Int rHeight,
                               HYPRE_Int rWidth, HYPRE_Complex* rVal, hypre_ParMultiVector * y);
 HYPRE_Int
-hypre_ParMultiVectorXapy(hypre_ParMultiVector *x, HYPRE_Int rGHeight, HYPRE_Int rHeight, 
+hypre_ParMultiVectorXapy(hypre_ParMultiVector *x, HYPRE_Int rGHeight, HYPRE_Int rHeight,
                               HYPRE_Int rWidth, HYPRE_Complex* rVal, hypre_ParMultiVector * y);
-                                      
+
 HYPRE_Int
 hypre_ParMultiVectorEval(void (*f)( void*, void*, void* ), void* par,
                            hypre_ParMultiVector * x, hypre_ParMultiVector * y);

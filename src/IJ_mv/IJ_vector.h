@@ -22,22 +22,22 @@ typedef struct hypre_IJVector_struct
 {
    MPI_Comm      comm;
 
-   HYPRE_BigInt	*partitioning;      /* Indicates partitioning over tasks */
+   HYPRE_BigInt *partitioning;      /* Indicates partitioning over tasks */
 
    HYPRE_Int     object_type;       /* Indicates the type of "local storage" */
 
    void         *object;            /* Structure for storing local portion */
 
    void         *translator;        /* Structure for storing off processor
-				       information */
+                                       information */
 
-   void         *assumed_part;        /* IJ Vector assumed partition */
+   void         *assumed_part;      /* IJ Vector assumed partition */
 
-   HYPRE_BigInt  global_first_row;    /* these for data items are necessary */
-   HYPRE_BigInt  global_num_rows;     /*   to be able to avoid using the global */
-                                    /*    global partition */ 
-   HYPRE_Int     print_level; 
-   
+   HYPRE_BigInt  global_first_row;  /* these for data items are necessary */
+   HYPRE_BigInt  global_num_rows;   /* to be able to avoid using the global */
+                                    /* global partition */
+   HYPRE_Int     print_level;
+
 
 
 } hypre_IJVector;

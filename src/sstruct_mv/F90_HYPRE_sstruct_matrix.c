@@ -17,7 +17,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-	
+
 /*--------------------------------------------------------------------------
  *  HYPRE_SStructMatrixCreate
  *--------------------------------------------------------------------------*/
@@ -369,7 +369,7 @@ hypre_F90_IFACE(hypre_sstructmatrixmatvec, HYPRE_SSTRUCTMATRIXMATVEC)
           hypre_F90_PassComplex (beta),
           hypre_F90_PassObj (HYPRE_SStructVector, y) )) ;
 }
-	
+
 #ifdef __cplusplus
 }
 #endif

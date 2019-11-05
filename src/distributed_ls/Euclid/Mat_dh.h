@@ -27,7 +27,7 @@ struct _mat_dh {
   HYPRE_Int bs;        /* block size */
 
   /* sparse row-oriented storage for locally owned submatrix */
-  HYPRE_Int *rp;       
+  HYPRE_Int *rp;
   HYPRE_Int *len;   /* length of each row; only used for MPI triangular solves */
   HYPRE_Int *cval;
   HYPRE_Int *fill;
@@ -51,17 +51,17 @@ struct _mat_dh {
   bool matvec_timing;
 
   /* used for MatVecs */
-  HYPRE_Int          num_recv; 
+  HYPRE_Int          num_recv;
   HYPRE_Int          num_send;   /* used in destructor */
   hypre_MPI_Request  *recv_req;
-  hypre_MPI_Request  *send_req; 
-  HYPRE_Real   *recvbuf, *sendbuf;  
+  hypre_MPI_Request  *send_req;
+  HYPRE_Real   *recvbuf, *sendbuf;
   HYPRE_Int          *sendind;
-  HYPRE_Int          sendlen;               
-  HYPRE_Int          recvlen;               
+  HYPRE_Int          sendlen;
+  HYPRE_Int          recvlen;
   bool         matvecIsSetup;
   Numbering_dh numb;
-  hypre_MPI_Status   *status;  
+  hypre_MPI_Status   *status;
 
   bool debug;
 };
@@ -133,7 +133,7 @@ extern void Mat_dhGetRow(Mat_dh B, HYPRE_Int globalRow, HYPRE_Int *len, HYPRE_In
 extern void Mat_dhRestoreRow(Mat_dh B, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, HYPRE_Real **val);
 
   /* partition matrix into "k" blocks.  User must free storage. */
-extern void Mat_dhPartition(Mat_dh mat, HYPRE_Int k, HYPRE_Int **beg_rowOUT, 
+extern void Mat_dhPartition(Mat_dh mat, HYPRE_Int k, HYPRE_Int **beg_rowOUT,
                             HYPRE_Int **row_countOUT, HYPRE_Int **n2oOUT, HYPRE_Int **o2nOUT);
 
 

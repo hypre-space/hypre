@@ -25,13 +25,13 @@
  * StoredRowsCreate - Return (a pointer to) a stored rows object.
  *
  * mat  - matrix used for returning on-processor rows (input)
- * size - the maximum number of (off-processor) rows that can be stored 
+ * size - the maximum number of (off-processor) rows that can be stored
  *        (input).  See below for more a precise description.
  *
  * A slot is available for "size" off-processor rows.  The slot for the
  * row with local index i is (i - num_loc).  Therefore, if max_i is the
- * largest local index expected, then size should be set to 
- * (max_i - num_loc + 1).  StoredRows will automatically increase its 
+ * largest local index expected, then size should be set to
+ * (max_i - num_loc + 1).  StoredRows will automatically increase its
  * size if a row with a larger local index needs to be put in StoredRows.
  *--------------------------------------------------------------------------*/
 
@@ -103,17 +103,17 @@ void StoredRowsPut(StoredRows *p, HYPRE_Int index, HYPRE_Int len, HYPRE_Int *ind
         HYPRE_Int j;
         HYPRE_Int newsize;
 
-	newsize = i*2;
+        newsize = i*2;
 #ifdef PARASAILS_DEBUG
-		    hypre_printf("StoredRows resize %d\n", newsize);
+        hypre_printf("StoredRows resize %d\n", newsize);
 #endif
         p->len = hypre_TReAlloc(p->len,HYPRE_Int,  newsize , HYPRE_MEMORY_HOST);
         p->ind = hypre_TReAlloc(p->ind,HYPRE_Int *,  newsize , HYPRE_MEMORY_HOST);
         p->val = hypre_TReAlloc(p->val,HYPRE_Real *,  newsize , HYPRE_MEMORY_HOST);
 
-	/* set lengths to zero */
+        /* set lengths to zero */
         for (j=p->size; j<newsize; j++)
-	    p->len[j] = 0;
+           p->len[j] = 0;
 
         p->size = newsize;
     }
@@ -129,11 +129,11 @@ void StoredRowsPut(StoredRows *p, HYPRE_Int index, HYPRE_Int len, HYPRE_Int *ind
 }
 
 /*--------------------------------------------------------------------------
- * StoredRowsGet - Return the row with index "index" through the pointers 
+ * StoredRowsGet - Return the row with index "index" through the pointers
  * "lenp", "indp" and "valp" in the stored rows object "p".
  *--------------------------------------------------------------------------*/
 
-void StoredRowsGet(StoredRows *p, HYPRE_Int index, HYPRE_Int *lenp, HYPRE_Int **indp, 
+void StoredRowsGet(StoredRows *p, HYPRE_Int index, HYPRE_Int *lenp, HYPRE_Int **indp,
   HYPRE_Real **valp)
 {
     if (index < p->num_loc)
@@ -142,7 +142,7 @@ void StoredRowsGet(StoredRows *p, HYPRE_Int index, HYPRE_Int *lenp, HYPRE_Int **
     }
     else
     {
-	index = index - p->num_loc;
+       index = index - p->num_loc;
 
         *lenp = p->len[index];
         *indp = p->ind[index];

@@ -37,7 +37,7 @@ HYPRE_Real hypre_p_dnrm2(DataDistType *ddist, HYPRE_Real *x, hypre_PilutSolverGl
 
 
 /*************************************************************************
-* This function computes the dot product of 2 vectors. 
+* This function computes the dot product of 2 vectors.
 * The result is returned at all the processors
 **************************************************************************/
 HYPRE_Real hypre_p_ddot(DataDistType *ddist, HYPRE_Real *x, HYPRE_Real *y,
@@ -45,7 +45,7 @@ HYPRE_Real hypre_p_ddot(DataDistType *ddist, HYPRE_Real *x, HYPRE_Real *y,
 {
   HYPRE_Int incx=1;
 
-  return hypre_GlobalSESumDouble(SDOT(&(ddist->ddist_lnrows), x, &incx, y, &incx), 
+  return hypre_GlobalSESumDouble(SDOT(&(ddist->ddist_lnrows), x, &incx, y, &incx),
          pilut_comm );
 }
 
@@ -78,7 +78,7 @@ void hypre_p_daxpy(DataDistType *ddist, HYPRE_Real alpha, HYPRE_Real *x, HYPRE_R
 /*************************************************************************
 * This function performs z = alpha*x+beta*y, where alpha resides on pe 0
 **************************************************************************/
-void hypre_p_daxbyz(DataDistType *ddist, HYPRE_Real alpha, HYPRE_Real *x, HYPRE_Real beta, 
+void hypre_p_daxbyz(DataDistType *ddist, HYPRE_Real alpha, HYPRE_Real *x, HYPRE_Real beta,
               HYPRE_Real *y, HYPRE_Real *z)
 {
   HYPRE_Int i, local_lnrows=ddist->ddist_lnrows;

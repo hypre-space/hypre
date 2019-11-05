@@ -22,9 +22,9 @@ HYPRE_Int
 hypre_AuxParVectorCreate( hypre_AuxParVector **aux_vector)
 {
    hypre_AuxParVector  *vector;
-   
+
    vector = hypre_CTAlloc(hypre_AuxParVector,  1, HYPRE_MEMORY_HOST);
-  
+
    /* set defaults */
    hypre_AuxParVectorMaxOffProcElmts(vector) = 0;
    hypre_AuxParVectorCurrentNumElmts(vector) = 0;
@@ -41,7 +41,7 @@ hypre_AuxParVectorCreate( hypre_AuxParVector **aux_vector)
  * hypre_AuxParVectorDestroy
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_AuxParVectorDestroy( hypre_AuxParVector *vector )
 {
    HYPRE_Int ierr=0;
@@ -62,7 +62,7 @@ hypre_AuxParVectorDestroy( hypre_AuxParVector *vector )
  * hypre_AuxParVectorInitialize
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_AuxParVectorInitialize( hypre_AuxParVector *vector )
 {
    HYPRE_Int max_off_proc_elmts = hypre_AuxParVectorMaxOffProcElmts(vector);
@@ -70,9 +70,9 @@ hypre_AuxParVectorInitialize( hypre_AuxParVector *vector )
    /* allocate stash for setting or adding off processor values */
    if (max_off_proc_elmts > 0)
    {
-      hypre_AuxParVectorOffProcI(vector) = hypre_CTAlloc(HYPRE_BigInt, 
+      hypre_AuxParVectorOffProcI(vector) = hypre_CTAlloc(HYPRE_BigInt,
                                                          max_off_proc_elmts, HYPRE_MEMORY_HOST);
-      hypre_AuxParVectorOffProcData(vector) = hypre_CTAlloc(HYPRE_Complex, 
+      hypre_AuxParVectorOffProcData(vector) = hypre_CTAlloc(HYPRE_Complex,
                                                             max_off_proc_elmts, HYPRE_MEMORY_HOST);
    }
 
@@ -83,7 +83,7 @@ hypre_AuxParVectorInitialize( hypre_AuxParVector *vector )
  * hypre_AuxParVectorSetMaxOffProcElmts
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_AuxParVectorSetMaxOffPRocElmts( hypre_AuxParVector *vector,
                                       HYPRE_Int max_off_proc_elmts )
 {

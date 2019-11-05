@@ -14,15 +14,15 @@
 extern "C" {
 #endif
 
-#define PROBLEM_SIZE_TOO_SMALL			       	1
-#define WRONG_BLOCK_SIZE			       	2
+#define PROBLEM_SIZE_TOO_SMALL                          1
+#define WRONG_BLOCK_SIZE                                2
 #define WRONG_CONSTRAINTS                               3
-#define REQUESTED_ACCURACY_NOT_ACHIEVED			-1
+#define REQUESTED_ACCURACY_NOT_ACHIEVED                -1
 
 typedef struct {
 
-  HYPRE_Real	absolute;
-  HYPRE_Real	relative;
+  HYPRE_Real    absolute;
+  HYPRE_Real    relative;
 
 } lobpcg_Tolerance;
 
@@ -39,18 +39,18 @@ typedef struct {
 
 HYPRE_Int
 lobpcg_solve( mv_MultiVectorPtr blockVectorX,
-	      void* operatorAData,
-	      void (*operatorA)( void*, void*, void* ),
-	      void* operatorBData,
-	      void (*operatorB)( void*, void*, void* ),
-	      void* operatorTData,
-	      void (*operatorT)( void*, void*, void* ),
-	      mv_MultiVectorPtr blockVectorY,
+              void* operatorAData,
+              void (*operatorA)( void*, void*, void* ),
+              void* operatorBData,
+              void (*operatorB)( void*, void*, void* ),
+              void* operatorTData,
+              void (*operatorT)( void*, void*, void* ),
+              mv_MultiVectorPtr blockVectorY,
               lobpcg_BLASLAPACKFunctions blap_fn,
-	      lobpcg_Tolerance tolerance,
-	      HYPRE_Int maxIterations,
-	      HYPRE_Int verbosityLevel,
-	      HYPRE_Int* iterationNumber,
+              lobpcg_Tolerance tolerance,
+              HYPRE_Int maxIterations,
+              HYPRE_Int verbosityLevel,
+              HYPRE_Int* iterationNumber,
 
 /* eigenvalues; "lambda_values" should point to array  containing <blocksize> doubles where <blocksi
 ze> is the width of multivector "blockVectorX" */

@@ -59,7 +59,7 @@ static HYPRE_Int Seed = 13579;
 void hypre_SeedRand( HYPRE_Int seed )
 {
    /* RL: seed must be between 1 and 2^31-2 */
-   if (seed < 1) 
+   if (seed < 1)
    {
       seed = 1;
    }

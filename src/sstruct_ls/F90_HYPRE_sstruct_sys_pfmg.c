@@ -183,7 +183,7 @@ hypre_F90_IFACE(hypre_sstructsyspfmgsetrelaxtyp, HYPRE_SSTRUCTSYSPFMGSETRELAXTYP
 /*--------------------------------------------------------------------------
  * HYPRE_SStructSysPFMGSetJacobiWeight
  *--------------------------------------------------------------------------*/
-                                                                                                                                                               
+
 void
 hypre_F90_IFACE(hypre_sstructsyspfmgsetjacobiweigh, HYPRE_SSTRUCTSYSPFMGSETJACOBIWEIGH)
    (hypre_F90_Obj *solver,

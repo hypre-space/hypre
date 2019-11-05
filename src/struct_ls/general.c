@@ -27,6 +27,6 @@ hypre_Log2(HYPRE_Int p)
       e += 1;
       p /= 2;
    }
- 
+
    return e;
 }

@@ -67,8 +67,8 @@ public :
    MLI_Matrix *getAmat()                     { return Amat_; }
    MLI_Matrix *getPmat()                     { return Pmat_; }
    MLI_Matrix *getRmat()                     { return Rmat_; }
-   MLI_Solver *getPreSmoother()              { return preSmoother_; }     
-   MLI_Solver *getPostSmoother()             { return postSmoother_; }     
+   MLI_Solver *getPreSmoother()              { return preSmoother_; }
+   MLI_Solver *getPostSmoother()             { return postSmoother_; }
    MLI_Vector *getRHSVector()                { return vecRhs_; }
    MLI_Vector *getResidualVector()           { return vecRes_; }
    MLI_Vector *getSolutionVector()           { return vecSol_; }

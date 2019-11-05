@@ -82,8 +82,8 @@ typedef struct
   HYPRE_Int  (*ScaleVector)   ( HYPRE_Complex alpha , void *x );
   HYPRE_Int  (*Axpy)          ( HYPRE_Complex alpha , void *x , void *y );
   HYPRE_Int  (*CommInfo)      ( void *A , HYPRE_Int *my_id , HYPRE_Int *num_procs );
-	HYPRE_Int  (*precond_setup) (void *vdata , void *A , void *b , void *x);
-	HYPRE_Int  (*precond)       (void *vdata , void *A , void *b , void *x);
+  HYPRE_Int  (*precond_setup) (void *vdata , void *A , void *b , void *x);
+  HYPRE_Int  (*precond)       (void *vdata , void *A , void *b , void *x);
 
 } hypre_BiCGSTABFunctions;
 
@@ -102,7 +102,7 @@ typedef struct
    HYPRE_Real   cf_tol;
    HYPRE_Real   rel_residual_norm;
    HYPRE_Real   a_tol;
-   
+
 
    void  *A;
    void  *r;
@@ -119,7 +119,7 @@ typedef struct
 
    /* log info (always logged) */
    HYPRE_Int      num_iterations;
- 
+
    /* additional log info (logged when `logging' > 0) */
    HYPRE_Int      logging;
    HYPRE_Int      print_level;

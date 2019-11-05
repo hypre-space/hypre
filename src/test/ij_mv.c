@@ -33,7 +33,7 @@ HYPRE_Int BuildParLaplacian9pt (HYPRE_Int argc , char *argv [], HYPRE_Int arg_in
 HYPRE_Int BuildParLaplacian27pt (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 
 #define SECOND_TIME 0
- 
+
 hypre_int
 main( hypre_int argc,
       char *argv[] )
@@ -45,10 +45,10 @@ main( hypre_int argc,
    HYPRE_Int                 build_matrix_arg_index;
    HYPRE_Int                 build_rhs_type;
    HYPRE_Int                 build_rhs_arg_index;
-   HYPRE_Real          norm;
-   void		      *object;
+   HYPRE_Real                norm;
+   void                     *object;
 
-   HYPRE_IJMatrix      ij_A; 
+   HYPRE_IJMatrix      ij_A;
    HYPRE_IJVector      ij_b=NULL;
    HYPRE_IJVector      ij_x=NULL;
    HYPRE_IJVector      ij_v;
@@ -69,7 +69,7 @@ main( hypre_int argc,
    HYPRE_BigInt             *col_inds;
 
    MPI_Comm            comm = hypre_MPI_COMM_WORLD;
-   HYPRE_Int		       time_index;
+   HYPRE_Int           time_index;
    HYPRE_Int                 ierr = 0;
    HYPRE_BigInt              M, N, big_i;
    HYPRE_Int                 i, j;
@@ -91,7 +91,7 @@ main( hypre_int argc,
    /*-----------------------------------------------------------
     * Set defaults
     *-----------------------------------------------------------*/
- 
+
    build_matrix_type = 2;
    build_matrix_arg_index = argc;
    build_rhs_type = 2;
@@ -100,7 +100,7 @@ main( hypre_int argc,
    /*-----------------------------------------------------------
     * Parse command line
     *-----------------------------------------------------------*/
- 
+
    print_usage = 0;
    arg_index = 1;
 
@@ -186,7 +186,7 @@ main( hypre_int argc,
          arg_index++;
          build_rhs_type      = 3;
          build_rhs_arg_index = arg_index;
-      }   
+      }
       else if ( strcmp(argv[arg_index], "-xisone") == 0 )
       {
          arg_index++;
@@ -198,7 +198,7 @@ main( hypre_int argc,
          arg_index++;
          build_rhs_type      = 5;
          build_rhs_arg_index = arg_index;
-      }   
+      }
       else if ( strcmp(argv[arg_index], "-help") == 0 )
       {
          print_usage = 1;
@@ -212,7 +212,7 @@ main( hypre_int argc,
    /*-----------------------------------------------------------
     * Print usage info
     *-----------------------------------------------------------*/
- 
+
    if ( (print_usage) && (myid == 0) )
    {
       hypre_printf("\n");
@@ -250,7 +250,7 @@ main( hypre_int argc,
    /*-----------------------------------------------------------
     * Print driver parameters
     *-----------------------------------------------------------*/
- 
+
    if (myid == 0)
    {
       hypre_printf("Running with these driver parameters:\n");
@@ -298,7 +298,7 @@ main( hypre_int argc,
 
    time_index = hypre_InitializeTiming("Spatial Operator");
    hypre_BeginTiming(time_index);
-    
+
    if (build_matrix_type < 2)
    {
      ierr += HYPRE_IJMatrixGetObject( ij_A, &object);
@@ -320,7 +320,7 @@ main( hypre_int argc,
      /*--------------------------------------------------------------------
       * Copy the parcsr matrix into the IJMatrix through interface calls
       *--------------------------------------------------------------------*/
- 
+
      ierr = HYPRE_ParCSRMatrixGetLocalRange( parcsr_A,
                &first_local_row, &last_local_row ,
                &first_local_col, &last_local_col );
@@ -335,7 +335,7 @@ main( hypre_int argc,
                                    &ij_A );
 
      ierr += HYPRE_IJMatrixSetObjectType( ij_A, HYPRE_PARCSR );
- 
+
 
 /* the following shows how to build an IJMatrix if one has only an
    estimate for the row sizes */
@@ -430,7 +430,7 @@ main( hypre_int argc,
    hypre_PrintTiming("Initial IJ Matrix Setup", hypre_MPI_COMM_WORLD);
    hypre_FinalizeTiming(time_index);
    hypre_ClearTiming();
-  
+
    if (ierr)
    {
        hypre_printf("Error in driver building IJMatrix from parcsr matrix. \n");
@@ -439,7 +439,7 @@ main( hypre_int argc,
 
    time_index = hypre_InitializeTiming("Backward Euler Time Step");
    hypre_BeginTiming(time_index);
-    
+
    /* This is to emphasize that one can IJMatrixAddToValues after an
       IJMatrixRead or an IJMatrixAssemble.  After an IJMatrixRead,
       assembly is unnecessary if the sparsity pattern of the matrix is
@@ -459,7 +459,7 @@ main( hypre_int argc,
      col_inds[j] = big_i;
      values[j] = -27.8;
    }
-     
+
    ierr += HYPRE_IJMatrixAddToValues( ij_A,
                                       local_num_rows,
                                       ncols, rows,
@@ -480,7 +480,7 @@ main( hypre_int argc,
    hypre_PrintTiming("IJ Matrix Diagonal Augmentation", hypre_MPI_COMM_WORLD);
    hypre_FinalizeTiming(time_index);
    hypre_ClearTiming();
-  
+
    /*-----------------------------------------------------------
     * Fetch the resulting underlying matrix out
     *-----------------------------------------------------------*/
@@ -771,7 +771,7 @@ main( hypre_int argc,
    hypre_PrintTiming("IJ Vector Setup", hypre_MPI_COMM_WORLD);
    hypre_FinalizeTiming(time_index);
    hypre_ClearTiming();
-   
+
    /*-----------------------------------------------------------
     * Print the solution and other info
     *-----------------------------------------------------------*/
@@ -837,16 +837,16 @@ BuildParFromFile( HYPRE_Int                  argc,
    /*-----------------------------------------------------------
     * Print driver parameters
     *-----------------------------------------------------------*/
- 
+
    if (myid == 0)
    {
       hypre_printf("  FromFile: %s\n", filename);
    }
 
    /*-----------------------------------------------------------
-    * Generate the matrix 
+    * Generate the matrix
     *-----------------------------------------------------------*/
- 
+
    HYPRE_ParCSRMatrixRead(hypre_MPI_COMM_WORLD, filename,&A);
 
    *A_ptr = A;
@@ -885,7 +885,7 @@ BuildParLaplacian( HYPRE_Int                  argc,
    /*-----------------------------------------------------------
     * Set defaults
     *-----------------------------------------------------------*/
- 
+
    nx = 10;
    ny = 10;
    nz = 10;
@@ -944,7 +944,7 @@ BuildParLaplacian( HYPRE_Int                  argc,
    /*-----------------------------------------------------------
     * Print driver parameters
     *-----------------------------------------------------------*/
- 
+
    if (myid == 0)
    {
       hypre_printf("  Laplacian:\n");
@@ -963,9 +963,9 @@ BuildParLaplacian( HYPRE_Int                  argc,
    r = ( myid - p - P*q)/( P*Q );
 
    /*-----------------------------------------------------------
-    * Generate the matrix 
+    * Generate the matrix
     *-----------------------------------------------------------*/
- 
+
    values = hypre_CTAlloc(HYPRE_Real,  4, HYPRE_MEMORY_HOST);
 
    values[1] = -cx;
@@ -986,8 +986,8 @@ BuildParLaplacian( HYPRE_Int                  argc,
       values[0] += 2.0*cz;
    }
 
-   A = (HYPRE_ParCSRMatrix) GenerateLaplacian(hypre_MPI_COMM_WORLD, 
-		nx, ny, nz, P, Q, R, p, q, r, values);
+   A = (HYPRE_ParCSRMatrix) GenerateLaplacian(hypre_MPI_COMM_WORLD,
+         nx, ny, nz, P, Q, R, p, q, r, values);
 
    hypre_TFree(values, HYPRE_MEMORY_HOST);
 
@@ -997,7 +997,7 @@ BuildParLaplacian( HYPRE_Int                  argc,
 }
 
 /*----------------------------------------------------------------------
- * Build standard 7-point convection-diffusion operator 
+ * Build standard 7-point convection-diffusion operator
  * Parameters given in command line.
  * Operator:
  *
@@ -1033,7 +1033,7 @@ BuildParDifConv( HYPRE_Int                  argc,
    /*-----------------------------------------------------------
     * Set defaults
     *-----------------------------------------------------------*/
- 
+
    nx = 10;
    ny = 10;
    nz = 10;
@@ -1107,11 +1107,11 @@ BuildParDifConv( HYPRE_Int                  argc,
    /*-----------------------------------------------------------
     * Print driver parameters
     *-----------------------------------------------------------*/
- 
+
    if (myid == 0)
    {
       hypre_printf("  Convection-Diffusion: \n");
-      hypre_printf("    -cx Dxx - cy Dyy - cz Dzz + ax Dx + ay Dy + az Dz = f\n");  
+      hypre_printf("    -cx Dxx - cy Dyy - cz Dzz + ax Dx + ay Dy + az Dz = f\n");
       hypre_printf("    (nx, ny, nz) = (%b, %b, %b)\n", nx, ny, nz);
       hypre_printf("    (Px, Py, Pz) = (%d, %d, %d)\n", P,  Q,  R);
       hypre_printf("    (cx, cy, cz) = (%f, %f, %f)\n", cx, cy, cz);
@@ -1128,9 +1128,9 @@ BuildParDifConv( HYPRE_Int                  argc,
    r = ( myid - p - P*q)/( P*Q );
 
    /*-----------------------------------------------------------
-    * Generate the matrix 
+    * Generate the matrix
     *-----------------------------------------------------------*/
- 
+
    values = hypre_CTAlloc(HYPRE_Real,  7, HYPRE_MEMORY_HOST);
 
    values[1] = -cx/(hinx*hinx);
@@ -1207,15 +1207,15 @@ BuildParFromOneFile( HYPRE_Int                  argc,
    /*-----------------------------------------------------------
     * Print driver parameters
     *-----------------------------------------------------------*/
- 
+
    if (myid == 0)
    {
       hypre_printf("  FromFile: %s\n", filename);
 
       /*-----------------------------------------------------------
-       * Generate the matrix 
+       * Generate the matrix
        *-----------------------------------------------------------*/
- 
+
       A_CSR = HYPRE_CSRMatrixRead(filename);
    }
    HYPRE_CSRMatrixToParCSRMatrix(hypre_MPI_COMM_WORLD, A_CSR, NULL, NULL, &A);
@@ -1228,7 +1228,7 @@ BuildParFromOneFile( HYPRE_Int                  argc,
 }
 
 /*----------------------------------------------------------------------
- * Build Rhs from one file on Proc. 0. Distributes vector across processors 
+ * Build Rhs from one file on Proc. 0. Distributes vector across processors
  * giving each about using the distribution of the matrix A.
  *----------------------------------------------------------------------*/
 
@@ -1236,7 +1236,7 @@ HYPRE_Int
 BuildRhsParFromOneFile( HYPRE_Int                  argc,
                         char                *argv[],
                         HYPRE_Int            arg_index,
-                        HYPRE_BigInt	    *partitioning,
+                        HYPRE_BigInt        *partitioning,
                         HYPRE_ParVector     *b_ptr     )
 {
    char           *filename;
@@ -1269,18 +1269,18 @@ BuildRhsParFromOneFile( HYPRE_Int                  argc,
    /*-----------------------------------------------------------
     * Print driver parameters
     *-----------------------------------------------------------*/
- 
+
    if (myid == 0)
    {
       hypre_printf("  Rhs FromFile: %s\n", filename);
 
       /*-----------------------------------------------------------
-       * Generate the matrix 
+       * Generate the matrix
        *-----------------------------------------------------------*/
- 
+
       b_CSR = HYPRE_VectorRead(filename);
    }
-   HYPRE_VectorToParVector(hypre_MPI_COMM_WORLD, b_CSR, partitioning,&b); 
+   HYPRE_VectorToParVector(hypre_MPI_COMM_WORLD, b_CSR, partitioning,&b);
 
    *b_ptr = b;
 
@@ -1319,7 +1319,7 @@ BuildParLaplacian9pt( HYPRE_Int            argc,
    /*-----------------------------------------------------------
     * Set defaults
     *-----------------------------------------------------------*/
- 
+
    nx = 10;
    ny = 10;
 
@@ -1363,7 +1363,7 @@ BuildParLaplacian9pt( HYPRE_Int            argc,
    /*-----------------------------------------------------------
     * Print driver parameters
     *-----------------------------------------------------------*/
- 
+
    if (myid == 0)
    {
       hypre_printf("  Laplacian 9pt:\n");
@@ -1380,9 +1380,9 @@ BuildParLaplacian9pt( HYPRE_Int            argc,
    q = ( myid - p)/P;
 
    /*-----------------------------------------------------------
-    * Generate the matrix 
+    * Generate the matrix
     *-----------------------------------------------------------*/
- 
+
    values = hypre_CTAlloc(HYPRE_Real,  2, HYPRE_MEMORY_HOST);
 
    values[1] = -1.0;
@@ -1440,7 +1440,7 @@ BuildParLaplacian27pt( HYPRE_Int                  argc,
    /*-----------------------------------------------------------
     * Set defaults
     *-----------------------------------------------------------*/
- 
+
    nx = 10;
    ny = 10;
    nz = 10;
@@ -1488,7 +1488,7 @@ BuildParLaplacian27pt( HYPRE_Int                  argc,
    /*-----------------------------------------------------------
     * Print driver parameters
     *-----------------------------------------------------------*/
- 
+
    if (myid == 0)
    {
       hypre_printf("  Laplacian_27pt:\n");
@@ -1506,20 +1506,20 @@ BuildParLaplacian27pt( HYPRE_Int                  argc,
    r = ( myid - p - P*q)/( P*Q );
 
    /*-----------------------------------------------------------
-    * Generate the matrix 
+    * Generate the matrix
     *-----------------------------------------------------------*/
- 
+
    values = hypre_CTAlloc(HYPRE_Real,  2, HYPRE_MEMORY_HOST);
 
    values[0] = 26.0;
    if (nx == 1 || ny == 1 || nz == 1)
-	values[0] = 8.0;
+      values[0] = 8.0;
    if (nx*ny == 1 || nx*nz == 1 || ny*nz == 1)
-	values[0] = 2.0;
+      values[0] = 2.0;
    values[1] = -1.0;
 
    A = (HYPRE_ParCSRMatrix) GenerateLaplacian27pt(hypre_MPI_COMM_WORLD,
-                               nx, ny, nz, P, Q, R, p, q, r, values);
+         nx, ny, nz, P, Q, R, p, q, r, values);
 
    hypre_TFree(values, HYPRE_MEMORY_HOST);
 

@@ -183,7 +183,7 @@ int main (int argc, char *argv[])
             /* These parts have the same orientation, so no
                rotation is necessary */
             int index_map[2] = {0,1};
-            /* These parts map increasing values to increasing values 
+            /* These parts map increasing values to increasing values
                for both variables (note: if decreasing maps to increasing, use -1)*/
             int index_dir[2] = {1,1};
 
@@ -205,7 +205,7 @@ int main (int argc, char *argv[])
             /* These parts have the same orientation, so no
                rotation is necessary */
             int index_map[2] = {0,1};
-            /* These parts map increasing values to increasing values 
+            /* These parts map increasing values to increasing values
                for both variables (note: if decreasing maps to increasing, use -1)*/
             int index_dir[2] = {1,1};
 
@@ -227,7 +227,7 @@ int main (int argc, char *argv[])
             /* These parts have the same orientation, so no
                rotation is necessary */
             int index_map[2] = {0,1};
-            /* These parts map increasing values to increasing values 
+            /* These parts map increasing values to increasing values
                for both variables (note: if decreasing maps to increasing, use -1)*/
             int index_dir[2] = {1,1};
 
@@ -251,13 +251,13 @@ int main (int argc, char *argv[])
             /* These parts have the same orientation, so no
                rotation is necessary */
             int index_map[2] = {0,1};
-            /* These parts map increasing values to increasing values 
+            /* These parts map increasing values to increasing values
               for both variables (note: if decreasing maps to increasing, use -1)*/
             int index_dir[2] = {1,1};
 
             HYPRE_SStructGridSetNeighborPart(grid, part, b_ilower, b_iupper,
                                              nbor_part, nbor_ilower, nbor_iupper,
-                                             index_map, index_dir); 
+                                             index_map, index_dir);
          }
       }
 

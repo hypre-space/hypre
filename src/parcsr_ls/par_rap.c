@@ -186,7 +186,7 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
    HYPRE_Real       r_a_p_product;
 
    HYPRE_Real       zero = 0.0;
-   HYPRE_Int 	   *prefix_sum_workspace;
+   HYPRE_Int       *prefix_sum_workspace;
 
    /*-----------------------------------------------------------------------
     *  Copy ParCSRMatrix RT into CSRMatrix R so that we have row-wise access

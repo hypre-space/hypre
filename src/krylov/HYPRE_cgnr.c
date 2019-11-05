@@ -21,7 +21,7 @@
  * HYPRE_CGNRDestroy
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_CGNRDestroy( HYPRE_Solver solver )
 {
    return( hypre_CGNRDestroy( (void *) solver ) );
@@ -31,7 +31,7 @@ HYPRE_CGNRDestroy( HYPRE_Solver solver )
  * HYPRE_CGNRSetup
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_CGNRSetup( HYPRE_Solver solver,
                         HYPRE_Matrix A,
                         HYPRE_Vector b,
@@ -44,7 +44,7 @@ HYPRE_CGNRSetup( HYPRE_Solver solver,
  * HYPRE_CGNRSolve
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_CGNRSolve( HYPRE_Solver solver,
                         HYPRE_Matrix A,
                         HYPRE_Vector b,
@@ -110,8 +110,8 @@ HYPRE_CGNRSetPrecond( HYPRE_Solver         solver,
 {
    return( hypre_CGNRSetPrecond( (void *) solver,
                                  (HYPRE_Int (*)(void*, void*, void*, void*))precond,
-								 (HYPRE_Int (*)(void*, void*, void*, void*))precondT,
-								 (HYPRE_Int (*)(void*, void*, void*, void*))precond_setup,
+                                 (HYPRE_Int (*)(void*, void*, void*, void*))precondT,
+                                 (HYPRE_Int (*)(void*, void*, void*, void*))precond_setup,
                                  (void *) precond_solver ) );
 }
 

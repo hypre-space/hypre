@@ -20,7 +20,7 @@
  * You may need to fiddle with some of these includes, depending
  * on your system.  Make sure and check the logFile to ensure
  * that CLK_TCK was properly defined.  See Timer_dhCreate()
- * for additional details. 
+ * for additional details.
  *
  * if "JUNK_TIMING" is defined during compilation, timing functions
  * either do nothing, or return -1.0; this is primarily for debugging.
@@ -41,7 +41,7 @@
 #endif
 
 
-/* 
+/*
    ??? may be needed for some compilers/platforms?
 #include <limits.h>
 #include <time.h>
@@ -54,14 +54,14 @@
 struct _timer_dh {
   bool isRunning;
   hypre_longint sc_clk_tck;
-  HYPRE_Real begin_wall; 
+  HYPRE_Real begin_wall;
   HYPRE_Real end_wall;
 
 #ifdef EUCLID_TIMING
   struct tms  begin_cpu;
   struct tms  end_cpu;
 #endif
- 
+
 };
 
 extern void Timer_dhCreate(Timer_dh *t);
@@ -73,7 +73,7 @@ extern HYPRE_Real Timer_dhReadWall(Timer_dh t);
 extern HYPRE_Real Timer_dhReadUsage(Timer_dh t);
 
 /* notes:
-    (1)  unless compiled with EUCLID_TIMING defined, readCPU 
+    (1)  unless compiled with EUCLID_TIMING defined, readCPU
          and readUseage return -1.0.
     (2)  whenever start() is called, the timer is reset; you
          don't need to call stop() first.

@@ -37,7 +37,7 @@ typedef long long int HYPRE_BigInt;
 typedef long long int HYPRE_Int;
 #define HYPRE_MPI_BIG_INT MPI_LONG_LONG_INT
 #define HYPRE_MPI_INT MPI_LONG_LONG_INT
- 
+
 #elif defined(HYPRE_MIXEDINT)
 typedef long long int HYPRE_BigInt;
 typedef int HYPRE_Int;

@@ -14,10 +14,10 @@
 #define HASH_I_DH
 
 /* #include "euclid_common.h" */
-                                 
+
 /*
-    class methods 
-    note: all parameters are inputs; the only output 
+    class methods
+    note: all parameters are inputs; the only output
           is the "HYPRE_Int" returned by Hash_i_dhLookup.
 */
 extern void Hash_i_dhCreate(Hash_i_dh *h, HYPRE_Int size);

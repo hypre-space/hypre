@@ -7,7 +7,7 @@
 
 /***************************************************************************
   Module:  LLNL_FEI_Solver.h
-  Purpose: custom implementation of the FEI/Solver 
+  Purpose: custom implementation of the FEI/Solver
  ***************************************************************************/
 
 #ifndef _LLNL_FEI_SOLVER_H_
@@ -16,7 +16,7 @@
 #include "LLNL_FEI_Matrix.h"
 
 /**************************************************************************
- definition of the class to capture the FEI/Solver information 
+ definition of the class to capture the FEI/Solver information
 ---------------------------------------------------------------------------*/
 
 class LLNL_FEI_Solver

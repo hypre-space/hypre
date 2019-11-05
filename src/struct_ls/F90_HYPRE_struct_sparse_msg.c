@@ -11,7 +11,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    
+
 /*--------------------------------------------------------------------------
  * HYPRE_StructSparseMSGCreate
  *--------------------------------------------------------------------------*/
@@ -32,7 +32,7 @@ hypre_F90_IFACE(hypre_structsparsemsgcreate, HYPRE_STRUCTSPARSEMSGCREATE)
  * HYPRE_StructSparseMSGDestroy
  *--------------------------------------------------------------------------*/
 
-void 
+void
 hypre_F90_IFACE(hypre_structsparsemsgdestroy, HYPRE_STRUCTSPARSEMSGDESTROY)
    ( hypre_F90_Obj *solver,
      hypre_F90_Int *ierr   )
@@ -46,7 +46,7 @@ hypre_F90_IFACE(hypre_structsparsemsgdestroy, HYPRE_STRUCTSPARSEMSGDESTROY)
  * HYPRE_StructSparseMSGSetup
  *--------------------------------------------------------------------------*/
 
-void 
+void
 hypre_F90_IFACE(hypre_structsparsemsgsetup, HYPRE_STRUCTSPARSEMSGSETUP)
    ( hypre_F90_Obj *solver,
      hypre_F90_Obj *A,
@@ -66,7 +66,7 @@ hypre_F90_IFACE(hypre_structsparsemsgsetup, HYPRE_STRUCTSPARSEMSGSETUP)
  * HYPRE_StructSparseMSGSolve
  *--------------------------------------------------------------------------*/
 
-void 
+void
 hypre_F90_IFACE(hypre_structsparsemsgsolve, HYPRE_STRUCTSPARSEMSGSOLVE)
    ( hypre_F90_Obj *solver,
      hypre_F90_Obj *A,
@@ -316,7 +316,7 @@ hypre_F90_IFACE(hypre_structsparsemsggetfinalre, HYPRE_STRUCTSPARSEMSGGETFINALRE
            hypre_F90_PassObj (HYPRE_StructSolver, solver),
            hypre_F90_PassRealRef (norm) ) );
 }
-    
+
 #ifdef __cplusplus
 }
 #endif

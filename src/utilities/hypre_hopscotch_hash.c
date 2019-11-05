@@ -43,7 +43,7 @@ static void DestroySegment(hypre_HopscotchSegment *s)
 
 void hypre_UnorderedIntSetCreate( hypre_UnorderedIntSet *s,
                                   HYPRE_Int inCapacity,
-                                  HYPRE_Int concurrencyLevel) 
+                                  HYPRE_Int concurrencyLevel)
 {
   s->segmentMask = NearestPowerOfTwo(concurrencyLevel) - 1;
   if (inCapacity < s->segmentMask + 1)
@@ -83,7 +83,7 @@ void hypre_UnorderedIntSetCreate( hypre_UnorderedIntSet *s,
 
 void hypre_UnorderedBigIntSetCreate( hypre_UnorderedBigIntSet *s,
                                   HYPRE_Int inCapacity,
-                                  HYPRE_Int concurrencyLevel) 
+                                  HYPRE_Int concurrencyLevel)
 {
   s->segmentMask = NearestPowerOfTwo(concurrencyLevel) - 1;
   if (inCapacity < s->segmentMask + 1)
@@ -123,7 +123,7 @@ void hypre_UnorderedBigIntSetCreate( hypre_UnorderedBigIntSet *s,
 
 void hypre_UnorderedIntMapCreate( hypre_UnorderedIntMap *m,
                                   HYPRE_Int inCapacity,
-                                  HYPRE_Int concurrencyLevel) 
+                                  HYPRE_Int concurrencyLevel)
 {
   m->segmentMask = NearestPowerOfTwo(concurrencyLevel) - 1;
   if (inCapacity < m->segmentMask + 1)
@@ -160,7 +160,7 @@ void hypre_UnorderedIntMapCreate( hypre_UnorderedIntMap *m,
 
 void hypre_UnorderedBigIntMapCreate( hypre_UnorderedBigIntMap *m,
                                   HYPRE_Int inCapacity,
-                                  HYPRE_Int concurrencyLevel) 
+                                  HYPRE_Int concurrencyLevel)
 {
   m->segmentMask = NearestPowerOfTwo(concurrencyLevel) - 1;
   if (inCapacity < m->segmentMask + 1)

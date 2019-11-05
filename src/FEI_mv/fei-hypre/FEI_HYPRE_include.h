@@ -15,9 +15,9 @@
 #endif
 
 #define FEI_FATAL_ERROR -1
-#define FEI_LOCAL_TIMES 0
-#define FEI_MAX_TIMES	1
-#define FEI_MIN_TIMES	2
+#define FEI_LOCAL_TIMES  0
+#define FEI_MAX_TIMES    1
+#define FEI_MIN_TIMES    2
 
 #if HAVE_FEI
 

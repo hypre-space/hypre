@@ -21,7 +21,7 @@ HYPRE_StructCycRedCreate( MPI_Comm comm, HYPRE_StructSolver *solver )
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructCycRedDestroy( HYPRE_StructSolver solver )
 {
    return( hypre_CyclicReductionDestroy( (void *) solver ) );
@@ -30,7 +30,7 @@ HYPRE_StructCycRedDestroy( HYPRE_StructSolver solver )
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructCycRedSetup( HYPRE_StructSolver solver,
                          HYPRE_StructMatrix A,
                          HYPRE_StructVector b,
@@ -45,7 +45,7 @@ HYPRE_StructCycRedSetup( HYPRE_StructSolver solver,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructCycRedSolve( HYPRE_StructSolver solver,
                          HYPRE_StructMatrix A,
                          HYPRE_StructVector b,
@@ -60,7 +60,7 @@ HYPRE_StructCycRedSolve( HYPRE_StructSolver solver,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructCycRedSetTDim( HYPRE_StructSolver solver,
                            HYPRE_Int          tdim )
 {

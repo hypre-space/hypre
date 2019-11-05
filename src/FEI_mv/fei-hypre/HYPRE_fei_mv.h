@@ -21,7 +21,7 @@ extern "C" {
  * @name FEI System Interface
  *
  * This interface represents a FE conceptual view of a
- * linear system.  
+ * linear system.
  *
  * @memo A FE conceptual interface
  **/
@@ -39,7 +39,7 @@ struct hypre_FEMesh_struct;
 typedef struct hypre_FEMesh_struct *HYPRE_FEMesh;
 
 /**
- * Create a FE Mesh object.  
+ * Create a FE Mesh object.
  **/
 
 int HYPRE_FEMeshCreate(MPI_Comm comm, HYPRE_FEMesh *mesh);
@@ -47,7 +47,7 @@ int HYPRE_FEMeshCreate(MPI_Comm comm, HYPRE_FEMesh *mesh);
 /**
  * Destroy an FE Mesh object.  An object should be explicitly destroyed
  * using this destructor when the user's code no longer needs direct
- * access to it.  
+ * access to it.
  **/
 
 int HYPRE_FEMeshDestroy(HYPRE_FEMesh mesh);
@@ -62,7 +62,7 @@ int HYPRE_FEMeshSetFEObject(HYPRE_FEMesh mesh, void *, void *);
  * initialize all fields in the finite element mesh
  **/
 
-int HYPRE_FEMeshInitFields(HYPRE_FEMesh mesh, int numFields, 
+int HYPRE_FEMeshInitFields(HYPRE_FEMesh mesh, int numFields,
                            int *fieldSizes, int *fieldIDs);
 
 /**
@@ -123,7 +123,7 @@ typedef struct hypre_FEMatrix_struct *HYPRE_FEMatrix;
  * create a new FE matrix
  **/
 
-int HYPRE_FEMatrixCreate(MPI_Comm comm, HYPRE_FEMesh mesh, 
+int HYPRE_FEMatrixCreate(MPI_Comm comm, HYPRE_FEMesh mesh,
                          HYPRE_FEMatrix *matrix);
 
 /**
@@ -131,19 +131,19 @@ int HYPRE_FEMatrixCreate(MPI_Comm comm, HYPRE_FEMesh mesh,
  **/
 
 int HYPRE_FEMatrixDestroy(HYPRE_FEMatrix matrix);
-   
+
 /**
  * prepare a matrix object for setting coefficient values
  **/
 
 int HYPRE_FEMatrixInitialize(HYPRE_FEMatrix matrix);
-   
+
 /**
  * signal that loading has been completed
  **/
 
 int HYPRE_FEMatrixAssemble(HYPRE_FEMatrix matrix);
-   
+
 /**
  * Set the storage type of the matrix object to be constructed.
  * Currently, {\tt type} can only be {\tt HYPRE\_PARCSR} (default).

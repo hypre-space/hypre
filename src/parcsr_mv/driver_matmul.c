@@ -6,11 +6,11 @@
  ******************************************************************************/
 
 #include "_hypre_parcsr_mv.h"
- 
+
 /*--------------------------------------------------------------------------
- * Test driver for unstructured matrix interface 
+ * Test driver for unstructured matrix interface
  *--------------------------------------------------------------------------*/
- 
+
 HYPRE_Int
 main( HYPRE_Int   argc,
       char *argv[] )
@@ -33,17 +33,17 @@ main( HYPRE_Int   argc,
 
    if (my_id == 0)
    {
-   	As = hypre_CSRMatrixRead("inpr");
-   	hypre_printf(" read input A\n");
-   	Bs = hypre_CSRMatrixRead("input");
-   	hypre_printf(" read input B\n");
+      As = hypre_CSRMatrixRead("inpr");
+      hypre_printf(" read input A\n");
+      Bs = hypre_CSRMatrixRead("input");
+      hypre_printf(" read input B\n");
    }
    A = hypre_CSRMatrixToParCSRMatrix(hypre_MPI_COMM_WORLD, As, row_starts,
-	col_starts);
+         col_starts);
    row_starts = hypre_ParCSRMatrixRowStarts(A);
    col_starts = hypre_ParCSRMatrixColStarts(A);
    B = hypre_CSRMatrixToParCSRMatrix(hypre_MPI_COMM_WORLD, Bs, col_starts,
-	row_starts);
+         row_starts);
    hypre_ParCSRMatrixSetRowStartsOwner(B,0);
    hypre_ParCSRMatrixSetColStartsOwner(B,0);
    C = hypre_ParMatmul(B,A);
@@ -53,8 +53,8 @@ main( HYPRE_Int   argc,
 
    if (my_id == 0)
    {
-	hypre_CSRMatrixDestroy(As);
-   	hypre_CSRMatrixDestroy(Bs);
+      hypre_CSRMatrixDestroy(As);
+      hypre_CSRMatrixDestroy(Bs);
    }
    hypre_ParCSRMatrixDestroy(A);
    hypre_ParCSRMatrixDestroy(B);

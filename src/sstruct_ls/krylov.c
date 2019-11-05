@@ -8,7 +8,7 @@
 #include "_hypre_utilities.h"
 #include "_hypre_sstruct_ls.h"
 
-	
+
 HYPRE_Int hypre_SStructKrylovCopyVector( void *x, void *y );
 
 /*--------------------------------------------------------------------------

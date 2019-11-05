@@ -27,7 +27,7 @@ HYPRE_MGRCreate( HYPRE_Solver *solver )
  * HYPRE_MGRDestroy
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_MGRDestroy( HYPRE_Solver solver )
 {
    return( hypre_MGRDestroy( (void *) solver ) );
@@ -37,7 +37,7 @@ HYPRE_MGRDestroy( HYPRE_Solver solver )
  * HYPRE_MGRSetup
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_MGRSetup( HYPRE_Solver solver,
                          HYPRE_ParCSRMatrix A,
                          HYPRE_ParVector b,
@@ -53,7 +53,7 @@ HYPRE_MGRSetup( HYPRE_Solver solver,
  * HYPRE_MGRSolve
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_MGRSolve( HYPRE_Solver solver,
                          HYPRE_ParCSRMatrix A,
                          HYPRE_ParVector b,
@@ -69,19 +69,19 @@ HYPRE_MGRSolve( HYPRE_Solver solver,
  * HYPRE_MGRSetCpointsByBlock
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
-HYPRE_MGRSetCpointsByBlock( HYPRE_Solver solver, 
-			HYPRE_Int  block_size, 
-			HYPRE_Int  max_num_levels, 
-			HYPRE_Int *block_num_coarse_points, 
-			HYPRE_Int  **block_coarse_indexes)
+HYPRE_Int
+HYPRE_MGRSetCpointsByBlock( HYPRE_Solver solver,
+                            HYPRE_Int  block_size,
+                            HYPRE_Int  max_num_levels,
+                            HYPRE_Int *block_num_coarse_points,
+                            HYPRE_Int  **block_coarse_indexes)
 {
    return( hypre_MGRSetCpointsByBlock( (void *) solver, block_size, max_num_levels, block_num_coarse_points, block_coarse_indexes));
 }
 
 HYPRE_Int
 HYPRE_MGRSetNonCpointsToFpoints( HYPRE_Solver solver, HYPRE_Int nonCptToFptFlag)
-{   
+{
    return hypre_MGRSetNonCpointsToFpoints((void *) solver, nonCptToFptFlag);
 }
 
@@ -96,9 +96,9 @@ HYPRE_MGRSetCoarseSolver(HYPRE_Solver          solver,
                              HYPRE_Solver          coarse_grid_solver )
 {
    return( hypre_MGRSetCoarseSolver( (void *) solver,
-									   (HYPRE_Int (*)(void*, void*, void*, void*)) coarse_grid_solver_solve,
-									   (HYPRE_Int (*)(void*, void*, void*, void*)) coarse_grid_solver_setup,
-									   (void *) coarse_grid_solver ) );
+            (HYPRE_Int (*)(void*, void*, void*, void*)) coarse_grid_solver_solve,
+            (HYPRE_Int (*)(void*, void*, void*, void*)) coarse_grid_solver_setup,
+            (void *) coarse_grid_solver ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -225,7 +225,7 @@ HYPRE_MGRSetTol( HYPRE_Solver solver, HYPRE_Real tol )
 HYPRE_Int
 HYPRE_MGRSetMaxGlobalsmoothIters( HYPRE_Solver solver, HYPRE_Int max_iter )
 {
-	return hypre_MGRSetMaxGlobalsmoothIters(solver, max_iter);
+   return hypre_MGRSetMaxGlobalsmoothIters(solver, max_iter);
 }
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetGlobalsmoothType
@@ -234,7 +234,7 @@ HYPRE_MGRSetMaxGlobalsmoothIters( HYPRE_Solver solver, HYPRE_Int max_iter )
 HYPRE_Int
 HYPRE_MGRSetGlobalsmoothType( HYPRE_Solver solver, HYPRE_Int iter_type )
 {
-	return hypre_MGRSetGlobalsmoothType(solver, iter_type);
+   return hypre_MGRSetGlobalsmoothType(solver, iter_type);
 }
 /*--------------------------------------------------------------------------
  * HYPRE_MGRGetNumIterations

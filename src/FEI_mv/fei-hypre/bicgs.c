@@ -9,7 +9,7 @@
 
 /******************************************************************************
  *
- * BiCGS 
+ * BiCGS
  *
  *****************************************************************************/
 
@@ -50,7 +50,7 @@ typedef struct
 
    /* log info (always logged) */
    int      num_iterations;
- 
+
    /* additional log info (logged when `logging' > 0) */
    int      logging;
    double  *norms;
@@ -61,13 +61,13 @@ typedef struct
 /*--------------------------------------------------------------------------
  * hypre_BiCGSCreate
  *--------------------------------------------------------------------------*/
- 
+
 void * hypre_BiCGSCreate( )
 {
    hypre_BiCGSData *bicgs_data;
- 
+
    bicgs_data = hypre_CTAlloc(hypre_BiCGSData,  1, HYPRE_MEMORY_HOST);
- 
+
    /* set defaults */
    (bicgs_data -> tol)            = 1.0e-06;
    (bicgs_data -> max_iter)       = 1000;
@@ -87,28 +87,28 @@ void * hypre_BiCGSCreate( )
    (bicgs_data -> matvec_data)    = NULL;
    (bicgs_data -> norms)          = NULL;
    (bicgs_data -> log_file_name)  = NULL;
- 
+
    return (void *) bicgs_data;
 }
 
 /*--------------------------------------------------------------------------
  * hypre_BiCGSDestroy
  *--------------------------------------------------------------------------*/
- 
+
 int hypre_BiCGSDestroy( void *bicgs_vdata )
 {
-	hypre_BiCGSData *bicgs_data = (hypre_BiCGSData *) bicgs_vdata;
+   hypre_BiCGSData *bicgs_data = (hypre_BiCGSData *) bicgs_vdata;
    int ierr = 0;
- 
+
    if (bicgs_data)
    {
       if ((bicgs_data -> logging) > 0)
       {
          hypre_TFree(bicgs_data -> norms, HYPRE_MEMORY_HOST);
       }
- 
+
       hypre_ParKrylovMatvecDestroy(bicgs_data -> matvec_data);
- 
+
       hypre_ParKrylovDestroyVector(bicgs_data -> r);
       hypre_ParKrylovDestroyVector(bicgs_data -> rh);
       hypre_ParKrylovDestroyVector(bicgs_data -> v);
@@ -117,33 +117,33 @@ int hypre_BiCGSDestroy( void *bicgs_vdata )
       hypre_ParKrylovDestroyVector(bicgs_data -> u);
       hypre_ParKrylovDestroyVector(bicgs_data -> t1);
       hypre_ParKrylovDestroyVector(bicgs_data -> t2);
- 
+
       hypre_TFree(bicgs_data, HYPRE_MEMORY_HOST);
    }
- 
+
    return(ierr);
 }
 
 /*--------------------------------------------------------------------------
  * hypre_BiCGSSetup
  *--------------------------------------------------------------------------*/
- 
+
 int hypre_BiCGSSetup( void *bicgs_vdata, void *A, void *b, void *x         )
 {
-	hypre_BiCGSData *bicgs_data     = (hypre_BiCGSData *) bicgs_vdata;
+   hypre_BiCGSData *bicgs_data     = (hypre_BiCGSData *) bicgs_vdata;
    int            max_iter         = (bicgs_data -> max_iter);
    int          (*precond_setup)(void*, void*, void*, void*) = (bicgs_data -> precond_setup);
    void          *precond_data     = (bicgs_data -> precond_data);
    int            ierr = 0;
- 
+
    (bicgs_data -> A) = A;
- 
+
    /*--------------------------------------------------
     * The arguments for NewVector are important to
     * maintain consistency between the setup and
     * compute phases of matvec and the preconditioner.
     *--------------------------------------------------*/
- 
+
    if ((bicgs_data -> r) == NULL)
       (bicgs_data -> r) = hypre_ParKrylovCreateVector(b);
    if ((bicgs_data -> rh) == NULL)
@@ -162,36 +162,36 @@ int hypre_BiCGSSetup( void *bicgs_vdata, void *A, void *b, void *x         )
       (bicgs_data -> t2) = hypre_ParKrylovCreateVector(b);
    if ((bicgs_data -> matvec_data) == NULL)
       (bicgs_data -> matvec_data) = hypre_ParKrylovMatvecCreate(A, x);
- 
+
    ierr = precond_setup(precond_data, A, b, x);
- 
+
    /*-----------------------------------------------------
     * Allocate space for log info
     *-----------------------------------------------------*/
- 
+
    if ((bicgs_data -> logging) > 0)
    {
       if ((bicgs_data -> norms) == NULL)
          (bicgs_data -> norms) = hypre_CTAlloc(double,  max_iter + 1, HYPRE_MEMORY_HOST);
       if ((bicgs_data -> log_file_name) == NULL)
-		  (bicgs_data -> log_file_name) = (char*)"bicgs.out.log";
+         (bicgs_data -> log_file_name) = (char*)"bicgs.out.log";
    }
- 
+
    return ierr;
 }
- 
+
 /*--------------------------------------------------------------------------
  * hypre_BiCGSSolve
  *-------------------------------------------------------------------------*/
 
 int hypre_BiCGSSolve(void  *bicgs_vdata, void  *A, void  *b, void  *x)
 {
-	hypre_BiCGSData  *bicgs_data    = (hypre_BiCGSData *) bicgs_vdata;
-   int 		     max_iter      = (bicgs_data -> max_iter);
-   int 		     stop_crit     = (bicgs_data -> stop_crit);
-   double 	     accuracy      = (bicgs_data -> tol);
+   hypre_BiCGSData  *bicgs_data    = (hypre_BiCGSData *) bicgs_vdata;
+   int      max_iter      = (bicgs_data -> max_iter);
+   int      stop_crit     = (bicgs_data -> stop_crit);
+   double      accuracy      = (bicgs_data -> tol);
    void             *matvec_data   = (bicgs_data -> matvec_data);
- 
+
    void             *r             = (bicgs_data -> r);
    void             *rh            = (bicgs_data -> rh);
    void             *v             = (bicgs_data -> v);
@@ -200,16 +200,16 @@ int hypre_BiCGSSolve(void  *bicgs_vdata, void  *A, void  *b, void  *x)
    void             *u             = (bicgs_data -> u);
    void             *t1            = (bicgs_data -> t1);
    void             *t2            = (bicgs_data -> t2);
-   int 	           (*precond)(void*, void*, void*, void*)    = (bicgs_data -> precond);
-   int 	            *precond_data  = (int*)(bicgs_data -> precond_data);
+   int            (*precond)(void*, void*, void*, void*)    = (bicgs_data -> precond);
+   int             *precond_data  = (int*)(bicgs_data -> precond_data);
 
    /* logging variables */
    int               logging       = (bicgs_data -> logging);
    double           *norms         = (bicgs_data -> norms);
-   
+
    int               ierr=0, my_id, num_procs, iter;
    double            rho1, rho2, sigma, alpha, dtmp, r_norm, b_norm;
-   double            beta, epsilon; 
+   double            beta, epsilon;
 
    hypre_ParKrylovCommInfo(A,&my_id,&num_procs);
    if (logging > 0)
@@ -231,12 +231,12 @@ int hypre_BiCGSSolve(void  *bicgs_vdata, void  *A, void  *b, void  *x)
       norms[0] = r_norm;
       if (my_id == 0)
       {
-  	 printf("BiCGS : L2 norm of b = %e\n", b_norm);
+         printf("BiCGS : L2 norm of b = %e\n", b_norm);
          if (b_norm == 0.0)
             printf("Rel_resid_norm actually contains the residual norm\n");
          printf("BiCGS : Initial L2 norm of residual = %e\n", r_norm);
       }
-      
+
    }
    iter = 0;
 
@@ -317,102 +317,102 @@ int hypre_BiCGSSolve(void  *bicgs_vdata, void  *A, void  *b, void  *x)
 /*--------------------------------------------------------------------------
  * hypre_BiCGSSetTol
  *--------------------------------------------------------------------------*/
- 
+
 int hypre_BiCGSSetTol( void *bicgs_vdata, double tol )
 {
-	hypre_BiCGSData *bicgs_data = (hypre_BiCGSData *) bicgs_vdata;
+   hypre_BiCGSData *bicgs_data = (hypre_BiCGSData *) bicgs_vdata;
    int            ierr = 0;
- 
+
    (bicgs_data -> tol) = tol;
- 
+
    return ierr;
 }
 
 /*--------------------------------------------------------------------------
  * hypre_BiCGSSetMaxIter
  *--------------------------------------------------------------------------*/
- 
+
 int hypre_BiCGSSetMaxIter( void *bicgs_vdata, int max_iter )
 {
-	hypre_BiCGSData *bicgs_data = (hypre_BiCGSData *) bicgs_vdata;
+   hypre_BiCGSData *bicgs_data = (hypre_BiCGSData *) bicgs_vdata;
    int              ierr = 0;
- 
+
    (bicgs_data -> max_iter) = max_iter;
- 
+
    return ierr;
 }
 
 /*--------------------------------------------------------------------------
  * hypre_BiCGSSetStopCrit
  *--------------------------------------------------------------------------*/
- 
+
 int hypre_BiCGSSetStopCrit( void *bicgs_vdata, double stop_crit )
 {
-	hypre_BiCGSData *bicgs_data = (hypre_BiCGSData *) bicgs_vdata;
+   hypre_BiCGSData *bicgs_data = (hypre_BiCGSData *) bicgs_vdata;
    int            ierr = 0;
- 
+
    (bicgs_data -> stop_crit) = stop_crit;
- 
+
    return ierr;
 }
 
 /*--------------------------------------------------------------------------
  * hypre_BiCGSSetPrecond
  *--------------------------------------------------------------------------*/
- 
+
 int hypre_BiCGSSetPrecond( void  *bicgs_vdata, int  (*precond)(void*,void*,void*,void*),
-						   int  (*precond_setup)(void*,void*,void*,void*), void  *precond_data )
+      int  (*precond_setup)(void*,void*,void*,void*), void  *precond_data )
 {
-	hypre_BiCGSData *bicgs_data = (hypre_BiCGSData *) bicgs_vdata;
+   hypre_BiCGSData *bicgs_data = (hypre_BiCGSData *) bicgs_vdata;
    int              ierr = 0;
- 
+
    (bicgs_data -> precond)        = precond;
    (bicgs_data -> precond_setup)  = precond_setup;
    (bicgs_data -> precond_data)   = precond_data;
- 
+
    return ierr;
 }
- 
+
 /*--------------------------------------------------------------------------
  * hypre_BiCGSSetLogging
  *--------------------------------------------------------------------------*/
- 
+
 int hypre_BiCGSSetLogging( void *bicgs_vdata, int logging)
 {
-	hypre_BiCGSData *bicgs_data = (hypre_BiCGSData *) bicgs_vdata;
+   hypre_BiCGSData *bicgs_data = (hypre_BiCGSData *) bicgs_vdata;
    int              ierr = 0;
- 
+
    (bicgs_data -> logging) = logging;
- 
+
    return ierr;
 }
 
 /*--------------------------------------------------------------------------
  * hypre_BiCGSGetNumIterations
  *--------------------------------------------------------------------------*/
- 
+
 int hypre_BiCGSGetNumIterations(void *bicgs_vdata,int  *num_iterations)
 {
-	hypre_BiCGSData *bicgs_data = (hypre_BiCGSData *) bicgs_vdata;
+   hypre_BiCGSData *bicgs_data = (hypre_BiCGSData *) bicgs_vdata;
    int              ierr = 0;
- 
+
    *num_iterations = (bicgs_data -> num_iterations);
- 
+
    return ierr;
 }
- 
+
 /*--------------------------------------------------------------------------
  * hypre_BiCGSGetFinalRelativeResidualNorm
  *--------------------------------------------------------------------------*/
- 
+
 int hypre_BiCGSGetFinalRelativeResidualNorm( void   *bicgs_vdata,
                                          double *relative_residual_norm )
 {
-	hypre_BiCGSData *bicgs_data = (hypre_BiCGSData *) bicgs_vdata;
-   int 		ierr = 0;
- 
+   hypre_BiCGSData *bicgs_data = (hypre_BiCGSData *) bicgs_vdata;
+   int ierr = 0;
+
    *relative_residual_norm = (bicgs_data -> rel_residual_norm);
-   
+
    return ierr;
-} 
+}
 

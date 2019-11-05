@@ -32,8 +32,8 @@ typedef struct
   HYPRE_Int *inprocessor;
 
   /* receiving in idof from different (in)processors; ---------------------- */
-  HYPRE_Int *num_idofs_inprocessor; 
-  HYPRE_Int **idof_inprocessor; 
+  HYPRE_Int *num_idofs_inprocessor;
+  HYPRE_Int **idof_inprocessor;
 
   /* symmetric information: ----------------------------------------------- */
   /* this can be replaces by CSR format: ---------------------------------- */
@@ -83,7 +83,7 @@ typedef struct
 #define hypre_ParChordMatrixNumRdofs(matrix)    ((matrix) -> num_rdofs)
 
 #define hypre_ParChordMatrixFirstindexIdof(matrix) ((matrix) -> firstindex_idof)
-#define hypre_ParChordMatrixFirstindexRdof(matrix) ((matrix) -> firstindex_rdof) 
+#define hypre_ParChordMatrixFirstindexRdof(matrix) ((matrix) -> firstindex_rdof)
 
 /* participation of rdof in different processors; ---------- */
 

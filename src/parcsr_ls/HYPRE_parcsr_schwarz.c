@@ -27,7 +27,7 @@ HYPRE_SchwarzCreate( HYPRE_Solver *solver)
  * HYPRE_SchwarzDestroy
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_SchwarzDestroy( HYPRE_Solver solver )
 {
    return( hypre_SchwarzDestroy( (void *) solver ) );
@@ -37,7 +37,7 @@ HYPRE_SchwarzDestroy( HYPRE_Solver solver )
  * HYPRE_SchwarzSetup
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_SchwarzSetup(HYPRE_Solver solver,
                    HYPRE_ParCSRMatrix A,
                    HYPRE_ParVector b,
@@ -53,7 +53,7 @@ HYPRE_SchwarzSetup(HYPRE_Solver solver,
  * HYPRE_SchwarzSolve
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_SchwarzSolve( HYPRE_Solver solver,
                     HYPRE_ParCSRMatrix A,
                     HYPRE_ParVector b,

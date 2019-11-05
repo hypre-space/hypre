@@ -11,7 +11,7 @@
 /* Functions called by Mat_dh, Factor_dh, and possibly others.
    Also, a few handy functions for dealing with permutations,
    etc.
- 
+
  */
 
 /* #include "euclid_common.h" */
@@ -23,7 +23,7 @@ extern void mat_dh_transpose_private(HYPRE_Int m, HYPRE_Int *rpIN, HYPRE_Int **r
                                      HYPRE_Real *avalIN, HYPRE_Real **avalOUT);
 
   /* same as above, but memory for output was already allocated */
-extern void mat_dh_transpose_reuse_private(HYPRE_Int m, 
+extern void mat_dh_transpose_reuse_private(HYPRE_Int m,
                                      HYPRE_Int *rpIN, HYPRE_Int *cvalIN, HYPRE_Real *avalIN,
                                      HYPRE_Int *rpOUT, HYPRE_Int *cvalOUT, HYPRE_Real *avalOUT);
 
@@ -36,7 +36,7 @@ extern void mat_dh_transpose_reuse_private(HYPRE_Int m,
  * the "ignore" parameter is only used for the matrix "trip" format,
  * and the vector "csr" and "trip" formats (which are misnamed, and identical);
  * the intention is to skip over the first "ignore" lines of the file;
- * this is a hack to enable reading of Matrix Market, etc, formats. 
+ * this is a hack to enable reading of Matrix Market, etc, formats.
  *-------------------------------------------------------------------------*/
 extern void readMat(Mat_dh *Aout, char *fileType, char *fileName, HYPRE_Int ignore);
 extern void readVec(Vec_dh *bout, char *fileType, char *fileName, HYPRE_Int ignore);
@@ -44,7 +44,7 @@ extern void writeMat(Mat_dh Ain, char *fileType, char *fileName);
 extern void writeVec(Vec_dh b, char *fileType, char *fileName);
 
 /* Next function is primarily (?) for testing/development/debugging.
-   P_0 reads and partitions the matrix, then distributes 
+   P_0 reads and partitions the matrix, then distributes
    amongst the other processors.
 */
 extern void readMat_par(Mat_dh *Aout, char *fileType, char *fileName, HYPRE_Int ignore);
@@ -65,7 +65,7 @@ extern void profileMat(Mat_dh A);
  *         beg_row is global number of 1st locally owned row;
  *         m, beg_row, rp, cval may not be null (caller's responsiblity);
  *         if n2o is NULL, it's assumed that o2n is NULL;
- *         if 
+ *         if
  *
  *         error thrown:
  *         if a nonlocal column (a column index that is less than beg_row,
@@ -76,30 +76,30 @@ extern void profileMat(Mat_dh A);
  *-------------------------------------------------------------------------*/
 
 /* seq or mpi */
-extern void mat_dh_print_graph_private(HYPRE_Int m, HYPRE_Int beg_row, HYPRE_Int *rp, HYPRE_Int *cval, 
+extern void mat_dh_print_graph_private(HYPRE_Int m, HYPRE_Int beg_row, HYPRE_Int *rp, HYPRE_Int *cval,
                    HYPRE_Real *aval, HYPRE_Int *n2o, HYPRE_Int *o2n, Hash_i_dh hash, FILE* fp);
 
 
 /* seq; reordering not implemented */
 /* see io_dh.h
-                                HYPRE_Int *rp, HYPRE_Int *cval, HYPRE_Real *aval, 
+                                HYPRE_Int *rp, HYPRE_Int *cval, HYPRE_Real *aval,
                            HYPRE_Int *n2o, HYPRE_Int *o2n, Hash_i_dh hash, char *filename);
 */
 
 /* seq only */
 extern void mat_dh_print_csr_private(HYPRE_Int m, HYPRE_Int *rp, HYPRE_Int *cval, HYPRE_Real *aval,
-                                                                    FILE* fp); 
+                                                                    FILE* fp);
 
 
 /* seq only */
 extern void mat_dh_read_csr_private(HYPRE_Int *m, HYPRE_Int **rp, HYPRE_Int **cval, HYPRE_Real **aval,
-                                                                    FILE* fp); 
+                                                                    FILE* fp);
 
 /* seq only */
-extern void mat_dh_read_triples_private(HYPRE_Int ignore, HYPRE_Int *m, HYPRE_Int **rp, 
-                                         HYPRE_Int **cval, HYPRE_Real **aval, FILE* fp); 
+extern void mat_dh_read_triples_private(HYPRE_Int ignore, HYPRE_Int *m, HYPRE_Int **rp,
+                                         HYPRE_Int **cval, HYPRE_Real **aval, FILE* fp);
 
-/* seq or mpi */ 
+/* seq or mpi */
 /* see io_dh.h
                                      HYPRE_Real **aval, char *filename);
 */

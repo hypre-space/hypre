@@ -57,7 +57,7 @@ typedef struct hypre_SStructMatrix_struct
    /* U-matrix info */
    HYPRE_IJMatrix          ijmatrix;
    hypre_ParCSRMatrix     *parcsrmatrix;
-                         
+
    /* temporary storage for SetValues routines */
    HYPRE_Int               entries_size;
    HYPRE_Int              *Sentries;

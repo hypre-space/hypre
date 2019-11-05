@@ -38,9 +38,9 @@ int HYPRE_ParCSRFGMRESSetStopCrit(HYPRE_Solver solver, int stop_crit);
 
 int HYPRE_ParCSRFGMRESSetPrecond(HYPRE_Solver  solver,
           int (*precond)(HYPRE_Solver sol, HYPRE_ParCSRMatrix matrix,
-			HYPRE_ParVector b, HYPRE_ParVector x),
+             HYPRE_ParVector b, HYPRE_ParVector x),
           int (*precond_setup)(HYPRE_Solver sol, HYPRE_ParCSRMatrix matrix,
-			       HYPRE_ParVector b, HYPRE_ParVector x),
+             HYPRE_ParVector b, HYPRE_ParVector x),
           void *precond_data);
 
 int HYPRE_ParCSRFGMRESSetLogging(HYPRE_Solver solver, int logging);

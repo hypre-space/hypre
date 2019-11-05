@@ -263,7 +263,7 @@ int main (int argc, char *argv[])
       {
          for (j = 0; j < nentries; j++)
          {
-			 values[i+j] =(-0.1 +  (HYPRE_Complex)I*0.1);
+            values[i+j] =(-0.1 +  (HYPRE_Complex)I*0.1);
          }
       }
       HYPRE_SStructMatrixSetBoxValues(A, part, ilower, iupper, var0,
@@ -273,7 +273,7 @@ int main (int argc, char *argv[])
       {
          for (j = 0; j < nentries; j++)
          {
-			 values[i+j] =(HYPRE_Complex)(-0.1 - I*0.1);
+            values[i+j] =(HYPRE_Complex)(-0.1 - I*0.1);
          }
       }
       HYPRE_SStructMatrixSetBoxValues(A, part, ilower, iupper, var1,

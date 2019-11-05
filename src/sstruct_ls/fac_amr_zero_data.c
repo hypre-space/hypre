@@ -9,7 +9,7 @@
 #include "fac.h"
 
 /*--------------------------------------------------------------------------
- * hypre_ZeroAMRVectorData: Zeroes the data over the underlying coarse 
+ * hypre_ZeroAMRVectorData: Zeroes the data over the underlying coarse
  * indices of the refinement patches.
  *--------------------------------------------------------------------------*/
 
@@ -18,7 +18,7 @@ hypre_ZeroAMRVectorData(hypre_SStructVector  *b,
                         HYPRE_Int            *plevels,
                         hypre_Index          *rfactors )
 {
-   hypre_SStructGrid     *grid =  hypre_SStructVectorGrid(b); 
+   hypre_SStructGrid     *grid =  hypre_SStructVectorGrid(b);
    hypre_SStructPGrid    *p_cgrid;
 
    hypre_StructGrid      *cgrid;
@@ -39,14 +39,14 @@ hypre_ZeroAMRVectorData(hypre_SStructVector  *b,
 
    hypre_Index           *refine_factors;
    hypre_Index            temp_index, ilower, iupper;
-  
+
    HYPRE_Int              level;
    HYPRE_Int              nvars, var;
 
    HYPRE_Int              part, ci, rem, i, j, intersect_size;
 
    HYPRE_Real            *values1;
- 
+
    HYPRE_Int              ierr = 0;
 
    hypre_BoxInit(&scaled_box, ndim);
@@ -131,7 +131,7 @@ hypre_ZeroAMRVectorData(hypre_SStructVector  *b,
                    *------------------------------------------------------------*/
                    values1= hypre_CTAlloc(HYPRE_Real,  intersect_size, HYPRE_MEMORY_HOST);
 
-                   HYPRE_SStructVectorSetBoxValues(b, levels[level-1], 
+                   HYPRE_SStructVectorSetBoxValues(b, levels[level-1],
                                                    hypre_BoxIMin(&intersect_box),
                                                    hypre_BoxIMax(&intersect_box),
                                                    var, values1);
@@ -139,7 +139,7 @@ hypre_ZeroAMRVectorData(hypre_SStructVector  *b,
 
                 }  /* if (intersect_size > 0) */
              }     /* for (i= 0; i< nboxman_entries; i++) */
-       
+
              hypre_TFree(boxman_entries, HYPRE_MEMORY_HOST);
 
          }   /* hypre_ForBoxI(ci, cgrid_boxes) */
@@ -154,7 +154,7 @@ hypre_ZeroAMRVectorData(hypre_SStructVector  *b,
 
 
 /*--------------------------------------------------------------------------
- * hypre_ZeroAMRMatrixData: Zeroes the data over the underlying coarse 
+ * hypre_ZeroAMRMatrixData: Zeroes the data over the underlying coarse
  * indices of the refinement patches between two levels.
  *--------------------------------------------------------------------------*/
 
@@ -164,7 +164,7 @@ hypre_ZeroAMRMatrixData(hypre_SStructMatrix  *A,
                         hypre_Index           rfactors )
 {
    hypre_SStructGraph    *graph=  hypre_SStructMatrixGraph(A);
-   hypre_SStructGrid     *grid =  hypre_SStructGraphGrid(graph); 
+   hypre_SStructGrid     *grid =  hypre_SStructGraphGrid(graph);
    HYPRE_Int              ndim =  hypre_SStructMatrixNDim(A);
 
    hypre_SStructPGrid    *p_cgrid;
@@ -185,13 +185,13 @@ hypre_ZeroAMRMatrixData(hypre_SStructMatrix  *A,
 
    hypre_Index           *stencil_shape;
    hypre_Index            temp_index, ilower, iupper;
-  
+
    HYPRE_Int              nvars, var;
 
    HYPRE_Int              ci, i, j, rem, intersect_size, rank;
 
    HYPRE_Real            *values1, *values2;
- 
+
    HYPRE_Int              ierr = 0;
 
    hypre_BoxInit(&scaled_box, ndim);
@@ -271,11 +271,11 @@ hypre_ZeroAMRMatrixData(hypre_SStructMatrix  *A,
                     rank= hypre_abs(hypre_IndexX(stencil_shape[j]))+
                           hypre_abs(hypre_IndexY(stencil_shape[j]))+
                           hypre_abs(hypre_IndexZ(stencil_shape[j]));
-                   
+
                     if (rank)
                     {
                        HYPRE_SStructMatrixSetBoxValues(A,
-                                                       part_crse, 
+                                                       part_crse,
                                                        hypre_BoxIMin(&intersect_box),
                                                        hypre_BoxIMax(&intersect_box),
                                                        var, 1, &j, values1);
@@ -283,7 +283,7 @@ hypre_ZeroAMRMatrixData(hypre_SStructMatrix  *A,
                     else
                     {
                        HYPRE_SStructMatrixSetBoxValues(A,
-                                                       part_crse, 
+                                                       part_crse,
                                                        hypre_BoxIMin(&intersect_box),
                                                        hypre_BoxIMax(&intersect_box),
                                                        var, 1, &j, values2);

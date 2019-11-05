@@ -555,7 +555,7 @@ static void ExchangePrunedRowsExt(MPI_Comm comm, Matrix *M, Numbering *numb,
         for (i=0; i<num_replies; i++)
         {
             /* Receive count indices stored in buffer */
-	    ReceiveRequest(comm, &source, ROW_PRUNED_REQ_TAG, &buffer, &bufferlen, &count);
+           ReceiveRequest(comm, &source, ROW_PRUNED_REQ_TAG, &buffer, &bufferlen, &count);
 
             SendReplyPrunedRows(comm, numb, source, buffer, count,
                 pruned_rows_local, mem, &requests[i]);
@@ -643,7 +643,7 @@ static void ExchangePrunedRowsExt2(MPI_Comm comm, Matrix *M, Numbering *numb,
     {
         mem = (Mem *) MemCreate();
 
-	/* Get list of indices - these are all nonlocal indices */
+        /* Get list of indices - these are all nonlocal indices */
         RowPattGet(patt, &len, &ind);
 
         /* Convert local row numbers to global row numbers */
@@ -870,8 +870,8 @@ static void ConstructPatternForEachRow(HYPRE_Int symmetric, PrunedRows *pruned_r
  *               This is the approximate inverse with lower triangular pattern
  *--------------------------------------------------------------------------*/
 
-static void ConstructPatternForEachRowExt(HYPRE_Int symmetric, 
-  PrunedRows *pruned_rows_global, PrunedRows *pruned_rows_local, 
+static void ConstructPatternForEachRowExt(HYPRE_Int symmetric,
+  PrunedRows *pruned_rows_global, PrunedRows *pruned_rows_local,
   HYPRE_Int num_levels, Numbering *numb, Matrix *M, HYPRE_Real *costp)
 {
     HYPRE_Int row, len, *ind, level, lenprev, *indprev;
@@ -907,8 +907,8 @@ static void ConstructPatternForEachRowExt(HYPRE_Int symmetric,
         }
 
         /***********************
-	 * Now do the transpose 
-	 ***********************/
+         * Now do the transpose
+         ***********************/
 
         /* Get initial pattern for row */
         PrunedRowsGet(pruned_rows_local, row, &len, &ind);
@@ -927,7 +927,7 @@ static void ConstructPatternForEachRowExt(HYPRE_Int symmetric,
             }
         }
 
-	/* One more merge, with pruned_rows_global */
+        /* One more merge, with pruned_rows_global */
         RowPattGet(row_patt2, &lenprev, &indprev);
         for (i=0; i<lenprev; i++)
         {
@@ -937,17 +937,17 @@ static void ConstructPatternForEachRowExt(HYPRE_Int symmetric,
 
 
         /****************************
-	 * Merge the two row patterns
-	 ****************************/
+         * Merge the two row patterns
+         ****************************/
 
         RowPattGet(row_patt2, &len, &ind);
         RowPattMerge(row_patt, len, ind);
 
         /****************************
-	 * Done computing pattern!
-	 ****************************/
+         * Done computing pattern!
+         ****************************/
 
-	/* get the indices in the pattern */
+        /* get the indices in the pattern */
         RowPattGet(row_patt, &len, &ind);
 
         /* do reset here, because now we mess with ind array */
@@ -1711,19 +1711,19 @@ void ParaSailsSetupPatternExt(ParaSails *ps, Matrix *A,
     if (ps->thresh < 0.0)
         ps->thresh = SelectThresh(ps->comm, A, diag_scale, -ps->thresh);
 
-    pruned_rows_global = PrunedRowsCreate(A, PARASAILS_NROWS, diag_scale, 
+    pruned_rows_global = PrunedRowsCreate(A, PARASAILS_NROWS, diag_scale,
          thresh_global);
-    pruned_rows_local = PrunedRowsCreate(A, PARASAILS_NROWS, diag_scale, 
+    pruned_rows_local = PrunedRowsCreate(A, PARASAILS_NROWS, diag_scale,
          thresh_local);
 
-    ExchangePrunedRowsExt(ps->comm, A, ps->numb, 
+    ExchangePrunedRowsExt(ps->comm, A, ps->numb,
         pruned_rows_global, pruned_rows_local, ps->num_levels);
 
-    ExchangePrunedRowsExt2(ps->comm, A, ps->numb, 
+    ExchangePrunedRowsExt2(ps->comm, A, ps->numb,
         pruned_rows_global, pruned_rows_local, ps->num_levels);
 
     ConstructPatternForEachRowExt(ps->symmetric, pruned_rows_global,
-	pruned_rows_local, ps->num_levels, ps->numb, ps->M, &ps->cost);
+          pruned_rows_local, ps->num_levels, ps->numb, ps->M, &ps->cost);
 
     DiagScaleDestroy(diag_scale);
     PrunedRowsDestroy(pruned_rows_global);
@@ -1782,7 +1782,7 @@ HYPRE_Int ParaSailsSetupValues(ParaSails *ps, Matrix *A, HYPRE_Real filter)
 
     if (ps->symmetric)
     {
-        error += 
+        error +=
           ComputeValuesSym(stored_rows, ps->M, load_bal->beg_row, ps->numb,
             ps->symmetric);
 
@@ -1796,7 +1796,7 @@ HYPRE_Int ParaSailsSetupValues(ParaSails *ps, Matrix *A, HYPRE_Real filter)
     }
     else
     {
-        error += 
+        error +=
           ComputeValuesNonsym(stored_rows, ps->M, load_bal->beg_row, ps->numb);
 
         for (i=0; i<load_bal->num_taken; i++)
@@ -1955,17 +1955,17 @@ HYPRE_Real ParaSailsStatsPattern(ParaSails *ps, Matrix *A)
     if (ps->symmetric)
     {
         n = ps->end_rows[npes-1] - ps->beg_rows[0] + 1;
-	nnza = (nnza - n) / 2 + n;
+        nnza = (nnza - n) / 2 + n;
     }
 
-    hypre_MPI_Allreduce(&ps->setup_pattern_time, &max_pattern_time, 
-	1, hypre_MPI_REAL, hypre_MPI_MAX, comm);
+    hypre_MPI_Allreduce(&ps->setup_pattern_time, &max_pattern_time,
+          1, hypre_MPI_REAL, hypre_MPI_MAX, comm);
     hypre_MPI_Allreduce(&ps->cost, &max_cost, 1, hypre_MPI_REAL, hypre_MPI_MAX, comm);
     hypre_MPI_Allreduce(&ps->cost, &ave_cost, 1, hypre_MPI_REAL, hypre_MPI_SUM, comm);
     ave_cost = ave_cost / (HYPRE_Real) npes;
 
     if (mype)
-	return ave_cost;
+       return ave_cost;
 
     if (ps->symmetric == 0)
         max_cost *= 8.0;  /* nonsymmetric method is harder */
@@ -2007,8 +2007,8 @@ void ParaSailsStatsValues(ParaSails *ps, Matrix *A)
         nnza = (nnza - n) / 2 + n;
     }
 
-    hypre_MPI_Allreduce(&ps->setup_values_time, &max_values_time, 
-	1, hypre_MPI_REAL, hypre_MPI_MAX, comm);
+    hypre_MPI_Allreduce(&ps->setup_values_time, &max_values_time,
+          1, hypre_MPI_REAL, hypre_MPI_MAX, comm);
 
     if (!mype)
         setup_times = hypre_TAlloc(HYPRE_Real, npes , HYPRE_MEMORY_HOST);

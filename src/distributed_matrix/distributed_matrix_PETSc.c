@@ -23,7 +23,7 @@
  *   Internal routine for freeing a matrix stored in PETSc form.
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_DistributedMatrixDestroyPETSc( hypre_DistributedMatrix *distributed_matrix )
 {
 #ifdef PETSC_AVAILABLE
@@ -44,7 +44,7 @@ hypre_DistributedMatrixDestroyPETSc( hypre_DistributedMatrix *distributed_matrix
  *   Internal routine for printing a matrix stored in PETSc form.
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_DistributedMatrixPrintPETSc( hypre_DistributedMatrix *matrix )
 {
    HYPRE_Int  ierr=0;
@@ -60,7 +60,7 @@ hypre_DistributedMatrixPrintPETSc( hypre_DistributedMatrix *matrix )
  * hypre_DistributedMatrixGetLocalRangePETSc
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_DistributedMatrixGetLocalRangePETSc( hypre_DistributedMatrix *matrix,
                              HYPRE_BigInt *start,
                              HYPRE_BigInt *end )
@@ -75,7 +75,7 @@ hypre_DistributedMatrixGetLocalRangePETSc( hypre_DistributedMatrix *matrix,
    ierr = MatGetOwnershipRange( PETSc_matrix, start, end ); CHKERRA(ierr);
 /*
 
-  Since PETSc's MatGetOwnershipRange actually returns 
+  Since PETSc's MatGetOwnershipRange actually returns
   end = "one more than the global index of the last local row",
   we need to subtract one; hypre assumes we return the index
   of the last row itself.
@@ -91,7 +91,7 @@ hypre_DistributedMatrixGetLocalRangePETSc( hypre_DistributedMatrix *matrix,
  * hypre_DistributedMatrixGetRowPETSc
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_DistributedMatrixGetRowPETSc( hypre_DistributedMatrix *matrix,
                              HYPRE_BigInt row,
                              HYPRE_Int *size,
@@ -114,7 +114,7 @@ hypre_DistributedMatrixGetRowPETSc( hypre_DistributedMatrix *matrix,
  * hypre_DistributedMatrixRestoreRowPETSc
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_DistributedMatrixRestoreRowPETSc( hypre_DistributedMatrix *matrix,
                              HYPRE_BigInt row,
                              HYPRE_Int *size,

@@ -20,9 +20,9 @@ HYPRE_SStructBiCGSTABCreate( MPI_Comm             comm,
          hypre_SStructKrylovDestroyVector, hypre_SStructKrylovMatvecCreate,
          hypre_SStructKrylovMatvec, hypre_SStructKrylovMatvecDestroy,
          hypre_SStructKrylovInnerProd, hypre_SStructKrylovCopyVector,
-	 hypre_SStructKrylovClearVector,
+         hypre_SStructKrylovClearVector,
          hypre_SStructKrylovScaleVector, hypre_SStructKrylovAxpy,
-	 hypre_SStructKrylovCommInfo,
+         hypre_SStructKrylovCommInfo,
          hypre_SStructKrylovIdentitySetup, hypre_SStructKrylovIdentity );
 
    *solver = ( (HYPRE_SStructSolver) hypre_BiCGSTABCreate( bicgstab_functions ) );
@@ -33,7 +33,7 @@ HYPRE_SStructBiCGSTABCreate( MPI_Comm             comm,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_SStructBiCGSTABDestroy( HYPRE_SStructSolver solver )
 {
    return( hypre_BiCGSTABDestroy( (void *) solver ) );
@@ -42,7 +42,7 @@ HYPRE_SStructBiCGSTABDestroy( HYPRE_SStructSolver solver )
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_SStructBiCGSTABSetup( HYPRE_SStructSolver solver,
                             HYPRE_SStructMatrix A,
                             HYPRE_SStructVector b,
@@ -57,7 +57,7 @@ HYPRE_SStructBiCGSTABSetup( HYPRE_SStructSolver solver,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_SStructBiCGSTABSolve( HYPRE_SStructSolver solver,
                             HYPRE_SStructMatrix A,
                             HYPRE_SStructVector b,
@@ -182,7 +182,7 @@ HYPRE_SStructBiCGSTABGetFinalRelativeResidualNorm( HYPRE_SStructSolver  solver,
 
 HYPRE_Int
 HYPRE_SStructBiCGSTABGetResidual( HYPRE_SStructSolver  solver,
-                                  void 			**residual)
+                                  void               **residual)
 {
    return( HYPRE_BiCGSTABGetResidual( (HYPRE_Solver) solver, residual ) );
 }

@@ -43,7 +43,7 @@ hypre_SStructRecvInfo( hypre_StructGrid      *cgrid,
    hypre_BoxInit(&fbox, ndim);
    hypre_BoxInit(&boxman_entry_box, ndim);
 
-   hypre_ClearIndex(index1); 
+   hypre_ClearIndex(index1);
    hypre_SetIndex3(index2, rfactor[0]-1, rfactor[1]-1, rfactor[2]-1);
 
    hypre_MPI_Comm_rank(comm, &myproc);
@@ -51,7 +51,7 @@ hypre_SStructRecvInfo( hypre_StructGrid      *cgrid,
    recvinfo_data= hypre_CTAlloc(hypre_SStructRecvInfoData,  1, HYPRE_MEMORY_HOST);
 
    /*------------------------------------------------------------------------
-    * Create the structured recvbox patterns. 
+    * Create the structured recvbox patterns.
     *   recv_boxes are obtained by intersecting this proc's cgrid boxes
     *   with the fine fboxman. Intersecting BoxManEntries not on this proc
     *   will give the boxes that we will be receiving some data from. To
@@ -105,13 +105,13 @@ hypre_SStructRecvInfo( hypre_StructGrid      *cgrid,
                                         rfactor, hypre_BoxIMin(&boxman_entry_box));
              hypre_SStructIndexScaleF_C(hypre_BoxIMax(&boxman_entry_box), index1,
                                         rfactor, hypre_BoxIMax(&boxman_entry_box));
-             hypre_AppendBox(&boxman_entry_box, 
+             hypre_AppendBox(&boxman_entry_box,
                               hypre_BoxArrayArrayBoxArray(recv_boxes, i));
              cnt++;
           }
-      } 
+      }
       hypre_TFree(boxman_entries, HYPRE_MEMORY_HOST);
-   }  /* hypre_ForBoxI(i, grid_boxes) */ 
+   }  /* hypre_ForBoxI(i, grid_boxes) */
 
    hypre_BoxDestroy(intersect_box);
 

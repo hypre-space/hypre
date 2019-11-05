@@ -16,7 +16,7 @@
 
 struct _numbering_dh {
   HYPRE_Int   size;    /* max number of indices that can be stored;
-                    (length of idx_ext[]) 
+                    (length of idx_ext[])
                   */
   HYPRE_Int   first;   /* global number of 1st local index (row) */
   HYPRE_Int   m;       /* number of local indices (number of local rows in mat) */
@@ -44,7 +44,7 @@ extern void Numbering_dhSetup(Numbering_dh numb, Mat_dh mat);
      output: local_out[len], containing corresponding local numbers.
      note: global_in[] and local_out[] may be identical.
    */
-extern void Numbering_dhGlobalToLocal(Numbering_dh numb, HYPRE_Int len, 
+extern void Numbering_dhGlobalToLocal(Numbering_dh numb, HYPRE_Int len,
                                       HYPRE_Int *global_in, HYPRE_Int *local_out);
 
 #endif

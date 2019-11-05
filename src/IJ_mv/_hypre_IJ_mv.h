@@ -48,19 +48,19 @@ typedef struct
 
    HYPRE_Int      *row_length; /* row_length_diag[i] contains number of stored
                                   elements in i-th row */
-   HYPRE_Int      *row_space; /* row_space_diag[i] contains space allocated to
-                                 i-th row */
-   HYPRE_BigInt  **aux_j;	/* contains collected column indices */
-   HYPRE_Complex **aux_data; /* contains collected data */
+   HYPRE_Int      *row_space;  /* row_space_diag[i] contains space allocated to
+                                  i-th row */
+   HYPRE_BigInt  **aux_j;      /* contains collected column indices */
+   HYPRE_Complex **aux_data;   /* contains collected data */
 
    HYPRE_Int      *indx_diag; /* indx_diag[i] points to first empty space of portion
-                                 in diag_j , diag_data assigned to row i */  
+                                 in diag_j , diag_data assigned to row i */
    HYPRE_Int      *indx_offd; /* indx_offd[i] points to first empty space of portion
-                                 in offd_j , offd_data assigned to row i */  
-   HYPRE_Int	   max_off_proc_elmts; /* length of off processor stash set for
+                                 in offd_j , offd_data assigned to row i */
+   HYPRE_Int       max_off_proc_elmts; /* length of off processor stash set for
                                           SetValues and AddTOValues */
-   HYPRE_Int	   current_num_elmts; /* current no. of elements stored in stash */
-   HYPRE_Int	   off_proc_i_indx; /* pointer to first empty space in 
+   HYPRE_Int       current_num_elmts; /* current no. of elements stored in stash */
+   HYPRE_Int       off_proc_i_indx; /* pointer to first empty space in
                                        set_off_proc_i_set */
    HYPRE_BigInt   *off_proc_i; /* length 2*num_off_procs_elmts, contains info pairs
                                   (code, no. of elmts) where code contains global
@@ -111,9 +111,9 @@ typedef struct
 
 typedef struct
 {
-   HYPRE_Int	    max_off_proc_elmts; /* length of off processor stash for
+   HYPRE_Int        max_off_proc_elmts; /* length of off processor stash for
                                            SetValues and AddToValues*/
-   HYPRE_Int	    current_num_elmts; /* current no. of elements stored in stash */
+   HYPRE_Int        current_num_elmts; /* current no. of elements stored in stash */
    HYPRE_BigInt    *off_proc_i; /* contains column indices */
    HYPRE_Complex   *off_proc_data; /* contains corresponding data */
 } hypre_AuxParVector;
@@ -151,14 +151,14 @@ typedef struct hypre_IJMatrix_struct
    HYPRE_Int     object_type;         /* Indicates the type of "object" */
    void         *object;              /* Structure for storing local portion */
    void         *translator;          /* optional storage_type specfic structure
-                                       for holding additional local info */
-   void         *assumed_part;	   /* IJMatrix assumed partition */
-   HYPRE_Int     assemble_flag;       /* indicates whether matrix has been 
-				       assembled */
+                                         for holding additional local info */
+   void         *assumed_part;        /* IJMatrix assumed partition */
+   HYPRE_Int     assemble_flag;       /* indicates whether matrix has been
+                                         assembled */
 
    HYPRE_BigInt  global_first_row;    /* these for data items are necessary */
    HYPRE_BigInt  global_first_col;    /*   to be able to avoind using the global */
-   HYPRE_BigInt  global_num_rows;     /*   global partition */ 
+   HYPRE_BigInt  global_num_rows;     /*   global partition */
    HYPRE_BigInt  global_num_cols;
    HYPRE_Int     omp_flag;
    HYPRE_Int     print_level;
@@ -198,7 +198,7 @@ typedef struct hypre_IJMatrix_struct
 HYPRE_Int
 hypre_GetIJMatrixParCSRMatrix( HYPRE_IJMatrix IJmatrix, Mat *reference )
 #endif
-  
+
 #ifdef ISIS_AVAILABLE
 /* IJMatrix_isis.c */
 HYPRE_Int
@@ -223,22 +223,22 @@ typedef struct hypre_IJVector_struct
 {
    MPI_Comm      comm;
 
-   HYPRE_BigInt	*partitioning;      /* Indicates partitioning over tasks */
+   HYPRE_BigInt *partitioning;      /* Indicates partitioning over tasks */
 
    HYPRE_Int     object_type;       /* Indicates the type of "local storage" */
 
    void         *object;            /* Structure for storing local portion */
 
    void         *translator;        /* Structure for storing off processor
-				       information */
+                                       information */
 
    void         *assumed_part;        /* IJ Vector assumed partition */
 
    HYPRE_BigInt  global_first_row;    /* these for data items are necessary */
    HYPRE_BigInt  global_num_rows;     /*   to be able to avoid using the global */
-                                    /*    global partition */ 
-   HYPRE_Int     print_level; 
-   
+                                    /*    global partition */
+   HYPRE_Int     print_level;
+
 
 
 } hypre_IJVector;

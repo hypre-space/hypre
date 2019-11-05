@@ -32,7 +32,7 @@ HYPRE_StructGMRESCreate( MPI_Comm comm, HYPRE_StructSolver *solver )
 
 /*==========================================================================*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructGMRESDestroy( HYPRE_StructSolver solver )
 {
    return( hypre_GMRESDestroy( (void *) solver ) );
@@ -40,7 +40,7 @@ HYPRE_StructGMRESDestroy( HYPRE_StructSolver solver )
 
 /*==========================================================================*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructGMRESSetup( HYPRE_StructSolver solver,
                         HYPRE_StructMatrix A,
                         HYPRE_StructVector b,
@@ -54,7 +54,7 @@ HYPRE_StructGMRESSetup( HYPRE_StructSolver solver,
 
 /*==========================================================================*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructGMRESSolve( HYPRE_StructSolver solver,
                         HYPRE_StructMatrix A,
                         HYPRE_StructVector b,

@@ -75,7 +75,7 @@ void Hash_dhInit_private(Hash_dh h, HYPRE_Int s)
   h->size = size;
 
 /*
-  hypre_sprintf(msgBuf_dh, "requested size = %i; allocated size = %i", s, size); 
+  hypre_sprintf(msgBuf_dh, "requested size = %i; allocated size = %i", s, size);
   SET_INFO(msgBuf_dh);
 */
 
@@ -112,13 +112,13 @@ HashData * Hash_dhLookup(Hash_dh h, HYPRE_Int key)
         retval = &(data[idx].data);
         break;
       }
-    } 
+    }
   }
   END_FUNC_VAL(retval)
 }
 
 
-/* 
+/*
   TODO: (1) check for already-inserted  (done?)
         (2) rehash, if table grows too large
 */

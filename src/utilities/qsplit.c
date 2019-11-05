@@ -7,16 +7,16 @@
 
 #include "_hypre_utilities.h"
 #include <math.h>
- 
+
 /*--------------------------------------------------------------------------
  * hypre_DoubleQuickSplit
  * C version of the routine "qsplit" from SPARSKIT
- * Uses a quicksort-type algorithm to split data into 
+ * Uses a quicksort-type algorithm to split data into
  * highest "NumberCut" values without completely sorting them.
  * Data is HYPRE_Real precision data.
  *--------------------------------------------------------------------------*/
- 
-HYPRE_Int hypre_DoubleQuickSplit(HYPRE_Real *values, HYPRE_Int *indices, 
+
+HYPRE_Int hypre_DoubleQuickSplit(HYPRE_Real *values, HYPRE_Int *indices,
                            HYPRE_Int list_length, HYPRE_Int NumberKept )
 {
    HYPRE_Int ierr = 0;

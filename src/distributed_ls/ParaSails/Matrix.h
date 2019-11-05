@@ -21,7 +21,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-	
+
 typedef struct
 {
     MPI_Comm comm;

@@ -57,7 +57,7 @@ extern int  HYPRE_LSI_MLIAdjustNullSpace( HYPRE_Solver, int, int *,
 extern int  HYPRE_LSI_MLISetFEData( HYPRE_Solver, void * );
 extern int  HYPRE_LSI_MLISetSFEI( HYPRE_Solver, void * );
 
-extern int  HYPRE_LSI_MLILoadNodalCoordinates( HYPRE_Solver, int, int, int *, 
+extern int  HYPRE_LSI_MLILoadNodalCoordinates( HYPRE_Solver, int, int, int *,
                                    int, double *, int );
 extern int  HYPRE_LSI_MLILoadMatrixScalings( HYPRE_Solver, int, double * );
 extern int  HYPRE_LSI_MLILoadMaterialLabels( HYPRE_Solver, int, int * );

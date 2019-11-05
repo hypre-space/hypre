@@ -11,7 +11,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    
+
 /*--------------------------------------------------------------------------
  * HYPRE_StructJacobiCreate
  *--------------------------------------------------------------------------*/
@@ -32,7 +32,7 @@ hypre_F90_IFACE(hypre_structjacobicreate, HYPRE_STRUCTJACOBICREATE)
  * HYPRE_StructJacobiDestroy
  *--------------------------------------------------------------------------*/
 
-void 
+void
 hypre_F90_IFACE(hypre_structjacobidestroy, HYPRE_STRUCTJACOBIDESTROY)
    ( hypre_F90_Obj *solver,
      hypre_F90_Int *ierr   )
@@ -46,7 +46,7 @@ hypre_F90_IFACE(hypre_structjacobidestroy, HYPRE_STRUCTJACOBIDESTROY)
  * HYPRE_StructJacobiSetup
  *--------------------------------------------------------------------------*/
 
-void 
+void
 hypre_F90_IFACE(hypre_structjacobisetup, HYPRE_STRUCTJACOBISETUP)
    ( hypre_F90_Obj *solver,
      hypre_F90_Obj *A,
@@ -66,7 +66,7 @@ hypre_F90_IFACE(hypre_structjacobisetup, HYPRE_STRUCTJACOBISETUP)
  * HYPRE_StructJacobiSolve
  *--------------------------------------------------------------------------*/
 
-void 
+void
 hypre_F90_IFACE(hypre_structjacobisolve, HYPRE_STRUCTJACOBISOLVE)
    ( hypre_F90_Obj *solver,
      hypre_F90_Obj *A,
@@ -221,7 +221,7 @@ hypre_F90_IFACE(hypre_structjacobigetfinalrelat, HYPRE_STRUCTJACOBIGETFINALRELAT
            hypre_F90_PassObj (HYPRE_StructSolver, solver),
            hypre_F90_PassRealRef (norm) ) );
 }
-    
+
 #ifdef __cplusplus
 }
 #endif

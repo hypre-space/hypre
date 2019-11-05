@@ -26,7 +26,7 @@ typedef enum {
 } SolverLib_t;
 
 /******************************************************************************
-  This is the definition for the base LLNL_FEI_LSCore class. 
+  This is the definition for the base LLNL_FEI_LSCore class.
   *****************************************************************************/
 
 class LLNL_FEI_LSCore
@@ -40,35 +40,35 @@ class LLNL_FEI_LSCore
   LLNL_FEI_LSCore( SolverLib_t tmp );
   ~LLNL_FEI_LSCore();
 
-  int setGlobalOffsets(int leng, int *nodeOffsets, int *eqnOffsets, 
+  int setGlobalOffsets(int leng, int *nodeOffsets, int *eqnOffsets,
                        int *blkEqnOffsets);
-  
-  int setMatrixStructure(int **ptColIndices, int *ptRowLengths, 
-                         int **blkColIndices, int *blkRowLengths, 
+
+  int setMatrixStructure(int **ptColIndices, int *ptRowLengths,
+                         int **blkColIndices, int *blkRowLengths,
                          int *ptRowsPerBlkRow);
-  
-  int sumIntoSystemMatrix(int nRows, const int *rows, int nCols, 
+
+  int sumIntoSystemMatrix(int nRows, const int *rows, int nCols,
                           const int* cols, const double* const* vals);
-  
-  int putIntoSystemMatrix(int nRows, const int *rows, int nCols, 
+
+  int putIntoSystemMatrix(int nRows, const int *rows, int nCols,
                           const int* cols, const double* const* vals);
-  
+
   int matrixLoadComplete();
-  
+
   int sumIntoRHSVector(int num, const double *vals, const int *indices);
-  
+
   int putIntoRHSVector(int num, const double *vals, const int *indices);
-  
+
   int putInitialGuess(const int *eqnNumbers, const double *values, int leng);
-  
+
   int parameters(int nParams, char **params);
-  
+
   int solve(int *status, int *iterations);
-  
+
   int formResidual( double* values, int leng);
 
   int getSolution(double *answers, int leng);
-  
+
   int getSolnEntry(int eqnNum, double *answers);
 
 };

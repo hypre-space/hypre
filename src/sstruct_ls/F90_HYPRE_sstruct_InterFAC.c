@@ -17,7 +17,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-	
+
 /*--------------------------------------------------------------------------
  * HYPRE_SStructFACCreate
  *--------------------------------------------------------------------------*/
@@ -380,7 +380,7 @@ hypre_F90_IFACE(hypre_sstructfacsetcoarsesolver, HYPRE_SSTRUCTFACSETCOARSESOLVER
     hypre_F90_Int *csolver_type,
     hypre_F90_Int *ierr)
 {
-   *ierr = (hypre_F90_Int) 
+   *ierr = (hypre_F90_Int)
       (HYPRE_SStructFACSetCoarseSolverType(
           hypre_F90_PassObj (HYPRE_SStructSolver, solver),
           hypre_F90_PassInt (csolver_type)));
@@ -412,7 +412,7 @@ hypre_F90_IFACE(hypre_sstructfacgetnumiteration, HYPRE_SSTRUCTFACGETNUMITERATION
     hypre_F90_Int *num_iterations,
     hypre_F90_Int *ierr)
 {
-   *ierr = (hypre_F90_Int)  
+   *ierr = (hypre_F90_Int)
       ( HYPRE_SStructFACGetNumIterations(
            hypre_F90_PassObj (HYPRE_SStructSolver, solver),
            hypre_F90_PassIntRef (num_iterations)));
@@ -428,7 +428,7 @@ hypre_F90_IFACE(hypre_sstructfacgetfinalrelativ, HYPRE_SSTRUCTFACGETFINALRELATIV
     hypre_F90_Real *norm,
     hypre_F90_Int *ierr)
 {
-   *ierr = (hypre_F90_Int) 
+   *ierr = (hypre_F90_Int)
       ( HYPRE_SStructFACGetFinalRelativeResidualNorm(
            hypre_F90_PassObj (HYPRE_SStructSolver, solver),
            hypre_F90_PassRealRef (norm) ));

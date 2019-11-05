@@ -37,7 +37,7 @@ extern "C" {
 #define hypre_OWNINFODATA_HEADER
 
 
-typedef struct 
+typedef struct
 {
    HYPRE_Int             size;
 
@@ -71,7 +71,7 @@ typedef struct
 #define hypre_RECVINFODATA_HEADER
 
 
-typedef struct 
+typedef struct
 {
    HYPRE_Int             size;
 
@@ -88,7 +88,7 @@ typedef struct
 #define hypre_SENDINFODATA_HEADER
 
 
-typedef struct 
+typedef struct
 {
    HYPRE_Int             size;
 
@@ -104,10 +104,10 @@ typedef struct
     hypre_IJMatrix    *Face_iedge;
     hypre_IJMatrix    *Element_iedge;
     hypre_IJMatrix    *Edge_iedge;
-                                                                                                                            
+
     hypre_IJMatrix    *Element_Face;
     hypre_IJMatrix    *Element_Edge;
-                                                                                                                            
+
 } hypre_PTopology;
 
 /******************************************************************************
@@ -126,22 +126,22 @@ typedef struct
 typedef struct
 {
    MPI_Comm                comm;
-                      
+
    HYPRE_Real              tol;
    HYPRE_Int               max_iter;
    HYPRE_Int               rel_change;
    HYPRE_Int               zero_guess;
    HYPRE_Int               ndim;
-                      
+
    HYPRE_Int               num_pre_relax;  /* number of pre relaxation sweeps */
    HYPRE_Int               num_post_relax; /* number of post relaxation sweeps */
 
    HYPRE_Int               constant_coef;
-   
+
    hypre_Index            *rfactor;
 
    hypre_SStructGrid     **egrid_l;
-                    
+
    HYPRE_IJMatrix          Aen;
    hypre_ParCSRMatrix    **Aen_l;
 
@@ -173,8 +173,8 @@ typedef struct
    hypre_ParCSRMatrix     *T_transpose;
 
    /* edge data structure. These will have grids. */
-   HYPRE_Int               edge_maxlevels;  
-   HYPRE_Int               edge_numlevels;  
+   HYPRE_Int               edge_maxlevels;
+   HYPRE_Int               edge_numlevels;
    hypre_ParCSRMatrix    **Aee_l;
    hypre_ParVector       **be_l;
    hypre_ParVector       **xe_l;
@@ -212,11 +212,11 @@ typedef struct
 typedef struct
 {
    HYPRE_Int row;
-                                                                                                                                    
+
    HYPRE_Int ncols;
    HYPRE_BigInt *cols;
    HYPRE_Real   *data;
-                                                                                                                                    
+
 } hypre_MaxwellOffProcRow;
 
 

@@ -347,7 +347,7 @@ hypre_PrefixSumInt(HYPRE_Int   nvals,
    }
    else
    {
-   
+
       /* Compute preliminary partial sums (in parallel) within each interval */
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE
@@ -355,20 +355,20 @@ hypre_PrefixSumInt(HYPRE_Int   nvals,
       for (j = 0; j < nvals; j += bsize)
       {
          HYPRE_Int  i, n = hypre_min((j+bsize), nvals);
-   
+
          sums[0] = 0;
          for (i = j+1; i < n; i++)
          {
             sums[i] = sums[i-1] + vals[i-1];
          }
       }
-   
+
       /* Compute final partial sums (in serial) for the first entry of every interval */
       for (j = bsize; j < nvals; j += bsize)
       {
          sums[j] = sums[j-bsize] + sums[j-1] + vals[j-1];
       }
-   
+
       /* Compute final partial sums (in parallel) for the remaining entries */
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE
@@ -376,7 +376,7 @@ hypre_PrefixSumInt(HYPRE_Int   nvals,
       for (j = bsize; j < nvals; j += bsize)
       {
          HYPRE_Int  i, n = hypre_min((j+bsize), nvals);
-   
+
          for (i = j+1; i < n; i++)
          {
             sums[i] += sums[j];

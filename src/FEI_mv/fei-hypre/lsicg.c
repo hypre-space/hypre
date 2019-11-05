@@ -7,7 +7,7 @@
 
 /******************************************************************************
  *
- * LSICG 
+ * LSICG
  *
  *****************************************************************************/
 
@@ -41,7 +41,7 @@ typedef struct
    void   *precond_data;
 
    int     num_iterations;
- 
+
    int     logging;
 
 } hypre_LSICGData;
@@ -49,13 +49,13 @@ typedef struct
 /*--------------------------------------------------------------------------
  * hypre_LSICGCreate
  *--------------------------------------------------------------------------*/
- 
+
 void *hypre_LSICGCreate( )
 {
    hypre_LSICGData *lsicg_data;
- 
+
    lsicg_data = hypre_CTAlloc(hypre_LSICGData,  1, HYPRE_MEMORY_HOST);
- 
+
    /* set defaults */
    (lsicg_data -> tol)            = 1.0e-06;
    (lsicg_data -> max_iter)       = 1000;
@@ -69,19 +69,19 @@ void *hypre_LSICGCreate( )
    (lsicg_data -> ap)             = NULL;
    (lsicg_data -> z)              = NULL;
    (lsicg_data -> matvec_data)    = NULL;
- 
+
    return (void *) lsicg_data;
 }
 
 /*--------------------------------------------------------------------------
  * hypre_LSICGDestroy
  *--------------------------------------------------------------------------*/
- 
+
 int hypre_LSICGDestroy( void *lsicg_vdata )
 {
-	hypre_LSICGData *lsicg_data = (hypre_LSICGData *) lsicg_vdata;
+   hypre_LSICGData *lsicg_data = (hypre_LSICGData *) lsicg_vdata;
    int             ierr = 0;
- 
+
    if (lsicg_data)
    {
       hypre_ParKrylovMatvecDestroy(lsicg_data -> matvec_data);
@@ -97,22 +97,22 @@ int hypre_LSICGDestroy( void *lsicg_vdata )
 /*--------------------------------------------------------------------------
  * hypre_LSICGSetup
  *--------------------------------------------------------------------------*/
- 
+
 int hypre_LSICGSetup( void *lsicg_vdata, void *A, void *b, void *x         )
 {
-	hypre_LSICGData *lsicg_data       = (hypre_LSICGData *) lsicg_vdata;
+   hypre_LSICGData *lsicg_data       = (hypre_LSICGData *) lsicg_vdata;
    int            (*precond_setup)(void*, void*, void*, void*) = (lsicg_data -> precond_setup);
    void           *precond_data      = (lsicg_data -> precond_data);
    int            ierr = 0;
- 
+
    (lsicg_data -> A) = A;
- 
+
    /*--------------------------------------------------
     * The arguments for NewVector are important to
     * maintain consistency between the setup and
     * compute phases of matvec and the preconditioner.
     *--------------------------------------------------*/
- 
+
    if ((lsicg_data -> r) == NULL)
       (lsicg_data -> r) = hypre_ParKrylovCreateVector(b);
    if ((lsicg_data -> p) == NULL)
@@ -123,12 +123,12 @@ int hypre_LSICGSetup( void *lsicg_vdata, void *A, void *b, void *x         )
       (lsicg_data -> ap) = hypre_ParKrylovCreateVector(b);
    if ((lsicg_data -> matvec_data) == NULL)
       (lsicg_data -> matvec_data) = hypre_ParKrylovMatvecCreate(A, x);
- 
+
    ierr = precond_setup(precond_data, A, b, x);
- 
+
    return ierr;
 }
- 
+
 /*--------------------------------------------------------------------------
  * hypre_LSICGSolve
  *-------------------------------------------------------------------------*/
@@ -142,16 +142,16 @@ int hypre_LSICGSolve(void  *lsicg_vdata, void  *A, void  *b, void  *x)
    MPI_Comm          comm;
 
    hypre_LSICGData  *lsicg_data    = (hypre_LSICGData *) lsicg_vdata;
-   int 		     max_iter      = (lsicg_data -> max_iter);
-   int 		     stop_crit     = (lsicg_data -> stop_crit);
-   double 	     accuracy      = (lsicg_data -> tol);
+   int      max_iter      = (lsicg_data -> max_iter);
+   int      stop_crit     = (lsicg_data -> stop_crit);
+   double      accuracy      = (lsicg_data -> tol);
    void             *matvec_data   = (lsicg_data -> matvec_data);
    void             *r             = (lsicg_data -> r);
    void             *p             = (lsicg_data -> p);
    void             *z             = (lsicg_data -> z);
    void             *ap            = (lsicg_data -> ap);
-   int 	           (*precond)(void*, void*, void*, void*)    = (lsicg_data -> precond);
-   int 	            *precond_data  = (int*)(lsicg_data -> precond_data);
+   int            (*precond)(void*, void*, void*, void*)    = (lsicg_data -> precond);
+   int             *precond_data  = (int*)(lsicg_data -> precond_data);
    int               logging       = (lsicg_data -> logging);
 
    /* compute initial residual */
@@ -168,7 +168,7 @@ int hypre_LSICGSolve(void  *lsicg_vdata, void  *A, void  *b, void  *x)
    {
       if (mypid == 0)
       {
-  	 printf("LSICG : L2 norm of b = %e\n", b_norm);
+         printf("LSICG : L2 norm of b = %e\n", b_norm);
          if (b_norm == 0.0)
             printf("Rel_resid_norm actually contains the residual norm\n");
          printf("LSICG : Initial L2 norm of residual = %e\n", r_norm);
@@ -240,10 +240,10 @@ int hypre_LSICGSolve(void  *lsicg_vdata, void  *A, void  *b, void  *x)
 /*--------------------------------------------------------------------------
  * hypre_LSICGSetTol
  *--------------------------------------------------------------------------*/
- 
+
 int hypre_LSICGSetTol( void *lsicg_vdata, double tol )
 {
-	hypre_LSICGData *lsicg_data = (hypre_LSICGData *) lsicg_vdata;
+   hypre_LSICGData *lsicg_data = (hypre_LSICGData *) lsicg_vdata;
    (lsicg_data -> tol) = tol;
    return 0;
 }
@@ -251,10 +251,10 @@ int hypre_LSICGSetTol( void *lsicg_vdata, double tol )
 /*--------------------------------------------------------------------------
  * hypre_LSICGSetMaxIter
  *--------------------------------------------------------------------------*/
- 
+
 int hypre_LSICGSetMaxIter( void *lsicg_vdata, int max_iter )
 {
-	hypre_LSICGData *lsicg_data = (hypre_LSICGData *) lsicg_vdata;
+   hypre_LSICGData *lsicg_data = (hypre_LSICGData *) lsicg_vdata;
    (lsicg_data -> max_iter) = max_iter;
    return 0;
 }
@@ -262,10 +262,10 @@ int hypre_LSICGSetMaxIter( void *lsicg_vdata, int max_iter )
 /*--------------------------------------------------------------------------
  * hypre_LSICGSetStopCrit
  *--------------------------------------------------------------------------*/
- 
+
 int hypre_LSICGSetStopCrit( void *lsicg_vdata, double stop_crit )
 {
-	hypre_LSICGData *lsicg_data = (hypre_LSICGData *) lsicg_vdata;
+   hypre_LSICGData *lsicg_data = (hypre_LSICGData *) lsicg_vdata;
    (lsicg_data -> stop_crit) = stop_crit;
    return 0;
 }
@@ -273,24 +273,24 @@ int hypre_LSICGSetStopCrit( void *lsicg_vdata, double stop_crit )
 /*--------------------------------------------------------------------------
  * hypre_LSICGSetPrecond
  *--------------------------------------------------------------------------*/
- 
+
 int hypre_LSICGSetPrecond( void  *lsicg_vdata, int  (*precond)(void*,void*,void*,void*),
-						   int  (*precond_setup)(void*,void*,void*,void*), void  *precond_data )
+      int  (*precond_setup)(void*,void*,void*,void*), void  *precond_data )
 {
-	hypre_LSICGData *lsicg_data = (hypre_LSICGData *) lsicg_vdata;
+   hypre_LSICGData *lsicg_data = (hypre_LSICGData *) lsicg_vdata;
    (lsicg_data -> precond)        = precond;
    (lsicg_data -> precond_setup)  = precond_setup;
    (lsicg_data -> precond_data)   = precond_data;
    return 0;
 }
- 
+
 /*--------------------------------------------------------------------------
  * hypre_LSICGSetLogging
  *--------------------------------------------------------------------------*/
- 
+
 int hypre_LSICGSetLogging( void *lsicg_vdata, int logging)
 {
-	hypre_LSICGData *lsicg_data = (hypre_LSICGData *) lsicg_vdata;
+   hypre_LSICGData *lsicg_data = (hypre_LSICGData *) lsicg_vdata;
    (lsicg_data -> logging) = logging;
    return 0;
 }
@@ -298,23 +298,23 @@ int hypre_LSICGSetLogging( void *lsicg_vdata, int logging)
 /*--------------------------------------------------------------------------
  * hypre_LSICGGetNumIterations
  *--------------------------------------------------------------------------*/
- 
+
 int hypre_LSICGGetNumIterations(void *lsicg_vdata,int  *num_iterations)
 {
-	hypre_LSICGData *lsicg_data = (hypre_LSICGData *) lsicg_vdata;
+   hypre_LSICGData *lsicg_data = (hypre_LSICGData *) lsicg_vdata;
    *num_iterations = (lsicg_data -> num_iterations);
    return 0;
 }
- 
+
 /*--------------------------------------------------------------------------
  * hypre_LSICGGetFinalRelativeResidualNorm
  *--------------------------------------------------------------------------*/
- 
+
 int hypre_LSICGGetFinalRelativeResidualNorm(void *lsicg_vdata,
                                             double *relative_residual_norm)
 {
-	hypre_LSICGData *lsicg_data = (hypre_LSICGData *) lsicg_vdata;
+   hypre_LSICGData *lsicg_data = (hypre_LSICGData *) lsicg_vdata;
    *relative_residual_norm = (lsicg_data -> rel_residual_norm);
    return 0;
-} 
+}
 

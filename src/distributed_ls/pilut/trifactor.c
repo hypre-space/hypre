@@ -64,7 +64,7 @@ void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, HYPRE_Real *x, HYPR
   ux = ldu->ux;
 
   /******************************************************************
-  * Do the L(lx) = b, first 
+  * Do the L(lx) = b, first
   *******************************************************************/
   snbrpes = ldu->lcomm.snbrpes;
   spes    = ldu->lcomm.spes;
@@ -92,7 +92,7 @@ void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, HYPRE_Real *x, HYPR
    * For forward substitution we do local+1st MIS == nnodes[1] (NOT [0]!) */
   for (i=0; i<nnodes[hypre_max(0,hypre_min(1,nlevels))]; i++) {
     xx = 0.0;
-    for (j=rowptr[i]; j<rowptr[i+1]; j++) 
+    for (j=rowptr[i]; j<rowptr[i+1]; j++)
       xx += values[j]*lx[colind[j]];
     lx[i] = b[perm[i]] - xx;
   }
@@ -118,21 +118,21 @@ void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, HYPRE_Real *x, HYPR
     /* Recv the required lx elements from the appropriate processors */
     for (i=0; i<rnbrpes; i++) {
       if ( rnum[i] > 0 ) { /* Something to recv */
-	hypre_MPI_Irecv( raddr[i]+rdone[i], rnum[i], hypre_MPI_REAL,
-		  rpes[i], TAG, pilut_comm, &receive_requests[i] );
+         hypre_MPI_Irecv( raddr[i]+rdone[i], rnum[i], hypre_MPI_REAL,
+               rpes[i], TAG, pilut_comm, &receive_requests[i] );
 
-	rdone[i] += rnum[i] ;
+         rdone[i] += rnum[i] ;
       }
     }
 
     /* Send the required lx elements to the appropriate processors */
     for (i=0; i<snbrpes; i++) {
       if (sptr[i+1] > auxsptr[i]  &&  sindex[auxsptr[i]]<nnodes[ii]) { /* Something to send */
-        for (j=auxsptr[i], l=0;   j<sptr[i+1] && sindex[j]<nnodes[ii];   j++, l++) 
+        for (j=auxsptr[i], l=0;   j<sptr[i+1] && sindex[j]<nnodes[ii];   j++, l++)
           gatherbuf[l] = lx[sindex[j]];
 
-	hypre_MPI_Send( gatherbuf, l, hypre_MPI_REAL,
-		  spes[i], TAG, pilut_comm );
+        hypre_MPI_Send( gatherbuf, l, hypre_MPI_REAL,
+              spes[i], TAG, pilut_comm );
 
         auxsptr[i] = j;
       }
@@ -161,7 +161,7 @@ void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, HYPRE_Real *x, HYPR
 
 
   /******************************************************************
-  * Do the U(ly) = (lx), next 
+  * Do the U(ly) = (lx), next
   *******************************************************************/
   snbrpes = ldu->ucomm.snbrpes;
   spes    = ldu->ucomm.spes;
@@ -190,7 +190,7 @@ void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, HYPRE_Real *x, HYPR
      * by construction all remote lx elements needed are filled in */
     for (i=nnodes[ii]-1; i>=nnodes[ii-1]; i--) {
       xx = 0.0;
-      for (j=rowptr[i]; j<rowptr[i+1]; j++) 
+      for (j=rowptr[i]; j<rowptr[i+1]; j++)
         xx += values[j]*ux[colind[j]];
       ux[i] = dvalues[i]*(lx[i] - xx);
     }
@@ -204,21 +204,21 @@ void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, HYPRE_Real *x, HYPR
     /* Recv the required ux elements from the appropriate processors */
     for (i=0; i<rnbrpes; i++) {
       if ( rnum[i] > 0 ) { /* Something to recv */
-	hypre_MPI_Irecv( raddr[i]+rdone[i], rnum[i], hypre_MPI_REAL,
-		  rpes[i], TAG, pilut_comm, &receive_requests[ i ] );
+         hypre_MPI_Irecv( raddr[i]+rdone[i], rnum[i], hypre_MPI_REAL,
+               rpes[i], TAG, pilut_comm, &receive_requests[ i ] );
 
-	rdone[i] += rnum[i] ;
+         rdone[i] += rnum[i] ;
       }
     }
 
     /* Send the required ux elements to the appropriate processors */
     for (i=0; i<snbrpes; i++) {
       if (sptr[i+1] > auxsptr[i]  &&  sindex[auxsptr[i]]>=nnodes[ii-1]) { /* Something to send */
-        for (j=auxsptr[i], l=0;   j<sptr[i+1] && sindex[j]>=nnodes[ii-1];   j++, l++) 
+        for (j=auxsptr[i], l=0;   j<sptr[i+1] && sindex[j]>=nnodes[ii-1];   j++, l++)
           gatherbuf[l] = ux[sindex[j]];
 
-	hypre_MPI_Send( gatherbuf, l, hypre_MPI_REAL,
-		  spes[i], TAG, pilut_comm );
+        hypre_MPI_Send( gatherbuf, l, hypre_MPI_REAL,
+              spes[i], TAG, pilut_comm );
 
         auxsptr[i] = j;
       }
@@ -227,7 +227,7 @@ void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, HYPRE_Real *x, HYPR
     /* Finish receives */
     for (i=0; i<rnbrpes; i++) {
       if ( rnum[i] > 0 ) { /* Something to recv */
-	hypre_MPI_Wait( &receive_requests[ i ], &Status );
+         hypre_MPI_Wait( &receive_requests[ i ], &Status );
       }
     }
 
@@ -244,7 +244,7 @@ void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, HYPRE_Real *x, HYPR
   /* Do the local next */
   for (i=nnodes[0]-1; i>=0; i--) {
     xx = 0.0;
-    for (j=rowptr[i]; j<rowptr[i+1]; j++) 
+    for (j=rowptr[i]; j<rowptr[i+1]; j++)
       xx += values[j]*ux[colind[j]];
     ux[i] = dvalues[i]*(lx[i] - xx);
   }
@@ -263,7 +263,7 @@ void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, HYPRE_Real *x, HYPR
 
 /*************************************************************************
 * This function sets-up the communication parameters for the forward
-* and backward substitution, and relabels the L and U matrices 
+* and backward substitution, and relabels the L and U matrices
 **************************************************************************/
 HYPRE_Int hypre_SetUpLUFactor(DataDistType *ddist, FactorMatType *ldu, HYPRE_Int maxnz,
                    hypre_PilutSolverGlobals *globals )
@@ -331,11 +331,11 @@ HYPRE_Int hypre_SetUpLUFactor(DataDistType *ddist, FactorMatType *ldu, HYPRE_Int
 * These differences are marked by **** in comments
 **************************************************************************/
 void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, HYPRE_Int maxnz,
-		 HYPRE_Int *petotal, HYPRE_Int *rind, HYPRE_Int *imap,
-		 HYPRE_Int *maxsendP, HYPRE_Int DoingL,
+      HYPRE_Int *petotal, HYPRE_Int *rind, HYPRE_Int *imap,
+      HYPRE_Int *maxsendP, HYPRE_Int DoingL,
                    hypre_PilutSolverGlobals *globals )
 {
-  HYPRE_Int i, ii, j, k, l, 
+  HYPRE_Int i, ii, j, k, l,
     nlevels, nrecv, nsend, snbrpes, rnbrpes;
   HYPRE_Int *rowdist, *sptr, *sindex, *spes, *rpes,
     *perm, *iperm, *newrowptr, *newcolind,
@@ -407,7 +407,7 @@ void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, HYPRE_Int maxnz,
   TriSolveComm->rnbrpes = rnbrpes ;
 
   hypre_MPI_Alltoall( petotal, 1, HYPRE_MPI_INT,
-		lu_recv, 1, HYPRE_MPI_INT, pilut_comm );
+        lu_recv, 1, HYPRE_MPI_INT, pilut_comm );
 
   /* Determine to how many processors you will be sending data */
   snbrpes = 0;
@@ -431,7 +431,7 @@ void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, HYPRE_Int maxnz,
           TriSolveComm->rdone   = hypre_idx_malloc(rnbrpes,  "hypre_SetUpFactor: TriSolveComm->rpes");
   rpes  = TriSolveComm->rpes    = hypre_idx_malloc(rnbrpes,  "hypre_SetUpFactor: TriSolveComm->rpes" );
   raddr = TriSolveComm->raddr   = (HYPRE_Real**) hypre_mymalloc( sizeof(HYPRE_Real*)*(rnbrpes+1),
-					       "hypre_SetUpFactor: TriSolveComm->raddr");
+        "hypre_SetUpFactor: TriSolveComm->raddr");
 
   /* Save send addresses, lengths, and construct spes */
   snbrpes = 0;
@@ -459,7 +459,7 @@ void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, HYPRE_Int maxnz,
   /* Start asynchronous receives */
   for (i=0; i<snbrpes; i++) {
     hypre_MPI_Irecv( sindex+sptr[i], sptr[i+1]-sptr[i], HYPRE_MPI_INT,
-	      spes[i], TAG_SetUp_rind, pilut_comm, &receive_requests[i] );
+          spes[i], TAG_SetUp_rind, pilut_comm, &receive_requests[i] );
   }
 
   /* Send the rind sets to the processors */
@@ -468,7 +468,7 @@ void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, HYPRE_Int maxnz,
   for (i=0; i<npes; i++) {
     if (petotal[i] > 0) {
       hypre_MPI_Send( rind+k, petotal[i], HYPRE_MPI_INT ,
-		i, TAG_SetUp_rind, pilut_comm );
+            i, TAG_SetUp_rind, pilut_comm );
 
       /* recv info for hypre_LDUSolve */
       raddr[rnbrpes] = x + k + lnrows;
@@ -499,7 +499,7 @@ void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, HYPRE_Int maxnz,
   /**** Go and do a segmented sort of the elements of the sindex.
    **** L is sorted increasing, U is sorted decreasing. ****/
   if ( DoingL ) {
-    for (i=0; i<snbrpes; i++) 
+    for (i=0; i<snbrpes; i++)
       hypre_sincsort_fast(sptr[i+1]-sptr[i], sindex+sptr[i]);
   }
   else {
@@ -518,7 +518,7 @@ void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, HYPRE_Int maxnz,
   for (i=0; i<npes; i++) {
     if (petotal[i] > 0) {
       hypre_MPI_Irecv( rind+k, petotal[i], HYPRE_MPI_INT,
-	        i, TAG_SetUp_reord, pilut_comm, &receive_requests[i] );
+            i, TAG_SetUp_reord, pilut_comm, &receive_requests[i] );
       k += petotal[i];
     }
   }
@@ -526,7 +526,7 @@ void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, HYPRE_Int maxnz,
   /* Write them back to the processors that send them to me */
   for (i=0; i<snbrpes; i++) {
     hypre_MPI_Send( sindex+sptr[i], sptr[i+1]-sptr[i], HYPRE_MPI_INT,
-	      spes[i], TAG_SetUp_reord, pilut_comm );
+          spes[i], TAG_SetUp_reord, pilut_comm );
   }
 
   /* Finish Recv  */
@@ -537,7 +537,7 @@ void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, HYPRE_Int maxnz,
   }
 
   /* Apply the iperm[] onto the sindex for easy indexing during solution */
-  for (i=0; i<nsend; i++) 
+  for (i=0; i<nsend; i++)
     sindex[i] = iperm[sindex[i]-firstrow];
 
   /* Create imap array for relabeling L */
@@ -547,7 +547,7 @@ void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, HYPRE_Int maxnz,
   }
 
   /* Construct the IMAP array of the locally stored rows */
-  for (i=0; i<lnrows; i++) 
+  for (i=0; i<lnrows; i++)
     imap[firstrow+perm[i]] = i;
 
   /* rnum is a 2D array of nlevels rows of rnbrpes columns each */
@@ -561,26 +561,26 @@ void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, HYPRE_Int maxnz,
   for (i=0; i<snbrpes; i++) {
     if ( DoingL ) {
       for (ii=1; ii<nlevels; ii++) {
-	for (j=TriSolveComm->auxsptr[i], l=0;   j<sptr[i+1] && sindex[j]<ldu->nnodes[ii];     j++, l++)
-	  ;
+         for (j=TriSolveComm->auxsptr[i], l=0;   j<sptr[i+1] && sindex[j]<ldu->nnodes[ii];     j++, l++)
+            ;
 
-	rnum[ii-1] = l;
-	TriSolveComm->auxsptr[i] = j;
+         rnum[ii-1] = l;
+         TriSolveComm->auxsptr[i] = j;
       }
       rnum[nlevels-1] = 0; /* never used */
     }
     else {
       for (ii=nlevels; ii>0; ii--) {
-	for (j=TriSolveComm->auxsptr[i], l=0;   j<sptr[i+1] && sindex[j]>=ldu->nnodes[ii-1];  j++, l++)
-	  ;
+         for (j=TriSolveComm->auxsptr[i], l=0;   j<sptr[i+1] && sindex[j]>=ldu->nnodes[ii-1];  j++, l++)
+            ;
 
-	rnum[ii-1] = l;
-	TriSolveComm->auxsptr[i] = j;
+         rnum[ii-1] = l;
+         TriSolveComm->auxsptr[i] = j;
       }
     }
 
     hypre_MPI_Send( rnum, nlevels, HYPRE_MPI_INT,
-	      spes[i], TAG_SetUp_rnum, pilut_comm );
+          spes[i], TAG_SetUp_rnum, pilut_comm );
   }
 
   if (rnum) free(rnum);
@@ -592,7 +592,7 @@ void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, HYPRE_Int maxnz,
   /* receive each column */
   for (i=0; i<rnbrpes; i++) {
     hypre_MPI_Recv( TriSolveComm->rnum+i, 1, MyColType_rnbr,
-	      rpes[i], TAG_SetUp_rnum, pilut_comm, &Status );
+          rpes[i], TAG_SetUp_rnum, pilut_comm, &Status );
   }
 
   hypre_MPI_Type_free( &MyColType_rnbr );
@@ -650,7 +650,7 @@ void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, HYPRE_Int maxnz,
   /* Reset the imap by only touching the appropriate elements */
   for (i=0; i<nrecv; i++)
     imap[rind[i]] = -1;
-  for (i=0; i<lnrows; i++) 
+  for (i=0; i<lnrows; i++)
     imap[firstrow+i] = -1;
 }
 

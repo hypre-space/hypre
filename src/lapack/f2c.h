@@ -9,7 +9,7 @@
 
 /**  barf  [ba:rf]  2.  "He suggested using FORTRAN, and everybody barfed."
 
-	- From The Shogakukan DICTIONARY OF NEW ENGLISH (Second edition) */
+   - From The Shogakukan DICTIONARY OF NEW ENGLISH (Second edition) */
 
 #ifndef F2C_INCLUDE
 #define F2C_INCLUDE
@@ -31,7 +31,7 @@
 #ifdef HYPRE_BIGINT
 typedef long long int HYPRE_LongInt;
 typedef unsigned long long int HYPRE_ULongInt;
-#else 
+#else
 typedef long int HYPRE_LongInt;
 typedef unsigned long int HYPRE_ULongInt;
 #endif
@@ -56,9 +56,9 @@ typedef char integer1;
 /* integer*8 support from f2c not currently supported: */
 #if 0
 typedef @F2C_LONGINT@ /* long long */ longint; /* system-dependent */
-typedef unsigned @F2C_LONGINT@ ulongint;	/* system-dependent */
-#define qbit_clear(a,b)	((a) & ~((ulongint)1 << (b)))
-#define qbit_set(a,b)	((a) |  ((ulongint)1 << (b)))
+typedef unsigned @F2C_LONGINT@ ulongint;   /* system-dependent */
+#define qbit_clear(a,b)   ((a) & ~((ulongint)1 << (b)))
+#define qbit_set(a,b)   ((a) |  ((ulongint)1 << (b)))
 #endif
 /* typedef long long HYPRE_Int longint; */ /* RDF: removed */
 
@@ -86,109 +86,110 @@ typedef HYPRE_LongInt /* HYPRE_Int or long HYPRE_Int */ ftnint;
 
 /*external read, write*/
 typedef struct
-{	flag cierr;
-	ftnint ciunit;
-	flag ciend;
-	char *cifmt;
-	ftnint cirec;
+{  flag cierr;
+   ftnint ciunit;
+   flag ciend;
+   char *cifmt;
+   ftnint cirec;
 } cilist;
 
 /*internal read, write*/
 typedef struct
-{	flag icierr;
-	char *iciunit;
-	flag iciend;
-	char *icifmt;
-	ftnint icirlen;
-	ftnint icirnum;
+{  flag icierr;
+   char *iciunit;
+   flag iciend;
+   char *icifmt;
+   ftnint icirlen;
+   ftnint icirnum;
 } icilist;
 
 /*open*/
 typedef struct
-{	flag oerr;
-	ftnint ounit;
-	char *ofnm;
-	ftnlen ofnmlen;
-	char *osta;
-	char *oacc;
-	char *ofm;
-	ftnint orl;
-	char *oblnk;
+{  flag oerr;
+   ftnint ounit;
+   char *ofnm;
+   ftnlen ofnmlen;
+   char *osta;
+   char *oacc;
+   char *ofm;
+   ftnint orl;
+   char *oblnk;
 } olist;
 
 /*close*/
 typedef struct
-{	flag cerr;
-	ftnint cunit;
-	char *csta;
+{  flag cerr;
+   ftnint cunit;
+   char *csta;
 } cllist;
 
 /*rewind, backspace, endfile*/
 typedef struct
-{	flag aerr;
-	ftnint aunit;
+{  flag aerr;
+   ftnint aunit;
 } alist;
 
 /* inquire */
 typedef struct
-{	flag inerr;
-	ftnint inunit;
-	char *infile;
-	ftnlen infilen;
-	ftnint	*inex;	/*parameters in standard's order*/
-	ftnint	*inopen;
-	ftnint	*innum;
-	ftnint	*innamed;
-	char	*inname;
-	ftnlen	innamlen;
-	char	*inacc;
-	ftnlen	inacclen;
-	char	*inseq;
-	ftnlen	inseqlen;
-	char 	*indir;
-	ftnlen	indirlen;
-	char	*infmt;
-	ftnlen	infmtlen;
-	char	*inform;
-	ftnint	informlen;
-	char	*inunf;
-	ftnlen	inunflen;
-	ftnint	*inrecl;
-	ftnint	*innrec;
-	char	*inblank;
-	ftnlen	inblanklen;
+{  flag inerr;
+   ftnint inunit;
+   char *infile;
+   ftnlen infilen;
+   ftnint   *inex;   /*parameters in standard's order*/
+   ftnint   *inopen;
+   ftnint   *innum;
+   ftnint   *innamed;
+   char   *inname;
+   ftnlen   innamlen;
+   char   *inacc;
+   ftnlen   inacclen;
+   char   *inseq;
+   ftnlen   inseqlen;
+   char    *indir;
+   ftnlen   indirlen;
+   char   *infmt;
+   ftnlen   infmtlen;
+   char   *inform;
+   ftnint   informlen;
+   char   *inunf;
+   ftnlen   inunflen;
+   ftnint   *inrecl;
+   ftnint   *innrec;
+   char   *inblank;
+   ftnlen   inblanklen;
 } inlist;
 
 #define VOID void
 
-union Multitype {	/* for multiple entry points */
-	integer1 g;
-	shortint h;
-	integer i;
-	/* longint j; */
-	real r;
-	doublereal d;
-	complex c;
-	doublecomplex z;
-	};
+union Multitype {   /* for multiple entry points */
+   integer1 g;
+   shortint h;
+   integer i;
+   /* longint j; */
+   real r;
+   doublereal d;
+   complex c;
+   doublecomplex z;
+};
 
 typedef union Multitype Multitype;
 
-/*typedef long HYPRE_Int Long;*/	/* No longer used; formerly in Namelist */
+/*typedef long HYPRE_Int Long;*/   /* No longer used; formerly in Namelist */
 
-struct Vardesc {	/* for Namelist */
-	char *name;
-	char *addr;
-	ftnlen *dims;
-	HYPRE_Int  type;
-	};
+struct Vardesc {   /* for Namelist */
+   char *name;
+   char *addr;
+   ftnlen *dims;
+   HYPRE_Int  type;
+};
+
 typedef struct Vardesc Vardesc;
 
 struct Namelist {
-	char *name;
-	Vardesc **vars;
-	HYPRE_Int nvars;
-	};
+   char *name;
+   Vardesc **vars;
+   HYPRE_Int nvars;
+};
 typedef struct Namelist Namelist;
 
 /* The following undefs are to prevent conflicts with external libraries */
@@ -201,9 +202,9 @@ typedef struct Namelist Namelist;
 #endif
 #define dmin(a,b) (doublereal)min(a,b)
 #define dmax(a,b) (doublereal)max(a,b)
-#define bit_test(a,b)	((a) >> (b) & 1)
-#define bit_clear(a,b)	((a) & ~((uinteger)1 << (b)))
-#define bit_set(a,b)	((a) |  ((uinteger)1 << (b)))
+#define bit_test(a,b)   ((a) >> (b) & 1)
+#define bit_clear(a,b)   ((a) & ~((uinteger)1 << (b)))
+#define bit_set(a,b)   ((a) |  ((uinteger)1 << (b)))
 
 /* procedure parameter types for -A and -C++ */
 
@@ -234,10 +235,10 @@ typedef /* Character */ VOID (*H_fp)();
 typedef /* Subroutine */ HYPRE_Int (*S_fp)();
 #endif
 /* E_fp is for real functions when -R is not specified */
-typedef VOID C_f;	/* complex function */
-typedef VOID H_f;	/* character function */
-typedef VOID Z_f;	/* HYPRE_Real complex function */
-typedef doublereal E_f;	/* real function with -R not specified */
+typedef VOID C_f;   /* complex function */
+typedef VOID H_f;   /* character function */
+typedef VOID Z_f;   /* HYPRE_Real complex function */
+typedef doublereal E_f;   /* real function with -R not specified */
 
 /* undef any lower-case symbols that your C compiler predefines, e.g.: */
 
@@ -265,3 +266,4 @@ typedef doublereal E_f;	/* real function with -R not specified */
 #undef vax
 #endif
 #endif
+

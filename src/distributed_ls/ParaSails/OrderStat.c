@@ -9,7 +9,7 @@
  *
  * OrderStat - Utility functions for selecting the i-th order statistic,
  * i.e., the i-th smallest element in a list of n elements.  There is one
- * user function in this file:  randomized_select(a, p, r, i), which 
+ * user function in this file:  randomized_select(a, p, r, i), which
  * selects the i-th order statistic from the HYPRE_Real precision array a[p:r].
    The contents of the array are altered by the function.
  *
@@ -21,7 +21,7 @@
 #include "OrderStat.h"
 
 /*--------------------------------------------------------------------------
- * partition - Return q such that a[p:q] has no element greater than 
+ * partition - Return q such that a[p:q] has no element greater than
  * elements in a[q+1:r].
  *--------------------------------------------------------------------------*/
 
@@ -36,22 +36,22 @@ static HYPRE_Int partition(HYPRE_Real *a, HYPRE_Int p, HYPRE_Int r)
 
     while (1)
     {
-	do
-	    j--;
-	while (a[j] > x);
+       do
+          j--;
+       while (a[j] > x);
 
-	do
-	    i++;
-	while (a[i] < x);
+       do
+          i++;
+       while (a[i] < x);
 
-	if (i < j)
-	{
-	    temp = a[i];
-	    a[i] = a[j];
-	    a[j] = temp;
-	}
-	else
-	    return j;
+       if (i < j)
+       {
+          temp = a[i];
+          a[i] = a[j];
+          a[j] = temp;
+       }
+       else
+          return j;
 
     }
 }
@@ -77,7 +77,7 @@ static HYPRE_Int randomized_partition(HYPRE_Real *a, HYPRE_Int p, HYPRE_Int r)
 }
 
 /*--------------------------------------------------------------------------
- * randomized_select - Return the i-th smallest element of the HYPRE_Real 
+ * randomized_select - Return the i-th smallest element of the HYPRE_Real
  * precision array a[p:r].  The contents of the array are altered on return.
  * "i" should range from 1 to r-p+1.
  *--------------------------------------------------------------------------*/
@@ -87,7 +87,7 @@ HYPRE_Real randomized_select(HYPRE_Real *a, HYPRE_Int p, HYPRE_Int r, HYPRE_Int 
     HYPRE_Int q, k;
 
     if (p == r)
-	return a[p];
+       return a[p];
 
     q = randomized_partition(a, p, r);
 
@@ -95,9 +95,9 @@ HYPRE_Real randomized_select(HYPRE_Real *a, HYPRE_Int p, HYPRE_Int r, HYPRE_Int 
     k = q - p + 1;
 
     if (i <= k)
-	return randomized_select(a, p, q, i);
+       return randomized_select(a, p, q, i);
     else
-	return randomized_select(a, q+1, r, i-k);
+       return randomized_select(a, q+1, r, i-k);
 }
 
 /*--------------------------------------------------------------------------

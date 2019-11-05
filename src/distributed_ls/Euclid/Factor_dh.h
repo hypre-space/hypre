@@ -12,7 +12,7 @@
 
 struct _factor_dh {
   /* dimensions of local rectangular submatrix; global matrix is n*n */
-  HYPRE_Int m, n;    
+  HYPRE_Int m, n;
 
   HYPRE_Int id;          /* this subdomain's id after reordering */
   HYPRE_Int beg_row;     /* global number of 1st locally owned row */
@@ -25,7 +25,7 @@ struct _factor_dh {
   bool blockJacobi;
 
   /* sparse row-oriented storage for locally owned submatrix */
-  HYPRE_Int *rp;       
+  HYPRE_Int *rp;
   HYPRE_Int *cval;
   REAL_DH *aval;
   HYPRE_Int *fill;
@@ -50,7 +50,7 @@ struct _factor_dh {
   hypre_MPI_Request  recv_reqLo[MAX_MPI_TASKS], recv_reqHi[MAX_MPI_TASKS]; /* used for persistent comms */
   hypre_MPI_Request  send_reqLo[MAX_MPI_TASKS], send_reqHi[MAX_MPI_TASKS]; /* used for persistent comms */
   hypre_MPI_Request  requests[MAX_MPI_TASKS];
-  hypre_MPI_Status   status[MAX_MPI_TASKS];  
+  hypre_MPI_Status   status[MAX_MPI_TASKS];
 
   bool debug;
 };

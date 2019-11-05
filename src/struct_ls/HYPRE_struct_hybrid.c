@@ -21,7 +21,7 @@ HYPRE_StructHybridCreate( MPI_Comm comm, HYPRE_StructSolver *solver )
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructHybridDestroy( HYPRE_StructSolver solver )
 {
    return( hypre_HybridDestroy( (void *) solver ) );
@@ -30,7 +30,7 @@ HYPRE_StructHybridDestroy( HYPRE_StructSolver solver )
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructHybridSetup( HYPRE_StructSolver solver,
                          HYPRE_StructMatrix A,
                          HYPRE_StructVector b,
@@ -45,7 +45,7 @@ HYPRE_StructHybridSetup( HYPRE_StructSolver solver,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructHybridSolve( HYPRE_StructSolver solver,
                          HYPRE_StructMatrix A,
                          HYPRE_StructVector b,
@@ -202,7 +202,7 @@ HYPRE_StructHybridSetPrecond( HYPRE_StructSolver         solver,
 {
    return( hypre_HybridSetPrecond( (void *) solver,
                                    (HYPRE_Int (*)(void*, void*, void*, void*)) precond,
-								   (HYPRE_Int (*)(void*, void*, void*, void*)) precond_setup,
+                                   (HYPRE_Int (*)(void*, void*, void*, void*)) precond_setup,
                                    (void *) precond_solver ) );
 }
 

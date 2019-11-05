@@ -17,7 +17,7 @@ static void scale_rhs_private(Euclid_dh ctx, HYPRE_Real *rhs);
 static void permute_vec_n2o_private(Euclid_dh ctx, HYPRE_Real *xIN, HYPRE_Real *xOUT);
 static void permute_vec_o2n_private(Euclid_dh ctx, HYPRE_Real *xIN, HYPRE_Real *xOUT);
 
-#undef __FUNC__ 
+#undef __FUNC__
 #define __FUNC__ "Euclid_dhApply"
 void Euclid_dhApply(Euclid_dh ctx, HYPRE_Real *rhs, HYPRE_Real *lhs)
 {
@@ -36,7 +36,7 @@ void Euclid_dhApply(Euclid_dh ctx, HYPRE_Real *rhs, HYPRE_Real *lhs)
     HYPRE_Int i, m = ctx->m;
     for (i=0; i<m; ++i) lhs[i] = rhs[i];
     goto END_OF_FUNCTION;
-  } 
+  }
 
   /*----------------------------------------------------------------
    * permute and scale rhs vector
@@ -94,7 +94,7 @@ END_OF_FUNCTION: ;
 
   t2 = hypre_MPI_Wtime();
   /* collective timing for triangular solves */
-  ctx->timing[TRI_SOLVE_T] += (t2 - t1); 
+  ctx->timing[TRI_SOLVE_T] += (t2 - t1);
 
   /* collective timing for setup+krylov+triSolves
      (intent is to time linear solve, but this is
@@ -110,7 +110,7 @@ END_OF_FUNCTION: ;
 }
 
 
-#undef __FUNC__ 
+#undef __FUNC__
 #define __FUNC__ "scale_rhs_private"
 void scale_rhs_private(Euclid_dh ctx, HYPRE_Real *rhs)
 {
@@ -124,12 +124,12 @@ void scale_rhs_private(Euclid_dh ctx, HYPRE_Real *rhs)
 #pragma omp for schedule(static)
 #endif
     for (i=0; i<m; ++i) { rhs[i] *= scale[i]; }
-  } 
+  }
   END_FUNC_DH
 }
 
 
-#undef __FUNC__ 
+#undef __FUNC__
 #define __FUNC__ "permute_vec_o2n_private"
 void permute_vec_o2n_private(Euclid_dh ctx, HYPRE_Real *xIN, HYPRE_Real *xOUT)
 {
@@ -141,7 +141,7 @@ void permute_vec_o2n_private(Euclid_dh ctx, HYPRE_Real *xIN, HYPRE_Real *xOUT)
 }
 
 
-#undef __FUNC__ 
+#undef __FUNC__
 #define __FUNC__ "permute_vec_n2o_private"
 void permute_vec_n2o_private(Euclid_dh ctx, HYPRE_Real *xIN, HYPRE_Real *xOUT)
 {

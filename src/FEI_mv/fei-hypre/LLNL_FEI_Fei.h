@@ -16,11 +16,11 @@
 #include "LLNL_FEI_Matrix.h"
 
 /**************************************************************************
- definition of the class to capture the FEI information 
+ definition of the class to capture the FEI information
 ---------------------------------------------------------------------------*/
 
 class LLNL_FEI_Elem_Block {
- 
+
    int    blockID_;
    int    numElems_;
    int    nodeDOF_;
@@ -54,7 +54,7 @@ public :
    int    resetRHSVectors(double s);
    int    resetSolnVectors(double s);
 
-   int    loadElemInfo(int elemID, int *elemNodeList, double **elemStiff,   
+   int    loadElemInfo(int elemID, int *elemNodeList, double **elemStiff,
                        double *elemRHS);
    int    loadElemMatrix(int elemID, int *elemNodeList, double **elemStiff);
    int    loadElemRHS(int elemID, double *elemRHS);
@@ -63,10 +63,10 @@ public :
 };
 
 /**************************************************************************
- definition of the class to capture the FEI information 
+ definition of the class to capture the FEI information
 ---------------------------------------------------------------------------*/
 
-class LLNL_FEI_Fei 
+class LLNL_FEI_Fei
 {
    MPI_Comm mpiComm_;
    int      mypid_;
@@ -128,16 +128,16 @@ public :
 
    int  initFields(int numFields, int *fieldSizes, int *fieldIDs);
 
-   int  initElemBlock(int elemBlockID, int numElements, 
-                      int numNodesPerElement, int *numFieldsPerNode, 
-                      int **nodalFieldIDs, int numElemDOFFieldsPerElement, 
+   int  initElemBlock(int elemBlockID, int numElements,
+                      int numNodesPerElement, int *numFieldsPerNode,
+                      int **nodalFieldIDs, int numElemDOFFieldsPerElement,
                       int *elemDOFFieldIDs, int interleaveStrategy);
 
-   int  initElem(int elemBlockID, int elemID, int *elemConn) 
+   int  initElem(int elemBlockID, int elemID, int *elemConn)
                       {(void) elemBlockID; (void) elemID; (void) elemConn;
                        return 0;}
 
-   int  initSharedNodes(int nShared, int *sharedIDs, int *sharedLeng, 
+   int  initSharedNodes(int nShared, int *sharedIDs, int *sharedLeng,
                         int **sharedProcs);
 
    int  initComplete() {return 0;}
@@ -150,13 +150,13 @@ public :
 
    int  resetInitialGuess(double s);
 
-   int  loadNodeBCs(int nNodes, int *nodeIDs, int fieldID, double **alpha, 
+   int  loadNodeBCs(int nNodes, int *nodeIDs, int fieldID, double **alpha,
                     double **beta, double **gamma);
 
-   int  sumInElem(int elemBlock, int elemID, int *elemConn, 
+   int  sumInElem(int elemBlock, int elemID, int *elemConn,
                   double **elemStiff, double *elemLoad, int elemFormat);
 
-   int  sumInElemMatrix(int elemBlock, int elemID, int* elemConn, 
+   int  sumInElemMatrix(int elemBlock, int elemID, int* elemConn,
                         double **elemStiffness, int elemFormat);
 
    int  sumInElemRHS(int elemBlock, int elemID, int *elemConn,
@@ -185,14 +185,14 @@ private:
    void gatherIData(int *x, int *y);
    void gatherDData(double *x, double *y);
    void sortSharedNodes();
-   void composeOrderedNodeIDList(int **nodeIDs, int **nodeIDAux, 
+   void composeOrderedNodeIDList(int **nodeIDs, int **nodeIDAux,
                                  int *totalNNodes, int *CRNNodes);
-   void findSharedNodeProcs(int *nodeIDs, int *nodeIDAux, int totalNNodes, 
+   void findSharedNodeProcs(int *nodeIDs, int *nodeIDAux, int totalNNodes,
                             int CRNNodes, int **sharedNodePInfo) ;
    void findSharedNodeOwners( int *sharedNodePInfo );
    void setupCommPattern( int *sharedNodePInfo );
-   void modifyCommPattern(int *nrecvs, int **recvlengs, int **recvprocs, 
-                          int **recvindices, int *nsends, int **sendlengs, 
+   void modifyCommPattern(int *nrecvs, int **recvlengs, int **recvprocs,
+                          int **recvindices, int *nsends, int **sendlengs,
                           int **sendprocs, int **sendIndices);
    void fetchExtEqnList(int **eqnList);
 

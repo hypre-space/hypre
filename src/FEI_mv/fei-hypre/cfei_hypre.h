@@ -70,18 +70,18 @@ int HYPRE_LSC_sumIntoSystemMatrix(LinSysCore *lsc, int numPtRows,
                      int numBlkRows, const int* blkRows, int numBlkCols,
                      const int* blkCols, const double* const* values);
 
-int HYPRE_LSC_sumIntoRHSVector(LinSysCore *lsc, int num, const double* values, 
+int HYPRE_LSC_sumIntoRHSVector(LinSysCore *lsc, int num, const double* values,
                              const int* indices);
 
 int HYPRE_LSC_matrixLoadComplete(LinSysCore *lsc);
 
-int HYPRE_LSC_enforceEssentialBC(LinSysCore *lsc, int* globalEqn, double* alpha, 
+int HYPRE_LSC_enforceEssentialBC(LinSysCore *lsc, int* globalEqn, double* alpha,
                              double* gamma, int leng);
 
 int HYPRE_LSC_enforceRemoteEssBCs(LinSysCore *lsc,int numEqns,int* globalEqns,
                              int** colIndices, int* colIndLen, double** coefs);
 
-int HYPRE_LSC_enforceOtherBC(LinSysCore *lsc, int* globalEqn, double* alpha, 
+int HYPRE_LSC_enforceOtherBC(LinSysCore *lsc, int* globalEqn, double* alpha,
                              double* beta, double* gamma, int leng);
 
 int HYPRE_LSC_putInitialGuess(LinSysCore *lsc, const int* eqnNumbers,

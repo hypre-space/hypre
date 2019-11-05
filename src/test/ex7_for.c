@@ -817,7 +817,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
             bvalues[i] = bcEval(U0,i,0);
 
 #ifdef HYPRE_FORTRAN
-         HYPRE_SStructVectorSetBoxValues(&b, &part, &bc_ilower[0], 
+         HYPRE_SStructVectorSetBoxValues(&b, &part, &bc_ilower[0],
                                          &bc_iupper[0], &var, &bvalues[0]);
 #else
          HYPRE_SStructVectorSetBoxValues(b, part, bc_ilower, bc_iupper, var, bvalues);
@@ -849,7 +849,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
             bvalues[j] = bcEval(U0,0,j);
 
 #ifdef HYPRE_FORTRAN
-         HYPRE_SStructVectorSetBoxValues(&b, &part, &bc_ilower[0], 
+         HYPRE_SStructVectorSetBoxValues(&b, &part, &bc_ilower[0],
                                          &bc_iupper[0], &var, &bvalues[0]);
 #else
          HYPRE_SStructVectorSetBoxValues(b, part, bc_ilower, bc_iupper,
@@ -1009,7 +1009,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
             bvalues[i] = 0.0;
 
 #ifdef HYPRE_FORTRAN
-         HYPRE_SStructMatrixSetBoxValues(&A, &part, &bc_ilower[0], &bc_iupper[0], 
+         HYPRE_SStructMatrixSetBoxValues(&A, &part, &bc_ilower[0], &bc_iupper[0],
                                          &var, &one,
                                          &stencil_indices[0], &bvalues[0]);
 #else

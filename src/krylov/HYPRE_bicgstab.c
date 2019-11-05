@@ -21,7 +21,7 @@
  * HYPRE_BiCGSTABDestroy
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_BiCGSTABDestroy( HYPRE_Solver solver )
 {
    return( hypre_BiCGSTABDestroy( (void *) solver ) );
@@ -31,7 +31,7 @@ HYPRE_BiCGSTABDestroy( HYPRE_Solver solver )
  * HYPRE_BiCGSTABSetup
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_BiCGSTABSetup( HYPRE_Solver solver,
                         HYPRE_Matrix A,
                         HYPRE_Vector b,
@@ -47,7 +47,7 @@ HYPRE_BiCGSTABSetup( HYPRE_Solver solver,
  * HYPRE_BiCGSTABSolve
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_BiCGSTABSolve( HYPRE_Solver solver,
                         HYPRE_Matrix A,
                         HYPRE_Vector b,
@@ -135,7 +135,7 @@ HYPRE_BiCGSTABSetPrecond( HYPRE_Solver         solver,
 {
    return( hypre_BiCGSTABSetPrecond( (void *) solver,
                                      (HYPRE_Int (*)(void*, void*, void*, void*))precond,
-									 (HYPRE_Int (*)(void*, void*, void*, void*))precond_setup,
+                                     (HYPRE_Int (*)(void*, void*, void*, void*))precond_setup,
                                      (void *) precond_solver ) );
 }
 

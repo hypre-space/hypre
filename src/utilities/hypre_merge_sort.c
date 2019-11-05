@@ -19,7 +19,7 @@
 
 /* union of two sorted (in ascending order) array arr1 and arr2 into arr3
  * Assumption: no duplicates in arr1 and arr2
- * arr3 should have enough space on entry 
+ * arr3 should have enough space on entry
  * map1 and map2 map arr1 and arr2 to arr3 */
 void hypre_union2(HYPRE_Int n1, HYPRE_BigInt *arr1, HYPRE_Int n2, HYPRE_BigInt *arr2, HYPRE_Int *n3, HYPRE_BigInt *arr3,
                   HYPRE_Int *map1, HYPRE_Int *map2)
@@ -381,7 +381,7 @@ static void hypre_parallel_merge(
 #ifdef DBG_MERGE_SORT
       printf("%s:%d\n", __FILE__, __LINE__);
 #endif
-      begin1--; begin2++; 
+      begin1--; begin2++;
    }
    while (begin2 > end2 && end1 > 0 && end2 < n2 && first1[end1 - 1] == first2[end2])
    {
@@ -437,7 +437,7 @@ static void hypre_big_parallel_merge(
 #ifdef DBG_MERGE_SORT
       printf("%s:%d\n", __FILE__, __LINE__);
 #endif
-      begin1--; begin2++; 
+      begin1--; begin2++;
    }
    while (begin2 > end2 && end1 > 0 && end2 < n2 && first1[end1 - 1] == first2[end2])
    {

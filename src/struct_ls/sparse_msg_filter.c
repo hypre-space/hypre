@@ -28,13 +28,13 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
 
    hypre_BoxArray        *compute_boxes;
    hypre_Box             *compute_box;
-                        
+
    hypre_Box             *A_dbox;
    hypre_Box             *v_dbox;
-                        
+
    HYPRE_Int              Ai;
    HYPRE_Int              vi;
-                        
+
    HYPRE_Real            *Ap;
    HYPRE_Real            *vxp;
    HYPRE_Real            *vyp;
@@ -43,20 +43,20 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
    HYPRE_Real             lambday;
    HYPRE_Real             lambdaz;
    HYPRE_Real             lambda_max;
-                        
+
    hypre_StructStencil   *stencil;
    hypre_Index           *stencil_shape;
    HYPRE_Int              stencil_size;
-                        
+
    HYPRE_Int              Astenc;
-                        
+
    hypre_Index            loop_size;
    hypre_Index            cindex;
    hypre_IndexRef         start;
    hypre_Index            startv;
    hypre_Index            stride;
    hypre_Index            stridev;
-                        
+
    HYPRE_Int              i, si, dir, k, l;
 
    /*----------------------------------------------------------
@@ -118,8 +118,8 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
          HYPRE_Real lambdax = 0.0;
          HYPRE_Real lambday = 0.0;
          HYPRE_Real lambdaz = 0.0;
-	 HYPRE_Int si, dir, Astenc;
-	 HYPRE_Real *Ap,lambda_max;
+         HYPRE_Int si, dir, Astenc;
+         HYPRE_Real *Ap,lambda_max;
 
          for (si = 0; si < stencil_size; si++)
          {
@@ -216,23 +216,23 @@ hypre_SparseMSGFilter( hypre_StructVector *visit,
 
    hypre_BoxArray        *compute_boxes;
    hypre_Box             *compute_box;
-                        
+
    hypre_Box             *e_dbox;
    hypre_Box             *v_dbox;
-                        
+
    HYPRE_Int              ei;
    HYPRE_Int              vi;
-                        
+
    HYPRE_Real            *ep;
    HYPRE_Real            *vp;
-                        
+
    hypre_Index            loop_size;
    hypre_Index            cindex;
    hypre_IndexRef         start;
    hypre_Index            startv;
    hypre_Index            stride;
    hypre_Index            stridev;
-                        
+
    HYPRE_Int              i, k, l;
 
    /*-----------------------------------------------------
@@ -310,26 +310,26 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
 
    hypre_BoxArray        *compute_boxes;
    hypre_Box             *compute_box;
-                        
+
    hypre_Box             *A_dbox;
    hypre_Box             *v_dbox;
-                        
+
    HYPRE_Real            *vxp;
    HYPRE_Real            *vyp;
    HYPRE_Real            *vzp;
 
-                        
+
    hypre_StructStencil   *stencil;
    hypre_Index           *stencil_shape;
-   HYPRE_Int              stencil_size;                        
-                        
+   HYPRE_Int              stencil_size;
+
    hypre_Index            loop_size;
    hypre_Index            cindex;
    hypre_IndexRef         start;
    hypre_Index            startv;
    hypre_Index            stride;
    hypre_Index            stridev;
-                        
+
    HYPRE_Int              i;
 
    /*----------------------------------------------------------
@@ -354,7 +354,7 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
    hypre_SetIndex3(cindex, 0, 0, 0);
 
    compute_boxes = hypre_StructGridBoxes(hypre_StructMatrixGrid(A));
-   
+
    HYPRE_Int     **data_indices = hypre_StructMatrixDataIndices(A);
    HYPRE_Complex  *matrixA_data = hypre_StructMatrixData(A);
    HYPRE_Int      *data_indices_d; /* On device */
@@ -366,7 +366,7 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
    stencil_shape_d = hypre_TAlloc(hypre_Index, stencil_size,        HYPRE_MEMORY_DEVICE);
    hypre_TMemcpy(data_indices_d, data_indices[0], HYPRE_Int, stencil_size*nboxes,
                  HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-   hypre_TMemcpy(stencil_shape_d, stencil_shape, hypre_Index, stencil_size, 
+   hypre_TMemcpy(stencil_shape_d, stencil_shape, hypre_Index, stencil_size,
                  HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
 #else
    data_indices_d  = data_indices[0];
@@ -475,20 +475,20 @@ hypre_SparseMSGFilter( hypre_StructVector *visit,
 
    hypre_BoxArray        *compute_boxes;
    hypre_Box             *compute_box;
-                        
+
    hypre_Box             *e_dbox;
    hypre_Box             *v_dbox;
-                        
+
    HYPRE_Real            *ep;
    HYPRE_Real            *vp;
-                        
+
    hypre_Index            loop_size;
    hypre_Index            cindex;
    hypre_IndexRef         start;
    hypre_Index            startv;
    hypre_Index            stride;
    hypre_Index            stridev;
-                        
+
    HYPRE_Int              i;
 
    /*-----------------------------------------------------

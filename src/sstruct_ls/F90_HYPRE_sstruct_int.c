@@ -18,7 +18,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-	
+
 /*--------------------------------------------------------------------------
  *  HYPRE_SStructPVectorSetRandomValues
  *--------------------------------------------------------------------------*/
@@ -63,7 +63,7 @@ hypre_F90_IFACE(hypre_sstructsetrandomvalues, HYPRE_SSTRUCTSETRANDOMVALUES)
 {
    *ierr = (hypre_F90_Int)
       ( hypre_SStructSetRandomValues(
-           (void *) v, hypre_F90_PassInt (seed) )); 
+           (void *) v, hypre_F90_PassInt (seed) ));
 }
 
 /*--------------------------------------------------------------------------

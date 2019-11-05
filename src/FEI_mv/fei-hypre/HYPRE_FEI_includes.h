@@ -30,7 +30,7 @@
 #else
 
 #define GlobalID int
-class Lookup { 
+class Lookup {
 public:
    Lookup() {}
    ~Lookup() {}

@@ -14,7 +14,7 @@
 /* #include "graphColor_dh.h" */
 
 static bool isThreeD;
- 
+
   /* handles for values in the 5-point (2D) or 7-point (for 3D) stencil */
 #define FRONT(a)  a[5]
 #define SOUTH(a)  a[3]
@@ -27,14 +27,14 @@ static bool isThreeD;
 
 static void setBoundary_private(HYPRE_Int node, HYPRE_Int *cval, HYPRE_Real *aval, HYPRE_Int len,
                  HYPRE_Real *rhs, HYPRE_Real bc, HYPRE_Real coeff, HYPRE_Real ctr, HYPRE_Int nabor);
-static void generateStriped(MatGenFD mg, HYPRE_Int *rp, HYPRE_Int *cval, 
+static void generateStriped(MatGenFD mg, HYPRE_Int *rp, HYPRE_Int *cval,
                                     HYPRE_Real *aval, Mat_dh A, Vec_dh b);
-static void generateBlocked(MatGenFD mg, HYPRE_Int *rp, HYPRE_Int *cval, HYPRE_Real *aval, 
+static void generateBlocked(MatGenFD mg, HYPRE_Int *rp, HYPRE_Int *cval, HYPRE_Real *aval,
                                                          Mat_dh A, Vec_dh b);
 static void getstencil(MatGenFD g, HYPRE_Int ix, HYPRE_Int iy, HYPRE_Int iz);
 
 #if 0
-static void fdaddbc(HYPRE_Int nx, HYPRE_Int ny, HYPRE_Int nz, HYPRE_Int *rp, HYPRE_Int *cval, 
+static void fdaddbc(HYPRE_Int nx, HYPRE_Int ny, HYPRE_Int nz, HYPRE_Int *rp, HYPRE_Int *cval,
              HYPRE_Int *diag, HYPRE_Real *aval, HYPRE_Real *rhs, HYPRE_Real h, MatGenFD mg);
 #endif
 
@@ -69,7 +69,7 @@ void MatGenFD_Create(MatGenFD *mg)
 
   tmp->a = tmp->b = tmp->c = 1.0;
   tmp->d = tmp->e = tmp->f = 0.0;
-  tmp->g = tmp->h = 0.0; 
+  tmp->g = tmp->h = 0.0;
 
   Parser_dhReadDouble(parser_dh,"-dx",&tmp->a);
   Parser_dhReadDouble(parser_dh,"-dy",&tmp->b);
@@ -84,7 +84,7 @@ void MatGenFD_Create(MatGenFD *mg)
 
   tmp->allocateMem = true;
 
-  tmp->A = tmp->B = tmp->C = tmp->D = tmp->E 
+  tmp->A = tmp->B = tmp->C = tmp->D = tmp->E
          =  tmp->F = tmp->G = tmp->H = konstant;
 
   tmp->bcX1 = tmp->bcX2 = tmp->bcY1 = tmp->bcY2
@@ -155,15 +155,15 @@ void MatGenFD_Run(MatGenFD mg, HYPRE_Int id, HYPRE_Int np, Mat_dh *AOut, Vec_dh 
   /* 1. compute "nice to have" values */
   /* each proc's subgrid dimension */
   mg->cc = m;
-  if (threeD) { 
+  if (threeD) {
     m = mg->m = m*m*m;
   } else {
     m = mg->m = m*m;
-  }    
+  }
 
   mg->first = id*m;
   mg->hh = 1.0/(mg->px*mg->cc - 1);
-  
+
   if (debug) {
     hypre_sprintf(msgBuf_dh, "cc (local grid dimension) = %i", mg->cc);
     SET_INFO(msgBuf_dh);
@@ -181,7 +181,7 @@ void MatGenFD_Run(MatGenFD mg, HYPRE_Int id, HYPRE_Int np, Mat_dh *AOut, Vec_dh 
   /* 2. allocate storage */
   if (mg->allocateMem) {
     A->rp = (HYPRE_Int*)MALLOC_DH((m+1)*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-    A->rp[0] = 0;  
+    A->rp[0] = 0;
     A->cval = (HYPRE_Int*)MALLOC_DH(nnz*sizeof(HYPRE_Int)); CHECK_V_ERROR
     A->aval = (HYPRE_Real*)MALLOC_DH(nnz*sizeof(HYPRE_Real)); CHECK_V_ERROR;
     /* rhs->vals = (HYPRE_Real*)MALLOC_DH(m*sizeof(HYPRE_Real)); CHECK_V_ERROR; */
@@ -199,7 +199,7 @@ void MatGenFD_Run(MatGenFD mg, HYPRE_Int id, HYPRE_Int np, Mat_dh *AOut, Vec_dh 
     generateStriped(mg, A->rp, A->cval, A->aval, A, rhs); CHECK_V_ERROR;
   } else {
     generateBlocked(mg, A->rp, A->cval, A->aval, A, rhs); CHECK_V_ERROR;
-  } 
+  }
 
   /* add in bdry conditions */
   /* only implemented for 2D mats! */
@@ -273,7 +273,7 @@ void generateStriped(MatGenFD mg, HYPRE_Int *rp, HYPRE_Int *cval, HYPRE_Real *av
         HYPRE_Int localRow = row-beg_row;
 
         /* compute current node's position in grid */
-        k = (row / plane);      
+        k = (row / plane);
         nodeRemainder = row - (k*plane); /* map row to 1st plane */
         j = nodeRemainder / m;
         i = nodeRemainder % m;
@@ -332,7 +332,7 @@ void generateStriped(MatGenFD mg, HYPRE_Int *rp, HYPRE_Int *cval, HYPRE_Real *av
         }
        rhs[localRow] = 0.0;
        ++localRow;
-       rp[localRow] = idx; 
+       rp[localRow] = idx;
 
        /* apply boundary conditions; only for 2D! */
        if (!threeD && applyBdry) {
@@ -369,15 +369,15 @@ void generateStriped(MatGenFD mg, HYPRE_Int *rp, HYPRE_Int *cval, HYPRE_Real *av
 }
 
 
-/* zero-based 
+/* zero-based
    (from Edmond Chow)
 */
-/* 
+/*
    x,y,z       -  coordinates of row, wrt naturally ordered grid
    nz, ny, nz  -  local grid dimensions, wrt 0
    P, Q        -  subdomain grid dimensions in x and y directions
 */
-HYPRE_Int rownum(const bool threeD, const HYPRE_Int x, const HYPRE_Int y, const HYPRE_Int z, 
+HYPRE_Int rownum(const bool threeD, const HYPRE_Int x, const HYPRE_Int y, const HYPRE_Int z,
    const HYPRE_Int nx, const HYPRE_Int ny, const HYPRE_Int nz, HYPRE_Int P, HYPRE_Int Q)
 {
    HYPRE_Int p, q, r;
@@ -417,8 +417,8 @@ if (myid_dh == 0) hypre_printf("x= %i y= %i z= %i  threeD= %i  p= %i q= %i r= %i
    lowerx = nx*p;
    lowery = ny*q;
    lowerz = nz*r;
-   
-   if (threeD) { 
+
+   if (threeD) {
      return startrow + nx*ny*(z-lowerz) + nx*(y-lowery) + (x-lowerx);
    } else {
      return startrow + nx*(y-lowery) + (x-lowerx);
@@ -429,7 +429,7 @@ if (myid_dh == 0) hypre_printf("x= %i y= %i z= %i  threeD= %i  p= %i q= %i r= %i
 
 void getstencil(MatGenFD g, HYPRE_Int ix, HYPRE_Int iy, HYPRE_Int iz)
 {
-  HYPRE_Int k; 
+  HYPRE_Int k;
   HYPRE_Real h = g->hh;
   HYPRE_Real hhalf = h*0.5;
   HYPRE_Real x = h*ix;
@@ -508,11 +508,11 @@ HYPRE_Real box_1(HYPRE_Real coeff, HYPRE_Real x, HYPRE_Real y, HYPRE_Real z)
 {
   static bool setup = false;
   HYPRE_Real retval = coeff;
- 
+
   /* dffusivity constants */
   static HYPRE_Real dd1 = BOX1_DD;
   static HYPRE_Real dd2 = BOX2_DD;
-  static HYPRE_Real dd3 = BOX3_DD;  
+  static HYPRE_Real dd3 = BOX3_DD;
 
   /* boxes */
   static HYPRE_Real ax1 = BOX1_X1, ay1 = BOX1_Y1;
@@ -556,7 +556,7 @@ HYPRE_Real box_1(HYPRE_Real coeff, HYPRE_Real x, HYPRE_Real y, HYPRE_Real z)
   }
 
   return retval;
-} 
+}
 
 HYPRE_Real boxThreeD(HYPRE_Real coeff, HYPRE_Real x, HYPRE_Real y, HYPRE_Real z)
 {
@@ -583,7 +583,7 @@ HYPRE_Real boxThreeD(HYPRE_Real coeff, HYPRE_Real x, HYPRE_Real y, HYPRE_Real z)
   }
 
   return retval;
-} 
+}
 
 #if 0
 HYPRE_Real box_1(HYPRE_Real coeff, HYPRE_Real x, HYPRE_Real y, HYPRE_Real z)
@@ -616,7 +616,7 @@ HYPRE_Real box_1(HYPRE_Real coeff, HYPRE_Real x, HYPRE_Real y, HYPRE_Real z)
   }
 
   return -1*retval;
-} 
+}
 #endif
 
 /* divide square into 4 quadrants; return one of
@@ -788,7 +788,7 @@ hypre_fprintf(logFile, "--- row: %i;  x >= nx*px-1; nobors2 has old value: %i\n"
        rhs[localRow] = 0.0;
 
        ++localRow;
-       rp[localRow] = idx; 
+       rp[localRow] = idx;
 
        /* apply boundary conditions; only for 2D! */
        if (!threeD && applyBdry) {
@@ -850,7 +850,7 @@ void setBoundary_private(HYPRE_Int node, HYPRE_Int *cval, HYPRE_Real *aval, HYPR
 
   /* case 1: Dirichlet Boundary condition  */
   if (bc >= 0) {
-    /* set all values to zero, set the diagonal to 1.0, set rhs to "bc" */ 
+    /* set all values to zero, set the diagonal to 1.0, set rhs to "bc" */
     *rhs = bc;
     for (i=0; i<len; ++i) {
       if (cval[i] == node) {
@@ -870,7 +870,7 @@ void setBoundary_private(HYPRE_Int node, HYPRE_Int *cval, HYPRE_Real *aval, HYPR
       if (cval[i] == node) {
         aval[i] += (ctr - coeff);
       /* adust node's right neighbor */
-      } else if (cval[i] == nabor) { 
+      } else if (cval[i] == nabor) {
         aval[i] = 2.0*coeff;
       }
     }

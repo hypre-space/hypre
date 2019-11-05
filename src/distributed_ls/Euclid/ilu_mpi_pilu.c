@@ -18,12 +18,12 @@
 /* #include "ExternalRows_dh.h" */
 /* #include "SubdomainGraph_dh.h" */
 
-static void iluk_symbolic_row_private(HYPRE_Int localRow, HYPRE_Int len, HYPRE_Int *CVAL, 
-                                      HYPRE_Real *AVAL, ExternalRows_dh extRows, 
-                                      SortedList_dh sList, Euclid_dh ctx, 
+static void iluk_symbolic_row_private(HYPRE_Int localRow, HYPRE_Int len, HYPRE_Int *CVAL,
+                                      HYPRE_Real *AVAL, ExternalRows_dh extRows,
+                                      SortedList_dh sList, Euclid_dh ctx,
                                       bool debug);
 
-static void iluk_numeric_row_private(HYPRE_Int new_row, ExternalRows_dh extRows, 
+static void iluk_numeric_row_private(HYPRE_Int new_row, ExternalRows_dh extRows,
                                       SortedList_dh slist, Euclid_dh ctx,
                                       bool debug);
 
@@ -33,7 +33,7 @@ void iluk_mpi_pilu(Euclid_dh ctx)
 {
   START_FUNC_DH
   HYPRE_Int from = ctx->from, to = ctx->to;
-  HYPRE_Int i, m; 
+  HYPRE_Int i, m;
   HYPRE_Int *n2o_row; /* *o2n_col; */
   HYPRE_Int *rp, *cval, *diag, *fill;
   HYPRE_Int beg_row, beg_rowP, end_rowP;
@@ -65,7 +65,7 @@ void iluk_mpi_pilu(Euclid_dh ctx)
   if (from != 0) idx = rp[from];
 
   /* global numbers of first and last locally owned rows,
-     with respect to A 
+     with respect to A
    */
   beg_row = sg->beg_row[myid_dh];
   /* end_row  = beg_row + sg->row_count[myid_dh]; */
@@ -95,8 +95,8 @@ void iluk_mpi_pilu(Euclid_dh ctx)
 
 
     /* compute scaling value for row(i) */
-    if (ctx->isScaled) { 
-      compute_scaling_private(i, len, AVAL, ctx); CHECK_V_ERROR; 
+    if (ctx->isScaled) {
+      compute_scaling_private(i, len, AVAL, ctx); CHECK_V_ERROR;
     }
 
     SortedList_dhReset(slist, i); CHECK_V_ERROR;
@@ -104,7 +104,7 @@ void iluk_mpi_pilu(Euclid_dh ctx)
     /* Compute symbolic factor for row(i);
        this also performs sparsification
      */
-    iluk_symbolic_row_private(i, len, CVAL, AVAL, 
+    iluk_symbolic_row_private(i, len, CVAL, AVAL,
                               extRows, slist, ctx, debug); CHECK_V_ERROR;
 
     /* enforce subdomain constraint */
@@ -143,7 +143,7 @@ void iluk_mpi_pilu(Euclid_dh ctx)
           ++idx;
         }
       }
-    } 
+    }
 
     if (debug) {
       hypre_fprintf(logFile, "ILU_pilu  ");
@@ -185,7 +185,7 @@ void iluk_mpi_pilu(Euclid_dh ctx)
       if (flag) {
         if (logFile != NULL) {
           HYPRE_Int k;
-          hypre_fprintf(logFile, "Failed to find diag in localRow %i (globalRow %i; ct= %i)\n   ", 
+          hypre_fprintf(logFile, "Failed to find diag in localRow %i (globalRow %i; ct= %i)\n   ",
                                 1+i, i+1+beg_rowP, rp[i+1] - rp[i]);
           for (k=rp[i]; k<rp[i+1]; ++k) {
             hypre_fprintf(logFile, "%i ", cval[i]+1);
@@ -197,7 +197,7 @@ void iluk_mpi_pilu(Euclid_dh ctx)
       }
     }
 /*
-    { HYPRE_Int temp = rp[i]; 
+    { HYPRE_Int temp = rp[i];
       while (cval[temp] != i+beg_row) ++temp;
       diag[i] = temp;
     }
@@ -223,15 +223,15 @@ void iluk_mpi_pilu(Euclid_dh ctx)
 
 #undef __FUNC__
 #define __FUNC__ "iluk_symbolic_row_private"
-void iluk_symbolic_row_private(HYPRE_Int localRow, HYPRE_Int len, HYPRE_Int *CVAL, 
-                               HYPRE_Real *AVAL, ExternalRows_dh extRows, 
+void iluk_symbolic_row_private(HYPRE_Int localRow, HYPRE_Int len, HYPRE_Int *CVAL,
+                               HYPRE_Real *AVAL, ExternalRows_dh extRows,
                                SortedList_dh slist, Euclid_dh ctx, bool debug)
 {
   START_FUNC_DH
   HYPRE_Int       level = ctx->level, m = ctx->m;
   HYPRE_Int       beg_row = ctx->sg->beg_row[myid_dh];
   HYPRE_Int       beg_rowP = ctx->sg->beg_rowP[myid_dh];
-  HYPRE_Int       *cval = ctx->F->cval, *diag = ctx->F->diag; 
+  HYPRE_Int       *cval = ctx->F->cval, *diag = ctx->F->diag;
   HYPRE_Int       *rp = ctx->F->rp, *fill = ctx->F->fill;
   HYPRE_Int       j, node, col;
   HYPRE_Int       end_rowP = beg_rowP + m;
@@ -262,7 +262,7 @@ void iluk_symbolic_row_private(HYPRE_Int localRow, HYPRE_Int len, HYPRE_Int *CVA
   }
 
   /* ensure diagonal entry is inserted */
-  sr.val = 0.0; 
+  sr.val = 0.0;
   sr.col = localRow+beg_rowP;
   srPtr = SortedList_dhFind(slist, &sr); CHECK_V_ERROR;
   if (srPtr == NULL) {
@@ -301,7 +301,7 @@ void iluk_symbolic_row_private(HYPRE_Int localRow, HYPRE_Int len, HYPRE_Int *CVA
         /* case 2: external row */
         else {
           len = 0;
-          ExternalRows_dhGetRow(extRows, node, &len, &cvalPtr, 
+          ExternalRows_dhGetRow(extRows, node, &len, &cvalPtr,
                                             &fillPtr, &avalPtr); CHECK_V_ERROR;
           if (debug && len == 0) {
             hypre_fprintf(stderr, "ILU_pilu  sf failed to get extern row: %i\n", 1+node);
@@ -330,7 +330,7 @@ void iluk_symbolic_row_private(HYPRE_Int localRow, HYPRE_Int len, HYPRE_Int *CVA
 
 #undef __FUNC__
 #define __FUNC__ "iluk_numeric_row_private"
-void iluk_numeric_row_private(HYPRE_Int new_row, ExternalRows_dh extRows, 
+void iluk_numeric_row_private(HYPRE_Int new_row, ExternalRows_dh extRows,
                                 SortedList_dh slist, Euclid_dh ctx, bool debug)
 {
   START_FUNC_DH
@@ -361,10 +361,10 @@ void iluk_numeric_row_private(HYPRE_Int new_row, ExternalRows_dh extRows,
 
       len = rp[local_row+1] - diag[local_row];
       cvalPtr = cval + diag[local_row];
-      avalPtr = aval + diag[local_row]; 
+      avalPtr = aval + diag[local_row];
     } else {
       len = 0;
-      ExternalRows_dhGetRow(extRows, row, &len, &cvalPtr, 
+      ExternalRows_dhGetRow(extRows, row, &len, &cvalPtr,
                                             NULL, &avalPtr); CHECK_V_ERROR;
       if (debug && len == 0) {
         hypre_fprintf(stderr, "ILU_pilu  failed to get extern row: %i\n", 1+row);
@@ -384,7 +384,7 @@ void iluk_numeric_row_private(HYPRE_Int new_row, ExternalRows_dh extRows,
       pc = srPtr->val;
 
       if (pc != 0.0) {
-        pv = *avalPtr++; 
+        pv = *avalPtr++;
         --len;
         ++cvalPtr;
         multiplier = pc / pv;

@@ -20,12 +20,12 @@
 /**************************************************************************
  * Function  : MLI_FEDataConstructElemNodeMatrix
  * Purpose   : Form element to node connectivity matrix
- * Inputs    : FEData 
+ * Inputs    : FEData
  * Outputs   : element-node matrix
  *-----------------------------------------------------------------------*/
 
-void MLI_FEDataConstructElemNodeMatrix(MPI_Comm comm, MLI_FEData *fedata, 
-			               MLI_Matrix **mli_mat)
+void MLI_FEDataConstructElemNodeMatrix(MPI_Comm comm, MLI_FEData *fedata,
+      MLI_Matrix **mli_mat)
 {
    int                i, j, rows, nNodes, nLocal, nNodesExt, nElems;
    int                elemOffset, nodeOffset, *elemIDs, *rowLengs, ind;
@@ -53,7 +53,7 @@ void MLI_FEDataConstructElemNodeMatrix(MPI_Comm comm, MLI_FEData *fedata,
    if ( nElems > 0 ) elemIDs = new int[nElems];
    else              elemIDs = NULL;
    fedata->getElemBlockGlobalIDs ( nElems, elemIDs );
- 
+
    /* ------------------------------------------------------------ */
    /* fetch element and node offsets                               */
    /* ------------------------------------------------------------ */
@@ -69,12 +69,12 @@ void MLI_FEDataConstructElemNodeMatrix(MPI_Comm comm, MLI_FEData *fedata,
    /* create HYPRE IJ matrix                                       */
    /* ------------------------------------------------------------ */
 
-   HYPRE_IJMatrixCreate(comm, elemOffset, elemOffset + nElems - 1, 
-			nodeOffset, nodeOffset + nLocal - 1 , &IJMat);
+   HYPRE_IJMatrixCreate(comm, elemOffset, elemOffset + nElems - 1,
+         nodeOffset, nodeOffset + nLocal - 1 , &IJMat);
 
    HYPRE_IJMatrixSetObjectType(IJMat, HYPRE_PARCSR);
 
-   if ( nElems > 0 ) rowLengs = new int[nElems]; 
+   if ( nElems > 0 ) rowLengs = new int[nElems];
    else              rowLengs = NULL;
    for ( i = 0; i < nElems; i++ ) rowLengs[i] = elemNNodes;
 
@@ -99,7 +99,7 @@ void MLI_FEDataConstructElemNodeMatrix(MPI_Comm comm, MLI_FEData *fedata,
    {
       rows = i + elemOffset;
       fedata->getElemNodeList(elemIDs[i], elemNNodes, nodeList);
-      for ( j = 0; j < elemNNodes; j++ ) 
+      for ( j = 0; j < elemNNodes; j++ )
       {
          ind = fedata->searchNode(nodeList[j]);
          if ( ind >= nLocal ) nodeList[j] = extMap[ind-nLocal];
@@ -130,12 +130,12 @@ void MLI_FEDataConstructElemNodeMatrix(MPI_Comm comm, MLI_FEData *fedata,
 /**************************************************************************
  * Function  : MLI_FEDataConstructElemFaceMatrix
  * Purpose   : Form element to face connectivity matrix
- * Inputs    : FEData 
+ * Inputs    : FEData
  * Outputs   : element-face matrix
  *-----------------------------------------------------------------------*/
 
-void MLI_FEDataConstructElemFaceMatrix(MPI_Comm comm, MLI_FEData *fedata, 
-			               MLI_Matrix **mli_mat )
+void MLI_FEDataConstructElemFaceMatrix(MPI_Comm comm, MLI_FEData *fedata,
+      MLI_Matrix **mli_mat )
 {
    int                nLocal, nFaces, nElems, i, j, rows, nFacesExt;
    int                elemOffset, faceOffset, *elemIDs, *rowLengs;
@@ -175,11 +175,11 @@ void MLI_FEDataConstructElemFaceMatrix(MPI_Comm comm, MLI_FEData *fedata,
    /* create HYPRE IJ matrix                                       */
    /* ------------------------------------------------------------ */
 
-   HYPRE_IJMatrixCreate(comm, elemOffset, elemOffset + nElems - 1, 
-			faceOffset, faceOffset + nLocal - 1 , &IJMat);
+   HYPRE_IJMatrixCreate(comm, elemOffset, elemOffset + nElems - 1,
+         faceOffset, faceOffset + nLocal - 1 , &IJMat);
    HYPRE_IJMatrixSetObjectType(IJMat, HYPRE_PARCSR);
 
-   rowLengs = new int[nElems]; 
+   rowLengs = new int[nElems];
    fedata->getElemNumFaces( ncols );
    for ( i = 0; i < nElems; i++ ) rowLengs[i] = ncols;
 
@@ -215,12 +215,12 @@ void MLI_FEDataConstructElemFaceMatrix(MPI_Comm comm, MLI_FEData *fedata,
 /**************************************************************************
  * Function  : MLI_FEDataConstructFaceNodeMatrix
  * Purpose   : Form face to node connectivity matrix
- * Inputs    : FEData 
+ * Inputs    : FEData
  * Outputs   : face-node matrix
  *-----------------------------------------------------------------------*/
 
-void MLI_FEDataConstructFaceNodeMatrix(MPI_Comm comm, MLI_FEData *fedata, 
-			               MLI_Matrix **mli_mat )
+void MLI_FEDataConstructFaceNodeMatrix(MPI_Comm comm, MLI_FEData *fedata,
+      MLI_Matrix **mli_mat )
 {
    int                nfaces, lfaces, efaces, nlocal, i, j, rows;
    int                faceOffset, nodeOffset, *elemIDs, *rowLengs, ncols;
@@ -264,12 +264,12 @@ void MLI_FEDataConstructFaceNodeMatrix(MPI_Comm comm, MLI_FEData *fedata,
    /* create HYPRE IJ matrix                                       */
    /* ------------------------------------------------------------ */
 
-   HYPRE_IJMatrixCreate(comm, faceOffset, faceOffset + lfaces - 1, 
-			nodeOffset, nodeOffset + nlocal - 1 , &IJMat);
+   HYPRE_IJMatrixCreate(comm, faceOffset, faceOffset + lfaces - 1,
+         nodeOffset, nodeOffset + nlocal - 1 , &IJMat);
 
    HYPRE_IJMatrixSetObjectType(IJMat, HYPRE_PARCSR);
 
-   rowLengs = new int[lfaces]; 
+   rowLengs = new int[lfaces];
    fedata->getFaceNumNodes( ncols );
    for ( i = 0; i < lfaces; i++ ) rowLengs[i] = ncols;
 
@@ -305,12 +305,12 @@ void MLI_FEDataConstructFaceNodeMatrix(MPI_Comm comm, MLI_FEData *fedata,
 /**************************************************************************
  * Function  : MLI_FEDataConstructNodeElemMatrix
  * Purpose   : Form node to element connectivity matrix
- * Inputs    : FEData 
+ * Inputs    : FEData
  * Outputs   : node-element matrix
  *-----------------------------------------------------------------------*/
 
-void MLI_FEDataConstructNodeElemMatrix(MPI_Comm comm, MLI_FEData *fedata, 
-			               MLI_Matrix **mli_mat )
+void MLI_FEDataConstructNodeElemMatrix(MPI_Comm comm, MLI_FEData *fedata,
+      MLI_Matrix **mli_mat )
 {
    int                i, j, k, nElems, nNodes, nLocal, nNodesExt;
    int                **cols, elemOffset, nodeOffset, *elemIDs, *ncols;
@@ -320,7 +320,7 @@ void MLI_FEDataConstructNodeElemMatrix(MPI_Comm comm, MLI_FEData *fedata,
    HYPRE_IJMatrix     IJMat;
    MLI_Function       *funcPtr;
    HYPRE_ParCSRMatrix *CSRMat;
-   
+
    /* ------------------------------------------------------------ */
    /* fetch number of elements, local nodes, and element IDs       */
    /* ------------------------------------------------------------ */
@@ -362,7 +362,7 @@ void MLI_FEDataConstructNodeElemMatrix(MPI_Comm comm, MLI_FEData *fedata,
    for( i = 0; i < nElems; i++ )
    {
       fedata->getElemNodeList(elemIDs[i], elemNNodes, nodeList);
-      for( j = 0; j < elemNNodes; j++ ) 
+      for( j = 0; j < elemNNodes; j++ )
          rowLengs[fedata->searchNode(nodeList[j])]++;
    }
    for ( i = 0; i < nNodes; i++ )
@@ -384,13 +384,13 @@ void MLI_FEDataConstructNodeElemMatrix(MPI_Comm comm, MLI_FEData *fedata,
    targv[0] = (char *) rowLengs;
    targv[1] = (char *) cols;
    fedata->impSpecificRequests(param_string, 2, targv);
- 
+
    /* ------------------------------------------------------------ */
    /* create HYPRE IJ matrix                                       */
    /* ------------------------------------------------------------ */
 
-   HYPRE_IJMatrixCreate(comm, nodeOffset, nodeOffset + nLocal - 1, 
-			elemOffset, elemOffset + nElems - 1 , &IJMat);
+   HYPRE_IJMatrixCreate(comm, nodeOffset, nodeOffset + nLocal - 1,
+         elemOffset, elemOffset + nElems - 1 , &IJMat);
    HYPRE_IJMatrixSetObjectType(IJMat, HYPRE_PARCSR);
    HYPRE_IJMatrixSetRowSizes(IJMat, rowLengs);
    HYPRE_IJMatrixInitialize(IJMat);
@@ -427,12 +427,12 @@ void MLI_FEDataConstructNodeElemMatrix(MPI_Comm comm, MLI_FEData *fedata,
 /**************************************************************************
  * Function  : MLI_FEDataConstructFaceElemMatrix
  * Purpose   : Form face to element connectivity matrix
- * Inputs    : FEData 
+ * Inputs    : FEData
  * Outputs   : face-element matrix
  *-----------------------------------------------------------------------*/
 
-void MLI_FEDataConstructFaceElemMatrix(MPI_Comm comm, MLI_FEData *fedata, 
-			               MLI_Matrix **mli_mat )
+void MLI_FEDataConstructFaceElemMatrix(MPI_Comm comm, MLI_FEData *fedata,
+      MLI_Matrix **mli_mat )
 {
    int                i, j, k, n, nElems, nfaces, nlocal, nFacesExt, rows;
    int                elemOffset, faceOffset, *elemIDs, *nncols, *ncols, face[8];
@@ -442,7 +442,7 @@ void MLI_FEDataConstructFaceElemMatrix(MPI_Comm comm, MLI_FEData *fedata,
    HYPRE_IJMatrix     IJMat;
    MLI_Function       *funcPtr;
    HYPRE_ParCSRMatrix *CSRMat;
-   
+
    /* ------------------------------------------------------------ */
    /* fetch number of elements, local nodes, and element IDs       */
    /* ------------------------------------------------------------ */
@@ -472,7 +472,7 @@ void MLI_FEDataConstructFaceElemMatrix(MPI_Comm comm, MLI_FEData *fedata,
    /* Update ncols and cols for shared nodes                       */
    /* ------------------------------------------------------------ */
 
-   nfaces = nlocal + nFacesExt; 
+   nfaces = nlocal + nFacesExt;
    ncols  = new int [nfaces];
    nncols = new int [nfaces];
    cols   = new int*[nfaces];
@@ -502,13 +502,13 @@ void MLI_FEDataConstructFaceElemMatrix(MPI_Comm comm, MLI_FEData *fedata,
    targv[0] = (char *) ncols;
    targv[1] = (char *) cols;
    fedata->impSpecificRequests(param_string, 2, targv);
- 
+
    /* ------------------------------------------------------------ */
    /* create HYPRE IJ matrix                                       */
    /* ------------------------------------------------------------ */
 
-   HYPRE_IJMatrixCreate(comm, faceOffset, faceOffset + nlocal - 1, 
-			elemOffset, elemOffset + nElems - 1 , &IJMat);
+   HYPRE_IJMatrixCreate(comm, faceOffset, faceOffset + nlocal - 1,
+         elemOffset, elemOffset + nElems - 1 , &IJMat);
    HYPRE_IJMatrixSetObjectType(IJMat, HYPRE_PARCSR);
    HYPRE_IJMatrixSetRowSizes(IJMat, ncols);
    HYPRE_IJMatrixInitialize(IJMat);
@@ -543,12 +543,12 @@ void MLI_FEDataConstructFaceElemMatrix(MPI_Comm comm, MLI_FEData *fedata,
 /**************************************************************************
  * Function  : MLI_FEDataConstructNodeFaceMatrix
  * Purpose   : Form node to face connectivity matrix
- * Inputs    : FEData 
+ * Inputs    : FEData
  * Outputs   : node-face matrix
  *-----------------------------------------------------------------------*/
 
-void MLI_FEDataConstructNodeFaceMatrix(MPI_Comm comm, MLI_FEData *fedata, 
-			               MLI_Matrix **mli_mat )
+void MLI_FEDataConstructNodeFaceMatrix(MPI_Comm comm, MLI_FEData *fedata,
+      MLI_Matrix **mli_mat )
 {
    int            i, j, k, n, nfaces, nNodes, nlocal, nNodesExt, **cols, rows;
    int            faceOffset, nodeOffset, efaces, *nncols, *ncols, node[8];
@@ -557,7 +557,7 @@ void MLI_FEDataConstructNodeFaceMatrix(MPI_Comm comm, MLI_FEData *fedata,
    HYPRE_IJMatrix     IJMat;
    MLI_Function       *funcPtr;
    HYPRE_ParCSRMatrix *CSRMat;
-   
+
    /* ------------------------------------------------------------ */
    /* fetch number of faces, local nodes, and face IDs             */
    /* ------------------------------------------------------------ */
@@ -593,7 +593,7 @@ void MLI_FEDataConstructNodeFaceMatrix(MPI_Comm comm, MLI_FEData *fedata,
    /* update_node_elements again since the info is in the args     */
    /* ------------------------------------------------------------ */
 
-   nNodes = nlocal + nNodesExt; 
+   nNodes = nlocal + nNodesExt;
    ncols  = new int [nNodes];
    nncols = new int [nNodes];
    cols   = new int*[nNodes];
@@ -623,13 +623,13 @@ void MLI_FEDataConstructNodeFaceMatrix(MPI_Comm comm, MLI_FEData *fedata,
    targv[0] = (char *) ncols;
    targv[1] = (char *) cols;
    fedata->impSpecificRequests(param_string, 2, targv);
- 
+
    /* ------------------------------------------------------------ */
    /* create HYPRE IJ matrix                                       */
    /* ------------------------------------------------------------ */
 
-   HYPRE_IJMatrixCreate(comm, nodeOffset, nodeOffset + nlocal - 1, 
-			faceOffset, faceOffset + nfaces - 1 , &IJMat);
+   HYPRE_IJMatrixCreate(comm, nodeOffset, nodeOffset + nlocal - 1,
+         faceOffset, faceOffset + nfaces - 1 , &IJMat);
    HYPRE_IJMatrixSetObjectType(IJMat, HYPRE_PARCSR);
    HYPRE_IJMatrixSetRowSizes(IJMat, ncols);
    HYPRE_IJMatrixInitialize(IJMat);
@@ -665,11 +665,11 @@ void MLI_FEDataConstructNodeFaceMatrix(MPI_Comm comm, MLI_FEData *fedata,
 /*************************************************************************
  * Function  : MLI_FEDataAgglomerateElemsLocal
  * Purpose   : Form macroelements
- * Inputs    : element-element matrix 
+ * Inputs    : element-element matrix
  * Outputs   : macro-element labels
  *-----------------------------------------------------------------------*/
 
-void MLI_FEDataAgglomerateElemsLocal(MLI_Matrix *elemMatrix, 
+void MLI_FEDataAgglomerateElemsLocal(MLI_Matrix *elemMatrix,
                                      int **macroLabelsOut)
 {
    int                 mypid, nprocs, startElem, endElem, localNElems;
@@ -692,7 +692,7 @@ void MLI_FEDataAgglomerateElemsLocal(MLI_Matrix *elemMatrix,
    comm    = hypre_ParCSRMatrixComm(hypreEE);
    MPI_Comm_rank(comm,&mypid);
    MPI_Comm_size(comm,&nprocs);
-   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) hypreEE, 
+   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) hypreEE,
                                         &partition);
    startElem   = partition[mypid];
    endElem     = partition[mypid+1] - 1;
@@ -941,7 +941,7 @@ void MLI_FEDataAgglomerateElemsLocal(MLI_Matrix *elemMatrix,
                denseRow2[elemIndex] = -1;
                noRoot[elemIndex] = 1;
             }
-            for ( jj = 0; jj < localNElems; jj++ ) 
+            for ( jj = 0; jj < localNElems; jj++ )
                denseRow[jj] = denseRow2[jj];
             for ( jj = 0; jj < localNElems; jj++ )
             {
@@ -988,7 +988,7 @@ void MLI_FEDataAgglomerateElemsLocal(MLI_Matrix *elemMatrix,
          {
             parent = -1;
             for ( jj = 0; jj < localNElems; jj++ )
-               if (macroLabels[jj] < 0 && noRoot[jj] == 0) 
+               if (macroLabels[jj] < 0 && noRoot[jj] == 0)
                   { nextElem = jj; break; }
          }
          if ( nextElem == -1 ) loopFlag = 0;
@@ -1027,7 +1027,7 @@ void MLI_FEDataAgglomerateElemsLocal(MLI_Matrix *elemMatrix,
       }
       for ( ii = 0; ii < localNElems; ii++ )
       {
-         if ( macroLabels[ii] <= -10 ) 
+         if ( macroLabels[ii] <= -10 )
             macroLabels[ii] = - macroLabels[ii] - 10;
       }
       if ( count == 0 ) loopFlag = 0;
@@ -1064,11 +1064,11 @@ void MLI_FEDataAgglomerateElemsLocal(MLI_Matrix *elemMatrix,
 /*************************************************************************
  * Function  : MLI_FEDataAgglomerateElemsLocalOld (Old version)
  * Purpose   : Form macroelements
- * Inputs    : element-element matrix 
+ * Inputs    : element-element matrix
  * Outputs   : macro-element labels
  *-----------------------------------------------------------------------*/
 
-void MLI_FEDataAgglomerateElemsLocalOld(MLI_Matrix *elemMatrix, 
+void MLI_FEDataAgglomerateElemsLocalOld(MLI_Matrix *elemMatrix,
                                      int **macroLabelsOut)
 {
    hypre_ParCSRMatrix  *hypreEE;
@@ -1088,7 +1088,7 @@ void MLI_FEDataAgglomerateElemsLocalOld(MLI_Matrix *elemMatrix,
    comm    = hypre_ParCSRMatrixComm(hypreEE);
    MPI_Comm_rank(comm,&mypid);
    MPI_Comm_size(comm,&nprocs);
-   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) hypreEE, 
+   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) hypreEE,
                                         &partition);
    startElem   = partition[mypid];
    endElem     = partition[mypid+1] - 1;
@@ -1103,15 +1103,15 @@ void MLI_FEDataAgglomerateElemsLocalOld(MLI_Matrix *elemMatrix,
    for ( ielem = 0; ielem < localNElems; ielem++ ) macroLabels[ielem] = -1;
 
    /*-----------------------------------------------------------------
-    * this array is used to expand a sparse row into a full row 
+    * this array is used to expand a sparse row into a full row
     *-----------------------------------------------------------------*/
 
    denseRow = hypre_TAlloc(int,  localNElems , HYPRE_MEMORY_HOST);
    for ( ielem = 0; ielem < localNElems; ielem++ ) denseRow[ielem] = 0;
 
    /*-----------------------------------------------------------------
-    * allocate memory for the output data (assume no more than 
-    * 100 elements in any macroelements 
+    * allocate memory for the output data (assume no more than
+    * 100 elements in any macroelements
     *-----------------------------------------------------------------*/
 
    nMacros = 0;
@@ -1148,8 +1148,8 @@ void MLI_FEDataAgglomerateElemsLocalOld(MLI_Matrix *elemMatrix,
                      curIndex  = colIndex;
                   }
                }
-            }    
-         }    
+            }
+         }
          hypre_ParCSRMatrixRestoreRow(hypreEE,rowNum,&rowLeng,&cols,&vals);
 
          /* begin agglomeration using element ielem as root */
@@ -1158,7 +1158,7 @@ void MLI_FEDataAgglomerateElemsLocalOld(MLI_Matrix *elemMatrix,
          macroList[elemCount++] = ielem;
          denseRow[ielem] = -1;
          while (curWeight >= 4 && curWeight > maxWeight && elemCount < 100)
-         { 
+         {
             maxWeight = curWeight;
             macroList[elemCount++] = curIndex;
             denseRow[curIndex] = -1;
@@ -1169,7 +1169,7 @@ void MLI_FEDataAgglomerateElemsLocalOld(MLI_Matrix *elemMatrix,
                colIndex = cols[jj] - startElem;
                if ( colIndex >= 0 && colIndex < localNElems )
                {
-                  if ( denseRow[colIndex] >= 0 ) 
+                  if ( denseRow[colIndex] >= 0 )
                   {
                      denseRow[colIndex] += (int) vals[jj];
                      if ( ((int) denseRow[colIndex]) > curWeight )
@@ -1181,11 +1181,11 @@ void MLI_FEDataAgglomerateElemsLocalOld(MLI_Matrix *elemMatrix,
                }
             }
             hypre_ParCSRMatrixRestoreRow(hypreEE,rowNum,&rowLeng,&cols,&vals);
-         } 
+         }
 
          /* if macroelement has size > 1, register it and reset denseRow */
 
-         if ( elemCount >= 4 ) 
+         if ( elemCount >= 4 )
          {
             for ( jj = 0; jj < elemCount; jj++ )
             {
@@ -1198,7 +1198,7 @@ void MLI_FEDataAgglomerateElemsLocalOld(MLI_Matrix *elemMatrix,
             for ( jj = 0; jj < localNElems; jj++ )
                if ( denseRow[jj] > 0 ) denseRow[jj] = 0;
             macroSizes[nMacros++] = elemCount;
-         } 
+         }
          else denseRow[ielem] = 0;
       }
    }
@@ -1227,14 +1227,14 @@ void MLI_FEDataAgglomerateElemsLocalOld(MLI_Matrix *elemMatrix,
                   curIndex  = macroNumber;
                }
             }
-         } 
+         }
          hypre_ParCSRMatrixRestoreRow(hypreEE,rowNum,&rowLeng,&cols,&vals);
          if ( curIndex >= 0 ) macroLabels[ielem] = curIndex;
-      } 
-   } 
+      }
+   }
 
    /*-----------------------------------------------------------------
-    * finally lone zones will be all by themselves 
+    * finally lone zones will be all by themselves
     *-----------------------------------------------------------------*/
 
    for ( ielem = 0; ielem < localNElems; ielem++ )
@@ -1247,7 +1247,7 @@ void MLI_FEDataAgglomerateElemsLocalOld(MLI_Matrix *elemMatrix,
    }
 
    /*-----------------------------------------------------------------
-    * initialize the output arrays 
+    * initialize the output arrays
     *-----------------------------------------------------------------*/
 
    printf("number of macroelements = %d (%d) : %e\n", nMacros, localNElems,

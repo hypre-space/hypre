@@ -27,7 +27,7 @@ HYPRE_ParCSRHybridCreate( HYPRE_Solver *solver )
  * HYPRE_ParCSRHybridDestroy
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_ParCSRHybridDestroy( HYPRE_Solver solver )
 {
    return( hypre_AMGHybridDestroy( (void *) solver ) );
@@ -37,7 +37,7 @@ HYPRE_ParCSRHybridDestroy( HYPRE_Solver solver )
  * HYPRE_ParCSRHybridSetup
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_ParCSRHybridSetup( HYPRE_Solver solver,
                          HYPRE_ParCSRMatrix A,
                          HYPRE_ParVector b,
@@ -53,7 +53,7 @@ HYPRE_ParCSRHybridSetup( HYPRE_Solver solver,
  * HYPRE_ParCSRHybridSolve
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_ParCSRHybridSolve( HYPRE_Solver solver,
                          HYPRE_ParCSRMatrix A,
                          HYPRE_ParVector b,
@@ -231,7 +231,7 @@ HYPRE_ParCSRHybridSetPrecond( HYPRE_Solver         solver,
 {
    return( hypre_AMGHybridSetPrecond( (void *) solver,
                                       (HYPRE_Int (*)(void*, void*, void*, void*) ) precond,
-									  (HYPRE_Int (*)(void*, void*, void*, void*) ) precond_setup,
+                                      (HYPRE_Int (*)(void*, void*, void*, void*) ) precond_setup,
                                       (void *) precond_solver ) );
 }
 
@@ -265,7 +265,7 @@ HYPRE_Int
 HYPRE_ParCSRHybridSetStrongThreshold( HYPRE_Solver solver,
                                       HYPRE_Real   strong_threshold    )
 {
-   return( hypre_AMGHybridSetStrongThreshold( (void *) solver, 
+   return( hypre_AMGHybridSetStrongThreshold( (void *) solver,
                                               strong_threshold ) );
 }
 

@@ -189,7 +189,7 @@ HYPRE_SStructGridSetFEMOrdering(HYPRE_SStructGrid  grid,
  * Indexes should increase from {\tt ilower} to {\tt iupper}.  It is not
  * necessary that indexes increase from {\tt nbor\_ilower} to {\tt
  * nbor\_iupper}.
- * 
+ *
  * The {\tt index\_map} describes the mapping of indexes 0, 1, and 2 on part
  * {\tt part} to the corresponding indexes on part {\tt nbor\_part}.  For
  * example, triple (1, 2, 0) means that indexes 0, 1, and 2 on part {\tt part}
@@ -252,7 +252,7 @@ HYPRE_SStructGridSetNeighborPart(HYPRE_SStructGrid  grid,
  * The {\tt shared\_offset} is used in the same way as {\tt offset}, but with
  * respect to the box extents {\tt shared\_ilower} and {\tt shared\_iupper} on
  * part {\tt shared\_part}.
- * 
+ *
  * The {\tt index\_map} describes the mapping of indexes 0, 1, and 2 on part
  * {\tt part} to the corresponding indexes on part {\tt shared\_part}.  For
  * example, triple (1, 2, 0) means that indexes 0, 1, and 2 on part {\tt part}
@@ -468,7 +468,7 @@ HYPRE_SStructGraphAssemble(HYPRE_SStructGraph graph);
 /**
  * Set the storage type of the associated matrix object.  It is used before
  * AddEntries and Assemble to compute the right ranks in the graph.
- * 
+ *
  * NOTE: This routine is only necessary for implementation reasons, and will
  * eventually be removed.
  *
@@ -745,7 +745,7 @@ HYPRE_SStructMatrixGetBoxValues2(HYPRE_SStructMatrix  matrix,
  * ``all''.  For example, if {\tt part} and {\tt to\_var} are set to -1, then
  * the boolean is applied to stencil entries on all parts that couple variable
  * {\tt var} to all other variables.
- * 
+ *
  * By default, matrices are assumed to be nonsymmetric.  Significant
  * storage savings can be made if the matrix is symmetric.
  **/

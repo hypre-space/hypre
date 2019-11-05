@@ -15,7 +15,7 @@
 #define switchSize 200
 
 /******************************************************************************
- * BSGS relaxation scheme 
+ * BSGS relaxation scheme
  *****************************************************************************/
 
 /******************************************************************************
@@ -58,7 +58,7 @@ MLI_Solver_BSGS::~MLI_Solver_BSGS()
 }
 
 /******************************************************************************
- * setup 
+ * setup
  *--------------------------------------------------------------------------*/
 
 int MLI_Solver_BSGS::setup(MLI_Matrix *Amat_in)
@@ -69,7 +69,7 @@ int MLI_Solver_BSGS::setup(MLI_Matrix *Amat_in)
    Amat_ = Amat_in;
 
    /*-----------------------------------------------------------------
-    * set up coloring scheme 
+    * set up coloring scheme
     *-----------------------------------------------------------------*/
 
    if      ( scheme_ == 0 ) doProcColoring();
@@ -93,7 +93,7 @@ int MLI_Solver_BSGS::setup(MLI_Matrix *Amat_in)
    cleanBlocks();
 
    /*-----------------------------------------------------------------
-    * fetch the extended (to other processors) portion of the matrix 
+    * fetch the extended (to other processors) portion of the matrix
     *-----------------------------------------------------------------*/
 
    composeOverlappedMatrix();
@@ -155,8 +155,8 @@ int MLI_Solver_BSGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
    f           = (hypre_ParVector *) f_in->getVector();
    fData       = hypre_VectorData(hypre_ParVectorLocalVector(f));
    partition   = hypre_ParVectorPartitioning(f);
-   MPI_Comm_rank(comm,&mypid);  
-   MPI_Comm_size(comm,&nprocs);  
+   MPI_Comm_rank(comm,&mypid);
+   MPI_Comm_size(comm,&nprocs);
    startRow    = partition[mypid];
    endRow      = partition[mypid+1] - 1;
    nRecvBefore = 0;
@@ -174,7 +174,7 @@ int MLI_Solver_BSGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
          offNRows_   = recvStarts[nRecvs];
          for ( iP = 0; iP < offNRows_; iP++ )
             totalOffNNZ += offRowLengths_[iP];
-      } 
+      }
    }
 
    /*-----------------------------------------------------------------
@@ -240,7 +240,7 @@ int MLI_Solver_BSGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
    /*-----------------------------------------------------------------
     * perform block SGS sweeps
     *-----------------------------------------------------------------*/
- 
+
    for ( iS = 0; iS < nSweeps_; iS++ )
    {
       if ( relaxWeights_ != NULL ) relaxWeight = relaxWeights_[iS];
@@ -276,7 +276,7 @@ int MLI_Solver_BSGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
          if ( iC == myColor_ )
          {
             offOffset = offIRow = 0;
-            if ( offRowLengths_ != NULL ) 
+            if ( offRowLengths_ != NULL )
             {
                offOffset = 0;
                offIRow--;
@@ -327,11 +327,11 @@ int MLI_Solver_BSGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
                      for (jcol = iStart; jcol < iEnd; jcol++)
                      {
                         colIndex = *tmpJ;
-                        if ( colIndex >= localNRows )   
+                        if ( colIndex >= localNRows )
                            res -= (*tmpA) * vExtData[colIndex-localNRows];
-                        else if ( colIndex >= 0 )   
+                        else if ( colIndex >= 0 )
                            res -= (*tmpA) * uData[colIndex];
-                        tmpA++; 
+                        tmpA++;
                         tmpJ++;
                      }
                      offOffset += iEnd;
@@ -339,8 +339,8 @@ int MLI_Solver_BSGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
                   }
                }
 #ifdef HAVE_ESSL
-	   if ( blockSize_ > switchSize )
-	   {
+               if ( blockSize_ > switchSize )
+               {
 #endif
                hypre_VectorSize(sluB) = blkLeng;
                hypre_VectorSize(sluX) = blkLeng;
@@ -357,20 +357,20 @@ int MLI_Solver_BSGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
             else
             {
                for (irow = 0; irow < blkLeng; irow++) dbleX[irow] = dbleB[irow];
-	       dpps(esslMatrices_[iB], blkLeng, dbleX, 1);
+               dpps(esslMatrices_[iB], blkLeng, dbleX, 1);
             }
 #endif
 
                for ( irow = blockStartRow; irow <= blockEndRow; irow++ )
                {
                   if ( irow < startRow )
-                     vExtData[offIRow-blockSize_+irow-blockStartRow+1] += 
+                     vExtData[offIRow-blockSize_+irow-blockStartRow+1] +=
                                relaxWeight * dbleX[irow-blockStartRow];
                   else if ( irow <= endRow )
-                     uData[irow-startRow] += relaxWeight * 
+                     uData[irow-startRow] += relaxWeight *
                                              dbleX[irow-blockStartRow];
-                  else 
-                     vExtData[offIRow-blockSize_+irow-blockStartRow+1] += 
+                  else
+                     vExtData[offIRow-blockSize_+irow-blockStartRow+1] +=
                                relaxWeight * dbleX[irow-blockStartRow];
                }
             }
@@ -441,7 +441,7 @@ int MLI_Solver_BSGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
                         }
                      }
                      dbleB[irow-blockStartRow] = res;
-                  } 
+                  }
                   else
                   {
                      offIRow--;
@@ -454,9 +454,9 @@ int MLI_Solver_BSGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
                      for (jcol = iStart; jcol < iEnd; jcol++)
                      {
                         colIndex = *tmpJ;
-                        if ( colIndex >= localNRows )   
+                        if ( colIndex >= localNRows )
                            res -= (*tmpA) * vExtData[colIndex-localNRows];
-                        else if ( colIndex >= 0 )   
+                        else if ( colIndex >= 0 )
                            res -= (*tmpA) * uData[colIndex];
                         tmpA++; tmpJ++;
                      }
@@ -483,20 +483,20 @@ int MLI_Solver_BSGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
             else
             {
                for (irow = 0; irow < blkLeng; irow++) dbleX[irow] = dbleB[irow];
-	       dpps(esslMatrices_[iB], blkLeng, dbleX, 1);
+               dpps(esslMatrices_[iB], blkLeng, dbleX, 1);
             }
 #endif
 
                for ( irow = blockStartRow; irow <= blockEndRow; irow++ )
                {
                   if ( irow < startRow )
-                     vExtData[offIRow+irow-blockStartRow] += 
+                     vExtData[offIRow+irow-blockStartRow] +=
                                relaxWeight * dbleX[irow-blockStartRow];
                   else if ( irow <= endRow )
                      uData[irow-startRow] += relaxWeight *
                                              dbleX[irow-blockStartRow];
-                  else 
-                     vExtData[offIRow+irow-blockStartRow] += 
+                  else
+                     vExtData[offIRow+irow-blockStartRow] +=
                                relaxWeight * dbleX[irow-blockStartRow];
                }
             }
@@ -520,8 +520,8 @@ int MLI_Solver_BSGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
          start = hypre_ParCSRCommPkgSendMapStart(commPkg, iP);
          for (jP=start;jP<hypre_ParCSRCommPkgSendMapStart(commPkg,iP+1);jP++)
          {
-            iS = hypre_ParCSRCommPkgSendMapElmt(commPkg,jP); 
-            uData[iS] = (uData[iS] + vBufData[index++]) * 0.5; 
+            iS = hypre_ParCSRCommPkgSendMapElmt(commPkg,jP);
+            uData[iS] = (uData[iS] + vBufData[index++]) * 0.5;
             fData[iS] *= 2.0;
          }
       }
@@ -544,7 +544,7 @@ int MLI_Solver_BSGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
    }
 #endif
 
-   return(relaxError); 
+   return(relaxError);
 }
 
 /******************************************************************************
@@ -572,7 +572,7 @@ int MLI_Solver_BSGS::setParams(char *paramString, int argc, char **argv)
    }
    else if ( !strcmp(param1, "relaxWeight") )
    {
-      if ( argc != 2 && argc != 1 ) 
+      if ( argc != 2 && argc != 1 )
       {
          printf("Solver_BSGS::setParams ERROR : needs 1 or 2 args.\n");
          return 1;
@@ -616,21 +616,21 @@ int MLI_Solver_BSGS::composeOverlappedMatrix()
    MPI_Status  *status;
    int         i, j, k, mypid, nprocs, *partition, startRow, endRow;
    int         localNRows, extNRows, nSends, *sendProcs, nRecvs;
-   int         *recvProcs, *recvStarts, proc, offset, length, reqNum; 
+   int         *recvProcs, *recvStarts, proc, offset, length, reqNum;
    int         totalSendNnz, totalRecvNnz, index, base, totalSends;
    int         totalRecvs, rowNum, rowSize, *colInd, *sendStarts;
-   int         limit, *iSendBuf, curNnz, *recvIndices; 
+   int         limit, *iSendBuf, curNnz, *recvIndices;
    double      *dSendBuf, *colVal;
    hypre_ParCSRCommPkg *commPkg;
 
    /*-----------------------------------------------------------------
-    * fetch machine and matrix parameters 
+    * fetch machine and matrix parameters
     *-----------------------------------------------------------------*/
 
    A = (hypre_ParCSRMatrix *) Amat_->getMatrix();
    comm = hypre_ParCSRMatrixComm(A);
-   MPI_Comm_rank(comm,&mypid);  
-   MPI_Comm_size(comm,&nprocs);  
+   MPI_Comm_rank(comm,&mypid);
+   MPI_Comm_size(comm,&nprocs);
    if ( ! useOverlap_ || nprocs <= 1 ) return 0;
    HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) A, &partition);
    startRow   = partition[mypid];
@@ -652,7 +652,7 @@ int MLI_Solver_BSGS::composeOverlappedMatrix()
       nRecvs     = hypre_ParCSRCommPkgNumRecvs(commPkg);
       recvProcs  = hypre_ParCSRCommPkgRecvProcs(commPkg);
       recvStarts = hypre_ParCSRCommPkgRecvVecStarts(commPkg);
-      for ( i = 0; i < nRecvs; i++ ) 
+      for ( i = 0; i < nRecvs; i++ )
          extNRows += ( recvStarts[i+1] - recvStarts[i] );
       requests = new MPI_Request[nRecvs+nSends];
       totalSends  = sendStarts[nSends];
@@ -662,14 +662,14 @@ int MLI_Solver_BSGS::composeOverlappedMatrix()
       recvIndices = hypre_ParCSRMatrixColMapOffd(A);
       if ( totalRecvs > 0 ) offRowIndices_ = new int[totalRecvs];
       else                  offRowIndices_ = NULL;
-      for ( i = 0; i < totalRecvs; i++ ) 
+      for ( i = 0; i < totalRecvs; i++ )
          offRowIndices_[i] = recvIndices[i];
       offNRows_ = totalRecvs;
    }
    else nRecvs = nSends = offNRows_ = totalRecvs = totalSends = 0;
 
    /*-----------------------------------------------------------------
-    * construct offRowLengths 
+    * construct offRowLengths
     *-----------------------------------------------------------------*/
 
    reqNum = 0;
@@ -678,7 +678,7 @@ int MLI_Solver_BSGS::composeOverlappedMatrix()
       proc   = recvProcs[i];
       offset = recvStarts[i];
       length = recvStarts[i+1] - offset;
-      MPI_Irecv(&(offRowLengths_[offset]), length, MPI_INT, proc, 
+      MPI_Irecv(&(offRowLengths_[offset]), length, MPI_INT, proc,
                 17304, comm, &(requests[reqNum++]));
    }
    if ( totalSends > 0 ) iSendBuf = new int[totalSends];
@@ -698,7 +698,7 @@ int MLI_Solver_BSGS::composeOverlappedMatrix()
          totalSendNnz += rowSize;
          hypre_ParCSRMatrixRestoreRow(A,rowNum,&rowSize,&colInd,NULL);
       }
-      MPI_Isend(&(iSendBuf[offset]), length, MPI_INT, proc, 17304, comm, 
+      MPI_Isend(&(iSendBuf[offset]), length, MPI_INT, proc, 17304, comm,
                 &(requests[reqNum++]));
    }
    status = new MPI_Status[reqNum];
@@ -707,7 +707,7 @@ int MLI_Solver_BSGS::composeOverlappedMatrix()
    if ( totalSends > 0 ) delete [] iSendBuf;
 
    /*-----------------------------------------------------------------
-    * construct offCols 
+    * construct offCols
     *-----------------------------------------------------------------*/
 
    totalRecvNnz = 0;
@@ -725,7 +725,7 @@ int MLI_Solver_BSGS::composeOverlappedMatrix()
       length = recvStarts[i+1] - offset;
       curNnz = 0;
       for (j = 0; j < length; j++) curNnz += offRowLengths_[offset+j];
-      MPI_Irecv(&(offCols_[totalRecvNnz]), curNnz, MPI_INT, proc, 17305, 
+      MPI_Irecv(&(offCols_[totalRecvNnz]), curNnz, MPI_INT, proc, 17305,
                 comm, &(requests[reqNum++]));
       totalRecvNnz += curNnz;
    }
@@ -743,12 +743,12 @@ int MLI_Solver_BSGS::composeOverlappedMatrix()
       {
          rowNum = hypre_ParCSRCommPkgSendMapElmt(commPkg,j) + startRow;
          hypre_ParCSRMatrixGetRow(A,rowNum,&rowSize,&colInd,NULL);
-         for (k = 0; k < rowSize; k++) 
+         for (k = 0; k < rowSize; k++)
             iSendBuf[totalSendNnz++] = colInd[k];
          hypre_ParCSRMatrixRestoreRow(A,rowNum,&rowSize,&colInd,NULL);
       }
       length = totalSendNnz - base;
-      MPI_Isend(&(iSendBuf[base]), length, MPI_INT, proc, 17305, comm, 
+      MPI_Isend(&(iSendBuf[base]), length, MPI_INT, proc, 17305, comm,
                 &(requests[reqNum++]));
    }
    status = new MPI_Status[reqNum];
@@ -757,7 +757,7 @@ int MLI_Solver_BSGS::composeOverlappedMatrix()
    if ( totalSendNnz > 0 ) delete [] iSendBuf;
 
    /*-----------------------------------------------------------------
-    * construct offVals 
+    * construct offVals
     *-----------------------------------------------------------------*/
 
    reqNum = totalRecvNnz = 0;
@@ -768,7 +768,7 @@ int MLI_Solver_BSGS::composeOverlappedMatrix()
       length  = recvStarts[i+1] - offset;
       curNnz = 0;
       for (j = 0; j < length; j++) curNnz += offRowLengths_[offset+j];
-      MPI_Irecv(&(offVals_[totalRecvNnz]), curNnz, MPI_DOUBLE, proc, 
+      MPI_Irecv(&(offVals_[totalRecvNnz]), curNnz, MPI_DOUBLE, proc,
                 17306, comm, &(requests[reqNum++]));
       totalRecvNnz += curNnz;
    }
@@ -786,12 +786,12 @@ int MLI_Solver_BSGS::composeOverlappedMatrix()
       {
          rowNum = hypre_ParCSRCommPkgSendMapElmt(commPkg,j) + startRow;
          hypre_ParCSRMatrixGetRow(A,rowNum,&rowSize,NULL,&colVal);
-         for (k = 0; k < rowSize; k++) 
+         for (k = 0; k < rowSize; k++)
             dSendBuf[totalSendNnz++] = colVal[k];
          hypre_ParCSRMatrixRestoreRow(A,rowNum,&rowSize,NULL,&colVal);
       }
       length = totalSendNnz - base;
-      MPI_Isend(&(dSendBuf[base]), length, MPI_DOUBLE, proc, 17306, comm, 
+      MPI_Isend(&(dSendBuf[base]), length, MPI_DOUBLE, proc, 17306, comm,
                 &(requests[reqNum++]));
    }
    status = new MPI_Status[reqNum];
@@ -805,13 +805,13 @@ int MLI_Solver_BSGS::composeOverlappedMatrix()
 }
 
 /******************************************************************************
- * build the blocks 
+ * build the blocks
  *--------------------------------------------------------------------------*/
 
 int MLI_Solver_BSGS::buildBlocks()
 {
    int      iB, iP, mypid, nprocs, *partition, startRow, endRow;
-   int      localNRows, nRecvs, *recvProcs, *recvStarts, nRecvBefore=0; 
+   int      localNRows, nRecvs, *recvProcs, *recvStarts, nRecvBefore=0;
    int      offRowOffset, offRowNnz, blockStartRow, blockEndRow;
    int      irow, jcol, colIndex, rowSize, *colInd, localRow, localNnz;
    int      blkLeng, *csrIA, *csrJA;
@@ -824,23 +824,23 @@ int MLI_Solver_BSGS::buildBlocks()
    MLI_Matrix          *mliMat;
    MLI_Function        *funcPtr;
 #ifdef HAVE_ESSL
-   int	    index, offset, rowIndex;
+   int    index, offset, rowIndex;
    double   *esslMatrix;
 #endif
 
    /*-----------------------------------------------------------------
-    * fetch matrix information 
+    * fetch matrix information
     *-----------------------------------------------------------------*/
 
    comm = hypre_ParCSRMatrixComm(A);
-   MPI_Comm_rank(comm,&mypid);  
-   MPI_Comm_size(comm,&nprocs);  
+   MPI_Comm_rank(comm,&mypid);
+   MPI_Comm_size(comm,&nprocs);
    HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) A, &partition);
    startRow   = partition[mypid];
    endRow     = partition[mypid+1] - 1;
    localNRows = endRow - startRow + 1;
    free( partition );
-   if ( blockSize_ == 1 ) 
+   if ( blockSize_ == 1 )
    {
       nBlocks_ = localNRows;
       blockLengths_ = new int[nBlocks_];
@@ -862,7 +862,7 @@ int MLI_Solver_BSGS::buildBlocks()
    else nRecvs = 0;
 
    /*-----------------------------------------------------------------
-    * compute block information (blockLengths_) 
+    * compute block information (blockLengths_)
     *-----------------------------------------------------------------*/
 
    nBlocks_ = ( localNRows + blockSize_ - 1 + offNRows_ ) / blockSize_;
@@ -871,8 +871,8 @@ int MLI_Solver_BSGS::buildBlocks()
    for ( iB = 0; iB < nBlocks_; iB++ ) blockLengths_[iB] = blockSize_;
    blockLengths_[nBlocks_-1] = localNRows+offNRows_-blockSize_*(nBlocks_-1);
    maxBlkLeng_ = 0;
-   for ( iB = 0; iB < nBlocks_; iB++ ) 
-      maxBlkLeng_ = ( blockLengths_[iB] > maxBlkLeng_ ) ? 
+   for ( iB = 0; iB < nBlocks_; iB++ )
+      maxBlkLeng_ = ( blockLengths_[iB] > maxBlkLeng_ ) ?
                        blockLengths_[iB] : maxBlkLeng_;
 
    /*-----------------------------------------------------------------
@@ -885,7 +885,7 @@ int MLI_Solver_BSGS::buildBlocks()
 #endif
    strcpy( sName, "SeqSuperLU" );
    blockSolvers_ = new MLI_Solver_SeqSuperLU*[nBlocks_];
-   for ( iB = 0; iB < nBlocks_; iB++ ) 
+   for ( iB = 0; iB < nBlocks_; iB++ )
       blockSolvers_[iB] = new MLI_Solver_SeqSuperLU(sName);
    funcPtr = hypre_TAlloc(MLI_Function, 1, HYPRE_MEMORY_HOST);
 #ifdef HAVE_ESSL
@@ -906,7 +906,7 @@ int MLI_Solver_BSGS::buildBlocks()
       blockEndRow   = blockStartRow + blkLeng - 1;
       localNnz      = 0;
 #ifdef HAVE_ESSL
-	if ( blockSize_ > switchSize )
+      if ( blockSize_ > switchSize )
       {
 #endif
       for ( irow = blockStartRow; irow <= blockEndRow; irow++ )
@@ -937,7 +937,7 @@ int MLI_Solver_BSGS::buildBlocks()
                colIndex = colInd[jcol];
                if ((colIndex >= blockStartRow) && (colIndex <= blockEndRow))
                {
-                  csrJA[localNnz] = colIndex - blockStartRow; 
+                  csrJA[localNnz] = colIndex - blockStartRow;
                   csrAA[localNnz++] = colVal[jcol];
                }
             }
@@ -953,7 +953,7 @@ int MLI_Solver_BSGS::buildBlocks()
                colIndex = colInd[jcol];
                if ((colIndex >= blockStartRow) && (colIndex <= blockEndRow))
                {
-                  csrJA[localNnz] = colIndex - blockStartRow; 
+                  csrJA[localNnz] = colIndex - blockStartRow;
                   csrAA[localNnz++] = colVal[jcol];
                }
             }
@@ -1042,12 +1042,12 @@ int MLI_Solver_BSGS::adjustOffColIndices()
    MPI_Comm           comm;
 
    /*-----------------------------------------------------------------
-    * fetch machine and matrix parameters 
+    * fetch machine and matrix parameters
     *-----------------------------------------------------------------*/
 
    A = (hypre_ParCSRMatrix *) Amat_->getMatrix();
    comm = hypre_ParCSRMatrixComm(A);
-   MPI_Comm_rank(comm,&mypid);  
+   MPI_Comm_rank(comm,&mypid);
    HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) A, &partition);
    startRow   = partition[mypid];
    endRow     = partition[mypid+1] - 1;
@@ -1086,7 +1086,7 @@ int MLI_Solver_BSGS::cleanBlocks()
 {
    int iB;
 
-   if ( blockSolvers_ != NULL ) 
+   if ( blockSolvers_ != NULL )
    {
       for ( iB = 0; iB < nBlocks_; iB++ ) delete blockSolvers_[iB];
       delete blockSolvers_;
@@ -1096,7 +1096,7 @@ int MLI_Solver_BSGS::cleanBlocks()
    if ( offRowLengths_ != NULL ) delete [] offRowLengths_;
    if ( offCols_       != NULL ) delete [] offCols_;
    if ( offVals_       != NULL ) delete [] offVals_;
-   nBlocks_       = 0; 
+   nBlocks_       = 0;
    blockLengths_  = NULL;
    blockSolvers_  = NULL;
    offNRows_      = 0;
@@ -1134,13 +1134,13 @@ int MLI_Solver_BSGS::doProcColoring()
    MPI_Comm_rank(comm, &mypid);
    MPI_Comm_size(comm, &nprocs);
 
-   commGraphI = new int[nprocs+1]; 
+   commGraphI = new int[nprocs+1];
    recvCounts = new int[nprocs];
    MPI_Allgather(&nSends, 1, MPI_INT, recvCounts, 1, MPI_INT, comm);
    commGraphI[0] = 0;
    for ( i = 1; i <= nprocs; i++ )
       commGraphI[i] = commGraphI[i-1] + recvCounts[i-1];
-   commGraphJ = new int[commGraphI[nprocs]]; 
+   commGraphJ = new int[commGraphI[nprocs]];
    MPI_Allgatherv(sendProcs, nSends, MPI_INT, commGraphJ,
                   recvCounts, commGraphI, MPI_INT, comm);
    delete [] recvCounts;
@@ -1165,7 +1165,7 @@ int MLI_Solver_BSGS::doProcColoring()
          pColor = colors[pIndex];
          if ( pColor >= 0 ) colorsAux[pColor] = 1;
       }
-      for ( j = 0; j < nprocs; j++ ) 
+      for ( j = 0; j < nprocs; j++ )
          if ( colorsAux[j] < 0 ) break;
       colors[i] = j;
       for ( j = commGraphI[i]; j < commGraphI[i+1]; j++ )
@@ -1178,7 +1178,7 @@ int MLI_Solver_BSGS::doProcColoring()
    delete [] colorsAux;
    myColor_ = colors[mypid];
    numColors_ = 0;
-   for ( j = 0; j < nprocs; j++ ) 
+   for ( j = 0; j < nprocs; j++ )
       if ( colors[j]+1 > numColors_ ) numColors_ = colors[j]+1;
    delete [] colors;
    return 0;

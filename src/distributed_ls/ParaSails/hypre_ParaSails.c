@@ -31,7 +31,7 @@ typedef struct
    hypre_ParaSails_struct;
 
 /*--------------------------------------------------------------------------
- * balance_info - Dump out information about the partitioning of the 
+ * balance_info - Dump out information about the partitioning of the
  * matrix, which affects load balance
  *--------------------------------------------------------------------------*/
 
@@ -120,7 +120,7 @@ static void matvec_timing(MPI_Comm comm, Matrix *mat)
 
    hypre_MPI_Comm_rank(comm, &mype);
    if (mype == 0)
-      hypre_printf("Timings: %f %f %f Serial: %f %f %f\n", 
+      hypre_printf("Timings: %f %f %f Serial: %f %f %f\n",
                    trial1, trial2, trial3, trial4, trial5, trial6);
 
    fflush(stdout);
@@ -131,7 +131,7 @@ static void matvec_timing(MPI_Comm comm, Matrix *mat)
 #endif
 
 /*--------------------------------------------------------------------------
- * convert_matrix - Create and convert distributed matrix to native 
+ * convert_matrix - Create and convert distributed matrix to native
  * data structure of ParaSails
  *--------------------------------------------------------------------------*/
 
@@ -216,7 +216,7 @@ HYPRE_Int hypre_ParaSailsSetup(hypre_ParaSails obj,
 
    ParaSailsDestroy(internal->ps);
 
-   internal->ps = ParaSailsCreate(internal->comm, 
+   internal->ps = ParaSailsCreate(internal->comm,
                                   mat->beg_row, mat->end_row, sym);
 
    ParaSailsSetupPattern(internal->ps, mat, thresh, nlevels);
@@ -256,7 +256,7 @@ HYPRE_Int hypre_ParaSailsSetupPattern(hypre_ParaSails obj,
 
    ParaSailsDestroy(internal->ps);
 
-   internal->ps = ParaSailsCreate(internal->comm, 
+   internal->ps = ParaSailsCreate(internal->comm,
                                   mat->beg_row, mat->end_row, sym);
 
    ParaSailsSetupPattern(internal->ps, mat, thresh, nlevels);
@@ -301,7 +301,7 @@ HYPRE_Int hypre_ParaSailsSetupValues(hypre_ParaSails obj,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_ParaSailsApply - Apply the ParaSails preconditioner to an array 
+ * hypre_ParaSailsApply - Apply the ParaSails preconditioner to an array
  * "u", and return the result in the array "v".
  *--------------------------------------------------------------------------*/
 
