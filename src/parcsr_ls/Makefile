@@ -83,6 +83,7 @@ FILES =\
  par_amg_solveT.c\
  par_cg_relax_wt.c\
  par_coarsen.c\
+ par_coarsen_device.c\
  par_cgc_coarsen.c\
  par_cheby.c\
  par_coarse_parms.c\
@@ -91,9 +92,13 @@ FILES =\
  par_cycle.c\
  par_add_cycle.c\
  par_difconv.c\
+ par_gauss_elim.c\
  par_gsmg.c\
  par_indepset.c\
+ par_indepset_device.c\
  par_interp.c\
+ par_interp_device.c\
+ par_interp_trunc_device.c\
  par_jacobi_interp.c\
  par_multi_interp.c\
  par_laplace.c\
@@ -115,6 +120,7 @@ FILES =\
  par_schwarz.c\
  par_stats.c\
  par_strength.c\
+ par_strength_device.c\
  par_sv_interp.c\
  par_sv_interp_ln.c\
  par_vardifconv.c\

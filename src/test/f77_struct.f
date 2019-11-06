@@ -1,16 +1,16 @@
-c     Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
-c     HYPRE Project Developers. See the top-level COPYRIGHT file for details.
-c
-c     SPDX-License-Identifier: (Apache-2.0 OR MIT)
+!     Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+!     HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+!
+!     SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
-c-----------------------------------------------------------------------
-c Test driver for structured matrix interface (structured storage)
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+! Test driver for structured matrix interface (structured storage)
+!-----------------------------------------------------------------------
  
-c-----------------------------------------------------------------------
-c Standard 7-point laplacian in 3D with grid and anisotropy determined
-c as user settings.
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+! Standard 7-point laplacian in 3D with grid and anisotropy determined
+! as user settings.
+!-----------------------------------------------------------------------
 
       program test
 
@@ -38,22 +38,22 @@ c-----------------------------------------------------------------------
       integer             num_iterations
       double precision    final_res_norm
                      
-c     HYPRE_StructMatrix  A
-c     HYPRE_StructVector  b
-c     HYPRE_StructVector  x
+!     HYPRE_StructMatrix  A
+!     HYPRE_StructVector  b
+!     HYPRE_StructVector  x
 
       integer*8           A
       integer*8           b
       integer*8           x
 
-c     HYPRE_StructSolver  solver
-c     HYPRE_StructSolver  precond
+!     HYPRE_StructSolver  solver
+!     HYPRE_StructSolver  precond
 
       integer*8           solver
       integer*8           precond
 
-c     HYPRE_StructGrid    grid
-c     HYPRE_StructStencil stencil
+!     HYPRE_StructGrid    grid
+!     HYPRE_StructStencil stencil
 
       integer*8           grid
       integer*8           stencil
@@ -82,9 +82,9 @@ c     HYPRE_StructStencil stencil
       data zero          / 0 /
       data one           / 1 /
 
-c-----------------------------------------------------------------------
-c     Initialize MPI
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!     Initialize MPI
+!-----------------------------------------------------------------------
 
       call MPI_INIT(ierr)
 
@@ -92,9 +92,9 @@ c-----------------------------------------------------------------------
       call MPI_COMM_SIZE(MPI_COMM_WORLD, num_procs, ierr)
 
 
-c-----------------------------------------------------------------------
-c     Set defaults
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!     Set defaults
+!-----------------------------------------------------------------------
 
       dim = 3
 
@@ -123,40 +123,40 @@ c-----------------------------------------------------------------------
       istart(2) = -3
       istart(3) = -3
 
-c-----------------------------------------------------------------------
-c     Read options
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!     Read options
+!-----------------------------------------------------------------------
  
-c     open( 5, file='struct_linear_solver.in', status='old')
-c
-c     read( 5, *) dim
-c
-c     read( 5, *) nx
-c     read( 5, *) ny
-c     read( 5, *) nz
-c
-c     read( 5, *) Px
-c     read( 5, *) Py
-c     read( 5, *) Pz
-c
-c     read( 5, *) bx
-c     read( 5, *) by
-c     read( 5, *) bz
-c
-c     read( 5, *) cx
-c     read( 5, *) cy
-c     read( 5, *) cz
-c
-c     read( 5, *) n_pre
-c     read( 5, *) n_post
-c
-c     read( 5, *) solver_id
-c
-c     close( 5 )
+!     open( 5, file='struct_linear_solver.in', status='old')
+!
+!     read( 5, *) dim
+!
+!     read( 5, *) nx
+!     read( 5, *) ny
+!     read( 5, *) nz
+!
+!     read( 5, *) Px
+!     read( 5, *) Py
+!     read( 5, *) Pz
+!
+!     read( 5, *) bx
+!     read( 5, *) by
+!     read( 5, *) bz
+!
+!     read( 5, *) cx
+!     read( 5, *) cy
+!     read( 5, *) cz
+!
+!     read( 5, *) n_pre
+!     read( 5, *) n_post
+!
+!     read( 5, *) solver_id
+!
+!     close( 5 )
 
-c-----------------------------------------------------------------------
-c     Check a few things
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!     Check a few things
+!-----------------------------------------------------------------------
 
       if ((Px*Py*Pz) .ne. num_procs) then
          print *, 'Error: Invalid number of processors or topology'
@@ -178,9 +178,9 @@ c-----------------------------------------------------------------------
          stop
       endif
 
-c-----------------------------------------------------------------------
-c     Print driver parameters
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!     Print driver parameters
+!-----------------------------------------------------------------------
 
       if (myid .eq. 0) then
          print *, 'Running with these driver parameters:'
@@ -193,45 +193,45 @@ c-----------------------------------------------------------------------
          print *, '  solver ID       = ', solver_id
       endif
 
-c-----------------------------------------------------------------------
-c     Set up dxyz for PFMG solver
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!     Set up dxyz for PFMG solver
+!-----------------------------------------------------------------------
 
       dxyz(1) = dsqrt(1.d0 / cx)
       dxyz(2) = dsqrt(1.d0 / cy)
       dxyz(3) = dsqrt(1.d0 / cz)
 
-c-----------------------------------------------------------------------
-c     Compute some grid and processor information
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!     Compute some grid and processor information
+!-----------------------------------------------------------------------
 
       if (dim .eq. 1) then
          volume  = nx
          nblocks = bx
 
-c        compute p from Px and myid
+!        compute p from Px and myid
          p = mod(myid,Px)
       elseif (dim .eq. 2) then
          volume  = nx*ny
          nblocks = bx*by
 
-c        compute p,q from Px, Py and myid
+!        compute p,q from Px, Py and myid
          p = mod(myid,Px)
          q = mod(((myid - p)/Px),Py)
       elseif (dim .eq. 3) then
          volume  = nx*ny*nz
          nblocks = bx*by*bz
 
-c        compute p,q,r from Px,Py,Pz and myid
+!        compute p,q,r from Px,Py,Pz and myid
          p = mod(myid,Px)
          q = mod((( myid - p)/Px),Py)
          r = (myid - (p + Px*q))/(Px*Py)
       endif
 
-c----------------------------------------------------------------------
-c    Compute ilower and iupper from (p,q,r), (bx,by,bz), and (nx,ny,nz)
-c    and set up the grid structure.
-c----------------------------------------------------------------------
+!----------------------------------------------------------------------
+!    Compute ilower and iupper from (p,q,r), (bx,by,bz), and (nx,ny,nz)
+!    and set up the grid structure.
+!----------------------------------------------------------------------
 
       ib = 1
       if (dim .eq. 1) then
@@ -273,9 +273,9 @@ c----------------------------------------------------------------------
       enddo
       call HYPRE_StructGridAssemble(grid, ierr)
 
-c----------------------------------------------------------------------
-c     Compute the offsets and set up the stencil structure.
-c----------------------------------------------------------------------
+!----------------------------------------------------------------------
+!     Compute the offsets and set up the stencil structure.
+!----------------------------------------------------------------------
 
       if (dim .eq. 1) then
          offsets(1,1) = -1
@@ -308,9 +308,9 @@ c----------------------------------------------------------------------
      & offsets(1,s), ierr)
       enddo
 
-c-----------------------------------------------------------------------
-c     Set up the matrix structure
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!     Set up the matrix structure
+!-----------------------------------------------------------------------
 
       do i=1,dim
          A_num_ghost(2*i - 1) = 1
@@ -323,9 +323,9 @@ c-----------------------------------------------------------------------
       call HYPRE_StructMatrixSetNumGhost(A, A_num_ghost, ierr)
       call HYPRE_StructMatrixInitialize(A, ierr)
 
-c-----------------------------------------------------------------------
-c     Set the coefficients for the grid
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!     Set the coefficients for the grid
+!-----------------------------------------------------------------------
 
       do s=1,(dim + 1)
          stencil_indices(s) = s - 1
@@ -352,9 +352,9 @@ c-----------------------------------------------------------------------
      & iupper(1,ib), (dim+1), stencil_indices, values, ierr)
       enddo
 
-c-----------------------------------------------------------------------
-c     Zero out stencils reaching to real boundary
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!     Zero out stencils reaching to real boundary
+!-----------------------------------------------------------------------
 
       do i=1,volume
          values(i) = 0.0
@@ -373,12 +373,12 @@ c-----------------------------------------------------------------------
       enddo
 
       call HYPRE_StructMatrixAssemble(A, ierr)
-c     call HYPRE_StructMatrixPrint(A, zero, ierr)
-c     call HYPRE_StructMatrixPrint("driver.out.A", A, zero, ierr)
+!     call HYPRE_StructMatrixPrint(A, zero, ierr)
+!     call HYPRE_StructMatrixPrint("driver.out.A", A, zero, ierr)
 
-c-----------------------------------------------------------------------
-c     Set up the rhs and initial guess
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!     Set up the rhs and initial guess
+!-----------------------------------------------------------------------
 
       call HYPRE_StructVectorCreate(MPI_COMM_WORLD, grid, b, ierr)
       call HYPRE_StructVectorInitialize(b, ierr)
@@ -390,7 +390,7 @@ c-----------------------------------------------------------------------
      & iupper(1,ib), values, ierr)
       enddo
       call HYPRE_StructVectorAssemble(b, ierr)
-c     call HYPRE_StructVectorPrint("driver.out.b", b, zero, ierr)
+!     call HYPRE_StructVectorPrint("driver.out.b", b, zero, ierr)
 
       call HYPRE_StructVectorCreate(MPI_COMM_WORLD, grid, x, ierr)
       call HYPRE_StructVectorInitialize(x, ierr)
@@ -402,15 +402,15 @@ c     call HYPRE_StructVectorPrint("driver.out.b", b, zero, ierr)
      & iupper(1,ib), values, ierr)
       enddo
       call HYPRE_StructVectorAssemble(x, ierr)
-c     call HYPRE_StructVectorPrint(x, zero, ierr)
-c     call HYPRE_StructVectorPrint("driver.out.x0", x, zero, ierr)
+!     call HYPRE_StructVectorPrint(x, zero, ierr)
+!     call HYPRE_StructVectorPrint("driver.out.x0", x, zero, ierr)
  
-c-----------------------------------------------------------------------
-c     Solve the linear system
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!     Solve the linear system
+!-----------------------------------------------------------------------
 
-c     General solver parameters, passing hard coded constants
-c     will break the interface.
+!     General solver parameters, passing hard coded constants
+!     will break the interface.
       maxiter = 50
       dscgmaxiter = 100
       pcgmaxiter = 50
@@ -418,7 +418,7 @@ c     will break the interface.
       convtol = 0.9
 
       if (solver_id .eq. 0) then
-c        Solve the system using SMG
+!        Solve the system using SMG
 
          call HYPRE_StructSMGCreate(MPI_COMM_WORLD, solver, ierr)
          call HYPRE_StructSMGSetMemoryUse(solver, zero, ierr)
@@ -439,17 +439,17 @@ c        Solve the system using SMG
      & ierr)
          call HYPRE_StructSMGDestroy(solver, ierr)
       elseif (solver_id .eq. 1) then
-c        Solve the system using PFMG
+!        Solve the system using PFMG
 
          call HYPRE_StructPFMGCreate(MPI_COMM_WORLD, solver, ierr)
          call HYPRE_StructPFMGSetMaxIter(solver, maxiter, ierr)
          call HYPRE_StructPFMGSetTol(solver, tol, ierr)
          call HYPRE_StructPFMGSetRelChange(solver, zero, ierr)
-c        weighted Jacobi = 1; red-black GS = 2
+!        weighted Jacobi = 1; red-black GS = 2
          call HYPRE_StructPFMGSetRelaxType(solver, one, ierr)
          call HYPRE_StructPFMGSetNumPreRelax(solver, n_pre, ierr)
          call HYPRE_StructPFMGSetNumPostRelax(solver, n_post, ierr)
-c        call HYPRE_StructPFMGSetDxyz(solver, dxyz, ierr)
+!        call HYPRE_StructPFMGSetDxyz(solver, dxyz, ierr)
          call HYPRE_StructPFMGSetLogging(solver, one, ierr)
          call HYPRE_StructPFMGSetup(solver, A, b, x, ierr)
 
@@ -461,7 +461,7 @@ c        call HYPRE_StructPFMGSetDxyz(solver, dxyz, ierr)
      & ierr)
          call HYPRE_StructPFMGDestroy(solver, ierr)
       elseif ((solver_id .gt. 9) .and. (solver_id .lt. 20)) then
-c        Solve the system using CG
+!        Solve the system using CG
 
          precond_id = -1
          call HYPRE_StructPCGCreate(MPI_COMM_WORLD, solver, ierr)
@@ -472,7 +472,7 @@ c        Solve the system using CG
          call HYPRE_StructPCGSetLogging(solver, one, ierr)
 
          if (solver_id .eq. 10) then
-c           use symmetric SMG as preconditioner
+!           use symmetric SMG as preconditioner
             precond_id = 0
             maxiter = 1
             tol = 0.0
@@ -489,7 +489,7 @@ c           use symmetric SMG as preconditioner
             call HYPRE_StructPCGSetPrecond(solver, precond_id, precond,
      & ierr)
          elseif (solver_id .eq. 11) then
-c           use symmetric PFMG as preconditioner
+!           use symmetric PFMG as preconditioner
             precond_id = 1
             maxiter = 1
             tol = 0.0
@@ -498,24 +498,24 @@ c           use symmetric PFMG as preconditioner
      & ierr)
             call HYPRE_StructPFMGSetMaxIter(precond, maxiter, ierr)
             call HYPRE_StructPFMGSetTol(precond, tol, ierr)
-c           weighted Jacobi = 1; red-black GS = 2
+!           weighted Jacobi = 1; red-black GS = 2
             call HYPRE_StructPFMGSetRelaxType(precond, one, ierr)
             call HYPRE_StructPFMGSetNumPreRelax(precond, n_pre, ierr)
             call HYPRE_StructPFMGSetNumPostRelax(precond, n_post, ierr)
-c           call HYPRE_StructPFMGSetDxyz(precond, dxyz, ierr)
+!           call HYPRE_StructPFMGSetDxyz(precond, dxyz, ierr)
             call HYPRE_StructPFMGSetLogging(precond, zero, ierr)
 
             call HYPRE_StructPCGSetPrecond(solver, precond_id, precond,
      & ierr)
          elseif (solver_id .eq. 18) then
-c           use diagonal scaling as preconditioner
+!           use diagonal scaling as preconditioner
             precond_id = 8
             precond = zero
 
             call HYPRE_StructPCGSetPrecond(solver, precond_id, precond,
      & ierr)
          elseif (solver_id .eq. 19) then
-c           use diagonal scaling as preconditioner
+!           use diagonal scaling as preconditioner
             precond_id = 9
 
             call HYPRE_StructPCGSetPrecond(solver, precond_id, precond,
@@ -538,7 +538,7 @@ c           use diagonal scaling as preconditioner
             call HYPRE_StructPFMGDestroy(precond, ierr)
          endif
       elseif ((solver_id .gt. 19) .and. (solver_id .le. 30)) then
-c        Solve the system using Hybrid
+!        Solve the system using Hybrid
 
          precond_id = -1
          call HYPRE_StructHybridCreate(MPI_COMM_WORLD, solver, ierr)
@@ -551,7 +551,7 @@ c        Solve the system using Hybrid
          call HYPRE_StructHybridSetLogging(solver, one, ierr)
 
          if (solver_id .eq. 20) then
-c           use symmetric SMG as preconditioner
+!           use symmetric SMG as preconditioner
             precond_id = 0
             maxiter = 1
             tol = 0.0
@@ -565,7 +565,7 @@ c           use symmetric SMG as preconditioner
             call HYPRE_StructSMGSetNumPostRelax(precond, n_post, ierr)
             call HYPRE_StructSMGSetLogging(precond, zero, ierr)
          elseif (solver_id .eq. 21) then
-c           use symmetric PFMG as preconditioner
+!           use symmetric PFMG as preconditioner
             precond_id = 1
             maxiter = 1
             tol = 0.0
@@ -574,11 +574,11 @@ c           use symmetric PFMG as preconditioner
      & ierr)
             call HYPRE_StructPFMGSetMaxIter(precond, maxiter, ierr)
             call HYPRE_StructPFMGSetTol(precond, tol, ierr)
-c           weighted Jacobi = 1; red-black GS = 2
+!           weighted Jacobi = 1; red-black GS = 2
             call HYPRE_StructPFMGSetRelaxType(precond, one, ierr)
             call HYPRE_StructPFMGSetNumPreRelax(precond, n_pre, ierr)
             call HYPRE_StructPFMGSetNumPostRelax(precond, n_post, ierr)
-c           call HYPRE_StructPFMGSetDxyz(precond, dxyz, ierr)
+!           call HYPRE_StructPFMGSetDxyz(precond, dxyz, ierr)
             call HYPRE_StructPFMGSetLogging(precond, zero, ierr)
          endif
 
@@ -602,20 +602,20 @@ c           call HYPRE_StructPFMGSetDxyz(precond, dxyz, ierr)
          endif
       endif
 
-c-----------------------------------------------------------------------
-c     Print the solution and other info
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!     Print the solution and other info
+!-----------------------------------------------------------------------
 
-c  call HYPRE_StructVectorPrint("driver.out.x", x, zero, ierr)
+!  call HYPRE_StructVectorPrint("driver.out.x", x, zero, ierr)
 
       if (myid .eq. 0) then
          print *, 'Iterations = ', num_iterations
          print *, 'Final Relative Residual Norm = ', final_res_norm
       endif
 
-c-----------------------------------------------------------------------
-c     Finalize things
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!     Finalize things
+!-----------------------------------------------------------------------
 
       call HYPRE_StructGridDestroy(grid, ierr)
       call HYPRE_StructStencilDestroy(stencil, ierr)
@@ -623,7 +623,7 @@ c-----------------------------------------------------------------------
       call HYPRE_StructVectorDestroy(b, ierr)
       call HYPRE_StructVectorDestroy(x, ierr)
 
-c     Finalize MPI
+!     Finalize MPI
 
       call MPI_FINALIZE(ierr)
 

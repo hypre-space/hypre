@@ -5,19 +5,17 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
-#if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && defined(HYPRE_USING_CUDA)
+/* CUDA reducer class */
 
-#ifndef CUDART_VERSION
-#error CUDART_VERSION Undefined!
-#elif (CUDART_VERSION >= 9000)
-#define WARP_SHFL_DOWN(mask, var, delta)  __shfl_down_sync(mask, var, delta)
-#elif (CUDART_VERSION <= 8000)
-#define WARP_SHFL_DOWN(mask, var, delta)  __shfl_down(var, delta);
-#endif
+#ifndef HYPRE_CUDA_REDUCER_H
+#define HYPRE_CUDA_REDUCER_H
 
+#if defined(HYPRE_USING_CUDA)
+#if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS)
+
+#ifdef __cplusplus
 extern "C++" {
-
-extern void *cuda_reduce_buffer;
+#endif
 
 template<typename T> void OneBlockReduce(T *d_arr, HYPRE_Int N, T *h_out);
 
@@ -99,7 +97,7 @@ HYPRE_Real warpReduceSum(HYPRE_Real val)
 #ifdef __CUDA_ARCH__
   for (HYPRE_Int offset = warpSize/2; offset > 0; offset /= 2)
   {
-    val += WARP_SHFL_DOWN(0xFFFFFFFF, val, offset);
+    val += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val, offset);
   }
 #endif
   return val;
@@ -110,10 +108,10 @@ HYPRE_double4 warpReduceSum(HYPRE_double4 val) {
 #ifdef __CUDA_ARCH__
   for (HYPRE_Int offset = warpSize / 2; offset > 0; offset /= 2)
   {
-    val.x += WARP_SHFL_DOWN(0xFFFFFFFF, val.x, offset);
-    val.y += WARP_SHFL_DOWN(0xFFFFFFFF, val.y, offset);
-    val.z += WARP_SHFL_DOWN(0xFFFFFFFF, val.z, offset);
-    val.w += WARP_SHFL_DOWN(0xFFFFFFFF, val.w, offset);
+    val.x += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.x, offset);
+    val.y += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.y, offset);
+    val.z += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.z, offset);
+    val.w += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.w, offset);
   }
 #endif
   return val;
@@ -124,12 +122,12 @@ HYPRE_double6 warpReduceSum(HYPRE_double6 val) {
 #ifdef __CUDA_ARCH__
   for (HYPRE_Int offset = warpSize / 2; offset > 0; offset /= 2)
   {
-    val.x += WARP_SHFL_DOWN(0xFFFFFFFF, val.x, offset);
-    val.y += WARP_SHFL_DOWN(0xFFFFFFFF, val.y, offset);
-    val.z += WARP_SHFL_DOWN(0xFFFFFFFF, val.z, offset);
-    val.w += WARP_SHFL_DOWN(0xFFFFFFFF, val.w, offset);
-    val.u += WARP_SHFL_DOWN(0xFFFFFFFF, val.u, offset);
-    val.v += WARP_SHFL_DOWN(0xFFFFFFFF, val.v, offset);
+    val.x += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.x, offset);
+    val.y += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.y, offset);
+    val.z += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.z, offset);
+    val.w += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.w, offset);
+    val.u += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.u, offset);
+    val.v += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.v, offset);
   }
 #endif
   return val;
@@ -143,8 +141,10 @@ T blockReduceSum(T val)
 #ifdef __CUDA_ARCH__
    //static __shared__ T shared[32]; // Shared mem for 32 partial sums
    __shared__ T shared[32];        // Shared mem for 32 partial sums
-   HYPRE_Int lane = threadIdx.x % warpSize;
-   HYPRE_Int wid  = threadIdx.x / warpSize;
+   //HYPRE_Int lane = threadIdx.x % warpSize;
+   //HYPRE_Int wid  = threadIdx.x / warpSize;
+   HYPRE_Int lane = threadIdx.x & (warpSize - 1);
+   HYPRE_Int wid  = threadIdx.x >> 5;
 
    val = warpReduceSum(val);       // Each warp performs partial reduction
 
@@ -174,6 +174,23 @@ T blockReduceSum(T val)
    return val;
 }
 
+template<typename T>
+__global__ void
+OneBlockReduceKernel(T *arr, HYPRE_Int N)
+{
+   T sum;
+   sum = 0.0;
+   if (threadIdx.x < N)
+   {
+      sum = arr[threadIdx.x];
+   }
+   sum = blockReduceSum(sum);
+   if (threadIdx.x == 0)
+   {
+      arr[0] = sum;
+   }
+}
+
 /* Reducer class */
 template <typename T>
 struct ReduceSum
@@ -181,24 +198,27 @@ struct ReduceSum
    T init;                    /* initial value passed in */
    mutable T __thread_sum;    /* place to hold local sum of a thread,
                                  and partial sum of a block */
-   T *d_buf;                  /* place to store partial sum of a block */
-   HYPRE_Int nblocks;         /* number of blocks used in the first round */
+   T *d_buf;                  /* place to store partial sum within blocks
+                                 in the 1st round, used in the 2nd round */
+   HYPRE_Int nblocks;         /* number of blocks used in the 1st round */
 
-   /* constructor.
+   /* constructor
     * val is the initial value (added to the reduced sum) */
    __host__
    ReduceSum(T val)
    {
       init = val;
       __thread_sum = 0.0;
+      nblocks = -1;
 
-      if (cuda_reduce_buffer == NULL)
+      if (hypre_handle->cuda_reduce_buffer == NULL)
       {
          /* allocate for the max size for reducing double6 type */
-         cuda_reduce_buffer = hypre_TAlloc(HYPRE_double6, 1024, HYPRE_MEMORY_DEVICE);
+         hypre_handle->cuda_reduce_buffer =
+            hypre_TAlloc(HYPRE_double6, 1024, HYPRE_MEMORY_DEVICE);
       }
 
-      d_buf = (T*) cuda_reduce_buffer;
+      d_buf = (T*) hypre_handle->cuda_reduce_buffer;
    }
 
    /* copy constructor */
@@ -208,6 +228,7 @@ struct ReduceSum
       *this = other;
    }
 
+   /* reduction within blocks */
    __host__ __device__
    void BlockReduce() const
    {
@@ -226,16 +247,18 @@ struct ReduceSum
       __thread_sum += val;
    }
 
-   /* we invoke the 2nd reduction at the time we want the sum from the reducer
-    * class */
+   /* invoke the 2nd reduction at the time want the sum from the reducer */
    __host__
    operator T()
    {
       T val;
       /* 2nd reduction with only *one* block */
-      OneBlockReduce(d_buf, nblocks, &val);
+      assert(nblocks >= 0 && nblocks <= 1024);
+      const dim3 gDim(1), bDim(1024);
+      HYPRE_CUDA_LAUNCH( OneBlockReduceKernel, gDim, bDim, d_buf, nblocks );
+      hypre_TMemcpy(&val, d_buf, T, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
       val += init;
-      //hypre_TFree(d_buf, HYPRE_MEMORY_DEVICE);
+
       return val;
    }
 
@@ -246,7 +269,11 @@ struct ReduceSum
    }
 };
 
-} // extern "C++"
-
+#ifdef __cplusplus
+}
 #endif
+
+#endif /* #if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) */
+#endif /* #if defined(HYPRE_USING_CUDA) */
+#endif /* #ifndef HYPRE_CUDA_REDUCER_H */
 

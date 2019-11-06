@@ -229,8 +229,15 @@ main( hypre_int argc,
    HYPRE_Int add_P_max_elmts = 0;
    HYPRE_Real add_trunc_factor = 0;
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_Int    rap2=0;
+   HYPRE_Int    mod_rap2=0;
+   HYPRE_Int    keepTranspose = 1;
+#else
+   HYPRE_Int    rap2=0;
+   HYPRE_Int    mod_rap2=0;
    HYPRE_Int    keepTranspose = 0;
+#endif
 #ifdef HYPRE_USING_DSUPERLU
    HYPRE_Int    dslu_threshold = -1;
 #endif
@@ -388,8 +395,21 @@ main( hypre_int argc,
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
+   time_index = hypre_InitializeTiming("Hypre init");
+   hypre_BeginTiming(time_index);
+
    /* Initialize Hypre */
    HYPRE_Init(argc, argv);
+
+   hypre_EndTiming(time_index);
+   hypre_PrintTiming("Hypre init times", hypre_MPI_COMM_WORLD);
+   hypre_FinalizeTiming(time_index);
+   hypre_ClearTiming();
+
+#ifdef HYPRE_USING_CUDA
+   //hypre_SetExecPolicy(HYPRE_EXEC_DEVICE);
+   hypre_SetExecPolicy(HYPRE_EXEC_HOST);
+#endif
 
    //omp_set_default_device(0);
    //nvtxDomainHandle_t domain = nvtxDomainCreateA("Domain_A");
@@ -1005,6 +1025,16 @@ main( hypre_int argc,
          mgr_num_restrict_sweeps = atoi(argv[arg_index++]);
       }
       /* end mgr options */
+      else if ( strcmp(argv[arg_index], "-exec_host") == 0 )
+      {
+         arg_index++;
+         hypre_SetExecPolicy(HYPRE_EXEC_HOST);
+      }
+      else if ( strcmp(argv[arg_index], "-exec_device") == 0 )
+      {
+         arg_index++;
+         hypre_SetExecPolicy(HYPRE_EXEC_DEVICE);
+      }
       else
       {
          arg_index++;
@@ -1478,6 +1508,11 @@ main( hypre_int argc,
       {
          arg_index++;
          rap2  = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-mod_rap2") == 0 )
+      {
+         arg_index++;
+         mod_rap2  = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-keepT") == 0 )
       {
@@ -2224,7 +2259,6 @@ main( hypre_int argc,
    /*-----------------------------------------------------------
     * Set up the interp vector
     *-----------------------------------------------------------*/
-
    if ( build_rbm)
    {
       char new_file_name[80];
@@ -2999,6 +3033,7 @@ main( hypre_int argc,
 
       HYPRE_BoomerAMGSetMaxIter(amg_solver, mg_max_iter);
       HYPRE_BoomerAMGSetRAP2(amg_solver, rap2);
+      HYPRE_BoomerAMGSetModuleRAP2(amg_solver, mod_rap2);
       HYPRE_BoomerAMGSetKeepTranspose(amg_solver, keepTranspose);
 #ifdef HYPRE_USING_DSUPERLU
       HYPRE_BoomerAMGSetDSLUThreshold(amg_solver, dslu_threshold);
@@ -3028,6 +3063,10 @@ main( hypre_int argc,
 
       HYPRE_BoomerAMGSetup(amg_solver, parcsr_A, b, x);
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+      cudaDeviceSynchronize();
+#endif
+
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
@@ -3036,7 +3075,13 @@ main( hypre_int argc,
       time_index = hypre_InitializeTiming("BoomerAMG Solve");
       hypre_BeginTiming(time_index);
 
+      //PUSH_RANGE("solve", 1)
       HYPRE_BoomerAMGSolve(amg_solver, parcsr_A, b, x);
+      //POP_RANGE
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+      cudaDeviceSynchronize();
+#endif
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
@@ -3159,6 +3204,7 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetMultAddPMaxElmts(amg_solver, add_P_max_elmts);
       HYPRE_BoomerAMGSetMultAddTruncFactor(amg_solver, add_trunc_factor);
       HYPRE_BoomerAMGSetRAP2(amg_solver, rap2);
+      HYPRE_BoomerAMGSetModuleRAP2(amg_solver, mod_rap2);
       HYPRE_BoomerAMGSetKeepTranspose(amg_solver, keepTranspose);
       if (nongalerk_tol)
       {
@@ -3330,6 +3376,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetMultAddPMaxElmts(pcg_precond, add_P_max_elmts);
          HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
          HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
+         HYPRE_BoomerAMGSetModuleRAP2(pcg_precond, mod_rap2);
          HYPRE_BoomerAMGSetKeepTranspose(pcg_precond, keepTranspose);
 #ifdef HYPRE_USING_DSUPERLU
          HYPRE_BoomerAMGSetDSLUThreshold(pcg_precond, dslu_threshold);
@@ -3491,6 +3538,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetMultAddPMaxElmts(pcg_precond, add_P_max_elmts);
          HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
          HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
+         HYPRE_BoomerAMGSetModuleRAP2(pcg_precond, mod_rap2);
          HYPRE_BoomerAMGSetKeepTranspose(pcg_precond, keepTranspose);
 #ifdef HYPRE_USING_DSUPERLU
          HYPRE_BoomerAMGSetDSLUThreshold(pcg_precond, dslu_threshold);
@@ -4720,6 +4768,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetMultAddPMaxElmts(pcg_precond, add_P_max_elmts);
          HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
          HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
+         HYPRE_BoomerAMGSetModuleRAP2(pcg_precond, mod_rap2);
          HYPRE_BoomerAMGSetKeepTranspose(pcg_precond, keepTranspose);
 #ifdef HYPRE_USING_DSUPERLU
          HYPRE_BoomerAMGSetDSLUThreshold(pcg_precond, dslu_threshold);
@@ -4871,6 +4920,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetMultAddPMaxElmts(pcg_precond, add_P_max_elmts);
          HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
          HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
+         HYPRE_BoomerAMGSetModuleRAP2(pcg_precond, mod_rap2);
          HYPRE_BoomerAMGSetKeepTranspose(pcg_precond, keepTranspose);
 #ifdef HYPRE_USING_DSUPERLU
          HYPRE_BoomerAMGSetDSLUThreshold(pcg_precond, dslu_threshold);
@@ -5121,6 +5171,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetMultAddPMaxElmts(pcg_precond, add_P_max_elmts);
          HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
          HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
+         HYPRE_BoomerAMGSetModuleRAP2(pcg_precond, mod_rap2);
          HYPRE_BoomerAMGSetKeepTranspose(pcg_precond, keepTranspose);
 #ifdef HYPRE_USING_DSUPERLU
          HYPRE_BoomerAMGSetDSLUThreshold(pcg_precond, dslu_threshold);
@@ -5302,6 +5353,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetMultAddPMaxElmts(pcg_precond, add_P_max_elmts);
          HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
          HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
+         HYPRE_BoomerAMGSetModuleRAP2(pcg_precond, mod_rap2);
          HYPRE_BoomerAMGSetKeepTranspose(pcg_precond, keepTranspose);
 #ifdef HYPRE_USING_DSUPERLU
          HYPRE_BoomerAMGSetDSLUThreshold(pcg_precond, dslu_threshold);
@@ -5602,6 +5654,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetMultAddPMaxElmts(pcg_precond, add_P_max_elmts);
          HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
          HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
+         HYPRE_BoomerAMGSetModuleRAP2(pcg_precond, mod_rap2);
          HYPRE_BoomerAMGSetKeepTranspose(pcg_precond, keepTranspose);
 #ifdef HYPRE_USING_DSUPERLU
          HYPRE_BoomerAMGSetDSLUThreshold(pcg_precond, dslu_threshold);
@@ -5945,6 +5998,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetMultAddPMaxElmts(pcg_precond, add_P_max_elmts);
          HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
          HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
+         HYPRE_BoomerAMGSetModuleRAP2(pcg_precond, mod_rap2);
          HYPRE_BoomerAMGSetKeepTranspose(pcg_precond, keepTranspose);
 #ifdef HYPRE_USING_DSUPERLU
          HYPRE_BoomerAMGSetDSLUThreshold(pcg_precond, dslu_threshold);
@@ -6242,6 +6296,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetMultAddPMaxElmts(pcg_precond, add_P_max_elmts);
          HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
          HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
+         HYPRE_BoomerAMGSetModuleRAP2(pcg_precond, mod_rap2);
          HYPRE_BoomerAMGSetKeepTranspose(pcg_precond, keepTranspose);
 #ifdef HYPRE_USING_DSUPERLU
          HYPRE_BoomerAMGSetDSLUThreshold(pcg_precond, dslu_threshold);

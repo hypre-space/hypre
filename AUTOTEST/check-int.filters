@@ -3,19 +3,14 @@
 /hypre_printf.c:
 /_hypre_utilities.h:
 /HYPRE_utilities.h:
-/utilities/general.h:
-/utilities/gpuErrorCheck.h:
-/utilities/gpuErrorCheck.c:
-/utilities/gpuMem.h:
-/utilities/hypre_nvtx.h:
+/utilities/hypre_general.h:
 /utilities/mpistubs.c
-/seq_mv/gpukernels.h:
-/seq_mv/seq_mv.h:.*cudaStream_t
 as long as
 too long
 long range interpolation
 long-range interpolation
 monstrously long
 get a long msg
+long rows
 utilities/hypre_hopscotch_hash.h:  //return _InterlockedCompareExchange
 utilities/hypre_hopscotch_hash.h:  //return _InterlockedExchangeAdd

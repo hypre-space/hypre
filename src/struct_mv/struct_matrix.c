@@ -603,19 +603,20 @@ hypre_StructMatrixSetValues( hypre_StructMatrix *matrix,
     * Set the matrix coefficients
     *-----------------------------------------------------------------------*/
 
+   center_rank = 0;
+   if ( constant_coefficient==2 )
+   {
+      hypre_SetIndex(center_index, 0);
+      stencil = hypre_StructMatrixStencil(matrix);
+      center_rank = hypre_StructStencilElementRank( stencil, center_index );
+   }
+
    for (i = istart; i < istop; i++)
    {
       grid_box = hypre_BoxArrayBox(grid_boxes, i);
 
       if (hypre_IndexInBox(grid_index, grid_box))
       {
-         if ( constant_coefficient==2 )
-         {
-            hypre_SetIndex(center_index, 0);
-            stencil = hypre_StructMatrixStencil(matrix);
-            center_rank = hypre_StructStencilElementRank( stencil, center_index );
-         }
-
          for (s = 0; s < num_stencil_indices; s++)
          {
             /* only set stored stencil values */

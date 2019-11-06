@@ -798,11 +798,8 @@ void BoxLoopforall(HYPRE_Int policy, HYPRE_Int length, LOOP_BODY loop_body)
    else if (policy == HYPRE_MEMORY_DEVICE)
    {
       HYPRE_Int gridSize = (length + BLOCKSIZE - 1) / BLOCKSIZE;
-      if (gridSize == 0)
-      {
-         gridSize = 1;
-      }
-      forall_kernel<<<gridSize, BLOCKSIZE>>>(loop_body, length);
+      const dim3 gDim(gridSize), bDim(BLOCKSIZE);
+      HYPRE_CUDA_LAUNCH( forall_kernel, gDim, bDim, loop_body, length );
    }
    else if (policy == 2)
    {
@@ -837,7 +834,8 @@ void ReductionBoxLoopforall(HYPRE_Int policy, HYPRE_Int length, LOOP_BODY Reduct
       hypre_printf("length= %d, blocksize = %d, gridsize = %d\n",
                    length, BLOCKSIZE, gridSize);
       */
-      reductionforall_kernel<<<gridSize, BLOCKSIZE>>>(ReductionLoop, length);
+      const dim3 gDim(gridSize), bDim(BLOCKSIZE);
+      HYPRE_CUDA_LAUNCH( reductionforall_kernel, gDim, bDim, ReductionLoop, length );
    }
 }
 
