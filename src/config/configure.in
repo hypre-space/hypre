@@ -1482,6 +1482,7 @@ dnl *********************************************************************
 if test "$hypre_using_debug" = "yes"
 then
    AC_HYPRE_DEBUG_FLAGS
+   AC_DEFINE([HYPRE_DEBUG], 1, [HYPRE in debug mode])
 else
    AC_HYPRE_OPTIMIZATION_FLAGS
 fi

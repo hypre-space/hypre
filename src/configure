@@ -7848,6 +7848,9 @@ then
         ;;
    esac
 fi
+
+$as_echo "#define HYPRE_DEBUG 1" >>confdefs.h
+
 else
 
 if test "x${hypre_user_chose_cflags}" = "xno"
