@@ -98,9 +98,9 @@ hypre_ParCSRMatrixCreate( MPI_Comm comm,
 
    hypre_ParCSRMatrixComm(matrix) = comm;
    hypre_ParCSRMatrixDiag(matrix) =
-      hypre_CSRMatrixCreate(local_num_rows, local_num_cols,num_nonzeros_diag);
+      hypre_CSRMatrixCreate(local_num_rows, local_num_cols, num_nonzeros_diag);
    hypre_ParCSRMatrixOffd(matrix) =
-      hypre_CSRMatrixCreate(local_num_rows, num_cols_offd,num_nonzeros_offd);
+      hypre_CSRMatrixCreate(local_num_rows, num_cols_offd, num_nonzeros_offd);
    hypre_ParCSRMatrixDiagT(matrix) = NULL;
    hypre_ParCSRMatrixOffdT(matrix) = NULL; // JSP: transposed matrices are optional
    hypre_ParCSRMatrixGlobalNumRows(matrix) = global_num_rows;
@@ -324,12 +324,39 @@ hypre_ParCSRMatrixSetNumNonzeros( hypre_ParCSRMatrix *matrix )
    diag_i = hypre_CSRMatrixI(diag);
    offd = hypre_ParCSRMatrixOffd(matrix);
    offd_i = hypre_CSRMatrixI(offd);
+
    local_num_rows = hypre_CSRMatrixNumRows(diag);
 
-   local_num_nonzeros = (HYPRE_BigInt)(diag_i[local_num_rows] + offd_i[local_num_rows]);
+   HYPRE_Int loc_diag = hypre_CSRMatrixMemoryLocation(diag);
+   HYPRE_Int loc_offd = hypre_CSRMatrixMemoryLocation(offd);
+
+   if (hypre_GetActualMemLocation(loc_diag) == HYPRE_MEMORY_DEVICE)
+   {
+      HYPRE_Int k;
+      hypre_TMemcpy(&k, &diag_i[local_num_rows], HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+      local_num_nonzeros = k;
+   }
+   else
+   {
+      local_num_nonzeros = diag_i[local_num_rows];
+   }
+
+   if (hypre_GetActualMemLocation(loc_offd) == HYPRE_MEMORY_DEVICE)
+   {
+      HYPRE_Int k;
+      hypre_TMemcpy(&k, &offd_i[local_num_rows], HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+      local_num_nonzeros += k;
+   }
+   else
+   {
+      local_num_nonzeros += offd_i[local_num_rows];
+   }
+
    hypre_MPI_Allreduce(&local_num_nonzeros, &total_num_nonzeros, 1, HYPRE_MPI_BIG_INT,
                        hypre_MPI_SUM, comm);
+
    hypre_ParCSRMatrixNumNonzeros(matrix) = total_num_nonzeros;
+
    return hypre_error_flag;
 }
 
@@ -360,12 +387,37 @@ hypre_ParCSRMatrixSetDNumNonzeros( hypre_ParCSRMatrix *matrix )
    offd_i = hypre_CSRMatrixI(offd);
 
    local_num_rows = hypre_CSRMatrixNumRows(diag);
-   local_num_nonzeros  = diag_i[local_num_rows];
-   local_num_nonzeros += offd_i[local_num_rows];
 
-   hypre_MPI_Allreduce(&local_num_nonzeros, &total_num_nonzeros, 1,
-                       HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
+   HYPRE_Int loc_diag = hypre_CSRMatrixMemoryLocation(diag);
+   HYPRE_Int loc_offd = hypre_CSRMatrixMemoryLocation(offd);
+
+   if (hypre_GetActualMemLocation(loc_diag) == HYPRE_MEMORY_DEVICE)
+   {
+      HYPRE_Int k;
+      hypre_TMemcpy(&k, &diag_i[local_num_rows], HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+      local_num_nonzeros = k;
+   }
+   else
+   {
+      local_num_nonzeros = diag_i[local_num_rows];
+   }
+
+   if (hypre_GetActualMemLocation(loc_offd) == HYPRE_MEMORY_DEVICE)
+   {
+      HYPRE_Int k;
+      hypre_TMemcpy(&k, &offd_i[local_num_rows], HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+      local_num_nonzeros += k;
+   }
+   else
+   {
+      local_num_nonzeros += offd_i[local_num_rows];
+   }
+
+   hypre_MPI_Allreduce(&local_num_nonzeros, &total_num_nonzeros, 1, HYPRE_MPI_REAL,
+                       hypre_MPI_SUM, comm);
+
    hypre_ParCSRMatrixDNumNonzeros(matrix) = total_num_nonzeros;
+
    return hypre_error_flag;
 }
 
