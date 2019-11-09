@@ -43,6 +43,7 @@ hypreDevice_CSRSpAdd(HYPRE_Int  ma,       HYPRE_Int   mb,        HYPRE_Int   n,
    HYPRE_Int *d_it, *d_jt, *d_pm, *d_it_cp, *d_jt_cp, *d_ic, *d_jc;
    HYPRE_Complex *d_at, *d_at_cp, *d_ac;
 
+   /* some trick here for memory alignment. maybe not worth it at all */ 
    HYPRE_Int align = 32;
    HYPRE_Int nnzT2 = (nnzT + align - 1) / align * align;
    char *work_mem = hypre_TAlloc(char, (5*sizeof(HYPRE_Int)+2*sizeof(HYPRE_Complex))*nnzT2, HYPRE_MEMORY_DEVICE);
@@ -64,15 +65,15 @@ hypreDevice_CSRSpAdd(HYPRE_Int  ma,       HYPRE_Int   mb,        HYPRE_Int   n,
    hypre_TMemcpy(d_at,        d_aa, HYPRE_Complex, nnzA,  HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
    hypre_TMemcpy(d_at + nnzA, d_ab, HYPRE_Complex, nnzB,  HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
-   hypreDevice_CsrRowPtrsToIndices_v2(ma, d_ia, d_it);
+   hypreDevice_CsrRowPtrsToIndices_v2(ma, nnzA, d_ia, d_it);
    if (d_num_b || mb <= 0)
    {
-      hypreDevice_CsrRowPtrsToIndicesWithRowNum(mb, d_ib, d_num_b, d_it + nnzA);
+      hypreDevice_CsrRowPtrsToIndicesWithRowNum(mb, nnzB, d_ib, d_num_b, d_it + nnzA);
    }
    else
    {
       hypre_assert(ma == mb);
-      hypreDevice_CsrRowPtrsToIndices_v2(mb, d_ib, d_it + nnzA);
+      hypreDevice_CsrRowPtrsToIndices_v2(mb, nnzB, d_ib, d_it + nnzA);
    }
 
    /* permutation vector */

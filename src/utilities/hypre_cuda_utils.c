@@ -274,6 +274,7 @@ hypreDevice_IntegerExclusiveScan(HYPRE_Int n, HYPRE_Int *d_i)
    return hypre_error_flag;
 }
 
+#if 0
 __global__ void
 hypreCUDAKernel_CsrRowPtrsToIndices(HYPRE_Int n, HYPRE_Int *ptr, HYPRE_Int *num, HYPRE_Int *idx)
 {
@@ -332,7 +333,7 @@ hypreDevice_CsrRowPtrsToIndices(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row
 }
 
 HYPRE_Int
-hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int *d_row_ptr, HYPRE_Int *d_row_ind)
+hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr, HYPRE_Int *d_row_ind)
 {
    /* trivial case */
    if (nrows <= 0)
@@ -351,7 +352,7 @@ hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int *d_row_ptr, HYPRE_
 }
 
 HYPRE_Int
-hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int *d_row_ptr, HYPRE_Int *d_row_num, HYPRE_Int *d_row_ind)
+hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr, HYPRE_Int *d_row_num, HYPRE_Int *d_row_ind)
 {
    /* trivial case */
    if (nrows <= 0)
@@ -368,6 +369,92 @@ hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int *d_row_ptr,
 
    return hypre_error_flag;
 }
+
+#else
+
+struct hypre_empty_row_functor
+{
+  /* typedef bool result_type; */
+
+  __device__
+  bool operator()(const thrust::tuple<HYPRE_Int, HYPRE_Int>& t) const
+  {
+    const HYPRE_Int a = thrust::get<0>(t);
+    const HYPRE_Int b = thrust::get<1>(t);
+
+    return a != b;
+  }
+};
+
+HYPRE_Int*
+hypreDevice_CsrRowPtrsToIndices(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr)
+{
+   /* trivial case */
+   if (nrows <= 0)
+   {
+      return NULL;
+   }
+
+   HYPRE_Int *d_row_ind = hypre_CTAlloc(HYPRE_Int, nnz, HYPRE_MEMORY_DEVICE);
+
+   HYPRE_THRUST_CALL( scatter_if,
+                      thrust::counting_iterator<HYPRE_Int>(0),
+                      thrust::counting_iterator<HYPRE_Int>(nrows),
+                      d_row_ptr,
+                      thrust::make_transform_iterator( thrust::make_zip_iterator(thrust::make_tuple(d_row_ptr, d_row_ptr+1)),
+                                                       hypre_empty_row_functor() ),
+                      d_row_ind );
+
+   HYPRE_THRUST_CALL( inclusive_scan, d_row_ind, d_row_ind + nnz, d_row_ind, thrust::maximum<HYPRE_Int>());
+
+   return d_row_ind;
+}
+
+HYPRE_Int
+hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr, HYPRE_Int *d_row_ind)
+{
+   /* trivial case */
+   if (nrows <= 0)
+   {
+      return hypre_error_flag;
+   }
+
+   HYPRE_THRUST_CALL( fill, d_row_ind, d_row_ind + nnz, 0 );
+
+   HYPRE_THRUST_CALL( scatter_if,
+                      thrust::counting_iterator<HYPRE_Int>(0),
+                      thrust::counting_iterator<HYPRE_Int>(nrows),
+                      d_row_ptr,
+                      thrust::make_transform_iterator( thrust::make_zip_iterator(thrust::make_tuple(d_row_ptr, d_row_ptr+1)),
+                                                       hypre_empty_row_functor() ),
+                      d_row_ind );
+
+   HYPRE_THRUST_CALL( inclusive_scan, d_row_ind, d_row_ind + nnz, d_row_ind, thrust::maximum<HYPRE_Int>());
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr, HYPRE_Int *d_row_num, HYPRE_Int *d_row_ind)
+{
+   /* trivial case */
+   if (nrows <= 0)
+   {
+      return hypre_error_flag;
+   }
+
+   HYPRE_Int *map = hypre_TAlloc(HYPRE_Int, nnz, HYPRE_MEMORY_DEVICE);
+
+   hypreDevice_CsrRowPtrsToIndices_v2(nrows, nnz, d_row_ptr, map);
+
+   HYPRE_THRUST_CALL(gather, map, map + nnz, d_row_num, d_row_ind);
+
+   hypre_TFree(map, HYPRE_MEMORY_DEVICE);
+
+   return hypre_error_flag;
+}
+
+#endif
 
 HYPRE_Int*
 hypreDevice_CsrRowIndicesToPtrs(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ind)

@@ -129,8 +129,8 @@ hypre_BoomerAMGInterpTruncationDevice( hypre_ParCSRMatrix *P, HYPRE_Real trunc_f
    hypre_MPI_Comm_rank(comm, &my_id);
    */
 
-   hypreDevice_CsrRowPtrsToIndices_v2(nrows, P_diag_i, P_i);
-   hypreDevice_CsrRowPtrsToIndices_v2(nrows, P_offd_i, P_i + nnz_diag);
+   hypreDevice_CsrRowPtrsToIndices_v2(nrows, nnz_diag, P_diag_i, P_i);
+   hypreDevice_CsrRowPtrsToIndices_v2(nrows, nnz_offd, P_offd_i, P_i + nnz_diag);
 
    hypre_TMemcpy(P_j, P_diag_j, HYPRE_Int, nnz_diag, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
    /* offd col id := -2 - offd col id */
