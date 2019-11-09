@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /*--------------------------------------------------------------------------
  * Test driver for unstructured matrix interface (IJ_matrix interface).
@@ -958,11 +953,11 @@ main( hypre_int argc,
     use_block_cf = 0;
     mgr_non_c_to_f = 0;
 
-    int flow_size = 2*(mgr_idx_array[2] - mgr_idx_array[1]);
+    HYPRE_Int flow_size = 2*(mgr_idx_array[2] - mgr_idx_array[1]);
     HYPRE_Int *flow_size_array = hypre_CTAlloc(HYPRE_Int, num_procs, HYPRE_MEMORY_HOST);
-    MPI_Allgather(&flow_size, 1, MPI_INT, flow_size_array, 1, MPI_INT, MPI_COMM_WORLD);
-    int flow_ibegin = 0;
-    for (unsigned int i = 0; i < myid; i++)
+    hypre_MPI_Allgather(&flow_size, 1, HYPRE_MPI_INT, flow_size_array, 1, HYPRE_MPI_INT, hypre_MPI_COMM_WORLD);
+    HYPRE_Int flow_ibegin = 0;
+    for (HYPRE_Int i = 0; i < myid; i++)
     {
       //printf("My_id = %d, flow size = %d\n", myid, *(flow_size_array+i));
       flow_ibegin += flow_size_array[i];

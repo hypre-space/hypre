@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2015,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -416,7 +411,7 @@ hypre_ILUSetSchurSolverMaxIter( void *ilu_vdata, HYPRE_Int ss_max_iter )
          break;
       default:
          /* warning - not open yet
-          * printf("Current type has no Schur System\n");
+          *hypre_printf("Current type has no Schur System\n");
           */
          break;
    }
@@ -746,7 +741,7 @@ HYPRE_Int
 hypre_ILUMinHeapAddI(HYPRE_Int *heap, HYPRE_Int len)
 {
    /* parent, left, right */
-   int p;
+   HYPRE_Int p;
    len--;/* now len is the current index */
    while(len > 0)
    {
@@ -771,7 +766,7 @@ HYPRE_Int
 hypre_ILUMinHeapAddIIIi(HYPRE_Int *heap, HYPRE_Int *I1, HYPRE_Int *Ii1, HYPRE_Int len)
 {
    /* parent, left, right */
-   int p;
+   HYPRE_Int p;
    len--;/* now len is the current index */
    while(len > 0)
    {
@@ -797,7 +792,7 @@ HYPRE_Int
 hypre_ILUMinHeapAddIRIi(HYPRE_Int *heap, HYPRE_Real *I1, HYPRE_Int *Ii1, HYPRE_Int len)
 {
    /* parent, left, right */
-   int p;
+   HYPRE_Int p;
    len--;/* now len is the current index */
    while(len > 0)
    {
@@ -823,7 +818,7 @@ HYPRE_Int
 hypre_ILUMaxHeapAddRabsIIi(HYPRE_Real *heap, HYPRE_Int *I1, HYPRE_Int *Ii1, HYPRE_Int len)
 {
    /* parent, left, right */
-   int p;
+   HYPRE_Int p;
    len--;/* now len is the current index */
    while(len > 0)
    {
@@ -849,7 +844,7 @@ HYPRE_Int
 hypre_ILUMaxrHeapAddRabsI(HYPRE_Real *heap, HYPRE_Int *I1, HYPRE_Int len)
 {
    /* parent, left, right */
-   int p;
+   HYPRE_Int p;
    len--;/* now len is the current index */
    while(len > 0)
    {
@@ -885,7 +880,7 @@ HYPRE_Int
 hypre_ILUMinHeapRemoveI(HYPRE_Int *heap, HYPRE_Int len)
 {
    /* parent, left, right */
-   int p,l,r;
+   HYPRE_Int p,l,r;
    len--;/* now len is the max index */
    /* swap the first element to last */
    hypre_swap(heap,0,len);
@@ -916,7 +911,7 @@ HYPRE_Int
 hypre_ILUMinHeapRemoveIIIi(HYPRE_Int *heap, HYPRE_Int *I1, HYPRE_Int *Ii1, HYPRE_Int len)
 {
    /* parent, left, right */
-   int p,l,r;
+   HYPRE_Int p,l,r;
    len--;/* now len is the max index */
    /* swap the first element to last */
    hypre_swap(Ii1,heap[0],heap[len]);
@@ -949,7 +944,7 @@ HYPRE_Int
 hypre_ILUMinHeapRemoveIRIi(HYPRE_Int *heap, HYPRE_Real *I1, HYPRE_Int *Ii1, HYPRE_Int len)
 {
    /* parent, left, right */
-   int p,l,r;
+   HYPRE_Int p,l,r;
    len--;/* now len is the max index */
    /* swap the first element to last */
    hypre_swap(Ii1,heap[0],heap[len]);
@@ -982,7 +977,7 @@ HYPRE_Int
 hypre_ILUMaxHeapRemoveRabsIIi(HYPRE_Real *heap, HYPRE_Int *I1, HYPRE_Int *Ii1, HYPRE_Int len)
 {
    /* parent, left, right */
-   int p,l,r;
+   HYPRE_Int p,l,r;
    len--;/* now len is the max index */
    /* swap the first element to last */
    hypre_swap(Ii1,heap[0],heap[len]);
@@ -1015,7 +1010,7 @@ HYPRE_Int
 hypre_ILUMaxrHeapRemoveRabsI(HYPRE_Real *heap, HYPRE_Int *I1, HYPRE_Int len)
 {
    /* parent, left, right */
-   int p,l,r;
+   HYPRE_Int p,l,r;
    len--;/* now len is the max index */
    /* swap the first element to last */
    hypre_swap2(I1,heap,0,-len);
@@ -1813,7 +1808,7 @@ HYPRE_Int
 hypre_ILUBuildRASExternalMatrix(hypre_ParCSRMatrix *A, HYPRE_Int *rperm, HYPRE_Int **E_i, HYPRE_Int **E_j, HYPRE_Real **E_data)
 {
    HYPRE_Int                i, j, idx;
-   /* BIG INT*/ HYPRE_BigInt   big_col;
+   HYPRE_BigInt   big_col;
    
    /* data objects for communication */
 //   MPI_Comm                 comm = hypre_ParCSRMatrixComm(A);
@@ -1822,24 +1817,29 @@ hypre_ILUBuildRASExternalMatrix(hypre_ParCSRMatrix *A, HYPRE_Int *rperm, HYPRE_I
    /* data objects for A */
    hypre_CSRMatrix          *A_diag = hypre_ParCSRMatrixDiag(A);
    hypre_CSRMatrix          *A_offd = hypre_ParCSRMatrixOffd(A);
-   /* BIG INT*/ HYPRE_BigInt   *A_col_starts = hypre_ParCSRMatrixColStarts(A);
-   /* BIG INT*/ HYPRE_BigInt   *A_offd_colmap = hypre_ParCSRMatrixColMapOffd(A);
+   HYPRE_BigInt   *A_col_starts = hypre_ParCSRMatrixColStarts(A);
+   HYPRE_BigInt   *A_offd_colmap = hypre_ParCSRMatrixColMapOffd(A);
    HYPRE_Int                *A_diag_i = hypre_CSRMatrixI(A_diag);
    HYPRE_Int                *A_offd_i = hypre_CSRMatrixI(A_offd);
    
    /* data objects for external A matrix */
-   hypre_CSRMatrix          *A_ext = NULL; // Need to check the new version of hypre_ParcsrGetExternalRows
-   HYPRE_Int                *A_ext_i = NULL; // # up to local offd cols, no need to be big int
-   /* BIG INT*/ HYPRE_BigInt   *A_ext_j = NULL; // Return global index, big int required
+   // Need to check the new version of hypre_ParcsrGetExternalRows
+   hypre_CSRMatrix          *A_ext = NULL; 
+   // # up to local offd cols, no need to be HYPRE_BigInt
+   HYPRE_Int                *A_ext_i = NULL; 
+   // Return global index, HYPRE_BigInt required
+   HYPRE_BigInt   *A_ext_j = NULL; 
    HYPRE_Real               *A_ext_data = NULL;
    
    /* data objects for output */
    HYPRE_Int                E_nnz;
    HYPRE_Int                *E_ext_i = NULL;
-   HYPRE_Int                *E_ext_j = NULL; // No need to use big int, local-index
+   // Local index, no need to use HYPRE_BigInt
+   HYPRE_Int                *E_ext_j = NULL; 
    HYPRE_Real               *E_ext_data = NULL;
    
-   HYPRE_Int                E_init_alloc; //guess non-zeros for E before start
+   //guess non-zeros for E before start
+   HYPRE_Int                E_init_alloc; 
    
    /* size */
    HYPRE_Int                n = hypre_CSRMatrixNumCols(A_diag);
@@ -1866,7 +1866,8 @@ hypre_ILUBuildRASExternalMatrix(hypre_ParCSRMatrix *A, HYPRE_Int *rperm, HYPRE_I
    A_ext = hypre_ParCSRMatrixExtractBExt(A, A, 1);    
    
    A_ext_i              = hypre_CSRMatrixI(A_ext);
-   /* BIG INT*/ A_ext_j = hypre_CSRMatrixBigJ(A_ext); // This should be big int since this is global index, use big_j in csr
+   //This should be HYPRE_BigInt since this is global index, use big_j in csr */
+   A_ext_j = hypre_CSRMatrixBigJ(A_ext); 
    A_ext_data           = hypre_CSRMatrixData(A_ext);
    
    /* guess memory we need to allocate to E_j */
@@ -1891,12 +1892,12 @@ hypre_ILUBuildRASExternalMatrix(hypre_ParCSRMatrix *A, HYPRE_Int *rperm, HYPRE_I
       for( j = A_ext_i[i] ; j < A_ext_i[i+1] ; j ++)
       {
          big_col = A_ext_j[j];
-         /* First check if that belons to the diagonal part */
+         /* First check if that belongs to the diagonal part */
          if( big_col >= A_col_starts[0] && big_col < A_col_starts[1] )
          {
             /* this is a diagonal entry, rperm (map old to new) and shift it */
             
-            /* Note here, the result of big_col - A_col_starts[0] in nolonger a big int */
+            /* Note here, the result of big_col - A_col_starts[0] in no longer a HYPRE_BigInt */
             idx = (HYPRE_Int)(big_col - A_col_starts[0]);
             E_ext_j[E_nnz]       = rperm[idx];
             E_ext_data[E_nnz++]  = A_ext_data[j];
@@ -1904,7 +1905,7 @@ hypre_ILUBuildRASExternalMatrix(hypre_ParCSRMatrix *A, HYPRE_Int *rperm, HYPRE_I
          /* If not, apply binary search to check if is offdiagonal */
          else
          {
-            /* big int search, result is not big int */            
+            /* Search, result is not HYPRE_BigInt */            
             E_ext_j[E_nnz] = hypre_BigBinarySearch( A_offd_colmap, big_col, m);
             if( E_ext_j[E_nnz] >= 0)
             {
@@ -2044,7 +2045,7 @@ hypre_ILULocalRCM( hypre_CSRMatrix *A, HYPRE_Int start, HYPRE_Int end,
    if(n!=ncol || end > n || start < 0)
    {
       /* don't do this if the input has error */
-      printf("Error input, abort RCM\n");
+      hypre_printf("Error input, abort RCM\n");
       return hypre_error_flag;
    }
    if(!perm)
@@ -3306,7 +3307,7 @@ hypre_ILUCSRMatrixInverseSelfPrecondMRGlobal(hypre_CSRMatrix *matA, hypre_CSRMat
       {
          i = 1;
       }
-      printf("matrix size %5d\nfinal norm at loop %5d is %16.12f, time per iteration is %16.12f, complexity is %16.12f out of maximum %16.12f\n",n,i,r_norm, (time_e-time_s)/i, nnzM/nnzA, n/nnzA*n);
+     hypre_printf("matrix size %5d\nfinal norm at loop %5d is %16.12f, time per iteration is %16.12f, complexity is %16.12f out of maximum %16.12f\n",n,i,r_norm, (time_e-time_s)/i, nnzM/nnzA, n/nnzA*n);
    }
    
    hypre_CSRMatrixDestroy(matI);
@@ -3367,7 +3368,7 @@ hypre_ILUParCSRInverseNSH(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix **M, HYPRE_R
    
    if(mr_col_version)
    {
-      printf("Column version is not yet support, switch to global version\n");
+     hypre_printf("Column version is not yet support, switch to global version\n");
    }
    
    /* call MR to build loacl initial matrix 
@@ -3415,7 +3416,7 @@ hypre_ILUParCSRInverseNSH(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix **M, HYPRE_R
    {
       if(myid == 0)
       {
-         printf("before NSH the norm is %16.12f\n", norm);
+        hypre_printf("before NSH the norm is %16.12f\n", norm);
       }
       time_s = hypre_MPI_Wtime();
    }
@@ -3458,7 +3459,7 @@ hypre_ILUParCSRInverseNSH(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix **M, HYPRE_R
       }
       if(myid == 0)
       {
-         printf("after %5d NSH iterations the norm is %16.12f, time per iteration is %16.12f\n", i, norm, (time_e-time_s)/i);
+        hypre_printf("after %5d NSH iterations the norm is %16.12f, time per iteration is %16.12f\n", i, norm, (time_e-time_s)/i);
       }
    }
    
@@ -3467,7 +3468,7 @@ hypre_ILUParCSRInverseNSH(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix **M, HYPRE_R
       /* the residual norm increase after NSH iteration, need to let user know */
       if(myid == 0)
       {
-         printf("Warning: NSH divergence, probably bad approximate invese matrix.\n");
+        hypre_printf("Warning: NSH divergence, probably bad approximate invese matrix.\n");
       }
    }
    
