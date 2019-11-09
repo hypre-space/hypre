@@ -944,7 +944,6 @@ hypre_BoomerAMGCreateSFromCFMarker(hypre_ParCSRMatrix    *A,
                     || (dof_func[i] != dof_func[jj]))
                 {
                   S_temp_diag_j[jA] = -1;
-                  //--jS_diag;
                 }
                 else
                 {
@@ -1012,7 +1011,7 @@ hypre_BoomerAMGCreateSFromCFMarker(hypre_ParCSRMatrix    *A,
               else
               {
                  S_temp_offd_j[jA] = jj;
-                   --jS_offd;
+                   ++jS_offd;
               }
             } else {
               S_temp_offd_j[jA] = -1;
