@@ -183,7 +183,6 @@ hypre_CSRMatrixSplitDevice(hypre_CSRMatrix  *B_ext,
 
    tmpc = HYPRE_THRUST_CALL(copy_if, B_ext_a, B_ext_a + B_ext_nnz, B_ext_j, B_ext_diag_a, pred1);
    hypre_assert(tmpc - B_ext_diag_a == B_ext_diag_nnz);
-   (void) tmpc;
 
    tmpi = HYPRE_THRUST_CALL(copy_if, B_ext_row_indices, B_ext_row_indices + B_ext_nnz, B_ext_j,
                             B_ext_diag_row_indices, pred1);

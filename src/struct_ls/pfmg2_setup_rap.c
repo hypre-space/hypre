@@ -195,7 +195,6 @@ hypre_PFMG2BuildRAPSym( hypre_StructMatrix *A,
    {
       hypre_assert( constant_coefficient_A==0 || constant_coefficient_A==2 );
    }
-   (void) constant_coefficient_A;
 
    fi = 0;
    hypre_ForBoxI(ci, cgrid_boxes)

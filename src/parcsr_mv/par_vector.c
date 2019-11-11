@@ -594,7 +594,6 @@ hypre_VectorToParVector ( MPI_Comm      comm,
    idxstride = hypre_VectorIndexStride(local_vector);
    /* so far the only implemented multivector StorageMethod is 0 */
    hypre_assert( idxstride==1 );
-   (void) idxstride;
 
    if (my_id == 0)
    {

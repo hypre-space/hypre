@@ -388,24 +388,30 @@ copy_from_hash_into_C(HYPRE_Int  M,   HYPRE_Int *js,  HYPRE_Complex *as,
       HYPRE_Int g1_size = iend_g1 - istart_g1;
       HYPRE_Int g2_size = iend_g2 - istart_g2;
 
+#ifdef HYPRE_DEBUG
       HYPRE_Int j;
+#endif
 
       if (g2_size == 0)
       {
-         j = copy_from_hash_into_C_row<NUM_WARPS_PER_BLOCK, SHMEM_HASH_SIZE>
-             (lane_id, js + i * SHMEM_HASH_SIZE, as + i * SHMEM_HASH_SIZE, g1_size, jg1 + istart_g1,
-             ag1 + istart_g1, jc + istart_c, ac + istart_c);
+#ifdef HYPRE_DEBUG
+         j =
+#endif
+         copy_from_hash_into_C_row<NUM_WARPS_PER_BLOCK, SHMEM_HASH_SIZE>
+         (lane_id, js + i * SHMEM_HASH_SIZE, as + i * SHMEM_HASH_SIZE, g1_size, jg1 + istart_g1,
+         ag1 + istart_g1, jc + istart_c, ac + istart_c);
       }
       else
       {
-         j = copy_from_hash_into_C_row<NUM_WARPS_PER_BLOCK, SHMEM_HASH_SIZE>
-             (lane_id, js + i * SHMEM_HASH_SIZE, as + i * SHMEM_HASH_SIZE, g2_size, jg2 + istart_g2,
-             ag2 + istart_g2, jc + istart_c, ac + istart_c);
+#ifdef HYPRE_DEBUG
+         j =
+#endif
+         copy_from_hash_into_C_row<NUM_WARPS_PER_BLOCK, SHMEM_HASH_SIZE>
+         (lane_id, js + i * SHMEM_HASH_SIZE, as + i * SHMEM_HASH_SIZE, g2_size, jg2 + istart_g2,
+         ag2 + istart_g2, jc + istart_c, ac + istart_c);
       }
 #ifdef HYPRE_DEBUG
       assert(istart_c + j == iend_c);
-#else
-      (void) j;
 #endif
    }
 }

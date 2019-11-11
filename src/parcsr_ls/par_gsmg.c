@@ -517,7 +517,6 @@ hypre_BoomerAMGCreateSmoothVecs(void         *data,
                   1.0 /*omega*/, NULL, U, Temp, 
                   Qtemp);
             hypre_assert(ret == 0);
-            (void) ret;
          }
       }
 

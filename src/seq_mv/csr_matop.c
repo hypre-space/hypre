@@ -1211,7 +1211,7 @@ HYPRE_Real hypre_CSRMatrixFnorm( hypre_CSRMatrix *A )
    HYPRE_Complex  sum = 0;
    HYPRE_Complex *data = hypre_CSRMatrixData( A );
    HYPRE_Int      num_nonzeros = hypre_CSRMatrixNumNonzeros(A);
-   HYPRE_Int      i, nrows, *A_i;
+   HYPRE_Int      i;
 
    hypre_assert(num_nonzeros == hypre_CSRMatrixI(A)[hypre_CSRMatrixNumRows(A)]);
 
