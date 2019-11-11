@@ -329,6 +329,7 @@ hypre_ExchangeExternalRowsDeviceInit( hypre_CSRMatrix      *B_ext,
    HYPRE_Int     *B_ext_i_h      = hypre_TAlloc(HYPRE_Int, B_ext_nrows + 1, HYPRE_MEMORY_HOST);
 
    hypre_assert(num_elmts_recv == B_ext_nrows);
+   (void) num_elmts_recv;
 
    /* output matrix */
    hypre_CSRMatrix *B_int_d;
@@ -380,6 +381,7 @@ hypre_ExchangeExternalRowsDeviceInit( hypre_CSRMatrix      *B_ext,
    }
 
    hypre_assert(B_ext_i_h[B_ext_nrows] == B_ext_nnz);
+   (void) B_ext_nnz;
 
    for (i = 1; i <= num_recvs; i++)
    {

@@ -155,6 +155,7 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
    tmp = HYPRE_THRUST_CALL(copy_if, S_temp_offd_j, S_temp_offd_j + num_nonzeros_offd, S_offd_j, is_nonnegative());
 
    hypre_assert(S_num_nonzeros_offd == tmp - S_offd_j);
+   (void) tmp;
 
    S = hypre_ParCSRMatrixCreate(comm, global_num_vars, global_num_vars, row_starts, row_starts,
                                 num_cols_offd, num_nonzeros_diag, num_nonzeros_offd);

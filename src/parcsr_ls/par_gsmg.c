@@ -444,12 +444,12 @@ hypre_BoomerAMGCreateSmoothVecs(void         *data,
    {
       hypre_MatvecCommPkgCreate(A);
 
-        comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+      comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    }
 
    if (debug_flag >= 1)
       hypre_printf("Creating smooth dirs, %d sweeps, %d samples\n", num_sweeps, 
-         nsamples);
+            nsamples);
 
    smooth_type = hypre_ParAMGDataSmoothType(amg_data);
    smooth_num_levels = hypre_ParAMGDataSmoothNumLevels(amg_data);
@@ -470,14 +470,14 @@ hypre_BoomerAMGCreateSmoothVecs(void         *data,
    hypre_ParVectorInitialize(Zero);
    datax = hypre_VectorData(hypre_ParVectorLocalVector(Zero));
    for (i=0; i<n_local; i++)
-       datax[i] = 0.;
+      datax[i] = 0.;
 
    Temp = hypre_ParVectorCreate(comm, n, starts);
    hypre_ParVectorSetPartitioningOwner(Temp,0);
    hypre_ParVectorInitialize(Temp);
    datax = hypre_VectorData(hypre_ParVectorLocalVector(Temp));
    for (i=0; i<n_local; i++)
-       datax[i] = 0.;
+      datax[i] = 0.;
 
    U = hypre_ParVectorCreate(comm, n, starts);
    hypre_ParVectorSetPartitioningOwner(U,0);
@@ -498,31 +498,32 @@ hypre_BoomerAMGCreateSmoothVecs(void         *data,
    /* generate random vectors */
    for (sample=0; sample<nsamples; sample++)
    {
-       for (i=0; i<n_local; i++)
-           datax[i] = hypre_Rand() - .5;
+      for (i=0; i<n_local; i++)
+         datax[i] = hypre_Rand() - .5;
 
-       for (i=0; i<num_sweeps; i++)
-       {
-	   if (smooth_option == 6)
-	   {
-	      HYPRE_SchwarzSolve(smoother[level],
-			(HYPRE_ParCSRMatrix) A, 
-			(HYPRE_ParVector) Zero,
-			(HYPRE_ParVector) U);
-	   }
-	   else
-	   {
-              ret = hypre_BoomerAMGRelax(A, Zero, NULL /*CFmarker*/,
-                rlx_type , 0 /*rel pts*/, 1.0 /*weight*/, 
-                                         1.0 /*omega*/, NULL, U, Temp, 
-                                         Qtemp);
-              hypre_assert(ret == 0);
-	   }
-       }
+      for (i=0; i<num_sweeps; i++)
+      {
+         if (smooth_option == 6)
+         {
+            HYPRE_SchwarzSolve(smoother[level],
+                  (HYPRE_ParCSRMatrix) A, 
+                  (HYPRE_ParVector) Zero,
+                  (HYPRE_ParVector) U);
+         }
+         else
+         {
+            ret = hypre_BoomerAMGRelax(A, Zero, NULL /*CFmarker*/,
+                  rlx_type , 0 /*rel pts*/, 1.0 /*weight*/, 
+                  1.0 /*omega*/, NULL, U, Temp, 
+                  Qtemp);
+            hypre_assert(ret == 0);
+            (void) ret;
+         }
+      }
 
-       /* copy out the solution */
-       for (i=0; i<n_local; i++)
-           *p++ = datax[i];
+      /* copy out the solution */
+      for (i=0; i<n_local; i++)
+         *p++ = datax[i];
    }
 
    hypre_ParVectorDestroy(Zero);

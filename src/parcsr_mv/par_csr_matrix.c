@@ -2074,6 +2074,7 @@ hypre_ParCSRMatrixCopy( hypre_ParCSRMatrix *A,
    num_cols_offd_B = hypre_CSRMatrixNumCols(B_offd);
 
    hypre_assert(num_cols_offd_A == num_cols_offd_B);
+   (void) num_cols_offd_A;
 
    col_map_offd_A = hypre_ParCSRMatrixColMapOffd(A);
    col_map_offd_B = hypre_ParCSRMatrixColMapOffd(B);

@@ -5073,6 +5073,7 @@ hypre_ExchangeExternalRowsInit( hypre_CSRMatrix      *B_ext,
    HYPRE_Int     *B_ext_rownnz = hypre_CTAlloc(HYPRE_Int, B_ext_nrows, HYPRE_MEMORY_HOST);
 
    hypre_assert(num_elmts_recv == B_ext_nrows);
+   (void) num_elmts_recv;
 
    /* output matrix */
    hypre_CSRMatrix *B_int;
@@ -5384,6 +5385,7 @@ hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix  *A,
    }
 
    hypre_assert(k == B_ncol_local);
+   (void) B_ncol_local;
 
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
    send_buf_data = hypre_TAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),

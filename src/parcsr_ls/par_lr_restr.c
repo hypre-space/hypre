@@ -1826,6 +1826,7 @@ hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
 
       /* make sure the first entry is diagonal */
       hypre_assert(AFF_diag_j[i1] == i);
+      (void) AFF_diag_j;
 
       /* !!! store the inverse */
       HYPRE_Complex di = 1.0 / AFF_diag_a[i1];
@@ -1842,6 +1843,7 @@ hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
          {
             hypre_assert( hypre_ParCSRMatrixColMapOffd(AFF)[AFF_offd_j[j]] != \
                           i + hypre_ParCSRMatrixFirstRowIndex(AFF) );
+            (void) AFF_offd_j;
 
             AFF_offd_a[j] *= di;
          }

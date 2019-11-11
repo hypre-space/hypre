@@ -192,7 +192,7 @@ csr_spmm_attempt(HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
    __shared__ volatile char s_failed[NUM_WARPS_PER_BLOCK];
    volatile char *warp_s_failed = s_failed + warp_id;
 
-#if DEBUG_MODE
+#ifdef HYPRE_DEBUG
    assert(blockDim.z              == NUM_WARPS_PER_BLOCK);
    assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
    assert(NUM_WARPS_PER_BLOCK <= HYPRE_WARP_SIZE);
@@ -250,7 +250,7 @@ csr_spmm_attempt(HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
                                                           ghash_size, jg + istart_g, ag + istart_g,
                                                           failed, warp_s_failed);
 
-#if DEBUG_MODE
+#ifdef HYPRE_DEBUG
       if (attempt == 2)
       {
          assert(failed == 0);
@@ -358,7 +358,7 @@ copy_from_hash_into_C(HYPRE_Int  M,   HYPRE_Int *js,  HYPRE_Complex *as,
    /* lane id inside the warp */
    volatile const HYPRE_Int lane_id = get_lane_id();
 
-#if DEBUG_MODE
+#ifdef HYPRE_DEBUG
    assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
 #endif
 
@@ -377,7 +377,7 @@ copy_from_hash_into_C(HYPRE_Int  M,   HYPRE_Int *js,  HYPRE_Complex *as,
       }
 
       HYPRE_Int istart_c  = __shfl_sync(HYPRE_WARP_FULL_MASK, kc, 0);
-#if DEBUG_MODE
+#ifdef HYPRE_DEBUG
       HYPRE_Int iend_c    = __shfl_sync(HYPRE_WARP_FULL_MASK, kc, 1);
 #endif
       HYPRE_Int istart_g1 = __shfl_sync(HYPRE_WARP_FULL_MASK, kg1, 0);
@@ -388,30 +388,24 @@ copy_from_hash_into_C(HYPRE_Int  M,   HYPRE_Int *js,  HYPRE_Complex *as,
       HYPRE_Int g1_size = iend_g1 - istart_g1;
       HYPRE_Int g2_size = iend_g2 - istart_g2;
 
-#if DEBUG_MODE
       HYPRE_Int j;
-#endif
 
       if (g2_size == 0)
       {
-#if DEBUG_MODE
-         j =
-#endif
-            copy_from_hash_into_C_row<NUM_WARPS_PER_BLOCK, SHMEM_HASH_SIZE>
-            (lane_id, js + i * SHMEM_HASH_SIZE, as + i * SHMEM_HASH_SIZE, g1_size, jg1 + istart_g1,
+         j = copy_from_hash_into_C_row<NUM_WARPS_PER_BLOCK, SHMEM_HASH_SIZE>
+             (lane_id, js + i * SHMEM_HASH_SIZE, as + i * SHMEM_HASH_SIZE, g1_size, jg1 + istart_g1,
              ag1 + istart_g1, jc + istart_c, ac + istart_c);
       }
       else
       {
-#if DEBUG_MODE
-         j =
-#endif
-            copy_from_hash_into_C_row<NUM_WARPS_PER_BLOCK, SHMEM_HASH_SIZE>
-            (lane_id, js + i * SHMEM_HASH_SIZE, as + i * SHMEM_HASH_SIZE, g2_size, jg2 + istart_g2,
+         j = copy_from_hash_into_C_row<NUM_WARPS_PER_BLOCK, SHMEM_HASH_SIZE>
+             (lane_id, js + i * SHMEM_HASH_SIZE, as + i * SHMEM_HASH_SIZE, g2_size, jg2 + istart_g2,
              ag2 + istart_g2, jc + istart_c, ac + istart_c);
       }
-#if DEBUG_MODE
+#ifdef HYPRE_DEBUG
       assert(istart_c + j == iend_c);
+#else
+      (void) j;
 #endif
    }
 }

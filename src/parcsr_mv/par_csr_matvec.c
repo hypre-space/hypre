@@ -66,6 +66,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
     *  is informational only.
     *--------------------------------------------------------------------*/
    hypre_assert( idxstride>0 );
+   (void) idxstride;
 
    if (num_cols != x_size)
    {
@@ -612,6 +613,7 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
    */
 
    hypre_assert( idxstride == 1 );
+   (void) idxstride;
 
    /* send_map_elmts on device */
    hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg);
