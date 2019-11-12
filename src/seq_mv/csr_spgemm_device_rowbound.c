@@ -151,7 +151,7 @@ void csr_spmm_symbolic(HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
 
    char failed = 0;
 
-#if DEBUG_MODE
+#ifdef HYPRE_DEBUG
    assert(blockDim.z              == NUM_WARPS_PER_BLOCK);
    assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
    assert(NUM_WARPS_PER_BLOCK <= HYPRE_WARP_SIZE);
@@ -205,7 +205,7 @@ void csr_spmm_symbolic(HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
                                                SHMEM_HASH_SIZE, warp_s_HashKeys,
                                                ghash_size, jg + istart_g, failed);
 
-#if DEBUG_MODE
+#ifdef HYPRE_DEBUG
       if (ATTEMPT == 2)
       {
          assert(failed == 0);
@@ -228,7 +228,7 @@ void csr_spmm_symbolic(HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
          {
             rf[i] = failed > 0;
          }
-#if DEBUG_MODE
+#ifdef HYPRE_DEBUG
          else
          {
             rf[i] = failed > 0;
@@ -343,7 +343,7 @@ hypreDevice_CSRSpGemmRownnz(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    {
       gpu_csr_spmm_rownnz_attempt<2> (m, k, n, d_ia, d_ja, d_ib, d_jb, d_rc, d_rf);
 
-#if DEBUG_MODE
+#ifdef HYPRE_DEBUG
       assert(hypreDevice_IntegerReduceSum(m, d_rf) == 0);
 #endif
    }

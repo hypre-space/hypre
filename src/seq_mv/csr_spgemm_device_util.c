@@ -52,7 +52,7 @@ void csr_spmm_create_ija(HYPRE_Int m, HYPRE_Int *d_c, HYPRE_Int **d_i, HYPRE_Int
 __global__
 void csr_spmm_get_ghash_size(HYPRE_Int n, HYPRE_Int *rc, HYPRE_Int *rf, HYPRE_Int *rg, HYPRE_Int SHMEM_HASH_SIZE)
 {
-#if DEBUG_MODE
+#ifdef HYPRE_DEBUG
    assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
 #endif
 
@@ -69,7 +69,7 @@ void csr_spmm_get_ghash_size(HYPRE_Int n, HYPRE_Int *rc, HYPRE_Int *rf, HYPRE_In
 __global__
 void csr_spmm_get_ghash_size(HYPRE_Int n, HYPRE_Int num_ghash, HYPRE_Int *rc, HYPRE_Int *rf, HYPRE_Int *rg, HYPRE_Int SHMEM_HASH_SIZE)
 {
-#if DEBUG_MODE
+#ifdef HYPRE_DEBUG
    assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
 #endif
 

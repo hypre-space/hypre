@@ -698,9 +698,9 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
       ic++;
    } /* outermost loop, for (i=0,...), for each C-pt find restriction */
 
-   hypre_assert(ic == n_cpts)
-   hypre_assert(cnt_diag == nnz_diag)
-   hypre_assert(cnt_offd == nnz_offd)
+   hypre_assert(ic == n_cpts);
+   hypre_assert(cnt_diag == nnz_diag);
+   hypre_assert(cnt_offd == nnz_offd);
 
    /* num of cols in the offd part of R */
    num_cols_offd_R = 0;
