@@ -356,6 +356,12 @@ hypre_MGRDestroy( void *data )
     hypre_TFree(mgr_data -> idx_array, HYPRE_MEMORY_HOST);
     (mgr_data -> idx_array) = NULL;
   }
+  /* array for setting option to use non-Galerkin coarse grid */
+   if (mgr_data -> use_non_galerkin_cg)
+  {
+    hypre_TFree(mgr_data -> use_non_galerkin_cg, HYPRE_MEMORY_HOST);
+    (mgr_data -> use_non_galerkin_cg) = NULL;
+  }
   /* coarse level matrix - RAP */
   if ((mgr_data -> RAP))
     hypre_ParCSRMatrixDestroy((mgr_data -> RAP));
@@ -432,7 +438,7 @@ hypre_MGRDestroyFrelaxVcycleData( void *data )
   }
 
   /* see comments in par_coarsen.c regarding special case for CF_marker */
-  if (num_levels == 1)
+  if (num_levels <= 1)
   {
      hypre_TFree(hypre_ParAMGDataCFMarkerArray(vdata)[0], HYPRE_MEMORY_HOST);
   }

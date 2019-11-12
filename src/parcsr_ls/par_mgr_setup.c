@@ -1346,29 +1346,35 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
       hypre_TFree(coarse_pnts_global_lvl, HYPRE_MEMORY_HOST);
       hypre_TFree(coarse_dof_func_lvl, HYPRE_MEMORY_HOST);
       hypre_TFree(col_offd_S_to_A, HYPRE_MEMORY_HOST);
-      //hypre_TFree(CF_marker_local, HYPRE_MEMORY_HOST);
       
-      // Save the cf_marker from outer MGR level (lev).
-      if (relax_order == 1)
+      if (lev_local == 0)
       {
-        /* We need to mask out C-points from outer CF-marker for C/F relaxation at solve phase --DOK*/
-        for (i = 0; i < local_size; i++) 
+        // Save the cf_marker from outer MGR level (lev).
+        if (relax_order == 1)
         {
-          if (CF_marker_array[lev][i] == 1) 
+          /* We need to mask out C-points from outer CF-marker for C/F relaxation at solve phase --DOK*/
+          for (i = 0; i < local_size; i++)
           {
-            CF_marker_local[i] = 0;
+            if (CF_marker_array[lev][i] == 1)
+            {
+              CF_marker_local[i] = 0;
+            }
           }
+          CF_marker_array_local[lev_local] = CF_marker_local;
         }
-        CF_marker_array_local[lev_local] = CF_marker_local;
+        else
+        {
+          /* Do lexicographic relaxation on F-points from outer CF-marker --DOK*/
+          for (i = 0; i < local_size; i++)
+          {
+            CF_marker_local[i] = CF_marker_array[lev][i];
+          }
+          CF_marker_array_local[lev_local] = CF_marker_local;
+        }
       }
       else
-      {  
-        /* Do lexicographic relaxation on F-points from outer CF-marker --DOK */ 
-        for (i = 0; i < local_size; i++) 
-        {
-          CF_marker_local[i] = CF_marker_array[lev][i];
-        }
-        CF_marker_array_local[lev_local] = CF_marker_local;
+      {
+        hypre_TFree(CF_marker_local, HYPRE_MEMORY_HOST);
       }
       break;
     }
@@ -1472,7 +1478,7 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
   /* setup GE for coarsest level (if small enough) */  
   if ((lev_local > 0) && (hypre_ParAMGDataUserCoarseRelaxType(FrelaxVcycleData[lev]) == 9))
   {
-    if((coarse_size <= max_local_coarse_size))
+    if((coarse_size <= max_local_coarse_size) && coarse_size > 0)
     {
       hypre_GaussElimSetup(FrelaxVcycleData[lev], lev_local, 9);
     }
