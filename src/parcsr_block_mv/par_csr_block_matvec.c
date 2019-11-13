@@ -16,7 +16,6 @@
 #include "HYPRE.h"
 #include "parcsr_mv/_hypre_parcsr_mv.h"
 #include "seq_mv/seq_mv.h"
-#include <assert.h>
 
 /*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixMatvec
@@ -50,16 +49,16 @@ hypre_ParCSRBlockMatrixMatvec(HYPRE_Complex alpha,
    diag   = hypre_ParCSRBlockMatrixDiag(A);
    offd   = hypre_ParCSRBlockMatrixOffd(A);
    num_cols_offd = hypre_CSRBlockMatrixNumCols(offd);
-   x_local  = hypre_ParVectorLocalVector(x);   
-   y_local  = hypre_ParVectorLocalVector(y);   
+   x_local  = hypre_ParVectorLocalVector(x);
+   y_local  = hypre_ParVectorLocalVector(y);
    x_size = hypre_ParVectorGlobalSize(x);
    y_size = hypre_ParVectorGlobalSize(y);
    x_local_data = hypre_VectorData(x_local);
 
    /*---------------------------------------------------------------------
-    *  Check for size compatibility.  
+    *  Check for size compatibility.
     *--------------------------------------------------------------------*/
- 
+
    if (num_cols*(HYPRE_BigInt)blk_size != x_size) ierr = 11;
    if (num_rows*(HYPRE_BigInt)blk_size != y_size) ierr = 12;
    if (num_cols*(HYPRE_BigInt)blk_size != x_size && num_rows*(HYPRE_BigInt)blk_size != y_size) ierr = 13;
@@ -73,7 +72,7 @@ hypre_ParCSRBlockMatrixMatvec(HYPRE_Complex alpha,
       if (!comm_pkg)
       {
          hypre_BlockMatvecCommPkgCreate(A);
-         comm_pkg = hypre_ParCSRBlockMatrixCommPkg(A); 
+         comm_pkg = hypre_ParCSRBlockMatrixCommPkg(A);
       }
       num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
       size = hypre_ParCSRCommPkgSendMapStart(comm_pkg,num_sends)*blk_size;
@@ -98,8 +97,8 @@ hypre_ParCSRBlockMatrixMatvec(HYPRE_Complex alpha,
    {
       hypre_ParCSRBlockCommHandleDestroy(comm_handle);
       comm_handle = NULL;
-      if (num_cols_offd) 
-         hypre_CSRBlockMatrixMatvec(alpha,offd,x_tmp,1.0,y_local);    
+      if (num_cols_offd)
+         hypre_CSRBlockMatrixMatvec(alpha,offd,x_tmp,1.0,y_local);
       hypre_SeqVectorDestroy(x_tmp);
       x_tmp = NULL;
       hypre_TFree(x_buf_data, HYPRE_MEMORY_HOST);
@@ -134,7 +133,7 @@ hypre_ParCSRBlockMatrixMatvecT( HYPRE_Complex    alpha,
    HYPRE_BigInt      x_size = hypre_ParVectorGlobalSize(x);
    HYPRE_BigInt      y_size = hypre_ParVectorGlobalSize(y);
    HYPRE_Complex    *y_tmp_data, *y_buf_data;
-   
+
 
    HYPRE_BigInt      num_rows  = hypre_ParCSRBlockMatrixGlobalNumRows(A);
    HYPRE_BigInt      num_cols  = hypre_ParCSRBlockMatrixGlobalNumCols(A);
@@ -143,21 +142,21 @@ hypre_ParCSRBlockMatrixMatvecT( HYPRE_Complex    alpha,
 
    HYPRE_Int         i, j, index, start, finish, elem, num_sends;
    HYPRE_Int         size, k;
-   
+
 
    HYPRE_Int         ierr  = 0;
 
    /*---------------------------------------------------------------------
     *  Check for size compatibility.  MatvecT returns ierr = 1 if
     *  length of X doesn't equal the number of rows of A,
-    *  ierr = 2 if the length of Y doesn't equal the number of 
+    *  ierr = 2 if the length of Y doesn't equal the number of
     *  columns of A, and ierr = 3 if both are true.
     *
-    *  Because temporary vectors are often used in MatvecT, none of 
+    *  Because temporary vectors are often used in MatvecT, none of
     *  these conditions terminates processing, and the ierr flag
     *  is informational only.
     *--------------------------------------------------------------------*/
- 
+
    if (num_rows*(HYPRE_BigInt)blk_size != x_size)
       ierr = 1;
 
@@ -180,7 +179,7 @@ hypre_ParCSRBlockMatrixMatvecT( HYPRE_Complex    alpha,
    if (!comm_pkg)
    {
       hypre_BlockMatvecCommPkgCreate(A);
-      comm_pkg = hypre_ParCSRBlockMatrixCommPkg(A); 
+      comm_pkg = hypre_ParCSRBlockMatrixCommPkg(A);
    }
 
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
@@ -189,13 +188,13 @@ hypre_ParCSRBlockMatrixMatvecT( HYPRE_Complex    alpha,
 
    y_tmp_data = hypre_VectorData(y_tmp);
    y_local_data = hypre_VectorData(y_local);
-  
+
    if (num_cols_offd) hypre_CSRBlockMatrixMatvecT(alpha, offd, x_local, 0.0, y_tmp);
 
    comm_handle = hypre_ParCSRBlockCommHandleCreate
       ( 2, blk_size, comm_pkg, y_tmp_data, y_buf_data);
 
-  
+
    hypre_CSRBlockMatrixMatvecT(alpha, diag, x_local, beta, y_local);
 
 
@@ -207,7 +206,7 @@ hypre_ParCSRBlockMatrixMatvecT( HYPRE_Complex    alpha,
    {
       start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
       finish = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1);
-      
+
       for (j = start; j < finish; j++)
       {
          elem =  hypre_ParCSRCommPkgSendMapElmt(comm_pkg, j)*blk_size;
@@ -218,12 +217,12 @@ hypre_ParCSRBlockMatrixMatvecT( HYPRE_Complex    alpha,
          }
       }
    }
-   
+
    hypre_TFree(y_buf_data, HYPRE_MEMORY_HOST);
 
-        
+
    hypre_SeqVectorDestroy(y_tmp);
    y_tmp = NULL;
-   
+
    return ierr;
 }

@@ -97,7 +97,7 @@ csr_spmm_create_hash_table(HYPRE_Int m, HYPRE_Int *d_rc, HYPRE_Int *d_rf, HYPRE_
    dim3 bDim(BDIMX, BDIMY, num_warps_per_block);
    dim3 gDim( (m + bDim.z * HYPRE_WARP_SIZE - 1) / (bDim.z * HYPRE_WARP_SIZE) );
 
-   assert(num_ghash <= m);
+   hypre_assert(num_ghash <= m);
 
    *d_ghash_i = hypre_TAlloc(HYPRE_Int, num_ghash + 1, HYPRE_MEMORY_DEVICE);
 

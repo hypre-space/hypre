@@ -5,7 +5,6 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
-#include <assert.h>
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>

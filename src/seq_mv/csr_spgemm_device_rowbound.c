@@ -254,7 +254,7 @@ void gpu_csr_spmm_rownnz_attempt(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
 
    /* CUDA kernel configurations */
    dim3 bDim(BDIMX, BDIMY, num_warps_per_block);
-   assert(bDim.x * bDim.y == HYPRE_WARP_SIZE);
+   hypre_assert(bDim.x * bDim.y == HYPRE_WARP_SIZE);
    // for cases where one WARP works on a row
    HYPRE_Int num_warps = min(m, HYPRE_MAX_NUM_WARPS);
    dim3 gDim( (num_warps + bDim.z - 1) / bDim.z );
@@ -344,7 +344,7 @@ hypreDevice_CSRSpGemmRownnz(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
       gpu_csr_spmm_rownnz_attempt<2> (m, k, n, d_ia, d_ja, d_ib, d_jb, d_rc, d_rf);
 
 #ifdef HYPRE_DEBUG
-      assert(hypreDevice_IntegerReduceSum(m, d_rf) == 0);
+      hypre_assert(hypreDevice_IntegerReduceSum(m, d_rf) == 0);
 #endif
    }
 

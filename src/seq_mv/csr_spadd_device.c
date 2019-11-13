@@ -136,7 +136,7 @@ hypreDevice_CSRSpAdd(HYPRE_Int  ma,       HYPRE_Int   mb,        HYPRE_Int   n,
 #ifdef HYPRE_DEBUG
    HYPRE_Int tmp_nnzC;
    hypre_TMemcpy(&tmp_nnzC, &d_ic[ma], HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-   assert(nnzC == tmp_nnzC);
+   hypre_assert(nnzC == tmp_nnzC);
 #endif
 
    /*

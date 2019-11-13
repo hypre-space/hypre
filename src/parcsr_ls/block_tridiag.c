@@ -11,7 +11,6 @@
  *
  *****************************************************************************/
 
-#include <assert.h>
 #include "HYPRE.h"
 #include "utilities/_hypre_utilities.h"
 #include "IJ_mv/_hypre_IJ_mv.h"
