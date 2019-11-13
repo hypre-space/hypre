@@ -2910,6 +2910,28 @@ main( hypre_int argc,
          hypre_printf("\n");
       }
 
+#if SECOND_TIME
+      /* run a second time to check for memory leaks */
+      HYPRE_ParVectorSetRandomValues(x, 775);
+      HYPRE_ParCSRHybridSetup(amg_solver, parcsr_A, b, x);
+      HYPRE_ParCSRHybridSolve(amg_solver, parcsr_A, b, x);
+
+      HYPRE_ParCSRHybridGetNumIterations(amg_solver, &num_iterations);
+      HYPRE_ParCSRHybridGetPCGNumIterations(amg_solver, &pcg_num_its);
+      HYPRE_ParCSRHybridGetDSCGNumIterations(amg_solver, &dscg_num_its);
+      HYPRE_ParCSRHybridGetFinalRelativeResidualNorm(amg_solver,
+                                                     &final_res_norm);
+      if (myid == 0)
+      {
+         hypre_printf("\n");
+         hypre_printf("Iterations = %d\n", num_iterations);
+         hypre_printf("PCG_Iterations = %d\n", pcg_num_its);
+         hypre_printf("DSCG_Iterations = %d\n", dscg_num_its);
+         hypre_printf("Final Relative Residual Norm = %e\n", final_res_norm);
+         hypre_printf("\n");
+      }
+#endif
+
       HYPRE_ParCSRHybridDestroy(amg_solver);
    }
    /*-----------------------------------------------------------

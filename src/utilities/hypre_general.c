@@ -241,6 +241,9 @@ HYPRE_Init( hypre_int argc, char *argv[] )
    hypre_handle = hypre_HandleCreate();
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+
+   HYPRE_CUDA_CALL( cudaGetLastError() );
+
    hypre_SetDevice(-1, hypre_handle);
 
    /* To include the cost of creating streams/cudahandles in HYPRE_Init */

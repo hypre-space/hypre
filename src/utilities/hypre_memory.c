@@ -318,6 +318,12 @@ hypre_Free(void *ptr, HYPRE_Int location)
 
    location = hypre_GetActualMemLocation(location);
 
+#ifdef HYPRE_DEBUG
+   HYPRE_Int tmp;
+   hypre_GetMemoryLocation(ptr, &tmp);
+   assert(location == tmp);
+#endif
+
    switch (location)
    {
       case HYPRE_MEMORY_HOST :
@@ -598,7 +604,17 @@ hypre_GetMemoryLocation(const void *ptr, HYPRE_Int *memory_location)
    *memory_location = HYPRE_MEMORY_UNSET;
 
 #if (CUDART_VERSION >= 10000)
+#if (CUDART_VERSION >= 11000)
    HYPRE_CUDA_CALL( cudaPointerGetAttributes(&attr, ptr) );
+#else
+   cudaError_t err = cudaPointerGetAttributes(&attr, ptr);
+   if (err != cudaSuccess)
+   {
+      ierr = 1;
+      /* clear the error */
+      cudaGetLastError();
+   }
+#endif
    if (attr.type == cudaMemoryTypeUnregistered)
    {
       *memory_location = HYPRE_MEMORY_HOST;
