@@ -25,7 +25,8 @@ void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, c
 #define hypre_error_in_arg(IARG)  hypre_error(HYPRE_ERROR_ARG | IARG<<3)
 
 #ifdef HYPRE_DEBUG
-#define hypre_assert(EX) do { if (!(EX)) {hypre_fprintf(stderr,"hypre_assert failed: %s\n", #EX); hypre_error(1);} } while (0)
+#include <assert.h>
+#define hypre_assert(EX) do { if (!(EX)) {hypre_fprintf(stderr,"hypre_assert failed: %s\n", #EX); hypre_error(1); assert(EX); } } while (0)
 #else
 #ifdef __cplusplus
 extern "C++" { template<class T> static inline void hypre_assert( const T& ) { } }

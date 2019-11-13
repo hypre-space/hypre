@@ -13,7 +13,6 @@
 
 #include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
-#include <assert.h>
 #ifdef HYPRE_USING_DSUPERLU
 #include <math.h>
 #include "superlu_ddefs.h"

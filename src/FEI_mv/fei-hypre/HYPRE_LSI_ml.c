@@ -5,11 +5,11 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
-/****************************************************************************/ 
+/****************************************************************************/
 /* HYPRE_LSI_ML interface                                                   */
 /*--------------------------------------------------------------------------*/
 /*  local functions :
- * 
+ *
  *        MH_Irecv
  *        MH_Send
  *        MH_Wait
@@ -34,7 +34,6 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <assert.h>
 #include <math.h>
 
 #include "../../parcsr_ls/HYPRE_parcsr_ls.h"
@@ -46,7 +45,7 @@
 #include "../../matrix_matrix/HYPRE_matrix_matrix_protos.h"
 
 #include "../../seq_mv/vector.h"
-#include "../../parcsr_mv/_hypre_parcsr_mv.h" 
+#include "../../parcsr_mv/_hypre_parcsr_mv.h"
 /* #include "../../parcsr_mv/par_vector.h" */
 
 extern void hypre_qsort0(int *, int, int);
@@ -54,9 +53,9 @@ extern void hypre_qsort0(int *, int, int);
 #include "HYPRE_MHMatrix.h"
 
 extern int  HYPRE_LSI_MLConstructMHMatrix(HYPRE_ParCSRMatrix, MH_Matrix *,
-                                          MPI_Comm, int *,MH_Context*); 
+                                          MPI_Comm, int *,MH_Context*);
 
-/****************************************************************************/ 
+/****************************************************************************/
 /* communication functions on parallel platforms                            */
 /*--------------------------------------------------------------------------*/
 
@@ -68,7 +67,7 @@ int MH_Irecv(void* buf, unsigned int count, int *src, int *mid,
 #else
    int my_id, lsrc, retcode;
 
-   if ( *src < 0 ) lsrc = MPI_ANY_SOURCE; else lsrc = (*src); 
+   if ( *src < 0 ) lsrc = MPI_ANY_SOURCE; else lsrc = (*src);
    retcode = MPI_Irecv( buf, (int) count, MPI_BYTE, lsrc, *mid, comm, request);
    if ( retcode != 0 )
    {
@@ -95,7 +94,7 @@ int MH_Wait(void* buf, unsigned int count, int *src, int *mid,
       printf("%d : MH_Wait warning : retcode = %d\n", my_id, retcode);
    }
    MPI_Get_count(&status, MPI_BYTE, &incount);
-   if ( *src < 0 ) *src = status.MPI_SOURCE; 
+   if ( *src < 0 ) *src = status.MPI_SOURCE;
    return incount;
 #endif
 }
@@ -116,7 +115,7 @@ int MH_Send(void* buf, unsigned int count, int dest, int mid, MPI_Comm comm )
 #endif
 }
 
-/****************************************************************************/ 
+/****************************************************************************/
 /* wrapper function for interprocessor communication for matvec and getrow  */
 /*--------------------------------------------------------------------------*/
 
@@ -130,7 +129,7 @@ int MH_ExchBdry(double *vec, void *obj)
    MH_Context  *context;
    MH_Matrix   *Amat;
    MPI_Comm    comm;
-   MPI_Request *request; 
+   MPI_Request *request;
 
    int sendProcCnt, recvProcCnt;
    int *sendProc, *recvProc;
@@ -186,11 +185,11 @@ int MH_ExchBdry(double *vec, void *obj)
 #endif
 }
 
-/****************************************************************************/ 
+/****************************************************************************/
 /* wrapper function for interprocessor communication for matvec and getrow  */
 /*--------------------------------------------------------------------------*/
 
-int MH_ExchBdryBack(double *vec, void *obj, int *length, double **outvec, 
+int MH_ExchBdryBack(double *vec, void *obj, int *length, double **outvec,
                     int **outindices)
 {
 #ifdef HYPRE_SEQUENTIAL
@@ -203,7 +202,7 @@ int MH_ExchBdryBack(double *vec, void *obj, int *length, double **outvec,
    MH_Context  *context;
    MH_Matrix   *Amat;
    MPI_Comm    comm;
-   MPI_Request *request; 
+   MPI_Request *request;
 
    int sendProcCnt, recvProcCnt;
    int *sendProc, *recvProc;
@@ -231,13 +230,13 @@ int MH_ExchBdryBack(double *vec, void *obj, int *length, double **outvec,
       (*outindices) = hypre_TAlloc(int, leng , HYPRE_MEMORY_HOST);
       (*length) = leng;
       offset = 0;
-      for ( i = 0; i < sendProcCnt; i++ ) 
+      for ( i = 0; i < sendProcCnt; i++ )
       {
-         for ( j = 0; j < sendLeng[i]; j++ ) 
+         for ( j = 0; j < sendLeng[i]; j++ )
             (*outindices)[offset+j] = sendList[i][j];
          offset += sendLeng[i];
-      } 
-   } 
+      }
+   }
    else
    {
       (*outvec) = NULL;
@@ -275,7 +274,7 @@ int MH_ExchBdryBack(double *vec, void *obj, int *length, double **outvec,
 #endif
 }
 
-/****************************************************************************/ 
+/****************************************************************************/
 /* matvec function for local matrix structure MH_Matrix                     */
 /*--------------------------------------------------------------------------*/
 
@@ -301,13 +300,13 @@ int MH_MatVec(void *obj, int leng1, double p[], int leng2, double ap[])
     dbuf = hypre_TAlloc( double ,  length , HYPRE_MEMORY_HOST);
     for ( i = 0; i < nRows; i++ ) dbuf[i] = p[i];
     MH_ExchBdry(dbuf, obj);
-    for ( i = 0 ; i < nRows; i++ ) 
+    for ( i = 0 ; i < nRows; i++ )
     {
        sum = 0.0;
        ibeg = rowptr[i];
        iend = rowptr[i+1];
        for ( j = ibeg; j < iend; j++ )
-       { 
+       {
           k = colnum[j];
           sum += ( values[j] * dbuf[k] );
        }
@@ -361,7 +360,7 @@ int HYPRE_LSI_MLCreate( MPI_Comm comm, HYPRE_Solver *solver)
     /* create an internal ML data structure */
 
     MH_Link *link = hypre_TAlloc( MH_Link , 1, HYPRE_MEMORY_HOST);
-    if ( link == NULL ) return 1;   
+    if ( link == NULL ) return 1;
 
     /* fill in all other default parameters */
 
@@ -380,7 +379,7 @@ int HYPRE_LSI_MLCreate( MPI_Comm comm, HYPRE_Solver *solver)
     link->ag_threshold  = 0.08; /* threshold for aggregation */
     link->contxt        = NULL; /* context for matvec */
     link->coarse_solver = 0;    /* default = SuperLU */
-  
+
     /* create the ML structure */
 
     ML_Create( &(link->ml_ptr), link->nlevels );
@@ -414,7 +413,7 @@ int HYPRE_LSI_MLDestroy( HYPRE_Solver solver )
        Amat = (MH_Matrix *) link->contxt->Amat;
        if ( Amat->sendProc != NULL ) free (Amat->sendProc);
        if ( Amat->sendLeng != NULL ) free (Amat->sendLeng);
-       if ( Amat->sendList != NULL ) 
+       if ( Amat->sendList != NULL )
        {
           for (i = 0; i < Amat->sendProcCnt; i++ )
              if (Amat->sendList[i] != NULL) free (Amat->sendList[i]);
@@ -451,25 +450,25 @@ int HYPRE_LSI_MLSetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
     MH_Context *context;
     MH_Matrix  *mh_mat;
 
-    /* -------------------------------------------------------- */ 
+    /* -------------------------------------------------------- */
     /* fetch the ML pointer                                     */
-    /* -------------------------------------------------------- */ 
+    /* -------------------------------------------------------- */
 
     MH_Link *link = (MH_Link *) solver;
     ML      *ml   = link->ml_ptr;
     nlevels       = link->nlevels;
-   
-    /* -------------------------------------------------------- */ 
+
+    /* -------------------------------------------------------- */
     /* set up the parallel environment                          */
-    /* -------------------------------------------------------- */ 
+    /* -------------------------------------------------------- */
 
     MPI_Comm_rank(link->comm, &my_id);
     MPI_Comm_size(link->comm, &nprocs);
 
-    /* -------------------------------------------------------- */ 
+    /* -------------------------------------------------------- */
     /* fetch the matrix row partition information and put it    */
     /* into the matrix data object (for matvec and getrow)      */
-    /* -------------------------------------------------------- */ 
+    /* -------------------------------------------------------- */
 
     HYPRE_ParCSRMatrixGetRowPartitioning( A, &row_partition );
     localEqns  = row_partition[my_id+1] - row_partition[my_id];
@@ -483,11 +482,11 @@ int HYPRE_LSI_MLSetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
     mh_mat = hypre_TAlloc( MH_Matrix, 1, HYPRE_MEMORY_HOST);
     context->Amat = mh_mat;
     HYPRE_LSI_MLConstructMHMatrix(A,mh_mat,link->comm,
-                                  context->partition,context); 
+                                  context->partition,context);
 
-    /* -------------------------------------------------------- */ 
+    /* -------------------------------------------------------- */
     /* set up the ML communicator information                   */
-    /* -------------------------------------------------------- */ 
+    /* -------------------------------------------------------- */
 
     ML_Set_Comm_Communicator(ml, link->comm);
     ML_Set_Comm_MyRank(ml, my_id);
@@ -496,9 +495,9 @@ int HYPRE_LSI_MLSetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
     ML_Set_Comm_Recv(ml, MH_Irecv);
     ML_Set_Comm_Wait(ml, MH_Wait);
 
-    /* -------------------------------------------------------- */ 
+    /* -------------------------------------------------------- */
     /* set up the ML matrix information                         */
-    /* -------------------------------------------------------- */ 
+    /* -------------------------------------------------------- */
 
     ML_Init_Amatrix(ml, nlevels-1, localEqns, localEqns, (void *) context);
     ML_Set_Amatrix_Matvec(ml, nlevels-1, MH_MatVec);
@@ -506,12 +505,12 @@ int HYPRE_LSI_MLSetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
     for (i=0; i<mh_mat->recvProcCnt; i++ ) length += mh_mat->recvLeng[i];
     ML_Set_Amatrix_Getrow(ml, nlevels-1, MH_GetRow, MH_ExchBdry, length);
 
-    /* -------------------------------------------------------- */ 
+    /* -------------------------------------------------------- */
     /* create an AMG or aggregate context                       */
-    /* -------------------------------------------------------- */ 
+    /* -------------------------------------------------------- */
 
     if ( link->method == 0 )
-    { 
+    {
        ML_AMG_Create(&(link->ml_amg));
        ML_AMG_Set_Threshold( link->ml_amg, link->ag_threshold );
        if ( link->num_PDEs > 1 )
@@ -519,7 +518,7 @@ int HYPRE_LSI_MLSetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
        else
           ML_AMG_Set_AMGScheme_Scalar(link->ml_amg);
        ML_AMG_Set_MaxLevels( link->ml_amg, link->nlevels );
-       coarsest_level = ML_Gen_MGHierarchy_UsingAMG(ml, nlevels-1, 
+       coarsest_level = ML_Gen_MGHierarchy_UsingAMG(ml, nlevels-1,
                                         ML_DECREASING, link->ml_amg);
     }
     else
@@ -542,24 +541,24 @@ int HYPRE_LSI_MLSetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
           default: ML_Aggregate_Set_CoarsenScheme_Uncoupled(link->ml_ag);
                    break;
        }
-       coarsest_level = ML_Gen_MGHierarchy_UsingAggregation(ml, nlevels-1, 
+       coarsest_level = ML_Gen_MGHierarchy_UsingAggregation(ml, nlevels-1,
                                         ML_DECREASING, link->ml_ag);
     }
 
-    /* -------------------------------------------------------- */ 
+    /* -------------------------------------------------------- */
     /* perform aggregation                                      */
-    /* -------------------------------------------------------- */ 
+    /* -------------------------------------------------------- */
 
     if ( my_id == 0 )
        printf("ML : number of levels = %d\n", coarsest_level);
 
     coarsest_level = nlevels - coarsest_level;
 
-    /* -------------------------------------------------------- */ 
+    /* -------------------------------------------------------- */
     /* set up smoother and coarse solver                        */
-    /* -------------------------------------------------------- */ 
+    /* -------------------------------------------------------- */
 
-    for (level = nlevels-1; level > coarsest_level; level--) 
+    for (level = nlevels-1; level > coarsest_level; level--)
     {
        sweeps = link->pre_sweeps;
        wght   = link->jacobi_wt;
@@ -594,7 +593,7 @@ int HYPRE_LSI_MLSetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
              {
                 Nblocks = ML_Aggregate_Get_AggrCount( link->ml_ag, level );
                 ML_Aggregate_Get_AggrMap( link->ml_ag, level, &blockList );
-                ML_Gen_Smoother_VBlockSymGaussSeidel(ml,level, ML_PRESMOOTHER, 
+                ML_Gen_Smoother_VBlockSymGaussSeidel(ml,level, ML_PRESMOOTHER,
                                              sweeps, 1.0, Nblocks, blockList);
              }
              else
@@ -618,7 +617,7 @@ int HYPRE_LSI_MLSetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
              }
              break;
           case 6 :
-             ML_Gen_Smoother_OverlappedDDILUT(ml,level, ML_PRESMOOTHER); 
+             ML_Gen_Smoother_OverlappedDDILUT(ml,level, ML_PRESMOOTHER);
              break;
           case 7 :
              ML_Gen_Smoother_VBlockAdditiveSchwarz(ml,level,ML_PRESMOOTHER,
@@ -721,7 +720,7 @@ int HYPRE_LSI_MLSetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
        ML_Gen_Smoother_GaussSeidel(ml,coarsest_level,ML_PRESMOOTHER,50,1.0);
     }
     ML_Gen_Solver(ml, ML_MGV, nlevels-1, coarsest_level);
-   
+
     return 0;
 #else
     printf("ML not linked.\n");
@@ -757,7 +756,7 @@ int HYPRE_LSI_MLSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
     ML_Krylov_Solve(ml_kry, leng, rhs, sol);
     ML_Krylov_Destroy(&ml_kry);
     */
-  
+
     ML_Solve_AMGV(ml, rhs, sol);
     /*ML_Iterate(ml, sol, rhs);*/
 
@@ -775,16 +774,16 @@ int HYPRE_LSI_MLSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
 int HYPRE_LSI_MLSetStrongThreshold(HYPRE_Solver solver,double strong_threshold)
 {
     MH_Link *link = (MH_Link *) solver;
-  
+
     if ( strong_threshold < 0.0 )
     {
        printf("HYPRE_LSI_MLSetStrongThreshold WARNING : reset to 0.\n");
        link->ag_threshold = 0.0;
-    } 
+    }
     else
     {
        link->ag_threshold = strong_threshold;
-    } 
+    }
     return( 0 );
 }
 
@@ -826,11 +825,11 @@ int HYPRE_LSI_MLSetNumPreSmoothings( HYPRE_Solver solver, int num_sweeps  )
     {
        printf("HYPRE_LSI_MLSetNumPreSmoothings WARNING : reset to 0.\n");
        link->pre_sweeps = 0;
-    } 
+    }
     else
     {
        link->pre_sweeps = num_sweeps;
-    } 
+    }
     return( 0 );
 }
 
@@ -846,11 +845,11 @@ int HYPRE_LSI_MLSetNumPostSmoothings( HYPRE_Solver solver, int num_sweeps  )
     {
        printf("HYPRE_LSI_MLSetNumPostSmoothings WARNING : reset to 0.\n");
        link->post_sweeps = 0;
-    } 
+    }
     else
     {
        link->post_sweeps = num_sweeps;
-    } 
+    }
     return( 0 );
 }
 
@@ -866,11 +865,11 @@ int HYPRE_LSI_MLSetPreSmoother( HYPRE_Solver solver, int smoother_type  )
     {
        printf("HYPRE_LSI_MLSetPreSmoother WARNING : set to Jacobi.\n");
        link->pre = 0;
-    } 
+    }
     else
     {
        link->pre = smoother_type;
-    } 
+    }
     return( 0 );
 }
 
@@ -886,11 +885,11 @@ int HYPRE_LSI_MLSetPostSmoother( HYPRE_Solver solver, int smoother_type  )
     {
        printf("HYPRE_LSI_MLSetPostSmoother WARNING : set to Jacobi.\n");
        link->post = 0;
-    } 
+    }
     else
     {
        link->post = smoother_type;
-    } 
+    }
     return( 0 );
 }
 
@@ -906,11 +905,11 @@ int HYPRE_LSI_MLSetDampingFactor( HYPRE_Solver solver, double factor  )
     {
        printf("HYPRE_LSI_MLSetDampingFactor WARNING : set to 0.5.\n");
        link->jacobi_wt = 0.5;
-    } 
+    }
     else
     {
        link->jacobi_wt = factor;
-    } 
+    }
     return( 0 );
 }
 
@@ -926,11 +925,11 @@ int HYPRE_LSI_MLSetCoarseSolver( HYPRE_Solver solver, int solver_id  )
     {
        printf("HYPRE_LSI_MLSetCoarseSolver WARNING : reset to Aggr\n");
        link->coarse_solver = 1;
-    } 
+    }
     else
     {
        link->coarse_solver = solver_id;
-    } 
+    }
     return( 0 );
 }
 
@@ -946,11 +945,11 @@ int HYPRE_LSI_MLSetCoarsenScheme( HYPRE_Solver solver, int scheme  )
     {
        printf("HYPRE_LSI_MLSetCoarsenScheme WARNING : reset to uncoupled\n");
        link->coarsen_scheme = 1;
-    } 
+    }
     else
     {
        link->coarsen_scheme = scheme;
-    } 
+    }
     return( 0 );
 }
 
@@ -966,11 +965,11 @@ int HYPRE_LSI_MLSetBGSBlockSize( HYPRE_Solver solver, int size  )
     {
        printf("HYPRE_LSI_MLSetBGSBlockSize WARNING : reset to 1.\n");
        link->BGS_blocksize = 1;
-    } 
+    }
     else
     {
        link->BGS_blocksize = size;
-    } 
+    }
     return( 0 );
 }
 
@@ -979,7 +978,7 @@ int HYPRE_LSI_MLSetBGSBlockSize( HYPRE_Solver solver, int size  )
 /*--------------------------------------------------------------------------*/
 
 int HYPRE_LSI_MLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
-                             MPI_Comm comm, int *partition,MH_Context *obj) 
+                             MPI_Comm comm, int *partition,MH_Context *obj)
 {
     int         i, j, index, my_id, nprocs;
     int         rowLeng, *colInd, startRow, endRow, localEqns;
@@ -996,7 +995,7 @@ int HYPRE_LSI_MLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
     /* -------------------------------------------------------- */
     /* get machine information and local matrix information     */
     /* -------------------------------------------------------- */
-    
+
 #ifdef HYPRE_SEQUENTIAL
     my_id = 0;
     nprocs = 1;
@@ -1063,31 +1062,31 @@ int HYPRE_LSI_MLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
     ncnt = 0;
     for ( i = 1; i < externLeng; i++ )
     {
-       if ( externList[i] != externList[ncnt] ) 
+       if ( externList[i] != externList[ncnt] )
           externList[++ncnt] = externList[i];
     }
     if ( externLeng > 0 ) externLeng = ncnt + 1;
 
     /* -------------------------------------------------------- */
     /* allocate the CSR matrix                                  */
-    /* -------------------------------------------------------- */ 
+    /* -------------------------------------------------------- */
 
-    nnz = 0; 
-    for ( i = 0; i < localEqns; i++ ) nnz += diagSize[i] + offdiagSize[i]; 
-    rowptr  = hypre_TAlloc(int,  (localEqns + 1) , HYPRE_MEMORY_HOST); 
-    columns = hypre_TAlloc(int,  nnz , HYPRE_MEMORY_HOST); 
-    values  = hypre_TAlloc(double,  nnz , HYPRE_MEMORY_HOST); 
-    rowptr[0] = 0; 
-    for ( i = 1; i <= localEqns; i++ ) 
+    nnz = 0;
+    for ( i = 0; i < localEqns; i++ ) nnz += diagSize[i] + offdiagSize[i];
+    rowptr  = hypre_TAlloc(int,  (localEqns + 1) , HYPRE_MEMORY_HOST);
+    columns = hypre_TAlloc(int,  nnz , HYPRE_MEMORY_HOST);
+    values  = hypre_TAlloc(double,  nnz , HYPRE_MEMORY_HOST);
+    rowptr[0] = 0;
+    for ( i = 1; i <= localEqns; i++ )
        rowptr[i] = rowptr[i-1] + diagSize[i-1] + offdiagSize[i-1];
     free( diagSize );
     free( offdiagSize );
 
-    /* -------------------------------------------------------- */ 
+    /* -------------------------------------------------------- */
     /* put the matrix data in the CSR matrix                    */
-    /* -------------------------------------------------------- */ 
+    /* -------------------------------------------------------- */
 
-    rowptr[0] = 0; 
+    rowptr[0] = 0;
     ncnt      = 0;
     for ( i = startRow; i <= endRow; i++ )
     {
@@ -1095,7 +1094,7 @@ int HYPRE_LSI_MLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
        for (j = 0; j < rowLeng; j++)
        {
           index = colInd[j];
-          if ( colVal[j] != 0.0 ) 
+          if ( colVal[j] != 0.0 )
           {
              if ( index < startRow || index > endRow )
              {
@@ -1114,11 +1113,11 @@ int HYPRE_LSI_MLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
        rowptr[i-startRow+1] = ncnt;
        HYPRE_ParCSRMatrixRestoreRow(A, i, &rowLeng, &colInd, &colVal);
     }
-    assert( ncnt == nnz );
-   
-    /* -------------------------------------------------------- */ 
+    hypre_assert( ncnt == nnz );
+
+    /* -------------------------------------------------------- */
     /* initialize the MH_Matrix data structure                  */
-    /* -------------------------------------------------------- */ 
+    /* -------------------------------------------------------- */
 
     mh_mat->Nrows       = localEqns;
     mh_mat->rowptr      = rowptr;
@@ -1132,18 +1131,18 @@ int HYPRE_LSI_MLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
     mh_mat->recvProc    = NULL;
     mh_mat->sendList    = NULL;
     mh_mat->map         = externList;
- 
-    /* -------------------------------------------------------- */ 
+
+    /* -------------------------------------------------------- */
     /* form the remote portion of the matrix                    */
-    /* -------------------------------------------------------- */ 
+    /* -------------------------------------------------------- */
 
 #ifndef HYPRE_SEQUENTIAL
-    if ( nprocs > 1 ) 
+    if ( nprocs > 1 )
     {
-       /* ----------------------------------------------------- */ 
+       /* ----------------------------------------------------- */
        /* count number of elements to be received from each     */
        /* remote processor (assume sequential mapping)          */
-       /* ----------------------------------------------------- */ 
+       /* ----------------------------------------------------- */
 
        tempCnt = hypre_TAlloc(int,  nprocs , HYPRE_MEMORY_HOST);
        for ( i = 0; i < nprocs; i++ ) tempCnt[i] = 0;
@@ -1151,7 +1150,7 @@ int HYPRE_LSI_MLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
        {
           for ( j = 0; j < nprocs; j++ )
           {
-             if ( externList[i] >= partition[j] && 
+             if ( externList[i] >= partition[j] &&
                   externList[i] < partition[j+1] )
              {
                 tempCnt[j]++;
@@ -1160,9 +1159,9 @@ int HYPRE_LSI_MLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
           }
        }
 
-       /* ----------------------------------------------------- */ 
+       /* ----------------------------------------------------- */
        /* compile a list processors data is to be received from */
-       /* ----------------------------------------------------- */ 
+       /* ----------------------------------------------------- */
 
        recvProcCnt = 0;
        for ( i = 0; i < nprocs; i++ )
@@ -1172,17 +1171,17 @@ int HYPRE_LSI_MLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
        recvProcCnt = 0;
        for ( i = 0; i < nprocs; i++ )
        {
-          if ( tempCnt[i] > 0 ) 
+          if ( tempCnt[i] > 0 )
           {
              recvProc[recvProcCnt]   = i;
              recvLeng[recvProcCnt++] = tempCnt[i];
           }
        }
 
-       /* ----------------------------------------------------- */ 
+       /* ----------------------------------------------------- */
        /* each processor has to find out how many processors it */
        /* has to send data to                                   */
-       /* ----------------------------------------------------- */ 
+       /* ----------------------------------------------------- */
 
        sendLeng = hypre_TAlloc(int,  nprocs , HYPRE_MEMORY_HOST);
        for ( i = 0; i < nprocs; i++ ) tempCnt[i] = 0;
@@ -1196,40 +1195,40 @@ int HYPRE_LSI_MLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
           sendProc = hypre_TAlloc(int,  sendProcCnt , HYPRE_MEMORY_HOST);
           sendList = hypre_TAlloc(int*,  sendProcCnt , HYPRE_MEMORY_HOST);
        }
-       else 
+       else
        {
           sendLeng = sendProc = NULL;
           sendList = NULL;
        }
 
-       /* ----------------------------------------------------- */ 
+       /* ----------------------------------------------------- */
        /* each processor sends to all processors it expects to  */
        /* receive data about the lengths of data expected       */
-       /* ----------------------------------------------------- */ 
+       /* ----------------------------------------------------- */
 
        msgid = 539;
-       for ( i = 0; i < recvProcCnt; i++ ) 
+       for ( i = 0; i < recvProcCnt; i++ )
        {
           MPI_Send((void*) &recvLeng[i],1,MPI_INT,recvProc[i],msgid,comm);
        }
-       for ( i = 0; i < sendProcCnt; i++ ) 
+       for ( i = 0; i < sendProcCnt; i++ )
        {
           MPI_Recv((void*) &sendLeng[i],1,MPI_INT,MPI_ANY_SOURCE,msgid,
                    comm,&status);
           sendProc[i] = status.MPI_SOURCE;
           sendList[i] = hypre_TAlloc(int,  sendLeng[i] , HYPRE_MEMORY_HOST);
-          if ( sendList[i] == NULL ) 
+          if ( sendList[i] == NULL )
              printf("allocate problem %d \n", sendLeng[i]);
        }
 
-       /* ----------------------------------------------------- */ 
+       /* ----------------------------------------------------- */
        /* each processor sends to all processors it expects to  */
        /* receive data about the equation numbers               */
-       /* ----------------------------------------------------- */ 
+       /* ----------------------------------------------------- */
 
-       for ( i = 0; i < nprocs; i++ ) tempCnt[i] = 0; 
+       for ( i = 0; i < nprocs; i++ ) tempCnt[i] = 0;
        ncnt = 1;
-       for ( i = 0; i < externLeng; i++ ) 
+       for ( i = 0; i < externLeng; i++ )
        {
           if ( externList[i] >= partition[ncnt] )
           {
@@ -1237,23 +1236,23 @@ int HYPRE_LSI_MLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
              i--;
              ncnt++;
           }
-       }    
-       for ( i = ncnt-1; i < nprocs; i++ ) tempCnt[i] = externLeng; 
+       }
+       for ( i = ncnt-1; i < nprocs; i++ ) tempCnt[i] = externLeng;
 
-       /* ----------------------------------------------------- */ 
+       /* ----------------------------------------------------- */
        /* send the global equation numbers                      */
-       /* ----------------------------------------------------- */ 
+       /* ----------------------------------------------------- */
 
        if ( sendProcCnt > 0 )
           Request = hypre_TAlloc(MPI_Request, sendProcCnt , HYPRE_MEMORY_HOST);
 
        msgid = 540;
-       for ( i = 0; i < sendProcCnt; i++ ) 
+       for ( i = 0; i < sendProcCnt; i++ )
        {
           MPI_Irecv((void*)sendList[i],sendLeng[i],MPI_INT,sendProc[i],
                     msgid,comm,&Request[i]);
        }
-       for ( i = 0; i < recvProcCnt; i++ ) 
+       for ( i = 0; i < recvProcCnt; i++ )
        {
           if ( recvProc[i] == 0 ) j = 0;
           else                    j = tempCnt[recvProc[i]-1];
@@ -1261,18 +1260,18 @@ int HYPRE_LSI_MLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
           MPI_Send((void*) &externList[j], rowLeng, MPI_INT, recvProc[i],
                    msgid, comm);
        }
-       for ( i = 0; i < sendProcCnt; i++ ) 
+       for ( i = 0; i < sendProcCnt; i++ )
        {
           MPI_Wait( &Request[i], &status );
        }
        if ( sendProcCnt > 0 ) free( Request );
 
-       /* ----------------------------------------------------- */ 
+       /* ----------------------------------------------------- */
        /* convert the send list from global to local numbers    */
-       /* ----------------------------------------------------- */ 
+       /* ----------------------------------------------------- */
 
        for ( i = 0; i < sendProcCnt; i++ )
-       { 
+       {
           for ( j = 0; j < sendLeng[i]; j++ )
           {
              index = sendList[i][j] - startRow;
@@ -1285,9 +1284,9 @@ int HYPRE_LSI_MLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
           }
        }
 
-       /* ----------------------------------------------------- */ 
+       /* ----------------------------------------------------- */
        /* convert the send list from global to local numbers    */
-       /* ----------------------------------------------------- */ 
+       /* ----------------------------------------------------- */
 
        mh_mat->sendProcCnt = sendProcCnt;
        mh_mat->recvProcCnt = recvProcCnt;
@@ -1297,9 +1296,9 @@ int HYPRE_LSI_MLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
        mh_mat->recvProc    = recvProc;
        mh_mat->sendList    = sendList;
 
-       /* ----------------------------------------------------- */ 
+       /* ----------------------------------------------------- */
        /* clean up                                              */
-       /* ----------------------------------------------------- */ 
+       /* ----------------------------------------------------- */
 
        free( tempCnt );
     }

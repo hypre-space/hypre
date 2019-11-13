@@ -1052,7 +1052,8 @@ void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, c
 #define hypre_error_in_arg(IARG)  hypre_error(HYPRE_ERROR_ARG | IARG<<3)
 
 #ifdef HYPRE_DEBUG
-#define hypre_assert(EX) do { if (!(EX)) {hypre_fprintf(stderr,"hypre_assert failed: %s\n", #EX); hypre_error(1);} } while (0)
+#include <assert.h>
+#define hypre_assert(EX) do { if (!(EX)) {hypre_fprintf(stderr,"hypre_assert failed: %s\n", #EX); hypre_error(1); assert(EX); } } while (0)
 #else
 #ifdef __cplusplus
 extern "C++" { template<class T> static inline void hypre_assert( const T& ) { } }
@@ -1117,7 +1118,6 @@ extern "C++" {
 
 #include <cuda.h>
 #include <cuda_runtime.h>
-#include <assert.h>
 #include <curand.h>
 #include <cublas_v2.h>
 #include <cusparse.h>
@@ -1886,7 +1886,7 @@ hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle_)
 {
 #if defined(HYPRE_USING_UNIFIED_MEMORY)
 #if defined(HYPRE_USING_CUDA)
-   assert(!hypre_HandleCudaComputeStreamSync(hypre_handle_).empty());
+   hypre_assert(!hypre_HandleCudaComputeStreamSync(hypre_handle_).empty());
 
    if ( hypre_HandleCudaComputeStreamSync(hypre_handle_).back() )
    {
@@ -2202,7 +2202,7 @@ struct ReduceSum
    {
       T val;
       /* 2nd reduction with only *one* block */
-      assert(nblocks >= 0 && nblocks <= 1024);
+      hypre_assert(nblocks >= 0 && nblocks <= 1024);
       const dim3 gDim(1), bDim(1024);
       HYPRE_CUDA_LAUNCH( OneBlockReduceKernel, gDim, bDim, d_buf, nblocks );
       hypre_TMemcpy(&val, d_buf, T, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);

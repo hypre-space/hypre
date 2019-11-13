@@ -277,7 +277,7 @@ template <typename T, HYPRE_Int BDIMX, HYPRE_Int BDIMY, HYPRE_Int NUM_WARPS_PER_
 void csr_spmm_rownnz_cohen(HYPRE_Int M, HYPRE_Int K, HYPRE_Int N, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Int *d_low, HYPRE_Int *d_upp, HYPRE_Int *d_rc, HYPRE_Int nsamples, T mult_factor, T *work)
 {
    dim3 bDim(BDIMX, BDIMY, NUM_WARPS_PER_BLOCK);
-   assert(bDim.x * bDim.y == HYPRE_WARP_SIZE);
+   hypre_assert(bDim.x * bDim.y == HYPRE_WARP_SIZE);
 
    T *d_V1, *d_V2, *d_V3;
 
@@ -329,7 +329,7 @@ hypreDevice_CSRSpGemmRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
 
    /* CUDA kernel configurations */
    dim3 bDim(BDIMX, BDIMY, num_warps_per_block);
-   assert(bDim.x * bDim.y == HYPRE_WARP_SIZE);
+   hypre_assert(bDim.x * bDim.y == HYPRE_WARP_SIZE);
    // for cases where one WARP works on a row
    dim3 gDim( (m + bDim.z - 1) / bDim.z );
 

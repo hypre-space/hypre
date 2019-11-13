@@ -7,7 +7,6 @@
 
 #include <string.h>
 #include <stdio.h>
-#include <assert.h>
 #include "_hypre_utilities.h"
 #include "HYPRE.h"
 #include "_hypre_parcsr_mv.h"
@@ -17,14 +16,14 @@
 #include "mli_utils.h"
 
 /***************************************************************************
- * get the external rows of B in order to multiply A * B 
+ * get the external rows of B in order to multiply A * B
  *--------------------------------------------------------------------------*/
 
-void MLI_Matrix_MatMatMult( MLI_Matrix *Amat, MLI_Matrix *Bmat, 
+void MLI_Matrix_MatMatMult( MLI_Matrix *Amat, MLI_Matrix *Bmat,
                             MLI_Matrix **Cmat)
 {
    int    ir, ic, is, ia, ia2, ib, index, length, offset, iTemp;
-   int    *iArray, ibegin, sortFlag, tempCnt, nprocs, mypid;  
+   int    *iArray, ibegin, sortFlag, tempCnt, nprocs, mypid;
    int    BExtNumUniqueCols, BExtNRows, *BExtRowLengs, *BExtCols, BExtNnz;
    int    *extColList, *extColListAux;
    int    *BRowStarts, *BColStarts, BNRows, BNCols, BStartCol, BEndCol;
@@ -45,7 +44,7 @@ void MLI_Matrix_MatMatMult( MLI_Matrix *Amat, MLI_Matrix *Bmat,
    MLI_Function        *funcPtr;
    hypre_CSRMatrix     *BDiag, *BOffd, *ADiag, *AOffd, *CDiag, *COffd;
    hypre_ParCSRMatrix  *hypreA, *hypreB, *hypreC;
- 
+
    /* -----------------------------------------------------------------------
     * check to make sure both matrices are ParCSR matrices
     * ----------------------------------------------------------------------*/
@@ -63,8 +62,8 @@ void MLI_Matrix_MatMatMult( MLI_Matrix *Amat, MLI_Matrix *Bmat,
    MPI_Comm_rank(mpiComm, &mypid);
 
    /* -----------------------------------------------------------------------
-    * Get external rows of B (BExtRowLengs has been allocated 1 longer than 
-    *     BExtNRows in the GetExtRows function) 
+    * Get external rows of B (BExtRowLengs has been allocated 1 longer than
+    *     BExtNRows in the GetExtRows function)
     * Extract the diagonal indices into arrays diagCols
     * ----------------------------------------------------------------------*/
 
@@ -77,7 +76,7 @@ void MLI_Matrix_MatMatMult( MLI_Matrix *Amat, MLI_Matrix *Bmat,
       BExtRowLengs[ir] = tempCnt;
       tempCnt += iTemp;
    }
-   if ( BExtNRows > 0 ) 
+   if ( BExtNRows > 0 )
    {
       BExtRowLengs[BExtNRows*2] = tempCnt;
       for ( ir = 0; ir < BExtNRows*2; ir++ )
@@ -123,7 +122,7 @@ void MLI_Matrix_MatMatMult( MLI_Matrix *Amat, MLI_Matrix *Bmat,
       mergeSortList2D = new int*[mergeSortNList];
       mergeSortAuxs   = new int*[mergeSortNList];
       mergeSortLengs  = new int[mergeSortNList];
-      for ( is = 0; is < BExtNRows*2; is++ ) 
+      for ( is = 0; is < BExtNRows*2; is++ )
       {
          if ( is % 2 == 0 )
          {
@@ -138,16 +137,16 @@ void MLI_Matrix_MatMatMult( MLI_Matrix *Amat, MLI_Matrix *Bmat,
             mergeSortLengs[is]  = BExtRowLengs[is+1] - BExtRowLengs[is];
          }
       }
-      for ( ir = 0; ir < BExtNRows; ir++ ) 
+      for ( ir = 0; ir < BExtNRows; ir++ )
          extDiagListAux[ir] = extColListAux[BExtRowLengs[ir*2]];
       mergeSortList2D[BExtNRows*2] = diagCols;
       mergeSortAuxs[BExtNRows*2]   = extDiagListAux;
       mergeSortLengs[BExtNRows*2]  = BExtNRows;
-      MLI_Utils_IntMergeSort(mergeSortNList, mergeSortLengs, 
+      MLI_Utils_IntMergeSort(mergeSortNList, mergeSortLengs,
                 mergeSortList2D, mergeSortAuxs, &BExtNumUniqueCols,
                 &mergeSortList);
 
-      for ( ir = 0; ir < BExtNRows; ir++ ) 
+      for ( ir = 0; ir < BExtNRows; ir++ )
          extColListAux[BExtRowLengs[ir*2]] = extDiagListAux[ir];
       delete [] mergeSortList2D;
       delete [] mergeSortAuxs;
@@ -157,42 +156,42 @@ void MLI_Matrix_MatMatMult( MLI_Matrix *Amat, MLI_Matrix *Bmat,
       delete [] diagCols;
       if ( BExtNumUniqueCols > 0 ) extColList = new int[BExtNumUniqueCols];
       else                         extColList = NULL;
-      for ( ir = 0; ir < BExtNumUniqueCols; ir++ ) 
+      for ( ir = 0; ir < BExtNumUniqueCols; ir++ )
          extColList[ir] = mergeSortList[ir];
       free( mergeSortList );
    }
 
    /* -----------------------------------------------------------------------
     * Next prune the internal columns (to my proc) from this list (by setting
-    * the colum index to its ones-complement), since they have already been 
+    * the colum index to its ones-complement), since they have already been
     * included elsewhere
     * ----------------------------------------------------------------------*/
 
    BColStarts = hypre_ParCSRMatrixColStarts(hypreB);
    BStartCol  = BColStarts[mypid];
    BEndCol    = BColStarts[mypid+1] - 1;
-   for ( ir = 0; ir < BExtNumUniqueCols; ir++ ) 
+   for ( ir = 0; ir < BExtNumUniqueCols; ir++ )
    {
       if ( extColList[ir] >= BStartCol && extColList[ir] <= BEndCol )
          extColList[ir] = - (extColList[ir] - BStartCol) - 1;
    }
 
    /* -----------------------------------------------------------------------
-    * Next prune the external columns by eliminating all columns already 
-    * present in the BColMap list, which is assumed ordered 
+    * Next prune the external columns by eliminating all columns already
+    * present in the BColMap list, which is assumed ordered
     * ----------------------------------------------------------------------*/
 
    BOffd      = hypre_ParCSRMatrixOffd(hypreB);
    BColMap    = hypre_ParCSRMatrixColMapOffd(hypreB);
    BColMapInd = 0;
    BNCols     = BColStarts[mypid+1] - BColStarts[mypid];
-   for ( ir = 0; ir < BExtNumUniqueCols; ir++ ) 
+   for ( ir = 0; ir < BExtNumUniqueCols; ir++ )
    {
       if ( extColList[ir] >= 0 )
       {
          while (BColMapInd<BExtNRows && BColMap[BColMapInd]<extColList[ir])
-            BColMapInd++; 
-         if (BColMapInd<BExtNRows && extColList[ir]==BColMap[BColMapInd]) 
+            BColMapInd++;
+         if (BColMapInd<BExtNRows && extColList[ir]==BColMap[BColMapInd])
          {
             extColList[ir] = - (BColMapInd + BNCols) - 1;
             BColMapInd++;
@@ -207,31 +206,31 @@ void MLI_Matrix_MatMatMult( MLI_Matrix *Amat, MLI_Matrix *Bmat,
 
    if ( BExtNumUniqueCols > 0 ) iArray  = new int[BExtNumUniqueCols];
    tempCnt = 0;
-   for ( ir = 0; ir < BExtNumUniqueCols; ir++ ) 
+   for ( ir = 0; ir < BExtNumUniqueCols; ir++ )
    {
-      if ( extColList[ir] >= 0 ) iArray[ir] = tempCnt++; 
+      if ( extColList[ir] >= 0 ) iArray[ir] = tempCnt++;
       else                       iArray[ir] = -1;
    }
-   for ( ir = 0; ir < BExtNnz; ir++ ) 
+   for ( ir = 0; ir < BExtNnz; ir++ )
    {
       index = extColListAux[ir];
       iTemp = extColList[index];
       if ( iTemp < 0 ) BExtCols[ir] = - iTemp - 1;
       else             BExtCols[ir] = iArray[index] + BNCols + BExtNRows;
    }
-   if ( BExtNumUniqueCols > 0 ) delete [] iArray; 
+   if ( BExtNumUniqueCols > 0 ) delete [] iArray;
    tempCnt = BExtNumUniqueCols;
    BExtNumUniqueCols = 0;
-   for ( ir = 0; ir < tempCnt; ir++ ) 
+   for ( ir = 0; ir < tempCnt; ir++ )
    {
-      if ( extColList[ir] >= 0 ) 
+      if ( extColList[ir] >= 0 )
          extColList[BExtNumUniqueCols++] = extColList[ir];
    }
    if ( BExtNRows > 0 ) delete [] extColListAux;
    CExtNCols = BNCols + BExtNRows + BExtNumUniqueCols;
 
    /* -----------------------------------------------------------------------
-    * fetch information about matrix A and B 
+    * fetch information about matrix A and B
     * ----------------------------------------------------------------------*/
 
    if (!hypre_ParCSRMatrixCommPkg(hypreA)) hypre_MatvecCommPkgCreate(hypreA);
@@ -276,7 +275,7 @@ void MLI_Matrix_MatMatMult( MLI_Matrix *Amat, MLI_Matrix *Bmat,
       {
          colIndA = ADiagJA[ia2];
          if ( colIndA < BNRows )
-         { 
+         {
             for ( ib = BDiagIA[colIndA]; ib < BDiagIA[colIndA+1]; ib++ )
             {
                colIndB = BDiagJA[ib];
@@ -299,10 +298,10 @@ void MLI_Matrix_MatMatMult( MLI_Matrix *Amat, MLI_Matrix *Bmat,
          else
          {
             index = colIndA - BNRows;
-            for (ib=BExtRowLengs[2*index]; ib<BExtRowLengs[2*(index+1)]; ib++) 
+            for (ib=BExtRowLengs[2*index]; ib<BExtRowLengs[2*(index+1)]; ib++)
             {
                colIndB = BExtCols[ib];
-               if ( colIndB < CNCols ) 
+               if ( colIndB < CNCols )
                {
                   if ( CDiagReg[colIndB] != ia ) CDiagNnz++;
                }
@@ -317,7 +316,7 @@ void MLI_Matrix_MatMatMult( MLI_Matrix *Amat, MLI_Matrix *Bmat,
       {
          colIndA = AOffdJA[ia2] + ANCols;
          if ( colIndA < BNRows )
-         { 
+         {
             for ( ib = BDiagIA[colIndA]; ib < BDiagIA[colIndA+1]; ib++ )
             {
                colIndB = BDiagJA[ib];
@@ -340,10 +339,10 @@ void MLI_Matrix_MatMatMult( MLI_Matrix *Amat, MLI_Matrix *Bmat,
          else
          {
             index = colIndA - BNRows;
-            for (ib=BExtRowLengs[2*index]; ib<BExtRowLengs[2*(index+1)]; ib++) 
+            for (ib=BExtRowLengs[2*index]; ib<BExtRowLengs[2*(index+1)]; ib++)
             {
                colIndB = BExtCols[ib];
-               if ( colIndB < CNCols ) 
+               if ( colIndB < CNCols )
                {
                   if ( CDiagReg[colIndB] != ia ) CDiagNnz++;
                }
@@ -381,14 +380,14 @@ void MLI_Matrix_MatMatMult( MLI_Matrix *Amat, MLI_Matrix *Bmat,
    CColMap = NULL;
    if (COffdNCols > 0) CColMap = hypre_TAlloc(int, COffdNCols , HYPRE_MEMORY_HOST);
    for ( ia = 0; ia < BExtNRows; ia++ ) CColMap[ia] = BColMap[ia];
-   for ( ia = BExtNRows; ia < COffdNCols; ia++ ) 
+   for ( ia = BExtNRows; ia < COffdNCols; ia++ )
       CColMap[ia] = extColList[ia-BExtNRows];
    if ( COffdNCols > 0 ) CColMapAux = new int[COffdNCols];
    for ( ia = 0; ia < COffdNCols; ia++ ) CColMapAux[ia] = ia;
    MLI_Utils_IntQSort2(CColMap, CColMapAux, 0, COffdNCols-1);
    iArray = CColMapAux;
    if ( COffdNCols > 0 ) CColMapAux = new int[COffdNCols];
-   for ( ia = 0; ia < COffdNCols; ia++ ) 
+   for ( ia = 0; ia < COffdNCols; ia++ )
       CColMapAux[iArray[ia]] = ia;
    if ( COffdNCols > 0 ) delete [] iArray;
 
@@ -402,7 +401,7 @@ void MLI_Matrix_MatMatMult( MLI_Matrix *Amat, MLI_Matrix *Bmat,
          colIndA = ADiagJA[ia2];
          dTempA  = ADiagAA[ia2];
          if ( colIndA < BNRows )
-         { 
+         {
             for ( ib = BDiagIA[colIndA]; ib < BDiagIA[colIndA+1]; ib++ )
             {
                colIndB = BDiagJA[ib];
@@ -437,7 +436,7 @@ void MLI_Matrix_MatMatMult( MLI_Matrix *Amat, MLI_Matrix *Bmat,
             {
                colIndB = BExtCols[ib];
                dTempB  = BOffdAA[ib];
-               if ( colIndB < CNCols ) 
+               if ( colIndB < CNCols )
                {
                   offset  = CDiagReg[colIndB];
                   if ( offset < iTempDiag )
@@ -467,7 +466,7 @@ void MLI_Matrix_MatMatMult( MLI_Matrix *Amat, MLI_Matrix *Bmat,
          colIndA = AOffdJA[ia2] + ANCols;
          dTempA  = AOffdAA[ia2];
          if ( colIndA < BNRows )
-         { 
+         {
             for ( ib = BDiagIA[colIndA]; ib < BDiagIA[colIndA+1]; ib++ )
             {
                colIndB = BDiagJA[ib];
@@ -498,11 +497,11 @@ void MLI_Matrix_MatMatMult( MLI_Matrix *Amat, MLI_Matrix *Bmat,
          else
          {
             index = colIndA - BNRows;
-            for (ib=BExtRowLengs[2*index];ib<BExtRowLengs[2*(index+1)];ib++) 
+            for (ib=BExtRowLengs[2*index];ib<BExtRowLengs[2*(index+1)];ib++)
             {
                colIndB = BExtCols[ib];
                dTempB  = BExtVals[ib];
-               if ( colIndB < CNCols ) 
+               if ( colIndB < CNCols )
                {
                   offset  = CDiagReg[colIndB];
                   if ( offset < iTempDiag )
@@ -538,12 +537,12 @@ void MLI_Matrix_MatMatMult( MLI_Matrix *Amat, MLI_Matrix *Bmat,
     * move the diagonal entry to the beginning of the row
     * ----------------------------------------------------------------------*/
 
-   for ( ia = 0; ia < CNRows; ia++ ) 
+   for ( ia = 0; ia < CNRows; ia++ )
    {
       iTemp = -1;
-      for ( ia2 = CDiagIA[ia]; ia2 < CDiagIA[ia+1]; ia2++ ) 
+      for ( ia2 = CDiagIA[ia]; ia2 < CDiagIA[ia+1]; ia2++ )
       {
-         if ( CDiagJA[ia2] == ia ) 
+         if ( CDiagJA[ia2] == ia )
          {
             iTemp = CDiagJA[ia2];
             dTemp = CDiagAA[ia2];
@@ -552,15 +551,15 @@ void MLI_Matrix_MatMatMult( MLI_Matrix *Amat, MLI_Matrix *Bmat,
       }
       if ( iTemp >= 0 )
       {
-         for ( ib = ia2; ib > CDiagIA[ia]; ib-- ) 
+         for ( ib = ia2; ib > CDiagIA[ia]; ib-- )
          {
             CDiagJA[ib] = CDiagJA[ib-1];
             CDiagAA[ib] = CDiagAA[ib-1];
          }
          CDiagJA[CDiagIA[ia]] = iTemp;
          CDiagAA[CDiagIA[ia]] = dTemp;
-      }  
-   }  
+      }
+   }
 
    /* -----------------------------------------------------------------------
     * finally form HYPRE_ParCSRMatrix for the product
@@ -569,12 +568,12 @@ void MLI_Matrix_MatMatMult( MLI_Matrix *Amat, MLI_Matrix *Bmat,
 #if 0
    if ( mypid == 1 )
    {
-      for ( ia = 0; ia < CNRows; ia++ ) 
+      for ( ia = 0; ia < CNRows; ia++ )
       {
-         for ( ia2 = CDiagIA[ia]; ia2 < CDiagIA[ia+1]; ia2++ ) 
+         for ( ia2 = CDiagIA[ia]; ia2 < CDiagIA[ia+1]; ia2++ )
             printf("%d : CDiag %5d = %5d %e\n",mypid,ia,CDiagJA[ia2],
                    CDiagAA[ia2]);
-         for ( ia2 = COffdIA[ia]; ia2 < COffdIA[ia+1]; ia2++ ) 
+         for ( ia2 = COffdIA[ia]; ia2 < COffdIA[ia+1]; ia2++ )
             printf("%d : COffd %5d = %5d %e\n",mypid,ia,COffdJA[ia2],
                    COffdAA[ia2]);
       }
@@ -609,7 +608,7 @@ void MLI_Matrix_MatMatMult( MLI_Matrix *Amat, MLI_Matrix *Bmat,
 }
 
 /***************************************************************************
- * get the external rows of B in order to multiply A * B 
+ * get the external rows of B in order to multiply A * B
  * (modified so that extRowLengs has 2 numbers for each row, one for
  *  the diagonal part, and the other for the off-diagonal part.  This is
  *  done to optimize the code in order each part is sorted.)
@@ -656,7 +655,7 @@ void MLI_Matrix_GetExtRows( MLI_Matrix *Amat, MLI_Matrix *Bmat, int *extNRowsP,
 #endif
    BColStarts = hypre_ParCSRMatrixColStarts(hypreB);
    BStartCol  = BColStarts[mypid];
-   if ( nprocs == 1 ) 
+   if ( nprocs == 1 )
    {
       (*extRowLengsP) = NULL;
       (*extColsP)     = NULL;
@@ -684,7 +683,7 @@ void MLI_Matrix_GetExtRows( MLI_Matrix *Amat, MLI_Matrix *Bmat, int *extNRowsP,
    if ( nRecvs + nSends > 0 ) requests = new MPI_Request[nRecvs+nSends];
 
    /* -----------------------------------------------------------------------
-    * fetch the local B matrix 
+    * fetch the local B matrix
     * ----------------------------------------------------------------------*/
 
    colMapOffd = hypre_ParCSRMatrixColMapOffd(hypreB);
@@ -698,7 +697,7 @@ void MLI_Matrix_GetExtRows( MLI_Matrix *Amat, MLI_Matrix *Bmat, int *extNRowsP,
    BOffdAA = hypre_CSRMatrixData(BOffd);
 
    /* -----------------------------------------------------------------------
-    * construct external row lengths (recvRowLengs) 
+    * construct external row lengths (recvRowLengs)
     * ----------------------------------------------------------------------*/
 
    if ( recvNRows > 0 ) recvRowLengs = new int[2*recvNRows+1];
@@ -709,7 +708,7 @@ void MLI_Matrix_GetExtRows( MLI_Matrix *Amat, MLI_Matrix *Bmat, int *extNRowsP,
       proc   = recvProcs[ip];
       offset = recvStarts[ip];
       length = recvStarts[ip+1] - offset;
-      MPI_Irecv(&(recvRowLengs[offset*2]), length*2, MPI_INT, proc, 27027, 
+      MPI_Irecv(&(recvRowLengs[offset*2]), length*2, MPI_INT, proc, 27027,
                 mpiComm, &requests[requestCnt++]);
    }
    if ( sendNRows > 0 ) iSendBuf = new int[sendNRows*2];
@@ -802,7 +801,7 @@ void MLI_Matrix_GetExtRows( MLI_Matrix *Amat, MLI_Matrix *Bmat, int *extNRowsP,
       length = recvStarts[ip+1] - offset;
       curNnz = 0;
       for (jp = 0; jp < length*2; jp++) curNnz += recvRowLengs[offset*2+jp];
-      MPI_Irecv(&recvVals[totalRecvNnz], curNnz, MPI_DOUBLE, proc, 27029, 
+      MPI_Irecv(&recvVals[totalRecvNnz], curNnz, MPI_DOUBLE, proc, 27029,
                 mpiComm, &requests[requestCnt++]);
       totalRecvNnz += curNnz;
    }
@@ -829,7 +828,7 @@ void MLI_Matrix_GetExtRows( MLI_Matrix *Amat, MLI_Matrix *Bmat, int *extNRowsP,
             dSendBuf[curNnz++] = BOffdAA[kp];
       }
       curNnz -= totalSendNnz;
-      MPI_Isend(&(dSendBuf[totalSendNnz]), curNnz, MPI_DOUBLE, proc, 27029, 
+      MPI_Isend(&(dSendBuf[totalSendNnz]), curNnz, MPI_DOUBLE, proc, 27029,
                 mpiComm, &requests[requestCnt++]);
       totalSendNnz += curNnz;
    }
@@ -860,9 +859,9 @@ void MLI_Matrix_GetExtRows( MLI_Matrix *Amat, MLI_Matrix *Bmat, int *extNRowsP,
          length = recvStarts[ip+1] - offset;
          curNnz = 0;
          for (jp = 0; jp < length*2; jp++) curNnz += recvRowLengs[offset*2+jp];
-         for (jp = 0; jp < curNnz; jp++) 
+         for (jp = 0; jp < curNnz; jp++)
          {
-            printf("%d : recvData = %5d %e\n", mypid, recvCols[totalRecvNnz], 
+            printf("%d : recvData = %5d %e\n", mypid, recvCols[totalRecvNnz],
                    recvVals[totalRecvNnz]);
             totalRecvNnz++;
          }

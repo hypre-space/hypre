@@ -11,8 +11,6 @@
  *
  *****************************************************************************/
 
-#include <assert.h>
-
 #include "seq_mv.h"
 #include "csr_matrix.h"
 
@@ -1217,7 +1215,7 @@ HYPRE_Real hypre_CSRMatrixFnorm( hypre_CSRMatrix *A )
    A_i = hypre_CSRMatrixI(A);
 
    hypre_assert(num_nonzeros == A_i[nrows]);
-   
+
    for ( i = 0; i < num_nonzeros; ++i )
    {
       HYPRE_Complex v = data[i];
