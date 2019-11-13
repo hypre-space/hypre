@@ -391,7 +391,7 @@ hypreCUDAKernel_PMISCoarseningUpdateCF(HYPRE_Int   graph_diag_size,
    }
    else
    {
-      hypre_assert(marker_row == 0);
+      assert(marker_row == 0);
 
       /*-------------------------------------------------
        * Now treat the case where this node is not in the
