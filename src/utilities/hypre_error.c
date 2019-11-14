@@ -76,10 +76,3 @@ HYPRE_Int HYPRE_ClearError(HYPRE_Int hypre_error_code)
    return (hypre_error_flag & hypre_error_code);
 }
 
-void hypre_error_assert(const char *assert_str, hypre_int assert_val)
-{
-   hypre_fprintf(stderr, "hypre_assert failed: %s\n", assert_str);
-   hypre_error(1);
-   assert(assert_val);
-}
-
