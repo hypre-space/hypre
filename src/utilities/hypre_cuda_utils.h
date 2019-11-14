@@ -10,6 +10,8 @@
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 
+HYPRE_Int hypre_printf( const char *format , ... );
+
 #ifdef __cplusplus
 extern "C++" {
 #endif
@@ -66,7 +68,7 @@ using namespace thrust::placeholders;
    if ( gridsize.x  == 0 || gridsize.y  == 0 || gridsize.z  == 0 ||                                                \
         blocksize.x == 0 || blocksize.y == 0 || blocksize.z == 0 )                                                 \
    {                                                                                                               \
-      /* printf("Warning %s %d: Zero CUDA grid/block (%d %d %d) (%d %d %d)\n",                                     \
+      /* hypre_printf("Warning %s %d: Zero CUDA grid/block (%d %d %d) (%d %d %d)\n",                               \
                  __FILE__, __LINE__,                                                                               \
                  gridsize.x, gridsize.y, gridsize.z, blocksize.x, blocksize.y, blocksize.z); */                    \
    }                                                                                                               \
@@ -84,7 +86,7 @@ using namespace thrust::placeholders;
 #define HYPRE_CUBLAS_CALL(call) do {                                                         \
    cublasStatus_t err = call;                                                                \
    if (CUBLAS_STATUS_SUCCESS != err) {                                                       \
-      printf("CUBLAS ERROR (code = %d, %d) at %s:%d\n",                                      \
+      hypre_printf("CUBLAS ERROR (code = %d, %d) at %s:%d\n",                                \
             err, err == CUBLAS_STATUS_EXECUTION_FAILED, __FILE__, __LINE__);                 \
       exit(1);                                                                               \
    } } while(0)
@@ -92,7 +94,7 @@ using namespace thrust::placeholders;
 #define HYPRE_CUSPARSE_CALL(call) do {                                                       \
    cusparseStatus_t err = call;                                                              \
    if (CUSPARSE_STATUS_SUCCESS != err) {                                                     \
-      printf("CUSPARSE ERROR (code = %d, %d) at %s:%d\n",                                    \
+      hypre_printf("CUSPARSE ERROR (code = %d, %d) at %s:%d\n",                              \
             err, err == CUSPARSE_STATUS_EXECUTION_FAILED, __FILE__, __LINE__);               \
       exit(1);                                                                               \
    } } while(0)
@@ -101,7 +103,8 @@ using namespace thrust::placeholders;
 #define HYPRE_CURAND_CALL(call) do {                                                         \
    curandStatus_t err = call;                                                                \
    if (CURAND_STATUS_SUCCESS != err) {                                                       \
-      printf("CURAND ERROR (code = %d) at %s:%d\n", err, __FILE__, __LINE__);                \
+      hypre_printf("CURAND ERROR (code = %d) at %s:%d\n",   \
+                   err, __FILE__, __LINE__);                \
       exit(1);                                                                               \
    } } while(0)
 
@@ -109,7 +112,7 @@ using namespace thrust::placeholders;
 #define HYPRE_CUDA_CALL(call) do {                                                                             \
    cudaError_t err = call;                                                                                     \
    if (cudaSuccess != err) {                                                                                   \
-      printf("CUDA ERROR (code = %d, %s) at %s:%d\n", err, cudaGetErrorString(err), __FILE__, __LINE__);       \
+      hypre_printf("CUDA ERROR (code = %d, %s) at %s:%d\n", err, cudaGetErrorString(err), __FILE__, __LINE__); \
       exit(1);                                                                                                 \
    } } while(0)
 
