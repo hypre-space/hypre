@@ -1046,6 +1046,8 @@ extern HYPRE_Int hypre__global_error;
  * HYPRE error macros
  *--------------------------------------------------------------------------*/
 
+HYPRE_Int hypre_fprintf( FILE *stream , const char *format, ... );
+
 void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, const char *msg);
 #define hypre_error(IERR)  hypre_error_handler(__FILE__, __LINE__, IERR, NULL)
 #define hypre_error_w_msg(IERR, msg)  hypre_error_handler(__FILE__, __LINE__, IERR, msg)
