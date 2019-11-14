@@ -72,6 +72,79 @@ typedef double            hypre_double;
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+#ifndef hypre_PRINTF_HEADER
+#define hypre_PRINTF_HEADER
+
+#include <stdio.h>
+
+/* hypre_printf.c */
+// #ifdef HYPRE_BIGINT
+HYPRE_Int hypre_ndigits( HYPRE_BigInt number );
+HYPRE_Int hypre_printf( const char *format , ... );
+HYPRE_Int hypre_fprintf( FILE *stream , const char *format, ... );
+HYPRE_Int hypre_sprintf( char *s , const char *format, ... );
+HYPRE_Int hypre_scanf( const char *format , ... );
+HYPRE_Int hypre_fscanf( FILE *stream , const char *format, ... );
+HYPRE_Int hypre_sscanf( char *s , const char *format, ... );
+// #else
+// #define hypre_printf  printf
+// #define hypre_fprintf fprintf
+// #define hypre_sprintf sprintf
+// #define hypre_scanf   scanf
+// #define hypre_fscanf  fscanf
+// #define hypre_sscanf  sscanf
+// #endif
+
+#endif
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
+#ifndef hypre_ERROR_HEADER
+#define hypre_ERROR_HEADER
+
+#include <assert.h>
+
+/*--------------------------------------------------------------------------
+ * Global variable used in hypre error checking
+ *--------------------------------------------------------------------------*/
+
+extern HYPRE_Int hypre__global_error;
+#define hypre_error_flag  hypre__global_error
+
+/*--------------------------------------------------------------------------
+ * HYPRE error macros
+ *--------------------------------------------------------------------------*/
+
+void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, const char *msg);
+void hypre_error_assert(const char *assert_str, hypre_int assert_val);
+
+#define hypre_error(IERR)  hypre_error_handler(__FILE__, __LINE__, IERR, NULL)
+#define hypre_error_w_msg(IERR, msg)  hypre_error_handler(__FILE__, __LINE__, IERR, msg)
+#define hypre_error_in_arg(IARG)  hypre_error(HYPRE_ERROR_ARG | IARG<<3)
+
+#ifdef HYPRE_DEBUG
+#define hypre_assert(EX) do { if (!(EX)) { hypre_error_assert(#EX, (hypre_int) (EX)); } } while (0)
+#else
+#ifdef __cplusplus
+extern "C++" { template<class T> static inline void hypre_assert( const T& ) { } }
+#else
+#define hypre_assert(EX) do { (void) (EX); } while (0)
+#endif
+#endif
+
+#endif /* hypre_ERROR_HEADER */
+
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 /******************************************************************************
  *
  *  Fake mpi stubs to generate serial codes without mpi
@@ -1032,47 +1105,6 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
-#ifndef hypre_ERROR_HEADER
-#define hypre_ERROR_HEADER
-
-/*--------------------------------------------------------------------------
- * Global variable used in hypre error checking
- *--------------------------------------------------------------------------*/
-
-extern HYPRE_Int hypre__global_error;
-#define hypre_error_flag  hypre__global_error
-
-/*--------------------------------------------------------------------------
- * HYPRE error macros
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int hypre_fprintf( FILE *stream , const char *format, ... );
-
-void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, const char *msg);
-#define hypre_error(IERR)  hypre_error_handler(__FILE__, __LINE__, IERR, NULL)
-#define hypre_error_w_msg(IERR, msg)  hypre_error_handler(__FILE__, __LINE__, IERR, msg)
-#define hypre_error_in_arg(IARG)  hypre_error(HYPRE_ERROR_ARG | IARG<<3)
-
-#ifdef HYPRE_DEBUG
-#include <assert.h>
-#define hypre_assert(EX) do { if (!(EX)) {hypre_fprintf(stderr,"hypre_assert failed: %s\n", #EX); hypre_error(1); assert(EX); } } while (0)
-#else
-#ifdef __cplusplus
-extern "C++" { template<class T> static inline void hypre_assert( const T& ) { } }
-#else
-#define hypre_assert(EX) do { (void) (EX); } while (0)
-#endif
-#endif
-
-#endif /* hypre_ERROR_HEADER */
-
-/******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
- * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
- *
- * SPDX-License-Identifier: (Apache-2.0 OR MIT)
- ******************************************************************************/
-
 /******************************************************************************
  *
  * Header file for Caliper instrumentation macros
@@ -1111,8 +1143,6 @@ extern "C++" { template<class T> static inline void hypre_assert( const T& ) { }
 #define HYPRE_CUDA_UTILS_H
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-
-HYPRE_Int hypre_printf( const char *format , ... );
 
 #ifdef __cplusplus
 extern "C++" {
@@ -2270,24 +2300,6 @@ HYPRE_Int hypre_SyncCudaDefaultStream(hypre_Handle *hypre_handle);
 void hypre_SetExecPolicy( HYPRE_Int policy );
 HYPRE_Int hypre_GetExecPolicy1(HYPRE_Int location);
 HYPRE_Int hypre_GetExecPolicy2(HYPRE_Int location1, HYPRE_Int location2);
-
-/* hypre_printf.c */
-// #ifdef HYPRE_BIGINT
-HYPRE_Int hypre_ndigits( HYPRE_BigInt number );
-HYPRE_Int hypre_printf( const char *format , ... );
-HYPRE_Int hypre_fprintf( FILE *stream , const char *format, ... );
-HYPRE_Int hypre_sprintf( char *s , const char *format, ... );
-HYPRE_Int hypre_scanf( const char *format , ... );
-HYPRE_Int hypre_fscanf( FILE *stream , const char *format, ... );
-HYPRE_Int hypre_sscanf( char *s , const char *format, ... );
-// #else
-// #define hypre_printf  printf
-// #define hypre_fprintf fprintf
-// #define hypre_sprintf sprintf
-// #define hypre_scanf   scanf
-// #define hypre_fscanf  fscanf
-// #define hypre_sscanf  sscanf
-// #endif
 
 /* hypre_qsort.c */
 void hypre_swap ( HYPRE_Int *v , HYPRE_Int i , HYPRE_Int j );
