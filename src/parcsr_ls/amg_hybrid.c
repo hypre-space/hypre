@@ -43,6 +43,7 @@ typedef struct
    HYPRE_Real            final_rel_res_norm;
    HYPRE_Int             time_index;
    HYPRE_Real            setup_time;
+   MPI_Comm              comm;
 
    /* additional information (place-holder currently used to print norms) */
    HYPRE_Int             logging;
@@ -1544,7 +1545,13 @@ hypre_AMGHybridGetSetupTime( void          *AMGhybrid_vdata,
       return hypre_error_flag;
    }
 
-   *time = AMGhybrid_data->setup_time;
+   HYPRE_Real t = AMGhybrid_data->setup_time;
+   HYPRE_Real max_t;
+   MPI_Comm comm = AMGhybrid_data->comm;
+
+   hypre_MPI_Allreduce(&t, &max_t, 1, hypre_MPI_REAL, hypre_MPI_MAX, comm);
+
+   *time = max_t;
 
    return hypre_error_flag;
 }
@@ -1742,7 +1749,8 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
    }
 
    AMGhybrid_data->setup_time = 0.0;
-
+   MPI_Comm  comm = hypre_ParCSRMatrixComm(A);
+   (AMGhybrid_data -> comm) = comm;
    /*-----------------------------------------------------------------------
     * Setup diagonal scaled solver
     *-----------------------------------------------------------------------*/

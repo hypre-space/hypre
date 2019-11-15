@@ -18,6 +18,7 @@ extern "C++" {
 
 #include <cuda.h>
 #include <cuda_runtime.h>
+#include <cuda_profiler_api.h>
 #include <curand.h>
 #include <cublas_v2.h>
 #include <cusparse.h>

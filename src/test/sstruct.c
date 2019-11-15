@@ -32,6 +32,8 @@
 
 #define DEBUG 0
 
+#define SECOND_TIME 1
+
 /*--------------------------------------------------------------------------
  * Data structures
  *--------------------------------------------------------------------------*/
@@ -2433,6 +2435,10 @@ main( hypre_int argc,
 
    /* Initialize Hypre */
    HYPRE_Init(argc, argv);
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+   /* hypre_SetExecPolicy(HYPRE_EXEC_DEVICE); */
+#endif
 
    /*-----------------------------------------------------------
     * Read input file
@@ -4863,10 +4869,38 @@ main( hypre_int argc,
       HYPRE_ParCSRHybridSetTol(par_solver, tol);
       HYPRE_ParCSRHybridSetTwoNorm(par_solver, 1);
       HYPRE_ParCSRHybridSetRelChange(par_solver, 0);
-      HYPRE_ParCSRHybridSetPrintLevel(par_solver,1);
+      HYPRE_ParCSRHybridSetPrintLevel(par_solver,1); //13
       HYPRE_ParCSRHybridSetLogging(par_solver,1);
       HYPRE_ParCSRHybridSetSolverType(par_solver, solver_type);
       HYPRE_ParCSRHybridSetRecomputeResidual(par_solver, recompute_res);
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+      HYPRE_ParCSRHybridSetPMaxElmts(par_solver, 8);
+      HYPRE_ParCSRHybridSetRelaxType(par_solver, 18);
+      HYPRE_ParCSRHybridSetCycleRelaxType(par_solver, 9, 3);
+      HYPRE_ParCSRHybridSetCoarsenType(par_solver, 8);
+      HYPRE_ParCSRHybridSetInterpType(par_solver, 3);
+      //HYPRE_ParCSRHybridSetMinCoarseSize(par_solver, 1);
+      HYPRE_ParCSRHybridSetMaxCoarseSize(par_solver, 20);
+#endif
+
+#if SECOND_TIME
+      hypre_ParVector *par_x2 =
+         hypre_ParVectorCreate(hypre_ParVectorComm(par_x), hypre_ParVectorGlobalSize(par_x),
+                               hypre_ParVectorPartitioning(par_x));
+      hypre_ParVectorOwnsPartitioning(par_x2) = 0;
+      hypre_ParVectorInitialize(par_x2);
+      hypre_ParVectorCopy(par_x, par_x2);
+
+      HYPRE_ParCSRHybridSetup(par_solver,par_A,par_b,par_x);
+      HYPRE_ParCSRHybridSolve(par_solver,par_A,par_b,par_x);
+
+      hypre_ParVectorCopy(par_x2, par_x);
+#endif
+
+      PUSH_RANGE("HybridSolve", 0);
+      //cudaProfilerStart();
+
       HYPRE_ParCSRHybridSetup(par_solver,par_A,par_b,par_x);
 
       hypre_EndTiming(time_index);
@@ -4889,9 +4923,18 @@ main( hypre_int argc,
 
       HYPRE_Real setup_time;
       HYPRE_ParCSRHybridGetSetupTime(par_solver, &setup_time);
-      printf("SetupTime %f\n", setup_time);
-
+      if (myid == 0)
+      {
+         printf("SetupTime %f\n", setup_time);
+      }
       HYPRE_ParCSRHybridDestroy(par_solver);
+
+      POP_RANGE;
+      //cudaProfilerStop();
+
+#if SECOND_TIME
+      hypre_ParVectorDestroy(par_x2);
+#endif
    }
 
    /*-----------------------------------------------------------
