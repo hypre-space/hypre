@@ -115,7 +115,11 @@ hypre_HandleCreate()
    hypre_HandleCudaComputeStreamNum(handle)         = 0;
    hypre_HandleCudaPrefetchStreamNum(handle)        = 1;
    hypre_HandleCudaComputeStreamSyncDefault(handle) = 1;
-   handle->spgemm_use_cusparse                      = 0; // TODO: accessor func #ifdef
+#ifdef HYPRE_USING_CUSPARSE
+   hypre_HandleSpgemmUseCusparse(handle)            = 1;
+#else
+   hypre_HandleSpgemmUseCusparse(handle)            = 0;
+#endif
    handle->spgemm_num_passes                        = 3;
    /* 1: naive overestimate, 2: naive underestimate, 3: Cohen's algorithm */
    handle->spgemm_rownnz_estimate_method            = 3;

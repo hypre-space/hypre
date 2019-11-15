@@ -1895,6 +1895,12 @@ hypre_HandleCusparseMatDescr(hypre_Handle *hypre_handle_)
    return mat_descr;
 }
 
+static inline HYPRE_Int &
+hypre_HandleSpgemmUseCusparse(hypre_Handle *hypre_handle_)
+{
+   return hypre_handle_->spgemm_use_cusparse;
+}
+
 #endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP) */
 
 static inline void
