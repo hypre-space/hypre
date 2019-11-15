@@ -10,8 +10,6 @@
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 
-HYPRE_Int hypre_printf( const char *format , ... );
-
 #ifdef __cplusplus
 extern "C++" {
 #endif
