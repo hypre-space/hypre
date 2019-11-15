@@ -292,8 +292,8 @@ hypre_UnifiedFree(void *ptr)
 {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    /* with UM, managed memory free */
-   //HYPRE_CUDA_CALL( cudaFree((size_t *) ptr - HYPRE_MEM_PAD_LEN) );
-   cudaFree((size_t *) ptr - HYPRE_MEM_PAD_LEN);
+   HYPRE_CUDA_CALL( cudaFree((size_t *) ptr - HYPRE_MEM_PAD_LEN) );
+   //cudaFree((size_t *) ptr - HYPRE_MEM_PAD_LEN);
    //cudaSafeFree(ptr, HYPRE_MEM_PAD_LEN);
 #endif
 }
@@ -321,6 +321,8 @@ hypre_Free(void *ptr, HYPRE_Int location)
 #ifdef HYPRE_DEBUG
    HYPRE_Int tmp;
    hypre_GetMemoryLocation(ptr, &tmp);
+   /* do not use hypre_assert, which has alloc and free;
+    * will create an endless loop otherwise */
    assert(location == tmp);
 #endif
 

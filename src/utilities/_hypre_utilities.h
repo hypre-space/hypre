@@ -1150,6 +1150,7 @@ extern "C++" {
 
 #include <cuda.h>
 #include <cuda_runtime.h>
+#include <cuda_profiler_api.h>
 #include <curand.h>
 #include <cublas_v2.h>
 #include <cusparse.h>
@@ -1955,6 +1956,8 @@ hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle_)
 
 static const uint32_t colors[] = { 0x0000ff00, 0x000000ff, 0x00ffff00, 0x00ff00ff, 0x0000ffff, 0x00ff0000, 0x00ffffff };
 static const hypre_int num_colors = sizeof(colors)/sizeof(uint32_t);
+
+//nvtxRangePushA(name);
 
 #define PUSH_RANGE(name,cid) { \
     hypre_int color_id = cid; \
