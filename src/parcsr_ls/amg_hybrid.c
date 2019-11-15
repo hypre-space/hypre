@@ -965,7 +965,6 @@ hypre_AMGHybridSetCycleRelaxType( void *AMGhybrid_vdata,
 {
    hypre_AMGHybridData *AMGhybrid_data =(hypre_AMGHybridData *) AMGhybrid_vdata;
    HYPRE_Int                 *grid_relax_type;
-   HYPRE_Int                 i;
    if (!AMGhybrid_data)
    {
       hypre_error_in_arg(1);
@@ -987,10 +986,9 @@ hypre_AMGHybridSetCycleRelaxType( void *AMGhybrid_vdata,
    {
       (AMGhybrid_data -> grid_relax_type) = hypre_CTAlloc(HYPRE_Int, 4, HYPRE_MEMORY_HOST);
       grid_relax_type = (AMGhybrid_data -> grid_relax_type);
-      for (i=0; i < 3; i++)
-      {
-         grid_relax_type[i] = 3;
-      }
+
+      grid_relax_type[1] = 13;
+      grid_relax_type[2] = 14;
       grid_relax_type[3] = 9;
    }
    grid_relax_type[k] = relax_type;

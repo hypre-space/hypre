@@ -43,7 +43,8 @@
 #ifndef hypre_HOPSCOTCH_HASH_HEADER
 #define hypre_HOPSCOTCH_HASH_HEADER
 
-#include <strings.h>
+//#include <strings.h>
+#include <string.h>
 #include <stdio.h>
 #include <limits.h>
 #include <math.h>
