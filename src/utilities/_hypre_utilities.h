@@ -475,8 +475,24 @@ HYPRE_Int hypre_MPI_Info_free( hypre_MPI_Info *info );
 #define HYPRE_STR(...) #__VA_ARGS__
 #define HYPRE_XSTR(...) HYPRE_STR(__VA_ARGS__)
 
+//#define SIMPLE_MEMPOOL
+
 #ifdef __cplusplus
 extern "C" {
+#endif
+
+#ifdef SIMPLE_MEMPOOL
+typedef struct
+{
+   size_t  device_pool_max_size;
+   size_t  device_pool_cur_size;
+   char   *device_pool;
+   size_t  managed_pool_max_size;
+   size_t  managed_pool_cur_size;
+   char   *managed_pool;
+} hypre_mem_pool_t;
+
+extern hypre_mem_pool_t hypre_mem_pool;
 #endif
 
 #define HYPRE_MEMORY_UNSET         (-1)
@@ -655,6 +671,12 @@ char *hypre_MAllocDML( HYPRE_Int size , char *file , HYPRE_Int line );
 char *hypre_CAllocDML( HYPRE_Int count , HYPRE_Int elt_size , char *file , HYPRE_Int line );
 char *hypre_ReAllocDML( char *ptr , HYPRE_Int size , char *file , HYPRE_Int line );
 void hypre_FreeDML( char *ptr , char *file , HYPRE_Int line );
+
+#ifdef SIMPLE_MEMPOOL
+void hypre_MemPoolCreate(hypre_mem_pool_t *pool, size_t device_pool_max_size, size_t managed_pool_max_size);
+void hypre_MemPoolDestroy(hypre_mem_pool_t *pool);
+void *hypre_MemPoolAlloc(hypre_mem_pool_t *pool, size_t size, HYPRE_Int location);
+#endif
 
 #ifdef __cplusplus
 }

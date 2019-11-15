@@ -18,6 +18,76 @@
 #undef HYPRE_USE_UMALLOC
 #endif
 
+#ifdef SIMPLE_MEMPOOL
+hypre_mem_pool_t hypre_mem_pool;
+
+void hypre_MemPoolCreate(hypre_mem_pool_t *pool,
+                         size_t            device_pool_max_size,
+                         size_t            managed_pool_max_size)
+{
+   pool->device_pool_max_size = device_pool_max_size;
+   pool->device_pool_cur_size = 0;
+   HYPRE_CUDA_CALL( cudaMalloc(&pool->device_pool, device_pool_max_size) );
+
+   pool->managed_pool_max_size = managed_pool_max_size;
+   pool->managed_pool_cur_size = 0;
+   HYPRE_CUDA_CALL( cudaMallocManaged(&pool->managed_pool, managed_pool_max_size, cudaMemAttachGlobal) );
+   HYPRE_CUDA_CALL( cudaMemAdvise( pool->managed_pool,
+                                   managed_pool_max_size,
+                                   cudaMemAdviseSetPreferredLocation,
+                                   hypre_HandleCudaDevice(hypre_handle)
+                                 ) );
+}
+
+void hypre_MemPoolDestroy(hypre_mem_pool_t *pool)
+{
+   pool->device_pool_max_size = 0;
+   pool->device_pool_cur_size = 0;
+   HYPRE_CUDA_CALL( cudaFree(pool->device_pool) );
+   pool->device_pool = NULL;
+
+   pool->managed_pool_max_size = 0;
+   pool->managed_pool_cur_size = 0;
+   HYPRE_CUDA_CALL( cudaFree(pool->managed_pool) );
+   pool->managed_pool = NULL;
+}
+
+void *hypre_MemPoolAlloc(hypre_mem_pool_t *pool, size_t size0, HYPRE_Int location)
+{
+   void *ptr = NULL;
+
+   size_t align = 256;
+   size_t size = (size0 + align - 1) / align * align;
+
+   if (location == HYPRE_MEMORY_DEVICE)
+   {
+      if (pool->device_pool_cur_size + size < pool->device_pool_max_size)
+      {
+         ptr = pool->device_pool + pool->device_pool_cur_size;
+         pool->device_pool_cur_size += size;
+      }
+      else
+      {
+         assert(0);
+      }
+   }
+   else if (location == HYPRE_MEMORY_SHARED)
+   {
+      if (pool->managed_pool_cur_size + size < pool->managed_pool_max_size)
+      {
+         ptr = pool->managed_pool + pool->managed_pool_cur_size;
+         pool->managed_pool_cur_size += size;
+      }
+      else
+      {
+         assert(0);
+      }
+   }
+
+   return ptr;
+}
+#endif
+
 /******************************************************************************
  *
  * Helper routines
@@ -32,6 +102,9 @@ hypre_OutOfMemory(size_t size)
 {
    hypre_error_w_msg(HYPRE_ERROR_MEMORY,"Out of memory trying to allocate too many bytes\n");
    fflush(stdout);
+
+   printf("Out of memory trying to allocate too many bytes\n");
+   exit(1);
 }
 
 static inline void
@@ -137,8 +210,11 @@ hypre_DeviceMalloc(size_t size, HYPRE_Int zeroinit)
    ptr = (void *) (&sp[HYPRE_MEM_PAD_LEN]);
    HYPRE_OMPOffload(hypre__offload_device_num, ptr, size, "enter", "alloc");
 #elif defined(HYPRE_USING_CUDA)
-   /* cudaMalloc */
+#ifdef SIMPLE_MEMPOOL
+   ptr = hypre_MemPoolAlloc(&hypre_mem_pool, size + sizeof(size_t)*HYPRE_MEM_PAD_LEN, HYPRE_MEMORY_DEVICE);
+#else
    HYPRE_CUDA_CALL( cudaMalloc(&ptr, size + sizeof(size_t)*HYPRE_MEM_PAD_LEN) );
+#endif
    HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
    hypre_Memcpy(ptr, &size, sizeof(size_t), HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
    size_t *sp = (size_t*) ptr;
@@ -162,7 +238,11 @@ hypre_UnifiedMalloc(size_t size, HYPRE_Int zeroinit)
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    size_t count = size + sizeof(size_t)*HYPRE_MEM_PAD_LEN;
    /* with UM, managed memory alloc */
+#ifdef SIMPLE_MEMPOOL
+   ptr = hypre_MemPoolAlloc(&hypre_mem_pool, count, HYPRE_MEMORY_SHARED);
+#else
    HYPRE_CUDA_CALL( cudaMallocManaged(&ptr, count, cudaMemAttachGlobal) );
+#endif
    HYPRE_Int device = hypre_HandleCudaDevice(hypre_handle);
    HYPRE_CUDA_CALL( cudaMemAdvise(ptr, count, cudaMemAdviseSetPreferredLocation, device) );
    size_t *sp = (size_t*) ptr;
@@ -282,8 +362,9 @@ hypre_DeviceFree(void *ptr)
    size_t size = ((size_t *) ptr)[-HYPRE_MEM_PAD_LEN];
    HYPRE_OMPOffload(hypre__offload_device_num, ptr, size, "exit", "delete");
 #elif defined(HYPRE_USING_CUDA)
+#ifndef SIMPLE_MEMPOOL
    HYPRE_CUDA_CALL( cudaFree((size_t *) ptr - HYPRE_MEM_PAD_LEN) );
-   //cudaSafeFree(ptr, HYPRE_MEM_PAD_LEN);
+#endif
 #endif
 }
 
@@ -291,10 +372,10 @@ static inline void
 hypre_UnifiedFree(void *ptr)
 {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   /* with UM, managed memory free */
+#ifndef SIMPLE_MEMPOOL
    //HYPRE_CUDA_CALL( cudaFree((size_t *) ptr - HYPRE_MEM_PAD_LEN) );
    cudaFree((size_t *) ptr - HYPRE_MEM_PAD_LEN);
-   //cudaSafeFree(ptr, HYPRE_MEM_PAD_LEN);
+#endif
 #endif
 }
 
@@ -321,6 +402,8 @@ hypre_Free(void *ptr, HYPRE_Int location)
 #ifdef HYPRE_DEBUG
    HYPRE_Int tmp;
    hypre_GetMemoryLocation(ptr, &tmp);
+   /* do not use hypre_assert, which has alloc and free;
+    * will create an endless loop otherwise */
    assert(location == tmp);
 #endif
 
@@ -424,6 +507,7 @@ hypre_Memcpy(void *dst, void *src, size_t size, HYPRE_Int loc_dst, HYPRE_Int loc
       if (size)
       {
          hypre_printf("hypre_Memcpy warning: copy %ld bytes from %p to %p !\n", size, src, dst);
+         assert(0);
       }
 
       return;

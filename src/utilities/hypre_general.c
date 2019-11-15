@@ -252,6 +252,10 @@ HYPRE_Init( hypre_int argc, char *argv[] )
    hypre_HandleCudaPrefetchStream(hypre_handle);
 #endif
 
+#ifdef SIMPLE_MEMPOOL
+   hypre_MemPoolCreate(&hypre_mem_pool, 10LL*1024*1024*1024, 5LL*1024*1024*1024);
+#endif
+
 #if defined(HYPRE_USING_CUBLAS)
    hypre_HandleCublasHandle(hypre_handle);
 #endif
@@ -304,6 +308,9 @@ HYPRE_Finalize()
    hypre_TFree(global_recv_buffer, HYPRE_MEMORY_DEVICE);
 
    //if (cudaSuccess == cudaPeekAtLastError() ) hypre_printf("OK...\n");
+#ifdef SIMPLE_MEMPOOL
+   hypre_MemPoolDestroy(&hypre_mem_pool);
+#endif
 
 #if defined(HYPRE_USING_CUDA)
    HYPRE_CUDA_CALL( cudaGetLastError() );
