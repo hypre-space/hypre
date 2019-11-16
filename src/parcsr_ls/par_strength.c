@@ -540,6 +540,7 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
 {
 #if defined(HYPRE_USING_CUDA)
    //hypre_SetExecPolicy(HYPRE_EXEC_DEVICE);
+   PUSH_RANGE("CreateS", 0);
 #endif
 
    HYPRE_Int exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(A)) );
@@ -563,6 +564,7 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
 
 #if defined(HYPRE_USING_CUDA)
    //hypre_SetExecPolicy(HYPRE_EXEC_HOST);
+   POP_RANGE;
 #endif
 
    return ierr;
