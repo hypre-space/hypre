@@ -268,6 +268,7 @@ hypre_ILUSetup( void               *ilu_vdata,
             HYPRE_GMRESSetKDim            (schur_solver, hypre_ParILUDataSchurGMRESKDim(ilu_data));
             HYPRE_GMRESSetMaxIter         (schur_solver, hypre_ParILUDataSchurGMRESMaxIter(ilu_data));/* we don't need that many solves */
             HYPRE_GMRESSetTol             (schur_solver, (ilu_data -> ss_tol));
+            //HYPRE_GMRESSetTol             (schur_solver, 0.); /* set tol for schur solve to zero. Avoids triggering hypre error for non convergence -DOK*/
             HYPRE_GMRESSetAbsoluteTol     (schur_solver, (ilu_data -> ss_absolute_tol));
             HYPRE_GMRESSetLogging         (schur_solver, (ilu_data -> ss_logging));
             HYPRE_GMRESSetPrintLevel      (schur_solver, (ilu_data -> ss_print_level));/* set to zero now, don't print */
@@ -283,8 +284,9 @@ hypre_ILUSetup( void               *ilu_vdata,
             hypre_ILUSetOwnDropThreshold  (schur_precond, 0);/* using exist droptol */
             HYPRE_ILUSetPrintLevel        (schur_precond, (ilu_data -> sp_print_level));
             HYPRE_ILUSetMaxIter           (schur_precond, (ilu_data -> sp_max_iter));
-            HYPRE_ILUSetTol               (schur_precond, (ilu_data -> sp_tol));
-                        
+            //HYPRE_ILUSetTol               (schur_precond, (ilu_data -> sp_tol));
+            HYPRE_ILUSetTol               (schur_precond, 0.); /* set tol for preconditioner to zero. Avoids triggering hypre error for non convergence -DOK*/
+                                    
             /* add preconditioner to solver */
             HYPRE_GMRESSetPrecond(schur_solver,
                      (HYPRE_PtrToSolverFcn) HYPRE_ILUSolve,

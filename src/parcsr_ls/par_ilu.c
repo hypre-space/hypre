@@ -291,7 +291,7 @@ hypre_ILUSetType( void *ilu_vdata, HYPRE_Int ilu_type )
       case 20: case 21:
          /* set NSH Solver parameters */
          hypre_ParILUDataSchurNSHSolveMaxIter(ilu_data)        = 5;
-         hypre_ParILUDataSchurNSHSolveTol(ilu_data)            = 1.0e-09;
+         hypre_ParILUDataSchurNSHSolveTol(ilu_data)            = 1.0e-02;
          hypre_ParILUDataSchurSolverLogging(ilu_data)          = 0;
          hypre_ParILUDataSchurSolverPrintLevel(ilu_data)       = 0;
          if(hypre_ParILUDataSchurNSHOwnDroptolData(ilu_data))
@@ -315,7 +315,7 @@ hypre_ILUSetType( void *ilu_vdata, HYPRE_Int ilu_type )
       case 10: case 11: case 40: case 41: 
          /* default data for schur solver */
          hypre_ParILUDataSchurGMRESKDim(ilu_data)              = 5;
-         hypre_ParILUDataSchurGMRESTol(ilu_data)               = 1.0e-09;
+         hypre_ParILUDataSchurGMRESTol(ilu_data)               = 1.0e-02;
          hypre_ParILUDataSchurGMRESAbsoluteTol(ilu_data)       = 0.0;
          hypre_ParILUDataSchurSolverLogging(ilu_data)          = 0;
          hypre_ParILUDataSchurSolverPrintLevel(ilu_data)       = 0;
@@ -1886,7 +1886,7 @@ hypre_ILUBuildRASExternalMatrix(hypre_ParCSRMatrix *A, HYPRE_Int *rperm, HYPRE_I
    E_nnz       = 0;
    E_ext_i[0]  = 0;
    
-   for( i = 0 ;  i <= m ; i ++)
+   for( i = 0 ;  i < m ; i ++)
    {
       E_ext_i[i] = E_nnz;
       for( j = A_ext_i[i] ; j < A_ext_i[i+1] ; j ++)

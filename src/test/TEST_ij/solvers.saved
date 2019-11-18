@@ -223,11 +223,11 @@ Final Relative Residual Norm = 9.518056e-09
 
 # Output file: solvers.out.206
 MGR Iterations = 52
-Final Relative Residual Norm = 7.230357e-09
+Final Relative Residual Norm = 7.228497e-09
 
 # Output file: solvers.out.207
 MGR Iterations = 50
-Final Relative Residual Norm = 7.965088e-09
+Final Relative Residual Norm = 7.963764e-09
 
 # Output file: solvers.out.208
 MGR Iterations = 15
@@ -275,11 +275,11 @@ Final Relative Residual Norm = 9.189235e-09
 
 # Output file: solvers.out.305
 hypre_ILU Iterations = 38
-Final Relative Residual Norm = 7.033171e-09
+Final Relative Residual Norm = 7.024789e-09
 
 # Output file: solvers.out.306
 hypre_ILU Iterations = 26
-Final Relative Residual Norm = 7.574812e-09
+Final Relative Residual Norm = 7.558316e-09
 
 # Output file: solvers.out.307
 hypre_ILU Iterations = 38
@@ -299,11 +299,11 @@ Final Relative Residual Norm = 6.699477e-09
 
 # Output file: solvers.out.311
 hypre_ILU Iterations = 36
-Final Relative Residual Norm = 6.400523e-09
+Final Relative Residual Norm = 6.391605e-09
 
 # Output file: solvers.out.312
 hypre_ILU Iterations = 24
-Final Relative Residual Norm = 5.969494e-09
+Final Relative Residual Norm = 5.954268e-09
 
 # Output file: solvers.out.313
 GMRES Iterations = 25
@@ -323,27 +323,27 @@ Final GMRES Relative Residual Norm = 7.969372e-09
 
 # Output file: solvers.out.317
 FlexGMRES Iterations = 17
-Final FlexGMRES Relative Residual Norm = 8.404730e-09
+Final FlexGMRES Relative Residual Norm = 8.994464e-09
 
 # Output file: solvers.out.318
 FlexGMRES Iterations = 10
-Final FlexGMRES Relative Residual Norm = 2.620120e-09
+Final FlexGMRES Relative Residual Norm = 4.055288e-09
 
 # Output file: solvers.out.319
 FlexGMRES Iterations = 17
-Final FlexGMRES Relative Residual Norm = 9.008926e-09
+Final FlexGMRES Relative Residual Norm = 8.793816e-09
 
 # Output file: solvers.out.320
 FlexGMRES Iterations = 9
-Final FlexGMRES Relative Residual Norm = 6.434301e-09
+Final FlexGMRES Relative Residual Norm = 4.406193e-09 
 
 # Output file: solvers.out.321
 FlexGMRES Iterations = 17
-Final FlexGMRES Relative Residual Norm = 4.575426e-09
+Final FlexGMRES Relative Residual Norm = 4.485230e-09
 
 # Output file: solvers.out.322
 FlexGMRES Iterations = 8
-Final FlexGMRES Relative Residual Norm = 5.938486e-09
+Final FlexGMRES Relative Residual Norm = 2.725521e-09
 
 # Output file: solvers.out.323
 BoomerAMG Iterations = 8

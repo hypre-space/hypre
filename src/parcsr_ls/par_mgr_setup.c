@@ -968,9 +968,22 @@ hypre_MGRSetup( void               *mgr_vdata,
     col_offd_ST_to_AT = NULL;
 
     /* check if Vcycle smoother setup required */
-    if(Frelax_method[lev] == 1)
+    if((mgr_data -> max_local_lvls) > 1)
     {
-       use_VcycleSmoother = 1;
+       if(Frelax_method[lev] == 1)
+       {
+          use_VcycleSmoother = 1;
+       }
+    }
+    else
+    {
+       /* Only check for vcycle smoother option. 
+        * Currently leaves Frelax_method[lev] = 99 (full amg) option as is 
+        */
+       if(Frelax_method[lev] == 1)
+       {
+          Frelax_method[lev] = 0;
+       }
     }
     
     /* check if last level */
@@ -1267,17 +1280,6 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
   F_array_local[0] = f;
   U_array_local[0] = u;
   
-  /* Special case max_local_lvls == 1 */
-  if (max_local_lvls == 1)
-  {
-    CF_marker_local = hypre_CTAlloc(HYPRE_Int,  local_size , HYPRE_MEMORY_HOST);
-    for (i=0; i < local_size ; i++)
-      CF_marker_local[i] = 1;
-    CF_marker_array_local[0] = CF_marker_local;
-    lev_local = max_local_lvls;
-    not_finished = 0;
-  }
-
   for (i = 0; i < local_size; i++)
   {
     if (CF_marker_array[lev][i] == smrk_local)
@@ -1458,7 +1460,6 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
     hypre_ParVectorSetPartitioningOwner(U_array_local[lev_local], 0);        
   
   } // end while loop
-//   hypre_printf("SETUP::OK TILL HERE >>> lev = %d, lev_local = %d \n",lev, lev_local);
 
   // setup Vcycle data
   (FrelaxVcycleData[lev] -> A_array) = A_array_local;

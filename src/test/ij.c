@@ -6734,7 +6734,7 @@ main( hypre_int argc,
       if(ilu_type == 20 || ilu_type == 21)
       {
 		 HYPRE_ILUSetNSHDropThreshold( ilu_solver, ilu_nsh_droptol);
-	  }              
+      }              
 
       
       /* setup hypre_ILU solver */
