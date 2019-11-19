@@ -460,6 +460,11 @@ hypre_Memcpy(void *dst, void *src, size_t size, HYPRE_Int loc_dst, HYPRE_Int loc
    }
 #endif
 
+   if (dst == src)
+   {
+      return;
+   }
+
    /* Totally 4 x 4 = 16 cases */
 
    /* 4: Host   <-- Host, Host   <-- Pinned,

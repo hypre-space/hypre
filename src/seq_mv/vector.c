@@ -483,7 +483,6 @@ hypre_SeqVectorScale( HYPRE_Complex alpha,
 /*--------------------------------------------------------------------------
  * hypre_SeqVectorAxpy
  *--------------------------------------------------------------------------*/
-
 HYPRE_Int
 hypre_SeqVectorAxpy( HYPRE_Complex alpha,
                      hypre_Vector *x,
@@ -639,3 +638,57 @@ hypre_SeqVectorPrefetch( hypre_Vector *x, HYPRE_Int to_location)
 //{
 //}
 
+#if 0
+/* y[i] = max(alpha*x[i], beta*y[i]) */
+HYPRE_Int
+hypre_SeqVectorMax( HYPRE_Complex alpha,
+                    hypre_Vector *x,
+                    HYPRE_Complex beta,
+                    hypre_Vector *y     )
+{
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_BLAS1] -= hypre_MPI_Wtime();
+#endif
+
+   HYPRE_Complex *x_data = hypre_VectorData(x);
+   HYPRE_Complex *y_data = hypre_VectorData(y);
+   HYPRE_Int      size   = hypre_VectorSize(x);
+   HYPRE_Int      ierr = 0;
+
+   size *= hypre_VectorNumVectors(x);
+
+   hypre_SeqVectorPrefetch(x, HYPRE_MEMORY_DEVICE);
+   hypre_SeqVectorPrefetch(y, HYPRE_MEMORY_DEVICE);
+
+   thrust::maximum<HYPRE_Complex> mx;
+
+#if defined(HYPRE_USING_CUDA)
+   HYPRE_THRUST_CALL( transform,
+                      thrust::make_transform_iterator(x_data,        alpha * _1),
+                      thrust::make_transform_iterator(x_data + size, alpha * _1),
+                      thrust::make_transform_iterator(y_data,        beta  * _1),
+                      y_data,
+                      mx );
+#else
+   HYPRE_Int i;
+#if defined(HYPRE_USING_DEVICE_OPENMP)
+#pragma omp target teams distribute parallel for private(i) is_device_ptr(y_data, x_data)
+#elif defined(HYPRE_USING_OPENMP)
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+   for (i = 0; i < size; i++)
+   {
+      y_data[i] += hypre_max(alpha * x_data[i], beta * y_data[i]);
+   }
+
+#endif /* defined(HYPRE_USING_CUDA) */
+
+   hypre_SyncCudaComputeStream(hypre_handle);
+
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
+#endif
+
+   return ierr;
+}
+#endif

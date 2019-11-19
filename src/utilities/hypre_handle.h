@@ -48,6 +48,8 @@ typedef struct
    HYPRE_Int spgemm_rownnz_estimate_nsamples;
    float     spgemm_rownnz_estimate_mult_factor;
    char      spgemm_hash_type;
+   /* RL: temporary TODO */
+   HYPRE_Int no_cuda_um;
 #endif
 } hypre_Handle;
 

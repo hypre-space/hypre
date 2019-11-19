@@ -500,15 +500,15 @@ hypre_ParCSRTMatMatKT( hypre_ParCSRMatrix  *A,
 #endif
 
 #if defined(HYPRE_USING_CUDA)
-   if (hypre_GetActualMemLocation(hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(C))) == HYPRE_MEMORY_DEVICE)
+   if (hypre_handle->no_cuda_um == 0 && hypre_GetActualMemLocation( hypre_ParCSRMatrixMemoryLocation(C) ) == HYPRE_MEMORY_DEVICE)
    {
-   hypre_CSRMatrix *C_diag = hypre_CSRMatrixClone(hypre_ParCSRMatrixDiag(C), 1);
-   hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(C));
-   hypre_ParCSRMatrixDiag(C) = C_diag;
+      hypre_CSRMatrix *C_diag = hypre_CSRMatrixClone(hypre_ParCSRMatrixDiag(C), 1);
+      hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(C));
+      hypre_ParCSRMatrixDiag(C) = C_diag;
 
-   hypre_CSRMatrix *C_offd = hypre_CSRMatrixClone(hypre_ParCSRMatrixOffd(C), 1);
-   hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(C));
-   hypre_ParCSRMatrixOffd(C) = C_offd;
+      hypre_CSRMatrix *C_offd = hypre_CSRMatrixClone(hypre_ParCSRMatrixOffd(C), 1);
+      hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(C));
+      hypre_ParCSRMatrixOffd(C) = C_offd;
    }
 #endif
 

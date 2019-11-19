@@ -86,7 +86,7 @@ extern HYPRE_Int hypre_FlexGMRESModifyPCDefault(void *precond_data, HYPRE_Int it
 #ifdef __cplusplus
 }
 #endif
-#define SECOND_TIME 0
+#define SECOND_TIME 1
 
 hypre_int
 main( hypre_int argc,
@@ -384,6 +384,8 @@ main( hypre_int argc,
 
    HYPRE_Int air = 0;
    HYPRE_Int **grid_relax_points = NULL;
+
+   HYPRE_Int no_cuda_um = 0;
    /*-----------------------------------------------------------
     * Initialize some stuff
     *-----------------------------------------------------------*/
@@ -408,6 +410,7 @@ main( hypre_int argc,
 #ifdef HYPRE_USING_CUDA
    //hypre_SetExecPolicy(HYPRE_EXEC_DEVICE);
    hypre_SetExecPolicy(HYPRE_EXEC_HOST);
+   HYPRE_CSRMatrixDeviceSpGemmSetUseCusparse(1);
 #endif
 
    //omp_set_default_device(0);
@@ -1033,6 +1036,12 @@ main( hypre_int argc,
       {
          arg_index++;
          hypre_SetExecPolicy(HYPRE_EXEC_DEVICE);
+      }
+      else if ( strcmp(argv[arg_index], "-no_cuda_um") == 0 )
+      {
+         arg_index++;
+         no_cuda_um = atoi(argv[arg_index++]);
+         HYPRE_SetNoCUDAUM(no_cuda_um);
       }
       else
       {
@@ -1922,6 +1931,8 @@ main( hypre_int argc,
          hypre_printf("  -mgr_frelax_method   1           : Use a 'multi-level smoother' strategy \n");
          hypre_printf("                                     for F-relaxation \n");
          /* end MGR options */
+
+         hypre_printf("  -no_cuda_um  <val>               : if use CUDA unified memory\n");
       }
 
       goto final;
@@ -2978,6 +2989,7 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetSCommPkgSwitch(amg_solver, S_commpkg_switch);
       /* note: log is written to standard output, not to file */
       HYPRE_BoomerAMGSetPrintLevel(amg_solver, 3);
+      HYPRE_BoomerAMGSetLogging(amg_solver, 2);
       HYPRE_BoomerAMGSetPrintFileName(amg_solver, "driver.out.log");
       HYPRE_BoomerAMGSetCycleType(amg_solver, cycle_type);
       HYPRE_BoomerAMGSetFCycle(amg_solver, fcycle);
@@ -3082,6 +3094,8 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetCoordinates (amg_solver, coordinates);
       }
 
+      cudaProfilerStart();
+
       HYPRE_BoomerAMGSetup(amg_solver, parcsr_A, b, x);
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
@@ -3096,9 +3110,7 @@ main( hypre_int argc,
       time_index = hypre_InitializeTiming("BoomerAMG Solve");
       hypre_BeginTiming(time_index);
 
-      //PUSH_RANGE("solve", 1)
       HYPRE_BoomerAMGSolve(amg_solver, parcsr_A, b, x);
-      //POP_RANGE
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
       cudaDeviceSynchronize();
@@ -3123,9 +3135,15 @@ main( hypre_int argc,
 #if SECOND_TIME
       /* run a second time to check for memory leaks */
       HYPRE_ParVectorSetRandomValues(x, 775);
+      PUSH_RANGE("AMG-Setup", 1)
       HYPRE_BoomerAMGSetup(amg_solver, parcsr_A, b, x);
+      POP_RANGE
+      PUSH_RANGE("AMG-Solve", 2)
       HYPRE_BoomerAMGSolve(amg_solver, parcsr_A, b, x);
+      POP_RANGE
 #endif
+
+      cudaProfilerStop();
 
       HYPRE_BoomerAMGDestroy(amg_solver);
    }
@@ -3699,6 +3717,7 @@ main( hypre_int argc,
       else
          if (myid == 0)
             hypre_printf("HYPRE_ParCSRPCGGetPrecond got good precond\n");
+
       HYPRE_PCGSetup(pcg_solver, (HYPRE_Matrix)parcsr_A,
                      (HYPRE_Vector)b, (HYPRE_Vector)x);
       hypre_EndTiming(time_index);
@@ -3723,10 +3742,27 @@ main( hypre_int argc,
 #if SECOND_TIME
       /* run a second time to check for memory leaks */
       HYPRE_ParVectorSetRandomValues(x, 775);
+      time_index = hypre_InitializeTiming("PCG Setup");
+      hypre_BeginTiming(time_index);
+
       HYPRE_PCGSetup(pcg_solver, (HYPRE_Matrix)parcsr_A,
                      (HYPRE_Vector)b, (HYPRE_Vector)x);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      time_index = hypre_InitializeTiming("PCG Solve");
+      hypre_BeginTiming(time_index);
+
       HYPRE_PCGSolve(pcg_solver, (HYPRE_Matrix)parcsr_A,
                      (HYPRE_Vector)b, (HYPRE_Vector)x);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
 #endif
 
       HYPRE_ParCSRPCGDestroy(pcg_solver);
