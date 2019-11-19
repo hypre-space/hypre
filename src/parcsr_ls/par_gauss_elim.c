@@ -198,7 +198,7 @@ HYPRE_Int hypre_GaussElimSetup (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
    return hypre_error_flag;
 }
 
-
+/* relax_type = 9, 99, 199, see par_relax.c for 19 and 98 */
 HYPRE_Int hypre_GaussElimSolve (hypre_ParAMGData *amg_data, HYPRE_Int level, HYPRE_Int relax_type)
 {
 #ifdef HYPRE_PROFILE
@@ -268,7 +268,7 @@ HYPRE_Int hypre_GaussElimSolve (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
          hypre_TFree(f_data_host, HYPRE_MEMORY_HOST);
       }
 
-      if (relax_type == 9 || relax_type == 19)
+      if (relax_type == 9 || relax_type == 99)
       {
          HYPRE_Real *A_mat = hypre_ParAMGDataAMat(amg_data);
          HYPRE_Real *A_tmp;
