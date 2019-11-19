@@ -7494,21 +7494,20 @@ BuildParDifConv( HYPRE_Int                  argc,
  *----------------------------------------------------------------------*/
 
 HYPRE_Int
-BuildParFromOneFile( HYPRE_Int                  argc,
+BuildParFromOneFile( HYPRE_Int            argc,
                      char                *argv[],
-                     HYPRE_Int                  arg_index,
-                     HYPRE_Int                  num_functions,
-                     HYPRE_ParCSRMatrix  *A_ptr     )
+                     HYPRE_Int            arg_index,
+                     HYPRE_Int            num_functions,
+                     HYPRE_ParCSRMatrix  *A_ptr )
 {
    char               *filename;
 
-   HYPRE_ParCSRMatrix  A;
-   HYPRE_CSRMatrix  A_CSR = NULL;
+   HYPRE_CSRMatrix     A_CSR    = NULL;
+   HYPRE_BigInt       *row_part = NULL;
+   HYPRE_BigInt       *col_part = NULL;
 
-   HYPRE_Int          myid, numprocs;
-   HYPRE_Int          i, rest, size, num_nodes, num_dofs;
-   HYPRE_BigInt      *row_part;
-   HYPRE_BigInt      *col_part;
+   HYPRE_Int           myid, numprocs;
+   HYPRE_Int           i, rest, size, num_nodes, num_dofs;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -7546,37 +7545,31 @@ BuildParFromOneFile( HYPRE_Int                  argc,
       A_CSR = HYPRE_CSRMatrixRead(filename);
    }
 
-   row_part = NULL;
-   col_part = NULL;
    if (myid == 0 && num_functions > 1)
    {
       HYPRE_CSRMatrixGetNumRows(A_CSR, &num_dofs);
       num_nodes = num_dofs/num_functions;
-      if (num_dofs != num_functions*num_nodes)
-      {
-         row_part = NULL;
-         col_part = NULL;
-      }
-      else
+      if (num_dofs == num_functions*num_nodes)
       {
          row_part = hypre_CTAlloc(HYPRE_BigInt,  numprocs+1, HYPRE_MEMORY_HOST);
+
          row_part[0] = 0;
          size = num_nodes/numprocs;
-         rest = num_nodes-size*numprocs;
-         for (i=0; i < numprocs; i++)
+         rest = num_nodes - size*numprocs;
+         for (i = 0; i < rest; i++)
          {
-            row_part[i+1] = row_part[i]+size*num_functions;
-            if (i < rest) row_part[i+1] += num_functions;
+            row_part[i+1] = row_part[i] + (size + 1)*num_functions;
          }
+         for (i = rest; i < numprocs; i++)
+         {
+            row_part[i+1] = row_part[i] + size*num_functions;
+         }
+
          col_part = row_part;
       }
    }
 
-   HYPRE_CSRMatrixToParCSRMatrix(hypre_MPI_COMM_WORLD, A_CSR, row_part, col_part, &A);
-
-   *A_ptr = A;
-
-   if (myid == 0) HYPRE_CSRMatrixDestroy(A_CSR);
+   HYPRE_CSRMatrixToParCSRMatrix(hypre_MPI_COMM_WORLD, A_CSR, row_part, col_part, A_ptr);
 
    return (0);
 }
