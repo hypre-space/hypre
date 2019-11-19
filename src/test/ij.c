@@ -7601,15 +7601,18 @@ BuildFuncsFromFiles(    HYPRE_Int                  argc,
 
 }
 
+/*----------------------------------------------------------------------
+ * Build Function array from file on master process
+ *----------------------------------------------------------------------*/
 
 HYPRE_Int
-BuildFuncsFromOneFile(  HYPRE_Int                  argc,
-                        char                *argv[],
-                        HYPRE_Int                  arg_index,
-                        HYPRE_ParCSRMatrix   parcsr_A,
-                        HYPRE_Int                **dof_func_ptr     )
+BuildFuncsFromOneFile( HYPRE_Int              argc,
+                       char                  *argv[],
+                       HYPRE_Int              arg_index,
+                       HYPRE_ParCSRMatrix     parcsr_A,
+                       HYPRE_Int            **dof_func_ptr )
 {
-   char           *filename;
+   char                 *filename;
 
    HYPRE_Int             myid, num_procs;
    HYPRE_BigInt         *partitioning;
@@ -7627,8 +7630,8 @@ BuildFuncsFromOneFile(  HYPRE_Int                  argc,
     *-----------------------------------------------------------*/
 
    comm = hypre_MPI_COMM_WORLD;
-   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
-   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
+   hypre_MPI_Comm_rank(comm, &myid );
+   hypre_MPI_Comm_size(comm, &num_procs );
 
    /*-----------------------------------------------------------
     * Parse command line
@@ -7667,35 +7670,62 @@ BuildFuncsFromOneFile(  HYPRE_Int                  argc,
       }
 
       fclose(fp);
-
    }
-   HYPRE_ParCSRMatrixGetRowPartitioning(parcsr_A, &partitioning);
-   local_size = partitioning[myid+1]-partitioning[myid];
-   dof_func_local = hypre_CTAlloc(HYPRE_Int, local_size, HYPRE_MEMORY_HOST);
 
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   HYPRE_BigInt  row_start;
+
+   if (myid == 0)
+   {
+      partitioning = hypre_CTAlloc(HYPRE_BigInt, num_procs+1, HYPRE_MEMORY_HOST);
+   }
+
+   row_start = hypre_ParCSRMatrixFirstRowIndex(parcsr_A);
+   hypre_MPI_Gather(&row_start, 1, HYPRE_MPI_BIG_INT, &partitioning[0],
+                    1, HYPRE_MPI_BIG_INT, 0, comm);
+   if (myid == 0)
+   {
+      partitioning[num_procs] = hypre_ParCSRMatrixNumRows(parcsr_A);
+   }
+#else
+   HYPRE_ParCSRMatrixGetRowPartitioning(parcsr_A, &partitioning);
+#endif
+
+   local_size     = partitioning[myid+1] - partitioning[myid];
+   dof_func_local = hypre_CTAlloc(HYPRE_Int, local_size, HYPRE_MEMORY_HOST);
    if (myid == 0)
    {
       requests = hypre_CTAlloc(hypre_MPI_Request, num_procs-1, HYPRE_MEMORY_HOST);
       status = hypre_CTAlloc(hypre_MPI_Status, num_procs-1, HYPRE_MEMORY_HOST);
-      j = 0;
-      for (i=1; i < num_procs; i++)
+      for (i = 1; i < num_procs; i++)
+      {
          hypre_MPI_Isend(&dof_func[partitioning[i]],
                          partitioning[i+1]-partitioning[i],
-                         HYPRE_MPI_INT, i, 0, comm, &requests[j++]);
-      for (i=0; i < local_size; i++)
+                         HYPRE_MPI_INT, i, 0, comm, &requests[i-1]);
+      }
+      for (i = 0; i < local_size; i++)
+      {
          dof_func_local[i] = dof_func[i];
-      hypre_MPI_Waitall(num_procs-1,requests, status);
+      }
+      hypre_MPI_Waitall(num_procs-1, requests, status);
       hypre_TFree(requests, HYPRE_MEMORY_HOST);
       hypre_TFree(status, HYPRE_MEMORY_HOST);
    }
    else
    {
-      hypre_MPI_Recv(dof_func_local,local_size,HYPRE_MPI_INT,0,0,comm,&status0);
+      hypre_MPI_Recv(dof_func_local, local_size, HYPRE_MPI_INT, 0, 0, comm, &status0);
    }
 
    *dof_func_ptr = dof_func_local;
 
    if (myid == 0) hypre_TFree(dof_func, HYPRE_MEMORY_HOST);
+
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   if (myid == 0)
+   {
+      hypre_TFree(partitioning, HYPRE_MEMORY_HOST);
+   }
+#endif
 
    return (0);
 }
@@ -8495,4 +8525,3 @@ BuildParIsoLaplacian( HYPRE_Int argc, char** argv, HYPRE_ParCSRMatrix *A_ptr )
 }
 
 /* end lobpcg */
-
