@@ -401,7 +401,7 @@ hypreCUDAKernel_CSRMoveDiagFirst( HYPRE_Int      nrows,
    }
 
    HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
-   HYPRE_Int i, p, q;
+   HYPRE_Int p, q;
 
    if (lane < 2)
    {
@@ -410,17 +410,17 @@ hypreCUDAKernel_CSRMoveDiagFirst( HYPRE_Int      nrows,
    q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
    p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
 
-   for (i = p + lane + 1; __any_sync(HYPRE_WARP_FULL_MASK, i < q); i += HYPRE_WARP_SIZE)
+   for (HYPRE_Int j = p + lane + 1; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
    {
-      hypre_int find_diag = i < q && ja[i] == row;
+      hypre_int find_diag = j < q && ja[j] == row;
 
       if (find_diag)
       {
-         ja[i] = ja[p];
+         ja[j] = ja[p];
          ja[p] = row;
          HYPRE_Complex tmp = aa[p];
-         aa[p] = aa[i];
-         aa[i] = tmp;
+         aa[p] = aa[j];
+         aa[j] = tmp;
       }
 
       if ( __any_sync(HYPRE_WARP_FULL_MASK, find_diag) )
@@ -437,7 +437,7 @@ hypre_CSRMatrixMoveDiagFirstDevice( hypre_CSRMatrix  *A )
    HYPRE_Complex *A_data = hypre_CSRMatrixData(A);
    HYPRE_Int     *A_i    = hypre_CSRMatrixI(A);
    HYPRE_Int     *A_j    = hypre_CSRMatrixJ(A);
-   dim3 bDim, gDim;
+   dim3           bDim, gDim;
 
    bDim = hypre_GetDefaultCUDABlockDimension();
    gDim = hypre_GetDefaultCUDAGridDimension(nrows, "warp", bDim);
@@ -446,6 +446,190 @@ hypre_CSRMatrixMoveDiagFirstDevice( hypre_CSRMatrix  *A )
                      nrows, A_i, A_j, A_data);
 
    return hypre_error_flag;
+}
+
+/* type == 0, sum,
+ *         1, abs sum (l-1)
+ *         2, square sum (l-2)
+ */
+template<HYPRE_Int type>
+__global__ void
+hypreCUDAKernel_CSRRowSum( HYPRE_Int      nrows,
+                           HYPRE_Int     *ia,
+                           HYPRE_Int     *ja,
+                           HYPRE_Complex *aa,
+                           HYPRE_Int     *CF_i,
+                           HYPRE_Int     *CF_j,
+                           HYPRE_Complex *row_sum,
+                           HYPRE_Complex  scal,
+                           HYPRE_Int      set)
+{
+   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1,1>();
+
+   if (row_i >= nrows)
+   {
+      return;
+   }
+
+   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int p, q;
+
+   if (lane < 2)
+   {
+      p = read_only_load(ia + row_i + lane);
+   }
+   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
+   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+
+   HYPRE_Complex row_sum_i = 0.0;
+
+   for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+   {
+      if ( j >= q || (CF_i && CF_j && read_only_load(&CF_i[row_i]) != read_only_load(&CF_j[ja[j]])) )
+      {
+         continue;
+      }
+
+      HYPRE_Complex aii = aa[j];
+
+      if (type == 0)
+      {
+         row_sum_i += aii;
+      }
+      else if (type == 1)
+      {
+         row_sum_i += fabs(aii);
+      }
+      else if (type == 2)
+      {
+         row_sum_i += aii * aii;
+      }
+   }
+
+   row_sum_i = warp_reduce_sum(row_sum_i);
+
+   if (lane == 0)
+   {
+      if (set)
+      {
+         row_sum[row_i] = scal * row_sum_i;
+      }
+      else
+      {
+         row_sum[row_i] += scal * row_sum_i;
+      }
+   }
+}
+
+void
+hypre_CSRMatrixComputeRowSumDevice( hypre_CSRMatrix *A,
+                                    HYPRE_Int       *CF_i,
+                                    HYPRE_Int       *CF_j,
+                                    HYPRE_Complex   *row_sum,
+                                    HYPRE_Int        type,
+                                    HYPRE_Complex    scal,
+                                    const char      *set_or_add)
+{
+   HYPRE_Int      nrows  = hypre_CSRMatrixNumRows(A);
+   HYPRE_Complex *A_data = hypre_CSRMatrixData(A);
+   HYPRE_Int     *A_i    = hypre_CSRMatrixI(A);
+   HYPRE_Int     *A_j    = hypre_CSRMatrixJ(A);
+   dim3           bDim, gDim;
+
+   bDim = hypre_GetDefaultCUDABlockDimension();
+   gDim = hypre_GetDefaultCUDAGridDimension(nrows, "warp", bDim);
+
+   if (type == 0)
+   {
+      HYPRE_CUDA_LAUNCH( hypreCUDAKernel_CSRRowSum<0>, gDim, bDim, nrows, A_i, A_j, A_data, CF_i, CF_j,
+                         row_sum, scal, set_or_add[0] == 's' );
+   }
+   else if (type == 1)
+   {
+      HYPRE_CUDA_LAUNCH( hypreCUDAKernel_CSRRowSum<1>, gDim, bDim, nrows, A_i, A_j, A_data, CF_i, CF_j,
+                         row_sum, scal, set_or_add[0] == 's' );
+   }
+   else if (type == 2)
+   {
+      HYPRE_CUDA_LAUNCH( hypreCUDAKernel_CSRRowSum<2>, gDim, bDim, nrows, A_i, A_j, A_data, CF_i, CF_j,
+                         row_sum, scal, set_or_add[0] == 's' );
+   }
+}
+
+/* type 0: diag
+ *      1: abs diag
+ */
+__global__ void
+hypreCUDAKernel_CSRExtractDiag( HYPRE_Int      nrows,
+                                HYPRE_Int     *ia,
+                                HYPRE_Int     *ja,
+                                HYPRE_Complex *aa,
+                                HYPRE_Complex *d,
+                                HYPRE_Int      type)
+{
+   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1,1>();
+
+   if (row >= nrows)
+   {
+      return;
+   }
+
+   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int p, q;
+
+   if (lane < 2)
+   {
+      p = read_only_load(ia + row + lane);
+   }
+   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
+   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+
+   HYPRE_Int has_diag = 0;
+
+   for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+   {
+      hypre_int find_diag = j < q && ja[j] == row;
+
+      if (find_diag)
+      {
+         if (type == 0)
+         {
+            d[row] = aa[j];
+         }
+         else if (type == 1)
+         {
+            d[row] = fabs(aa[j]);
+         }
+      }
+
+      if ( __any_sync(HYPRE_WARP_FULL_MASK, find_diag) )
+      {
+         has_diag = 1;
+         break;
+      }
+   }
+
+   if (!has_diag && lane == 0)
+   {
+      d[row] = 0.0;
+   }
+}
+
+void
+hypre_CSRMatrixExtractDiagonalDevice( hypre_CSRMatrix *A,
+                                      HYPRE_Complex   *d,
+                                      HYPRE_Int        type)
+{
+   HYPRE_Int      nrows  = hypre_CSRMatrixNumRows(A);
+   HYPRE_Complex *A_data = hypre_CSRMatrixData(A);
+   HYPRE_Int     *A_i    = hypre_CSRMatrixI(A);
+   HYPRE_Int     *A_j    = hypre_CSRMatrixJ(A);
+   dim3           bDim, gDim;
+
+   bDim = hypre_GetDefaultCUDABlockDimension();
+   gDim = hypre_GetDefaultCUDAGridDimension(nrows, "warp", bDim);
+
+   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_CSRExtractDiag, gDim, bDim, nrows, A_i, A_j, A_data, d, type );
 }
 
 #endif /* HYPRE_USING_CUDA */

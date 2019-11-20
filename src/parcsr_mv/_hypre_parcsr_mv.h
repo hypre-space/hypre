@@ -258,6 +258,10 @@ typedef struct hypre_ParVector_struct
 
 #define hypre_ParVectorAssumedPartition(vector) ((vector) -> assumed_partition)
 
+static inline HYPRE_Int hypre_ParVectorMemoryLocation(hypre_ParVector *vector)
+{
+   return hypre_VectorMemoryLocation(hypre_ParVectorLocalVector(vector));
+}
 
 #endif
 /******************************************************************************
@@ -377,6 +381,18 @@ typedef struct hypre_ParCSRMatrix_struct
 
 #define hypre_ParCSRMatrixNumRows(matrix) hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(matrix))
 #define hypre_ParCSRMatrixNumCols(matrix) hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(matrix))
+
+static inline HYPRE_Int hypre_ParCSRMatrixMemoryLocation(hypre_ParCSRMatrix *matrix)
+{
+   HYPRE_Int memory_diag = hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(matrix));
+   HYPRE_Int memory_offd = hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixOffd(matrix));
+
+   if (memory_diag != memory_offd)
+   {
+      hypre_printf("Warning: ParCSRMatrix Memory Location Diag != Offd\n");
+   }
+   return memory_diag;
+}
 
 /*--------------------------------------------------------------------------
  * Parallel CSR Boolean Matrix
@@ -836,6 +852,7 @@ hypre_ParVector *hypre_ParVectorCreate ( MPI_Comm comm , HYPRE_BigInt global_siz
 hypre_ParVector *hypre_ParMultiVectorCreate ( MPI_Comm comm , HYPRE_BigInt global_size , HYPRE_BigInt *partitioning , HYPRE_Int num_vectors );
 HYPRE_Int hypre_ParVectorDestroy ( hypre_ParVector *vector );
 HYPRE_Int hypre_ParVectorInitialize ( hypre_ParVector *vector );
+HYPRE_Int hypre_ParVectorInitialize_v2( hypre_ParVector *vector, HYPRE_Int memory_location );
 HYPRE_Int hypre_ParVectorSetDataOwner ( hypre_ParVector *vector , HYPRE_Int owns_data );
 HYPRE_Int hypre_ParVectorSetPartitioningOwner ( hypre_ParVector *vector , HYPRE_Int owns_partitioning );
 HYPRE_Int hypre_ParVectorSetNumVectors ( hypre_ParVector *vector , HYPRE_Int num_vectors );

@@ -1225,3 +1225,144 @@ HYPRE_Real hypre_CSRMatrixFnorm( hypre_CSRMatrix *A )
    return sqrt(sum);
 }
 
+/* type == 0, sum,
+ *         1, abs sum
+ *         2, square sum
+ */
+void
+hypre_CSRMatrixComputeRowSumHost( hypre_CSRMatrix *A,
+                                  HYPRE_Int       *CF_i,
+                                  HYPRE_Int       *CF_j,
+                                  HYPRE_Complex   *row_sum,
+                                  HYPRE_Int        type,
+                                  HYPRE_Complex    scal,
+                                  const char      *set_or_add)
+{
+   HYPRE_Int      nrows  = hypre_CSRMatrixNumRows(A);
+   HYPRE_Complex *A_data = hypre_CSRMatrixData(A);
+   HYPRE_Int     *A_i    = hypre_CSRMatrixI(A);
+   HYPRE_Int     *A_j    = hypre_CSRMatrixJ(A);
+
+   HYPRE_Int i, j;
+
+   for (i = 0; i < nrows; i++)
+   {
+      HYPRE_Complex row_sum_i = 0.0;
+
+      for (j = A_i[i]; j < A_i[i+1]; j++)
+      {
+         if (CF_i && CF_j && CF_i[i] != CF_j[A_j[j]])
+         {
+            continue;
+         }
+
+         if (type == 0)
+         {
+            row_sum_i += A_data[j];
+         }
+         else if (type == 1)
+         {
+            row_sum_i += fabs(A_data[j]);
+         }
+         else if (type == 2)
+         {
+            row_sum_i += A_data[j] * A_data[j];
+         }
+      }
+
+      if (set_or_add[0] == 's')
+      {
+         row_sum[i] = scal * row_sum_i;
+      }
+      else
+      {
+         row_sum[i] += scal * row_sum_i;
+      }
+   }
+}
+
+void
+hypre_CSRMatrixComputeRowSum( hypre_CSRMatrix *A,
+                              HYPRE_Int       *CF_i,
+                              HYPRE_Int       *CF_j,
+                              HYPRE_Complex   *row_sum,
+                              HYPRE_Int        type,
+                              HYPRE_Complex    scal,
+                              const char      *set_or_add)
+{
+   hypre_assert( (CF_i && CF_j) || (!CF_i && !CF_j) );
+
+   HYPRE_Int exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(A) );
+
+   hypre_assert(exec != HYPRE_EXEC_UNSET);
+
+   if (exec == HYPRE_EXEC_HOST)
+   {
+      hypre_CSRMatrixComputeRowSumHost(A, CF_i, CF_j, row_sum, type, scal, set_or_add);
+   }
+#if defined(HYPRE_USING_CUDA)
+   else
+   {
+      hypre_CSRMatrixComputeRowSumDevice(A, CF_i, CF_j, row_sum, type, scal, set_or_add);
+   }
+#endif
+}
+
+void
+hypre_CSRMatrixExtractDiagonalHost( hypre_CSRMatrix *A,
+                                    HYPRE_Complex   *d,
+                                    HYPRE_Int        type)
+{
+   HYPRE_Int      nrows  = hypre_CSRMatrixNumRows(A);
+   HYPRE_Complex *A_data = hypre_CSRMatrixData(A);
+   HYPRE_Int     *A_i    = hypre_CSRMatrixI(A);
+   HYPRE_Int     *A_j    = hypre_CSRMatrixJ(A);
+   HYPRE_Int      i, j;
+   HYPRE_Complex  d_i;
+
+   for (i = 0; i < nrows; i++)
+   {
+      d_i = 0.0;
+      for (j = A_i[i]; j < A_i[i+1]; j++)
+      {
+         if (A_j[j] == i)
+         {
+            if (type == 0)
+            {
+               d_i = A_data[j];
+            }
+            else if (type == 1)
+            {
+               d_i = fabs(A_data[j]);
+            }
+            break;
+         }
+      }
+      d[i] = d_i;
+   }
+}
+
+/* type 0: diag
+ *      1: abs diag
+ */
+void
+hypre_CSRMatrixExtractDiagonal( hypre_CSRMatrix *A,
+                                HYPRE_Complex   *d,
+                                HYPRE_Int        type)
+{
+   HYPRE_Int exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(A) );
+
+   hypre_assert(exec != HYPRE_EXEC_UNSET);
+
+   if (exec == HYPRE_EXEC_HOST)
+   {
+      hypre_CSRMatrixExtractDiagonalHost(A, d, type);
+   }
+#if defined(HYPRE_USING_CUDA)
+   else
+   {
+      hypre_CSRMatrixExtractDiagonalDevice(A, d, type);
+   }
+#endif
+}
+

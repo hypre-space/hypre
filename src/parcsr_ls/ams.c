@@ -25,6 +25,26 @@
  * The default value of relax_type is 2.
  *--------------------------------------------------------------------------*/
 
+#if defined(HYPRE_USING_CUDA)
+struct l1_norm_op1 : public thrust::binary_function<HYPRE_Complex, HYPRE_Complex, HYPRE_Complex>
+{
+   __host__ __device__
+   HYPRE_Complex operator()(HYPRE_Complex &x, HYPRE_Complex &y) const
+   {
+      return x <= 4.0/3.0 * y ? y : x;
+   }
+};
+
+struct l1_norm_op2 : public thrust::unary_function<HYPRE_Complex, HYPRE_Complex>
+{
+   __host__ __device__
+   HYPRE_Complex operator()(const HYPRE_Complex &/*x*/) const
+   {
+      return 1.0;
+   }
+};
+#endif
+
 HYPRE_Int hypre_ParCSRRelax(/* matrix to relax with */
                             hypre_ParCSRMatrix *A,
                             /* right-hand side */
@@ -63,7 +83,7 @@ HYPRE_Int hypre_ParCSRRelax(/* matrix to relax with */
       {
          HYPRE_Int num_rows = hypre_ParCSRMatrixNumRows(A);
 #ifdef HYPRE_USING_UNIFIED_MEMORY
-         if (sweep == 0)
+         if (hypre_handle->no_cuda_um == 0 && sweep == 0)
          {
             /* prefetch l1 norms */
             hypre_TMemcpy(l1_norms, l1_norms, HYPRE_Real, num_rows,
@@ -556,30 +576,58 @@ HYPRE_Int hypre_ParCSRMatrixFixZeroRows(hypre_ParCSRMatrix *A)
  * cf_marker is not NULL.
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix *A,
-                                     HYPRE_Int option,
-                                     HYPRE_Int *cf_marker,
-                                     HYPRE_Real **l1_norm_ptr)
+HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
+                                     HYPRE_Int            option,
+                                     HYPRE_Int           *cf_marker,
+                                     HYPRE_Real         **l1_norm_ptr)
 {
    HYPRE_Int i, j;
    HYPRE_Int num_rows = hypre_ParCSRMatrixNumRows(A);
 
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
+
+   /*
    HYPRE_Int *A_diag_I = hypre_CSRMatrixI(A_diag);
    HYPRE_Int *A_diag_J = hypre_CSRMatrixJ(A_diag);
    HYPRE_Real *A_diag_data = hypre_CSRMatrixData(A_diag);
-
+   */
    hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
+   /*
    HYPRE_Int *A_offd_I = hypre_CSRMatrixI(A_offd);
    HYPRE_Int *A_offd_J = hypre_CSRMatrixJ(A_offd);
    HYPRE_Real *A_offd_data = hypre_CSRMatrixData(A_offd);
+   */
    HYPRE_Int num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
 
-   HYPRE_Real diag;
-   HYPRE_Real *l1_norm = hypre_TAlloc(HYPRE_Real,  num_rows, HYPRE_MEMORY_SHARED);
+   HYPRE_Int exec = hypre_GetExecPolicy1( HYPRE_MEMORY_SHARED );
+
+   hypre_assert(exec != HYPRE_EXEC_UNSET);
+
+   HYPRE_Int memory_location_l1 = HYPRE_MEMORY_SHARED;
+   HYPRE_Int memory_location_td;
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+   if (hypre_handle->no_cuda_um == 1)
+   {
+      memory_location_l1 = HYPRE_MEMORY_DEVICE;
+   }
+#endif
+
+   if (exec == HYPRE_EXEC_HOST)
+   {
+      memory_location_td = HYPRE_MEMORY_HOST;
+   }
+   else
+   {
+      memory_location_td = HYPRE_MEMORY_DEVICE;
+   }
+
+   /* HYPRE_Real diag; */
+   HYPRE_Real *l1_norm = hypre_TAlloc(HYPRE_Real, num_rows, memory_location_l1);
+   HYPRE_Real *diag_tmp = NULL;
 
    HYPRE_Int *cf_marker_offd = NULL;
-   HYPRE_Int cf_diag;
+   /* HYPRE_Int cf_diag; */
 
    /* collect the cf marker data from other procs */
    if (cf_marker != NULL)
@@ -593,11 +641,15 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix *A,
       hypre_ParCSRCommHandle *comm_handle;
 
       if (num_cols_offd)
-         cf_marker_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_offd, HYPRE_MEMORY_HOST);
+      {
+         cf_marker_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd, HYPRE_MEMORY_HOST);
+      }
       num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
       if (hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends))
-         int_buf_data = hypre_CTAlloc(HYPRE_Int,
-              hypre_ParCSRCommPkgSendMapStart(comm_pkg,  num_sends), HYPRE_MEMORY_HOST);
+      {
+         int_buf_data = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                                      HYPRE_MEMORY_HOST);
+      }
       index = 0;
       for (i = 0; i < num_sends; i++)
       {
@@ -615,138 +667,144 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix *A,
 
    if (option == 1)
    {
-      for (i = 0; i < num_rows; i++)
+      /* Set the l1 norm of the diag part */
+      hypre_CSRMatrixComputeRowSum(A_diag, cf_marker, cf_marker, l1_norm, 1, 1.0, "set");
+
+      /* Add the l1 norm of the offd part */
+      if (num_cols_offd)
       {
-         l1_norm[i] = 0.0;
-         if (cf_marker == NULL)
-         {
-            /* Add the l1 norm of the diag part of the ith row */
-            for (j = A_diag_I[i]; j < A_diag_I[i+1]; j++)
-               l1_norm[i] += fabs(A_diag_data[j]);
-            /* Add the l1 norm of the offd part of the ith row */
-            if (num_cols_offd)
-            {
-               for (j = A_offd_I[i]; j < A_offd_I[i+1]; j++)
-                  l1_norm[i] += fabs(A_offd_data[j]);
-            }
-         }
-         else
-         {
-            cf_diag = cf_marker[i];
-            /* Add the CF l1 norm of the diag part of the ith row */
-            for (j = A_diag_I[i]; j < A_diag_I[i+1]; j++)
-               if (cf_diag == cf_marker[A_diag_J[j]])
-                  l1_norm[i] += fabs(A_diag_data[j]);
-            /* Add the CF l1 norm of the offd part of the ith row */
-            if (num_cols_offd)
-            {
-               for (j = A_offd_I[i]; j < A_offd_I[i+1]; j++)
-                  if (cf_diag == cf_marker_offd[A_offd_J[j]])
-                     l1_norm[i] += fabs(A_offd_data[j]);
-            }
-         }
+         hypre_CSRMatrixComputeRowSum(A_offd, cf_marker, cf_marker_offd, l1_norm, 1, 1.0, "add");
       }
    }
    else if (option == 2)
    {
-      for (i = 0; i < num_rows; i++)
+      /* Set the abs(diag) element */
+      hypre_CSRMatrixExtractDiagonal(A_diag, l1_norm, 1);
+      /* Add the l1 norm of the offd part */
+      if (num_cols_offd)
       {
-         /* Add the diag element of the ith row */
-         l1_norm[i] = fabs(A_diag_data[A_diag_I[i]]);
-         if (cf_marker == NULL)
-         {
-            /* Add the l1 norm of the offd part of the ith row */
-            if (num_cols_offd)
-            {
-               for (j = A_offd_I[i]; j < A_offd_I[i+1]; j++)
-                  l1_norm[i] += fabs(A_offd_data[j]);
-            }
-         }
-         else
-         {
-            cf_diag = cf_marker[i];
-            /* Add the CF l1 norm of the offd part of the ith row */
-            if (num_cols_offd)
-            {
-               for (j = A_offd_I[i]; j < A_offd_I[i+1]; j++)
-                  if (cf_diag == cf_marker_offd[A_offd_J[j]])
-                     l1_norm[i] += fabs(A_offd_data[j]);
-            }
-         }
+         hypre_CSRMatrixComputeRowSum(A_offd, cf_marker, cf_marker_offd, l1_norm, 1, 1.0, "add");
       }
    }
    else if (option == 3)
    {
-      for (i = 0; i < num_rows; i++)
+      /* Set the CF l2 norm of the diag part */
+      hypre_CSRMatrixComputeRowSum(A_diag, NULL, NULL, l1_norm, 2, 1.0, "set");
+      /* Add the CF l2 norm of the offd part */
+      if (num_cols_offd)
       {
-         l1_norm[i] = 0.0;
-         for (j = A_diag_I[i]; j < A_diag_I[i+1]; j++)
-            l1_norm[i] += A_diag_data[j] * A_diag_data[j];
-         if (num_cols_offd)
-            for (j = A_offd_I[i]; j < A_offd_I[i+1]; j++)
-               l1_norm[i] += A_offd_data[j] * A_offd_data[j];
+         hypre_CSRMatrixComputeRowSum(A_offd, NULL, NULL, l1_norm, 2, 1.0, "add");
       }
    }
    else if (option == 4)
    {
-      for (i = 0; i < num_rows; i++)
-      {
-         /* Add the diag element of the ith row */
-         diag = l1_norm[i] = fabs(A_diag_data[A_diag_I[i]]);
-         if (cf_marker == NULL)
-         {
-            /* Add the scaled l1 norm of the offd part of the ith row */
-            if (num_cols_offd)
-            {
-               for (j = A_offd_I[i]; j < A_offd_I[i+1]; j++)
-                  l1_norm[i] += 0.5*fabs(A_offd_data[j]);
-            }
-         }
-         else
-         {
-            cf_diag = cf_marker[i];
-            /* Add the scaled CF l1 norm of the offd part of the ith row */
-            if (num_cols_offd)
-            {
-               for (j = A_offd_I[i]; j < A_offd_I[i+1]; j++)
-                  if (cf_diag == cf_marker_offd[A_offd_J[j]])
-                     l1_norm[i] += 0.5*fabs(A_offd_data[j]);
-            }
-         }
+      /* Set the abs(diag) element */
+      hypre_CSRMatrixExtractDiagonal(A_diag, l1_norm, 1);
 
-         /* Truncate according to Remark 6.2 */
-         if (l1_norm[i] <= 4.0/3.0*diag)
-            l1_norm[i] = diag;
+      diag_tmp = hypre_TAlloc(HYPRE_Complex, num_rows, memory_location_td);
+      hypre_TMemcpy(diag_tmp, l1_norm, HYPRE_Complex, num_rows, memory_location_td, memory_location_l1);
+
+      /* Add the scaled l1 norm of the offd part */
+      if (num_cols_offd)
+      {
+         hypre_CSRMatrixComputeRowSum(A_offd, cf_marker, cf_marker_offd, l1_norm, 1, 0.5, "add");
+      }
+
+      /* Truncate according to Remark 6.2 */
+      if (exec == HYPRE_EXEC_DEVICE)
+      {
+#if defined(HYPRE_USING_CUDA)
+         HYPRE_THRUST_CALL( transform, l1_norm, l1_norm + num_rows, diag_tmp, l1_norm, l1_norm_op1() );
+#endif
+      }
+      else
+      {
+         for (i = 0; i < num_rows; i++)
+         {
+            if (l1_norm[i] <= 4.0/3.0 * diag_tmp[i])
+            {
+               l1_norm[i] = diag_tmp[i];
+            }
+         }
       }
    }
    else if (option == 5) /*stores diagonal of A for Jacobi using matvec, rlx 7 */
    {
-      for (i = 0; i < num_rows; i++)
+      /* Set the diag element */
+      hypre_CSRMatrixExtractDiagonal(A_diag, l1_norm, 0);
+
+      if ( exec == HYPRE_EXEC_DEVICE)
       {
-         diag = A_diag_data[A_diag_I[i]];
-         if (diag != 0.0) l1_norm[i] = diag;
-         else l1_norm[i] = 1.0;
+#if defined(HYPRE_USING_CUDA)
+         thrust::identity<HYPRE_Complex> identity;
+         HYPRE_THRUST_CALL( transform_if, l1_norm, l1_norm + num_rows, l1_norm, l1_norm_op2(),
+                            thrust::not1(identity) );
+#endif
       }
+      else
+      {
+         for (i = 0; i < num_rows; i++)
+         {
+            if (l1_norm[i] == 0.0)
+            {
+               l1_norm[i] = 1.0;
+            }
+         }
+      }
+
       *l1_norm_ptr = l1_norm;
 
       return hypre_error_flag;
    }
 
    /* Handle negative definite matrices */
-   for (i = 0; i < num_rows; i++)
-      if (A_diag_data[A_diag_I[i]] < 0)
-         l1_norm[i] = -l1_norm[i];
+   if (!diag_tmp)
+   {
+      diag_tmp = hypre_TAlloc(HYPRE_Complex, num_rows, memory_location_td);
+   }
 
-   for (i = 0; i < num_rows; i++)
-      /* if (fabs(l1_norm[i]) < DBL_EPSILON) */
-      if (fabs(l1_norm[i]) == 0.0)
+   /* Set the diag element */
+   hypre_CSRMatrixExtractDiagonal(A_diag, diag_tmp, 0);
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+#if defined(HYPRE_USING_CUDA)
+      thrust::negate<HYPRE_Complex> negate;
+      thrust::identity<HYPRE_Complex> identity;
+      HYPRE_THRUST_CALL( transform_if, l1_norm, l1_norm + num_rows, diag_tmp, l1_norm, negate,
+                         is_negative<HYPRE_Complex>() );
+
+      bool any_zero = HYPRE_THRUST_CALL( any_of, l1_norm, l1_norm + num_rows, thrust::not1(identity) );
+      if ( any_zero )
       {
          hypre_error_in_arg(1);
-         break;
       }
+#endif
+   }
+   else
+   {
+      for (i = 0; i < num_rows; i++)
+      {
+         if (diag_tmp[i] < 0.0)
+         {
+            l1_norm[i] = -l1_norm[i];
+         }
+      }
+
+      for (i = 0; i < num_rows; i++)
+      {
+         /* if (fabs(l1_norm[i]) < DBL_EPSILON) */
+         if (fabs(l1_norm[i]) == 0.0)
+         {
+            hypre_error_in_arg(1);
+            break;
+         }
+      }
+   }
 
    //for (i = 0; i < num_rows; i++) l1_norm[i]=1.0/l1_norm[i];
    hypre_TFree(cf_marker_offd, HYPRE_MEMORY_HOST);
+   hypre_TFree(diag_tmp, memory_location_td);
 
    *l1_norm_ptr = l1_norm;
 

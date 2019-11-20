@@ -660,7 +660,7 @@ hypre_GetActualMemLocation(HYPRE_Int location)
 #define hypre_TAlloc(type, count, location) \
 (\
 {\
- if (location == HYPRE_MEMORY_DEVICE) printf("[%s:%d] TALLOC %.3f MB\n", __FILE__,__LINE__, (size_t)(sizeof(type) * (count))/1024.0/1024.0); \
+ if (location == HYPRE_MEMORY_SHARED) printf("[%s:%d] TALLOC %.3f MB\n", __FILE__,__LINE__, (size_t)(sizeof(type) * (count))/1024.0/1024.0); \
  (type *) hypre_MAlloc((size_t)(sizeof(type) * (count)), location); \
 }\
 )
@@ -668,7 +668,7 @@ hypre_GetActualMemLocation(HYPRE_Int location)
 #define hypre_CTAlloc(type, count, location) \
 (\
 {\
- if (location == HYPRE_MEMORY_DEVICE) printf("[%s:%d] CTALLOC %.3f MB\n", __FILE__,__LINE__, (size_t)(sizeof(type) * (count))/1024.0/1024.0); \
+ if (location == HYPRE_MEMORY_SHARED) printf("[%s:%d] CTALLOC %.3f MB\n", __FILE__,__LINE__, (size_t)(sizeof(type) * (count))/1024.0/1024.0); \
  (type *) hypre_CAlloc((size_t)(count), (size_t)sizeof(type), location); \
 }\
 )
@@ -676,7 +676,7 @@ hypre_GetActualMemLocation(HYPRE_Int location)
 #define hypre_TReAlloc(ptr, type, count, location) \
 (\
 {\
- if (location == HYPRE_MEMORY_DEVICE) printf("[%s:%d] TReALLOC %p, %.3f MB\n", __FILE__,__LINE__, ptr, (size_t)(sizeof(type) * (count))/1024.0/1024.0); \
+ if (location == HYPRE_MEMORY_SHARED) printf("[%s:%d] TReALLOC %p, %.3f MB\n", __FILE__,__LINE__, ptr, (size_t)(sizeof(type) * (count))/1024.0/1024.0); \
  (type *)hypre_ReAlloc((char *)ptr, (size_t)(sizeof(type) * (count)), location); \
 }\
 )
@@ -684,7 +684,7 @@ hypre_GetActualMemLocation(HYPRE_Int location)
 #define hypre_TMemcpy(dst, src, type, count, locdst, locsrc) \
 ( \
 { \
-  printf("[%s:%d] TMemcpy %d to %d %.3f MB\n", __FILE__,__LINE__, locsrc, locdst, (size_t)(sizeof(type) * (count))/1024.0/1024.0); \
+  /* printf("[%s:%d] TMemcpy %d to %d %.3f MB\n", __FILE__,__LINE__, locsrc, locdst, (size_t)(sizeof(type) * (count))/1024.0/1024.0);*/ \
   hypre_Memcpy((void *)(dst), (void *)(src), (size_t)(sizeof(type) * (count)), locdst, locsrc); \
 } \
 )
@@ -1180,6 +1180,7 @@ extern "C++" {
 #include <thrust/fill.h>
 #include <thrust/adjacent_difference.h>
 #include <thrust/inner_product.h>
+#include <thrust/logical.h>
 using namespace thrust::placeholders;
 #endif // #if defined(HYPRE_USING_CUDA)
 
@@ -1221,7 +1222,7 @@ using namespace thrust::placeholders;
    if (CUBLAS_STATUS_SUCCESS != err) {                                                       \
       hypre_printf("CUBLAS ERROR (code = %d, %d) at %s:%d\n",                                \
             err, err == CUBLAS_STATUS_EXECUTION_FAILED, __FILE__, __LINE__);                 \
-      exit(1);                                                                               \
+      assert(0); exit(1);                                                                    \
    } } while(0)
 
 #define HYPRE_CUSPARSE_CALL(call) do {                                                       \
@@ -1229,24 +1230,24 @@ using namespace thrust::placeholders;
    if (CUSPARSE_STATUS_SUCCESS != err) {                                                     \
       hypre_printf("CUSPARSE ERROR (code = %d, %d) at %s:%d\n",                              \
             err, err == CUSPARSE_STATUS_EXECUTION_FAILED, __FILE__, __LINE__);               \
-      exit(1);                                                                               \
+      assert(0); exit(1);                                                                    \
    } } while(0)
 
 
 #define HYPRE_CURAND_CALL(call) do {                                                         \
    curandStatus_t err = call;                                                                \
    if (CURAND_STATUS_SUCCESS != err) {                                                       \
-      hypre_printf("CURAND ERROR (code = %d) at %s:%d\n",   \
-                   err, __FILE__, __LINE__);                \
-      exit(1);                                                                               \
+      hypre_printf("CURAND ERROR (code = %d) at %s:%d\n", err, __FILE__, __LINE__);          \
+      assert(0); exit(1);                                                                    \
    } } while(0)
 
 
-#define HYPRE_CUDA_CALL(call) do {                                                                             \
-   cudaError_t err = call;                                                                                     \
-   if (cudaSuccess != err) {                                                                                   \
-      hypre_printf("CUDA ERROR (code = %d, %s) at %s:%d\n", err, cudaGetErrorString(err), __FILE__, __LINE__); \
-      exit(1);                                                                                                 \
+#define HYPRE_CUDA_CALL(call) do {                                                           \
+   cudaError_t err = call;                                                                   \
+   if (cudaSuccess != err) {                                                                 \
+      hypre_printf("CUDA ERROR (code = %d, %s) at %s:%d\n", err, cudaGetErrorString(err),    \
+                   __FILE__, __LINE__);                                                      \
+      assert(0); exit(1);                                                                    \
    } } while(0)
 
 #if defined(HYPRE_USING_CUDA)
@@ -1615,25 +1616,28 @@ struct TupleComp2
 
 #endif // #if defined(HYPRE_USING_CUDA)
 
-#ifdef __cplusplus
-}
-#endif
 
+template<typename T>
 struct is_negative
 {
-   __host__ __device__ bool operator()(const HYPRE_Int &x)
+   __host__ __device__ bool operator()(const T &x)
    {
       return (x < 0);
    }
 };
 
+template<typename T>
 struct is_nonnegative
 {
-   __host__ __device__ bool operator()(const HYPRE_Int &x)
+   __host__ __device__ bool operator()(const T &x)
    {
       return (x >= 0);
    }
 };
+
+#ifdef __cplusplus
+}
+#endif
 
 struct in_range
 {
@@ -1733,6 +1737,8 @@ typedef struct
    HYPRE_Int spgemm_rownnz_estimate_nsamples;
    float     spgemm_rownnz_estimate_mult_factor;
    char      spgemm_hash_type;
+   /* RL: temporary TODO */
+   HYPRE_Int no_cuda_um;
 #endif
 } hypre_Handle;
 
@@ -1945,49 +1951,6 @@ hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle_)
 
 #endif
 
-/******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
- * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
- *
- * SPDX-License-Identifier: (Apache-2.0 OR MIT)
- ******************************************************************************/
-
-#ifndef HYPRE_NVTX_H
-#define HYPRE_NVTX_H
-
-#ifdef HYPRE_USING_NVTX
-
-#include "nvToolsExt.h"
-#include "nvToolsExtCudaRt.h"
-
-static const uint32_t colors[] = { 0x0000ff00, 0x000000ff, 0x00ffff00, 0x00ff00ff, 0x0000ffff, 0x00ff0000, 0x00ffffff };
-static const hypre_int num_colors = sizeof(colors)/sizeof(uint32_t);
-
-//nvtxRangePushA(name);
-
-#define PUSH_RANGE(name,cid) { \
-    hypre_int color_id = cid; \
-    color_id = color_id%num_colors;\
-    nvtxEventAttributes_t eventAttrib = {0}; \
-    eventAttrib.version = NVTX_VERSION; \
-    eventAttrib.size = NVTX_EVENT_ATTRIB_STRUCT_SIZE; \
-    eventAttrib.colorType = NVTX_COLOR_ARGB; \
-    eventAttrib.color = colors[color_id]; \
-    eventAttrib.messageType = NVTX_MESSAGE_TYPE_ASCII; \
-    eventAttrib.message.ascii = name; \
-    nvtxRangePushEx(&eventAttrib); \
-}
-
-#define POP_RANGE nvtxRangePop();
-
-#else /* HYPRE_USING_NVTX */
-
-#define PUSH_RANGE(name,cid)
-#define POP_RANGE
-
-#endif /* HYPRE_USING_NVTX */
-
-#endif /* HYPRE_NVTX_H */
 /******************************************************************************
  * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
@@ -2309,6 +2272,7 @@ HYPRE_Int hypre_SyncCudaDefaultStream(hypre_Handle *hypre_handle);
 void hypre_SetExecPolicy( HYPRE_Int policy );
 HYPRE_Int hypre_GetExecPolicy1(HYPRE_Int location);
 HYPRE_Int hypre_GetExecPolicy2(HYPRE_Int location1, HYPRE_Int location2);
+void HYPRE_SetNoCUDAUM(HYPRE_Int no_cuda_um);
 
 /* hypre_qsort.c */
 void hypre_swap ( HYPRE_Int *v , HYPRE_Int i , HYPRE_Int j );
@@ -2579,6 +2543,10 @@ void hypre_CudaCompileFlagCheck();
 
 #endif
 
+/* hypre_nvtx.c */
+void hypre_NvtxPushRangeColor(const char *name, HYPRE_Int cid);
+void hypre_NvtxPushRange(const char *name);
+void hypre_NvtxPopRange();
 
 #ifdef __cplusplus
 }

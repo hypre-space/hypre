@@ -13,6 +13,8 @@
  *
  *****************************************************************************/
 
+#if 0
+
 #ifndef hypre_CSR_MATRIX_HEADER
 #define hypre_CSR_MATRIX_HEADER
 
@@ -87,6 +89,8 @@ typedef struct
 #define hypre_CSRBooleanMatrix_Get_NCols(matrix)    ((matrix)->num_cols)
 #define hypre_CSRBooleanMatrix_Get_NNZ(matrix)      ((matrix)->num_nonzeros)
 #define hypre_CSRBooleanMatrix_Get_OwnsData(matrix) ((matrix)->owns_data)
+
+#endif
 
 #endif
 

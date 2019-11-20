@@ -316,3 +316,13 @@ HYPRE_Finalize()
    return hypre_error_flag;
 }
 
+
+void HYPRE_SetNoCUDAUM(HYPRE_Int no_cuda_um)
+{
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+   if (hypre_handle)
+   {
+      hypre_handle->no_cuda_um = no_cuda_um;
+   }
+#endif
+}

@@ -5,6 +5,8 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+#if 0
+
 #ifndef hypre_ParAMG_DATA_HEADER
 #define hypre_ParAMG_DATA_HEADER
 
@@ -463,5 +465,4 @@ typedef struct
 
 #endif
 
-
-
+#endif

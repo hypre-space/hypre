@@ -291,6 +291,30 @@ hypre_CSRMatrixSetRownnz( hypre_CSRMatrix *matrix )
    return ierr;
 }
 
+/* check if numnonzeros was properly set to be ia[nrow] */
+HYPRE_Int
+hypre_CSRMatrixCheckSetNumNonzeros( hypre_CSRMatrix *matrix )
+{
+   if (!matrix)
+   {
+      return 0;
+   }
+
+   HYPRE_Int nnz, ierr = 0;
+
+   hypre_TMemcpy(&nnz, hypre_CSRMatrixI(matrix) + hypre_CSRMatrixNumRows(matrix),
+                 HYPRE_Int, 1, HYPRE_MEMORY_HOST, hypre_CSRMatrixMemoryLocation(matrix));
+
+   if (hypre_CSRMatrixNumNonzeros(matrix) != nnz)
+   {
+      ierr = 1;
+      hypre_printf("warning: CSR matrix nnz was not set properly (!= ia[nrow])\n");
+      hypre_CSRMatrixNumNonzeros(matrix) = nnz;
+   }
+
+   return ierr;
+}
+
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixRead
  *--------------------------------------------------------------------------*/

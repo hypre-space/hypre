@@ -2683,6 +2683,7 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
 {
 #if defined(HYPRE_USING_CUDA)
    //hypre_SetExecPolicy(HYPRE_EXEC_DEVICE);
+   hypre_NvtxPushRange("PMIS");
 #endif
 
    HYPRE_Int exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(A)) );
@@ -2706,6 +2707,7 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
 
 #if defined(HYPRE_USING_CUDA)
    //hypre_SetExecPolicy(HYPRE_EXEC_HOST);
+   hypre_NvtxPopRange();
 #endif
 
    return ierr;
