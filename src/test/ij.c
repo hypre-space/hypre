@@ -3124,9 +3124,14 @@ main( hypre_int argc,
 
       //cudaProfilerStart();
 
+#if defined(HYPRE_USING_NVTX)
       hypre_NvtxPushRange("AMG-Setup-1");
+#endif
       HYPRE_BoomerAMGSetup(amg_solver, parcsr_A, b, x);
+
+#if defined(HYPRE_USING_NVTX)
       hypre_NvtxPopRange();
+#endif
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
       cudaDeviceSynchronize();
@@ -3140,9 +3145,14 @@ main( hypre_int argc,
       time_index = hypre_InitializeTiming("BoomerAMG Solve");
       hypre_BeginTiming(time_index);
 
+#if defined(HYPRE_USING_NVTX)
       hypre_NvtxPushRange("AMG-Solve-1");
+#endif
       HYPRE_BoomerAMGSolve(amg_solver, parcsr_A, b, x);
+
+#if defined(HYPRE_USING_NVTX)
       hypre_NvtxPopRange();
+#endif
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
       cudaDeviceSynchronize();
@@ -3167,12 +3177,26 @@ main( hypre_int argc,
 #if SECOND_TIME
       /* run a second time to check for memory leaks */
       HYPRE_ParVectorSetRandomValues(x, 775);
+
+#if defined(HYPRE_USING_NVTX)
       hypre_NvtxPushRange("AMG-Setup-2");
+#endif
+
       HYPRE_BoomerAMGSetup(amg_solver, parcsr_A, b, x);
+
+#if defined(HYPRE_USING_NVTX)
       hypre_NvtxPopRange();
+#endif
+
+#if defined(HYPRE_USING_NVTX)
       hypre_NvtxPushRange("AMG-Solve-2");
+#endif
+
       HYPRE_BoomerAMGSolve(amg_solver, parcsr_A, b, x);
+
+#if defined(HYPRE_USING_NVTX)
       hypre_NvtxPopRange();
+#endif
 #endif
 
       //cudaProfilerStop();
