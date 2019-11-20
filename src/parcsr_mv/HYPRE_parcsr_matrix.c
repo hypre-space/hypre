@@ -204,7 +204,7 @@ HYPRE_ParCSRMatrixGetGlobalRowPartitioning( HYPRE_ParCSRMatrix   matrix,
 
    if (my_id == 0 || all_procs)
    {
-      row_partitioning[num_procs] = hypre_ParCSRMatrixNumRows((hypre_ParCSRMatrix *) matrix);
+      row_partitioning[num_procs] = hypre_ParCSRMatrixGlobalNumRows((hypre_ParCSRMatrix *) matrix);
    }
 #else
    if (all_procs)

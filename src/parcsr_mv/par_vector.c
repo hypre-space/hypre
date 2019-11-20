@@ -596,7 +596,7 @@ hypre_VectorToParVector ( MPI_Comm      comm,
    {
       global_vec_starts = hypre_CTAlloc(HYPRE_BigInt, num_procs+1, HYPRE_MEMORY_HOST);
    }
-   hypre_MPI_Gather(&first_index, 1, HYPRE_MPI_BIG_INT, &global_vec_starts,
+   hypre_MPI_Gather(&first_index, 1, HYPRE_MPI_BIG_INT, global_vec_starts,
                      1, HYPRE_MPI_BIG_INT, 0, comm);
    if (my_id == 0)
    {
