@@ -542,7 +542,7 @@ hypre_ParVectorMassDotpTwo ( hypre_ParVector *x, hypre_ParVector *y,
  * generates a ParVector from a Vector on proc 0 and distributes the pieces
  * to the other procs in comm
  *
- * this is not being optimized to use HYPRE_NO_GLOBAL_PARTITION
+ * the length of vec_starts depends on HYPRE_NO_GLOBAL_PARTITION
  *--------------------------------------------------------------------------*/
 
 hypre_ParVector *
@@ -551,6 +551,9 @@ hypre_VectorToParVector ( MPI_Comm      comm,
                           HYPRE_BigInt *vec_starts )
 {
    HYPRE_BigInt        global_size;
+   HYPRE_BigInt       *global_vec_starts = NULL;
+   HYPRE_BigInt        first_index;
+   HYPRE_BigInt        last_index;
    HYPRE_Int           local_size;
    HYPRE_Int           num_vectors;
    HYPRE_Int           num_procs, my_id;
@@ -563,8 +566,8 @@ hypre_VectorToParVector ( MPI_Comm      comm,
    hypre_MPI_Status   *status, status0;
    HYPRE_Int           i, j, k, p;
 
-   hypre_MPI_Comm_size(comm,&num_procs);
-   hypre_MPI_Comm_rank(comm,&my_id);
+   hypre_MPI_Comm_size(comm, &num_procs);
+   hypre_MPI_Comm_rank(comm, &my_id);
 
    if (my_id == 0)
    {
@@ -578,14 +581,30 @@ hypre_VectorToParVector ( MPI_Comm      comm,
    hypre_MPI_Bcast(&num_vectors,1,HYPRE_MPI_INT,0,comm);
    hypre_MPI_Bcast(&global_vecstride,1,HYPRE_MPI_INT,0,comm);
 
-   if ( num_vectors==1 )
+   if ( num_vectors == 1 )
       par_vector = hypre_ParVectorCreate(comm, global_size, vec_starts);
    else
       par_vector = hypre_ParMultiVectorCreate(comm, global_size, vec_starts, num_vectors);
 
-   vec_starts = hypre_ParVectorPartitioning(par_vector);
+   vec_starts  = hypre_ParVectorPartitioning(par_vector);
+   first_index = hypre_ParVectorFirstIndex(par_vector);
+   last_index  = hypre_ParVectorLastIndex(par_vector);
+   local_size  = (HYPRE_Int)(last_index - first_index) + 1;
 
-   local_size = (HYPRE_Int)(vec_starts[my_id+1] - vec_starts[my_id]);
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   if (my_id == 0)
+   {
+      global_vec_starts = hypre_CTAlloc(HYPRE_BigInt, num_procs+1, HYPRE_MEMORY_HOST);
+   }
+   hypre_MPI_Gather(&first_index, 1, HYPRE_MPI_BIG_INT, &global_vec_starts,
+                     1, HYPRE_MPI_BIG_INT, 0, comm);
+   if (my_id == 0)
+   {
+      global_vec_starts[num_procs] = hypre_ParVectorGlobalSize(par_vector);
+   }
+#else
+   global_vec_starts = vec_starts;
+#endif
 
    hypre_ParVectorInitialize(par_vector);
    local_vector = hypre_ParVectorLocalVector(par_vector);
@@ -600,24 +619,26 @@ hypre_VectorToParVector ( MPI_Comm      comm,
       requests = hypre_CTAlloc(hypre_MPI_Request, num_vectors*(num_procs-1), HYPRE_MEMORY_HOST);
       status = hypre_CTAlloc(hypre_MPI_Status, num_vectors*(num_procs-1), HYPRE_MEMORY_HOST);
       k = 0;
-      for ( p=1; p<num_procs; p++)
-         for ( j=0; j<num_vectors; ++j )
+      for (p = 1; p<num_procs; p++)
+         for (j = 0; j<num_vectors; ++j)
          {
-            hypre_MPI_Isend( &v_data[(HYPRE_Int)vec_starts[p]]+j*global_vecstride,
-                             (HYPRE_Int)(vec_starts[p+1]-vec_starts[p]),
+            hypre_MPI_Isend( &v_data[(HYPRE_Int) global_vec_starts[p]] + j*global_vecstride,
+                             (HYPRE_Int)(global_vec_starts[p+1] - global_vec_starts[p]),
                              HYPRE_MPI_COMPLEX, p, 0, comm, &requests[k++] );
          }
-      if ( num_vectors==1 )
+      if (num_vectors == 1)
       {
-         for (i=0; i < local_size; i++)
+         for (i = 0; i < local_size; i++)
             local_data[i] = v_data[i];
       }
       else
-         for ( j=0; j<num_vectors; ++j )
+      {
+         for (j = 0; j<num_vectors; ++j)
          {
-            for (i=0; i < local_size; i++)
+            for (i = 0; i < local_size; i++)
                local_data[i+j*vecstride] = v_data[i+j*global_vecstride];
          }
+      }
       hypre_MPI_Waitall(num_procs-1,requests, status);
       hypre_TFree(requests, HYPRE_MEMORY_HOST);
       hypre_TFree(status, HYPRE_MEMORY_HOST);
@@ -627,6 +648,11 @@ hypre_VectorToParVector ( MPI_Comm      comm,
       for ( j=0; j<num_vectors; ++j )
          hypre_MPI_Recv( local_data+j*vecstride, local_size, HYPRE_MPI_COMPLEX,
                          0, 0, comm,&status0 );
+   }
+
+   if (global_vec_starts)
+   {
+      hypre_TFree(global_vec_starts, HYPRE_MEMORY_HOST);
    }
 
    return par_vector;
