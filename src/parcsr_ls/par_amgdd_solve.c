@@ -10,7 +10,7 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-#define TEST_RES_COMM 0
+#define TEST_RES_COMM 1
 #define DEBUGGING_MESSAGES 0
 
 #include "_hypre_parcsr_ls.h"
@@ -130,40 +130,34 @@ hypre_BoomerAMGDDSolve( void *amg_vdata,
          hypre_ParVectorCopy(hypre_ParAMGDataVtemp(amg_data), hypre_ParAMGDataFArray(amg_data)[amgdd_start_level]);
       }
 
-
-      // HYPRE_Int relax_type, i;
-      // for (i = 0; i < hypre_ParAMGDataAMGDDNumGlobalRelax(amg_data); i++)
-      //    for (relax_type = 13; relax_type < 15; relax_type++)
-      //       hypre_BoomerAMGRelax( hypre_ParAMGDataAArray(amg_data)[amgdd_start_level],
-      //                            hypre_ParAMGDataFArray(amg_data)[amgdd_start_level],
-      //                            hypre_ParAMGDataCFMarkerArray(amg_data)[amgdd_start_level],
-      //                            relax_type,
-      //                            0,
-      //                            hypre_ParAMGDataRelaxWeight(amg_data)[amgdd_start_level],
-      //                            hypre_ParAMGDataOmega(amg_data)[amgdd_start_level],
-      //                            hypre_ParAMGDataL1Norms(amg_data)[amgdd_start_level],
-      //                            hypre_ParAMGDataUArray(amg_data)[amgdd_start_level],
-      //                            hypre_ParAMGDataVtemp(amg_data),
-      //                            hypre_ParAMGDataZtemp(amg_data) );
-      // if (hypre_ParAMGDataAMGDDNumGlobalRelax(amg_data) < 0)
-      //    for (i = 0; i < -hypre_ParAMGDataAMGDDNumGlobalRelax(amg_data); i++)
-      //       for (relax_type = 13; relax_type < 15; relax_type++)
-      //          hypre_BoomerAMGRelax( hypre_ParAMGDataAArray(amg_data)[amgdd_start_level],
-      //                            hypre_ParAMGDataFArray(amg_data)[amgdd_start_level],
-      //                            boundary_marker,
-      //                            relax_type,
-      //                            1,
-      //                            hypre_ParAMGDataRelaxWeight(amg_data)[amgdd_start_level],
-      //                            hypre_ParAMGDataOmega(amg_data)[amgdd_start_level],
-      //                            hypre_ParAMGDataL1Norms(amg_data)[amgdd_start_level],
-      //                            hypre_ParAMGDataUArray(amg_data)[amgdd_start_level],
-      //                            hypre_ParAMGDataVtemp(amg_data),
-      //                            hypre_ParAMGDataZtemp(amg_data) );
-
-      if (hypre_ParAMGDataAMGDDNumGlobalRelax(amg_data))
-      {
-         hypre_BoomerAMGDDCorrect(amg_data, hypre_ParAMGDataAMGDDNumGlobalRelax(amg_data));
-      }
+      HYPRE_Int relax_type, i;
+      for (i = 0; i < hypre_ParAMGDataAMGDDNumGlobalRelax(amg_data); i++)
+         for (relax_type = 13; relax_type < 15; relax_type++)
+            hypre_BoomerAMGRelax( hypre_ParAMGDataAArray(amg_data)[amgdd_start_level],
+                                 hypre_ParAMGDataFArray(amg_data)[amgdd_start_level],
+                                 hypre_ParAMGDataCFMarkerArray(amg_data)[amgdd_start_level],
+                                 relax_type,
+                                 0,
+                                 hypre_ParAMGDataRelaxWeight(amg_data)[amgdd_start_level],
+                                 hypre_ParAMGDataOmega(amg_data)[amgdd_start_level],
+                                 hypre_ParAMGDataL1Norms(amg_data)[amgdd_start_level],
+                                 hypre_ParAMGDataUArray(amg_data)[amgdd_start_level],
+                                 hypre_ParAMGDataVtemp(amg_data),
+                                 hypre_ParAMGDataZtemp(amg_data) );
+      if (hypre_ParAMGDataAMGDDNumGlobalRelax(amg_data) < 0)
+         for (i = 0; i < -hypre_ParAMGDataAMGDDNumGlobalRelax(amg_data); i++)
+            for (relax_type = 13; relax_type < 15; relax_type++)
+               hypre_BoomerAMGRelax( hypre_ParAMGDataAArray(amg_data)[amgdd_start_level],
+                                 hypre_ParAMGDataFArray(amg_data)[amgdd_start_level],
+                                 boundary_marker,
+                                 relax_type,
+                                 1,
+                                 hypre_ParAMGDataRelaxWeight(amg_data)[amgdd_start_level],
+                                 hypre_ParAMGDataOmega(amg_data)[amgdd_start_level],
+                                 hypre_ParAMGDataL1Norms(amg_data)[amgdd_start_level],
+                                 hypre_ParAMGDataUArray(amg_data)[amgdd_start_level],
+                                 hypre_ParAMGDataVtemp(amg_data),
+                                 hypre_ParAMGDataZtemp(amg_data) );
 
       // Do normal AMG V-cycle upsweep back up to the fine grid
       if (amgdd_start_level > 0) 
@@ -322,129 +316,6 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata )
    #endif
 
 	return test_failed;
-}
-
-HYPRE_Int
-hypre_BoomerAMGDDCorrect(hypre_ParAMGData *amg_data, HYPRE_Int type)
-{
-   HYPRE_Int i,j;
-   HYPRE_Int amgdd_start_level = hypre_ParAMGDataAMGDDStartLevel(amg_data);
-   hypre_ParCompGrid *compGrid = hypre_ParAMGDataCompGrid(amg_data)[amgdd_start_level];
-
-   // Create parallel wrappers for local matrix
-   hypre_CSRMatrix *A_local = hypre_ParCSRMatrixDiag(hypre_ParAMGDataAArray(amg_data)[amgdd_start_level]);
-
-   HYPRE_BigInt *row_starts = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-   row_starts[0] = 0;
-   row_starts[1] = hypre_CSRMatrixNumRows(A_local);
-   hypre_ParCSRMatrix *Par_A_local = hypre_ParCSRMatrixCreate( MPI_COMM_SELF,
-                       hypre_CSRMatrixNumRows(A_local),
-                       hypre_CSRMatrixNumCols(A_local),
-                       row_starts,
-                       NULL,
-                       0,
-                       hypre_CSRMatrixNumNonzeros(A_local),
-                       0 );
-   hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(Par_A_local)) = hypre_CSRMatrixI(A_local);
-   hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(Par_A_local)) = hypre_CSRMatrixJ(A_local);
-   hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(Par_A_local)) = hypre_CSRMatrixData(A_local);
-   hypre_CSRMatrixInitialize(hypre_ParCSRMatrixOffd(Par_A_local));
-   hypre_ParCSRMatrixColMapOffd(Par_A_local) = hypre_CTAlloc(HYPRE_BigInt, 0, HYPRE_MEMORY_HOST);
-
-   // Setup the vectors
-   hypre_ParVector *Par_b_local = hypre_ParVectorCreate(MPI_COMM_SELF, hypre_CSRMatrixNumRows(A_local), row_starts);
-   hypre_ParVectorInitialize(Par_b_local);
-   hypre_ParVector *Par_x_local;
-   if (hypre_ParAMGDataAMGDDCorrectionVector(amg_data))
-   {
-      Par_x_local = hypre_ParAMGDataAMGDDCorrectionVector(amg_data);
-      hypre_ParVectorSetConstantValues(Par_x_local, 0.0);
-   }
-   else
-   {
-      HYPRE_BigInt *x_row_starts = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-      x_row_starts[0] = row_starts[0];
-      x_row_starts[1] = row_starts[1];
-      Par_x_local = hypre_ParVectorCreate(MPI_COMM_SELF, hypre_CSRMatrixNumRows(A_local), x_row_starts);
-      hypre_ParVectorInitialize(Par_x_local);
-   }
-
-   // Communicate to get u_recv (i.e. the values of u on the boundary from other procs)
-   hypre_CSRMatrix   *offd = hypre_ParCSRMatrixOffd(hypre_ParAMGDataAArray(amg_data)[amgdd_start_level]);
-   hypre_CSRMatrix   *diag = hypre_ParCSRMatrixDiag(hypre_ParAMGDataAArray(amg_data)[amgdd_start_level]);
-   hypre_Vector      *x_tmp = hypre_SeqVectorCreate( hypre_CSRMatrixNumCols(offd) );
-   hypre_SeqVectorInitialize(x_tmp);
-   HYPRE_Complex     *x_tmp_data = hypre_VectorData(x_tmp);
-   HYPRE_Complex     *x_local_data  = hypre_VectorData(hypre_ParVectorLocalVector( hypre_ParAMGDataUArray(amg_data)[amgdd_start_level] ));
-
-   hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRMatrixCommPkg(hypre_ParAMGDataAArray(amg_data)[amgdd_start_level]);
-   HYPRE_Int begin = hypre_ParCSRCommPkgSendMapStart(comm_pkg, 0);
-   HYPRE_Int end   = hypre_ParCSRCommPkgSendMapStart(comm_pkg, hypre_ParCSRCommPkgNumSends(comm_pkg));
-   HYPRE_Complex     *x_buf_data = hypre_CTAlloc(HYPRE_Complex,  hypre_ParCSRCommPkgSendMapStart(comm_pkg,  hypre_ParCSRCommPkgNumSends(comm_pkg)), HYPRE_MEMORY_SHARED);
-
-   #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
-   PackOnDevice(x_buf_data,x_local_data,hypre_ParCSRCommPkgSendMapElmts(comm_pkg),begin,end,HYPRE_STREAM(4));
-   #else
-   for (i = begin; i < end; i++)
-   {
-      x_buf_data[i - begin] = x_local_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,i)];
-   }
-   #endif
-
-   hypre_ParCSRCommHandle *comm_handle = hypre_ParCSRCommHandleCreate(1, 
-                                          hypre_ParCSRMatrixCommPkg(hypre_ParAMGDataAArray(amg_data)[amgdd_start_level]), 
-                                          x_buf_data, 
-                                          x_tmp_data );
-   hypre_ParCSRCommHandleDestroy(comm_handle);
-
-   if (type < 3)
-   {
-      if (type == 1)
-      {
-         // Try rhs = f - Au
-         hypre_SeqVectorCopy(hypre_ParVectorLocalVector(hypre_ParAMGDataFArray(amg_data)[amgdd_start_level]), hypre_ParVectorLocalVector(Par_b_local));
-         hypre_CSRMatrixMatvec( -1.0, diag, hypre_ParVectorLocalVector(hypre_ParAMGDataUArray(amg_data)[amgdd_start_level]), 1.0, hypre_ParVectorLocalVector(Par_b_local) );
-      }
-      else if (type == 2)
-      {
-         // What about rhs = f - Au at the edges, but otherwise 0
-         for (i = 0; i < hypre_CSRMatrixNumRows(offd); i++)
-         {
-            if (hypre_CSRMatrixI(offd)[i+1] - hypre_CSRMatrixI(offd)[i] > 0) 
-            {
-               hypre_VectorData( hypre_ParVectorLocalVector(Par_b_local) )[i] = hypre_VectorData( hypre_ParVectorLocalVector(hypre_ParAMGDataFArray(amg_data)[amgdd_start_level]) )[i];
-               for (j = hypre_CSRMatrixI(diag)[i]; j < hypre_CSRMatrixI(diag)[i+1]; j++)
-                  hypre_VectorData( hypre_ParVectorLocalVector(Par_b_local) )[i] -= hypre_CSRMatrixData(diag)[j] * x_local_data[ hypre_CSRMatrixJ(diag)[j] ];
-            }
-         }
-      }
-
-      // Get b = A_offd u_recv
-      hypre_CSRMatrixMatvec( -1.0, offd, x_tmp, 1.0, hypre_ParVectorLocalVector(Par_b_local) );
-
-      // If necessary, setup the solver
-      HYPRE_Solver krylov_solver = hypre_ParCompGridLocalKrylovSolver(compGrid);
-      if (!krylov_solver) 
-      {
-         HYPRE_BoomerAMGCreate(&hypre_ParCompGridLocalAMGSolver(compGrid));
-         HYPRE_ParCSRPCGCreate(MPI_COMM_SELF, &krylov_solver);
-         HYPRE_PCGSetMaxIter(krylov_solver, 10);
-         HYPRE_PCGSetPrecond(krylov_solver, (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve, (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup, hypre_ParCompGridLocalAMGSolver(compGrid));
-         HYPRE_ParCSRPCGSetup(krylov_solver, Par_A_local, Par_b_local, Par_x_local);
-      }
-
-      // Do the solve
-      HYPRE_ParCSRPCGSolve(krylov_solver, Par_A_local, Par_b_local, Par_x_local);
-
-      // Add the damped correction 
-      HYPRE_Real alpha = hypre_ParAMGDataAMGDDCorrectionStep(amg_data);
-      hypre_SeqVectorAxpy(alpha, hypre_ParVectorLocalVector(Par_x_local), hypre_ParVectorLocalVector( hypre_ParAMGDataUArray(amg_data)[amgdd_start_level] ) );
-
-      // Clean up and save the update for visualization purposes
-      hypre_ParVectorDestroy(Par_b_local);
-      hypre_ParAMGDataAMGDDCorrectionVector(amg_data) = Par_x_local;
-   }
-
 }
 
 HYPRE_Int
@@ -1010,47 +881,37 @@ TestResComm(hypre_ParAMGData *amg_data)
       for (level = 0; level < transition_level; level++)
       {
          // Broadcast the number of nodes
-         HYPRE_Int num_nodes = 0;
-         if (myid == proc)
-         {
-            for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
-            {
-               if (hypre_ParCompGridARowPtr(compGrid[level])[i+1] - hypre_ParCompGridARowPtr(compGrid[level])[i] > 0) 
-                  num_nodes++;
-            }
-         }
-         hypre_MPI_Bcast(&num_nodes, 1, HYPRE_MPI_INT, proc, hypre_MPI_COMM_WORLD);
+         HYPRE_Int num_real_nodes = hypre_ParCompGridNumRealNodes(compGrid[level]);
+         hypre_MPI_Bcast(&num_real_nodes, 1, HYPRE_MPI_INT, proc, hypre_MPI_COMM_WORLD);
 
          // Broadcast the composite residual
-         HYPRE_Complex *comp_res = hypre_CTAlloc(HYPRE_Complex, num_nodes, HYPRE_MEMORY_HOST);
+         HYPRE_Complex *comp_res = hypre_CTAlloc(HYPRE_Complex, num_real_nodes, HYPRE_MEMORY_HOST);
          if (myid == proc)
          {
             HYPRE_Int cnt = 0;
-            for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
+            for (i = 0; i < num_real_nodes; i++)
             {
-               if (hypre_ParCompGridARowPtr(compGrid[level])[i+1] - hypre_ParCompGridARowPtr(compGrid[level])[i] > 0) 
-                  comp_res[cnt++] = hypre_VectorData(hypre_ParCompGridF(compGrid[level]))[i];
+               comp_res[cnt++] = hypre_VectorData(hypre_ParCompGridF(compGrid[level]))[i];
             }
          }
-         hypre_MPI_Bcast(comp_res, num_nodes, HYPRE_MPI_COMPLEX, proc, hypre_MPI_COMM_WORLD);
+         hypre_MPI_Bcast(comp_res, num_real_nodes, HYPRE_MPI_COMPLEX, proc, hypre_MPI_COMM_WORLD);
 
          // Broadcast the global indices
-         HYPRE_Int *global_indices = hypre_CTAlloc(HYPRE_Int, num_nodes, HYPRE_MEMORY_HOST);
+         HYPRE_Int *global_indices = hypre_CTAlloc(HYPRE_Int, num_real_nodes, HYPRE_MEMORY_HOST);
          if (myid == proc)
          {
             HYPRE_Int cnt = 0;
-            for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
+            for (i = 0; i < num_real_nodes; i++)
             {
-               if (hypre_ParCompGridARowPtr(compGrid[level])[i+1] - hypre_ParCompGridARowPtr(compGrid[level])[i] > 0) 
-                  global_indices[cnt++] = hypre_ParCompGridGlobalIndices(compGrid[level])[i];
+               global_indices[cnt++] = hypre_ParCompGridGlobalIndices(compGrid[level])[i];
             }
          }
-         hypre_MPI_Bcast(global_indices, num_nodes, HYPRE_MPI_INT, proc, hypre_MPI_COMM_WORLD);
+         hypre_MPI_Bcast(global_indices, num_real_nodes, HYPRE_MPI_INT, proc, hypre_MPI_COMM_WORLD);
 
          // Now, each processors checks their owned residual value against the composite residual
          HYPRE_Int proc_first_index = hypre_ParVectorFirstIndex(hypre_ParAMGDataUArray(amg_data)[level]);
          HYPRE_Int proc_last_index = hypre_ParVectorLastIndex(hypre_ParAMGDataUArray(amg_data)[level]);
-         for (i = 0; i < num_nodes; i++)
+         for (i = 0; i < num_real_nodes; i++)
          {
             if (global_indices[i] <= proc_last_index && global_indices[i] >= proc_first_index)
             {

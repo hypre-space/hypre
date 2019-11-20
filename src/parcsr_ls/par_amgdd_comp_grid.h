@@ -144,9 +144,6 @@ typedef struct
    hypre_Vector     *temp2;
    hypre_Vector     *temp3;
 
-   HYPRE_Solver     local_amg_solver;
-   HYPRE_Solver     local_krylov_solver;
-
    HYPRE_Real       *l1_norms;
    HYPRE_Int        *cf_marker_array;
    int              *c_mask;
@@ -175,8 +172,6 @@ typedef struct
 #define hypre_ParCompGridTemp(compGrid)        ((compGrid) -> temp)
 #define hypre_ParCompGridTemp2(compGrid)        ((compGrid) -> temp2)
 #define hypre_ParCompGridTemp3(compGrid)        ((compGrid) -> temp3)
-#define hypre_ParCompGridLocalAMGSolver(compGrid)        ((compGrid) -> local_amg_solver)
-#define hypre_ParCompGridLocalKrylovSolver(compGrid)        ((compGrid) -> local_krylov_solver)
 #define hypre_ParCompGridGlobalIndices(compGrid)           ((compGrid) -> global_indices)
 #define hypre_ParCompGridCoarseGlobalIndices(compGrid)           ((compGrid) -> coarse_global_indices)
 #define hypre_ParCompGridCoarseLocalIndices(compGrid)           ((compGrid) -> coarse_local_indices)
