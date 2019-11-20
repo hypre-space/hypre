@@ -195,7 +195,7 @@ hypre_GetActualMemLocation(HYPRE_Int location)
 #define hypre_TAlloc(type, count, location) \
 (\
 {\
- if (location == HYPRE_MEMORY_DEVICE) printf("[%s:%d] TALLOC %.3f MB\n", __FILE__,__LINE__, (size_t)(sizeof(type) * (count))/1024.0/1024.0); \
+ if (location == HYPRE_MEMORY_SHARED) printf("[%s:%d] TALLOC %.3f MB\n", __FILE__,__LINE__, (size_t)(sizeof(type) * (count))/1024.0/1024.0); \
  (type *) hypre_MAlloc((size_t)(sizeof(type) * (count)), location); \
 }\
 )
@@ -203,7 +203,7 @@ hypre_GetActualMemLocation(HYPRE_Int location)
 #define hypre_CTAlloc(type, count, location) \
 (\
 {\
- if (location == HYPRE_MEMORY_DEVICE) printf("[%s:%d] CTALLOC %.3f MB\n", __FILE__,__LINE__, (size_t)(sizeof(type) * (count))/1024.0/1024.0); \
+ if (location == HYPRE_MEMORY_SHARED) printf("[%s:%d] CTALLOC %.3f MB\n", __FILE__,__LINE__, (size_t)(sizeof(type) * (count))/1024.0/1024.0); \
  (type *) hypre_CAlloc((size_t)(count), (size_t)sizeof(type), location); \
 }\
 )
@@ -211,7 +211,7 @@ hypre_GetActualMemLocation(HYPRE_Int location)
 #define hypre_TReAlloc(ptr, type, count, location) \
 (\
 {\
- if (location == HYPRE_MEMORY_DEVICE) printf("[%s:%d] TReALLOC %p, %.3f MB\n", __FILE__,__LINE__, ptr, (size_t)(sizeof(type) * (count))/1024.0/1024.0); \
+ if (location == HYPRE_MEMORY_SHARED) printf("[%s:%d] TReALLOC %p, %.3f MB\n", __FILE__,__LINE__, ptr, (size_t)(sizeof(type) * (count))/1024.0/1024.0); \
  (type *)hypre_ReAlloc((char *)ptr, (size_t)(sizeof(type) * (count)), location); \
 }\
 )
@@ -219,7 +219,7 @@ hypre_GetActualMemLocation(HYPRE_Int location)
 #define hypre_TMemcpy(dst, src, type, count, locdst, locsrc) \
 ( \
 { \
-  printf("[%s:%d] TMemcpy %d to %d %.3f MB\n", __FILE__,__LINE__, locsrc, locdst, (size_t)(sizeof(type) * (count))/1024.0/1024.0); \
+  /* printf("[%s:%d] TMemcpy %d to %d %.3f MB\n", __FILE__,__LINE__, locsrc, locdst, (size_t)(sizeof(type) * (count))/1024.0/1024.0);*/ \
   hypre_Memcpy((void *)(dst), (void *)(src), (size_t)(sizeof(type) * (count)), locdst, locsrc); \
 } \
 )

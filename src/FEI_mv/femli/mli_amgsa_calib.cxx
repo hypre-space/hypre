@@ -21,7 +21,6 @@
 // ---------------------------------------------------------------------
 
 #include <string.h>
-#include <assert.h>
 
 #include "HYPRE.h"
 #include "_hypre_utilities.h"
@@ -31,12 +30,12 @@
 
 #include "mli_method_amgsa.h"
 #include "mli_utils.h"
- 
+
 /***********************************************************************
  * generate multilevel structure using an adaptive method
  * --------------------------------------------------------------------- */
 
-int MLI_Method_AMGSA::setupCalibration( MLI *mli ) 
+int MLI_Method_AMGSA::setupCalibration( MLI *mli )
 {
    int          mypid, nprocs, *partition, ndofs, nrows, n_null;
    int          i, j, k, level, local_nrows, relax_num, targc, calib_size_tmp;
@@ -71,11 +70,11 @@ int MLI_Method_AMGSA::setupCalibration( MLI *mli )
    /* create trial vectors for calibration (trial_sol, zero_rhs)      */
    /* --------------------------------------------------------------- */
 
-   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) hypreA, 
+   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) hypreA,
                                         &partition);
    trial_sol = hypre_ParVectorCreate(comm, partition[nprocs], partition);
    hypre_ParVectorInitialize( trial_sol );
-   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) hypreA, 
+   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) hypreA,
                                         &partition);
    local_nrows = partition[mypid+1] - partition[mypid];
    zero_rhs = hypre_ParVectorCreate(comm, partition[nprocs], partition);
@@ -93,17 +92,17 @@ int MLI_Method_AMGSA::setupCalibration( MLI *mli )
    {
       dble_array = nullspace_store;
       nullspace_store = new double[nrows*(n_null+calibrationSize_)];
-      for (i = 0; i < nrows*n_null; i++) nullspace_store[i] = dble_array[i]; 
+      for (i = 0; i < nrows*n_null; i++) nullspace_store[i] = dble_array[i];
       delete [] dble_array;
    }
    else
    {
       nrows = local_nrows;
       nullspace_store = new double[nrows*(n_null+calibrationSize_)];
-      for ( j = 0; j < n_null; j++ ) 
+      for ( j = 0; j < n_null; j++ )
       {
-         for ( k = 0; k < nrows; k++ ) 
-            if ( k % n_null == j ) nullspace_store[j*nrows+k] = 1.0; 
+         for ( k = 0; k < nrows; k++ )
+            if ( k % n_null == j ) nullspace_store[j*nrows+k] = 1.0;
             else                   nullspace_store[j*nrows+k] = 0.0;
       }
    }
@@ -144,10 +143,10 @@ int MLI_Method_AMGSA::setupCalibration( MLI *mli )
 
       sprintf( param_string, "setNullSpace" );
       targc = 4;
-      targv[0] = (char *) &ndofs;  
-      targv[1] = (char *) &n_null;  
-      targv[2] = (char *) nullspace_store;  
-      targv[3] = (char *) &nrows;  
+      targv[0] = (char *) &ndofs;
+      targv[1] = (char *) &n_null;
+      targv[2] = (char *) nullspace_store;
+      targv[3] = (char *) &nrows;
       new_amgsa->setParams( param_string, targc, targv );
 
       dtime = time_getWallclockSeconds();
@@ -179,7 +178,7 @@ int MLI_Method_AMGSA::setupCalibration( MLI *mli )
       for ( j = 0; j < nrows*n_null; j++ ) Q_array[j] = nullspace_store[j];
 #if 0
       MLI_Utils_QR( Q_array, R_array, nrows, n_null );
-      for ( j = 0; j < n_null; j++ ) 
+      for ( j = 0; j < n_null; j++ )
          printf("P%d : Norm of Null %d = %e\n", mypid,j,R_array[j*n_null+j]);
 #endif
    }
@@ -220,7 +219,7 @@ int MLI_Method_AMGSA::setupCalibration( MLI *mli )
  * generate multilevel structure using an adaptive method (not done yet)
  * --------------------------------------------------------------------- */
 #if 0
-int MLI_Method_AMGSA::setupCalibration( MLI *mli ) 
+int MLI_Method_AMGSA::setupCalibration( MLI *mli )
 {
    int          mypid, nprocs, *partition, ndofs, nrows, n_null;
    int          i, j, k, level, local_nrows, relax_num, targc, calib_size_tmp;
@@ -250,7 +249,7 @@ int MLI_Method_AMGSA::setupCalibration( MLI *mli )
    mli_Amat = mli->getSystemMatrix( 0 );
    hypreA   = (hypre_ParCSRMatrix *) mli_Amat->getMatrix();
    targv    = new char*[4];
-   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) hypreA, 
+   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) hypreA,
                                         &partition);
    local_nrows = partition[mypid+1] - partition[mypid];
    free( partition );
@@ -268,13 +267,13 @@ int MLI_Method_AMGSA::setupCalibration( MLI *mli )
    /* create trial vectors for calibration (trial_sol, zero_rhs)      */
    /* --------------------------------------------------------------- */
 
-   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) hypreA, 
+   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) hypreA,
                                         &partition);
    trial_sol = hypre_ParVectorCreate(comm, partition[nprocs], partition);
    hypre_ParVectorInitialize( trial_sol );
    hypre_ParVectorSetRandomValues( trial_sol, (int) dtime );
 
-   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) hypreA, 
+   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) hypreA,
                                         &partition);
    zero_rhs = hypre_ParVectorCreate(comm, partition[nprocs], partition);
    hypre_ParVectorInitialize( zero_rhs );
@@ -299,7 +298,7 @@ int MLI_Method_AMGSA::setupCalibration( MLI *mli )
       dtime = time_getWallclockSeconds();
       hypre_ParVectorSetRandomValues( trial_sol, (int) dtime );
 
-      if ( i ==  0 ) 
+      if ( i ==  0 )
       {
          smoother_ptr->solve(mli_rhs, mli_sol);
       }
@@ -329,16 +328,16 @@ int MLI_Method_AMGSA::setupCalibration( MLI *mli )
       /* ------------------------------------------------------------ */
 
       offset = local_nrows * n_null;
-      for (i = offset; i < offset+local_nrows; i++) 
-         nullspace_store[i] = sol_data[i-offset]; 
+      for (i = offset; i < offset+local_nrows; i++)
+         nullspace_store[i] = sol_data[i-offset];
       n_null++;
 
       sprintf( param_string, "setNullSpace" );
       targc = 4;
-      targv[0] = (char *) &ndofs;  
-      targv[1] = (char *) &n_null;  
-      targv[2] = (char *) nullspace_store;  
-      targv[3] = (char *) &nrows;  
+      targv[0] = (char *) &ndofs;
+      targv[1] = (char *) &n_null;
+      targv[2] = (char *) nullspace_store;
+      targv[3] = (char *) &nrows;
       new_amgsa->setParams( param_string, targc, targv );
 
       if ( i < calibrationSize_-1 ) new_mli->setup();

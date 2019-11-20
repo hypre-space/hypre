@@ -160,7 +160,7 @@ hypre_BoomerAMGInterpTruncationDevice( hypre_ParCSRMatrix *P, HYPRE_Real trunc_f
             thrust::make_zip_iterator(thrust::make_tuple(P_i+nnz_P, P_j+nnz_P, P_a+nnz_P)),
             P_j,
             thrust::make_zip_iterator(thrust::make_tuple(tmp_rowid, P_diag_j,  P_diag_a)),
-            is_nonnegative() );
+            is_nonnegative<HYPRE_Int>() );
 
       new_nnz_diag = thrust::get<0>(new_end.get_iterator_tuple()) - tmp_rowid;
 

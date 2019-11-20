@@ -13,7 +13,6 @@
 
 #include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
-#include <assert.h>
 #ifdef HYPRE_USING_DSUPERLU
 #include <math.h>
 #include "superlu_ddefs.h"
@@ -594,9 +593,20 @@ hypre_BoomerAMGDestroy( void *data )
 
    if (hypre_ParAMGDataL1Norms(amg_data))
    {
-      for (i=0; i < num_levels; i++)
+      HYPRE_Int memory_location_l1 = HYPRE_MEMORY_SHARED;
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+      if (hypre_handle->no_cuda_um == 1)
+      {
+         memory_location_l1 = HYPRE_MEMORY_DEVICE;
+      }
+#endif
+      for (i = 0; i < num_levels; i++)
+      {
          if (hypre_ParAMGDataL1Norms(amg_data)[i])
-            hypre_TFree(hypre_ParAMGDataL1Norms(amg_data)[i], HYPRE_MEMORY_SHARED);
+         {
+            hypre_TFree(hypre_ParAMGDataL1Norms(amg_data)[i], memory_location_l1);
+         }
+      }
       hypre_TFree(hypre_ParAMGDataL1Norms(amg_data), HYPRE_MEMORY_HOST);
    }
 

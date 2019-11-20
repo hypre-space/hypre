@@ -45,6 +45,7 @@ FILES =\
  hypre_memory.c\
  hypre_merge_sort.c\
  hypre_mpi_comm_f2c.c\
+ hypre_nvtx.c\
  hypre_omp_device.c\
  hypre_prefix_sum.c\
  hypre_printf.c\

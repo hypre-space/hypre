@@ -595,6 +595,7 @@ HYPRE_Int hypre_AMGHybridSetDofFunc ( void *AMGhybrid_vdata , HYPRE_Int *dof_fun
 HYPRE_Int hypre_AMGHybridSetAggNumLevels ( void *AMGhybrid_vdata , HYPRE_Int agg_num_levels );
 HYPRE_Int hypre_AMGHybridSetNumFunctions ( void *AMGhybrid_vdata , HYPRE_Int num_functions );
 HYPRE_Int hypre_AMGHybridSetNodal ( void *AMGhybrid_vdata , HYPRE_Int nodal );
+HYPRE_Int hypre_AMGHybridGetSetupTime( void *AMGhybrid_vdata, HYPRE_Real *time );
 HYPRE_Int hypre_AMGHybridGetNumIterations ( void *AMGhybrid_vdata , HYPRE_Int *num_its );
 HYPRE_Int hypre_AMGHybridGetDSCGNumIterations ( void *AMGhybrid_vdata , HYPRE_Int *dscg_num_its );
 HYPRE_Int hypre_AMGHybridGetPCGNumIterations ( void *AMGhybrid_vdata , HYPRE_Int *pcg_num_its );
@@ -1100,6 +1101,7 @@ HYPRE_Int HYPRE_ParCSRHybridGetNumIterations ( HYPRE_Solver solver , HYPRE_Int *
 HYPRE_Int HYPRE_ParCSRHybridGetDSCGNumIterations ( HYPRE_Solver solver , HYPRE_Int *dscg_num_its );
 HYPRE_Int HYPRE_ParCSRHybridGetPCGNumIterations ( HYPRE_Solver solver , HYPRE_Int *pcg_num_its );
 HYPRE_Int HYPRE_ParCSRHybridGetFinalRelativeResidualNorm ( HYPRE_Solver solver , HYPRE_Real *norm );
+HYPRE_Int HYPRE_ParCSRHybridGetSetupTime( HYPRE_Solver solver, HYPRE_Real  *setup_time );
 
 /* HYPRE_parcsr_int.c */
 HYPRE_Int hypre_ParSetRandomValues ( void *v , HYPRE_Int seed );

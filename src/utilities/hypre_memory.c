@@ -241,7 +241,7 @@ hypre_MAlloc_core(size_t size, HYPRE_Int zeroinit, HYPRE_Int location)
    if (!ptr)
    {
       hypre_OutOfMemory(size);
-      exit(0);
+      hypre_MPI_Abort(hypre_MPI_COMM_WORLD, -1);
    }
 
    return ptr;
@@ -292,8 +292,8 @@ hypre_UnifiedFree(void *ptr)
 {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    /* with UM, managed memory free */
-   //HYPRE_CUDA_CALL( cudaFree((size_t *) ptr - HYPRE_MEM_PAD_LEN) );
-   cudaFree((size_t *) ptr - HYPRE_MEM_PAD_LEN);
+   HYPRE_CUDA_CALL( cudaFree((size_t *) ptr - HYPRE_MEM_PAD_LEN) );
+   //cudaFree((size_t *) ptr - HYPRE_MEM_PAD_LEN);
    //cudaSafeFree(ptr, HYPRE_MEM_PAD_LEN);
 #endif
 }
@@ -317,6 +317,14 @@ hypre_Free(void *ptr, HYPRE_Int location)
    }
 
    location = hypre_GetActualMemLocation(location);
+
+#ifdef HYPRE_DEBUG
+   HYPRE_Int tmp;
+   hypre_GetMemoryLocation(ptr, &tmp);
+   /* do not use hypre_assert, which has alloc and free;
+    * will create an endless loop otherwise */
+   assert(location == tmp);
+#endif
 
    switch (location)
    {
@@ -452,26 +460,55 @@ hypre_Memcpy(void *dst, void *src, size_t size, HYPRE_Int loc_dst, HYPRE_Int loc
    }
 #endif
 
-   /* 4 x 4 = 16 cases = 9 + 2 + 2 + 2 + 1 */
-   /* 9: Host   <-- Host, Host   <-- Shared, Host   <-- Pinned,
-    *    Shared <-- Host, Shared <-- Shared, Shared <-- Pinned,
-    *    Pinned <-- Host, Pinned <-- Shared, Pinned <-- Pinned.
-    *              (i.e, without Device involved)
+   if (dst == src)
+   {
+      return;
+   }
+
+   /* Totally 4 x 4 = 16 cases */
+
+   /* 4: Host   <-- Host, Host   <-- Pinned,
+    *    Pinned <-- Host, Pinned <-- Pinned.
     */
-   if (loc_dst != HYPRE_MEMORY_DEVICE && loc_src != HYPRE_MEMORY_DEVICE)
+   if ( loc_dst != HYPRE_MEMORY_DEVICE && loc_dst != HYPRE_MEMORY_SHARED &&
+        loc_src != HYPRE_MEMORY_DEVICE && loc_src != HYPRE_MEMORY_SHARED )
    {
       memcpy(dst, src, size);
       return;
    }
 
-   /* 2: Shared <-- Device, Device <-- Shared */
-   if (loc_dst == HYPRE_MEMORY_SHARED || loc_src == HYPRE_MEMORY_SHARED)
+
+   /* 3: Shared <-- Device, Device <-- Shared, Shared <-- Shared */
+   if ( (loc_dst == HYPRE_MEMORY_SHARED && loc_src == HYPRE_MEMORY_DEVICE) ||
+        (loc_dst == HYPRE_MEMORY_DEVICE && loc_src == HYPRE_MEMORY_SHARED) ||
+        (loc_dst == HYPRE_MEMORY_SHARED && loc_src == HYPRE_MEMORY_SHARED) )
    {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
       HYPRE_CUDA_CALL( cudaMemcpy(dst, src, size, cudaMemcpyDeviceToDevice) );
 #endif
       return;
    }
+
+
+   /* 2: Shared <-- Host, Shared <-- Pinned */
+   if (loc_dst == HYPRE_MEMORY_SHARED)
+   {
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+      HYPRE_CUDA_CALL( cudaMemcpy(dst, src, size, cudaMemcpyHostToDevice) );
+#endif
+      return;
+   }
+
+
+   /* 2: Host <-- Shared, Pinned <-- Shared */
+   if (loc_src == HYPRE_MEMORY_SHARED)
+   {
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+      HYPRE_CUDA_CALL( cudaMemcpy(dst, src, size, cudaMemcpyDeviceToHost) );
+#endif
+      return;
+   }
+
 
    /* 2: Device <-- Host, Device <-- Pinned */
    if ( loc_dst == HYPRE_MEMORY_DEVICE && (loc_src == HYPRE_MEMORY_HOST || loc_src == HYPRE_MEMORY_HOST_PINNED) )
@@ -598,7 +635,17 @@ hypre_GetMemoryLocation(const void *ptr, HYPRE_Int *memory_location)
    *memory_location = HYPRE_MEMORY_UNSET;
 
 #if (CUDART_VERSION >= 10000)
+#if (CUDART_VERSION >= 11000)
    HYPRE_CUDA_CALL( cudaPointerGetAttributes(&attr, ptr) );
+#else
+   cudaError_t err = cudaPointerGetAttributes(&attr, ptr);
+   if (err != cudaSuccess)
+   {
+      ierr = 1;
+      /* clear the error */
+      cudaGetLastError();
+   }
+#endif
    if (attr.type == cudaMemoryTypeUnregistered)
    {
       *memory_location = HYPRE_MEMORY_HOST;

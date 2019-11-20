@@ -115,7 +115,11 @@ hypre_HandleCreate()
    hypre_HandleCudaComputeStreamNum(handle)         = 0;
    hypre_HandleCudaPrefetchStreamNum(handle)        = 1;
    hypre_HandleCudaComputeStreamSyncDefault(handle) = 1;
-   handle->spgemm_use_cusparse                      = 0; // TODO: accessor func #ifdef
+#ifdef HYPRE_USING_CUSPARSE
+   hypre_HandleSpgemmUseCusparse(handle)            = 1;
+#else
+   hypre_HandleSpgemmUseCusparse(handle)            = 0;
+#endif
    handle->spgemm_num_passes                        = 3;
    /* 1: naive overestimate, 2: naive underestimate, 3: Cohen's algorithm */
    handle->spgemm_rownnz_estimate_method            = 3;
@@ -241,6 +245,9 @@ HYPRE_Init( hypre_int argc, char *argv[] )
    hypre_handle = hypre_HandleCreate();
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+
+   HYPRE_CUDA_CALL( cudaGetLastError() );
+
    hypre_SetDevice(-1, hypre_handle);
 
    /* To include the cost of creating streams/cudahandles in HYPRE_Init */
@@ -309,3 +316,13 @@ HYPRE_Finalize()
    return hypre_error_flag;
 }
 
+
+void HYPRE_SetNoCUDAUM(HYPRE_Int no_cuda_um)
+{
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+   if (hypre_handle)
+   {
+      hypre_handle->no_cuda_um = no_cuda_um;
+   }
+#endif
+}

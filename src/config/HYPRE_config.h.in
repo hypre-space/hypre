@@ -188,3 +188,13 @@
 
 /* Define to 1 if using MLI */
 #undef HAVE_MLI
+
+/* Define to 1 if in debug mode */
+#undef HYPRE_DEBUG
+
+/* if not in debug mode, define NDEBUG */
+#ifndef HYPRE_DEBUG
+#ifndef NDEBUG
+#define NDEBUG
+#endif
+#endif

@@ -48,6 +48,8 @@ typedef struct
    HYPRE_Int spgemm_rownnz_estimate_nsamples;
    float     spgemm_rownnz_estimate_mult_factor;
    char      spgemm_hash_type;
+   /* RL: temporary TODO */
+   HYPRE_Int no_cuda_um;
 #endif
 } hypre_Handle;
 
@@ -210,6 +212,12 @@ hypre_HandleCusparseMatDescr(hypre_Handle *hypre_handle_)
    return mat_descr;
 }
 
+static inline HYPRE_Int &
+hypre_HandleSpgemmUseCusparse(hypre_Handle *hypre_handle_)
+{
+   return hypre_handle_->spgemm_use_cusparse;
+}
+
 #endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP) */
 
 static inline void
@@ -234,7 +242,7 @@ hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle_)
 {
 #if defined(HYPRE_USING_UNIFIED_MEMORY)
 #if defined(HYPRE_USING_CUDA)
-   assert(!hypre_HandleCudaComputeStreamSync(hypre_handle_).empty());
+   hypre_assert(!hypre_HandleCudaComputeStreamSync(hypre_handle_).empty());
 
    if ( hypre_HandleCudaComputeStreamSync(hypre_handle_).back() )
    {

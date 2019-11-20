@@ -370,7 +370,7 @@ void
 hypre_F90_IFACE(hypre_amsconstructdiscretegradient, HYPRE_AMSCONSTRUCTDISCRETEGRADIENT)
    ( hypre_F90_Obj *A,
      hypre_F90_Obj *x_coord,
-     hypre_F90_IntArray *edge_vertex,
+     hypre_F90_BigIntArray *edge_vertex,
      hypre_F90_Int *edge_orientation,
      hypre_F90_Obj *G,
      hypre_F90_Int *ierr)
@@ -379,7 +379,7 @@ hypre_F90_IFACE(hypre_amsconstructdiscretegradient, HYPRE_AMSCONSTRUCTDISCRETEGR
       ( HYPRE_AMSConstructDiscreteGradient(
            hypre_F90_PassObj (HYPRE_ParCSRMatrix, A),
            hypre_F90_PassObj (HYPRE_ParVector, x_coord),
-           hypre_F90_PassIntArray (edge_vertex),
+           hypre_F90_PassBigIntArray (edge_vertex),
            hypre_F90_PassInt (edge_orientation),
            hypre_F90_PassObjRef (HYPRE_ParCSRMatrix, G) ) );
 }

@@ -55,6 +55,10 @@ co="--enable-bigint --disable-fortran"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic--enable-bigint
 
+co="--enable-mixedint --disable-fortran"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo
+./renametest.sh basic $output_dir/basic--enable-mixedint
+
 # Test linking for different languages
 link_opts="all++"
 for opt in $link_opts
