@@ -63,7 +63,7 @@ HYPRE_Int BuildParDifConv (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index ,
 HYPRE_Int BuildParFromOneFile (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_Int num_functions , HYPRE_ParCSRMatrix *A_ptr );
 HYPRE_Int BuildFuncsFromFiles (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix A , HYPRE_Int **dof_func_ptr );
 HYPRE_Int BuildFuncsFromOneFile (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix A , HYPRE_Int **dof_func_ptr );
-HYPRE_Int BuildRhsParFromOneFile (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_BigInt *partitioning , HYPRE_ParVector *b_ptr );
+HYPRE_Int BuildRhsParFromOneFile (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix A , HYPRE_ParVector *b_ptr );
 HYPRE_Int BuildParLaplacian9pt (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 HYPRE_Int BuildParLaplacian27pt (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 HYPRE_Int BuildParRotate7pt (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix *A_ptr );
@@ -2286,26 +2286,42 @@ main( hypre_int argc,
    time_index = hypre_InitializeTiming("RHS and Initial Guess");
    hypre_BeginTiming(time_index);
 
-   if ( build_rhs_type == 0 )
+   if ( (build_rhs_type == 0) || (build_rhs_type == 1) || (build_rhs_type == 7))
    {
-      if (myid == 0)
-      {
-         hypre_printf("  RHS vector read from file %s\n", argv[build_rhs_arg_index]);
-         hypre_printf("  Initial guess is 0\n");
-      }
-
       /* RHS */
-      ierr = HYPRE_IJVectorRead( argv[build_rhs_arg_index], hypre_MPI_COMM_WORLD,
-                                 HYPRE_PARCSR, &ij_b );
-      if (ierr)
+      if (build_rhs_type == 0)
       {
-         hypre_printf("ERROR: Problem reading in the right-hand-side!\n");
-         exit(1);
+         if (myid == 0)
+         {
+            hypre_printf("  RHS vector read from file %s\n", argv[build_rhs_arg_index]);
+         }
+
+         ierr = HYPRE_IJVectorRead( argv[build_rhs_arg_index], hypre_MPI_COMM_WORLD,
+                                    HYPRE_PARCSR, &ij_b );
+         if (ierr)
+         {
+            hypre_printf("ERROR: Problem reading in the right-hand-side!\n");
+            exit(1);
+         }
+         ierr = HYPRE_IJVectorGetObject( ij_b, &object );
+         b = (HYPRE_ParVector) object;
       }
-      ierr = HYPRE_IJVectorGetObject( ij_b, &object );
-      b = (HYPRE_ParVector) object;
+      else if (build_rhs_type == 1)
+      {
+         BuildRhsParFromOneFile(argc, argv, build_rhs_arg_index, parcsr_A, &b);
+         ij_b = NULL;
+      }
+      else
+      {
+         BuildParRhsFromFile(argc, argv, build_rhs_arg_index, &b);
+         ij_b = NULL;
+      }
 
       /* Initial guess */
+      if (myid == 0)
+      {
+         hypre_printf("  Initial guess is 0\n");
+      }
       HYPRE_IJVectorCreate(hypre_MPI_COMM_WORLD, first_local_col, last_local_col, &ij_x);
       HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_x);
@@ -2319,61 +2335,6 @@ main( hypre_int argc,
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
       x = (HYPRE_ParVector) object;
    }
-   else if ( build_rhs_type == 1 )
-   {
-
-#if 0
-      hypre_printf("build_rhs_type == 1 not currently implemented\n");
-      return(-1);
-#else
-      /* RHS - this has not been tested for multiple processors*/
-      BuildRhsParFromOneFile(argc, argv, build_rhs_arg_index, NULL, &b);
-
-      hypre_printf("  Initial guess is 0\n");
-
-      ij_b = NULL;
-
-      /* initial guess */
-      HYPRE_IJVectorCreate(hypre_MPI_COMM_WORLD, first_local_col, last_local_col, &ij_x);
-      HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
-      HYPRE_IJVectorInitialize(ij_x);
-
-      values = hypre_CTAlloc(HYPRE_Real,  local_num_cols, HYPRE_MEMORY_HOST);
-      for (i = 0; i < local_num_cols; i++)
-         values[i] = 0.;
-      HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values);
-      hypre_TFree(values, HYPRE_MEMORY_HOST);
-
-      ierr = HYPRE_IJVectorGetObject( ij_x, &object );
-      x = (HYPRE_ParVector) object;
-
-#endif
-   }
-   else if ( build_rhs_type == 7 )
-   {
-
-      /* rhs */
-      BuildParRhsFromFile(argc, argv, build_rhs_arg_index, &b);
-
-      hypre_printf("  Initial guess is 0\n");
-
-      ij_b = NULL;
-
-      /* initial guess */
-      HYPRE_IJVectorCreate(hypre_MPI_COMM_WORLD, first_local_col, last_local_col, &ij_x);
-      HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
-      HYPRE_IJVectorInitialize(ij_x);
-
-      values = hypre_CTAlloc(HYPRE_Real,  local_num_cols, HYPRE_MEMORY_HOST);
-      for (i = 0; i < local_num_cols; i++)
-         values[i] = 0.;
-      HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values);
-      hypre_TFree(values, HYPRE_MEMORY_HOST);
-
-      ierr = HYPRE_IJVectorGetObject( ij_x, &object );
-      x = (HYPRE_ParVector) object;
-   }
-
    else if ( build_rhs_type == 2 )
    {
       if (myid == 0)
@@ -2528,35 +2489,38 @@ main( hypre_int argc,
       ij_b = NULL;
    }
 
-   if ( build_src_type == 0 )
+   if ( (build_src_type == 0) || (build_src_type == 1))
    {
-#if 0
-      /* RHS */
-      BuildRhsParFromFile(argc, argv, build_src_arg_index, &b);
-#endif
-
       if (myid == 0)
       {
          hypre_printf("  Source vector read from file %s\n", argv[build_src_arg_index]);
          hypre_printf("  Initial unknown vector in evolution is 0\n");
       }
 
-      ierr = HYPRE_IJVectorRead( argv[build_src_arg_index], hypre_MPI_COMM_WORLD,
-                                 HYPRE_PARCSR, &ij_b );
-      if (ierr)
+      if (build_src_type == 0)
       {
-         hypre_printf("ERROR: Problem reading in the right-hand-side!\n");
-         exit(1);
+         ierr = HYPRE_IJVectorRead(argv[build_src_arg_index], hypre_MPI_COMM_WORLD,
+                                   HYPRE_PARCSR, &ij_b);
+         if (ierr)
+         {
+            hypre_printf("ERROR: Problem reading in the right-hand-side!\n");
+            exit(1);
+         }
+         ierr = HYPRE_IJVectorGetObject( ij_b, &object );
+         b = (HYPRE_ParVector) object;
       }
-      ierr = HYPRE_IJVectorGetObject( ij_b, &object );
-      b = (HYPRE_ParVector) object;
+      else
+      {
+         BuildRhsParFromOneFile(argc, argv, build_src_arg_index, parcsr_A, &b);
+         ij_b = NULL;
+      }
 
       /* Initial unknown vector */
       HYPRE_IJVectorCreate(hypre_MPI_COMM_WORLD, first_local_col, last_local_col, &ij_x);
       HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_x);
 
-      values = hypre_CTAlloc(HYPRE_Real,  local_num_cols, HYPRE_MEMORY_HOST);
+      values = hypre_CTAlloc(HYPRE_Real, local_num_cols, HYPRE_MEMORY_HOST);
       for (i = 0; i < local_num_cols; i++)
          values[i] = 0.;
       HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values);
@@ -2564,15 +2528,6 @@ main( hypre_int argc,
 
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
       x = (HYPRE_ParVector) object;
-   }
-   else if ( build_src_type == 1 )
-   {
-      hypre_printf("build_src_type == 1 not currently implemented\n");
-      return(-1);
-
-#if 0
-      BuildRhsParFromOneFile(argc, argv, build_src_arg_index, part_b, &b);
-#endif
    }
    else if ( build_src_type == 2 )
    {
@@ -7711,24 +7666,24 @@ BuildFuncsFromOneFile( HYPRE_Int              argc,
  *----------------------------------------------------------------------*/
 
 HYPRE_Int
-BuildRhsParFromOneFile( HYPRE_Int                  argc,
+BuildRhsParFromOneFile( HYPRE_Int            argc,
                         char                *argv[],
-                        HYPRE_Int                  arg_index,
-                        HYPRE_BigInt              *partitioning,
+                        HYPRE_Int            arg_index,
+                        HYPRE_ParCSRMatrix   parcsr_A,
                         HYPRE_ParVector     *b_ptr     )
 {
    char           *filename;
-
+   HYPRE_Int       myid;
+   HYPRE_BigInt   *partitioning;
    HYPRE_ParVector b;
-   HYPRE_Vector    b_CSR=NULL;
-
-   HYPRE_Int             myid;
+   HYPRE_Vector    b_CSR = NULL;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
     *-----------------------------------------------------------*/
 
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+   partitioning = hypre_ParCSRMatrixRowStarts(parcsr_A);
 
    /*-----------------------------------------------------------
     * Parse command line
@@ -7758,7 +7713,7 @@ BuildRhsParFromOneFile( HYPRE_Int                  argc,
 
       b_CSR = HYPRE_VectorRead(filename);
    }
-   HYPRE_VectorToParVector(hypre_MPI_COMM_WORLD, b_CSR, partitioning,&b);
+   HYPRE_VectorToParVector(hypre_MPI_COMM_WORLD, b_CSR, partitioning, &b);
 
    *b_ptr = b;
 
