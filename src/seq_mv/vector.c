@@ -320,10 +320,24 @@ hypre_SeqVectorSetRandomValues( hypre_Vector *v,
 
    size *= hypre_VectorNumVectors(v);
 
-   /* RDF: threading this loop may cause problems because of hypre_Rand() */
-   for (i = 0; i < size; i++)
+   if (hypre_GetActualMemLocation(hypre_VectorMemoryLocation(v)) == HYPRE_MEMORY_HOST)
    {
-      vector_data[i] = 2.0 * hypre_Rand() - 1.0;
+      /* RDF: threading this loop may cause problems because of hypre_Rand() */
+      for (i = 0; i < size; i++)
+      {
+         vector_data[i] = 2.0 * hypre_Rand() - 1.0;
+      }
+   }
+   else
+   {
+      HYPRE_Complex *h_data = hypre_TAlloc(HYPRE_Complex, size, HYPRE_MEMORY_HOST);
+      for (i = 0; i < size; i++)
+      {
+         h_data[i] = 2.0 * hypre_Rand() - 1.0;
+      }
+      hypre_TMemcpy(vector_data, h_data, HYPRE_Complex, size, hypre_VectorMemoryLocation(v),
+                    HYPRE_MEMORY_HOST);
+      hypre_TFree(h_data, HYPRE_MEMORY_HOST);
    }
 
    return ierr;

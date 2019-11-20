@@ -28,7 +28,7 @@ HYPRE_IJVectorCreate( MPI_Comm        comm,
    hypre_IJVector *vec;
    HYPRE_Int num_procs, my_id;
    HYPRE_BigInt *partitioning;
- 
+
 #ifdef HYPRE_NO_GLOBAL_PARTITION
    HYPRE_BigInt  row0, rowN;
 #else
@@ -38,9 +38,9 @@ HYPRE_IJVectorCreate( MPI_Comm        comm,
 #endif
 
    vec = hypre_CTAlloc(hypre_IJVector,  1, HYPRE_MEMORY_HOST);
-   
+
    if (!vec)
-   {  
+   {
       hypre_error(HYPRE_ERROR_MEMORY);
       return hypre_error_flag;
    }
@@ -68,17 +68,17 @@ HYPRE_IJVectorCreate( MPI_Comm        comm,
    partitioning[0] = jlower;
    partitioning[1] = jupper+1;
 
-      
+
    /* now we need the global number of rows as well
       as the global first row index */
 
    /* proc 0 has the first row  */
-   if (my_id==0) 
+   if (my_id==0)
    {
       row0 = jlower;
    }
    hypre_MPI_Bcast(&row0, 1, HYPRE_MPI_BIG_INT, 0, comm);
-   /* proc (num_procs-1) has the last row  */   
+   /* proc (num_procs-1) has the last row  */
    if (my_id == (num_procs-1))
    {
       rowN = jupper;
@@ -87,7 +87,7 @@ HYPRE_IJVectorCreate( MPI_Comm        comm,
 
    hypre_IJVectorGlobalFirstRow(vec) = row0;
    hypre_IJVectorGlobalNumRows(vec) = rowN - row0 + 1;
-   
+
 #else
 
    info = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
@@ -137,7 +137,7 @@ HYPRE_IJVectorCreate( MPI_Comm        comm,
    hypre_IJVectorPrintLevel(vec)   = 0;
 
    *vector = (HYPRE_IJVector) vec;
-  
+
    return hypre_error_flag;
 }
 
@@ -145,7 +145,7 @@ HYPRE_IJVectorCreate( MPI_Comm        comm,
  * HYPRE_IJVectorDestroy
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_IJVectorDestroy( HYPRE_IJVector vector )
 {
    hypre_IJVector *vec = (hypre_IJVector *) vector;
@@ -154,7 +154,7 @@ HYPRE_IJVectorDestroy( HYPRE_IJVector vector )
    {
       hypre_error_in_arg(1);
       return hypre_error_flag;
-   } 
+   }
 
    if (hypre_IJVectorPartitioning(vec))
       hypre_TFree(hypre_IJVectorPartitioning(vec), HYPRE_MEMORY_HOST);
@@ -186,7 +186,7 @@ HYPRE_IJVectorDestroy( HYPRE_IJVector vector )
  * HYPRE_IJVectorInitialize
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_IJVectorInitialize( HYPRE_IJVector vector )
 {
    hypre_IJVector *vec = (hypre_IJVector *) vector;
@@ -195,12 +195,12 @@ HYPRE_IJVectorInitialize( HYPRE_IJVector vector )
    {
       hypre_error_in_arg(1);
       return hypre_error_flag;
-   } 
+   }
 
    if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
    {
       if (!hypre_IJVectorObject(vec))
-	 hypre_IJVectorCreatePar(vec, hypre_IJVectorPartitioning(vec));
+         hypre_IJVectorCreatePar(vec, hypre_IJVectorPartitioning(vec));
 
       hypre_IJVectorInitializePar(vec);
    }
@@ -237,7 +237,7 @@ HYPRE_IJVectorSetPrintLevel( HYPRE_IJVector vector,
  * HYPRE_IJVectorSetValues
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_IJVectorSetValues( HYPRE_IJVector        vector,
                          HYPRE_Int             nvalues,
                          const HYPRE_BigInt   *indices,
@@ -251,19 +251,19 @@ HYPRE_IJVectorSetValues( HYPRE_IJVector        vector,
    {
       hypre_error_in_arg(1);
       return hypre_error_flag;
-   } 
+   }
 
    if (nvalues < 0)
    {
       hypre_error_in_arg(2);
       return hypre_error_flag;
-   } 
+   }
 
    if (!values)
    {
       hypre_error_in_arg(4);
       return hypre_error_flag;
-   } 
+   }
 
    if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
    {
@@ -281,7 +281,7 @@ HYPRE_IJVectorSetValues( HYPRE_IJVector        vector,
  * HYPRE_IJVectorAddToValues
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_IJVectorAddToValues( HYPRE_IJVector        vector,
                            HYPRE_Int             nvalues,
                            const HYPRE_BigInt   *indices,
@@ -295,19 +295,19 @@ HYPRE_IJVectorAddToValues( HYPRE_IJVector        vector,
    {
       hypre_error_in_arg(1);
       return hypre_error_flag;
-   } 
+   }
 
    if (nvalues < 0)
    {
       hypre_error_in_arg(2);
       return hypre_error_flag;
-   } 
+   }
 
    if (!values)
    {
       hypre_error_in_arg(4);
       return hypre_error_flag;
-   } 
+   }
 
    if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
    {
@@ -325,7 +325,7 @@ HYPRE_IJVectorAddToValues( HYPRE_IJVector        vector,
  * HYPRE_IJVectorAssemble
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_IJVectorAssemble( HYPRE_IJVector  vector )
 {
    hypre_IJVector *vec = (hypre_IJVector *) vector;
@@ -334,13 +334,13 @@ HYPRE_IJVectorAssemble( HYPRE_IJVector  vector )
    {
       hypre_error_in_arg(1);
       return hypre_error_flag;
-   } 
+   }
 
    if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
    {
       return( hypre_IJVectorAssemblePar(vec) );
    }
-   else 
+   else
    {
       hypre_error_in_arg(1);
    }
@@ -352,7 +352,7 @@ HYPRE_IJVectorAssemble( HYPRE_IJVector  vector )
  * HYPRE_IJVectorGetValues
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_IJVectorGetValues( HYPRE_IJVector      vector,
                          HYPRE_Int           nvalues,
                          const HYPRE_BigInt *indices,
@@ -366,19 +366,19 @@ HYPRE_IJVectorGetValues( HYPRE_IJVector      vector,
    {
       hypre_error_in_arg(1);
       return hypre_error_flag;
-   } 
+   }
 
    if (nvalues < 0)
    {
       hypre_error_in_arg(2);
       return hypre_error_flag;
-   } 
+   }
 
    if (!values)
    {
       hypre_error_in_arg(4);
       return hypre_error_flag;
-   } 
+   }
 
    if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
    {
@@ -396,8 +396,8 @@ HYPRE_IJVectorGetValues( HYPRE_IJVector      vector,
  * HYPRE_IJVectorSetMaxOffProcElmts
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
-HYPRE_IJVectorSetMaxOffProcElmts( HYPRE_IJVector vector, 
+HYPRE_Int
+HYPRE_IJVectorSetMaxOffProcElmts( HYPRE_IJVector vector,
 				  HYPRE_Int      max_off_proc_elmts )
 {
    hypre_IJVector *vec = (hypre_IJVector *) vector;
@@ -406,7 +406,7 @@ HYPRE_IJVectorSetMaxOffProcElmts( HYPRE_IJVector vector,
    {
       hypre_error_in_arg(1);
       return hypre_error_flag;
-   } 
+   }
 
    if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
    {
@@ -424,7 +424,7 @@ HYPRE_IJVectorSetMaxOffProcElmts( HYPRE_IJVector vector,
  * HYPRE_IJVectorSetObjectType
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_IJVectorSetObjectType( HYPRE_IJVector vector,
                              HYPRE_Int      type )
 {
@@ -434,7 +434,7 @@ HYPRE_IJVectorSetObjectType( HYPRE_IJVector vector,
    {
       hypre_error_in_arg(1);
       return hypre_error_flag;
-   } 
+   }
 
    hypre_IJVectorObjectType(vec) = type;
 
@@ -455,7 +455,7 @@ HYPRE_IJVectorGetObjectType( HYPRE_IJVector  vector,
    {
       hypre_error_in_arg(1);
       return hypre_error_flag;
-   } 
+   }
 
    *type = hypre_IJVectorObjectType(vec);
 
@@ -480,7 +480,7 @@ HYPRE_IJVectorGetLocalRange( HYPRE_IJVector  vector,
    {
       hypre_error_in_arg(1);
       return hypre_error_flag;
-   } 
+   }
 
    comm = hypre_IJVectorComm(vec);
    partitioning = hypre_IJVectorPartitioning(vec);
@@ -510,7 +510,7 @@ HYPRE_IJVectorGetObject( HYPRE_IJVector   vector,
    {
       hypre_error_in_arg(1);
       return hypre_error_flag;
-   } 
+   }
 
    *object = hypre_IJVectorObject(vec);
 
@@ -535,7 +535,7 @@ HYPRE_IJVectorRead( const char     *filename,
    FILE           *file;
 
    hypre_MPI_Comm_rank(comm, &myid);
-   
+
    hypre_sprintf(new_filename,"%s.%05d", filename, myid);
 
    if ((file = fopen(new_filename, "r")) == NULL)
@@ -596,11 +596,11 @@ HYPRE_IJVectorPrint( HYPRE_IJVector  vector,
    {
       hypre_error_in_arg(1);
       return hypre_error_flag;
-   } 
+   }
 
    comm = hypre_IJVectorComm(vector);
    hypre_MPI_Comm_rank(comm, &myid);
-   
+
    hypre_sprintf(new_filename,"%s.%05d", filename, myid);
 
    if ((file = fopen(new_filename, "w")) == NULL)

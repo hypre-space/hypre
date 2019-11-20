@@ -660,7 +660,7 @@ hypre_GetActualMemLocation(HYPRE_Int location)
 #define hypre_TAlloc(type, count, location) \
 (\
 {\
- if (location == HYPRE_MEMORY_DEVICE) printf("[%s:%d] TALLOC %.3f MB\n", __FILE__,__LINE__, (size_t)(sizeof(type) * (count))/1024.0/1024.0); \
+ if (location == HYPRE_MEMORY_SHARED) printf("[%s:%d] TALLOC %.3f MB\n", __FILE__,__LINE__, (size_t)(sizeof(type) * (count))/1024.0/1024.0); \
  (type *) hypre_MAlloc((size_t)(sizeof(type) * (count)), location); \
 }\
 )
@@ -668,7 +668,7 @@ hypre_GetActualMemLocation(HYPRE_Int location)
 #define hypre_CTAlloc(type, count, location) \
 (\
 {\
- if (location == HYPRE_MEMORY_DEVICE) printf("[%s:%d] CTALLOC %.3f MB\n", __FILE__,__LINE__, (size_t)(sizeof(type) * (count))/1024.0/1024.0); \
+ if (location == HYPRE_MEMORY_SHARED) printf("[%s:%d] CTALLOC %.3f MB\n", __FILE__,__LINE__, (size_t)(sizeof(type) * (count))/1024.0/1024.0); \
  (type *) hypre_CAlloc((size_t)(count), (size_t)sizeof(type), location); \
 }\
 )
@@ -676,7 +676,7 @@ hypre_GetActualMemLocation(HYPRE_Int location)
 #define hypre_TReAlloc(ptr, type, count, location) \
 (\
 {\
- if (location == HYPRE_MEMORY_DEVICE) printf("[%s:%d] TReALLOC %p, %.3f MB\n", __FILE__,__LINE__, ptr, (size_t)(sizeof(type) * (count))/1024.0/1024.0); \
+ if (location == HYPRE_MEMORY_SHARED) printf("[%s:%d] TReALLOC %p, %.3f MB\n", __FILE__,__LINE__, ptr, (size_t)(sizeof(type) * (count))/1024.0/1024.0); \
  (type *)hypre_ReAlloc((char *)ptr, (size_t)(sizeof(type) * (count)), location); \
 }\
 )
@@ -684,7 +684,7 @@ hypre_GetActualMemLocation(HYPRE_Int location)
 #define hypre_TMemcpy(dst, src, type, count, locdst, locsrc) \
 ( \
 { \
-  printf("[%s:%d] TMemcpy %d to %d %.3f MB\n", __FILE__,__LINE__, locsrc, locdst, (size_t)(sizeof(type) * (count))/1024.0/1024.0); \
+  /* printf("[%s:%d] TMemcpy %d to %d %.3f MB\n", __FILE__,__LINE__, locsrc, locdst, (size_t)(sizeof(type) * (count))/1024.0/1024.0);*/ \
   hypre_Memcpy((void *)(dst), (void *)(src), (size_t)(sizeof(type) * (count)), locdst, locsrc); \
 } \
 )
@@ -1958,49 +1958,6 @@ hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle_)
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
-#ifndef HYPRE_NVTX_H
-#define HYPRE_NVTX_H
-
-#ifdef HYPRE_USING_NVTX
-
-#include "nvToolsExt.h"
-#include "nvToolsExtCudaRt.h"
-
-static const uint32_t colors[] = { 0x0000ff00, 0x000000ff, 0x00ffff00, 0x00ff00ff, 0x0000ffff, 0x00ff0000, 0x00ffffff };
-static const hypre_int num_colors = sizeof(colors)/sizeof(uint32_t);
-
-//nvtxRangePushA(name);
-
-#define PUSH_RANGE(name,cid) { \
-    hypre_int color_id = cid; \
-    color_id = color_id%num_colors;\
-    nvtxEventAttributes_t eventAttrib = {0}; \
-    eventAttrib.version = NVTX_VERSION; \
-    eventAttrib.size = NVTX_EVENT_ATTRIB_STRUCT_SIZE; \
-    eventAttrib.colorType = NVTX_COLOR_ARGB; \
-    eventAttrib.color = colors[color_id]; \
-    eventAttrib.messageType = NVTX_MESSAGE_TYPE_ASCII; \
-    eventAttrib.message.ascii = name; \
-    nvtxRangePushEx(&eventAttrib); \
-}
-
-#define POP_RANGE nvtxRangePop();
-
-#else /* HYPRE_USING_NVTX */
-
-#define PUSH_RANGE(name,cid)
-#define POP_RANGE
-
-#endif /* HYPRE_USING_NVTX */
-
-#endif /* HYPRE_NVTX_H */
-/******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
- * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
- *
- * SPDX-License-Identifier: (Apache-2.0 OR MIT)
- ******************************************************************************/
-
 /* CUDA reducer class */
 
 #ifndef HYPRE_CUDA_REDUCER_H
@@ -2586,6 +2543,10 @@ void hypre_CudaCompileFlagCheck();
 
 #endif
 
+/* hypre_nvtx.c */
+void hypre_NvtxPushRangeColor(const char *name, HYPRE_Int cid);
+void hypre_NvtxPushRange(const char *name);
+void hypre_NvtxPopRange();
 
 #ifdef __cplusplus
 }

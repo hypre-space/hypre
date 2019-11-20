@@ -338,7 +338,7 @@ hypre_ParVectorSetRandomValues( hypre_ParVector *v,
 
    seed *= (my_id+1);
 
-   return hypre_SeqVectorSetRandomValues(v_local,seed);
+   return hypre_SeqVectorSetRandomValues(v_local, seed);
 }
 
 /*--------------------------------------------------------------------------

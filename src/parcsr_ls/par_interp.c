@@ -2682,6 +2682,7 @@ hypre_BoomerAMGBuildDirInterp( hypre_ParCSRMatrix   *A,
 {
 #if defined(HYPRE_USING_CUDA)
    //hypre_SetExecPolicy(HYPRE_EXEC_DEVICE);
+   hypre_NvtxPushRange("DirInterp");
 #endif
 
    HYPRE_Int exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(A)) );
@@ -2709,6 +2710,7 @@ hypre_BoomerAMGBuildDirInterp( hypre_ParCSRMatrix   *A,
 
 #if defined(HYPRE_USING_CUDA)
    //hypre_SetExecPolicy(HYPRE_EXEC_HOST);
+   hypre_NvtxPopRange();
 #endif
 
    return ierr;

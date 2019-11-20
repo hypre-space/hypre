@@ -86,7 +86,7 @@ extern HYPRE_Int hypre_FlexGMRESModifyPCDefault(void *precond_data, HYPRE_Int it
 #ifdef __cplusplus
 }
 #endif
-#define SECOND_TIME 1
+#define SECOND_TIME 0
 
 hypre_int
 main( hypre_int argc,
@@ -137,7 +137,7 @@ main( hypre_int argc,
 
    HYPRE_ParCSRMatrix  parcsr_A = NULL;
    HYPRE_ParVector     b = NULL;
-   HYPRE_ParVector     x;
+   HYPRE_ParVector     x = NULL;
    HYPRE_ParVector     *interp_vecs = NULL;
    HYPRE_ParVector     residual = NULL;
 
@@ -410,7 +410,7 @@ main( hypre_int argc,
 #ifdef HYPRE_USING_CUDA
    //hypre_SetExecPolicy(HYPRE_EXEC_DEVICE);
    hypre_SetExecPolicy(HYPRE_EXEC_HOST);
-   HYPRE_CSRMatrixDeviceSpGemmSetUseCusparse(1);
+   //HYPRE_CSRMatrixDeviceSpGemmSetUseCusparse(0);
 #endif
 
    //omp_set_default_device(0);
@@ -2420,6 +2420,34 @@ main( hypre_int argc,
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
       x = (HYPRE_ParVector) object;
    }
+   else if ( build_rhs_type == 22)
+   {
+      if (myid == 0)
+      {
+         hypre_printf("  RHS vector has unit components\n");
+         hypre_printf("  Initial guess is 0\n");
+      }
+
+      HYPRE_Int memory_location = HYPRE_MEMORY_SHARED;
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+      if (hypre_handle->no_cuda_um)
+      {
+         memory_location = HYPRE_MEMORY_DEVICE;
+      }
+#endif
+
+      b = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD,
+                                hypre_ParCSRMatrixGlobalNumRows(parcsr_A),
+                                NULL);
+      hypre_ParVectorInitialize_v2(b, memory_location);
+      hypre_ParVectorSetConstantValues(b, 1.0);
+
+      x = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD,
+                                hypre_ParCSRMatrixGlobalNumCols(parcsr_A),
+                                NULL);
+      hypre_ParVectorInitialize_v2(x, memory_location);
+      hypre_ParVectorSetConstantValues(x, 0.0);
+   }
    else if ( build_rhs_type == 3 )
    {
       if (myid == 0)
@@ -2989,7 +3017,7 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetSCommPkgSwitch(amg_solver, S_commpkg_switch);
       /* note: log is written to standard output, not to file */
       HYPRE_BoomerAMGSetPrintLevel(amg_solver, 3);
-      HYPRE_BoomerAMGSetLogging(amg_solver, 2);
+      //HYPRE_BoomerAMGSetLogging(amg_solver, 2);
       HYPRE_BoomerAMGSetPrintFileName(amg_solver, "driver.out.log");
       HYPRE_BoomerAMGSetCycleType(amg_solver, cycle_type);
       HYPRE_BoomerAMGSetFCycle(amg_solver, fcycle);
@@ -3094,9 +3122,11 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetCoordinates (amg_solver, coordinates);
       }
 
-      cudaProfilerStart();
+      //cudaProfilerStart();
 
+      hypre_NvtxPushRange("AMG-Setup-1");
       HYPRE_BoomerAMGSetup(amg_solver, parcsr_A, b, x);
+      hypre_NvtxPopRange();
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
       cudaDeviceSynchronize();
@@ -3110,7 +3140,9 @@ main( hypre_int argc,
       time_index = hypre_InitializeTiming("BoomerAMG Solve");
       hypre_BeginTiming(time_index);
 
+      hypre_NvtxPushRange("AMG-Solve-1");
       HYPRE_BoomerAMGSolve(amg_solver, parcsr_A, b, x);
+      hypre_NvtxPopRange();
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
       cudaDeviceSynchronize();
@@ -3135,15 +3167,15 @@ main( hypre_int argc,
 #if SECOND_TIME
       /* run a second time to check for memory leaks */
       HYPRE_ParVectorSetRandomValues(x, 775);
-      PUSH_RANGE("AMG-Setup", 1)
+      hypre_NvtxPushRange("AMG-Setup-2");
       HYPRE_BoomerAMGSetup(amg_solver, parcsr_A, b, x);
-      POP_RANGE
-      PUSH_RANGE("AMG-Solve", 2)
+      hypre_NvtxPopRange();
+      hypre_NvtxPushRange("AMG-Solve-2");
       HYPRE_BoomerAMGSolve(amg_solver, parcsr_A, b, x);
-      POP_RANGE
+      hypre_NvtxPopRange();
 #endif
 
-      cudaProfilerStop();
+      //cudaProfilerStop();
 
       HYPRE_BoomerAMGDestroy(amg_solver);
    }
@@ -6618,7 +6650,7 @@ main( hypre_int argc,
    else HYPRE_ParCSRMatrixDestroy(parcsr_A);
 
    /* for build_rhs_type = 1 or 7, we did not create ij_b  - just b*/
-   if (build_rhs_type ==1 || build_rhs_type ==7 || build_rhs_type==6)
+   if (build_rhs_type == 1 || build_rhs_type == 7 || build_rhs_type == 6 || build_rhs_type == 22)
       HYPRE_ParVectorDestroy(b);
    else
       HYPRE_IJVectorDestroy(ij_b);

@@ -311,3 +311,7 @@ void hypre_CudaCompileFlagCheck();
 
 #endif
 
+/* hypre_nvtx.c */
+void hypre_NvtxPushRangeColor(const char *name, HYPRE_Int cid);
+void hypre_NvtxPushRange(const char *name);
+void hypre_NvtxPopRange();
