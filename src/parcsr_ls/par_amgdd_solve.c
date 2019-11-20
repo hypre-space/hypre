@@ -397,50 +397,53 @@ hypre_BoomerAMGDDCorrect(hypre_ParAMGData *amg_data, HYPRE_Int type)
                                           x_tmp_data );
    hypre_ParCSRCommHandleDestroy(comm_handle);
 
-   if (type == 1)
+   if (type < 3)
    {
-      // Try rhs = f - Au
-      hypre_SeqVectorCopy(hypre_ParVectorLocalVector(hypre_ParAMGDataFArray(amg_data)[amgdd_start_level]), hypre_ParVectorLocalVector(Par_b_local));
-      hypre_CSRMatrixMatvec( -1.0, diag, hypre_ParVectorLocalVector(hypre_ParAMGDataUArray(amg_data)[amgdd_start_level]), 1.0, hypre_ParVectorLocalVector(Par_b_local) );
-   }
-   else if (type == 2)
-   {
-      // What about rhs = f - Au at the edges, but otherwise 0
-      for (i = 0; i < hypre_CSRMatrixNumRows(offd); i++)
+      if (type == 1)
       {
-         if (hypre_CSRMatrixI(offd)[i+1] - hypre_CSRMatrixI(offd)[i] > 0) 
+         // Try rhs = f - Au
+         hypre_SeqVectorCopy(hypre_ParVectorLocalVector(hypre_ParAMGDataFArray(amg_data)[amgdd_start_level]), hypre_ParVectorLocalVector(Par_b_local));
+         hypre_CSRMatrixMatvec( -1.0, diag, hypre_ParVectorLocalVector(hypre_ParAMGDataUArray(amg_data)[amgdd_start_level]), 1.0, hypre_ParVectorLocalVector(Par_b_local) );
+      }
+      else if (type == 2)
+      {
+         // What about rhs = f - Au at the edges, but otherwise 0
+         for (i = 0; i < hypre_CSRMatrixNumRows(offd); i++)
          {
-            hypre_VectorData( hypre_ParVectorLocalVector(Par_b_local) )[i] = hypre_VectorData( hypre_ParVectorLocalVector(hypre_ParAMGDataFArray(amg_data)[amgdd_start_level]) )[i];
-            for (j = hypre_CSRMatrixI(diag)[i]; j < hypre_CSRMatrixI(diag)[i+1]; j++)
-               hypre_VectorData( hypre_ParVectorLocalVector(Par_b_local) )[i] -= hypre_CSRMatrixData(diag)[j] * x_local_data[ hypre_CSRMatrixJ(diag)[j] ];
+            if (hypre_CSRMatrixI(offd)[i+1] - hypre_CSRMatrixI(offd)[i] > 0) 
+            {
+               hypre_VectorData( hypre_ParVectorLocalVector(Par_b_local) )[i] = hypre_VectorData( hypre_ParVectorLocalVector(hypre_ParAMGDataFArray(amg_data)[amgdd_start_level]) )[i];
+               for (j = hypre_CSRMatrixI(diag)[i]; j < hypre_CSRMatrixI(diag)[i+1]; j++)
+                  hypre_VectorData( hypre_ParVectorLocalVector(Par_b_local) )[i] -= hypre_CSRMatrixData(diag)[j] * x_local_data[ hypre_CSRMatrixJ(diag)[j] ];
+            }
          }
       }
+
+      // Get b = A_offd u_recv
+      hypre_CSRMatrixMatvec( -1.0, offd, x_tmp, 1.0, hypre_ParVectorLocalVector(Par_b_local) );
+
+      // If necessary, setup the solver
+      HYPRE_Solver krylov_solver = hypre_ParCompGridLocalKrylovSolver(compGrid);
+      if (!krylov_solver) 
+      {
+         HYPRE_BoomerAMGCreate(&hypre_ParCompGridLocalAMGSolver(compGrid));
+         HYPRE_ParCSRPCGCreate(MPI_COMM_SELF, &krylov_solver);
+         HYPRE_PCGSetMaxIter(krylov_solver, 10);
+         HYPRE_PCGSetPrecond(krylov_solver, (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve, (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup, hypre_ParCompGridLocalAMGSolver(compGrid));
+         HYPRE_ParCSRPCGSetup(krylov_solver, Par_A_local, Par_b_local, Par_x_local);
+      }
+
+      // Do the solve
+      HYPRE_ParCSRPCGSolve(krylov_solver, Par_A_local, Par_b_local, Par_x_local);
+
+      // Add the damped correction 
+      HYPRE_Real alpha = hypre_ParAMGDataAMGDDCorrectionStep(amg_data);
+      hypre_SeqVectorAxpy(alpha, hypre_ParVectorLocalVector(Par_x_local), hypre_ParVectorLocalVector( hypre_ParAMGDataUArray(amg_data)[amgdd_start_level] ) );
+
+      // Clean up and save the update for visualization purposes
+      hypre_ParVectorDestroy(Par_b_local);
+      hypre_ParAMGDataAMGDDCorrectionVector(amg_data) = Par_x_local;
    }
-
-   // Get b = A_offd u_recv
-   hypre_CSRMatrixMatvec( -1.0, offd, x_tmp, 1.0, hypre_ParVectorLocalVector(Par_b_local) );
-
-   // If necessary, setup the solver
-   HYPRE_Solver krylov_solver = hypre_ParCompGridLocalKrylovSolver(compGrid);
-   if (!krylov_solver) 
-   {
-      HYPRE_BoomerAMGCreate(&hypre_ParCompGridLocalAMGSolver(compGrid));
-      HYPRE_ParCSRPCGCreate(MPI_COMM_SELF, &krylov_solver);
-      HYPRE_PCGSetMaxIter(krylov_solver, 10);
-      HYPRE_PCGSetPrecond(krylov_solver, (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve, (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup, hypre_ParCompGridLocalAMGSolver(compGrid));
-      HYPRE_ParCSRPCGSetup(krylov_solver, Par_A_local, Par_b_local, Par_x_local);
-   }
-
-   // Do the solve
-   HYPRE_ParCSRPCGSolve(krylov_solver, Par_A_local, Par_b_local, Par_x_local);
-
-   // Add the damped correction 
-   HYPRE_Real alpha = hypre_ParAMGDataAMGDDCorrectionStep(amg_data);
-   hypre_SeqVectorAxpy(alpha, hypre_ParVectorLocalVector(Par_x_local), hypre_ParVectorLocalVector( hypre_ParAMGDataUArray(amg_data)[amgdd_start_level] ) );
-
-   // Clean up and save the update for visualization purposes
-   hypre_ParVectorDestroy(Par_b_local);
-   hypre_ParAMGDataAMGDDCorrectionVector(amg_data) = Par_x_local;
 
 }
 

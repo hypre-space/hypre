@@ -261,9 +261,6 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    {
       transition_level = FindTransitionLevel(amg_data);
 
-      // !!! Debug
-      if (myid == 0) printf("transition_level = %d\n", transition_level);
-
       hypre_ParCompGridCommPkgTransitionLevel(compGridCommPkg) = transition_level;
       // if (myid == 0) hypre_printf("transition_level = %d\n", transition_level);
       // Do all gather so that all processors own the coarsest levels of the AMG hierarchy
@@ -625,6 +622,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
       {
          hypre_printf("TestCompGrids1 failed! Rank %d, level %d\n", myid, level);
       }
+
       #endif
    }
 
@@ -2316,10 +2314,10 @@ RecursivelyBuildPsiComposite(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *com
       }
       else
       {
-         error_code = 1; 
+         // error_code = 1; 
          // hypre_printf("Rank %d: Error! Ran into a -1 index when building Psi_c\n", myid);
-         // if (myid == 59 && hypre_ParCompGridGlobalIndices(compGrid)[node] == 9216) hypre_printf("Rank %d: Error! Ran into a -1 index when building Psi_c,\ngrid size %d, node = %d with global id %d, index = %d with global id = %d, m = %d\n",
-         //    myid, hypre_ParCompGridNumNodes(compGrid), node, hypre_ParCompGridGlobalIndices(compGrid)[node], index, hypre_ParCompGridAGlobalColInd(compGrid)[i], m);
+         printf("Rank %d: Error! Ran into a -1 index when building Psi_c,\ngrid size %d, node = %d with global id %d, index = %d with global id = %d, m = %d\n",
+            myid, hypre_ParCompGridNumNodes(compGrid), node, hypre_ParCompGridGlobalIndices(compGrid)[node], index, hypre_ParCompGridAGlobalColInd(compGrid)[i], m);
       }
    }
 
@@ -2569,7 +2567,10 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
       {
          for (i = 0; i < num_recv_nodes[current_level][buffer_number][level]; i++) 
          {   
-            if (incoming_dest[i] >= 0) hypre_ParCompGridCoarseGlobalIndices(compGrid[level])[ incoming_dest[i] ] = recv_buffer[cnt];
+            if (incoming_dest[i] >= 0)
+            {
+               hypre_ParCompGridCoarseGlobalIndices(compGrid[level])[ incoming_dest[i] ] = recv_buffer[cnt];
+            }
             cnt++;
          }
       }
@@ -3177,7 +3178,7 @@ TestCompGrids1(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int tra
    HYPRE_Int            need_coarse_info, nodes_to_add = 1;
    HYPRE_Int            **add_flag = hypre_CTAlloc( HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST );
    HYPRE_Int            test_failed = 0;
-   HYPRE_Int            error_code;
+   HYPRE_Int            error_code = 0;
 
    HYPRE_Int myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
@@ -3207,7 +3208,11 @@ TestCompGrids1(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int tra
             {
                if (need_coarse_info) error_code = RecursivelyBuildPsiComposite(i, padding[level], compGrid[level], add_flag[level], add_flag[level+1], need_coarse_info, &nodes_to_add, padding[level+1]);
                else error_code = RecursivelyBuildPsiComposite(i, padding[level], compGrid[level], add_flag[level], NULL, need_coarse_info, &nodes_to_add, 0);
-               if (error_code) test_failed = 1;
+               if (error_code)
+               {
+                  hypre_printf("Error: expand padding\n");
+                  test_failed = 1;
+               }
             }
          }
 
@@ -3221,7 +3226,11 @@ TestCompGrids1(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int tra
          {
             // Recursively add the region of ghost nodes (do not add any coarse nodes underneath)
             if (add_flag[level][i] == num_ghost_layers + 1) error_code = RecursivelyBuildPsiComposite(i, num_ghost_layers, compGrid[level], add_flag[level], NULL, 0, NULL, 0);
-            if (error_code) test_failed = 1;
+            if (error_code)
+            {
+               hypre_printf("Error: recursively add the region of ghost nodes\n");
+               test_failed = 1;
+            }
          }
       }
       else break;
@@ -3248,10 +3257,10 @@ TestCompGrids1(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int tra
             //    test_failed = 1;
             //    if (myid == 0) hypre_printf("Error: dof that should have been marked as ghost was marked as real\n");
             // }
-            if (add_flag[level][i] > num_ghost_layers && hypre_ParCompGridARowPtr(compGrid[level])[i+1] - hypre_ParCompGridARowPtr(compGrid[level])[i] == 0) 
+            if (add_flag[level][i] > num_ghost_layers && hypre_ParCompGridRealDofMarker(compGrid[level])[i] == 0) 
             {
                test_failed = 1;
-               if (myid == 0) hypre_printf("Error: dof that should have been marked as real was marked as ghost\n");
+               hypre_printf("Error: dof that should have been marked as real was marked as ghost\n");
             }
          }
       }
@@ -3517,7 +3526,7 @@ CheckCompGridCommPkg(hypre_ParCompGridCommPkg *compGridCommPkg)
       HYPRE_Int num_send_partitions = hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg)[level];
 
       HYPRE_Int **send_buffers = hypre_CTAlloc(HYPRE_Int*, num_send_partitions, HYPRE_MEMORY_HOST);
-      HYPRE_Int **recv_buffers = hypre_CTAlloc(HYPRE_Int*, num_send_partitions, HYPRE_MEMORY_HOST);
+      HYPRE_Int **recv_buffers = hypre_CTAlloc(HYPRE_Int*, num_recv_procs, HYPRE_MEMORY_HOST);
 
       hypre_MPI_Request *requests = hypre_CTAlloc(hypre_MPI_Request, num_send_procs + num_recv_procs, HYPRE_MEMORY_HOST );
       hypre_MPI_Status *status = hypre_CTAlloc(hypre_MPI_Status, num_send_procs + num_recv_procs, HYPRE_MEMORY_HOST );
@@ -3560,10 +3569,9 @@ CheckCompGridCommPkg(hypre_ParCompGridCommPkg *compGridCommPkg)
 
       // Clean up memory
       for (i = 0; i < num_send_partitions; i++)
-      {
          hypre_TFree(send_buffers[i], HYPRE_MEMORY_HOST);
+      for (i = 0; i < num_recv_procs; i++)
          hypre_TFree(recv_buffers[i], HYPRE_MEMORY_HOST);
-      }
       hypre_TFree(send_buffers, HYPRE_MEMORY_HOST);
       hypre_TFree(recv_buffers, HYPRE_MEMORY_HOST);
       hypre_TFree(requests, HYPRE_MEMORY_HOST);

@@ -233,7 +233,7 @@ hypre_ParCompGridInitialize ( hypre_ParAMGData *amg_data, HYPRE_Int padding, HYP
    HYPRE_Int        *real_dof_marker = hypre_CTAlloc(HYPRE_Int, mem_size, HYPRE_MEMORY_HOST);
    HYPRE_Int        *coarse_global_indices_comp = NULL; 
    HYPRE_Int        *coarse_local_indices_comp = NULL;
-   if ( CF_marker_array )
+   if ( P )
    {
       coarse_global_indices_comp = hypre_CTAlloc(HYPRE_Int, mem_size, HYPRE_MEMORY_HOST); 
       coarse_local_indices_comp = hypre_CTAlloc(HYPRE_Int, mem_size, HYPRE_MEMORY_HOST);
@@ -264,18 +264,26 @@ hypre_ParCompGridInitialize ( hypre_ParAMGData *amg_data, HYPRE_Int padding, HYP
    {
       global_indices_comp[i] = hypre_ParVectorFirstIndex(residual) + i;
       real_dof_marker[i] = 1;
-      if ( CF_marker_array ) // if there is a CF_marker_array for this level (i.e. unless we are on the coarsest level)
+      if ( P ) // if there is a CF_marker_array for this level (i.e. unless we are on the coarsest level)
       {
-         if ( CF_marker_array[i] == 1 )
+         if ( CF_marker_array )
          {
-            coarse_global_indices_comp[i] = coarseIndexCounter + coarseStart;
-            coarse_local_indices_comp[i] = coarseIndexCounter;
-            coarseIndexCounter++;
+            if ( CF_marker_array[i] == 1 )
+            {
+               coarse_global_indices_comp[i] = coarseIndexCounter + coarseStart;
+               coarse_local_indices_comp[i] = coarseIndexCounter;
+               coarseIndexCounter++;
+            }
+            else 
+            {
+               coarse_global_indices_comp[i] = -1;
+               coarse_local_indices_comp[i] = -1;
+            }
          }
          else 
          {
-               coarse_global_indices_comp[i] = -1;
-               coarse_local_indices_comp[i] = -1;
+            coarse_global_indices_comp[i] = -1;
+            coarse_local_indices_comp[i] = -1;
          }
       }
       else coarse_global_indices_comp = coarse_local_indices_comp = NULL;
