@@ -7608,6 +7608,8 @@ BuildFuncsFromOneFile( HYPRE_Int              argc,
    char                 *filename;
 
    HYPRE_Int             myid, num_procs;
+   HYPRE_Int             first_row_index;
+   HYPRE_Int             last_row_index;
    HYPRE_BigInt         *partitioning;
    HYPRE_Int            *dof_func;
    HYPRE_Int            *dof_func_local;
@@ -7665,27 +7667,12 @@ BuildFuncsFromOneFile( HYPRE_Int              argc,
       fclose(fp);
    }
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-   HYPRE_BigInt  row_start;
+   HYPRE_ParCSRMatrixGetGlobalRowPartitioning(parcsr_A, 0, &partitioning);
 
-   if (myid == 0)
-   {
-      partitioning = hypre_CTAlloc(HYPRE_BigInt, num_procs+1, HYPRE_MEMORY_HOST);
-   }
-
-   row_start = hypre_ParCSRMatrixFirstRowIndex(parcsr_A);
-   hypre_MPI_Gather(&row_start, 1, HYPRE_MPI_BIG_INT, &partitioning[0],
-                    1, HYPRE_MPI_BIG_INT, 0, comm);
-   if (myid == 0)
-   {
-      partitioning[num_procs] = hypre_ParCSRMatrixNumRows(parcsr_A);
-   }
-#else
-   HYPRE_ParCSRMatrixGetRowPartitioning(parcsr_A, &partitioning);
-#endif
-
-   local_size     = partitioning[myid+1] - partitioning[myid];
-   dof_func_local = hypre_CTAlloc(HYPRE_Int, local_size, HYPRE_MEMORY_HOST);
+   first_row_index = hypre_ParCSRMatrixFirstRowIndex(parcsr_A);
+   last_row_index  = hypre_ParCSRMatrixLastRowIndex(parcsr_A);
+   local_size      = last_row_index - first_row_index + 1;
+   dof_func_local  = hypre_CTAlloc(HYPRE_Int, local_size, HYPRE_MEMORY_HOST);
    if (myid == 0)
    {
       requests = hypre_CTAlloc(hypre_MPI_Request, num_procs-1, HYPRE_MEMORY_HOST);
@@ -7693,7 +7680,7 @@ BuildFuncsFromOneFile( HYPRE_Int              argc,
       for (i = 1; i < num_procs; i++)
       {
          hypre_MPI_Isend(&dof_func[partitioning[i]],
-                         partitioning[i+1]-partitioning[i],
+                         (partitioning[i+1] - partitioning[i]),
                          HYPRE_MPI_INT, i, 0, comm, &requests[i-1]);
       }
       for (i = 0; i < local_size; i++)
@@ -7713,12 +7700,7 @@ BuildFuncsFromOneFile( HYPRE_Int              argc,
 
    if (myid == 0) hypre_TFree(dof_func, HYPRE_MEMORY_HOST);
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-   if (myid == 0)
-   {
-      hypre_TFree(partitioning, HYPRE_MEMORY_HOST);
-   }
-#endif
+   if (partitioning) hypre_TFree(partitioning, HYPRE_MEMORY_HOST);
 
    return (0);
 }
