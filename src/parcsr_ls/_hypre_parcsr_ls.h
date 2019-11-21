@@ -42,6 +42,7 @@ typedef struct
    /* setup params */
    HYPRE_Int     max_levels;
    HYPRE_Real   strong_threshold;
+   HYPRE_Int    coarsen_cut_factor;
    HYPRE_Real   strong_thresholdR; /* theta for build R: defines strong F neighbors */
    HYPRE_Real   filter_thresholdR; /* theta for filtering R  */
    HYPRE_Real   max_row_sum;
@@ -271,6 +272,7 @@ typedef struct
 #define hypre_ParAMGDataIsTriangular(amg_data) ((amg_data)->is_triangular)
 #define hypre_ParAMGDataGMRESSwitchR(amg_data) ((amg_data)->gmres_switch)
 #define hypre_ParAMGDataMaxLevels(amg_data) ((amg_data)->max_levels)
+#define hypre_ParAMGDataCoarsenCutFactor(amg_data) ((amg_data)->coarsen_cut_factor)
 #define hypre_ParAMGDataStrongThreshold(amg_data) ((amg_data)->strong_threshold)
 #define hypre_ParAMGDataStrongThresholdR(amg_data)((amg_data)->strong_thresholdR)
 #define hypre_ParAMGDataFilterThresholdR(amg_data)((amg_data)->filter_thresholdR)
@@ -771,6 +773,8 @@ HYPRE_Int HYPRE_BoomerAMGSetSeqThreshold ( HYPRE_Solver solver , HYPRE_Int seq_t
 HYPRE_Int HYPRE_BoomerAMGGetSeqThreshold ( HYPRE_Solver solver , HYPRE_Int *seq_threshold );
 HYPRE_Int HYPRE_BoomerAMGSetRedundant ( HYPRE_Solver solver , HYPRE_Int redundant );
 HYPRE_Int HYPRE_BoomerAMGGetRedundant ( HYPRE_Solver solver , HYPRE_Int *redundant );
+HYPRE_Int HYPRE_BoomerAMGSetCoarsenCutFactor( HYPRE_Solver solver, HYPRE_Int coarsen_cut_factor );
+HYPRE_Int HYPRE_BoomerAMGGetCoarsenCutFactor( HYPRE_Solver solver, HYPRE_Int *coarsen_cut_factor );
 HYPRE_Int HYPRE_BoomerAMGSetStrongThreshold ( HYPRE_Solver solver , HYPRE_Real strong_threshold );
 HYPRE_Int HYPRE_BoomerAMGGetStrongThreshold ( HYPRE_Solver solver , HYPRE_Real *strong_threshold );
 HYPRE_Int HYPRE_BoomerAMGSetStrongThresholdR ( HYPRE_Solver solver , HYPRE_Real strong_threshold );
@@ -1232,6 +1236,8 @@ HYPRE_Int hypre_BoomerAMGSetMinCoarseSize ( void *data , HYPRE_Int min_coarse_si
 HYPRE_Int hypre_BoomerAMGGetMinCoarseSize ( void *data , HYPRE_Int *min_coarse_size );
 HYPRE_Int hypre_BoomerAMGSetSeqThreshold ( void *data , HYPRE_Int seq_threshold );
 HYPRE_Int hypre_BoomerAMGGetSeqThreshold ( void *data , HYPRE_Int *seq_threshold );
+HYPRE_Int hypre_BoomerAMGSetCoarsenCutFactor( void *data, HYPRE_Int coarsen_cut_factor );
+HYPRE_Int hypre_BoomerAMGGetCoarsenCutFactor( void *data, HYPRE_Int *coarsen_cut_factor );
 HYPRE_Int hypre_BoomerAMGSetRedundant ( void *data , HYPRE_Int redundant );
 HYPRE_Int hypre_BoomerAMGGetRedundant ( void *data , HYPRE_Int *redundant );
 HYPRE_Int hypre_BoomerAMGSetStrongThreshold ( void *data , HYPRE_Real strong_threshold );
@@ -1430,9 +1436,9 @@ HYPRE_Int hypre_ParCSRRelax_Cheby_Solve ( hypre_ParCSRMatrix *A , hypre_ParVecto
 
 /* par_coarsen.c */
 HYPRE_Int hypre_BoomerAMGCoarsen ( hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , HYPRE_Int CF_init , HYPRE_Int debug_flag , HYPRE_Int **CF_marker_ptr );
-HYPRE_Int hypre_BoomerAMGCoarsenRuge ( hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , HYPRE_Int measure_type , HYPRE_Int coarsen_type , HYPRE_Int debug_flag , HYPRE_Int **CF_marker_ptr );
-HYPRE_Int hypre_BoomerAMGCoarsenFalgout ( hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , HYPRE_Int measure_type , HYPRE_Int debug_flag , HYPRE_Int **CF_marker_ptr );
-HYPRE_Int hypre_BoomerAMGCoarsenHMIS ( hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , HYPRE_Int measure_type , HYPRE_Int debug_flag , HYPRE_Int **CF_marker_ptr );
+HYPRE_Int hypre_BoomerAMGCoarsenRuge ( hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , HYPRE_Int measure_type , HYPRE_Int coarsen_type , HYPRE_Int cut_factor , HYPRE_Int debug_flag , HYPRE_Int **CF_marker_ptr );
+HYPRE_Int hypre_BoomerAMGCoarsenFalgout ( hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , HYPRE_Int measure_type , HYPRE_Int cut_factor , HYPRE_Int debug_flag , HYPRE_Int **CF_marker_ptr );
+HYPRE_Int hypre_BoomerAMGCoarsenHMIS ( hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , HYPRE_Int measure_type , HYPRE_Int cut_factor , HYPRE_Int debug_flag , HYPRE_Int **CF_marker_ptr );
 HYPRE_Int hypre_BoomerAMGCoarsenPMIS ( hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , HYPRE_Int CF_init , HYPRE_Int debug_flag , HYPRE_Int **CF_marker_ptr );
 
 HYPRE_Int hypre_BoomerAMGCoarsenPMISDevice( hypre_ParCSRMatrix *S, hypre_ParCSRMatrix *A, HYPRE_Int CF_init, HYPRE_Int debug_flag, HYPRE_Int **CF_marker_ptr );
@@ -1781,4 +1787,3 @@ HYPRE_Int hypre_MGRGetFinalRelativeResidualNorm( void *mgr_vdata, HYPRE_Real *re
 #endif
 
 #endif
-

@@ -53,6 +53,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Real          *omega;
    HYPRE_Real           schwarz_relax_wt = 1;
    HYPRE_Real           strong_threshold;
+   HYPRE_Int            coarsen_cut_factor;
    HYPRE_Int            useSabs;
    HYPRE_Real           CR_strong_th;
    HYPRE_Real           max_row_sum;
@@ -817,6 +818,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    level = 0;
 
    strong_threshold = hypre_ParAMGDataStrongThreshold(amg_data);
+   coarsen_cut_factor = hypre_ParAMGDataCoarsenCutFactor(amg_data);
    useSabs = hypre_ParAMGDataSabs(amg_data);
    CR_strong_th = hypre_ParAMGDataCRStrongTh(amg_data);
    max_row_sum = hypre_ParAMGDataMaxRowSum(amg_data);
@@ -1034,7 +1036,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          {
             if (coarsen_type == 6)
                hypre_BoomerAMGCoarsenFalgout(S, A_array[level], measure_type,
-                                             debug_flag, &CF_marker);
+                                             coarsen_cut_factor, debug_flag, &CF_marker);
             else if (coarsen_type == 7)
                hypre_BoomerAMGCoarsen(S, A_array[level], 2,
                                       debug_flag, &CF_marker);
@@ -1046,7 +1048,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                           debug_flag, &CF_marker);
             else if (coarsen_type == 10)
                hypre_BoomerAMGCoarsenHMIS(S, A_array[level], measure_type,
-                                          debug_flag, &CF_marker);
+                                          coarsen_cut_factor, debug_flag, &CF_marker);
            else if (coarsen_type == 21 || coarsen_type == 22)
            {
 #ifdef HYPRE_MIXEDINT
@@ -1132,8 +1134,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 #endif
             else if (coarsen_type)
             {
-               hypre_BoomerAMGCoarsenRuge(S, A_array[level],
-                                          measure_type, coarsen_type, debug_flag, &CF_marker);
+               hypre_BoomerAMGCoarsenRuge(S, A_array[level], measure_type, coarsen_type,
+                                          coarsen_cut_factor, debug_flag, &CF_marker);
                   /* DEBUG: SAVE CF the splitting
                   HYPRE_Int my_id;
                   MPI_Comm comm = hypre_ParCSRMatrixComm(A_array[level]);
@@ -1174,7 +1176,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                hypre_BoomerAMGCreate2ndS(S, CF_marker, num_paths,
                                          coarse_pnts_global1, &S2);
                if (coarsen_type == 10)
-                  hypre_BoomerAMGCoarsenHMIS(S2, S2, measure_type+3,
+                  hypre_BoomerAMGCoarsenHMIS(S2, S2, measure_type+3, coarsen_cut_factor,
                                              debug_flag, &CFN_marker);
                else if (coarsen_type == 8)
                   hypre_BoomerAMGCoarsenPMIS(S2, S2, 3,
@@ -1183,7 +1185,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   hypre_BoomerAMGCoarsenPMIS(S2, S2, 4,
                                              debug_flag, &CFN_marker);
                else if (coarsen_type == 6)
-                  hypre_BoomerAMGCoarsenFalgout(S2, S2, measure_type,
+                  hypre_BoomerAMGCoarsenFalgout(S2, S2, measure_type, coarsen_cut_factor,
                                                 debug_flag, &CFN_marker);
                else if (coarsen_type == 21 || coarsen_type == 22)
                   hypre_BoomerAMGCoarsenCGCb(S2, S2, measure_type,
@@ -1192,7 +1194,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   hypre_BoomerAMGCoarsen(S2, S2, 2, debug_flag, &CFN_marker);
                else if (coarsen_type)
                   hypre_BoomerAMGCoarsenRuge(S2, S2, measure_type, coarsen_type,
-                                             debug_flag, &CFN_marker);
+                                             coarsen_cut_factor, debug_flag, &CFN_marker);
                else
                   hypre_BoomerAMGCoarsen(S2, S2, 0, debug_flag, &CFN_marker);
 
@@ -1202,7 +1204,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          else if (block_mode)
          {
             if (coarsen_type == 6)
-               hypre_BoomerAMGCoarsenFalgout(SN, SN, measure_type,
+               hypre_BoomerAMGCoarsenFalgout(SN, SN, measure_type, coarsen_cut_factor,
                                              debug_flag, &CF_marker);
             else if (coarsen_type == 7)
                hypre_BoomerAMGCoarsen(SN, SN, 2,
@@ -1214,14 +1216,14 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                hypre_BoomerAMGCoarsenPMIS(SN, SN, 2,
                                           debug_flag, &CF_marker);
             else if (coarsen_type == 10)
-               hypre_BoomerAMGCoarsenHMIS(SN, SN, measure_type,
+               hypre_BoomerAMGCoarsenHMIS(SN, SN, measure_type, coarsen_cut_factor,
                                           debug_flag, &CF_marker);
             else if (coarsen_type == 21 || coarsen_type == 22)
                hypre_BoomerAMGCoarsenCGCb(SN, SN, measure_type,
                                           coarsen_type, cgc_its, debug_flag, &CF_marker);
             else if (coarsen_type)
-               hypre_BoomerAMGCoarsenRuge(SN, SN,
-                                          measure_type, coarsen_type, debug_flag, &CF_marker);
+               hypre_BoomerAMGCoarsenRuge(SN, SN, measure_type, coarsen_type,
+                                          coarsen_cut_factor, debug_flag, &CF_marker);
            else
               hypre_BoomerAMGCoarsen(SN, SN, 0,
                                      debug_flag, &CF_marker);
@@ -1229,7 +1231,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          else if (nodal > 0)
          {
             if (coarsen_type == 6)
-               hypre_BoomerAMGCoarsenFalgout(SN, SN, measure_type,
+               hypre_BoomerAMGCoarsenFalgout(SN, SN, measure_type, coarsen_cut_factor,
                                              debug_flag, &CFN_marker);
             else if (coarsen_type == 7)
                hypre_BoomerAMGCoarsen(SN, SN, 2, debug_flag, &CFN_marker);
@@ -1238,14 +1240,14 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             else if (coarsen_type == 9)
                hypre_BoomerAMGCoarsenPMIS(SN, SN, 2, debug_flag, &CFN_marker);
             else if (coarsen_type == 10)
-               hypre_BoomerAMGCoarsenHMIS(SN, SN, measure_type,
+               hypre_BoomerAMGCoarsenHMIS(SN, SN, measure_type, coarsen_cut_factor,
                                           debug_flag, &CFN_marker);
             else if (coarsen_type == 21 || coarsen_type == 22)
                hypre_BoomerAMGCoarsenCGCb(SN, SN, measure_type,
                                           coarsen_type, cgc_its, debug_flag, &CFN_marker);
             else if (coarsen_type)
-               hypre_BoomerAMGCoarsenRuge(SN, SN,
-                                          measure_type, coarsen_type, debug_flag, &CFN_marker);
+               hypre_BoomerAMGCoarsenRuge(SN, SN, measure_type, coarsen_type,
+                                          coarsen_cut_factor, debug_flag, &CFN_marker);
             else
                hypre_BoomerAMGCoarsen(SN, SN, 0,
                                       debug_flag, &CFN_marker);
@@ -1257,7 +1259,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                hypre_BoomerAMGCreate2ndS(SN, CFN_marker, num_paths,
                                          coarse_pnts_global1, &S2);
                if (coarsen_type == 10)
-                  hypre_BoomerAMGCoarsenHMIS(S2, S2, measure_type+3,
+                  hypre_BoomerAMGCoarsenHMIS(S2, S2, measure_type+3, coarsen_cut_factor,
                                              debug_flag, &CF2_marker);
                else if (coarsen_type == 8)
                   hypre_BoomerAMGCoarsenPMIS(S2, S2, 3,
@@ -1266,7 +1268,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   hypre_BoomerAMGCoarsenPMIS(S2, S2, 4,
                                              debug_flag, &CF2_marker);
                else if (coarsen_type == 6)
-                  hypre_BoomerAMGCoarsenFalgout(S2, S2, measure_type,
+                  hypre_BoomerAMGCoarsenFalgout(S2, S2, measure_type, coarsen_cut_factor,
                                                 debug_flag, &CF2_marker);
                else if (coarsen_type == 21 || coarsen_type == 22)
                   hypre_BoomerAMGCoarsenCGCb(S2, S2, measure_type,
@@ -1275,7 +1277,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   hypre_BoomerAMGCoarsen(S2, S2, 2, debug_flag, &CF2_marker);
                else if (coarsen_type)
                   hypre_BoomerAMGCoarsenRuge(S2, S2, measure_type, coarsen_type,
-                                             debug_flag, &CF2_marker);
+                                             coarsen_cut_factor, debug_flag, &CF2_marker);
                else
                   hypre_BoomerAMGCoarsen(S2, S2, 0, debug_flag, &CF2_marker);
                hypre_ParCSRMatrixDestroy(S2);

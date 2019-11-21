@@ -31,6 +31,7 @@ hypre_BoomerAMGCreate()
    HYPRE_Int    max_levels;
    HYPRE_Int    max_coarse_size;
    HYPRE_Int    min_coarse_size;
+   HYPRE_Int    coarsen_cut_factor;
    HYPRE_Real   strong_threshold;
    HYPRE_Real   strong_threshold_R;
    HYPRE_Real   filter_threshold_R;
@@ -137,6 +138,7 @@ hypre_BoomerAMGCreate()
    min_coarse_size = 0;
    seq_threshold = 0;
    redundant = 0;
+   coarsen_cut_factor = 0;
    strong_threshold = 0.25;
    strong_threshold_R = 0.25;
    filter_threshold_R = 0.0;
@@ -255,6 +257,7 @@ hypre_BoomerAMGCreate()
    hypre_ParAMGDataOuterWt(amg_data) = outer_wt;
    hypre_BoomerAMGSetMaxCoarseSize(amg_data, max_coarse_size);
    hypre_BoomerAMGSetMinCoarseSize(amg_data, min_coarse_size);
+   hypre_BoomerAMGSetCoarsenCutFactor(amg_data, coarsen_cut_factor);
    hypre_BoomerAMGSetStrongThreshold(amg_data, strong_threshold);
    hypre_BoomerAMGSetStrongThresholdR(amg_data, strong_threshold_R);
    hypre_BoomerAMGSetFilterThresholdR(amg_data, filter_threshold_R);
@@ -1076,6 +1079,46 @@ hypre_BoomerAMGGetRedundant( void *data,
    }
 
    *redundant = hypre_ParAMGDataRedundant(amg_data);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGSetCoarsenCutFactor( void       *data,
+                                    HYPRE_Int   coarsen_cut_factor )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if (coarsen_cut_factor < 0)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   hypre_ParAMGDataCoarsenCutFactor(amg_data) = coarsen_cut_factor;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGGetCoarsenCutFactor( void       *data,
+                                    HYPRE_Int  *coarsen_cut_factor )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   *coarsen_cut_factor = hypre_ParAMGDataCoarsenCutFactor(amg_data);
 
    return hypre_error_flag;
 }
@@ -4367,4 +4410,3 @@ hypre_BoomerAMGSetCpointsToKeep(void      *data,
 
    return hypre_error_flag;
 }
-

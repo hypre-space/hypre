@@ -22,6 +22,7 @@ typedef struct
 
    /* setup params */
    HYPRE_Int      max_levels;
+   HYPRE_Int      coarsen_cut_factor;
    HYPRE_Real     strong_threshold;
    HYPRE_Real     max_row_sum;
    HYPRE_Real     trunc_factor;
@@ -247,8 +248,8 @@ typedef struct
 #define hypre_ParAMGDataIsTriangular(amg_data) ((amg_data)->is_triangular)
 #define hypre_ParAMGDataGMRESSwitchR(amg_data) ((amg_data)->gmres_switch)
 #define hypre_ParAMGDataMaxLevels(amg_data) ((amg_data)->max_levels)
-#define hypre_ParAMGDataStrongThreshold(amg_data) \
-((amg_data)->strong_threshold)
+#define hypre_ParAMGDataCoarsenCutFactor(amg_data) ((amg_data)->coarsen_cut_factor)
+#define hypre_ParAMGDataStrongThreshold(amg_data) ((amg_data)->strong_threshold)
 #define hypre_ParAMGDataMaxRowSum(amg_data) ((amg_data)->max_row_sum)
 #define hypre_ParAMGDataTruncFactor(amg_data) ((amg_data)->trunc_factor)
 #define hypre_ParAMGDataAggTruncFactor(amg_data) ((amg_data)->agg_trunc_factor)
@@ -462,6 +463,3 @@ typedef struct
 #endif
 
 #endif
-
-
-

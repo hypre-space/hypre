@@ -224,6 +224,16 @@ HYPRE_Int HYPRE_BoomerAMGSetMaxLevels(HYPRE_Solver solver,
                                       HYPRE_Int    max_levels);
 
 /**
+ * (Optional) Sets cut factor for choosing isolated points
+ * during coarsening according to the rows' density. The default is 0.
+ * If nnzrow > coarsen_cut_factor*avg_nnzrow, where avg_nnzrow is the
+ * average number of nonzeros of the global matrix, holds for a given row,
+ * it is set as fine, and interpolation weights are not computed.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetCoarsenCutFactor(HYPRE_Solver solver,
+                                             HYPRE_Int    coarsen_cut_factor);
+
+/**
  * (Optional) Sets AMG strength threshold. The default is 0.25.
  * For 2d Laplace operators, 0.25 is a good value, for 3d Laplace
  * operators, 0.5 or 0.6 is a better value. For elasticity problems,

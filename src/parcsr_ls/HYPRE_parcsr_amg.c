@@ -210,6 +210,24 @@ HYPRE_BoomerAMGGetRedundant( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetRedundant, HYPRE_BoomerAMGGetRedundant
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetCoarsenCutFactor( HYPRE_Solver solver,
+                                    HYPRE_Int    coarsen_cut_factor )
+{
+   return( hypre_BoomerAMGSetCoarsenCutFactor( (void *) solver, coarsen_cut_factor ) );
+}
+
+HYPRE_Int
+HYPRE_BoomerAMGGetCoarsenCutFactor( HYPRE_Solver  solver,
+                                    HYPRE_Int    *coarsen_cut_factor )
+{
+   return( hypre_BoomerAMGGetCoarsenCutFactor( (void *) solver, coarsen_cut_factor ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetStrongThreshold, HYPRE_BoomerAMGGetStrongThreshold
  *--------------------------------------------------------------------------*/
 

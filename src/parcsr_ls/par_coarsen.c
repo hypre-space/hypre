@@ -865,6 +865,7 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
                             hypre_ParCSRMatrix    *A,
                             HYPRE_Int              measure_type,
                             HYPRE_Int              coarsen_type,
+                            HYPRE_Int              cut_factor,
                             HYPRE_Int              debug_flag,
                             HYPRE_Int            **CF_marker_ptr)
 {
@@ -884,6 +885,10 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    HYPRE_Int        num_variables = hypre_CSRMatrixNumRows(S_diag);
    HYPRE_Int        num_cols_offd = hypre_CSRMatrixNumCols(S_offd);
    HYPRE_BigInt    *col_map_offd  = hypre_ParCSRMatrixColMapOffd(S);
+
+   HYPRE_BigInt     num_nonzeros    = hypre_ParCSRMatrixNumNonzeros(A);
+   HYPRE_BigInt     global_num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
+   HYPRE_Int        avg_nnzrow      = num_nonzeros/global_num_rows;
 
    hypre_CSRMatrix *S_ext = NULL;
    HYPRE_Int       *S_ext_i = NULL;
@@ -911,6 +916,7 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    HYPRE_Int        set_empty = 1;
    HYPRE_Int        C_i_nonempty = 0;
    //HYPRE_Int      num_nonzeros;
+   HYPRE_Int        cut, nnzrow;
    HYPRE_Int        num_procs, my_id;
    HYPRE_Int        num_sends = 0;
    HYPRE_BigInt     first_col;
@@ -1128,34 +1134,29 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
       }
    }
 
-#if 1
-   HYPRE_BigInt  num_nonzeros    = hypre_ParCSRMatrixNumNonzeros(A);
-   HYPRE_BigInt  global_num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
-   HYPRE_Int     avg_nnzrow      = num_nonzeros/global_num_rows;
-   HYPRE_Int     cut_factor      = 10;
-   HYPRE_Int     cut             = cut_factor*avg_nnzrow;
-   HYPRE_Int     nnzrow;
-
+   /* Set dense rows as SF_PT */
+   cut = cut_factor*avg_nnzrow;
+   if (cut > 0)
+   {
 #ifdef DEBUG
    hypre_printf("[%d]: average nonzeros per row = %d\n", my_id, avg_nnzrow);
 #endif
-   for (j = 0; j < num_variables; j++)
-   {
-      nnzrow = (A_i[j+1] - A_i[j]) + (A_offd_i[j+1] - A_offd_i[j]);
-      if (nnzrow > cut)
+      for (j = 0; j < num_variables; j++)
       {
-         if (CF_marker[j] == UNDECIDED)
+         nnzrow = (A_i[j+1] - A_i[j]) + (A_offd_i[j+1] - A_offd_i[j]);
+         if (nnzrow > cut)
          {
-            num_left--;
-         }
-         CF_marker[j] = SF_PT;
-
+            if (CF_marker[j] == UNDECIDED)
+            {
+               num_left--;
+            }
+            CF_marker[j] = SF_PT;
 #ifdef DEBUG
-         hypre_printf("[%d]: row %d has %d nonzero connections and became SF_PT\n", my_id, j, nnzrow);
+   hypre_printf("[%d]: row %d has %d nonzero connections and became SF_PT\n", my_id, j, nnzrow);
 #endif
+         }
       }
    }
-#endif
 
    for (j = 0; j < num_variables; j++)
    {
@@ -1995,11 +1996,12 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
 
 
 HYPRE_Int
-hypre_BoomerAMGCoarsenFalgout( hypre_ParCSRMatrix    *S,
-                               hypre_ParCSRMatrix    *A,
-                               HYPRE_Int                    measure_type,
-                               HYPRE_Int                    debug_flag,
-                               HYPRE_Int                  **CF_marker_ptr)
+hypre_BoomerAMGCoarsenFalgout( hypre_ParCSRMatrix  *S,
+                               hypre_ParCSRMatrix  *A,
+                               HYPRE_Int            measure_type,
+                               HYPRE_Int            cut_factor,
+                               HYPRE_Int            debug_flag,
+                               HYPRE_Int          **CF_marker_ptr)
 {
    HYPRE_Int              ierr = 0;
 
@@ -2007,11 +2009,11 @@ hypre_BoomerAMGCoarsenFalgout( hypre_ParCSRMatrix    *S,
     * Perform Ruge coarsening followed by CLJP coarsening
     *-------------------------------------------------------*/
 
-   ierr += hypre_BoomerAMGCoarsenRuge (S, A, measure_type, 6, debug_flag,
-         CF_marker_ptr);
+   ierr += hypre_BoomerAMGCoarsenRuge (S, A, measure_type, 6, cut_factor,
+                                       debug_flag, CF_marker_ptr);
 
    ierr += hypre_BoomerAMGCoarsen (S, A, 1, debug_flag,
-         CF_marker_ptr);
+                                   CF_marker_ptr);
 
    return (ierr);
 }
@@ -2779,6 +2781,7 @@ HYPRE_Int
 hypre_BoomerAMGCoarsenHMIS( hypre_ParCSRMatrix    *S,
                             hypre_ParCSRMatrix    *A,
                             HYPRE_Int              measure_type,
+                            HYPRE_Int              cut_factor,
                             HYPRE_Int              debug_flag,
                             HYPRE_Int            **CF_marker_ptr)
 {
@@ -2788,11 +2791,11 @@ hypre_BoomerAMGCoarsenHMIS( hypre_ParCSRMatrix    *S,
     * Perform Ruge coarsening followed by CLJP coarsening
     *-------------------------------------------------------*/
 
-   ierr += hypre_BoomerAMGCoarsenRuge (S, A, measure_type, 10, debug_flag,
-                                CF_marker_ptr);
+   ierr += hypre_BoomerAMGCoarsenRuge (S, A, measure_type, 10, cut_factor,
+                                       debug_flag, CF_marker_ptr);
 
    ierr += hypre_BoomerAMGCoarsenPMISHost (S, A, 1, debug_flag,
-                                CF_marker_ptr);
+                                           CF_marker_ptr);
 
    return (ierr);
 }
