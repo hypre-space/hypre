@@ -1247,7 +1247,7 @@ hypre_CSRMatrixComputeRowSumHost( hypre_CSRMatrix *A,
 
    for (i = 0; i < nrows; i++)
    {
-      HYPRE_Complex row_sum_i = 0.0;
+      HYPRE_Complex row_sum_i = set_or_add[0] == 's' ? 0.0 : row_sum[i];
 
       for (j = A_i[i]; j < A_i[i+1]; j++)
       {
@@ -1258,26 +1258,19 @@ hypre_CSRMatrixComputeRowSumHost( hypre_CSRMatrix *A,
 
          if (type == 0)
          {
-            row_sum_i += A_data[j];
+            row_sum_i += scal * A_data[j];
          }
          else if (type == 1)
          {
-            row_sum_i += fabs(A_data[j]);
+            row_sum_i += scal * fabs(A_data[j]);
          }
          else if (type == 2)
          {
-            row_sum_i += A_data[j] * A_data[j];
+            row_sum_i += scal * A_data[j] * A_data[j];
          }
       }
 
-      if (set_or_add[0] == 's')
-      {
-         row_sum[i] = scal * row_sum_i;
-      }
-      else
-      {
-         row_sum[i] += scal * row_sum_i;
-      }
+      row_sum[i] = row_sum_i;
    }
 }
 

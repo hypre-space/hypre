@@ -321,7 +321,7 @@ hypre_ParCSRMatrixSetNumNonzeros_core( hypre_ParCSRMatrix *matrix, const char* f
    hypre_CSRMatrixCheckSetNumNonzeros(diag);
    hypre_CSRMatrixCheckSetNumNonzeros(offd);
 
-   if (format[0] == 'i')
+   if (format[0] == 'I')
    {
       HYPRE_BigInt total_num_nonzeros;
       HYPRE_BigInt local_num_nonzeros;
@@ -333,7 +333,7 @@ hypre_ParCSRMatrixSetNumNonzeros_core( hypre_ParCSRMatrix *matrix, const char* f
 
       hypre_ParCSRMatrixNumNonzeros(matrix) = total_num_nonzeros;
    }
-   else if (format[0] == 'd')
+   else if (format[0] == 'D')
    {
       HYPRE_Real total_num_nonzeros;
       HYPRE_Real local_num_nonzeros;
@@ -360,7 +360,7 @@ hypre_ParCSRMatrixSetNumNonzeros_core( hypre_ParCSRMatrix *matrix, const char* f
 HYPRE_Int
 hypre_ParCSRMatrixSetNumNonzeros( hypre_ParCSRMatrix *matrix )
 {
-   return hypre_ParCSRMatrixSetNumNonzeros_core(matrix, "int");
+   return hypre_ParCSRMatrixSetNumNonzeros_core(matrix, "Int");
 }
 
 /*--------------------------------------------------------------------------
@@ -370,7 +370,7 @@ hypre_ParCSRMatrixSetNumNonzeros( hypre_ParCSRMatrix *matrix )
 HYPRE_Int
 hypre_ParCSRMatrixSetDNumNonzeros( hypre_ParCSRMatrix *matrix )
 {
-   return hypre_ParCSRMatrixSetNumNonzeros_core(matrix, "double");
+   return hypre_ParCSRMatrixSetNumNonzeros_core(matrix, "Double");
 }
 
 /*--------------------------------------------------------------------------
