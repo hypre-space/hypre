@@ -2286,7 +2286,7 @@ main( hypre_int argc,
    time_index = hypre_InitializeTiming("RHS and Initial Guess");
    hypre_BeginTiming(time_index);
 
-   if ( (build_rhs_type == 0) || (build_rhs_type == 1) || (build_rhs_type == 7))
+   if ( (build_rhs_type == 0) || (build_rhs_type == 1) || (build_rhs_type == 7) )
    {
       /* RHS */
       if (build_rhs_type == 0)
@@ -6515,11 +6515,15 @@ main( hypre_int argc,
    if (test_ij || build_matrix_type == -1) HYPRE_IJMatrixDestroy(ij_A);
    else HYPRE_ParCSRMatrixDestroy(parcsr_A);
 
-   /* for build_rhs_type = 1 or 7, we did not create ij_b  - just b*/
-   if (build_rhs_type ==1 || build_rhs_type ==7 || build_rhs_type==6)
+   /* for build_rhs_type = 0, 1 or 7, we did not create ij_b  - just b*/
+   if ( (build_rhs_type == 0) || (build_rhs_type == 1) || (build_rhs_type == 7) )
+   {
       HYPRE_ParVectorDestroy(b);
+   }
    else
+   {
       HYPRE_IJVectorDestroy(ij_b);
+   }
 
    HYPRE_IJVectorDestroy(ij_x);
 
@@ -7526,6 +7530,11 @@ BuildParFromOneFile( HYPRE_Int            argc,
 
    HYPRE_CSRMatrixToParCSRMatrix(hypre_MPI_COMM_WORLD, A_CSR, row_part, col_part, A_ptr);
 
+   if (myid == 0)
+   {
+      HYPRE_CSRMatrixDestroy(A_CSR);
+   }
+
    return (0);
 }
 
@@ -7623,7 +7632,6 @@ BuildFuncsFromOneFile( HYPRE_Int              argc,
    }
 
    HYPRE_ParCSRMatrixGetGlobalRowPartitioning(parcsr_A, 0, &partitioning);
-
    first_row_index = hypre_ParCSRMatrixFirstRowIndex(parcsr_A);
    last_row_index  = hypre_ParCSRMatrixLastRowIndex(parcsr_A);
    local_size      = last_row_index - first_row_index + 1;
@@ -7714,6 +7722,7 @@ BuildRhsParFromOneFile( HYPRE_Int            argc,
       b_CSR = HYPRE_VectorRead(filename);
    }
    HYPRE_VectorToParVector(hypre_MPI_COMM_WORLD, b_CSR, partitioning, &b);
+   hypre_ParVectorSetPartitioningOwner(b, 0);
 
    *b_ptr = b;
 

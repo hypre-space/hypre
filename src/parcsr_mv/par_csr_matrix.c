@@ -1302,12 +1302,6 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm         comm,
          send_start = 5 + (num_procs + 1);
          hypre_MPI_Scatter(&global_data[send_start], 1, HYPRE_MPI_BIG_INT,
                            &col_starts[1], 1, HYPRE_MPI_BIG_INT, 0, comm);
-
-         if (my_id == 0)
-         {
-            free_global_row_starts = 1;
-            free_global_col_starts = 1;
-         }
       }
       else if ((global_data[3] == 0) || (global_data[3] == 1))
       {
@@ -1325,11 +1319,6 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm         comm,
          {
             col_starts = row_starts;
          }
-
-         if (my_id == 0)
-         {
-            free_global_row_starts = 1;
-         }
       }
       else
       {
@@ -1342,11 +1331,6 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm         comm,
          send_start = 5;
          hypre_MPI_Scatter(&global_data[send_start], 1, HYPRE_MPI_BIG_INT,
                            &col_starts[1], 1, HYPRE_MPI_BIG_INT, 0, comm);
-
-         if (my_id == 0)
-         {
-            free_global_col_starts = 1;
-         }
       }
 #else
       hypre_MPI_Bcast(&global_data[3], (global_size - 3), HYPRE_MPI_BIG_INT, 0, comm);
@@ -1401,10 +1385,12 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm         comm,
       if (!global_row_starts)
       {
          hypre_GeneratePartitioning(global_num_rows, num_procs, &global_row_starts);
+         free_global_row_starts = 1;
       }
       if (!global_col_starts)
       {
          hypre_GeneratePartitioning(global_num_rows, num_procs, &global_col_starts);
+         free_global_col_starts = 1;
       }
 #else
       if (!global_row_starts)
@@ -1415,7 +1401,6 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm         comm,
       {
          global_col_starts = hypre_ParCSRMatrixColStarts(parcsr_A);
       }
-
 #endif
 
       num_rows_proc     = hypre_CTAlloc(HYPRE_Int, num_procs, HYPRE_MEMORY_HOST);
