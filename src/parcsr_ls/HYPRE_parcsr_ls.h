@@ -235,19 +235,26 @@ HYPRE_Int HYPRE_BoomerAMGSetCoarsenCutFactor(HYPRE_Solver solver,
 
 /**
  * (Optional) Sets AMG strength threshold. The default is 0.25.
- * For 2d Laplace operators, 0.25 is a good value, for 3d Laplace
+ * For 2D Laplace operators, 0.25 is a good value, for 3D Laplace
  * operators, 0.5 or 0.6 is a better value. For elasticity problems,
- * a large strength threshold, such as 0.9, is often better. The
- * strong threshold for R is strong connections used in building an
- * approximate ideal restriction, and the filter threshold for R a
- * threshold to eliminate small entries from R after building it.
+ * a large strength threshold, such as 0.9, is often better.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetStrongThreshold(HYPRE_Solver solver,
                                             HYPRE_Real   strong_threshold);
 
+/**
+ * (Optional) The strong threshold for R is strong connections used
+ * in building an approximate ideal restriction.
+ * Default value is 0.25.
+ **/
 HYPRE_Int HYPRE_BoomerAMGSetStrongThresholdR(HYPRE_Solver solver,
                                              HYPRE_Real   strong_threshold);
 
+/**
+ * (Optional) The filter threshold for R is used to eliminate small entries
+ * of the approximate ideal restriction after building it.
+ * Default value is 0.0, which disables filtering.
+ **/
 HYPRE_Int HYPRE_BoomerAMGSetFilterThresholdR(HYPRE_Solver solver,
                                              HYPRE_Real   filter_threshold);
 
@@ -338,7 +345,7 @@ HYPRE_Int HYPRE_BoomerAMGSetNonGalerkinTol (HYPRE_Solver solver,
 HYPRE_Int HYPRE_BoomerAMGSetLevelNonGalerkinTol (HYPRE_Solver solver,
                                           HYPRE_Real   nongalerkin_tol,
                                           HYPRE_Int  level);
-/*
+/**
  * (Optional) Defines the non-Galerkin drop-tolerance (old version)
  **/
 HYPRE_Int HYPRE_BoomerAMGSetNonGalerkTol (HYPRE_Solver solver,
@@ -667,7 +674,7 @@ HYPRE_Int HYPRE_BoomerAMGSetSeqThreshold(HYPRE_Solver solver,
 HYPRE_Int HYPRE_BoomerAMGSetRedundant(HYPRE_Solver solver,
                                       HYPRE_Int    redundant);
 
-/*
+/**
  * (Optional) Defines the number of sweeps for the fine and coarse grid,
  * the up and down cycle.
  *
@@ -779,7 +786,7 @@ HYPRE_Int HYPRE_BoomerAMGSetCycleRelaxType(HYPRE_Solver  solver,
 HYPRE_Int HYPRE_BoomerAMGSetRelaxOrder(HYPRE_Solver  solver,
                                        HYPRE_Int     relax_order);
 
-/*
+/**
  * (Optional) Defines in which order the points are relaxed.
  *
  * Note: This routine will be phased out!!!!
@@ -788,7 +795,7 @@ HYPRE_Int HYPRE_BoomerAMGSetRelaxOrder(HYPRE_Solver  solver,
 HYPRE_Int HYPRE_BoomerAMGSetGridRelaxPoints(HYPRE_Solver   solver,
                                             HYPRE_Int    **grid_relax_points);
 
-/*
+/**
  * (Optional) Defines the relaxation weight for smoothed Jacobi and hybrid SOR.
  *
  * Note: This routine will be phased out!!!!
@@ -879,20 +886,20 @@ HYPRE_Int HYPRE_BoomerAMGSetChebyOrder(HYPRE_Solver solver,
 HYPRE_Int HYPRE_BoomerAMGSetChebyFraction (HYPRE_Solver solver,
                                            HYPRE_Real   ratio);
 
-/*
+/**
  * (Optional) Defines whether matrix should be scaled.
  *  The default is 1 (i.e., scaled).
  **/
 HYPRE_Int HYPRE_BoomerAMGSetChebyScale (HYPRE_Solver solver,
                                            HYPRE_Int   scale);
-/*
+/**
  * (Optional) Defines which polynomial variant should be used.
  *  The default is 0 (i.e., scaled).
  **/
 HYPRE_Int HYPRE_BoomerAMGSetChebyVariant (HYPRE_Solver solver,
                                            HYPRE_Int   variant);
 
-/*
+/**
  * (Optional) Defines how to estimate eigenvalues.
  *  The default is 10 (i.e., 10 CG iterations are used to find extreme
  *  eigenvalues.) If eig_est=0, the largest eigenvalue is estimated
@@ -1121,13 +1128,15 @@ HYPRE_Int
 HYPRE_BoomerAMGSetADropTol( HYPRE_Solver  solver,
                             HYPRE_Real    A_drop_tol  );
 
-/* drop the entries that are not on the diagonal and smaller than
- * its row norm: type 1: 1-norm, 2: 2-norm, -1: infinity norm */
+/**
+ * (Optional) Drop the entries that are not on the diagonal and smaller than
+ * its row norm: type 1: 1-norm, 2: 2-norm, -1: infinity norm
+ **/
 HYPRE_Int
 HYPRE_BoomerAMGSetADropType( HYPRE_Solver  solver,
                              HYPRE_Int     A_drop_type  );
 
-/*
+/**
  * (Optional) Name of file to which BoomerAMG will print;
  * cf HYPRE\_BoomerAMGSetPrintLevel.  (Presently this is ignored).
  **/
@@ -1198,37 +1207,37 @@ HYPRE_Int HYPRE_BoomerAMGSetModuleRAP2(HYPRE_Solver solver,
 HYPRE_Int HYPRE_BoomerAMGSetKeepTranspose(HYPRE_Solver solver,
                                       HYPRE_Int    keepTranspose);
 
-/*
+/**
  * HYPRE_BoomerAMGSetPlotGrids
  **/
 HYPRE_Int HYPRE_BoomerAMGSetPlotGrids (HYPRE_Solver solver,
                                        HYPRE_Int    plotgrids);
 
-/*
+/**
  * HYPRE_BoomerAMGSetPlotFilename
  **/
 HYPRE_Int HYPRE_BoomerAMGSetPlotFileName (HYPRE_Solver  solver,
                                           const char   *plotfilename);
 
-/*
+/**
  * HYPRE_BoomerAMGSetCoordDim
  **/
 HYPRE_Int HYPRE_BoomerAMGSetCoordDim (HYPRE_Solver solver,
                                       HYPRE_Int    coorddim);
 
-/*
+/**
  * HYPRE_BoomerAMGSetCoordinates
  **/
 HYPRE_Int HYPRE_BoomerAMGSetCoordinates (HYPRE_Solver  solver,
                                          float        *coordinates);
 #ifdef HYPRE_USING_DSUPERLU
-/*
+/**
  * HYPRE_BoomerAMGSetDSLUThreshold
  **/
-
 HYPRE_Int HYPRE_BoomerAMGSetDSLUThreshold (HYPRE_Solver solver,
                                 HYPRE_Int    slu_threshold);
 #endif
+
 /**
  * (Optional) Fix C points to be kept till a specified coarse level.
  *
@@ -1238,10 +1247,11 @@ HYPRE_Int HYPRE_BoomerAMGSetDSLUThreshold (HYPRE_Solver solver,
  * @param cpt_coarse_index [IN] indexes of C points to be kept
  **/
 HYPRE_Int HYPRE_BoomerAMGSetCpointsToKeep(HYPRE_Solver solver,
-				HYPRE_Int  cpt_coarse_level,
-				HYPRE_Int  num_cpt_coarse,
-				HYPRE_Int *cpt_coarse_index);
-/*
+                                          HYPRE_Int    cpt_coarse_level,
+                                          HYPRE_Int    num_cpt_coarse,
+                                          HYPRE_Int   *cpt_coarse_index);
+
+/**
  * (Optional) if Sabs equals 1, the strength of connection test is based
  * on the absolute value of the matrix coefficients
  **/
