@@ -42,7 +42,12 @@ typedef struct
    HYPRE_Int             pcg_num_its;
    HYPRE_Real            final_rel_res_norm;
    HYPRE_Int             time_index;
-   HYPRE_Real            setup_time;
+
+   HYPRE_Real            setup_time1;
+   HYPRE_Real            setup_time2;
+   HYPRE_Real            solve_time1;
+   HYPRE_Real            solve_time2;
+
    MPI_Comm              comm;
 
    /* additional information (place-holder currently used to print norms) */
@@ -109,7 +114,10 @@ hypre_AMGHybridCreate( )
    (AMGhybrid_data -> pcg_precond_setup) = NULL;
    (AMGhybrid_data -> pcg_precond)       = NULL;
    (AMGhybrid_data -> pcg_solver)        = NULL;
-   (AMGhybrid_data -> setup_time)        = 0.0;
+   (AMGhybrid_data -> setup_time1)       = 0.0;
+   (AMGhybrid_data -> setup_time2)       = 0.0;
+   (AMGhybrid_data -> solve_time1)       = 0.0;
+   (AMGhybrid_data -> solve_time2)       = 0.0;
 
    /* initialize */
    (AMGhybrid_data -> dscg_num_its)      = 0;
@@ -1533,8 +1541,8 @@ hypre_AMGHybridSetNodal( void   *AMGhybrid_vdata,
  * hypre_AMGHybridGetNumIterations
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_AMGHybridGetSetupTime( void          *AMGhybrid_vdata,
-                             HYPRE_Real    *time      )
+hypre_AMGHybridGetSetupSolveTime( void          *AMGhybrid_vdata,
+                                  HYPRE_Real    *time )
 {
    hypre_AMGHybridData *AMGhybrid_data =(hypre_AMGHybridData *) AMGhybrid_vdata;
    if (!AMGhybrid_data)
@@ -1543,13 +1551,15 @@ hypre_AMGHybridGetSetupTime( void          *AMGhybrid_vdata,
       return hypre_error_flag;
    }
 
-   HYPRE_Real t = AMGhybrid_data->setup_time;
-   HYPRE_Real max_t;
+   HYPRE_Real t[4];
+   t[0] = AMGhybrid_data->setup_time1;
+   t[1] = AMGhybrid_data->solve_time1;
+   t[2] = AMGhybrid_data->setup_time2;
+   t[3] = AMGhybrid_data->solve_time2;
+
    MPI_Comm comm = AMGhybrid_data->comm;
 
-   hypre_MPI_Allreduce(&t, &max_t, 1, hypre_MPI_REAL, hypre_MPI_MAX, comm);
-
-   *time = max_t;
+   hypre_MPI_Allreduce(t, time, 4, hypre_MPI_REAL, hypre_MPI_MAX, comm);
 
    return hypre_error_flag;
 }
@@ -1664,8 +1674,8 @@ hypre_AMGHybridSetup( void               *AMGhybrid_vdata,
 HYPRE_Int
 hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
                       hypre_ParCSRMatrix *A,
-                      hypre_ParVector *b,
-                      hypre_ParVector *x            )
+                      hypre_ParVector    *b,
+                      hypre_ParVector    *x )
 {
    hypre_AMGHybridData  *AMGhybrid_data    =(hypre_AMGHybridData *) AMGhybrid_vdata;
 
@@ -1738,7 +1748,7 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
    HYPRE_Int          nongalerk_num_tol;
    HYPRE_Real        *nongalerkin_tol;
 
-   HYPRE_Real         tt;
+   HYPRE_Real         tt1, tt2;
 
    if (!AMGhybrid_data)
    {
@@ -1746,7 +1756,10 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
       return hypre_error_flag;
    }
 
-   AMGhybrid_data->setup_time = 0.0;
+   AMGhybrid_data->setup_time1 = 0.0;
+   AMGhybrid_data->setup_time2 = 0.0;
+   AMGhybrid_data->solve_time1 = 0.0;
+   AMGhybrid_data->solve_time2 = 0.0;
    MPI_Comm  comm = hypre_ParCSRMatrixComm(A);
    (AMGhybrid_data -> comm) = comm;
    /*-----------------------------------------------------------------------
@@ -1830,6 +1843,8 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
       }
       if (solver_type == 1)
       {
+         tt1 = hypre_MPI_Wtime();
+
          if (pcg_solver == NULL)
          {
             pcg_functions =
@@ -1867,18 +1882,17 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
                              (HYPRE_Int (*)(void*, void*, void*, void*)) HYPRE_ParCSRDiagScaleSetup,
                              (void*) pcg_precond);
 
-         tt = hypre_MPI_Wtime();
-
          hypre_PCGSetup(pcg_solver, (void*) A, (void*) b, (void*) x);
-
-         tt = hypre_MPI_Wtime() - tt;
-         AMGhybrid_data->setup_time += tt;
-
          (AMGhybrid_data -> pcg_solver) = pcg_solver;
+
+         tt2 = hypre_MPI_Wtime();
+         AMGhybrid_data->setup_time1 = tt2 - tt1;
 
          /*---------------------------------------------------------------------
           * Solve with DSCG.
           *---------------------------------------------------------------------*/
+         tt1 = tt2;
+
          hypre_PCGSolve(pcg_solver, (void*) A, (void*) b, (void*) x);
 
          /*---------------------------------------------------------------------
@@ -1890,9 +1904,13 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
 
          hypre_PCGGetConverged(pcg_solver, &converged);
 
+         tt2 = hypre_MPI_Wtime();
+         AMGhybrid_data->solve_time1 = tt2 - tt1;
       }
       else if (solver_type == 2)
       {
+         tt1 = hypre_MPI_Wtime();
+
          if (pcg_solver == NULL)
          {
             gmres_functions =
@@ -1929,18 +1947,17 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
                                (HYPRE_Int (*)(void*, void*, void*, void*)) HYPRE_ParCSRDiagScaleSetup,
                                (void*) pcg_precond);
 
-         tt = hypre_MPI_Wtime();
-
          hypre_GMRESSetup(pcg_solver, (void*) A, (void*) b, (void*) x);
-
-         tt = hypre_MPI_Wtime() - tt;
-         AMGhybrid_data->setup_time += tt;
-
          (AMGhybrid_data -> pcg_solver) = pcg_solver;
+
+         tt2 = hypre_MPI_Wtime();
+         AMGhybrid_data->setup_time1 = tt2 - tt1;
 
          /*---------------------------------------------------------------------
           * Solve with diagonal scaled GMRES
           *---------------------------------------------------------------------*/
+         tt1 = tt2;
+
          hypre_GMRESSolve(pcg_solver, (void*) A, (void*) b, (void*) x);
 
          /*---------------------------------------------------------------------
@@ -1952,9 +1969,13 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
 
          hypre_GMRESGetConverged(pcg_solver, &converged);
 
+         tt2 = hypre_MPI_Wtime();
+         AMGhybrid_data->solve_time1 = tt2 - tt1;
       }
       else if (solver_type == 3)
       {
+         tt1 = hypre_MPI_Wtime();
+
          if (pcg_solver == NULL)
          {
             bicgstab_functions =
@@ -1987,18 +2008,17 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
                                   (HYPRE_Int (*)(void*, void*, void*, void*)) HYPRE_ParCSRDiagScaleSetup,
                                   (void*) pcg_precond);
 
-         tt = hypre_MPI_Wtime();
-
          hypre_BiCGSTABSetup(pcg_solver, (void*) A, (void*) b, (void*) x);
-
-         tt = hypre_MPI_Wtime() - tt;
-         AMGhybrid_data->setup_time += tt;
-
          (AMGhybrid_data -> pcg_solver) = pcg_solver;
+
+         tt2 = hypre_MPI_Wtime();
+         AMGhybrid_data->setup_time1 = tt2 - tt1;
 
          /*---------------------------------------------------------------------
           * Solve with diagonal scaled BiCGSTAB
           *---------------------------------------------------------------------*/
+         tt1 = tt2;
+
          hypre_BiCGSTABSolve(pcg_solver, (void*) A, (void*) b, (void*) x);
 
          /*---------------------------------------------------------------------
@@ -2010,6 +2030,8 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
 
          hypre_BiCGSTABGetConverged(pcg_solver, &converged);
 
+         tt2 = hypre_MPI_Wtime();
+         AMGhybrid_data->solve_time1 = tt2 - tt1;
       }
    }
 
@@ -2028,6 +2050,8 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
     *-----------------------------------------------------------------------*/
    else
    {
+      tt1 = hypre_MPI_Wtime();
+
       /*--------------------------------------------------------------------
        * Free up previous PCG solver structure and set up a new one.
        *--------------------------------------------------------------------*/
@@ -2156,14 +2180,14 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
                              (HYPRE_Int (*)(void*, void*, void*, void*)) pcg_precond_setup,
                              (void*) pcg_precond);
 
-         tt = hypre_MPI_Wtime();
-
          hypre_PCGSetup(pcg_solver, (void*) A, (void*) b, (void*) x);
 
-         tt = hypre_MPI_Wtime() - tt;
-         AMGhybrid_data->setup_time += tt;
+         tt2 = hypre_MPI_Wtime();
+         AMGhybrid_data->setup_time2 = tt2 - tt1;
 
          /* Solve */
+         tt1 = tt2;
+
          hypre_PCGSolve(pcg_solver, (void*) A, (void*) b, (void*) x);
 
          /* Get information from PCG that is always logged in AMGhybrid solver*/
@@ -2174,6 +2198,9 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
             hypre_PCGGetFinalRelativeResidualNorm(pcg_solver, &res_norm);
             (AMGhybrid_data -> final_rel_res_norm) = res_norm;
          }
+
+         tt2 = hypre_MPI_Wtime();
+         AMGhybrid_data->solve_time2 = tt2 - tt1;
       }
       else if (solver_type == 2)
       {
@@ -2182,14 +2209,14 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
                                (HYPRE_Int (*)(void*, void*, void*, void*)) pcg_precond_setup,
                                (void*) pcg_precond);
 
-         tt = hypre_MPI_Wtime();
-
          hypre_GMRESSetup(pcg_solver, (void*) A, (void*) b, (void*) x);
 
-         tt = hypre_MPI_Wtime() - tt;
-         AMGhybrid_data->setup_time += tt;
+         tt2 = hypre_MPI_Wtime();
+         AMGhybrid_data->setup_time2 = tt2 - tt1;
 
          /* Solve */
+         tt1 = tt2;
+
          hypre_GMRESSolve(pcg_solver, (void*) A, (void*) b, (void*) x);
 
          /* Get information from GMRES that is always logged in AMGhybrid solver*/
@@ -2200,6 +2227,9 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
             hypre_GMRESGetFinalRelativeResidualNorm(pcg_solver, &res_norm);
             (AMGhybrid_data -> final_rel_res_norm) = res_norm;
          }
+
+         tt2 = hypre_MPI_Wtime();
+         AMGhybrid_data->solve_time2 = tt2 - tt1;
       }
       else if (solver_type == 3)
       {
@@ -2208,14 +2238,14 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
                                   (HYPRE_Int (*)(void*, void*, void*, void*)) pcg_precond_setup,
                                   (void*) pcg_precond);
 
-         tt = hypre_MPI_Wtime();
-
          hypre_BiCGSTABSetup(pcg_solver, (void*) A, (void*) b, (void*) x);
 
-         tt = hypre_MPI_Wtime() - tt;
-         AMGhybrid_data->setup_time += tt;
+         tt2 = hypre_MPI_Wtime();
+         AMGhybrid_data->setup_time2 = tt2 - tt1;
 
          /* Solve */
+         tt1 = tt2;
+
          hypre_BiCGSTABSolve(pcg_solver, (void*) A, (void*) b, (void*) x);
 
          /* Get information from BiCGSTAB that is always logged in AMGhybrid solver*/
@@ -2226,6 +2256,9 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
             hypre_BiCGSTABGetFinalRelativeResidualNorm(pcg_solver, &res_norm);
             (AMGhybrid_data -> final_rel_res_norm) = res_norm;
          }
+
+         tt2 = hypre_MPI_Wtime();
+         AMGhybrid_data->solve_time2 = tt2 - tt1;
       }
    }
 
