@@ -1113,24 +1113,36 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
     *
     *************************************************************/
 
-   CF_marker = hypre_CTAlloc(HYPRE_Int,  num_variables, HYPRE_MEMORY_HOST);
+   /* Decide wheter CF_marker is allocated or inputted from CF_marker_ptr */
+   if (*CF_marker_ptr == NULL)
+   {
+      CF_marker = hypre_CTAlloc(HYPRE_Int,  num_variables, HYPRE_MEMORY_HOST);
+   }
+   else
+   {
+      CF_marker = *CF_marker_ptr;
+   }
 
    num_left = 0;
    for (j = 0; j < num_variables; j++)
    {
-      if (S_i[j+1]-S_i[j] == 0 && S_offd_i[j+1]-S_offd_i[j] == 0)
+      if (CF_marker[j] == 0)
       {
-         CF_marker[j] = SF_PT;
-         if (agg_2)
+         nnzrow = (S_i[j+1] - S_i[j]) + (S_offd_i[j+1] - S_offd_i[j]);
+         if (nnzrow == 0)
          {
-            CF_marker[j] = SC_PT;
+            CF_marker[j] = SF_PT;
+            if (agg_2)
+            {
+               CF_marker[j] = SC_PT;
+            }
+            measure_array[j] = 0;
          }
-         measure_array[j] = 0;
-      }
-      else
-      {
-         CF_marker[j] = UNDECIDED;
-         num_left++;
+         else
+         {
+            CF_marker[j] = UNDECIDED;
+            num_left++;
+         }
       }
    }
 

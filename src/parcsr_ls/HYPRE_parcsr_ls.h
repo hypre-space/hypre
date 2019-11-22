@@ -1252,6 +1252,18 @@ HYPRE_Int HYPRE_BoomerAMGSetCpointsToKeep(HYPRE_Solver solver,
                                           HYPRE_Int   *cpt_coarse_index);
 
 /**
+ * (Optional) Set isolated fine points in the first level.
+ * Interpolation weights are not computed for these points.
+ *
+ * @param solver [IN] solver or preconditioner
+ * @param num_isolated_fpt [IN] number of isolated fine points
+ * @param isolated_fpt_index [IN] global indices of isolated fine points
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetIsolatedFPoints(HYPRE_Solver solver,
+                                            HYPRE_Int    num_isolated_fpt,
+                                            HYPRE_Int   *isolated_fpt_index);
+
+/**
  * (Optional) if Sabs equals 1, the strength of connection test is based
  * on the absolute value of the matrix coefficients
  **/
@@ -2843,13 +2855,13 @@ HYPRE_Int HYPRE_ParCSRHybridSetKDim(HYPRE_Solver solver,
 HYPRE_Int HYPRE_ParCSRHybridSetTwoNorm(HYPRE_Solver solver,
                                        HYPRE_Int    two_norm);
 
-/*
+/**
  * RE-VISIT
  **/
 HYPRE_Int HYPRE_ParCSRHybridSetStopCrit(HYPRE_Solver solver,
                                         HYPRE_Int    stop_crit);
 
-/*
+/**
  *
  **/
 HYPRE_Int HYPRE_ParCSRHybridSetRelChange(HYPRE_Solver solver,
@@ -2956,7 +2968,7 @@ HYPRE_Int
 HYPRE_ParCSRHybridSetCoarsenType(HYPRE_Solver solver,
                                  HYPRE_Int    coarsen_type);
 
-/*
+/**
  * (Optional) Specifies which interpolation operator is used
  * The default is ext+i interpolation truncated to at most 4 elements per row.
  **/
@@ -3169,14 +3181,14 @@ HYPRE_Int
 HYPRE_ParCSRHybridSetSeqThreshold(HYPRE_Solver solver,
                                   HYPRE_Int    seq_threshold);
 
-/*
+/**
  *
  **/
 HYPRE_Int
 HYPRE_ParCSRHybridSetRelaxWeight(HYPRE_Solver  solver,
                                  HYPRE_Real   *relax_weight);
 
-/*
+/**
  *
  **/
 HYPRE_Int

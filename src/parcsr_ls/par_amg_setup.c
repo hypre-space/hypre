@@ -87,9 +87,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    hypre_ParCSRBlockMatrix **A_block_array, **P_block_array, **R_block_array;
 
    /* Local variables */
-   HYPRE_Int                 *CF_marker;
-   HYPRE_Int                 *CFN_marker;
-   HYPRE_Int                 *CF2_marker;
+   HYPRE_Int           *CF_marker;
+   HYPRE_Int           *CFN_marker;
+   HYPRE_Int           *CF2_marker;
    hypre_ParCSRMatrix  *S = NULL, *Sabs = NULL;
    hypre_ParCSRMatrix  *S2;
    hypre_ParCSRMatrix  *SN = NULL;
@@ -180,25 +180,28 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    hypre_ParCSRBlockMatrix *A_H_block;
 
-   HYPRE_Int block_mode = 0;
+   HYPRE_Int       block_mode = 0;
 
-   HYPRE_Int mult_addlvl = hypre_max(mult_additive, simple);
-   HYPRE_Int addlvl = hypre_max(mult_addlvl, additive);
-   HYPRE_Int rap2 = hypre_ParAMGDataRAP2(amg_data);
-   HYPRE_Int keepTranspose = hypre_ParAMGDataKeepTranspose(amg_data);
+   HYPRE_Int       mult_addlvl = hypre_max(mult_additive, simple);
+   HYPRE_Int       addlvl = hypre_max(mult_addlvl, additive);
+   HYPRE_Int       rap2 = hypre_ParAMGDataRAP2(amg_data);
+   HYPRE_Int       keepTranspose = hypre_ParAMGDataKeepTranspose(amg_data);
 
-   HYPRE_Int                **C_point_marker_array;
-   HYPRE_Int    local_coarse_size;
-   HYPRE_Int    num_C_point_coarse = hypre_ParAMGDataNumCPointKeep(amg_data);
-   HYPRE_Int   *C_point_keep;
+   HYPRE_Int     **C_point_marker_array;
+   HYPRE_Int       local_coarse_size;
+   HYPRE_Int       num_C_point_coarse = hypre_ParAMGDataNumCPointKeep(amg_data);
+   HYPRE_Int      *C_point_keep;
 
-   HYPRE_Int *num_grid_sweeps = hypre_ParAMGDataNumGridSweeps(amg_data);
-   HYPRE_Int ns = num_grid_sweeps[1];
-   HYPRE_Real    wall_time;   /* for debugging instrumentation */
-   HYPRE_Int      add_end;
+   HYPRE_Int       num_isolated_F_points = hypre_ParAMGDataNumIsolatedFPoints(amg_data);
+   HYPRE_BigInt   *isolated_F_points_marker = hypre_ParAMGDataIsolatedFPointsMarker(amg_data);
+
+   HYPRE_Int      *num_grid_sweeps = hypre_ParAMGDataNumGridSweeps(amg_data);
+   HYPRE_Int       ns = num_grid_sweeps[1];
+   HYPRE_Real      wall_time;   /* for debugging instrumentation */
+   HYPRE_Int       add_end;
 
 #ifdef HYPRE_USING_DSUPERLU
-   HYPRE_Int dslu_threshold = hypre_ParAMGDataDSLUThreshold(amg_data);
+   HYPRE_Int       dslu_threshold = hypre_ParAMGDataDSLUThreshold(amg_data);
 #endif
 
 #if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_UNIFIED_MEMORY)
@@ -1029,6 +1032,28 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                             num_functions, dof_func_array[level], &S);
          }
 
+         /* CF_marker will be allocated in the coarsening functions or
+            if we want to set the behavior of specific points before entering
+            the coarsening function */
+         CF_marker = NULL;
+
+         /* Set isolated fine points (SF_PT) given by the user */
+         if ((num_isolated_F_points > 0) && (level == 0))
+         {
+            HYPRE_BigInt ilower;
+            HYPRE_Int    row;
+
+            ilower = hypre_ParCSRMatrixFirstRowIndex(A_array[0]);
+            CF_marker = hypre_CTAlloc(HYPRE_Int, local_size , HYPRE_MEMORY_HOST);
+            for (j = 0; j < num_isolated_F_points; j++)
+            {
+               row = (HYPRE_Int) (isolated_F_points_marker[j] - ilower);
+               if ((row >= 0) && (row < local_size))
+               {
+                  CF_marker[row] = -3; // Assumes SF_PT == -3
+               }
+            }
+         }
 
          /**** Do the appropriate coarsening ****/
 
@@ -1049,19 +1074,18 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             else if (coarsen_type == 10)
                hypre_BoomerAMGCoarsenHMIS(S, A_array[level], measure_type,
                                           coarsen_cut_factor, debug_flag, &CF_marker);
-           else if (coarsen_type == 21 || coarsen_type == 22)
+            else if (coarsen_type == 21 || coarsen_type == 22)
            {
 #ifdef HYPRE_MIXEDINT
               hypre_error_w_msg(HYPRE_ERROR_GENERIC,"CGC coarsening is not available in mixedint mode!");
               return hypre_error_flag;
 #endif
-               hypre_BoomerAMGCoarsenCGCb(S, A_array[level], measure_type,
-                           coarsen_type, cgc_its, debug_flag, &CF_marker);
+              hypre_BoomerAMGCoarsenCGCb(S, A_array[level], measure_type, coarsen_type,
+                                         cgc_its, debug_flag, &CF_marker);
            }
-           else if (coarsen_type == 98)
-               hypre_BoomerAMGCoarsenCR1(A_array[level], &CF_marker,
-                                         &coarse_size,
-                                         num_CR_relax_steps, IS_type, 0);
+            else if (coarsen_type == 98)
+              hypre_BoomerAMGCoarsenCR1(A_array[level], &CF_marker,
+                                        &coarse_size, num_CR_relax_steps, IS_type, 0);
             else if (coarsen_type == 99)
             {
                hypre_BoomerAMGCreateS(A_array[level],
@@ -1224,9 +1248,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             else if (coarsen_type)
                hypre_BoomerAMGCoarsenRuge(SN, SN, measure_type, coarsen_type,
                                           coarsen_cut_factor, debug_flag, &CF_marker);
-           else
-              hypre_BoomerAMGCoarsen(SN, SN, 0,
-                                     debug_flag, &CF_marker);
+            else
+               hypre_BoomerAMGCoarsen(SN, SN, 0, debug_flag, &CF_marker);
          }
          else if (nodal > 0)
          {
@@ -1280,6 +1303,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                              coarsen_cut_factor, debug_flag, &CF2_marker);
                else
                   hypre_BoomerAMGCoarsen(S2, S2, 0, debug_flag, &CF2_marker);
+
                hypre_ParCSRMatrixDestroy(S2);
                S2 = NULL;
             }
@@ -1315,7 +1339,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          {
             if (block_mode)
             {
-               hypre_printf("Keeping coarse nodes in block mode is not implemented\n");
+               if (my_id == 0)
+               {
+                  hypre_printf("Keeping coarse nodes in block mode is not implemented\n");
+               }
             }
             else if  (level < hypre_ParAMGDataCPointKeepLevel(amg_data))
             {
@@ -1344,8 +1371,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          }
 
          /*****xxxxxxxxxxxxx changes for min_coarse_size */
-         /* here we will determine the coarse grid size to be able to determine if it is not smaller
-            than requested minimal size */
+         /* here we will determine the coarse grid size to be able to
+            determine if it is not smaller than requested minimal size */
+
          if (level >= agg_num_levels)
          {
             if (block_mode )

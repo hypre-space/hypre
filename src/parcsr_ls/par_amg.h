@@ -225,10 +225,14 @@ typedef struct
    HYPRE_Int rap2;
    HYPRE_Int keepTranspose;
 
-   /* information for preserving indeces as coarse grid points */
+   /* information for preserving indices as coarse grid points */
    HYPRE_Int   C_point_coarse_level;
    HYPRE_Int   num_C_point_marker;
    HYPRE_Int **C_point_marker_array;
+
+   /* information for preserving indices as special fine grid points */
+   HYPRE_Int      num_isolated_F_points;
+   HYPRE_BigInt  *isolated_F_points_marker;
 
 #ifdef HYPRE_USING_DSUPERLU
  /* Parameters and data for SuperLU_Dist */
@@ -451,10 +455,14 @@ typedef struct
 #define hypre_ParAMGDataRAP2(amg_data) ((amg_data)->rap2)
 #define hypre_ParAMGDataKeepTranspose(amg_data) ((amg_data)->keepTranspose)
 
-/*indices for the dof which will keep coarsening to the coarse level */
+/* indices for the dof which will keep coarsening to the coarse level */
 #define hypre_ParAMGDataCPointKeepMarkerArray(amg_data) ((amg_data)-> C_point_marker_array)
 #define hypre_ParAMGDataCPointKeepLevel(amg_data) ((amg_data)-> C_point_keep_level)
 #define hypre_ParAMGDataNumCPointKeep(amg_data) ((amg_data)-> num_C_point_marker)
+
+/* information for preserving indices as special fine grid points */
+#define hypre_ParAMGDataNumIsolatedFPoints(amg_data)     ((amg_data)->num_isolated_F_points)
+#define hypre_ParAMGDataIsolatedFPointsMarker(amg_data)  ((amg_data)->isolated_F_points_marker)
 
 #ifdef HYPRE_USING_DSUPERLU
  /* Parameters and data for SuperLU_Dist */
