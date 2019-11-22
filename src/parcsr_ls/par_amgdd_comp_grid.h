@@ -116,6 +116,7 @@ typedef struct
    HYPRE_Int		 mem_size;
    HYPRE_Int       A_mem_size;
    HYPRE_Int       P_mem_size;
+   HYPRE_Int       R_mem_size;
 
    HYPRE_Int        *global_indices;
    HYPRE_Int        *coarse_global_indices; 
@@ -131,6 +132,10 @@ typedef struct
    HYPRE_Int        *P_colind;
    HYPRE_Complex    *P_data;
 
+   HYPRE_Int        *R_rowptr;
+   HYPRE_Int        *R_colind;
+   HYPRE_Complex    *R_data;
+   
    hypre_CSRMatrix  *A;
    hypre_CSRMatrix  *A_real;
    hypre_CSRMatrix  *P;
@@ -165,6 +170,7 @@ typedef struct
 #define hypre_ParCompGridMemSize(compGrid)           ((compGrid) -> mem_size)
 #define hypre_ParCompGridAMemSize(compGrid)           ((compGrid) -> A_mem_size)
 #define hypre_ParCompGridPMemSize(compGrid)           ((compGrid) -> P_mem_size)
+#define hypre_ParCompGridRMemSize(compGrid)           ((compGrid) -> R_mem_size)
 #define hypre_ParCompGridU(compGrid)           ((compGrid) -> u)
 #define hypre_ParCompGridF(compGrid)           ((compGrid) -> f)
 #define hypre_ParCompGridT(compGrid)           ((compGrid) -> t)
@@ -183,6 +189,9 @@ typedef struct
 #define hypre_ParCompGridPRowPtr(compGrid)         ((compGrid) -> P_rowptr)
 #define hypre_ParCompGridPColInd(compGrid)         ((compGrid) -> P_colind)
 #define hypre_ParCompGridPData(compGrid)           ((compGrid) -> P_data)
+#define hypre_ParCompGridRRowPtr(compGrid)         ((compGrid) -> R_rowptr)
+#define hypre_ParCompGridRColInd(compGrid)         ((compGrid) -> R_colind)
+#define hypre_ParCompGridRData(compGrid)           ((compGrid) -> R_data)
 
 #define hypre_ParCompGridA(compGrid)               ((compGrid) -> A)
 #define hypre_ParCompGridAReal(compGrid)               ((compGrid) -> A_real)
