@@ -225,7 +225,7 @@ extern void hypre_F90_NAME(fhypre_boomeramggetmaxlevels, FHYPRE_BOOMERAMGGETMAXL
 extern void hypre_F90_NAME(fhypre_boomeramgsetcoarsencutfa, FHYPRE_BOOMERAMGSETCOARSENCUTFAC)
                       (hypre_F90_Obj *, HYPRE_Real *);
 
-#define HYPRE_BoomerAMGGetStrongThreshold  \
+#define HYPRE_BoomerAMGGetCoarsenCutFactor  \
         hypre_F90_NAME(fhypre_boomeramggetcoarsencutfa, FHYPRE_BOOMERAMGGETCOARSENCUTFAC)
 extern void hypre_F90_NAME(fhypre_boomeramggetcoarsencutfa, FHYPRE_BOOMERAMGGETCOARSENCUTFAC)
                       (hypre_F90_Obj *, HYPRE_Real *);
