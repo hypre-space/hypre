@@ -1032,10 +1032,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                             num_functions, dof_func_array[level], &S);
          }
 
-         /* CF_marker will be allocated in the coarsening functions or
-            if we want to set the behavior of specific points before entering
-            the coarsening function */
-         CF_marker = NULL;
+         /* Allocate CF_marker for the current level */
+         CF_marker_array[level] = hypre_CTAlloc(HYPRE_Int, local_size, HYPRE_MEMORY_HOST);
+         CF_marker = CF_marker_array[level];
 
          /* Set isolated fine points (SF_PT) given by the user */
          if ((num_isolated_F_points > 0) && (level == 0))
@@ -1044,7 +1043,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             HYPRE_Int    row;
 
             ilower = hypre_ParCSRMatrixFirstRowIndex(A_array[0]);
-            CF_marker = hypre_CTAlloc(HYPRE_Int, local_size , HYPRE_MEMORY_HOST);
             for (j = 0; j < num_isolated_F_points; j++)
             {
                row = (HYPRE_Int) (isolated_F_points_marker[j] - ilower);
@@ -2082,16 +2080,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
            if (num_functions > 1 && nodal > -1 && (!block_mode) )
             dof_func_array[level+1] = coarse_dof_func;*/
 
-
-         /* store the CF array */
-         CF_marker_array[level] = CF_marker;
-
-
          dof_func_array[level+1] = NULL;
          if (num_functions > 1 && nodal > -1 && (!block_mode) )
             dof_func_array[level+1] = coarse_dof_func;
-
-
 
       } /* end of if max_levels > 1 */
 

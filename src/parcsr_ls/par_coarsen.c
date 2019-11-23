@@ -79,7 +79,7 @@
   threshold parameter used to define strength
   @param S_ptr [OUT]
   strength matrix
-  @param CF_marker_ptr [OUT]
+  @param CF_marker_ptr [IN/OUT]
   array indicating C/F points
 
   @see */
@@ -271,9 +271,9 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
 
    graph_offd_size = num_cols_offd;
 
+   CF_marker = *CF_marker_ptr;
    if (CF_init == 1)
    {
-      CF_marker = *CF_marker_ptr;
       cnt = 0;
       for (i = 0; i < num_variables; i++)
       {
@@ -310,7 +310,6 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
    }
    else
    {
-      CF_marker = hypre_CTAlloc(HYPRE_Int,  num_variables, HYPRE_MEMORY_HOST);
       cnt = 0;
       for (i=0; i < num_variables; i++)
       {
@@ -838,8 +837,6 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
    hypre_TFree(CF_marker_offd, HYPRE_MEMORY_HOST);
    if (num_procs > 1) hypre_CSRMatrixDestroy(S_ext);
 
-   *CF_marker_ptr   = CF_marker;
-
    return hypre_error_flag;
 }
 
@@ -1113,16 +1110,7 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
     *
     *************************************************************/
 
-   /* Decide wheter CF_marker is allocated or inputted from CF_marker_ptr */
-   if (*CF_marker_ptr == NULL)
-   {
-      CF_marker = hypre_CTAlloc(HYPRE_Int,  num_variables, HYPRE_MEMORY_HOST);
-   }
-   else
-   {
-      CF_marker = *CF_marker_ptr;
-   }
-
+   CF_marker = *CF_marker_ptr;
    num_left = 0;
    for (j = 0; j < num_variables; j++)
    {
@@ -1352,7 +1340,6 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
       }
 #endif
 
-      *CF_marker_ptr = CF_marker;
       if (meas_type && num_procs > 1)
       {
          hypre_CSRMatrixDestroy(S_ext);
@@ -2001,8 +1988,6 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
       hypre_CSRMatrixDestroy(S_ext);
    }
 
-   *CF_marker_ptr   = CF_marker;
-
    return hypre_error_flag;
 }
 
@@ -2094,6 +2079,7 @@ hypre_BoomerAMGCoarsenPMISHost( hypre_ParCSRMatrix    *S,
 
    HYPRE_Int                 i, j, jj, jS, ig;
    HYPRE_Int                 index, start, my_id, num_procs, jrow, cnt, elmt;
+   HYPRE_Int                 nnzrow;
 
    HYPRE_Int                 ierr = 0;
 
@@ -2288,9 +2274,9 @@ CF_marker, CF_marker_offd: initialize CF_marker
    /* now the local part of the graph array, and the local CF_marker array */
    graph_array = hypre_CTAlloc(HYPRE_Int, num_variables, HYPRE_MEMORY_HOST);
 
+   CF_marker = *CF_marker_ptr;
    if (CF_init == 1)
    {
-      CF_marker = *CF_marker_ptr;
       cnt = 0;
       for (i = 0; i < num_variables; i++)
       {
@@ -2325,12 +2311,12 @@ CF_marker, CF_marker_offd: initialize CF_marker
    }
    else
    {
-      CF_marker = hypre_CTAlloc(HYPRE_Int, num_variables, HYPRE_MEMORY_HOST);
       cnt = 0;
       for (i = 0; i < num_variables; i++)
       {
          CF_marker[i] = 0;
-         if ( S_diag_i[i+1] - S_diag_i[i] == 0 && S_offd_i[i+1] - S_offd_i[i] == 0)
+         nnzrow = (S_diag_i[i+1] - S_diag_i[i]) + (S_offd_i[i+1] - S_offd_i[i]);
+         if (nnzrow == 0)
          {
             CF_marker[i] = SF_PT; /* an isolated fine grid */
             if (CF_init == 3 || CF_init == 4)
@@ -2742,8 +2728,6 @@ CF_marker, CF_marker_offd: initialize CF_marker
    hypre_TFree(int_buf_data, HYPRE_MEMORY_HOST);
    hypre_TFree(CF_marker_offd, HYPRE_MEMORY_HOST);
    /*if (num_procs > 1) hypre_CSRMatrixDestroy(S_ext);*/
-
-   *CF_marker_ptr   = CF_marker;
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_PMIS] += hypre_MPI_Wtime();
