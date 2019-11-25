@@ -136,7 +136,7 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
    HYPRE_BigInt        global_graph_size;
 
    HYPRE_Int           i, j, k, kc, jS, kS, ig, elmt;
-   HYPRE_Int           index, start, my_id, num_procs, jrow, cnt;
+   HYPRE_Int           index, start, my_id, num_procs, jrow, cnt, nnzrow;
 
    HYPRE_Int           use_commpkg_A = 0;
    HYPRE_Int           break_var = 1;
@@ -271,7 +271,13 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
 
    graph_offd_size = num_cols_offd;
 
+   /* Allocate CF_marker if not done before */
+   if (*CF_marker_ptr == NULL)
+   {
+      *CF_marker_ptr = hypre_CTAlloc(HYPRE_Int, num_variables, HYPRE_MEMORY_HOST);
+   }
    CF_marker = *CF_marker_ptr;
+
    if (CF_init == 1)
    {
       cnt = 0;
@@ -311,17 +317,26 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
    else
    {
       cnt = 0;
-      for (i=0; i < num_variables; i++)
+      for (i = 0; i < num_variables; i++)
       {
-         CF_marker[i] = 0;
-         if ( (S_diag_i[i+1]-S_diag_i[i]) == 0
-               && (S_offd_i[i+1]-S_offd_i[i]) == 0)
+         if ( CF_marker[i] != SF_PT )
          {
-            CF_marker[i] = SF_PT;
-            measure_array[i] = 0;
+            CF_marker[i] = 0;
+            nnzrow = (S_diag_i[i+1] - S_diag_i[i]) + (S_offd_i[i+1] - S_offd_i[i]);
+            if (nnzrow == 0)
+            {
+               CF_marker[i] = SF_PT;
+               measure_array[i] = 0;
+            }
+            else
+            {
+               graph_array[cnt++] = i;
+            }
          }
          else
-            graph_array[cnt++] = i;
+         {
+            measure_array[i] = 0;
+         }
       }
    }
    graph_size = cnt;
@@ -1110,7 +1125,13 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
     *
     *************************************************************/
 
+   /* Allocate CF_marker if not done before */
+   if (*CF_marker_ptr == NULL)
+   {
+      *CF_marker_ptr = hypre_CTAlloc(HYPRE_Int, num_variables, HYPRE_MEMORY_HOST);
+   }
    CF_marker = *CF_marker_ptr;
+
    num_left = 0;
    for (j = 0; j < num_variables; j++)
    {
@@ -1131,6 +1152,10 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
             CF_marker[j] = UNDECIDED;
             num_left++;
          }
+      }
+      else
+      {
+         measure_array[j] = 0;
       }
    }
 
@@ -1173,7 +1198,6 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
             {
                hypre_error_w_msg(HYPRE_ERROR_GENERIC,"negative measure!\n");
             }
-            /*if (measure < 0) hypre_printf("negative measure!\n");*/
 
             CF_marker[j] = f_pnt;
             for (k = S_i[j]; k < S_i[j+1]; k++)
@@ -2009,8 +2033,7 @@ hypre_BoomerAMGCoarsenFalgout( hypre_ParCSRMatrix  *S,
    ierr += hypre_BoomerAMGCoarsenRuge (S, A, measure_type, 6, cut_factor,
                                        debug_flag, CF_marker_ptr);
 
-   ierr += hypre_BoomerAMGCoarsen (S, A, 1, debug_flag,
-                                   CF_marker_ptr);
+   ierr += hypre_BoomerAMGCoarsen (S, A, 1, debug_flag, CF_marker_ptr);
 
    return (ierr);
 }
@@ -2274,7 +2297,13 @@ CF_marker, CF_marker_offd: initialize CF_marker
    /* now the local part of the graph array, and the local CF_marker array */
    graph_array = hypre_CTAlloc(HYPRE_Int, num_variables, HYPRE_MEMORY_HOST);
 
+   /* Allocate CF_marker if not done before */
+   if (*CF_marker_ptr == NULL)
+   {
+      *CF_marker_ptr = hypre_CTAlloc(HYPRE_Int, num_variables, HYPRE_MEMORY_HOST);
+   }
    CF_marker = *CF_marker_ptr;
+
    if (CF_init == 1)
    {
       cnt = 0;
@@ -2790,8 +2819,7 @@ hypre_BoomerAMGCoarsenHMIS( hypre_ParCSRMatrix    *S,
    ierr += hypre_BoomerAMGCoarsenRuge (S, A, measure_type, 10, cut_factor,
                                        debug_flag, CF_marker_ptr);
 
-   ierr += hypre_BoomerAMGCoarsenPMISHost (S, A, 1, debug_flag,
-                                           CF_marker_ptr);
+   ierr += hypre_BoomerAMGCoarsenPMISHost (S, A, 1, debug_flag, CF_marker_ptr);
 
    return (ierr);
 }
