@@ -16,21 +16,20 @@
  * Implementation:  Mapping from a local index to a global index is performed
  * through an array.  Mapping from a global index to a local index is more
  * difficult.  If the global index is determined to be owned by the local
- * processor, then a conversion is performed; else the local index is 
+ * processor, then a conversion is performed; else the local index is
  * looked up in a hash table.
  *
  *****************************************************************************/
 
 #include <stdlib.h>
 #include <memory.h>
-#include <assert.h>
 #include "Common.h"
 #include "Numbering.h"
 #include "OrderStat.h"
 
 /*--------------------------------------------------------------------------
  * NumberingCreate - Return (a pointer to) a numbering object
- * for a given matrix.  The "size" parameter is the initial number of 
+ * for a given matrix.  The "size" parameter is the initial number of
  * external indices that can be stored, and will grow if necessary.
  * (Implementation note: the hash table size is kept approximately twice
  * this number.)
@@ -77,8 +76,8 @@ Numbering *NumberingCreate(Matrix *mat, HYPRE_Int size)
 
 		        /* allocate more space for numbering */
 		        numb->size *= 2;
-		        numb->local_to_global = (HYPRE_Int *) 
-			    hypre_TReAlloc(numb->local_to_global,HYPRE_Int,  
+		        numb->local_to_global = (HYPRE_Int *)
+			    hypre_TReAlloc(numb->local_to_global,HYPRE_Int,
 			    (numb->num_loc+numb->size), HYPRE_MEMORY_HOST);
                         newHash = HashCreate(2*numb->size+1);
 		        HashRehash(numb->hash, newHash);
@@ -101,7 +100,7 @@ Numbering *NumberingCreate(Matrix *mat, HYPRE_Int size)
     HashReset(numb->hash);
 
     for (i=0; i<num_external; i++)
-        HashInsert(numb->hash, 
+        HashInsert(numb->hash,
 	    numb->local_to_global[i+numb->num_loc], i+numb->num_loc);
 
     numb->num_ind += num_external;
@@ -124,9 +123,9 @@ Numbering *NumberingCreateCopy(Numbering *orig)
     numb->num_loc = orig->num_loc;
     numb->num_ind = orig->num_ind;
 
-    numb->local_to_global = 
+    numb->local_to_global =
         hypre_TAlloc(HYPRE_Int, (numb->num_loc+numb->size) , HYPRE_MEMORY_HOST);
-    hypre_TMemcpy(numb->local_to_global,  orig->local_to_global,  
+    hypre_TMemcpy(numb->local_to_global,  orig->local_to_global,
 				  HYPRE_Int, numb->num_ind, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
 
     numb->hash = HashCreate(2*numb->size+1);
@@ -187,8 +186,8 @@ void NumberingGlobalToLocal(Numbering *numb, HYPRE_Int len, HYPRE_Int *global, H
 #ifdef PARASAILS_DEBUG
 		    hypre_printf("Numbering resize %d\n", numb->size);
 #endif
-		    numb->local_to_global = (HYPRE_Int *) 
-			realloc(numb->local_to_global, 
+		    numb->local_to_global = (HYPRE_Int *)
+			realloc(numb->local_to_global,
 			(numb->num_loc+numb->size)*sizeof(HYPRE_Int));
                     newHash = HashCreate(2*numb->size+1);
 		    HashRehash(numb->hash, newHash);

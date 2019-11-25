@@ -26,7 +26,6 @@
 #include <math.h>
 #include <stdarg.h>
 
-#include <assert.h>
 #include <signal.h>
 
 #include "macros.h"

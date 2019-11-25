@@ -234,7 +234,7 @@ hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle_)
 {
 #if defined(HYPRE_USING_UNIFIED_MEMORY)
 #if defined(HYPRE_USING_CUDA)
-   assert(!hypre_HandleCudaComputeStreamSync(hypre_handle_).empty());
+   hypre_assert(!hypre_HandleCudaComputeStreamSync(hypre_handle_).empty());
 
    if ( hypre_HandleCudaComputeStreamSync(hypre_handle_).back() )
    {

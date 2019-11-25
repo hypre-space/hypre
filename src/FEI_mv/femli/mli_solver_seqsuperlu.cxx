@@ -15,7 +15,6 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include <assert.h>
 #include "mli_solver_seqsuperlu.h"
 #include "HYPRE.h"
 #include "_hypre_parcsr_mv.h"
