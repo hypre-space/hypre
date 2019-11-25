@@ -1853,6 +1853,10 @@ HYPRE_BoomerAMGSetDSLUThreshold (HYPRE_Solver solver,
 }
 #endif
 
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetCpointsToKeep
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 HYPRE_BoomerAMGSetCpointsToKeep(HYPRE_Solver solver,
                                 HYPRE_Int  cpt_coarse_level,
@@ -1862,12 +1866,30 @@ HYPRE_BoomerAMGSetCpointsToKeep(HYPRE_Solver solver,
    return (hypre_BoomerAMGSetCpointsToKeep( (void *) solver, cpt_coarse_level, num_cpt_coarse, cpt_coarse_index));
 }
 
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetFPoints
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetFPoints(HYPRE_Solver   solver,
+                          HYPRE_Int      num_fpt,
+                          HYPRE_BigInt  *fpt_index)
+{
+   return (hypre_BoomerAMGSetFPoints( (void *) solver,
+                                      0, num_fpt,
+                                      fpt_index) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetIsolatedFPoints
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 HYPRE_BoomerAMGSetIsolatedFPoints(HYPRE_Solver   solver,
-                                  HYPRE_Int      num_isolated_F_points,
-                                  HYPRE_BigInt  *isolated_F_points_marker)
+                                  HYPRE_Int      num_isolated_fpt,
+                                  HYPRE_BigInt  *isolated_fpt_index)
 {
-   return (hypre_BoomerAMGSetIsolatedFPoints( (void *) solver,
-                                              num_isolated_F_points,
-                                              isolated_F_points_marker));
+   return (hypre_BoomerAMGSetFPoints( (void *) solver,
+                                      1, num_isolated_fpt,
+                                      isolated_fpt_index) );
 }

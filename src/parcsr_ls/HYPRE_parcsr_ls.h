@@ -1252,6 +1252,17 @@ HYPRE_Int HYPRE_BoomerAMGSetCpointsToKeep(HYPRE_Solver solver,
                                           HYPRE_Int   *cpt_coarse_index);
 
 /**
+ * (Optional) Set fine points in the first level.
+ *
+ * @param solver [IN] solver or preconditioner
+ * @param num_fpt [IN] number of fine points
+ * @param fpt_index [IN] global indices of fine points
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetFPoints(HYPRE_Solver solver,
+                                    HYPRE_Int    num_fpt,
+                                    HYPRE_Int   *fpt_index);
+
+/**
  * (Optional) Set isolated fine points in the first level.
  * Interpolation weights are not computed for these points.
  *

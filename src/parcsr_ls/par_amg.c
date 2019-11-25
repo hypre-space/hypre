@@ -4421,12 +4421,13 @@ hypre_BoomerAMGSetCpointsToKeep(void      *data,
 }
 
 HYPRE_Int
-hypre_BoomerAMGSetIsolatedFPoints(void         *data,
-                                  HYPRE_Int     num_isolated_fpt,
-                                  HYPRE_BigInt *isolated_fpt_index)
+hypre_BoomerAMGSetFPoints(void         *data,
+                          HYPRE_Int     isolated,
+                          HYPRE_Int     num_points,
+                          HYPRE_BigInt *indices)
 {
    hypre_ParAMGData   *amg_data = (hypre_ParAMGData*) data;
-   HYPRE_BigInt       *isolated_F_points_marker = NULL;
+   HYPRE_BigInt       *marker = NULL;
    HYPRE_Int           i;
 
    if (!amg_data)
@@ -4436,39 +4437,55 @@ hypre_BoomerAMGSetIsolatedFPoints(void         *data,
       return hypre_error_flag;
    }
 
-   if (num_isolated_fpt < 0)
+   if (num_points < 0)
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Warning! num_isolated_fpt < 0 !\n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Warning! negative number of points!\n");
       hypre_error_in_arg(2);
       return hypre_error_flag;
    }
 
-   if ((num_isolated_fpt > 0) && (!isolated_fpt_index))
+
+   if ((num_points > 0) && (!indices))
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Warning! isolated_fpt_index not given!\n");
-      hypre_error_in_arg(3);
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Warning! indices not given!\n");
+      hypre_error_in_arg(4);
       return hypre_error_flag;
    }
 
-   /* Free data not previously destroyed */
-   if (hypre_ParAMGDataIsolatedFPointsMarker(amg_data))
+   /* Set marker data */
+   if (num_points > 0)
    {
-      hypre_TFree(hypre_ParAMGDataIsolatedFPointsMarker(amg_data), HYPRE_MEMORY_HOST);
-      hypre_ParAMGDataIsolatedFPointsMarker(amg_data) = NULL;
-   }
-
-   /* Set global_isolated_fpt_marker data */
-   if (num_isolated_fpt > 0)
-   {
-      isolated_F_points_marker = hypre_CTAlloc(HYPRE_BigInt, num_isolated_fpt, HYPRE_MEMORY_HOST);
-      for (i = 0; i < num_isolated_fpt; i++)
+      marker = hypre_CTAlloc(HYPRE_BigInt, num_points, HYPRE_MEMORY_HOST);
+      for (i = 0; i < num_points; i++)
       {
-         isolated_F_points_marker[i] = isolated_fpt_index[i];
+         marker[i] = indices[i];
       }
    }
 
-   hypre_ParAMGDataNumIsolatedFPoints(amg_data) = num_isolated_fpt;
-   hypre_ParAMGDataIsolatedFPointsMarker(amg_data) = isolated_F_points_marker;
+   if (isolated)
+   {
+      /* Free data not previously destroyed */
+      if (hypre_ParAMGDataIsolatedFPointsMarker(amg_data))
+      {
+         hypre_TFree(hypre_ParAMGDataIsolatedFPointsMarker(amg_data), HYPRE_MEMORY_HOST);
+         hypre_ParAMGDataIsolatedFPointsMarker(amg_data) = NULL;
+      }
+
+      hypre_ParAMGDataNumIsolatedFPoints(amg_data)    = num_points;
+      hypre_ParAMGDataIsolatedFPointsMarker(amg_data) = marker;
+   }
+   else
+   {
+      /* Free data not previously destroyed */
+      if (hypre_ParAMGDataFPointsMarker(amg_data))
+      {
+         hypre_TFree(hypre_ParAMGDataFPointsMarker(amg_data), HYPRE_MEMORY_HOST);
+         hypre_ParAMGDataFPointsMarker(amg_data) = NULL;
+      }
+
+      hypre_ParAMGDataNumFPoints(amg_data)    = num_points;
+      hypre_ParAMGDataFPointsMarker(amg_data) = marker;
+   }
 
    return hypre_error_flag;
 }

@@ -108,7 +108,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    HYPRE_Int       old_num_levels, num_levels;
    HYPRE_Int       level;
-   HYPRE_Int       local_size, i;
+   HYPRE_Int       local_size, i, row;
    HYPRE_BigInt    first_local_row;
    HYPRE_BigInt    coarse_size;
    HYPRE_Int       coarsen_type;
@@ -191,8 +191,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Int       local_coarse_size;
    HYPRE_Int       num_C_point_coarse = hypre_ParAMGDataNumCPointKeep(amg_data);
    HYPRE_Int      *C_point_keep;
-
-   HYPRE_Int       num_isolated_F_points = hypre_ParAMGDataNumIsolatedFPoints(amg_data);
+   HYPRE_Int       num_F_points    = hypre_ParAMGDataNumFPoints(amg_data);
+   HYPRE_BigInt   *F_points_marker = hypre_ParAMGDataFPointsMarker(amg_data);
+   HYPRE_Int       num_isolated_F_points    = hypre_ParAMGDataNumIsolatedFPoints(amg_data);
    HYPRE_BigInt   *isolated_F_points_marker = hypre_ParAMGDataIsolatedFPointsMarker(amg_data);
 
    HYPRE_Int      *num_grid_sweeps = hypre_ParAMGDataNumGridSweeps(amg_data);
@@ -626,6 +627,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    if (num_functions > 1 && dof_func == NULL)
    {
       HYPRE_BigInt num_fun = (HYPRE_BigInt) num_functions;
+
       first_local_row = hypre_ParCSRMatrixFirstRowIndex(A);
       dof_func = hypre_CTAlloc(HYPRE_Int, local_size, HYPRE_MEMORY_HOST);
       rest = first_local_row-((first_local_row/num_fun)*num_fun);
@@ -845,6 +847,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    while (not_finished_coarsening)
    {
+      first_local_row = hypre_ParCSRMatrixFirstRowIndex(A_array[level]);
 
       /* only do nodal coarsening on a fixed number of levels */
       if (level >= nodal_levels)
@@ -913,12 +916,12 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
           fflush(NULL);
       }
 
-      if ( max_levels == 1)
+      if (max_levels == 1)
       {
          S = NULL;
          coarse_pnts_global = NULL;
          CF_marker = hypre_CTAlloc(HYPRE_Int, local_size , HYPRE_MEMORY_HOST);
-         for (i=0; i < local_size ; i++)
+         for (i = 0; i < local_size ; i++)
             CF_marker[i] = 1;
          /* AB removed below - already allocated */
          /* CF_marker_array = hypre_CTAlloc(HYPRE_Int*, 1);*/
@@ -1039,13 +1042,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          /* Set isolated fine points (SF_PT) given by the user */
          if ((num_isolated_F_points > 0) && (level == 0))
          {
-            HYPRE_BigInt ilower;
-            HYPRE_Int    row;
-
-            ilower = hypre_ParCSRMatrixFirstRowIndex(A_array[0]);
             for (j = 0; j < num_isolated_F_points; j++)
             {
-               row = (HYPRE_Int) (isolated_F_points_marker[j] - ilower);
+               row = (HYPRE_Int) (isolated_F_points_marker[j] - first_local_row);
                if ((row >= 0) && (row < local_size))
                {
                   CF_marker[row] = -3; // Assumes SF_PT == -3
@@ -1331,7 +1330,19 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
          /**************************************************/
          /*********Set the fixed index to CF_marker*********/
-         //num_C_point_coarse
+
+         /* Set fine points (F_PT) given by the user */
+         if ((num_F_points > 0) && (level == 0))
+         {
+            for (j = 0; j < num_F_points; j++)
+            {
+               row = (HYPRE_Int) (F_points_marker[j] - first_local_row);
+               if ((row >= 0) && (row < local_size))
+               {
+                  CF_marker[row] = -1; // Assumes F_PT == -1
+               }
+            }
+         }
 
          if (hypre_ParAMGDataCPointKeepLevel(amg_data) > 0)
          {

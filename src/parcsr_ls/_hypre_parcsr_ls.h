@@ -259,6 +259,10 @@ typedef struct
    HYPRE_Int      num_isolated_F_points;
    HYPRE_BigInt  *isolated_F_points_marker;
 
+   /* information for preserving indices as fine grid points */
+   HYPRE_Int      num_F_points;
+   HYPRE_BigInt  *F_points_marker;
+
 #ifdef HYPRE_USING_DSUPERLU
  /* Parameters and data for SuperLU_Dist */
    HYPRE_Int dslu_threshold;
@@ -494,6 +498,10 @@ typedef struct
 /* information for preserving indices as special fine grid points */
 #define hypre_ParAMGDataNumIsolatedFPoints(amg_data)     ((amg_data)->num_isolated_F_points)
 #define hypre_ParAMGDataIsolatedFPointsMarker(amg_data)  ((amg_data)->isolated_F_points_marker)
+
+/* information for preserving indices as fine grid points */
+#define hypre_ParAMGDataNumFPoints(amg_data)     ((amg_data)->num_F_points)
+#define hypre_ParAMGDataFPointsMarker(amg_data)  ((amg_data)->F_points_marker)
 
 /* Parameters and data for SuperLU_Dist */
 #ifdef HYPRE_USING_DSUPERLU
@@ -936,7 +944,8 @@ HYPRE_Int HYPRE_BoomerAMGSetKeepTranspose ( HYPRE_Solver solver , HYPRE_Int keep
 HYPRE_Int HYPRE_BoomerAMGSetDSLUThreshold ( HYPRE_Solver solver , HYPRE_Int slu_threshold );
 #endif
 HYPRE_Int HYPRE_BoomerAMGSetCpointsToKeep( HYPRE_Solver solver, HYPRE_Int cpt_coarse_level, HYPRE_Int num_cpt_coarse,HYPRE_Int *cpt_coarse_index);
-
+HYPRE_Int HYPRE_BoomerAMGSetIsolatedFPoints(HYPRE_Solver solver, HYPRE_Int num_isolated_fpt, HYPRE_BigInt *isolated_fpt_index);
+HYPRE_Int HYPRE_BoomerAMGSetFPoints(HYPRE_Solver solver, HYPRE_Int num_fpt, HYPRE_BigInt *fpt_index);
 
 /* HYPRE_parcsr_bicgstab.c */
 HYPRE_Int HYPRE_ParCSRBiCGSTABCreate ( MPI_Comm comm , HYPRE_Solver *solver );
@@ -1414,8 +1423,7 @@ HYPRE_Int hypre_BoomerAMGSetKeepTranspose ( void *data , HYPRE_Int keepTranspose
 HYPRE_Int hypre_BoomerAMGSetDSLUThreshold ( void *data , HYPRE_Int slu_threshold );
 #endif
 HYPRE_Int hypre_BoomerAMGSetCpointsToKeep(void *data, HYPRE_Int cpt_coarse_level, HYPRE_Int  num_cpt_coarse, HYPRE_Int *cpt_coarse_index);
-HYPRE_Int hypre_BoomerAMGSetIsolatedFPoints(void *data, HYPRE_Int num_isolated_fpt, HYPRE_BigInt *isolated_fpt_index);
-
+HYPRE_Int hypre_BoomerAMGSetFPoints(void *data, HYPRE_Int isolated, HYPRE_Int num_points, HYPRE_BigInt *indices);
 
 /* par_amg_setup.c */
 HYPRE_Int hypre_BoomerAMGSetup ( void *amg_vdata , hypre_ParCSRMatrix *A , hypre_ParVector *f , hypre_ParVector *u );

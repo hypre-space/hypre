@@ -234,6 +234,10 @@ typedef struct
    HYPRE_Int      num_isolated_F_points;
    HYPRE_BigInt  *isolated_F_points_marker;
 
+   /* information for preserving indices as fine grid points */
+   HYPRE_Int      num_F_points;
+   HYPRE_BigInt  *F_points_marker;
+
 #ifdef HYPRE_USING_DSUPERLU
  /* Parameters and data for SuperLU_Dist */
    HYPRE_Int dslu_threshold;
@@ -463,6 +467,10 @@ typedef struct
 /* information for preserving indices as special fine grid points */
 #define hypre_ParAMGDataNumIsolatedFPoints(amg_data)     ((amg_data)->num_isolated_F_points)
 #define hypre_ParAMGDataIsolatedFPointsMarker(amg_data)  ((amg_data)->isolated_F_points_marker)
+
+/* information for preserving indices as fine grid points */
+#define hypre_ParAMGDataNumFPoints(amg_data)     ((amg_data)->num_F_points)
+#define hypre_ParAMGDataFPointsMarker(amg_data)  ((amg_data)->F_points_marker)
 
 #ifdef HYPRE_USING_DSUPERLU
  /* Parameters and data for SuperLU_Dist */
