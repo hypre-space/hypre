@@ -3387,6 +3387,21 @@ HYPRE_Int hypre_AMSFEIDestroy(void *solver)
 
    return hypre_error_flag;
 }
+
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+
+HYPRE_Int hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
+                                            HYPRE_Int option,
+                                            HYPRE_Int num_threads,
+                                            HYPRE_Int *cf_marker,
+                                            HYPRE_Real **l1_norm_ptr)
+{
+   return hypre_ParCSRComputeL1Norms(A, option, cf_marker, l1_norm_ptr);
+}
+
+#else
+
 /*--------------------------------------------------------------------------
  * hypre_ParCSRComputeL1Norms Threads
  *
@@ -3653,6 +3668,8 @@ HYPRE_Int hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
 
    return hypre_error_flag;
 }
+
+#endif
 
 
 /*--------------------------------------------------------------------------

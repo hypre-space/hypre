@@ -54,7 +54,7 @@ extern "C" {
 #endif
 
 HYPRE_Int BuildParFromFile (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix *A_ptr );
-HYPRE_Int BuildParRhsFromFile (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParVector *b_ptr );
+HYPRE_Int ReadParVectorFromFile (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParVector *b_ptr );
 
 HYPRE_Int BuildParLaplacian (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 HYPRE_Int BuildParSysLaplacian (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix *A_ptr );
@@ -663,6 +663,12 @@ main( hypre_int argc,
          build_x0_type       = 0;
          build_x0_arg_index  = arg_index;
       }
+      else if ( strcmp(argv[arg_index], "-x0parcsrfile") == 0 )
+      {
+         arg_index++;
+         build_x0_type      = 7;
+         build_x0_arg_index = arg_index;
+      }
       else if ( strcmp(argv[arg_index], "-x0rand") == 0 )
       {
          arg_index++;
@@ -1042,6 +1048,7 @@ main( hypre_int argc,
          arg_index++;
          no_cuda_um = atoi(argv[arg_index++]);
          HYPRE_SetNoCUDAUM(no_cuda_um);
+         build_rhs_type = 22;
       }
       else
       {
@@ -2363,9 +2370,9 @@ main( hypre_int argc,
    {
 
       /* rhs */
-      BuildParRhsFromFile(argc, argv, build_rhs_arg_index, &b);
+      ReadParVectorFromFile(argc, argv, build_rhs_arg_index, &b);
 
-      hypre_printf("  Initial guess is 0\n");
+      //hypre_printf("  Initial guess is 0\n");
 
       ij_b = NULL;
 
@@ -2426,6 +2433,7 @@ main( hypre_int argc,
       {
          hypre_printf("  RHS vector has unit components\n");
          hypre_printf("  Initial guess is 0\n");
+         hypre_printf("  ParVector\n");
       }
 
       HYPRE_Int memory_location = HYPRE_MEMORY_SHARED;
@@ -2781,6 +2789,16 @@ main( hypre_int argc,
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
       x = (HYPRE_ParVector) object;
    }
+   else if (build_x0_type == 7)
+   {
+      /* from file */
+      if (myid == 0)
+      {
+         hypre_printf("  Initial guess vector read from file %s\n", argv[build_x0_arg_index]);
+      }
+
+      ReadParVectorFromFile(argc, argv, build_x0_arg_index, &x);
+   }
    else if (build_x0_type == 1)
    {
       /* random */
@@ -2891,6 +2909,8 @@ main( hypre_int argc,
       HYPRE_ParCSRHybridSetMaxLevels(amg_solver, max_levels);
       HYPRE_ParCSRHybridSetMaxRowSum(amg_solver, max_row_sum);
       HYPRE_ParCSRHybridSetNumSweeps(amg_solver, num_sweeps);
+      HYPRE_ParCSRHybridSetInterpType(amg_solver, interp_type);
+
       if (relax_type > -1) HYPRE_ParCSRHybridSetRelaxType(amg_solver, relax_type);
       HYPRE_ParCSRHybridSetAggNumLevels(amg_solver, agg_num_levels);
       HYPRE_ParCSRHybridSetNumPaths(amg_solver, num_paths);
@@ -2969,6 +2989,14 @@ main( hypre_int argc,
          hypre_printf("\n");
       }
 #endif
+
+      HYPRE_Real time[4];
+      HYPRE_ParCSRHybridGetSetupSolveTime(amg_solver, time);
+      if (myid == 0)
+      {
+         printf("ParCSRHybrid: Setup-Time1 %f, Solve-Time1 %f, Setup-Time2 %f, Solve-Time2 %f\n",
+                time[0], time[1], time[2], time[3]);
+      }
 
       HYPRE_ParCSRHybridDestroy(amg_solver);
    }
@@ -6679,6 +6707,11 @@ main( hypre_int argc,
    else
       HYPRE_IJVectorDestroy(ij_b);
 
+   if ( build_x0_type == 0 || build_x0_type == 7 )
+   {
+      HYPRE_ParVectorDestroy(x);
+   }
+
    HYPRE_IJVectorDestroy(ij_x);
 
    if (build_rbm)
@@ -6774,10 +6807,10 @@ BuildParFromFile( HYPRE_Int                  argc,
  *----------------------------------------------------------------------*/
 
 HYPRE_Int
-BuildParRhsFromFile( HYPRE_Int                  argc,
-                     char                *argv[],
-                     HYPRE_Int                  arg_index,
-                     HYPRE_ParVector      *b_ptr     )
+ReadParVectorFromFile( HYPRE_Int            argc,
+                       char                *argv[],
+                       HYPRE_Int            arg_index,
+                       HYPRE_ParVector      *b_ptr     )
 {
    char               *filename;
 
@@ -6811,7 +6844,7 @@ BuildParRhsFromFile( HYPRE_Int                  argc,
 
    if (myid == 0)
    {
-      hypre_printf("  RhsFromParFile: %s\n", filename);
+      hypre_printf(" From ParFile: %s\n", filename);
    }
 
    /*-----------------------------------------------------------
