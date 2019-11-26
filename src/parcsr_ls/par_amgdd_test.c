@@ -188,30 +188,17 @@ SetRelaxMarker(hypre_ParCompGrid *compGrid, hypre_ParVector *relax_marker, HYPRE
     exit(0);
   }
 
-  // Broadcast the number of nodes in the composite gird on this level for the root proc
-  HYPRE_Int num_nodes = 0;
-  HYPRE_Int is_real;
-  if (myid == proc)
-  {
-    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
-    {
-      if (hypre_ParCompGridRealDofMarker(compGrid)) is_real = hypre_ParCompGridRealDofMarker(compGrid)[i];
-      else is_real = 1;
-      if (is_real) num_nodes++;
-    }
-  }
+  // Broadcast the number of nodes in the composite grid on this level for the root proc
+  HYPRE_Int num_nodes = hypre_ParCompGridNumRealNodes(compGrid);
   hypre_MPI_Bcast(&num_nodes, 1, HYPRE_MPI_INT, proc, hypre_MPI_COMM_WORLD);
 
   // Broadcast the global indices of the dofs in the composite grid
   HYPRE_Int *global_indices = hypre_CTAlloc(HYPRE_Int, num_nodes, HYPRE_MEMORY_HOST);
   if (myid == proc)
   {
-    HYPRE_Int cnt = 0;
-    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
+    for (i = 0; i < num_nodes; i++)
     {
-      if (hypre_ParCompGridRealDofMarker(compGrid)) is_real = hypre_ParCompGridRealDofMarker(compGrid)[i];
-      else is_real = 1;
-      if (is_real) global_indices[cnt++] = hypre_ParCompGridGlobalIndices(compGrid)[i];
+      global_indices[i] = hypre_ParCompGridGlobalIndices(compGrid)[i];
     }
   }
   hypre_MPI_Bcast(global_indices, num_nodes, HYPRE_MPI_INT, proc, hypre_MPI_COMM_WORLD);
