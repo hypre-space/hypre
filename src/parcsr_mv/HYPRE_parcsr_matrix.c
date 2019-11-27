@@ -193,12 +193,12 @@ HYPRE_ParCSRMatrixGetGlobalRowPartitioning( HYPRE_ParCSRMatrix   matrix,
    row_start = hypre_ParCSRMatrixFirstRowIndex((hypre_ParCSRMatrix *) matrix);
    if (all_procs)
    {
-      hypre_MPI_Allgather(&row_start, 1, HYPRE_MPI_BIG_INT, &row_partitioning[0],
+      hypre_MPI_Allgather(&row_start, 1, HYPRE_MPI_BIG_INT, row_partitioning,
                           1, HYPRE_MPI_BIG_INT, comm);
    }
    else
    {
-      hypre_MPI_Gather(&row_start, 1, HYPRE_MPI_BIG_INT, &row_partitioning[0],
+      hypre_MPI_Gather(&row_start, 1, HYPRE_MPI_BIG_INT, row_partitioning,
                        1, HYPRE_MPI_BIG_INT, 0, comm);
    }
 
@@ -207,16 +207,9 @@ HYPRE_ParCSRMatrixGetGlobalRowPartitioning( HYPRE_ParCSRMatrix   matrix,
       row_partitioning[num_procs] = hypre_ParCSRMatrixGlobalNumRows((hypre_ParCSRMatrix *) matrix);
    }
 #else
-   if (all_procs)
+   if (all_procs || ((!all_procs) && (my_id == 0)))
    {
       HYPRE_ParCSRMatrixGetRowPartitioning( matrix, &row_partitioning );
-   }
-   else
-   {
-      if (my_id == 0)
-      {
-         HYPRE_ParCSRMatrixGetRowPartitioning( matrix, &row_partitioning );
-      }
    }
 #endif
 

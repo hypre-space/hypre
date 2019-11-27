@@ -192,7 +192,7 @@ main( hypre_int argc,
    /* parameters for BoomerAMG */
    HYPRE_Real   A_drop_tol = 0.0;
    HYPRE_Int    A_drop_type = -1;
-   HYPRE_Int    coarsen_cut_factor;
+   HYPRE_Int    coarsen_cut_factor = 0;
    HYPRE_Real   strong_threshold;
    HYPRE_Real   strong_thresholdR;
    HYPRE_Real   trunc_factor;
@@ -384,9 +384,9 @@ main( hypre_int argc,
    HYPRE_Int       nongalerk_num_tol = 0;
 
    /* coasening data */
-   HYPRE_Int     num_cpt;
-   HYPRE_Int     num_fpt;
-   HYPRE_Int     num_isolated_fpt;
+   HYPRE_Int     num_cpt = 0;
+   HYPRE_Int     num_fpt = 0;
+   HYPRE_Int     num_isolated_fpt = 0;
    HYPRE_BigInt *cpt_index = NULL;
    HYPRE_BigInt *fpt_index = NULL;
    HYPRE_BigInt *isolated_fpt_index = NULL;
@@ -7966,6 +7966,7 @@ BuildBigArrayFromOneFile( HYPRE_Int            argc,
       hypre_TFree(send_buffer, HYPRE_MEMORY_HOST);
       hypre_TFree(displs, HYPRE_MEMORY_HOST);
       hypre_TFree(array_procs, HYPRE_MEMORY_HOST);
+      hypre_TFree(global_array, HYPRE_MEMORY_HOST);
    }
 
    return 0;
