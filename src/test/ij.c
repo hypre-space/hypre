@@ -114,6 +114,7 @@ main( hypre_int argc,
    HYPRE_Int                 build_funcs_arg_index;
    HYPRE_Int                 build_fpt_arg_index;
    HYPRE_Int                 build_sfpt_arg_index;
+   HYPRE_Int                 build_cpt_arg_index;
    HYPRE_Int                 solver_id;
    HYPRE_Int                 solver_type = 1;
    HYPRE_Int                 recompute_res = 0;   /* What should be the default here? */
@@ -383,8 +384,10 @@ main( hypre_int argc,
    HYPRE_Int       nongalerk_num_tol = 0;
 
    /* coasening data */
+   HYPRE_Int     num_cpt;
    HYPRE_Int     num_fpt;
    HYPRE_Int     num_isolated_fpt;
+   HYPRE_BigInt *cpt_index = NULL;
    HYPRE_BigInt *fpt_index = NULL;
    HYPRE_BigInt *isolated_fpt_index = NULL;
 
@@ -443,6 +446,7 @@ main( hypre_int argc,
    build_funcs_arg_index = argc;
    build_fpt_arg_index = 0;
    build_sfpt_arg_index = 0;
+   build_cpt_arg_index = 0;
    IS_type = 1;
    debug_flag = 0;
 
@@ -694,6 +698,11 @@ main( hypre_int argc,
       {
          arg_index++;
          build_sfpt_arg_index = arg_index;
+      }
+      else if ( strcmp(argv[arg_index], "-Cfromonefile") == 0 )
+      {
+         arg_index++;
+         build_cpt_arg_index = arg_index;
       }
       else if ( strcmp(argv[arg_index], "-cljp") == 0 )
       {
@@ -2316,7 +2325,7 @@ main( hypre_int argc,
    /*-----------------------------------------------------------
     * Set up coarsening data
     *-----------------------------------------------------------*/
-   if (build_fpt_arg_index || build_sfpt_arg_index)
+   if (build_fpt_arg_index || build_sfpt_arg_index || build_cpt_arg_index)
    {
       HYPRE_ParCSRMatrixGetGlobalRowPartitioning(parcsr_A, 0, &partitioning);
 
@@ -2330,6 +2339,12 @@ main( hypre_int argc,
       {
          BuildBigArrayFromOneFile(argc, argv, "Isolated Fine points", build_sfpt_arg_index,
                                   partitioning, &num_isolated_fpt, &isolated_fpt_index);
+      }
+
+      if (build_cpt_arg_index)
+      {
+         BuildBigArrayFromOneFile(argc, argv, "Coarse points", build_cpt_arg_index,
+                                  partitioning, &num_cpt, &cpt_index);
       }
 
       if (partitioning)
@@ -3316,6 +3331,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, coarsen_type);
          HYPRE_BoomerAMGSetCoarsenCutFactor(pcg_precond, coarsen_cut_factor);
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
+         HYPRE_BoomerAMGSetCpointsToKeep(pcg_precond, max_levels, num_cpt, cpt_index);
          HYPRE_BoomerAMGSetFPoints(pcg_precond, num_fpt, fpt_index);
          HYPRE_BoomerAMGSetIsolatedFPoints(pcg_precond, num_isolated_fpt, isolated_fpt_index);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
@@ -6611,6 +6627,7 @@ main( hypre_int argc,
       hypre_TFree(interp_vecs, HYPRE_MEMORY_HOST);
    }
    if (nongalerk_tol) hypre_TFree(nongalerk_tol, HYPRE_MEMORY_HOST);
+   if (cpt_index) hypre_TFree(cpt_index, HYPRE_MEMORY_HOST);
    if (fpt_index) hypre_TFree(fpt_index, HYPRE_MEMORY_HOST);
    if (isolated_fpt_index) hypre_TFree(isolated_fpt_index, HYPRE_MEMORY_HOST);
 
@@ -7840,8 +7857,8 @@ BuildBigArrayFromOneFile( HYPRE_Int            argc,
    /*-----------------------------------------------------------
     * Initialize some stuff
     *-----------------------------------------------------------*/
-   hypre_MPI_Comm_rank(comm, &myid );
-   hypre_MPI_Comm_size(comm, &num_procs );
+   hypre_MPI_Comm_rank(comm, &myid);
+   hypre_MPI_Comm_size(comm, &num_procs);
 
    /*-----------------------------------------------------------
     * Parse command line
