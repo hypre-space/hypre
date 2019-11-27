@@ -16,6 +16,7 @@
 #include "par_csr_block_matrix.h"   
 
 #define DEBUG_FAC 0
+#define DUMP_INTERMEDIATE_TEST_SOLNS 0
 #define DEBUGGING_MESSAGES 0
 
 HYPRE_Int
@@ -96,6 +97,7 @@ HYPRE_Int FAC_Cycle(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type, HYPR
 {
    HYPRE_Int   myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+   char filename[256];
 
    HYPRE_Int i;
 
@@ -117,6 +119,22 @@ HYPRE_Int FAC_Cycle(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type, HYPR
    #endif
    for (i = 0; i < numRelax[1]; i++) FAC_Relax( amg_data, compGrid[level], relax_type, level, 1 );
 
+
+
+
+   #if DUMP_INTERMEDIATE_TEST_SOLNS
+   sprintf(filename, "outputs/actual/u%d_level%d_relax1", myid, level);
+   hypre_SeqVectorPrint(hypre_ParCompGridU(compGrid[level]), filename);
+   if (level == 0)
+   {
+     sprintf(filename, "outputs/actual/f%d_level%d", myid, level);
+     hypre_SeqVectorPrint(hypre_ParCompGridF(compGrid[level]), filename);
+   }
+   #endif
+
+
+
+
    // Restrict the residual at all fine points (real and ghost) and set residual at coarse points not under the fine grid
    if (level < transition_level)
    {
@@ -129,6 +147,18 @@ HYPRE_Int FAC_Cycle(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type, HYPR
    }
    else FAC_Simple_Restrict( compGrid[level], compGrid[level+1] );
 
+
+
+
+   #if DUMP_INTERMEDIATE_TEST_SOLNS
+   sprintf(filename, "outputs/actual/f%d_level%d", myid, level+1);
+   hypre_SeqVectorPrint(hypre_ParCompGridF(compGrid[level+1]), filename);
+   #endif
+
+
+
+
+
    //  Either solve on the coarse level or recurse
    if (level+1 == num_levels-1)
    {
@@ -136,6 +166,12 @@ HYPRE_Int FAC_Cycle(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type, HYPR
       printf("Rank %d, coarse solve on level %d\n", myid, num_levels-1);
       #endif
       for (i = 0; i < numRelax[3]; i++) FAC_Relax( amg_data, compGrid[num_levels-1], relax_type, num_levels-1, 3 );
+
+      #if DUMP_INTERMEDIATE_TEST_SOLNS
+      sprintf(filename, "outputs/actual/u%d_level%d_relax2", myid, num_levels-1);
+      hypre_SeqVectorPrint(hypre_ParCompGridU(compGrid[num_levels-1]), filename);
+      #endif
+
    }
    else for (i = 0; i < cycle_type; i++)
    {
@@ -152,10 +188,25 @@ HYPRE_Int FAC_Cycle(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type, HYPR
    #endif
    FAC_Interpolate( compGrid[level], compGrid[level+1] );
 
+
+   #if DUMP_INTERMEDIATE_TEST_SOLNS
+   sprintf(filename, "outputs/actual/u%d_level%d_project", myid, level);
+   hypre_SeqVectorPrint(hypre_ParCompGridU(compGrid[level]), filename);
+   #endif
+
+
+
    #if DEBUGGING_MESSAGES
    printf("Rank %d, relax on level %d\n", myid, level);
    #endif
    for (i = 0; i < numRelax[2]; i++) FAC_Relax( amg_data, compGrid[level], relax_type, level, 2 );
+
+
+   #if DUMP_INTERMEDIATE_TEST_SOLNS
+   sprintf(filename, "outputs/actual/u%d_level%d_relax2", myid, level);
+   hypre_SeqVectorPrint(hypre_ParCompGridU(compGrid[level]), filename);
+   #endif
+
 
    return 0;
 }
@@ -323,6 +374,28 @@ FAC_Restrict( hypre_ParCompGrid *compGrid_f, hypre_ParCompGrid *compGrid_c, HYPR
    // Get update: s_l <- A_lt_l + s_l 
    hypre_CSRMatrixMatvec(1.0, hypre_ParCompGridA(compGrid_f), hypre_ParCompGridT(compGrid_f), 1.0, hypre_ParCompGridS(compGrid_f));
 
+
+
+
+
+
+   #if DUMP_INTERMEDIATE_TEST_SOLNS
+   char filename[256];
+   HYPRE_Int myid;
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+   sprintf(filename, "outputs/actual/t%d", myid);
+   hypre_SeqVectorPrint(hypre_ParCompGridT(compGrid_f), filename);
+   sprintf(filename, "outputs/actual/At%d", myid);
+   hypre_SeqVectorPrint(hypre_ParCompGridS(compGrid_f), filename);
+   #endif
+
+
+
+
+
+
+
+
    // If we need to preserve the updates on the next level !!! Do we need this if statement? Implications? Still need to generally make sure transition level stuff still works...
    if (hypre_ParCompGridS(compGrid_c))
    {
@@ -349,17 +422,17 @@ HYPRE_Int
 FAC_Simple_Restrict( hypre_ParCompGrid *compGrid_f, hypre_ParCompGrid *compGrid_c )
 {
    // Calculate fine grid residuals and restrict
-   if (!hypre_ParCompGridTemp(compGrid_f))
-   {      
-      hypre_ParCompGridTemp(compGrid_f) = hypre_SeqVectorCreate(hypre_ParCompGridNumNodes(compGrid_f));
-      hypre_SeqVectorInitialize(hypre_ParCompGridTemp(compGrid_f));
-   }
-   hypre_CSRMatrixMatvecOutOfPlace(-1.0, hypre_ParCompGridA(compGrid_f), hypre_ParCompGridU(compGrid_f), 1.0, hypre_ParCompGridF(compGrid_f), hypre_ParCompGridTemp(compGrid_f), 0);
-   // hypre_CSRMatrixMatvecT(1.0, hypre_ParCompGridP(compGrid_f), hypre_ParCompGridTemp(compGrid_f), 0.0, hypre_ParCompGridF(compGrid_c));
-   hypre_CSRMatrixMatvec(1.0, hypre_ParCompGridR(compGrid_f), hypre_ParCompGridTemp(compGrid_f), 0.0, hypre_ParCompGridF(compGrid_c));
+   hypre_Vector *res = hypre_SeqVectorCreate(hypre_ParCompGridNumNodes(compGrid_f)); // !!! NOTE: don't generate this every time
+   hypre_SeqVectorInitialize(res);
+   
+   hypre_CSRMatrixMatvecOutOfPlace(-1.0, hypre_ParCompGridA(compGrid_f), hypre_ParCompGridU(compGrid_f), 1.0, hypre_ParCompGridF(compGrid_f), res, 0);
+   // hypre_CSRMatrixMatvecT(1.0, hypre_ParCompGridP(compGrid_f), res, 0.0, hypre_ParCompGridF(compGrid_c));
+   hypre_CSRMatrixMatvec(1.0, hypre_ParCompGridR(compGrid_f), res, 0.0, hypre_ParCompGridF(compGrid_c));
    
    // Zero out initial guess on coarse grid
    hypre_SeqVectorSetConstantValues(hypre_ParCompGridU(compGrid_c), 0.0);
+
+   hypre_SeqVectorDestroy(res);
 
    return 0;
 }
@@ -400,6 +473,13 @@ FAC_Jacobi( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int l
 {
    HYPRE_Int i,j; 
    HYPRE_Real relax_weight = hypre_ParAMGDataRelaxWeight(amg_data)[level];
+
+   // !!! Debug
+   HYPRE_Int myid;
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+   HYPRE_Int num_owned_nodes = hypre_ParCompGridOwnedBlockStarts(compGrid)[hypre_ParCompGridNumOwnedBlocks(compGrid)];
+   // if (myid == 0) printf("FAC_Jacobi, n = %d, relax_weight = %f\n", num_owned_nodes, relax_weight);
+
 
    // Calculate l1_norms if necessary (right now, I'm just using this vector for the diagonal of A and doing straight ahead Jacobi)
    if (!hypre_ParCompGridL1Norms(compGrid))

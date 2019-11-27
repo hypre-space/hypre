@@ -2092,7 +2092,7 @@ HYPRE_Int hypre_ParCompGridResize ( hypre_ParCompGrid *compGrid, HYPRE_Int new_s
 HYPRE_Int hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *num_added_nodes, HYPRE_Int start_level, HYPRE_Int num_levels );
 HYPRE_Int hypre_ParCompGridSetupLocalIndicesP( hypre_ParCompGrid **compGrid, HYPRE_Int start_level, HYPRE_Int transition_level );
 HYPRE_Int hypre_ParCompGridLocalIndexBinarySearch( hypre_ParCompGrid *compGrid, HYPRE_Int global_index, HYPRE_Int allow_failed_search );
-HYPRE_Int hypre_ParCompGridDebugPrint ( hypre_ParCompGrid *compGrid, const char* filename );
+HYPRE_Int hypre_ParCompGridDebugPrint ( hypre_ParCompGrid *compGrid, const char* filename, HYPRE_Int coarse_num_nodes );
 HYPRE_Int hypre_ParCompGridDumpSorted( hypre_ParCompGrid *compGrid, const char* filename);
 HYPRE_Int hypre_ParCompGridGlobalIndicesDump( hypre_ParCompGrid *compGrid, const char* filename);
 HYPRE_Int hypre_ParCompGridRealDofMarkerDump( hypre_ParCompGrid *compGrid, const char* filename);

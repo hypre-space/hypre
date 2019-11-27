@@ -323,20 +323,12 @@ hypre_ParCompGridInitialize ( hypre_ParAMGData *amg_data, HYPRE_Int padding, HYP
       }
 
       if (R)
-      {
-         // !!! Debug
-         if (hypre_ParCompGridRMemSize(compGrid) == 0)
-         {
-            printf("rank %d, level %d, r mem size = %d, num_nodes = %d\n", myid, level, hypre_ParCompGridRMemSize(compGrid), num_nodes);
-         }
-         
+      {         
          // Setup row of matrix R
          hypre_ParCSRMatrixGetRow( R, global_indices_comp[i], &row_size, &row_col_ind, &row_values );
          R_rowptr[i+1] = R_rowptr[i] + row_size;
          for (j = R_rowptr[i]; j < R_rowptr[i+1]; j++)
          {
-            // !!! Debug
-            if (R_data == NULL) printf("null r data and row_size = %d\n", row_size);
             R_data[j] = row_values[j - R_rowptr[i]];
             R_colind[j] = row_col_ind[j - R_rowptr[i]];
          }
@@ -526,6 +518,10 @@ hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPk
          if (hypre_ParCompGridRealDofMarker(compGrid[level])[i]) num_real_nodes++;
       }
       hypre_ParCompGridNumRealNodes(compGrid[level]) = num_real_nodes;
+
+      // // !!! Debug
+      // printf("inside finalize, num_real_nodes = %d\n", num_real_nodes);
+
       HYPRE_Int *new_indices = hypre_CTAlloc(HYPRE_Int, num_nodes, HYPRE_MEMORY_HOST);
       HYPRE_Int real_cnt = 0;
       HYPRE_Int ghost_cnt = 0;
@@ -719,7 +715,8 @@ hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPk
          }
       }
       new_A_rowPtr[num_nodes] = A_cnt;
-      if (level != num_levels-1) new_P_rowPtr[num_nodes] = P_cnt;
+      if (hypre_ParCompGridPRowPtr(compGrid[level])) new_P_rowPtr[num_nodes] = P_cnt;
+      if (hypre_ParCompGridRRowPtr(compGrid[level])) new_R_rowPtr[num_nodes] = R_cnt;
 
       // Fix up P col indices on finer level
       if (level != 0)
@@ -1158,13 +1155,14 @@ HYPRE_Int hypre_ParCompGridLocalIndexBinarySearch( hypre_ParCompGrid *compGrid, 
 }
 
 HYPRE_Int
-hypre_ParCompGridDebugPrint ( hypre_ParCompGrid *compGrid, const char* filename )
+hypre_ParCompGridDebugPrint ( hypre_ParCompGrid *compGrid, const char* filename, HYPRE_Int coarse_num_nodes )
 {
    HYPRE_Int      myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
    // Get composite grid information
    HYPRE_Int       num_nodes = hypre_ParCompGridNumNodes(compGrid);
+   HYPRE_Int       num_real = hypre_ParCompGridNumRealNodes(compGrid);
    HYPRE_Int       num_owned_blocks = hypre_ParCompGridNumOwnedBlocks(compGrid);
    HYPRE_Int       num_owned_nodes = hypre_ParCompGridOwnedBlockStarts(compGrid)[hypre_ParCompGridNumOwnedBlocks(compGrid)];
    HYPRE_Int       mem_size = hypre_ParCompGridMemSize(compGrid);
@@ -1174,6 +1172,7 @@ hypre_ParCompGridDebugPrint ( hypre_ParCompGrid *compGrid, const char* filename 
    HYPRE_Int        *global_indices = hypre_ParCompGridGlobalIndices(compGrid);
    HYPRE_Int        *coarse_global_indices = hypre_ParCompGridCoarseGlobalIndices(compGrid);
    HYPRE_Int        *coarse_local_indices = hypre_ParCompGridCoarseLocalIndices(compGrid);
+   HYPRE_Int        *real_dof_marker = hypre_ParCompGridRealDofMarker(compGrid);
 
    HYPRE_Int *A_rowptr = hypre_ParCompGridARowPtr(compGrid);
    HYPRE_Int *A_colind = hypre_ParCompGridAColInd(compGrid);
@@ -1187,10 +1186,6 @@ hypre_ParCompGridDebugPrint ( hypre_ParCompGrid *compGrid, const char* filename 
    HYPRE_Complex *R_data = hypre_ParCompGridRData(compGrid);
 
    HYPRE_Int         i;
-
-   // Measure number of ghost nodes
-   HYPRE_Int num_real = 0;
-   for (i = 0; i < num_nodes; i++) if (A_rowptr[i+1] - A_rowptr[i] > 0) num_real++;
 
    // Print info to given filename   
    FILE             *file;
@@ -1215,11 +1210,13 @@ hypre_ParCompGridDebugPrint ( hypre_ParCompGrid *compGrid, const char* filename 
    // hypre_fprintf(file, "\n");
    if (global_indices)
    {
+      hypre_fprintf(file, "\n");
       hypre_fprintf(file, "global_indices:\n");
       for (i = 0; i < num_nodes; i++)
       {
          hypre_fprintf(file, "%d ", global_indices[i]);
       }
+      hypre_fprintf(file, "\n");
    }
    if (coarse_global_indices)
    {
@@ -1230,10 +1227,21 @@ hypre_ParCompGridDebugPrint ( hypre_ParCompGrid *compGrid, const char* filename 
          hypre_fprintf(file, "%d ", coarse_global_indices[i]);
       }
       hypre_fprintf(file, "\n");
+      hypre_fprintf(file, "\n");
       hypre_fprintf(file, "coarse_local_indices:\n");
       for (i = 0; i < num_nodes; i++)
       {
          hypre_fprintf(file, "%d ", coarse_local_indices[i]);
+      }
+      hypre_fprintf(file, "\n");
+   }
+   if (real_dof_marker)
+   {
+      hypre_fprintf(file, "\n");
+      hypre_fprintf(file, "real_dof_marker:\n");
+      for (i = 0; i < num_nodes; i++)
+      {
+         hypre_fprintf(file, "%d ", real_dof_marker[i]);
       }
       hypre_fprintf(file, "\n");
    }
@@ -1268,18 +1276,30 @@ hypre_ParCompGridDebugPrint ( hypre_ParCompGrid *compGrid, const char* filename 
       hypre_fprintf(file, "P data:\n");
       for (i = 0; i < P_rowptr[num_nodes]; i++) hypre_fprintf(file, "%f ", P_data[i]);
    }
-   // if (R_rowptr) // NOTE: depending on when this is called, R might have num_nodes rows or coarse_num_nodes rows...
-   // {
-   //    hypre_fprintf(file,"\n\n");
-   //    hypre_fprintf(file, "R row pointer:\n");
-   //    for (i = 0; i < num_nodes+1; i++) hypre_fprintf(file, "%d ", R_rowptr[i]);
-   //    hypre_fprintf(file,"\n\n");
-   //    hypre_fprintf(file, "R colind:\n");
-   //    for (i = 0; i < R_rowptr[num_nodes]; i++) hypre_fprintf(file, "%d ", R_colind[i]);
-   //    hypre_fprintf(file,"\n\n");
-   //    hypre_fprintf(file, "R data:\n");
-   //    for (i = 0; i < R_rowptr[num_nodes]; i++) hypre_fprintf(file, "%f ", R_data[i]);
-   // }
+   if (R_rowptr && !hypre_ParCompGridR(compGrid)) // NOTE: depending on when this is called, R might have num_nodes rows or coarse_num_nodes rows...
+   {
+      hypre_fprintf(file,"\n\n");
+      hypre_fprintf(file, "R row pointer:\n");
+      for (i = 0; i < num_nodes+1; i++) hypre_fprintf(file, "%d ", R_rowptr[i]);
+      hypre_fprintf(file,"\n\n");
+      hypre_fprintf(file, "R colind:\n");
+      for (i = 0; i < R_rowptr[num_nodes]; i++) hypre_fprintf(file, "%d ", R_colind[i]);
+      hypre_fprintf(file,"\n\n");
+      hypre_fprintf(file, "R data:\n");
+      for (i = 0; i < R_rowptr[num_nodes]; i++) hypre_fprintf(file, "%f ", R_data[i]);
+   }
+   if (hypre_ParCompGridR(compGrid)) // NOTE: depending on when this is called, R might have num_nodes rows or coarse_num_nodes rows...
+   {
+      hypre_fprintf(file,"\n\n");
+      hypre_fprintf(file, "R row pointer:\n");
+      for (i = 0; i < coarse_num_nodes+1; i++) hypre_fprintf(file, "%d ", R_rowptr[i]);
+      hypre_fprintf(file,"\n\n");
+      hypre_fprintf(file, "R colind:\n");
+      for (i = 0; i < R_rowptr[coarse_num_nodes]; i++) hypre_fprintf(file, "%d ", R_colind[i]);
+      hypre_fprintf(file,"\n\n");
+      hypre_fprintf(file, "R data:\n");
+      for (i = 0; i < R_rowptr[coarse_num_nodes]; i++) hypre_fprintf(file, "%f ", R_data[i]);
+   }
 
    fclose(file);
 

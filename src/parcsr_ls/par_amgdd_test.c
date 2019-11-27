@@ -123,7 +123,6 @@ hypre_BoomerAMGDDTestSolve( void               *amg_vdata,
     HYPRE_Int i;
     for (i = 0; i < num_comp_cycles; i++)
     {
-      hypre_BoomerAMGSetMaxIter(amg_data, 1);
       TestBoomerAMGSolve(amg_data, A, res, U_comp, relax_marker, proc);
 
 
@@ -867,6 +866,15 @@ TestBoomerAMGCycle( void              *amg_vdata,
 
    /* Initialize */
 
+
+
+    #if DUMP_INTERMEDIATE_TEST_SOLNS
+    hypre_ParVector **t = hypre_CTAlloc(hypre_ParVector*, num_levels, HYPRE_MEMORY_SHARED);
+    hypre_ParVector **s = hypre_CTAlloc(hypre_ParVector*, num_levels, HYPRE_MEMORY_SHARED);
+    #endif
+
+
+
    Solve_err_flag = 0;
 
    if (grid_relax_points) old_version = 1;
@@ -1377,6 +1385,11 @@ TestBoomerAMGCycle( void              *amg_vdata,
     // This is where relaxation is done but we haven't yet messed with restriction/interpolation, so reset U back to U_copy at appropriate locations
     // Want U_array[level] to hold the correct values (i.e. relaxed everywhere except at relax_marker)
 
+
+
+
+
+
     hypre_Vector  *local_U = hypre_ParVectorLocalVector(U_array[level]);
     hypre_Vector  *local_U_before_relax = hypre_ParVectorLocalVector(U_copy);
     hypre_Vector  *local_relax_marker = hypre_ParVectorLocalVector(relax_marker[level]); 
@@ -1387,6 +1400,44 @@ TestBoomerAMGCycle( void              *amg_vdata,
         hypre_VectorData(local_U)[i] = hypre_VectorData(local_U_before_relax)[i];
       }
     }
+
+    #if DUMP_INTERMEDIATE_TEST_SOLNS
+    if (lev_counter[level]-1 >= 0 && level != num_levels-1)
+    {
+      if (!t[level])
+      {
+        t[level] = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD, hypre_ParVectorGlobalSize(U_array[level]), hypre_ParVectorPartitioning(U_array[level]));
+        hypre_ParVectorInitialize(t[level]);
+        hypre_ParVectorSetPartitioningOwner(t[level], 0);
+      }
+      hypre_Vector *local_t = hypre_ParVectorLocalVector(t[level]);
+      for (i = 0; i < hypre_VectorSize(local_U); i++)
+      {
+        if (hypre_VectorData(local_relax_marker)[i])
+        {
+          hypre_VectorData(local_t)[i] = hypre_VectorData(local_U)[i] - hypre_VectorData(local_U_before_relax)[i];
+        }
+      }
+      if (!s[level])
+      {
+        s[level] = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD, hypre_ParVectorGlobalSize(U_array[level]), hypre_ParVectorPartitioning(U_array[level]));
+        hypre_ParVectorInitialize(s[level]);
+        hypre_ParVectorSetPartitioningOwner(s[level], 0);
+      }
+      hypre_ParCSRMatrixMatvec(1.0, A_array[level], t[level], 1.0, s[level]);
+      
+      sprintf(filename, "outputs/test/t%d_level%d", proc, level);
+      hypre_ParVectorPrint(t[level], filename);
+      sprintf(filename, "outputs/test/u_before%d_level%d", proc, level);
+      hypre_ParVectorPrint(U_copy, filename);
+      sprintf(filename, "outputs/test/u_after%d_level%d", proc, level);
+      hypre_ParVectorPrint(U_array[level], filename);
+      sprintf(filename, "outputs/test/At%d_level%d", proc, level);
+      hypre_ParVectorPrint(s[level], filename);
+    }
+
+    #endif
+
     hypre_ParVectorDestroy(U_copy);
 
 
@@ -1418,11 +1469,11 @@ TestBoomerAMGCycle( void              *amg_vdata,
 
 
       #if DUMP_INTERMEDIATE_TEST_SOLNS
-      sprintf(filename, "outputs/u%d_level%d_relax1", proc, level);
+      sprintf(filename, "outputs/test/u%d_level%d_relax1", proc, level);
       hypre_ParVectorPrint(U_array[level], filename);
       if (level == 0)
       {
-        sprintf(filename, "outputs/f%d_level%d", proc, level);
+        sprintf(filename, "outputs/test/f%d_level%d", proc, level);
         hypre_ParVectorPrint(F_array[level], filename);
       }
       #endif
@@ -1459,7 +1510,7 @@ TestBoomerAMGCycle( void              *amg_vdata,
 
 
       #if DUMP_INTERMEDIATE_TEST_SOLNS
-      sprintf(filename, "outputs/r%d_level%d", proc, level);
+      sprintf(filename, "outputs/test/r%d_level%d", proc, level);
       hypre_ParVectorPrint(Vtemp, filename);
       #endif
 
@@ -1498,10 +1549,14 @@ TestBoomerAMGCycle( void              *amg_vdata,
 
 
       #if DUMP_INTERMEDIATE_TEST_SOLNS
-      sprintf(filename, "outputs/f%d_level%d", proc, level+1);
+      sprintf(filename, "outputs/test/f%d_level%d", proc, level+1);
       hypre_ParVectorPrint(F_array[coarse_grid], filename);
       #endif
 
+      #if DUMP_INTERMEDIATE_TEST_SOLNS
+      hypre_ParVectorSetConstantValues(t[fine_grid], 0.0);
+      hypre_ParVectorSetConstantValues(s[fine_grid], 0.0);
+      #endif
 
 
 
@@ -1544,9 +1599,9 @@ TestBoomerAMGCycle( void              *amg_vdata,
 
 
       #if DUMP_INTERMEDIATE_TEST_SOLNS
-      sprintf(filename, "outputs/u%d_level%d_relax2", proc, level);
+      sprintf(filename, "outputs/test/u%d_level%d_relax2", proc, level);
       hypre_ParVectorPrint(U_array[level], filename);
-      sprintf(filename, "outputs/u%d_level%d_project", proc, level-1);
+      sprintf(filename, "outputs/test/u%d_level%d_project", proc, level-1);
       hypre_ParVectorPrint(U_array[level-1], filename);
       #endif
 
@@ -1569,7 +1624,7 @@ TestBoomerAMGCycle( void              *amg_vdata,
 
 
   #if DUMP_INTERMEDIATE_TEST_SOLNS
-  sprintf(filename, "outputs/u%d_level%d_relax2", proc, 0);
+  sprintf(filename, "outputs/test/u%d_level%d_relax2", proc, 0);
   hypre_ParVectorPrint(U_array[0], filename);
   #endif
 
