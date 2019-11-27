@@ -27,7 +27,7 @@ HYPRE_MGRCreate( HYPRE_Solver *solver )
  * HYPRE_MGRDestroy
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_MGRDestroy( HYPRE_Solver solver )
 {
    return( hypre_MGRDestroy( (void *) solver ) );
@@ -37,7 +37,7 @@ HYPRE_MGRDestroy( HYPRE_Solver solver )
  * HYPRE_MGRSetup
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_MGRSetup( HYPRE_Solver solver,
                          HYPRE_ParCSRMatrix A,
                          HYPRE_ParVector b,
@@ -53,7 +53,7 @@ HYPRE_MGRSetup( HYPRE_Solver solver,
  * HYPRE_MGRSolve
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_MGRSolve( HYPRE_Solver solver,
                          HYPRE_ParCSRMatrix A,
                          HYPRE_ParVector b,
@@ -69,11 +69,11 @@ HYPRE_MGRSolve( HYPRE_Solver solver,
  * HYPRE_MGRSetCpointsByBlock
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
-HYPRE_MGRSetCpointsByBlock( HYPRE_Solver solver, 
-			HYPRE_Int  block_size, 
-			HYPRE_Int  max_num_levels, 
-			HYPRE_Int *block_num_coarse_points, 
+HYPRE_Int
+HYPRE_MGRSetCpointsByBlock( HYPRE_Solver solver,
+			HYPRE_Int  block_size,
+			HYPRE_Int  max_num_levels,
+			HYPRE_Int *block_num_coarse_points,
 			HYPRE_Int  **block_coarse_indexes)
 {
    return( hypre_MGRSetCpointsByBlock( (void *) solver, block_size, max_num_levels, block_num_coarse_points, block_coarse_indexes));
@@ -81,7 +81,7 @@ HYPRE_MGRSetCpointsByBlock( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_MGRSetNonCpointsToFpoints( HYPRE_Solver solver, HYPRE_Int nonCptToFptFlag)
-{   
+{
    return hypre_MGRSetNonCpointsToFpoints((void *) solver, nonCptToFptFlag);
 }
 
@@ -121,7 +121,7 @@ HYPRE_MGRSetBlockSize( HYPRE_Solver solver, HYPRE_Int bsize )
  * HYPRE_MGRSetReservedCoarseNodes
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_MGRSetReservedCoarseNodes( HYPRE_Solver solver, HYPRE_Int reserved_coarse_size, HYPRE_Int *reserved_coarse_indexes )
+HYPRE_MGRSetReservedCoarseNodes( HYPRE_Solver solver, HYPRE_Int reserved_coarse_size, HYPRE_BigInt *reserved_coarse_indexes )
 {
    return hypre_MGRSetReservedCoarseNodes(solver, reserved_coarse_size, reserved_coarse_indexes );
 }

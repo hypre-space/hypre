@@ -362,22 +362,22 @@ main( hypre_int argc,
    /* end lobpcg */
 
    /* mgr options */
-   HYPRE_Int mgr_bsize = 1;
-   HYPRE_Int mgr_nlevels = 0;
-   HYPRE_Int mgr_num_reserved_nodes = 0;
-   HYPRE_Int mgr_non_c_to_f = 1;
-   HYPRE_Int mgr_frelax_method = 0;
-   HYPRE_Int *mgr_num_cindexes = NULL;
-   HYPRE_Int **mgr_cindexes = NULL;
-   HYPRE_Int *mgr_reserved_coarse_indexes = NULL;
-   HYPRE_Int mgr_relax_type = 0;
-   HYPRE_Int mgr_num_relax_sweeps = 2;
-   HYPRE_Int mgr_interp_type = 2;
-   HYPRE_Int mgr_num_interp_sweeps = 2;
-   HYPRE_Int mgr_gsmooth_type = 0;
-   HYPRE_Int mgr_num_gsmooth_sweeps = 1;
-   HYPRE_Int mgr_restrict_type = 0;
-   HYPRE_Int mgr_num_restrict_sweeps = 0;
+   HYPRE_Int     mgr_bsize = 1;
+   HYPRE_Int     mgr_nlevels = 0;
+   HYPRE_Int     mgr_num_reserved_nodes = 0;
+   HYPRE_Int     mgr_non_c_to_f = 1;
+   HYPRE_Int     mgr_frelax_method = 0;
+   HYPRE_Int    *mgr_num_cindexes = NULL;
+   HYPRE_Int   **mgr_cindexes = NULL;
+   HYPRE_BigInt *mgr_reserved_coarse_indexes = NULL;
+   HYPRE_Int     mgr_relax_type = 0;
+   HYPRE_Int     mgr_num_relax_sweeps = 2;
+   HYPRE_Int     mgr_interp_type = 2;
+   HYPRE_Int     mgr_num_interp_sweeps = 2;
+   HYPRE_Int     mgr_gsmooth_type = 0;
+   HYPRE_Int     mgr_num_gsmooth_sweeps = 1;
+   HYPRE_Int     mgr_restrict_type = 0;
+   HYPRE_Int     mgr_num_restrict_sweeps = 0;
    /* end mgr options */
 
    HYPRE_Real     *nongalerk_tol = NULL;
@@ -3639,10 +3639,10 @@ main( hypre_int argc,
          { /* assume coarse point is at index 0 */
             mgr_cindexes[i][0] = 0;
          }
-         mgr_reserved_coarse_indexes = hypre_CTAlloc(HYPRE_Int,  mgr_num_reserved_nodes, HYPRE_MEMORY_HOST);
+         mgr_reserved_coarse_indexes = hypre_CTAlloc(HYPRE_BigInt,  mgr_num_reserved_nodes, HYPRE_MEMORY_HOST);
          for(i=0; i<mgr_num_reserved_nodes; i++)
          { /* generate artificial reserved nodes */
-            mgr_reserved_coarse_indexes[i] = last_local_row-i;//2*i+1;
+            mgr_reserved_coarse_indexes[i] = last_local_row - (HYPRE_BigInt) i; //2*i+1;
          }
 
          /* set MGR data by block */
@@ -5435,10 +5435,10 @@ main( hypre_int argc,
          { /* assume coarse point is at index 0 */
             mgr_cindexes[i][0] = 0;
          }
-         mgr_reserved_coarse_indexes = hypre_CTAlloc(HYPRE_Int,  mgr_num_reserved_nodes, HYPRE_MEMORY_HOST);
+         mgr_reserved_coarse_indexes = hypre_CTAlloc(HYPRE_BigInt,  mgr_num_reserved_nodes, HYPRE_MEMORY_HOST);
          for(i=0; i<mgr_num_reserved_nodes; i++)
          { /* generate artificial reserved nodes */
-            mgr_reserved_coarse_indexes[i] = last_local_row-i;//2*i+1;
+            mgr_reserved_coarse_indexes[i] = last_local_row - (HYPRE_BigInt) i; //2*i+1;
          }
 
          /* set MGR data by block */
@@ -5799,11 +5799,11 @@ main( hypre_int argc,
             mgr_cindexes[i][0] = 2;
          }
 
-         mgr_reserved_coarse_indexes = hypre_CTAlloc(HYPRE_Int, mgr_num_reserved_nodes, HYPRE_MEMORY_HOST);
+         mgr_reserved_coarse_indexes = hypre_CTAlloc(HYPRE_BigInt, mgr_num_reserved_nodes, HYPRE_MEMORY_HOST);
          for(i=0; i<mgr_num_reserved_nodes; i++)
          {
             /* Generate 'artificial' reserved nodes. Assumes these are ordered last in the system */
-            mgr_reserved_coarse_indexes[i] = last_local_row-i;//2*i+1;
+            mgr_reserved_coarse_indexes[i] = last_local_row - (HYPRE_BigInt) i; //2*i+1;
             hypre_printf("mgr_reserved_coarse_indexes[i] = %d \n", mgr_reserved_coarse_indexes[i]);
          }
 

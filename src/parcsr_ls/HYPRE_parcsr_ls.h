@@ -3527,7 +3527,7 @@ HYPRE_MGRSetBlockSize( HYPRE_Solver solver, HYPRE_Int bsize );
  * @param reserved_coarse_nodes [IN] (global) indexes of reserved coarse points
  **/
 HYPRE_Int
-HYPRE_MGRSetReservedCoarseNodes( HYPRE_Solver solver, HYPRE_Int reserved_coarse_size, HYPRE_Int *reserved_coarse_nodes );
+HYPRE_MGRSetReservedCoarseNodes( HYPRE_Solver solver, HYPRE_Int reserved_coarse_size, HYPRE_BigInt *reserved_coarse_nodes );
 
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetRelaxType
