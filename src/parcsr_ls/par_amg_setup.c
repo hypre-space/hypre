@@ -85,6 +85,15 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    hypre_ParCSRBlockMatrix **A_block_array, **P_block_array, **R_block_array;
 
+   HYPRE_Int            memory_location = HYPRE_MEMORY_SHARED;
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+   if (hypre_handle->no_cuda_um == 1)
+   {
+      memory_location = HYPRE_MEMORY_DEVICE;
+   }
+#endif
+
    /* Local variables */
    HYPRE_Int                 *CF_marker;
    HYPRE_Int                 *CFN_marker;
@@ -411,7 +420,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          if (P_block_array[j])
          {
             hypre_ParCSRBlockMatrixDestroy(P_block_array[j]);
-            P_array[j] = NULL;
+            P_block_array[j] = NULL;
          }
          /* RL */
          if (R_array[j])
@@ -423,7 +432,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          if (R_block_array[j])
          {
             hypre_ParCSRBlockMatrixDestroy(R_block_array[j]);
-            R_array[j] = NULL;
+            R_block_array[j] = NULL;
          }
       }
 
@@ -529,9 +538,20 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       }
       if (hypre_ParAMGDataL1Norms(amg_data))
       {
-         for (i=0; i < old_num_levels; i++)
+         HYPRE_Int memory_location_l1 = HYPRE_MEMORY_SHARED;
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+         if (hypre_handle->no_cuda_um == 1)
+         {
+            memory_location_l1 = HYPRE_MEMORY_DEVICE;
+         }
+#endif
+         for (i = 0; i < old_num_levels; i++)
+         {
             if (hypre_ParAMGDataL1Norms(amg_data)[i])
-              hypre_TFree(hypre_ParAMGDataL1Norms(amg_data)[i], HYPRE_MEMORY_SHARED);
+            {
+               hypre_TFree(hypre_ParAMGDataL1Norms(amg_data)[i], memory_location_l1);
+            }
+         }
          hypre_TFree(hypre_ParAMGDataL1Norms(amg_data), HYPRE_MEMORY_HOST);
       }
       if (smooth_num_levels && smoother)
@@ -585,10 +605,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          hypre_TFree(hypre_ParAMGDataSmoother(amg_data), HYPRE_MEMORY_HOST);
          hypre_ParAMGDataSmoother(amg_data) = NULL;
       }
-     if ( hypre_ParAMGDataResidual(amg_data) ) {
-         hypre_ParVectorDestroy( hypre_ParAMGDataResidual(amg_data) );
-         hypre_ParAMGDataResidual(amg_data) = NULL;
-      }
+     if ( hypre_ParAMGDataResidual(amg_data) )
+     {
+        hypre_ParVectorDestroy( hypre_ParAMGDataResidual(amg_data) );
+        hypre_ParAMGDataResidual(amg_data) = NULL;
+     }
    }
 
    if (A_array == NULL)
@@ -711,7 +732,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    Vtemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[0]),
                                  hypre_ParCSRMatrixGlobalNumRows(A_array[0]),
                                  hypre_ParCSRMatrixRowStarts(A_array[0]));
-   hypre_ParVectorInitialize(Vtemp);
+   hypre_ParVectorInitialize_v2(Vtemp, memory_location);
    hypre_ParVectorSetPartitioningOwner(Vtemp,0);
    hypre_ParAMGDataVtemp(amg_data) = Vtemp;
 
@@ -882,14 +903,14 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[level]),
                                      hypre_ParCSRMatrixGlobalNumRows(A_array[level]),
                                      hypre_ParCSRMatrixRowStarts(A_array[level]));
-            hypre_ParVectorInitialize(F_array[level]);
+            hypre_ParVectorInitialize_v2(F_array[level], memory_location);
             hypre_ParVectorSetPartitioningOwner(F_array[level],0);
 
             U_array[level] =
                hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[level]),
                                      hypre_ParCSRMatrixGlobalNumRows(A_array[level]),
                                      hypre_ParCSRMatrixRowStarts(A_array[level]));
-            hypre_ParVectorInitialize(U_array[level]);
+            hypre_ParVectorInitialize_v2(U_array[level], memory_location);
             hypre_ParVectorSetPartitioningOwner(U_array[level],0);
          }
 
@@ -2655,6 +2676,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          {
             hypre_MatvecCommPkgCreate(A_H);
          }
+         /* NumNonzeros was set in hypre_ParCSRMatrixDropSmallEntries */
          if (hypre_ParAMGDataADropTol(amg_data) <= 0.0)
          {
             hypre_ParCSRMatrixSetNumNonzeros(A_H);
@@ -2740,14 +2762,14 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[level]),
                                   hypre_ParCSRMatrixGlobalNumRows(A_array[level]),
                                   hypre_ParCSRMatrixRowStarts(A_array[level]));
-         hypre_ParVectorInitialize(F_array[level]);
+         hypre_ParVectorInitialize_v2(F_array[level], memory_location);
          hypre_ParVectorSetPartitioningOwner(F_array[level],0);
 
          U_array[level] =
             hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[level]),
                                   hypre_ParCSRMatrixGlobalNumRows(A_array[level]),
                                   hypre_ParCSRMatrixRowStarts(A_array[level]));
-         hypre_ParVectorInitialize(U_array[level]);
+         hypre_ParVectorInitialize_v2(U_array[level], memory_location);
          hypre_ParVectorSetPartitioningOwner(U_array[level],0);
       }
    }
@@ -3090,8 +3112,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       Residual_array = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[0]),
                                              hypre_ParCSRMatrixGlobalNumRows(A_array[0]),
                                              hypre_ParCSRMatrixRowStarts(A_array[0]) );
-      hypre_ParVectorInitialize(Residual_array);
-      hypre_ParVectorSetPartitioningOwner(Residual_array,0);
+      hypre_ParVectorInitialize_v2(Residual_array, memory_location);
+      hypre_ParVectorSetPartitioningOwner(Residual_array, 0);
       hypre_ParAMGDataResidual(amg_data) = Residual_array;
    }
    else

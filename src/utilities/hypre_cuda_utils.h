@@ -10,8 +10,6 @@
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 
-HYPRE_Int hypre_printf( const char *format , ... );
-
 #ifdef __cplusplus
 extern "C++" {
 #endif
@@ -48,6 +46,7 @@ extern "C++" {
 #include <thrust/fill.h>
 #include <thrust/adjacent_difference.h>
 #include <thrust/inner_product.h>
+#include <thrust/logical.h>
 using namespace thrust::placeholders;
 #endif // #if defined(HYPRE_USING_CUDA)
 
@@ -89,7 +88,7 @@ using namespace thrust::placeholders;
    if (CUBLAS_STATUS_SUCCESS != err) {                                                       \
       hypre_printf("CUBLAS ERROR (code = %d, %d) at %s:%d\n",                                \
             err, err == CUBLAS_STATUS_EXECUTION_FAILED, __FILE__, __LINE__);                 \
-      exit(1);                                                                               \
+      assert(0); exit(1);                                                                    \
    } } while(0)
 
 #define HYPRE_CUSPARSE_CALL(call) do {                                                       \
@@ -97,24 +96,24 @@ using namespace thrust::placeholders;
    if (CUSPARSE_STATUS_SUCCESS != err) {                                                     \
       hypre_printf("CUSPARSE ERROR (code = %d, %d) at %s:%d\n",                              \
             err, err == CUSPARSE_STATUS_EXECUTION_FAILED, __FILE__, __LINE__);               \
-      exit(1);                                                                               \
+      assert(0); exit(1);                                                                    \
    } } while(0)
 
 
 #define HYPRE_CURAND_CALL(call) do {                                                         \
    curandStatus_t err = call;                                                                \
    if (CURAND_STATUS_SUCCESS != err) {                                                       \
-      hypre_printf("CURAND ERROR (code = %d) at %s:%d\n",   \
-                   err, __FILE__, __LINE__);                \
-      exit(1);                                                                               \
+      hypre_printf("CURAND ERROR (code = %d) at %s:%d\n", err, __FILE__, __LINE__);          \
+      assert(0); exit(1);                                                                    \
    } } while(0)
 
 
-#define HYPRE_CUDA_CALL(call) do {                                                                             \
-   cudaError_t err = call;                                                                                     \
-   if (cudaSuccess != err) {                                                                                   \
-      hypre_printf("CUDA ERROR (code = %d, %s) at %s:%d\n", err, cudaGetErrorString(err), __FILE__, __LINE__); \
-      exit(1);                                                                                                 \
+#define HYPRE_CUDA_CALL(call) do {                                                           \
+   cudaError_t err = call;                                                                   \
+   if (cudaSuccess != err) {                                                                 \
+      hypre_printf("CUDA ERROR (code = %d, %s) at %s:%d\n", err, cudaGetErrorString(err),    \
+                   __FILE__, __LINE__);                                                      \
+      assert(0); exit(1);                                                                    \
    } } while(0)
 
 #if defined(HYPRE_USING_CUDA)
@@ -483,25 +482,28 @@ struct TupleComp2
 
 #endif // #if defined(HYPRE_USING_CUDA)
 
-#ifdef __cplusplus
-}
-#endif
 
+template<typename T>
 struct is_negative
 {
-   __host__ __device__ bool operator()(const HYPRE_Int &x)
+   __host__ __device__ bool operator()(const T &x)
    {
       return (x < 0);
    }
 };
 
+template<typename T>
 struct is_nonnegative
 {
-   __host__ __device__ bool operator()(const HYPRE_Int &x)
+   __host__ __device__ bool operator()(const T &x)
    {
       return (x >= 0);
    }
 };
+
+#ifdef __cplusplus
+}
+#endif
 
 struct in_range
 {

@@ -11,6 +11,8 @@
  *
  *****************************************************************************/
 
+#if 0
+
 #include <HYPRE_config.h>
 
 #ifndef hypre_PAR_CHORD_MATRIX_HEADER
@@ -94,3 +96,6 @@ typedef struct
 
 
 #endif
+
+#endif
+

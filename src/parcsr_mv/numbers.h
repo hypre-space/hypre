@@ -34,6 +34,9 @@
  *
  *****************************************************************************/
 
+#if 0
+
+
 #ifndef hypre_NUMBERS_HEADER
 #define hypre_NUMBERS_HEADER
 
@@ -49,5 +52,7 @@ HYPRE_Int hypre_NumbersNEntered( hypre_NumbersNode * node );
 HYPRE_Int hypre_NumbersQuery( hypre_NumbersNode * node, const HYPRE_Int n );
 HYPRE_Int * hypre_NumbersArray( hypre_NumbersNode * node );
 
+
+#endif
 
 #endif

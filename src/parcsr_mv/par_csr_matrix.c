@@ -299,38 +299,68 @@ hypre_ParCSRMatrixClone(hypre_ParCSRMatrix *A, HYPRE_Int copy_data)
    return hypre_ParCSRMatrixClone_v2(A, copy_data, HYPRE_MEMORY_SHARED);
 }
 
-/*--------------------------------------------------------------------------
- * hypre_ParCSRMatrixSetNumNonzeros
- *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParCSRMatrixSetNumNonzeros( hypre_ParCSRMatrix *matrix )
+hypre_ParCSRMatrixSetNumNonzeros_core( hypre_ParCSRMatrix *matrix, const char* format )
 {
    MPI_Comm comm;
    hypre_CSRMatrix *diag;
-   HYPRE_Int *diag_i;
    hypre_CSRMatrix *offd;
-   HYPRE_Int *offd_i;
-   HYPRE_Int local_num_rows;
-   HYPRE_BigInt total_num_nonzeros;
-   HYPRE_BigInt local_num_nonzeros;
+
    if (!matrix)
    {
       hypre_error_in_arg(1);
       return hypre_error_flag;
    }
+
    comm = hypre_ParCSRMatrixComm(matrix);
    diag = hypre_ParCSRMatrixDiag(matrix);
-   diag_i = hypre_CSRMatrixI(diag);
    offd = hypre_ParCSRMatrixOffd(matrix);
-   offd_i = hypre_CSRMatrixI(offd);
-   local_num_rows = hypre_CSRMatrixNumRows(diag);
 
-   local_num_nonzeros = (HYPRE_BigInt)(diag_i[local_num_rows] + offd_i[local_num_rows]);
-   hypre_MPI_Allreduce(&local_num_nonzeros, &total_num_nonzeros, 1, HYPRE_MPI_BIG_INT,
-                       hypre_MPI_SUM, comm);
-   hypre_ParCSRMatrixNumNonzeros(matrix) = total_num_nonzeros;
+   /* TODO in HYPRE_DEBUG ? */
+   hypre_CSRMatrixCheckSetNumNonzeros(diag);
+   hypre_CSRMatrixCheckSetNumNonzeros(offd);
+
+   if (format[0] == 'I')
+   {
+      HYPRE_BigInt total_num_nonzeros;
+      HYPRE_BigInt local_num_nonzeros;
+      local_num_nonzeros = (HYPRE_BigInt) ( hypre_CSRMatrixNumNonzeros(diag) +
+                                            hypre_CSRMatrixNumNonzeros(offd) );
+
+      hypre_MPI_Allreduce(&local_num_nonzeros, &total_num_nonzeros, 1, HYPRE_MPI_BIG_INT,
+                          hypre_MPI_SUM, comm);
+
+      hypre_ParCSRMatrixNumNonzeros(matrix) = total_num_nonzeros;
+   }
+   else if (format[0] == 'D')
+   {
+      HYPRE_Real total_num_nonzeros;
+      HYPRE_Real local_num_nonzeros;
+      local_num_nonzeros = (HYPRE_Real) ( hypre_CSRMatrixNumNonzeros(diag) +
+                                          hypre_CSRMatrixNumNonzeros(offd) );
+
+      hypre_MPI_Allreduce(&local_num_nonzeros, &total_num_nonzeros, 1,
+                          HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
+
+      hypre_ParCSRMatrixDNumNonzeros(matrix) = total_num_nonzeros;
+   }
+   else
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
    return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixSetNumNonzeros
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+hypre_ParCSRMatrixSetNumNonzeros( hypre_ParCSRMatrix *matrix )
+{
+   return hypre_ParCSRMatrixSetNumNonzeros_core(matrix, "Int");
 }
 
 /*--------------------------------------------------------------------------
@@ -340,33 +370,7 @@ hypre_ParCSRMatrixSetNumNonzeros( hypre_ParCSRMatrix *matrix )
 HYPRE_Int
 hypre_ParCSRMatrixSetDNumNonzeros( hypre_ParCSRMatrix *matrix )
 {
-   MPI_Comm comm;
-   hypre_CSRMatrix *diag;
-   HYPRE_Int *diag_i;
-   hypre_CSRMatrix *offd;
-   HYPRE_Int *offd_i;
-   HYPRE_Int local_num_rows;
-   HYPRE_Real total_num_nonzeros;
-   HYPRE_Real local_num_nonzeros;
-   if (!matrix)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
-   comm = hypre_ParCSRMatrixComm(matrix);
-   diag = hypre_ParCSRMatrixDiag(matrix);
-   diag_i = hypre_CSRMatrixI(diag);
-   offd = hypre_ParCSRMatrixOffd(matrix);
-   offd_i = hypre_CSRMatrixI(offd);
-
-   local_num_rows = hypre_CSRMatrixNumRows(diag);
-   local_num_nonzeros  = diag_i[local_num_rows];
-   local_num_nonzeros += offd_i[local_num_rows];
-
-   hypre_MPI_Allreduce(&local_num_nonzeros, &total_num_nonzeros, 1,
-                       HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
-   hypre_ParCSRMatrixDNumNonzeros(matrix) = total_num_nonzeros;
-   return hypre_error_flag;
+   return hypre_ParCSRMatrixSetNumNonzeros_core(matrix, "Double");
 }
 
 /*--------------------------------------------------------------------------

@@ -40,24 +40,7 @@ HYPRE_Int hypre_SyncCudaDefaultStream(hypre_Handle *hypre_handle);
 void hypre_SetExecPolicy( HYPRE_Int policy );
 HYPRE_Int hypre_GetExecPolicy1(HYPRE_Int location);
 HYPRE_Int hypre_GetExecPolicy2(HYPRE_Int location1, HYPRE_Int location2);
-
-/* hypre_printf.c */
-// #ifdef HYPRE_BIGINT
-HYPRE_Int hypre_ndigits( HYPRE_BigInt number );
-HYPRE_Int hypre_printf( const char *format , ... );
-HYPRE_Int hypre_fprintf( FILE *stream , const char *format, ... );
-HYPRE_Int hypre_sprintf( char *s , const char *format, ... );
-HYPRE_Int hypre_scanf( const char *format , ... );
-HYPRE_Int hypre_fscanf( FILE *stream , const char *format, ... );
-HYPRE_Int hypre_sscanf( char *s , const char *format, ... );
-// #else
-// #define hypre_printf  printf
-// #define hypre_fprintf fprintf
-// #define hypre_sprintf sprintf
-// #define hypre_scanf   scanf
-// #define hypre_fscanf  fscanf
-// #define hypre_sscanf  sscanf
-// #endif
+void HYPRE_SetNoCUDAUM(HYPRE_Int no_cuda_um);
 
 /* hypre_qsort.c */
 void hypre_swap ( HYPRE_Int *v , HYPRE_Int i , HYPRE_Int j );
@@ -328,3 +311,7 @@ void hypre_CudaCompileFlagCheck();
 
 #endif
 
+/* hypre_nvtx.c */
+void hypre_NvtxPushRangeColor(const char *name, HYPRE_Int cid);
+void hypre_NvtxPushRange(const char *name);
+void hypre_NvtxPopRange();

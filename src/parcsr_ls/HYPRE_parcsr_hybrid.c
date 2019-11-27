@@ -673,8 +673,8 @@ HYPRE_ParCSRHybridGetFinalRelativeResidualNorm( HYPRE_Solver solver,
 
 
 HYPRE_Int
-HYPRE_ParCSRHybridGetSetupTime( HYPRE_Solver solver,
-                                HYPRE_Real  *setup_time    )
+HYPRE_ParCSRHybridGetSetupSolveTime( HYPRE_Solver solver,
+                                     HYPRE_Real  *time    )
 {
-   return( hypre_AMGHybridGetSetupTime( (void *) solver, setup_time ) );
+   return( hypre_AMGHybridGetSetupSolveTime( (void *) solver, time ) );
 }

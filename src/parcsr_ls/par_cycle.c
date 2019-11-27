@@ -665,8 +665,8 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 
          if (block_mode)
          {
-            hypre_ParCSRBlockMatrixMatvecT(alpha,R_block_array[fine_grid],Vtemp,
-                                           beta,F_array[coarse_grid]);
+            hypre_ParCSRBlockMatrixMatvecT(alpha, R_block_array[fine_grid], Vtemp,
+                                           beta, F_array[coarse_grid]);
          }
          else
          {
@@ -678,7 +678,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
             }
             else
             {
-               hypre_ParCSRMatrixMatvecT(alpha, R_array[fine_grid],Vtemp,
+               hypre_ParCSRMatrixMatvecT(alpha, R_array[fine_grid], Vtemp,
                                          beta, F_array[coarse_grid]);
             }
          }

@@ -54,7 +54,7 @@ extern "C" {
 #endif
 
 HYPRE_Int BuildParFromFile (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix *A_ptr );
-HYPRE_Int BuildParRhsFromFile (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParVector *b_ptr );
+HYPRE_Int ReadParVectorFromFile (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParVector *b_ptr );
 
 HYPRE_Int BuildParLaplacian (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 HYPRE_Int BuildParSysLaplacian (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix *A_ptr );
@@ -137,7 +137,7 @@ main( hypre_int argc,
 
    HYPRE_ParCSRMatrix  parcsr_A = NULL;
    HYPRE_ParVector     b = NULL;
-   HYPRE_ParVector     x;
+   HYPRE_ParVector     x = NULL;
    HYPRE_ParVector     *interp_vecs = NULL;
    HYPRE_ParVector     residual = NULL;
 
@@ -384,6 +384,8 @@ main( hypre_int argc,
 
    HYPRE_Int air = 0;
    HYPRE_Int **grid_relax_points = NULL;
+
+   HYPRE_Int no_cuda_um = 0;
    /*-----------------------------------------------------------
     * Initialize some stuff
     *-----------------------------------------------------------*/
@@ -408,6 +410,7 @@ main( hypre_int argc,
 #ifdef HYPRE_USING_CUDA
    //hypre_SetExecPolicy(HYPRE_EXEC_DEVICE);
    hypre_SetExecPolicy(HYPRE_EXEC_HOST);
+   //HYPRE_CSRMatrixDeviceSpGemmSetUseCusparse(0);
 #endif
 
    //omp_set_default_device(0);
@@ -659,6 +662,12 @@ main( hypre_int argc,
          arg_index++;
          build_x0_type       = 0;
          build_x0_arg_index  = arg_index;
+      }
+      else if ( strcmp(argv[arg_index], "-x0parcsrfile") == 0 )
+      {
+         arg_index++;
+         build_x0_type      = 7;
+         build_x0_arg_index = arg_index;
       }
       else if ( strcmp(argv[arg_index], "-x0rand") == 0 )
       {
@@ -1033,6 +1042,13 @@ main( hypre_int argc,
       {
          arg_index++;
          hypre_SetExecPolicy(HYPRE_EXEC_DEVICE);
+      }
+      else if ( strcmp(argv[arg_index], "-no_cuda_um") == 0 )
+      {
+         arg_index++;
+         no_cuda_um = atoi(argv[arg_index++]);
+         HYPRE_SetNoCUDAUM(no_cuda_um);
+         build_rhs_type = 22;
       }
       else
       {
@@ -1922,6 +1938,8 @@ main( hypre_int argc,
          hypre_printf("  -mgr_frelax_method   1           : Use a 'multi-level smoother' strategy \n");
          hypre_printf("                                     for F-relaxation \n");
          /* end MGR options */
+
+         hypre_printf("  -no_cuda_um  <val>               : if use CUDA unified memory\n");
       }
 
       goto final;
@@ -2352,9 +2370,9 @@ main( hypre_int argc,
    {
 
       /* rhs */
-      BuildParRhsFromFile(argc, argv, build_rhs_arg_index, &b);
+      ReadParVectorFromFile(argc, argv, build_rhs_arg_index, &b);
 
-      hypre_printf("  Initial guess is 0\n");
+      //hypre_printf("  Initial guess is 0\n");
 
       ij_b = NULL;
 
@@ -2408,6 +2426,35 @@ main( hypre_int argc,
 
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
       x = (HYPRE_ParVector) object;
+   }
+   else if ( build_rhs_type == 22)
+   {
+      if (myid == 0)
+      {
+         hypre_printf("  RHS vector has unit components\n");
+         hypre_printf("  Initial guess is 0\n");
+         hypre_printf("  ParVector\n");
+      }
+
+      HYPRE_Int memory_location = HYPRE_MEMORY_SHARED;
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+      if (hypre_handle->no_cuda_um)
+      {
+         memory_location = HYPRE_MEMORY_DEVICE;
+      }
+#endif
+
+      b = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD,
+                                hypre_ParCSRMatrixGlobalNumRows(parcsr_A),
+                                NULL);
+      hypre_ParVectorInitialize_v2(b, memory_location);
+      hypre_ParVectorSetConstantValues(b, 1.0);
+
+      x = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD,
+                                hypre_ParCSRMatrixGlobalNumCols(parcsr_A),
+                                NULL);
+      hypre_ParVectorInitialize_v2(x, memory_location);
+      hypre_ParVectorSetConstantValues(x, 0.0);
    }
    else if ( build_rhs_type == 3 )
    {
@@ -2742,6 +2789,16 @@ main( hypre_int argc,
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
       x = (HYPRE_ParVector) object;
    }
+   else if (build_x0_type == 7)
+   {
+      /* from file */
+      if (myid == 0)
+      {
+         hypre_printf("  Initial guess vector read from file %s\n", argv[build_x0_arg_index]);
+      }
+
+      ReadParVectorFromFile(argc, argv, build_x0_arg_index, &x);
+   }
    else if (build_x0_type == 1)
    {
       /* random */
@@ -2852,6 +2909,8 @@ main( hypre_int argc,
       HYPRE_ParCSRHybridSetMaxLevels(amg_solver, max_levels);
       HYPRE_ParCSRHybridSetMaxRowSum(amg_solver, max_row_sum);
       HYPRE_ParCSRHybridSetNumSweeps(amg_solver, num_sweeps);
+      HYPRE_ParCSRHybridSetInterpType(amg_solver, interp_type);
+
       if (relax_type > -1) HYPRE_ParCSRHybridSetRelaxType(amg_solver, relax_type);
       HYPRE_ParCSRHybridSetAggNumLevels(amg_solver, agg_num_levels);
       HYPRE_ParCSRHybridSetNumPaths(amg_solver, num_paths);
@@ -2931,6 +2990,14 @@ main( hypre_int argc,
       }
 #endif
 
+      HYPRE_Real time[4];
+      HYPRE_ParCSRHybridGetSetupSolveTime(amg_solver, time);
+      if (myid == 0)
+      {
+         printf("ParCSRHybrid: Setup-Time1 %f, Solve-Time1 %f, Setup-Time2 %f, Solve-Time2 %f\n",
+                time[0], time[1], time[2], time[3]);
+      }
+
       HYPRE_ParCSRHybridDestroy(amg_solver);
    }
    /*-----------------------------------------------------------
@@ -2978,6 +3045,7 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetSCommPkgSwitch(amg_solver, S_commpkg_switch);
       /* note: log is written to standard output, not to file */
       HYPRE_BoomerAMGSetPrintLevel(amg_solver, 3);
+      //HYPRE_BoomerAMGSetLogging(amg_solver, 2);
       HYPRE_BoomerAMGSetPrintFileName(amg_solver, "driver.out.log");
       HYPRE_BoomerAMGSetCycleType(amg_solver, cycle_type);
       HYPRE_BoomerAMGSetFCycle(amg_solver, fcycle);
@@ -3082,7 +3150,16 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetCoordinates (amg_solver, coordinates);
       }
 
+      //cudaProfilerStart();
+
+#if defined(HYPRE_USING_NVTX)
+      hypre_NvtxPushRange("AMG-Setup-1");
+#endif
       HYPRE_BoomerAMGSetup(amg_solver, parcsr_A, b, x);
+
+#if defined(HYPRE_USING_NVTX)
+      hypre_NvtxPopRange();
+#endif
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
       cudaDeviceSynchronize();
@@ -3096,9 +3173,14 @@ main( hypre_int argc,
       time_index = hypre_InitializeTiming("BoomerAMG Solve");
       hypre_BeginTiming(time_index);
 
-      //PUSH_RANGE("solve", 1)
+#if defined(HYPRE_USING_NVTX)
+      hypre_NvtxPushRange("AMG-Solve-1");
+#endif
       HYPRE_BoomerAMGSolve(amg_solver, parcsr_A, b, x);
-      //POP_RANGE
+
+#if defined(HYPRE_USING_NVTX)
+      hypre_NvtxPopRange();
+#endif
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
       cudaDeviceSynchronize();
@@ -3123,9 +3205,29 @@ main( hypre_int argc,
 #if SECOND_TIME
       /* run a second time to check for memory leaks */
       HYPRE_ParVectorSetRandomValues(x, 775);
-      HYPRE_BoomerAMGSetup(amg_solver, parcsr_A, b, x);
-      HYPRE_BoomerAMGSolve(amg_solver, parcsr_A, b, x);
+
+#if defined(HYPRE_USING_NVTX)
+      hypre_NvtxPushRange("AMG-Setup-2");
 #endif
+
+      HYPRE_BoomerAMGSetup(amg_solver, parcsr_A, b, x);
+
+#if defined(HYPRE_USING_NVTX)
+      hypre_NvtxPopRange();
+#endif
+
+#if defined(HYPRE_USING_NVTX)
+      hypre_NvtxPushRange("AMG-Solve-2");
+#endif
+
+      HYPRE_BoomerAMGSolve(amg_solver, parcsr_A, b, x);
+
+#if defined(HYPRE_USING_NVTX)
+      hypre_NvtxPopRange();
+#endif
+#endif
+
+      //cudaProfilerStop();
 
       HYPRE_BoomerAMGDestroy(amg_solver);
    }
@@ -3699,6 +3801,7 @@ main( hypre_int argc,
       else
          if (myid == 0)
             hypre_printf("HYPRE_ParCSRPCGGetPrecond got good precond\n");
+
       HYPRE_PCGSetup(pcg_solver, (HYPRE_Matrix)parcsr_A,
                      (HYPRE_Vector)b, (HYPRE_Vector)x);
       hypre_EndTiming(time_index);
@@ -3723,10 +3826,27 @@ main( hypre_int argc,
 #if SECOND_TIME
       /* run a second time to check for memory leaks */
       HYPRE_ParVectorSetRandomValues(x, 775);
+      time_index = hypre_InitializeTiming("PCG Setup");
+      hypre_BeginTiming(time_index);
+
       HYPRE_PCGSetup(pcg_solver, (HYPRE_Matrix)parcsr_A,
                      (HYPRE_Vector)b, (HYPRE_Vector)x);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      time_index = hypre_InitializeTiming("PCG Solve");
+      hypre_BeginTiming(time_index);
+
       HYPRE_PCGSolve(pcg_solver, (HYPRE_Matrix)parcsr_A,
                      (HYPRE_Vector)b, (HYPRE_Vector)x);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
 #endif
 
       HYPRE_ParCSRPCGDestroy(pcg_solver);
@@ -6582,10 +6702,15 @@ main( hypre_int argc,
    else HYPRE_ParCSRMatrixDestroy(parcsr_A);
 
    /* for build_rhs_type = 1 or 7, we did not create ij_b  - just b*/
-   if (build_rhs_type ==1 || build_rhs_type ==7 || build_rhs_type==6)
+   if (build_rhs_type == 1 || build_rhs_type == 7 || build_rhs_type == 6 || build_rhs_type == 22)
       HYPRE_ParVectorDestroy(b);
    else
       HYPRE_IJVectorDestroy(ij_b);
+
+   if ( build_x0_type == 0 || build_x0_type == 7 )
+   {
+      HYPRE_ParVectorDestroy(x);
+   }
 
    HYPRE_IJVectorDestroy(ij_x);
 
@@ -6682,10 +6807,10 @@ BuildParFromFile( HYPRE_Int                  argc,
  *----------------------------------------------------------------------*/
 
 HYPRE_Int
-BuildParRhsFromFile( HYPRE_Int                  argc,
-                     char                *argv[],
-                     HYPRE_Int                  arg_index,
-                     HYPRE_ParVector      *b_ptr     )
+ReadParVectorFromFile( HYPRE_Int            argc,
+                       char                *argv[],
+                       HYPRE_Int            arg_index,
+                       HYPRE_ParVector      *b_ptr     )
 {
    char               *filename;
 
@@ -6719,7 +6844,7 @@ BuildParRhsFromFile( HYPRE_Int                  argc,
 
    if (myid == 0)
    {
-      hypre_printf("  RhsFromParFile: %s\n", filename);
+      hypre_printf(" From ParFile: %s\n", filename);
    }
 
    /*-----------------------------------------------------------

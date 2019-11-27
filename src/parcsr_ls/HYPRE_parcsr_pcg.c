@@ -317,7 +317,7 @@ HYPRE_ParCSRSymPrecondSetup( HYPRE_Solver solver,
 
    for (i=0; i < hypre_VectorSize(hypre_ParVectorLocalVector(x)); i++)
    {
-	x_data[i] = y_data[i]/A_data[A_i[i]];
+      x_data[i] = y_data[i]/A_data[A_i[i]];
    }
 
    return ierr;

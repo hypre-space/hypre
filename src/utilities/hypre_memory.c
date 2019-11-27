@@ -102,9 +102,6 @@ hypre_OutOfMemory(size_t size)
 {
    hypre_error_w_msg(HYPRE_ERROR_MEMORY,"Out of memory trying to allocate too many bytes\n");
    fflush(stdout);
-
-   printf("Out of memory trying to allocate too many bytes\n");
-   exit(1);
 }
 
 static inline void
@@ -321,7 +318,7 @@ hypre_MAlloc_core(size_t size, HYPRE_Int zeroinit, HYPRE_Int location)
    if (!ptr)
    {
       hypre_OutOfMemory(size);
-      exit(0);
+      hypre_MPI_Abort(hypre_MPI_COMM_WORLD, -1);
    }
 
    return ptr;
@@ -373,8 +370,7 @@ hypre_UnifiedFree(void *ptr)
 {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 #ifndef SIMPLE_MEMPOOL
-   //HYPRE_CUDA_CALL( cudaFree((size_t *) ptr - HYPRE_MEM_PAD_LEN) );
-   cudaFree((size_t *) ptr - HYPRE_MEM_PAD_LEN);
+   HYPRE_CUDA_CALL( cudaFree((size_t *) ptr - HYPRE_MEM_PAD_LEN) );
 #endif
 #endif
 }
@@ -507,7 +503,7 @@ hypre_Memcpy(void *dst, void *src, size_t size, HYPRE_Int loc_dst, HYPRE_Int loc
       if (size)
       {
          hypre_printf("hypre_Memcpy warning: copy %ld bytes from %p to %p !\n", size, src, dst);
-         assert(0);
+         hypre_assert(0);
       }
 
       return;
@@ -542,26 +538,55 @@ hypre_Memcpy(void *dst, void *src, size_t size, HYPRE_Int loc_dst, HYPRE_Int loc
    }
 #endif
 
-   /* 4 x 4 = 16 cases = 9 + 2 + 2 + 2 + 1 */
-   /* 9: Host   <-- Host, Host   <-- Shared, Host   <-- Pinned,
-    *    Shared <-- Host, Shared <-- Shared, Shared <-- Pinned,
-    *    Pinned <-- Host, Pinned <-- Shared, Pinned <-- Pinned.
-    *              (i.e, without Device involved)
+   if (dst == src)
+   {
+      return;
+   }
+
+   /* Totally 4 x 4 = 16 cases */
+
+   /* 4: Host   <-- Host, Host   <-- Pinned,
+    *    Pinned <-- Host, Pinned <-- Pinned.
     */
-   if (loc_dst != HYPRE_MEMORY_DEVICE && loc_src != HYPRE_MEMORY_DEVICE)
+   if ( loc_dst != HYPRE_MEMORY_DEVICE && loc_dst != HYPRE_MEMORY_SHARED &&
+        loc_src != HYPRE_MEMORY_DEVICE && loc_src != HYPRE_MEMORY_SHARED )
    {
       memcpy(dst, src, size);
       return;
    }
 
-   /* 2: Shared <-- Device, Device <-- Shared */
-   if (loc_dst == HYPRE_MEMORY_SHARED || loc_src == HYPRE_MEMORY_SHARED)
+
+   /* 3: Shared <-- Device, Device <-- Shared, Shared <-- Shared */
+   if ( (loc_dst == HYPRE_MEMORY_SHARED && loc_src == HYPRE_MEMORY_DEVICE) ||
+        (loc_dst == HYPRE_MEMORY_DEVICE && loc_src == HYPRE_MEMORY_SHARED) ||
+        (loc_dst == HYPRE_MEMORY_SHARED && loc_src == HYPRE_MEMORY_SHARED) )
    {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
       HYPRE_CUDA_CALL( cudaMemcpy(dst, src, size, cudaMemcpyDeviceToDevice) );
 #endif
       return;
    }
+
+
+   /* 2: Shared <-- Host, Shared <-- Pinned */
+   if (loc_dst == HYPRE_MEMORY_SHARED)
+   {
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+      HYPRE_CUDA_CALL( cudaMemcpy(dst, src, size, cudaMemcpyHostToDevice) );
+#endif
+      return;
+   }
+
+
+   /* 2: Host <-- Shared, Pinned <-- Shared */
+   if (loc_src == HYPRE_MEMORY_SHARED)
+   {
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+      HYPRE_CUDA_CALL( cudaMemcpy(dst, src, size, cudaMemcpyDeviceToHost) );
+#endif
+      return;
+   }
+
 
    /* 2: Device <-- Host, Device <-- Pinned */
    if ( loc_dst == HYPRE_MEMORY_DEVICE && (loc_src == HYPRE_MEMORY_HOST || loc_src == HYPRE_MEMORY_HOST_PINNED) )

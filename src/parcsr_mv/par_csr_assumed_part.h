@@ -5,6 +5,8 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+#if 0
+
 #ifndef hypre_PARCSR_ASSUMED_PART
 #define  hypre_PARCSR_ASSUMED_PART
 
@@ -25,3 +27,4 @@ typedef struct
 
 #endif /* hypre_PARCSR_ASSUMED_PART */
 
+#endif

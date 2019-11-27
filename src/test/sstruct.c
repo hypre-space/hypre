@@ -32,7 +32,7 @@
 
 #define DEBUG 0
 
-#define SECOND_TIME 1
+#define SECOND_TIME 0
 
 /*--------------------------------------------------------------------------
  * Data structures
@@ -2438,6 +2438,7 @@ main( hypre_int argc,
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    /* hypre_SetExecPolicy(HYPRE_EXEC_DEVICE); */
+   /* HYPRE_CSRMatrixDeviceSpGemmSetUseCusparse(0); */
 #endif
 
    /*-----------------------------------------------------------
@@ -4875,13 +4876,14 @@ main( hypre_int argc,
       HYPRE_ParCSRHybridSetRecomputeResidual(par_solver, recompute_res);
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+      /*
       HYPRE_ParCSRHybridSetPMaxElmts(par_solver, 8);
       HYPRE_ParCSRHybridSetRelaxType(par_solver, 18);
       HYPRE_ParCSRHybridSetCycleRelaxType(par_solver, 9, 3);
       HYPRE_ParCSRHybridSetCoarsenType(par_solver, 8);
       HYPRE_ParCSRHybridSetInterpType(par_solver, 3);
-      //HYPRE_ParCSRHybridSetMinCoarseSize(par_solver, 1);
       HYPRE_ParCSRHybridSetMaxCoarseSize(par_solver, 20);
+      */
 #endif
 
 #if SECOND_TIME
@@ -4898,7 +4900,9 @@ main( hypre_int argc,
       hypre_ParVectorCopy(par_x2, par_x);
 #endif
 
-      PUSH_RANGE("HybridSolve", 0);
+#if defined(HYPRE_USING_NVTX)
+      hypre_NvtxPushRange("HybridSolve");
+#endif
       //cudaProfilerStart();
 
       HYPRE_ParCSRHybridSetup(par_solver,par_A,par_b,par_x);
@@ -4921,15 +4925,21 @@ main( hypre_int argc,
       HYPRE_ParCSRHybridGetNumIterations(par_solver, &num_iterations);
       HYPRE_ParCSRHybridGetFinalRelativeResidualNorm(par_solver, &final_res_norm);
 
-      HYPRE_Real setup_time;
-      HYPRE_ParCSRHybridGetSetupTime(par_solver, &setup_time);
+      /*
+      HYPRE_Real time[4];
+      HYPRE_ParCSRHybridGetSetupSolveTime(par_solver, time);
       if (myid == 0)
       {
-         printf("SetupTime %f\n", setup_time);
+         printf("ParCSRHybrid: Setup-Time1 %f, Solve-Time1 %f, Setup-Time2 %f, Solve-Time2 %f\n",
+                time[0], time[1], time[2], time[3]);
       }
+      */
+
       HYPRE_ParCSRHybridDestroy(par_solver);
 
-      POP_RANGE;
+#if defined(HYPRE_USING_NVTX)
+      hypre_NvtxPopRange();
+#endif
       //cudaProfilerStop();
 
 #if SECOND_TIME
