@@ -19,7 +19,7 @@ hypre_MGRSetup( void               *mgr_vdata,
 	MPI_Comm 	         comm = hypre_ParCSRMatrixComm(A);
 	hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
 
-	HYPRE_Int       cnt,i,j, final_coarse_size, block_size, idx, **block_cf_marker;
+	HYPRE_Int       i,j, final_coarse_size, block_size, idx, **block_cf_marker;
 	HYPRE_BigInt    row;
 	HYPRE_Int	   lev, num_coarsening_levs, last_level, num_c_levels, num_threads,nc,index_i,cflag;
 	HYPRE_Int	   debug_flag = 0;
@@ -96,7 +96,7 @@ hypre_MGRSetup( void               *mgr_vdata,
     HYPRE_Int **level_coarse_indexes = NULL;
     HYPRE_Int *level_coarse_size = NULL;
     HYPRE_Int setNonCpointToF = (mgr_data -> set_non_Cpoints_to_F);
-    HYPRE_BigInt *reserved_coarse_indexes = (mgr_data -> reserved_coarse_indexes);
+    HYPRE_BigInt *reserved_coarse_indexes = NULL;
 
 
 //  HYPRE_Int num_coarse_levels = (mgr_data -> max_num_coarse_levels);
@@ -136,19 +136,10 @@ hypre_MGRSetup( void               *mgr_vdata,
 		}
 
 		// keep reserved coarse indexes to coarsest grid
-  		if((mgr_data -> reserved_Cpoint_local_indexes) != NULL)
-     		 hypre_TFree((mgr_data -> reserved_Cpoint_local_indexes), HYPRE_MEMORY_HOST);
   		if (reserved_coarse_size > 0)
   		{
-			(mgr_data -> reserved_Cpoint_local_indexes) = hypre_CTAlloc(HYPRE_Int,  reserved_coarse_size, HYPRE_MEMORY_HOST);
-			reserved_Cpoint_local_indexes = (mgr_data -> reserved_Cpoint_local_indexes);
-			cnt=0;
-			for(i=0; i<reserved_coarse_size; i++)
-			{
-				row = reserved_coarse_indexes[i];
-				reserved_Cpoint_local_indexes[cnt++] = (HYPRE_Int)(row - ilower);
-			}
-		        HYPRE_BoomerAMGSetCpointsToKeep((mgr_data ->coarse_grid_solver), 25,reserved_coarse_size,reserved_Cpoint_local_indexes);
+                   reserved_coarse_indexes = (mgr_data -> reserved_coarse_indexes);
+		   HYPRE_BoomerAMGSetCpointsToKeep((mgr_data ->coarse_grid_solver), 25, reserved_coarse_size, reserved_coarse_indexes);
    		}
 
 		/* setup coarse grid solver */
@@ -207,12 +198,13 @@ hypre_MGRSetup( void               *mgr_vdata,
      hypre_TFree((mgr_data -> reserved_Cpoint_local_indexes), HYPRE_MEMORY_HOST);
   if (reserved_coarse_size > 0)
   {
+        reserved_coarse_indexes = hypre_CTAlloc(HYPRE_BigInt, reserved_coarse_size, HYPRE_MEMORY_HOST);
 	(mgr_data -> reserved_Cpoint_local_indexes) = hypre_CTAlloc(HYPRE_Int,  reserved_coarse_size, HYPRE_MEMORY_HOST);
 	reserved_Cpoint_local_indexes = (mgr_data -> reserved_Cpoint_local_indexes);
-//	cnt=0;
 	for(i=0; i<reserved_coarse_size; i++)
 	{
-		row = reserved_coarse_indexes[i];
+		reserved_coarse_indexes[i] = (mgr_data -> reserved_coarse_indexes)[i];
+                row = reserved_coarse_indexes[i];
 		idx = row % block_size;
 		for(j=0; j<max_num_coarse_levels; j++)
 		{
@@ -606,7 +598,14 @@ hypre_MGRSetup( void               *mgr_vdata,
    }
    // keep reserved coarse indexes to coarsest grid
    if(reserved_coarse_size > 0)
-      HYPRE_BoomerAMGSetCpointsToKeep((mgr_data ->coarse_grid_solver), 25,reserved_coarse_size,reserved_Cpoint_local_indexes);
+   {
+      ilower = hypre_ParCSRMatrixFirstRowIndex(A_array[num_c_levels-1]);
+      for (i = 0; i < reserved_coarse_size; i++)
+      {
+         reserved_coarse_indexes[i] = (HYPRE_BigInt) (reserved_Cpoint_local_indexes[i] + ilower);
+      }
+      HYPRE_BoomerAMGSetCpointsToKeep((mgr_data ->coarse_grid_solver), 25, reserved_coarse_size, reserved_coarse_indexes);
+   }
 
    /* setup coarse grid solver */
    coarse_grid_solver_setup((mgr_data -> coarse_grid_solver), RAP_ptr, F_array[num_c_levels], U_array[num_c_levels]);
@@ -701,6 +700,11 @@ hypre_MGRSetup( void               *mgr_vdata,
       level_coarse_indexes = NULL;
       hypre_TFree(level_coarse_size, HYPRE_MEMORY_HOST);
       level_coarse_size = NULL;
+   }
+
+   if (reserved_coarse_indexes != NULL)
+   {
+      hypre_TFree(reserved_coarse_indexes, HYPRE_MEMORY_HOST);
    }
 
    return hypre_error_flag;
