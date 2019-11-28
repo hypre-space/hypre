@@ -12,7 +12,6 @@
  *****************************************************************************/
 
 #include "_hypre_parcsr_mv.h"
-#include <assert.h>
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
 HYPRE_Int hypre_FillResponseParToVectorAll(void*, HYPRE_Int, HYPRE_Int, void*, MPI_Comm, void**, HYPRE_Int*);

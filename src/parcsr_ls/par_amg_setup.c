@@ -415,7 +415,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          if (P_block_array[j])
          {
             hypre_ParCSRBlockMatrixDestroy(P_block_array[j]);
-            P_array[j] = NULL;
+            P_block_array[j] = NULL;
          }
          /* RL */
          if (R_array[j])
@@ -427,7 +427,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          if (R_block_array[j])
          {
             hypre_ParCSRBlockMatrixDestroy(R_block_array[j]);
-            R_array[j] = NULL;
+            R_block_array[j] = NULL;
          }
       }
 

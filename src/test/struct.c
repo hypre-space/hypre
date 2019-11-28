@@ -22,7 +22,7 @@
 #include "_hypre_struct_mv.h"
 
 #ifdef HYPRE_DEBUG
-#include <cegdb.h>
+/*#include <cegdb.h>*/
 #endif
 
 /* begin lobpcg */
@@ -191,7 +191,7 @@ main( hypre_int argc,
    HYPRE_Init(argc, argv);
 
 #ifdef HYPRE_DEBUG
-   cegdb(&argc, &argv, myid);
+   /*cegdb(&argc, &argv, myid);*/
 #endif
 
    /*-----------------------------------------------------------

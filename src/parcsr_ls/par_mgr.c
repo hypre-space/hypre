@@ -14,7 +14,6 @@
 #include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
 #include "par_mgr.h"
-#include <assert.h>
 
 /* Create */
 void *

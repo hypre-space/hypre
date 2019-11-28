@@ -494,7 +494,7 @@ void hypre_SecondDrop(HYPRE_Int maxnz, HYPRE_Real tol, HYPRE_Int row,
   diag = iperm[lrow];
 
   /* Deal with the diagonal element first */
-  assert(jw[0] == row);
+  hypre_assert(jw[0] == row);
   if (w[0] != 0.0) 
     ldu->dvalues[lrow] = 1.0/w[0];
   else { /* zero pivot */

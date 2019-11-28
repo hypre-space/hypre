@@ -51,14 +51,14 @@ HYPRE_LSI_DSuperLU;
 int HYPRE_LSI_DSuperLUGenMatrix(HYPRE_Solver solver);
 
 /***************************************************************************
- * HYPRE_LSI_DSuperLUCreate - Return a DSuperLU object "solver".  
+ * HYPRE_LSI_DSuperLUCreate - Return a DSuperLU object "solver".
  *--------------------------------------------------------------------------*/
 
 int HYPRE_LSI_DSuperLUCreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
    HYPRE_LSI_DSuperLU *sluPtr;
    sluPtr = hypre_TAlloc(HYPRE_LSI_DSuperLU, 1, HYPRE_MEMORY_HOST);
-   assert ( sluPtr != NULL );
+   hypre_assert ( sluPtr != NULL );
    sluPtr->comm_        = comm;
    sluPtr->Amat_        = NULL;
    sluPtr->localNRows_  = 0;
@@ -97,7 +97,7 @@ int HYPRE_LSI_DSuperLUDestroy( HYPRE_Solver solver )
 }
 
 /***************************************************************************
- * HYPRE_LSI_DSuperLUSetOutputLevel - Set debug level 
+ * HYPRE_LSI_DSuperLUSetOutputLevel - Set debug level
  *--------------------------------------------------------------------------*/
 
 int HYPRE_LSI_DSuperLUSetOutputLevel(HYPRE_Solver solver, int level)
@@ -155,7 +155,7 @@ int HYPRE_LSI_DSuperLUSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
       options->Equil             = YES (NO, ROW, COL, BOTH)
                                    (YES not robust)
       options->ParSymbFact       = NO;
-      options->ColPerm           = MMD_AT_PLUS_A (NATURAL, MMD_ATA, 
+      options->ColPerm           = MMD_AT_PLUS_A (NATURAL, MMD_ATA,
                                    METIS_AT_PLUS_A, PARMETIS, MY_PERMC}
                                    (MMD_AT_PLUS_A the fastest, a factor
                                     of 3+ better than MMD_ATA, which in
@@ -179,16 +179,16 @@ int HYPRE_LSI_DSuperLUSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
    if (sluPtr->outputLevel_ < 2) sluPtr->options_.PrintStat = NO;
    ScalePermstructInit(sluPtr->globalNRows_, sluPtr->globalNRows_,
                        &(sluPtr->ScalePermstruct_));
-//   LUstructInit(sluPtr->globalNRows_, sluPtr->globalNRows_, 
+//   LUstructInit(sluPtr->globalNRows_, sluPtr->globalNRows_,
 //                &(sluPtr->LUstruct_));
    LUstructInit(sluPtr->globalNRows_, &(sluPtr->LUstruct_));
    sluPtr->berr_[0] = 0.0;
    PStatInit(&(sluPtr->stat_));
-   pdgssvx(&(sluPtr->options_), &(sluPtr->sluAmat_), 
-           &(sluPtr->ScalePermstruct_), NULL, sluPtr->localNRows_, iZero, 
-           &(sluPtr->sluGrid_), &(sluPtr->LUstruct_), 
+   pdgssvx(&(sluPtr->options_), &(sluPtr->sluAmat_),
+           &(sluPtr->ScalePermstruct_), NULL, sluPtr->localNRows_, iZero,
+           &(sluPtr->sluGrid_), &(sluPtr->LUstruct_),
            &(sluPtr->SOLVEstruct_), sluPtr->berr_, &(sluPtr->stat_), &info);
-   sluPtr->options_.Fact = FACTORED; 
+   sluPtr->options_.Fact = FACTORED;
    if (sluPtr->outputLevel_ >= 2)
       PStatPrint(&(sluPtr->options_),&(sluPtr->stat_),&(sluPtr->sluGrid_));
 
@@ -229,9 +229,9 @@ int HYPRE_LSI_DSuperLUSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
    /* solve                                                            */
    /* ---------------------------------------------------------------- */
 
-   pdgssvx(&(sluPtr->options_), &(sluPtr->sluAmat_), 
-           &(sluPtr->ScalePermstruct_), soln, localNRows, iOne, 
-           &(sluPtr->sluGrid_), &(sluPtr->LUstruct_), 
+   pdgssvx(&(sluPtr->options_), &(sluPtr->sluAmat_),
+           &(sluPtr->ScalePermstruct_), soln, localNRows, iOne,
+           &(sluPtr->sluGrid_), &(sluPtr->LUstruct_),
            &(sluPtr->SOLVEstruct_), sluPtr->berr_, &(sluPtr->stat_), &info);
 
    /* ---------------------------------------------------------------- */
@@ -286,9 +286,9 @@ int HYPRE_LSI_DSuperLUGenMatrix(HYPRE_Solver solver)
    localNRows = procNRows[mypid+1] - procNRows[mypid];
    sluPtr->localNRows_ = localNRows;
    sluPtr->globalNRows_ = procNRows[nprocs];
-   csrIA = (int *) intMalloc_dist(localNRows+1); 
-   csrJA = (int *) intMalloc_dist(localNNZ); 
-   csrAA = (double *) doubleMalloc_dist(localNNZ); 
+   csrIA = (int *) intMalloc_dist(localNRows+1);
+   csrJA = (int *) intMalloc_dist(localNNZ);
+   csrAA = (double *) doubleMalloc_dist(localNNZ);
    localNNZ = 0;
 
    csrIA[0] = localNNZ;
@@ -312,7 +312,7 @@ int HYPRE_LSI_DSuperLUGenMatrix(HYPRE_Solver solver)
    /* ---------------------------------------------------------------- */
 
    dCreate_CompRowLoc_Matrix_dist(&(sluPtr->sluAmat_), sluPtr->globalNRows_,
-            sluPtr->globalNRows_, localNNZ, localNRows, startRow, csrAA, 
+            sluPtr->globalNRows_, localNNZ, localNRows, startRow, csrAA,
             csrJA, csrIA, SLU_NR_loc, SLU_D, SLU_GE);
    free(procNRows);
    return 0;
