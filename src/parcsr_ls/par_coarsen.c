@@ -14,8 +14,6 @@
 
 #include "_hypre_parcsr_ls.h"
 
-#define DEBUG
-
 /*==========================================================================*/
 /*==========================================================================*/
 /**
@@ -1163,9 +1161,6 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    cut = cut_factor*avg_nnzrow;
    if (cut > 0)
    {
-#ifdef DEBUG
-   hypre_printf("[%d]: average nonzeros per row = %d\n", my_id, avg_nnzrow);
-#endif
       for (j = 0; j < num_variables; j++)
       {
          nnzrow = (A_i[j+1] - A_i[j]) + (A_offd_i[j+1] - A_offd_i[j]);
@@ -1176,9 +1171,6 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
                num_left--;
             }
             CF_marker[j] = SF_PT;
-#ifdef DEBUG
-   hypre_printf("[%d]: row %d has %d nonzero connections and became SF_PT\n", my_id, j, nnzrow);
-#endif
          }
       }
    }
@@ -1354,16 +1346,6 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
 
    if (coarsen_type == 11)
    {
-#ifdef DEBUG
-      for (j = 0; j < num_variables; j++)
-      {
-         if (CF_marker[j] == SF_PT)
-         {
-             hypre_printf("[%d]: row %d is SF_PT before exiting CoarsenRuge\n", my_id, j);
-         }
-      }
-#endif
-
       if (meas_type && num_procs > 1)
       {
          hypre_CSRMatrixDestroy(S_ext);
@@ -1989,16 +1971,6 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    /*---------------------------------------------------
     * Clean up and return
     *---------------------------------------------------*/
-
-#ifdef DEBUG
-   for (j = 0; j < num_variables; j++)
-   {
-      if (CF_marker[j] == SF_PT)
-      {
-          hypre_printf("[%d]: row %d is SF_PT before exiting CoarsenRuge\n", my_id, j);
-      }
-   }
-#endif
 
    /*if (coarsen_type != 1)
      { */
