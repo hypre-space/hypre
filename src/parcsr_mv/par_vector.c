@@ -650,10 +650,12 @@ hypre_VectorToParVector ( MPI_Comm      comm,
                          0, 0, comm,&status0 );
    }
 
+#ifdef HYPRE_NO_GLOBAL_PARTITION
    if (global_vec_starts)
    {
       hypre_TFree(global_vec_starts, HYPRE_MEMORY_HOST);
    }
+#endif
 
    return par_vector;
 }
