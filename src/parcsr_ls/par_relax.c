@@ -138,8 +138,6 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
    {
       case 0: /* Weighted Jacobi */
       {
-        // !!! Debug
-        // if (my_id == 0) printf("Jacobi, n = %d, relax_points = %d, relax_weight = %f\n", n, relax_points, relax_weight);
          if (num_procs > 1)
          {
             num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);

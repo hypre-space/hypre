@@ -44,6 +44,7 @@ hypre_ParCompGridCreate ()
    hypre_ParCompGridF(compGrid) = NULL;
    hypre_ParCompGridT(compGrid) = NULL;
    hypre_ParCompGridS(compGrid) = NULL;
+   hypre_ParCompGridQ(compGrid) = NULL;
    hypre_ParCompGridTemp(compGrid) = NULL;
    hypre_ParCompGridTemp2(compGrid) = NULL;
    hypre_ParCompGridTemp3(compGrid) = NULL;
@@ -128,6 +129,11 @@ hypre_ParCompGridDestroy ( hypre_ParCompGrid *compGrid )
    if (hypre_ParCompGridS(compGrid))
    {
       hypre_SeqVectorDestroy(hypre_ParCompGridS(compGrid));
+   }
+
+   if (hypre_ParCompGridQ(compGrid))
+   {
+      hypre_SeqVectorDestroy(hypre_ParCompGridQ(compGrid));
    }
 
    if (hypre_ParCompGridTemp(compGrid))
@@ -503,7 +509,7 @@ hypre_ParCompGridSetupRelax( hypre_ParAMGData *amg_data )
 }
 
 HYPRE_Int
-hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int start_level, HYPRE_Int transition_level, HYPRE_Int debug )
+hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int start_level, HYPRE_Int transition_level, HYPRE_Int use_rd, HYPRE_Int debug )
 {
    HYPRE_Int level, i, j;
    HYPRE_Int num_levels = hypre_ParCompGridCommPkgNumLevels(compGridCommPkg);
@@ -518,10 +524,6 @@ hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPk
          if (hypre_ParCompGridRealDofMarker(compGrid[level])[i]) num_real_nodes++;
       }
       hypre_ParCompGridNumRealNodes(compGrid[level]) = num_real_nodes;
-
-      // // !!! Debug
-      // printf("inside finalize, num_real_nodes = %d\n", num_real_nodes);
-
       HYPRE_Int *new_indices = hypre_CTAlloc(HYPRE_Int, num_nodes, HYPRE_MEMORY_HOST);
       HYPRE_Int real_cnt = 0;
       HYPRE_Int ghost_cnt = 0;
@@ -852,6 +854,26 @@ hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPk
       hypre_VectorData(hypre_ParCompGridF(compGrid[level])) = &(f_data[total_num_nodes]);
 
       total_num_nodes += num_nodes;
+   }
+
+   if (use_rd)
+   {
+      // Allocate space for the update vectors, compGridQ, as one big block of memory for better access when packing/unpack communication buffers
+      HYPRE_Complex *q_data = hypre_CTAlloc(HYPRE_Complex, total_num_nodes, HYPRE_MEMORY_SHARED);
+
+      total_num_nodes = 0;
+
+      for (level = start_level; level < num_levels; level++)
+      {
+         HYPRE_Int num_nodes = hypre_ParCompGridNumNodes(compGrid[level]);
+         HYPRE_Int num_real_nodes = hypre_ParCompGridNumRealNodes(compGrid[level]);
+
+         hypre_ParCompGridQ(compGrid[level]) = hypre_SeqVectorCreate(num_real_nodes);
+         if (level != 0) hypre_SeqVectorSetDataOwner(hypre_ParCompGridQ(compGrid[level]), 0);
+         hypre_VectorData(hypre_ParCompGridQ(compGrid[level])) = &(q_data[total_num_nodes]);
+
+         total_num_nodes += num_nodes;
+      }
    }
 
    // Clean up memory for things we don't need anymore

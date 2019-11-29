@@ -17,7 +17,7 @@
 #include "par_amg.h"
 #include "par_csr_block_matrix.h"
 
-#define DEBUG_COMP_GRID 1 // if true, runs some tests, prints out what is stored in the comp grids for each processor to a file
+#define DEBUG_COMP_GRID 0 // if true, runs some tests, prints out what is stored in the comp grids for each processor to a file
 #define DEBUG_PROC_NEIGHBORS 0 // if true, dumps info on the add flag structures that determine nearest processor neighbors 
 #define DEBUGGING_MESSAGES 0 // if true, prints a bunch of messages to the screen to let you know where in the algorithm you are
 #define ENABLE_AGGLOMERATION 0 // if true, enable coarse level processor agglomeration, which requires linking with parmetis
@@ -722,7 +722,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    if (timers) hypre_BeginTiming(timers[8]);
 
    // Finalize the comp grid structures
-   hypre_ParCompGridFinalize(compGrid, compGridCommPkg, amgdd_start_level, transition_level, verify_amgdd);
+   hypre_ParCompGridFinalize(compGrid, compGridCommPkg, amgdd_start_level, transition_level, hypre_ParAMGDataAMGDDUseRD(amg_data), verify_amgdd);
 
    #if DEBUGGING_MESSAGES
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
@@ -2950,8 +2950,6 @@ CommunicateRemainingMatrixInfo(hypre_ParAMGData* amg_data, hypre_ParCompGrid **c
                      if (idx < 0) idx = -(idx + 1);
                      if (idx < num_owned_nodes)
                      {
-                        // !!! Debug
-                        if (int_cnt >= send_sizes[2*part]) printf("int_cnt = %d, size = %d\n", int_cnt, send_sizes[2*part]);
                         int_send_buffers[part][int_cnt++] = hypre_ParCompGridRRowPtr(compGrid[level])[idx+1] - hypre_ParCompGridRRowPtr(compGrid[level])[idx];
                         for (j = hypre_ParCompGridRRowPtr(compGrid[level])[idx]; j < hypre_ParCompGridRRowPtr(compGrid[level])[idx+1]; j++)
                         {

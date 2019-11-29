@@ -10,7 +10,7 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-#define TEST_RES_COMM 1
+#define TEST_RES_COMM 0
 #define DEBUGGING_MESSAGES 0
 
 #include "_hypre_parcsr_ls.h"
@@ -25,6 +25,9 @@ AddSolution( void *amg_vdata );
 
 HYPRE_Int
 ZeroInitialGuess( void *amg_vdata );
+
+HYPRE_Int
+ZeroCompositeRHS( void *amg_vdata );
 
 HYPRE_Int
 PackResidualBuffer( HYPRE_Complex *send_buffer, HYPRE_Int *send_map_elmts, HYPRE_Int end, HYPRE_Complex *f_data );
@@ -224,9 +227,17 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata )
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
    #endif
 
-	// Form residual and do residual communication
    HYPRE_Int test_failed = 0;
-	test_failed = hypre_BoomerAMGDDResidualCommunication( amg_vdata );
+   if (hypre_ParAMGDataAMGDDUseRD(amg_data))
+   {
+      // If doing range decomposition, simply zero out RHS outside owned dofs
+      ZeroCompositeRHS( amg_vdata );
+   }
+   else
+   {
+      // Otherwise, do residual communication
+      test_failed = hypre_BoomerAMGDDResidualCommunication( amg_vdata );
+   }
 
 	// Set zero initial guess for all comp grids on all levels
 	ZeroInitialGuess( amg_vdata );
@@ -307,7 +318,16 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata )
 
 
 	// Update fine grid solution
-   AddSolution( amg_vdata );
+   if (hypre_ParAMGDataAMGDDUseRD(amg_data))
+   {
+      // If using RD, need to communicate and add composite solutions
+      test_failed = hypre_BoomerAMGRDSolutionCommunication( amg_vdata );      
+   }
+   else
+   {
+      // Otherwise simply do a local add over the owned dofs
+      AddSolution( amg_vdata );
+   }
 
    #if DEBUGGING_MESSAGES
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
@@ -325,13 +345,9 @@ AddSolution( void *amg_vdata )
    HYPRE_Int amgdd_start_level = hypre_ParAMGDataAMGDDStartLevel(amg_data);
 	hypre_ParCompGrid 	**compGrid = hypre_ParAMGDataCompGrid(amg_data);
 
-   hypre_Vector *owned_comp_u = hypre_SeqVectorCreate( hypre_VectorSize( hypre_ParVectorLocalVector( hypre_ParAMGDataUArray(amg_data)[amgdd_start_level] ) ) );
-   hypre_VectorData(owned_comp_u) = hypre_VectorData(hypre_ParCompGridU(compGrid[amgdd_start_level]));
-   hypre_SeqVectorSetDataOwner(owned_comp_u, 0);
-
-   hypre_SeqVectorAxpy( 1.0, owned_comp_u, hypre_ParVectorLocalVector( hypre_ParAMGDataUArray(amg_data)[amgdd_start_level] ) );
-
-   hypre_SeqVectorDestroy(owned_comp_u);
+   hypre_VectorSize(hypre_ParCompGridU(compGrid[amgdd_start_level])) = hypre_VectorSize( hypre_ParVectorLocalVector( hypre_ParAMGDataUArray(amg_data)[amgdd_start_level] ) );
+   hypre_SeqVectorAxpy( 1.0, hypre_ParCompGridU(compGrid[amgdd_start_level]), hypre_ParVectorLocalVector( hypre_ParAMGDataUArray(amg_data)[amgdd_start_level] ) );
+   hypre_VectorSize(hypre_ParCompGridU(compGrid[amgdd_start_level])) = hypre_ParCompGridNumNodes(compGrid[amgdd_start_level]);
 
 	return 0;
 }
@@ -367,9 +383,34 @@ ZeroInitialGuess( void *amg_vdata )
    for (level = amgdd_start_level; level < hypre_ParAMGDataNumLevels(amg_data); level++)
    {
       hypre_SeqVectorSetConstantValues( hypre_ParCompGridU(hypre_ParAMGDataCompGrid(amg_data)[level]), 0.0);
+      if (hypre_ParCompGridQ(hypre_ParAMGDataCompGrid(amg_data)[level])) hypre_SeqVectorSetConstantValues( hypre_ParCompGridQ(hypre_ParAMGDataCompGrid(amg_data)[level]), 0.0);
    }
 	
 	return 0;
+}
+
+HYPRE_Int
+ZeroCompositeRHS( void *amg_vdata )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) amg_vdata;
+
+   HYPRE_Int level;
+   HYPRE_Int amgdd_start_level = hypre_ParAMGDataAMGDDStartLevel(amg_data);
+   hypre_ParCompGrid *compGrid = hypre_ParAMGDataCompGrid(amg_data)[amgdd_start_level];
+   
+   // Set RHS = 0, then copy in residual (from AMG F) into the owned portion
+   hypre_SeqVectorSetConstantValues(hypre_ParCompGridF(compGrid), 0.0);
+   hypre_SeqVectorCopy(hypre_ParVectorLocalVector(hypre_ParAMGDataFArray(amg_data)[0]), hypre_ParCompGridF(compGrid));
+
+   // Restrict rhs to all levels to get appropriate initial values
+   for (level = amgdd_start_level; level < hypre_ParAMGDataNumLevels(amg_data)-1; level++)
+   {
+      hypre_ParCompGrid *compGrid_f = hypre_ParAMGDataCompGrid(amg_data)[level];
+      hypre_ParCompGrid *compGrid_c = hypre_ParAMGDataCompGrid(amg_data)[level+1];
+      hypre_CSRMatrixMatvec(1.0, hypre_ParCompGridR(compGrid_f), hypre_ParCompGridF(compGrid_f), 0.0, hypre_ParCompGridF(compGrid_c));
+   }
+
+   return 0;
 }
 
 HYPRE_Int 
@@ -398,7 +439,6 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
    // info from amg
    hypre_ParCSRMatrix         **A_array;
    hypre_ParVector            **F_array;
-   hypre_ParVector            **U_array;
    hypre_ParCSRMatrix         **R_array;
    hypre_ParVector            *Vtemp;
    HYPRE_Int                  *proc_first_index, *proc_last_index;
@@ -432,7 +472,6 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
    A_array = hypre_ParAMGDataAArray(amg_data);
    R_array = hypre_ParAMGDataRArray(amg_data);
    F_array = hypre_ParAMGDataFArray(amg_data);
-   U_array = hypre_ParAMGDataUArray(amg_data);
    Vtemp = hypre_ParAMGDataVtemp(amg_data);
    num_levels = hypre_ParAMGDataNumLevels(amg_data);
    amgdd_start_level = hypre_ParAMGDataAMGDDStartLevel(amg_data);
@@ -613,7 +652,7 @@ hypre_BoomerAMGDDTimeResidualCommunication( void *amg_vdata, HYPRE_Int time_leve
    // info from amg
    hypre_ParCSRMatrix         **A_array;
    hypre_ParVector            **F_array;
-   hypre_ParCSRMatrix         **P_array;
+   hypre_ParCSRMatrix         **R_array;
    HYPRE_Int                  *proc_first_index, *proc_last_index;
    HYPRE_Int                  *global_nodes;
    hypre_ParCompGrid          **compGrid;
@@ -643,7 +682,7 @@ hypre_BoomerAMGDDTimeResidualCommunication( void *amg_vdata, HYPRE_Int time_leve
 
    // get info from amg
    A_array = hypre_ParAMGDataAArray(amg_data);
-   P_array = hypre_ParAMGDataPArray(amg_data);
+   R_array = hypre_ParAMGDataRArray(amg_data);
    F_array = hypre_ParAMGDataFArray(amg_data);
    num_levels = hypre_ParAMGDataNumLevels(amg_data);
    amgdd_start_level = hypre_ParAMGDataAMGDDStartLevel(amg_data);
@@ -674,19 +713,17 @@ hypre_BoomerAMGDDTimeResidualCommunication( void *amg_vdata, HYPRE_Int time_leve
    // Restrict residual down to all levels (or just to the transition level) and initialize composite grids
    if (time_level < 0)
    {
+
+      // Restrict residual down to all levels (or just to the transition level) and initialize composite grids
       for (level = amgdd_start_level; level < transition_level-1; level++)
       {
-         alpha = 1.0;
-         beta = 0.0;
-         hypre_ParCSRMatrixMatvecT(alpha,P_array[level],F_array[level],
-                               beta,F_array[level+1]);
+         if ( hypre_ParAMGDataRestriction(amg_data) ) hypre_ParCSRMatrixMatvec(1.0, R_array[level], F_array[level], 0.0, F_array[level+1]);
+         else hypre_ParCSRMatrixMatvecT(1.0, R_array[level], F_array[level], 0.0, F_array[level+1]);
       }
-      if (transition_level != num_levels)
+      if (transition_level != num_levels && transition_level != 0)
       {
-         alpha = 1.0;
-         beta = 0.0;
-         hypre_ParCSRMatrixMatvecT(alpha,P_array[transition_level-1],F_array[transition_level-1],
-                               beta,F_array[transition_level]);
+         if ( hypre_ParAMGDataRestriction(amg_data) ) hypre_ParCSRMatrixMatvec(1.0, R_array[transition_level-1], F_array[transition_level-1], 0.0, F_array[transition_level]);
+         else hypre_ParCSRMatrixMatvecT(1.0, R_array[transition_level-1], F_array[transition_level-1], 0.0, F_array[transition_level]);
       }
 
       // copy new restricted residual into comp grid structure
@@ -825,6 +862,205 @@ hypre_BoomerAMGDDTimeResidualCommunication( void *amg_vdata, HYPRE_Int time_leve
    return 0;
    #endif
 }
+
+HYPRE_Int
+hypre_BoomerAMGRDSolutionCommunication( void *amg_vdata )
+{
+   HYPRE_Int   myid, num_procs;
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
+
+   #if DEBUGGING_MESSAGES
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   if (myid == 0) hypre_printf("Began residual communication on all ranks\n");
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   #endif
+
+   MPI_Comm          comm;
+   hypre_ParAMGData   *amg_data = (hypre_ParAMGData*) amg_vdata;
+   
+   /* Data Structure variables */
+
+   // level counters, indices, and parameters
+   HYPRE_Int                  num_levels, amgdd_start_level;
+   HYPRE_Real                 alpha, beta;
+   HYPRE_Int                  level,i;
+
+   // info from amg
+   hypre_ParCSRMatrix         **A_array;
+   hypre_ParVector            **F_array;
+   hypre_ParVector            **U_array;
+   hypre_ParCSRMatrix         **P_array;
+   hypre_ParVector            *Vtemp;
+   HYPRE_Int                  *proc_first_index, *proc_last_index;
+   HYPRE_Int                  *global_nodes;
+   hypre_ParCompGrid          **compGrid;
+
+   // info from comp grid comm pkg
+   hypre_ParCompGridCommPkg   *compGridCommPkg;
+   HYPRE_Int                  num_send_procs, num_recv_procs, num_send_partitions;
+   HYPRE_Int                  **send_procs;
+   HYPRE_Int                  **recv_procs;
+   HYPRE_Int                  **send_map_starts;
+   HYPRE_Int                  **send_map_elmts;
+   HYPRE_Int                  **recv_map_starts;
+   HYPRE_Int                  **recv_map_elmts;
+
+   // temporary arrays used for communication during comp grid setup
+   HYPRE_Complex              *send_buffer;
+   HYPRE_Complex              *recv_buffer;
+
+   // temporary vectors used to copy data into composite grid structures
+   hypre_Vector      *residual_local;
+   HYPRE_Complex     *residual_data;
+
+   // mpi stuff
+   hypre_MPI_Request          *requests;
+   hypre_MPI_Status           *status;
+   HYPRE_Int                  request_counter = 0;
+
+   // get info from amg
+   A_array = hypre_ParAMGDataAArray(amg_data);
+   P_array = hypre_ParAMGDataPArray(amg_data);
+   F_array = hypre_ParAMGDataFArray(amg_data);
+   U_array = hypre_ParAMGDataUArray(amg_data);
+   Vtemp = hypre_ParAMGDataVtemp(amg_data);
+   num_levels = hypre_ParAMGDataNumLevels(amg_data);
+   amgdd_start_level = hypre_ParAMGDataAMGDDStartLevel(amg_data);
+   compGrid = hypre_ParAMGDataCompGrid(amg_data);
+   compGridCommPkg = hypre_ParAMGDataCompGridCommPkg(amg_data);
+
+   // get info from comp grid comm pkg
+   // NOTE: we reverse send/recv info for the RD communication pattern
+   HYPRE_Int transition_level = hypre_ParCompGridCommPkgTransitionLevel(compGridCommPkg);
+   if (transition_level < 0) transition_level = num_levels;
+   send_procs = hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg);
+   recv_procs = hypre_ParCompGridCommPkgSendProcs(compGridCommPkg);
+   send_map_starts = hypre_ParCompGridCommPkgRecvMapStarts(compGridCommPkg);
+   send_map_elmts = hypre_ParCompGridCommPkgRecvMapElmts(compGridCommPkg);
+   recv_map_starts = hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg);
+   recv_map_elmts = hypre_ParCompGridCommPkgSendMapElmts(compGridCommPkg);
+
+   #if DEBUGGING_MESSAGES
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   if (myid == 0) hypre_printf("About to do coarse levels allgather on all ranks\n");
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   #endif
+
+   // Do Allgather of transition level !!! TODO
+   // if (transition_level != num_levels)
+   // {
+   //    residual_local = hypre_ParVectorLocalVector(F_array[transition_level]);
+   //    residual_data = hypre_VectorData(residual_local);
+
+   //    hypre_MPI_Allgatherv(residual_data, 
+   //       hypre_VectorSize(residual_local), 
+   //       HYPRE_MPI_COMPLEX, 
+   //       hypre_VectorData(hypre_ParCompGridF(compGrid[transition_level])), 
+   //       hypre_ParCompGridCommPkgTransitionResRecvSizes(compGridCommPkg), 
+   //       hypre_ParCompGridCommPkgTransitionResRecvDisps(compGridCommPkg), 
+   //       HYPRE_MPI_COMPLEX, 
+   //       hypre_MPI_COMM_WORLD);
+   // }
+
+   // Do local allgathers for agglomerated procsesors !!! TODO
+   // AgglomeratedProcessorsLocalResidualAllgather(amg_data);
+
+   #if DEBUGGING_MESSAGES
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   if (myid == 0) hypre_printf("Entering loop over levels in residual communication on all ranks\n");
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   #endif
+
+   /* Outer loop over levels:
+   Start from finest level and work down to coarsest */
+   for (level = amgdd_start_level; level < num_levels; level++) // !!! TODO: transition level
+   {
+      // Get some communication info
+      comm = hypre_ParCSRMatrixComm(A_array[level]);
+      num_send_procs = hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg)[level];
+      num_recv_procs = hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[level]; // !!! TODO: processor agglomeration?
+
+      if ( num_send_procs || num_recv_procs ) // If there are any owned nodes on this level
+      {
+         // allocate space for the buffers, buffer sizes, requests and status, psiComposite_send, psiComposite_recv, send and recv maps
+         recv_buffer = hypre_CTAlloc(HYPRE_Complex, recv_map_starts[level][num_recv_procs], HYPRE_MEMORY_SHARED);
+         send_buffer = hypre_CTAlloc(HYPRE_Complex, send_map_starts[level][num_send_procs], HYPRE_MEMORY_SHARED);
+         request_counter = 0;
+         requests = hypre_CTAlloc(hypre_MPI_Request, num_send_procs + num_recv_procs, HYPRE_MEMORY_HOST );
+         status = hypre_CTAlloc(hypre_MPI_Status, num_send_procs + num_recv_procs, HYPRE_MEMORY_HOST );
+
+         // allocate space for the receive buffers and post the receives
+         for (i = 0; i < num_recv_procs; i++)
+         {
+            HYPRE_Int recv_buffer_size = recv_map_starts[level][i+1] - recv_map_starts[level][i];
+            if (recv_buffer_size) hypre_MPI_Irecv(&(recv_buffer[ recv_map_starts[level][i] ]), recv_buffer_size, HYPRE_MPI_COMPLEX, recv_procs[level][i], 3, comm, &requests[request_counter++]);
+         }
+
+         // pack and send the buffers
+         PackResidualBuffer(send_buffer, send_map_elmts[level], send_map_starts[level][num_send_procs], hypre_VectorData(hypre_ParCompGridQ(compGrid[amgdd_start_level])));
+         
+         for (i = 0; i < num_send_procs; i++)
+         {
+            // HYPRE_Int buffer_index = hypre_ParCompGridCommPkgSendProcPartitions(compGridCommPkg)[level][i]; // !!! TODO: processor agglomeration
+            HYPRE_Int buffer_index = i;
+            HYPRE_Int send_buffer_size = send_map_starts[level][buffer_index+1] - send_map_starts[level][buffer_index];
+            if (send_buffer_size) hypre_MPI_Isend(&(send_buffer[ send_map_starts[level][buffer_index] ]), send_buffer_size, HYPRE_MPI_COMPLEX, send_procs[level][i], 3, comm, &requests[request_counter++]);
+         }
+
+         // wait for buffers to be received
+         hypre_MPI_Waitall( request_counter, requests, status );
+
+         hypre_TFree(requests, HYPRE_MEMORY_HOST);
+         hypre_TFree(status, HYPRE_MEMORY_HOST);
+         hypre_TFree(send_buffer, HYPRE_MEMORY_SHARED);
+
+         UnpackResidualBuffer(recv_buffer, recv_map_elmts[level], recv_map_starts[level][num_recv_procs], hypre_VectorData(hypre_ParCompGridQ(compGrid[amgdd_start_level])));
+
+         // clean up memory for this level
+         hypre_TFree(recv_buffer, HYPRE_MEMORY_SHARED);
+      }
+
+      #if DEBUGGING_MESSAGES
+      hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+      if (myid == 0) hypre_printf("   Finished residual communication on level %d on all ranks\n", level);
+      hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+      #endif
+
+   }
+
+   // Copy owned parts of updates into ParVectors. Using F from AMG, since this is free.
+   for (level  = amgdd_start_level; level < num_levels; level++)
+   {
+      hypre_SeqVectorCopy(hypre_ParCompGridQ(compGrid[level]), hypre_ParVectorLocalVector(F_array[level]));
+   }
+
+   // Interpolate updates to fine grid
+   for (level = num_levels-2; level >= amgdd_start_level; level--)
+   {
+      hypre_ParCSRMatrixMatvec(1.0, P_array[level], F_array[level+1], 0.0, F_array[level]);
+   }
+
+   // Add update to solution
+   hypre_ParVectorAxpy( 1.0, F_array[amgdd_start_level], U_array[amgdd_start_level]);
+   
+   #if DEBUGGING_MESSAGES
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   if (myid == 0) hypre_printf("Finished residual communication on all ranks\n");
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   #endif
+
+   #if TEST_RES_COMM
+   HYPRE_Int test_failed = TestResComm(amg_data);
+   #endif
+   
+   #if TEST_RES_COMM
+   return test_failed;
+   #else
+   return 0;
+   #endif
+}
+
 
 HYPRE_Int
 PackResidualBuffer( HYPRE_Complex *send_buffer, HYPRE_Int *send_map_elmts, HYPRE_Int end, HYPRE_Complex *f_data )

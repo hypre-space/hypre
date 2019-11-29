@@ -163,6 +163,7 @@ typedef struct
    hypre_Vector     *f;
    hypre_Vector     *t;
    hypre_Vector     *s;
+   hypre_Vector     *q;
    hypre_Vector     *temp;
    hypre_Vector     *temp2;
    hypre_Vector     *temp3;
@@ -193,6 +194,7 @@ typedef struct
 #define hypre_ParCompGridF(compGrid)           ((compGrid) -> f)
 #define hypre_ParCompGridT(compGrid)           ((compGrid) -> t)
 #define hypre_ParCompGridS(compGrid)           ((compGrid) -> s)
+#define hypre_ParCompGridQ(compGrid)           ((compGrid) -> q)
 #define hypre_ParCompGridTemp(compGrid)        ((compGrid) -> temp)
 #define hypre_ParCompGridTemp2(compGrid)        ((compGrid) -> temp2)
 #define hypre_ParCompGridTemp3(compGrid)        ((compGrid) -> temp3)
@@ -342,6 +344,7 @@ typedef struct
    HYPRE_Int                 variable_padding;
    HYPRE_Int                 num_ghost_layers;
    HYPRE_Int                 use_transition_level;
+   HYPRE_Int                 amgdd_use_rd;
    HYPRE_Int                 amgdd_agglomeration_max_num_levels;
    HYPRE_Int                 amgdd_agglomeration_threshold;
    HYPRE_Int                 amgdd_agglomeration_partition_size;
@@ -626,6 +629,7 @@ typedef struct
 #define hypre_ParAMGDataAMGDDVariablePadding(amg_data) ((amg_data)->variable_padding)
 #define hypre_ParAMGDataAMGDDNumGhostLayers(amg_data) ((amg_data)->num_ghost_layers)
 #define hypre_ParAMGDataAMGDDUseTransitionLevel(amg_data) ((amg_data)->use_transition_level)
+#define hypre_ParAMGDataAMGDDUseRD(amg_data) ((amg_data)->amgdd_use_rd)
 #define hypre_ParAMGDataAMGDDAgglomerationMaxNumLevels(amg_data) ((amg_data)->amgdd_agglomeration_max_num_levels)
 #define hypre_ParAMGDataAMGDDAgglomerationThreshold(amg_data) ((amg_data)->amgdd_agglomeration_threshold)
 #define hypre_ParAMGDataAMGDDAgglomerationPartitionSize(amg_data) ((amg_data)->amgdd_agglomeration_partition_size)
@@ -2066,6 +2070,7 @@ HYPRE_Int hypre_BoomerAMGDDSolve( void *solver, hypre_ParCSRMatrix *A, hypre_Par
 HYPRE_Int hypre_BoomerAMGDD_Cycle( void *amg_vdata );
 HYPRE_Int hypre_BoomerAMGDDResidualCommunication( void *amg_vdata );
 HYPRE_Int hypre_BoomerAMGDDTimeResidualCommunication( void *amg_vdata, HYPRE_Int time_level );
+HYPRE_Int hypre_BoomerAMGRDSolutionCommunication( void *amg_vdata );
 
 /* par_amgdd_setup.c */
 HYPRE_Int hypre_BoomerAMGDDSetup(  void *amg_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *b, hypre_ParVector *x, HYPRE_Int *timers, HYPRE_Int use_barriers, HYPRE_Int *communication_cost, HYPRE_Int verify_amgdd );
@@ -2085,7 +2090,7 @@ hypre_ParCompGrid *hypre_ParCompGridCreate ();
 HYPRE_Int hypre_ParCompGridDestroy ( hypre_ParCompGrid *compGrid );
 HYPRE_Int hypre_ParCompGridInitialize( hypre_ParAMGData *amg_data, HYPRE_Int padding, HYPRE_Int level );
 HYPRE_Int hypre_ParCompGridSetupRelax( hypre_ParAMGData *amg_data );
-HYPRE_Int hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int start_level, HYPRE_Int transition_level, HYPRE_Int debug );
+HYPRE_Int hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int start_level, HYPRE_Int transition_level, HYPRE_Int use_rd, HYPRE_Int debug );
 HYPRE_Int hypre_ParCompGridSetupRealDofMarker( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int num_ghost_layers );
 HYPRE_Int hypre_ParCompGridSetSize ( hypre_ParCompGrid *compGrid, HYPRE_Int num_nodes, HYPRE_Int mem_size, HYPRE_Int A_nnz, HYPRE_Int P_nnz, HYPRE_Int full_comp_info );
 HYPRE_Int hypre_ParCompGridResize ( hypre_ParCompGrid *compGrid, HYPRE_Int new_size, HYPRE_Int need_coarse_info, HYPRE_Int type );

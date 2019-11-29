@@ -145,6 +145,7 @@ typedef struct
    hypre_Vector     *f;
    hypre_Vector     *t;
    hypre_Vector     *s;
+   hypre_Vector     *q;
    hypre_Vector     *temp;
    hypre_Vector     *temp2;
    hypre_Vector     *temp3;
@@ -175,6 +176,7 @@ typedef struct
 #define hypre_ParCompGridF(compGrid)           ((compGrid) -> f)
 #define hypre_ParCompGridT(compGrid)           ((compGrid) -> t)
 #define hypre_ParCompGridS(compGrid)           ((compGrid) -> s)
+#define hypre_ParCompGridQ(compGrid)           ((compGrid) -> q)
 #define hypre_ParCompGridTemp(compGrid)        ((compGrid) -> temp)
 #define hypre_ParCompGridTemp2(compGrid)        ((compGrid) -> temp2)
 #define hypre_ParCompGridTemp3(compGrid)        ((compGrid) -> temp3)
