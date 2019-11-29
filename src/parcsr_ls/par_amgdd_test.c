@@ -34,14 +34,16 @@ TestBoomerAMGSolve( void               *amg_vdata,
                    hypre_ParVector    *f,
                    hypre_ParVector    *u,
                    hypre_ParVector    **relax_marker,
-                   HYPRE_Int proc         );
+                   HYPRE_Int          proc,
+                   hypre_ParVector    **Q_array         );
 
 HYPRE_Int
 TestBoomerAMGCycle( void              *amg_vdata,
                    hypre_ParVector  **F_array,
                    hypre_ParVector  **U_array,
                    hypre_ParVector  **relax_marker,
-                   HYPRE_Int proc   );
+                   HYPRE_Int        proc,
+                   hypre_ParVector  **Q_array   );
 
 
 
@@ -57,6 +59,8 @@ hypre_BoomerAMGDDTestSolve( void               *amg_vdata,
   HYPRE_Int myid, num_procs;
   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
+
+  HYPRE_Int proc, level;
 
   #if DEBUGGING_MESSAGES
   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
@@ -74,16 +78,44 @@ hypre_BoomerAMGDDTestSolve( void               *amg_vdata,
   HYPRE_Int transition_level = hypre_ParCompGridCommPkgTransitionLevel(hypre_ParAMGDataCompGridCommPkg(amg_data));
   if (transition_level < 0) transition_level = num_levels;
 
-  // Generate the residual and store in f
+  // Generate the residual
   hypre_ParVector *res = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD, hypre_ParVectorGlobalSize(f), hypre_ParVectorPartitioning(f));
   hypre_ParVectorSetPartitioningOwner(res, 0);
   hypre_ParVectorInitialize(res);
   hypre_ParVectorCopy(f, res);
   hypre_ParCSRMatrixMatvec(-1.0, A, u, 1.0, res );
+  hypre_ParVector *res_copy = NULL;
+  if (hypre_ParAMGDataAMGDDUseRD(amg_data))
+  {
+    res_copy = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD, hypre_ParVectorGlobalSize(f), hypre_ParVectorPartitioning(f));
+    hypre_ParVectorSetPartitioningOwner(res_copy, 0);
+    hypre_ParVectorInitialize(res_copy);
+    hypre_ParVectorCopy(res, res_copy);
+  }
+
+
+
+  // !!! TRY: testing whether my representation of Q is correct for RD
+  hypre_ParVector *U_copy = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD, hypre_ParVectorGlobalSize(u), hypre_ParVectorPartitioning(u));
+  hypre_ParVectorSetPartitioningOwner(U_copy, 0);
+  hypre_ParVectorInitialize(U_copy);
+  hypre_ParVectorCopy(u, U_copy);
+  hypre_ParVector **Q_array = NULL;
+  if (hypre_ParAMGDataAMGDDUseRD(amg_data))
+  {
+    Q_array = hypre_CTAlloc(hypre_ParVector*, num_levels, HYPRE_MEMORY_HOST);
+    for (level = 0; level < num_levels; level++)
+    {
+      Q_array[level] = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD, hypre_ParVectorGlobalSize(hypre_ParAMGDataUArray(amg_data)[level]), hypre_ParVectorPartitioning(hypre_ParAMGDataUArray(amg_data)[level]));
+      hypre_ParVectorSetPartitioningOwner(Q_array[level], 0);
+      hypre_ParVectorInitialize(Q_array[level]);
+    }
+  }
+
+
 
 
   // Loop over processors
-  HYPRE_Int proc, level;
   for (proc = 0; proc < num_procs; proc++)
   {
     #if DEBUGGING_MESSAGES
@@ -115,6 +147,13 @@ hypre_BoomerAMGDDTestSolve( void               *amg_vdata,
     // Set the initial guess for the AMG solve to 0
     hypre_ParVectorSetConstantValues(U_comp,0);
 
+    // If doing RD, setup RHS
+    if (hypre_ParAMGDataAMGDDUseRD(amg_data))
+    {
+      hypre_ParVectorSetConstantValues(res, 0.0);
+      if (myid == proc) hypre_SeqVectorCopy(hypre_ParVectorLocalVector(res_copy), hypre_ParVectorLocalVector(res));
+    }
+
     // Perform AMG solve with suppressed relaxation
     #if MEASURE_TEST_COMP_RES
     HYPRE_Real *res_norm = hypre_CTAlloc(HYPRE_Real, num_comp_cycles+1, HYPRE_MEMORY_HOST);
@@ -123,7 +162,7 @@ hypre_BoomerAMGDDTestSolve( void               *amg_vdata,
     HYPRE_Int i;
     for (i = 0; i < num_comp_cycles; i++)
     {
-      TestBoomerAMGSolve(amg_data, A, res, U_comp, relax_marker, proc);
+      TestBoomerAMGSolve(amg_data, A, res, U_comp, relax_marker, proc, Q_array);
 
 
       #if MEASURE_TEST_COMP_RES
@@ -149,17 +188,51 @@ hypre_BoomerAMGDDTestSolve( void               *amg_vdata,
     }
     #endif
 
-    // Update the values in the global solution for this proc
-    if (myid == proc)
+    // Update global solution
+    if (hypre_ParAMGDataAMGDDUseRD(amg_data))
     {
-      // add local part of U_comp to local part of u 
-      hypre_SeqVectorAxpy( 1.0, hypre_ParVectorLocalVector(U_comp), hypre_ParVectorLocalVector(u));
+      hypre_ParVectorAxpy(1.0, U_comp, u);
+    }
+    else
+    {
+      // Update the values in the global solution for this proc
+      if (myid == proc)
+      {
+        // add local part of U_comp to local part of u 
+        hypre_SeqVectorAxpy( 1.0, hypre_ParVectorLocalVector(U_comp), hypre_ParVectorLocalVector(u));
+      }
     }
     
     // Clean up memory
     for (level = 0; level < num_levels; level++) hypre_ParVectorDestroy(relax_marker[level]);
     hypre_TFree(relax_marker, HYPRE_MEMORY_HOST);
   }
+
+
+  // !!! TRY: see if Q interpolated from all levels up to the finest is same as the total update to U
+  if (Q_array)
+  {
+    for (level = num_levels-2; level >= 0; level--)
+    {
+      hypre_ParCSRMatrixMatvec(1.0, hypre_ParAMGDataPArray(amg_data)[level], Q_array[level+1], 1.0, Q_array[level]);
+    }
+    hypre_ParVectorAxpy(-1.0, u, U_copy);
+    hypre_ParVectorScale(-1.0, U_copy);
+
+    #if DUMP_INTERMEDIATE_TEST_SOLNS
+    char filename[256];
+    sprintf(filename, "outputs/test/q");
+    hypre_ParVectorPrint(Q_array[0], filename);
+    sprintf(filename, "outputs/test/update");
+    hypre_ParVectorPrint(U_copy, filename);
+    #endif
+  }
+
+
+
+
+
+
 
   // Reset fine grid solution and right-hand side vectors for amg_data structure
   hypre_ParAMGDataUArray(amg_data)[0] = u;
@@ -168,6 +241,19 @@ hypre_BoomerAMGDDTestSolve( void               *amg_vdata,
   // Clean up memory
   hypre_ParVectorDestroy(U_comp);
   hypre_ParVectorDestroy(res);
+
+  // !!! TRY: clean up Q_array
+  if (Q_array)
+  {
+    for (level = 0; level < num_levels; level++)
+    {
+      hypre_ParVectorDestroy(Q_array[level]);
+    }
+    hypre_TFree(Q_array, HYPRE_MEMORY_HOST);
+  }
+  hypre_ParVectorDestroy(U_copy);
+
+
 
   return 0;
 }
@@ -283,7 +369,8 @@ TestBoomerAMGSolve( void               *amg_vdata,
                    hypre_ParVector    *f,
                    hypre_ParVector    *u,
                    hypre_ParVector    **relax_marker,
-                   HYPRE_Int proc         )
+                   HYPRE_Int          proc,
+                   hypre_ParVector    **Q_array         )
 {
 
    MPI_Comm          comm = hypre_ParCSRMatrixComm(A);   
@@ -538,7 +625,7 @@ TestBoomerAMGSolve( void               *amg_vdata,
       && (simple < 0 || simple >= num_levels) )
       {
         // printf("Rank %d about to call TestBoomerAMGCycle(), cycle_count = %d, max_iter = %d\n", my_id, cycle_count, max_iter);
-         TestBoomerAMGCycle(amg_data, F_array, U_array, relax_marker, proc); 
+         TestBoomerAMGCycle(amg_data, F_array, U_array, relax_marker, proc, Q_array); 
       }
       else
          hypre_BoomerAMGAdditiveCycle(amg_data); 
@@ -708,7 +795,8 @@ TestBoomerAMGCycle( void              *amg_vdata,
                    hypre_ParVector  **F_array,
                    hypre_ParVector  **U_array,
                    hypre_ParVector  **relax_marker,
-                   HYPRE_Int proc   )
+                   HYPRE_Int        proc,
+                   hypre_ParVector  ** Q_array   )
 {
 
 
@@ -1386,6 +1474,19 @@ TestBoomerAMGCycle( void              *amg_vdata,
         hypre_VectorData(local_U)[i] = hypre_VectorData(local_U_before_relax)[i];
       }
     }
+
+
+
+    // !!! TRY: look at Q
+    if (Q_array)
+    {
+      // Q += u - u_before
+      hypre_ParVectorAxpy(-1.0, U_array[level], U_copy);
+      hypre_ParVectorAxpy(-1.0, U_copy, Q_array[level]);
+    }
+
+
+
     hypre_ParVectorDestroy(U_copy);
 
 

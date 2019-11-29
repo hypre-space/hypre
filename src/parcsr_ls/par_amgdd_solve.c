@@ -36,6 +36,9 @@ HYPRE_Int
 UnpackResidualBuffer( HYPRE_Complex *recv_buffer, HYPRE_Int *recv_map_elmts, HYPRE_Int end, HYPRE_Complex *f_data );
 
 HYPRE_Int
+UnpackSolutionBuffer( HYPRE_Complex *recv_buffer, HYPRE_Int *recv_map_elmts, HYPRE_Int end, HYPRE_Complex *f_data );
+
+HYPRE_Int
 TestResComm(hypre_ParAMGData *amg_data);
 
 HYPRE_Int
@@ -1015,7 +1018,7 @@ hypre_BoomerAMGRDSolutionCommunication( void *amg_vdata )
          hypre_TFree(status, HYPRE_MEMORY_HOST);
          hypre_TFree(send_buffer, HYPRE_MEMORY_SHARED);
 
-         UnpackResidualBuffer(recv_buffer, recv_map_elmts[level], recv_map_starts[level][num_recv_procs], hypre_VectorData(hypre_ParCompGridQ(compGrid[amgdd_start_level])));
+         UnpackSolutionBuffer(recv_buffer, recv_map_elmts[level], recv_map_starts[level][num_recv_procs], hypre_VectorData(hypre_ParCompGridQ(compGrid[amgdd_start_level])));
 
          // clean up memory for this level
          hypre_TFree(recv_buffer, HYPRE_MEMORY_SHARED);
@@ -1038,7 +1041,7 @@ hypre_BoomerAMGRDSolutionCommunication( void *amg_vdata )
    // Interpolate updates to fine grid
    for (level = num_levels-2; level >= amgdd_start_level; level--)
    {
-      hypre_ParCSRMatrixMatvec(1.0, P_array[level], F_array[level+1], 0.0, F_array[level]);
+      hypre_ParCSRMatrixMatvec(1.0, P_array[level], F_array[level+1], 1.0, F_array[level]);
    }
 
    // Add update to solution
@@ -1051,7 +1054,7 @@ hypre_BoomerAMGRDSolutionCommunication( void *amg_vdata )
    #endif
 
    #if TEST_RES_COMM
-   HYPRE_Int test_failed = TestResComm(amg_data);
+   // HYPRE_Int test_failed = TestResComm(amg_data); // !!! TODO: write a test for this
    #endif
    
    #if TEST_RES_COMM
@@ -1087,6 +1090,21 @@ UnpackResidualBuffer( HYPRE_Complex *recv_buffer, HYPRE_Int *recv_map_elmts, HYP
    #else
    HYPRE_Int i;
    for (i = 0; i < end; i++) f_data[ recv_map_elmts[i] ] = recv_buffer[i];
+   #endif
+
+   return 0;
+}
+
+HYPRE_Int
+UnpackSolutionBuffer( HYPRE_Complex *recv_buffer, HYPRE_Int *recv_map_elmts, HYPRE_Int end, HYPRE_Complex *f_data )
+{
+   #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
+   UnpackOnDevice(recv_buffer, f_data, recv_map_elmts, 0, end, HYPRE_STREAM(4));
+   hypre_CheckErrorDevice(cudaPeekAtLastError());
+   hypre_CheckErrorDevice(cudaDeviceSynchronize());
+   #else
+   HYPRE_Int i;
+   for (i = 0; i < end; i++) f_data[ recv_map_elmts[i] ] += recv_buffer[i];
    #endif
 
    return 0;
