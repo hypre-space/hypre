@@ -2988,7 +2988,6 @@ main( hypre_int argc,
          hypre_printf("Final Relative Residual Norm = %e\n", final_res_norm);
          hypre_printf("\n");
       }
-#endif
 
       HYPRE_Real time[4];
       HYPRE_ParCSRHybridGetSetupSolveTime(amg_solver, time);
@@ -2997,6 +2996,7 @@ main( hypre_int argc,
          printf("ParCSRHybrid: Setup-Time1 %f, Solve-Time1 %f, Setup-Time2 %f, Solve-Time2 %f\n",
                 time[0], time[1], time[2], time[3]);
       }
+#endif
 
       HYPRE_ParCSRHybridDestroy(amg_solver);
    }
@@ -6727,6 +6727,8 @@ main( hypre_int argc,
   hypre_FinalizeMemoryDebug();
 */
   final:
+
+   hypre_PrintMemoryTracker();
 
    /* Finalize Hypre */
    HYPRE_Finalize();

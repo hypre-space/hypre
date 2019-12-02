@@ -413,6 +413,11 @@ hypreCUDAKernel_ScatterAdd(HYPRE_Int n, HYPRE_Real *x, HYPRE_Int *map, HYPRE_Rea
 HYPRE_Int
 hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Real *y)
 {
+   if (ny <= 0)
+   {
+      return hypre_error_flag;
+   }
+
    HYPRE_Int *map2 = hypre_TAlloc(HYPRE_Int, ny, HYPRE_MEMORY_DEVICE);
    HYPRE_Int *reduced_map = hypre_TAlloc(HYPRE_Int, ny, HYPRE_MEMORY_DEVICE);
    HYPRE_Real *reduced_y = hypre_TAlloc(HYPRE_Real, ny, HYPRE_MEMORY_DEVICE);

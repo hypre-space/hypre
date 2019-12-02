@@ -194,10 +194,10 @@ hypre_BoomerAMGInterpTruncationDevice( hypre_ParCSRMatrix *P, HYPRE_Real trunc_f
    printf("nnz_offd %d, new nnz_offd %d\n", nnz_offd, new_nnz_offd);
    */
 
-   hypre_CSRMatrixJ   (P_diag) = hypre_TReAlloc(P_diag_j, HYPRE_Int,  new_nnz_diag, memory_loc);
-   hypre_CSRMatrixData(P_diag) = hypre_TReAlloc(P_diag_a, HYPRE_Real, new_nnz_diag, memory_loc);
-   hypre_CSRMatrixJ   (P_offd) = hypre_TReAlloc(P_offd_j, HYPRE_Int,  new_nnz_offd, memory_loc);
-   hypre_CSRMatrixData(P_offd) = hypre_TReAlloc(P_offd_a, HYPRE_Real, new_nnz_offd, memory_loc);
+   hypre_CSRMatrixJ   (P_diag) = hypre_TReAlloc_v2(P_diag_j, HYPRE_Int,  nnz_diag, HYPRE_Int,  new_nnz_diag, memory_loc);
+   hypre_CSRMatrixData(P_diag) = hypre_TReAlloc_v2(P_diag_a, HYPRE_Real, nnz_diag, HYPRE_Real, new_nnz_diag, memory_loc);
+   hypre_CSRMatrixJ   (P_offd) = hypre_TReAlloc_v2(P_offd_j, HYPRE_Int,  nnz_offd, HYPRE_Int,  new_nnz_offd, memory_loc);
+   hypre_CSRMatrixData(P_offd) = hypre_TReAlloc_v2(P_offd_a, HYPRE_Real, nnz_offd, HYPRE_Real, new_nnz_offd, memory_loc);
    hypre_CSRMatrixNumNonzeros(P_diag) = new_nnz_diag;
    hypre_CSRMatrixNumNonzeros(P_offd) = new_nnz_offd;
 

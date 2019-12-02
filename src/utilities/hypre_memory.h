@@ -83,6 +83,7 @@
 #define HYPRE_STR(...) #__VA_ARGS__
 #define HYPRE_XSTR(...) HYPRE_STR(__VA_ARGS__)
 
+//#define HYPRE_USING_MEMORY_TRACKER
 //#define SIMPLE_MEMPOOL
 
 #ifdef __cplusplus
@@ -204,43 +205,103 @@ hypre_GetActualMemLocation(HYPRE_Int location)
    return HYPRE_MEMORY_UNSET;
 }
 
-#define HYPRE_MEM_PAD_LEN 1
+#ifdef HYPRE_USING_MEMORY_TRACKER
 
-#if 0
+#ifdef __cplusplus
+extern "C++" {
+#endif
+
+#include <vector>
+
+struct hypre_memory_tracker_t
+{
+   char      _action[16];
+   void     *_ptr;
+   size_t    _nbytes;
+   HYPRE_Int _memory_location;
+   char      _filename[256];
+   char      _function[256];
+   HYPRE_Int _line;
+
+   hypre_memory_tracker_t(const char *action, void *ptr, size_t nbytes, HYPRE_Int memory_location, const char *filename, const char *function, HYPRE_Int line)
+   {
+      sprintf(_action, "%s", action);
+      _ptr = ptr;
+      _nbytes = nbytes;
+      _memory_location = memory_location;
+      sprintf(_filename, "%s", filename);
+      sprintf(_function, "%s", function);
+      _line = line;
+   }
+};
+
+extern std::vector<hypre_memory_tracker_t> hypre_memory_tracker;
+
+static inline void hypre_MemoryTrackerInsert(struct hypre_memory_tracker_t const &memory)
+{
+   if (memory._memory_location != HYPRE_MEMORY_HOST)
+   {
+      hypre_memory_tracker.push_back(memory);
+   }
+}
+
+#ifdef __cplusplus
+}
+#endif
+
 /* These Allocs are with printfs, for debug */
-#define hypre_TAlloc(type, count, location) \
-(\
-{\
- if (location == HYPRE_MEMORY_SHARED) printf("[%s:%d] TALLOC %.3f MB\n", __FILE__,__LINE__, (size_t)(sizeof(type) * (count))/1024.0/1024.0); \
- (type *) hypre_MAlloc((size_t)(sizeof(type) * (count)), location); \
-}\
+#define hypre_TAlloc(type, count, location)                                                                                           \
+(                                                                                                                                     \
+{                                                                                                                                     \
+   void *ptr = hypre_MAlloc((size_t)(sizeof(type) * (count)), location);                                                              \
+   hypre_MemoryTrackerInsert( hypre_memory_tracker_t("malloc", ptr, sizeof(type)*(count), location, __FILE__, __func__, __LINE__) );  \
+   (type *) ptr;                                                                                                                      \
+}                                                                                                                                     \
 )
 
-#define hypre_CTAlloc(type, count, location) \
-(\
-{\
- if (location == HYPRE_MEMORY_SHARED) printf("[%s:%d] CTALLOC %.3f MB\n", __FILE__,__LINE__, (size_t)(sizeof(type) * (count))/1024.0/1024.0); \
- (type *) hypre_CAlloc((size_t)(count), (size_t)sizeof(type), location); \
-}\
+#define hypre_CTAlloc(type, count, location)                                                                                          \
+(                                                                                                                                     \
+{                                                                                                                                     \
+   void *ptr = hypre_CAlloc((size_t)(count), (size_t)sizeof(type), location);                                                         \
+   hypre_MemoryTrackerInsert( hypre_memory_tracker_t("calloc", ptr, sizeof(type)*(count), location, __FILE__, __func__, __LINE__) );  \
+   (type *) ptr;                                                                                                                      \
+}                                                                                                                                     \
 )
 
-#define hypre_TReAlloc(ptr, type, count, location) \
-(\
-{\
- if (location == HYPRE_MEMORY_SHARED) printf("[%s:%d] TReALLOC %p, %.3f MB\n", __FILE__,__LINE__, ptr, (size_t)(sizeof(type) * (count))/1024.0/1024.0); \
- (type *)hypre_ReAlloc((char *)ptr, (size_t)(sizeof(type) * (count)), location); \
-}\
+#define hypre_TReAlloc(ptr, type, count, location)                                      \
+(                                                                                       \
+{                                                                                       \
+   (type *) hypre_ReAlloc((char *)ptr, (size_t)(sizeof(type) * (count)), location);     \
+}                                                                                       \
 )
 
-#define hypre_TMemcpy(dst, src, type, count, locdst, locsrc) \
-( \
-{ \
-  /* printf("[%s:%d] TMemcpy %d to %d %.3f MB\n", __FILE__,__LINE__, locsrc, locdst, (size_t)(sizeof(type) * (count))/1024.0/1024.0);*/ \
-  hypre_Memcpy((void *)(dst), (void *)(src), (size_t)(sizeof(type) * (count)), locdst, locsrc); \
-} \
+#define hypre_TReAlloc_v2(ptr, old_type, old_count, new_type, new_count, location)                                                                \
+(                                                                                                                                                 \
+{                                                                                                                                                 \
+   hypre_MemoryTrackerInsert( hypre_memory_tracker_t("rfree", ptr, sizeof(old_type)*(old_count), location, __FILE__, __func__, __LINE__) );       \
+   void *new_ptr = hypre_ReAlloc_v2((char *)ptr, (size_t)(sizeof(old_type)*(old_count)), (size_t)(sizeof(new_type)*(new_count)), location);       \
+   hypre_MemoryTrackerInsert( hypre_memory_tracker_t("rmalloc", new_ptr, sizeof(new_type)*(new_count), location, __FILE__, __func__, __LINE__) ); \
+   (new_type *) new_ptr;                                                                                                                          \
+}                                                                                                                                                 \
 )
 
-#else
+#define hypre_TMemcpy(dst, src, type, count, locdst, locsrc)                                     \
+(                                                                                                \
+{                                                                                                \
+   hypre_Memcpy((void *)(dst), (void *)(src), (size_t)(sizeof(type) * (count)), locdst, locsrc); \
+}                                                                                                \
+)
+
+#define hypre_TFree(ptr, location)                                                                              \
+(                                                                                                               \
+{                                                                                                               \
+   hypre_MemoryTrackerInsert( hypre_memory_tracker_t("free", ptr, 0, location, __FILE__, __func__, __LINE__) ); \
+   hypre_Free((void *)ptr, location);                                                                           \
+   ptr = NULL;                                                                                                  \
+}                                                                                                               \
+)
+
+#else /* #ifdef HYPRE_USING_MEMORY_TRACKER */
 
 #define hypre_TAlloc(type, count, location) \
 ( (type *) hypre_MAlloc((size_t)(sizeof(type) * (count)), location) )
@@ -251,13 +312,17 @@ hypre_GetActualMemLocation(HYPRE_Int location)
 #define hypre_TReAlloc(ptr, type, count, location) \
 ( (type *) hypre_ReAlloc((char *)ptr, (size_t)(sizeof(type) * (count)), location) )
 
+#define hypre_TReAlloc_v2(ptr, old_type, old_count, new_type, new_count, location) \
+( (new_type *) hypre_ReAlloc_v2((char *)ptr, (size_t)(sizeof(old_type)*(old_count)), (size_t)(sizeof(new_type)*(new_count)), location) )
+
 #define hypre_TMemcpy(dst, src, type, count, locdst, locsrc) \
 (hypre_Memcpy((void *)(dst), (void *)(src), (size_t)(sizeof(type) * (count)), locdst, locsrc))
 
-#endif
-
 #define hypre_TFree(ptr, location) \
 ( hypre_Free((void *)ptr, location), ptr = NULL )
+
+#endif /* #ifdef HYPRE_USING_MEMORY_TRACKER */
+
 
 /*--------------------------------------------------------------------------
  * Prototypes
@@ -267,10 +332,12 @@ hypre_GetActualMemLocation(HYPRE_Int location)
 void * hypre_MAlloc(size_t size, HYPRE_Int location);
 void * hypre_CAlloc( size_t count, size_t elt_size, HYPRE_Int location);
 void * hypre_ReAlloc(void *ptr, size_t size, HYPRE_Int location);
+void * hypre_ReAlloc_v2(void *ptr, size_t old_size, size_t new_size, HYPRE_Int location);
 void   hypre_Memcpy(void *dst, void *src, size_t size, HYPRE_Int loc_dst, HYPRE_Int loc_src);
 void * hypre_Memset(void *ptr, HYPRE_Int value, size_t num, HYPRE_Int location);
 void   hypre_Free(void *ptr, HYPRE_Int location);
 HYPRE_Int hypre_GetMemoryLocation(const void *ptr, HYPRE_Int *memory_location);
+HYPRE_Int hypre_PrintMemoryTracker();
 
 /* memory_dmalloc.c */
 HYPRE_Int hypre_InitMemoryDebugDML( HYPRE_Int id );

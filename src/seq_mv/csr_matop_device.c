@@ -212,7 +212,7 @@ hypre_CSRMatrixSplitDevice(hypre_CSRMatrix  *B_ext,
    hypre_TFree(col_map_offd_C, HYPRE_MEMORY_DEVICE);
    col_map_offd_C = tmp;
 #else
-   col_map_offd_C = hypre_TReAlloc(col_map_offd_C, HYPRE_Int, num_cols_offd_C, HYPRE_MEMORY_DEVICE);
+   col_map_offd_C = hypre_TReAlloc_v2(col_map_offd_C, HYPRE_Int, B_ext_offd_nnz + num_cols_offd_B, HYPRE_Int, num_cols_offd_C, HYPRE_MEMORY_DEVICE);
 #endif
 
    /* create map from col_map_offd_B */
