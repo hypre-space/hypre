@@ -317,8 +317,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    if (interp_vec_variant > 0 && nodal < 1)
    {
       nodal = 1;
-      if (my_id == 0)
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC,"WARNING: Changing to node-based coarsening because LN of GM interpolation has been specified via HYPRE_BoomerAMGSetInterpVecVariant.\n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"WARNING: Changing to node-based coarsening because LN of GM interpolation has been specified via HYPRE_BoomerAMGSetInterpVecVariant.\n");
    }
 
    /* Verify that settings are correct for solving systmes */
@@ -1359,10 +1358,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          {
             if (block_mode)
             {
-               if (my_id == 0)
-               {
-                  hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Keeping coarse nodes in block mode is not implemented\n");
-               }
+               hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Keeping coarse nodes in block mode is not implemented\n");
             }
             else if ((level < hypre_ParAMGDataCPointsKeepLevel(amg_data)) &&
                      (num_C_points_coarse > 0))
