@@ -119,39 +119,54 @@ hypre_BoomerAMGDDSolve( void *amg_vdata,
       if (amgdd_start_level > 0) 
          hypre_BoomerAMGPartialCycle(amg_vdata, hypre_ParAMGDataFArray(amg_data), hypre_ParAMGDataUArray(amg_data), amgdd_start_level-1, 0);
 
-      // If on the finest level, need to convert to a residual/correction equation
-      if (amgdd_start_level == 0)
-      {
-         // Store the original fine grid right-hand side in Vtemp and use f as the current fine grid residual
-         hypre_ParVectorCopy(hypre_ParAMGDataFArray(amg_data)[amgdd_start_level], hypre_ParAMGDataVtemp(amg_data));
-         hypre_ParCSRMatrixMatvec(-1.0, hypre_ParAMGDataAArray(amg_data)[amgdd_start_level], hypre_ParAMGDataUArray(amg_data)[amgdd_start_level], 1.0, hypre_ParAMGDataFArray(amg_data)[amgdd_start_level]);
-      }
-      
       // Do the AMGDD cycle
       if (hypre_ParAMGDataAMGDDUseRD(amg_data) > 1) // Do a DD cycles followed by an RD cycles
       {
+         hypre_ParVectorCopy(hypre_ParAMGDataFArray(amg_data)[amgdd_start_level], hypre_ParAMGDataVtemp(amg_data));
+         if (amgdd_start_level == 0) hypre_ParCSRMatrixMatvec(-1.0, hypre_ParAMGDataAArray(amg_data)[amgdd_start_level], hypre_ParAMGDataUArray(amg_data)[amgdd_start_level], 1.0, hypre_ParAMGDataFArray(amg_data)[amgdd_start_level]);
+
          HYPRE_Int num_cycles = hypre_ParAMGDataAMGDDUseRD(amg_data) - 1; // number of each cycle type is 
          hypre_ParAMGDataAMGDDUseRD(amg_data) = 0;
          for (i = 0; i < num_cycles; i++)
          {
             error_code = hypre_BoomerAMGDD_Cycle(amg_vdata);
             if (error_code) test_failed = 1;
+            hypre_ParVectorCopy(hypre_ParAMGDataVtemp(amg_data), hypre_ParAMGDataFArray(amg_data)[amgdd_start_level]);
+            hypre_ParCSRMatrixMatvec(-1.0, hypre_ParAMGDataAArray(amg_data)[amgdd_start_level], hypre_ParAMGDataUArray(amg_data)[amgdd_start_level], 1.0, hypre_ParAMGDataFArray(amg_data)[amgdd_start_level]);
          }
          hypre_ParAMGDataAMGDDUseRD(amg_data) = 1;
          for (i = 0; i < num_cycles; i++)
          {
             error_code = hypre_BoomerAMGDD_Cycle(amg_vdata);
             if (error_code) test_failed = 1;
+            if (i != num_cycles-1)
+            {
+               hypre_ParVectorCopy(hypre_ParAMGDataVtemp(amg_data), hypre_ParAMGDataFArray(amg_data)[amgdd_start_level]);
+               hypre_ParCSRMatrixMatvec(-1.0, hypre_ParAMGDataAArray(amg_data)[amgdd_start_level], hypre_ParAMGDataUArray(amg_data)[amgdd_start_level], 1.0, hypre_ParAMGDataFArray(amg_data)[amgdd_start_level]);
+            }
          }
          hypre_ParAMGDataAMGDDUseRD(amg_data) = 2;
-      }
-      else error_code = hypre_BoomerAMGDD_Cycle(amg_vdata);
-      if (error_code) test_failed = 1;
 
-      if (amgdd_start_level == 0)
+         if (amgdd_start_level == 0) hypre_ParVectorCopy(hypre_ParAMGDataVtemp(amg_data), hypre_ParAMGDataFArray(amg_data)[amgdd_start_level]);
+      }
+      else
       {
-         // Copy RHS back into f
-         hypre_ParVectorCopy(hypre_ParAMGDataVtemp(amg_data), hypre_ParAMGDataFArray(amg_data)[amgdd_start_level]);
+         // If on the finest level, need to convert to a residual/correction equation
+         if (amgdd_start_level == 0)
+         {
+            // Store the original fine grid right-hand side in Vtemp and use f as the current fine grid residual
+            hypre_ParVectorCopy(hypre_ParAMGDataFArray(amg_data)[amgdd_start_level], hypre_ParAMGDataVtemp(amg_data));
+            hypre_ParCSRMatrixMatvec(-1.0, hypre_ParAMGDataAArray(amg_data)[amgdd_start_level], hypre_ParAMGDataUArray(amg_data)[amgdd_start_level], 1.0, hypre_ParAMGDataFArray(amg_data)[amgdd_start_level]);
+         }
+
+         error_code = hypre_BoomerAMGDD_Cycle(amg_vdata);
+         if (error_code) test_failed = 1;
+
+         if (amgdd_start_level == 0)
+         {
+            // Copy RHS back into f
+            hypre_ParVectorCopy(hypre_ParAMGDataVtemp(amg_data), hypre_ParAMGDataFArray(amg_data)[amgdd_start_level]);
+         }
       }
 
       HYPRE_Int relax_type, i;
