@@ -54,6 +54,7 @@ hypre_BoomerAMGDDSolve( void *amg_vdata,
    HYPRE_Int test_failed = 0;
    HYPRE_Int error_code;
    HYPRE_Int cycle_count = 0;
+   HYPRE_Int i;
    HYPRE_Real resid_nrm, resid_nrm_init, rhs_norm, relative_resid;
 
    // Get info from amg_data
@@ -127,7 +128,24 @@ hypre_BoomerAMGDDSolve( void *amg_vdata,
       }
       
       // Do the AMGDD cycle
-      error_code = hypre_BoomerAMGDD_Cycle(amg_vdata);
+      if (hypre_ParAMGDataAMGDDUseRD(amg_data) > 1) // Do a DD cycles followed by an RD cycles
+      {
+         HYPRE_Int num_cycles = hypre_ParAMGDataAMGDDUseRD(amg_data) - 1; // number of each cycle type is 
+         hypre_ParAMGDataAMGDDUseRD(amg_data) = 0;
+         for (i = 0; i < num_cycles; i++)
+         {
+            error_code = hypre_BoomerAMGDD_Cycle(amg_vdata);
+            if (error_code) test_failed = 1;
+         }
+         hypre_ParAMGDataAMGDDUseRD(amg_data) = 1;
+         for (i = 0; i < num_cycles; i++)
+         {
+            error_code = hypre_BoomerAMGDD_Cycle(amg_vdata);
+            if (error_code) test_failed = 1;
+         }
+         hypre_ParAMGDataAMGDDUseRD(amg_data) = 2;
+      }
+      else error_code = hypre_BoomerAMGDD_Cycle(amg_vdata);
       if (error_code) test_failed = 1;
 
       if (amgdd_start_level == 0)
