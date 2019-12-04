@@ -83,6 +83,8 @@
 #define HYPRE_STR(...) #__VA_ARGS__
 #define HYPRE_XSTR(...) HYPRE_STR(__VA_ARGS__)
 
+#define HYPRE_USING_CUB_ALLOCATOR
+
 //#define HYPRE_USING_MEMORY_TRACKER
 //#define SIMPLE_MEMPOOL
 
@@ -232,6 +234,13 @@ struct hypre_memory_tracker_t
       sprintf(_filename, "%s", filename);
       sprintf(_function, "%s", function);
       _line = line;
+   }
+
+   void print()
+   {
+      printf("%8s  %16p  %10ld  %d  %32s  %64s      %d\n",
+            _action, _ptr, _nbytes, _memory_location, _filename, _function, _line);
+
    }
 };
 

@@ -18,6 +18,10 @@
 #undef HYPRE_USE_UMALLOC
 #endif
 
+#ifdef HYPRE_USING_CUB_ALLOCATOR
+#include "cub/util_allocator.cuh"
+#endif
+
 #ifdef SIMPLE_MEMPOOL
 hypre_mem_pool_t hypre_mem_pool;
 
@@ -650,7 +654,9 @@ hypre_Memset(void *ptr, HYPRE_Int value, size_t num, HYPRE_Int location)
          break;
       case HYPRE_MEMORY_SHARED :
          /* memset unified memory */
+#if defined(HYPRE_USING_CUDA)
          HYPRE_CUDA_CALL( cudaMemset(ptr, value, num) );
+#endif
          break;
       default :
          /* unrecognized location */
