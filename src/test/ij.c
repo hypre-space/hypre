@@ -386,6 +386,8 @@ main( hypre_int argc,
    HYPRE_Int **grid_relax_points = NULL;
 
    HYPRE_Int no_cuda_um = 0;
+   HYPRE_Int spgemm_use_cusparse = 1;
+
    /*-----------------------------------------------------------
     * Initialize some stuff
     *-----------------------------------------------------------*/
@@ -406,12 +408,6 @@ main( hypre_int argc,
    hypre_PrintTiming("Hypre init times", hypre_MPI_COMM_WORLD);
    hypre_FinalizeTiming(time_index);
    hypre_ClearTiming();
-
-#ifdef HYPRE_USING_CUDA
-   //hypre_SetExecPolicy(HYPRE_EXEC_DEVICE);
-   hypre_SetExecPolicy(HYPRE_EXEC_HOST);
-   //HYPRE_CSRMatrixDeviceSpGemmSetUseCusparse(0);
-#endif
 
    //omp_set_default_device(0);
    //nvtxDomainHandle_t domain = nvtxDomainCreateA("Domain_A");
@@ -1049,6 +1045,12 @@ main( hypre_int argc,
          no_cuda_um = atoi(argv[arg_index++]);
          HYPRE_SetNoCUDAUM(no_cuda_um);
          build_rhs_type = 22;
+      }
+      else if ( strcmp(argv[arg_index], "-mm_cusparse") == 0 )
+      {
+         arg_index++;
+         spgemm_use_cusparse = atoi(argv[arg_index++]);
+         HYPRE_CSRMatrixDeviceSpGemmSetUseCusparse(spgemm_use_cusparse);
       }
       else
       {
@@ -2886,6 +2888,47 @@ main( hypre_int argc,
     * Solve the system using the hybrid solver
     *-----------------------------------------------------------*/
 
+   if (solver_id == -1)
+   {
+      HYPRE_Int nmv = 100;
+      HYPRE_Int num_threads = hypre_NumThreads();
+
+      if (myid == 0)
+      {
+         hypre_printf("Running %d matvecs with A\n", nmv);
+         hypre_printf("\n\n Num MPI tasks = %d\n\n",num_procs);
+         hypre_printf(" Num OpenMP threads = %d\n\n",num_threads);
+      }
+
+      HYPRE_Real tt = hypre_MPI_Wtime();
+
+      time_index = hypre_InitializeTiming("MatVec Test");
+      hypre_BeginTiming(time_index);
+
+      for (i = 0; i < nmv; i++)
+      {
+         HYPRE_ParCSRMatrixMatvec(1., parcsr_A, x, 0., b);
+      }
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+      cudaDeviceSynchronize();
+#endif
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("MatVec Test", hypre_MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      tt = hypre_MPI_Wtime() - tt;
+
+      if (myid == 0)
+      {
+      hypre_printf("Matvec time %.2f (ms)\n", tt*1000.0);
+      }
+
+      goto final;
+   }
+
    if (solver_id == 20)
    {
       if (myid == 0) hypre_printf("Solver:  AMG\n");
@@ -2988,7 +3031,6 @@ main( hypre_int argc,
          hypre_printf("Final Relative Residual Norm = %e\n", final_res_norm);
          hypre_printf("\n");
       }
-#endif
 
       HYPRE_Real time[4];
       HYPRE_ParCSRHybridGetSetupSolveTime(amg_solver, time);
@@ -2997,6 +3039,7 @@ main( hypre_int argc,
          printf("ParCSRHybrid: Setup-Time1 %f, Solve-Time1 %f, Setup-Time2 %f, Solve-Time2 %f\n",
                 time[0], time[1], time[2], time[3]);
       }
+#endif
 
       HYPRE_ParCSRHybridDestroy(amg_solver);
    }
@@ -3206,6 +3249,10 @@ main( hypre_int argc,
       /* run a second time to check for memory leaks */
       HYPRE_ParVectorSetRandomValues(x, 775);
 
+      HYPRE_Real tt, maxtt = 0.0, tset = 0.0, tsol = 0.0;
+
+      tt = hypre_MPI_Wtime();
+
 #if defined(HYPRE_USING_NVTX)
       hypre_NvtxPushRange("AMG-Setup-2");
 #endif
@@ -3216,6 +3263,21 @@ main( hypre_int argc,
       hypre_NvtxPopRange();
 #endif
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+      cudaDeviceSynchronize();
+#endif
+
+      tt = hypre_MPI_Wtime() - tt;
+
+      hypre_MPI_Reduce(&tt, &maxtt, 1, hypre_MPI_REAL, hypre_MPI_MAX, 0, hypre_MPI_COMM_WORLD);
+
+      if (myid == 0)
+      {
+         tset = maxtt;
+      }
+
+      tt = hypre_MPI_Wtime();
+
 #if defined(HYPRE_USING_NVTX)
       hypre_NvtxPushRange("AMG-Solve-2");
 #endif
@@ -3225,7 +3287,22 @@ main( hypre_int argc,
 #if defined(HYPRE_USING_NVTX)
       hypre_NvtxPopRange();
 #endif
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+      cudaDeviceSynchronize();
 #endif
+
+      tt = hypre_MPI_Wtime() - tt;
+
+      hypre_MPI_Reduce(&tt, &maxtt, 1, hypre_MPI_REAL, hypre_MPI_MAX, 0, hypre_MPI_COMM_WORLD);
+
+      if (myid == 0)
+      {
+         tsol = maxtt;
+         hypre_printf("AMG Setup time %.2f (s)\n", tset);
+         hypre_printf("AMG Solve time %.2f (s)\n", tsol);
+      }
+#endif // SECOND_TIME
 
       //cudaProfilerStop();
 
@@ -6697,6 +6774,7 @@ main( hypre_int argc,
    /*-----------------------------------------------------------
     * Finalize things
     *-----------------------------------------------------------*/
+  final:
 
    if (test_ij || build_matrix_type == -1) HYPRE_IJMatrixDestroy(ij_A);
    else HYPRE_ParCSRMatrixDestroy(parcsr_A);
@@ -6726,7 +6804,7 @@ main( hypre_int argc,
 /*
   hypre_FinalizeMemoryDebug();
 */
-  final:
+
 
    /* Finalize Hypre */
    HYPRE_Finalize();
