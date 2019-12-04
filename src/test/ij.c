@@ -386,6 +386,8 @@ main( hypre_int argc,
    HYPRE_Int **grid_relax_points = NULL;
 
    HYPRE_Int no_cuda_um = 0;
+   HYPRE_Int spgemm_use_cusparse = 1;
+
    /*-----------------------------------------------------------
     * Initialize some stuff
     *-----------------------------------------------------------*/
@@ -406,12 +408,6 @@ main( hypre_int argc,
    hypre_PrintTiming("Hypre init times", hypre_MPI_COMM_WORLD);
    hypre_FinalizeTiming(time_index);
    hypre_ClearTiming();
-
-#ifdef HYPRE_USING_CUDA
-   //hypre_SetExecPolicy(HYPRE_EXEC_DEVICE);
-   hypre_SetExecPolicy(HYPRE_EXEC_HOST);
-   //HYPRE_CSRMatrixDeviceSpGemmSetUseCusparse(0);
-#endif
 
    //omp_set_default_device(0);
    //nvtxDomainHandle_t domain = nvtxDomainCreateA("Domain_A");
@@ -1049,6 +1045,12 @@ main( hypre_int argc,
          no_cuda_um = atoi(argv[arg_index++]);
          HYPRE_SetNoCUDAUM(no_cuda_um);
          build_rhs_type = 22;
+      }
+      else if ( strcmp(argv[arg_index], "-mm_cusparse") == 0 )
+      {
+         arg_index++;
+         spgemm_use_cusparse = atoi(argv[arg_index++]);
+         HYPRE_CSRMatrixDeviceSpGemmSetUseCusparse(spgemm_use_cusparse);
       }
       else
       {
