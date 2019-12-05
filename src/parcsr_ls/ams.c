@@ -576,7 +576,7 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix *A,
    HYPRE_Int num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
 
    HYPRE_Real diag;
-   HYPRE_Real *l1_norm = hypre_TAlloc(HYPRE_Real,  num_rows, HYPRE_MEMORY_SHARED);
+   HYPRE_Real *l1_norm = hypre_TAlloc(HYPRE_Real, num_rows, HYPRE_MEMORY_SHARED);
 
    HYPRE_Int *cf_marker_offd = NULL;
    HYPRE_Int cf_diag;
@@ -593,11 +593,11 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix *A,
       hypre_ParCSRCommHandle *comm_handle;
 
       if (num_cols_offd)
-         cf_marker_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_offd, HYPRE_MEMORY_HOST);
+         cf_marker_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd, HYPRE_MEMORY_HOST);
       num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
       if (hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends))
          int_buf_data = hypre_CTAlloc(HYPRE_Int,
-              hypre_ParCSRCommPkgSendMapStart(comm_pkg,  num_sends), HYPRE_MEMORY_HOST);
+              hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends), HYPRE_MEMORY_HOST);
       index = 0;
       for (i = 0; i < num_sends; i++)
       {

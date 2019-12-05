@@ -513,7 +513,7 @@ hypre_IJVectorAddToValuesPar(hypre_IJVector       *vector,
    if (indices)
    {
       HYPRE_Int current_num_elmts
-         = hypre_AuxParVectorCurrentNumElmts(aux_vector);
+         = hypre_AuxParVectorCurrentOffProcElmts(aux_vector);
       HYPRE_Int max_off_proc_elmts
          = hypre_AuxParVectorMaxOffProcElmts(aux_vector);
       HYPRE_BigInt *off_proc_i = hypre_AuxParVectorOffProcI(aux_vector);
@@ -552,7 +552,7 @@ hypre_IJVectorAddToValuesPar(hypre_IJVector       *vector,
             }
             off_proc_i[current_num_elmts] = i;
             off_proc_data[current_num_elmts++] = values[j];
-            hypre_AuxParVectorCurrentNumElmts(aux_vector)=current_num_elmts;
+            hypre_AuxParVectorCurrentOffProcElmts(aux_vector)=current_num_elmts;
          }
          else /* local values are added to the vector */
          {
@@ -638,7 +638,7 @@ hypre_IJVectorAssemblePar(hypre_IJVector *vector)
       HYPRE_Int max_off_proc_elmts;
       HYPRE_BigInt *off_proc_i;
       HYPRE_Complex *off_proc_data;
-      current_num_elmts = hypre_AuxParVectorCurrentNumElmts(aux_vector);
+      current_num_elmts = hypre_AuxParVectorCurrentOffProcElmts(aux_vector);
       hypre_MPI_Allreduce(&current_num_elmts,&off_proc_elmts,1,HYPRE_MPI_INT,
                           hypre_MPI_SUM,comm);
       if (off_proc_elmts)
@@ -651,7 +651,7 @@ hypre_IJVectorAssemblePar(hypre_IJVector *vector)
 	 hypre_TFree(hypre_AuxParVectorOffProcI(aux_vector), HYPRE_MEMORY_HOST);
 	 hypre_TFree(hypre_AuxParVectorOffProcData(aux_vector), HYPRE_MEMORY_HOST);
 	 hypre_AuxParVectorMaxOffProcElmts(aux_vector) = 0;
-	 hypre_AuxParVectorCurrentNumElmts(aux_vector) = 0;
+	 hypre_AuxParVectorCurrentOffProcElmts(aux_vector) = 0;
       }
    }
 

@@ -204,8 +204,8 @@ hypre_ParCSRMatrixDestroy( hypre_ParCSRMatrix *matrix )
          hypre_TFree(hypre_ParCSRMatrixColStarts(matrix), HYPRE_MEMORY_HOST);
       }
 
-      hypre_TFree(hypre_ParCSRMatrixRowindices(matrix), HYPRE_MEMORY_HOST);
-      hypre_TFree(hypre_ParCSRMatrixRowvalues(matrix), HYPRE_MEMORY_HOST);
+      hypre_TFree(hypre_ParCSRMatrixRowindices(matrix), HYPRE_MEMORY_SHARED);
+      hypre_TFree(hypre_ParCSRMatrixRowvalues(matrix), HYPRE_MEMORY_SHARED);
 
       if ( hypre_ParCSRMatrixAssumedPartition(matrix) && hypre_ParCSRMatrixOwnsAssumedPartition(matrix) )
       {
@@ -1089,7 +1089,10 @@ hypre_ParCSRMatrixGetRow( hypre_ParCSRMatrix  *mat,
    row_end = hypre_ParCSRMatrixRowStarts(mat)[ my_id + 1 ];
    row_start = hypre_ParCSRMatrixRowStarts(mat)[ my_id ];
 #endif
-   if (row < row_start || row >= row_end) return(-1);
+   if (row < row_start || row >= row_end)
+   {
+      return(-1);
+   }
 
    /* if buffer is not allocated and some information is requested,
       allocate buffer */
@@ -1098,78 +1101,126 @@ hypre_ParCSRMatrixGetRow( hypre_ParCSRMatrix  *mat,
       /*
         allocate enough space to hold information from the longest row.
       */
-      HYPRE_Int     max = 1,tmp;
+      HYPRE_Int max = 1,tmp;
       HYPRE_Int i;
-      HYPRE_Int     m = row_end-row_start;
+      HYPRE_Int m = row_end - row_start;
 
-      for ( i=0; i<m; i++ ) {
+      for ( i = 0; i < m; i++ )
+      {
          tmp = hypre_CSRMatrixI(Aa)[i+1] - hypre_CSRMatrixI(Aa)[i] +
-            hypre_CSRMatrixI(Ba)[i+1] - hypre_CSRMatrixI(Ba)[i];
-         if (max < tmp) { max = tmp; }
+               hypre_CSRMatrixI(Ba)[i+1] - hypre_CSRMatrixI(Ba)[i];
+         if (max < tmp)
+         {
+            max = tmp;
+         }
       }
 
-      hypre_ParCSRMatrixRowvalues(mat) = (HYPRE_Complex *) hypre_CTAlloc( HYPRE_Complex, max , HYPRE_MEMORY_HOST);
-      hypre_ParCSRMatrixRowindices(mat) = (HYPRE_BigInt *) hypre_CTAlloc( HYPRE_BigInt, max , HYPRE_MEMORY_HOST);
+      // RL: TODO
+      hypre_ParCSRMatrixRowvalues(mat)  = (HYPRE_Complex *) hypre_CTAlloc(HYPRE_Complex, max, HYPRE_MEMORY_SHARED);
+      hypre_ParCSRMatrixRowindices(mat) = (HYPRE_BigInt *)  hypre_CTAlloc(HYPRE_BigInt,  max, HYPRE_MEMORY_SHARED);
    }
 
    /* Copy from dual sequential matrices into buffer */
    {
-      HYPRE_Complex     *vworkA, *vworkB, *v_p;
+      HYPRE_Complex    *vworkA, *vworkB, *v_p;
       HYPRE_Int        i, *cworkA, *cworkB;
       HYPRE_BigInt     cstart = hypre_ParCSRMatrixFirstColDiag(mat);
-      HYPRE_Int        nztot, nzA, nzB, lrow=(HYPRE_Int)(row-row_start);
+      HYPRE_Int        nztot, nzA, nzB, lrow = (HYPRE_Int)(row-row_start);
       HYPRE_BigInt     *cmap, *idx_p;
 
-      nzA = hypre_CSRMatrixI(Aa)[lrow+1]-hypre_CSRMatrixI(Aa)[lrow];
+      nzA = hypre_CSRMatrixI(Aa)[lrow+1] - hypre_CSRMatrixI(Aa)[lrow];
       cworkA = &( hypre_CSRMatrixJ(Aa)[ hypre_CSRMatrixI(Aa)[lrow] ] );
       vworkA = &( hypre_CSRMatrixData(Aa)[ hypre_CSRMatrixI(Aa)[lrow] ] );
 
-      nzB = hypre_CSRMatrixI(Ba)[lrow+1]-hypre_CSRMatrixI(Ba)[lrow];
+      nzB = hypre_CSRMatrixI(Ba)[lrow+1] - hypre_CSRMatrixI(Ba)[lrow];
       cworkB = &( hypre_CSRMatrixJ(Ba)[ hypre_CSRMatrixI(Ba)[lrow] ] );
       vworkB = &( hypre_CSRMatrixData(Ba)[ hypre_CSRMatrixI(Ba)[lrow] ] );
 
       nztot = nzA + nzB;
 
-      cmap  = hypre_ParCSRMatrixColMapOffd(mat);
+      cmap = hypre_ParCSRMatrixColMapOffd(mat);
 
-      if (values  || col_ind) {
-         if (nztot) {
+      if (values || col_ind)
+      {
+         if (nztot)
+         {
             /* Sort by increasing column numbers, assuming A and B already sorted */
             HYPRE_Int imark = -1;
-            if (values) {
+
+            if (values)
+            {
                *values = v_p = hypre_ParCSRMatrixRowvalues(mat);
-               for ( i=0; i<nzB; i++ ) {
-                  if (cmap[cworkB[i]] < cstart)   v_p[i] = vworkB[i];
-                  else break;
+               for ( i = 0; i < nzB; i++ )
+               {
+                  if (cmap[cworkB[i]] < cstart)
+                  {
+                     v_p[i] = vworkB[i];
+                  }
+                  else
+                  {
+                     break;
+                  }
                }
                imark = i;
-               for ( i=0; i<nzA; i++ )     v_p[imark+i] = vworkA[i];
-               for ( i=imark; i<nzB; i++ ) v_p[nzA+i]   = vworkB[i];
+               for ( i = 0; i < nzA; i++ )
+               {
+                  v_p[imark+i] = vworkA[i];
+               }
+               for ( i = imark; i < nzB; i++ )
+               {
+                  v_p[nzA+i] = vworkB[i];
+               }
             }
-            if (col_ind) {
+
+            if (col_ind)
+            {
                *col_ind = idx_p = hypre_ParCSRMatrixRowindices(mat);
-               if (imark > -1) {
-                  for ( i=0; i<imark; i++ ) {
+               if (imark > -1)
+               {
+                  for ( i = 0; i < imark; i++ )
+                  {
                      idx_p[i] = cmap[cworkB[i]];
                   }
-               } else {
-                  for ( i=0; i<nzB; i++ ) {
-                     if (cmap[cworkB[i]] < cstart)   idx_p[i] = cmap[cworkB[i]];
-                     else break;
+               }
+               else
+               {
+                  for ( i = 0; i < nzB; i++ )
+                  {
+                     if (cmap[cworkB[i]] < cstart)
+                     {
+                        idx_p[i] = cmap[cworkB[i]];
+                     }
+                     else
+                     {
+                        break;
+                     }
                   }
                   imark = i;
                }
-               for ( i=0; i<nzA; i++ )     idx_p[imark+i] = cstart + cworkA[i];
-               for ( i=imark; i<nzB; i++ ) idx_p[nzA+i]   = cmap[cworkB[i]];
+               for ( i = 0; i < nzA; i++ )
+               {
+                  idx_p[imark+i] = cstart + cworkA[i];
+               }
+               for ( i = imark; i < nzB; i++ )
+               {
+                  idx_p[nzA+i] = cmap[cworkB[i]];
+               }
             }
          }
-         else {
-            if (col_ind) *col_ind = 0;
-            if (values)   *values   = 0;
+         else
+         {
+            if (col_ind)
+            {
+               *col_ind = 0;
+            }
+            if (values)
+            {
+               *values = 0;
+            }
          }
       }
-      *size = nztot;
 
+      *size = nztot;
    } /* End of copy */
 
    return hypre_error_flag;
