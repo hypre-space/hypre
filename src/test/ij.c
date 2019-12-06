@@ -86,7 +86,7 @@ extern HYPRE_Int hypre_FlexGMRESModifyPCDefault(void *precond_data, HYPRE_Int it
 #ifdef __cplusplus
 }
 #endif
-#define SECOND_TIME 0
+#define SECOND_TIME 1
 
 hypre_int
 main( hypre_int argc,
@@ -387,6 +387,40 @@ main( hypre_int argc,
 
    HYPRE_Int no_cuda_um = 0;
    HYPRE_Int spgemm_use_cusparse = 1;
+#ifdef HYPRE_USING_CUB_ALLOCATOR
+//   const HYPRE_Int onekb=1024;
+   const HYPRE_Int oneMb=1024*1024;
+   HYPRE_Int mempool_bin_growth=8, mempool_min_bin=3, mempool_max_bin=9, mempool_max_cached_bytes=10*oneMb;
+
+   arg_index = 1;
+   while( arg_index < argc  )
+   {
+      if ( strcmp(argv[arg_index], "-mempool_growth") == 0 )
+      {
+         arg_index++;
+         mempool_bin_growth = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-mempool_minbin") == 0 )
+      {
+         arg_index++;
+         mempool_min_bin = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-mempool_maxbin") == 0 )
+      {
+         arg_index++;
+         mempool_max_bin = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-mempool_maxcached") == 0 )
+      { // Give maximum cached in Mbytes.
+         arg_index++;
+         mempool_max_cached_bytes = atoi(argv[arg_index++])*oneMb;
+      }
+      else
+         arg_index++;
+   }
+   hypre_CubMemPoolCreate( mempool_bin_growth, mempool_min_bin,
+                           mempool_max_bin, mempool_max_cached_bytes );
+#endif
 
    HYPRE_Int memory_location;
    HYPRE_ParCSRMatrix parcsr_A_copy = NULL, parcsr_A_ori = NULL;

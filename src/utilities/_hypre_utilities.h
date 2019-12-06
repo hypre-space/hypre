@@ -548,8 +548,7 @@ HYPRE_Int hypre_MPI_Info_free( hypre_MPI_Info *info );
 #define HYPRE_STR(...) #__VA_ARGS__
 #define HYPRE_XSTR(...) HYPRE_STR(__VA_ARGS__)
 
-//#define HYPRE_USING_CUB_ALLOCATOR
-
+#define HYPRE_USING_CUB_ALLOCATOR
 //#define HYPRE_USING_MEMORY_TRACKER
 //#define SIMPLE_MEMPOOL
 
@@ -826,7 +825,10 @@ void hypre_MemPoolCreate(hypre_mem_pool_t *pool, size_t device_pool_max_size, si
 void hypre_MemPoolDestroy(hypre_mem_pool_t *pool);
 void *hypre_MemPoolAlloc(hypre_mem_pool_t *pool, size_t size, HYPRE_Int location);
 #endif
-
+#ifdef HYPRE_USING_CUB_ALLOCATOR
+void hypre_CubMemPoolCreate( unsigned int bin_growth, unsigned int min_bin,
+                             unsigned int max_bin, size_t max_cached_bytes );
+#endif   
 #ifdef __cplusplus
 }
 #endif
