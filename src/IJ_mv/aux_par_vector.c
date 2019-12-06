@@ -27,7 +27,7 @@ hypre_AuxParVectorCreate( hypre_AuxParVector **aux_vector)
   
    /* set defaults */
    hypre_AuxParVectorMaxOffProcElmts(vector) = 0;
-   hypre_AuxParVectorCurrentNumElmts(vector) = 0;
+   hypre_AuxParVectorCurrentOffProcElmts(vector) = 0;
    /* stash for setting or adding off processor values */
    hypre_AuxParVectorOffProcI(vector) = NULL;
    hypre_AuxParVectorOffProcData(vector) = NULL;

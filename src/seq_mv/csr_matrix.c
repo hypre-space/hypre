@@ -65,7 +65,7 @@ hypre_CSRMatrixDestroy( hypre_CSRMatrix *matrix )
       HYPRE_Int memory_location = hypre_CSRMatrixMemoryLocation(matrix);
 
       hypre_TFree(hypre_CSRMatrixI(matrix),      memory_location);
-      hypre_TFree(hypre_CSRMatrixRownnz(matrix), memory_location);
+      hypre_TFree(hypre_CSRMatrixRownnz(matrix), HYPRE_MEMORY_HOST);
 
       if ( hypre_CSRMatrixOwnsData(matrix) )
       {
@@ -275,7 +275,7 @@ hypre_CSRMatrixSetRownnz( hypre_CSRMatrix *matrix )
    }
    else
    {
-      Arownnz = hypre_CTAlloc(HYPRE_Int,  irownnz, HYPRE_MEMORY_SHARED);
+      Arownnz = hypre_CTAlloc(HYPRE_Int, irownnz, HYPRE_MEMORY_HOST);
       irownnz = 0;
       for (i = 0; i < num_rows; i++)
       {

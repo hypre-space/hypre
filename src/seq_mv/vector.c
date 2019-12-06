@@ -167,6 +167,9 @@ hypre_SeqVectorRead( char *file_name )
    hypre_fscanf(fp, "%d", &size);
 
    vector = hypre_SeqVectorCreate(size);
+
+   hypre_VectorMemoryLocation(vector) = HYPRE_MEMORY_HOST;
+
    hypre_SeqVectorInitialize(vector);
 
    data = hypre_VectorData(vector);
@@ -406,7 +409,7 @@ hypre_SeqVectorCopy( hypre_Vector *x,
  *--------------------------------------------------------------------------*/
 
 hypre_Vector*
-hypre_SeqVectorCloneDeep( hypre_Vector *x )
+hypre_SeqVectorCloneDeep_v2( hypre_Vector *x, HYPRE_Int memory_location )
 {
    HYPRE_Int      size          = hypre_VectorSize(x);
    HYPRE_Int      num_vectors   = hypre_VectorNumVectors(x);
@@ -417,10 +420,16 @@ hypre_SeqVectorCloneDeep( hypre_Vector *x )
    hypre_VectorVectorStride(y) = hypre_VectorVectorStride(x);
    hypre_VectorIndexStride(y) = hypre_VectorIndexStride(x);
 
-   hypre_SeqVectorInitialize(y);
+   hypre_SeqVectorInitialize_v2(y, memory_location);
    hypre_SeqVectorCopy( x, y );
 
    return y;
+}
+
+hypre_Vector*
+hypre_SeqVectorCloneDeep( hypre_Vector *x )
+{
+   return hypre_SeqVectorCloneDeep_v2(x, HYPRE_MEMORY_SHARED);
 }
 
 /*--------------------------------------------------------------------------
@@ -438,6 +447,8 @@ hypre_SeqVectorCloneShallow( hypre_Vector *x )
    hypre_VectorMultiVecStorageMethod(y) = hypre_VectorMultiVecStorageMethod(x);
    hypre_VectorVectorStride(y) = hypre_VectorVectorStride(x);
    hypre_VectorIndexStride(y) = hypre_VectorIndexStride(x);
+
+   hypre_VectorMemoryLocation(y) = hypre_VectorMemoryLocation(x);
 
    hypre_VectorData(y) = hypre_VectorData(x);
    hypre_SeqVectorSetDataOwner( y, 0 );
