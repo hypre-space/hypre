@@ -390,7 +390,7 @@ main( hypre_int argc,
 
    HYPRE_Int memory_location;
    HYPRE_ParCSRMatrix parcsr_A_copy = NULL, parcsr_A_ori = NULL;
-   HYPRE_ParVector b_copy = NULL, b_ori = NULL, x_copy = NULL, x_ori = NULL;
+   HYPRE_ParVector b_copy = NULL, b_ori = NULL, x_copy = NULL, x_ori = NULL, x0_save = NULL;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -1048,7 +1048,8 @@ main( hypre_int argc,
          arg_index++;
          no_cuda_um = atoi(argv[arg_index++]);
          HYPRE_SetNoCUDAUM(no_cuda_um);
-         if (build_rhs_type == 2)
+         //RL: TODO
+         if (no_cuda_um && build_rhs_type == 2)
          {
             build_rhs_type = 22;
          }
@@ -2905,6 +2906,11 @@ main( hypre_int argc,
    }
 #endif
 
+#if SECOND_TIME
+   /* save the initial guess for the 2nd time */
+   x0_save = hypre_ParVectorCloneDeep_v2(x, hypre_ParVectorMemoryLocation(x));
+#endif
+
    /*-----------------------------------------------------------
     * Solve the system using the hybrid solver
     *-----------------------------------------------------------*/
@@ -3034,7 +3040,7 @@ main( hypre_int argc,
 
 #if SECOND_TIME
       /* run a second time to check for memory leaks */
-      HYPRE_ParVectorSetRandomValues(x, 775);
+      hypre_ParVectorCopy(x0_save, x);
       HYPRE_ParCSRHybridSetup(amg_solver, parcsr_A, b, x);
       HYPRE_ParCSRHybridSolve(amg_solver, parcsr_A, b, x);
 
@@ -3057,7 +3063,7 @@ main( hypre_int argc,
       HYPRE_ParCSRHybridGetSetupSolveTime(amg_solver, time);
       if (myid == 0)
       {
-         printf("ParCSRHybrid: Setup-Time1 %f, Solve-Time1 %f, Setup-Time2 %f, Solve-Time2 %f\n",
+         printf("ParCSRHybrid: Setup-Time1 %f  Solve-Time1 %f  Setup-Time2 %f  Solve-Time2 %f\n",
                 time[0], time[1], time[2], time[3]);
       }
 #endif
@@ -6800,6 +6806,8 @@ main( hypre_int argc,
    HYPRE_ParCSRMatrixDestroy(parcsr_A_copy);
    HYPRE_ParVectorDestroy(b_copy);
    HYPRE_ParVectorDestroy(x_copy);
+   HYPRE_ParVectorDestroy(x0_save);
+
    parcsr_A = parcsr_A_ori;  b = b_ori;  x = x_ori;
 
    if (test_ij || build_matrix_type == -1) HYPRE_IJMatrixDestroy(ij_A);
