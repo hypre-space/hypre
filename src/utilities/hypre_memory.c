@@ -14,12 +14,23 @@
 #include "_hypre_utilities.h"
 #include "../struct_mv/_hypre_struct_mv.h"
 
+#define HYPRE_USING_CUB_ALLOCATOR
+
 #ifdef HYPRE_USE_UMALLOC
 #undef HYPRE_USE_UMALLOC
 #endif
 
 #ifdef HYPRE_USING_CUB_ALLOCATOR
 #include "cub/util_allocator.cuh"
+cub::CachingDeviceAllocator *dev_allocator;
+cub::CachingDeviceAllocator  *um_allocator;
+
+void hypre_CubMemPoolCreate( unsigned int bin_growth, unsigned int min_bin,
+                             unsigned int max_bin, size_t max_cached_bytes )
+{
+   dev_allocator = new cub::CachingDeviceAllocator(bin_growth,min_bin,max_bin,max_cached_bytes,true,false,false);
+   um_allocator  = new cub::CachingDeviceAllocator(bin_growth,min_bin,max_bin,max_cached_bytes,true,false,true);
+}
 #endif
 
 #ifdef SIMPLE_MEMPOOL
@@ -158,6 +169,8 @@ hypre_DeviceMalloc(size_t size, HYPRE_Int zeroinit)
 #elif defined(HYPRE_USING_CUDA)
 #ifdef SIMPLE_MEMPOOL
    ptr = hypre_MemPoolAlloc(&hypre_mem_pool, size, HYPRE_MEMORY_DEVICE);
+#elif defined(HYPRE_USING_CUB_ALLOCATOR)
+   dev_allocator->DeviceAllocate( (void**)&ptr, size );
 #else
    HYPRE_CUDA_CALL( cudaMalloc(&ptr, size) );
 #endif
@@ -180,6 +193,8 @@ hypre_UnifiedMalloc(size_t size, HYPRE_Int zeroinit)
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 #ifdef SIMPLE_MEMPOOL
    ptr = hypre_MemPoolAlloc(&hypre_mem_pool, size, HYPRE_MEMORY_SHARED);
+#elif defined(HYPRE_USING_CUB_ALLOCATOR)
+   um_allocator->DeviceAllocate( (void**)&ptr, size );
 #else
    HYPRE_CUDA_CALL( cudaMallocManaged(&ptr, size, cudaMemAttachGlobal) );
 #endif
@@ -291,7 +306,11 @@ hypre_DeviceFree(void *ptr)
    HYPRE_OMPOffload(hypre__offload_device_num, ptr, size, "exit", "delete");
 #elif defined(HYPRE_USING_CUDA)
 #ifndef SIMPLE_MEMPOOL
+#ifdef HYPRE_USING_CUB_ALLOCATOR
+   dev_allocator->DeviceFree(ptr);
+#else
    HYPRE_CUDA_CALL( cudaFree(ptr) );
+#endif
 #endif
 #endif
 }
@@ -301,7 +320,11 @@ hypre_UnifiedFree(void *ptr)
 {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 #ifndef SIMPLE_MEMPOOL
+#ifdef HYPRE_USING_CUB_ALLOCATOR
+   um_allocator->DeviceFree(ptr);
+#else
    HYPRE_CUDA_CALL( cudaFree(ptr) );
+#endif
 #endif
 #endif
 }
