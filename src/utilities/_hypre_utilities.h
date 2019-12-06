@@ -548,8 +548,7 @@ HYPRE_Int hypre_MPI_Info_free( hypre_MPI_Info *info );
 #define HYPRE_STR(...) #__VA_ARGS__
 #define HYPRE_XSTR(...) HYPRE_STR(__VA_ARGS__)
 
-//#define HYPRE_USING_CUB_ALLOCATOR
-
+#define HYPRE_USING_CUB_ALLOCATOR
 //#define HYPRE_USING_MEMORY_TRACKER
 //#define SIMPLE_MEMPOOL
 

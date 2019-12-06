@@ -29,8 +29,6 @@
 #include "superlu_ddefs.h"
 #endif
 
-#define HYPRE_USING_CUB_ALLOCATOR
-
 /* begin lobpcg */
 
 #define NO_SOLVER -9198
@@ -390,9 +388,8 @@ main( hypre_int argc,
    HYPRE_Int no_cuda_um = 0;
    HYPRE_Int spgemm_use_cusparse = 1;
 #ifdef HYPRE_USING_CUB_ALLOCATOR
-   const HYPRE_Int onekb=1024;
+//   const HYPRE_Int onekb=1024;
    const HYPRE_Int oneMb=1024*1024;
-   //   const HYPRE_Int oneGb=1024*1024*1024;
    HYPRE_Int mempool_bin_growth=8, mempool_min_bin=3, mempool_max_bin=9, mempool_max_cached_bytes=10*oneMb;
 
    arg_index = 1;
