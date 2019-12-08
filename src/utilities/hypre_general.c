@@ -131,7 +131,7 @@ hypre_HandleCreate()
 #ifdef HYPRE_USING_CUB_ALLOCATOR
    handle->cub_bin_growth                           = 8u;
    handle->cub_min_bin                              = 1u;
-   handle->cub_max_bin                              = (unsigned int) -1;
+   handle->cub_max_bin                              = (hypre_uint) -1;
    handle->cub_max_cached_bytes                     = (size_t) -1;
    handle->cub_dev_allocator                        = NULL;
    handle->cub_um_allocator                         = NULL;

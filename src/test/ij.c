@@ -2473,7 +2473,7 @@ main( hypre_int argc,
          hypre_printf("  ParVector\n");
       }
 
-      HYPRE_Int memory_location = HYPRE_MEMORY_SHARED;
+      memory_location = HYPRE_MEMORY_SHARED;
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
       if (hypre_handle->no_cuda_um)
       {
