@@ -13,10 +13,14 @@
 HYPRE_Int hypre_exec_policy = HYPRE_MEMORY_DEVICE;
 
 __global__ void
-hypreCUDAKernel_CompileFlagSafetyCheck(HYPRE_Int *cuda_arch)
+hypreCUDAKernel_CompileFlagSafetyCheck(HYPRE_Int cuda_arch_actual)
 {
 #ifdef __CUDA_ARCH__
-    cuda_arch[0] = __CUDA_ARCH__;
+   if (cuda_arch_actual != __CUDA_ARCH__)
+   {
+      printf("ERROR: Compile arch flags %d does not match actual device arch = sm_%d\n", __CUDA_ARCH__, cuda_arch_actual);
+      assert(0);
+   }
 #endif
 }
 
@@ -28,22 +32,10 @@ void hypre_CudaCompileFlagCheck()
    cudaGetDeviceProperties(&props, device);
    HYPRE_Int cuda_arch_actual = props.major*100 + props.minor*10;
 
-   HYPRE_Int *cuda_arch = hypre_TAlloc(HYPRE_Int, 1, HYPRE_MEMORY_DEVICE);
-   HYPRE_Int h_cuda_arch;
-
    dim3 gDim(1,1,1), bDim(1,1,1);
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_CompileFlagSafetyCheck, gDim, bDim, cuda_arch );
-
-   hypre_TMemcpy(&h_cuda_arch, cuda_arch, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-
-   if (h_cuda_arch != cuda_arch_actual)
-   {
-      hypre_printf("ERROR: Compile arch flags %d does not match actual device arch = sm_%d\n", h_cuda_arch, cuda_arch_actual);
-   }
+   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_CompileFlagSafetyCheck, gDim, bDim, cuda_arch_actual );
 
    HYPRE_CUDA_CALL(cudaDeviceSynchronize());
-
-   hypre_TFree(cuda_arch, HYPRE_MEMORY_DEVICE);
 }
 
 dim3

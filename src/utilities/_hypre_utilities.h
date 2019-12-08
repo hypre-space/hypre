@@ -528,10 +528,6 @@ HYPRE_Int hypre_MPI_Info_free( hypre_MPI_Info *info );
  *             location=LOCATION_DEVICE - execute on the device
  *             location=LOCATION_HOST   - execute on the host
  *
- * Questions:
- *
- *    1. prefetch?
- *
  *****************************************************************************/
 
 #ifndef hypre_MEMORY_HEADER
@@ -548,26 +544,10 @@ HYPRE_Int hypre_MPI_Info_free( hypre_MPI_Info *info );
 #define HYPRE_STR(...) #__VA_ARGS__
 #define HYPRE_XSTR(...) HYPRE_STR(__VA_ARGS__)
 
-#define HYPRE_USING_CUB_ALLOCATOR
 //#define HYPRE_USING_MEMORY_TRACKER
-//#define SIMPLE_MEMPOOL
 
 #ifdef __cplusplus
 extern "C" {
-#endif
-
-#ifdef SIMPLE_MEMPOOL
-typedef struct
-{
-   size_t  device_pool_max_size;
-   size_t  device_pool_cur_size;
-   char   *device_pool;
-   size_t  managed_pool_max_size;
-   size_t  managed_pool_cur_size;
-   char   *managed_pool;
-} hypre_mem_pool_t;
-
-extern hypre_mem_pool_t hypre_mem_pool;
 #endif
 
 #define HYPRE_MEMORY_UNSET         (-1)
@@ -670,6 +650,16 @@ hypre_GetActualMemLocation(HYPRE_Int location)
 
    return HYPRE_MEMORY_UNSET;
 }
+
+#ifdef HYPRE_USING_CUB_ALLOCATOR
+#ifdef __cplusplus
+extern "C++" {
+#endif
+#include "cub/util_allocator.cuh"
+#ifdef __cplusplus
+}
+#endif
+#endif
 
 #ifdef HYPRE_USING_MEMORY_TRACKER
 
@@ -811,6 +801,7 @@ void * hypre_Memset(void *ptr, HYPRE_Int value, size_t num, HYPRE_Int location);
 void   hypre_Free(void *ptr, HYPRE_Int location);
 HYPRE_Int hypre_GetMemoryLocation(const void *ptr, HYPRE_Int *memory_location);
 HYPRE_Int hypre_PrintMemoryTracker();
+HYPRE_Int hypre_SetCubMemPoolSize( hypre_uint bin_growth, hypre_uint min_bin, hypre_uint max_bin, size_t max_cached_bytes );
 
 /* memory_dmalloc.c */
 HYPRE_Int hypre_InitMemoryDebugDML( HYPRE_Int id );
@@ -820,15 +811,6 @@ char *hypre_CAllocDML( HYPRE_Int count , HYPRE_Int elt_size , char *file , HYPRE
 char *hypre_ReAllocDML( char *ptr , HYPRE_Int size , char *file , HYPRE_Int line );
 void hypre_FreeDML( char *ptr , char *file , HYPRE_Int line );
 
-#ifdef SIMPLE_MEMPOOL
-void hypre_MemPoolCreate(hypre_mem_pool_t *pool, size_t device_pool_max_size, size_t managed_pool_max_size);
-void hypre_MemPoolDestroy(hypre_mem_pool_t *pool);
-void *hypre_MemPoolAlloc(hypre_mem_pool_t *pool, size_t size, HYPRE_Int location);
-#endif
-#ifdef HYPRE_USING_CUB_ALLOCATOR
-void hypre_CubMemPoolCreate( unsigned int bin_growth, unsigned int min_bin,
-                             unsigned int max_bin, size_t max_cached_bytes );
-#endif   
 #ifdef __cplusplus
 }
 #endif
@@ -1839,6 +1821,15 @@ typedef struct
    char      spgemm_hash_type;
    /* RL: temporary TODO */
    HYPRE_Int no_cuda_um;
+#ifdef HYPRE_USING_CUB_ALLOCATOR
+   hypre_uint cub_bin_growth;
+   hypre_uint cub_min_bin;
+   hypre_uint cub_max_bin;
+   size_t     cub_max_cached_bytes;
+
+   cub::CachingDeviceAllocator *cub_dev_allocator;
+   cub::CachingDeviceAllocator *cub_um_allocator;
+#endif
 #endif
 } hypre_Handle;
 
@@ -2006,6 +1997,44 @@ hypre_HandleSpgemmUseCusparse(hypre_Handle *hypre_handle_)
 {
    return hypre_handle_->spgemm_use_cusparse;
 }
+
+#ifdef HYPRE_USING_CUB_ALLOCATOR
+static inline cub::CachingDeviceAllocator*
+hypre_HandleCubCachingDeviceAllocator(hypre_Handle *hypre_handle_)
+{
+   if (hypre_handle_->cub_dev_allocator)
+   {
+      return hypre_handle_->cub_dev_allocator;
+   }
+
+   hypre_handle_->cub_dev_allocator =
+      new cub::CachingDeviceAllocator(hypre_handle_->cub_bin_growth,
+                                      hypre_handle_->cub_min_bin,
+                                      hypre_handle_->cub_max_bin,
+                                      hypre_handle_->cub_max_cached_bytes,
+                                      true, false, false);
+
+   return hypre_handle_->cub_dev_allocator;
+}
+
+static inline cub::CachingDeviceAllocator*
+hypre_HandleCubCachingManagedAllocator(hypre_Handle *hypre_handle_)
+{
+   if (hypre_handle_->cub_um_allocator)
+   {
+      return hypre_handle_->cub_um_allocator;
+   }
+
+   hypre_handle_->cub_um_allocator =
+      new cub::CachingDeviceAllocator(hypre_handle_->cub_bin_growth,
+                                      hypre_handle_->cub_min_bin,
+                                      hypre_handle_->cub_max_bin,
+                                      hypre_handle_->cub_max_cached_bytes,
+                                      true, false, true);
+
+   return hypre_handle_->cub_um_allocator;
+}
+#endif
 
 #endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP) */
 

@@ -18,89 +18,6 @@
 #undef HYPRE_USE_UMALLOC
 #endif
 
-#ifdef HYPRE_USING_CUB_ALLOCATOR
-#include "cub/util_allocator.cuh"
-cub::CachingDeviceAllocator *dev_allocator;
-cub::CachingDeviceAllocator  *um_allocator;
-
-void hypre_CubMemPoolCreate( unsigned int bin_growth, unsigned int min_bin,
-                             unsigned int max_bin, size_t max_cached_bytes )
-{
-   dev_allocator = new cub::CachingDeviceAllocator(bin_growth,min_bin,max_bin,max_cached_bytes,true,false,false);
-   um_allocator  = new cub::CachingDeviceAllocator(bin_growth,min_bin,max_bin,max_cached_bytes,true,false,true);
-}
-#endif
-
-#ifdef SIMPLE_MEMPOOL
-hypre_mem_pool_t hypre_mem_pool;
-
-void hypre_MemPoolCreate(hypre_mem_pool_t *pool,
-                         size_t            device_pool_max_size,
-                         size_t            managed_pool_max_size)
-{
-   pool->device_pool_max_size = device_pool_max_size;
-   pool->device_pool_cur_size = 0;
-   HYPRE_CUDA_CALL( cudaMalloc(&pool->device_pool, device_pool_max_size) );
-
-   pool->managed_pool_max_size = managed_pool_max_size;
-   pool->managed_pool_cur_size = 0;
-   HYPRE_CUDA_CALL( cudaMallocManaged(&pool->managed_pool, managed_pool_max_size, cudaMemAttachGlobal) );
-   HYPRE_CUDA_CALL( cudaMemAdvise( pool->managed_pool,
-                                   managed_pool_max_size,
-                                   cudaMemAdviseSetPreferredLocation,
-                                   hypre_HandleCudaDevice(hypre_handle)
-                                 ) );
-}
-
-void hypre_MemPoolDestroy(hypre_mem_pool_t *pool)
-{
-   pool->device_pool_max_size = 0;
-   pool->device_pool_cur_size = 0;
-   HYPRE_CUDA_CALL( cudaFree(pool->device_pool) );
-   pool->device_pool = NULL;
-
-   pool->managed_pool_max_size = 0;
-   pool->managed_pool_cur_size = 0;
-   HYPRE_CUDA_CALL( cudaFree(pool->managed_pool) );
-   pool->managed_pool = NULL;
-}
-
-void *hypre_MemPoolAlloc(hypre_mem_pool_t *pool, size_t size0, HYPRE_Int location)
-{
-   void *ptr = NULL;
-
-   size_t align = 256;
-   size_t size = (size0 + align - 1) / align * align;
-
-   if (location == HYPRE_MEMORY_DEVICE)
-   {
-      if (pool->device_pool_cur_size + size < pool->device_pool_max_size)
-      {
-         ptr = pool->device_pool + pool->device_pool_cur_size;
-         pool->device_pool_cur_size += size;
-      }
-      else
-      {
-         assert(0);
-      }
-   }
-   else if (location == HYPRE_MEMORY_SHARED)
-   {
-      if (pool->managed_pool_cur_size + size < pool->managed_pool_max_size)
-      {
-         ptr = pool->managed_pool + pool->managed_pool_cur_size;
-         pool->managed_pool_cur_size += size;
-      }
-      else
-      {
-         assert(0);
-      }
-   }
-
-   return ptr;
-}
-#endif
-
 /******************************************************************************
  *
  * Helper routines
@@ -165,10 +82,8 @@ hypre_DeviceMalloc(size_t size, HYPRE_Int zeroinit)
    ptr = (void *) (&sp[1]);
    HYPRE_OMPOffload(hypre__offload_device_num, ptr, size, "enter", "alloc");
 #elif defined(HYPRE_USING_CUDA)
-#ifdef SIMPLE_MEMPOOL
-   ptr = hypre_MemPoolAlloc(&hypre_mem_pool, size, HYPRE_MEMORY_DEVICE);
-#elif defined(HYPRE_USING_CUB_ALLOCATOR)
-   dev_allocator->DeviceAllocate( (void**)&ptr, size );
+#if defined(HYPRE_USING_CUB_ALLOCATOR)
+   CubDebugExit( hypre_HandleCubCachingDeviceAllocator(hypre_handle)->DeviceAllocate( (void**)&ptr, size ) );
 #else
    HYPRE_CUDA_CALL( cudaMalloc(&ptr, size) );
 #endif
@@ -189,20 +104,22 @@ hypre_UnifiedMalloc(size_t size, HYPRE_Int zeroinit)
    void *ptr = NULL;
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-#ifdef SIMPLE_MEMPOOL
-   ptr = hypre_MemPoolAlloc(&hypre_mem_pool, size, HYPRE_MEMORY_SHARED);
-#elif defined(HYPRE_USING_CUB_ALLOCATOR)
-   um_allocator->DeviceAllocate( (void**)&ptr, size );
+#if defined(HYPRE_USING_CUB_ALLOCATOR)
+   CubDebugExit( hypre_HandleCubCachingManagedAllocator(hypre_handle)->DeviceAllocate( (void**)&ptr, size ) );
 #else
    HYPRE_CUDA_CALL( cudaMallocManaged(&ptr, size, cudaMemAttachGlobal) );
 #endif
-   HYPRE_Int device = hypre_HandleCudaDevice(hypre_handle);
-   HYPRE_CUDA_CALL( cudaMemAdvise(ptr, size, cudaMemAdviseSetPreferredLocation, device) );
-
+   HYPRE_CUDA_CALL( cudaMemAdvise(ptr, size, cudaMemAdviseSetPreferredLocation,
+                                  hypre_HandleCudaDevice(hypre_handle)) );
    if (zeroinit)
    {
       hypre_Memset(ptr, 0, size, HYPRE_MEMORY_SHARED);
    }
+
+#if defined(HYPRE_USING_DEVICE_OPENMP)
+   HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
+#endif
+
 #endif
 
    return ptr;
@@ -300,15 +217,12 @@ hypre_DeviceFree(void *ptr)
 #if defined(HYPRE_DEVICE_OPENMP_ALLOC)
    omp_target_free(ptr, hypre__offload_device_num);
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
-   size_t size = ((size_t *) ptr)[-1];
-   HYPRE_OMPOffload(hypre__offload_device_num, ptr, size, "exit", "delete");
+   HYPRE_OMPOffload(hypre__offload_device_num, ptr, ((size_t *) ptr)[-1], "exit", "delete");
 #elif defined(HYPRE_USING_CUDA)
-#ifndef SIMPLE_MEMPOOL
 #ifdef HYPRE_USING_CUB_ALLOCATOR
-   dev_allocator->DeviceFree(ptr);
+   CubDebugExit( hypre_HandleCubCachingDeviceAllocator(hypre_handle)->DeviceFree(ptr) );
 #else
    HYPRE_CUDA_CALL( cudaFree(ptr) );
-#endif
 #endif
 #endif
 }
@@ -317,12 +231,10 @@ static inline void
 hypre_UnifiedFree(void *ptr)
 {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-#ifndef SIMPLE_MEMPOOL
 #ifdef HYPRE_USING_CUB_ALLOCATOR
-   um_allocator->DeviceFree(ptr);
+   CubDebugExit( hypre_HandleCubCachingManagedAllocator(hypre_handle)->DeviceFree(ptr) );
 #else
    HYPRE_CUDA_CALL( cudaFree(ptr) );
-#endif
 #endif
 #endif
 }
@@ -675,7 +587,7 @@ hypre_Memset(void *ptr, HYPRE_Int value, size_t num, HYPRE_Int location)
          break;
       case HYPRE_MEMORY_SHARED :
          /* memset unified memory */
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
          HYPRE_CUDA_CALL( cudaMemset(ptr, value, num) );
 #endif
          break;
@@ -789,3 +701,31 @@ hypre_PrintMemoryTracker()
    return ierr;
 }
 
+/******************************************************************************
+ *
+ * Memory Pool
+ *
+ *****************************************************************************/
+HYPRE_Int
+hypre_SetCubMemPoolSize(hypre_uint cub_bin_growth,
+                        hypre_uint cub_min_bin,
+                        hypre_uint cub_max_bin,
+                        size_t     cub_max_cached_bytes)
+{
+   HYPRE_Int ierr = 0;
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#ifdef HYPRE_USING_CUB_ALLOCATOR
+   if (!hypre_handle)
+   {
+      return -1;
+   }
+
+   hypre_handle->cub_bin_growth       = cub_bin_growth;
+   hypre_handle->cub_min_bin          = cub_min_bin;
+   hypre_handle->cub_max_bin          = cub_max_bin;
+   hypre_handle->cub_max_cached_bytes = cub_max_cached_bytes;
+#endif
+#endif
+
+   return ierr;
+}

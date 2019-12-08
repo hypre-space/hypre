@@ -143,6 +143,9 @@
 /* Define to 1 if using cuSPARSE */
 #undef HYPRE_USING_CUSPARSE
 
+/* Define to 1 if using CUB */
+#undef HYPRE_USING_CUB_ALLOCATOR
+
 /* Define to 1 if using cuBLAS */
 #undef HYPRE_USING_CUBLAS
 
