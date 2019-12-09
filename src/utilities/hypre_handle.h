@@ -50,6 +50,14 @@ typedef struct
    char      spgemm_hash_type;
    /* RL: temporary TODO */
    HYPRE_Int no_cuda_um;
+#ifdef HYPRE_USING_CUB_ALLOCATOR
+   hypre_uint cub_bin_growth;
+   hypre_uint cub_min_bin;
+   hypre_uint cub_max_bin;
+   size_t     cub_max_cached_bytes;
+   cub::CachingDeviceAllocator *cub_dev_allocator;
+   cub::CachingDeviceAllocator *cub_um_allocator;
+#endif
 #endif
 } hypre_Handle;
 
@@ -217,6 +225,44 @@ hypre_HandleSpgemmUseCusparse(hypre_Handle *hypre_handle_)
 {
    return hypre_handle_->spgemm_use_cusparse;
 }
+
+#ifdef HYPRE_USING_CUB_ALLOCATOR
+static inline cub::CachingDeviceAllocator*
+hypre_HandleCubCachingDeviceAllocator(hypre_Handle *hypre_handle_)
+{
+   if (hypre_handle_->cub_dev_allocator)
+   {
+      return hypre_handle_->cub_dev_allocator;
+   }
+
+   hypre_handle_->cub_dev_allocator =
+      new cub::CachingDeviceAllocator(hypre_handle_->cub_bin_growth,
+                                      hypre_handle_->cub_min_bin,
+                                      hypre_handle_->cub_max_bin,
+                                      hypre_handle_->cub_max_cached_bytes,
+                                      false, false, false);
+
+   return hypre_handle_->cub_dev_allocator;
+}
+
+static inline cub::CachingDeviceAllocator*
+hypre_HandleCubCachingManagedAllocator(hypre_Handle *hypre_handle_)
+{
+   if (hypre_handle_->cub_um_allocator)
+   {
+      return hypre_handle_->cub_um_allocator;
+   }
+
+   hypre_handle_->cub_um_allocator =
+      new cub::CachingDeviceAllocator(hypre_handle_->cub_bin_growth,
+                                      hypre_handle_->cub_min_bin,
+                                      hypre_handle_->cub_max_bin,
+                                      hypre_handle_->cub_max_cached_bytes,
+                                      false, false, true);
+
+   return hypre_handle_->cub_um_allocator;
+}
+#endif
 
 #endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP) */
 

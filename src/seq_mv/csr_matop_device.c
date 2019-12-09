@@ -175,7 +175,7 @@ hypre_CSRMatrixSplitDevice(hypre_CSRMatrix  *B_ext,
    B_ext_row_indices      = hypre_TAlloc(HYPRE_Int, B_ext_nnz, HYPRE_MEMORY_DEVICE);
    */
 
-   hypreDevice_CsrRowPtrsToIndices_v2(num_rows, B_ext_i, B_ext_row_indices);
+   hypreDevice_CsrRowPtrsToIndices_v2(num_rows, B_ext_nnz, B_ext_i, B_ext_row_indices);
 
    /* copy to diag */
    tmpi = HYPRE_THRUST_CALL(copy_if, B_ext_j, B_ext_j + B_ext_nnz, B_ext_j, B_ext_diag_j, pred1);
@@ -212,7 +212,7 @@ hypre_CSRMatrixSplitDevice(hypre_CSRMatrix  *B_ext,
    hypre_TFree(col_map_offd_C, HYPRE_MEMORY_DEVICE);
    col_map_offd_C = tmp;
 #else
-   col_map_offd_C = hypre_TReAlloc(col_map_offd_C, HYPRE_Int, num_cols_offd_C, HYPRE_MEMORY_DEVICE);
+   col_map_offd_C = hypre_TReAlloc_v2(col_map_offd_C, HYPRE_Int, B_ext_offd_nnz + num_cols_offd_B, HYPRE_Int, num_cols_offd_C, HYPRE_MEMORY_DEVICE);
 #endif
 
    /* create map from col_map_offd_B */

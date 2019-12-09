@@ -388,6 +388,16 @@ main( hypre_int argc,
    HYPRE_Int no_cuda_um = 0;
    HYPRE_Int spgemm_use_cusparse = 1;
 
+   /* CUB Allocator */
+   hypre_uint mempool_bin_growth   = 8, 
+              mempool_min_bin      = 3, 
+              mempool_max_bin      = 9;
+   size_t mempool_max_cached_bytes = 10LL * 1024 * 1024;
+
+   HYPRE_Int memory_location;
+   HYPRE_ParCSRMatrix parcsr_A_copy = NULL, parcsr_A_ori = NULL;
+   HYPRE_ParVector b_copy = NULL, b_ori = NULL, x_copy = NULL, x_ori = NULL, x0_save = NULL;
+
    /*-----------------------------------------------------------
     * Initialize some stuff
     *-----------------------------------------------------------*/
@@ -401,13 +411,17 @@ main( hypre_int argc,
    time_index = hypre_InitializeTiming("Hypre init");
    hypre_BeginTiming(time_index);
 
-   /* Initialize Hypre */
+   /* Initialize Hypre: must be the first Hypre function to call */
    HYPRE_Init(argc, argv);
 
    hypre_EndTiming(time_index);
    hypre_PrintTiming("Hypre init times", hypre_MPI_COMM_WORLD);
    hypre_FinalizeTiming(time_index);
    hypre_ClearTiming();
+
+   /* To be effective, hypre_SetCubMemPoolSize must immediately follow HYPRE_Init */
+   hypre_SetCubMemPoolSize( mempool_bin_growth, mempool_min_bin,
+                            mempool_max_bin, mempool_max_cached_bytes );
 
    //omp_set_default_device(0);
    //nvtxDomainHandle_t domain = nvtxDomainCreateA("Domain_A");
@@ -1044,13 +1058,38 @@ main( hypre_int argc,
          arg_index++;
          no_cuda_um = atoi(argv[arg_index++]);
          HYPRE_SetNoCUDAUM(no_cuda_um);
-         build_rhs_type = 22;
+         //RL: TODO
+         if (no_cuda_um && build_rhs_type == 2)
+         {
+            build_rhs_type = 22;
+         }
       }
       else if ( strcmp(argv[arg_index], "-mm_cusparse") == 0 )
       {
          arg_index++;
          spgemm_use_cusparse = atoi(argv[arg_index++]);
          HYPRE_CSRMatrixDeviceSpGemmSetUseCusparse(spgemm_use_cusparse);
+      }
+      else if ( strcmp(argv[arg_index], "-mempool_growth") == 0 )
+      {
+         arg_index++;
+         mempool_bin_growth = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-mempool_minbin") == 0 )
+      {
+         arg_index++;
+         mempool_min_bin = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-mempool_maxbin") == 0 )
+      {
+         arg_index++;
+         mempool_max_bin = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-mempool_maxcached") == 0 )
+      {
+         // Give maximum cached in Mbytes.
+         arg_index++;
+         mempool_max_cached_bytes = atoi(argv[arg_index++])*1024LL*1024LL;
       }
       else
       {
@@ -2370,15 +2409,11 @@ main( hypre_int argc,
    }
    else if ( build_rhs_type == 7 )
    {
-
-      /* rhs */
-      ReadParVectorFromFile(argc, argv, build_rhs_arg_index, &b);
-
-      //hypre_printf("  Initial guess is 0\n");
-
       ij_b = NULL;
-
+      ReadParVectorFromFile(argc, argv, build_rhs_arg_index, &b);
+#if 0
       /* initial guess */
+      //hypre_printf("  Initial guess is 0\n");
       HYPRE_IJVectorCreate(hypre_MPI_COMM_WORLD, first_local_col, last_local_col, &ij_x);
       HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_x);
@@ -2391,8 +2426,8 @@ main( hypre_int argc,
 
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
       x = (HYPRE_ParVector) object;
+#endif
    }
-
    else if ( build_rhs_type == 2 )
    {
       if (myid == 0)
@@ -2438,7 +2473,7 @@ main( hypre_int argc,
          hypre_printf("  ParVector\n");
       }
 
-      HYPRE_Int memory_location = HYPRE_MEMORY_SHARED;
+      memory_location = HYPRE_MEMORY_SHARED;
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
       if (hypre_handle->no_cuda_um)
       {
@@ -2880,9 +2915,32 @@ main( hypre_int argc,
          HYPRE_ParVectorPrint(b, "ParVec.out.b");
       }
       HYPRE_IJVectorPrint(ij_x, "IJ.out.x0");
-
-      /* HYPRE_ParCSRMatrixPrint( parcsr_A, "new_mat.A" );*/
    }
+
+   parcsr_A_ori = parcsr_A;  b_ori = b;  x_ori = x;
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+   memory_location = hypre_handle->no_cuda_um ? HYPRE_MEMORY_DEVICE : HYPRE_MEMORY_SHARED;
+
+   if (hypre_ParCSRMatrixMemoryLocation(parcsr_A) == HYPRE_MEMORY_HOST)
+   {
+      parcsr_A = parcsr_A_copy = hypre_ParCSRMatrixClone_v2(parcsr_A_ori, 1, memory_location);
+   }
+
+   if (hypre_ParVectorMemoryLocation(b) == HYPRE_MEMORY_HOST)
+   {
+      b = b_copy = hypre_ParVectorCloneDeep_v2(b_ori, memory_location);
+   }
+
+   if (hypre_ParVectorMemoryLocation(x) == HYPRE_MEMORY_HOST)
+   {
+      x = x_copy = hypre_ParVectorCloneDeep_v2(x_ori, memory_location);
+   }
+#endif
+
+#if SECOND_TIME
+   /* save the initial guess for the 2nd time */
+   x0_save = hypre_ParVectorCloneDeep_v2(x, hypre_ParVectorMemoryLocation(x));
+#endif
 
    /*-----------------------------------------------------------
     * Solve the system using the hybrid solver
@@ -3013,7 +3071,7 @@ main( hypre_int argc,
 
 #if SECOND_TIME
       /* run a second time to check for memory leaks */
-      HYPRE_ParVectorSetRandomValues(x, 775);
+      hypre_ParVectorCopy(x0_save, x);
       HYPRE_ParCSRHybridSetup(amg_solver, parcsr_A, b, x);
       HYPRE_ParCSRHybridSolve(amg_solver, parcsr_A, b, x);
 
@@ -3036,7 +3094,7 @@ main( hypre_int argc,
       HYPRE_ParCSRHybridGetSetupSolveTime(amg_solver, time);
       if (myid == 0)
       {
-         printf("ParCSRHybrid: Setup-Time1 %f, Solve-Time1 %f, Setup-Time2 %f, Solve-Time2 %f\n",
+         printf("ParCSRHybrid: Setup-Time1 %f  Solve-Time1 %f  Setup-Time2 %f  Solve-Time2 %f\n",
                 time[0], time[1], time[2], time[3]);
       }
 #endif
@@ -6776,6 +6834,13 @@ main( hypre_int argc,
     *-----------------------------------------------------------*/
   final:
 
+   HYPRE_ParCSRMatrixDestroy(parcsr_A_copy);
+   HYPRE_ParVectorDestroy(b_copy);
+   HYPRE_ParVectorDestroy(x_copy);
+   HYPRE_ParVectorDestroy(x0_save);
+
+   parcsr_A = parcsr_A_ori;  b = b_ori;  x = x_ori;
+
    if (test_ij || build_matrix_type == -1) HYPRE_IJMatrixDestroy(ij_A);
    else HYPRE_ParCSRMatrixDestroy(parcsr_A);
 
@@ -6805,6 +6870,7 @@ main( hypre_int argc,
   hypre_FinalizeMemoryDebug();
 */
 
+   //hypre_PrintMemoryTracker();
 
    /* Finalize Hypre */
    HYPRE_Finalize();
@@ -6929,7 +6995,7 @@ ReadParVectorFromFile( HYPRE_Int            argc,
     * Generate the matrix
     *-----------------------------------------------------------*/
 
-   HYPRE_ParVectorRead(hypre_MPI_COMM_WORLD, filename,&b);
+   HYPRE_ParVectorRead(hypre_MPI_COMM_WORLD, filename, &b);
 
    *b_ptr = b;
 

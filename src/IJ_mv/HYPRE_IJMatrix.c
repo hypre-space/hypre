@@ -45,14 +45,15 @@ HYPRE_IJMatrixCreate( MPI_Comm        comm,
 
    ijmatrix = hypre_CTAlloc(hypre_IJMatrix,  1, HYPRE_MEMORY_HOST);
 
-   hypre_IJMatrixComm(ijmatrix)         = comm;
-   hypre_IJMatrixObject(ijmatrix)       = NULL;
-   hypre_IJMatrixTranslator(ijmatrix)   = NULL;
-   hypre_IJMatrixAssumedPart(ijmatrix)   = NULL;
-   hypre_IJMatrixObjectType(ijmatrix)   = HYPRE_UNITIALIZED;
-   hypre_IJMatrixAssembleFlag(ijmatrix) = 0;
-   hypre_IJMatrixPrintLevel(ijmatrix) = 0;
-   hypre_IJMatrixOMPFlag(ijmatrix) = 0;
+   hypre_IJMatrixComm(ijmatrix)           = comm;
+   hypre_IJMatrixMemoryLocation(ijmatrix) = HYPRE_MEMORY_SHARED;
+   hypre_IJMatrixObject(ijmatrix)         = NULL;
+   hypre_IJMatrixTranslator(ijmatrix)     = NULL;
+   hypre_IJMatrixAssumedPart(ijmatrix)    = NULL;
+   hypre_IJMatrixObjectType(ijmatrix)     = HYPRE_UNITIALIZED;
+   hypre_IJMatrixAssembleFlag(ijmatrix)   = 0;
+   hypre_IJMatrixPrintLevel(ijmatrix)     = 0;
+   hypre_IJMatrixOMPFlag(ijmatrix)        = 0;
 
    hypre_MPI_Comm_size(comm,&num_procs);
    hypre_MPI_Comm_rank(comm, &myid);
@@ -90,8 +91,8 @@ HYPRE_IJMatrixCreate( MPI_Comm        comm,
 
    info = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
 
-   row_partitioning = hypre_CTAlloc(HYPRE_BigInt,  2, HYPRE_MEMORY_HOST);
-   col_partitioning = hypre_CTAlloc(HYPRE_BigInt,  2, HYPRE_MEMORY_HOST);
+   row_partitioning = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
+   col_partitioning = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
 
    row_partitioning[0] = ilower;
    row_partitioning[1] = iupper+1;
@@ -102,7 +103,7 @@ HYPRE_IJMatrixCreate( MPI_Comm        comm,
       as the global first row and column index */
 
    /* proc 0 has the first row and col */
-   if (myid==0)
+   if (myid == 0)
    {
       info[0] = ilower;
       info[1] = jlower;
@@ -293,7 +294,7 @@ HYPRE_IJMatrixInitialize( HYPRE_IJMatrix matrix )
 
    if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
    {
-      hypre_IJMatrixInitializeParCSR( ijmatrix ) ;
+      hypre_IJMatrixInitializeParCSR_v2( ijmatrix, hypre_IJMatrixMemoryLocation(matrix) ) ;
    }
    else
    {
@@ -550,15 +551,15 @@ HYPRE_IJMatrixAddToValues( HYPRE_IJMatrix       matrix,
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
-
 HYPRE_Int
-HYPRE_IJMatrixSetValues2( HYPRE_IJMatrix       matrix,
-                          HYPRE_Int            nrows,
-                          HYPRE_Int           *ncols,
-                          const HYPRE_BigInt  *rows,
-                          const HYPRE_Int     *row_indexes,
-                          const HYPRE_BigInt  *cols,
-                          const HYPRE_Complex *values )
+HYPRE_IJMatrixSetValues2_v2( HYPRE_IJMatrix       matrix,
+                             HYPRE_Int            nrows,
+                             HYPRE_Int            memory_location,
+                             HYPRE_Int           *ncols,
+                             const HYPRE_BigInt  *rows,
+                             const HYPRE_Int     *row_indexes,
+                             const HYPRE_BigInt  *cols,
+                             const HYPRE_Complex *values )
 {
    hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
 
@@ -626,6 +627,18 @@ HYPRE_IJMatrixSetValues2( HYPRE_IJMatrix       matrix,
 
    return hypre_error_flag;
 
+}
+
+HYPRE_Int
+HYPRE_IJMatrixSetValues2( HYPRE_IJMatrix       matrix,
+                          HYPRE_Int            nrows,
+                          HYPRE_Int           *ncols,
+                          const HYPRE_BigInt  *rows,
+                          const HYPRE_Int     *row_indexes,
+                          const HYPRE_BigInt  *cols,
+                          const HYPRE_Complex *values )
+{
+   return HYPRE_IJMatrixSetValues2_v2(matrix, nrows, HYPRE_MEMORY_HOST, ncols, rows, row_indexes, cols, values);
 }
 
 /*--------------------------------------------------------------------------
@@ -1075,6 +1088,9 @@ HYPRE_IJMatrixRead( const char     *filename,
    HYPRE_IJMatrixCreate(comm, ilower, iupper, jlower, jupper, &matrix);
 
    HYPRE_IJMatrixSetObjectType(matrix, type);
+
+   hypre_IJMatrixMemoryLocation(matrix) = HYPRE_MEMORY_HOST;
+
    HYPRE_IJMatrixInitialize(matrix);
 
    /* It is important to ensure that whitespace follows the index value to help
