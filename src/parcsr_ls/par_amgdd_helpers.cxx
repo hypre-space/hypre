@@ -11,6 +11,9 @@
 #include <map>
 #include <set>
 
+// !!! Debug
+#include <chrono>
+
 using namespace std;
 
 extern "C"
@@ -125,6 +128,13 @@ FindNeighborProcessors(hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A,
    HYPRE_Int   myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
+
+   // !!! Debug
+   vector<chrono::duration<double>> timings;
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   auto start = chrono::system_clock::now();
+
+
    // Nodes to request from other processors. Note, requests are only issued to processors within distance 1, i.e. within the original communication stencil for A
    hypre_ParCSRCommPkg *commPkg = hypre_ParCSRMatrixCommPkg(A);
    map< HYPRE_Int, map<HYPRE_Int, map<HYPRE_Int, HYPRE_Int> > > request_proc_dofs; // request_proc_dofs[proc to request from, i.e. recv_proc][destination_proc][dof global index][distance]
@@ -146,9 +156,20 @@ FindNeighborProcessors(hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A,
    // Clear the list of starting dofs
    starting_dofs.clear();
 
+
+   auto end = chrono::system_clock::now();
+   timings.push_back(end - start);
+
+
+
+
    //////////////////////////////////////////////////
    // Communicate newly connected longer-distance processors to send procs: sending to current long distance send_procs and receiving from current long distance recv_procs
    //////////////////////////////////////////////////
+
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   start = chrono::system_clock::now();
+
 
    // Get the sizes
    hypre_MPI_Request *requests = hypre_CTAlloc(hypre_MPI_Request, send_proc_dofs.size() + recv_procs.size(), HYPRE_MEMORY_HOST);
@@ -181,6 +202,12 @@ FindNeighborProcessors(hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A,
    statuses = hypre_CTAlloc(hypre_MPI_Status, send_proc_dofs.size() + recv_procs.size(), HYPRE_MEMORY_HOST);
    request_cnt = 0;
 
+   end = chrono::system_clock::now();
+   timings.push_back(end - start);
+
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   start = chrono::system_clock::now();
+
    // Allocate and post the recvs
    HYPRE_Int **recv_buffers = hypre_CTAlloc(HYPRE_Int*, recv_procs.size(), HYPRE_MEMORY_HOST);
    cnt = 0;
@@ -210,6 +237,12 @@ FindNeighborProcessors(hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A,
    hypre_TFree(requests, HYPRE_MEMORY_HOST);
    hypre_TFree(statuses, HYPRE_MEMORY_HOST);
 
+   end = chrono::system_clock::now();
+   timings.push_back(end - start);
+
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   start = chrono::system_clock::now();
+
    // Update recv_procs
    HYPRE_Int old_num_recv_procs = recv_procs.size();
    for (HYPRE_Int i = 0; i < old_num_recv_procs; i++)
@@ -228,9 +261,17 @@ FindNeighborProcessors(hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A,
    hypre_TFree(recv_sizes, HYPRE_MEMORY_HOST);
    hypre_TFree(send_sizes, HYPRE_MEMORY_HOST);
 
+   end = chrono::system_clock::now();
+   timings.push_back(end - start);
+
+
    //////////////////////////////////////////////////
    // Communicate request dofs to processors that I recv from: sending to request_procs and receiving from distance 1 send procs
    //////////////////////////////////////////////////
+
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   start = chrono::system_clock::now();
+
 
    // Count up the send size: 1 + sum_{destination_procs}(2 + 2*num_requested_dofs)
    // send_buffer = [num destination procs, [request info for proc], [request info for proc], ... ]
@@ -361,6 +402,23 @@ FindNeighborProcessors(hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A,
    hypre_TFree(recv_sizes, HYPRE_MEMORY_HOST);
    hypre_TFree(send_sizes, HYPRE_MEMORY_HOST);
 
+   end = chrono::system_clock::now();
+   timings.push_back(end - start);
+
+   // !!! Debug
+   HYPRE_Int num_procs;
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
+   for (auto proc = 0; proc < num_procs; proc++)
+   {
+      if (myid == proc) 
+      {
+         cout << "Rank " << myid << ": " << endl;
+         for (size_t i = 0; i < timings.size(); i++) cout << timings[i].count() << ", ";
+         cout << endl;
+      }
+      hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   }
+
    return 0;
 }
 
@@ -386,6 +444,20 @@ SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGr
       hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[level] = 0;
       hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg)[level] = 0;
       hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg)[level] = 0;
+      
+      // !!! Debug
+      hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+      hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+      hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+      hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+      hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+      HYPRE_Int num_procs;
+      hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
+      for (auto proc = 0; proc < num_procs; proc++)
+      {
+         hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+      }
+
    }
    else
    {
