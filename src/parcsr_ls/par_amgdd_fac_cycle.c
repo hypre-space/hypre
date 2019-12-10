@@ -129,50 +129,53 @@ HYPRE_Int FAC_Cycle(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type, HYPR
    #endif
 
    // Restrict the residual at all fine points (real and ghost) and set residual at coarse points not under the fine grid
-   if (level < transition_level)
+   if (num_levels > 1)
    {
-      #if DEBUGGING_MESSAGES
-      printf("Rank %d, restrict on level %d\n", myid, level);
-      #endif
-      FAC_Restrict( compGrid[level], compGrid[level+1], first_iteration );
-      hypre_SeqVectorSetConstantValues( hypre_ParCompGridS(compGrid[level]), 0.0 );
-      hypre_SeqVectorSetConstantValues( hypre_ParCompGridT(compGrid[level]), 0.0 );
-   }
-   else FAC_Simple_Restrict( compGrid[level], compGrid[level+1] );
-
-   #if DUMP_INTERMEDIATE_TEST_SOLNS
-   sprintf(filename, "outputs/actual/f%d_level%d", myid, level+1);
-   hypre_SeqVectorPrint(hypre_ParCompGridF(compGrid[level+1]), filename);
-   #endif
-
-   //  Either solve on the coarse level or recurse
-   if (level+1 == num_levels-1)
-   {
-      #if DEBUGGING_MESSAGES
-      printf("Rank %d, coarse solve on level %d\n", myid, num_levels-1);
-      #endif
-      for (i = 0; i < numRelax[3]; i++) FAC_Relax( amg_data, compGrid[num_levels-1], relax_type, num_levels-1, 3 );
+      if (level < transition_level)
+      {
+         #if DEBUGGING_MESSAGES
+         printf("Rank %d, restrict on level %d\n", myid, level);
+         #endif
+         FAC_Restrict( compGrid[level], compGrid[level+1], first_iteration );
+         hypre_SeqVectorSetConstantValues( hypre_ParCompGridS(compGrid[level]), 0.0 );
+         hypre_SeqVectorSetConstantValues( hypre_ParCompGridT(compGrid[level]), 0.0 );
+      }
+      else FAC_Simple_Restrict( compGrid[level], compGrid[level+1] );
 
       #if DUMP_INTERMEDIATE_TEST_SOLNS
-      sprintf(filename, "outputs/actual/u%d_level%d_relax2", myid, num_levels-1);
-      hypre_SeqVectorPrint(hypre_ParCompGridU(compGrid[num_levels-1]), filename);
+      sprintf(filename, "outputs/actual/f%d_level%d", myid, level+1);
+      hypre_SeqVectorPrint(hypre_ParCompGridF(compGrid[level+1]), filename);
       #endif
 
-   }
-   else for (i = 0; i < cycle_type; i++)
-   {
+      //  Either solve on the coarse level or recurse
+      if (level+1 == num_levels-1)
+      {
+         #if DEBUGGING_MESSAGES
+         printf("Rank %d, coarse solve on level %d\n", myid, num_levels-1);
+         #endif
+         for (i = 0; i < numRelax[3]; i++) FAC_Relax( amg_data, compGrid[num_levels-1], relax_type, num_levels-1, 3 );
+
+         #if DUMP_INTERMEDIATE_TEST_SOLNS
+         sprintf(filename, "outputs/actual/u%d_level%d_relax2", myid, num_levels-1);
+         hypre_SeqVectorPrint(hypre_ParCompGridU(compGrid[num_levels-1]), filename);
+         #endif
+
+      }
+      else for (i = 0; i < cycle_type; i++)
+      {
+         #if DEBUGGING_MESSAGES
+         printf("Rank %d, recurse on level %d\n", myid, level);
+         #endif
+         FAC_Cycle(amg_vdata, level+1, cycle_type, first_iteration);
+         first_iteration = 0;
+      }
+
+      // Interpolate up and relax
       #if DEBUGGING_MESSAGES
-      printf("Rank %d, recurse on level %d\n", myid, level);
+      printf("Rank %d, interpolate on level %d\n", myid, level);
       #endif
-      FAC_Cycle(amg_vdata, level+1, cycle_type, first_iteration);
-      first_iteration = 0;
+      FAC_Interpolate( compGrid[level], compGrid[level+1] );
    }
-
-   // Interpolate up and relax
-   #if DEBUGGING_MESSAGES
-   printf("Rank %d, interpolate on level %d\n", myid, level);
-   #endif
-   FAC_Interpolate( compGrid[level], compGrid[level+1] );
 
    #if DUMP_INTERMEDIATE_TEST_SOLNS
    sprintf(filename, "outputs/actual/u%d_level%d_project", myid, level);
@@ -381,8 +384,12 @@ HYPRE_Int
 FAC_Simple_Restrict( hypre_ParCompGrid *compGrid_f, hypre_ParCompGrid *compGrid_c )
 {
    // Calculate fine grid residuals and restrict
-   hypre_Vector *res = hypre_SeqVectorCreate(hypre_ParCompGridNumNodes(compGrid_f)); // !!! NOTE: don't generate this every time
-   hypre_SeqVectorInitialize(res);
+   if (!hypre_ParCompGridTemp(compGrid_f))
+   {      
+      hypre_ParCompGridTemp(compGrid_f) = hypre_SeqVectorCreate(hypre_ParCompGridNumNodes(compGrid_f));
+      hypre_SeqVectorInitialize(hypre_ParCompGridTemp(compGrid_f));
+   }
+   hypre_Vector *res = hypre_ParCompGridTemp(compGrid_f);
    
    hypre_CSRMatrixMatvecOutOfPlace(-1.0, hypre_ParCompGridA(compGrid_f), hypre_ParCompGridU(compGrid_f), 1.0, hypre_ParCompGridF(compGrid_f), res, 0);
    // hypre_CSRMatrixMatvecT(1.0, hypre_ParCompGridP(compGrid_f), res, 0.0, hypre_ParCompGridF(compGrid_c));
@@ -390,8 +397,6 @@ FAC_Simple_Restrict( hypre_ParCompGrid *compGrid_f, hypre_ParCompGrid *compGrid_
    
    // Zero out initial guess on coarse grid
    hypre_SeqVectorSetConstantValues(hypre_ParCompGridU(compGrid_c), 0.0);
-
-   hypre_SeqVectorDestroy(res);
 
    return 0;
 }
@@ -447,12 +452,13 @@ FAC_Jacobi( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int l
       }
    }
 
-   // Allocate temporary vector if necessary
+   // Allocate temporary vector if necessary (needs length num real nodes here)
    if (!hypre_ParCompGridTemp(compGrid))
    {      
-      hypre_ParCompGridTemp(compGrid) = hypre_SeqVectorCreate(hypre_ParCompGridNumRealNodes(compGrid));
+      hypre_ParCompGridTemp(compGrid) = hypre_SeqVectorCreate(hypre_ParCompGridNumNodes(compGrid));
       hypre_SeqVectorInitialize(hypre_ParCompGridTemp(compGrid));
    }
+   hypre_VectorSize(hypre_ParCompGridTemp(compGrid)) = hypre_ParCompGridNumRealNodes(compGrid);
 
 
    hypre_SeqVectorCopy(hypre_ParCompGridF(compGrid),hypre_ParCompGridTemp(compGrid));
@@ -483,6 +489,8 @@ FAC_Jacobi( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int l
       }
    }
    #endif
+
+   hypre_VectorSize(hypre_ParCompGridTemp(compGrid)) = hypre_ParCompGridNumNodes(compGrid);
 
    return 0;
 }
@@ -565,9 +573,26 @@ FAC_Cheby( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int le
    cheby_order = order -1;
 
    // Get temporary/auxiliary vectors
+   if (!hypre_ParCompGridTemp(compGrid))
+   {
+      hypre_ParCompGridTemp(compGrid) = hypre_SeqVectorCreate(hypre_ParCompGridNumNodes(compGrid));
+      hypre_SeqVectorInitialize(hypre_ParCompGridTemp(compGrid));
+   }
+   if (!hypre_ParCompGridTemp2(compGrid))
+   {
+      hypre_ParCompGridTemp2(compGrid) = hypre_SeqVectorCreate(hypre_ParCompGridNumNodes(compGrid));
+      hypre_SeqVectorInitialize(hypre_ParCompGridTemp2(compGrid));
+   }
+   if (!hypre_ParCompGridTemp3(compGrid))
+   {
+      hypre_ParCompGridTemp3(compGrid) = hypre_SeqVectorCreate(hypre_ParCompGridNumNodes(compGrid));
+      hypre_SeqVectorInitialize(hypre_ParCompGridTemp3(compGrid));
+   }
    hypre_Vector *r = hypre_ParCompGridTemp(compGrid); // length = num real 
+   hypre_VectorSize(r) = num_real_nodes;
    hypre_Vector *u_update = hypre_ParCompGridTemp2(compGrid); // length = num nodes
    hypre_Vector *v = hypre_ParCompGridTemp3(compGrid); // length = num real
+   hypre_VectorSize(v) = num_real_nodes;
 
    // hypre_SeqVectorCopy(u, u_update);
 
@@ -649,6 +674,9 @@ FAC_Cheby( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int le
    if (t) hypre_VectorSize(t) = num_nodes;
    hypre_VectorSize(u_update) = num_nodes;
 
+   hypre_VectorSize(r) = num_nodes;
+   hypre_VectorSize(v) = num_real_nodes;
+
    return hypre_error_flag;
 }
 
@@ -680,6 +708,11 @@ FAC_CFL1Jacobi( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_I
       cusparseSetMatIndexBase(descr,CUSPARSE_INDEX_BASE_ZERO);
 
       FirstCall=0;
+   }
+   if (!hypre_ParCompGridTemp(compGrid))
+   {
+      hypre_ParCompGridTemp(compGrid) = hypre_SeqVectorCreate(hypre_ParCompGridNumNodes(compGrid));
+      hypre_SeqVectorInitialize(hypre_ParCompGridTemp(compGrid));
    }
    hypre_SeqVectorCopy(hypre_ParCompGridF(compGrid), hypre_ParCompGridTemp(compGrid));
    double alpha = -relax_weight;

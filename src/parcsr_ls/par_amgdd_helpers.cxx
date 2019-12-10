@@ -131,7 +131,7 @@ FindNeighborProcessors(hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A,
 
    // !!! Debug
    vector<chrono::duration<double>> timings;
-   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
    auto start = chrono::system_clock::now();
 
 
@@ -167,7 +167,7 @@ FindNeighborProcessors(hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A,
    // Communicate newly connected longer-distance processors to send procs: sending to current long distance send_procs and receiving from current long distance recv_procs
    //////////////////////////////////////////////////
 
-   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
    start = chrono::system_clock::now();
 
 
@@ -205,7 +205,7 @@ FindNeighborProcessors(hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A,
    end = chrono::system_clock::now();
    timings.push_back(end - start);
 
-   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
    start = chrono::system_clock::now();
 
    // Allocate and post the recvs
@@ -240,7 +240,7 @@ FindNeighborProcessors(hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A,
    end = chrono::system_clock::now();
    timings.push_back(end - start);
 
-   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
    start = chrono::system_clock::now();
 
    // Update recv_procs
@@ -269,7 +269,7 @@ FindNeighborProcessors(hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A,
    // Communicate request dofs to processors that I recv from: sending to request_procs and receiving from distance 1 send procs
    //////////////////////////////////////////////////
 
-   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
    start = chrono::system_clock::now();
 
 
@@ -406,18 +406,18 @@ FindNeighborProcessors(hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A,
    timings.push_back(end - start);
 
    // !!! Debug
-   HYPRE_Int num_procs;
-   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
-   for (auto proc = 0; proc < num_procs; proc++)
-   {
-      if (myid == proc) 
-      {
-         cout << "Rank " << myid << ": " << endl;
-         for (size_t i = 0; i < timings.size(); i++) cout << timings[i].count() << ", ";
-         cout << endl;
-      }
-      hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
-   }
+   // HYPRE_Int num_procs;
+   // hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
+   // for (auto proc = 0; proc < num_procs; proc++)
+   // {
+   //    if (myid == proc) 
+   //    {
+   //       cout << "Rank " << myid << ": " << endl;
+   //       for (size_t i = 0; i < timings.size(); i++) cout << timings[i].count() << ", ";
+   //       cout << endl;
+   //    }
+   //    // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   // }
 
    return 0;
 }
@@ -446,16 +446,16 @@ SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGr
       hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg)[level] = 0;
       
       // !!! Debug
-      hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
-      hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
-      hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
-      hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
-      hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+      // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+      // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+      // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+      // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+      // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
       HYPRE_Int num_procs;
       hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
       for (auto proc = 0; proc < num_procs; proc++)
       {
-         hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+         // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
       }
 
    }
