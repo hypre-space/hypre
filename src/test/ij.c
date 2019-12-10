@@ -392,7 +392,7 @@ main( hypre_int argc,
    hypre_uint mempool_bin_growth   = 8, 
               mempool_min_bin      = 3, 
               mempool_max_bin      = 9;
-   size_t mempool_max_cached_bytes = 10LL * 1024 * 1024;
+   size_t mempool_max_cached_bytes = 2000LL * 1024 * 1024;
 
    HYPRE_Int memory_location;
    HYPRE_ParCSRMatrix parcsr_A_copy = NULL, parcsr_A_ori = NULL;
@@ -418,10 +418,6 @@ main( hypre_int argc,
    hypre_PrintTiming("Hypre init times", hypre_MPI_COMM_WORLD);
    hypre_FinalizeTiming(time_index);
    hypre_ClearTiming();
-
-   /* To be effective, hypre_SetCubMemPoolSize must immediately follow HYPRE_Init */
-   hypre_SetCubMemPoolSize( mempool_bin_growth, mempool_min_bin,
-                            mempool_max_bin, mempool_max_cached_bytes );
 
    //omp_set_default_device(0);
    //nvtxDomainHandle_t domain = nvtxDomainCreateA("Domain_A");
@@ -1096,6 +1092,10 @@ main( hypre_int argc,
          arg_index++;
       }
    }
+
+   /* To be effective, hypre_SetCubMemPoolSize must immediately follow HYPRE_Init */
+   hypre_SetCubMemPoolSize( mempool_bin_growth, mempool_min_bin,
+                            mempool_max_bin, mempool_max_cached_bytes );
 
    /* begin CGC BM Aug 25, 2006 */
    if (coarsen_type == 21 || coarsen_type == 22) {

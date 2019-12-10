@@ -724,6 +724,17 @@ hypre_SetCubMemPoolSize(hypre_uint cub_bin_growth,
    hypre_handle->cub_min_bin          = cub_min_bin;
    hypre_handle->cub_max_bin          = cub_max_bin;
    hypre_handle->cub_max_cached_bytes = cub_max_cached_bytes;
+
+   // RL: TODO
+   if (hypre_handle->cub_dev_allocator)
+   {
+      hypre_handle->cub_dev_allocator->SetMaxCachedBytes(cub_max_cached_bytes);
+   }
+
+   if (hypre_handle->cub_um_allocator)
+   {
+      hypre_handle->cub_um_allocator->SetMaxCachedBytes(cub_max_cached_bytes);
+   }
 #endif
 #endif
 

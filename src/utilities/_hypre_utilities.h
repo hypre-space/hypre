@@ -1826,7 +1826,6 @@ typedef struct
    hypre_uint cub_min_bin;
    hypre_uint cub_max_bin;
    size_t     cub_max_cached_bytes;
-
    cub::CachingDeviceAllocator *cub_dev_allocator;
    cub::CachingDeviceAllocator *cub_um_allocator;
 #endif
@@ -2012,7 +2011,7 @@ hypre_HandleCubCachingDeviceAllocator(hypre_Handle *hypre_handle_)
                                       hypre_handle_->cub_min_bin,
                                       hypre_handle_->cub_max_bin,
                                       hypre_handle_->cub_max_cached_bytes,
-                                      true, false, false);
+                                      false, false, false);
 
    return hypre_handle_->cub_dev_allocator;
 }
@@ -2030,7 +2029,7 @@ hypre_HandleCubCachingManagedAllocator(hypre_Handle *hypre_handle_)
                                       hypre_handle_->cub_min_bin,
                                       hypre_handle_->cub_max_bin,
                                       hypre_handle_->cub_max_cached_bytes,
-                                      true, false, true);
+                                      false, false, true);
 
    return hypre_handle_->cub_um_allocator;
 }
