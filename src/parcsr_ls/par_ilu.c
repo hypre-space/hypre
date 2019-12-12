@@ -626,6 +626,7 @@ hypre_ILUGetFinalRelativeResidualNorm( void *ilu_vdata, HYPRE_Real *res_norm )
  *   ie, iw[a1] and iw[a2] will be switched if a1 and a2 are switched
  * lo and hi are the extents of the region of the array a, that is to be sorted.
 */
+/*
 HYPRE_Int 
 hypre_quickSortIR (HYPRE_Int *a, HYPRE_Real *b, HYPRE_Int *iw, const HYPRE_Int lo, const HYPRE_Int hi)
 {
@@ -653,6 +654,7 @@ hypre_quickSortIR (HYPRE_Int *a, HYPRE_Real *b, HYPRE_Int *iw, const HYPRE_Int l
    
    return hypre_error_flag;
 }
+*/
 /* Print solver params */
 HYPRE_Int
 hypre_ILUWriteSolverParams(void *ilu_vdata)
@@ -1811,8 +1813,8 @@ hypre_ILUBuildRASExternalMatrix(hypre_ParCSRMatrix *A, HYPRE_Int *rperm, HYPRE_I
    HYPRE_BigInt   big_col;
    
    /* data objects for communication */
-//   MPI_Comm                 comm = hypre_ParCSRMatrixComm(A);
-//   HYPRE_Int                my_id,num_procs;
+   MPI_Comm                 comm = hypre_ParCSRMatrixComm(A);
+   HYPRE_Int                my_id;
    
    /* data objects for A */
    hypre_CSRMatrix          *A_diag = hypre_ParCSRMatrixDiag(A);
@@ -1853,7 +1855,7 @@ hypre_ILUBuildRASExternalMatrix(hypre_ParCSRMatrix *A, HYPRE_Int *rperm, HYPRE_I
    
    /* MPI stuff */
    //hypre_MPI_Comm_size(comm, &num_procs);
-   //hypre_MPI_Comm_rank(comm, &my_id);
+   hypre_MPI_Comm_rank(comm, &my_id);
    
    /* Param of hypre_ParcsrGetExternalRows:
     * hypre_ParCSRMatrix   *A          [in]  -> Input parcsr matrix.
@@ -1893,6 +1895,8 @@ hypre_ILUBuildRASExternalMatrix(hypre_ParCSRMatrix *A, HYPRE_Int *rperm, HYPRE_I
       {
          big_col = A_ext_j[j];
          /* First check if that belongs to the diagonal part */
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+
          if( big_col >= A_col_starts[0] && big_col < A_col_starts[1] )
          {
             /* this is a diagonal entry, rperm (map old to new) and shift it */
@@ -1902,6 +1906,18 @@ hypre_ILUBuildRASExternalMatrix(hypre_ParCSRMatrix *A, HYPRE_Int *rperm, HYPRE_I
             E_ext_j[E_nnz]       = rperm[idx];
             E_ext_data[E_nnz++]  = A_ext_data[j];
          }
+
+#else
+         if( big_col >= A_col_starts[my_id] && big_col < A_col_starts[my_id+1] )
+         {
+            /* this is a diagonal entry, rperm (map old to new) and shift it */
+            
+            /* Note here, the result of big_col - A_col_starts[0] in no longer a HYPRE_BigInt */
+            idx = (HYPRE_Int)(big_col - A_col_starts[my_id]);
+            E_ext_j[E_nnz]       = rperm[idx];
+            E_ext_data[E_nnz++]  = A_ext_data[j];
+         }
+#endif
          /* If not, apply binary search to check if is offdiagonal */
          else
          {
@@ -1964,9 +1980,9 @@ hypre_ILUSortOffdColmap(hypre_ParCSRMatrix *A)
    {
       perm[i] = i;
    }
-   
-   hypre_qsort2i(A_offd_colmap,perm,0,len-1);
-   
+
+   hypre_BigQsort2i(A_offd_colmap,perm,0,len-1);
+
    for(i = 0 ; i < len ; i ++)
    {
       rperm[perm[i]] = i;
