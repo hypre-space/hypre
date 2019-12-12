@@ -11,8 +11,8 @@
  *
  * We allow rehashing the data into a larger or smaller table, and thus
  * allow a data item (an integer, but a pointer would be more general)
- * to be stored with each key in the table.  (If we only return the 
- * storage location of the key in the table (the implied index), then 
+ * to be stored with each key in the table.  (If we only return the
+ * storage location of the key in the table (the implied index), then
  * rehashing would change the implied indices.)
  *
  * The modulus function is used as the hash function.
@@ -23,7 +23,6 @@
  *****************************************************************************/
 
 #include <stdlib.h>
-#include <assert.h>
 #include "Common.h"
 #include "Hash.h"
 
@@ -65,7 +64,7 @@ void HashDestroy(Hash *h)
 }
 
 /*--------------------------------------------------------------------------
- * HashLookup - Look up the "key" in hash table "h" and return the data 
+ * HashLookup - Look up the "key" in hash table "h" and return the data
  * associated with the key, or return HASH_NOTFOUND.
  *--------------------------------------------------------------------------*/
 
@@ -105,7 +104,7 @@ void HashInsert(Hash *h, HYPRE_Int key, HYPRE_Int data)
     {
         if (h->table[loc] == HASH_EMPTY)
         {
-            assert(h->num < h->size);
+            hypre_assert(h->num < h->size);
 
 	    h->keys[h->num++] = key;
             h->table[loc] = key;

@@ -1498,9 +1498,9 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
    air_time2 += t2;
    */
 
-   hypre_assert(ic == n_cpts)
-   hypre_assert(cnt_diag == nnz_diag)
-   hypre_assert(cnt_offd == nnz_offd)
+   hypre_assert(ic == n_cpts);
+   hypre_assert(cnt_diag == nnz_diag);
+   hypre_assert(cnt_offd == nnz_offd);
 
    /*
    HYPRE_Real t3 = hypre_MPI_Wtime();

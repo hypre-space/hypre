@@ -13,7 +13,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <assert.h>
 #include <math.h>
 #include "_hypre_utilities.h"
 #include "HYPRE.h"
@@ -972,7 +971,7 @@ int LLNL_FEI_Fei::loadComplete()
    for ( iB = 0; iB < numBlocks_; iB++ )
    {
       ierr = elemBlocks_[iB]->checkLoadComplete();
-      assert( !ierr );
+      hypre_assert( !ierr );
    }
 
    /* -----------------------------------------------------------------

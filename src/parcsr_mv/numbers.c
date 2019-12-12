@@ -8,7 +8,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include <assert.h>
 
 #include "_hypre_utilities.h"
 

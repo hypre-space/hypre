@@ -47,7 +47,6 @@
 #include <string.h>
 #include <stdio.h>
 #include <limits.h>
-#include <assert.h>
 #include <math.h>
 
 #ifdef HYPRE_USING_OPENMP
@@ -208,7 +207,7 @@ static inline HYPRE_BigInt hypre_BigHash(HYPRE_BigInt input)
 #ifndef NDEBUG
     if (HYPRE_HOPSCOTCH_HASH_EMPTY == h64) {
       hypre_printf("hash(%lld) = %d\n", h64, HYPRE_HOPSCOTCH_HASH_EMPTY);
-      assert(HYPRE_HOPSCOTCH_HASH_EMPTY != h64);
+      hypre_assert(HYPRE_HOPSCOTCH_HASH_EMPTY != h64);
     }
 #endif 
 
@@ -232,7 +231,7 @@ static inline HYPRE_Int hypre_BigHash(HYPRE_Int input)
     h32 *= HYPRE_XXH_PRIME32_3;
     h32 ^= h32 >> 16;
 
-    //assert(HYPRE_HOPSCOTCH_HASH_EMPTY != h32);
+    //hypre_assert(HYPRE_HOPSCOTCH_HASH_EMPTY != h32);
 
     return h32;
 }
@@ -259,7 +258,7 @@ static inline HYPRE_Int hypre_Hash(HYPRE_Int input)
 #ifndef NDEBUG
     if (HYPRE_HOPSCOTCH_HASH_EMPTY == h64) {
       hypre_printf("hash(%lld) = %d\n", h64, HYPRE_HOPSCOTCH_HASH_EMPTY);
-      assert(HYPRE_HOPSCOTCH_HASH_EMPTY != h64);
+      hypre_assert(HYPRE_HOPSCOTCH_HASH_EMPTY != h64);
     }
 #endif 
 
@@ -283,7 +282,7 @@ static inline HYPRE_Int hypre_Hash(HYPRE_Int input)
     h32 *= HYPRE_XXH_PRIME32_3;
     h32 ^= h32 >> 16;
 
-    //assert(HYPRE_HOPSCOTCH_HASH_EMPTY != h32);
+    //hypre_assert(HYPRE_HOPSCOTCH_HASH_EMPTY != h32);
 
     return h32;
 }

@@ -3417,8 +3417,6 @@ typedef struct hypre_ComputePkg_struct
 #ifndef hypre_STRUCT_MATRIX_HEADER
 #define hypre_STRUCT_MATRIX_HEADER
 
-#include <assert.h>
-
 /*--------------------------------------------------------------------------
  * hypre_StructMatrix:
  *--------------------------------------------------------------------------*/

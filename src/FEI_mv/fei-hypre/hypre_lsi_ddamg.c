@@ -9,7 +9,6 @@
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
-#include <assert.h>
 
 #define habs(x) ((x > 0 ) ? x : -(x))
 

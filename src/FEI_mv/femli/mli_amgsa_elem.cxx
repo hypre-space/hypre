@@ -14,7 +14,6 @@
 // ---------------------------------------------------------------------
 
 #include <string.h>
-#include <assert.h>
 
 #include "HYPRE.h"
 #include "_hypre_utilities.h"
