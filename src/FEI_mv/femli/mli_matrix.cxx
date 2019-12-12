@@ -7,7 +7,6 @@
 
 #include <string.h>
 #include <stdio.h>
-#include <assert.h>
 #include "_hypre_utilities.h"
 #include "HYPRE.h"
 #include "_hypre_parcsr_mv.h"
@@ -16,7 +15,7 @@
 #include "mli_utils.h"
 
 /***************************************************************************
- * constructor function for the MLI_Matrix 
+ * constructor function for the MLI_Matrix
  *--------------------------------------------------------------------------*/
 
 MLI_Matrix::MLI_Matrix(void *inMatrix,char *inName, MLI_Function *func)
@@ -40,7 +39,7 @@ MLI_Matrix::MLI_Matrix(void *inMatrix,char *inName, MLI_Function *func)
 }
 
 /***************************************************************************
- * destructor function for the MLI_Matrix 
+ * destructor function for the MLI_Matrix
  *--------------------------------------------------------------------------*/
 
 MLI_Matrix::~MLI_Matrix()
@@ -59,7 +58,7 @@ MLI_Matrix::~MLI_Matrix()
  * apply function ( vec3 = alpha * Matrix * vec1 + beta * vec2)
  *--------------------------------------------------------------------------*/
 
-int MLI_Matrix::apply(double alpha, MLI_Vector *vec1, double beta, 
+int MLI_Matrix::apply(double alpha, MLI_Vector *vec1, double beta,
                       MLI_Vector *vec2, MLI_Vector *vec3)
 {
    int                irow, status, ncolsA, nrowsV, mypid, index;
@@ -118,7 +117,7 @@ int MLI_Matrix::apply(double alpha, MLI_Vector *vec1, double beta,
    nrowsV = hypre_VectorSize(hypre_ParVectorLocalVector(hypreV1));
    if (!strcmp(name_, "HYPRE_ParCSR"))
       ncolsA = hypre_ParCSRMatrixNumCols(hypreA);
-   else 
+   else
       ncolsA = hypre_ParCSRMatrixNumRows(hypreA);
    if (subMatrixLength_ == 0 || ncolsA == nrowsV)
    {
@@ -212,7 +211,7 @@ int MLI_Matrix::apply(double alpha, MLI_Vector *vec1, double beta,
 }
 
 /******************************************************************************
- * create a vector from information of this matrix 
+ * create a vector from information of this matrix
  *---------------------------------------------------------------------------*/
 
 MLI_Vector *MLI_Matrix::createVector()
@@ -252,21 +251,21 @@ MLI_Vector *MLI_Matrix::createVector()
    ierr += HYPRE_IJVectorGetObject(IJvec, (void **) &newVec);
    ierr += HYPRE_IJVectorSetObjectType(IJvec, -1);
    ierr += HYPRE_IJVectorDestroy(IJvec);
-   assert( !ierr );
+   hypre_assert( !ierr );
    HYPRE_ParVectorSetConstantValues(newVec, 0.0);
    sprintf(paramString, "HYPRE_ParVector");
    funcPtr = new MLI_Function();
-   MLI_Utils_HypreParVectorGetDestroyFunc(funcPtr); 
+   MLI_Utils_HypreParVectorGetDestroyFunc(funcPtr);
    mli_vec = new MLI_Vector((void*) newVec, paramString, funcPtr);
    delete funcPtr;
    return mli_vec;
 }
 
 /******************************************************************************
- * create a vector from information of this matrix 
+ * create a vector from information of this matrix
  *---------------------------------------------------------------------------*/
 
-int MLI_Matrix::getMatrixInfo(char *paramString, int &intParams, 
+int MLI_Matrix::getMatrixInfo(char *paramString, int &intParams,
                               double &dbleParams)
 {
    int      matInfo[4];
@@ -303,7 +302,7 @@ int MLI_Matrix::getMatrixInfo(char *paramString, int &intParams,
 }
 
 /******************************************************************************
- * load submatrix equation list 
+ * load submatrix equation list
  *---------------------------------------------------------------------------*/
 
 void MLI_Matrix::setSubMatrixEqnList(int length, int *list)
@@ -336,7 +335,7 @@ void *MLI_Matrix::takeMatrix()
 }
 
 /******************************************************************************
- * get the name of this matrix 
+ * get the name of this matrix
  *---------------------------------------------------------------------------*/
 
 char *MLI_Matrix::getName()

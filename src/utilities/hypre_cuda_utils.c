@@ -70,14 +70,14 @@ hypre_GetDefaultCUDAGridDimension( HYPRE_Int n,
    {
       HYPRE_Int num_warps_per_block = num_threads_per_block >> 5;
 
-      assert(num_warps_per_block * 32 == num_threads_per_block);
+      hypre_assert(num_warps_per_block * 32 == num_threads_per_block);
 
       num_blocks = (n + num_warps_per_block - 1) / num_warps_per_block;
    }
    else
    {
       hypre_printf("Error %s %d: Unknown granularity !\n", __FILE__, __LINE__);
-      assert(0);
+      hypre_assert(0);
    }
 
    dim3 gDim(num_blocks, 1, 1);

@@ -10,15 +10,12 @@
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 
-HYPRE_Int hypre_printf( const char *format , ... );
-
 #ifdef __cplusplus
 extern "C++" {
 #endif
 
 #include <cuda.h>
 #include <cuda_runtime.h>
-#include <assert.h>
 #include <curand.h>
 #include <cublas_v2.h>
 #include <cusparse.h>

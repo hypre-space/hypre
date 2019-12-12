@@ -15,7 +15,6 @@
  *****************************************************************************/
 
 #include <stdlib.h>
-#include <assert.h>
 #include "Common.h"
 #include "Mem.h"
 #include "Matrix.h"
@@ -119,7 +118,7 @@ void StoredRowsPut(StoredRows *p, HYPRE_Int index, HYPRE_Int len, HYPRE_Int *ind
     }
 
     /* check that row has not been put already */
-    assert(p->len[i] == 0);
+    hypre_assert(p->len[i] == 0);
 
     p->len[i] = len;
     p->ind[i] = ind;

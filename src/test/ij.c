@@ -33,7 +33,6 @@
 
 #define NO_SOLVER -9198
 
-#include <assert.h>
 #include <time.h>
 
 #include "fortran_matrix.h"

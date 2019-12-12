@@ -25,7 +25,7 @@
 /*************************************************************************
 * This function prints a message and file/line number
 **************************************************************************/
-void hypre_PrintLine(char *str, hypre_PilutSolverGlobals *globals)
+void hypre_PrintLine(const char *str, hypre_PilutSolverGlobals *globals)
 {
   hypre_printf("PE %d ---- %-27s (%s, %d)\n",
 	 mype, str, __FILE__, __LINE__);

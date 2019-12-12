@@ -14,7 +14,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <assert.h>
 
 #if 0 /* RDF: Not sure this is really needed */
 #ifdef WIN32
@@ -27,7 +26,7 @@
 #include "mli_utils.h"
 
 /**************************************************************************
- * constructor 
+ * constructor
  *-----------------------------------------------------------------------*/
 
 MLI_FEData::MLI_FEData(MPI_Comm mpi_comm)
@@ -48,7 +47,7 @@ MLI_FEData::MLI_FEData(MPI_Comm mpi_comm)
 }
 
 //*************************************************************************
-// destructor 
+// destructor
 //-------------------------------------------------------------------------
 
 MLI_FEData::~MLI_FEData()
@@ -65,7 +64,7 @@ MLI_FEData::~MLI_FEData()
 
 int MLI_FEData::setOutputLevel(int level)
 {
-   if ( level < 0 ) 
+   if ( level < 0 )
    {
       printf("setOutputLevel ERROR : level should be >= 0.\n");
       return 0;
@@ -75,7 +74,7 @@ int MLI_FEData::setOutputLevel(int level)
 }
 
 //*************************************************************************
-// dimension of the physical problem (2D, 3D, etc.) 
+// dimension of the physical problem (2D, 3D, etc.)
 //-------------------------------------------------------------------------
 
 int MLI_FEData::setSpaceDimension(int dimension)
@@ -91,7 +90,7 @@ int MLI_FEData::setSpaceDimension(int dimension)
 }
 
 //*************************************************************************
-// order of the partial differential equation 
+// order of the partial differential equation
 //-------------------------------------------------------------------------
 
 int MLI_FEData::setOrderOfPDE(int pdeOrder)
@@ -199,7 +198,7 @@ int MLI_FEData::initElemBlock(int nElems, int nNodesPerElem,
       printf("initElemBlock ERROR : nodeNumFields < 0.\n");
       exit(1);
    }
-   if (outputLevel_ >= 1) 
+   if (outputLevel_ >= 1)
    {
       printf("initElemBlock : nElems = %d\n", nElems);
       printf("initElemBlock : node nFields = %d\n", nodeNumFields);
@@ -210,8 +209,8 @@ int MLI_FEData::initElemBlock(int nElems, int nNodesPerElem,
    // --- clean up previous element setups
    // -------------------------------------------------------------
 
-   if ( currentElemBlock_ >= 0 && currentElemBlock_ < numElemBlocks_ && 
-        elemBlockList_[currentElemBlock_] != NULL ) 
+   if ( currentElemBlock_ >= 0 && currentElemBlock_ < numElemBlocks_ &&
+        elemBlockList_[currentElemBlock_] != NULL )
    {
       deleteElemBlock(currentElemBlock_);
       createElemBlock(currentElemBlock_);
@@ -250,8 +249,8 @@ int MLI_FEData::initElemBlock(int nElems, int nNodesPerElem,
 
    currBlock->nodeNumFields_ = nodeNumFields;
    currBlock->nodeFieldIDs_  = new int[nodeNumFields];
-   for ( i = 0; i < nodeNumFields; i++ ) 
-      currBlock->nodeFieldIDs_[i] = nodeFieldIDs[i]; 
+   for ( i = 0; i < nodeNumFields; i++ )
+      currBlock->nodeFieldIDs_[i] = nodeFieldIDs[i];
 
    // -------------------------------------------------------------
    // --- store element level data
@@ -261,8 +260,8 @@ int MLI_FEData::initElemBlock(int nElems, int nNodesPerElem,
    if ( elemNumFields > 0 )
    {
       currBlock->elemFieldIDs_  = new int[elemNumFields];
-      for ( i = 0; i < elemNumFields; i++ ) 
-         currBlock->elemFieldIDs_[i] = elemFieldIDs[i]; 
+      for ( i = 0; i < elemNumFields; i++ )
+         currBlock->elemFieldIDs_[i] = elemFieldIDs[i];
    }
    return 1;
 }
@@ -271,7 +270,7 @@ int MLI_FEData::initElemBlock(int nElems, int nNodesPerElem,
 // initialize the element connectivities
 //-------------------------------------------------------------------------
 
-int MLI_FEData::initElemBlockNodeLists(int nElems, 
+int MLI_FEData::initElemBlockNodeLists(int nElems,
                         const int *eGlobalIDs, int nNodesPerElem,
                         const int* const *nGlobalIDLists,
                         int spaceDim, const double* const *coord)
@@ -303,14 +302,14 @@ int MLI_FEData::initElemBlockNodeLists(int nElems,
 #ifdef MLI_DEBUG_DETAILED
    printf("initElemBlockNodeLists Diagnostics: segFault test.\n");
    double ddata;
-   for (i = 0; i < nElems; i++) 
+   for (i = 0; i < nElems; i++)
    {
       index  = eGlobalIDs[i];
-      for (j = 0; j < nNodesPerElem; j++) 
+      for (j = 0; j < nNodesPerElem; j++)
          length = nGlobalIDLists[i][j];
       if ( coord != NULL )
       {
-         for (j = 0; j < nNodesPerElem*spaceDim; j++) 
+         for (j = 0; j < nNodesPerElem*spaceDim; j++)
          ddata = coord[i][j];
       }
    }
@@ -329,16 +328,16 @@ int MLI_FEData::initElemBlockNodeLists(int nElems,
    for (i = 0; i < nElems; i++) currBlock->elemGlobalIDs_[i] = eGlobalIDs[i];
 
    // -------------------------------------------------------------
-   // --- allocate storage and load for element node connectivities 
+   // --- allocate storage and load for element node connectivities
    // -------------------------------------------------------------
 
-   for ( i = 0; i < nElems; i++ ) 
+   for ( i = 0; i < nElems; i++ )
    {
       currBlock->elemNodeIDList_[i] = new int[nNodesPerElem];
       intArray = currBlock->elemNodeIDList_[i];
-      for ( j = 0; j < nNodesPerElem; j++ ) 
-         intArray[j] = nGlobalIDLists[i][j]; 
-   }   
+      for ( j = 0; j < nNodesPerElem; j++ )
+         intArray[j] = nGlobalIDLists[i][j];
+   }
    if ( coord == NULL ) return 1;
 
    // -------------------------------------------------------------
@@ -348,9 +347,9 @@ int MLI_FEData::initElemBlockNodeLists(int nElems,
    length = nNodesPerElem * spaceDimension_ * nElems;
    currBlock->nodeCoordinates_ =  new double[length];
    length = nNodesPerElem * spaceDimension_;
-   for ( i = 0; i < nElems; i++ ) 
+   for ( i = 0; i < nElems; i++ )
    {
-      for ( j = 0; j < length; j++ ) 
+      for ( j = 0; j < length; j++ )
          currBlock->nodeCoordinates_[i*length+j] = coord[i][j];
    }
    return 1;
@@ -361,7 +360,7 @@ int MLI_FEData::initElemBlockNodeLists(int nElems,
 //-------------------------------------------------------------------------
 
 int MLI_FEData::initElemNodeList( int eGlobalID, int nNodesPerElem,
-                                  const int* nGlobalIDs, int spaceDim, 
+                                  const int* nGlobalIDs, int spaceDim,
                                   const double *coord)
 {
    int           i, j, length, index, *intArray, nElems;
@@ -405,12 +404,12 @@ int MLI_FEData::initElemNodeList( int eGlobalID, int nNodesPerElem,
    currBlock->elemGlobalIDs_[index] = eGlobalID;
 
    // -------------------------------------------------------------
-   // --- allocate storage and load for element node connectivities 
+   // --- allocate storage and load for element node connectivities
    // -------------------------------------------------------------
 
    currBlock->elemNodeIDList_[index] = new int[nNodesPerElem];
    intArray = currBlock->elemNodeIDList_[index];
-   for ( j = 0; j < nNodesPerElem; j++ ) intArray[j] = nGlobalIDs[j]; 
+   for ( j = 0; j < nNodesPerElem; j++ ) intArray[j] = nGlobalIDs[j];
    if ( coord == NULL ) return 1;
 
    // -------------------------------------------------------------
@@ -422,16 +421,16 @@ int MLI_FEData::initElemNodeList( int eGlobalID, int nNodesPerElem,
    if ( currBlock->nodeCoordinates_ == NULL )
       currBlock->nodeCoordinates_ =  new double[length];
    length = nNodesPerElem * spaceDimension_;
-   for ( i = 0; i < length; i++ ) 
+   for ( i = 0; i < length; i++ )
       currBlock->nodeCoordinates_[index*length+i] = coord[i];
    return 1;
 }
 
 //*************************************************************************
-// initialize shared node list 
+// initialize shared node list
 //-------------------------------------------------------------------------
 
-int MLI_FEData::initSharedNodes(int nNodes, const int *nGlobalIDs, 
+int MLI_FEData::initSharedNodes(int nNodes, const int *nGlobalIDs,
                     const int *numProcs, const int * const *procLists)
 {
    int i, j, length, index, index2, *nodeIDs, *auxArray;
@@ -458,11 +457,11 @@ int MLI_FEData::initSharedNodes(int nNodes, const int *nGlobalIDs,
 
 #ifdef MLI_DEBUG_DETAILED
    printf("initSharedNodes Diagnostics: segFault test.\n");
-   for (i = 0; i < nNodes; i++) 
+   for (i = 0; i < nNodes; i++)
    {
       index  = nGlobalIDs[i];
       length = numProcs[i];
-      for (j = 0; j < length; j++) 
+      for (j = 0; j < length; j++)
          index = procLists[i][j];
    }
    printf("initSharedNodes Diagnostics: passed the segFault test.\n");
@@ -478,14 +477,14 @@ int MLI_FEData::initSharedNodes(int nNodes, const int *nGlobalIDs,
    for (i = 0; i < nNodes; i++) auxArray[i] = i;
    MLI_Utils_IntQSort2(nodeIDs, auxArray, 0, nNodes-1);
    nSharedNodes = 1;
-   for (i = 1; i < nNodes; i++) 
+   for (i = 1; i < nNodes; i++)
       if ( nodeIDs[i] != nodeIDs[nSharedNodes-1] ) nSharedNodes++;
    sharedNodeIDs    = new int[nSharedNodes];
    sharedNodeNProcs = new int[nSharedNodes];
    sharedNodeProc   = new int*[nSharedNodes];
    nSharedNodes = 1;
    sharedNodeIDs[0] = nodeIDs[0];
-   for (i = 1; i < nNodes; i++) 
+   for (i = 1; i < nNodes; i++)
       if ( nodeIDs[i] != sharedNodeIDs[nSharedNodes-1] )
          sharedNodeIDs[nSharedNodes++] = nodeIDs[i];
    for ( i = 0; i < nSharedNodes; i++ ) sharedNodeNProcs[i] = 0;
@@ -507,7 +506,7 @@ int MLI_FEData::initSharedNodes(int nNodes, const int *nGlobalIDs,
                                       nSharedNodes);
       index2 = auxArray[i];
       for ( j = 0; j < numProcs[index2]; j++ )
-         sharedNodeProc[index][sharedNodeNProcs[index]++] = 
+         sharedNodeProc[index][sharedNodeNProcs[index]++] =
                        procLists[index2][j];
    }
    delete [] nodeIDs;
@@ -515,7 +514,7 @@ int MLI_FEData::initSharedNodes(int nNodes, const int *nGlobalIDs,
    for ( i = 0; i < nSharedNodes; i++ )
    {
       MLI_Utils_IntQSort2(sharedNodeProc[i],NULL,0,sharedNodeNProcs[i]-1);
-      length = 1;       
+      length = 1;
       for ( j = 1; j < sharedNodeNProcs[i]; j++ )
          if ( sharedNodeProc[i][j] != sharedNodeProc[i][length-1] )
             sharedNodeProc[i][length++] = sharedNodeProc[i][j];
@@ -530,7 +529,7 @@ int MLI_FEData::initSharedNodes(int nNodes, const int *nGlobalIDs,
 }
 
 //*************************************************************************
-// initialize element face lists 
+// initialize element face lists
 //-------------------------------------------------------------------------
 
 int MLI_FEData::initElemBlockFaceLists(int nElems, int nFaces,
@@ -557,7 +556,7 @@ int MLI_FEData::initElemBlockFaceLists(int nElems, int nFaces,
 
 #ifdef MLI_DEBUG_DETAILED
    printf("initElemBlockFaceLists Diagnostics: segFault test.\n");
-   for (i = 0; i < nElems; i++) 
+   for (i = 0; i < nElems; i++)
       for (j = 0; j < nFaces; j++) index = fGlobalIDLists[i][j];
    printf("initElemBlockFaceLists Diagnostics: passed the segFault test.\n");
 #endif
@@ -569,8 +568,8 @@ int MLI_FEData::initElemBlockFaceLists(int nElems, int nFaces,
    if ( currBlock->elemFaceIDList_ == NULL )
    {
       currBlock->elemFaceIDList_ = new int*[nElems];
-      currBlock->elemNumFaces_   = nFaces; 
-      for (i = 0; i < nElems; i++) 
+      currBlock->elemNumFaces_   = nFaces;
+      for (i = 0; i < nElems; i++)
          currBlock->elemFaceIDList_[i] = new int[nFaces];
    }
 
@@ -582,11 +581,11 @@ int MLI_FEData::initElemBlockFaceLists(int nElems, int nFaces,
    {
       index        = currBlock->elemGlobalIDAux_[i];
       elemFaceList = currBlock->elemFaceIDList_[i];
-      for ( j = 0; j < nFaces; j++ ) 
+      for ( j = 0; j < nFaces; j++ )
          elemFaceList[j] = fGlobalIDLists[index][j];
    }
    return 1;
-} 
+}
 
 //*************************************************************************
 // initialize face node list
@@ -611,10 +610,10 @@ int MLI_FEData::initFaceBlockNodeLists(int nFaces, const int *fGlobalIDs,
 
 #ifdef MLI_DEBUG_DETAILED
    printf("initFaceBlockNodeLists Diagnostics: segFault test.\n");
-   for (i = 0; i < nFaces; i++) 
+   for (i = 0; i < nFaces; i++)
    {
       index  = fGlobalIDs[i];
-      for (j = 0; j < nNodes; j++) 
+      for (j = 0; j < nNodes; j++)
          index = nGlobalIDLists[i][j];
    }
    printf("initFaceBlockNodeLists Diagnostics: passed the segFault test.\n");
@@ -628,18 +627,18 @@ int MLI_FEData::initFaceBlockNodeLists(int nFaces, const int *fGlobalIDs,
    currBlock->faceNumNodes_     = nNodes;
    currBlock->numExternalFaces_ = 0;
    currBlock->faceGlobalIDs_    = new int[nFaces];
-   currBlock->faceNodeIDList_   = new int*[nFaces]; 
+   currBlock->faceNodeIDList_   = new int*[nFaces];
    faceArray = new int[nFaces];
    for ( i = 0; i < nFaces; i++ )
    {
-      currBlock->faceGlobalIDs_[i]  = fGlobalIDs[i]; 
+      currBlock->faceGlobalIDs_[i]  = fGlobalIDs[i];
       currBlock->faceNodeIDList_[i] = NULL;
       faceArray[i]                  = i;
-   } 
+   }
    MLI_Utils_IntQSort2(currBlock->faceGlobalIDs_, faceArray, 0, nFaces-1);
 
    // -------------------------------------------------------------
-   // --- load the face Node list 
+   // --- load the face Node list
    // -------------------------------------------------------------
 
    faceNodeList = currBlock->faceNodeIDList_;
@@ -647,15 +646,15 @@ int MLI_FEData::initFaceBlockNodeLists(int nFaces, const int *fGlobalIDs,
    {
       index = faceArray[faceArray[i]];
       faceNodeList[index] = new int[nNodes];
-      for ( j = 0; j < nNodes; j++ ) 
+      for ( j = 0; j < nNodes; j++ )
          faceNodeList[i][j] = nGlobalIDLists[index][j];
    }
    delete [] faceArray;
    return 1;
-} 
+}
 
 //*************************************************************************
-// initialize shared face list 
+// initialize shared face list
 // (*** need to take into consideration of repeated face numbers in the
 //      face list - for pairs, just as already been done in initSharedNodes)
 //-------------------------------------------------------------------------
@@ -685,7 +684,7 @@ int MLI_FEData::initSharedFaces(int nFaces, const int *fGlobalIDs,
 
 #ifdef MLI_DEBUG_DETAILED
    printf("initSharedFaces Diagnostics: segFault test.\n");
-   for (i = 0; i < nFaces; i++) 
+   for (i = 0; i < nFaces; i++)
    {
       index  = fGlobalIDs[i];
       length = numProcs[i];
@@ -695,7 +694,7 @@ int MLI_FEData::initSharedFaces(int nFaces, const int *fGlobalIDs,
 #endif
 
    // -------------------------------------------------------------
-   // --- allocate space for the incoming data 
+   // --- allocate space for the incoming data
    // -------------------------------------------------------------
 
    currBlock->numSharedFaces_   = nFaces;
@@ -704,7 +703,7 @@ int MLI_FEData::initSharedFaces(int nFaces, const int *fGlobalIDs,
    currBlock->sharedFaceProc_   = new int*[nFaces];
 
    // -------------------------------------------------------------
-   // --- load shared face information 
+   // --- load shared face information
    // -------------------------------------------------------------
 
    intArray = new int[nFaces];
@@ -724,9 +723,9 @@ int MLI_FEData::initSharedFaces(int nFaces, const int *fGlobalIDs,
       currBlock->sharedFaceProc_[i]   = new int[numProcs[index]];
       for ( j = 0; j < numProcs[index]; j++ )
          currBlock->sharedFaceProc_[i][j] = procLists[index][j];
-      MLI_Utils_IntQSort2(currBlock->sharedFaceProc_[i], NULL, 0, 
+      MLI_Utils_IntQSort2(currBlock->sharedFaceProc_[i], NULL, 0,
                           numProcs[index]-1);
-   } 
+   }
    delete [] intArray;
    return 1;
 }
@@ -745,9 +744,9 @@ int MLI_FEData::initComplete()
    int           mypid, totalFaces, nExtFaces, *faceArray, *procArray;
    int           **elemFaceList, *procArray2, *ownerP, *sndrcvReg, nProcs;
    int           nRecv, nSend, *recvProcs, *sendProcs, *recvLengs, *sendLengs;
-   int           nNodes, pnum, **sendBuf, **recvBuf, *iauxArray, index2; 
+   int           nNodes, pnum, **sendBuf, **recvBuf, *iauxArray, index2;
    int           *intArray, **intArray2, nNodesPerElem, length, *nodeArrayAux;
-   double        *dtemp_array, *nodeCoords; 
+   double        *dtemp_array, *nodeCoords;
    MPI_Request   *request;
    MPI_Status    status;
    MLI_ElemBlock *currBlock;
@@ -759,7 +758,7 @@ int MLI_FEData::initComplete()
    // -------------------------------------------------------------
 
    nElems = currBlock->numLocalElems_;
-   assert( nElems > 0 );
+   hypre_assert( nElems > 0 );
    elemList = currBlock->elemGlobalIDs_;
    if ( elemList == NULL )
    {
@@ -799,9 +798,9 @@ int MLI_FEData::initComplete()
    // --- error checking (for duplicate element IDs)
    // -------------------------------------------------------------
 
-   for ( i = 1; i < nElems; i++ ) 
-   { 
-      assert( currBlock->elemGlobalIDs_[i] >= 0 );
+   for ( i = 1; i < nElems; i++ )
+   {
+      hypre_assert( currBlock->elemGlobalIDs_[i] >= 0 );
       if ( currBlock->elemGlobalIDs_[i] == currBlock->elemGlobalIDs_[i-1] )
       {
          printf("initComplete ERROR : duplicate elemIDs.\n");
@@ -810,18 +809,18 @@ int MLI_FEData::initComplete()
    }
 
    // -------------------------------------------------------------
-   // --- allocate storage and load for element node connectivities 
+   // --- allocate storage and load for element node connectivities
    // -------------------------------------------------------------
 
    nNodesPerElem = currBlock->elemNumNodes_;
    intArray2 = new int*[nElems];
    for ( i = 0; i < nElems; i++ ) intArray2[i] = new int[nNodesPerElem];
-   for ( i = 0; i < nElems; i++ ) 
+   for ( i = 0; i < nElems; i++ )
    {
       index = currBlock->elemGlobalIDAux_[i];
       intArray = currBlock->elemNodeIDList_[index];
-      for ( j = 0; j < nNodesPerElem; j++ ) intArray2[i][j] = intArray[j]; 
-   }   
+      for ( j = 0; j < nNodesPerElem; j++ ) intArray2[i][j] = intArray[j];
+   }
    for ( i = 0; i < nElems; i++ ) delete [] currBlock->elemNodeIDList_[i];
    delete [] currBlock->elemNodeIDList_;
    currBlock->elemNodeIDList_ = intArray2;
@@ -829,9 +828,9 @@ int MLI_FEData::initComplete()
    if ( currBlock->nodeCoordinates_ != NULL )
    {
       nodeCoords = new double[length];
-      for ( i = 0; i < nElems; i++ ) 
+      for ( i = 0; i < nElems; i++ )
       {
-         for ( j = 0; j < length; j++ ) 
+         for ( j = 0; j < length; j++ )
          {
             index = currBlock->elemGlobalIDAux_[i];
             nodeCoords[i*length+j] =
@@ -891,12 +890,12 @@ int MLI_FEData::initComplete()
    {
       for ( j = 0; j < sharedNodeNProcs[i]; j++ )
       {
-         if ( sharedNodeProc[i][j] < mypid ) 
+         if ( sharedNodeProc[i][j] < mypid )
          {
             nExtNodes++;
-            index = MLI_Utils_BinarySearch( sharedNodeIDs[i], nodeArray, 
+            index = MLI_Utils_BinarySearch( sharedNodeIDs[i], nodeArray,
                                             totalNodes);
-            if ( index < 0 ) 
+            if ( index < 0 )
             {
                printf("initComplete ERROR : shared node not in elements.\n");
                printf("         %d\n", sharedNodeIDs[i]);
@@ -921,14 +920,14 @@ int MLI_FEData::initComplete()
    currBlock->numLocalNodes_    = totalNodes - nExtNodes;
    currBlock->nodeGlobalIDs_    = new int[totalNodes];
    temp_cnt = 0;
-   for (i = 0; i < totalNodes; i++) 
+   for (i = 0; i < totalNodes; i++)
    {
-      if ( nodeArrayAux[i] >= 0 ) 
+      if ( nodeArrayAux[i] >= 0 )
          currBlock->nodeGlobalIDs_[temp_cnt++] = nodeArray[i];
    }
-   for (i = 0; i < totalNodes; i++) 
+   for (i = 0; i < totalNodes; i++)
    {
-      if ( nodeArrayAux[i] < 0 ) 
+      if ( nodeArrayAux[i] < 0 )
          currBlock->nodeGlobalIDs_[temp_cnt++] = nodeArray[i];
    }
    delete [] nodeArray;
@@ -976,7 +975,7 @@ int MLI_FEData::initComplete()
    MLI_Utils_IntQSort2( iauxArray, NULL, 0, nExtNodes-1);
    if ( nExtNodes > 0 ) nRecv = 1;
    for ( i = 1; i < nExtNodes; i++ )
-      if (iauxArray[i] != iauxArray[nRecv-1]) 
+      if (iauxArray[i] != iauxArray[nRecv-1])
          iauxArray[nRecv++] = iauxArray[i];
    if ( nRecv > 0 )
    {
@@ -984,7 +983,7 @@ int MLI_FEData::initComplete()
       for ( i = 0; i < nRecv; i++ ) recvProcs[i] = iauxArray[i];
       recvLengs = new int[nRecv];
       for ( i = 0; i < nRecv; i++ ) recvLengs[i] = 0;
-      for ( i = 0; i < nExtNodes; i++ ) 
+      for ( i = 0; i < nExtNodes; i++ )
       {
          index = MLI_Utils_BinarySearch( ownerP[i], recvProcs, nRecv );
          recvLengs[index]++;
@@ -995,15 +994,15 @@ int MLI_FEData::initComplete()
    if ( nExtNodes > 0 ) delete [] iauxArray;
 
    counter = 0;
-   for ( i = 0; i < numSharedNodes; i++ ) 
+   for ( i = 0; i < numSharedNodes; i++ )
       if ( sndrcvReg[i] == 0 ) counter += sharedNodeNProcs[i];
    if ( counter > 0 ) iauxArray = new int[counter];
    counter = 0;
-   for ( i = 0; i < numSharedNodes; i++ ) 
+   for ( i = 0; i < numSharedNodes; i++ )
    {
-      if ( sndrcvReg[i] == 0 ) 
+      if ( sndrcvReg[i] == 0 )
       {
-         for ( j = 0; j < sharedNodeNProcs[i]; j++ ) 
+         for ( j = 0; j < sharedNodeNProcs[i]; j++ )
             if ( sharedNodeProc[i][j] != mypid )
                iauxArray[counter++] = sharedNodeProc[i][j];
       }
@@ -1017,62 +1016,62 @@ int MLI_FEData::initComplete()
       MLI_Utils_IntQSort2( iauxArray, NULL, 0, counter-1);
       nSend = 1;
       for ( i = 1; i < counter; i++ )
-         if (iauxArray[i] != iauxArray[nSend-1]) 
+         if (iauxArray[i] != iauxArray[nSend-1])
             iauxArray[nSend++] = iauxArray[i];
       sendProcs = new int[nSend];
       for ( i = 0; i < nSend; i++ ) sendProcs[i] = iauxArray[i];
       sendLengs = new int[nSend];
       for ( i = 0; i < nSend; i++ ) sendLengs[i] = 0;
-      for ( i = 0; i < numSharedNodes; i++ ) 
+      for ( i = 0; i < numSharedNodes; i++ )
       {
-         if ( sndrcvReg[i] == 0 ) 
+         if ( sndrcvReg[i] == 0 )
          {
             for ( j = 0; j < sharedNodeNProcs[i]; j++ )
             {
-               if ( sharedNodeProc[i][j] != mypid ) 
+               if ( sharedNodeProc[i][j] != mypid )
                {
                   index = sharedNodeProc[i][j];
                   index = MLI_Utils_BinarySearch( index, sendProcs, nSend );
                   sendLengs[index]++;
-               }        
-            }        
-         }        
+               }
+            }
+         }
       }
       sendBuf = new int*[nSend];
       for ( i = 0; i < nSend; i++ ) sendBuf[i] = new int[sendLengs[i]];
       for ( i = 0; i < nSend; i++ ) sendLengs[i] = 0;
-      for ( i = 0; i < numSharedNodes; i++ ) 
+      for ( i = 0; i < numSharedNodes; i++ )
       {
-         if ( sndrcvReg[i] == 0 ) 
+         if ( sndrcvReg[i] == 0 )
          {
             for ( j = 0; j < sharedNodeNProcs[i]; j++ )
             {
-               if ( sharedNodeProc[i][j] != mypid ) 
+               if ( sharedNodeProc[i][j] != mypid )
                {
                   index = sharedNodeProc[i][j];
                   index = MLI_Utils_BinarySearch( index, sendProcs, nSend );
                   index2 = searchNode( sharedNodeIDs[i] );
-                  sendBuf[index][sendLengs[index]++] = 
+                  sendBuf[index][sendLengs[index]++] =
                      currBlock->nodeOffset_ + index2;
-               }        
-            }        
-         }        
-      }        
+               }
+            }
+         }
+      }
    }
    if ( counter > 0 ) delete [] iauxArray;
 
    if ( nRecv > 0 ) request = new MPI_Request[nRecv];
    for ( i = 0; i < nRecv; i++ )
-      MPI_Irecv( recvBuf[i], recvLengs[i], MPI_INT, 
+      MPI_Irecv( recvBuf[i], recvLengs[i], MPI_INT,
                  recvProcs[i], 183, mpiComm_, &request[i]);
    for ( i = 0; i < nSend; i++ )
-      MPI_Send( sendBuf[i], sendLengs[i], MPI_INT, 
+      MPI_Send( sendBuf[i], sendLengs[i], MPI_INT,
                 sendProcs[i], 183, mpiComm_);
    for ( i = 0; i < nRecv; i++ ) MPI_Wait( &request[i], &status );
 
    if ( nExtNodes > 0 ) currBlock->nodeExtNewGlobalIDs_ = new int[nExtNodes];
    for ( i = 0; i < nRecv; i++ ) recvLengs[i] = 0;
-   for ( i = 0; i < nExtNodes; i++ ) 
+   for ( i = 0; i < nExtNodes; i++ )
    {
       index = MLI_Utils_BinarySearch( ownerP[i], recvProcs, nRecv );
       j = recvBuf[index][recvLengs[index]++];
@@ -1105,14 +1104,14 @@ int MLI_FEData::initComplete()
          for ( j = 0; j < currBlock->elemNumNodes_; j++ )
          {
             index     = currBlock->elemNodeIDList_[i][j];
-            searchInd = MLI_Utils_BinarySearch(index, nodeArray, 
+            searchInd = MLI_Utils_BinarySearch(index, nodeArray,
                                                totalNodes-nExtNodes);
             if ( searchInd < 0 )
-               searchInd = MLI_Utils_BinarySearch(index, 
-                               &(nodeArray[totalNodes-nExtNodes]), 
+               searchInd = MLI_Utils_BinarySearch(index,
+                               &(nodeArray[totalNodes-nExtNodes]),
                                nExtNodes) + totalNodes - nExtNodes;
             for ( k = 0; k < spaceDimension_; k++ )
-               nodeCoords[searchInd*spaceDimension_+k] = 
+               nodeCoords[searchInd*spaceDimension_+k] =
                   dtemp_array[(i*elemNumNodes+j)*spaceDimension_+k];
          }
       }
@@ -1142,18 +1141,18 @@ int MLI_FEData::initComplete()
          if ( faceArray[i] != faceArray[i-1] )
             faceArray[totalFaces++] = faceArray[i];
 
-      if ( totalFaces != currBlock->numLocalFaces_ && 
+      if ( totalFaces != currBlock->numLocalFaces_ &&
            currBlock->faceGlobalIDs_ == NULL )
       {
          printf("initComplete WARNING : face IDs not initialized.\n");
       }
-      else if ( totalFaces != currBlock->numLocalFaces_ && 
+      else if ( totalFaces != currBlock->numLocalFaces_ &&
                 currBlock->faceGlobalIDs_ != NULL )
       {
          printf("initComplete ERROR : numbers of face do not match.\n");
          exit(1);
       }
-      else 
+      else
       {
          delete [] currBlock->faceGlobalIDs_;
          currBlock->faceGlobalIDs_ = NULL;
@@ -1176,12 +1175,12 @@ int MLI_FEData::initComplete()
       {
          for ( j = 0; j < sharedFaceNProcs[i]; j++ )
          {
-            if ( sharedFaceProc[i][j] < mypid ) 
+            if ( sharedFaceProc[i][j] < mypid )
             {
                nExtFaces++;
-               index = MLI_Utils_BinarySearch( sharedFaceIDs[i], faceArray, 
+               index = MLI_Utils_BinarySearch( sharedFaceIDs[i], faceArray,
                                                totalFaces);
-               if ( index < 0 ) 
+               if ( index < 0 )
                {
                   printf("initComplete ERROR : shared node not in elements.\n");
                   exit(1);
@@ -1196,24 +1195,24 @@ int MLI_FEData::initComplete()
       currBlock->numLocalFaces_    = totalFaces - nExtFaces;
       currBlock->faceGlobalIDs_    = new int[totalFaces];
       temp_cnt = 0;
-      for (i = 0; i < totalFaces; i++) 
+      for (i = 0; i < totalFaces; i++)
       {
-         if ( faceArray[i] >= 0 ) 
+         if ( faceArray[i] >= 0 )
             currBlock->faceGlobalIDs_[temp_cnt++] = faceArray[i];
       }
-      for (i = 0; i < totalFaces; i++) 
+      for (i = 0; i < totalFaces; i++)
       {
-         if ( faceArray[i] < 0 ) 
+         if ( faceArray[i] < 0 )
             currBlock->faceGlobalIDs_[temp_cnt++] = - faceArray[i];
       }
       delete [] faceArray;
    }
 
    // -------------------------------------------------------------
-   // --- get element, node and face offsets 
+   // --- get element, node and face offsets
    // -------------------------------------------------------------
 
-   MPI_Comm_size( mpiComm_, &numProcs ); 
+   MPI_Comm_size( mpiComm_, &numProcs );
    procArray  = new int[numProcs];
    procArray2 = new int[numProcs];
    for ( i = 0; i < numProcs; i++ ) procArray2[i] = 0;
@@ -1261,7 +1260,7 @@ int MLI_FEData::loadElemBlockMatrices(int nElems, int sMatDim,
       printf("loadElemBlockMatrices ERROR : nElems mismatch.\n");
       exit(1);
    }
-   if ( ! currBlock->initComplete_ ) 
+   if ( ! currBlock->initComplete_ )
    {
       printf("loadElemBlockMatrices ERROR : initialization not completed.\n");
       exit(1);
@@ -1270,7 +1269,7 @@ int MLI_FEData::loadElemBlockMatrices(int nElems, int sMatDim,
 #ifdef MLI_DEBUG_DETAILED
    printf("loadElemBlockMatrices Diagnostics: segFault test.\n");
    double ddata;
-   for (i = 0; i < nElems; i++) 
+   for (i = 0; i < nElems; i++)
    {
       for (j = 0; j < sMatDim*sMatDim; j++) ddata = stiffMat[i][j];
    }
@@ -1288,19 +1287,19 @@ int MLI_FEData::loadElemBlockMatrices(int nElems, int sMatDim,
    }
    currBlock->elemStiffDim_ = sMatDim;
    currBlock->elemStiffMat_ = new double*[nElems];
-   for ( i = 0; i < nElems; i++ ) 
+   for ( i = 0; i < nElems; i++ )
    {
       length = sMatDim * sMatDim;
       currBlock->elemStiffMat_[i] = new double[length];
       index = currBlock->elemGlobalIDAux_[i];
       row_darray = currBlock->elemStiffMat_[i];
-      for ( j = 0; j < length; j++ ) row_darray[j] = stiffMat[index][j]; 
+      for ( j = 0; j < length; j++ ) row_darray[j] = stiffMat[index][j];
    }
    return 1;
 }
 
 //*************************************************************************
-// load element nullspace for all elements 
+// load element nullspace for all elements
 //-------------------------------------------------------------------------
 
 int MLI_FEData::loadElemBlockNullSpaces(int nElems, const int *nNSpace,
@@ -1313,7 +1312,7 @@ int MLI_FEData::loadElemBlockNullSpaces(int nElems, const int *nNSpace,
    // --- initial checking
    // -------------------------------------------------------------
 
-   (void) sMatDim; 
+   (void) sMatDim;
 
    currBlock = elemBlockList_[currentElemBlock_];
    if ( nElems != currBlock->numLocalElems_ )
@@ -1321,7 +1320,7 @@ int MLI_FEData::loadElemBlockNullSpaces(int nElems, const int *nNSpace,
       printf("loadElemBlockNullSpaces ERROR : nElems do not match.\n");
       exit(1);
    }
-   if ( ! currBlock->initComplete_ ) 
+   if ( ! currBlock->initComplete_ )
    {
       printf("loadElemBlockNullSpaces ERROR : initialization not complete.\n");
       exit(1);
@@ -1339,7 +1338,7 @@ int MLI_FEData::loadElemBlockNullSpaces(int nElems, const int *nNSpace,
 #ifdef MLI_DEBUG_DETAILED
    printf("loadElemBlockNullSpaces Diagnostics: segFault test.\n");
    double ddata;
-   for (i = 0; i < nElems; i++) 
+   for (i = 0; i < nElems; i++)
    {
       length = nNSpace[i];
       for (j = 0; j < sMatDim*length; j++) ddata = nSpace[i][j];
@@ -1364,7 +1363,7 @@ int MLI_FEData::loadElemBlockNullSpaces(int nElems, const int *nNSpace,
 }
 
 //*************************************************************************
-// load element volumes for all elements 
+// load element volumes for all elements
 //-------------------------------------------------------------------------
 
 int MLI_FEData::loadElemBlockVolumes(int nElems, const double *elemVols)
@@ -1382,7 +1381,7 @@ int MLI_FEData::loadElemBlockVolumes(int nElems, const double *elemVols)
       printf("loadElemBlockVolumes ERROR : nElems do not match.\n");
       exit(1);
    }
-   if ( ! currBlock->initComplete_ ) 
+   if ( ! currBlock->initComplete_ )
    {
       printf("loadElemBlockVolumes ERROR : initialization not complete.\n");
       exit(1);
@@ -1410,7 +1409,7 @@ int MLI_FEData::loadElemBlockVolumes(int nElems, const double *elemVols)
 }
 
 //*************************************************************************
-// load element material for all elements 
+// load element material for all elements
 //-------------------------------------------------------------------------
 
 int MLI_FEData::loadElemBlockMaterials(int nElems, const int *elemMats)
@@ -1428,7 +1427,7 @@ int MLI_FEData::loadElemBlockMaterials(int nElems, const int *elemMats)
       printf("loadElemBlockMaterials ERROR : nElems do not match.\n");
       exit(1);
    }
-   if ( ! currBlock->initComplete_ ) 
+   if ( ! currBlock->initComplete_ )
    {
       printf("loadElemBlockMaterials ERROR : initialization not complete.\n");
       exit(1);
@@ -1456,7 +1455,7 @@ int MLI_FEData::loadElemBlockMaterials(int nElems, const int *elemMats)
 }
 
 //*************************************************************************
-// load element parent IDs for all elements 
+// load element parent IDs for all elements
 //-------------------------------------------------------------------------
 
 int MLI_FEData::loadElemBlockParentIDs(int nElems, const int *elemPIDs)
@@ -1474,7 +1473,7 @@ int MLI_FEData::loadElemBlockParentIDs(int nElems, const int *elemPIDs)
       printf("loadElemBlockParentIDs ERROR : nElems do not match.\n");
       exit(1);
    }
-   if ( ! currBlock->initComplete_ ) 
+   if ( ! currBlock->initComplete_ )
    {
       printf("loadElemBlockParentIDs ERROR : initialization not complete.\n");
       exit(1);
@@ -1501,7 +1500,7 @@ int MLI_FEData::loadElemBlockParentIDs(int nElems, const int *elemPIDs)
 }
 
 //*************************************************************************
-// load element load 
+// load element load
 //-------------------------------------------------------------------------
 
 int MLI_FEData::loadElemBlockLoads(int nElems, int loadDim,
@@ -1526,7 +1525,7 @@ int MLI_FEData::loadElemBlockLoads(int nElems, int loadDim,
       printf("loadElemBlockLoads ERROR : loadDim invalid.\n");
       exit(1);
    }
-   if ( ! currBlock->initComplete_ ) 
+   if ( ! currBlock->initComplete_ )
    {
       printf("loadElemBlockLoads ERROR : initialization not complete.\n");
       exit(1);
@@ -1535,7 +1534,7 @@ int MLI_FEData::loadElemBlockLoads(int nElems, int loadDim,
 #ifdef MLI_DEBUG_DETAILED
    double ddata;
    printf("loadElemBlockLoads Diagnostics: segFault test.\n");
-   for (i = 0; i < nElems; i++) 
+   for (i = 0; i < nElems; i++)
       for (j = 0; j < loadDim; j++) ddata = elemLoads[i][j];
    printf("loadElemBlockLoads Diagnostics: passed the segFault test.\n");
 #endif
@@ -1565,7 +1564,7 @@ int MLI_FEData::loadElemBlockLoads(int nElems, int loadDim,
 }
 
 //*************************************************************************
-// load element solution 
+// load element solution
 //-------------------------------------------------------------------------
 
 int MLI_FEData::loadElemBlockSolutions(int nElems, int solDim,
@@ -1590,7 +1589,7 @@ int MLI_FEData::loadElemBlockSolutions(int nElems, int solDim,
       printf("loadElemBlockSolutions ERROR : solDim invalid.");
       exit(1);
    }
-   if ( ! currBlock->initComplete_ ) 
+   if ( ! currBlock->initComplete_ )
    {
       printf("loadElemBlockSolutions ERROR : initialization not complete.\n");
       exit(1);
@@ -1599,7 +1598,7 @@ int MLI_FEData::loadElemBlockSolutions(int nElems, int solDim,
 #ifdef MLI_DEBUG_DETAILED
    printf("loadElemBlockSolutions Diagnostics: segFault test.\n");
    double ddata;
-   for (i = 0; i < nElems; i++) 
+   for (i = 0; i < nElems; i++)
       for (j = 0; j < loadDim; j++) ddata = elemSols[i][j];
    printf("loadElemBlockSolutions Diagnostics: passed the segFault test.\n");
 #endif
@@ -1629,11 +1628,11 @@ int MLI_FEData::loadElemBlockSolutions(int nElems, int solDim,
 }
 
 //*************************************************************************
-// load element boundary conditions 
+// load element boundary conditions
 //-------------------------------------------------------------------------
 
-int MLI_FEData::loadElemBCs(int nElems, const int *eGlobalIDs, 
-                            int elemDOF, const char * const *BCFlags, 
+int MLI_FEData::loadElemBCs(int nElems, const int *eGlobalIDs,
+                            int elemDOF, const char * const *BCFlags,
                             const double *const *BCVals)
 
 {
@@ -1659,7 +1658,7 @@ int MLI_FEData::loadElemBCs(int nElems, const int *eGlobalIDs,
       printf("loadElemBCs ERROR : element DOF not valid.\n");
       exit(1);
    }
-   if ( ! currBlock->initComplete_ ) 
+   if ( ! currBlock->initComplete_ )
    {
       printf("loadElemBCs ERROR : initialization not complete.\n");
       exit(1);
@@ -1669,7 +1668,7 @@ int MLI_FEData::loadElemBCs(int nElems, const int *eGlobalIDs,
    printf("loadElemBCs Diagnostics: segFault test.\n");
    char   cdata;
    double ddata;
-   for (i = 0; i < nElems; i++) 
+   for (i = 0; i < nElems; i++)
    {
       j = eGlobalIDs[i];
       for (j = 0; j < elemDOF; j++) cdata = BCFlags[i][j];
@@ -1703,7 +1702,7 @@ int MLI_FEData::loadElemBCs(int nElems, const int *eGlobalIDs,
    {
       currBlock->elemBCIDList_[i] = eGlobalIDs[i];
       bcData = currBlock->elemBCValues_[i];
-      for ( j = 0; j < elemDOF; j++ ) 
+      for ( j = 0; j < elemDOF; j++ )
       {
          bcData[j] = BCVals[i][j];
          currBlock->elemBCFlagList_[i][j] = BCFlags[i][j];
@@ -1713,10 +1712,10 @@ int MLI_FEData::loadElemBCs(int nElems, const int *eGlobalIDs,
 }
 
 //*************************************************************************
-// load element node list and stiffness matrix 
+// load element node list and stiffness matrix
 //-------------------------------------------------------------------------
 
-int MLI_FEData::loadElemMatrix(int eGlobalID, int eMatDim, 
+int MLI_FEData::loadElemMatrix(int eGlobalID, int eMatDim,
                                const double *elemMat)
 {
    int           i, j, index;
@@ -1728,12 +1727,12 @@ int MLI_FEData::loadElemMatrix(int eGlobalID, int eMatDim,
 
    currBlock = elemBlockList_[currentElemBlock_];
 #ifdef MLI_DEBUG_DETAILED
-   if ( ! currBlock->intComplete_ ) 
+   if ( ! currBlock->intComplete_ )
    {
       printf("loadElemMatrix ERROR : initialization not complete.\n");
       exit(1);
    }
-   if (currBlock->elemStiffMat_ != NULL && eMatDim != currBlock->elemStiffDim_) 
+   if (currBlock->elemStiffMat_ != NULL && eMatDim != currBlock->elemStiffDim_)
    {
       printf("loadElemMatrix ERROR : dimension mismatch.\n");
       exit(1);
@@ -1756,7 +1755,7 @@ int MLI_FEData::loadElemMatrix(int eGlobalID, int eMatDim,
          currBlock->elemStiffMat_[i] = NULL;
       currBlock->elemStiffDim_ = eMatDim;
    }
-  
+
    // -------------------------------------------------------------
    // --- search for the data holder
    // -------------------------------------------------------------
@@ -1780,14 +1779,14 @@ int MLI_FEData::loadElemMatrix(int eGlobalID, int eMatDim,
    // -------------------------------------------------------------
 
    currBlock->elemStiffMat_[index] = new double[eMatDim*eMatDim];
-   for ( j = 0; j < eMatDim*eMatDim; j++ ) 
+   for ( j = 0; j < eMatDim*eMatDim; j++ )
       currBlock->elemStiffMat_[index][j] = elemMat[j];
-    
+
    return 1;
 }
 
 //*************************************************************************
-// load element nullspace 
+// load element nullspace
 //-------------------------------------------------------------------------
 
 int MLI_FEData::loadElemNullSpace(int eGlobalID, int numNS, int eMatDim,
@@ -1803,7 +1802,7 @@ int MLI_FEData::loadElemNullSpace(int eGlobalID, int numNS, int eMatDim,
    currBlock = elemBlockList_[currentElemBlock_];
 
 #ifdef MLI_DEBUG_DETAILED
-   if ( ! currBlock->intComplete_ ) 
+   if ( ! currBlock->intComplete_ )
    {
       printf("loadElemNullSpace ERROR : initialization not complete.\n");
       exit(1);
@@ -1860,7 +1859,7 @@ int MLI_FEData::loadElemNullSpace(int eGlobalID, int numNS, int eMatDim,
 }
 
 //*************************************************************************
-// load element load (right hand side) 
+// load element load (right hand side)
 //-------------------------------------------------------------------------
 
 int MLI_FEData::loadElemLoad(int eGlobalID, int eMatDim,
@@ -1876,7 +1875,7 @@ int MLI_FEData::loadElemLoad(int eGlobalID, int eMatDim,
    currBlock = elemBlockList_[currentElemBlock_];
 
 #ifdef MLI_DEBUG_DETAILED
-   if ( ! currBlock->intComplete_ ) 
+   if ( ! currBlock->intComplete_ )
    {
       printf("loadElemLoad ERROR : initialization not complete.\n");
       exit(1);
@@ -1925,7 +1924,7 @@ int MLI_FEData::loadElemLoad(int eGlobalID, int eMatDim,
 }
 
 //*************************************************************************
-// load element solution 
+// load element solution
 //-------------------------------------------------------------------------
 
 int MLI_FEData::loadElemSolution(int eGlobalID, int eMatDim,
@@ -1941,7 +1940,7 @@ int MLI_FEData::loadElemSolution(int eGlobalID, int eMatDim,
    currBlock = elemBlockList_[currentElemBlock_];
 
 #ifdef MLI_DEBUG_DETAILED
-   if ( ! currBlock->intComplete_ ) 
+   if ( ! currBlock->intComplete_ )
    {
       printf("loadElemSolution ERROR : initialization not complete.\n");
       exit(1);
@@ -1990,7 +1989,7 @@ int MLI_FEData::loadElemSolution(int eGlobalID, int eMatDim,
 }
 
 //*************************************************************************
-// set node boundary condition 
+// set node boundary condition
 //-------------------------------------------------------------------------
 
 int MLI_FEData::loadNodeBCs(int nNodes, const int *nodeIDs, int nodeDOF,
@@ -2029,7 +2028,7 @@ int MLI_FEData::loadNodeBCs(int nNodes, const int *nodeIDs, int nodeDOF,
    printf("loadNodeBCs Diagnostics: segFault test.\n");
    char   cdata;
    double ddata;
-   for (i = 0; i < nNodes; i++) 
+   for (i = 0; i < nNodes; i++)
    {
       j = nodeIDs[i];
       for (j = 0; j < nodeDOF; j++) cdata = BCFlags[i][j];
@@ -2083,7 +2082,7 @@ int MLI_FEData::getSpaceDimension(int& numDim)
 }
 
 //*************************************************************************
-// get order of PDE 
+// get order of PDE
 //-------------------------------------------------------------------------
 
 int MLI_FEData::getOrderOfPDE(int& order)
@@ -2093,7 +2092,7 @@ int MLI_FEData::getOrderOfPDE(int& order)
 }
 
 //*************************************************************************
-// get order of FE 
+// get order of FE
 //-------------------------------------------------------------------------
 
 int MLI_FEData::getOrderOfFE(int& order)
@@ -2103,7 +2102,7 @@ int MLI_FEData::getOrderOfFE(int& order)
 }
 
 //*************************************************************************
-// get field size  
+// get field size
 //-------------------------------------------------------------------------
 
 int MLI_FEData::getFieldSize(int fieldID, int& fieldSize)
@@ -2116,7 +2115,7 @@ int MLI_FEData::getFieldSize(int fieldID, int& fieldSize)
 }
 
 //*************************************************************************
-// get number of local elements 
+// get number of local elements
 //-------------------------------------------------------------------------
 
 int MLI_FEData::getNumElements(int& nelems)
@@ -2156,7 +2155,7 @@ int MLI_FEData::getElemFieldIDs(int numFields, int *fieldIDs)
 }
 
 //*************************************************************************
-// get an element globalID 
+// get an element globalID
 //-------------------------------------------------------------------------
 
 int MLI_FEData::getElemGlobalID(int localID, int &globalID)
@@ -2183,7 +2182,7 @@ int MLI_FEData::getElemGlobalID(int localID, int &globalID)
 }
 
 //*************************************************************************
-// get all element globalIDs 
+// get all element globalIDs
 //-------------------------------------------------------------------------
 
 int MLI_FEData::getElemBlockGlobalIDs(int nElems, int *eGlobalIDs)
@@ -2210,7 +2209,7 @@ int MLI_FEData::getElemBlockGlobalIDs(int nElems, int *eGlobalIDs)
    printf("getElemBlockGlobalIDs Diagnostics: passed the segFault test.\n");
 #endif
 
-   for ( int j = 0; j < nElems; j++ ) 
+   for ( int j = 0; j < nElems; j++ )
       eGlobalIDs[j] = currBlock->elemGlobalIDs_[j];
    return 1;
 }
@@ -2227,7 +2226,7 @@ int MLI_FEData::getElemNumNodes(int& nNodes)
 }
 
 //*************************************************************************
-// get element block nodelists 
+// get element block nodelists
 //-------------------------------------------------------------------------
 
 int MLI_FEData::getElemBlockNodeLists(int nElems, int nNodes, int **nodeList)
@@ -2256,7 +2255,7 @@ int MLI_FEData::getElemBlockNodeLists(int nElems, int nNodes, int **nodeList)
 
 #ifdef MLI_DEBUG_DETAILED
    printf("getElemBlockNodeLists Diagnostics: segFault test.\n");
-   for (i = 0; i < nElems; i++) 
+   for (i = 0; i < nElems; i++)
       for (j = 0; j < nNodes; j++) nodeList[i][j] = 0;
    printf("getElemBlockNodeLists Diagnostics: passed the segFault test.\n");
 #endif
@@ -2274,7 +2273,7 @@ int MLI_FEData::getElemBlockNodeLists(int nElems, int nNodes, int **nodeList)
 }
 
 //*************************************************************************
-// get element matrices' dimension 
+// get element matrices' dimension
 //-------------------------------------------------------------------------
 
 int MLI_FEData::getElemMatrixDim(int& matDim)
@@ -2285,7 +2284,7 @@ int MLI_FEData::getElemMatrixDim(int& matDim)
 }
 
 //*************************************************************************
-// get all element stiffness matrices 
+// get all element stiffness matrices
 //-------------------------------------------------------------------------
 
 int MLI_FEData::getElemBlockMatrices(int nElems,int eMatDim,double **elemMat)
@@ -2316,7 +2315,7 @@ int MLI_FEData::getElemBlockMatrices(int nElems,int eMatDim,double **elemMat)
 
 #ifdef MLI_DEBUG_DETAILED
    printf("getElemBlockMatrices Diagnostics: segFault test.\n");
-   for (i = 0; i < nElems; i++) 
+   for (i = 0; i < nElems; i++)
       for (j = 0; j < eMatDim*eMatDim; j++) elemMat[i][j] = 0.0;
    printf("getElemBlockMatrices Diagnostics: passed the segFault test.\n");
 #endif
@@ -2364,7 +2363,7 @@ int MLI_FEData::getElemBlockNullSpaceSizes(int nElems, int *dimNS)
 
 #ifdef MLI_DEBUG_DETAILED
    printf("getElemBlockNullSpaceSizes Diagnostics: segFault test.\n");
-   for (i = 0; i < nElems; i++) dimNS[i] = 0; 
+   for (i = 0; i < nElems; i++) dimNS[i] = 0;
    printf("getElemBlockNullSpaceSizes Diagnostics: passed segFault test.\n");
 #endif
 
@@ -2381,10 +2380,10 @@ int MLI_FEData::getElemBlockNullSpaceSizes(int nElems, int *dimNS)
 }
 
 //*************************************************************************
-// get all element nullspaces 
+// get all element nullspaces
 //-------------------------------------------------------------------------
 
-int MLI_FEData::getElemBlockNullSpaces(int nElems, const int *dimNS, 
+int MLI_FEData::getElemBlockNullSpaces(int nElems, const int *dimNS,
                                        int eMatDim, double **nullSpaces)
 {
    int i,j;
@@ -2416,8 +2415,8 @@ int MLI_FEData::getElemBlockNullSpaces(int nElems, const int *dimNS,
 
 #ifdef MLI_DEBUG_DETAILED
    printf("getElemBlockNullSpaces Diagnostics: segFault test.\n");
-   for (i = 0; i < nElems; i++) 
-      for (j = 0; j < dimNS[i]*eMatDim; j++) nullSpaces[i][j] = 0.0; 
+   for (i = 0; i < nElems; i++)
+      for (j = 0; j < dimNS[i]*eMatDim; j++) nullSpaces[i][j] = 0.0;
    printf("getElemBlockNullSpaces Diagnostics: passed segFault test.\n");
 #endif
 
@@ -2425,21 +2424,21 @@ int MLI_FEData::getElemBlockNullSpaces(int nElems, const int *dimNS,
    // --- load nullspace sizes
    // -------------------------------------------------------------
 
-   for ( i = 0; i < nElems; i++ ) 
+   for ( i = 0; i < nElems; i++ )
    {
       if ( dimNS[i] != currBlock->elemNumNS_[i] )
       {
          printf("getElemBlockNullSpaces ERROR : dimension do not match.\n");
          exit(1);
       }
-      for ( j = 0; j < eMatDim*dimNS[i]; j++ ) 
+      for ( j = 0; j < eMatDim*dimNS[i]; j++ )
          nullSpaces[i][j] = currBlock->elemNullSpace_[i][j];
    }
    return 1;
 }
 
 //*************************************************************************
-// get all element volumes 
+// get all element volumes
 //-------------------------------------------------------------------------
 
 int MLI_FEData::getElemBlockVolumes(int nElems, double *elemVols)
@@ -2466,7 +2465,7 @@ int MLI_FEData::getElemBlockVolumes(int nElems, double *elemVols)
    }
 
    // -------------------------------------------------------------
-   // --- load element volumes 
+   // --- load element volumes
    // -------------------------------------------------------------
 
    for ( int i = 0; i < nElems; i++ ) elemVols[i] = currBlock->elemVolume_[i];
@@ -2475,7 +2474,7 @@ int MLI_FEData::getElemBlockVolumes(int nElems, double *elemVols)
 }
 
 //*************************************************************************
-// get all element materials 
+// get all element materials
 //-------------------------------------------------------------------------
 
 int MLI_FEData::getElemBlockMaterials(int nElems, int *elemMats)
@@ -2502,7 +2501,7 @@ int MLI_FEData::getElemBlockMaterials(int nElems, int *elemMats)
    }
 
    // -------------------------------------------------------------
-   // --- load element materials 
+   // --- load element materials
    // -------------------------------------------------------------
 
    for (int i = 0; i < nElems; i++) elemMats[i] = currBlock->elemMaterial_[i];
@@ -2511,7 +2510,7 @@ int MLI_FEData::getElemBlockMaterials(int nElems, int *elemMats)
 }
 
 //*************************************************************************
-// get all element parent IDs 
+// get all element parent IDs
 //-------------------------------------------------------------------------
 
 int MLI_FEData::getElemBlockParentIDs(int nElems, int *parentIDs)
@@ -2538,7 +2537,7 @@ int MLI_FEData::getElemBlockParentIDs(int nElems, int *parentIDs)
    }
 
    // -------------------------------------------------------------
-   // --- load element parent IDs 
+   // --- load element parent IDs
    // -------------------------------------------------------------
 
    for (int i = 0; i < nElems; i++) parentIDs[i] = currBlock->elemParentIDs_[i];
@@ -2634,7 +2633,7 @@ int MLI_FEData::getElemNodeList(int eGlobalID, int nNodes, int *nodeList)
 }
 
 //*************************************************************************
-// get an element matrix 
+// get an element matrix
 //-------------------------------------------------------------------------
 
 int MLI_FEData::getElemMatrix(int eGlobalID, int eMatDim, double *elemMat)
@@ -2710,10 +2709,10 @@ int MLI_FEData::getElemNullSpaceSize(int eGlobalID, int &dimNS)
 }
 
 //*************************************************************************
-// get an element nullspace 
+// get an element nullspace
 //-------------------------------------------------------------------------
 
-int MLI_FEData::getElemNullSpace(int eGlobalID, int dimNS, int eMatDim, 
+int MLI_FEData::getElemNullSpace(int eGlobalID, int dimNS, int eMatDim,
                                  double *nullSpaces)
 {
    // -------------------------------------------------------------
@@ -2747,13 +2746,13 @@ int MLI_FEData::getElemNullSpace(int eGlobalID, int dimNS, int eMatDim,
       printf("getElemNullSpace ERROR : element not found.\n");
       exit(1);
    }
-   for ( int i = 0; i < eMatDim*dimNS; i++ ) 
+   for ( int i = 0; i < eMatDim*dimNS; i++ )
       nullSpaces[i] = currBlock->elemNullSpace_[index][i];
    return 1;
 }
 
 //*************************************************************************
-// get an element volume 
+// get an element volume
 //-------------------------------------------------------------------------
 
 int MLI_FEData::getElemVolume(int eGlobalID, double &elemVol)
@@ -2775,7 +2774,7 @@ int MLI_FEData::getElemVolume(int eGlobalID, double &elemVol)
    }
 
    // -------------------------------------------------------------
-   // --- load element volumes 
+   // --- load element volumes
    // -------------------------------------------------------------
 
    int index = searchElement(eGlobalID);
@@ -2790,7 +2789,7 @@ int MLI_FEData::getElemVolume(int eGlobalID, double &elemVol)
 }
 
 //*************************************************************************
-// get an element material 
+// get an element material
 //-------------------------------------------------------------------------
 
 int MLI_FEData::getElemMaterial(int eGlobalID, int &elemMat)
@@ -2812,7 +2811,7 @@ int MLI_FEData::getElemMaterial(int eGlobalID, int &elemMat)
    }
 
    // -------------------------------------------------------------
-   // --- load element material 
+   // --- load element material
    // -------------------------------------------------------------
 
    int index = searchElement(eGlobalID);
@@ -2827,7 +2826,7 @@ int MLI_FEData::getElemMaterial(int eGlobalID, int &elemMat)
 }
 
 //*************************************************************************
-// get all element parent IDs 
+// get all element parent IDs
 //-------------------------------------------------------------------------
 
 int MLI_FEData::getElemParentID(int eGlobalID, int &parentID)
@@ -2849,7 +2848,7 @@ int MLI_FEData::getElemParentID(int eGlobalID, int &parentID)
    }
 
    // -------------------------------------------------------------
-   // --- load element parent IDs 
+   // --- load element parent IDs
    // -------------------------------------------------------------
 
    int index = searchElement(eGlobalID);
@@ -2915,7 +2914,7 @@ int MLI_FEData::getNumBCElems(int& nElems)
 // get number of boundary elements
 //-------------------------------------------------------------------------
 
-int MLI_FEData::getElemBCs(int nElems, int *eGlobalIDs, int eDOFs, 
+int MLI_FEData::getElemBCs(int nElems, int *eGlobalIDs, int eDOFs,
                            char **fieldFlag, double **BCVals)
 {
    // -------------------------------------------------------------
@@ -2956,7 +2955,7 @@ int MLI_FEData::getElemBCs(int nElems, int *eGlobalIDs, int eDOFs,
 }
 
 //*************************************************************************
-// get number of total nodes (local + external) 
+// get number of total nodes (local + external)
 //-------------------------------------------------------------------------
 
 int MLI_FEData::getNumNodes(int& nNodes)
@@ -2967,7 +2966,7 @@ int MLI_FEData::getNumNodes(int& nNodes)
 }
 
 //*************************************************************************
-// get all node globalIDs 
+// get all node globalIDs
 //-------------------------------------------------------------------------
 
 int MLI_FEData::getNodeBlockGlobalIDs(int nNodes, int *nGlobalIDs)
@@ -2992,7 +2991,7 @@ int MLI_FEData::getNodeBlockGlobalIDs(int nNodes, int *nGlobalIDs)
    // --- get nodal global IDs
    // -------------------------------------------------------------
 
-   for (int i = 0; i < nNodes; i++) 
+   for (int i = 0; i < nNodes; i++)
       nGlobalIDs[i] = currBlock->nodeGlobalIDs_[i];
    return 1;
 }
@@ -3021,7 +3020,7 @@ int MLI_FEData::getNodeFieldIDs(int numFields, int *fieldIDs)
 }
 
 //*************************************************************************
-// get all node coordinates 
+// get all node coordinates
 //-------------------------------------------------------------------------
 
 int MLI_FEData::getNodeBlockCoordinates(int nNodes, int spaceDim,
@@ -3052,7 +3051,7 @@ int MLI_FEData::getNodeBlockCoordinates(int nNodes, int spaceDim,
    // --- get nodal coordinates
    // -------------------------------------------------------------
 
-   for (int i = 0; i < nNodes*spaceDim; i++) 
+   for (int i = 0; i < nNodes*spaceDim; i++)
       coordinates[i] = currBlock->nodeCoordinates_[i];
    return 1;
 }
@@ -3072,7 +3071,7 @@ int MLI_FEData::getNumBCNodes(int& nNodes)
 // get number of boundary nodes
 //-------------------------------------------------------------------------
 
-int MLI_FEData::getNodeBCs(int nNodes, int *nGlobalIDs, int nDOFs, 
+int MLI_FEData::getNodeBCs(int nNodes, int *nGlobalIDs, int nDOFs,
                            char **fieldFlag, double **BCVals)
 {
    // -------------------------------------------------------------
@@ -3147,7 +3146,7 @@ int MLI_FEData::getSharedNodeNumProcs(int nNodes, int *nGlobalIDs,
    }
 
    // -------------------------------------------------------------
-   // --- get information 
+   // --- get information
    // -------------------------------------------------------------
 
    for ( int i = 0; i < nNodes; i++ )
@@ -3182,7 +3181,7 @@ int MLI_FEData::getSharedNodeProcs(int nNodes, int *numProcs,
    }
 
    // -------------------------------------------------------------
-   // --- get information 
+   // --- get information
    // -------------------------------------------------------------
 
    for ( int i = 0; i < nNodes; i++ )
@@ -3199,7 +3198,7 @@ int MLI_FEData::getSharedNodeProcs(int nNodes, int *numProcs,
 }
 
 //*************************************************************************
-// get number of faces 
+// get number of faces
 //-------------------------------------------------------------------------
 
 int MLI_FEData::getNumFaces(int &nFaces)
@@ -3215,7 +3214,7 @@ int MLI_FEData::getNumFaces(int &nFaces)
 }
 
 //*************************************************************************
-// get all face globalIDs 
+// get all face globalIDs
 //-------------------------------------------------------------------------
 
 int MLI_FEData::getFaceBlockGlobalIDs(int nFaces, int *fGlobalIDs)
@@ -3231,13 +3230,13 @@ int MLI_FEData::getFaceBlockGlobalIDs(int nFaces, int *fGlobalIDs)
       printf("getFaceBlockGlobalIDs ERROR : nFaces mismatch.\n");
       exit(1);
    }
-   for ( int i = 0; i < nFaces; i++ ) 
+   for ( int i = 0; i < nFaces; i++ )
       fGlobalIDs[i] = currBlock->faceGlobalIDs_[i];
    return 1;
 }
 
 //*************************************************************************
-// get number of shared faces 
+// get number of shared faces
 //-------------------------------------------------------------------------
 
 int MLI_FEData::getNumSharedFaces(int &nFaces)
@@ -3276,7 +3275,7 @@ int MLI_FEData::getSharedFaceNumProcs(int nFaces, int *fGlobalIDs,
    }
 
    // -------------------------------------------------------------
-   // --- get information 
+   // --- get information
    // -------------------------------------------------------------
 
    for ( int i = 0; i < nFaces; i++ )
@@ -3311,7 +3310,7 @@ int MLI_FEData::getSharedFaceProcs(int nFaces, int *numProcs,
    }
 
    // -------------------------------------------------------------
-   // --- get information 
+   // --- get information
    // -------------------------------------------------------------
 
    for ( int i = 0; i < nFaces; i++ )
@@ -3344,7 +3343,7 @@ int MLI_FEData::getFaceNumNodes(int &nNodes)
 }
 
 //*************************************************************************
-// get block face node list 
+// get block face node list
 //-------------------------------------------------------------------------
 
 int MLI_FEData::getFaceBlockNodeLists(int nFaces, int nNodesPerFace,
@@ -3379,12 +3378,12 @@ int MLI_FEData::getFaceBlockNodeLists(int nFaces, int nNodesPerFace,
    for ( int i = 0; i < nFaces; i++ )
       for ( int j = 0; j < nNodesPerFace; j++ )
          nGlobalIDLists[i][j] = currBlock->faceNodeIDList_[i][j];
-   
+
    return 1;
 }
 
 //*************************************************************************
-// get face node list 
+// get face node list
 //-------------------------------------------------------------------------
 
 int MLI_FEData::getFaceNodeList(int fGlobalID, int nNodes, int *nodeList)
@@ -3418,12 +3417,12 @@ int MLI_FEData::getFaceNodeList(int fGlobalID, int nNodes, int *nodeList)
    }
    for ( int i = 0; i < nNodes; i++ )
       nodeList[i] = currBlock->faceNodeIDList_[index][i];
-   
+
    return 1;
 }
 
 //*************************************************************************
-// load in the function to calculate shape function interpolant 
+// load in the function to calculate shape function interpolant
 //-------------------------------------------------------------------------
 
 int MLI_FEData::loadFunc_computeShapeFuncInterpolant(void *object, int (*func)
@@ -3435,10 +3434,10 @@ int MLI_FEData::loadFunc_computeShapeFuncInterpolant(void *object, int (*func)
 }
 
 //*************************************************************************
-// get shape function interpolant 
+// get shape function interpolant
 //-------------------------------------------------------------------------
 
-int MLI_FEData::getShapeFuncInterpolant(int elemID, int nNodes, 
+int MLI_FEData::getShapeFuncInterpolant(int elemID, int nNodes,
                    const double *coord, double *coef)
 {
    USR_computeShapeFuncInterpolant(USR_FEGridObj_, elemID, nNodes,
@@ -3454,7 +3453,7 @@ int MLI_FEData::impSpecificRequests(char *data_key, int argc, char **argv)
 {
    int           mypid, nprocs;
    MLI_ElemBlock *currBlock = elemBlockList_[currentElemBlock_];
-  
+
    // -------------------------------------------------------------
    // --- error checking
    // -------------------------------------------------------------
@@ -3466,7 +3465,7 @@ int MLI_FEData::impSpecificRequests(char *data_key, int argc, char **argv)
    }
 
    // -------------------------------------------------------------
-   // --- output help menu 
+   // --- output help menu
    // -------------------------------------------------------------
 
    MPI_Comm_rank( mpiComm_, &mypid);
@@ -3507,11 +3506,11 @@ int MLI_FEData::impSpecificRequests(char *data_key, int argc, char **argv)
 
    if ( ! strcmp("getElemOffset",data_key) )
    {
-      if ( argc < 1 ) 
+      if ( argc < 1 )
       {
          printf("implSpecificRequests ERROR : getElemOffset - argc < 1.\n");
          exit(1);
-      } 
+      }
       int *offset = (int *) argv[0];
       (*offset) = currBlock->elemOffset_;
       return 1;
@@ -3521,11 +3520,11 @@ int MLI_FEData::impSpecificRequests(char *data_key, int argc, char **argv)
 
    else if ( ! strcmp("getNodeOffset", data_key) )
    {
-      if ( argc < 1 ) 
+      if ( argc < 1 )
       {
          printf("impSpecificRequests ERROR : getNodeOffset - argc < 1.\n");
          exit(1);
-      } 
+      }
       int *offset = (int *) argv[0];
       (*offset) = currBlock->nodeOffset_;
       return 1;
@@ -3535,11 +3534,11 @@ int MLI_FEData::impSpecificRequests(char *data_key, int argc, char **argv)
 
    else if ( ! strcmp("getFaceOffset", data_key) )
    {
-      if ( argc < 1 ) 
+      if ( argc < 1 )
       {
          printf("impSpecificRequests ERROR : getFaceOffset - argc < 1.\n");
          exit(1);
-      } 
+      }
       int *offset = (int *) argv[0];
       (*offset) = currBlock->faceOffset_;
       return 1;
@@ -3549,11 +3548,11 @@ int MLI_FEData::impSpecificRequests(char *data_key, int argc, char **argv)
 
    else if ( ! strcmp("getNumExtNodes", data_key) )
    {
-      if ( argc < 1 ) 
+      if ( argc < 1 )
       {
          printf("impSpecificRequests ERROR : getNumExtNodes - argc < 1.\n");
          exit(1);
-      } 
+      }
       int *nNodesExt = (int *) argv[0];
       (*nNodesExt) = currBlock->numExternalNodes_;
       return 1;
@@ -3563,11 +3562,11 @@ int MLI_FEData::impSpecificRequests(char *data_key, int argc, char **argv)
 
    else if ( ! strcmp("getNumExtFaces", data_key) )
    {
-      if ( argc < 1 ) 
+      if ( argc < 1 )
       {
          printf("impSpecificRequests ERROR : getNumExtFaces - argc < 1.\n");
          exit(1);
-      } 
+      }
       int *nFacesExt = (int *) argv[0];
       (*nFacesExt) = currBlock->numExternalFaces_;
       return 1;
@@ -3577,11 +3576,11 @@ int MLI_FEData::impSpecificRequests(char *data_key, int argc, char **argv)
 
    else if ( ! strcmp("getExtNodeNewGlobalIDs", data_key) )
    {
-      if ( argc < 1 ) 
+      if ( argc < 1 )
       {
          printf("impSpecificRequests ERROR : getExtNodeNewGlobalIDs-argc<1\n");
          exit(1);
-      } 
+      }
       int *newGlobalIDs = (int *) argv[0];
       for ( int i = 0; i < currBlock->numExternalNodes_; i++ )
          newGlobalIDs[i] = currBlock->nodeExtNewGlobalIDs_[i];
@@ -3592,11 +3591,11 @@ int MLI_FEData::impSpecificRequests(char *data_key, int argc, char **argv)
 
    else if ( ! strcmp("getExtFaceNewGlobalIDs", data_key) )
    {
-      if ( argc < 1 ) 
+      if ( argc < 1 )
       {
          printf("impSpecificRequests ERROR : getExtFaceNewGlobalIDs-argc<1\n");
          exit(1);
-      } 
+      }
       int *newGlobalIDs = (int *) argv[0];
       for ( int j = 0; j < currBlock->numExternalFaces_; j++ )
          newGlobalIDs[j] = currBlock->faceExtNewGlobalIDs_[j];
@@ -3660,28 +3659,28 @@ int MLI_FEData::impSpecificRequests(char *data_key, int argc, char **argv)
          }
       }
 
-      // find out how many distinct processor numbers and fill the 
+      // find out how many distinct processor numbers and fill the
       // send buffer
 
       if ( nNodesExt > 0 ) procList = new int[mypid];
       else                 procList = NULL;
       for ( i = 0; i < nNodesExt; i++ ) procList[i] = 0;
-      for ( i = 0; i < nNodesExt; i++ ) 
+      for ( i = 0; i < nNodesExt; i++ )
          procList[owner[index]] += ncols[i+nNodes] + 2;
       nSends = 0;
       for ( i = 0; i < mypid; i++ ) if ( procList[i] > 0 ) nSends++;
       sendLengs = NULL;
       sendProcs = NULL;
       sendBufs  = NULL;
-      if ( nSends > 0 ) 
+      if ( nSends > 0 )
       {
          sendLengs = new int[nSends];
          sendProcs = new int[nSends];
          sendBufs  = new int*[nSends];
          nSends = 0;
-         for ( i = 0; i < mypid; i++ ) 
+         for ( i = 0; i < mypid; i++ )
          {
-            if ( procList[i] > 0 ) 
+            if ( procList[i] > 0 )
             {
                sendLengs[nSends] = procList[i];
                sendProcs[nSends] = i;
@@ -3691,14 +3690,14 @@ int MLI_FEData::impSpecificRequests(char *data_key, int argc, char **argv)
             }
          }
          nSends = 0;
-         for ( i = 0; i < mypid; i++ ) 
-            if ( procList[i] > 0 ) procList[i] = nSends++; 
+         for ( i = 0; i < mypid; i++ )
+            if ( procList[i] > 0 ) procList[i] = nSends++;
          for ( i = 0; i < nNodesExt; i++ ) owner[i] = procList[owner[i]];
-         for ( i = 0; i < nNodesExt; i++ ) 
+         for ( i = 0; i < nNodesExt; i++ )
          {
             sendBufs[owner[i]][sendLengs[owner[i]]++] = nodeList[i+nNodes];
             sendBufs[owner[i]][sendLengs[owner[i]]++] = ncols[i+nNodes];
-            for ( j = 0; j < ncols[i+nNodes]; j++ ) 
+            for ( j = 0; j < ncols[i+nNodes]; j++ )
                sendBufs[owner[i]][sendLengs[owner[i]]++] = cols[i+nNodes][j];
          }
       }
@@ -3723,33 +3722,33 @@ int MLI_FEData::impSpecificRequests(char *data_key, int argc, char **argv)
          recvLengs = new int[nRecvs];
          pSrc = MPI_ANY_SOURCE;
          msgID = 33420;
-         for ( i = 0; i < nRecvs; i++ ) 
+         for ( i = 0; i < nRecvs; i++ )
             MPI_Irecv(&recvLengs[i],1,MPI_INT,pSrc,msgID,mpiComm_,&request[i]);
       }
       if ( nSends > 0 )
       {
          msgID = 33420;
-         for ( i = 0; i < nSends; i++ ) 
+         for ( i = 0; i < nSends; i++ )
             MPI_Send(&sendLengs[i],1,MPI_INT,sendProcs[i],msgID,mpiComm_);
       }
       if ( nRecvs > 0 )
       {
          recvProcs = new int[nRecvs];
          recvBufs  = new int*[nRecvs];
-         for ( i = 0; i < nRecvs; i++ ) 
+         for ( i = 0; i < nRecvs; i++ )
          {
             MPI_Wait( &request[i], &status );
             recvProcs[i] = status.MPI_SOURCE;
             recvBufs[i]  = new int[recvLengs[i]];
          }
       }
-      
+
       // now send/receive the external information
 
       if ( nRecvs > 0 )
       {
          msgID = 33421;
-         for ( i = 0; i < nRecvs; i++ ) 
+         for ( i = 0; i < nRecvs; i++ )
          {
             pSrc   = recvProcs[i];
             length = recvLengs[i];
@@ -3760,7 +3759,7 @@ int MLI_FEData::impSpecificRequests(char *data_key, int argc, char **argv)
       if ( nSends > 0 )
       {
          msgID = 33421;
-         for ( i = 0; i < nSends; i++ ) 
+         for ( i = 0; i < nSends; i++ )
          {
             pSrc   = sendProcs[i];
             length = sendLengs[i];
@@ -3772,7 +3771,7 @@ int MLI_FEData::impSpecificRequests(char *data_key, int argc, char **argv)
       {
          for ( i = 0; i < nRecvs; i++ ) MPI_Wait( &request[i], &status );
       }
-      
+
       // owners of shared nodes receive data
 
       for( i = 0; i < nRecvs; i++ )
@@ -3791,7 +3790,7 @@ int MLI_FEData::impSpecificRequests(char *data_key, int argc, char **argv)
             }
             columns = new int[ncols[index]+length];
             for ( j = 0; j < ncols[index]; j++ ) columns[j] = cols[index][j];
-            for ( j = 0; j < length; j++ ) 
+            for ( j = 0; j < length; j++ )
                columns[ncols[index]++] = iBuf[j+ncnt];
             ncnt += length;
             delete [] cols[index];
@@ -3824,7 +3823,7 @@ int MLI_FEData::impSpecificRequests(char *data_key, int argc, char **argv)
       int *columns, l, k;
       MPI_Request request;
       MPI_Status  Status;
-      
+
       // get the owners for the external faces
 
       int nFaces = currBlock->numLocalFaces_;
@@ -3847,19 +3846,19 @@ int MLI_FEData::impSpecificRequests(char *data_key, int argc, char **argv)
             owner[index] = pnum;
          }
       }
-      
+
       // external faces send with which elements are connected
 
       for ( i = 0; i < nFacesExt; i++ )
-         MPI_Isend(cols[i+nFaces], ncols[i+nFaces], MPI_INT, 
+         MPI_Isend(cols[i+nFaces], ncols[i+nFaces], MPI_INT,
                    owner[i], faceList[i+nFaces], mpiComm_, &request);
-      
+
       // owners of shared faces receive data
 
       for ( i = 0; i < numSharedFaces; i++ )
       {
          ind[i] = MLI_Utils_BinarySearch(sharedFaceList[i], faceList, nFaces);
-	  
+
          // the shared face is owned by this subdomain
 
          if (ind[i] >= 0)
@@ -3872,10 +3871,10 @@ int MLI_FEData::impSpecificRequests(char *data_key, int argc, char **argv)
                   MPI_Get_count( &Status, MPI_INT, &n);
                   k = MLI_Utils_BinarySearch(Status.MPI_TAG,faceList,nFaces);
                   columns = new int[ncols[k]+n];
-		  
+
                   for( l = 0; l < ncols[k]; l++ ) columns[l] = cols[k][l];
                   for( l = 0; l < n; l++ ) columns[ncols[k]++] = Buf[l];
-		    
+
                   delete [] cols[k];
                   cols[k] = columns;
                }
@@ -3914,9 +3913,9 @@ int MLI_FEData::readFromFile(char *infile)
    //          number of elements
    //          number of nodes per element
    //          number of element fields
-   //          element field IDs... 
+   //          element field IDs...
    //          number of nodal fields
-   //          nodal field IDs... 
+   //          nodal field IDs...
    //          element global IDs (nElems of them)
    //          element node list (nElems*nNodesPerElem of them)
    // -------------------------------------------------------------
@@ -3954,14 +3953,14 @@ int MLI_FEData::readFromFile(char *infile)
 
    IDLists = new int*[nElems];
    for (i = 0; i < nElems; i++) IDLists[i] = new int[nNodesPerElem];
-   for (i = 0; i < nElems; i++) 
+   for (i = 0; i < nElems; i++)
    {
       for (j = 0; j < nNodesPerElem; j++) fscanf(fp, "%d", &(IDLists[i][j]));
    }
    fclose(fp);
 
    // -------------------------------------------------------------
-   // --- read coordinate file, if present 
+   // --- read coordinate file, if present
    // Format : number of nodes
    //          space dimension
    //          node global ID x y z ...
@@ -3977,24 +3976,24 @@ int MLI_FEData::readFromFile(char *infile)
       fscanf(fp, "%d", &spaceDim);
       nodeIDs    = new int[nNodes];
       nodeCoords = new double[nNodes * spaceDim];
-      for (i = 0; i < nNodes; i++) 
+      for (i = 0; i < nNodes; i++)
       {
          fscanf(fp, "%d", &(nodeIDs[i]));
-         for (j = 0; j < spaceDim; j++) 
+         for (j = 0; j < spaceDim; j++)
             fscanf(fp, "%lg", &(nodeCoords[i*spaceDim+j]));
       }
       fclose(fp);
 
       nodeIDAux = new int[nNodes];
-      for (i = 0; i < nNodes; i++) nodeIDAux[i] = i; 
+      for (i = 0; i < nNodes; i++) nodeIDAux[i] = i;
       newCoords = new double*[nElems];
-      for (i = 0; i < nElems; i++) 
-         newCoords[i] = new double[nNodesPerElem*spaceDim]; 
+      for (i = 0; i < nElems; i++)
+         newCoords[i] = new double[nNodesPerElem*spaceDim];
 
       MLI_Utils_IntQSort2(nodeIDs, nodeIDAux, 0, nNodes-1);
-      for (i = 0; i < nElems; i++) 
+      for (i = 0; i < nElems; i++)
       {
-         for (j = 0; j < nNodesPerElem; j++) 
+         for (j = 0; j < nNodesPerElem; j++)
          {
             index = MLI_Utils_BinarySearch(IDLists[i][j], nodeIDs, nNodes);
             if ( index < 0 )
@@ -4002,7 +4001,7 @@ int MLI_FEData::readFromFile(char *infile)
                printf("readFromFile ERROR : element node ID not found.\n");
                exit(1);
             }
-            for (k = 0; k < spaceDim; k++) 
+            for (k = 0; k < spaceDim; k++)
             {
                index2 = nodeIDAux[index];
                newCoords[i][j*spaceDim+k] = nodeCoords[index2*spaceDim+k];
@@ -4043,7 +4042,7 @@ int MLI_FEData::readFromFile(char *infile)
    if ( nodeIDAux    != NULL ) delete [] nodeIDAux;
    if ( elemFieldIDs != NULL ) delete [] elemFieldIDs;
    if ( nodeFieldIDs != NULL ) delete [] nodeFieldIDs;
-   
+
    // -------------------------------------------------------------
    // --- read and shared nodes information
    // -------------------------------------------------------------
@@ -4058,11 +4057,11 @@ int MLI_FEData::readFromFile(char *infile)
       nodeIDs   = new int[nNodes];
       numProcs  = new int[nNodes];
       procLists = new int*[nNodes];
-      for ( i = 0; i < nNodes; i++ ) 
+      for ( i = 0; i < nNodes; i++ )
       {
          fscanf(fp, "%d %d", &(nodeIDs[i]), &(numProcs[i]));
          procLists[i] = new int[numProcs[i]];
-         for ( j = 0; j < numProcs[i]; j++ ) 
+         for ( j = 0; j < numProcs[i]; j++ )
             fscanf(fp, "%d", &(procLists[i][j]));
       }
       initSharedNodes(nNodes, nodeIDs, numProcs, procLists);
@@ -4123,21 +4122,21 @@ int MLI_FEData::readFromFile(char *infile)
       nodeBCFlags = new char*[nNodes];
       nodeBCVals  = new double*[nNodes];
       for ( i = 0; i < nNodes; i++ ) nodeBCFlags[i] = new char[nodeDOF];
-      for ( i = 0; i < nNodes; i++ ) 
+      for ( i = 0; i < nNodes; i++ )
       {
          nodeBCVals[i] = new double[nodeDOF];
-         for ( j = 0; j < nodeDOF; j++ ) nodeBCVals[i][j] = 0.0; 
+         for ( j = 0; j < nodeDOF; j++ ) nodeBCVals[i][j] = 0.0;
       }
-      for ( i = 0; i < nNodes; i++ ) 
+      for ( i = 0; i < nNodes; i++ )
       {
          fscanf(fp, "%d", &(nodeIDs[i]));
-         for ( j = 0; j < nodeDOF; j++ ) 
+         for ( j = 0; j < nodeDOF; j++ )
          {
             fscanf(fp, "%d", &k);
             if ( k > 0 )
             {
                nodeBCFlags[i][j] = 'Y';
-               fscanf(fp, "%lg", &(nodeBCVals[i][j])); 
+               fscanf(fp, "%lg", &(nodeBCVals[i][j]));
             }
             else nodeBCFlags[i][j] = 'N';
          }
@@ -4184,9 +4183,9 @@ int MLI_FEData::writeToFile(char *infile)
    //          number of elements
    //          number of nodes per element
    //          number of element fields
-   //          element field IDs... 
+   //          element field IDs...
    //          number of nodal fields
-   //          nodal field IDs... 
+   //          nodal field IDs...
    //          element global IDs (nElems of them)
    //          element node list (nElems*nNodesPerElem of them)
    // -------------------------------------------------------------
@@ -4217,32 +4216,32 @@ int MLI_FEData::writeToFile(char *infile)
    fprintf(fp, "%12d\n", numFields_);
    for ( i = 0; i < numFields_; i++ )
       fprintf(fp, "%12d %12d\n", fieldIDs_[i], fieldSizes_[i]);
-   
+
    nElems = currBlock->numLocalElems_;
    fprintf(fp, "%12d\n", nElems);
    fprintf(fp, "%12d\n", currBlock->elemNumNodes_);
    fprintf(fp, "%12d\n", currBlock->elemNumFields_);
-   for (i = 0; i < currBlock->elemNumFields_; i++) 
+   for (i = 0; i < currBlock->elemNumFields_; i++)
       fprintf(fp, "%12d\n", currBlock->elemFieldIDs_[i]);
    fprintf(fp, "%12d\n", currBlock->nodeNumFields_);
-   for (i = 0; i < currBlock->nodeNumFields_; i++) 
+   for (i = 0; i < currBlock->nodeNumFields_; i++)
       fprintf(fp, "%12d\n", currBlock->nodeFieldIDs_[i]);
 
    fprintf(fp, "\n");
-   for (i = 0; i < nElems; i++) 
+   for (i = 0; i < nElems; i++)
       fprintf(fp, "%12d\n", currBlock->elemGlobalIDs_[i]);
    fprintf(fp,"\n");
 
-   for (i = 0; i < nElems; i++) 
+   for (i = 0; i < nElems; i++)
    {
-      for ( j = 0; j < currBlock->elemNumNodes_; j++ ) 
+      for ( j = 0; j < currBlock->elemNumNodes_; j++ )
          fprintf(fp, "%d ", currBlock->elemNodeIDList_[i][j]);
       fprintf(fp,"\n");
-   } 
+   }
    fclose(fp);
 
    // -------------------------------------------------------------
-   // --- write coordinate file, if needed 
+   // --- write coordinate file, if needed
    // Format : number of nodes
    //          space dimension
    //          node global ID x y z ...
@@ -4266,10 +4265,10 @@ int MLI_FEData::writeToFile(char *infile)
       nNodes = currBlock->numLocalNodes_ + currBlock->numExternalNodes_;
       fprintf(fp, "%12d\n", nNodes);
       fprintf(fp, "%12d\n", spaceDimension_);
-      for ( i = 0; i < nNodes; i++ ) 
+      for ( i = 0; i < nNodes; i++ )
       {
          fprintf(fp, "%12d", currBlock->nodeGlobalIDs_[i]);
-         for (j = 0; j < spaceDimension_; j++) 
+         for (j = 0; j < spaceDimension_; j++)
             fprintf(fp, "%20.12e",
                     currBlock->nodeCoordinates_[i*spaceDimension_+j]);
          fprintf(fp,"\n");
@@ -4299,11 +4298,11 @@ int MLI_FEData::writeToFile(char *infile)
       fprintf(fp, "#\n");
 
       fprintf(fp, "%d\n", nNodes);
-      for ( i = 0; i < nNodes; i++ ) 
+      for ( i = 0; i < nNodes; i++ )
       {
-         fprintf(fp, "%12d %12d\n", currBlock->sharedNodeIDs_[i], 
+         fprintf(fp, "%12d %12d\n", currBlock->sharedNodeIDs_[i],
                 currBlock->sharedNodeNProcs_[i]);
-         for ( j = 0; j < currBlock->sharedNodeNProcs_[i]; j++ ) 
+         for ( j = 0; j < currBlock->sharedNodeNProcs_[i]; j++ )
             fprintf(fp, "%12d\n", currBlock->sharedNodeProc_[i][j]);
       }
       fclose(fp);
@@ -4365,9 +4364,9 @@ int MLI_FEData::writeToFile(char *infile)
 
       fprintf(fp, "%d\n", nNodes );
       fprintf(fp, "%d\n", nodeDOF );
-      for ( i = 0; i < nNodes; i++ ) 
+      for ( i = 0; i < nNodes; i++ )
       {
-         for ( j = 0; j < nodeDOF; j++ ) 
+         for ( j = 0; j < nodeDOF; j++ )
          {
             if ( currBlock->nodeBCFlagList_[i][j] == 'Y' )
                fprintf(fp, "%12d  1  %25.16e\n", currBlock->nodeBCIDList_[i],
@@ -4382,7 +4381,7 @@ int MLI_FEData::writeToFile(char *infile)
 }
 
 /**************************************************************************
- * constructor for the elemBlock 
+ * constructor for the elemBlock
  *-----------------------------------------------------------------------*/
 
 int MLI_FEData::createElemBlock(int blockID)
@@ -4479,7 +4478,7 @@ int MLI_FEData::createElemBlock(int blockID)
 }
 
 /**************************************************************************
- * destructor for the elemBlock 
+ * destructor for the elemBlock
  *-----------------------------------------------------------------------*/
 
 int MLI_FEData::deleteElemBlock(int blockID)
@@ -4508,16 +4507,16 @@ int MLI_FEData::deleteElemBlock(int blockID)
 
    currBlock = elemBlockList_[blockID];
    if (currBlock->elemGlobalIDs_ != NULL) delete [] currBlock->elemGlobalIDs_;
-   if (currBlock->elemGlobalIDAux_ != NULL) 
+   if (currBlock->elemGlobalIDAux_ != NULL)
       delete [] currBlock->elemGlobalIDAux_;
    if (currBlock->elemFieldIDs_ != NULL) delete [] currBlock->elemFieldIDs_;
-   if (currBlock->elemNodeIDList_ != NULL) 
+   if (currBlock->elemNodeIDList_ != NULL)
    {
       for ( i = 0; i < currBlock->numLocalElems_; i++ )
          delete [] currBlock->elemNodeIDList_[i];
       delete [] currBlock->elemNodeIDList_;
    }
-   if (currBlock->elemStiffMat_ != NULL) 
+   if (currBlock->elemStiffMat_ != NULL)
    {
       for ( i = 0; i < currBlock->numLocalElems_; i++ )
          delete [] currBlock->elemStiffMat_[i];
@@ -4528,26 +4527,26 @@ int MLI_FEData::deleteElemBlock(int blockID)
    if (currBlock->elemVolume_ != NULL) delete [] currBlock->elemVolume_;
    if (currBlock->elemMaterial_ != NULL) delete [] currBlock->elemMaterial_;
    if (currBlock->elemParentIDs_ != NULL) delete [] currBlock->elemParentIDs_;
-   if (currBlock->elemLoads_ != NULL) 
+   if (currBlock->elemLoads_ != NULL)
    {
       for ( i = 0; i < currBlock->numLocalElems_; i++ )
          delete [] currBlock->elemLoads_[i];
       delete [] currBlock->elemLoads_;
    }
-   if (currBlock->elemSol_ != NULL) 
+   if (currBlock->elemSol_ != NULL)
    {
       for ( i = 0; i < currBlock->numLocalElems_; i++ )
          delete [] currBlock->elemSol_[i];
       delete [] currBlock->elemSol_;
    }
-   if (currBlock->elemFaceIDList_ != NULL) 
+   if (currBlock->elemFaceIDList_ != NULL)
    {
       for ( i = 0; i < currBlock->numLocalElems_; i++ )
          delete [] currBlock->elemFaceIDList_[i];
       delete [] currBlock->elemFaceIDList_;
    }
    if (currBlock->elemBCIDList_ != NULL) delete [] currBlock->elemBCIDList_;
-   if (currBlock->elemBCFlagList_ != NULL) 
+   if (currBlock->elemBCFlagList_ != NULL)
    {
       for ( i = 0; i < currBlock->numLocalElems_; i++ )
          delete [] currBlock->elemBCFlagList_[i];
@@ -4567,7 +4566,7 @@ int MLI_FEData::deleteElemBlock(int blockID)
 
    if (currBlock->nodeGlobalIDs_ != NULL) delete [] currBlock->nodeGlobalIDs_;
    if (currBlock->nodeFieldIDs_ != NULL) delete [] currBlock->nodeFieldIDs_;
-   if (currBlock->nodeCoordinates_ != NULL) 
+   if (currBlock->nodeCoordinates_ != NULL)
       delete [] currBlock->nodeCoordinates_;
    if (currBlock->nodeBCIDList_ != NULL) delete [] currBlock->nodeBCIDList_;
    if (currBlock->nodeBCFlagList_ != NULL)
@@ -4580,9 +4579,9 @@ int MLI_FEData::deleteElemBlock(int blockID)
       delete [] currBlock->nodeBCValues_;
    }
    if (currBlock->sharedNodeIDs_ != NULL) delete [] currBlock->sharedNodeIDs_;
-   if (currBlock->sharedNodeNProcs_ != NULL) 
+   if (currBlock->sharedNodeNProcs_ != NULL)
       delete [] currBlock->sharedNodeNProcs_;
-   if (currBlock->sharedNodeProc_ != NULL) 
+   if (currBlock->sharedNodeProc_ != NULL)
    {
       for ( i = 0; i < currBlock->numSharedNodes_; i++ )
          delete [] currBlock->sharedNodeProc_[i];
@@ -4599,7 +4598,7 @@ int MLI_FEData::deleteElemBlock(int blockID)
    currBlock->nodeOffset_       = 0;
 
    if (currBlock->faceGlobalIDs_ != NULL) delete [] currBlock->faceGlobalIDs_;
-   if (currBlock->faceNodeIDList_ != NULL) 
+   if (currBlock->faceNodeIDList_ != NULL)
    {
       int nFaces = currBlock->numLocalFaces_ + currBlock->numExternalFaces_;
       for ( i = 0; i < nFaces; i++ )
@@ -4607,9 +4606,9 @@ int MLI_FEData::deleteElemBlock(int blockID)
       delete [] currBlock->faceNodeIDList_;
    }
    if (currBlock->sharedFaceIDs_ != NULL) delete [] currBlock->sharedFaceIDs_;
-   if (currBlock->sharedFaceNProcs_ != NULL) 
+   if (currBlock->sharedFaceNProcs_ != NULL)
       delete [] currBlock->sharedFaceNProcs_;
-   if (currBlock->sharedFaceProc_ != NULL) 
+   if (currBlock->sharedFaceProc_ != NULL)
    {
       for ( i = 0; i < currBlock->numSharedFaces_; i++ )
          delete [] currBlock->sharedFaceProc_[i];
@@ -4636,7 +4635,7 @@ int MLI_FEData::searchElement(int key)
    int           index;
    MLI_ElemBlock *currBlock = elemBlockList_[currentElemBlock_];
 
-   index = MLI_Utils_BinarySearch(key, currBlock->elemGlobalIDs_, 
+   index = MLI_Utils_BinarySearch(key, currBlock->elemGlobalIDs_,
                                   currBlock->numLocalElems_);
    return index;
 }
@@ -4650,7 +4649,7 @@ int MLI_FEData::searchNode(int key)
    int           index;
    MLI_ElemBlock *currBlock = elemBlockList_[currentElemBlock_];
 
-   index = MLI_Utils_BinarySearch(key, currBlock->nodeGlobalIDs_, 
+   index = MLI_Utils_BinarySearch(key, currBlock->nodeGlobalIDs_,
                                   currBlock->numLocalNodes_);
    if ( index < 0 )
    {
@@ -4671,7 +4670,7 @@ int MLI_FEData::searchFace(int key)
    int           index;
    MLI_ElemBlock *currBlock = elemBlockList_[currentElemBlock_];
 
-   index = MLI_Utils_BinarySearch(key, currBlock->faceGlobalIDs_, 
+   index = MLI_Utils_BinarySearch(key, currBlock->faceGlobalIDs_,
                                   currBlock->numLocalFaces_);
    if ( index < 0 )
    {

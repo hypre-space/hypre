@@ -8,7 +8,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <assert.h>
 
 #include "HYPRE_FEI_includes.h"
 
@@ -103,7 +102,7 @@ int HYPRE_LSI_Schur::computeBlockInfo()
    endRow       = APartition_[mypid+1] - 1;
    localNrows   = endRow - startRow + 1;
    globalNrows  = APartition_[nprocs];
-    
+
    //------------------------------------------------------------------
    // find the local size of the (2,2) block
    //------------------------------------------------------------------
@@ -113,10 +112,10 @@ int HYPRE_LSI_Schur::computeBlockInfo()
    for ( irow = startRow; irow <= endRow; irow++ )
    {
       nodeNum = lookup_->getAssociatedNodeNumber(irow);
-      if ( nodeNum != lastNodeNum ) 
+      if ( nodeNum != lastNodeNum )
       {
-         if (count == 1) break; 
-         lastNodeNum = nodeNum; 
+         if (count == 1) break;
+         lastNodeNum = nodeNum;
          count = 1;
       }
       else count++;
@@ -128,11 +127,11 @@ int HYPRE_LSI_Schur::computeBlockInfo()
       printf("%4d HYPRE_LSI_Schur : P22_size = %d\n", mypid, P22Size_);
 
    //------------------------------------------------------------------
-   // allocate array for storing indices of (2,2) block variables 
+   // allocate array for storing indices of (2,2) block variables
    //------------------------------------------------------------------
 
    if ( P22Size_ > 0 ) P22LocalInds_ = new int[P22Size_];
-   else                P22LocalInds_ = NULL; 
+   else                P22LocalInds_ = NULL;
 
    //------------------------------------------------------------------
    // compose a local list of rows for the (2,2) block
@@ -143,16 +142,16 @@ int HYPRE_LSI_Schur::computeBlockInfo()
    for ( irow = startRow; irow <= endRow; irow++ )
    {
       nodeNum = lookup_->getAssociatedNodeNumber(irow);
-      if ( nodeNum != lastNodeNum ) 
+      if ( nodeNum != lastNodeNum )
       {
-         if (count == 1) break; 
-         lastNodeNum = nodeNum; 
+         if (count == 1) break;
+         lastNodeNum = nodeNum;
          count = 1;
       }
       else count++;
    }
    index = irow - 1;
-   for ( irow = index; irow <= endRow; irow++ ) 
+   for ( irow = index; irow <= endRow; irow++ )
       P22LocalInds_[P22Size_++] = irow;
 
    //------------------------------------------------------------------
@@ -179,7 +178,7 @@ int HYPRE_LSI_Schur::computeBlockInfo()
    P22Offsets_ = new int[nprocs];
    MPI_Allgather(&P22Size_, 1, MPI_INT, P22Offsets_, 1, MPI_INT, mpiComm_);
    dispArray[0] = 0;
-   for ( j = 1; j < nprocs; j++ ) 
+   for ( j = 1; j < nprocs; j++ )
       dispArray[j] = dispArray[j-1] + P22Offsets_[j-1];
    MPI_Allgatherv(P22LocalInds_, P22Size_, MPI_INT, P22GlobalInds_,
                   P22Offsets_, dispArray, MPI_INT, mpiComm_);
@@ -193,7 +192,7 @@ int HYPRE_LSI_Schur::computeBlockInfo()
                 j, P22LocalInds_[j]);
    }
    return 0;
-} 
+}
 
 //******************************************************************************
 // Given a matrix A, build the 2 x 2 blocks
@@ -256,19 +255,19 @@ int HYPRE_LSI_Schur::buildBlocks(HYPRE_IJMatrix Amat)
    if ( outputLevel_ >= 1 )
    {
       printf("%4d HYPRE_LSI_Schur(1,1) : StartRow  = %d\n",mypid,A11StartRow);
-      printf("%4d HYPRE_LSI_Schur(1,1) : GlobalDim = %d %d\n",mypid,A11GNRows, 
+      printf("%4d HYPRE_LSI_Schur(1,1) : GlobalDim = %d %d\n",mypid,A11GNRows,
                                                    A11GNCols);
-      printf("%4d HYPRE_LSI_Schur(1,1) : LocalDim  = %d %d\n",mypid,A11NRows, 
+      printf("%4d HYPRE_LSI_Schur(1,1) : LocalDim  = %d %d\n",mypid,A11NRows,
                                                    A11NCols);
       printf("%4d HYPRE_LSI_Schur(1,2) : StartRow  = %d\n",mypid,A12StartRow);
-      printf("%4d HYPRE_LSI_Schur(1,2) : GlobalDim = %d %d\n",mypid,A12GNRows, 
+      printf("%4d HYPRE_LSI_Schur(1,2) : GlobalDim = %d %d\n",mypid,A12GNRows,
                                                    A12GNCols);
-      printf("%4d HYPRE_LSI_Schur(1,2) : LocalDim  = %d %d\n",mypid,A12NRows, 
+      printf("%4d HYPRE_LSI_Schur(1,2) : LocalDim  = %d %d\n",mypid,A12NRows,
                                                    A12NCols);
       printf("%4d HYPRE_LSI_Schur(2,2) : StartRow  = %d\n",mypid,A22StartRow);
-      printf("%4d HYPRE_LSI_Schur(2,2) : GlobalDim = %d %d\n",mypid,A22GNRows, 
+      printf("%4d HYPRE_LSI_Schur(2,2) : GlobalDim = %d %d\n",mypid,A22GNRows,
                                                    A22GNCols);
-      printf("%4d HYPRE_LSI_Schur(2,2) : LocalDim  = %d %d\n",mypid,A22NRows, 
+      printf("%4d HYPRE_LSI_Schur(2,2) : LocalDim  = %d %d\n",mypid,A22NRows,
                                                    A22NCols);
    }
 
@@ -287,14 +286,14 @@ int HYPRE_LSI_Schur::buildBlocks(HYPRE_IJMatrix Amat)
    A22RowCnt = 0;
    HYPRE_IJMatrixGetObject(Amat, (void**) &Amat_csr);
 
-   for ( irow = AStartRow; irow < AStartRow+ANRows; irow++ ) 
+   for ( irow = AStartRow; irow < AStartRow+ANRows; irow++ )
    {
       HYPRE_ParCSRMatrixGetRow(Amat_csr, irow, &rowSize, &inds, &vals);
       searchInd = hypre_BinarySearch(P22LocalInds_, irow, P22Size_);
       if ( searchInd < 0 )   // A(1,1) or A(1,2) block
       {
          A11NewSize = A12NewSize = 0;
-         for ( j = 0; j < rowSize; j++ ) 
+         for ( j = 0; j < rowSize; j++ )
          {
             index = inds[j];
             searchInd = hypre_BinarySearch(P22GlobalInds_,index,P22GSize_);
@@ -304,9 +303,9 @@ int HYPRE_LSI_Schur::buildBlocks(HYPRE_IJMatrix Amat)
          if ( A12NewSize == 0 ) A12NewSize = 1;
          A11RowLengs[A11RowCnt++] = A11NewSize;
          A12RowLengs[A12RowCnt++] = A12NewSize;
-         A11MaxRowLeng = (A11NewSize > A11MaxRowLeng) ? 
+         A11MaxRowLeng = (A11NewSize > A11MaxRowLeng) ?
                           A11NewSize : A11MaxRowLeng;
-         A12MaxRowLeng = (A12NewSize > A12MaxRowLeng) ? 
+         A12MaxRowLeng = (A12NewSize > A12MaxRowLeng) ?
                           A12NewSize : A12MaxRowLeng;
          if ( A11NewSize != 1 )
             printf("%4d HYPRE_LSI_Schur WARNING - A11 row length > 1 : %d\n",
@@ -315,14 +314,14 @@ int HYPRE_LSI_Schur::buildBlocks(HYPRE_IJMatrix Amat)
       else // A(2,2) block
       {
          A22NewSize = 0;
-         for ( j = 0; j < rowSize; j++ ) 
+         for ( j = 0; j < rowSize; j++ )
          {
             index = inds[j];
             searchInd = hypre_BinarySearch(P22GlobalInds_,index,P22GSize_);
             if (searchInd >= 0) A22NewSize++;
          }
          A22RowLengs[A22RowCnt++] = A22NewSize;
-         A22MaxRowLeng = (A22NewSize > A22MaxRowLeng) ? 
+         A22MaxRowLeng = (A22NewSize > A22MaxRowLeng) ?
                           A22NewSize : A22MaxRowLeng;
       }
       HYPRE_ParCSRMatrixRestoreRow(Amat_csr, irow, &rowSize, &inds, &vals);
@@ -337,14 +336,14 @@ int HYPRE_LSI_Schur::buildBlocks(HYPRE_IJMatrix Amat)
    ierr += HYPRE_IJMatrixSetObjectType(A11mat_, HYPRE_PARCSR);
    ierr  = HYPRE_IJMatrixSetRowSizes(A11mat_, A11RowLengs);
    ierr += HYPRE_IJMatrixInitialize(A11mat_);
-   assert(!ierr);
+   hypre_assert(!ierr);
    delete [] A11RowLengs;
    ierr  = HYPRE_IJMatrixCreate(mpiComm_, A12StartRow, A12StartRow+A12NRows-1,
                                 A12StartCol, A12StartCol+A12NCols-1, &A12mat_);
    ierr += HYPRE_IJMatrixSetObjectType(A12mat_, HYPRE_PARCSR);
    ierr  = HYPRE_IJMatrixSetRowSizes(A12mat_, A12RowLengs);
    ierr += HYPRE_IJMatrixInitialize(A12mat_);
-   assert(!ierr);
+   hypre_assert(!ierr);
    delete [] A12RowLengs;
    if ( A22MaxRowLeng > 0 )
    {
@@ -353,7 +352,7 @@ int HYPRE_LSI_Schur::buildBlocks(HYPRE_IJMatrix Amat)
       ierr += HYPRE_IJMatrixSetObjectType(A22mat_, HYPRE_PARCSR);
       ierr  = HYPRE_IJMatrixSetRowSizes(A22mat_, A22RowLengs);
       ierr += HYPRE_IJMatrixInitialize(A22mat_);
-      assert(!ierr);
+      hypre_assert(!ierr);
    }
    else A22mat_ = NULL;
    delete [] A22RowLengs;
@@ -373,18 +372,18 @@ int HYPRE_LSI_Schur::buildBlocks(HYPRE_IJMatrix Amat)
    A12RowCnt = A12StartRow;
    A22RowCnt = A22StartRow;
 
-   for ( irow = AStartRow; irow < AStartRow+ANRows; irow++ ) 
+   for ( irow = AStartRow; irow < AStartRow+ANRows; irow++ )
    {
       HYPRE_ParCSRMatrixGetRow(Amat_csr, irow, &rowSize, &inds, &vals);
       searchInd = hypre_BinarySearch(P22LocalInds_, irow, P22Size_);
       if ( searchInd < 0 )   // A(1,1) or A(1,2) block
       {
          A11NewSize = A12NewSize = 0;
-         for ( j = 0; j < rowSize; j++ ) 
+         for ( j = 0; j < rowSize; j++ )
          {
             index = inds[j];
             searchInd = HYPRE_LSI_Search(P22GlobalInds_,index,P22GSize_);
-            if (searchInd >= 0) // A(1,2) block 
+            if (searchInd >= 0) // A(1,2) block
             {
                A12_inds[A12NewSize] = searchInd;
                A12_vals[A12NewSize++] = vals[j];
@@ -414,10 +413,10 @@ int HYPRE_LSI_Schur::buildBlocks(HYPRE_IJMatrix Amat)
                exit(1);
             }
          }
-         HYPRE_IJMatrixSetValues(A11mat_, 1, &A11NewSize, 
+         HYPRE_IJMatrixSetValues(A11mat_, 1, &A11NewSize,
 	                    (const int *) &A11RowCnt, (const int *) A11_inds,
                             (const double *) A11_vals);
-         HYPRE_IJMatrixSetValues(A12mat_, 1, &A12NewSize, 
+         HYPRE_IJMatrixSetValues(A12mat_, 1, &A12NewSize,
 	                    (const int *) &A12RowCnt, (const int *) A12_inds,
                             (const double *) A12_vals);
          A11RowCnt++;
@@ -426,11 +425,11 @@ int HYPRE_LSI_Schur::buildBlocks(HYPRE_IJMatrix Amat)
       else if ( A22MaxRowLeng > 0 ) // A(2,2) block
       {
          A22NewSize = 0;
-         for ( j = 0; j < rowSize; j++ ) 
+         for ( j = 0; j < rowSize; j++ )
          {
             index = inds[j];
             searchInd = hypre_BinarySearch(P22GlobalInds_,index,P22GSize_);
-            if (searchInd >= 0) 
+            if (searchInd >= 0)
             {
                A22_inds[A22NewSize] = searchInd;
                A22_vals[A22NewSize++] = vals[j];
@@ -442,7 +441,7 @@ int HYPRE_LSI_Schur::buildBlocks(HYPRE_IJMatrix Amat)
             A22_vals[0] = 0.0;
             A22NewSize  = 1;
          }
-         HYPRE_IJMatrixSetValues(A22mat_, 1, &A22NewSize, 
+         HYPRE_IJMatrixSetValues(A22mat_, 1, &A22NewSize,
 	                    (const int *) &A22RowCnt, (const int *) A22_inds,
                             (const double *) A22_vals);
          A22RowCnt++;
@@ -457,22 +456,22 @@ int HYPRE_LSI_Schur::buildBlocks(HYPRE_IJMatrix Amat)
    delete [] A22_vals;
 
    //------------------------------------------------------------------
-   // finally assemble the matrix 
+   // finally assemble the matrix
    //------------------------------------------------------------------
 
    ierr =  HYPRE_IJMatrixAssemble(A11mat_);
    ierr += HYPRE_IJMatrixGetObject(A11mat_, (void **) &A11mat_csr);
-   assert( !ierr );
+   hypre_assert( !ierr );
    hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) A11mat_csr);
    ierr =  HYPRE_IJMatrixAssemble(A12mat_);
    ierr += HYPRE_IJMatrixGetObject(A12mat_, (void **) &A12mat_csr);
-   assert( !ierr );
+   hypre_assert( !ierr );
    hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) A12mat_csr);
    if ( A22mat_ != NULL )
    {
       ierr =  HYPRE_IJMatrixAssemble(A22mat_);
       ierr += HYPRE_IJMatrixGetObject(A22mat_, (void **) &A22mat_csr);
-      assert( !ierr );
+      hypre_assert( !ierr );
       hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) A22mat_csr);
    }
    else A22mat_csr = NULL;
@@ -481,7 +480,7 @@ int HYPRE_LSI_Schur::buildBlocks(HYPRE_IJMatrix Amat)
    {
       sprintf( fname, "A11.%d", mypid);
       fp = fopen( fname, "w" );
-      for ( irow = A11StartRow; irow < A11StartRow+A11NRows; irow++ ) 
+      for ( irow = A11StartRow; irow < A11StartRow+A11NRows; irow++ )
       {
          HYPRE_ParCSRMatrixGetRow(A11mat_csr,irow,&rowSize,&inds,&vals);
          for ( j = 0; j < rowSize; j++ )
@@ -491,7 +490,7 @@ int HYPRE_LSI_Schur::buildBlocks(HYPRE_IJMatrix Amat)
       fclose(fp);
       sprintf( fname, "A12.%d", mypid);
       fp = fopen( fname, "w" );
-      for ( irow = A12StartRow; irow < A12StartRow+A12NRows; irow++ ) 
+      for ( irow = A12StartRow; irow < A12StartRow+A12NRows; irow++ )
       {
          HYPRE_ParCSRMatrixGetRow(A12mat_csr,irow,&rowSize,&inds,&vals);
          for ( j = 0; j < rowSize; j++ )
@@ -503,7 +502,7 @@ int HYPRE_LSI_Schur::buildBlocks(HYPRE_IJMatrix Amat)
       {
          sprintf( fname, "A22.%d", mypid);
          fp = fopen( fname, "w" );
-         for ( irow = A22StartRow; irow < A22StartRow+A22NRows; irow++ ) 
+         for ( irow = A22StartRow; irow < A22StartRow+A22NRows; irow++ )
          {
             HYPRE_ParCSRMatrixGetRow(A22mat_csr,irow,&rowSize,&inds,&vals);
             for ( j = 0; j < rowSize; j++ )
@@ -568,8 +567,8 @@ int HYPRE_LSI_Schur::setup(HYPRE_IJMatrix Amat,  HYPRE_IJVector sol,
    //------------------------------------------------------------------
    // create Pressure Poisson matrix (T = C^T M^{-1} C)
    //------------------------------------------------------------------
-   
-   if (outputLevel_ >= 1) 
+
+   if (outputLevel_ >= 1)
       printf("%4d : HYPRE_LSI_Schur setup : C^T M^{-1} C begins\n", mypid);
 
    HYPRE_IJMatrixGetObject(A11mat_, (void **) &Mmat_csr);
@@ -580,7 +579,7 @@ int HYPRE_LSI_Schur::setup(HYPRE_IJMatrix Amat,  HYPRE_IJVector sol,
                                        (hypre_ParCSRMatrix *) Cmat_csr,
                                        (hypre_ParCSRMatrix **) &RAP_csr);
 
-   if (outputLevel_ >= 1) 
+   if (outputLevel_ >= 1)
       printf("%4d : HYPRE_LSI_Schur setup : C^T M^{-1} C ends\n", mypid);
 
    //------------------------------------------------------------------
@@ -592,13 +591,13 @@ int HYPRE_LSI_Schur::setup(HYPRE_IJMatrix Amat,  HYPRE_IJVector sol,
    ierr  = HYPRE_IJMatrixCreate(mpiComm_, SStartRow, SStartRow+SNRows-1,
 			        SStartRow, SStartRow+SNRows-1, &Smat);
    ierr += HYPRE_IJMatrixSetObjectType(Smat, HYPRE_PARCSR);
-   assert(!ierr);
+   hypre_assert(!ierr);
    if ( A22mat_ != NULL )
       HYPRE_IJMatrixGetObject(A22mat_, (void **) &A22mat_csr);
 
    SRowLengs = new int[SNRows];
    maxRowSize = 0;
-   for ( irow = SStartRow; irow < SStartRow+SNRows; irow++ ) 
+   for ( irow = SStartRow; irow < SStartRow+SNRows; irow++ )
    {
       HYPRE_ParCSRMatrixGetRow(RAP_csr,irow,&rowSize,&colInd,NULL);
       newRowSize = rowSize;
@@ -630,10 +629,10 @@ int HYPRE_LSI_Schur::setup(HYPRE_IJMatrix Amat,  HYPRE_IJVector sol,
    }
    ierr  = HYPRE_IJMatrixSetRowSizes(Smat, SRowLengs);
    ierr += HYPRE_IJMatrixInitialize(Smat);
-   assert(!ierr);
+   hypre_assert(!ierr);
    delete [] SRowLengs;
 
-   for ( irow = SStartRow; irow < SStartRow+SNRows; irow++ ) 
+   for ( irow = SStartRow; irow < SStartRow+SNRows; irow++ )
    {
       HYPRE_ParCSRMatrixGetRow(RAP_csr,irow,&rowSize,&colInd,&colVal);
       if ( A22mat_csr == NULL )
@@ -641,7 +640,7 @@ int HYPRE_LSI_Schur::setup(HYPRE_IJMatrix Amat,  HYPRE_IJVector sol,
          newRowSize = rowSize;
          newColInd  = new int[newRowSize];
          newColVal  = new double[newRowSize];
-         for (j = 0; j < rowSize; j++) 
+         for (j = 0; j < rowSize; j++)
          {
             newColInd[j] = colInd[j];
             newColVal[j] = - colVal[j];
@@ -653,12 +652,12 @@ int HYPRE_LSI_Schur::setup(HYPRE_IJMatrix Amat,  HYPRE_IJVector sol,
          newRowSize = rowSize + rowSize2;
          newColInd = new int[newRowSize];
          newColVal = new double[newRowSize];
-         for (j = 0; j < rowSize; j++) 
+         for (j = 0; j < rowSize; j++)
          {
             newColInd[j] = colInd[j];
             newColVal[j] = - colVal[j];
          }
-         for (j = 0; j < rowSize2; j++) 
+         for (j = 0; j < rowSize2; j++)
          {
             newColInd[j+rowSize] = colInd2[j];
             newColVal[j+rowSize] = colVal2[j];
@@ -700,7 +699,7 @@ int HYPRE_LSI_Schur::setup(HYPRE_IJMatrix Amat,  HYPRE_IJVector sol,
    Svec_ = (*rrhs);
 
    //------------------------------------------------------------------
-   // construct the new solution and residual vectors 
+   // construct the new solution and residual vectors
    //------------------------------------------------------------------
 
    V2Leng  = P22Size_;
@@ -709,12 +708,12 @@ int HYPRE_LSI_Schur::setup(HYPRE_IJMatrix Amat,  HYPRE_IJVector sol,
    HYPRE_IJVectorSetObjectType(X2vec, HYPRE_PARCSR);
    ierr  = HYPRE_IJVectorInitialize(X2vec);
    ierr += HYPRE_IJVectorAssemble(X2vec);
-   assert(!ierr);
+   hypre_assert(!ierr);
    HYPRE_IJVectorCreate(mpiComm_, V2Start, V2Start+V2Leng-1, &R2vec);
    HYPRE_IJVectorSetObjectType(R2vec, HYPRE_PARCSR);
    ierr  = HYPRE_IJVectorInitialize(R2vec);
    ierr += HYPRE_IJVectorAssemble(R2vec);
-   assert(!ierr);
+   hypre_assert(!ierr);
    (*rsol) = X2vec;
    (*rres) = R2vec;
    return 0;
@@ -731,8 +730,8 @@ int HYPRE_LSI_Schur::computeRHS(HYPRE_IJVector rhs, HYPRE_IJVector *rrhs)
    int                rowSize, *colInd;
    double             *colVal, ddata;
    HYPRE_ParVector    F1_csr, F2_csr;
-   HYPRE_IJVector     F2vec, R2vec, X2vec; 
-   HYPRE_ParCSRMatrix A11_csr, C_csr; 
+   HYPRE_IJVector     F2vec, R2vec, X2vec;
+   HYPRE_ParCSRMatrix A11_csr, C_csr;
 
    //------------------------------------------------------------------
    // error checking
@@ -741,7 +740,7 @@ int HYPRE_LSI_Schur::computeRHS(HYPRE_IJVector rhs, HYPRE_IJVector *rrhs)
    if ( assembled_ == 0 ) return 1;
 
    //------------------------------------------------------------------
-   // get machine and matrix information 
+   // get machine and matrix information
    //------------------------------------------------------------------
 
    MPI_Comm_rank( mpiComm_, &mypid );
@@ -750,7 +749,7 @@ int HYPRE_LSI_Schur::computeRHS(HYPRE_IJVector rhs, HYPRE_IJVector *rrhs)
    AEnd   = APartition_[mypid+1] - 1;
    ANRows = AEnd - AStart + 1;
    HYPRE_IJMatrixGetObject(A11mat_, (void**) &A11_csr);
-    
+
    //------------------------------------------------------------------
    // construct the reduced right hand side
    //------------------------------------------------------------------
@@ -761,14 +760,14 @@ int HYPRE_LSI_Schur::computeRHS(HYPRE_IJVector rhs, HYPRE_IJVector *rrhs)
    HYPRE_IJVectorSetObjectType(F1vec_, HYPRE_PARCSR);
    ierr += HYPRE_IJVectorInitialize(F1vec_);
    ierr += HYPRE_IJVectorAssemble(F1vec_);
-   assert(!ierr);
+   hypre_assert(!ierr);
    V2Leng  = P22Size_;
    V2Start = P22Offsets_[mypid];
    HYPRE_IJVectorCreate(mpiComm_, V2Start, V2Start+V2Leng-1, &F2vec);
    HYPRE_IJVectorSetObjectType(F2vec, HYPRE_PARCSR);
    ierr += HYPRE_IJVectorInitialize(F2vec);
    ierr += HYPRE_IJVectorAssemble(F2vec);
-   assert(!ierr);
+   hypre_assert(!ierr);
 
    f1Ind = V1Start;
    f2Ind = V2Start;
@@ -783,14 +782,14 @@ int HYPRE_LSI_Schur::computeRHS(HYPRE_IJVector rhs, HYPRE_IJVector *rrhs)
          ierr = HYPRE_IJVectorSetValues(F1vec_, 1, (const int *) &f1Ind,
                         (const double *) &ddata);
          HYPRE_ParCSRMatrixRestoreRow(A11_csr,f1Ind,&rowSize,&colInd,&colVal);
-         assert( !ierr );
+         hypre_assert( !ierr );
          f1Ind++;
       }
       else
       {
          ierr = HYPRE_IJVectorSetValues(F2vec, 1, (const int *) &f2Ind,
                         (const double *) &ddata);
-         assert( !ierr );
+         hypre_assert( !ierr );
          f2Ind++;
       }
    }
@@ -804,7 +803,7 @@ int HYPRE_LSI_Schur::computeRHS(HYPRE_IJVector rhs, HYPRE_IJVector *rrhs)
 }
 
 //******************************************************************************
-// compute the long solution 
+// compute the long solution
 //------------------------------------------------------------------------------
 
 int HYPRE_LSI_Schur::computeSol(HYPRE_IJVector X2vec, HYPRE_IJVector Xvec)
@@ -846,10 +845,10 @@ int HYPRE_LSI_Schur::computeSol(HYPRE_IJVector X2vec, HYPRE_IJVector Xvec)
    HYPRE_IJVectorSetObjectType(X1vec, HYPRE_PARCSR);
    ierr += HYPRE_IJVectorInitialize(X1vec);
    ierr += HYPRE_IJVectorAssemble(X1vec);
-   assert(!ierr);
+   hypre_assert(!ierr);
 
    //------------------------------------------------------------------
-   // recover X1 
+   // recover X1
    //------------------------------------------------------------------
 
    HYPRE_ParCSRMatrixMatvec( -1.0, C_csr, X2_csr, 1.0, F1_csr );
@@ -862,22 +861,22 @@ int HYPRE_LSI_Schur::computeSol(HYPRE_IJVector X2vec, HYPRE_IJVector Xvec)
    V1Cnt = AStart - P22Offsets_[mypid];
    V2Cnt = P22Offsets_[mypid];
    xvals = hypre_VectorData(hypre_ParVectorLocalVector((hypre_ParVector*)Xvec));
-   for ( irow = AStart; irow < AEnd; irow++ ) 
+   for ( irow = AStart; irow < AEnd; irow++ )
    {
       searchInd = hypre_BinarySearch( P22LocalInds_, irow, P22Size_);
       if ( searchInd >= 0 )
       {
          ierr = HYPRE_IJVectorGetValues(X2vec, 1, &V2Cnt, &xvals[irow-AStart]);
-         assert( !ierr );
+         hypre_assert( !ierr );
          V2Cnt++;
       }
       else
       {
          ierr = HYPRE_IJVectorGetValues(X1vec, 1, &V1Cnt, &xvals[irow-AStart]);
-         assert( !ierr );
+         hypre_assert( !ierr );
          V1Cnt++;
       }
-   } 
+   }
 
    //------------------------------------------------------------------
    // clean up and return
@@ -893,7 +892,7 @@ int HYPRE_LSI_Schur::computeSol(HYPRE_IJVector X2vec, HYPRE_IJVector Xvec)
 
 int HYPRE_LSI_Schur::print()
 {
-   int      mypid, irow, j, nnz, V2Leng, V2Start, rowSize, *colInd; 
+   int      mypid, irow, j, nnz, V2Leng, V2Start, rowSize, *colInd;
    double   *colVal, ddata;
    FILE     *fp;
    char     fname[100];

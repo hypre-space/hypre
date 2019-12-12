@@ -5208,7 +5208,7 @@ hypre_ExchangeExternalRowsWait(void *vrequest)
 HYPRE_Int
 hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix  *A,
                                       HYPRE_Int           *CF_marker,
-                                      HYPRE_Int           *cpts_starts_in,
+                                      HYPRE_BigInt        *cpts_starts_in,
                                       const char          *job,
                                       hypre_ParCSRMatrix **B_ptr,
                                       HYPRE_Real           strength_thresh)
@@ -5236,16 +5236,19 @@ hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix  *A,
    HYPRE_Real         *B_maxel_row;
    HYPRE_Int          *B_diag_i, *B_diag_j, *B_offd_i, *B_offd_j;
    HYPRE_Complex      *B_diag_a, *B_offd_a;
-   HYPRE_Int           num_cols_B_offd, *col_map_offd_B;
+   HYPRE_Int           num_cols_B_offd;
+   HYPRE_BigInt       *col_map_offd_B;
 
    HYPRE_Int           i, j, k, k1, k2;
-   HYPRE_Int           A_nlocal, B_nrow_local, B_ncol_local, B_nrow_global, B_ncol_global,
+   HYPRE_BigInt        B_nrow_global, B_ncol_global;
+   HYPRE_Int           A_nlocal, B_nrow_local, B_ncol_local,
                        B_nnz_diag, B_nnz_offd;
-   HYPRE_Int           total_global_fpts, total_global_cpts, *fpts_starts, *cpts_starts,
-                       nf_local, nc_local;
+   HYPRE_BigInt        total_global_fpts, total_global_cpts, *fpts_starts, *cpts_starts;
+   HYPRE_Int           nf_local, nc_local;
    HYPRE_Int           row_set, col_set;
-   HYPRE_Int           my_id, num_procs, *B_row_starts, *B_col_starts,
-                      *sub_idx_diag, *sub_idx_offd, B_first_col;
+   HYPRE_BigInt       *B_row_starts, *B_col_starts, B_first_col;
+   HYPRE_Int           my_id, num_procs,
+                      *sub_idx_diag, *sub_idx_offd;
    HYPRE_Int           num_sends, *send_buf_data;
 
    /* MPI size and rank*/
@@ -5268,8 +5271,8 @@ hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix  *A,
 #else
       len = num_procs + 1;
 #endif
-      cpts_starts = hypre_TAlloc(HYPRE_Int, len, HYPRE_MEMORY_HOST);
-      memcpy(cpts_starts, cpts_starts_in, len*sizeof(HYPRE_Int));
+      cpts_starts = hypre_TAlloc(HYPRE_BigInt, len, HYPRE_MEMORY_HOST);
+      memcpy(cpts_starts, cpts_starts_in, len*sizeof(HYPRE_BigInt));
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
       if (my_id == (num_procs -1))
@@ -5277,10 +5280,10 @@ hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix  *A,
          total_global_cpts = cpts_starts[1];
       }
       hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_INT, num_procs-1, comm);
-      nc_local = cpts_starts[1] - cpts_starts[0];
+      nc_local = (HYPRE_Int)(cpts_starts[1] - cpts_starts[0]);
 #else
       total_global_cpts = cpts_starts[num_procs];
-      nc_local = cpts_starts[my_id+1] - cpts_starts[my_id];
+      nc_local = (HYPRE_Int)(cpts_starts[my_id+1] - cpts_starts[my_id]);
 #endif
    }
 
@@ -5296,8 +5299,8 @@ hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix  *A,
          }
       }
 #ifdef HYPRE_NO_GLOBAL_PARTITION
-      fpts_starts = hypre_TAlloc(HYPRE_Int, 2, HYPRE_MEMORY_HOST);
-      hypre_MPI_Scan(&nf_local, fpts_starts+1, 1, HYPRE_MPI_INT, hypre_MPI_SUM, comm);
+      fpts_starts = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
+      hypre_MPI_Scan(&nf_local, fpts_starts+1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
       fpts_starts[0] = fpts_starts[1] - nf_local;
       if (my_id == num_procs - 1)
       {
@@ -5305,8 +5308,8 @@ hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix  *A,
       }
       hypre_MPI_Bcast(&total_global_fpts, 1, HYPRE_MPI_INT, num_procs-1, comm);
 #else
-      fpts_starts = hypre_TAlloc(HYPRE_Int, num_procs+1, HYPRE_MEMORY_HOST);
-      hypre_MPI_Allgather(&nf_local, 1, HYPRE_MPI_INT, &fpts_starts[1], 1, HYPRE_MPI_INT, comm);
+      fpts_starts = hypre_TAlloc(HYPRE_BigInt, num_procs+1, HYPRE_MEMORY_HOST);
+      hypre_MPI_Allgather(&nf_local, 1, HYPRE_MPI_BIG_INT, &fpts_starts[1], 1, HYPRE_MPI_INT, comm);
       for (i = 2; i < num_procs+1; i++)
       {
          fpts_starts[i] += fpts_starts[i-1];
@@ -5421,7 +5424,7 @@ hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix  *A,
          num_cols_B_offd ++;
       }
    }
-   col_map_offd_B = hypre_TAlloc(HYPRE_Int, num_cols_B_offd, HYPRE_MEMORY_HOST);
+   col_map_offd_B = hypre_TAlloc(HYPRE_BigInt, num_cols_B_offd, HYPRE_MEMORY_HOST);
    for (i = 0, k = 0; i < num_cols_A_offd; i++)
    {
       if (sub_idx_offd[i] != -1)

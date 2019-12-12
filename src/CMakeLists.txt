@@ -11,8 +11,8 @@ endif (POLICY CMP0074)
 project (hypre)
 
 # The version number.
-set (HYPRE_VERSION 2.18.1)
-set (HYPRE_DATE    2019/10/15)
+set (HYPRE_VERSION 2.18.2)
+set (HYPRE_DATE    2019/10/28)
 set (HYPRE_TIME    00:00:00)
 set (HYPRE_BUGS    hypre-support@llnl.gov)
 set (HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
@@ -99,13 +99,13 @@ endif()
 
 if (HYPRE_ENABLE_GLOBAL_PARTITION)
   set(HYPRE_NO_GLOBAL_PARTITION OFF CACHE BOOL "" FORCE)
-elseif()
+else()
   set(HYPRE_NO_GLOBAL_PARTITION ON CACHE BOOL "" FORCE)
 endif()
 
 if (HYPRE_WITH_MPI)
   set(HYPRE_SEQUENTIAL OFF CACHE BOOL "" FORCE)
-elseif()
+else()
   set(HYPRE_SEQUENTIAL ON CACHE BOOL "" FORCE)
 endif()
 

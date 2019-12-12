@@ -66,7 +66,7 @@ hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int    
    /* convert into ic: row idx --> row ptrs */
    d_ic = hypreDevice_CsrRowIndicesToPtrs(n, nnzA, d_jt);
 
-#if DEBUG_MODE
+#ifdef HYPRE_DEBUG
    HYPRE_Int nnzC;
    hypre_TMemcpy(&nnzC, &d_ic[n], HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    hypre_assert(nnzC == nnzA);

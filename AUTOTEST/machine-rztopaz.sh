@@ -71,6 +71,10 @@ co="--enable-bigint"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic--enable-bigint
 
+co="--enable-mixedint"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo
+./renametest.sh basic $output_dir/basic--enable-mixedint
+
 # Echo to stderr all nonempty error files in $output_dir
 for errfile in $( find $output_dir ! -size 0 -name "*.err" )
 do

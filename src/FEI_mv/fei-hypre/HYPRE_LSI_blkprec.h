@@ -19,7 +19,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 #include <math.h>
 #include "HYPRE.h"
 #include "IJ_mv/HYPRE_IJ_mv.h"
@@ -27,7 +26,7 @@
 #include "parcsr_mv/_hypre_parcsr_mv.h"
 
 // *************************************************************************
-// local defines 
+// local defines
 // -------------------------------------------------------------------------
 
 #define HYPRE_INCFLOW_BDIAG  1
@@ -37,13 +36,13 @@
 
 
 // *************************************************************************
-// FEI include files 
+// FEI include files
 // -------------------------------------------------------------------------
 
 #include "HYPRE_FEI_includes.h"
 
 // *************************************************************************
-// C-wrapper for the FEI Lookup class 
+// C-wrapper for the FEI Lookup class
 // -------------------------------------------------------------------------
 
 typedef struct HYPRE_Lookup_Struct
@@ -95,7 +94,7 @@ class HYPRE_LSI_BlockP
    HYPRE_ParCSRMatrix Amat_;         // incoming system matrix
    HYPRE_IJMatrix A11mat_;           // velocity matrix
    HYPRE_IJMatrix A12mat_;           // gradient (divergence) matrix
-   HYPRE_IJMatrix A22mat_;           // pressure Poisson 
+   HYPRE_IJMatrix A22mat_;           // pressure Poisson
    HYPRE_IJVector F1vec_;            // rhs for velocity
    HYPRE_IJVector F2vec_;            // rhs for pressure
    HYPRE_IJVector X1vec_;            // solution for velocity
@@ -120,7 +119,7 @@ class HYPRE_LSI_BlockP
    int            printFlag_;        // for diagnostics
    HYPRE_Solver   A11Solver_;        // solver for velocity matrix
    HYPRE_Solver   A11Precond_;       // preconditioner for velocity matrix
-   HYPRE_Solver   A22Solver_;        // solver for pressure Poisson 
+   HYPRE_Solver   A22Solver_;        // solver for pressure Poisson
    HYPRE_Solver   A22Precond_;       // preconditioner for pressure Poisson
    HYPRE_LSI_BLOCKP_PARAMS A11Params_;
    HYPRE_LSI_BLOCKP_PARAMS A22Params_;
