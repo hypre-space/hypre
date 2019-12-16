@@ -611,7 +611,8 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
          for (i = 0; i < num_recv_procs; i++)
          {
             HYPRE_Int recv_buffer_size = recv_map_starts[level][i+1] - recv_map_starts[level][i];
-            if (recv_buffer_size) hypre_MPI_Irecv(&(recv_buffer[ recv_map_starts[level][i] ]), recv_buffer_size, HYPRE_MPI_COMPLEX, recv_procs[level][i], 3, comm, &requests[request_counter++]);
+            if (!recv_buffer_size) printf("Posted recv for empty buffer\n");
+            hypre_MPI_Irecv(&(recv_buffer[ recv_map_starts[level][i] ]), recv_buffer_size, HYPRE_MPI_COMPLEX, recv_procs[level][i], 3, comm, &requests[request_counter++]);
          }
 
          // pack and send the buffers
@@ -621,7 +622,8 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
          {
             HYPRE_Int buffer_index = hypre_ParCompGridCommPkgSendProcPartitions(compGridCommPkg)[level][i];
             HYPRE_Int send_buffer_size = send_map_starts[level][buffer_index+1] - send_map_starts[level][buffer_index];
-            if (send_buffer_size) hypre_MPI_Isend(&(send_buffer[ send_map_starts[level][buffer_index] ]), send_buffer_size, HYPRE_MPI_COMPLEX, send_procs[level][i], 3, comm, &requests[request_counter++]);
+            if (!send_buffer_size) printf("Posted send for empty buffer\n");
+            hypre_MPI_Isend(&(send_buffer[ send_map_starts[level][buffer_index] ]), send_buffer_size, HYPRE_MPI_COMPLEX, send_procs[level][i], 3, comm, &requests[request_counter++]);
          }
 
          // wait for buffers to be received
