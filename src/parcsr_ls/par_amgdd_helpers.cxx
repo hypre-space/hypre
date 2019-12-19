@@ -809,11 +809,6 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
                                         - hypre_ParCompGridARowPtr(compGrid[level])[i + num_owned_nodes];
       }
       
-      // !!! Debug
-      auto end = chrono::system_clock::now();
-      timings[1] += end - start; // merge plus
-      start = chrono::system_clock::now();
-
       // Place the incoming comp grid A row sizes in the appropriate places and count up number of nonzeros added to A
       HYPRE_Int added_A_nnz = 0;
       for (i = 0; i < num_recv_nodes[current_level][buffer_number][level]; i++)
@@ -826,11 +821,6 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
          }
          cnt++;
       }
-
-      // !!! Debug
-      end = chrono::system_clock::now();
-      timings[2] += end - start;
-      start = chrono::system_clock::now();
 
       // Now that row sizes are in the right places, setup a new A row pointer appropriately
       HYPRE_Int *A_new_rowptr = hypre_CTAlloc(HYPRE_Int, add_node_cnt + num_nodes - num_owned_nodes + 1, HYPRE_MEMORY_HOST);
@@ -848,8 +838,8 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
       }
 
       // !!! Debug
-      end = chrono::system_clock::now();
-      timings[3] += end - start;
+      auto end = chrono::system_clock::now();
+      timings[1] += end - start;
       start = chrono::system_clock::now();
 
       // Move existing A col ind info
@@ -865,10 +855,21 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
          }
       }
 
-      // !!! Debug
+      // !!! Debug: extra code that doesn't do anything! Just timing comparison
       end = chrono::system_clock::now();
-      timings[4] += end - start;
+      timings[2] += end - start;
       start = chrono::system_clock::now();
+      for (i = num_nodes - 1; i >= num_owned_nodes; i--)
+      {
+         for (j = 0; j < hypre_ParCompGridARowPtr(compGrid[level])[ i+1 ] - hypre_ParCompGridARowPtr(compGrid[level])[ i ]; j++)
+         {
+            HYPRE_Int old_index = hypre_ParCompGridARowPtr(compGrid[level])[ i + 1 ] - 1 - j;
+         }
+      }
+      end = chrono::system_clock::now();
+      timings[3] += end - start;
+      start = chrono::system_clock::now();
+
 
       // Set new row ptr values
       for (i = num_owned_nodes; i < num_nodes + add_node_cnt + 1; i++) 
@@ -904,24 +905,25 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
 
       // !!! Debug
       end = chrono::system_clock::now();
-      timings[5] += end - start;
+      timings[4] += end - start;
       
    }
 
 
 
    // !!! Debug
-
    auto total_end = chrono::system_clock::now();
    timings[0] = total_end - total_start;
-   cout << "Rank " << myid << ", level " << current_level
+   if (current_level == 0)
+   {
+      cout << "Rank " << myid << ", level " << current_level
                            << ": total " << timings[0].count() 
                            << ", merge plus " << timings[1].count()
-                           << ", 2 " << timings[2].count()
-                           << ", 3 " << timings[3].count()
-                           << ", 4 " << timings[4].count()
-                           << ", 5 " << timings[5].count()
+                           << ", expensive " << timings[2].count()
+                           << ", test " << timings[3].count()
+                           << ", rest " << timings[4].count()
                            << endl;
+   }
 
    return 0;
 }
