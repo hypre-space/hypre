@@ -828,7 +828,7 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
       }
 
       // !!! Debug
-      auto end = chrono::system_clock::now();
+      end = chrono::system_clock::now();
       timings[2] += end - start;
       start = chrono::system_clock::now();
 
@@ -848,7 +848,7 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
       }
 
       // !!! Debug
-      auto end = chrono::system_clock::now();
+      end = chrono::system_clock::now();
       timings[3] += end - start;
       start = chrono::system_clock::now();
 
@@ -866,7 +866,7 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
       }
 
       // !!! Debug
-      auto end = chrono::system_clock::now();
+      end = chrono::system_clock::now();
       timings[4] += end - start;
       start = chrono::system_clock::now();
 
