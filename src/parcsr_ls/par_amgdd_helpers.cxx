@@ -859,14 +859,18 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
       end = chrono::system_clock::now();
       timings[2] += end - start;
       start = chrono::system_clock::now();
+      int test_cnt = 0;
       for (i = num_nodes - 1; i >= num_owned_nodes; i--)
       {
          for (j = 0; j < hypre_ParCompGridARowPtr(compGrid[level])[ i+1 ] - hypre_ParCompGridARowPtr(compGrid[level])[ i ]; j++)
          {
             HYPRE_Int old_index = hypre_ParCompGridARowPtr(compGrid[level])[ i + 1 ] - 1 - j;
+            test_cnt++;
          }
       }
       end = chrono::system_clock::now();
+      if (current_level == 0 && myid == 0) cout << "loop length = " << hypre_ParCompGridARowPtr(compGrid[level])[num_nodes] - hypre_ParCompGridARowPtr(compGrid[level])[num_owned_nodes] << endl;
+      if (current_level == 0 && myid == 0) cout << "loop length (test_cnt) = " << test_cnt << endl;
       timings[3] += end - start;
       start = chrono::system_clock::now();
 
@@ -914,7 +918,7 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
    // !!! Debug
    auto total_end = chrono::system_clock::now();
    timings[0] = total_end - total_start;
-   if (current_level == 0)
+   if (current_level == 0 && myid == 0)
    {
       cout << "Rank " << myid << ", level " << current_level
                            << ": total " << timings[0].count() 
