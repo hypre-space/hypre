@@ -607,11 +607,6 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
       // NOTE: Don't free incoming_dest because we set that as recv_map and use it outside this function
       HYPRE_Int *incoming_dest = hypre_CTAlloc(HYPRE_Int, num_recv_nodes[current_level][buffer_number][level], HYPRE_MEMORY_HOST);
 
-      // !!! Debug
-      auto end = chrono::system_clock::now();
-      timings[1] += end - start; // Allocation
-      start = chrono::system_clock::now();
-
       while (incoming_cnt < num_recv_nodes[current_level][buffer_number][level] && compGrid_cnt < num_nonowned_nodes)
       {
          HYPRE_Int incoming_global_index = recv_buffer[cnt];
@@ -705,11 +700,6 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
          compGrid_dest[compGrid_cnt++] = dest++;
       }
 
-      // !!! Debug
-      end = chrono::system_clock::now();
-      timings[2] += end - start; // Merge
-      start = chrono::system_clock::now();
-
       // Set recv_map[current_level] to incoming_dest
       recv_map[current_level][buffer_number][level] = incoming_dest;
 
@@ -737,11 +727,6 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
          for (i = num_nonowned_nodes - 1; i >= 0; i--)
             hypre_ParCompGridCoarseLocalIndices(compGrid[level])[ compGrid_dest[i] ] = hypre_ParCompGridCoarseLocalIndices(compGrid[level])[i + num_owned_nodes];
       }
-
-      // !!! Debug
-      end = chrono::system_clock::now();
-      timings[3] += end - start; // Copy existing
-      start = chrono::system_clock::now();
 
       // Fix up the send_flag and recv_map from previous levels
       for (i = current_level; i < num_levels; i++)
@@ -785,11 +770,6 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
          }
       }
 
-      // !!! Debug
-      end = chrono::system_clock::now();
-      timings[4] += end - start; // Fix up prev send/recv
-      start = chrono::system_clock::now();
-
       // Now copy in the new nodes to their appropriate positions
       cnt = level_start;
       for (i = 0; i < num_recv_nodes[current_level][buffer_number][level]; i++) 
@@ -830,8 +810,8 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
       }
       
       // !!! Debug
-      end = chrono::system_clock::now();
-      timings[5] += end - start; // More copies
+      auto end = chrono::system_clock::now();
+      timings[1] += end - start; // merge plus
       start = chrono::system_clock::now();
 
       // Place the incoming comp grid A row sizes in the appropriate places and count up number of nonzeros added to A
@@ -846,6 +826,11 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
          }
          cnt++;
       }
+
+      // !!! Debug
+      auto end = chrono::system_clock::now();
+      timings[2] += end - start;
+      start = chrono::system_clock::now();
 
       // Now that row sizes are in the right places, setup a new A row pointer appropriately
       HYPRE_Int *A_new_rowptr = hypre_CTAlloc(HYPRE_Int, add_node_cnt + num_nodes - num_owned_nodes + 1, HYPRE_MEMORY_HOST);
@@ -862,6 +847,11 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
          hypre_ParCompGridResize(compGrid[level], new_size, level != num_levels-1, 1); // !!! Is there a better way to manage memory? !!!
       }
 
+      // !!! Debug
+      auto end = chrono::system_clock::now();
+      timings[3] += end - start;
+      start = chrono::system_clock::now();
+
       // Move existing A col ind info
       for (i = num_nodes - 1; i >= num_owned_nodes; i--)
       {
@@ -874,6 +864,11 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
             hypre_ParCompGridAGlobalColInd(compGrid[level])[ new_index ] = hypre_ParCompGridAGlobalColInd(compGrid[level])[ old_index ];
          }
       }
+
+      // !!! Debug
+      auto end = chrono::system_clock::now();
+      timings[4] += end - start;
+      start = chrono::system_clock::now();
 
       // Set new row ptr values
       for (i = num_owned_nodes; i < num_nodes + add_node_cnt + 1; i++) 
@@ -909,7 +904,7 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
 
       // !!! Debug
       end = chrono::system_clock::now();
-      timings[6] += end - start; // Copy stuff for A
+      timings[5] += end - start;
       
    }
 
@@ -921,12 +916,11 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
    timings[0] = total_end - total_start;
    cout << "Rank " << myid << ", level " << current_level
                            << ": total " << timings[0].count() 
-                           << ", allocate " << timings[1].count()
-                           << ", merge " << timings[2].count()
-                           << ", copy existing " << timings[3].count()
-                           << ", Fix up prev send/recv " << timings[4].count()
-                           << ", More copies " << timings[5].count()
-                           << ", Copy stuff for A " << timings[6].count()
+                           << ", merge plus " << timings[1].count()
+                           << ", 2 " << timings[2].count()
+                           << ", 3 " << timings[3].count()
+                           << ", 4 " << timings[4].count()
+                           << ", 5 " << timings[5].count()
                            << endl;
 
    return 0;
