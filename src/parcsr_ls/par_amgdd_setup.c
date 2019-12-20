@@ -65,11 +65,11 @@ AllgatherCommunicationInfo(hypre_ParAMGData *amg_data, HYPRE_Int level, MPI_Comm
 HYPRE_Int*
 PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int *buffer_size, HYPRE_Int *send_flag_buffer_size, 
    HYPRE_Int ****send_flag, HYPRE_Int ***num_send_nodes, HYPRE_Int partition, HYPRE_Int current_level, HYPRE_Int num_levels, HYPRE_Int *padding, 
-   HYPRE_Int num_ghost_layers );
+   HYPRE_Int num_ghost_layers, HYPRE_Int symmetric );
 
 HYPRE_Int
 RecursivelyBuildPsiComposite(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *compGrid, HYPRE_Int *add_flag, HYPRE_Int *add_flag_coarse, 
-   HYPRE_Int need_coarse_info, HYPRE_Int *nodes_to_add, HYPRE_Int padding);
+   HYPRE_Int *sort_map, HYPRE_Int *sort_map_coarse, HYPRE_Int need_coarse_info, HYPRE_Int *nodes_to_add, HYPRE_Int padding);
 
 HYPRE_Int
 PackRecvMapSendBuffer(HYPRE_Int *recv_map_send_buffer, HYPRE_Int **recv_map, HYPRE_Int *num_recv_nodes, HYPRE_Int *recv_buffer_size, HYPRE_Int current_level, HYPRE_Int num_levels, hypre_ParCompGrid **compGrid);
@@ -149,6 +149,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    HYPRE_Int                  pad;
    HYPRE_Int                  variable_padding;
    HYPRE_Int                  num_ghost_layers;
+   HYPRE_Int                  symmetric;
    HYPRE_Int                  use_transition_level;
    HYPRE_Int                  transition_level;
    HYPRE_Int                  level,i,j,l;
@@ -192,6 +193,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    pad = hypre_ParAMGDataAMGDDPadding(amg_data);
    variable_padding = hypre_ParAMGDataAMGDDVariablePadding(amg_data);
    num_ghost_layers = hypre_ParAMGDataAMGDDNumGhostLayers(amg_data);
+   symmetric = hypre_ParAMGDataSym(amg_data);
    use_transition_level = hypre_ParAMGDataAMGDDUseTransitionLevel(amg_data);
 
    // Figure out padding on each level
@@ -449,7 +451,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
             num_send_nodes[level][i] = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
             send_buffer[i] = PackSendBuffer( compGrid, compGridCommPkg, &(send_buffer_size[level][i]), 
                                              &(send_flag_buffer_size[i]), send_flag, num_send_nodes, i, level, num_levels, padding, 
-                                             num_ghost_layers );
+                                             num_ghost_layers, symmetric );
          }
 
          if (timers) hypre_EndTiming(timers[2]);
@@ -529,7 +531,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
             UnpackRecvBuffer(recv_buffer[i], compGrid, compGridCommPkg, 
                send_flag, num_send_nodes, 
                recv_map, num_recv_nodes, 
-               &(recv_map_send_buffer_size[i]), level, num_levels, transition_level, nodes_added_on_level, i, num_resizes);
+               &(recv_map_send_buffer_size[i]), level, num_levels, transition_level, nodes_added_on_level, i, num_resizes, symmetric);
             
             recv_map_send_buffer[i] = hypre_CTAlloc(HYPRE_Int, recv_map_send_buffer_size[i], HYPRE_MEMORY_HOST);
             PackRecvMapSendBuffer(recv_map_send_buffer[i], recv_map[level][i], num_recv_nodes[level][i], &(recv_buffer_size[level][i]), level, num_levels, compGrid);
@@ -1926,7 +1928,7 @@ AllgatherCommunicationInfo(hypre_ParAMGData *amg_data, HYPRE_Int level, MPI_Comm
 HYPRE_Int*
 PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int *buffer_size, 
    HYPRE_Int *send_flag_buffer_size, HYPRE_Int ****send_flag, HYPRE_Int ***num_send_nodes,
-   HYPRE_Int partition, HYPRE_Int current_level, HYPRE_Int num_levels, HYPRE_Int *padding, HYPRE_Int num_ghost_layers )
+   HYPRE_Int partition, HYPRE_Int current_level, HYPRE_Int num_levels, HYPRE_Int *padding, HYPRE_Int num_ghost_layers, HYPRE_Int symmetric )
 {
    // send_buffer = [ num_psi_levels , [level] , [level] , ... ]
    // level = [ num send nodes, [global indices] , [coarse global indices] , [A row sizes] , [A col ind] ]
@@ -1950,6 +1952,11 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
    // Get the transition level
    HYPRE_Int transition_level = hypre_ParCompGridCommPkgTransitionLevel(compGridCommPkg);
    if (transition_level < 0) transition_level = num_levels;
+
+   // Get the sort maps
+   HYPRE_Int            *sort_map;
+   HYPRE_Int            *sort_map_coarse;
+   if (current_level != transition_level-1) sort_map_coarse = hypre_ParCompGridSortMap(compGrid[current_level+1]);
 
    // initialize send map buffer size
    (*send_flag_buffer_size) = num_levels - current_level;
@@ -1990,7 +1997,7 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
             coarse_grid_index = hypre_ParCompGridCoarseLocalIndices(compGrid[current_level])[send_elmt];
             if ( coarse_grid_index != -1 ) 
             {
-               add_flag[current_level+1][ coarse_grid_index ] = padding[current_level+1]+1;
+               add_flag[current_level+1][ sort_map_coarse[coarse_grid_index] ] = padding[current_level+1]+1;
                nodes_to_add = 1;
             }
          }
@@ -2003,6 +2010,10 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
       // if there are nodes to add on this grid
       if (nodes_to_add)
       {
+         sort_map = hypre_ParCompGridSortMap(compGrid[level]);
+         if (level != transition_level-1) sort_map_coarse = hypre_ParCompGridSortMap(compGrid[level+1]);
+         HYPRE_Int *inv_sort_map = hypre_ParCompGridSortMap(compGrid[level]);
+         
          num_psi_levels++;
          (*buffer_size)++;
          nodes_to_add = 0;
@@ -2013,24 +2024,24 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
          // Expand by the padding on this level and add coarse grid counterparts if applicable
          for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
          {
-            if (add_flag[level][i] == padding[level] + 1)
+            if (add_flag[level][sort_map[i]] == padding[level] + 1)
             {
                // Recursively add the region of padding (flagging coarse nodes on the next level if applicable)
-               if (level != transition_level-1) RecursivelyBuildPsiComposite(i, padding[level], compGrid[level], add_flag[level], add_flag[level+1], 1, &nodes_to_add, padding[level+1]);
-               else RecursivelyBuildPsiComposite(i, padding[level], compGrid[level], add_flag[level], NULL, 0, &nodes_to_add, 0);
+               if (level != transition_level-1) RecursivelyBuildPsiComposite(i, padding[level], compGrid[level], add_flag[level], add_flag[level+1], sort_map, sort_map_coarse, 1, &nodes_to_add, padding[level+1]);
+               else RecursivelyBuildPsiComposite(i, padding[level], compGrid[level], add_flag[level], NULL, sort_map, NULL, 0, &nodes_to_add, 0);
             }
          }
 
          // Expand by the number of ghost layers 
          for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
          {
-            if (add_flag[level][i] > 1) add_flag[level][i] = num_ghost_layers + 2;
-            else if (add_flag[level][i] == 1) add_flag[level][i] = num_ghost_layers + 1;
+            if (add_flag[level][sort_map[i]] > 1) add_flag[level][sort_map[i]] = num_ghost_layers + 2;
+            else if (add_flag[level][sort_map[i]] == 1) add_flag[level][sort_map[i]] = num_ghost_layers + 1;
          }
          for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
          {
             // Recursively add the region of ghost nodes (do not add any coarse nodes underneath)
-            if (add_flag[level][i] == num_ghost_layers + 1) RecursivelyBuildPsiComposite(i, num_ghost_layers, compGrid[level], add_flag[level], NULL, 0, NULL, 0);
+            if (add_flag[level][sort_map[i]] == num_ghost_layers + 1) RecursivelyBuildPsiComposite(i, num_ghost_layers, compGrid[level], add_flag[level], NULL, sort_map, NULL, 0, NULL, 0);
          }
 
          // If we previously sent dofs to this partition on this level, mark the redundant_add_flag
@@ -2076,7 +2087,7 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
                      coarse_grid_index = hypre_ParCompGridCoarseLocalIndices(compGrid[level])[send_elmt];
                      if ( coarse_grid_index != -1 ) 
                      {
-                        redundant_add_flag[level+1][ coarse_grid_index ] = padding[level+1]+1;
+                        redundant_add_flag[level+1][ sort_map_coarse[coarse_grid_index] ] = padding[level+1]+1;
                      }
                   }
                }
@@ -2089,28 +2100,28 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
                if (redundant_add_flag[level][i] == padding[level] + 1)
                {
                   // Recursively add the region of padding (flagging coarse nodes on the next level if applicable)
-                  if (nodes_to_add) RecursivelyBuildPsiComposite(i, padding[level], compGrid[level], redundant_add_flag[level], redundant_add_flag[level+1], 1, &dummy, padding[level+1]);
-                  else RecursivelyBuildPsiComposite(i, padding[level], compGrid[level], redundant_add_flag[level], NULL, 0, &dummy, 0);
+                  if (nodes_to_add) RecursivelyBuildPsiComposite(i, padding[level], compGrid[level], redundant_add_flag[level], redundant_add_flag[level+1], sort_map, sort_map_coarse, 1, &dummy, padding[level+1]);
+                  else RecursivelyBuildPsiComposite(i, padding[level], compGrid[level], redundant_add_flag[level], NULL, sort_map, NULL, 0, &dummy, 0);
                }
             }
 
             // Expand by the number of ghost layers 
             for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
             {
-               if (redundant_add_flag[level][i] > 1) redundant_add_flag[level][i] = num_ghost_layers + 2;
-               else if (redundant_add_flag[level][i] == 1) redundant_add_flag[level][i] = num_ghost_layers + 1;
+               if (redundant_add_flag[level][sort_map[i]] > 1) redundant_add_flag[level][sort_map[i]] = num_ghost_layers + 2;
+               else if (redundant_add_flag[level][sort_map[i]] == 1) redundant_add_flag[level][sort_map[i]] = num_ghost_layers + 1;
             }
             for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
             {
                // Recursively add the region of ghost nodes (do not add any coarse nodes underneath)
-               if (redundant_add_flag[level][i] == num_ghost_layers + 1) RecursivelyBuildPsiComposite(i, num_ghost_layers, compGrid[level], redundant_add_flag[level], NULL, 0, NULL, 0);
+               if (redundant_add_flag[level][sort_map[i]] == num_ghost_layers + 1) RecursivelyBuildPsiComposite(i, num_ghost_layers, compGrid[level], redundant_add_flag[level], NULL, sort_map, NULL, 0, NULL, 0);
             }
 
             // Make sure starting elements on this level are included
             for (i = start; i < finish; i++)
             {
                send_elmt = hypre_ParCompGridCommPkgSendMapElmts(compGridCommPkg)[level][i];
-               redundant_add_flag[level][send_elmt] = 1;
+               redundant_add_flag[level][sort_map[send_elmt]] = 1;
             }
          }
 
@@ -2120,9 +2131,9 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
             for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
             {
                // Note: redundant add flag should not cancel out dofs flagged for send as real when same dof was previously sent as ghost
-               if ( redundant_add_flag[level][i] && !(add_flag[level][i] > num_ghost_layers && redundant_add_flag[level][i] <= num_ghost_layers) )
+               if ( redundant_add_flag[level][sort_map[i]] && !(add_flag[level][sort_map[i]] > num_ghost_layers && redundant_add_flag[level][sort_map[i]] <= num_ghost_layers) )
                {
-                  add_flag[level][i] = 0;
+                  add_flag[level][sort_map[i]] = 0;
                }
             }
          }
@@ -2139,62 +2150,13 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
          // Save the indices (in global index ordering) so I don't have to keep looping over all nodes in compGrid when I pack the buffer
          send_flag[current_level][partition][level] = hypre_CTAlloc( HYPRE_Int, num_send_nodes[current_level][partition][level], HYPRE_MEMORY_HOST );
          cnt =  0;
-
-         HYPRE_Int *insert_owned_positions = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumOwnedBlocks(compGrid[level])+1, HYPRE_MEMORY_HOST);
-         HYPRE_Int num_owned_nodes = hypre_ParCompGridOwnedBlockStarts(compGrid[level])[hypre_ParCompGridNumOwnedBlocks(compGrid[level])];
-         insert_owned_positions[0] = num_owned_nodes;
-         for (i = 0; i < hypre_ParCompGridNumOwnedBlocks(compGrid[level]); i++)
-         {
-            HYPRE_Int nodes_this_block = hypre_ParCompGridOwnedBlockStarts(compGrid[level])[i+1] - hypre_ParCompGridOwnedBlockStarts(compGrid[level])[i];
-            if (nodes_this_block && hypre_ParCompGridNumNodes(compGrid[level]) > num_owned_nodes)
-            // if (nodes_this_block)
-            {
-               HYPRE_Int first_owned = hypre_ParCompGridGlobalIndices(compGrid[level])[ hypre_ParCompGridOwnedBlockStarts(compGrid[level])[i] ];
-               HYPRE_Int last_owned = hypre_ParCompGridGlobalIndices(compGrid[level])[ hypre_ParCompGridOwnedBlockStarts(compGrid[level])[i+1] - 1 ];
-               HYPRE_Int first_nonowned = hypre_ParCompGridGlobalIndices(compGrid[level])[ num_owned_nodes ];
-               HYPRE_Int last_nonowned = hypre_ParCompGridGlobalIndices(compGrid[level])[ hypre_ParCompGridNumNodes(compGrid[level]) - 1 ];
-
-               // Find where to insert owned nodes in the list of all comp grid nodes (such that they are ordered according to global index)
-               if (last_owned < first_nonowned) insert_owned_positions[i+1] = num_owned_nodes;
-               else if (first_owned > last_nonowned) insert_owned_positions[i+1] = hypre_ParCompGridNumNodes(compGrid[level]);
-               else
-               {
-                  // Binary search to find where to insert
-                  insert_owned_positions[i+1] = hypre_ParCompGridLocalIndexBinarySearch(compGrid[level], first_owned, 1);
-               }
-            }
-            else insert_owned_positions[i+1] = insert_owned_positions[i];
-         }
-
-         // Generate the send_flag in global index ordering
-         for (i = 0; i < hypre_ParCompGridNumOwnedBlocks(compGrid[level]); i++)
-         {
-            // Non-owned dofs before the owned dofs
-            for (j = insert_owned_positions[i]; j < insert_owned_positions[i+1]; j++)
-            {
-               if (add_flag[level][j] > num_ghost_layers)
-                  send_flag[current_level][partition][level][cnt++] = j;
-               else if (add_flag[level][j] > 0)
-                  send_flag[current_level][partition][level][cnt++] = -(j+1);
-            }
-            // Owned dofs
-            for (j = hypre_ParCompGridOwnedBlockStarts(compGrid[level])[i]; j < hypre_ParCompGridOwnedBlockStarts(compGrid[level])[i+1]; j++)
-            {
-               if (add_flag[level][j] > num_ghost_layers)
-                  send_flag[current_level][partition][level][cnt++] = j;
-               else if (add_flag[level][j] > 0)
-                  send_flag[current_level][partition][level][cnt++] = -(j+1);
-            }
-         }
-         // Non-owned dofs after the owned dofs
-         for (j = insert_owned_positions[hypre_ParCompGridNumOwnedBlocks(compGrid[level])]; j < hypre_ParCompGridNumNodes(compGrid[level]); j++)
+         for (j = 0; j < hypre_ParCompGridNumNodes(compGrid[level]); j++)
          {
                if (add_flag[level][j] > num_ghost_layers)
-                  send_flag[current_level][partition][level][cnt++] = j;
+                  send_flag[current_level][partition][level][cnt++] = inv_sort_map[j];
                else if (add_flag[level][j] > 0)
-                  send_flag[current_level][partition][level][cnt++] = -(j+1);
+                  send_flag[current_level][partition][level][cnt++] = -(inv_sort_map[j]+1);
          }
-         hypre_TFree(insert_owned_positions, HYPRE_MEMORY_HOST);
 
          // Count up the buffer sizes
          (*send_flag_buffer_size) += num_send_nodes[current_level][partition][level];
@@ -2245,27 +2207,65 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
       }
 
       // store the row length for matrix A
-      for (i = 0; i < num_send_nodes[current_level][partition][level]; i++)
+      if (symmetric)
       {
-         send_elmt = send_flag[current_level][partition][level][i];
-         if (send_elmt < 0) send_elmt = -(send_elmt + 1);
-         row_length = hypre_ParCompGridARowPtr(compGrid[level])[ send_elmt + 1 ]
-                    - hypre_ParCompGridARowPtr(compGrid[level])[ send_elmt ];
-         send_buffer[cnt++] = row_length;
+         for (i = 0; i < num_send_nodes[current_level][partition][level]; i++)
+         {
+            send_elmt = send_flag[current_level][partition][level][i];
+            if (send_elmt < 0) send_buffer[cnt++] = 0;
+            else
+            {
+               row_length = hypre_ParCompGridARowPtr(compGrid[level])[ send_elmt + 1 ]
+                          - hypre_ParCompGridARowPtr(compGrid[level])[ send_elmt ];
+               send_buffer[cnt++] = row_length;
+            }
+         }
+      }
+      else
+      {
+         for (i = 0; i < num_send_nodes[current_level][partition][level]; i++)
+         {
+            send_elmt = send_flag[current_level][partition][level][i];
+            if (send_elmt < 0) send_elmt = -(send_elmt + 1);
+            row_length = hypre_ParCompGridARowPtr(compGrid[level])[ send_elmt + 1 ]
+                       - hypre_ParCompGridARowPtr(compGrid[level])[ send_elmt ];
+            send_buffer[cnt++] = row_length;
+         }
       }
 
       // copy global indices for matrix A
-      for (i = 0; i < num_send_nodes[current_level][partition][level]; i++)
+      if (symmetric)
       {
-         send_elmt = send_flag[current_level][partition][level][i];
-         if (send_elmt < 0) send_elmt = -(send_elmt + 1);
-         row_length = hypre_ParCompGridARowPtr(compGrid[level])[ send_elmt + 1 ]
-                    - hypre_ParCompGridARowPtr(compGrid[level])[ send_elmt ];
-         HYPRE_Int offset = hypre_ParCompGridARowPtr(compGrid[level])[ send_elmt ];
-
-         for (j = 0; j < row_length; j++)
+         for (i = 0; i < num_send_nodes[current_level][partition][level]; i++)
          {
-            send_buffer[cnt++] = hypre_ParCompGridAGlobalColInd(compGrid[level])[ offset + j ];
+            send_elmt = send_flag[current_level][partition][level][i];
+            if (send_elmt >= 0)
+            {
+               row_length = hypre_ParCompGridARowPtr(compGrid[level])[ send_elmt + 1 ]
+                          - hypre_ParCompGridARowPtr(compGrid[level])[ send_elmt ];
+               HYPRE_Int offset = hypre_ParCompGridARowPtr(compGrid[level])[ send_elmt ];
+
+               for (j = 0; j < row_length; j++)
+               {
+                  send_buffer[cnt++] = hypre_ParCompGridAGlobalColInd(compGrid[level])[ offset + j ];
+               }
+            }
+         }
+      }
+      else
+      {
+         for (i = 0; i < num_send_nodes[current_level][partition][level]; i++)
+         {
+            send_elmt = send_flag[current_level][partition][level][i];
+            if (send_elmt < 0) send_elmt = -(send_elmt + 1);
+            row_length = hypre_ParCompGridARowPtr(compGrid[level])[ send_elmt + 1 ]
+                       - hypre_ParCompGridARowPtr(compGrid[level])[ send_elmt ];
+            HYPRE_Int offset = hypre_ParCompGridARowPtr(compGrid[level])[ send_elmt ];
+
+            for (j = 0; j < row_length; j++)
+            {
+               send_buffer[cnt++] = hypre_ParCompGridAGlobalColInd(compGrid[level])[ offset + j ];
+            }
          }
       }
    }
@@ -2285,9 +2285,9 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
 
 HYPRE_Int
 RecursivelyBuildPsiComposite(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *compGrid, HYPRE_Int *add_flag, HYPRE_Int *add_flag_coarse, 
-   HYPRE_Int need_coarse_info, HYPRE_Int *nodes_to_add, HYPRE_Int padding)
+   HYPRE_Int *sort_map, HYPRE_Int *sort_map_coarse, HYPRE_Int need_coarse_info, HYPRE_Int *nodes_to_add, HYPRE_Int padding)
 {
-   HYPRE_Int         i,index,coarse_grid_index;
+   HYPRE_Int         i,index,sort_index,coarse_grid_index;
    HYPRE_Int error_code = 0;
 
    HYPRE_Int myid;
@@ -2302,12 +2302,15 @@ RecursivelyBuildPsiComposite(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *com
       // If the neighbor info is available on this proc
       if (index >= 0)
       {
+         if (sort_map) sort_index = sort_map[index];
+         else sort_index = index;
+
          // And if we still need to visit this index (note that add_flag[index] = m means we have already added all distance m-1 neighbors of index)
-         if (add_flag[index] < m)
+         if (add_flag[sort_index] < m)
          {
-            add_flag[index] = m;
+            add_flag[sort_index] = m;
             // Recursively call to find distance m-1 neighbors of index
-            if (m-1 > 0) error_code = RecursivelyBuildPsiComposite(index, m-1, compGrid, add_flag, add_flag_coarse, need_coarse_info, nodes_to_add, padding);
+            if (m-1 > 0) error_code = RecursivelyBuildPsiComposite(index, m-1, compGrid, add_flag, add_flag_coarse, sort_map, sort_map_coarse, need_coarse_info, nodes_to_add, padding);
          }
          // If m = 1, we won't do another recursive call, so make sure to flag the coarse grid here if applicable
          if (need_coarse_info && m == 1)
@@ -2316,7 +2319,9 @@ RecursivelyBuildPsiComposite(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *com
             if ( coarse_grid_index != -1 ) 
             {
                // Again, need to set the add_flag to the appropriate value in order to recursively find neighbors on the next level
-               add_flag_coarse[ coarse_grid_index ] = padding+1;
+               if (sort_map_coarse) sort_index = sort_map_coarse[coarse_grid_index];
+               else sort_index = coarse_grid_index;
+               add_flag_coarse[ sort_index ] = padding+1;
                *nodes_to_add = 1;   
             }
          }
@@ -2337,7 +2342,9 @@ RecursivelyBuildPsiComposite(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *com
       if ( coarse_grid_index != -1 ) 
       {
          // Again, need to set the add_flag to the appropriate value in order to recursively find neighbors on the next level
-         add_flag_coarse[ coarse_grid_index ] = padding+1;
+         if (sort_map_coarse) sort_index = sort_map_coarse[coarse_grid_index];
+         else sort_index = coarse_grid_index;
+         add_flag_coarse[ sort_index ] = padding+1;
          *nodes_to_add = 1;
       }
    }
@@ -3062,8 +3069,8 @@ TestCompGrids1(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int tra
          {
             if (add_flag[level][i] == padding[level] + 1)
             {
-               if (need_coarse_info) error_code = RecursivelyBuildPsiComposite(i, padding[level], compGrid[level], add_flag[level], add_flag[level+1], need_coarse_info, &nodes_to_add, padding[level+1]);
-               else error_code = RecursivelyBuildPsiComposite(i, padding[level], compGrid[level], add_flag[level], NULL, need_coarse_info, &nodes_to_add, 0);
+               if (need_coarse_info) error_code = RecursivelyBuildPsiComposite(i, padding[level], compGrid[level], add_flag[level], add_flag[level+1], NULL, NULL, need_coarse_info, &nodes_to_add, padding[level+1]);
+               else error_code = RecursivelyBuildPsiComposite(i, padding[level], compGrid[level], add_flag[level], NULL, NULL, NULL, need_coarse_info, &nodes_to_add, 0);
                if (error_code)
                {
                   hypre_printf("Error: expand padding\n");
@@ -3081,7 +3088,7 @@ TestCompGrids1(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int tra
          for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
          {
             // Recursively add the region of ghost nodes (do not add any coarse nodes underneath)
-            if (add_flag[level][i] == num_ghost_layers + 1) error_code = RecursivelyBuildPsiComposite(i, num_ghost_layers, compGrid[level], add_flag[level], NULL, 0, NULL, 0);
+            if (add_flag[level][i] == num_ghost_layers + 1) error_code = RecursivelyBuildPsiComposite(i, num_ghost_layers, compGrid[level], add_flag[level], NULL, NULL, NULL, 0, NULL, 0);
             if (error_code)
             {
                hypre_printf("Error: recursively add the region of ghost nodes\n");

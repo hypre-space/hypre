@@ -140,6 +140,8 @@ typedef struct
    HYPRE_Int        *coarse_global_indices; 
    HYPRE_Int        *coarse_local_indices;
    HYPRE_Int        *real_dof_marker;
+   HYPRE_Int        *sort_map;
+   HYPRE_Int        *inv_sort_map;
 
    HYPRE_Int        *A_rowptr;
    HYPRE_Int        *A_colind;
@@ -202,6 +204,8 @@ typedef struct
 #define hypre_ParCompGridCoarseGlobalIndices(compGrid)           ((compGrid) -> coarse_global_indices)
 #define hypre_ParCompGridCoarseLocalIndices(compGrid)           ((compGrid) -> coarse_local_indices)
 #define hypre_ParCompGridRealDofMarker(compGrid) ((compGrid) -> real_dof_marker)
+#define hypre_ParCompGridSortMap(compGrid) ((compGrid) -> sort_map)
+#define hypre_ParCompGridInvSortMap(compGrid) ((compGrid) -> inv_sort_map)
 #define hypre_ParCompGridARowPtr(compGrid)         ((compGrid) -> A_rowptr)
 #define hypre_ParCompGridAColInd(compGrid)         ((compGrid) -> A_colind)
 #define hypre_ParCompGridAGlobalColInd(compGrid)         ((compGrid) -> A_global_colind)
@@ -2082,7 +2086,7 @@ HYPRE_Int UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid
       HYPRE_Int ****send_flag, HYPRE_Int ***num_send_nodes,
       HYPRE_Int ****recv_map, HYPRE_Int ***num_recv_nodes, 
       HYPRE_Int *recv_map_send_buffer_size, HYPRE_Int current_level, HYPRE_Int num_levels, HYPRE_Int transition_level,
-      HYPRE_Int *nodes_added_on_level, HYPRE_Int buffer_number, HYPRE_Int *num_resizes );
+      HYPRE_Int *nodes_added_on_level, HYPRE_Int buffer_number, HYPRE_Int *num_resizes, HYPRE_Int symmetric );
 /* par_amgdd_test.c */
 HYPRE_Int hypre_BoomerAMGDDTestSolve( void *amg_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u);
 

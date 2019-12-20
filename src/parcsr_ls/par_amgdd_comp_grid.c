@@ -57,6 +57,8 @@ hypre_ParCompGridCreate ()
    hypre_ParCompGridCoarseGlobalIndices(compGrid) = NULL;
    hypre_ParCompGridCoarseLocalIndices(compGrid) = NULL;
    hypre_ParCompGridRealDofMarker(compGrid) = NULL;
+   hypre_ParCompGridSortMap(compGrid) = NULL;
+   hypre_ParCompGridInvSortMap(compGrid) = NULL;
 
    hypre_ParCompGridARowPtr(compGrid) = NULL;
    hypre_ParCompGridAColInd(compGrid) = NULL;
@@ -229,6 +231,8 @@ hypre_ParCompGridInitialize ( hypre_ParAMGData *amg_data, HYPRE_Int padding, HYP
    // Allocate space for the info on the comp nodes
    HYPRE_Int        *global_indices_comp = hypre_CTAlloc(HYPRE_Int, mem_size, HYPRE_MEMORY_HOST);
    HYPRE_Int        *real_dof_marker = hypre_CTAlloc(HYPRE_Int, mem_size, HYPRE_MEMORY_HOST);
+   HYPRE_Int        *sort_map = hypre_CTAlloc(HYPRE_Int, mem_size, HYPRE_MEMORY_HOST);
+   HYPRE_Int        *inv_sort_map = hypre_CTAlloc(HYPRE_Int, mem_size, HYPRE_MEMORY_HOST);
    HYPRE_Int        *coarse_global_indices_comp = NULL; 
    HYPRE_Int        *coarse_local_indices_comp = NULL;
    if (level != hypre_ParAMGDataNumLevels(amg_data) - 1)
@@ -275,6 +279,8 @@ hypre_ParCompGridInitialize ( hypre_ParAMGData *amg_data, HYPRE_Int padding, HYP
    {
       global_indices_comp[i] = hypre_ParVectorFirstIndex(residual) + i;
       real_dof_marker[i] = 1;
+      sort_map[i] = i;
+      inv_sort_map[i] = i;
       if (level != hypre_ParAMGDataNumLevels(amg_data) - 1) 
       {
          if ( CF_marker_array )
@@ -345,6 +351,8 @@ hypre_ParCompGridInitialize ( hypre_ParAMGData *amg_data, HYPRE_Int padding, HYP
    // Set attributes for compGrid
    hypre_ParCompGridGlobalIndices(compGrid) = global_indices_comp;
    hypre_ParCompGridRealDofMarker(compGrid) = real_dof_marker;
+   hypre_ParCompGridSortMap(compGrid) = sort_map;
+   hypre_ParCompGridInvSortMap(compGrid) = inv_sort_map;
    hypre_ParCompGridCoarseGlobalIndices(compGrid) = coarse_global_indices_comp;
    hypre_ParCompGridCoarseLocalIndices(compGrid) = coarse_local_indices_comp;
    hypre_ParCompGridARowPtr(compGrid) = A_rowptr;
@@ -956,6 +964,8 @@ hypre_ParCompGridResize ( hypre_ParCompGrid *compGrid, HYPRE_Int new_size, HYPRE
       // Re allocate to given size
       hypre_ParCompGridGlobalIndices(compGrid) = hypre_TReAlloc(hypre_ParCompGridGlobalIndices(compGrid), HYPRE_Int, new_size, HYPRE_MEMORY_HOST);
       hypre_ParCompGridRealDofMarker(compGrid) = hypre_TReAlloc(hypre_ParCompGridRealDofMarker(compGrid), HYPRE_Int, new_size, HYPRE_MEMORY_HOST);
+      hypre_ParCompGridSortMap(compGrid) = hypre_TReAlloc(hypre_ParCompGridSortMap(compGrid), HYPRE_Int, new_size, HYPRE_MEMORY_HOST);
+      hypre_ParCompGridInvSortMap(compGrid) = hypre_TReAlloc(hypre_ParCompGridInvSortMap(compGrid), HYPRE_Int, new_size, HYPRE_MEMORY_HOST);
       hypre_ParCompGridARowPtr(compGrid) = hypre_TReAlloc(hypre_ParCompGridARowPtr(compGrid), HYPRE_Int, new_size+1, HYPRE_MEMORY_HOST);
       if (need_coarse_info)
       {
