@@ -520,12 +520,12 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
 
          if (timers) hypre_EndTiming(timers[3]);
 
-         if (use_barriers) hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
-         if (timers) hypre_BeginTiming(timers[4]);
 
          // unpack the buffers
          for (i = 0; i < num_recv_procs; i++)
          {
+            if (timers) hypre_BeginTiming(timers[4]);
+
             recv_map[level][i] = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
             num_recv_nodes[level][i] = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
             UnpackRecvBuffer(recv_buffer[i], compGrid, compGridCommPkg, 
@@ -533,11 +533,21 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
                recv_map, num_recv_nodes, 
                &(recv_map_send_buffer_size[i]), level, num_levels, transition_level, nodes_added_on_level, i, num_resizes, symmetric);
             
+            if (timers) hypre_EndTiming(timers[4]);
+            
+            // Setup local indices for the composite grid
+            if (timers) hypre_BeginTiming(timers[5]);
+
+            hypre_ParCompGridSetupLocalIndices(compGrid, nodes_added_on_level, amgdd_start_level, transition_level);
+            for (i = level; i < num_levels; i++) nodes_added_on_level[i] = 0;
+
+
+            if (timers) hypre_EndTiming(timers[5]);
+
             recv_map_send_buffer[i] = hypre_CTAlloc(HYPRE_Int, recv_map_send_buffer_size[i], HYPRE_MEMORY_HOST);
             PackRecvMapSendBuffer(recv_map_send_buffer[i], recv_map[level][i], num_recv_nodes[level][i], &(recv_buffer_size[level][i]), level, num_levels, compGrid);
          }
 
-         if (timers) hypre_EndTiming(timers[4]);
 
          // Communicate redundancy info 
          // post receives for send maps
@@ -560,17 +570,6 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
                communication_cost[level*10 + 3] += recv_map_send_buffer_size[i]*sizeof(HYPRE_Int);
             }
          }
-
-         // Setup local indices for the composite grid
-         if (use_barriers) hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
-         if (timers) hypre_BeginTiming(timers[5]);
-
-         hypre_ParCompGridSetupLocalIndices(compGrid, nodes_added_on_level, amgdd_start_level, transition_level);
-
-         // Zero out nodes_added_on_level
-         for (i = level; i < num_levels; i++) nodes_added_on_level[i] = 0;
-
-         if (timers) hypre_EndTiming(timers[5]);
 
          if (use_barriers) hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
          if (timers) hypre_BeginTiming(timers[6]);  
@@ -610,8 +609,6 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
       {
          if (use_barriers)
          {
-            hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
-            hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
             hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
             hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
             hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);

@@ -57,6 +57,7 @@ hypre_ParCompGridCreate ()
    hypre_ParCompGridCoarseGlobalIndices(compGrid) = NULL;
    hypre_ParCompGridCoarseLocalIndices(compGrid) = NULL;
    hypre_ParCompGridRealDofMarker(compGrid) = NULL;
+   hypre_ParCompGridEdgeIndices(compGrid) = NULL;
    hypre_ParCompGridSortMap(compGrid) = NULL;
    hypre_ParCompGridInvSortMap(compGrid) = NULL;
 
@@ -231,10 +232,19 @@ hypre_ParCompGridInitialize ( hypre_ParAMGData *amg_data, HYPRE_Int padding, HYP
    // Allocate space for the info on the comp nodes
    HYPRE_Int        *global_indices_comp = hypre_CTAlloc(HYPRE_Int, mem_size, HYPRE_MEMORY_HOST);
    HYPRE_Int        *real_dof_marker = hypre_CTAlloc(HYPRE_Int, mem_size, HYPRE_MEMORY_HOST);
+   HYPRE_Int        *edge_indices = hypre_CTAlloc(HYPRE_Int, mem_size, HYPRE_MEMORY_HOST);
    HYPRE_Int        *sort_map = hypre_CTAlloc(HYPRE_Int, mem_size, HYPRE_MEMORY_HOST);
    HYPRE_Int        *inv_sort_map = hypre_CTAlloc(HYPRE_Int, mem_size, HYPRE_MEMORY_HOST);
    HYPRE_Int        *coarse_global_indices_comp = NULL; 
    HYPRE_Int        *coarse_local_indices_comp = NULL;
+   
+   // Initialize edge indices using offd from A
+   HYPRE_Int num_edge_indices = 0;
+   hypre_CSRMatrix *offd = hypre_ParCSRMatrixOffd(A);
+   for (i = 0; i < num_nodes; i++)
+      if (hypre_CSRMatrixI(offd)[i+1] > hypre_CSRMatrixI(offd)[i]) 
+         edge_indices[num_edge_indices++] = i;
+
    if (level != hypre_ParAMGDataNumLevels(amg_data) - 1)
    {
       coarse_global_indices_comp = hypre_CTAlloc(HYPRE_Int, mem_size, HYPRE_MEMORY_HOST); 
@@ -351,6 +361,8 @@ hypre_ParCompGridInitialize ( hypre_ParAMGData *amg_data, HYPRE_Int padding, HYP
    // Set attributes for compGrid
    hypre_ParCompGridGlobalIndices(compGrid) = global_indices_comp;
    hypre_ParCompGridRealDofMarker(compGrid) = real_dof_marker;
+   hypre_ParCompGridNumEdgeIndices(compGrid) = num_edge_indices;
+   hypre_ParCompGridEdgeIndices(compGrid) = edge_indices;
    hypre_ParCompGridSortMap(compGrid) = sort_map;
    hypre_ParCompGridInvSortMap(compGrid) = inv_sort_map;
    hypre_ParCompGridCoarseGlobalIndices(compGrid) = coarse_global_indices_comp;
@@ -964,6 +976,7 @@ hypre_ParCompGridResize ( hypre_ParCompGrid *compGrid, HYPRE_Int new_size, HYPRE
       // Re allocate to given size
       hypre_ParCompGridGlobalIndices(compGrid) = hypre_TReAlloc(hypre_ParCompGridGlobalIndices(compGrid), HYPRE_Int, new_size, HYPRE_MEMORY_HOST);
       hypre_ParCompGridRealDofMarker(compGrid) = hypre_TReAlloc(hypre_ParCompGridRealDofMarker(compGrid), HYPRE_Int, new_size, HYPRE_MEMORY_HOST);
+      hypre_ParCompGridEdgeIndices(compGrid) = hypre_TReAlloc(hypre_ParCompGridEdgeIndices(compGrid), HYPRE_Int, new_size, HYPRE_MEMORY_HOST);
       hypre_ParCompGridSortMap(compGrid) = hypre_TReAlloc(hypre_ParCompGridSortMap(compGrid), HYPRE_Int, new_size, HYPRE_MEMORY_HOST);
       hypre_ParCompGridInvSortMap(compGrid) = hypre_TReAlloc(hypre_ParCompGridInvSortMap(compGrid), HYPRE_Int, new_size, HYPRE_MEMORY_HOST);
       hypre_ParCompGridARowPtr(compGrid) = hypre_TReAlloc(hypre_ParCompGridARowPtr(compGrid), HYPRE_Int, new_size+1, HYPRE_MEMORY_HOST);
@@ -1007,7 +1020,7 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *nod
    // this must be done on each level as info is added to correctly construct subsequent Psi_c grids
    // also done after each ghost layer is added
    HYPRE_Int      level,i,j,k;
-   HYPRE_Int      global_index, coarse_global_index, local_index;
+   HYPRE_Int      global_index, local_index;
 
    HYPRE_Int myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
@@ -1018,41 +1031,44 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *nod
       // If we have added nodes on this level
       if (nodes_added_on_level[level])
       {
-         // loop over indices on this level !!! This could be made more efficient! I now loop over all the owned nodes, and most of these don't need any work, yet I'm doing it anyway...
-         for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
+
+         HYPRE_Int num_nodes = hypre_ParCompGridNumNodes(compGrid[level]);
+         HYPRE_Int old_num_nodes = num_nodes - nodes_added_on_level[level];
+
+         // Loop over previous edge dofs to fill in missing col indices
+         // NOTE: can do binary search over just the added dofs. The block of dofs received should be in global index ordering
+         HYPRE_Int new_num_edge_indices = 0;
+         for (i = 0; i < hypre_ParCompGridNumEdgeIndices(compGrid[level]); i++)
          {
-            // fix up the local indices for the matrix A row info
-            for (j = hypre_ParCompGridARowPtr(compGrid[level])[i]; j < hypre_ParCompGridARowPtr(compGrid[level])[i+1]; j++)
+            HYPRE_Int edge_index = hypre_ParCompGridEdgeIndices(compGrid[level])[i];
+            // Loop over col indices of A at the edge indices
+            for (j = hypre_ParCompGridARowPtr(compGrid[level])[edge_index]; j < hypre_ParCompGridARowPtr(compGrid[level])[edge_index+1]; j++)
             {
-               // initialize local index to -1 (it will be set to another value only if we can find the global index somewhere in this comp grid)
-               global_index = hypre_ParCompGridAGlobalColInd(compGrid[level])[j];
-               local_index = -global_index-1;
-               
-               // if global index of j'th row entry is owned by this proc, then local index is calculable
-               HYPRE_Int num_owned_blocks = hypre_ParCompGridNumOwnedBlocks(compGrid[level]);
-               for (k = 0; k < num_owned_blocks; k++)
-               {
-                  if (hypre_ParCompGridOwnedBlockStarts(compGrid[level])[k+1] - hypre_ParCompGridOwnedBlockStarts(compGrid[level])[k] > 0)
-                  {
-                     HYPRE_Int low_global_index = hypre_ParCompGridGlobalIndices(compGrid[level])[ hypre_ParCompGridOwnedBlockStarts(compGrid[level])[k] ];
-                     HYPRE_Int high_global_index = hypre_ParCompGridGlobalIndices(compGrid[level])[ hypre_ParCompGridOwnedBlockStarts(compGrid[level])[k+1] - 1 ];
-                     
-                     if ( global_index >= low_global_index && global_index <= high_global_index )
-                     {
-                        // set local index for entry in this row of the matrix
-                        local_index = global_index - low_global_index + hypre_ParCompGridOwnedBlockStarts(compGrid[level])[k];
-                     }
-                  }
-               }
-               // otherwise find local index via binary search
+               local_index = hypre_ParCompGridAColInd(compGrid[level])[j];
                if (local_index < 0)
                {
-                  local_index = hypre_ParCompGridLocalIndexBinarySearch(compGrid[level], global_index, 0);
-                  if (local_index == -1) local_index = -global_index-1;
+                  global_index = hypre_ParCompGridAGlobalColInd(compGrid[level])[j];
+                  local_index = hypre_ParCompGridLocalIndexBinarySearch(compGrid[level], global_index, old_num_nodes, num_nodes, NULL);
                }
+               if (local_index < 0) hypre_ParCompGridEdgeIndices(compGrid[level])[new_num_edge_indices++] = edge_index;
+            }
+         }
+
+         // Loop over new nodes and setup
+         // NOTE: don't forget to mark edges here as well
+         for (i = old_num_nodes; i < num_nodes; i++)
+         {
+            for (j = hypre_ParCompGridARowPtr(compGrid[level])[i]; j < hypre_ParCompGridARowPtr(compGrid[level])[i+1]; j++)
+            {
+               // !!! NOTE: could optimize here a bit by checking if global index is owned
+               global_index = hypre_ParCompGridAGlobalColInd(compGrid[level])[j];
+               local_index = hypre_ParCompGridLocalIndexBinarySearch(compGrid[level], global_index, 0, num_nodes, hypre_ParCompGridInvSortMap(compGrid[level]));
+               if (local_index < 0) hypre_ParCompGridEdgeIndices(compGrid[level])[new_num_edge_indices++] = i;
                hypre_ParCompGridAColInd(compGrid[level])[j] = local_index;
             }
          }
+
+         hypre_ParCompGridNumEdgeIndices(compGrid[level]) = new_num_edge_indices;
       }
       
       // if we are not on the coarsest level
@@ -1060,34 +1076,20 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *nod
       {
          if (nodes_added_on_level[level] || nodes_added_on_level[level+1])
          {
-            // loop over indices of non-owned nodes on this level
+            // loop over indices of non-owned nodes on this level 
+            // !!! No guarantee that previous ghost dofs converted to real dofs have coarse local indices setup...
+            // !!! Thus we go over all non-owned dofs here instead of just the added ones. Could probably be optimized.
             HYPRE_Int num_owned_nodes = hypre_ParCompGridOwnedBlockStarts(compGrid[level])[hypre_ParCompGridNumOwnedBlocks(compGrid[level])];
             for (i = num_owned_nodes; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
             {
                // fix up the coarse local indices
-               coarse_global_index = hypre_ParCompGridCoarseGlobalIndices(compGrid[level])[i];
+               global_index = hypre_ParCompGridCoarseGlobalIndices(compGrid[level])[i];
+               local_index = hypre_ParCompGridCoarseLocalIndices(compGrid[level])[i];
 
-               // if this node is repeated on the next coarsest grid, figure out its local index
-               hypre_ParCompGridCoarseLocalIndices(compGrid[level])[i] = -1;
-               if ( coarse_global_index != -1)
+               // setup coarse local index if necessary
+               if ( hypre_ParCompGridGlobalIndices(compGrid[level+1])[local_index] != global_index )
                {
-                  // Check whether this node belongs to an owned block on the next level
-                  for (j = 0; j < hypre_ParCompGridNumOwnedBlocks(compGrid[level+1]); j++)
-                  {
-                     if (hypre_ParCompGridOwnedBlockStarts(compGrid[level+1])[j+1] - hypre_ParCompGridOwnedBlockStarts(compGrid[level+1])[j] > 0)
-                     {
-                        HYPRE_Int low_global_index = hypre_ParCompGridGlobalIndices(compGrid[level+1])[hypre_ParCompGridOwnedBlockStarts(compGrid[level+1])[j]];
-                        HYPRE_Int high_global_index = hypre_ParCompGridGlobalIndices(compGrid[level+1])[hypre_ParCompGridOwnedBlockStarts(compGrid[level+1])[j+1]-1];
-                        if (coarse_global_index >= low_global_index && coarse_global_index <= high_global_index)
-                        {
-                           hypre_ParCompGridCoarseLocalIndices(compGrid[level])[i] = coarse_global_index - low_global_index + hypre_ParCompGridOwnedBlockStarts(compGrid[level+1])[j];
-                           break;
-                        }
-                     }
-                  }
-
-                  if (hypre_ParCompGridCoarseLocalIndices(compGrid[level])[i] < 0)
-                     hypre_ParCompGridCoarseLocalIndices(compGrid[level])[i] = hypre_ParCompGridLocalIndexBinarySearch(compGrid[level+1], coarse_global_index, 0);
+                  hypre_ParCompGridCoarseLocalIndices(compGrid[level])[i] = hypre_ParCompGridLocalIndexBinarySearch(compGrid[level+1], global_index, 0, hypre_ParCompGridNumNodes(compGrid[level+1]), hypre_ParCompGridInvSortMap(compGrid[level+1]));
                }
             }
          }
@@ -1111,7 +1113,7 @@ HYPRE_Int hypre_ParCompGridSetupLocalIndicesP( hypre_ParCompGrid **compGrid, HYP
          for (i = 0; i < hypre_ParCompGridPRowPtr(compGrid[level])[ hypre_ParCompGridNumNodes(compGrid[level]) ]; i++)
          {
             global_index = hypre_ParCompGridPColInd(compGrid[level])[i];
-            hypre_ParCompGridPColInd(compGrid[level])[i] = -global_index - 1;
+            hypre_ParCompGridPColInd(compGrid[level])[i] = -1;
             // If global index is owned, simply calculate
             for (j = 0; j < num_owned_blocks; j++)
             {
@@ -1126,8 +1128,7 @@ HYPRE_Int hypre_ParCompGridSetupLocalIndicesP( hypre_ParCompGrid **compGrid, HYP
                }
             }
             // Otherwise, binary search
-            if (hypre_ParCompGridPColInd(compGrid[level])[i] < 0) hypre_ParCompGridPColInd(compGrid[level])[i] = hypre_ParCompGridLocalIndexBinarySearch(compGrid[level+1], global_index, 0);
-            if (hypre_ParCompGridPColInd(compGrid[level])[i] < 0) hypre_ParCompGridPColInd(compGrid[level])[i] = -global_index - 1;
+            if (hypre_ParCompGridPColInd(compGrid[level])[i] < 0) hypre_ParCompGridPColInd(compGrid[level])[i] = hypre_ParCompGridLocalIndexBinarySearch(compGrid[level+1], global_index, 0, hypre_ParCompGridNumNodes(compGrid[level+1]), hypre_ParCompGridInvSortMap(compGrid[level+1]));
          }
       }
 
@@ -1139,7 +1140,7 @@ HYPRE_Int hypre_ParCompGridSetupLocalIndicesP( hypre_ParCompGrid **compGrid, HYP
          for (i = 0; i < hypre_ParCompGridRRowPtr(compGrid[level])[ hypre_ParCompGridNumNodes(compGrid[level]) ]; i++)
          {
             global_index = hypre_ParCompGridRColInd(compGrid[level])[i];
-            hypre_ParCompGridRColInd(compGrid[level])[i] = -global_index - 1;
+            hypre_ParCompGridRColInd(compGrid[level])[i] = -1;
             // If global index is owned, simply calculate
             for (j = 0; j < num_owned_blocks; j++)
             {
@@ -1154,8 +1155,7 @@ HYPRE_Int hypre_ParCompGridSetupLocalIndicesP( hypre_ParCompGrid **compGrid, HYP
                }
             }
             // Otherwise, binary search
-            if (hypre_ParCompGridRColInd(compGrid[level])[i] < 0) hypre_ParCompGridRColInd(compGrid[level])[i] = hypre_ParCompGridLocalIndexBinarySearch(compGrid[level-1], global_index, 0);
-            if (hypre_ParCompGridRColInd(compGrid[level])[i] < 0) hypre_ParCompGridRColInd(compGrid[level])[i] = -global_index - 1;
+            if (hypre_ParCompGridRColInd(compGrid[level])[i] < 0) hypre_ParCompGridRColInd(compGrid[level])[i] = hypre_ParCompGridLocalIndexBinarySearch(compGrid[level-1], global_index, 0, hypre_ParCompGridNumNodes(compGrid[level-1]), hypre_ParCompGridInvSortMap(compGrid[level-1]));
          }
       }
    }
@@ -1163,27 +1163,26 @@ HYPRE_Int hypre_ParCompGridSetupLocalIndicesP( hypre_ParCompGrid **compGrid, HYP
    return 0;
 }
 
-HYPRE_Int hypre_ParCompGridLocalIndexBinarySearch( hypre_ParCompGrid *compGrid, HYPRE_Int global_index, HYPRE_Int allow_failed_search )
+HYPRE_Int hypre_ParCompGridLocalIndexBinarySearch( hypre_ParCompGrid *compGrid, HYPRE_Int global_index, HYPRE_Int start, HYPRE_Int end, HYPRE_Int *inv_map )
 {
-   HYPRE_Int      num_owned_nodes = hypre_ParCompGridOwnedBlockStarts(compGrid)[hypre_ParCompGridNumOwnedBlocks(compGrid)];
-   HYPRE_Int      left = num_owned_nodes;
-   HYPRE_Int      right = hypre_ParCompGridNumNodes(compGrid) - 1;
-   HYPRE_Int      index;
+   HYPRE_Int      left = start;
+   HYPRE_Int      right = end-1;
+   HYPRE_Int      index, sorted_index;
 
    HYPRE_Int      myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
    while (left <= right)
    {
-      index = (left + right) / 2;
-      if (hypre_ParCompGridGlobalIndices(compGrid)[index] < global_index) left = index + 1;
-      else if (hypre_ParCompGridGlobalIndices(compGrid)[index] > global_index) right = index - 1;
+      sorted_index = (left + right) / 2;
+      if (inv_map) index = inv_map[sorted_index];
+      else index = sorted_index;
+      if (hypre_ParCompGridGlobalIndices(compGrid)[index] < global_index) left = sorted_index + 1;
+      else if (hypre_ParCompGridGlobalIndices(compGrid)[index] > global_index) right = sorted_index - 1;
       else return index;
    }
 
-   // If binary search fails to find an exact match, return the index of the first element greater than global_index or -1
-   if (allow_failed_search) return left;
-   else return -1;
+   return -1;
 }
 
 HYPRE_Int
@@ -1337,65 +1336,6 @@ hypre_ParCompGridDebugPrint ( hypre_ParCompGrid *compGrid, const char* filename,
 
    return 0;
 
-}
-
-HYPRE_Int 
-hypre_ParCompGridDumpSorted( hypre_ParCompGrid *compGrid, const char* filename)
-{
-   // Check whether we have anything to dump
-   if (!hypre_ParCompGridGlobalIndices(compGrid))
-   {
-      printf("Trying to dump comp grid, but no global indices\n");
-      return 0;
-   }
-
-   // Get composite grid information
-   HYPRE_Int        *global_indices = hypre_ParCompGridGlobalIndices(compGrid);
-
-   // Get the position where the owned nodes should go in order to output arrays sorted by global index
-   HYPRE_Int insert_owned_position;
-   HYPRE_Int num_owned_nodes = hypre_ParCompGridOwnedBlockStarts(compGrid)[hypre_ParCompGridNumOwnedBlocks(compGrid)];
-   if (num_owned_nodes)
-   {
-      HYPRE_Int first_owned = hypre_ParCompGridGlobalIndices(compGrid)[0];
-      HYPRE_Int last_owned = hypre_ParCompGridGlobalIndices(compGrid)[ num_owned_nodes - 1 ];
-      HYPRE_Int first_nonowned = hypre_ParCompGridGlobalIndices(compGrid)[ num_owned_nodes ];
-      HYPRE_Int last_nonowned = hypre_ParCompGridGlobalIndices(compGrid)[ hypre_ParCompGridNumNodes(compGrid) - 1 ];
-
-      // Find where to insert owned nodes in the list of all comp grid nodes (such that they are ordered according to global index)
-      if (last_owned < first_nonowned) insert_owned_position = num_owned_nodes;
-      else if (first_owned > last_nonowned) insert_owned_position = hypre_ParCompGridNumNodes(compGrid);
-      else
-      {
-         // Binary search to find where to insert
-         insert_owned_position = hypre_ParCompGridLocalIndexBinarySearch(compGrid, first_owned, 1);
-      }
-   }
-   else insert_owned_position = 0;
-
-   // Print info to given filename   
-   FILE             *file;
-   file = fopen(filename,"w");
-   HYPRE_Int i;
-
-   // Global indices
-   for (i = num_owned_nodes; i < insert_owned_position; i++)
-   {
-      hypre_fprintf(file, "%d ", global_indices[i]);
-   }
-   for (i = 0; i < num_owned_nodes; i++)
-   {
-      hypre_fprintf(file, "%d ", global_indices[i]);
-   }
-   for (i = insert_owned_position; i < hypre_ParCompGridNumNodes(compGrid); i++)
-   {
-      hypre_fprintf(file, "%d ", global_indices[i]);
-   }
-   hypre_fprintf(file, "\n");
-
-   fclose(file);
-
-   return 0;
 }
 
 HYPRE_Int 

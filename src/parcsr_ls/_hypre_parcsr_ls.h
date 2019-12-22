@@ -131,6 +131,7 @@ typedef struct
    HYPRE_Int       *owned_block_starts; // start positions for the blocks of owned nodes
    HYPRE_Int       num_real_nodes; // number of real nodes
    HYPRE_Int       num_c_points; // number of C points
+   HYPRE_Int       num_edge_indices;
    HYPRE_Int       mem_size;
    HYPRE_Int       A_mem_size;
    HYPRE_Int       P_mem_size;
@@ -140,6 +141,7 @@ typedef struct
    HYPRE_Int        *coarse_global_indices; 
    HYPRE_Int        *coarse_local_indices;
    HYPRE_Int        *real_dof_marker;
+   HYPRE_Int        *edge_indices;
    HYPRE_Int        *sort_map;
    HYPRE_Int        *inv_sort_map;
 
@@ -188,6 +190,7 @@ typedef struct
 #define hypre_ParCompGridOwnedBlockStarts(compGrid)           ((compGrid) -> owned_block_starts)
 #define hypre_ParCompGridNumRealNodes(compGrid)           ((compGrid) -> num_real_nodes)
 #define hypre_ParCompGridNumCPoints(compGrid)           ((compGrid) -> num_c_points)
+#define hypre_ParCompGridNumEdgeIndices(compGrid)           ((compGrid) -> num_edge_indices)
 #define hypre_ParCompGridMemSize(compGrid)           ((compGrid) -> mem_size)
 #define hypre_ParCompGridAMemSize(compGrid)           ((compGrid) -> A_mem_size)
 #define hypre_ParCompGridPMemSize(compGrid)           ((compGrid) -> P_mem_size)
@@ -204,6 +207,7 @@ typedef struct
 #define hypre_ParCompGridCoarseGlobalIndices(compGrid)           ((compGrid) -> coarse_global_indices)
 #define hypre_ParCompGridCoarseLocalIndices(compGrid)           ((compGrid) -> coarse_local_indices)
 #define hypre_ParCompGridRealDofMarker(compGrid) ((compGrid) -> real_dof_marker)
+#define hypre_ParCompGridEdgeIndices(compGrid) ((compGrid) -> edge_indices)
 #define hypre_ParCompGridSortMap(compGrid) ((compGrid) -> sort_map)
 #define hypre_ParCompGridInvSortMap(compGrid) ((compGrid) -> inv_sort_map)
 #define hypre_ParCompGridARowPtr(compGrid)         ((compGrid) -> A_rowptr)
@@ -2105,7 +2109,7 @@ HYPRE_Int hypre_ParCompGridSetSize ( hypre_ParCompGrid *compGrid, HYPRE_Int num_
 HYPRE_Int hypre_ParCompGridResize ( hypre_ParCompGrid *compGrid, HYPRE_Int new_size, HYPRE_Int need_coarse_info, HYPRE_Int type );
 HYPRE_Int hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *num_added_nodes, HYPRE_Int start_level, HYPRE_Int num_levels );
 HYPRE_Int hypre_ParCompGridSetupLocalIndicesP( hypre_ParCompGrid **compGrid, HYPRE_Int start_level, HYPRE_Int transition_level );
-HYPRE_Int hypre_ParCompGridLocalIndexBinarySearch( hypre_ParCompGrid *compGrid, HYPRE_Int global_index, HYPRE_Int allow_failed_search );
+HYPRE_Int hypre_ParCompGridLocalIndexBinarySearch( hypre_ParCompGrid *compGrid, HYPRE_Int global_index, HYPRE_Int start, HYPRE_Int end, HYPRE_Int *inv_map );
 HYPRE_Int hypre_ParCompGridDebugPrint ( hypre_ParCompGrid *compGrid, const char* filename, HYPRE_Int coarse_num_nodes );
 HYPRE_Int hypre_ParCompGridDumpSorted( hypre_ParCompGrid *compGrid, const char* filename);
 HYPRE_Int hypre_ParCompGridGlobalIndicesDump( hypre_ParCompGrid *compGrid, const char* filename);

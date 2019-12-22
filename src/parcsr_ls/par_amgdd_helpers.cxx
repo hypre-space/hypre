@@ -665,8 +665,6 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
             dest++;
             cnt++;
             add_node_cnt++;
-
-            nodes_added_on_level[level] = 1; // !!! ???
          }
          else
          {
@@ -690,9 +688,6 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
          dest++;
          cnt++;
          add_node_cnt++;
-
-         nodes_added_on_level[level] = 1; // !!! ???
-
       }
       while (compGrid_cnt < num_nodes)
       {
@@ -701,6 +696,8 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
          compGrid_cnt++;
          sort_cnt++;
       }
+
+      nodes_added_on_level[level] = add_node_cnt;
 
       // Free the old inv sort map and set new
       hypre_TFree(inv_sort_map, HYPRE_MEMORY_HOST);
