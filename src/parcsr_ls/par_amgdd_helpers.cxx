@@ -138,9 +138,9 @@ FindNeighborProcessors(hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A,
 
 
    // !!! Debug
-   vector<chrono::duration<double>> timings;
+   // vector<chrono::duration<double>> timings;
    // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
-   auto start = chrono::system_clock::now();
+   // auto start = chrono::system_clock::now();
 
 
    // Nodes to request from other processors. Note, requests are only issued to processors within distance 1, i.e. within the original communication stencil for A
@@ -164,9 +164,9 @@ FindNeighborProcessors(hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A,
    // Clear the list of starting dofs
    starting_dofs.clear();
 
-
-   auto end = chrono::system_clock::now();
-   timings.push_back(end - start);
+   // !!! Debug
+   // auto end = chrono::system_clock::now();
+   // timings.push_back(end - start);
 
 
 
@@ -175,8 +175,9 @@ FindNeighborProcessors(hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A,
    // Communicate newly connected longer-distance processors to send procs: sending to current long distance send_procs and receiving from current long distance recv_procs
    //////////////////////////////////////////////////
 
+   // !!! Debug
    // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
-   start = chrono::system_clock::now();
+   // start = chrono::system_clock::now();
 
 
    // Get the sizes
@@ -215,11 +216,11 @@ FindNeighborProcessors(hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A,
    statuses = hypre_CTAlloc(hypre_MPI_Status, send_proc_dofs.size() + recv_procs.size(), HYPRE_MEMORY_HOST);
    request_cnt = 0;
 
-   end = chrono::system_clock::now();
-   timings.push_back(end - start);
-
+   // !!! Debug
+   // end = chrono::system_clock::now();
+   // timings.push_back(end - start);
    // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
-   start = chrono::system_clock::now();
+   // start = chrono::system_clock::now();
 
    // Allocate and post the recvs
    HYPRE_Int **recv_buffers = hypre_CTAlloc(HYPRE_Int*, recv_procs.size(), HYPRE_MEMORY_HOST);
@@ -255,11 +256,11 @@ FindNeighborProcessors(hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A,
    hypre_TFree(requests, HYPRE_MEMORY_HOST);
    hypre_TFree(statuses, HYPRE_MEMORY_HOST);
 
-   end = chrono::system_clock::now();
-   timings.push_back(end - start);
-
+   // !!! Debug
+   // end = chrono::system_clock::now();
+   // timings.push_back(end - start);
    // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
-   start = chrono::system_clock::now();
+   // start = chrono::system_clock::now();
 
    // Update recv_procs
    HYPRE_Int old_num_recv_procs = recv_procs.size();
@@ -279,16 +280,17 @@ FindNeighborProcessors(hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A,
    hypre_TFree(recv_sizes, HYPRE_MEMORY_HOST);
    hypre_TFree(send_sizes, HYPRE_MEMORY_HOST);
 
-   end = chrono::system_clock::now();
-   timings.push_back(end - start);
+   // !!! Debug
+   // end = chrono::system_clock::now();
+   // timings.push_back(end - start);
+   // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   // start = chrono::system_clock::now();
+
 
 
    //////////////////////////////////////////////////
    // Communicate request dofs to processors that I recv from: sending to request_procs and receiving from distance 1 send procs
    //////////////////////////////////////////////////
-
-   // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
-   start = chrono::system_clock::now();
 
 
    // Count up the send size: 1 + sum_{destination_procs}(2 + 2*num_requested_dofs)
@@ -420,8 +422,9 @@ FindNeighborProcessors(hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A,
    hypre_TFree(recv_sizes, HYPRE_MEMORY_HOST);
    hypre_TFree(send_sizes, HYPRE_MEMORY_HOST);
 
-   end = chrono::system_clock::now();
-   timings.push_back(end - start);
+   // !!! Debug
+   // end = chrono::system_clock::now();
+   // timings.push_back(end - start);
 
    // !!! Debug
    // HYPRE_Int num_procs;
@@ -565,9 +568,9 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
    // level = [ num send nodes, [global indices] , [coarse global indices] , [A row sizes] , [A col ind] ]
 
    // !!! Debug
-   vector<chrono::duration<double>> timings(20);
-   auto total_start = chrono::system_clock::now();
-   HYPRE_Int test_cnt = 0;
+   // vector<chrono::duration<double>> timings(20);
+   // auto total_start = chrono::system_clock::now();
+   // HYPRE_Int test_cnt = 0;
 
    HYPRE_Int            level, i, j, k;
    HYPRE_Int            num_psi_levels, row_size, level_start, add_node_cnt;
@@ -599,8 +602,7 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
       // Incoming nodes and existing (non-owned) nodes in the comp grid are both sorted by global index, so here we merge these lists together (getting rid of redundant nodes along the way)
       add_node_cnt = 0;
       HYPRE_Int num_nodes = hypre_ParCompGridNumNodes(compGrid[level]);
-      HYPRE_Int *sort_map = hypre_ParCompGridSortMap(compGrid[level]);
-      HYPRE_Int *inv_sort_map = hypre_ParCompGridInvSortMap(compGrid[level]);
+
 
       // NOTE: Don't free incoming_dest because we set that as recv_map and use it outside this function
       HYPRE_Int *incoming_dest = hypre_CTAlloc(HYPRE_Int, num_recv_nodes[current_level][buffer_number][level], HYPRE_MEMORY_HOST);
@@ -614,6 +616,8 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
          hypre_ParCompGridResize(compGrid[level], new_size, level != num_levels-1, 0); // !!! Is there a better way to manage memory? !!!
       }
 
+      HYPRE_Int *sort_map = hypre_ParCompGridSortMap(compGrid[level]);
+      HYPRE_Int *inv_sort_map = hypre_ParCompGridInvSortMap(compGrid[level]);
       HYPRE_Int *new_inv_sort_map = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridMemSize(compGrid[level]), HYPRE_MEMORY_HOST);
       HYPRE_Int sort_cnt = 0;
       HYPRE_Int compGrid_cnt = 0;
@@ -668,8 +672,8 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
          }
          else
          {
-            sort_map[compGrid_cnt] = sort_cnt;
-            new_inv_sort_map[sort_cnt] = compGrid_cnt;
+            sort_map[ inv_sort_map[compGrid_cnt] ] = sort_cnt;
+            new_inv_sort_map[sort_cnt] = inv_sort_map[compGrid_cnt];
             compGrid_cnt++;
             sort_cnt++;
          }
@@ -691,8 +695,8 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
       }
       while (compGrid_cnt < num_nodes)
       {
-         sort_map[compGrid_cnt] = sort_cnt;
-         new_inv_sort_map[sort_cnt] = compGrid_cnt;
+         sort_map[ inv_sort_map[compGrid_cnt] ] = sort_cnt;
+         new_inv_sort_map[sort_cnt] = inv_sort_map[compGrid_cnt];
          compGrid_cnt++;
          sort_cnt++;
       }
@@ -781,26 +785,26 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
       hypre_ParCompGridNumNodes(compGrid[level]) = num_nodes + add_node_cnt;
 
       // !!! Debug
-      auto end = chrono::system_clock::now();
-      timings[3] += end - start;
+      // auto end = chrono::system_clock::now();
+      // timings[3] += end - start;
       
    }
 
 
 
    // !!! Debug
-   auto total_end = chrono::system_clock::now();
-   timings[0] = total_end - total_start;
-   if (current_level == 0 && myid == 0)
-   {
-      cout << "Rank " << myid << ", level " << current_level
-                           << ", test_cnt = " << test_cnt
-                           << ": total " << timings[0].count() 
-                           << ", merge plus " << timings[1].count()
-                           << ", expensive " << timings[2].count()
-                           << ", rest " << timings[3].count()
-                           << endl;
-   }
+   // auto total_end = chrono::system_clock::now();
+   // timings[0] = total_end - total_start;
+   // if (current_level == 0 && myid == 0)
+   // {
+   //    cout << "Rank " << myid << ", level " << current_level
+   //                         << ", test_cnt = " << test_cnt
+   //                         << ": total " << timings[0].count() 
+   //                         << ", merge plus " << timings[1].count()
+   //                         << ", expensive " << timings[2].count()
+   //                         << ", rest " << timings[3].count()
+   //                         << endl;
+   // }
 
    return 0;
 }

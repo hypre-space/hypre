@@ -17,9 +17,9 @@
 #include "par_amg.h"
 #include "par_csr_block_matrix.h"
 
-#define DEBUG_COMP_GRID 0 // if true, runs some tests, prints out what is stored in the comp grids for each processor to a file
+#define DEBUG_COMP_GRID 2 // if true, runs some tests, prints out what is stored in the comp grids for each processor to a file
 #define DEBUG_PROC_NEIGHBORS 0 // if true, dumps info on the add flag structures that determine nearest processor neighbors 
-#define DEBUGGING_MESSAGES 0 // if true, prints a bunch of messages to the screen to let you know where in the algorithm you are
+#define DEBUGGING_MESSAGES 1 // if true, prints a bunch of messages to the screen to let you know where in the algorithm you are
 #define ENABLE_AGGLOMERATION 0 // if true, enable coarse level processor agglomeration, which requires linking with parmetis
 
 #if ENABLE_AGGLOMERATION
@@ -253,15 +253,15 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    #if DEBUG_COMP_GRID == 2
    for (level = 0; level < num_levels; level++)
    {
-      sprintf(filename, "outputs/AMG_hierarchy/A_level%d.txt", level);
+      sprintf(filename, "outputs/AMG_hierarchy/A_level%d", level);
       hypre_ParCSRMatrixPrint(hypre_ParAMGDataAArray(amg_data)[level], filename);
       if (level != num_levels-1)
       {
-         sprintf(filename, "outputs/AMG_hierarchy/P_level%d.txt", level);
+         sprintf(filename, "outputs/AMG_hierarchy/P_level%d", level);
          hypre_ParCSRMatrixPrint(hypre_ParAMGDataPArray(amg_data)[level], filename);
          if (hypre_ParAMGDataRestriction(amg_data))
          {
-            sprintf(filename, "outputs/AMG_hierarchy/R_level%d.txt", level);
+            sprintf(filename, "outputs/AMG_hierarchy/R_level%d", level);
             hypre_ParCSRMatrixPrint(hypre_ParAMGDataRArray(amg_data)[level], filename);
          }
       }
@@ -533,13 +533,37 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
                recv_map, num_recv_nodes, 
                &(recv_map_send_buffer_size[i]), level, num_levels, transition_level, nodes_added_on_level, i, num_resizes, symmetric);
             
+
+
+            // !!! Debug
+            // Check whether inv sort map is correct
+            HYPRE_Int not_in_order = 0;
+            for (j = 0; j < hypre_ParCompGridNumNodes(compGrid[level])-1; j++)
+            {
+               if (hypre_ParCompGridGlobalIndices(compGrid[level])[ hypre_ParCompGridInvSortMap(compGrid[level])[j+1] ]
+                  <= hypre_ParCompGridGlobalIndices(compGrid[level])[ hypre_ParCompGridInvSortMap(compGrid[level])[j] ])
+               {
+                  not_in_order = 1;
+                  printf("Inv sort map not in order\n");
+                  break;
+               }
+            }
+            if (not_in_order)
+            {
+               for (j = 0; j < hypre_ParCompGridNumNodes(compGrid[level])-1; j++) 
+                  printf("%d ", hypre_ParCompGridGlobalIndices(compGrid[level])[ hypre_ParCompGridInvSortMap(compGrid[level])[j] ]);
+               printf("\n");
+            }
+
+
+
             if (timers) hypre_EndTiming(timers[4]);
             
             // Setup local indices for the composite grid
             if (timers) hypre_BeginTiming(timers[5]);
 
             hypre_ParCompGridSetupLocalIndices(compGrid, nodes_added_on_level, amgdd_start_level, transition_level);
-            for (i = level; i < num_levels; i++) nodes_added_on_level[i] = 0;
+            for (j = level; j < num_levels; j++) nodes_added_on_level[j] = 0;
 
 
             if (timers) hypre_EndTiming(timers[5]);
@@ -2159,10 +2183,27 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
          (*send_flag_buffer_size) += num_send_nodes[current_level][partition][level];
          if (level != transition_level-1) (*buffer_size) += 3*num_send_nodes[current_level][partition][level];
          else (*buffer_size) += 2*num_send_nodes[current_level][partition][level];
+         
+
+         // !!! Debug
+         HYPRE_Int prev_send_elmt;
+
+
          for (i = 0; i < num_send_nodes[current_level][partition][level]; i++)
          {
             send_elmt = send_flag[current_level][partition][level][i];
             if (send_elmt < 0) send_elmt = -(send_elmt + 1);
+
+
+            // !!! Debug: check whether send elements are in global index ordering
+            if (i > 0)
+            {
+               if (hypre_ParCompGridGlobalIndices(compGrid[level])[send_elmt] <= hypre_ParCompGridGlobalIndices(compGrid[level])[prev_send_elmt])
+                  printf("Send is not in order!\n");
+            }
+            prev_send_elmt = send_elmt;
+
+
             (*buffer_size) += hypre_ParCompGridARowPtr(compGrid[level])[ send_elmt + 1 ] - hypre_ParCompGridARowPtr(compGrid[level])[ send_elmt ];   
          }
       }
@@ -2325,9 +2366,9 @@ RecursivelyBuildPsiComposite(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *com
       }
       else
       {
-         // error_code = 1; 
+         error_code = 1; 
          // hypre_printf("Rank %d: Error! Ran into a -1 index when building Psi_c\n", myid);
-         printf("Rank %d: Error! Ran into a -1 index when building Psi_c,\ngrid size %d, node = %d with global id %d, index = %d with global id = %d, m = %d\n",
+         if (myid == 1) printf("Rank %d: Error! Ran into a -1 index when building Psi_c,\ngrid size %d, node = %d with global id %d, index = %d with global id = %d, m = %d\n",
             myid, hypre_ParCompGridNumNodes(compGrid), node, hypre_ParCompGridGlobalIndices(compGrid)[node], index, hypre_ParCompGridAGlobalColInd(compGrid)[i], m);
       }
    }

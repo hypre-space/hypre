@@ -1025,7 +1025,6 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *nod
    HYPRE_Int myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
 
-
    for (level = start_level; level < transition_level; level++)
    {
       // If we have added nodes on this level
@@ -1038,9 +1037,12 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *nod
          // Loop over previous edge dofs to fill in missing col indices
          // NOTE: can do binary search over just the added dofs. The block of dofs received should be in global index ordering
          HYPRE_Int new_num_edge_indices = 0;
+
          for (i = 0; i < hypre_ParCompGridNumEdgeIndices(compGrid[level]); i++)
          {
+            HYPRE_Int is_edge = 0;
             HYPRE_Int edge_index = hypre_ParCompGridEdgeIndices(compGrid[level])[i];
+
             // Loop over col indices of A at the edge indices
             for (j = hypre_ParCompGridARowPtr(compGrid[level])[edge_index]; j < hypre_ParCompGridARowPtr(compGrid[level])[edge_index+1]; j++)
             {
@@ -1050,22 +1052,26 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *nod
                   global_index = hypre_ParCompGridAGlobalColInd(compGrid[level])[j];
                   local_index = hypre_ParCompGridLocalIndexBinarySearch(compGrid[level], global_index, old_num_nodes, num_nodes, NULL);
                }
-               if (local_index < 0) hypre_ParCompGridEdgeIndices(compGrid[level])[new_num_edge_indices++] = edge_index;
+               if (local_index < 0) is_edge = 1;
+               hypre_ParCompGridAColInd(compGrid[level])[j] = local_index;
             }
+            if (is_edge) hypre_ParCompGridEdgeIndices(compGrid[level])[new_num_edge_indices++] = edge_index;
          }
 
          // Loop over new nodes and setup
          // NOTE: don't forget to mark edges here as well
          for (i = old_num_nodes; i < num_nodes; i++)
          {
+            HYPRE_Int is_edge = 0;
             for (j = hypre_ParCompGridARowPtr(compGrid[level])[i]; j < hypre_ParCompGridARowPtr(compGrid[level])[i+1]; j++)
             {
                // !!! NOTE: could optimize here a bit by checking if global index is owned
                global_index = hypre_ParCompGridAGlobalColInd(compGrid[level])[j];
                local_index = hypre_ParCompGridLocalIndexBinarySearch(compGrid[level], global_index, 0, num_nodes, hypre_ParCompGridInvSortMap(compGrid[level]));
-               if (local_index < 0) hypre_ParCompGridEdgeIndices(compGrid[level])[new_num_edge_indices++] = i;
+               if (local_index < 0) is_edge = 1;
                hypre_ParCompGridAColInd(compGrid[level])[j] = local_index;
             }
+            if (is_edge) hypre_ParCompGridEdgeIndices(compGrid[level])[new_num_edge_indices++] = i;
          }
 
          hypre_ParCompGridNumEdgeIndices(compGrid[level]) = new_num_edge_indices;
@@ -1087,10 +1093,18 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *nod
                local_index = hypre_ParCompGridCoarseLocalIndices(compGrid[level])[i];
 
                // setup coarse local index if necessary
-               if ( hypre_ParCompGridGlobalIndices(compGrid[level+1])[local_index] != global_index )
+               if (global_index >= 0)
                {
-                  hypre_ParCompGridCoarseLocalIndices(compGrid[level])[i] = hypre_ParCompGridLocalIndexBinarySearch(compGrid[level+1], global_index, 0, hypre_ParCompGridNumNodes(compGrid[level+1]), hypre_ParCompGridInvSortMap(compGrid[level+1]));
+                  if (local_index < 0)
+                  {
+                     hypre_ParCompGridCoarseLocalIndices(compGrid[level])[i] = hypre_ParCompGridLocalIndexBinarySearch(compGrid[level+1], global_index, 0, hypre_ParCompGridNumNodes(compGrid[level+1]), hypre_ParCompGridInvSortMap(compGrid[level+1]));
+                  }
+                  else if ( hypre_ParCompGridGlobalIndices(compGrid[level+1])[local_index] != global_index )
+                  {
+                     hypre_ParCompGridCoarseLocalIndices(compGrid[level])[i] = hypre_ParCompGridLocalIndexBinarySearch(compGrid[level+1], global_index, 0, hypre_ParCompGridNumNodes(compGrid[level+1]), hypre_ParCompGridInvSortMap(compGrid[level+1]));
+                  }
                }
+               else hypre_ParCompGridCoarseLocalIndices(compGrid[level])[i] = -1;
             }
          }
       }
@@ -1307,30 +1321,32 @@ hypre_ParCompGridDebugPrint ( hypre_ParCompGrid *compGrid, const char* filename,
       hypre_fprintf(file, "P data:\n");
       for (i = 0; i < P_rowptr[num_nodes]; i++) hypre_fprintf(file, "%f ", P_data[i]);
    }
-   if (R_rowptr && !hypre_ParCompGridR(compGrid)) // NOTE: depending on when this is called, R might have num_nodes rows or coarse_num_nodes rows...
-   {
-      hypre_fprintf(file,"\n\n");
-      hypre_fprintf(file, "R row pointer:\n");
-      for (i = 0; i < num_nodes+1; i++) hypre_fprintf(file, "%d ", R_rowptr[i]);
-      hypre_fprintf(file,"\n\n");
-      hypre_fprintf(file, "R colind:\n");
-      for (i = 0; i < R_rowptr[num_nodes]; i++) hypre_fprintf(file, "%d ", R_colind[i]);
-      hypre_fprintf(file,"\n\n");
-      hypre_fprintf(file, "R data:\n");
-      for (i = 0; i < R_rowptr[num_nodes]; i++) hypre_fprintf(file, "%f ", R_data[i]);
-   }
-   if (hypre_ParCompGridR(compGrid)) // NOTE: depending on when this is called, R might have num_nodes rows or coarse_num_nodes rows...
-   {
-      hypre_fprintf(file,"\n\n");
-      hypre_fprintf(file, "R row pointer:\n");
-      for (i = 0; i < coarse_num_nodes+1; i++) hypre_fprintf(file, "%d ", R_rowptr[i]);
-      hypre_fprintf(file,"\n\n");
-      hypre_fprintf(file, "R colind:\n");
-      for (i = 0; i < R_rowptr[coarse_num_nodes]; i++) hypre_fprintf(file, "%d ", R_colind[i]);
-      hypre_fprintf(file,"\n\n");
-      hypre_fprintf(file, "R data:\n");
-      for (i = 0; i < R_rowptr[coarse_num_nodes]; i++) hypre_fprintf(file, "%f ", R_data[i]);
-   }
+   // if (R_rowptr && !hypre_ParCompGridR(compGrid)) // NOTE: depending on when this is called, R might have num_nodes rows or coarse_num_nodes rows...
+   // {
+   //    hypre_fprintf(file,"\n\n");
+   //    hypre_fprintf(file, "R row pointer:\n");
+   //    for (i = 0; i < num_nodes+1; i++) hypre_fprintf(file, "%d ", R_rowptr[i]);
+   //    hypre_fprintf(file,"\n\n");
+   //    hypre_fprintf(file, "R colind:\n");
+   //    for (i = 0; i < R_rowptr[num_nodes]; i++) hypre_fprintf(file, "%d ", R_colind[i]);
+   //    hypre_fprintf(file,"\n\n");
+   //    hypre_fprintf(file, "R data:\n");
+   //    for (i = 0; i < R_rowptr[num_nodes]; i++) hypre_fprintf(file, "%f ", R_data[i]);
+   // }
+   // if (hypre_ParCompGridR(compGrid)) // NOTE: depending on when this is called, R might have num_nodes rows or coarse_num_nodes rows...
+   // {
+   //    hypre_fprintf(file,"\n\n");
+   //    hypre_fprintf(file, "R row pointer:\n");
+   //    for (i = 0; i < coarse_num_nodes+1; i++) hypre_fprintf(file, "%d ", R_rowptr[i]);
+   //    hypre_fprintf(file,"\n\n");
+   //    hypre_fprintf(file, "R colind:\n");
+   //    for (i = 0; i < R_rowptr[coarse_num_nodes]; i++) hypre_fprintf(file, "%d ", R_colind[i]);
+   //    hypre_fprintf(file,"\n\n");
+   //    hypre_fprintf(file, "R data:\n");
+   //    for (i = 0; i < R_rowptr[coarse_num_nodes]; i++) hypre_fprintf(file, "%f ", R_data[i]);
+   // }
+
+   hypre_fprintf(file, "\n");
 
    fclose(file);
 
