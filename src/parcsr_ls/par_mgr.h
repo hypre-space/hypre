@@ -95,7 +95,7 @@ typedef struct
   HYPRE_Int *reserved_Cpoint_local_indexes;
 
   HYPRE_Int set_non_Cpoints_to_F;
-  HYPRE_Int *idx_array;
+  HYPRE_BigInt *idx_array;
 
   /* F-relaxation method */
   HYPRE_Int *Frelax_method;

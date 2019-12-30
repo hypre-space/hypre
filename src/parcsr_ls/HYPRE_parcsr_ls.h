@@ -3441,7 +3441,7 @@ HYPRE_Int HYPRE_MGRSolve( HYPRE_Solver solver,
 HYPRE_Int HYPRE_MGRSetCpointsByContiguousBlock( HYPRE_Solver solver,
                          HYPRE_Int  block_size, 
                          HYPRE_Int max_num_levels,
-                         HYPRE_Int *idx_array, 
+                         HYPRE_BigInt *idx_array, 
                          HYPRE_Int *num_block_coarse_points, 
                          HYPRE_Int  **block_coarse_indexes);
 
@@ -3513,7 +3513,7 @@ HYPRE_MGRSetBlockSize( HYPRE_Solver solver, HYPRE_Int bsize );
  * @param reserved_coarse_nodes [IN] (global) indexes of reserved coarse points
  **/
 HYPRE_Int
-HYPRE_MGRSetReservedCoarseNodes( HYPRE_Solver solver, HYPRE_Int reserved_coarse_size, HYPRE_Int *reserved_coarse_nodes );
+HYPRE_MGRSetReservedCoarseNodes( HYPRE_Solver solver, HYPRE_Int reserved_coarse_size, HYPRE_BigInt *reserved_coarse_nodes );
 
 /* (Optional) Set the level for reducing the reserved Cpoints before the coarse
  * grid solve. This is necessary for some applications, such as phase transitions.

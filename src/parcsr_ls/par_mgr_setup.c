@@ -828,7 +828,7 @@ hypre_MGRSetup( void               *mgr_vdata,
       }
     }
 
-    if (Frelax_method[lev] == 99)
+    if (Frelax_method[lev] == 99) // full AMG
     {
       if (use_default_fsolver)
       {

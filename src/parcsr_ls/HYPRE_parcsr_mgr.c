@@ -73,7 +73,7 @@ HYPRE_Int
 HYPRE_MGRSetCpointsByContiguousBlock( HYPRE_Solver solver, 
       HYPRE_Int  block_size, 
       HYPRE_Int  max_num_levels, 
-      HYPRE_Int  *idx_array,
+      HYPRE_BigInt  *idx_array,
       HYPRE_Int  *block_num_coarse_points, 
       HYPRE_Int  **block_coarse_indexes)
 {
@@ -160,7 +160,7 @@ HYPRE_MGRSetBlockSize( HYPRE_Solver solver, HYPRE_Int bsize )
  * HYPRE_MGRSetReservedCoarseNodes
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_MGRSetReservedCoarseNodes( HYPRE_Solver solver, HYPRE_Int reserved_coarse_size, HYPRE_Int *reserved_coarse_indexes )
+HYPRE_MGRSetReservedCoarseNodes( HYPRE_Solver solver, HYPRE_Int reserved_coarse_size, HYPRE_BigInt *reserved_coarse_indexes )
 {
    return hypre_MGRSetReservedCoarseNodes(solver, reserved_coarse_size, reserved_coarse_indexes );
 }

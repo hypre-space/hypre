@@ -522,7 +522,7 @@ hypre_MGRSetCpointsByContiguousBlock( void  *mgr_vdata,
     hypre_TFree(mgr_data -> idx_array, HYPRE_MEMORY_HOST);
     (mgr_data -> idx_array) = NULL;
   }
-  HYPRE_Int *index_array = hypre_CTAlloc(HYPRE_BigInt, block_size, HYPRE_MEMORY_HOST);
+  HYPRE_BigInt *index_array = hypre_CTAlloc(HYPRE_BigInt, block_size, HYPRE_MEMORY_HOST);
   if (begin_idx_array != NULL)
   {
     for (i = 0; i < block_size; i++) {
