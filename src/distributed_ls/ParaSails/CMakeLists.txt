@@ -19,9 +19,11 @@ set(PARASAILS_SRCS
   RowPatt.c
   StoredRows.c
 )
-  
+
+target_sources(HYPRE
+  PRIVATE ${PARASAILS_SRCS}
+  )
+
 convert_filenames_to_full_paths(PARASAILS_SRCS)
 
 set(SRCS ${SRCS} ${PARASAILS_SRCS} PARENT_SCOPE)
-
-

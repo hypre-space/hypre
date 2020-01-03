@@ -22,7 +22,12 @@ set(PILUT_SRCS
   trifactor.c
   util.c
 )
-  
+
+target_sources(HYPRE
+  PRIVATE ${PILUT_SRCS}
+          ${PILUT_HDRS}
+  )
+
 convert_filenames_to_full_paths(PILUT_HDRS)
 convert_filenames_to_full_paths(PILUT_SRCS)
 

@@ -78,7 +78,11 @@ set(SRCS
   lsame.c
   xerbla.c
 )
-  
+
+target_sources(HYPRE
+  PRIVATE ${SRCS}
+  )
+
 convert_filenames_to_full_paths(SRCS)
 
 set(HYPRE_SOURCES ${HYPRE_SOURCES} ${SRCS} PARENT_SCOPE)
@@ -89,4 +93,3 @@ if (MSVC)
 else ()
   set_source_files_properties (dlamch.c PROPERTIES COMPILE_FLAGS -O0)
 endif ()
-

@@ -30,8 +30,10 @@ set(SRCS
   xerbla.c
 )
 
+target_sources(HYPRE
+  PRIVATE ${SRCS}
+  )
+
 convert_filenames_to_full_paths(SRCS)
 
 set(HYPRE_SOURCES ${HYPRE_SOURCES} ${SRCS} PARENT_SCOPE)
-
-

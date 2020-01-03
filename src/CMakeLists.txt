@@ -26,7 +26,7 @@ if (${hypre_SOURCE_DIR} STREQUAL ${hypre_BINARY_DIR})
   message(FATAL_ERROR "In-place build not allowed! Please use a separate build directory. See the Users Manual or INSTALL file for details.")
 endif ()
 
-# Set cmake module path 
+# Set cmake module path
 set(CMAKE_MODULE_PATH "${hypre_SOURCE_DIR}/config/cmake" "${CMAKE_MODULE_PATH}")
 include(hypre_CMakeUtilities)
 
@@ -155,43 +155,42 @@ if (HYPRE_SEQUENTIAL)
   set (HYPRE_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 endif ()
 
+add_library (HYPRE)
+
 # Headers and sources
 set (HYPRE_HEADERS "")
-set (HYPRE_SOURCES "")
 
 # Headers and sources: .
-list (APPEND HYPRE_HEADERS
-  "${PROJECT_BINARY_DIR}/HYPRE_config.h"
+set(HYPRE_MAIN_HEADERS
+  ${CMAKE_CURRENT_BINARY_DIR}/HYPRE_config.h
   HYPREf.h
   HYPRE.h
 )
-
-# This is a list of TPLs that are used by all targets
-set(TPL_LIBRARIES "")
-
-# This is a list of linker flags to be used with TPLs for all targets
-set(TPL_LINKER_FLAGS "")
+target_sources(HYPRE
+  PRIVATE ${HYPRE_MAIN_HEADERS}
+  )
+set(HYPRE_HEADERS ${HYPRE_HEADERS} ${HYPRE_MAIN_HEADERS})
 
 # Headers and sources: blas
 if (HYPRE_USING_HYPRE_BLAS)
-  add_subdirectory(blas) 
+  add_subdirectory(blas)
 else()
   # Find system blas
   find_package(BLAS REQUIRED)
-  list(APPEND TPL_LIBRARIES ${BLAS_LIBRARIES})
-  set(CMAKE_C_FLAGS "-DUSE_VENDOR_BLAS ${CMAKE_C_FLAGS}")
+  target_link_libraries(HYPRE PUBLIC "${BLAS_LIBRARIES}")
+  target_compile_definitions(HYPRE PUBLIC "USE_VENDOR_BLAS")
 endif()
 
 # Headers and sources: lapack
 if (HYPRE_USING_HYPRE_LAPACK)
-  add_subdirectory(lapack) 
+  add_subdirectory(lapack)
 else()
   # Find system lapack
   find_package(LAPACK REQUIRED)
-  list(APPEND TPL_LIBRARIES ${LAPACK_LIBRARIES})
+  target_link_libraries(HYPRE PUBLIC "${LAPACK_LIBRARIES}")
 endif()
 
-# Find DSUPERLU, if requested 
+# Find DSUPERLU, if requested
 if (HYPRE_USING_DSUPERLU)
   if (NOT TPL_DSUPERLU_LIBRARIES)
     message(FATAL_ERROR "TPL_DSUPERLU_LIBRARIES option should be set for SuperLU_Dist support.")
@@ -208,41 +207,36 @@ if (HYPRE_USING_DSUPERLU)
   endforeach()
   message("-- Enabled support for using DSUPERLU.")
   set(DSUPERLU_FOUND TRUE)
-  list(APPEND TPL_LIBRARIES ${TPL_DSUPERLU_LIBRARIES} stdc++)
+  target_link_libraries(HYPRE PUBLIC ${TPL_DSUPERLU_LIBRARIES} stdc++)
+  target_include_directories(${TPL_DSUPERLU_INCLUDE_DIRS})
 endif()
-
-if (TPL_DSUPERLU_INCLUDE_DIRS)
-  include_directories(${TPL_DSUPERLU_INCLUDE_DIRS})  
-endif ()
 
 if(DSUPERLU_FOUND)
   set(HYPRE_USING_DSUPERLU TRUE)
 endif()
 
-
 # Headers and sources: remaining subdirectories
 set(HYPRE_DIRS utilities multivector krylov seq_mv parcsr_mv parcsr_block_mv distributed_matrix IJ_mv matrix_matrix distributed_ls parcsr_ls struct_mv struct_ls sstruct_mv sstruct_ls)
 foreach(DIR IN LISTS HYPRE_DIRS)
   add_subdirectory(${DIR})
+  target_include_directories(HYPRE PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${DIR}>)
 endforeach()
 
 # Configure a header file to pass CMake settings to the source code
 configure_file (
-  "${PROJECT_SOURCE_DIR}/config/HYPRE_config.h.cmake.in"
-  "${PROJECT_BINARY_DIR}/HYPRE_config.h"
+  "${CMAKE_CURRENT_SOURCE_DIR}/config/HYPRE_config.h.cmake.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/HYPRE_config.h"
   )
 
 # BINARY must be first in order to get the correct HYPRE_config.h file
-include_directories(${hypre_BINARY_DIR})
-include_directories(${hypre_SOURCE_DIR})
-include_directories(blas)
-include_directories(lapack)
-# Add remaining subdirectories
-foreach(DIR IN LISTS HYPRE_DIRS)
-  include_directories(${DIR})
-endforeach()
-include_directories(distributed_ls/Euclid)
-include_directories(distributed_ls/ParaSails)
+target_include_directories(HYPRE PUBLIC
+  $<BUILD_INTERFACE:${hypre_BINARY_DIR}>
+  $<BUILD_INTERFACE:${hypre_SOURCE_DIR}>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/blas>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/lapack>
+  $<INSTALL_INTERFACE:include>
+  )
 
 # Set library build type
 if (HYPRE_SHARED)
@@ -253,24 +247,19 @@ endif ()
 
 # Set MPI compile flags
 if (NOT HYPRE_SEQUENTIAL)
-  find_package (MPI)
-  if ((MPI_C_FOUND) AND (NOT CMAKE_C_COMPILER STREQUAL MPI_C_COMPILER))
-    include_directories (${MPI_C_INCLUDE_PATH})
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${MPI_C_COMPILE_FLAGS}")
-    list(APPEND TPL_LIBRARIES ${MPI_C_LIBRARIES})
-  endif ()
+  find_program (MPIEXEC_EXECUTABLE NAMES mpiexec mpirun)
+  find_package (MPI REQUIRED)
+  target_link_libraries (HYPRE PUBLIC MPI::MPI_C)
 endif (NOT HYPRE_SEQUENTIAL)
 
 # Set OpenMP compile flags
 if (HYPRE_USING_OPENMP)
-  find_package (OpenMP)
-  if (OPENMP_FOUND)
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-  endif (OPENMP_FOUND)
+  find_package (OpenMP REQUIRED)
+  target_link_libraries (HYPRE PUBLIC OpenMP::OpenMP_C)
 endif (HYPRE_USING_OPENMP)
 
 if (MSVC)
-  add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+  target_compile_definitions(HYPRE PRIVATE _CRT_SECURE_NO_WARNINGS)
   # Use the C++ compiler to compile these files to get around lack of C99 support
   set_source_files_properties (utilities/hypre_hopscotch_hash.c PROPERTIES COMPILE_FLAGS /TP)
   set_source_files_properties (utilities/hypre_merge_sort.c     PROPERTIES COMPILE_FLAGS /TP)
@@ -305,13 +294,6 @@ endif()
 if (HYPRE_BUILD_TESTS)
   add_subdirectory(test)
 endif()
-
-# Cleanup the TPL list
-list(REMOVE_DUPLICATES TPL_LIBRARIES)
-
-add_library (HYPRE ${HYPRE_SOURCES} ${HYPRE_HEADERS} ${FEI_LIBS})
-
-target_link_libraries(HYPRE PUBLIC ${TPL_LIBRARIES})
 
 include (GNUInstallDirs)
 install (TARGETS HYPRE

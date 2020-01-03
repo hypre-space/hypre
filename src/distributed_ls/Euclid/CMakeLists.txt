@@ -33,9 +33,11 @@ set(EUCLID_SRCS
   Timer_dh.c
   Vec_dh.c
 )
-  
+
+target_sources(HYPRE
+  PRIVATE ${EUCLID_SRCS}
+  )
+
 convert_filenames_to_full_paths(EUCLID_SRCS)
 
 set(SRCS ${SRCS} ${EUCLID_SRCS} PARENT_SCOPE)
-
-
