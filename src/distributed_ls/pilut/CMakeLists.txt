@@ -29,8 +29,4 @@ target_sources(HYPRE
   )
 
 convert_filenames_to_full_paths(PILUT_HDRS)
-convert_filenames_to_full_paths(PILUT_SRCS)
-
 set(HDRS ${HDRS} ${PILUT_HDRS} PARENT_SCOPE)
-set(SRCS ${SRCS} ${PILUT_SRCS} PARENT_SCOPE)
-

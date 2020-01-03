@@ -29,5 +29,4 @@ target_sources(HYPRE
   )
 
 convert_filenames_to_full_paths(HDRS)
-
 set(HYPRE_HEADERS ${HYPRE_HEADERS} ${HDRS} PARENT_SCOPE)
