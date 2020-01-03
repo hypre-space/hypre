@@ -3,12 +3,13 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
-cmake_minimum_required (VERSION 2.8.8)
-if (POLICY CMP0074)
-   cmake_policy(SET CMP0074 NEW) 
-endif (POLICY CMP0074)
+cmake_minimum_required (VERSION 3.13...3.16)
 
-project (hypre)
+if(${CMAKE_VERSION} VERSION_LESS 3.16)
+  cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
+else()
+  cmake_policy(VERSION 3.16)
+endif()
 
 # The version number.
 set (HYPRE_VERSION 2.18.2)
@@ -16,6 +17,10 @@ set (HYPRE_DATE    2019/10/28)
 set (HYPRE_TIME    00:00:00)
 set (HYPRE_BUGS    hypre-support@llnl.gov)
 set (HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
+
+project (hypre
+  VERSION ${HYPRE_VERSION}
+  LANGUAGES C)
 
 if (${hypre_SOURCE_DIR} STREQUAL ${hypre_BINARY_DIR})
   message(FATAL_ERROR "In-place build not allowed! Please use a separate build directory. See the Users Manual or INSTALL file for details.")
