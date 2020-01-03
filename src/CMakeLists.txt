@@ -313,6 +313,41 @@ add_library (HYPRE ${HYPRE_SOURCES} ${HYPRE_HEADERS} ${FEI_LIBS})
 
 target_link_libraries(HYPRE PUBLIC ${TPL_LIBRARIES})
 
-install (TARGETS HYPRE DESTINATION lib)
-install (FILES ${HYPRE_HEADERS} DESTINATION include)
+include (GNUInstallDirs)
+install (TARGETS HYPRE
+  EXPORT HYPRETargets
+  LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+  ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+  INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+install (FILES ${HYPRE_HEADERS} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
 
+include (CMakePackageConfigHelpers)
+write_basic_package_version_file (
+  HYPREConfigVersion.cmake
+  VERSION ${PACKAGE_VERSION}
+  COMPATIBILITY SameMajorVersion
+  )
+
+install (EXPORT HYPRETargets
+  FILE HYPRETargets.cmake
+  NAMESPACE HYPRE::
+  DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/HYPRE"
+  )
+
+configure_package_config_file (
+  config/HYPREConfig.cmake.in HYPREConfig.cmake
+  INSTALL_DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/HYPREConfig.cmake"
+  )
+install (
+  FILES
+      "${CMAKE_CURRENT_BINARY_DIR}/HYPREConfig.cmake"
+      "${CMAKE_CURRENT_BINARY_DIR}/HYPREConfigVersion.cmake"
+  DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/HYPRE"
+  )
+
+export (EXPORT HYPRETargets
+  FILE "${CMAKE_CURRENT_BINARY_DIR}/HYPRETargets.cmake"
+  NAMESPACE HYPRE::
+  )
+
+export (PACKAGE HYPRE)
