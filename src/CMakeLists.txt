@@ -27,18 +27,26 @@ if (${hypre_SOURCE_DIR} STREQUAL ${hypre_BINARY_DIR})
 endif ()
 
 # Set cmake module path 
-set(CMAKE_MODULE_PATH ${hypre_SOURCE_DIR}/config/cmake) 
+set(CMAKE_MODULE_PATH "${hypre_SOURCE_DIR}/config/cmake" "${CMAKE_MODULE_PATH}")
 include(hypre_CMakeUtilities)
 
 # Set default installation directory, but provide a means for users to change
 set (HYPRE_INSTALL_PREFIX "${PROJECT_SOURCE_DIR}/hypre" CACHE PATH
-  "Installation directory for HYPRE")
-set (CMAKE_INSTALL_PREFIX "${HYPRE_INSTALL_PREFIX}" CACHE INTERNAL "" FORCE)
+    "Installation directory for HYPRE")
+if (NOT CMAKE_INSTALL_PREFIX)
+  set (CMAKE_INSTALL_PREFIX "${HYPRE_INSTALL_PREFIX}" CACHE INTERNAL "" FORCE)
+endif ()
 
 # Set default compile optimization flag
 set (HYPRE_BUILD_TYPE "Release" CACHE STRING
-  "Optimization flags: set to Debug, Release, RelWithDebInfo, or MinSizeRel")
-set (CMAKE_BUILD_TYPE "${HYPRE_BUILD_TYPE}" CACHE INTERNAL "" FORCE)
+    "Optimization flags: set to Debug, Release, RelWithDebInfo, or MinSizeRel")
+
+if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  set (CMAKE_BUILD_TYPE "${HYPRE_BUILD_TYPE}" CACHE INTERNAL "" FORCE)
+  # Set the possible values of build type for cmake-gui
+  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
+    "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
+endif ()
 
 # Configuration options
 option(HYPRE_ENABLE_SHARED           "Build a shared library" OFF)
