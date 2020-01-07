@@ -537,24 +537,49 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
 
             // !!! Debug
             // Check whether inv sort map is correct
-            HYPRE_Int not_in_order = 0;
-            for (j = 0; j < hypre_ParCompGridNumNodes(compGrid[level])-1; j++)
+            HYPRE_Int inner_level;
+            for (inner_level = 0; inner_level < num_levels; inner_level++)
             {
-               if (hypre_ParCompGridGlobalIndices(compGrid[level])[ hypre_ParCompGridInvSortMap(compGrid[level])[j+1] ]
-                  <= hypre_ParCompGridGlobalIndices(compGrid[level])[ hypre_ParCompGridInvSortMap(compGrid[level])[j] ])
+               HYPRE_Int not_in_order = 0;
+               for (j = 0; j < hypre_ParCompGridNumNodes(compGrid[inner_level])-1; j++)
                {
-                  not_in_order = 1;
-                  printf("Inv sort map not in order\n");
-                  break;
+                  if (hypre_ParCompGridGlobalIndices(compGrid[inner_level])[ hypre_ParCompGridInvSortMap(compGrid[inner_level])[j+1] ]
+                     <= hypre_ParCompGridGlobalIndices(compGrid[inner_level])[ hypre_ParCompGridInvSortMap(compGrid[inner_level])[j] ])
+                  {
+                     not_in_order = 1;
+                     printf("Inv sort map not in order, rank %d, current_level %d, level %d\n", myid, level, inner_level);
+                     break;
+                  }
+               }
+               if (not_in_order)
+               {
+                  for (j = 0; j < hypre_ParCompGridNumNodes(compGrid[inner_level])-1; j++) 
+                     printf("%d ", hypre_ParCompGridGlobalIndices(compGrid[inner_level])[ hypre_ParCompGridInvSortMap(compGrid[inner_level])[j] ]);
+                  printf("\n");
                }
             }
-            if (not_in_order)
-            {
-               for (j = 0; j < hypre_ParCompGridNumNodes(compGrid[level])-1; j++) 
-                  printf("%d ", hypre_ParCompGridGlobalIndices(compGrid[level])[ hypre_ParCompGridInvSortMap(compGrid[level])[j] ]);
-               printf("\n");
-            }
 
+            // !!! Debug
+            // Check whether inv sort map and sort map correctly map to eachother
+            for (inner_level = 0; inner_level < num_levels; inner_level++)
+            {
+               HYPRE_Int not_in_order = 0;
+               for (j = 0; j < hypre_ParCompGridNumNodes(compGrid[inner_level]); j++)
+               {
+                  if (hypre_ParCompGridInvSortMap(compGrid[inner_level])[ hypre_ParCompGridSortMap(compGrid[inner_level])[j] ] != j)
+                  {
+                     not_in_order = 1;
+                     printf("Inv sort map [sort map] != j, rank %d, current_level %d, level %d\n", myid, level, inner_level);
+                     break;
+                  }
+               }
+               if (not_in_order)
+               {
+                  for (j = 0; j < hypre_ParCompGridNumNodes(compGrid[inner_level])-1; j++) 
+                     printf("%d ", hypre_ParCompGridInvSortMap(compGrid[inner_level])[ hypre_ParCompGridSortMap(compGrid[inner_level])[j] ]);
+                  printf("\n");
+               }
+            }
 
 
             if (timers) hypre_EndTiming(timers[4]);
@@ -653,7 +678,35 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
          hypre_printf("TestCompGrids1 failed! Rank %d, level %d\n", myid, level);
       }
 
+
+      // !!! Debug
+      #if DEBUG_COMP_GRID == 2
+      HYPRE_Int inner_level;
+      // for (inner_level = level; inner_level < num_levels; inner_level++)
+      if (level <= 2 && myid == 1)
+      {
+         inner_level = 2;
+         hypre_sprintf(filename, "outputs/CompGrids/level%dCompGridRank%dLevel%d.txt", level, myid, inner_level);
+         hypre_ParCompGridDebugPrint( compGrid[inner_level], filename, 0 );
+      }
       #endif
+
+
+
+
+
+      #endif
+
+
+      // !!! Debug
+      // if (level == 1)
+      // {
+      //    MPI_Finalize();
+      //    exit(0);
+      // }
+
+
+
    }
 
    #if DEBUG_COMP_GRID
@@ -690,8 +743,34 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
    #endif 
 
+
+   // !!! Debug
+   // if (myid == 1)
+   // {
+   //    printf("Rank 1 P row ptr before = \n");
+   //    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[1])+1; i++)
+   //    {
+   //       printf("%d ", hypre_ParCompGridPRowPtr(compGrid[1])[i]);
+   //    }
+   //    printf("\n");
+   // }
+
+
+
    // Communicate data for A and all info for P
    CommunicateRemainingMatrixInfo(amg_data, compGrid, compGridCommPkg, communication_cost);
+
+
+   // !!! Debug
+   // if (myid == 1)
+   // {
+   //    printf("Rank 1 P row ptr after = \n");
+   //    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[1])+1; i++)
+   //    {
+   //       printf("%d ", hypre_ParCompGridPRowPtr(compGrid[1])[i]);
+   //    }
+   // }
+
 
    #if DEBUGGING_MESSAGES
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
@@ -2031,9 +2110,14 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
       // if there are nodes to add on this grid
       if (nodes_to_add)
       {
+
+         // !!! Debug
+         if (myid == 1 && current_level == 0) printf("Building Psi_c on level %d\n", level);
+
+
          sort_map = hypre_ParCompGridSortMap(compGrid[level]);
          if (level != transition_level-1) sort_map_coarse = hypre_ParCompGridSortMap(compGrid[level+1]);
-         HYPRE_Int *inv_sort_map = hypre_ParCompGridSortMap(compGrid[level]);
+         HYPRE_Int *inv_sort_map = hypre_ParCompGridInvSortMap(compGrid[level]);
          
          num_psi_levels++;
          (*buffer_size)++;
@@ -2171,13 +2255,35 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
          // Save the indices (in global index ordering) so I don't have to keep looping over all nodes in compGrid when I pack the buffer
          send_flag[current_level][partition][level] = hypre_CTAlloc( HYPRE_Int, num_send_nodes[current_level][partition][level], HYPRE_MEMORY_HOST );
          cnt =  0;
+
+         // !!! Debug
+         // if (myid == 1 && level == 2)
+         // {
+         //    printf("Rank 1, level 2, setup send flag:\n");
+            
+         // }
+
+
          for (j = 0; j < hypre_ParCompGridNumNodes(compGrid[level]); j++)
          {
-               if (add_flag[level][j] > num_ghost_layers)
-                  send_flag[current_level][partition][level][cnt++] = inv_sort_map[j];
-               else if (add_flag[level][j] > 0)
-                  send_flag[current_level][partition][level][cnt++] = -(inv_sort_map[j]+1);
+
+            // !!! Debug
+            // if (myid == 1 && level == 2)
+            // {
+            //    printf("add_flag[%d] = %d, inv_sort_map[%d] = %d, global index = %d\n", j, add_flag[j], j, inv_sort_map[j], hypre_ParCompGridGlobalIndices(compGrid[level]));
+
+            // }
+
+
+
+
+
+            if (add_flag[level][j] > num_ghost_layers)
+               send_flag[current_level][partition][level][cnt++] = inv_sort_map[j];
+            else if (add_flag[level][j] > 0)
+               send_flag[current_level][partition][level][cnt++] = -(inv_sort_map[j]+1);
          }
+
 
          // Count up the buffer sizes
          (*send_flag_buffer_size) += num_send_nodes[current_level][partition][level];
@@ -2187,6 +2293,7 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
 
          // !!! Debug
          HYPRE_Int prev_send_elmt;
+         HYPRE_Int not_in_order = 0;
 
 
          for (i = 0; i < num_send_nodes[current_level][partition][level]; i++)
@@ -2199,12 +2306,27 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
             if (i > 0)
             {
                if (hypre_ParCompGridGlobalIndices(compGrid[level])[send_elmt] <= hypre_ParCompGridGlobalIndices(compGrid[level])[prev_send_elmt])
-                  printf("Send is not in order!\n");
+               {
+                  printf("Send is not in order! Rank %d, current_level %d, level %d\n", myid, current_level, level);
+                  not_in_order = 1;
+               }
             }
             prev_send_elmt = send_elmt;
 
 
             (*buffer_size) += hypre_ParCompGridARowPtr(compGrid[level])[ send_elmt + 1 ] - hypre_ParCompGridARowPtr(compGrid[level])[ send_elmt ];   
+         }
+
+         // !!! Debug
+         if (not_in_order)
+         {
+            for (i = 0; i < num_send_nodes[current_level][partition][level]; i++)
+            {
+               send_elmt = send_flag[current_level][partition][level][i];
+               if (send_elmt < 0) send_elmt = -(send_elmt + 1);
+               printf("%d ", hypre_ParCompGridGlobalIndices(compGrid[level])[send_elmt]);
+            }
+            printf("\n");
          }
       }
       else break;
@@ -2230,7 +2352,10 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
             send_elmt = -(send_elmt + 1);
             send_buffer[cnt++] = -(hypre_ParCompGridGlobalIndices(compGrid[level])[ send_elmt ] + 1);
          }
-         else send_buffer[cnt++] = hypre_ParCompGridGlobalIndices(compGrid[level])[ send_elmt ];
+         else 
+         {
+            send_buffer[cnt++] = hypre_ParCompGridGlobalIndices(compGrid[level])[ send_elmt ];
+         }
       }
 
       // if not on last level, copy coarse gobal indices
@@ -2750,6 +2875,12 @@ CommunicateRemainingMatrixInfo(hypre_ParAMGData* amg_data, hypre_ParCompGrid **c
 
                      HYPRE_Int row_size = int_recv_buffers[proc][int_cnt++];
                      hypre_ParCompGridPRowPtr(compGrid[level])[idx+1] = row_size;
+
+                     // !!! Debug
+                     if (idx < num_owned_nodes) printf("Unpack index is less than num owned! Rank %d, outer level %d, level %d, idx %d\n", myid, outer_level, level, idx);
+
+
+
                      if (!temp_PColInd[level][temp_idx])
                      {
                         temp_PColInd[level][temp_idx] = hypre_CTAlloc(HYPRE_Int, row_size, HYPRE_MEMORY_HOST);
@@ -2814,6 +2945,24 @@ CommunicateRemainingMatrixInfo(hypre_ParAMGData* amg_data, hypre_ParCompGrid **c
       hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
       #endif 
    }
+
+
+
+
+
+   // !!! Debug
+   // if (myid == 1)
+   // {
+   //    printf("Rank 1 P row ptr middle = \n");
+   //    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[1])+1; i++)
+   //    {
+   //       printf("%d ", hypre_ParCompGridPRowPtr(compGrid[1])[i]);
+   //    }
+   // }
+
+
+
+
 
    // Fix up P and R
    for (level = amgdd_start_level; level < transition_level; level++)
@@ -3138,14 +3287,14 @@ TestCompGrids1(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int tra
 
       // Check whether add_flag has any zeros (zeros indicate that we have extra nodes in the comp grid that don't belong) 
       // !!! NOTE: disabling this check for now since I think processor agglomeration may put extra nodes in (and that is OK)
-      // for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
-      // {
-      //    if (add_flag[level][i] == 0) 
-      //    {
-      //       test_failed = 1;
-      //       if (myid == 0) hypre_printf("Error: extra nodes present in comp grid\n");
-      //    }
-      // }
+      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
+      {
+         if (add_flag[level][i] == 0) 
+         {
+            test_failed = 1;
+            if (myid == 0) hypre_printf("Error: extra nodes present in comp grid, rank %d, level %d, i = %d, global index = %d\n", myid, level, i, hypre_ParCompGridGlobalIndices(compGrid[level])[i]);
+         }
+      }
 
       // Check to make sure we have the correct identification of ghost nodes
       if (level != transition_level-1 && check_ghost_info)
@@ -3153,15 +3302,15 @@ TestCompGrids1(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int tra
          for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++) 
          {
             // !!! NOTE: disabling this check since I've redefined how real dofs are determined after agglomeration (can now be many more real dofs than expected via simple top down construction)
-            // if (add_flag[level][i] < num_ghost_layers + 1 && hypre_ParCompGridARowPtr(compGrid[level])[i+1] - hypre_ParCompGridARowPtr(compGrid[level])[i] != 0) 
-            // {
-            //    test_failed = 1;
-            //    if (myid == 0) hypre_printf("Error: dof that should have been marked as ghost was marked as real\n");
-            // }
+            if (add_flag[level][i] < num_ghost_layers + 1 && hypre_ParCompGridRealDofMarker(compGrid[level])[i] != 0) 
+            {
+               test_failed = 1;
+               hypre_printf("Error: dof that should have been marked as ghost was marked as real, rank %d, level %d\n", myid, level);
+            }
             if (add_flag[level][i] > num_ghost_layers && hypre_ParCompGridRealDofMarker(compGrid[level])[i] == 0) 
             {
                test_failed = 1;
-               hypre_printf("Error: dof that should have been marked as real was marked as ghost\n");
+               hypre_printf("Error: dof that should have been marked as real was marked as ghost, rank %d, level %d\n", myid, level);
             }
          }
       }

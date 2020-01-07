@@ -328,6 +328,9 @@ hypre_ParCompGridInitialize ( hypre_ParAMGData *amg_data, HYPRE_Int padding, HYP
          if ( global_index >= hypre_ParVectorFirstIndex(residual) && global_index <= hypre_ParVectorLastIndex(residual) )
             A_colind[j] = global_index - hypre_ParVectorFirstIndex(residual);
          else A_colind[j] = -1;
+
+         // !!! Debug
+         if (myid == 0 && global_index == 1300 && level == 1) printf("Rank 0, GID 1300 encountered in initialize at %d, local index set to %d\n", global_indices_comp[i], A_colind[j]);
       }
       hypre_ParCSRMatrixRestoreRow( A, i, &row_size, &row_col_ind, &row_values );
 
@@ -1080,17 +1083,20 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *nod
       // if we are not on the coarsest level
       if (level != transition_level-1)
       {
-         if (nodes_added_on_level[level] || nodes_added_on_level[level+1])
+         if ( (nodes_added_on_level[level] || nodes_added_on_level[level+1]) && hypre_ParCompGridNumNodes(compGrid[level+1]) )
          {
             // loop over indices of non-owned nodes on this level 
             // !!! No guarantee that previous ghost dofs converted to real dofs have coarse local indices setup...
             // !!! Thus we go over all non-owned dofs here instead of just the added ones. Could probably be optimized.
+            HYPRE_Int num_nodes = hypre_ParCompGridNumNodes(compGrid[level]);
+            HYPRE_Int old_num_nodes = num_nodes - nodes_added_on_level[level];
             HYPRE_Int num_owned_nodes = hypre_ParCompGridOwnedBlockStarts(compGrid[level])[hypre_ParCompGridNumOwnedBlocks(compGrid[level])];
             for (i = num_owned_nodes; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
             {
                // fix up the coarse local indices
                global_index = hypre_ParCompGridCoarseGlobalIndices(compGrid[level])[i];
-               local_index = hypre_ParCompGridCoarseLocalIndices(compGrid[level])[i];
+               if (i < old_num_nodes) local_index = hypre_ParCompGridCoarseLocalIndices(compGrid[level])[i];
+               else local_index = -1;
 
                // setup coarse local index if necessary
                if (global_index >= 0)

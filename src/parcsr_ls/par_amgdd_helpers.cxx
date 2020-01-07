@@ -68,6 +68,9 @@ RecursivelyFindNeighborNodes(HYPRE_Int dof_index, HYPRE_Int distance, hypre_ParC
    map<HYPRE_Int, HYPRE_Int> &send_dofs, 
    map< HYPRE_Int, map<HYPRE_Int, map<HYPRE_Int, HYPRE_Int> > > &request_proc_dofs, HYPRE_Int destination_proc )
 {
+   HYPRE_Int   myid;
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+
    HYPRE_Int         i,j;
 
    // Look at neighbors
@@ -635,18 +638,30 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
          }
          HYPRE_Int compGrid_global_index = hypre_ParCompGridGlobalIndices(compGrid[level])[ inv_sort_map[compGrid_cnt] ];
 
+         // !!! Debug
+         // if (myid == 1 && current_level == 0 && level == 1)
+         //    printf("incoming_global_index = %d, compGrid_global_index = %d, real dof marker = %d\n", incoming_global_index, compGrid_global_index, hypre_ParCompGridRealDofMarker(compGrid[level])[ inv_sort_map[compGrid_cnt] ]);
+
+
          // !!! Add optimization for owned dofs? That is, some way of skipping over the merge for the owned block.
 
          if (incoming_global_index == compGrid_global_index)
          {
-            if (incoming_is_real && !hypre_ParCompGridRealDofMarker(compGrid[level])[ compGrid_cnt ])
+            if (incoming_is_real && !hypre_ParCompGridRealDofMarker(compGrid[level])[ inv_sort_map[compGrid_cnt] ])
             {
 
                // !!! Symmetric: Need to insert A col ind
 
-               hypre_ParCompGridRealDofMarker(compGrid[level])[ compGrid_cnt ] = 1;
+               hypre_ParCompGridRealDofMarker(compGrid[level])[ inv_sort_map[compGrid_cnt] ] = 1;
                
                incoming_dest[incoming_cnt++] = inv_sort_map[compGrid_cnt]; // Incoming real dof received to existing ghost location
+
+
+               // !!! Debug
+               // if (myid == 1 && current_level == 0 && level == 1)
+               //    printf("overwrite, incoming_dest[%d] = %d\n", incoming_cnt-1, incoming_dest[incoming_cnt-1]);
+
+
                cnt++;
 
             }
@@ -663,6 +678,10 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
             new_inv_sort_map[sort_cnt] = dest;
 
             incoming_dest[incoming_cnt] = dest;
+
+            // !!! Debug
+            // if (myid == 0 && current_level == 1 && level == 1 && incoming_global_index == 1286)
+            //    printf("bringing in GID 1286 from buffer number %d\n", buffer_number);
 
             sort_cnt++;
             incoming_cnt++;
@@ -686,6 +705,10 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
          new_inv_sort_map[sort_cnt] = dest;
 
          incoming_dest[incoming_cnt] = dest;
+
+         // !!! Debug
+         // if (myid == 1 && current_level == 0 && level == 1)
+         //    printf("new after merge, incoming_dest[%d] = %d\n", incoming_cnt-1, incoming_dest[incoming_cnt-1]);
 
          sort_cnt++;
          incoming_cnt++;
@@ -739,6 +762,16 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
          }
       }
       
+      // !!! Debug
+      // if (myid == 1 && current_level == 0 && level == 1)
+      // {
+      //    printf("Rank 1, current level 0, level 1 recv map = \n");
+      //    for (i = 0; i < num_recv_nodes[current_level][buffer_number][level]; i++)
+      //       printf("%d ", incoming_dest[i]);
+      //    printf("\n");
+      // }
+
+
       // Setup incoming A row ptr info and count up number of nonzeros added to A
       HYPRE_Int added_A_nnz = 0;
       for (i = 0; i < num_recv_nodes[current_level][buffer_number][level]; i++)
