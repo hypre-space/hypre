@@ -357,8 +357,8 @@ hypre_MGRFrelaxVcycle ( void   *Frelax_vdata, hypre_ParVector *f, hypre_ParVecto
   HYPRE_Int Not_Finished = 0;
   HYPRE_Int level = 0;
   HYPRE_Int cycle_param = 1;
-  HYPRE_Int j, Solve_err_flag, local_size, coarse_grid, fine_grid;
-
+  HYPRE_Int j, Solve_err_flag, coarse_grid, fine_grid;
+  HYPRE_Int local_size;
   HYPRE_Int num_sweeps = 1;
   HYPRE_Int relax_order = hypre_ParAMGDataRelaxOrder(Frelax_data);
   HYPRE_Int relax_type = 3;
@@ -387,6 +387,9 @@ hypre_MGRFrelaxVcycle ( void   *Frelax_vdata, hypre_ParVector *f, hypre_ParVecto
   F_array[0] = f;
   U_array[0] = u;
 
+  /* (Re)set local_size for Vtemp */
+  local_size = hypre_VectorSize(hypre_ParVectorLocalVector(F_array[0]));
+  hypre_VectorSize(hypre_ParVectorLocalVector(Vtemp)) = local_size;
   /* smoother on finest level: 
    * This is separated from subsequent levels since the finest level matrix 
    * may be larger than what is needed for the vcycle solve
@@ -433,6 +436,7 @@ hypre_MGRFrelaxVcycle ( void   *Frelax_vdata, hypre_ParVector *f, hypre_ParVecto
   {
     if (cycle_param == 1)
     {
+//hypre_printf("Vcycle smoother (down cycle): vtemp size = %d, level = %d \n", hypre_VectorSize(hypre_ParVectorLocalVector(Vtemp)), level);
       /* compute coarse grid vectors */
       fine_grid = level;
       coarse_grid = level + 1;
@@ -513,6 +517,7 @@ hypre_MGRFrelaxVcycle ( void   *Frelax_vdata, hypre_ParVector *f, hypre_ParVecto
                                             Ztemp);
           }
       }
+//hypre_printf("Vcycle smoother (coarse level): vtemp size = %d, level = %d \n", hypre_VectorSize(hypre_ParVectorLocalVector(Vtemp)), level);
       cycle_param = 2;
     } 
     else if (cycle_param == 2) 
@@ -534,6 +539,11 @@ hypre_MGRFrelaxVcycle ( void   *Frelax_vdata, hypre_ParVector *f, hypre_ParVecto
       --level;
       cycle_param = 2;
       if (level == 0) cycle_param = 99;
+
+      // reset vtemp size
+      local_size = hypre_VectorSize(hypre_ParVectorLocalVector(F_array[level]));
+      hypre_VectorSize(hypre_ParVectorLocalVector(Vtemp)) = local_size;  
+//hypre_printf("Vcycle smoother (up cycle): vtemp size = %d, level = %d \n", hypre_VectorSize(hypre_ParVectorLocalVector(Vtemp)), level);    
     } 
     else 
     {
@@ -696,9 +706,8 @@ hypre_MGRCycle( void               *mgr_vdata,
 
          for(i=0; i<nsweeps; i++) 
          {
-
            hypre_MGRFrelaxVcycle(FrelaxVcycleData[level], F_array[level], U_array[level]);
-        }
+         }
 
         // compute residual after solve
         //hypre_ParCSRMatrixMatvecOutOfPlace(-1.0, A_array[level],
@@ -711,7 +720,8 @@ hypre_MGRCycle( void               *mgr_vdata,
         hypre_ParVectorSetConstantValues(F_fine_array[coarse_grid], 0.0);
         hypre_MGRAddVectorR(CF_marker[fine_grid], FMRK, 1.0, F_array[fine_grid], 0.0, &(F_fine_array[coarse_grid]));
         hypre_ParVectorSetConstantValues(U_fine_array[coarse_grid], 0.0);
-        fine_grid_solver_solve((mgr_data -> aff_solver)[fine_grid], A_ff_array[fine_grid], F_fine_array[coarse_grid], U_fine_array[coarse_grid]);
+        fine_grid_solver_solve((mgr_data -> aff_solver)[fine_grid], A_ff_array[fine_grid], F_fine_array[coarse_grid],
+         U_fine_array[coarse_grid]);
         hypre_MGRAddVectorP(CF_marker[fine_grid], FMRK, 1.0, U_fine_array[coarse_grid], 1.0, &(U_array[fine_grid]));
       }
       else 
@@ -755,7 +765,7 @@ hypre_MGRCycle( void               *mgr_vdata,
 		  ++level;
 
 		  if (level == num_coarse_levels) cycle_type = 3;
-	  } // end cycle_type == 1
+    } // end cycle_type == 1
     else if(level != 0)
     {
       /* Interpolate */

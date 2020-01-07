@@ -830,7 +830,26 @@ hypre_MGRSetup( void               *mgr_vdata,
 
     if (Frelax_method[lev] == 99) // full AMG
     {
-      if (use_default_fsolver)
+      if (use_default_fsolver == 0) // user provided AMG solver
+      {
+        A_ff_ptr = ((hypre_ParAMGData*)aff_solver[lev])->A_array[0];
+
+        F_fine_array[lev+1] =
+        hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_ff_ptr),
+                       hypre_ParCSRMatrixGlobalNumRows(A_ff_ptr),
+                       hypre_ParCSRMatrixRowStarts(A_ff_ptr));
+        hypre_ParVectorInitialize(F_fine_array[lev+1]);
+        hypre_ParVectorSetPartitioningOwner(F_fine_array[lev+1],0);
+
+        U_fine_array[lev+1] =
+        hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_ff_ptr),
+                       hypre_ParCSRMatrixGlobalNumRows(A_ff_ptr),
+                       hypre_ParCSRMatrixRowStarts(A_ff_ptr));
+        hypre_ParVectorInitialize(U_fine_array[lev+1]);
+        hypre_ParVectorSetPartitioningOwner(U_fine_array[lev+1],0);
+        A_ff_array[lev] = A_ff_ptr;
+      }
+      else // construct default AMG solver
       {
         hypre_MGRBuildAffNew(A_array[lev], CF_marker_array[lev], debug_flag, &A_ff_ptr);
 
@@ -858,26 +877,11 @@ hypre_MGRSetup( void               *mgr_vdata,
         hypre_BoomerAMGSetNumFunctions(aff_solver[lev], 1);
 
         fine_grid_solver_setup(aff_solver[lev], A_ff_ptr, F_fine_array[lev+1], U_fine_array[lev+1]);
+        
+        (mgr_data -> use_default_fsolver) = 1;
+        use_default_fsolver = (mgr_data -> use_default_fsolver);
       }
-      else
-      {
-        A_ff_ptr = ((hypre_ParAMGData*)aff_solver[lev])->A_array[0];
 
-        F_fine_array[lev+1] =
-        hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_ff_ptr),
-                       hypre_ParCSRMatrixGlobalNumRows(A_ff_ptr),
-                       hypre_ParCSRMatrixRowStarts(A_ff_ptr));
-        hypre_ParVectorInitialize(F_fine_array[lev+1]);
-        hypre_ParVectorSetPartitioningOwner(F_fine_array[lev+1],0);
-
-        U_fine_array[lev+1] =
-        hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_ff_ptr),
-                       hypre_ParCSRMatrixGlobalNumRows(A_ff_ptr),
-                       hypre_ParCSRMatrixRowStarts(A_ff_ptr));
-        hypre_ParVectorInitialize(U_fine_array[lev+1]);
-        hypre_ParVectorSetPartitioningOwner(U_fine_array[lev+1],0);
-        A_ff_array[lev] = A_ff_ptr;
-      }
     }
           
     /* Update coarse level indexes for next levels */
@@ -1341,7 +1345,7 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
 #else
    coarse_size = coarse_pnts_global_lvl[num_procs];
 #endif
-
+//hypre_printf("Coarse size = %d \n", coarse_size);
     if (coarse_size == 0) // stop coarsening
     {
       if (S_local) hypre_ParCSRMatrixDestroy(S_local);
@@ -1429,14 +1433,14 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
     /* build the coarse grid */
     hypre_BoomerAMGBuildCoarseOperatorKT(P_local, A_array_local[lev_local], 
                                     P_local, 0, &RAP_local);
-
+/*
 #ifdef HYPRE_NO_GLOBAL_PARTITION
     if (my_id == (num_procs -1)) coarse_size = coarse_pnts_global_lvl[1];
     hypre_MPI_Bcast(&coarse_size, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
 #else
     coarse_size = coarse_pnts_global_lvl[num_procs];
 #endif
-
+*/
     lev_local++;
 
     if (S_local) hypre_ParCSRMatrixDestroy(S_local);

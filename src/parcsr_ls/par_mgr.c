@@ -69,7 +69,7 @@ hypre_MGRCreate()
   (mgr_data -> global_smoother) = NULL;
 
   (mgr_data -> use_default_cgrid_solver) = 1;
-  (mgr_data -> use_default_fsolver) = 1;
+  (mgr_data -> use_default_fsolver) = -1; // set to -1 to avoid printing when not used
   (mgr_data -> omega) = 1.;
   (mgr_data -> max_iter) = 20;
   (mgr_data -> tol) = 1.0e-7;
@@ -5149,7 +5149,7 @@ hypre_MGRGetCoarseGridMatrix( void *mgr_vdata, hypre_ParCSRMatrix **RAP )
       hypre_error_w_msg(HYPRE_ERROR_GENERIC," Coarse grid matrix is NULL. Please make sure MGRSetup() is called \n");
       return hypre_error_flag;
    }
-   RAP = &mgr_data->RAP;
+   *RAP = mgr_data->RAP;
 
    return hypre_error_flag;
 }
@@ -5170,7 +5170,7 @@ hypre_MGRGetCoarseGridSolution( void *mgr_vdata, hypre_ParVector **sol )
       hypre_error_w_msg(HYPRE_ERROR_GENERIC," MGR solution array is NULL. Please make sure MGRSetup() and MGRSolve() are called \n");
       return hypre_error_flag;
    }
-   sol = &mgr_data->U_array[mgr_data->num_coarse_levels];
+   *sol = mgr_data->U_array[mgr_data->num_coarse_levels];
 
    return hypre_error_flag;
 }
@@ -5191,7 +5191,7 @@ hypre_MGRGetCoarseGridRHS( void *mgr_vdata, hypre_ParVector **rhs )
       hypre_error_w_msg(HYPRE_ERROR_GENERIC," MGR RHS array is NULL. Please make sure MGRSetup() and MGRSolve() are called \n");
       return hypre_error_flag;
    }
-   rhs = &mgr_data->F_array[mgr_data->num_coarse_levels];
+   *rhs = mgr_data->F_array[mgr_data->num_coarse_levels];
 
    return hypre_error_flag;
 }
@@ -5262,7 +5262,9 @@ hypre_MGRWriteSolverParams(void *mgr_vdata)
   hypre_printf("Max number of iterations: %d\n", (mgr_data -> max_iter));
   hypre_printf("Stopping tolerance: %e\n", (mgr_data -> tol));
   hypre_printf("Use default coarse grid solver: %d\n", (mgr_data -> use_default_cgrid_solver));
-  hypre_printf("Use default F-relaxation solver: %d\n", (mgr_data -> use_default_fsolver));
-
+  if((mgr_data -> use_default_fsolver) >= 0)
+  {
+    hypre_printf("Use default AMG solver for full AMG F-relaxation: %d\n", (mgr_data -> use_default_fsolver));
+  }
   return hypre_error_flag;
 }
