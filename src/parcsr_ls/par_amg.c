@@ -4359,19 +4359,19 @@ hypre_BoomerAMGSetCPoints(void         *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! AMG object empty!\n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Warning! AMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    }
    if (cpt_coarse_level < 0)
    {
-      hypre_printf("Warning! cpt_coarse_level < 0 !\n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Warning! cpt_coarse_level < 0 !\n");
       hypre_error_in_arg(2);
       return hypre_error_flag;
    }
    if (num_cpt_coarse < 0)
    {
-      hypre_printf("Warning! num_cpt_coarse < 0 !\n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Warning! num_cpt_coarse < 0 !\n");
       hypre_error_in_arg(3);
       return hypre_error_flag;
    }

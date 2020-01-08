@@ -1246,18 +1246,18 @@ HYPRE_Int HYPRE_BoomerAMGSetDSLUThreshold (HYPRE_Solver solver,
  * @param num_cpt_coarse [IN] number of C points to be kept
  * @param cpt_coarse_index [IN] indexes of C points to be kept
  **/
-HYPRE_Int HYPRE_BoomerAMGSetCPoints(HYPRE_Solver solver,
-                                    HYPRE_Int    cpt_coarse_level,
-                                    HYPRE_Int    num_cpt_coarse,
-                                    HYPRE_Int   *cpt_coarse_index);
+HYPRE_Int HYPRE_BoomerAMGSetCPoints(HYPRE_Solver  solver,
+                                    HYPRE_Int     cpt_coarse_level,
+                                    HYPRE_Int     num_cpt_coarse,
+                                    HYPRE_BigInt *cpt_coarse_index);
 
 /**
  * (Optional) Deprecated function. Use HYPRE_BoomerAMGSetCPoints instead.
  **/
-HYPRE_Int HYPRE_BoomerAMGSetCpointsToKeep(HYPRE_Solver solver,
-                                          HYPRE_Int    cpt_coarse_level,
-                                          HYPRE_Int    num_cpt_coarse,
-                                          HYPRE_Int   *cpt_coarse_index);
+HYPRE_Int HYPRE_BoomerAMGSetCpointsToKeep(HYPRE_Solver  solver,
+                                          HYPRE_Int     cpt_coarse_level,
+                                          HYPRE_Int     num_cpt_coarse,
+                                          HYPRE_BigInt *cpt_coarse_index);
 
 /**
  * (Optional) Set fine points in the first level.
@@ -1266,9 +1266,9 @@ HYPRE_Int HYPRE_BoomerAMGSetCpointsToKeep(HYPRE_Solver solver,
  * @param num_fpt [IN] number of fine points
  * @param fpt_index [IN] global indices of fine points
  **/
-HYPRE_Int HYPRE_BoomerAMGSetFPoints(HYPRE_Solver solver,
-                                    HYPRE_Int    num_fpt,
-                                    HYPRE_Int   *fpt_index);
+HYPRE_Int HYPRE_BoomerAMGSetFPoints(HYPRE_Solver  solver,
+                                    HYPRE_Int     num_fpt,
+                                    HYPRE_BigInt *fpt_index);
 
 /**
  * (Optional) Set isolated fine points in the first level.
@@ -1278,9 +1278,9 @@ HYPRE_Int HYPRE_BoomerAMGSetFPoints(HYPRE_Solver solver,
  * @param num_isolated_fpt [IN] number of isolated fine points
  * @param isolated_fpt_index [IN] global indices of isolated fine points
  **/
-HYPRE_Int HYPRE_BoomerAMGSetIsolatedFPoints(HYPRE_Solver solver,
-                                            HYPRE_Int    num_isolated_fpt,
-                                            HYPRE_Int   *isolated_fpt_index);
+HYPRE_Int HYPRE_BoomerAMGSetIsolatedFPoints(HYPRE_Solver  solver,
+                                            HYPRE_Int     num_isolated_fpt,
+                                            HYPRE_BigInt *isolated_fpt_index);
 
 /**
  * (Optional) if Sabs equals 1, the strength of connection test is based

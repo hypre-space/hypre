@@ -945,8 +945,8 @@ HYPRE_Int HYPRE_BoomerAMGSetKeepTranspose ( HYPRE_Solver solver , HYPRE_Int keep
 #ifdef HYPRE_USING_DSUPERLU
 HYPRE_Int HYPRE_BoomerAMGSetDSLUThreshold ( HYPRE_Solver solver , HYPRE_Int slu_threshold );
 #endif
-HYPRE_Int HYPRE_BoomerAMGSetCpointsToKeep( HYPRE_Solver solver, HYPRE_Int cpt_coarse_level, HYPRE_Int num_cpt_coarse, HYPRE_Int *cpt_coarse_index);
-HYPRE_Int HYPRE_BoomerAMGSetCPoints( HYPRE_Solver solver, HYPRE_Int cpt_coarse_level, HYPRE_Int num_cpt_coarse,HYPRE_Int *cpt_coarse_index);
+HYPRE_Int HYPRE_BoomerAMGSetCpointsToKeep( HYPRE_Solver solver, HYPRE_Int cpt_coarse_level, HYPRE_Int num_cpt_coarse, HYPRE_BigInt *cpt_coarse_index);
+HYPRE_Int HYPRE_BoomerAMGSetCPoints( HYPRE_Solver solver, HYPRE_Int cpt_coarse_level, HYPRE_Int num_cpt_coarse, HYPRE_BigInt *cpt_coarse_index);
 HYPRE_Int HYPRE_BoomerAMGSetIsolatedFPoints( HYPRE_Solver solver, HYPRE_Int num_isolated_fpt, HYPRE_BigInt *isolated_fpt_index );
 HYPRE_Int HYPRE_BoomerAMGSetFPoints( HYPRE_Solver solver, HYPRE_Int num_fpt, HYPRE_BigInt *fpt_index );
 
