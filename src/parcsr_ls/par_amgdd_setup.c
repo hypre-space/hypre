@@ -682,10 +682,8 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
       // !!! Debug
       #if DEBUG_COMP_GRID == 2
       HYPRE_Int inner_level;
-      // for (inner_level = level; inner_level < num_levels; inner_level++)
-      if (level <= 2 && myid == 1)
+      for (inner_level = level; inner_level < num_levels; inner_level++)
       {
-         inner_level = 2;
          hypre_sprintf(filename, "outputs/CompGrids/level%dCompGridRank%dLevel%d.txt", level, myid, inner_level);
          hypre_ParCompGridDebugPrint( compGrid[inner_level], filename, 0 );
       }
@@ -2126,6 +2124,10 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
          // if we need coarse info, allocate space for the add flag on the next level
          if (level != transition_level-1) add_flag[level+1] = hypre_CTAlloc( HYPRE_Int, hypre_ParCompGridNumNodes(compGrid[level+1]), HYPRE_MEMORY_HOST );
 
+         // !!! Debug
+         if (myid == 1 && current_level == 0) printf("   Expand padding level %d\n", level);
+
+
          // Expand by the padding on this level and add coarse grid counterparts if applicable
          for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
          {
@@ -2136,6 +2138,10 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
                else RecursivelyBuildPsiComposite(i, padding[level], compGrid[level], add_flag[level], NULL, sort_map, NULL, 0, &nodes_to_add, 0);
             }
          }
+
+         // !!! Debug
+         if (myid == 1 && current_level == 0) printf("   Expand ghosts level %d\n", level);
+
 
          // Expand by the number of ghost layers 
          for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
@@ -2198,17 +2204,23 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
                }
             }
 
+            // !!! Debug
+            if (myid == 1 && current_level == 0) printf("   Redundant padding level %d\n", level);
+
             // Expand by the padding on this level and add coarse grid counterparts if applicable
             HYPRE_Int dummy;
             for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
             {
-               if (redundant_add_flag[level][i] == padding[level] + 1)
+               if (redundant_add_flag[level][sort_map[i]] == padding[level] + 1)
                {
                   // Recursively add the region of padding (flagging coarse nodes on the next level if applicable)
                   if (nodes_to_add) RecursivelyBuildPsiComposite(i, padding[level], compGrid[level], redundant_add_flag[level], redundant_add_flag[level+1], sort_map, sort_map_coarse, 1, &dummy, padding[level+1]);
                   else RecursivelyBuildPsiComposite(i, padding[level], compGrid[level], redundant_add_flag[level], NULL, sort_map, NULL, 0, &dummy, 0);
                }
             }
+
+            // !!! Debug
+            if (myid == 1 && current_level == 0) printf("   Redundant ghosts level %d\n", level);
 
             // Expand by the number of ghost layers 
             for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)

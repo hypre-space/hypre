@@ -328,9 +328,6 @@ hypre_ParCompGridInitialize ( hypre_ParAMGData *amg_data, HYPRE_Int padding, HYP
          if ( global_index >= hypre_ParVectorFirstIndex(residual) && global_index <= hypre_ParVectorLastIndex(residual) )
             A_colind[j] = global_index - hypre_ParVectorFirstIndex(residual);
          else A_colind[j] = -1;
-
-         // !!! Debug
-         if (myid == 0 && global_index == 1300 && level == 1) printf("Rank 0, GID 1300 encountered in initialize at %d, local index set to %d\n", global_indices_comp[i], A_colind[j]);
       }
       hypre_ParCSRMatrixRestoreRow( A, i, &row_size, &row_col_ind, &row_values );
 
@@ -1054,6 +1051,7 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *nod
                {
                   global_index = hypre_ParCompGridAGlobalColInd(compGrid[level])[j];
                   local_index = hypre_ParCompGridLocalIndexBinarySearch(compGrid[level], global_index, old_num_nodes, num_nodes, NULL);
+                  if (local_index == -1) local_index = -global_index-1;
                }
                if (local_index < 0) is_edge = 1;
                hypre_ParCompGridAColInd(compGrid[level])[j] = local_index;
@@ -1071,6 +1069,7 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *nod
                // !!! NOTE: could optimize here a bit by checking if global index is owned
                global_index = hypre_ParCompGridAGlobalColInd(compGrid[level])[j];
                local_index = hypre_ParCompGridLocalIndexBinarySearch(compGrid[level], global_index, 0, num_nodes, hypre_ParCompGridInvSortMap(compGrid[level]));
+               if (local_index == -1) local_index = -global_index-1;
                if (local_index < 0) is_edge = 1;
                hypre_ParCompGridAColInd(compGrid[level])[j] = local_index;
             }
@@ -1352,7 +1351,7 @@ hypre_ParCompGridDebugPrint ( hypre_ParCompGrid *compGrid, const char* filename,
    //    for (i = 0; i < R_rowptr[coarse_num_nodes]; i++) hypre_fprintf(file, "%f ", R_data[i]);
    // }
 
-   hypre_fprintf(file, "\n");
+   // hypre_fprintf(file, "\n");
 
    fclose(file);
 
