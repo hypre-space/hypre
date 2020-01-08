@@ -251,10 +251,10 @@ typedef struct
    HYPRE_Int modularized_matmat;
 
    /* information for preserving indices as coarse grid points */
-   HYPRE_Int      num_C_points_keep;
+   HYPRE_Int      num_C_points;
    HYPRE_Int      C_points_coarse_level;
-   HYPRE_Int     *C_points_keep_local_marker;
-   HYPRE_BigInt  *C_points_keep_marker;
+   HYPRE_Int     *C_points_local_marker;
+   HYPRE_BigInt  *C_points_marker;
 
    /* information for preserving indices as special fine grid points */
    HYPRE_Int      num_isolated_F_points;
@@ -492,10 +492,10 @@ typedef struct
 #define hypre_ParAMGDataModularizedMatMat(amg_data) ((amg_data)->modularized_matmat)
 
 /* indices for the dof which will keep coarsening to the coarse level */
-#define hypre_ParAMGDataNumCPointsKeep(amg_data)  ((amg_data)->num_C_points_keep)
-#define hypre_ParAMGDataCPointsKeepLevel(amg_data) ((amg_data)->C_points_coarse_level)
-#define hypre_ParAMGDataCPointsKeepLocalMarker(amg_data) ((amg_data)->C_points_keep_local_marker)
-#define hypre_ParAMGDataCPointsKeepMarker(amg_data) ((amg_data)->C_points_keep_marker)
+#define hypre_ParAMGDataNumCPoints(amg_data)  ((amg_data)->num_C_points)
+#define hypre_ParAMGDataCPointsLevel(amg_data) ((amg_data)->C_points_coarse_level)
+#define hypre_ParAMGDataCPointsLocalMarker(amg_data) ((amg_data)->C_points_local_marker)
+#define hypre_ParAMGDataCPointsMarker(amg_data) ((amg_data)->C_points_marker)
 
 /* information for preserving indices as special fine grid points */
 #define hypre_ParAMGDataNumIsolatedFPoints(amg_data)     ((amg_data)->num_isolated_F_points)
@@ -945,9 +945,10 @@ HYPRE_Int HYPRE_BoomerAMGSetKeepTranspose ( HYPRE_Solver solver , HYPRE_Int keep
 #ifdef HYPRE_USING_DSUPERLU
 HYPRE_Int HYPRE_BoomerAMGSetDSLUThreshold ( HYPRE_Solver solver , HYPRE_Int slu_threshold );
 #endif
-HYPRE_Int HYPRE_BoomerAMGSetCpointsToKeep( HYPRE_Solver solver, HYPRE_Int cpt_coarse_level, HYPRE_Int num_cpt_coarse,HYPRE_Int *cpt_coarse_index);
-HYPRE_Int HYPRE_BoomerAMGSetIsolatedFPoints(HYPRE_Solver solver, HYPRE_Int num_isolated_fpt, HYPRE_BigInt *isolated_fpt_index);
-HYPRE_Int HYPRE_BoomerAMGSetFPoints(HYPRE_Solver solver, HYPRE_Int num_fpt, HYPRE_BigInt *fpt_index);
+HYPRE_Int HYPRE_BoomerAMGSetCpointsToKeep( HYPRE_Solver solver, HYPRE_Int cpt_coarse_level, HYPRE_Int num_cpt_coarse, HYPRE_Int *cpt_coarse_index);
+HYPRE_Int HYPRE_BoomerAMGSetCPoints( HYPRE_Solver solver, HYPRE_Int cpt_coarse_level, HYPRE_Int num_cpt_coarse,HYPRE_Int *cpt_coarse_index);
+HYPRE_Int HYPRE_BoomerAMGSetIsolatedFPoints( HYPRE_Solver solver, HYPRE_Int num_isolated_fpt, HYPRE_BigInt *isolated_fpt_index );
+HYPRE_Int HYPRE_BoomerAMGSetFPoints( HYPRE_Solver solver, HYPRE_Int num_fpt, HYPRE_BigInt *fpt_index );
 
 /* HYPRE_parcsr_bicgstab.c */
 HYPRE_Int HYPRE_ParCSRBiCGSTABCreate ( MPI_Comm comm , HYPRE_Solver *solver );
@@ -1424,8 +1425,8 @@ HYPRE_Int hypre_BoomerAMGSetKeepTranspose ( void *data , HYPRE_Int keepTranspose
 #ifdef HYPRE_USING_DSUPERLU
 HYPRE_Int hypre_BoomerAMGSetDSLUThreshold ( void *data , HYPRE_Int slu_threshold );
 #endif
-HYPRE_Int hypre_BoomerAMGSetCpointsToKeep(void *data, HYPRE_Int cpt_coarse_level, HYPRE_Int  num_cpt_coarse, HYPRE_Int *cpt_coarse_index);
-HYPRE_Int hypre_BoomerAMGSetFPoints(void *data, HYPRE_Int isolated, HYPRE_Int num_points, HYPRE_BigInt *indices);
+HYPRE_Int hypre_BoomerAMGSetCPoints( void *data, HYPRE_Int cpt_coarse_level, HYPRE_Int  num_cpt_coarse, HYPRE_Int *cpt_coarse_index );
+HYPRE_Int hypre_BoomerAMGSetFPoints( void *data, HYPRE_Int isolated, HYPRE_Int num_points, HYPRE_BigInt *indices );
 
 /* par_amg_setup.c */
 HYPRE_Int hypre_BoomerAMGSetup ( void *amg_vdata , hypre_ParCSRMatrix *A , hypre_ParVector *f , hypre_ParVector *u );

@@ -227,8 +227,8 @@ HYPRE_Int HYPRE_BoomerAMGSetMaxLevels(HYPRE_Solver solver,
  * (Optional) Sets cut factor for choosing isolated points
  * during coarsening according to the rows' density. The default is 0.
  * If nnzrow > coarsen_cut_factor*avg_nnzrow, where avg_nnzrow is the
- * average number of nonzeros of the global matrix, holds for a given row,
- * it is set as fine, and interpolation weights are not computed.
+ * average number of nonzeros per row of the global matrix, holds for
+ * a given row, it is set as fine, and interpolation weights are not computed.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetCoarsenCutFactor(HYPRE_Solver solver,
                                              HYPRE_Int    coarsen_cut_factor);
@@ -1245,6 +1245,14 @@ HYPRE_Int HYPRE_BoomerAMGSetDSLUThreshold (HYPRE_Solver solver,
  * @param cpt_coarse_level [IN] coarse level up to which to keep C points
  * @param num_cpt_coarse [IN] number of C points to be kept
  * @param cpt_coarse_index [IN] indexes of C points to be kept
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetCPoints(HYPRE_Solver solver,
+                                    HYPRE_Int    cpt_coarse_level,
+                                    HYPRE_Int    num_cpt_coarse,
+                                    HYPRE_Int   *cpt_coarse_index);
+
+/**
+ * (Optional) Deprecated function. Use HYPRE_BoomerAMGSetCPoints instead.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetCpointsToKeep(HYPRE_Solver solver,
                                           HYPRE_Int    cpt_coarse_level,

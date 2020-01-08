@@ -188,11 +188,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Int       keepTranspose = hypre_ParAMGDataKeepTranspose(amg_data);
 
    HYPRE_Int       local_coarse_size;
-   HYPRE_Int       num_C_points_coarse  = hypre_ParAMGDataNumCPointsKeep(amg_data);
-   HYPRE_Int      *C_points_keep_local_marker = hypre_ParAMGDataCPointsKeepLocalMarker(amg_data);
-   HYPRE_BigInt   *C_points_keep_marker = hypre_ParAMGDataCPointsKeepMarker(amg_data);
-   HYPRE_Int       num_F_points    = hypre_ParAMGDataNumFPoints(amg_data);
-   HYPRE_BigInt   *F_points_marker = hypre_ParAMGDataFPointsMarker(amg_data);
+   HYPRE_Int       num_C_points_coarse      = hypre_ParAMGDataNumCPoints(amg_data);
+   HYPRE_Int      *C_points_local_marker    = hypre_ParAMGDataCPointsLocalMarker(amg_data);
+   HYPRE_BigInt   *C_points_marker          = hypre_ParAMGDataCPointsMarker(amg_data);
+   HYPRE_Int       num_F_points             = hypre_ParAMGDataNumFPoints(amg_data);
+   HYPRE_BigInt   *F_points_marker          = hypre_ParAMGDataFPointsMarker(amg_data);
    HYPRE_Int       num_isolated_F_points    = hypre_ParAMGDataNumIsolatedFPoints(amg_data);
    HYPRE_BigInt   *isolated_F_points_marker = hypre_ParAMGDataIsolatedFPointsMarker(amg_data);
 
@@ -625,10 +625,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       k = 0;
       for (j = 0; j < num_C_points_coarse; j++)
       {
-         row = (HYPRE_Int) (C_points_keep_marker[j] - first_local_row);
+         row = (HYPRE_Int) (C_points_marker[j] - first_local_row);
          if ((row >= 0) && (row < local_size))
          {
-            C_points_keep_local_marker[k++] = row;
+            C_points_local_marker[k++] = row;
          }
       }
       num_C_points_coarse = k;
@@ -687,9 +687,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
 
    dof_func_array[0] = dof_func;
-   hypre_ParAMGDataCFMarkerArray(amg_data)  = CF_marker_array;
-   hypre_ParAMGDataNumCPointsKeep(amg_data) = num_C_points_coarse;
-   hypre_ParAMGDataDofFuncArray(amg_data)   = dof_func_array;
+   hypre_ParAMGDataCFMarkerArray(amg_data) = CF_marker_array;
+   hypre_ParAMGDataNumCPoints(amg_data) = num_C_points_coarse;
+   hypre_ParAMGDataDofFuncArray(amg_data) = dof_func_array;
    hypre_ParAMGDataAArray(amg_data) = A_array;
    hypre_ParAMGDataPArray(amg_data) = P_array;
 
@@ -1354,18 +1354,18 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             }
          }
 
-         if (hypre_ParAMGDataCPointsKeepLevel(amg_data) > 0)
+         if (hypre_ParAMGDataCPointsLevel(amg_data) > 0)
          {
             if (block_mode)
             {
                hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Keeping coarse nodes in block mode is not implemented\n");
             }
-            else if ((level < hypre_ParAMGDataCPointsKeepLevel(amg_data)) &&
+            else if ((level < hypre_ParAMGDataCPointsLevel(amg_data)) &&
                      (num_C_points_coarse > 0))
             {
                for (j = 0; j < num_C_points_coarse; j++)
                {
-                  CF_marker[C_points_keep_local_marker[j]] = 2;
+                  CF_marker[C_points_local_marker[j]] = 2;
                }
 
                local_coarse_size = 0;
@@ -1378,9 +1378,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   }
                   else if (CF_marker[j] == 2)
                   {
-                     if ((level + 1) < hypre_ParAMGDataCPointsKeepLevel(amg_data))
+                     if ((level + 1) < hypre_ParAMGDataCPointsLevel(amg_data))
                      {
-                        C_points_keep_local_marker[k++] = local_coarse_size;
+                        C_points_local_marker[k++] = local_coarse_size;
                      }
                      local_coarse_size++;
                      CF_marker[j] = 1;

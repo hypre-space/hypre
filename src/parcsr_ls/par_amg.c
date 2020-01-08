@@ -441,10 +441,10 @@ hypre_BoomerAMGCreate()
 #endif
 
    /* information for preserving indices as coarse grid points */
-   hypre_ParAMGDataCPointsKeepMarker(amg_data)      = NULL;
-   hypre_ParAMGDataCPointsKeepLocalMarker(amg_data) = NULL;
-   hypre_ParAMGDataCPointsKeepLevel(amg_data) = 0;
-   hypre_ParAMGDataNumCPointsKeep(amg_data)   = 0;
+   hypre_ParAMGDataCPointsMarker(amg_data)      = NULL;
+   hypre_ParAMGDataCPointsLocalMarker(amg_data) = NULL;
+   hypre_ParAMGDataCPointsLevel(amg_data)       = 0;
+   hypre_ParAMGDataNumCPoints(amg_data)         = 0;
 
    /* information for preserving indices as special fine grid points */
    hypre_ParAMGDataIsolatedFPointsMarker(amg_data) = NULL;
@@ -756,13 +756,13 @@ hypre_BoomerAMGDestroy( void *data )
       hypre_ParVectorDestroy(hypre_ParAMGDataFCoarse(amg_data));
 
    /* destroy input CF_marker data */
-   if (hypre_ParAMGDataCPointsKeepMarker(amg_data))
+   if (hypre_ParAMGDataCPointsMarker(amg_data))
    {
-      hypre_TFree(hypre_ParAMGDataCPointsKeepMarker(amg_data), HYPRE_MEMORY_HOST);
+      hypre_TFree(hypre_ParAMGDataCPointsMarker(amg_data), HYPRE_MEMORY_HOST);
    }
-   if (hypre_ParAMGDataCPointsKeepLocalMarker(amg_data))
+   if (hypre_ParAMGDataCPointsLocalMarker(amg_data))
    {
-      hypre_TFree(hypre_ParAMGDataCPointsKeepLocalMarker(amg_data), HYPRE_MEMORY_HOST);
+      hypre_TFree(hypre_ParAMGDataCPointsLocalMarker(amg_data), HYPRE_MEMORY_HOST);
    }
    if (hypre_ParAMGDataFPointsMarker(amg_data))
    {
@@ -4323,8 +4323,8 @@ hypre_BoomerAMGSetModuleRAP2( void      *data,
 }
 
 HYPRE_Int
-hypre_BoomerAMGSetKeepTranspose( void   *data,
-                            HYPRE_Int   keepTranspose)
+hypre_BoomerAMGSetKeepTranspose( void       *data,
+                                 HYPRE_Int   keepTranspose)
 {
   hypre_ParAMGData *amg_data = (hypre_ParAMGData*) data;
 
@@ -4345,15 +4345,15 @@ hypre_BoomerAMGSetDSLUThreshold( void   *data,
 #endif
 
 HYPRE_Int
-hypre_BoomerAMGSetCpointsToKeep(void         *data,
-                                HYPRE_Int     cpt_coarse_level,
-                                HYPRE_Int     num_cpt_coarse,
-                                HYPRE_BigInt *cpt_coarse_index)
+hypre_BoomerAMGSetCPoints(void         *data,
+                          HYPRE_Int     cpt_coarse_level,
+                          HYPRE_Int     num_cpt_coarse,
+                          HYPRE_BigInt *cpt_coarse_index)
 {
    hypre_ParAMGData *amg_data = (hypre_ParAMGData*) data;
 
-   HYPRE_BigInt     *C_points_keep_marker = NULL;
-   HYPRE_Int        *C_points_keep_local_marker = NULL;
+   HYPRE_BigInt     *C_points_marker = NULL;
+   HYPRE_Int        *C_points_local_marker = NULL;
    HYPRE_Int         cpt_level;
    HYPRE_Int         i;
 
@@ -4377,15 +4377,15 @@ hypre_BoomerAMGSetCpointsToKeep(void         *data,
    }
 
    /* free data not previously destroyed */
-   if (hypre_ParAMGDataCPointsKeepLevel(amg_data))
+   if (hypre_ParAMGDataCPointsLevel(amg_data))
    {
-      hypre_TFree(hypre_ParAMGDataCPointsKeepMarker(amg_data), HYPRE_MEMORY_HOST);
-      hypre_TFree(hypre_ParAMGDataCPointsKeepLocalMarker(amg_data), HYPRE_MEMORY_HOST);
-      hypre_ParAMGDataCPointsKeepMarker(amg_data) = NULL;
-      hypre_ParAMGDataCPointsKeepLocalMarker(amg_data) = NULL;
+      hypre_TFree(hypre_ParAMGDataCPointsMarker(amg_data), HYPRE_MEMORY_HOST);
+      hypre_TFree(hypre_ParAMGDataCPointsLocalMarker(amg_data), HYPRE_MEMORY_HOST);
+      hypre_ParAMGDataCPointsMarker(amg_data) = NULL;
+      hypre_ParAMGDataCPointsLocalMarker(amg_data) = NULL;
    }
 
-   /* set Cpoint_keep data */
+   /* set Cpoint data */
    if (hypre_ParAMGDataMaxLevels(amg_data) < cpt_coarse_level)
    {
       cpt_level = hypre_ParAMGDataNumLevels(amg_data);
@@ -4397,19 +4397,19 @@ hypre_BoomerAMGSetCpointsToKeep(void         *data,
 
    if (cpt_level)
    {
-      C_points_keep_marker       = hypre_CTAlloc(HYPRE_BigInt, num_cpt_coarse, HYPRE_MEMORY_HOST);
-      C_points_keep_local_marker = hypre_CTAlloc(HYPRE_Int, num_cpt_coarse, HYPRE_MEMORY_HOST);
+      C_points_marker       = hypre_CTAlloc(HYPRE_BigInt, num_cpt_coarse, HYPRE_MEMORY_HOST);
+      C_points_local_marker = hypre_CTAlloc(HYPRE_Int, num_cpt_coarse, HYPRE_MEMORY_HOST);
 
       /* copy Cpoints indexes */
       for (i = 0; i < num_cpt_coarse; i++)
       {
-         C_points_keep_marker[i] = cpt_coarse_index[i];
+         C_points_marker[i] = cpt_coarse_index[i];
       }
    }
-   hypre_ParAMGDataCPointsKeepMarker(amg_data)      = C_points_keep_marker;
-   hypre_ParAMGDataCPointsKeepLocalMarker(amg_data) = C_points_keep_local_marker;
-   hypre_ParAMGDataNumCPointsKeep(amg_data)         = num_cpt_coarse;
-   hypre_ParAMGDataCPointsKeepLevel(amg_data)       = cpt_level;
+   hypre_ParAMGDataCPointsMarker(amg_data)      = C_points_marker;
+   hypre_ParAMGDataCPointsLocalMarker(amg_data) = C_points_local_marker;
+   hypre_ParAMGDataNumCPoints(amg_data)         = num_cpt_coarse;
+   hypre_ParAMGDataCPointsLevel(amg_data)       = cpt_level;
 
    return hypre_error_flag;
 }

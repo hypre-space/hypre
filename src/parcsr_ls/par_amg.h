@@ -226,10 +226,10 @@ typedef struct
    HYPRE_Int keepTranspose;
 
    /* information for preserving indices as coarse grid points */
-   HYPRE_Int      num_C_points_keep;
+   HYPRE_Int      num_C_points;
    HYPRE_Int      C_points_coarse_level;
-   HYPRE_Int     *C_points_keep_local_marker;
-   HYPRE_BigInt  *C_points_keep_marker;
+   HYPRE_Int     *C_points_local_marker;
+   HYPRE_BigInt  *C_points_marker;
 
    /* information for preserving indices as special fine grid points */
    HYPRE_Int      num_isolated_F_points;
@@ -461,10 +461,10 @@ typedef struct
 #define hypre_ParAMGDataKeepTranspose(amg_data) ((amg_data)->keepTranspose)
 
 /* indices for the dof which will keep coarsening to the coarse level */
-#define hypre_ParAMGDataNumCPointsKeep(amg_data)  ((amg_data)->num_C_points_keep)
-#define hypre_ParAMGDataCPointsKeepLevel(amg_data) ((amg_data)->C_points_coarse_level)
-#define hypre_ParAMGDataCPointsKeepLocalMarker(amg_data) ((amg_data)->C_points_keep_local_marker)
-#define hypre_ParAMGDataCPointsKeepMarker(amg_data) ((amg_data)->C_points_keep_marker)
+#define hypre_ParAMGDataNumCPoints(amg_data)  ((amg_data)->num_C_points)
+#define hypre_ParAMGDataCPointsLevel(amg_data) ((amg_data)->C_points_coarse_level)
+#define hypre_ParAMGDataCPointsLocalMarker(amg_data) ((amg_data)->C_points_local_marker)
+#define hypre_ParAMGDataCPointsMarker(amg_data) ((amg_data)->C_points_marker)
 
 /* information for preserving indices as special fine grid points */
 #define hypre_ParAMGDataNumIsolatedFPoints(amg_data)     ((amg_data)->num_isolated_F_points)

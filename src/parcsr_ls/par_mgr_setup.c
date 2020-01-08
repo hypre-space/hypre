@@ -139,7 +139,7 @@ hypre_MGRSetup( void               *mgr_vdata,
   		if (reserved_coarse_size > 0)
   		{
                    reserved_coarse_indexes = (mgr_data -> reserved_coarse_indexes);
-		   HYPRE_BoomerAMGSetCpointsToKeep((mgr_data ->coarse_grid_solver), 25, reserved_coarse_size, reserved_coarse_indexes);
+		   HYPRE_BoomerAMGSetCPoints((mgr_data ->coarse_grid_solver), 25, reserved_coarse_size, reserved_coarse_indexes);
    		}
 
 		/* setup coarse grid solver */
@@ -604,7 +604,7 @@ hypre_MGRSetup( void               *mgr_vdata,
       {
          reserved_coarse_indexes[i] = (HYPRE_BigInt) (reserved_Cpoint_local_indexes[i] + ilower);
       }
-      HYPRE_BoomerAMGSetCpointsToKeep((mgr_data ->coarse_grid_solver), 25, reserved_coarse_size, reserved_coarse_indexes);
+      HYPRE_BoomerAMGSetCPoints((mgr_data ->coarse_grid_solver), 25, reserved_coarse_size, reserved_coarse_indexes);
    }
 
    /* setup coarse grid solver */
