@@ -2971,6 +2971,9 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetNumSamples(amg_solver, gsmg_samples);
       HYPRE_BoomerAMGSetCoarsenType(amg_solver, coarsen_type);
       HYPRE_BoomerAMGSetCoarsenCutFactor(amg_solver, coarsen_cut_factor);
+      HYPRE_BoomerAMGSetCPoints(amg_solver, max_levels, num_cpt, cpt_index);
+      HYPRE_BoomerAMGSetFPoints(amg_solver, num_fpt, fpt_index);
+      HYPRE_BoomerAMGSetIsolatedFPoints(amg_solver, num_isolated_fpt, isolated_fpt_index);
       HYPRE_BoomerAMGSetMeasureType(amg_solver, measure_type);
       HYPRE_BoomerAMGSetConvergeType(amg_solver, converge_type);
       HYPRE_BoomerAMGSetTol(amg_solver, tol);
@@ -3160,6 +3163,9 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetNumSamples(amg_solver, gsmg_samples);
       HYPRE_BoomerAMGSetCoarsenType(amg_solver, coarsen_type);
       HYPRE_BoomerAMGSetCoarsenCutFactor(amg_solver, coarsen_cut_factor);
+      HYPRE_BoomerAMGSetCPoints(amg_solver, max_levels, num_cpt, cpt_index);
+      HYPRE_BoomerAMGSetFPoints(amg_solver, num_fpt, fpt_index);
+      HYPRE_BoomerAMGSetIsolatedFPoints(amg_solver, num_isolated_fpt, isolated_fpt_index);
       HYPRE_BoomerAMGSetMeasureType(amg_solver, measure_type);
       HYPRE_BoomerAMGSetTol(amg_solver, tol);
       HYPRE_BoomerAMGSetStrongThreshold(amg_solver, strong_threshold);
@@ -3330,7 +3336,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, coarsen_type);
          HYPRE_BoomerAMGSetCoarsenCutFactor(pcg_precond, coarsen_cut_factor);
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
-         HYPRE_BoomerAMGSetCpointsToKeep(pcg_precond, max_levels, num_cpt, cpt_index);
+         HYPRE_BoomerAMGSetCPoints(pcg_precond, max_levels, num_cpt, cpt_index);
          HYPRE_BoomerAMGSetFPoints(pcg_precond, num_fpt, fpt_index);
          HYPRE_BoomerAMGSetIsolatedFPoints(pcg_precond, num_isolated_fpt, isolated_fpt_index);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
@@ -3498,6 +3504,9 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, coarsen_type);
          HYPRE_BoomerAMGSetCoarsenCutFactor(pcg_precond, coarsen_cut_factor);
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
+         HYPRE_BoomerAMGSetCPoints(pcg_precond, max_levels, num_cpt, cpt_index);
+         HYPRE_BoomerAMGSetFPoints(pcg_precond, num_fpt, fpt_index);
+         HYPRE_BoomerAMGSetIsolatedFPoints(pcg_precond, num_isolated_fpt, isolated_fpt_index);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetSeqThreshold(pcg_precond, seq_threshold);
          HYPRE_BoomerAMGSetRedundant(pcg_precond, redundant);
@@ -3949,6 +3958,9 @@ main( hypre_int argc,
             HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
             HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
             HYPRE_BoomerAMGSetCoarsenCutFactor(pcg_precond, coarsen_cut_factor);
+            HYPRE_BoomerAMGSetCPoints(pcg_precond, max_levels, num_cpt, cpt_index);
+            HYPRE_BoomerAMGSetFPoints(pcg_precond, num_fpt, fpt_index);
+            HYPRE_BoomerAMGSetIsolatedFPoints(pcg_precond, num_isolated_fpt, isolated_fpt_index);
             HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
             HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
             HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
@@ -4055,6 +4067,9 @@ main( hypre_int argc,
             HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
             HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
             HYPRE_BoomerAMGSetCoarsenCutFactor(pcg_precond, coarsen_cut_factor);
+            HYPRE_BoomerAMGSetCPoints(pcg_precond, max_levels, num_cpt, cpt_index);
+            HYPRE_BoomerAMGSetFPoints(pcg_precond, num_fpt, fpt_index);
+            HYPRE_BoomerAMGSetIsolatedFPoints(pcg_precond, num_isolated_fpt, isolated_fpt_index);
             HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
             HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
             HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
@@ -4326,6 +4341,9 @@ main( hypre_int argc,
             HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
             HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
             HYPRE_BoomerAMGSetCoarsenCutFactor(pcg_precond, coarsen_cut_factor);
+            HYPRE_BoomerAMGSetCPoints(pcg_precond, max_levels, num_cpt, cpt_index);
+            HYPRE_BoomerAMGSetFPoints(pcg_precond, num_fpt, fpt_index);
+            HYPRE_BoomerAMGSetIsolatedFPoints(pcg_precond, num_isolated_fpt, isolated_fpt_index);
             HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
             HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
             HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
@@ -4437,6 +4455,9 @@ main( hypre_int argc,
             HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
             HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
             HYPRE_BoomerAMGSetCoarsenCutFactor(pcg_precond, coarsen_cut_factor);
+            HYPRE_BoomerAMGSetCPoints(pcg_precond, max_levels, num_cpt, cpt_index);
+            HYPRE_BoomerAMGSetFPoints(pcg_precond, num_fpt, fpt_index);
+            HYPRE_BoomerAMGSetIsolatedFPoints(pcg_precond, num_isolated_fpt, isolated_fpt_index);
             HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
             HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
             HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
@@ -4723,6 +4744,9 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, coarsen_type);
          HYPRE_BoomerAMGSetCoarsenCutFactor(pcg_precond, coarsen_cut_factor);
+         HYPRE_BoomerAMGSetCPoints(pcg_precond, max_levels, num_cpt, cpt_index);
+         HYPRE_BoomerAMGSetFPoints(pcg_precond, num_fpt, fpt_index);
+         HYPRE_BoomerAMGSetIsolatedFPoints(pcg_precond, num_isolated_fpt, isolated_fpt_index);
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetSeqThreshold(pcg_precond, seq_threshold);
@@ -4884,6 +4908,9 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, coarsen_type);
          HYPRE_BoomerAMGSetCoarsenCutFactor(pcg_precond, coarsen_cut_factor);
+         HYPRE_BoomerAMGSetCPoints(pcg_precond, max_levels, num_cpt, cpt_index);
+         HYPRE_BoomerAMGSetFPoints(pcg_precond, num_fpt, fpt_index);
+         HYPRE_BoomerAMGSetIsolatedFPoints(pcg_precond, num_isolated_fpt, isolated_fpt_index);
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetSeqThreshold(pcg_precond, seq_threshold);
@@ -5136,6 +5163,9 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, coarsen_type);
          HYPRE_BoomerAMGSetCoarsenCutFactor(pcg_precond, coarsen_cut_factor);
+         HYPRE_BoomerAMGSetCPoints(pcg_precond, max_levels, num_cpt, cpt_index);
+         HYPRE_BoomerAMGSetFPoints(pcg_precond, num_fpt, fpt_index);
+         HYPRE_BoomerAMGSetIsolatedFPoints(pcg_precond, num_isolated_fpt, isolated_fpt_index);
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetSeqThreshold(pcg_precond, seq_threshold);
@@ -5319,6 +5349,9 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, coarsen_type);
          HYPRE_BoomerAMGSetCoarsenCutFactor(pcg_precond, coarsen_cut_factor);
+         HYPRE_BoomerAMGSetCPoints(pcg_precond, max_levels, num_cpt, cpt_index);
+         HYPRE_BoomerAMGSetFPoints(pcg_precond, num_fpt, fpt_index);
+         HYPRE_BoomerAMGSetIsolatedFPoints(pcg_precond, num_isolated_fpt, isolated_fpt_index);
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetSeqThreshold(pcg_precond, seq_threshold);
@@ -5620,6 +5653,9 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, coarsen_type);
          HYPRE_BoomerAMGSetCoarsenCutFactor(pcg_precond, coarsen_cut_factor);
+         HYPRE_BoomerAMGSetCPoints(pcg_precond, max_levels, num_cpt, cpt_index);
+         HYPRE_BoomerAMGSetFPoints(pcg_precond, num_fpt, fpt_index);
+         HYPRE_BoomerAMGSetIsolatedFPoints(pcg_precond, num_isolated_fpt, isolated_fpt_index);
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetSeqThreshold(pcg_precond, seq_threshold);
@@ -5965,6 +6001,9 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, coarsen_type);
          HYPRE_BoomerAMGSetCoarsenCutFactor(pcg_precond, coarsen_cut_factor);
+         HYPRE_BoomerAMGSetCPoints(pcg_precond, max_levels, num_cpt, cpt_index);
+         HYPRE_BoomerAMGSetFPoints(pcg_precond, num_fpt, fpt_index);
+         HYPRE_BoomerAMGSetIsolatedFPoints(pcg_precond, num_isolated_fpt, isolated_fpt_index);
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetSeqThreshold(pcg_precond, seq_threshold);
@@ -6124,7 +6163,7 @@ main( hypre_int argc,
          for(i=0; i<mgr_num_reserved_nodes; i++)
          {
             /* Generate 'artificial' reserved nodes. Assumes these are ordered last in the system */
-            mgr_reserved_coarse_indexes[i] = last_local_row-i;//2*i+1;
+            mgr_reserved_coarse_indexes[i] = last_local_row - (HYPRE_BigInt) i; //2*i+1;
             hypre_printf("mgr_reserved_coarse_indexes[i] = %d \n", mgr_reserved_coarse_indexes[i]);
          }
 
@@ -6277,6 +6316,9 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, coarsen_type);
          HYPRE_BoomerAMGSetCoarsenCutFactor(pcg_precond, coarsen_cut_factor);
+         HYPRE_BoomerAMGSetCPoints(pcg_precond, max_levels, num_cpt, cpt_index);
+         HYPRE_BoomerAMGSetFPoints(pcg_precond, num_fpt, fpt_index);
+         HYPRE_BoomerAMGSetIsolatedFPoints(pcg_precond, num_isolated_fpt, isolated_fpt_index);
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetSeqThreshold(pcg_precond, seq_threshold);
@@ -6458,7 +6500,7 @@ main( hypre_int argc,
       mgr_reserved_coarse_indexes = hypre_CTAlloc(HYPRE_Int,  mgr_num_reserved_nodes, HYPRE_MEMORY_HOST);
       for(i=0; i<mgr_num_reserved_nodes; i++)
       { /* generate artificial reserved nodes */
-         mgr_reserved_coarse_indexes[i] = last_local_row-i;//2*i+1;
+         mgr_reserved_coarse_indexes[i] = last_local_row - (HYPRE_BigInt) i; //2*i+1;
       }
 
       /* set MGR data by block */
