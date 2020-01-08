@@ -88,8 +88,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    /* Local variables */
    HYPRE_Int           *CF_marker;
-   HYPRE_Int           *CFN_marker;
-   HYPRE_Int           *CF2_marker;
+   HYPRE_Int           *CFN_marker = NULL;
+   HYPRE_Int           *CF2_marker = NULL;
    hypre_ParCSRMatrix  *S = NULL, *Sabs = NULL;
    hypre_ParCSRMatrix  *S2;
    hypre_ParCSRMatrix  *SN = NULL;
