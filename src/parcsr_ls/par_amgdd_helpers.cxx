@@ -425,24 +425,6 @@ FindNeighborProcessors(hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A,
    hypre_TFree(recv_sizes, HYPRE_MEMORY_HOST);
    hypre_TFree(send_sizes, HYPRE_MEMORY_HOST);
 
-   // !!! Debug
-   // end = chrono::system_clock::now();
-   // timings.push_back(end - start);
-
-   // !!! Debug
-   // HYPRE_Int num_procs;
-   // hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
-   // for (auto proc = 0; proc < num_procs; proc++)
-   // {
-   //    if (myid == proc) 
-   //    {
-   //       cout << "Rank " << myid << ": " << endl;
-   //       for (size_t i = 0; i < timings.size(); i++) cout << timings[i].count() << ", ";
-   //       cout << endl;
-   //    }
-   //    // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
-   // }
-
    return 0;
 }
 
@@ -468,20 +450,8 @@ SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGr
       hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[level] = 0;
       hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg)[level] = 0;
       hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg)[level] = 0;
-      
-      // !!! Debug
-      // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
-      // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
-      // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
-      // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
-      // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
       HYPRE_Int num_procs;
       hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
-      for (auto proc = 0; proc < num_procs; proc++)
-      {
-         // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
-      }
-
    }
    else
    {
@@ -570,14 +540,8 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
    // recv_buffer = [ num_psi_levels , [level] , [level] , ... ]
    // level = [ num send nodes, [global indices] , [coarse global indices] , [A row sizes] , [A col ind] ]
 
-   // !!! Debug
-   // vector<chrono::duration<double>> timings(20);
-   // auto total_start = chrono::system_clock::now();
-   // HYPRE_Int test_cnt = 0;
-
    HYPRE_Int            level, i, j, k;
    HYPRE_Int            num_psi_levels, row_size, level_start, add_node_cnt;
-   // HYPRE_Int            *add_flag;
 
    HYPRE_Int myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
@@ -600,7 +564,7 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
       *recv_map_send_buffer_size += num_recv_nodes[current_level][buffer_number][level];
 
       // !!! Debug
-      auto start = chrono::system_clock::now();
+      // auto start = chrono::system_clock::now();
 
       // Incoming nodes and existing (non-owned) nodes in the comp grid are both sorted by global index, so here we merge these lists together (getting rid of redundant nodes along the way)
       add_node_cnt = 0;
@@ -638,11 +602,6 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
          }
          HYPRE_Int compGrid_global_index = hypre_ParCompGridGlobalIndices(compGrid[level])[ inv_sort_map[compGrid_cnt] ];
 
-         // !!! Debug
-         // if (myid == 1 && current_level == 0 && level == 1)
-         //    printf("incoming_global_index = %d, compGrid_global_index = %d, real dof marker = %d\n", incoming_global_index, compGrid_global_index, hypre_ParCompGridRealDofMarker(compGrid[level])[ inv_sort_map[compGrid_cnt] ]);
-
-
          // !!! Add optimization for owned dofs? That is, some way of skipping over the merge for the owned block.
 
          if (incoming_global_index == compGrid_global_index)
@@ -655,13 +614,6 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
                hypre_ParCompGridRealDofMarker(compGrid[level])[ inv_sort_map[compGrid_cnt] ] = 1;
                
                incoming_dest[incoming_cnt++] = inv_sort_map[compGrid_cnt]; // Incoming real dof received to existing ghost location
-
-
-               // !!! Debug
-               // if (myid == 1 && current_level == 0 && level == 1)
-               //    printf("overwrite, incoming_dest[%d] = %d\n", incoming_cnt-1, incoming_dest[incoming_cnt-1]);
-
-
                cnt++;
 
             }
@@ -678,10 +630,6 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
             new_inv_sort_map[sort_cnt] = dest;
 
             incoming_dest[incoming_cnt] = dest;
-
-            // !!! Debug
-            // if (myid == 0 && current_level == 1 && level == 1 && incoming_global_index == 1286)
-            //    printf("bringing in GID 1286 from buffer number %d\n", buffer_number);
 
             sort_cnt++;
             incoming_cnt++;
@@ -705,10 +653,6 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
          new_inv_sort_map[sort_cnt] = dest;
 
          incoming_dest[incoming_cnt] = dest;
-
-         // !!! Debug
-         // if (myid == 1 && current_level == 0 && level == 1)
-         //    printf("new after merge, incoming_dest[%d] = %d\n", incoming_cnt-1, incoming_dest[incoming_cnt-1]);
 
          sort_cnt++;
          incoming_cnt++;
@@ -761,16 +705,6 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
             cnt++;
          }
       }
-      
-      // !!! Debug
-      // if (myid == 1 && current_level == 0 && level == 1)
-      // {
-      //    printf("Rank 1, current level 0, level 1 recv map = \n");
-      //    for (i = 0; i < num_recv_nodes[current_level][buffer_number][level]; i++)
-      //       printf("%d ", incoming_dest[i]);
-      //    printf("\n");
-      // }
-
 
       // Setup incoming A row ptr info and count up number of nonzeros added to A
       HYPRE_Int added_A_nnz = 0;
