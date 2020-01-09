@@ -1082,37 +1082,50 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *nod
       // if we are not on the coarsest level
       if (level != transition_level-1)
       {
-         if ( nodes_added_on_level[level] || nodes_added_on_level[level+1] )
+
+
+
+         // !!! Debug
+         // if (myid == 28 && level == 6) printf("hypre_ParCompGridSetupLocalIndices rank 28 level 6 setting coarse \n");
+
+
+            // !!! Debug
+            // if (myid == 28 && level == 6) printf("setuplocal doing coarse\n");
+
+
+         // loop over indices of non-owned nodes on this level 
+         // !!! No guarantee that previous ghost dofs converted to real dofs have coarse local indices setup...
+         // !!! Thus we go over all non-owned dofs here instead of just the added ones. Could probably be optimized.
+         // !!! NOTE: can't use nodes_added_on_level here either because real overwritten by ghost doesn't count as added node (so you can miss setting these up)
+         HYPRE_Int num_nodes = hypre_ParCompGridNumNodes(compGrid[level]);
+         HYPRE_Int old_num_nodes = num_nodes - nodes_added_on_level[level];
+         HYPRE_Int num_owned_nodes = hypre_ParCompGridOwnedBlockStarts(compGrid[level])[hypre_ParCompGridNumOwnedBlocks(compGrid[level])];
+         for (i = num_owned_nodes; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
          {
-            // loop over indices of non-owned nodes on this level 
-            // !!! No guarantee that previous ghost dofs converted to real dofs have coarse local indices setup...
-            // !!! Thus we go over all non-owned dofs here instead of just the added ones. Could probably be optimized.
-            HYPRE_Int num_nodes = hypre_ParCompGridNumNodes(compGrid[level]);
-            HYPRE_Int old_num_nodes = num_nodes - nodes_added_on_level[level];
-            HYPRE_Int num_owned_nodes = hypre_ParCompGridOwnedBlockStarts(compGrid[level])[hypre_ParCompGridNumOwnedBlocks(compGrid[level])];
-            for (i = num_owned_nodes; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
+            // fix up the coarse local indices
+            global_index = hypre_ParCompGridCoarseGlobalIndices(compGrid[level])[i];
+            HYPRE_Int is_real = hypre_ParCompGridRealDofMarker(compGrid[level])[i];
+
+            // setup coarse local index if necessary
+            if (global_index >= 0 && is_real)
             {
-               // fix up the coarse local indices
-               global_index = hypre_ParCompGridCoarseGlobalIndices(compGrid[level])[i];
-               HYPRE_Int is_real = hypre_ParCompGridRealDofMarker(compGrid[level])[i];
+               if (i < old_num_nodes) local_index = hypre_ParCompGridCoarseLocalIndices(compGrid[level])[i];
+               else local_index = -1;
 
-               // setup coarse local index if necessary
-               if (global_index >= 0 && is_real)
+               if (local_index < 0)
                {
-                  if (i < old_num_nodes) local_index = hypre_ParCompGridCoarseLocalIndices(compGrid[level])[i];
-                  else local_index = -1;
-
-                  if (local_index < 0)
-                  {
-                     hypre_ParCompGridCoarseLocalIndices(compGrid[level])[i] = hypre_ParCompGridLocalIndexBinarySearch(compGrid[level+1], global_index, 0, hypre_ParCompGridNumNodes(compGrid[level+1]), hypre_ParCompGridInvSortMap(compGrid[level+1]));
-                  }
-                  else if ( hypre_ParCompGridGlobalIndices(compGrid[level+1])[local_index] != global_index )
-                  {
-                     hypre_ParCompGridCoarseLocalIndices(compGrid[level])[i] = hypre_ParCompGridLocalIndexBinarySearch(compGrid[level+1], global_index, 0, hypre_ParCompGridNumNodes(compGrid[level+1]), hypre_ParCompGridInvSortMap(compGrid[level+1]));
-                  }
+                  hypre_ParCompGridCoarseLocalIndices(compGrid[level])[i] = hypre_ParCompGridLocalIndexBinarySearch(compGrid[level+1], global_index, 0, hypre_ParCompGridNumNodes(compGrid[level+1]), hypre_ParCompGridInvSortMap(compGrid[level+1]));
                }
-               else hypre_ParCompGridCoarseLocalIndices(compGrid[level])[i] = -1;
+               else if ( hypre_ParCompGridGlobalIndices(compGrid[level+1])[local_index] != global_index )
+               {
+                  hypre_ParCompGridCoarseLocalIndices(compGrid[level])[i] = hypre_ParCompGridLocalIndexBinarySearch(compGrid[level+1], global_index, 0, hypre_ParCompGridNumNodes(compGrid[level+1]), hypre_ParCompGridInvSortMap(compGrid[level+1]));
+               }
             }
+            else hypre_ParCompGridCoarseLocalIndices(compGrid[level])[i] = -1;
+
+            // !!! Debug
+            // if (myid == 28 && level == 6 && global_index == 1) printf("   In setup local ind: gid 7, is_real = %d, lid set to %d\n", is_real, hypre_ParCompGridCoarseLocalIndices(compGrid[level])[i]);
+
          }
       }
    }

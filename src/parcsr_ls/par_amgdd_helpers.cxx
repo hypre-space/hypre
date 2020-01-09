@@ -613,6 +613,17 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
 
                hypre_ParCompGridRealDofMarker(compGrid[level])[ inv_sort_map[compGrid_cnt] ] = 1;
                
+
+
+               // !!! Debug
+               // if (myid == 28 && level == 6 && hypre_ParCompGridGlobalIndices(compGrid[level])[ inv_sort_map[compGrid_cnt] ] == 7)
+               //    printf("overwriting gid 7 as real!\n");
+
+
+
+
+
+
                incoming_dest[incoming_cnt++] = inv_sort_map[compGrid_cnt]; // Incoming real dof received to existing ghost location
                cnt++;
 

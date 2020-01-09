@@ -17,7 +17,7 @@
 #include "par_amg.h"
 #include "par_csr_block_matrix.h"
 
-#define DEBUG_COMP_GRID 0 // if true, runs some tests, prints out what is stored in the comp grids for each processor to a file
+#define DEBUG_COMP_GRID 1 // if true, runs some tests, prints out what is stored in the comp grids for each processor to a file
 #define DEBUG_PROC_NEIGHBORS 0 // if true, dumps info on the add flag structures that determine nearest processor neighbors 
 #define DEBUGGING_MESSAGES 0 // if true, prints a bunch of messages to the screen to let you know where in the algorithm you are
 #define ENABLE_AGGLOMERATION 0 // if true, enable coarse level processor agglomeration, which requires linking with parmetis
@@ -538,6 +538,31 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
             // Setup local indices for the composite grid
             if (timers) hypre_BeginTiming(timers[5]);
 
+
+
+
+
+            // !!! Debug
+            // if (myid == 28)
+            // {
+            //    for (j = 0; j < hypre_ParCompGridNumNodes(compGrid[6]); j++)
+            //    {
+            //       if (hypre_ParCompGridCoarseGlobalIndices(compGrid[6])[j] == 1)
+            //       {
+            //          printf("  Just before setup local ind: gid %d, cgid %d, lgid %d, real %d\n", 
+            //             hypre_ParCompGridGlobalIndices(compGrid[6])[j], 
+            //             hypre_ParCompGridCoarseGlobalIndices(compGrid[6])[j],
+            //             hypre_ParCompGridCoarseLocalIndices(compGrid[6])[j],
+            //             hypre_ParCompGridRealDofMarker(compGrid[6])[j]);
+            //          break;
+            //       }
+            //    }
+            // }
+
+
+
+
+
             hypre_ParCompGridSetupLocalIndices(compGrid, nodes_added_on_level, amgdd_start_level, transition_level);
             for (j = level; j < num_levels; j++) nodes_added_on_level[j] = 0;
 
@@ -623,7 +648,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
       #if DEBUG_COMP_GRID
       CheckCompGridLocalIndices(amg_data);
       HYPRE_Int error_code;
-      error_code = TestCompGrids1(compGrid, num_levels, transition_level, padding, num_ghost_layers, level, 0);
+      error_code = TestCompGrids1(compGrid, num_levels, transition_level, padding, num_ghost_layers, level, 1);
       if (error_code)
       {
          hypre_printf("TestCompGrids1 failed! Rank %d, level %d\n", myid, level);
@@ -638,6 +663,54 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
       //    hypre_ParCompGridDebugPrint( compGrid[inner_level], filename, 0 );
       // }
       // #endif
+
+
+      // !!! Debug
+      // if (myid == 28)
+      // {
+      //    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[7]); i++)
+      //    {
+      //       if (hypre_ParCompGridGlobalIndices(compGrid[7])[i] == 5) printf("Rank 28 has GID 5 on outer level %d, real = %d\n", level, hypre_ParCompGridRealDofMarker(compGrid[7])[i]);
+      //    }
+      // }
+
+      // !!! Debug
+      // if (myid == 28)
+      // {
+      //    for (i = 0; i < num_levels; i++) printf("  %d\n", hypre_ParCompGridNumNodes(compGrid[i]));
+      // }
+
+
+
+
+      // // !!! Debug
+      // if (myid == 28)
+      // {
+      //    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[6]); i++)
+      //    {
+      //       if (hypre_ParCompGridCoarseGlobalIndices(compGrid[6])[i] == 1)
+      //       {
+      //          printf("gid %d, cgid %d, lgid %d, real %d\n", 
+      //             hypre_ParCompGridGlobalIndices(compGrid[6])[i], 
+      //             hypre_ParCompGridCoarseGlobalIndices(compGrid[6])[i],
+      //             hypre_ParCompGridCoarseLocalIndices(compGrid[6])[i],
+      //             hypre_ParCompGridRealDofMarker(compGrid[6])[i]);
+      //          break;
+      //       }
+      //    }
+      // }
+
+
+
+
+      // !!! Debug
+      // if (level == 4) 
+      // {
+      //    MPI_Finalize();
+      //    exit(0);
+      // }
+
+
    }
 
    #if DEBUG_COMP_GRID
@@ -2199,10 +2272,18 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
          {
             send_elmt = -(send_elmt + 1);
             send_buffer[cnt++] = -(hypre_ParCompGridGlobalIndices(compGrid[level])[ send_elmt ] + 1);
+
+            // !!! Debug
+            // if (hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[current_level][partition] == 28 && level == 7 && hypre_ParCompGridGlobalIndices(compGrid[level])[ send_elmt ] == 5)
+            //    printf("Rank %d, outer level %d, sending GID 5 on level 7 to rank 28 as ghost\n", myid, current_level);
          }
          else 
          {
             send_buffer[cnt++] = hypre_ParCompGridGlobalIndices(compGrid[level])[ send_elmt ];
+
+            // !!! Debug
+            // if (hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[current_level][partition] == 28 && level == 7 && hypre_ParCompGridGlobalIndices(compGrid[level])[ send_elmt ] == 5)
+            //    printf("Rank %d, outer_level %d, sending GID 5 on level 7 to rank 28 as real\n", myid, current_level);
          }
       }
 
@@ -2327,12 +2408,28 @@ RecursivelyBuildPsiComposite(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *com
          if (need_coarse_info && m == 1)
          {
             coarse_grid_index = hypre_ParCompGridCoarseLocalIndices(compGrid)[index];
+
+
+            // !!! Debug 
+            // if (myid == 28 && hypre_ParCompGridCoarseGlobalIndices(compGrid)[index] == 1 && hypre_ParCompGridGlobalIndices(compGrid)[index] == 7)
+            //    printf("HEY! index = %d, coarse gid = %d, local coarse idx = %d\n", index, hypre_ParCompGridCoarseGlobalIndices(compGrid)[index], coarse_grid_index);
+
+
+
+
             if ( coarse_grid_index != -1 ) 
             {
                // Again, need to set the add_flag to the appropriate value in order to recursively find neighbors on the next level
                if (sort_map_coarse) sort_index = sort_map_coarse[coarse_grid_index];
                else sort_index = coarse_grid_index;
                add_flag_coarse[ sort_index ] = padding+1;
+            
+
+               // !!! Debug 
+               // if (myid == 28 && hypre_ParCompGridCoarseGlobalIndices(compGrid)[index] == 1 && hypre_ParCompGridGlobalIndices(compGrid)[index] == 7)
+               //    printf("Setting coarse add flag to %d at sort_index %d\n", padding+1, sort_index);
+
+
                *nodes_to_add = 1;   
             }
          }
@@ -3062,6 +3159,24 @@ TestCompGrids1(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int tra
    HYPRE_Int num_owned_nodes = hypre_ParCompGridOwnedBlockStarts(compGrid[current_level])[hypre_ParCompGridNumOwnedBlocks(compGrid[current_level])];
    for (i = 0; i < num_owned_nodes; i++) add_flag[current_level][i] = padding[current_level] + 1;
 
+
+
+   // !!! Debug
+   // if (myid == 28 && current_level == 4)
+   // {
+   //    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[6]); i++)
+   //    {
+   //       if (hypre_ParCompGridCoarseGlobalIndices(compGrid[6])[i] == 1)
+   //       {
+   //          printf("\n\nIndex %d on level 6 has coarse gid 1, lid %d\n\n\n", hypre_ParCompGridGlobalIndices(compGrid[6])[i], hypre_ParCompGridCoarseLocalIndices(compGrid[6])[i]);
+   //          break;
+   //       }
+   //    }
+   // }
+
+
+
+
    // Serially generate comp grid from top down
    // Note that if nodes that should be present in the comp grid are not found, we will be alerted by the error message in RecursivelyBuildPsiComposite()
    for (level = current_level; level < transition_level; level++)
@@ -3074,6 +3189,19 @@ TestCompGrids1(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int tra
          // see whether we need coarse info on this level
          if (level != transition_level-1) need_coarse_info = 1;
          else need_coarse_info = 0;
+
+
+         // !!! Debug
+         // if (myid == 28 && current_level == 4 && level == 7)
+         // {
+         //    printf("starting dofs[%d] = \n", level);
+         //    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++) 
+         //    {
+         //       if (add_flag[level][hypre_ParCompGridInvSortMap(compGrid[level])[i]] > 0)
+         //          printf("  %d - %d\n", hypre_ParCompGridGlobalIndices(compGrid[level])[hypre_ParCompGridInvSortMap(compGrid[level])[i]], 
+         //             add_flag[level][hypre_ParCompGridInvSortMap(compGrid[level])[i]]);
+         //    }
+         // }
 
          // Expand by the padding on this level and add coarse grid counterparts if applicable
          for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
@@ -3089,6 +3217,16 @@ TestCompGrids1(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int tra
                }
             }
          }
+
+         // !!! Debug
+         // if (myid == 28 && current_level == 4 && level == 6)
+         // {
+         //    printf("add_flag[%d] (intermediate) = \n", level);
+         //    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++) 
+         //       printf("  %d - %d\n", hypre_ParCompGridGlobalIndices(compGrid[level])[hypre_ParCompGridInvSortMap(compGrid[level])[i]], 
+         //          add_flag[level][hypre_ParCompGridInvSortMap(compGrid[level])[i]]);
+         // }
+
 
          // Expand by the number of ghost layers 
          for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
@@ -3109,6 +3247,49 @@ TestCompGrids1(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int tra
       }
       else break;
 
+
+
+      // !!! Debug
+      // if (myid == 28 && current_level == 4 && level == 6)
+      // {
+      //    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
+      //    {
+      //       if (hypre_ParCompGridCoarseGlobalIndices(compGrid[level])[i] == 7)
+      //       {
+      //          printf("add flag at gid 7 is %d\n", add_flag[level][i]);
+      //          break;
+      //       }
+      //    }
+      // }
+
+      // // !!! Debug
+      // if (myid == 28 && current_level == 4 && level == 6)
+      // {
+      //    printf("add_flag[%d] = \n", level);
+      //    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++) 
+      //       printf("  %d - %d\n", hypre_ParCompGridGlobalIndices(compGrid[level])[hypre_ParCompGridInvSortMap(compGrid[level])[i]], 
+      //          add_flag[level][hypre_ParCompGridInvSortMap(compGrid[level])[i]]);
+      // }
+      // // !!! Debug
+      // if (myid == 28 && current_level == 4 && level == 6)
+      // {
+      //    printf("add_flag[%d] = \n", 7);
+      //    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[7]); i++) 
+      //       printf("  %d - %d\n", hypre_ParCompGridGlobalIndices(compGrid[7])[hypre_ParCompGridInvSortMap(compGrid[7])[i]], 
+      //          add_flag[7][hypre_ParCompGridInvSortMap(compGrid[7])[i]]);
+      // }
+      // // !!! Debug
+      // if (myid == 28 && current_level == 4 && level == 6)
+      // {
+      //    printf("add_flag[%d] = \n", 7);
+      //    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[7]); i++) 
+      //       printf("  local id %d - %d\n", i, 
+      //          add_flag[7][i]);
+      // }
+
+
+
+
       // Check whether add_flag has any zeros (zeros indicate that we have extra nodes in the comp grid that don't belong) 
       // !!! NOTE: disabling this check for now since I think processor agglomeration may put extra nodes in (and that is OK)
       for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
@@ -3125,11 +3306,19 @@ TestCompGrids1(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int tra
       {
          for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++) 
          {
+
+
+            // !!! Debug
+            // if (myid == 28 && hypre_ParCompGridGlobalIndices(compGrid[level])[i] == 5 && level == 7)
+            //    printf("TestCompGrids1: rank 28, level 7, GID 5, add_flag = %d\n", add_flag[level][i]);
+
+
+
             // !!! NOTE: disabling this check since I've redefined how real dofs are determined after agglomeration (can now be many more real dofs than expected via simple top down construction)
             if (add_flag[level][i] < num_ghost_layers + 1 && hypre_ParCompGridRealDofMarker(compGrid[level])[i] != 0) 
             {
                test_failed = 1;
-               hypre_printf("Error: dof that should have been marked as ghost was marked as real, rank %d, level %d\n", myid, level);
+               hypre_printf("Error: dof that should have been marked as ghost was marked as real, rank %d, level %d, GID %d\n", myid, level, hypre_ParCompGridGlobalIndices(compGrid[level])[i]);
             }
             if (add_flag[level][i] > num_ghost_layers && hypre_ParCompGridRealDofMarker(compGrid[level])[i] == 0) 
             {
