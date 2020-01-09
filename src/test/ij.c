@@ -6159,7 +6159,7 @@ main( hypre_int argc,
             mgr_cindexes[i][0] = 2;
          }
 
-         mgr_reserved_coarse_indexes = hypre_CTAlloc(HYPRE_Int, mgr_num_reserved_nodes, HYPRE_MEMORY_HOST);
+         mgr_reserved_coarse_indexes = hypre_CTAlloc(HYPRE_BigInt, mgr_num_reserved_nodes, HYPRE_MEMORY_HOST);
          for(i=0; i<mgr_num_reserved_nodes; i++)
          {
             /* Generate 'artificial' reserved nodes. Assumes these are ordered last in the system */
@@ -6497,7 +6497,7 @@ main( hypre_int argc,
       { /* assume coarse point is at index 0 */
          mgr_cindexes[i][0] = 0;
       }
-      mgr_reserved_coarse_indexes = hypre_CTAlloc(HYPRE_Int,  mgr_num_reserved_nodes, HYPRE_MEMORY_HOST);
+      mgr_reserved_coarse_indexes = hypre_CTAlloc(HYPRE_BigInt,  mgr_num_reserved_nodes, HYPRE_MEMORY_HOST);
       for(i=0; i<mgr_num_reserved_nodes; i++)
       { /* generate artificial reserved nodes */
          mgr_reserved_coarse_indexes[i] = last_local_row - (HYPRE_BigInt) i; //2*i+1;

@@ -1425,7 +1425,7 @@ HYPRE_Int hypre_BoomerAMGSetKeepTranspose ( void *data , HYPRE_Int keepTranspose
 #ifdef HYPRE_USING_DSUPERLU
 HYPRE_Int hypre_BoomerAMGSetDSLUThreshold ( void *data , HYPRE_Int slu_threshold );
 #endif
-HYPRE_Int hypre_BoomerAMGSetCPoints( void *data, HYPRE_Int cpt_coarse_level, HYPRE_Int  num_cpt_coarse, HYPRE_Int *cpt_coarse_index );
+HYPRE_Int hypre_BoomerAMGSetCPoints( void *data, HYPRE_Int cpt_coarse_level, HYPRE_Int  num_cpt_coarse, HYPRE_BigInt *cpt_coarse_index );
 HYPRE_Int hypre_BoomerAMGSetFPoints( void *data, HYPRE_Int isolated, HYPRE_Int num_points, HYPRE_BigInt *indices );
 
 /* par_amg_setup.c */
