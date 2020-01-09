@@ -1082,7 +1082,7 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *nod
       // if we are not on the coarsest level
       if (level != transition_level-1)
       {
-         if ( (nodes_added_on_level[level] || nodes_added_on_level[level+1]) && hypre_ParCompGridNumNodes(compGrid[level+1]) )
+         if ( nodes_added_on_level[level] || nodes_added_on_level[level+1] )
          {
             // loop over indices of non-owned nodes on this level 
             // !!! No guarantee that previous ghost dofs converted to real dofs have coarse local indices setup...
@@ -1094,12 +1094,14 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *nod
             {
                // fix up the coarse local indices
                global_index = hypre_ParCompGridCoarseGlobalIndices(compGrid[level])[i];
-               if (i < old_num_nodes) local_index = hypre_ParCompGridCoarseLocalIndices(compGrid[level])[i];
-               else local_index = -1;
+               HYPRE_Int is_real = hypre_ParCompGridRealDofMarker(compGrid[level])[i];
 
                // setup coarse local index if necessary
-               if (global_index >= 0)
+               if (global_index >= 0 && is_real)
                {
+                  if (i < old_num_nodes) local_index = hypre_ParCompGridCoarseLocalIndices(compGrid[level])[i];
+                  else local_index = -1;
+
                   if (local_index < 0)
                   {
                      hypre_ParCompGridCoarseLocalIndices(compGrid[level])[i] = hypre_ParCompGridLocalIndexBinarySearch(compGrid[level+1], global_index, 0, hypre_ParCompGridNumNodes(compGrid[level+1]), hypre_ParCompGridInvSortMap(compGrid[level+1]));
