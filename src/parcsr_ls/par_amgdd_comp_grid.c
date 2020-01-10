@@ -1082,17 +1082,6 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *nod
       // if we are not on the coarsest level
       if (level != transition_level-1)
       {
-
-
-
-         // !!! Debug
-         // if (myid == 28 && level == 6) printf("hypre_ParCompGridSetupLocalIndices rank 28 level 6 setting coarse \n");
-
-
-            // !!! Debug
-            // if (myid == 28 && level == 6) printf("setuplocal doing coarse\n");
-
-
          // loop over indices of non-owned nodes on this level 
          // !!! No guarantee that previous ghost dofs converted to real dofs have coarse local indices setup...
          // !!! Thus we go over all non-owned dofs here instead of just the added ones. Could probably be optimized.
@@ -1122,10 +1111,6 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *nod
                }
             }
             else hypre_ParCompGridCoarseLocalIndices(compGrid[level])[i] = -1;
-
-            // !!! Debug
-            // if (myid == 28 && level == 6 && global_index == 1) printf("   In setup local ind: gid 7, is_real = %d, lid set to %d\n", is_real, hypre_ParCompGridCoarseLocalIndices(compGrid[level])[i]);
-
          }
       }
    }
