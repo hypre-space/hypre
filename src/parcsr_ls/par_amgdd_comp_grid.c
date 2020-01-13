@@ -741,7 +741,7 @@ hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPk
       if (hypre_ParCompGridRRowPtr(compGrid[level])) new_R_rowPtr[num_nodes] = R_cnt;
 
       // Fix up P col indices on finer level
-      if (level != 0)
+      if (level != start_level)
       {
          if (hypre_ParCompGridPRowPtr(compGrid[level-1]))
          {
