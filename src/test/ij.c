@@ -1048,6 +1048,7 @@ main( hypre_int argc,
       {
          arg_index++;
          hypre_SetExecPolicy(HYPRE_EXEC_DEVICE);
+         rap2 = mod_rap2 = 1;
       }
       else if ( strcmp(argv[arg_index], "-no_cuda_um") == 0 )
       {
@@ -2122,8 +2123,8 @@ main( hypre_int argc,
       }
       /* The following shows how to build an IJMatrix if one has only an
          estimate for the row sizes */
-      row_nums = hypre_CTAlloc(HYPRE_BigInt,  num_rows, HYPRE_MEMORY_HOST);
-      num_cols = hypre_CTAlloc(HYPRE_Int,  num_rows, HYPRE_MEMORY_HOST);
+      row_nums = hypre_CTAlloc(HYPRE_BigInt,  num_rows, HYPRE_MEMORY_SHARED);
+      num_cols = hypre_CTAlloc(HYPRE_Int,  num_rows, HYPRE_MEMORY_SHARED);
       if (sparsity_known == 1)
       {
          diag_sizes = hypre_CTAlloc(HYPRE_Int,  local_num_rows, HYPRE_MEMORY_HOST);
@@ -2146,8 +2147,8 @@ main( hypre_int argc,
       if (build_matrix_type == 2) mx_size = 7;
       if (build_matrix_type == 3) mx_size = 9;
       if (build_matrix_type == 4) mx_size = 27;
-      col_nums = hypre_CTAlloc(HYPRE_BigInt,  mx_size*num_rows, HYPRE_MEMORY_HOST);
-      data = hypre_CTAlloc(HYPRE_Real,  mx_size*num_rows, HYPRE_MEMORY_HOST);
+      col_nums = hypre_CTAlloc(HYPRE_BigInt,  mx_size*num_rows, HYPRE_MEMORY_SHARED);
+      data = hypre_CTAlloc(HYPRE_Real,  mx_size*num_rows, HYPRE_MEMORY_SHARED);
       i_indx = 0;
       j_indx = 0;
       if (off_proc && myid)
@@ -2223,23 +2224,27 @@ main( hypre_int argc,
                                                   (const HYPRE_BigInt *) &col_nums[j_indx],
                                                   (const HYPRE_Real *) &data[j_indx] );
             else
+            {
                ierr += HYPRE_IJMatrixSetValues( ij_A, 1, &num_cols[i], &row_nums[i],
                                                 (const HYPRE_BigInt *) &col_nums[j_indx],
                                                 (const HYPRE_Real *) &data[j_indx] );
+            }
             j_indx += num_cols[i];
          }
       }
-      hypre_TFree(col_nums, HYPRE_MEMORY_HOST);
-      hypre_TFree(data, HYPRE_MEMORY_HOST);
-      hypre_TFree(row_nums, HYPRE_MEMORY_HOST);
-      hypre_TFree(num_cols, HYPRE_MEMORY_HOST);
+      hypre_TFree(col_nums, HYPRE_MEMORY_SHARED);
+      hypre_TFree(data, HYPRE_MEMORY_SHARED);
+      hypre_TFree(row_nums, HYPRE_MEMORY_SHARED);
+      hypre_TFree(num_cols, HYPRE_MEMORY_SHARED);
       if (sparsity_known == 1)
       {
          hypre_TFree(diag_sizes, HYPRE_MEMORY_HOST);
          hypre_TFree(offdiag_sizes, HYPRE_MEMORY_HOST);
       }
       else
+      {
          hypre_TFree(row_sizes, HYPRE_MEMORY_HOST);
+      }
 
       ierr += HYPRE_IJMatrixAssemble( ij_A );
 
@@ -2263,20 +2268,29 @@ main( hypre_int argc,
          to the diagonal to restore the original matrix*/
 
       if (check_constant)
+      {
          ierr += HYPRE_IJMatrixSetConstantValues( ij_A, -1.0 );
+      }
 
-      ncols    = hypre_CTAlloc(HYPRE_Int,  last_local_row - first_local_row + 1, HYPRE_MEMORY_HOST);
-      rows     = hypre_CTAlloc(HYPRE_BigInt,  last_local_row - first_local_row + 1, HYPRE_MEMORY_HOST);
-      col_inds = hypre_CTAlloc(HYPRE_BigInt,  last_local_row - first_local_row + 1, HYPRE_MEMORY_HOST);
-      values   = hypre_CTAlloc(HYPRE_Real,  last_local_row - first_local_row + 1, HYPRE_MEMORY_HOST);
+      ncols    = hypre_CTAlloc(HYPRE_Int,     last_local_row - first_local_row + 1, HYPRE_MEMORY_SHARED);
+      rows     = hypre_CTAlloc(HYPRE_BigInt,  last_local_row - first_local_row + 1, HYPRE_MEMORY_SHARED);
+      col_inds = hypre_CTAlloc(HYPRE_BigInt,  last_local_row - first_local_row + 1, HYPRE_MEMORY_SHARED);
+      values   = hypre_CTAlloc(HYPRE_Real,    last_local_row - first_local_row + 1, HYPRE_MEMORY_SHARED);
 
       val = 0.0;
 
-      if (check_constant) val = 7.0;
+      if (check_constant)
+      {
+         val = 7.0;
+      }
       if (dt < dt_inf)
+      {
          val += 1./dt;
+      }
       else
+      {
          val += 0.0;   /* Use zero to avoid unintentional loss of significance */
+      }
 
       for (big_i = first_local_row; big_i <= last_local_row; big_i++)
       {
@@ -2293,10 +2307,10 @@ main( hypre_int argc,
                                          (const HYPRE_BigInt *) col_inds,
                                          (const HYPRE_Real *) values );
 
-      hypre_TFree(values, HYPRE_MEMORY_HOST);
-      hypre_TFree(col_inds, HYPRE_MEMORY_HOST);
-      hypre_TFree(rows, HYPRE_MEMORY_HOST);
-      hypre_TFree(ncols, HYPRE_MEMORY_HOST);
+      hypre_TFree(values,   HYPRE_MEMORY_SHARED);
+      hypre_TFree(col_inds, HYPRE_MEMORY_SHARED);
+      hypre_TFree(rows,     HYPRE_MEMORY_SHARED);
+      hypre_TFree(ncols,    HYPRE_MEMORY_SHARED);
 
       /* If sparsity pattern is not changed since last IJMatrixAssemble call,
          this should be a no-op */
@@ -2306,12 +2320,10 @@ main( hypre_int argc,
       /*-----------------------------------------------------------
        * Fetch the resulting underlying matrix out
        *-----------------------------------------------------------*/
-      if (build_matrix_type > -1)
-         ierr += HYPRE_ParCSRMatrixDestroy(parcsr_A);
+      ierr += HYPRE_ParCSRMatrixDestroy(parcsr_A);
 
       ierr += HYPRE_IJMatrixGetObject( ij_A, &object);
       parcsr_A = (HYPRE_ParCSRMatrix) object;
-
    }
 
    /*-----------------------------------------------------------

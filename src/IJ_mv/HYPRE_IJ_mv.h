@@ -88,6 +88,8 @@ HYPRE_Int HYPRE_IJMatrixDestroy(HYPRE_IJMatrix matrix);
  **/
 HYPRE_Int HYPRE_IJMatrixInitialize(HYPRE_IJMatrix matrix);
 
+HYPRE_Int HYPRE_IJMatrixInitialize_v2(HYPRE_IJMatrix matrix, HYPRE_Int memory_location);
+
 /**
  * Sets values for {\tt nrows} rows or partial rows of the matrix.  
  * The arrays {\tt ncols}

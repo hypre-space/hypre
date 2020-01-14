@@ -35,14 +35,6 @@ struct l1_norm_op1 : public thrust::binary_function<HYPRE_Complex, HYPRE_Complex
    }
 };
 
-struct l1_norm_op2 : public thrust::unary_function<HYPRE_Complex, HYPRE_Complex>
-{
-   __host__ __device__
-   HYPRE_Complex operator()(const HYPRE_Complex &/*x*/) const
-   {
-      return 1.0;
-   }
-};
 #endif
 
 HYPRE_Int hypre_ParCSRRelax(/* matrix to relax with */
@@ -737,8 +729,7 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
       {
 #if defined(HYPRE_USING_CUDA)
          thrust::identity<HYPRE_Complex> identity;
-         HYPRE_THRUST_CALL( transform_if, l1_norm, l1_norm + num_rows, l1_norm, l1_norm_op2(),
-                            thrust::not1(identity) );
+         HYPRE_THRUST_CALL( replace_if, l1_norm, l1_norm + num_rows, thrust::not1(identity), 1.0 );
 #endif
       }
       else

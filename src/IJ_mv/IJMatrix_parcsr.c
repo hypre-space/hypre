@@ -147,6 +147,9 @@ hypre_IJMatrixSetRowSizesParCSR(hypre_IJMatrix  *matrix,
    HYPRE_BigInt *col_partitioning = hypre_IJMatrixColPartitioning(matrix);
    hypre_AuxParCSRMatrix *aux_matrix;
    MPI_Comm comm = hypre_IJMatrixComm(matrix);
+#if defined(HYPRE_USING_CUDA)
+   HYPRE_Int usr_on_proc_size = 0;
+#endif
 
    hypre_MPI_Comm_rank(comm,&my_id);
 #ifdef HYPRE_NO_GLOBAL_PARTITION
@@ -160,7 +163,7 @@ hypre_IJMatrixSetRowSizesParCSR(hypre_IJMatrix  *matrix,
    row_space = NULL;
    if (aux_matrix)
    {
-      row_space =  hypre_AuxParCSRMatrixRowSpace(aux_matrix);
+      row_space = hypre_AuxParCSRMatrixRowSpace(aux_matrix);
    }
    if (!row_space)
    {
@@ -169,14 +172,20 @@ hypre_IJMatrixSetRowSizesParCSR(hypre_IJMatrix  *matrix,
    for (i = 0; i < local_num_rows; i++)
    {
       row_space[i] = sizes[i];
+#if defined(HYPRE_USING_CUDA)
+      usr_on_proc_size += sizes[i];
+#endif
    }
    if (!aux_matrix)
    {
-      hypre_AuxParCSRMatrixCreate(&aux_matrix, local_num_rows,
-                                  local_num_cols, row_space);
+      hypre_AuxParCSRMatrixCreate(&aux_matrix, local_num_rows, local_num_cols, row_space);
       hypre_IJMatrixTranslator(matrix) = aux_matrix;
    }
    hypre_AuxParCSRMatrixRowSpace(aux_matrix) = row_space;
+
+#if defined(HYPRE_USING_CUDA)
+   hypre_AuxParCSRMatrixUsrOnProcSize(aux_matrix) = usr_on_proc_size;
+#endif
 
    return hypre_error_flag;
 }
@@ -223,8 +232,8 @@ hypre_IJMatrixSetDiagOffdSizesParCSR(hypre_IJMatrix  *matrix,
    }
    hypre_CSRMatrixI(diag) = diag_i;
    hypre_CSRMatrixNumNonzeros(diag) = diag_i[local_num_rows];
-   offd =  hypre_ParCSRMatrixOffd(par_matrix);
-   offd_i =  hypre_CSRMatrixI(offd);
+   offd = hypre_ParCSRMatrixOffd(par_matrix);
+   offd_i = hypre_CSRMatrixI(offd);
    if (!offd_i)
    {
       offd_i = hypre_CTAlloc(HYPRE_Int, local_num_rows+1, hypre_CSRMatrixMemoryLocation(offd));
@@ -310,8 +319,14 @@ hypre_IJMatrixInitializeParCSR_v2(hypre_IJMatrix *matrix, HYPRE_Int memory_locat
    }
    else if (hypre_GetActualMemLocation(memory_location) == HYPRE_MEMORY_SHARED)
    {
-      /* memory_location_aux = HYPRE_MEMORY_DEVICE; */
-      memory_location_aux = HYPRE_MEMORY_HOST;
+      if (hypre_GetExecPolicy1(HYPRE_MEMORY_SHARED) == HYPRE_EXEC_HOST)
+      {
+         memory_location_aux = HYPRE_MEMORY_HOST;
+      }
+      else
+      {
+         memory_location_aux = HYPRE_MEMORY_DEVICE;
+      }
    }
    else if (hypre_GetActualMemLocation(memory_location) == HYPRE_MEMORY_DEVICE)
    {
@@ -1079,40 +1094,48 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix       *matrix,
  *****************************************************************************/
 
 HYPRE_Int
-hypre_IJMatrixSetConstantValuesParCSR( hypre_IJMatrix       *matrix,
+hypre_IJMatrixSetConstantValuesParCSR( hypre_IJMatrix *matrix,
                                        HYPRE_Complex   value )
 {
-   hypre_ParCSRMatrix *par_matrix;
-   par_matrix = (hypre_ParCSRMatrix *) hypre_IJMatrixObject( matrix );
-
    if (hypre_IJMatrixAssembleFlag(matrix))  /* matrix already assembled*/
    {
-      hypre_CSRMatrix *diag, *offd;
-      HYPRE_Int *diag_i, *offd_i;
-      HYPRE_Complex *diag_data, *offd_data;
-      HYPRE_Int num_rows;
-      HYPRE_Int ii;
-      diag = hypre_ParCSRMatrixDiag(par_matrix);
-      offd = hypre_ParCSRMatrixOffd(par_matrix);
-      diag_i = hypre_CSRMatrixI(diag);
-      offd_i = hypre_CSRMatrixI(offd);
-      diag_data = hypre_CSRMatrixData(diag);
-      offd_data = hypre_CSRMatrixData(offd);
-      num_rows = hypre_CSRMatrixNumRows(diag);
+      hypre_ParCSRMatrix *par_matrix = (hypre_ParCSRMatrix *) hypre_IJMatrixObject( matrix );
+      hypre_CSRMatrix    *diag       = hypre_ParCSRMatrixDiag(par_matrix);
+      hypre_CSRMatrix    *offd       = hypre_ParCSRMatrixOffd(par_matrix);
+      HYPRE_Complex      *diag_data  = hypre_CSRMatrixData(diag);
+      HYPRE_Complex      *offd_data  = hypre_CSRMatrixData(offd);
+      HYPRE_Int           nnz_diag   = hypre_CSRMatrixNumNonzeros(diag);
+      HYPRE_Int           nnz_offd   = hypre_CSRMatrixNumNonzeros(offd);
+
+      HYPRE_Int exec = hypre_GetExecPolicy1( hypre_IJMatrixMemoryLocation(matrix) );
+      hypre_assert(exec != HYPRE_EXEC_UNSET);
+
+      if (exec == HYPRE_EXEC_HOST)
+      {
+         HYPRE_Int ii;
+
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(ii) HYPRE_SMP_SCHEDULE
 #endif
-      for (ii=0; ii < diag_i[num_rows]; ii++)
-      {
-         diag_data[ii] = value;
-      }
+         for (ii = 0; ii < nnz_diag; ii++)
+         {
+            diag_data[ii] = value;
+         }
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(ii) HYPRE_SMP_SCHEDULE
 #endif
-      for (ii=0; ii < offd_i[num_rows]; ii++)
-      {
-         offd_data[ii] = value;
+         for (ii = 0; ii < nnz_offd; ii++)
+         {
+            offd_data[ii] = value;
+         }
       }
+#if defined(HYPRE_USING_CUDA)
+      else
+      {
+         HYPRE_THRUST_CALL( fill_n, diag_data, nnz_diag, value );
+         HYPRE_THRUST_CALL( fill_n, offd_data, nnz_offd, value );
+      }
+#endif
    }
    else
    {

@@ -16,33 +16,6 @@
 
 #include "../HYPRE.h"
 
-__global__ void
-hypreCUDAKernel_IJMatrixValues_dev1(HYPRE_Int n, HYPRE_Int *rowind, HYPRE_Int *row_ptr, HYPRE_Int *row_len, HYPRE_Int *mark);
-
-template<typename T1, typename T2>
-struct hypre_IJMatrixAssembleFunctor : public thrust::binary_function< thrust::tuple<T1, T2>, thrust::tuple<T1, T2>, thrust::tuple<T1, T2> >
-{
-   typedef thrust::tuple<T1, T2> Tuple;
-
-   /* ---------------------------------
-    * |   *   | set y     | add y     |
-    * |-------+-----------+-----------|
-    * | set x | set x + y | set x     |
-    * |-------+-----------+-----------|
-    * | add x | set y     | add x + y |
-    * --------------------------------- */
-   __device__ Tuple operator()(const Tuple& x, const Tuple& y )
-   {
-      const char          tx = thrust::get<0>(x);
-      const char          ty = thrust::get<0>(y);
-      const HYPRE_Complex vx = thrust::get<1>(x);
-      const HYPRE_Complex vy = thrust::get<1>(y);
-      const char tz = tx == 0 && ty == 0 ? 0 : 1;
-      const HYPRE_Complex vz = tx == ty ? vx + vy : tx ? vx : vy;
-      return thrust::make_tuple(tz, vz);
-   }
-};
-
 /* The preferred interface for GPU */
 HYPRE_Int
 hypre_IJMatrixSetAddValuesParCSRDevice0( hypre_IJMatrix       *matrix,
@@ -182,6 +155,25 @@ hypre_IJMatrixSetAddValuesParCSRDevice0( hypre_IJMatrix       *matrix,
    return hypre_error_flag;
 }
 
+__global__ void
+hypreCUDAKernel_IJMatrixValues_dev1(HYPRE_Int n, HYPRE_Int *rowind, HYPRE_Int *row_ptr, HYPRE_Int *row_len, HYPRE_Int *mark)
+{
+   HYPRE_Int global_thread_id = hypre_cuda_get_grid_thread_id<1,1>();
+
+   if (global_thread_id < n)
+   {
+      HYPRE_Int row = rowind[global_thread_id];
+      if (global_thread_id < read_only_load(&row_ptr[row]) + read_only_load(&row_len[row]))
+      {
+         mark[global_thread_id] = 0;
+      }
+      else
+      {
+         mark[global_thread_id] = -1;
+      }
+   }
+}
+
 /* E.g. nrows = 3
  *      ncols = 2 3 4
  *      rows  = 10 20 30
@@ -283,43 +275,121 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
    return hypre_error_flag;
 }
 
+/*
 __global__ void
-hypreCUDAKernel_IJMatrixValues_dev1(HYPRE_Int n, HYPRE_Int *rowind, HYPRE_Int *row_ptr, HYPRE_Int *row_len, HYPRE_Int *mark)
+hypreCUDAKernel_IJMatrixAssembleSortAndReduce1(HYPRE_Int n, HYPRE_BigInt *I, HYPRE_BigInt *J, char *X, HYPRE_Complex *A)
 {
-   HYPRE_Int global_thread_id = hypre_cuda_get_grid_thread_id<1,1>();
-
-   if (global_thread_id < n)
+   HYPRE_Int t = hypre_cuda_get_grid_thread_id<1,1>();
+   if (t >= n)
    {
-      HYPRE_Int row = rowind[global_thread_id];
-      if (global_thread_id < read_only_load(&row_ptr[row]) + read_only_load(&row_len[row]))
+      return;
+   }
+   HYPRE_BigInt i = read_only_load(I+t);
+   HYPRE_BigInt j = read_only_load(J+t);
+   for (HYPRE_Int k=t+1; k < n && read_only_load(I+k) == i && read_only_load(J+k) == j; k++)
+   {
+      if (read_only_load(X+k) == 1)
       {
-         mark[global_thread_id] = 0;
-      }
-      else
-      {
-         mark[global_thread_id] = -1;
+         A[t] = 0.0;
+         break;
       }
    }
 }
+*/
+
+template<typename T1, typename T2>
+struct hypre_IJMatrixAssembleFunctor : public thrust::binary_function< thrust::tuple<T1, T2>, thrust::tuple<T1, T2>, thrust::tuple<T1, T2> >
+{
+   typedef thrust::tuple<T1, T2> Tuple;
+
+   __device__ Tuple operator()(const Tuple& x, const Tuple& y )
+   {
+      return thrust::make_tuple( hypre_max(thrust::get<0>(x), thrust::get<0>(y)), thrust::get<1>(x) + thrust::get<1>(y) );
+   }
+};
 
 /* helper routine used in hypre_IJMatrixAssembleParCSRDevice:
- * Sort and reduce (X0, A0) with key (I0, J0) and return results in (X1, A1) and (I1, J1)
- * T: HYPRE_Int or HYPRE_BigInt
+ * 1. sort (X0, A0) with key (I0, J0)
+ *    [put the diagonal first; see the comments in hypre_cuda_utils.c]
+ * 2. for each segment in (I0, J0), zero out in A0 all before the last `set'
+ * 3. reduce A0 [with sum] and reduce X0 [with max]
  * N0: input size; N1: size after reduction (<= N0)
  * Note: (I1, J1, X1, A1) are not resized to N1 but have size N0
- * Opt: sort comparison operator
- * 1:
- * 2: put the diagonal first; see the comments in hypre_cuda_utils.c */
-template <typename T>
+ */
 HYPRE_Int
-hypre_IJMatrixAssembleSortAndReduce(HYPRE_Int  N0, T  *I0, T  *J0, char  *X0, HYPRE_Complex  *A0,
-                                    HYPRE_Int *N1, T **I1, T **J1, char **X1, HYPRE_Complex **A1,
-                                    HYPRE_Int  opt)
+hypre_IJMatrixAssembleSortAndReduce1(HYPRE_Int  N0, HYPRE_BigInt  *I0, HYPRE_BigInt  *J0, char  *X0, HYPRE_Complex  *A0,
+                                     HYPRE_Int *N1, HYPRE_BigInt **I1, HYPRE_BigInt **J1, char **X1, HYPRE_Complex **A1 )
+{
+   hypreDevice_StableSortTupleByTupleKey(N0, I0, J0, X0, A0, 2);
+
+   HYPRE_BigInt  *I = hypre_TAlloc(HYPRE_BigInt,  N0, HYPRE_MEMORY_DEVICE);
+   HYPRE_BigInt  *J = hypre_TAlloc(HYPRE_BigInt,  N0, HYPRE_MEMORY_DEVICE);
+   char          *X = hypre_TAlloc(char,          N0, HYPRE_MEMORY_DEVICE);
+   HYPRE_Complex *A = hypre_TAlloc(HYPRE_Complex, N0, HYPRE_MEMORY_DEVICE);
+
+   /*
+   dim3 bDim = hypre_GetDefaultCUDABlockDimension();
+   dim3 gDim = hypre_GetDefaultCUDAGridDimension(N0, "thread", bDim);
+   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_IJMatrixAssembleSortAndReduce1, gDim, bDim, N0, I0, J0, X0, A0 );
+   */
+
+   /* output X: 1: keep, 0: zero-out */
+   HYPRE_THRUST_CALL(
+         exclusive_scan_by_key,
+         make_reverse_iterator(thrust::make_zip_iterator(thrust::make_tuple(I0+N0, J0+N0))),
+         make_reverse_iterator(thrust::make_zip_iterator(thrust::make_tuple(I0,    J0))),
+         make_reverse_iterator(thrust::device_pointer_cast<char>(X0)+N0),
+         make_reverse_iterator(thrust::device_pointer_cast<char>(X) +N0),
+         0,
+         thrust::equal_to< thrust::tuple<HYPRE_BigInt, HYPRE_BigInt> >(),
+         thrust::maximum<char>() );
+
+   HYPRE_THRUST_CALL(replace_if, A0, A0 + N0, X, thrust::identity<char>(), 0.0);
+
+   auto new_end = HYPRE_THRUST_CALL(
+         reduce_by_key,
+         thrust::make_zip_iterator(thrust::make_tuple(I0,      J0     )), /* keys_first */
+         thrust::make_zip_iterator(thrust::make_tuple(I0 + N0, J0 + N0)), /* keys_last */
+         thrust::make_zip_iterator(thrust::make_tuple(X0,      A0     )), /* values_first */
+         thrust::make_zip_iterator(thrust::make_tuple(I,       J      )), /* keys_output */
+         thrust::make_zip_iterator(thrust::make_tuple(X,       A      )), /* values_output */
+         thrust::equal_to< thrust::tuple<HYPRE_BigInt, HYPRE_BigInt> >(), /* binary_pred */
+         hypre_IJMatrixAssembleFunctor<char, HYPRE_Complex>()             /* binary_op */);
+
+   *N1 = thrust::get<0>(new_end.first.get_iterator_tuple()) - I;
+   *I1 = I;
+   *J1 = J;
+   *X1 = X;
+   *A1 = A;
+
+   return hypre_error_flag;
+}
+
+template<typename T1, typename T2>
+struct hypre_IJMatrixAssembleFunctor2 : public thrust::binary_function< thrust::tuple<T1, T2>, thrust::tuple<T1, T2>, thrust::tuple<T1, T2> >
+{
+   typedef thrust::tuple<T1, T2> Tuple;
+
+   __device__ Tuple operator()(const Tuple& x, const Tuple& y)
+   {
+      const char          tx = thrust::get<0>(x);
+      const char          ty = thrust::get<0>(y);
+      const HYPRE_Complex vx = thrust::get<1>(x);
+      const HYPRE_Complex vy = thrust::get<1>(y);
+      const HYPRE_Complex vz = tx == 0 && ty == 0 ? vx + vy : tx ? vx : vy;
+      return thrust::make_tuple(0, vz);
+   }
+};
+
+HYPRE_Int
+hypre_IJMatrixAssembleSortAndReduce2(HYPRE_Int  N0, HYPRE_Int  *I0, HYPRE_Int  *J0, char  *X0, HYPRE_Complex  *A0,
+                                     HYPRE_Int *N1, HYPRE_Int **I1, HYPRE_Int **J1,            HYPRE_Complex **A1,
+                                     HYPRE_Int  opt )
 {
    hypreDevice_StableSortTupleByTupleKey(N0, I0, J0, X0, A0, opt);
 
-   HYPRE_BigInt  *I = hypre_TAlloc(T,  N0, HYPRE_MEMORY_DEVICE);
-   HYPRE_BigInt  *J = hypre_TAlloc(T,  N0, HYPRE_MEMORY_DEVICE);
+   HYPRE_Int     *I = hypre_TAlloc(HYPRE_Int,     N0, HYPRE_MEMORY_DEVICE);
+   HYPRE_Int     *J = hypre_TAlloc(HYPRE_Int,     N0, HYPRE_MEMORY_DEVICE);
    char          *X = hypre_TAlloc(char,          N0, HYPRE_MEMORY_DEVICE);
    HYPRE_Complex *A = hypre_TAlloc(HYPRE_Complex, N0, HYPRE_MEMORY_DEVICE);
 
@@ -330,14 +400,15 @@ hypre_IJMatrixAssembleSortAndReduce(HYPRE_Int  N0, T  *I0, T  *J0, char  *X0, HY
          thrust::make_zip_iterator(thrust::make_tuple(X0,      A0     )), /* values_first */
          thrust::make_zip_iterator(thrust::make_tuple(I,       J      )), /* keys_output */
          thrust::make_zip_iterator(thrust::make_tuple(X,       A      )), /* values_output */
-         thrust::equal_to< thrust::tuple<T, T> >(),                       /* binary_pred */
-         hypre_IJMatrixAssembleFunctor<char, HYPRE_Complex>()             /* binary_op */);
+         thrust::equal_to< thrust::tuple<HYPRE_Int, HYPRE_Int> >(),       /* binary_pred */
+         hypre_IJMatrixAssembleFunctor2<char, HYPRE_Complex>()            /* binary_op */);
 
    *N1 = thrust::get<0>(new_end.first.get_iterator_tuple()) - I;
    *I1 = I;
    *J1 = J;
-   *X1 = X;
    *A1 = A;
+
+   hypre_TFree(X, HYPRE_MEMORY_DEVICE);
 
    return hypre_error_flag;
 }
@@ -400,8 +471,8 @@ hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix)
       char          *new_SorA;
 
       /* sort and reduce */
-      hypre_IJMatrixAssembleSortAndReduce(nelms_on, on_proc_i, on_proc_j, on_proc_SorA, on_proc_data,
-                                          &new_nnz, &new_i, &new_j, &new_SorA, &new_data, 2);
+      hypre_IJMatrixAssembleSortAndReduce1(nelms_on, on_proc_i, on_proc_j, on_proc_SorA, on_proc_data,
+                                           &new_nnz, &new_i, &new_j, &new_SorA, &new_data);
 
       /* adjust row indices from global to local */
       HYPRE_Int *new_i_local = hypre_TAlloc(HYPRE_Int, new_nnz, HYPRE_MEMORY_DEVICE);
@@ -475,8 +546,8 @@ hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix)
          hypre_TFree(diag_a_new,    HYPRE_MEMORY_DEVICE);
 
          HYPRE_Int nnz_new;
-         hypre_IJMatrixAssembleSortAndReduce(diag_nnz_existed + diag_nnz_new, tmp_i, tmp_j, tmp_x, tmp_a,
-                                             &nnz_new, &diag_i_new, &diag_j_new, &diag_SorA_new, &diag_a_new, 2);
+         hypre_IJMatrixAssembleSortAndReduce2(diag_nnz_existed + diag_nnz_new, tmp_i, tmp_j, tmp_x, tmp_a,
+                                              &nnz_new, &diag_i_new, &diag_j_new, &diag_a_new, 2);
 
          hypre_TFree(tmp_i, HYPRE_MEMORY_DEVICE);
          hypre_TFree(tmp_j, HYPRE_MEMORY_DEVICE);
@@ -487,7 +558,6 @@ hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix)
                                         nnz_new, HYPRE_MEMORY_DEVICE);
          diag_a_new = hypre_TReAlloc_v2(diag_a_new, HYPRE_Complex, diag_nnz_existed + diag_nnz_new, HYPRE_Complex,
                                         nnz_new, HYPRE_MEMORY_DEVICE);
-         hypre_TFree(diag_SorA_new, HYPRE_MEMORY_DEVICE);
          diag_nnz_new = nnz_new;
       }
 
@@ -523,8 +593,8 @@ hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix)
          hypre_TFree(offd_a_new,    HYPRE_MEMORY_DEVICE);
 
          HYPRE_Int nnz_new;
-         hypre_IJMatrixAssembleSortAndReduce(offd_nnz_existed + offd_nnz_new, tmp_i, tmp_j, tmp_x, tmp_a,
-                                             &nnz_new, &offd_i_new, &offd_j_new, &offd_SorA_new, &offd_a_new, 0);
+         hypre_IJMatrixAssembleSortAndReduce2(offd_nnz_existed + offd_nnz_new, tmp_i, tmp_j, tmp_x, tmp_a,
+                                              &nnz_new, &offd_i_new, &offd_j_new, &offd_a_new, 0);
 
          hypre_TFree(tmp_i, HYPRE_MEMORY_DEVICE);
          hypre_TFree(tmp_j, HYPRE_MEMORY_DEVICE);
@@ -535,7 +605,6 @@ hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix)
                                         nnz_new, HYPRE_MEMORY_DEVICE);
          offd_a_new = hypre_TReAlloc_v2(offd_a_new, HYPRE_Complex, offd_nnz_existed + offd_nnz_new, HYPRE_Complex,
                                         nnz_new, HYPRE_MEMORY_DEVICE);
-         hypre_TFree(offd_SorA_new, HYPRE_MEMORY_DEVICE);
          offd_nnz_new = nnz_new;
       }
 
