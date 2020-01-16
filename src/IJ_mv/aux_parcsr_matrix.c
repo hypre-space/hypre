@@ -41,22 +41,27 @@ hypre_AuxParCSRMatrixCreate( hypre_AuxParCSRMatrix **aux_matrix,
    hypre_AuxParCSRMatrixAuxData(matrix) = NULL;
    hypre_AuxParCSRMatrixIndxDiag(matrix) = NULL;
    hypre_AuxParCSRMatrixIndxOffd(matrix) = NULL;
+   hypre_AuxParCSRMatrixDiagSizes(matrix) = NULL;
+   hypre_AuxParCSRMatrixOffdSizes(matrix) = NULL;
    hypre_AuxParCSRMatrixMemoryLocation(matrix) = HYPRE_MEMORY_HOST;
+   
    /* stash for setting or adding off processor values */
    hypre_AuxParCSRMatrixMaxOffProcElmts(matrix) = 0;
    hypre_AuxParCSRMatrixCurrentOffProcElmts(matrix) = 0;
    hypre_AuxParCSRMatrixOffProcI(matrix) = NULL;
    hypre_AuxParCSRMatrixOffProcJ(matrix) = NULL;
    hypre_AuxParCSRMatrixOffProcData(matrix) = NULL;
+   hypre_AuxParCSRMatrixOffProcSorA(matrix) = NULL;
 
    hypre_AuxParCSRMatrixMaxOnProcElmts(matrix) = 0;
    hypre_AuxParCSRMatrixCurrentOnProcElmts(matrix) = 0;
    hypre_AuxParCSRMatrixOnProcI(matrix) = NULL;
    hypre_AuxParCSRMatrixOnProcJ(matrix) = NULL;
    hypre_AuxParCSRMatrixOnProcData(matrix) = NULL;
+   hypre_AuxParCSRMatrixOnProcSorA(matrix) = NULL;
 
-   hypre_AuxParCSRMatrixUsrOnProcSize(matrix) = -1;
-   hypre_AuxParCSRMatrixUsrOffProcSize(matrix) = -1;
+   hypre_AuxParCSRMatrixUsrOnProcElmts(matrix) = -1;
+   hypre_AuxParCSRMatrixUsrOffProcElmts(matrix) = -1;
    hypre_AuxParCSRMatrixInitAllocFactor(matrix) = 5.0;
    hypre_AuxParCSRMatrixGrowFactor(matrix) = 2.0;
 
@@ -103,6 +108,9 @@ hypre_AuxParCSRMatrixDestroy( hypre_AuxParCSRMatrix *matrix )
       hypre_TFree(hypre_AuxParCSRMatrixIndxDiag(matrix), HYPRE_MEMORY_HOST);
       hypre_TFree(hypre_AuxParCSRMatrixIndxOffd(matrix), HYPRE_MEMORY_HOST);
 
+      hypre_TFree(hypre_AuxParCSRMatrixDiagSizes(matrix), HYPRE_MEMORY_HOST);
+      hypre_TFree(hypre_AuxParCSRMatrixOffdSizes(matrix), HYPRE_MEMORY_HOST);
+
       hypre_TFree(hypre_AuxParCSRMatrixOffProcI(matrix),    memory_location);
       hypre_TFree(hypre_AuxParCSRMatrixOffProcJ(matrix),    memory_location);
       hypre_TFree(hypre_AuxParCSRMatrixOffProcData(matrix), memory_location);
@@ -118,7 +126,7 @@ hypre_AuxParCSRMatrixDestroy( hypre_AuxParCSRMatrix *matrix )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_AuxParCSRMatrixInitialize
+ * hypre_AuxParCSRMatrixInitialize_v2
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 hypre_AuxParCSRMatrixInitialize_v2( hypre_AuxParCSRMatrix *matrix, HYPRE_Int memory_location )
@@ -142,7 +150,9 @@ hypre_AuxParCSRMatrixInitialize_v2( hypre_AuxParCSRMatrix *matrix, HYPRE_Int mem
 
    if ( hypre_GetActualMemLocation(memory_location) != HYPRE_MEMORY_HOST )
    {
-      /* GPU assembly: do nothing! */
+      /* GPU assembly */
+      hypre_AuxParCSRMatrixMaxOffProcElmts(matrix) = 0;
+      hypre_AuxParCSRMatrixNeedAux(matrix) = 1;
    }
    else
    {

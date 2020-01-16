@@ -140,27 +140,20 @@ HYPRE_Int
 hypre_IJMatrixSetRowSizesParCSR(hypre_IJMatrix  *matrix,
                                 const HYPRE_Int *sizes)
 {
-   HYPRE_Int local_num_rows, local_num_cols;
-   HYPRE_Int i, my_id;
-   HYPRE_Int *row_space;
+   HYPRE_Int local_num_rows, local_num_cols, i, *row_space = NULL;
    HYPRE_BigInt *row_partitioning = hypre_IJMatrixRowPartitioning(matrix);
    HYPRE_BigInt *col_partitioning = hypre_IJMatrixColPartitioning(matrix);
-   hypre_AuxParCSRMatrix *aux_matrix;
-   MPI_Comm comm = hypre_IJMatrixComm(matrix);
-#if defined(HYPRE_USING_CUDA)
-   HYPRE_Int usr_on_proc_size = 0;
-#endif
-
-   hypre_MPI_Comm_rank(comm,&my_id);
 #ifdef HYPRE_NO_GLOBAL_PARTITION
    local_num_rows = (HYPRE_Int)(row_partitioning[1]-row_partitioning[0]);
    local_num_cols = (HYPRE_Int)(col_partitioning[1]-col_partitioning[0]);
 #else
+   HYPRE_Int my_id;
+   hypre_MPI_Comm_rank(hypre_IJMatrixComm(matrix), &my_id);
    local_num_rows = (HYPRE_Int)(row_partitioning[my_id+1]-row_partitioning[my_id]);
    local_num_cols = (HYPRE_Int)(col_partitioning[my_id+1]-col_partitioning[my_id]);
 #endif
-   aux_matrix = (hypre_AuxParCSRMatrix *) hypre_IJMatrixTranslator(matrix);
-   row_space = NULL;
+   hypre_AuxParCSRMatrix *aux_matrix = (hypre_AuxParCSRMatrix *) hypre_IJMatrixTranslator(matrix);
+
    if (aux_matrix)
    {
       row_space = hypre_AuxParCSRMatrixRowSpace(aux_matrix);
@@ -172,9 +165,6 @@ hypre_IJMatrixSetRowSizesParCSR(hypre_IJMatrix  *matrix,
    for (i = 0; i < local_num_rows; i++)
    {
       row_space[i] = sizes[i];
-#if defined(HYPRE_USING_CUDA)
-      usr_on_proc_size += sizes[i];
-#endif
    }
    if (!aux_matrix)
    {
@@ -182,10 +172,6 @@ hypre_IJMatrixSetRowSizesParCSR(hypre_IJMatrix  *matrix,
       hypre_IJMatrixTranslator(matrix) = aux_matrix;
    }
    hypre_AuxParCSRMatrixRowSpace(aux_matrix) = row_space;
-
-#if defined(HYPRE_USING_CUDA)
-   hypre_AuxParCSRMatrixUsrOnProcSize(aux_matrix) = usr_on_proc_size;
-#endif
 
    return hypre_error_flag;
 }
@@ -202,55 +188,82 @@ hypre_IJMatrixSetRowSizesParCSR(hypre_IJMatrix  *matrix,
 HYPRE_Int
 hypre_IJMatrixSetDiagOffdSizesParCSR(hypre_IJMatrix  *matrix,
                                      const HYPRE_Int *diag_sizes,
-                                     const HYPRE_Int *offdiag_sizes)
+                                     const HYPRE_Int *offd_sizes)
 {
-   HYPRE_Int local_num_rows;
-   HYPRE_Int i;
-   hypre_ParCSRMatrix *par_matrix = (hypre_ParCSRMatrix *)hypre_IJMatrixObject(matrix);
+   HYPRE_Int local_num_rows, local_num_cols;
+   HYPRE_BigInt *row_partitioning = hypre_IJMatrixRowPartitioning(matrix);
+   HYPRE_BigInt *col_partitioning = hypre_IJMatrixColPartitioning(matrix);
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   local_num_rows = (HYPRE_Int)(row_partitioning[1]-row_partitioning[0]);
+   local_num_cols = (HYPRE_Int)(col_partitioning[1]-col_partitioning[0]);
+#else
+   HYPRE_Int my_id;
+   hypre_MPI_Comm_rank(hypre_IJMatrixComm(matrix), &my_id);
+   local_num_rows = (HYPRE_Int)(row_partitioning[my_id+1]-row_partitioning[my_id]);
+   local_num_cols = (HYPRE_Int)(col_partitioning[my_id+1]-col_partitioning[my_id]);
+#endif
    hypre_AuxParCSRMatrix *aux_matrix = (hypre_AuxParCSRMatrix *)hypre_IJMatrixTranslator(matrix);
-   hypre_CSRMatrix *diag;
-   hypre_CSRMatrix *offd;
-   HYPRE_Int *diag_i;
-   HYPRE_Int *offd_i;
 
-   if (!par_matrix)
-   {
-      hypre_IJMatrixCreateParCSR(matrix);
-      par_matrix = (hypre_ParCSRMatrix *)hypre_IJMatrixObject(matrix);
-   }
-
-   diag = hypre_ParCSRMatrixDiag(par_matrix);
-   diag_i = hypre_CSRMatrixI(diag);
-   local_num_rows = hypre_CSRMatrixNumRows(diag);
-   if (!diag_i)
-   {
-      diag_i = hypre_CTAlloc(HYPRE_Int, local_num_rows+1, hypre_CSRMatrixMemoryLocation(diag));
-   }
-   for (i = 0; i < local_num_rows; i++)
-   {
-      diag_i[i+1] = diag_i[i] + diag_sizes[i];
-   }
-   hypre_CSRMatrixI(diag) = diag_i;
-   hypre_CSRMatrixNumNonzeros(diag) = diag_i[local_num_rows];
-   offd = hypre_ParCSRMatrixOffd(par_matrix);
-   offd_i = hypre_CSRMatrixI(offd);
-   if (!offd_i)
-   {
-      offd_i = hypre_CTAlloc(HYPRE_Int, local_num_rows+1, hypre_CSRMatrixMemoryLocation(offd));
-   }
-   for (i = 0; i < local_num_rows; i++)
-   {
-      offd_i[i+1] = offd_i[i] + offdiag_sizes[i];
-   }
-   hypre_CSRMatrixI(offd) = offd_i;
-   hypre_CSRMatrixNumNonzeros(offd) = offd_i[local_num_rows];
    if (!aux_matrix)
    {
-      hypre_AuxParCSRMatrixCreate(&aux_matrix, local_num_rows,
-                                  hypre_CSRMatrixNumCols(diag), NULL);
+      hypre_AuxParCSRMatrixCreate(&aux_matrix, local_num_rows, local_num_cols, NULL);
       hypre_IJMatrixTranslator(matrix) = aux_matrix;
    }
+
+   if ( hypre_AuxParCSRMatrixDiagSizes(aux_matrix) == NULL)
+   {
+      hypre_AuxParCSRMatrixDiagSizes(aux_matrix) = hypre_TAlloc(HYPRE_Int, local_num_rows, HYPRE_MEMORY_HOST);
+   }
+
+   if ( hypre_AuxParCSRMatrixOffdSizes(aux_matrix) == NULL)
+   {
+      hypre_AuxParCSRMatrixOffdSizes(aux_matrix) = hypre_TAlloc(HYPRE_Int, local_num_rows, HYPRE_MEMORY_HOST);
+   }
+
+   hypre_TMemcpy(hypre_AuxParCSRMatrixDiagSizes(aux_matrix), diag_sizes, HYPRE_Int, local_num_rows,
+                 HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+
+   hypre_TMemcpy(hypre_AuxParCSRMatrixOffdSizes(aux_matrix), offd_sizes, HYPRE_Int, local_num_rows,
+                 HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+
    hypre_AuxParCSRMatrixNeedAux(aux_matrix) = 0;
+
+   return hypre_error_flag;
+}
+
+/******************************************************************************
+ *
+ * hypre_IJMatrixSetMaxOnProcElmtsParCSR
+ *
+ *****************************************************************************/
+
+HYPRE_Int
+hypre_IJMatrixSetMaxOnProcElmtsParCSR(hypre_IJMatrix *matrix,
+                                      HYPRE_Int       max_on_proc_elmts)
+{
+#if defined(HYPRE_USING_CUDA)
+   hypre_AuxParCSRMatrix *aux_matrix;
+   HYPRE_Int local_num_rows, local_num_cols, my_id;
+   HYPRE_BigInt *row_partitioning = hypre_IJMatrixRowPartitioning(matrix);
+   HYPRE_BigInt *col_partitioning = hypre_IJMatrixColPartitioning(matrix);
+   MPI_Comm comm = hypre_IJMatrixComm(matrix);
+
+   hypre_MPI_Comm_rank(comm,&my_id);
+   aux_matrix = (hypre_AuxParCSRMatrix *) hypre_IJMatrixTranslator(matrix);
+   if (!aux_matrix)
+   {
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+      local_num_rows = (HYPRE_Int)(row_partitioning[1]-row_partitioning[0]);
+      local_num_cols = (HYPRE_Int)(col_partitioning[1]-col_partitioning[0]);
+#else
+      local_num_rows = (HYPRE_Int)(row_partitioning[my_id+1]-row_partitioning[my_id]);
+      local_num_cols = (HYPRE_Int)(col_partitioning[my_id+1]-col_partitioning[my_id]);
+#endif
+      hypre_AuxParCSRMatrixCreate(&aux_matrix, local_num_rows, local_num_cols, NULL);
+      hypre_IJMatrixTranslator(matrix) = aux_matrix;
+   }
+   hypre_AuxParCSRMatrixUsrOnProcElmts(aux_matrix) = max_on_proc_elmts;
+#endif
 
    return hypre_error_flag;
 }
@@ -287,6 +300,10 @@ hypre_IJMatrixSetMaxOffProcElmtsParCSR(hypre_IJMatrix *matrix,
       hypre_IJMatrixTranslator(matrix) = aux_matrix;
    }
    hypre_AuxParCSRMatrixMaxOffProcElmts(aux_matrix) = max_off_proc_elmts;
+
+#if defined(HYPRE_USING_CUDA)
+   hypre_AuxParCSRMatrixUsrOffProcElmts(aux_matrix) = max_off_proc_elmts;
+#endif
 
    return hypre_error_flag;
 }
@@ -340,7 +357,9 @@ hypre_IJMatrixInitializeParCSR_v2(hypre_IJMatrix *matrix, HYPRE_Int memory_locat
          hypre_IJMatrixCreateParCSR(matrix);
          par_matrix = (hypre_ParCSRMatrix *) hypre_IJMatrixObject(matrix);
       }
+
       local_num_rows = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(par_matrix));
+
       if (!aux_matrix)
       {
          hypre_AuxParCSRMatrixCreate(&aux_matrix, local_num_rows,
@@ -353,11 +372,30 @@ hypre_IJMatrixInitializeParCSR_v2(hypre_IJMatrix *matrix, HYPRE_Int memory_locat
 
       if (!hypre_AuxParCSRMatrixNeedAux(aux_matrix))
       {
-         HYPRE_Int i, *indx_diag, *indx_offd, *diag_i, *offd_i;
-         diag_i = hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(par_matrix));
-         offd_i = hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(par_matrix));
+         HYPRE_Int i, *indx_diag, *indx_offd, *diag_i, *offd_i, *diag_sizes, *offd_sizes;
+         hypre_CSRMatrix *diag = hypre_ParCSRMatrixDiag(par_matrix);
+         hypre_CSRMatrix *offd = hypre_ParCSRMatrixOffd(par_matrix);
+         diag_i = hypre_CSRMatrixI(diag);
+         offd_i = hypre_CSRMatrixI(offd);
+         diag_sizes = hypre_AuxParCSRMatrixDiagSizes(aux_matrix);
+         offd_sizes = hypre_AuxParCSRMatrixOffdSizes(aux_matrix);
          indx_diag = hypre_AuxParCSRMatrixIndxDiag(aux_matrix);
          indx_offd = hypre_AuxParCSRMatrixIndxOffd(aux_matrix);
+
+         for (i = 0; i < local_num_rows; i++)
+         {
+            diag_i[i+1] = diag_i[i] + diag_sizes[i];
+         }
+         hypre_CSRMatrixNumNonzeros(diag) = diag_i[local_num_rows];
+         hypre_CSRMatrixInitialize(diag);
+
+         for (i = 0; i < local_num_rows; i++)
+         {
+            offd_i[i+1] = offd_i[i] + offd_sizes[i];
+         }
+         hypre_CSRMatrixNumNonzeros(offd) = offd_i[local_num_rows];
+         hypre_CSRMatrixInitialize(offd);
+
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
@@ -368,9 +406,11 @@ hypre_IJMatrixInitializeParCSR_v2(hypre_IJMatrix *matrix, HYPRE_Int memory_locat
          }
       }
    }
-   else /* AB 4/06 - the assemble routine destroys the aux matrix - so we need
-           to recreate if initialize is called again*/
+   else if ( hypre_GetActualMemLocation(memory_location_aux) == HYPRE_MEMORY_HOST )
    {
+      /* AB 4/06 - the assemble routine destroys the aux matrix - so we need
+         to recreate if initialize is called again
+      */
       if (!aux_matrix)
       {
          local_num_rows = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(par_matrix));
@@ -379,7 +419,6 @@ hypre_IJMatrixInitializeParCSR_v2(hypre_IJMatrix *matrix, HYPRE_Int memory_locat
          hypre_AuxParCSRMatrixNeedAux(aux_matrix) = 0;
          hypre_IJMatrixTranslator(matrix) = aux_matrix;
       }
-
    }
 
    return hypre_error_flag;

@@ -51,6 +51,10 @@ typedef struct
                                                elements in i-th row */
    HYPRE_Int      *row_space;               /* row_space_diag[i] contains space allocated to
                                                i-th row */
+
+   HYPRE_Int      *diag_sizes;              /* user input row lengths of diag */
+   HYPRE_Int      *offd_sizes;              /* user input row lengths of diag */
+
    HYPRE_BigInt  **aux_j;                   /* contains collected column indices */
    HYPRE_Complex **aux_data;                /* contains collected data */
 
@@ -86,8 +90,8 @@ typedef struct
    HYPRE_Complex  *on_proc_data;            /*                                                        [GPU] */
    char           *on_proc_SorA;            /* Set (1) or Add (0)                                     [GPU] */
 
-   HYPRE_Int       usr_on_proc_size;        /* the num of on-proc elements usr guided                 [GPU] */
-   HYPRE_Int       usr_off_proc_size;       /* the num of off-proc elements usr guided                [GPU] */
+   HYPRE_Int       usr_on_proc_elmts;       /* the num of on-proc elements usr guided                 [GPU] */
+   HYPRE_Int       usr_off_proc_elmts;      /* the num of off-proc elements usr guided                [GPU] */
    HYPRE_Real      init_alloc_factor;       /*                                                        [GPU] */
    HYPRE_Real      grow_factor;             /*                                                        [GPU] */
 #endif
@@ -97,17 +101,20 @@ typedef struct
  * Accessor functions for the Parallel CSR Matrix structure
  *--------------------------------------------------------------------------*/
 
-#define hypre_AuxParCSRMatrixLocalNumRows(matrix)  ((matrix) -> local_num_rows)
-#define hypre_AuxParCSRMatrixLocalNumCols(matrix)  ((matrix) -> local_num_cols)
+#define hypre_AuxParCSRMatrixLocalNumRows(matrix)         ((matrix) -> local_num_rows)
+#define hypre_AuxParCSRMatrixLocalNumCols(matrix)         ((matrix) -> local_num_cols)
 
-#define hypre_AuxParCSRMatrixNeedAux(matrix)   ((matrix) -> need_aux)
-#define hypre_AuxParCSRMatrixRowLength(matrix) ((matrix) -> row_length)
-#define hypre_AuxParCSRMatrixRowSpace(matrix)  ((matrix) -> row_space)
-#define hypre_AuxParCSRMatrixAuxJ(matrix)      ((matrix) -> aux_j)
-#define hypre_AuxParCSRMatrixAuxData(matrix)   ((matrix) -> aux_data)
+#define hypre_AuxParCSRMatrixNeedAux(matrix)              ((matrix) -> need_aux)
+#define hypre_AuxParCSRMatrixRowLength(matrix)            ((matrix) -> row_length)
+#define hypre_AuxParCSRMatrixRowSpace(matrix)             ((matrix) -> row_space)
+#define hypre_AuxParCSRMatrixAuxJ(matrix)                 ((matrix) -> aux_j)
+#define hypre_AuxParCSRMatrixAuxData(matrix)              ((matrix) -> aux_data)
 
-#define hypre_AuxParCSRMatrixIndxDiag(matrix)  ((matrix) -> indx_diag)
-#define hypre_AuxParCSRMatrixIndxOffd(matrix)  ((matrix) -> indx_offd)
+#define hypre_AuxParCSRMatrixIndxDiag(matrix)             ((matrix) -> indx_diag)
+#define hypre_AuxParCSRMatrixIndxOffd(matrix)             ((matrix) -> indx_offd)
+
+#define hypre_AuxParCSRMatrixDiagSizes(matrix)            ((matrix) -> diag_sizes)
+#define hypre_AuxParCSRMatrixOffdSizes(matrix)            ((matrix) -> offd_sizes)
 
 #define hypre_AuxParCSRMatrixMemoryLocation(matrix)       ((matrix) -> memory_location)
 
@@ -126,8 +133,8 @@ typedef struct
 #define hypre_AuxParCSRMatrixOnProcData(matrix)           ((matrix) -> on_proc_data)
 #define hypre_AuxParCSRMatrixOnProcSorA(matrix)           ((matrix) -> on_proc_SorA)
 
-#define hypre_AuxParCSRMatrixUsrOnProcSize(matrix)        ((matrix) -> usr_on_proc_size)
-#define hypre_AuxParCSRMatrixUsrOffProcSize(matrix)       ((matrix) -> usr_off_proc_size)
+#define hypre_AuxParCSRMatrixUsrOnProcElmts(matrix)       ((matrix) -> usr_on_proc_elmts)
+#define hypre_AuxParCSRMatrixUsrOffProcElmts(matrix)      ((matrix) -> usr_off_proc_elmts)
 #define hypre_AuxParCSRMatrixInitAllocFactor(matrix)      ((matrix) -> init_alloc_factor)
 #define hypre_AuxParCSRMatrixGrowFactor(matrix)           ((matrix) -> grow_factor)
 

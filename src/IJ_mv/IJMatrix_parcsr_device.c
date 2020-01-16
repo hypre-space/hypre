@@ -53,10 +53,11 @@ hypre_IJMatrixSetAddValuesParCSRDevice0( hypre_IJMatrix       *matrix,
    if (!aux_matrix)
    {
       hypre_AuxParCSRMatrixCreate(&aux_matrix, nrows, ncols, NULL);
+      hypre_AuxParCSRMatrixInitialize_v2(aux_matrix, HYPRE_MEMORY_DEVICE);
       hypre_IJMatrixTranslator(matrix) = aux_matrix;
    }
 
-   hypre_AuxParCSRMatrixMemoryLocation(aux_matrix) = HYPRE_MEMORY_DEVICE;
+   /* hypre_AuxParCSRMatrixMemoryLocation(aux_matrix) = HYPRE_MEMORY_DEVICE; */
 
    /* on proc */
    if (nelms_on)
@@ -64,8 +65,8 @@ hypre_IJMatrixSetAddValuesParCSRDevice0( hypre_IJMatrix       *matrix,
       if ( hypre_AuxParCSRMatrixMaxOnProcElmts(aux_matrix) < hypre_AuxParCSRMatrixCurrentOnProcElmts(aux_matrix) + nelms_on )
       {
          HYPRE_Int size, size0;
-         size0 = hypre_AuxParCSRMatrixUsrOnProcSize(aux_matrix) >= 0 ? hypre_AuxParCSRMatrixUsrOnProcSize(aux_matrix) :
-                                                                       hypre_AuxParCSRMatrixInitAllocFactor(aux_matrix) * nrows;
+         size0 = hypre_AuxParCSRMatrixUsrOnProcElmts(aux_matrix) >= 0 ? hypre_AuxParCSRMatrixUsrOnProcElmts(aux_matrix) :
+                                                                        hypre_AuxParCSRMatrixInitAllocFactor(aux_matrix) * nrows;
          size = hypre_max( hypre_AuxParCSRMatrixCurrentOnProcElmts(aux_matrix) + nelms_on, size0);
          size = hypre_max( hypre_AuxParCSRMatrixMaxOnProcElmts(aux_matrix) * hypre_AuxParCSRMatrixGrowFactor(aux_matrix), size );
 
@@ -111,8 +112,8 @@ hypre_IJMatrixSetAddValuesParCSRDevice0( hypre_IJMatrix       *matrix,
       if ( hypre_AuxParCSRMatrixMaxOffProcElmts(aux_matrix) < hypre_AuxParCSRMatrixCurrentOffProcElmts(aux_matrix) + nelms_off )
       {
          HYPRE_Int size, size0;
-         size0 = hypre_AuxParCSRMatrixUsrOffProcSize(aux_matrix) >= 0 ? hypre_AuxParCSRMatrixUsrOffProcSize(aux_matrix) :
-                                                                        hypre_AuxParCSRMatrixInitAllocFactor(aux_matrix) * nrows;
+         size0 = hypre_AuxParCSRMatrixUsrOffProcElmts(aux_matrix) >= 0 ? hypre_AuxParCSRMatrixUsrOffProcElmts(aux_matrix) :
+                                                                         hypre_AuxParCSRMatrixInitAllocFactor(aux_matrix) * nrows;
          size = hypre_max( hypre_AuxParCSRMatrixCurrentOffProcElmts(aux_matrix) + nelms_off, size0 );
          size = hypre_max( hypre_AuxParCSRMatrixMaxOffProcElmts(aux_matrix) * hypre_AuxParCSRMatrixGrowFactor(aux_matrix), size );
 
