@@ -22,6 +22,8 @@ typedef struct hypre_ParILUData_struct
    /* Data slots for cusparse-based ilu0 */
    cusparseMatDescr_t      matL_des;//lower tri with ones on diagonal
    cusparseMatDescr_t      matU_des;//upper tri
+   csrsv2Info_t            matAL_info;//ILU info for L of A block (used in A-smoothing)
+   csrsv2Info_t            matAU_info;//ILU info for U of A block
    csrsv2Info_t            matBL_info;//ILU info for L of B block
    csrsv2Info_t            matBU_info;//ILU info for U of B block
    csrsv2Info_t            matSL_info;//ILU info for L of S block
@@ -32,9 +34,14 @@ typedef struct hypre_ParILUData_struct
    /* on GPU, we have to form E and F explicitly, since we don't have much control to it 
     *  
     */
-   hypre_CSRMatrix         *matBLU_d;//the matrix holding
+   hypre_CSRMatrix         *matALU_d;//the matrix holding ILU of A (for A-smoothing)
+   hypre_CSRMatrix         *matBLU_d;//the matrix holding ILU of B
+   hypre_CSRMatrix         *matSLU_d;//the matrix holding ILU of S
    hypre_CSRMatrix         *matE_d;
    hypre_CSRMatrix         *matF_d;
+   hypre_ParCSRMatrix      *Aperm;
+   hypre_ParCSRMatrix      *R;
+   hypre_ParCSRMatrix      *P;
    hypre_ParVector         *Xtemp;
    hypre_ParVector         *Ytemp;
    hypre_Vector            *Ftemp_upper;
@@ -117,17 +124,24 @@ typedef struct hypre_ParILUData_struct
 #ifdef HYPRE_USING_CUDA
    #define hypre_ParILUDataMatLMatrixDescription(ilu_data)     ((ilu_data) -> matL_des)
    #define hypre_ParILUDataMatUMatrixDescription(ilu_data)     ((ilu_data) -> matU_des)
+   #define hypre_ParILUDataMatALILUSolveInfo(ilu_data)         ((ilu_data) -> matAL_info)
+   #define hypre_ParILUDataMatAUILUSolveInfo(ilu_data)         ((ilu_data) -> matAU_info)
    #define hypre_ParILUDataMatBLILUSolveInfo(ilu_data)         ((ilu_data) -> matBL_info)
    #define hypre_ParILUDataMatBUILUSolveInfo(ilu_data)         ((ilu_data) -> matBU_info)
    #define hypre_ParILUDataMatSLILUSolveInfo(ilu_data)         ((ilu_data) -> matSL_info)
    #define hypre_ParILUDataMatSUILUSolveInfo(ilu_data)         ((ilu_data) -> matSU_info)
    #define hypre_ParILUDataILUSolveBuffer(ilu_data)            ((ilu_data) -> ilu_solve_buffer)
    #define hypre_ParILUDataILUSolvePolicy(ilu_data)            ((ilu_data) -> ilu_solve_policy)
+   #define hypre_ParILUDataMatAILUDevice(ilu_data)             ((ilu_data) -> matALU_d)
    #define hypre_ParILUDataMatBILUDevice(ilu_data)             ((ilu_data) -> matBLU_d)
+   #define hypre_ParILUDataMatSILUDevice(ilu_data)             ((ilu_data) -> matSLU_d)
    #define hypre_ParILUDataMatEDevice(ilu_data)                ((ilu_data) -> matE_d)
    #define hypre_ParILUDataMatFDevice(ilu_data)                ((ilu_data) -> matF_d)
    #define hypre_ParILUDataXTemp(ilu_data)                     ((ilu_data) -> Xtemp)
    #define hypre_ParILUDataYTemp(ilu_data)                     ((ilu_data) -> Ytemp)
+   #define hypre_ParILUDataAperm(ilu_data)                     ((ilu_data) -> Aperm)
+   #define hypre_ParILUDataR(ilu_data)                         ((ilu_data) -> R)
+   #define hypre_ParILUDataP(ilu_data)                         ((ilu_data) -> P)
    #define hypre_ParILUDataFTempUpper(ilu_data)                ((ilu_data) -> Ftemp_upper)
    #define hypre_ParILUDataUTempLower(ilu_data)                ((ilu_data) -> Utemp_lower)
    #define hypre_ParILUDataMatAFakeDiagonal(ilu_data)          ((ilu_data) -> A_diag_fake)
