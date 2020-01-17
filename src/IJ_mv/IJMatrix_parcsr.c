@@ -416,6 +416,7 @@ hypre_IJMatrixInitializeParCSR_v2(hypre_IJMatrix *matrix, HYPRE_Int memory_locat
          local_num_rows = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(par_matrix));
          hypre_AuxParCSRMatrixCreate(&aux_matrix, local_num_rows,
                                      hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(par_matrix)), NULL);
+         hypre_AuxParCSRMatrixMemoryLocation(aux_matrix) = HYPRE_MEMORY_HOST;
          hypre_AuxParCSRMatrixNeedAux(aux_matrix) = 0;
          hypre_IJMatrixTranslator(matrix) = aux_matrix;
       }
@@ -2025,13 +2026,14 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix,
 /* assumed partition version */
 
 HYPRE_Int
-hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix,
-                                         HYPRE_Int       off_proc_i_indx,
-                                         HYPRE_Int       max_off_proc_elmts,
-                                         HYPRE_Int       current_num_elmts,
-                                         HYPRE_BigInt   *off_proc_i,
-                                         HYPRE_BigInt   *off_proc_j,
-                                         HYPRE_Complex  *off_proc_data )
+hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix  *matrix,
+                                         HYPRE_Int        off_proc_i_indx,
+                                         HYPRE_Int        max_off_proc_elmts,
+                                         HYPRE_Int        current_num_elmts,
+                                         HYPRE_Int        memory_location,
+                                         HYPRE_BigInt    *off_proc_i,
+                                         HYPRE_BigInt    *off_proc_j,
+                                         HYPRE_Complex   *off_proc_data )
 {
    MPI_Comm comm = hypre_IJMatrixComm(matrix);
 
@@ -2093,6 +2095,43 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix,
    global_num_cols = hypre_IJMatrixGlobalNumCols(matrix);
    global_first_col = hypre_IJMatrixGlobalFirstCol(matrix);
    global_first_row = hypre_IJMatrixGlobalFirstRow(matrix);
+
+   if (hypre_GetActualMemLocation(memory_location) == HYPRE_MEMORY_DEVICE)
+   {
+      HYPRE_BigInt  *tmp             = hypre_TAlloc(HYPRE_BigInt,    current_num_elmts, HYPRE_MEMORY_HOST);
+      HYPRE_BigInt  *off_proc_i_h    = hypre_TAlloc(HYPRE_BigInt,  2*current_num_elmts, HYPRE_MEMORY_HOST);
+      HYPRE_BigInt  *off_proc_j_h    = hypre_TAlloc(HYPRE_BigInt,    current_num_elmts, HYPRE_MEMORY_HOST);
+      HYPRE_Complex *off_proc_data_h = hypre_TAlloc(HYPRE_Complex,   current_num_elmts, HYPRE_MEMORY_HOST);
+
+      hypre_TMemcpy(tmp,             off_proc_i,    HYPRE_BigInt,  current_num_elmts, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+      hypre_TMemcpy(off_proc_j_h,    off_proc_j,    HYPRE_BigInt,  current_num_elmts, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+      hypre_TMemcpy(off_proc_data_h, off_proc_data, HYPRE_Complex, current_num_elmts, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+
+      for (i = 0; i < current_num_elmts; i++)
+      {
+         off_proc_i_h[2*i]   = tmp[i];
+         off_proc_i_h[2*i+1] = 1;
+      }
+
+      off_proc_i_indx = current_num_elmts * 2;
+
+      off_proc_i    = off_proc_i_h;
+      off_proc_j    = off_proc_j_h;
+      off_proc_data = off_proc_data_h;
+
+      hypre_TFree(tmp, HYPRE_MEMORY_HOST);
+   }
+
+   /* can call hypre_IJMatrixAddToValuesParCSR directly inside this function
+    * or output a chunk of data */
+   HYPRE_Int      off_proc_nelm_recv_cur = 0;
+   HYPRE_Int      off_proc_nelm_recv_max = 0;
+   HYPRE_BigInt  *off_proc_i_recv = NULL;
+   HYPRE_BigInt  *off_proc_j_recv = NULL;
+   HYPRE_Complex *off_proc_data_recv = NULL;
+   HYPRE_BigInt  *off_proc_i_recv_d = NULL;
+   HYPRE_BigInt  *off_proc_j_recv_d = NULL;
+   HYPRE_Complex *off_proc_data_recv_d = NULL;
 
    num_rows = off_proc_i_indx/2;
 
@@ -2501,8 +2540,7 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix,
          if (big_int_size == obj_size_bytes)
          {
             col_ptr = (HYPRE_BigInt *) recv_data_ptr;
-            recv_data_ptr =
-               (void *) ((char *)recv_data_ptr + num_elements*obj_size_bytes);
+            recv_data_ptr = (void *) ((char *)recv_data_ptr + num_elements*obj_size_bytes);
          }
          else /* copy data */
          {
@@ -2522,8 +2560,7 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix,
          if (complex_size == obj_size_bytes)
          {
             col_data_ptr = (HYPRE_Complex *) recv_data_ptr;
-            recv_data_ptr =
-               (void *) ((char *)recv_data_ptr + num_elements*obj_size_bytes);
+            recv_data_ptr = (void *) ((char *)recv_data_ptr + num_elements*obj_size_bytes);
          }
          else /* copy data */
          {
@@ -2541,11 +2578,56 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix,
 
          }
 
-         hypre_IJMatrixAddToValuesParCSR(matrix,1,&num_elements,&row,&row_index,
-                                         col_ptr,col_data_ptr);
+         if (hypre_GetActualMemLocation(memory_location) == HYPRE_MEMORY_HOST)
+         {
+            hypre_IJMatrixAddToValuesParCSR(matrix, 1, &num_elements, &row, &row_index, col_ptr, col_data_ptr);
+         }
+         else
+         {
+            HYPRE_Int nelm_new = off_proc_nelm_recv_cur + num_elements;
+
+            if (nelm_new > off_proc_nelm_recv_max)
+            {
+               off_proc_nelm_recv_max = nelm_new * 2;
+               off_proc_i_recv    = hypre_TReAlloc(off_proc_i_recv,    HYPRE_BigInt,  off_proc_nelm_recv_max, HYPRE_MEMORY_HOST);
+               off_proc_j_recv    = hypre_TReAlloc(off_proc_j_recv,    HYPRE_BigInt,  off_proc_nelm_recv_max, HYPRE_MEMORY_HOST);
+               off_proc_data_recv = hypre_TReAlloc(off_proc_data_recv, HYPRE_Complex, off_proc_nelm_recv_max, HYPRE_MEMORY_HOST);
+            }
+
+            HYPRE_Int i;
+            for (i = 0; i < num_elements; i++)
+            {
+               off_proc_i_recv[off_proc_nelm_recv_cur + i] = row;
+            }
+            hypre_TMemcpy(off_proc_j_recv + off_proc_nelm_recv_cur, col_ptr, HYPRE_BigInt, num_elements,
+                           HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+            hypre_TMemcpy(off_proc_data_recv + off_proc_nelm_recv_cur, col_data_ptr, HYPRE_Complex, num_elements,
+                           HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+
+            off_proc_nelm_recv_cur = nelm_new;
+         }
+
          indx += (num_elements*2);
       }
    }
+
+   if (hypre_GetActualMemLocation(memory_location) == HYPRE_MEMORY_DEVICE)
+   {
+      off_proc_i_recv_d    = hypre_TAlloc(HYPRE_BigInt,  off_proc_nelm_recv_cur, HYPRE_MEMORY_DEVICE);
+      off_proc_j_recv_d    = hypre_TAlloc(HYPRE_BigInt,  off_proc_nelm_recv_cur, HYPRE_MEMORY_DEVICE);
+      off_proc_data_recv_d = hypre_TAlloc(HYPRE_Complex, off_proc_nelm_recv_cur, HYPRE_MEMORY_DEVICE);
+
+      hypre_TMemcpy(off_proc_i_recv_d,    off_proc_i_recv,    HYPRE_BigInt,  off_proc_nelm_recv_cur,
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(off_proc_j_recv_d,    off_proc_j_recv,    HYPRE_BigInt,  off_proc_nelm_recv_cur,
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(off_proc_data_recv_d, off_proc_data_recv, HYPRE_Complex, off_proc_nelm_recv_cur,
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+
+      hypre_IJMatrixSetAddValuesParCSRDevice0(matrix, off_proc_nelm_recv_cur, off_proc_i_recv_d, off_proc_j_recv_d,
+                                              off_proc_data_recv_d, "add");
+   }
+
    hypre_TFree(send_proc_obj.v_elements, HYPRE_MEMORY_HOST);
    hypre_TFree(send_proc_obj.vec_starts, HYPRE_MEMORY_HOST);
    hypre_TFree(send_proc_obj.id, HYPRE_MEMORY_HOST);
@@ -2555,10 +2637,26 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix,
    {
       hypre_TFree(big_int_data, HYPRE_MEMORY_HOST);
    }
+
    if (complex_data)
    {
       hypre_TFree(complex_data, HYPRE_MEMORY_HOST);
    }
+
+   if (hypre_GetActualMemLocation(memory_location) == HYPRE_MEMORY_DEVICE)
+   {
+      hypre_TFree(off_proc_i,    HYPRE_MEMORY_HOST);
+      hypre_TFree(off_proc_j,    HYPRE_MEMORY_HOST);
+      hypre_TFree(off_proc_data, HYPRE_MEMORY_HOST);
+   }
+
+   hypre_TFree(off_proc_i_recv,    HYPRE_MEMORY_HOST);
+   hypre_TFree(off_proc_j_recv,    HYPRE_MEMORY_HOST);
+   hypre_TFree(off_proc_data_recv, HYPRE_MEMORY_HOST);
+
+   hypre_TFree(off_proc_i_recv_d,    HYPRE_MEMORY_DEVICE);
+   hypre_TFree(off_proc_j_recv_d,    HYPRE_MEMORY_DEVICE);
+   hypre_TFree(off_proc_data_recv_d, HYPRE_MEMORY_DEVICE);
 
    return hypre_error_flag;
 }
@@ -2810,6 +2908,7 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
          off_proc_data=hypre_AuxParCSRMatrixOffProcData(aux_matrix);
          hypre_IJMatrixAssembleOffProcValsParCSR(
             matrix,off_proc_i_indx, max_off_proc_elmts, current_num_elmts,
+            HYPRE_MEMORY_HOST,
             off_proc_i, off_proc_j, off_proc_data);
       }
    }

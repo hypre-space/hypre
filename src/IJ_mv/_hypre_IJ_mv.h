@@ -124,6 +124,7 @@ typedef struct
 #define hypre_AuxParCSRMatrixOffProcI(matrix)             ((matrix) -> off_proc_i)
 #define hypre_AuxParCSRMatrixOffProcJ(matrix)             ((matrix) -> off_proc_j)
 #define hypre_AuxParCSRMatrixOffProcData(matrix)          ((matrix) -> off_proc_data)
+#if defined(HYPRE_USING_CUDA)
 #define hypre_AuxParCSRMatrixOffProcSorA(matrix)          ((matrix) -> off_proc_SorA)
 
 #define hypre_AuxParCSRMatrixMaxOnProcElmts(matrix)       ((matrix) -> max_on_proc_elmts)
@@ -137,6 +138,7 @@ typedef struct
 #define hypre_AuxParCSRMatrixUsrOffProcElmts(matrix)      ((matrix) -> usr_off_proc_elmts)
 #define hypre_AuxParCSRMatrixInitAllocFactor(matrix)      ((matrix) -> init_alloc_factor)
 #define hypre_AuxParCSRMatrixGrowFactor(matrix)           ((matrix) -> grow_factor)
+#endif
 
 #endif
 /******************************************************************************
@@ -156,11 +158,25 @@ typedef struct
 
 typedef struct
 {
+   HYPRE_Int        memory_location;
+
    HYPRE_Int        max_off_proc_elmts;      /* length of off processor stash for
                                                 SetValues and AddToValues*/
    HYPRE_Int        current_off_proc_elmts;  /* current no. of elements stored in stash */
    HYPRE_BigInt    *off_proc_i;              /* contains column indices */
    HYPRE_Complex   *off_proc_data;           /* contains corresponding data */
+
+#if defined(HYPRE_USING_CUDA)
+   HYPRE_Int        max_on_proc_elmts;      /* length of on processor stash for
+                                               SetValues and AddToValues*/
+   HYPRE_Int        current_on_proc_elmts;  /* current no. of elements stored in stash */
+   HYPRE_BigInt    *on_proc_i;              /* contains column indices */
+   HYPRE_Complex   *on_proc_data;           /* contains corresponding data */
+
+   HYPRE_Int        usr_off_proc_elmts;     /* the num of off-proc elements usr guided */
+   HYPRE_Real       init_alloc_factor;
+   HYPRE_Real       grow_factor;
+#endif
 } hypre_AuxParVector;
 
 /*--------------------------------------------------------------------------
@@ -375,10 +391,11 @@ HYPRE_Int hypre_IJMatrixGetRowCountsParCSR ( hypre_IJMatrix *matrix , HYPRE_Int 
 HYPRE_Int hypre_IJMatrixGetValuesParCSR ( hypre_IJMatrix *matrix , HYPRE_Int nrows , HYPRE_Int *ncols , HYPRE_BigInt *rows , HYPRE_BigInt *cols , HYPRE_Complex *values );
 HYPRE_Int hypre_IJMatrixSetValuesParCSR ( hypre_IJMatrix *matrix , HYPRE_Int nrows , HYPRE_Int *ncols , const HYPRE_BigInt *rows , const HYPRE_Int *row_indexes , const HYPRE_BigInt *cols , const HYPRE_Complex *values );
 HYPRE_Int hypre_IJMatrixSetAddValuesParCSRDevice ( hypre_IJMatrix *matrix , HYPRE_Int nrows , HYPRE_Int *ncols , const HYPRE_BigInt *rows , const HYPRE_Int *row_indexes , const HYPRE_BigInt *cols , const HYPRE_Complex *values, const char *action );
+HYPRE_Int hypre_IJMatrixSetAddValuesParCSRDevice0( hypre_IJMatrix *matrix, HYPRE_Int nelms, const HYPRE_BigInt *rows, const HYPRE_BigInt *cols, const HYPRE_Complex *values, const char *action);
 HYPRE_Int hypre_IJMatrixSetConstantValuesParCSR ( hypre_IJMatrix *matrix , HYPRE_Complex value );
 HYPRE_Int hypre_IJMatrixAddToValuesParCSR ( hypre_IJMatrix *matrix , HYPRE_Int nrows , HYPRE_Int *ncols , const HYPRE_BigInt *rows , const HYPRE_Int *row_indexes , const HYPRE_BigInt *cols , const HYPRE_Complex *values );
 HYPRE_Int hypre_IJMatrixDestroyParCSR ( hypre_IJMatrix *matrix );
-HYPRE_Int hypre_IJMatrixAssembleOffProcValsParCSR ( hypre_IJMatrix *matrix , HYPRE_Int off_proc_i_indx , HYPRE_Int max_off_proc_elmts , HYPRE_Int current_num_elmts , HYPRE_BigInt *off_proc_i , HYPRE_BigInt *off_proc_j , HYPRE_Complex *off_proc_data );
+HYPRE_Int hypre_IJMatrixAssembleOffProcValsParCSR ( hypre_IJMatrix *matrix , HYPRE_Int off_proc_i_indx , HYPRE_Int max_off_proc_elmts , HYPRE_Int current_num_elmts , HYPRE_Int memory_location , HYPRE_BigInt *off_proc_i , HYPRE_BigInt *off_proc_j , HYPRE_Complex *off_proc_data );
 HYPRE_Int hypre_FillResponseIJOffProcVals ( void *p_recv_contact_buf , HYPRE_Int contact_size , HYPRE_Int contact_proc , void *ro , MPI_Comm comm , void **p_send_response_buf , HYPRE_Int *response_message_size );
 HYPRE_Int hypre_FindProc ( HYPRE_BigInt *list , HYPRE_BigInt value , HYPRE_Int list_length );
 HYPRE_Int hypre_IJMatrixAssembleParCSR ( hypre_IJMatrix *matrix );
