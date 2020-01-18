@@ -19,23 +19,25 @@ extern "C" {
  *--------------------------------------------------------------------------*/
 
 /**
- * @name IJ System Interface
+ * @defgroup IJSystemInterface IJ System Interface
  *
  * This interface represents a linear-algebraic conceptual view of a
  * linear system.  The 'I' and 'J' in the name are meant to be
  * mnemonic for the traditional matrix notation A(I,J).
  *
  * @memo A linear-algebraic conceptual interface
+ *
+ * @{
  **/
-/*@{*/
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 /**
  * @name IJ Matrices
+ *
+ * @{
  **/
-/*@{*/
 
 struct hypre_IJMatrix_struct;
 /**
@@ -45,20 +47,20 @@ typedef struct hypre_IJMatrix_struct *HYPRE_IJMatrix;
 
 /**
  * Create a matrix object.  Each process owns some unique consecutive
- * range of rows, indicated by the global row indices {\tt ilower} and
- * {\tt iupper}.  The row data is required to be such that the value
- * of {\tt ilower} on any process $p$ be exactly one more than the
- * value of {\tt iupper} on process $p-1$.  Note that the first row of
+ * range of rows, indicated by the global row indices \e ilower and
+ * \e iupper.  The row data is required to be such that the value
+ * of \e ilower on any process $p$ be exactly one more than the
+ * value of \e iupper on process $p-1$.  Note that the first row of
  * the global matrix may start with any integer value.  In particular,
  * one may use zero- or one-based indexing.
  *
- * For square matrices, {\tt jlower} and {\tt jupper} typically should
- * match {\tt ilower} and {\tt iupper}, respectively.  For rectangular
- * matrices, {\tt jlower} and {\tt jupper} should define a
+ * For square matrices, \e jlower and \e jupper typically should
+ * match \e ilower and \e iupper, respectively.  For rectangular
+ * matrices, \e jlower and \e jupper should define a
  * partitioning of the columns.  This partitioning must be used for
  * any vector $v$ that will be used in matrix-vector products with the
- * rectangular matrix.  The matrix data structure may use {\tt jlower}
- * and {\tt jupper} to store the diagonal blocks (rectangular in
+ * rectangular matrix.  The matrix data structure may use \e jlower
+ * and \e jupper to store the diagonal blocks (rectangular in
  * general) of the matrix separately from the rest of the matrix.
  *
  * Collective.
@@ -89,13 +91,13 @@ HYPRE_Int HYPRE_IJMatrixDestroy(HYPRE_IJMatrix matrix);
 HYPRE_Int HYPRE_IJMatrixInitialize(HYPRE_IJMatrix matrix);
 
 /**
- * Sets values for {\tt nrows} rows or partial rows of the matrix.  
- * The arrays {\tt ncols}
- * and {\tt rows} are of dimension {\tt nrows} and contain the number
+ * Sets values for \e nrows rows or partial rows of the matrix.  
+ * The arrays \e ncols
+ * and \e rows are of dimension \e nrows and contain the number
  * of columns in each row and the row indices, respectively.  The
- * array {\tt cols} contains the column indices for each of the {\tt
- * rows}, and is ordered by rows.  The data in the {\tt values} array
- * corresponds directly to the column entries in {\tt cols}.  Erases
+ * array \e cols contains the column indices for each of the \e
+ * rows, and is ordered by rows.  The data in the \e values array
+ * corresponds directly to the column entries in \e cols.  Erases
  * any previous values at the specified locations and replaces them
  * with new ones, or, if there was no value there before, inserts a
  * new one if set locally. Note that it is not possible to set values
@@ -123,14 +125,14 @@ HYPRE_Int HYPRE_IJMatrixSetValues(HYPRE_IJMatrix       matrix,
 
 /**
  * Sets all  matrix coefficients of an already assembled matrix to
- * {\tt value}
+ * \e value
  **/
 HYPRE_Int HYPRE_IJMatrixSetConstantValues(HYPRE_IJMatrix matrix,
                                           HYPRE_Complex value);
 
 /**
- * Adds to values for {\tt nrows} rows or partial rows of the matrix.  
- * Usage details are analogous to \Ref{HYPRE_IJMatrixSetValues}.  
+ * Adds to values for \e nrows rows or partial rows of the matrix.  
+ * Usage details are analogous to \ref HYPRE_IJMatrixSetValues.  
  * Adds to any previous values at the specified locations, or, if 
  * there was no value there before, inserts a new one. 
  * AddToValues can be used to add to values on other processors.
@@ -153,10 +155,10 @@ HYPRE_Int HYPRE_IJMatrixAddToValues(HYPRE_IJMatrix       matrix,
                                     const HYPRE_Complex *values);
 
 /**
- * Sets values for {\tt nrows} rows or partial rows of the matrix.
+ * Sets values for \e nrows rows or partial rows of the matrix.
  *
- * Same as IJMatrixSetValues, but with an additional {\tt row_indexes} array
- * that provides indexes into the {\tt cols} and {\tt values} arrays.  Because
+ * Same as IJMatrixSetValues, but with an additional \e row_indexes array
+ * that provides indexes into the \e cols and \e values arrays.  Because
  * of this, there can be gaps between the row data in these latter two arrays.
  *
  **/
@@ -169,10 +171,10 @@ HYPRE_Int HYPRE_IJMatrixSetValues2(HYPRE_IJMatrix       matrix,
                                    const HYPRE_Complex *values);
 
 /**
- * Adds to values for {\tt nrows} rows or partial rows of the matrix.  
+ * Adds to values for \e nrows rows or partial rows of the matrix.  
  *
- * Same as IJMatrixAddToValues, but with an additional {\tt row_indexes} array
- * that provides indexes into the {\tt cols} and {\tt values} arrays.  Because
+ * Same as IJMatrixAddToValues, but with an additional \e row_indexes array
+ * that provides indexes into the \e cols and \e values arrays.  Because
  * of this, there can be gaps between the row data in these latter two arrays.
  *
  **/
@@ -190,8 +192,8 @@ HYPRE_Int HYPRE_IJMatrixAddToValues2(HYPRE_IJMatrix       matrix,
 HYPRE_Int HYPRE_IJMatrixAssemble(HYPRE_IJMatrix matrix);
 
 /**
- * Gets number of nonzeros elements for {\tt nrows} rows specified in {\tt rows}
- * and returns them in {\tt ncols}, which needs to be allocated by the
+ * Gets number of nonzeros elements for \e nrows rows specified in \e rows
+ * and returns them in \e ncols, which needs to be allocated by the
  * user.
  **/
 HYPRE_Int HYPRE_IJMatrixGetRowCounts(HYPRE_IJMatrix  matrix,
@@ -200,9 +202,9 @@ HYPRE_Int HYPRE_IJMatrixGetRowCounts(HYPRE_IJMatrix  matrix,
                                      HYPRE_Int      *ncols);
 
 /**
- * Gets values for {\tt nrows} rows or partial rows of the matrix.  
+ * Gets values for \e nrows rows or partial rows of the matrix.  
  * Usage details are mostly
- * analogous to \Ref{HYPRE_IJMatrixSetValues}.
+ * analogous to \ref HYPRE_IJMatrixSetValues.
  * Note that if nrows is negative, the routine will return
  * the column_indices and matrix coefficients of the
  * (-nrows) rows contained in rows.
@@ -216,7 +218,7 @@ HYPRE_Int HYPRE_IJMatrixGetValues(HYPRE_IJMatrix  matrix,
 
 /**
  * Set the storage type of the matrix object to be constructed.
- * Currently, {\tt type} can only be {\tt HYPRE\_PARCSR}.
+ * Currently, \e type can only be \c HYPRE_PARCSR.
  *
  * Not collective, but must be the same on all processes.
  *
@@ -251,7 +253,7 @@ HYPRE_Int HYPRE_IJMatrixGetObject(HYPRE_IJMatrix   matrix,
 
 /**
  * (Optional) Set the max number of nonzeros to expect in each row.
- * The array {\tt sizes} contains estimated sizes for each row on this
+ * The array \e sizes contains estimated sizes for each row on this
  * process.  This call can significantly improve the efficiency of
  * matrix construction, and should always be utilized if possible.
  *
@@ -265,7 +267,7 @@ HYPRE_Int HYPRE_IJMatrixSetRowSizes(HYPRE_IJMatrix   matrix,
  * the diagonal and off-diagonal blocks.  The diagonal block is the
  * submatrix whose column numbers correspond to rows owned by this
  * process, and the off-diagonal block is everything else.  The arrays
- * {\tt diag\_sizes} and {\tt offdiag\_sizes} contain estimated sizes
+ * \e diag_sizes and \e offdiag_sizes contain estimated sizes
  * for each row of the diagonal and off-diagonal blocks, respectively.
  * This routine can significantly improve the efficiency of matrix
  * construction, and should always be utilized if possible.
@@ -327,15 +329,16 @@ HYPRE_Int HYPRE_IJMatrixRead(const char     *filename,
 HYPRE_Int HYPRE_IJMatrixPrint(HYPRE_IJMatrix  matrix,
                               const char     *filename);
 
-/*@}*/
+/**@}*/
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 /**
  * @name IJ Vectors
+ *
+ * @{
  **/
-/*@{*/
 
 struct hypre_IJVector_struct;
 /**
@@ -345,10 +348,10 @@ typedef struct hypre_IJVector_struct *HYPRE_IJVector;
 
 /**
  * Create a vector object.  Each process owns some unique consecutive
- * range of vector unknowns, indicated by the global indices {\tt
- * jlower} and {\tt jupper}.  The data is required to be such that the
- * value of {\tt jlower} on any process $p$ be exactly one more than
- * the value of {\tt jupper} on process $p-1$.  Note that the first
+ * range of vector unknowns, indicated by the global indices \e
+ * jlower and \e jupper.  The data is required to be such that the
+ * value of \e jlower on any process $p$ be exactly one more than
+ * the value of \e jupper on process $p-1$.  Note that the first
  * index of the global vector may start with any integer value.  In
  * particular, one may use zero- or one-based indexing.
  *
@@ -389,8 +392,8 @@ HYPRE_Int HYPRE_IJVectorSetMaxOffProcElmts(HYPRE_IJVector vector,
                                            HYPRE_Int      max_off_proc_elmts);
 
 /**
- * Sets values in vector.  The arrays {\tt values} and {\tt indices}
- * are of dimension {\tt nvalues} and contain the vector values to be
+ * Sets values in vector.  The arrays \e values and \e indices
+ * are of dimension \e nvalues and contain the vector values to be
  * set and the corresponding global vector indices, respectively.
  * Erases any previous values at the specified locations and replaces
  * them with new ones.  Note that it is not possible to set values
@@ -408,7 +411,7 @@ HYPRE_Int HYPRE_IJVectorSetValues(HYPRE_IJVector       vector,
 
 /**
  * Adds to values in vector.  Usage details are analogous to
- * \Ref{HYPRE_IJVectorSetValues}.
+ * \ref HYPRE_IJVectorSetValues.
  * Adds to any previous values at the specified locations, or, if 
  * there was no value there before, inserts a new one. 
  * AddToValues can be used to add to values on other processors.
@@ -427,7 +430,7 @@ HYPRE_Int HYPRE_IJVectorAssemble(HYPRE_IJVector vector);
 
 /**
  * Gets values in vector.  Usage details are analogous to
- * \Ref{HYPRE_IJVectorSetValues}.
+ * \ref HYPRE_IJVectorSetValues.
  *
  * Not collective.
  **/
@@ -438,7 +441,7 @@ HYPRE_Int HYPRE_IJVectorGetValues(HYPRE_IJVector   vector,
 
 /**
  * Set the storage type of the vector object to be constructed.
- * Currently, {\tt type} can only be {\tt HYPRE\_PARCSR}.
+ * Currently, \e type can only be \c HYPRE_PARCSR.
  *
  * Not collective, but must be the same on all processes.
  *
@@ -490,8 +493,8 @@ HYPRE_Int HYPRE_IJVectorRead(const char     *filename,
 HYPRE_Int HYPRE_IJVectorPrint(HYPRE_IJVector  vector,
                               const char     *filename);
 
-/*@}*/
-/*@}*/
+/**@}*/
+/**@}*/
 
 #ifdef __cplusplus
 }
