@@ -49,8 +49,8 @@ typedef struct hypre_IJMatrix_struct *HYPRE_IJMatrix;
  * Create a matrix object.  Each process owns some unique consecutive
  * range of rows, indicated by the global row indices \e ilower and
  * \e iupper.  The row data is required to be such that the value
- * of \e ilower on any process $p$ be exactly one more than the
- * value of \e iupper on process $p-1$.  Note that the first row of
+ * of \e ilower on any process \f$p\f$ be exactly one more than the
+ * value of \e iupper on process \f$p-1\f$.  Note that the first row of
  * the global matrix may start with any integer value.  In particular,
  * one may use zero- or one-based indexing.
  *
@@ -58,7 +58,7 @@ typedef struct hypre_IJMatrix_struct *HYPRE_IJMatrix;
  * match \e ilower and \e iupper, respectively.  For rectangular
  * matrices, \e jlower and \e jupper should define a
  * partitioning of the columns.  This partitioning must be used for
- * any vector $v$ that will be used in matrix-vector products with the
+ * any vector \f$v\f$ that will be used in matrix-vector products with the
  * rectangular matrix.  The matrix data structure may use \e jlower
  * and \e jupper to store the diagonal blocks (rectangular in
  * general) of the matrix separately from the rest of the matrix.
@@ -350,8 +350,8 @@ typedef struct hypre_IJVector_struct *HYPRE_IJVector;
  * Create a vector object.  Each process owns some unique consecutive
  * range of vector unknowns, indicated by the global indices \e
  * jlower and \e jupper.  The data is required to be such that the
- * value of \e jlower on any process $p$ be exactly one more than
- * the value of \e jupper on process $p-1$.  Note that the first
+ * value of \e jlower on any process \f$p\f$ be exactly one more than
+ * the value of \e jupper on process \f$p-1\f$.  Note that the first
  * index of the global vector may start with any integer value.  In
  * particular, one may use zero- or one-based indexing.
  *

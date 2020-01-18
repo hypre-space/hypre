@@ -360,9 +360,9 @@ HYPRE_Int HYPRE_StructMatrixPrint(const char         *filename,
                                   HYPRE_Int           all);
 
 /**
- * Matvec operator.  This operation is  $y = \alpha A x + \beta y$ .
+ * Matvec operator.  This operation is \f$y = \alpha A x + \beta y\f$ .
  * Note that you can do a simple matrix-vector multiply by setting
- * $\alpha=1$ and $\beta=0$.
+ * \f$\alpha=1\f$ and \f$\beta=0\f$.
  **/
 HYPRE_Int HYPRE_StructMatrixMatvec ( HYPRE_Complex alpha,
                                      HYPRE_StructMatrix A,

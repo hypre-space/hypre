@@ -15,7 +15,7 @@ all: html pdf
 install:
 
 clean:
-	@/bin/rm -fr html latex
+	@/bin/rm -fr html latex xml
 
 distclean: clean
 
