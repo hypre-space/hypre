@@ -681,6 +681,20 @@ hypre_PrintMemoryTracker()
    HYPRE_Int ierr = 0;
 #ifdef HYPRE_USING_MEMORY_TRACKER
    size_t i;
+   HYPRE_Int myid;
+   char filename[256];
+   FILE *file;
+
+   hypre_MPI_Comm_rank(MPI_COMM_WORLD, &myid);
+   hypre_sprintf(filename,"HypreMemoryTrack.log.%05d", myid);
+   if ((file = fopen(filename, "w")) == NULL)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Error: can't open output file %s\n");
+      return hypre_error_flag;
+   }
+
+   char *mark = hypre_CTAlloc(char, hypre_memory_tracker.size(), HYPRE_MEMORY_HOST);
+
    for (i = 0; i < hypre_memory_tracker.size(); i++)
    {
       if (hypre_memory_tracker[i]._ptr == NULL && hypre_memory_tracker[i]._nbytes == 0)
@@ -688,7 +702,7 @@ hypre_PrintMemoryTracker()
          continue;
       }
 
-      printf("%6ld: %8s  %16p  %10ld  %d  %32s  %64s      %d\n", i,
+      hypre_fprintf(file, "%6ld: %8s  %16p  %10ld  %d  %32s  %64s      %d\n", i,
             hypre_memory_tracker[i]._action,
             hypre_memory_tracker[i]._ptr,
             hypre_memory_tracker[i]._nbytes,
@@ -696,7 +710,35 @@ hypre_PrintMemoryTracker()
             hypre_memory_tracker[i]._filename,
             hypre_memory_tracker[i]._function,
             hypre_memory_tracker[i]._line);
+
+      if ( strstr(hypre_memory_tracker[i]._action, "alloc") != NULL)
+      {
+         size_t j;
+         HYPRE_Int found = 0;
+         for (j = i+1; j < hypre_memory_tracker.size(); j++)
+         {
+            if ( mark[j] == 0 &&
+                 strstr(hypre_memory_tracker[j]._action, "free") != NULL &&
+                 hypre_memory_tracker[i]._ptr == hypre_memory_tracker[j]._ptr &&
+                 hypre_memory_tracker[i]._memory_location == hypre_memory_tracker[j]._memory_location )
+            {
+               mark[j] = 1;
+               found = 1;
+               break;
+            }
+         }
+
+         if (!found)
+         {
+            hypre_printf("Proc %3d: [%6d], %16p may have not been freed\n",
+                  myid, i, hypre_memory_tracker[i]._ptr );
+         }
+      }
    }
+
+   hypre_TFree(mark, HYPRE_MEMORY_HOST);
+
+   fclose(file);
 #endif
    return ierr;
 }

@@ -2483,13 +2483,15 @@ main( hypre_int argc,
 
       b = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD,
                                 hypre_ParCSRMatrixGlobalNumRows(parcsr_A),
-                                NULL);
+                                hypre_ParCSRMatrixRowStarts(parcsr_A));
+      hypre_ParVectorOwnsPartitioning(b) = 0;
       hypre_ParVectorInitialize_v2(b, memory_location);
       hypre_ParVectorSetConstantValues(b, 1.0);
 
       x = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD,
                                 hypre_ParCSRMatrixGlobalNumCols(parcsr_A),
-                                NULL);
+                                hypre_ParCSRMatrixColStarts(parcsr_A));
+      hypre_ParVectorOwnsPartitioning(x) = 0;
       hypre_ParVectorInitialize_v2(x, memory_location);
       hypre_ParVectorSetConstantValues(x, 0.0);
    }
@@ -6850,7 +6852,7 @@ main( hypre_int argc,
    else
       HYPRE_IJVectorDestroy(ij_b);
 
-   if ( build_x0_type == 0 || build_x0_type == 7 )
+   if ( build_x0_type == 0 || build_x0_type == 7 || build_rhs_type == 22)
    {
       HYPRE_ParVectorDestroy(x);
    }
@@ -6877,6 +6879,9 @@ main( hypre_int argc,
 
    /* Finalize MPI */
    hypre_MPI_Finalize();
+
+   /* when using cuda-memcheck --leak-check full, uncomment this */
+   /* cudaDeviceReset(); */
 
    return (0);
 }
