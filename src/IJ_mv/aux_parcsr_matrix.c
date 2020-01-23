@@ -35,6 +35,8 @@ hypre_AuxParCSRMatrixCreate( hypre_AuxParCSRMatrix **aux_matrix,
 
    /* set defaults */
    hypre_AuxParCSRMatrixNeedAux(matrix) = 1;
+   hypre_AuxParCSRMatrixMaxOffProcElmts(matrix) = 0;
+   hypre_AuxParCSRMatrixCurrentOffProcElmts(matrix) = 0;
    hypre_AuxParCSRMatrixOffProcIIndx(matrix) = 0;
    hypre_AuxParCSRMatrixRowLength(matrix) = NULL;
    hypre_AuxParCSRMatrixAuxJ(matrix) = NULL;
@@ -43,27 +45,23 @@ hypre_AuxParCSRMatrixCreate( hypre_AuxParCSRMatrix **aux_matrix,
    hypre_AuxParCSRMatrixIndxOffd(matrix) = NULL;
    hypre_AuxParCSRMatrixDiagSizes(matrix) = NULL;
    hypre_AuxParCSRMatrixOffdSizes(matrix) = NULL;
-   hypre_AuxParCSRMatrixMemoryLocation(matrix) = HYPRE_MEMORY_HOST;
-   
-   /* stash for setting or adding off processor values */
-   hypre_AuxParCSRMatrixMaxOffProcElmts(matrix) = 0;
-   hypre_AuxParCSRMatrixCurrentOffProcElmts(matrix) = 0;
+   /* stash for setting or adding on/off-proc values */
    hypre_AuxParCSRMatrixOffProcI(matrix) = NULL;
    hypre_AuxParCSRMatrixOffProcJ(matrix) = NULL;
    hypre_AuxParCSRMatrixOffProcData(matrix) = NULL;
-   hypre_AuxParCSRMatrixOffProcSorA(matrix) = NULL;
-
-   hypre_AuxParCSRMatrixMaxOnProcElmts(matrix) = 0;
-   hypre_AuxParCSRMatrixCurrentOnProcElmts(matrix) = 0;
-   hypre_AuxParCSRMatrixOnProcI(matrix) = NULL;
-   hypre_AuxParCSRMatrixOnProcJ(matrix) = NULL;
-   hypre_AuxParCSRMatrixOnProcData(matrix) = NULL;
-   hypre_AuxParCSRMatrixOnProcSorA(matrix) = NULL;
-
+   hypre_AuxParCSRMatrixMemoryLocation(matrix) = HYPRE_MEMORY_HOST;
+#if defined(HYPRE_USING_CUDA)
+   hypre_AuxParCSRMatrixMaxStackElmts(matrix) = 0;
+   hypre_AuxParCSRMatrixCurrentStackElmts(matrix) = 0;
+   hypre_AuxParCSRMatrixStackI(matrix) = NULL;
+   hypre_AuxParCSRMatrixStackJ(matrix) = NULL;
+   hypre_AuxParCSRMatrixStackData(matrix) = NULL;
+   hypre_AuxParCSRMatrixStackSorA(matrix) = NULL;
    hypre_AuxParCSRMatrixUsrOnProcElmts(matrix) = -1;
    hypre_AuxParCSRMatrixUsrOffProcElmts(matrix) = -1;
    hypre_AuxParCSRMatrixInitAllocFactor(matrix) = 5.0;
    hypre_AuxParCSRMatrixGrowFactor(matrix) = 2.0;
+#endif
 
    *aux_matrix = matrix;
 
@@ -83,7 +81,6 @@ hypre_AuxParCSRMatrixDestroy( hypre_AuxParCSRMatrix *matrix )
 
    if (matrix)
    {
-      HYPRE_Int memory_location = hypre_AuxParCSRMatrixMemoryLocation(matrix);
       num_rows = hypre_AuxParCSRMatrixLocalNumRows(matrix);
       hypre_TFree(hypre_AuxParCSRMatrixRowLength(matrix), HYPRE_MEMORY_HOST);
       hypre_TFree(hypre_AuxParCSRMatrixRowSpace(matrix), HYPRE_MEMORY_HOST);
@@ -111,13 +108,16 @@ hypre_AuxParCSRMatrixDestroy( hypre_AuxParCSRMatrix *matrix )
       hypre_TFree(hypre_AuxParCSRMatrixDiagSizes(matrix), HYPRE_MEMORY_HOST);
       hypre_TFree(hypre_AuxParCSRMatrixOffdSizes(matrix), HYPRE_MEMORY_HOST);
 
-      hypre_TFree(hypre_AuxParCSRMatrixOffProcI(matrix),    memory_location);
-      hypre_TFree(hypre_AuxParCSRMatrixOffProcJ(matrix),    memory_location);
-      hypre_TFree(hypre_AuxParCSRMatrixOffProcData(matrix), memory_location);
+      hypre_TFree(hypre_AuxParCSRMatrixOffProcI(matrix),    HYPRE_MEMORY_HOST);
+      hypre_TFree(hypre_AuxParCSRMatrixOffProcJ(matrix),    HYPRE_MEMORY_HOST);
+      hypre_TFree(hypre_AuxParCSRMatrixOffProcData(matrix), HYPRE_MEMORY_HOST);
 
-      hypre_TFree(hypre_AuxParCSRMatrixOnProcI(matrix),    memory_location);
-      hypre_TFree(hypre_AuxParCSRMatrixOnProcJ(matrix),    memory_location);
-      hypre_TFree(hypre_AuxParCSRMatrixOnProcData(matrix), memory_location);
+#if defined(HYPRE_USING_CUDA)
+      hypre_TFree(hypre_AuxParCSRMatrixStackI(matrix),    hypre_AuxParCSRMatrixMemoryLocation(matrix));
+      hypre_TFree(hypre_AuxParCSRMatrixStackJ(matrix),    hypre_AuxParCSRMatrixMemoryLocation(matrix));
+      hypre_TFree(hypre_AuxParCSRMatrixStackData(matrix), hypre_AuxParCSRMatrixMemoryLocation(matrix));
+      hypre_TFree(hypre_AuxParCSRMatrixStackSorA(matrix), hypre_AuxParCSRMatrixMemoryLocation(matrix));
+#endif
 
       hypre_TFree(matrix, HYPRE_MEMORY_HOST);
    }
@@ -151,7 +151,6 @@ hypre_AuxParCSRMatrixInitialize_v2( hypre_AuxParCSRMatrix *matrix, HYPRE_Int mem
    if ( hypre_GetActualMemLocation(memory_location) != HYPRE_MEMORY_HOST )
    {
       /* GPU assembly */
-      hypre_AuxParCSRMatrixMaxOffProcElmts(matrix) = 0;
       hypre_AuxParCSRMatrixNeedAux(matrix) = 1;
    }
    else
@@ -209,16 +208,3 @@ hypre_AuxParCSRMatrixInitialize_v2( hypre_AuxParCSRMatrix *matrix, HYPRE_Int mem
    return 0;
 }
 
-/*--------------------------------------------------------------------------
- * hypre_AuxParCSRMatrixSetMaxOffProcElmts
- *--------------------------------------------------------------------------*/
-/*
-HYPRE_Int
-hypre_AuxParCSRMatrixSetMaxOffPRocElmts( hypre_AuxParCSRMatrix *matrix,
-                                         HYPRE_Int max_off_proc_elmts )
-{
-   HYPRE_Int ierr = 0;
-   hypre_AuxParCSRMatrixMaxOffProcElmts(matrix) = max_off_proc_elmts;
-   return ierr;
-}
-*/

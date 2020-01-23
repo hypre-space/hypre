@@ -42,7 +42,7 @@ hypre_IJMatrixCreateParCSR(hypre_IJMatrix *matrix)
    {
       for (i = 0; i < 2; i++)
       {
-         row_starts[i] = row_partitioning[i]- hypre_IJMatrixGlobalFirstRow(matrix);
+         row_starts[i] = row_partitioning[i] - hypre_IJMatrixGlobalFirstRow(matrix);
       }
    }
    else
@@ -172,6 +172,14 @@ hypre_IJMatrixSetRowSizesParCSR(hypre_IJMatrix  *matrix,
       hypre_IJMatrixTranslator(matrix) = aux_matrix;
    }
    hypre_AuxParCSRMatrixRowSpace(aux_matrix) = row_space;
+
+#if defined(HYPRE_USING_CUDA)
+   hypre_AuxParCSRMatrixUsrOnProcElmts(aux_matrix) = 0;
+   for (i = 0; i < local_num_rows; i++)
+   {
+      hypre_AuxParCSRMatrixUsrOnProcElmts(aux_matrix) += sizes[i];
+   }
+#endif
 
    return hypre_error_flag;
 }
@@ -2122,8 +2130,8 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix  *matrix,
       hypre_TFree(tmp, HYPRE_MEMORY_HOST);
    }
 
-   /* can call hypre_IJMatrixAddToValuesParCSR directly inside this function
-    * or output a chunk of data */
+   /* call hypre_IJMatrixAddToValuesParCSR directly inside this function 
+    * with one chunk of data */
    HYPRE_Int      off_proc_nelm_recv_cur = 0;
    HYPRE_Int      off_proc_nelm_recv_max = 0;
    HYPRE_BigInt  *off_proc_i_recv = NULL;

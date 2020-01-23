@@ -106,7 +106,7 @@ HYPRE_IJVectorCreate( MPI_Comm        comm,
       if (recv_buf[i2+1] != (recv_buf[i2+2]-1))
       {
          /*hypre_printf("Inconsistent partitioning -- HYPRE_IJVectorCreate\n");  */
-	 hypre_error(HYPRE_ERROR_GENERIC);
+         hypre_error(HYPRE_ERROR_GENERIC);
          hypre_TFree(info, HYPRE_MEMORY_HOST);
          hypre_TFree(recv_buf, HYPRE_MEMORY_HOST);
          hypre_TFree(partitioning, HYPRE_MEMORY_HOST);
@@ -114,7 +114,9 @@ HYPRE_IJVectorCreate( MPI_Comm        comm,
          return hypre_error_flag;
       }
       else
-	 partitioning[i+1] = recv_buf[i2+2];
+      {
+         partitioning[i+1] = recv_buf[i2+2];
+      }
    }
    i2 = (num_procs-1)*2;
    partitioning[num_procs] = recv_buf[i2+1]+1;
@@ -157,14 +159,18 @@ HYPRE_IJVectorDestroy( HYPRE_IJVector vector )
    }
 
    if (hypre_IJVectorPartitioning(vec))
+   {
       hypre_TFree(hypre_IJVectorPartitioning(vec), HYPRE_MEMORY_HOST);
+   }
 
    if (hypre_IJVectorAssumedPart(vec))
-	   hypre_AssumedPartitionDestroy((hypre_IJAssumedPart*)hypre_IJVectorAssumedPart(vec));
+   {
+      hypre_AssumedPartitionDestroy((hypre_IJAssumedPart*)hypre_IJVectorAssumedPart(vec));
+   }
 
    if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
    {
-      hypre_IJVectorDestroyPar(vec) ;
+      hypre_IJVectorDestroyPar(vec);
       if (hypre_IJVectorTranslator(vec))
       {
          hypre_AuxParVectorDestroy((hypre_AuxParVector *)
@@ -200,9 +206,39 @@ HYPRE_IJVectorInitialize( HYPRE_IJVector vector )
    if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
    {
       if (!hypre_IJVectorObject(vec))
+      {
          hypre_IJVectorCreatePar(vec, hypre_IJVectorPartitioning(vec));
+      }
 
       hypre_IJVectorInitializePar(vec);
+   }
+   else
+   {
+      hypre_error_in_arg(1);
+   }
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+HYPRE_IJVectorInitialize_v2( HYPRE_IJVector vector, HYPRE_Int memory_location )
+{
+   hypre_IJVector *vec = (hypre_IJVector *) vector;
+
+   if (!vec)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
+   {
+      if (!hypre_IJVectorObject(vec))
+      {
+         hypre_IJVectorCreatePar(vec, hypre_IJVectorPartitioning(vec));
+      }
+
+      hypre_IJVectorInitializePar_v2(vec, memory_location);
    }
    else
    {
@@ -265,9 +301,21 @@ HYPRE_IJVectorSetValues( HYPRE_IJVector        vector,
       return hypre_error_flag;
    }
 
+   HYPRE_Int exec = hypre_GetExecPolicy1( hypre_IJVectorMemoryLocation(vector) );
+   hypre_assert(exec != HYPRE_EXEC_UNSET);
+
    if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
    {
-      return( hypre_IJVectorSetValuesPar(vec, nvalues, indices, values) );
+      if (exec == HYPRE_EXEC_HOST)
+      {
+         return( hypre_IJVectorSetValuesPar(vec, nvalues, indices, values) );
+      }
+#if defined(HYPRE_USING_CUDA)
+      else
+      {
+         return ( hypre_IJVectorSetAddValuesParDevice(vec, nvalues, indices, values, "set") );
+      }
+#endif
    }
    else
    {
@@ -309,9 +357,21 @@ HYPRE_IJVectorAddToValues( HYPRE_IJVector        vector,
       return hypre_error_flag;
    }
 
+   HYPRE_Int exec = hypre_GetExecPolicy1( hypre_IJVectorMemoryLocation(vector) );
+   hypre_assert(exec != HYPRE_EXEC_UNSET);
+
    if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
    {
-      return( hypre_IJVectorAddToValuesPar(vec, nvalues, indices, values) );
+      if (exec == HYPRE_EXEC_HOST)
+      {
+         return ( hypre_IJVectorAddToValuesPar(vec, nvalues, indices, values) );
+      }
+#if defined(HYPRE_USING_CUDA)
+      else
+      {
+         return ( hypre_IJVectorSetAddValuesParDevice(vec, nvalues, indices, values, "add") );
+      }
+#endif
    }
    else
    {
@@ -326,7 +386,7 @@ HYPRE_IJVectorAddToValues( HYPRE_IJVector        vector,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_IJVectorAssemble( HYPRE_IJVector  vector )
+HYPRE_IJVectorAssemble( HYPRE_IJVector vector )
 {
    hypre_IJVector *vec = (hypre_IJVector *) vector;
 
@@ -336,9 +396,21 @@ HYPRE_IJVectorAssemble( HYPRE_IJVector  vector )
       return hypre_error_flag;
    }
 
+   HYPRE_Int exec = hypre_GetExecPolicy1( hypre_IJVectorMemoryLocation(vector) );
+   hypre_assert(exec != HYPRE_EXEC_UNSET);
+
    if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
    {
-      return( hypre_IJVectorAssemblePar(vec) );
+      if (exec == HYPRE_EXEC_HOST)
+      {
+         return( hypre_IJVectorAssemblePar(vec) );
+      }
+#if defined(HYPRE_USING_CUDA)
+      else
+      {
+         return( hypre_IJVectorAssembleParDevice(vec) );
+      }
+#endif
    }
    else
    {
@@ -398,7 +470,7 @@ HYPRE_IJVectorGetValues( HYPRE_IJVector      vector,
 
 HYPRE_Int
 HYPRE_IJVectorSetMaxOffProcElmts( HYPRE_IJVector vector,
-				  HYPRE_Int      max_off_proc_elmts )
+                                  HYPRE_Int      max_off_proc_elmts )
 {
    hypre_IJVector *vec = (hypre_IJVector *) vector;
 
@@ -548,7 +620,8 @@ HYPRE_IJVectorRead( const char     *filename,
    HYPRE_IJVectorCreate(comm, jlower, jupper, &vector);
 
    HYPRE_IJVectorSetObjectType(vector, type);
-   HYPRE_IJVectorInitialize(vector);
+
+   HYPRE_IJVectorInitialize_v2(vector, HYPRE_MEMORY_HOST);
 
    /* It is important to ensure that whitespace follows the index value to help
     * catch mistakes in the input file.  This is done with %*[ \t].  Using a
@@ -562,9 +635,13 @@ HYPRE_IJVectorRead( const char     *filename,
          return hypre_error_flag;
       }
       if (j < jlower || j > jupper)
-	 HYPRE_IJVectorAddToValues(vector, 1, &j, &value);
+      {
+         HYPRE_IJVectorAddToValues(vector, 1, &j, &value);
+      }
       else
-	 HYPRE_IJVectorSetValues(vector, 1, &j, &value);
+      {
+         HYPRE_IJVectorSetValues(vector, 1, &j, &value);
+      }
    }
 
    HYPRE_IJVectorAssemble(vector);
