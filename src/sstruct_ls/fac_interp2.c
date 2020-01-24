@@ -432,6 +432,12 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
                              hypre_BoxManEntryIMax(crse_entry));
          if(crse_proc == myproc)
          {
+            for (k= ndim; k< HYPRE_MAXDIM; k++)
+            {
+                hypre_BoxIMinD(&cbox, k)= 0;
+                hypre_BoxIMaxD(&cbox, k)= 0;
+            }
+
             hypre_AppendBox(&cbox,
                             hypre_BoxArrayArrayBoxArray(identity_arrayboxes[vars], ci));
 
