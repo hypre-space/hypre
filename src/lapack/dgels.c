@@ -1,9 +1,14 @@
+/* Copyright (c) 1992-2008 The University of Tennessee.  All rights reserved.
+ * See file COPYING in this directory for details. */
 
-#include "../blas/hypre_blas.h"
-#include "hypre_lapack.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "f2c.h"
+#include "hypre_lapack.h"
 
-/* Subroutine */ HYPRE_Int dgels_(char *trans, integer *m, integer *n, integer *
+/* Subroutine */ integer dgels_(char *trans, integer *m, integer *n, integer *
 	nrhs, doublereal *a, integer *lda, doublereal *b, integer *ldb, 
 	doublereal *work, integer *lwork, integer *info)
 {
@@ -131,17 +136,17 @@
     static logical tpsd;
     static integer i__, j, iascl, ibscl;
     extern logical lsame_(const char *,const char *);
-    extern /* Subroutine */ HYPRE_Int dtrsm_(const char *,const char *,const char *,const char *, 
+    extern /* Subroutine */ integer dtrsm_(const char *,const char *,const char *,const char *, 
 	    integer *, integer *, doublereal *, doublereal *, integer *, 
 	    doublereal *, integer *);
     static integer wsize;
     static doublereal rwork[1];
-    extern /* Subroutine */ HYPRE_Int dlabad_(doublereal *, doublereal *);
+    extern /* Subroutine */ integer dlabad_(doublereal *, doublereal *);
     static integer nb;
     extern doublereal dlamch_(const char *), dlange_(const char *, integer *, 
 	    integer *, doublereal *, integer *, doublereal *);
     static integer mn;
-    extern /* Subroutine */ HYPRE_Int dgelqf_(integer *, integer *, doublereal *, 
+    extern /* Subroutine */ integer dgelqf_(integer *, integer *, doublereal *, 
 	    integer *, doublereal *, doublereal *, integer *, integer *), 
 	    dlascl_(const char *, integer *, integer *, doublereal *, doublereal *, 
 	    integer *, integer *, doublereal *, integer *, integer *),
@@ -153,7 +158,7 @@
 	    integer *, integer *, ftnlen, ftnlen);
     static integer scllen;
     static doublereal bignum;
-    extern /* Subroutine */ HYPRE_Int dormlq_(const char *,const char *, integer *, integer *, 
+    extern /* Subroutine */ integer dormlq_(const char *,const char *, integer *, integer *, 
 	    integer *, doublereal *, integer *, doublereal *, doublereal *, 
 	    integer *, doublereal *, integer *, integer *), 
 	    dormqr_(const char *,const char *, integer *, integer *, integer *, 
@@ -473,4 +478,6 @@ L50:
 
 #undef b_ref
 
-
+#ifdef __cplusplus
+}
+#endif

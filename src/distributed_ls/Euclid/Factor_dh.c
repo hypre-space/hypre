@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_Euclid.h"
 /* #include "Factor_dh.h" */
@@ -379,7 +374,7 @@ static HYPRE_Int setup_receives_private(Factor_dh mat, HYPRE_Int *beg_rows, HYPR
     hypre_MPI_Request_free(&request); 
 
     /* set up persistent comms for receiving the values from this_pe */
-    hypre_MPI_Recv_init(recvBuf+i, j-i, hypre_MPI_DOUBLE, this_pe, 555,
+    hypre_MPI_Recv_init(recvBuf+i, j-i, hypre_MPI_REAL, this_pe, 555,
                         comm_dh, req+num_recv); 
     ++num_recv;
   }
@@ -457,7 +452,7 @@ static void setup_sends_private(Factor_dh mat, HYPRE_Int *inlist,
       ++count;
 
       /* Set up the send */
-      hypre_MPI_Send_init(sendBuf, inlist[i], hypre_MPI_DOUBLE, i, 555, comm_dh, sendReq); 
+      hypre_MPI_Send_init(sendBuf, inlist[i], hypre_MPI_REAL, i, 555, comm_dh, sendReq); 
     }
   }
 
@@ -765,7 +760,7 @@ for (i=0; i<m+offsetLo+offsetHi; ++i) {
   }
 
   /* copy solution from work vector lhs vector */
-  memcpy(lhs, work_x, m*sizeof(HYPRE_Real));
+  hypre_TMemcpy(lhs,  work_x, HYPRE_Real, m, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
 
   if (debug) {
     hypre_fprintf(logFile, "\nFACT solution: ");
@@ -946,18 +941,18 @@ void Factor_dhReallocate(Factor_dh F, HYPRE_Int used, HYPRE_Int additional)
     F->alloc = alloc;
     tmpI = F->cval;
     F->cval = (HYPRE_Int*)MALLOC_DH(alloc*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-    memcpy(F->cval, tmpI, used*sizeof(HYPRE_Int));
+    hypre_TMemcpy(F->cval,  tmpI, HYPRE_Int, used, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
     FREE_DH(tmpI); CHECK_V_ERROR;
     if (F->fill != NULL) {
       tmpI = F->fill;
       F->fill = (HYPRE_Int*)MALLOC_DH(alloc*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-      memcpy(F->fill, tmpI, used*sizeof(HYPRE_Int));
+      hypre_TMemcpy(F->fill,  tmpI, HYPRE_Int, used, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
       FREE_DH(tmpI); CHECK_V_ERROR;
     }
     if (F->aval != NULL) {
       REAL_DH *tmpF = F->aval;
       F->aval = (REAL_DH*)MALLOC_DH(alloc*sizeof(REAL_DH)); CHECK_V_ERROR;
-      memcpy(F->aval, tmpF, used*sizeof(REAL_DH));
+      hypre_TMemcpy(F->aval,  tmpF, REAL_DH, used, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
       FREE_DH(tmpF); CHECK_V_ERROR;
     }
   }
@@ -1128,7 +1123,7 @@ HYPRE_Real Factor_dhMaxPivotInverse(Factor_dh mat)
   if (np_dh == 1) {
     minGlobal = min;
   } else {
-    hypre_MPI_Reduce(&min, &minGlobal, 1, hypre_MPI_DOUBLE, hypre_MPI_MIN, 0, comm_dh);
+    hypre_MPI_Reduce(&min, &minGlobal, 1, hypre_MPI_REAL, hypre_MPI_MIN, 0, comm_dh);
   }
 
   if (minGlobal == 0) {
@@ -1155,7 +1150,7 @@ HYPRE_Real Factor_dhMaxValue(Factor_dh mat)
   if (np_dh == 1) {
     maxGlobal = max;
   } else {
-    hypre_MPI_Reduce(&max, &maxGlobal, 1, hypre_MPI_DOUBLE, hypre_MPI_MAX, 0, comm_dh);
+    hypre_MPI_Reduce(&max, &maxGlobal, 1, hypre_MPI_REAL, hypre_MPI_MAX, 0, comm_dh);
   }
   END_FUNC_VAL(maxGlobal)
 }
@@ -1185,7 +1180,7 @@ HYPRE_Real Factor_dhCondEst(Factor_dh mat, Euclid_dh ctx)
   if (np_dh == 1) {
     maxGlobal = max;
   } else {
-    hypre_MPI_Reduce(&max, &maxGlobal, 1, hypre_MPI_DOUBLE, hypre_MPI_MAX, 0, comm_dh);
+    hypre_MPI_Reduce(&max, &maxGlobal, 1, hypre_MPI_REAL, hypre_MPI_MAX, 0, comm_dh);
   }
   END_FUNC_VAL(maxGlobal)
 }

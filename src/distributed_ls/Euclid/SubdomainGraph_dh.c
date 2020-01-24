@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_Euclid.h"
 /* #include "SubdomainGraph_dh.h" */
@@ -322,7 +317,7 @@ void init_seq_private(SubdomainGraph_dh s, HYPRE_Int blocks, bool bj, void *A)
     for (i=0; i<blocks; ++i) s->row_count[i] = rpp;
     s->row_count[blocks-1] = m - rpp*(blocks-1);
   }
-  memcpy(s->beg_rowP, s->beg_row, blocks*sizeof(HYPRE_Int));
+  hypre_TMemcpy(s->beg_rowP,  s->beg_row, HYPRE_Int, blocks, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
 
 
   /*-----------------------------------------------------------------
@@ -501,7 +496,7 @@ void init_mpi_private(SubdomainGraph_dh s, HYPRE_Int blocks, bool bj, void *A)
   if (!bj) {
     hypre_MPI_Allgather(&beg_row, 1, HYPRE_MPI_INT, s->beg_row, 1, HYPRE_MPI_INT, comm_dh);
     hypre_MPI_Allgather(&m, 1, HYPRE_MPI_INT, s->row_count, 1, HYPRE_MPI_INT, comm_dh);
-    memcpy(s->beg_rowP, s->beg_row, np_dh*sizeof(HYPRE_Int));
+    hypre_TMemcpy(s->beg_rowP,  s->beg_row, HYPRE_Int, np_dh, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
   } else {
     s->beg_row[myid_dh] = beg_row;
     s->beg_rowP[myid_dh] = beg_row;
@@ -1012,7 +1007,7 @@ hypre_fprintf(stderr, "\n");
     if (nabors[i]) myNabors[nz++] = i;
   }
   s->allCount = nz;
-  memcpy(nabors, myNabors, nz*sizeof(HYPRE_Int));
+  hypre_TMemcpy(nabors,  myNabors, HYPRE_Int, nz, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
 
   if (marker != NULL) { FREE_DH(marker); CHECK_V_ERROR; }
   if (myNabors != NULL) { FREE_DH(myNabors); CHECK_V_ERROR; }

@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -18,7 +13,6 @@
 
 #include "csr_block_matrix.h"
 #include "../seq_mv/seq_mv.h"
-#include <assert.h>
 
 /*--------------------------------------------------------------------------
  * hypre_CSRBlockMatrixMatvec
@@ -50,11 +44,11 @@ hypre_CSRBlockMatrixMatvec(HYPRE_Complex alpha, hypre_CSRBlockMatrix *A,
     *  ierr = 2 if the length of Y doesn't equal the number of rows
     *  of A, and ierr = 3 if both are true.
     *
-    *  Because temporary vectors are often used in Matvec, none of 
+    *  Because temporary vectors are often used in Matvec, none of
     *  these conditions terminates processing, and the ierr flag
     *  is informational only.
     *--------------------------------------------------------------------*/
- 
+
    if (num_cols*blk_size != x_size) ierr = 1;
    if (num_rows*blk_size != y_size) ierr = 2;
    if (num_cols*blk_size != x_size && num_rows*blk_size != y_size) ierr = 3;
@@ -76,9 +70,9 @@ hypre_CSRBlockMatrixMatvec(HYPRE_Complex alpha, hypre_CSRBlockMatrix *A,
    /*-----------------------------------------------------------------------
     * y = (beta/alpha)*y
     *-----------------------------------------------------------------------*/
-   
+
    temp = beta / alpha;
-   
+
    if (temp != 1.0)
    {
       if (temp == 0.0)
@@ -165,21 +159,21 @@ hypre_CSRBlockMatrixMatvecT( HYPRE_Complex         alpha,
    HYPRE_Int         y_size = hypre_VectorSize(y);
 
    HYPRE_Complex     temp;
-   
+
    HYPRE_Int         i, j, jj;
    HYPRE_Int         ierr  = 0;
    HYPRE_Int         b1, b2;
-   
+
    HYPRE_Int         blk_size = hypre_CSRBlockMatrixBlockSize(A);
    HYPRE_Int         bnnz=blk_size*blk_size;
 
    /*---------------------------------------------------------------------
     *  Check for size compatibility.  MatvecT returns ierr = 1 if
     *  length of X doesn't equal the number of rows of A,
-    *  ierr = 2 if the length of Y doesn't equal the number of 
+    *  ierr = 2 if the length of Y doesn't equal the number of
     *  columns of A, and ierr = 3 if both are true.
     *
-    *  Because temporary vectors are often used in MatvecT, none of 
+    *  Because temporary vectors are often used in MatvecT, none of
     *  these conditions terminates processing, and the ierr flag
     *  is informational only.
     *--------------------------------------------------------------------*/
@@ -212,7 +206,7 @@ hypre_CSRBlockMatrixMatvecT( HYPRE_Complex         alpha,
     *-----------------------------------------------------------------------*/
 
    temp = beta / alpha;
-   
+
    if (temp != 1.0)
    {
       if (temp == 0.0)
@@ -236,11 +230,11 @@ hypre_CSRBlockMatrixMatvecT( HYPRE_Complex         alpha,
    /*-----------------------------------------------------------------
     * y += A^T*x
     *-----------------------------------------------------------------*/
- 
+
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i, jj,j, b1, b2) HYPRE_SMP_SCHEDULE
 #endif
-    
+
    for (i = 0; i < num_rows; i++)
    {
       for (jj = A_i[i]; jj < A_i[i+1]; jj++) /*each nonzero in that row*/
@@ -256,7 +250,7 @@ hypre_CSRBlockMatrixMatvecT( HYPRE_Complex         alpha,
          }
       }
    }
-      
+
    /*-----------------------------------------------------------------
     * y = alpha*y
     *-----------------------------------------------------------------*/

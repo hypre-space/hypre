@@ -1,18 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -29,8 +20,8 @@
 
 HYPRE_Int
 hypre_BoomerAMGCGRelaxWt( void              *amg_vdata, 
-		   	  HYPRE_Int 		     level,
-		   	  HYPRE_Int 		     num_cg_sweeps,
+		   	  HYPRE_Int	     level,
+		   	  HYPRE_Int 	     num_cg_sweeps,
 			  HYPRE_Real 	    *rlx_wt_ptr)
 {
    hypre_ParAMGData *amg_data = (hypre_ParAMGData*) amg_vdata;
@@ -103,8 +94,8 @@ hypre_BoomerAMGCGRelaxWt( void              *amg_vdata,
 
    /* Acquire data and allocate storage */
 
-   tridiag  = hypre_CTAlloc(HYPRE_Real, num_cg_sweeps+1);
-   trioffd  = hypre_CTAlloc(HYPRE_Real, num_cg_sweeps+1);
+   tridiag  = hypre_CTAlloc(HYPRE_Real,  num_cg_sweeps+1, HYPRE_MEMORY_HOST);
+   trioffd  = hypre_CTAlloc(HYPRE_Real,  num_cg_sweeps+1, HYPRE_MEMORY_HOST);
    for (i=0; i < num_cg_sweeps+1; i++)
    {
 	tridiag[i] = 0;
@@ -265,8 +256,8 @@ hypre_BoomerAMGCGRelaxWt( void              *amg_vdata,
          if (Solve_err_flag != 0)
          {
             hypre_ParVectorDestroy(Ptemp);
-            hypre_TFree(tridiag);
-            hypre_TFree(trioffd);
+            hypre_TFree(tridiag, HYPRE_MEMORY_HOST);
+            hypre_TFree(trioffd, HYPRE_MEMORY_HOST);
             return(Solve_err_flag);
          }
       }
@@ -350,8 +341,8 @@ hypre_BoomerAMGCGRelaxWt( void              *amg_vdata,
    if (num_threads > 1)
       hypre_ParVectorDestroy(Qtemp);
 
-   hypre_TFree(tridiag);
-   hypre_TFree(trioffd);
+   hypre_TFree(tridiag, HYPRE_MEMORY_HOST);
+   hypre_TFree(trioffd, HYPRE_MEMORY_HOST);
 
    if (smooth_option > 6 && smooth_option < 10)
    {

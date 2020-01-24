@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #ifndef HYPRE_SSTRUCT_MV_HEADER
 #define HYPRE_SSTRUCT_MV_HEADER
@@ -667,6 +662,47 @@ HYPRE_SStructMatrixAddToBoxValues(HYPRE_SStructMatrix  matrix,
                                   HYPRE_Complex       *values);
 
 /**
+ * Set matrix coefficients a box at a time.  The {\tt values} array is logically
+ * box shaped with value-box extents {\tt vilower} and {\tt viupper} that must
+ * contain the set-box extents {\tt ilower} and {\tt iupper} .  The data in the
+ * {\tt values} array is ordered as in \Ref{HYPRE_SStructMatrixSetBoxValues},
+ * but based on the value-box extents.
+ **/
+HYPRE_Int
+HYPRE_SStructMatrixSetBoxValues2(HYPRE_SStructMatrix  matrix,
+                                 HYPRE_Int            part,
+                                 HYPRE_Int           *ilower,
+                                 HYPRE_Int           *iupper,
+                                 HYPRE_Int            var,
+                                 HYPRE_Int            nentries,
+                                 HYPRE_Int           *entries,
+                                 HYPRE_Int           *vilower,
+                                 HYPRE_Int           *viupper,
+                                 HYPRE_Complex       *values);
+
+/**
+ * Add to matrix coefficients a box at a time.  The data in {\tt values} is
+ * ordered as in \Ref{HYPRE_SStructMatrixSetBoxValues2}.
+ **/
+HYPRE_Int
+HYPRE_SStructMatrixAddToBoxValues2(HYPRE_SStructMatrix  matrix,
+                                   HYPRE_Int            part,
+                                   HYPRE_Int           *ilower,
+                                   HYPRE_Int           *iupper,
+                                   HYPRE_Int            var,
+                                   HYPRE_Int            nentries,
+                                   HYPRE_Int           *entries,
+                                   HYPRE_Int           *vilower,
+                                   HYPRE_Int           *viupper,
+                                   HYPRE_Complex       *values);
+
+/**
+ * Finalize the construction of the matrix before using.
+ **/
+HYPRE_Int
+HYPRE_SStructMatrixAssemble(HYPRE_SStructMatrix matrix);
+
+/**
  * Get matrix coefficients a box at a time.  The data in {\tt values} is
  * ordered as in \Ref{HYPRE_SStructMatrixSetBoxValues}.
  *
@@ -686,10 +722,20 @@ HYPRE_SStructMatrixGetBoxValues(HYPRE_SStructMatrix  matrix,
                                 HYPRE_Complex       *values);
 
 /**
- * Finalize the construction of the matrix before using.
+ * Get matrix coefficients a box at a time.  The data in {\tt values} is
+ * ordered as in \Ref{HYPRE_SStructMatrixSetBoxValues2}.
  **/
 HYPRE_Int
-HYPRE_SStructMatrixAssemble(HYPRE_SStructMatrix matrix);
+HYPRE_SStructMatrixGetBoxValues2(HYPRE_SStructMatrix  matrix,
+                                 HYPRE_Int            part,
+                                 HYPRE_Int           *ilower,
+                                 HYPRE_Int           *iupper,
+                                 HYPRE_Int            var,
+                                 HYPRE_Int            nentries,
+                                 HYPRE_Int           *entries,
+                                 HYPRE_Int           *vilower,
+                                 HYPRE_Int           *viupper,
+                                 HYPRE_Complex       *values);
 
 /**
  * Define symmetry properties for the stencil entries in the matrix.  The
@@ -897,6 +943,43 @@ HYPRE_SStructVectorAddToBoxValues(HYPRE_SStructVector  vector,
                                   HYPRE_Complex       *values);
 
 /**
+ * Set vector coefficients a box at a time.  The {\tt values} array is logically
+ * box shaped with value-box extents {\tt vilower} and {\tt viupper} that must
+ * contain the set-box extents {\tt ilower} and {\tt iupper} .  The data in the
+ * {\tt values} array is ordered as in \Ref{HYPRE_SStructVectorSetBoxValues},
+ * but based on the value-box extents.
+ **/
+HYPRE_Int
+HYPRE_SStructVectorSetBoxValues2(HYPRE_SStructVector  vector,
+                                 HYPRE_Int            part,
+                                 HYPRE_Int           *ilower,
+                                 HYPRE_Int           *iupper,
+                                 HYPRE_Int            var,
+                                 HYPRE_Int           *vilower,
+                                 HYPRE_Int           *viupper,
+                                 HYPRE_Complex       *values);
+
+/**
+ * Add to vector coefficients a box at a time.  The data in {\tt values} is
+ * ordered as in \Ref{HYPRE_SStructVectorSetBoxValues2}.
+ **/
+HYPRE_Int
+HYPRE_SStructVectorAddToBoxValues2(HYPRE_SStructVector  vector,
+                                   HYPRE_Int            part,
+                                   HYPRE_Int           *ilower,
+                                   HYPRE_Int           *iupper,
+                                   HYPRE_Int            var,
+                                   HYPRE_Int           *vilower,
+                                   HYPRE_Int           *viupper,
+                                   HYPRE_Complex       *values);
+
+/**
+ * Finalize the construction of the vector before using.
+ **/
+HYPRE_Int
+HYPRE_SStructVectorAssemble(HYPRE_SStructVector vector);
+
+/**
  * Get vector coefficients a box at a time.  The data in {\tt values} is ordered
  * as in \Ref{HYPRE_SStructVectorSetBoxValues}.  Users must first call the
  * routine \Ref{HYPRE_SStructVectorGather} to ensure that data owned by multiple
@@ -914,10 +997,18 @@ HYPRE_SStructVectorGetBoxValues(HYPRE_SStructVector  vector,
                                 HYPRE_Complex       *values);
 
 /**
- * Finalize the construction of the vector before using.
+ * Get vector coefficients a box at a time.  The data in {\tt values} is ordered
+ * as in \Ref{HYPRE_SStructVectorSetBoxValues2}.
  **/
 HYPRE_Int
-HYPRE_SStructVectorAssemble(HYPRE_SStructVector vector);
+HYPRE_SStructVectorGetBoxValues2(HYPRE_SStructVector  vector,
+                                 HYPRE_Int            part,
+                                 HYPRE_Int           *ilower,
+                                 HYPRE_Int           *iupper,
+                                 HYPRE_Int            var,
+                                 HYPRE_Int           *vilower,
+                                 HYPRE_Int           *viupper,
+                                 HYPRE_Complex       *values);
 
 /**
  * Gather vector data so that efficient {\tt GetValues} can be done.  This

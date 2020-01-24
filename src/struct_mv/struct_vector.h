@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -31,7 +26,7 @@ typedef struct hypre_StructVector_struct
 
    hypre_BoxArray       *data_space;
 
-   HYPRE_Complex        *data;         /* Pointer to vector data */
+   HYPRE_Complex        *data;         /* Pointer to vector data on device*/
    HYPRE_Int             data_alloced; /* Boolean used for freeing data */
    HYPRE_Int             data_size;    /* Size of vector data */
    HYPRE_Int            *data_indices; /* num-boxes array of indices into
@@ -43,7 +38,7 @@ typedef struct hypre_StructVector_struct
                                                      * direction */
    HYPRE_Int             bghost_not_clear; /* Are boundary ghosts clear? */
                       
-   HYPRE_Int             global_size;  /* Total number coefficients */
+   HYPRE_BigInt          global_size;  /* Total number coefficients */
 
    HYPRE_Int             ref_count;
 

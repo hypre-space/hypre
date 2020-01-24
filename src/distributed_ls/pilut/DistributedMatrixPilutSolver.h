@@ -1,24 +1,15 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #ifndef _DISTRIBUTED_MATRIX_PILUT_SOLVER_HEADER
 #define _DISTRIBUTED_MATRIX_PILUT_SOLVER_HEADER
 
 #include "HYPRE_config.h"
-#include "general.h"
+#include "hypre_general.h"
 #include "_hypre_utilities.h"
 /*
 #ifdef HYPRE_DEBUG
@@ -114,14 +105,7 @@ HYPRE_Int Ul_timer;
 #define lu_recv (globals->lu_recv)
 
 
-
 #include "./const.h"
-
-
-/* prototype definitions for BLAS calls that are used */
-HYPRE_Real SNRM2( HYPRE_Int *, HYPRE_Real *, HYPRE_Int *);
-HYPRE_Real SDOT(HYPRE_Int *, HYPRE_Real *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *);
-
 
 /*--------------------------------------------------------------------------
  * pilut structures

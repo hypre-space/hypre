@@ -1,8 +1,14 @@
+/* Copyright (c) 1992-2008 The University of Tennessee.  All rights reserved.
+ * See file COPYING in this directory for details. */
 
-#include "hypre_lapack.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "f2c.h"
+#include "hypre_lapack.h"
 
-/* Subroutine */ HYPRE_Int dgebd2_(integer *m, integer *n, doublereal *a, integer *
+/* Subroutine */ integer dgebd2_(integer *m, integer *n, doublereal *a, integer *
 	lda, doublereal *d__, doublereal *e, doublereal *tauq, doublereal *
 	taup, doublereal *work, integer *info)
 {
@@ -134,7 +140,7 @@
     integer a_dim1, a_offset, i__1, i__2, i__3, i__4;
     /* Local variables */
     static integer i__;
-    extern /* Subroutine */ HYPRE_Int dlarf_(const char *, integer *, integer *, 
+    extern /* Subroutine */ integer dlarf_(const char *, integer *, integer *, 
 	    doublereal *, integer *, doublereal *, doublereal *, integer *, 
 	    doublereal *), dlarfg_(integer *, doublereal *, 
 	    doublereal *, integer *, doublereal *), xerbla_(const char *, integer *);
@@ -276,4 +282,6 @@
 
 #undef a_ref
 
-
+#ifdef __cplusplus
+}
+#endif

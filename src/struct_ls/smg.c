@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_struct_ls.h"
 #include "smg.h"
@@ -21,7 +16,7 @@ hypre_SMGCreate( MPI_Comm  comm )
 {
    hypre_SMGData *smg_data;
 
-   smg_data = hypre_CTAlloc(hypre_SMGData, 1);
+   smg_data = hypre_CTAlloc(hypre_SMGData,  1, HYPRE_MEMORY_HOST);
 
    (smg_data -> comm)        = comm;
    (smg_data -> time_index)  = hypre_InitializeTiming("SMG");
@@ -43,7 +38,9 @@ hypre_SMGCreate( MPI_Comm  comm )
 
    /* initialize */
    (smg_data -> num_levels) = -1;
-
+#if defined(HYPRE_USING_CUDA)
+   (smg_data -> devicelevel) = 200;
+#endif
    return (void *) smg_data;
 }
 
@@ -53,7 +50,7 @@ hypre_SMGCreate( MPI_Comm  comm )
 HYPRE_Int
 hypre_SMGDestroy( void *smg_vdata )
 {
-	hypre_SMGData *smg_data = (hypre_SMGData *)smg_vdata;
+   hypre_SMGData *smg_data = (hypre_SMGData *)smg_vdata;
 
    HYPRE_Int l;
 
@@ -63,8 +60,8 @@ hypre_SMGDestroy( void *smg_vdata )
    {
       if ((smg_data -> logging) > 0)
       {
-         hypre_TFree(smg_data -> norms);
-         hypre_TFree(smg_data -> rel_norms);
+         hypre_TFree(smg_data -> norms, HYPRE_MEMORY_HOST);
+         hypre_TFree(smg_data -> rel_norms, HYPRE_MEMORY_HOST);
       }
 
       if ((smg_data -> num_levels) > -1)
@@ -81,10 +78,10 @@ hypre_SMGDestroy( void *smg_vdata )
          {
             hypre_SMGResidualDestroy(smg_data -> residual_data_l[l]);
          }
-         hypre_TFree(smg_data -> relax_data_l);
-         hypre_TFree(smg_data -> residual_data_l);
-         hypre_TFree(smg_data -> restrict_data_l);
-         hypre_TFree(smg_data -> interp_data_l);
+         hypre_TFree(smg_data -> relax_data_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(smg_data -> residual_data_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(smg_data -> restrict_data_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(smg_data -> interp_data_l, HYPRE_MEMORY_HOST);
  
          hypre_StructVectorDestroy(smg_data -> tb_l[0]);
          hypre_StructVectorDestroy(smg_data -> tx_l[0]);
@@ -111,20 +108,20 @@ hypre_SMGDestroy( void *smg_vdata )
             hypre_StructVectorDestroy(smg_data -> tb_l[l+1]);
             hypre_StructVectorDestroy(smg_data -> tx_l[l+1]);
          }
-         hypre_SharedTFree(smg_data -> data);
-         hypre_TFree(smg_data -> grid_l);
-         hypre_TFree(smg_data -> PT_grid_l);
-         hypre_TFree(smg_data -> A_l);
-         hypre_TFree(smg_data -> PT_l);
-         hypre_TFree(smg_data -> R_l);
-         hypre_TFree(smg_data -> b_l);
-         hypre_TFree(smg_data -> x_l);
-         hypre_TFree(smg_data -> tb_l);
-         hypre_TFree(smg_data -> tx_l);
+          hypre_TFree(smg_data -> data, HYPRE_MEMORY_DEVICE);
+         hypre_TFree(smg_data -> grid_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(smg_data -> PT_grid_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(smg_data -> A_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(smg_data -> PT_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(smg_data -> R_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(smg_data -> b_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(smg_data -> x_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(smg_data -> tb_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(smg_data -> tx_l, HYPRE_MEMORY_HOST);
       }
  
       hypre_FinalizeTiming(smg_data -> time_index);
-      hypre_TFree(smg_data);
+      hypre_TFree(smg_data, HYPRE_MEMORY_HOST);
    }
    
    HYPRE_ANNOTATION_END("SMG.destroy");
@@ -468,7 +465,6 @@ hypre_SMGSetStructVectorConstantValues( hypre_StructVector *vector,
 {
    hypre_Box          *v_data_box;
 
-   HYPRE_Int           vi;
    HYPRE_Real         *vp;
 
    hypre_Box          *box;
@@ -492,19 +488,42 @@ hypre_SMGSetStructVectorConstantValues( hypre_StructVector *vector,
 
       hypre_BoxGetStrideSize(box, stride, loop_size);
 
+#define DEVICE_VAR is_device_ptr(vp)
       hypre_BoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
                           v_data_box, start, stride, vi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,vi) HYPRE_SMP_SCHEDULE
-#endif
-      hypre_BoxLoop1For(vi)
       {
          vp[vi] = values;
       }
       hypre_BoxLoop1End(vi);
+#undef DEVICE_VAR
    }
 
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
 
+HYPRE_Int
+hypre_StructSMGSetMaxLevel( void   *smg_vdata,
+			    HYPRE_Int   max_level  )
+{
+   hypre_SMGData *smg_data = (hypre_SMGData *)smg_vdata;
+
+   (smg_data -> max_levels) = max_level;
+ 
+   return hypre_error_flag;
+}
+
+#if defined(HYPRE_USING_CUDA)
+HYPRE_Int
+hypre_StructSMGSetDeviceLevel( void   *smg_vdata,
+			       HYPRE_Int   device_level  )
+{
+   hypre_SMGData *smg_data = (hypre_SMGData *)smg_vdata;
+
+   (smg_data -> devicelevel) = device_level;
+ 
+   return hypre_error_flag;
+}
+#endif

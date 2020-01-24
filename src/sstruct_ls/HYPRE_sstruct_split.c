@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -61,7 +56,7 @@ HYPRE_SStructSplitCreate( MPI_Comm             comm,
 {
    hypre_SStructSolver *solver;
 
-   solver = hypre_TAlloc(hypre_SStructSolver, 1);
+   solver = hypre_TAlloc(hypre_SStructSolver,  1, HYPRE_MEMORY_HOST);
 
    (solver -> y)               = NULL;
    (solver -> nparts)          = 0;
@@ -124,23 +119,23 @@ HYPRE_SStructSplitDestroy( HYPRE_SStructSolver solver )
                   hypre_StructMatvecDestroy(smatvec_data[part][vi][vj]);
                }
             }
-            hypre_TFree(smatvec_data[part][vi]);
+            hypre_TFree(smatvec_data[part][vi], HYPRE_MEMORY_HOST);
             sdestroy = (HYPRE_Int (*)(void *))ssolver_destroy[part][vi];
             sdata = ssolver_data[part][vi];
             sdestroy(sdata);
          }
-         hypre_TFree(smatvec_data[part]);
-         hypre_TFree(ssolver_solve[part]);
-         hypre_TFree(ssolver_destroy[part]);
-         hypre_TFree(ssolver_data[part]);
+         hypre_TFree(smatvec_data[part], HYPRE_MEMORY_HOST);
+         hypre_TFree(ssolver_solve[part], HYPRE_MEMORY_HOST);
+         hypre_TFree(ssolver_destroy[part], HYPRE_MEMORY_HOST);
+         hypre_TFree(ssolver_data[part], HYPRE_MEMORY_HOST);
       }
-      hypre_TFree(nvars);
-      hypre_TFree(smatvec_data);
-      hypre_TFree(ssolver_solve);
-      hypre_TFree(ssolver_destroy);
-      hypre_TFree(ssolver_data);
+      hypre_TFree(nvars, HYPRE_MEMORY_HOST);
+      hypre_TFree(smatvec_data, HYPRE_MEMORY_HOST);
+      hypre_TFree(ssolver_solve, HYPRE_MEMORY_HOST);
+      hypre_TFree(ssolver_destroy, HYPRE_MEMORY_HOST);
+      hypre_TFree(ssolver_data, HYPRE_MEMORY_HOST);
       hypre_SStructMatvecDestroy(solver -> matvec_data);
-      hypre_TFree(solver);
+      hypre_TFree(solver, HYPRE_MEMORY_HOST);
    }
 
    return hypre_error_flag;
@@ -188,11 +183,11 @@ HYPRE_SStructSplitSetup( HYPRE_SStructSolver solver,
    HYPRE_SStructVectorAssemble(y);
 
    nparts = hypre_SStructMatrixNParts(A);
-   nvars = hypre_TAlloc(HYPRE_Int, nparts);
-   smatvec_data    = hypre_TAlloc(void ***, nparts);
-   ssolver_solve   = (HYPRE_Int (***)()) hypre_MAlloc((sizeof(HYPRE_Int (**)()) * nparts));
-   ssolver_destroy = (HYPRE_Int (***)()) hypre_MAlloc((sizeof(HYPRE_Int (**)()) * nparts));
-   ssolver_data    = hypre_TAlloc(void **, nparts);
+   nvars = hypre_TAlloc(HYPRE_Int,  nparts, HYPRE_MEMORY_HOST);
+   smatvec_data    = hypre_TAlloc(void ***,  nparts, HYPRE_MEMORY_HOST);
+   ssolver_solve   = (HYPRE_Int (***)()) hypre_MAlloc((sizeof(HYPRE_Int (**)()) * nparts), HYPRE_MEMORY_HOST);
+   ssolver_destroy = (HYPRE_Int (***)()) hypre_MAlloc((sizeof(HYPRE_Int (**)()) * nparts), HYPRE_MEMORY_HOST);
+   ssolver_data    = hypre_TAlloc(void **,  nparts, HYPRE_MEMORY_HOST);
    for (part = 0; part < nparts; part++)
    {
       pA = hypre_SStructMatrixPMatrix(A, part);
@@ -200,15 +195,15 @@ HYPRE_SStructSplitSetup( HYPRE_SStructSolver solver,
       py = hypre_SStructVectorPVector(y, part);
       nvars[part] = hypre_SStructPMatrixNVars(pA);
 
-      smatvec_data[part]    = hypre_TAlloc(void **, nvars[part]);
+      smatvec_data[part]    = hypre_TAlloc(void **,  nvars[part], HYPRE_MEMORY_HOST);
       ssolver_solve[part]   =
-         (HYPRE_Int (**)()) hypre_MAlloc((sizeof(HYPRE_Int (*)()) * nvars[part]));
+         (HYPRE_Int (**)()) hypre_MAlloc((sizeof(HYPRE_Int (*)()) * nvars[part]), HYPRE_MEMORY_HOST);
       ssolver_destroy[part] =
-         (HYPRE_Int (**)()) hypre_MAlloc((sizeof(HYPRE_Int (*)()) * nvars[part]));
-      ssolver_data[part]    = hypre_TAlloc(void *, nvars[part]);
+         (HYPRE_Int (**)()) hypre_MAlloc((sizeof(HYPRE_Int (*)()) * nvars[part]), HYPRE_MEMORY_HOST);
+      ssolver_data[part]    = hypre_TAlloc(void *,  nvars[part], HYPRE_MEMORY_HOST);
       for (vi = 0; vi < nvars[part]; vi++)
       {
-         smatvec_data[part][vi] = hypre_TAlloc(void *, nvars[part]);
+         smatvec_data[part][vi] = hypre_TAlloc(void *,  nvars[part], HYPRE_MEMORY_HOST);
          for (vj = 0; vj < nvars[part]; vj++)
          {
             sA = hypre_SStructPMatrixSMatrix(pA, vi, vj);
@@ -416,7 +411,7 @@ HYPRE_SStructSplitSolve( HYPRE_SStructSolver solver,
          py = hypre_SStructVectorPVector(y, part);
          for (vi = 0; vi < nvars[part]; vi++)
          {
-			 ssolve = (HYPRE_Int (*)(void *, hypre_StructMatrix *, hypre_StructVector *, hypre_StructVector *))ssolver_solve[part][vi];
+            ssolve = (HYPRE_Int (*)(void *, hypre_StructMatrix *, hypre_StructVector *, hypre_StructVector *))ssolver_solve[part][vi];
             sdata  = ssolver_data[part][vi];
             sA = hypre_SStructPMatrixSMatrix(pA, vi, vi);
             sx = hypre_SStructPVectorSVector(px, vi);

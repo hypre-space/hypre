@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -19,7 +14,6 @@
 #include "_hypre_struct_mv.h"
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructMatrixCreate
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -34,17 +28,15 @@ HYPRE_StructMatrixCreate( MPI_Comm             comm,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructMatrixDestroy
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructMatrixDestroy( HYPRE_StructMatrix matrix )
 {
    return( hypre_StructMatrixDestroy(matrix) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructMatrixInitialize
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -54,10 +46,9 @@ HYPRE_StructMatrixInitialize( HYPRE_StructMatrix matrix )
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructMatrixSetValues
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructMatrixSetValues( HYPRE_StructMatrix  matrix,
                              HYPRE_Int          *grid_index,
                              HYPRE_Int           num_stencil_indices,
@@ -81,10 +72,9 @@ HYPRE_StructMatrixSetValues( HYPRE_StructMatrix  matrix,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructMatrixGetValues
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructMatrixGetValues( HYPRE_StructMatrix  matrix,
                              HYPRE_Int          *grid_index,
                              HYPRE_Int           num_stencil_indices,
@@ -108,10 +98,9 @@ HYPRE_StructMatrixGetValues( HYPRE_StructMatrix  matrix,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructMatrixSetBoxValues
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructMatrixSetBoxValues( HYPRE_StructMatrix  matrix,
                                 HYPRE_Int          *ilower,
                                 HYPRE_Int          *iupper,
@@ -119,32 +108,13 @@ HYPRE_StructMatrixSetBoxValues( HYPRE_StructMatrix  matrix,
                                 HYPRE_Int          *stencil_indices,
                                 HYPRE_Complex      *values )
 {
-   hypre_Index         new_ilower;
-   hypre_Index         new_iupper;
-   hypre_Box          *new_value_box;
-   HYPRE_Int           d;
-
-   hypre_SetIndex(new_ilower, 0);
-   hypre_SetIndex(new_iupper, 0);
-   for (d = 0; d < hypre_StructMatrixNDim(matrix); d++)
-   {
-      hypre_IndexD(new_ilower, d) = ilower[d];
-      hypre_IndexD(new_iupper, d) = iupper[d];
-   }
-   new_value_box = hypre_BoxCreate(hypre_StructMatrixNDim(matrix));
-   hypre_BoxSetExtents(new_value_box, new_ilower, new_iupper);
-
-   hypre_StructMatrixSetBoxValues(matrix, new_value_box, new_value_box,
-                                  num_stencil_indices, stencil_indices,
-                                  values, 0, -1, 0);
-
-   hypre_BoxDestroy(new_value_box);
+   HYPRE_StructMatrixSetBoxValues2(matrix, ilower, iupper, num_stencil_indices,
+                                   stencil_indices, ilower, iupper, values);
 
    return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructMatrixGetBoxValues
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -155,35 +125,92 @@ HYPRE_StructMatrixGetBoxValues( HYPRE_StructMatrix  matrix,
                                 HYPRE_Int          *stencil_indices,
                                 HYPRE_Complex      *values )
 {
-   hypre_Index         new_ilower;
-   hypre_Index         new_iupper;
-   hypre_Box          *new_value_box;
-   HYPRE_Int           d;
-
-   hypre_SetIndex(new_ilower, 0);
-   hypre_SetIndex(new_iupper, 0);
-   for (d = 0; d < hypre_StructMatrixNDim(matrix); d++)
-   {
-      hypre_IndexD(new_ilower, d) = ilower[d];
-      hypre_IndexD(new_iupper, d) = iupper[d];
-   }
-   new_value_box = hypre_BoxCreate(hypre_StructMatrixNDim(matrix));
-   hypre_BoxSetExtents(new_value_box, new_ilower, new_iupper);
-
-   hypre_StructMatrixSetBoxValues(matrix, new_value_box, new_value_box,
-                                  num_stencil_indices, stencil_indices,
-                                  values, -1, -1, 0);
-
-   hypre_BoxDestroy(new_value_box);
+   HYPRE_StructMatrixGetBoxValues2(matrix, ilower, iupper, num_stencil_indices,
+                                   stencil_indices, ilower, iupper, values);
 
    return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructMatrixSetConstantValues
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
+HYPRE_StructMatrixSetBoxValues2( HYPRE_StructMatrix  matrix,
+                                 HYPRE_Int          *ilower,
+                                 HYPRE_Int          *iupper,
+                                 HYPRE_Int           num_stencil_indices,
+                                 HYPRE_Int          *stencil_indices,
+                                 HYPRE_Int          *vilower,
+                                 HYPRE_Int          *viupper,
+                                 HYPRE_Complex      *values )
+{
+   hypre_Box  *set_box, *value_box;
+   HYPRE_Int   d;
+
+   /* This creates boxes with zeroed-out extents */
+   set_box = hypre_BoxCreate(hypre_StructMatrixNDim(matrix));
+   value_box = hypre_BoxCreate(hypre_StructMatrixNDim(matrix));
+
+   for (d = 0; d < hypre_StructMatrixNDim(matrix); d++)
+   {
+      hypre_BoxIMinD(set_box, d) = ilower[d];
+      hypre_BoxIMaxD(set_box, d) = iupper[d];
+      hypre_BoxIMinD(value_box, d) = vilower[d];
+      hypre_BoxIMaxD(value_box, d) = viupper[d];
+   }
+
+   hypre_StructMatrixSetBoxValues(matrix, set_box, value_box,
+                                  num_stencil_indices, stencil_indices,
+                                  values, 0, -1, 0);
+
+   hypre_BoxDestroy(set_box);
+   hypre_BoxDestroy(value_box);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatrixGetBoxValues2( HYPRE_StructMatrix  matrix,
+                                 HYPRE_Int          *ilower,
+                                 HYPRE_Int          *iupper,
+                                 HYPRE_Int           num_stencil_indices,
+                                 HYPRE_Int          *stencil_indices,
+                                 HYPRE_Int          *vilower,
+                                 HYPRE_Int          *viupper,
+                                 HYPRE_Complex      *values )
+{
+   hypre_Box  *set_box, *value_box;
+   HYPRE_Int   d;
+
+   /* This creates boxes with zeroed-out extents */
+   set_box = hypre_BoxCreate(hypre_StructMatrixNDim(matrix));
+   value_box = hypre_BoxCreate(hypre_StructMatrixNDim(matrix));
+
+   for (d = 0; d < hypre_StructMatrixNDim(matrix); d++)
+   {
+      hypre_BoxIMinD(set_box, d) = ilower[d];
+      hypre_BoxIMaxD(set_box, d) = iupper[d];
+      hypre_BoxIMinD(value_box, d) = vilower[d];
+      hypre_BoxIMaxD(value_box, d) = viupper[d];
+   }
+
+   hypre_StructMatrixSetBoxValues(matrix, set_box, value_box,
+                                  num_stencil_indices, stencil_indices,
+                                  values, -1, -1, 0);
+
+   hypre_BoxDestroy(set_box);
+   hypre_BoxDestroy(value_box);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_StructMatrixSetConstantValues( HYPRE_StructMatrix matrix,
                                      HYPRE_Int          num_stencil_indices,
                                      HYPRE_Int         *stencil_indices,
@@ -194,10 +221,9 @@ HYPRE_StructMatrixSetConstantValues( HYPRE_StructMatrix matrix,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructMatrixAddToValues
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructMatrixAddToValues( HYPRE_StructMatrix  matrix,
                                HYPRE_Int          *grid_index,
                                HYPRE_Int           num_stencil_indices,
@@ -221,10 +247,9 @@ HYPRE_StructMatrixAddToValues( HYPRE_StructMatrix  matrix,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructMatrixAddToBoxValues
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructMatrixAddToBoxValues( HYPRE_StructMatrix  matrix,
                                   HYPRE_Int          *ilower,
                                   HYPRE_Int          *iupper,
@@ -232,35 +257,54 @@ HYPRE_StructMatrixAddToBoxValues( HYPRE_StructMatrix  matrix,
                                   HYPRE_Int          *stencil_indices,
                                   HYPRE_Complex      *values )
 {
-   hypre_Index         new_ilower;
-   hypre_Index         new_iupper;
-   hypre_Box          *new_value_box;
-   HYPRE_Int           d;
-
-   hypre_SetIndex(new_ilower, 0);
-   hypre_SetIndex(new_iupper, 0);
-   for (d = 0; d < hypre_StructMatrixNDim(matrix); d++)
-   {
-      hypre_IndexD(new_ilower, d) = ilower[d];
-      hypre_IndexD(new_iupper, d) = iupper[d];
-   }
-   new_value_box = hypre_BoxCreate(hypre_StructMatrixNDim(matrix));
-   hypre_BoxSetExtents(new_value_box, new_ilower, new_iupper);
-
-   hypre_StructMatrixSetBoxValues(matrix, new_value_box, new_value_box,
-                                  num_stencil_indices, stencil_indices,
-                                  values, 1, -1, 0);
-
-   hypre_BoxDestroy(new_value_box);
+   HYPRE_StructMatrixAddToBoxValues2(matrix, ilower, iupper, num_stencil_indices,
+                                     stencil_indices, ilower, iupper, values);
 
    return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructMatrixAddToConstantValues
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
+HYPRE_StructMatrixAddToBoxValues2( HYPRE_StructMatrix  matrix,
+                                   HYPRE_Int          *ilower,
+                                   HYPRE_Int          *iupper,
+                                   HYPRE_Int           num_stencil_indices,
+                                   HYPRE_Int          *stencil_indices,
+                                   HYPRE_Int          *vilower,
+                                   HYPRE_Int          *viupper,
+                                   HYPRE_Complex      *values )
+{
+   hypre_Box  *set_box, *value_box;
+   HYPRE_Int   d;
+
+   /* This creates boxes with zeroed-out extents */
+   set_box = hypre_BoxCreate(hypre_StructMatrixNDim(matrix));
+   value_box = hypre_BoxCreate(hypre_StructMatrixNDim(matrix));
+
+   for (d = 0; d < hypre_StructMatrixNDim(matrix); d++)
+   {
+      hypre_BoxIMinD(set_box, d) = ilower[d];
+      hypre_BoxIMaxD(set_box, d) = iupper[d];
+      hypre_BoxIMinD(value_box, d) = vilower[d];
+      hypre_BoxIMaxD(value_box, d) = viupper[d];
+   }
+
+   hypre_StructMatrixSetBoxValues(matrix, set_box, value_box,
+                                  num_stencil_indices, stencil_indices,
+                                  values, 1, -1, 0);
+
+   hypre_BoxDestroy(set_box);
+   hypre_BoxDestroy(value_box);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_StructMatrixAddToConstantValues( HYPRE_StructMatrix matrix,
                                        HYPRE_Int          num_stencil_indices,
                                        HYPRE_Int         *stencil_indices,
@@ -271,19 +315,17 @@ HYPRE_StructMatrixAddToConstantValues( HYPRE_StructMatrix matrix,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructMatrixAssemble
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructMatrixAssemble( HYPRE_StructMatrix matrix )
 {
    return( hypre_StructMatrixAssemble(matrix) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructMatrixSetNumGhost
  *--------------------------------------------------------------------------*/
- 
+
 HYPRE_Int
 HYPRE_StructMatrixSetNumGhost( HYPRE_StructMatrix  matrix,
                                HYPRE_Int          *num_ghost )
@@ -292,7 +334,6 @@ HYPRE_StructMatrixSetNumGhost( HYPRE_StructMatrix  matrix,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructMatrixGetGrid
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -304,9 +345,8 @@ HYPRE_StructMatrixGetGrid( HYPRE_StructMatrix matrix, HYPRE_StructGrid *grid )
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructMatrixSetSymmetric
  *--------------------------------------------------------------------------*/
- 
+
 HYPRE_Int
 HYPRE_StructMatrixSetSymmetric( HYPRE_StructMatrix  matrix,
                                 HYPRE_Int           symmetric )
@@ -317,7 +357,6 @@ HYPRE_StructMatrixSetSymmetric( HYPRE_StructMatrix  matrix,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructMatrixSetConstantEntries
  * Call this function to declare that certain stencil points are constant
  * throughout the mesh.
  * - nentries is the number of array entries
@@ -340,7 +379,6 @@ HYPRE_Int  HYPRE_StructMatrixSetConstantEntries( HYPRE_StructMatrix  matrix,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructMatrixPrint
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -352,7 +390,6 @@ HYPRE_StructMatrixPrint( const char         *filename,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructMatrixMatvec
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -368,7 +405,6 @@ HYPRE_StructMatrixMatvec( HYPRE_Complex      alpha,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructMatrixClearBoundary
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -376,4 +412,3 @@ HYPRE_StructMatrixClearBoundary( HYPRE_StructMatrix matrix )
 {
    return( hypre_StructMatrixClearBoundary(matrix) );
 }
-

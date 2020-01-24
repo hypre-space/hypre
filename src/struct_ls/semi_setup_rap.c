@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_struct_ls.h"
 #include "pfmg.h"
@@ -35,7 +30,7 @@
       if (imacro==2) imacro=-1;                         \
       if (jmacro==2) jmacro=-1;                         \
       if (kmacro==2) kmacro=-1;                         \
-      hypre_SetIndex3(indexRAP,imacro,jmacro,kmacro);    \
+      hypre_SetIndex3(indexRAP,imacro,jmacro,kmacro);   \
    }
 
 /*--------------------------------------------------------------------------
@@ -91,7 +86,7 @@ hypre_SemiCreateRAPOp( hypre_StructMatrix *R,
    {
       RAP_marker_size *= 3;
    }
-   RAP_marker = hypre_CTAlloc(HYPRE_Int, RAP_marker_size);
+   RAP_marker = hypre_CTAlloc(HYPRE_Int,  RAP_marker_size, HYPRE_MEMORY_HOST);
    
    /*-----------------------------------------------------------------------
     * Define RAP_stencil
@@ -182,7 +177,7 @@ hypre_SemiCreateRAPOp( hypre_StructMatrix *R,
    {
       if (dim > 1)
       {
-         not_cdirs = hypre_CTAlloc(HYPRE_Int, dim-1);
+         not_cdirs = hypre_CTAlloc(HYPRE_Int,  dim-1, HYPRE_MEMORY_HOST);
       }
 
       for (d = 1; d < dim; d++)
@@ -226,7 +221,7 @@ hypre_SemiCreateRAPOp( hypre_StructMatrix *R,
 
       if (dim > 1)
       {
-         hypre_TFree(not_cdirs);
+         hypre_TFree(not_cdirs, HYPRE_MEMORY_HOST);
       }
    }
 
@@ -240,7 +235,7 @@ hypre_SemiCreateRAPOp( hypre_StructMatrix *R,
       }
    }
 
-   RAP_stencil_shape = hypre_CTAlloc(hypre_Index, RAP_stencil_size);
+   RAP_stencil_shape = hypre_CTAlloc(hypre_Index,  RAP_stencil_size, HYPRE_MEMORY_HOST);
 
    stencil_rank= 0;
    for (i = 0; i < RAP_marker_size; i++)
@@ -269,7 +264,7 @@ hypre_SemiCreateRAPOp( hypre_StructMatrix *R,
     *-----------------------------------------------------------------------*/
    hypre_StructMatrixSetNumGhost(RAP, RAP_num_ghost);
 
-   hypre_TFree(RAP_marker);
+   hypre_TFree(RAP_marker, HYPRE_MEMORY_HOST);
 
    return RAP;
 }
@@ -322,11 +317,6 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
    HYPRE_Real           *rap_ptrS, *rap_ptrU, *rap_ptrD;
 
    HYPRE_Int             symm_path_multiplier;
-
-   HYPRE_Int             iA, iAp;
-   HYPRE_Int             iAc;
-   HYPRE_Int             iP, iPp;
-   HYPRE_Int             iR;
                         
    HYPRE_Int             COffsetA; 
    HYPRE_Int             COffsetP; 
@@ -400,6 +390,8 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
        *-----------------------------------------------------------------*/
 
       hypre_SetIndex(index, 0);
+      //RL:PTROFFSET
+      HYPRE_Int pb_offset = 0;
       if (P_stored_as_transpose)
       {
          hypre_IndexD(index, cdir) = 1;
@@ -414,8 +406,8 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
          pa = hypre_StructMatrixExtractPointerByIndex(P, fi, index);
 
          hypre_IndexD(index, cdir) = 1;
-         pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index) -
-            hypre_BoxOffsetDistance(P_dbox, index);
+         pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index); 
+         pb_offset = -hypre_BoxOffsetDistance(P_dbox, index);
       }
  
       /*-----------------------------------------------------------------
@@ -440,6 +432,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
        *-----------------------------------------------------------------*/
 
       hypre_SetIndex(index, 0);
+      HYPRE_Int rb_offset = 0;
       if (P_stored_as_transpose)
       {
          hypre_IndexD(index, cdir) = 1;
@@ -454,8 +447,8 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
          ra = hypre_StructMatrixExtractPointerByIndex(R, fi, index);
 
          hypre_IndexD(index, cdir) = 1;
-         rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index) -
-            hypre_BoxOffsetDistance(P_dbox, index);
+         rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index);
+         rb_offset = -hypre_BoxOffsetDistance(P_dbox, index);
       }
  
       /*-----------------------------------------------------------------
@@ -482,16 +475,14 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
          if (coarse_symm_elements[RAPloop] == -1)
          {
             rap_ptrS = hypre_StructMatrixBoxData(RAP, ci, RAPloop);
+#define DEVICE_VAR is_device_ptr(rap_ptrS)
             hypre_BoxLoop1Begin(hypre_StructMatrixNDim(A), loop_size,
                                 RAP_dbox, cstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iAc) HYPRE_SMP_SCHEDULE
-#endif
-            hypre_BoxLoop1For(iAc)
             {
                rap_ptrS[iAc] = zero;
             }
             hypre_BoxLoop1End(iAc);
+#undef DEVICE_VAR
          }
       }
 
@@ -555,16 +546,14 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                          * the (up,up) path contributes to a non-stored entry
                          * in RAP.
                          *--------------------------------------------------*/
+#define DEVICE_VAR is_device_ptr(rap_ptrS,a_ptr,ra,pa,rb,pb,rap_ptrD)
                         hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                                             P_dbox, cstart, stridec, iP,
                                             R_dbox, cstart, stridec, iR,
                                             A_dbox, fstart, stridef, iA,
                                             RAP_dbox, cstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iP,iR,iA,iAc,iAp,iPp) HYPRE_SMP_SCHEDULE
-#endif
-                        hypre_BoxLoop4For(iP, iR, iA, iAc)
                         {
+                           HYPRE_Int iAp,iPp;
                            /* path 1 : (stay,stay) */
                            rap_ptrS[iAc] +=          a_ptr[iA]           ;
 
@@ -577,13 +566,14 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
 
                            /* path 4 : (down,up) */
                            iAp = iA - COffsetA;
-                           rap_ptrS[iAc] += rb[iR] * a_ptr[iAp] * pb[iPp];
+                           rap_ptrS[iAc] += rb[iR+rb_offset] * a_ptr[iAp] * pb[iPp+pb_offset];
 
                            /* path 5 : (down,down) */
                            iPp = iP - COffsetP + AOffsetP; 
-                           rap_ptrD[iAc] += rb[iR] * a_ptr[iAp] * pa[iPp];
+                           rap_ptrD[iAc] += rb[iR+rb_offset] * a_ptr[iAp] * pa[iPp];
                         }
                         hypre_BoxLoop4End(iP, iR, iA, iAc);
+#undef DEVICE_VAR
                      }
                      else
                      {
@@ -591,23 +581,21 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                          * If A stencil index is not (0,0,0) or RAP is
                          * nonsymmetric, all 5 paths are calculated.
                          *--------------------------------------------------*/
+#define DEVICE_VAR is_device_ptr(rap_ptrS,a_ptr,rap_ptrU,ra,pb,pa,rb,rap_ptrD)
                         hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                                             P_dbox, cstart, stridec, iP,
                                             R_dbox, cstart, stridec, iR,
                                             A_dbox, fstart, stridef, iA,
                                             RAP_dbox, cstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iP,iR,iA,iAc,iAp,iPp) HYPRE_SMP_SCHEDULE
-#endif
-                        hypre_BoxLoop4For(iP, iR, iA, iAc)
                         {
+                           HYPRE_Int iAp,iPp;
                            /* path 1 : (stay,stay) */
                            rap_ptrS[iAc] +=          a_ptr[iA]           ;
 
                            /* path 2 : (up,up) */
                            iAp = iA + COffsetA;
                            iPp = iP + COffsetP + AOffsetP; 
-                           rap_ptrU[iAc] += ra[iR] * a_ptr[iAp] * pb[iPp];
+                           rap_ptrU[iAc] += ra[iR] * a_ptr[iAp] * pb[iPp+pb_offset];
 
                            /* path 3 : (up,down) */
                            iPp = iP + AOffsetP; 
@@ -615,13 +603,14 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
 
                            /* path 4 : (down,up) */
                            iAp = iA - COffsetA;
-                           rap_ptrS[iAc] += rb[iR] * a_ptr[iAp] * pb[iPp];
+                           rap_ptrS[iAc] += rb[iR+rb_offset] * a_ptr[iAp] * pb[iPp+pb_offset];
 
                            /* path 5 : (down,down) */
                            iPp = iP - COffsetP + AOffsetP; 
-                           rap_ptrD[iAc] += rb[iR] * a_ptr[iAp] * pa[iPp];
+                           rap_ptrD[iAc] += rb[iR+rb_offset] * a_ptr[iAp] * pa[iPp];
                         }
                         hypre_BoxLoop4End(iP, iR, iA, iAc);
+#undef DEVICE_VAR
                      }
 
                      break;
@@ -664,20 +653,18 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                         symm_path_multiplier = 2;
                      }
 
+#define DEVICE_VAR is_device_ptr(rap_ptrS,a_ptr,pb,rap_ptrD,pa,ra,rb)
                      hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                                          P_dbox, cstart, stridec, iP,
                                          R_dbox, cstart, stridec, iR,
                                          A_dbox, fstart, stridef, iA,
                                          RAP_dbox, cstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iP,iR,iA,iAc,iAp,iPp) HYPRE_SMP_SCHEDULE
-#endif
-                     hypre_BoxLoop4For(iP, iR, iA, iAc)
                      {
+                        HYPRE_Int iAp,iPp;
                         /* Path 1 : (stay,up) & symmetric path  */
                         iPp = iP + AOffsetP; 
                         rap_ptrS[iAc] += symm_path_multiplier *
-                           (a_ptr[iA]  * pb[iPp]);
+                           (a_ptr[iA]  * pb[iPp+pb_offset]);
 
                         /* Path 2 : (stay,down) */
                         iPp = iP - COffsetP + AOffsetP; 
@@ -690,9 +677,10 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
 
                         /* Path 4 : (down,stay) */
                         iAp = iA - COffsetA;
-                        rap_ptrD[iAc] += rb[iR] * a_ptr[iAp]          ;
+                        rap_ptrD[iAc] += rb[iR+rb_offset] * a_ptr[iAp]          ;
                      }
                      hypre_BoxLoop4End(iP, iR, iA, iAc);
+#undef DEVICE_VAR
 
                      break;
 
@@ -733,19 +721,17 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                         symm_path_multiplier = 2;
                      }
 
+#define DEVICE_VAR is_device_ptr(rap_ptrU,a_ptr,pb,rap_ptrS,pa,ra,rb)
                      hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                                          P_dbox, cstart, stridec, iP,
                                          R_dbox, cstart, stridec, iR,
                                          A_dbox, fstart, stridef, iA,
                                          RAP_dbox, cstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iP,iR,iA,iAc,iAp,iPp) HYPRE_SMP_SCHEDULE
-#endif
-                     hypre_BoxLoop4For(iP, iR, iA, iAc)
                      {
+                        HYPRE_Int iAp,iPp;
                         /* Path 1 : (stay,up) */
                         iPp = iP + COffsetP + AOffsetP; 
-                        rap_ptrU[iAc] +=          a_ptr[iA]  * pb[iPp];
+                        rap_ptrU[iAc] +=          a_ptr[iA]  * pb[iPp+pb_offset];
 
                         /* Path 2 : (stay,down) */
                         iPp = iP + AOffsetP; 
@@ -759,9 +745,10 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                         /* Path 4 : (down,stay) */
                         iAp = iA - COffsetA;
                         rap_ptrS[iAc] += symm_path_multiplier *
-                           (rb[iR] * a_ptr[iAp]          );
+                           (rb[iR+rb_offset] * a_ptr[iAp]          );
                      }
                      hypre_BoxLoop4End(iP, iR, iA, iAc);
+#undef DEVICE_VAR
 
                      break;
                } /* end of switch */
@@ -843,13 +830,9 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                      {
                         symm_path_multiplier = 2;
                      }
-
+#define DEVICE_VAR is_device_ptr(rap_ptrS,rap_ptrD)
                      hypre_BoxLoop1Begin(hypre_StructMatrixNDim(A), loop_size,
                                          RAP_dbox, cstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iAc) HYPRE_SMP_SCHEDULE
-#endif
-                     hypre_BoxLoop1For(iAc)
                      {
                         rap_ptrS[iAc] += symm_path_multiplier *
                            (rap_ptrD[iAc]);
@@ -857,6 +840,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                         rap_ptrD[iAc] = zero;
                      }
                      hypre_BoxLoop1End(iAc);
+#undef DEVICE_VAR
 
                      break;
 

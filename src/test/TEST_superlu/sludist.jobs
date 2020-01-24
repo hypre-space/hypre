@@ -1,0 +1,22 @@
+#!/bin/sh
+# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
+#=============================================================================
+# ij: Run various cases using SuperLU_Dist as a coarse grid solve
+#=============================================================================
+
+mpirun -np 1 ./ij -n 20 20 30 -dslu_th 2000 \
+ > sludist.out.0
+
+mpirun -np 4 ./ij -solver 1 -n 40 50 30 -P 2 2 1 -dslu_th 8000 -agg_nl 1 -tol 1.e-7 \
+ > sludist.out.1
+
+mpirun -np 8 ./ij -solver 3 -n 50 50 50 -P 2 2 2 -dslu_th 4000 -tol 1.e-7 \
+ > sludist.out.2
+
+
+
+

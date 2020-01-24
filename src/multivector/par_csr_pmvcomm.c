@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "par_csr_pmvcomm.h"
 
@@ -51,7 +46,7 @@ hypre_ParCSRCommMultiHandleCreate (HYPRE_Int                   job,
     *--------------------------------------------------------------------*/
 
    num_requests = num_sends + num_recvs;
-   requests = hypre_CTAlloc(hypre_MPI_Request, num_requests);
+   requests = hypre_CTAlloc(hypre_MPI_Request,  num_requests, HYPRE_MEMORY_HOST);
  
    hypre_MPI_Comm_size(comm,&num_procs);
    hypre_MPI_Comm_rank(comm,&my_id);
@@ -109,7 +104,7 @@ hypre_ParCSRCommMultiHandleCreate (HYPRE_Int                   job,
     * set up comm_handle and return
     *--------------------------------------------------------------------*/
 
-   comm_handle = hypre_CTAlloc(hypre_ParCSRCommMultiHandle, 1);
+   comm_handle = hypre_CTAlloc(hypre_ParCSRCommMultiHandle,  1, HYPRE_MEMORY_HOST);
 
    hypre_ParCSRCommMultiHandleCommPkg(comm_handle)     = comm_pkg;
    hypre_ParCSRCommMultiHandleSendData(comm_handle)    = send_data;
@@ -128,15 +123,15 @@ hypre_ParCSRCommMultiHandleDestroy(hypre_ParCSRCommMultiHandle *comm_handle)
 
    if (hypre_ParCSRCommMultiHandleNumRequests(comm_handle))
    {
-      status0 = hypre_CTAlloc(hypre_MPI_Status,
-                              hypre_ParCSRCommMultiHandleNumRequests(comm_handle));
+      status0 = hypre_CTAlloc(hypre_MPI_Status, 
+                              hypre_ParCSRCommMultiHandleNumRequests(comm_handle), HYPRE_MEMORY_HOST);
       hypre_MPI_Waitall(hypre_ParCSRCommMultiHandleNumRequests(comm_handle),
                         hypre_ParCSRCommMultiHandleRequests(comm_handle), status0);
-      hypre_TFree(status0);
+      hypre_TFree(status0, HYPRE_MEMORY_HOST);
    }
 
-   hypre_TFree(hypre_ParCSRCommMultiHandleRequests(comm_handle));
-   hypre_TFree(comm_handle);
+   hypre_TFree(hypre_ParCSRCommMultiHandleRequests(comm_handle), HYPRE_MEMORY_HOST);
+   hypre_TFree(comm_handle, HYPRE_MEMORY_HOST);
 
    return ierr;
 }

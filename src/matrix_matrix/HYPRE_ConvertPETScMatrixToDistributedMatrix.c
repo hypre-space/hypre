@@ -1,17 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -25,7 +17,7 @@
 
 #include <HYPRE_config.h>
 
-#include "general.h"
+#include "hypre_general.h"
 
 #include "HYPRE.h"
 #include "HYPRE_utilities.h"
@@ -42,14 +34,14 @@
  * HYPRE_ConvertPETScMatrixToDistributedMatrix
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
-HYPRE_ConvertPETScMatrixToDistributedMatrix( 
+HYPRE_Int
+HYPRE_ConvertPETScMatrixToDistributedMatrix(
                  Mat PETSc_matrix,
                  HYPRE_DistributedMatrix *DistributedMatrix )
 {
    HYPRE_Int ierr;
    MPI_Comm hypre_MPI_Comm;
-   HYPRE_Int M, N;
+   HYPRE_BigInt M, N;
 #ifdef HYPRE_TIMING
    HYPRE_Int           timer;
 #endif

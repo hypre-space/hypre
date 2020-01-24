@@ -207,8 +207,6 @@ main( hypre_int argc,
 
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
 
-   hypre_InitMemoryDebug(myid);
-
    /*-----------------------------------------------------------
     * Defaults
     *-----------------------------------------------------------*/
@@ -665,8 +663,6 @@ main( hypre_int argc,
    /*-----------------------------------------------------------
     * Finalize things
     *-----------------------------------------------------------*/
-
-   hypre_FinalizeMemoryDebug();
 
    hypre_MPI_Finalize();
 

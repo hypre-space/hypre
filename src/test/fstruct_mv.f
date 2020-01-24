@@ -1,27 +1,20 @@
-cBHEADER**********************************************************************
-c Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
-c Produced at the Lawrence Livermore National Laboratory.
-c This file is part of HYPRE.  See file COPYRIGHT for details.
-c
-c HYPRE is free software; you can redistribute it and/or modify it under the
-c terms of the GNU Lesser General Public License (as published by the Free
-c Software Foundation) version 2.1 dated February 1999.
-c
-c $Revision$
-cEHEADER**********************************************************************
+!     Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+!     HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+!
+!     SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
-c**************************************************
-c      Routines to test struct_mv fortran interface
-c**************************************************
+!**************************************************
+!      Routines to test struct_mv fortran interface
+!**************************************************
 
 
-c**************************************************
-c           HYPRE_StructStencil routines
-c**************************************************
+!**************************************************
+!           HYPRE_StructStencil routines
+!**************************************************
 
-c******************************************
-c      fhypre_structstencilcreate
-c******************************************
+!******************************************
+!      fhypre_structstencilcreate
+!******************************************
       subroutine fhypre_structstencilcreate(fdim, fdim1, fstencil)
       integer ierr
       integer fdim
@@ -36,9 +29,9 @@ c******************************************
       return
       end
 
-c******************************************
-c      fhypre_structstencilsetelement
-c******************************************
+!******************************************
+!      fhypre_structstencilsetelement
+!******************************************
       subroutine fhypre_structstencilsetelement(fstencil, findx,
      1                                          foffset)
       integer ierr
@@ -55,9 +48,9 @@ c******************************************
       return
       end
 
-c******************************************
-c      fhypre_structstencildestroy
-c******************************************
+!******************************************
+!      fhypre_structstencildestroy
+!******************************************
       subroutine fhypre_structstencildestroy(fstencil)
       integer ierr
       integer*8 fstencil
@@ -72,13 +65,13 @@ c******************************************
 
 
 
-c**************************************************
-c           HYPRE_StructGrid routines
-c**************************************************
+!**************************************************
+!           HYPRE_StructGrid routines
+!**************************************************
 
-c******************************************
-c      fhypre_structgridcreate
-c******************************************
+!******************************************
+!      fhypre_structgridcreate
+!******************************************
       subroutine fhypre_structgridcreate(fcomm, fdim, fgrid)
       integer ierr
       integer fcomm
@@ -93,9 +86,9 @@ c******************************************
       return
       end
 
-c******************************************
-c      fhypre_structgriddestroy
-c******************************************
+!******************************************
+!      fhypre_structgriddestroy
+!******************************************
       subroutine fhypre_structgriddestroy(fgrid)
       integer ierr
       integer*8 fgrid
@@ -108,9 +101,9 @@ c******************************************
       return
       end
 
-c******************************************
-c      fhypre_structgridsetextents
-c******************************************
+!******************************************
+!      fhypre_structgridsetextents
+!******************************************
       subroutine fhypre_structgridsetextents(fgrid, flower, fupper)
       integer ierr
       integer flower(*)
@@ -125,9 +118,9 @@ c******************************************
       return
       end
 
-c******************************************
-c      fhypre_structgridsetperiodic
-c******************************************
+!******************************************
+!      fhypre_structgridsetperiodic
+!******************************************
       subroutine fhypre_structgridsetperiodic(fgrid, fperiod)
       integer ierr
       integer fperiod(*)
@@ -141,9 +134,9 @@ c******************************************
       return
       end
 
-c******************************************
-c      fhypre_structgridassemble
-c******************************************
+!******************************************
+!      fhypre_structgridassemble
+!******************************************
       subroutine fhypre_structgridassemble(fgrid)
       integer ierr
       integer*8 fgrid
@@ -156,9 +149,9 @@ c******************************************
       return
       end
 
-c******************************************
-c      fhypre_structgridsetnumghost
-c******************************************
+!******************************************
+!      fhypre_structgridsetnumghost
+!******************************************
       subroutine fhypre_structgridsetnumghost(fgrid, fnumghost)
       integer ierr
       integer fnumghost
@@ -174,13 +167,13 @@ c******************************************
 
 
 
-c**************************************************
-c           HYPRE_StructMatrix routines
-c**************************************************
+!**************************************************
+!           HYPRE_StructMatrix routines
+!**************************************************
 
-c******************************************
-c      fhypre_structmatrixcreate
-c******************************************
+!******************************************
+!      fhypre_structmatrixcreate
+!******************************************
       subroutine fhypre_structmatrixcreate(fcomm, fgrid, fstencil, 
      1                                     fmatrix)
       integer ierr
@@ -198,9 +191,9 @@ c******************************************
       return
       end
 
-c******************************************
-c      fhypre_structmatrixdestroy
-c******************************************
+!******************************************
+!      fhypre_structmatrixdestroy
+!******************************************
       subroutine fhypre_structmatrixdestroy(fmatrix)
       integer ierr
       integer*8 fmatrix
@@ -213,9 +206,9 @@ c******************************************
       return
       end
 
-c******************************************
-c      fhypre_structmatrixinitialize
-c******************************************
+!******************************************
+!      fhypre_structmatrixinitialize
+!******************************************
       subroutine fhypre_structmatrixinitialize(fmatrix)
       integer ierr
       integer*8 fmatrix
@@ -228,9 +221,9 @@ c******************************************
       return
       end
 
-c******************************************
-c      fhypre_structmatrixsetvalues
-c******************************************
+!******************************************
+!      fhypre_structmatrixsetvalues
+!******************************************
       subroutine fhypre_structmatrixsetvalues(fmatrix, fgridindx, 
      1                                        fnumsindx, fsindx, fvals)
       integer ierr
@@ -249,9 +242,9 @@ c******************************************
       return
       end
 
-c******************************************
-c      fhypre_structmatrixsetboxvalues
-c******************************************
+!******************************************
+!      fhypre_structmatrixsetboxvalues
+!******************************************
       subroutine fhypre_structmatrixsetboxvalues(fmatrix, flower,
      1                                           fupper, fnumsindx,
      2                                           fsindx, fvals)
@@ -273,9 +266,9 @@ c******************************************
       return
       end
 
-c******************************************
-c      fhypre_structmatrixgetboxvalues
-c******************************************
+!******************************************
+!      fhypre_structmatrixgetboxvalues
+!******************************************
       subroutine fhypre_structmatrixgetboxvalues(fmatrix, flower,
      1                                           fupper, fnumsindx,
      2                                           fsindx, fvals)
@@ -297,9 +290,9 @@ c******************************************
       return
       end
 
-c******************************************
-c      fhypre_structmatrixsetconstantentries
-c******************************************
+!******************************************
+!      fhypre_structmatrixsetconstantentries
+!******************************************
       subroutine fhypre_structmatrixsetconstante(fmatrix, fnument,
      1                                           fentries)
       integer ierr
@@ -316,9 +309,9 @@ c******************************************
       return
       end
 
-c******************************************
-c      fhypre_structmatrixsetconstantvalues
-c******************************************
+!******************************************
+!      fhypre_structmatrixsetconstantvalues
+!******************************************
       subroutine fhypre_structmatrixsetconstantv(fmatrix,
      1                                           fnumsindx, fsindx,
      2                                           fvals)
@@ -337,9 +330,9 @@ c******************************************
       return
       end
 
-c******************************************
-c      fhypre_structmatrixaddtovalues
-c******************************************
+!******************************************
+!      fhypre_structmatrixaddtovalues
+!******************************************
       subroutine fhypre_structmatrixaddtovalues(fmatrix, fgrdindx,
      1                                          fnumsindx, fsindx,
      2                                          fvals)
@@ -360,9 +353,9 @@ c******************************************
       return
       end
 
-c******************************************
-c      fhypre_structmatrixaddtoboxvalues
-c******************************************
+!******************************************
+!      fhypre_structmatrixaddtoboxvalues
+!******************************************
       subroutine fhypre_structmatrixaddtoboxvalues(fmatrix, filower,
      1                                             fiupper, fnumsindx,
      2                                             fsindx, fvals)
@@ -384,9 +377,9 @@ c******************************************
       return
       end
 
-c******************************************
-c      fhypre_structmatrixaddtoconstantvalues
-c******************************************
+!******************************************
+!      fhypre_structmatrixaddtoconstantvalues
+!******************************************
       subroutine fhypre_structmatrixaddtoconstant(fmatrix, fnumsindx,
      2                                            fsindx, fvals)
       integer ierr
@@ -405,9 +398,9 @@ c******************************************
       return
       end
 
-c******************************************
-c      fhypre_structmatrixassemble
-c******************************************
+!******************************************
+!      fhypre_structmatrixassemble
+!******************************************
       subroutine fhypre_structmatrixassemble(fmatrix)
       integer ierr
       integer*8 fmatrix
@@ -420,9 +413,9 @@ c******************************************
       return
       end
 
-c******************************************
-c      fhypre_structmatrixsetnumghost
-c******************************************
+!******************************************
+!      fhypre_structmatrixsetnumghost
+!******************************************
       subroutine fhypre_structmatrixsetnumghost(fmatrix, fnumghost)
       integer ierr
       integer fnumghost
@@ -436,9 +429,9 @@ c******************************************
       return
       end
 
-c******************************************
-c      fhypre_structmatrixgetgrid
-c******************************************
+!******************************************
+!      fhypre_structmatrixgetgrid
+!******************************************
       subroutine fhypre_structmatrixgetgrid(fmatrix, fgrid)
       integer ierr
       integer*8 fmatrix
@@ -452,9 +445,9 @@ c******************************************
       return
       end
 
-c******************************************
-c      fhypre_structmatrixsetsymmetric
-c******************************************
+!******************************************
+!      fhypre_structmatrixsetsymmetric
+!******************************************
       subroutine fhypre_structmatrixsetsymmetric(fmatrix, fsymmetric)
       integer ierr
       integer fsymmetric
@@ -468,9 +461,9 @@ c******************************************
       return
       end
 
-c******************************************
-c      fhypre_structmatrixprint
-c******************************************
+!******************************************
+!      fhypre_structmatrixprint
+!******************************************
       subroutine fhypre_structmatrixprint(fmatrix, fall)
       integer ierr
       integer fall
@@ -484,9 +477,9 @@ c******************************************
       return
       end
 
-c******************************************
-c      fhypre_structmatrixmatvec
-c******************************************
+!******************************************
+!      fhypre_structmatrixmatvec
+!******************************************
       subroutine fhypre_structmatrixmatvec(falpha, fA, fx, fbeta, fy)
       integer ierr
       integer falpha
@@ -505,13 +498,13 @@ c******************************************
 
 
 
-c**************************************************
-c           HYPRE_StructVector routines
-c**************************************************
+!**************************************************
+!           HYPRE_StructVector routines
+!**************************************************
 
-c******************************************
-c      fhypre_structvectorcreate
-c******************************************
+!******************************************
+!      fhypre_structvectorcreate
+!******************************************
       subroutine fhypre_structvectorcreate(fcomm, fgrid, fvector)
       integer ierr
       integer fcomm
@@ -526,9 +519,9 @@ c******************************************
       return
       end
 
-c******************************************
-c      fhypre_structvectordestroy
-c******************************************
+!******************************************
+!      fhypre_structvectordestroy
+!******************************************
       subroutine fhypre_structvectordestroy(fvector)
       integer ierr
       integer*8 fvector
@@ -541,9 +534,9 @@ c******************************************
       return
       end
 
-c******************************************
-c      fhypre_structvectorinitialize
-c******************************************
+!******************************************
+!      fhypre_structvectorinitialize
+!******************************************
       subroutine fhypre_structvectorinitialize(fvector)
       integer ierr
       integer*8 fvector
@@ -556,9 +549,9 @@ c******************************************
       return
       end
 
-c******************************************
-c      fhypre_structvectorsetvalues
-c******************************************
+!******************************************
+!      fhypre_structvectorsetvalues
+!******************************************
       subroutine fhypre_structvectorsetvalues(fvector, fgridindx,
      1                                          fvals)
       integer ierr
@@ -574,9 +567,9 @@ c******************************************
       return
       end
 
-c******************************************
-c      fhypre_structvectorsetboxvalues
-c******************************************
+!******************************************
+!      fhypre_structvectorsetboxvalues
+!******************************************
       subroutine fhypre_structvectorsetboxvalues(fvector, flower,
      1                                           fupper, fvals)
       integer ierr
@@ -594,9 +587,9 @@ c******************************************
       return
       end
 
-c******************************************
-c      fhypre_structvectorsetconstantvalues
-c******************************************
+!******************************************
+!      fhypre_structvectorsetconstantvalues
+!******************************************
       subroutine fhypre_structvectorsetconstantv(fvector, fvals)
       integer ierr
       double precision fvals(*)
@@ -610,9 +603,9 @@ c******************************************
       return
       end
 
-c******************************************
-c      fhypre_structvectoraddtovalues
-c******************************************
+!******************************************
+!      fhypre_structvectoraddtovalues
+!******************************************
       subroutine fhypre_structvectoraddtovalues(fvector, fgrdindx,
      1                                          fvals)
       integer ierr
@@ -628,9 +621,9 @@ c******************************************
       return
       end
 
-c******************************************
-c      fhypre_structvectoraddtoboxvalues
-c******************************************
+!******************************************
+!      fhypre_structvectoraddtoboxvalues
+!******************************************
       subroutine fhypre_structvectoraddtoboxvalu(fvector, flower, 
      1                                             fupper, fvals)
       integer ierr
@@ -648,9 +641,9 @@ c******************************************
       return
       end
 
-c******************************************
-c      fhypre_structvectorscalevalues
-c******************************************
+!******************************************
+!      fhypre_structvectorscalevalues
+!******************************************
       subroutine fhypre_structvectorscalevalues(fvector, ffactor)
       integer ierr
       double precision ffactor
@@ -664,9 +657,9 @@ c******************************************
       return
       end
 
-c******************************************
-c      fhypre_structvectorgetvalues
-c******************************************
+!******************************************
+!      fhypre_structvectorgetvalues
+!******************************************
       subroutine fhypre_structvectorgetvalues(fvector, fgrdindx,
      1                                          fvals)
       integer ierr
@@ -682,9 +675,9 @@ c******************************************
       return
       end
 
-c******************************************
-c      fhypre_structvectorgetboxvalues
-c******************************************
+!******************************************
+!      fhypre_structvectorgetboxvalues
+!******************************************
       subroutine fhypre_structvectorgetboxvalues(fvector, flower, 
      1                                           fupper, fvals)
       integer ierr
@@ -702,9 +695,9 @@ c******************************************
       return
       end
 
-c******************************************
-c      fhypre_structvectorassemble
-c******************************************
+!******************************************
+!      fhypre_structvectorassemble
+!******************************************
       subroutine fhypre_structvectorassemble(fvector)
       integer ierr
       integer*8 fvector
@@ -717,9 +710,9 @@ c******************************************
       return
       end
 
-c******************************************
-c      fhypre_structvectorsetnumghost
-c******************************************
+!******************************************
+!      fhypre_structvectorsetnumghost
+!******************************************
       subroutine fhypre_structvectorsetnumghost(fvector, fnumghost)
       integer ierr
       integer fnumghost
@@ -733,9 +726,9 @@ c******************************************
       return
       end
 
-c******************************************
-c      fhypre_structvectorcopy
-c******************************************
+!******************************************
+!      fhypre_structvectorcopy
+!******************************************
       subroutine fhypre_structvectorcopy(fx, fy)
       integer ierr
       integer*8 fx
@@ -749,9 +742,9 @@ c******************************************
       return
       end
 
-c******************************************
-c      fhypre_structvectorgetmigratecommpkg
-c******************************************
+!******************************************
+!      fhypre_structvectorgetmigratecommpkg
+!******************************************
       subroutine fhypre_structvectorgetmigrateco(ffromvec, ftovec, 
      1                                                fcommpkg)
       integer ierr
@@ -768,9 +761,9 @@ c******************************************
       return
       end
 
-c******************************************
-c      fhypre_structvectormigrate
-c******************************************
+!******************************************
+!      fhypre_structvectormigrate
+!******************************************
       subroutine fhypre_structvectormigrate(fcommpkg, ffromvec,
      1                                        ftovec)
       integer ierr
@@ -786,9 +779,9 @@ c******************************************
       return
       end
 
-c******************************************
-c      fhypre_commpkgdestroy
-c******************************************
+!******************************************
+!      fhypre_commpkgdestroy
+!******************************************
       subroutine fhypre_commpkgdestroy(fcommpkg)
       integer ierr
       integer*8 fcommpkg
@@ -801,9 +794,9 @@ c******************************************
       return
       end
 
-c******************************************
-c      fhypre_structvectorprint
-c******************************************
+!******************************************
+!      fhypre_structvectorprint
+!******************************************
       subroutine fhypre_structvectorprint(fvector, fall)
       integer ierr
       integer fall

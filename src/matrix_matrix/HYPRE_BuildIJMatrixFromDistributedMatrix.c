@@ -1,17 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -45,7 +37,7 @@ HYPRE_Int HYPRE_IJMatrixSetLocalSize(HYPRE_IJMatrix ij_matrix,
                                HYPRE_Int row, HYPRE_Int col );
 
 HYPRE_Int HYPRE_IJMatrixInsertRow( HYPRE_IJMatrix ij_matrix, 
-                             HYPRE_Int size, HYPRE_Int i, HYPRE_Int *col_ind,
+                             HYPRE_Int size, HYPRE_BigInt i, HYPRE_BigInt *col_ind,
                              HYPRE_Real *values );
 
 /*--------------------------------------------------------------------------
@@ -67,11 +59,12 @@ HYPRE_BuildIJMatrixFromDistributedMatrix(
 {
    HYPRE_Int ierr;
    MPI_Comm comm;
-   HYPRE_Int M, N;
-   HYPRE_Int first_local_row, last_local_row;
-   HYPRE_Int first_local_col, last_local_col;
-   HYPRE_Int i;
-   HYPRE_Int size, *col_ind;
+   HYPRE_BigInt M, N;
+   HYPRE_BigInt first_local_row, last_local_row;
+   HYPRE_BigInt first_local_col, last_local_col;
+   HYPRE_BigInt i;
+   HYPRE_Int size;
+   HYPRE_BigInt *col_ind;
    HYPRE_Real *values;
 
 

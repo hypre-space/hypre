@@ -1,15 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
@@ -48,7 +42,7 @@ void hypre_BoomerAMGJacobiInterp( hypre_ParCSRMatrix * A,
    }
 
    if ( dof_func_offd != NULL )
-      hypre_TFree( dof_func_offd );
+      hypre_TFree( dof_func_offd , HYPRE_MEMORY_HOST);
 }
 
 void hypre_BoomerAMGJacobiInterp_1( hypre_ParCSRMatrix * A,
@@ -83,7 +77,7 @@ void hypre_BoomerAMGJacobiInterp_1( hypre_ParCSRMatrix * A,
    hypre_CSRMatrix *P_diag = hypre_ParCSRMatrixDiag(*P);
    /*hypre_CSRMatrix *P_offd = hypre_ParCSRMatrixOffd(*P);
    HYPRE_Real      *P_diag_data = hypre_CSRMatrixData(P_diag);*/
-   HYPRE_Int             *P_diag_i = hypre_CSRMatrixI(P_diag);
+   HYPRE_Int       *P_diag_i = hypre_CSRMatrixI(P_diag);
    /*HYPRE_Int             *P_diag_j = hypre_CSRMatrixJ(P_diag);
    HYPRE_Real      *P_offd_data = hypre_CSRMatrixData(P_offd);
    HYPRE_Int             *P_offd_i = hypre_CSRMatrixI(P_offd);
@@ -95,7 +89,7 @@ void hypre_BoomerAMGJacobiInterp_1( hypre_ParCSRMatrix * A,
    HYPRE_Int i;
    /*HYPRE_Int Jnochanges=0, Jchanges, Pnew_num_nonzeros*/;
    HYPRE_Int CF_coarse=0;
-   HYPRE_Int * J_marker = hypre_CTAlloc( HYPRE_Int, num_rows_diag_P );
+   HYPRE_Int * J_marker = hypre_CTAlloc( HYPRE_Int,  num_rows_diag_P , HYPRE_MEMORY_HOST);
    HYPRE_Int nc, ncmax, ncmin, nc1;
    HYPRE_Int num_procs, my_id;
    MPI_Comm comm = hypre_ParCSRMatrixComm( A );
@@ -189,7 +183,7 @@ void hypre_BoomerAMGJacobiInterp_1( hypre_ParCSRMatrix * A,
    {
       if ( J_marker[i]<0 )
       {
-         if ( ((HYPRE_Real)rand())/RAND_MAX < randthresh )
+         if ( ((HYPRE_Real)hypre_Rand()) < randthresh )
          {
             hypre_printf( "%i: ", i );
             for ( m=P_diag_i[i]; m<P_diag_i[i+1]; ++m )
@@ -375,7 +369,7 @@ void hypre_BoomerAMGJacobiInterp_1( hypre_ParCSRMatrix * A,
    if ( num_rows_diag_P <= HYPRE_MAX_PRINTABLE_MATRIX )  hypre_ParCSRMatrixPrintIJ( *P,0,0,filename);
 #endif
 
-   hypre_TFree( J_marker );
+   hypre_TFree( J_marker , HYPRE_MEMORY_HOST);
       
 }
 
@@ -405,13 +399,13 @@ void hypre_BoomerAMGTruncateInterp( hypre_ParCSRMatrix *P,
    hypre_CSRMatrix *P_diag = hypre_ParCSRMatrixDiag(P);
    hypre_CSRMatrix *P_offd = hypre_ParCSRMatrixOffd(P);
    HYPRE_Real      *P_diag_data = hypre_CSRMatrixData(P_diag);
-   HYPRE_Int             *P_diag_i = hypre_CSRMatrixI(P_diag);
-   HYPRE_Int             *P_diag_j = hypre_CSRMatrixJ(P_diag);
+   HYPRE_Int       *P_diag_i = hypre_CSRMatrixI(P_diag);
+   HYPRE_Int       *P_diag_j = hypre_CSRMatrixJ(P_diag);
    HYPRE_Real      *P_offd_data = hypre_CSRMatrixData(P_offd);
-   HYPRE_Int             *P_offd_i = hypre_CSRMatrixI(P_offd);
-   HYPRE_Int             *P_offd_j = hypre_CSRMatrixJ(P_offd);
-   HYPRE_Int             *new_P_diag_i;
-   HYPRE_Int             *new_P_offd_i;
+   HYPRE_Int       *P_offd_i = hypre_CSRMatrixI(P_offd);
+   HYPRE_Int       *P_offd_j = hypre_CSRMatrixJ(P_offd);
+   HYPRE_Int       *new_P_diag_i;
+   HYPRE_Int       *new_P_offd_i;
    HYPRE_Int	num_rows_diag_P = hypre_CSRMatrixNumRows(P_diag);
    HYPRE_Int	num_rows_offd_P = hypre_CSRMatrixNumRows(P_offd);
    HYPRE_Int num_nonzeros_diag = hypre_CSRMatrixNumNonzeros(P_diag);
@@ -461,8 +455,8 @@ void hypre_BoomerAMGTruncateInterp( hypre_ParCSRMatrix *P,
       Elements of Coarse rows (CF_marker>=0) are always kept.
       The arrays are not re-allocated, so there will generally be unused space
       at the ends of the arrays. */
-   new_P_diag_i = hypre_CTAlloc( HYPRE_Int, num_rows_diag_P+1 );
-   new_P_offd_i = hypre_CTAlloc( HYPRE_Int, num_rows_offd_P+1 );
+   new_P_diag_i = hypre_CTAlloc( HYPRE_Int,  num_rows_diag_P+1 , HYPRE_MEMORY_HOST);
+   new_P_offd_i = hypre_CTAlloc( HYPRE_Int,  num_rows_offd_P+1 , HYPRE_MEMORY_HOST);
    m1d = P_diag_i[0];
    m1o = P_offd_i[0];
    for ( i1 = 0; i1 < num_rows_diag_P; i1++ )
@@ -520,8 +514,8 @@ void hypre_BoomerAMGTruncateInterp( hypre_ParCSRMatrix *P,
       P_diag_i[i1] = new_P_diag_i[i1];
       if ( i1<=num_rows_offd_P && num_nonzeros_offd>0 ) P_offd_i[i1] = new_P_offd_i[i1];
    }
-   hypre_TFree( new_P_diag_i );
-   if ( num_rows_offd_P>0 ) hypre_TFree( new_P_offd_i );
+   hypre_TFree( new_P_diag_i , HYPRE_MEMORY_HOST);
+   if ( num_rows_offd_P>0 ) hypre_TFree( new_P_offd_i , HYPRE_MEMORY_HOST);
 
    hypre_CSRMatrixNumNonzeros(P_diag) = num_nonzeros_diag;
    hypre_CSRMatrixNumNonzeros(P_offd) = num_nonzeros_offd;
@@ -562,7 +556,7 @@ hypre_ParCSRMatrix_dof_func_offd(
    if (num_cols_offd)
    {
         if (num_functions > 1)
-	   *dof_func_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd);
+	   *dof_func_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_offd, HYPRE_MEMORY_HOST);
    }
 
 
@@ -579,8 +573,8 @@ hypre_ParCSRMatrix_dof_func_offd(
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
    if (num_functions > 1)
    {
-      int_buf_data = hypre_CTAlloc(HYPRE_Int,hypre_ParCSRCommPkgSendMapStart(comm_pkg,
-						num_sends));
+      int_buf_data = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg, 
+						num_sends), HYPRE_MEMORY_HOST);
       index = 0;
       for (i = 0; i < num_sends; i++)
       {
@@ -594,7 +588,7 @@ hypre_ParCSRMatrix_dof_func_offd(
 	*dof_func_offd);
 
       hypre_ParCSRCommHandleDestroy(comm_handle);   
-      hypre_TFree(int_buf_data);
+      hypre_TFree(int_buf_data, HYPRE_MEMORY_HOST);
    }
 
    return(Solve_err_flag);

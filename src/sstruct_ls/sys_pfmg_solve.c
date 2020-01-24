@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_sstruct_ls.h"
 #include "sys_pfmg.h"
@@ -24,7 +19,7 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
                     hypre_SStructVector  *b_in,
                     hypre_SStructVector  *x_in         )
 {
-	hypre_SysPFMGData       *sys_pfmg_data = (hypre_SysPFMGData*)sys_pfmg_vdata;
+   hypre_SysPFMGData       *sys_pfmg_data = (hypre_SysPFMGData*)sys_pfmg_vdata;
 
    hypre_SStructPMatrix *A;
    hypre_SStructPVector *b;
@@ -106,7 +101,7 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
       /* eps = (tol^2) */
       hypre_SStructPInnerProd(b_l[0], b_l[0], &b_dot_b);
       eps = tol*tol;
-
+      
       /* if rhs is zero, return a zero solution */
       if (b_dot_b == 0.0)
       {
@@ -216,6 +211,8 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
             hypre_SStructPVectorPrint(filename, x_l[l], 0);
             hypre_sprintf(filename, "zout_rdown.%02d", l);
             hypre_SStructPVectorPrint(filename, r_l[l], 0);
+	    hypre_sprintf(filename, "zout_RT.%02d", l);
+	    hypre_SStructPMatrixPrint(filename, RT_l[l], 0);
             hypre_sprintf(filename, "zout_b.%02d", l+1);
             hypre_SStructPVectorPrint(filename, b_l[l+1], 0);
 #endif
@@ -277,7 +274,6 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
             hypre_SStructPInnerProd(x_l[0], x_l[0], &x_dot_x);
          }
       }
-
       /* fine grid post-relaxation */
       hypre_SysPFMGRelaxSetPostRelax(relax_data_l[0]);
       hypre_SysPFMGRelaxSetMaxIter(relax_data_l[0], num_post_relax);

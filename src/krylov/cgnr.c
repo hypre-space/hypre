@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -47,7 +42,7 @@ hypre_CGNRFunctionsCreate(
 {
    hypre_CGNRFunctions * cgnr_functions;
    cgnr_functions = (hypre_CGNRFunctions *)
-      hypre_CTAlloc( hypre_CGNRFunctions, 1 );
+      hypre_CTAlloc( hypre_CGNRFunctions,  1 , HYPRE_MEMORY_HOST);
 
    cgnr_functions->CommInfo = CommInfo;
    cgnr_functions->CreateVector = CreateVector;
@@ -79,7 +74,7 @@ hypre_CGNRCreate( hypre_CGNRFunctions *cgnr_functions )
 {
    hypre_CGNRData *cgnr_data;
 
-   cgnr_data = hypre_CTAlloc( hypre_CGNRData, 1);
+   cgnr_data = hypre_CTAlloc( hypre_CGNRData,  1, HYPRE_MEMORY_HOST);
    cgnr_data->functions = cgnr_functions;
 
    /* set defaults */
@@ -111,7 +106,7 @@ hypre_CGNRDestroy( void *cgnr_vdata )
       hypre_CGNRFunctions *cgnr_functions = cgnr_data->functions;
       if ((cgnr_data -> logging) > 0)
       {
-         hypre_TFree(cgnr_data -> norms);
+         hypre_TFree(cgnr_data -> norms, HYPRE_MEMORY_HOST);
       }
 
       (*(cgnr_functions->MatvecDestroy))(cgnr_data -> matvec_data);
@@ -121,8 +116,8 @@ hypre_CGNRDestroy( void *cgnr_vdata )
       (*(cgnr_functions->DestroyVector))(cgnr_data -> r);
       (*(cgnr_functions->DestroyVector))(cgnr_data -> t);
 
-      hypre_TFree(cgnr_data);
-      hypre_TFree(cgnr_functions);
+      hypre_TFree(cgnr_data, HYPRE_MEMORY_HOST);
+      hypre_TFree(cgnr_functions, HYPRE_MEMORY_HOST);
    }
 
    return(ierr);
@@ -169,7 +164,7 @@ hypre_CGNRSetup(void *cgnr_vdata,
 
    if ((cgnr_data -> logging) > 0)
    {
-      (cgnr_data -> norms)     = hypre_CTAlloc(HYPRE_Real, max_iter + 1);
+      (cgnr_data -> norms)     = hypre_CTAlloc(HYPRE_Real,  max_iter + 1, HYPRE_MEMORY_HOST);
       (cgnr_data -> log_file_name) = (char*)"cgnr.out.log";
    }
 

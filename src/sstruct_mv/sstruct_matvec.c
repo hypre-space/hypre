@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -42,7 +37,7 @@ hypre_SStructPMatvecCreate( void **pmatvec_vdata_ptr )
 {
    hypre_SStructPMatvecData *pmatvec_data;
 
-   pmatvec_data = hypre_CTAlloc(hypre_SStructPMatvecData, 1);
+   pmatvec_data = hypre_CTAlloc(hypre_SStructPMatvecData,  1, HYPRE_MEMORY_HOST);
    *pmatvec_vdata_ptr = (void *) pmatvec_data;
 
    return hypre_error_flag;
@@ -57,7 +52,7 @@ hypre_SStructPMatvecSetup( void                 *pmatvec_vdata,
                            hypre_SStructPMatrix *pA,
                            hypre_SStructPVector *px )
 {
-	hypre_SStructPMatvecData   *pmatvec_data = (hypre_SStructPMatvecData   *)pmatvec_vdata;
+   hypre_SStructPMatvecData   *pmatvec_data = (hypre_SStructPMatvecData   *)pmatvec_vdata;
    HYPRE_Int                   nvars;
    void                     ***smatvec_data;
    hypre_StructMatrix         *sA;
@@ -65,10 +60,10 @@ hypre_SStructPMatvecSetup( void                 *pmatvec_vdata,
    HYPRE_Int                   vi, vj;
 
    nvars = hypre_SStructPMatrixNVars(pA);
-   smatvec_data = hypre_TAlloc(void **, nvars);
+   smatvec_data = hypre_TAlloc(void **,  nvars, HYPRE_MEMORY_HOST);
    for (vi = 0; vi < nvars; vi++)
    {
-      smatvec_data[vi] = hypre_TAlloc(void *, nvars);
+      smatvec_data[vi] = hypre_TAlloc(void *,  nvars, HYPRE_MEMORY_HOST);
       for (vj = 0; vj < nvars; vj++)
       {
          sA = hypre_SStructPMatrixSMatrix(pA, vi, vj);
@@ -168,10 +163,10 @@ hypre_SStructPMatvecDestroy( void *pmatvec_vdata )
                hypre_StructMatvecDestroy(smatvec_data[vi][vj]);
             }
          }
-         hypre_TFree(smatvec_data[vi]);
+         hypre_TFree(smatvec_data[vi], HYPRE_MEMORY_HOST);
       }
-      hypre_TFree(smatvec_data);
-      hypre_TFree(pmatvec_data);
+      hypre_TFree(smatvec_data, HYPRE_MEMORY_HOST);
+      hypre_TFree(pmatvec_data, HYPRE_MEMORY_HOST);
    }
 
    return hypre_error_flag;
@@ -222,7 +217,7 @@ hypre_SStructMatvecCreate( void **matvec_vdata_ptr )
 {
    hypre_SStructMatvecData *matvec_data;
 
-   matvec_data = hypre_CTAlloc(hypre_SStructMatvecData, 1);
+   matvec_data = hypre_CTAlloc(hypre_SStructMatvecData,  1, HYPRE_MEMORY_HOST);
    *matvec_vdata_ptr = (void *) matvec_data;
 
    return hypre_error_flag;
@@ -245,7 +240,7 @@ hypre_SStructMatvecSetup( void                *matvec_vdata,
    HYPRE_Int                 part;
 
    nparts = hypre_SStructMatrixNParts(A);
-   pmatvec_data = hypre_TAlloc(void *, nparts);
+   pmatvec_data = hypre_TAlloc(void *,  nparts, HYPRE_MEMORY_HOST);
    for (part = 0; part < nparts; part++)
    {
       hypre_SStructPMatvecCreate(&pmatvec_data[part]);
@@ -369,8 +364,8 @@ hypre_SStructMatvecDestroy( void *matvec_vdata )
       {
          hypre_SStructPMatvecDestroy(pmatvec_data[part]);
       }
-      hypre_TFree(pmatvec_data);
-      hypre_TFree(matvec_data);
+      hypre_TFree(pmatvec_data, HYPRE_MEMORY_HOST);
+      hypre_TFree(matvec_data, HYPRE_MEMORY_HOST);
    }
 
    return hypre_error_flag;

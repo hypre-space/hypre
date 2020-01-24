@@ -1,8 +1,14 @@
+/* Copyright (c) 1992-2008 The University of Tennessee.  All rights reserved.
+ * See file COPYING in this directory for details. */
 
-#include "hypre_blas.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "f2c.h"
+#include "hypre_blas.h"
 
-/* Subroutine */ HYPRE_Int dswap_(integer *n, doublereal *dx, integer *incx, 
+/* Subroutine */ integer dswap_(integer *n, doublereal *dx, integer *incx, 
 	doublereal *dy, integer *incy)
 {
     /* System generated locals */
@@ -80,3 +86,6 @@ L40:
     return 0;
 } /* dswap_ */
 
+#ifdef __cplusplus
+}
+#endif

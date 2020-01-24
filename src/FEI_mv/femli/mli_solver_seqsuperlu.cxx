@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /* **************************************************************************** 
  * -- SuperLU routine (version 1.1) --
@@ -20,7 +15,6 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include <assert.h>
 #include "mli_solver_seqsuperlu.h"
 #include "HYPRE.h"
 #include "_hypre_parcsr_mv.h"
@@ -110,12 +104,13 @@ int MLI_Solver_SeqSuperLU::setup( MLI_Matrix *Amat )
    int      nrows, iP, startRow, nnz, *csrIA, *csrJA, *cscJA, *cscIA;
    int      irow, icol, *rowArray, *countArray, colNum, index, nSubRows;
    int      *etree, permcSpec, lwork, panelSize, relax, info, rowCnt;
-   double   *csrAA, *cscAA, dropTol;
+   double   *csrAA, *cscAA;
    hypre_ParCSRMatrix  *hypreA;
    hypre_CSRMatrix     *ADiag;
    SuperMatrix         AC, superLU_Amat;
    superlu_options_t   slu_options;
    SuperLUStat_t       slu_stat;
+   GlobalLU_t          Glu;
 
    /* ---------------------------------------------------------------
     * fetch matrix
@@ -238,9 +233,9 @@ fclose(fp);
          }
          nnz = 0;
          for ( irow = 0; irow < nSubRows; irow++ ) nnz += countArray[irow];
-         cscJA = (int *)    malloc( (nSubRows+1) * sizeof(int) );
-         cscIA = (int *)    malloc( nnz * sizeof(int) );
-         cscAA = (double *) malloc( nnz * sizeof(double) );
+         cscJA = hypre_TAlloc(int,  (nSubRows+1) , HYPRE_MEMORY_HOST);
+         cscIA = hypre_TAlloc(int,  nnz , HYPRE_MEMORY_HOST);
+         cscAA = hypre_TAlloc(double,  nnz , HYPRE_MEMORY_HOST);
          cscJA[0] = 0;
          nnz = 0;
          for ( icol = 1; icol <= nSubRows; icol++ ) 
@@ -281,14 +276,16 @@ fclose(fp);
          slu_options.Fact = DOFACT;
          slu_options.SymmetricMode = NO;
          sp_preorder(&slu_options, &superLU_Amat, permCs_[iP], etree, &AC);
-         dropTol = 0.0;
          panelSize = sp_ienv(1);
          relax = sp_ienv(2);
          StatInit(&slu_stat);
          lwork = 0;
-         dgstrf(&slu_options, &AC, dropTol, relax, panelSize,
+//         dgstrf(&slu_options, &AC, dropTol, relax, panelSize,
+//                etree,NULL,lwork,permCs_[iP],permRs_[iP],
+//                &(superLU_Lmats[iP]),&(superLU_Umats[iP]),&slu_stat,&info);
+         dgstrf(&slu_options, &AC, relax, panelSize,
                 etree,NULL,lwork,permCs_[iP],permRs_[iP],
-                &(superLU_Lmats[iP]),&(superLU_Umats[iP]),&slu_stat,&info);
+                &(superLU_Lmats[iP]),&(superLU_Umats[iP]),&Glu,&slu_stat,&info);
          Destroy_CompCol_Permuted(&AC);
          Destroy_CompCol_Matrix(&superLU_Amat);
          delete [] etree;
@@ -306,9 +303,9 @@ fclose(fp);
                countArray[csrJA[icol]]++;
             }
          }
-         cscJA = (int *)    malloc( (nrows+1) * sizeof(int) );
-         cscAA = (double *) malloc( nnz * sizeof(double) );
-         cscIA = (int *)    malloc( nnz * sizeof(int) );
+         cscJA = hypre_TAlloc(int,  (nrows+1) , HYPRE_MEMORY_HOST);
+         cscAA = hypre_TAlloc(double,  nnz , HYPRE_MEMORY_HOST);
+         cscIA = hypre_TAlloc(int,  nnz , HYPRE_MEMORY_HOST);
          cscJA[0] = 0;
          nnz = 0;
          for ( icol = 1; icol <= nrows; icol++ ) 
@@ -351,14 +348,16 @@ fclose(fp);
          slu_options.Fact = DOFACT;
          slu_options.SymmetricMode = NO;
          sp_preorder(&slu_options, &superLU_Amat, permCs_[iP], etree, &AC);
-         dropTol = 0.0;
          panelSize = sp_ienv(1);
          relax = sp_ienv(2);
          StatInit(&slu_stat);
          lwork = 0;
-         dgstrf(&slu_options, &AC, dropTol, relax, panelSize,
+//         dgstrf(&slu_options, &AC, dropTol, relax, panelSize,
+//                etree,NULL,lwork,permRs_[iP],permCs_[iP],&(superLU_Lmats[iP]),
+//                &(superLU_Umats[iP]),&slu_stat,&info);
+         dgstrf(&slu_options, &AC, relax, panelSize,
                 etree,NULL,lwork,permRs_[iP],permCs_[iP],&(superLU_Lmats[iP]),
-                &(superLU_Umats[iP]),&slu_stat,&info);
+                &(superLU_Umats[iP]),&Glu,&slu_stat,&info);
          Destroy_CompCol_Permuted(&AC);
          Destroy_CompCol_Matrix(&superLU_Amat);
          delete [] etree;

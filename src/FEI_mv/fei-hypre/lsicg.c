@@ -1,17 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -62,7 +54,7 @@ void *hypre_LSICGCreate( )
 {
    hypre_LSICGData *lsicg_data;
  
-   lsicg_data = hypre_CTAlloc(hypre_LSICGData, 1);
+   lsicg_data = hypre_CTAlloc(hypre_LSICGData,  1, HYPRE_MEMORY_HOST);
  
    /* set defaults */
    (lsicg_data -> tol)            = 1.0e-06;
@@ -97,7 +89,7 @@ int hypre_LSICGDestroy( void *lsicg_vdata )
       hypre_ParKrylovDestroyVector(lsicg_data -> p);
       hypre_ParKrylovDestroyVector(lsicg_data -> ap);
       hypre_ParKrylovDestroyVector(lsicg_data -> z);
-      hypre_TFree(lsicg_data);
+      hypre_TFree(lsicg_data, HYPRE_MEMORY_HOST);
    }
    return(ierr);
 }

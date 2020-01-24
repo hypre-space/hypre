@@ -1,4 +1,9 @@
+/* Copyright (c) 1992-2008 The University of Tennessee.  All rights reserved.
+ * See file COPYING in this directory for details. */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /*  -- translated by f2c (version 19940927).
    You must link the resulting object file with the libraries:
@@ -8,7 +13,7 @@
 #include "f2c.h"
 #include "hypre_blas.h"
 
-/* Subroutine */ HYPRE_Int drot_(integer *n, doublereal *dx, integer *incx, 
+/* Subroutine */ integer drot_(integer *n, doublereal *dx, integer *incx, 
 	doublereal *dy, integer *incy, doublereal *c, doublereal *s)
 {
 
@@ -73,3 +78,6 @@ L20:
     return 0;
 } /* drot_ */
 
+#ifdef __cplusplus
+}
+#endif

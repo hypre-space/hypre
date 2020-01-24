@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -216,7 +211,7 @@ hypre_BoxCreate( HYPRE_Int  ndim )
 {
    hypre_Box *box;
 
-   box = hypre_CTAlloc(hypre_Box, 1);
+   box = hypre_CTAlloc(hypre_Box,  1, HYPRE_MEMORY_HOST);
    hypre_BoxNDim(box) = ndim;
 
    return box;
@@ -230,7 +225,7 @@ hypre_BoxDestroy( hypre_Box *box )
 {
    if (box)
    {
-      hypre_TFree(box);
+      hypre_TFree(box, HYPRE_MEMORY_HOST);
    }
 
    return hypre_error_flag;
@@ -605,9 +600,9 @@ hypre_BoxArrayCreate( HYPRE_Int size,
    hypre_Box      *box;
    hypre_BoxArray *box_array;
 
-   box_array = hypre_TAlloc(hypre_BoxArray, 1);
+   box_array = hypre_TAlloc(hypre_BoxArray,  1, HYPRE_MEMORY_HOST);
 
-   hypre_BoxArrayBoxes(box_array)     = hypre_CTAlloc(hypre_Box, size);
+   hypre_BoxArrayBoxes(box_array)     = hypre_CTAlloc(hypre_Box,  size, HYPRE_MEMORY_HOST);
    hypre_BoxArraySize(box_array)      = size;
    hypre_BoxArrayAllocSize(box_array) = size;
    hypre_BoxArrayNDim(box_array)      = ndim;
@@ -628,8 +623,8 @@ hypre_BoxArrayDestroy( hypre_BoxArray *box_array )
 {
    if (box_array)
    {
-      hypre_TFree(hypre_BoxArrayBoxes(box_array));
-      hypre_TFree(box_array);
+      hypre_TFree(hypre_BoxArrayBoxes(box_array), HYPRE_MEMORY_HOST);
+      hypre_TFree(box_array, HYPRE_MEMORY_HOST);
    }
 
    return hypre_error_flag;
@@ -654,7 +649,7 @@ hypre_BoxArraySetSize( hypre_BoxArray  *box_array,
       old_alloc_size = alloc_size;
       alloc_size = size + hypre_BoxArrayExcess;
       hypre_BoxArrayBoxes(box_array) =
-         hypre_TReAlloc(hypre_BoxArrayBoxes(box_array), hypre_Box, alloc_size);
+         hypre_TReAlloc(hypre_BoxArrayBoxes(box_array),  hypre_Box,  alloc_size, HYPRE_MEMORY_HOST);
       hypre_BoxArrayAllocSize(box_array) = alloc_size;
 
       for (i = old_alloc_size; i < alloc_size; i++)
@@ -814,10 +809,10 @@ hypre_BoxArrayArrayCreate( HYPRE_Int size,
    hypre_BoxArrayArray  *box_array_array;
    HYPRE_Int             i;
  
-   box_array_array = hypre_CTAlloc(hypre_BoxArrayArray, 1);
+   box_array_array = hypre_CTAlloc(hypre_BoxArrayArray,  1, HYPRE_MEMORY_HOST);
  
    hypre_BoxArrayArrayBoxArrays(box_array_array) =
-      hypre_CTAlloc(hypre_BoxArray *, size);
+      hypre_CTAlloc(hypre_BoxArray *,  size, HYPRE_MEMORY_HOST);
  
    for (i = 0; i < size; i++)
    {
@@ -844,8 +839,8 @@ hypre_BoxArrayArrayDestroy( hypre_BoxArrayArray *box_array_array )
          hypre_BoxArrayDestroy(
             hypre_BoxArrayArrayBoxArray(box_array_array, i));
 
-      hypre_TFree(hypre_BoxArrayArrayBoxArrays(box_array_array));
-      hypre_TFree(box_array_array);
+      hypre_TFree(hypre_BoxArrayArrayBoxArrays(box_array_array), HYPRE_MEMORY_HOST);
+      hypre_TFree(box_array_array, HYPRE_MEMORY_HOST);
    }
 
    return hypre_error_flag;

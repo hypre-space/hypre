@@ -1,15 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /* config/HYPRE_config.h.in.  Generated from configure.in by autoheader.  */
 
@@ -46,8 +40,17 @@
 /* Define to 1 for IRIX64 platforms */
 #undef HYPRE_IRIX64
 
-/* Define to 1 if using long long int for HYPRE_Int */
+/* Define to 1 if using long long int for HYPRE_BigInt */
+#undef HYPRE_MIXEDINT
+
+/* Define to 1 if using long long int for HYPRE_Int and HYPRE_BigInt */
 #undef HYPRE_BIGINT
+
+/* Define to 1 if using single precision values for HYPRE_Real */
+#undef HYPRE_SINGLE
+
+/* Define to 1 if using quad precision values for HYPRE_Real */
+#undef HYPRE_LONG_DOUBLE
 
 /* Define to 1 if using complex values */
 #undef HYPRE_COMPLEX
@@ -63,6 +66,9 @@
 
 /* Define to 1 if an MPI library is found */
 #undef HYPRE_HAVE_MPI
+
+/* Define to 1 if Node Aware MPI library is used */
+#undef HYPRE_USING_NODE_AWARE_MPI
 
 /* Define to 1 if the routine MPI_Comm_f2c is found */
 #undef HYPRE_HAVE_MPI_COMM_F2C
@@ -94,12 +100,68 @@
 /* Enable OpenMP support */
 #undef HYPRE_USING_OPENMP
 
+/*- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ * MEMORY
+ *- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
+
+/* Define to 1 if using host memory only */
+#undef HYPRE_USING_HOST_MEMORY
+
+/* Define to 1 if using device memory without UM */
+#undef HYPRE_USING_DEVICE_MEMORY
+
+/* Define to 1 if using unified memory */
+#undef HYPRE_USING_UNIFIED_MEMORY
+
+/*- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ * EXECUTION
+ *- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
+/* Define to 1 if executing on device with CUDA */
+#undef HYPRE_USING_CUDA
+
+/* Define to 1 if executing on device with OpenMP  */
+#undef HYPRE_USING_DEVICE_OPENMP
+
+/* Define to 1 if using OpenMP on device [target alloc version] */
+#undef HYPRE_DEVICE_OPENMP_ALLOC
+
+/* Define to 1 if using OpenMP on device [target mapped version] */
+#undef HYPRE_DEVICE_OPENMP_MAPPED
+
+/* Define to 1 if strictly checking OpenMP offload directives */
+#undef HYPRE_DEVICE_OPENMP_CHECK
+
+/* Define to 1 if executing on host/device with RAJA */
+#undef HYPRE_USING_RAJA
+
+/* Define to 1 if executing on host/device with KOKKOS */
+#undef HYPRE_USING_KOKKOS
+
+/* Define to 1 if using NVIDIA Tools Extension (NVTX) */
+#undef HYPRE_USING_NVTX
+
+/* Define to 1 if using cuSPARSE */
+#undef HYPRE_USING_CUSPARSE
+
+/* Define to 1 if using cuBLAS */
+#undef HYPRE_USING_CUBLAS
+
+/* Define to 1 if using cuRAND */
+#undef HYPRE_USING_CURAND
+
+/* Define to 1 if using GPU aware MPI */
+#undef HYPRE_WITH_GPU_AWARE_MPI
+
+/* Define to 1 if using CUDA streams */
+#undef HYPRE_USING_CUDA_STREAMS
+
 /* Define as follows to set the Fortran name mangling scheme:
  * 0 = unspecified
  * 1 = no underscores
  * 2 = one underscore
  * 3 = two underscores
- * 4 = caps, no underscores */
+ * 4 = caps, no underscores
+ * 5 = one underscore before and after */
 #undef HYPRE_FMANGLE
 
 /* Define as in HYPRE_FMANGLE to set the BLAS name mangling scheme */
@@ -117,3 +179,22 @@
 
 /* Define to 1 if Caliper instrumentation is enabled */
 #undef HYPRE_USING_CALIPER
+
+/* Define to 1 if using SuperLU */
+#undef HAVE_SUPERLU
+
+/* Define to 1 if using DSuperLU */
+#undef HYPRE_USING_DSUPERLU
+
+/* Define to 1 if using MLI */
+#undef HAVE_MLI
+
+/* Define to 1 if in debug mode */
+#undef HYPRE_DEBUG
+
+/* if not in debug mode, define NDEBUG */
+#ifndef HYPRE_DEBUG
+#ifndef NDEBUG
+#define NDEBUG
+#endif
+#endif

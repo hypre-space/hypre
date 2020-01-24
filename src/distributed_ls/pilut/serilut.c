@@ -1,17 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /*
  * serilut.c
@@ -123,7 +115,7 @@ HYPRE_Int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
 #endif
 
   /* Structural Union no longer required */
-  hypre_TFree( structural_union );
+  hypre_TFree( structural_union , HYPRE_MEMORY_HOST);
 
   nbnd = lnrows - nlocal ;
 #ifdef HYPRE_DEBUG
@@ -332,10 +324,10 @@ HYPRE_Int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
 #endif
 
   /*hypre_free_multi(jr, jw, lr, w, -1);*/
-  hypre_TFree(jr);
-  hypre_TFree(jw);
-  hypre_TFree(lr);
-  hypre_TFree(w);
+  hypre_TFree(jr, HYPRE_MEMORY_HOST);
+  hypre_TFree(jw, HYPRE_MEMORY_HOST);
+  hypre_TFree(lr, HYPRE_MEMORY_HOST);
+  hypre_TFree(w, HYPRE_MEMORY_HOST);
   jr = NULL;
   jw = NULL;
   lr = NULL;
@@ -418,7 +410,7 @@ HYPRE_Int hypre_FindStructuralUnion( HYPRE_DistributedMatrix matrix,
   HYPRE_Int ierr=0, i, j, row_size, *col_ind;
 
   /* Allocate and clear structural_union vector */
-  *structural_union = hypre_CTAlloc( HYPRE_Int, nrows );
+  *structural_union = hypre_CTAlloc( HYPRE_Int,  nrows , HYPRE_MEMORY_HOST);
 
   /* Loop through rows */
   for ( i=0; i< lnrows; i++ )
@@ -463,19 +455,19 @@ HYPRE_Int hypre_ExchangeStructuralUnions( DataDistType *ddist,
   HYPRE_Int ierr=0, *recv_unions;
 
   /* allocate space for receiving unions */
-  recv_unions = hypre_CTAlloc( HYPRE_Int, nrows );
+  recv_unions = hypre_CTAlloc( HYPRE_Int,  nrows , HYPRE_MEMORY_HOST);
 
   hypre_MPI_Allreduce( *structural_union, recv_unions, nrows, 
                  HYPRE_MPI_INT, hypre_MPI_LOR, pilut_comm );
 
   /* free and reallocate structural union so that is of local size */
-  hypre_TFree( *structural_union );
-  *structural_union = hypre_TAlloc( HYPRE_Int, lnrows );
+  hypre_TFree( *structural_union , HYPRE_MEMORY_HOST);
+  *structural_union = hypre_TAlloc( HYPRE_Int,  lnrows , HYPRE_MEMORY_HOST);
 
   hypre_memcpy_int( *structural_union, &recv_unions[firstrow], lnrows );
 
   /* deallocate recv_unions */
-  hypre_TFree( recv_unions );
+  hypre_TFree( recv_unions , HYPRE_MEMORY_HOST);
 
   return(ierr);
 }
@@ -502,7 +494,7 @@ void hypre_SecondDrop(HYPRE_Int maxnz, HYPRE_Real tol, HYPRE_Int row,
   diag = iperm[lrow];
 
   /* Deal with the diagonal element first */
-  assert(jw[0] == row);
+  hypre_assert(jw[0] == row);
   if (w[0] != 0.0) 
     ldu->dvalues[lrow] = 1.0/w[0];
   else { /* zero pivot */

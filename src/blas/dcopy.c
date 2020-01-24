@@ -1,3 +1,9 @@
+/* Copyright (c) 1992-2008 The University of Tennessee.  All rights reserved.
+ * See file COPYING in this directory for details. */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* dcopy.f -- translated by f2c (version 19960315).
    You must link the resulting object file with the libraries:
@@ -7,7 +13,7 @@
 #include "f2c.h"
 #include "hypre_blas.h"
 
-/* Subroutine */ HYPRE_Int dcopy_(integer* n, doublereal* dx,integer* incx,doublereal* dy,integer* incy)
+/* Subroutine */ integer dcopy_(integer* n, doublereal* dx,integer* incx,doublereal* dy,integer* incy)
 {
     /* System generated locals */
     integer i__1;
@@ -87,3 +93,6 @@ L40:
     return 0;
 } /* dcopy_ */
 
+#ifdef __cplusplus
+}
+#endif

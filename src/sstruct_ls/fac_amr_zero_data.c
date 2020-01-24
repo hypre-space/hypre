@@ -1,17 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_sstruct_ls.h"
 #include "fac.h"
@@ -60,8 +52,8 @@ hypre_ZeroAMRVectorData(hypre_SStructVector  *b,
    hypre_BoxInit(&scaled_box, ndim);
    hypre_BoxInit(&intersect_box, ndim);
 
-   levels        = hypre_CTAlloc(HYPRE_Int, npart);
-   refine_factors= hypre_CTAlloc(hypre_Index, npart);
+   levels        = hypre_CTAlloc(HYPRE_Int,  npart, HYPRE_MEMORY_HOST);
+   refine_factors= hypre_CTAlloc(hypre_Index,  npart, HYPRE_MEMORY_HOST);
    for (part= 0; part< npart; part++)
    {
        levels[plevels[part]]= part;
@@ -137,25 +129,25 @@ hypre_ZeroAMRVectorData(hypre_SStructVector  *b,
                   /*------------------------------------------------------------
                    * Coarse underlying box found. Now zero off.
                    *------------------------------------------------------------*/
-                   values1= hypre_CTAlloc(HYPRE_Real, intersect_size);
+                   values1= hypre_CTAlloc(HYPRE_Real,  intersect_size, HYPRE_MEMORY_HOST);
 
                    HYPRE_SStructVectorSetBoxValues(b, levels[level-1], 
                                                    hypre_BoxIMin(&intersect_box),
                                                    hypre_BoxIMax(&intersect_box),
                                                    var, values1);
-                   hypre_TFree(values1);
+                   hypre_TFree(values1, HYPRE_MEMORY_HOST);
 
                 }  /* if (intersect_size > 0) */
              }     /* for (i= 0; i< nboxman_entries; i++) */
        
-             hypre_TFree(boxman_entries);
+             hypre_TFree(boxman_entries, HYPRE_MEMORY_HOST);
 
          }   /* hypre_ForBoxI(ci, cgrid_boxes) */
       }      /* for (var= 0; var< nvars; var++) */
    }         /* for (level= max_level; level> 0; level--) */
 
-   hypre_TFree(levels);
-   hypre_TFree(refine_factors);
+   hypre_TFree(levels, HYPRE_MEMORY_HOST);
+   hypre_TFree(refine_factors, HYPRE_MEMORY_HOST);
 
    return ierr;
 }
@@ -267,8 +259,8 @@ hypre_ZeroAMRMatrixData(hypre_SStructMatrix  *A,
                 /*------------------------------------------------------------
                  * Coarse underlying box found. Now zero off.
                  *------------------------------------------------------------*/
-                 values1= hypre_CTAlloc(HYPRE_Real, intersect_size);
-                 values2= hypre_TAlloc(HYPRE_Real, intersect_size);
+                 values1= hypre_CTAlloc(HYPRE_Real,  intersect_size, HYPRE_MEMORY_HOST);
+                 values2= hypre_TAlloc(HYPRE_Real,  intersect_size, HYPRE_MEMORY_HOST);
                  for (j= 0; j< intersect_size; j++)
                  {
                      values2[j]= 1.0;
@@ -297,13 +289,13 @@ hypre_ZeroAMRMatrixData(hypre_SStructMatrix  *A,
                                                        var, 1, &j, values2);
                     }
                  }
-                 hypre_TFree(values1);
-                 hypre_TFree(values2);
+                 hypre_TFree(values1, HYPRE_MEMORY_HOST);
+                 hypre_TFree(values2, HYPRE_MEMORY_HOST);
 
              }   /* if (intersect_size > 0) */
           }      /* for (i= 0; i< nmap_entries; i++) */
 
-          hypre_TFree(boxman_entries);
+          hypre_TFree(boxman_entries, HYPRE_MEMORY_HOST);
       }   /* hypre_ForBoxI(ci, cgrid_boxes) */
    }      /* for (var= 0; var< nvars; var++) */
 

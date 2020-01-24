@@ -1,3 +1,9 @@
+/* Copyright (c) 1992-2008 The University of Tennessee.  All rights reserved.
+ * See file COPYING in this directory for details. */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /*  -- translated by f2c (version 19940927).
    You must link the resulting object file with the libraries:
@@ -7,7 +13,7 @@
 #include "f2c.h"
 #include "hypre_blas.h"
 
-/* Subroutine */ HYPRE_Int dgemm_(const char *transa,const char *transb, integer *m, integer *
+/* Subroutine */ integer dgemm_(const char *transa,const char *transb, integer *m, integer *
 	n, integer *k, doublereal *alpha, doublereal *a, integer *lda, 
 	doublereal *b, integer *ldb, doublereal *beta, doublereal *c, integer 
 	*ldc)
@@ -21,9 +27,9 @@
     static logical nota, notb;
     static doublereal temp;
     static integer i, j, l;
-    extern logical hypre_lsame_(const char *,const char *);
+    extern logical lsame_(const char *,const char *);
     static integer nrowa, nrowb;
-    extern /* Subroutine */ HYPRE_Int hypre_xerbla_(const char *, integer *);
+    extern /* Subroutine */ integer xerbla_(const char *, integer *);
 
 
 /*  Purpose   
@@ -192,8 +198,8 @@
 #define B(I,J) b[(I)-1 + ((J)-1)* ( *ldb)]
 #define C(I,J) c[(I)-1 + ((J)-1)* ( *ldc)]
 
-    nota = hypre_lsame_(transa, "N");
-    notb = hypre_lsame_(transb, "N");
+    nota = lsame_(transa, "N");
+    notb = lsame_(transb, "N");
     if (nota) {
 	nrowa = *m;
     } else {
@@ -208,9 +214,9 @@
 /*     Test the input parameters. */
 
     info = 0;
-    if (! nota && ! hypre_lsame_(transa, "C") && ! hypre_lsame_(transa, "T")) {
+    if (! nota && ! lsame_(transa, "C") && ! lsame_(transa, "T")) {
 	info = 1;
-    } else if (! notb && ! hypre_lsame_(transb, "C") && ! hypre_lsame_(transb, 
+    } else if (! notb && ! lsame_(transb, "C") && ! lsame_(transb, 
 	    "T")) {
 	info = 2;
     } else if (*m < 0) {
@@ -227,7 +233,7 @@
 	info = 13;
     }
     if (info != 0) {
-	hypre_xerbla_("DGEMM ", &info);
+	xerbla_("DGEMM ", &info);
 	return 0;
     }
 
@@ -369,3 +375,7 @@
 /*     End of DGEMM . */
 
 } /* dgemm_ */
+
+#ifdef __cplusplus
+}
+#endif

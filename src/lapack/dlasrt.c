@@ -1,8 +1,14 @@
+/* Copyright (c) 1992-2008 The University of Tennessee.  All rights reserved.
+ * See file COPYING in this directory for details. */
 
-#include "hypre_lapack.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "f2c.h"
+#include "hypre_lapack.h"
 
-/* Subroutine */ HYPRE_Int dlasrt_(const char *id, integer *n, doublereal *d__, integer *
+/* Subroutine */ integer dlasrt_(const char *id, integer *n, doublereal *d__, integer *
 	info)
 {
 /*  -- LAPACK routine (version 3.0) --   
@@ -54,7 +60,7 @@
     static integer stack[64]	/* was [2][32] */;
     static doublereal dmnmx, d1, d2, d3;
     static integer start;
-    extern /* Subroutine */ HYPRE_Int xerbla_(const char *, integer *);
+    extern /* Subroutine */ integer xerbla_(const char *, integer *);
     static integer stkpnt, dir;
     static doublereal tmp;
 #define stack_ref(a_1,a_2) stack[(a_2)*2 + a_1 - 3]
@@ -258,4 +264,6 @@ L110:
 
 #undef stack_ref
 
-
+#ifdef __cplusplus
+}
+#endif

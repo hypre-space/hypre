@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -60,7 +55,7 @@ hypre_InitializeTiming( const char *name )
 
    if (hypre_global_timing == NULL)
    {
-      hypre_global_timing = hypre_CTAlloc(hypre_TimingType, 1);
+      hypre_global_timing = hypre_CTAlloc(hypre_TimingType,  1, HYPRE_MEMORY_HOST);
    }
 
    /*-------------------------------------------------------
@@ -108,19 +103,19 @@ hypre_InitializeTiming( const char *name )
          old_name      = (hypre_global_timing_ref(threadid, name));
          old_state     = (hypre_global_timing_ref(threadid, state));
          old_num_regs  = (hypre_global_timing_ref(threadid, num_regs));
-    
+
          (hypre_global_timing_ref(threadid, wall_time)) =
-            hypre_CTAlloc(HYPRE_Real, (time_index+1));
+            hypre_CTAlloc(HYPRE_Real,  (time_index+1), HYPRE_MEMORY_HOST);
          (hypre_global_timing_ref(threadid, cpu_time))  =
-            hypre_CTAlloc(HYPRE_Real, (time_index+1));
+            hypre_CTAlloc(HYPRE_Real,  (time_index+1), HYPRE_MEMORY_HOST);
          (hypre_global_timing_ref(threadid, flops))     =
-            hypre_CTAlloc(HYPRE_Real, (time_index+1));
+            hypre_CTAlloc(HYPRE_Real,  (time_index+1), HYPRE_MEMORY_HOST);
          (hypre_global_timing_ref(threadid, name))      =
-            hypre_CTAlloc(char *, (time_index+1));
+            hypre_CTAlloc(char *,  (time_index+1), HYPRE_MEMORY_HOST);
          (hypre_global_timing_ref(threadid, state))     =
-            hypre_CTAlloc(HYPRE_Int,    (time_index+1));
+            hypre_CTAlloc(HYPRE_Int,     (time_index+1), HYPRE_MEMORY_HOST);
          (hypre_global_timing_ref(threadid, num_regs))  =
-            hypre_CTAlloc(HYPRE_Int,    (time_index+1));
+            hypre_CTAlloc(HYPRE_Int,     (time_index+1), HYPRE_MEMORY_HOST);
          (hypre_global_timing_ref(threadid, size)) ++;
 
          for (i = 0; i < time_index; i++)
@@ -133,15 +128,15 @@ hypre_InitializeTiming( const char *name )
             hypre_TimingNumRegs(i)  = old_num_regs[i];
          }
 
-         hypre_TFree(old_wall_time);
-         hypre_TFree(old_cpu_time);
-         hypre_TFree(old_flops);
-         hypre_TFree(old_name);
-         hypre_TFree(old_state);
-         hypre_TFree(old_num_regs);
+         hypre_TFree(old_wall_time, HYPRE_MEMORY_HOST);
+         hypre_TFree(old_cpu_time, HYPRE_MEMORY_HOST);
+         hypre_TFree(old_flops, HYPRE_MEMORY_HOST);
+         hypre_TFree(old_name, HYPRE_MEMORY_HOST);
+         hypre_TFree(old_state, HYPRE_MEMORY_HOST);
+         hypre_TFree(old_num_regs, HYPRE_MEMORY_HOST);
       }
 
-      hypre_TimingName(time_index) = hypre_CTAlloc(char, 80);
+      hypre_TimingName(time_index) = hypre_CTAlloc(char,  80, HYPRE_MEMORY_HOST);
       strncpy(hypre_TimingName(time_index), name, 79);
       hypre_TimingState(time_index)   = 0;
       hypre_TimingNumRegs(time_index) = 1;
@@ -173,7 +168,7 @@ hypre_FinalizeTiming( HYPRE_Int time_index )
 
       if (hypre_TimingNumRegs(time_index) == 0)
       {
-         hypre_TFree(hypre_TimingName(time_index));
+         hypre_TFree(hypre_TimingName(time_index), HYPRE_MEMORY_HOST);
          (hypre_global_timing_ref(threadid, num_names)) --;
       }
    }
@@ -181,16 +176,16 @@ hypre_FinalizeTiming( HYPRE_Int time_index )
    if ((hypre_global_timing -> num_names) == 0)
    {
       for (i = 0; i < (hypre_global_timing -> size); i++)
-      {  
-         hypre_TFree(hypre_global_timing_ref(i, wall_time));
-         hypre_TFree(hypre_global_timing_ref(i, cpu_time));
-         hypre_TFree(hypre_global_timing_ref(i, flops));
-         hypre_TFree(hypre_global_timing_ref(i, name));
-         hypre_TFree(hypre_global_timing_ref(i, state));
-         hypre_TFree(hypre_global_timing_ref(i, num_regs));
+      {
+         hypre_TFree(hypre_global_timing_ref(i,  wall_time), HYPRE_MEMORY_HOST);
+         hypre_TFree(hypre_global_timing_ref(i,  cpu_time), HYPRE_MEMORY_HOST);
+         hypre_TFree(hypre_global_timing_ref(i,  flops), HYPRE_MEMORY_HOST);
+         hypre_TFree(hypre_global_timing_ref(i,  name), HYPRE_MEMORY_HOST);
+         hypre_TFree(hypre_global_timing_ref(i,  state), HYPRE_MEMORY_HOST);
+         hypre_TFree(hypre_global_timing_ref(i,  num_regs), HYPRE_MEMORY_HOST);
       }
-      
-      hypre_TFree(hypre_global_timing);
+
+      hypre_TFree(hypre_global_timing, HYPRE_MEMORY_HOST);
       hypre_global_timing = NULL;
    }
 
@@ -202,7 +197,7 @@ hypre_FinalizeTiming( HYPRE_Int time_index )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_IncFLOPCount( HYPRE_Int inc )
+hypre_IncFLOPCount( HYPRE_BigInt inc )
 {
    HYPRE_Int  ierr = 0;
 
@@ -328,9 +323,9 @@ hypre_PrintTiming( const char     *heading,
          local_wall_time = hypre_TimingWallTime(i);
          local_cpu_time  = hypre_TimingCPUTime(i);
          hypre_MPI_Allreduce(&local_wall_time, &wall_time, 1,
-                       hypre_MPI_DOUBLE, hypre_MPI_MAX, comm);
+                       hypre_MPI_REAL, hypre_MPI_MAX, comm);
          hypre_MPI_Allreduce(&local_cpu_time, &cpu_time, 1,
-                       hypre_MPI_DOUBLE, hypre_MPI_MAX, comm);
+                       hypre_MPI_REAL, hypre_MPI_MAX, comm);
 
          if (myrank == 0)
          {

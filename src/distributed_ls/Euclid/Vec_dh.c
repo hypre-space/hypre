@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include <stdlib.h>
 #include "_hypre_Euclid.h"
@@ -58,7 +53,7 @@ void Vec_dhCopy(Vec_dh x, Vec_dh y)
   if (x->vals == NULL) SET_V_ERROR("x->vals is NULL");
   if (y->vals == NULL) SET_V_ERROR("y->vals is NULL");
   if (x->n != y->n) SET_V_ERROR("x and y are different lengths");
-  memcpy(y->vals, x->vals, x->n*sizeof(HYPRE_Real));
+  hypre_TMemcpy(y->vals,  x->vals, HYPRE_Real, x->n, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
   END_FUNC_DH
 }
 

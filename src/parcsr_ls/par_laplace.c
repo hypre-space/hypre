@@ -1,36 +1,27 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
-
-
-
- 
 #include "_hypre_parcsr_ls.h"
- 
+
 /*--------------------------------------------------------------------------
  * hypre_GenerateLaplacian
  *--------------------------------------------------------------------------*/
 
-HYPRE_ParCSRMatrix 
+HYPRE_ParCSRMatrix
 GenerateLaplacian( MPI_Comm comm,
-                   HYPRE_Int      nx,
-                   HYPRE_Int      ny,
-                   HYPRE_Int      nz, 
+                   HYPRE_BigInt   nx,
+                   HYPRE_BigInt   ny,
+                   HYPRE_BigInt   nz,
                    HYPRE_Int      P,
                    HYPRE_Int      Q,
                    HYPRE_Int      R,
-                   HYPRE_Int      p,
-                   HYPRE_Int      q,
-                   HYPRE_Int      r,
+                   HYPRE_Int      ip,
+                   HYPRE_Int      iq,
+                   HYPRE_Int      ir,
                    HYPRE_Real  *value )
 {
    hypre_ParCSRMatrix *A;
@@ -43,147 +34,155 @@ GenerateLaplacian( MPI_Comm comm,
 
    HYPRE_Int    *offd_i;
    HYPRE_Int    *offd_j = NULL;
+   HYPRE_BigInt *big_offd_j = NULL;
    HYPRE_Real *offd_data = NULL;
 
-   HYPRE_Int *global_part;
-   HYPRE_Int ix, iy, iz;
+   HYPRE_BigInt *global_part;
+   HYPRE_BigInt ix, iy, iz;
    HYPRE_Int cnt, o_cnt;
-   HYPRE_Int local_num_rows; 
-   HYPRE_Int *col_map_offd;
+   HYPRE_Int local_num_rows;
+   HYPRE_BigInt *col_map_offd;
    HYPRE_Int row_index;
-   HYPRE_Int i,j;
+   HYPRE_Int i, j;
 
    HYPRE_Int nx_local, ny_local, nz_local;
-   HYPRE_Int nx_size, ny_size, nz_size;
    HYPRE_Int num_cols_offd;
-   HYPRE_Int grid_size;
+   HYPRE_BigInt grid_size;
 
-   HYPRE_Int *nx_part;
-   HYPRE_Int *ny_part;
-   HYPRE_Int *nz_part;
+   HYPRE_BigInt *nx_part;
+   HYPRE_BigInt *ny_part;
+   HYPRE_BigInt *nz_part;
 
-   HYPRE_Int num_procs, my_id;
+   HYPRE_Int num_procs;
    HYPRE_Int P_busy, Q_busy, R_busy;
 
    hypre_MPI_Comm_size(comm,&num_procs);
-   hypre_MPI_Comm_rank(comm,&my_id);
 
    grid_size = nx*ny*nz;
-
 
    hypre_GeneratePartitioning(nx,P,&nx_part);
    hypre_GeneratePartitioning(ny,Q,&ny_part);
    hypre_GeneratePartitioning(nz,R,&nz_part);
 
-   global_part = hypre_CTAlloc(HYPRE_Int,P*Q*R+1);
+   nx_local =(HYPRE_Int)(nx_part[ip+1] - nx_part[ip]);
+   ny_local =(HYPRE_Int)(ny_part[iq+1] - ny_part[iq]);
+   nz_local =(HYPRE_Int)(nz_part[ir+1] - nz_part[ir]);
+
+   local_num_rows = nx_local*ny_local*nz_local;
+
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+
+   global_part = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
+   global_part[0] = nz_part[ir]*nx*ny+(ny_part[iq]*nx+nx_part[ip]*ny_local)*nz_local;
+   global_part[1] = global_part[0] + (HYPRE_BigInt)local_num_rows;
+
+#else
+
+   HYPRE_Int nx_size, ny_size, nz_size;
+   HYPRE_Int jx, jy, jz;
+   global_part = hypre_CTAlloc(HYPRE_BigInt, P*Q*R+1, HYPRE_MEMORY_HOST);
 
    global_part[0] = 0;
    cnt = 1;
-   for (iz = 0; iz < R; iz++)
+   for (jz = 0; jz < R; jz++)
    {
-      nz_size = nz_part[iz+1]-nz_part[iz];
-      for (iy = 0; iy < Q; iy++)
+      nz_size = (HYPRE_Int)(nz_part[jz+1]-nz_part[jz]);
+      for (jy = 0; jy < Q; jy++)
       {
-         ny_size = ny_part[iy+1]-ny_part[iy];
-         for (ix = 0; ix < P; ix++)
+         ny_size = (HYPRE_Int)(ny_part[jy+1]-ny_part[jy]);
+         for (jx = 0; jx < P; jx++)
          {
-            nx_size = nx_part[ix+1] - nx_part[ix];
+            nx_size = (HYPRE_Int)(nx_part[jx+1] - nx_part[jx]);
             global_part[cnt] = global_part[cnt-1];
-            global_part[cnt++] += nx_size*ny_size*nz_size;
+            global_part[cnt++] += (HYPRE_BigInt)(nx_size*ny_size*nz_size);
          }
       }
    }
 
-   nx_local = nx_part[p+1] - nx_part[p];
-   ny_local = ny_part[q+1] - ny_part[q];
-   nz_local = nz_part[r+1] - nz_part[r];
+#endif
 
-   my_id = r*(P*Q) + q*P + p;
-   num_procs = P*Q*R;
-
-   local_num_rows = nx_local*ny_local*nz_local;
-   diag_i = hypre_CTAlloc(HYPRE_Int, local_num_rows+1);
-   offd_i = hypre_CTAlloc(HYPRE_Int, local_num_rows+1);
+   diag_i = hypre_CTAlloc(HYPRE_Int,  local_num_rows+1, HYPRE_MEMORY_SHARED);
+   offd_i = hypre_CTAlloc(HYPRE_Int,  local_num_rows+1, HYPRE_MEMORY_SHARED);
 
    P_busy = hypre_min(nx,P);
    Q_busy = hypre_min(ny,Q);
    R_busy = hypre_min(nz,R);
 
    num_cols_offd = 0;
-   if (p) num_cols_offd += ny_local*nz_local;
-   if (p < P_busy-1) num_cols_offd += ny_local*nz_local;
-   if (q) num_cols_offd += nx_local*nz_local;
-   if (q < Q_busy-1) num_cols_offd += nx_local*nz_local;
-   if (r) num_cols_offd += nx_local*ny_local;
-   if (r < R_busy-1) num_cols_offd += nx_local*ny_local;
+   if (ip) num_cols_offd += ny_local*nz_local;
+   if (ip < P_busy-1) num_cols_offd += ny_local*nz_local;
+   if (iq) num_cols_offd += nx_local*nz_local;
+   if (iq < Q_busy-1) num_cols_offd += nx_local*nz_local;
+   if (ir) num_cols_offd += nx_local*ny_local;
+   if (ir < R_busy-1) num_cols_offd += nx_local*ny_local;
 
    if (!local_num_rows) num_cols_offd = 0;
 
-   col_map_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd);
+   col_map_offd = hypre_CTAlloc(HYPRE_BigInt, num_cols_offd, HYPRE_MEMORY_HOST);
 
    cnt = 1;
    o_cnt = 1;
    diag_i[0] = 0;
    offd_i[0] = 0;
-   for (iz = nz_part[r]; iz < nz_part[r+1]; iz++)
+   for (iz = nz_part[ir]; iz < nz_part[ir+1]; iz++)
    {
-      for (iy = ny_part[q];  iy < ny_part[q+1]; iy++)
+      for (iy = ny_part[iq];  iy < ny_part[iq+1]; iy++)
       {
-         for (ix = nx_part[p]; ix < nx_part[p+1]; ix++)
+         for (ix = nx_part[ip]; ix < nx_part[ip+1]; ix++)
          {
             diag_i[cnt] = diag_i[cnt-1];
             offd_i[o_cnt] = offd_i[o_cnt-1];
             diag_i[cnt]++;
-            if (iz > nz_part[r]) 
+            if (iz > nz_part[ir])
                diag_i[cnt]++;
             else
             {
-               if (iz) 
+               if (iz)
                {
                   offd_i[o_cnt]++;
                }
             }
-            if (iy > ny_part[q]) 
+            if (iy > ny_part[iq] )
                diag_i[cnt]++;
             else
             {
-               if (iy) 
+               if (iy)
                {
                   offd_i[o_cnt]++;
                }
             }
-            if (ix > nx_part[p]) 
+            if (ix > nx_part[ip] )
                diag_i[cnt]++;
             else
             {
-               if (ix) 
-               {
-                  offd_i[o_cnt]++; 
-               }
-            }
-            if (ix+1 < nx_part[p+1]) 
-               diag_i[cnt]++;
-            else
-            {
-               if (ix+1 < nx) 
-               {
-                  offd_i[o_cnt]++; 
-               }
-            }
-            if (iy+1 < ny_part[q+1]) 
-               diag_i[cnt]++;
-            else
-            {
-               if (iy+1 < ny) 
+               if (ix)
                {
                   offd_i[o_cnt]++;
                }
             }
-            if (iz+1 < nz_part[r+1]) 
+            if (ix+1 < nx_part[ip+1])
                diag_i[cnt]++;
             else
             {
-               if (iz+1 < nz) 
+               if (ix+1 < nx)
+               {
+                  offd_i[o_cnt]++;
+               }
+            }
+            if (iy+1 < ny_part[iq+1])
+               diag_i[cnt]++;
+            else
+            {
+               if (iy+1 < ny)
+               {
+                  offd_i[o_cnt]++;
+               }
+            }
+            if (iz+1 < nz_part[ir+1])
+               diag_i[cnt]++;
+            else
+            {
+               if (iz+1 < nz)
                {
                   offd_i[o_cnt]++;
                }
@@ -194,107 +193,108 @@ GenerateLaplacian( MPI_Comm comm,
       }
    }
 
-   diag_j = hypre_CTAlloc(HYPRE_Int, diag_i[local_num_rows]);
-   diag_data = hypre_CTAlloc(HYPRE_Real, diag_i[local_num_rows]);
+   diag_j = hypre_CTAlloc(HYPRE_Int,  diag_i[local_num_rows], HYPRE_MEMORY_SHARED);
+   diag_data = hypre_CTAlloc(HYPRE_Real,  diag_i[local_num_rows], HYPRE_MEMORY_SHARED);
 
    if (num_procs > 1)
    {
-      offd_j = hypre_CTAlloc(HYPRE_Int, offd_i[local_num_rows]);
-      offd_data = hypre_CTAlloc(HYPRE_Real, offd_i[local_num_rows]);
+      big_offd_j = hypre_CTAlloc(HYPRE_BigInt, offd_i[local_num_rows], HYPRE_MEMORY_HOST);
+      offd_j = hypre_CTAlloc(HYPRE_Int,  offd_i[local_num_rows], HYPRE_MEMORY_SHARED);
+      offd_data = hypre_CTAlloc(HYPRE_Real,  offd_i[local_num_rows], HYPRE_MEMORY_SHARED);
    }
 
    row_index = 0;
    cnt = 0;
    o_cnt = 0;
-   for (iz = nz_part[r]; iz < nz_part[r+1]; iz++)
+   for (iz = nz_part[ir]; iz < nz_part[ir+1]; iz++)
    {
-      for (iy = ny_part[q];  iy < ny_part[q+1]; iy++)
+      for (iy = ny_part[iq];  iy < ny_part[iq+1]; iy++)
       {
-         for (ix = nx_part[p]; ix < nx_part[p+1]; ix++)
+         for (ix = nx_part[ip]; ix < nx_part[ip+1]; ix++)
          {
             diag_j[cnt] = row_index;
             diag_data[cnt++] = value[0];
-            if (iz > nz_part[r]) 
+            if (iz > nz_part[ir])
             {
                diag_j[cnt] = row_index-nx_local*ny_local;
                diag_data[cnt++] = value[3];
             }
             else
             {
-               if (iz) 
+               if (iz)
                {
-                  offd_j[o_cnt] = hypre_map(ix,iy,iz-1,p,q,r-1,P,Q,R,
-                                      nx_part,ny_part,nz_part,global_part);
+                  big_offd_j[o_cnt] = hypre_map(ix,iy,iz-1,ip,iq,ir-1,nx,ny,
+                                                nx_part,ny_part,nz_part);
                   offd_data[o_cnt++] = value[3];
                }
             }
-            if (iy > ny_part[q]) 
+            if (iy > ny_part[iq])
             {
                diag_j[cnt] = row_index-nx_local;
                diag_data[cnt++] = value[2];
             }
             else
             {
-               if (iy) 
+               if (iy)
                {
-                  offd_j[o_cnt] = hypre_map(ix,iy-1,iz,p,q-1,r,P,Q,R,
-                                      nx_part,ny_part,nz_part,global_part);
+                  big_offd_j[o_cnt] = hypre_map(ix,iy-1,iz,ip,iq-1,ir,nx,ny,
+                                                nx_part,ny_part,nz_part);
                   offd_data[o_cnt++] = value[2];
                }
             }
-            if (ix > nx_part[p]) 
+            if (ix > nx_part[ip])
             {
                diag_j[cnt] = row_index-1;
                diag_data[cnt++] = value[1];
             }
             else
             {
-               if (ix) 
+               if (ix)
                {
-                  offd_j[o_cnt] = hypre_map(ix-1,iy,iz,p-1,q,r,P,Q,R,
-                                      nx_part,ny_part,nz_part,global_part);
+                  big_offd_j[o_cnt] = hypre_map(ix-1,iy,iz,ip-1,iq,ir,nx,ny,
+                                                nx_part,ny_part,nz_part);
                   offd_data[o_cnt++] = value[1];
                }
             }
-            if (ix+1 < nx_part[p+1]) 
+            if (ix+1 < nx_part[ip+1])
             {
                diag_j[cnt] = row_index+1;
                diag_data[cnt++] = value[1];
             }
             else
             {
-               if (ix+1 < nx) 
+               if (ix+1 < nx)
                {
-                  offd_j[o_cnt] = hypre_map(ix+1,iy,iz,p+1,q,r,P,Q,R,
-                                      nx_part,ny_part,nz_part,global_part);
+                  big_offd_j[o_cnt] = hypre_map(ix+1,iy,iz,ip+1,iq,ir,nx,ny,
+                                                nx_part,ny_part,nz_part);
                   offd_data[o_cnt++] = value[1];
                }
             }
-            if (iy+1 < ny_part[q+1]) 
+            if (iy+1 < ny_part[iq+1])
             {
                diag_j[cnt] = row_index+nx_local;
                diag_data[cnt++] = value[2];
             }
             else
             {
-               if (iy+1 < ny) 
+               if (iy+1 < ny)
                {
-                  offd_j[o_cnt] = hypre_map(ix,iy+1,iz,p,q+1,r,P,Q,R,
-                                      nx_part,ny_part,nz_part,global_part);
+                  big_offd_j[o_cnt] = hypre_map(ix,iy+1,iz,ip,iq+1,ir,nx,ny,
+                                                nx_part,ny_part,nz_part);
                   offd_data[o_cnt++] = value[2];
                }
             }
-            if (iz+1 < nz_part[r+1]) 
+            if (iz+1 < nz_part[ir+1])
             {
                diag_j[cnt] = row_index+nx_local*ny_local;
                diag_data[cnt++] = value[3];
             }
             else
             {
-               if (iz+1 < nz) 
+               if (iz+1 < nz)
                {
-                  offd_j[o_cnt] = hypre_map(ix,iy,iz+1,p,q,r+1,P,Q,R,
-                                      nx_part,ny_part,nz_part,global_part);
+                  big_offd_j[o_cnt] = hypre_map(ix,iy,iz+1,ip,iq,ir+1,nx,ny,
+                                                nx_part,ny_part,nz_part);
                   offd_data[o_cnt++] = value[3];
                }
             }
@@ -306,35 +306,23 @@ GenerateLaplacian( MPI_Comm comm,
    if (num_procs > 1)
    {
       for (i=0; i < num_cols_offd; i++)
-         col_map_offd[i] = offd_j[i];
-   	
-      hypre_qsort0(col_map_offd, 0, num_cols_offd-1);
+         col_map_offd[i] = big_offd_j[i];
+
+      hypre_BigQsort0(col_map_offd, 0, num_cols_offd-1);
 
       for (i=0; i < num_cols_offd; i++)
          for (j=0; j < num_cols_offd; j++)
-            if (offd_j[i] == col_map_offd[j])
+            if (big_offd_j[i] == col_map_offd[j])
             {
                offd_j[i] = j;
                break;
             }
+
+      /*for (i=0; i < offd_i[local_num_rows]; i++)
+      {
+         offd_j[i] = hypre_BigBinarySearch(col_map_offd,big_offd_j[i],num_cols_offd);
+      }*/
    }
-
-
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-/* ideally we would use less storage earlier in this function, but this is fine
-   for testing */
-   {
-      HYPRE_Int tmp1, tmp2;
-      tmp1 = global_part[my_id];
-      tmp2 = global_part[my_id + 1];
-      hypre_TFree(global_part);
-      global_part = hypre_CTAlloc(HYPRE_Int, 2);
-      global_part[0] = tmp1;
-      global_part[1] = tmp2;
-   }
-#endif
-
-
 
    A = hypre_ParCSRMatrixCreate(comm, grid_size, grid_size,
                                 global_part, global_part, num_cols_offd,
@@ -356,9 +344,10 @@ GenerateLaplacian( MPI_Comm comm,
       hypre_CSRMatrixData(offd) = offd_data;
    }
 
-   hypre_TFree(nx_part);
-   hypre_TFree(ny_part);
-   hypre_TFree(nz_part);
+   hypre_TFree(nx_part, HYPRE_MEMORY_HOST);
+   hypre_TFree(ny_part, HYPRE_MEMORY_HOST);
+   hypre_TFree(nz_part, HYPRE_MEMORY_HOST);
+   hypre_TFree(big_offd_j, HYPRE_MEMORY_HOST);
 
    return (HYPRE_ParCSRMatrix) A;
 }
@@ -366,38 +355,29 @@ GenerateLaplacian( MPI_Comm comm,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int
-hypre_map( HYPRE_Int  ix,
-     HYPRE_Int  iy,
-     HYPRE_Int  iz,
-     HYPRE_Int  p,
-     HYPRE_Int  q,
-     HYPRE_Int  r,
-     HYPRE_Int  P,
-     HYPRE_Int  Q,
-     HYPRE_Int  R, 
-     HYPRE_Int *nx_part,
-     HYPRE_Int *ny_part,
-     HYPRE_Int *nz_part,
-     HYPRE_Int *global_part )
+HYPRE_BigInt
+hypre_map(HYPRE_BigInt  ix,
+     HYPRE_BigInt  iy,
+     HYPRE_BigInt  iz,
+     HYPRE_Int     p,
+     HYPRE_Int     q,
+     HYPRE_Int     r,
+     HYPRE_BigInt  nx,
+     HYPRE_BigInt  ny,
+     HYPRE_BigInt *nx_part,
+     HYPRE_BigInt *ny_part,
+     HYPRE_BigInt *nz_part)
 {
-   HYPRE_Int nx_local;
-   HYPRE_Int ny_local;
-   HYPRE_Int ix_local;
-   HYPRE_Int iy_local;
-   HYPRE_Int iz_local;
-   HYPRE_Int global_index;
-   HYPRE_Int proc_num;
- 
-   proc_num = r*P*Q + q*P + p;
-   nx_local = nx_part[p+1] - nx_part[p];
-   ny_local = ny_part[q+1] - ny_part[q];
-   ix_local = ix - nx_part[p];
-   iy_local = iy - ny_part[q];
-   iz_local = iz - nz_part[r];
-   global_index = global_part[proc_num] 
-      + (iz_local*ny_local+iy_local)*nx_local + ix_local;
+   HYPRE_Int nx_local = (HYPRE_Int)(nx_part[p+1]-nx_part[p]);
+   HYPRE_Int ny_local = (HYPRE_Int)(ny_part[q+1]-ny_part[q]);
+   HYPRE_Int nz_local = (HYPRE_Int)(nz_part[r+1]-nz_part[r]);
+   HYPRE_Int ix_local = (HYPRE_Int)(ix-nx_part[p]);
+   HYPRE_Int iy_local = (HYPRE_Int)(iy-ny_part[q]);
+   HYPRE_Int iz_local = (HYPRE_Int)(iz-nz_part[r]);
+   HYPRE_BigInt global_index;
 
+   global_index = nz_part[r]*nx*ny+ny_part[q]*nx*(HYPRE_BigInt)nz_local+nx_part[p]*(HYPRE_BigInt)(ny_local*nz_local);
+   global_index += (HYPRE_BigInt)((iz_local*ny_local+iy_local)*nx_local + ix_local);
    return global_index;
 }
 
@@ -405,11 +385,11 @@ hypre_map( HYPRE_Int  ix,
  * hypre_GenerateVectorLaplacian - this is the systems version
  *--------------------------------------------------------------------------*/
 
-HYPRE_ParCSRMatrix 
+HYPRE_ParCSRMatrix
 GenerateSysLaplacian( MPI_Comm comm,
-                      HYPRE_Int      nx,
-                      HYPRE_Int      ny,
-                      HYPRE_Int      nz, 
+                      HYPRE_BigInt   nx,
+                      HYPRE_BigInt   ny,
+                      HYPRE_BigInt   nz,
                       HYPRE_Int      P,
                       HYPRE_Int      Q,
                       HYPRE_Int      R,
@@ -429,36 +409,37 @@ GenerateSysLaplacian( MPI_Comm comm,
    HYPRE_Real *diag_data;
 
    HYPRE_Int    *offd_i;
-   HYPRE_Int    *offd_j;
+   HYPRE_Int    *offd_j = NULL;
+   HYPRE_BigInt *big_offd_j = NULL;
    HYPRE_Real *offd_data;
 
-   HYPRE_Int *global_part;
+   HYPRE_BigInt *global_part;
    HYPRE_Int ix, iy, iz;
    HYPRE_Int cnt, o_cnt;
-   HYPRE_Int local_num_rows; 
-   HYPRE_Int *col_map_offd;
+   HYPRE_Int local_num_rows;
+   HYPRE_BigInt *col_map_offd;
    HYPRE_Int row_index, row, col;
    HYPRE_Int index, diag_index;
    HYPRE_Int i,j;
 
    HYPRE_Int nx_local, ny_local, nz_local;
-   HYPRE_Int nx_size, ny_size, nz_size;
    HYPRE_Int num_cols_offd;
-   HYPRE_Int grid_size;
+   HYPRE_BigInt grid_size;
    HYPRE_Int local_grid_size;
    HYPRE_Int first_j, j_ind;
+   HYPRE_BigInt big_first_j, big_num_fun = (HYPRE_BigInt)num_fun;
    HYPRE_Int num_coeffs, num_offd_coeffs;
 
-   HYPRE_Int *nx_part;
-   HYPRE_Int *ny_part;
-   HYPRE_Int *nz_part;
+   HYPRE_BigInt *nx_part;
+   HYPRE_BigInt *ny_part;
+   HYPRE_BigInt *nz_part;
 
-   HYPRE_Int num_procs, my_id;
+   HYPRE_Int num_procs;
    HYPRE_Int P_busy, Q_busy, R_busy;
    HYPRE_Real val;
+   HYPRE_Int gp_size;
 
    hypre_MPI_Comm_size(comm,&num_procs);
-   hypre_MPI_Comm_rank(comm,&my_id);
 
    grid_size = nx*ny*nz;
 
@@ -466,36 +447,47 @@ GenerateSysLaplacian( MPI_Comm comm,
    hypre_GeneratePartitioning(ny,Q,&ny_part);
    hypre_GeneratePartitioning(nz,R,&nz_part);
 
-   global_part = hypre_CTAlloc(HYPRE_Int,P*Q*R+1);
-
-   global_part[0] = 0;
-   cnt = 1;
-   for (iz = 0; iz < R; iz++)
-   {
-      nz_size = nz_part[iz+1]-nz_part[iz];
-      for (iy = 0; iy < Q; iy++)
-      {
-         ny_size = ny_part[iy+1]-ny_part[iy];
-         for (ix = 0; ix < P; ix++)
-         {
-            nx_size = nx_part[ix+1] - nx_part[ix];
-            global_part[cnt] = global_part[cnt-1];
-            global_part[cnt++] += nx_size*ny_size*nz_size;
-         }
-      }
-   }
-
-   nx_local = nx_part[p+1] - nx_part[p];
-   ny_local = ny_part[q+1] - ny_part[q];
-   nz_local = nz_part[r+1] - nz_part[r];
-
-   my_id = r*(P*Q) + q*P + p;
-   num_procs = P*Q*R;
+   nx_local = (HYPRE_Int)(nx_part[p+1] - nx_part[p]);
+   ny_local = (HYPRE_Int)(ny_part[q+1] - ny_part[q]);
+   nz_local = (HYPRE_Int)(nz_part[r+1] - nz_part[r]);
 
    local_grid_size = nx_local*ny_local*nz_local;
    local_num_rows = num_fun*local_grid_size;
-   diag_i = hypre_CTAlloc(HYPRE_Int, local_num_rows+1);
-   offd_i = hypre_CTAlloc(HYPRE_Int, local_num_rows+1);
+
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+
+   global_part = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
+   global_part[0] = nz_part[r]*nx*ny+(ny_part[q]*nx+nx_part[p]*ny_local)*nz_local;
+   global_part[1] = global_part[0] + (HYPRE_BigInt)local_grid_size;
+   gp_size = 2;
+
+#else
+
+   HYPRE_Int nx_size, ny_size, nz_size;
+   HYPRE_Int jx, jy, jz;
+   global_part = hypre_CTAlloc(HYPRE_BigInt, num_procs+1, HYPRE_MEMORY_HOST);
+
+   global_part[0] = 0;
+   cnt = 1;
+   for (jz = 0; jz < R; jz++)
+   {
+      nz_size = (HYPRE_Int)(nz_part[jz+1]-nz_part[jz]);
+      for (jy = 0; jy < Q; jy++)
+      {
+         ny_size = (HYPRE_Int)(ny_part[jy+1]-ny_part[jy]);
+         for (jx = 0; jx < P; jx++)
+         {
+            nx_size = (HYPRE_Int)(nx_part[jx+1] - nx_part[jx]);
+            global_part[cnt] = global_part[cnt-1];
+            global_part[cnt++] += (HYPRE_BigInt)(nx_size*ny_size*nz_size);
+         }
+      }
+   }
+   gp_size = num_procs+1;
+#endif
+
+   diag_i = hypre_CTAlloc(HYPRE_Int,  local_num_rows+1, HYPRE_MEMORY_SHARED);
+   offd_i = hypre_CTAlloc(HYPRE_Int,  local_num_rows+1, HYPRE_MEMORY_SHARED);
 
    P_busy = hypre_min(nx,P);
    Q_busy = hypre_min(ny,Q);
@@ -512,7 +504,7 @@ GenerateSysLaplacian( MPI_Comm comm,
 
    if (!local_num_rows) num_cols_offd = 0;
 
-   col_map_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd);
+   col_map_offd = hypre_CTAlloc(HYPRE_BigInt, num_cols_offd, HYPRE_MEMORY_HOST);
 
    cnt = 1;
    diag_i[0] = 0;
@@ -526,56 +518,56 @@ GenerateSysLaplacian( MPI_Comm comm,
             diag_i[cnt] = diag_i[cnt-1];
             offd_i[cnt] = offd_i[cnt-1];
             diag_i[cnt] += num_fun;
-            if (iz > nz_part[r]) 
+            if (iz > nz_part[r])
                diag_i[cnt] += num_fun;
             else
             {
-               if (iz) 
+               if (iz)
                {
                   offd_i[cnt] += num_fun;
                }
             }
-            if (iy > ny_part[q]) 
+            if (iy > ny_part[q])
                diag_i[cnt] += num_fun;
             else
             {
-               if (iy) 
+               if (iy)
                {
                   offd_i[cnt] += num_fun;
                }
             }
-            if (ix > nx_part[p]) 
+            if (ix > nx_part[p])
                diag_i[cnt] += num_fun;
             else
             {
-               if (ix) 
-               {
-                  offd_i[cnt] += num_fun; 
-               }
-            }
-            if (ix+1 < nx_part[p+1]) 
-               diag_i[cnt] += num_fun;
-            else
-            {
-               if (ix+1 < nx) 
-               {
-                  offd_i[cnt] += num_fun; 
-               }
-            }
-            if (iy+1 < ny_part[q+1]) 
-               diag_i[cnt] += num_fun;
-            else
-            {
-               if (iy+1 < ny) 
+               if (ix)
                {
                   offd_i[cnt] += num_fun;
                }
             }
-            if (iz+1 < nz_part[r+1]) 
+            if (ix+1 < nx_part[p+1])
                diag_i[cnt] += num_fun;
             else
             {
-               if (iz+1 < nz) 
+               if (ix+1 < nx)
+               {
+                  offd_i[cnt] += num_fun;
+               }
+            }
+            if (iy+1 < ny_part[q+1])
+               diag_i[cnt] += num_fun;
+            else
+            {
+               if (iy+1 < ny)
+               {
+                  offd_i[cnt] += num_fun;
+               }
+            }
+            if (iz+1 < nz_part[r+1])
+               diag_i[cnt] += num_fun;
+            else
+            {
+               if (iz+1 < nz)
                {
                   offd_i[cnt] += num_fun;
                }
@@ -593,13 +585,14 @@ GenerateSysLaplacian( MPI_Comm comm,
       }
    }
 
-   diag_j = hypre_CTAlloc(HYPRE_Int, diag_i[local_num_rows]);
-   diag_data = hypre_CTAlloc(HYPRE_Real, diag_i[local_num_rows]);
+   diag_j = hypre_CTAlloc(HYPRE_Int,  diag_i[local_num_rows], HYPRE_MEMORY_SHARED);
+   diag_data = hypre_CTAlloc(HYPRE_Real,  diag_i[local_num_rows], HYPRE_MEMORY_SHARED);
 
    if (num_procs > 1)
    {
-      offd_j = hypre_CTAlloc(HYPRE_Int, offd_i[local_num_rows]);
-      offd_data = hypre_CTAlloc(HYPRE_Real, offd_i[local_num_rows]);
+      offd_j = hypre_CTAlloc(HYPRE_Int, offd_i[local_num_rows], HYPRE_MEMORY_SHARED);
+      big_offd_j = hypre_CTAlloc(HYPRE_BigInt, offd_i[local_num_rows], HYPRE_MEMORY_HOST);
+      offd_data = hypre_CTAlloc(HYPRE_Real, offd_i[local_num_rows], HYPRE_MEMORY_SHARED);
    }
 
    row_index = 0;
@@ -624,7 +617,7 @@ GenerateSysLaplacian( MPI_Comm comm,
 	       }
 	    }
             cnt += num_fun;
-            if (iz > nz_part[r]) 
+            if (iz > nz_part[r])
             {
                first_j = row_index-nx_local*ny_local*num_fun;
                for (i=0; i < num_fun; i++)
@@ -640,23 +633,23 @@ GenerateSysLaplacian( MPI_Comm comm,
             }
             else
             {
-               if (iz) 
+               if (iz)
                {
-                  first_j = num_fun*hypre_map(ix,iy,iz-1,p,q,r-1,P,Q,R,
-                                      nx_part,ny_part,nz_part,global_part);
+                  big_first_j = big_num_fun*hypre_map(ix,iy,iz-1,p,q,r-1,nx,ny,
+                                                nx_part,ny_part,nz_part);
                   for (i=0; i < num_fun; i++)
 	          {
                      for (j=0; j < num_fun; j++)
 	             {
                         j_ind = o_cnt+i*num_offd_coeffs+j;
-                        offd_j[j_ind] = first_j+j;
+                        big_offd_j[j_ind] = big_first_j+(HYPRE_BigInt)j;
                         offd_data[j_ind] = value[3]*mtrx[i*num_fun+j];
 	             }
 	          }
                   o_cnt += num_fun;
                }
             }
-            if (iy > ny_part[q]) 
+            if (iy > ny_part[q])
             {
                first_j = row_index-nx_local*num_fun;
                for (i=0; i < num_fun; i++)
@@ -672,23 +665,23 @@ GenerateSysLaplacian( MPI_Comm comm,
             }
             else
             {
-               if (iy) 
+               if (iy)
                {
-                  first_j = num_fun*hypre_map(ix,iy-1,iz,p,q-1,r,P,Q,R,
-                                      nx_part,ny_part,nz_part,global_part);
+                  big_first_j = big_num_fun*hypre_map(ix,iy-1,iz,p,q-1,r,nx,ny,
+                                                nx_part,ny_part,nz_part);
                   for (i=0; i < num_fun; i++)
 	          {
                      for (j=0; j < num_fun; j++)
 	             {
                         j_ind = o_cnt+i*num_offd_coeffs+j;
-                        offd_j[j_ind] = first_j+j;
+                        big_offd_j[j_ind] = big_first_j+(HYPRE_BigInt)j;
                         offd_data[j_ind] = value[2]*mtrx[i*num_fun+j];
 	             }
 	          }
                   o_cnt += num_fun;
                }
             }
-            if (ix > nx_part[p]) 
+            if (ix > nx_part[p])
             {
                first_j = row_index-num_fun;
                for (i=0; i < num_fun; i++)
@@ -704,23 +697,23 @@ GenerateSysLaplacian( MPI_Comm comm,
             }
             else
             {
-               if (ix) 
+               if (ix)
                {
-                  first_j = num_fun*hypre_map(ix-1,iy,iz,p-1,q,r,P,Q,R,
-                                      nx_part,ny_part,nz_part,global_part);
+                  big_first_j = big_num_fun*hypre_map(ix-1,iy,iz,p-1,q,r,nx,ny,
+                                                nx_part,ny_part,nz_part);
                   for (i=0; i < num_fun; i++)
 	          {
                      for (j=0; j < num_fun; j++)
 	             {
                         j_ind = o_cnt+i*num_offd_coeffs+j;
-                        offd_j[j_ind] = first_j+j;
+                        big_offd_j[j_ind] = big_first_j+(HYPRE_BigInt)j;
                         offd_data[j_ind] = value[1]*mtrx[i*num_fun+j];
 	             }
 	          }
                   o_cnt += num_fun;
                }
             }
-            if (ix+1 < nx_part[p+1]) 
+            if (ix+1 < nx_part[p+1])
             {
                first_j = row_index+num_fun;
                for (i=0; i < num_fun; i++)
@@ -736,23 +729,23 @@ GenerateSysLaplacian( MPI_Comm comm,
             }
             else
             {
-               if (ix+1 < nx) 
+               if (ix+1 < nx)
                {
-                  first_j = num_fun*hypre_map(ix+1,iy,iz,p+1,q,r,P,Q,R,
-                                      nx_part,ny_part,nz_part,global_part);
+                  big_first_j = big_num_fun*hypre_map(ix+1,iy,iz,p+1,q,r,nx,ny,
+                                                nx_part,ny_part,nz_part);
                   for (i=0; i < num_fun; i++)
 	          {
                      for (j=0; j < num_fun; j++)
 	             {
                         j_ind = o_cnt+i*num_offd_coeffs+j;
-                        offd_j[j_ind] = first_j+j;
+                        big_offd_j[j_ind] = big_first_j+(HYPRE_BigInt)j;
                         offd_data[j_ind] = value[1]*mtrx[i*num_fun+j];
 	             }
 	          }
                   o_cnt += num_fun;
                }
             }
-            if (iy+1 < ny_part[q+1]) 
+            if (iy+1 < ny_part[q+1])
             {
                first_j = row_index+nx_local*num_fun;
                for (i=0; i < num_fun; i++)
@@ -768,23 +761,23 @@ GenerateSysLaplacian( MPI_Comm comm,
             }
             else
             {
-               if (iy+1 < ny) 
+               if (iy+1 < ny)
                {
-                  first_j = num_fun*hypre_map(ix,iy+1,iz,p,q+1,r,P,Q,R,
-                                      nx_part,ny_part,nz_part,global_part);
+                  big_first_j = big_num_fun*hypre_map(ix,iy+1,iz,p,q+1,r,nx,ny,
+                                                nx_part,ny_part,nz_part);
                   for (i=0; i < num_fun; i++)
 	          {
                      for (j=0; j < num_fun; j++)
 	             {
                         j_ind = o_cnt+i*num_offd_coeffs+j;
-                        offd_j[j_ind] = first_j+j;
+                        big_offd_j[j_ind] = big_first_j+(HYPRE_BigInt)j;
                         offd_data[j_ind] = value[2]*mtrx[i*num_fun+j];
 	             }
 	          }
                   o_cnt += num_fun;
                }
             }
-            if (iz+1 < nz_part[r+1]) 
+            if (iz+1 < nz_part[r+1])
             {
                first_j = row_index+nx_local*ny_local*num_fun;
                for (i=0; i < num_fun; i++)
@@ -800,16 +793,16 @@ GenerateSysLaplacian( MPI_Comm comm,
             }
             else
             {
-               if (iz+1 < nz) 
+               if (iz+1 < nz)
                {
-                  first_j = num_fun*hypre_map(ix,iy,iz+1,p,q,r+1,P,Q,R,
-                                      nx_part,ny_part,nz_part,global_part);
+                  big_first_j = big_num_fun*hypre_map(ix,iy,iz+1,p,q,r+1,nx,ny,
+                                                nx_part,ny_part,nz_part);
                   for (i=0; i < num_fun; i++)
 	          {
                      for (j=0; j < num_fun; j++)
 	             {
                         j_ind = o_cnt+i*num_offd_coeffs+j;
-                        offd_j[j_ind] = first_j+j;
+                        big_offd_j[j_ind] = big_first_j+(HYPRE_BigInt)j;
                         offd_data[j_ind] = value[3]*mtrx[i*num_fun+j];
 	             }
 	          }
@@ -828,23 +821,23 @@ GenerateSysLaplacian( MPI_Comm comm,
  	 {
 	    for (j=offd_i[i]; j < offd_i[i+1]; j++)
             {
-               col_map_offd[cnt++] = offd_j[j];
+               col_map_offd[cnt++] = big_offd_j[j];
 	    }
-	 }  
-   	
-      hypre_qsort0(col_map_offd, 0, num_cols_offd-1);
+	 }
+
+      hypre_BigQsort0(col_map_offd, 0, num_cols_offd-1);
 
       for (i=0; i < num_fun*num_cols_offd; i++)
          for (j=hypre_min(0,hypre_abs(i-num_fun)); j < num_cols_offd; j++)
-            if (offd_j[i] == col_map_offd[j])
+            if (big_offd_j[i] == col_map_offd[j])
             {
                offd_j[i] = j;
                break;
             }
    }
 
-   for (i=0; i < num_procs+1; i++)
-      global_part[i] *= num_fun;
+   for (i=0; i < gp_size; i++)
+      global_part[i] *= big_num_fun;
 
    for (j=1; j< num_fun; j++)
    {
@@ -862,22 +855,7 @@ GenerateSysLaplacian( MPI_Comm comm,
       }
    }
 
-
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-/* ideally we would use less storage earlier in this function, but this is fine
-   for testing */
-   {
-      HYPRE_Int tmp1, tmp2;
-      tmp1 = global_part[my_id];
-      tmp2 = global_part[my_id + 1];
-      hypre_TFree(global_part);
-      global_part = hypre_CTAlloc(HYPRE_Int, 2);
-      global_part[0] = tmp1;
-      global_part[1] = tmp2;
-   }
-#endif
-
-   A = hypre_ParCSRMatrixCreate(comm, num_fun*grid_size, num_fun*grid_size,
+   A = hypre_ParCSRMatrixCreate(comm, big_num_fun*grid_size, big_num_fun*grid_size,
                                 global_part, global_part, num_cols_offd,
                                 diag_i[local_num_rows],
                                 offd_i[local_num_rows]);
@@ -897,9 +875,10 @@ GenerateSysLaplacian( MPI_Comm comm,
       hypre_CSRMatrixData(offd) = offd_data;
    }
 
-   hypre_TFree(nx_part);
-   hypre_TFree(ny_part);
-   hypre_TFree(nz_part);
+   hypre_TFree(nx_part, HYPRE_MEMORY_HOST);
+   hypre_TFree(ny_part, HYPRE_MEMORY_HOST);
+   hypre_TFree(nz_part, HYPRE_MEMORY_HOST);
+   hypre_TFree(big_offd_j, HYPRE_MEMORY_HOST);
 
    return (HYPRE_ParCSRMatrix) A;
 }
@@ -907,14 +886,14 @@ GenerateSysLaplacian( MPI_Comm comm,
 
 /*--------------------------------------------------------------------------
  * hypre_GenerateVectorLaplacian - this is also a systems version and we can
- * vary the diffusion coefficients in each block  
+ * vary the diffusion coefficients in each block
  *--------------------------------------------------------------------------*/
 
-HYPRE_ParCSRMatrix 
+HYPRE_ParCSRMatrix
 GenerateSysLaplacianVCoef( MPI_Comm comm,
-                      HYPRE_Int      nx,
-                      HYPRE_Int      ny,
-                      HYPRE_Int      nz, 
+                      HYPRE_BigInt   nx,
+                      HYPRE_BigInt   ny,
+                      HYPRE_BigInt   nz,
                       HYPRE_Int      P,
                       HYPRE_Int      Q,
                       HYPRE_Int      R,
@@ -935,38 +914,38 @@ GenerateSysLaplacianVCoef( MPI_Comm comm,
 
    HYPRE_Int    *offd_i;
    HYPRE_Int    *offd_j;
+   HYPRE_BigInt *big_offd_j;
    HYPRE_Real *offd_data;
 
-   HYPRE_Int *global_part;
-   HYPRE_Int ix, iy, iz;
+   HYPRE_BigInt *global_part;
+   HYPRE_BigInt ix, iy, iz;
    HYPRE_Int cnt, o_cnt;
-   HYPRE_Int local_num_rows; 
-   HYPRE_Int *col_map_offd;
+   HYPRE_Int local_num_rows;
+   HYPRE_BigInt *col_map_offd;
    HYPRE_Int row_index, row, col;
    HYPRE_Int index, diag_index;
    HYPRE_Int i,j;
+   HYPRE_Int gp_size;
 
    HYPRE_Int nx_local, ny_local, nz_local;
-   HYPRE_Int nx_size, ny_size, nz_size;
    HYPRE_Int num_cols_offd;
-   HYPRE_Int grid_size;
+   HYPRE_BigInt grid_size;
    HYPRE_Int local_grid_size;
    HYPRE_Int first_j, j_ind;
+   HYPRE_BigInt big_first_j, big_num_fun = (HYPRE_BigInt) num_fun;
    HYPRE_Int num_coeffs, num_offd_coeffs;
 
-   HYPRE_Int *nx_part;
-   HYPRE_Int *ny_part;
-   HYPRE_Int *nz_part;
+   HYPRE_BigInt *nx_part;
+   HYPRE_BigInt *ny_part;
+   HYPRE_BigInt *nz_part;
 
-   HYPRE_Int num_procs, my_id;
-   HYPRE_Int P_busy, Q_busy, R_busy;
+   HYPRE_Int num_procs, P_busy, Q_busy, R_busy;
    HYPRE_Real val;
 
   /* for indexing in values */
    HYPRE_Int sz = num_fun*num_fun;
 
    hypre_MPI_Comm_size(comm,&num_procs);
-   hypre_MPI_Comm_rank(comm,&my_id);
 
    grid_size = nx*ny*nz;
 
@@ -974,36 +953,46 @@ GenerateSysLaplacianVCoef( MPI_Comm comm,
    hypre_GeneratePartitioning(ny,Q,&ny_part);
    hypre_GeneratePartitioning(nz,R,&nz_part);
 
-   global_part = hypre_CTAlloc(HYPRE_Int,P*Q*R+1);
+   nx_local = (HYPRE_Int)(nx_part[p+1] - nx_part[p]);
+   ny_local = (HYPRE_Int)(ny_part[q+1] - ny_part[q]);
+   nz_local = (HYPRE_Int)(nz_part[r+1] - nz_part[r]);
+
+   local_grid_size = nx_local*ny_local*nz_local;
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+
+   global_part = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
+   global_part[0] = nz_part[r]*nx*ny+(ny_part[q]*nx+nx_part[p]*ny_local)*nz_local;
+   global_part[1] = global_part[0] + (HYPRE_BigInt)local_grid_size;
+   gp_size = 2;
+
+#else
+
+   HYPRE_Int nx_size, ny_size, nz_size;
+   HYPRE_Int jx, jy, jz;
+   global_part = hypre_CTAlloc(HYPRE_BigInt, num_procs+1, HYPRE_MEMORY_HOST);
 
    global_part[0] = 0;
    cnt = 1;
-   for (iz = 0; iz < R; iz++)
+   for (jz = 0; jz < R; jz++)
    {
-      nz_size = nz_part[iz+1]-nz_part[iz];
-      for (iy = 0; iy < Q; iy++)
+      nz_size = (HYPRE_Int)(nz_part[jz+1]-nz_part[jz]);
+      for (jy = 0; jy < Q; jy++)
       {
-         ny_size = ny_part[iy+1]-ny_part[iy];
-         for (ix = 0; ix < P; ix++)
+         ny_size = (HYPRE_Int)(ny_part[jy+1]-ny_part[jy]);
+         for (jx = 0; jx < P; jx++)
          {
-            nx_size = nx_part[ix+1] - nx_part[ix];
+            nx_size = (HYPRE_Int)(nx_part[jx+1] - nx_part[jx]);
             global_part[cnt] = global_part[cnt-1];
-            global_part[cnt++] += nx_size*ny_size*nz_size;
+            global_part[cnt++] += (HYPRE_BigInt)(nx_size*ny_size*nz_size);
          }
       }
    }
+   gp_size = num_procs+1;
+#endif
 
-   nx_local = nx_part[p+1] - nx_part[p];
-   ny_local = ny_part[q+1] - ny_part[q];
-   nz_local = nz_part[r+1] - nz_part[r];
-
-   my_id = r*(P*Q) + q*P + p;
-   num_procs = P*Q*R;
-
-   local_grid_size = nx_local*ny_local*nz_local;
    local_num_rows = num_fun*local_grid_size;
-   diag_i = hypre_CTAlloc(HYPRE_Int, local_num_rows+1);
-   offd_i = hypre_CTAlloc(HYPRE_Int, local_num_rows+1);
+   diag_i = hypre_CTAlloc(HYPRE_Int,  local_num_rows+1, HYPRE_MEMORY_SHARED);
+   offd_i = hypre_CTAlloc(HYPRE_Int,  local_num_rows+1, HYPRE_MEMORY_SHARED);
 
    P_busy = hypre_min(nx,P);
    Q_busy = hypre_min(ny,Q);
@@ -1020,7 +1009,7 @@ GenerateSysLaplacianVCoef( MPI_Comm comm,
 
    if (!local_num_rows) num_cols_offd = 0;
 
-   col_map_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd);
+   col_map_offd = hypre_CTAlloc(HYPRE_BigInt, num_cols_offd, HYPRE_MEMORY_HOST);
 
    cnt = 1;
    diag_i[0] = 0;
@@ -1034,56 +1023,56 @@ GenerateSysLaplacianVCoef( MPI_Comm comm,
             diag_i[cnt] = diag_i[cnt-1];
             offd_i[cnt] = offd_i[cnt-1];
             diag_i[cnt] += num_fun;
-            if (iz > nz_part[r]) 
+            if (iz > nz_part[r])
                diag_i[cnt] += num_fun;
             else
             {
-               if (iz) 
+               if (iz)
                {
                   offd_i[cnt] += num_fun;
                }
             }
-            if (iy > ny_part[q]) 
+            if (iy > ny_part[q])
                diag_i[cnt] += num_fun;
             else
             {
-               if (iy) 
+               if (iy)
                {
                   offd_i[cnt] += num_fun;
                }
             }
-            if (ix > nx_part[p]) 
+            if (ix > nx_part[p])
                diag_i[cnt] += num_fun;
             else
             {
-               if (ix) 
-               {
-                  offd_i[cnt] += num_fun; 
-               }
-            }
-            if (ix+1 < nx_part[p+1]) 
-               diag_i[cnt] += num_fun;
-            else
-            {
-               if (ix+1 < nx) 
-               {
-                  offd_i[cnt] += num_fun; 
-               }
-            }
-            if (iy+1 < ny_part[q+1]) 
-               diag_i[cnt] += num_fun;
-            else
-            {
-               if (iy+1 < ny) 
+               if (ix)
                {
                   offd_i[cnt] += num_fun;
                }
             }
-            if (iz+1 < nz_part[r+1]) 
+            if (ix+1 < nx_part[p+1])
                diag_i[cnt] += num_fun;
             else
             {
-               if (iz+1 < nz) 
+               if (ix+1 < nx)
+               {
+                  offd_i[cnt] += num_fun;
+               }
+            }
+            if (iy+1 < ny_part[q+1])
+               diag_i[cnt] += num_fun;
+            else
+            {
+               if (iy+1 < ny)
+               {
+                  offd_i[cnt] += num_fun;
+               }
+            }
+            if (iz+1 < nz_part[r+1])
+               diag_i[cnt] += num_fun;
+            else
+            {
+               if (iz+1 < nz)
                {
                   offd_i[cnt] += num_fun;
                }
@@ -1101,13 +1090,14 @@ GenerateSysLaplacianVCoef( MPI_Comm comm,
       }
    }
 
-   diag_j = hypre_CTAlloc(HYPRE_Int, diag_i[local_num_rows]);
-   diag_data = hypre_CTAlloc(HYPRE_Real, diag_i[local_num_rows]);
+   diag_j = hypre_CTAlloc(HYPRE_Int,  diag_i[local_num_rows], HYPRE_MEMORY_HOST);
+   diag_data = hypre_CTAlloc(HYPRE_Real,  diag_i[local_num_rows], HYPRE_MEMORY_HOST);
 
    if (num_procs > 1)
    {
-      offd_j = hypre_CTAlloc(HYPRE_Int, offd_i[local_num_rows]);
-      offd_data = hypre_CTAlloc(HYPRE_Real, offd_i[local_num_rows]);
+      offd_j = hypre_CTAlloc(HYPRE_Int, offd_i[local_num_rows], HYPRE_MEMORY_SHARED);
+      big_offd_j = hypre_CTAlloc(HYPRE_BigInt, offd_i[local_num_rows], HYPRE_MEMORY_HOST);
+      offd_data = hypre_CTAlloc(HYPRE_Real, offd_i[local_num_rows], HYPRE_MEMORY_SHARED);
    }
 
    row_index = 0;
@@ -1132,7 +1122,7 @@ GenerateSysLaplacianVCoef( MPI_Comm comm,
 	       }
 	    }
             cnt += num_fun;
-            if (iz > nz_part[r]) 
+            if (iz > nz_part[r])
             {
                first_j = row_index-nx_local*ny_local*num_fun;
                for (i=0; i < num_fun; i++)
@@ -1148,23 +1138,23 @@ GenerateSysLaplacianVCoef( MPI_Comm comm,
             }
             else
             {
-               if (iz) 
+               if (iz)
                {
-                  first_j = num_fun*hypre_map(ix,iy,iz-1,p,q,r-1,P,Q,R,
-                                      nx_part,ny_part,nz_part,global_part);
+                  big_first_j = big_num_fun*hypre_map(ix,iy,iz-1,p,q,r-1,nx,ny,
+                                                nx_part,ny_part,nz_part);
                   for (i=0; i < num_fun; i++)
 	          {
                      for (j=0; j < num_fun; j++)
 	             {
                         j_ind = o_cnt+i*num_offd_coeffs+j;
-                        offd_j[j_ind] = first_j+j;
+                        big_offd_j[j_ind] = big_first_j+(HYPRE_BigInt)j;
                         offd_data[j_ind] = value[3*sz + i*num_fun+j]*mtrx[i*num_fun+j];
 	             }
 	          }
                   o_cnt += num_fun;
                }
             }
-            if (iy > ny_part[q]) 
+            if (iy > ny_part[q])
             {
                first_j = row_index-nx_local*num_fun;
                for (i=0; i < num_fun; i++)
@@ -1180,23 +1170,23 @@ GenerateSysLaplacianVCoef( MPI_Comm comm,
             }
             else
             {
-               if (iy) 
+               if (iy)
                {
-                  first_j = num_fun*hypre_map(ix,iy-1,iz,p,q-1,r,P,Q,R,
-                                      nx_part,ny_part,nz_part,global_part);
+                  big_first_j = big_num_fun*hypre_map(ix,iy-1,iz,p,q-1,r,nx,ny,
+                                                nx_part,ny_part,nz_part);
                   for (i=0; i < num_fun; i++)
 	          {
                      for (j=0; j < num_fun; j++)
 	             {
                         j_ind = o_cnt+i*num_offd_coeffs+j;
-                        offd_j[j_ind] = first_j+j;
+                        big_offd_j[j_ind] = big_first_j+(HYPRE_BigInt)j;
                         offd_data[j_ind] = value[2*sz + i*num_fun+j]*mtrx[i*num_fun+j];
 	             }
 	          }
                   o_cnt += num_fun;
                }
             }
-            if (ix > nx_part[p]) 
+            if (ix > nx_part[p])
             {
                first_j = row_index-num_fun;
                for (i=0; i < num_fun; i++)
@@ -1212,23 +1202,23 @@ GenerateSysLaplacianVCoef( MPI_Comm comm,
             }
             else
             {
-               if (ix) 
+               if (ix)
                {
-                  first_j = num_fun*hypre_map(ix-1,iy,iz,p-1,q,r,P,Q,R,
-                                      nx_part,ny_part,nz_part,global_part);
+                  big_first_j = big_num_fun*hypre_map(ix-1,iy,iz,p-1,q,r,nx,ny,
+                                                nx_part,ny_part,nz_part);
                   for (i=0; i < num_fun; i++)
 	          {
                      for (j=0; j < num_fun; j++)
 	             {
                         j_ind = o_cnt+i*num_offd_coeffs+j;
-                        offd_j[j_ind] = first_j+j;
+                        big_offd_j[j_ind] = big_first_j+(HYPRE_BigInt)j;
                         offd_data[j_ind] = value[1*sz + i*num_fun+j]*mtrx[i*num_fun+j];
 	             }
 	          }
                   o_cnt += num_fun;
                }
             }
-            if (ix+1 < nx_part[p+1]) 
+            if (ix+1 < nx_part[p+1])
             {
                first_j = row_index+num_fun;
                for (i=0; i < num_fun; i++)
@@ -1244,23 +1234,23 @@ GenerateSysLaplacianVCoef( MPI_Comm comm,
             }
             else
             {
-               if (ix+1 < nx) 
+               if (ix+1 < nx)
                {
-                  first_j = num_fun*hypre_map(ix+1,iy,iz,p+1,q,r,P,Q,R,
-                                      nx_part,ny_part,nz_part,global_part);
+                  big_first_j = big_num_fun*hypre_map(ix+1,iy,iz,p+1,q,r,nx,ny,
+                                                nx_part,ny_part,nz_part);
                   for (i=0; i < num_fun; i++)
 	          {
                      for (j=0; j < num_fun; j++)
 	             {
                         j_ind = o_cnt+i*num_offd_coeffs+j;
-                        offd_j[j_ind] = first_j+j;
+                        big_offd_j[j_ind] = big_first_j+(HYPRE_BigInt)j;
                         offd_data[j_ind] = value[1*sz + i*num_fun+j]*mtrx[i*num_fun+j];
 	             }
 	          }
                   o_cnt += num_fun;
                }
             }
-            if (iy+1 < ny_part[q+1]) 
+            if (iy+1 < ny_part[q+1])
             {
                first_j = row_index+nx_local*num_fun;
                for (i=0; i < num_fun; i++)
@@ -1276,23 +1266,23 @@ GenerateSysLaplacianVCoef( MPI_Comm comm,
             }
             else
             {
-               if (iy+1 < ny) 
+               if (iy+1 < ny)
                {
-                  first_j = num_fun*hypre_map(ix,iy+1,iz,p,q+1,r,P,Q,R,
-                                      nx_part,ny_part,nz_part,global_part);
+                  big_first_j = big_num_fun*hypre_map(ix,iy+1,iz,p,q+1,r,nx,ny,
+                                                nx_part,ny_part,nz_part);
                   for (i=0; i < num_fun; i++)
 	          {
                      for (j=0; j < num_fun; j++)
 	             {
                         j_ind = o_cnt+i*num_offd_coeffs+j;
-                        offd_j[j_ind] = first_j+j;
+                        big_offd_j[j_ind] = big_first_j+(HYPRE_BigInt)j;
                         offd_data[j_ind] = value[2*sz + i*num_fun+j]*mtrx[i*num_fun+j];
 	             }
 	          }
                   o_cnt += num_fun;
                }
             }
-            if (iz+1 < nz_part[r+1]) 
+            if (iz+1 < nz_part[r+1])
             {
                first_j = row_index+nx_local*ny_local*num_fun;
                for (i=0; i < num_fun; i++)
@@ -1308,16 +1298,16 @@ GenerateSysLaplacianVCoef( MPI_Comm comm,
             }
             else
             {
-               if (iz+1 < nz) 
+               if (iz+1 < nz)
                {
-                  first_j = num_fun*hypre_map(ix,iy,iz+1,p,q,r+1,P,Q,R,
-                                      nx_part,ny_part,nz_part,global_part);
+                  big_first_j = big_num_fun*hypre_map(ix,iy,iz+1,p,q,r+1,nx,ny,
+                                                nx_part,ny_part,nz_part);
                   for (i=0; i < num_fun; i++)
 	          {
                      for (j=0; j < num_fun; j++)
 	             {
                         j_ind = o_cnt+i*num_offd_coeffs+j;
-                        offd_j[j_ind] = first_j+j;
+                        big_offd_j[j_ind] = big_first_j+(HYPRE_BigInt)j;
                         offd_data[j_ind] = value[3*sz + i*num_fun+j]*mtrx[i*num_fun+j];
 	             }
 	          }
@@ -1336,22 +1326,22 @@ GenerateSysLaplacianVCoef( MPI_Comm comm,
  	 {
 	    for (j=offd_i[i]; j < offd_i[i+1]; j++)
             {
-               col_map_offd[cnt++] = offd_j[j];
+               col_map_offd[cnt++] = big_offd_j[j];
 	    }
-	 }  
-   	
-      hypre_qsort0(col_map_offd, 0, num_cols_offd-1);
+	 }
+
+      hypre_BigQsort0(col_map_offd, 0, num_cols_offd-1);
 
       for (i=0; i < num_fun*num_cols_offd; i++)
          for (j=hypre_min(0,hypre_abs(i-num_fun)); j < num_cols_offd; j++)
-            if (offd_j[i] == col_map_offd[j])
+            if (big_offd_j[i] == col_map_offd[j])
             {
                offd_j[i] = j;
                break;
             }
    }
 
-   for (i=0; i < num_procs+1; i++)
+   for (i=0; i < gp_size; i++)
       global_part[i] *= num_fun;
 
    for (j=1; j< num_fun; j++)
@@ -1369,21 +1359,6 @@ GenerateSysLaplacianVCoef( MPI_Comm comm,
 	  diag_j[index] = col;
       }
    }
-
-
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-/* ideally we would use less storage earlier in this function, but this is fine
-   for testing */
-   {
-      HYPRE_Int tmp1, tmp2;
-      tmp1 = global_part[my_id];
-      tmp2 = global_part[my_id + 1];
-      hypre_TFree(global_part);
-      global_part = hypre_CTAlloc(HYPRE_Int, 2);
-      global_part[0] = tmp1;
-      global_part[1] = tmp2;
-   }
-#endif
 
    A = hypre_ParCSRMatrixCreate(comm, num_fun*grid_size, num_fun*grid_size,
                                 global_part, global_part, num_cols_offd,
@@ -1405,9 +1380,10 @@ GenerateSysLaplacianVCoef( MPI_Comm comm,
       hypre_CSRMatrixData(offd) = offd_data;
    }
 
-   hypre_TFree(nx_part);
-   hypre_TFree(ny_part);
-   hypre_TFree(nz_part);
+   hypre_TFree(nx_part, HYPRE_MEMORY_HOST);
+   hypre_TFree(ny_part, HYPRE_MEMORY_HOST);
+   hypre_TFree(nz_part, HYPRE_MEMORY_HOST);
+   hypre_TFree(big_offd_j, HYPRE_MEMORY_HOST);
 
    return (HYPRE_ParCSRMatrix) A;
 }

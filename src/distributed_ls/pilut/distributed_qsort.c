@@ -1,17 +1,15 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
-
-
+#ifdef __cplusplus
+#define REGISTER 
+#else
+#define REGISTER register
+#endif
 
 /*
  * distributed_qsort.c:
@@ -47,12 +45,12 @@ static HYPRE_Int mthresh;		/* MTHRESHold in chars */
 void
 hypre_tex_qsort(char* base,HYPRE_Int n,HYPRE_Int size, HYPRE_Int (*compar) (char*,char*))
 {
-    register char *i;
-    register char *j;
-    register char *lo;
-    register char *hi;
-    register char *min;
-    register char c;
+    REGISTER char *i;
+    REGISTER char *j;
+    REGISTER char *lo;
+    REGISTER char *hi;
+    REGISTER char *min;
+    REGISTER char c;
     char *max;
 
     if (n <= 1)
@@ -129,12 +127,12 @@ hypre_tex_qsort(char* base,HYPRE_Int n,HYPRE_Int size, HYPRE_Int (*compar) (char
 
 static void qst(char *base, char *max)
 {
-    register char *i;
-    register char *j;
-    register char *jj;
-    register char *mid;
-    register HYPRE_Int ii;
-    register char c;
+    REGISTER char *i;
+    REGISTER char *j;
+    REGISTER char *jj;
+    REGISTER char *mid;
+    REGISTER HYPRE_Int ii;
+    REGISTER char c;
     char *tmp;
     HYPRE_Int lo;
     HYPRE_Int hi;

@@ -1,9 +1,14 @@
+/* Copyright (c) 1992-2008 The University of Tennessee.  All rights reserved.
+ * See file COPYING in this directory for details. */
 
-#include "../blas/hypre_blas.h"
-#include "hypre_lapack.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "f2c.h"
+#include "hypre_lapack.h"
 
-/* Subroutine */ HYPRE_Int dgetf2_(integer *m, integer *n, doublereal *a, integer *
+/* Subroutine */ integer dgetf2_(integer *m, integer *n, doublereal *a, integer *
 	lda, integer *ipiv, integer *info)
 {
 /*  -- LAPACK routine (version 3.0) --   
@@ -69,16 +74,16 @@
     integer a_dim1, a_offset, i__1, i__2, i__3;
     doublereal d__1;
     /* Local variables */
-    extern /* Subroutine */ HYPRE_Int dger_(integer *, integer *, doublereal *, 
+    extern /* Subroutine */ integer dger_(integer *, integer *, doublereal *, 
 	    doublereal *, integer *, doublereal *, integer *, doublereal *, 
 	    integer *);
     static integer j;
-    extern /* Subroutine */ HYPRE_Int dscal_(integer *, doublereal *, doublereal *, 
+    extern /* Subroutine */ integer dscal_(integer *, doublereal *, doublereal *, 
 	    integer *), dswap_(integer *, doublereal *, integer *, doublereal 
 	    *, integer *);
     static integer jp;
     extern integer idamax_(integer *, doublereal *, integer *);
-    extern /* Subroutine */ HYPRE_Int xerbla_(const char *, integer *);
+    extern /* Subroutine */ integer xerbla_(const char *, integer *);
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]
 
 
@@ -156,4 +161,6 @@
 
 #undef a_ref
 
-
+#ifdef __cplusplus
+}
+#endif

@@ -1,15 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #ifndef HYPRE_STRUCT_LS_HEADER
 #define HYPRE_STRUCT_LS_HEADER
@@ -323,6 +317,11 @@ HYPRE_Int HYPRE_StructPFMGGetNumIterations(HYPRE_StructSolver  solver,
 HYPRE_Int HYPRE_StructPFMGGetFinalRelativeResidualNorm(HYPRE_StructSolver  solver,
                                                  HYPRE_Real         *norm);
 
+#if defined(HYPRE_USING_CUDA)
+HYPRE_Int
+HYPRE_StructPFMGSetDeviceLevel( HYPRE_StructSolver  solver,
+				HYPRE_Int   device_level  );
+#endif  
 /*@}*/
 
 /*--------------------------------------------------------------------------
@@ -439,6 +438,12 @@ HYPRE_Int HYPRE_StructSMGGetNumIterations(HYPRE_StructSolver  solver,
  **/
 HYPRE_Int HYPRE_StructSMGGetFinalRelativeResidualNorm(HYPRE_StructSolver  solver,
                                                 HYPRE_Real         *norm);
+
+#if defined(HYPRE_USING_CUDA)
+HYPRE_Int
+HYPRE_StructSMGSetDeviceLevel( HYPRE_StructSolver  solver,
+			       HYPRE_Int   device_level  );
+#endif
 
 /*@}*/
 
@@ -943,7 +948,37 @@ HYPRE_Int HYPRE_StructHybridSetRelChange(HYPRE_StructSolver solver,
  * \end{tabular}
  **/
 HYPRE_Int HYPRE_StructHybridSetSolverType(HYPRE_StructSolver solver,
-                                    HYPRE_Int          solver_type);
+                                          HYPRE_Int          solver_type);
+
+/**
+ * (Optional) Set recompute residual (don't rely on 3-term recurrence).
+ **/
+HYPRE_Int
+HYPRE_StructHybridSetRecomputeResidual( HYPRE_StructSolver  solver,
+                                        HYPRE_Int           recompute_residual );
+
+/**
+ * (Optional) Get recompute residual option.
+ **/
+HYPRE_Int
+HYPRE_StructHybridGetRecomputeResidual( HYPRE_StructSolver  solver,
+                                        HYPRE_Int          *recompute_residual );
+
+/**
+ * (Optional) Set recompute residual period (don't rely on 3-term recurrence).
+ *
+ * Recomputes residual after every specified number of iterations.
+ **/
+HYPRE_Int
+HYPRE_StructHybridSetRecomputeResidualP( HYPRE_StructSolver  solver,
+                                         HYPRE_Int           recompute_residual_p );
+
+/**
+ * (Optional) Get recompute residual period option.
+ **/
+HYPRE_Int
+HYPRE_StructHybridGetRecomputeResidualP( HYPRE_StructSolver  solver,
+                                         HYPRE_Int          *recompute_residual_p );
 
 /**
  * (Optional) Set the maximum size of the Krylov space when using GMRES.

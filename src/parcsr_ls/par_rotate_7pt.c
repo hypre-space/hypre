@@ -1,19 +1,10 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
-
-
-
- 
 #include "_hypre_parcsr_ls.h"
  
 /*--------------------------------------------------------------------------
@@ -22,8 +13,8 @@
 
 HYPRE_ParCSRMatrix 
 GenerateRotate7pt( MPI_Comm comm,
-                      HYPRE_Int      nx,
-                      HYPRE_Int      ny,
+                      HYPRE_BigInt   nx,
+                      HYPRE_BigInt   ny,
                       HYPRE_Int      P,
                       HYPRE_Int      Q,
                       HYPRE_Int      p,
@@ -45,32 +36,30 @@ GenerateRotate7pt( MPI_Comm comm,
 
    HYPRE_Real *value;
    HYPRE_Real ac, bc, cc, s, c, pi, x;
-   HYPRE_Int *global_part;
-   HYPRE_Int ix, iy;
+   HYPRE_BigInt *global_part;
+   HYPRE_BigInt ix, iy;
    HYPRE_Int cnt, o_cnt;
    HYPRE_Int local_num_rows; 
-   HYPRE_Int *col_map_offd;
-   HYPRE_Int *work;
+   HYPRE_BigInt *col_map_offd;
+   HYPRE_BigInt *big_offd_j = NULL;
    HYPRE_Int row_index;
-   HYPRE_Int i,j;
+   HYPRE_Int i;
 
    HYPRE_Int nx_local, ny_local;
-   HYPRE_Int nx_size, ny_size;
    HYPRE_Int num_cols_offd;
-   HYPRE_Int grid_size;
+   HYPRE_BigInt grid_size;
 
-   HYPRE_Int *nx_part;
-   HYPRE_Int *ny_part;
+   HYPRE_BigInt *nx_part;
+   HYPRE_BigInt *ny_part;
 
-   HYPRE_Int num_procs, my_id;
+   HYPRE_Int num_procs;
    HYPRE_Int P_busy, Q_busy;
 
    hypre_MPI_Comm_size(comm,&num_procs);
-   hypre_MPI_Comm_rank(comm,&my_id);
 
    grid_size = nx*ny;
 
-   value = hypre_CTAlloc(HYPRE_Real,4);
+   value = hypre_CTAlloc(HYPRE_Real, 4, HYPRE_MEMORY_HOST);
    pi = 4.0*atan(1.0);
    x = pi*alpha/180.0;
    s = sin(x);
@@ -86,30 +75,40 @@ GenerateRotate7pt( MPI_Comm comm,
    hypre_GeneratePartitioning(nx,P,&nx_part);
    hypre_GeneratePartitioning(ny,Q,&ny_part);
 
-   global_part = hypre_CTAlloc(HYPRE_Int,P*Q+1);
+   nx_local = (HYPRE_Int)(nx_part[p+1] - nx_part[p]);
+   ny_local = (HYPRE_Int)(ny_part[q+1] - ny_part[q]);
+
+   local_num_rows = nx_local*ny_local;
+
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+
+   global_part = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
+   global_part[0] = ny_part[q]*nx + nx_part[p]*ny_local;
+   global_part[1] = global_part[0]+(HYPRE_BigInt)local_num_rows;
+
+#else
+   HYPRE_Int nx_size, ny_size;
+   HYPRE_Int jx, jy;
+
+   global_part = hypre_CTAlloc(HYPRE_BigInt, P*Q+1, HYPRE_MEMORY_HOST);
 
    global_part[0] = 0;
    cnt = 1;
-   for (iy = 0; iy < Q; iy++)
+   for (jy = 0; jy < Q; jy++)
    {
-      ny_size = ny_part[iy+1]-ny_part[iy];
-      for (ix = 0; ix < P; ix++)
+      ny_size = ny_part[jy+1]-ny_part[jy];
+      for (jx = 0; jx < P; jx++)
       {
-         nx_size = nx_part[ix+1] - nx_part[ix];
+         nx_size = nx_part[jx+1] - nx_part[jx];
          global_part[cnt] = global_part[cnt-1];
-         global_part[cnt++] += nx_size*ny_size;
+         global_part[cnt++] += (HYPRE_BigInt)(nx_size*ny_size);
       }
    }
 
-   nx_local = nx_part[p+1] - nx_part[p];
-   ny_local = ny_part[q+1] - ny_part[q];
+#endif
 
-   my_id = q*P + p;
-   num_procs = P*Q;
-
-   local_num_rows = nx_local*ny_local;
-   diag_i = hypre_CTAlloc(HYPRE_Int, local_num_rows+1);
-   offd_i = hypre_CTAlloc(HYPRE_Int, local_num_rows+1);
+   diag_i = hypre_CTAlloc(HYPRE_Int,  local_num_rows+1, HYPRE_MEMORY_SHARED);
+   offd_i = hypre_CTAlloc(HYPRE_Int,  local_num_rows+1, HYPRE_MEMORY_SHARED);
 
    P_busy = hypre_min(nx,P);
    Q_busy = hypre_min(ny,Q);
@@ -126,7 +125,7 @@ GenerateRotate7pt( MPI_Comm comm,
 
    if (!local_num_rows) num_cols_offd = 0;
 
-   col_map_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd);
+   col_map_offd = hypre_CTAlloc(HYPRE_BigInt,  num_cols_offd, HYPRE_MEMORY_HOST);
 
    cnt = 0;
    o_cnt = 0;
@@ -218,13 +217,14 @@ GenerateRotate7pt( MPI_Comm comm,
       }
    }
 
-   diag_j = hypre_CTAlloc(HYPRE_Int, diag_i[local_num_rows]);
-   diag_data = hypre_CTAlloc(HYPRE_Real, diag_i[local_num_rows]);
+   diag_j = hypre_CTAlloc(HYPRE_Int,  diag_i[local_num_rows], HYPRE_MEMORY_SHARED);
+   diag_data = hypre_CTAlloc(HYPRE_Real,  diag_i[local_num_rows], HYPRE_MEMORY_SHARED);
 
    if (num_procs > 1)
    {
-      offd_j = hypre_CTAlloc(HYPRE_Int, offd_i[local_num_rows]);
-      offd_data = hypre_CTAlloc(HYPRE_Real, offd_i[local_num_rows]);
+      big_offd_j = hypre_CTAlloc(HYPRE_BigInt,  offd_i[local_num_rows], HYPRE_MEMORY_HOST);
+      offd_j = hypre_CTAlloc(HYPRE_Int,  offd_i[local_num_rows], HYPRE_MEMORY_SHARED);
+      offd_data = hypre_CTAlloc(HYPRE_Real,  offd_i[local_num_rows], HYPRE_MEMORY_SHARED);
    }
 
    row_index = 0;
@@ -247,8 +247,8 @@ GenerateRotate7pt( MPI_Comm comm,
 	    {
 	       if (ix) 
 	       { 
-                  offd_j[o_cnt] = hypre_map2(ix-1,iy-1,p-1,q,P,Q,
-                                   nx_part,ny_part,global_part);
+                  big_offd_j[o_cnt] = hypre_map2(ix-1,iy-1,p-1,q,nx,
+                                   nx_part,ny_part);
                   offd_data[o_cnt++] = value[3];
 	       } 
 	    }
@@ -261,18 +261,18 @@ GenerateRotate7pt( MPI_Comm comm,
             {
 	       if (ix > nx_part[p])
 	       {
-                  offd_j[o_cnt] = hypre_map2(ix-1,iy-1,p,q-1,P,Q,
-                                   nx_part,ny_part,global_part);
+                  big_offd_j[o_cnt] = hypre_map2(ix-1,iy-1,p,q-1,nx,
+                                   nx_part,ny_part);
                   offd_data[o_cnt++] = value[3];
 	       }
 	       else if (ix)
 	       {
-                  offd_j[o_cnt] = hypre_map2(ix-1,iy-1,p-1,q-1,P,Q,
-                                   nx_part,ny_part,global_part);
+                  big_offd_j[o_cnt] = hypre_map2(ix-1,iy-1,p-1,q-1,nx,
+                                   nx_part,ny_part);
                   offd_data[o_cnt++] = value[3];
 	       }
-               offd_j[o_cnt] = hypre_map2(ix,iy-1,p,q-1,P,Q,
-                                   nx_part,ny_part,global_part);
+               big_offd_j[o_cnt] = hypre_map2(ix,iy-1,p,q-1,nx,
+                                   nx_part,ny_part);
                offd_data[o_cnt++] = value[2];
             }
          }
@@ -285,8 +285,8 @@ GenerateRotate7pt( MPI_Comm comm,
          {
             if (ix) 
             {
-               offd_j[o_cnt] = hypre_map2(ix-1,iy,p-1,q,P,Q,
-                                   nx_part,ny_part,global_part);
+               big_offd_j[o_cnt] = hypre_map2(ix-1,iy,p-1,q,nx,
+                                   nx_part,ny_part);
                offd_data[o_cnt++] = value[1];
             }
          }
@@ -299,8 +299,8 @@ GenerateRotate7pt( MPI_Comm comm,
          {
             if (ix+1 < nx) 
             {
-               offd_j[o_cnt] = hypre_map2(ix+1,iy,p+1,q,P,Q,
-                                   nx_part,ny_part,global_part);
+               big_offd_j[o_cnt] = hypre_map2(ix+1,iy,p+1,q,nx,
+                                   nx_part,ny_part);
                offd_data[o_cnt++] = value[1];
             }
          }
@@ -317,8 +317,8 @@ GenerateRotate7pt( MPI_Comm comm,
 	    {
 	       if (ix+1 < nx)
 	       { 
-                  offd_j[o_cnt] = hypre_map2(ix+1,iy+1,p+1,q,P,Q,
-                                   nx_part,ny_part,global_part);
+                  big_offd_j[o_cnt] = hypre_map2(ix+1,iy+1,p+1,q,nx,
+                                   nx_part,ny_part);
                   offd_data[o_cnt++] = value[3];
 	       } 
 	    }
@@ -327,19 +327,19 @@ GenerateRotate7pt( MPI_Comm comm,
          {
             if (iy+1 < ny) 
             {
-               offd_j[o_cnt] = hypre_map2(ix,iy+1,p,q+1,P,Q,
-                                   nx_part,ny_part,global_part);
+               big_offd_j[o_cnt] = hypre_map2(ix,iy+1,p,q+1,nx,
+                                   nx_part,ny_part);
                offd_data[o_cnt++] = value[2];
 	       if (ix < nx_part[p+1]-1)
 	       {
-                  offd_j[o_cnt] = hypre_map2(ix+1,iy+1,p,q+1,P,Q,
-                                   nx_part,ny_part,global_part);
+                  big_offd_j[o_cnt] = hypre_map2(ix+1,iy+1,p,q+1,nx,
+                                   nx_part,ny_part);
                   offd_data[o_cnt++] = value[3];
 	       }
 	       else if (ix < nx-1)
 	       {
-                  offd_j[o_cnt] = hypre_map2(ix+1,iy+1,p+1,q+1,P,Q,
-                                   nx_part,ny_part,global_part);
+                  big_offd_j[o_cnt] = hypre_map2(ix+1,iy+1,p+1,q+1,nx,
+                                   nx_part,ny_part);
                   offd_data[o_cnt++] = value[3];
 	       }
             }
@@ -350,12 +350,12 @@ GenerateRotate7pt( MPI_Comm comm,
 
    if (num_procs > 1)
    {
-      work = hypre_CTAlloc(HYPRE_Int,o_cnt);
+      HYPRE_BigInt *work = hypre_CTAlloc(HYPRE_BigInt, o_cnt, HYPRE_MEMORY_HOST);
 
       for (i=0; i < o_cnt; i++)
-         work[i] = offd_j[i];
+         work[i] = big_offd_j[i];
 
-      hypre_qsort0(work, 0, o_cnt-1);
+      hypre_BigQsort0(work, 0, o_cnt-1);
 
       col_map_offd[0] = work[0];
       cnt = 0;
@@ -371,31 +371,12 @@ GenerateRotate7pt( MPI_Comm comm,
       num_cols_offd = cnt+1;
       for (i=0; i < o_cnt; i++)
       {
-         for (j=0; j < num_cols_offd; j++)
-         {
-            if (offd_j[i] == col_map_offd[j])
-            {
-               offd_j[i] = j;
-               break;
-            }
-         }
+         offd_j[i] = hypre_BigBinarySearch(col_map_offd,big_offd_j[i],num_cols_offd);
       }
 
-      hypre_TFree(work);
+      hypre_TFree(work, HYPRE_MEMORY_HOST);
+      hypre_TFree(big_offd_j, HYPRE_MEMORY_HOST);
    }
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-/* ideally we would use less storage earlier in this function, but this is fine
-   for testing */
-   {
-      HYPRE_Int tmp1, tmp2;
-      tmp1 = global_part[my_id];
-      tmp2 = global_part[my_id + 1];
-      hypre_TFree(global_part);
-      global_part = hypre_CTAlloc(HYPRE_Int, 2);
-      global_part[0] = tmp1;
-      global_part[1] = tmp2;
-   }
-#endif
 
    A = hypre_ParCSRMatrixCreate(comm, grid_size, grid_size,
                                 global_part, global_part, num_cols_offd,
@@ -417,9 +398,9 @@ GenerateRotate7pt( MPI_Comm comm,
       hypre_CSRMatrixData(offd) = offd_data;
    }
 
-   hypre_TFree(nx_part);
-   hypre_TFree(ny_part);
-   hypre_TFree(value);
+   hypre_TFree(nx_part, HYPRE_MEMORY_HOST);
+   hypre_TFree(ny_part, HYPRE_MEMORY_HOST);
+   hypre_TFree(value, HYPRE_MEMORY_HOST);
 
    return (HYPRE_ParCSRMatrix) A;
 }

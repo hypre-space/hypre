@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_Euclid.h"
 /* #include "SortedList_dh.h" */
@@ -318,7 +313,7 @@ void lengthen_list_private(SortedList_dh sList)
   SET_INFO("lengthening list");
 
   sList->list = (SRecord*)MALLOC_DH(size * sizeof(SRecord));
-  memcpy(sList->list, tmp, sList->countMax * sizeof(SRecord)); 
+  hypre_TMemcpy(sList->list,  tmp, SRecord, sList->countMax, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST); 
   SET_INFO("doubling size of sList->list");
   FREE_DH(tmp); CHECK_V_ERROR;
   END_FUNC_DH

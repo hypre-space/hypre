@@ -1,17 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /*
  * parilut.c
@@ -64,12 +56,12 @@
 * This function performs hypre_ILUT on the boundary nodes via MIS computation
 **************************************************************************/
 void hypre_ParILUT(DataDistType *ddist, FactorMatType *ldu,
-	     ReduceMatType *rmat, HYPRE_Int gmaxnz, HYPRE_Real tol, 
+	     ReduceMatType *rmat, HYPRE_Int gmaxnz, HYPRE_Real tol,
              hypre_PilutSolverGlobals *globals )
 {
   HYPRE_Int nmis, nlevel;
   CommInfoType cinfo;
-  HYPRE_Int *perm, *iperm, *newiperm, *newperm; 
+  HYPRE_Int *perm, *iperm, *newiperm, *newperm;
   ReduceMatType *rmats[2], nrmat;
 
 #ifdef HYPRE_DEBUG
@@ -151,27 +143,27 @@ void hypre_ParILUT(DataDistType *ddist, FactorMatType *ldu,
 	     cinfo.snbrind, cinfo.srowind, cinfo.snbrptr,
              cinfo.incolind,  cinfo.invalues,
              newperm, newiperm, vrowdist, -1);*/
-  hypre_TFree(jr);
-  hypre_TFree(jw);
-  hypre_TFree(lr);
-  hypre_TFree(w);
-  hypre_TFree(pilut_map);
-  hypre_TFree(nrmat.rmat_rnz);
-  hypre_TFree(nrmat.rmat_rrowlen);
-  hypre_TFree(nrmat.rmat_rcolind);
-  hypre_TFree(nrmat.rmat_rvalues);
-  hypre_TFree(cinfo.gatherbuf);
-  hypre_TFree(cinfo.rrowind);
-  hypre_TFree(cinfo.rnbrind);
-  hypre_TFree(cinfo.rnbrptr);
-  hypre_TFree(cinfo.snbrind);
-  hypre_TFree(cinfo.srowind);
-  hypre_TFree(cinfo.snbrptr);
-  hypre_TFree(cinfo.incolind);
-  hypre_TFree(cinfo.invalues);
-  hypre_TFree(newperm);
-  hypre_TFree(newiperm);
-  hypre_TFree(vrowdist);
+  hypre_TFree(jr, HYPRE_MEMORY_HOST);
+  hypre_TFree(jw, HYPRE_MEMORY_HOST);
+  hypre_TFree(lr, HYPRE_MEMORY_HOST);
+  hypre_TFree(w, HYPRE_MEMORY_HOST);
+  hypre_TFree(pilut_map, HYPRE_MEMORY_HOST);
+  hypre_TFree(nrmat.rmat_rnz, HYPRE_MEMORY_HOST);
+  hypre_TFree(nrmat.rmat_rrowlen, HYPRE_MEMORY_HOST);
+  hypre_TFree(nrmat.rmat_rcolind, HYPRE_MEMORY_HOST);
+  hypre_TFree(nrmat.rmat_rvalues, HYPRE_MEMORY_HOST);
+  hypre_TFree(cinfo.gatherbuf, HYPRE_MEMORY_HOST);
+  hypre_TFree(cinfo.rrowind, HYPRE_MEMORY_HOST);
+  hypre_TFree(cinfo.rnbrind, HYPRE_MEMORY_HOST);
+  hypre_TFree(cinfo.rnbrptr, HYPRE_MEMORY_HOST);
+  hypre_TFree(cinfo.snbrind, HYPRE_MEMORY_HOST);
+  hypre_TFree(cinfo.srowind, HYPRE_MEMORY_HOST);
+  hypre_TFree(cinfo.snbrptr, HYPRE_MEMORY_HOST);
+  hypre_TFree(cinfo.incolind, HYPRE_MEMORY_HOST);
+  hypre_TFree(cinfo.invalues, HYPRE_MEMORY_HOST);
+  hypre_TFree(newperm, HYPRE_MEMORY_HOST);
+  hypre_TFree(newiperm, HYPRE_MEMORY_HOST);
+  hypre_TFree(vrowdist, HYPRE_MEMORY_HOST);
 
   jr = NULL;
   jw = NULL;
@@ -271,8 +263,8 @@ void hypre_ComputeCommInfo(ReduceMatType *rmat, CommInfoType *cinfo, HYPRE_Int *
     cinfo->invalues =  hypre_fp_malloc(maxnrecv*(global_maxnz+2)+1, "hypre_ComputeCommInfo: cinfo->invalues");
     cinfo->maxnrecv = maxnrecv;
   }
-  assert( cinfo->incolind != NULL );
-  assert( cinfo->invalues != NULL );
+  hypre_assert( cinfo->incolind != NULL );
+  hypre_assert( cinfo->invalues != NULL );
 
   /* Zero our send buffer */
   for(i=0; i<npes; i++)
@@ -298,7 +290,7 @@ void hypre_ComputeCommInfo(ReduceMatType *rmat, CommInfoType *cinfo, HYPRE_Int *
   cinfo->snnbr = snnbr;
 
   /* Allocate requests */
-  index_requests = hypre_CTAlloc( hypre_MPI_Request, snnbr );
+  index_requests = hypre_CTAlloc( hypre_MPI_Request,  snnbr , HYPRE_MEMORY_HOST);
 
   maxnsend = hypre_GlobalSEMax(nsend, pilut_comm);
 
@@ -309,7 +301,7 @@ void hypre_ComputeCommInfo(ReduceMatType *rmat, CommInfoType *cinfo, HYPRE_Int *
     cinfo->srowind  = hypre_idx_malloc(maxnsend, "hypre_ComputeCommInfo: cinfo->srowind");
     cinfo->maxnsend = maxnsend;
   }
-  assert( cinfo->srowind  != NULL );
+  hypre_assert( cinfo->srowind  != NULL );
   srowind = cinfo->srowind;
 
   /* issue asynchronous recieves */
@@ -332,7 +324,7 @@ void hypre_ComputeCommInfo(ReduceMatType *rmat, CommInfoType *cinfo, HYPRE_Int *
   hypre_EndTiming( globals->CCI_timer  );
 #endif
   /* clean up memory */
-  hypre_TFree(index_requests);
+  hypre_TFree(index_requests, HYPRE_MEMORY_HOST);
 }
 
 
@@ -345,7 +337,7 @@ HYPRE_Int hypre_Idx2PE(HYPRE_Int idx,
   HYPRE_Int penum = 0;
   while (idx >= vrowdist[penum+1]) {  /* idx >= lastrow? */
     penum++;
-    assert( penum < npes );
+    hypre_assert( penum < npes );
   }
 
   return penum;
@@ -434,9 +426,9 @@ HYPRE_Int hypre_SelectSet(ReduceMatType *rmat, CommInfoType *cinfo,
 #ifndef NDEBUG
   /* DEBUGGING: check map is zero outside of local rows */
   for (i=0; i<firstrow; i++)
-    assert(pilut_map[i] == 0);
+    hypre_assert(pilut_map[i] == 0);
   for (i=lastrow; i<nrows; i++)
-    assert(pilut_map[i] == 0);
+    hypre_assert(pilut_map[i] == 0);
 #endif
 
   return num;
@@ -459,7 +451,7 @@ void hypre_SendFactoredRows(FactorMatType *ldu, CommInfoType *cinfo,
   HYPRE_Int *snbrind, *rnbrind, *rnbrptr, *sgatherbuf, *incolind;
   HYPRE_Int *usrowptr, *uerowptr, *ucolind;
   HYPRE_Real *dgatherbuf, *uvalues, *dvalues, *invalues;
-  hypre_MPI_Status Status; 
+  hypre_MPI_Status Status;
   hypre_MPI_Request *index_requests, *value_requests ;
 
 #ifdef HYPRE_DEBUG
@@ -467,7 +459,7 @@ void hypre_SendFactoredRows(FactorMatType *ldu, CommInfoType *cinfo,
 #endif
 #ifdef HYPRE_TIMING
   hypre_BeginTiming( globals->SFR_timer  );
-#endif 
+#endif
 
   snnbr   = cinfo->snnbr;
   snbrind = cinfo->snbrind;
@@ -490,8 +482,8 @@ void hypre_SendFactoredRows(FactorMatType *ldu, CommInfoType *cinfo,
   dvalues  = ldu->dvalues;
 
   /* Allocate requests */
-  index_requests = hypre_CTAlloc( hypre_MPI_Request, rnnbr );
-  value_requests = hypre_CTAlloc( hypre_MPI_Request, rnnbr );
+  index_requests = hypre_CTAlloc( hypre_MPI_Request,  rnnbr , HYPRE_MEMORY_HOST);
+  value_requests = hypre_CTAlloc( hypre_MPI_Request,  rnnbr , HYPRE_MEMORY_HOST);
 
   /* Issue asynchronous receives for rows from other processors.
      Asynchronous receives needed to avoid overflowing comm buffers. */
@@ -503,7 +495,7 @@ void hypre_SendFactoredRows(FactorMatType *ldu, CommInfoType *cinfo,
     hypre_MPI_Irecv( incolind+j, cnt, HYPRE_MPI_INT,
 	      penum, TAG_Send_colind, pilut_comm, &index_requests[i] );
 
-    hypre_MPI_Irecv( invalues+j, cnt, hypre_MPI_DOUBLE,
+    hypre_MPI_Irecv( invalues+j, cnt, hypre_MPI_REAL,
 	      penum, TAG_Send_values, pilut_comm, &value_requests[i] );
 
     j += cnt;
@@ -514,7 +506,7 @@ void hypre_SendFactoredRows(FactorMatType *ldu, CommInfoType *cinfo,
   for (j=ndone; j<ndone+nmis; j++) {
     k = newperm[j];
     hypre_CheckBounds(firstrow, k+firstrow, lastrow, globals);
-    assert(IsInMIS(pilut_map[k+firstrow]));
+    hypre_assert(IsInMIS(pilut_map[k+firstrow]));
     hypre_CheckBounds(0, uerowptr[k]-usrowptr[k], global_maxnz+1, globals);
 
     /* sgatherbuf[l++] = uerowptr[k]-usrowptr[k]; */  /* store length */
@@ -538,7 +530,7 @@ void hypre_SendFactoredRows(FactorMatType *ldu, CommInfoType *cinfo,
   for (j=ndone; j<ndone+nmis; j++) {
     k = newperm[j];
     hypre_CheckBounds(firstrow, k+firstrow, lastrow, globals);
-    assert(IsInMIS(pilut_map[k+firstrow]));
+    hypre_assert(IsInMIS(pilut_map[k+firstrow]));
 
     l++;                          /* first element undefined */
     dgatherbuf[l++] = dvalues[k]; /* store diagonal */
@@ -550,7 +542,7 @@ void hypre_SendFactoredRows(FactorMatType *ldu, CommInfoType *cinfo,
 
   /* send values to each neighbor */
   for (i=0; i<snnbr; i++) {
-    hypre_MPI_Send( dgatherbuf, l, hypre_MPI_DOUBLE,
+    hypre_MPI_Send( dgatherbuf, l, hypre_MPI_REAL,
 	      snbrind[i], TAG_Send_values, pilut_comm );
   }
 
@@ -575,11 +567,11 @@ void hypre_SendFactoredRows(FactorMatType *ldu, CommInfoType *cinfo,
   }
 #ifdef HYPRE_TIMING
   hypre_EndTiming( globals->SFR_timer  );
-#endif 
+#endif
 
   /* clean up memory */
-  hypre_TFree(index_requests);
-  hypre_TFree(value_requests);
+  hypre_TFree(index_requests, HYPRE_MEMORY_HOST);
+  hypre_TFree(value_requests, HYPRE_MEMORY_HOST);
 }
 
 
@@ -609,7 +601,7 @@ void hypre_ComputeRmat(FactorMatType *ldu, ReduceMatType *rmat,
 #endif
 #ifdef HYPRE_TIMING
   hypre_BeginTiming( globals->CR_timer  );
-#endif 
+#endif
 
   usrowptr = ldu->usrowptr;
   uerowptr = ldu->uerowptr;
@@ -627,7 +619,7 @@ void hypre_ComputeRmat(FactorMatType *ldu, ReduceMatType *rmat,
   for (ir=ndone+nmis; ir<lnrows; ir++) {
     i = newperm[ir];
     hypre_CheckBounds(0, i, lnrows, globals);
-    assert(!IsInMIS(pilut_map[i+firstrow]));
+    hypre_assert(!IsInMIS(pilut_map[i+firstrow]));
 
     rtol = nrm2s[i]*tol;
 
@@ -661,7 +653,7 @@ void hypre_ComputeRmat(FactorMatType *ldu, ReduceMatType *rmat,
 	  lr[lastlr] = (newiperm[rcolind[lastjr]-firstrow] << 1);
 	else {
 	  lr[lastlr] = pilut_map[rcolind[lastjr]];  /* map[] == (l<<1) | 1 */
-	  assert(incolind[StripMIS(pilut_map[rcolind[lastjr]])+1] == 
+	  hypre_assert(incolind[StripMIS(pilut_map[rcolind[lastjr]])+1] ==
                  rcolind[lastjr]);
 	}
         lastlr++;
@@ -671,8 +663,8 @@ void hypre_ComputeRmat(FactorMatType *ldu, ReduceMatType *rmat,
       jw[lastjr] = rcolind[lastjr];
        w[lastjr] = rvalues[lastjr];
     }
-    assert(lastjr == nnz);
-    assert(lastjr > 0);
+    hypre_assert(lastjr == nnz);
+    hypre_assert(lastjr > 0);
 
     /* Go through the L nonzeros and pull in the contributions */
     while( lastlr != 0 ) {
@@ -685,7 +677,7 @@ void hypre_ComputeRmat(FactorMatType *ldu, ReduceMatType *rmat,
 
 	hypre_CheckBounds(0, kk, lnrows, globals);
 	hypre_CheckBounds(0, jr[k], lastjr, globals);
-	assert(jw[jr[k]] == k);
+	hypre_assert(jw[jr[k]] == k);
 
         mult = w[jr[k]]*dvalues[kk];
         w[jr[k]] = mult;
@@ -702,7 +694,7 @@ void hypre_ComputeRmat(FactorMatType *ldu, ReduceMatType *rmat,
 
 	    /* record L elements -- these must be local */
             if (IsInMIS(pilut_map[ucolind[l]])) {
-	      assert(ucolind[l] >= firstrow  &&  ucolind[l] < lastrow);
+	      hypre_assert(ucolind[l] >= firstrow  &&  ucolind[l] < lastrow);
 	      lr[lastlr] = (newiperm[ucolind[l]-firstrow] << 1);
 	      lastlr++;
 	    }
@@ -713,7 +705,7 @@ void hypre_ComputeRmat(FactorMatType *ldu, ReduceMatType *rmat,
              w[lastjr] = -mult*uvalues[l];
 	    lastjr++;
           }
-          else 
+          else
             w[m] -= mult*uvalues[l];
         }
       }
@@ -725,7 +717,7 @@ void hypre_ComputeRmat(FactorMatType *ldu, ReduceMatType *rmat,
 
 	hypre_CheckBounds(0, k, nrows, globals);
 	hypre_CheckBounds(0, jr[k], lastjr, globals);
-	assert(jw[jr[k]] == k);
+	hypre_assert(jw[jr[k]] == k);
 
         mult = w[jr[k]]*invalues[start];
         w[jr[k]] = mult;
@@ -742,7 +734,7 @@ void hypre_ComputeRmat(FactorMatType *ldu, ReduceMatType *rmat,
 
 	    /* record L elements -- these must be remote */
             if (IsInMIS(pilut_map[incolind[l]])) {
-	      assert(incolind[l] < firstrow  ||  incolind[l] >= lastrow);
+	      hypre_assert(incolind[l] < firstrow  ||  incolind[l] >= lastrow);
 	      lr[lastlr] = pilut_map[incolind[l]];  /* map[] == (l<<1) | 1 */
 	      lastlr++;
 	    }
@@ -753,7 +745,7 @@ void hypre_ComputeRmat(FactorMatType *ldu, ReduceMatType *rmat,
              w[lastjr] = -mult*invalues[l];
 	    lastjr++;
           }
-          else 
+          else
             w[m] -= mult*invalues[l];
         }
       }
@@ -768,7 +760,7 @@ void hypre_ComputeRmat(FactorMatType *ldu, ReduceMatType *rmat,
   }
 #ifdef HYPRE_TIMING
   hypre_EndTiming( globals->CR_timer  );
-#endif 
+#endif
 
 }
 
@@ -795,12 +787,12 @@ void hypre_FactorLocal(FactorMatType *ldu, ReduceMatType *rmat,
 #endif
 #ifdef HYPRE_TIMING
   hypre_BeginTiming( globals->FL_timer  );
-#endif 
+#endif
 
 
-  assert( rmat  != nrmat    );
-  assert( perm  != newperm  );
-  assert( iperm != newiperm );
+  hypre_assert( rmat  != nrmat    );
+  hypre_assert( perm  != newperm  );
+  hypre_assert( iperm != newiperm );
 
   usrowptr = ldu->usrowptr;
   uerowptr = ldu->uerowptr;
@@ -813,7 +805,7 @@ void hypre_FactorLocal(FactorMatType *ldu, ReduceMatType *rmat,
   for (ir=ndone; ir<ndone+nmis; ir++) {
     i = newperm[ir];
     hypre_CheckBounds(0, i, lnrows, globals);
-    assert(IsInMIS(pilut_map[i+firstrow]));
+    hypre_assert(IsInMIS(pilut_map[i+firstrow]));
 
     rtol = nrm2s[i]*tol;  /* Compute relative tolerance */
     diag = newiperm[i];
@@ -831,7 +823,7 @@ void hypre_FactorLocal(FactorMatType *ldu, ReduceMatType *rmat,
     jr[rcolind[0]] = 0;  /* store diagonal first */
     jw[0] = rcolind[0];
      w[0] = rvalues[0];
-    assert(jw[0] == i+firstrow);
+    hypre_assert(jw[0] == i+firstrow);
 
     lastlr = 0;
     for (lastjr=1; lastjr<nnz; lastjr++) {
@@ -860,7 +852,7 @@ void hypre_FactorLocal(FactorMatType *ldu, ReduceMatType *rmat,
 
       hypre_CheckBounds(0, kk, lnrows, globals);
       hypre_CheckBounds(0, jr[k], lastjr, globals);
-      assert(jw[jr[k]] == k);
+      hypre_assert(jw[jr[k]] == k);
 
       mult = w[jr[k]]*dvalues[kk];
       w[jr[k]] = mult;
@@ -879,7 +871,7 @@ void hypre_FactorLocal(FactorMatType *ldu, ReduceMatType *rmat,
 	  if (ucolind[l] >= firstrow  &&
 	      ucolind[l] <  lastrow   &&
 	      newiperm[ucolind[l]-firstrow] < diag) {
-	    assert(IsInMIS(pilut_map[ucolind[l]]));
+	    hypre_assert(IsInMIS(pilut_map[ucolind[l]]));
 	    lr[lastlr] = newiperm[ucolind[l]-firstrow];
 	    lastlr++;
 	  }
@@ -890,7 +882,7 @@ void hypre_FactorLocal(FactorMatType *ldu, ReduceMatType *rmat,
 	   w[lastjr] = -mult*uvalues[l];
 	  lastjr++;
 	}
-	else 
+	else
 	  w[m] -= mult*uvalues[l];
       }
     } /* L non-zeros */
@@ -903,7 +895,7 @@ void hypre_FactorLocal(FactorMatType *ldu, ReduceMatType *rmat,
   }
 #ifdef HYPRE_TIMING
   hypre_EndTiming( globals->FL_timer  );
-#endif 
+#endif
 }
 
 
@@ -954,7 +946,7 @@ HYPRE_Int hypre_SeperateLU_byDIAG( HYPRE_Int diag, HYPRE_Int *newiperm,
 
 #ifdef HYPRE_TIMING
   hypre_BeginTiming( globals->SLUD_timer  );
-#endif 
+#endif
 
   /* Perform a Qsort type pass to seperate L and U (rmat) entries. */
   if (lastjr == 1)
@@ -999,21 +991,21 @@ HYPRE_Int hypre_SeperateLU_byDIAG( HYPRE_Int diag, HYPRE_Int *newiperm,
 #ifndef NDEBUG
   /* DEBUGGING: verify sorting to some extent */
   for (itmp=1; itmp<last; itmp++) {
-    assert((jw[itmp] >= firstrow &&   /* [itmp] is in L -- must be MIS */
+    hypre_assert((jw[itmp] >= firstrow &&   /* [itmp] is in L -- must be MIS */
 	    jw[itmp] <  lastrow  &&
 	    newiperm[jw[itmp]-firstrow] < diag));
-    assert(IsInMIS(pilut_map[jw[itmp]]));
+    hypre_assert(IsInMIS(pilut_map[jw[itmp]]));
   }
   for (itmp=first; itmp<lastjr; itmp++) {
-    assert(!(jw[itmp] >= firstrow &&  /* [itmp] is not in L -- may be MIS still */
+    hypre_assert(!(jw[itmp] >= firstrow &&  /* [itmp] is not in L -- may be MIS still */
 	     jw[itmp] <  lastrow  &&
 	     newiperm[jw[itmp]-firstrow] < diag));
   }
-  assert(last == first);
+  hypre_assert(last == first);
 #endif
 #ifdef HYPRE_TIMING
   hypre_EndTiming( globals->SLUD_timer  );
-#endif 
+#endif
 
 
   return first;
@@ -1038,7 +1030,7 @@ HYPRE_Int hypre_SeperateLU_byMIS( hypre_PilutSolverGlobals *globals )
 
 #ifdef HYPRE_TIMING
   hypre_BeginTiming( globals->SLUM_timer  );
-#endif 
+#endif
 
   /* Perform a Qsort type pass to seperate L and U (rmat) entries. */
   if (lastjr == 1)
@@ -1075,15 +1067,15 @@ HYPRE_Int hypre_SeperateLU_byMIS( hypre_PilutSolverGlobals *globals )
 #ifndef NDEBUG
   /* DEBUGGING: verify sorting to some extent */
   for (itmp=1; itmp<last; itmp++)
-    assert(IsInMIS(pilut_map[jw[itmp]]));
+    hypre_assert(IsInMIS(pilut_map[jw[itmp]]));
   for (itmp=first; itmp<lastjr; itmp++)
-    assert(!IsInMIS(pilut_map[jw[itmp]]));
-  assert(last == first);
+    hypre_assert(!IsInMIS(pilut_map[jw[itmp]]));
+  hypre_assert(last == first);
 #endif
 
 #ifdef HYPRE_TIMING
   hypre_EndTiming( globals->SLUM_timer  );
-#endif 
+#endif
 
 
   return first;
@@ -1105,7 +1097,7 @@ void hypre_UpdateL(HYPRE_Int lrow, HYPRE_Int last, FactorMatType *ldu,
 
 #ifdef HYPRE_TIMING
   hypre_BeginTiming( globals->UL_timer  );
-#endif 
+#endif
 
   lcolind = ldu->lcolind;
   lvalues = ldu->lvalues;
@@ -1137,13 +1129,13 @@ void hypre_UpdateL(HYPRE_Int lrow, HYPRE_Int last, FactorMatType *ldu,
   hypre_CheckBounds(0, end-start, global_maxnz+1, globals);
 #ifdef HYPRE_TIMING
   hypre_EndTiming( globals->UL_timer  );
-#endif 
+#endif
 
 }
 
 
 /*************************************************************************
-* This function forms the new reduced row corresponding to 
+* This function forms the new reduced row corresponding to
 * the given row, assuming that the
 * workspace has already been split into L and U (rmat) entries. It reuses
 * the memory for the row in the reduced matrix, storing the new row into
@@ -1161,17 +1153,17 @@ void hypre_FormNRmat(HYPRE_Int rrow, HYPRE_Int first, ReduceMatType *nrmat,
 
 #ifdef HYPRE_TIMING
   hypre_BeginTiming( globals->FNR_timer  );
-#endif 
+#endif
 
-  assert(in_colind[0] == jw[0]);  /* diagonal at the beginning */
+  hypre_assert(in_colind[0] == jw[0]);  /* diagonal at the beginning */
 
   /* check to see if we need to reallocate space */
   out_rowlen = hypre_min( max_rowlen, lastjr-first+1 );
   if( out_rowlen > in_rowlen )
   {
     /*hypre_free_multi( in_colind, in_values, -1 );*/
-    hypre_TFree(in_colind);
-    hypre_TFree(in_values);
+    hypre_TFree(in_colind, HYPRE_MEMORY_HOST);
+    hypre_TFree(in_values, HYPRE_MEMORY_HOST);
     in_colind = NULL; in_values = NULL;
     rcolind = hypre_idx_malloc( out_rowlen, "FornNRmat: rcolind");
     rvalues = hypre_fp_malloc( out_rowlen, "FornNRmat: rvalues");
@@ -1190,7 +1182,7 @@ void hypre_FormNRmat(HYPRE_Int rrow, HYPRE_Int first, ReduceMatType *nrmat,
       rcolind[nz] = jw[j];
       rvalues[nz] =  w[j];
     }
-    assert(nz == lastjr-first+1);
+    hypre_assert(nz == lastjr-first+1);
   }
   else { /* Keep largest out_rowlen elements in the reduced row */
     for (nz=1; nz<out_rowlen; nz++) {
@@ -1199,17 +1191,17 @@ void hypre_FormNRmat(HYPRE_Int rrow, HYPRE_Int first, ReduceMatType *nrmat,
 	if (fabs(w[j]) > fabs(w[max]))
 	  max = j;
       }
-      
+
       rcolind[nz] = jw[max];   /* store max */
       rvalues[nz] =  w[max];
-      
+
       jw[max] = jw[--lastjr];  /* swap max out */
        w[max] =  w[  lastjr];
     }
-    assert(nz == out_rowlen);
+    hypre_assert(nz == out_rowlen);
   }
-  assert(nz <= max_rowlen);
-  
+  hypre_assert(nz <= max_rowlen);
+
   /* link the reused storage to the new reduced system */
   nrmat->rmat_rnz[rrow]     = nz;
   nrmat->rmat_rrowlen[rrow] = out_rowlen;
@@ -1218,7 +1210,7 @@ void hypre_FormNRmat(HYPRE_Int rrow, HYPRE_Int first, ReduceMatType *nrmat,
 
 #ifdef HYPRE_TIMING
   hypre_EndTiming( globals->FNR_timer  );
-#endif 
+#endif
 
 }
 
@@ -1241,7 +1233,7 @@ void hypre_FormDU(HYPRE_Int lrow, HYPRE_Int first, FactorMatType *ldu,
   uerowptr = ldu->uerowptr;
   uvalues  = ldu->uvalues;
 
-  /* 
+  /*
    * Take care of the diagonal
    */
   if (w[0] == 0.0) {
@@ -1251,13 +1243,13 @@ void hypre_FormDU(HYPRE_Int lrow, HYPRE_Int first, FactorMatType *ldu,
   else
     ldu->dvalues[lrow] = 1.0/w[0];
 
-  /* 
+  /*
    * Take care of the elements of U
    * Note U is completely empty beforehand.
    */
   end = ldu->uerowptr[lrow];
 
-  assert(ldu->usrowptr[lrow] == ldu->uerowptr[lrow]);
+  hypre_assert(ldu->usrowptr[lrow] == ldu->uerowptr[lrow]);
   for (nz=0; nz<global_maxnz && lastjr>first; nz++) {
     /* The entries [first, lastjr) are part of U */
     max = first;
@@ -1269,7 +1261,7 @@ void hypre_FormDU(HYPRE_Int lrow, HYPRE_Int first, FactorMatType *ldu,
     ucolind[end] = jw[max];  /* store max */
     uvalues[end] =  w[max];
     end++;
-    
+
     jw[max] = jw[--lastjr];  /* swap max out */
      w[max] =  w[  lastjr];
   }
@@ -1302,7 +1294,7 @@ void hypre_EraseMap(CommInfoType *cinfo, HYPRE_Int *newperm, HYPRE_Int nmis,
 #endif
 
   /* clear map of all MIS rows */
-  for (i=ndone; i<ndone+nmis; i++) 
+  for (i=ndone; i<ndone+nmis; i++)
     pilut_map[newperm[i]+firstrow] = 0;
 
   /* clear map of all received rows. see hypre_SendFactoredRows code */
@@ -1375,7 +1367,7 @@ void hypre_ParINIT( ReduceMatType *nrmat, CommInfoType *cinfo, HYPRE_Int *rowdis
   cinfo->rnbrind  = hypre_idx_malloc(npes,   "hypre_ComputeCommInfo: cinfo->rnbrind");
   cinfo->rrowind  = hypre_idx_malloc(nleft,  "hypre_ComputeCommInfo: cinfo->rrowind");
   cinfo->rnbrptr  = hypre_idx_malloc(npes+1, "hypre_ComputeCommInfo: cinfo->rnbrptr");
-  
+
   cinfo->snbrind  = hypre_idx_malloc(npes,   "hypre_ComputeCommInfo: cinfo->snbrind");
   cinfo->snbrptr  = hypre_idx_malloc(npes+1, "hypre_ComputeCommInfo: cinfo->snbrptr");
 
@@ -1390,6 +1382,6 @@ void hypre_ParINIT( ReduceMatType *nrmat, CommInfoType *cinfo, HYPRE_Int *rowdis
   /*cinfo->gatherbuf = hypre_fp_malloc(ntogo*(global_maxnz+2), "ComputeMIS: gatherbuf");*/
   /* RDF: There is a purify UMR problem that a calloc gets rid of.
    * Don't know if this is actually an indication of a bug */
-  cinfo->gatherbuf = hypre_CTAlloc(HYPRE_Real, ntogo*(global_maxnz+2));
+  cinfo->gatherbuf = hypre_CTAlloc(HYPRE_Real,  ntogo*(global_maxnz+2), HYPRE_MEMORY_HOST);
 
 }

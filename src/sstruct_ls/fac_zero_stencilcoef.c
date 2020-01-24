@@ -1,25 +1,20 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_sstruct_ls.h"
 #include "fac.h"
 
-#define AbsStencilShape(stencil, abs_shape)     \
-   {                                            \
-      HYPRE_Int ii,jj,kk;                       \
-      ii = hypre_IndexX(stencil);               \
-      jj = hypre_IndexY(stencil);               \
-      kk = hypre_IndexZ(stencil);               \
-      abs_shape= hypre_abs(ii) + hypre_abs(jj) + hypre_abs(kk);   \
+#define AbsStencilShape(stencil, abs_shape)                     \
+   {                                                            \
+      HYPRE_Int ii,jj,kk;                                       \
+      ii = hypre_IndexX(stencil);                               \
+      jj = hypre_IndexY(stencil);                               \
+      kk = hypre_IndexZ(stencil);                               \
+      abs_shape= hypre_abs(ii) + hypre_abs(jj) + hypre_abs(kk); \
    }
 
 /*--------------------------------------------------------------------------
@@ -71,7 +66,6 @@ hypre_FacZeroCFSten( hypre_SStructPMatrix *Af,
    HYPRE_Real            *ac_ptr;
    hypre_Index            loop_size;
 
-   HYPRE_Int              iac;
    HYPRE_Int              ci, i, j;
 
    HYPRE_Int              abs_shape;
@@ -172,17 +166,15 @@ hypre_FacZeroCFSten( hypre_SStructPMatrix *Af,
                                                                            stencil_shape);
                            hypre_BoxGetSize(shift_ibox, loop_size);
 
+#define DEVICE_VAR is_device_ptr(ac_ptr)
                            hypre_BoxLoop1Begin(ndim, loop_size,
                                                ac_dbox, hypre_BoxIMin(shift_ibox),
                                                stride, iac);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iac) HYPRE_SMP_SCHEDULE
-#endif
-                           hypre_BoxLoop1For(iac)
                            {
                               ac_ptr[iac] = 0.0;
                            }
                            hypre_BoxLoop1End(iac);
+#undef DEVICE_VAR
                         }   /* if ( hypre_BoxVolume(shift_ibox) ) */
 
                         hypre_BoxDestroy(shift_ibox);
@@ -193,7 +185,7 @@ hypre_FacZeroCFSten( hypre_SStructPMatrix *Af,
             }           /* if (stencils != NULL) */
          }              /* for (var2= 0; var2< nvars; var2++) */
 
-         hypre_TFree(boxman_entries);
+         hypre_TFree(boxman_entries, HYPRE_MEMORY_HOST);
       }   /* hypre_ForBoxI  ci */
    }      /* for (var1= 0; var1< nvars; var1++) */
 
@@ -258,7 +250,6 @@ hypre_FacZeroFCSten( hypre_SStructPMatrix  *A,
    HYPRE_Real            *a_ptr;
    hypre_Index            loop_size;
 
-   HYPRE_Int              ia;
    HYPRE_Int              fi, fj, i, j;
    HYPRE_Int              abs_shape;
    HYPRE_Int              myid, proc;
@@ -398,17 +389,15 @@ hypre_FacZeroFCSten( hypre_SStructPMatrix  *A,
 
                         hypre_BoxGetSize(&intersect_box, loop_size);
 
+#define DEVICE_VAR is_device_ptr(a_ptr)
                         hypre_BoxLoop1Begin(ndim, loop_size,
                                             a_dbox, hypre_BoxIMin(&intersect_box),
                                             stride, ia);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,ia) HYPRE_SMP_SCHEDULE
-#endif
-                        hypre_BoxLoop1For(ia)
                         {
                            a_ptr[ia] = 0.0;
                         }
                         hypre_BoxLoop1End(ia);
+#undef DEVICE_VAR
 
                      }  /* hypre_ForBoxI(fj, intersect_boxes) */
 
@@ -419,7 +408,7 @@ hypre_FacZeroFCSten( hypre_SStructPMatrix  *A,
             }         /* if (stencils != NULL) */
          }            /* for (var2= 0; var2< nvars; var2++) */
 
-         hypre_TFree(boxman_entries);
+         hypre_TFree(boxman_entries, HYPRE_MEMORY_HOST);
       }  /* hypre_ForBoxI(fi, fgrid_boxes) */
    }     /* for (var1= 0; var1< nvars; var1++) */
 

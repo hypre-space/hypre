@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -33,52 +28,59 @@ typedef struct hypre_ParCSRMatrix_struct
 {
    MPI_Comm              comm;
 
-   HYPRE_Int             global_num_rows;
-   HYPRE_Int             global_num_cols;
-   HYPRE_Int             first_row_index;
-   HYPRE_Int             first_col_diag;
-   /* need to know entire local range in case row_starts and col_starts 
+   HYPRE_BigInt          global_num_rows;
+   HYPRE_BigInt          global_num_cols;
+   HYPRE_BigInt          first_row_index;
+   HYPRE_BigInt          first_col_diag;
+   /* need to know entire local range in case row_starts and col_starts
       are null  (i.e., bgl) AHB 6/05*/
-   HYPRE_Int             last_row_index;
-   HYPRE_Int             last_col_diag;
+   HYPRE_BigInt          last_row_index;
+   HYPRE_BigInt          last_col_diag;
 
    hypre_CSRMatrix      *diag;
    hypre_CSRMatrix      *offd;
    hypre_CSRMatrix      *diagT, *offdT;
-        /* JSP: transposed matrices are created lazily and optional */
-   HYPRE_Int            *col_map_offd; 
-        /* maps columns of offd to global columns */
-   HYPRE_Int            *row_starts; 
-        /* array of length num_procs+1, row_starts[i] contains the 
-           global number of the first row on proc i,  
-           first_row_index = row_starts[my_id],
-           row_starts[num_procs] = global_num_rows */
-   HYPRE_Int            *col_starts;
-        /* array of length num_procs+1, col_starts[i] contains the 
-           global number of the first column of diag on proc i,  
-           first_col_diag = col_starts[my_id],
-           col_starts[num_procs] = global_num_cols */
+   /* JSP: transposed matrices are created lazily and optional */
+   HYPRE_BigInt         *col_map_offd;
+   HYPRE_BigInt         *device_col_map_offd;
+   /* maps columns of offd to global columns */
+   HYPRE_BigInt         *row_starts;
+        /* array of length 2 giving the glboal index of the first row
+           on this processor, and 1+index of the final row on this
+           processor. If –enable-global-partition is used, then array
+           is length num_procs+1, and row_starts[i] contains the 
+           global number of the first row on proc i, first_row_index =
+           row_starts[my_id], row_starts[num_procs] = global_num_rows */
+   HYPRE_BigInt         *col_starts;
+   /* array of length num_procs+1, col_starts[i] contains the
+      global number of the first column of diag on proc i,
+      first_col_diag = col_starts[my_id],
+      col_starts[num_procs] = global_num_cols */
 
    hypre_ParCSRCommPkg  *comm_pkg;
    hypre_ParCSRCommPkg  *comm_pkgT;
-   
+
    /* Does the ParCSRMatrix create/destroy `diag', `offd', `col_map_offd'? */
    HYPRE_Int             owns_data;
    /* Does the ParCSRMatrix create/destroy `row_starts', `col_starts'? */
    HYPRE_Int             owns_row_starts;
    HYPRE_Int             owns_col_starts;
 
-   HYPRE_Int             num_nonzeros;
+   HYPRE_BigInt          num_nonzeros;
    HYPRE_Real            d_num_nonzeros;
 
    /* Buffers used by GetRow to hold row currently being accessed. AJC, 4/99 */
-   HYPRE_Int            *rowindices;
+   HYPRE_BigInt         *rowindices;
    HYPRE_Complex        *rowvalues;
    HYPRE_Int             getrowactive;
 
    hypre_IJAssumedPart  *assumed_partition; /* only populated if
                                               no_global_partition option is used
                                               (compile-time option)*/
+
+   /* Array to store ordering of local diagonal block to relax. In particular,
+   used for triangulr matrices that are not ordered to be triangular. */
+   HYPRE_Int            *proc_ordering;
 
 } hypre_ParCSRMatrix;
 
@@ -98,6 +100,7 @@ typedef struct hypre_ParCSRMatrix_struct
 #define hypre_ParCSRMatrixDiagT(matrix)            ((matrix) -> diagT)
 #define hypre_ParCSRMatrixOffdT(matrix)            ((matrix) -> offdT)
 #define hypre_ParCSRMatrixColMapOffd(matrix)      ((matrix) -> col_map_offd)
+#define hypre_ParCSRMatrixDeviceColMapOffd(matrix) ((matrix) -> device_col_map_offd)
 #define hypre_ParCSRMatrixRowStarts(matrix)       ((matrix) -> row_starts)
 #define hypre_ParCSRMatrixColStarts(matrix)       ((matrix) -> col_starts)
 #define hypre_ParCSRMatrixCommPkg(matrix)         ((matrix) -> comm_pkg)
@@ -115,6 +118,7 @@ hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(matrix))
 #define hypre_ParCSRMatrixRowvalues(matrix)       ((matrix) -> rowvalues)
 #define hypre_ParCSRMatrixGetrowactive(matrix)    ((matrix) -> getrowactive)
 #define hypre_ParCSRMatrixAssumedPartition(matrix) ((matrix) -> assumed_partition)
+#define hypre_ParCSRMatrixProcOrdering(matrix)    ((matrix) -> proc_ordering)
 
 /*--------------------------------------------------------------------------
  * Parallel CSR Boolean Matrix
@@ -123,24 +127,24 @@ hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(matrix))
 typedef struct
 {
    MPI_Comm                comm;
-   HYPRE_Int               global_num_rows;
-   HYPRE_Int               global_num_cols;
-   HYPRE_Int               first_row_index;
-   HYPRE_Int               first_col_diag;
-   HYPRE_Int               last_row_index;
-   HYPRE_Int               last_col_diag;
+   HYPRE_BigInt            global_num_rows;
+   HYPRE_BigInt            global_num_cols;
+   HYPRE_BigInt            first_row_index;
+   HYPRE_BigInt            first_col_diag;
+   HYPRE_BigInt            last_row_index;
+   HYPRE_BigInt            last_col_diag;
    hypre_CSRBooleanMatrix *diag;
    hypre_CSRBooleanMatrix *offd;
-   HYPRE_Int              *col_map_offd; 
-   HYPRE_Int              *row_starts; 
-   HYPRE_Int              *col_starts;
+   HYPRE_BigInt           *col_map_offd;
+   HYPRE_BigInt           *row_starts;
+   HYPRE_BigInt           *col_starts;
    hypre_ParCSRCommPkg    *comm_pkg;
    hypre_ParCSRCommPkg    *comm_pkgT;
    HYPRE_Int               owns_data;
    HYPRE_Int               owns_row_starts;
    HYPRE_Int               owns_col_starts;
-   HYPRE_Int               num_nonzeros;
-   HYPRE_Int              *rowindices;
+   HYPRE_BigInt            num_nonzeros;
+   HYPRE_BigInt           *rowindices;
    HYPRE_Int               getrowactive;
 
 } hypre_ParCSRBooleanMatrix;

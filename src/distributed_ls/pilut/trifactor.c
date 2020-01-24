@@ -1,17 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /*
  * trifactor.c
@@ -72,7 +64,7 @@ void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, HYPRE_Real *x, HYPR
   ux = ldu->ux;
 
   /******************************************************************
-  * Do the L(lx) = b, first 
+  * Do the L(lx) = b, first
   *******************************************************************/
   snbrpes = ldu->lcomm.snbrpes;
   spes    = ldu->lcomm.spes;
@@ -100,7 +92,7 @@ void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, HYPRE_Real *x, HYPR
    * For forward substitution we do local+1st MIS == nnodes[1] (NOT [0]!) */
   for (i=0; i<nnodes[hypre_max(0,hypre_min(1,nlevels))]; i++) {
     xx = 0.0;
-    for (j=rowptr[i]; j<rowptr[i+1]; j++) 
+    for (j=rowptr[i]; j<rowptr[i+1]; j++)
       xx += values[j]*lx[colind[j]];
     lx[i] = b[perm[i]] - xx;
   }
@@ -110,7 +102,7 @@ void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, HYPRE_Real *x, HYPR
 
 
   /* Allocate requests */
-  receive_requests = hypre_CTAlloc( hypre_MPI_Request, npes );
+  receive_requests = hypre_CTAlloc( hypre_MPI_Request,  npes , HYPRE_MEMORY_HOST);
 
 #ifdef HYPRE_TIMING
   hypre_BeginTiming( globals->Lp_timer );
@@ -126,7 +118,7 @@ void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, HYPRE_Real *x, HYPR
     /* Recv the required lx elements from the appropriate processors */
     for (i=0; i<rnbrpes; i++) {
       if ( rnum[i] > 0 ) { /* Something to recv */
-	hypre_MPI_Irecv( raddr[i]+rdone[i], rnum[i], hypre_MPI_DOUBLE,
+	hypre_MPI_Irecv( raddr[i]+rdone[i], rnum[i], hypre_MPI_REAL,
 		  rpes[i], TAG, pilut_comm, &receive_requests[i] );
 
 	rdone[i] += rnum[i] ;
@@ -136,10 +128,10 @@ void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, HYPRE_Real *x, HYPR
     /* Send the required lx elements to the appropriate processors */
     for (i=0; i<snbrpes; i++) {
       if (sptr[i+1] > auxsptr[i]  &&  sindex[auxsptr[i]]<nnodes[ii]) { /* Something to send */
-        for (j=auxsptr[i], l=0;   j<sptr[i+1] && sindex[j]<nnodes[ii];   j++, l++) 
+        for (j=auxsptr[i], l=0;   j<sptr[i+1] && sindex[j]<nnodes[ii];   j++, l++)
           gatherbuf[l] = lx[sindex[j]];
 
-	hypre_MPI_Send( gatherbuf, l, hypre_MPI_DOUBLE,
+	hypre_MPI_Send( gatherbuf, l, hypre_MPI_REAL,
 		  spes[i], TAG, pilut_comm );
 
         auxsptr[i] = j;
@@ -169,7 +161,7 @@ void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, HYPRE_Real *x, HYPR
 
 
   /******************************************************************
-  * Do the U(ly) = (lx), next 
+  * Do the U(ly) = (lx), next
   *******************************************************************/
   snbrpes = ldu->ucomm.snbrpes;
   spes    = ldu->ucomm.spes;
@@ -198,7 +190,7 @@ void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, HYPRE_Real *x, HYPR
      * by construction all remote lx elements needed are filled in */
     for (i=nnodes[ii]-1; i>=nnodes[ii-1]; i--) {
       xx = 0.0;
-      for (j=rowptr[i]; j<rowptr[i+1]; j++) 
+      for (j=rowptr[i]; j<rowptr[i+1]; j++)
         xx += values[j]*ux[colind[j]];
       ux[i] = dvalues[i]*(lx[i] - xx);
     }
@@ -212,7 +204,7 @@ void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, HYPRE_Real *x, HYPR
     /* Recv the required ux elements from the appropriate processors */
     for (i=0; i<rnbrpes; i++) {
       if ( rnum[i] > 0 ) { /* Something to recv */
-	hypre_MPI_Irecv( raddr[i]+rdone[i], rnum[i], hypre_MPI_DOUBLE,
+	hypre_MPI_Irecv( raddr[i]+rdone[i], rnum[i], hypre_MPI_REAL,
 		  rpes[i], TAG, pilut_comm, &receive_requests[ i ] );
 
 	rdone[i] += rnum[i] ;
@@ -222,10 +214,10 @@ void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, HYPRE_Real *x, HYPR
     /* Send the required ux elements to the appropriate processors */
     for (i=0; i<snbrpes; i++) {
       if (sptr[i+1] > auxsptr[i]  &&  sindex[auxsptr[i]]>=nnodes[ii-1]) { /* Something to send */
-        for (j=auxsptr[i], l=0;   j<sptr[i+1] && sindex[j]>=nnodes[ii-1];   j++, l++) 
+        for (j=auxsptr[i], l=0;   j<sptr[i+1] && sindex[j]>=nnodes[ii-1];   j++, l++)
           gatherbuf[l] = ux[sindex[j]];
 
-	hypre_MPI_Send( gatherbuf, l, hypre_MPI_DOUBLE,
+	hypre_MPI_Send( gatherbuf, l, hypre_MPI_REAL,
 		  spes[i], TAG, pilut_comm );
 
         auxsptr[i] = j;
@@ -252,7 +244,7 @@ void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, HYPRE_Real *x, HYPR
   /* Do the local next */
   for (i=nnodes[0]-1; i>=0; i--) {
     xx = 0.0;
-    for (j=rowptr[i]; j<rowptr[i+1]; j++) 
+    for (j=rowptr[i]; j<rowptr[i+1]; j++)
       xx += values[j]*ux[colind[j]];
     ux[i] = dvalues[i]*(lx[i] - xx);
   }
@@ -265,13 +257,13 @@ void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, HYPRE_Real *x, HYPR
   for (i=0; i<lnrows; i++)
     x[i] = ux[iperm[i]];
 
-  hypre_TFree( receive_requests );
+  hypre_TFree( receive_requests , HYPRE_MEMORY_HOST);
 }
 
 
 /*************************************************************************
 * This function sets-up the communication parameters for the forward
-* and backward substitution, and relabels the L and U matrices 
+* and backward substitution, and relabels the L and U matrices
 **************************************************************************/
 HYPRE_Int hypre_SetUpLUFactor(DataDistType *ddist, FactorMatType *ldu, HYPRE_Int maxnz,
                    hypre_PilutSolverGlobals *globals )
@@ -324,9 +316,9 @@ HYPRE_Int hypre_SetUpLUFactor(DataDistType *ddist, FactorMatType *ldu, HYPRE_Int
   ldu->gatherbuf = hypre_fp_malloc(maxsend, "hypre_SetUpLUFactor: ldu->gatherbuf");
 
   /*hypre_free_multi(petotal, rind, imap, -1);*/
-  hypre_TFree(petotal);
-  hypre_TFree(rind);
-  hypre_TFree(imap);
+  hypre_TFree(petotal, HYPRE_MEMORY_HOST);
+  hypre_TFree(rind, HYPRE_MEMORY_HOST);
+  hypre_TFree(imap, HYPRE_MEMORY_HOST);
 
   return(0);
 }
@@ -343,7 +335,7 @@ void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, HYPRE_Int maxnz,
 		 HYPRE_Int *maxsendP, HYPRE_Int DoingL,
                    hypre_PilutSolverGlobals *globals )
 {
-  HYPRE_Int i, ii, j, k, l, 
+  HYPRE_Int i, ii, j, k, l,
     nlevels, nrecv, nsend, snbrpes, rnbrpes;
   HYPRE_Int *rowdist, *sptr, *sindex, *spes, *rpes,
     *perm, *iperm, *newrowptr, *newcolind,
@@ -452,7 +444,7 @@ void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, HYPRE_Int maxnz,
       lu_recv[i] = 0;
     }
   }
-  assert( TriSolveComm->snbrpes == snbrpes );
+  hypre_assert( TriSolveComm->snbrpes == snbrpes );
 
   /* Create a sptr array into sindex */
   for (i=1; i<snbrpes; i++)
@@ -462,7 +454,7 @@ void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, HYPRE_Int maxnz,
   sptr[0] = 0;
 
   /* Allocate requests */
-  receive_requests = hypre_CTAlloc( hypre_MPI_Request, npes );
+  receive_requests = hypre_CTAlloc( hypre_MPI_Request,  npes , HYPRE_MEMORY_HOST);
 
   /* Start asynchronous receives */
   for (i=0; i<snbrpes; i++) {
@@ -484,12 +476,12 @@ void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, HYPRE_Int maxnz,
       rnbrpes++;
       k += petotal[i];
 
-      assert( k < ddist->ddist_nrows );
+      hypre_assert( k < ddist->ddist_nrows );
     }
   }
   /* this last one is to compute (raddr[i+1] - raddr[i]) */
   raddr[rnbrpes] = x + k + lnrows;
-  assert( TriSolveComm->rnbrpes == rnbrpes );
+  hypre_assert( TriSolveComm->rnbrpes == rnbrpes );
 
   /* complete asynchronous receives */
   for (i=0; i<snbrpes; i++) {
@@ -507,7 +499,7 @@ void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, HYPRE_Int maxnz,
   /**** Go and do a segmented sort of the elements of the sindex.
    **** L is sorted increasing, U is sorted decreasing. ****/
   if ( DoingL ) {
-    for (i=0; i<snbrpes; i++) 
+    for (i=0; i<snbrpes; i++)
       hypre_sincsort_fast(sptr[i+1]-sptr[i], sindex+sptr[i]);
   }
   else {
@@ -545,17 +537,17 @@ void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, HYPRE_Int maxnz,
   }
 
   /* Apply the iperm[] onto the sindex for easy indexing during solution */
-  for (i=0; i<nsend; i++) 
+  for (i=0; i<nsend; i++)
     sindex[i] = iperm[sindex[i]-firstrow];
 
   /* Create imap array for relabeling L */
   for (i=0; i<nrecv; i++) {
-    assert(imap[rind[i]] == -2);
+    hypre_assert(imap[rind[i]] == -2);
     imap[rind[i]] = lnrows+i;
   }
 
   /* Construct the IMAP array of the locally stored rows */
-  for (i=0; i<lnrows; i++) 
+  for (i=0; i<lnrows; i++)
     imap[firstrow+perm[i]] = i;
 
   /* rnum is a 2D array of nlevels rows of rnbrpes columns each */
@@ -615,7 +607,7 @@ void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, HYPRE_Int maxnz,
   for (ii=0; ii<lnrows; ii++) {
     i = perm[ii];
     for (j=srowptr[i]; j<erowptr[i]; j++) {
-      assert(imap[colind[j]] != -1);
+      hypre_assert(imap[colind[j]] != -1);
       newcolind[k] = imap[colind[j]];
       newvalues[k] = values[j];
       k++;
@@ -627,10 +619,10 @@ void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, HYPRE_Int maxnz,
   if ( DoingL ) {
     /* Free memory that stored the L so far and relink the data structures */
     /*hypre_free_multi(ldu->lsrowptr, ldu->lerowptr, ldu->lcolind, ldu->lvalues, -1);*/
-    hypre_TFree(ldu->lsrowptr);
-    hypre_TFree(ldu->lerowptr);
-    hypre_TFree(ldu->lcolind);
-    hypre_TFree(ldu->lvalues);
+    hypre_TFree(ldu->lsrowptr, HYPRE_MEMORY_HOST);
+    hypre_TFree(ldu->lerowptr, HYPRE_MEMORY_HOST);
+    hypre_TFree(ldu->lcolind, HYPRE_MEMORY_HOST);
+    hypre_TFree(ldu->lvalues, HYPRE_MEMORY_HOST);
     ldu->lrowptr = newrowptr;
     ldu->lcolind = newcolind;
     ldu->lvalues = newvalues;
@@ -643,22 +635,22 @@ void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, HYPRE_Int maxnz,
 
     /* Free memory that stored the U so far and relink the data structures */
     /*hypre_free_multi(ldu->usrowptr, ldu->uerowptr, ldu->ucolind, ldu->uvalues, -1);*/
-    hypre_TFree(ldu->usrowptr);
-    hypre_TFree(ldu->uerowptr);
-    hypre_TFree(ldu->ucolind);
-    hypre_TFree(ldu->uvalues);
+    hypre_TFree(ldu->usrowptr, HYPRE_MEMORY_HOST);
+    hypre_TFree(ldu->uerowptr, HYPRE_MEMORY_HOST);
+    hypre_TFree(ldu->ucolind, HYPRE_MEMORY_HOST);
+    hypre_TFree(ldu->uvalues, HYPRE_MEMORY_HOST);
     ldu->urowptr = newrowptr;
     ldu->ucolind = newcolind;
     ldu->uvalues = newvalues;
   }
 
   /* clean up memory */
-  hypre_TFree(receive_requests);
+  hypre_TFree(receive_requests, HYPRE_MEMORY_HOST);
 
   /* Reset the imap by only touching the appropriate elements */
   for (i=0; i<nrecv; i++)
     imap[rind[i]] = -1;
-  for (i=0; i<lnrows; i++) 
+  for (i=0; i<lnrows; i++)
     imap[firstrow+i] = -1;
 }
 

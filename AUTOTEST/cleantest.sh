@@ -1,15 +1,8 @@
 #!/bin/sh
-#BHEADER**********************************************************************
-# Copyright (c) 2015,  Lawrence Livermore National Security, LLC.
-# Produced at the Lawrence Livermore National Laboratory.
-# This file is part of HYPRE.  See file COPYRIGHT for details.
+# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
-# HYPRE is free software; you can redistribute it and/or modify it under the
-# terms of the GNU Lesser General Public License (as published by the Free
-# Software Foundation) version 2.1 dated February 1999.
-#
-# $Revision$
-#EHEADER**********************************************************************
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 # Echo usage information
 case $1 in
@@ -39,14 +32,16 @@ then
       if [ -f $i ] # This check is important in the case that there are no .err files
       then
          testname=`basename $i .err`
-         rm -fr $testname.???
+         # Use explicit extensions to avoid removing '.bat' files
+         rm -fr $testname.err $testname.dir $testname.out $testname.fil
       fi
    done
 else
    while [ "$*" ]
    do
       testname=$1
-      rm -fr $testname.???
+      # Use explicit extensions to avoid removing '.bat' files
+      rm -fr $testname.err $testname.dir $testname.out $testname.fil
       shift
    done
 fi

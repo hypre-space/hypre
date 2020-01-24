@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #ifndef HYPRE_IJ_MV_HEADER
 #define HYPRE_IJ_MV_HEADER
@@ -69,10 +64,10 @@ typedef struct hypre_IJMatrix_struct *HYPRE_IJMatrix;
  * Collective.
  **/
 HYPRE_Int HYPRE_IJMatrixCreate(MPI_Comm        comm,
-                               HYPRE_Int       ilower,
-                               HYPRE_Int       iupper,
-                               HYPRE_Int       jlower,
-                               HYPRE_Int       jupper,
+                               HYPRE_BigInt    ilower,
+                               HYPRE_BigInt    iupper,
+                               HYPRE_BigInt    jlower,
+                               HYPRE_BigInt    jupper,
                                HYPRE_IJMatrix *matrix);
 
 /**
@@ -122,9 +117,16 @@ HYPRE_Int HYPRE_IJMatrixInitialize(HYPRE_IJMatrix matrix);
 HYPRE_Int HYPRE_IJMatrixSetValues(HYPRE_IJMatrix       matrix,
                                   HYPRE_Int            nrows,
                                   HYPRE_Int           *ncols,
-                                  const HYPRE_Int     *rows,
-                                  const HYPRE_Int     *cols,
+                                  const HYPRE_BigInt  *rows,
+                                  const HYPRE_BigInt  *cols,
                                   const HYPRE_Complex *values);
+
+/**
+ * Sets all  matrix coefficients of an already assembled matrix to
+ * {\tt value}
+ **/
+HYPRE_Int HYPRE_IJMatrixSetConstantValues(HYPRE_IJMatrix matrix,
+                                          HYPRE_Complex value);
 
 /**
  * Adds to values for {\tt nrows} rows or partial rows of the matrix.  
@@ -146,9 +148,41 @@ HYPRE_Int HYPRE_IJMatrixSetValues(HYPRE_IJMatrix       matrix,
 HYPRE_Int HYPRE_IJMatrixAddToValues(HYPRE_IJMatrix       matrix,
                                     HYPRE_Int            nrows,
                                     HYPRE_Int           *ncols,
-                                    const HYPRE_Int     *rows,
-                                    const HYPRE_Int     *cols,
+                                    const HYPRE_BigInt  *rows,
+                                    const HYPRE_BigInt  *cols,
                                     const HYPRE_Complex *values);
+
+/**
+ * Sets values for {\tt nrows} rows or partial rows of the matrix.
+ *
+ * Same as IJMatrixSetValues, but with an additional {\tt row_indexes} array
+ * that provides indexes into the {\tt cols} and {\tt values} arrays.  Because
+ * of this, there can be gaps between the row data in these latter two arrays.
+ *
+ **/
+HYPRE_Int HYPRE_IJMatrixSetValues2(HYPRE_IJMatrix       matrix,
+                                   HYPRE_Int            nrows,
+                                   HYPRE_Int           *ncols,
+                                   const HYPRE_BigInt  *rows,
+                                   const HYPRE_Int     *row_indexes,
+                                   const HYPRE_BigInt  *cols,
+                                   const HYPRE_Complex *values);
+
+/**
+ * Adds to values for {\tt nrows} rows or partial rows of the matrix.  
+ *
+ * Same as IJMatrixAddToValues, but with an additional {\tt row_indexes} array
+ * that provides indexes into the {\tt cols} and {\tt values} arrays.  Because
+ * of this, there can be gaps between the row data in these latter two arrays.
+ *
+ **/
+HYPRE_Int HYPRE_IJMatrixAddToValues2(HYPRE_IJMatrix       matrix,
+                                     HYPRE_Int            nrows,
+                                     HYPRE_Int           *ncols,
+                                     const HYPRE_BigInt  *rows,
+                                     const HYPRE_Int     *row_indexes,
+                                     const HYPRE_BigInt  *cols,
+                                     const HYPRE_Complex *values);
 
 /**
  * Finalize the construction of the matrix before using.
@@ -162,19 +196,22 @@ HYPRE_Int HYPRE_IJMatrixAssemble(HYPRE_IJMatrix matrix);
  **/
 HYPRE_Int HYPRE_IJMatrixGetRowCounts(HYPRE_IJMatrix  matrix,
                                      HYPRE_Int       nrows,
-                                     HYPRE_Int      *rows,
+                                     HYPRE_BigInt   *rows,
                                      HYPRE_Int      *ncols);
 
 /**
  * Gets values for {\tt nrows} rows or partial rows of the matrix.  
- * Usage details are
+ * Usage details are mostly
  * analogous to \Ref{HYPRE_IJMatrixSetValues}.
+ * Note that if nrows is negative, the routine will return
+ * the column_indices and matrix coefficients of the
+ * (-nrows) rows contained in rows.
  **/
 HYPRE_Int HYPRE_IJMatrixGetValues(HYPRE_IJMatrix  matrix,
                                   HYPRE_Int       nrows,
                                   HYPRE_Int      *ncols,
-                                  HYPRE_Int      *rows,
-                                  HYPRE_Int      *cols,
+                                  HYPRE_BigInt   *rows,
+                                  HYPRE_BigInt   *cols,
                                   HYPRE_Complex  *values);
 
 /**
@@ -199,10 +236,10 @@ HYPRE_Int HYPRE_IJMatrixGetObjectType(HYPRE_IJMatrix  matrix,
  * of column partitioning for this processor.
  **/
 HYPRE_Int HYPRE_IJMatrixGetLocalRange(HYPRE_IJMatrix  matrix,
-                                      HYPRE_Int      *ilower,
-                                      HYPRE_Int      *iupper,
-                                      HYPRE_Int      *jlower,
-                                      HYPRE_Int      *jupper);
+                                      HYPRE_BigInt   *ilower,
+                                      HYPRE_BigInt   *iupper,
+                                      HYPRE_BigInt   *jlower,
+                                      HYPRE_BigInt   *jupper);
 
 /**
  * Get a reference to the constructed matrix object.
@@ -318,8 +355,8 @@ typedef struct hypre_IJVector_struct *HYPRE_IJVector;
  * Collective.
  **/
 HYPRE_Int HYPRE_IJVectorCreate(MPI_Comm        comm,
-                               HYPRE_Int       jlower,
-                               HYPRE_Int       jupper,
+                               HYPRE_BigInt    jlower,
+                               HYPRE_BigInt    jupper,
                                HYPRE_IJVector *vector);
 
 /**
@@ -366,7 +403,7 @@ HYPRE_Int HYPRE_IJVectorSetMaxOffProcElmts(HYPRE_IJVector vector,
  **/
 HYPRE_Int HYPRE_IJVectorSetValues(HYPRE_IJVector       vector,
                                   HYPRE_Int            nvalues,
-                                  const HYPRE_Int     *indices,
+                                  const HYPRE_BigInt  *indices,
                                   const HYPRE_Complex *values);
 
 /**
@@ -380,7 +417,7 @@ HYPRE_Int HYPRE_IJVectorSetValues(HYPRE_IJVector       vector,
  **/
 HYPRE_Int HYPRE_IJVectorAddToValues(HYPRE_IJVector       vector,
                                     HYPRE_Int            nvalues,
-                                    const HYPRE_Int     *indices,
+                                    const HYPRE_BigInt  *indices,
                                     const HYPRE_Complex *values);
 
 /**
@@ -396,7 +433,7 @@ HYPRE_Int HYPRE_IJVectorAssemble(HYPRE_IJVector vector);
  **/
 HYPRE_Int HYPRE_IJVectorGetValues(HYPRE_IJVector   vector,
                                   HYPRE_Int        nvalues,
-                                  const HYPRE_Int *indices,
+                                  const HYPRE_BigInt *indices,
                                   HYPRE_Complex   *values);
 
 /**
@@ -420,8 +457,8 @@ HYPRE_Int HYPRE_IJVectorGetObjectType(HYPRE_IJVector  vector,
  * Returns range of the part of the vector owned by this processor.
  **/
 HYPRE_Int HYPRE_IJVectorGetLocalRange(HYPRE_IJVector  vector,
-                                      HYPRE_Int      *jlower,
-                                      HYPRE_Int      *jupper);
+                                      HYPRE_BigInt   *jlower,
+                                      HYPRE_BigInt   *jupper);
 
 /**
  * Get a reference to the constructed vector object.

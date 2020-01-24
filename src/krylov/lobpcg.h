@@ -1,19 +1,18 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "multivector.h"
 
 #ifndef LOCALLY_OPTIMAL_BLOCK_PRECONDITIONED_CONJUGATE_GRADIENTS
 #define LOCALLY_OPTIMAL_BLOCK_PRECONDITIONED_CONJUGATE_GRADIENTS
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define PROBLEM_SIZE_TOO_SMALL			       	1
 #define WRONG_BLOCK_SIZE			       	2
@@ -30,17 +29,13 @@ typedef struct {
 typedef struct {
 
 /* these pointers should point to 2 functions providing standard lapack  functionality */
-   HYPRE_Int   (*dpotrf) (char *uplo, HYPRE_Int *n, HYPRE_Real *a, HYPRE_Int *
+   HYPRE_Int   (*dpotrf) (const char *uplo, HYPRE_Int *n, HYPRE_Real *a, HYPRE_Int *
         lda, HYPRE_Int *info);
    HYPRE_Int   (*dsygv) (HYPRE_Int *itype, char *jobz, char *uplo, HYPRE_Int *
         n, HYPRE_Real *a, HYPRE_Int *lda, HYPRE_Real *b, HYPRE_Int *ldb,
         HYPRE_Real *w, HYPRE_Real *work, HYPRE_Int *lwork, HYPRE_Int *info);
 
 } lobpcg_BLASLAPACKFunctions;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 HYPRE_Int
 lobpcg_solve( mv_MultiVectorPtr blockVectorX,

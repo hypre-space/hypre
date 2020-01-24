@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -390,6 +385,22 @@ hypre_F90_IFACE(hypre_parcsrhybridsettruncfacto, HYPRE_PARCSRHYBRIDSETTRUNCFACTO
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetPMaxElmts
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_parcsrhybridsetpmaxelmts, HYPRE_PARCSRHYBRIDSETPMAXELMTS)
+   (hypre_F90_Obj *solver,
+    hypre_F90_Int *p_max_elmts,
+    hypre_F90_Int *ierr)
+{
+   *ierr = (hypre_F90_Int)
+      (HYPRE_ParCSRHybridSetPMaxElmts(
+          hypre_F90_PassObj (HYPRE_Solver, solver),
+          hypre_F90_PassInt (p_max_elmts) ));
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParCSRHybridSetMaxLevels
  *--------------------------------------------------------------------------*/
 
@@ -438,6 +449,22 @@ hypre_F90_IFACE(hypre_parcsrhybridsetcoarsentyp, HYPRE_PARCSRHYBRIDSETCOARSENTYP
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetInterpType
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_parcsrhybridsetinterptyp, HYPRE_PARCSRHYBRIDSETINTERPTYP)
+   (hypre_F90_Obj *solver,
+    hypre_F90_Int *interp_type,
+    hypre_F90_Int *ierr)
+{
+   *ierr = (hypre_F90_Int)
+      (HYPRE_ParCSRHybridSetCoarsenType(
+          hypre_F90_PassObj (HYPRE_Solver, solver),
+          hypre_F90_PassInt (interp_type)  ));
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParCSRHybridSetCycleType
  *--------------------------------------------------------------------------*/
 
@@ -469,7 +496,7 @@ hypre_F90_IFACE(hypre_parcsrhybridsetnumgridswe, HYPRE_PARCSRHYBRIDSETNUMGRIDSWE
           hypre_F90_PassIntArray (num_grid_sweeps) ));
 }
 
-/*--------------------------------------------------------------------------
+/*------------------------------------------------------------------------
  * HYPRE_ParCSRHybridSetGridRelaxType
  *--------------------------------------------------------------------------*/
 
@@ -567,6 +594,120 @@ hypre_F90_IFACE(hypre_parcsrhybridsetcyclerelax, HYPRE_PARCSRHYBRIDSETCYCLERELAX
           hypre_F90_PassObj (HYPRE_Solver, solver),
           hypre_F90_PassInt (relax_type),
           hypre_F90_PassInt (k) ));
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetAggNumLevels
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_parcsrhybridsetaggnumlev, HYPRE_PARCSRHYBRIDSETAGGNUMLEV)
+   (hypre_F90_Obj *solver,
+    hypre_F90_Int *agg_nl,
+    hypre_F90_Int *ierr)
+{
+   *ierr = (hypre_F90_Int)
+      (HYPRE_ParCSRHybridSetAggNumLevels(
+          hypre_F90_PassObj (HYPRE_Solver, solver),
+          hypre_F90_PassInt (agg_nl) ));
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetNumPaths
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_parcsrhybridsetnumpaths, HYPRE_PARCSRHYBRIDSETNUMPATHS)
+   (hypre_F90_Obj *solver,
+    hypre_F90_Int *num_paths,
+    hypre_F90_Int *ierr)
+{
+   *ierr = (hypre_F90_Int)
+      (HYPRE_ParCSRHybridSetNumPaths(
+          hypre_F90_PassObj (HYPRE_Solver, solver),
+          hypre_F90_PassInt (num_paths) ));
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetNumFunctions
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_parcsrhybridsetnumfunc, HYPRE_PARCSRHYBRIDSETNUMFUNC)
+   (hypre_F90_Obj *solver,
+    hypre_F90_Int *num_fun,
+    hypre_F90_Int *ierr)
+{
+   *ierr = (hypre_F90_Int)
+      (HYPRE_ParCSRHybridSetNumFunctions(
+          hypre_F90_PassObj (HYPRE_Solver, solver),
+          hypre_F90_PassInt (num_fun) ));
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetNodal
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_parcsrhybridsetnodal, HYPRE_PARCSRHYBRIDSETNODAL)
+   (hypre_F90_Obj *solver,
+    hypre_F90_Int *nodal,
+    hypre_F90_Int *ierr)
+{
+   *ierr = (hypre_F90_Int)
+      (HYPRE_ParCSRHybridSetNodal(
+          hypre_F90_PassObj (HYPRE_Solver, solver),
+          hypre_F90_PassInt (nodal) ));
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetKeepTranspose
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_parcsrhybridsetkeeptrans, HYPRE_PARCSRHYBRIDSETKEEPTRANS)
+   (hypre_F90_Obj *solver,
+    hypre_F90_Int *keepT,
+    hypre_F90_Int *ierr)
+{
+   *ierr = (hypre_F90_Int)
+      (HYPRE_ParCSRHybridSetKeepTranspose(
+          hypre_F90_PassObj (HYPRE_Solver, solver),
+          hypre_F90_PassInt (keepT) ));
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetDofFunc
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_parcsrhybridsetdoffunc, HYPRE_PARCSRHYBRIDSETDOFFUNC)
+   (hypre_F90_Obj *solver,
+    hypre_F90_IntArray *dof_func,
+    hypre_F90_Int *ierr)
+{
+   *ierr = (hypre_F90_Int)
+      (HYPRE_ParCSRHybridSetDofFunc(
+          hypre_F90_PassObj (HYPRE_Solver, solver),
+          hypre_F90_PassIntArray (dof_func) ));
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetNonGalerkinTol
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_parcsrhybridsetnongaltol, HYPRE_PARCSRHYBRIDSETNONGALTOL)
+   (hypre_F90_Obj *solver,
+    hypre_F90_Int *ng_num_tol,
+    hypre_F90_RealArray *nongal_tol,
+    hypre_F90_Int *ierr)
+{
+   *ierr = (hypre_F90_Int)
+      (HYPRE_ParCSRHybridSetNonGalerkinTol(
+          hypre_F90_PassObj (HYPRE_Solver, solver),
+          hypre_F90_PassInt (ng_num_tol),
+          hypre_F90_PassRealArray (nongal_tol) ));
 }
 
 /*--------------------------------------------------------------------------

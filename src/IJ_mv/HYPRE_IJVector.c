@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -26,22 +21,23 @@
 
 HYPRE_Int
 HYPRE_IJVectorCreate( MPI_Comm        comm,
-                      HYPRE_Int       jlower,
-                      HYPRE_Int       jupper,
+                      HYPRE_BigInt    jlower,
+                      HYPRE_BigInt    jupper,
                       HYPRE_IJVector *vector )
 {
    hypre_IJVector *vec;
-   HYPRE_Int num_procs, my_id, *partitioning;
+   HYPRE_Int num_procs, my_id;
+   HYPRE_BigInt *partitioning;
  
 #ifdef HYPRE_NO_GLOBAL_PARTITION
-   HYPRE_Int  row0, rowN;
+   HYPRE_BigInt  row0, rowN;
 #else
-   HYPRE_Int *recv_buf;
-   HYPRE_Int *info;
+   HYPRE_BigInt *recv_buf;
+   HYPRE_BigInt *info;
    HYPRE_Int i, i2;
 #endif
 
-   vec = hypre_CTAlloc(hypre_IJVector, 1);
+   vec = hypre_CTAlloc(hypre_IJVector,  1, HYPRE_MEMORY_HOST);
    
    if (!vec)
    {  
@@ -55,7 +51,7 @@ HYPRE_IJVectorCreate( MPI_Comm        comm,
    if (jlower > jupper+1 || jlower < 0)
    {
       hypre_error_in_arg(2);
-      hypre_TFree(vec);
+      hypre_TFree(vec, HYPRE_MEMORY_HOST);
       return hypre_error_flag;
    }
    if (jupper < -1)
@@ -67,7 +63,7 @@ HYPRE_IJVectorCreate( MPI_Comm        comm,
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
 
-   partitioning = hypre_CTAlloc(HYPRE_Int, 2);
+   partitioning = hypre_CTAlloc(HYPRE_BigInt,  2, HYPRE_MEMORY_HOST);
 
    partitioning[0] = jlower;
    partitioning[1] = jupper+1;
@@ -81,27 +77,27 @@ HYPRE_IJVectorCreate( MPI_Comm        comm,
    {
       row0 = jlower;
    }
-   hypre_MPI_Bcast(&row0, 1, HYPRE_MPI_INT, 0, comm);
+   hypre_MPI_Bcast(&row0, 1, HYPRE_MPI_BIG_INT, 0, comm);
    /* proc (num_procs-1) has the last row  */   
    if (my_id == (num_procs-1))
    {
       rowN = jupper;
    }
-   hypre_MPI_Bcast(&rowN, 1, HYPRE_MPI_INT, num_procs-1, comm);
+   hypre_MPI_Bcast(&rowN, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
 
    hypre_IJVectorGlobalFirstRow(vec) = row0;
    hypre_IJVectorGlobalNumRows(vec) = rowN - row0 + 1;
    
 #else
 
-   info = hypre_CTAlloc(HYPRE_Int,2);
-   recv_buf = hypre_CTAlloc(HYPRE_Int, 2*num_procs);
-   partitioning = hypre_CTAlloc(HYPRE_Int, num_procs+1);
+   info = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
+   recv_buf = hypre_CTAlloc(HYPRE_BigInt,  2*num_procs, HYPRE_MEMORY_HOST);
+   partitioning = hypre_CTAlloc(HYPRE_BigInt,  num_procs+1, HYPRE_MEMORY_HOST);
 
    info[0] = jlower;
    info[1] = jupper;
 
-   hypre_MPI_Allgather(info, 2, HYPRE_MPI_INT, recv_buf, 2, HYPRE_MPI_INT, comm);
+   hypre_MPI_Allgather(info, 2, HYPRE_MPI_BIG_INT, recv_buf, 2, HYPRE_MPI_BIG_INT, comm);
 
    partitioning[0] = recv_buf[0];
    for (i=0; i < num_procs-1; i++)
@@ -111,10 +107,10 @@ HYPRE_IJVectorCreate( MPI_Comm        comm,
       {
          /*hypre_printf("Inconsistent partitioning -- HYPRE_IJVectorCreate\n");  */
 	 hypre_error(HYPRE_ERROR_GENERIC);
-         hypre_TFree(info);
-         hypre_TFree(recv_buf);
-         hypre_TFree(partitioning);
-         hypre_TFree(vec);
+         hypre_TFree(info, HYPRE_MEMORY_HOST);
+         hypre_TFree(recv_buf, HYPRE_MEMORY_HOST);
+         hypre_TFree(partitioning, HYPRE_MEMORY_HOST);
+         hypre_TFree(vec, HYPRE_MEMORY_HOST);
          return hypre_error_flag;
       }
       else
@@ -123,8 +119,8 @@ HYPRE_IJVectorCreate( MPI_Comm        comm,
    i2 = (num_procs-1)*2;
    partitioning[num_procs] = recv_buf[i2+1]+1;
 
-   hypre_TFree(info);
-   hypre_TFree(recv_buf);
+   hypre_TFree(info, HYPRE_MEMORY_HOST);
+   hypre_TFree(recv_buf, HYPRE_MEMORY_HOST);
 
 
    hypre_IJVectorGlobalFirstRow(vec) = partitioning[0];
@@ -161,7 +157,7 @@ HYPRE_IJVectorDestroy( HYPRE_IJVector vector )
    } 
 
    if (hypre_IJVectorPartitioning(vec))
-      hypre_TFree(hypre_IJVectorPartitioning(vec));
+      hypre_TFree(hypre_IJVectorPartitioning(vec), HYPRE_MEMORY_HOST);
 
    if (hypre_IJVectorAssumedPart(vec))
 	   hypre_AssumedPartitionDestroy((hypre_IJAssumedPart*)hypre_IJVectorAssumedPart(vec));
@@ -181,7 +177,7 @@ HYPRE_IJVectorDestroy( HYPRE_IJVector vector )
       return hypre_error_flag;
    }
 
-   hypre_TFree(vec);
+   hypre_TFree(vec, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }
@@ -244,7 +240,7 @@ HYPRE_IJVectorSetPrintLevel( HYPRE_IJVector vector,
 HYPRE_Int 
 HYPRE_IJVectorSetValues( HYPRE_IJVector        vector,
                          HYPRE_Int             nvalues,
-                         const HYPRE_Int      *indices,
+                         const HYPRE_BigInt   *indices,
                          const HYPRE_Complex  *values   )
 {
    hypre_IJVector *vec = (hypre_IJVector *) vector;
@@ -288,7 +284,7 @@ HYPRE_IJVectorSetValues( HYPRE_IJVector        vector,
 HYPRE_Int 
 HYPRE_IJVectorAddToValues( HYPRE_IJVector        vector,
                            HYPRE_Int             nvalues,
-                           const HYPRE_Int      *indices,
+                           const HYPRE_BigInt   *indices,
                            const HYPRE_Complex  *values )
 {
    hypre_IJVector *vec = (hypre_IJVector *) vector;
@@ -357,10 +353,10 @@ HYPRE_IJVectorAssemble( HYPRE_IJVector  vector )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int 
-HYPRE_IJVectorGetValues( HYPRE_IJVector   vector,
-                         HYPRE_Int        nvalues,
-                         const HYPRE_Int *indices,
-                         HYPRE_Complex   *values )
+HYPRE_IJVectorGetValues( HYPRE_IJVector      vector,
+                         HYPRE_Int           nvalues,
+                         const HYPRE_BigInt *indices,
+                         HYPRE_Complex      *values )
 {
    hypre_IJVector *vec = (hypre_IJVector *) vector;
 
@@ -472,12 +468,12 @@ HYPRE_IJVectorGetObjectType( HYPRE_IJVector  vector,
 
 HYPRE_Int
 HYPRE_IJVectorGetLocalRange( HYPRE_IJVector  vector,
-                             HYPRE_Int      *jlower,
-                             HYPRE_Int      *jupper )
+                             HYPRE_BigInt   *jlower,
+                             HYPRE_BigInt   *jupper )
 {
    hypre_IJVector *vec = (hypre_IJVector *) vector;
    MPI_Comm comm;
-   HYPRE_Int *partitioning;
+   HYPRE_BigInt *partitioning;
    HYPRE_Int my_id;
 
    if (!vec)
@@ -532,7 +528,7 @@ HYPRE_IJVectorRead( const char     *filename,
                     HYPRE_IJVector *vector_ptr )
 {
    HYPRE_IJVector  vector;
-   HYPRE_Int       jlower, jupper, j;
+   HYPRE_BigInt    jlower, jupper, j;
    HYPRE_Complex   value;
    HYPRE_Int       myid, ret;
    char            new_filename[255];
@@ -548,7 +544,7 @@ HYPRE_IJVectorRead( const char     *filename,
       return hypre_error_flag;
    }
 
-   hypre_fscanf(file, "%d %d", &jlower, &jupper);
+   hypre_fscanf(file, "%b %b", &jlower, &jupper);
    HYPRE_IJVectorCreate(comm, jlower, jupper, &vector);
 
    HYPRE_IJVectorSetObjectType(vector, type);
@@ -558,7 +554,7 @@ HYPRE_IJVectorRead( const char     *filename,
     * catch mistakes in the input file.  This is done with %*[ \t].  Using a
     * space here causes an input line with a single decimal value on it to be
     * read as if it were an integer followed by a decimal value. */
-   while ( (ret = hypre_fscanf(file, "%d%*[ \t]%le", &j, &value)) != EOF )
+   while ( (ret = hypre_fscanf(file, "%b%*[ \t]%le", &j, &value)) != EOF )
    {
       if (ret != 2)
       {
@@ -589,8 +585,8 @@ HYPRE_IJVectorPrint( HYPRE_IJVector  vector,
                      const char     *filename )
 {
    MPI_Comm        comm;
-   HYPRE_Int      *partitioning;
-   HYPRE_Int       jlower, jupper, j;
+   HYPRE_BigInt   *partitioning;
+   HYPRE_BigInt    jlower, jupper, j;
    HYPRE_Complex   value;
    HYPRE_Int       myid;
    char            new_filename[255];
@@ -621,13 +617,13 @@ HYPRE_IJVectorPrint( HYPRE_IJVector  vector,
    jlower = partitioning[myid];
    jupper = partitioning[myid+1] - 1;
 #endif
-   hypre_fprintf(file, "%d %d\n", jlower, jupper);
+   hypre_fprintf(file, "%b %b\n", jlower, jupper);
 
    for (j = jlower; j <= jupper; j++)
    {
       HYPRE_IJVectorGetValues(vector, 1, &j, &value);
 
-      hypre_fprintf(file, "%d %.14e\n", j, value);
+      hypre_fprintf(file, "%b %.14e\n", j, value);
    }
 
    fclose(file);

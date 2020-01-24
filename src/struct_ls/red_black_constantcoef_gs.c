@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_struct_ls.h"
 #include "red_black_gs.h"
@@ -26,7 +21,7 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                               hypre_StructVector *b,
                               hypre_StructVector *x )
 {
-	hypre_RedBlackGSData  *relax_data = (hypre_RedBlackGSData  *)relax_vdata;
+   hypre_RedBlackGSData  *relax_data = (hypre_RedBlackGSData  *)relax_vdata;
 
    HYPRE_Int              max_iter    = (relax_data -> max_iter);
    HYPRE_Int              zero_guess  = (relax_data -> zero_guess);
@@ -46,8 +41,8 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
    hypre_Box             *x_dbox;
                         
    HYPRE_Int              Ai, Astart, Ani, Anj;
-   HYPRE_Int              bi, bstart, bni, bnj;
-   HYPRE_Int              xi, xstart, xni, xnj;
+   HYPRE_Int              bstart, bni, bnj;
+   HYPRE_Int              xstart, xni, xnj;
    HYPRE_Int              xoff0, xoff1, xoff2, xoff3, xoff4, xoff5;
                         
    HYPRE_Real            *Ap;
@@ -68,7 +63,7 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
    HYPRE_Int              offd[6];
                         
    HYPRE_Int              iter, rb, redblack, d;
-   HYPRE_Int              compute_i, i, j, ii, jj, kk;
+   HYPRE_Int              compute_i, i, j;
    HYPRE_Int              ni, nj, nk;
 
    /*----------------------------------------------------------
@@ -194,22 +189,17 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                   Ai= hypre_CCBoxIndexRank(A_dbox, start);
                   AApd= 1.0/Ap[Ai];
 
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ii,jj,bi,xi,kk) HYPRE_SMP_SCHEDULE
-#endif
-                  for (kk = 0; kk < nk; kk++)
+                  hypre_RedBlackLoopInit();
+
+#define DEVICE_VAR is_device_ptr(xp,bp)
+                  hypre_RedBlackConstantcoefLoopBegin(ni,nj,nk,redblack,
+                                                      bstart,bni,bnj,bi,
+                                                      xstart,xni,xnj,xi);
                   {
-                     for (jj = 0; jj < nj; jj++)
-                     {
-                        ii = (kk + jj + redblack) % 2;
-                        bi = bstart + kk*bnj*bni + jj*bni + ii;
-                        xi = xstart + kk*xnj*xni + jj*xni + ii;
-                        for (; ii < ni; ii+=2, bi+=2, xi+=2)
-                        {
-                           xp[xi] = bp[bi]*AApd;
-                        }
-                     }
+                     xp[xi] = bp[bi]*AApd;
                   }
+                  hypre_RedBlackConstantcoefLoopEnd();                  
+#undef DEVICE_VAR
                }
 
                else      /* variable coefficient diag */
@@ -218,23 +208,17 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                   Ani = hypre_BoxSizeX(A_dbox);
                   Anj = hypre_BoxSizeY(A_dbox);
 
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ii,jj,Ai,bi,xi,kk) HYPRE_SMP_SCHEDULE
-#endif
-                  for (kk = 0; kk < nk; kk++)
+                  hypre_RedBlackLoopInit();
+#define DEVICE_VAR is_device_ptr(xp,bp,Ap)
+                  hypre_RedBlackLoopBegin(ni,nj,nk,redblack,
+                                          Astart,Ani,Anj,Ai,
+                                          bstart,bni,bnj,bi,
+                                          xstart,xni,xnj,xi);
                   {
-                     for (jj = 0; jj < nj; jj++)
-                     {
-                        ii = (kk + jj + redblack) % 2;
-                        Ai = Astart + kk*Anj*Ani + jj*Ani + ii;
-                        bi = bstart + kk*bnj*bni + jj*bni + ii;
-                        xi = xstart + kk*xnj*xni + jj*xni + ii;
-                        for (; ii < ni; ii+=2, Ai+=2, bi+=2, xi+=2)
-                        {
-                           xp[xi] = bp[bi] / Ap[Ai];
-                        }
-                     }
+                     xp[xi] = bp[bi] / Ap[Ai];
                   }
+                  hypre_RedBlackLoopEnd();
+#undef DEVICE_VAR
                }
 
             }
@@ -358,75 +342,58 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                   switch(stencil_size)
                   {
                      case 7:
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ii,jj,bi,xi,kk) HYPRE_SMP_SCHEDULE
-#endif
-                        for (kk = 0; kk < nk; kk++)
+                        hypre_RedBlackLoopInit();
+#define DEVICE_VAR is_device_ptr(xp,bp)
+                        hypre_RedBlackConstantcoefLoopBegin(ni,nj,nk,redblack,
+                                                            bstart,bni,bnj,bi,
+                                                            xstart,xni,xnj,xi);
                         {
-                           for (jj = 0; jj < nj; jj++)
-                           {
-                              ii = (kk + jj + redblack) % 2;
-                              bi = bstart + kk*bnj*bni + jj*bni + ii;
-                              xi = xstart + kk*xnj*xni + jj*xni + ii;
-                              for (; ii < ni; ii+=2, bi+=2, xi+=2)
-                              {
-                                 xp[xi] =
-                                    (bp[bi] - 
-                                     App0*xp[xi + xoff0] -
-                                     App1*xp[xi + xoff1] -
-                                     App2*xp[xi + xoff2] -
-                                     App3*xp[xi + xoff3] -
-                                     App4*xp[xi + xoff4] -
-                                     App5*xp[xi + xoff5])*AApd;
-                              }
-                           }
+                           xp[xi] =
+                              (bp[bi] - 
+                               App0*xp[xi + xoff0] -
+                               App1*xp[xi + xoff1] -
+                               App2*xp[xi + xoff2] -
+                               App3*xp[xi + xoff3] -
+                               App4*xp[xi + xoff4] -
+                               App5*xp[xi + xoff5])*AApd;
                         }
+                        hypre_RedBlackConstantcoefLoopEnd();
+#undef DEVICE_VAR
+                        
                         break;
 
                      case 5:
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ii,jj,bi,xi,kk) HYPRE_SMP_SCHEDULE
-#endif
-                        for (kk = 0; kk < nk; kk++)
+                        hypre_RedBlackLoopInit();
+#define DEVICE_VAR is_device_ptr(xp,bp)
+                        hypre_RedBlackConstantcoefLoopBegin(ni,nj,nk,redblack,
+                                                            bstart,bni,bnj,bi,
+                                                            xstart,xni,xnj,xi);
                         {
-                           for (jj = 0; jj < nj; jj++)
-                           {
-                              ii = (kk + jj + redblack) % 2;
-                              bi = bstart + kk*bnj*bni + jj*bni + ii;
-                              xi = xstart + kk*xnj*xni + jj*xni + ii;
-                              for (; ii < ni; ii+=2, bi+=2, xi+=2)
-                              {
-                                 xp[xi] =
-                                    (bp[bi] -
-                                     App0*xp[xi + xoff0] -
-                                     App1*xp[xi + xoff1] -
-                                     App2*xp[xi + xoff2] -
-                                     App3*xp[xi + xoff3])*AApd;
-                              }
-                           }
+                           xp[xi] =
+                              (bp[bi] -
+                               App0*xp[xi + xoff0] -
+                               App1*xp[xi + xoff1] -
+                               App2*xp[xi + xoff2] -
+                               App3*xp[xi + xoff3])*AApd;
                         }
+                        hypre_RedBlackConstantcoefLoopEnd();
+#undef DEVICE_VAR
                         break;
 
                      case 3:
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ii,jj,bi,xi,kk) HYPRE_SMP_SCHEDULE
-#endif
-                        for (kk = 0; kk < nk; kk++)
+                        hypre_RedBlackLoopInit();
+#define DEVICE_VAR is_device_ptr(xp,bp)
+                        hypre_RedBlackConstantcoefLoopBegin(ni,nj,nk,redblack,
+                                                            bstart,bni,bnj,bi,
+                                                            xstart,xni,xnj,xi);
                         {
-                           for (jj = 0; jj < nj; jj++)
-                           {
-                              ii = (kk + jj + redblack) % 2;
-                              bi = bstart + kk*bnj*bni + jj*bni + ii;
-                              xi = xstart + kk*xnj*xni + jj*xni + ii;
-                              for (; ii < ni; ii+=2, bi+=2, xi+=2)
-                              {
-                                 xp[xi] =
-                                    (bp[bi] -
-                                     App0*xp[xi + xoff0] -
-                                     App1*xp[xi + xoff1])*AApd;
-                              }
-                           }
+                           xp[xi] =
+                              (bp[bi] -
+                               App0*xp[xi + xoff0] -
+                               App1*xp[xi + xoff1])*AApd;
                         }
+                        hypre_RedBlackConstantcoefLoopEnd();
+#undef DEVICE_VAR
                         break;
                   }
 
@@ -441,78 +408,60 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                   switch(stencil_size)
                   {
                      case 7:
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ii,jj,Ai,bi,xi,kk) HYPRE_SMP_SCHEDULE
-#endif
-                        for (kk = 0; kk < nk; kk++)
+                        hypre_RedBlackLoopInit();
+#define DEVICE_VAR is_device_ptr(xp,bp,Ap)
+                        hypre_RedBlackLoopBegin(ni,nj,nk,redblack,
+                                                Astart,Ani,Anj,Ai,
+                                                bstart,bni,bnj,bi,
+                                                xstart,xni,xnj,xi);
                         {
-                           for (jj = 0; jj < nj; jj++)
-                           {
-                              ii = (kk + jj + redblack) % 2;
-                              Ai = Astart + kk*Anj*Ani + jj*Ani + ii;
-                              bi = bstart + kk*bnj*bni + jj*bni + ii;
-                              xi = xstart + kk*xnj*xni + jj*xni + ii;
-                              for (; ii < ni; ii+=2, Ai+=2, bi+=2, xi+=2)
-                              {
-                                 xp[xi] =
-                                    (bp[bi] - 
-                                     App0*xp[xi + xoff0] -
-                                     App1*xp[xi + xoff1] -
-                                     App2*xp[xi + xoff2] -
-                                     App3*xp[xi + xoff3] -
-                                     App4*xp[xi + xoff4] -
-                                     App5*xp[xi + xoff5]) / Ap[Ai];
-                              }
-                           }
+                           xp[xi] =
+                              (bp[bi] - 
+                               App0*xp[xi + xoff0] -
+                               App1*xp[xi + xoff1] -
+                               App2*xp[xi + xoff2] -
+                               App3*xp[xi + xoff3] -
+                               App4*xp[xi + xoff4] -
+                               App5*xp[xi + xoff5]) / Ap[Ai];
                         }
+                        hypre_RedBlackLoopEnd();
+#undef DEVICE_VAR
                         break;
 
                      case 5:
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ii,jj,Ai,bi,xi,kk) HYPRE_SMP_SCHEDULE
-#endif
-                        for (kk = 0; kk < nk; kk++)
+                        hypre_RedBlackLoopInit();
+#define DEVICE_VAR is_device_ptr(xp,bp,Ap)
+                        hypre_RedBlackLoopBegin(ni,nj,nk,redblack,
+                                                Astart,Ani,Anj,Ai,
+                                                bstart,bni,bnj,bi,
+                                                xstart,xni,xnj,xi);
                         {
-                           for (jj = 0; jj < nj; jj++)
-                           {
-                              ii = (kk + jj + redblack) % 2;
-                              Ai = Astart + kk*Anj*Ani + jj*Ani + ii;
-                              bi = bstart + kk*bnj*bni + jj*bni + ii;
-                              xi = xstart + kk*xnj*xni + jj*xni + ii;
-                              for (; ii < ni; ii+=2, Ai+=2, bi+=2, xi+=2)
-                              {
-                                 xp[xi] =
-                                    (bp[bi] - 
-                                     App0*xp[xi + xoff0] -
-                                     App1*xp[xi + xoff1] -
-                                     App2*xp[xi + xoff2] -
-                                     App3*xp[xi + xoff3]) / Ap[Ai]; 
-                              }
-                           }
+                           xp[xi] =
+                              (bp[bi] - 
+                               App0*xp[xi + xoff0] -
+                               App1*xp[xi + xoff1] -
+                               App2*xp[xi + xoff2] -
+                               App3*xp[xi + xoff3]) / Ap[Ai]; 
                         }
+                        hypre_RedBlackLoopEnd();
+#undef DEVICE_VAR
                         break;
 
                      case 3:
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ii,jj,Ai,bi,xi,kk) HYPRE_SMP_SCHEDULE
-#endif
-                        for (kk = 0; kk < nk; kk++)
+                        hypre_RedBlackLoopInit();
+#define DEVICE_VAR is_device_ptr(xp,bp,Ap)
+                        hypre_RedBlackLoopBegin(ni,nj,nk,redblack,
+                                                Astart,Ani,Anj,Ai,
+                                                bstart,bni,bnj,bi,
+                                                xstart,xni,xnj,xi);
                         {
-                           for (jj = 0; jj < nj; jj++)
-                           {
-                              ii = (kk + jj + redblack) % 2;
-                              Ai = Astart + kk*Anj*Ani + jj*Ani + ii;
-                              bi = bstart + kk*bnj*bni + jj*bni + ii;
-                              xi = xstart + kk*xnj*xni + jj*xni + ii;
-                              for (; ii < ni; ii+=2, Ai+=2, bi+=2, xi+=2)
-                              {
-                                 xp[xi] =
-                                    (bp[bi] -
-                                     App0*xp[xi + xoff0] -
-                                     App1*xp[xi + xoff1]) / Ap[Ai]; 
-                              }
-                           }
+                           xp[xi] =
+                              (bp[bi] -
+                               App0*xp[xi + xoff0] -
+                               App1*xp[xi + xoff1]) / Ap[Ai]; 
                         }
+                        hypre_RedBlackLoopEnd();
+#undef DEVICE_VAR
                         break;
 
                   }  /* switch(stencil_size) */

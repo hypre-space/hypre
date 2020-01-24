@@ -1,4 +1,9 @@
+/* Copyright (c) 1992-2008 The University of Tennessee.  All rights reserved.
+ * See file COPYING in this directory for details. */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /*  -- translated by f2c (version 19940927).
    You must link the resulting object file with the libraries:
@@ -8,7 +13,7 @@
 #include "f2c.h"
 #include "hypre_blas.h"
 
-/* Subroutine */ HYPRE_Int dsyr2_(const char *uplo, integer *n, doublereal *alpha, 
+/* Subroutine */ integer dsyr2_(const char *uplo, integer *n, doublereal *alpha, 
 	doublereal *x, integer *incx, doublereal *y, integer *incy, 
 	doublereal *a, integer *lda)
 {
@@ -20,9 +25,9 @@
     static integer info;
     static doublereal temp1, temp2;
     static integer i, j;
-    extern logical hypre_lsame_(const char *,const char *);
+    extern logical lsame_(const char *,const char *);
     static integer ix, iy, jx, jy, kx, ky;
-    extern /* Subroutine */ HYPRE_Int hypre_xerbla_(const char *, integer *);
+    extern /* Subroutine */ integer xerbla_(const char *, integer *);
 
 
 /*  Purpose   
@@ -128,7 +133,7 @@
 #define A(I,J) a[(I)-1 + ((J)-1)* ( *lda)]
 
     info = 0;
-    if (! hypre_lsame_(uplo, "U") && ! hypre_lsame_(uplo, "L")) {
+    if (! lsame_(uplo, "U") && ! lsame_(uplo, "L")) {
 	info = 1;
     } else if (*n < 0) {
 	info = 2;
@@ -140,7 +145,7 @@
 	info = 9;
     }
     if (info != 0) {
-	hypre_xerbla_("DSYR2 ", &info);
+	xerbla_("DSYR2 ", &info);
 	return 0;
     }
 
@@ -173,7 +178,7 @@
        accessed sequentially with one pass through the triangular part   
        of A. */
 
-    if (hypre_lsame_(uplo, "U")) {
+    if (lsame_(uplo, "U")) {
 
 /*        Form  A  when A is stored in the upper triangle. */
 
@@ -255,3 +260,6 @@
 
 } /* dsyr2_ */
 
+#ifdef __cplusplus
+}
+#endif

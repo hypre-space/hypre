@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /*
    Example 5
@@ -308,9 +303,9 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       HYPRE_Real *rhs_values, *x_values;
       HYPRE_Int    *rows;
 
-      rhs_values = (HYPRE_Real*) calloc(local_size, sizeof(HYPRE_Real));
-      x_values = (HYPRE_Real*) calloc(local_size, sizeof(HYPRE_Real));
-      rows = (HYPRE_Int*) calloc(local_size, sizeof(HYPRE_Int));
+      rhs_values = hypre_CTAlloc(HYPRE_Real, local_size, HYPRE_MEMORY_HOST);
+      x_values = hypre_CTAlloc(HYPRE_Real, local_size, HYPRE_MEMORY_HOST);
+      rows = hypre_CTAlloc(HYPRE_Int, local_size, HYPRE_MEMORY_HOST);
 
       for (i=0; i<local_size; i++)
       {

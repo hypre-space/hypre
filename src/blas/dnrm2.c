@@ -1,3 +1,9 @@
+/* Copyright (c) 1992-2008 The University of Tennessee.  All rights reserved.
+ * See file COPYING in this directory for details. */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* dnrm2.f -- translated by f2c (version 19960315).
    You must link the resulting object file with the libraries:
@@ -6,7 +12,6 @@
 
 #include "f2c.h"
 #include "hypre_blas.h"
-#include "math.h"
 
 doublereal dnrm2_(integer*n,doublereal* dx,integer* incx)
 {
@@ -24,7 +29,7 @@ doublereal dnrm2_(integer*n,doublereal* dx,integer* incx)
     doublereal ret_val, d__1;
 
     /* Builtin functions */
-    /*HYPRE_Real sqrt(doublereal);*/
+    /*doublereal sqrt(doublereal);*/
 
     /* Local variables */
     static doublereal xmax;
@@ -90,7 +95,7 @@ L10:
     ix = 1;
 /*                                                 begin main loop */
 L20:
-    switch ((HYPRE_Int)next) {
+    switch ((integer)next) {
 	case 0: goto L30;
 	case 1: goto L50;
 	case 2: goto L70;
@@ -200,3 +205,6 @@ L300:
     return ret_val;
 } /* dnrm2_ */
 
+#ifdef __cplusplus
+}
+#endif

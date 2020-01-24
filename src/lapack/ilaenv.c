@@ -1,7 +1,12 @@
+/* Copyright (c) 1992-2008 The University of Tennessee.  All rights reserved.
+ * See file COPYING in this directory for details. */
 
-#include "hypre_lapack.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "f2c.h"
-#include "hypre_blas.h"
+#include "hypre_lapack.h"
 
 integer ilaenv_(integer *ispec,const char *name__,const char *opts, integer *n1, 
 	integer *n2, integer *n3, integer *n4, ftnlen name_len, ftnlen 
@@ -113,8 +118,9 @@ integer ilaenv_(integer *ispec,const char *name__,const char *opts, integer *n1,
     /* Builtin functions   
        Subroutine */
 
-	//VOID s_copy( char *, char *, ftnlen, ftnlen);
-    //integer s_cmp( char *, char *, ftnlen, ftnlen);
+    /* Builtin functions */
+    /* Subroutine */ integer s_copy(char *, const char *, ftnlen, ftnlen);
+    integer s_cmp(char *, const char *, ftnlen, ftnlen);
 
     /* Local variables */
     static integer i__;
@@ -228,7 +234,7 @@ L110:
 
        In these examples, separate code is provided for setting NB for   
        real and complex.  We assume that NB will take the same value in   
-       single or HYPRE_Real precision. */
+       single or doublereal precision. */
 
     nb = 1;
 
@@ -615,3 +621,6 @@ L1100:
 
 } /* ilaenv_ */
 
+#ifdef __cplusplus
+}
+#endif

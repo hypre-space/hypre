@@ -1,8 +1,14 @@
-#include "../blas/hypre_blas.h"
-#include "hypre_lapack.h"
-#include "f2c.h"
+/* Copyright (c) 1992-2008 The University of Tennessee.  All rights reserved.
+ * See file COPYING in this directory for details. */
 
-/* Subroutine */ HYPRE_Int dsygs2_(integer *itype,const char *uplo, integer *n, 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "f2c.h"
+#include "hypre_lapack.h"
+
+/* Subroutine */ integer dsygs2_(integer *itype,const char *uplo, integer *n, 
 	doublereal *a, integer *lda, doublereal *b, integer *ldb, integer *
 	info)
 {
@@ -83,21 +89,21 @@
     integer a_dim1, a_offset, b_dim1, b_offset, i__1, i__2;
     doublereal d__1;
     /* Local variables */
-    extern /* Subroutine */ HYPRE_Int dsyr2_(const char *, integer *, doublereal *, 
+    extern /* Subroutine */ integer dsyr2_(const char *, integer *, doublereal *, 
 	    doublereal *, integer *, doublereal *, integer *, doublereal *, 
 	    integer *);
     static integer k;
-    extern /* Subroutine */ HYPRE_Int dscal_(integer *, doublereal *, doublereal *, 
+    extern /* Subroutine */ integer dscal_(integer *, doublereal *, doublereal *, 
 	    integer *);
     extern logical lsame_(const char *,const char *);
-    extern /* Subroutine */ HYPRE_Int daxpy_(integer *, doublereal *, doublereal *, 
+    extern /* Subroutine */ integer daxpy_(integer *, doublereal *, doublereal *, 
 	    integer *, doublereal *, integer *);
     static logical upper;
-    extern /* Subroutine */ HYPRE_Int dtrmv_(const char *,const char *,const char *, integer *, 
+    extern /* Subroutine */ integer dtrmv_(const char *,const char *,const char *, integer *, 
 	    doublereal *, integer *, doublereal *, integer *), dtrsv_(const char *,const char *,const char *, integer *, doublereal *, 
 	    integer *, doublereal *, integer *);
     static doublereal ct;
-    extern /* Subroutine */ HYPRE_Int xerbla_(const char *, integer *);
+    extern /* Subroutine */ integer xerbla_(const char *, integer *);
     static doublereal akk, bkk;
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]
 #define b_ref(a_1,a_2) b[(a_2)*b_dim1 + a_1]
@@ -272,4 +278,6 @@
 #undef b_ref
 #undef a_ref
 
-
+#ifdef __cplusplus
+}
+#endif

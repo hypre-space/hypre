@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -40,7 +35,7 @@ typedef struct
                                   elements in i-th row */
    HYPRE_Int      *row_space; /* row_space_diag[i] contains space allocated to
                                  i-th row */
-   HYPRE_Int     **aux_j;	/* contains collected column indices */
+   HYPRE_BigInt  **aux_j;	/* contains collected column indices */
    HYPRE_Complex **aux_data; /* contains collected data */
 
    HYPRE_Int      *indx_diag; /* indx_diag[i] points to first empty space of portion
@@ -52,14 +47,11 @@ typedef struct
    HYPRE_Int	   current_num_elmts; /* current no. of elements stored in stash */
    HYPRE_Int	   off_proc_i_indx; /* pointer to first empty space in 
                                        set_off_proc_i_set */
-   HYPRE_Int      *off_proc_i; /* length 2*num_off_procs_elmts, contains info pairs
+   HYPRE_BigInt   *off_proc_i; /* length 2*num_off_procs_elmts, contains info pairs
                                   (code, no. of elmts) where code contains global
-                                  row no. if  SetValues, and (-global row no. -1)
-                                  if  AddToValues*/
-   HYPRE_Int      *off_proc_j; /* contains column indices */
+                                  row no., only used for AddToValues */
+   HYPRE_BigInt   *off_proc_j; /* contains column indices */
    HYPRE_Complex  *off_proc_data; /* contains corresponding data */
-   HYPRE_Int	   cancel_indx; /* number of elements that have to be deleted due
-                                   to setting values from another processor */
 } hypre_AuxParCSRMatrix;
 
 /*--------------------------------------------------------------------------
@@ -84,6 +76,7 @@ typedef struct
 #define hypre_AuxParCSRMatrixOffProcI(matrix)  ((matrix) -> off_proc_i)
 #define hypre_AuxParCSRMatrixOffProcJ(matrix)  ((matrix) -> off_proc_j)
 #define hypre_AuxParCSRMatrixOffProcData(matrix)  ((matrix) -> off_proc_data)
-#define hypre_AuxParCSRMatrixCancelIndx(matrix)  ((matrix) -> cancel_indx)
+#define hypre_AuxParCSRMatrixAuxOffdJ(matrix)  ((matrix) -> aux_offd_j)
+//#define hypre_AuxParCSRMatrixCancelIndx(matrix)  ((matrix) -> cancel_indx)
 
 #endif

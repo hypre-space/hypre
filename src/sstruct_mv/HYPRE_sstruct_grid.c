@@ -1,15 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /* 9/09 AB - modified all functions to use the box manager */
 
@@ -42,18 +36,18 @@ HYPRE_SStructGridCreate( MPI_Comm           comm,
    HYPRE_Int                num_ghost[2*HYPRE_MAXDIM];
    HYPRE_Int                i;
 
-   grid = hypre_TAlloc(hypre_SStructGrid, 1);
+   grid = hypre_TAlloc(hypre_SStructGrid,  1, HYPRE_MEMORY_HOST);
 
    hypre_SStructGridComm(grid)   = comm;
    hypre_SStructGridNDim(grid)   = ndim;
    hypre_SStructGridNParts(grid) = nparts;
-   pgrids = hypre_TAlloc(hypre_SStructPGrid *, nparts);
-   nneighbors    = hypre_TAlloc(HYPRE_Int, nparts);
-   neighbors     = hypre_TAlloc(hypre_SStructNeighbor *, nparts);
-   nbor_offsets  = hypre_TAlloc(hypre_Index *, nparts);
-   fem_nvars     = hypre_TAlloc(HYPRE_Int, nparts);
-   fem_vars      = hypre_TAlloc(HYPRE_Int *, nparts);
-   fem_offsets   = hypre_TAlloc(hypre_Index *, nparts);
+   pgrids = hypre_TAlloc(hypre_SStructPGrid *,  nparts, HYPRE_MEMORY_HOST);
+   nneighbors    = hypre_TAlloc(HYPRE_Int,  nparts, HYPRE_MEMORY_HOST);
+   neighbors     = hypre_TAlloc(hypre_SStructNeighbor *,  nparts, HYPRE_MEMORY_HOST);
+   nbor_offsets  = hypre_TAlloc(hypre_Index *,  nparts, HYPRE_MEMORY_HOST);
+   fem_nvars     = hypre_TAlloc(HYPRE_Int,  nparts, HYPRE_MEMORY_HOST);
+   fem_vars      = hypre_TAlloc(HYPRE_Int *,  nparts, HYPRE_MEMORY_HOST);
+   fem_offsets   = hypre_TAlloc(hypre_Index *,  nparts, HYPRE_MEMORY_HOST);
    for (i = 0; i < nparts; i++)
    {
       hypre_SStructPGridCreate(comm, ndim, &pgrid);
@@ -146,40 +140,40 @@ HYPRE_SStructGridDestroy( HYPRE_SStructGrid grid )
             nvars = hypre_SStructPGridNVars(pgrids[part]);
             for (var = 0; var < nvars; var++)
             {
-               hypre_TFree(vneighbors[part][var]);
+               hypre_TFree(vneighbors[part][var], HYPRE_MEMORY_HOST);
                hypre_BoxManDestroy(managers[part][var]);
                hypre_BoxManDestroy(nbor_managers[part][var]);
             }
-            hypre_TFree(neighbors[part]);
-            hypre_TFree(nbor_offsets[part]);
-            hypre_TFree(nvneighbors[part]);
-            hypre_TFree(vneighbors[part]);
+            hypre_TFree(neighbors[part], HYPRE_MEMORY_HOST);
+            hypre_TFree(nbor_offsets[part], HYPRE_MEMORY_HOST);
+            hypre_TFree(nvneighbors[part], HYPRE_MEMORY_HOST);
+            hypre_TFree(vneighbors[part], HYPRE_MEMORY_HOST);
             hypre_SStructPGridDestroy(pgrids[part]);
-            hypre_TFree(fem_vars[part]);
-            hypre_TFree(fem_offsets[part]);
-            hypre_TFree(managers[part]);
-            hypre_TFree(nbor_managers[part]);
+            hypre_TFree(fem_vars[part], HYPRE_MEMORY_HOST);
+            hypre_TFree(fem_offsets[part], HYPRE_MEMORY_HOST);
+            hypre_TFree(managers[part], HYPRE_MEMORY_HOST);
+            hypre_TFree(nbor_managers[part], HYPRE_MEMORY_HOST);
          }
          for (i = 0; i < vnbor_ncomms; i++)
          {
             hypre_CommInfoDestroy(
                hypre_SStructCommInfoCommInfo(vnbor_comm_info[i]));
-            hypre_TFree(vnbor_comm_info[i]);
+            hypre_TFree(vnbor_comm_info[i], HYPRE_MEMORY_HOST);
          }
-         hypre_TFree(vnbor_comm_info);
-         hypre_TFree(pgrids);
-         hypre_TFree(nneighbors);
-         hypre_TFree(neighbors);
-         hypre_TFree(nbor_offsets);
-         hypre_TFree(fem_nvars);
-         hypre_TFree(fem_vars);
-         hypre_TFree(fem_offsets);
-         hypre_TFree(nvneighbors);
-         hypre_TFree(vneighbors);
-         hypre_TFree(vnbor_comm_info);
-         hypre_TFree(managers);
-         hypre_TFree(nbor_managers);
-         hypre_TFree(grid);
+         hypre_TFree(vnbor_comm_info, HYPRE_MEMORY_HOST);
+         hypre_TFree(pgrids, HYPRE_MEMORY_HOST);
+         hypre_TFree(nneighbors, HYPRE_MEMORY_HOST);
+         hypre_TFree(neighbors, HYPRE_MEMORY_HOST);
+         hypre_TFree(nbor_offsets, HYPRE_MEMORY_HOST);
+         hypre_TFree(fem_nvars, HYPRE_MEMORY_HOST);
+         hypre_TFree(fem_vars, HYPRE_MEMORY_HOST);
+         hypre_TFree(fem_offsets, HYPRE_MEMORY_HOST);
+         hypre_TFree(nvneighbors, HYPRE_MEMORY_HOST);
+         hypre_TFree(vneighbors, HYPRE_MEMORY_HOST);
+         hypre_TFree(vnbor_comm_info, HYPRE_MEMORY_HOST);
+         hypre_TFree(managers, HYPRE_MEMORY_HOST);
+         hypre_TFree(nbor_managers, HYPRE_MEMORY_HOST);
+         hypre_TFree(grid, HYPRE_MEMORY_HOST);
       }
    }
 
@@ -244,12 +238,12 @@ HYPRE_SStructGridAddVariables( HYPRE_SStructGrid      grid,
    /* allocate more space if necessary */
    if ((nucvars % memchunk) == 0)
    {
-      ucvars = hypre_TReAlloc(ucvars, hypre_SStructUCVar *,
-                              (nucvars + memchunk));
+      ucvars = hypre_TReAlloc(ucvars,  hypre_SStructUCVar *, 
+                              (nucvars + memchunk), HYPRE_MEMORY_HOST);
    }
 
-   ucvar = hypre_TAlloc(hypre_SStructUCVar, 1);
-   hypre_SStructUCVarUVars(ucvar) = hypre_TAlloc(hypre_SStructUVar, nvars);
+   ucvar = hypre_TAlloc(hypre_SStructUCVar,  1, HYPRE_MEMORY_HOST);
+   hypre_SStructUCVarUVars(ucvar) = hypre_TAlloc(hypre_SStructUVar,  nvars, HYPRE_MEMORY_HOST);
    hypre_SStructUCVarPart(ucvar) = part;
    hypre_CopyToCleanIndex(index, ndim, hypre_SStructUCVarCell(ucvar));
    hypre_SStructUCVarNUVars(ucvar) = nvars;
@@ -311,7 +305,7 @@ HYPRE_SStructGridSetFEMOrdering( HYPRE_SStructGrid  grid,
    if (ordering == NULL)
    {
       clean = 1;
-      ordering = hypre_TAlloc(HYPRE_Int, (1+ndim)*fem_nvars);
+      ordering = hypre_TAlloc(HYPRE_Int,  (1+ndim)*fem_nvars, HYPRE_MEMORY_HOST);
       j = 0;
       for (i = 0; i < nvars; i++)
       {
@@ -343,8 +337,8 @@ HYPRE_SStructGridSetFEMOrdering( HYPRE_SStructGrid  grid,
       }
    }
 
-   fem_vars    = hypre_TAlloc(HYPRE_Int, fem_nvars);
-   fem_offsets = hypre_TAlloc(hypre_Index, fem_nvars);
+   fem_vars    = hypre_TAlloc(HYPRE_Int,  fem_nvars, HYPRE_MEMORY_HOST);
+   fem_offsets = hypre_TAlloc(hypre_Index,  fem_nvars, HYPRE_MEMORY_HOST);
    for (i = 0; i < fem_nvars; i++)
    {
       block = &ordering[(1+ndim)*i];
@@ -366,7 +360,7 @@ HYPRE_SStructGridSetFEMOrdering( HYPRE_SStructGrid  grid,
 
    if (clean)
    {
-      hypre_TFree(ordering);
+      hypre_TFree(ordering, HYPRE_MEMORY_HOST);
    }
 
    return hypre_error_flag;
@@ -403,10 +397,10 @@ HYPRE_SStructGridSetNeighborPart( HYPRE_SStructGrid  grid,
    /* allocate more memory if needed */
    if ((nneighbors[part] % memchunk) == 0)
    {
-      neighbors[part] = hypre_TReAlloc(neighbors[part], hypre_SStructNeighbor,
-                                       (nneighbors[part] + memchunk));
-      nbor_offsets[part] = hypre_TReAlloc(nbor_offsets[part], hypre_Index,
-                                          (nneighbors[part] + memchunk));
+      neighbors[part] = hypre_TReAlloc(neighbors[part],  hypre_SStructNeighbor, 
+                                       (nneighbors[part] + memchunk), HYPRE_MEMORY_HOST);
+      nbor_offsets[part] = hypre_TReAlloc(nbor_offsets[part],  hypre_Index, 
+                                          (nneighbors[part] + memchunk), HYPRE_MEMORY_HOST);
    }
 
    neighbor = &neighbors[part][nneighbors[part]];
@@ -496,10 +490,10 @@ HYPRE_SStructGridSetSharedPart( HYPRE_SStructGrid  grid,
    /* allocate more memory if needed */
    if ((nneighbors[part] % memchunk) == 0)
    {
-      neighbors[part] = hypre_TReAlloc(neighbors[part], hypre_SStructNeighbor,
-                                       (nneighbors[part] + memchunk));
-      nbor_offsets[part] = hypre_TReAlloc(nbor_offsets[part], hypre_Index,
-                                          (nneighbors[part] + memchunk));
+      neighbors[part] = hypre_TReAlloc(neighbors[part],  hypre_SStructNeighbor, 
+                                       (nneighbors[part] + memchunk), HYPRE_MEMORY_HOST);
+      nbor_offsets[part] = hypre_TReAlloc(nbor_offsets[part],  hypre_Index, 
+                                          (nneighbors[part] + memchunk), HYPRE_MEMORY_HOST);
    }
 
    neighbor = &neighbors[part][nneighbors[part]];
@@ -620,8 +614,8 @@ HYPRE_SStructGridAssemble( HYPRE_SStructGrid grid )
       if (hypre_StructGridNumBoxes(hypre_SStructPGridCellSGrid(pgrid)) == 0)
       {
          nneighbors[part] = 0;
-         hypre_TFree(neighbors[part]);
-         hypre_TFree(nbor_offsets[part]);
+         hypre_TFree(neighbors[part], HYPRE_MEMORY_HOST);
+         hypre_TFree(nbor_offsets[part], HYPRE_MEMORY_HOST);
       }
    }
 
@@ -709,23 +703,23 @@ HYPRE_SStructGridAssemble( HYPRE_SStructGrid grid )
    box = hypre_BoxCreate(ndim);
    tmp_boxa = hypre_BoxArrayCreate(0, ndim);
 
-   nvneighbors = hypre_TAlloc(HYPRE_Int *, nparts);
-   vneighbors  = hypre_TAlloc(hypre_SStructNeighbor **, nparts);
+   nvneighbors = hypre_TAlloc(HYPRE_Int *,  nparts, HYPRE_MEMORY_HOST);
+   vneighbors  = hypre_TAlloc(hypre_SStructNeighbor **,  nparts, HYPRE_MEMORY_HOST);
 
    for (part = 0; part < nparts; part++)
    {
       pgrid = hypre_SStructGridPGrid(grid, part);
       nvars = hypre_SStructPGridNVars(pgrid);
       vartypes = hypre_SStructPGridVarTypes(pgrid);
-      nvneighbors[part] = hypre_TAlloc(HYPRE_Int, nvars);
-      vneighbors[part]  = hypre_TAlloc(hypre_SStructNeighbor *, nvars);
+      nvneighbors[part] = hypre_TAlloc(HYPRE_Int,  nvars, HYPRE_MEMORY_HOST);
+      vneighbors[part]  = hypre_TAlloc(hypre_SStructNeighbor *,  nvars, HYPRE_MEMORY_HOST);
 
       for (var = 0; var < nvars; var++)
       {
          /* Put each new vneighbor box into a BoxArrayArray so we can remove overlap */
          nbor_boxes = hypre_BoxArrayArrayCreate(nneighbors[part], ndim);
-         fr_roots = hypre_TAlloc(hypre_Index, nneighbors[part]);
-         to_roots = hypre_TAlloc(hypre_Index, nneighbors[part]);
+         fr_roots = hypre_TAlloc(hypre_Index,  nneighbors[part], HYPRE_MEMORY_HOST);
+         to_roots = hypre_TAlloc(hypre_Index,  nneighbors[part], HYPRE_MEMORY_HOST);
          hypre_SStructVariableGetOffset((hypre_SStructVariable) vartypes[var], ndim, varoffset);
          nvneighbors[part][var] = 0;
          for (b = 0; b < nneighbors[part]; b++)
@@ -793,7 +787,7 @@ HYPRE_SStructGridAssemble( HYPRE_SStructGrid grid )
          }
 
          /* Set up vneighbors for this (part, var) */
-         vneighbors[part][var] = hypre_TAlloc(hypre_SStructNeighbor, nvneighbors[part][var]);
+         vneighbors[part][var] = hypre_TAlloc(hypre_SStructNeighbor,  nvneighbors[part][var], HYPRE_MEMORY_HOST);
          vb = 0;
          for (b = 0; b < nneighbors[part]; b++)
          {
@@ -821,8 +815,8 @@ HYPRE_SStructGridAssemble( HYPRE_SStructGrid grid )
          } /* end of vneighbor box loop */
 
          hypre_BoxArrayArrayDestroy(nbor_boxes);
-         hypre_TFree(fr_roots);
-         hypre_TFree(to_roots);
+         hypre_TFree(fr_roots, HYPRE_MEMORY_HOST);
+         hypre_TFree(to_roots, HYPRE_MEMORY_HOST);
 
       } /* end of variables loop */
    } /* end of part loop */

@@ -1,3 +1,10 @@
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 /*
    Example 11
 
@@ -255,7 +262,7 @@ int main (int argc, char *argv[])
          verbosity = 0;
 
       /* define an interpreter for the ParCSR interface */
-      interpreter = hypre_CTAlloc(mv_InterfaceInterpreter,1);
+      interpreter = hypre_CTAlloc(mv_InterfaceInterpreter, 1, HYPRE_MEMORY_HOST);
       HYPRE_ParCSRSetupInterpreter(interpreter);
       HYPRE_ParCSRSetupMatvec(&matvec_fn);
 
@@ -301,8 +308,8 @@ int main (int argc, char *argv[])
       /* clean-up */
       HYPRE_BoomerAMGDestroy(precond);
       HYPRE_LOBPCGDestroy(lobpcg_solver);
-      hypre_TFree(eigenvalues);
-      hypre_TFree(interpreter);
+      hypre_TFree(eigenvalues, HYPRE_MEMORY_HOST);
+      hypre_TFree(interpreter, HYPRE_MEMORY_HOST);
    }
 
    /* Save the solution for GLVis visualization, see vis/glvis-ex11.sh */

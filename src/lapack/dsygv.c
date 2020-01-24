@@ -1,8 +1,14 @@
-#include "../blas/hypre_blas.h"
-#include "hypre_lapack.h"
-#include "f2c.h"
+/* Copyright (c) 1992-2008 The University of Tennessee.  All rights reserved.
+ * See file COPYING in this directory for details. */
 
-/* Subroutine */ HYPRE_Int dsygv_(integer *itype, char *jobz, char *uplo, integer *
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "f2c.h"
+#include "hypre_lapack.h"
+
+/* Subroutine */ integer dsygv_(integer *itype, char *jobz, char *uplo, integer *
 	n, doublereal *a, integer *lda, doublereal *b, integer *ldb, 
 	doublereal *w, doublereal *work, integer *lwork, integer *info)
 {
@@ -118,22 +124,22 @@
     /* Local variables */
     static integer neig;
     extern logical lsame_(const char *,const char *);
-    extern /* Subroutine */ HYPRE_Int dtrmm_(const char *,const char *,const char *,const char *, 
+    extern /* Subroutine */ integer dtrmm_(const char *,const char *,const char *,const char *, 
 	    integer *, integer *, doublereal *, doublereal *, integer *, 
 	    doublereal *, integer *);
     static char trans[1];
-    extern /* Subroutine */ HYPRE_Int dtrsm_(const char *,const char *,const char *,const char *, 
+    extern /* Subroutine */ integer dtrsm_(const char *,const char *,const char *,const char *, 
 	    integer *, integer *, doublereal *, doublereal *, integer *, 
 	    doublereal *, integer *);
     static logical upper;
-    extern /* Subroutine */ HYPRE_Int dsyev_(const char *,const char *, integer *, doublereal *
+    extern /* Subroutine */ integer dsyev_(const char *,const char *, integer *, doublereal *
 	    , integer *, doublereal *, doublereal *, integer *, integer *);
     static logical wantz;
     static integer nb;
-    extern /* Subroutine */ HYPRE_Int xerbla_(const char *, integer *);
+    extern /* Subroutine */ integer xerbla_(const char *, integer *);
     extern integer ilaenv_(integer *,const char *,const char *, integer *, integer *, 
 	    integer *, integer *, ftnlen, ftnlen);
-    extern /* Subroutine */ HYPRE_Int dpotrf_(const char *, integer *, doublereal *, 
+    extern /* Subroutine */ integer dpotrf_(const char *, integer *, doublereal *, 
 	    integer *, integer *), dsygst_(integer *,const char *, integer 
 	    *, doublereal *, integer *, doublereal *, integer *, integer *);
     static integer lwkopt;
@@ -254,3 +260,6 @@
 
 } /* dsygv_ */
 
+#ifdef __cplusplus
+}
+#endif

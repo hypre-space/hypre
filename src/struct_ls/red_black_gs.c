@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -27,7 +22,7 @@ hypre_RedBlackGSCreate( MPI_Comm  comm )
 {
    hypre_RedBlackGSData *relax_data;
 
-   relax_data = hypre_CTAlloc(hypre_RedBlackGSData, 1);
+   relax_data = hypre_CTAlloc(hypre_RedBlackGSData,  1, HYPRE_MEMORY_HOST);
 
    (relax_data -> comm)       = comm;
    (relax_data -> time_index) = hypre_InitializeTiming("RedBlackGS");
@@ -53,7 +48,7 @@ hypre_RedBlackGSCreate( MPI_Comm  comm )
 HYPRE_Int
 hypre_RedBlackGSDestroy( void *relax_vdata )
 {
-	hypre_RedBlackGSData *relax_data = (hypre_RedBlackGSData *)relax_vdata;
+   hypre_RedBlackGSData *relax_data = (hypre_RedBlackGSData *)relax_vdata;
 
    if (relax_data)
    {
@@ -63,7 +58,7 @@ hypre_RedBlackGSDestroy( void *relax_vdata )
       hypre_ComputePkgDestroy(relax_data -> compute_pkg);
 
       hypre_FinalizeTiming(relax_data -> time_index);
-      hypre_TFree(relax_data);
+      hypre_TFree(relax_data, HYPRE_MEMORY_HOST);
    }
 
    return hypre_error_flag;
@@ -147,9 +142,9 @@ hypre_RedBlackGS( void               *relax_vdata,
    hypre_Box             *b_dbox;
    hypre_Box             *x_dbox;
                         
-   HYPRE_Int              Ai, Astart, Ani, Anj;
-   HYPRE_Int              bi, bstart, bni, bnj;
-   HYPRE_Int              xi, xstart, xni, xnj;
+   HYPRE_Int              Astart, Ani, Anj;
+   HYPRE_Int              bstart, bni, bnj;
+   HYPRE_Int              xstart, xni, xnj;
    HYPRE_Int              xoff0, xoff1, xoff2, xoff3, xoff4, xoff5;
                         
    HYPRE_Real            *Ap;
@@ -166,7 +161,7 @@ hypre_RedBlackGS( void               *relax_vdata,
    HYPRE_Int              offd[6];
                         
    HYPRE_Int              iter, rb, redblack, d;
-   HYPRE_Int              compute_i, i, j, ii, jj, kk;
+   HYPRE_Int              compute_i, i, j;
    HYPRE_Int              ni, nj, nk;
 
    /*----------------------------------------------------------
@@ -288,23 +283,17 @@ hypre_RedBlackGS( void               *relax_vdata,
                   }
                }
 
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ii,jj,Ai,bi,xi,kk) HYPRE_SMP_SCHEDULE
-#endif
-               for (kk = 0; kk < nk; kk++)
+               hypre_RedBlackLoopInit();
+#define DEVICE_VAR is_device_ptr(xp,bp,Ap)
+               hypre_RedBlackLoopBegin(ni,nj,nk,redblack,
+                                       Astart,Ani,Anj,Ai,
+                                       bstart,bni,bnj,bi,
+                                       xstart,xni,xnj,xi);
                {
-                  for (jj = 0; jj < nj; jj++)
-                  {
-                     ii = (kk + jj + redblack) % 2;
-                     Ai = Astart + kk*Anj*Ani + jj*Ani + ii;
-                     bi = bstart + kk*bnj*bni + jj*bni + ii;
-                     xi = xstart + kk*xnj*xni + jj*xni + ii;
-                     for (; ii < ni; ii+=2, Ai+=2, bi+=2, xi+=2)
-                     {
-                        xp[xi] = bp[bi] / Ap[Ai];
-                     }
-                  }
+                  xp[xi] = bp[bi] / Ap[Ai];
                }
+               hypre_RedBlackLoopEnd();
+#undef DEVICE_VAR
             }
          }
       }
@@ -418,78 +407,61 @@ hypre_RedBlackGS( void               *relax_vdata,
                switch(stencil_size)
                {
                   case 7:
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ii,jj,Ai,bi,xi,kk) HYPRE_SMP_SCHEDULE
-#endif
-                     for (kk = 0; kk < nk; kk++)
+                     hypre_RedBlackLoopInit();
+#define DEVICE_VAR is_device_ptr(xp,bp,Ap0,Ap1,Ap2,Ap3,Ap4,Ap5,Ap)
+                     hypre_RedBlackLoopBegin(ni,nj,nk,redblack,
+                                             Astart,Ani,Anj,Ai,
+                                             bstart,bni,bnj,bi,
+                                             xstart,xni,xnj,xi);
                      {
-                        for (jj = 0; jj < nj; jj++)
-                        {
-                           ii = (kk + jj + redblack) % 2;
-                           Ai = Astart + kk*Anj*Ani + jj*Ani + ii;
-                           bi = bstart + kk*bnj*bni + jj*bni + ii;
-                           xi = xstart + kk*xnj*xni + jj*xni + ii;
-                           for (; ii < ni; ii+=2, Ai+=2, bi+=2, xi+=2)
-                           {
-                              xp[xi] =
-                                 (bp[bi] - 
-                                  Ap0[Ai] * xp[xi + xoff0] -
-                                  Ap1[Ai] * xp[xi + xoff1] -
-                                  Ap2[Ai] * xp[xi + xoff2] -
-                                  Ap3[Ai] * xp[xi + xoff3] -
-                                  Ap4[Ai] * xp[xi + xoff4] -
-                                  Ap5[Ai] * xp[xi + xoff5]) / Ap[Ai];
-                           }
-                        }
+                        xp[xi] =
+                           (bp[bi] - 
+                            Ap0[Ai] * xp[xi + xoff0] -
+                            Ap1[Ai] * xp[xi + xoff1] -
+                            Ap2[Ai] * xp[xi + xoff2] -
+                            Ap3[Ai] * xp[xi + xoff3] -
+                            Ap4[Ai] * xp[xi + xoff4] -
+                            Ap5[Ai] * xp[xi + xoff5]) / Ap[Ai];
                      }
+                     hypre_RedBlackLoopEnd();
+#undef DEVICE_VAR
                      break;
 
                   case 5:
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ii,jj,Ai,bi,xi,kk) HYPRE_SMP_SCHEDULE
-#endif
-                     for (kk = 0; kk < nk; kk++)
+                     hypre_RedBlackLoopInit();
+#define DEVICE_VAR is_device_ptr(xp,bp,Ap0,Ap1,Ap2,Ap3,Ap)
+                     hypre_RedBlackLoopBegin(ni,nj,nk,redblack,
+                                             Astart,Ani,Anj,Ai,
+                                             bstart,bni,bnj,bi,
+                                             xstart,xni,xnj,xi);
                      {
-                        for (jj = 0; jj < nj; jj++)
-                        {
-                           ii = (kk + jj + redblack) % 2;
-                           Ai = Astart + kk*Anj*Ani + jj*Ani + ii;
-                           bi = bstart + kk*bnj*bni + jj*bni + ii;
-                           xi = xstart + kk*xnj*xni + jj*xni + ii;
-                           for (; ii < ni; ii+=2, Ai+=2, bi+=2, xi+=2)
-                           {
-                              xp[xi] =
-                                 (bp[bi] - 
-                                  Ap0[Ai] * xp[xi + xoff0] -
-                                  Ap1[Ai] * xp[xi + xoff1] -
-                                  Ap2[Ai] * xp[xi + xoff2] -
-                                  Ap3[Ai] * xp[xi + xoff3]) / Ap[Ai];
-                           }
-                        }
+                        xp[xi] =
+                           (bp[bi] - 
+                            Ap0[Ai] * xp[xi + xoff0] -
+                            Ap1[Ai] * xp[xi + xoff1] -
+                            Ap2[Ai] * xp[xi + xoff2] -
+                            Ap3[Ai] * xp[xi + xoff3]) / Ap[Ai];
                      }
+                     hypre_RedBlackLoopEnd();
+#undef DEVICE_VAR
                      break;
 
                   case 3:
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ii,jj,Ai,bi,xi,kk) HYPRE_SMP_SCHEDULE
-#endif
-                     for (kk = 0; kk < nk; kk++)
+                     hypre_RedBlackLoopInit();
+#define DEVICE_VAR is_device_ptr(xp,bp,Ap0,Ap1,Ap)
+                     hypre_RedBlackLoopBegin(ni,nj,nk,redblack,
+                                             Astart,Ani,Anj,Ai,
+                                             bstart,bni,bnj,bi,
+                                             xstart,xni,xnj,xi);
                      {
-                        for (jj = 0; jj < nj; jj++)
-                        {
-                           ii = (kk + jj + redblack) % 2;
-                           Ai = Astart + kk*Anj*Ani + jj*Ani + ii;
-                           bi = bstart + kk*bnj*bni + jj*bni + ii;
-                           xi = xstart + kk*xnj*xni + jj*xni + ii;
-                           for (; ii < ni; ii+=2, Ai+=2, bi+=2, xi+=2)
-                           {
-                              xp[xi] =
-                                 (bp[bi] - 
-                                  Ap0[Ai] * xp[xi + xoff0] -
-                                  Ap1[Ai] * xp[xi + xoff1]) / Ap[Ai];
-                           }
-                        }
+                        xp[xi] =
+                           (bp[bi] - 
+                            Ap0[Ai] * xp[xi + xoff0] -
+                            Ap1[Ai] * xp[xi + xoff1]) / Ap[Ai];
                      }
+                     hypre_RedBlackLoopEnd();
+#undef DEVICE_VAR
+
                      break;
                }
             }

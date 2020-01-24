@@ -1,7 +1,12 @@
+/* Copyright (c) 1992-2008 The University of Tennessee.  All rights reserved.
+ * See file COPYING in this directory for details. */
 
-#include "hypre_lapack.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "f2c.h"
-#include "math.h"
+#include "hypre_lapack.h"
 
 doublereal dlapy2_(doublereal *x, doublereal *y)
 {
@@ -28,7 +33,7 @@ doublereal dlapy2_(doublereal *x, doublereal *y)
     /* System generated locals */
     doublereal ret_val, d__1;
     /* Builtin functions */
-    /*HYPRE_Real sqrt(doublereal);*/
+    /*doublereal sqrt(doublereal);*/
     /* Local variables */
     static doublereal xabs, yabs, w, z__;
 
@@ -51,3 +56,6 @@ doublereal dlapy2_(doublereal *x, doublereal *y)
 
 } /* dlapy2_ */
 
+#ifdef __cplusplus
+}
+#endif

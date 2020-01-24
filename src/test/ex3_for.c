@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /*
    Example 3
@@ -262,7 +257,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       /* Indicate that the matrix coefficients are ready to be set */
       HYPRE_StructMatrixInitialize(&A);
 
-      values = (HYPRE_Real*) calloc(nvalues, sizeof(HYPRE_Real));
+      values = hypre_CTAlloc(HYPRE_Real, nvalues, HYPRE_MEMORY_HOST);
 
       for (j = 0; j < nentries; j++)
          stencil_indices[j] = j;
@@ -287,7 +282,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       /* Indicate that the matrix coefficients are ready to be set */
       HYPRE_StructMatrixInitialize(A);
 
-      values = calloc(nvalues, sizeof(HYPRE_Real));
+      values = hypre_CTAlloc(HYPRE_Real, nvalues, HYPRE_MEMORY_HOST);
 
       for (j = 0; j < nentries; j++)
          stencil_indices[j] = j;
@@ -320,7 +315,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       HYPRE_Real *values;
       HYPRE_Int stencil_indices[1];
 
-      values = (HYPRE_Real*) calloc(nvalues, sizeof(HYPRE_Real));
+      values = hypre_CTAlloc(HYPRE_Real, nvalues, HYPRE_MEMORY_HOST);
       for (j = 0; j < nvalues; j++)
             values[j] = 0.0;
 
@@ -421,7 +416,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       HYPRE_Int    nvalues = n*n;
       HYPRE_Real *values;
 
-      values = (HYPRE_Real*) calloc(nvalues, sizeof(HYPRE_Real));
+      values = hypre_CTAlloc(HYPRE_Real, nvalues, HYPRE_MEMORY_HOST);
 
       /* Create an empty vector object */
 #ifdef HYPRE_FORTRAN

@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include <string.h>
 
@@ -129,7 +124,7 @@ int MLI_Solver_ParaSails::setup(MLI_Matrix *Amat_in)
     * set up other auxiliary vectors
     *-----------------------------------------------------------------*/
 
-   funcPtr = (MLI_Function *) malloc( sizeof( MLI_Function ) );
+   funcPtr = hypre_TAlloc( MLI_Function , 1, HYPRE_MEMORY_HOST);
    MLI_Utils_HypreParVectorGetDestroyFunc(funcPtr);
    paramString = new char[20];
    strcpy( paramString, "HYPRE_ParVector" );
@@ -306,7 +301,7 @@ int MLI_Solver_ParaSails::applyParaSails(MLI_Vector *f_in, MLI_Vector *u_in)
    f           = (hypre_ParVector *) f_in->getVector();
    global_size = hypre_ParVectorGlobalSize(f);
    partition1  = hypre_ParVectorPartitioning(f);
-   partition2  = hypre_CTAlloc( int, num_procs+1 );
+   partition2  = hypre_CTAlloc( int, num_procs+1 , HYPRE_MEMORY_HOST);
    for ( i = 0; i <= num_procs; i++ ) partition2[i] = partition1[i];
    Vtemp = hypre_ParVectorCreate(comm, global_size, partition2);
    hypre_ParVectorInitialize(Vtemp);
@@ -387,7 +382,7 @@ int MLI_Solver_ParaSails::applyParaSailsTrans(MLI_Vector *f_in,
    f           = (hypre_ParVector *) f_in->getVector();
    global_size = hypre_ParVectorGlobalSize(f);
    partition1  = hypre_ParVectorPartitioning(f);
-   partition2  = hypre_CTAlloc( int, num_procs+1 );
+   partition2  = hypre_CTAlloc( int, num_procs+1 , HYPRE_MEMORY_HOST);
    for ( i = 0; i <= num_procs; i++ ) partition2[i] = partition1[i];
    Vtemp = hypre_ParVectorCreate(comm, global_size, partition2);
    Vtemp_local = hypre_ParVectorLocalVector(Vtemp);

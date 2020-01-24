@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_struct_ls.h"
 #include "pfmg.h"
@@ -21,7 +16,7 @@ hypre_PFMGCreate( MPI_Comm  comm )
 {
    hypre_PFMGData *pfmg_data;
 
-   pfmg_data = hypre_CTAlloc(hypre_PFMGData, 1);
+   pfmg_data = hypre_CTAlloc(hypre_PFMGData,  1, HYPRE_MEMORY_HOST);
 
    (pfmg_data -> comm)       = comm;
    (pfmg_data -> time_index) = hypre_InitializeTiming("PFMG");
@@ -46,8 +41,10 @@ hypre_PFMGCreate( MPI_Comm  comm )
    (pfmg_data -> print_level)      = 0;
 
    /* initialize */
-   (pfmg_data -> num_levels) = -1;
-
+   (pfmg_data -> num_levels)  = -1;
+#if defined(HYPRE_USING_CUDA)
+   (pfmg_data -> devicelevel) = 200;
+#endif
    return (void *) pfmg_data;
 }
 
@@ -57,7 +54,7 @@ hypre_PFMGCreate( MPI_Comm  comm )
 HYPRE_Int
 hypre_PFMGDestroy( void *pfmg_vdata )
 {
-	hypre_PFMGData *pfmg_data = (hypre_PFMGData *)pfmg_vdata;
+   hypre_PFMGData *pfmg_data = (hypre_PFMGData *)pfmg_vdata;
 
    HYPRE_Int l;
    
@@ -67,8 +64,8 @@ hypre_PFMGDestroy( void *pfmg_vdata )
    {
       if ((pfmg_data -> logging) > 0)
       {
-         hypre_TFree(pfmg_data -> norms);
-         hypre_TFree(pfmg_data -> rel_norms);
+         hypre_TFree(pfmg_data -> norms, HYPRE_MEMORY_HOST);
+         hypre_TFree(pfmg_data -> rel_norms, HYPRE_MEMORY_HOST);
       }
 
       if ((pfmg_data -> num_levels) > -1)
@@ -86,10 +83,10 @@ hypre_PFMGDestroy( void *pfmg_vdata )
             hypre_SemiRestrictDestroy(pfmg_data -> restrict_data_l[l]);
             hypre_SemiInterpDestroy(pfmg_data -> interp_data_l[l]);
          }
-         hypre_TFree(pfmg_data -> relax_data_l);
-         hypre_TFree(pfmg_data -> matvec_data_l);
-         hypre_TFree(pfmg_data -> restrict_data_l);
-         hypre_TFree(pfmg_data -> interp_data_l);
+         hypre_TFree(pfmg_data -> relax_data_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(pfmg_data -> matvec_data_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(pfmg_data -> restrict_data_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(pfmg_data -> interp_data_l, HYPRE_MEMORY_HOST);
  
          hypre_StructVectorDestroy(pfmg_data -> tx_l[0]);
          hypre_StructGridDestroy(pfmg_data -> grid_l[0]);
@@ -106,21 +103,24 @@ hypre_PFMGDestroy( void *pfmg_vdata )
             hypre_StructVectorDestroy(pfmg_data -> x_l[l+1]);
             hypre_StructVectorDestroy(pfmg_data -> tx_l[l+1]);
          }
-         hypre_SharedTFree(pfmg_data -> data);
-         hypre_TFree(pfmg_data -> cdir_l);
-         hypre_TFree(pfmg_data -> active_l);
-         hypre_TFree(pfmg_data -> grid_l);
-         hypre_TFree(pfmg_data -> P_grid_l);
-         hypre_TFree(pfmg_data -> A_l);
-         hypre_TFree(pfmg_data -> P_l);
-         hypre_TFree(pfmg_data -> RT_l);
-         hypre_TFree(pfmg_data -> b_l);
-         hypre_TFree(pfmg_data -> x_l);
-         hypre_TFree(pfmg_data -> tx_l);
+
+	 hypre_TFree(pfmg_data -> data, HYPRE_MEMORY_DEVICE);
+	 hypre_TFree(pfmg_data -> data_const, HYPRE_MEMORY_HOST);
+	 
+          hypre_TFree(pfmg_data -> cdir_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(pfmg_data -> active_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(pfmg_data -> grid_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(pfmg_data -> P_grid_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(pfmg_data -> A_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(pfmg_data -> P_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(pfmg_data -> RT_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(pfmg_data -> b_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(pfmg_data -> x_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(pfmg_data -> tx_l, HYPRE_MEMORY_HOST);
       }
  
       hypre_FinalizeTiming(pfmg_data -> time_index);
-      hypre_TFree(pfmg_data);
+      hypre_TFree(pfmg_data, HYPRE_MEMORY_HOST);
    }
 
    HYPRE_ANNOTATION_END("PFMG.destroy");
@@ -550,4 +550,15 @@ hypre_PFMGGetFinalRelativeResidualNorm( void   *pfmg_vdata,
    return hypre_error_flag;
 }
 
-
+#if defined(HYPRE_USING_CUDA)
+HYPRE_Int
+hypre_PFMGSetDeviceLevel( void *pfmg_vdata,
+			  HYPRE_Int   device_level  )
+{
+   hypre_PFMGData *pfmg_data = (hypre_PFMGData *)pfmg_vdata;
+ 
+   (pfmg_data -> devicelevel) = device_level;
+ 
+   return hypre_error_flag;
+}
+#endif

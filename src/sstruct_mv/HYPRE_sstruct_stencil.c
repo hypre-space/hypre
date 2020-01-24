@@ -1,15 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -31,9 +25,9 @@ HYPRE_SStructStencilCreate( HYPRE_Int             ndim,
    hypre_StructStencil   *sstencil;
    HYPRE_Int             *vars;
 
-   stencil = hypre_TAlloc(hypre_SStructStencil, 1);
+   stencil = hypre_TAlloc(hypre_SStructStencil,  1, HYPRE_MEMORY_HOST);
    HYPRE_StructStencilCreate(ndim, size, &sstencil);
-   vars = hypre_CTAlloc(HYPRE_Int, hypre_StructStencilSize(sstencil));
+   vars = hypre_CTAlloc(HYPRE_Int,  hypre_StructStencilSize(sstencil), HYPRE_MEMORY_HOST);
 
    hypre_SStructStencilSStencil(stencil) = sstencil;
    hypre_SStructStencilVars(stencil)     = vars;
@@ -56,8 +50,8 @@ HYPRE_SStructStencilDestroy( HYPRE_SStructStencil stencil )
       if (hypre_SStructStencilRefCount(stencil) == 0)
       {
          HYPRE_StructStencilDestroy(hypre_SStructStencilSStencil(stencil));
-         hypre_TFree(hypre_SStructStencilVars(stencil));
-         hypre_TFree(stencil);
+         hypre_TFree(hypre_SStructStencilVars(stencil), HYPRE_MEMORY_HOST);
+         hypre_TFree(stencil, HYPRE_MEMORY_HOST);
       }
    }
 

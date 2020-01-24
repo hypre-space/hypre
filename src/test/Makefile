@@ -1,18 +1,14 @@
-#BHEADER**********************************************************************
-# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
-# Produced at the Lawrence Livermore National Laboratory.
-# This file is part of HYPRE.  See file COPYRIGHT for details.
+# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
-# HYPRE is free software; you can redistribute it and/or modify it under the
-# terms of the GNU Lesser General Public License (as published by the Free
-# Software Foundation) version 2.1 dated February 1999.
-#
-# $Revision$
-#EHEADER**********************************************************************
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
+default:all
 
 include ../config/Makefile.config
 
 CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
+
 CDEFS = -DHYPRE_TIMING -DHYPRE_FORTRAN
 CXXDEFS = -DNOFEI -DHYPRE_TIMING -DMPICH_SKIP_MPICXX
 
@@ -20,6 +16,8 @@ C_COMPILE_FLAGS = \
  -I$(srcdir)\
  -I$(srcdir)/..\
  -I${HYPRE_BUILD_DIR}/include\
+ $(SUPERLU_INCLUDE)\
+ $(DSUPERLU_INCLUDE)\
  ${CINCLUDES}\
  ${CDEFS}
 
@@ -28,6 +26,8 @@ CXX_COMPILE_FLAGS = \
  -I$(srcdir)/..\
  -I$(srcdir)/../FEI_mv/fei-base\
  -I${HYPRE_BUILD_DIR}/include\
+ $(SUPERLU_INCLUDE)\
+ $(DSUPERLU_INCLUDE)\
  ${CINCLUDES}\
  ${CXXDEFS}
 
@@ -42,9 +42,17 @@ LAPACKLIBFLAGS = ${LAPACKLIBDIRS} ${LAPACKLIBS}
 BLASLIBFLAGS = ${BLASLIBDIRS} ${BLASLIBS}
 LIBFLAGS = ${LDFLAGS} ${LIBS}
 
+ifeq (${LINK_CC}, nvcc)
+   XLINK = -Xlinker=-rpath,${HYPRE_BUILD_DIR}/lib
+else
+   XLINK = -Wl,-rpath,${HYPRE_BUILD_DIR}/lib
+endif
+
 LFLAGS =\
- -L${HYPRE_BUILD_DIR}/lib\
- -lHYPRE\
+ -L${HYPRE_BUILD_DIR}/lib -lHYPRE\
+ ${XLINK}\
+ ${DSUPERLU_LIBS}\
+ ${SUPERLU_LIBS}\
  ${MPILIBFLAGS}\
  ${LAPACKLIBFLAGS}\
  ${BLASLIBFLAGS}\
@@ -78,7 +86,6 @@ HYPRE_DRIVERS =\
  zboxloop.c
 
 HYPRE_DRIVERS_CXX =\
- fei.cxx\
  cxx_ij.cxx\
  cxx_sstruct.cxx\
  cxx_struct.cxx
@@ -101,6 +108,7 @@ HYPRE_DRIVER_F77_EXECS=${HYPRE_DRIVERS_F77:.f=}
 HYPRE_DRIVER_CXX_EXECS=${HYPRE_DRIVERS_CXX:.cxx=}
 
 all: ${HYPRE_DRIVER_EXECS} hypre_drive
+
 all77: ${HYPRE_DRIVER_F77_EXECS}
 
 all++: ${HYPRE_DRIVER_CXX_EXECS}
@@ -171,7 +179,19 @@ ij_mv: ij_mv.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $@.o ${LFLAGS}
 
+ij_device: ij_device.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $@.o ${LFLAGS}
+
+ij_mm: ij_mm.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $@.o ${LFLAGS}
+
 zboxloop: zboxloop.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $@.o ${LFLAGS}
+
+struct_newboxloop: struct_newboxloop.o $(KOKKOS_LINK_DEPENDS)
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $@.o ${LFLAGS}
 

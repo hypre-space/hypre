@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_Euclid.h"
 /* #include "Euclid_dh.h" */
@@ -75,7 +70,7 @@ void Euclid_dhCreate(Euclid_dh *ctxOUT)
   strcpy(ctx->krylovMethod, "bicgstab");
   ctx->maxIts = 200;
   ctx->rtol = 1e-5;
-  ctx->atol = 1e-50;
+  ctx->atol = _ATOL_;
   ctx->its = 0;
   ctx->itsTotal = 0;
   ctx->setupCount = 0;
@@ -169,7 +164,9 @@ void Euclid_dhSetup(Euclid_dh ctx)
   if (ctx->A == NULL) {
     SET_V_ERROR("must set ctx->A before calling init");
   }
+
   EuclidGetDimensions(ctx->A, &beg_row, &m, &n); CHECK_V_ERROR;
+  
   ctx->m = m;
   ctx->n = n;
 
@@ -410,7 +407,7 @@ void compute_rho_private(Euclid_dh ctx)
       bufGlobal[1] = bufLocal[1];
       bufGlobal[2] = bufLocal[2];
     } else {
-      hypre_MPI_Reduce(bufLocal, bufGlobal, 3, hypre_MPI_DOUBLE, hypre_MPI_SUM, 0, comm_dh);
+      hypre_MPI_Reduce(bufLocal, bufGlobal, 3, hypre_MPI_REAL, hypre_MPI_SUM, 0, comm_dh);
     }
 
     if (myid_dh == 0) {
@@ -887,8 +884,8 @@ void reduce_timings_private(Euclid_dh ctx)
   if (np_dh > 1) {
     HYPRE_Real bufOUT[TIMING_BINS];
 
-    memcpy(bufOUT, ctx->timing, TIMING_BINS*sizeof(HYPRE_Real));
-    hypre_MPI_Reduce(bufOUT, ctx->timing, TIMING_BINS, hypre_MPI_DOUBLE, hypre_MPI_MAX, 0, comm_dh);
+    hypre_TMemcpy(bufOUT,  ctx->timing, HYPRE_Real, TIMING_BINS, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+    hypre_MPI_Reduce(bufOUT, ctx->timing, TIMING_BINS, hypre_MPI_REAL, hypre_MPI_MAX, 0, comm_dh);
   }
 
   ctx->timingsWereReduced = true;

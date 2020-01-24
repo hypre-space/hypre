@@ -1,17 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /**************************************************************************
   Module:  LLNL_FEI_LSCore.h
@@ -22,10 +14,10 @@
 #define _LLNL_FEI_LSCORE_H_
 
 //New FEI 2.23.02
-#include "FEI_mv/fei-base/fei_defs.h"
-#include "FEI_mv/fei-base/fei_Data.hpp"
-#include "FEI_mv/fei-base/fei_Lookup.hpp"
-#include "FEI_mv/fei-base/fei_LinearSystemCore.hpp"
+#include "fei_defs.h"
+#include "fei_Data.hpp"
+#include "fei_Lookup.hpp"
+#include "fei_LinearSystemCore.hpp"
 #include "cfei_hypre.h"
 
 typedef enum {

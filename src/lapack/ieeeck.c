@@ -1,6 +1,12 @@
+/* Copyright (c) 1992-2008 The University of Tennessee.  All rights reserved.
+ * See file COPYING in this directory for details. */
 
-#include "hypre_lapack.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "f2c.h"
+#include "hypre_lapack.h"
 
 integer ieeeck_(integer *ispec, real *zero, real *one)
 {
@@ -149,3 +155,6 @@ integer ieeeck_(integer *ispec, real *zero, real *one)
     return ret_val;
 } /* ieeeck_ */
 
+#ifdef __cplusplus
+}
+#endif

@@ -1,15 +1,7 @@
-#BHEADER**********************************************************************
-# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
-# Produced at the Lawrence Livermore National Laboratory.
-# This file is part of HYPRE.  See file COPYRIGHT for details.
+# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
-# HYPRE is free software; you can redistribute it and/or modify it under the
-# terms of the GNU Lesser General Public License (as published by the Free
-# Software Foundation) version 2.1 dated February 1999.
-#
-# $Revision$
-#EHEADER**********************************************************************
-
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 include ../config/Makefile.config
 
@@ -18,6 +10,8 @@ CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
 C_COMPILE_FLAGS = \
  -I..\
  -I$(srcdir)/..\
+ -I$(srcdir)/../blas\
+ -I$(srcdir)/../lapack\
  -I$(srcdir)/../multivector\
  -I$(srcdir)/../utilities\
  ${CINCLUDES}
@@ -28,6 +22,7 @@ HEADERS =\
  bicgstab.h\
  cgnr.h\
  gmres.h\
+ cogmres.h\
  flexgmres.h\
  lgmres.h\
  pcg.h\
@@ -39,11 +34,13 @@ FILES =\
  bicgstab.c\
  cgnr.c\
  gmres.c\
+ cogmres.c\
  flexgmres.c\
  lgmres.c\
  HYPRE_bicgstab.c\
  HYPRE_cgnr.c\
  HYPRE_gmres.c\
+ HYPRE_cogmres.c\
  HYPRE_lgmres.c\
  HYPRE_flexgmres.c\
  HYPRE_pcg.c\
@@ -53,7 +50,7 @@ FILES =\
 
 OBJS = ${FILES:.c=.o}
 
-SONAME = libHYPRE_krylov-${HYPRE_RELEASE_VERSION}.so
+SONAME = libHYPRE_krylov-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
 ##################################################################
 # Targets
@@ -86,7 +83,7 @@ libHYPRE_krylov.a: ${OBJS}
 	${AR} $@ ${OBJS}
 	${RANLIB} $@
 
-libHYPRE_krylov.so: ${OBJS}
+libHYPRE_krylov.so libHYPRE_krylov.dylib: ${OBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
 	ln -s ${SONAME} $@

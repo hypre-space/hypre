@@ -1,17 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -24,20 +16,16 @@
 #include "Common.h"
 #include "Matrix.h"
 #include "ParaSails.h"
-
-HYPRE_Real hypre_F90_NAME_BLAS(ddot, DDOT)(HYPRE_Int *, HYPRE_Real *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *);
-HYPRE_Int hypre_F90_NAME_BLAS(dcopy, DCOPY)(HYPRE_Int *, HYPRE_Real *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *);
-HYPRE_Int hypre_F90_NAME_BLAS(dscal, DSCAL)(HYPRE_Int *, HYPRE_Real *, HYPRE_Real *, HYPRE_Int *);
-HYPRE_Int hypre_F90_NAME_BLAS(daxpy, DAXPY)(HYPRE_Int *, HYPRE_Real *, HYPRE_Real *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *);
+#include "_hypre_blas.h"
 
 static HYPRE_Real InnerProd(HYPRE_Int n, HYPRE_Real *x, HYPRE_Real *y, MPI_Comm comm)
 {
     HYPRE_Real local_result, result;
 
     HYPRE_Int one = 1;
-    local_result = hypre_F90_NAME_BLAS(ddot, DDOT)(&n, x, &one, y, &one);
+    local_result = hypre_ddot(&n, x, &one, y, &one);
 
-    hypre_MPI_Allreduce(&local_result, &result, 1, hypre_MPI_DOUBLE, hypre_MPI_SUM, comm);
+    hypre_MPI_Allreduce(&local_result, &result, 1, hypre_MPI_REAL, hypre_MPI_SUM, comm);
 
     return result;
 }
@@ -97,9 +85,9 @@ void PCG_ParaSails(Matrix *mat, ParaSails *ps, HYPRE_Real *b, HYPRE_Real *x,
       return;
    }
 
-   p = (HYPRE_Real *) malloc(n * sizeof(HYPRE_Real));
-   s = (HYPRE_Real *) malloc(n * sizeof(HYPRE_Real));
-   r = (HYPRE_Real *) malloc(n * sizeof(HYPRE_Real));
+   p = hypre_TAlloc(HYPRE_Real, n , HYPRE_MEMORY_HOST);
+   s = hypre_TAlloc(HYPRE_Real, n , HYPRE_MEMORY_HOST);
+   r = hypre_TAlloc(HYPRE_Real, n , HYPRE_MEMORY_HOST);
 
    /* r = b - Ax */
    MatrixMatvec(mat, x, r);  /* r = Ax */

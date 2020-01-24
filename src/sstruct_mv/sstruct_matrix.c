@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -64,7 +59,7 @@ hypre_SStructPMatrixCreate( MPI_Comm               comm,
    HYPRE_Int              vi, vj;
    HYPRE_Int              i, j, k;
 
-   pmatrix = hypre_TAlloc(hypre_SStructPMatrix, 1);
+   pmatrix = hypre_TAlloc(hypre_SStructPMatrix,  1, HYPRE_MEMORY_HOST);
 
    hypre_SStructPMatrixComm(pmatrix)     = comm;
    hypre_SStructPMatrixPGrid(pmatrix)    = pgrid;
@@ -73,14 +68,14 @@ hypre_SStructPMatrixCreate( MPI_Comm               comm,
    hypre_SStructPMatrixNVars(pmatrix) = nvars;
 
    /* create sstencils */
-   smaps     = hypre_TAlloc(HYPRE_Int *, nvars);
-   sstencils = hypre_TAlloc(hypre_StructStencil **, nvars);
-   new_sizes  = hypre_TAlloc(HYPRE_Int, nvars);
-   new_shapes = hypre_TAlloc(hypre_Index *, nvars);
+   smaps     = hypre_TAlloc(HYPRE_Int *,  nvars, HYPRE_MEMORY_HOST);
+   sstencils = hypre_TAlloc(hypre_StructStencil **,  nvars, HYPRE_MEMORY_HOST);
+   new_sizes  = hypre_TAlloc(HYPRE_Int,  nvars, HYPRE_MEMORY_HOST);
+   new_shapes = hypre_TAlloc(hypre_Index *,  nvars, HYPRE_MEMORY_HOST);
    size = 0;
    for (vi = 0; vi < nvars; vi++)
    {
-      sstencils[vi] = hypre_TAlloc(hypre_StructStencil *, nvars);
+      sstencils[vi] = hypre_TAlloc(hypre_StructStencil *,  nvars, HYPRE_MEMORY_HOST);
       for (vj = 0; vj < nvars; vj++)
       {
          sstencils[vi][vj] = NULL;
@@ -92,7 +87,7 @@ hypre_SStructPMatrixCreate( MPI_Comm               comm,
       sstencil_shape = hypre_StructStencilShape(sstencil);
       sstencil_size  = hypre_StructStencilSize(sstencil);
 
-      smaps[vi] = hypre_TAlloc(HYPRE_Int, sstencil_size);
+      smaps[vi] = hypre_TAlloc(HYPRE_Int,  sstencil_size, HYPRE_MEMORY_HOST);
       for (i = 0; i < sstencil_size; i++)
       {
          j = vars[i];
@@ -102,7 +97,7 @@ hypre_SStructPMatrixCreate( MPI_Comm               comm,
       {
          if (new_sizes[vj])
          {
-            new_shapes[vj] = hypre_TAlloc(hypre_Index, new_sizes[vj]);
+            new_shapes[vj] = hypre_TAlloc(hypre_Index,  new_sizes[vj], HYPRE_MEMORY_HOST);
             new_sizes[vj] = 0;
          }
       }
@@ -127,14 +122,14 @@ hypre_SStructPMatrixCreate( MPI_Comm               comm,
    }
    hypre_SStructPMatrixSMaps(pmatrix)     = smaps;
    hypre_SStructPMatrixSStencils(pmatrix) = sstencils;
-   hypre_TFree(new_sizes);
-   hypre_TFree(new_shapes);
+   hypre_TFree(new_sizes, HYPRE_MEMORY_HOST);
+   hypre_TFree(new_shapes, HYPRE_MEMORY_HOST);
 
    /* create smatrices */
-   smatrices = hypre_TAlloc(hypre_StructMatrix **, nvars);
+   smatrices = hypre_TAlloc(hypre_StructMatrix **,  nvars, HYPRE_MEMORY_HOST);
    for (vi = 0; vi < nvars; vi++)
    {
-      smatrices[vi] = hypre_TAlloc(hypre_StructMatrix *, nvars);
+      smatrices[vi] = hypre_TAlloc(hypre_StructMatrix *,  nvars, HYPRE_MEMORY_HOST);
       for (vj = 0; vj < nvars; vj++)
       {
          smatrices[vi][vj] = NULL;
@@ -149,10 +144,10 @@ hypre_SStructPMatrixCreate( MPI_Comm               comm,
    hypre_SStructPMatrixSMatrices(pmatrix) = smatrices;
 
    /* create symmetric */
-   symmetric = hypre_TAlloc(HYPRE_Int *, nvars);
+   symmetric = hypre_TAlloc(HYPRE_Int *,  nvars, HYPRE_MEMORY_HOST);
    for (vi = 0; vi < nvars; vi++)
    {
-      symmetric[vi] = hypre_TAlloc(HYPRE_Int, nvars);
+      symmetric[vi] = hypre_TAlloc(HYPRE_Int,  nvars, HYPRE_MEMORY_HOST);
       for (vj = 0; vj < nvars; vj++)
       {
          symmetric[vi][vj] = 0;
@@ -161,7 +156,7 @@ hypre_SStructPMatrixCreate( MPI_Comm               comm,
    hypre_SStructPMatrixSymmetric(pmatrix) = symmetric;
 
    hypre_SStructPMatrixSEntriesSize(pmatrix) = size;
-   hypre_SStructPMatrixSEntries(pmatrix) = hypre_TAlloc(HYPRE_Int, size);
+   hypre_SStructPMatrixSEntries(pmatrix) = hypre_TAlloc(HYPRE_Int,  size, HYPRE_MEMORY_HOST);
 
    hypre_SStructPMatrixRefCount(pmatrix) = 1;
 
@@ -173,7 +168,7 @@ hypre_SStructPMatrixCreate( MPI_Comm               comm,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_SStructPMatrixDestroy( hypre_SStructPMatrix *pmatrix )
 {
    hypre_SStructStencil  **stencils;
@@ -198,23 +193,23 @@ hypre_SStructPMatrixDestroy( hypre_SStructPMatrix *pmatrix )
          for (vi = 0; vi < nvars; vi++)
          {
             HYPRE_SStructStencilDestroy(stencils[vi]);
-            hypre_TFree(smaps[vi]);
+            hypre_TFree(smaps[vi], HYPRE_MEMORY_HOST);
             for (vj = 0; vj < nvars; vj++)
             {
                hypre_StructStencilDestroy(sstencils[vi][vj]);
                hypre_StructMatrixDestroy(smatrices[vi][vj]);
             }
-            hypre_TFree(sstencils[vi]);
-            hypre_TFree(smatrices[vi]);
-            hypre_TFree(symmetric[vi]);
+            hypre_TFree(sstencils[vi], HYPRE_MEMORY_HOST);
+            hypre_TFree(smatrices[vi], HYPRE_MEMORY_HOST);
+            hypre_TFree(symmetric[vi], HYPRE_MEMORY_HOST);
          }
-         hypre_TFree(stencils);
-         hypre_TFree(smaps);
-         hypre_TFree(sstencils);
-         hypre_TFree(smatrices);
-         hypre_TFree(symmetric);
-         hypre_TFree(hypre_SStructPMatrixSEntries(pmatrix));
-         hypre_TFree(pmatrix);
+         hypre_TFree(stencils, HYPRE_MEMORY_HOST);
+         hypre_TFree(smaps, HYPRE_MEMORY_HOST);
+         hypre_TFree(sstencils, HYPRE_MEMORY_HOST);
+         hypre_TFree(smatrices, HYPRE_MEMORY_HOST);
+         hypre_TFree(symmetric, HYPRE_MEMORY_HOST);
+         hypre_TFree(hypre_SStructPMatrixSEntries(pmatrix), HYPRE_MEMORY_HOST);
+         hypre_TFree(pmatrix, HYPRE_MEMORY_HOST);
       }
    }
 
@@ -223,7 +218,7 @@ hypre_SStructPMatrixDestroy( hypre_SStructPMatrix *pmatrix )
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
-HYPRE_Int 
+HYPRE_Int
 hypre_SStructPMatrixInitialize( hypre_SStructPMatrix *pmatrix )
 {
    HYPRE_Int             nvars        = hypre_SStructPMatrixNVars(pmatrix);
@@ -269,7 +264,7 @@ hypre_SStructPMatrixInitialize( hypre_SStructPMatrix *pmatrix )
  * (action < 0): get values
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_SStructPMatrixSetValues( hypre_SStructPMatrix *pmatrix,
                                hypre_Index           index,
                                HYPRE_Int             var,
@@ -364,13 +359,13 @@ hypre_SStructPMatrixSetValues( hypre_SStructPMatrix *pmatrix,
  * (action =-2): get values and zero out
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_SStructPMatrixSetBoxValues( hypre_SStructPMatrix *pmatrix,
-                                  hypre_Index           ilower,
-                                  hypre_Index           iupper,
+                                  hypre_Box            *set_box,
                                   HYPRE_Int             var,
                                   HYPRE_Int             nentries,
                                   HYPRE_Int            *entries,
+                                  hypre_Box            *value_box,
                                   HYPRE_Complex        *values,
                                   HYPRE_Int             action )
 {
@@ -380,17 +375,10 @@ hypre_SStructPMatrixSetBoxValues( hypre_SStructPMatrix *pmatrix,
    HYPRE_Int            *vars    = hypre_SStructStencilVars(stencil);
    hypre_StructMatrix   *smatrix;
    hypre_BoxArray       *grid_boxes;
-   hypre_Box            *box;
-   hypre_Box            *value_box;
    HYPRE_Int            *sentries;
    HYPRE_Int             i, j;
 
    smatrix = hypre_SStructPMatrixSMatrix(pmatrix, var, vars[entries[0]]);
-
-   box = hypre_BoxCreate(hypre_StructMatrixNDim(smatrix));
-   hypre_CopyIndex(ilower, hypre_BoxIMin(box));
-   hypre_CopyIndex(iupper, hypre_BoxIMax(box));
-   value_box = box;
 
    sentries = hypre_SStructPMatrixSEntries(pmatrix);
    for (i = 0; i < nentries; i++)
@@ -399,9 +387,12 @@ hypre_SStructPMatrixSetBoxValues( hypre_SStructPMatrix *pmatrix,
    }
 
    /* set values inside the grid */
-   hypre_StructMatrixSetBoxValues(smatrix, box, value_box, nentries, sentries,
+   hypre_StructMatrixSetBoxValues(smatrix, set_box, value_box, nentries, sentries,
                                   values, action, -1, 0);
-
+   /* TODO: Why need DeviceSync? */
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+   HYPRE_CUDA_CALL(cudaDeviceSynchronize());
+#endif
    /* set (AddTo/Get) or clear (Set) values outside the grid in ghost zones */
    if (action != 0)
    {
@@ -424,7 +415,7 @@ hypre_SStructPMatrixSetBoxValues( hypre_SStructPMatrix *pmatrix,
       /* int_box always points to the second box in done_boxes */
       int_box = hypre_BoxArrayBox(done_boxes, 1);
 
-      hypre_CopyBox(box, hypre_BoxArrayBox(left_boxes, 0));
+      hypre_CopyBox(set_box, hypre_BoxArrayBox(left_boxes, 0));
       hypre_BoxArraySetSize(left_boxes, 1);
       hypre_SubtractBoxArrays(left_boxes, grid_boxes, temp_boxes);
 
@@ -462,7 +453,7 @@ hypre_SStructPMatrixSetBoxValues( hypre_SStructPMatrix *pmatrix,
       {
          grid_box = hypre_BoxArrayBox(grid_boxes, i);
          hypre_BoxArraySetSize(diff_boxes, 0);
-         hypre_SubtractBoxes(box, grid_box, diff_boxes);
+         hypre_SubtractBoxes(set_box, grid_box, diff_boxes);
 
          hypre_ForBoxI(j, diff_boxes)
          {
@@ -474,15 +465,13 @@ hypre_SStructPMatrixSetBoxValues( hypre_SStructPMatrix *pmatrix,
       hypre_BoxArrayDestroy(diff_boxes);
    }
 
-   hypre_BoxDestroy(box);
-
    return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_SStructPMatrixAccumulate( hypre_SStructPMatrix *pmatrix )
 {
    hypre_SStructPGrid    *pgrid    = hypre_SStructPMatrixPGrid(pmatrix);
@@ -520,7 +509,7 @@ hypre_SStructPMatrixAccumulate( hypre_SStructPMatrix *pmatrix )
             {
                num_ghost[2*d]   = num_ghost[2*d+1] = hypre_IndexD(varoffset, d);
             }
-         
+
             /* accumulate values from AddTo */
             hypre_CreateCommInfoFromNumGhost(sgrid, num_ghost, &comm_info);
             hypre_CommPkgCreate(comm_info,
@@ -549,7 +538,7 @@ hypre_SStructPMatrixAccumulate( hypre_SStructPMatrix *pmatrix )
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_SStructPMatrixAssemble( hypre_SStructPMatrix *pmatrix )
 {
    HYPRE_Int              nvars    = hypre_SStructPMatrixNVars(pmatrix);
@@ -576,7 +565,7 @@ hypre_SStructPMatrixAssemble( hypre_SStructPMatrix *pmatrix )
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
- 
+
 HYPRE_Int
 hypre_SStructPMatrixSetSymmetric( hypre_SStructPMatrix *pmatrix,
                                   HYPRE_Int             var,
@@ -649,7 +638,7 @@ hypre_SStructPMatrixPrint( const char           *filename,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
 {
    HYPRE_Int               ndim        = hypre_SStructMatrixNDim(matrix);
@@ -681,6 +670,10 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
 
    HYPRE_IJMatrixSetObjectType(ijmatrix, HYPRE_PARCSR);
 
+#ifdef HYPRE_USING_OPENMP
+   HYPRE_IJMatrixSetOMPFlag(ijmatrix, 1); /* Use OpenMP */
+#endif
+
    if (matrix_type == HYPRE_SSTRUCT || matrix_type == HYPRE_STRUCT)
    {
       rowstart = hypre_SStructGridGhstartRank(grid);
@@ -696,7 +689,7 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
    m = 0;
    max_row_size = 0;
    ghost_box = hypre_BoxCreate(ndim);
-   row_sizes = hypre_CTAlloc(HYPRE_Int, nrows);
+   row_sizes = hypre_CTAlloc(HYPRE_Int,  nrows, HYPRE_MEMORY_HOST);
    hypre_SetIndex(stride, 1);
    for (part = 0; part < nparts; part++)
    {
@@ -704,7 +697,7 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
       for (var = 0; var < nvars; var++)
       {
          sgrid = hypre_SStructPGridSGrid(pgrids[part], var);
-              
+
          stencil = stencils[part][var];
          split = hypre_SStructMatrixSplit(matrix, part, var);
          nnzs = 0;
@@ -728,21 +721,21 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
             box = hypre_BoxArrayBox(boxes, b);
             hypre_CopyBox(box, ghost_box);
             if (matrix_type == HYPRE_SSTRUCT || matrix_type == HYPRE_STRUCT)
-	    {
+            {
                hypre_BoxGrowByArray(ghost_box, hypre_StructGridNumGhost(sgrid));
             }
             start = hypre_BoxIMin(box);
             hypre_BoxGetSize(box, loop_size);
-            hypre_BoxLoop1Begin(hypre_SStructMatrixNDim(matrix), loop_size,
+            zypre_BoxLoop1Begin(hypre_SStructMatrixNDim(matrix), loop_size,
                                 ghost_box, start, stride, mi);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,mi) HYPRE_SMP_SCHEDULE
 #endif
-            hypre_BoxLoop1For(mi)
+            zypre_BoxLoop1For(mi)
             {
                row_sizes[m+mi] = nnzs;
             }
-            hypre_BoxLoop1End(mi);
+            zypre_BoxLoop1End(mi);
 
             m += hypre_BoxVolume(ghost_box);
          }
@@ -775,11 +768,11 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
    /* ZTODO: Update row_sizes based on neighbor off-part couplings */
    HYPRE_IJMatrixSetRowSizes (ijmatrix, (const HYPRE_Int *) row_sizes);
 
-   hypre_TFree(row_sizes);
+   hypre_TFree(row_sizes, HYPRE_MEMORY_HOST);
    hypre_SStructMatrixTmpColCoords(matrix) =
-      hypre_CTAlloc(HYPRE_Int, max_row_size);
+      hypre_CTAlloc(HYPRE_BigInt,  max_row_size, HYPRE_MEMORY_HOST);
    hypre_SStructMatrixTmpCoeffs(matrix) =
-      hypre_CTAlloc(HYPRE_Complex, max_row_size);
+      hypre_CTAlloc(HYPRE_Complex,  max_row_size, HYPRE_MEMORY_HOST);
 
    HYPRE_IJMatrixInitialize(ijmatrix);
 
@@ -792,10 +785,10 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
  * (action < 0): get values
  *
  * 9/09 - AB: modified to use the box manager - here we need to check the
- *            neighbor box manager also  
+ *            neighbor box manager also
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
                                HYPRE_Int            part,
                                hypre_Index          index,
@@ -819,11 +812,12 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
    hypre_SStructUVEntry    *Uventry;
    hypre_BoxManEntry       *boxman_entry;
    hypre_SStructBoxManInfo *entry_info;
-   HYPRE_Int                row_coord;
-   HYPRE_Int               *col_coords;
+   HYPRE_BigInt             row_coord;
+   HYPRE_BigInt            *col_coords;
    HYPRE_Int                ncoeffs;
    HYPRE_Complex           *coeffs;
-   HYPRE_Int                i, entry, Uverank;
+   HYPRE_Int                i, entry;
+   HYPRE_BigInt             Uverank;
    HYPRE_Int                matrix_type = hypre_SStructMatrixObjectType(matrix);
 
    hypre_SStructGridFindBoxManEntry(grid, part, index, var, &boxman_entry);
@@ -831,7 +825,7 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
    /* if not local, check neighbors */
    if (boxman_entry == NULL)
       hypre_SStructGridFindNborBoxManEntry(grid, part, index, var, &boxman_entry);
-      
+
    if (boxman_entry == NULL)
    {
       hypre_error_in_arg(1);
@@ -844,7 +838,7 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
       hypre_BoxManEntryGetInfo(boxman_entry, (void **) &entry_info);
    }
 
-   hypre_SStructBoxManEntryGetGlobalRank(boxman_entry, index, 
+   hypre_SStructBoxManEntryGetGlobalRank(boxman_entry, index,
                                          &row_coord, matrix_type);
 
    col_coords = hypre_SStructMatrixTmpColCoords(matrix);
@@ -859,13 +853,13 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
          /* stencil entries */
          offset = shape[entry];
          hypre_AddIndexes(index, offset, ndim, to_index);
-         
+
          hypre_SStructGridFindBoxManEntry(dom_grid, part, to_index, vars[entry],
                                           &boxman_entry);
-         
+
          /* if not local, check neighbors */
          if (boxman_entry == NULL)
-            hypre_SStructGridFindNborBoxManEntry(dom_grid, part, to_index, 
+            hypre_SStructGridFindNborBoxManEntry(dom_grid, part, to_index,
                                                  vars[entry], &boxman_entry);
 
          if (boxman_entry != NULL)
@@ -886,7 +880,7 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
          if (Uverank > -1)
          {
             Uventry = hypre_SStructGraphUVEntry(graph, Uverank);
-            col_coords[ncoeffs] = hypre_SStructUVEntryToRank(Uventry, entry);   
+            col_coords[ncoeffs] = hypre_SStructUVEntryToRank(Uventry, entry);
             coeffs[ncoeffs] = values[i];
             ncoeffs++;
          }
@@ -896,13 +890,13 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
    if (action > 0)
    {
       HYPRE_IJMatrixAddToValues(ijmatrix, 1, &ncoeffs, &row_coord,
-                                (const HYPRE_Int *) col_coords,
+                                (const HYPRE_BigInt *) col_coords,
                                 (const HYPRE_Complex *) coeffs);
    }
    else if (action > -1)
    {
       HYPRE_IJMatrixSetValues(ijmatrix, 1, &ncoeffs, &row_coord,
-                              (const HYPRE_Int *) col_coords,
+                              (const HYPRE_BigInt *) col_coords,
                               (const HYPRE_Complex *) coeffs);
    }
    else
@@ -920,19 +914,31 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
  * (action > 0): add-to values
  * (action = 0): set values
  * (action < 0): get values
-
+ *
  * 9/09 - AB: modified to use the box manager- here we need to check the
- *            neighbor box manager also  
+ *            neighbor box manager also
+ *
+ * To illustrate what is computed below before calling IJSetValues2(), consider
+ * the following example of a 5-pt stencil (c,w,e,s,n) on a 3x2 grid (the 'x' in
+ * arrays 'cols' and 'ijvalues' indicates "no data"):
+ *
+ *   nrows       = 6
+ *   ncols       = 3         4         3         3         4         3
+ *   rows        = 0         1         2         3         4         5
+ *   row_indexes = 0         5         10        15        20        25
+ *   cols        = . . . x x . . . . x . . . x x . . . x x . . . . x . . . x x
+ *   ijvalues    = . . . x x . . . . x . . . x x . . . x x . . . . x . . . x x
+ *   entry       = c e n     c w e n   c w n     c e s     c w e s   c w s
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
                                   HYPRE_Int            part,
-                                  hypre_Index          ilower,
-                                  hypre_Index          iupper,
+                                  hypre_Box           *set_box,
                                   HYPRE_Int            var,
                                   HYPRE_Int            nentries,
                                   HYPRE_Int           *entries,
+                                  hypre_Box           *value_box,
                                   HYPRE_Complex       *values,
                                   HYPRE_Int            action )
 {
@@ -951,25 +957,21 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
    hypre_BoxManEntry   **boxman_to_entries;
    HYPRE_Int             nboxman_to_entries;
    HYPRE_Int             nrows;
-   HYPRE_Int            *ncols;
-   HYPRE_Int            *rows;
-   HYPRE_Int            *cols;
+   HYPRE_Int            *ncols, *row_indexes;;
+   HYPRE_BigInt         *rows, *cols;
    HYPRE_Complex        *ijvalues;
-   hypre_Box            *box, *vbox;
+   hypre_Box            *box;
    hypre_Box            *to_box;
    hypre_Box            *map_box;
    hypre_Box            *int_box;
    hypre_Index           index, stride, loop_size;
    hypre_IndexRef        start;
    hypre_Index           rs, cs;
-   HYPRE_Int             row_base, col_base;
-   HYPRE_Int             d, ei, entry, ii, jj, i, mi, vi;
+   HYPRE_BigInt          row_base, col_base;
+   HYPRE_Int             ei, entry, ii, jj, i;
    HYPRE_Int             matrix_type = hypre_SStructMatrixObjectType(matrix);
 
    box  = hypre_BoxCreate(ndim);
-   vbox = hypre_BoxCreate(ndim);
-
-   hypre_BoxSetExtents(vbox, ilower, iupper);
 
    /*------------------------------------------
     * all stencil entries
@@ -981,128 +983,137 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
       map_box = hypre_BoxCreate(ndim);
       int_box = hypre_BoxCreate(ndim);
 
-      nrows    = hypre_BoxVolume(vbox)*nentries;
-      ncols    = hypre_CTAlloc(HYPRE_Int, nrows);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-#endif
-      for (i = 0; i < nrows; i++)
-      {
-         ncols[i] = 1;
-      }
-      rows     = hypre_CTAlloc(HYPRE_Int, nrows);
-      cols     = hypre_CTAlloc(HYPRE_Int, nrows);
-      ijvalues = hypre_CTAlloc(HYPRE_Complex, nrows);
+      nrows       = hypre_BoxVolume(set_box);
+      ncols       = hypre_CTAlloc(HYPRE_Int, nrows, HYPRE_MEMORY_SHARED);
+      rows        = hypre_CTAlloc(HYPRE_BigInt, nrows, HYPRE_MEMORY_SHARED);
+      row_indexes = hypre_CTAlloc(HYPRE_Int, nrows, HYPRE_MEMORY_SHARED);
+      cols        = hypre_CTAlloc(HYPRE_BigInt, nrows*nentries, HYPRE_MEMORY_SHARED);
+      ijvalues    = hypre_CTAlloc(HYPRE_Complex, nrows*nentries, HYPRE_MEMORY_SHARED);
 
       hypre_SetIndex(stride, 1);
 
-      hypre_SStructGridIntersect(grid, part, var, vbox, -1,
+      hypre_SStructGridIntersect(grid, part, var, set_box, -1,
                                  &boxman_entries, &nboxman_entries);
 
       for (ii = 0; ii < nboxman_entries; ii++)
       {
          hypre_SStructBoxManEntryGetStrides(boxman_entries[ii], rs, matrix_type);
 
-         hypre_CopyBox(vbox, box);
+         hypre_CopyBox(set_box, box);
          hypre_BoxManEntryGetExtents(boxman_entries[ii],
-                                     hypre_BoxIMin(map_box),
-                                     hypre_BoxIMax(map_box));
+                                     hypre_BoxIMin(map_box), hypre_BoxIMax(map_box));
          hypre_IntersectBoxes(box, map_box, int_box);
          hypre_CopyBox(int_box, box);
-            
-         nrows = 0;
+
+         /* For each index in 'box', compute a row of length <= nentries and
+          * insert it into an nentries-length segment of 'cols' and 'ijvalues'.
+          * This may result in gaps, but IJSetValues2() is designed for that. */
+
+         nrows = hypre_BoxVolume(box);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+         for (i = 0; i < nrows; i++)
+         {
+            ncols[i] = 0;
+            row_indexes[i] = i*nentries;
+         }
+
          for (ei = 0; ei < nentries; ei++)
          {
             entry = entries[ei];
-               
+
             hypre_CopyBox(box, to_box);
-               
+
             offset = shape[entry];
             hypre_BoxShiftPos(to_box, offset);
-               
+
             hypre_SStructGridIntersect(dom_grid, part, vars[entry], to_box, -1,
                                        &boxman_to_entries, &nboxman_to_entries);
 
             for (jj = 0; jj < nboxman_to_entries; jj++)
             {
-               hypre_SStructBoxManEntryGetStrides(boxman_to_entries[jj], 
-                                                  cs, matrix_type);
+               hypre_SStructBoxManEntryGetStrides(boxman_to_entries[jj], cs, matrix_type);
 
                hypre_BoxManEntryGetExtents(boxman_to_entries[jj],
-                                           hypre_BoxIMin(map_box),
-                                           hypre_BoxIMax(map_box));
+                                           hypre_BoxIMin(map_box), hypre_BoxIMax(map_box));
                hypre_IntersectBoxes(to_box, map_box, int_box);
-                  
+
                hypre_CopyIndex(hypre_BoxIMin(int_box), index);
                hypre_SStructBoxManEntryGetGlobalRank(boxman_to_entries[jj],
                                                      index, &col_base, matrix_type);
-                  
+
                hypre_BoxShiftNeg(int_box, offset);
 
                hypre_CopyIndex(hypre_BoxIMin(int_box), index);
                hypre_SStructBoxManEntryGetGlobalRank(boxman_entries[ii],
                                                      index, &row_base, matrix_type);
-                     
+
                start = hypre_BoxIMin(int_box);
                hypre_BoxGetSize(int_box, loop_size);
-               hypre_BoxLoop2Begin(ndim, loop_size,
-                                   int_box, start, stride, mi,
-                                   vbox,    start, stride, vi);
+               /*FIXME: Currently works only for the default boxloop (see GetIndex below) */
+               zypre_BoxLoop2Begin(ndim, loop_size,
+                                   box,  start, stride, mi,
+                                   value_box, start, stride, vi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,mi,vi,index,d) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
-               hypre_BoxLoop2For(mi, vi)
+               zypre_BoxLoop2For(mi, vi)
                {
-                  hypre_BoxLoopGetIndex(index);
-                  rows[nrows + mi] = row_base;
-                  cols[nrows + mi] = col_base;
+                  hypre_Index index;
+                  HYPRE_Int   d, ci;
+
+                  hypre_BoxLoopGetIndex(index); /* FIXME (see comment above) */
+
+                  ci = mi*nentries + ncols[mi];
+                  rows[mi] = row_base;
+                  cols[ci] = col_base;
                   for (d = 0; d < ndim; d++)
                   {
-                     rows[nrows + mi] += index[d]*rs[d];
-                     cols[nrows + mi] += index[d]*cs[d];
+                     rows[mi] += index[d]*rs[d];
+                     cols[ci] += index[d]*cs[d];
                   }
-                  ijvalues[nrows + mi] = values[ei + vi*nentries];
+                  ijvalues[ci] = values[ei + vi*nentries];
+                  ncols[mi]++;
                }
-               hypre_BoxLoop2End(mi, vi);
-
-               nrows += hypre_BoxVolume(int_box);
+               zypre_BoxLoop2End(mi, vi);
 
             } /* end loop through boxman to entries */
 
-            hypre_TFree(boxman_to_entries);
+            hypre_TFree(boxman_to_entries, HYPRE_MEMORY_HOST);
 
          } /* end of ei nentries loop */
 
-         /*------------------------------------------
-          * set IJ values one stencil entry at a time
-          *------------------------------------------*/
-            
          if (action > 0)
          {
-            HYPRE_IJMatrixAddToValues(ijmatrix, nrows, ncols,
-                                      (const HYPRE_Int *) rows,
-                                      (const HYPRE_Int *) cols,
-                                      (const HYPRE_Complex *) ijvalues);
+            HYPRE_IJMatrixAddToValues2(ijmatrix, nrows, ncols,
+                                       (const HYPRE_BigInt *) rows,
+                                       (const HYPRE_Int *) row_indexes,
+                                       (const HYPRE_BigInt *) cols,
+                                       (const HYPRE_Complex *) ijvalues);
          }
          else if (action > -1)
          {
-            HYPRE_IJMatrixSetValues(ijmatrix, nrows, ncols,
-                                    (const HYPRE_Int *) rows,
-                                    (const HYPRE_Int *) cols,
-                                    (const HYPRE_Complex *) ijvalues);
+            HYPRE_IJMatrixSetValues2(ijmatrix, nrows, ncols,
+                                     (const HYPRE_BigInt *) rows,
+                                     (const HYPRE_Int *) row_indexes,
+                                     (const HYPRE_BigInt *) cols,
+                                     (const HYPRE_Complex *) ijvalues);
          }
          else
          {
             HYPRE_IJMatrixGetValues(ijmatrix, nrows, ncols, rows, cols, values);
          }
+
       } /* end loop through boxman entries */
 
-      hypre_TFree(boxman_entries);
-      
-      hypre_TFree(ncols);
-      hypre_TFree(rows);
-      hypre_TFree(cols);
-      hypre_TFree(ijvalues);
+      hypre_TFree(boxman_entries, HYPRE_MEMORY_HOST);
+
+      hypre_TFree(ncols, HYPRE_MEMORY_SHARED);
+      hypre_TFree(rows, HYPRE_MEMORY_SHARED);
+      hypre_TFree(row_indexes, HYPRE_MEMORY_SHARED);
+      hypre_TFree(cols, HYPRE_MEMORY_SHARED);
+      hypre_TFree(ijvalues, HYPRE_MEMORY_SHARED);
 
       hypre_BoxDestroy(to_box);
       hypre_BoxDestroy(map_box);
@@ -1116,22 +1127,19 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
    else
    {
       /* RDF: THREAD (Check safety on UMatrixSetValues call) */
-      hypre_BoxGetSize(vbox, loop_size);
-      hypre_BoxLoop0Begin(ndim, loop_size);
-      hypre_BoxLoopSetOneBlock();
-      hypre_BoxLoop0For()
+      hypre_BoxGetSize(set_box, loop_size);
+      hypre_SerialBoxLoop0Begin(ndim, loop_size);
       {
          hypre_BoxLoopGetIndex(index);
-         hypre_AddIndexes(index, hypre_BoxIMin(vbox), ndim, index);
+         hypre_AddIndexes(index, hypre_BoxIMin(set_box), ndim, index);
          hypre_SStructUMatrixSetValues(matrix, part, index, var,
                                        nentries, entries, values, action);
          values += nentries;
       }
-      hypre_BoxLoop0End();
+      hypre_SerialBoxLoop0End();
    }
 
    hypre_BoxDestroy(box);
-   hypre_BoxDestroy(vbox);
 
    return hypre_error_flag;
 }
@@ -1139,7 +1147,7 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_SStructUMatrixAssemble( hypre_SStructMatrix *matrix )
 {
    HYPRE_IJMatrix ijmatrix = hypre_SStructMatrixIJMatrix(matrix);
@@ -1270,8 +1278,18 @@ hypre_SStructMatrixSetValues( HYPRE_SStructMatrix  matrix,
        * (possibly in ghost zones) */
       if (nvneighbors[part][var] > 0)
       {
-         hypre_SStructMatrixSetInterPartValues(matrix, part, cindex, cindex, var,
-                                               nSentries, entries, values, action);
+         hypre_Box  *set_box;
+         HYPRE_Int   d;
+         /* This creates boxes with zeroed-out extents */
+         set_box = hypre_BoxCreate(ndim);
+         for (d = 0; d < ndim; d++)
+         {
+            hypre_BoxIMinD(set_box, d) = cindex[d];
+            hypre_BoxIMaxD(set_box, d) = cindex[d];
+         }
+         hypre_SStructMatrixSetInterPartValues(matrix, part, set_box, var, nSentries, entries,
+                                               set_box, values, action);
+         hypre_BoxDestroy(set_box);
       }
    }
 
@@ -1295,15 +1313,14 @@ hypre_SStructMatrixSetValues( HYPRE_SStructMatrix  matrix,
 HYPRE_Int
 hypre_SStructMatrixSetBoxValues( HYPRE_SStructMatrix  matrix,
                                  HYPRE_Int            part,
-                                 HYPRE_Int           *ilower,
-                                 HYPRE_Int           *iupper,
+                                 hypre_Box           *set_box,
                                  HYPRE_Int            var,
                                  HYPRE_Int            nentries,
                                  HYPRE_Int           *entries,
+                                 hypre_Box           *value_box,
                                  HYPRE_Complex       *values,
                                  HYPRE_Int            action )
 {
-   HYPRE_Int                ndim  = hypre_SStructMatrixNDim(matrix);
    hypre_SStructGraph      *graph = hypre_SStructMatrixGraph(matrix);
    hypre_SStructGrid       *grid  = hypre_SStructGraphGrid(graph);
    HYPRE_Int              **nvneighbors = hypre_SStructGridNVNeighbors(grid);
@@ -1312,38 +1329,33 @@ hypre_SStructMatrixSetBoxValues( HYPRE_SStructMatrix  matrix,
    HYPRE_Int                nSentries;
    HYPRE_Int                nUentries;
    hypre_SStructPMatrix    *pmatrix;
-   hypre_Index              cilower;
-   hypre_Index              ciupper;
-                           
+
 
    hypre_SStructMatrixSplitEntries(matrix, part, var, nentries, entries,
                                    &nSentries, &Sentries,
                                    &nUentries, &Uentries);
 
-   hypre_CopyToCleanIndex(ilower, ndim, cilower);
-   hypre_CopyToCleanIndex(iupper, ndim, ciupper);
-
    /* S-matrix */
    if (nSentries > 0)
    {
       pmatrix = hypre_SStructMatrixPMatrix(matrix, part);
-      hypre_SStructPMatrixSetBoxValues(pmatrix, cilower, ciupper, var,
-                                       nSentries, Sentries, values, action);
+      hypre_SStructPMatrixSetBoxValues(pmatrix, set_box, var, nSentries, Sentries,
+                                       value_box, values, action);
 
       /* put inter-part couplings in UMatrix and zero them out in PMatrix
        * (possibly in ghost zones) */
       if (nvneighbors[part][var] > 0)
       {
-         hypre_SStructMatrixSetInterPartValues(matrix, part, cilower, ciupper, var,
-                                               nSentries, entries, values, action);
+         hypre_SStructMatrixSetInterPartValues(matrix, part, set_box, var, nSentries, entries,
+                                               value_box, values, action);
       }
    }
 
    /* U-matrix */
    if (nUentries > 0)
    {
-      hypre_SStructUMatrixSetBoxValues(matrix, part, cilower, ciupper, var,
-                                       nUentries, Uentries, values, action);
+      hypre_SStructUMatrixSetBoxValues(matrix, part, set_box, var, nUentries, Uentries,
+                                       value_box, values, action);
    }
 
    return hypre_error_flag;
@@ -1357,11 +1369,11 @@ hypre_SStructMatrixSetBoxValues( HYPRE_SStructMatrix  matrix,
 HYPRE_Int
 hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
                                        HYPRE_Int            part,
-                                       hypre_Index          ilower,
-                                       hypre_Index          iupper,
+                                       hypre_Box           *set_box,
                                        HYPRE_Int            var,
                                        HYPRE_Int            nentries,
                                        HYPRE_Int           *entries,
+                                       hypre_Box           *value_box,
                                        HYPRE_Complex       *values,
                                        HYPRE_Int            action )
 {
@@ -1370,20 +1382,20 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
    hypre_SStructGrid       *grid  = hypre_SStructGraphGrid(graph);
    hypre_SStructPMatrix    *pmatrix;
    hypre_SStructPGrid      *pgrid;
-                           
+
    hypre_SStructStencil    *stencil;
    hypre_Index             *shape;
    HYPRE_Int               *smap;
    HYPRE_Int               *vars, frvartype, tovartype;
    hypre_StructMatrix      *smatrix;
-   hypre_Box               *box, *vbox, *ibox0, *ibox1, *tobox, *frbox;
+   hypre_Box               *box, *ibox0, *ibox1, *tobox, *frbox;
    hypre_Index              stride, loop_size;
    hypre_IndexRef           offset, start;
    hypre_BoxManEntry      **frentries, **toentries;
    hypre_SStructBoxManInfo *frinfo, *toinfo;
    HYPRE_Complex           *tvalues = NULL;
    HYPRE_Int                nfrentries, ntoentries, frpart, topart;
-   HYPRE_Int                entry, sentry, ei, fri, toi, vi, mi;
+   HYPRE_Int                entry, sentry, ei, fri, toi;
 
    pmatrix = hypre_SStructMatrixPMatrix(matrix, part);
 
@@ -1391,7 +1403,6 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
    frvartype = hypre_SStructPGridVarType(pgrid, var);
 
    box   = hypre_BoxCreate(ndim);
-   vbox  = hypre_BoxCreate(ndim);
    ibox0 = hypre_BoxCreate(ndim);
    ibox1 = hypre_BoxCreate(ndim);
    tobox = hypre_BoxCreate(ndim);
@@ -1401,8 +1412,6 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
    smap    = hypre_SStructPMatrixSMap(pmatrix, var);
    shape   = hypre_SStructStencilShape(stencil);
    vars    = hypre_SStructStencilVars(stencil);
-
-   hypre_BoxSetExtents(vbox, ilower, iupper);
 
    hypre_SetIndex(stride, 1);
 
@@ -1415,7 +1424,8 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
       tovartype = hypre_SStructPGridVarType(pgrid, vars[entry]);
 
       /* shift box in the stencil offset direction */
-      hypre_BoxSetExtents(box, ilower, iupper);
+      hypre_CopyBox(set_box, box);
+
       hypre_AddIndexes(hypre_BoxIMin(box), offset, ndim, hypre_BoxIMin(box));
       hypre_AddIndexes(hypre_BoxIMax(box), offset, ndim, hypre_BoxIMax(box));
 
@@ -1467,8 +1477,7 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
                hypre_IntersectBoxes(ibox0, frbox, ibox1);
                if (hypre_BoxVolume(ibox1))
                {
-                  tvalues =
-                     hypre_TReAlloc(tvalues, HYPRE_Complex, hypre_BoxVolume(ibox1));
+                  tvalues = hypre_TReAlloc(tvalues, HYPRE_Complex, hypre_BoxVolume(ibox1), HYPRE_MEMORY_SHARED);
 
                   if (action >= 0)
                   {
@@ -1477,22 +1486,21 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
                      /* copy values into tvalues */
                      start = hypre_BoxIMin(ibox1);
                      hypre_BoxGetSize(ibox1, loop_size);
-                     hypre_BoxLoop2Begin(ndim, loop_size,
+                     zypre_BoxLoop2Begin(ndim, loop_size,
                                          ibox1, start, stride, mi,
-                                         vbox,  start, stride, vi);
+                                         value_box,  start, stride, vi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,mi,vi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
-                     hypre_BoxLoop2For(mi, vi)
+                     zypre_BoxLoop2For(mi, vi)
                      {
                         tvalues[mi] = values[ei + vi*nentries];
                      }
-                     hypre_BoxLoop2End(mi, vi);
+                     zypre_BoxLoop2End(mi, vi);
 
                      /* put values into UMatrix */
                      hypre_SStructUMatrixSetBoxValues(
-                        matrix, part, hypre_BoxIMin(ibox1), hypre_BoxIMax(ibox1),
-                        var, 1, &entry, tvalues, action);
+                        matrix, part, ibox1, var, 1, &entry, ibox1, tvalues, action);
                      /* zero out values in PMatrix (possibly in ghost) */
                      hypre_StructMatrixClearBoxValues(
                         smatrix, ibox1, 1, &sentry, -1, 1);
@@ -1503,40 +1511,38 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
 
                      /* get values from UMatrix */
                      hypre_SStructUMatrixSetBoxValues(
-                        matrix, part, hypre_BoxIMin(ibox1), hypre_BoxIMax(ibox1),
-                        var, 1, &entry, tvalues, action);
+                        matrix, part, ibox1, var, 1, &entry, ibox1, tvalues, action);
 
                      /* copy tvalues into values */
                      start = hypre_BoxIMin(ibox1);
                      hypre_BoxGetSize(ibox1, loop_size);
-                     hypre_BoxLoop2Begin(ndim, loop_size,
+                     zypre_BoxLoop2Begin(ndim, loop_size,
                                          ibox1, start, stride, mi,
-                                         vbox,  start, stride, vi);
+                                         value_box,  start, stride, vi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,mi,vi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
-                     hypre_BoxLoop2For(mi, vi)
+                     zypre_BoxLoop2For(mi, vi)
                      {
                         values[ei + vi*nentries] = tvalues[mi];
                      }
-                     hypre_BoxLoop2End(mi, vi);
+                     zypre_BoxLoop2End(mi, vi);
 
                   } /* end if action */
                } /* end if nonzero ibox1 */
             } /* end of "from" boxman entries loop */
-            hypre_TFree(frentries);
+            hypre_TFree(frentries, HYPRE_MEMORY_HOST);
          } /* end if nonzero ibox0 */
       } /* end of "to" boxman entries loop */
-      hypre_TFree(toentries);
+      hypre_TFree(toentries, HYPRE_MEMORY_HOST);
    } /* end of entries loop */
 
    hypre_BoxDestroy(box);
-   hypre_BoxDestroy(vbox);
    hypre_BoxDestroy(ibox0);
    hypre_BoxDestroy(ibox1);
    hypre_BoxDestroy(tobox);
    hypre_BoxDestroy(frbox);
-   hypre_TFree(tvalues);
+   hypre_TFree(tvalues, HYPRE_MEMORY_SHARED);
 
    return hypre_error_flag;
 }

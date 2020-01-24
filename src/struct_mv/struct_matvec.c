@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -45,7 +40,7 @@ hypre_StructMatvecCreate( )
 {
    hypre_StructMatvecData *matvec_data;
 
-   matvec_data = hypre_CTAlloc(hypre_StructMatvecData, 1);
+   matvec_data = hypre_CTAlloc(hypre_StructMatvecData,  1, HYPRE_MEMORY_HOST);
 
    return (void *) matvec_data;
 }
@@ -100,7 +95,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                            HYPRE_Complex       beta,
                            hypre_StructVector *y            )
 {
-	hypre_StructMatvecData  *matvec_data = (hypre_StructMatvecData  *)matvec_vdata;
+   hypre_StructMatvecData  *matvec_data = (hypre_StructMatvecData  *)matvec_vdata;
                           
    hypre_ComputePkg        *compute_pkg;
                           
@@ -108,8 +103,6 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                           
    hypre_BoxArrayArray     *compute_box_aa;
    hypre_Box               *y_data_box;
-                          
-   HYPRE_Int                yi;
                           
    HYPRE_Complex           *xp;
    HYPRE_Complex           *yp;
@@ -155,16 +148,14 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
 
          hypre_BoxGetSize(box, loop_size);
 
+#define DEVICE_VAR is_device_ptr(yp)
          hypre_BoxLoop1Begin(hypre_StructVectorNDim(x), loop_size,
                              y_data_box, start, stride, yi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi) HYPRE_SMP_SCHEDULE
-#endif
-         hypre_BoxLoop1For(yi)
          {
             yp[yi] *= beta;
          }
          hypre_BoxLoop1End(yi);
+#undef DEVICE_VAR
       }
 
       return hypre_error_flag;
@@ -215,16 +206,13 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                      hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), i);
                   yp = hypre_StructVectorBoxData(y, i);
 
+#define DEVICE_VAR is_device_ptr(yp)
                   if (temp == 0.0)
                   {
                      hypre_BoxGetSize(box, loop_size);
 
                      hypre_BoxLoop1Begin(hypre_StructVectorNDim(x), loop_size,
                                          y_data_box, start, stride, yi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi) HYPRE_SMP_SCHEDULE
-#endif
-                     hypre_BoxLoop1For(yi)
                      {
                         yp[yi] = 0.0;
                      }
@@ -236,15 +224,12 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
 
                      hypre_BoxLoop1Begin(hypre_StructVectorNDim(x), loop_size,
                                          y_data_box, start, stride, yi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi) HYPRE_SMP_SCHEDULE
-#endif
-                     hypre_BoxLoop1For(yi)
                      {
                         yp[yi] *= temp;
                      }
                      hypre_BoxLoop1End(yi);
                   }
+#undef DEVICE_VAR
                }
             }
          }
@@ -321,8 +306,6 @@ HYPRE_Int hypre_StructMatvecCC0( HYPRE_Complex       alpha,
    HYPRE_Int                xoff4;
    HYPRE_Int                xoff5;
    HYPRE_Int                xoff6;
-   HYPRE_Int                Ai;
-   HYPRE_Int                xi;
    hypre_BoxArray          *compute_box_a;
    hypre_Box               *compute_box;
                           
@@ -338,7 +321,6 @@ HYPRE_Int hypre_StructMatvecCC0( HYPRE_Complex       alpha,
    HYPRE_Int                depth;
    hypre_Index              loop_size;
    hypre_IndexRef           start;
-   HYPRE_Int                yi;
    HYPRE_Int                ndim;
 
    stencil       = hypre_StructMatrixStencil(A);
@@ -394,14 +376,11 @@ HYPRE_Int hypre_StructMatvecCC0( HYPRE_Complex       alpha,
                   xoff6 = hypre_BoxOffsetDistance(x_data_box,
                                                   stencil_shape[si+6]);
 
+#define DEVICE_VAR is_device_ptr(yp,Ap0,Ap1,Ap2,Ap3,Ap4,Ap5,Ap6,xp)
                   hypre_BoxLoop3Begin(ndim, loop_size,
                                       A_data_box, start, stride, Ai,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi,Ai) HYPRE_SMP_SCHEDULE
-#endif
-                  hypre_BoxLoop3For(Ai, xi, yi)
                   {
                      yp[yi] +=
                         Ap0[Ai] * xp[xi + xoff0] +
@@ -413,6 +392,7 @@ HYPRE_Int hypre_StructMatvecCC0( HYPRE_Complex       alpha,
                         Ap6[Ai] * xp[xi + xoff6];
                   }
                   hypre_BoxLoop3End(Ai, xi, yi);
+#undef DEVICE_VAR
 
                   break;
 
@@ -437,14 +417,11 @@ HYPRE_Int hypre_StructMatvecCC0( HYPRE_Complex       alpha,
                   xoff5 = hypre_BoxOffsetDistance(x_data_box,
                                                   stencil_shape[si+5]);
 
+#define DEVICE_VAR is_device_ptr(yp,Ap0,Ap1,Ap2,Ap3,Ap4,Ap5,xp)
                   hypre_BoxLoop3Begin(ndim, loop_size,
                                       A_data_box, start, stride, Ai,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi,Ai) HYPRE_SMP_SCHEDULE
-#endif
-                  hypre_BoxLoop3For(Ai, xi, yi)
                   {
                      yp[yi] +=
                         Ap0[Ai] * xp[xi + xoff0] +
@@ -455,6 +432,7 @@ HYPRE_Int hypre_StructMatvecCC0( HYPRE_Complex       alpha,
                         Ap5[Ai] * xp[xi + xoff5];
                   }
                   hypre_BoxLoop3End(Ai, xi, yi);
+#undef DEVICE_VAR
                         
                   break;
 
@@ -476,14 +454,11 @@ HYPRE_Int hypre_StructMatvecCC0( HYPRE_Complex       alpha,
                   xoff4 = hypre_BoxOffsetDistance(x_data_box,
                                                   stencil_shape[si+4]);
 
+#define DEVICE_VAR is_device_ptr(yp,Ap0,Ap1,Ap2,Ap3,Ap4,xp)
                   hypre_BoxLoop3Begin(ndim, loop_size,
                                       A_data_box, start, stride, Ai,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi,Ai) HYPRE_SMP_SCHEDULE
-#endif
-                  hypre_BoxLoop3For(Ai, xi, yi)
                   {
                      yp[yi] +=
                         Ap0[Ai] * xp[xi + xoff0] +
@@ -493,6 +468,7 @@ HYPRE_Int hypre_StructMatvecCC0( HYPRE_Complex       alpha,
                         Ap4[Ai] * xp[xi + xoff4]; 
                   }
                   hypre_BoxLoop3End(Ai, xi, yi);
+#undef DEVICE_VAR
 
                   break;
 
@@ -511,14 +487,11 @@ HYPRE_Int hypre_StructMatvecCC0( HYPRE_Complex       alpha,
                   xoff3 = hypre_BoxOffsetDistance(x_data_box,
                                                   stencil_shape[si+3]);
 
+#define DEVICE_VAR is_device_ptr(yp,Ap0,Ap1,Ap2,Ap3,xp)
                   hypre_BoxLoop3Begin(ndim, loop_size,
                                       A_data_box, start, stride, Ai,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi,Ai) HYPRE_SMP_SCHEDULE
-#endif
-                  hypre_BoxLoop3For(Ai, xi, yi)
                   {
                      yp[yi] +=
                         Ap0[Ai] * xp[xi + xoff0] +
@@ -527,6 +500,7 @@ HYPRE_Int hypre_StructMatvecCC0( HYPRE_Complex       alpha,
                         Ap3[Ai] * xp[xi + xoff3];
                   }
                   hypre_BoxLoop3End(Ai, xi, yi);
+#undef DEVICE_VAR
 
                   break;
 
@@ -542,14 +516,11 @@ HYPRE_Int hypre_StructMatvecCC0( HYPRE_Complex       alpha,
                   xoff2 = hypre_BoxOffsetDistance(x_data_box,
                                                   stencil_shape[si+2]);
 
+#define DEVICE_VAR is_device_ptr(yp,Ap0,Ap1,Ap2,xp)
                   hypre_BoxLoop3Begin(ndim, loop_size,
                                       A_data_box, start, stride, Ai,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi,Ai) HYPRE_SMP_SCHEDULE
-#endif
-                  hypre_BoxLoop3For(Ai, xi, yi)
                   {
                      yp[yi] +=
                         Ap0[Ai] * xp[xi + xoff0] +
@@ -557,6 +528,7 @@ HYPRE_Int hypre_StructMatvecCC0( HYPRE_Complex       alpha,
                         Ap2[Ai] * xp[xi + xoff2]; 
                   }
                   hypre_BoxLoop3End(Ai, xi, yi);
+#undef DEVICE_VAR
 
                   break;
 
@@ -569,20 +541,18 @@ HYPRE_Int hypre_StructMatvecCC0( HYPRE_Complex       alpha,
                   xoff1 = hypre_BoxOffsetDistance(x_data_box,
                                                   stencil_shape[si+1]);
 
+#define DEVICE_VAR is_device_ptr(yp,Ap0,Ap1,xp)
                   hypre_BoxLoop3Begin(ndim, loop_size,
                                       A_data_box, start, stride, Ai,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi,Ai) HYPRE_SMP_SCHEDULE
-#endif
-                  hypre_BoxLoop3For(Ai, xi, yi)
                   {
                      yp[yi] +=
                         Ap0[Ai] * xp[xi + xoff0] +
                         Ap1[Ai] * xp[xi + xoff1];
                   }
                   hypre_BoxLoop3End(Ai, xi, yi);
+#undef DEVICE_VAR
 
                   break;
 
@@ -592,19 +562,17 @@ HYPRE_Int hypre_StructMatvecCC0( HYPRE_Complex       alpha,
                   xoff0 = hypre_BoxOffsetDistance(x_data_box,
                                                   stencil_shape[si+0]);
 
+#define DEVICE_VAR is_device_ptr(yp,Ap0,xp)
                   hypre_BoxLoop3Begin(ndim, loop_size,
                                       A_data_box, start, stride, Ai,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi,Ai) HYPRE_SMP_SCHEDULE
-#endif
-                  hypre_BoxLoop3For(Ai, xi, yi)
                   {
                      yp[yi] +=
                         Ap0[Ai] * xp[xi + xoff0];
                   }
                   hypre_BoxLoop3End(Ai, xi, yi);
+#undef DEVICE_VAR
 
                   break;
             }
@@ -612,16 +580,14 @@ HYPRE_Int hypre_StructMatvecCC0( HYPRE_Complex       alpha,
 
          if (alpha != 1.0)
          {
+#define DEVICE_VAR is_device_ptr(yp)
             hypre_BoxLoop1Begin(ndim, loop_size,
                                 y_data_box, start, stride, yi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi) HYPRE_SMP_SCHEDULE
-#endif
-            hypre_BoxLoop1For(yi)
             {
                yp[yi] *= alpha;
             }
             hypre_BoxLoop1End(yi);
+#undef DEVICE_VAR
          }
       }
    }
@@ -666,7 +632,7 @@ HYPRE_Int hypre_StructMatvecCC1( HYPRE_Complex       alpha,
    HYPRE_Int                xoff5;
    HYPRE_Int                xoff6;
    HYPRE_Int                Ai;
-   HYPRE_Int                xi;
+
    hypre_BoxArray          *compute_box_a;
    hypre_Box               *compute_box;
                           
@@ -681,7 +647,6 @@ HYPRE_Int hypre_StructMatvecCC1( HYPRE_Complex       alpha,
    HYPRE_Int                depth;
    hypre_Index              loop_size;
    hypre_IndexRef           start;
-   HYPRE_Int                yi;
    HYPRE_Int                ndim;
 
    stencil       = hypre_StructMatrixStencil(A);
@@ -745,13 +710,10 @@ HYPRE_Int hypre_StructMatvecCC1( HYPRE_Complex       alpha,
                   xoff6 = hypre_BoxOffsetDistance(x_data_box,
                                                   stencil_shape[si+6]);
 
+#define DEVICE_VAR is_device_ptr(yp,xp)
                   hypre_BoxLoop2Begin(ndim, loop_size,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi) HYPRE_SMP_SCHEDULE
-#endif
-                  hypre_BoxLoop2For(xi, yi)
                   {
                      yp[yi] +=
                         AAp0 * xp[xi + xoff0] +
@@ -763,6 +725,7 @@ HYPRE_Int hypre_StructMatvecCC1( HYPRE_Complex       alpha,
                         AAp6 * xp[xi + xoff6];
                   }
                   hypre_BoxLoop2End(xi, yi);
+#undef DEVICE_VAR
                   break;
 
                case 6:
@@ -792,13 +755,10 @@ HYPRE_Int hypre_StructMatvecCC1( HYPRE_Complex       alpha,
                   xoff5 = hypre_BoxOffsetDistance(x_data_box,
                                                   stencil_shape[si+5]);
 
+#define DEVICE_VAR is_device_ptr(yp,xp)
                   hypre_BoxLoop2Begin(ndim, loop_size,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi) HYPRE_SMP_SCHEDULE
-#endif
-                  hypre_BoxLoop2For(xi, yi)
                   {
                      yp[yi] +=
                         AAp0 * xp[xi + xoff0] +
@@ -809,6 +769,7 @@ HYPRE_Int hypre_StructMatvecCC1( HYPRE_Complex       alpha,
                         AAp5 * xp[xi + xoff5];
                   }
                   hypre_BoxLoop2End(xi, yi);
+#undef DEVICE_VAR
                   break;
 
                case 5:
@@ -834,13 +795,10 @@ HYPRE_Int hypre_StructMatvecCC1( HYPRE_Complex       alpha,
                   xoff4 = hypre_BoxOffsetDistance(x_data_box,
                                                   stencil_shape[si+4]);
 
+#define DEVICE_VAR is_device_ptr(yp,xp)
                   hypre_BoxLoop2Begin(ndim, loop_size,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi) HYPRE_SMP_SCHEDULE
-#endif
-                  hypre_BoxLoop2For(xi, yi)
                   {
                      yp[yi] +=
                         AAp0 * xp[xi + xoff0] +
@@ -850,6 +808,7 @@ HYPRE_Int hypre_StructMatvecCC1( HYPRE_Complex       alpha,
                         AAp4 * xp[xi + xoff4];
                   }
                   hypre_BoxLoop2End(xi, yi);
+#undef DEVICE_VAR
                   break;
 
                case 4:
@@ -871,13 +830,10 @@ HYPRE_Int hypre_StructMatvecCC1( HYPRE_Complex       alpha,
                   xoff3 = hypre_BoxOffsetDistance(x_data_box,
                                                   stencil_shape[si+3]);
 
+#define DEVICE_VAR is_device_ptr(yp,xp)
                   hypre_BoxLoop2Begin(ndim, loop_size,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi) HYPRE_SMP_SCHEDULE
-#endif
-                  hypre_BoxLoop2For(xi, yi)
                   {
                      yp[yi] +=
                         AAp0 * xp[xi + xoff0] +
@@ -886,6 +842,7 @@ HYPRE_Int hypre_StructMatvecCC1( HYPRE_Complex       alpha,
                         AAp3 * xp[xi + xoff3];
                   }
                   hypre_BoxLoop2End(xi, yi);
+#undef DEVICE_VAR
                   break;
 
                case 3:
@@ -903,13 +860,10 @@ HYPRE_Int hypre_StructMatvecCC1( HYPRE_Complex       alpha,
                   xoff2 = hypre_BoxOffsetDistance(x_data_box,
                                                   stencil_shape[si+2]);
 
+#define DEVICE_VAR is_device_ptr(yp,xp)
                   hypre_BoxLoop2Begin(ndim, loop_size,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi) HYPRE_SMP_SCHEDULE
-#endif
-                  hypre_BoxLoop2For(xi, yi)
                   {
                      yp[yi] +=
                         AAp0 * xp[xi + xoff0] +
@@ -917,6 +871,7 @@ HYPRE_Int hypre_StructMatvecCC1( HYPRE_Complex       alpha,
                         AAp2 * xp[xi + xoff2];
                   }
                   hypre_BoxLoop2End(xi, yi);
+#undef DEVICE_VAR
                   break;
 
                case 2:
@@ -930,19 +885,17 @@ HYPRE_Int hypre_StructMatvecCC1( HYPRE_Complex       alpha,
                   xoff1 = hypre_BoxOffsetDistance(x_data_box,
                                                   stencil_shape[si+1]);
 
+#define DEVICE_VAR is_device_ptr(yp,xp)
                   hypre_BoxLoop2Begin(ndim, loop_size,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi) HYPRE_SMP_SCHEDULE
-#endif
-                  hypre_BoxLoop2For(xi, yi)
                   {
                      yp[yi] +=
                         AAp0 * xp[xi + xoff0] +
                         AAp1 * xp[xi + xoff1];
                   }
                   hypre_BoxLoop2End(xi, yi);
+#undef DEVICE_VAR
                   break;
 
                case 1:
@@ -952,18 +905,16 @@ HYPRE_Int hypre_StructMatvecCC1( HYPRE_Complex       alpha,
                   xoff0 = hypre_BoxOffsetDistance(x_data_box,
                                                   stencil_shape[si+0]);
 
+#define DEVICE_VAR is_device_ptr(yp,xp)
                   hypre_BoxLoop2Begin(ndim, loop_size,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi) HYPRE_SMP_SCHEDULE
-#endif
-                  hypre_BoxLoop2For(xi, yi)
                   {
                      yp[yi] +=
                         AAp0 * xp[xi + xoff0];
                   }
                   hypre_BoxLoop2End(xi, yi);
+#undef DEVICE_VAR
             }
          }
       }
@@ -1010,8 +961,7 @@ HYPRE_Int hypre_StructMatvecCC2( HYPRE_Complex       alpha,
    HYPRE_Int                xoff6;
    HYPRE_Int                si_center, center_rank;
    hypre_Index              center_index;
-   HYPRE_Int                Ai, Ai_CC;
-   HYPRE_Int                xi;
+   HYPRE_Int                Ai_CC;
    hypre_BoxArray          *compute_box_a;
    hypre_Box               *compute_box;
                           
@@ -1027,8 +977,8 @@ HYPRE_Int hypre_StructMatvecCC2( HYPRE_Complex       alpha,
    HYPRE_Int                depth;
    hypre_Index              loop_size;
    hypre_IndexRef           start;
-   HYPRE_Int                yi;
    HYPRE_Int                ndim;
+   HYPRE_Complex            zero[1]={0};
 
    stencil       = hypre_StructMatrixStencil(A);
    stencil_shape = hypre_StructStencilShape(stencil);
@@ -1078,6 +1028,20 @@ HYPRE_Int hypre_StructMatvecCC2( HYPRE_Complex       alpha,
                   Ap4 = hypre_StructMatrixBoxData(A, i, si+4);
                   Ap5 = hypre_StructMatrixBoxData(A, i, si+5);
                   Ap6 = hypre_StructMatrixBoxData(A, i, si+6);
+		  if ( (0 <= si_center-si) && (si_center-si < 7) )
+                  {
+                     switch ( si_center-si )
+                     {
+                        case 0: Ap0 = zero; break;
+                        case 1: Ap1 = zero; break;
+                        case 2: Ap2 = zero; break;
+                        case 3: Ap3 = zero; break;
+                        case 4: Ap4 = zero; break;
+                        case 5: Ap5 = zero; break;
+                        case 6: Ap6 = zero; break;
+                     }
+                  }
+		  
                   AAp0 = Ap0[Ai_CC];
                   AAp1 = Ap1[Ai_CC];
                   AAp2 = Ap2[Ai_CC];
@@ -1085,19 +1049,7 @@ HYPRE_Int hypre_StructMatvecCC2( HYPRE_Complex       alpha,
                   AAp4 = Ap4[Ai_CC];
                   AAp5 = Ap5[Ai_CC];
                   AAp6 = Ap6[Ai_CC];
-                  if ( (0 <= si_center-si) && (si_center-si < 7) )
-                  {
-                     switch ( si_center-si )
-                     {
-                        case 0: AAp0 = 0; break;
-                        case 1: AAp1 = 0; break;
-                        case 2: AAp2 = 0; break;
-                        case 3: AAp3 = 0; break;
-                        case 4: AAp4 = 0; break;
-                        case 5: AAp5 = 0; break;
-                        case 6: AAp6 = 0; break;
-                     }
-                  }
+                  
 
                   xoff0 = hypre_BoxOffsetDistance(x_data_box,
                                                   stencil_shape[si+0]);
@@ -1116,13 +1068,10 @@ HYPRE_Int hypre_StructMatvecCC2( HYPRE_Complex       alpha,
                   xoff6 = hypre_BoxOffsetDistance(x_data_box,
                                                   stencil_shape[si+6]);
 
+#define DEVICE_VAR is_device_ptr(yp,xp)
                   hypre_BoxLoop2Begin(ndim, loop_size,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi) HYPRE_SMP_SCHEDULE
-#endif
-                  hypre_BoxLoop2For(xi, yi)
                   {
                      yp[yi] +=
                         AAp0 * xp[xi + xoff0] +
@@ -1134,6 +1083,7 @@ HYPRE_Int hypre_StructMatvecCC2( HYPRE_Complex       alpha,
                         AAp6 * xp[xi + xoff6];
                   }
                   hypre_BoxLoop2End(xi, yi);
+#undef DEVICE_VAR
 
                   break;
 
@@ -1144,24 +1094,24 @@ HYPRE_Int hypre_StructMatvecCC2( HYPRE_Complex       alpha,
                   Ap3 = hypre_StructMatrixBoxData(A, i, si+3);
                   Ap4 = hypre_StructMatrixBoxData(A, i, si+4);
                   Ap5 = hypre_StructMatrixBoxData(A, i, si+5);
+		  if ( (0 <= si_center-si) && (si_center-si < 6) )
+                  {
+                     switch ( si_center-si )
+                     {
+                        case 0: Ap0 = zero; break;
+                        case 1: Ap1 = zero; break;
+                        case 2: Ap2 = zero; break;
+                        case 3: Ap3 = zero; break;
+                        case 4: Ap4 = zero; break;
+                        case 5: Ap5 = zero; break;
+                     }
+                  }
                   AAp0 = Ap0[Ai_CC];
                   AAp1 = Ap1[Ai_CC];
                   AAp2 = Ap2[Ai_CC];
                   AAp3 = Ap3[Ai_CC];
                   AAp4 = Ap4[Ai_CC];
                   AAp5 = Ap5[Ai_CC];
-                  if ( (0 <= si_center-si) && (si_center-si < 6) )
-                  {
-                     switch ( si_center-si )
-                     {
-                        case 0: AAp0 = 0; break;
-                        case 1: AAp1 = 0; break;
-                        case 2: AAp2 = 0; break;
-                        case 3: AAp3 = 0; break;
-                        case 4: AAp4 = 0; break;
-                        case 5: AAp5 = 0; break;
-                     }
-                  }
 
                   xoff0 = hypre_BoxOffsetDistance(x_data_box,
                                                   stencil_shape[si+0]);
@@ -1176,13 +1126,10 @@ HYPRE_Int hypre_StructMatvecCC2( HYPRE_Complex       alpha,
                   xoff5 = hypre_BoxOffsetDistance(x_data_box,
                                                   stencil_shape[si+5]);
 
+#define DEVICE_VAR is_device_ptr(yp,xp)
                   hypre_BoxLoop2Begin(ndim, loop_size,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi) HYPRE_SMP_SCHEDULE
-#endif
-                  hypre_BoxLoop2For(xi, yi)
                   {
                      yp[yi] +=
                         AAp0 * xp[xi + xoff0] +
@@ -1193,6 +1140,7 @@ HYPRE_Int hypre_StructMatvecCC2( HYPRE_Complex       alpha,
                         AAp5 * xp[xi + xoff5];
                   }
                   hypre_BoxLoop2End(xi, yi);
+#undef DEVICE_VAR
                   break;
 
                case 5:
@@ -1201,22 +1149,22 @@ HYPRE_Int hypre_StructMatvecCC2( HYPRE_Complex       alpha,
                   Ap2 = hypre_StructMatrixBoxData(A, i, si+2);
                   Ap3 = hypre_StructMatrixBoxData(A, i, si+3);
                   Ap4 = hypre_StructMatrixBoxData(A, i, si+4);
+		  if ( (0 <= si_center-si) && (si_center-si < 5) )
+                  {
+                     switch ( si_center-si )
+                     {
+                        case 0: Ap0 = zero; break;
+                        case 1: Ap1 = zero; break;
+                        case 2: Ap2 = zero; break;
+                        case 3: Ap3 = zero; break;
+                        case 4: Ap4 = zero; break;
+                     }
+                  }
                   AAp0 = Ap0[Ai_CC];
                   AAp1 = Ap1[Ai_CC];
                   AAp2 = Ap2[Ai_CC];
                   AAp3 = Ap3[Ai_CC];
                   AAp4 = Ap4[Ai_CC];
-                  if ( (0 <= si_center-si) && (si_center-si < 5) )
-                  {
-                     switch ( si_center-si )
-                     {
-                        case 0: AAp0 = 0; break;
-                        case 1: AAp1 = 0; break;
-                        case 2: AAp2 = 0; break;
-                        case 3: AAp3 = 0; break;
-                        case 4: AAp4 = 0; break;
-                     }
-                  }
 
                   xoff0 = hypre_BoxOffsetDistance(x_data_box,
                                                   stencil_shape[si+0]);
@@ -1229,13 +1177,10 @@ HYPRE_Int hypre_StructMatvecCC2( HYPRE_Complex       alpha,
                   xoff4 = hypre_BoxOffsetDistance(x_data_box,
                                                   stencil_shape[si+4]);
 
+#define DEVICE_VAR is_device_ptr(yp,xp)
                   hypre_BoxLoop2Begin(ndim, loop_size,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi) HYPRE_SMP_SCHEDULE
-#endif
-                  hypre_BoxLoop2For(xi, yi)
                   {
                      yp[yi] +=
                         AAp0 * xp[xi + xoff0] +
@@ -1245,6 +1190,7 @@ HYPRE_Int hypre_StructMatvecCC2( HYPRE_Complex       alpha,
                         AAp4 * xp[xi + xoff4];
                   }
                   hypre_BoxLoop2End(xi, yi);
+#undef DEVICE_VAR
                   break;
 
                case 4:
@@ -1252,20 +1198,20 @@ HYPRE_Int hypre_StructMatvecCC2( HYPRE_Complex       alpha,
                   Ap1 = hypre_StructMatrixBoxData(A, i, si+1);
                   Ap2 = hypre_StructMatrixBoxData(A, i, si+2);
                   Ap3 = hypre_StructMatrixBoxData(A, i, si+3);
-                  AAp0 = Ap0[Ai_CC];
-                  AAp1 = Ap1[Ai_CC];
-                  AAp2 = Ap2[Ai_CC];
-                  AAp3 = Ap3[Ai_CC];
                   if ( (0 <= si_center-si) && (si_center-si < 4) )
                   {
                      switch ( si_center-si )
                      {
-                        case 0: AAp0 = 0; break;
-                        case 1: AAp1 = 0; break;
-                        case 2: AAp2 = 0; break;
-                        case 3: AAp3 = 0; break;
+                        case 0: Ap0 = zero; break;
+                        case 1: Ap1 = zero; break;
+                        case 2: Ap2 = zero; break;
+                        case 3: Ap3 = zero; break;
                      }
                   }
+                  AAp0 = Ap0[Ai_CC];
+                  AAp1 = Ap1[Ai_CC];
+                  AAp2 = Ap2[Ai_CC];
+                  AAp3 = Ap3[Ai_CC];
 
                   xoff0 = hypre_BoxOffsetDistance(x_data_box,
                                                   stencil_shape[si+0]);
@@ -1276,13 +1222,10 @@ HYPRE_Int hypre_StructMatvecCC2( HYPRE_Complex       alpha,
                   xoff3 = hypre_BoxOffsetDistance(x_data_box,
                                                   stencil_shape[si+3]);
 
+#define DEVICE_VAR is_device_ptr(yp,xp)
                   hypre_BoxLoop2Begin(ndim, loop_size,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi) HYPRE_SMP_SCHEDULE
-#endif
-                  hypre_BoxLoop2For(xi, yi)
                   {
                      yp[yi] +=
                         AAp0 * xp[xi + xoff0] +
@@ -1291,24 +1234,25 @@ HYPRE_Int hypre_StructMatvecCC2( HYPRE_Complex       alpha,
                         AAp3 * xp[xi + xoff3];
                   }
                   hypre_BoxLoop2End(xi, yi);
+#undef DEVICE_VAR
                   break;
 
                case 3:
                   Ap0 = hypre_StructMatrixBoxData(A, i, si+0);
                   Ap1 = hypre_StructMatrixBoxData(A, i, si+1);
                   Ap2 = hypre_StructMatrixBoxData(A, i, si+2);
-                  AAp0 = Ap0[Ai_CC];
-                  AAp1 = Ap1[Ai_CC];
-                  AAp2 = Ap2[Ai_CC];
-                  if ( (0 <= si_center-si) && (si_center-si < 3) )
+		  if ( (0 <= si_center-si) && (si_center-si < 3) )
                   {
                      switch ( si_center-si )
                      {
-                        case 0: AAp0 = 0; break;
-                        case 1: AAp1 = 0; break;
-                        case 2: AAp2 = 0; break;
+                        case 0: Ap0 = zero; break;
+                        case 1: Ap1 = zero; break;
+                        case 2: Ap2 = zero; break;
                      }
                   }
+                  AAp0 = Ap0[Ai_CC];
+                  AAp1 = Ap1[Ai_CC];
+                  AAp2 = Ap2[Ai_CC];
 
                   xoff0 = hypre_BoxOffsetDistance(x_data_box,
                                                   stencil_shape[si+0]);
@@ -1317,13 +1261,10 @@ HYPRE_Int hypre_StructMatvecCC2( HYPRE_Complex       alpha,
                   xoff2 = hypre_BoxOffsetDistance(x_data_box,
                                                   stencil_shape[si+2]);
 
+#define DEVICE_VAR is_device_ptr(yp,xp)
                   hypre_BoxLoop2Begin(ndim, loop_size,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi) HYPRE_SMP_SCHEDULE
-#endif
-                  hypre_BoxLoop2For(xi, yi)
                   {
                      yp[yi] +=
                         AAp0 * xp[xi + xoff0] +
@@ -1331,65 +1272,62 @@ HYPRE_Int hypre_StructMatvecCC2( HYPRE_Complex       alpha,
                         AAp2 * xp[xi + xoff2];
                   }
                   hypre_BoxLoop2End(xi, yi);
+#undef DEVICE_VAR
                   break;
 
                case 2:
                   Ap0 = hypre_StructMatrixBoxData(A, i, si+0);
                   Ap1 = hypre_StructMatrixBoxData(A, i, si+1);
-                  AAp0 = Ap0[Ai_CC];
-                  AAp1 = Ap1[Ai_CC];
-                  if ( (0 <= si_center-si) && (si_center-si < 2) )
+		  if ( (0 <= si_center-si) && (si_center-si < 2) )
                   {
                      switch ( si_center-si )
                      {
-                        case 0: AAp0 = 0; break;
-                        case 1: AAp1 = 0; break;
+                        case 0: Ap0 = zero; break;
+                        case 1: Ap1 = zero; break;
                      }
                   }
+                  AAp0 = Ap0[Ai_CC];
+                  AAp1 = Ap1[Ai_CC];
 
                   xoff0 = hypre_BoxOffsetDistance(x_data_box,
                                                   stencil_shape[si+0]);
                   xoff1 = hypre_BoxOffsetDistance(x_data_box,
                                                   stencil_shape[si+1]);
 
+#define DEVICE_VAR is_device_ptr(yp,xp)
                   hypre_BoxLoop2Begin(ndim, loop_size,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi) HYPRE_SMP_SCHEDULE
-#endif
-                  hypre_BoxLoop2For(xi, yi)
                   {
                      yp[yi] +=
                         AAp0 * xp[xi + xoff0] +
                         AAp1 * xp[xi + xoff1];
                   }
                   hypre_BoxLoop2End(xi, yi);
+#undef DEVICE_VAR
                   break;
 
                case 1:
                   Ap0 = hypre_StructMatrixBoxData(A, i, si+0);
-                  AAp0 = Ap0[Ai_CC];
-                  if ( si_center-si == 0 )
+		  if ( si_center-si == 0 )
                   {
-                     AAp0 = 0;
+                     Ap0 = zero;
                   }
+                  AAp0 = Ap0[Ai_CC];
 
                   xoff0 = hypre_BoxOffsetDistance(x_data_box,
                                                   stencil_shape[si+0]);
 
+#define DEVICE_VAR is_device_ptr(yp,xp)
                   hypre_BoxLoop2Begin(ndim, loop_size,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi) HYPRE_SMP_SCHEDULE
-#endif
-                  hypre_BoxLoop2For(xi, yi)
                   {
                      yp[yi] +=
                         AAp0 * xp[xi + xoff0];
                   }
                   hypre_BoxLoop2End(xi, yi);
+#undef DEVICE_VAR
 
                   break;
             }
@@ -1400,35 +1338,31 @@ HYPRE_Int hypre_StructMatvecCC2( HYPRE_Complex       alpha,
                                          stencil_shape[si_center]);
          if (alpha!= 1.0 )
          {
+#define DEVICE_VAR is_device_ptr(yp,Ap0,xp)
             hypre_BoxLoop3Begin(ndim, loop_size,
                                 A_data_box, start, stride, Ai,
                                 x_data_box, start, stride, xi,
                                 y_data_box, start, stride, yi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi,Ai) HYPRE_SMP_SCHEDULE
-#endif
-            hypre_BoxLoop3For(Ai, xi, yi)
             {
                yp[yi] = alpha * ( yp[yi] +
                                   Ap0[Ai] * xp[xi + xoff0] );
             }
             hypre_BoxLoop3End(Ai, xi, yi);
+#undef DEVICE_VAR
          }
          else
          {
+#define DEVICE_VAR is_device_ptr(yp,Ap0,xp)
             hypre_BoxLoop3Begin(ndim, loop_size,
                                 A_data_box, start, stride, Ai,
                                 x_data_box, start, stride, xi,
                                 y_data_box, start, stride, yi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi,Ai) HYPRE_SMP_SCHEDULE
-#endif
-            hypre_BoxLoop3For(Ai, xi, yi)
             {
                yp[yi] +=
                   Ap0[Ai] * xp[xi + xoff0];
             }
             hypre_BoxLoop3End(Ai, xi, yi);
+#undef DEVICE_VAR
          }
 
       }
@@ -1452,7 +1386,7 @@ hypre_StructMatvecDestroy( void *matvec_vdata )
       hypre_StructMatrixDestroy(matvec_data -> A);
       hypre_StructVectorDestroy(matvec_data -> x);
       hypre_ComputePkgDestroy(matvec_data -> compute_pkg );
-      hypre_TFree(matvec_data);
+      hypre_TFree(matvec_data, HYPRE_MEMORY_HOST);
    }
 
    return hypre_error_flag;

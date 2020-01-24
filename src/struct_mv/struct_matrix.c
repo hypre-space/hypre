@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -37,9 +32,13 @@ hypre_StructMatrixExtractPointerByIndex( hypre_StructMatrix *matrix,
    rank = hypre_StructStencilElementRank( stencil, index );
 
    if ( rank >= 0 )
+   {
       return hypre_StructMatrixBoxData(matrix, b, rank);
+   }
    else
+   {
       return NULL;  /* error - invalid index */
+   }
 }
 
 /*--------------------------------------------------------------------------
@@ -55,12 +54,11 @@ hypre_StructMatrixCreate( MPI_Comm             comm,
    hypre_StructMatrix  *matrix;
    HYPRE_Int            i;
 
-   matrix = hypre_CTAlloc(hypre_StructMatrix, 1);
+   matrix = hypre_CTAlloc(hypre_StructMatrix,  1, HYPRE_MEMORY_HOST);
 
    hypre_StructMatrixComm(matrix)        = comm;
    hypre_StructGridRef(grid, &hypre_StructMatrixGrid(matrix));
-   hypre_StructMatrixUserStencil(matrix) =
-      hypre_StructStencilRef(user_stencil);
+   hypre_StructMatrixUserStencil(matrix) = hypre_StructStencilRef(user_stencil);
    hypre_StructMatrixDataAlloced(matrix) = 1;
    hypre_StructMatrixRefCount(matrix)    = 1;
 
@@ -94,8 +92,6 @@ hypre_StructMatrixRef( hypre_StructMatrix *matrix )
 HYPRE_Int 
 hypre_StructMatrixDestroy( hypre_StructMatrix *matrix )
 {
-   HYPRE_Int  i;
-
    if (matrix)
    {
       hypre_StructMatrixRefCount(matrix) --;
@@ -103,22 +99,22 @@ hypre_StructMatrixDestroy( hypre_StructMatrix *matrix )
       {
          if (hypre_StructMatrixDataAlloced(matrix))
          {
-            hypre_SharedTFree(hypre_StructMatrixData(matrix));
+            hypre_TFree(hypre_StructMatrixData(matrix),HYPRE_MEMORY_DEVICE);
+            hypre_TFree(hypre_StructMatrixDataConst(matrix),HYPRE_MEMORY_HOST);
          }
+         hypre_TFree(hypre_StructMatrixStencilData(matrix),HYPRE_MEMORY_HOST);
          hypre_CommPkgDestroy(hypre_StructMatrixCommPkg(matrix));
-         
-         hypre_ForBoxI(i, hypre_StructMatrixDataSpace(matrix))
-            hypre_TFree(hypre_StructMatrixDataIndices(matrix)[i]);
-         hypre_TFree(hypre_StructMatrixDataIndices(matrix));
-         
+         if (hypre_BoxArraySize(hypre_StructMatrixDataSpace(matrix)) > 0)
+         {
+            hypre_TFree(hypre_StructMatrixDataIndices(matrix)[0],HYPRE_MEMORY_HOST);
+         }
+         hypre_TFree(hypre_StructMatrixDataIndices(matrix),HYPRE_MEMORY_HOST);
          hypre_BoxArrayDestroy(hypre_StructMatrixDataSpace(matrix));
-         
-         hypre_TFree(hypre_StructMatrixSymmElements(matrix));
+         hypre_TFree(hypre_StructMatrixSymmElements(matrix), HYPRE_MEMORY_HOST);
          hypre_StructStencilDestroy(hypre_StructMatrixUserStencil(matrix));
          hypre_StructStencilDestroy(hypre_StructMatrixStencil(matrix));
          hypre_StructGridDestroy(hypre_StructMatrixGrid(matrix));
-         
-         hypre_TFree(matrix);
+         hypre_TFree(matrix, HYPRE_MEMORY_HOST);
       }
    }
 
@@ -129,7 +125,7 @@ hypre_StructMatrixDestroy( hypre_StructMatrix *matrix )
  * hypre_StructMatrixInitializeShell
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
 {
    HYPRE_Int             ndim = hypre_StructMatrixNDim(matrix);
@@ -139,6 +135,7 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
    hypre_StructStencil  *stencil;
    hypre_Index          *stencil_shape;
    HYPRE_Int             stencil_size;
+   HYPRE_Complex       **stencil_data;
    HYPRE_Int             num_values;
    HYPRE_Int            *symm_elements;
    HYPRE_Int             constant_coefficient;
@@ -153,6 +150,7 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
 
    HYPRE_Int           **data_indices;
    HYPRE_Int             data_size;
+   HYPRE_Int             data_const_size;
    HYPRE_Int             data_box_volume;
                     
    HYPRE_Int             i, j, d;
@@ -185,7 +183,7 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
          /* store all stencil entry data */
          stencil = hypre_StructStencilRef(user_stencil);
          num_values = hypre_StructStencilSize(stencil);
-         symm_elements = hypre_TAlloc(HYPRE_Int, num_values);
+         symm_elements = hypre_TAlloc(HYPRE_Int,  num_values, HYPRE_MEMORY_HOST);
          for (i = 0; i < num_values; i++)
          {
             symm_elements[i] = -1;
@@ -209,6 +207,9 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
    stencil_size  = hypre_StructStencilSize(stencil);
    symm_elements = hypre_StructMatrixSymmElements(matrix);
 
+   stencil_data  = hypre_TAlloc(HYPRE_Complex*, stencil_size, HYPRE_MEMORY_HOST);
+   hypre_StructMatrixStencilData(matrix) = stencil_data;
+
    for (d = 0; d < 2*ndim; d++)
    {
       extra_ghost[d] = 0;
@@ -220,10 +221,10 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
       {
          for (d = 0; d < ndim; d++)
          {
-            extra_ghost[2*d] =
-               hypre_max(extra_ghost[2*d], -hypre_IndexD(stencil_shape[i], d));
-            extra_ghost[2*d + 1] =
-               hypre_max(extra_ghost[2*d + 1],  hypre_IndexD(stencil_shape[i], d));
+            extra_ghost[2*d]     = hypre_max( extra_ghost[2*d], 
+                                             -hypre_IndexD(stencil_shape[i], d) );
+            extra_ghost[2*d + 1] = hypre_max( extra_ghost[2*d + 1],
+                                              hypre_IndexD(stencil_shape[i], d) );
          }
       }
    }
@@ -266,18 +267,25 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
    if (hypre_StructMatrixDataIndices(matrix) == NULL)
    {
       data_space = hypre_StructMatrixDataSpace(matrix);
-      data_indices = hypre_CTAlloc(HYPRE_Int *, hypre_BoxArraySize(data_space));
+      data_indices = hypre_TAlloc(HYPRE_Int *, hypre_BoxArraySize(data_space),
+                                  HYPRE_MEMORY_HOST);
+      if (hypre_BoxArraySize(data_space) > 0)
+      {
+         data_indices[0] = hypre_TAlloc(HYPRE_Int, stencil_size*hypre_BoxArraySize(data_space),
+                                        HYPRE_MEMORY_HOST);
+      }
       constant_coefficient = hypre_StructMatrixConstantCoefficient(matrix);
 
       data_size = 0;
-      if ( constant_coefficient==0 )
+      data_const_size = 0;
+      if ( constant_coefficient == 0 )
       {
          hypre_ForBoxI(i, data_space)
          {
             data_box = hypre_BoxArrayBox(data_space, i);
             data_box_volume  = hypre_BoxVolume(data_box);
 
-            data_indices[i] = hypre_CTAlloc(HYPRE_Int, stencil_size);
+            data_indices[i] = data_indices[0] + stencil_size * i;
 
             /* set pointers for "stored" coefficients */
             for (j = 0; j < stencil_size; j++)
@@ -295,28 +303,26 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
                if (symm_elements[j] >= 0)
                {
                   data_indices[i][j] = data_indices[i][symm_elements[j]] +
-                     hypre_BoxOffsetDistance(data_box, stencil_shape[j]);
+                                       hypre_BoxOffsetDistance(data_box, stencil_shape[j]);
                }
             }
          }
       }
-      else if ( constant_coefficient==1 )
+      else if ( constant_coefficient == 1 )
       {
-      
          hypre_ForBoxI(i, data_space)
          {
             data_box = hypre_BoxArrayBox(data_space, i);
             data_box_volume  = hypre_BoxVolume(data_box);
 
-            data_indices[i] = hypre_CTAlloc(HYPRE_Int, stencil_size);
-
+	    data_indices[i] = data_indices[0] + stencil_size * i;
             /* set pointers for "stored" coefficients */
             for (j = 0; j < stencil_size; j++)
             {
                if (symm_elements[j] < 0)
                {
-                  data_indices[i][j] = data_size;
-                  ++data_size;
+                  data_indices[i][j] = data_const_size;
+                  ++data_const_size;
                }
             }
 
@@ -333,15 +339,23 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
       else
       {
          hypre_assert( constant_coefficient == 2 );
-         data_size += stencil_size;  /* all constant coeffs at the beginning */
+         data_const_size += stencil_size;
+#if defined(HYPRE_USING_CUDA)
+         if (hypre_StructGridDataLocation(grid) == HYPRE_MEMORY_HOST)
+         {
+            /* in this case, "data" is put on host using the space of
+             * "data_const". so, "data" need to be shifted by the size of
+             * const coeff */
+            data_size += stencil_size;/* all constant coeffs at the beginning */
+         }
+#endif
          /* ... this allocates a little more space than is absolutely necessary */
          hypre_ForBoxI(i, data_space)
          {
             data_box = hypre_BoxArrayBox(data_space, i);
             data_box_volume  = hypre_BoxVolume(data_box);
 
-            data_indices[i] = hypre_CTAlloc(HYPRE_Int, stencil_size);
-
+	    data_indices[i] = data_indices[0] + stencil_size * i;
             /* set pointers for "stored" coefficients */
             for (j = 0; j < stencil_size; j++)
             {
@@ -383,7 +397,27 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
       }
 
       hypre_StructMatrixDataIndices(matrix) = data_indices;
-      hypre_StructMatrixDataSize(matrix)    = data_size;
+
+      /*-----------------------------------------------------------------------
+       * if data location has not been set outside, set up the data location
+       * based on the total number of  
+       *-----------------------------------------------------------------------*/
+#if defined(HYPRE_USING_CUDA)     
+      if (hypre_StructGridDataLocation(grid) == HYPRE_MEMORY_HOST)
+      {
+	 data_const_size = data_size + data_const_size;
+	 data_size       = 0;
+      }
+#endif
+      hypre_StructMatrixDataSize(matrix)      = data_size;
+      hypre_StructMatrixDataConstSize(matrix) = data_const_size;
+
+      /*
+      if (hypre_BoxArraySize(data_space) > 0)
+      {
+	 hypre_StructMatrixDataDeviceIndices(matrix) = data_indices[0];
+      }
+      */
    }
 
    /*-----------------------------------------------------------------------
@@ -392,8 +426,7 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
     * actually stored.
     *-----------------------------------------------------------------------*/
 
-   hypre_StructMatrixGlobalSize(matrix) =
-      hypre_StructGridGlobalSize(grid) * stencil_size;
+   hypre_StructMatrixGlobalSize(matrix) = hypre_StructGridGlobalSize(grid) * stencil_size;
 
    /*-----------------------------------------------------------------------
     * Return
@@ -408,10 +441,81 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
 
 HYPRE_Int
 hypre_StructMatrixInitializeData( hypre_StructMatrix *matrix,
-                                  HYPRE_Complex      *data   )
+                                  HYPRE_Complex      *data,
+				  HYPRE_Complex      *data_const)
 {
+   HYPRE_Int             ndim = hypre_StructMatrixNDim(matrix);
+   HYPRE_Int constant_coefficient;
+   hypre_StructStencil  *stencil;
+   hypre_Index          *stencil_shape;
+   HYPRE_Complex       **stencil_data;
+   HYPRE_Int stencil_size, i;
+#if defined(HYPRE_USING_CUDA)
+   hypre_StructGrid     *grid = hypre_StructMatrixGrid(matrix);
+#endif
    hypre_StructMatrixData(matrix) = data;
+   hypre_StructMatrixDataConst(matrix) = data_const;
    hypre_StructMatrixDataAlloced(matrix) = 0;
+
+   stencil       = hypre_StructMatrixStencil(matrix);
+   stencil_shape = hypre_StructStencilShape(stencil);
+   stencil_size  = hypre_StructStencilSize(stencil);
+   stencil_data  = hypre_StructMatrixStencilData(matrix);
+
+   constant_coefficient = hypre_StructMatrixConstantCoefficient(matrix);
+
+   if (constant_coefficient == 0)
+   {
+      for (i = 0; i < stencil_size; i++)
+      {
+#if defined(HYPRE_USING_CUDA)   
+         if (hypre_StructGridDataLocation(grid) != HYPRE_MEMORY_HOST)
+         {
+            stencil_data[i] = hypre_StructMatrixData(matrix);
+         }
+         else
+         {
+            stencil_data[i] = hypre_StructMatrixDataConst(matrix);
+         }
+#else
+         stencil_data[i] = hypre_StructMatrixData(matrix);
+#endif
+      }
+   }
+   else if (constant_coefficient == 1)
+   {
+      for (i = 0; i < stencil_size; i++)
+      {
+         stencil_data[i] = hypre_StructMatrixDataConst(matrix);
+      }
+   }
+   else
+   {
+      for (i = 0; i < stencil_size; i++)
+      {
+         /* diagonal, variable coefficient */
+         if (hypre_IndexEqual(stencil_shape[i], 0, ndim))
+         {
+#if defined(HYPRE_USING_CUDA) 	  
+            if (hypre_StructGridDataLocation(grid) != HYPRE_MEMORY_HOST)
+            {
+               stencil_data[i] = hypre_StructMatrixData(matrix);
+            }
+            else
+            {
+               stencil_data[i] = hypre_StructMatrixDataConst(matrix);
+            }
+#else
+            stencil_data[i] = hypre_StructMatrixData(matrix);
+#endif
+         }
+         /* off-diagonal, constant coefficient */
+         else
+         {
+            stencil_data[i] = hypre_StructMatrixDataConst(matrix);
+         }
+      }
+   }
 
    return hypre_error_flag;
 }
@@ -423,12 +527,15 @@ HYPRE_Int
 hypre_StructMatrixInitialize( hypre_StructMatrix *matrix )
 {
    HYPRE_Complex *data;
-
+   HYPRE_Complex *data_const;
+   
    hypre_StructMatrixInitializeShell(matrix);
+   
+   data = hypre_CTAlloc(HYPRE_Complex, hypre_StructMatrixDataSize(matrix), HYPRE_MEMORY_DEVICE);
+   data_const = hypre_CTAlloc(HYPRE_Complex, hypre_StructMatrixDataConstSize(matrix), HYPRE_MEMORY_HOST);
+   
 
-   data = hypre_StructMatrixData(matrix);
-   data = hypre_SharedCTAlloc(HYPRE_Complex, hypre_StructMatrixDataSize(matrix));
-   hypre_StructMatrixInitializeData(matrix, data);
+   hypre_StructMatrixInitializeData(matrix, data, data_const);
    hypre_StructMatrixDataAlloced(matrix) = 1;
 
    return hypre_error_flag;
@@ -496,26 +603,27 @@ hypre_StructMatrixSetValues( hypre_StructMatrix *matrix,
     * Set the matrix coefficients
     *-----------------------------------------------------------------------*/
 
+   center_rank = 0;
+   if ( constant_coefficient==2 )
+   {
+      hypre_SetIndex(center_index, 0);
+      stencil = hypre_StructMatrixStencil(matrix);
+      center_rank = hypre_StructStencilElementRank( stencil, center_index );
+   }
+
    for (i = istart; i < istop; i++)
    {
       grid_box = hypre_BoxArrayBox(grid_boxes, i);
 
       if (hypre_IndexInBox(grid_index, grid_box))
       {
-         if ( constant_coefficient==2 )
-         {
-            hypre_SetIndex(center_index, 0);
-            stencil = hypre_StructMatrixStencil(matrix);
-            center_rank = hypre_StructStencilElementRank( stencil, center_index );
-         }
-
          for (s = 0; s < num_stencil_indices; s++)
          {
             /* only set stored stencil values */
             if (symm_elements[stencil_indices[s]] < 0)
             {
                if ( (constant_coefficient==1) ||
-                    (constant_coefficient==2 && stencil_indices[s]!=center_rank ))
+                    (constant_coefficient==2 && stencil_indices[s]!=center_rank) )
                {
                   /* call SetConstantValues instead */
                   hypre_error(HYPRE_ERROR_GENERIC);
@@ -523,10 +631,35 @@ hypre_StructMatrixSetValues( hypre_StructMatrix *matrix,
                }
                else /* variable coefficient, constant_coefficient=0 */
                {
-                  matp = hypre_StructMatrixBoxDataValue(
-                     matrix, i, stencil_indices[s], grid_index);
+                  matp = hypre_StructMatrixBoxDataValue(matrix, i, stencil_indices[s], grid_index);
                }
 
+               /* FIXME: THIS IS SLOW! copy one entry at a time from/to device */
+#if HYPRE_MEMORY_DEVICE_ACT == HYPRE_MEMORY_DEVICE
+	       if (action > 0)
+               {
+		  HYPRE_Complex matval;
+		  hypre_TMemcpy(&matval, matp, HYPRE_Complex, 1,
+                                HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+		  matval += values[s];
+		  hypre_TMemcpy(matp, &matval, HYPRE_Complex, 1,
+                                HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+                  //*matp += values[s];
+               }
+               else if (action > -1)
+               {
+		  hypre_TMemcpy(matp, &(values[s]), HYPRE_Complex, 1,
+                                HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+                  //*matp = values[s];
+               }
+               else /* action < 0 */
+               {
+		 //values[s] = *matp;
+		  hypre_TMemcpy(&(values[s]), matp, HYPRE_Complex, 1,
+                                HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+               }
+#else
+               /* TODO: combine to code above ? */
                if (action > 0)
                {
                   *matp += values[s];
@@ -539,6 +672,7 @@ hypre_StructMatrixSetValues( hypre_StructMatrix *matrix,
                {
                   values[s] = *matp;
                }
+#endif
             }
          }
       }
@@ -698,20 +832,17 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
                else   /* variable coefficient: constant_coefficient==0
                          or diagonal with constant_coefficient==2   */
                {
+#define DEVICE_VAR is_device_ptr(datap,values)
                   hypre_BoxGetSize(int_box, loop_size);
 
                   if (action > 0)
                   {
-                     hypre_BoxLoop2Begin(hypre_StructMatrixNDim(matrix), loop_size,
-                                         data_box,data_start,data_stride,datai,
-                                         dval_box,dval_start,dval_stride,dvali);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,datai,dvali) HYPRE_SMP_SCHEDULE
-#endif
-                     hypre_BoxLoop2For(datai, dvali)
-                     {
-                        datap[datai] += values[dvali];
-                     }
+		     hypre_BoxLoop2Begin(hypre_StructMatrixNDim(matrix), loop_size,
+					 data_box,data_start,data_stride,datai,
+					 dval_box,dval_start,dval_stride,dvali);
+		     {
+		        datap[datai] += values[dvali];
+		     }
                      hypre_BoxLoop2End(datai, dvali);
                   }
                   else if (action > -1)
@@ -719,12 +850,19 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
                      hypre_BoxLoop2Begin(hypre_StructMatrixNDim(matrix), loop_size,
                                          data_box,data_start,data_stride,datai,
                                          dval_box,dval_start,dval_stride,dvali);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,datai,dvali) HYPRE_SMP_SCHEDULE
-#endif
-                     hypre_BoxLoop2For(datai, dvali)
                      {
                         datap[datai] = values[dvali];
+                     }
+                     hypre_BoxLoop2End(datai, dvali);
+                  }
+                  else if (action == -2)
+                  {
+                     hypre_BoxLoop2Begin(hypre_StructMatrixNDim(matrix), loop_size,
+                                         data_box,data_start,data_stride,datai,
+                                         dval_box,dval_start,dval_stride,dvali);
+                     {
+                        values[dvali] = datap[datai];
+                        datap[datai] = 0;
                      }
                      hypre_BoxLoop2End(datai, dvali);
                   }
@@ -733,19 +871,12 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
                      hypre_BoxLoop2Begin(hypre_StructMatrixNDim(matrix), loop_size,
                                          data_box,data_start,data_stride,datai,
                                          dval_box,dval_start,dval_stride,dvali);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,datai,dvali) HYPRE_SMP_SCHEDULE
-#endif
-                     hypre_BoxLoop2For(datai, dvali)
                      {
                         values[dvali] = datap[datai];
-                        if (action == -2)
-                        {
-                           datap[datai] = 0;
-                        }
                      }
                      hypre_BoxLoop2End(datai, dvali);
                   }
+#undef DEVICE_VAR
                }
             } /* end if (symm_elements) */
 
@@ -799,7 +930,7 @@ hypre_StructMatrixSetConstantValues( hypre_StructMatrix *matrix,
             for (s = 0; s < num_stencil_indices; s++)
             {
                matp = hypre_StructMatrixBoxData(matrix, i,
-                                                stencil_indices[s]);
+						stencil_indices[s]);
                *matp += values[s];
             }
          }
@@ -808,7 +939,7 @@ hypre_StructMatrixSetConstantValues( hypre_StructMatrix *matrix,
             for (s = 0; s < num_stencil_indices; s++)
             {
                matp = hypre_StructMatrixBoxData(matrix, i,
-                                                stencil_indices[s]);
+						stencil_indices[s]);
                *matp = values[s];
             }
          }
@@ -817,7 +948,7 @@ hypre_StructMatrixSetConstantValues( hypre_StructMatrix *matrix,
             for (s = 0; s < num_stencil_indices; s++)
             {
                matp = hypre_StructMatrixBoxData(matrix, i,
-                                                stencil_indices[s]);
+						stencil_indices[s]);
                values[s] = *matp;
             }
          }
@@ -848,7 +979,7 @@ hypre_StructMatrixSetConstantValues( hypre_StructMatrix *matrix,
             else
             {  /* non-center, like constant_coefficient==1 */
                matp = hypre_StructMatrixBoxData(matrix, 0,
-                                                stencil_indices[s]);
+						stencil_indices[s]);
                *matp += values[s];
             }
          }
@@ -873,7 +1004,7 @@ hypre_StructMatrixSetConstantValues( hypre_StructMatrix *matrix,
             else
             {  /* non-center, like constant_coefficient==1 */
                matp = hypre_StructMatrixBoxData(matrix, 0,
-                                                stencil_indices[s]);
+						stencil_indices[s]);
                *matp += values[s];
             }
          }
@@ -898,7 +1029,7 @@ hypre_StructMatrixSetConstantValues( hypre_StructMatrix *matrix,
             else
             {  /* non-center, like constant_coefficient==1 */
                matp = hypre_StructMatrixBoxData(matrix, 0,
-                                                stencil_indices[s]);
+						stencil_indices[s]);
                values[s] = *matp;
             }
          }
@@ -1007,7 +1138,6 @@ hypre_StructMatrixClearBoxValues( hypre_StructMatrix *matrix,
    hypre_Box           *data_box;
    hypre_IndexRef       data_start;
    hypre_Index          data_stride;
-   HYPRE_Int            datai;
    HYPRE_Complex       *datap;
                    
    hypre_Index          loop_size;
@@ -1071,16 +1201,14 @@ hypre_StructMatrixClearBoxValues( hypre_StructMatrix *matrix,
                
                hypre_BoxGetSize(int_box, loop_size);
                
+#define DEVICE_VAR is_device_ptr(datap)
                hypre_BoxLoop1Begin(hypre_StructMatrixNDim(matrix), loop_size,
                                    data_box,data_start,data_stride,datai);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,datai) HYPRE_SMP_SCHEDULE
-#endif
-               hypre_BoxLoop1For(datai)
                {
                   datap[datai] = 0.0;
                }
                hypre_BoxLoop1End(datai);
+#undef DEVICE_VAR
             }
          }
       }
@@ -1101,15 +1229,17 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
    HYPRE_Int             *num_ghost = hypre_StructMatrixNumGhost(matrix);
 
    HYPRE_Int              comm_num_values, mat_num_values, constant_coefficient;
+#if defined(HYPRE_USING_CUDA)   
    HYPRE_Int              stencil_size;
    hypre_StructStencil   *stencil;
-
+#endif
    hypre_CommInfo        *comm_info;
    hypre_CommPkg         *comm_pkg;
 
    hypre_CommHandle      *comm_handle;
-   HYPRE_Int              data_initial_offset = 0;
+
    HYPRE_Complex         *matrix_data = hypre_StructMatrixData(matrix);
+   
    HYPRE_Complex         *matrix_data_comm = matrix_data;
 
    /* BEGIN - variables for ghost layer identity code below */
@@ -1129,7 +1259,7 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
    hypre_IndexRef         start;
    hypre_Index            stride;
    HYPRE_Complex         *datap;
-   HYPRE_Int              i, j, ei, datai;
+   HYPRE_Int              i, j, ei;
    HYPRE_Int              num_entries;
    /* End - variables for ghost layer identity code below */
 
@@ -1175,7 +1305,7 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
                                         hypre_BoxIMin(entry_box),
                                         hypre_BoxIMax(entry_box));
          }
-         hypre_TFree(entries);
+         hypre_TFree(entries, HYPRE_MEMORY_HOST);
 
          /* subtract neighbor boxes (entry_box_a) from data box (boundary_box_a) */
          hypre_SubtractBoxArrays(boundary_box_a, entry_box_a, tmp_box_a);
@@ -1203,16 +1333,14 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
 
                hypre_BoxGetSize(boundary_box, loop_size);
 
+#define DEVICE_VAR is_device_ptr(datap)
                hypre_BoxLoop1Begin(hypre_StructMatrixNDim(matrix), loop_size,
                                    data_box, start, stride, datai);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,datai) HYPRE_SMP_SCHEDULE
-#endif
-               hypre_BoxLoop1For(datai)
                {
                   datap[datai] = 1.0;
                }
                hypre_BoxLoop1End(datai);
+#undef DEVICE_VAR
             }
          }
       }
@@ -1237,6 +1365,12 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
    if ( constant_coefficient==0 ) 
    {
       comm_num_values = mat_num_values;
+#if defined(HYPRE_USING_CUDA) 
+      if (hypre_StructGridDataLocation(grid) == HYPRE_MEMORY_HOST)
+      {
+         matrix_data_comm = hypre_StructMatrixDataConst(matrix);
+      }
+#endif      
    }    
    else if ( constant_coefficient==1 ) 
    {
@@ -1245,10 +1379,14 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
    else /* constant_coefficient==2 */
    {
       comm_num_values = 1;
-      stencil = hypre_StructMatrixStencil(matrix);
-      stencil_size  = hypre_StructStencilSize(stencil);
-      data_initial_offset = stencil_size;
-      matrix_data_comm = &( matrix_data[data_initial_offset] );
+#if defined(HYPRE_USING_CUDA) 
+      if (hypre_StructGridDataLocation(grid) == HYPRE_MEMORY_HOST)
+      {
+	  stencil = hypre_StructMatrixStencil(matrix);
+	  stencil_size  = hypre_StructStencilSize(stencil);
+	  matrix_data_comm = hypre_StructMatrixDataConst(matrix) + stencil_size;
+      }
+#endif
    }
 
    comm_pkg = hypre_StructMatrixCommPkg(matrix);
@@ -1352,7 +1490,7 @@ HYPRE_Int  hypre_StructMatrixSetConstantEntries( hypre_StructMatrix *matrix,
    hypre_StructStencil *stencil = hypre_StructMatrixUserStencil(matrix);
    /* ... Stencil doesn't exist yet */
    HYPRE_Int stencil_size  = hypre_StructStencilSize(stencil);
-   HYPRE_Int *offdconst = hypre_CTAlloc(HYPRE_Int, stencil_size);
+   HYPRE_Int *offdconst = hypre_CTAlloc(HYPRE_Int,  stencil_size, HYPRE_MEMORY_HOST);
    /* ... note: CTAlloc initializes to 0 (normally it works by calling calloc) */
    HYPRE_Int nconst = 0;
    HYPRE_Int constant_coefficient, diag_rank;
@@ -1363,12 +1501,20 @@ HYPRE_Int  hypre_StructMatrixSetConstantEntries( hypre_StructMatrix *matrix,
    {
       offdconst[ entries[i] ] = 1;
    }
+   
    for ( j=0; j<stencil_size; ++j )
    {
       nconst += offdconst[j];
    }
-   if ( nconst<=0 ) constant_coefficient=0;
-   else if ( nconst>=stencil_size ) constant_coefficient=1;
+
+   if ( nconst<=0 ) 
+   {
+      constant_coefficient=0;
+   }
+   else if ( nconst>=stencil_size ) 
+   {
+      constant_coefficient=1;
+   }
    else
    {
       hypre_SetIndex(diag_index, 0);
@@ -1390,7 +1536,7 @@ HYPRE_Int  hypre_StructMatrixSetConstantEntries( hypre_StructMatrix *matrix,
 
    hypre_StructMatrixSetConstantCoefficient( matrix, constant_coefficient );
 
-   hypre_TFree(offdconst);
+   hypre_TFree(offdconst, HYPRE_MEMORY_HOST);
    return hypre_error_flag;
 }
 
@@ -1403,7 +1549,6 @@ hypre_StructMatrixClearGhostValues( hypre_StructMatrix *matrix )
    HYPRE_Int             ndim = hypre_StructMatrixNDim(matrix);
    hypre_Box            *m_data_box;
                         
-   HYPRE_Int             mi;
    HYPRE_Complex        *mp;
 
    hypre_StructStencil  *stencil;
@@ -1447,17 +1592,15 @@ hypre_StructMatrixClearGhostValues( hypre_StructMatrix *matrix )
                start = hypre_BoxIMin(diff_box);
                      
                hypre_BoxGetSize(diff_box, loop_size);
-                     
+
+#define DEVICE_VAR is_device_ptr(mp)
                hypre_BoxLoop1Begin(hypre_StructMatrixNDim(matrix), loop_size,
                                    m_data_box, start, unit_stride, mi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,mi ) HYPRE_SMP_SCHEDULE
-#endif
-               hypre_BoxLoop1For(mi)
                {
                   mp[mi] = 0.0;
                }
                hypre_BoxLoop1End(mi);
+#undef DEVICE_VAR
             }
          }
       }
@@ -1583,6 +1726,7 @@ hypre_StructMatrixPrint( const char         *filename,
    }
    else
    {
+      
       hypre_PrintBoxArrayData(file, boxes, data_space, num_values,
                               hypre_StructGridNDim(grid),
                               hypre_StructMatrixData(matrix));
@@ -1613,7 +1757,7 @@ hypre_StructMatrixMigrate( hypre_StructMatrix *from_matrix,
    HYPRE_Int              constant_coefficient, comm_num_values;
    HYPRE_Int              stencil_size, mat_num_values;
    hypre_StructStencil   *stencil;
-   HYPRE_Int              data_initial_offset = 0;
+
    HYPRE_Complex         *matrix_data_from = hypre_StructMatrixData(from_matrix);
    HYPRE_Complex         *matrix_data_to = hypre_StructMatrixData(to_matrix);
    HYPRE_Complex         *matrix_data_comm_from = matrix_data_from;
@@ -1644,9 +1788,17 @@ hypre_StructMatrixMigrate( hypre_StructMatrix *from_matrix,
       stencil_size = hypre_StructStencilSize(stencil);
       hypre_assert(stencil_size ==
                    hypre_StructStencilSize( hypre_StructMatrixStencil(to_matrix) ) );
-      data_initial_offset = stencil_size;
-      matrix_data_comm_from = &( matrix_data_from[data_initial_offset] );
-      matrix_data_comm_to = &( matrix_data_to[data_initial_offset] );
+#if defined(HYPRE_USING_CUDA)
+      if (hypre_StructGridDataLocation(hypre_StructMatrixGrid(from_matrix)) == HYPRE_MEMORY_HOST)
+      {
+	 stencil = hypre_StructMatrixStencil(from_matrix);
+	 stencil_size  = hypre_StructStencilSize(stencil);
+	 matrix_data_comm_from = hypre_StructMatrixDataConst(from_matrix) + stencil_size;
+	 stencil = hypre_StructMatrixStencil(to_matrix);
+	 stencil_size  = hypre_StructStencilSize(stencil);
+	 matrix_data_comm_to = hypre_StructMatrixDataConst(to_matrix) + stencil_size;
+      }
+#endif
    }
 
    hypre_CreateCommInfoFromGrids(hypre_StructMatrixGrid(from_matrix),
@@ -1746,7 +1898,7 @@ hypre_StructMatrixRead( MPI_Comm    comm,
    /* ... real_stencil_size is the stencil size of the matrix after it's fixed up
       by the call (if any) of hypre_StructStencilSymmetrize from
       hypre_StructMatrixInitializeShell.*/
-   stencil_shape = hypre_CTAlloc(hypre_Index, stencil_size);
+   stencil_shape = hypre_CTAlloc(hypre_Index,  stencil_size, HYPRE_MEMORY_HOST);
    for (i = 0; i < stencil_size; i++)
    {
       /* Read line of the form: "%d: %d %d %d\n" */
@@ -1832,7 +1984,7 @@ hypre_StructMatrixClearBoundary( hypre_StructMatrix *matrix)
    hypre_StructStencil *stencil;
    hypre_BoxArray      *boundary;
 
-   HYPRE_Int           i, i2, ixyz, j;
+   HYPRE_Int           i, i2, j;
 
    /*-----------------------------------------------------------------------
     * Set the matrix coefficients
@@ -1857,22 +2009,20 @@ hypre_StructMatrixClearBoundary( hypre_StructMatrix *matrix)
             data_box = hypre_BoxArrayBox(data_space, i);
             boundary = hypre_BoxArrayCreate( 0, ndim );
             hypre_GeneralBoxBoundaryIntersect(grid_box, grid, stencil_element,
-                boundary);
+                                              boundary);
             data = hypre_StructMatrixBoxData(matrix, i, j);
             hypre_ForBoxI(i2, boundary)
             {
                tmp_box = hypre_BoxArrayBox(boundary, i2);
                hypre_BoxGetSize(tmp_box, loop_size);
                start = hypre_BoxIMin(tmp_box);
+#define DEVICE_VAR is_device_ptr(data)
                hypre_BoxLoop1Begin(ndim, loop_size, data_box, start, stride, ixyz);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,ixyz) HYPRE_SMP_SCHEDULE
-#endif
-               hypre_BoxLoop1For(ixyz)
                {
                   data[ixyz] = 0.0;
                }
                hypre_BoxLoop1End(ixyz);
+#undef DEVICE_VAR
             }
             hypre_BoxArrayDestroy(boundary);
          }
@@ -1881,5 +2031,4 @@ hypre_StructMatrixClearBoundary( hypre_StructMatrix *matrix)
 
    return hypre_error_flag;
 }
-
 

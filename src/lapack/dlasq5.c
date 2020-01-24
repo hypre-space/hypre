@@ -1,8 +1,14 @@
+/* Copyright (c) 1992-2008 The University of Tennessee.  All rights reserved.
+ * See file COPYING in this directory for details. */
 
-#include "hypre_lapack.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "f2c.h"
+#include "hypre_lapack.h"
 
-/* Subroutine */ HYPRE_Int dlasq5_(integer *i0, integer *n0, doublereal *z__, 
+/* Subroutine */ integer dlasq5_(integer *i0, integer *n0, doublereal *z__, 
 	integer *pp, doublereal *tau, doublereal *dmin__, doublereal *dmin1, 
 	doublereal *dmin2, doublereal *dn, doublereal *dnm1, doublereal *dnm2,
 	 logical *ieee)
@@ -209,3 +215,6 @@
 
 } /* dlasq5_ */
 
+#ifdef __cplusplus
+}
+#endif

@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include <stdio.h>
 #include <string.h>
@@ -184,8 +179,8 @@ int MLI_Solver_GMRES::solve(MLI_Vector *b_in, MLI_Vector *u_in)
     *-----------------------------------------------------------------*/
 
    r  = (hypre_ParVector *) rVec_->getVector();
-   p  = (hypre_ParVector **) malloc(sizeof(hypre_ParVector *) * (KDim_+1)); 
-   z  = (hypre_ParVector **) malloc(sizeof(hypre_ParVector *) * (KDim_+1)); 
+   p  = hypre_TAlloc(hypre_ParVector *,  (KDim_+1), HYPRE_MEMORY_HOST); 
+   z  = hypre_TAlloc(hypre_ParVector *,  (KDim_+1), HYPRE_MEMORY_HOST); 
    for ( i = 0; i <= KDim_; i++ )
       p[i] = (hypre_ParVector *) pVec_[i]->getVector();
    for ( i = 0; i <= KDim_; i++ )

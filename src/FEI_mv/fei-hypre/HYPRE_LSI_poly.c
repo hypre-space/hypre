@@ -1,17 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -52,7 +44,7 @@ int HYPRE_LSI_PolyCreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
    HYPRE_LSI_Poly *poly_ptr;
    
-   poly_ptr = (HYPRE_LSI_Poly *) malloc(sizeof(HYPRE_LSI_Poly));
+   poly_ptr = hypre_TAlloc(HYPRE_LSI_Poly, 1, HYPRE_MEMORY_HOST);
 
    if (poly_ptr == NULL) return 1;
 
@@ -134,7 +126,7 @@ int HYPRE_LSI_PolySolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
       printf("HYPRE_LSI_PolySolve ERROR : PolySetup not called.\n");
       exit(1);
    }
-   orig_rhs = (double *) malloc( Nrows * sizeof(double) );
+   orig_rhs = hypre_TAlloc(double,  Nrows , HYPRE_MEMORY_HOST);
    for ( i = 0; i < Nrows; i++ ) 
    {
       orig_rhs[i] = rhs[i]; 
@@ -175,7 +167,7 @@ int HYPRE_LSI_PolySetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
    /* ---------------------------------------------------------------- */
 
    order = poly_ptr->order;
-   coefs = (double *) malloc((order+1) * sizeof(double));
+   coefs = hypre_TAlloc(double, (order+1) , HYPRE_MEMORY_HOST);
    poly_ptr->coefficients = coefs;
 
    /* ---------------------------------------------------------------- */
@@ -191,7 +183,7 @@ int HYPRE_LSI_PolySetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
 
    startRow  = row_partition[my_id];
    endRow    = row_partition[my_id+1] - 1;
-   hypre_TFree( row_partition ); 
+   hypre_TFree( row_partition , HYPRE_MEMORY_HOST); 
    poly_ptr->Nrows = endRow - startRow + 1;
 
    max_norm = 0.0;

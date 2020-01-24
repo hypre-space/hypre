@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /* HYPRE_sstruct_graph.c */
 HYPRE_Int HYPRE_SStructGraphCreate ( MPI_Comm comm , HYPRE_SStructGrid grid , HYPRE_SStructGraph *graph_ptr );
@@ -94,7 +89,7 @@ HYPRE_Int hypre_SStructCopy ( hypre_SStructVector *x , hypre_SStructVector *y );
 
 /* sstruct_graph.c */
 HYPRE_Int hypre_SStructGraphRef ( hypre_SStructGraph *graph , hypre_SStructGraph **graph_ref );
-HYPRE_Int hypre_SStructGraphGetUVEntryRank( hypre_SStructGraph *graph , HYPRE_Int part , HYPRE_Int var , hypre_Index index, HYPRE_Int *rank );
+HYPRE_Int hypre_SStructGraphGetUVEntryRank( hypre_SStructGraph *graph , HYPRE_Int part , HYPRE_Int var , hypre_Index index, HYPRE_BigInt *rank );
 HYPRE_Int hypre_SStructGraphFindBoxEndpt ( hypre_SStructGraph *graph , HYPRE_Int part , HYPRE_Int var , HYPRE_Int proc , HYPRE_Int endpt , HYPRE_Int boxi );
 HYPRE_Int hypre_SStructGraphFindSGridEndpts ( hypre_SStructGraph *graph , HYPRE_Int part , HYPRE_Int var , HYPRE_Int proc , HYPRE_Int endpt , HYPRE_Int *endpts );
 
@@ -116,8 +111,8 @@ HYPRE_Int hypre_SStructGridFindNborBoxManEntry ( hypre_SStructGrid *grid , HYPRE
 HYPRE_Int hypre_SStructGridBoxProcFindBoxManEntry ( hypre_SStructGrid *grid , HYPRE_Int part , HYPRE_Int var , HYPRE_Int box , HYPRE_Int proc , hypre_BoxManEntry **entry_ptr );
 HYPRE_Int hypre_SStructBoxManEntryGetCSRstrides ( hypre_BoxManEntry *entry , hypre_Index strides );
 HYPRE_Int hypre_SStructBoxManEntryGetGhstrides ( hypre_BoxManEntry *entry , hypre_Index strides );
-HYPRE_Int hypre_SStructBoxManEntryGetGlobalCSRank ( hypre_BoxManEntry *entry , hypre_Index index , HYPRE_Int *rank_ptr );
-HYPRE_Int hypre_SStructBoxManEntryGetGlobalGhrank ( hypre_BoxManEntry *entry , hypre_Index index , HYPRE_Int *rank_ptr );
+HYPRE_Int hypre_SStructBoxManEntryGetGlobalCSRank ( hypre_BoxManEntry *entry , hypre_Index index , HYPRE_BigInt *rank_ptr );
+HYPRE_Int hypre_SStructBoxManEntryGetGlobalGhrank ( hypre_BoxManEntry *entry , hypre_Index index , HYPRE_BigInt *rank_ptr );
 HYPRE_Int hypre_SStructBoxManEntryGetProcess ( hypre_BoxManEntry *entry , HYPRE_Int *proc_ptr );
 HYPRE_Int hypre_SStructBoxManEntryGetBoxnum ( hypre_BoxManEntry *entry , HYPRE_Int *id_ptr );
 HYPRE_Int hypre_SStructBoxManEntryGetPart ( hypre_BoxManEntry *entry , HYPRE_Int part , HYPRE_Int *part_ptr );
@@ -127,7 +122,7 @@ HYPRE_Int hypre_SStructNborIndexToIndex( hypre_Index nbor_index , hypre_Index ro
 HYPRE_Int hypre_SStructNborBoxToBox ( hypre_Box *nbor_box , hypre_Index root , hypre_Index nbor_root , hypre_Index coord , hypre_Index dir );
 HYPRE_Int hypre_SStructVarToNborVar ( hypre_SStructGrid *grid , HYPRE_Int part , HYPRE_Int var , HYPRE_Int *coord , HYPRE_Int *nbor_var_ptr );
 HYPRE_Int hypre_SStructGridSetNumGhost ( hypre_SStructGrid *grid , HYPRE_Int *num_ghost );
-HYPRE_Int hypre_SStructBoxManEntryGetGlobalRank ( hypre_BoxManEntry *entry , hypre_Index index , HYPRE_Int *rank_ptr , HYPRE_Int type );
+HYPRE_Int hypre_SStructBoxManEntryGetGlobalRank ( hypre_BoxManEntry *entry , hypre_Index index , HYPRE_BigInt *rank_ptr , HYPRE_Int type );
 HYPRE_Int hypre_SStructBoxManEntryGetStrides ( hypre_BoxManEntry *entry , hypre_Index strides , HYPRE_Int type );
 HYPRE_Int hypre_SStructBoxNumMap ( hypre_SStructGrid *grid , HYPRE_Int part , HYPRE_Int boxnum , HYPRE_Int **num_varboxes_ptr , HYPRE_Int ***map_ptr );
 HYPRE_Int hypre_SStructCellGridBoxNumMap ( hypre_SStructGrid *grid , HYPRE_Int part , HYPRE_Int ***num_varboxes_ptr , HYPRE_Int ****map_ptr );
@@ -144,20 +139,20 @@ HYPRE_Int hypre_SStructPMatrixCreate ( MPI_Comm comm , hypre_SStructPGrid *pgrid
 HYPRE_Int hypre_SStructPMatrixDestroy ( hypre_SStructPMatrix *pmatrix );
 HYPRE_Int hypre_SStructPMatrixInitialize ( hypre_SStructPMatrix *pmatrix );
 HYPRE_Int hypre_SStructPMatrixSetValues ( hypre_SStructPMatrix *pmatrix , hypre_Index index , HYPRE_Int var , HYPRE_Int nentries , HYPRE_Int *entries , HYPRE_Complex *values , HYPRE_Int action );
-HYPRE_Int hypre_SStructPMatrixSetBoxValues ( hypre_SStructPMatrix *pmatrix , hypre_Index ilower , hypre_Index iupper , HYPRE_Int var , HYPRE_Int nentries , HYPRE_Int *entries , HYPRE_Complex *values , HYPRE_Int action );
+HYPRE_Int hypre_SStructPMatrixSetBoxValues( hypre_SStructPMatrix *pmatrix , hypre_Box *set_box , HYPRE_Int var , HYPRE_Int nentries , HYPRE_Int *entries , hypre_Box *value_box , HYPRE_Complex *values , HYPRE_Int action );
 HYPRE_Int hypre_SStructPMatrixAccumulate ( hypre_SStructPMatrix *pmatrix );
 HYPRE_Int hypre_SStructPMatrixAssemble ( hypre_SStructPMatrix *pmatrix );
 HYPRE_Int hypre_SStructPMatrixSetSymmetric ( hypre_SStructPMatrix *pmatrix , HYPRE_Int var , HYPRE_Int to_var , HYPRE_Int symmetric );
 HYPRE_Int hypre_SStructPMatrixPrint ( const char *filename , hypre_SStructPMatrix *pmatrix , HYPRE_Int all );
 HYPRE_Int hypre_SStructUMatrixInitialize ( hypre_SStructMatrix *matrix );
 HYPRE_Int hypre_SStructUMatrixSetValues ( hypre_SStructMatrix *matrix , HYPRE_Int part , hypre_Index index , HYPRE_Int var , HYPRE_Int nentries , HYPRE_Int *entries , HYPRE_Complex *values , HYPRE_Int action );
-HYPRE_Int hypre_SStructUMatrixSetBoxValues ( hypre_SStructMatrix *matrix , HYPRE_Int part , hypre_Index ilower , hypre_Index iupper , HYPRE_Int var , HYPRE_Int nentries , HYPRE_Int *entries , HYPRE_Complex *values , HYPRE_Int action );
+HYPRE_Int hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix , HYPRE_Int part , hypre_Box *set_box , HYPRE_Int var , HYPRE_Int nentries , HYPRE_Int *entries , hypre_Box *value_box , HYPRE_Complex *values , HYPRE_Int action );
 HYPRE_Int hypre_SStructUMatrixAssemble ( hypre_SStructMatrix *matrix );
 HYPRE_Int hypre_SStructMatrixRef ( hypre_SStructMatrix *matrix , hypre_SStructMatrix **matrix_ref );
 HYPRE_Int hypre_SStructMatrixSplitEntries ( hypre_SStructMatrix *matrix , HYPRE_Int part , HYPRE_Int var , HYPRE_Int nentries , HYPRE_Int *entries , HYPRE_Int *nSentries_ptr , HYPRE_Int **Sentries_ptr , HYPRE_Int *nUentries_ptr , HYPRE_Int **Uentries_ptr );
 HYPRE_Int hypre_SStructMatrixSetValues ( HYPRE_SStructMatrix matrix , HYPRE_Int part , HYPRE_Int *index , HYPRE_Int var , HYPRE_Int nentries , HYPRE_Int *entries , HYPRE_Complex *values , HYPRE_Int action );
-HYPRE_Int hypre_SStructMatrixSetBoxValues ( HYPRE_SStructMatrix matrix , HYPRE_Int part , HYPRE_Int *ilower , HYPRE_Int *iupper , HYPRE_Int var , HYPRE_Int nentries , HYPRE_Int *entries , HYPRE_Complex *values , HYPRE_Int action );
-HYPRE_Int hypre_SStructMatrixSetInterPartValues ( HYPRE_SStructMatrix matrix , HYPRE_Int part , hypre_Index ilower , hypre_Index iupper , HYPRE_Int var , HYPRE_Int nentries , HYPRE_Int *entries , HYPRE_Complex *values , HYPRE_Int action );
+HYPRE_Int hypre_SStructMatrixSetBoxValues( HYPRE_SStructMatrix matrix , HYPRE_Int part , hypre_Box *set_box , HYPRE_Int var , HYPRE_Int nentries , HYPRE_Int *entries , hypre_Box *value_box , HYPRE_Complex *values , HYPRE_Int action );
+HYPRE_Int hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix matrix , HYPRE_Int part , hypre_Box *set_box , HYPRE_Int var , HYPRE_Int nentries , HYPRE_Int *entries , hypre_Box *value_box , HYPRE_Complex *values , HYPRE_Int action );
 
 /* sstruct_matvec.c */
 HYPRE_Int hypre_SStructPMatvecCreate ( void **pmatvec_vdata_ptr );
@@ -184,12 +179,12 @@ HYPRE_Int hypre_SStructPVectorCreate ( MPI_Comm comm , hypre_SStructPGrid *pgrid
 HYPRE_Int hypre_SStructPVectorDestroy ( hypre_SStructPVector *pvector );
 HYPRE_Int hypre_SStructPVectorInitialize ( hypre_SStructPVector *pvector );
 HYPRE_Int hypre_SStructPVectorSetValues ( hypre_SStructPVector *pvector , hypre_Index index , HYPRE_Int var , HYPRE_Complex *value , HYPRE_Int action );
-HYPRE_Int hypre_SStructPVectorSetBoxValues ( hypre_SStructPVector *pvector , hypre_Index ilower , hypre_Index iupper , HYPRE_Int var , HYPRE_Complex *values , HYPRE_Int action );
+HYPRE_Int hypre_SStructPVectorSetBoxValues( hypre_SStructPVector *pvector , hypre_Box *set_box , HYPRE_Int var , hypre_Box *value_box , HYPRE_Complex *values , HYPRE_Int action );
 HYPRE_Int hypre_SStructPVectorAccumulate ( hypre_SStructPVector *pvector );
 HYPRE_Int hypre_SStructPVectorAssemble ( hypre_SStructPVector *pvector );
 HYPRE_Int hypre_SStructPVectorGather ( hypre_SStructPVector *pvector );
 HYPRE_Int hypre_SStructPVectorGetValues ( hypre_SStructPVector *pvector , hypre_Index index , HYPRE_Int var , HYPRE_Complex *value );
-HYPRE_Int hypre_SStructPVectorGetBoxValues ( hypre_SStructPVector *pvector , hypre_Index ilower , hypre_Index iupper , HYPRE_Int var , HYPRE_Complex *values );
+HYPRE_Int hypre_SStructPVectorGetBoxValues( hypre_SStructPVector *pvector , hypre_Box *set_box , HYPRE_Int var , hypre_Box *value_box , HYPRE_Complex *values );
 HYPRE_Int hypre_SStructPVectorSetConstantValues ( hypre_SStructPVector *pvector , HYPRE_Complex value );
 HYPRE_Int hypre_SStructPVectorPrint ( const char *filename , hypre_SStructPVector *pvector , HYPRE_Int all );
 HYPRE_Int hypre_SStructVectorRef ( hypre_SStructVector *vector , hypre_SStructVector **vector_ref );

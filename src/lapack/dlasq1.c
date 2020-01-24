@@ -1,6 +1,12 @@
-#include "../blas/hypre_blas.h"
-#include "hypre_lapack.h"
+/* Copyright (c) 1992-2008 The University of Tennessee.  All rights reserved.
+ * See file COPYING in this directory for details. */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "f2c.h"
+#include "hypre_lapack.h"
 
 /*  -- translated by f2c (version 19990503).
    You must link the resulting object file with the libraries:
@@ -13,33 +19,30 @@ static integer c__1 = 1;
 static integer c__2 = 2;
 static integer c__0 = 0;
 
-/* Subroutine */ HYPRE_Int dlasq1_(integer *n, doublereal *d__, doublereal *e, 
+/* Subroutine */ integer dlasq1_(integer *n, doublereal *d__, doublereal *e, 
 	doublereal *work, integer *info)
 {
     /* System generated locals */
     integer i__1, i__2;
     doublereal d__1, d__2, d__3;
 
-    /* Builtin functions */
-    HYPRE_Real sqrt(doublereal);
-
     /* Local variables */
-    extern /* Subroutine */ HYPRE_Int dlas2_(doublereal *, doublereal *, doublereal 
+    extern /* Subroutine */ integer dlas2_(doublereal *, doublereal *, doublereal 
 	    *, doublereal *, doublereal *);
     static integer i__;
     static doublereal scale;
     static integer iinfo;
     static doublereal sigmn;
-    extern /* Subroutine */ HYPRE_Int dcopy_(integer *, doublereal *, integer *, 
+    extern /* Subroutine */ integer dcopy_(integer *, doublereal *, integer *, 
 	    doublereal *, integer *);
     static doublereal sigmx;
-    extern /* Subroutine */ HYPRE_Int dlasq2_(integer *, doublereal *, integer *);
+    extern /* Subroutine */ integer dlasq2_(integer *, doublereal *, integer *);
     extern doublereal dlamch_(const char *);
-    extern /* Subroutine */ HYPRE_Int dlascl_(const char *, integer *, integer *, 
+    extern /* Subroutine */ integer dlascl_(const char *, integer *, integer *, 
 	    doublereal *, doublereal *, integer *, integer *, doublereal *, 
 	    integer *, integer *);
     static doublereal safmin;
-    extern /* Subroutine */ HYPRE_Int xerbla_(const char *, integer *), dlasrt_(
+    extern /* Subroutine */ integer xerbla_(const char *, integer *), dlasrt_(
 	    const char *, integer *, doublereal *, integer *);
     static doublereal eps;
 
@@ -192,3 +195,6 @@ static integer c__0 = 0;
 
 } /* dlasq1_ */
 
+#ifdef __cplusplus
+}
+#endif

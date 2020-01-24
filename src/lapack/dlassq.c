@@ -1,8 +1,14 @@
+/* Copyright (c) 1992-2008 The University of Tennessee.  All rights reserved.
+ * See file COPYING in this directory for details. */
 
-#include "hypre_lapack.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "f2c.h"
+#include "hypre_lapack.h"
 
-/* Subroutine */ HYPRE_Int dlassq_(integer *n, doublereal *x, integer *incx, 
+/* Subroutine */ integer dlassq_(integer *n, doublereal *x, integer *incx, 
 	doublereal *scale, doublereal *sumsq)
 {
 /*  -- LAPACK auxiliary routine (version 3.0) --   
@@ -92,3 +98,6 @@
 
 } /* dlassq_ */
 
+#ifdef __cplusplus
+}
+#endif

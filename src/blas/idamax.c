@@ -1,4 +1,9 @@
+/* Copyright (c) 1992-2008 The University of Tennessee.  All rights reserved.
+ * See file COPYING in this directory for details. */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /*  -- translated by f2c (version 19940927).
    You must link the resulting object file with the libraries:
@@ -78,3 +83,6 @@ L30:
     return ret_val;
 } /* idamax_ */
 
+#ifdef __cplusplus
+}
+#endif

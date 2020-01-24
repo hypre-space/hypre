@@ -1,17 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #ifndef HYPRE_PAR_CSR_COMMUNICATION_HEADER
 #define HYPRE_PAR_CSR_COMMUNICATION_HEADER
@@ -29,6 +21,8 @@ typedef enum CommPkgJobType
    HYPRE_COMM_PKG_JOB_COMPLEX_TRANSPOSE,
    HYPRE_COMM_PKG_JOB_INT,
    HYPRE_COMM_PKG_JOB_INT_TRANSPOSE,
+   HYPRE_COMM_PKG_JOB_BIGINT,
+   HYPRE_COMM_PKG_JOB_BIGINT_TRANSPOSE,
    NUM_OF_COMM_PKG_JOB_TYPE,
 } CommPkgJobType;
 
@@ -49,18 +43,18 @@ typedef struct
 {
    MPI_Comm               comm;
 
-   HYPRE_Int                    num_sends;
-   HYPRE_Int                   *send_procs;
-   HYPRE_Int			 *send_map_starts;
-   HYPRE_Int			 *send_map_elmts;
+   HYPRE_Int              num_sends;
+   HYPRE_Int             *send_procs;
+   HYPRE_Int             *send_map_starts;
+   HYPRE_Int             *send_map_elmts;
 
-   HYPRE_Int                    num_recvs;
-   HYPRE_Int                   *recv_procs;
-   HYPRE_Int                   *recv_vec_starts;
+   HYPRE_Int              num_recvs;
+   HYPRE_Int             *recv_procs;
+   HYPRE_Int             *recv_vec_starts;
 
    /* remote communication information */
-   hypre_MPI_Datatype          *send_mpi_types;
-   hypre_MPI_Datatype          *recv_mpi_types;
+   hypre_MPI_Datatype    *send_mpi_types;
+   hypre_MPI_Datatype    *recv_mpi_types;
 
 #ifdef HYPRE_USING_PERSISTENT_COMM
    hypre_ParCSRPersistentCommHandle *persistent_comm_handles[NUM_OF_COMM_PKG_JOB_TYPE];
@@ -74,8 +68,8 @@ typedef struct
 typedef struct
 {
    hypre_ParCSRCommPkg  *comm_pkg;
-   void 	  *send_data;
-   void 	  *recv_data;
+   void                 *send_data;
+   void                 *recv_data;
 
    HYPRE_Int             num_requests;
    hypre_MPI_Request    *requests;
@@ -85,9 +79,9 @@ typedef struct
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_ParCSRCommPkg
  *--------------------------------------------------------------------------*/
- 
+
 #define hypre_ParCSRCommPkgComm(comm_pkg)          (comm_pkg -> comm)
-                                               
+
 #define hypre_ParCSRCommPkgNumSends(comm_pkg)      (comm_pkg -> num_sends)
 #define hypre_ParCSRCommPkgSendProcs(comm_pkg)     (comm_pkg -> send_procs)
 #define hypre_ParCSRCommPkgSendProc(comm_pkg, i)   (comm_pkg -> send_procs[i])
@@ -111,7 +105,7 @@ typedef struct
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_ParCSRCommHandle
  *--------------------------------------------------------------------------*/
- 
+
 #define hypre_ParCSRCommHandleCommPkg(comm_handle)     (comm_handle -> comm_pkg)
 #define hypre_ParCSRCommHandleSendData(comm_handle)    (comm_handle -> send_data)
 #define hypre_ParCSRCommHandleRecvData(comm_handle)    (comm_handle -> recv_data)
