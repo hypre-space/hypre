@@ -628,9 +628,10 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
    //   HYPRE_ParCSRMatrixDestroy(maxwellGEN_);
    //   maxwellGEN_ = NULL;
    //}
-   if (AMSData_.EdgeNodeList_ != NULL) delete [] AMSData_.EdgeNodeList_;
-   if (AMSData_.NodeNumbers_  != NULL) delete [] AMSData_.NodeNumbers_;
-   if (AMSData_.NodalCoord_   != NULL) delete [] AMSData_.NodalCoord_;
+   // This data seems to be freed by hypre_AMSFEIDestroy in ams.c
+   //if (AMSData_.EdgeNodeList_ != NULL) hypre_TFree(AMSData_.EdgeNodeList_, HYPRE_MEMORY_HOST);
+   if (AMSData_.NodeNumbers_  != NULL) hypre_TFree(AMSData_.NodeNumbers_, HYPRE_MEMORY_HOST);
+   if (AMSData_.NodalCoord_   != NULL) hypre_TFree(AMSData_.NodalCoord_, HYPRE_MEMORY_HOST);
    if (FEI_mixedDiag_ != NULL) delete [] FEI_mixedDiag_;
 
    //-------------------------------------------------------------------
@@ -2398,12 +2399,12 @@ int HYPRE_LinSysCore::putNodalFieldData(int fieldID, int fieldSize,
             }
          }
          nRows = localEndRow_ - localStartRow_ + 1;
-         if (AMSData_.EdgeNodeList_ != NULL) delete [] AMSData_.EdgeNodeList_;
+         if (AMSData_.EdgeNodeList_ != NULL) hypre_TFree(AMSData_.EdgeNodeList_, HYPRE_MEMORY_HOST);
          AMSData_.EdgeNodeList_ = NULL;
          if (newNumEdges > 0)
          {
             AMSData_.numEdges_ = nRows;
-            AMSData_.EdgeNodeList_ = new int[nRows*fieldSize];
+            AMSData_.EdgeNodeList_ = hypre_CTAlloc(HYPRE_BigInt, nRows*fieldSize, HYPRE_MEMORY_HOST);
             for (i = 0; i < nRows*fieldSize; i++)
                AMSData_.EdgeNodeList_[i] = -99999;
             for (i = 0; i < newNumEdges; i++)
@@ -2444,8 +2445,8 @@ int HYPRE_LinSysCore::putNodalFieldData(int fieldID, int fieldSize,
          blockID        = blockIDs[0];
          nodeFieldIDs   = (int **) lookup_->getFieldIDsTable(blockID);
          nodeFieldID    = nodeFieldIDs[0][0];
-         if (AMSData_.NodeNumbers_ != NULL) delete [] AMSData_.NodeNumbers_;
-         if (AMSData_.NodalCoord_  != NULL) delete [] AMSData_.NodalCoord_;
+         if (AMSData_.NodeNumbers_ != NULL) hypre_TFree(AMSData_.NodeNumbers_, HYPRE_MEMORY_HOST);
+         if (AMSData_.NodalCoord_  != NULL) hypre_TFree(AMSData_.NodalCoord_, HYPRE_MEMORY_HOST);
          AMSData_.NodeNumbers_ = NULL;
          AMSData_.NodalCoord_  = NULL;
          AMSData_.numNodes_ = 0;
@@ -2453,8 +2454,8 @@ int HYPRE_LinSysCore::putNodalFieldData(int fieldID, int fieldSize,
          {
             AMSData_.numNodes_ = numNodes;
             AMSData_.numLocalNodes_ = localEndRow_ - localStartRow_ + 1;
-            AMSData_.NodeNumbers_ = new int[numNodes];
-            AMSData_.NodalCoord_  = new double[fieldSize*numNodes];
+            AMSData_.NodeNumbers_ = hypre_CTAlloc(HYPRE_BigInt, numNodes, HYPRE_MEMORY_HOST);
+            AMSData_.NodalCoord_  = hypre_CTAlloc(HYPRE_Real, fieldSize*numNodes, HYPRE_MEMORY_HOST);
             for (i = 0; i < numNodes; i++)
             {
                index = lookup_->getEqnNumber(nodeNumbers[i],nodeFieldID);
@@ -3469,16 +3470,16 @@ int HYPRE_LinSysCore::copyInMatrix(double scalar, const Data& data)
    else if (!strcmp(name, "AMSData"))
    {
       auxAMSData = (HYPRE_FEI_AMSData *) data.getDataPtr();
-      if (AMSData_.NodeNumbers_ != NULL) delete [] AMSData_.NodeNumbers_;
-      if (AMSData_.NodalCoord_  != NULL) delete [] AMSData_.NodalCoord_;
+      if (AMSData_.NodeNumbers_ != NULL) hypre_TFree(AMSData_.NodeNumbers_, HYPRE_MEMORY_HOST);
+      if (AMSData_.NodalCoord_  != NULL) hypre_TFree(AMSData_.NodalCoord_, HYPRE_MEMORY_HOST);
       AMSData_.NodeNumbers_ = NULL;
       AMSData_.NodalCoord_  = NULL;
       AMSData_.numNodes_ = auxAMSData->numNodes_;
       AMSData_.numLocalNodes_ = auxAMSData->numLocalNodes_;
       if (AMSData_.numNodes_ > 0)
       {
-         AMSData_.NodeNumbers_ = new int[AMSData_.numNodes_];
-         AMSData_.NodalCoord_  = new double[AMSData_.numNodes_*mlNumPDEs_];
+         AMSData_.NodeNumbers_ = hypre_CTAlloc(HYPRE_BigInt, AMSData_.numNodes_, HYPRE_MEMORY_HOST);
+         AMSData_.NodalCoord_  = hypre_CTAlloc(HYPRE_Real, AMSData_.numNodes_*mlNumPDEs_, HYPRE_MEMORY_HOST);
          for (i = 0; i < AMSData_.numNodes_; i++)
             AMSData_.NodeNumbers_[i] = auxAMSData->NodeNumbers_[i];
          for (i = 0; i < AMSData_.numNodes_*mlNumPDEs_; i++)
