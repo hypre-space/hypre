@@ -12,6 +12,7 @@
 #include "HYPRE_seq_mv.h"
 #include "HYPRE_parcsr_mv.h"
 #include "HYPRE_IJ_mv.h"
+#include "HYPRE_lobpcg.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -3864,10 +3865,6 @@ HYPRE_Int HYPRE_BoomerAMGSetISType(HYPRE_Solver solver,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-/* These includes shouldn't be here. (RDF) */
-#include "interpreter.h"
-#include "HYPRE_MatvecFunctions.h"
-
 /**
  * @name ParCSR LOBPCG Eigensolver
  *
@@ -3889,20 +3886,17 @@ HYPRE_ParCSRSetupInterpreter(mv_InterfaceInterpreter *i);
 HYPRE_Int
 HYPRE_ParCSRSetupMatvec(HYPRE_MatvecFunctions *mv);
 
-/* The next routines should not be here (lower-case prefix). (RDF) */
-
 /*
  * Print multivector to file.
  **/
 HYPRE_Int
-hypre_ParCSRMultiVectorPrint(void *x_, const char *fileName);
+HYPRE_ParCSRMultiVectorPrint(void *x_, const char *fileName);
 
 /*
  * Read multivector from file.
  **/
 void *
-hypre_ParCSRMultiVectorRead(MPI_Comm comm, void *ii_, const char *fileName);
-
+HYPRE_ParCSRMultiVectorRead(MPI_Comm comm, void *ii_, const char *fileName);
 
 /*@}*/
 

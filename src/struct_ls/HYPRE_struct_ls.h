@@ -10,6 +10,7 @@
 
 #include "HYPRE_utilities.h"
 #include "HYPRE_struct_mv.h"
+#include "HYPRE_lobpcg.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -1101,11 +1102,6 @@ HYPRE_Int HYPRE_StructSparseMSGGetFinalRelativeResidualNorm(HYPRE_StructSolver  
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-/* These includes shouldn't be here. (RDF) */
-#include "interpreter.h"
-#include "HYPRE_MatvecFunctions.h"
-#include "_hypre_struct_mv.h"
-
 /**
  * @name Struct LOBPCG Eigensolver
  *
@@ -1126,20 +1122,6 @@ HYPRE_StructSetupInterpreter(mv_InterfaceInterpreter *i);
  **/
 HYPRE_Int
 HYPRE_StructSetupMatvec(HYPRE_MatvecFunctions *mv);
-
-/* The next routines should not be here (lower-case prefix). (RDF) */
-
-/*
- * Set hypre_StructPVector to random values.
- **/
-HYPRE_Int
-hypre_StructVectorSetRandomValues(hypre_StructVector *vector, HYPRE_Int seed);
-
-/*
- * Same as hypre_StructVectorSetRandomValues except uses void pointer.
- **/
-HYPRE_Int
-hypre_StructSetRandomValues(void *v, HYPRE_Int seed);
 
 /*@}*/
 
