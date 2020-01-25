@@ -209,9 +209,13 @@ hypreCUDAKernel_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_
 }
 
 /* B = A(row_indices, :) */
-/* d_ib is input that contains row ptrs, of length (nrows + 1) or nrow (without the last entry, nnz) */
-/* special case: if d_row_indices == NULL, it means d_row_indices=[0,1,...,nrows-1]
- * if col_map_offd_A == NULL, use (-1 - d_offd_j) as column id*/
+/* Note: d_ib is an input vector that contains row ptrs, 
+ *       i.e., start positions where to put the rows in d_jb and d_ab.
+ *       The col indices in B are global indices
+ *       of length (nrows + 1) or nrow (without the last entry, nnz) */
+/* Special case:
+ *    if d_row_indices == NULL, it means d_row_indices=[0,1,...,nrows-1]
+ *    If col_map_offd_A == NULL, use (-1 - d_offd_j) as column id*/
 HYPRE_Int
 hypreDevice_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int job, HYPRE_Int has_offd,
                            HYPRE_BigInt first_col, HYPRE_BigInt *d_col_map_offd_A,

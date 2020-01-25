@@ -209,8 +209,8 @@ hypre_ParCSRMatMat( hypre_ParCSRMatrix  *A,
    hypre_NvtxPushRange("Mat-Mat");
 #endif
 
-   HYPRE_Int exec = hypre_GetExecPolicy2( hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(A)),
-                                          hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(B)) );
+   HYPRE_Int exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A),
+                                          hypre_ParCSRMatrixMemoryLocation(B) );
 
    hypre_assert(exec != HYPRE_EXEC_UNSET);
 
@@ -483,8 +483,8 @@ hypre_ParCSRTMatMatKT( hypre_ParCSRMatrix  *A,
    hypre_NvtxPushRange("Mat-T-Mat");
 #endif
 
-   HYPRE_Int exec = hypre_GetExecPolicy2( hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(A)),
-                                          hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(B)) );
+   HYPRE_Int exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A),
+                                          hypre_ParCSRMatrixMemoryLocation(B) );
 
    hypre_assert(exec != HYPRE_EXEC_UNSET);
 
