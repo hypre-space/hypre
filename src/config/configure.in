@@ -1214,9 +1214,9 @@ then
 
       if test "$hypre_using_openmp" = "yes"
       then
-         AC_CHECK_PROGS(CC, [mpxlc mpixlc_r mpixlc mpiicc mpigcc mpicc mpipgcc])
+         AC_CHECK_PROGS(CC, [mpxlc mpixlc_r mpixlc mpiicc mpigcc mpicc mpipgcc mpipgicc])
       else
-         AC_CHECK_PROGS(CC, [mpxlc mpixlc mpiicc mpigcc mpicc mpipgcc])
+         AC_CHECK_PROGS(CC, [mpxlc mpixlc mpiicc mpigcc mpicc mpipgcc mpipgicc])
       fi
    fi
 
@@ -1237,9 +1237,9 @@ then
 
       if test "$hypre_using_openmp" = "yes"
       then
-         AC_CHECK_PROGS(CXX, [xlC_r xlc_r xlC xlc icpc icc g++ gcc pgCC pgcc CC cc KCC kcc])
+         AC_CHECK_PROGS(CXX, [xlC_r xlc_r xlC xlc icpc icc g++ gcc pgCC pgcc pgc++ CC cc KCC kcc])
       else
-         AC_CHECK_PROGS(CXX, [xlC xlc icpc icc g++ gcc pgCC pgcc CC cc KCC kcc])
+         AC_CHECK_PROGS(CXX, [xlC xlc icpc icc g++ gcc pgCC pgcc pgc++ CC cc KCC kcc])
       fi
    else
       if test "$hypre_using_device_openmp" = "yes"
@@ -1249,9 +1249,9 @@ then
 
       if test "$hypre_using_openmp" = "yes"
       then
-         AC_CHECK_PROGS(CXX, [mpxlC mpixlcxx_r mpixlcxx mpixlC mpiicpc mpig++ mpic++ mpicxx mpiCC mpipgCC])
+         AC_CHECK_PROGS(CXX, [mpxlC mpixlcxx_r mpixlcxx mpixlC mpiicpc mpig++ mpic++ mpicxx mpiCC mpipgCC mpipgic++])
       else
-         AC_CHECK_PROGS(CXX, [mpxlC mpixlcxx mpixlC mpiicpc mpig++ mpic++ mpicxx mpiCC mpipgCC])
+         AC_CHECK_PROGS(CXX, [mpxlC mpixlcxx mpixlC mpiicpc mpig++ mpic++ mpicxx mpiCC mpipgCC mpipgic++])
       fi
    fi
 
@@ -1267,16 +1267,16 @@ then
    then
       if test "$hypre_using_openmp" = "yes"
       then
-         AC_CHECK_PROGS(FC, [xlf_r ifort gfortran g77 g95 pgf77 f77])
+         AC_CHECK_PROGS(FC, [xlf_r ifort gfortran g77 g95 pgf77 pgfortran f77])
       else
-         AC_CHECK_PROGS(FC, [xlf ifort gfortran g77 g95 pgf77 f77])
+         AC_CHECK_PROGS(FC, [xlf ifort gfortran g77 g95 pgf77 pgfortran  f77])
       fi
    else
       if test "$hypre_using_openmp" = "yes"
       then
-         AC_CHECK_PROGS(FC, [mpxlf mpixlf77_r mpiifort mpif77 mpipgf77])
+         AC_CHECK_PROGS(FC, [mpxlf mpixlf77_r mpiifort mpif77 mpipgf77 mpipgifort])
       else
-         AC_CHECK_PROGS(FC, [mpxlf mpixlf77 mpiifort mpif77 mpipgf77])
+         AC_CHECK_PROGS(FC, [mpxlf mpixlf77 mpiifort mpif77 mpipgf77 mpipgifort])
       fi
    fi
 
@@ -1750,12 +1750,18 @@ then
 
    HYPRE_CUDA_GENCODE="-gencode arch=compute_${HYPRE_CUDA_SM},\"code=sm_${HYPRE_CUDA_SM}\""
 
-   CUFLAGS+="-O2 -ccbin=$NVCCBIN ${HYPRE_CUDA_GENCODE} -expt-extended-lambda -dc -std=c++11 -Xcompiler -Wno-deprecated-register --x cu"
+   CUFLAGS+="-O2 -ccbin=$NVCCBIN ${HYPRE_CUDA_GENCODE} -expt-extended-lambda -dc -std=c++11 --x cu"
    if test "$hypre_using_debug" = "yes"
    then
       CUFLAGS="-g ${CUFLAGS}"
    fi
+
+   if [test "$CXX" = "mpixlC" || test "$CXX" = "xlC_r" || test "$CXX" = "xlC"]
+   then
+     CXXFLAGS+=" -Wno-deprecated-register"
+   fi
    CXXFLAGS="${CUFLAGS} -Xcompiler \"${CXXFLAGS}\""
+
    CFLAGS=${CXXFLAGS}
    LDFLAGS="-ccbin=$NVCCBIN ${HYPRE_CUDA_GENCODE} -Xcompiler \"${LDFLAGS}\""
    HYPRE_CUDA_INCL="-I${HYPRE_CUDA_PATH}/include"

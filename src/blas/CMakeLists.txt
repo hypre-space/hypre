@@ -3,7 +3,8 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
-set(SRCS
+target_sources(HYPRE
+  PRIVATE
   dasum.c
   daxpy.c
   dcopy.c
@@ -29,9 +30,3 @@ set(SRCS
   lsame.c
   xerbla.c
 )
-
-convert_filenames_to_full_paths(SRCS)
-
-set(HYPRE_SOURCES ${HYPRE_SOURCES} ${SRCS} PARENT_SCOPE)
-
-
