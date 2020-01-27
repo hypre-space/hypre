@@ -436,11 +436,13 @@ HYPRE_IJMatrixSetValues( HYPRE_IJMatrix       matrix,
       return hypre_error_flag;
    }
 
+   /*
    if (!ncols)
    {
       hypre_error_in_arg(3);
       return hypre_error_flag;
    }
+   */
 
    if (!rows)
    {
@@ -501,11 +503,13 @@ HYPRE_IJMatrixSetValues2( HYPRE_IJMatrix       matrix,
       return hypre_error_flag;
    }
 
+   /*
    if (!ncols)
    {
       hypre_error_in_arg(3);
       return hypre_error_flag;
    }
+   */
 
    if (!rows)
    {
@@ -623,11 +627,13 @@ HYPRE_IJMatrixAddToValues( HYPRE_IJMatrix       matrix,
       return hypre_error_flag;
    }
 
+   /*
    if (!ncols)
    {
       hypre_error_in_arg(3);
       return hypre_error_flag;
    }
+   */
 
    if (!rows)
    {
@@ -689,11 +695,13 @@ HYPRE_IJMatrixAddToValues2( HYPRE_IJMatrix       matrix,
       return hypre_error_flag;
    }
 
+   /*
    if (!ncols)
    {
       hypre_error_in_arg(3);
       return hypre_error_flag;
    }
+   */
 
    if (!rows)
    {

@@ -798,7 +798,7 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix       *matrix,
       for (ii=0; ii < nrows; ii++)
       {
          row = rows[ii];
-         n = ncols[ii];
+         n = ncols ? ncols[ii] : 1;
          if (n == 0) /* empty row */
          {
             continue;
@@ -936,7 +936,7 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix       *matrix,
       for (ii=0; ii < nrows; ii++)
       {
          row = rows[ii];
-         n = ncols[ii];
+         n = ncols ? ncols[ii] : 1;
          if (n == 0) /* empty row */
          {
             continue;
@@ -1281,7 +1281,7 @@ hypre_IJMatrixAddToValuesParCSR( hypre_IJMatrix       *matrix,
       for (ii=0; ii < nrows; ii++)
       {
          row = rows[ii];
-         n = ncols[ii];
+         n = ncols ? ncols[ii] : 1;
          if (n == 0) /* empty row */
          {
             continue;
@@ -1479,7 +1479,7 @@ hypre_IJMatrixAddToValuesParCSR( hypre_IJMatrix       *matrix,
       for (ii=0; ii < nrows; ii++)
       {
          row = rows[ii];
-         n = ncols[ii];
+         n = ncols ? ncols[ii] : 1;
          if (n == 0) /* empty row */
          {
             continue;
@@ -3329,7 +3329,7 @@ hypre_IJMatrixSetValuesOMPParCSR( hypre_IJMatrix       *matrix,
          for (ii=ns; ii < ne; ii++)
          {
             row = rows[ii];
-            n = ncols[ii];
+            n = ncols ? ncols[ii] : 1;
             if (n == 0) /* empty row */
             {
                continue;
@@ -3588,7 +3588,7 @@ hypre_IJMatrixSetValuesOMPParCSR( hypre_IJMatrix       *matrix,
          for (ii=ns; ii < ne; ii++)
          {
             row = rows[ii];
-            n = ncols[ii];
+            n = ncols ? ncols[ii] : 1;
             if (n == 0) /* empty row */
             {
                continue;
@@ -3963,7 +3963,7 @@ hypre_IJMatrixAddToValuesOMPParCSR( hypre_IJMatrix       *matrix,
          for (ii=ns; ii < ne; ii++)
          {
             row = rows[ii];
-            n = ncols[ii];
+            n = ncols ? ncols[ii] : 1;
             if (n == 0) /* empty row */
             {
                continue;
@@ -4206,7 +4206,7 @@ hypre_IJMatrixAddToValuesOMPParCSR( hypre_IJMatrix       *matrix,
          for (ii=ns; ii < ne; ii++)
          {
             row = rows[ii];
-            n = ncols[ii];
+            n = ncols ? ncols[ii] : 1;
             if (n == 0) /* empty row */
             {
                continue;
@@ -4434,7 +4434,7 @@ hypre_IJMatrixAddToValuesOMPParCSR( hypre_IJMatrix       *matrix,
          {
             ii = my_offproc_cnt[i2];
             row = rows[ii];
-            n = ncols[ii];
+            n = ncols ? ncols[ii] : 1;
             if (n == 0) /* empty row */
             {
                continue;
