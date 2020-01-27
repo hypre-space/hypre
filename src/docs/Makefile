@@ -48,10 +48,10 @@ html: usr-html ref-html
 pdf: usr-pdf ref-pdf
 
 usr: usr-html usr-pdf
-usr-html:
+usr-html: ref-html
 	@cd usr-manual; make html
 	@mv usr-manual/_build/html usr-manual-html
-usr-pdf:
+usr-pdf: ref-html
 	@cd usr-manual; make latexpdf
 	@mv usr-manual/_build/latex/hypre.pdf usr-manual.pdf
 
