@@ -10,7 +10,7 @@ PDFLATEX = pdflatex --interaction=nonstopmode
 ##################################################################
 
 # all: html pdf
-all: html pdf
+all: pdf
 
 install:
 
