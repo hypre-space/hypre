@@ -5,13 +5,14 @@ HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 SPDX-License-Identifier: (Apache-2.0 OR MIT)
 -->
 
-## Installing the utilities needed to build the documentation
+# Writing hypre documentation
 
 The hypre documentation is written in reStructuredText and built through a
 combination of Sphinx, doxygen, and breathe.  The User Manual source files are
-in the directory `usr-manual` with the top level file being `index.rst`.  The
-top level Reference Manual files are in the directory `ref-manual`, but most of
-the actual source is written in the main hypre header files.
+in the directory `usr-manual` with top-level file `index.rst`.  The Reference
+Manual is in `ref-manual`, but the actual content is in the hypre header files.
+
+## Installing the utilities needed to build the documentation
 
 Building the documentation requires a number of things to be installed.  To help
 keep everything consistent and manageable, it is best to create a Python virtual
@@ -55,8 +56,8 @@ to your home directory (here, it's set to `~/texlive/2019`) and install:
       R
       I
 
-Add `~/texlive/2019/bin/x86_64-linux` to your `PATH` and `which pdflatex` to
-check that you did it correctly.
+Add `~/texlive/2019/bin/x86_64-linux` to your `PATH` and do `which pdflatex` to
+verify that you did it correctly.
 
 ## Building the documentation
 
@@ -69,8 +70,8 @@ When you are finished editing and building, turn off the virtual environment:
 
     deactivate
 
-To view the output, open a browswer and navigate to the following to see the
-user and reference manuals (adjust the path as needed):
+To view the output, open a browser and navigate to the following links to see
+the user and reference manuals (adjust the path as needed):
 
     file:///home/falgout2/hypre/src/docs/usr-manual-html/index.html
     file:///home/falgout2/hypre/src/docs/ref-manual-html/index.html
