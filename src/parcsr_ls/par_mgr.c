@@ -5044,7 +5044,9 @@ hypre_MGRBuildAffNew( hypre_ParCSRMatrix   *A,
   }
 
   hypre_MGRGetSubBlock(A, CF_marker_copy, CF_marker_copy, debug_flag, A_ff_ptr);
-
+  
+  /* Free copy of CF marker */
+  hypre_TFree(CF_marker_copy, HYPRE_MEMORY_HOST);
   return(0);
 }
 
