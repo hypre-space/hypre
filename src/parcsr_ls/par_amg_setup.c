@@ -2782,7 +2782,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    num_levels = level+1;
    hypre_ParAMGDataNumLevels(amg_data) = num_levels;
    if (hypre_ParAMGDataSmoothNumLevels(amg_data) > num_levels-1)
+   {
       hypre_ParAMGDataSmoothNumLevels(amg_data) = num_levels;
+   }
    smooth_num_levels = hypre_ParAMGDataSmoothNumLevels(amg_data);
 
    /*-----------------------------------------------------------------------
@@ -2818,7 +2820,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       hypre_ParAMGDataSmoother(amg_data) = smoother;
    }
 
-   if (addlvl == -1) addlvl = num_levels;
+   if (addlvl == -1)
+   {
+      addlvl = num_levels;
+   }
+
    for (j = 0; j < addlvl; j++)
    {
       if (num_threads == 1)
@@ -2883,9 +2889,13 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       if (add_rlx == 18 )
       {
          if (num_threads == 1)
-               hypre_ParCSRComputeL1Norms(A_array[j], 1, NULL, &l1_norms[j]);
+         {
+            hypre_ParCSRComputeL1Norms(A_array[j], 1, NULL, &l1_norms[j]);
+         }
          else
-               hypre_ParCSRComputeL1NormsThreads(A_array[j], 1, num_threads, NULL, &l1_norms[j]);
+         {
+            hypre_ParCSRComputeL1NormsThreads(A_array[j], 1, num_threads, NULL, &l1_norms[j]);
+         }
       }
    }
    for (j = add_end+1; j < num_levels; j++)

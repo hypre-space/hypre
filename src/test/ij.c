@@ -2177,18 +2177,15 @@ main( hypre_int argc,
          hypre_TMemcpy(&row_nums[i_indx], &tmpbi, HYPRE_BigInt, 1, memory_location, HYPRE_MEMORY_HOST);
          ierr += HYPRE_ParCSRMatrixGetRow( parcsr_A, first_local_row+i, &size, &col_inds, &values);
          hypre_TMemcpy(&num_cols[i_indx++], &size, HYPRE_Int, 1, memory_location, HYPRE_MEMORY_HOST);
-
-         hypre_TMemcpy(&col_nums[j_indx], &col_inds[0], HYPRE_BigInt, size,
-                       memory_location, hypre_ParCSRMatrixMemoryLocation(parcsr_A));
-         hypre_TMemcpy(&data[j_indx], &values[0], HYPRE_Real, size,
-                       memory_location, hypre_ParCSRMatrixMemoryLocation(parcsr_A));
+         hypre_TMemcpy(&col_nums[j_indx], &col_inds[0], HYPRE_BigInt, size, memory_location, hypre_ParCSRMatrixMemoryLocation(parcsr_A));
+         hypre_TMemcpy(&data[j_indx], &values[0], HYPRE_Real, size, memory_location, hypre_ParCSRMatrixMemoryLocation(parcsr_A));
          if (sparsity_known == 1)
          {
-            HYPRE_Int *col_nums_h = hypre_CTAlloc(HYPRE_BigInt, mx_size*num_rows, HYPRE_MEMORY_HOST);
-            hypre_TMemcpy(col_nums_h, col_nums, HYPRE_BigInt, mx_size*num_rows, HYPRE_MEMORY_HOST, memory_location);
+            HYPRE_Int *tmp = hypre_CTAlloc(HYPRE_BigInt, size, HYPRE_MEMORY_HOST);
+            hypre_TMemcpy(tmp, &col_nums[j_indx], HYPRE_BigInt, size, HYPRE_MEMORY_HOST, memory_location);
             for (j = 0; j < size; j++)
             {
-               if (col_nums_h[j_indx+j] < first_local_row || col_nums_h[j_indx+j] > last_local_row)
+               if (tmp[j] < first_local_row || tmp[j] > last_local_row)
                {
                   offdiag_sizes[local_row]++;
                }
@@ -2197,7 +2194,7 @@ main( hypre_int argc,
                   diag_sizes[local_row]++;
                }
             }
-            hypre_TFree(col_nums_h, HYPRE_MEMORY_HOST);
+            hypre_TFree(tmp, HYPRE_MEMORY_HOST);
          }
          j_indx += size;
          local_row++;
@@ -2344,7 +2341,8 @@ main( hypre_int argc,
 
       ierr += HYPRE_IJMatrixAddToValues( ij_A,
                                          local_num_rows,
-                                         ncols,
+                                         /* this is to show one can use NULL if ncols contains all ones */
+                                         NULL, /* ncols, */
                                          rows,
                                          (const HYPRE_BigInt *) col_inds,
                                          (const HYPRE_Real *) values );

@@ -542,19 +542,36 @@ HYPRE_IJMatrixSetValues2( HYPRE_IJMatrix       matrix,
    if (exec == HYPRE_EXEC_HOST)
    {
       HYPRE_Int *row_indexes_tmp = (HYPRE_Int *) row_indexes;
+      HYPRE_Int *ncols_tmp = ncols;
+
+      if (!ncols_tmp)
+      {
+         HYPRE_Int i;
+         ncols_tmp = hypre_TAlloc(HYPRE_Int, nrows, HYPRE_MEMORY_HOST);
+         for (i = 0; i < nrows; i++)
+         {
+            ncols_tmp[i] = 1;
+         }
+      }
+
       if (!row_indexes)
       {
          row_indexes_tmp = hypre_CTAlloc(HYPRE_Int, nrows, HYPRE_MEMORY_HOST);
-         hypre_PrefixSumInt(nrows, ncols, row_indexes_tmp);
+         hypre_PrefixSumInt(nrows, ncols_tmp, row_indexes_tmp);
       }
 
       if (hypre_IJMatrixOMPFlag(ijmatrix))
       {
-         hypre_IJMatrixSetValuesOMPParCSR(ijmatrix, nrows, ncols, rows, row_indexes_tmp, cols, values);
+         hypre_IJMatrixSetValuesOMPParCSR(ijmatrix, nrows, ncols_tmp, rows, row_indexes_tmp, cols, values);
       }
       else
       {
-         hypre_IJMatrixSetValuesParCSR(ijmatrix, nrows, ncols, rows, row_indexes_tmp, cols, values);
+         hypre_IJMatrixSetValuesParCSR(ijmatrix, nrows, ncols_tmp, rows, row_indexes_tmp, cols, values);
+      }
+
+      if (!ncols)
+      {
+         hypre_TFree(ncols_tmp, HYPRE_MEMORY_HOST);
       }
 
       if (!row_indexes)
@@ -734,19 +751,36 @@ HYPRE_IJMatrixAddToValues2( HYPRE_IJMatrix       matrix,
    if (exec == HYPRE_EXEC_HOST)
    {
       HYPRE_Int *row_indexes_tmp = (HYPRE_Int *) row_indexes;
+      HYPRE_Int *ncols_tmp = ncols;
+
+      if (!ncols_tmp)
+      {
+         HYPRE_Int i;
+         ncols_tmp = hypre_TAlloc(HYPRE_Int, nrows, HYPRE_MEMORY_HOST);
+         for (i = 0; i < nrows; i++)
+         {
+            ncols_tmp[i] = 1;
+         }
+      }
+
       if (!row_indexes)
       {
          row_indexes_tmp = hypre_CTAlloc(HYPRE_Int, nrows, HYPRE_MEMORY_HOST);
-         hypre_PrefixSumInt(nrows, ncols, row_indexes_tmp);
+         hypre_PrefixSumInt(nrows, ncols_tmp, row_indexes_tmp);
       }
 
       if (hypre_IJMatrixOMPFlag(ijmatrix))
       {
-         hypre_IJMatrixAddToValuesOMPParCSR(ijmatrix, nrows, ncols, rows, row_indexes_tmp, cols, values);
+         hypre_IJMatrixAddToValuesOMPParCSR(ijmatrix, nrows, ncols_tmp, rows, row_indexes_tmp, cols, values);
       }
       else
       {
-         hypre_IJMatrixAddToValuesParCSR(ijmatrix, nrows, ncols, rows, row_indexes_tmp, cols, values);
+         hypre_IJMatrixAddToValuesParCSR(ijmatrix, nrows, ncols_tmp, rows, row_indexes_tmp, cols, values);
+      }
+
+      if (!ncols)
+      {
+         hypre_TFree(ncols_tmp, HYPRE_MEMORY_HOST);
       }
 
       if (!row_indexes)

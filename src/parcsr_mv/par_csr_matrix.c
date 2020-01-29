@@ -1231,15 +1231,13 @@ hypre_ParCSRMatrixGetRowDevice( hypre_ParCSRMatrix  *mat,
    row_start = hypre_ParCSRMatrixRowStarts(mat)[ my_id ];
 #endif
    nrows = row_end - row_start;
-   local_row = row - row_start;
 
    if (row < row_start || row >= row_end)
    {
       return(-1);
    }
 
-   HYPRE_Int *tmp_d = hypre_TAlloc(HYPRE_Int, 2, HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy(tmp_d, &local_row, HYPRE_Int, 1, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+   local_row = row - row_start;
 
    /* if buffer is not allocated and some information is requested, allocate buffer with the max row_nnz */
    if ( !hypre_ParCSRMatrixRowvalues(mat) && (col_ind || values) )
@@ -1251,11 +1249,13 @@ hypre_ParCSRMatrixGetRowDevice( hypre_ParCSRMatrix  *mat,
 
       hypre_TMemcpy(size, row_nnz + local_row, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
-      HYPRE_Int *max_row_nnz_d = HYPRE_THRUST_CALL(max_element, row_nnz, row_nnz + nrows);
+      max_row_nnz = HYPRE_THRUST_CALL(reduce, row_nnz, row_nnz + nrows, 0, thrust::maximum<HYPRE_Int>());
 
-      hypre_TMemcpy( &max_row_nnz,
-                     max_row_nnz_d,
+/*
+      HYPRE_Int *max_row_nnz_d = HYPRE_THRUST_CALL(max_element, row_nnz, row_nnz + nrows);
+      hypre_TMemcpy( &max_row_nnz, max_row_nnz_d,
                      HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE );
+*/
 
       hypre_TFree(row_nnz, HYPRE_MEMORY_DEVICE);
 
@@ -1266,10 +1266,11 @@ hypre_ParCSRMatrixGetRowDevice( hypre_ParCSRMatrix  *mat,
    }
    else
    {
-      hypreDevice_GetRowNnz(1, tmp_d, hypre_CSRMatrixI(Aa), hypre_CSRMatrixI(Ba), tmp_d+1);
-      hypre_TMemcpy(size, tmp_d+1, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+      HYPRE_Int *size_d = hypre_TAlloc(HYPRE_Int, 1, HYPRE_MEMORY_DEVICE);
+      hypreDevice_GetRowNnz(1, NULL, hypre_CSRMatrixI(Aa) + local_row, hypre_CSRMatrixI(Ba) + local_row, size_d);
+      hypre_TMemcpy(size, size_d, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+      hypre_TFree(size_d, HYPRE_MEMORY_DEVICE);
    }
-
 
    if (col_ind || values)
    {
@@ -1285,14 +1286,16 @@ hypre_ParCSRMatrixGetRowDevice( hypre_ParCSRMatrix  *mat,
                         HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST );
       }
 
-      hypre_Memset(tmp_d+1, 0, sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE);
-
-      hypreDevice_CopyParCSRRows( 1, tmp_d, -1, Ba != NULL,
+      hypreDevice_CopyParCSRRows( 1, NULL, -1, Ba != NULL,
                                   hypre_ParCSRMatrixFirstColDiag(mat),
                                   hypre_ParCSRMatrixDeviceColMapOffd(mat),
-                                  hypre_CSRMatrixI(Aa), hypre_CSRMatrixJ(Aa), hypre_CSRMatrixData(Aa),
-                                  hypre_CSRMatrixI(Ba), hypre_CSRMatrixJ(Ba), hypre_CSRMatrixData(Ba),
-                                  tmp_d+1,
+                                  hypre_CSRMatrixI(Aa) + local_row,
+                                  hypre_CSRMatrixJ(Aa),
+                                  hypre_CSRMatrixData(Aa),
+                                  hypre_CSRMatrixI(Ba) + local_row,
+                                  hypre_CSRMatrixJ(Ba),
+                                  hypre_CSRMatrixData(Ba),
+                                  NULL,
                                   hypre_ParCSRMatrixRowindices(mat),
                                   hypre_ParCSRMatrixRowvalues(mat) );
    }
@@ -1306,8 +1309,6 @@ hypre_ParCSRMatrixGetRowDevice( hypre_ParCSRMatrix  *mat,
    {
       *values = hypre_ParCSRMatrixRowvalues(mat);
    }
-
-   hypre_TFree(tmp_d, HYPRE_MEMORY_DEVICE);
 
    return hypre_error_flag;
 }

@@ -86,8 +86,7 @@ __global__ void
 hypreCUDAKernel_GetRowNnz(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int *d_diag_ia, HYPRE_Int *d_offd_ia,
                           HYPRE_Int *d_rownnz)
 {
-   const HYPRE_Int global_thread_id = blockIdx.x * blockDim.x + threadIdx.x;
-   //const HYPRE_Int total_num_threads = gridDim.x  * blockDim.x;
+   const HYPRE_Int global_thread_id = hypre_cuda_get_grid_thread_id<1,1>();
 
    if (global_thread_id < nrows)
    {
@@ -133,14 +132,15 @@ hypreCUDAKernel_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_
                                HYPRE_Int *d_offd_i, HYPRE_Int *d_offd_j, HYPRE_Complex *d_offd_a,
                                HYPRE_Int *d_ib, HYPRE_BigInt *d_jb, HYPRE_Complex *d_ab)
 {
-   HYPRE_Int global_warp_id = blockIdx.x * blockDim.y + threadIdx.y;
+   const HYPRE_Int global_warp_id = hypre_cuda_get_grid_warp_id<1,1>();
 
    if (global_warp_id >= nrows)
    {
       return;
    }
+
    /* lane id inside the warp */
-   HYPRE_Int lane_id = threadIdx.x;
+   const HYPRE_Int lane_id = hypre_cuda_get_lane_id<1>();
    HYPRE_Int i, j, k, p, row, istart, iend, bstart;
 
    /* diag part */
@@ -158,7 +158,7 @@ hypreCUDAKernel_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_
       /* start/end position of the row */
       j = read_only_load(d_diag_i + row + lane_id);
       /* start position of b */
-      k = read_only_load(d_ib + global_warp_id);
+      k = d_ib ? read_only_load(d_ib + global_warp_id) : 0;
    }
    istart = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 0);
    iend   = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 1);
@@ -205,17 +205,17 @@ hypreCUDAKernel_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_
          d_ab[p+i] = read_only_load(d_offd_a + i);
       }
    }
-
 }
 
 /* B = A(row_indices, :) */
-/* Note: d_ib is an input vector that contains row ptrs, 
+/* Note: d_ib is an input vector that contains row ptrs,
  *       i.e., start positions where to put the rows in d_jb and d_ab.
  *       The col indices in B are global indices
  *       of length (nrows + 1) or nrow (without the last entry, nnz) */
-/* Special case:
+/* Special cases:
  *    if d_row_indices == NULL, it means d_row_indices=[0,1,...,nrows-1]
- *    If col_map_offd_A == NULL, use (-1 - d_offd_j) as column id*/
+ *    If col_map_offd_A == NULL, use (-1 - d_offd_j) as column id
+ *    If nrows == 1 and d_ib == NULL, it means d_ib[0] = 0 */
 HYPRE_Int
 hypreDevice_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int job, HYPRE_Int has_offd,
                            HYPRE_BigInt first_col, HYPRE_BigInt *d_col_map_offd_A,
@@ -229,9 +229,10 @@ hypreDevice_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int 
       return hypre_error_flag;
    }
 
-   HYPRE_Int num_warps_per_block = 16;
-   const dim3 bDim(HYPRE_WARP_SIZE, num_warps_per_block);
-   const dim3 gDim((nrows + num_warps_per_block - 1) / num_warps_per_block);
+   hypre_assert(!(nrows > 1 && d_ib == NULL));
+
+   const dim3 bDim = hypre_GetDefaultCUDABlockDimension();
+   const dim3 gDim = hypre_GetDefaultCUDAGridDimension(nrows, "warp", bDim);
 
    /*
    if (job == 2)

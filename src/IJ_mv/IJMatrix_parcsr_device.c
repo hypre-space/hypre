@@ -120,7 +120,7 @@ hypreCUDAKernel_IJMatrixValues_dev1(HYPRE_Int n, HYPRE_Int *rowind, HYPRE_Int *r
  *      rows_indexes = 0 4 9
  *              (0 1 2 3 | 4 5 6 7 8 | 9 10 11 12 13)
  *      cols   = x x ! ! | * * * ! ! | +  +  +  +  !
- *      values = . . ! !   . . . ! !   .  .  .  .  !
+ *      values = . . ! ! | . . . ! ! | .  .  .  .  !
  */
 HYPRE_Int
 hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
@@ -145,9 +145,11 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
    {
       HYPRE_Int *row_ptr = hypre_TAlloc(HYPRE_Int, nrows + 1, HYPRE_MEMORY_DEVICE);
       hypre_TMemcpy(row_ptr, ncols, HYPRE_Int, nrows, HYPRE_MEMORY_DEVICE, memory_location);
+      /* RL: have to init the last entry; cuda-memcheck --tool initcheck complains otherwise
+       * but why? exclusive scan does not need it */
+      /* hypre_Memset(row_ptr + nrows, 0, sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE); */
       hypreDevice_IntegerExclusiveScan(nrows + 1, row_ptr);
       hypre_TMemcpy(&nnz, row_ptr+nrows, HYPRE_Int, 1, HYPRE_MEMORY_HOST, memory_location);
-
       rows2 = hypre_TAlloc(HYPRE_BigInt, nnz, HYPRE_MEMORY_DEVICE);
       hypreDevice_CsrRowPtrsToIndicesWithRowNum(nrows, nnz, row_ptr, (HYPRE_BigInt *) rows, rows2);
       hypre_TFree(row_ptr, HYPRE_MEMORY_DEVICE);
