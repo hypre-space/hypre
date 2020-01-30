@@ -90,6 +90,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Int           *CF_marker;
    HYPRE_Int           *CFN_marker = NULL;
    HYPRE_Int           *CF2_marker = NULL;
+   HYPRE_Int           *CF3_marker = NULL;
    hypre_ParCSRMatrix  *S = NULL, *Sabs = NULL;
    hypre_ParCSRMatrix  *S2;
    hypre_ParCSRMatrix  *SN = NULL;
@@ -857,8 +858,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    while (not_finished_coarsening)
    {
-      first_local_row = hypre_ParCSRMatrixFirstRowIndex(A_array[level]);
-
       /* only do nodal coarsening on a fixed number of levels */
       if (level >= nodal_levels)
       {
@@ -1046,12 +1045,21 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          }
 
          /* Allocate CF_marker for the current level */
-         CF_marker_array[level] = hypre_CTAlloc(HYPRE_Int, local_size, HYPRE_MEMORY_HOST);
+         CF_marker_array[level] = hypre_CTAlloc(HYPRE_Int, local_num_vars, HYPRE_MEMORY_HOST);
          CF_marker = CF_marker_array[level];
 
          /* Set isolated fine points (SF_PT) given by the user */
          if ((num_isolated_F_points > 0) && (level == 0))
          {
+            if (block_mode)
+            {
+               first_local_row = hypre_ParCSRBlockMatrixFirstRowIndex(A_block_array[level]);
+            }
+            else
+            {
+               first_local_row = hypre_ParCSRMatrixFirstRowIndex(A_array[level]);
+            }
+
             for (j = 0; j < num_isolated_F_points; j++)
             {
                row = (HYPRE_Int) (isolated_F_points_marker[j] - first_local_row);
@@ -1119,7 +1127,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                hypre_sprintf(CFfile, "CF_%d.txt", level);
                hypre_printf("myid %d: level %d, read C/F from file %s, first_row %d, local_size %d\n",
                              my_id, level, CFfile, first_local_row, local_size);
-               CF_marker = hypre_CTAlloc(HYPRE_Int, local_size, HYPRE_MEMORY_HOST);
                FILE *fp;
                if ((fp = fopen(CFfile, "r")) == NULL)
                {
@@ -1329,7 +1336,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                {
                   col_offd_S_to_A = NULL;
                }
-               hypre_TFree(CFN_marker, HYPRE_MEMORY_HOST);
+               hypre_TFree(CFN_marker, HYPRE_MEMORY_HOST); CFN_marker = NULL;
                hypre_TFree(col_offd_SN_to_AN, HYPRE_MEMORY_HOST);
                hypre_ParCSRMatrixDestroy(SN);
                SN = NULL;
@@ -1511,7 +1518,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   hypre_TFree(coarse_pnts_global1, HYPRE_MEMORY_HOST);
                   /*hypre_TFree(coarse_dof_func);
                   coarse_dof_func = NULL;*/
-                  hypre_TFree(CFN_marker, HYPRE_MEMORY_HOST);
+                  hypre_TFree(CFN_marker, HYPRE_MEMORY_HOST); CFN_marker = NULL;
                   hypre_BoomerAMGCoarseParms(comm, local_num_vars,
                                              num_functions, dof_func_array[level], CF_marker,
                                              &coarse_dof_func,&coarse_pnts_global);
@@ -1525,7 +1532,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                {
                   hypre_BoomerAMGCorrectCFMarker2 (CF_marker, local_num_vars,
                                                    CFN_marker);
-                  hypre_TFree(CFN_marker, HYPRE_MEMORY_HOST);
+                  hypre_TFree(CFN_marker, HYPRE_MEMORY_HOST); CFN_marker = NULL;
                   /*hypre_TFree(coarse_dof_func);
                   coarse_dof_func = NULL;*/
                   hypre_BoomerAMGCoarseParms(comm, local_num_vars,
@@ -1583,7 +1590,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                {
                   hypre_BoomerAMGCorrectCFMarker (CFN_marker,
                                                   local_num_vars/num_functions, CF2_marker);
-                  hypre_TFree(CF2_marker, HYPRE_MEMORY_HOST);
+                  hypre_TFree(CF2_marker, HYPRE_MEMORY_HOST); CF2_marker = NULL;
                   hypre_TFree(coarse_pnts_global1, HYPRE_MEMORY_HOST);
                   col_offd_S_to_A = NULL;
 
@@ -1596,7 +1603,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                                  &CF_marker, &col_offd_S_to_A, &S);
                   if (col_offd_SN_to_AN == NULL)
                      col_offd_S_to_A = NULL;
-                  hypre_TFree(CFN_marker, HYPRE_MEMORY_HOST);
+                  hypre_TFree(CFN_marker, HYPRE_MEMORY_HOST); CFN_marker = NULL;
                   hypre_BoomerAMGCoarseParms(comm, local_num_vars,
                                              num_functions, dof_func_array[level], CF_marker,
                                              &coarse_dof_func,&coarse_pnts_global);
@@ -1614,7 +1621,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                     &CF_marker, &col_offd_S_to_A, &S);*/
                   hypre_BoomerAMGCreateScalarCFS(SN, CFN_marker,
                                                  col_offd_SN_to_AN, num_functions, nodal, 0, NULL,
-                                                 &CF_marker, &col_offd_S_to_A, &S);
+                                                 &CF3_marker, &col_offd_S_to_A, &S);
 #ifdef HYPRE_NO_GLOBAL_PARTITION
                   for (i=0; i < 2; i++)
                      coarse_pnts_global1[i] *= num_functions;
@@ -1626,27 +1633,24 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                      col_offd_S_to_A = NULL;
                   if (agg_interp_type == 1)
                      hypre_BoomerAMGBuildExtPIInterp(A_array[level],
-                                                     CF_marker, S, coarse_pnts_global1,
+                                                     CF3_marker, S, coarse_pnts_global1,
                                                      num_functions, dof_func_array[level], debug_flag,
                                                      agg_P12_trunc_factor, agg_P12_max_elmts, col_offd_S_to_A, &P1);
                   else if (agg_interp_type == 2)
                      hypre_BoomerAMGBuildStdInterp(A_array[level],
-                                                   CF_marker, S, coarse_pnts_global1,
+                                                   CF3_marker, S, coarse_pnts_global1,
                                                    num_functions, dof_func_array[level], debug_flag,
                                                    agg_P12_trunc_factor, agg_P12_max_elmts, 0, col_offd_S_to_A, &P1);
                   else if (agg_interp_type == 3)
                      hypre_BoomerAMGBuildExtInterp(A_array[level],
-                                                   CF_marker, S, coarse_pnts_global1,
+                                                   CF3_marker, S, coarse_pnts_global1,
                                                    num_functions, dof_func_array[level], debug_flag,
                                                    agg_P12_trunc_factor, agg_P12_max_elmts, col_offd_S_to_A, &P1);
                   hypre_BoomerAMGCorrectCFMarker2 (CFN_marker,
                                                    local_num_vars/num_functions, CF2_marker);
-                  hypre_TFree(CF2_marker, HYPRE_MEMORY_HOST);
-                  hypre_TFree(CF_marker, HYPRE_MEMORY_HOST);
-                  hypre_TFree(col_offd_S_to_A, HYPRE_MEMORY_HOST);
-                  col_offd_S_to_A = NULL;
-                  CF_marker = NULL;
-                  CF2_marker = NULL;
+                  hypre_TFree(CF2_marker, HYPRE_MEMORY_HOST); CF2_marker = NULL;
+                  hypre_TFree(CF3_marker, HYPRE_MEMORY_HOST); CF3_marker = NULL;
+                  hypre_TFree(col_offd_S_to_A, HYPRE_MEMORY_HOST); col_offd_S_to_A = NULL;
                   hypre_ParCSRMatrixDestroy(S);
                   /* hypre_BoomerAMGCreateScalarCFS(A_array[level],SN, CFN_marker,
                      col_offd_SN_to_AN, num_functions, nodal, 0, NULL,
@@ -1657,7 +1661,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
                   if (col_offd_SN_to_AN == NULL)
                      col_offd_S_to_A = NULL;
-                  hypre_TFree(CFN_marker, HYPRE_MEMORY_HOST);
+                  hypre_TFree(CFN_marker, HYPRE_MEMORY_HOST); CFN_marker = NULL;
                   hypre_BoomerAMGCoarseParms(comm, local_num_vars,
                                              num_functions, dof_func_array[level], CF_marker,
                                              &coarse_dof_func,&coarse_pnts_global);

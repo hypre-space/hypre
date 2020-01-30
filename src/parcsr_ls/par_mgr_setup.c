@@ -879,6 +879,9 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
     CF_marker_array_local[lev_local] = CF_marker_local;
     P_array_local[lev_local] = P_local;
 
+    /* CF_marker_local will be allocated in hypre_BoomerAMGCoarsen if it is NULL */
+    CF_marker_local = NULL;
+
     /* build the coarse grid */
     hypre_BoomerAMGBuildCoarseOperatorKT(P_local, A_array_local[lev_local],
                                     P_local, 0, &RAP_local);
