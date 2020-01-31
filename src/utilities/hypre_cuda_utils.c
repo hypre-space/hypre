@@ -538,6 +538,7 @@ hypreCUDAKernel_ScatterConstant(HYPRE_Int *x, HYPRE_Int n, HYPRE_Int *map, HYPRE
 }
 
 /* x[map[i]] = v
+ * n is length of map
  * TODO: thrust? */
 HYPRE_Int
 hypreDevice_ScatterConstant(HYPRE_Int *x, HYPRE_Int n, HYPRE_Int *map, HYPRE_Int v)

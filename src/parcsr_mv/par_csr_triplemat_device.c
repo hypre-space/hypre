@@ -139,6 +139,7 @@ hypre_CSRMatrixPrint2(AB_offd_host, NULL);
        * NOTE: cannot adjust the cols of B_offd (which needs less work) beforehand, unless want to change B */
       AB_offd_num_nonzeros = hypre_CSRMatrixNumNonzeros(AB_offd);
       AB_offd_j = hypre_CSRMatrixJ(AB_offd);
+      /* RL: TODO XXX thrust manual says map should not overlap result. but it seems work here. */
       HYPRE_THRUST_CALL(gather, AB_offd_j, AB_offd_j + AB_offd_num_nonzeros, map_B_to_C, AB_offd_j);
 
       hypre_TFree(map_B_to_C, HYPRE_MEMORY_DEVICE);
