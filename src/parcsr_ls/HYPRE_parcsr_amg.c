@@ -210,6 +210,24 @@ HYPRE_BoomerAMGGetRedundant( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetRedundant, HYPRE_BoomerAMGGetRedundant
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetCoarsenCutFactor( HYPRE_Solver solver,
+                                    HYPRE_Int    coarsen_cut_factor )
+{
+   return( hypre_BoomerAMGSetCoarsenCutFactor( (void *) solver, coarsen_cut_factor ) );
+}
+
+HYPRE_Int
+HYPRE_BoomerAMGGetCoarsenCutFactor( HYPRE_Solver  solver,
+                                    HYPRE_Int    *coarsen_cut_factor )
+{
+   return( hypre_BoomerAMGGetCoarsenCutFactor( (void *) solver, coarsen_cut_factor ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetStrongThreshold, HYPRE_BoomerAMGGetStrongThreshold
  *--------------------------------------------------------------------------*/
 
@@ -1835,11 +1853,56 @@ HYPRE_BoomerAMGSetDSLUThreshold (HYPRE_Solver solver,
 }
 #endif
 
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetCpointsToKeep
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
-HYPRE_BoomerAMGSetCpointsToKeep(HYPRE_Solver solver,
-                                HYPRE_Int  cpt_coarse_level,
-                                HYPRE_Int  num_cpt_coarse,
-                                HYPRE_Int *cpt_coarse_index)
+HYPRE_BoomerAMGSetCpointsToKeep(HYPRE_Solver  solver,
+                                HYPRE_Int     cpt_coarse_level,
+                                HYPRE_Int     num_cpt_coarse,
+                                HYPRE_BigInt *cpt_coarse_index)
 {
-   return (hypre_BoomerAMGSetCpointsToKeep( (void *) solver, cpt_coarse_level, num_cpt_coarse, cpt_coarse_index));
+   return (hypre_BoomerAMGSetCPoints( (void *) solver, cpt_coarse_level, num_cpt_coarse, cpt_coarse_index));
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetCPoints
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetCPoints(HYPRE_Solver  solver,
+                          HYPRE_Int     cpt_coarse_level,
+                          HYPRE_Int     num_cpt_coarse,
+                          HYPRE_BigInt *cpt_coarse_index)
+{
+   return (hypre_BoomerAMGSetCPoints( (void *) solver, cpt_coarse_level, num_cpt_coarse, cpt_coarse_index));
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetFPoints
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetFPoints(HYPRE_Solver   solver,
+                          HYPRE_Int      num_fpt,
+                          HYPRE_BigInt  *fpt_index)
+{
+   return (hypre_BoomerAMGSetFPoints( (void *) solver,
+                                      0, num_fpt,
+                                      fpt_index) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetIsolatedFPoints
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetIsolatedFPoints(HYPRE_Solver   solver,
+                                  HYPRE_Int      num_isolated_fpt,
+                                  HYPRE_BigInt  *isolated_fpt_index)
+{
+   return (hypre_BoomerAMGSetFPoints( (void *) solver,
+                                      1, num_isolated_fpt,
+                                      isolated_fpt_index) );
 }
