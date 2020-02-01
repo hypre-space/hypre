@@ -93,8 +93,8 @@ hypre_ParKrylovCreateVectorArray(HYPRE_Int n, void *vvector )
                                              hypre_ParVectorPartitioning(vector) );
       hypre_ParVectorSetPartitioningOwner(new_vector[i], 0);
       hypre_VectorData(hypre_ParVectorLocalVector(new_vector[i])) = &array_data[i*size];
-      hypre_ParVectorInitialize(new_vector[i]);
-      if (i) 
+      hypre_ParVectorInitialize_v2(new_vector[i], memory_location);
+      if (i)
       {
          hypre_VectorOwnsData(hypre_ParVectorLocalVector(new_vector[i])) = 0;
       }
@@ -265,13 +265,14 @@ hypre_ParKrylovAxpy( HYPRE_Complex alpha,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParKrylovMassAxpy( HYPRE_Complex * alpha,
-                     void   **x,
-                     void   *y ,
-                     HYPRE_Int k, HYPRE_Int unroll)
+hypre_ParKrylovMassAxpy( HYPRE_Complex *alpha,
+                         void   **x,
+                         void   *y,
+                         HYPRE_Int k,
+                         HYPRE_Int unroll )
 {
    return ( hypre_ParVectorMassAxpy( alpha, (hypre_ParVector **) x,
-                                 (hypre_ParVector *) y ,  k, unroll));
+                                     (hypre_ParVector *) y, k, unroll));
 }
 
 
