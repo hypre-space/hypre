@@ -599,11 +599,12 @@ hypre_MGRSetup( void               *mgr_vdata,
    // keep reserved coarse indexes to coarsest grid
    if(reserved_coarse_size > 0)
    {
-      ilower = hypre_ParCSRMatrixFirstRowIndex(A_array[num_c_levels-1]);
+      ilower = hypre_ParCSRMatrixFirstRowIndex(RAP_ptr);
       for (i = 0; i < reserved_coarse_size; i++)
       {
          reserved_coarse_indexes[i] = (HYPRE_BigInt) (reserved_Cpoint_local_indexes[i] + ilower);
       }
+
       HYPRE_BoomerAMGSetCPoints((mgr_data ->coarse_grid_solver), 25, reserved_coarse_size, reserved_coarse_indexes);
    }
 

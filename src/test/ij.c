@@ -63,7 +63,7 @@ HYPRE_Int BuildParFromOneFile (HYPRE_Int argc , char *argv [], HYPRE_Int arg_ind
 HYPRE_Int BuildFuncsFromFiles (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix A , HYPRE_Int **dof_func_ptr );
 HYPRE_Int BuildFuncsFromOneFile (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix A , HYPRE_Int **dof_func_ptr );
 HYPRE_Int BuildRhsParFromOneFile (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix A , HYPRE_ParVector *b_ptr );
-HYPRE_Int BuildBigArrayFromOneFile (HYPRE_Int argc , char *argv [] , char array_name[] , HYPRE_Int arg_index , HYPRE_BigInt *partitioning , HYPRE_Int *size , HYPRE_BigInt **array_ptr);
+HYPRE_Int BuildBigArrayFromOneFile (HYPRE_Int argc , char *argv [] , char *array_name , HYPRE_Int arg_index , HYPRE_BigInt *partitioning , HYPRE_Int *size , HYPRE_BigInt **array_ptr);
 HYPRE_Int BuildParLaplacian9pt (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 HYPRE_Int BuildParLaplacian27pt (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 HYPRE_Int BuildParRotate7pt (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix *A_ptr );
@@ -7875,7 +7875,7 @@ BuildRhsParFromOneFile( HYPRE_Int            argc,
 HYPRE_Int
 BuildBigArrayFromOneFile( HYPRE_Int            argc,
                           char                *argv[],
-                          char                 array_name[],
+                          char                *array_name,
                           HYPRE_Int            arg_index,
                           HYPRE_BigInt        *partitioning,
                           HYPRE_Int           *size,
