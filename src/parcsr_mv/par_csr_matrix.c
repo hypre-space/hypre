@@ -145,6 +145,11 @@ hypre_ParCSRMatrixCreate( MPI_Comm comm,
    matrix->bdiaginv_comm_pkg = NULL;
    matrix->bdiag_size = -1;
 
+#if defined(HYPRE_USING_CUDA)
+   hypre_ParCSRMatrixSocDiagJ(matrix) = NULL;
+   hypre_ParCSRMatrixSocOffdJ(matrix) = NULL;
+#endif
+
    return matrix;
 }
 
@@ -222,6 +227,11 @@ hypre_ParCSRMatrixDestroy( hypre_ParCSRMatrix *matrix )
       {
          hypre_MatvecCommPkgDestroy(matrix->bdiaginv_comm_pkg);
       }
+
+#if defined(HYPRE_USING_CUDA)
+      hypre_TFree(hypre_ParCSRMatrixSocDiagJ(matrix), HYPRE_MEMORY_DEVICE);
+      hypre_TFree(hypre_ParCSRMatrixSocOffdJ(matrix), HYPRE_MEMORY_DEVICE);
+#endif
 
       hypre_TFree(matrix, HYPRE_MEMORY_HOST);
    }
