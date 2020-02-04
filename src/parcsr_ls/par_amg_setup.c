@@ -1361,14 +1361,13 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             }
          }
 
-         if (hypre_ParAMGDataCPointsLevel(amg_data) > 0)
+         if (num_C_points_coarse > 0)
          {
             if (block_mode)
             {
                hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Keeping coarse nodes in block mode is not implemented\n");
             }
-            else if ((level < hypre_ParAMGDataCPointsLevel(amg_data)) &&
-                     (num_C_points_coarse > 0))
+            else if (level < hypre_ParAMGDataCPointsLevel(amg_data))
             {
                for (j = 0; j < num_C_points_coarse; j++)
                {
