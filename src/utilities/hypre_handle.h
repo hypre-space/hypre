@@ -55,8 +55,8 @@ typedef struct
    hypre_uint cub_min_bin;
    hypre_uint cub_max_bin;
    size_t     cub_max_cached_bytes;
-   cub::CachingDeviceAllocator *cub_dev_allocator;
-   cub::CachingDeviceAllocator *cub_um_allocator;
+   hypre::cub::CachingDeviceAllocator *cub_dev_allocator;
+   hypre::cub::CachingDeviceAllocator *cub_um_allocator;
 #endif
 #endif
 } hypre_Handle;
@@ -227,7 +227,7 @@ hypre_HandleSpgemmUseCusparse(hypre_Handle *hypre_handle_)
 }
 
 #ifdef HYPRE_USING_CUB_ALLOCATOR
-static inline cub::CachingDeviceAllocator*
+static inline hypre::cub::CachingDeviceAllocator*
 hypre_HandleCubCachingDeviceAllocator(hypre_Handle *hypre_handle_)
 {
    if (hypre_handle_->cub_dev_allocator)
@@ -236,7 +236,7 @@ hypre_HandleCubCachingDeviceAllocator(hypre_Handle *hypre_handle_)
    }
 
    hypre_handle_->cub_dev_allocator =
-      new cub::CachingDeviceAllocator(hypre_handle_->cub_bin_growth,
+      new hypre::cub::CachingDeviceAllocator(hypre_handle_->cub_bin_growth,
                                       hypre_handle_->cub_min_bin,
                                       hypre_handle_->cub_max_bin,
                                       hypre_handle_->cub_max_cached_bytes,
@@ -245,7 +245,7 @@ hypre_HandleCubCachingDeviceAllocator(hypre_Handle *hypre_handle_)
    return hypre_handle_->cub_dev_allocator;
 }
 
-static inline cub::CachingDeviceAllocator*
+static inline hypre::cub::CachingDeviceAllocator*
 hypre_HandleCubCachingManagedAllocator(hypre_Handle *hypre_handle_)
 {
    if (hypre_handle_->cub_um_allocator)
@@ -254,7 +254,7 @@ hypre_HandleCubCachingManagedAllocator(hypre_Handle *hypre_handle_)
    }
 
    hypre_handle_->cub_um_allocator =
-      new cub::CachingDeviceAllocator(hypre_handle_->cub_bin_growth,
+      new hypre::cub::CachingDeviceAllocator(hypre_handle_->cub_bin_growth,
                                       hypre_handle_->cub_min_bin,
                                       hypre_handle_->cub_max_bin,
                                       hypre_handle_->cub_max_cached_bytes,
