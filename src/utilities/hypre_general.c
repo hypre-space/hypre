@@ -268,7 +268,7 @@ HYPRE_Init( hypre_int argc, char *argv[] )
    /* To include the cost of creating streams/cudahandles in HYPRE_Init */
    /* If not here, will be done at the first use */
    hypre_HandleCudaComputeStream(hypre_handle);
-   hypre_HandleCudaPrefetchStream(hypre_handle);
+   //hypre_HandleCudaPrefetchStream(hypre_handle);
 #endif
 
 #if defined(HYPRE_USING_CUBLAS)

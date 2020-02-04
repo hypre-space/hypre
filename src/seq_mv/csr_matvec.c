@@ -794,14 +794,15 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
    cusparseHandle_t handle = hypre_HandleCusparseHandle(hypre_handle);
    cusparseMatDescr_t descr = hypre_HandleCusparseMatDescr(hypre_handle);
 
-   hypre_CSRMatrixPrefetch(A, HYPRE_MEMORY_DEVICE);
-   hypre_SeqVectorPrefetch(x, HYPRE_MEMORY_DEVICE);
-   hypre_SeqVectorPrefetch(b, HYPRE_MEMORY_DEVICE);
+   //hypre_CSRMatrixPrefetch(A, HYPRE_MEMORY_DEVICE);
+   //hypre_SeqVectorPrefetch(x, HYPRE_MEMORY_DEVICE);
+   //hypre_SeqVectorPrefetch(b, HYPRE_MEMORY_DEVICE);
 
-   if (b != y)
-   {
-      hypre_SeqVectorPrefetch(y, HYPRE_MEMORY_DEVICE);
-   }
+
+   //if (b != y)
+   //{
+   //   hypre_SeqVectorPrefetch(y, HYPRE_MEMORY_DEVICE);
+   //}
 
    if (b != y)
    {
