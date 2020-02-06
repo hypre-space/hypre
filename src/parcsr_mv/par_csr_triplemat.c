@@ -205,7 +205,6 @@ hypre_ParCSRMatMat( hypre_ParCSRMatrix  *A,
                     hypre_ParCSRMatrix  *B )
 {
 #if defined(HYPRE_USING_CUDA)
-   //hypre_SetExecPolicy(HYPRE_EXEC_DEVICE);
    hypre_NvtxPushRange("Mat-Mat");
 #endif
 
@@ -228,18 +227,14 @@ hypre_ParCSRMatMat( hypre_ParCSRMatrix  *A,
 #endif
 
 #if defined(HYPRE_USING_CUDA)
-   //hypre_SetExecPolicy(HYPRE_EXEC_HOST);
-#endif
-
-   // TODO
-#if defined(HYPRE_USING_CUDA)
-   if (hypre_handle->no_cuda_um == 0 && hypre_GetActualMemLocation(hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(C))) == HYPRE_MEMORY_DEVICE)
+   if (hypre_GetActualMemLocation(hypre_ParCSRMatrixMemoryLocation(A)) == HYPRE_MEMORY_SHARED &&
+       hypre_GetActualMemLocation(hypre_ParCSRMatrixMemoryLocation(C)) == HYPRE_MEMORY_DEVICE)
    {
-      hypre_CSRMatrix *C_diag = hypre_CSRMatrixClone(hypre_ParCSRMatrixDiag(C), 1);
+      hypre_CSRMatrix *C_diag = hypre_CSRMatrixClone_v2(hypre_ParCSRMatrixDiag(C), 1, HYPRE_MEMORY_SHARED);
       hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(C));
       hypre_ParCSRMatrixDiag(C) = C_diag;
 
-      hypre_CSRMatrix *C_offd = hypre_CSRMatrixClone(hypre_ParCSRMatrixOffd(C), 1);
+      hypre_CSRMatrix *C_offd = hypre_CSRMatrixClone_v2(hypre_ParCSRMatrixOffd(C), 1, HYPRE_MEMORY_SHARED);
       hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(C));
       hypre_ParCSRMatrixOffd(C) = C_offd;
    }
@@ -479,7 +474,6 @@ hypre_ParCSRTMatMatKT( hypre_ParCSRMatrix  *A,
                        HYPRE_Int            keep_transpose)
 {
 #if defined(HYPRE_USING_CUDA)
-   //hypre_SetExecPolicy(HYPRE_EXEC_DEVICE);
    hypre_NvtxPushRange("Mat-T-Mat");
 #endif
 
@@ -502,17 +496,14 @@ hypre_ParCSRTMatMatKT( hypre_ParCSRMatrix  *A,
 #endif
 
 #if defined(HYPRE_USING_CUDA)
-   //hypre_SetExecPolicy(HYPRE_EXEC_HOST);
-#endif
-
-#if defined(HYPRE_USING_CUDA)
-   if (hypre_handle->no_cuda_um == 0 && hypre_GetActualMemLocation( hypre_ParCSRMatrixMemoryLocation(C) ) == HYPRE_MEMORY_DEVICE)
+   if (hypre_GetActualMemLocation(hypre_ParCSRMatrixMemoryLocation(A)) == HYPRE_MEMORY_SHARED &&
+       hypre_GetActualMemLocation(hypre_ParCSRMatrixMemoryLocation(C)) == HYPRE_MEMORY_DEVICE)
    {
-      hypre_CSRMatrix *C_diag = hypre_CSRMatrixClone(hypre_ParCSRMatrixDiag(C), 1);
+      hypre_CSRMatrix *C_diag = hypre_CSRMatrixClone_v2(hypre_ParCSRMatrixDiag(C), 1, HYPRE_MEMORY_SHARED);
       hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(C));
       hypre_ParCSRMatrixDiag(C) = C_diag;
 
-      hypre_CSRMatrix *C_offd = hypre_CSRMatrixClone(hypre_ParCSRMatrixOffd(C), 1);
+      hypre_CSRMatrix *C_offd = hypre_CSRMatrixClone_v2(hypre_ParCSRMatrixOffd(C), 1, HYPRE_MEMORY_SHARED);
       hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(C));
       hypre_ParCSRMatrixOffd(C) = C_offd;
    }

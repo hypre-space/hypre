@@ -98,8 +98,8 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    HYPRE_Int       my_id;
    HYPRE_Int       restri_type;
    HYPRE_Real      alpha;
-   HYPRE_Real    **l1_norms = NULL;
-   HYPRE_Real     *l1_norms_level;
+   hypre_Vector  **l1_norms = NULL;
+   hypre_Vector   *l1_norms_level;
    HYPRE_Real    **ds = hypre_ParAMGDataChebyDS(amg_data);
    HYPRE_Real    **coefs = hypre_ParAMGDataChebyCoefs(amg_data);
    HYPRE_Int       seq_cg = 0;

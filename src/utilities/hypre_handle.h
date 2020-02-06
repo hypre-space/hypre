@@ -25,6 +25,7 @@ extern "C++" {
 typedef struct
 {
    HYPRE_Int hypre_error;
+   HYPRE_Int memory_location;
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_Int default_exec_policy;
    HYPRE_Int cuda_device;
@@ -48,8 +49,6 @@ typedef struct
    HYPRE_Int spgemm_rownnz_estimate_nsamples;
    float     spgemm_rownnz_estimate_mult_factor;
    char      spgemm_hash_type;
-   /* RL: temporary TODO */
-   HYPRE_Int no_cuda_um;
 #ifdef HYPRE_USING_CUB_ALLOCATOR
    hypre_uint cub_bin_growth;
    hypre_uint cub_min_bin;
@@ -66,8 +65,10 @@ extern hypre_Handle *hypre_handle;
 hypre_Handle* hypre_HandleCreate();
 HYPRE_Int hypre_HandleDestroy(hypre_Handle *hypre_handle_);
 
-/* accessor inline function to hypre_device_csr_handle */
+/* accessor macros to hypre_Handle */
+#define hypre_HandleMemoryLocation(hypre_handle) ((hypre_handle) -> memory_location)
 
+/* accessor inline functions to hypre_Handle */
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 static inline HYPRE_Int &
 hypre_HandleDefaultExecPolicy(hypre_Handle *hypre_handle_)

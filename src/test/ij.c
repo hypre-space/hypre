@@ -1053,11 +1053,14 @@ main( hypre_int argc,
       {
          arg_index++;
          no_cuda_um = atoi(argv[arg_index++]);
-         HYPRE_SetNoCUDAUM(no_cuda_um);
          //RL: TODO
          if (no_cuda_um && build_rhs_type == 2)
          {
             build_rhs_type = 22;
+         }
+         if (no_cuda_um)
+         {
+            hypre_handle->memory_location = HYPRE_MEMORY_DEVICE;
          }
       }
       else if ( strcmp(argv[arg_index], "-mm_cusparse") == 0 )
@@ -2475,7 +2478,7 @@ main( hypre_int argc,
 
       memory_location = HYPRE_MEMORY_SHARED;
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-      if (hypre_handle->no_cuda_um)
+      if (no_cuda_um)
       {
          memory_location = HYPRE_MEMORY_DEVICE;
       }
@@ -2921,7 +2924,7 @@ main( hypre_int argc,
 
    parcsr_A_ori = parcsr_A;  b_ori = b;  x_ori = x;
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   memory_location = hypre_handle->no_cuda_um ? HYPRE_MEMORY_DEVICE : HYPRE_MEMORY_SHARED;
+   memory_location = no_cuda_um ? HYPRE_MEMORY_DEVICE : HYPRE_MEMORY_SHARED;
 
    if (hypre_ParCSRMatrixMemoryLocation(parcsr_A) == HYPRE_MEMORY_HOST)
    {

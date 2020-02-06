@@ -127,13 +127,7 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
 
    HYPRE_Real       wall_time;  /* for debugging instrumentation  */
 
-   HYPRE_Int        memory_location = HYPRE_MEMORY_SHARED;
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   if (hypre_handle->no_cuda_um == 1)
-   {
-      memory_location = HYPRE_MEMORY_DEVICE;
-   }
-#endif
+   HYPRE_Int        memory_location = hypre_ParCSRMatrixMemoryLocation(A);
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm,&my_id);

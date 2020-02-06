@@ -171,8 +171,9 @@ hypre_MGRDestroy( void *data )
   if ((mgr_data -> l1_norms))
   {
     for (i=0; i < (num_coarse_levels); i++)
-       if ((mgr_data -> l1_norms)[i])
-         hypre_TFree((mgr_data -> l1_norms)[i], HYPRE_MEMORY_HOST);
+    {
+       hypre_SeqVectorDestroy((mgr_data -> l1_norms)[i]);
+    }
     hypre_TFree((mgr_data -> l1_norms), HYPRE_MEMORY_HOST);
   }
 

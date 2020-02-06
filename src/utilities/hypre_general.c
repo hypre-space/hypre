@@ -108,6 +108,8 @@ hypre_HandleCreate()
 {
    hypre_Handle *handle = hypre_CTAlloc(hypre_Handle, 1, HYPRE_MEMORY_HOST);
 
+   hypre_HandleMemoryLocation(handle) = HYPRE_MEMORY_SHARED;
+
    /* set default options */
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    hypre_HandleDefaultExecPolicy(handle)            = HYPRE_EXEC_HOST;
@@ -341,13 +343,3 @@ HYPRE_Finalize()
    return hypre_error_flag;
 }
 
-
-void HYPRE_SetNoCUDAUM(HYPRE_Int no_cuda_um)
-{
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   if (hypre_handle)
-   {
-      hypre_handle->no_cuda_um = no_cuda_um;
-   }
-#endif
-}
