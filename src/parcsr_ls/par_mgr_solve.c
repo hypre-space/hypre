@@ -449,7 +449,7 @@ hypre_MGRCycle( void               *mgr_vdata,
    HYPRE_Int            relax_type = (mgr_data -> relax_type);
    HYPRE_Real           relax_weight = (mgr_data -> relax_weight);
    HYPRE_Real           omega = (mgr_data -> omega);
-   HYPRE_Real           **relax_l1_norms = (mgr_data -> l1_norms);
+   hypre_Vector       **relax_l1_norms = (mgr_data -> l1_norms);
    hypre_ParVector      *Vtemp = (mgr_data -> Vtemp);
    hypre_ParVector      *Ztemp = (mgr_data -> Ztemp);
 

@@ -1797,6 +1797,7 @@ extern "C++" {
 typedef struct
 {
    HYPRE_Int hypre_error;
+   HYPRE_Int memory_location;
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_Int default_exec_policy;
    HYPRE_Int cuda_device;
@@ -1820,15 +1821,13 @@ typedef struct
    HYPRE_Int spgemm_rownnz_estimate_nsamples;
    float     spgemm_rownnz_estimate_mult_factor;
    char      spgemm_hash_type;
-   /* RL: temporary TODO */
-   HYPRE_Int no_cuda_um;
 #ifdef HYPRE_USING_CUB_ALLOCATOR
    hypre_uint cub_bin_growth;
    hypre_uint cub_min_bin;
    hypre_uint cub_max_bin;
    size_t     cub_max_cached_bytes;
-   cub::CachingDeviceAllocator *cub_dev_allocator;
-   cub::CachingDeviceAllocator *cub_um_allocator;
+   hypre::cub::CachingDeviceAllocator *cub_dev_allocator;
+   hypre::cub::CachingDeviceAllocator *cub_um_allocator;
 #endif
 #endif
 } hypre_Handle;
@@ -1838,8 +1837,10 @@ extern hypre_Handle *hypre_handle;
 hypre_Handle* hypre_HandleCreate();
 HYPRE_Int hypre_HandleDestroy(hypre_Handle *hypre_handle_);
 
-/* accessor inline function to hypre_device_csr_handle */
+/* accessor macros to hypre_Handle */
+#define hypre_HandleMemoryLocation(hypre_handle) ((hypre_handle) -> memory_location)
 
+/* accessor inline functions to hypre_Handle */
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 static inline HYPRE_Int &
 hypre_HandleDefaultExecPolicy(hypre_Handle *hypre_handle_)
@@ -1999,7 +2000,7 @@ hypre_HandleSpgemmUseCusparse(hypre_Handle *hypre_handle_)
 }
 
 #ifdef HYPRE_USING_CUB_ALLOCATOR
-static inline cub::CachingDeviceAllocator*
+static inline hypre::cub::CachingDeviceAllocator*
 hypre_HandleCubCachingDeviceAllocator(hypre_Handle *hypre_handle_)
 {
    if (hypre_handle_->cub_dev_allocator)
@@ -2008,7 +2009,7 @@ hypre_HandleCubCachingDeviceAllocator(hypre_Handle *hypre_handle_)
    }
 
    hypre_handle_->cub_dev_allocator =
-      new cub::CachingDeviceAllocator(hypre_handle_->cub_bin_growth,
+      new hypre::cub::CachingDeviceAllocator(hypre_handle_->cub_bin_growth,
                                       hypre_handle_->cub_min_bin,
                                       hypre_handle_->cub_max_bin,
                                       hypre_handle_->cub_max_cached_bytes,
@@ -2017,7 +2018,7 @@ hypre_HandleCubCachingDeviceAllocator(hypre_Handle *hypre_handle_)
    return hypre_handle_->cub_dev_allocator;
 }
 
-static inline cub::CachingDeviceAllocator*
+static inline hypre::cub::CachingDeviceAllocator*
 hypre_HandleCubCachingManagedAllocator(hypre_Handle *hypre_handle_)
 {
    if (hypre_handle_->cub_um_allocator)
@@ -2026,7 +2027,7 @@ hypre_HandleCubCachingManagedAllocator(hypre_Handle *hypre_handle_)
    }
 
    hypre_handle_->cub_um_allocator =
-      new cub::CachingDeviceAllocator(hypre_handle_->cub_bin_growth,
+      new hypre::cub::CachingDeviceAllocator(hypre_handle_->cub_bin_growth,
                                       hypre_handle_->cub_min_bin,
                                       hypre_handle_->cub_max_bin,
                                       hypre_handle_->cub_max_cached_bytes,
@@ -2401,7 +2402,6 @@ HYPRE_Int hypre_SyncCudaDefaultStream(hypre_Handle *hypre_handle);
 void hypre_SetExecPolicy( HYPRE_Int policy );
 HYPRE_Int hypre_GetExecPolicy1(HYPRE_Int location);
 HYPRE_Int hypre_GetExecPolicy2(HYPRE_Int location1, HYPRE_Int location2);
-void HYPRE_SetNoCUDAUM(HYPRE_Int no_cuda_um);
 
 /* hypre_qsort.c */
 void hypre_swap ( HYPRE_Int *v , HYPRE_Int i , HYPRE_Int j );

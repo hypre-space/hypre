@@ -200,7 +200,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
 
    hypre_assert( idxstride == 1 );
 
-   hypre_SeqVectorPrefetch(x_local, HYPRE_MEMORY_DEVICE);
+   //hypre_SeqVectorPrefetch(x_local, HYPRE_MEMORY_DEVICE);
 
    /* send_map_elmts on device */
    hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg);
