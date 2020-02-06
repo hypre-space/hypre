@@ -589,7 +589,7 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
    HYPRE_Int num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
 
    HYPRE_Int memory_location_l1 = hypre_VectorMemoryLocation(l1_norm_vec);
-   HYPRE_Complex *l1_norm = hypre_VectorData(l1_norm_vec);
+   HYPRE_Real *l1_norm = hypre_VectorData(l1_norm_vec);
 
    HYPRE_Int exec = hypre_GetExecPolicy1( memory_location_l1 );
    hypre_assert(exec != HYPRE_EXEC_UNSET);
@@ -680,8 +680,8 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
       /* Set the abs(diag) element */
       hypre_CSRMatrixExtractDiagonal(A_diag, l1_norm, 1);
 
-      diag_tmp = hypre_TAlloc(HYPRE_Complex, num_rows, memory_location_tmp);
-      hypre_TMemcpy(diag_tmp, l1_norm, HYPRE_Complex, num_rows, memory_location_tmp, memory_location_l1);
+      diag_tmp = hypre_TAlloc(HYPRE_Real, num_rows, memory_location_tmp);
+      hypre_TMemcpy(diag_tmp, l1_norm, HYPRE_Real, num_rows, memory_location_tmp, memory_location_l1);
 
       /* Add the scaled l1 norm of the offd part */
       if (num_cols_offd)
@@ -737,7 +737,7 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
    /* Handle negative definite matrices */
    if (!diag_tmp)
    {
-      diag_tmp = hypre_TAlloc(HYPRE_Complex, num_rows, memory_location_tmp);
+      diag_tmp = hypre_TAlloc(HYPRE_Real, num_rows, memory_location_tmp);
    }
 
    /* Set the diag element */
@@ -3404,7 +3404,7 @@ HYPRE_Int hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
    HYPRE_Int num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
 
    HYPRE_Real diag;
-   HYPRE_Complex *l1_norm = hypre_VectorData(l1_norm_vec);
+   HYPRE_Real *l1_norm = hypre_VectorData(l1_norm_vec);
    HYPRE_Int ii, ns, ne, rest, size;
 
    HYPRE_Int *cf_marker_offd = NULL;

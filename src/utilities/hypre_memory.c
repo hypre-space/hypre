@@ -685,7 +685,7 @@ hypre_PrintMemoryTracker()
    char filename[256];
    FILE *file;
 
-   hypre_MPI_Comm_rank(MPI_COMM_WORLD, &myid);
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
    hypre_sprintf(filename,"HypreMemoryTrack.log.%05d", myid);
    if ((file = fopen(filename, "w")) == NULL)
    {
