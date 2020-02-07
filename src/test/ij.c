@@ -1740,10 +1740,10 @@ main( hypre_int argc,
          hypre_printf("       43=Euclid-PCG      44=Euclid-GMRES   \n");
          hypre_printf("       45=Euclid-BICGSTAB\n");
          hypre_printf("       46=Euclid-COGMRES\n");
-         hypre_printf("       50=DS-LGMRES         51=AMG-LGMRES     \n");
-         hypre_printf("       60=DS-FlexGMRES         61=AMG-FlexGMRES     \n");
+         hypre_printf("       50=DS-LGMRES       51=AMG-LGMRES     \n");
+         hypre_printf("       60=DS-FlexGMRES    61=AMG-FlexGMRES  \n");
          hypre_printf("       70=MGR             71=MGR-PCG  \n");
-         hypre_printf("       72=MGR-FlexGMRES  73=MGR-BICGSTAB  \n");
+         hypre_printf("       72=MGR-FlexGMRES   73=MGR-BICGSTAB  \n");
          hypre_printf("       74=MGR-COGMRES  \n");
          hypre_printf("\n");
          hypre_printf("  -cljp                 : CLJP coarsening \n");
@@ -1765,6 +1765,7 @@ main( hypre_int argc,
          hypre_printf("       1=least squares interpolation (for GSMG only)  \n");
          hypre_printf("       0=Classical modified interpolation for hyperbolic PDEs \n");
          hypre_printf("       3=direct interpolation with separation of weights  \n");
+         hypre_printf("       15=direct interpolation\n");
          hypre_printf("       4=multipass interpolation  \n");
          hypre_printf("       5=multipass interpolation with separation of weights  \n");
          hypre_printf("       6=extended classical modified interpolation (default) \n");
