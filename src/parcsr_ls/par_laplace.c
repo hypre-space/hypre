@@ -344,8 +344,10 @@ GenerateLaplacian( MPI_Comm       comm,
       hypre_CSRMatrixData(offd) = offd_data;
    }
 
-   HYPRE_Int memory_location = hypre_HandleMemoryLocation(hypre_handle);
+   hypre_CSRMatrixMemoryLocation(diag) = HYPRE_MEMORY_HOST;
+   hypre_CSRMatrixMemoryLocation(offd) = HYPRE_MEMORY_HOST;
 
+   HYPRE_Int memory_location = hypre_HandleMemoryLocation(hypre_handle);
    if (hypre_GetActualMemLocation(memory_location) != HYPRE_MEMORY_HOST)
    {
       hypre_CSRMatrix *A_diag = hypre_CSRMatrixClone_v2(hypre_ParCSRMatrixDiag(A), 1, memory_location);
@@ -356,9 +358,11 @@ GenerateLaplacian( MPI_Comm       comm,
       hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(A));
       hypre_ParCSRMatrixOffd(A) = A_offd;
    }
-
-   hypre_CSRMatrixMemoryLocation(diag) = memory_location;
-   hypre_CSRMatrixMemoryLocation(offd) = memory_location;
+   else
+   {
+      hypre_CSRMatrixMemoryLocation(diag) = memory_location;
+      hypre_CSRMatrixMemoryLocation(offd) = memory_location;
+   }
 
    hypre_TFree(nx_part,    HYPRE_MEMORY_HOST);
    hypre_TFree(ny_part,    HYPRE_MEMORY_HOST);
@@ -891,8 +895,10 @@ GenerateSysLaplacian( MPI_Comm comm,
       hypre_CSRMatrixData(offd) = offd_data;
    }
 
-   HYPRE_Int memory_location = hypre_HandleMemoryLocation(hypre_handle);
+   hypre_CSRMatrixMemoryLocation(diag) = HYPRE_MEMORY_HOST;
+   hypre_CSRMatrixMemoryLocation(offd) = HYPRE_MEMORY_HOST;
 
+   HYPRE_Int memory_location = hypre_HandleMemoryLocation(hypre_handle);
    if (hypre_GetActualMemLocation(memory_location) != HYPRE_MEMORY_HOST)
    {
       hypre_CSRMatrix *A_diag = hypre_CSRMatrixClone_v2(hypre_ParCSRMatrixDiag(A), 1, memory_location);
@@ -903,9 +909,11 @@ GenerateSysLaplacian( MPI_Comm comm,
       hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(A));
       hypre_ParCSRMatrixOffd(A) = A_offd;
    }
-
-   hypre_CSRMatrixMemoryLocation(diag) = memory_location;
-   hypre_CSRMatrixMemoryLocation(offd) = memory_location;
+   else
+   {
+      hypre_CSRMatrixMemoryLocation(diag) = memory_location;
+      hypre_CSRMatrixMemoryLocation(offd) = memory_location;
+   }
 
    hypre_TFree(nx_part,    HYPRE_MEMORY_HOST);
    hypre_TFree(ny_part,    HYPRE_MEMORY_HOST);
@@ -1412,8 +1420,10 @@ GenerateSysLaplacianVCoef( MPI_Comm       comm,
       hypre_CSRMatrixData(offd) = offd_data;
    }
 
-   HYPRE_Int memory_location = hypre_HandleMemoryLocation(hypre_handle);
+   hypre_CSRMatrixMemoryLocation(diag) = HYPRE_MEMORY_HOST;
+   hypre_CSRMatrixMemoryLocation(offd) = HYPRE_MEMORY_HOST;
 
+   HYPRE_Int memory_location = hypre_HandleMemoryLocation(hypre_handle);
    if (hypre_GetActualMemLocation(memory_location) != HYPRE_MEMORY_HOST)
    {
       hypre_CSRMatrix *A_diag = hypre_CSRMatrixClone_v2(hypre_ParCSRMatrixDiag(A), 1, memory_location);
@@ -1424,9 +1434,11 @@ GenerateSysLaplacianVCoef( MPI_Comm       comm,
       hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(A));
       hypre_ParCSRMatrixOffd(A) = A_offd;
    }
-
-   hypre_CSRMatrixMemoryLocation(diag) = memory_location;
-   hypre_CSRMatrixMemoryLocation(offd) = memory_location;
+   else
+   {
+      hypre_CSRMatrixMemoryLocation(diag) = memory_location;
+      hypre_CSRMatrixMemoryLocation(offd) = memory_location;
+   }
 
    hypre_TFree(nx_part,    HYPRE_MEMORY_HOST);
    hypre_TFree(ny_part,    HYPRE_MEMORY_HOST);
