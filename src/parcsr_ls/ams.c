@@ -89,7 +89,9 @@ HYPRE_Int hypre_ParCSRRelax(/* matrix to relax with */
             hypre_SeqVectorPrefetch(l1_norms_vec, HYPRE_MEMORY_DEVICE);
          }
          */
-         hypre_HandleCudaComputeStreamSyncPush(hypre_handle, 0);
+
+         HYPRE_Int sync_stream = hypre_HandleCudaComputeStreamSync(hypre_handle);
+         hypre_HandleCudaComputeStreamSync(hypre_handle) = 0;
 
          hypre_ParVectorCopy(f, v);
 
@@ -109,7 +111,7 @@ HYPRE_Int hypre_ParCSRRelax(/* matrix to relax with */
          }
 #endif /* #if defined(HYPRE_USING_CUDA) */
 
-         hypre_HandleCudaComputeStreamSyncPop(hypre_handle);
+         hypre_HandleCudaComputeStreamSync(hypre_handle) = sync_stream;
 
          hypre_SyncCudaComputeStream(hypre_handle);
       }
