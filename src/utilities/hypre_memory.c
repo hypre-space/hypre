@@ -111,6 +111,9 @@ hypre_UnifiedMalloc(size_t size, HYPRE_Int zeroinit)
 #endif
    HYPRE_CUDA_CALL( cudaMemAdvise(ptr, size, cudaMemAdviseSetPreferredLocation,
                                   hypre_HandleCudaDevice(hypre_handle)) );
+   /* prefecth to device */
+   hypre_Memcpy(ptr, ptr, size, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_SHARED);
+
    if (zeroinit)
    {
       hypre_Memset(ptr, 0, size, HYPRE_MEMORY_SHARED);
@@ -131,8 +134,6 @@ hypre_HostPinnedMalloc(size_t size, HYPRE_Int zeroinit)
    void *ptr = NULL;
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   /* TODO which one of the following two? */
-   /* HYPRE_CUDA_CALL( cudaHostAlloc(&ptr,size, cudaHostAllocMapped)); */
    HYPRE_CUDA_CALL( cudaMallocHost(&ptr, size) );
 
    if (zeroinit)
@@ -415,18 +416,16 @@ hypre_Memcpy(void *dst, void *src, size_t size, HYPRE_Int loc_dst, HYPRE_Int loc
       {
          HYPRE_CUDA_CALL(
          cudaMemPrefetchAsync(src, size, hypre_HandleCudaDevice(hypre_handle),
-                              hypre_HandleCudaPrefetchStream(hypre_handle))
+                              hypre_HandleCudaComputeStream(hypre_handle))
          );
       }
       else if (loc_dst == HYPRE_MEMORY_HOST)
       {
          HYPRE_CUDA_CALL(
          cudaMemPrefetchAsync(src, size, cudaCpuDeviceId,
-                              hypre_HandleCudaPrefetchStream(hypre_handle))
+                              hypre_HandleCudaComputeStream(hypre_handle))
          );
       }
-
-      /* HYPRE_CUDA_CALL( cudaStreamSynchronize(hypre_HandleCudaPrefetchStream(hypre_handle)) ); */
 
       return;
    }

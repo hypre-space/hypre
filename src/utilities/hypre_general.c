@@ -110,13 +110,19 @@ hypre_HandleCreate()
 
    hypre_HandleMemoryLocation(handle) = HYPRE_MEMORY_SHARED;
 
-   /* set default options */
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+
+   /* default CUDA options */
    hypre_HandleDefaultExecPolicy(handle)            = HYPRE_EXEC_HOST;
    hypre_HandleCudaDevice(handle)                   = 0;
    hypre_HandleCudaComputeStreamNum(handle)         = 0;
-   hypre_HandleCudaPrefetchStreamNum(handle)        = 1;
-   hypre_HandleCudaComputeStreamSyncDefault(handle) = 1;
+#if defined(HYPRE_USING_UNIFIED_MEMORY)
+   hypre_HandleCudaComputeStreamSync(handle)        = 1;
+#else
+   hypre_HandleCudaComputeStreamSync(handle)        = 0;
+#endif
+
+   /* SpGeMM */
 #ifdef HYPRE_USING_CUSPARSE
    hypre_HandleSpgemmUseCusparse(handle)            = 1;
 #else
@@ -139,8 +145,6 @@ hypre_HandleCreate()
    handle->cub_um_allocator                         = NULL;
 #endif
 
-   hypre_HandleCudaComputeStreamSync(handle).clear();
-   hypre_HandleCudaComputeStreamSyncPush( handle, hypre_HandleCudaComputeStreamSyncDefault(handle) );
 #endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 
    return handle;
