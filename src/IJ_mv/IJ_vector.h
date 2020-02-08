@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+#if 0
 /******************************************************************************
  *
  * Header info for the hypre_IJMatrix structures
@@ -68,5 +69,7 @@ typedef struct hypre_IJVector_struct
  * prototypes for operations on local objects
  *--------------------------------------------------------------------------*/
 /* #include "./internal_protos.h" */
+
+#endif
 
 #endif

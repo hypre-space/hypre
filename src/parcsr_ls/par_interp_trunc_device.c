@@ -171,7 +171,7 @@ hypre_BoomerAMGInterpTruncationDevice( hypre_ParCSRMatrix *P, HYPRE_Real trunc_f
 
    if (nnz_offd)
    {
-      less_than pred(-1);
+      less_than<HYPRE_Int> pred(-1);
       auto new_end = HYPRE_THRUST_CALL(
             copy_if,
             thrust::make_zip_iterator(thrust::make_tuple(P_i,       P_j,       P_a)),

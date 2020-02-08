@@ -40,13 +40,13 @@ hypreDevice_CSRSpAdd(HYPRE_Int  ma,       HYPRE_Int   mb,        HYPRE_Int   n,
 
    /* expand */
    HYPRE_Int nnzT = nnzA + nnzB, nnzC;
-   HYPRE_Int *d_it, *d_jt, *d_pm, *d_it_cp, *d_jt_cp, *d_ic, *d_jc;
+   HYPRE_Int *d_it, *d_jt, *d_it_cp, *d_jt_cp, *d_ic, *d_jc;
    HYPRE_Complex *d_at, *d_at_cp, *d_ac;
 
-   /* some trick here for memory alignment. maybe not worth it at all */ 
+   /* some trick here for memory alignment. maybe not worth it at all */
    HYPRE_Int align = 32;
    HYPRE_Int nnzT2 = (nnzT + align - 1) / align * align;
-   char *work_mem = hypre_TAlloc(char, (5*sizeof(HYPRE_Int)+2*sizeof(HYPRE_Complex))*nnzT2, HYPRE_MEMORY_DEVICE);
+   char *work_mem = hypre_TAlloc(char, (4*sizeof(HYPRE_Int)+2*sizeof(HYPRE_Complex))*nnzT2, HYPRE_MEMORY_DEVICE);
    char *work_mem_saved = work_mem;
 
    //d_it = hypre_TAlloc(HYPRE_Int, nnzT, HYPRE_MEMORY_DEVICE);
@@ -76,11 +76,6 @@ hypreDevice_CSRSpAdd(HYPRE_Int  ma,       HYPRE_Int   mb,        HYPRE_Int   n,
       hypreDevice_CsrRowPtrsToIndices_v2(mb, nnzB, d_ib, d_it + nnzA);
    }
 
-   /* permutation vector */
-   //d_pm = hypre_TAlloc(HYPRE_Int, nnzT, HYPRE_MEMORY_DEVICE);
-   d_pm = (HYPRE_Int *) work_mem;
-   work_mem += sizeof(HYPRE_Int) * nnzT2;
-
    /* make copy of (it, jt, at), since gather cannot be done in-place */
    //d_it_cp = hypre_TAlloc(HYPRE_Int,     nnzT, HYPRE_MEMORY_DEVICE);
    //d_jt_cp = hypre_TAlloc(HYPRE_Int,     nnzT, HYPRE_MEMORY_DEVICE);
@@ -92,37 +87,14 @@ hypreDevice_CSRSpAdd(HYPRE_Int  ma,       HYPRE_Int   mb,        HYPRE_Int   n,
    d_at_cp = (HYPRE_Complex *) work_mem;
    work_mem += sizeof(HYPRE_Complex) * nnzT2;
 
-   hypre_assert(work_mem - work_mem_saved == (5*sizeof(HYPRE_Int)+2*sizeof(HYPRE_Complex))*nnzT2);
+   hypre_assert(work_mem - work_mem_saved == (4*sizeof(HYPRE_Int)+2*sizeof(HYPRE_Complex))*nnzT2);
 
-   hypre_TMemcpy(d_it_cp, d_it, HYPRE_Int,     nnzT, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy(d_jt_cp, d_jt, HYPRE_Int,     nnzT, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy(d_at_cp, d_at, HYPRE_Complex, nnzT, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-
-   /* sort: lexicographical order (row, col) */
-   HYPRE_THRUST_CALL(sequence, d_pm, d_pm + nnzT);
-   HYPRE_THRUST_CALL(stable_sort_by_key, d_jt, d_jt + nnzT, d_pm);
-   HYPRE_THRUST_CALL(gather, d_pm, d_pm + nnzT, d_it_cp, d_it);
-
-   HYPRE_THRUST_CALL(stable_sort_by_key, d_it, d_it + nnzT, d_pm);
-   HYPRE_THRUST_CALL(gather, d_pm, d_pm + nnzT, d_jt_cp, d_jt);
-   HYPRE_THRUST_CALL(gather, d_pm, d_pm + nnzT, d_at_cp, d_at);
+   /* sort: lexicographical order (row, col): hypreDevice_StableSortByTupleKey */
+   hypreDevice_StableSortByTupleKey(nnzT, d_it, d_jt, d_at, 0);
 
    /* compress */
-   typedef thrust::tuple< thrust::device_ptr<HYPRE_Int>, thrust::device_ptr<HYPRE_Int> > IteratorTuple;
-   typedef thrust::zip_iterator<IteratorTuple> ZipIterator;
-
-   thrust::pair< ZipIterator, thrust::device_ptr<HYPRE_Complex> > new_end =
-      HYPRE_THRUST_CALL(reduce_by_key,
-      thrust::make_zip_iterator(thrust::make_tuple(d_it       , d_jt       )),
-      thrust::make_zip_iterator(thrust::make_tuple(d_it + nnzT, d_jt + nnzT)),
-      d_at,
-      thrust::make_zip_iterator(thrust::make_tuple(d_it_cp,     d_jt_cp)),
-      d_at_cp,
-      thrust::equal_to< thrust::tuple<HYPRE_Int, HYPRE_Int> >()
-   );
-
    /* returns end: so nnz = end - start */
-   nnzC = new_end.second - thrust::device_pointer_cast(d_at_cp);
+   nnzC = hypreDevice_ReduceByTupleKey(nnzT, d_it, d_jt, d_at, d_it_cp, d_jt_cp, d_at_cp);
 
    /* allocate final C */
    d_jc = hypre_TAlloc(HYPRE_Int,     nnzC, HYPRE_MEMORY_DEVICE);
@@ -144,7 +116,6 @@ hypreDevice_CSRSpAdd(HYPRE_Int  ma,       HYPRE_Int   mb,        HYPRE_Int   n,
    hypre_TFree(d_it,    HYPRE_MEMORY_DEVICE);
    hypre_TFree(d_jt,    HYPRE_MEMORY_DEVICE);
    hypre_TFree(d_at,    HYPRE_MEMORY_DEVICE);
-   hypre_TFree(d_pm,    HYPRE_MEMORY_DEVICE);
    hypre_TFree(d_it_cp, HYPRE_MEMORY_DEVICE);
    hypre_TFree(d_jt_cp, HYPRE_MEMORY_DEVICE);
    hypre_TFree(d_at_cp, HYPRE_MEMORY_DEVICE);

@@ -86,8 +86,7 @@ __global__ void
 hypreCUDAKernel_GetRowNnz(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int *d_diag_ia, HYPRE_Int *d_offd_ia,
                           HYPRE_Int *d_rownnz)
 {
-   const HYPRE_Int global_thread_id = blockIdx.x * blockDim.x + threadIdx.x;
-   //const HYPRE_Int total_num_threads = gridDim.x  * blockDim.x;
+   const HYPRE_Int global_thread_id = hypre_cuda_get_grid_thread_id<1,1>();
 
    if (global_thread_id < nrows)
    {
@@ -133,14 +132,15 @@ hypreCUDAKernel_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_
                                HYPRE_Int *d_offd_i, HYPRE_Int *d_offd_j, HYPRE_Complex *d_offd_a,
                                HYPRE_Int *d_ib, HYPRE_BigInt *d_jb, HYPRE_Complex *d_ab)
 {
-   HYPRE_Int global_warp_id = blockIdx.x * blockDim.y + threadIdx.y;
+   const HYPRE_Int global_warp_id = hypre_cuda_get_grid_warp_id<1,1>();
 
    if (global_warp_id >= nrows)
    {
       return;
    }
+
    /* lane id inside the warp */
-   HYPRE_Int lane_id = threadIdx.x;
+   const HYPRE_Int lane_id = hypre_cuda_get_lane_id<1>();
    HYPRE_Int i, j, k, p, row, istart, iend, bstart;
 
    /* diag part */
@@ -158,7 +158,7 @@ hypreCUDAKernel_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_
       /* start/end position of the row */
       j = read_only_load(d_diag_i + row + lane_id);
       /* start position of b */
-      k = read_only_load(d_ib + global_warp_id);
+      k = d_ib ? read_only_load(d_ib + global_warp_id) : 0;
    }
    istart = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 0);
    iend   = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 1);
@@ -205,13 +205,17 @@ hypreCUDAKernel_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_
          d_ab[p+i] = read_only_load(d_offd_a + i);
       }
    }
-
 }
 
 /* B = A(row_indices, :) */
-/* d_ib is input that contains row ptrs, of length (nrows + 1) or nrow (without the last entry, nnz) */
-/* special case: if d_row_indices == NULL, it means d_row_indices=[0,1,...,nrows-1]
- * if col_map_offd_A == NULL, use (-1 - d_offd_j) as column id*/
+/* Note: d_ib is an input vector that contains row ptrs,
+ *       i.e., start positions where to put the rows in d_jb and d_ab.
+ *       The col indices in B are global indices
+ *       of length (nrows + 1) or nrow (without the last entry, nnz) */
+/* Special cases:
+ *    if d_row_indices == NULL, it means d_row_indices=[0,1,...,nrows-1]
+ *    If col_map_offd_A == NULL, use (-1 - d_offd_j) as column id
+ *    If nrows == 1 and d_ib == NULL, it means d_ib[0] = 0 */
 HYPRE_Int
 hypreDevice_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int job, HYPRE_Int has_offd,
                            HYPRE_BigInt first_col, HYPRE_BigInt *d_col_map_offd_A,
@@ -225,9 +229,10 @@ hypreDevice_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int 
       return hypre_error_flag;
    }
 
-   HYPRE_Int num_warps_per_block = 16;
-   const dim3 bDim(HYPRE_WARP_SIZE, num_warps_per_block);
-   const dim3 gDim((nrows + num_warps_per_block - 1) / num_warps_per_block);
+   hypre_assert(!(nrows > 1 && d_ib == NULL));
+
+   const dim3 bDim = hypre_GetDefaultCUDABlockDimension();
+   const dim3 gDim = hypre_GetDefaultCUDAGridDimension(nrows, "warp", bDim);
 
    /*
    if (job == 2)
@@ -426,8 +431,9 @@ hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_
    return hypre_error_flag;
 }
 
+template <typename T>
 HYPRE_Int
-hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr, HYPRE_Int *d_row_num, HYPRE_Int *d_row_ind)
+hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr, T *d_row_num, T *d_row_ind)
 {
    /* trivial case */
    if (nrows <= 0)
@@ -445,6 +451,12 @@ hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_
 
    return hypre_error_flag;
 }
+
+template HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr, HYPRE_Int *d_row_num, HYPRE_Int *d_row_ind);
+#if defined(HYPRE_MIXEDINT) || defined(HYPRE_BIGINT)
+template HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr, HYPRE_BigInt *d_row_num, HYPRE_BigInt *d_row_ind);
+#endif
+
 
 #endif
 
@@ -474,7 +486,7 @@ hypreDevice_CsrRowIndicesToPtrs_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_
    return hypre_error_flag;
 }
 
-/* x[map[i]] += y[i] */
+/* x[map[i]] += y[i], same index cannot appear more than once in map */
 __global__ void
 hypreCUDAKernel_ScatterAdd(HYPRE_Int n, HYPRE_Real *x, HYPRE_Int *map, HYPRE_Real *y)
 {
@@ -641,8 +653,8 @@ hypreDevice_BigToSmallCopy(HYPRE_Int *tgt, const HYPRE_BigInt *src, HYPRE_Int si
 
 
 /* https://github.com/OrangeOwlSolutions/Thrust/blob/master/Sort_by_key_with_tuple_key.cu */
-/* opt: 0, (a,b) <= (a',b') if and only if a < a' or (a = a' and  b  <=  b')
- *      1, (a,b) <= (a',b') if and only if a < a' or (a = a' and |b| >= |b'|)
+/* opt: 0, (a,b) < (a',b') iff a < a' or (a = a' and  b  <  b')  [normal tupe comp]
+ *      1, (a,b) < (a',b') iff a < a' or (a = a' and |b| > |b'|) [used in dropping small entries]
  */
 template <typename T1, typename T2, typename T3>
 HYPRE_Int
@@ -653,7 +665,7 @@ hypreDevice_StableSortByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *vals, HY
 
    if (opt == 0)
    {
-      HYPRE_THRUST_CALL(stable_sort_by_key, begin_keys, end_keys, vals, TupleComp1<T1,T2>());
+      HYPRE_THRUST_CALL(stable_sort_by_key, begin_keys, end_keys, vals, thrust::less< thrust::tuple<T1, T2> >());
    }
    else if (opt == 1)
    {
@@ -665,6 +677,53 @@ hypreDevice_StableSortByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *vals, HY
 
 template HYPRE_Int hypreDevice_StableSortByTupleKey(HYPRE_Int N, HYPRE_Int *keys1, HYPRE_Int  *keys2, HYPRE_Int *vals, HYPRE_Int opt);
 template HYPRE_Int hypreDevice_StableSortByTupleKey(HYPRE_Int N, HYPRE_Int *keys1, HYPRE_Real *keys2, HYPRE_Int *vals, HYPRE_Int opt);
+template HYPRE_Int hypreDevice_StableSortByTupleKey(HYPRE_Int N, HYPRE_BigInt *keys1, HYPRE_BigInt *keys2, HYPRE_Complex *vals, HYPRE_Int opt);
+
+/* opt:
+ *      0, (a,b) < (a',b') iff a < a' or (a = a' and  b  <  b')                       [normal tupe comp]
+ *      2, (a,b) < (a',b') iff a < a' or (a = a' and (b == a or b < b') and b' != a') [used in assembly to put diagonal first]
+ */
+template <typename T1, typename T2, typename T3, typename T4>
+HYPRE_Int
+hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *vals1, T4 *vals2, HYPRE_Int opt)
+{
+   auto begin_keys = thrust::make_zip_iterator(thrust::make_tuple(keys1,     keys2));
+   auto end_keys   = thrust::make_zip_iterator(thrust::make_tuple(keys1 + N, keys2 + N));
+   auto begin_vals = thrust::make_zip_iterator(thrust::make_tuple(vals1,     vals2));
+
+   if (opt == 0)
+   {
+      HYPRE_THRUST_CALL(stable_sort_by_key, begin_keys, end_keys, begin_vals, thrust::less< thrust::tuple<T1, T2> >());
+   }
+   else if (opt == 2)
+   {
+      HYPRE_THRUST_CALL(stable_sort_by_key, begin_keys, end_keys, begin_vals, TupleComp3<T1,T2>());
+   }
+
+   return hypre_error_flag;
+}
+
+#if defined(HYPRE_MIXEDINT) || defined(HYPRE_BIGINT)
+template HYPRE_Int hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, HYPRE_BigInt *keys1, HYPRE_BigInt *keys2, char *vals1, HYPRE_Complex *vals2, HYPRE_Int opt);
+#endif
+template HYPRE_Int hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, HYPRE_Int *keys1, HYPRE_Int *keys2, char *vals1, HYPRE_Complex *vals2, HYPRE_Int opt);
+
+template <typename T1, typename T2, typename T3>
+HYPRE_Int
+hypreDevice_ReduceByTupleKey(HYPRE_Int N, T1 *keys1_in,  T2 *keys2_in,  T3 *vals_in,
+                                          T1 *keys1_out, T2 *keys2_out, T3 *vals_out)
+{
+   auto begin_keys_in  = thrust::make_zip_iterator(thrust::make_tuple(keys1_in,     keys2_in    ));
+   auto end_keys_in    = thrust::make_zip_iterator(thrust::make_tuple(keys1_in + N, keys2_in + N));
+   auto begin_keys_out = thrust::make_zip_iterator(thrust::make_tuple(keys1_out,    keys2_out   ));
+   thrust::equal_to< thrust::tuple<T1, T2> > pred;
+   thrust::plus<T3> func;
+   auto new_end = HYPRE_THRUST_CALL(reduce_by_key, begin_keys_in, end_keys_in, vals_in, begin_keys_out, vals_out, pred, func);
+
+   return new_end.second - vals_out;
+}
+
+template HYPRE_Int hypreDevice_ReduceByTupleKey(HYPRE_Int N, HYPRE_Int *keys1_in, HYPRE_Int *keys2_in, HYPRE_Complex *vals_in, HYPRE_Int *keys1_out, HYPRE_Int *keys2_out, HYPRE_Complex *vals_out);
 
 #endif // #if defined(HYPRE_USING_CUDA)
 

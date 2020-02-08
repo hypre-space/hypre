@@ -35,14 +35,6 @@ struct l1_norm_op1 : public thrust::binary_function<HYPRE_Complex, HYPRE_Complex
    }
 };
 
-struct l1_norm_op2 : public thrust::unary_function<HYPRE_Complex, HYPRE_Complex>
-{
-   __host__ __device__
-   HYPRE_Complex operator()(const HYPRE_Complex &/*x*/) const
-   {
-      return 1.0;
-   }
-};
 #endif
 
 HYPRE_Int hypre_ParCSRRelax(/* matrix to relax with */
@@ -718,8 +710,7 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
       {
 #if defined(HYPRE_USING_CUDA)
          thrust::identity<HYPRE_Complex> identity;
-         HYPRE_THRUST_CALL( transform_if, l1_norm, l1_norm + num_rows, l1_norm, l1_norm_op2(),
-                            thrust::not1(identity) );
+         HYPRE_THRUST_CALL( replace_if, l1_norm, l1_norm + num_rows, thrust::not1(identity), 1.0 );
 #endif
       }
       else
@@ -748,12 +739,10 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
    if (exec == HYPRE_EXEC_DEVICE)
    {
 #if defined(HYPRE_USING_CUDA)
-      thrust::negate<HYPRE_Complex> negate;
-      thrust::identity<HYPRE_Complex> identity;
-      HYPRE_THRUST_CALL( transform_if, l1_norm, l1_norm + num_rows, diag_tmp, l1_norm, negate,
-                         is_negative<HYPRE_Complex>() );
-
-      bool any_zero = HYPRE_THRUST_CALL( any_of, l1_norm, l1_norm + num_rows, thrust::not1(identity) );
+      HYPRE_THRUST_CALL( transform_if, l1_norm, l1_norm + num_rows, diag_tmp, l1_norm, thrust::negate<HYPRE_Real>(),
+                         is_negative<HYPRE_Real>() );
+      //bool any_zero = HYPRE_THRUST_CALL( any_of, l1_norm, l1_norm + num_rows, thrust::not1(thrust::identity<HYPRE_Complex>()) );
+      bool any_zero = 0.0 == HYPRE_THRUST_CALL( reduce, l1_norm, l1_norm + num_rows, 1.0, thrust::minimum<HYPRE_Real>() );
       if ( any_zero )
       {
          hypre_error_in_arg(1);

@@ -44,10 +44,10 @@ hypre_ParcsrGetExternalRowsDeviceInit( hypre_ParCSRMatrix   *A,
 
    /* HYPRE_Int       *row_starts      = hypre_ParCSRMatrixRowStarts(A); */
    /* HYPRE_Int        first_row       = hypre_ParCSRMatrixFirstRowIndex(A); */
-   HYPRE_Int        first_col       = hypre_ParCSRMatrixFirstColDiag(A);
-   HYPRE_Int       *col_map_offd_A  = hypre_ParCSRMatrixColMapOffd(A);
-   HYPRE_Int        num_cols_A_offd = hypre_CSRMatrixNumCols(A_offd);
-   HYPRE_Int       *d_col_map_offd_A = hypre_ParCSRMatrixDeviceColMapOffd(A);
+   HYPRE_Int        first_col        = hypre_ParCSRMatrixFirstColDiag(A);
+   HYPRE_BigInt    *col_map_offd_A   = hypre_ParCSRMatrixColMapOffd(A);
+   HYPRE_Int        num_cols_A_offd  = hypre_CSRMatrixNumCols(A_offd);
+   HYPRE_BigInt    *d_col_map_offd_A = hypre_ParCSRMatrixDeviceColMapOffd(A);
 
    MPI_Comm         comm  = hypre_ParCSRMatrixComm(A);
 
@@ -107,8 +107,8 @@ hypre_ParcsrGetExternalRowsDeviceInit( hypre_ParCSRMatrix   *A,
 
    if (d_col_map_offd_A == NULL)
    {
-      d_col_map_offd_A = hypre_TAlloc(HYPRE_Int, num_cols_A_offd, HYPRE_MEMORY_DEVICE);
-      hypre_TMemcpy(d_col_map_offd_A, col_map_offd_A, HYPRE_Int, num_cols_A_offd,
+      d_col_map_offd_A = hypre_TAlloc(HYPRE_BigInt, num_cols_A_offd, HYPRE_MEMORY_DEVICE);
+      hypre_TMemcpy(d_col_map_offd_A, col_map_offd_A, HYPRE_BigInt, num_cols_A_offd,
                     HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
       hypre_ParCSRMatrixDeviceColMapOffd(A) = d_col_map_offd_A;
    }

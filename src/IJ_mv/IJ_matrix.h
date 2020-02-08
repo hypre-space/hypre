@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+#if 0
 /******************************************************************************
  *
  * Header info for the hypre_IJMatrix structures
@@ -81,6 +82,8 @@ hypre_GetIJMatrixParCSRMatrix( HYPRE_IJMatrix IJmatrix, Mat *reference )
 /* IJMatrix_isis.c */
 HYPRE_Int
 hypre_GetIJMatrixISISMatrix( HYPRE_IJMatrix IJmatrix, RowMatrix *reference )
+#endif
+
 #endif
 
 #endif
