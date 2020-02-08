@@ -393,6 +393,24 @@ hypre_ParVectorCloneDeep_v2( hypre_ParVector *x, HYPRE_Int memory_location )
    return y;
 }
 
+HYPRE_Int
+hypre_ParVectorMigrate(hypre_ParVector *x, HYPRE_Int memory_location)
+{
+   if ( hypre_GetActualMemLocation(memory_location) !=
+        hypre_GetActualMemLocation(hypre_ParVectorMemoryLocation(x)) )
+   {
+      hypre_Vector *x_local = hypre_SeqVectorCloneDeep_v2(hypre_ParVectorLocalVector(x), memory_location);
+      hypre_SeqVectorDestroy(hypre_ParVectorLocalVector(x));
+      hypre_ParVectorLocalVector(x) = x_local;
+   }
+   else
+   {
+      hypre_VectorMemoryLocation(hypre_ParVectorLocalVector(x)) = memory_location;
+   }
+
+   return hypre_error_flag;
+}
+
 
 /*--------------------------------------------------------------------------
  * hypre_ParVectorScale

@@ -162,6 +162,8 @@ hypre_ParCSRMatrixDestroy( hypre_ParCSRMatrix *matrix )
 {
    if (matrix)
    {
+      HYPRE_Int memory_location = hypre_ParCSRMatrixMemoryLocation(matrix);
+
       if ( hypre_ParCSRMatrixOwnsData(matrix) )
       {
          hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(matrix));
@@ -208,8 +210,10 @@ hypre_ParCSRMatrixDestroy( hypre_ParCSRMatrix *matrix )
          hypre_TFree(hypre_ParCSRMatrixColStarts(matrix), HYPRE_MEMORY_HOST);
       }
 
-      hypre_TFree(hypre_ParCSRMatrixRowindices(matrix), HYPRE_MEMORY_SHARED);
-      hypre_TFree(hypre_ParCSRMatrixRowvalues(matrix), HYPRE_MEMORY_SHARED);
+      /* RL: this is actually not correct since the memory_location may have been changed after allocation 
+       * put them in containers TODO */
+      hypre_TFree(hypre_ParCSRMatrixRowindices(matrix), memory_location);
+      hypre_TFree(hypre_ParCSRMatrixRowvalues(matrix), memory_location);
 
       if ( hypre_ParCSRMatrixAssumedPartition(matrix) && hypre_ParCSRMatrixOwnsAssumedPartition(matrix) )
       {
@@ -308,6 +312,28 @@ hypre_ParCSRMatrixClone(hypre_ParCSRMatrix *A, HYPRE_Int copy_data)
    return hypre_ParCSRMatrixClone_v2(A, copy_data, HYPRE_MEMORY_SHARED);
 }
 
+HYPRE_Int
+hypre_ParCSRMatrixMigrate(hypre_ParCSRMatrix *A, HYPRE_Int memory_location)
+{
+   if ( hypre_GetActualMemLocation(memory_location) !=
+        hypre_GetActualMemLocation(hypre_ParCSRMatrixMemoryLocation(A)) )
+   {
+      hypre_CSRMatrix *A_diag = hypre_CSRMatrixClone_v2(hypre_ParCSRMatrixDiag(A), 1, memory_location);
+      hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(A));
+      hypre_ParCSRMatrixDiag(A) = A_diag;
+
+      hypre_CSRMatrix *A_offd = hypre_CSRMatrixClone_v2(hypre_ParCSRMatrixOffd(A), 1, memory_location);
+      hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(A));
+      hypre_ParCSRMatrixOffd(A) = A_offd;
+   }
+   else
+   {
+      hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(A)) = memory_location;
+      hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixOffd(A)) = memory_location;
+   }
+
+   return hypre_error_flag;
+}
 
 HYPRE_Int
 hypre_ParCSRMatrixSetNumNonzeros_core( hypre_ParCSRMatrix *matrix, const char* format )

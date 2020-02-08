@@ -360,41 +360,16 @@ hypre_SeqVectorCopy( hypre_Vector *x,
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] -= hypre_MPI_Wtime();
 #endif
 
-   //hypre_SeqVectorPrefetch(x, HYPRE_MEMORY_DEVICE);
-   //hypre_SeqVectorPrefetch(y, HYPRE_MEMORY_DEVICE);
+   HYPRE_Int ierr = 0;
 
-   HYPRE_Complex *x_data = hypre_VectorData(x);
-   HYPRE_Complex *y_data = hypre_VectorData(y);
-   HYPRE_Int      size   = hypre_VectorSize(x);
-   HYPRE_Int      size_y = hypre_VectorSize(y);
-   HYPRE_Int      ierr = 0;
+   size_t size = hypre_min( hypre_VectorSize(x), hypre_VectorSize(y) ) * hypre_VectorNumVectors(x);
 
-   if (size > size_y)
-   {
-      size = size_y;
-   }
-   size *= hypre_VectorNumVectors(x);
-
-#if defined(HYPRE_USING_CUDA)
-#if defined(HYPRE_USING_CUBLAS)
-   HYPRE_CUBLAS_CALL( cublasDcopy(hypre_HandleCublasHandle(hypre_handle), size, x_data, 1, y_data, 1) );
-#else
-   HYPRE_THRUST_CALL( copy_n, x_data, size, y_data );
-#endif
-#else
-   HYPRE_Int i;
-#if defined(HYPRE_USING_DEVICE_OPENMP)
-#pragma omp target teams distribute parallel for private(i) is_device_ptr(y_data,x_data)
-#elif defined(HYPRE_USING_OPENMP)
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-#endif
-   for (i = 0; i < size; i++)
-   {
-      y_data[i] = x_data[i];
-   }
-#endif /* defined(HYPRE_USING_CUDA) */
-
-   hypre_SyncCudaComputeStream(hypre_handle);
+   hypre_TMemcpy( hypre_VectorData(y),
+                  hypre_VectorData(x),
+                  HYPRE_Complex,
+                  size,
+                  hypre_VectorMemoryLocation(y),
+                  hypre_VectorMemoryLocation(x) );
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();

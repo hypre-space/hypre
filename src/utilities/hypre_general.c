@@ -11,16 +11,6 @@
 #include <Kokkos_Core.hpp>
 #endif
 
-void hypre_SetExecPolicy( HYPRE_Int policy )
-{
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   if ( policy == HYPRE_EXEC_HOST || policy == HYPRE_EXEC_DEVICE)
-   {
-      hypre_HandleDefaultExecPolicy(hypre_handle) = policy;
-   }
-#endif
-}
-
 /*---------------------------------------------------
  * hypre_GetExecPolicy
  * Return execution policy based on memory locations

@@ -140,6 +140,7 @@ main( hypre_int argc,
    HYPRE_ParVector     x = NULL;
    HYPRE_ParVector     *interp_vecs = NULL;
    HYPRE_ParVector     residual = NULL;
+   HYPRE_ParVector     x0_save = NULL;
 
    HYPRE_Solver        amg_solver;
    HYPRE_Solver        pcg_solver;
@@ -227,14 +228,11 @@ main( hypre_int argc,
    HYPRE_Int add_last_lvl = -1;
    HYPRE_Int add_P_max_elmts = 0;
    HYPRE_Real add_trunc_factor = 0;
-
+   HYPRE_Int    rap2     = 0;
+   HYPRE_Int    mod_rap2 = 0;
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   HYPRE_Int    rap2 = 1;
-   HYPRE_Int    mod_rap2 = 1;
    HYPRE_Int    keepTranspose = 1;
 #else
-   HYPRE_Int    rap2=0;
-   HYPRE_Int    mod_rap2=0;
    HYPRE_Int    keepTranspose = 0;
 #endif
 #ifdef HYPRE_USING_DSUPERLU
@@ -385,8 +383,8 @@ main( hypre_int argc,
    HYPRE_Int air = 0;
    HYPRE_Int **grid_relax_points = NULL;
 
-   HYPRE_Int no_cuda_um = 0;
    HYPRE_Int spgemm_use_cusparse = 1;
+   HYPRE_Int default_exec_policy = HYPRE_EXEC_HOST;
    HYPRE_Int memory_location = HYPRE_MEMORY_SHARED;
 
    /* CUB Allocator */
@@ -395,35 +393,12 @@ main( hypre_int argc,
               mempool_max_bin      = 9;
    size_t mempool_max_cached_bytes = 2000LL * 1024 * 1024;
 
-   HYPRE_ParCSRMatrix parcsr_A_host = NULL;
-   HYPRE_ParVector b_host = NULL, x_host = NULL, x0_save = NULL;
-
-   /*-----------------------------------------------------------
-    * Initialize some stuff
-    *-----------------------------------------------------------*/
-
    /* Initialize MPI */
    hypre_MPI_Init(&argc, &argv);
 
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
-   time_index = hypre_InitializeTiming("Hypre init");
-   hypre_BeginTiming(time_index);
-
-   /* Initialize Hypre: must be the first Hypre function to call */
-   HYPRE_Init(argc, argv);
-
-   hypre_EndTiming(time_index);
-   hypre_PrintTiming("Hypre init times", hypre_MPI_COMM_WORLD);
-   hypre_FinalizeTiming(time_index);
-   hypre_ClearTiming();
-
-   //omp_set_default_device(0);
-   //nvtxDomainHandle_t domain = nvtxDomainCreateA("Domain_A");
-   /*
-     hypre_InitMemoryDebug(myid);
-   */
    /*-----------------------------------------------------------
     * Set defaults
     *-----------------------------------------------------------*/
@@ -445,7 +420,6 @@ main( hypre_int argc,
 
    ioutdat = 3;
    poutdat = 1;
-
    hypre_sprintf (plot_file_name,"AMGgrids.CF.dat");
 
    /*-----------------------------------------------------------
@@ -1042,28 +1016,18 @@ main( hypre_int argc,
       else if ( strcmp(argv[arg_index], "-exec_host") == 0 )
       {
          arg_index++;
-         hypre_SetExecPolicy(HYPRE_EXEC_HOST);
+         default_exec_policy = HYPRE_EXEC_HOST;
       }
       else if ( strcmp(argv[arg_index], "-exec_device") == 0 )
       {
          arg_index++;
-         hypre_SetExecPolicy(HYPRE_EXEC_DEVICE);
+         default_exec_policy = HYPRE_EXEC_DEVICE;
          rap2 = mod_rap2 = 1;
-      }
-      else if ( strcmp(argv[arg_index], "-no_cuda_um") == 0 )
-      {
-         arg_index++;
-         no_cuda_um = atoi(argv[arg_index++]);
-         if (no_cuda_um)
-         {
-            hypre_handle->memory_location = memory_location = HYPRE_MEMORY_DEVICE;
-         }
       }
       else if ( strcmp(argv[arg_index], "-mm_cusparse") == 0 )
       {
          arg_index++;
          spgemm_use_cusparse = atoi(argv[arg_index++]);
-         HYPRE_CSRMatrixDeviceSpGemmSetUseCusparse(spgemm_use_cusparse);
       }
       else if ( strcmp(argv[arg_index], "-mempool_growth") == 0 )
       {
@@ -1091,10 +1055,6 @@ main( hypre_int argc,
          arg_index++;
       }
    }
-
-   /* To be effective, hypre_SetCubMemPoolSize must immediately follow HYPRE_Init */
-   hypre_SetCubMemPoolSize( mempool_bin_growth, mempool_min_bin,
-                            mempool_max_bin, mempool_max_cached_bytes );
 
    /* begin CGC BM Aug 25, 2006 */
    if (coarsen_type == 21 || coarsen_type == 22) {
@@ -1979,8 +1939,6 @@ main( hypre_int argc,
          hypre_printf("  -mgr_frelax_method   1           : Use a 'multi-level smoother' strategy \n");
          hypre_printf("                                     for F-relaxation \n");
          /* end MGR options */
-
-         hypre_printf("  -no_cuda_um  <val>               : if use CUDA unified memory\n");
       }
 
       goto final;
@@ -1995,6 +1953,29 @@ main( hypre_int argc,
       hypre_printf("Running with these driver parameters:\n");
       hypre_printf("  solver ID    = %d\n\n", solver_id);
    }
+
+   time_index = hypre_InitializeTiming("Hypre init");
+   hypre_BeginTiming(time_index);
+
+   /*-----------------------------------------------------------
+    * Initialize : must be the first HYPRE function to call
+    *-----------------------------------------------------------*/
+   HYPRE_Init(argc, argv);
+
+   hypre_EndTiming(time_index);
+   hypre_PrintTiming("Hypre init times", hypre_MPI_COMM_WORLD);
+   hypre_FinalizeTiming(time_index);
+   hypre_ClearTiming();
+
+   /* To be effective, hypre_SetCubMemPoolSize must immediately follow HYPRE_Init */
+   hypre_SetCubMemPoolSize( mempool_bin_growth, mempool_min_bin,
+                            mempool_max_bin, mempool_max_cached_bytes );
+
+   hypre_HandleMemoryLocation(hypre_handle)    = memory_location;
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+   hypre_HandleDefaultExecPolicy(hypre_handle) = default_exec_policy;
+   hypre_HandleSpgemmUseCusparse(hypre_handle) = spgemm_use_cusparse;
+#endif
 
    /*-----------------------------------------------------------
     * Set up matrix
@@ -2103,6 +2084,8 @@ main( hypre_int argc,
    /* Check the ij interface - not necessary if one just wants to test solvers */
    if (test_ij && build_matrix_type > -1)
    {
+      hypre_ParCSRMatrixMigrate(parcsr_A, HYPRE_MEMORY_HOST);
+
       HYPRE_Int mx_size = 5;
       time_index = hypre_InitializeTiming("Generate IJ matrix");
       hypre_BeginTiming(time_index);
@@ -2110,23 +2093,28 @@ main( hypre_int argc,
       ierr += HYPRE_ParCSRMatrixGetDims( parcsr_A, &M, &N );
 
       ierr += HYPRE_IJMatrixCreate( comm, first_local_row, last_local_row,
-                                    first_local_col, last_local_col,
-                                    &ij_A );
+                                    first_local_col, last_local_col, &ij_A );
 
       ierr += HYPRE_IJMatrixSetObjectType( ij_A, HYPRE_PARCSR );
       num_rows = local_num_rows;
       if (off_proc)
       {
-         if (myid != num_procs-1) num_rows++;
-         if (myid) num_rows++;
+         if (myid != num_procs-1)
+         {
+            num_rows++;
+         }
+         if (myid)
+         {
+            num_rows++;
+         }
       }
       /* The following shows how to build an IJMatrix if one has only an
          estimate for the row sizes */
-      row_nums = hypre_CTAlloc(HYPRE_BigInt, num_rows, memory_location);
-      num_cols = hypre_CTAlloc(HYPRE_Int, num_rows, memory_location);
+      row_nums = hypre_CTAlloc(HYPRE_BigInt, num_rows, HYPRE_MEMORY_HOST);
+      num_cols = hypre_CTAlloc(HYPRE_Int,    num_rows, HYPRE_MEMORY_HOST);
       if (sparsity_known == 1)
       {
-         diag_sizes = hypre_CTAlloc(HYPRE_Int, local_num_rows, HYPRE_MEMORY_HOST);
+         diag_sizes    = hypre_CTAlloc(HYPRE_Int, local_num_rows, HYPRE_MEMORY_HOST);
          offdiag_sizes = hypre_CTAlloc(HYPRE_Int, local_num_rows, HYPRE_MEMORY_HOST);
       }
       else
@@ -2134,9 +2122,18 @@ main( hypre_int argc,
          size = 5;
          if (sparsity_known == 0)
          {
-            if (build_matrix_type == 2) size = 7;
-            if (build_matrix_type == 3) size = 9;
-            if (build_matrix_type == 4) size = 27;
+            if (build_matrix_type == 2)
+            {
+               size = 7;
+            }
+            if (build_matrix_type == 3)
+            {
+               size = 9;
+            }
+            if (build_matrix_type == 4)
+            {
+               size = 27;
+            }
          }
          row_sizes = hypre_CTAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_HOST);
          for (i = 0; i < num_rows; i++)
@@ -2145,48 +2142,44 @@ main( hypre_int argc,
          }
       }
       local_row = 0;
-      if (build_matrix_type == 2) mx_size = 7;
-      if (build_matrix_type == 3) mx_size = 9;
-      if (build_matrix_type == 4) mx_size = 27;
-      col_nums = hypre_CTAlloc(HYPRE_BigInt, mx_size*num_rows, memory_location);
-      data = hypre_CTAlloc(HYPRE_Real, mx_size*num_rows, memory_location);
+      if (build_matrix_type == 2)
+      {
+         mx_size = 7;
+      }
+      if (build_matrix_type == 3)
+      {
+         mx_size = 9;
+      }
+      if (build_matrix_type == 4)
+      {
+         mx_size = 27;
+      }
+      col_nums = hypre_CTAlloc(HYPRE_BigInt, mx_size*num_rows, HYPRE_MEMORY_HOST);
+      data     = hypre_CTAlloc(HYPRE_Real,   mx_size*num_rows, HYPRE_MEMORY_HOST);
       i_indx = 0;
       j_indx = 0;
 
-      HYPRE_Int tmpi;
-      HYPRE_BigInt tmpbi;
-      HYPRE_Real tmpr;
-
       if (off_proc && myid)
       {
-         tmpi = 2;
-         hypre_TMemcpy(&num_cols[i_indx], &tmpi, HYPRE_Int, 1, memory_location, HYPRE_MEMORY_HOST);
-         tmpbi = first_local_row-1;
-         hypre_TMemcpy(&row_nums[i_indx++], &tmpbi, HYPRE_BigInt, 1, memory_location, HYPRE_MEMORY_HOST);
-         tmpbi = first_local_row-1;
-         hypre_TMemcpy(&col_nums[j_indx], &tmpbi, HYPRE_BigInt, 1, memory_location, HYPRE_MEMORY_HOST);
-         tmpr = 6.0;
-         hypre_TMemcpy(&data[j_indx++], &tmpr, HYPRE_Real, 1, memory_location, HYPRE_MEMORY_HOST);
-         tmpbi = first_local_row-2;
-         hypre_TMemcpy(&col_nums[j_indx], &tmpbi, HYPRE_BigInt, 1, memory_location, HYPRE_MEMORY_HOST);
-         tmpr = -1.0;
-         hypre_TMemcpy(&data[j_indx++], &tmpr, HYPRE_Real, 1, memory_location, HYPRE_MEMORY_HOST);
+         num_cols[i_indx]   = 2;
+         row_nums[i_indx++] = first_local_row - 1;
+         col_nums[j_indx]   = first_local_row - 1;
+         data[j_indx++]     = 6.0;
+         col_nums[j_indx]   = first_local_row - 2;
+         data[j_indx++]     = -1.0;
       }
-      for (i=0; i < local_num_rows; i++)
+      for (i = 0; i < local_num_rows; i++)
       {
-         tmpbi = first_local_row + i;
-         hypre_TMemcpy(&row_nums[i_indx], &tmpbi, HYPRE_BigInt, 1, memory_location, HYPRE_MEMORY_HOST);
-         ierr += HYPRE_ParCSRMatrixGetRow( parcsr_A, first_local_row+i, &size, &col_inds, &values);
-         hypre_TMemcpy(&num_cols[i_indx++], &size, HYPRE_Int, 1, memory_location, HYPRE_MEMORY_HOST);
-         hypre_TMemcpy(&col_nums[j_indx], &col_inds[0], HYPRE_BigInt, size, memory_location, hypre_ParCSRMatrixMemoryLocation(parcsr_A));
-         hypre_TMemcpy(&data[j_indx], &values[0], HYPRE_Real, size, memory_location, hypre_ParCSRMatrixMemoryLocation(parcsr_A));
+         row_nums[i_indx] = first_local_row + i;
+         ierr += HYPRE_ParCSRMatrixGetRow(parcsr_A, first_local_row+i, &size, &col_inds, &values);
+         num_cols[i_indx++] = size;
+         hypre_TMemcpy(&col_nums[j_indx], &col_inds[0], HYPRE_BigInt, size, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(&data[j_indx], &values[0], HYPRE_Real, size, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
          if (sparsity_known == 1)
          {
-            HYPRE_Int *tmp = hypre_CTAlloc(HYPRE_BigInt, size, HYPRE_MEMORY_HOST);
-            hypre_TMemcpy(tmp, &col_nums[j_indx], HYPRE_BigInt, size, HYPRE_MEMORY_HOST, memory_location);
             for (j = 0; j < size; j++)
             {
-               if (tmp[j] < first_local_row || tmp[j] > last_local_row)
+               if (col_nums[j_indx+j] < first_local_row || col_nums[j_indx+j] > last_local_row)
                {
                   offdiag_sizes[local_row]++;
                }
@@ -2195,29 +2188,22 @@ main( hypre_int argc,
                   diag_sizes[local_row]++;
                }
             }
-            hypre_TFree(tmp, HYPRE_MEMORY_HOST);
          }
          j_indx += size;
          local_row++;
-         ierr += HYPRE_ParCSRMatrixRestoreRow( parcsr_A, first_local_row+i, &size, &col_inds, &values );
-      }
-      if (off_proc && myid != num_procs-1)
-      {
-         tmpi = 2;
-         hypre_TMemcpy(&num_cols[i_indx], &tmpi, HYPRE_Int, 1, memory_location, HYPRE_MEMORY_HOST);
-         tmpbi = last_local_row+1;
-         hypre_TMemcpy(&row_nums[i_indx++], &tmpbi, HYPRE_BigInt, 1, memory_location, HYPRE_MEMORY_HOST);
-         tmpbi = last_local_row+2;
-         hypre_TMemcpy(&col_nums[j_indx], &tmpbi, HYPRE_BigInt, 1, memory_location, HYPRE_MEMORY_HOST);
-         tmpr = -1.0;
-         hypre_TMemcpy(&data[j_indx++], &tmpr, HYPRE_Real, 1, memory_location, HYPRE_MEMORY_HOST);
-         tmpbi =  last_local_row+1;
-         hypre_TMemcpy(&col_nums[j_indx], &tmpbi, HYPRE_BigInt, 1, memory_location, HYPRE_MEMORY_HOST);
-         tmpr = 6.0;
-         hypre_TMemcpy(&data[j_indx++], &tmpr, HYPRE_Real, 1, memory_location, HYPRE_MEMORY_HOST);
+         ierr += HYPRE_ParCSRMatrixRestoreRow(parcsr_A, first_local_row+i, &size, &col_inds, &values);
       }
 
-      /*ierr += HYPRE_IJMatrixSetRowSizes ( ij_A, (const HYPRE_Int *) num_cols );*/
+      if (off_proc && myid != num_procs-1)
+      {
+         num_cols[i_indx]   = 2;
+         row_nums[i_indx++] = last_local_row + 1;
+         col_nums[j_indx]   = last_local_row + 2;
+         data[j_indx++]     = -1.0;
+         col_nums[j_indx]   = last_local_row + 1;
+         data[j_indx++]     = 6.0;
+      }
+
       if (sparsity_known == 1)
       {
          ierr += HYPRE_IJMatrixSetDiagOffdSizes( ij_A, (const HYPRE_Int *) diag_sizes,
@@ -2230,7 +2216,28 @@ main( hypre_int argc,
 
       ierr += HYPRE_IJMatrixInitialize_v2( ij_A, memory_location );
 
-      if (omp_flag) HYPRE_IJMatrixSetOMPFlag(ij_A, 1);
+      if (omp_flag)
+      {
+         HYPRE_IJMatrixSetOMPFlag(ij_A, 1);
+      }
+
+      /* move arrays to `memory_location' */
+      HYPRE_Int    *num_cols_h = num_cols;
+      HYPRE_BigInt *row_nums_h = row_nums;
+      HYPRE_BigInt *col_nums_h = col_nums;
+      HYPRE_Real   *data_h     = data;
+      if (hypre_GetActualMemLocation(memory_location) != HYPRE_MEMORY_HOST)
+      {
+         num_cols = hypre_TAlloc(HYPRE_Int,    num_rows,         memory_location);
+         row_nums = hypre_TAlloc(HYPRE_BigInt, num_rows,         memory_location);
+         col_nums = hypre_TAlloc(HYPRE_BigInt, mx_size*num_rows, memory_location);
+         data     = hypre_TAlloc(HYPRE_Real,   mx_size*num_rows, memory_location);
+
+         hypre_TMemcpy(num_cols, num_cols_h, HYPRE_Int,    num_rows,         memory_location, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(row_nums, row_nums_h, HYPRE_BigInt, num_rows,         memory_location, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(col_nums, col_nums_h, HYPRE_BigInt, mx_size*num_rows, memory_location, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(data,     data_h,     HYPRE_Real,   mx_size*num_rows, memory_location, HYPRE_MEMORY_HOST);
+      }
 
       if (chunk)
       {
@@ -2264,18 +2271,24 @@ main( hypre_int argc,
                                                 (const HYPRE_BigInt *) &col_nums[j_indx],
                                                 (const HYPRE_Real *) &data[j_indx] );
             }
-            hypre_TMemcpy(&tmpi, &num_cols[i], HYPRE_Int, 1, HYPRE_MEMORY_HOST, memory_location);
-            j_indx += tmpi;
+            j_indx += num_cols_h[i];
          }
       }
-      hypre_TFree(col_nums, memory_location);
-      hypre_TFree(data,     memory_location);
-      hypre_TFree(row_nums, memory_location);
-      hypre_TFree(num_cols, memory_location);
+      hypre_TFree(num_cols_h, HYPRE_MEMORY_HOST);
+      hypre_TFree(row_nums_h, HYPRE_MEMORY_HOST);
+      hypre_TFree(col_nums_h, HYPRE_MEMORY_HOST);
+      hypre_TFree(data_h,     HYPRE_MEMORY_HOST);
+      if (hypre_GetActualMemLocation(memory_location) != HYPRE_MEMORY_HOST)
+      {
+         hypre_TFree(col_nums, memory_location);
+         hypre_TFree(data,     memory_location);
+         hypre_TFree(row_nums, memory_location);
+         hypre_TFree(num_cols, memory_location);
+      }
 
       if (sparsity_known == 1)
       {
-         hypre_TFree(diag_sizes, HYPRE_MEMORY_HOST);
+         hypre_TFree(diag_sizes,    HYPRE_MEMORY_HOST);
          hypre_TFree(offdiag_sizes, HYPRE_MEMORY_HOST);
       }
       else
@@ -2309,10 +2322,10 @@ main( hypre_int argc,
          ierr += HYPRE_IJMatrixSetConstantValues( ij_A, -1.0 );
       }
 
-      ncols    = hypre_CTAlloc(HYPRE_Int,     last_local_row - first_local_row + 1, memory_location);
-      rows     = hypre_CTAlloc(HYPRE_BigInt,  last_local_row - first_local_row + 1, memory_location);
-      col_inds = hypre_CTAlloc(HYPRE_BigInt,  last_local_row - first_local_row + 1, memory_location);
-      values   = hypre_CTAlloc(HYPRE_Real,    last_local_row - first_local_row + 1, memory_location);
+      ncols    = hypre_TAlloc(HYPRE_Int,     last_local_row - first_local_row + 1, HYPRE_MEMORY_HOST);
+      rows     = hypre_TAlloc(HYPRE_BigInt,  last_local_row - first_local_row + 1, HYPRE_MEMORY_HOST);
+      col_inds = hypre_TAlloc(HYPRE_BigInt,  last_local_row - first_local_row + 1, HYPRE_MEMORY_HOST);
+      values   = hypre_TAlloc(HYPRE_Real,    last_local_row - first_local_row + 1, HYPRE_MEMORY_HOST);
 
       val = 0.0;
 
@@ -2331,13 +2344,34 @@ main( hypre_int argc,
 
       for (big_i = first_local_row; big_i <= last_local_row; big_i++)
       {
-         HYPRE_Int tmpi = 1;
          j = (HYPRE_Int) (big_i - first_local_row);
+         ncols[j]    = 1;
+         rows[j]     = big_i;
+         col_inds[j] = big_i;
+         values[j]   = val;
+      }
 
-         hypre_TMemcpy(&ncols[j],    &tmpi,  HYPRE_Int,    1, memory_location, HYPRE_MEMORY_HOST);
-         hypre_TMemcpy(&rows[j],     &big_i, HYPRE_BigInt, 1, memory_location, HYPRE_MEMORY_HOST);
-         hypre_TMemcpy(&col_inds[j], &big_i, HYPRE_BigInt, 1, memory_location, HYPRE_MEMORY_HOST);
-         hypre_TMemcpy(&values[j],   &val,   HYPRE_Real,   1, memory_location, HYPRE_MEMORY_HOST);
+      if (hypre_GetActualMemLocation(memory_location) != HYPRE_MEMORY_HOST)
+      {
+         HYPRE_Int    *ncols_h    = ncols;
+         HYPRE_BigInt *rows_h     = rows;
+         HYPRE_BigInt *col_inds_h = col_inds;
+         HYPRE_Real   *values_h   = values;
+
+         ncols    = hypre_TAlloc(HYPRE_Int,     last_local_row - first_local_row + 1, memory_location);
+         rows     = hypre_TAlloc(HYPRE_BigInt,  last_local_row - first_local_row + 1, memory_location);
+         col_inds = hypre_TAlloc(HYPRE_BigInt,  last_local_row - first_local_row + 1, memory_location);
+         values   = hypre_TAlloc(HYPRE_Real,    last_local_row - first_local_row + 1, memory_location);
+
+         hypre_TMemcpy(ncols,    ncols_h,    HYPRE_Int,    last_local_row - first_local_row + 1, memory_location, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(rows,     rows_h,     HYPRE_BigInt, last_local_row - first_local_row + 1, memory_location, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(col_inds, col_inds_h, HYPRE_BigInt, last_local_row - first_local_row + 1, memory_location, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(values,   values_h,   HYPRE_Real,   last_local_row - first_local_row + 1, memory_location, HYPRE_MEMORY_HOST);
+
+         hypre_TFree(ncols_h,    HYPRE_MEMORY_HOST);
+         hypre_TFree(rows_h,     HYPRE_MEMORY_HOST);
+         hypre_TFree(col_inds_h, HYPRE_MEMORY_HOST);
+         hypre_TFree(values_h,   HYPRE_MEMORY_HOST);
       }
 
       ierr += HYPRE_IJMatrixAddToValues( ij_A,
@@ -2348,10 +2382,10 @@ main( hypre_int argc,
                                          (const HYPRE_BigInt *) col_inds,
                                          (const HYPRE_Real *) values );
 
-      hypre_TFree(values,   memory_location);
-      hypre_TFree(col_inds, memory_location);
-      hypre_TFree(rows,     memory_location);
       hypre_TFree(ncols,    memory_location);
+      hypre_TFree(rows,     memory_location);
+      hypre_TFree(col_inds, memory_location);
+      hypre_TFree(values,   memory_location);
 
       /* If sparsity pattern is not changed since last IJMatrixAssemble call,
          this should be a no-op */
@@ -2486,8 +2520,6 @@ main( hypre_int argc,
          hypre_printf("  Initial guess is 0\n");
       }
 
-      HYPRE_Int memory_location = HYPRE_MEMORY_SHARED;
-      memory_location = no_cuda_um ? HYPRE_MEMORY_DEVICE : HYPRE_MEMORY_SHARED;
       HYPRE_Real *values_h = hypre_CTAlloc(HYPRE_Real, local_num_rows, HYPRE_MEMORY_HOST);
       HYPRE_Real *values_d = hypre_CTAlloc(HYPRE_Real, local_num_rows, memory_location);
       for (i = 0; i < local_num_rows; i++)
@@ -2926,7 +2958,9 @@ main( hypre_int argc,
       else
       {
          if (myid == 0)
+         {
             hypre_printf (" Number of functions = %d \n", num_functions);
+         }
       }
    }
 
@@ -2955,30 +2989,15 @@ main( hypre_int argc,
       HYPRE_IJVectorPrint(ij_x, "IJ.out.x0");
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   memory_location = no_cuda_um ? HYPRE_MEMORY_DEVICE : HYPRE_MEMORY_SHARED;
+   /*-----------------------------------------------------------
+    * Migrate the system to the wanted memory space
+    *-----------------------------------------------------------*/
+   hypre_ParCSRMatrixMigrate(parcsr_A, hypre_HandleMemoryLocation(hypre_handle));
+   hypre_ParVectorMigrate(b, hypre_HandleMemoryLocation(hypre_handle));
+   hypre_ParVectorMigrate(x, hypre_HandleMemoryLocation(hypre_handle));
 
-   if (hypre_ParCSRMatrixMemoryLocation(parcsr_A) == HYPRE_MEMORY_HOST)
-   {
-      parcsr_A_host = parcsr_A;
-      parcsr_A = hypre_ParCSRMatrixClone_v2(parcsr_A, 1, memory_location);
-   }
-
-   if (hypre_ParVectorMemoryLocation(b) == HYPRE_MEMORY_HOST)
-   {
-      b_host = b;
-      b = hypre_ParVectorCloneDeep_v2(b, memory_location);
-   }
-
-   if (hypre_ParVectorMemoryLocation(x) == HYPRE_MEMORY_HOST)
-   {
-      x_host = x;
-      x = hypre_ParVectorCloneDeep_v2(x, memory_location);
-   }
-#endif
-
-#if SECOND_TIME
    /* save the initial guess for the 2nd time */
+#if SECOND_TIME
    x0_save = hypre_ParVectorCloneDeep_v2(x, hypre_ParVectorMemoryLocation(x));
 #endif
 
@@ -6874,9 +6893,6 @@ main( hypre_int argc,
     *-----------------------------------------------------------*/
   final:
 
-   HYPRE_ParCSRMatrixDestroy(parcsr_A_host);
-   HYPRE_ParVectorDestroy(b_host);
-   HYPRE_ParVectorDestroy(x_host);
    HYPRE_ParVectorDestroy(x0_save);
 
    if (test_ij || build_matrix_type == -1)
