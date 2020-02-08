@@ -8473,24 +8473,17 @@ done
 
    HYPRE_CUDA_GENCODE="-gencode arch=compute_${HYPRE_CUDA_SM},\"code=sm_${HYPRE_CUDA_SM}\""
 
-<<<<<<< HEAD
-   CUFLAGS+="-ccbin=$NVCCBIN ${HYPRE_CUDA_GENCODE} -expt-extended-lambda -dc -std=c++11 -Xcompiler -Wno-deprecated-register --x cu"
-=======
    CUFLAGS+="-lineinfo -ccbin=$NVCCBIN ${HYPRE_CUDA_GENCODE} -expt-extended-lambda -dc -std=c++11 --x cu"
->>>>>>> 039dc2833d5003c61a2f3c5257ca6f85aeda4b7c
    if test "$hypre_using_debug" = "yes"
    then
       CUFLAGS="-g -O0 ${CUFLAGS}"
    else
       CUFLAGS="-O2 ${CUFLAGS}"
-<<<<<<< HEAD
-=======
    fi
 
    if test "$CXX" = "mpixlC" || test "$CXX" = "xlC_r" || test "$CXX" = "xlC"
    then
      CXXFLAGS+=" -Wno-deprecated-register"
->>>>>>> 039dc2833d5003c61a2f3c5257ca6f85aeda4b7c
    fi
    CXXFLAGS="${CUFLAGS} -Xcompiler \"${CXXFLAGS}\""
 
