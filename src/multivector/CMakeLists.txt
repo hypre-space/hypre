@@ -18,11 +18,11 @@ set(SRCS
   multivector.c
   temp_multivector.c
 )
+
+target_sources(HYPRE
+  PRIVATE ${SRCS}
+          ${HDRS}
+  )
   
 convert_filenames_to_full_paths(HDRS)
-convert_filenames_to_full_paths(SRCS)
-
 set(HYPRE_HEADERS ${HYPRE_HEADERS} ${HDRS} PARENT_SCOPE)
-set(HYPRE_SOURCES ${HYPRE_SOURCES} ${SRCS} PARENT_SCOPE)
-
-

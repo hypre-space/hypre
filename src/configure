@@ -4128,7 +4128,7 @@ done
 
       if test "$hypre_using_openmp" = "yes"
       then
-         for ac_prog in mpxlc mpixlc_r mpixlc mpiicc mpigcc mpicc mpipgcc
+         for ac_prog in mpxlc mpixlc_r mpixlc mpiicc mpigcc mpicc mpipgcc mpipgicc
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -4171,7 +4171,7 @@ fi
 done
 
       else
-         for ac_prog in mpxlc mpixlc mpiicc mpigcc mpicc mpipgcc
+         for ac_prog in mpxlc mpixlc mpiicc mpigcc mpicc mpipgcc mpipgicc
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -4274,7 +4274,7 @@ done
 
       if test "$hypre_using_openmp" = "yes"
       then
-         for ac_prog in xlC_r xlc_r xlC xlc icpc icc g++ gcc pgCC pgcc CC cc KCC kcc
+         for ac_prog in xlC_r xlc_r xlC xlc icpc icc g++ gcc pgCC pgcc pgc++ CC cc KCC kcc
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -4317,7 +4317,7 @@ fi
 done
 
       else
-         for ac_prog in xlC xlc icpc icc g++ gcc pgCC pgcc CC cc KCC kcc
+         for ac_prog in xlC xlc icpc icc g++ gcc pgCC pgcc pgc++ CC cc KCC kcc
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -4409,7 +4409,7 @@ done
 
       if test "$hypre_using_openmp" = "yes"
       then
-         for ac_prog in mpxlC mpixlcxx_r mpixlcxx mpixlC mpiicpc mpig++ mpic++ mpicxx mpiCC mpipgCC
+         for ac_prog in mpxlC mpixlcxx_r mpixlcxx mpixlC mpiicpc mpig++ mpic++ mpicxx mpiCC mpipgCC mpipgic++
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -4452,7 +4452,7 @@ fi
 done
 
       else
-         for ac_prog in mpxlC mpixlcxx mpixlC mpiicpc mpig++ mpic++ mpicxx mpiCC mpipgCC
+         for ac_prog in mpxlC mpixlcxx mpixlC mpiicpc mpig++ mpic++ mpicxx mpiCC mpipgCC mpipgic++
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -4509,7 +4509,7 @@ then
    then
       if test "$hypre_using_openmp" = "yes"
       then
-         for ac_prog in xlf_r ifort gfortran g77 g95 pgf77 f77
+         for ac_prog in xlf_r ifort gfortran g77 g95 pgf77 pgfortran f77
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -4552,7 +4552,7 @@ fi
 done
 
       else
-         for ac_prog in xlf ifort gfortran g77 g95 pgf77 f77
+         for ac_prog in xlf ifort gfortran g77 g95 pgf77 pgfortran  f77
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -4598,7 +4598,7 @@ done
    else
       if test "$hypre_using_openmp" = "yes"
       then
-         for ac_prog in mpxlf mpixlf77_r mpiifort mpif77 mpipgf77
+         for ac_prog in mpxlf mpixlf77_r mpiifort mpif77 mpipgf77 mpipgifort
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -4641,7 +4641,7 @@ fi
 done
 
       else
-         for ac_prog in mpxlf mpixlf77 mpiifort mpif77 mpipgf77
+         for ac_prog in mpxlf mpixlf77 mpiifort mpif77 mpipgf77 mpipgifort
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -7770,7 +7770,7 @@ then
           LDFLAGS="$LDFLAGS -qopenmp"
         fi
         ;;
-      pgcc|mpipgcc)
+      pgcc|mpipgcc|mpipgicc)
         CFLAGS="-g"
         if test "$hypre_using_openmp" = "yes" ; then
           CFLAGS="$CFLAGS -mp"
@@ -7808,7 +7808,7 @@ then
           CXXFLAGS="$CXXFLAGS -qopenmp"
         fi
         ;;
-      pgCC|mpipgCC)
+      pgCC|mpipgCC|pgc++|mpipgic++)
         CXXFLAGS="-g"
         if test "$hypre_using_openmp" = "yes" ; then
           CXXFLAGS="$CXXFLAGS -mp"
@@ -7844,7 +7844,7 @@ then
           FFLAGS="$FFLAGS -qopenmp"
         fi
         ;;
-      pgf77|mpipgf77)
+      pgf77|mpipgf77|pgfortran|mpipgifort)
         FFLAGS="-g"
         if test "$hypre_using_openmp" = "yes" ; then
           FFLAGS="$FFLAGS -mp"
@@ -7886,7 +7886,7 @@ then
           LDFLAGS="$LDFLAGS -qopenmp"
         fi
         ;;
-      pgcc|mpipgcc)
+      pgcc|mpipgcc|mpipgicc)
         CFLAGS="-fast"
         if test "$hypre_using_openmp" = "yes" ; then
           CFLAGS="$CFLAGS -mp"
@@ -7924,7 +7924,7 @@ then
           CXXFLAGS="$CXXFLAGS -qopenmp"
         fi
         ;;
-      pgCC|mpipgCC)
+      pgCC|mpipgCC|pgc++|mpipgic++)
         CXXFLAGS="-fast"
         if test "$hypre_using_openmp" = "yes" ; then
           CXXFLAGS="$CXXFLAGS -mp"
@@ -7960,7 +7960,7 @@ then
           FFLAGS="$FFLAGS -qopenmp"
         fi
         ;;
-      pgf77|mpipgf77)
+      pgf77|mpipgf77|pgfortran|mpipgifort)
         FFLAGS="-fast"
         if test "$hypre_using_openmp" = "yes" ; then
           FFLAGS="$FFLAGS -mp"
@@ -8473,14 +8473,27 @@ done
 
    HYPRE_CUDA_GENCODE="-gencode arch=compute_${HYPRE_CUDA_SM},\"code=sm_${HYPRE_CUDA_SM}\""
 
+<<<<<<< HEAD
    CUFLAGS+="-ccbin=$NVCCBIN ${HYPRE_CUDA_GENCODE} -expt-extended-lambda -dc -std=c++11 -Xcompiler -Wno-deprecated-register --x cu"
+=======
+   CUFLAGS+="-lineinfo -ccbin=$NVCCBIN ${HYPRE_CUDA_GENCODE} -expt-extended-lambda -dc -std=c++11 --x cu"
+>>>>>>> 039dc2833d5003c61a2f3c5257ca6f85aeda4b7c
    if test "$hypre_using_debug" = "yes"
    then
       CUFLAGS="-g -O0 ${CUFLAGS}"
    else
       CUFLAGS="-O2 ${CUFLAGS}"
+<<<<<<< HEAD
+=======
+   fi
+
+   if test "$CXX" = "mpixlC" || test "$CXX" = "xlC_r" || test "$CXX" = "xlC"
+   then
+     CXXFLAGS+=" -Wno-deprecated-register"
+>>>>>>> 039dc2833d5003c61a2f3c5257ca6f85aeda4b7c
    fi
    CXXFLAGS="${CUFLAGS} -Xcompiler \"${CXXFLAGS}\""
+
    CFLAGS=${CXXFLAGS}
    LDFLAGS="-ccbin=$NVCCBIN ${HYPRE_CUDA_GENCODE} -Xcompiler \"${LDFLAGS}\""
    HYPRE_CUDA_INCL="-I${HYPRE_CUDA_PATH}/include"

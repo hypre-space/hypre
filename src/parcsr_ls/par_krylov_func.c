@@ -47,15 +47,7 @@ hypre_ParKrylovCreateVector( void *vvector )
                                        hypre_ParVectorPartitioning(vector) );
    hypre_ParVectorSetPartitioningOwner(new_vector,0);
 
-   HYPRE_Int memory_location = HYPRE_MEMORY_SHARED;
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   if (hypre_handle->no_cuda_um == 1)
-   {
-      memory_location = HYPRE_MEMORY_DEVICE;
-   }
-#endif
-
-   hypre_ParVectorInitialize_v2(new_vector, memory_location);
+   hypre_ParVectorInitialize_v2(new_vector, hypre_ParVectorMemoryLocation(vector));
 
    return ( (void *) new_vector );
 }
@@ -75,13 +67,7 @@ hypre_ParKrylovCreateVectorArray(HYPRE_Int n, void *vvector )
    HYPRE_Int i, size;
    HYPRE_Complex *array_data;
 
-   HYPRE_Int memory_location = HYPRE_MEMORY_SHARED;
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   if (hypre_handle->no_cuda_um == 1)
-   {
-      memory_location = HYPRE_MEMORY_DEVICE;
-   }
-#endif
+   HYPRE_Int memory_location = hypre_ParVectorMemoryLocation(vector);
 
    size = hypre_VectorSize(hypre_ParVectorLocalVector(vector));
    array_data = hypre_CTAlloc(HYPRE_Complex, (n*size), memory_location);
@@ -93,8 +79,8 @@ hypre_ParKrylovCreateVectorArray(HYPRE_Int n, void *vvector )
                                              hypre_ParVectorPartitioning(vector) );
       hypre_ParVectorSetPartitioningOwner(new_vector[i], 0);
       hypre_VectorData(hypre_ParVectorLocalVector(new_vector[i])) = &array_data[i*size];
-      hypre_ParVectorInitialize(new_vector[i]);
-      if (i) 
+      hypre_ParVectorInitialize_v2(new_vector[i], memory_location);
+      if (i)
       {
          hypre_VectorOwnsData(hypre_ParVectorLocalVector(new_vector[i])) = 0;
       }
@@ -265,13 +251,14 @@ hypre_ParKrylovAxpy( HYPRE_Complex alpha,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParKrylovMassAxpy( HYPRE_Complex * alpha,
-                     void   **x,
-                     void   *y ,
-                     HYPRE_Int k, HYPRE_Int unroll)
+hypre_ParKrylovMassAxpy( HYPRE_Complex *alpha,
+                         void   **x,
+                         void   *y,
+                         HYPRE_Int k,
+                         HYPRE_Int unroll )
 {
    return ( hypre_ParVectorMassAxpy( alpha, (hypre_ParVector **) x,
-                                 (hypre_ParVector *) y ,  k, unroll));
+                                     (hypre_ParVector *) y, k, unroll));
 }
 
 

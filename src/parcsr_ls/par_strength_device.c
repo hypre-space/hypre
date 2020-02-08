@@ -64,14 +64,7 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
    HYPRE_Int                num_sends;
    HYPRE_Int                index, start, j;
 
-   HYPRE_Int                memory_location = HYPRE_MEMORY_SHARED;
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   if (hypre_handle->no_cuda_um == 1)
-   {
-      memory_location = HYPRE_MEMORY_DEVICE;
-   }
-#endif
+   HYPRE_Int                memory_location = hypre_ParCSRMatrixMemoryLocation(A);
 
    /*--------------------------------------------------------------
     * Compute a  ParCSR strength matrix, S.
@@ -90,14 +83,14 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
    num_nonzeros_diag = hypre_CSRMatrixNumNonzeros(A_diag);
    num_nonzeros_offd = hypre_CSRMatrixNumNonzeros(A_offd);
 
-   S_diag_i = hypre_CTAlloc(HYPRE_Int, num_variables+1, memory_location);
-   S_offd_i = hypre_CTAlloc(HYPRE_Int, num_variables+1, memory_location);
-   S_temp_diag_j = hypre_CTAlloc(HYPRE_Int, num_nonzeros_diag, HYPRE_MEMORY_DEVICE);
-   S_temp_offd_j = hypre_CTAlloc(HYPRE_Int, num_nonzeros_offd, HYPRE_MEMORY_DEVICE);
+   S_diag_i = hypre_TAlloc(HYPRE_Int, num_variables+1, memory_location);
+   S_offd_i = hypre_TAlloc(HYPRE_Int, num_variables+1, memory_location);
+   S_temp_diag_j = hypre_TAlloc(HYPRE_Int, num_nonzeros_diag, HYPRE_MEMORY_DEVICE);
+   S_temp_offd_j = hypre_TAlloc(HYPRE_Int, num_nonzeros_offd, HYPRE_MEMORY_DEVICE);
 
    if (num_functions > 1)
    {
-      dof_func_offd_dev = hypre_CTAlloc(HYPRE_Int, num_cols_offd, HYPRE_MEMORY_DEVICE);
+      dof_func_offd_dev = hypre_TAlloc(HYPRE_Int, num_cols_offd, HYPRE_MEMORY_DEVICE);
    }
 
   /*-------------------------------------------------------------------
@@ -113,7 +106,7 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
 
    if (num_functions > 1 )
    {
-      HYPRE_Int *int_buf_data = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends), HYPRE_MEMORY_HOST);
+      HYPRE_Int *int_buf_data = hypre_TAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends), HYPRE_MEMORY_HOST);
       index = 0;
       for (i = 0; i < num_sends; i++)
       {
@@ -129,7 +122,7 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
 
       hypre_TFree(int_buf_data, HYPRE_MEMORY_HOST);
 
-      dof_func_dev = hypre_CTAlloc(HYPRE_Int, num_variables, HYPRE_MEMORY_DEVICE);
+      dof_func_dev = hypre_TAlloc(HYPRE_Int, num_variables, HYPRE_MEMORY_DEVICE);
       hypre_TMemcpy(dof_func_dev, dof_func, HYPRE_Int, num_variables, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
    }
 
@@ -189,12 +182,17 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
    hypre_TMemcpy(hypre_ParCSRMatrixColMapOffd(S), hypre_ParCSRMatrixColMapOffd(A),
                  HYPRE_Int, num_cols_offd, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
 
+   hypre_ParCSRMatrixSocDiagJ(S) = S_temp_diag_j;
+   hypre_ParCSRMatrixSocOffdJ(S) = S_temp_offd_j;
+
    *S_ptr = S;
 
    hypre_TFree(dof_func_offd_dev, HYPRE_MEMORY_DEVICE);
    hypre_TFree(dof_func_dev,      HYPRE_MEMORY_DEVICE);
+   /*
    hypre_TFree(S_temp_diag_j,     HYPRE_MEMORY_DEVICE);
    hypre_TFree(S_temp_offd_j,     HYPRE_MEMORY_DEVICE);
+   */
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_CREATES] += hypre_MPI_Wtime();

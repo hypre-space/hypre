@@ -83,7 +83,7 @@ hypre_DeviceMalloc(size_t size, HYPRE_Int zeroinit)
    HYPRE_OMPOffload(hypre__offload_device_num, ptr, size, "enter", "alloc");
 #elif defined(HYPRE_USING_CUDA)
 #if defined(HYPRE_USING_CUB_ALLOCATOR)
-   CubDebugExit( hypre_HandleCubCachingDeviceAllocator(hypre_handle)->DeviceAllocate( (void**)&ptr, size ) );
+   HYPRE_CUDA_CALL( hypre_HandleCubCachingDeviceAllocator(hypre_handle)->DeviceAllocate( (void**)&ptr, size ) );
 #else
    HYPRE_CUDA_CALL( cudaMalloc(&ptr, size) );
 #endif
@@ -105,7 +105,7 @@ hypre_UnifiedMalloc(size_t size, HYPRE_Int zeroinit)
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 #if defined(HYPRE_USING_CUB_ALLOCATOR)
-   CubDebugExit( hypre_HandleCubCachingManagedAllocator(hypre_handle)->DeviceAllocate( (void**)&ptr, size ) );
+   HYPRE_CUDA_CALL( hypre_HandleCubCachingManagedAllocator(hypre_handle)->DeviceAllocate( (void**)&ptr, size ) );
 #else
    HYPRE_CUDA_CALL( cudaMallocManaged(&ptr, size, cudaMemAttachGlobal) );
 #endif
@@ -220,7 +220,7 @@ hypre_DeviceFree(void *ptr)
    HYPRE_OMPOffload(hypre__offload_device_num, ptr, ((size_t *) ptr)[-1], "exit", "delete");
 #elif defined(HYPRE_USING_CUDA)
 #ifdef HYPRE_USING_CUB_ALLOCATOR
-   CubDebugExit( hypre_HandleCubCachingDeviceAllocator(hypre_handle)->DeviceFree(ptr) );
+   HYPRE_CUDA_CALL( hypre_HandleCubCachingDeviceAllocator(hypre_handle)->DeviceFree(ptr) );
 #else
    HYPRE_CUDA_CALL( cudaFree(ptr) );
 #endif
@@ -232,7 +232,7 @@ hypre_UnifiedFree(void *ptr)
 {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 #ifdef HYPRE_USING_CUB_ALLOCATOR
-   CubDebugExit( hypre_HandleCubCachingManagedAllocator(hypre_handle)->DeviceFree(ptr) );
+   HYPRE_CUDA_CALL( hypre_HandleCubCachingManagedAllocator(hypre_handle)->DeviceFree(ptr) );
 #else
    HYPRE_CUDA_CALL( cudaFree(ptr) );
 #endif
@@ -685,7 +685,7 @@ hypre_PrintMemoryTracker()
    char filename[256];
    FILE *file;
 
-   hypre_MPI_Comm_rank(MPI_COMM_WORLD, &myid);
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
    hypre_sprintf(filename,"HypreMemoryTrack.log.%05d", myid);
    if ((file = fopen(filename, "w")) == NULL)
    {

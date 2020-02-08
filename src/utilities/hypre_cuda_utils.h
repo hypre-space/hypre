@@ -295,6 +295,7 @@ T read_only_load( const T *ptr )
    return __ldg( ptr );
 }
 
+/* exclusive prefix scan */
 template <typename T>
 static __device__ __forceinline__
 T warp_prefix_sum(hypre_int lane_id, T in, T &all_sum)

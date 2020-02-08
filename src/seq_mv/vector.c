@@ -279,7 +279,7 @@ hypre_SeqVectorSetConstantValues( hypre_Vector *v,
 
    size *= hypre_VectorNumVectors(v);
 
-   hypre_SeqVectorPrefetch(v, HYPRE_MEMORY_DEVICE);
+   //hypre_SeqVectorPrefetch(v, HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_CUDA)
    HYPRE_THRUST_CALL( fill_n, vector_data, size, value );
@@ -360,8 +360,8 @@ hypre_SeqVectorCopy( hypre_Vector *x,
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] -= hypre_MPI_Wtime();
 #endif
 
-   hypre_SeqVectorPrefetch(x, HYPRE_MEMORY_DEVICE);
-   hypre_SeqVectorPrefetch(y, HYPRE_MEMORY_DEVICE);
+   //hypre_SeqVectorPrefetch(x, HYPRE_MEMORY_DEVICE);
+   //hypre_SeqVectorPrefetch(y, HYPRE_MEMORY_DEVICE);
 
    HYPRE_Complex *x_data = hypre_VectorData(x);
    HYPRE_Complex *y_data = hypre_VectorData(y);
@@ -474,7 +474,7 @@ hypre_SeqVectorScale( HYPRE_Complex alpha,
 
    size *= hypre_VectorNumVectors(y);
 
-   hypre_SeqVectorPrefetch(y, HYPRE_MEMORY_DEVICE);
+   //hypre_SeqVectorPrefetch(y, HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_CUDA)
 #if defined(HYPRE_USING_CUBLAS)
@@ -524,8 +524,8 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
 
    size *= hypre_VectorNumVectors(x);
 
-   hypre_SeqVectorPrefetch(x, HYPRE_MEMORY_DEVICE);
-   hypre_SeqVectorPrefetch(y, HYPRE_MEMORY_DEVICE);
+   //hypre_SeqVectorPrefetch(x, HYPRE_MEMORY_DEVICE);
+   //hypre_SeqVectorPrefetch(y, HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_CUDA)
 #if defined(HYPRE_USING_CUBLAS)
@@ -575,8 +575,8 @@ hypre_SeqVectorInnerProd( hypre_Vector *x,
 
    size *= hypre_VectorNumVectors(x);
 
-   hypre_SeqVectorPrefetch(x, HYPRE_MEMORY_DEVICE);
-   hypre_SeqVectorPrefetch(y, HYPRE_MEMORY_DEVICE);
+   //hypre_SeqVectorPrefetch(x, HYPRE_MEMORY_DEVICE);
+   //hypre_SeqVectorPrefetch(y, HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_CUDA)
 #ifndef HYPRE_COMPLEX
@@ -682,8 +682,8 @@ hypre_SeqVectorMax( HYPRE_Complex alpha,
 
    size *= hypre_VectorNumVectors(x);
 
-   hypre_SeqVectorPrefetch(x, HYPRE_MEMORY_DEVICE);
-   hypre_SeqVectorPrefetch(y, HYPRE_MEMORY_DEVICE);
+   //hypre_SeqVectorPrefetch(x, HYPRE_MEMORY_DEVICE);
+   //hypre_SeqVectorPrefetch(y, HYPRE_MEMORY_DEVICE);
 
    thrust::maximum<HYPRE_Complex> mx;
 

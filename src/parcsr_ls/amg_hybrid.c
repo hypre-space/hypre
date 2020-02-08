@@ -2105,7 +2105,9 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
          {
             boom_grt = hypre_CTAlloc(HYPRE_Int, 4, HYPRE_MEMORY_HOST);
             for (i=0; i < 4; i++)
+            {
                boom_grt[i] = grid_relax_type[i];
+            }
             hypre_BoomerAMGSetGridRelaxType(pcg_precond, boom_grt);
          }
          else
@@ -2117,6 +2119,10 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
             boom_grt[3] = 9;
             hypre_BoomerAMGSetGridRelaxType(pcg_precond, boom_grt);
          }
+
+         hypre_ParAMGDataUserCoarseRelaxType((hypre_ParAMGData *) pcg_precond) = boom_grt[3];
+         hypre_ParAMGDataUserRelaxType((hypre_ParAMGData *) pcg_precond) = boom_grt[0];
+
          if (relax_weight)
          {
             boom_rlxw = hypre_CTAlloc(HYPRE_Real, max_levels, HYPRE_MEMORY_HOST);

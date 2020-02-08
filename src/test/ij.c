@@ -387,6 +387,7 @@ main( hypre_int argc,
 
    HYPRE_Int no_cuda_um = 0;
    HYPRE_Int spgemm_use_cusparse = 1;
+   HYPRE_Int memory_location = HYPRE_MEMORY_SHARED;
 
    /* CUB Allocator */
    hypre_uint mempool_bin_growth   = 8,
@@ -1053,7 +1054,10 @@ main( hypre_int argc,
       {
          arg_index++;
          no_cuda_um = atoi(argv[arg_index++]);
-         HYPRE_SetNoCUDAUM(no_cuda_um);
+         if (no_cuda_um)
+         {
+            hypre_handle->memory_location = memory_location = HYPRE_MEMORY_DEVICE;
+         }
       }
       else if ( strcmp(argv[arg_index], "-mm_cusparse") == 0 )
       {
@@ -1732,10 +1736,10 @@ main( hypre_int argc,
          hypre_printf("       43=Euclid-PCG      44=Euclid-GMRES   \n");
          hypre_printf("       45=Euclid-BICGSTAB\n");
          hypre_printf("       46=Euclid-COGMRES\n");
-         hypre_printf("       50=DS-LGMRES         51=AMG-LGMRES     \n");
-         hypre_printf("       60=DS-FlexGMRES         61=AMG-FlexGMRES     \n");
+         hypre_printf("       50=DS-LGMRES       51=AMG-LGMRES     \n");
+         hypre_printf("       60=DS-FlexGMRES    61=AMG-FlexGMRES  \n");
          hypre_printf("       70=MGR             71=MGR-PCG  \n");
-         hypre_printf("       72=MGR-FlexGMRES  73=MGR-BICGSTAB  \n");
+         hypre_printf("       72=MGR-FlexGMRES   73=MGR-BICGSTAB  \n");
          hypre_printf("       74=MGR-COGMRES  \n");
          hypre_printf("\n");
          hypre_printf("  -cljp                 : CLJP coarsening \n");
@@ -1757,6 +1761,7 @@ main( hypre_int argc,
          hypre_printf("       1=least squares interpolation (for GSMG only)  \n");
          hypre_printf("       0=Classical modified interpolation for hyperbolic PDEs \n");
          hypre_printf("       3=direct interpolation with separation of weights  \n");
+         hypre_printf("       15=direct interpolation\n");
          hypre_printf("       4=multipass interpolation  \n");
          hypre_printf("       5=multipass interpolation with separation of weights  \n");
          hypre_printf("       6=extended classical modified interpolation (default) \n");
@@ -2098,10 +2103,6 @@ main( hypre_int argc,
    /* Check the ij interface - not necessary if one just wants to test solvers */
    if (test_ij && build_matrix_type > -1)
    {
-      HYPRE_Int memory_location = HYPRE_MEMORY_SHARED;
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-      memory_location = hypre_handle->no_cuda_um ? HYPRE_MEMORY_DEVICE : HYPRE_MEMORY_SHARED;
-#endif
       HYPRE_Int mx_size = 5;
       time_index = hypre_InitializeTiming("Generate IJ matrix");
       hypre_BeginTiming(time_index);
@@ -2486,9 +2487,7 @@ main( hypre_int argc,
       }
 
       HYPRE_Int memory_location = HYPRE_MEMORY_SHARED;
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-      memory_location = hypre_handle->no_cuda_um ? HYPRE_MEMORY_DEVICE : HYPRE_MEMORY_SHARED;
-#endif
+      memory_location = no_cuda_um ? HYPRE_MEMORY_DEVICE : HYPRE_MEMORY_SHARED;
       HYPRE_Real *values_h = hypre_CTAlloc(HYPRE_Real, local_num_rows, HYPRE_MEMORY_HOST);
       HYPRE_Real *values_d = hypre_CTAlloc(HYPRE_Real, local_num_rows, memory_location);
       for (i = 0; i < local_num_rows; i++)
@@ -2957,25 +2956,24 @@ main( hypre_int argc,
    }
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+   memory_location = no_cuda_um ? HYPRE_MEMORY_DEVICE : HYPRE_MEMORY_SHARED;
+
+   if (hypre_ParCSRMatrixMemoryLocation(parcsr_A) == HYPRE_MEMORY_HOST)
    {
-      HYPRE_Int memory_location = hypre_handle->no_cuda_um ? HYPRE_MEMORY_DEVICE : HYPRE_MEMORY_SHARED;
-      if (hypre_ParCSRMatrixMemoryLocation(parcsr_A) == HYPRE_MEMORY_HOST)
-      {
-         parcsr_A_host = parcsr_A;
-         parcsr_A = hypre_ParCSRMatrixClone_v2(parcsr_A, 1, memory_location);
-      }
+      parcsr_A_host = parcsr_A;
+      parcsr_A = hypre_ParCSRMatrixClone_v2(parcsr_A, 1, memory_location);
+   }
 
-      if (hypre_ParVectorMemoryLocation(b) == HYPRE_MEMORY_HOST)
-      {
-         b_host = b;
-         b = hypre_ParVectorCloneDeep_v2(b, memory_location);
-      }
+   if (hypre_ParVectorMemoryLocation(b) == HYPRE_MEMORY_HOST)
+   {
+      b_host = b;
+      b = hypre_ParVectorCloneDeep_v2(b, memory_location);
+   }
 
-      if (hypre_ParVectorMemoryLocation(x) == HYPRE_MEMORY_HOST)
-      {
-         x_host = x;
-         x = hypre_ParVectorCloneDeep_v2(x, memory_location);
-      }
+   if (hypre_ParVectorMemoryLocation(x) == HYPRE_MEMORY_HOST)
+   {
+      x_host = x;
+      x = hypre_ParVectorCloneDeep_v2(x, memory_location);
    }
 #endif
 
