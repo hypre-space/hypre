@@ -849,6 +849,7 @@ HYPRE_Int
 hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
                                       HYPRE_Int       max_off_proc_elmts,
                                       HYPRE_Int       current_num_elmts,
+                                      HYPRE_Int       memory_location,
                                       HYPRE_BigInt   *off_proc_i,
                                       HYPRE_Complex  *off_proc_data)
 {

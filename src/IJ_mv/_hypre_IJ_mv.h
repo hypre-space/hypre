@@ -15,7 +15,7 @@
 #include "seq_mv.h"
 #include "_hypre_parcsr_mv.h"
 #include "HYPRE_IJ_mv.h"
-#include "../HYPRE.h"
+#include "HYPRE.h"
 
 #ifdef __cplusplus
 extern "C" {
