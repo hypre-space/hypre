@@ -52,8 +52,10 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    HYPRE_Complex *x_tmp_data, **x_buf_data;
    HYPRE_Complex *x_local_data = hypre_VectorData(x_local);
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_Int sync_stream = hypre_HandleCudaComputeStreamSync(hypre_handle);
    hypre_HandleCudaComputeStreamSync(hypre_handle) = 0;
+#endif
 
    /*---------------------------------------------------------------------
     *  Check for size compatibility.  ParMatvec returns ierr = 11 if
@@ -326,9 +328,10 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
       hypre_TFree(x_buf_data, HYPRE_MEMORY_HOST);
    }
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    hypre_HandleCudaComputeStreamSync(hypre_handle) = sync_stream;
-
    hypre_SyncCudaComputeStream(hypre_handle);
+#endif
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] += hypre_MPI_Wtime();
@@ -389,8 +392,10 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
    HYPRE_Complex *y_tmp_data, **y_buf_data;
    HYPRE_Complex *y_local_data = hypre_VectorData(y_local);
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_Int sync_stream = hypre_HandleCudaComputeStreamSync(hypre_handle);
    hypre_HandleCudaComputeStreamSync(hypre_handle) = 0;
+#endif
 
    /*---------------------------------------------------------------------
     *  Check for size compatibility.  MatvecT returns ierr = 1 if
@@ -671,9 +676,10 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
       hypre_TFree(y_buf_data, HYPRE_MEMORY_HOST);
    }
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    hypre_HandleCudaComputeStreamSync(hypre_handle) = sync_stream;
-
    hypre_SyncCudaComputeStream(hypre_handle);
+#endif
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] += hypre_MPI_Wtime();

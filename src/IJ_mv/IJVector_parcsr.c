@@ -1517,7 +1517,9 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
       hypre_TMemcpy(off_proc_data_recv_d, off_proc_data_recv, HYPRE_Complex, off_proc_nelm_recv_cur,
                     HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
 
+#if defined(HYPRE_USING_CUDA)
       hypre_IJVectorSetAddValuesParDevice(vector, off_proc_nelm_recv_cur, off_proc_i_recv_d, off_proc_data_recv_d, "add");
+#endif
    }
 
    hypre_TFree(send_proc_obj.v_elements, HYPRE_MEMORY_HOST);

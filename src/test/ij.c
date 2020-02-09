@@ -383,8 +383,10 @@ main( hypre_int argc,
    HYPRE_Int air = 0;
    HYPRE_Int **grid_relax_points = NULL;
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_Int spgemm_use_cusparse = 1;
    HYPRE_Int default_exec_policy = HYPRE_EXEC_HOST;
+#endif
    HYPRE_Int memory_location = HYPRE_MEMORY_SHARED;
 
    /* CUB Allocator */
@@ -1013,6 +1015,7 @@ main( hypre_int argc,
          mgr_num_restrict_sweeps = atoi(argv[arg_index++]);
       }
       /* end mgr options */
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
       else if ( strcmp(argv[arg_index], "-exec_host") == 0 )
       {
          arg_index++;
@@ -1029,6 +1032,7 @@ main( hypre_int argc,
          arg_index++;
          spgemm_use_cusparse = atoi(argv[arg_index++]);
       }
+#endif
       else if ( strcmp(argv[arg_index], "-mempool_growth") == 0 )
       {
          arg_index++;
