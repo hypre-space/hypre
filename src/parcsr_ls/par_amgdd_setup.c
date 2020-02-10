@@ -732,6 +732,11 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    // Setup extra info for specific relaxation methods
    hypre_ParCompGridSetupRelax(amg_data);
 
+   if (hypre_ParAMGDataFACRelaxType(amg_data) == 0) hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data) = (HYPRE_PtrToUserFACRelaxation) hypre_BoomerAMGDD_FAC_Jacobi;
+   else if (hypre_ParAMGDataFACRelaxType(amg_data) == 1) hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data) = (HYPRE_PtrToUserFACRelaxation) hypre_BoomerAMGDD_FAC_GaussSeidel;
+   else if (hypre_ParAMGDataFACRelaxType(amg_data) == 2) hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data) = (HYPRE_PtrToUserFACRelaxation) hypre_BoomerAMGDD_FAC_Cheby;
+   else if (hypre_ParAMGDataFACRelaxType(amg_data) == 3) hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data) = (HYPRE_PtrToUserFACRelaxation) hypre_BoomerAMGDD_FAC_CFL1Jacobi; 
+
    if (timers) hypre_EndTiming(timers[8]);
 
    // Count up the cost for subsequent residual communications

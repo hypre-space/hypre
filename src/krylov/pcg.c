@@ -392,14 +392,14 @@ hypre_PCGSolve( void *pcg_vdata,
    else    /* bi_prod==0.0: the rhs vector b is zero */
    {
       /* Set x equal to zero and return */
-      (*(pcg_functions->CopyVector))(b, x);
+      // (*(pcg_functions->CopyVector))(b, x);
       if (logging>0 || print_level>0)
       {
-         norms[0]     = 0.0;
-         rel_norms[i] = 0.0;
+         // norms[0]     = 0.0;
+         // rel_norms[i] = 0.0;
       }
 
-      return hypre_error_flag;
+      // return hypre_error_flag;
       /* In this case, for the original parcsr pcg, the code would take special
          action to force iterations even though the exact value was known. */
    };
@@ -447,7 +447,11 @@ hypre_PCGSolve( void *pcg_vdata,
       else
          i_prod_0 = gamma;
 
-      if ( logging>0 || print_level>0 ) norms[0] = sqrt(i_prod_0);
+      if ( logging>0 || print_level>0 )
+      {
+        norms[0] = sqrt(i_prod_0);
+        rel_norms[0] = sqrt(-(*(pcg_functions->InnerProd))(r,x));
+      }
    }
    if ( print_level > 1 && my_id==0 )
    {
@@ -576,7 +580,8 @@ hypre_PCGSolve( void *pcg_vdata,
       if ( logging>0 || print_level>0 )
       {
          norms[i]     = sqrt(i_prod);
-         rel_norms[i] = bi_prod ? sqrt(i_prod/bi_prod) : 0;
+         // rel_norms[i] = bi_prod ? sqrt(i_prod/bi_prod) : 0;
+         rel_norms[i] = sqrt(-(*(pcg_functions->InnerProd))(r,x));
       }
       if ( print_level > 1 && my_id==0 )
       {
@@ -600,95 +605,95 @@ hypre_PCGSolve( void *pcg_vdata,
       }
 
 
-      /*--------------------------------------------------------------------
-       * check for convergence
-       *--------------------------------------------------------------------*/
-      if (i_prod / bi_prod < eps)  /* the basic convergence test */
-            tentatively_converged = 1;
-      if ( tentatively_converged && recompute_residual )
-         /* At user request, don't trust the convergence test until we've recomputed
-            the residual from scratch.  This is expensive in the usual case where an
-            the norm is the energy norm.
-            This calculation is coded on the assumption that r's accuracy is only a
-            concern for problems where CG takes many iterations. */
-      {
-         /* r = b - Ax */
-         (*(pcg_functions->CopyVector))(b, r);
-         (*(pcg_functions->Matvec))(matvec_data, -1.0, A, x, 1.0, r);
+//       /*--------------------------------------------------------------------
+//        * check for convergence
+//        *--------------------------------------------------------------------*/
+//       if (i_prod / bi_prod < eps)  /* the basic convergence test */
+//             tentatively_converged = 1;
+//       if ( tentatively_converged && recompute_residual )
+//          /* At user request, don't trust the convergence test until we've recomputed
+//             the residual from scratch.  This is expensive in the usual case where an
+//             the norm is the energy norm.
+//             This calculation is coded on the assumption that r's accuracy is only a
+//             concern for problems where CG takes many iterations. */
+//       {
+//          /* r = b - Ax */
+//          (*(pcg_functions->CopyVector))(b, r);
+//          (*(pcg_functions->Matvec))(matvec_data, -1.0, A, x, 1.0, r);
 
-         /* set i_prod for convergence test */
-         if (two_norm)
-            i_prod = (*(pcg_functions->InnerProd))(r,r);
-         else
-         {
-            /* s = C*r */
-            (*(pcg_functions->ClearVector))(s);
-            precond(precond_data, A, r, s);
-            /* iprod = gamma = <r,s> */
-            i_prod = (*(pcg_functions->InnerProd))(r, s);
-         }
-         if (i_prod / bi_prod >= eps) tentatively_converged = 0;
-      }
-      if ( tentatively_converged && rel_change && (i_prod > guard_zero_residual ))
-         /* At user request, don't treat this as converged unless x didn't change
-            much in the last iteration. */
-      {
-            pi_prod = (*(pcg_functions->InnerProd))(p,p);
-            xi_prod = (*(pcg_functions->InnerProd))(x,x);
-            ratio = alpha*alpha*pi_prod/xi_prod;
-            if (ratio >= eps) tentatively_converged = 0;
-      }
-      if ( tentatively_converged )
-         /* we've passed all the convergence tests, it's for real */
-      {
-         (pcg_data -> converged) = 1;
-         break;
-      }
+//          /* set i_prod for convergence test */
+//          if (two_norm)
+//             i_prod = (*(pcg_functions->InnerProd))(r,r);
+//          else
+//          {
+//             /* s = C*r */
+//             (*(pcg_functions->ClearVector))(s);
+//             precond(precond_data, A, r, s);
+//             /* iprod = gamma = <r,s> */
+//             i_prod = (*(pcg_functions->InnerProd))(r, s);
+//          }
+//          if (i_prod / bi_prod >= eps) tentatively_converged = 0;
+//       }
+//       if ( tentatively_converged && rel_change && (i_prod > guard_zero_residual ))
+//          /* At user request, don't treat this as converged unless x didn't change
+//             much in the last iteration. */
+//       {
+//             pi_prod = (*(pcg_functions->InnerProd))(p,p);
+//             xi_prod = (*(pcg_functions->InnerProd))(x,x);
+//             ratio = alpha*alpha*pi_prod/xi_prod;
+//             if (ratio >= eps) tentatively_converged = 0;
+//       }
+//       if ( tentatively_converged )
+//          /* we've passed all the convergence tests, it's for real */
+//       {
+//          (pcg_data -> converged) = 1;
+//          break;
+//       }
 
-      if ( (gamma<HYPRE_REAL_MIN) && ((-gamma)<HYPRE_REAL_MIN) ) {
-         /* ierr = 1;*/
-         hypre_error(HYPRE_ERROR_CONV);
+//       if ( (gamma<HYPRE_REAL_MIN) && ((-gamma)<HYPRE_REAL_MIN) ) {
+//          /* ierr = 1;*/
+//          hypre_error(HYPRE_ERROR_CONV);
 
-         break;
-      }
-      /* ... gamma should be >=0.  IEEE subnormal numbers are < 2**(-1022)=2.2e-308
-         (and >= 2**(-1074)=4.9e-324).  So a gamma this small means we're getting
-         dangerously close to subnormal or zero numbers (usually if gamma is small,
-         so will be other variables).  Thus further calculations risk a crash.
-         Such small gamma generally means no hope of progress anyway. */
+//          break;
+//       }
+//       /* ... gamma should be >=0.  IEEE subnormal numbers are < 2**(-1022)=2.2e-308
+//          (and >= 2**(-1074)=4.9e-324).  So a gamma this small means we're getting
+//          dangerously close to subnormal or zero numbers (usually if gamma is small,
+//          so will be other variables).  Thus further calculations risk a crash.
+//          Such small gamma generally means no hope of progress anyway. */
 
-      /*--------------------------------------------------------------------
-       * Optional test to see if adequate progress is being made.
-       * The average convergence factor is recorded and compared
-       * against the tolerance 'cf_tol'. The weighting factor is
-       * intended to pay more attention to the test when an accurate
-       * estimate for average convergence factor is available.
-       *--------------------------------------------------------------------*/
+//       /*--------------------------------------------------------------------
+//        * Optional test to see if adequate progress is being made.
+//        * The average convergence factor is recorded and compared
+//        * against the tolerance 'cf_tol'. The weighting factor is
+//        * intended to pay more attention to the test when an accurate
+//        * estimate for average convergence factor is available.
+//        *--------------------------------------------------------------------*/
 
-      if (cf_tol > 0.0)
-      {
-         cf_ave_0 = cf_ave_1;
-         if ( i_prod_0<HYPRE_REAL_MIN ) {
-            /* i_prod_0 is zero, or (almost) subnormal, yet i_prod wasn't small
-               enough to pass the convergence test.  Therefore initial guess was good,
-               and we're just calculating garbage - time to bail out before the
-               next step, which will be a divide by zero (or close to it). */
-            /* ierr = 1; */
-            hypre_error(HYPRE_ERROR_CONV);
+//       if (cf_tol > 0.0)
+//       {
+//          cf_ave_0 = cf_ave_1;
+//          if ( i_prod_0<HYPRE_REAL_MIN ) {
+//             /* i_prod_0 is zero, or (almost) subnormal, yet i_prod wasn't small
+//                enough to pass the convergence test.  Therefore initial guess was good,
+//                and we're just calculating garbage - time to bail out before the
+//                next step, which will be a divide by zero (or close to it). */
+//             /* ierr = 1; */
+//             hypre_error(HYPRE_ERROR_CONV);
 
-            break;
-         }
-         cf_ave_1 = pow( i_prod / i_prod_0, 1.0/(2.0*i));
+//             break;
+//          }
+//          cf_ave_1 = pow( i_prod / i_prod_0, 1.0/(2.0*i));
 
-         weight   = fabs(cf_ave_1 - cf_ave_0);
-         weight   = weight / hypre_max(cf_ave_1, cf_ave_0);
-         weight   = 1.0 - weight;
-#if 0
-         hypre_printf("I = %d: cf_new = %e, cf_old = %e, weight = %e\n",
-                i, cf_ave_1, cf_ave_0, weight );
-#endif
-         if (weight * cf_ave_1 > cf_tol) break;
-      }
+//          weight   = fabs(cf_ave_1 - cf_ave_0);
+//          weight   = weight / hypre_max(cf_ave_1, cf_ave_0);
+//          weight   = 1.0 - weight;
+// #if 0
+//          hypre_printf("I = %d: cf_new = %e, cf_old = %e, weight = %e\n",
+//                 i, cf_ave_1, cf_ave_0, weight );
+// #endif
+//          if (weight * cf_ave_1 > cf_tol) break;
+//       }
 
       /*--------------------------------------------------------------------
        * back to the core CG calculations

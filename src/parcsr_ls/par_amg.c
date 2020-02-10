@@ -371,6 +371,7 @@ hypre_BoomerAMGCreate()
    hypre_ParAMGDataAMGDDCorrectionVector(amg_data) = NULL;
    hypre_ParAMGDataCompGrid(amg_data) = NULL;
    hypre_ParAMGDataCompGridCommPkg(amg_data) = NULL;
+   hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data) = (HYPRE_PtrToUserFACRelaxation) hypre_BoomerAMGDD_FAC_CFL1Jacobi;
 
 #ifdef CUMNUMIT
    hypre_ParAMGDataCumNumIterations(amg_data) = cum_num_iterations;
