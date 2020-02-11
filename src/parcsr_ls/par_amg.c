@@ -371,7 +371,7 @@ hypre_BoomerAMGCreate()
    hypre_ParAMGDataAMGDDCorrectionVector(amg_data) = NULL;
    hypre_ParAMGDataCompGrid(amg_data) = NULL;
    hypre_ParAMGDataCompGridCommPkg(amg_data) = NULL;
-   hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data) = (HYPRE_PtrToUserFACRelaxation) hypre_BoomerAMGDD_FAC_CFL1Jacobi;
+   hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data) = hypre_BoomerAMGDD_FAC_CFL1Jacobi;
 
 #ifdef CUMNUMIT
    hypre_ParAMGDataCumNumIterations(amg_data) = cum_num_iterations;
@@ -819,6 +819,9 @@ hypre_BoomerAMGDestroy( void *data )
          hypre_ParCompGridDestroy(hypre_ParAMGDataCompGrid(amg_data)[i]);
       }
       hypre_TFree(hypre_ParAMGDataCompGrid(amg_data), HYPRE_MEMORY_HOST);
+   }
+   if (hypre_ParAMGDataCompGridCommPkg(amg_data))
+   {
       hypre_ParCompGridCommPkgDestroy(hypre_ParAMGDataCompGridCommPkg(amg_data));
    }
 

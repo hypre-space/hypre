@@ -92,7 +92,8 @@ HYPRE_Int FAC_Cycle(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type, HYPR
    // Get the AMG structure
    hypre_ParAMGData   *amg_data = (hypre_ParAMGData*) amg_vdata;
    HYPRE_Int num_levels = hypre_ParAMGDataNumLevels(amg_data);
-   HYPRE_Int transition_level = hypre_ParCompGridCommPkgTransitionLevel(hypre_ParAMGDataCompGridCommPkg(amg_data));
+   HYPRE_Int transition_level = num_levels;
+   if (hypre_ParAMGDataCompGridCommPkg(amg_data)) transition_level = hypre_ParCompGridCommPkgTransitionLevel(hypre_ParAMGDataCompGridCommPkg(amg_data));
    if (transition_level < 0) transition_level = num_levels;
    HYPRE_Int relax_type = hypre_ParAMGDataFACRelaxType(amg_data);
    HYPRE_Int *numRelax = hypre_ParAMGDataNumGridSweeps(amg_data);
@@ -100,13 +101,11 @@ HYPRE_Int FAC_Cycle(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type, HYPR
    // Get the composite grid
    hypre_ParCompGrid          **compGrid = hypre_ParAMGDataCompGrid(amg_data);
 
-   HYPRE_PtrToUserFACRelaxation FAC_relax = hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data);
-
    // Relax on the real nodes
    #if DEBUGGING_MESSAGES
    printf("Rank %d, relax on level %d\n", myid, level);
    #endif
-   for (i = 0; i < numRelax[1]; i++) FAC_Relax( amg_data, compGrid[level], 1 );
+   for (i = 0; i < numRelax[1]; i++) (*hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data))( amg_vdata, compGrid[level], 1 );
 
    #if DUMP_INTERMEDIATE_TEST_SOLNS
    sprintf(filename, "outputs/actual/u%d_level%d_relax1", myid, level);
@@ -143,7 +142,7 @@ HYPRE_Int FAC_Cycle(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type, HYPR
          #if DEBUGGING_MESSAGES
          printf("Rank %d, coarse solve on level %d\n", myid, num_levels-1);
          #endif
-         for (i = 0; i < numRelax[3]; i++) FAC_Relax( amg_data, compGrid[num_levels-1], 3 );
+         for (i = 0; i < numRelax[3]; i++) (*hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data))( amg_vdata, compGrid[num_levels-1], 3 );
 
          #if DUMP_INTERMEDIATE_TEST_SOLNS
          sprintf(filename, "outputs/actual/u%d_level%d_relax2", myid, num_levels-1);
@@ -175,7 +174,7 @@ HYPRE_Int FAC_Cycle(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type, HYPR
    #if DEBUGGING_MESSAGES
    printf("Rank %d, relax on level %d\n", myid, level);
    #endif
-   for (i = 0; i < numRelax[2]; i++) FAC_Relax( amg_data, compGrid[level], 2 );
+   for (i = 0; i < numRelax[2]; i++) (*hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data))( amg_vdata, compGrid[level], 2 );
 
    #if DUMP_INTERMEDIATE_TEST_SOLNS
    sprintf(filename, "outputs/actual/u%d_level%d_relax2", myid, level);
@@ -196,15 +195,14 @@ HYPRE_Int FAC_FCycle(void *amg_vdata, HYPRE_Int first_iteration)
    // Get the AMG structure
    hypre_ParAMGData   *amg_data = (hypre_ParAMGData*) amg_vdata;
    HYPRE_Int num_levels = hypre_ParAMGDataNumLevels(amg_data);
-   HYPRE_Int transition_level = hypre_ParCompGridCommPkgTransitionLevel(hypre_ParAMGDataCompGridCommPkg(amg_data));
+   HYPRE_Int transition_level = num_levels;
+   if (hypre_ParAMGDataCompGridCommPkg(amg_data)) transition_level = hypre_ParCompGridCommPkgTransitionLevel(hypre_ParAMGDataCompGridCommPkg(amg_data));
    if (transition_level < 0) transition_level = num_levels;
    HYPRE_Int relax_type = hypre_ParAMGDataFACRelaxType(amg_data);
    HYPRE_Int *numRelax = hypre_ParAMGDataNumGridSweeps(amg_data);
 
    // Get the composite grid
    hypre_ParCompGrid          **compGrid = hypre_ParAMGDataCompGrid(amg_data);
-
-   HYPRE_PtrToUserFACRelaxation FAC_relax = hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data);
 
    // ... work down to coarsest ... Note: proper restricted values already stored on and above transition level
    if (!first_iteration)
@@ -223,7 +221,7 @@ HYPRE_Int FAC_FCycle(void *amg_vdata, HYPRE_Int first_iteration)
    }
 
    //  ... solve on coarsest level ...
-   for (i = 0; i < numRelax[3]; i++) FAC_Relax( amg_data, compGrid[num_levels-1], 3 );
+   for (i = 0; i < numRelax[3]; i++) (*hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data))( amg_vdata, compGrid[num_levels-1], 3 );
 
    // ... and work back up to the finest
    for (level = num_levels - 2; level > hypre_ParAMGDataAMGDDStartLevel(amg_data)-1; level--)
@@ -248,7 +246,8 @@ HYPRE_Int FAC_Cycle_timed(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type
    // Get the AMG structure
    hypre_ParAMGData   *amg_data = (hypre_ParAMGData*) amg_vdata;
    HYPRE_Int num_levels = hypre_ParAMGDataNumLevels(amg_data);
-   HYPRE_Int transition_level = hypre_ParCompGridCommPkgTransitionLevel(hypre_ParAMGDataCompGridCommPkg(amg_data));
+   HYPRE_Int transition_level = num_levels;
+   if (hypre_ParAMGDataCompGridCommPkg(amg_data)) transition_level = hypre_ParCompGridCommPkgTransitionLevel(hypre_ParAMGDataCompGridCommPkg(amg_data));
    if (transition_level < 0) transition_level = num_levels;
    HYPRE_Int relax_type = hypre_ParAMGDataFACRelaxType(amg_data);
    HYPRE_Int *numRelax = hypre_ParAMGDataNumGridSweeps(amg_data);
@@ -256,10 +255,8 @@ HYPRE_Int FAC_Cycle_timed(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type
    // Get the composite grid
    hypre_ParCompGrid          **compGrid = hypre_ParAMGDataCompGrid(amg_data);
 
-   HYPRE_PtrToUserFACRelaxation FAC_relax = hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data);
-
    // Relax on the real nodes
-   if (time_part == 1) for (i = 0; i < numRelax[1]; i++) FAC_Relax( amg_data, compGrid[level], 1 );
+   if (time_part == 1) for (i = 0; i < numRelax[1]; i++) (*hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data))( amg_vdata, compGrid[level], 1 );
 
    // Restrict the residual at all fine points (real and ghost) and set residual at coarse points not under the fine grid
    if (time_part == 2)
@@ -274,13 +271,13 @@ HYPRE_Int FAC_Cycle_timed(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type
    }
 
    //  Either solve on the coarse level or recurse
-   if (level+1 == num_levels-1) for (i = 0; i < numRelax[3]; i++) FAC_Relax( amg_data, compGrid[num_levels-1], 3 );
+   if (level+1 == num_levels-1) for (i = 0; i < numRelax[3]; i++) (*hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data))( amg_vdata, compGrid[num_levels-1], 3 );
    else for (i = 0; i < cycle_type; i++) FAC_Cycle_timed(amg_vdata, level+1, cycle_type, time_part);
 
    // Interpolate up and relax
    if (time_part == 3) FAC_Interpolate( compGrid[level], compGrid[level+1] );
 
-   if (time_part == 1) for (i = 0; i < numRelax[2]; i++) FAC_Relax( amg_data, compGrid[level], 2 );
+   if (time_part == 1) for (i = 0; i < numRelax[2]; i++) (*hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data))( amg_vdata, compGrid[level], 2 );
 
    return 0;
 }
@@ -296,15 +293,14 @@ HYPRE_Int FAC_FCycle_timed(void *amg_vdata, HYPRE_Int time_part)
    // Get the AMG structure
    hypre_ParAMGData   *amg_data = (hypre_ParAMGData*) amg_vdata;
    HYPRE_Int num_levels = hypre_ParAMGDataNumLevels(amg_data);
-   HYPRE_Int transition_level = hypre_ParCompGridCommPkgTransitionLevel(hypre_ParAMGDataCompGridCommPkg(amg_data));
+   HYPRE_Int transition_level = num_levels;
+   if (hypre_ParAMGDataCompGridCommPkg(amg_data)) transition_level = hypre_ParCompGridCommPkgTransitionLevel(hypre_ParAMGDataCompGridCommPkg(amg_data));
    if (transition_level < 0) transition_level = num_levels;
    HYPRE_Int relax_type = hypre_ParAMGDataFACRelaxType(amg_data);
    HYPRE_Int *numRelax = hypre_ParAMGDataNumGridSweeps(amg_data);
 
    // Get the composite grid
    hypre_ParCompGrid          **compGrid = hypre_ParAMGDataCompGrid(amg_data);
-
-   HYPRE_PtrToUserFACRelaxation FAC_relax = hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data);
 
    // ... work down to coarsest ... Note: proper restricted values already stored on and above transition level
    for (level = hypre_ParAMGDataAMGDDStartLevel(amg_data); level < num_levels - 1; level++)
@@ -323,7 +319,7 @@ HYPRE_Int FAC_FCycle_timed(void *amg_vdata, HYPRE_Int time_part)
    }
 
    //  ... solve on coarsest level ...
-   if (time_part == 1) for (i = 0; i < numRelax[3]; i++) FAC_Relax( amg_data, compGrid[num_levels-1], 3 );
+   if (time_part == 1) for (i = 0; i < numRelax[3]; i++) (*hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data))( amg_vdata, compGrid[num_levels-1], 3 );
 
    // ... and work back up to the finest
    for (level = num_levels - 2; level > hypre_ParAMGDataAMGDDStartLevel(amg_data)-1; level--)
@@ -398,9 +394,10 @@ FAC_Simple_Restrict( hypre_ParCompGrid *compGrid_f, hypre_ParCompGrid *compGrid_
 }
 
 HYPRE_Int
-hypre_BoomerAMGDD_FAC_Jacobi( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int cycle_param )
+hypre_BoomerAMGDD_FAC_Jacobi( HYPRE_Solver amg_vdata, hypre_ParCompGrid *compGrid, HYPRE_Int cycle_param )
 {
    HYPRE_Int i,j; 
+   hypre_ParAMGData   *amg_data = (hypre_ParAMGData*) amg_vdata;
    HYPRE_Real relax_weight = hypre_ParAMGDataRelaxWeight(amg_data)[0];
 
    // Calculate l1_norms if necessary (right now, I'm just using this vector for the diagonal of A and doing straight ahead Jacobi)
@@ -461,11 +458,12 @@ hypre_BoomerAMGDD_FAC_Jacobi( hypre_ParAMGData *amg_data, hypre_ParCompGrid *com
 }
 
 HYPRE_Int
-hypre_BoomerAMGDD_FAC_GaussSeidel( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int cycle_param )
+hypre_BoomerAMGDD_FAC_GaussSeidel( HYPRE_Solver amg_vdata, hypre_ParCompGrid *compGrid, HYPRE_Int cycle_param )
 {
    HYPRE_Int               i, j; // loop variables
    HYPRE_Complex           diag; // placeholder for the diagonal of A
    HYPRE_Complex           u_before;
+   hypre_ParAMGData   *amg_data = (hypre_ParAMGData*) amg_vdata;
 
    // Do Gauss-Seidel relaxation on the real nodes
    for (i = 0; i < hypre_ParCompGridNumRealNodes(compGrid); i++)
@@ -503,7 +501,7 @@ hypre_BoomerAMGDD_FAC_GaussSeidel( hypre_ParAMGData *amg_data, hypre_ParCompGrid
 }
 
 HYPRE_Int 
-hypre_BoomerAMGDD_FAC_Cheby( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int cycle_param )
+hypre_BoomerAMGDD_FAC_Cheby( HYPRE_Solver amg_vdata, hypre_ParCompGrid *compGrid, HYPRE_Int cycle_param )
 {
    // !!! NOTE: is this correct??? If I'm doing a bunch of matvecs that include the ghost dofs, is that right?
    // I think this is fine for now because I don't store the rows associated with ghost dofs, so their values shouldn't change at all, but this may change in a later version.
@@ -513,6 +511,7 @@ hypre_BoomerAMGDD_FAC_Cheby( hypre_ParAMGData *amg_data, hypre_ParCompGrid *comp
 
 
    HYPRE_Int i,j;
+   hypre_ParAMGData   *amg_data = (hypre_ParAMGData*) amg_vdata;
 
    HYPRE_Int num_nodes = hypre_ParCompGridNumNodes(compGrid);
    HYPRE_Int num_real_nodes = hypre_ParCompGridNumRealNodes(compGrid);
@@ -647,8 +646,9 @@ hypre_BoomerAMGDD_FAC_Cheby( hypre_ParAMGData *amg_data, hypre_ParCompGrid *comp
 
 
 HYPRE_Int
-hypre_BoomerAMGDD_FAC_CFL1Jacobi( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int cycle_param )
+hypre_BoomerAMGDD_FAC_CFL1Jacobi( HYPRE_Solver amg_vdata, hypre_ParCompGrid *compGrid, HYPRE_Int cycle_param )
 {
+   hypre_ParAMGData   *amg_data = (hypre_ParAMGData*) amg_vdata;
    if (cycle_param == 1)
    {
       FAC_CFL1Jacobi(amg_data, compGrid, 1); 

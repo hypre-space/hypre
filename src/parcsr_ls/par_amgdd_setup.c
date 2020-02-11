@@ -196,6 +196,23 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    symmetric = hypre_ParAMGDataSym(amg_data);
    use_transition_level = hypre_ParAMGDataAMGDDUseTransitionLevel(amg_data);
 
+   // Allocate pointer for the composite grids
+   compGrid = hypre_CTAlloc(hypre_ParCompGrid*, num_levels, HYPRE_MEMORY_HOST);
+   hypre_ParAMGDataCompGrid(amg_data) = compGrid;
+
+   // In the 1 processor case, just need to initialize the comp grids
+   if (num_procs == 1)
+   {
+      for (level = amgdd_start_level; level < num_levels; level++)
+      {
+         compGrid[level] = hypre_ParCompGridCreate();
+         hypre_ParCompGridInitialize( amg_data, 0, level );
+      }
+      hypre_ParCompGridFinalize(compGrid, NULL, amgdd_start_level, num_levels, hypre_ParAMGDataAMGDDUseRD(amg_data), verify_amgdd);
+      hypre_ParCompGridSetupRelax(amg_data);
+      return 0;
+   }
+
    // Figure out padding on each level
    padding = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
    if (variable_padding > num_levels - amgdd_start_level) variable_padding = num_levels - amgdd_start_level;
@@ -221,7 +238,6 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    }
 
    // Allocate space for some variables that store info on each level
-   compGrid = hypre_CTAlloc(hypre_ParCompGrid*, num_levels, HYPRE_MEMORY_HOST);
    compGridCommPkg = hypre_ParCompGridCommPkgCreate();
    hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg) = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
    hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg) = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
@@ -246,7 +262,6 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    HYPRE_Int *num_resizes = hypre_CTAlloc(HYPRE_Int, 3*num_levels, HYPRE_MEMORY_HOST);
 
    // assign compGrid and compGridCommPkg info to the amg structure
-   hypre_ParAMGDataCompGrid(amg_data) = compGrid;
    hypre_ParAMGDataCompGridCommPkg(amg_data) = compGridCommPkg;
 
 
@@ -731,11 +746,6 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
 
    // Setup extra info for specific relaxation methods
    hypre_ParCompGridSetupRelax(amg_data);
-
-   if (hypre_ParAMGDataFACRelaxType(amg_data) == 0) hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data) = (HYPRE_PtrToUserFACRelaxation) hypre_BoomerAMGDD_FAC_Jacobi;
-   else if (hypre_ParAMGDataFACRelaxType(amg_data) == 1) hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data) = (HYPRE_PtrToUserFACRelaxation) hypre_BoomerAMGDD_FAC_GaussSeidel;
-   else if (hypre_ParAMGDataFACRelaxType(amg_data) == 2) hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data) = (HYPRE_PtrToUserFACRelaxation) hypre_BoomerAMGDD_FAC_Cheby;
-   else if (hypre_ParAMGDataFACRelaxType(amg_data) == 3) hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data) = (HYPRE_PtrToUserFACRelaxation) hypre_BoomerAMGDD_FAC_CFL1Jacobi; 
 
    if (timers) hypre_EndTiming(timers[8]);
 

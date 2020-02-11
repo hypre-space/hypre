@@ -236,10 +236,6 @@ typedef struct
 #endif
 
 
-
-typedef HYPRE_Int (*HYPRE_PtrToUserFACRelaxation)( HYPRE_Solver, hypre_ParCompGrid *compGrid, HYPRE_Int cycle_param );
-
-
 #ifndef hypre_ParAMG_DATA_HEADER
 #define hypre_ParAMG_DATA_HEADER
 
@@ -364,7 +360,7 @@ typedef struct
    hypre_ParVector          *amgdd_correction_vector;
    hypre_ParCompGrid       **compGrid;
    hypre_ParCompGridCommPkg *compGridCommPkg;
-   HYPRE_PtrToUserFACRelaxation amgddUserFACRelaxation;
+   HYPRE_Int       (*amgddUserFACRelaxation)( HYPRE_Solver, hypre_ParCompGrid*, HYPRE_Int );
 
    /* Block data */
    hypre_ParCSRBlockMatrix **A_block_array;
@@ -2102,10 +2098,10 @@ HYPRE_Int hypre_BoomerAMGDDTestSolve( void *amg_vdata, hypre_ParCSRMatrix *A, hy
 /* par_amgdd_fac_cycle.c */
 HYPRE_Int hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata, HYPRE_Int first_iteration );
 HYPRE_Int hypre_BoomerAMGDD_FAC_Cycle_timed( void *amg_vdata, HYPRE_Int time_part );
-HYPRE_Int hypre_BoomerAMGDD_FAC_Jacobi( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int cycle_param  );
-HYPRE_Int hypre_BoomerAMGDD_FAC_GaussSeidel( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int cycle_param  );
-HYPRE_Int hypre_BoomerAMGDD_FAC_Cheby( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int cycle_param  );
-HYPRE_Int hypre_BoomerAMGDD_FAC_CFL1Jacobi( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int cycle_param  );
+HYPRE_Int hypre_BoomerAMGDD_FAC_Jacobi( HYPRE_Solver amg_vdata, hypre_ParCompGrid *compGrid, HYPRE_Int cycle_param  );
+HYPRE_Int hypre_BoomerAMGDD_FAC_GaussSeidel( HYPRE_Solver amg_vdata, hypre_ParCompGrid *compGrid, HYPRE_Int cycle_param  );
+HYPRE_Int hypre_BoomerAMGDD_FAC_Cheby( HYPRE_Solver amg_vdata, hypre_ParCompGrid *compGrid, HYPRE_Int cycle_param  );
+HYPRE_Int hypre_BoomerAMGDD_FAC_CFL1Jacobi( HYPRE_Solver amg_vdata, hypre_ParCompGrid *compGrid, HYPRE_Int cycle_param  );
 
 /* par_amgdd_comp_grid.c */
 hypre_ParCompGrid *hypre_ParCompGridCreate ();
