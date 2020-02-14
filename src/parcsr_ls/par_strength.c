@@ -1011,7 +1011,7 @@ hypre_BoomerAMGCreateSFromCFMarker(hypre_ParCSRMatrix    *A,
               else
               {
                  S_temp_offd_j[jA] = jj;
-                   ++jS_offd;
+                 ++jS_offd;
               }
             } else {
               S_temp_offd_j[jA] = -1;
