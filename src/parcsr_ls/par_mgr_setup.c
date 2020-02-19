@@ -1336,7 +1336,8 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
     if (strong_threshold > S_commpkg_switch)
       hypre_BoomerAMGCreateSCommPkg(A_array_local[lev_local],S_local,&col_offd_S_to_A);
     */
-    hypre_BoomerAMGCoarsenHMIS(S_local, A_array_local[lev_local], measure_type, debug_flag, &CF_marker_local);     
+    HYPRE_Int coarsen_cut_factor = 0;
+    hypre_BoomerAMGCoarsenHMIS(S_local, A_array_local[lev_local], measure_type, coarsen_cut_factor, debug_flag, &CF_marker_local);     
     //hypre_BoomerAMGCoarsen(S_local, A_array_local[lev_local], 0, 0, &CF_marker_local);      
 
 
@@ -1432,7 +1433,7 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
     /* Save interpolation matrix pointer */
     P_array_local[lev_local] = P_local;
 
-    /* CF_marker_local will be allocated in hypre_BoomerAMGCoarsen if it is NULL */
+    /* Reset CF_marker_local to NULL. It will be allocated in hypre_BoomerAMGCoarsen (if NULL) */
     CF_marker_local = NULL;
 
     if (num_functions > 1)

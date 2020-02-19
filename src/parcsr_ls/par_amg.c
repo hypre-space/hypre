@@ -2875,7 +2875,8 @@ HYPRE_Int
 hypre_BoomerAMGGetGridHierarchy( void       *data,
                               HYPRE_Int *cgrid )
 {
-   HYPRE_Int *ibuff, *wbuff, *cbuff, *tmp;
+   HYPRE_Int *ibuff = NULL;
+   HYPRE_Int *wbuff, *cbuff, *tmp;
    HYPRE_Int local_size, lev_size, i, j, level, num_levels, block_mode;
    HYPRE_Int          **CF_marker_array;   
    
