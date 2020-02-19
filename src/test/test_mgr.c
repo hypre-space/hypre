@@ -76,10 +76,8 @@ main( hypre_int argc,
   HYPRE_Int                 build_x0_type;
   HYPRE_Int                 build_x0_arg_index;
   HYPRE_Int                 use_block_cf = 0;
-  HYPRE_Int                 use_point_marker_array = 0;
   HYPRE_Int                 use_reserved_coarse_grid;
   HYPRE_Int                 build_block_cf_arg_index;
-  HYPRE_Int                 build_marker_array_arg_index;
   HYPRE_Int                 solver_id;
   HYPRE_Int                 print_solution = 0;
   HYPRE_Int                 poutdat;
@@ -226,14 +224,13 @@ main( hypre_int argc,
 
   /* mgr options */
   mg_max_iter = 20;
-  HYPRE_Int mgr_bsize = 3;
-  HYPRE_Int mgr_nlevels = 2;
+  HYPRE_Int mgr_bsize = 2;
+  HYPRE_Int mgr_nlevels = 1;
   HYPRE_Int mgr_num_reserved_nodes = 0;
   HYPRE_Int mgr_non_c_to_f = 1;
   HYPRE_Int mgr_frelax_method = 0;
   HYPRE_Int *mgr_frelax_num_functions= NULL;
   HYPRE_Int *mgr_idx_array = NULL;
-  HYPRE_Int *mgr_point_marker_array = NULL;
   HYPRE_Int *mgr_num_cindexes = NULL; 
   HYPRE_Int **mgr_cindexes = NULL;
   HYPRE_Int *mgr_reserved_coarse_indexes = NULL;
@@ -247,25 +244,25 @@ main( hypre_int argc,
   HYPRE_Int mgr_interp_type = 2;
   HYPRE_Int *mgr_level_interp_type = hypre_CTAlloc(HYPRE_Int, mgr_nlevels, HYPRE_MEMORY_HOST);
   mgr_level_interp_type[0] = 2;
-  mgr_level_interp_type[1] = 2;
+  //mgr_level_interp_type[1] = 2;
   HYPRE_Int *mgr_level_restrict_type = hypre_CTAlloc(HYPRE_Int, mgr_nlevels, HYPRE_MEMORY_HOST);
   mgr_level_restrict_type[0] = 0;
-  mgr_level_restrict_type[1] = 0;
+  //mgr_level_restrict_type[1] = 0;
   HYPRE_Int *mgr_coarse_grid_method = hypre_CTAlloc(HYPRE_Int, mgr_nlevels, HYPRE_MEMORY_HOST);
-  mgr_coarse_grid_method[0] = 1;
-  mgr_coarse_grid_method[1] = 0;
+  mgr_coarse_grid_method[0] = 0;
+  //mgr_coarse_grid_method[1] = 0;
 
   mgr_cindexes = hypre_CTAlloc(HYPRE_Int*, mgr_nlevels, HYPRE_MEMORY_HOST);
   HYPRE_Int *lv1 = hypre_CTAlloc(HYPRE_Int, mgr_bsize, HYPRE_MEMORY_HOST);
   HYPRE_Int *lv2 = hypre_CTAlloc(HYPRE_Int, mgr_bsize, HYPRE_MEMORY_HOST);
-  lv1[0] = 1;
-  lv1[1] = 2;
-  lv2[0] = 2;
+  lv1[0] = 0;
+  //lv1[1] = 2;
+  //lv2[0] = 2;
   mgr_cindexes[0] = lv1;
-  mgr_cindexes[1] = lv2;
+  //mgr_cindexes[1] = lv2;
   mgr_num_cindexes = hypre_CTAlloc(HYPRE_Int, mgr_nlevels, HYPRE_MEMORY_HOST);
-  mgr_num_cindexes[0] = 2;
-  mgr_num_cindexes[1] = 1;
+  mgr_num_cindexes[0] = 1;
+  //mgr_num_cindexes[1] = 1;
 
   mgr_idx_array = hypre_CTAlloc(HYPRE_Int, mgr_bsize, HYPRE_MEMORY_HOST);
   //mgr_idx_array[0] = 0;
@@ -274,11 +271,11 @@ main( hypre_int argc,
   //mgr_idx_array[1] = 52800;
 
   HYPRE_Int *mgr_level_frelax_method = hypre_CTAlloc(HYPRE_Int, mgr_nlevels, HYPRE_MEMORY_HOST);
-  mgr_level_frelax_method[0] = 99;
-  mgr_level_frelax_method[1] = 0;
+  mgr_level_frelax_method[0] = 0;
+  //mgr_level_frelax_method[1] = 1;
 
   mgr_frelax_num_functions = hypre_CTAlloc(HYPRE_Int, mgr_nlevels, HYPRE_MEMORY_HOST);
-  //mgr_frelax_num_functions[0] = 0;
+  mgr_frelax_num_functions[0] = 0;
   //mgr_frelax_num_functions[1] = 2;
 
   char* indexList = NULL;
@@ -316,7 +313,7 @@ main( hypre_int argc,
 
   solver_id = 72;
 
-  poutdat = 1;
+  poutdat = 0;
 
   /*-----------------------------------------------------------
    * Parse command line
@@ -366,12 +363,6 @@ main( hypre_int argc,
       arg_index++;
       use_block_cf = 1;
       build_block_cf_arg_index = arg_index;
-    }
-    else if ( strcmp(argv[arg_index], "-markerArray") == 0)
-    {
-      arg_index++;
-      use_point_marker_array = 1;
-      build_marker_array_arg_index = arg_index;
     }
     else
     {
@@ -540,22 +531,6 @@ main( hypre_int argc,
     }
   }
 
-  mgr_point_marker_array = hypre_CTAlloc(HYPRE_Int, local_num_rows, HYPRE_MEMORY_HOST);
-  if (use_point_marker_array)
-  {
-    FILE *ifp;
-    char fname[80];
-    hypre_sprintf(fname, "%s.%05i", argv[build_marker_array_arg_index], myid);
-    ifp = fopen(fname,"r");
-    if (ifp == NULL) {
-      fprintf(stderr, "Can't open input file for block CF indices!\n");
-      exit(1);
-    }
-    for (i = 0; i < local_num_rows; i++)
-    {
-      fscanf(ifp, "%d", &mgr_point_marker_array[i]);
-    }
-  }
 
   if ( solver_id == 72 )
   {
@@ -581,9 +556,8 @@ main( hypre_int argc,
     HYPRE_BoomerAMGSetPrintLevel(aux_precond, 0);
     HYPRE_BoomerAMGSetRelaxOrder(aux_precond, 1);
     HYPRE_BoomerAMGSetMaxIter(aux_precond, 1);
-    HYPRE_BoomerAMGSetNumSweeps(aux_precond, 1);
-    HYPRE_BoomerAMGSetNumFunctions(aux_precond, 3);
-    HYPRE_BoomerAMGSetAggNumLevels(aux_precond, 1);
+    HYPRE_BoomerAMGSetNumSweeps(aux_precond, 3);
+    HYPRE_BoomerAMGSetNumFunctions(aux_precond, 2);
 
     HYPRE_ParCSRFlexGMRESCreate(hypre_MPI_COMM_WORLD, &aux_solver);
     HYPRE_FlexGMRESSetMaxIter(aux_solver, 10);
@@ -634,17 +608,10 @@ main( hypre_int argc,
     */
   
     /* set MGR data by block */
-    if (use_block_cf) 
-    {
-      HYPRE_MGRSetCpointsByContiguousBlock( pcg_precond, mgr_bsize, mgr_nlevels, mgr_idx_array, mgr_num_cindexes, mgr_cindexes);
-    } 
-    else if (use_point_marker_array) 
-    {
-      HYPRE_MGRSetCpointsByPointMarkerArray( pcg_precond, mgr_bsize, mgr_nlevels, mgr_num_cindexes, mgr_cindexes, mgr_point_marker_array);
-    } 
-    else
-    {
-      HYPRE_MGRSetCpointsByBlock( pcg_precond, mgr_bsize, mgr_nlevels, mgr_num_cindexes,mgr_cindexes);
+    if (use_block_cf) {
+       HYPRE_MGRSetCpointsByContiguousBlock( pcg_precond, mgr_bsize, mgr_nlevels, mgr_idx_array, mgr_num_cindexes, mgr_cindexes);
+    } else {
+       HYPRE_MGRSetCpointsByBlock( pcg_precond, mgr_bsize, mgr_nlevels, mgr_num_cindexes,mgr_cindexes);
     }
     /* set reserved coarse nodes */
     if(mgr_num_reserved_nodes)HYPRE_MGRSetReservedCoarseNodes(pcg_precond, mgr_num_reserved_nodes, mgr_reserved_coarse_indexes);
@@ -678,6 +645,7 @@ main( hypre_int argc,
     HYPRE_MGRSetGlobalsmoothType(pcg_precond, mgr_gsmooth_type);
     HYPRE_MGRSetMaxGlobalsmoothIters( pcg_precond, mgr_num_gsmooth_sweeps );   
     hypre_MGRPrintCoarseSystem( pcg_precond, 0 );
+    HYPRE_MGRSetNonCpointsToFpoints( pcg_precond, 0 );
   
     /* create AMG coarse grid solver */
   
@@ -689,7 +657,7 @@ main( hypre_int argc,
     //HYPRE_BoomerAMGSetCoarsenType(amg_solver, 3);
     //HYPRE_BoomerAMGSetPMaxElmts(amg_solver, 0);
     /* note: log is written to standard output, not to file */
-    HYPRE_BoomerAMGSetPrintLevel(amg_solver, 1);
+    HYPRE_BoomerAMGSetPrintLevel(amg_solver, 0);
     /*HYPRE_BoomerAMGSetNumSweeps(amg_solver, 3);
     HYPRE_BoomerAMGSetCycleType(amg_solver, cycle_type);
     HYPRE_BoomerAMGSetRelaxType(amg_solver, 3);
@@ -704,7 +672,7 @@ main( hypre_int argc,
     HYPRE_BoomerAMGSetTol(amg_solver, 0.0);*/
     HYPRE_BoomerAMGSetRelaxOrder(amg_solver, 1);
     HYPRE_BoomerAMGSetMaxIter(amg_solver, 1);
-    HYPRE_BoomerAMGSetNumFunctions(amg_solver, 1);
+    HYPRE_BoomerAMGSetNumFunctions(amg_solver, 2);
     //HYPRE_BoomerAMGSetNumSweeps(amg_solver, 3);
     /*
     HYPRE_BoomerAMGSetSmoothType(amg_solver, 9);
@@ -955,7 +923,7 @@ main( hypre_int argc,
     hypre_MGRPrintCoarseSystem( pcg_precond, 0 );
 
     // set fine grid solver, already setup above
-    //HYPRE_MGRSetFSolver(pcg_precond, HYPRE_BoomerAMGSolve, HYPRE_BoomerAMGSetup, aff_solver);
+    HYPRE_MGRSetFSolver(pcg_precond, HYPRE_BoomerAMGSolve, HYPRE_BoomerAMGSetup, aff_solver);
 
     // Set the A_ff_inv for constructing P
     //hypre_MGRSetAffInv(pcg_precond, A_ff_inv);
@@ -1025,7 +993,7 @@ main( hypre_int argc,
     HYPRE_MGRSetMaxIter(mgr_solver_flow, 1);
     HYPRE_MGRSetTol(mgr_solver_flow, pc_tol);
     /* set coarse grid method, non-Galerkin will keep the stencil for interleaved ordering */
-    //HYPRE_MGRSetCoarseGridMethod(mgr_solver_flow, mgr_coarse_grid_method);
+    HYPRE_MGRSetCoarseGridMethod(mgr_solver_flow, mgr_coarse_grid_method);
 
     HYPRE_MGRSetGlobalsmoothType(mgr_solver_flow, mgr_gsmooth_type);
     HYPRE_MGRSetMaxGlobalsmoothIters( mgr_solver_flow, mgr_num_gsmooth_sweeps );   
@@ -1462,7 +1430,6 @@ main( hypre_int argc,
   hypre_TFree(mgr_level_frelax_method, HYPRE_MEMORY_HOST);
   hypre_TFree(mgr_frelax_num_functions, HYPRE_MEMORY_HOST);
   hypre_TFree(mgr_idx_array, HYPRE_MEMORY_HOST);
-  hypre_TFree(mgr_point_marker_array, HYPRE_MEMORY_HOST);
   hypre_TFree(lv1, HYPRE_MEMORY_HOST);
   hypre_TFree(lv2, HYPRE_MEMORY_HOST);
   hypre_TFree(mgr_cindexes, HYPRE_MEMORY_HOST);

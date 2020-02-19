@@ -20,7 +20,6 @@ hypre_MGRSetup( void               *mgr_vdata,
   hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
 
   HYPRE_Int       cnt,i,j, final_coarse_size, block_size, idx, **block_cf_marker;
-  HYPRE_Int       *block_num_coarse_indexes, *point_marker_array;
   HYPRE_BigInt    row, end_idx;
   HYPRE_Int    lev, num_coarsening_levs, last_level, num_c_levels, num_threads,nc,index_i,cflag;
         HYPRE_Int      set_c_points_method;
@@ -117,8 +116,6 @@ hypre_MGRSetup( void               *mgr_vdata,
 
   block_size = (mgr_data -> block_size);
   block_cf_marker = (mgr_data -> block_cf_marker);
-  block_num_coarse_indexes = (mgr_data -> block_num_coarse_indexes);
-  point_marker_array = (mgr_data -> point_marker_array);
   set_c_points_method = (mgr_data -> set_c_points_method);
   
   HYPRE_Int **level_coarse_indexes = NULL;
@@ -248,28 +245,6 @@ hypre_MGRSetup( void               *mgr_vdata,
         }
       }
       //hypre_printf("Level %d, # of coarse points %d\n", i, final_coarse_size);
-    }
-    else if (set_c_points_method == 2)
-    {
-      HYPRE_Int isCpoint;
-      // row start from 0 since point_marker_array is local
-      for (row = 0; row < nloc; row++)
-      {
-        isCpoint = 0;
-        for (j = 0; j < block_num_coarse_indexes[i]; j++)
-        {
-          if (point_marker_array[row] == block_cf_marker[i][j])
-          {
-            isCpoint = 1;
-            break;
-          }
-        }
-        if (isCpoint)
-        {
-          level_coarse_indexes[i][final_coarse_size++] = row;
-          //printf("%d\n",row);
-        }
-      }
     }
     else
     {
@@ -840,9 +815,9 @@ hypre_MGRSetup( void               *mgr_vdata,
       /* Compute RAP for next level */
       if (use_non_galerkin_cg[lev] != 0)
       {
-        //HYPRE_Int keep_stencil = (set_c_points_method == 0 ? 1 : 0);
+        HYPRE_Int keep_stencil = (set_c_points_method == 1 ? 0 : 1);
         hypre_MGRComputeNonGalerkinCoarseGrid(A_array[lev], P, RT, 2/*hypre_max(block_size - lev - 1, 1)*/,
-          /* ordering */0, /* method */ 0, max_elmts, /* keep_stencil */ 0, CF_marker_array[lev], &RAP_ptr);
+          /* ordering */0, /* method */ 0, max_elmts, keep_stencil, CF_marker_array[lev], &RAP_ptr);
         hypre_ParCSRMatrixOwnsColStarts(RAP_ptr) = 0;
         hypre_ParCSRMatrixOwnsColStarts(P_array[lev]) = 0;
         hypre_ParCSRMatrixOwnsRowStarts(RT) = 0;
