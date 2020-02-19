@@ -1379,6 +1379,11 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm         comm,
    // Create ParCSR matrix
    parcsr_A = hypre_ParCSRMatrixCreate(comm, global_num_rows, global_num_cols,
                                        row_starts, col_starts, 0, 0, 0);
+   
+   // Allocate memory for building ParCSR matrix
+   num_rows_proc     = hypre_CTAlloc(HYPRE_Int, num_procs, HYPRE_MEMORY_HOST);
+   num_nonzeros_proc = hypre_CTAlloc(HYPRE_Int, num_procs, HYPRE_MEMORY_HOST);   
+   
    if (my_id == 0)
    {
 #ifdef HYPRE_NO_GLOBAL_PARTITION
@@ -1403,8 +1408,6 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm         comm,
       }
 #endif
 
-      num_rows_proc     = hypre_CTAlloc(HYPRE_Int, num_procs, HYPRE_MEMORY_HOST);
-      num_nonzeros_proc = hypre_CTAlloc(HYPRE_Int, num_procs, HYPRE_MEMORY_HOST);
       for (i = 0; i < num_procs; i++)
       {
          num_rows_proc[i] = (HYPRE_Int) (global_row_starts[i+1] - global_row_starts[i]);
