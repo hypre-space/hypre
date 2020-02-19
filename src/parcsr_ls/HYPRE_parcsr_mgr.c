@@ -88,7 +88,7 @@ HYPRE_Int
 HYPRE_MGRSetCpointsByBlock( HYPRE_Solver solver, 
 			HYPRE_Int  block_size, 
 			HYPRE_Int  max_num_levels, 
-			HYPRE_Int  *block_num_coarse_points, 
+			HYPRE_Int *block_num_coarse_points, 
 			HYPRE_Int  **block_coarse_indexes)
 {
    return( hypre_MGRSetCpointsByBlock( (void *) solver, block_size, max_num_levels, block_num_coarse_points, block_coarse_indexes));
@@ -182,9 +182,9 @@ HYPRE_MGRSetReservedCpointsLevelToKeep( HYPRE_Solver solver, HYPRE_Int level)
  * HYPRE_MGRSetRestrictType
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_MGRSetRestrictType( HYPRE_Solver solver, HYPRE_Int restrict_type )
+HYPRE_MGRSetRestrictType(HYPRE_Solver solver, HYPRE_Int restrict_type )
 {
-   return hypre_MGRSetRestrictType( solver, restrict_type );
+   return hypre_MGRSetRestrictType(solver, restrict_type );
 }
 
 HYPRE_Int
@@ -197,9 +197,9 @@ HYPRE_MGRSetLevelRestrictType( HYPRE_Solver solver, HYPRE_Int *restrict_type )
  * HYPRE_MGRSetRelaxMethod
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_MGRSetFRelaxMethod( HYPRE_Solver solver, HYPRE_Int relax_method )
+HYPRE_MGRSetFRelaxMethod(HYPRE_Solver solver, HYPRE_Int relax_method )
 {
-   return hypre_MGRSetFRelaxMethod( solver, relax_method );
+   return hypre_MGRSetFRelaxMethod(solver, relax_method );
 }
 
 HYPRE_Int
@@ -230,9 +230,9 @@ HYPRE_MGRSetLevelFRelaxNumFunctions( HYPRE_Solver solver, HYPRE_Int *num_functio
  * HYPRE_MGRSetRelaxType
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_MGRSetRelaxType( HYPRE_Solver solver, HYPRE_Int relax_type )
+HYPRE_MGRSetRelaxType(HYPRE_Solver solver, HYPRE_Int relax_type )
 {
-   return hypre_MGRSetRelaxType( solver, relax_type );
+   return hypre_MGRSetRelaxType(solver, relax_type );
 }
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetNumRelaxSweeps
