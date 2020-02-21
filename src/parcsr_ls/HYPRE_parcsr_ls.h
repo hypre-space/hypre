@@ -895,6 +895,7 @@ HYPRE_Int HYPRE_BoomerAMGSetChebyEigEst (HYPRE_Solver solver,
  *          HYPRE_BoomerAMGSetLevel, HYPRE_BoomerAMGSetFilter,
  *          HYPRE_BoomerAMGSetThreshold)
  *    - 9 : Euclid (routines needed to set: HYPRE_BoomerAMGSetEuclidFile)
+ *    - 5 : ParILUK (routines needed to set: HYPRE_ILUSetLevelOfFill, HYPRE_ILUSetType)
  *
  * The default is 6.  Also, if no smoother parameters are set via the routines
  * mentioned in the table above, default values are used.
@@ -3460,7 +3461,7 @@ HYPRE_MGRSetBlockSize( HYPRE_Solver solver,
 HYPRE_Int
 HYPRE_MGRSetReservedCoarseNodes( HYPRE_Solver solver,
                                  HYPRE_Int reserved_coarse_size,
-                                 HYPRE_Int *reserved_coarse_nodes );
+                                 HYPRE_BigInt *reserved_coarse_nodes );
 
 /* (Optional) Set the level for reducing the reserved Cpoints before the coarse
  * grid solve. This is necessary for some applications, such as phase transitions.
@@ -3534,6 +3535,10 @@ HYPRE_Int
 HYPRE_MGRSetRestrictType( HYPRE_Solver solver,
                           HYPRE_Int restrict_type);
 
+HYPRE_Int
+HYPRE_MGRSetLevelRestrictType( HYPRE_Solver solver,
+                               HYPRE_Int *restrict_type);
+
 /**
  * (Optional) Set number of restriction sweeps.
  * This option is for \e restrict_type > 2.
@@ -3557,6 +3562,10 @@ HYPRE_MGRSetNumRestrictSweeps( HYPRE_Solver solver,
 HYPRE_Int
 HYPRE_MGRSetInterpType( HYPRE_Solver solver,
                         HYPRE_Int interp_type );
+
+HYPRE_Int
+HYPRE_MGRSetLevelInterpType( HYPRE_Solver solver,
+                             HYPRE_Int *interp_type );
 
 /**
  * (Optional) Set number of relaxation sweeps.
