@@ -233,7 +233,7 @@ int MLI_Method_AMGRS::setup( MLI *mli )
 {
    int             k, level, irow, localNRows, mypid, nprocs, startRow;
    int             numNodes, one=1, globalNRows, *coarsePartition;
-   int             *CFMarkers, coarseNRows, *dofArray, *cdofArray=NULL;
+   int             *CFMarkers=NULL, coarseNRows, *dofArray, *cdofArray=NULL;
    int             *reduceArray1, *reduceArray2, *rowLengs, ierr, zeroNRows;
    int             startCol, localNCols, colInd, rowNum;
    int             globalCoarseNRows, numTrials;
@@ -1900,4 +1900,3 @@ MLI_Matrix *MLI_Method_AMGRS::createPmat(int *indepSet, MLI_Matrix *mli_Amat,
    delete funcPtr;
    return mli_Pmat;
 }
-

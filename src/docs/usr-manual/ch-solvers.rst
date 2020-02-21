@@ -31,6 +31,7 @@ interfaces:
    MLI                      X        X        X
    MGR                                        X
    ParaSails                X        X        X
+   hypre-ILU                                  X
    Euclid                   X        X        X
    PILUT                    X        X        X
    PCG             X        X        X        X
@@ -152,6 +153,7 @@ be found in the reference manual.
    solvers-mli
    solvers-mgr
    solvers-parasails
+   solvers-hypre-ilu   
    solvers-euclid
    solvers-pilut
    solvers-lobpcg

@@ -45,6 +45,8 @@ set(SRCS
   HYPRE_parcsr_pcg.c
   HYPRE_parcsr_pilut.c
   HYPRE_parcsr_schwarz.c
+  HYPRE_parcsr_mgr.c
+  HYPRE_parcsr_ilu.c
   HYPRE_ams.c
   HYPRE_ads.c
   HYPRE_ame.c
@@ -100,6 +102,12 @@ set(SRCS
   ame.c
   par_restr.c
   par_lr_restr.c
+  par_mgr.c
+  par_mgr_setup.c
+  par_mgr_solve.c
+  par_ilu.c
+  par_ilu_setup.c
+  par_ilu_solve.c
 )
 
 if (HYPRE_USING_DSUPERLU)
