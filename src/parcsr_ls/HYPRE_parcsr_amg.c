@@ -1581,6 +1581,17 @@ HYPRE_BoomerAMGSetCoordinates (HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGGetGridHierarchy
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGGetGridHierarchy(HYPRE_Solver solver,
+                              HYPRE_Int *cgrid )
+{
+   return (hypre_BoomerAMGGetGridHierarchy ( (void *) solver, cgrid ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetChebyOrder
  *--------------------------------------------------------------------------*/
 

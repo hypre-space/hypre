@@ -624,7 +624,11 @@ HYPRE_Int HYPRE_CSRMatrixToParCSRMatrix ( MPI_Comm comm , HYPRE_CSRMatrix A_CSR 
 HYPRE_Int HYPRE_CSRMatrixToParCSRMatrix_WithNewPartitioning ( MPI_Comm comm , HYPRE_CSRMatrix A_CSR , HYPRE_ParCSRMatrix *matrix );
 HYPRE_Int HYPRE_ParCSRMatrixMatvec ( HYPRE_Complex alpha , HYPRE_ParCSRMatrix A , HYPRE_ParVector x , HYPRE_Complex beta , HYPRE_ParVector y );
 HYPRE_Int HYPRE_ParCSRMatrixMatvecT ( HYPRE_Complex alpha , HYPRE_ParCSRMatrix A , HYPRE_ParVector x , HYPRE_Complex beta , HYPRE_ParVector y );
-
+HYPRE_Int hypre_ParCSRMatrixTruncate(hypre_ParCSRMatrix *A,
+                                    HYPRE_Real tol,
+                                    HYPRE_Int max_row_elmts, 
+                                    HYPRE_Int rescale,
+                                    HYPRE_Int nrm_type);
 /* HYPRE_parcsr_vector.c */
 HYPRE_Int HYPRE_ParVectorCreate ( MPI_Comm comm , HYPRE_BigInt global_size , HYPRE_BigInt *partitioning , HYPRE_ParVector *vector );
 HYPRE_Int HYPRE_ParMultiVectorCreate ( MPI_Comm comm , HYPRE_BigInt global_size , HYPRE_BigInt *partitioning , HYPRE_Int number_vectors , HYPRE_ParVector *vector );
