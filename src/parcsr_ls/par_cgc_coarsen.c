@@ -243,7 +243,12 @@ hypre_BoomerAMGCoarsenCGCb( hypre_ParCSRMatrix    *S,
     *
     *************************************************************/
 
-   CF_marker = hypre_CTAlloc(HYPRE_Int,  num_variables, HYPRE_MEMORY_HOST);
+   /* Allocate CF_marker if not done before */
+   if (*CF_marker_ptr == NULL)
+   {
+      *CF_marker_ptr = hypre_CTAlloc(HYPRE_Int, num_variables, HYPRE_MEMORY_HOST);
+   }
+   CF_marker = *CF_marker_ptr;
 
    num_left = 0;
    for (j = 0; j < num_variables; j++)
@@ -609,8 +614,6 @@ hypre_BoomerAMGCoarsenCGCb( hypre_ParCSRMatrix    *S,
    if ((measure_type || (coarsen_type != 1 && coarsen_type != 11))
          && num_procs > 1)
       hypre_CSRMatrixDestroy(S_ext);
-
-   *CF_marker_ptr   = CF_marker;
 
    return hypre_error_flag;
 }
@@ -1341,4 +1344,3 @@ HYPRE_Int hypre_AmgCGCBoundaryFix (hypre_ParCSRMatrix *S,HYPRE_Int *CF_marker,HY
 #endif
    return hypre_error_flag;
 }
-

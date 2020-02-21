@@ -13,6 +13,7 @@
 #include "fortran_matrix.h"
 #include "multivector.h"
 #include "interpreter.h"
+#include "temp_multivector.h"
 #include "HYPRE_MatvecFunctions.h"
 
 #ifdef __cplusplus

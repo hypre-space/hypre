@@ -33,7 +33,7 @@ include(hypre_CMakeUtilities)
 # Set default installation directory, but provide a means for users to change
 set (HYPRE_INSTALL_PREFIX "${PROJECT_SOURCE_DIR}/hypre" CACHE PATH
     "Installation directory for HYPRE")
-if (NOT CMAKE_INSTALL_PREFIX)
+if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   set (CMAKE_INSTALL_PREFIX "${HYPRE_INSTALL_PREFIX}" CACHE INTERNAL "" FORCE)
 endif ()
 

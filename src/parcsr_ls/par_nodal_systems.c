@@ -890,7 +890,13 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix  *SN,
    hypre_MPI_Comm_size(comm, &num_procs);
 
    num_variables = num_functions*num_nodes;
-   CF_marker = hypre_CTAlloc(HYPRE_Int,  num_variables, HYPRE_MEMORY_HOST);
+
+   /* Allocate CF_marker if not done before */
+   if (*CF_marker_ptr == NULL)
+   {
+      *CF_marker_ptr = hypre_CTAlloc(HYPRE_Int, num_variables, HYPRE_MEMORY_HOST);
+   }
+   CF_marker = *CF_marker_ptr;
 
    if (nodal < 0)
    {
@@ -922,9 +928,6 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix  *SN,
          for (j=0; j < num_functions; j++)
             CF_marker[cnt++] = CFN_marker[i];
    }
-
-   *CF_marker_ptr = CF_marker;
-
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
    row_starts_S = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
@@ -1163,7 +1166,13 @@ hypre_BoomerAMGCreateScalarCF(HYPRE_Int                   *CFN_marker,
 
 
    num_variables = num_functions*num_nodes;
-   CF_marker = hypre_CTAlloc(HYPRE_Int,  num_variables, HYPRE_MEMORY_HOST);
+
+   /* Allocate CF_marker if not done before */
+   if (*CF_marker_ptr == NULL)
+   {
+      *CF_marker_ptr = hypre_CTAlloc(HYPRE_Int, num_variables, HYPRE_MEMORY_HOST);
+   }
+   CF_marker = *CF_marker_ptr;
 
    cnt = 0;
    num_coarse_nodes = 0;
@@ -1173,7 +1182,6 @@ hypre_BoomerAMGCreateScalarCF(HYPRE_Int                   *CFN_marker,
       for (j=0; j < num_functions; j++)
          CF_marker[cnt++] = CFN_marker[i];
    }
-
 
    dof_func = hypre_CTAlloc(HYPRE_Int, num_coarse_nodes*num_functions, HYPRE_MEMORY_HOST);
    cnt = 0;
@@ -1186,10 +1194,7 @@ hypre_BoomerAMGCreateScalarCF(HYPRE_Int                   *CFN_marker,
       }
    }
 
-
    *dof_func_ptr = dof_func;
-   *CF_marker_ptr = CF_marker;
-
 
    return hypre_error_flag;
 }
