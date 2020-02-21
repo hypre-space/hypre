@@ -1075,9 +1075,24 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *nod
             HYPRE_Int is_edge = 0;
             for (j = hypre_ParCompGridARowPtr(compGrid[level])[i]; j < hypre_ParCompGridARowPtr(compGrid[level])[i+1]; j++)
             {
-               // !!! NOTE: could optimize here a bit by checking if global index is owned
                global_index = hypre_ParCompGridAGlobalColInd(compGrid[level])[j];
-               local_index = hypre_ParCompGridLocalIndexBinarySearch(compGrid[level], global_index, 0, num_nodes, hypre_ParCompGridInvSortMap(compGrid[level]));
+               local_index = -1;
+
+               // If global index is owned, simply calculate
+               HYPRE_Int num_owned_blocks = hypre_ParCompGridNumOwnedBlocks(compGrid[level]);
+               for (k = 0; k < num_owned_blocks; k++)
+               {
+                  if (hypre_ParCompGridOwnedBlockStarts(compGrid[level])[k+1] - hypre_ParCompGridOwnedBlockStarts(compGrid[level])[k] > 0)
+                  {
+                     HYPRE_Int low_global_index = hypre_ParCompGridGlobalIndices(compGrid[level])[ hypre_ParCompGridOwnedBlockStarts(compGrid[level])[k] ];
+                     HYPRE_Int high_global_index = hypre_ParCompGridGlobalIndices(compGrid[level])[ hypre_ParCompGridOwnedBlockStarts(compGrid[level])[k+1] - 1 ];
+                     if ( global_index >= low_global_index && global_index <= high_global_index )
+                     {
+                        local_index = global_index - low_global_index + hypre_ParCompGridOwnedBlockStarts(compGrid[level])[k];
+                     }
+                  }
+               }
+               if (local_index == -1) local_index = hypre_ParCompGridLocalIndexBinarySearch(compGrid[level], global_index, 0, num_nodes, hypre_ParCompGridInvSortMap(compGrid[level]));
                if (local_index == -1) local_index = -global_index-1;
                if (local_index < 0) is_edge = 1;
                hypre_ParCompGridAColInd(compGrid[level])[j] = local_index;
