@@ -57,16 +57,16 @@ hypre_BoomerAMGAdditiveCycle( void              *amg_vdata)
    HYPRE_Int       rlx_coarse;
    HYPRE_Int      *grid_relax_type;
    HYPRE_Int      *num_grid_sweeps;
-   HYPRE_Real      **l1_norms;
-   HYPRE_Real    alpha, beta;
-   HYPRE_Real *u_data;
-   HYPRE_Real *v_data;
-   HYPRE_Real *l1_norms_lvl;
-   HYPRE_Real *D_inv;
-   HYPRE_Real *x_global;
-   HYPRE_Real *r_global;
-   HYPRE_Real *relax_weight;
-   HYPRE_Real *omega;
+   hypre_Vector  **l1_norms;
+   HYPRE_Real      alpha, beta;
+   HYPRE_Real     *u_data;
+   HYPRE_Real     *v_data;
+   hypre_Vector   *l1_norms_lvl;
+   HYPRE_Real     *D_inv;
+   HYPRE_Real     *x_global;
+   HYPRE_Real     *r_global;
+   HYPRE_Real     *relax_weight;
+   HYPRE_Real     *omega;
 
 #if 0
    HYPRE_Real   *D_mat;
@@ -164,12 +164,14 @@ hypre_BoomerAMGAdditiveCycle( void              *amg_vdata)
             num_rows = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[fine_grid]));
             for (j=0; j < num_grid_sweeps[1]; j++)
             {
-             hypre_ParVectorCopy(F_array[fine_grid],Vtemp);
+               hypre_ParVectorCopy(F_array[fine_grid],Vtemp);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
-             for (i = 0; i < num_rows; i++)
-               u_data[i] += v_data[i] / l1_norms_lvl[i];
+               for (i = 0; i < num_rows; i++)
+               {
+                  u_data[i] += v_data[i] / hypre_VectorData(l1_norms_lvl)[i];
+               }
             }
          }
 
@@ -336,7 +338,7 @@ HYPRE_Int hypre_CreateLambda(void *amg_vdata)
    HYPRE_Real    *tmp_data;
    HYPRE_Real    *x_data;
    HYPRE_Real    *r_data;
-   HYPRE_Real    *l1_norms;
+   hypre_Vector  *l1_norms;
    HYPRE_Real    *A_tmp_diag_data;
    HYPRE_Real    *A_tmp_offd_data;
    HYPRE_Real    *D_data = NULL;
@@ -396,7 +398,7 @@ HYPRE_Int hypre_CreateLambda(void *amg_vdata)
    HYPRE_Int       num_nonzeros_diag;
    HYPRE_Int       num_nonzeros_offd;
 
-   HYPRE_Real  **l1_norms_ptr = NULL;
+   hypre_Vector  **l1_norms_ptr = NULL;
    /*HYPRE_Real   *relax_weight = NULL;
    HYPRE_Int      relax_type; */
    HYPRE_Int       add_rlx;
@@ -816,22 +818,24 @@ HYPRE_Int hypre_CreateLambda(void *amg_vdata)
       }
       else
       {
-        l1_norms = l1_norms_ptr[level];
+         l1_norms = l1_norms_ptr[level];
 #ifdef HYPRE_USING_OPENMP
 #pragma omp for private(i) HYPRE_SMP_SCHEDULE
 #endif
-        for (i=0; i < num_rows_tmp; i++)
-        {
-           D_data[i] = 1.0/l1_norms[i];
-           L_diag_i[cnt_row+i] = start_diag + A_tmp_diag_i[i+1];
-           L_offd_i[cnt_row+i] = start_offd + A_tmp_offd_i[i+1];
-        }
-        if (ns > 1)
-          for (i=0; i < num_rows_tmp; i++)
-          {
-            Atilde_diag_i[cnt_row+i] = start_diag + A_tmp_diag_i[i+1];
-            Atilde_offd_i[cnt_row+i] = start_offd + A_tmp_offd_i[i+1];
-          }
+         for (i=0; i < num_rows_tmp; i++)
+         {
+            D_data[i] = 1.0 / hypre_VectorData(l1_norms)[i];
+            L_diag_i[cnt_row+i] = start_diag + A_tmp_diag_i[i+1];
+            L_offd_i[cnt_row+i] = start_offd + A_tmp_offd_i[i+1];
+         }
+         if (ns > 1)
+         {
+            for (i=0; i < num_rows_tmp; i++)
+            {
+               Atilde_diag_i[cnt_row+i] = start_diag + A_tmp_diag_i[i+1];
+               Atilde_offd_i[cnt_row+i] = start_offd + A_tmp_offd_i[i+1];
+            }
+         }
       }
 
       if (num_procs > 1)
@@ -1021,8 +1025,8 @@ HYPRE_Int hypre_CreateDinv(void *amg_vdata)
  /* Local variables  */
    HYPRE_Int       Solve_err_flag = 0;
 
-   HYPRE_Real  **l1_norms_ptr = NULL;
-   HYPRE_Real  *l1_norms;
+   hypre_Vector  **l1_norms_ptr = NULL;
+   hypre_Vector   *l1_norms;
    HYPRE_Int l1_start;
 
    /* Acquire data and allocate storage */
@@ -1103,7 +1107,9 @@ HYPRE_Int hypre_CreateDinv(void *amg_vdata)
 #pragma omp for private(i) HYPRE_SMP_SCHEDULE
 #endif
          for (i=0; i < num_rows_tmp; i++)
+         {
             D_inv[l1_start+i] = add_rlx_wt/A_tmp_diag_data[A_tmp_diag_i[i]];
+         }
       }
       else
       {
@@ -1112,7 +1118,9 @@ HYPRE_Int hypre_CreateDinv(void *amg_vdata)
 #pragma omp for private(i) HYPRE_SMP_SCHEDULE
 #endif
          for (i=0; i < num_rows_tmp; i++)
-            D_inv[l1_start+i] = 1.0/l1_norms[i];
+         {
+            D_inv[l1_start+i] = 1.0 / hypre_VectorData(l1_norms)[i];
+         }
       }
       l1_start += num_rows_tmp;
    }

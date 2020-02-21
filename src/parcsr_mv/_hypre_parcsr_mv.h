@@ -344,40 +344,50 @@ typedef struct hypre_ParCSRMatrix_struct
    HYPRE_Complex        *bdiaginv;
    hypre_ParCSRCommPkg  *bdiaginv_comm_pkg;
 
+#if defined(HYPRE_USING_CUDA)
+   /* these two arrays are reserveed for SoC matrices on GPUs to help build interpolation */
+   HYPRE_Int            *soc_diag_j;
+   HYPRE_Int            *soc_offd_j;
+#endif
+
 } hypre_ParCSRMatrix;
 
 /*--------------------------------------------------------------------------
  * Accessor functions for the Parallel CSR Matrix structure
  *--------------------------------------------------------------------------*/
 
-#define hypre_ParCSRMatrixComm(matrix)             ((matrix) -> comm)
-#define hypre_ParCSRMatrixGlobalNumRows(matrix)    ((matrix) -> global_num_rows)
-#define hypre_ParCSRMatrixGlobalNumCols(matrix)    ((matrix) -> global_num_cols)
-#define hypre_ParCSRMatrixFirstRowIndex(matrix)    ((matrix) -> first_row_index)
-#define hypre_ParCSRMatrixFirstColDiag(matrix)     ((matrix) -> first_col_diag)
-#define hypre_ParCSRMatrixLastRowIndex(matrix)     ((matrix) -> last_row_index)
-#define hypre_ParCSRMatrixLastColDiag(matrix)      ((matrix) -> last_col_diag)
-#define hypre_ParCSRMatrixDiag(matrix)             ((matrix) -> diag)
-#define hypre_ParCSRMatrixOffd(matrix)             ((matrix) -> offd)
-#define hypre_ParCSRMatrixDiagT(matrix)            ((matrix) -> diagT)
-#define hypre_ParCSRMatrixOffdT(matrix)            ((matrix) -> offdT)
-#define hypre_ParCSRMatrixColMapOffd(matrix)       ((matrix) -> col_map_offd)
-#define hypre_ParCSRMatrixDeviceColMapOffd(matrix) ((matrix) -> device_col_map_offd)
-#define hypre_ParCSRMatrixRowStarts(matrix)        ((matrix) -> row_starts)
-#define hypre_ParCSRMatrixColStarts(matrix)        ((matrix) -> col_starts)
-#define hypre_ParCSRMatrixCommPkg(matrix)          ((matrix) -> comm_pkg)
-#define hypre_ParCSRMatrixCommPkgT(matrix)         ((matrix) -> comm_pkgT)
-#define hypre_ParCSRMatrixOwnsData(matrix)         ((matrix) -> owns_data)
-#define hypre_ParCSRMatrixOwnsRowStarts(matrix)    ((matrix) -> owns_row_starts)
-#define hypre_ParCSRMatrixOwnsColStarts(matrix)    ((matrix) -> owns_col_starts)
-#define hypre_ParCSRMatrixNumNonzeros(matrix)      ((matrix) -> num_nonzeros)
-#define hypre_ParCSRMatrixDNumNonzeros(matrix)     ((matrix) -> d_num_nonzeros)
-#define hypre_ParCSRMatrixRowindices(matrix)       ((matrix) -> rowindices)
-#define hypre_ParCSRMatrixRowvalues(matrix)        ((matrix) -> rowvalues)
-#define hypre_ParCSRMatrixGetrowactive(matrix)     ((matrix) -> getrowactive)
-#define hypre_ParCSRMatrixAssumedPartition(matrix) ((matrix) -> assumed_partition)
+#define hypre_ParCSRMatrixComm(matrix)                   ((matrix) -> comm)
+#define hypre_ParCSRMatrixGlobalNumRows(matrix)          ((matrix) -> global_num_rows)
+#define hypre_ParCSRMatrixGlobalNumCols(matrix)          ((matrix) -> global_num_cols)
+#define hypre_ParCSRMatrixFirstRowIndex(matrix)          ((matrix) -> first_row_index)
+#define hypre_ParCSRMatrixFirstColDiag(matrix)           ((matrix) -> first_col_diag)
+#define hypre_ParCSRMatrixLastRowIndex(matrix)           ((matrix) -> last_row_index)
+#define hypre_ParCSRMatrixLastColDiag(matrix)            ((matrix) -> last_col_diag)
+#define hypre_ParCSRMatrixDiag(matrix)                   ((matrix) -> diag)
+#define hypre_ParCSRMatrixOffd(matrix)                   ((matrix) -> offd)
+#define hypre_ParCSRMatrixDiagT(matrix)                  ((matrix) -> diagT)
+#define hypre_ParCSRMatrixOffdT(matrix)                  ((matrix) -> offdT)
+#define hypre_ParCSRMatrixColMapOffd(matrix)             ((matrix) -> col_map_offd)
+#define hypre_ParCSRMatrixDeviceColMapOffd(matrix)       ((matrix) -> device_col_map_offd)
+#define hypre_ParCSRMatrixRowStarts(matrix)              ((matrix) -> row_starts)
+#define hypre_ParCSRMatrixColStarts(matrix)              ((matrix) -> col_starts)
+#define hypre_ParCSRMatrixCommPkg(matrix)                ((matrix) -> comm_pkg)
+#define hypre_ParCSRMatrixCommPkgT(matrix)               ((matrix) -> comm_pkgT)
+#define hypre_ParCSRMatrixOwnsData(matrix)               ((matrix) -> owns_data)
+#define hypre_ParCSRMatrixOwnsRowStarts(matrix)          ((matrix) -> owns_row_starts)
+#define hypre_ParCSRMatrixOwnsColStarts(matrix)          ((matrix) -> owns_col_starts)
+#define hypre_ParCSRMatrixNumNonzeros(matrix)            ((matrix) -> num_nonzeros)
+#define hypre_ParCSRMatrixDNumNonzeros(matrix)           ((matrix) -> d_num_nonzeros)
+#define hypre_ParCSRMatrixRowindices(matrix)             ((matrix) -> rowindices)
+#define hypre_ParCSRMatrixRowvalues(matrix)              ((matrix) -> rowvalues)
+#define hypre_ParCSRMatrixGetrowactive(matrix)           ((matrix) -> getrowactive)
+#define hypre_ParCSRMatrixAssumedPartition(matrix)       ((matrix) -> assumed_partition)
 #define hypre_ParCSRMatrixOwnsAssumedPartition(matrix)   ((matrix) -> owns_assumed_partition)
-#define hypre_ParCSRMatrixProcOrdering(matrix)    ((matrix) -> proc_ordering)
+#define hypre_ParCSRMatrixProcOrdering(matrix)           ((matrix) -> proc_ordering)
+#if defined(HYPRE_USING_CUDA)
+#define hypre_ParCSRMatrixSocDiagJ(matrix)               ((matrix) -> soc_diag_j)
+#define hypre_ParCSRMatrixSocOffdJ(matrix)               ((matrix) -> soc_offd_j)
+#endif
 
 #define hypre_ParCSRMatrixNumRows(matrix) hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(matrix))
 #define hypre_ParCSRMatrixNumCols(matrix) hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(matrix))
@@ -389,7 +399,8 @@ static inline HYPRE_Int hypre_ParCSRMatrixMemoryLocation(hypre_ParCSRMatrix *mat
 
    if (memory_diag != memory_offd)
    {
-      hypre_printf("Warning: ParCSRMatrix Memory Location Diag != Offd\n");
+      hypre_printf("Warning: ParCSRMatrix Memory Location Diag (%d) != Offd (%d)\n", memory_diag, memory_offd);
+      hypre_assert(0);
    }
    return memory_diag;
 }
@@ -818,9 +829,7 @@ hypre_ParCSRMatrix *hypre_ParCSRMatrixUnion ( hypre_ParCSRMatrix *A , hypre_ParC
 hypre_ParCSRMatrix* hypre_ParCSRMatrixClone ( hypre_ParCSRMatrix *A, HYPRE_Int copy_data );
 #define hypre_ParCSRMatrixCompleteClone(A) hypre_ParCSRMatrixClone(A,0)
 hypre_ParCSRMatrix* hypre_ParCSRMatrixClone_v2 ( hypre_ParCSRMatrix *A, HYPRE_Int copy_data, HYPRE_Int memory_location );
-#ifdef HYPRE_USING_CUDA
-//hypre_int hypre_ParCSRMatrixIsManaged(hypre_ParCSRMatrix *a);
-#endif
+HYPRE_Int hypre_ParCSRMatrixMigrate(hypre_ParCSRMatrix *A, HYPRE_Int memory_location);
 HYPRE_Int hypre_ParCSRMatrixDropSmallEntries( hypre_ParCSRMatrix *A, HYPRE_Real tol, HYPRE_Int type);
 
 /* par_csr_matvec.c */
@@ -862,6 +871,8 @@ HYPRE_Int hypre_ParVectorSetConstantValues ( hypre_ParVector *v , HYPRE_Complex 
 HYPRE_Int hypre_ParVectorSetRandomValues ( hypre_ParVector *v , HYPRE_Int seed );
 HYPRE_Int hypre_ParVectorCopy ( hypre_ParVector *x , hypre_ParVector *y );
 hypre_ParVector *hypre_ParVectorCloneShallow ( hypre_ParVector *x );
+hypre_ParVector *hypre_ParVectorCloneDeep_v2( hypre_ParVector *x, HYPRE_Int memory_location );
+HYPRE_Int hypre_ParVectorMigrate(hypre_ParVector *x, HYPRE_Int memory_location);
 HYPRE_Int hypre_ParVectorScale ( HYPRE_Complex alpha , hypre_ParVector *y );
 HYPRE_Int hypre_ParVectorAxpy ( HYPRE_Complex alpha , hypre_ParVector *x , hypre_ParVector *y );
 HYPRE_Int hypre_ParVectorMassAxpy ( HYPRE_Complex *alpha, hypre_ParVector **x, hypre_ParVector *y, HYPRE_Int k, HYPRE_Int unroll);

@@ -14,4 +14,5 @@
 ./src/zerr
 ./src/config.log
 ./src/config.status
+./src/utilities/cub
 TVD.v3breakpoints

@@ -1951,16 +1951,16 @@ for (i = 0; i < n_fine; i++) fine_to_coarse[i] -= my_first_cpt;*/
 
 HYPRE_Int
 hypre_BoomerAMGBuildDirInterpHost( hypre_ParCSRMatrix   *A,
-                         HYPRE_Int                  *CF_marker,
-                         hypre_ParCSRMatrix         *S,
-                         HYPRE_BigInt               *num_cpts_global,
-                         HYPRE_Int                   num_functions,
-                         HYPRE_Int                  *dof_func,
-                         HYPRE_Int                   debug_flag,
-                         HYPRE_Real                  trunc_factor,
-                         HYPRE_Int                   max_elmts,
-                         HYPRE_Int                  *col_offd_S_to_A,
-                         hypre_ParCSRMatrix        **P_ptr)
+                                   HYPRE_Int            *CF_marker,
+                                   hypre_ParCSRMatrix   *S,
+                                   HYPRE_BigInt         *num_cpts_global,
+                                   HYPRE_Int             num_functions,
+                                   HYPRE_Int            *dof_func,
+                                   HYPRE_Int             debug_flag,
+                                   HYPRE_Real            trunc_factor,
+                                   HYPRE_Int             max_elmts,
+                                   HYPRE_Int            *col_offd_S_to_A,
+                                   hypre_ParCSRMatrix  **P_ptr)
 {
 
    MPI_Comm      comm = hypre_ParCSRMatrixComm(A);
@@ -2669,16 +2669,17 @@ for (i = 0; i < n_fine; i++) fine_to_coarse[i] -= my_first_cpt;*/
 
 HYPRE_Int
 hypre_BoomerAMGBuildDirInterp( hypre_ParCSRMatrix   *A,
-                         HYPRE_Int                  *CF_marker,
-                         hypre_ParCSRMatrix         *S,
-                         HYPRE_BigInt               *num_cpts_global,
-                         HYPRE_Int                   num_functions,
-                         HYPRE_Int                  *dof_func,
-                         HYPRE_Int                   debug_flag,
-                         HYPRE_Real                  trunc_factor,
-                         HYPRE_Int                   max_elmts,
-                         HYPRE_Int                  *col_offd_S_to_A,
-                         hypre_ParCSRMatrix        **P_ptr)
+                               HYPRE_Int            *CF_marker,
+                               hypre_ParCSRMatrix   *S,
+                               HYPRE_BigInt         *num_cpts_global,
+                               HYPRE_Int             num_functions,
+                               HYPRE_Int            *dof_func,
+                               HYPRE_Int             debug_flag,
+                               HYPRE_Real            trunc_factor,
+                               HYPRE_Int             max_elmts,
+                               HYPRE_Int            *col_offd_S_to_A,
+                               HYPRE_Int             interp_type,
+                               hypre_ParCSRMatrix  **P_ptr)
 {
 #if defined(HYPRE_USING_CUDA)
    //hypre_SetExecPolicy(HYPRE_EXEC_DEVICE);
@@ -2703,7 +2704,8 @@ hypre_BoomerAMGBuildDirInterp( hypre_ParCSRMatrix   *A,
    {
       /*      printf(" dir interp Device\n");*/
       ierr = hypre_BoomerAMGBuildDirInterpDevice(A,CF_marker,S,num_cpts_global,num_functions,dof_func,
-                                               debug_flag,trunc_factor,max_elmts,col_offd_S_to_A, P_ptr);
+                                                 debug_flag,trunc_factor,max_elmts,col_offd_S_to_A, 
+                                                 interp_type, P_ptr);
       /*      printf(" done dir interp Device\n");*/
    }
 #endif

@@ -11,16 +11,6 @@
 #include <Kokkos_Core.hpp>
 #endif
 
-void hypre_SetExecPolicy( HYPRE_Int policy )
-{
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   if ( policy == HYPRE_EXEC_HOST || policy == HYPRE_EXEC_DEVICE)
-   {
-      hypre_HandleDefaultExecPolicy(hypre_handle) = policy;
-   }
-#endif
-}
-
 /*---------------------------------------------------
  * hypre_GetExecPolicy
  * Return execution policy based on memory locations
@@ -108,13 +98,21 @@ hypre_HandleCreate()
 {
    hypre_Handle *handle = hypre_CTAlloc(hypre_Handle, 1, HYPRE_MEMORY_HOST);
 
-   /* set default options */
+   hypre_HandleMemoryLocation(handle) = HYPRE_MEMORY_SHARED;
+
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+
+   /* default CUDA options */
    hypre_HandleDefaultExecPolicy(handle)            = HYPRE_EXEC_HOST;
    hypre_HandleCudaDevice(handle)                   = 0;
    hypre_HandleCudaComputeStreamNum(handle)         = 0;
-   hypre_HandleCudaPrefetchStreamNum(handle)        = 1;
-   hypre_HandleCudaComputeStreamSyncDefault(handle) = 1;
+#if defined(HYPRE_USING_UNIFIED_MEMORY)
+   hypre_HandleCudaComputeStreamSync(handle)        = 1;
+#else
+   hypre_HandleCudaComputeStreamSync(handle)        = 0;
+#endif
+
+   /* SpGeMM */
 #ifdef HYPRE_USING_CUSPARSE
    hypre_HandleSpgemmUseCusparse(handle)            = 1;
 #else
@@ -127,8 +125,16 @@ hypre_HandleCreate()
    handle->spgemm_rownnz_estimate_mult_factor       = 1.5;
    handle->spgemm_hash_type                         = 'L';
 
-   hypre_HandleCudaComputeStreamSync(handle).clear();
-   hypre_HandleCudaComputeStreamSyncPush( handle, hypre_HandleCudaComputeStreamSyncDefault(handle) );
+   /* cub */
+#ifdef HYPRE_USING_CUB_ALLOCATOR
+   handle->cub_bin_growth                           = 8u;
+   handle->cub_min_bin                              = 1u;
+   handle->cub_max_bin                              = (hypre_uint) -1;
+   handle->cub_max_cached_bytes                     = (size_t) -1;
+   handle->cub_dev_allocator                        = NULL;
+   handle->cub_um_allocator                         = NULL;
+#endif
+
 #endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 
    return handle;
@@ -175,6 +181,11 @@ hypre_HandleDestroy(hypre_Handle *hypre_handle_)
          HYPRE_CUDA_CALL( cudaStreamDestroy(hypre_handle_->cuda_streams[i]) );
       }
    }
+#endif
+
+#ifdef HYPRE_USING_CUB_ALLOCATOR
+   delete hypre_handle_->cub_dev_allocator;
+   delete hypre_handle_->cub_um_allocator;
 #endif
 
    hypre_TFree(hypre_handle_, HYPRE_MEMORY_HOST);
@@ -253,7 +264,7 @@ HYPRE_Init( hypre_int argc, char *argv[] )
    /* To include the cost of creating streams/cudahandles in HYPRE_Init */
    /* If not here, will be done at the first use */
    hypre_HandleCudaComputeStream(hypre_handle);
-   hypre_HandleCudaPrefetchStream(hypre_handle);
+   //hypre_HandleCudaPrefetchStream(hypre_handle);
 #endif
 
 #if defined(HYPRE_USING_CUBLAS)
@@ -280,6 +291,16 @@ HYPRE_Init( hypre_int argc, char *argv[] )
 
 #if defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_OMPOffloadOn();
+#endif
+
+#ifdef HYPRE_USING_CUB_ALLOCATOR
+   /* Keep this check here at the end of HYPRE_Init()
+    * Make sure that CUB Allocator has not been setup in HYPRE_Init,
+    * otherwise users are not able to set the parameters of CUB */
+   if (hypre_handle->cub_dev_allocator || hypre_handle->cub_um_allocator)
+   {
+      hypre_printf("ERROR: CUB Allocators have been setup ... \n");
+   }
 #endif
 
    return hypre_error_flag;
@@ -316,13 +337,3 @@ HYPRE_Finalize()
    return hypre_error_flag;
 }
 
-
-void HYPRE_SetNoCUDAUM(HYPRE_Int no_cuda_um)
-{
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   if (hypre_handle)
-   {
-      hypre_handle->no_cuda_um = no_cuda_um;
-   }
-#endif
-}

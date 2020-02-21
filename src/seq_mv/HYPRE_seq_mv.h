@@ -82,7 +82,6 @@ HYPRE_Int HYPRE_CSRMatrixDeviceSpGemmSetRownnzEstimateMethod( HYPRE_Int value );
 HYPRE_Int HYPRE_CSRMatrixDeviceSpGemmSetRownnzEstimateNSamples( HYPRE_Int value );
 HYPRE_Int HYPRE_CSRMatrixDeviceSpGemmSetRownnzEstimateMultFactor( HYPRE_Real value );
 HYPRE_Int HYPRE_CSRMatrixDeviceSpGemmSetHashType( char value );
-HYPRE_Int HYPRE_CSRMatrixDeviceSpGemmSetUseCusparse( HYPRE_Int value );
 
 typedef enum HYPRE_TimerID
 {

@@ -347,17 +347,7 @@ GenerateLaplacian( MPI_Comm       comm,
    hypre_CSRMatrixMemoryLocation(diag) = HYPRE_MEMORY_HOST;
    hypre_CSRMatrixMemoryLocation(offd) = HYPRE_MEMORY_HOST;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   HYPRE_Int memory_location = hypre_handle->no_cuda_um ? HYPRE_MEMORY_DEVICE : HYPRE_MEMORY_SHARED;
-
-   hypre_CSRMatrix *A_diag = hypre_CSRMatrixClone_v2(hypre_ParCSRMatrixDiag(A), 1, memory_location);
-   hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(A));
-   hypre_ParCSRMatrixDiag(A) = A_diag;
-
-   hypre_CSRMatrix *A_offd = hypre_CSRMatrixClone_v2(hypre_ParCSRMatrixOffd(A), 1, memory_location);
-   hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(A));
-   hypre_ParCSRMatrixOffd(A) = A_offd;
-#endif
+   hypre_ParCSRMatrixMigrate(A, hypre_HandleMemoryLocation(hypre_handle));
 
    hypre_TFree(nx_part,    HYPRE_MEMORY_HOST);
    hypre_TFree(ny_part,    HYPRE_MEMORY_HOST);
@@ -893,17 +883,7 @@ GenerateSysLaplacian( MPI_Comm comm,
    hypre_CSRMatrixMemoryLocation(diag) = HYPRE_MEMORY_HOST;
    hypre_CSRMatrixMemoryLocation(offd) = HYPRE_MEMORY_HOST;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   HYPRE_Int memory_location = hypre_handle->no_cuda_um ? HYPRE_MEMORY_DEVICE : HYPRE_MEMORY_SHARED;
-
-   hypre_CSRMatrix *A_diag = hypre_CSRMatrixClone_v2(hypre_ParCSRMatrixDiag(A), 1, memory_location);
-   hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(A));
-   hypre_ParCSRMatrixDiag(A) = A_diag;
-
-   hypre_CSRMatrix *A_offd = hypre_CSRMatrixClone_v2(hypre_ParCSRMatrixOffd(A), 1, memory_location);
-   hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(A));
-   hypre_ParCSRMatrixOffd(A) = A_offd;
-#endif
+   hypre_ParCSRMatrixMigrate(A, hypre_HandleMemoryLocation(hypre_handle));
 
    hypre_TFree(nx_part,    HYPRE_MEMORY_HOST);
    hypre_TFree(ny_part,    HYPRE_MEMORY_HOST);
@@ -1413,17 +1393,7 @@ GenerateSysLaplacianVCoef( MPI_Comm       comm,
    hypre_CSRMatrixMemoryLocation(diag) = HYPRE_MEMORY_HOST;
    hypre_CSRMatrixMemoryLocation(offd) = HYPRE_MEMORY_HOST;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   HYPRE_Int memory_location = hypre_handle->no_cuda_um ? HYPRE_MEMORY_DEVICE : HYPRE_MEMORY_SHARED;
-
-   hypre_CSRMatrix *A_diag = hypre_CSRMatrixClone_v2(hypre_ParCSRMatrixDiag(A), 1, memory_location);
-   hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(A));
-   hypre_ParCSRMatrixDiag(A) = A_diag;
-
-   hypre_CSRMatrix *A_offd = hypre_CSRMatrixClone_v2(hypre_ParCSRMatrixOffd(A), 1, memory_location);
-   hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(A));
-   hypre_ParCSRMatrixOffd(A) = A_offd;
-#endif
+   hypre_ParCSRMatrixMigrate(A, hypre_HandleMemoryLocation(hypre_handle));
 
    hypre_TFree(nx_part,    HYPRE_MEMORY_HOST);
    hypre_TFree(ny_part,    HYPRE_MEMORY_HOST);

@@ -47,6 +47,8 @@ extern "C++" {
 #include <thrust/adjacent_difference.h>
 #include <thrust/inner_product.h>
 #include <thrust/logical.h>
+#include <thrust/replace.h>
+
 using namespace thrust::placeholders;
 #endif // #if defined(HYPRE_USING_CUDA)
 
@@ -293,6 +295,7 @@ T read_only_load( const T *ptr )
    return __ldg( ptr );
 }
 
+/* exclusive prefix scan */
 template <typename T>
 static __device__ __forceinline__
 T warp_prefix_sum(hypre_int lane_id, T in, T &all_sum)
@@ -440,27 +443,6 @@ struct absolute_value : public thrust::unary_function<T,T>
   }
 };
 
-
-template<typename T1, typename T2>
-struct TupleComp1
-{
-   typedef thrust::tuple<T1, T2> Tuple;
-
-   __host__ __device__ bool operator()(const Tuple& t1, const Tuple& t2)
-   {
-      if (thrust::get<0>(t1) < thrust::get<0>(t2))
-      {
-         return true;
-      }
-      if (thrust::get<0>(t1) > thrust::get<0>(t2))
-      {
-         return false;
-      }
-      return thrust::get<1>(t1) < thrust::get<1>(t2);
-   }
-};
-
-
 template<typename T1, typename T2>
 struct TupleComp2
 {
@@ -480,11 +462,31 @@ struct TupleComp2
    }
 };
 
-#endif // #if defined(HYPRE_USING_CUDA)
+template<typename T1, typename T2>
+struct TupleComp3
+{
+   typedef thrust::tuple<T1, T2> Tuple;
 
+   __host__ __device__ bool operator()(const Tuple& t1, const Tuple& t2)
+   {
+      if (thrust::get<0>(t1) < thrust::get<0>(t2))
+      {
+         return true;
+      }
+      if (thrust::get<0>(t1) > thrust::get<0>(t2))
+      {
+         return false;
+      }
+      if (thrust::get<0>(t2) == thrust::get<1>(t2))
+      {
+         return false;
+      }
+      return thrust::get<0>(t1) == thrust::get<1>(t1) || thrust::get<1>(t1) < thrust::get<1>(t2);
+   }
+};
 
 template<typename T>
-struct is_negative
+struct is_negative : public thrust::unary_function<T,bool>
 {
    __host__ __device__ bool operator()(const T &x)
    {
@@ -493,7 +495,7 @@ struct is_negative
 };
 
 template<typename T>
-struct is_nonnegative
+struct is_nonnegative : public thrust::unary_function<T,bool>
 {
    __host__ __device__ bool operator()(const T &x)
    {
@@ -501,46 +503,51 @@ struct is_nonnegative
    }
 };
 
-#ifdef __cplusplus
-}
-#endif
 
-struct in_range
+template<typename T>
+struct in_range : public thrust::unary_function<T, bool>
 {
-   HYPRE_Int low, up;
+   T low, up;
 
-   in_range(HYPRE_Int low_, HYPRE_Int up_) { low = low_; up = up_; }
+   in_range(T low_, T up_) { low = low_; up = up_; }
 
-   __host__ __device__ bool operator()(const HYPRE_Int &x)
+   __host__ __device__ bool operator()(const T &x)
    {
       return (x >= low && x <= up);
    }
 };
 
-struct out_of_range
+template<typename T>
+struct out_of_range : public thrust::unary_function<T,bool>
 {
-   HYPRE_Int low, up;
+   T low, up;
 
-   out_of_range(HYPRE_Int low_, HYPRE_Int up_) { low = low_; up = up_; }
+   out_of_range(T low_, T up_) { low = low_; up = up_; }
 
-   __host__ __device__ bool operator()(const HYPRE_Int &x)
+   __host__ __device__ bool operator()(const T &x)
    {
       return (x < low || x > up);
    }
 };
 
-struct less_than
+template<typename T>
+struct less_than : public thrust::unary_function<T,bool>
 {
-   HYPRE_Int val;
+   T val;
 
-   less_than(HYPRE_Int val_) { val = val_; }
+   less_than(T val_) { val = val_; }
 
-   __host__ __device__ bool operator()(const HYPRE_Int &x)
+   __host__ __device__ bool operator()(const T &x)
    {
       return (x < val);
    }
 };
 
+#endif // #if defined(HYPRE_USING_CUDA)
+
+#ifdef __cplusplus
+}
+#endif
 
 #if defined(HYPRE_USING_CUDA)
 /* for struct solvers */

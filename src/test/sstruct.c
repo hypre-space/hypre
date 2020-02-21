@@ -4900,7 +4900,9 @@ main( hypre_int argc,
       hypre_ParVectorCopy(par_x2, par_x);
 #endif
 
+#if defined(HYPRE_USING_NVTX)
       hypre_NvtxPushRange("HybridSolve");
+#endif
       //cudaProfilerStart();
 
       HYPRE_ParCSRHybridSetup(par_solver,par_A,par_b,par_x);
@@ -4924,17 +4926,20 @@ main( hypre_int argc,
       HYPRE_ParCSRHybridGetFinalRelativeResidualNorm(par_solver, &final_res_norm);
 
       /*
-      HYPRE_Real setup_time;
-      HYPRE_ParCSRHybridGetSetupTime(par_solver, &setup_time);
+      HYPRE_Real time[4];
+      HYPRE_ParCSRHybridGetSetupSolveTime(par_solver, time);
       if (myid == 0)
       {
-         printf("SetupTime %f\n", setup_time);
+         printf("ParCSRHybrid: Setup-Time1 %f, Solve-Time1 %f, Setup-Time2 %f, Solve-Time2 %f\n",
+                time[0], time[1], time[2], time[3]);
       }
       */
 
       HYPRE_ParCSRHybridDestroy(par_solver);
 
+#if defined(HYPRE_USING_NVTX)
       hypre_NvtxPopRange();
+#endif
       //cudaProfilerStop();
 
 #if SECOND_TIME

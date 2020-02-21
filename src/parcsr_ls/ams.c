@@ -35,14 +35,6 @@ struct l1_norm_op1 : public thrust::binary_function<HYPRE_Complex, HYPRE_Complex
    }
 };
 
-struct l1_norm_op2 : public thrust::unary_function<HYPRE_Complex, HYPRE_Complex>
-{
-   __host__ __device__
-   HYPRE_Complex operator()(const HYPRE_Complex &/*x*/) const
-   {
-      return 1.0;
-   }
-};
 #endif
 
 HYPRE_Int hypre_ParCSRRelax(/* matrix to relax with */
@@ -54,7 +46,7 @@ HYPRE_Int hypre_ParCSRRelax(/* matrix to relax with */
                             /* number of sweeps */
                             HYPRE_Int relax_times,
                             /* l1 norms of the rows of A */
-                            HYPRE_Real *l1_norms,
+                            hypre_Vector *l1_norms_vec,
                             /* damping coefficient (usually <= 1) */
                             HYPRE_Real relax_weight,
                             /* SOR parameter (usually in (0,2) */
@@ -73,24 +65,27 @@ HYPRE_Int hypre_ParCSRRelax(/* matrix to relax with */
 {
    HYPRE_Int sweep;
 
-   HYPRE_Real *u_data = hypre_VectorData(hypre_ParVectorLocalVector(u));
-   HYPRE_Real *f_data = hypre_VectorData(hypre_ParVectorLocalVector(f));
-   HYPRE_Real *v_data = hypre_VectorData(hypre_ParVectorLocalVector(v));
+   HYPRE_Complex *u_data = hypre_VectorData(hypre_ParVectorLocalVector(u));
+   HYPRE_Complex *f_data = hypre_VectorData(hypre_ParVectorLocalVector(f));
+   HYPRE_Complex *v_data = hypre_VectorData(hypre_ParVectorLocalVector(v));
+   HYPRE_Complex *l1_norms = hypre_VectorData(l1_norms_vec);
 
    for (sweep = 0; sweep < relax_times; sweep++)
    {
       if (relax_type == 1) /* l1-scaled Jacobi */
       {
          HYPRE_Int num_rows = hypre_ParCSRMatrixNumRows(A);
-#ifdef HYPRE_USING_UNIFIED_MEMORY
-         if (hypre_handle->no_cuda_um == 0 && sweep == 0)
+         /*
+         if (sweep == 0)
          {
-            /* prefetch l1 norms */
-            hypre_TMemcpy(l1_norms, l1_norms, HYPRE_Real, num_rows,
-                          HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_SHARED);
+            hypre_SeqVectorPrefetch(l1_norms_vec, HYPRE_MEMORY_DEVICE);
          }
+         */
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+         HYPRE_Int sync_stream = hypre_HandleCudaComputeStreamSync(hypre_handle);
+         hypre_HandleCudaComputeStreamSync(hypre_handle) = 0;
 #endif
-         hypre_HandleCudaComputeStreamSyncPush(hypre_handle, 0);
 
          hypre_ParVectorCopy(f, v);
 
@@ -110,9 +105,10 @@ HYPRE_Int hypre_ParCSRRelax(/* matrix to relax with */
          }
 #endif /* #if defined(HYPRE_USING_CUDA) */
 
-         hypre_HandleCudaComputeStreamSyncPop(hypre_handle);
-
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+         hypre_HandleCudaComputeStreamSync(hypre_handle) = sync_stream;
          hypre_SyncCudaComputeStream(hypre_handle);
+#endif
       }
       else if (relax_type == 2 || relax_type == 4) /* offd-l1-scaled block GS */
       {
@@ -359,8 +355,10 @@ HYPRE_Int hypre_ParCSRRelax(/* matrix to relax with */
 
          }
          else
+         {
             hypre_BoomerAMGRelax(A, f, NULL, hypre_abs(relax_type), 0, relax_weight,
-                                 omega, l1_norms, u, v, z);
+                                 omega, l1_norms_vec, u, v, z);
+         }
       }
    }
    return hypre_error_flag;
@@ -579,55 +577,33 @@ HYPRE_Int hypre_ParCSRMatrixFixZeroRows(hypre_ParCSRMatrix *A)
 HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
                                      HYPRE_Int            option,
                                      HYPRE_Int           *cf_marker,
-                                     HYPRE_Real         **l1_norm_ptr)
+                                     hypre_Vector        *l1_norm_vec)
 {
    HYPRE_Int i, j;
    HYPRE_Int num_rows = hypre_ParCSRMatrixNumRows(A);
-
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
-
-   /*
-   HYPRE_Int *A_diag_I = hypre_CSRMatrixI(A_diag);
-   HYPRE_Int *A_diag_J = hypre_CSRMatrixJ(A_diag);
-   HYPRE_Real *A_diag_data = hypre_CSRMatrixData(A_diag);
-   */
    hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
-   /*
-   HYPRE_Int *A_offd_I = hypre_CSRMatrixI(A_offd);
-   HYPRE_Int *A_offd_J = hypre_CSRMatrixJ(A_offd);
-   HYPRE_Real *A_offd_data = hypre_CSRMatrixData(A_offd);
-   */
    HYPRE_Int num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
 
-   HYPRE_Int exec = hypre_GetExecPolicy1( HYPRE_MEMORY_SHARED );
+   HYPRE_Int memory_location_l1 = hypre_VectorMemoryLocation(l1_norm_vec);
+   HYPRE_Real *l1_norm = hypre_VectorData(l1_norm_vec);
 
+   HYPRE_Int exec = hypre_GetExecPolicy1( memory_location_l1 );
    hypre_assert(exec != HYPRE_EXEC_UNSET);
-
-   HYPRE_Int memory_location_l1 = HYPRE_MEMORY_SHARED;
-   HYPRE_Int memory_location_td;
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   if (hypre_handle->no_cuda_um == 1)
-   {
-      memory_location_l1 = HYPRE_MEMORY_DEVICE;
-   }
-#endif
 
    if (exec == HYPRE_EXEC_HOST)
    {
-      memory_location_td = HYPRE_MEMORY_HOST;
-   }
-   else
-   {
-      memory_location_td = HYPRE_MEMORY_DEVICE;
+      HYPRE_Int num_threads = hypre_NumThreads();
+      if (num_threads > 1)
+      {
+         return hypre_ParCSRComputeL1NormsThreads(A, option, num_threads, cf_marker, l1_norm_vec);
+      }
    }
 
-   /* HYPRE_Real diag; */
-   HYPRE_Real *l1_norm = hypre_TAlloc(HYPRE_Real, num_rows, memory_location_l1);
+   HYPRE_Int memory_location_tmp = exec == HYPRE_EXEC_HOST ? HYPRE_MEMORY_HOST : HYPRE_MEMORY_DEVICE;
    HYPRE_Real *diag_tmp = NULL;
 
    HYPRE_Int *cf_marker_offd = NULL;
-   /* HYPRE_Int cf_diag; */
 
    /* collect the cf marker data from other procs */
    if (cf_marker != NULL)
@@ -701,8 +677,8 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
       /* Set the abs(diag) element */
       hypre_CSRMatrixExtractDiagonal(A_diag, l1_norm, 1);
 
-      diag_tmp = hypre_TAlloc(HYPRE_Complex, num_rows, memory_location_td);
-      hypre_TMemcpy(diag_tmp, l1_norm, HYPRE_Complex, num_rows, memory_location_td, memory_location_l1);
+      diag_tmp = hypre_TAlloc(HYPRE_Real, num_rows, memory_location_tmp);
+      hypre_TMemcpy(diag_tmp, l1_norm, HYPRE_Real, num_rows, memory_location_tmp, memory_location_l1);
 
       /* Add the scaled l1 norm of the offd part */
       if (num_cols_offd)
@@ -737,8 +713,7 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
       {
 #if defined(HYPRE_USING_CUDA)
          thrust::identity<HYPRE_Complex> identity;
-         HYPRE_THRUST_CALL( transform_if, l1_norm, l1_norm + num_rows, l1_norm, l1_norm_op2(),
-                            thrust::not1(identity) );
+         HYPRE_THRUST_CALL( replace_if, l1_norm, l1_norm + num_rows, thrust::not1(identity), 1.0 );
 #endif
       }
       else
@@ -752,15 +727,13 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
          }
       }
 
-      *l1_norm_ptr = l1_norm;
-
       return hypre_error_flag;
    }
 
    /* Handle negative definite matrices */
    if (!diag_tmp)
    {
-      diag_tmp = hypre_TAlloc(HYPRE_Complex, num_rows, memory_location_td);
+      diag_tmp = hypre_TAlloc(HYPRE_Real, num_rows, memory_location_tmp);
    }
 
    /* Set the diag element */
@@ -769,12 +742,10 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
    if (exec == HYPRE_EXEC_DEVICE)
    {
 #if defined(HYPRE_USING_CUDA)
-      thrust::negate<HYPRE_Complex> negate;
-      thrust::identity<HYPRE_Complex> identity;
-      HYPRE_THRUST_CALL( transform_if, l1_norm, l1_norm + num_rows, diag_tmp, l1_norm, negate,
-                         is_negative<HYPRE_Complex>() );
-
-      bool any_zero = HYPRE_THRUST_CALL( any_of, l1_norm, l1_norm + num_rows, thrust::not1(identity) );
+      HYPRE_THRUST_CALL( transform_if, l1_norm, l1_norm + num_rows, diag_tmp, l1_norm, thrust::negate<HYPRE_Real>(),
+                         is_negative<HYPRE_Real>() );
+      //bool any_zero = HYPRE_THRUST_CALL( any_of, l1_norm, l1_norm + num_rows, thrust::not1(thrust::identity<HYPRE_Complex>()) );
+      bool any_zero = 0.0 == HYPRE_THRUST_CALL( reduce, l1_norm, l1_norm + num_rows, 1.0, thrust::minimum<HYPRE_Real>() );
       if ( any_zero )
       {
          hypre_error_in_arg(1);
@@ -802,11 +773,8 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
       }
    }
 
-   //for (i = 0; i < num_rows; i++) l1_norm[i]=1.0/l1_norm[i];
    hypre_TFree(cf_marker_offd, HYPRE_MEMORY_HOST);
-   hypre_TFree(diag_tmp, memory_location_td);
-
-   *l1_norm_ptr = l1_norm;
+   hypre_TFree(diag_tmp, memory_location_tmp);
 
    return hypre_error_flag;
 }
@@ -1011,13 +979,14 @@ HYPRE_Int hypre_AMSDestroy(void *solver)
    if (ams_data -> B_G0)
       HYPRE_BoomerAMGDestroy(ams_data -> B_G0);
 
-   if (ams_data -> A_l1_norms)
-      hypre_TFree(ams_data -> A_l1_norms, HYPRE_MEMORY_SHARED);
+   hypre_SeqVectorDestroy(ams_data -> A_l1_norms);
 
    /* G, x, y ,z, Gx, Gy and Gz are not destroyed */
 
    if (ams_data)
+   {
       hypre_TFree(ams_data, HYPRE_MEMORY_HOST);
+   }
 
    return hypre_error_flag;
 }
@@ -2208,8 +2177,11 @@ HYPRE_Int hypre_AMSSetup(void *solver,
 
    /* Compute the l1 norm of the rows of A */
    if (ams_data -> A_relax_type >= 1 && ams_data -> A_relax_type <= 4)
-      hypre_ParCSRComputeL1Norms(ams_data -> A, ams_data -> A_relax_type,
-                                 NULL, &ams_data -> A_l1_norms);
+   {
+      ams_data -> A_l1_norms = hypre_SeqVectorCreate(hypre_ParCSRMatrixNumRows(ams_data -> A));
+      hypre_SeqVectorInitialize_v2(ams_data -> A_l1_norms, HYPRE_MEMORY_SHARED);
+      hypre_ParCSRComputeL1Norms(ams_data -> A, ams_data -> A_relax_type, NULL, ams_data -> A_l1_norms);
+   }
 
    /* Chebyshev? */
    if (ams_data -> A_relax_type == 16)
@@ -2920,7 +2892,7 @@ HYPRE_Int hypre_ParCSRSubspacePrec(/* fine space matrix */
                                    /* relaxation parameters */
                                    HYPRE_Int A0_relax_type,
                                    HYPRE_Int A0_relax_times,
-                                   HYPRE_Real *A0_l1_norms,
+                                   hypre_Vector *A0_l1_norms,
                                    HYPRE_Real A0_relax_weight,
                                    HYPRE_Real A0_omega,
                                    HYPRE_Real A0_max_eig_est,
@@ -3387,6 +3359,7 @@ HYPRE_Int hypre_AMSFEIDestroy(void *solver)
 
    return hypre_error_flag;
 }
+
 /*--------------------------------------------------------------------------
  * hypre_ParCSRComputeL1Norms Threads
  *
@@ -3408,7 +3381,7 @@ HYPRE_Int hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
                                             HYPRE_Int option,
                                             HYPRE_Int num_threads,
                                             HYPRE_Int *cf_marker,
-                                            HYPRE_Real **l1_norm_ptr)
+                                            hypre_Vector *l1_norm_vec)
 {
    HYPRE_Int i, j, k;
    HYPRE_Int num_rows = hypre_ParCSRMatrixNumRows(A);
@@ -3425,7 +3398,7 @@ HYPRE_Int hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
    HYPRE_Int num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
 
    HYPRE_Real diag;
-   HYPRE_Real *l1_norm = hypre_CTAlloc(HYPRE_Real,  num_rows, HYPRE_MEMORY_SHARED);
+   HYPRE_Real *l1_norm = hypre_VectorData(l1_norm_vec);
    HYPRE_Int ii, ns, ne, rest, size;
 
    HYPRE_Int *cf_marker_offd = NULL;
@@ -3649,11 +3622,8 @@ HYPRE_Int hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
 
    hypre_TFree(cf_marker_offd, HYPRE_MEMORY_HOST);
 
-   *l1_norm_ptr = l1_norm;
-
    return hypre_error_flag;
 }
-
 
 /*--------------------------------------------------------------------------
  * hypre_ParCSRRelaxThreads
@@ -3664,7 +3634,7 @@ HYPRE_Int  hypre_ParCSRRelaxThreads(hypre_ParCSRMatrix *A,
                                     hypre_ParVector    *f,
                                     HYPRE_Int           relax_type,
                                     HYPRE_Int           relax_times,
-                                    HYPRE_Real         *l1_norms,
+                                    hypre_Vector       *l1_norms_vec,
                                     HYPRE_Real          relax_weight,
                                     HYPRE_Real          omega,
                                     hypre_ParVector    *u,
@@ -3708,6 +3678,8 @@ HYPRE_Int  hypre_ParCSRRelaxThreads(hypre_ParCSRMatrix *A,
 
    HYPRE_Real       zero = 0.0;
    HYPRE_Real       res, res2;
+
+   HYPRE_Complex    *l1_norms = hypre_VectorData(l1_norms_vec);
 
    hypre_MPI_Comm_size(comm,&num_procs);
    hypre_MPI_Comm_rank(comm,&my_id);

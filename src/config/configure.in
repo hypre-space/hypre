@@ -149,6 +149,7 @@ hypre_using_nvtx=no
 hypre_using_cusparse=yes
 hypre_using_cublas=no
 hypre_using_curand=yes
+hypre_using_cub=no
 
 hypre_using_caliper=no
 hypre_user_gave_caliper_lib=no
@@ -405,6 +406,17 @@ AS_HELP_STRING([--enable-cusparse],
     *)   hypre_using_cusparse=yes ;;
  esac],
 [hypre_using_cusparse=yes]
+)
+
+AC_ARG_ENABLE(cub,
+AS_HELP_STRING([--enable-cub],
+               [Use CUB Allocator (default is NO).]),
+[case "${enableval}" in
+    yes) hypre_using_cub=yes ;;
+    no)  hypre_using_cub=no ;;
+    *)   hypre_using_cub=no ;;
+ esac],
+[hypre_using_cub=no]
 )
 
 AC_ARG_ENABLE(cublas,
@@ -1202,9 +1214,9 @@ then
 
       if test "$hypre_using_openmp" = "yes"
       then
-         AC_CHECK_PROGS(CC, [mpxlc mpixlc_r mpixlc mpiicc mpigcc mpicc mpipgcc])
+         AC_CHECK_PROGS(CC, [mpxlc mpixlc_r mpixlc mpiicc mpigcc mpicc mpipgcc mpipgicc])
       else
-         AC_CHECK_PROGS(CC, [mpxlc mpixlc mpiicc mpigcc mpicc mpipgcc])
+         AC_CHECK_PROGS(CC, [mpxlc mpixlc mpiicc mpigcc mpicc mpipgcc mpipgicc])
       fi
    fi
 
@@ -1225,9 +1237,9 @@ then
 
       if test "$hypre_using_openmp" = "yes"
       then
-         AC_CHECK_PROGS(CXX, [xlC_r xlc_r xlC xlc icpc icc g++ gcc pgCC pgcc CC cc KCC kcc])
+         AC_CHECK_PROGS(CXX, [xlC_r xlc_r xlC xlc icpc icc g++ gcc pgCC pgcc pgc++ CC cc KCC kcc])
       else
-         AC_CHECK_PROGS(CXX, [xlC xlc icpc icc g++ gcc pgCC pgcc CC cc KCC kcc])
+         AC_CHECK_PROGS(CXX, [xlC xlc icpc icc g++ gcc pgCC pgcc pgc++ CC cc KCC kcc])
       fi
    else
       if test "$hypre_using_device_openmp" = "yes"
@@ -1237,9 +1249,9 @@ then
 
       if test "$hypre_using_openmp" = "yes"
       then
-         AC_CHECK_PROGS(CXX, [mpxlC mpixlcxx_r mpixlcxx mpixlC mpiicpc mpig++ mpic++ mpicxx mpiCC mpipgCC])
+         AC_CHECK_PROGS(CXX, [mpxlC mpixlcxx_r mpixlcxx mpixlC mpiicpc mpig++ mpic++ mpicxx mpiCC mpipgCC mpipgic++])
       else
-         AC_CHECK_PROGS(CXX, [mpxlC mpixlcxx mpixlC mpiicpc mpig++ mpic++ mpicxx mpiCC mpipgCC])
+         AC_CHECK_PROGS(CXX, [mpxlC mpixlcxx mpixlC mpiicpc mpig++ mpic++ mpicxx mpiCC mpipgCC mpipgic++])
       fi
    fi
 
@@ -1255,16 +1267,16 @@ then
    then
       if test "$hypre_using_openmp" = "yes"
       then
-         AC_CHECK_PROGS(FC, [xlf_r ifort gfortran g77 g95 pgf77 f77])
+         AC_CHECK_PROGS(FC, [xlf_r ifort gfortran g77 g95 pgf77 pgfortran f77])
       else
-         AC_CHECK_PROGS(FC, [xlf ifort gfortran g77 g95 pgf77 f77])
+         AC_CHECK_PROGS(FC, [xlf ifort gfortran g77 g95 pgf77 pgfortran  f77])
       fi
    else
       if test "$hypre_using_openmp" = "yes"
       then
-         AC_CHECK_PROGS(FC, [mpxlf mpixlf77_r mpiifort mpif77 mpipgf77])
+         AC_CHECK_PROGS(FC, [mpxlf mpixlf77_r mpiifort mpif77 mpipgf77 mpipgifort])
       else
-         AC_CHECK_PROGS(FC, [mpxlf mpixlf77 mpiifort mpif77 mpipgf77])
+         AC_CHECK_PROGS(FC, [mpxlf mpixlf77 mpiifort mpif77 mpipgf77 mpipgifort])
       fi
    fi
 
@@ -1707,6 +1719,11 @@ then
       AC_DEFINE(HYPRE_USING_CUSPARSE, 1, [CUSPARSE being used])
    fi
 
+   if test "$hypre_using_cub" = "yes"
+   then
+      AC_DEFINE(HYPRE_USING_CUB_ALLOCATOR, 1, [CUB allocator being used])
+   fi
+
    if test "$hypre_using_cublas" = "yes"
    then
       AC_DEFINE(HYPRE_USING_CUBLAS, 1, [CUBLAS being used])
@@ -1733,12 +1750,20 @@ then
 
    HYPRE_CUDA_GENCODE="-gencode arch=compute_${HYPRE_CUDA_SM},\"code=sm_${HYPRE_CUDA_SM}\""
 
-   CUFLAGS+="-O2 -ccbin=$NVCCBIN ${HYPRE_CUDA_GENCODE} -expt-extended-lambda -dc -std=c++11 -Xcompiler -Wno-deprecated-register --x cu"
+   CUFLAGS+="-lineinfo -ccbin=$NVCCBIN ${HYPRE_CUDA_GENCODE} -expt-extended-lambda -dc -std=c++11 --x cu"
    if test "$hypre_using_debug" = "yes"
    then
-      CUFLAGS="-g ${CUFLAGS}"
+      CUFLAGS="-g -O0 ${CUFLAGS}"
+   else
+      CUFLAGS="-O2 ${CUFLAGS}"
+   fi
+
+   if [test "$CXX" = "mpixlC" || test "$CXX" = "xlC_r" || test "$CXX" = "xlC"]
+   then
+     CXXFLAGS+=" -Wno-deprecated-register"
    fi
    CXXFLAGS="${CUFLAGS} -Xcompiler \"${CXXFLAGS}\""
+
    CFLAGS=${CXXFLAGS}
    LDFLAGS="-ccbin=$NVCCBIN ${HYPRE_CUDA_GENCODE} -Xcompiler \"${LDFLAGS}\""
    HYPRE_CUDA_INCL="-I${HYPRE_CUDA_PATH}/include"

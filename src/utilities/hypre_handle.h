@@ -18,22 +18,18 @@
 extern "C++" {
 #endif
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-#include <vector>
-#endif
-
 typedef struct
 {
    HYPRE_Int hypre_error;
+   HYPRE_Int memory_location;
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_Int default_exec_policy;
    HYPRE_Int cuda_device;
    /* by default, hypre puts GPU computations in this stream
     * Do not be confused with the default (null) CUDA stream */
    HYPRE_Int cuda_compute_stream_num;
-   HYPRE_Int cuda_prefetch_stream_num;
-   HYPRE_Int cuda_compute_stream_sync_default;
-   std::vector<HYPRE_Int> cuda_compute_stream_sync;
+   /* if synchronize the stream after computations */
+   HYPRE_Int cuda_compute_stream_sync;
    curandGenerator_t curand_gen;
    cublasHandle_t cublas_handle;
    cusparseHandle_t cusparse_handle;
@@ -48,8 +44,14 @@ typedef struct
    HYPRE_Int spgemm_rownnz_estimate_nsamples;
    float     spgemm_rownnz_estimate_mult_factor;
    char      spgemm_hash_type;
-   /* RL: temporary TODO */
-   HYPRE_Int no_cuda_um;
+#ifdef HYPRE_USING_CUB_ALLOCATOR
+   hypre_uint cub_bin_growth;
+   hypre_uint cub_min_bin;
+   hypre_uint cub_max_bin;
+   size_t     cub_max_cached_bytes;
+   hypre::cub::CachingDeviceAllocator *cub_dev_allocator;
+   hypre::cub::CachingDeviceAllocator *cub_um_allocator;
+#endif
 #endif
 } hypre_Handle;
 
@@ -58,8 +60,10 @@ extern hypre_Handle *hypre_handle;
 hypre_Handle* hypre_HandleCreate();
 HYPRE_Int hypre_HandleDestroy(hypre_Handle *hypre_handle_);
 
-/* accessor inline function to hypre_device_csr_handle */
+/* accessor macros to hypre_Handle */
+#define hypre_HandleMemoryLocation(hypre_handle) ((hypre_handle) -> memory_location)
 
+/* accessor inline functions to hypre_Handle */
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 static inline HYPRE_Int &
 hypre_HandleDefaultExecPolicy(hypre_Handle *hypre_handle_)
@@ -80,18 +84,6 @@ hypre_HandleCudaComputeStreamNum(hypre_Handle *hypre_handle_)
 }
 
 static inline HYPRE_Int &
-hypre_HandleCudaPrefetchStreamNum(hypre_Handle *hypre_handle_)
-{
-   return hypre_handle_->cuda_prefetch_stream_num;
-}
-
-static inline HYPRE_Int &
-hypre_HandleCudaComputeStreamSyncDefault(hypre_Handle *hypre_handle_)
-{
-   return hypre_handle_->cuda_compute_stream_sync_default;
-}
-
-static inline std::vector<HYPRE_Int> &
 hypre_HandleCudaComputeStreamSync(hypre_Handle *hypre_handle_)
 {
    return hypre_handle_->cuda_compute_stream_sync;
@@ -131,13 +123,6 @@ hypre_HandleCudaComputeStream(hypre_Handle *hypre_handle_)
 {
    return hypre_HandleCudaStream(hypre_handle_,
                                  hypre_HandleCudaComputeStreamNum(hypre_handle_));
-}
-
-static inline cudaStream_t
-hypre_HandleCudaPrefetchStream(hypre_Handle *hypre_handle_)
-{
-   return hypre_HandleCudaStream(hypre_handle_,
-                                 hypre_HandleCudaPrefetchStreamNum(hypre_handle_));
 }
 
 static inline curandGenerator_t
@@ -218,33 +203,52 @@ hypre_HandleSpgemmUseCusparse(hypre_Handle *hypre_handle_)
    return hypre_handle_->spgemm_use_cusparse;
 }
 
+#ifdef HYPRE_USING_CUB_ALLOCATOR
+static inline hypre::cub::CachingDeviceAllocator*
+hypre_HandleCubCachingDeviceAllocator(hypre_Handle *hypre_handle_)
+{
+   if (hypre_handle_->cub_dev_allocator)
+   {
+      return hypre_handle_->cub_dev_allocator;
+   }
+
+   hypre_handle_->cub_dev_allocator =
+      new hypre::cub::CachingDeviceAllocator(hypre_handle_->cub_bin_growth,
+                                      hypre_handle_->cub_min_bin,
+                                      hypre_handle_->cub_max_bin,
+                                      hypre_handle_->cub_max_cached_bytes,
+                                      false, false, false);
+
+   return hypre_handle_->cub_dev_allocator;
+}
+
+static inline hypre::cub::CachingDeviceAllocator*
+hypre_HandleCubCachingManagedAllocator(hypre_Handle *hypre_handle_)
+{
+   if (hypre_handle_->cub_um_allocator)
+   {
+      return hypre_handle_->cub_um_allocator;
+   }
+
+   hypre_handle_->cub_um_allocator =
+      new hypre::cub::CachingDeviceAllocator(hypre_handle_->cub_bin_growth,
+                                      hypre_handle_->cub_min_bin,
+                                      hypre_handle_->cub_max_bin,
+                                      hypre_handle_->cub_max_cached_bytes,
+                                      false, false, true);
+
+   return hypre_handle_->cub_um_allocator;
+}
+#endif
+
 #endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP) */
 
-static inline void
-hypre_HandleCudaComputeStreamSyncPush(hypre_Handle *hypre_handle_, HYPRE_Int sync)
-{
-#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_UNIFIED_MEMORY)
-   hypre_HandleCudaComputeStreamSync(hypre_handle_).push_back(sync);
-#endif
-}
-
-static inline void
-hypre_HandleCudaComputeStreamSyncPop(hypre_Handle *hypre_handle_)
-{
-#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_UNIFIED_MEMORY)
-   hypre_HandleCudaComputeStreamSync(hypre_handle_).pop_back();
-#endif
-}
-
-/* synchronize the default stream */
+/* synchronize the Hypre compute stream */
 static inline HYPRE_Int
 hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle_)
 {
-#if defined(HYPRE_USING_UNIFIED_MEMORY)
 #if defined(HYPRE_USING_CUDA)
-   hypre_assert(!hypre_HandleCudaComputeStreamSync(hypre_handle_).empty());
-
-   if ( hypre_HandleCudaComputeStreamSync(hypre_handle_).back() )
+   if ( hypre_HandleCudaComputeStreamSync(hypre_handle_) )
    {
       HYPRE_CUDA_CALL( cudaStreamSynchronize(hypre_HandleCudaComputeStream(hypre_handle_)) );
    }
@@ -252,7 +256,6 @@ hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle_)
 #if defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
 #endif
-#endif /* #if defined(HYPRE_USING_UNIFIED_MEMORY) */
    return hypre_error_flag;
 }
 

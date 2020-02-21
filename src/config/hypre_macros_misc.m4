@@ -8,7 +8,7 @@ dnl * AC_HYPRE_CHECK_MPI
 dnl *
 dnl try to determine what the MPI flags should be
 dnl AC_HYPRE_CHECK_MPI([ACTION-IF-FOUND[, ACTION-IF-NOT-FOUND]])
-dnl ACTION-IF-FOUND is a list of shell commands to run 
+dnl ACTION-IF-FOUND is a list of shell commands to run
 dnl   if an MPI library is found, and
 dnl ACTION-IF-NOT-FOUND is a list of commands to run it
 dnl   if it is not found. If ACTION-IF-FOUND is not specified,
@@ -113,7 +113,7 @@ then
           LDFLAGS="$LDFLAGS -qopenmp"
         fi
         ;;
-      pgcc|mpipgcc)
+      pgcc|mpipgcc|mpipgicc)
         CFLAGS="-fast"
         if test "$hypre_using_openmp" = "yes" ; then
           CFLAGS="$CFLAGS -mp"
@@ -151,7 +151,7 @@ then
           CXXFLAGS="$CXXFLAGS -qopenmp"
         fi
         ;;
-      pgCC|mpipgCC)
+      pgCC|mpipgCC|pgc++|mpipgic++)
         CXXFLAGS="-fast"
         if test "$hypre_using_openmp" = "yes" ; then
           CXXFLAGS="$CXXFLAGS -mp"
@@ -187,7 +187,7 @@ then
           FFLAGS="$FFLAGS -qopenmp"
         fi
         ;;
-      pgf77|mpipgf77)
+      pgf77|mpipgf77|pgfortran|mpipgifort)
         FFLAGS="-fast"
         if test "$hypre_using_openmp" = "yes" ; then
           FFLAGS="$FFLAGS -mp"
@@ -233,7 +233,7 @@ then
           LDFLAGS="$LDFLAGS -qopenmp"
         fi
         ;;
-      pgcc|mpipgcc)
+      pgcc|mpipgcc|mpipgicc)
         CFLAGS="-g"
         if test "$hypre_using_openmp" = "yes" ; then
           CFLAGS="$CFLAGS -mp"
@@ -271,7 +271,7 @@ then
           CXXFLAGS="$CXXFLAGS -qopenmp"
         fi
         ;;
-      pgCC|mpipgCC)
+      pgCC|mpipgCC|pgc++|mpipgic++)
         CXXFLAGS="-g"
         if test "$hypre_using_openmp" = "yes" ; then
           CXXFLAGS="$CXXFLAGS -mp"
@@ -307,7 +307,7 @@ then
           FFLAGS="$FFLAGS -qopenmp"
         fi
         ;;
-      pgf77|mpipgf77)
+      pgf77|mpipgf77|pgfortran|mpipgifort)
         FFLAGS="-g"
         if test "$hypre_using_openmp" = "yes" ; then
           FFLAGS="$FFLAGS -mp"
@@ -340,7 +340,7 @@ dnl * Find the hostname and assign it to an exported macro $HOSTNAME.
 dnl * Guesses a one-word name for the current architecture, unless ARCH
 dnl * has been preset.  This is an alternative to the built-in macro
 dnl * AC_CANONICAL_HOST, which gives a three-word name.  Uses the utility
-dnl * 'tarch', which is a Bourne shell script that should be in the same 
+dnl * 'tarch', which is a Bourne shell script that should be in the same
 dnl * directory as the configure script.  If tarch is not present or if it
 dnl * fails, ARCH is set to the value, if any, of shell variable HOSTTYPE,
 dnl * otherwise ARCH is set to "unknown".
@@ -356,7 +356,7 @@ AC_DEFUN([AC_HYPRE_SET_ARCH],
       HOSTNAME="`$hypre_hostname`"
 
       dnl * if $HOSTNAME is still empty, give it the value "unknown".
-      if test -z "$HOSTNAME" 
+      if test -z "$HOSTNAME"
       then
          HOSTNAME=unknown
          AC_MSG_WARN(hostname is unknown)
@@ -433,7 +433,7 @@ dnl *    define type of architecture
          if test -r /etc/home.config
          then
             systemtype=`grep ^SYS_TYPE /etc/home.config | cut -d" " -f2`
-            case $systemtype in 
+            case $systemtype in
                chaos*)
                   AC_DEFINE(HYPRE_LINUX_CHAOS)
                   ;;
@@ -446,7 +446,7 @@ dnl *    define type of architecture
          fi
          ;;
    esac
-     
+
 dnl *
 dnl *    return architecture and host name values
    AC_SUBST(HYPRE_ARCH)

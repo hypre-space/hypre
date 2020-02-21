@@ -244,7 +244,9 @@ hypre_BoomerAMGCreate()
     * Create the hypre_ParAMGData structure and return
     *-----------------------------------------------------------------------*/
 
-   amg_data = hypre_CTAlloc(hypre_ParAMGData,  1, HYPRE_MEMORY_HOST);
+   amg_data = hypre_CTAlloc(hypre_ParAMGData, 1, HYPRE_MEMORY_HOST);
+
+   hypre_ParAMGDataMemoryLocation(amg_data) = HYPRE_MEMORY_UNSET;
 
    hypre_ParAMGDataMaxLevels(amg_data) =  max_levels;
    hypre_ParAMGDataUserCoarseRelaxType(amg_data) = 9;
@@ -544,7 +546,6 @@ hypre_BoomerAMGDestroy( void *data )
       if (hypre_ParAMGDataPArray(amg_data)[i-1])
          hypre_ParCSRMatrixDestroy(hypre_ParAMGDataPArray(amg_data)[i-1]);
 
-      /* RL */
       if (hypre_ParAMGDataRestriction(amg_data))
       {
          if (hypre_ParAMGDataRArray(amg_data)[i-1])
@@ -593,19 +594,9 @@ hypre_BoomerAMGDestroy( void *data )
 
    if (hypre_ParAMGDataL1Norms(amg_data))
    {
-      HYPRE_Int memory_location_l1 = HYPRE_MEMORY_SHARED;
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-      if (hypre_handle->no_cuda_um == 1)
-      {
-         memory_location_l1 = HYPRE_MEMORY_DEVICE;
-      }
-#endif
       for (i = 0; i < num_levels; i++)
       {
-         if (hypre_ParAMGDataL1Norms(amg_data)[i])
-         {
-            hypre_TFree(hypre_ParAMGDataL1Norms(amg_data)[i], memory_location_l1);
-         }
+         hypre_SeqVectorDestroy(hypre_ParAMGDataL1Norms(amg_data)[i]);
       }
       hypre_TFree(hypre_ParAMGDataL1Norms(amg_data), HYPRE_MEMORY_HOST);
    }

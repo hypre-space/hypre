@@ -37,7 +37,7 @@ typedef long long int HYPRE_BigInt;
 typedef long long int HYPRE_Int;
 #define HYPRE_MPI_BIG_INT MPI_LONG_LONG_INT
 #define HYPRE_MPI_INT MPI_LONG_LONG_INT
- 
+
 #elif defined(HYPRE_MIXEDINT)
 typedef long long int HYPRE_BigInt;
 typedef int HYPRE_Int;
@@ -163,6 +163,13 @@ HYPRE_VersionNumber( HYPRE_Int  *major_ptr,
 /*Checks whether the AP is on */
 HYPRE_Int HYPRE_AssumedPartitionCheck();
 
+typedef enum
+{
+   HYPRE_HOST = 0,
+   HYPRE_DEVICE,
+   HYPRE_UNIFIED,
+   HYPRE_MEMORY_LOCATION_COUNT
+} HYPRE_MemoryLocation;
 
 #ifdef __cplusplus
 }

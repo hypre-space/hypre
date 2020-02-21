@@ -54,26 +54,24 @@ hypre_ParVectorCreate( MPI_Comm      comm,
 
    hypre_ParVectorAssumedPartition(vector) = NULL;
 
-   hypre_ParVectorComm(vector) = comm;
-   hypre_ParVectorGlobalSize(vector) = global_size;
+   hypre_ParVectorComm(vector)         = comm;
+   hypre_ParVectorGlobalSize(vector)   = global_size;
 #ifdef HYPRE_NO_GLOBAL_PARTITION
-   hypre_ParVectorFirstIndex(vector) = partitioning[0];
-   hypre_ParVectorLastIndex(vector) = partitioning[1]-1;
+   hypre_ParVectorFirstIndex(vector)   = partitioning[0];
+   hypre_ParVectorLastIndex(vector)    = partitioning[1]-1;
    hypre_ParVectorPartitioning(vector) = partitioning;
-   hypre_ParVectorLocalVector(vector) =
-      hypre_SeqVectorCreate(partitioning[1]-partitioning[0]);
+   hypre_ParVectorLocalVector(vector)  = hypre_SeqVectorCreate(partitioning[1] - partitioning[0]);
 #else
-   hypre_ParVectorFirstIndex(vector) = partitioning[my_id];
-   hypre_ParVectorLastIndex(vector) = partitioning[my_id+1] -1;
+   hypre_ParVectorFirstIndex(vector)   = partitioning[my_id];
+   hypre_ParVectorLastIndex(vector)    = partitioning[my_id+1] - 1;
    hypre_ParVectorPartitioning(vector) = partitioning;
-   hypre_ParVectorLocalVector(vector) =
-      hypre_SeqVectorCreate(partitioning[my_id+1]-partitioning[my_id]);
+   hypre_ParVectorLocalVector(vector)  = hypre_SeqVectorCreate(partitioning[my_id+1] - partitioning[my_id]);
 #endif
 
    /* set defaults */
-   hypre_ParVectorOwnsData(vector) = 1;
+   hypre_ParVectorOwnsData(vector)         = 1;
    hypre_ParVectorOwnsPartitioning(vector) = 1;
-   hypre_ParVectorActualLocalSize(vector) = 0;
+   hypre_ParVectorActualLocalSize(vector)  = 0;
 
    return vector;
 }
@@ -238,7 +236,7 @@ hypre_ParVector
    fclose (fp);
    partitioning[num_procs] = global_size;
 #endif
-   par_vector = hypre_CTAlloc(hypre_ParVector,  1, HYPRE_MEMORY_HOST);
+   par_vector = hypre_CTAlloc(hypre_ParVector, 1, HYPRE_MEMORY_HOST);
 
    hypre_ParVectorComm(par_vector) = comm;
    hypre_ParVectorGlobalSize(par_vector) = global_size;
@@ -372,12 +370,47 @@ hypre_ParVectorCloneShallow( hypre_ParVector *x )
     * own _its_ data */
    hypre_ParVectorOwnsPartitioning(y) = 0;
    hypre_SeqVectorDestroy( hypre_ParVectorLocalVector(y) );
-   hypre_ParVectorLocalVector(y) = hypre_SeqVectorCloneShallow(
-      hypre_ParVectorLocalVector(x) );
+   hypre_ParVectorLocalVector(y) = hypre_SeqVectorCloneShallow(hypre_ParVectorLocalVector(x) );
    hypre_ParVectorFirstIndex(y) = hypre_ParVectorFirstIndex(x);
 
    return y;
 }
+
+hypre_ParVector *
+hypre_ParVectorCloneDeep_v2( hypre_ParVector *x, HYPRE_Int memory_location )
+{
+   hypre_ParVector *y =
+      hypre_ParVectorCreate(hypre_ParVectorComm(x), hypre_ParVectorGlobalSize(x),
+                            hypre_ParVectorPartitioning(x));
+
+   hypre_ParVectorOwnsData(y) = 1;
+   hypre_ParVectorOwnsPartitioning(y) = 0;
+   hypre_SeqVectorDestroy( hypre_ParVectorLocalVector(y) );
+   hypre_ParVectorLocalVector(y) = hypre_SeqVectorCloneDeep_v2( hypre_ParVectorLocalVector(x),
+                                                                memory_location );
+   hypre_ParVectorFirstIndex(y) = hypre_ParVectorFirstIndex(x); //RL: WHY HERE?
+
+   return y;
+}
+
+HYPRE_Int
+hypre_ParVectorMigrate(hypre_ParVector *x, HYPRE_Int memory_location)
+{
+   if ( hypre_GetActualMemLocation(memory_location) !=
+        hypre_GetActualMemLocation(hypre_ParVectorMemoryLocation(x)) )
+   {
+      hypre_Vector *x_local = hypre_SeqVectorCloneDeep_v2(hypre_ParVectorLocalVector(x), memory_location);
+      hypre_SeqVectorDestroy(hypre_ParVectorLocalVector(x));
+      hypre_ParVectorLocalVector(x) = x_local;
+   }
+   else
+   {
+      hypre_VectorMemoryLocation(hypre_ParVectorLocalVector(x)) = memory_location;
+   }
+
+   return hypre_error_flag;
+}
+
 
 /*--------------------------------------------------------------------------
  * hypre_ParVectorScale
@@ -464,8 +497,8 @@ hypre_ParVectorInnerProd( hypre_ParVector *x,
 
 HYPRE_Int
 hypre_ParVectorMassInnerProd( hypre_ParVector  *x,
-                              hypre_ParVector **y, 
-                              HYPRE_Int         k, 
+                              hypre_ParVector **y,
+                              HYPRE_Int         k,
                               HYPRE_Int         unroll,
                               HYPRE_Real       *result )
 {
