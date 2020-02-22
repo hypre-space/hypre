@@ -24,22 +24,24 @@ extern "C" {
  *--------------------------------------------------------------------------*/
 
 /**
- * @name SStruct Solvers
+ * @defgroup SStructSolvers SStruct Solvers
  *
  * These solvers use matrix/vector storage schemes that are taylored
  * to semi-structured grid problems.
  *
  * @memo Linear solvers for semi-structured grids
+ *
+ * @{
  **/
-/*@{*/
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 /**
  * @name SStruct Solvers
+ *
+ * @{
  **/
-/*@{*/
 
 struct hypre_SStructSolver_struct;
 /**
@@ -67,7 +69,7 @@ typedef HYPRE_Int (*HYPRE_PtrToModifyPCFcn)(HYPRE_Solver,
                                             HYPRE_Real);
 #endif
 
-/*@}*/
+/**@}*/
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -78,9 +80,10 @@ typedef HYPRE_Int (*HYPRE_PtrToModifyPCFcn)(HYPRE_Solver,
  * SysPFMG is a semicoarsening multigrid solver similar to PFMG, but for systems
  * of PDEs.  For periodic problems, users should try to set the grid size in
  * periodic dimensions to be as close to a power-of-two as possible (for more
- * details, see \Ref{Struct PFMG Solver}).
+ * details, see \ref Struct PFMG Solver).
+ *
+ * @{
  **/
-/*@{*/
 
 /**
  * Create a solver object.
@@ -102,7 +105,7 @@ HYPRE_Int
 HYPRE_SStructSysPFMGDestroy(HYPRE_SStructSolver solver);
 
 /**
- * Prepare to solve the system.  The coefficient data in {\tt b} and {\tt x} is
+ * Prepare to solve the system.  The coefficient data in \e b and \e x is
  * ignored here, but information about the layout of the data may be used.
  **/
 HYPRE_Int
@@ -152,7 +155,7 @@ HYPRE_SStructSysPFMGSetZeroGuess(HYPRE_SStructSolver solver);
 
 /**
  * (Optional) Use a nonzero initial guess.  This is the default behavior, but
- * this routine allows the user to switch back after using {\tt SetZeroGuess}.
+ * this routine allows the user to switch back after using \e SetZeroGuess.
  **/
 HYPRE_Int
 HYPRE_SStructSysPFMGSetNonZeroGuess(HYPRE_SStructSolver solver);
@@ -160,13 +163,11 @@ HYPRE_SStructSysPFMGSetNonZeroGuess(HYPRE_SStructSolver solver);
 /**
  * (Optional) Set relaxation type.
  *
- * Current relaxation methods set by {\tt relax\_type} are:
+ * Current relaxation methods set by \e relax\_type are:
  *
- * \begin{tabular}{l@{ -- }l}
- * 0 & Jacobi \\
- * 1 & Weighted Jacobi (default) \\
- * 2 & Red/Black Gauss-Seidel (symmetric: RB pre-relaxation, BR post-relaxation) \\
- * \end{tabular}
+ *    - 0 : Jacobi
+ *    - 1 : Weighted Jacobi (default)
+ *    - 2 : Red/Black Gauss-Seidel (symmetric: RB pre-relaxation, BR post-relaxation)
  **/
 HYPRE_Int
 HYPRE_SStructSysPFMGSetRelaxType(HYPRE_SStructSolver solver,
@@ -238,15 +239,16 @@ HYPRE_Int
 HYPRE_SStructSysPFMGGetFinalRelativeResidualNorm(HYPRE_SStructSolver solver,
                                                  HYPRE_Real         *norm);
 
-/*@}*/
+/**@}*/
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 /**
  * @name SStruct Split Solver
+ *
+ * @{
  **/
-/*@{*/
 
 #define HYPRE_PFMG   10
 #define HYPRE_SMG    11
@@ -272,7 +274,7 @@ HYPRE_Int
 HYPRE_SStructSplitDestroy(HYPRE_SStructSolver solver);
 
 /**
- * Prepare to solve the system.  The coefficient data in {\tt b} and {\tt x} is
+ * Prepare to solve the system.  The coefficient data in \e b and \e x is
  * ignored here, but information about the layout of the data may be used.
  **/
 HYPRE_Int
@@ -314,14 +316,14 @@ HYPRE_SStructSplitSetZeroGuess(HYPRE_SStructSolver solver);
 
 /**
  * (Optional) Use a nonzero initial guess.  This is the default behavior, but
- * this routine allows the user to switch back after using {\tt SetZeroGuess}.
+ * this routine allows the user to switch back after using \e SetZeroGuess.
  **/
 HYPRE_Int
 HYPRE_SStructSplitSetNonZeroGuess(HYPRE_SStructSolver solver);
 
 /**
- * (Optional) Set up the type of diagonal struct solver.  Either {\tt ssolver} is
- * set to {\tt HYPRE\_SMG} or {\tt HYPRE\_PFMG}.
+ * (Optional) Set up the type of diagonal struct solver.  Either \e ssolver is
+ * set to \e HYPRE\_SMG or \e HYPRE\_PFMG.
  **/
 HYPRE_Int
 HYPRE_SStructSplitSetStructSolver(HYPRE_SStructSolver solver,
@@ -341,15 +343,16 @@ HYPRE_Int
 HYPRE_SStructSplitGetFinalRelativeResidualNorm(HYPRE_SStructSolver  solver,
                                                HYPRE_Real          *norm);
 
-/*@}*/
+/**@}*/
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 /**
  * @name SStruct FAC Solver
+ *
+ * @{
  **/
-/*@{*/
 
 /**
  * Create a solver object.
@@ -488,14 +491,14 @@ HYPRE_SStructFACSetZeroGuess(HYPRE_SStructSolver solver);
 
 /**
  * (Optional) Use a nonzero initial guess.  This is the default behavior, but
- * this routine allows the user to switch back after using {\tt SetZeroGuess}.
+ * this routine allows the user to switch back after using \e SetZeroGuess.
  **/
 HYPRE_Int
 HYPRE_SStructFACSetNonZeroGuess(HYPRE_SStructSolver solver);
 
 /**
- * (Optional) Set relaxation type.  See \Ref{HYPRE_SStructSysPFMGSetRelaxType}
- * for appropriate values of {\tt relax\_type}.
+ * (Optional) Set relaxation type.  See \ref HYPRE_SStructSysPFMGSetRelaxType
+ * for appropriate values of \e relax\_type.
  **/
 HYPRE_Int
 HYPRE_SStructFACSetRelaxType(HYPRE_SStructSolver solver,
@@ -522,12 +525,10 @@ HYPRE_SStructFACSetNumPostRelax(HYPRE_SStructSolver solver,
 /**
  * (Optional) Set coarsest solver type.
  *
- * Current solver types set by {\tt csolver\_type} are:
+ * Current solver types set by \e csolver\_type are:
  *
- * \begin{tabular}{l@{ -- }l}
- * 1 & SysPFMG-PCG (default) \\
- * 2 & SysPFMG \\
- * \end{tabular}
+ *    - 1 : SysPFMG-PCG (default)
+ *    - 2 : SysPFMG
  **/
 HYPRE_Int
 HYPRE_SStructFACSetCoarseSolverType(HYPRE_SStructSolver solver,
@@ -554,14 +555,15 @@ HYPRE_Int
 HYPRE_SStructFACGetFinalRelativeResidualNorm(HYPRE_SStructSolver solver,
                                              HYPRE_Real         *norm);
 
-/*@}*/
+/**@}*/
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 /**
  * @name SStruct Maxwell Solver
+ *
+ * @{
  **/
-/*@{*/
 
 /**
  * Create a solver object.
@@ -582,7 +584,7 @@ HYPRE_Int
 HYPRE_SStructMaxwellDestroy( HYPRE_SStructSolver solver );
 
 /**
- * Prepare to solve the system.  The coefficient data in {\tt b} and {\tt x} is
+ * Prepare to solve the system.  The coefficient data in \e b and \e x is
  * ignored here, but information about the layout of the data may be used.
  **/
 HYPRE_Int
@@ -726,7 +728,7 @@ HYPRE_Int
 HYPRE_SStructMaxwellGetFinalRelativeResidualNorm(HYPRE_SStructSolver solver,
                                                  HYPRE_Real         *norm);
 
-/*@}*/
+/**@}*/
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -735,9 +737,10 @@ HYPRE_SStructMaxwellGetFinalRelativeResidualNorm(HYPRE_SStructSolver solver,
  * @name SStruct PCG Solver
  * 
  * These routines should be used in conjunction with the generic interface in
- * \Ref{PCG Solver}.
+ * \ref KrylovSolvers.
+ *
+ * @{
  **/
-/*@{*/
 
 /**
  * Create a solver object.
@@ -834,7 +837,7 @@ HYPRE_SStructDiagScale(HYPRE_SStructSolver solver,
                        HYPRE_SStructVector y,
                        HYPRE_SStructVector x);
 
-/*@}*/
+/**@}*/
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -843,9 +846,10 @@ HYPRE_SStructDiagScale(HYPRE_SStructSolver solver,
  * @name SStruct GMRES Solver
  *
  * These routines should be used in conjunction with the generic interface in
- * \Ref{GMRES Solver}.
+ * \ref KrylovSolvers.
+ *
+ * @{
  **/
-/*@{*/
 
 /**
  * Create a solver object.
@@ -934,7 +938,7 @@ HYPRE_Int
 HYPRE_SStructGMRESGetResidual(HYPRE_SStructSolver   solver,
                               void                **residual);
 
-/*@}*/
+/**@}*/
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -943,9 +947,10 @@ HYPRE_SStructGMRESGetResidual(HYPRE_SStructSolver   solver,
  * @name SStruct FlexGMRES Solver
  *
  * These routines should be used in conjunction with the generic interface in
- * \Ref{FlexGMRES Solver}.
+ * \ref KrylovSolvers.
+ *
+ * @{
  **/
-/*@{*/
 
 /**
  * Create a solver object.
@@ -1031,7 +1036,7 @@ HYPRE_Int
 HYPRE_SStructFlexGMRESSetModifyPC(HYPRE_SStructSolver    solver,
                                   HYPRE_PtrToModifyPCFcn modify_pc);
 
-/*@}*/
+/**@}*/
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -1040,9 +1045,10 @@ HYPRE_SStructFlexGMRESSetModifyPC(HYPRE_SStructSolver    solver,
  * @name SStruct LGMRES Solver
  *
  * These routines should be used in conjunction with the generic interface in
- * \Ref{LGMRES Solver}.
+ * \ref KrylovSolvers.
+ *
+ * @{
  **/
-/*@{*/
 
 /**
  * Create a solver object.
@@ -1128,7 +1134,7 @@ HYPRE_Int
 HYPRE_SStructLGMRESGetResidual(HYPRE_SStructSolver   solver,
                                void                **residual);
 
-/*@}*/
+/**@}*/
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -1137,9 +1143,10 @@ HYPRE_SStructLGMRESGetResidual(HYPRE_SStructSolver   solver,
  * @name SStruct BiCGSTAB Solver
  *
  * These routines should be used in conjunction with the generic interface in
- * \Ref{BiCGSTAB Solver}.
+ * \ref KrylovSolvers.
+ *
+ * @{
  **/
-/*@{*/
 
 /**
  * Create a solver object.
@@ -1223,7 +1230,7 @@ HYPRE_Int
 HYPRE_SStructBiCGSTABGetResidual(HYPRE_SStructSolver   solver,
                                  void                **residual);
 
-/*@}*/
+/**@}*/
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -1232,9 +1239,10 @@ HYPRE_SStructBiCGSTABGetResidual(HYPRE_SStructSolver   solver,
  * @name SStruct LOBPCG Eigensolver
  *
  * These routines should be used in conjunction with the generic interface in
- * \Ref{LOBPCG Eigensolver}.
+ * \ref Eigensolvers.
+ *
+ * @{
  **/
-/*@{*/
 
 /**
   * Load interface interpreter.  Vector part loaded with hypre_SStructKrylov
@@ -1249,11 +1257,11 @@ HYPRE_SStructSetupInterpreter(mv_InterfaceInterpreter *i);
 HYPRE_Int
 HYPRE_SStructSetupMatvec(HYPRE_MatvecFunctions *mv);
 
-/*@}*/
+/**@}*/
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
-/*@}*/
+/**@}*/
 
 #ifdef __cplusplus
 }
