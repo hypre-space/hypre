@@ -4907,7 +4907,7 @@ hypre_ParcsrAdd( HYPRE_Complex alpha,
       {
          HYPRE_Int     col = B_diag_j[j];
          HYPRE_Complex val = B_diag_a[j];
-         if (marker_diag[col] < diag_i_start)
+         if (marker_diag[col] < diag_i_start /*&& hypre_abs(val) > 0.0*/)
          {
             /* this col has not been seen before, create new entry */
             marker_diag[col] = nnz_diag_C;
@@ -4959,7 +4959,7 @@ hypre_ParcsrAdd( HYPRE_Complex alpha,
          HYPRE_Int     colB = B_offd_j[j];
          HYPRE_Int     colC = B2C_offd[colB];
          HYPRE_Complex val  = B_offd_a[j];
-         if (marker_offd[colC] < offd_i_start)
+         if (marker_offd[colC] < offd_i_start /*&& hypre_abs(val) > 0.0*/)
          {
             /* this col has not been seen before, create new entry */
             marker_offd[colC] = nnz_offd_C;

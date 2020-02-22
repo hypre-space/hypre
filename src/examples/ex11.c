@@ -26,16 +26,12 @@
 
 #include <math.h>
 #include "_hypre_utilities.h"
-#include "krylov.h"
 #include "HYPRE.h"
 #include "HYPRE_parcsr_ls.h"
+#include "HYPRE_krylov.h"
 
 /* lobpcg stuff */
 #include "HYPRE_lobpcg.h"
-#include "interpreter.h"
-#include "HYPRE_MatvecFunctions.h"
-#include "temp_multivector.h"
-#include "_hypre_parcsr_mv.h"
 
 #include "vis.c"
 

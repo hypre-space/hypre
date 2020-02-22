@@ -19,6 +19,14 @@ import alabaster
 # Read the docs
 #import sphinx_rtd_theme
 
+import subprocess
+
+read_the_docs_build = os.environ.get('READTHEDOCS', None) == 'True'
+
+if read_the_docs_build:
+
+    subprocess.call('cd ../ref-manual; doxygen conf.doxygen', shell=True)
+
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
@@ -32,7 +40,8 @@ import alabaster
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 #extensions = ['sphinx.ext.autodoc', 'sphinx.ext.pngmath']
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.mathjax']
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.mathjax', 'breathe']
+breathe_projects = { 'hypre': '../ref-manual/xml' }
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
