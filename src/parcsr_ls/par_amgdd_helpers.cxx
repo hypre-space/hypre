@@ -736,27 +736,41 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
 
          if (incoming_dest[i] >= 0)
          {
-            for (j = 0; j < row_size; j++)
+            // Treatment for incoming dofs (setup global indices and available local indices)
+            if (incoming_dest[i] >= num_nodes)
             {
-               HYPRE_Int index = hypre_ParCompGridARowPtr(compGrid[level])[ incoming_dest[i] ] + j;
-
-
-               HYPRE_Int incoming_index = recv_buffer[cnt++];
-               if (incoming_index < 0)
+               for (j = 0; j < row_size; j++)
                {
-                  hypre_ParCompGridAGlobalColInd(compGrid[level])[ index ] = -(incoming_index+1);
-                  hypre_ParCompGridAColInd(compGrid[level])[ index ] = -1;
+                  HYPRE_Int index = hypre_ParCompGridARowPtr(compGrid[level])[ incoming_dest[i] ] + j;
+                  HYPRE_Int incoming_index = recv_buffer[cnt++];
+                  if (incoming_index < 0)
+                  {
+                     hypre_ParCompGridAGlobalColInd(compGrid[level])[ index ] = -(incoming_index+1);
+                     hypre_ParCompGridAColInd(compGrid[level])[ index ] = -1;
+                  }
+                  else
+                  {
+                     HYPRE_Int local_index = incoming_dest[ incoming_index ];
+                     hypre_ParCompGridAColInd(compGrid[level])[ index ] = local_index;
+                     hypre_ParCompGridAGlobalColInd(compGrid[level])[ index ] = hypre_ParCompGridGlobalIndices(compGrid[level])[ local_index ];
+                  }
                }
-               else
+            }
+            // Treatment for ghosts overwritten as real (just need to account for possible missing connections)
+            else
+            {
+               for (j = 0; j < row_size; j++)
                {
-                  HYPRE_Int local_index = incoming_dest[ incoming_index ];
-                  hypre_ParCompGridAColInd(compGrid[level])[ index ] = local_index;
-                  hypre_ParCompGridAGlobalColInd(compGrid[level])[ index ] = hypre_ParCompGridGlobalIndices(compGrid[level])[ local_index ];
-               }
-
-
-
-               // hypre_ParCompGridAGlobalColInd(compGrid[level])[ index ] = recv_buffer[cnt++];
+                  HYPRE_Int index = hypre_ParCompGridARowPtr(compGrid[level])[ incoming_dest[i] ] + j;
+                  HYPRE_Int local_index = hypre_ParCompGridAColInd(compGrid[level])[ index ];
+                  HYPRE_Int incoming_index = recv_buffer[cnt++];
+                  if (incoming_index >= 0 && local_index < 0)
+                  {
+                     local_index = incoming_dest[ incoming_index ];
+                     hypre_ParCompGridAColInd(compGrid[level])[ index ] = local_index;
+                     hypre_ParCompGridAGlobalColInd(compGrid[level])[ index ] = hypre_ParCompGridGlobalIndices(compGrid[level])[ local_index ];
+                  }
+               }               
             }
          }
          else
