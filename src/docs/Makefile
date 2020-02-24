@@ -12,7 +12,7 @@ include ../config/Makefile.config
 # Targets
 ##################################################################
 
-all: html pdf
+all: usr
 
 install: all
 	@ \
@@ -43,24 +43,14 @@ distclean: clean
 # Rules
 ##################################################################
 
-html: usr-html ref-html
-
-pdf: usr-pdf ref-pdf
-
-usr: usr-html usr-pdf
-usr-html:
-	@cd usr-manual; make html
+usr: ref
+	@cd usr-manual; make html; make latexpdf
 	@mv usr-manual/_build/html usr-manual-html
-usr-pdf:
-	@cd usr-manual; make latexpdf
 	@mv usr-manual/_build/latex/hypre.pdf usr-manual.pdf
 
-ref: ref-html ref-pdf
-ref-html:
-	@cd ref-manual; make html
+ref:
+	@cd ref-manual; make
 	@mv ref-manual/html ref-manual-html
-ref-pdf:
-	@cd ref-manual; make pdf
 	@mv ref-manual/latex/refman.pdf ref-manual.pdf
 
 ##########

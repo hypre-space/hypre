@@ -35,12 +35,7 @@
 
 #include <time.h>
 
-#include "fortran_matrix.h"
 #include "HYPRE_lobpcg.h"
-
-#include "interpreter.h"
-#include "multivector.h"
-#include "HYPRE_MatvecFunctions.h"
 
 /* max dt */
 #define DT_INF 1.0e30
@@ -4237,7 +4232,7 @@ main( hypre_int argc,
 
          if ( vFromFileFlag ) {
             eigenvectors = mv_MultiVectorWrap( interpreter,
-                                               hypre_ParCSRMultiVectorRead(hypre_MPI_COMM_WORLD,
+                                               HYPRE_ParCSRMultiVectorRead(hypre_MPI_COMM_WORLD,
                                                                            interpreter,
                                                                            "vectors" ),1);
             hypre_assert( eigenvectors != NULL );
@@ -4255,7 +4250,7 @@ main( hypre_int argc,
 
          if ( constrained ) {
             constraints = mv_MultiVectorWrap( interpreter,
-                                              hypre_ParCSRMultiVectorRead(hypre_MPI_COMM_WORLD,
+                                              HYPRE_ParCSRMultiVectorRead(hypre_MPI_COMM_WORLD,
                                                                           interpreter,
                                                                           "vectors" ),1);
             hypre_assert( constraints != NULL );
@@ -4304,8 +4299,7 @@ main( hypre_int argc,
          }
 
          if ( printLevel ) {
-
-            hypre_ParCSRMultiVectorPrint( mv_MultiVectorGetData(eigenvectors), "vectors" );
+            HYPRE_ParCSRMultiVectorPrint( mv_MultiVectorGetData(eigenvectors), "vectors" );
 
             if ( myid == 0 ) {
                if ( (filePtr = fopen("values.txt", "w")) ) {
@@ -4608,7 +4602,7 @@ main( hypre_int argc,
 
          if ( vFromFileFlag ) {
             eigenvectors = mv_MultiVectorWrap( interpreter,
-                                               hypre_ParCSRMultiVectorRead(hypre_MPI_COMM_WORLD,
+                                               HYPRE_ParCSRMultiVectorRead(hypre_MPI_COMM_WORLD,
                                                                            interpreter,
                                                                            "vectors" ),1);
             hypre_assert( eigenvectors != NULL );
@@ -4626,7 +4620,7 @@ main( hypre_int argc,
 
          if ( constrained ) {
             constraints = mv_MultiVectorWrap( interpreter,
-                                              hypre_ParCSRMultiVectorRead(hypre_MPI_COMM_WORLD,
+                                              HYPRE_ParCSRMultiVectorRead(hypre_MPI_COMM_WORLD,
                                                                           interpreter,
                                                                           "vectors" ),1);
             hypre_assert( constraints != NULL );
@@ -4674,7 +4668,7 @@ main( hypre_int argc,
          }
 
          if ( printLevel ) {
-            hypre_ParCSRMultiVectorPrint( mv_MultiVectorGetData(eigenvectors), "vectors" );
+            HYPRE_ParCSRMultiVectorPrint( mv_MultiVectorGetData(eigenvectors), "vectors" );
 
             if ( myid == 0 ) {
                if ( (filePtr = fopen("values.txt", "w")) ) {

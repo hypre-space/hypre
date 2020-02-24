@@ -35,7 +35,7 @@ HYPRE_Int hypre_ParVectorSize(void * x)
 }
 
 HYPRE_Int
-hypre_ParCSRMultiVectorPrint( void* x_, const char* fileName ) {
+HYPRE_ParCSRMultiVectorPrint( void* x_, const char* fileName ) {
 
   HYPRE_Int i, ierr;
   mv_TempMultiVector* x;
@@ -54,7 +54,7 @@ hypre_ParCSRMultiVectorPrint( void* x_, const char* fileName ) {
 }
 
 void*
-hypre_ParCSRMultiVectorRead( MPI_Comm comm, void* ii_, const char* fileName ) {
+HYPRE_ParCSRMultiVectorRead( MPI_Comm comm, void* ii_, const char* fileName ) {
 
   HYPRE_Int i, n, id;
   FILE* fp;

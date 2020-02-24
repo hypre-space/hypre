@@ -8,8 +8,8 @@
 #ifndef MULTIVECTOR_FUNCTION_PROTOTYPES
 #define MULTIVECTOR_FUNCTION_PROTOTYPES
 
+#include "HYPRE_utilities.h"
 #include "interpreter.h"
-#include "_hypre_utilities.h"
 
 /* abstract multivector */
 typedef struct mv_MultiVector* mv_MultiVectorPtr;
