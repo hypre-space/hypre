@@ -609,7 +609,7 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
             if (incoming_is_real && !hypre_ParCompGridRealDofMarker(compGrid[level])[ inv_sort_map[compGrid_cnt] ])
             {
 
-               // !!! Symmetric: Need to insert A col ind
+               // !!! Symmetric: Need to insert A col ind (no space allocated for row info at ghost point... but now trying to overwrite with real dof)
 
                hypre_ParCompGridRealDofMarker(compGrid[level])[ inv_sort_map[compGrid_cnt] ] = 1;
                
@@ -668,7 +668,7 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
          sort_cnt++;
       }
 
-      nodes_added_on_level[level] = add_node_cnt;
+      nodes_added_on_level[level] += add_node_cnt;
 
       // Free the old inv sort map and set new
       hypre_TFree(inv_sort_map, HYPRE_MEMORY_HOST);
@@ -734,12 +734,29 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
       {
          row_size = recv_buffer[size_cnt];
 
-         if (incoming_dest[i] >= num_nodes)
+         if (incoming_dest[i] >= 0)
          {
             for (j = 0; j < row_size; j++)
             {
                HYPRE_Int index = hypre_ParCompGridARowPtr(compGrid[level])[ incoming_dest[i] ] + j;
-               hypre_ParCompGridAGlobalColInd(compGrid[level])[ index ] = recv_buffer[cnt++];
+
+
+               HYPRE_Int incoming_index = recv_buffer[cnt++];
+               if (incoming_index < 0)
+               {
+                  hypre_ParCompGridAGlobalColInd(compGrid[level])[ index ] = -(incoming_index+1);
+                  hypre_ParCompGridAColInd(compGrid[level])[ index ] = -1;
+               }
+               else
+               {
+                  HYPRE_Int local_index = incoming_dest[ incoming_index ];
+                  hypre_ParCompGridAColInd(compGrid[level])[ index ] = local_index;
+                  hypre_ParCompGridAGlobalColInd(compGrid[level])[ index ] = hypre_ParCompGridGlobalIndices(compGrid[level])[ local_index ];
+               }
+
+
+
+               // hypre_ParCompGridAGlobalColInd(compGrid[level])[ index ] = recv_buffer[cnt++];
             }
          }
          else
