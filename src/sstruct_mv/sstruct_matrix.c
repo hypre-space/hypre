@@ -984,11 +984,11 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
       int_box = hypre_BoxCreate(ndim);
 
       nrows       = hypre_BoxVolume(set_box);
-      ncols       = hypre_CTAlloc(HYPRE_Int, nrows, HYPRE_MEMORY_SHARED);
-      rows        = hypre_CTAlloc(HYPRE_BigInt, nrows, HYPRE_MEMORY_SHARED);
-      row_indexes = hypre_CTAlloc(HYPRE_Int, nrows, HYPRE_MEMORY_SHARED);
-      cols        = hypre_CTAlloc(HYPRE_BigInt, nrows*nentries, HYPRE_MEMORY_SHARED);
-      ijvalues    = hypre_CTAlloc(HYPRE_Complex, nrows*nentries, HYPRE_MEMORY_SHARED);
+      ncols       = hypre_CTAlloc(HYPRE_Int, nrows, HYPRE_MEMORY_DEVICE);
+      rows        = hypre_CTAlloc(HYPRE_BigInt, nrows, HYPRE_MEMORY_DEVICE);
+      row_indexes = hypre_CTAlloc(HYPRE_Int, nrows, HYPRE_MEMORY_DEVICE);
+      cols        = hypre_CTAlloc(HYPRE_BigInt, nrows*nentries, HYPRE_MEMORY_DEVICE);
+      ijvalues    = hypre_CTAlloc(HYPRE_Complex, nrows*nentries, HYPRE_MEMORY_DEVICE);
 
       hypre_SetIndex(stride, 1);
 
@@ -1109,11 +1109,11 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
 
       hypre_TFree(boxman_entries, HYPRE_MEMORY_HOST);
 
-      hypre_TFree(ncols, HYPRE_MEMORY_SHARED);
-      hypre_TFree(rows, HYPRE_MEMORY_SHARED);
-      hypre_TFree(row_indexes, HYPRE_MEMORY_SHARED);
-      hypre_TFree(cols, HYPRE_MEMORY_SHARED);
-      hypre_TFree(ijvalues, HYPRE_MEMORY_SHARED);
+      hypre_TFree(ncols, HYPRE_MEMORY_DEVICE);
+      hypre_TFree(rows, HYPRE_MEMORY_DEVICE);
+      hypre_TFree(row_indexes, HYPRE_MEMORY_DEVICE);
+      hypre_TFree(cols, HYPRE_MEMORY_DEVICE);
+      hypre_TFree(ijvalues, HYPRE_MEMORY_DEVICE);
 
       hypre_BoxDestroy(to_box);
       hypre_BoxDestroy(map_box);

@@ -11,86 +11,6 @@
 #include <Kokkos_Core.hpp>
 #endif
 
-/*---------------------------------------------------
- * hypre_GetExecPolicy
- * Return execution policy based on memory locations
- *---------------------------------------------------*/
-/* for unary operation */
-HYPRE_Int
-hypre_GetExecPolicy1(HYPRE_Int location)
-{
-   HYPRE_Int exec = HYPRE_EXEC_UNSET;
-
-   location = hypre_GetActualMemLocation(location);
-
-   switch (location)
-   {
-      case HYPRE_MEMORY_HOST :
-         exec = HYPRE_EXEC_HOST;
-         break;
-      case HYPRE_MEMORY_HOST_PINNED :
-         exec = HYPRE_EXEC_HOST;
-         break;
-      case HYPRE_MEMORY_DEVICE :
-         exec = HYPRE_EXEC_DEVICE;
-         break;
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-      case HYPRE_MEMORY_SHARED :
-         exec = hypre_HandleDefaultExecPolicy(hypre_handle);
-         break;
-#endif
-   }
-
-   return exec;
-}
-
-/* for binary operation */
-HYPRE_Int
-hypre_GetExecPolicy2(HYPRE_Int location1,
-                     HYPRE_Int location2)
-{
-   location1 = hypre_GetActualMemLocation(location1);
-   location2 = hypre_GetActualMemLocation(location2);
-
-   /* HOST_PINNED has the same exec policy as HOST */
-   if (location1 == HYPRE_MEMORY_HOST_PINNED)
-   {
-      location1 = HYPRE_MEMORY_HOST;
-   }
-
-   if (location2 == HYPRE_MEMORY_HOST_PINNED)
-   {
-      location2 = HYPRE_MEMORY_HOST;
-   }
-
-   /* no policy for these combinations */
-   if ( (location1 == HYPRE_MEMORY_HOST && location2 == HYPRE_MEMORY_DEVICE) ||
-        (location2 == HYPRE_MEMORY_HOST && location1 == HYPRE_MEMORY_DEVICE) )
-   {
-      return HYPRE_EXEC_UNSET;
-   }
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   /* policy for S-S can be HOST or DEVICE. Choose HOST by default */
-   if (location1 == HYPRE_MEMORY_SHARED && location2 == HYPRE_MEMORY_SHARED)
-   {
-      return hypre_HandleDefaultExecPolicy(hypre_handle);
-   }
-#endif
-
-   if (location1 == HYPRE_MEMORY_HOST || location2 == HYPRE_MEMORY_HOST)
-   {
-      return HYPRE_EXEC_HOST;
-   }
-
-   if (location1 == HYPRE_MEMORY_DEVICE || location2 == HYPRE_MEMORY_DEVICE)
-   {
-      return HYPRE_EXEC_DEVICE;
-   }
-
-   return HYPRE_EXEC_UNSET;
-}
-
 hypre_Handle *hypre_handle = NULL;
 
 hypre_Handle*
@@ -98,7 +18,7 @@ hypre_HandleCreate()
 {
    hypre_Handle *handle = hypre_CTAlloc(hypre_Handle, 1, HYPRE_MEMORY_HOST);
 
-   hypre_HandleMemoryLocation(handle) = HYPRE_MEMORY_SHARED;
+   hypre_HandleMemoryLocation(handle) = HYPRE_MEMORY_DEVICE;
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 

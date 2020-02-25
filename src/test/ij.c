@@ -21,6 +21,7 @@
 #include "HYPRE_parcsr_mv.h"
 
 #include "HYPRE_IJ_mv.h"
+#include "_hypre_IJ_mv.h"
 #include "HYPRE_parcsr_ls.h"
 #include "_hypre_parcsr_mv.h"
 #include "HYPRE_krylov.h"
@@ -385,9 +386,9 @@ main( hypre_int argc,
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_Int spgemm_use_cusparse = 1;
-   HYPRE_Int default_exec_policy = HYPRE_EXEC_HOST;
+   HYPRE_ExecuctionPolicy default_exec_policy = HYPRE_EXEC_HOST;
 #endif
-   HYPRE_Int memory_location = HYPRE_MEMORY_SHARED;
+   HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_DEVICE;
 
    /* CUB Allocator */
    hypre_uint mempool_bin_growth   = 8,
@@ -2230,7 +2231,7 @@ main( hypre_int argc,
       HYPRE_BigInt *row_nums_h = row_nums;
       HYPRE_BigInt *col_nums_h = col_nums;
       HYPRE_Real   *data_h     = data;
-      if (hypre_GetActualMemLocation(memory_location) != HYPRE_MEMORY_HOST)
+      if (hypre_GetActualMemLocation(memory_location) != hypre_MEMORY_HOST)
       {
          num_cols = hypre_TAlloc(HYPRE_Int,    num_rows,         memory_location);
          row_nums = hypre_TAlloc(HYPRE_BigInt, num_rows,         memory_location);
@@ -2282,7 +2283,7 @@ main( hypre_int argc,
       hypre_TFree(row_nums_h, HYPRE_MEMORY_HOST);
       hypre_TFree(col_nums_h, HYPRE_MEMORY_HOST);
       hypre_TFree(data_h,     HYPRE_MEMORY_HOST);
-      if (hypre_GetActualMemLocation(memory_location) != HYPRE_MEMORY_HOST)
+      if (hypre_GetActualMemLocation(memory_location) != hypre_MEMORY_HOST)
       {
          hypre_TFree(col_nums, memory_location);
          hypre_TFree(data,     memory_location);
@@ -2355,7 +2356,7 @@ main( hypre_int argc,
          values[j]   = val;
       }
 
-      if (hypre_GetActualMemLocation(memory_location) != HYPRE_MEMORY_HOST)
+      if (hypre_GetActualMemLocation(memory_location) != hypre_MEMORY_HOST)
       {
          HYPRE_Int    *ncols_h    = ncols;
          HYPRE_BigInt *rows_h     = rows;
@@ -2458,63 +2459,51 @@ main( hypre_int argc,
       HYPRE_IJVectorCreate(hypre_MPI_COMM_WORLD, first_local_col, last_local_col, &ij_x);
       HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_x);
-
-      values = hypre_CTAlloc(HYPRE_Real, local_num_cols, HYPRE_MEMORY_SHARED);
-      HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values);
       HYPRE_IJVectorAssemble(ij_x);
-      hypre_TFree(values, HYPRE_MEMORY_SHARED);
 
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
       x = (HYPRE_ParVector) object;
    }
    else if ( build_rhs_type == 1 )
    {
+      if (myid == 0)
+      {
+         hypre_printf("  RHS vector read from file %s\n", argv[build_rhs_arg_index]);
+         hypre_printf("  Initial guess is 0\n");
+      }
 
-#if 0
-      hypre_printf("build_rhs_type == 1 not currently implemented\n");
-      return(-1);
-#else
+      ij_b = NULL;
       /* RHS - this has not been tested for multiple processors*/
       BuildRhsParFromOneFile(argc, argv, build_rhs_arg_index, NULL, &b);
 
-      hypre_printf("  Initial guess is 0\n");
-
-      ij_b = NULL;
-
       /* initial guess */
       HYPRE_IJVectorCreate(hypre_MPI_COMM_WORLD, first_local_col, last_local_col, &ij_x);
       HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_x);
-
-      values = hypre_CTAlloc(HYPRE_Real,  local_num_cols, HYPRE_MEMORY_SHARED);
-      HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values);
       HYPRE_IJVectorAssemble(ij_x);
-      hypre_TFree(values, HYPRE_MEMORY_SHARED);
 
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
       x = (HYPRE_ParVector) object;
-
-#endif
    }
    else if ( build_rhs_type == 7 )
    {
+      if (myid == 0)
+      {
+         hypre_printf("  RHS vector read from file %s\n", argv[build_rhs_arg_index]);
+         hypre_printf("  Initial guess is 0\n");
+      }
+
       ij_b = NULL;
       ReadParVectorFromFile(argc, argv, build_rhs_arg_index, &b);
-#if 0
+
       /* initial guess */
-      //hypre_printf("  Initial guess is 0\n");
       HYPRE_IJVectorCreate(hypre_MPI_COMM_WORLD, first_local_col, last_local_col, &ij_x);
       HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_x);
-
-      values = hypre_CTAlloc(HYPRE_Real,  local_num_cols, HYPRE_MEMORY_SHARED);
-      HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values);
       HYPRE_IJVectorAssemble(ij_x);
-      hypre_TFree(values, HYPRE_MEMORY_SHARED);
 
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
       x = (HYPRE_ParVector) object;
-#endif
    }
    else if ( build_rhs_type == 2 )
    {
@@ -2583,11 +2572,7 @@ main( hypre_int argc,
       HYPRE_IJVectorCreate(hypre_MPI_COMM_WORLD, first_local_col, last_local_col, &ij_x);
       HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_x);
-
-      values = hypre_CTAlloc(HYPRE_Real, local_num_cols, HYPRE_MEMORY_SHARED);
-      HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values);
       HYPRE_IJVectorAssemble(ij_x);
-      hypre_TFree(values, HYPRE_MEMORY_SHARED);
 
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
       x = (HYPRE_ParVector) object;
@@ -2605,14 +2590,14 @@ main( hypre_int argc,
       HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_x);
 
-      values = hypre_CTAlloc(HYPRE_Real, local_num_cols, HYPRE_MEMORY_SHARED);
+      values = hypre_CTAlloc(HYPRE_Real, local_num_cols, HYPRE_MEMORY_DEVICE);
       for (i = 0; i < local_num_cols; i++)
       {
          values[i] = 1.;
       }
       HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values);
       HYPRE_IJVectorAssemble(ij_x);
-      hypre_TFree(values, HYPRE_MEMORY_SHARED);
+      hypre_TFree(values, HYPRE_MEMORY_DEVICE);
 
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
       x = (HYPRE_ParVector) object;
@@ -2624,13 +2609,10 @@ main( hypre_int argc,
       ierr = HYPRE_IJVectorGetObject( ij_b, &object );
       b = (HYPRE_ParVector) object;
 
-      HYPRE_ParCSRMatrixMatvec(1.,parcsr_A,x,0.,b);
+      HYPRE_ParCSRMatrixMatvec(1.0, parcsr_A, x, 0.0, b);
 
-      /* Initial guess */
-      values = hypre_CTAlloc(HYPRE_Real,  local_num_cols, HYPRE_MEMORY_SHARED);
-      HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values);
-      HYPRE_IJVectorAssemble(ij_x);
-      hypre_TFree(values, HYPRE_MEMORY_SHARED);
+      /* Zero initial guess */
+      hypre_IJVectorZeroValues(ij_x);
    }
    else if ( build_rhs_type == 5 )
    {
@@ -2644,11 +2626,7 @@ main( hypre_int argc,
       HYPRE_IJVectorCreate(hypre_MPI_COMM_WORLD, first_local_row, last_local_row, &ij_b);
       HYPRE_IJVectorSetObjectType(ij_b, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_b);
-
-      values = hypre_CTAlloc(HYPRE_Real, local_num_rows, HYPRE_MEMORY_SHARED);
-      HYPRE_IJVectorSetValues(ij_b, local_num_rows, NULL, values);
       HYPRE_IJVectorAssemble(ij_b);
-      hypre_TFree(values, HYPRE_MEMORY_SHARED);
 
       ierr = HYPRE_IJVectorGetObject( ij_b, &object );
       b = (HYPRE_ParVector) object;
@@ -2658,14 +2636,14 @@ main( hypre_int argc,
       HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_x);
 
-      values = hypre_CTAlloc(HYPRE_Real, local_num_cols, HYPRE_MEMORY_SHARED);
+      values = hypre_CTAlloc(HYPRE_Real, local_num_cols, HYPRE_MEMORY_DEVICE);
       for (i = 0; i < local_num_cols; i++)
       {
          values[i] = 1.;
       }
       HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values);
       HYPRE_IJVectorAssemble(ij_x);
-      hypre_TFree(values, HYPRE_MEMORY_SHARED);
+      hypre_TFree(values, HYPRE_MEMORY_DEVICE);
 
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
       x = (HYPRE_ParVector) object;
@@ -2702,11 +2680,7 @@ main( hypre_int argc,
       HYPRE_IJVectorCreate(hypre_MPI_COMM_WORLD, first_local_col, last_local_col, &ij_x);
       HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_x);
-
-      values = hypre_CTAlloc(HYPRE_Real, local_num_cols, HYPRE_MEMORY_SHARED);
-      HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values);
       HYPRE_IJVectorAssemble(ij_x);
-      hypre_TFree(values, HYPRE_MEMORY_SHARED);
 
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
       x = (HYPRE_ParVector) object;
@@ -2733,14 +2707,14 @@ main( hypre_int argc,
       HYPRE_IJVectorSetObjectType(ij_b, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_b);
 
-      values = hypre_CTAlloc(HYPRE_Real, local_num_rows, HYPRE_MEMORY_SHARED);
+      values = hypre_CTAlloc(HYPRE_Real, local_num_rows, HYPRE_MEMORY_DEVICE);
       for (i = 0; i < local_num_rows; i++)
       {
          values[i] = 1.;
       }
       HYPRE_IJVectorSetValues(ij_b, local_num_rows, NULL, values);
       HYPRE_IJVectorAssemble(ij_b);
-      hypre_TFree(values, HYPRE_MEMORY_SHARED);
+      hypre_TFree(values, HYPRE_MEMORY_DEVICE);
 
       ierr = HYPRE_IJVectorGetObject( ij_b, &object );
       b = (HYPRE_ParVector) object;
@@ -2749,13 +2723,9 @@ main( hypre_int argc,
       HYPRE_IJVectorCreate(hypre_MPI_COMM_WORLD, first_local_col, last_local_col, &ij_x);
       HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_x);
-
       /* For backward Euler the previous backward Euler iterate (assumed
          0 here) is usually used as the initial guess */
-      values = hypre_CTAlloc(HYPRE_Real, local_num_cols, HYPRE_MEMORY_SHARED);
-      HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values);
       HYPRE_IJVectorAssemble(ij_x);
-      hypre_TFree(values, HYPRE_MEMORY_SHARED);
 
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
       x = (HYPRE_ParVector) object;
@@ -2772,8 +2742,8 @@ main( hypre_int argc,
       HYPRE_IJVectorCreate(hypre_MPI_COMM_WORLD, first_local_row, last_local_row, &ij_b);
       HYPRE_IJVectorSetObjectType(ij_b, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_b);
-      values = hypre_CTAlloc(HYPRE_Real, local_num_rows, HYPRE_MEMORY_SHARED);
 
+      values = hypre_CTAlloc(HYPRE_Real, local_num_rows, HYPRE_MEMORY_DEVICE);
       hypre_SeedRand(myid);
       for (i = 0; i < local_num_rows; i++)
       {
@@ -2781,7 +2751,7 @@ main( hypre_int argc,
       }
       HYPRE_IJVectorSetValues(ij_b, local_num_rows, NULL, values);
       HYPRE_IJVectorAssemble(ij_b);
-      hypre_TFree(values, HYPRE_MEMORY_SHARED);
+      hypre_TFree(values, HYPRE_MEMORY_DEVICE);
 
       ierr = HYPRE_IJVectorGetObject( ij_b, &object );
       b = (HYPRE_ParVector) object;
@@ -2790,13 +2760,9 @@ main( hypre_int argc,
       HYPRE_IJVectorCreate(hypre_MPI_COMM_WORLD, first_local_col, last_local_col, &ij_x);
       HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_x);
-
       /* For backward Euler the previous backward Euler iterate (assumed
          0 here) is usually used as the initial guess */
-      values = hypre_CTAlloc(HYPRE_Real, local_num_cols, HYPRE_MEMORY_SHARED);
-      HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values);
       HYPRE_IJVectorAssemble(ij_x);
-      hypre_TFree(values, HYPRE_MEMORY_SHARED);
 
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
       x = (HYPRE_ParVector) object;
@@ -2814,7 +2780,7 @@ main( hypre_int argc,
       HYPRE_IJVectorSetObjectType(ij_b, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_b);
 
-      values = hypre_CTAlloc(HYPRE_Real, local_num_rows, HYPRE_MEMORY_SHARED);
+      values = hypre_CTAlloc(HYPRE_Real, local_num_rows, HYPRE_MEMORY_DEVICE);
       hypre_SeedRand(myid);
       for (i = 0; i < local_num_rows; i++)
       {
@@ -2822,7 +2788,7 @@ main( hypre_int argc,
       }
       HYPRE_IJVectorSetValues(ij_b, local_num_rows, NULL, values);
       HYPRE_IJVectorAssemble(ij_b);
-      hypre_TFree(values, HYPRE_MEMORY_SHARED);
+      hypre_TFree(values, HYPRE_MEMORY_DEVICE);
 
       ierr = HYPRE_IJVectorGetObject( ij_b, &object );
       b = (HYPRE_ParVector) object;
@@ -2831,10 +2797,9 @@ main( hypre_int argc,
       HYPRE_IJVectorCreate(hypre_MPI_COMM_WORLD, first_local_col, last_local_col, &ij_x);
       HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_x);
-
       /* For backward Euler the previous backward Euler iterate (assumed
          random in 0 - 1 here) is usually used as the initial guess */
-      values = hypre_CTAlloc(HYPRE_Real, local_num_cols, HYPRE_MEMORY_SHARED);
+      values = hypre_CTAlloc(HYPRE_Real, local_num_cols, HYPRE_MEMORY_DEVICE);
       hypre_SeedRand(myid);
       for (i = 0; i < local_num_cols; i++)
       {
@@ -2842,7 +2807,7 @@ main( hypre_int argc,
       }
       HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values);
       HYPRE_IJVectorAssemble(ij_x);
-      hypre_TFree(values, HYPRE_MEMORY_SHARED);
+      hypre_TFree(values, HYPRE_MEMORY_DEVICE);
 
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
       x = (HYPRE_ParVector) object;
@@ -2861,7 +2826,7 @@ main( hypre_int argc,
 
       /* For backward Euler the previous backward Euler iterate (assumed
          random in 0 - 1 here) is usually used as the initial guess */
-      values = hypre_CTAlloc(HYPRE_Real, local_num_cols, HYPRE_MEMORY_SHARED);
+      values = hypre_CTAlloc(HYPRE_Real, local_num_cols, HYPRE_MEMORY_DEVICE);
       hypre_SeedRand(myid+2747);
       hypre_SeedRand(myid);
       for (i = 0; i < local_num_cols; i++)
@@ -2870,7 +2835,7 @@ main( hypre_int argc,
       }
       HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values);
       HYPRE_IJVectorAssemble(ij_x);
-      hypre_TFree(values, HYPRE_MEMORY_SHARED);
+      hypre_TFree(values, HYPRE_MEMORY_DEVICE);
 
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
       x = (HYPRE_ParVector) object;
@@ -2929,7 +2894,7 @@ main( hypre_int argc,
 
       /* For backward Euler the previous backward Euler iterate (assumed
          random in 0 - 1 here) is usually used as the initial guess */
-      values = hypre_CTAlloc(HYPRE_Real, local_num_cols, HYPRE_MEMORY_SHARED);
+      values = hypre_CTAlloc(HYPRE_Real, local_num_cols, HYPRE_MEMORY_DEVICE);
       hypre_SeedRand(myid);
       for (i = 0; i < local_num_cols; i++)
       {
@@ -2937,7 +2902,7 @@ main( hypre_int argc,
       }
       HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values);
       HYPRE_IJVectorAssemble(ij_x);
-      hypre_TFree(values, HYPRE_MEMORY_SHARED);
+      hypre_TFree(values, HYPRE_MEMORY_DEVICE);
 
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
       x = (HYPRE_ParVector) object;
@@ -3340,7 +3305,12 @@ main( hypre_int argc,
 #if defined(HYPRE_USING_NVTX)
       hypre_NvtxPushRange("AMG-Solve-1");
 #endif
+
+      //cudaProfilerStart();
+
       HYPRE_BoomerAMGSolve(amg_solver, parcsr_A, b, x);
+
+      //cudaProfilerStop();
 
 #if defined(HYPRE_USING_NVTX)
       hypre_NvtxPopRange();

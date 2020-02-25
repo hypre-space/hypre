@@ -246,7 +246,7 @@ hypre_BoomerAMGCreate()
 
    amg_data = hypre_CTAlloc(hypre_ParAMGData, 1, HYPRE_MEMORY_HOST);
 
-   hypre_ParAMGDataMemoryLocation(amg_data) = HYPRE_MEMORY_UNSET;
+   hypre_ParAMGDataMemoryLocation(amg_data) = HYPRE_MEMORY_UNDEFINED;
 
    hypre_ParAMGDataMaxLevels(amg_data) =  max_levels;
    hypre_ParAMGDataUserCoarseRelaxType(amg_data) = 9;

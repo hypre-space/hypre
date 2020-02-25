@@ -208,10 +208,8 @@ hypre_ParCSRMatMat( hypre_ParCSRMatrix  *A,
    hypre_NvtxPushRange("Mat-Mat");
 #endif
 
-   HYPRE_Int exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A),
-                                          hypre_ParCSRMatrixMemoryLocation(B) );
-
-   hypre_assert(exec != HYPRE_EXEC_UNSET);
+   HYPRE_ExecuctionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A),
+                                                       hypre_ParCSRMatrixMemoryLocation(B) );
 
    hypre_ParCSRMatrix *C = NULL;
 
@@ -223,20 +221,6 @@ hypre_ParCSRMatMat( hypre_ParCSRMatrix  *A,
    else
    {
       C = hypre_ParCSRMatMatDevice(A,B);
-   }
-#endif
-
-#if defined(HYPRE_USING_CUDA)
-   if (hypre_GetActualMemLocation(hypre_ParCSRMatrixMemoryLocation(A)) == HYPRE_MEMORY_SHARED &&
-       hypre_GetActualMemLocation(hypre_ParCSRMatrixMemoryLocation(C)) == HYPRE_MEMORY_DEVICE)
-   {
-      hypre_CSRMatrix *C_diag = hypre_CSRMatrixClone_v2(hypre_ParCSRMatrixDiag(C), 1, HYPRE_MEMORY_SHARED);
-      hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(C));
-      hypre_ParCSRMatrixDiag(C) = C_diag;
-
-      hypre_CSRMatrix *C_offd = hypre_CSRMatrixClone_v2(hypre_ParCSRMatrixOffd(C), 1, HYPRE_MEMORY_SHARED);
-      hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(C));
-      hypre_ParCSRMatrixOffd(C) = C_offd;
    }
 #endif
 
@@ -477,10 +461,8 @@ hypre_ParCSRTMatMatKT( hypre_ParCSRMatrix  *A,
    hypre_NvtxPushRange("Mat-T-Mat");
 #endif
 
-   HYPRE_Int exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A),
-                                          hypre_ParCSRMatrixMemoryLocation(B) );
-
-   hypre_assert(exec != HYPRE_EXEC_UNSET);
+   HYPRE_ExecuctionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A),
+                                                       hypre_ParCSRMatrixMemoryLocation(B) );
 
    hypre_ParCSRMatrix *C = NULL;
 
@@ -492,20 +474,6 @@ hypre_ParCSRTMatMatKT( hypre_ParCSRMatrix  *A,
    else
    {
       C = hypre_ParCSRTMatMatKTDevice(A, B, keep_transpose);
-   }
-#endif
-
-#if defined(HYPRE_USING_CUDA)
-   if (hypre_GetActualMemLocation(hypre_ParCSRMatrixMemoryLocation(A)) == HYPRE_MEMORY_SHARED &&
-       hypre_GetActualMemLocation(hypre_ParCSRMatrixMemoryLocation(C)) == HYPRE_MEMORY_DEVICE)
-   {
-      hypre_CSRMatrix *C_diag = hypre_CSRMatrixClone_v2(hypre_ParCSRMatrixDiag(C), 1, HYPRE_MEMORY_SHARED);
-      hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(C));
-      hypre_ParCSRMatrixDiag(C) = C_diag;
-
-      hypre_CSRMatrix *C_offd = hypre_CSRMatrixClone_v2(hypre_ParCSRMatrixOffd(C), 1, HYPRE_MEMORY_SHARED);
-      hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(C));
-      hypre_ParCSRMatrixOffd(C) = C_offd;
    }
 #endif
 

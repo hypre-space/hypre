@@ -129,7 +129,7 @@ hypre_AuxParCSRMatrixDestroy( hypre_AuxParCSRMatrix *matrix )
  * hypre_AuxParCSRMatrixInitialize_v2
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_AuxParCSRMatrixInitialize_v2( hypre_AuxParCSRMatrix *matrix, HYPRE_Int memory_location )
+hypre_AuxParCSRMatrixInitialize_v2( hypre_AuxParCSRMatrix *matrix, HYPRE_MemoryLocation memory_location )
 {
    HYPRE_Int local_num_rows = hypre_AuxParCSRMatrixLocalNumRows(matrix);
    HYPRE_Int max_off_proc_elmts = hypre_AuxParCSRMatrixMaxOffProcElmts(matrix);
@@ -146,9 +146,7 @@ hypre_AuxParCSRMatrixInitialize_v2( hypre_AuxParCSRMatrix *matrix, HYPRE_Int mem
       return 0;
    }
 
-   hypre_assert(memory_location == HYPRE_MEMORY_HOST || memory_location == HYPRE_MEMORY_DEVICE);
-
-   if ( hypre_GetActualMemLocation(memory_location) != HYPRE_MEMORY_HOST )
+   if ( memory_location != HYPRE_MEMORY_HOST )
    {
       /* GPU assembly */
       hypre_AuxParCSRMatrixNeedAux(matrix) = 1;

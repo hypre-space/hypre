@@ -838,7 +838,7 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
    /* Prepare send buffers: allocate device buffer */
    HYPRE_Int alloc_dev_buffer = 0;
    /* In the case of running on device and cannot access host memory from device */
-#if (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)) && (HYPRE_MEMORY_HOST_ACT != HYPRE_MEMORY_SHARED)
+#if (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP))
 #if defined(HYPRE_USING_RAJA) || defined(HYPRE_USING_KOKKOS)
    alloc_dev_buffer = 1;
 #elif defined(HYPRE_USING_CUDA)
@@ -991,7 +991,10 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
       size = hypre_CommPkgSendBufsize(comm_pkg);
       dptr_host = (HYPRE_Complex *) send_buffers[0];
       dptr      = (HYPRE_Complex *) send_buffers_data[0];
-      hypre_TMemcpy(dptr_host,dptr,HYPRE_Complex,size,HYPRE_MEMORY_HOST,HYPRE_MEMORY_DEVICE);
+      if (dptr_host != dptr)
+      {
+         hypre_TMemcpy(dptr_host, dptr, HYPRE_Complex, size, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+      }
    }
 
    for (i = 0; i < num_sends; i++)
@@ -1005,11 +1008,11 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
          qptr = (HYPRE_Int *) send_buffers[i];
          *qptr = num_entries;
          qptr ++;
-         hypre_TMemcpy(qptr,  hypre_CommTypeRemBoxnums(comm_type),
-               HYPRE_Int, num_entries, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(qptr, hypre_CommTypeRemBoxnums(comm_type),
+                       HYPRE_Int, num_entries, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
          qptr += num_entries;
-         hypre_TMemcpy(qptr,  hypre_CommTypeRemBoxes(comm_type),
-               hypre_Box, num_entries, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(qptr, hypre_CommTypeRemBoxes(comm_type),
+                       hypre_Box, num_entries, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
          hypre_CommTypeRemBoxnums(comm_type) = NULL;
          hypre_CommTypeRemBoxes(comm_type)   = NULL;
       }
@@ -1203,7 +1206,7 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
    /* Copy buffer data from Host to Device */
    HYPRE_Int alloc_dev_buffer = 0;
    /* In the case of running on device and cannot access host memory from device */
-#if (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)) && (HYPRE_MEMORY_HOST_ACT != HYPRE_MEMORY_SHARED)
+#if (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP))
 #if defined(HYPRE_USING_RAJA) || defined(HYPRE_USING_KOKKOS)
    alloc_dev_buffer = 1;
 #elif defined(HYPRE_USING_CUDA)
@@ -1231,8 +1234,10 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
       dptr_host = (HYPRE_Complex *) recv_buffers[0];
       dptr      = (HYPRE_Complex *) recv_buffers_data[0];
 
-      hypre_TMemcpy( dptr, dptr_host, HYPRE_Complex, size,
-                     HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST );
+      if (dptr != dptr_host)
+      {
+         hypre_TMemcpy( dptr, dptr_host, HYPRE_Complex, size, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST );
+      }
    }
 
    for (i = 0; i < num_recvs; i++)

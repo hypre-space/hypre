@@ -59,11 +59,7 @@ typedef struct
    HYPRE_Int      num_rownnz;
 
    /* memory location of arrays i, j, data */
-   HYPRE_Int      memory_location;
-
-//#ifdef HYPRE_BIGINT
-//   hypre_int *i_short, *j_short;
-//#endif
+   HYPRE_MemoryLocation      memory_location;
 
 } hypre_CSRMatrix;
 
@@ -210,7 +206,7 @@ typedef struct
    HYPRE_Int       owns_data;
 
    /* memory location of array data */
-   HYPRE_Int       memory_location;
+   HYPRE_MemoryLocation  memory_location;
 
    /* For multivectors...*/
    HYPRE_Int   num_vectors;  /* the above "size" is size of one vector */
@@ -274,7 +270,7 @@ void hypre_CSRMatrixExtractDiagonalDevice( hypre_CSRMatrix *A, HYPRE_Complex *d,
 /* csr_matrix.c */
 hypre_CSRMatrix *hypre_CSRMatrixCreate ( HYPRE_Int num_rows , HYPRE_Int num_cols , HYPRE_Int num_nonzeros );
 HYPRE_Int hypre_CSRMatrixDestroy ( hypre_CSRMatrix *matrix );
-HYPRE_Int hypre_CSRMatrixInitialize_v2( hypre_CSRMatrix *matrix, HYPRE_Int bigInit, HYPRE_Int memory_location );
+HYPRE_Int hypre_CSRMatrixInitialize_v2( hypre_CSRMatrix *matrix, HYPRE_Int bigInit, HYPRE_MemoryLocation memory_location );
 HYPRE_Int hypre_CSRMatrixInitialize ( hypre_CSRMatrix *matrix );
 HYPRE_Int hypre_CSRMatrixBigInitialize ( hypre_CSRMatrix *matrix );
 HYPRE_Int hypre_CSRMatrixBigJtoJ ( hypre_CSRMatrix *matrix );
@@ -288,7 +284,7 @@ HYPRE_Int hypre_CSRMatrixPrintHB ( hypre_CSRMatrix *matrix_input , char *file_na
 HYPRE_Int hypre_CSRMatrixPrintMM( hypre_CSRMatrix *matrix, HYPRE_Int basei, HYPRE_Int basej, HYPRE_Int trans, const char *file_name );
 HYPRE_Int hypre_CSRMatrixCopy ( hypre_CSRMatrix *A , hypre_CSRMatrix *B , HYPRE_Int copy_data );
 hypre_CSRMatrix *hypre_CSRMatrixClone ( hypre_CSRMatrix *A, HYPRE_Int copy_data );
-hypre_CSRMatrix *hypre_CSRMatrixClone_v2( hypre_CSRMatrix *A, HYPRE_Int copy_data, HYPRE_Int memory_location );
+hypre_CSRMatrix *hypre_CSRMatrixClone_v2( hypre_CSRMatrix *A, HYPRE_Int copy_data, HYPRE_MemoryLocation memory_location );
 hypre_CSRMatrix *hypre_CSRMatrixUnion ( hypre_CSRMatrix *A , hypre_CSRMatrix *B , HYPRE_BigInt *col_map_offd_A , HYPRE_BigInt *col_map_offd_B , HYPRE_BigInt **col_map_offd_C );
 HYPRE_Int hypre_CSRMatrixPrefetch( hypre_CSRMatrix *A, HYPRE_Int to_location);
 //hypre_int hypre_CSRMatrixIsManaged(hypre_CSRMatrix *a);
@@ -376,7 +372,7 @@ HYPRE_Int hypre_MultiblockMatrixSetSubmatrix ( hypre_MultiblockMatrix *matrix , 
 hypre_Vector *hypre_SeqVectorCreate ( HYPRE_Int size );
 hypre_Vector *hypre_SeqMultiVectorCreate ( HYPRE_Int size , HYPRE_Int num_vectors );
 HYPRE_Int hypre_SeqVectorDestroy ( hypre_Vector *vector );
-HYPRE_Int hypre_SeqVectorInitialize_v2( hypre_Vector *vector, HYPRE_Int memory_location );
+HYPRE_Int hypre_SeqVectorInitialize_v2( hypre_Vector *vector, HYPRE_MemoryLocation memory_location );
 HYPRE_Int hypre_SeqVectorInitialize ( hypre_Vector *vector );
 HYPRE_Int hypre_SeqVectorSetDataOwner ( hypre_Vector *vector , HYPRE_Int owns_data );
 hypre_Vector *hypre_SeqVectorRead ( char *file_name );
@@ -385,7 +381,7 @@ HYPRE_Int hypre_SeqVectorSetConstantValues ( hypre_Vector *v , HYPRE_Complex val
 HYPRE_Int hypre_SeqVectorSetRandomValues ( hypre_Vector *v , HYPRE_Int seed );
 HYPRE_Int hypre_SeqVectorCopy ( hypre_Vector *x , hypre_Vector *y );
 hypre_Vector *hypre_SeqVectorCloneDeep ( hypre_Vector *x );
-hypre_Vector *hypre_SeqVectorCloneDeep_v2( hypre_Vector *x, HYPRE_Int memory_location );
+hypre_Vector *hypre_SeqVectorCloneDeep_v2( hypre_Vector *x, HYPRE_MemoryLocation memory_location );
 hypre_Vector *hypre_SeqVectorCloneShallow ( hypre_Vector *x );
 HYPRE_Int hypre_SeqVectorScale( HYPRE_Complex alpha, hypre_Vector *y );
 

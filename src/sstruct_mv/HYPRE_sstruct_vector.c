@@ -108,7 +108,7 @@ HYPRE_SStructVectorDestroy( HYPRE_SStructVector vector )
 
          if (hypre_SStructVectorData(vector) && (vector_type == HYPRE_PARCSR))
          {
-            hypre_TFree(hypre_SStructVectorData(vector), HYPRE_MEMORY_SHARED);
+            hypre_TFree(hypre_SStructVectorData(vector), HYPRE_MEMORY_DEVICE);
          }
 
          hypre_TFree(vector, HYPRE_MEMORY_HOST);
@@ -158,7 +158,7 @@ HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector )
 
    datasize = hypre_SStructVectorDataSize(vector);
 
-   data = hypre_CTAlloc(HYPRE_Complex,  datasize, HYPRE_MEMORY_SHARED);
+   data = hypre_CTAlloc(HYPRE_Complex, datasize, HYPRE_MEMORY_DEVICE);
 
    dataindices = hypre_SStructVectorDataIndices(vector);
 
@@ -237,7 +237,7 @@ HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector )
    {
       par_vector = (hypre_ParVector        *)hypre_IJVectorObject(ijvector);
       parlocal_vector = hypre_ParVectorLocalVector(par_vector);
-      hypre_TFree(hypre_VectorData(parlocal_vector), HYPRE_MEMORY_SHARED);
+      hypre_TFree(hypre_VectorData(parlocal_vector), HYPRE_MEMORY_DEVICE);
       hypre_VectorData(parlocal_vector) = data ;
    }
 

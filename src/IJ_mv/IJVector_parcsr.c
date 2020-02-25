@@ -89,11 +89,11 @@ hypre_IJVectorDestroyPar(hypre_IJVector *vector)
 HYPRE_Int
 hypre_IJVectorInitializePar(hypre_IJVector *vector)
 {
-   return hypre_IJVectorInitializePar_v2(vector, HYPRE_MEMORY_SHARED);
+   return hypre_IJVectorInitializePar_v2(vector, hypre_IJVectorMemoryLocation(vector));
 }
 
 HYPRE_Int
-hypre_IJVectorInitializePar_v2(hypre_IJVector *vector, HYPRE_Int memory_location)
+hypre_IJVectorInitializePar_v2(hypre_IJVector *vector, HYPRE_MemoryLocation memory_location)
 {
    hypre_ParVector *par_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
    hypre_AuxParVector *aux_vector = (hypre_AuxParVector*) hypre_IJVectorTranslator(vector);
@@ -105,27 +105,8 @@ hypre_IJVectorInitializePar_v2(hypre_IJVector *vector, HYPRE_Int memory_location
    MPI_Comm  comm = hypre_IJVectorComm(vector);
    hypre_MPI_Comm_rank(comm, &my_id);
 
-   HYPRE_Int memory_location_aux = HYPRE_MEMORY_UNSET;
-
-   if (hypre_GetActualMemLocation(memory_location) == HYPRE_MEMORY_HOST)
-   {
-      memory_location_aux = HYPRE_MEMORY_HOST;
-   }
-   else if (hypre_GetActualMemLocation(memory_location) == HYPRE_MEMORY_SHARED)
-   {
-      if (hypre_GetExecPolicy1(HYPRE_MEMORY_SHARED) == HYPRE_EXEC_HOST)
-      {
-         memory_location_aux = HYPRE_MEMORY_HOST;
-      }
-      else
-      {
-         memory_location_aux = HYPRE_MEMORY_DEVICE;
-      }
-   }
-   else if (hypre_GetActualMemLocation(memory_location) == HYPRE_MEMORY_DEVICE)
-   {
-      memory_location_aux = HYPRE_MEMORY_DEVICE;
-   }
+   HYPRE_MemoryLocation memory_location_aux =
+      hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_HOST ? HYPRE_MEMORY_HOST : HYPRE_MEMORY_DEVICE;
 
    if (!partitioning)
    {
@@ -846,12 +827,12 @@ hypre_IJVectorGetValuesPar(hypre_IJVector  *vector,
 #ifndef HYPRE_NO_GLOBAL_PARTITION
 
 HYPRE_Int
-hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
-                                      HYPRE_Int       max_off_proc_elmts,
-                                      HYPRE_Int       current_num_elmts,
-                                      HYPRE_Int       memory_location,
-                                      HYPRE_BigInt   *off_proc_i,
-                                      HYPRE_Complex  *off_proc_data)
+hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector       *vector,
+                                      HYPRE_Int             max_off_proc_elmts,
+                                      HYPRE_Int             current_num_elmts,
+                                      HYPRE_MemoryLocation  memory_location,
+                                      HYPRE_BigInt         *off_proc_i,
+                                      HYPRE_Complex        *off_proc_data)
 {
    MPI_Comm comm = hypre_IJVectorComm(vector);
    hypre_ParVector *par_vector = ( hypre_ParVector *) hypre_IJVectorObject(vector);
@@ -1073,12 +1054,12 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
 /*   assumed partition version */
 
 HYPRE_Int
-hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
-                                      HYPRE_Int       max_off_proc_elmts,
-                                      HYPRE_Int       current_num_elmts,
-                                      HYPRE_Int       memory_location,
-                                      HYPRE_BigInt   *off_proc_i,
-                                      HYPRE_Complex  *off_proc_data)
+hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector       *vector,
+                                      HYPRE_Int             max_off_proc_elmts,
+                                      HYPRE_Int             current_num_elmts,
+                                      HYPRE_MemoryLocation  memory_location,
+                                      HYPRE_BigInt         *off_proc_i,
+                                      HYPRE_Complex        *off_proc_data)
 {
    HYPRE_Int myid;
    HYPRE_BigInt global_first_row, global_num_rows;
@@ -1130,7 +1111,7 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
    global_num_rows = hypre_IJVectorGlobalNumRows(vector);
    global_first_row = hypre_IJVectorGlobalFirstRow(vector);
 
-   if (hypre_GetActualMemLocation(memory_location) == HYPRE_MEMORY_DEVICE)
+   if (memory_location == HYPRE_MEMORY_DEVICE)
    {
       HYPRE_BigInt  *off_proc_i_h    = hypre_TAlloc(HYPRE_BigInt,  current_num_elmts, HYPRE_MEMORY_HOST);
       HYPRE_Complex *off_proc_data_h = hypre_TAlloc(HYPRE_Complex, current_num_elmts, HYPRE_MEMORY_HOST);
@@ -1488,7 +1469,7 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
          recv_data_ptr = (void *) ((char *)recv_data_ptr + obj_size_bytes);
          indx++;
 
-         if (hypre_GetActualMemLocation(memory_location) == HYPRE_MEMORY_HOST)
+         if (memory_location == HYPRE_MEMORY_HOST)
          {
             k = (HYPRE_Int)(row - first_index - global_first_row);
             vector_data[k] += value;
@@ -1508,7 +1489,7 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
       }
    }
 
-   if (hypre_GetActualMemLocation(memory_location) == HYPRE_MEMORY_DEVICE)
+   if (memory_location == HYPRE_MEMORY_DEVICE)
    {
       off_proc_i_recv_d    = hypre_TAlloc(HYPRE_BigInt,  off_proc_nelm_recv_cur, HYPRE_MEMORY_DEVICE);
       off_proc_data_recv_d = hypre_TAlloc(HYPRE_Complex, off_proc_nelm_recv_cur, HYPRE_MEMORY_DEVICE);
@@ -1526,7 +1507,7 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
    hypre_TFree(send_proc_obj.v_elements, HYPRE_MEMORY_HOST);
    hypre_TFree(send_proc_obj.vec_starts, HYPRE_MEMORY_HOST);
 
-   if (hypre_GetActualMemLocation(memory_location) == HYPRE_MEMORY_DEVICE)
+   if (memory_location == HYPRE_MEMORY_DEVICE)
    {
       hypre_TFree(off_proc_i,    HYPRE_MEMORY_HOST);
       hypre_TFree(off_proc_data, HYPRE_MEMORY_HOST);

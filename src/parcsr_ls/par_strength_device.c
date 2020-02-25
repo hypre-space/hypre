@@ -64,7 +64,7 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
    HYPRE_Int                num_sends;
    HYPRE_Int                index, start, j;
 
-   HYPRE_Int                memory_location = hypre_ParCSRMatrixMemoryLocation(A);
+   HYPRE_MemoryLocation     memory_location = hypre_ParCSRMatrixMemoryLocation(A);
 
    /*--------------------------------------------------------------
     * Compute a  ParCSR strength matrix, S.

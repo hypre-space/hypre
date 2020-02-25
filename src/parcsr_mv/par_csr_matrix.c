@@ -162,7 +162,7 @@ hypre_ParCSRMatrixDestroy( hypre_ParCSRMatrix *matrix )
 {
    if (matrix)
    {
-      HYPRE_Int memory_location = hypre_ParCSRMatrixMemoryLocation(matrix);
+      HYPRE_MemoryLocation memory_location = hypre_ParCSRMatrixMemoryLocation(matrix);
 
       if ( hypre_ParCSRMatrixOwnsData(matrix) )
       {
@@ -247,7 +247,7 @@ hypre_ParCSRMatrixDestroy( hypre_ParCSRMatrix *matrix )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParCSRMatrixInitialize_v2( hypre_ParCSRMatrix *matrix, HYPRE_Int memory_location )
+hypre_ParCSRMatrixInitialize_v2( hypre_ParCSRMatrix *matrix, HYPRE_MemoryLocation memory_location )
 {
    if (!matrix)
    {
@@ -268,7 +268,7 @@ hypre_ParCSRMatrixInitialize_v2( hypre_ParCSRMatrix *matrix, HYPRE_Int memory_lo
 HYPRE_Int
 hypre_ParCSRMatrixInitialize( hypre_ParCSRMatrix *matrix )
 {
-   return hypre_ParCSRMatrixInitialize_v2(matrix, HYPRE_MEMORY_SHARED);
+   return hypre_ParCSRMatrixInitialize_v2(matrix, hypre_ParCSRMatrixMemoryLocation(matrix));
 }
 
 /*--------------------------------------------------------------------------
@@ -279,7 +279,7 @@ hypre_ParCSRMatrixInitialize( hypre_ParCSRMatrix *matrix )
  *--------------------------------------------------------------------------*/
 
 hypre_ParCSRMatrix*
-hypre_ParCSRMatrixClone_v2(hypre_ParCSRMatrix *A, HYPRE_Int copy_data, HYPRE_Int memory_location)
+hypre_ParCSRMatrixClone_v2(hypre_ParCSRMatrix *A, HYPRE_Int copy_data, HYPRE_MemoryLocation memory_location)
 {
    hypre_ParCSRMatrix *S;
 
@@ -309,11 +309,11 @@ hypre_ParCSRMatrixClone_v2(hypre_ParCSRMatrix *A, HYPRE_Int copy_data, HYPRE_Int
 hypre_ParCSRMatrix*
 hypre_ParCSRMatrixClone(hypre_ParCSRMatrix *A, HYPRE_Int copy_data)
 {
-   return hypre_ParCSRMatrixClone_v2(A, copy_data, HYPRE_MEMORY_SHARED);
+   return hypre_ParCSRMatrixClone_v2(A, copy_data, hypre_ParCSRMatrixMemoryLocation(A));
 }
 
 HYPRE_Int
-hypre_ParCSRMatrixMigrate(hypre_ParCSRMatrix *A, HYPRE_Int memory_location)
+hypre_ParCSRMatrixMigrate(hypre_ParCSRMatrix *A, HYPRE_MemoryLocation memory_location)
 {
    if ( hypre_GetActualMemLocation(memory_location) !=
         hypre_GetActualMemLocation(hypre_ParCSRMatrixMemoryLocation(A)) )
@@ -1357,9 +1357,7 @@ hypre_ParCSRMatrixGetRow( hypre_ParCSRMatrix  *mat,
                           HYPRE_BigInt       **col_ind,
                           HYPRE_Complex      **values )
 {
-   HYPRE_Int exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(mat) );
-
-   hypre_assert(exec != HYPRE_EXEC_UNSET);
+   HYPRE_ExecuctionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(mat) );
 
    if (exec == HYPRE_EXEC_HOST)
    {

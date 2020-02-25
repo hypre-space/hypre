@@ -606,7 +606,7 @@ hypre_MGRSetup( void               *mgr_vdata,
       for (j = 0; j < num_c_levels; j++)
       {
          l1_norms[j] = hypre_SeqVectorCreate(hypre_ParCSRMatrixNumRows(A_array[j]));
-         hypre_SeqVectorInitialize_v2(l1_norms[j], HYPRE_MEMORY_SHARED);
+         hypre_SeqVectorInitialize_v2(l1_norms[j], HYPRE_MEMORY_DEVICE);
       }
    }
 

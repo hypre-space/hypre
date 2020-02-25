@@ -585,11 +585,10 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
    hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
    HYPRE_Int num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
 
-   HYPRE_Int memory_location_l1 = hypre_VectorMemoryLocation(l1_norm_vec);
+   HYPRE_MemoryLocation memory_location_l1 = hypre_VectorMemoryLocation(l1_norm_vec);
    HYPRE_Real *l1_norm = hypre_VectorData(l1_norm_vec);
 
-   HYPRE_Int exec = hypre_GetExecPolicy1( memory_location_l1 );
-   hypre_assert(exec != HYPRE_EXEC_UNSET);
+   HYPRE_ExecuctionPolicy exec = hypre_GetExecPolicy1( memory_location_l1 );
 
    if (exec == HYPRE_EXEC_HOST)
    {
@@ -600,7 +599,7 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
       }
    }
 
-   HYPRE_Int memory_location_tmp = exec == HYPRE_EXEC_HOST ? HYPRE_MEMORY_HOST : HYPRE_MEMORY_DEVICE;
+   HYPRE_MemoryLocation memory_location_tmp = exec == HYPRE_EXEC_HOST ? HYPRE_MEMORY_HOST : HYPRE_MEMORY_DEVICE;
    HYPRE_Real *diag_tmp = NULL;
 
    HYPRE_Int *cf_marker_offd = NULL;
@@ -2179,7 +2178,7 @@ HYPRE_Int hypre_AMSSetup(void *solver,
    if (ams_data -> A_relax_type >= 1 && ams_data -> A_relax_type <= 4)
    {
       ams_data -> A_l1_norms = hypre_SeqVectorCreate(hypre_ParCSRMatrixNumRows(ams_data -> A));
-      hypre_SeqVectorInitialize_v2(ams_data -> A_l1_norms, HYPRE_MEMORY_SHARED);
+      hypre_SeqVectorInitialize_v2(ams_data -> A_l1_norms, HYPRE_MEMORY_DEVICE);
       hypre_ParCSRComputeL1Norms(ams_data -> A, ams_data -> A_relax_type, NULL, ams_data -> A_l1_norms);
    }
 

@@ -2996,7 +2996,7 @@ main( hypre_int argc,
     * Set up the matrix
     *-----------------------------------------------------------*/
 
-   values = hypre_TAlloc(HYPRE_Real, hypre_max(data.max_boxsize, data.fem_nsparse), HYPRE_MEMORY_SHARED);
+   values = hypre_TAlloc(HYPRE_Real, hypre_max(data.max_boxsize, data.fem_nsparse), HYPRE_MEMORY_DEVICE);
 
    HYPRE_SStructMatrixCreate(hypre_MPI_COMM_WORLD, graph, &A);
 
@@ -3652,7 +3652,7 @@ main( hypre_int argc,
    }
 #endif
 
-   hypre_TFree(values,HYPRE_MEMORY_SHARED);
+   hypre_TFree(values, HYPRE_MEMORY_DEVICE);
 
    /*-----------------------------------------------------------
     * Solve the system using SysPFMG or Split

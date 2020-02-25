@@ -85,7 +85,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    hypre_ParCSRBlockMatrix **A_block_array, **P_block_array, **R_block_array;
 
-   HYPRE_Int            memory_location = hypre_ParCSRMatrixMemoryLocation(A);
+   HYPRE_MemoryLocation memory_location = hypre_ParCSRMatrixMemoryLocation(A);
 
    /* Local variables */
    HYPRE_Int                 *CF_marker;
@@ -2125,7 +2125,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       {
          for (k = 0; k < interp_refine; k++)
             hypre_BoomerAMGRefineInterp(A_array[level],
-                                        &P,
+                                        P,
                                         coarse_pnts_global,
                                         &num_functions,
                                         dof_func_array[level],
@@ -2206,15 +2206,15 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                if (local_sz < local_P_sz)
                {
                   hypre_Vector* Vtemp_local = hypre_ParVectorLocalVector(Vtemp);
-                  hypre_TFree(hypre_VectorData(Vtemp_local), HYPRE_MEMORY_SHARED);
+                  hypre_TFree(hypre_VectorData(Vtemp_local), HYPRE_MEMORY_DEVICE);
                   hypre_VectorSize(Vtemp_local) = local_P_sz;
-                  hypre_VectorData(Vtemp_local) = hypre_CTAlloc(HYPRE_Complex, local_P_sz, HYPRE_MEMORY_SHARED);
+                  hypre_VectorData(Vtemp_local) = hypre_CTAlloc(HYPRE_Complex, local_P_sz, HYPRE_MEMORY_DEVICE);
                   if (Ztemp)
                   {
                      hypre_Vector* Ztemp_local = hypre_ParVectorLocalVector(Ztemp);
-                     hypre_TFree(hypre_VectorData(Ztemp_local), HYPRE_MEMORY_SHARED);
+                     hypre_TFree(hypre_VectorData(Ztemp_local), HYPRE_MEMORY_DEVICE);
                      hypre_VectorSize(Ztemp_local) = local_P_sz;
-                     hypre_VectorData(Ztemp_local) = hypre_CTAlloc(HYPRE_Complex, local_P_sz, HYPRE_MEMORY_SHARED);
+                     hypre_VectorData(Ztemp_local) = hypre_CTAlloc(HYPRE_Complex, local_P_sz, HYPRE_MEMORY_DEVICE);
                   }
                   if (Ptemp)
                   {
@@ -2294,7 +2294,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             }
             else
             {
-               hypre_SeqVectorInitialize_v2(d_diag, HYPRE_MEMORY_SHARED);
+               hypre_SeqVectorInitialize_v2(d_diag, HYPRE_MEMORY_DEVICE);
                hypre_ParCSRComputeL1Norms(A_array[level], 1, NULL, d_diag);
             }
 

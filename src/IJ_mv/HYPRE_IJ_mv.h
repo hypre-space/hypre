@@ -88,7 +88,7 @@ HYPRE_Int HYPRE_IJMatrixDestroy(HYPRE_IJMatrix matrix);
  **/
 HYPRE_Int HYPRE_IJMatrixInitialize(HYPRE_IJMatrix matrix);
 
-HYPRE_Int HYPRE_IJMatrixInitialize_v2(HYPRE_IJMatrix matrix, HYPRE_Int memory_location);
+HYPRE_Int HYPRE_IJMatrixInitialize_v2(HYPRE_IJMatrix matrix, HYPRE_MemoryLocation memory_location);
 
 /**
  * Sets values for {\tt nrows} rows or partial rows of the matrix.
@@ -379,8 +379,7 @@ HYPRE_Int HYPRE_IJVectorDestroy(HYPRE_IJVector vector);
  **/
 HYPRE_Int HYPRE_IJVectorInitialize(HYPRE_IJVector vector);
 
-HYPRE_Int HYPRE_IJVectorInitialize_v2( HYPRE_IJVector vector,
-                                       HYPRE_Int memory_location );
+HYPRE_Int HYPRE_IJVectorInitialize_v2( HYPRE_IJVector vector, HYPRE_MemoryLocation memory_location );
 
 /**
  * (Optional) Sets the maximum number of elements that are expected to be set

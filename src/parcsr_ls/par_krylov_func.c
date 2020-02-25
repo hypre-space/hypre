@@ -67,7 +67,7 @@ hypre_ParKrylovCreateVectorArray(HYPRE_Int n, void *vvector )
    HYPRE_Int i, size;
    HYPRE_Complex *array_data;
 
-   HYPRE_Int memory_location = hypre_ParVectorMemoryLocation(vector);
+   HYPRE_MemoryLocation memory_location = hypre_ParVectorMemoryLocation(vector);
 
    size = hypre_VectorSize(hypre_ParVectorLocalVector(vector));
    array_data = hypre_CTAlloc(HYPRE_Complex, (n*size), memory_location);

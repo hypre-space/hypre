@@ -163,13 +163,19 @@ HYPRE_VersionNumber( HYPRE_Int  *major_ptr,
 /*Checks whether the AP is on */
 HYPRE_Int HYPRE_AssumedPartitionCheck();
 
-typedef enum
+typedef enum _HYPRE_MemoryLocation
 {
-   HYPRE_HOST = 0,
-   HYPRE_DEVICE,
-   HYPRE_UNIFIED,
-   HYPRE_MEMORY_LOCATION_COUNT
+   HYPRE_MEMORY_UNDEFINED = -1,
+   HYPRE_MEMORY_HOST          ,
+   HYPRE_MEMORY_DEVICE
 } HYPRE_MemoryLocation;
+
+typedef enum _HYPRE_ExecuctionPolicy
+{
+   HYPRE_EXEC_UNDEFINED = -1,
+   HYPRE_EXEC_HOST          ,
+   HYPRE_EXEC_DEVICE
+} HYPRE_ExecuctionPolicy;
 
 #ifdef __cplusplus
 }

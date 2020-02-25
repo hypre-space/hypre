@@ -34,7 +34,7 @@ HYPRE_Int hypre_GaussElimSetup (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
    MPI_Comm new_comm;
 
    hypre_CSRMatrix *A_diag_host, *A_offd_host;
-   if (hypre_GetActualMemLocation(hypre_CSRMatrixMemoryLocation(A_diag)) != HYPRE_MEMORY_HOST)
+   if (hypre_GetActualMemLocation(hypre_CSRMatrixMemoryLocation(A_diag)) != hypre_MEMORY_HOST)
    {
       A_diag_host = hypre_CSRMatrixClone_v2(A_diag, 1, HYPRE_MEMORY_HOST);
    }
@@ -42,7 +42,7 @@ HYPRE_Int hypre_GaussElimSetup (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
    {
       A_diag_host = A_diag;
    }
-   if (hypre_GetActualMemLocation(hypre_CSRMatrixMemoryLocation(A_offd)) != HYPRE_MEMORY_HOST)
+   if (hypre_GetActualMemLocation(hypre_CSRMatrixMemoryLocation(A_offd)) != hypre_MEMORY_HOST)
    {
       A_offd_host = hypre_CSRMatrixClone_v2(A_offd, 1, HYPRE_MEMORY_HOST);
    }
@@ -234,24 +234,20 @@ HYPRE_Int hypre_GaussElimSolve (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
       info = &comm_info[0];
       displs = &comm_info[new_num_procs];
 
-      HYPRE_Int memory_location_f = hypre_GetActualMemLocation( hypre_ParVectorMemoryLocation(f) );
-
-      HYPRE_Int memory_location_u = hypre_GetActualMemLocation( hypre_ParVectorMemoryLocation(u) );
-
       HYPRE_Real *f_data_host, *u_data_host;
 
-      if (memory_location_f != HYPRE_MEMORY_HOST)
+      if (hypre_GetActualMemLocation(hypre_ParVectorMemoryLocation(f)) != hypre_MEMORY_HOST)
       {
          f_data_host = hypre_TAlloc(HYPRE_Real, n, HYPRE_MEMORY_HOST);
 
-         hypre_TMemcpy(f_data_host, f_data, HYPRE_Real, n, HYPRE_MEMORY_HOST, memory_location_f);
+         hypre_TMemcpy(f_data_host, f_data, HYPRE_Real, n, HYPRE_MEMORY_HOST, hypre_ParVectorMemoryLocation(f));
       }
       else
       {
          f_data_host = f_data;
       }
 
-      if (memory_location_u != HYPRE_MEMORY_HOST)
+      if (hypre_GetActualMemLocation(hypre_ParVectorMemoryLocation(u)) != hypre_MEMORY_HOST)
       {
          u_data_host = hypre_TAlloc(HYPRE_Real, n, HYPRE_MEMORY_HOST);
       }
@@ -315,7 +311,7 @@ HYPRE_Int hypre_GaussElimSolve (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
 
       if (u_data_host != u_data)
       {
-         hypre_TMemcpy(u_data, u_data_host, HYPRE_Real, n, memory_location_u, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(u_data, u_data_host, HYPRE_Real, n, hypre_ParVectorMemoryLocation(u), HYPRE_MEMORY_HOST);
          hypre_TFree(u_data_host, HYPRE_MEMORY_HOST);
       }
    }

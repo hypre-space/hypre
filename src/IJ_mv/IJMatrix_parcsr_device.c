@@ -137,7 +137,7 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
    HYPRE_Complex *values2;
 
    /* Caveat: the memory that all the pointers referring to must be compatible with the memory location of matrix */
-   HYPRE_Int memory_location = hypre_IJMatrixMemoryLocation(matrix);
+   HYPRE_MemoryLocation memory_location = hypre_IJMatrixMemoryLocation(matrix);
 
    /* expand rows into full expansion of rows based on ncols
     * if ncols == NULL, ncols is all ones, so rows are indeed full expansion */
@@ -439,8 +439,6 @@ hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix)
       return hypre_error_flag;
    }
 
-   HYPRE_Int memory_location = hypre_GetActualMemLocation(hypre_IJMatrixMemoryLocation(matrix));
-
    HYPRE_Int      nelms      = hypre_AuxParCSRMatrixCurrentStackElmts(aux_matrix);
    HYPRE_BigInt  *stack_i    = hypre_AuxParCSRMatrixStackI(aux_matrix);
    HYPRE_BigInt  *stack_j    = hypre_AuxParCSRMatrixStackJ(aux_matrix);
@@ -699,21 +697,8 @@ hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix)
       hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(par_matrix));
       hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(par_matrix));
 
-      /* [clone to UM] and save in par_csr matrix */
-      if (memory_location != HYPRE_MEMORY_DEVICE)
-      {
-         hypre_CSRMatrix *new_diag = hypre_CSRMatrixClone(diag, 1);
-         hypre_CSRMatrixDestroy(diag);
-         hypre_ParCSRMatrixDiag(par_matrix) = new_diag;
-         hypre_CSRMatrix *new_offd = hypre_CSRMatrixClone(offd, 1);
-         hypre_CSRMatrixDestroy(offd);
-         hypre_ParCSRMatrixOffd(par_matrix) = new_offd;
-      }
-      else
-      {
-         hypre_ParCSRMatrixDiag(par_matrix) = diag;
-         hypre_ParCSRMatrixOffd(par_matrix) = offd;
-      }
+      hypre_ParCSRMatrixDiag(par_matrix) = diag;
+      hypre_ParCSRMatrixOffd(par_matrix) = offd;
 
       hypre_TFree(hypre_ParCSRMatrixDeviceColMapOffd(par_matrix), HYPRE_MEMORY_DEVICE);
       hypre_ParCSRMatrixDeviceColMapOffd(par_matrix) = col_map_offd_new;

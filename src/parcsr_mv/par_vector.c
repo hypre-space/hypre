@@ -126,7 +126,7 @@ hypre_ParVectorDestroy( hypre_ParVector *vector )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParVectorInitialize_v2( hypre_ParVector *vector, HYPRE_Int memory_location )
+hypre_ParVectorInitialize_v2( hypre_ParVector *vector, HYPRE_MemoryLocation memory_location )
 {
    if (!vector)
    {
@@ -143,7 +143,7 @@ hypre_ParVectorInitialize_v2( hypre_ParVector *vector, HYPRE_Int memory_location
 HYPRE_Int
 hypre_ParVectorInitialize( hypre_ParVector *vector )
 {
-   return hypre_ParVectorInitialize_v2(vector, HYPRE_MEMORY_SHARED);
+   return hypre_ParVectorInitialize_v2(vector, hypre_ParVectorMemoryLocation(vector));
 }
 
 /*--------------------------------------------------------------------------
@@ -377,7 +377,7 @@ hypre_ParVectorCloneShallow( hypre_ParVector *x )
 }
 
 hypre_ParVector *
-hypre_ParVectorCloneDeep_v2( hypre_ParVector *x, HYPRE_Int memory_location )
+hypre_ParVectorCloneDeep_v2( hypre_ParVector *x, HYPRE_MemoryLocation memory_location )
 {
    hypre_ParVector *y =
       hypre_ParVectorCreate(hypre_ParVectorComm(x), hypre_ParVectorGlobalSize(x),
@@ -394,7 +394,7 @@ hypre_ParVectorCloneDeep_v2( hypre_ParVector *x, HYPRE_Int memory_location )
 }
 
 HYPRE_Int
-hypre_ParVectorMigrate(hypre_ParVector *x, HYPRE_Int memory_location)
+hypre_ParVectorMigrate(hypre_ParVector *x, HYPRE_MemoryLocation memory_location)
 {
    if ( hypre_GetActualMemLocation(memory_location) !=
         hypre_GetActualMemLocation(hypre_ParVectorMemoryLocation(x)) )
@@ -445,21 +445,25 @@ hypre_ParVectorAxpy( HYPRE_Complex    alpha,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParVectorMassAxpy( HYPRE_Complex   *alpha,
-                     hypre_ParVector **x,
-                     hypre_ParVector *y, HYPRE_Int k, HYPRE_Int unroll )
+hypre_ParVectorMassAxpy( HYPRE_Complex    *alpha,
+                         hypre_ParVector **x,
+                         hypre_ParVector  *y,
+                         HYPRE_Int         k,
+                         HYPRE_Int         unroll )
 {
    HYPRE_Int i;
    hypre_Vector **x_local;
    hypre_Vector *y_local = hypre_ParVectorLocalVector(y);
-   x_local = hypre_TAlloc(hypre_Vector *, k, HYPRE_MEMORY_SHARED);
+   x_local = hypre_TAlloc(hypre_Vector *, k, HYPRE_MEMORY_HOST);
 
    for (i=0; i < k; i++)
+   {
       x_local[i] = hypre_ParVectorLocalVector(x[i]);
+   }
 
    hypre_SeqVectorMassAxpy( alpha, x_local, y_local, k, unroll);
 
-   hypre_TFree(x_local, HYPRE_MEMORY_SHARED);
+   hypre_TFree(x_local, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }
@@ -507,12 +511,14 @@ hypre_ParVectorMassInnerProd( hypre_ParVector  *x,
    HYPRE_Real *local_result;
    HYPRE_Int i;
    hypre_Vector **y_local;
-   y_local = hypre_TAlloc(hypre_Vector *, k, HYPRE_MEMORY_SHARED);
+   y_local = hypre_TAlloc(hypre_Vector *, k, HYPRE_MEMORY_HOST);
 
    for (i=0; i < k; i++)
+   {
       y_local[i] = (hypre_Vector *) hypre_ParVectorLocalVector(y[i]);
+   }
 
-   local_result = hypre_CTAlloc(HYPRE_Real, k, HYPRE_MEMORY_SHARED);
+   local_result = hypre_CTAlloc(HYPRE_Real, k, HYPRE_MEMORY_HOST);
 
    hypre_SeqVectorMassInnerProd(x_local, y_local, k, unroll, local_result);
 
@@ -525,8 +531,8 @@ hypre_ParVectorMassInnerProd( hypre_ParVector  *x,
    hypre_profile_times[HYPRE_TIMER_ID_ALL_REDUCE] += hypre_MPI_Wtime();
 #endif
 
-   hypre_TFree(y_local, HYPRE_MEMORY_SHARED);
-   hypre_TFree(local_result, HYPRE_MEMORY_SHARED);
+   hypre_TFree(y_local, HYPRE_MEMORY_HOST);
+   hypre_TFree(local_result, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }
@@ -536,9 +542,13 @@ hypre_ParVectorMassInnerProd( hypre_ParVector  *x,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParVectorMassDotpTwo ( hypre_ParVector *x, hypre_ParVector *y,
-                              hypre_ParVector **z, HYPRE_Int k, HYPRE_Int unroll,
-                              HYPRE_Real *result_x, HYPRE_Real *result_y )
+hypre_ParVectorMassDotpTwo ( hypre_ParVector  *x,
+                             hypre_ParVector  *y,
+                             hypre_ParVector **z,
+                             HYPRE_Int         k,
+                             HYPRE_Int         unroll,
+                             HYPRE_Real       *result_x,
+                             HYPRE_Real       *result_y )
 {
    MPI_Comm      comm    = hypre_ParVectorComm(x);
    hypre_Vector *x_local = hypre_ParVectorLocalVector(x);
@@ -546,13 +556,15 @@ hypre_ParVectorMassDotpTwo ( hypre_ParVector *x, hypre_ParVector *y,
    HYPRE_Real *local_result, *result;
    HYPRE_Int i;
    hypre_Vector **z_local;
-   z_local = hypre_TAlloc(hypre_Vector *, k, HYPRE_MEMORY_SHARED);
+   z_local = hypre_TAlloc(hypre_Vector*, k, HYPRE_MEMORY_HOST);
 
    for (i=0; i < k; i++)
+   {
       z_local[i] = (hypre_Vector *) hypre_ParVectorLocalVector(z[i]);
+   }
 
-   local_result = hypre_CTAlloc(HYPRE_Real, 2*k, HYPRE_MEMORY_SHARED);
-   result = hypre_CTAlloc(HYPRE_Real, 2*k, HYPRE_MEMORY_SHARED);
+   local_result = hypre_CTAlloc(HYPRE_Real, 2*k, HYPRE_MEMORY_HOST);
+   result = hypre_CTAlloc(HYPRE_Real, 2*k, HYPRE_MEMORY_HOST);
 
    hypre_SeqVectorMassDotpTwo(x_local, y_local, z_local, k, unroll, &local_result[0], &local_result[k]);
 
@@ -570,9 +582,9 @@ hypre_ParVectorMassDotpTwo ( hypre_ParVector *x, hypre_ParVector *y,
       result_x[i] = result[i];
       result_y[i] = result[k+i];
    }
-   hypre_TFree(z_local, HYPRE_MEMORY_SHARED);
-   hypre_TFree(local_result, HYPRE_MEMORY_SHARED);
-   hypre_TFree(result, HYPRE_MEMORY_SHARED);
+   hypre_TFree(z_local, HYPRE_MEMORY_HOST);
+   hypre_TFree(local_result, HYPRE_MEMORY_HOST);
+   hypre_TFree(result, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }

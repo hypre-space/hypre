@@ -78,17 +78,11 @@ hypre_AuxParVectorDestroy( hypre_AuxParVector *vector )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_AuxParVectorInitialize_v2( hypre_AuxParVector *vector, HYPRE_Int memory_location )
+hypre_AuxParVectorInitialize_v2( hypre_AuxParVector *vector, HYPRE_MemoryLocation memory_location )
 {
    hypre_AuxParVectorMemoryLocation(vector) = memory_location;
 
-   hypre_assert(memory_location == HYPRE_MEMORY_HOST || memory_location == HYPRE_MEMORY_DEVICE);
-
-   if ( hypre_GetActualMemLocation(memory_location) != HYPRE_MEMORY_HOST )
-   {
-      /* GPU assembly */
-   }
-   else
+   if ( memory_location == HYPRE_MEMORY_HOST )
    {
       /* CPU assembly */
       /* allocate stash for setting or adding off processor values */

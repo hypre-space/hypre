@@ -183,8 +183,8 @@ hypre_BoomerAMGBuildStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
    /*-----------------------------------------------------------------------
     *  Intialize counters and allocate mapping vector.
     *-----------------------------------------------------------------------*/
-   P_diag_i    = hypre_CTAlloc(HYPRE_Int, n_fine+1, HYPRE_MEMORY_SHARED);
-   P_offd_i    = hypre_CTAlloc(HYPRE_Int, n_fine+1, HYPRE_MEMORY_SHARED);
+   P_diag_i    = hypre_CTAlloc(HYPRE_Int, n_fine+1, HYPRE_MEMORY_DEVICE);
+   P_offd_i    = hypre_CTAlloc(HYPRE_Int, n_fine+1, HYPRE_MEMORY_DEVICE);
 
    if (n_fine)
    {
@@ -349,14 +349,14 @@ hypre_BoomerAMGBuildStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
 
    if (P_diag_size)
    {
-      P_diag_j    = hypre_CTAlloc(HYPRE_Int, P_diag_size, HYPRE_MEMORY_SHARED);
-      P_diag_data = hypre_CTAlloc(HYPRE_Real, P_diag_size, HYPRE_MEMORY_SHARED);
+      P_diag_j    = hypre_CTAlloc(HYPRE_Int,  P_diag_size, HYPRE_MEMORY_DEVICE);
+      P_diag_data = hypre_CTAlloc(HYPRE_Real, P_diag_size, HYPRE_MEMORY_DEVICE);
    }
 
    if (P_offd_size)
    {
-      P_offd_j    = hypre_CTAlloc(HYPRE_Int, P_offd_size, HYPRE_MEMORY_SHARED);
-      P_offd_data = hypre_CTAlloc(HYPRE_Real, P_offd_size, HYPRE_MEMORY_SHARED);
+      P_offd_j    = hypre_CTAlloc(HYPRE_Int,  P_offd_size, HYPRE_MEMORY_DEVICE);
+      P_offd_data = hypre_CTAlloc(HYPRE_Real, P_offd_size, HYPRE_MEMORY_DEVICE);
    }
 
    P_diag_i[n_fine] = jj_counter;
@@ -378,8 +378,8 @@ hypre_BoomerAMGBuildStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
    if (n_fine)
    {
       ahat = hypre_CTAlloc(HYPRE_Real, n_fine, HYPRE_MEMORY_HOST);
-      ihat = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_HOST);
-      ipnt = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_HOST);
+      ihat = hypre_CTAlloc(HYPRE_Int,  n_fine, HYPRE_MEMORY_HOST);
+      ipnt = hypre_CTAlloc(HYPRE_Int,  n_fine, HYPRE_MEMORY_HOST);
    }
    if (full_off_procNodes)
    {
@@ -1143,8 +1143,8 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix   *A,
    /*-----------------------------------------------------------------------
     *  Intialize counters and allocate mapping vector.
     *-----------------------------------------------------------------------*/
-   P_diag_i    = hypre_CTAlloc(HYPRE_Int, n_fine+1, HYPRE_MEMORY_SHARED);
-   P_offd_i    = hypre_CTAlloc(HYPRE_Int, n_fine+1, HYPRE_MEMORY_SHARED);
+   P_diag_i    = hypre_CTAlloc(HYPRE_Int, n_fine+1, HYPRE_MEMORY_DEVICE);
+   P_offd_i    = hypre_CTAlloc(HYPRE_Int, n_fine+1, HYPRE_MEMORY_DEVICE);
 
    if (n_fine)
    {
@@ -1420,14 +1420,14 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix   *A,
 
          if (P_diag_size)
          {
-            P_diag_j    = hypre_CTAlloc(HYPRE_Int,  P_diag_size, HYPRE_MEMORY_SHARED);
-            P_diag_data = hypre_CTAlloc(HYPRE_Real,  P_diag_size, HYPRE_MEMORY_SHARED);
+            P_diag_j    = hypre_CTAlloc(HYPRE_Int,  P_diag_size, HYPRE_MEMORY_DEVICE);
+            P_diag_data = hypre_CTAlloc(HYPRE_Real, P_diag_size, HYPRE_MEMORY_DEVICE);
          }
 
          if (P_offd_size)
          {
-            P_offd_j    = hypre_CTAlloc(HYPRE_Int,  P_offd_size, HYPRE_MEMORY_SHARED);
-            P_offd_data = hypre_CTAlloc(HYPRE_Real,  P_offd_size, HYPRE_MEMORY_SHARED);
+            P_offd_j    = hypre_CTAlloc(HYPRE_Int,  P_offd_size, HYPRE_MEMORY_DEVICE);
+            P_offd_data = hypre_CTAlloc(HYPRE_Real, P_offd_size, HYPRE_MEMORY_DEVICE);
          }
       }
 
@@ -2007,8 +2007,8 @@ hypre_BoomerAMGBuildExtPICCInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
    /*-----------------------------------------------------------------------
     *  Intialize counters and allocate mapping vector.
     *-----------------------------------------------------------------------*/
-   P_diag_i    = hypre_CTAlloc(HYPRE_Int,  n_fine+1, HYPRE_MEMORY_SHARED);
-   P_offd_i    = hypre_CTAlloc(HYPRE_Int,  n_fine+1, HYPRE_MEMORY_SHARED);
+   P_diag_i    = hypre_CTAlloc(HYPRE_Int, n_fine+1, HYPRE_MEMORY_DEVICE);
+   P_offd_i    = hypre_CTAlloc(HYPRE_Int, n_fine+1, HYPRE_MEMORY_DEVICE);
 
    if (n_fine)
    {
@@ -2288,14 +2288,14 @@ hypre_BoomerAMGBuildExtPICCInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
 
    if (P_diag_size)
    {
-      P_diag_j    = hypre_CTAlloc(HYPRE_Int,  P_diag_size, HYPRE_MEMORY_SHARED);
-      P_diag_data = hypre_CTAlloc(HYPRE_Real,  P_diag_size, HYPRE_MEMORY_SHARED);
+      P_diag_j    = hypre_CTAlloc(HYPRE_Int,  P_diag_size, HYPRE_MEMORY_DEVICE);
+      P_diag_data = hypre_CTAlloc(HYPRE_Real, P_diag_size, HYPRE_MEMORY_DEVICE);
    }
 
    if (P_offd_size)
    {
-      P_offd_j    = hypre_CTAlloc(HYPRE_Int,  P_offd_size, HYPRE_MEMORY_SHARED);
-      P_offd_data = hypre_CTAlloc(HYPRE_Real,  P_offd_size, HYPRE_MEMORY_SHARED);
+      P_offd_j    = hypre_CTAlloc(HYPRE_Int,  P_offd_size, HYPRE_MEMORY_DEVICE);
+      P_offd_data = hypre_CTAlloc(HYPRE_Real, P_offd_size, HYPRE_MEMORY_DEVICE);
    }
 
    P_diag_i[n_fine] = jj_counter;

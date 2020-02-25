@@ -33,7 +33,7 @@ hypre_SeqVectorCreate( HYPRE_Int size )
    /* set defaults */
    hypre_VectorOwnsData(vector) = 1;
 
-   hypre_VectorMemoryLocation(vector) = HYPRE_MEMORY_SHARED;
+   hypre_VectorMemoryLocation(vector) = hypre_HandleMemoryLocation(hypre_handle);
 
    return vector;
 }
@@ -62,7 +62,7 @@ hypre_SeqVectorDestroy( hypre_Vector *vector )
 
    if (vector)
    {
-      HYPRE_Int memory_location = hypre_VectorMemoryLocation(vector);
+      HYPRE_MemoryLocation memory_location = hypre_VectorMemoryLocation(vector);
 
       if ( hypre_VectorOwnsData(vector) )
       {
@@ -80,7 +80,7 @@ hypre_SeqVectorDestroy( hypre_Vector *vector )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SeqVectorInitialize_v2( hypre_Vector *vector, HYPRE_Int memory_location )
+hypre_SeqVectorInitialize_v2( hypre_Vector *vector, HYPRE_MemoryLocation memory_location )
 {
    HYPRE_Int  size = hypre_VectorSize(vector);
    HYPRE_Int  ierr = 0;
@@ -95,8 +95,7 @@ hypre_SeqVectorInitialize_v2( hypre_Vector *vector, HYPRE_Int memory_location )
     * when being used, and freed */
    if ( !hypre_VectorData(vector) )
    {
-      hypre_VectorData(vector) = hypre_CTAlloc(HYPRE_Complex, num_vectors*size,
-                                               memory_location);
+      hypre_VectorData(vector) = hypre_CTAlloc(HYPRE_Complex, num_vectors*size, memory_location);
    }
 
    if ( multivec_storage_method == 0 )
@@ -323,7 +322,7 @@ hypre_SeqVectorSetRandomValues( hypre_Vector *v,
 
    size *= hypre_VectorNumVectors(v);
 
-   if (hypre_GetActualMemLocation(hypre_VectorMemoryLocation(v)) == HYPRE_MEMORY_HOST)
+   if (hypre_GetActualMemLocation(hypre_VectorMemoryLocation(v)) == hypre_MEMORY_HOST)
    {
       /* RDF: threading this loop may cause problems because of hypre_Rand() */
       for (i = 0; i < size; i++)
@@ -338,8 +337,7 @@ hypre_SeqVectorSetRandomValues( hypre_Vector *v,
       {
          h_data[i] = 2.0 * hypre_Rand() - 1.0;
       }
-      hypre_TMemcpy(vector_data, h_data, HYPRE_Complex, size, hypre_VectorMemoryLocation(v),
-                    HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(vector_data, h_data, HYPRE_Complex, size, hypre_VectorMemoryLocation(v), HYPRE_MEMORY_HOST);
       hypre_TFree(h_data, HYPRE_MEMORY_HOST);
    }
 
@@ -384,7 +382,7 @@ hypre_SeqVectorCopy( hypre_Vector *x,
  *--------------------------------------------------------------------------*/
 
 hypre_Vector*
-hypre_SeqVectorCloneDeep_v2( hypre_Vector *x, HYPRE_Int memory_location )
+hypre_SeqVectorCloneDeep_v2( hypre_Vector *x, HYPRE_MemoryLocation memory_location )
 {
    HYPRE_Int      size          = hypre_VectorSize(x);
    HYPRE_Int      num_vectors   = hypre_VectorNumVectors(x);
@@ -404,7 +402,7 @@ hypre_SeqVectorCloneDeep_v2( hypre_Vector *x, HYPRE_Int memory_location )
 hypre_Vector*
 hypre_SeqVectorCloneDeep( hypre_Vector *x )
 {
-   return hypre_SeqVectorCloneDeep_v2(x, HYPRE_MEMORY_SHARED);
+   return hypre_SeqVectorCloneDeep_v2(x, hypre_VectorMemoryLocation(x));
 }
 
 /*--------------------------------------------------------------------------
@@ -609,34 +607,29 @@ HYPRE_Complex hypre_SeqVectorSumElts( hypre_Vector *vector )
 }
 
 HYPRE_Int
-hypre_SeqVectorPrefetch( hypre_Vector *x, HYPRE_Int to_location)
+hypre_SeqVectorPrefetch( hypre_Vector *x, HYPRE_MemoryLocation memory_location)
 {
    HYPRE_Int      ierr = 0;
 #ifdef HYPRE_USING_UNIFIED_MEMORY
-   HYPRE_Complex *x_data = hypre_VectorData(x);
-   HYPRE_Int      size   = hypre_VectorSize(x) * hypre_VectorNumVectors(x);
-
-   if (hypre_GetActualMemLocation(hypre_VectorMemoryLocation(x)) != HYPRE_MEMORY_SHARED)
+   if (hypre_VectorMemoryLocation(x) != HYPRE_MEMORY_DEVICE)
    {
       /* hypre_error_w_msg(HYPRE_ERROR_GENERIC," Error! CUDA Prefetch with non-unified momory\n");*/
-      return ierr;
+      return 1;
    }
+
+   HYPRE_Complex *x_data = hypre_VectorData(x);
+   HYPRE_Int      size   = hypre_VectorSize(x) * hypre_VectorNumVectors(x);
 
    if (size == 0)
    {
       return ierr;
    }
 
-   /* speical use of TMemcpy for prefetch */
-   hypre_TMemcpy(x_data, x_data, HYPRE_Complex, size, to_location, HYPRE_MEMORY_SHARED);
+   hypre_MemPrefetch(x_data, sizeof(HYPRE_Complex)*size, memory_location);
 #endif
 
    return ierr;
 }
-
-//hypre_int hypre_SeqVectorIsManaged(hypre_Vector *x)
-//{
-//}
 
 #if 0
 /* y[i] = max(alpha*x[i], beta*y[i]) */

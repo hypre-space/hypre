@@ -221,7 +221,7 @@ HYPRE_IJVectorInitialize( HYPRE_IJVector vector )
 }
 
 HYPRE_Int
-HYPRE_IJVectorInitialize_v2( HYPRE_IJVector vector, HYPRE_Int memory_location )
+HYPRE_IJVectorInitialize_v2( HYPRE_IJVector vector, HYPRE_MemoryLocation memory_location )
 {
    hypre_IJVector *vec = (hypre_IJVector *) vector;
 
@@ -301,8 +301,7 @@ HYPRE_IJVectorSetValues( HYPRE_IJVector        vector,
       return hypre_error_flag;
    }
 
-   HYPRE_Int exec = hypre_GetExecPolicy1( hypre_IJVectorMemoryLocation(vector) );
-   hypre_assert(exec != HYPRE_EXEC_UNSET);
+   HYPRE_ExecuctionPolicy exec = hypre_GetExecPolicy1( hypre_IJVectorMemoryLocation(vector) );
 
    if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
    {
@@ -357,8 +356,7 @@ HYPRE_IJVectorAddToValues( HYPRE_IJVector        vector,
       return hypre_error_flag;
    }
 
-   HYPRE_Int exec = hypre_GetExecPolicy1( hypre_IJVectorMemoryLocation(vector) );
-   hypre_assert(exec != HYPRE_EXEC_UNSET);
+   HYPRE_ExecuctionPolicy exec = hypre_GetExecPolicy1( hypre_IJVectorMemoryLocation(vector) );
 
    if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
    {
@@ -396,8 +394,7 @@ HYPRE_IJVectorAssemble( HYPRE_IJVector vector )
       return hypre_error_flag;
    }
 
-   HYPRE_Int exec = hypre_GetExecPolicy1( hypre_IJVectorMemoryLocation(vector) );
-   hypre_assert(exec != HYPRE_EXEC_UNSET);
+   HYPRE_ExecuctionPolicy exec = hypre_GetExecPolicy1( hypre_IJVectorMemoryLocation(vector) );
 
    if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
    {

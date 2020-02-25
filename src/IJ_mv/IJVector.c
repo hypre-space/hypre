@@ -69,9 +69,9 @@ hypre_IJVectorZeroValues( HYPRE_IJVector vector )
    else */
 
    if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
-
+   {
       return( hypre_IJVectorZeroValuesPar(vec) );
-
+   }
    else
    {
       hypre_printf("Unrecognized object type -- hypre_IJVectorZeroValues\n");

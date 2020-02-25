@@ -527,7 +527,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
       else
       {
          A_diag = hypre_ParCSRMatrixDiag(A_array[level]);
-         if ( hypre_GetActualMemLocation(hypre_CSRMatrixMemoryLocation(A_diag)) != HYPRE_MEMORY_HOST )
+         if ( hypre_GetActualMemLocation(hypre_CSRMatrixMemoryLocation(A_diag)) != hypre_MEMORY_HOST )
          {
             A_diag_clone = hypre_CSRMatrixClone_v2(A_diag, 1, HYPRE_MEMORY_HOST);
          }
@@ -539,7 +539,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
          A_diag_i = hypre_CSRMatrixI(A_diag_clone);
 
          A_offd = hypre_ParCSRMatrixOffd(A_array[level]);
-         if ( hypre_GetActualMemLocation(hypre_CSRMatrixMemoryLocation(A_offd)) != HYPRE_MEMORY_HOST )
+         if ( hypre_GetActualMemLocation(hypre_CSRMatrixMemoryLocation(A_offd)) != hypre_MEMORY_HOST )
          {
             A_offd_clone = hypre_CSRMatrixClone_v2(A_offd, 1, HYPRE_MEMORY_HOST);
          }
@@ -825,7 +825,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
       else
       {
          P_diag = hypre_ParCSRMatrixDiag(P_array[level]);
-         if ( hypre_GetActualMemLocation(hypre_CSRMatrixMemoryLocation(P_diag)) != HYPRE_MEMORY_HOST )
+         if ( hypre_GetActualMemLocation(hypre_CSRMatrixMemoryLocation(P_diag)) != hypre_MEMORY_HOST )
          {
             P_diag_clone = hypre_CSRMatrixClone_v2(P_diag, 1, HYPRE_MEMORY_HOST);
          }
@@ -837,7 +837,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
          P_diag_i = hypre_CSRMatrixI(P_diag_clone);
 
          P_offd = hypre_ParCSRMatrixOffd(P_array[level]);
-         if ( hypre_GetActualMemLocation(hypre_CSRMatrixMemoryLocation(P_offd)) != HYPRE_MEMORY_HOST )
+         if ( hypre_GetActualMemLocation(hypre_CSRMatrixMemoryLocation(P_offd)) != hypre_MEMORY_HOST )
          {
             P_offd_clone = hypre_CSRMatrixClone_v2(P_offd, 1, HYPRE_MEMORY_HOST);
          }

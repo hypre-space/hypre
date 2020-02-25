@@ -45,18 +45,21 @@ hypre_CSRMatrixAddHost ( hypre_CSRMatrix *A,
    HYPRE_Int         pos;
    HYPRE_Int         *marker;
 
+   HYPRE_MemoryLocation memory_location = hypre_CSRMatrixMemoryLocation(A);
+
    if (nrows_A != nrows_B || ncols_A != ncols_B)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Warning! incompatible matrix dimensions!\n");
       return NULL;
    }
 
-
-   marker = hypre_CTAlloc(HYPRE_Int,  ncols_A, HYPRE_MEMORY_HOST);
-   C_i = hypre_CTAlloc(HYPRE_Int,  nrows_A+1, HYPRE_MEMORY_SHARED);
+   marker = hypre_CTAlloc(HYPRE_Int, ncols_A, HYPRE_MEMORY_HOST);
+   C_i = hypre_CTAlloc(HYPRE_Int, nrows_A+1, memory_location);
 
    for (ia = 0; ia < ncols_A; ia++)
+   {
       marker[ia] = -1;
+   }
 
    num_nonzeros = 0;
    C_i[0] = 0;
@@ -82,13 +85,14 @@ hypre_CSRMatrixAddHost ( hypre_CSRMatrix *A,
 
    C = hypre_CSRMatrixCreate(nrows_A, ncols_A, num_nonzeros);
    hypre_CSRMatrixI(C) = C_i;
-   hypre_CSRMatrixInitialize(C);
+   hypre_CSRMatrixInitialize_v2(C, 0, memory_location);
    C_j = hypre_CSRMatrixJ(C);
    C_data = hypre_CSRMatrixData(C);
 
    for (ia = 0; ia < ncols_A; ia++)
+   {
       marker[ia] = -1;
-
+   }
    pos = 0;
    for (ic = 0; ic < nrows_A; ic++)
    {
@@ -126,21 +130,19 @@ hypre_CSRMatrix*
 hypre_CSRMatrixAdd( hypre_CSRMatrix *A,
                     hypre_CSRMatrix *B)
 {
-   HYPRE_Int exec = hypre_GetExecPolicy2( hypre_CSRMatrixMemoryLocation(A),
-                                          hypre_CSRMatrixMemoryLocation(B) );
-
-   hypre_assert(exec != HYPRE_EXEC_UNSET);
+   HYPRE_ExecuctionPolicy exec = hypre_GetExecPolicy2( hypre_CSRMatrixMemoryLocation(A),
+                                                       hypre_CSRMatrixMemoryLocation(B) );
 
    hypre_CSRMatrix *C = NULL;
 
    if (exec == HYPRE_EXEC_HOST)
    {
-      C = hypre_CSRMatrixAddHost(A,B);
+      C = hypre_CSRMatrixAddHost(A, B);
    }
 #if defined(HYPRE_USING_CUDA)
    else
    {
-      C = hypre_CSRMatrixAddDevice(A,B);
+      C = hypre_CSRMatrixAddDevice(A, B);
    }
 #endif
 
@@ -179,18 +181,21 @@ hypre_CSRMatrixBigAdd( hypre_CSRMatrix *A,
    HYPRE_Int         pos;
    HYPRE_Int         *marker;
 
+   HYPRE_MemoryLocation memory_location = hypre_CSRMatrixMemoryLocation(A);
+
    if (nrows_A != nrows_B || ncols_A != ncols_B)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Warning! incompatible matrix dimensions!\n");
       return NULL;
    }
 
-
-   marker = hypre_CTAlloc(HYPRE_Int,  ncols_A, HYPRE_MEMORY_HOST);
-   C_i = hypre_CTAlloc(HYPRE_Int,  nrows_A+1, HYPRE_MEMORY_SHARED);
+   marker = hypre_CTAlloc(HYPRE_Int, ncols_A, HYPRE_MEMORY_HOST);
+   C_i = hypre_CTAlloc(HYPRE_Int, nrows_A+1, memory_location);
 
    for (ia = 0; ia < ncols_A; ia++)
+   {
       marker[ia] = -1;
+   }
 
    num_nonzeros = 0;
    C_i[0] = 0;
@@ -216,12 +221,14 @@ hypre_CSRMatrixBigAdd( hypre_CSRMatrix *A,
 
    C = hypre_CSRMatrixCreate(nrows_A, ncols_A, num_nonzeros);
    hypre_CSRMatrixI(C) = C_i;
-   hypre_CSRMatrixBigInitialize(C);
+   hypre_CSRMatrixInitialize_v2(C, 1, memory_location);
    C_j = hypre_CSRMatrixBigJ(C);
    C_data = hypre_CSRMatrixData(C);
 
    for (ia = 0; ia < ncols_A; ia++)
+   {
       marker[ia] = -1;
+   }
 
    pos = 0;
    for (ic = 0; ic < nrows_A; ic++)
@@ -289,19 +296,24 @@ hypre_CSRMatrixMultiplyHost( hypre_CSRMatrix *A,
    HYPRE_Int         max_num_threads;
    HYPRE_Int         *jj_count;
 
+   HYPRE_MemoryLocation memory_location = hypre_CSRMatrixMemoryLocation(A);
+
    if (ncols_A != nrows_B)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Warning! incompatible matrix dimensions!\n");
       return NULL;
    }
 
-   if (nrows_A == ncols_B) allsquare = 1;
+   if (nrows_A == ncols_B)
+   {
+      allsquare = 1;
+   }
 
-   C_i = hypre_CTAlloc(HYPRE_Int,  nrows_A+1, HYPRE_MEMORY_SHARED);
+   C_i = hypre_CTAlloc(HYPRE_Int, nrows_A+1, memory_location);
 
    max_num_threads = hypre_NumThreads();
 
-   jj_count = hypre_CTAlloc(HYPRE_Int,  max_num_threads, HYPRE_MEMORY_HOST);
+   jj_count = hypre_CTAlloc(HYPRE_Int, max_num_threads, HYPRE_MEMORY_HOST);
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel private(ia, ib, ic, ja, jb, num_nonzeros, row_start, counter, a_entry, b_entry)
@@ -327,7 +339,7 @@ hypre_CSRMatrixMultiplyHost( hypre_CSRMatrix *A,
          ne = (ii+1)*size+rest;
       }
 
-      B_marker = hypre_CTAlloc(HYPRE_Int,  ncols_B, HYPRE_MEMORY_HOST);
+      B_marker = hypre_CTAlloc(HYPRE_Int, ncols_B, HYPRE_MEMORY_HOST);
 
       for (ib = 0; ib < ncols_B; ib++)
          B_marker[ib] = -1;
@@ -378,7 +390,7 @@ hypre_CSRMatrixMultiplyHost( hypre_CSRMatrix *A,
 
          C = hypre_CSRMatrixCreate(nrows_A, ncols_B, C_i[nrows_A]);
          hypre_CSRMatrixI(C) = C_i;
-         hypre_CSRMatrixInitialize(C);
+         hypre_CSRMatrixInitialize_v2(C, 0, memory_location);
          C_j = hypre_CSRMatrixJ(C);
          C_data = hypre_CSRMatrixData(C);
       }
@@ -431,10 +443,8 @@ hypre_CSRMatrix*
 hypre_CSRMatrixMultiply( hypre_CSRMatrix *A,
                          hypre_CSRMatrix *B)
 {
-   HYPRE_Int exec = hypre_GetExecPolicy2( hypre_CSRMatrixMemoryLocation(A),
-                                          hypre_CSRMatrixMemoryLocation(B) );
-
-   hypre_assert(exec != HYPRE_EXEC_UNSET);
+   HYPRE_ExecuctionPolicy exec = hypre_GetExecPolicy2( hypre_CSRMatrixMemoryLocation(A),
+                                                       hypre_CSRMatrixMemoryLocation(B) );
 
    hypre_CSRMatrix *C = NULL;
 
@@ -554,12 +564,14 @@ hypre_CSRMatrixTransposeHost(hypre_CSRMatrix  *A,
    HYPRE_Int           max_col;
    HYPRE_Int           i, j;
 
+   HYPRE_MemoryLocation memory_location = hypre_CSRMatrixMemoryLocation(A);
+
    /*--------------------------------------------------------------
     * First, ascertain that num_cols and num_nonzeros has been set.
     * If not, set them.
     *--------------------------------------------------------------*/
 
-   if (! num_nonzerosA)
+   if (!num_nonzerosA)
    {
       num_nonzerosA = A_i[num_rowsA];
    }
@@ -572,7 +584,9 @@ hypre_CSRMatrixTransposeHost(hypre_CSRMatrix  *A,
          for (j = A_i[i]; j < A_i[i+1]; j++)
          {
             if (A_j[j] > max_col)
+            {
                max_col = A_j[j];
+            }
          }
       }
       num_colsA = max_col+1;
@@ -583,6 +597,7 @@ hypre_CSRMatrixTransposeHost(hypre_CSRMatrix  *A,
    num_nonzerosAT = num_nonzerosA;
 
    *AT = hypre_CSRMatrixCreate(num_rowsAT, num_colsAT, num_nonzerosAT);
+   hypre_CSRMatrixMemoryLocation(*AT) = memory_location;
 
    if (0 == num_colsA)
    {
@@ -592,131 +607,139 @@ hypre_CSRMatrixTransposeHost(hypre_CSRMatrix  *A,
       return 0;
    }
 
-   AT_j = hypre_CTAlloc(HYPRE_Int,  num_nonzerosAT, HYPRE_MEMORY_SHARED);
+   AT_j = hypre_CTAlloc(HYPRE_Int, num_nonzerosAT, memory_location);
    hypre_CSRMatrixJ(*AT) = AT_j;
    if (data)
    {
-      AT_data = hypre_CTAlloc(HYPRE_Complex,  num_nonzerosAT, HYPRE_MEMORY_SHARED);
+      AT_data = hypre_CTAlloc(HYPRE_Complex, num_nonzerosAT, memory_location);
       hypre_CSRMatrixData(*AT) = AT_data;
    }
 
    /*-----------------------------------------------------------------
     * Parallel count sort
     *-----------------------------------------------------------------*/
-
-   HYPRE_Int *bucket = hypre_TAlloc(
-    HYPRE_Int,  (num_colsA + 1)*hypre_NumThreads(), HYPRE_MEMORY_SHARED);
+   HYPRE_Int *bucket = hypre_TAlloc(HYPRE_Int, (num_colsA + 1)*hypre_NumThreads(), HYPRE_MEMORY_HOST);
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel
 #endif
    {
-   HYPRE_Int num_threads = hypre_NumActiveThreads();
-   HYPRE_Int my_thread_num = hypre_GetThreadNum();
+      HYPRE_Int num_threads = hypre_NumActiveThreads();
+      HYPRE_Int my_thread_num = hypre_GetThreadNum();
 
-   HYPRE_Int iBegin = hypre_CSRMatrixGetLoadBalancedPartitionBegin(A);
-   HYPRE_Int iEnd = hypre_CSRMatrixGetLoadBalancedPartitionEnd(A);
-   hypre_assert(iBegin <= iEnd);
-   hypre_assert(iBegin >= 0 && iBegin <= num_rowsA);
-   hypre_assert(iEnd >= 0 && iEnd <= num_rowsA);
+      HYPRE_Int iBegin = hypre_CSRMatrixGetLoadBalancedPartitionBegin(A);
+      HYPRE_Int iEnd = hypre_CSRMatrixGetLoadBalancedPartitionEnd(A);
+      hypre_assert(iBegin <= iEnd);
+      hypre_assert(iBegin >= 0 && iBegin <= num_rowsA);
+      hypre_assert(iEnd >= 0 && iEnd <= num_rowsA);
 
-   HYPRE_Int i, j;
-   memset(bucket + my_thread_num*num_colsA, 0, sizeof(HYPRE_Int)*num_colsA);
+      HYPRE_Int i, j;
+      memset(bucket + my_thread_num*num_colsA, 0, sizeof(HYPRE_Int)*num_colsA);
 
-   /*-----------------------------------------------------------------
-    * Count the number of entries that will go into each bucket
-    * bucket is used as HYPRE_Int[num_threads][num_colsA] 2D array
-    *-----------------------------------------------------------------*/
+      /*-----------------------------------------------------------------
+       * Count the number of entries that will go into each bucket
+       * bucket is used as HYPRE_Int[num_threads][num_colsA] 2D array
+       *-----------------------------------------------------------------*/
 
-   for (j = A_i[iBegin]; j < A_i[iEnd]; ++j) {
-     HYPRE_Int idx = A_j[j];
-     bucket[my_thread_num*num_colsA + idx]++;
-   }
+      for (j = A_i[iBegin]; j < A_i[iEnd]; ++j)
+      {
+         HYPRE_Int idx = A_j[j];
+         bucket[my_thread_num*num_colsA + idx]++;
+      }
 
-   /*-----------------------------------------------------------------
-    * Parallel prefix sum of bucket with length num_colsA * num_threads
-    * accessed as if it is transposed as HYPRE_Int[num_colsA][num_threads]
-    *-----------------------------------------------------------------*/
+      /*-----------------------------------------------------------------
+       * Parallel prefix sum of bucket with length num_colsA * num_threads
+       * accessed as if it is transposed as HYPRE_Int[num_colsA][num_threads]
+       *-----------------------------------------------------------------*/
 #ifdef HYPRE_USING_OPENMP
 #pragma omp barrier
 #endif
 
-   for (i = my_thread_num*num_colsA + 1; i < (my_thread_num + 1)*num_colsA; ++i) {
-     HYPRE_Int transpose_i = transpose_idx(i, num_threads, num_colsA);
-     HYPRE_Int transpose_i_minus_1 = transpose_idx(i - 1, num_threads, num_colsA);
+      for (i = my_thread_num*num_colsA + 1; i < (my_thread_num + 1)*num_colsA; ++i)
+      {
+         HYPRE_Int transpose_i = transpose_idx(i, num_threads, num_colsA);
+         HYPRE_Int transpose_i_minus_1 = transpose_idx(i - 1, num_threads, num_colsA);
 
-     bucket[transpose_i] += bucket[transpose_i_minus_1];
-   }
+         bucket[transpose_i] += bucket[transpose_i_minus_1];
+      }
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp barrier
 #pragma omp master
 #endif
-   {
-     for (i = 1; i < num_threads; ++i) {
-       HYPRE_Int j0 = num_colsA*i - 1, j1 = num_colsA*(i + 1) - 1;
-       HYPRE_Int transpose_j0 = transpose_idx(j0, num_threads, num_colsA);
-       HYPRE_Int transpose_j1 = transpose_idx(j1, num_threads, num_colsA);
+      {
+         for (i = 1; i < num_threads; ++i)
+         {
+            HYPRE_Int j0 = num_colsA*i - 1, j1 = num_colsA*(i + 1) - 1;
+            HYPRE_Int transpose_j0 = transpose_idx(j0, num_threads, num_colsA);
+            HYPRE_Int transpose_j1 = transpose_idx(j1, num_threads, num_colsA);
 
-       bucket[transpose_j1] += bucket[transpose_j0];
-     }
-   }
+            bucket[transpose_j1] += bucket[transpose_j0];
+         }
+      }
 #ifdef HYPRE_USING_OPENMP
 #pragma omp barrier
 #endif
 
-   if (my_thread_num > 0) {
-     HYPRE_Int transpose_i0 = transpose_idx(num_colsA*my_thread_num - 1, num_threads, num_colsA);
-     HYPRE_Int offset = bucket[transpose_i0];
+      if (my_thread_num > 0)
+      {
+         HYPRE_Int transpose_i0 = transpose_idx(num_colsA*my_thread_num - 1, num_threads, num_colsA);
+         HYPRE_Int offset = bucket[transpose_i0];
 
-     for (i = my_thread_num*num_colsA; i < (my_thread_num + 1)*num_colsA - 1; ++i) {
-       HYPRE_Int transpose_i = transpose_idx(i, num_threads, num_colsA);
+         for (i = my_thread_num*num_colsA; i < (my_thread_num + 1)*num_colsA - 1; ++i)
+         {
+            HYPRE_Int transpose_i = transpose_idx(i, num_threads, num_colsA);
 
-       bucket[transpose_i] += offset;
-     }
-   }
+            bucket[transpose_i] += offset;
+         }
+      }
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp barrier
 #endif
 
-   /*----------------------------------------------------------------
-    * Load the data and column numbers of AT
-    *----------------------------------------------------------------*/
+      /*----------------------------------------------------------------
+       * Load the data and column numbers of AT
+       *----------------------------------------------------------------*/
 
-   if (data) {
-      for (i = iEnd - 1; i >= iBegin; --i) {
-        for (j = A_i[i + 1] - 1; j >= A_i[i]; --j) {
-          HYPRE_Int idx = A_j[j];
-          --bucket[my_thread_num*num_colsA + idx];
+      if (data)
+      {
+         for (i = iEnd - 1; i >= iBegin; --i)
+         {
+            for (j = A_i[i + 1] - 1; j >= A_i[i]; --j)
+            {
+               HYPRE_Int idx = A_j[j];
+               --bucket[my_thread_num*num_colsA + idx];
 
-          HYPRE_Int offset = bucket[my_thread_num*num_colsA + idx];
+               HYPRE_Int offset = bucket[my_thread_num*num_colsA + idx];
 
-          AT_data[offset] = A_data[j];
-          AT_j[offset] = i;
-        }
+               AT_data[offset] = A_data[j];
+               AT_j[offset] = i;
+            }
+         }
       }
-   }
-   else {
-      for (i = iEnd - 1; i >= iBegin; --i) {
-        for (j = A_i[i + 1] - 1; j >= A_i[i]; --j) {
-          HYPRE_Int idx = A_j[j];
-          --bucket[my_thread_num*num_colsA + idx];
+      else
+      {
+         for (i = iEnd - 1; i >= iBegin; --i)
+         {
+            for (j = A_i[i + 1] - 1; j >= A_i[i]; --j)
+            {
+               HYPRE_Int idx = A_j[j];
+               --bucket[my_thread_num*num_colsA + idx];
 
-          HYPRE_Int offset = bucket[my_thread_num*num_colsA + idx];
+               HYPRE_Int offset = bucket[my_thread_num*num_colsA + idx];
 
-          AT_j[offset] = i;
-        }
+               AT_j[offset] = i;
+            }
+         }
       }
-   }
    } /*end parallel region */
 
-   hypre_CSRMatrixI(*AT) = bucket;
-      // JSP: bucket is hypre_NumThreads() times longer than
-      // the size needed for AT_i, but this should be OK.
-      // If the memory size is a concern, we can allocate
-      // a new memory for AT_i and copy from bucket.
+   hypre_CSRMatrixI(*AT) = hypre_TAlloc(HYPRE_Int, num_colsA + 1, memory_location);
+   hypre_TMemcpy(hypre_CSRMatrixI(*AT), bucket, HYPRE_Int, num_colsA + 1, memory_location, HYPRE_MEMORY_HOST);
    hypre_CSRMatrixI(*AT)[num_colsA] = num_nonzerosA;
+
+   hypre_TFree(bucket, HYPRE_MEMORY_HOST);
 
    return (0);
 }
@@ -727,9 +750,7 @@ hypre_CSRMatrixTranspose(hypre_CSRMatrix  *A,
                          hypre_CSRMatrix **AT,
                          HYPRE_Int         data)
 {
-   HYPRE_Int exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(A) );
-
-   hypre_assert(exec != HYPRE_EXEC_UNSET);
+   HYPRE_ExecuctionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(A) );
 
    HYPRE_Int ierr = 0;
 
@@ -1071,6 +1092,8 @@ hypre_CSRMatrixAddPartial( hypre_CSRMatrix *A,
    HYPRE_Int         *map;
    HYPRE_Int         *temp;
 
+   HYPRE_MemoryLocation memory_location = hypre_CSRMatrixMemoryLocation(A);
+
    if (ncols_A != ncols_B)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Warning! incompatible matrix dimensions!\n");
@@ -1088,10 +1111,12 @@ hypre_CSRMatrixAddPartial( hypre_CSRMatrix *A,
    hypre_qsort2i(temp,map,0,nrows_B-1);
 
    marker = hypre_CTAlloc(HYPRE_Int, ncols_A, HYPRE_MEMORY_HOST);
-   C_i = hypre_CTAlloc(HYPRE_Int, nrows_A+1, HYPRE_MEMORY_SHARED);
+   C_i = hypre_CTAlloc(HYPRE_Int, nrows_A+1, memory_location);
 
    for (ia = 0; ia < ncols_A; ia++)
+   {
       marker[ia] = -1;
+   }
 
    num_nonzeros = 0;
    C_i[0] = 0;
@@ -1122,7 +1147,9 @@ hypre_CSRMatrixAddPartial( hypre_CSRMatrix *A,
                }
             }
             else
+            {
                break;
+            }
          }
       }
       C_i[ic+1] = num_nonzeros;
@@ -1130,12 +1157,14 @@ hypre_CSRMatrixAddPartial( hypre_CSRMatrix *A,
 
    C = hypre_CSRMatrixCreate(nrows_A, ncols_A, num_nonzeros);
    hypre_CSRMatrixI(C) = C_i;
-   hypre_CSRMatrixInitialize(C);
+   hypre_CSRMatrixInitialize_v2(C, 0, memory_location);
    C_j = hypre_CSRMatrixJ(C);
    C_data = hypre_CSRMatrixData(C);
 
    for (ia = 0; ia < ncols_A; ia++)
+   {
       marker[ia] = -1;
+   }
 
    cnt = 0;
    pos = 0;
@@ -1173,7 +1202,9 @@ hypre_CSRMatrixAddPartial( hypre_CSRMatrix *A,
                }
             }
             else
+            {
                break;
+            }
          }
       }
    }
@@ -1181,6 +1212,7 @@ hypre_CSRMatrixAddPartial( hypre_CSRMatrix *A,
    hypre_TFree(marker, HYPRE_MEMORY_HOST);
    hypre_TFree(map, HYPRE_MEMORY_HOST);
    hypre_TFree(temp, HYPRE_MEMORY_HOST);
+
    return C;
 }
 
@@ -1285,9 +1317,7 @@ hypre_CSRMatrixComputeRowSum( hypre_CSRMatrix *A,
 {
    hypre_assert( (CF_i && CF_j) || (!CF_i && !CF_j) );
 
-   HYPRE_Int exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(A) );
-
-   hypre_assert(exec != HYPRE_EXEC_UNSET);
+   HYPRE_ExecuctionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(A) );
 
    if (exec == HYPRE_EXEC_HOST)
    {
@@ -1343,9 +1373,7 @@ hypre_CSRMatrixExtractDiagonal( hypre_CSRMatrix *A,
                                 HYPRE_Complex   *d,
                                 HYPRE_Int        type)
 {
-   HYPRE_Int exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(A) );
-
-   hypre_assert(exec != HYPRE_EXEC_UNSET);
+   HYPRE_ExecuctionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(A) );
 
    if (exec == HYPRE_EXEC_HOST)
    {

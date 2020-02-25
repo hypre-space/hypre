@@ -120,7 +120,7 @@ hypre_IJMatrixCreateParCSR(hypre_IJMatrix *matrix)
       col_starts = row_starts;
    }
 
-   par_matrix = hypre_ParCSRMatrixCreate(comm,row_starts[num_procs],
+   par_matrix = hypre_ParCSRMatrixCreate(comm, row_starts[num_procs],
                                          col_starts[num_procs],
                                          row_starts, col_starts, 0, 0, 0);
 #endif
@@ -326,37 +326,18 @@ hypre_IJMatrixSetMaxOffProcElmtsParCSR(hypre_IJMatrix *matrix,
 HYPRE_Int
 hypre_IJMatrixInitializeParCSR(hypre_IJMatrix *matrix)
 {
-   return hypre_IJMatrixInitializeParCSR_v2(matrix, HYPRE_MEMORY_SHARED);
+   return hypre_IJMatrixInitializeParCSR_v2(matrix, hypre_HandleMemoryLocation(hypre_handle));
 }
 
 HYPRE_Int
-hypre_IJMatrixInitializeParCSR_v2(hypre_IJMatrix *matrix, HYPRE_Int memory_location)
+hypre_IJMatrixInitializeParCSR_v2(hypre_IJMatrix *matrix, HYPRE_MemoryLocation memory_location)
 {
    hypre_ParCSRMatrix    *par_matrix = (hypre_ParCSRMatrix *)    hypre_IJMatrixObject(matrix);
    hypre_AuxParCSRMatrix *aux_matrix = (hypre_AuxParCSRMatrix *) hypre_IJMatrixTranslator(matrix);
    HYPRE_Int local_num_rows;
 
-   HYPRE_Int memory_location_aux = HYPRE_MEMORY_UNSET;
-
-   if (hypre_GetActualMemLocation(memory_location) == HYPRE_MEMORY_HOST)
-   {
-      memory_location_aux = HYPRE_MEMORY_HOST;
-   }
-   else if (hypre_GetActualMemLocation(memory_location) == HYPRE_MEMORY_SHARED)
-   {
-      if (hypre_GetExecPolicy1(HYPRE_MEMORY_SHARED) == HYPRE_EXEC_HOST)
-      {
-         memory_location_aux = HYPRE_MEMORY_HOST;
-      }
-      else
-      {
-         memory_location_aux = HYPRE_MEMORY_DEVICE;
-      }
-   }
-   else if (hypre_GetActualMemLocation(memory_location) == HYPRE_MEMORY_DEVICE)
-   {
-      memory_location_aux = HYPRE_MEMORY_DEVICE;
-   }
+   HYPRE_MemoryLocation memory_location_aux =
+      hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_HOST ? HYPRE_MEMORY_HOST : HYPRE_MEMORY_DEVICE;
 
    if (hypre_IJMatrixAssembleFlag(matrix) == 0)
    {
@@ -414,7 +395,7 @@ hypre_IJMatrixInitializeParCSR_v2(hypre_IJMatrix *matrix, HYPRE_Int memory_locat
          }
       }
    }
-   else if ( hypre_GetActualMemLocation(memory_location_aux) == HYPRE_MEMORY_HOST )
+   else if ( memory_location_aux == HYPRE_MEMORY_HOST )
    {
       /* AB 4/06 - the assemble routine destroys the aux matrix - so we need
          to recreate if initialize is called again
@@ -1155,10 +1136,7 @@ hypre_IJMatrixSetConstantValuesParCSR( hypre_IJMatrix *matrix,
       HYPRE_Int           nnz_diag   = hypre_CSRMatrixNumNonzeros(diag);
       HYPRE_Int           nnz_offd   = hypre_CSRMatrixNumNonzeros(offd);
 
-      HYPRE_Int exec = hypre_GetExecPolicy1( hypre_IJMatrixMemoryLocation(matrix) );
-      hypre_assert(exec != HYPRE_EXEC_UNSET);
-
-      if (exec == HYPRE_EXEC_HOST)
+      if (hypre_GetExecPolicy1(hypre_IJMatrixMemoryLocation(matrix)) == HYPRE_EXEC_HOST)
       {
          HYPRE_Int ii;
 
@@ -1756,14 +1734,14 @@ hypre_IJMatrixDestroyParCSR(hypre_IJMatrix *matrix)
 #ifndef HYPRE_NO_GLOBAL_PARTITION
 
 HYPRE_Int
-hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix,
-                                         HYPRE_Int       off_proc_i_indx,
-                                         HYPRE_Int       max_off_proc_elmts,
-                                         HYPRE_Int       current_num_elmts,
-                                         HYPRE_Int       memory_location,
-                                         HYPRE_BigInt   *off_proc_i,
-                                         HYPRE_BigInt   *off_proc_j,
-                                         HYPRE_Complex  *off_proc_data )
+hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix       *matrix,
+                                         HYPRE_Int             off_proc_i_indx,
+                                         HYPRE_Int             max_off_proc_elmts,
+                                         HYPRE_Int             current_num_elmts,
+                                         HYPRE_MemoryLocation  memory_location,
+                                         HYPRE_BigInt         *off_proc_i,
+                                         HYPRE_BigInt         *off_proc_j,
+                                         HYPRE_Complex        *off_proc_data )
 {
    MPI_Comm comm = hypre_IJMatrixComm(matrix);
    hypre_MPI_Request *requests = NULL;
@@ -2035,14 +2013,14 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix,
 /* assumed partition version */
 
 HYPRE_Int
-hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix  *matrix,
-                                         HYPRE_Int        off_proc_i_indx,
-                                         HYPRE_Int        max_off_proc_elmts,
-                                         HYPRE_Int        current_num_elmts,
-                                         HYPRE_Int        memory_location,
-                                         HYPRE_BigInt    *off_proc_i,
-                                         HYPRE_BigInt    *off_proc_j,
-                                         HYPRE_Complex   *off_proc_data )
+hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix       *matrix,
+                                         HYPRE_Int             off_proc_i_indx,
+                                         HYPRE_Int             max_off_proc_elmts,
+                                         HYPRE_Int             current_num_elmts,
+                                         HYPRE_MemoryLocation  memory_location,
+                                         HYPRE_BigInt         *off_proc_i,
+                                         HYPRE_BigInt         *off_proc_j,
+                                         HYPRE_Complex        *off_proc_data )
 {
    MPI_Comm comm = hypre_IJMatrixComm(matrix);
 
@@ -2105,7 +2083,7 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix  *matrix,
    global_first_col = hypre_IJMatrixGlobalFirstCol(matrix);
    global_first_row = hypre_IJMatrixGlobalFirstRow(matrix);
 
-   if (hypre_GetActualMemLocation(memory_location) == HYPRE_MEMORY_DEVICE)
+   if (memory_location == HYPRE_MEMORY_DEVICE)
    {
       HYPRE_BigInt  *tmp             = hypre_TAlloc(HYPRE_BigInt,    current_num_elmts, HYPRE_MEMORY_HOST);
       HYPRE_BigInt  *off_proc_i_h    = hypre_TAlloc(HYPRE_BigInt,  2*current_num_elmts, HYPRE_MEMORY_HOST);
@@ -2131,7 +2109,7 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix  *matrix,
       hypre_TFree(tmp, HYPRE_MEMORY_HOST);
    }
 
-   /* call hypre_IJMatrixAddToValuesParCSR directly inside this function 
+   /* call hypre_IJMatrixAddToValuesParCSR directly inside this function
     * with one chunk of data */
    HYPRE_Int      off_proc_nelm_recv_cur = 0;
    HYPRE_Int      off_proc_nelm_recv_max = 0;
@@ -2587,7 +2565,7 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix  *matrix,
 
          }
 
-         if (hypre_GetActualMemLocation(memory_location) == HYPRE_MEMORY_HOST)
+         if (memory_location == HYPRE_MEMORY_HOST)
          {
             hypre_IJMatrixAddToValuesParCSR(matrix, 1, &num_elements, &row, &row_index, col_ptr, col_data_ptr);
          }
@@ -2620,7 +2598,7 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix  *matrix,
       }
    }
 
-   if (hypre_GetActualMemLocation(memory_location) == HYPRE_MEMORY_DEVICE)
+   if (memory_location == HYPRE_MEMORY_DEVICE)
    {
       off_proc_i_recv_d    = hypre_TAlloc(HYPRE_BigInt,  off_proc_nelm_recv_cur, HYPRE_MEMORY_DEVICE);
       off_proc_j_recv_d    = hypre_TAlloc(HYPRE_BigInt,  off_proc_nelm_recv_cur, HYPRE_MEMORY_DEVICE);
@@ -2654,7 +2632,7 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix  *matrix,
       hypre_TFree(complex_data, HYPRE_MEMORY_HOST);
    }
 
-   if (hypre_GetActualMemLocation(memory_location) == HYPRE_MEMORY_DEVICE)
+   if (memory_location == HYPRE_MEMORY_DEVICE)
    {
       hypre_TFree(off_proc_i,    HYPRE_MEMORY_HOST);
       hypre_TFree(off_proc_j,    HYPRE_MEMORY_HOST);

@@ -305,7 +305,7 @@ HYPRE_IJMatrixInitialize( HYPRE_IJMatrix matrix )
 }
 
 HYPRE_Int
-HYPRE_IJMatrixInitialize_v2( HYPRE_IJMatrix matrix, HYPRE_Int memory_location )
+HYPRE_IJMatrixInitialize_v2( HYPRE_IJMatrix matrix, HYPRE_MemoryLocation memory_location )
 {
    hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
 
@@ -535,9 +535,7 @@ HYPRE_IJMatrixSetValues2( HYPRE_IJMatrix       matrix,
       return hypre_error_flag;
    }
 
-   HYPRE_Int exec = hypre_GetExecPolicy1( hypre_IJMatrixMemoryLocation(matrix) );
-
-   hypre_assert(exec != HYPRE_EXEC_UNSET);
+   HYPRE_ExecuctionPolicy exec = hypre_GetExecPolicy1( hypre_IJMatrixMemoryLocation(matrix) );
 
    if (exec == HYPRE_EXEC_HOST)
    {
@@ -744,9 +742,7 @@ HYPRE_IJMatrixAddToValues2( HYPRE_IJMatrix       matrix,
       return hypre_error_flag;
    }
 
-   HYPRE_Int exec = hypre_GetExecPolicy1( hypre_IJMatrixMemoryLocation(matrix) );
-
-   hypre_assert(exec != HYPRE_EXEC_UNSET);
+   HYPRE_ExecuctionPolicy exec = hypre_GetExecPolicy1( hypre_IJMatrixMemoryLocation(matrix) );
 
    if (exec == HYPRE_EXEC_HOST)
    {
@@ -812,9 +808,7 @@ HYPRE_IJMatrixAssemble( HYPRE_IJMatrix matrix )
       return hypre_error_flag;
    }
 
-   HYPRE_Int exec = hypre_GetExecPolicy1( hypre_IJMatrixMemoryLocation(matrix) );
-
-   hypre_assert(exec != HYPRE_EXEC_UNSET);
+   HYPRE_ExecuctionPolicy exec = hypre_GetExecPolicy1( hypre_IJMatrixMemoryLocation(matrix) );
 
    if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
    {

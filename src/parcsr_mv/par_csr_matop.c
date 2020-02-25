@@ -63,10 +63,10 @@ void hypre_ParMatmul_RowSizes(
       first_col_diag_B, n_cols_B, num_cols_offd_B, num_cols_diag_B
    */
 
-   *C_diag_i = hypre_CTAlloc(HYPRE_Int,  num_rows_diag_A+1, HYPRE_MEMORY_SHARED);
-   *C_offd_i = hypre_CTAlloc(HYPRE_Int,  num_rows_diag_A+1, HYPRE_MEMORY_SHARED);
-   jj_count_diag_array = hypre_CTAlloc(HYPRE_Int,  num_threads, HYPRE_MEMORY_HOST);
-   jj_count_offd_array = hypre_CTAlloc(HYPRE_Int,  num_threads, HYPRE_MEMORY_HOST);
+   *C_diag_i = hypre_CTAlloc(HYPRE_Int, num_rows_diag_A+1, HYPRE_MEMORY_DEVICE);
+   *C_offd_i = hypre_CTAlloc(HYPRE_Int, num_rows_diag_A+1, HYPRE_MEMORY_DEVICE);
+   jj_count_diag_array = hypre_CTAlloc(HYPRE_Int, num_threads, HYPRE_MEMORY_HOST);
+   jj_count_offd_array = hypre_CTAlloc(HYPRE_Int, num_threads, HYPRE_MEMORY_HOST);
    /*-----------------------------------------------------------------------
     *  Loop over rows of A
     *-----------------------------------------------------------------------*/
@@ -798,12 +798,12 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
     *-----------------------------------------------------------------------*/
 
    last_col_diag_B = first_col_diag_B + (HYPRE_BigInt)num_cols_diag_B - 1;
-   C_diag_data = hypre_CTAlloc(HYPRE_Complex,  C_diag_size, HYPRE_MEMORY_SHARED);
-   C_diag_j    = hypre_CTAlloc(HYPRE_Int,  C_diag_size, HYPRE_MEMORY_SHARED);
+   C_diag_data = hypre_CTAlloc(HYPRE_Complex, C_diag_size, HYPRE_MEMORY_DEVICE);
+   C_diag_j    = hypre_CTAlloc(HYPRE_Int, C_diag_size, HYPRE_MEMORY_DEVICE);
    if (C_offd_size)
    {
-      C_offd_data = hypre_CTAlloc(HYPRE_Complex,  C_offd_size, HYPRE_MEMORY_SHARED);
-      C_offd_j    = hypre_CTAlloc(HYPRE_Int,  C_offd_size, HYPRE_MEMORY_SHARED);
+      C_offd_data = hypre_CTAlloc(HYPRE_Complex, C_offd_size, HYPRE_MEMORY_DEVICE);
+      C_offd_j    = hypre_CTAlloc(HYPRE_Int, C_offd_size, HYPRE_MEMORY_DEVICE);
    }
 
    /*-----------------------------------------------------------------------
@@ -1660,8 +1660,6 @@ hypre_ParCSRMatrixExtractBExt( hypre_ParCSRMatrix *B,
    hypre_assert( hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(B)) ==
                  hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixOffd(B)) );
 
-   hypre_assert( hypre_GetActualMemLocation(hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(B))) != HYPRE_MEMORY_DEVICE );
-
    hypre_CSRMatrix *B_ext;
    void            *request;
 
@@ -1795,7 +1793,7 @@ hypre_ParCSRMatrixTranspose( hypre_ParCSRMatrix  *A,
 
    hypre_CSRMatrixTranspose( A_diag, &AT_diag, data);
 
-   AT_offd_i = hypre_CTAlloc(HYPRE_Int,  num_cols+1, HYPRE_MEMORY_SHARED);
+   AT_offd_i = hypre_CTAlloc(HYPRE_Int, num_cols+1, HYPRE_MEMORY_DEVICE);
 
    if (num_procs > 1)
    {
@@ -1861,9 +1859,12 @@ hypre_ParCSRMatrixTranspose( hypre_ParCSRMatrix  *A,
 
       if (AT_offd_i[num_cols])
       {
-         AT_offd_j = hypre_CTAlloc(HYPRE_Int,  AT_offd_i[num_cols], HYPRE_MEMORY_SHARED);
-         AT_big_j = hypre_CTAlloc(HYPRE_BigInt,  AT_offd_i[num_cols], HYPRE_MEMORY_HOST);
-         if (data) AT_offd_data = hypre_CTAlloc(HYPRE_Complex,  AT_offd_i[num_cols], HYPRE_MEMORY_SHARED);
+         AT_offd_j = hypre_CTAlloc(HYPRE_Int, AT_offd_i[num_cols], HYPRE_MEMORY_DEVICE);
+         AT_big_j = hypre_CTAlloc(HYPRE_BigInt, AT_offd_i[num_cols], HYPRE_MEMORY_HOST);
+         if (data)
+         {
+            AT_offd_data = hypre_CTAlloc(HYPRE_Complex,  AT_offd_i[num_cols], HYPRE_MEMORY_DEVICE);
+         }
       }
       else
       {
@@ -3479,8 +3480,8 @@ hypre_ParCSRMatrix *hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
 
    if (C_ext_size || num_cols_offd_B)
    {
-      C_diag_i = hypre_CTAlloc(HYPRE_Int,  num_cols_diag_A+1, HYPRE_MEMORY_SHARED);
-      C_offd_i = hypre_CTAlloc(HYPRE_Int,  num_cols_diag_A+1, HYPRE_MEMORY_SHARED);
+      C_diag_i = hypre_CTAlloc(HYPRE_Int, num_cols_diag_A+1, HYPRE_MEMORY_DEVICE);
+      C_offd_i = hypre_CTAlloc(HYPRE_Int, num_cols_diag_A+1, HYPRE_MEMORY_DEVICE);
 
       C_diag_array = hypre_CTAlloc(HYPRE_Int,  max_num_threads, HYPRE_MEMORY_HOST);
       C_offd_array = hypre_CTAlloc(HYPRE_Int,  max_num_threads, HYPRE_MEMORY_HOST);

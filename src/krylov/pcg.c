@@ -29,7 +29,7 @@
 
 hypre_PCGFunctions *
 hypre_PCGFunctionsCreate(
-   void *       (*CAlloc)        ( size_t count, size_t elt_size, HYPRE_Int location ),
+   void *       (*CAlloc)        ( size_t count, size_t elt_size, HYPRE_MemoryLocation location ),
    HYPRE_Int    (*Free)          ( void *ptr ),
    HYPRE_Int    (*CommInfo)      ( void  *A, HYPRE_Int   *my_id,
                                    HYPRE_Int   *num_procs ),

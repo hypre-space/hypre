@@ -85,105 +85,41 @@
 extern "C" {
 #endif
 
-#define HYPRE_MEMORY_UNSET         (-1)
-#define HYPRE_MEMORY_DEVICE        ( 0)
-#define HYPRE_MEMORY_HOST          ( 1)
-#define HYPRE_MEMORY_SHARED        ( 2)
-#define HYPRE_MEMORY_HOST_PINNED   ( 3)
-
-#define HYPRE_EXEC_UNSET           (-1)
-#define HYPRE_EXEC_DEVICE          ( 0)
-#define HYPRE_EXEC_HOST            ( 1)
-
-/*==================================================================
- *       default def of memory location selected based memory env
- *   +-------------------------------------------------------------+
- *   |                           |          HYPRE_MEMORY_*         |
- *   |        MEM \ LOC          | HOST | DEVICE | SHARED | PINNED |
- *   |---------------------------+---------------+-----------------|
- *   | HYPRE_USING_HOST_MEMORY   | HOST | HOST   | HOST   | HOST   |
- *   |---------------------------+---------------+-------- --------|
- *   | HYPRE_USING_DEVICE_MEMORY | HOST | DEVICE | DEVICE | PINNED |
- *   |---------------------------+---------------+-----------------|
- *   | HYPRE_USING_UNIFIED_MEMORY| HOST | DEVICE | SHARED | PINNED |
- *   +-------------------------------------------------------------+
- *==================================================================*/
-
-#if defined(HYPRE_USING_HOST_MEMORY)
-
-/* default memory model without device (host only) */
-#define HYPRE_MEMORY_HOST_ACT         HYPRE_MEMORY_HOST
-#define HYPRE_MEMORY_DEVICE_ACT       HYPRE_MEMORY_HOST
-#define HYPRE_MEMORY_SHARED_ACT       HYPRE_MEMORY_HOST
-#define HYPRE_MEMORY_HOST_PINNED_ACT  HYPRE_MEMORY_HOST
-
-#elif defined(HYPRE_USING_DEVICE_MEMORY)
-
-/* default memory model with device and without unified memory */
-#define HYPRE_MEMORY_HOST_ACT         HYPRE_MEMORY_HOST
-#define HYPRE_MEMORY_DEVICE_ACT       HYPRE_MEMORY_DEVICE
-#define HYPRE_MEMORY_SHARED_ACT       HYPRE_MEMORY_DEVICE
-#define HYPRE_MEMORY_HOST_PINNED_ACT  HYPRE_MEMORY_HOST_PINNED
-
-#elif defined(HYPRE_USING_UNIFIED_MEMORY)
-
-/* default memory model with device and with unified memory */
-#define HYPRE_MEMORY_HOST_ACT         HYPRE_MEMORY_HOST
-#define HYPRE_MEMORY_DEVICE_ACT       HYPRE_MEMORY_DEVICE
-#define HYPRE_MEMORY_SHARED_ACT       HYPRE_MEMORY_SHARED
-//#define HYPRE_MEMORY_SHARED_ACT       HYPRE_MEMORY_HOST
-#define HYPRE_MEMORY_HOST_PINNED_ACT  HYPRE_MEMORY_HOST_PINNED
-
-#else
-
-/* default */
-#define HYPRE_MEMORY_HOST_ACT         HYPRE_MEMORY_HOST
-#define HYPRE_MEMORY_DEVICE_ACT       HYPRE_MEMORY_HOST
-#define HYPRE_MEMORY_SHARED_ACT       HYPRE_MEMORY_HOST
-#define HYPRE_MEMORY_HOST_PINNED_ACT  HYPRE_MEMORY_HOST
-
-#endif
-
-/* the above definitions might be overridden to customize
- * memory locations */
-
-/* #undef  HYPRE_MEMORY_HOST_ACT */
-/* #undef  HYPRE_MEMORY_DEVICE_ACT */
-/* #undef  HYPRE_MEMORY_SHARED_ACT */
-/* #undef  HYPRE_MEMORY_PINNED_ACT */
-/* #define HYPRE_MEMORY_HOST_ACT    HYPRE_MEMORY_? */
-/* #define HYPRE_MEMORY_DEVICE_ACT  HYPRE_MEMORY_? */
-/* #define HYPRE_MEMORY_SHARED_ACT  HYPRE_MEMORY_? */
-/* #define HYPRE_MEMORY_PINNED_ACT  HYPRE_MEMORY_? */
+typedef enum _hypre_MemoryLocation
+{
+   hypre_MEMORY_UNDEFINED = -1,
+   hypre_MEMORY_HOST          ,
+   hypre_MEMORY_HOST_PINNED   ,
+   hypre_MEMORY_DEVICE        ,
+   hypre_MEMORY_UNIFIED
+} hypre_MemoryLocation;
 
 /*-------------------------------------------------------
  * hypre_GetActualMemLocation
  *   return actual location based on the selected memory model
  *-------------------------------------------------------*/
-static inline HYPRE_Int
-hypre_GetActualMemLocation(HYPRE_Int location)
+static inline hypre_MemoryLocation
+hypre_GetActualMemLocation(HYPRE_MemoryLocation location)
 {
    if (location == HYPRE_MEMORY_HOST)
    {
-      return HYPRE_MEMORY_HOST_ACT;
+      return hypre_MEMORY_HOST;
    }
 
    if (location == HYPRE_MEMORY_DEVICE)
    {
-      return HYPRE_MEMORY_DEVICE_ACT;
+#if defined(HYPRE_USING_HOST_MEMORY)
+      return hypre_MEMORY_HOST;
+#elif defined(HYPRE_USING_DEVICE_MEMORY)
+      return hypre_MEMORY_DEVICE;
+#elif defined(HYPRE_USING_UNIFIED_MEMORY)
+      return hypre_MEMORY_UNIFIED;
+#else
+#error Wrong HYPRE memory setting.
+#endif
    }
 
-   if (location == HYPRE_MEMORY_SHARED)
-   {
-      return HYPRE_MEMORY_SHARED_ACT;
-   }
-
-   if (location == HYPRE_MEMORY_HOST_PINNED)
-   {
-      return HYPRE_MEMORY_HOST_PINNED_ACT;
-   }
-
-   return HYPRE_MEMORY_UNSET;
+   return hypre_MEMORY_UNDEFINED;
 }
 
 #ifdef HYPRE_USING_CUB_ALLOCATOR
@@ -206,15 +142,17 @@ extern "C++" {
 
 struct hypre_memory_tracker_t
 {
-   char      _action[16];
-   void     *_ptr;
-   size_t    _nbytes;
-   HYPRE_Int _memory_location;
-   char      _filename[256];
-   char      _function[256];
-   HYPRE_Int _line;
+   char                  _action[16];
+   void                 *_ptr;
+   size_t                _nbytes;
+   HYPRE_MemoryLocation  _memory_location;
+   char                  _filename[256];
+   char                  _function[256];
+   HYPRE_Int             _line;
 
-   hypre_memory_tracker_t(const char *action, void *ptr, size_t nbytes, HYPRE_Int memory_location, const char *filename, const char *function, HYPRE_Int line)
+   hypre_memory_tracker_t(const char *action, void *ptr, size_t nbytes,
+                          HYPRE_MemoryLocation memory_location, const char *filename,
+                          const char *function, HYPRE_Int line)
    {
       sprintf(_action, "%s", action);
       _ptr = ptr;
@@ -247,11 +185,11 @@ static inline void hypre_MemoryTrackerInsert(struct hypre_memory_tracker_t const
 }
 #endif
 
-/* These Allocs are with printfs, for debug */
+/* These Allocs are with memory tracker, for debug */
 #define hypre_TAlloc(type, count, location)                                                                                           \
 (                                                                                                                                     \
 {                                                                                                                                     \
-   void *ptr = hypre_MAlloc((size_t)(sizeof(type) * (count)), location);                                                              \
+   void *ptr = hypre_MAlloc((size_t)(sizeof(type) * (count)), location);                                                           \
    hypre_MemoryTrackerInsert( hypre_memory_tracker_t("malloc", ptr, sizeof(type)*(count), location, __FILE__, __func__, __LINE__) );  \
    (type *) ptr;                                                                                                                      \
 }                                                                                                                                     \
@@ -260,7 +198,7 @@ static inline void hypre_MemoryTrackerInsert(struct hypre_memory_tracker_t const
 #define hypre_CTAlloc(type, count, location)                                                                                          \
 (                                                                                                                                     \
 {                                                                                                                                     \
-   void *ptr = hypre_CAlloc((size_t)(count), (size_t)sizeof(type), location);                                                         \
+   void *ptr = hypre_CAlloc((size_t)(count), (size_t)sizeof(type), location);                                                           \
    hypre_MemoryTrackerInsert( hypre_memory_tracker_t("calloc", ptr, sizeof(type)*(count), location, __FILE__, __func__, __LINE__) );  \
    (type *) ptr;                                                                                                                      \
 }                                                                                                                                     \
@@ -327,14 +265,24 @@ static inline void hypre_MemoryTrackerInsert(struct hypre_memory_tracker_t const
  *--------------------------------------------------------------------------*/
 
 /* hypre_memory.c */
-void * hypre_MAlloc(size_t size, HYPRE_Int location);
-void * hypre_CAlloc( size_t count, size_t elt_size, HYPRE_Int location);
-void * hypre_ReAlloc(void *ptr, size_t size, HYPRE_Int location);
-void * hypre_ReAlloc_v2(void *ptr, size_t old_size, size_t new_size, HYPRE_Int location);
-void   hypre_Memcpy(void *dst, void *src, size_t size, HYPRE_Int loc_dst, HYPRE_Int loc_src);
-void * hypre_Memset(void *ptr, HYPRE_Int value, size_t num, HYPRE_Int location);
-void   hypre_Free(void *ptr, HYPRE_Int location);
-HYPRE_Int hypre_GetMemoryLocation(const void *ptr, HYPRE_Int *memory_location);
+void * hypre_Memset(void *ptr, HYPRE_Int value, size_t num, HYPRE_MemoryLocation location);
+void   hypre_MemPrefetch(void *ptr, size_t size, HYPRE_MemoryLocation location);
+void * hypre_MAlloc(size_t size, HYPRE_MemoryLocation location);
+void * hypre_CAlloc( size_t count, size_t elt_size, HYPRE_MemoryLocation location);
+void   hypre_Free(void *ptr, HYPRE_MemoryLocation location);
+void   hypre_Memcpy(void *dst, void *src, size_t size, HYPRE_MemoryLocation loc_dst, HYPRE_MemoryLocation loc_src);
+void * hypre_ReAlloc(void *ptr, size_t size, HYPRE_MemoryLocation location);
+void * hypre_ReAlloc_v2(void *ptr, size_t old_size, size_t new_size, HYPRE_MemoryLocation location);
+
+void * hypre_DeviceMalloc(size_t size, HYPRE_Int zeroinit);
+void   hypre_DeviceFree(void *ptr);
+void * hypre_HostPinnedMalloc(size_t size, HYPRE_Int zeroinit);
+void   hypre_HostPinnedFree(void *ptr);
+
+HYPRE_ExecuctionPolicy hypre_GetExecPolicy1(HYPRE_MemoryLocation location);
+HYPRE_ExecuctionPolicy hypre_GetExecPolicy2(HYPRE_MemoryLocation location1, HYPRE_MemoryLocation location2);
+
+HYPRE_Int hypre_GetPointerLocation(const void *ptr, hypre_MemoryLocation *memory_location);
 HYPRE_Int hypre_PrintMemoryTracker();
 HYPRE_Int hypre_SetCubMemPoolSize( hypre_uint bin_growth, hypre_uint min_bin, hypre_uint max_bin, size_t max_cached_bytes );
 

@@ -143,7 +143,8 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    {
       if (!hypre_ParCSRCommPkgTmpData(comm_pkg))
       {
-         hypre_ParCSRCommPkgTmpData(comm_pkg) = hypre_TAlloc(HYPRE_Complex, num_cols_offd, HYPRE_MEMORY_DEVICE);
+         /* hypre_ParCSRCommPkgTmpData(comm_pkg) = hypre_TAlloc(HYPRE_Complex, num_cols_offd, HYPRE_MEMORY_DEVICE); */
+         hypre_ParCSRCommPkgTmpData(comm_pkg) = (HYPRE_Complex *) hypre_DeviceMalloc(sizeof(HYPRE_Complex) * num_cols_offd, 0);
       }
       hypre_VectorData(x_tmp) = hypre_ParCSRCommPkgTmpData(comm_pkg);
       hypre_SeqVectorSetDataOwner(x_tmp, 0);
@@ -171,9 +172,13 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
       {
          if (!hypre_ParCSRCommPkgBufData(comm_pkg))
          {
+            /*
             hypre_ParCSRCommPkgBufData(comm_pkg) = hypre_TAlloc(HYPRE_Complex,
                                                                 hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                                                                 HYPRE_MEMORY_DEVICE);
+            */
+            hypre_ParCSRCommPkgBufData(comm_pkg) =
+               (HYPRE_Complex *) hypre_DeviceMalloc(sizeof(HYPRE_Complex) * hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends), 0);
          }
          x_buf_data[0] = hypre_ParCSRCommPkgBufData(comm_pkg);
          continue;
@@ -481,7 +486,9 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
    {
       if (!hypre_ParCSRCommPkgTmpData(comm_pkg))
       {
-         hypre_ParCSRCommPkgTmpData(comm_pkg) = hypre_TAlloc(HYPRE_Complex, num_cols_offd, HYPRE_MEMORY_DEVICE);
+         //hypre_ParCSRCommPkgTmpData(comm_pkg) = hypre_TAlloc(HYPRE_Complex, num_cols_offd, HYPRE_MEMORY_DEVICE);
+         hypre_ParCSRCommPkgTmpData(comm_pkg) =
+            (HYPRE_Complex *) hypre_DeviceMalloc(sizeof(HYPRE_Complex) * num_cols_offd, 0);
       }
       hypre_VectorData(y_tmp) = hypre_ParCSRCommPkgTmpData(comm_pkg);
       hypre_SeqVectorSetDataOwner(y_tmp, 0);
@@ -509,9 +516,13 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
       {
          if (!hypre_ParCSRCommPkgBufData(comm_pkg))
          {
+            /*
             hypre_ParCSRCommPkgBufData(comm_pkg) = hypre_TAlloc(HYPRE_Complex,
                                                                 hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                                                                 HYPRE_MEMORY_DEVICE);
+            */
+            hypre_ParCSRCommPkgBufData(comm_pkg) =
+               (HYPRE_Complex *) hypre_DeviceMalloc(sizeof(HYPRE_Complex) * hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends), 0);
          }
          y_buf_data[0] = hypre_ParCSRCommPkgBufData(comm_pkg);
          continue;
@@ -629,10 +640,18 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
 
 #if defined(HYPRE_USING_CUDA)
       /* unpack recv data on device */
+      if (!hypre_ParCSRCommPkgWorkSpace(comm_pkg))
+      {
+         hypre_ParCSRCommPkgWorkSpace(comm_pkg) =
+            hypre_TAlloc( char,
+                          (2*sizeof(HYPRE_Int)+sizeof(HYPRE_Real)) * hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                          HYPRE_MEMORY_DEVICE );
+      }
       hypreDevice_GenScatterAdd(locl_data,
                                 hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                                 hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
-                                recv_data);
+                                recv_data,
+                                hypre_ParCSRCommPkgWorkSpace(comm_pkg));
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
       HYPRE_Int i, j;
       /* unpack recv data on device */

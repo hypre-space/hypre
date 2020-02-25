@@ -899,7 +899,7 @@ HYPRE_Int hypre_ADSSetup(void *solver,
    if (ads_data -> A_relax_type >= 1 && ads_data -> A_relax_type <= 4)
    {
       ads_data -> A_l1_norms = hypre_SeqVectorCreate(hypre_ParCSRMatrixNumRows(ads_data -> A));
-      hypre_SeqVectorInitialize_v2(ads_data -> A_l1_norms, HYPRE_MEMORY_SHARED);
+      hypre_SeqVectorInitialize_v2(ads_data -> A_l1_norms, HYPRE_MEMORY_DEVICE);
       hypre_ParCSRComputeL1Norms(ads_data -> A, ads_data -> A_relax_type, NULL, ads_data -> A_l1_norms);
    }
 

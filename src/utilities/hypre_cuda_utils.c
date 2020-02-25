@@ -502,16 +502,28 @@ hypreCUDAKernel_ScatterAdd(HYPRE_Int n, HYPRE_Real *x, HYPRE_Int *map, HYPRE_Rea
  * than once in map
  * Note: content in y will be destroyed */
 HYPRE_Int
-hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Real *y)
+hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Real *y, char *work)
 {
    if (ny <= 0)
    {
       return hypre_error_flag;
    }
 
-   HYPRE_Int *map2 = hypre_TAlloc(HYPRE_Int, ny, HYPRE_MEMORY_DEVICE);
-   HYPRE_Int *reduced_map = hypre_TAlloc(HYPRE_Int, ny, HYPRE_MEMORY_DEVICE);
-   HYPRE_Real *reduced_y = hypre_TAlloc(HYPRE_Real, ny, HYPRE_MEMORY_DEVICE);
+   HYPRE_Int *map2, *reduced_map;
+   HYPRE_Real *reduced_y;
+
+   if (work)
+   {
+      map2 = (HYPRE_Int *) work;
+      reduced_map = map2 + ny;
+      reduced_y = (HYPRE_Real *) (reduced_map + ny);
+   }
+   else
+   {
+      map2        = hypre_TAlloc(HYPRE_Int,  ny, HYPRE_MEMORY_DEVICE);
+      reduced_map = hypre_TAlloc(HYPRE_Int,  ny, HYPRE_MEMORY_DEVICE);
+      reduced_y   = hypre_TAlloc(HYPRE_Real, ny, HYPRE_MEMORY_DEVICE);
+   }
 
    hypre_TMemcpy(map2, map, HYPRE_Int, ny, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
@@ -530,9 +542,12 @@ hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Rea
    HYPRE_CUDA_LAUNCH( hypreCUDAKernel_ScatterAdd, gDim, bDim,
                       reduced_n, x, reduced_map, reduced_y );
 
-   hypre_TFree(map2, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(reduced_map, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(reduced_y, HYPRE_MEMORY_DEVICE);
+   if (!work)
+   {
+      hypre_TFree(map2, HYPRE_MEMORY_DEVICE);
+      hypre_TFree(reduced_map, HYPRE_MEMORY_DEVICE);
+      hypre_TFree(reduced_y, HYPRE_MEMORY_DEVICE);
+   }
 
    return hypre_error_flag;
 }

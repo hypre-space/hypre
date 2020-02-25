@@ -370,18 +370,18 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
 
    P_diag_size = jj_counter;
 
-   P_diag_i    = hypre_CTAlloc(HYPRE_Int,  n_fine+1, HYPRE_MEMORY_SHARED);
-   P_diag_j    = hypre_CTAlloc(HYPRE_Int,  P_diag_size, HYPRE_MEMORY_SHARED);
-   P_diag_data = hypre_CTAlloc(HYPRE_Real,  P_diag_size, HYPRE_MEMORY_SHARED);
+   P_diag_i    = hypre_CTAlloc(HYPRE_Int,  n_fine+1,    HYPRE_MEMORY_DEVICE);
+   P_diag_j    = hypre_CTAlloc(HYPRE_Int,  P_diag_size, HYPRE_MEMORY_DEVICE);
+   P_diag_data = hypre_CTAlloc(HYPRE_Real, P_diag_size, HYPRE_MEMORY_DEVICE);
 
    P_diag_i[n_fine] = jj_counter;
 
 
    P_offd_size = jj_counter_offd;
 
-   P_offd_i    = hypre_CTAlloc(HYPRE_Int,  n_fine+1, HYPRE_MEMORY_SHARED);
-   P_offd_j    = hypre_CTAlloc(HYPRE_Int,  P_offd_size, HYPRE_MEMORY_SHARED);
-   P_offd_data = hypre_CTAlloc(HYPRE_Real,  P_offd_size, HYPRE_MEMORY_SHARED);
+   P_offd_i    = hypre_CTAlloc(HYPRE_Int,  n_fine+1,    HYPRE_MEMORY_DEVICE);
+   P_offd_j    = hypre_CTAlloc(HYPRE_Int,  P_offd_size, HYPRE_MEMORY_DEVICE);
+   P_offd_data = hypre_CTAlloc(HYPRE_Real, P_offd_size, HYPRE_MEMORY_DEVICE);
 
    /*-----------------------------------------------------------------------
     *  Intialize some stuff.
@@ -2234,18 +2234,18 @@ hypre_BoomerAMGBuildDirInterpHost( hypre_ParCSRMatrix   *A,
 
    P_diag_size = jj_counter;
 
-   P_diag_i    = hypre_CTAlloc(HYPRE_Int,  n_fine+1, HYPRE_MEMORY_SHARED);
-   P_diag_j    = hypre_CTAlloc(HYPRE_Int,  P_diag_size, HYPRE_MEMORY_SHARED);
-   P_diag_data = hypre_CTAlloc(HYPRE_Real,  P_diag_size, HYPRE_MEMORY_SHARED);
+   P_diag_i    = hypre_CTAlloc(HYPRE_Int,  n_fine+1,    HYPRE_MEMORY_DEVICE);
+   P_diag_j    = hypre_CTAlloc(HYPRE_Int,  P_diag_size, HYPRE_MEMORY_DEVICE);
+   P_diag_data = hypre_CTAlloc(HYPRE_Real, P_diag_size, HYPRE_MEMORY_DEVICE);
 
    P_diag_i[n_fine] = jj_counter;
 
 
    P_offd_size = jj_counter_offd;
 
-   P_offd_i    = hypre_CTAlloc(HYPRE_Int,  n_fine+1, HYPRE_MEMORY_SHARED);
-   P_offd_j    = hypre_CTAlloc(HYPRE_Int,  P_offd_size, HYPRE_MEMORY_SHARED);
-   P_offd_data = hypre_CTAlloc(HYPRE_Real,  P_offd_size, HYPRE_MEMORY_SHARED);
+   P_offd_i    = hypre_CTAlloc(HYPRE_Int,  n_fine+1,    HYPRE_MEMORY_DEVICE);
+   P_offd_j    = hypre_CTAlloc(HYPRE_Int,  P_offd_size, HYPRE_MEMORY_DEVICE);
+   P_offd_data = hypre_CTAlloc(HYPRE_Real, P_offd_size, HYPRE_MEMORY_DEVICE);
 
    /*-----------------------------------------------------------------------
     *  Intialize some stuff.
@@ -2682,36 +2682,28 @@ hypre_BoomerAMGBuildDirInterp( hypre_ParCSRMatrix   *A,
                                hypre_ParCSRMatrix  **P_ptr)
 {
 #if defined(HYPRE_USING_CUDA)
-   //hypre_SetExecPolicy(HYPRE_EXEC_DEVICE);
    hypre_NvtxPushRange("DirInterp");
 #endif
 
-   HYPRE_Int exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(A)) );
-
-   hypre_assert(exec != HYPRE_EXEC_UNSET);
+   HYPRE_ExecuctionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(A)) );
 
    HYPRE_Int ierr = 0;
 
    if (exec == HYPRE_EXEC_HOST)
    {
-      /* printf(" dir interp Host\n"); */
       ierr = hypre_BoomerAMGBuildDirInterpHost(A,CF_marker,S,num_cpts_global,num_functions,dof_func,
                                                debug_flag,trunc_factor,max_elmts,col_offd_S_to_A, P_ptr);
-      /*      printf(" done dir interp Host\n");*/
    }
 #if defined(HYPRE_USING_CUDA)
    else
    {
-      /*      printf(" dir interp Device\n");*/
       ierr = hypre_BoomerAMGBuildDirInterpDevice(A,CF_marker,S,num_cpts_global,num_functions,dof_func,
                                                  debug_flag,trunc_factor,max_elmts,col_offd_S_to_A, 
                                                  interp_type, P_ptr);
-      /*      printf(" done dir interp Device\n");*/
    }
 #endif
 
 #if defined(HYPRE_USING_CUDA)
-   //hypre_SetExecPolicy(HYPRE_EXEC_HOST);
    hypre_NvtxPopRange();
 #endif
 
@@ -2762,8 +2754,8 @@ hypre_BoomerAMGInterpTruncation( hypre_ParCSRMatrix *P,
    HYPRE_Real row_sum;
    HYPRE_Real scale;
 
-   HYPRE_Int mem_loc_diag = hypre_CSRMatrixMemoryLocation(P_diag);
-   HYPRE_Int mem_loc_offd = hypre_CSRMatrixMemoryLocation(P_offd);
+   HYPRE_MemoryLocation memory_location_diag = hypre_CSRMatrixMemoryLocation(P_diag);
+   HYPRE_MemoryLocation memory_location_offd = hypre_CSRMatrixMemoryLocation(P_offd);
 
    /* Threading variables.  Entry i of num_lost_(offd_)per_thread  holds the
     * number of dropped entries over thread i's row range. Cum_lost_per_thread
@@ -3121,8 +3113,8 @@ hypre_BoomerAMGInterpTruncation( hypre_ParCSRMatrix *P,
                }
             }
 
-            P_diag_j_new = hypre_CTAlloc(HYPRE_Int, P_diag_size, mem_loc_diag);
-            P_diag_data_new = hypre_CTAlloc(HYPRE_Real, P_diag_size, mem_loc_diag);
+            P_diag_j_new = hypre_CTAlloc(HYPRE_Int, P_diag_size, memory_location_diag);
+            P_diag_data_new = hypre_CTAlloc(HYPRE_Real, P_diag_size, memory_location_diag);
          }
 #ifdef HYPRE_USING_OPENMP
 #pragma omp barrier
@@ -3166,8 +3158,8 @@ hypre_BoomerAMGInterpTruncation( hypre_ParCSRMatrix *P,
             /* Set last entry */
             P_diag_i[n_fine] = P_diag_size ;
 
-            hypre_TFree(P_diag_j, mem_loc_diag);
-            hypre_TFree(P_diag_data, mem_loc_diag);
+            hypre_TFree(P_diag_j, memory_location_diag);
+            hypre_TFree(P_diag_data, memory_location_diag);
             hypre_CSRMatrixJ(P_diag) = P_diag_j_new;
             hypre_CSRMatrixData(P_diag) = P_diag_data_new;
             hypre_CSRMatrixNumNonzeros(P_diag) = P_diag_size;
@@ -3200,8 +3192,8 @@ hypre_BoomerAMGInterpTruncation( hypre_ParCSRMatrix *P,
                }
             }
 
-            P_offd_j_new = hypre_CTAlloc(HYPRE_Int, P_offd_size, mem_loc_offd);
-            P_offd_data_new = hypre_CTAlloc(HYPRE_Real, P_offd_size, mem_loc_offd);
+            P_offd_j_new = hypre_CTAlloc(HYPRE_Int, P_offd_size, memory_location_offd);
+            P_offd_data_new = hypre_CTAlloc(HYPRE_Real, P_offd_size, memory_location_offd);
          }
 #ifdef HYPRE_USING_OPENMP
 #pragma omp barrier
@@ -3245,8 +3237,8 @@ hypre_BoomerAMGInterpTruncation( hypre_ParCSRMatrix *P,
             /* Set last entry */
             P_offd_i[n_fine] = P_offd_size ;
 
-            hypre_TFree(P_offd_j, mem_loc_offd);
-            hypre_TFree(P_offd_data, mem_loc_offd);
+            hypre_TFree(P_offd_j, memory_location_offd);
+            hypre_TFree(P_offd_data, memory_location_offd);
             hypre_CSRMatrixJ(P_offd) = P_offd_j_new;
             hypre_CSRMatrixData(P_offd) = P_offd_data_new;
             hypre_CSRMatrixNumNonzeros(P_offd) = P_offd_size;
