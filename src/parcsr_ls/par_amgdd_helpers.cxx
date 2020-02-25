@@ -580,7 +580,7 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
          num_resizes[3*level]++;
          HYPRE_Int new_size = ceil(1.5*hypre_ParCompGridMemSize(compGrid[level]));
          if (new_size < num_recv_nodes[current_level][buffer_number][level] + num_nodes) new_size = num_recv_nodes[current_level][buffer_number][level] + num_nodes;
-         hypre_ParCompGridResize(compGrid[level], new_size, level != num_levels-1, 0); // !!! Is there a better way to manage memory? !!!
+         hypre_ParCompGridResize(compGrid[level], new_size, level != num_levels-1, 0, symmetric); // !!! Is there a better way to manage memory? !!!
       }
 
       HYPRE_Int *sort_map = hypre_ParCompGridSortMap(compGrid[level]);
@@ -619,7 +619,7 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
             }
             else
             {
-               incoming_dest[incoming_cnt++] = -1; // Repeated real dof marked as redundant
+               incoming_dest[incoming_cnt++] = -(inv_sort_map[compGrid_cnt] + 1); // Repeated real dof marked as redundant (incoming dest still marks the location of the existing local dof, using negative mapping to denote redundancy)
                cnt++;
             }
          }
@@ -684,6 +684,7 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
          if (incoming_dest[i] >= 0)
          {
             HYPRE_Int global_index = recv_buffer[cnt];
+
             if (global_index < 0) 
             {
                global_index = -(global_index + 1);
@@ -725,7 +726,7 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
          num_resizes[3*level + 1]++;
          HYPRE_Int new_size = ceil(1.5*hypre_ParCompGridAMemSize(compGrid[level]));
          if (new_size < hypre_ParCompGridARowPtr(compGrid[level])[add_node_cnt + num_nodes]) new_size = hypre_ParCompGridARowPtr(compGrid[level])[add_node_cnt + num_nodes];
-         hypre_ParCompGridResize(compGrid[level], new_size, level != num_levels-1, 1); // !!! Is there a better way to manage memory? !!!
+         hypre_ParCompGridResize(compGrid[level], new_size, level != num_levels-1, 1, symmetric); // !!! Is there a better way to manage memory? !!!
       }
 
       // Copy in new A global col ind info
@@ -751,6 +752,7 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
                   else
                   {
                      HYPRE_Int local_index = incoming_dest[ incoming_index ];
+                     if (local_index < 0) local_index = -(local_index + 1);
                      hypre_ParCompGridAColInd(compGrid[level])[ index ] = local_index;
                      hypre_ParCompGridAGlobalColInd(compGrid[level])[ index ] = hypre_ParCompGridGlobalIndices(compGrid[level])[ local_index ];
                   }
@@ -767,6 +769,7 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
                   if (incoming_index >= 0 && local_index < 0)
                   {
                      local_index = incoming_dest[ incoming_index ];
+                     if (local_index < 0) local_index = -(local_index + 1);
                      hypre_ParCompGridAColInd(compGrid[level])[ index ] = local_index;
                      hypre_ParCompGridAGlobalColInd(compGrid[level])[ index ] = hypre_ParCompGridGlobalIndices(compGrid[level])[ local_index ];
                   }

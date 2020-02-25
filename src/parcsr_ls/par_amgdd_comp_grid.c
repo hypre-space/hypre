@@ -978,7 +978,7 @@ hypre_ParCompGridSetSize ( hypre_ParCompGrid *compGrid, HYPRE_Int num_nodes, HYP
 }
 
 HYPRE_Int
-hypre_ParCompGridResize ( hypre_ParCompGrid *compGrid, HYPRE_Int new_size, HYPRE_Int need_coarse_info, HYPRE_Int type )
+hypre_ParCompGridResize ( hypre_ParCompGrid *compGrid, HYPRE_Int new_size, HYPRE_Int need_coarse_info, HYPRE_Int type, HYPRE_Int symmetric )
 {
    // This function reallocates memory to hold a comp grid of size new_size
    // num_nodes and mem_size are set to new_size. Use this when exact size of new comp grid is known.
@@ -989,7 +989,7 @@ hypre_ParCompGridResize ( hypre_ParCompGrid *compGrid, HYPRE_Int new_size, HYPRE
       // Re allocate to given size
       hypre_ParCompGridGlobalIndices(compGrid) = hypre_TReAlloc(hypre_ParCompGridGlobalIndices(compGrid), HYPRE_Int, new_size, HYPRE_MEMORY_HOST);
       hypre_ParCompGridRealDofMarker(compGrid) = hypre_TReAlloc(hypre_ParCompGridRealDofMarker(compGrid), HYPRE_Int, new_size, HYPRE_MEMORY_HOST);
-      if (hypre_ParCompGridEdgeIndices(compGrid)) hypre_ParCompGridEdgeIndices(compGrid) = hypre_TReAlloc(hypre_ParCompGridEdgeIndices(compGrid), HYPRE_Int, new_size, HYPRE_MEMORY_HOST);
+      if (!symmetric) hypre_ParCompGridEdgeIndices(compGrid) = hypre_TReAlloc(hypre_ParCompGridEdgeIndices(compGrid), HYPRE_Int, new_size, HYPRE_MEMORY_HOST);
       hypre_ParCompGridSortMap(compGrid) = hypre_TReAlloc(hypre_ParCompGridSortMap(compGrid), HYPRE_Int, new_size, HYPRE_MEMORY_HOST);
       hypre_ParCompGridInvSortMap(compGrid) = hypre_TReAlloc(hypre_ParCompGridInvSortMap(compGrid), HYPRE_Int, new_size, HYPRE_MEMORY_HOST);
       hypre_ParCompGridARowPtr(compGrid) = hypre_TReAlloc(hypre_ParCompGridARowPtr(compGrid), HYPRE_Int, new_size+1, HYPRE_MEMORY_HOST);

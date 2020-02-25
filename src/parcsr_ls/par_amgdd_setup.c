@@ -17,7 +17,7 @@
 #include "par_amg.h"
 #include "par_csr_block_matrix.h"
 
-#define DEBUG_COMP_GRID 0 // if true, runs some tests, prints out what is stored in the comp grids for each processor to a file
+#define DEBUG_COMP_GRID 1 // if true, runs some tests, prints out what is stored in the comp grids for each processor to a file
 #define DEBUG_PROC_NEIGHBORS 0 // if true, dumps info on the add flag structures that determine nearest processor neighbors 
 #define DEBUGGING_MESSAGES 0 // if true, prints a bunch of messages to the screen to let you know where in the algorithm you are
 #define ENABLE_AGGLOMERATION 0 // if true, enable coarse level processor agglomeration, which requires linking with parmetis
@@ -78,7 +78,7 @@ HYPRE_Int
 UnpackSendFlagBuffer(HYPRE_Int *send_flag_buffer, HYPRE_Int **send_flag, HYPRE_Int *num_send_nodes, HYPRE_Int *send_buffer_size, HYPRE_Int current_level, HYPRE_Int num_levels);
 
 HYPRE_Int
-CommunicateRemainingMatrixInfo(hypre_ParAMGData* amg_data, hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int *communication_cost);
+CommunicateRemainingMatrixInfo(hypre_ParAMGData* amg_data, hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int *communication_cost, HYPRE_Int symmetric);
 
 HYPRE_Int
 FinalizeCompGridCommPkg(hypre_ParAMGData* amg_data, hypre_ParCompGridCommPkg *compGridCommPkg, hypre_ParCompGrid **compGrid);
@@ -540,7 +540,6 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
 
          if (timers) hypre_EndTiming(timers[3]);
 
-
          // unpack the buffers
          if (timers) hypre_BeginTiming(timers[4]);
          
@@ -549,6 +548,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
 
             recv_map[level][i] = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
             num_recv_nodes[level][i] = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
+            
             UnpackRecvBuffer(recv_buffer[i], compGrid, compGridCommPkg, 
                send_flag, num_send_nodes, 
                recv_map, num_recv_nodes, 
@@ -557,7 +557,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
             recv_map_send_buffer[i] = hypre_CTAlloc(HYPRE_Int, recv_map_send_buffer_size[i], HYPRE_MEMORY_HOST);
             PackRecvMapSendBuffer(recv_map_send_buffer[i], recv_map[level][i], num_recv_nodes[level][i], &(recv_buffer_size[level][i]), level, num_levels, compGrid);
          }
-         
+
          if (timers) hypre_EndTiming(timers[4]);
 
          // Setup local indices for the composite grid
@@ -691,7 +691,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    #endif 
 
    // Communicate data for A and all info for P
-   CommunicateRemainingMatrixInfo(amg_data, compGrid, compGridCommPkg, communication_cost);
+   CommunicateRemainingMatrixInfo(amg_data, compGrid, compGridCommPkg, communication_cost, symmetric);
 
    #if DEBUGGING_MESSAGES
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
@@ -2393,9 +2393,9 @@ RecursivelyBuildPsiComposite(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *com
       else
       {
          error_code = 1; 
-         hypre_printf("Rank %d: Error! Ran into a -1 index when building Psi_c\n", myid);
-         // if (myid == 1) printf("Rank %d, level %d: Error! Ran into a -1 index when building Psi_c,\nnode = %d with global id %d, index = %d with global id = %d, m = %d\n",
-         //    myid, level, node, hypre_ParCompGridGlobalIndices(compGrid)[node], index, hypre_ParCompGridAGlobalColInd(compGrid)[i], m);
+         // hypre_printf("Rank %d: Error! Ran into a -1 index when building Psi_c\n", myid);
+         if (myid == 3 && node == 1627) printf("Rank %d, level %d: Error! Ran into a -1 index when building Psi_c,\nnode = %d with global id %d, index = %d with global id = %d, m = %d\n",
+            myid, level, node, hypre_ParCompGridGlobalIndices(compGrid)[node], index, hypre_ParCompGridAGlobalColInd(compGrid)[i], m);
       }
    }
 
@@ -2444,7 +2444,7 @@ PackRecvMapSendBuffer(HYPRE_Int *recv_map_send_buffer,
             // store the map values for each node
             recv_map_send_buffer[cnt++] = recv_map[level][i];
 
-            if (recv_map[level][i] != -1)
+            if (recv_map[level][i] >= 0)
             {
                if (hypre_ParCompGridRealDofMarker(compGrid[level])[ recv_map[level][i] ] > 0)
                {
@@ -2484,7 +2484,7 @@ UnpackSendFlagBuffer(HYPRE_Int *send_flag_buffer,
 
       for (i = 0; i < num_nodes; i++)
       {
-         if (send_flag_buffer[cnt++] != -1) 
+         if (send_flag_buffer[cnt++] >= 0) 
          {
             send_flag[level][ num_send_nodes[level]++ ] = send_flag[level][i];
             (*send_buffer_size)++;
@@ -2499,7 +2499,7 @@ UnpackSendFlagBuffer(HYPRE_Int *send_flag_buffer,
 
 
 HYPRE_Int
-CommunicateRemainingMatrixInfo(hypre_ParAMGData* amg_data, hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int *communication_cost)
+CommunicateRemainingMatrixInfo(hypre_ParAMGData* amg_data, hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int *communication_cost, HYPRE_Int symmetric)
 {
    HYPRE_Int outer_level,proc,part,level,i,j;
    HYPRE_Int num_levels = hypre_ParCompGridCommPkgNumLevels(compGridCommPkg);
@@ -2857,7 +2857,7 @@ CommunicateRemainingMatrixInfo(hypre_ParAMGData* amg_data, hypre_ParCompGrid **c
          if (hypre_ParCompGridPRowPtr(compGrid[level])[hypre_ParCompGridNumNodes(compGrid[level])] > hypre_ParCompGridPMemSize(compGrid[level]))
          {
             HYPRE_Int new_size = hypre_ParCompGridPRowPtr(compGrid[level])[hypre_ParCompGridNumNodes(compGrid[level])];
-            hypre_ParCompGridResize(compGrid[level], new_size, level != num_levels-1, 2);
+            hypre_ParCompGridResize(compGrid[level], new_size, level != num_levels-1, 2, symmetric);
          }
 
          // Copy col ind and data into the CSR structure
@@ -2884,7 +2884,7 @@ CommunicateRemainingMatrixInfo(hypre_ParAMGData* amg_data, hypre_ParCompGrid **c
          if (hypre_ParCompGridRRowPtr(compGrid[level])[hypre_ParCompGridNumNodes(compGrid[level])] > hypre_ParCompGridRMemSize(compGrid[level]))
          {
             HYPRE_Int new_size = hypre_ParCompGridRRowPtr(compGrid[level])[hypre_ParCompGridNumNodes(compGrid[level])];
-            hypre_ParCompGridResize(compGrid[level], new_size, level != num_levels-1, 3);
+            hypre_ParCompGridResize(compGrid[level], new_size, level != num_levels-1, 3, symmetric);
          }
 
          // Copy col ind and data into the CSR structure

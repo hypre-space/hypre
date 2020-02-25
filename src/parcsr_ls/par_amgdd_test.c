@@ -266,7 +266,7 @@ SetRelaxMarker(hypre_ParCompGrid *compGrid, hypre_ParVector *relax_marker, HYPRE
   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
 
   // Check whether the global indices are still around
-  if (!hypre_ParCompGridGlobalIndices(compGrid))
+  if (!hypre_ParCompGridGlobalIndices(compGrid) && hypre_ParCompGridNumNodes(compGrid))
   {
     if (myid == 0) printf("Error: need to setup AMG-DD with debugging flag set.\n");
     hypre_MPI_Finalize();
