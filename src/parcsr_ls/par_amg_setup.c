@@ -374,7 +374,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    /* end of systems checks */
 
-   /* free up storage in case of new setup without prvious destroy */
+   /* free up storage in case of new setup without previous destroy */
 
    if (A_array || A_block_array || P_array || P_block_array || CF_marker_array ||
        dof_func_array || R_array || R_block_array)

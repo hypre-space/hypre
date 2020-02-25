@@ -37,7 +37,7 @@ F77_COMPILE_FLAGS = \
  -I${HYPRE_BUILD_DIR}/include\
  ${CINCLUDES}
 
-MPILIBFLAGS = ${MPILIBDIRS} ${MPILIBS} ${MPIFLAGS} 
+MPILIBFLAGS = ${MPILIBDIRS} ${MPILIBS} ${MPIFLAGS}
 LAPACKLIBFLAGS = ${LAPACKLIBDIRS} ${LAPACKLIBS}
 BLASLIBFLAGS = ${BLASLIBDIRS} ${BLASLIBS}
 LIBFLAGS = ${LDFLAGS} ${LIBS}
@@ -133,6 +133,10 @@ distclean: clean
 # C
 
 ij: ij.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $@.o ${LFLAGS}
+
+ij_assembly: ij_assembly.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $@.o ${LFLAGS}
 
@@ -277,7 +281,7 @@ fparcsr_mv: fparcsr_mv.f
 	@echo  "Building" $@ "... "
 	${LINK_FC} -c $@
 
-fsstruct_ls: fsstruct_ls.f 
+fsstruct_ls: fsstruct_ls.f
 	@echo  "Building" $@ "... "
 	${LINK_FC} -c $@
 
@@ -292,4 +296,3 @@ fstruct_ls: fstruct_ls.f
 fstruct_mv: fstruct_mv.f
 	@echo  "Building" $@ "... "
 	${LINK_FC} -c $@
-
