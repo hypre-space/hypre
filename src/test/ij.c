@@ -1965,7 +1965,7 @@ main( hypre_int argc,
    /*-----------------------------------------------------------
     * Initialize : must be the first HYPRE function to call
     *-----------------------------------------------------------*/
-   HYPRE_Init(argc, argv);
+   HYPRE_Init();
 
    hypre_EndTiming(time_index);
    hypre_PrintTiming("Hypre init times", hypre_MPI_COMM_WORLD);

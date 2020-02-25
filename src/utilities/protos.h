@@ -32,7 +32,7 @@ HYPRE_Real    hypre_cimag( HYPRE_Complex value );
 #endif
 
 /* hypre_general.c */
-HYPRE_Int HYPRE_Init( hypre_int argc, char *argv[] );
+HYPRE_Int HYPRE_Init();
 HYPRE_Int HYPRE_Finalize();
 HYPRE_Int hypre_GetDevice(hypre_Handle *hypre_handle);
 HYPRE_Int hypre_SetDevice(HYPRE_Int use_device, hypre_Handle *hypre_handle);

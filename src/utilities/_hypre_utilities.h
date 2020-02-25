@@ -1659,6 +1659,15 @@ struct is_negative : public thrust::unary_function<T,bool>
 };
 
 template<typename T>
+struct is_positive : public thrust::unary_function<T,bool>
+{
+   __host__ __device__ bool operator()(const T &x)
+   {
+      return (x > 0);
+   }
+};
+
+template<typename T>
 struct is_nonnegative : public thrust::unary_function<T,bool>
 {
    __host__ __device__ bool operator()(const T &x)
@@ -2304,7 +2313,7 @@ HYPRE_Real    hypre_cimag( HYPRE_Complex value );
 #endif
 
 /* hypre_general.c */
-HYPRE_Int HYPRE_Init( hypre_int argc, char *argv[] );
+HYPRE_Int HYPRE_Init();
 HYPRE_Int HYPRE_Finalize();
 HYPRE_Int hypre_GetDevice(hypre_Handle *hypre_handle);
 HYPRE_Int hypre_SetDevice(HYPRE_Int use_device, hypre_Handle *hypre_handle);

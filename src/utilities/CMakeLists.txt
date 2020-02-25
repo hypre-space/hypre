@@ -18,6 +18,7 @@ set(SRCS
   binsearch.c
   exchange_data.c
   F90_HYPRE_error.c
+  F90_HYPRE_general.c
   fortran_matrix.c
   hypre_ap.c
   hypre_complex.c

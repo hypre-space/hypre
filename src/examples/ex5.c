@@ -63,6 +63,9 @@ int main (int argc, char *argv[])
    MPI_Comm_rank(MPI_COMM_WORLD, &myid);
    MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
 
+   /* Initialize HYPRE */
+   HYPRE_Init();
+
    /* Default problem parameters */
    n = 33;
    solver_id = 0;
@@ -590,6 +593,9 @@ int main (int argc, char *argv[])
    HYPRE_IJVectorDestroy(b);
    HYPRE_IJVectorDestroy(x);
 
+   /* Finalize HYPRE */
+   HYPRE_Finalize();
+
    /* Finalize MPI*/
    MPI_Finalize();
 
@@ -613,7 +619,7 @@ int hypre_FlexGMRESModifyPCAMGExample(void *precond_data, int iterations,
 
    if (rel_residual_norm > .1)
    {
-	   HYPRE_BoomerAMGSetNumSweeps((HYPRE_Solver)precond_data, 10);
+      HYPRE_BoomerAMGSetNumSweeps((HYPRE_Solver)precond_data, 10);
    }
    else
    {

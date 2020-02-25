@@ -171,7 +171,7 @@ hypre_SetDevice(HYPRE_Int use_device, hypre_Handle *hypre_handle_)
  *****************************************************************************/
 
 HYPRE_Int
-HYPRE_Init( hypre_int argc, char *argv[] )
+HYPRE_Init()
 {
    hypre_handle = hypre_HandleCreate();
 
@@ -200,9 +200,11 @@ HYPRE_Init( hypre_int argc, char *argv[] )
    hypre_HandleCurandGenerator(hypre_handle);
 #endif
 
+   /*
 #if defined(HYPRE_USING_KOKKOS)
    Kokkos::initialize (argc, argv);
 #endif
+   */
 
    /* Check if cuda arch flags in compiling match the device */
 #if defined(HYPRE_USING_CUDA)

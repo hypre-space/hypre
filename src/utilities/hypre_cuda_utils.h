@@ -495,6 +495,15 @@ struct is_negative : public thrust::unary_function<T,bool>
 };
 
 template<typename T>
+struct is_positive : public thrust::unary_function<T,bool>
+{
+   __host__ __device__ bool operator()(const T &x)
+   {
+      return (x > 0);
+   }
+};
+
+template<typename T>
 struct is_nonnegative : public thrust::unary_function<T,bool>
 {
    __host__ __device__ bool operator()(const T &x)

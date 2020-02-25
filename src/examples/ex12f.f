@@ -82,6 +82,8 @@
       call MPI_Comm_rank(MPI_COMM_WORLD, myid, ierr)
       call MPI_Comm_size(MPI_COMM_WORLD, num_procs, ierr)
 
+      call HYPRE_Init(ierr)
+
       if (num_procs .ne. 2) then
          if (myid .eq. 0) then
             print *, "Must run with 2 processors!"
@@ -476,6 +478,8 @@
       call HYPRE_SStructMatrixDestroy(A, ierr)
       call HYPRE_SStructVectorDestroy(b, ierr)
       call HYPRE_SStructVectorDestroy(x, ierr)
+
+      call HYPRE_Finalize(ierr)
 
 !     Finalize MPI
       call MPI_Finalize(ierr)

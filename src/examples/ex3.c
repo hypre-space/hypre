@@ -80,6 +80,9 @@ int main (int argc, char *argv[])
    MPI_Comm_rank(MPI_COMM_WORLD, &myid);
    MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
 
+   /* Initialize HYPRE */
+   HYPRE_Init();
+
    /* Set defaults */
    n = 33;
    solver_id = 0;
@@ -450,6 +453,9 @@ int main (int argc, char *argv[])
    HYPRE_StructMatrixDestroy(A);
    HYPRE_StructVectorDestroy(b);
    HYPRE_StructVectorDestroy(x);
+
+   /* Finalize HYPRE */
+   HYPRE_Finalize();
 
    /* Finalize MPI */
    MPI_Finalize();

@@ -91,6 +91,7 @@ hypre_UnifiedMemset(void *ptr, HYPRE_Int value, size_t num)
 static inline void
 hypre_UnifiedMemPrefetch(void *ptr, size_t size, hypre_MemoryLocation location)
 {
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 #ifdef HYPRE_DEBUG
    hypre_MemoryLocation tmp;
    hypre_GetPointerLocation(ptr, &tmp);
@@ -109,6 +110,7 @@ hypre_UnifiedMemPrefetch(void *ptr, size_t size, hypre_MemoryLocation location)
       HYPRE_CUDA_CALL( cudaMemPrefetchAsync(ptr, size, cudaCpuDeviceId,
                        hypre_HandleCudaComputeStream(hypre_handle)) );
    }
+#endif
 }
 
 /*--------------------------------------------------------------------------

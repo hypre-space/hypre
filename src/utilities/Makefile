@@ -31,6 +31,7 @@ HEADERS =\
 
 FILES =\
  F90_HYPRE_error.c\
+ F90_HYPRE_general.c\
  HYPRE_version.c\
  amg_linklist.c\
  binsearch.c\
