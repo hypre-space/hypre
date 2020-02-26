@@ -100,12 +100,13 @@ hypre_ParCSRMatMatHost( hypre_ParCSRMatrix  *A,
        * equally load balanced partitionings within
        * hypre_ParCSRMatrixExtractBExt
        *--------------------------------------------------------------------*/
-      Bs_ext = hypre_ParCSRMatrixExtractBExt(B,A,1); /* contains communication
-                                                        which should be explicitly included to allow for overlap */
+      Bs_ext = hypre_ParCSRMatrixExtractBExt(B, A, 1); /* contains communication
+                                                          which should be explicitly included to allow for overlap */
 
 
       hypre_CSRMatrixSplit(Bs_ext, first_col_diag_B, last_col_diag_B, num_cols_offd_B, col_map_offd_B,
                            &num_cols_offd_C, &col_map_offd_C, &Bext_diag, &Bext_offd);
+
       hypre_CSRMatrixDestroy(Bs_ext);
 
       /* These are local and could be overlapped with communication */
@@ -179,8 +180,8 @@ hypre_ParCSRMatMatHost( hypre_ParCSRMatrix  *A,
                                 C_diag->num_nonzeros, C_offd->num_nonzeros);
 
    /* Note that C does not own the partitionings */
-   hypre_ParCSRMatrixSetRowStartsOwner(C,0);
-   hypre_ParCSRMatrixSetColStartsOwner(C,0);
+   hypre_ParCSRMatrixSetRowStartsOwner(C, 0);
+   hypre_ParCSRMatrixSetColStartsOwner(C, 0);
 
    hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(C));
    hypre_ParCSRMatrixDiag(C) = C_diag;

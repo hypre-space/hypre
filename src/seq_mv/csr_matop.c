@@ -45,7 +45,18 @@ hypre_CSRMatrixAddHost ( hypre_CSRMatrix *A,
    HYPRE_Int         pos;
    HYPRE_Int         *marker;
 
-   HYPRE_MemoryLocation memory_location = hypre_CSRMatrixMemoryLocation(A);
+   HYPRE_MemoryLocation memory_location_A = hypre_CSRMatrixMemoryLocation(A);
+   HYPRE_MemoryLocation memory_location_B = hypre_CSRMatrixMemoryLocation(B);
+
+   /* RL: TODO cannot guarantee, maybe should never assert
+   hypre_assert(memory_location_A == memory_location_B);
+   */
+
+   /* RL: in the case of A=H, B=D, or A=D, B=H, let C = D,
+    * not sure if this is the right thing to do.
+    * Also, need something like this in other places
+    * TODO */
+   HYPRE_MemoryLocation memory_location_C = hypre_max(memory_location_A, memory_location_B);
 
    if (nrows_A != nrows_B || ncols_A != ncols_B)
    {
@@ -54,7 +65,7 @@ hypre_CSRMatrixAddHost ( hypre_CSRMatrix *A,
    }
 
    marker = hypre_CTAlloc(HYPRE_Int, ncols_A, HYPRE_MEMORY_HOST);
-   C_i = hypre_CTAlloc(HYPRE_Int, nrows_A+1, memory_location);
+   C_i = hypre_CTAlloc(HYPRE_Int, nrows_A+1, memory_location_C);
 
    for (ia = 0; ia < ncols_A; ia++)
    {
@@ -85,7 +96,7 @@ hypre_CSRMatrixAddHost ( hypre_CSRMatrix *A,
 
    C = hypre_CSRMatrixCreate(nrows_A, ncols_A, num_nonzeros);
    hypre_CSRMatrixI(C) = C_i;
-   hypre_CSRMatrixInitialize_v2(C, 0, memory_location);
+   hypre_CSRMatrixInitialize_v2(C, 0, memory_location_C);
    C_j = hypre_CSRMatrixJ(C);
    C_data = hypre_CSRMatrixData(C);
 
@@ -181,7 +192,18 @@ hypre_CSRMatrixBigAdd( hypre_CSRMatrix *A,
    HYPRE_Int         pos;
    HYPRE_Int         *marker;
 
-   HYPRE_MemoryLocation memory_location = hypre_CSRMatrixMemoryLocation(A);
+   HYPRE_MemoryLocation memory_location_A = hypre_CSRMatrixMemoryLocation(A);
+   HYPRE_MemoryLocation memory_location_B = hypre_CSRMatrixMemoryLocation(B);
+
+   /* RL: TODO cannot guarantee, maybe should never assert
+   hypre_assert(memory_location_A == memory_location_B);
+   */
+
+   /* RL: in the case of A=H, B=D, or A=D, B=H, let C = D,
+    * not sure if this is the right thing to do.
+    * Also, need something like this in other places
+    * TODO */
+   HYPRE_MemoryLocation memory_location_C = hypre_max(memory_location_A, memory_location_B);
 
    if (nrows_A != nrows_B || ncols_A != ncols_B)
    {
@@ -190,7 +212,7 @@ hypre_CSRMatrixBigAdd( hypre_CSRMatrix *A,
    }
 
    marker = hypre_CTAlloc(HYPRE_Int, ncols_A, HYPRE_MEMORY_HOST);
-   C_i = hypre_CTAlloc(HYPRE_Int, nrows_A+1, memory_location);
+   C_i = hypre_CTAlloc(HYPRE_Int, nrows_A+1, memory_location_C);
 
    for (ia = 0; ia < ncols_A; ia++)
    {
@@ -221,7 +243,7 @@ hypre_CSRMatrixBigAdd( hypre_CSRMatrix *A,
 
    C = hypre_CSRMatrixCreate(nrows_A, ncols_A, num_nonzeros);
    hypre_CSRMatrixI(C) = C_i;
-   hypre_CSRMatrixInitialize_v2(C, 1, memory_location);
+   hypre_CSRMatrixInitialize_v2(C, 1, memory_location_C);
    C_j = hypre_CSRMatrixBigJ(C);
    C_data = hypre_CSRMatrixData(C);
 
@@ -296,7 +318,18 @@ hypre_CSRMatrixMultiplyHost( hypre_CSRMatrix *A,
    HYPRE_Int         max_num_threads;
    HYPRE_Int         *jj_count;
 
-   HYPRE_MemoryLocation memory_location = hypre_CSRMatrixMemoryLocation(A);
+   HYPRE_MemoryLocation memory_location_A = hypre_CSRMatrixMemoryLocation(A);
+   HYPRE_MemoryLocation memory_location_B = hypre_CSRMatrixMemoryLocation(B);
+
+   /* RL: TODO cannot guarantee, maybe should never assert
+   hypre_assert(memory_location_A == memory_location_B);
+   */
+
+   /* RL: in the case of A=H, B=D, or A=D, B=H, let C = D,
+    * not sure if this is the right thing to do.
+    * Also, need something like this in other places
+    * TODO */
+   HYPRE_MemoryLocation memory_location_C = hypre_max(memory_location_A, memory_location_B);
 
    if (ncols_A != nrows_B)
    {
@@ -309,7 +342,7 @@ hypre_CSRMatrixMultiplyHost( hypre_CSRMatrix *A,
       allsquare = 1;
    }
 
-   C_i = hypre_CTAlloc(HYPRE_Int, nrows_A+1, memory_location);
+   C_i = hypre_CTAlloc(HYPRE_Int, nrows_A+1, memory_location_C);
 
    max_num_threads = hypre_NumThreads();
 
@@ -390,7 +423,7 @@ hypre_CSRMatrixMultiplyHost( hypre_CSRMatrix *A,
 
          C = hypre_CSRMatrixCreate(nrows_A, ncols_B, C_i[nrows_A]);
          hypre_CSRMatrixI(C) = C_i;
-         hypre_CSRMatrixInitialize_v2(C, 0, memory_location);
+         hypre_CSRMatrixInitialize_v2(C, 0, memory_location_C);
          C_j = hypre_CSRMatrixJ(C);
          C_data = hypre_CSRMatrixData(C);
       }
@@ -768,6 +801,8 @@ hypre_CSRMatrixTranspose(hypre_CSRMatrix  *A,
    return ierr;
 }
 
+
+/* RL: TODO add memory locations */
 HYPRE_Int hypre_CSRMatrixSplit(hypre_CSRMatrix  *Bs_ext,
                                HYPRE_BigInt      first_col_diag_B,
                                HYPRE_BigInt      last_col_diag_B,
@@ -1092,7 +1127,18 @@ hypre_CSRMatrixAddPartial( hypre_CSRMatrix *A,
    HYPRE_Int         *map;
    HYPRE_Int         *temp;
 
-   HYPRE_MemoryLocation memory_location = hypre_CSRMatrixMemoryLocation(A);
+   HYPRE_MemoryLocation memory_location_A = hypre_CSRMatrixMemoryLocation(A);
+   HYPRE_MemoryLocation memory_location_B = hypre_CSRMatrixMemoryLocation(B);
+
+   /* RL: TODO cannot guarantee, maybe should never assert
+   hypre_assert(memory_location_A == memory_location_B);
+   */
+
+   /* RL: in the case of A=H, B=D, or A=D, B=H, let C = D,
+    * not sure if this is the right thing to do.
+    * Also, need something like this in other places
+    * TODO */
+   HYPRE_MemoryLocation memory_location_C = hypre_max(memory_location_A, memory_location_B);
 
    if (ncols_A != ncols_B)
    {
@@ -1111,7 +1157,7 @@ hypre_CSRMatrixAddPartial( hypre_CSRMatrix *A,
    hypre_qsort2i(temp,map,0,nrows_B-1);
 
    marker = hypre_CTAlloc(HYPRE_Int, ncols_A, HYPRE_MEMORY_HOST);
-   C_i = hypre_CTAlloc(HYPRE_Int, nrows_A+1, memory_location);
+   C_i = hypre_CTAlloc(HYPRE_Int, nrows_A+1, memory_location_C);
 
    for (ia = 0; ia < ncols_A; ia++)
    {
@@ -1157,7 +1203,7 @@ hypre_CSRMatrixAddPartial( hypre_CSRMatrix *A,
 
    C = hypre_CSRMatrixCreate(nrows_A, ncols_A, num_nonzeros);
    hypre_CSRMatrixI(C) = C_i;
-   hypre_CSRMatrixInitialize_v2(C, 0, memory_location);
+   hypre_CSRMatrixInitialize_v2(C, 0, memory_location_C);
    C_j = hypre_CSRMatrixJ(C);
    C_data = hypre_CSRMatrixData(C);
 
