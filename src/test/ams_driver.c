@@ -125,7 +125,7 @@ hypre_int main (hypre_int argc, char *argv[])
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
 
    /* Initialize Hypre */
-   HYPRE_Init(argc, argv);
+   HYPRE_Init();
 
    /* Set defaults */
    solver_id = 3;

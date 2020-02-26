@@ -85,7 +85,15 @@ main( HYPRE_Int  argc,
    hypre_MPI_Comm_rank(comm, &myid );
 
    /* Initialize Hypre */
-   HYPRE_Init(argc, argv);
+   /* Initialize Hypre: must be the first Hypre function to call */
+   time_index = hypre_InitializeTiming("Hypre init");
+   hypre_BeginTiming(time_index);
+   HYPRE_Init();
+   hypre_EndTiming(time_index);
+   hypre_PrintTiming("Hypre init times", hypre_MPI_COMM_WORLD);
+   hypre_FinalizeTiming(time_index);
+   hypre_ClearTiming();
+
    hypre_SetExecPolicy(HYPRE_EXEC_DEVICE);
 /* #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP) */
 /*    memory_loc = hypre_handle->no_cuda_um ? HYPRE_MEMORY_DEVICE : HYPRE_MEMORY_SHARED; */
@@ -111,15 +119,6 @@ main( HYPRE_Int  argc,
       case HYPRE_MEMORY_HOST_PINNED:
          hypre_sprintf(memory_loc_name, "Host pinned"); break;
    }
-
-   /* Initialize Hypre: must be the first Hypre function to call */
-   time_index = hypre_InitializeTiming("Hypre init");
-   hypre_BeginTiming(time_index);
-   HYPRE_Init(argc, argv);
-   hypre_EndTiming(time_index);
-   hypre_PrintTiming("Hypre init times", hypre_MPI_COMM_WORLD);
-   hypre_FinalizeTiming(time_index);
-   hypre_ClearTiming();
 
    /*-----------------------------------------------------------
     * Set default parameters
