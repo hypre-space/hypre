@@ -396,6 +396,11 @@ hypre_ParVectorCloneDeep_v2( hypre_ParVector *x, HYPRE_MemoryLocation memory_loc
 HYPRE_Int
 hypre_ParVectorMigrate(hypre_ParVector *x, HYPRE_MemoryLocation memory_location)
 {
+   if (!x)
+   {
+      return hypre_error_flag;
+   }
+
    if ( hypre_GetActualMemLocation(memory_location) !=
         hypre_GetActualMemLocation(hypre_ParVectorMemoryLocation(x)) )
    {

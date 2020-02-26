@@ -8481,9 +8481,9 @@ done
       CUFLAGS="-O2 ${CUFLAGS}"
    fi
 
-   if test "$CXX" = "mpixlC" || test "$CXX" = "xlC_r" || test "$CXX" = "xlC"
+   if test "$NVCCBIN" = "mpixlC" || test "$NVCCBIN" = "xlC_r" || test "$NVCCBIN" = "xlC"
    then
-     CXXFLAGS+=" -Wno-deprecated-register"
+     CXXFLAGS+=" -Wno-deprecated-register -Wenum-compare"
    fi
    CXXFLAGS="${CUFLAGS} -Xcompiler \"${CXXFLAGS}\""
 

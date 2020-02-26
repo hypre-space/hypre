@@ -156,8 +156,10 @@ hypre_SetDevice(HYPRE_Int use_device, hypre_Handle *hypre_handle_)
 
    hypre_HandleCudaDevice(hypre_handle_) = device_id;
 
+   /*
    hypre_printf("Proc [global %d/%d, local %d/%d] can see %d GPUs and is running on %d\n",
                  myid, nproc, myNodeid, NodeSize, nDevices, device_id);
+   */
 
    return hypre_error_flag;
 }

@@ -315,6 +315,11 @@ hypre_ParCSRMatrixClone(hypre_ParCSRMatrix *A, HYPRE_Int copy_data)
 HYPRE_Int
 hypre_ParCSRMatrixMigrate(hypre_ParCSRMatrix *A, HYPRE_MemoryLocation memory_location)
 {
+   if (!A)
+   {
+      return hypre_error_flag;
+   }
+
    if ( hypre_GetActualMemLocation(memory_location) !=
         hypre_GetActualMemLocation(hypre_ParCSRMatrixMemoryLocation(A)) )
    {

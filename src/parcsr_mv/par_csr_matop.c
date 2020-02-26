@@ -1647,7 +1647,6 @@ hypre_ParCSRMatrixExtractBExt( hypre_ParCSRMatrix *B,
                                hypre_ParCSRMatrix *A,
                                HYPRE_Int want_data )
 {
-
 #if 0
    hypre_ParCSRCommHandle *comm_handle_idx, *comm_handle_data;
 
@@ -2976,8 +2975,10 @@ HYPRE_Complex hypre_ParCSRMatrixLocalSumElts( hypre_ParCSRMatrix * A )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParCSRMatrixAminvDB( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B,
-                           HYPRE_Complex *d, hypre_ParCSRMatrix **C_ptr)
+hypre_ParCSRMatrixAminvDB( hypre_ParCSRMatrix *A,
+                           hypre_ParCSRMatrix *B,
+                           HYPRE_Complex *d,
+                           hypre_ParCSRMatrix **C_ptr)
 {
    MPI_Comm comm = hypre_ParCSRMatrixComm(B);
    hypre_CSRMatrix      *A_diag   = hypre_ParCSRMatrixDiag(A);
@@ -4837,7 +4838,6 @@ hypre_ParcsrAdd( HYPRE_Complex alpha,
                  hypre_ParCSRMatrix *B,
                  hypre_ParCSRMatrix **Cout )
 {
-
    MPI_Comm         comm     = hypre_ParCSRMatrixComm(A);
    HYPRE_Int        num_procs, my_id;
    hypre_MPI_Comm_rank(comm, &my_id);
@@ -4889,6 +4889,12 @@ hypre_ParcsrAdd( HYPRE_Complex alpha,
    HYPRE_Int        nnz_diag_B = B_diag_i[nrow_local];
    HYPRE_Int        nnz_offd_B = B_offd_i[nrow_local];
 
+   HYPRE_MemoryLocation memory_location_A = hypre_ParCSRMatrixMemoryLocation(A);
+   /* RL: TODO cannot guarantee, maybe should never assert
+   HYPRE_MemoryLocation memory_location_B = hypre_ParCSRMatrixMemoryLocation(B);
+   hypre_assert(memory_location_A == memory_location_B);
+   */
+
    /* C */
    hypre_ParCSRMatrix *C;
    HYPRE_BigInt       *row_starts_C, *col_starts_C;
@@ -4902,17 +4908,17 @@ hypre_ParcsrAdd( HYPRE_Complex alpha,
    HYPRE_Int        nnz_offd_C_alloc = nnz_offd_A + nnz_offd_B;
    HYPRE_Int        nnz_diag_C = 0, nnz_offd_C = 0;
 
-   HYPRE_Int     *C_diag_i = hypre_CTAlloc(HYPRE_Int,     nrow_local + 1, HYPRE_MEMORY_HOST);
-   HYPRE_Int     *C_diag_j = hypre_CTAlloc(HYPRE_Int,     nnz_diag_C_alloc, HYPRE_MEMORY_HOST);
-   HYPRE_Complex *C_diag_a = hypre_CTAlloc(HYPRE_Complex, nnz_diag_C_alloc, HYPRE_MEMORY_HOST);
-   HYPRE_Int     *C_offd_i = hypre_CTAlloc(HYPRE_Int,     nrow_local + 1, HYPRE_MEMORY_HOST);
-   HYPRE_Int     *C_offd_j = hypre_CTAlloc(HYPRE_Int,     nnz_offd_C_alloc, HYPRE_MEMORY_HOST);
-   HYPRE_Complex *C_offd_a = hypre_CTAlloc(HYPRE_Complex, nnz_offd_C_alloc, HYPRE_MEMORY_HOST);
+   HYPRE_Int     *C_diag_i = hypre_CTAlloc(HYPRE_Int,     nrow_local + 1,   memory_location_A);
+   HYPRE_Int     *C_diag_j = hypre_CTAlloc(HYPRE_Int,     nnz_diag_C_alloc, memory_location_A);
+   HYPRE_Complex *C_diag_a = hypre_CTAlloc(HYPRE_Complex, nnz_diag_C_alloc, memory_location_A);
+   HYPRE_Int     *C_offd_i = hypre_CTAlloc(HYPRE_Int,     nrow_local + 1,   memory_location_A);
+   HYPRE_Int     *C_offd_j = hypre_CTAlloc(HYPRE_Int,     nnz_offd_C_alloc, memory_location_A);
+   HYPRE_Complex *C_offd_a = hypre_CTAlloc(HYPRE_Complex, nnz_offd_C_alloc, memory_location_A);
 
    hypre_union2( num_cols_A_offd, col_map_offd_A, num_cols_B_offd, col_map_offd_B,
                  &num_cols_C_offd, col_map_offd_C, A2C_offd, B2C_offd );
 
-   HYPRE_Int     *marker_diag = hypre_TAlloc(HYPRE_Int, ncol_local, HYPRE_MEMORY_HOST);
+   HYPRE_Int     *marker_diag = hypre_TAlloc(HYPRE_Int, ncol_local,      HYPRE_MEMORY_HOST);
    HYPRE_Int     *marker_offd = hypre_TAlloc(HYPRE_Int, num_cols_C_offd, HYPRE_MEMORY_HOST);
 
    for (i = 0; i < ncol_local; i++)
@@ -5053,13 +5059,13 @@ hypre_ParcsrAdd( HYPRE_Complex alpha,
    hypre_CSRMatrixData(C_diag) = C_diag_a;
    hypre_CSRMatrixI(C_diag)    = C_diag_i;
    hypre_CSRMatrixJ(C_diag)    = C_diag_j;
-   hypre_CSRMatrixMemoryLocation(C_diag) = HYPRE_MEMORY_HOST;
+   hypre_CSRMatrixMemoryLocation(C_diag) = memory_location_A;
 
    C_offd = hypre_ParCSRMatrixOffd(C);
    hypre_CSRMatrixData(C_offd) = C_offd_a;
    hypre_CSRMatrixI(C_offd)    = C_offd_i;
    hypre_CSRMatrixJ(C_offd)    = C_offd_j;
-   hypre_CSRMatrixMemoryLocation(C_offd) = HYPRE_MEMORY_HOST;
+   hypre_CSRMatrixMemoryLocation(C_offd) = memory_location_A;
 
    hypre_ParCSRMatrixColMapOffd(C) = col_map_offd_C;
 
@@ -5072,8 +5078,8 @@ hypre_ParcsrAdd( HYPRE_Complex alpha,
    *Cout = C;
 
    /* done */
-   hypre_TFree(A2C_offd, HYPRE_MEMORY_HOST);
-   hypre_TFree(B2C_offd, HYPRE_MEMORY_HOST);
+   hypre_TFree(A2C_offd,    HYPRE_MEMORY_HOST);
+   hypre_TFree(B2C_offd,    HYPRE_MEMORY_HOST);
    hypre_TFree(marker_diag, HYPRE_MEMORY_HOST);
    hypre_TFree(marker_offd, HYPRE_MEMORY_HOST);
 
@@ -5620,3 +5626,4 @@ hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix  *A,
 
    return hypre_error_flag;
 }
+
