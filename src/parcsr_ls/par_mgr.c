@@ -104,7 +104,7 @@ hypre_MGRCreate()
   (mgr_data -> max_local_lvls) = 10;
 
   (mgr_data -> use_non_galerkin_cg) = NULL;
-  
+
   (mgr_data -> print_coarse_system) = 0;
 
   (mgr_data -> set_c_points_method) = 0;
@@ -333,7 +333,7 @@ hypre_MGRDestroy( void *data )
   {
     hypre_ParVectorDestroy( (mgr_data -> VcycleRelaxZtemp) );
     (mgr_data -> VcycleRelaxZtemp) = NULL;
-  }  
+  }
   if (mgr_data -> FrelaxVcycleData) {
     for (i = 0; i < num_coarse_levels; i++) {
       if ((mgr_data -> FrelaxVcycleData)[i]) {
@@ -408,7 +408,7 @@ hypre_MGRCreateFrelaxVcycleData()
   hypre_ParAMGDataRelaxOrder(vdata) = 1;
   hypre_ParAMGDataMaxCoarseSize(vdata) = 9;
   hypre_ParAMGDataMinCoarseSize(vdata) = 0;
-  hypre_ParAMGDataUserCoarseRelaxType(vdata) = 9;    
+  hypre_ParAMGDataUserCoarseRelaxType(vdata) = 9;
 
   return (void *) vdata;
 }
@@ -433,7 +433,7 @@ hypre_MGRDestroyFrelaxVcycleData( void *data )
 
  hypre_TFree(hypre_ParAMGDataCFMarkerArray(vdata)[i-1], HYPRE_MEMORY_HOST);
     hypre_ParVectorDestroy(hypre_ParAMGDataFArray(vdata)[i]);
-    hypre_ParVectorDestroy(hypre_ParAMGDataUArray(vdata)[i]);  
+    hypre_ParVectorDestroy(hypre_ParAMGDataUArray(vdata)[i]);
     hypre_TFree(hypre_ParAMGDataDofFuncArray(vdata)[i], HYPRE_MEMORY_HOST);
   }
 
@@ -675,7 +675,7 @@ hypre_MGRCoarsen(hypre_ParCSRMatrix *S,
        CF_marker[cindexes[i]] = CMRK;
     }
   }
-  else 
+  else
   {
     /* First coarsen to get initial CF splitting.
      * This is then followed by updating the CF marker to pass
@@ -2191,7 +2191,7 @@ hypre_MGRComputeAlgebraicFixedStress(hypre_ParCSRMatrix    *A,
   HYPRE_Int n_fine, i;
   HYPRE_BigInt ibegin;
   hypre_ParCSRMatrix *A_up;
-  hypre_ParCSRMatrix *A_uu; 
+  hypre_ParCSRMatrix *A_uu;
   hypre_ParCSRMatrix *A_su;
   hypre_ParCSRMatrix *A_pu;
   hypre_ParVector *e1_vector;
@@ -2231,13 +2231,13 @@ hypre_MGRComputeAlgebraicFixedStress(hypre_ParCSRMatrix    *A,
     }
   }
 
-  // Get A_up 
+  // Get A_up
   hypre_MGRGetSubBlock(A, U_marker, P_marker, 0, &A_up);
-  // GetA_uu 
+  // GetA_uu
   hypre_MGRGetSubBlock(A, U_marker, U_marker, 0, &A_uu);
-  // Get A_su 
+  // Get A_su
   hypre_MGRGetSubBlock(A, S_marker, U_marker, 0, &A_su);
-  // Get A_pu 
+  // Get A_pu
   hypre_MGRGetSubBlock(A, P_marker, U_marker, 0, &A_pu);
 
   e1_vector = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_up),
@@ -2330,7 +2330,7 @@ hypre_MGRApproximateInverse(hypre_ParCSRMatrix     *A,
   droptol[0] = 1.0e-2;
   droptol[1] = 1.0e-2;
 
-  hypre_ILUParCSRInverseNSH(A, &approx_A_inv, droptol, mr_tol, nsh_tol, DIVIDE_TOL, mr_max_row_nnz, 
+  hypre_ILUParCSRInverseNSH(A, &approx_A_inv, droptol, mr_tol, nsh_tol, DIVIDE_TOL, mr_max_row_nnz,
                               nsh_max_row_nnz, mr_max_iter, nsh_max_iter, mr_col_version, print_level);
   *A_inv = approx_A_inv;
 
@@ -2341,7 +2341,7 @@ hypre_MGRApproximateInverse(hypre_ParCSRMatrix     *A,
 
 HYPRE_Int
 hypre_MGRBuildInterpApproximateInverseExp(hypre_ParCSRMatrix   *A,
-                                       hypre_ParCSRMatrix   *S, 
+                                       hypre_ParCSRMatrix   *S,
                                        HYPRE_Int            *CF_marker,
                                        HYPRE_BigInt            *num_cpts_global,
                                        HYPRE_Int            debug_flag,
@@ -2495,18 +2495,18 @@ hypre_MGRBuildInterpApproximateInverseExp(hypre_ParCSRMatrix   *A,
 
   P_diag_size = jj_counter;
 
-  P_diag_i    = hypre_CTAlloc(HYPRE_Int,  n_fine+1, HYPRE_MEMORY_SHARED);
-  P_diag_j    = hypre_CTAlloc(HYPRE_Int,  P_diag_size, HYPRE_MEMORY_SHARED);
-  P_diag_data = hypre_CTAlloc(HYPRE_Real,  P_diag_size, HYPRE_MEMORY_SHARED);
+  P_diag_i    = hypre_CTAlloc(HYPRE_Int,  n_fine+1, HYPRE_MEMORY_DEVICE);
+  P_diag_j    = hypre_CTAlloc(HYPRE_Int,  P_diag_size, HYPRE_MEMORY_DEVICE);
+  P_diag_data = hypre_CTAlloc(HYPRE_Real,  P_diag_size, HYPRE_MEMORY_DEVICE);
 
   P_diag_i[n_fine] = jj_counter;
 
 
   P_offd_size = jj_counter_offd;
 
-  P_offd_i    = hypre_CTAlloc(HYPRE_Int,  n_fine+1, HYPRE_MEMORY_SHARED);
-  P_offd_j    = hypre_CTAlloc(HYPRE_Int,  P_offd_size, HYPRE_MEMORY_SHARED);
-  P_offd_data = hypre_CTAlloc(HYPRE_Real,  P_offd_size, HYPRE_MEMORY_SHARED);
+  P_offd_i    = hypre_CTAlloc(HYPRE_Int,  n_fine+1, HYPRE_MEMORY_DEVICE);
+  P_offd_j    = hypre_CTAlloc(HYPRE_Int,  P_offd_size, HYPRE_MEMORY_DEVICE);
+  P_offd_data = hypre_CTAlloc(HYPRE_Real,  P_offd_size, HYPRE_MEMORY_DEVICE);
 
   /*-----------------------------------------------------------------------
    *  Intialize some stuff.
@@ -2590,7 +2590,7 @@ hypre_MGRBuildInterpApproximateInverseExp(hypre_ParCSRMatrix   *A,
     for (i=0; i < num_cols_P_offd; i++)
     {
       col_map_offd_P[i] = col_map_offd_tmp[i];
-    }   
+    }
   }
 
   if (num_cols_P_offd)
@@ -2800,18 +2800,18 @@ hypre_MGRBuildInterpApproximateInverse(hypre_ParCSRMatrix   *A,
 
   P_diag_size = jj_counter;
 
-  P_diag_i    = hypre_CTAlloc(HYPRE_Int,  n_fine+1, HYPRE_MEMORY_SHARED);
-  P_diag_j    = hypre_CTAlloc(HYPRE_Int,  P_diag_size, HYPRE_MEMORY_SHARED);
-  P_diag_data = hypre_CTAlloc(HYPRE_Real,  P_diag_size, HYPRE_MEMORY_SHARED);
+  P_diag_i    = hypre_CTAlloc(HYPRE_Int,  n_fine+1, HYPRE_MEMORY_DEVICE);
+  P_diag_j    = hypre_CTAlloc(HYPRE_Int,  P_diag_size, HYPRE_MEMORY_DEVICE);
+  P_diag_data = hypre_CTAlloc(HYPRE_Real,  P_diag_size, HYPRE_MEMORY_DEVICE);
 
   P_diag_i[n_fine] = jj_counter;
 
 
   P_offd_size = jj_counter_offd;
 
-  P_offd_i    = hypre_CTAlloc(HYPRE_Int,  n_fine+1, HYPRE_MEMORY_SHARED);
-  P_offd_j    = hypre_CTAlloc(HYPRE_Int,  P_offd_size, HYPRE_MEMORY_SHARED);
-  P_offd_data = hypre_CTAlloc(HYPRE_Real,  P_offd_size, HYPRE_MEMORY_SHARED);
+  P_offd_i    = hypre_CTAlloc(HYPRE_Int,  n_fine+1, HYPRE_MEMORY_DEVICE);
+  P_offd_j    = hypre_CTAlloc(HYPRE_Int,  P_offd_size, HYPRE_MEMORY_DEVICE);
+  P_offd_data = hypre_CTAlloc(HYPRE_Real,  P_offd_size, HYPRE_MEMORY_DEVICE);
 
   /*-----------------------------------------------------------------------
    *  Intialize some stuff.
@@ -2965,7 +2965,7 @@ hypre_MGRBuildInterpApproximateInverse(hypre_ParCSRMatrix   *A,
     for (i=0; i < num_cols_P_offd; i++)
     {
       col_map_offd_P[i] = col_map_offd_tmp[i];
-    }   
+    }
   }
 
   /*
@@ -3694,7 +3694,7 @@ HYPRE_Int hypre_block_gs (hypre_ParCSRMatrix *A,
   {
     num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
 
-    v_buf_data = hypre_CTAlloc(HYPRE_Real, 
+    v_buf_data = hypre_CTAlloc(HYPRE_Real,
                    hypre_ParCSRCommPkgSendMapStart(comm_pkg,  num_sends), HYPRE_MEMORY_HOST);
 
     Vext_data = hypre_CTAlloc(HYPRE_Real, num_cols_offd, HYPRE_MEMORY_HOST);
@@ -4580,7 +4580,7 @@ hypre_MGRGetSubBlock( hypre_ParCSRMatrix   *A,
 
   hypre_ParCSRMatrix    *Ablock;
   HYPRE_BigInt         *col_map_offd_Ablock;
-  HYPRE_Int       *tmp_map_offd = NULL;  
+  HYPRE_Int       *tmp_map_offd = NULL;
 
   HYPRE_Int             *CF_marker_offd = NULL;
 
@@ -4753,7 +4753,7 @@ hypre_MGRGetSubBlock( hypre_ParCSRMatrix   *A,
     for (i = ns; i < ne; i++)
     {
       /*--------------------------------------------------------------------
-       *  If i is a F-point, we loop through the columns and select 
+       *  If i is a F-point, we loop through the columns and select
        *  the F-columns. Also set up mapping vector.
        *--------------------------------------------------------------------*/
 
@@ -4893,7 +4893,7 @@ hypre_MGRGetSubBlock( hypre_ParCSRMatrix   *A,
     for (i = ns; i < ne; i++)
     {
       /*--------------------------------------------------------------------
-       *  If i is a F-point, we loop through the columns and select 
+       *  If i is a F-point, we loop through the columns and select
        *  the F-columns. Also set up mapping vector.
        *--------------------------------------------------------------------*/
       if (row_cf_marker[i] > 0)
@@ -4998,7 +4998,7 @@ hypre_MGRGetSubBlock( hypre_ParCSRMatrix   *A,
     hypre_ParCSRMatrixColMapOffd(Ablock) = col_map_offd_Ablock;
     hypre_CSRMatrixNumCols(Ablock_offd) = num_cols_Ablock_offd;
   }
-  
+
   hypre_GetCommPkgRTFromCommPkgA(Ablock, A, fine_to_coarse, tmp_map_offd);
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
@@ -5046,15 +5046,15 @@ hypre_MGRBuildAffNew( hypre_ParCSRMatrix   *A,
   }
 
   hypre_MGRGetSubBlock(A, CF_marker_copy, CF_marker_copy, debug_flag, A_ff_ptr);
-  
+
   /* Free copy of CF marker */
   hypre_TFree(CF_marker_copy, HYPRE_MEMORY_HOST);
   return(0);
 }
 
 /*********************************************************************************
- * This routine assumes that the 'toVector' is larger than the 'fromVector' and 
- * the CF_marker is of the same length as the toVector. There must be n 'point_type' 
+ * This routine assumes that the 'toVector' is larger than the 'fromVector' and
+ * the CF_marker is of the same length as the toVector. There must be n 'point_type'
  * values in the CF_marker, where n is the length of the 'fromVector'.
  * It adds the values of the 'fromVector' to the 'toVector' where the marker is the
  * same as the 'point_type'
@@ -5086,8 +5086,8 @@ hypre_MGRAddVectorP ( HYPRE_Int  *CF_marker,
 }
 
 /*************************************************************************************
- * This routine assumes that the 'fromVector' is larger than the 'toVector' and 
- * the CF_marker is of the same length as the fromVector. There must be n 'point_type' 
+ * This routine assumes that the 'fromVector' is larger than the 'toVector' and
+ * the CF_marker is of the same length as the fromVector. There must be n 'point_type'
  * values in the CF_marker, where n is the length of the 'toVector'.
  * It adds the values of the 'fromVector' where the marker is the
  * same as the 'point_type' to the 'toVector'
@@ -5118,7 +5118,7 @@ hypre_MGRAddVectorR ( HYPRE_Int  *CF_marker,
   return 0;
 }
 
-HYPRE_Int 
+HYPRE_Int
 hypre_MGRBuildAff( MPI_Comm comm, HYPRE_Int local_num_variables, HYPRE_Int num_functions,
   HYPRE_Int *dof_func, HYPRE_Int *CF_marker, HYPRE_Int **coarse_dof_func_ptr, HYPRE_BigInt **coarse_pnts_global_ptr,
   hypre_ParCSRMatrix *A, HYPRE_Int debug_flag, hypre_ParCSRMatrix **P_f_ptr, hypre_ParCSRMatrix **A_ff_ptr )
@@ -5217,7 +5217,7 @@ hypre_MGRPrintGsmoothConvergenceFactor( void *mgr_vdata, HYPRE_Int print_flag)
 {
    hypre_ParMGRData  *mgr_data = (hypre_ParMGRData*) mgr_vdata;
    mgr_data->print_gsmooth_convergence_factor = print_flag;
-   
+
    return hypre_error_flag;
 }
 */

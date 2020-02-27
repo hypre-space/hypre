@@ -36,25 +36,25 @@ hypre_ILUSetup( void               *ilu_vdata,
    HYPRE_Int            *perm                = hypre_ParILUDataPerm(ilu_data);
    HYPRE_Int            *qperm               = hypre_ParILUDataQPerm(ilu_data);
    HYPRE_Real           tol_ddPQ             = hypre_ParILUDataTolDDPQ(ilu_data);
-   
+
    hypre_ParCSRMatrix   *matA                = hypre_ParILUDataMatA(ilu_data);
    hypre_ParCSRMatrix   *matL                = hypre_ParILUDataMatL(ilu_data);
-   HYPRE_Real           *matD                = hypre_ParILUDataMatD(ilu_data);   
+   HYPRE_Real           *matD                = hypre_ParILUDataMatD(ilu_data);
    hypre_ParCSRMatrix   *matU                = hypre_ParILUDataMatU(ilu_data);
    hypre_ParCSRMatrix   *matS                = hypre_ParILUDataMatS(ilu_data);
 //   hypre_ParCSRMatrix   *matM                = NULL;
    HYPRE_Real           nnzS/* total nnz in S */;
    HYPRE_Int            nnzS_offd;
    HYPRE_Int            size_C/* total size of coarse grid */;
-   
+
    HYPRE_Int            n                    = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
 //   HYPRE_Int            m;/* m = n-LU */
    /* reordering option */
    HYPRE_Int            reordering_type = hypre_ParILUDataReorderingType(ilu_data);
    HYPRE_Int            num_procs,  my_id;
 
-   hypre_ParVector      *Utemp				 = NULL;
-   hypre_ParVector      *Ftemp				 = NULL;
+   hypre_ParVector      *Utemp               = NULL;
+   hypre_ParVector      *Ftemp               = NULL;
    HYPRE_Real           *uext                = NULL;
    HYPRE_Real           *fext                = NULL;
    hypre_ParVector      *rhs                 = NULL;
@@ -63,19 +63,19 @@ hypre_ILUSetup( void               *ilu_vdata,
    hypre_ParVector      *U_array             = hypre_ParILUDataU(ilu_data);
    hypre_ParVector      *residual            = hypre_ParILUDataResidual(ilu_data);
    HYPRE_Real           *rel_res_norms       = hypre_ParILUDataRelResNorms(ilu_data);
-   
+
    /* might need for Schur Complement */
    HYPRE_Int            *u_end               = NULL;
    HYPRE_Solver         schur_solver         = NULL;
    HYPRE_Solver         schur_precond        = NULL;
    HYPRE_Solver         schur_precond_gotten = NULL;
-   
+
    /* help to build external */
    hypre_ParCSRCommPkg  *comm_pkg;
    HYPRE_Int            buffer_size;
    HYPRE_Int            send_size;
    HYPRE_Int            recv_size;
-   
+
    /* ----- begin -----*/
 
    //num_threads = hypre_NumThreads();
@@ -108,7 +108,7 @@ hypre_ILUSetup( void               *ilu_vdata,
    {
       hypre_TFree(CF_marker_array, HYPRE_MEMORY_HOST);
       CF_marker_array = NULL;
-   }     
+   }
 
 
    /* clear old l1_norm data, if created */
@@ -118,7 +118,7 @@ hypre_ILUSetup( void               *ilu_vdata,
       hypre_ParILUDataL1Norms(ilu_data) = NULL;
    }
 
-   /* setup temporary storage 
+   /* setup temporary storage
     * first check is they've already here
     */
    if (hypre_ParILUDataUTemp(ilu_data))
@@ -169,7 +169,7 @@ hypre_ILUSetup( void               *ilu_vdata,
    if (hypre_ParILUDataSchurSolver(ilu_data))
    {
       switch(ilu_type){
-      case 10: case 11: 
+      case 10: case 11:
          HYPRE_ParCSRGMRESDestroy(hypre_ParILUDataSchurSolver(ilu_data)); //GMRES for Schur
          break;
       case 20: case 21:
@@ -179,18 +179,18 @@ hypre_ILUSetup( void               *ilu_vdata,
          break;
         }
      (hypre_ParILUDataSchurSolver(ilu_data)) = NULL;
-   } 
+   }
    if(hypre_ParILUDataSchurPrecond(ilu_data))
    {
       switch(ilu_type){
-      case 10: case 11: 
+      case 10: case 11:
          HYPRE_ILUDestroy(hypre_ParILUDataSchurPrecond(ilu_data)); //ILU as precond for Schur
          break;
       default:
          break;
         }
      (hypre_ParILUDataSchurPrecond(ilu_data)) = NULL;
-   } 
+   }
    /* start to create working vectors */
    Utemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
                           hypre_ParCSRMatrixGlobalNumRows(A),
@@ -209,7 +209,7 @@ hypre_ILUSetup( void               *ilu_vdata,
    matA = A;
    F_array = f;
    U_array = u;
-   
+
    // create perm arary if necessary
    if(perm == NULL)
    {
@@ -221,7 +221,7 @@ hypre_ILUSetup( void               *ilu_vdata,
          case 40: case 41:/* ddPQ */
             hypre_ILUGetPermddPQ(matA, &perm, &qperm, tol_ddPQ, &nLU, &nI, reordering_type);
             break;
-	 case 0: case 1:
+         case 0: case 1:
             hypre_ILUGetLocalPerm(matA, &perm, &nLU, reordering_type);
             break;
          default:
@@ -264,7 +264,7 @@ hypre_ILUSetup( void               *ilu_vdata,
          {
             /* setup GMRES parameters */
             HYPRE_ParCSRGMRESCreate(comm, &schur_solver);
-            
+
             HYPRE_GMRESSetKDim            (schur_solver, hypre_ParILUDataSchurGMRESKDim(ilu_data));
             HYPRE_GMRESSetMaxIter         (schur_solver, hypre_ParILUDataSchurGMRESMaxIter(ilu_data));/* we don't need that many solves */
             HYPRE_GMRESSetTol             (schur_solver, (ilu_data -> ss_tol));
@@ -273,10 +273,10 @@ hypre_ILUSetup( void               *ilu_vdata,
             HYPRE_GMRESSetLogging         (schur_solver, (ilu_data -> ss_logging));
             HYPRE_GMRESSetPrintLevel      (schur_solver, (ilu_data -> ss_print_level));/* set to zero now, don't print */
             HYPRE_GMRESSetRelChange       (schur_solver, (ilu_data -> ss_rel_change));
-            
+
             /* setup preconditioner parameters */
             /* create precond, the default is ILU0 */
-            HYPRE_ILUCreate               (&schur_precond);    
+            HYPRE_ILUCreate               (&schur_precond);
             HYPRE_ILUSetType              (schur_precond, (ilu_data -> sp_ilu_type));
             HYPRE_ILUSetLevelOfFill       (schur_precond, (ilu_data -> sp_ilu_lfil));
             HYPRE_ILUSetMaxNnzPerRow      (schur_precond, (ilu_data -> sp_ilu_max_row_nnz));
@@ -286,34 +286,34 @@ hypre_ILUSetup( void               *ilu_vdata,
             HYPRE_ILUSetMaxIter           (schur_precond, (ilu_data -> sp_max_iter));
             //HYPRE_ILUSetTol               (schur_precond, (ilu_data -> sp_tol));
             HYPRE_ILUSetTol               (schur_precond, 0.); /* set tol for preconditioner to zero. Avoids triggering hypre error for non convergence -DOK*/
-                                    
+
             /* add preconditioner to solver */
             HYPRE_GMRESSetPrecond(schur_solver,
                      (HYPRE_PtrToSolverFcn) HYPRE_ILUSolve,
                      (HYPRE_PtrToSolverFcn) HYPRE_ILUSetup,
-                                          schur_precond);    
+                                          schur_precond);
             HYPRE_GMRESGetPrecond(schur_solver, &schur_precond_gotten);
             if (schur_precond_gotten != (schur_precond))
             {
                hypre_printf("Schur complement got bad precond\n");
                return(-1);
             }
-            
-            /* need to create working vector rhs and x for Schur System */       
+
+            /* need to create working vector rhs and x for Schur System */
             rhs = hypre_ParVectorCreate(comm,
                                     hypre_ParCSRMatrixGlobalNumRows(matS),
                                     hypre_ParCSRMatrixRowStarts(matS));
             hypre_ParVectorInitialize(rhs);
-            hypre_ParVectorSetPartitioningOwner(rhs,0);        
+            hypre_ParVectorSetPartitioningOwner(rhs,0);
             x = hypre_ParVectorCreate(comm,
                                     hypre_ParCSRMatrixGlobalNumRows(matS),
                                     hypre_ParCSRMatrixRowStarts(matS));
             hypre_ParVectorInitialize(x);
             hypre_ParVectorSetPartitioningOwner(x,0);
-            
+
             /* setup solver */
             HYPRE_GMRESSetup(schur_solver,(HYPRE_Matrix)matS,(HYPRE_Vector)rhs,(HYPRE_Vector)x);
-            
+
             /* update ilu_data */
             hypre_ParILUDataSchurSolver   (ilu_data) = schur_solver;
             hypre_ParILUDataSchurPrecond  (ilu_data) = schur_precond;
@@ -326,29 +326,29 @@ hypre_ILUSetup( void               *ilu_vdata,
          {
             /* approximate inverse preconditioner */
             schur_solver = (HYPRE_Solver)hypre_NSHCreate();
-            
+
             /* set NSH parameters */
             hypre_NSHSetMaxIter           (schur_solver, hypre_ParILUDataSchurNSHSolveMaxIter(ilu_data));
             hypre_NSHSetTol               (schur_solver, hypre_ParILUDataSchurNSHSolveTol(ilu_data));
             hypre_NSHSetLogging           (schur_solver, hypre_ParILUDataSchurSolverLogging(ilu_data));
             hypre_NSHSetPrintLevel        (schur_solver, hypre_ParILUDataSchurSolverPrintLevel(ilu_data));
             hypre_NSHSetDropThresholdArray(schur_solver, hypre_ParILUDataSchurNSHDroptol(ilu_data));
-            
+
             hypre_NSHSetNSHMaxIter        (schur_solver, hypre_ParILUDataSchurNSHMaxNumIter(ilu_data));
             hypre_NSHSetNSHMaxRowNnz      (schur_solver, hypre_ParILUDataSchurNSHMaxRowNnz(ilu_data));
             hypre_NSHSetNSHTol            (schur_solver, hypre_ParILUDataSchurNSHTol(ilu_data));
-            
+
             hypre_NSHSetMRMaxIter         (schur_solver, hypre_ParILUDataSchurMRMaxIter(ilu_data));
             hypre_NSHSetMRMaxRowNnz       (schur_solver, hypre_ParILUDataSchurMRMaxRowNnz(ilu_data));
             hypre_NSHSetMRTol             (schur_solver, hypre_ParILUDataSchurMRTol(ilu_data));
             hypre_NSHSetColVersion        (schur_solver, hypre_ParILUDataSchurMRColVersion(ilu_data));
-            
-            /* need to create working vector rhs and x for Schur System */       
+
+            /* need to create working vector rhs and x for Schur System */
             rhs = hypre_ParVectorCreate(comm,
                                     hypre_ParCSRMatrixGlobalNumRows(matS),
                                     hypre_ParCSRMatrixRowStarts(matS));
             hypre_ParVectorInitialize(rhs);
-            hypre_ParVectorSetPartitioningOwner(rhs,0);        
+            hypre_ParVectorSetPartitioningOwner(rhs,0);
             x = hypre_ParVectorCreate(comm,
                                     hypre_ParCSRMatrixGlobalNumRows(matS),
                                     hypre_ParCSRMatrixRowStarts(matS));
@@ -357,7 +357,7 @@ hypre_ILUSetup( void               *ilu_vdata,
 
             /* setup solver */
             hypre_NSHSetup(schur_solver,matS,rhs,x);
-            
+
             hypre_ParILUDataSchurSolver(ilu_data) = schur_solver;
             hypre_ParILUDataRhs        (ilu_data) = rhs;
             hypre_ParILUDataX          (ilu_data) = x;
@@ -399,7 +399,7 @@ hypre_ILUSetup( void               *ilu_vdata,
    hypre_ParILUDataUEnd(ilu_data)            = u_end;
    hypre_ParILUDataUExt(ilu_data)            = uext;
    hypre_ParILUDataFExt(ilu_data)            = fext;
-      
+
    /* compute operator complexity */
    hypre_ParCSRMatrixSetDNumNonzeros(matA);
    nnzS = 0.0;
@@ -425,15 +425,15 @@ hypre_ILUSetup( void               *ilu_vdata,
          case 20: case 21:
             schur_solver_nsh = (hypre_ParNSHData*) hypre_ParILUDataSchurSolver(ilu_data);
             nnzS = nnzS * (hypre_ParNSHDataOperatorComplexity(schur_solver_nsh));
-            break; 
+            break;
          default:
             break;
       }
    }
-   
+
    (ilu_data -> operator_complexity) =  ((HYPRE_Real)size_C + nnzS +
-                                          hypre_ParCSRMatrixDNumNonzeros(matL) + 
-                                          hypre_ParCSRMatrixDNumNonzeros(matU)) / 
+                                          hypre_ParCSRMatrixDNumNonzeros(matL) +
+                                          hypre_ParCSRMatrixDNumNonzeros(matU)) /
                                           hypre_ParCSRMatrixDNumNonzeros(matA);
    if ((my_id == 0) && (print_level > 0))
    {
@@ -453,30 +453,30 @@ hypre_ILUSetup( void               *ilu_vdata,
       (ilu_data -> residual) = NULL;
    }
    rel_res_norms = hypre_CTAlloc(HYPRE_Real, (ilu_data -> max_iter), HYPRE_MEMORY_HOST);
-   (ilu_data -> rel_res_norms) = rel_res_norms;      
-   
+   (ilu_data -> rel_res_norms) = rel_res_norms;
+
    return hypre_error_flag;
 }
 
-/* ILU(0) 
- * A = input matrix 
- * perm = permutation array indicating ordering of rows. Perm could come from a 
+/* ILU(0)
+ * A = input matrix
+ * perm = permutation array indicating ordering of rows. Perm could come from a
  *    CF_marker array or a reordering routine.
  * qperm = permutation array indicating ordering of columns
  * nI = number of interial unknowns
  * nLU = size of incomplete factorization, nLU should obey nLU <= nI.
  *    Schur complement is formed if nLU < n
  * Lptr, Dptr, Uptr, Sptr = L, D, U, S factors.
- * will form global Schur Matrix if nLU < n 
+ * will form global Schur Matrix if nLU < n
  */
 HYPRE_Int
-hypre_ILUSetupILU0(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qperm, HYPRE_Int nLU, HYPRE_Int nI, 
+hypre_ILUSetupILU0(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qperm, HYPRE_Int nLU, HYPRE_Int nI,
       hypre_ParCSRMatrix **Lptr, HYPRE_Real** Dptr, hypre_ParCSRMatrix **Uptr, hypre_ParCSRMatrix **Sptr, HYPRE_Int **u_end)
 {
    HYPRE_Int                i, ii, j, k, k1, k2, k3, ctrU, ctrL, ctrS, lenl, lenu, jpiv, col, jpos;
    HYPRE_Int                *iw, *iL, *iU;
    HYPRE_Real               dd, t, dpiv, lxu, *wU, *wL;
-   
+
    /* communication stuffs for S */
    MPI_Comm                 comm             = hypre_ParCSRMatrixComm(A);
    HYPRE_Int                S_offd_nnz, S_offd_ncols;
@@ -484,8 +484,8 @@ hypre_ILUSetupILU0(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qperm, HYP
    hypre_ParCSRCommHandle   *comm_handle;
    HYPRE_Int                num_sends, begin, end;
    HYPRE_BigInt                *send_buf        = NULL;
-   HYPRE_Int                num_procs, my_id;   
-   
+   HYPRE_Int                num_procs, my_id;
+
    /* data objects for A */
    hypre_CSRMatrix          *A_diag          = hypre_ParCSRMatrixDiag(A);
    hypre_CSRMatrix          *A_offd          = hypre_ParCSRMatrixOffd(A);
@@ -495,7 +495,7 @@ hypre_ILUSetupILU0(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qperm, HYP
    HYPRE_Real               *A_offd_data     = hypre_CSRMatrixData(A_offd);
    HYPRE_Int                *A_offd_i        = hypre_CSRMatrixI(A_offd);
    HYPRE_Int                *A_offd_j        = hypre_CSRMatrixJ(A_offd);
-   
+
    /* size of problem and schur system */
    HYPRE_Int                n                =  hypre_CSRMatrixNumRows(A_diag);
    HYPRE_Int                m                = n - nLU;
@@ -504,7 +504,7 @@ hypre_ILUSetupILU0(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qperm, HYP
    HYPRE_Real               local_nnz, total_nnz;
    HYPRE_Int                *u_end_array;
    HYPRE_Int                u_end_location;
-   
+
    /* data objects for L, D, U */
    hypre_ParCSRMatrix       *matL;
    hypre_ParCSRMatrix       *matU;
@@ -516,8 +516,8 @@ hypre_ILUSetupILU0(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qperm, HYP
    HYPRE_Int                *L_diag_j;
    HYPRE_Real               *U_diag_data;
    HYPRE_Int                *U_diag_i;
-   HYPRE_Int                *U_diag_j;  
-   
+   HYPRE_Int                *U_diag_j;
+
    /* data objects for S */
    hypre_ParCSRMatrix       *matS = NULL;
    hypre_CSRMatrix          *S_diag;
@@ -531,22 +531,22 @@ hypre_ILUSetupILU0(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qperm, HYP
    HYPRE_Real               *S_offd_data;
    HYPRE_BigInt                *col_starts;
    HYPRE_BigInt                total_rows;
-   
+
    /* memory management */
    HYPRE_Int                initial_alloc    = 0;
    HYPRE_Int                capacity_L;
    HYPRE_Int                capacity_U;
    HYPRE_Int                capacity_S       = 0;
-   HYPRE_Int                nnz_A            = A_diag_i[n];        
-   
+   HYPRE_Int                nnz_A            = A_diag_i[n];
+
    /* reverse permutation array */
    HYPRE_Int                *rperm;
-   
+
    /* start setup
     * get communication stuffs first
     */
-   hypre_MPI_Comm_size(comm,&num_procs);    
-   hypre_MPI_Comm_rank(comm,&my_id);   
+   hypre_MPI_Comm_size(comm,&num_procs);
+   hypre_MPI_Comm_rank(comm,&my_id);
    comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    /* setup if not yet built */
    if(!comm_pkg)
@@ -554,7 +554,7 @@ hypre_ILUSetupILU0(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qperm, HYP
       hypre_MatvecCommPkgCreate(A);
       comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    }
-   
+
    /* check for correctness */
    if(nLU < 0 || nLU > n)
    {
@@ -564,43 +564,43 @@ hypre_ILUSetupILU0(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qperm, HYP
    {
       hypre_error_w_msg(HYPRE_ERROR_ARG,"WARNING: nLU should not exceed nI.\n");
    }
-   
+
    /* Allocate memory for u_end array */
    u_end_array    = hypre_TAlloc(HYPRE_Int, nLU, HYPRE_MEMORY_HOST);
-   
+
    /* Allocate memory for L,D,U,S factors */
    if(n > 0)
    {
       initial_alloc  = nLU + ceil((nnz_A / 2.0)*nLU/n);
-      capacity_S     = m + ceil((nnz_A / 2.0)*m/n); 
+      capacity_S     = m + ceil((nnz_A / 2.0)*m/n);
    }
-   capacity_L     = initial_alloc;   
-   capacity_U     = initial_alloc;      
-   
-   D_data         = hypre_TAlloc(HYPRE_Real, n, HYPRE_MEMORY_SHARED);
-   L_diag_i       = hypre_TAlloc(HYPRE_Int, n+1, HYPRE_MEMORY_SHARED);
-   L_diag_j       = hypre_TAlloc(HYPRE_Int, capacity_L, HYPRE_MEMORY_SHARED);
-   L_diag_data    = hypre_TAlloc(HYPRE_Real, capacity_L, HYPRE_MEMORY_SHARED);
-   U_diag_i       = hypre_TAlloc(HYPRE_Int, n+1, HYPRE_MEMORY_SHARED);
-   U_diag_j       = hypre_TAlloc(HYPRE_Int, capacity_U, HYPRE_MEMORY_SHARED);
-   U_diag_data    = hypre_TAlloc(HYPRE_Real, capacity_U, HYPRE_MEMORY_SHARED);
-   S_diag_i       = hypre_TAlloc(HYPRE_Int, m+1, HYPRE_MEMORY_SHARED);
-   S_diag_j       = hypre_TAlloc(HYPRE_Int, capacity_S, HYPRE_MEMORY_SHARED);
-   S_diag_data    = hypre_TAlloc(HYPRE_Real, capacity_S, HYPRE_MEMORY_SHARED);   
-                 
+   capacity_L     = initial_alloc;
+   capacity_U     = initial_alloc;
+
+   D_data         = hypre_TAlloc(HYPRE_Real, n, HYPRE_MEMORY_DEVICE);
+   L_diag_i       = hypre_TAlloc(HYPRE_Int, n+1, HYPRE_MEMORY_DEVICE);
+   L_diag_j       = hypre_TAlloc(HYPRE_Int, capacity_L, HYPRE_MEMORY_DEVICE);
+   L_diag_data    = hypre_TAlloc(HYPRE_Real, capacity_L, HYPRE_MEMORY_DEVICE);
+   U_diag_i       = hypre_TAlloc(HYPRE_Int, n+1, HYPRE_MEMORY_DEVICE);
+   U_diag_j       = hypre_TAlloc(HYPRE_Int, capacity_U, HYPRE_MEMORY_DEVICE);
+   U_diag_data    = hypre_TAlloc(HYPRE_Real, capacity_U, HYPRE_MEMORY_DEVICE);
+   S_diag_i       = hypre_TAlloc(HYPRE_Int, m+1, HYPRE_MEMORY_DEVICE);
+   S_diag_j       = hypre_TAlloc(HYPRE_Int, capacity_S, HYPRE_MEMORY_DEVICE);
+   S_diag_data    = hypre_TAlloc(HYPRE_Real, capacity_S, HYPRE_MEMORY_DEVICE);
+
    /* allocate working arrays */
    iw             = hypre_TAlloc(HYPRE_Int, 3*n, HYPRE_MEMORY_HOST);
    iL             = iw+n;
    rperm          = iw + 2*n;
    wL             = hypre_TAlloc(HYPRE_Real, n, HYPRE_MEMORY_HOST);
-   
+
    ctrU        = ctrL        = ctrS        = 0;
    L_diag_i[0] = U_diag_i[0] = S_diag_i[0] = 0;
    /* set marker array iw to -1 */
-   for( i = 0; i < n; i++ ) 
+   for( i = 0; i < n; i++ )
    {
      iw[i] = -1;
-   }   
+   }
 
    /* get reverse permutation (rperm).
     * rperm holds the reordered indexes.
@@ -608,17 +608,17 @@ hypre_ILUSetupILU0(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qperm, HYP
    */
    for(i=0; i<n; i++)
    {
-     rperm[qperm[i]] = i;   
-   }   
+     rperm[qperm[i]] = i;
+   }
    /*---------  Begin Factorization. Work in permuted space  ----*/
-   for( ii = 0; ii < nLU; ii++ ) 
+   for( ii = 0; ii < nLU; ii++ )
    {
 
       // get row i
       i = perm[ii];
-      // get extents of row i    
-      k1=A_diag_i[i];   
-      k2=A_diag_i[i+1]; 
+      // get extents of row i
+      k1=A_diag_i[i];
+      k2=A_diag_i[i+1];
 
 /*-------------------- unpack L & U-parts of row of A in arrays w */
       iU = iL+ii;
@@ -628,23 +628,23 @@ hypre_ILUSetupILU0(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qperm, HYP
       lenl  = lenu = 0;
       iw[ii] = ii;
 /*-------------------- scan & unwrap column */
-      for(j=k1; j < k2; j++) 
+      for(j=k1; j < k2; j++)
       {
          col = rperm[A_diag_j[j]];
          t = A_diag_data[j];
-         if( col < ii ) 
+         if( col < ii )
          {
             iw[col] = lenl;
             iL[lenl] = col;
             wL[lenl++] = t;
-         } 
-         else if (col > ii) 
+         }
+         else if (col > ii)
          {
             iw[col] = lenu;
             iU[lenu] = col;
             wU[lenu++] = t;
          }
-         else 
+         else
          {
             dd=t;
          }
@@ -653,20 +653,20 @@ hypre_ILUSetupILU0(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qperm, HYP
       /* eliminate row */
       /*-------------------------------------------------------------------------
       *  In order to do the elimination in the correct order we must select the
-      *  smallest column index among iL[k], k = j, j+1, ..., lenl-1. For ILU(0), 
-      *  no new fill-ins are expect, so we can pre-sort iL and wL prior to the 
+      *  smallest column index among iL[k], k = j, j+1, ..., lenl-1. For ILU(0),
+      *  no new fill-ins are expect, so we can pre-sort iL and wL prior to the
       *  entering the elimination loop.
-      *-----------------------------------------------------------------------*/     
+      *-----------------------------------------------------------------------*/
 //      hypre_quickSortIR(iL, wL, iw, 0, (lenl-1));
       hypre_qsort3ir(iL, wL, iw, 0, (lenl-1));
       for(j=0; j<lenl; j++)
-      {   
+      {
          jpiv = iL[j];
          /* get factor/ pivot element */
          dpiv = wL[j] * D_data[jpiv];
          /* store entry in L */
          wL[j] = dpiv;
-                                         
+
          /* zero out element - reset pivot */
          iw[jpiv] = -1;
          /* combine current row and pivot row */
@@ -676,11 +676,11 @@ hypre_ILUSetupILU0(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qperm, HYP
             jpos = iw[col];
 
             /* Only fill-in nonzero pattern (jpos != 0) */
-            if(jpos < 0) 
+            if(jpos < 0)
             {
                continue;
             }
-            
+
             lxu = - U_diag_data[k] * dpiv;
             if(col < ii)
             {
@@ -696,12 +696,12 @@ hypre_ILUSetupILU0(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qperm, HYP
             {
                /* diagonal update */
                dd += lxu;
-            }          
-         }       
+            }
+         }
       }
       /* restore iw (only need to restore diagonal and U part */
       iw[ii] = -1;
-      for( j = 0; j < lenu; j++ ) 
+      for( j = 0; j < lenu; j++ )
       {
          iw[iU[j]] = -1;
       }
@@ -713,19 +713,19 @@ hypre_ILUSetupILU0(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qperm, HYP
       {
          while((ctrL+lenl) > capacity_L)
          {
-            capacity_L = capacity_L * EXPAND_FACT + 1;         
-            L_diag_j = hypre_TReAlloc(L_diag_j, HYPRE_Int, capacity_L, HYPRE_MEMORY_SHARED);
-            L_diag_data = hypre_TReAlloc(L_diag_data, HYPRE_Real, capacity_L, HYPRE_MEMORY_SHARED);
+            capacity_L = capacity_L * EXPAND_FACT + 1;
+            L_diag_j = hypre_TReAlloc(L_diag_j, HYPRE_Int, capacity_L, HYPRE_MEMORY_DEVICE);
+            L_diag_data = hypre_TReAlloc(L_diag_data, HYPRE_Real, capacity_L, HYPRE_MEMORY_DEVICE);
          }
-         hypre_TMemcpy(&(L_diag_j)[ctrL], iL, HYPRE_Int, lenl, HYPRE_MEMORY_SHARED, HYPRE_MEMORY_HOST);
-         hypre_TMemcpy(&(L_diag_data)[ctrL], wL, HYPRE_Real, lenl, HYPRE_MEMORY_SHARED, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(&(L_diag_j)[ctrL], iL, HYPRE_Int, lenl, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(&(L_diag_data)[ctrL], wL, HYPRE_Real, lenl, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
       }
-      L_diag_i[ii+1] = (ctrL+=lenl); 
+      L_diag_i[ii+1] = (ctrL+=lenl);
 
       /* diagonal part (we store the inverse) */
       if(fabs(dd) < MAT_TOL)
       {
-         dd = 1.0e-6;     
+         dd = 1.0e-6;
       }
       D_data[ii] = 1./dd;
 
@@ -736,14 +736,14 @@ hypre_ILUSetupILU0(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qperm, HYP
          while((ctrU+lenu) > capacity_U)
          {
             capacity_U = capacity_U * EXPAND_FACT + 1;
-            U_diag_j = hypre_TReAlloc(U_diag_j, HYPRE_Int, capacity_U, HYPRE_MEMORY_SHARED);
-            U_diag_data = hypre_TReAlloc(U_diag_data, HYPRE_Real, capacity_U, HYPRE_MEMORY_SHARED);
-         } 
-         hypre_TMemcpy(&(U_diag_j)[ctrU], iU, HYPRE_Int, lenu, HYPRE_MEMORY_SHARED, HYPRE_MEMORY_HOST);
-         hypre_TMemcpy(&(U_diag_data)[ctrU], wU, HYPRE_Real, lenu, HYPRE_MEMORY_SHARED, HYPRE_MEMORY_HOST);
+            U_diag_j = hypre_TReAlloc(U_diag_j, HYPRE_Int, capacity_U, HYPRE_MEMORY_DEVICE);
+            U_diag_data = hypre_TReAlloc(U_diag_data, HYPRE_Real, capacity_U, HYPRE_MEMORY_DEVICE);
+         }
+         hypre_TMemcpy(&(U_diag_j)[ctrU], iU, HYPRE_Int, lenu, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(&(U_diag_data)[ctrU], wU, HYPRE_Real, lenu, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
       }
-      U_diag_i[ii+1] = (ctrU+=lenu); 
-      
+      U_diag_i[ii+1] = (ctrU+=lenu);
+
       /* check and build u_end array */
       if(m > 0)
       {
@@ -759,16 +759,16 @@ hypre_ILUSetupILU0(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qperm, HYP
          /* Everything is in U */
          u_end_array[ii] = ctrU;
       }
-      
+
    }
    /*---------  Begin Factorization in Schur Complement part  ----*/
-   for( ii = nLU; ii < n; ii++ ) 
+   for( ii = nLU; ii < n; ii++ )
    {
       // get row i
       i = perm[ii];
-      // get extents of row i    
-      k1=A_diag_i[i];   
-      k2=A_diag_i[i+1]; 
+      // get extents of row i
+      k1=A_diag_i[i];
+      k2=A_diag_i[i+1];
 
 /*-------------------- unpack L & U-parts of row of A in arrays w */
       iU = iL+nLU + 1;
@@ -778,23 +778,23 @@ hypre_ILUSetupILU0(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qperm, HYP
       lenl  = lenu = 0;
       iw[ii] = nLU;
 /*-------------------- scan & unwrap column */
-      for(j=k1; j < k2; j++) 
+      for(j=k1; j < k2; j++)
       {
          col = rperm[A_diag_j[j]];
          t = A_diag_data[j];
-         if( col < nLU ) 
+         if( col < nLU )
          {
             iw[col] = lenl;
             iL[lenl] = col;
             wL[lenl++] = t;
-         } 
-         else if (col != ii) 
+         }
+         else if (col != ii)
          {
             iw[col] = lenu;
             iU[lenu] = col;
             wU[lenu++] = t;
          }
-         else 
+         else
          {
             dd=t;
          }
@@ -803,20 +803,20 @@ hypre_ILUSetupILU0(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qperm, HYP
       /* eliminate row */
       /*-------------------------------------------------------------------------
       *  In order to do the elimination in the correct order we must select the
-      *  smallest column index among iL[k], k = j, j+1, ..., lenl-1. For ILU(0), 
-      *  no new fill-ins are expect, so we can pre-sort iL and wL prior to the 
+      *  smallest column index among iL[k], k = j, j+1, ..., lenl-1. For ILU(0),
+      *  no new fill-ins are expect, so we can pre-sort iL and wL prior to the
       *  entering the elimination loop.
-      *-----------------------------------------------------------------------*/     
+      *-----------------------------------------------------------------------*/
 //      hypre_quickSortIR(iL, wL, iw, 0, (lenl-1));
       hypre_qsort3ir(iL, wL, iw, 0, (lenl-1));
       for(j=0; j<lenl; j++)
-      {   
+      {
          jpiv = iL[j];
          /* get factor/ pivot element */
          dpiv = wL[j] * D_data[jpiv];
          /* store entry in L */
          wL[j] = dpiv;
-                                         
+
          /* zero out element - reset pivot */
          iw[jpiv] = -1;
          /* combine current row and pivot row */
@@ -826,11 +826,11 @@ hypre_ILUSetupILU0(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qperm, HYP
             jpos = iw[col];
 
             /* Only fill-in nonzero pattern (jpos != 0) */
-            if(jpos < 0) 
-            {  
+            if(jpos < 0)
+            {
                continue;
             }
-            
+
             lxu = - U_diag_data[k] * dpiv;
             if(col < nLU)
             {
@@ -846,12 +846,12 @@ hypre_ILUSetupILU0(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qperm, HYP
             {
                /* diagonal update */
                dd += lxu;
-            }          
-         }       
+            }
+         }
       }
       /* restore iw (only need to restore diagonal and U part */
       iw[ii] = -1;
-      for( j = 0; j < lenu; j++ ) 
+      for( j = 0; j < lenu; j++ )
       {
          iw[iU[j]] = -1;
       }
@@ -863,23 +863,23 @@ hypre_ILUSetupILU0(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qperm, HYP
       {
          while((ctrL+lenl) > capacity_L)
          {
-            capacity_L = capacity_L * EXPAND_FACT + 1;         
-            L_diag_j = hypre_TReAlloc(L_diag_j, HYPRE_Int, capacity_L, HYPRE_MEMORY_SHARED);
-            L_diag_data = hypre_TReAlloc(L_diag_data, HYPRE_Real, capacity_L, HYPRE_MEMORY_SHARED);
+            capacity_L = capacity_L * EXPAND_FACT + 1;
+            L_diag_j = hypre_TReAlloc(L_diag_j, HYPRE_Int, capacity_L, HYPRE_MEMORY_DEVICE);
+            L_diag_data = hypre_TReAlloc(L_diag_data, HYPRE_Real, capacity_L, HYPRE_MEMORY_DEVICE);
          }
-         hypre_TMemcpy(&(L_diag_j)[ctrL], iL, HYPRE_Int, lenl, HYPRE_MEMORY_SHARED, HYPRE_MEMORY_HOST);
-         hypre_TMemcpy(&(L_diag_data)[ctrL], wL, HYPRE_Real, lenl, HYPRE_MEMORY_SHARED, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(&(L_diag_j)[ctrL], iL, HYPRE_Int, lenl, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(&(L_diag_data)[ctrL], wL, HYPRE_Real, lenl, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
       }
-      L_diag_i[ii+1] = (ctrL+=lenl); 
+      L_diag_i[ii+1] = (ctrL+=lenl);
 
       /* S part */
       /* Check that memory is sufficient */
       while((ctrS+lenu+1) > capacity_S)
       {
          capacity_S = capacity_S * EXPAND_FACT + 1;
-         S_diag_j = hypre_TReAlloc(S_diag_j, HYPRE_Int, capacity_S, HYPRE_MEMORY_SHARED);
-         S_diag_data = hypre_TReAlloc(S_diag_data, HYPRE_Real, capacity_S, HYPRE_MEMORY_SHARED);
-      } 
+         S_diag_j = hypre_TReAlloc(S_diag_j, HYPRE_Int, capacity_S, HYPRE_MEMORY_DEVICE);
+         S_diag_data = hypre_TReAlloc(S_diag_data, HYPRE_Real, capacity_S, HYPRE_MEMORY_DEVICE);
+      }
       /* remember S in under a new index system! */
       S_diag_j[ctrS] = ii - nLU;
       S_diag_data[ctrS] = dd;
@@ -888,8 +888,8 @@ hypre_ILUSetupILU0(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qperm, HYP
          S_diag_j[ctrS+1+j] = iU[j] - nLU;
       }
       //hypre_TMemcpy(S_diag_j+ctrS+1, iU, HYPRE_Int, lenu, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(S_diag_data+ctrS+1, wU, HYPRE_Real, lenu, HYPRE_MEMORY_SHARED, HYPRE_MEMORY_HOST);
-      S_diag_i[ii-nLU+1] = ctrS+=(lenu+1); 
+      hypre_TMemcpy(S_diag_data+ctrS+1, wU, HYPRE_Real, lenu, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+      S_diag_i[ii-nLU+1] = ctrS+=(lenu+1);
    }
    /* Assemble LDUS matrices */
    /* zero out unfactored rows for U and D */
@@ -903,13 +903,13 @@ hypre_ILUSetupILU0(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qperm, HYP
     * Check if we need to create Schur complement
     */
    HYPRE_BigInt big_m = (HYPRE_BigInt)m;
-   hypre_MPI_Allreduce(&big_m, &total_rows, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);  
+   hypre_MPI_Allreduce(&big_m, &total_rows, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
    /* only form when total_rows > 0 */
    if( total_rows > 0 )
    {
       /* now create S */
       /* need to get new column start */
-#ifdef HYPRE_NO_GLOBAL_PARTITION 
+#ifdef HYPRE_NO_GLOBAL_PARTITION
 {
       HYPRE_BigInt global_start;
       col_starts = hypre_CTAlloc(HYPRE_BigInt,2,HYPRE_MEMORY_HOST);
@@ -921,19 +921,19 @@ hypre_ILUSetupILU0(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qperm, HYP
       col_starts = hypre_CTAlloc(HYPRE_BigInt,num_procs+1,HYPRE_MEMORY_HOST);
 
       hypre_MPI_Allgather(&big_m,1,HYPRE_MPI_BIG_INT,&col_starts[1],
-   		1,HYPRE_MPI_BIG_INT,comm);
+            1,HYPRE_MPI_BIG_INT,comm);
 
       for (i=2; i < num_procs+1; i++)
          col_starts[i] += col_starts[i-1];
-#endif 
+#endif
 
       /* We did nothing to A_offd, so all the data kept, just reorder them
-       * The create function takes comm, global num rows/cols, 
+       * The create function takes comm, global num rows/cols,
        *    row/col start, num cols offd, nnz diag, nnz offd
        */
       S_offd_nnz = hypre_CSRMatrixNumNonzeros(A_offd);
       S_offd_ncols = hypre_CSRMatrixNumCols(A_offd);
-      
+
       matS = hypre_ParCSRMatrixCreate( comm,
                            total_rows,
                            total_rows,
@@ -942,25 +942,25 @@ hypre_ILUSetupILU0(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qperm, HYP
                            S_offd_ncols,
                            ctrS,
                            S_offd_nnz);
-         
+
       /* S owns different start/end */
       hypre_ParCSRMatrixSetColStartsOwner(matS,1);
       hypre_ParCSRMatrixSetRowStartsOwner(matS,0);/* square matrix, use same row and col start */
-      
+
       /* first put diagonal data in */
       S_diag = hypre_ParCSRMatrixDiag(matS);
-      
+
       hypre_CSRMatrixI(S_diag) = S_diag_i;
-      hypre_CSRMatrixData(S_diag) = S_diag_data; 
+      hypre_CSRMatrixData(S_diag) = S_diag_data;
       hypre_CSRMatrixJ(S_diag) = S_diag_j;
-      
+
       /* now start to construct offdiag of S */
       S_offd = hypre_ParCSRMatrixOffd(matS);
-      S_offd_i = hypre_TAlloc(HYPRE_Int, m+1, HYPRE_MEMORY_SHARED);
-      S_offd_j = hypre_TAlloc(HYPRE_Int, S_offd_nnz, HYPRE_MEMORY_SHARED);
-      S_offd_data = hypre_TAlloc(HYPRE_Real, S_offd_nnz, HYPRE_MEMORY_SHARED);
+      S_offd_i = hypre_TAlloc(HYPRE_Int, m+1, HYPRE_MEMORY_DEVICE);
+      S_offd_j = hypre_TAlloc(HYPRE_Int, S_offd_nnz, HYPRE_MEMORY_DEVICE);
+      S_offd_data = hypre_TAlloc(HYPRE_Real, S_offd_nnz, HYPRE_MEMORY_DEVICE);
       S_offd_colmap = hypre_CTAlloc(HYPRE_BigInt, S_offd_ncols, HYPRE_MEMORY_HOST);
-      
+
       /* simply use a loop to copy data from A_offd */
       S_offd_i[0] = 0;
       k3 = 0;
@@ -980,14 +980,14 @@ hypre_ILUSetupILU0(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qperm, HYP
          }
          S_offd_i[i+1+e] = k3;
       }
-      
+
       /* give I, J, DATA to S_offd */
       hypre_CSRMatrixI(S_offd) = S_offd_i;
       hypre_CSRMatrixJ(S_offd) = S_offd_j;
       hypre_CSRMatrixData(S_offd) = S_offd_data;
-         
+
       /* now we need to update S_offd_colmap */
-         
+
       /* get total num of send */
       num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
       begin = hypre_ParCSRCommPkgSendMapStart(comm_pkg,0);
@@ -997,27 +997,27 @@ hypre_ILUSetupILU0(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qperm, HYP
 #ifdef HYPRE_NO_GLOBAL_PARTITION
       for(i = begin ; i < end ; i ++)
       {
-         send_buf[i-begin] = rperm[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,i)] - nLU + col_starts[0]; 
+         send_buf[i-begin] = rperm[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,i)] - nLU + col_starts[0];
       }
 #else
       for(i = begin ; i < end ; i ++)
       {
-         send_buf[i-begin] = rperm[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,i)] - nLU + col_starts[my_id]; 
+         send_buf[i-begin] = rperm[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,i)] - nLU + col_starts[my_id];
       }
-#endif         
+#endif
       /* main communication */
       comm_handle = hypre_ParCSRCommHandleCreate(22, comm_pkg, send_buf, S_offd_colmap);
       hypre_ParCSRCommHandleDestroy(comm_handle);
 
       /* setup index */
       hypre_ParCSRMatrixColMapOffd(matS) = S_offd_colmap;
-      
+
       hypre_ILUSortOffdColmap(matS);
-      
+
       /* free */
       hypre_TFree(send_buf, HYPRE_MEMORY_HOST);
    }/* end of forming S */
-   
+
    /* create S finished */
 
    matL = hypre_ParCSRMatrixCreate( comm,
@@ -1033,23 +1033,23 @@ hypre_ILUSetupILU0(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qperm, HYP
    hypre_ParCSRMatrixSetColStartsOwner(matL,0);
    hypre_ParCSRMatrixSetRowStartsOwner(matL,0);
    L_diag = hypre_ParCSRMatrixDiag(matL);
-   hypre_CSRMatrixI(L_diag) = L_diag_i; 
+   hypre_CSRMatrixI(L_diag) = L_diag_i;
    if (ctrL)
    {
-      hypre_CSRMatrixData(L_diag) = L_diag_data; 
-      hypre_CSRMatrixJ(L_diag) = L_diag_j; 
+      hypre_CSRMatrixData(L_diag) = L_diag_data;
+      hypre_CSRMatrixJ(L_diag) = L_diag_j;
    }
    else
    {
       /* we've allocated some memory, so free if not used */
-      hypre_TFree(L_diag_j,HYPRE_MEMORY_SHARED);
-      hypre_TFree(L_diag_data,HYPRE_MEMORY_SHARED);
+      hypre_TFree(L_diag_j,HYPRE_MEMORY_DEVICE);
+      hypre_TFree(L_diag_data,HYPRE_MEMORY_DEVICE);
    }
    /* store (global) total number of nonzeros */
    local_nnz = (HYPRE_Real) ctrL;
    hypre_MPI_Allreduce(&local_nnz, &total_nnz, 1, HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
    hypre_ParCSRMatrixDNumNonzeros(matL) = total_nnz;
-    
+
    matU = hypre_ParCSRMatrixCreate( comm,
                        hypre_ParCSRMatrixGlobalNumRows(A),
                        hypre_ParCSRMatrixGlobalNumRows(A),
@@ -1063,17 +1063,17 @@ hypre_ILUSetupILU0(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qperm, HYP
    hypre_ParCSRMatrixSetColStartsOwner(matU,0);
    hypre_ParCSRMatrixSetRowStartsOwner(matU,0);
    U_diag = hypre_ParCSRMatrixDiag(matU);
-   hypre_CSRMatrixI(U_diag) = U_diag_i; 
+   hypre_CSRMatrixI(U_diag) = U_diag_i;
    if (ctrU)
    {
-      hypre_CSRMatrixData(U_diag) = U_diag_data; 
-      hypre_CSRMatrixJ(U_diag) = U_diag_j; 
+      hypre_CSRMatrixData(U_diag) = U_diag_data;
+      hypre_CSRMatrixJ(U_diag) = U_diag_j;
    }
    else
    {
       /* we've allocated some memory, so free if not used */
-      hypre_TFree(U_diag_j,HYPRE_MEMORY_SHARED);
-      hypre_TFree(U_diag_data,HYPRE_MEMORY_SHARED);
+      hypre_TFree(U_diag_j,HYPRE_MEMORY_DEVICE);
+      hypre_TFree(U_diag_data,HYPRE_MEMORY_DEVICE);
    }
    /* store (global) total number of nonzeros */
    local_nnz = (HYPRE_Real) ctrU;
@@ -1081,37 +1081,37 @@ hypre_ILUSetupILU0(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qperm, HYP
    hypre_ParCSRMatrixDNumNonzeros(matU) = total_nnz;
    /* free memory */
    hypre_TFree(wL,HYPRE_MEMORY_HOST);
-   hypre_TFree(iw,HYPRE_MEMORY_HOST);  
+   hypre_TFree(iw,HYPRE_MEMORY_HOST);
    if(!matS)
    {
       /* we allocate some memory for S, need to free if unused */
-      hypre_TFree(S_diag_i,HYPRE_MEMORY_SHARED);
+      hypre_TFree(S_diag_i,HYPRE_MEMORY_DEVICE);
 //      hypre_TFree(col_starts,HYPRE_MEMORY_HOST);
    }
-   
+
    /* set matrix pointers */
    *Lptr = matL;
    *Dptr = D_data;
    *Uptr = matU;
    *Sptr = matS;
    *u_end = u_end_array;
-   
+
    return hypre_error_flag;
 }
 
 /* ILU(k) symbolic factorization
  * n = total rows of input
  * lfil = level of fill-in, the k in ILU(k)
- * perm = permutation array indicating ordering of factorization. Perm could come from a 
+ * perm = permutation array indicating ordering of factorization. Perm could come from a
  * rperm = reverse permutation array, used here to avoid duplicate memory allocation
  * iw = working array, used here to avoid duplicate memory allocation
  * nLU = size of computed LDU factorization.
  * A/L/U/S_diag_i = the I slot of A, L, U and S
  * A/L/U/S_diag_j = the J slot of A, L, U and S
- * will form global Schur Matrix if nLU < n 
+ * will form global Schur Matrix if nLU < n
  */
 HYPRE_Int
-hypre_ILUSetupILUKSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j, HYPRE_Int lfil, HYPRE_Int *perm, 
+hypre_ILUSetupILUKSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j, HYPRE_Int lfil, HYPRE_Int *perm,
       HYPRE_Int *rperm,   HYPRE_Int *iw,   HYPRE_Int nLU, HYPRE_Int *L_diag_i, HYPRE_Int *U_diag_i,
       HYPRE_Int *S_diag_i, HYPRE_Int **L_diag_j, HYPRE_Int **U_diag_j, HYPRE_Int **S_diag_j, HYPRE_Int **u_end)
 {
@@ -1125,15 +1125,15 @@ hypre_ILUSetupILUKSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j
    * iLev: working array store the active level of current row
    * lenl/u: current position in iw and so
    * ctrL/U/S: global position in J
-   */ 
-   
+   */
+
    HYPRE_Int         *temp_L_diag_j, *temp_U_diag_j, *temp_S_diag_j = NULL, *u_levels;
    HYPRE_Int         *iL, *iLev;
    HYPRE_Int         ii, i, j, k, ku, lena, lenl, lenu, lenh, ilev, lev, col, icol;
    HYPRE_Int         m = n - nLU;
    HYPRE_Int         *u_end_array;
    HYPRE_Int         u_end_location;
-   
+
    /* memory management */
    HYPRE_Int         ctrL;
    HYPRE_Int         ctrU;
@@ -1143,11 +1143,11 @@ hypre_ILUSetupILUKSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j
    HYPRE_Int         capacity_S;
    HYPRE_Int         initial_alloc = 0;
    HYPRE_Int         nnz_A;
-   
+
    /* set iL and iLev to right place in iw array */
    iL                = iw + n;
    iLev              = iw + 2*n;
-   
+
    /* setup initial memory used */
    nnz_A             = A_diag_i[n];
    if(n > 0)
@@ -1156,27 +1156,27 @@ hypre_ILUSetupILUKSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j
    }
    capacity_L        = initial_alloc;
    capacity_U        = initial_alloc;
-   
+
    /* allocate other memory for L and U struct */
-   temp_L_diag_j     = hypre_CTAlloc(HYPRE_Int, capacity_L, HYPRE_MEMORY_SHARED);
-   temp_U_diag_j     = hypre_CTAlloc(HYPRE_Int, capacity_U, HYPRE_MEMORY_SHARED);
-   
+   temp_L_diag_j     = hypre_CTAlloc(HYPRE_Int, capacity_L, HYPRE_MEMORY_DEVICE);
+   temp_U_diag_j     = hypre_CTAlloc(HYPRE_Int, capacity_U, HYPRE_MEMORY_DEVICE);
+
    if(m > 0)
    {
       capacity_S     = m + ceil(nnz_A / 2.0 * m / n);
-      temp_S_diag_j  = hypre_CTAlloc(HYPRE_Int, capacity_S, HYPRE_MEMORY_SHARED);
+      temp_S_diag_j  = hypre_CTAlloc(HYPRE_Int, capacity_S, HYPRE_MEMORY_DEVICE);
    }
-   
+
    u_end_array       = hypre_TAlloc(HYPRE_Int, nLU, HYPRE_MEMORY_HOST);
    u_levels          = hypre_CTAlloc(HYPRE_Int, capacity_U, HYPRE_MEMORY_HOST);
    ctrL = ctrU = ctrS = 0;
-   
+
    /* set initial value for working array */
    for(ii = 0 ; ii < n ; ii ++)
    {
       iw[ii] = -1;
    }
-   
+
    /*
     * 2: Start of main loop
     * those in iL are NEW col index (after permutation)
@@ -1195,8 +1195,8 @@ hypre_ILUSetupILUKSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j
          col = rperm[A_diag_j[j]];
          if(col < ii)
          {
-            /* 
-             * this is an entry in L 
+            /*
+             * this is an entry in L
              * we maintain a heap structure for L part
              */
             iL[lenh] = col;
@@ -1213,13 +1213,13 @@ hypre_ILUSetupILUKSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j
             iw[col] = lenu++;
          }
       }/* end of j loop for adding pattern in original matrix */
-       
+
       /*
        * search lower part of current row and update pattern based on level
        */
       while(lenh > 0)
       {
-         /* 
+         /*
           * k is now the new col index after permutation
           * the first element of the heap is the smallest
           */
@@ -1235,7 +1235,7 @@ hypre_ILUSetupILUKSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j
          /* reset iw for that, not using anymore */
          iw[k]=-1;
          hypre_swap2i(iL,iLev,ii-lenl,lenh);
-         /* 
+         /*
           * now the elimination on current row could start.
           * eliminate row k (new index) from current row
           */
@@ -1256,8 +1256,8 @@ hypre_ILUSetupILUKSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j
                /* not yet in */
                if(col < ii)
                {
-                  /* 
-                   * if we add to the left L, we need to maintian the 
+                  /*
+                   * if we add to the left L, we need to maintian the
                    *    heap structure
                    */
                   iL[lenh] = col;
@@ -1281,7 +1281,7 @@ hypre_ILUSetupILUKSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j
             }
          }/* end of loop j for level update */
       }/* end of while loop for iith row */
-       
+
       /* now update everything, indices, levels and so */
       L_diag_i[ii+1] = L_diag_i[ii] + lenl;
       if(lenl > 0)
@@ -1290,7 +1290,7 @@ hypre_ILUSetupILUKSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j
          while(ctrL + lenl > capacity_L)
          {
             capacity_L = capacity_L * EXPAND_FACT + 1;
-            temp_L_diag_j = hypre_TReAlloc(temp_L_diag_j, HYPRE_Int, capacity_L, HYPRE_MEMORY_SHARED);
+            temp_L_diag_j = hypre_TReAlloc(temp_L_diag_j, HYPRE_Int, capacity_L, HYPRE_MEMORY_DEVICE);
          }
          /* now copy L data, reverse order */
          for(j = 0 ; j < lenl ; j ++)
@@ -1307,10 +1307,10 @@ hypre_ILUSetupILUKSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j
          while(ctrU + k > capacity_U)
          {
             capacity_U = capacity_U * EXPAND_FACT + 1;
-            temp_U_diag_j = hypre_TReAlloc(temp_U_diag_j, HYPRE_Int, capacity_U, HYPRE_MEMORY_SHARED);
+            temp_U_diag_j = hypre_TReAlloc(temp_U_diag_j, HYPRE_Int, capacity_U, HYPRE_MEMORY_DEVICE);
             u_levels = hypre_TReAlloc(u_levels, HYPRE_Int, capacity_U, HYPRE_MEMORY_HOST);
          }
-         hypre_TMemcpy(temp_U_diag_j+ctrU,iL+ii,HYPRE_Int,k,HYPRE_MEMORY_SHARED,HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(temp_U_diag_j+ctrU,iL+ii,HYPRE_Int,k,HYPRE_MEMORY_DEVICE,HYPRE_MEMORY_HOST);
          hypre_TMemcpy(u_levels+ctrU,iLev+ii,HYPRE_Int,k,HYPRE_MEMORY_HOST,HYPRE_MEMORY_HOST);
          ctrU += k;
       }
@@ -1328,15 +1328,15 @@ hypre_ILUSetupILUKSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j
          /* Everything is in U */
          u_end_array[ii] = ctrU;
       }
-      
+
       /* reset iw */
       for(j = ii ; j < lenu ; j ++)
       {
          iw[iL[j]] = -1;
       }
-      
+
    }/* end of main loop ii from 0 to nLU-1 */
-   
+
    /* another loop to set EU^-1 and Schur complement */
    for(ii = nLU ; ii < n ; ii ++)
    {
@@ -1352,8 +1352,8 @@ hypre_ILUSetupILUKSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j
          col = rperm[A_diag_j[j]];
          if(col < nLU)
          {
-            /* 
-             * this is an entry in L 
+            /*
+             * this is an entry in L
              * we maintain a heap structure for L part
              */
             iL[lenh] = col;
@@ -1370,13 +1370,13 @@ hypre_ILUSetupILUKSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j
             iw[col] = lenu++;
          }
       }/* end of j loop for adding pattern in original matrix */
-       
+
       /*
        * search lower part of current row and update pattern based on level
        */
       while(lenh > 0)
       {
-         /* 
+         /*
           * k is now the new col index after permutation
           * the first element of the heap is the smallest
           */
@@ -1392,7 +1392,7 @@ hypre_ILUSetupILUKSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j
          /* reset iw for that, not using anymore */
          iw[k]=-1;
          hypre_swap2i(iL,iLev,nLU-lenl,lenh);
-         /* 
+         /*
           * now the elimination on current row could start.
           * eliminate row k (new index) from current row
           */
@@ -1413,8 +1413,8 @@ hypre_ILUSetupILUKSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j
                /* not yet in */
                if(col < nLU)
                {
-                  /* 
-                   * if we add to the left L, we need to maintian the 
+                  /*
+                   * if we add to the left L, we need to maintian the
                    *    heap structure
                    */
                   iL[lenh] = col;
@@ -1439,7 +1439,7 @@ hypre_ILUSetupILUKSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j
             }
          }/* end of loop j for level update */
       }/* end of while loop for iith row */
-       
+
       /* now update everything, indices, levels and so */
       L_diag_i[ii+1] = L_diag_i[ii] + lenl;
       if(lenl > 0)
@@ -1448,7 +1448,7 @@ hypre_ILUSetupILUKSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j
          while(ctrL + lenl > capacity_L)
          {
             capacity_L = capacity_L * EXPAND_FACT + 1;
-            temp_L_diag_j = hypre_TReAlloc(temp_L_diag_j, HYPRE_Int, capacity_L, HYPRE_MEMORY_SHARED);
+            temp_L_diag_j = hypre_TReAlloc(temp_L_diag_j, HYPRE_Int, capacity_L, HYPRE_MEMORY_DEVICE);
          }
          /* now copy L data, reverse order */
          for(j = 0 ; j < lenl ; j ++)
@@ -1462,21 +1462,21 @@ hypre_ILUSetupILUKSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j
       while(ctrS + k > capacity_S)
       {
          capacity_S = capacity_S * EXPAND_FACT + 1;
-         temp_S_diag_j = hypre_TReAlloc(temp_S_diag_j, HYPRE_Int, capacity_S, HYPRE_MEMORY_SHARED);
+         temp_S_diag_j = hypre_TReAlloc(temp_S_diag_j, HYPRE_Int, capacity_S, HYPRE_MEMORY_DEVICE);
       }
       temp_S_diag_j[ctrS] = ii;/* must have diagonal */
-      hypre_TMemcpy(temp_S_diag_j+ctrS+1,iL+nLU,HYPRE_Int,k-1,HYPRE_MEMORY_SHARED,HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(temp_S_diag_j+ctrS+1,iL+nLU,HYPRE_Int,k-1,HYPRE_MEMORY_DEVICE,HYPRE_MEMORY_HOST);
       ctrS += k;
       S_diag_i[ii-nLU+1] = ctrS;
-      
+
       /* reset iw */
       for(j = nLU ; j < lenu ; j ++)
       {
          iw[iL[j]] = -1;
       }
-      
+
    }/* end of main loop ii from nLU to n-1 */
-   
+
    /*
     * 3: Update the struct for L, U and S
     */
@@ -1488,19 +1488,19 @@ hypre_ILUSetupILUKSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j
     * 4: Finishing up and free memory
     */
    hypre_TFree(u_levels,HYPRE_MEMORY_HOST);
-   
+
    *L_diag_j = temp_L_diag_j;
    *U_diag_j = temp_U_diag_j;
    *S_diag_j = temp_S_diag_j;
    *u_end = u_end_array;
-   
+
    return hypre_error_flag;
 }
 
-/* ILU(k) 
+/* ILU(k)
  * A: input matrix
  * lfil: level of fill-in, the k in ILU(k)
- * perm: permutation array indicating ordering of factorization. Perm could come from a 
+ * perm: permutation array indicating ordering of factorization. Perm could come from a
  *    CF_marker: array or a reordering routine.
  * qperm: column permutation array.
  * nLU: size of computed LDU factorization.
@@ -1521,8 +1521,8 @@ hypre_ILUSetupILUK(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HYPRE
    * i = the real col number in diag inside the outer loop
    * iw =  working array store the reverse of active col number
    * iL = working array store the active col number
-   */ 
-   
+   */
+
    /* call ILU0 if lfil is 0 */
    if(lfil == 0)
    {
@@ -1543,7 +1543,7 @@ hypre_ILUSetupILUK(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HYPRE
    HYPRE_Real              *A_offd_data   = hypre_CSRMatrixData(A_offd);
    HYPRE_Int               *A_offd_i      = hypre_CSRMatrixI(A_offd);
    HYPRE_Int               *A_offd_j      = hypre_CSRMatrixJ(A_offd);
-   
+
    /* data objects for L, D, U */
    hypre_ParCSRMatrix      *matL;
    hypre_ParCSRMatrix      *matU;
@@ -1556,14 +1556,14 @@ hypre_ILUSetupILUK(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HYPRE
    HYPRE_Real              *U_diag_data   = NULL;
    HYPRE_Int               *U_diag_i;
    HYPRE_Int               *U_diag_j      = NULL;
-   
+
    /* data objects for S */
    hypre_ParCSRMatrix      *matS          = NULL;
    hypre_CSRMatrix         *S_diag;
    hypre_CSRMatrix         *S_offd;
    HYPRE_Real              *S_diag_data   = NULL;
    HYPRE_Int               *S_diag_i      = NULL;
-   HYPRE_Int               *S_diag_j      = NULL;          
+   HYPRE_Int               *S_diag_j      = NULL;
    HYPRE_Int               *S_offd_i      = NULL;
    HYPRE_Int               *S_offd_j      = NULL;
    HYPRE_BigInt               *S_offd_colmap = NULL;
@@ -1575,7 +1575,7 @@ hypre_ILUSetupILUK(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HYPRE
    hypre_ParCSRCommPkg     *comm_pkg;
    hypre_ParCSRCommHandle  *comm_handle;
    HYPRE_BigInt               *send_buf      = NULL;
-   
+
    /* problem size */
    HYPRE_Int               n;
    HYPRE_Int               m;
@@ -1583,7 +1583,7 @@ hypre_ILUSetupILUK(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HYPRE
    HYPRE_Int               m_e;
    /* reverse permutation array */
    HYPRE_Int               *rperm;
-   
+
    /* start setup */
    /* check input and get problem size */
    n =  hypre_CSRMatrixNumRows(A_diag);
@@ -1600,25 +1600,25 @@ hypre_ILUSetupILUK(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HYPRE
    }
 
    /* Init I array anyway. S's might be freed later */
-   D_data = hypre_CTAlloc(HYPRE_Real, n, HYPRE_MEMORY_SHARED);
-   L_diag_i = hypre_CTAlloc(HYPRE_Int, (n+1), HYPRE_MEMORY_SHARED);
-   U_diag_i = hypre_CTAlloc(HYPRE_Int, (n+1), HYPRE_MEMORY_SHARED);
-   S_diag_i = hypre_CTAlloc(HYPRE_Int, (m+1), HYPRE_MEMORY_SHARED);
-   
+   D_data = hypre_CTAlloc(HYPRE_Real, n, HYPRE_MEMORY_DEVICE);
+   L_diag_i = hypre_CTAlloc(HYPRE_Int, (n+1), HYPRE_MEMORY_DEVICE);
+   U_diag_i = hypre_CTAlloc(HYPRE_Int, (n+1), HYPRE_MEMORY_DEVICE);
+   S_diag_i = hypre_CTAlloc(HYPRE_Int, (m+1), HYPRE_MEMORY_DEVICE);
+
    /* set Comm_Pkg if not yet built */
-   hypre_MPI_Comm_size(comm,&num_procs);       
-   hypre_MPI_Comm_rank(comm,&my_id);   
+   hypre_MPI_Comm_size(comm,&num_procs);
+   hypre_MPI_Comm_rank(comm,&my_id);
    comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    if(!comm_pkg)
    {
       hypre_MatvecCommPkgCreate(A);
       comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    }
-   
+
    /*
    * 2: Symbolic factorization
    * setup iw and rperm first
-   */             
+   */
    /* allocate work arrays */
    iw = hypre_CTAlloc(HYPRE_Int, 4*n, HYPRE_MEMORY_HOST);
    rperm = iw + 3*n;
@@ -1628,37 +1628,37 @@ hypre_ILUSetupILUK(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HYPRE
    */
    for(i=0; i<n; i++)
    {
-     rperm[qperm[i]] = i;   
+     rperm[qperm[i]] = i;
    }
-   
+
    /* do symbolic factorization */
-   hypre_ILUSetupILUKSymbolic(n, A_diag_i, A_diag_j, lfil, perm, rperm, iw, 
+   hypre_ILUSetupILUKSymbolic(n, A_diag_i, A_diag_j, lfil, perm, rperm, iw,
       nLU, L_diag_i, U_diag_i, S_diag_i, &L_diag_j, &U_diag_j, &S_diag_j, u_end);
-   
+
    /*
     * after this, we have our I,J for L, U and S ready, and L sorted
     * iw are still -1 after symbolic factorization
     * now setup helper array here
     */
    if(L_diag_i[n])
-   { 
-      L_diag_data = hypre_CTAlloc(HYPRE_Real, L_diag_i[n], HYPRE_MEMORY_SHARED);
+   {
+      L_diag_data = hypre_CTAlloc(HYPRE_Real, L_diag_i[n], HYPRE_MEMORY_DEVICE);
    }
    if(U_diag_i[n])
    {
-      U_diag_data = hypre_CTAlloc(HYPRE_Real, U_diag_i[n], HYPRE_MEMORY_SHARED);
+      U_diag_data = hypre_CTAlloc(HYPRE_Real, U_diag_i[n], HYPRE_MEMORY_DEVICE);
    }
    if(S_diag_i[m])
    {
-      S_diag_data = hypre_CTAlloc(HYPRE_Real, S_diag_i[m], HYPRE_MEMORY_SHARED);
+      S_diag_data = hypre_CTAlloc(HYPRE_Real, S_diag_i[m], HYPRE_MEMORY_DEVICE);
    }
-   
+
    /*
     * 3: Begin real factorization
-    * we already have L and U structure ready, so no extra working array needed 
-    */  
+    * we already have L and U structure ready, so no extra working array needed
+    */
    /* first loop for upper part */
-   for( ii = 0; ii < nLU; ii++ ) 
+   for( ii = 0; ii < nLU; ii++ )
    {
       // get row i
       i = perm[ii];
@@ -1705,7 +1705,7 @@ hypre_ILUSetupILUK(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HYPRE
          jpiv = L_diag_j[j];
          L_diag_data[j] *= D_data[jpiv];
          ku = U_diag_i[jpiv+1];
-         
+
          for(k = U_diag_i[jpiv] ; k < ku ; k ++)
          {
             col = U_diag_j[k];
@@ -1752,11 +1752,11 @@ hypre_ILUSetupILUK(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HYPRE
          D_data[ii] = 1e-06;
       }
       D_data[ii] = 1./ D_data[ii];
-      
+
    }
-   
+
    /* Now lower part for Schur complement */
-   for( ii = nLU; ii < n; ii++ ) 
+   for( ii = nLU; ii < n; ii++ )
    {
       // get row i
       i = perm[ii];
@@ -1833,16 +1833,16 @@ hypre_ILUSetupILUK(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HYPRE
          S_diag_j[j]-=nLU;
       }
    }
-   
+
    /*
     * 4: Finishing up and free
     */
-    
+
    /* First create Schur complement if necessary
     * Check if we need to create Schur complement
     */
    HYPRE_BigInt big_m = (HYPRE_BigInt)m;
-   hypre_MPI_Allreduce(&big_m, &total_rows, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);  
+   hypre_MPI_Allreduce(&big_m, &total_rows, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
    /* only form when total_rows > 0 */
    if( total_rows > 0 )
    {
@@ -1860,19 +1860,19 @@ hypre_ILUSetupILUK(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HYPRE
       col_starts = hypre_CTAlloc(HYPRE_BigInt,num_procs+1,HYPRE_MEMORY_HOST);
 
       hypre_MPI_Allgather(&big_m,1,HYPRE_MPI_BIG_INT,&col_starts[1],
-   		1,HYPRE_MPI_BIG_INT,comm);
+            1,HYPRE_MPI_BIG_INT,comm);
 
       for (i=2; i < num_procs+1; i++)
          col_starts[i] += col_starts[i-1];
-#endif 
-      
+#endif
+
       /* We did nothing to A_offd, so all the data kept, just reorder them
-       * The create function takes comm, global num rows/cols, 
+       * The create function takes comm, global num rows/cols,
        *    row/col start, num cols offd, nnz diag, nnz offd
        */
       S_offd_nnz = hypre_CSRMatrixNumNonzeros(A_offd);
       S_offd_ncols = hypre_CSRMatrixNumCols(A_offd);
-      
+
       matS = hypre_ParCSRMatrixCreate( comm,
                            total_rows,
                            total_rows,
@@ -1881,25 +1881,25 @@ hypre_ILUSetupILUK(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HYPRE
                            S_offd_ncols,
                            S_diag_i[m],
                            S_offd_nnz);
-         
+
       /* S owns different start/end */
       hypre_ParCSRMatrixSetColStartsOwner(matS,1);
       hypre_ParCSRMatrixSetRowStartsOwner(matS,0);/* square matrix, use same row and col start */
-      
+
       /* first put diagonal data in */
       S_diag = hypre_ParCSRMatrixDiag(matS);
-      
+
       hypre_CSRMatrixI(S_diag) = S_diag_i;
-      hypre_CSRMatrixData(S_diag) = S_diag_data; 
+      hypre_CSRMatrixData(S_diag) = S_diag_data;
       hypre_CSRMatrixJ(S_diag) = S_diag_j;
-      
+
       /* now start to construct offdiag of S */
       S_offd = hypre_ParCSRMatrixOffd(matS);
-      S_offd_i = hypre_TAlloc(HYPRE_Int, m+1, HYPRE_MEMORY_SHARED);
-      S_offd_j = hypre_TAlloc(HYPRE_Int, S_offd_nnz, HYPRE_MEMORY_SHARED);
-      S_offd_data = hypre_TAlloc(HYPRE_Real, S_offd_nnz, HYPRE_MEMORY_SHARED);
+      S_offd_i = hypre_TAlloc(HYPRE_Int, m+1, HYPRE_MEMORY_DEVICE);
+      S_offd_j = hypre_TAlloc(HYPRE_Int, S_offd_nnz, HYPRE_MEMORY_DEVICE);
+      S_offd_data = hypre_TAlloc(HYPRE_Real, S_offd_nnz, HYPRE_MEMORY_DEVICE);
       S_offd_colmap = hypre_CTAlloc(HYPRE_BigInt, S_offd_ncols, HYPRE_MEMORY_HOST);
-      
+
       /* simply use a loop to copy data from A_offd */
       S_offd_i[0] = 0;
       k3 = 0;
@@ -1919,14 +1919,14 @@ hypre_ILUSetupILUK(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HYPRE
          }
          S_offd_i[i+e+1] = k3;
       }
-      
+
       /* give I, J, DATA to S_offd */
       hypre_CSRMatrixI(S_offd) = S_offd_i;
       hypre_CSRMatrixJ(S_offd) = S_offd_j;
       hypre_CSRMatrixData(S_offd) = S_offd_data;
-         
+
       /* now we need to update S_offd_colmap */
-         
+
       /* get total num of send */
       HYPRE_Int num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
       HYPRE_Int begin = hypre_ParCSRCommPkgSendMapStart(comm_pkg,0);
@@ -1936,34 +1936,34 @@ hypre_ILUSetupILUK(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HYPRE
 #ifdef HYPRE_NO_GLOBAL_PARTITION
       for(i = begin ; i < end ; i ++)
       {
-         send_buf[i-begin] = rperm[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,i)] - nLU + col_starts[0]; 
+         send_buf[i-begin] = rperm[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,i)] - nLU + col_starts[0];
       }
 #else
       for(i = begin ; i < end ; i ++)
       {
-         send_buf[i-begin] = rperm[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,i)] - nLU + col_starts[my_id]; 
+         send_buf[i-begin] = rperm[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,i)] - nLU + col_starts[my_id];
       }
-#endif  
-         
+#endif
+
       /* main communication */
       comm_handle = hypre_ParCSRCommHandleCreate(22, comm_pkg, send_buf, S_offd_colmap);
       hypre_ParCSRCommHandleDestroy(comm_handle);
-      
+
       /* setup index */
       hypre_ParCSRMatrixColMapOffd(matS) = S_offd_colmap;
-      
+
       hypre_ILUSortOffdColmap(matS);
-      
+
       /* free */
       hypre_TFree(send_buf, HYPRE_MEMORY_HOST);
    }/* end of forming S */
-   
+
    /* Assemble LDU matrices */
    /* zero out unfactored rows */
    for(k=nLU; k<n; k++)
    {
       D_data[k] = 1.;
-   }     
+   }
 
    matL = hypre_ParCSRMatrixCreate( comm,
                        hypre_ParCSRMatrixGlobalNumRows(A),
@@ -1981,19 +1981,19 @@ hypre_ILUSetupILUK(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HYPRE
    hypre_CSRMatrixI(L_diag) = L_diag_i;
    if (L_diag_i[n]>0)
    {
-      hypre_CSRMatrixData(L_diag) = L_diag_data; 
-      hypre_CSRMatrixJ(L_diag) = L_diag_j; 
+      hypre_CSRMatrixData(L_diag) = L_diag_data;
+      hypre_CSRMatrixJ(L_diag) = L_diag_j;
    }
    else
    {
       /* we allocated some initial length, so free them */
-      hypre_TFree(L_diag_j, HYPRE_MEMORY_SHARED);
+      hypre_TFree(L_diag_j, HYPRE_MEMORY_DEVICE);
    }
    /* store (global) total number of nonzeros */
    local_nnz = (HYPRE_Real) (L_diag_i[n]);
    hypre_MPI_Allreduce(&local_nnz, &total_nnz, 1, HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
    hypre_ParCSRMatrixDNumNonzeros(matL) = total_nnz;
- 
+
    matU = hypre_ParCSRMatrixCreate( comm,
                        hypre_ParCSRMatrixGlobalNumRows(A),
                        hypre_ParCSRMatrixGlobalNumRows(A),
@@ -2008,61 +2008,61 @@ hypre_ILUSetupILUK(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HYPRE
    hypre_ParCSRMatrixSetRowStartsOwner(matU,0);
 
    U_diag = hypre_ParCSRMatrixDiag(matU);
-   hypre_CSRMatrixI(U_diag) = U_diag_i; 
+   hypre_CSRMatrixI(U_diag) = U_diag_i;
    if (U_diag_i[n]>0)
    {
-      hypre_CSRMatrixData(U_diag) = U_diag_data; 
-      hypre_CSRMatrixJ(U_diag) = U_diag_j; 
+      hypre_CSRMatrixData(U_diag) = U_diag_data;
+      hypre_CSRMatrixJ(U_diag) = U_diag_j;
    }
    else
    {
       /* we allocated some initial length, so free them */
-      hypre_TFree(U_diag_j, HYPRE_MEMORY_SHARED);
+      hypre_TFree(U_diag_j, HYPRE_MEMORY_DEVICE);
    }
    /* store (global) total number of nonzeros */
    local_nnz = (HYPRE_Real) (U_diag_i[n]);
    hypre_MPI_Allreduce(&local_nnz, &total_nnz, 1, HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
-   hypre_ParCSRMatrixDNumNonzeros(matU) = total_nnz;  
-   
+   hypre_ParCSRMatrixDNumNonzeros(matU) = total_nnz;
+
    /* free */
    hypre_TFree(iw,HYPRE_MEMORY_HOST);
    if(!matS)
    {
       /* we allocate some memory for S, need to free if unused */
-      hypre_TFree(S_diag_i,HYPRE_MEMORY_SHARED);
+      hypre_TFree(S_diag_i,HYPRE_MEMORY_DEVICE);
 //      hypre_TFree(col_starts,HYPRE_MEMORY_HOST);
    }
-   
+
    /* set matrix pointers */
    *Lptr = matL;
    *Dptr = D_data;
    *Uptr = matU;
    *Sptr = matS;
-   
+
    return hypre_error_flag;
 }
 
-/* ILUT 
+/* ILUT
  * A: input matrix
  * lfil: maximum nnz per row in L and U
  * tol: droptol array in ILUT
  *    tol[0]: matrix B
  *    tol[1]: matrix E and F
  *    tol[2]: matrix S
- * perm: permutation array indicating ordering of factorization. Perm could come from a 
+ * perm: permutation array indicating ordering of factorization. Perm could come from a
  *    CF_marker: array or a reordering routine.
  * qperm: permutation array for column
  * nLU: size of computed LDU factorization. If nLU < n, Schur compelemnt will be formed
  * nI: number of interial unknowns. nLU should obey nLU <= nI.
  * Lptr, Dptr, Uptr: L, D, U factors.
  * Sptr: Schur complement
- * 
- * Keep the largest lfil entries that is greater than some tol relative 
+ *
+ * Keep the largest lfil entries that is greater than some tol relative
  *    to the input tol and the norm of that row in both L and U
  */
 HYPRE_Int
 hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
-      HYPRE_Int *perm, HYPRE_Int *qperm, HYPRE_Int nLU, HYPRE_Int nI, hypre_ParCSRMatrix **Lptr, 
+      HYPRE_Int *perm, HYPRE_Int *qperm, HYPRE_Int nLU, HYPRE_Int nI, hypre_ParCSRMatrix **Lptr,
       HYPRE_Real** Dptr, hypre_ParCSRMatrix **Uptr, hypre_ParCSRMatrix **Sptr, HYPRE_Int **u_end)
 {
    /*
@@ -2080,7 +2080,7 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
    HYPRE_Real               inorm, itolb, itolef, itols, dpiv, lxu;
    HYPRE_Int                *iw,*iL;
    HYPRE_Real               *w;
-   
+
    /* memory management */
    HYPRE_Int                ctrL;
    HYPRE_Int                ctrU;
@@ -2090,18 +2090,18 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
    HYPRE_Int                ctrS;
    HYPRE_Int                capacity_S;
    HYPRE_Int                nnz_A;
-      
+
    /* communication stuffs for S */
    MPI_Comm                 comm             = hypre_ParCSRMatrixComm(A);
    HYPRE_Int                S_offd_nnz, S_offd_ncols;
    hypre_ParCSRCommPkg      *comm_pkg;
    hypre_ParCSRCommHandle   *comm_handle;
-   HYPRE_Int                num_procs, my_id;   
+   HYPRE_Int                num_procs, my_id;
    HYPRE_BigInt                *col_starts;
    HYPRE_BigInt                total_rows;
    HYPRE_Int                num_sends;
    HYPRE_Int                begin, end;
-   
+
    /* data objects for A */
    hypre_CSRMatrix          *A_diag          = hypre_ParCSRMatrixDiag(A);
    hypre_CSRMatrix          *A_offd          = hypre_ParCSRMatrixOffd(A);
@@ -2111,7 +2111,7 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
    HYPRE_Int                *A_offd_i        = hypre_CSRMatrixI(A_offd);
    HYPRE_Int                *A_offd_j        = hypre_CSRMatrixJ(A_offd);
    HYPRE_Real               *A_offd_data     = hypre_CSRMatrixData(A_offd);
-   
+
    /* data objects for L, D, U */
    hypre_ParCSRMatrix       *matL;
    hypre_ParCSRMatrix       *matU;
@@ -2124,7 +2124,7 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
    HYPRE_Real               *U_diag_data     = NULL;
    HYPRE_Int                *U_diag_i;
    HYPRE_Int                *U_diag_j        = NULL;
-   
+
    /* data objects for S */
    hypre_ParCSRMatrix       *matS            = NULL;
    hypre_CSRMatrix          *S_diag;
@@ -2139,10 +2139,10 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
    HYPRE_BigInt                *send_buf        = NULL;
    HYPRE_Int                *u_end_array;
    HYPRE_Int                u_end_location;
-   
+
    /* reverse permutation */
    HYPRE_Int                *rperm;
-   
+
    /* problem size
     * m is n - nLU, num of rows of local Schur system
     * m_e is the size of interface nodes
@@ -2152,7 +2152,7 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
    HYPRE_Int                m;
    HYPRE_Int                e;
    HYPRE_Int                m_e;
-   
+
    /* start setup
     * check input first
     */
@@ -2168,14 +2168,14 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
    {
       hypre_error_w_msg(HYPRE_ERROR_ARG,"WARNING: nLU should not exceed nI.\n");
    }
-   
+
    u_end_array = hypre_TAlloc(HYPRE_Int, nLU, HYPRE_MEMORY_HOST);
-   
+
    /* start set up
     * setup communication stuffs first
     */
-   hypre_MPI_Comm_size(comm,&num_procs);    
-   hypre_MPI_Comm_rank(comm,&my_id);   
+   hypre_MPI_Comm_size(comm,&num_procs);
+   hypre_MPI_Comm_rank(comm,&my_id);
    comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    /* create if not yet built */
    if(!comm_pkg)
@@ -2183,7 +2183,7 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
       hypre_MatvecCommPkgCreate(A);
       comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    }
-   
+
    /* setup initial memory, in ILUT, just guess with max nnz per row */
    nnz_A = A_diag_i[nLU];
    if(n > 0)
@@ -2192,29 +2192,29 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
    }
    capacity_L = initial_alloc;
    capacity_U = initial_alloc;
-   
-   D_data = hypre_CTAlloc(HYPRE_Real, n, HYPRE_MEMORY_SHARED);
-   L_diag_i = hypre_CTAlloc(HYPRE_Int, (n+1), HYPRE_MEMORY_SHARED);
-   U_diag_i = hypre_CTAlloc(HYPRE_Int, (n+1), HYPRE_MEMORY_SHARED);
-   
-   L_diag_j = hypre_CTAlloc(HYPRE_Int, capacity_L, HYPRE_MEMORY_SHARED);
-   U_diag_j = hypre_CTAlloc(HYPRE_Int, capacity_U, HYPRE_MEMORY_SHARED);
-   L_diag_data = hypre_CTAlloc(HYPRE_Real, capacity_L, HYPRE_MEMORY_SHARED);
-   U_diag_data = hypre_CTAlloc(HYPRE_Real, capacity_U, HYPRE_MEMORY_SHARED);
-   
+
+   D_data = hypre_CTAlloc(HYPRE_Real, n, HYPRE_MEMORY_DEVICE);
+   L_diag_i = hypre_CTAlloc(HYPRE_Int, (n+1), HYPRE_MEMORY_DEVICE);
+   U_diag_i = hypre_CTAlloc(HYPRE_Int, (n+1), HYPRE_MEMORY_DEVICE);
+
+   L_diag_j = hypre_CTAlloc(HYPRE_Int, capacity_L, HYPRE_MEMORY_DEVICE);
+   U_diag_j = hypre_CTAlloc(HYPRE_Int, capacity_U, HYPRE_MEMORY_DEVICE);
+   L_diag_data = hypre_CTAlloc(HYPRE_Real, capacity_L, HYPRE_MEMORY_DEVICE);
+   U_diag_data = hypre_CTAlloc(HYPRE_Real, capacity_U, HYPRE_MEMORY_DEVICE);
+
    ctrL = ctrU = 0;
-   
+
    ctrS = 0;
-   S_diag_i = hypre_CTAlloc(HYPRE_Int, (m + 1), HYPRE_MEMORY_SHARED);
+   S_diag_i = hypre_CTAlloc(HYPRE_Int, (m + 1), HYPRE_MEMORY_DEVICE);
    S_diag_i[0] = 0;
    /* only setup S part when n > nLU */
    if(m > 0)
    {
       capacity_S = hypre_min(m + ceil((nnz_A / 2.0) * m / n), m * lfil);
-      S_diag_j = hypre_CTAlloc(HYPRE_Int, capacity_S, HYPRE_MEMORY_SHARED);
-      S_diag_data = hypre_CTAlloc(HYPRE_Real, capacity_S, HYPRE_MEMORY_SHARED);
+      S_diag_j = hypre_CTAlloc(HYPRE_Int, capacity_S, HYPRE_MEMORY_DEVICE);
+      S_diag_data = hypre_CTAlloc(HYPRE_Real, capacity_S, HYPRE_MEMORY_DEVICE);
    }
-   
+
    /* setting up working array */
    iw = hypre_CTAlloc(HYPRE_Int,3*n,HYPRE_MEMORY_HOST);
    iL = iw + n;
@@ -2227,12 +2227,12 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
    /* get reverse permutation (rperm).
     * rperm holds the reordered indexes.
     * rperm[old] -> new
-    * perm[new]  -> old 
+    * perm[new]  -> old
     */
    rperm = iw + 2*n;
    for(i = 0 ; i < n ; i ++)
    {
-     rperm[perm[i]] = i;   
+     rperm[perm[i]] = i;
    }
    /*
     * 2: Main loop of elimination
@@ -2240,7 +2240,7 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
     * |----->*********<-----|-----*********|
     * |col heap***value heap|value in U****|
     */
-   
+
    /* main outer loop for upper part */
    for(ii = 0 ; ii < nLU ; ii ++)
    {
@@ -2263,7 +2263,7 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
       /* set the scaled tol for that row */
       itolb = tol[0] * inorm;
       itolef = tol[1] * inorm;
-      
+
       /* reset displacement */
       lenhll = lenhlr = lenu = 0;
       w[ii] = 0.0;
@@ -2295,8 +2295,8 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
             iw[col] = jpos;
          }
       }
-      
-      /* 
+
+      /*
        * main elimination
        * need to maintain 2 heaps for L, one heap for col and one heaps for value
        * maintian an array for U, and do qsplit with quick sort after that
@@ -2304,7 +2304,7 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
        */
       while(lenhll > 0)
       {
-        
+
          /* get the next row from top of the heap */
          jrow = iL[0];
          dpiv = w[0] * D_data[jrow];
@@ -2312,8 +2312,8 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
          /* now remove it from the top of the heap */
          hypre_ILUMinHeapRemoveIRIi(iL,w,iw,lenhll);
          lenhll--;
-         /* 
-          * reset the drop part to -1 
+         /*
+          * reset the drop part to -1
           * we don't need this iw anymore
           */
          iw[jrow] = -1;
@@ -2367,24 +2367,24 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
                }
             }
             else
-            {   
+            {
                w[icol] += lxu;
             }
          }
       }/* while loop for the elimination of current row */
-      
+
       if(fabs(w[ii]) < MAT_TOL)
       {
          w[ii]=1e-06;
       }
       D_data[ii] = 1./w[ii];
       iw[ii] = -1;
-      
-      /* 
+
+      /*
        * now pick up the largest lfil from L
        * L part is guarantee to be larger than itol
        */
-      
+
       lenl = lenhlr < lfil ? lenhlr : lfil;
       L_diag_i[ii+1] = L_diag_i[ii] + lenl;
       if(lenl > 0)
@@ -2393,8 +2393,8 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
          while(ctrL + lenl > capacity_L)
          {
             capacity_L = capacity_L * EXPAND_FACT + 1;
-            L_diag_j = hypre_TReAlloc(L_diag_j, HYPRE_Int, capacity_L, HYPRE_MEMORY_SHARED);
-            L_diag_data = hypre_TReAlloc(L_diag_data, HYPRE_Real, capacity_L, HYPRE_MEMORY_SHARED);
+            L_diag_j = hypre_TReAlloc(L_diag_j, HYPRE_Int, capacity_L, HYPRE_MEMORY_DEVICE);
+            L_diag_data = hypre_TReAlloc(L_diag_data, HYPRE_Real, capacity_L, HYPRE_MEMORY_DEVICE);
          }
          ctrL += lenl;
          /* copy large data in */
@@ -2407,7 +2407,7 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
          }
       }
       /*
-       * now reset working array 
+       * now reset working array
        * L part already reset when move out of heap, only U part
        */
       ku = lenu+ii;
@@ -2415,7 +2415,7 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
       {
          iw[iL[j]] = -1;
       }
-      
+
       if(lenu < lfil)
       {
          /* we simply keep all of the data, no need to sort */
@@ -2428,7 +2428,7 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
          /* quick split, only sort the first small part of the array */
          hypre_ILUMaxQSplitRabsI(w,iL,ii+1,ii+lenhu,ii+lenu);
       }
-      
+
       U_diag_i[ii+1] = U_diag_i[ii] + lenhu;
       if(lenhu > 0)
       {
@@ -2436,8 +2436,8 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
          while(ctrU + lenhu > capacity_U)
          {
             capacity_U = capacity_U * EXPAND_FACT + 1;
-            U_diag_j = hypre_TReAlloc(U_diag_j, HYPRE_Int, capacity_U, HYPRE_MEMORY_SHARED);
-            U_diag_data = hypre_TReAlloc(U_diag_data, HYPRE_Real, capacity_U, HYPRE_MEMORY_SHARED);
+            U_diag_j = hypre_TReAlloc(U_diag_j, HYPRE_Int, capacity_U, HYPRE_MEMORY_DEVICE);
+            U_diag_data = hypre_TReAlloc(U_diag_data, HYPRE_Real, capacity_U, HYPRE_MEMORY_DEVICE);
          }
          ctrU += lenhu;
          /* copy large data in */
@@ -2464,8 +2464,8 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
          u_end_array[ii] = ctrU;
       }
    }/* end of ii loop from 0 to nLU-1 */
-   
-   
+
+
    /* now main loop for Schur comlement part */
    for(ii = nLU ; ii < n ; ii ++)
    {
@@ -2488,7 +2488,7 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
       /* set the scaled tol for that row */
       itols = tol[2] * inorm;
       itolef = tol[1] * inorm;
-      
+
       /* reset displacement */
       lenhll = lenhlr = lenu = 0;
       /* copy in data from A */
@@ -2522,8 +2522,8 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
             iw[col] = jpos;
          }
       }
-      
-      /* 
+
+      /*
        * main elimination
        * need to maintain 2 heaps for L, one heap for col and one heaps for value
        * maintian an array for S, and do qsplit with quick sort after that
@@ -2538,8 +2538,8 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
          /* now remove it from the top of the heap */
          hypre_ILUMinHeapRemoveIRIi(iL,w,iw,lenhll);
          lenhll--;
-         /* 
-          * reset the drop part to -1 
+         /*
+          * reset the drop part to -1
           * we don't need this iw anymore
           */
          iw[jrow] = -1;
@@ -2596,17 +2596,17 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
                }
             }
             else
-            {   
+            {
                w[icol] += lxu;
             }
          }
       }/* while loop for the elimination of current row */
-      
-      /* 
+
+      /*
        * now pick up the largest lfil from L
        * L part is guarantee to be larger than itol
        */
-      
+
       lenl = lenhlr < lfil ? lenhlr : lfil;
       L_diag_i[ii+1] = L_diag_i[ii] + lenl;
       if(lenl > 0)
@@ -2615,8 +2615,8 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
          while(ctrL + lenl > capacity_L)
          {
             capacity_L = capacity_L * EXPAND_FACT + 1;
-            L_diag_j = hypre_TReAlloc(L_diag_j, HYPRE_Int, capacity_L, HYPRE_MEMORY_SHARED);
-            L_diag_data = hypre_TReAlloc(L_diag_data, HYPRE_Real, capacity_L, HYPRE_MEMORY_SHARED);
+            L_diag_j = hypre_TReAlloc(L_diag_j, HYPRE_Int, capacity_L, HYPRE_MEMORY_DEVICE);
+            L_diag_data = hypre_TReAlloc(L_diag_data, HYPRE_Real, capacity_L, HYPRE_MEMORY_DEVICE);
          }
          ctrL += lenl;
          /* copy large data in */
@@ -2629,7 +2629,7 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
          }
       }
       /*
-       * now reset working array 
+       * now reset working array
        * L part already reset when move out of heap, only S part
        */
       ku = lenu+nLU;
@@ -2637,7 +2637,7 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
       {
          iw[iL[j]] = -1;
       }
-      
+
       /* no dropping at this point of time for S */
       //lenhu = lenu < lfil ? lenu : lfil;
       lenhu = lenu;
@@ -2648,13 +2648,13 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
       while(ctrS + lenhu + 1 > capacity_S)
       {
          capacity_S = capacity_S * EXPAND_FACT + 1;
-         S_diag_j = hypre_TReAlloc(S_diag_j, HYPRE_Int, capacity_S, HYPRE_MEMORY_SHARED);
-         S_diag_data = hypre_TReAlloc(S_diag_data, HYPRE_Real, capacity_S, HYPRE_MEMORY_SHARED);
+         S_diag_j = hypre_TReAlloc(S_diag_j, HYPRE_Int, capacity_S, HYPRE_MEMORY_DEVICE);
+         S_diag_data = hypre_TReAlloc(S_diag_data, HYPRE_Real, capacity_S, HYPRE_MEMORY_DEVICE);
       }
-      
+
       ctrS += (lenhu+1);
       S_diag_i[ii-nLU+1] = ctrS;
-      
+
       /* copy large data in, diagonal first */
       S_diag_j[S_diag_i[ii-nLU]] = iL[nLU]-nLU;
       S_diag_data[S_diag_i[ii-nLU]] = w[nLU];
@@ -2665,16 +2665,16 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
          S_diag_data[j] = w[jpos];
       }
    }/* end of ii loop from nLU to n-1 */
-   
+
    /*
     * 3: Finishing up and free
     */
-   
+
    /* First create Schur complement if necessary
     * Check if we need to create Schur complement
     */
    HYPRE_BigInt big_m = (HYPRE_BigInt)m;
-   hypre_MPI_Allreduce(&big_m, &total_rows, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);  
+   hypre_MPI_Allreduce(&big_m, &total_rows, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
    /* only form when total_rows > 0 */
    if( total_rows > 0 )
    {
@@ -2692,18 +2692,18 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
       col_starts = hypre_CTAlloc(HYPRE_BigInt,num_procs+1,HYPRE_MEMORY_HOST);
 
       hypre_MPI_Allgather(&big_m,1,HYPRE_MPI_BIG_INT,&col_starts[1],
-   		1,HYPRE_MPI_BIG_INT,comm);
+            1,HYPRE_MPI_BIG_INT,comm);
 
       for (i=2; i < num_procs+1; i++)
          col_starts[i] += col_starts[i-1];
-#endif 
+#endif
       /* We did nothing to A_offd, so all the data kept, just reorder them
-       * The create function takes comm, global num rows/cols, 
+       * The create function takes comm, global num rows/cols,
        *    row/col start, num cols offd, nnz diag, nnz offd
        */
       S_offd_nnz = hypre_CSRMatrixNumNonzeros(A_offd);
       S_offd_ncols = hypre_CSRMatrixNumCols(A_offd);
-      
+
       matS = hypre_ParCSRMatrixCreate( comm,
                            total_rows,
                            total_rows,
@@ -2712,25 +2712,25 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
                            S_offd_ncols,
                            S_diag_i[m],
                            S_offd_nnz);
-         
+
       /* S owns different start/end */
       hypre_ParCSRMatrixSetColStartsOwner(matS,1);
       hypre_ParCSRMatrixSetRowStartsOwner(matS,0);/* square matrix, use same row and col start */
-      
+
       /* first put diagonal data in */
       S_diag = hypre_ParCSRMatrixDiag(matS);
-      
+
       hypre_CSRMatrixI(S_diag) = S_diag_i;
-      hypre_CSRMatrixData(S_diag) = S_diag_data; 
+      hypre_CSRMatrixData(S_diag) = S_diag_data;
       hypre_CSRMatrixJ(S_diag) = S_diag_j;
-      
+
       /* now start to construct offdiag of S */
       S_offd = hypre_ParCSRMatrixOffd(matS);
-      S_offd_i = hypre_TAlloc(HYPRE_Int, m+1, HYPRE_MEMORY_SHARED);
-      S_offd_j = hypre_TAlloc(HYPRE_Int, S_offd_nnz, HYPRE_MEMORY_SHARED);
-      S_offd_data = hypre_TAlloc(HYPRE_Real, S_offd_nnz, HYPRE_MEMORY_SHARED);
+      S_offd_i = hypre_TAlloc(HYPRE_Int, m+1, HYPRE_MEMORY_DEVICE);
+      S_offd_j = hypre_TAlloc(HYPRE_Int, S_offd_nnz, HYPRE_MEMORY_DEVICE);
+      S_offd_data = hypre_TAlloc(HYPRE_Real, S_offd_nnz, HYPRE_MEMORY_DEVICE);
       S_offd_colmap = hypre_CTAlloc(HYPRE_BigInt, S_offd_ncols, HYPRE_MEMORY_HOST);
-      
+
       /* simply use a loop to copy data from A_offd */
       S_offd_i[0] = 0;
       k3 = 0;
@@ -2750,14 +2750,14 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
          }
          S_offd_i[i+e+1] = k3;
       }
-      
+
       /* give I, J, DATA to S_offd */
       hypre_CSRMatrixI(S_offd) = S_offd_i;
       hypre_CSRMatrixJ(S_offd) = S_offd_j;
       hypre_CSRMatrixData(S_offd) = S_offd_data;
-         
+
       /* now we need to update S_offd_colmap */
-         
+
       /* get total num of send */
       num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
       begin = hypre_ParCSRCommPkgSendMapStart(comm_pkg,0);
@@ -2767,15 +2767,15 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
 #ifdef HYPRE_NO_GLOBAL_PARTITION
       for(i = begin ; i < end ; i ++)
       {
-         send_buf[i-begin] = rperm[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,i)] - nLU + col_starts[0]; 
+         send_buf[i-begin] = rperm[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,i)] - nLU + col_starts[0];
       }
 #else
       for(i = begin ; i < end ; i ++)
       {
-         send_buf[i-begin] = rperm[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,i)] - nLU + col_starts[my_id]; 
+         send_buf[i-begin] = rperm[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,i)] - nLU + col_starts[my_id];
       }
-#endif  
-         
+#endif
+
       /* main communication */
       comm_handle = hypre_ParCSRCommHandleCreate(22, comm_pkg, send_buf, S_offd_colmap);
       /* need this to synchronize, Isend & Irecv used in above functions */
@@ -2783,13 +2783,13 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
 
       /* setup index */
       hypre_ParCSRMatrixColMapOffd(matS) = S_offd_colmap;
-      
+
       hypre_ILUSortOffdColmap(matS);
-      
+
       /* free */
       hypre_TFree(send_buf, HYPRE_MEMORY_HOST);
    }/* end of forming S */
-   
+
    /* now start to construct L and U */
    for(k=nLU; k<n; k++)
    {
@@ -2797,7 +2797,7 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
       U_diag_i[k+1] = U_diag_i[nLU];
       D_data[k] = 1.;
    }
-   
+
    /* create parcsr matrix */
    matL = hypre_ParCSRMatrixCreate( comm,
                        hypre_ParCSRMatrixGlobalNumRows(A),
@@ -2815,8 +2815,8 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
    hypre_CSRMatrixI(L_diag) = L_diag_i;
    if (L_diag_i[n] > 0)
    {
-      hypre_CSRMatrixData(L_diag) = L_diag_data; 
-      hypre_CSRMatrixJ(L_diag) = L_diag_j; 
+      hypre_CSRMatrixData(L_diag) = L_diag_data;
+      hypre_CSRMatrixJ(L_diag) = L_diag_j;
    }
    else
    {
@@ -2828,7 +2828,7 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
    local_nnz = (HYPRE_Real) (L_diag_i[n]);
    hypre_MPI_Allreduce(&local_nnz, &total_nnz, 1, HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
    hypre_ParCSRMatrixDNumNonzeros(matL) = total_nnz;
- 
+
    matU = hypre_ParCSRMatrixCreate( comm,
                        hypre_ParCSRMatrixGlobalNumRows(A),
                        hypre_ParCSRMatrixGlobalNumRows(A),
@@ -2843,40 +2843,40 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
    hypre_ParCSRMatrixSetRowStartsOwner(matU,0);
 
    U_diag = hypre_ParCSRMatrixDiag(matU);
-   hypre_CSRMatrixI(U_diag) = U_diag_i; 
+   hypre_CSRMatrixI(U_diag) = U_diag_i;
    if (U_diag_i[n] > 0)
    {
-      hypre_CSRMatrixData(U_diag) = U_diag_data; 
-      hypre_CSRMatrixJ(U_diag) = U_diag_j; 
+      hypre_CSRMatrixData(U_diag) = U_diag_data;
+      hypre_CSRMatrixJ(U_diag) = U_diag_j;
    }
    else
    {
       /* we initialized some anyway, so remove if unused */
-      hypre_TFree(U_diag_j,HYPRE_MEMORY_SHARED);
-      hypre_TFree(U_diag_data,HYPRE_MEMORY_SHARED);
+      hypre_TFree(U_diag_j,HYPRE_MEMORY_DEVICE);
+      hypre_TFree(U_diag_data,HYPRE_MEMORY_DEVICE);
    }
    /* store (global) total number of nonzeros */
    local_nnz = (HYPRE_Real) (U_diag_i[n]);
    hypre_MPI_Allreduce(&local_nnz, &total_nnz, 1, HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
    hypre_ParCSRMatrixDNumNonzeros(matU) = total_nnz;
-   
+
    /* free working array */
    hypre_TFree(iw,HYPRE_MEMORY_HOST);
    hypre_TFree(w,HYPRE_MEMORY_HOST);
-   
+
    if(!matS)
    {
-      hypre_TFree(S_diag_i,HYPRE_MEMORY_SHARED);
+      hypre_TFree(S_diag_i,HYPRE_MEMORY_DEVICE);
 //      hypre_TFree(col_starts,HYPRE_MEMORY_HOST);
    }
-   
+
    /* set matrix pointers */
    *Lptr = matL;
    *Dptr = D_data;
    *Uptr = matU;
    *Sptr = matS;
    *u_end = u_end_array;
-   
+
    return hypre_error_flag;
 }
 
@@ -2899,10 +2899,10 @@ hypre_NSHSetup( void               *nsh_vdata,
    /* pointers to NSH data */
    HYPRE_Int            logging           = hypre_ParNSHDataLogging(nsh_data);
    HYPRE_Int            print_level       = hypre_ParNSHDataPrintLevel(nsh_data);
-   
+
    hypre_ParCSRMatrix   *matA             = hypre_ParNSHDataMatA(nsh_data);
    hypre_ParCSRMatrix   *matM             = hypre_ParNSHDataMatM(nsh_data);
-   
+
 //   HYPRE_Int            n                 = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
    HYPRE_Int            num_procs,  my_id;
 
@@ -2912,7 +2912,7 @@ hypre_NSHSetup( void               *nsh_vdata,
    hypre_ParVector      *U_array          = hypre_ParNSHDataU(nsh_data);
    hypre_ParVector      *residual         = hypre_ParNSHDataResidual(nsh_data);
    HYPRE_Real           *rel_res_norms    = hypre_ParNSHDataRelResNorms(nsh_data);
-   
+
    /* solver setting */
    HYPRE_Real           *droptol          = hypre_ParNSHDataDroptol(nsh_data);
    HYPRE_Real           mr_tol            = hypre_ParNSHDataMRTol(nsh_data);
@@ -2922,7 +2922,7 @@ hypre_NSHSetup( void               *nsh_vdata,
    HYPRE_Real           nsh_tol           = hypre_ParNSHDataNSHTol(nsh_data);
    HYPRE_Int            nsh_max_row_nnz   = hypre_ParNSHDataNSHMaxRowNnz(nsh_data);
    HYPRE_Int            nsh_max_iter      = hypre_ParNSHDataNSHMaxIter(nsh_data);
-   
+
    /* ----- begin -----*/
 
    //num_threads = hypre_NumThreads();
@@ -2935,7 +2935,7 @@ hypre_NSHSetup( void               *nsh_vdata,
    {
       hypre_TFree(matM, HYPRE_MEMORY_HOST);
       matM = NULL;
-   }    
+   }
 
    /* clear old l1_norm data, if created */
    if(hypre_ParNSHDataL1Norms(nsh_data))
@@ -2944,7 +2944,7 @@ hypre_NSHSetup( void               *nsh_vdata,
       hypre_ParNSHDataL1Norms(nsh_data) = NULL;
    }
 
-   /* setup temporary storage 
+   /* setup temporary storage
     * first check is they've already here
     */
    if (hypre_ParNSHDataUTemp(nsh_data))
@@ -2967,7 +2967,7 @@ hypre_NSHSetup( void               *nsh_vdata,
       hypre_TFree(hypre_ParNSHDataRelResNorms(nsh_data), HYPRE_MEMORY_HOST);
       hypre_ParNSHDataRelResNorms(nsh_data) = NULL;
    }
-   
+
    /* start to create working vectors */
    Utemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
                           hypre_ParCSRMatrixGlobalNumRows(A),
@@ -2988,15 +2988,15 @@ hypre_NSHSetup( void               *nsh_vdata,
    U_array = u;
 
    /* NSH compute approximate inverse, see par_ilu.c */
-   hypre_ILUParCSRInverseNSH(matA, &matM, droptol, mr_tol, nsh_tol, DIVIDE_TOL, mr_max_row_nnz, 
+   hypre_ILUParCSRInverseNSH(matA, &matM, droptol, mr_tol, nsh_tol, DIVIDE_TOL, mr_max_row_nnz,
                               nsh_max_row_nnz, mr_max_iter, nsh_max_iter, mr_col_version, print_level);
-                              
+
    /* set pointers to NSH data */
    hypre_ParNSHDataMatA(nsh_data) = matA;
    hypre_ParNSHDataF(nsh_data) = F_array;
    hypre_ParNSHDataU(nsh_data) = U_array;
    hypre_ParNSHDataMatM(nsh_data) = matM;
-      
+
    /* compute operator complexity */
    hypre_ParCSRMatrixSetDNumNonzeros(matA);
    hypre_ParCSRMatrixSetDNumNonzeros(matM);
@@ -3020,28 +3020,28 @@ hypre_NSHSetup( void               *nsh_vdata,
       hypre_ParNSHDataResidual(nsh_data) = NULL;
    }
    rel_res_norms = hypre_CTAlloc(HYPRE_Real, hypre_ParNSHDataMaxIter(nsh_data), HYPRE_MEMORY_HOST);
-   hypre_ParNSHDataRelResNorms(nsh_data) = rel_res_norms;      
-   
+   hypre_ParNSHDataRelResNorms(nsh_data) = rel_res_norms;
+
    return hypre_error_flag;
 }
 
 
 /* ILU(0) for RAS, has some external rows
- * A = input matrix 
- * perm = permutation array indicating ordering of factorization. Perm could come from a 
+ * A = input matrix
+ * perm = permutation array indicating ordering of factorization. Perm could come from a
  *    CF_marker array or a reordering routine.
  * nLU = size of computed LDU factorization.
  * Lptr, Dptr, Uptr, Sptr = L, D, U, S factors.
- * will form global Schur Matrix if nLU < n 
+ * will form global Schur Matrix if nLU < n
  */
 HYPRE_Int
-hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU, 
+hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
       hypre_ParCSRMatrix **Lptr, HYPRE_Real** Dptr, hypre_ParCSRMatrix **Uptr)
 {
    HYPRE_Int                i, ii, j, k, k1, k2, ctrU, ctrL, lenl, lenu, jpiv, col, jpos;
    HYPRE_Int                *iw, *iL, *iU;
    HYPRE_Real               dd, t, dpiv, lxu, *wU, *wL;
-   
+
    /* communication stuffs for S */
    MPI_Comm                 comm          = hypre_ParCSRMatrixComm(A);
    HYPRE_Int                num_procs;
@@ -3050,7 +3050,7 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
 //   hypre_ParCSRCommHandle   *comm_handle;
 //   HYPRE_Int                num_sends, begin, end;
 //   HYPRE_Int                *send_buf     = NULL;
-   
+
    /* data objects for A */
    hypre_CSRMatrix          *A_diag       = hypre_ParCSRMatrixDiag(A);
    hypre_CSRMatrix          *A_offd       = hypre_ParCSRMatrixOffd(A);
@@ -3060,7 +3060,7 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
    HYPRE_Real               *A_offd_data  = hypre_CSRMatrixData(A_offd);
    HYPRE_Int                *A_offd_i     = hypre_CSRMatrixI(A_offd);
    HYPRE_Int                *A_offd_j     = hypre_CSRMatrixJ(A_offd);
-   
+
    /* size of problem and external matrix */
    HYPRE_Int                n             =  hypre_CSRMatrixNumRows(A_diag);
 //   HYPRE_Int                m             = n - nLU;
@@ -3069,7 +3069,7 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
    HYPRE_BigInt             *col_starts;
    HYPRE_BigInt             global_num_rows;
    HYPRE_Real               local_nnz, total_nnz;
-   
+
    /* data objects for L, D, U */
    hypre_ParCSRMatrix       *matL;
    hypre_ParCSRMatrix       *matU;
@@ -3081,28 +3081,28 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
    HYPRE_Int                *L_diag_j;
    HYPRE_Real               *U_diag_data;
    HYPRE_Int                *U_diag_i;
-   HYPRE_Int                *U_diag_j;  
-   
+   HYPRE_Int                *U_diag_j;
+
    /* data objects for E, external matrix */
    HYPRE_Int                *E_i;
    HYPRE_Int                *E_j;
    HYPRE_Real               *E_data;
-   
+
    /* memory management */
    HYPRE_Int                initial_alloc = 0;
    HYPRE_Int                capacity_L;
    HYPRE_Int                capacity_U;
-   HYPRE_Int                nnz_A = A_diag_i[n];        
-   
+   HYPRE_Int                nnz_A = A_diag_i[n];
+
    /* reverse permutation array */
    HYPRE_Int                *rperm;
    /* the original permutation array */
    HYPRE_Int                *perm_old;
-   
+
    /* start setup
     * get communication stuffs first
     */
-   hypre_MPI_Comm_size(comm,&num_procs);    
+   hypre_MPI_Comm_size(comm,&num_procs);
    comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    /* setup if not yet built */
    if(!comm_pkg)
@@ -3110,29 +3110,29 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
       hypre_MatvecCommPkgCreate(A);
       comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    }
-   
+
    /* check for correctness */
    if(nLU < 0 || nLU > n)
    {
       hypre_error_w_msg(HYPRE_ERROR_ARG,"WARNING: nLU out of range.\n");
    }
-   
+
    /* Allocate memory for L,D,U,S factors */
    if(n > 0)
    {
    initial_alloc = (n + ext) + ceil((nnz_A / 2.0)*total_rows/n);
    }
-   capacity_L = initial_alloc;   
+   capacity_L = initial_alloc;
    capacity_U = initial_alloc;
-   
-   D_data      = hypre_TAlloc(HYPRE_Real, total_rows, HYPRE_MEMORY_SHARED);
-   L_diag_i    = hypre_TAlloc(HYPRE_Int, total_rows+1, HYPRE_MEMORY_SHARED);
-   L_diag_j    = hypre_TAlloc(HYPRE_Int, capacity_L, HYPRE_MEMORY_SHARED);
-   L_diag_data = hypre_TAlloc(HYPRE_Real, capacity_L, HYPRE_MEMORY_SHARED);
-   U_diag_i    = hypre_TAlloc(HYPRE_Int, total_rows+1, HYPRE_MEMORY_SHARED);
-   U_diag_j    = hypre_TAlloc(HYPRE_Int, capacity_U, HYPRE_MEMORY_SHARED);
-   U_diag_data = hypre_TAlloc(HYPRE_Real, capacity_U, HYPRE_MEMORY_SHARED);
-                 
+
+   D_data      = hypre_TAlloc(HYPRE_Real, total_rows, HYPRE_MEMORY_DEVICE);
+   L_diag_i    = hypre_TAlloc(HYPRE_Int, total_rows+1, HYPRE_MEMORY_DEVICE);
+   L_diag_j    = hypre_TAlloc(HYPRE_Int, capacity_L, HYPRE_MEMORY_DEVICE);
+   L_diag_data = hypre_TAlloc(HYPRE_Real, capacity_L, HYPRE_MEMORY_DEVICE);
+   U_diag_i    = hypre_TAlloc(HYPRE_Int, total_rows+1, HYPRE_MEMORY_DEVICE);
+   U_diag_j    = hypre_TAlloc(HYPRE_Int, capacity_U, HYPRE_MEMORY_DEVICE);
+   U_diag_data = hypre_TAlloc(HYPRE_Real, capacity_U, HYPRE_MEMORY_DEVICE);
+
    /* allocate working arrays */
    iw          = hypre_TAlloc(HYPRE_Int, 4*total_rows, HYPRE_MEMORY_HOST);
    iL          = iw+total_rows;
@@ -3143,11 +3143,11 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
    ctrU = ctrL = 0;
    L_diag_i[0] = U_diag_i[0] = 0;
    /* set marker array iw to -1 */
-   for( i = 0 ; i < total_rows ; i++ ) 
+   for( i = 0 ; i < total_rows ; i++ )
    {
      iw[i] = -1;
-   }   
-   
+   }
+
    /* expand perm to suit extra data, remember to free */
    for( i = 0 ; i < n ; i ++)
    {
@@ -3157,29 +3157,29 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
    {
       perm[i] = i;
    }
-   
+
    /* get reverse permutation (rperm).
     * rperm holds the reordered indexes.
    */
    for(i=0 ; i < total_rows ; i++)
    {
-     rperm[perm[i]] = i;   
-   } 
-   
+     rperm[perm[i]] = i;
+   }
+
    /* get external rows */
    hypre_ILUBuildRASExternalMatrix(A, rperm, &E_i, &E_j, &E_data);
-   
+
    /*---------  Begin Factorization. Work in permuted space  ----
-    * this is the first part, without offd 
+    * this is the first part, without offd
     */
-   for( ii = 0; ii < nLU; ii++ ) 
+   for( ii = 0; ii < nLU; ii++ )
    {
 
       // get row i
       i = perm[ii];
-      // get extents of row i    
-      k1=A_diag_i[i];   
-      k2=A_diag_i[i+1]; 
+      // get extents of row i
+      k1=A_diag_i[i];
+      k2=A_diag_i[i+1];
 
 /*-------------------- unpack L & U-parts of row of A in arrays w */
       iU = iL+ii;
@@ -3189,23 +3189,23 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
       lenl  = lenu = 0;
       iw[ii] = ii;
 /*-------------------- scan & unwrap column */
-      for(j=k1; j < k2; j++) 
+      for(j=k1; j < k2; j++)
       {
          col = rperm[A_diag_j[j]];
          t = A_diag_data[j];
-         if( col < ii ) 
+         if( col < ii )
          {
             iw[col] = lenl;
             iL[lenl] = col;
             wL[lenl++] = t;
-         } 
-         else if (col > ii) 
+         }
+         else if (col > ii)
          {
             iw[col] = lenu;
             iU[lenu] = col;
             wU[lenu++] = t;
          }
-         else 
+         else
          {
             dd=t;
          }
@@ -3214,20 +3214,20 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
       /* eliminate row */
       /*-------------------------------------------------------------------------
       *  In order to do the elimination in the correct order we must select the
-      *  smallest column index among iL[k], k = j, j+1, ..., lenl-1. For ILU(0), 
-      *  no new fill-ins are expect, so we can pre-sort iL and wL prior to the 
+      *  smallest column index among iL[k], k = j, j+1, ..., lenl-1. For ILU(0),
+      *  no new fill-ins are expect, so we can pre-sort iL and wL prior to the
       *  entering the elimination loop.
-      *-----------------------------------------------------------------------*/     
+      *-----------------------------------------------------------------------*/
 //      hypre_quickSortIR(iL, wL, iw, 0, (lenl-1));
       hypre_qsort3ir(iL, wL, iw, 0, (lenl-1));
       for(j=0; j<lenl; j++)
-      {   
+      {
          jpiv = iL[j];
          /* get factor/ pivot element */
          dpiv = wL[j] * D_data[jpiv];
          /* store entry in L */
          wL[j] = dpiv;
-                                         
+
          /* zero out element - reset pivot */
          iw[jpiv] = -1;
          /* combine current row and pivot row */
@@ -3237,11 +3237,11 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
             jpos = iw[col];
 
             /* Only fill-in nonzero pattern (jpos != 0) */
-            if(jpos < 0) 
+            if(jpos < 0)
             {
                continue;
             }
-            
+
             lxu = - U_diag_data[k] * dpiv;
             if(col < ii)
             {
@@ -3257,12 +3257,12 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
             {
                /* diagonal update */
                dd += lxu;
-            }          
-         }       
+            }
+         }
       }
       /* restore iw (only need to restore diagonal and U part */
       iw[ii] = -1;
-      for( j = 0; j < lenu; j++ ) 
+      for( j = 0; j < lenu; j++ )
       {
          iw[iU[j]] = -1;
       }
@@ -3272,18 +3272,18 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
       /* Check that memory is sufficient */
       while((ctrL+lenl) > capacity_L)
       {
-         capacity_L = capacity_L * EXPAND_FACT + 1;         
-         L_diag_j = hypre_TReAlloc(L_diag_j, HYPRE_Int, capacity_L, HYPRE_MEMORY_SHARED);
-         L_diag_data = hypre_TReAlloc(L_diag_data, HYPRE_Real, capacity_L, HYPRE_MEMORY_SHARED);
+         capacity_L = capacity_L * EXPAND_FACT + 1;
+         L_diag_j = hypre_TReAlloc(L_diag_j, HYPRE_Int, capacity_L, HYPRE_MEMORY_DEVICE);
+         L_diag_data = hypre_TReAlloc(L_diag_data, HYPRE_Real, capacity_L, HYPRE_MEMORY_DEVICE);
       }
-      hypre_TMemcpy(&(L_diag_j)[ctrL], iL, HYPRE_Int, lenl, HYPRE_MEMORY_SHARED, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(&(L_diag_data)[ctrL], wL, HYPRE_Real, lenl, HYPRE_MEMORY_SHARED, HYPRE_MEMORY_HOST);
-      L_diag_i[ii+1] = (ctrL+=lenl); 
+      hypre_TMemcpy(&(L_diag_j)[ctrL], iL, HYPRE_Int, lenl, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(&(L_diag_data)[ctrL], wL, HYPRE_Real, lenl, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+      L_diag_i[ii+1] = (ctrL+=lenl);
 
       /* diagonal part (we store the inverse) */
       if(fabs(dd) < MAT_TOL)
       {
-         dd = 1.0e-6;     
+         dd = 1.0e-6;
       }
       D_data[ii] = 1./dd;
 
@@ -3292,25 +3292,25 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
       while((ctrU+lenu) > capacity_U)
       {
          capacity_U = capacity_U * EXPAND_FACT + 1;
-         U_diag_j = hypre_TReAlloc(U_diag_j, HYPRE_Int, capacity_U, HYPRE_MEMORY_SHARED);
-         U_diag_data = hypre_TReAlloc(U_diag_data, HYPRE_Real, capacity_U, HYPRE_MEMORY_SHARED);
-      } 
-      hypre_TMemcpy(&(U_diag_j)[ctrU], iU, HYPRE_Int, lenu, HYPRE_MEMORY_SHARED, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(&(U_diag_data)[ctrU], wU, HYPRE_Real, lenu, HYPRE_MEMORY_SHARED, HYPRE_MEMORY_HOST);
-      U_diag_i[ii+1] = (ctrU+=lenu); 
-      
+         U_diag_j = hypre_TReAlloc(U_diag_j, HYPRE_Int, capacity_U, HYPRE_MEMORY_DEVICE);
+         U_diag_data = hypre_TReAlloc(U_diag_data, HYPRE_Real, capacity_U, HYPRE_MEMORY_DEVICE);
+      }
+      hypre_TMemcpy(&(U_diag_j)[ctrU], iU, HYPRE_Int, lenu, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(&(U_diag_data)[ctrU], wU, HYPRE_Real, lenu, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+      U_diag_i[ii+1] = (ctrU+=lenu);
+
    }
    /*---------  Begin Factorization in lower part  ----
-    * here we need to get off diagonals in 
+    * here we need to get off diagonals in
     */
-   for( ii = nLU ; ii < n ; ii++ ) 
+   for( ii = nLU ; ii < n ; ii++ )
    {
 
       // get row i
       i = perm[ii];
-      // get extents of row i    
-      k1=A_diag_i[i];   
-      k2=A_diag_i[i+1]; 
+      // get extents of row i
+      k1=A_diag_i[i];
+      k2=A_diag_i[i+1];
 
 /*-------------------- unpack L & U-parts of row of A in arrays w */
       iU = iL+ii;
@@ -3320,30 +3320,30 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
       lenl  = lenu = 0;
       iw[ii] = ii;
 /*-------------------- scan & unwrap column */
-      for(j=k1; j < k2; j++) 
+      for(j=k1; j < k2; j++)
       {
          col = rperm[A_diag_j[j]];
          t = A_diag_data[j];
-         if( col < ii ) 
+         if( col < ii )
          {
             iw[col] = lenl;
             iL[lenl] = col;
             wL[lenl++] = t;
-         } 
-         else if (col > ii) 
+         }
+         else if (col > ii)
          {
             iw[col] = lenu;
             iU[lenu] = col;
             wU[lenu++] = t;
          }
-         else 
+         else
          {
             dd=t;
          }
       }
-      
+
 /*------------------ sjcan offd*/
-      k1=A_offd_i[i];   
+      k1=A_offd_i[i];
       k2=A_offd_i[i+1];
       for(j = k1 ; j < k2 ; j ++)
       {
@@ -3358,20 +3358,20 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
       /* eliminate row */
       /*-------------------------------------------------------------------------
       *  In order to do the elimination in the correct order we must select the
-      *  smallest column index among iL[k], k = j, j+1, ..., lenl-1. For ILU(0), 
-      *  no new fill-ins are expect, so we can pre-sort iL and wL prior to the 
+      *  smallest column index among iL[k], k = j, j+1, ..., lenl-1. For ILU(0),
+      *  no new fill-ins are expect, so we can pre-sort iL and wL prior to the
       *  entering the elimination loop.
-      *-----------------------------------------------------------------------*/     
+      *-----------------------------------------------------------------------*/
 //      hypre_quickSortIR(iL, wL, iw, 0, (lenl-1));
       hypre_qsort3ir(iL, wL, iw, 0, (lenl-1));
       for(j=0; j<lenl; j++)
-      {   
+      {
          jpiv = iL[j];
          /* get factor/ pivot element */
          dpiv = wL[j] * D_data[jpiv];
          /* store entry in L */
          wL[j] = dpiv;
-                                         
+
          /* zero out element - reset pivot */
          iw[jpiv] = -1;
          /* combine current row and pivot row */
@@ -3381,11 +3381,11 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
             jpos = iw[col];
 
             /* Only fill-in nonzero pattern (jpos != 0) */
-            if(jpos < 0) 
+            if(jpos < 0)
             {
                continue;
             }
-            
+
             lxu = - U_diag_data[k] * dpiv;
             if(col < ii)
             {
@@ -3401,12 +3401,12 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
             {
                /* diagonal update */
                dd += lxu;
-            }          
-         }       
+            }
+         }
       }
       /* restore iw (only need to restore diagonal and U part */
       iw[ii] = -1;
-      for( j = 0; j < lenu; j++ ) 
+      for( j = 0; j < lenu; j++ )
       {
          iw[iU[j]] = -1;
       }
@@ -3416,18 +3416,18 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
       /* Check that memory is sufficient */
       while((ctrL+lenl) > capacity_L)
       {
-         capacity_L = capacity_L * EXPAND_FACT + 1;         
-         L_diag_j = hypre_TReAlloc(L_diag_j, HYPRE_Int, capacity_L, HYPRE_MEMORY_SHARED);
-         L_diag_data = hypre_TReAlloc(L_diag_data, HYPRE_Real, capacity_L, HYPRE_MEMORY_SHARED);
+         capacity_L = capacity_L * EXPAND_FACT + 1;
+         L_diag_j = hypre_TReAlloc(L_diag_j, HYPRE_Int, capacity_L, HYPRE_MEMORY_DEVICE);
+         L_diag_data = hypre_TReAlloc(L_diag_data, HYPRE_Real, capacity_L, HYPRE_MEMORY_DEVICE);
       }
-      hypre_TMemcpy(&(L_diag_j)[ctrL], iL, HYPRE_Int, lenl, HYPRE_MEMORY_SHARED, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(&(L_diag_data)[ctrL], wL, HYPRE_Real, lenl, HYPRE_MEMORY_SHARED, HYPRE_MEMORY_HOST);
-      L_diag_i[ii+1] = (ctrL+=lenl); 
+      hypre_TMemcpy(&(L_diag_j)[ctrL], iL, HYPRE_Int, lenl, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(&(L_diag_data)[ctrL], wL, HYPRE_Real, lenl, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+      L_diag_i[ii+1] = (ctrL+=lenl);
 
       /* diagonal part (we store the inverse) */
       if(fabs(dd) < MAT_TOL)
       {
-         dd = 1.0e-6;     
+         dd = 1.0e-6;
       }
       D_data[ii] = 1./dd;
 
@@ -3436,26 +3436,26 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
       while((ctrU+lenu) > capacity_U)
       {
          capacity_U = capacity_U * EXPAND_FACT + 1;
-         U_diag_j = hypre_TReAlloc(U_diag_j, HYPRE_Int, capacity_U, HYPRE_MEMORY_SHARED);
-         U_diag_data = hypre_TReAlloc(U_diag_data, HYPRE_Real, capacity_U, HYPRE_MEMORY_SHARED);
-      } 
-      hypre_TMemcpy(&(U_diag_j)[ctrU], iU, HYPRE_Int, lenu, HYPRE_MEMORY_SHARED, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(&(U_diag_data)[ctrU], wU, HYPRE_Real, lenu, HYPRE_MEMORY_SHARED, HYPRE_MEMORY_HOST);
-      U_diag_i[ii+1] = (ctrU+=lenu); 
-      
+         U_diag_j = hypre_TReAlloc(U_diag_j, HYPRE_Int, capacity_U, HYPRE_MEMORY_DEVICE);
+         U_diag_data = hypre_TReAlloc(U_diag_data, HYPRE_Real, capacity_U, HYPRE_MEMORY_DEVICE);
+      }
+      hypre_TMemcpy(&(U_diag_j)[ctrU], iU, HYPRE_Int, lenu, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(&(U_diag_data)[ctrU], wU, HYPRE_Real, lenu, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+      U_diag_i[ii+1] = (ctrU+=lenu);
+
    }
-   
+
    /*---------  Begin Factorization in external part  ----
-    * here we need to get off diagonals in 
+    * here we need to get off diagonals in
     */
-   for( ii = n ; ii < total_rows ; ii++ ) 
+   for( ii = n ; ii < total_rows ; ii++ )
    {
 
       // get row i
       i = ii-n;
-      // get extents of row i    
-      k1=E_i[i];   
-      k2=E_i[i+1]; 
+      // get extents of row i
+      k1=E_i[i];
+      k2=E_i[i+1];
 
 /*-------------------- unpack L & U-parts of row of A in arrays w */
       iU = iL+ii;
@@ -3465,23 +3465,23 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
       lenl  = lenu = 0;
       iw[ii] = ii;
 /*-------------------- scan & unwrap column */
-      for(j=k1; j < k2; j++) 
+      for(j=k1; j < k2; j++)
       {
          col = rperm[E_j[j]];
          t = E_data[j];
-         if( col < ii ) 
+         if( col < ii )
          {
             iw[col] = lenl;
             iL[lenl] = col;
             wL[lenl++] = t;
-         } 
-         else if (col > ii) 
+         }
+         else if (col > ii)
          {
             iw[col] = lenu;
             iU[lenu] = col;
             wU[lenu++] = t;
          }
-         else 
+         else
          {
             dd=t;
          }
@@ -3490,20 +3490,20 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
       /* eliminate row */
       /*-------------------------------------------------------------------------
       *  In order to do the elimination in the correct order we must select the
-      *  smallest column index among iL[k], k = j, j+1, ..., lenl-1. For ILU(0), 
-      *  no new fill-ins are expect, so we can pre-sort iL and wL prior to the 
+      *  smallest column index among iL[k], k = j, j+1, ..., lenl-1. For ILU(0),
+      *  no new fill-ins are expect, so we can pre-sort iL and wL prior to the
       *  entering the elimination loop.
-      *-----------------------------------------------------------------------*/     
+      *-----------------------------------------------------------------------*/
 //      hypre_quickSortIR(iL, wL, iw, 0, (lenl-1));
       hypre_qsort3ir(iL, wL, iw, 0, (lenl-1));
       for(j=0; j<lenl; j++)
-      {   
+      {
          jpiv = iL[j];
          /* get factor/ pivot element */
          dpiv = wL[j] * D_data[jpiv];
          /* store entry in L */
          wL[j] = dpiv;
-                                         
+
          /* zero out element - reset pivot */
          iw[jpiv] = -1;
          /* combine current row and pivot row */
@@ -3513,11 +3513,11 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
             jpos = iw[col];
 
             /* Only fill-in nonzero pattern (jpos != 0) */
-            if(jpos < 0) 
+            if(jpos < 0)
             {
                continue;
             }
-            
+
             lxu = - U_diag_data[k] * dpiv;
             if(col < ii)
             {
@@ -3533,12 +3533,12 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
             {
                /* diagonal update */
                dd += lxu;
-            }          
-         }       
+            }
+         }
       }
       /* restore iw (only need to restore diagonal and U part */
       iw[ii] = -1;
-      for( j = 0; j < lenu; j++ ) 
+      for( j = 0; j < lenu; j++ )
       {
          iw[iU[j]] = -1;
       }
@@ -3548,18 +3548,18 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
       /* Check that memory is sufficient */
       while((ctrL+lenl) > capacity_L)
       {
-         capacity_L = capacity_L * EXPAND_FACT + 1;         
-         L_diag_j = hypre_TReAlloc(L_diag_j, HYPRE_Int, capacity_L, HYPRE_MEMORY_SHARED);
-         L_diag_data = hypre_TReAlloc(L_diag_data, HYPRE_Real, capacity_L, HYPRE_MEMORY_SHARED);
+         capacity_L = capacity_L * EXPAND_FACT + 1;
+         L_diag_j = hypre_TReAlloc(L_diag_j, HYPRE_Int, capacity_L, HYPRE_MEMORY_DEVICE);
+         L_diag_data = hypre_TReAlloc(L_diag_data, HYPRE_Real, capacity_L, HYPRE_MEMORY_DEVICE);
       }
-      hypre_TMemcpy(&(L_diag_j)[ctrL], iL, HYPRE_Int, lenl, HYPRE_MEMORY_SHARED, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(&(L_diag_data)[ctrL], wL, HYPRE_Real, lenl, HYPRE_MEMORY_SHARED, HYPRE_MEMORY_HOST);
-      L_diag_i[ii+1] = (ctrL+=lenl); 
+      hypre_TMemcpy(&(L_diag_j)[ctrL], iL, HYPRE_Int, lenl, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(&(L_diag_data)[ctrL], wL, HYPRE_Real, lenl, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+      L_diag_i[ii+1] = (ctrL+=lenl);
 
       /* diagonal part (we store the inverse) */
       if(fabs(dd) < MAT_TOL)
       {
-         dd = 1.0e-6;     
+         dd = 1.0e-6;
       }
       D_data[ii] = 1./dd;
 
@@ -3568,15 +3568,15 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
       while((ctrU+lenu) > capacity_U)
       {
          capacity_U = capacity_U * EXPAND_FACT + 1;
-         U_diag_j = hypre_TReAlloc(U_diag_j, HYPRE_Int, capacity_U, HYPRE_MEMORY_SHARED);
-         U_diag_data = hypre_TReAlloc(U_diag_data, HYPRE_Real, capacity_U, HYPRE_MEMORY_SHARED);
-      } 
-      hypre_TMemcpy(&(U_diag_j)[ctrU], iU, HYPRE_Int, lenu, HYPRE_MEMORY_SHARED, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(&(U_diag_data)[ctrU], wU, HYPRE_Real, lenu, HYPRE_MEMORY_SHARED, HYPRE_MEMORY_HOST);
-      U_diag_i[ii+1] = (ctrU+=lenu); 
-      
+         U_diag_j = hypre_TReAlloc(U_diag_j, HYPRE_Int, capacity_U, HYPRE_MEMORY_DEVICE);
+         U_diag_data = hypre_TReAlloc(U_diag_data, HYPRE_Real, capacity_U, HYPRE_MEMORY_DEVICE);
+      }
+      hypre_TMemcpy(&(U_diag_j)[ctrU], iU, HYPRE_Int, lenu, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(&(U_diag_data)[ctrU], wU, HYPRE_Real, lenu, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+      U_diag_i[ii+1] = (ctrU+=lenu);
+
    }
-   HYPRE_BigInt big_total_rows = (HYPRE_BigInt)total_rows;   
+   HYPRE_BigInt big_total_rows = (HYPRE_BigInt)total_rows;
    hypre_MPI_Allreduce( &big_total_rows, &global_num_rows, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
 
    /* need to get new column start */
@@ -3592,11 +3592,11 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
    col_starts = hypre_CTAlloc(HYPRE_BigInt,num_procs+1,HYPRE_MEMORY_HOST);
 
    hypre_MPI_Allgather(&big_total_rows,1,HYPRE_MPI_BIG_INT,&col_starts[1],
-		1,HYPRE_MPI_BIG_INT,comm);
+         1,HYPRE_MPI_BIG_INT,comm);
 
    for (i=2; i < num_procs+1; i++)
       col_starts[i] += col_starts[i-1];
-#endif  
+#endif
 
    matL = hypre_ParCSRMatrixCreate( comm,
                        global_num_rows,
@@ -3611,23 +3611,23 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
    hypre_ParCSRMatrixSetColStartsOwner(matL,1);
    hypre_ParCSRMatrixSetRowStartsOwner(matL,0);
    L_diag = hypre_ParCSRMatrixDiag(matL);
-   hypre_CSRMatrixI(L_diag) = L_diag_i; 
+   hypre_CSRMatrixI(L_diag) = L_diag_i;
    if (ctrL)
    {
-      hypre_CSRMatrixData(L_diag) = L_diag_data; 
+      hypre_CSRMatrixData(L_diag) = L_diag_data;
       hypre_CSRMatrixJ(L_diag) = L_diag_j;
    }
    else
    {
       /* we've allocated some memory, so free if not used */
-      hypre_TFree(L_diag_j,HYPRE_MEMORY_SHARED);
-      hypre_TFree(L_diag_data,HYPRE_MEMORY_SHARED);
+      hypre_TFree(L_diag_j,HYPRE_MEMORY_DEVICE);
+      hypre_TFree(L_diag_data,HYPRE_MEMORY_DEVICE);
    }
    /* store (global) total number of nonzeros */
    local_nnz = (HYPRE_Real) ctrL;
    hypre_MPI_Allreduce(&local_nnz, &total_nnz, 1, HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
    hypre_ParCSRMatrixDNumNonzeros(matL) = total_nnz;
-    
+
    matU = hypre_ParCSRMatrixCreate( comm,
                        global_num_rows,
                        global_num_rows,
@@ -3641,17 +3641,17 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
    hypre_ParCSRMatrixSetColStartsOwner(matU,0);
    hypre_ParCSRMatrixSetRowStartsOwner(matU,0);
    U_diag = hypre_ParCSRMatrixDiag(matU);
-   hypre_CSRMatrixI(U_diag) = U_diag_i; 
+   hypre_CSRMatrixI(U_diag) = U_diag_i;
    if (ctrU)
    {
-      hypre_CSRMatrixData(U_diag) = U_diag_data; 
-      hypre_CSRMatrixJ(U_diag) = U_diag_j; 
+      hypre_CSRMatrixData(U_diag) = U_diag_data;
+      hypre_CSRMatrixJ(U_diag) = U_diag_j;
    }
    else
    {
       /* we've allocated some memory, so free if not used */
-      hypre_TFree(U_diag_j,HYPRE_MEMORY_SHARED);
-      hypre_TFree(U_diag_data,HYPRE_MEMORY_SHARED);
+      hypre_TFree(U_diag_j,HYPRE_MEMORY_DEVICE);
+      hypre_TFree(U_diag_data,HYPRE_MEMORY_DEVICE);
    }
    /* store (global) total number of nonzeros */
    local_nnz = (HYPRE_Real) ctrU;
@@ -3659,8 +3659,8 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
    hypre_ParCSRMatrixDNumNonzeros(matU) = total_nnz;
    /* free memory */
    hypre_TFree(wL,HYPRE_MEMORY_HOST);
-   hypre_TFree(iw,HYPRE_MEMORY_HOST);  
-   
+   hypre_TFree(iw,HYPRE_MEMORY_HOST);
+
    /* free external data */
    if(E_i)
    {
@@ -3671,12 +3671,12 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
       hypre_TFree(E_j, HYPRE_MEMORY_HOST);
       hypre_TFree(E_data, HYPRE_MEMORY_HOST);
    }
-   
+
    /* set matrix pointers */
    *Lptr = matL;
    *Dptr = D_data;
    *Uptr = matU;
-   
+
    return hypre_error_flag;
 }
 
@@ -3685,19 +3685,19 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
 /* ILU(k) symbolic factorization for RAS
  * n = total rows of input
  * lfil = level of fill-in, the k in ILU(k)
- * perm = permutation array indicating ordering of factorization. Perm could come from a 
+ * perm = permutation array indicating ordering of factorization. Perm could come from a
  * rperm = reverse permutation array, used here to avoid duplicate memory allocation
  * iw = working array, used here to avoid duplicate memory allocation
  * nLU = size of computed LDU factorization.
  * A/L/U/E_i = the I slot of A, L, U and E
  * A/L/U/E_j = the J slot of A, L, U and E
- * will form global Schur Matrix if nLU < n 
+ * will form global Schur Matrix if nLU < n
  */
 HYPRE_Int
 hypre_ILUSetupILUKRASSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j, HYPRE_Int *A_offd_i, HYPRE_Int *A_offd_j,
                               HYPRE_Int *E_i, HYPRE_Int *E_j, HYPRE_Int ext,
-                              HYPRE_Int lfil, HYPRE_Int *perm, 
-                              HYPRE_Int *rperm,   HYPRE_Int *iw,   HYPRE_Int nLU, 
+                              HYPRE_Int lfil, HYPRE_Int *perm,
+                              HYPRE_Int *rperm,   HYPRE_Int *iw,   HYPRE_Int nLU,
                               HYPRE_Int *L_diag_i, HYPRE_Int *U_diag_i,
                               HYPRE_Int **L_diag_j, HYPRE_Int **U_diag_j)
 {
@@ -3711,14 +3711,14 @@ hypre_ILUSetupILUKRASSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_dia
    * iLev: working array store the active level of current row
    * lenl/u: current position in iw and so
    * ctrL/U/S: global position in J
-   */ 
-   
+   */
+
    HYPRE_Int      *temp_L_diag_j, *temp_U_diag_j, *u_levels;
    HYPRE_Int      *iL, *iLev;
    HYPRE_Int      ii, i, j, k, ku, lena, lenl, lenu, lenh, ilev, lev, col, icol;
 //   HYPRE_Int      m = n - nLU;
    HYPRE_Int      total_rows = ext + n;
-   
+
    /* memory management */
    HYPRE_Int      ctrL;
    HYPRE_Int      ctrU;
@@ -3726,11 +3726,11 @@ hypre_ILUSetupILUKRASSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_dia
    HYPRE_Int      capacity_U;
    HYPRE_Int      initial_alloc = 0;
    HYPRE_Int      nnz_A;
-   
+
    /* set iL and iLev to right place in iw array */
    iL             = iw + total_rows;
    iLev           = iw + 2*total_rows;
-   
+
    /* setup initial memory used */
    nnz_A          = A_diag_i[n];
    if(n > 0)
@@ -3739,20 +3739,20 @@ hypre_ILUSetupILUKRASSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_dia
    }
    capacity_L     = initial_alloc;
    capacity_U     = initial_alloc;
-   
+
    /* allocate other memory for L and U struct */
-   temp_L_diag_j  = hypre_CTAlloc(HYPRE_Int, capacity_L, HYPRE_MEMORY_SHARED);
-   temp_U_diag_j  = hypre_CTAlloc(HYPRE_Int, capacity_U, HYPRE_MEMORY_SHARED);
-   
+   temp_L_diag_j  = hypre_CTAlloc(HYPRE_Int, capacity_L, HYPRE_MEMORY_DEVICE);
+   temp_U_diag_j  = hypre_CTAlloc(HYPRE_Int, capacity_U, HYPRE_MEMORY_DEVICE);
+
    u_levels       = hypre_CTAlloc(HYPRE_Int, capacity_U, HYPRE_MEMORY_HOST);
    ctrL = ctrU = 0;
-   
+
    /* set initial value for working array */
    for(ii = 0 ; ii < total_rows ; ii ++)
    {
       iw[ii] = -1;
    }
-   
+
    /*
     * 2: Start of main loop
     * those in iL are NEW col index (after permutation)
@@ -3771,8 +3771,8 @@ hypre_ILUSetupILUKRASSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_dia
          col = rperm[A_diag_j[j]];
          if(col < ii)
          {
-            /* 
-             * this is an entry in L 
+            /*
+             * this is an entry in L
              * we maintain a heap structure for L part
              */
             iL[lenh] = col;
@@ -3789,13 +3789,13 @@ hypre_ILUSetupILUKRASSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_dia
             iw[col] = lenu++;
          }
       }/* end of j loop for adding pattern in original matrix */
-       
+
       /*
        * search lower part of current row and update pattern based on level
        */
       while(lenh > 0)
       {
-         /* 
+         /*
           * k is now the new col index after permutation
           * the first element of the heap is the smallest
           */
@@ -3811,7 +3811,7 @@ hypre_ILUSetupILUKRASSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_dia
          /* reset iw for that, not using anymore */
          iw[k]=-1;
          hypre_swap2i(iL,iLev,ii-lenl,lenh);
-         /* 
+         /*
           * now the elimination on current row could start.
           * eliminate row k (new index) from current row
           */
@@ -3832,8 +3832,8 @@ hypre_ILUSetupILUKRASSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_dia
                /* not yet in */
                if(col < ii)
                {
-                  /* 
-                   * if we add to the left L, we need to maintian the 
+                  /*
+                   * if we add to the left L, we need to maintian the
                    *    heap structure
                    */
                   iL[lenh] = col;
@@ -3857,7 +3857,7 @@ hypre_ILUSetupILUKRASSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_dia
             }
          }/* end of loop j for level update */
       }/* end of while loop for iith row */
-       
+
       /* now update everything, indices, levels and so */
       L_diag_i[ii+1] = L_diag_i[ii] + lenl;
       if(lenl > 0)
@@ -3866,7 +3866,7 @@ hypre_ILUSetupILUKRASSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_dia
          while(ctrL + lenl > capacity_L)
          {
             capacity_L = capacity_L * EXPAND_FACT + 1;
-            temp_L_diag_j = hypre_TReAlloc(temp_L_diag_j, HYPRE_Int, capacity_L, HYPRE_MEMORY_SHARED);
+            temp_L_diag_j = hypre_TReAlloc(temp_L_diag_j, HYPRE_Int, capacity_L, HYPRE_MEMORY_DEVICE);
          }
          /* now copy L data, reverse order */
          for(j = 0 ; j < lenl ; j ++)
@@ -3883,22 +3883,22 @@ hypre_ILUSetupILUKRASSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_dia
          while(ctrU + k > capacity_U)
          {
             capacity_U = capacity_U * EXPAND_FACT + 1;
-            temp_U_diag_j = hypre_TReAlloc(temp_U_diag_j, HYPRE_Int, capacity_U, HYPRE_MEMORY_SHARED);
+            temp_U_diag_j = hypre_TReAlloc(temp_U_diag_j, HYPRE_Int, capacity_U, HYPRE_MEMORY_DEVICE);
             u_levels = hypre_TReAlloc(u_levels, HYPRE_Int, capacity_U, HYPRE_MEMORY_HOST);
          }
-         hypre_TMemcpy(temp_U_diag_j+ctrU,iL+ii,HYPRE_Int,k,HYPRE_MEMORY_SHARED,HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(temp_U_diag_j+ctrU,iL+ii,HYPRE_Int,k,HYPRE_MEMORY_DEVICE,HYPRE_MEMORY_HOST);
          hypre_TMemcpy(u_levels+ctrU,iLev+ii,HYPRE_Int,k,HYPRE_MEMORY_HOST,HYPRE_MEMORY_HOST);
          ctrU += k;
       }
-      
+
       /* reset iw */
       for(j = ii ; j < lenu ; j ++)
       {
          iw[iL[j]] = -1;
       }
-      
+
    }/* end of main loop ii from 0 to nLU-1 */
-   
+
    /*
     * Offd part
     */
@@ -3916,8 +3916,8 @@ hypre_ILUSetupILUKRASSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_dia
          col = rperm[A_diag_j[j]];
          if(col < ii)
          {
-            /* 
-             * this is an entry in L 
+            /*
+             * this is an entry in L
              * we maintain a heap structure for L part
              */
             iL[lenh] = col;
@@ -3934,7 +3934,7 @@ hypre_ILUSetupILUKRASSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_dia
             iw[col] = lenu++;
          }
       }/* end of j loop for adding pattern in original matrix */
-      
+
       /* put those already inside offd pattern in, and set their level to 0 */
       lena = A_offd_i[i+1];
       for( j = A_offd_i[i] ; j < lena ; j ++ )
@@ -3946,13 +3946,13 @@ hypre_ILUSetupILUKRASSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_dia
          iLev[lenu] = 0;
          iw[col] = lenu++;
       }
-      
+
       /*
        * search lower part of current row and update pattern based on level
        */
       while(lenh > 0)
       {
-         /* 
+         /*
           * k is now the new col index after permutation
           * the first element of the heap is the smallest
           */
@@ -3968,7 +3968,7 @@ hypre_ILUSetupILUKRASSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_dia
          /* reset iw for that, not using anymore */
          iw[k]=-1;
          hypre_swap2i(iL,iLev,ii-lenl,lenh);
-         /* 
+         /*
           * now the elimination on current row could start.
           * eliminate row k (new index) from current row
           */
@@ -3989,8 +3989,8 @@ hypre_ILUSetupILUKRASSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_dia
                /* not yet in */
                if(col < ii)
                {
-                  /* 
-                   * if we add to the left L, we need to maintian the 
+                  /*
+                   * if we add to the left L, we need to maintian the
                    *    heap structure
                    */
                   iL[lenh] = col;
@@ -4014,7 +4014,7 @@ hypre_ILUSetupILUKRASSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_dia
             }
          }/* end of loop j for level update */
       }/* end of while loop for iith row */
-       
+
       /* now update everything, indices, levels and so */
       L_diag_i[ii+1] = L_diag_i[ii] + lenl;
       if(lenl > 0)
@@ -4023,7 +4023,7 @@ hypre_ILUSetupILUKRASSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_dia
          while(ctrL + lenl > capacity_L)
          {
             capacity_L = capacity_L * EXPAND_FACT + 1;
-            temp_L_diag_j = hypre_TReAlloc(temp_L_diag_j, HYPRE_Int, capacity_L, HYPRE_MEMORY_SHARED);
+            temp_L_diag_j = hypre_TReAlloc(temp_L_diag_j, HYPRE_Int, capacity_L, HYPRE_MEMORY_DEVICE);
          }
          /* now copy L data, reverse order */
          for(j = 0 ; j < lenl ; j ++)
@@ -4040,22 +4040,22 @@ hypre_ILUSetupILUKRASSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_dia
          while(ctrU + k > capacity_U)
          {
             capacity_U = capacity_U * EXPAND_FACT + 1;
-            temp_U_diag_j = hypre_TReAlloc(temp_U_diag_j, HYPRE_Int, capacity_U, HYPRE_MEMORY_SHARED);
+            temp_U_diag_j = hypre_TReAlloc(temp_U_diag_j, HYPRE_Int, capacity_U, HYPRE_MEMORY_DEVICE);
             u_levels = hypre_TReAlloc(u_levels, HYPRE_Int, capacity_U, HYPRE_MEMORY_HOST);
          }
-         hypre_TMemcpy(temp_U_diag_j+ctrU,iL+ii,HYPRE_Int,k,HYPRE_MEMORY_SHARED,HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(temp_U_diag_j+ctrU,iL+ii,HYPRE_Int,k,HYPRE_MEMORY_DEVICE,HYPRE_MEMORY_HOST);
          hypre_TMemcpy(u_levels+ctrU,iLev+ii,HYPRE_Int,k,HYPRE_MEMORY_HOST,HYPRE_MEMORY_HOST);
          ctrU += k;
       }
-      
+
       /* reset iw */
       for(j = ii ; j < lenu ; j ++)
       {
          iw[iL[j]] = -1;
       }
-      
+
    }/* end of main loop ii from nLU to n */
-   
+
    /* external part matrix */
    for(ii = n ; ii < total_rows ; ii ++)
    {
@@ -4071,8 +4071,8 @@ hypre_ILUSetupILUKRASSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_dia
          col = E_j[j];
          if(col < ii)
          {
-            /* 
-             * this is an entry in L 
+            /*
+             * this is an entry in L
              * we maintain a heap structure for L part
              */
             iL[lenh] = col;
@@ -4089,13 +4089,13 @@ hypre_ILUSetupILUKRASSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_dia
             iw[col] = lenu++;
          }
       }/* end of j loop for adding pattern in original matrix */
-       
+
       /*
        * search lower part of current row and update pattern based on level
        */
       while(lenh > 0)
       {
-         /* 
+         /*
           * k is now the new col index after permutation
           * the first element of the heap is the smallest
           */
@@ -4111,7 +4111,7 @@ hypre_ILUSetupILUKRASSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_dia
          /* reset iw for that, not using anymore */
          iw[k]=-1;
          hypre_swap2i(iL,iLev,ii-lenl,lenh);
-         /* 
+         /*
           * now the elimination on current row could start.
           * eliminate row k (new index) from current row
           */
@@ -4132,8 +4132,8 @@ hypre_ILUSetupILUKRASSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_dia
                /* not yet in */
                if(col < ii)
                {
-                  /* 
-                   * if we add to the left L, we need to maintian the 
+                  /*
+                   * if we add to the left L, we need to maintian the
                    *    heap structure
                    */
                   iL[lenh] = col;
@@ -4157,7 +4157,7 @@ hypre_ILUSetupILUKRASSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_dia
             }
          }/* end of loop j for level update */
       }/* end of while loop for iith row */
-       
+
       /* now update everything, indices, levels and so */
       L_diag_i[ii+1] = L_diag_i[ii] + lenl;
       if(lenl > 0)
@@ -4166,7 +4166,7 @@ hypre_ILUSetupILUKRASSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_dia
          while(ctrL + lenl > capacity_L)
          {
             capacity_L = capacity_L * EXPAND_FACT + 1;
-            temp_L_diag_j = hypre_TReAlloc(temp_L_diag_j, HYPRE_Int, capacity_L, HYPRE_MEMORY_SHARED);
+            temp_L_diag_j = hypre_TReAlloc(temp_L_diag_j, HYPRE_Int, capacity_L, HYPRE_MEMORY_DEVICE);
          }
          /* now copy L data, reverse order */
          for(j = 0 ; j < lenl ; j ++)
@@ -4183,43 +4183,43 @@ hypre_ILUSetupILUKRASSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_dia
          while(ctrU + k > capacity_U)
          {
             capacity_U = capacity_U * EXPAND_FACT + 1;
-            temp_U_diag_j = hypre_TReAlloc(temp_U_diag_j, HYPRE_Int, capacity_U, HYPRE_MEMORY_SHARED);
+            temp_U_diag_j = hypre_TReAlloc(temp_U_diag_j, HYPRE_Int, capacity_U, HYPRE_MEMORY_DEVICE);
             u_levels = hypre_TReAlloc(u_levels, HYPRE_Int, capacity_U, HYPRE_MEMORY_HOST);
          }
-         hypre_TMemcpy(temp_U_diag_j+ctrU,iL+ii,HYPRE_Int,k,HYPRE_MEMORY_SHARED,HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(temp_U_diag_j+ctrU,iL+ii,HYPRE_Int,k,HYPRE_MEMORY_DEVICE,HYPRE_MEMORY_HOST);
          hypre_TMemcpy(u_levels+ctrU,iLev+ii,HYPRE_Int,k,HYPRE_MEMORY_HOST,HYPRE_MEMORY_HOST);
          ctrU += k;
       }
-      
+
       /* reset iw */
       for(j = ii ; j < lenu ; j ++)
       {
          iw[iL[j]] = -1;
       }
-      
+
    }/* end of main loop ii from n to total_rows */
-   
+
    /*
     * 3: Finishing up and free memory
     */
    hypre_TFree(u_levels,HYPRE_MEMORY_HOST);
-   
+
    *L_diag_j = temp_L_diag_j;
    *U_diag_j = temp_U_diag_j;
-   
+
    return hypre_error_flag;
 }
 
 /* ILU(k) for RAS
  * A: input matrix
  * lfil: level of fill-in, the k in ILU(k)
- * perm: permutation array indicating ordering of factorization. Perm could come from a 
+ * perm: permutation array indicating ordering of factorization. Perm could come from a
  * CF_marker: array or a reordering routine.
  * nLU: size of computed LDU factorization.
  * Lptr, Dptr, Uptr: L, D, U factors.
  */
 HYPRE_Int
-hypre_ILUSetupILUKRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HYPRE_Int nLU, 
+hypre_ILUSetupILUKRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HYPRE_Int nLU,
       hypre_ParCSRMatrix **Lptr, HYPRE_Real** Dptr, hypre_ParCSRMatrix **Uptr)
 {
    /*
@@ -4231,8 +4231,8 @@ hypre_ILUSetupILUKRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HY
    * i = the real col number in diag inside the outer loop
    * iw =  working array store the reverse of active col number
    * iL = working array store the active col number
-   */ 
-   
+   */
+
    /* call ILU0 if lfil is 0 */
    if(lfil == 0)
    {
@@ -4241,7 +4241,7 @@ hypre_ILUSetupILUKRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HY
    HYPRE_Int               i, ii, j, k, k1, k2, kl, ku, jpiv, col, icol;
    HYPRE_Int               *iw;
    MPI_Comm                comm           = hypre_ParCSRMatrixComm(A);
-   HYPRE_Int		   num_procs;
+   HYPRE_Int               num_procs;
 
    /* data objects for A */
    hypre_CSRMatrix         *A_diag        = hypre_ParCSRMatrixDiag(A);
@@ -4252,7 +4252,7 @@ hypre_ILUSetupILUKRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HY
    HYPRE_Real              *A_offd_data   = hypre_CSRMatrixData(A_offd);
    HYPRE_Int               *A_offd_i      = hypre_CSRMatrixI(A_offd);
    HYPRE_Int               *A_offd_j      = hypre_CSRMatrixJ(A_offd);
-   
+
    /* data objects for L, D, U */
    hypre_ParCSRMatrix      *matL;
    hypre_ParCSRMatrix      *matU;
@@ -4265,7 +4265,7 @@ hypre_ILUSetupILUKRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HY
    HYPRE_Real              *U_diag_data   = NULL;
    HYPRE_Int               *U_diag_i;
    HYPRE_Int               *U_diag_j      = NULL;
-   
+
    /* size of problem and external matrix */
    HYPRE_Int               n              = hypre_CSRMatrixNumRows(A_diag);
 //   HYPRE_Int               m              = n - nLU;
@@ -4274,23 +4274,23 @@ hypre_ILUSetupILUKRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HY
    HYPRE_BigInt            global_num_rows;
    HYPRE_BigInt               *col_starts;
    HYPRE_Real              local_nnz, total_nnz;
-   
+
    /* data objects for E, external matrix */
    HYPRE_Int               *E_i;
    HYPRE_Int               *E_j;
    HYPRE_Real              *E_data;
-   
+
    /* communication */
    hypre_ParCSRCommPkg     *comm_pkg;
    hypre_MPI_Comm_size(comm, &num_procs);
 //   hypre_ParCSRCommHandle  *comm_handle;
 //   HYPRE_Int               *send_buf      = NULL;
-   
+
    /* reverse permutation array */
    HYPRE_Int               *rperm;
    /* temp array for old permutation */
    HYPRE_Int               *perm_old;
-   
+
    /* start setup */
    /* check input and get problem size */
    n =  hypre_CSRMatrixNumRows(A_diag);
@@ -4300,10 +4300,10 @@ hypre_ILUSetupILUKRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HY
    }
 
    /* Init I array anyway. S's might be freed later */
-   D_data   = hypre_CTAlloc(HYPRE_Real, total_rows, HYPRE_MEMORY_SHARED);
-   L_diag_i = hypre_CTAlloc(HYPRE_Int, (total_rows+1), HYPRE_MEMORY_SHARED);
-   U_diag_i = hypre_CTAlloc(HYPRE_Int, (total_rows+1), HYPRE_MEMORY_SHARED);
-   
+   D_data   = hypre_CTAlloc(HYPRE_Real, total_rows, HYPRE_MEMORY_DEVICE);
+   L_diag_i = hypre_CTAlloc(HYPRE_Int, (total_rows+1), HYPRE_MEMORY_DEVICE);
+   U_diag_i = hypre_CTAlloc(HYPRE_Int, (total_rows+1), HYPRE_MEMORY_DEVICE);
+
    /* set Comm_Pkg if not yet built */
    comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    if(!comm_pkg)
@@ -4311,11 +4311,11 @@ hypre_ILUSetupILUKRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HY
       hypre_MatvecCommPkgCreate(A);
       comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    }
-   
+
    /*
     * 2: Symbolic factorization
     * setup iw and rperm first
-    */             
+    */
    /* allocate work arrays */
    iw          = hypre_CTAlloc(HYPRE_Int, 5*total_rows, HYPRE_MEMORY_HOST);
    rperm       = iw + 3*total_rows;
@@ -4327,43 +4327,43 @@ hypre_ILUSetupILUKRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HY
     */
    for(i=0; i<n; i++)
    {
-     perm[i] = perm_old[i];   
+     perm[i] = perm_old[i];
    }
    for(i=n; i<total_rows; i++)
    {
-     perm[i] = i;   
+     perm[i] = i;
    }
    for(i=0; i<total_rows; i++)
    {
-     rperm[perm[i]] = i;   
+     rperm[perm[i]] = i;
    }
-   
+
    /* get external rows */
    hypre_ILUBuildRASExternalMatrix(A,rperm,&E_i,&E_j,&E_data);
    /* do symbolic factorization */
-   hypre_ILUSetupILUKRASSymbolic(n, A_diag_i, A_diag_j, A_offd_i, A_offd_j, E_i, E_j, ext, lfil, perm, rperm, iw, 
+   hypre_ILUSetupILUKRASSymbolic(n, A_diag_i, A_diag_j, A_offd_i, A_offd_j, E_i, E_j, ext, lfil, perm, rperm, iw,
       nLU, L_diag_i, U_diag_i, &L_diag_j, &U_diag_j);
-   
+
    /*
     * after this, we have our I,J for L, U and S ready, and L sorted
     * iw are still -1 after symbolic factorization
     * now setup helper array here
     */
    if(L_diag_i[total_rows])
-   { 
-      L_diag_data = hypre_CTAlloc(HYPRE_Real, L_diag_i[total_rows], HYPRE_MEMORY_SHARED);
+   {
+      L_diag_data = hypre_CTAlloc(HYPRE_Real, L_diag_i[total_rows], HYPRE_MEMORY_DEVICE);
    }
    if(U_diag_i[total_rows])
    {
-      U_diag_data = hypre_CTAlloc(HYPRE_Real, U_diag_i[total_rows], HYPRE_MEMORY_SHARED);
+      U_diag_data = hypre_CTAlloc(HYPRE_Real, U_diag_i[total_rows], HYPRE_MEMORY_DEVICE);
    }
-   
+
    /*
     * 3: Begin real factorization
-    * we already have L and U structure ready, so no extra working array needed 
-    */  
+    * we already have L and U structure ready, so no extra working array needed
+    */
    /* first loop for upper part */
-   for( ii = 0; ii < nLU; ii++ ) 
+   for( ii = 0; ii < nLU; ii++ )
    {
       // get row i
       i = perm[ii];
@@ -4410,7 +4410,7 @@ hypre_ILUSetupILUKRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HY
          jpiv = L_diag_j[j];
          L_diag_data[j] *= D_data[jpiv];
          ku = U_diag_i[jpiv+1];
-         
+
          for(k = U_diag_i[jpiv] ; k < ku ; k ++)
          {
             col = U_diag_j[k];
@@ -4457,11 +4457,11 @@ hypre_ILUSetupILUKRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HY
          D_data[ii] = 1e-06;
       }
       D_data[ii] = 1./ D_data[ii];
-      
+
    }/* end of loop for upper part */
-   
+
    /* first loop for upper part */
-   for( ii = nLU; ii < n; ii++ ) 
+   for( ii = nLU; ii < n; ii++ )
    {
       // get row i
       i = perm[ii];
@@ -4518,7 +4518,7 @@ hypre_ILUSetupILUKRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HY
          jpiv = L_diag_j[j];
          L_diag_data[j] *= D_data[jpiv];
          ku = U_diag_i[jpiv+1];
-         
+
          for(k = U_diag_i[jpiv] ; k < ku ; k ++)
          {
             col = U_diag_j[k];
@@ -4565,11 +4565,11 @@ hypre_ILUSetupILUKRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HY
          D_data[ii] = 1e-06;
       }
       D_data[ii] = 1./ D_data[ii];
-      
+
    }/* end of loop for lower part */
-   
+
    /* last loop through external */
-   for( ii = n; ii < total_rows; ii++ ) 
+   for( ii = n; ii < total_rows; ii++ )
    {
       // get row i
       i = ii - n;
@@ -4616,7 +4616,7 @@ hypre_ILUSetupILUKRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HY
          jpiv = L_diag_j[j];
          L_diag_data[j] *= D_data[jpiv];
          ku = U_diag_i[jpiv+1];
-         
+
          for(k = U_diag_i[jpiv] ; k < ku ; k ++)
          {
             col = U_diag_j[k];
@@ -4663,13 +4663,13 @@ hypre_ILUSetupILUKRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HY
          D_data[ii] = 1e-06;
       }
       D_data[ii] = 1./ D_data[ii];
-      
+
    }/* end of loop for external loop */
-   
+
    /*
     * 4: Finishing up and free
     */
-   HYPRE_BigInt big_total_rows = (HYPRE_BigInt)total_rows;   
+   HYPRE_BigInt big_total_rows = (HYPRE_BigInt)total_rows;
    hypre_MPI_Allreduce( &big_total_rows, &global_num_rows, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
    /* need to get new column start */
 #ifdef HYPRE_NO_GLOBAL_PARTITION
@@ -4684,13 +4684,13 @@ hypre_ILUSetupILUKRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HY
    col_starts = hypre_CTAlloc(HYPRE_BigInt,num_procs+1,HYPRE_MEMORY_HOST);
 
    hypre_MPI_Allgather(&big_total_rows,1,HYPRE_MPI_BIG_INT,&col_starts[1],
-		1,HYPRE_MPI_BIG_INT,comm);
+         1,HYPRE_MPI_BIG_INT,comm);
 
    for (i=2; i < num_procs+1; i++)
       col_starts[i] += col_starts[i-1];
 
-#endif   
-   /* Assemble LDU matrices */    
+#endif
+   /* Assemble LDU matrices */
    matL = hypre_ParCSRMatrixCreate( comm,
                        global_num_rows,
                        global_num_rows,
@@ -4707,19 +4707,19 @@ hypre_ILUSetupILUKRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HY
    hypre_CSRMatrixI(L_diag) = L_diag_i;
    if (L_diag_i[total_rows]>0)
    {
-      hypre_CSRMatrixData(L_diag) = L_diag_data; 
-      hypre_CSRMatrixJ(L_diag) = L_diag_j; 
+      hypre_CSRMatrixData(L_diag) = L_diag_data;
+      hypre_CSRMatrixJ(L_diag) = L_diag_j;
    }
    else
    {
       /* we allocated some initial length, so free them */
-      hypre_TFree(L_diag_j, HYPRE_MEMORY_SHARED);
+      hypre_TFree(L_diag_j, HYPRE_MEMORY_DEVICE);
    }
    /* store (global) total number of nonzeros */
    local_nnz = (HYPRE_Real) (L_diag_i[total_rows]);
    hypre_MPI_Allreduce(&local_nnz, &total_nnz, 1, HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
    hypre_ParCSRMatrixDNumNonzeros(matL) = total_nnz;
- 
+
    matU = hypre_ParCSRMatrixCreate( comm,
                        global_num_rows,
                        global_num_rows,
@@ -4734,25 +4734,25 @@ hypre_ILUSetupILUKRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HY
    hypre_ParCSRMatrixSetRowStartsOwner(matU,0);
 
    U_diag = hypre_ParCSRMatrixDiag(matU);
-   hypre_CSRMatrixI(U_diag) = U_diag_i; 
+   hypre_CSRMatrixI(U_diag) = U_diag_i;
    if (U_diag_i[n]>0)
    {
-      hypre_CSRMatrixData(U_diag) = U_diag_data; 
-      hypre_CSRMatrixJ(U_diag) = U_diag_j; 
+      hypre_CSRMatrixData(U_diag) = U_diag_data;
+      hypre_CSRMatrixJ(U_diag) = U_diag_j;
    }
    else
    {
       /* we allocated some initial length, so free them */
-      hypre_TFree(U_diag_j, HYPRE_MEMORY_SHARED);
+      hypre_TFree(U_diag_j, HYPRE_MEMORY_DEVICE);
    }
    /* store (global) total number of nonzeros */
    local_nnz = (HYPRE_Real) (U_diag_i[total_rows]);
    hypre_MPI_Allreduce(&local_nnz, &total_nnz, 1, HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
-   hypre_ParCSRMatrixDNumNonzeros(matU) = total_nnz;  
-   
+   hypre_ParCSRMatrixDNumNonzeros(matU) = total_nnz;
+
    /* free */
    hypre_TFree(iw,HYPRE_MEMORY_HOST);
-   
+
    /* free external data */
    if(E_i)
    {
@@ -4763,12 +4763,12 @@ hypre_ILUSetupILUKRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HY
       hypre_TFree(E_j, HYPRE_MEMORY_HOST);
       hypre_TFree(E_data, HYPRE_MEMORY_HOST);
    }
-   
+
    /* set matrix pointers */
    *Lptr = matL;
    *Dptr = D_data;
    *Uptr = matU;
-   
+
    return hypre_error_flag;
 }
 
@@ -4779,18 +4779,18 @@ hypre_ILUSetupILUKRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HY
  *    tol[0]: matrix B
  *    tol[1]: matrix E and F
  *    tol[2]: matrix S
- * perm: permutation array indicating ordering of factorization. Perm could come from a 
+ * perm: permutation array indicating ordering of factorization. Perm could come from a
  * CF_marker: array or a reordering routine.
  * nLU: size of computed LDU factorization. If nLU < n, Schur compelemnt will be formed
  * Lptr, Dptr, Uptr: L, D, U factors.
  * Sptr: Schur complement
- * 
- * Keep the largest lfil entries that is greater than some tol relative 
+ *
+ * Keep the largest lfil entries that is greater than some tol relative
  *    to the input tol and the norm of that row in both L and U
  */
 HYPRE_Int
 hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
-      HYPRE_Int *perm, HYPRE_Int nLU, hypre_ParCSRMatrix **Lptr, 
+      HYPRE_Int *perm, HYPRE_Int nLU, hypre_ParCSRMatrix **Lptr,
       HYPRE_Real** Dptr, hypre_ParCSRMatrix **Uptr)
 {
    /*
@@ -4808,7 +4808,7 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
    HYPRE_Real               inorm, itolb, itolef, dpiv, lxu;
    HYPRE_Int                *iw,*iL;
    HYPRE_Real               *w;
-   
+
    /* memory management */
    HYPRE_Int                ctrL;
    HYPRE_Int                ctrU;
@@ -4816,16 +4816,16 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
    HYPRE_Int                capacity_L;
    HYPRE_Int                capacity_U;
    HYPRE_Int                nnz_A;
-      
+
    /* communication stuffs for S */
    MPI_Comm                 comm          = hypre_ParCSRMatrixComm(A);
-   HYPRE_Int		    num_procs;
+   HYPRE_Int                num_procs;
    hypre_ParCSRCommPkg      *comm_pkg;
 //   hypre_ParCSRCommHandle   *comm_handle;
    HYPRE_BigInt                *col_starts;
 //   HYPRE_Int                num_sends;
 //   HYPRE_Int                begin, end;
-   
+
    /* data objects for A */
    hypre_CSRMatrix          *A_diag       = hypre_ParCSRMatrixDiag(A);
    hypre_CSRMatrix          *A_offd       = hypre_ParCSRMatrixOffd(A);
@@ -4835,7 +4835,7 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
    HYPRE_Int                *A_offd_i     = hypre_CSRMatrixI(A_offd);
    HYPRE_Int                *A_offd_j     = hypre_CSRMatrixJ(A_offd);
    HYPRE_Real               *A_offd_data  = hypre_CSRMatrixData(A_offd);
-   
+
    /* data objects for L, D, U */
    hypre_ParCSRMatrix       *matL;
    hypre_ParCSRMatrix       *matU;
@@ -4848,24 +4848,24 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
    HYPRE_Real               *U_diag_data  = NULL;
    HYPRE_Int                *U_diag_i;
    HYPRE_Int                *U_diag_j     = NULL;
-   
+
    /* size of problem and external matrix */
    HYPRE_Int                n             = hypre_CSRMatrixNumRows(A_diag);
 //   HYPRE_Int                m             = n - nLU;
    HYPRE_Int                ext           = hypre_CSRMatrixNumCols(A_offd);
    HYPRE_Int                total_rows    = n + ext;
    HYPRE_BigInt              global_num_rows;
-   
+
    /* data objects for E, external matrix */
    HYPRE_Int                *E_i;
    HYPRE_Int                *E_j;
    HYPRE_Real               *E_data;
-   
+
    /* reverse permutation */
    HYPRE_Int                *rperm;
    /* old permutation */
    HYPRE_Int                *perm_old;
-   
+
    /* start setup
     * check input first
     */
@@ -4874,7 +4874,7 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
    {
       hypre_error_w_msg(HYPRE_ERROR_ARG,"WARNING: nLU out of range.\n");
    }
-   
+
    /* start set up
     * setup communication stuffs first
     */
@@ -4886,7 +4886,7 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
       hypre_MatvecCommPkgCreate(A);
       comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    }
-   
+
    /* setup initial memory */
    nnz_A = A_diag_i[nLU];
    if(n > 0)
@@ -4895,18 +4895,18 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
    }
    capacity_L = initial_alloc;
    capacity_U = initial_alloc;
-   
-   D_data = hypre_CTAlloc(HYPRE_Real, total_rows, HYPRE_MEMORY_SHARED);
-   L_diag_i = hypre_CTAlloc(HYPRE_Int, (total_rows+1), HYPRE_MEMORY_SHARED);
-   U_diag_i = hypre_CTAlloc(HYPRE_Int, (total_rows+1), HYPRE_MEMORY_SHARED);
-   
-   L_diag_j = hypre_CTAlloc(HYPRE_Int, capacity_L, HYPRE_MEMORY_SHARED);
-   U_diag_j = hypre_CTAlloc(HYPRE_Int, capacity_U, HYPRE_MEMORY_SHARED);
-   L_diag_data = hypre_CTAlloc(HYPRE_Real, capacity_L, HYPRE_MEMORY_SHARED);
-   U_diag_data = hypre_CTAlloc(HYPRE_Real, capacity_U, HYPRE_MEMORY_SHARED);
-   
+
+   D_data = hypre_CTAlloc(HYPRE_Real, total_rows, HYPRE_MEMORY_DEVICE);
+   L_diag_i = hypre_CTAlloc(HYPRE_Int, (total_rows+1), HYPRE_MEMORY_DEVICE);
+   U_diag_i = hypre_CTAlloc(HYPRE_Int, (total_rows+1), HYPRE_MEMORY_DEVICE);
+
+   L_diag_j = hypre_CTAlloc(HYPRE_Int, capacity_L, HYPRE_MEMORY_DEVICE);
+   U_diag_j = hypre_CTAlloc(HYPRE_Int, capacity_U, HYPRE_MEMORY_DEVICE);
+   L_diag_data = hypre_CTAlloc(HYPRE_Real, capacity_L, HYPRE_MEMORY_DEVICE);
+   U_diag_data = hypre_CTAlloc(HYPRE_Real, capacity_U, HYPRE_MEMORY_DEVICE);
+
    ctrL = ctrU = 0;
-   
+
    /* setting up working array */
    iw = hypre_CTAlloc(HYPRE_Int,4*total_rows,HYPRE_MEMORY_HOST);
    iL = iw + total_rows;
@@ -4919,7 +4919,7 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
    /* get reverse permutation (rperm).
     * rperm holds the reordered indexes.
     * rperm[old] -> new
-    * perm[new]  -> old 
+    * perm[new]  -> old
     */
    rperm = iw + 2*total_rows;
    perm_old = perm;
@@ -4934,18 +4934,18 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
    }
    for(i = 0 ; i < total_rows ; i ++)
    {
-     rperm[perm[i]] = i;   
+     rperm[perm[i]] = i;
    }
    /* get external matrix */
    hypre_ILUBuildRASExternalMatrix(A,rperm,&E_i,&E_j,&E_data);
-   
+
    /*
     * 2: Main loop of elimination
     * maintain two heaps
     * |----->*********<-----|-----*********|
     * |col heap***value heap|value in U****|
     */
-   
+
    /* main outer loop for upper part */
    for(ii = 0 ; ii < nLU ; ii ++)
    {
@@ -4968,7 +4968,7 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
       /* set the scaled tol for that row */
       itolb = tol[0] * inorm;
       itolef = tol[1] * inorm;
-      
+
       /* reset displacement */
       lenhll = lenhlr = lenu = 0;
       w[ii] = 0.0;
@@ -5000,8 +5000,8 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
             iw[col] = jpos;
          }
       }
-      
-      /* 
+
+      /*
        * main elimination
        * need to maintain 2 heaps for L, one heap for col and one heaps for value
        * maintian an array for U, and do qsplit with quick sort after that
@@ -5009,7 +5009,7 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
        */
       while(lenhll > 0)
       {
-        
+
          /* get the next row from top of the heap */
          jrow = iL[0];
          dpiv = w[0] * D_data[jrow];
@@ -5017,8 +5017,8 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
          /* now remove it from the top of the heap */
          hypre_ILUMinHeapRemoveIRIi(iL,w,iw,lenhll);
          lenhll--;
-         /* 
-          * reset the drop part to -1 
+         /*
+          * reset the drop part to -1
           * we don't need this iw anymore
           */
          iw[jrow] = -1;
@@ -5072,24 +5072,24 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
                }
             }
             else
-            {   
+            {
                w[icol] += lxu;
             }
          }
       }/* while loop for the elimination of current row */
-      
+
       if(fabs(w[ii]) < MAT_TOL)
       {
          w[ii]=1e-06;
       }
       D_data[ii] = 1./w[ii];
       iw[ii] = -1;
-      
-      /* 
+
+      /*
        * now pick up the largest lfil from L
        * L part is guarantee to be larger than itol
        */
-      
+
       lenl = lenhlr < lfil ? lenhlr : lfil;
       L_diag_i[ii+1] = L_diag_i[ii] + lenl;
       if(lenl > 0)
@@ -5098,8 +5098,8 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
          while(ctrL + lenl > capacity_L)
          {
             capacity_L = capacity_L * EXPAND_FACT + 1;
-            L_diag_j = hypre_TReAlloc(L_diag_j, HYPRE_Int, capacity_L, HYPRE_MEMORY_SHARED);
-            L_diag_data = hypre_TReAlloc(L_diag_data, HYPRE_Real, capacity_L, HYPRE_MEMORY_SHARED);
+            L_diag_j = hypre_TReAlloc(L_diag_j, HYPRE_Int, capacity_L, HYPRE_MEMORY_DEVICE);
+            L_diag_data = hypre_TReAlloc(L_diag_data, HYPRE_Real, capacity_L, HYPRE_MEMORY_DEVICE);
          }
          ctrL += lenl;
          /* copy large data in */
@@ -5112,7 +5112,7 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
          }
       }
       /*
-       * now reset working array 
+       * now reset working array
        * L part already reset when move out of heap, only U part
        */
       ku = lenu+ii;
@@ -5120,7 +5120,7 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
       {
          iw[iL[j]] = -1;
       }
-      
+
       if(lenu < lfil)
       {
          /* we simply keep all of the data, no need to sort */
@@ -5133,7 +5133,7 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
          /* quick split, only sort the first small part of the array */
          hypre_ILUMaxQSplitRabsI(w,iL,ii+1,ii+lenhu,ii+lenu);
       }
-      
+
       U_diag_i[ii+1] = U_diag_i[ii] + lenhu;
       if(lenhu > 0)
       {
@@ -5141,8 +5141,8 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
          while(ctrU + lenhu > capacity_U)
          {
             capacity_U = capacity_U * EXPAND_FACT + 1;
-            U_diag_j = hypre_TReAlloc(U_diag_j, HYPRE_Int, capacity_U, HYPRE_MEMORY_SHARED);
-            U_diag_data = hypre_TReAlloc(U_diag_data, HYPRE_Real, capacity_U, HYPRE_MEMORY_SHARED);
+            U_diag_j = hypre_TReAlloc(U_diag_j, HYPRE_Int, capacity_U, HYPRE_MEMORY_DEVICE);
+            U_diag_data = hypre_TReAlloc(U_diag_data, HYPRE_Real, capacity_U, HYPRE_MEMORY_DEVICE);
          }
          ctrU += lenhu;
          /* copy large data in */
@@ -5154,8 +5154,8 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
          }
       }
    }/* end of ii loop from 0 to nLU-1 */
-   
-   
+
+
    /* second outer loop for lower part */
    for(ii = nLU ; ii < n ; ii ++)
    {
@@ -5184,7 +5184,7 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
       /* set the scaled tol for that row */
       itolb = tol[0] * inorm;
       itolef = tol[1] * inorm;
-      
+
       /* reset displacement */
       lenhll = lenhlr = lenu = 0;
       w[ii] = 0.0;
@@ -5228,8 +5228,8 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
          w[jpos] = A_offd_data[j];
          iw[col] = jpos;
       }
-      
-      /* 
+
+      /*
        * main elimination
        * need to maintain 2 heaps for L, one heap for col and one heaps for value
        * maintian an array for U, and do qsplit with quick sort after that
@@ -5237,7 +5237,7 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
        */
       while(lenhll > 0)
       {
-        
+
          /* get the next row from top of the heap */
          jrow = iL[0];
          dpiv = w[0] * D_data[jrow];
@@ -5245,8 +5245,8 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
          /* now remove it from the top of the heap */
          hypre_ILUMinHeapRemoveIRIi(iL,w,iw,lenhll);
          lenhll--;
-         /* 
-          * reset the drop part to -1 
+         /*
+          * reset the drop part to -1
           * we don't need this iw anymore
           */
          iw[jrow] = -1;
@@ -5300,24 +5300,24 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
                }
             }
             else
-            {   
+            {
                w[icol] += lxu;
             }
          }
       }/* while loop for the elimination of current row */
-      
+
       if(fabs(w[ii]) < MAT_TOL)
       {
          w[ii]=1e-06;
       }
       D_data[ii] = 1./w[ii];
       iw[ii] = -1;
-      
-      /* 
+
+      /*
        * now pick up the largest lfil from L
        * L part is guarantee to be larger than itol
        */
-      
+
       lenl = lenhlr < lfil ? lenhlr : lfil;
       L_diag_i[ii+1] = L_diag_i[ii] + lenl;
       if(lenl > 0)
@@ -5326,8 +5326,8 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
          while(ctrL + lenl > capacity_L)
          {
             capacity_L = capacity_L * EXPAND_FACT + 1;
-            L_diag_j = hypre_TReAlloc(L_diag_j, HYPRE_Int, capacity_L, HYPRE_MEMORY_SHARED);
-            L_diag_data = hypre_TReAlloc(L_diag_data, HYPRE_Real, capacity_L, HYPRE_MEMORY_SHARED);
+            L_diag_j = hypre_TReAlloc(L_diag_j, HYPRE_Int, capacity_L, HYPRE_MEMORY_DEVICE);
+            L_diag_data = hypre_TReAlloc(L_diag_data, HYPRE_Real, capacity_L, HYPRE_MEMORY_DEVICE);
          }
          ctrL += lenl;
          /* copy large data in */
@@ -5340,7 +5340,7 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
          }
       }
       /*
-       * now reset working array 
+       * now reset working array
        * L part already reset when move out of heap, only U part
        */
       ku = lenu+ii;
@@ -5348,7 +5348,7 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
       {
          iw[iL[j]] = -1;
       }
-      
+
       if(lenu < lfil)
       {
          /* we simply keep all of the data, no need to sort */
@@ -5361,7 +5361,7 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
          /* quick split, only sort the first small part of the array */
          hypre_ILUMaxQSplitRabsI(w,iL,ii+1,ii+lenhu,ii+lenu);
       }
-      
+
       U_diag_i[ii+1] = U_diag_i[ii] + lenhu;
       if(lenhu > 0)
       {
@@ -5369,8 +5369,8 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
          while(ctrU + lenhu > capacity_U)
          {
             capacity_U = capacity_U * EXPAND_FACT + 1;
-            U_diag_j = hypre_TReAlloc(U_diag_j, HYPRE_Int, capacity_U, HYPRE_MEMORY_SHARED);
-            U_diag_data = hypre_TReAlloc(U_diag_data, HYPRE_Real, capacity_U, HYPRE_MEMORY_SHARED);
+            U_diag_j = hypre_TReAlloc(U_diag_j, HYPRE_Int, capacity_U, HYPRE_MEMORY_DEVICE);
+            U_diag_data = hypre_TReAlloc(U_diag_data, HYPRE_Real, capacity_U, HYPRE_MEMORY_DEVICE);
          }
          ctrU += lenhu;
          /* copy large data in */
@@ -5382,8 +5382,8 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
          }
       }
    }/* end of ii loop from nLU to n */
-   
-   
+
+
    /* main outer loop for upper part */
    for(ii = n ; ii < total_rows ; ii ++)
    {
@@ -5406,7 +5406,7 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
       /* set the scaled tol for that row */
       itolb = tol[0] * inorm;
       itolef = tol[1] * inorm;
-      
+
       /* reset displacement */
       lenhll = lenhlr = lenu = 0;
       w[ii] = 0.0;
@@ -5438,8 +5438,8 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
             iw[col] = jpos;
          }
       }
-      
-      /* 
+
+      /*
        * main elimination
        * need to maintain 2 heaps for L, one heap for col and one heaps for value
        * maintian an array for U, and do qsplit with quick sort after that
@@ -5447,7 +5447,7 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
        */
       while(lenhll > 0)
       {
-        
+
          /* get the next row from top of the heap */
          jrow = iL[0];
          dpiv = w[0] * D_data[jrow];
@@ -5455,8 +5455,8 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
          /* now remove it from the top of the heap */
          hypre_ILUMinHeapRemoveIRIi(iL,w,iw,lenhll);
          lenhll--;
-         /* 
-          * reset the drop part to -1 
+         /*
+          * reset the drop part to -1
           * we don't need this iw anymore
           */
          iw[jrow] = -1;
@@ -5510,24 +5510,24 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
                }
             }
             else
-            {   
+            {
                w[icol] += lxu;
             }
          }
       }/* while loop for the elimination of current row */
-      
+
       if(fabs(w[ii]) < MAT_TOL)
       {
          w[ii]=1e-06;
       }
       D_data[ii] = 1./w[ii];
       iw[ii] = -1;
-      
-      /* 
+
+      /*
        * now pick up the largest lfil from L
        * L part is guarantee to be larger than itol
        */
-      
+
       lenl = lenhlr < lfil ? lenhlr : lfil;
       L_diag_i[ii+1] = L_diag_i[ii] + lenl;
       if(lenl > 0)
@@ -5536,8 +5536,8 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
          while(ctrL + lenl > capacity_L)
          {
             capacity_L = capacity_L * EXPAND_FACT + 1;
-            L_diag_j = hypre_TReAlloc(L_diag_j, HYPRE_Int, capacity_L, HYPRE_MEMORY_SHARED);
-            L_diag_data = hypre_TReAlloc(L_diag_data, HYPRE_Real, capacity_L, HYPRE_MEMORY_SHARED);
+            L_diag_j = hypre_TReAlloc(L_diag_j, HYPRE_Int, capacity_L, HYPRE_MEMORY_DEVICE);
+            L_diag_data = hypre_TReAlloc(L_diag_data, HYPRE_Real, capacity_L, HYPRE_MEMORY_DEVICE);
          }
          ctrL += lenl;
          /* copy large data in */
@@ -5550,7 +5550,7 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
          }
       }
       /*
-       * now reset working array 
+       * now reset working array
        * L part already reset when move out of heap, only U part
        */
       ku = lenu+ii;
@@ -5558,7 +5558,7 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
       {
          iw[iL[j]] = -1;
       }
-      
+
       if(lenu < lfil)
       {
          /* we simply keep all of the data, no need to sort */
@@ -5571,7 +5571,7 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
          /* quick split, only sort the first small part of the array */
          hypre_ILUMaxQSplitRabsI(w,iL,ii+1,ii+lenhu,ii+lenu);
       }
-      
+
       U_diag_i[ii+1] = U_diag_i[ii] + lenhu;
       if(lenhu > 0)
       {
@@ -5579,8 +5579,8 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
          while(ctrU + lenhu > capacity_U)
          {
             capacity_U = capacity_U * EXPAND_FACT + 1;
-            U_diag_j = hypre_TReAlloc(U_diag_j, HYPRE_Int, capacity_U, HYPRE_MEMORY_SHARED);
-            U_diag_data = hypre_TReAlloc(U_diag_data, HYPRE_Real, capacity_U, HYPRE_MEMORY_SHARED);
+            U_diag_j = hypre_TReAlloc(U_diag_j, HYPRE_Int, capacity_U, HYPRE_MEMORY_DEVICE);
+            U_diag_data = hypre_TReAlloc(U_diag_data, HYPRE_Real, capacity_U, HYPRE_MEMORY_DEVICE);
          }
          ctrU += lenhu;
          /* copy large data in */
@@ -5592,11 +5592,11 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
          }
       }
    }/* end of ii loop from nLU to total_rows */
-   
+
    /*
     * 3: Finishing up and free
     */
-   HYPRE_BigInt big_total_rows = (HYPRE_BigInt)total_rows;   
+   HYPRE_BigInt big_total_rows = (HYPRE_BigInt)total_rows;
    hypre_MPI_Allreduce( &big_total_rows, &global_num_rows, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
    /* need to get new column start */
 #ifdef HYPRE_NO_GLOBAL_PARTITION
@@ -5611,12 +5611,12 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
    col_starts = hypre_CTAlloc(HYPRE_BigInt,num_procs+1,HYPRE_MEMORY_HOST);
 
    hypre_MPI_Allgather(&big_total_rows,1,HYPRE_MPI_BIG_INT,&col_starts[1],
-		1,HYPRE_MPI_BIG_INT,comm);
+         1,HYPRE_MPI_BIG_INT,comm);
 
    for (i=2; i < num_procs+1; i++)
       col_starts[i] += col_starts[i-1];
-#endif 
-   
+#endif
+
    /* create parcsr matrix */
    matL = hypre_ParCSRMatrixCreate( comm,
                        global_num_rows,
@@ -5634,20 +5634,20 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
    hypre_CSRMatrixI(L_diag) = L_diag_i;
    if (L_diag_i[total_rows] > 0)
    {
-      hypre_CSRMatrixData(L_diag) = L_diag_data; 
-      hypre_CSRMatrixJ(L_diag) = L_diag_j; 
+      hypre_CSRMatrixData(L_diag) = L_diag_data;
+      hypre_CSRMatrixJ(L_diag) = L_diag_j;
    }
    else
    {
       /* we initialized some anyway, so remove if unused */
-      hypre_TFree(L_diag_j,HYPRE_MEMORY_SHARED);
-      hypre_TFree(L_diag_data,HYPRE_MEMORY_SHARED);
+      hypre_TFree(L_diag_j,HYPRE_MEMORY_DEVICE);
+      hypre_TFree(L_diag_data,HYPRE_MEMORY_DEVICE);
    }
    /* store (global) total number of nonzeros */
    local_nnz = (HYPRE_Real) (L_diag_i[total_rows]);
    hypre_MPI_Allreduce(&local_nnz, &total_nnz, 1, HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
    hypre_ParCSRMatrixDNumNonzeros(matL) = total_nnz;
- 
+
    matU = hypre_ParCSRMatrixCreate( comm,
                        global_num_rows,
                        global_num_rows,
@@ -5662,27 +5662,27 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
    hypre_ParCSRMatrixSetRowStartsOwner(matU,0);
 
    U_diag = hypre_ParCSRMatrixDiag(matU);
-   hypre_CSRMatrixI(U_diag) = U_diag_i; 
+   hypre_CSRMatrixI(U_diag) = U_diag_i;
    if (U_diag_i[total_rows] > 0)
    {
-      hypre_CSRMatrixData(U_diag) = U_diag_data; 
-      hypre_CSRMatrixJ(U_diag) = U_diag_j; 
+      hypre_CSRMatrixData(U_diag) = U_diag_data;
+      hypre_CSRMatrixJ(U_diag) = U_diag_j;
    }
    else
    {
       /* we initialized some anyway, so remove if unused */
-      hypre_TFree(U_diag_j,HYPRE_MEMORY_SHARED);
-      hypre_TFree(U_diag_data,HYPRE_MEMORY_SHARED);
+      hypre_TFree(U_diag_j,HYPRE_MEMORY_DEVICE);
+      hypre_TFree(U_diag_data,HYPRE_MEMORY_DEVICE);
    }
    /* store (global) total number of nonzeros */
    local_nnz = (HYPRE_Real) (U_diag_i[total_rows]);
    hypre_MPI_Allreduce(&local_nnz, &total_nnz, 1, HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
    hypre_ParCSRMatrixDNumNonzeros(matU) = total_nnz;
-   
+
    /* free working array */
    hypre_TFree(iw,HYPRE_MEMORY_HOST);
    hypre_TFree(w,HYPRE_MEMORY_HOST);
-   
+
    /* free external data */
    if(E_i)
    {
@@ -5693,11 +5693,11 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
       hypre_TFree(E_j, HYPRE_MEMORY_HOST);
       hypre_TFree(E_data, HYPRE_MEMORY_HOST);
    }
-   
+
    /* set matrix pointers */
    *Lptr = matL;
    *Dptr = D_data;
    *Uptr = matU;
-   
+
    return hypre_error_flag;
 }

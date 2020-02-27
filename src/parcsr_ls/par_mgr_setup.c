@@ -21,7 +21,7 @@ hypre_MGRSetup( void               *mgr_vdata,
 
    HYPRE_Int       i,j, final_coarse_size, block_size, idx, **block_cf_marker;
    HYPRE_BigInt    row, end_idx;
-   HYPRE_Int    lev, num_coarsening_levs, last_level, num_c_levels, num_threads,nc,index_i,cflag;
+   HYPRE_Int    lev, num_coarsening_levs, last_level, num_c_levels, nc, index_i, cflag;
    HYPRE_Int      set_c_points_method;
    HYPRE_Int    debug_flag = 0;
 
