@@ -89,42 +89,42 @@ hypre_int
 main( hypre_int argc,
       char *argv[] )
 {
-   HYPRE_Int                 arg_index;
-   HYPRE_Int                 print_usage;
-   HYPRE_Int                 sparsity_known = 0;
-   HYPRE_Int                 add = 0;
-   HYPRE_Int                 check_constant = 0;
-   HYPRE_Int                 off_proc = 0;
-   HYPRE_Int                 chunk = 0;
-   HYPRE_Int                 omp_flag = 0;
-   HYPRE_Int                 build_matrix_type;
-   HYPRE_Int                 build_matrix_arg_index;
-   HYPRE_Int                 build_rhs_type;
-   HYPRE_Int                 build_rhs_arg_index;
-   HYPRE_Int                 build_src_type;
-   HYPRE_Int                 build_src_arg_index;
-   HYPRE_Int                 build_x0_type;
-   HYPRE_Int                 build_x0_arg_index;
-   HYPRE_Int                 build_funcs_type;
-   HYPRE_Int                 build_funcs_arg_index;
-   HYPRE_Int                 build_fpt_arg_index;
-   HYPRE_Int                 build_sfpt_arg_index;
-   HYPRE_Int                 build_cpt_arg_index;
-   HYPRE_Int                 solver_id;
-   HYPRE_Int                 solver_type = 1;
-   HYPRE_Int                 recompute_res = 0;   /* What should be the default here? */
-   HYPRE_Int                 ioutdat;
-   HYPRE_Int                 poutdat;
-   HYPRE_Int                 debug_flag;
-   HYPRE_Int                 ierr = 0;
-   HYPRE_Int                 i,j;
-   HYPRE_Int                 max_levels = 25;
-   HYPRE_Int                 num_iterations;
-   HYPRE_Int                 pcg_num_its, dscg_num_its;
-   HYPRE_Int                 max_iter = 1000;
-   HYPRE_Int                 mg_max_iter = 100;
-   HYPRE_Int                 nodal = 0;
-   HYPRE_Int                 nodal_diag = 0;
+   HYPRE_Int           arg_index;
+   HYPRE_Int           print_usage;
+   HYPRE_Int           sparsity_known = 0;
+   HYPRE_Int           add = 0;
+   HYPRE_Int           check_constant = 0;
+   HYPRE_Int           off_proc = 0;
+   HYPRE_Int           chunk = 0;
+   HYPRE_Int           omp_flag = 0;
+   HYPRE_Int           build_matrix_type;
+   HYPRE_Int           build_matrix_arg_index;
+   HYPRE_Int           build_rhs_type;
+   HYPRE_Int           build_rhs_arg_index;
+   HYPRE_Int           build_src_type;
+   HYPRE_Int           build_src_arg_index;
+   HYPRE_Int           build_x0_type;
+   HYPRE_Int           build_x0_arg_index;
+   HYPRE_Int           build_funcs_type;
+   HYPRE_Int           build_funcs_arg_index;
+   HYPRE_Int           build_fpt_arg_index;
+   HYPRE_Int           build_sfpt_arg_index;
+   HYPRE_Int           build_cpt_arg_index;
+   HYPRE_Int           solver_id;
+   HYPRE_Int           solver_type = 1;
+   HYPRE_Int           recompute_res = 0;   /* What should be the default here? */
+   HYPRE_Int           ioutdat;
+   HYPRE_Int           poutdat;
+   HYPRE_Int           debug_flag;
+   HYPRE_Int           ierr = 0;
+   HYPRE_Int           i,j;
+   HYPRE_Int           max_levels = 25;
+   HYPRE_Int           num_iterations;
+   HYPRE_Int           pcg_num_its, dscg_num_its;
+   HYPRE_Int           max_iter = 1000;
+   HYPRE_Int           mg_max_iter = 100;
+   HYPRE_Int           nodal = 0;
+   HYPRE_Int           nodal_diag = 0;
    HYPRE_Real          cf_tol = 0.9;
    HYPRE_Real          norm;
    HYPRE_Real          final_res_norm;
@@ -164,38 +164,38 @@ main( hypre_int argc,
 
    HYPRE_Int           time_index;
    MPI_Comm            comm = hypre_MPI_COMM_WORLD;
-   HYPRE_BigInt M, N, big_i;
-   HYPRE_Int local_num_rows, local_num_cols;
-   HYPRE_BigInt first_local_row, last_local_row;
-   HYPRE_BigInt first_local_col, last_local_col;
+   HYPRE_BigInt        M, N, big_i;
+   HYPRE_Int           local_num_rows, local_num_cols;
+   HYPRE_BigInt        first_local_row, last_local_row;
+   HYPRE_BigInt        first_local_col, last_local_col;
    HYPRE_BigInt       *partitioning = NULL;
-   HYPRE_Int variant, overlap, domain_type;
-   HYPRE_Real schwarz_rlx_weight;
-   HYPRE_Real *values, val;
+   HYPRE_Int           variant, overlap, domain_type;
+   HYPRE_Real          schwarz_rlx_weight;
+   HYPRE_Real         *values, val;
 
-   HYPRE_Int use_nonsymm_schwarz = 0;
-   HYPRE_Int test_ij = 0;
-   HYPRE_Int build_rbm = 0;
-   HYPRE_Int build_rbm_index = 0;
-   HYPRE_Int num_interp_vecs = 0;
-   HYPRE_Int interp_vec_variant = 0;
-   HYPRE_Int Q_max = 0;
-   HYPRE_Real Q_trunc = 0;
+   HYPRE_Int           use_nonsymm_schwarz = 0;
+   HYPRE_Int           test_ij = 0;
+   HYPRE_Int           build_rbm = 0;
+   HYPRE_Int           build_rbm_index = 0;
+   HYPRE_Int           num_interp_vecs = 0;
+   HYPRE_Int           interp_vec_variant = 0;
+   HYPRE_Int           Q_max = 0;
+   HYPRE_Real          Q_trunc = 0;
 
-   const HYPRE_Real dt_inf = DT_INF;
-   HYPRE_Real dt = dt_inf;
+   const HYPRE_Real    dt_inf = DT_INF;
+   HYPRE_Real          dt = dt_inf;
 
    /* parameters for BoomerAMG */
-   HYPRE_Real   A_drop_tol = 0.0;
-   HYPRE_Int    A_drop_type = -1;
-   HYPRE_Int    coarsen_cut_factor = 0;
-   HYPRE_Real   strong_threshold;
-   HYPRE_Real   strong_thresholdR;
-   HYPRE_Real   trunc_factor;
-   HYPRE_Real   jacobi_trunc_threshold;
-   HYPRE_Real   S_commpkg_switch = 1.0;
-   HYPRE_Real   CR_rate = 0.7;
-   HYPRE_Real   CR_strong_th = 0.0;
+   HYPRE_Real     A_drop_tol = 0.0;
+   HYPRE_Int      A_drop_type = -1;
+   HYPRE_Int      coarsen_cut_factor = 0;
+   HYPRE_Real     strong_threshold;
+   HYPRE_Real     strong_thresholdR;
+   HYPRE_Real     trunc_factor;
+   HYPRE_Real     jacobi_trunc_threshold;
+   HYPRE_Real     S_commpkg_switch = 1.0;
+   HYPRE_Real     CR_rate = 0.7;
+   HYPRE_Real     CR_strong_th = 0.0;
    HYPRE_Int      CR_use_CG = 0;
    HYPRE_Int      P_max_elmts = 4;
    HYPRE_Int      cycle_type;
@@ -220,16 +220,16 @@ main( hypre_int argc,
    HYPRE_Int      smooth_num_sweeps = 1;
    HYPRE_Int      coarse_threshold = 9;
    HYPRE_Int      min_coarse_size = 0;
-/* redundant coarse grid solve */
+   /* redundant coarse grid solve */
    HYPRE_Int      seq_threshold = 0;
    HYPRE_Int      redundant = 0;
-/* additive versions */
-   HYPRE_Int additive = -1;
-   HYPRE_Int mult_add = -1;
-   HYPRE_Int simple = -1;
-   HYPRE_Int add_last_lvl = -1;
-   HYPRE_Int add_P_max_elmts = 0;
-   HYPRE_Real add_trunc_factor = 0;
+   /* additive versions */
+   HYPRE_Int    additive = -1;
+   HYPRE_Int    mult_add = -1;
+   HYPRE_Int    simple = -1;
+   HYPRE_Int    add_last_lvl = -1;
+   HYPRE_Int    add_P_max_elmts = 0;
+   HYPRE_Real   add_trunc_factor = 0;
    HYPRE_Int    rap2     = 0;
    HYPRE_Int    mod_rap2 = 0;
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
@@ -250,10 +250,10 @@ main( hypre_int argc,
    HYPRE_Real   max_row_sum = 1.;
    HYPRE_Int    converge_type = 0;
 
-   HYPRE_Int cheby_order = 2;
-   HYPRE_Int cheby_eig_est = 10;
-   HYPRE_Int cheby_variant = 0;
-   HYPRE_Int cheby_scale = 1;
+   HYPRE_Int  cheby_order = 2;
+   HYPRE_Int  cheby_eig_est = 10;
+   HYPRE_Int  cheby_variant = 0;
+   HYPRE_Int  cheby_scale = 1;
    HYPRE_Real cheby_fraction = .3;
 
    /* for CGC BM Aug 25, 2006 */
@@ -261,8 +261,8 @@ main( hypre_int argc,
    /* for coordinate plotting BM Oct 24, 2006 */
    HYPRE_Int      plot_grids = 0;
    HYPRE_Int      coord_dim  = 3;
-   float    *coordinates = NULL;
-   char    plot_file_name[256];
+   float         *coordinates = NULL;
+   char           plot_file_name[256];
 
    /* parameters for ParaSAILS */
    HYPRE_Real   sai_threshold = 0.1;
@@ -270,7 +270,7 @@ main( hypre_int argc,
 
    /* parameters for PILUT */
    HYPRE_Real   drop_tol = -1;
-   HYPRE_Int      nonzeros_to_keep = -1;
+   HYPRE_Int    nonzeros_to_keep = -1;
 
    /* parameters for Euclid or ILU smoother in AMG */
    HYPRE_Real   eu_ilut = 0.0;
@@ -289,42 +289,41 @@ main( hypre_int argc,
    /* parameters for LGMRES */
    HYPRE_Int    aug_dim;
    /* parameters for GSMG */
-   HYPRE_Int      gsmg_samples = 5;
+   HYPRE_Int    gsmg_samples = 5;
    /* interpolation */
-   HYPRE_Int      interp_type  = 6; /* default value */
-   HYPRE_Int      post_interp_type  = 0; /* default value */
+   HYPRE_Int    interp_type  = 6; /* default value */
+   HYPRE_Int    post_interp_type  = 0; /* default value */
    /* RL: restriction */
-   HYPRE_Int      restri_type = 0;
+   HYPRE_Int    restri_type = 0;
    /* aggressive coarsening */
-   HYPRE_Int      agg_interp_type  = 4; /* default value */
-   HYPRE_Int      agg_P_max_elmts  = 0; /* default value */
-   HYPRE_Int      agg_P12_max_elmts  = 0; /* default value */
+   HYPRE_Int    agg_interp_type  = 4; /* default value */
+   HYPRE_Int    agg_P_max_elmts  = 0; /* default value */
+   HYPRE_Int    agg_P12_max_elmts  = 0; /* default value */
    HYPRE_Real   agg_trunc_factor  = 0; /* default value */
    HYPRE_Real   agg_P12_trunc_factor  = 0; /* default value */
 
-   HYPRE_Int      print_system = 0;
+   HYPRE_Int    print_system = 0;
+   HYPRE_Int    rel_change = 0;
 
-   HYPRE_Int rel_change = 0;
    /* begin lobpcg */
+   HYPRE_Int    hybrid = 1;
+   HYPRE_Int    num_sweep = 1;
+   HYPRE_Int    relax_default = 3;
 
-   HYPRE_Int      hybrid = 1;
-   HYPRE_Int      num_sweep = 1;
-   HYPRE_Int      relax_default = 3;
-
-   HYPRE_Int lobpcgFlag = 0;
-   HYPRE_Int lobpcgGen = 0;
-   HYPRE_Int constrained = 0;
-   HYPRE_Int vFromFileFlag = 0;
-   HYPRE_Int lobpcgSeed = 0;
-   HYPRE_Int blockSize = 1;
-   HYPRE_Int verbosity = 1;
-   HYPRE_Int iterations;
-   HYPRE_Int maxIterations = 100;
-   HYPRE_Int checkOrtho = 0;
-   HYPRE_Int printLevel = 0; /* also c.f. poutdat */
-   HYPRE_Int two_norm = 1;
-   HYPRE_Int pcgIterations = 0;
-   HYPRE_Int pcgMode = 1;
+   HYPRE_Int  lobpcgFlag = 0;
+   HYPRE_Int  lobpcgGen = 0;
+   HYPRE_Int  constrained = 0;
+   HYPRE_Int  vFromFileFlag = 0;
+   HYPRE_Int  lobpcgSeed = 0;
+   HYPRE_Int  blockSize = 1;
+   HYPRE_Int  verbosity = 1;
+   HYPRE_Int  iterations;
+   HYPRE_Int  maxIterations = 100;
+   HYPRE_Int  checkOrtho = 0;
+   HYPRE_Int  printLevel = 0; /* also c.f. poutdat */
+   HYPRE_Int  two_norm = 1;
+   HYPRE_Int  pcgIterations = 0;
+   HYPRE_Int  pcgMode = 1;
    HYPRE_Real pcgTol = 1e-2;
    HYPRE_Real nonOrthF;
 
@@ -423,7 +422,6 @@ main( hypre_int argc,
    /*-----------------------------------------------------------
     * Set defaults
     *-----------------------------------------------------------*/
-
    build_matrix_type = 2;
    build_matrix_arg_index = argc;
    build_rhs_type = 2;
@@ -439,9 +437,7 @@ main( hypre_int argc,
    build_cpt_arg_index = 0;
    IS_type = 1;
    debug_flag = 0;
-
    solver_id = 0;
-
    ioutdat = 3;
    poutdat = 1;
    hypre_sprintf (plot_file_name,"AMGgrids.CF.dat");
@@ -575,7 +571,9 @@ main( hypre_int argc,
             arg_index++;
          }
          else /* end lobpcg */
+         {
             solver_id = atoi(argv[arg_index++]);
+         }
       }
       else if ( strcmp(argv[arg_index], "-rbm") == 0 )
       {
@@ -1055,32 +1053,32 @@ main( hypre_int argc,
       /* begin ilu options*/
       else if ( strcmp(argv[arg_index], "-ilu_type") == 0 )
       {                /* ilu_type */
-         arg_index++;        
+         arg_index++;
          ilu_type = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-ilu_lfil") == 0 )
       {                /* level of fill */
-         arg_index++;        
+         arg_index++;
          ilu_lfil = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-ilu_droptol") == 0 )
       {                /* drop tolerance */
-         arg_index++;        
+         arg_index++;
          ilu_droptol = atof(argv[arg_index++]);
-      }      
+      }
       else if ( strcmp(argv[arg_index], "-ilu_max_row_nnz") == 0 )
       {                /* Max number of nonzeros to keep per row */
-         arg_index++;        
+         arg_index++;
          ilu_max_row_nnz = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-ilu_schur_max_iter") == 0 )
       {                /* Max number of iterations for schur system solver */
-         arg_index++;        
+         arg_index++;
          ilu_schur_max_iter = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-ilu_nsh_droptol") == 0 )
       {                /* Max number of iterations for schur system solver */
-         arg_index++;        
+         arg_index++;
          ilu_nsh_droptol = atof(argv[arg_index++]);
       }
       /* end ilu options */
@@ -1149,7 +1147,9 @@ main( hypre_int argc,
    /* begin lobpcg */
 
    if ( solver_id == 0 && lobpcgFlag )
+   {
       solver_id = 1;
+   }
 
    /* end lobpcg */
 
@@ -1192,7 +1192,6 @@ main( hypre_int argc,
    schwarz_rlx_weight = 1.;
 
    /* defaults for GMRES */
-
    k_dim = 5;
    cgs = 1;
    unroll = 0;
@@ -1626,7 +1625,9 @@ main( hypre_int argc,
          nongalerk_num_tol = atoi(argv[arg_index++]);
          nongalerk_tol = hypre_CTAlloc(HYPRE_Real,  nongalerk_num_tol, HYPRE_MEMORY_HOST);
          for (i = 0; i < nongalerk_num_tol; i++)
+         {
             nongalerk_tol[i] = atof(argv[arg_index++]);
+         }
       }
       else if ( strcmp(argv[arg_index], "-print") == 0 )
       {
@@ -1784,8 +1785,8 @@ main( hypre_int argc,
          hypre_printf("       70=MGR             71=MGR-PCG  \n");
          hypre_printf("       72=MGR-FlexGMRES   73=MGR-BICGSTAB  \n");
          hypre_printf("       74=MGR-COGMRES  \n");
-	 hypre_printf("       80=ILU      81=ILU-GMRES  \n");	 
-	 hypre_printf("       82=ILU-FlexGMRES  \n");	 
+         hypre_printf("       80=ILU      81=ILU-GMRES  \n");
+         hypre_printf("       82=ILU-FlexGMRES  \n");
          hypre_printf("\n");
          hypre_printf("  -cljp                 : CLJP coarsening \n");
          hypre_printf("  -cljp1                : CLJP coarsening, fixed random \n");
@@ -2026,20 +2027,20 @@ main( hypre_int argc,
          hypre_printf("                                     for F-relaxation \n");
          /* end MGR options */
          /* hypre ILU options */
-         hypre_printf("  -ilu_type   <val>                : set ILU factorization type = val\n");      
-         hypre_printf("  -ilu_type   0                    : Block Jacobi with ILU(k) variants \n");      
-         hypre_printf("  -ilu_type   1                    : Block Jacobi with ILUT \n");   
-         hypre_printf("  -ilu_type   10                   : GMRES with ILU(k) variants \n");      
-         hypre_printf("  -ilu_type   11                   : GMRES with ILUT \n"); 
-         hypre_printf("  -ilu_type   20                   : NSH with ILU(k) variants \n");      
-         hypre_printf("  -ilu_type   21                   : NSH with ILUT \n"); 
-         hypre_printf("  -ilu_type   30                   : RAS with ILU(k) variants \n");      
-         hypre_printf("  -ilu_type   31                   : RAS with ILUT \n");    
-         hypre_printf("  -ilu_type   40                   : ddPQ + GMRES with ILU(k) variants \n");      
-         hypre_printf("  -ilu_type   41                   : ddPQ + GMRES with ILUT \n");               
-         hypre_printf("  -ilu_lfil   <val>                : set level of fill (k) for ILU(k) = val\n");      
-         hypre_printf("  -ilu_droptol   <val>             : set drop tolerance threshold for ILUT = val \n");      
-         hypre_printf("  -ilu_max_row_nnz   <val>         : set max. num of nonzeros to keep per row = val \n");          
+         hypre_printf("  -ilu_type   <val>                : set ILU factorization type = val\n");
+         hypre_printf("  -ilu_type   0                    : Block Jacobi with ILU(k) variants \n");
+         hypre_printf("  -ilu_type   1                    : Block Jacobi with ILUT \n");
+         hypre_printf("  -ilu_type   10                   : GMRES with ILU(k) variants \n");
+         hypre_printf("  -ilu_type   11                   : GMRES with ILUT \n");
+         hypre_printf("  -ilu_type   20                   : NSH with ILU(k) variants \n");
+         hypre_printf("  -ilu_type   21                   : NSH with ILUT \n");
+         hypre_printf("  -ilu_type   30                   : RAS with ILU(k) variants \n");
+         hypre_printf("  -ilu_type   31                   : RAS with ILUT \n");
+         hypre_printf("  -ilu_type   40                   : ddPQ + GMRES with ILU(k) variants \n");
+         hypre_printf("  -ilu_type   41                   : ddPQ + GMRES with ILUT \n");
+         hypre_printf("  -ilu_lfil   <val>                : set level of fill (k) for ILU(k) = val\n");
+         hypre_printf("  -ilu_droptol   <val>             : set drop tolerance threshold for ILUT = val \n");
+         hypre_printf("  -ilu_max_row_nnz   <val>         : set max. num of nonzeros to keep per row = val \n");
          hypre_printf("  -ilu_schur_max_iter   <val>      : set max. num of iteration for GMRES/NSH Schur = val \n");
          hypre_printf("  -ilu_nsh_droptol   <val>         : set drop tolerance threshold for NSH = val \n");
          /* end ILU options */
@@ -2782,7 +2783,7 @@ main( hypre_int argc,
       ij_b = NULL;
    }
 
-   if ( build_src_type == 0 || build_src_type == 1)
+   if ( build_src_type == 0)
    {
       if (myid == 0)
       {
@@ -2790,8 +2791,6 @@ main( hypre_int argc,
          hypre_printf("  Initial unknown vector in evolution is 0\n");
       }
 
-      if (build_src_type == 0)
-      {
       ierr = HYPRE_IJVectorRead( argv[build_src_arg_index], hypre_MPI_COMM_WORLD,
                                  HYPRE_PARCSR, &ij_b );
       if (ierr)
@@ -2801,12 +2800,6 @@ main( hypre_int argc,
       }
       ierr = HYPRE_IJVectorGetObject( ij_b, &object );
       b = (HYPRE_ParVector) object;
-      }
-      else
-      {
-         BuildRhsParFromOneFile(argc, argv, build_src_arg_index, parcsr_A, &b);
-         ij_b = NULL;
-      }
 
       /* Initial unknown vector */
       HYPRE_IJVectorCreate(hypre_MPI_COMM_WORLD, first_local_col, last_local_col, &ij_x);
@@ -2817,6 +2810,19 @@ main( hypre_int argc,
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
       x = (HYPRE_ParVector) object;
    }
+   else if (build_src_type == 1)
+   {
+      BuildRhsParFromOneFile(argc, argv, build_src_arg_index, parcsr_A, &b);
+      ij_b = NULL;
+
+      /* Initial unknown vector */
+      HYPRE_IJVectorCreate(hypre_MPI_COMM_WORLD, first_local_col, last_local_col, &ij_x);
+      HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
+      HYPRE_IJVectorInitialize(ij_x);
+      HYPRE_IJVectorAssemble(ij_x);
+
+      ierr = HYPRE_IJVectorGetObject( ij_x, &object );
+      x = (HYPRE_ParVector) object;
    }
    else if ( build_src_type == 2 )
    {
@@ -4213,9 +4219,8 @@ main( hypre_int argc,
    /*-----------------------------------------------------------
     * Solve the eigenvalue problem using LOBPCG
     *-----------------------------------------------------------*/
-
-   if ( lobpcgFlag ) {
-
+   if ( lobpcgFlag )
+   {
       interpreter = hypre_CTAlloc(mv_InterfaceInterpreter, 1, HYPRE_MEMORY_HOST);
 
       HYPRE_ParCSRSetupInterpreter( interpreter );
@@ -5443,9 +5448,9 @@ main( hypre_int argc,
       {
          /* use hypre_ILU preconditioning */
          if (myid == 0) hypre_printf("Solver:  ILU-GMRES\n");
-         
+
          /* create precon */
-         HYPRE_ILUCreate(&pcg_precond);    
+         HYPRE_ILUCreate(&pcg_precond);
          HYPRE_ILUSetType(pcg_precond, ilu_type);
          HYPRE_ILUSetLevelOfFill(pcg_precond, ilu_lfil);
          /* set print level */
@@ -5456,20 +5461,20 @@ main( hypre_int argc,
          /* set max number of nonzeros per row */
          HYPRE_ILUSetMaxNnzPerRow(pcg_precond,ilu_max_row_nnz);
          /* set the droptol */
-         HYPRE_ILUSetDropThreshold(pcg_precond,ilu_droptol);  
-         /* set max iterations for Schur system solve */                
+         HYPRE_ILUSetDropThreshold(pcg_precond,ilu_droptol);
+         /* set max iterations for Schur system solve */
          HYPRE_ILUSetSchurMaxIter( pcg_precond, ilu_schur_max_iter );
          if(ilu_type == 20 || ilu_type == 21)
          {
-			 HYPRE_ILUSetNSHDropThreshold( pcg_precond, ilu_nsh_droptol);
-		 }              
+            HYPRE_ILUSetNSHDropThreshold( pcg_precond, ilu_nsh_droptol);
+         }
 
          /* setup ILU-GMRES solver */
-	 HYPRE_GMRESSetMaxIter(pcg_solver, mg_max_iter);
+         HYPRE_GMRESSetMaxIter(pcg_solver, mg_max_iter);
          HYPRE_GMRESSetPrecond(pcg_solver,
-				   (HYPRE_PtrToSolverFcn) HYPRE_ILUSolve,
-				   (HYPRE_PtrToSolverFcn) HYPRE_ILUSetup,
-                                   pcg_precond);
+                               (HYPRE_PtrToSolverFcn) HYPRE_ILUSolve,
+                               (HYPRE_PtrToSolverFcn) HYPRE_ILUSetup,
+                               pcg_precond);
       }
 
       HYPRE_GMRESGetPrecond(pcg_solver, &pcg_precond_gotten);
@@ -5982,22 +5987,22 @@ main( hypre_int argc,
          if (eu_bj) HYPRE_EuclidSetBJ(pcg_precond, eu_bj);
          HYPRE_EuclidSetStats(pcg_precond, eu_stats);
          HYPRE_EuclidSetMem(pcg_precond, eu_mem);
-         /*HYPRE_EuclidSetParams(pcg_precond, argc, argv);*/            
+         /*HYPRE_EuclidSetParams(pcg_precond, argc, argv);*/
 
          /* setup MGR-PCG solver */
-	     HYPRE_FlexGMRESSetMaxIter(pcg_solver, mg_max_iter);
+         HYPRE_FlexGMRESSetMaxIter(pcg_solver, mg_max_iter);
          HYPRE_FlexGMRESSetPrecond(pcg_solver,
-				   (HYPRE_PtrToSolverFcn) HYPRE_EuclidSolve,
-				   (HYPRE_PtrToSolverFcn) HYPRE_EuclidSetup,
+                                   (HYPRE_PtrToSolverFcn) HYPRE_EuclidSolve,
+                                   (HYPRE_PtrToSolverFcn) HYPRE_EuclidSetup,
                                    pcg_precond);
       }
       else if (solver_id == 82)
       {
          /* use hypre_ILU preconditioning */
          if (myid == 0) hypre_printf("Solver:  ILU-FlexGMRES\n");
-         
+
          /* create precon */
-         HYPRE_ILUCreate(&pcg_precond);    
+         HYPRE_ILUCreate(&pcg_precond);
          HYPRE_ILUSetType(pcg_precond, ilu_type);
          HYPRE_ILUSetLevelOfFill(pcg_precond, ilu_lfil);
          /* set print level */
@@ -6009,18 +6014,18 @@ main( hypre_int argc,
          HYPRE_ILUSetMaxNnzPerRow(pcg_precond,ilu_max_row_nnz);
          /* set the droptol */
          HYPRE_ILUSetDropThreshold(pcg_precond,ilu_droptol);
-         /* set max iterations for Schur system solve */                
+         /* set max iterations for Schur system solve */
          HYPRE_ILUSetSchurMaxIter( pcg_precond, ilu_schur_max_iter );
          if(ilu_type == 20 || ilu_type == 21)
          {
-			 HYPRE_ILUSetNSHDropThreshold( pcg_precond, ilu_nsh_droptol);
-		 }              
+            HYPRE_ILUSetNSHDropThreshold( pcg_precond, ilu_nsh_droptol);
+         }
 
          /* setup MGR-PCG solver */
-	     HYPRE_FlexGMRESSetMaxIter(pcg_solver, mg_max_iter);
+         HYPRE_FlexGMRESSetMaxIter(pcg_solver, mg_max_iter);
          HYPRE_FlexGMRESSetPrecond(pcg_solver,
-				   (HYPRE_PtrToSolverFcn) HYPRE_ILUSolve,
-				   (HYPRE_PtrToSolverFcn) HYPRE_ILUSetup,
+                                   (HYPRE_PtrToSolverFcn) HYPRE_ILUSolve,
+                                   (HYPRE_PtrToSolverFcn) HYPRE_ILUSetup,
                                    pcg_precond);
       }
       else if (solver_id == 60)
@@ -6466,6 +6471,7 @@ main( hypre_int argc,
          hypre_printf("\n");
       }
    }
+
    /*-----------------------------------------------------------
     * Solve the system using COGMRES
     *-----------------------------------------------------------*/
@@ -7126,16 +7132,16 @@ main( hypre_int argc,
 
    /*-----------------------------------------------------------
     * Solve the system using hypre_ILU
-    *-----------------------------------------------------------*/   
+    *-----------------------------------------------------------*/
 
    if (solver_id == 80)
    {
       if (myid == 0) hypre_printf("Solver:  hypre_ILU\n");
       time_index = hypre_InitializeTiming("hypre_ILU Setup");
       hypre_BeginTiming(time_index);
-      
+
       HYPRE_Solver ilu_solver;
-      HYPRE_ILUCreate(&ilu_solver); 
+      HYPRE_ILUCreate(&ilu_solver);
 
       /* set ilu type */
       HYPRE_ILUSetType(ilu_solver, ilu_type);
@@ -7150,16 +7156,16 @@ main( hypre_int argc,
       /* set the droptol */
       HYPRE_ILUSetDropThreshold(ilu_solver,ilu_droptol);
       HYPRE_ILUSetTol(ilu_solver, tol);
-      /* set max iterations for Schur system solve */                
-      HYPRE_ILUSetSchurMaxIter( ilu_solver, ilu_schur_max_iter ); 
-      
+      /* set max iterations for Schur system solve */
+      HYPRE_ILUSetSchurMaxIter( ilu_solver, ilu_schur_max_iter );
+
       /* setting for NSH */
       if(ilu_type == 20 || ilu_type == 21)
       {
-		 HYPRE_ILUSetNSHDropThreshold( ilu_solver, ilu_nsh_droptol);
-      }              
+         HYPRE_ILUSetNSHDropThreshold( ilu_solver, ilu_nsh_droptol);
+      }
 
-      
+
       /* setup hypre_ILU solver */
       HYPRE_ILUSetup(ilu_solver, parcsr_A, b, x);
 
@@ -7167,13 +7173,13 @@ main( hypre_int argc,
       hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
- 
+
       time_index = hypre_InitializeTiming("hypre_ILU Solve");
       hypre_BeginTiming(time_index);
-      
+
       /* hypre_ILU solve */
       HYPRE_ILUSolve(ilu_solver, parcsr_A, b, x);
-      
+
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
@@ -7196,7 +7202,7 @@ main( hypre_int argc,
       HYPRE_ILUSetup(ilu_solver, parcsr_A, b, x);
       HYPRE_ILUSolve(ilu_solver, parcsr_A, b, x);
 #endif
-      
+
       /* free memory */
       HYPRE_ILUDestroy(ilu_solver);
    }
@@ -7204,10 +7210,6 @@ main( hypre_int argc,
    /*-----------------------------------------------------------
     * Print the solution and other info
     *-----------------------------------------------------------*/
-
-   /* RDF: Why is this here? */
-   /*if (!(build_rhs_type ==1 || build_rhs_type ==7))
-     HYPRE_IJVectorGetObjectType(ij_b, &j);*/
 
    if (print_system)
    {
@@ -7217,6 +7219,7 @@ main( hypre_int argc,
    /*-----------------------------------------------------------
     * Finalize things
     *-----------------------------------------------------------*/
+
   final:
 
    HYPRE_ParVectorDestroy(x0_save);
@@ -7240,7 +7243,7 @@ main( hypre_int argc,
       HYPRE_IJVectorDestroy(ij_b);
    }
 
-   if ( build_x0_type == 0 || build_x0_type == 7)
+   if (build_x0_type == 0)
    {
       HYPRE_ParVectorDestroy(x);
    }
@@ -7261,9 +7264,18 @@ main( hypre_int argc,
       hypre_TFree(nongalerk_tol, HYPRE_MEMORY_HOST);
    }
 
-   if (cpt_index) hypre_TFree(cpt_index, HYPRE_MEMORY_HOST);
-   if (fpt_index) hypre_TFree(fpt_index, HYPRE_MEMORY_HOST);
-   if (isolated_fpt_index) hypre_TFree(isolated_fpt_index, HYPRE_MEMORY_HOST);
+   if (cpt_index)
+   {
+      hypre_TFree(cpt_index, HYPRE_MEMORY_HOST);
+   }
+   if (fpt_index)
+   {
+      hypre_TFree(fpt_index, HYPRE_MEMORY_HOST);
+   }
+   if (isolated_fpt_index)
+   {
+      hypre_TFree(isolated_fpt_index, HYPRE_MEMORY_HOST);
+   }
 
    /*
       hypre_FinalizeMemoryDebug();
