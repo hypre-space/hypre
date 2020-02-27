@@ -26,6 +26,7 @@ hypre_MGRCreate()
   /* block data */
   (mgr_data -> block_size) = 1;
   (mgr_data -> block_num_coarse_indexes) = NULL;
+  (mgr_data -> point_marker_array) = NULL;
   (mgr_data -> block_cf_marker) = NULL;
 
   /* general data */
@@ -599,6 +600,72 @@ hypre_MGRSetCpointsByBlock( void      *mgr_vdata,
   (mgr_data -> set_c_points_method) = 0;
 
    return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_MGRSetCpointsByPointMarkerArray( void      *mgr_vdata,
+                           HYPRE_Int  block_size,
+                           HYPRE_Int  max_num_levels,
+                           HYPRE_Int  *lvl_num_coarse_points,
+                           HYPRE_Int  **lvl_coarse_indexes,
+                           HYPRE_Int  *point_marker_array)
+{
+  hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
+  HYPRE_Int  i,j;
+  HYPRE_Int  **block_cf_marker = NULL;
+  HYPRE_Int *block_num_coarse_indexes = NULL;
+
+  /* free block cf_marker data if not previously destroyed */
+  if((mgr_data -> block_cf_marker) != NULL)
+  {
+    for (i=0; i < (mgr_data -> max_num_coarse_levels); i++)
+    {
+      if ((mgr_data -> block_cf_marker)[i])
+      {
+        hypre_TFree((mgr_data -> block_cf_marker)[i], HYPRE_MEMORY_HOST);
+        (mgr_data -> block_cf_marker)[i] = NULL;
+      }
+    }
+    hypre_TFree(mgr_data -> block_cf_marker, HYPRE_MEMORY_HOST);
+    (mgr_data -> block_cf_marker) = NULL;
+  }
+  if((mgr_data -> block_num_coarse_indexes))
+  {
+    hypre_TFree((mgr_data -> block_num_coarse_indexes), HYPRE_MEMORY_HOST);
+    (mgr_data -> block_num_coarse_indexes) = NULL;
+  }
+
+  /* store block cf_marker */
+  block_cf_marker = hypre_CTAlloc(HYPRE_Int *, max_num_levels, HYPRE_MEMORY_HOST);
+  for (i = 0; i < max_num_levels; i++)
+  {
+    block_cf_marker[i] = hypre_CTAlloc(HYPRE_Int, block_size, HYPRE_MEMORY_HOST);
+    memset(block_cf_marker[i], FMRK, block_size*sizeof(HYPRE_Int));
+  }
+  for (i = 0; i < max_num_levels; i++)
+  {
+    for(j=0; j<lvl_num_coarse_points[i]; j++)
+    {
+      block_cf_marker[i][j] = lvl_coarse_indexes[i][j];
+    }
+  }
+
+  /* store block_num_coarse_points */
+  if(max_num_levels > 0)
+  {
+    block_num_coarse_indexes = hypre_CTAlloc(HYPRE_Int,  max_num_levels, HYPRE_MEMORY_HOST);
+    for(i=0; i<max_num_levels; i++)
+       block_num_coarse_indexes[i] = lvl_num_coarse_points[i];
+  }
+  /* set block data */
+  (mgr_data -> max_num_coarse_levels) = max_num_levels;
+  (mgr_data -> block_size) = block_size;
+  (mgr_data -> block_num_coarse_indexes) = block_num_coarse_indexes;
+  (mgr_data -> block_cf_marker) = block_cf_marker;
+  (mgr_data -> point_marker_array) = point_marker_array;
+  (mgr_data -> set_c_points_method) = 2;
+
+  return hypre_error_flag;
 }
 
 /*Set number of points that remain part of the coarse grid throughout the hierarchy */
