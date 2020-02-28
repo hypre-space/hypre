@@ -73,7 +73,7 @@ hypre_ILUCreate()
    (ilu_data -> nI)                    = 0;
    (ilu_data -> u_end)                 = NULL;
 
-    /* reordering_type default to use local RCM */
+   /* reordering_type default to use local RCM */
    (ilu_data -> reordering_type) = 1;
 
    /* see hypre_ILUSetType for more default values */
@@ -87,144 +87,144 @@ hypre_ILUCreate()
 HYPRE_Int
 hypre_ILUDestroy( void *data )
 {
-  hypre_ParILUData * ilu_data = (hypre_ParILUData*) data;
+   hypre_ParILUData * ilu_data = (hypre_ParILUData*) data;
 
-  /* final residual vector */
-  if((ilu_data -> residual))
-  {
-    hypre_ParVectorDestroy( (ilu_data -> residual) );
-    (ilu_data -> residual) = NULL;
-  }
-  if((ilu_data -> rel_res_norms))
-  {
-    hypre_TFree( (ilu_data -> rel_res_norms) , HYPRE_MEMORY_HOST);
-    (ilu_data -> rel_res_norms) = NULL;
-  }
-  /* temp vectors for solve phase */
-  if((ilu_data -> Utemp))
-  {
-    hypre_ParVectorDestroy( (ilu_data -> Utemp) );
-    (ilu_data -> Utemp) = NULL;
-  }
-  if((ilu_data -> Ftemp))
-  {
-    hypre_ParVectorDestroy( (ilu_data -> Ftemp) );
-    (ilu_data -> Ftemp) = NULL;
-  }
-  if(hypre_ParILUDataUExt(ilu_data))
-  {
-    hypre_TFree(hypre_ParILUDataUExt(ilu_data), HYPRE_MEMORY_HOST);
-    hypre_ParILUDataUExt(ilu_data) = NULL;
-  }
-  if(hypre_ParILUDataFExt(ilu_data))
-  {
-    hypre_TFree(hypre_ParILUDataFExt(ilu_data), HYPRE_MEMORY_HOST);
-    hypre_ParILUDataFExt(ilu_data) = NULL;
-  }
-  if((ilu_data -> rhs))
-  {
-    hypre_ParVectorDestroy( (ilu_data -> rhs) );
-    (ilu_data -> rhs) = NULL;
-  }
-  if((ilu_data -> x))
-  {
-    hypre_ParVectorDestroy( (ilu_data -> x) );
-    (ilu_data -> x) = NULL;
-  }
-  /* l1_norms */
-  if((ilu_data -> l1_norms))
-  {
-    hypre_TFree((ilu_data -> l1_norms), HYPRE_MEMORY_HOST);
-    (ilu_data -> l1_norms) = NULL;
-  }
+   /* final residual vector */
+   if((ilu_data -> residual))
+   {
+      hypre_ParVectorDestroy( (ilu_data -> residual) );
+      (ilu_data -> residual) = NULL;
+   }
+   if((ilu_data -> rel_res_norms))
+   {
+      hypre_TFree( (ilu_data -> rel_res_norms) , HYPRE_MEMORY_HOST);
+      (ilu_data -> rel_res_norms) = NULL;
+   }
+   /* temp vectors for solve phase */
+   if((ilu_data -> Utemp))
+   {
+      hypre_ParVectorDestroy( (ilu_data -> Utemp) );
+      (ilu_data -> Utemp) = NULL;
+   }
+   if((ilu_data -> Ftemp))
+   {
+      hypre_ParVectorDestroy( (ilu_data -> Ftemp) );
+      (ilu_data -> Ftemp) = NULL;
+   }
+   if(hypre_ParILUDataUExt(ilu_data))
+   {
+      hypre_TFree(hypre_ParILUDataUExt(ilu_data), HYPRE_MEMORY_HOST);
+      hypre_ParILUDataUExt(ilu_data) = NULL;
+   }
+   if(hypre_ParILUDataFExt(ilu_data))
+   {
+      hypre_TFree(hypre_ParILUDataFExt(ilu_data), HYPRE_MEMORY_HOST);
+      hypre_ParILUDataFExt(ilu_data) = NULL;
+   }
+   if((ilu_data -> rhs))
+   {
+      hypre_ParVectorDestroy( (ilu_data -> rhs) );
+      (ilu_data -> rhs) = NULL;
+   }
+   if((ilu_data -> x))
+   {
+      hypre_ParVectorDestroy( (ilu_data -> x) );
+      (ilu_data -> x) = NULL;
+   }
+   /* l1_norms */
+   if((ilu_data -> l1_norms))
+   {
+      hypre_TFree((ilu_data -> l1_norms), HYPRE_MEMORY_HOST);
+      (ilu_data -> l1_norms) = NULL;
+   }
 
-  /* u_end */
-  if(hypre_ParILUDataUEnd(ilu_data))
-  {
-    hypre_TFree(hypre_ParILUDataUEnd(ilu_data), HYPRE_MEMORY_HOST);
-    hypre_ParILUDataUEnd(ilu_data) = NULL;
-  }
+   /* u_end */
+   if(hypre_ParILUDataUEnd(ilu_data))
+   {
+      hypre_TFree(hypre_ParILUDataUEnd(ilu_data), HYPRE_MEMORY_HOST);
+      hypre_ParILUDataUEnd(ilu_data) = NULL;
+   }
 
-  /* Factors */
-  if(ilu_data -> matL)
-  {
-    hypre_ParCSRMatrixDestroy((ilu_data -> matL));
-    (ilu_data -> matL) = NULL;
-  }
-  if(ilu_data -> matU)
-  {
-    hypre_ParCSRMatrixDestroy((ilu_data -> matU));
-    (ilu_data -> matU) = NULL;
-  }
-  if(ilu_data -> matD)
-  {
-    hypre_TFree((ilu_data -> matD), HYPRE_MEMORY_DEVICE);
-    (ilu_data -> matD) = NULL;
-  }
-  if(ilu_data -> matS)
-  {
-    hypre_ParCSRMatrixDestroy((ilu_data -> matS));
-    (ilu_data -> matS) = NULL;
-  }
-  if(ilu_data -> schur_solver)
-  {
-     switch(ilu_data -> ilu_type){
-      case 10: case 11: case 40: case 41:
-         HYPRE_ParCSRGMRESDestroy(ilu_data -> schur_solver); //GMRES for Schur
-         break;
-      case 20: case 21:
-         hypre_NSHDestroy(hypre_ParILUDataSchurSolver(ilu_data));//NSH for Schur
-         break;
-      default:
-         break;
-        }
-     (ilu_data -> schur_solver) = NULL;
-  }
-  if(ilu_data -> schur_precond)
-  {
-     switch(ilu_data -> ilu_type){
-      case 10: case 11: case 40: case 41:
-         HYPRE_ILUDestroy(ilu_data -> schur_precond); //ILU as precond for Schur
-         break;
-      default:
-         break;
-        }
-     (ilu_data -> schur_precond) = NULL;
-  }
-  /* CF marker array */
-  if((ilu_data -> CF_marker_array))
-  {
-    hypre_TFree((ilu_data -> CF_marker_array), HYPRE_MEMORY_HOST);
-    (ilu_data -> CF_marker_array) = NULL;
-  }
-  /* permutation array */
-  if((ilu_data -> perm))
-  {
-    hypre_TFree((ilu_data -> perm), HYPRE_MEMORY_DEVICE);
-    (ilu_data -> perm) = NULL;
-  }
-  if((ilu_data -> qperm))
-  {
-    hypre_TFree((ilu_data -> qperm), HYPRE_MEMORY_DEVICE);
-    (ilu_data -> qperm) = NULL;
-  }
-  /* droptol array */
-  if((ilu_data -> own_droptol_data))
-  {
-     hypre_TFree((ilu_data -> droptol), HYPRE_MEMORY_HOST);
-     (ilu_data -> own_droptol_data) = 0;
-     (ilu_data -> droptol) = NULL;
-  }
-  if((ilu_data -> sp_own_droptol_data))
-  {
-     hypre_TFree((ilu_data -> sp_ilu_droptol), HYPRE_MEMORY_HOST);
-     (ilu_data -> sp_own_droptol_data) = 0;
-     (ilu_data -> sp_ilu_droptol) = NULL;
-  }
-  /* ilu data */
-  hypre_TFree(ilu_data, HYPRE_MEMORY_HOST);
+   /* Factors */
+   if(ilu_data -> matL)
+   {
+      hypre_ParCSRMatrixDestroy((ilu_data -> matL));
+      (ilu_data -> matL) = NULL;
+   }
+   if(ilu_data -> matU)
+   {
+      hypre_ParCSRMatrixDestroy((ilu_data -> matU));
+      (ilu_data -> matU) = NULL;
+   }
+   if(ilu_data -> matD)
+   {
+      hypre_TFree((ilu_data -> matD), HYPRE_MEMORY_DEVICE);
+      (ilu_data -> matD) = NULL;
+   }
+   if(ilu_data -> matS)
+   {
+      hypre_ParCSRMatrixDestroy((ilu_data -> matS));
+      (ilu_data -> matS) = NULL;
+   }
+   if(ilu_data -> schur_solver)
+   {
+      switch(ilu_data -> ilu_type){
+         case 10: case 11: case 40: case 41:
+            HYPRE_ParCSRGMRESDestroy(ilu_data -> schur_solver); //GMRES for Schur
+            break;
+         case 20: case 21:
+            hypre_NSHDestroy(hypre_ParILUDataSchurSolver(ilu_data));//NSH for Schur
+            break;
+         default:
+            break;
+      }
+      (ilu_data -> schur_solver) = NULL;
+   }
+   if(ilu_data -> schur_precond)
+   {
+      switch(ilu_data -> ilu_type){
+         case 10: case 11: case 40: case 41:
+            HYPRE_ILUDestroy(ilu_data -> schur_precond); //ILU as precond for Schur
+            break;
+         default:
+            break;
+      }
+      (ilu_data -> schur_precond) = NULL;
+   }
+   /* CF marker array */
+   if((ilu_data -> CF_marker_array))
+   {
+      hypre_TFree((ilu_data -> CF_marker_array), HYPRE_MEMORY_HOST);
+      (ilu_data -> CF_marker_array) = NULL;
+   }
+   /* permutation array */
+   if((ilu_data -> perm))
+   {
+      hypre_TFree((ilu_data -> perm), HYPRE_MEMORY_DEVICE);
+      (ilu_data -> perm) = NULL;
+   }
+   if((ilu_data -> qperm))
+   {
+      hypre_TFree((ilu_data -> qperm), HYPRE_MEMORY_DEVICE);
+      (ilu_data -> qperm) = NULL;
+   }
+   /* droptol array */
+   if((ilu_data -> own_droptol_data))
+   {
+      hypre_TFree((ilu_data -> droptol), HYPRE_MEMORY_HOST);
+      (ilu_data -> own_droptol_data) = 0;
+      (ilu_data -> droptol) = NULL;
+   }
+   if((ilu_data -> sp_own_droptol_data))
+   {
+      hypre_TFree((ilu_data -> sp_ilu_droptol), HYPRE_MEMORY_HOST);
+      (ilu_data -> sp_own_droptol_data) = 0;
+      (ilu_data -> sp_ilu_droptol) = NULL;
+   }
+   /* ilu data */
+   hypre_TFree(ilu_data, HYPRE_MEMORY_HOST);
 
-  return hypre_error_flag;
+   return hypre_error_flag;
 }
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -232,17 +232,17 @@ hypre_ILUDestroy( void *data )
 HYPRE_Int
 hypre_ILUSetLevelOfFill( void *ilu_vdata, HYPRE_Int lfil )
 {
-  hypre_ParILUData *ilu_data = (hypre_ParILUData*) ilu_vdata;
-  (ilu_data -> lfil) = lfil;
-  return hypre_error_flag;
+   hypre_ParILUData *ilu_data = (hypre_ParILUData*) ilu_vdata;
+   (ilu_data -> lfil) = lfil;
+   return hypre_error_flag;
 }
 /* set max non-zeros per row in factors (for ilut) */
 HYPRE_Int
 hypre_ILUSetMaxNnzPerRow( void *ilu_vdata, HYPRE_Int nzmax )
 {
-  hypre_ParILUData *ilu_data = (hypre_ParILUData*) ilu_vdata;
-  (ilu_data -> maxRowNnz) = nzmax;
-  return hypre_error_flag;
+   hypre_ParILUData *ilu_data = (hypre_ParILUData*) ilu_vdata;
+   (ilu_data -> maxRowNnz) = nzmax;
+   return hypre_error_flag;
 }
 /* set threshold for dropping in LU factors (for ilut) */
 HYPRE_Int
@@ -272,9 +272,9 @@ hypre_ILUSetDropThresholdArray( void *ilu_vdata, HYPRE_Real *threshold )
 HYPRE_Int
 hypre_ILUSetOwnDropThreshold( void *ilu_vdata, HYPRE_Int own_droptol_data )
 {
-  hypre_ParILUData *ilu_data = (hypre_ParILUData*) ilu_vdata;
-  (ilu_data -> own_droptol_data) = own_droptol_data;
-  return hypre_error_flag;
+   hypre_ParILUData *ilu_data = (hypre_ParILUData*) ilu_vdata;
+   (ilu_data -> own_droptol_data) = own_droptol_data;
+   return hypre_error_flag;
 }
 /* set ILU factorization type */
 HYPRE_Int
@@ -664,57 +664,57 @@ hypre_ILUWriteSolverParams(void *ilu_vdata)
    hypre_printf("ILU factorization type: %d : ", (ilu_data -> ilu_type));
    switch(ilu_data -> ilu_type){
       case 0:
-              hypre_printf("Block Jacobi with ILU(%d) \n", (ilu_data -> lfil));
-              hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
+         hypre_printf("Block Jacobi with ILU(%d) \n", (ilu_data -> lfil));
+         hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
          break;
       case 1:
-              hypre_printf("Block Jacobi with ILUT \n");
-              hypre_printf("drop tolerance for B = %e, E&F = %e, S = %e \n", hypre_ParILUDataDroptol(ilu_data)[0],hypre_ParILUDataDroptol(ilu_data)[1],hypre_ParILUDataDroptol(ilu_data)[2]);
-              hypre_printf("Max nnz per row = %d \n", (ilu_data -> maxRowNnz));
-              hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
+         hypre_printf("Block Jacobi with ILUT \n");
+         hypre_printf("drop tolerance for B = %e, E&F = %e, S = %e \n", hypre_ParILUDataDroptol(ilu_data)[0],hypre_ParILUDataDroptol(ilu_data)[1],hypre_ParILUDataDroptol(ilu_data)[2]);
+         hypre_printf("Max nnz per row = %d \n", (ilu_data -> maxRowNnz));
+         hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
          break;
       case 10:
-              hypre_printf("ILU-GMRES with ILU(%d) \n", (ilu_data -> lfil));
-              hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
+         hypre_printf("ILU-GMRES with ILU(%d) \n", (ilu_data -> lfil));
+         hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
          break;
       case 11:
-              hypre_printf("ILU-GMRES with ILUT \n");
-              hypre_printf("drop tolerance for B = %e, E&F = %e, S = %e \n", hypre_ParILUDataDroptol(ilu_data)[0],hypre_ParILUDataDroptol(ilu_data)[1],hypre_ParILUDataDroptol(ilu_data)[2]);
-              hypre_printf("Max nnz per row = %d \n", (ilu_data -> maxRowNnz));
-              hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
+         hypre_printf("ILU-GMRES with ILUT \n");
+         hypre_printf("drop tolerance for B = %e, E&F = %e, S = %e \n", hypre_ParILUDataDroptol(ilu_data)[0],hypre_ParILUDataDroptol(ilu_data)[1],hypre_ParILUDataDroptol(ilu_data)[2]);
+         hypre_printf("Max nnz per row = %d \n", (ilu_data -> maxRowNnz));
+         hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
          break;
       case 20:
-              hypre_printf("Newton–Schulz–Hotelling with ILU(%d) \n", (ilu_data -> lfil));
-              hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
+         hypre_printf("Newton-Schulz-Hotelling with ILU(%d) \n", (ilu_data -> lfil));
+         hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
          break;
       case 21:
-              hypre_printf("Newton–Schulz–Hotelling with ILUT \n");
-              hypre_printf("drop tolerance for B = %e, E&F = %e, S = %e \n", hypre_ParILUDataDroptol(ilu_data)[0],hypre_ParILUDataDroptol(ilu_data)[1],hypre_ParILUDataDroptol(ilu_data)[2]);
-              hypre_printf("Max nnz per row = %d \n", (ilu_data -> maxRowNnz));
-              hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
+         hypre_printf("Newton-Schulz-Hotelling with ILUT \n");
+         hypre_printf("drop tolerance for B = %e, E&F = %e, S = %e \n", hypre_ParILUDataDroptol(ilu_data)[0],hypre_ParILUDataDroptol(ilu_data)[1],hypre_ParILUDataDroptol(ilu_data)[2]);
+         hypre_printf("Max nnz per row = %d \n", (ilu_data -> maxRowNnz));
+         hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
          break;
       case 30:
-              hypre_printf("RAS with ILU(%d) \n", (ilu_data -> lfil));
-              hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
+         hypre_printf("RAS with ILU(%d) \n", (ilu_data -> lfil));
+         hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
          break;
       case 31:
-              hypre_printf("RAS with ILUT \n");
-              hypre_printf("drop tolerance for B = %e, E&F = %e, S = %e \n", hypre_ParILUDataDroptol(ilu_data)[0],hypre_ParILUDataDroptol(ilu_data)[1],hypre_ParILUDataDroptol(ilu_data)[2]);
-              hypre_printf("Max nnz per row = %d \n", (ilu_data -> maxRowNnz));
-              hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
+         hypre_printf("RAS with ILUT \n");
+         hypre_printf("drop tolerance for B = %e, E&F = %e, S = %e \n", hypre_ParILUDataDroptol(ilu_data)[0],hypre_ParILUDataDroptol(ilu_data)[1],hypre_ParILUDataDroptol(ilu_data)[2]);
+         hypre_printf("Max nnz per row = %d \n", (ilu_data -> maxRowNnz));
+         hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
          break;
       case 40:
-              hypre_printf("ddPQ-ILU-GMRES with ILU(%d) \n", (ilu_data -> lfil));
-              hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
+         hypre_printf("ddPQ-ILU-GMRES with ILU(%d) \n", (ilu_data -> lfil));
+         hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
          break;
       case 41:
-              hypre_printf("ddPQ-ILU-GMRES with ILUT \n");
-              hypre_printf("drop tolerance for B = %e, E&F = %e, S = %e \n", hypre_ParILUDataDroptol(ilu_data)[0],hypre_ParILUDataDroptol(ilu_data)[1],hypre_ParILUDataDroptol(ilu_data)[2]);
-              hypre_printf("Max nnz per row = %d \n", (ilu_data -> maxRowNnz));
-              hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
+         hypre_printf("ddPQ-ILU-GMRES with ILUT \n");
+         hypre_printf("drop tolerance for B = %e, E&F = %e, S = %e \n", hypre_ParILUDataDroptol(ilu_data)[0],hypre_ParILUDataDroptol(ilu_data)[1],hypre_ParILUDataDroptol(ilu_data)[2]);
+         hypre_printf("Max nnz per row = %d \n", (ilu_data -> maxRowNnz));
+         hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
          break;
       default: hypre_printf("Unknown type \n");
-         break;
+               break;
    }
 
    hypre_printf("\n ILU Solver Parameters: \n");
@@ -1864,7 +1864,7 @@ hypre_ILUBuildRASExternalMatrix(hypre_ParCSRMatrix *A, HYPRE_Int *rperm, HYPRE_I
     * hypre_CSRMatrix      **A_ext     [out] -> Return the external CSR matrix.
     * hypre_ParCSRCommPkg  commpkg_out [out] -> Return commpkg if set to a point. Use NULL here since we don't want it.
     */
-//   hypre_ParcsrGetExternalRows( A, m, A_offd_colmap, &A_ext, NULL );
+   //   hypre_ParcsrGetExternalRows( A, m, A_offd_colmap, &A_ext, NULL );
    A_ext = hypre_ParCSRMatrixExtractBExt(A, A, 1);
 
    A_ext_i              = hypre_CSRMatrixI(A_ext);
@@ -2033,15 +2033,15 @@ hypre_ILULocalRCM( hypre_CSRMatrix *A, HYPRE_Int start, HYPRE_Int end,
    HYPRE_Int               ncol           = hypre_CSRMatrixNumCols(A);
    HYPRE_Int               *A_i           = hypre_CSRMatrixI(A);
    HYPRE_Int               *A_j           = hypre_CSRMatrixJ(A);
-    hypre_CSRMatrix         *GT            = NULL;
-    hypre_CSRMatrix         *GGT           = NULL;
-//    HYPRE_Int               *AAT_i         = NULL;
-//    HYPRE_Int               *AAT_j         = NULL;
+   hypre_CSRMatrix         *GT            = NULL;
+   hypre_CSRMatrix         *GGT           = NULL;
+   //    HYPRE_Int               *AAT_i         = NULL;
+   //    HYPRE_Int               *AAT_j         = NULL;
    HYPRE_Int               A_nnz          = hypre_CSRMatrixNumNonzeros(A);
    hypre_CSRMatrix         *G             = NULL;
    HYPRE_Int               *G_i           = NULL;
    HYPRE_Int               *G_j           = NULL;
-    HYPRE_Real              *G_data           = NULL;
+   HYPRE_Real              *G_data           = NULL;
    HYPRE_Int               *G_perm        = NULL;
    HYPRE_Int               G_nnz;
    HYPRE_Int               G_capacity;
@@ -2111,8 +2111,9 @@ hypre_ILULocalRCM( hypre_CSRMatrix *A, HYPRE_Int start, HYPRE_Int end,
                G_j[G_nnz++] = col - start;
                if(G_nnz >= G_capacity)
                {
+                  HYPRE_Int tmp = G_capacity;
                   G_capacity = G_capacity * EXPAND_FACT + 1;
-                  G_j = hypre_TReAlloc(G_j, HYPRE_Int, G_capacity, HYPRE_MEMORY_DEVICE);
+                  G_j = hypre_TReAlloc_v2(G_j, HYPRE_Int, tmp, HYPRE_Int, G_capacity, HYPRE_MEMORY_DEVICE);
                }
             }
          }
@@ -2134,53 +2135,54 @@ hypre_ILULocalRCM( hypre_CSRMatrix *A, HYPRE_Int start, HYPRE_Int end,
    else
    {
       /* Use A + A' */
-        G_nnz = 0;
-        G_capacity = hypre_max(A_nnz * n * n / num_nodes / num_nodes - num_nodes, 1);
-        G_j = hypre_TAlloc(HYPRE_Int, G_capacity, HYPRE_MEMORY_DEVICE);
-        for(i = 0 ; i < num_nodes ; i ++)
-        {
-            G_i[i] = G_nnz;
-            row = perm[i + start];
-            r1 = A_i[row];
-            r2 = A_i[row+1];
-            for(j = r1 ; j < r2 ; j ++)
+      G_nnz = 0;
+      G_capacity = hypre_max(A_nnz * n * n / num_nodes / num_nodes - num_nodes, 1);
+      G_j = hypre_TAlloc(HYPRE_Int, G_capacity, HYPRE_MEMORY_DEVICE);
+      for(i = 0 ; i < num_nodes ; i ++)
+      {
+         G_i[i] = G_nnz;
+         row = perm[i + start];
+         r1 = A_i[row];
+         r2 = A_i[row+1];
+         for(j = r1 ; j < r2 ; j ++)
+         {
+            col = rqperm[A_j[j]];
+            if(col != row && col >= start && col < end)
             {
-                col = rqperm[A_j[j]];
-                if(col != row && col >= start && col < end)
-                {
-                    /* this is an entry in G */
-                    G_j[G_nnz++] = col - start;
-                    if(G_nnz >= G_capacity)
-                    {
-                        G_capacity = G_capacity * EXPAND_FACT + 1;
-                        G_j = hypre_TReAlloc(G_j, HYPRE_Int, G_capacity, HYPRE_MEMORY_DEVICE);
-                    }
-                }
+               /* this is an entry in G */
+               G_j[G_nnz++] = col - start;
+               if(G_nnz >= G_capacity)
+               {
+                  HYPRE_Int tmp = G_capacity;
+                  G_capacity = G_capacity * EXPAND_FACT + 1;
+                  G_j = hypre_TReAlloc_v2(G_j, HYPRE_Int, tmp, HYPRE_Int, G_capacity, HYPRE_MEMORY_DEVICE);
+               }
             }
-        }
-        G_i[num_nodes] = G_nnz;
-        if(G_nnz == 0)
-        {
-            //G has only diagonal, no need to do any kind of RCM
-            hypre_TFree(G_j, HYPRE_MEMORY_DEVICE);
-            hypre_TFree(rqperm, HYPRE_MEMORY_HOST);
-            *permp   = perm;
-            *qpermp  = qperm;
-            hypre_CSRMatrixDestroy(G);
-            return hypre_error_flag;
-        }
-        hypre_CSRMatrixJ(G) = G_j;
-        G_data = hypre_CTAlloc(HYPRE_Real, G_nnz, HYPRE_MEMORY_DEVICE);
-        hypre_CSRMatrixData(G) = G_data;
-        hypre_CSRMatrixNumNonzeros(G) = G_nnz;
+         }
+      }
+      G_i[num_nodes] = G_nnz;
+      if(G_nnz == 0)
+      {
+         //G has only diagonal, no need to do any kind of RCM
+         hypre_TFree(G_j, HYPRE_MEMORY_DEVICE);
+         hypre_TFree(rqperm, HYPRE_MEMORY_HOST);
+         *permp   = perm;
+         *qpermp  = qperm;
+         hypre_CSRMatrixDestroy(G);
+         return hypre_error_flag;
+      }
+      hypre_CSRMatrixJ(G) = G_j;
+      G_data = hypre_CTAlloc(HYPRE_Real, G_nnz, HYPRE_MEMORY_DEVICE);
+      hypre_CSRMatrixData(G) = G_data;
+      hypre_CSRMatrixNumNonzeros(G) = G_nnz;
 
-        /* now sum G with G' */
-        hypre_CSRMatrixTranspose(G, &GT, 1);
-        GGT = hypre_CSRMatrixAdd(G, GT);
-        hypre_CSRMatrixDestroy(G);
-        hypre_CSRMatrixDestroy(GT);
-        G = GGT;
-        GGT = NULL;
+      /* now sum G with G' */
+      hypre_CSRMatrixTranspose(G, &GT, 1);
+      GGT = hypre_CSRMatrixAdd(G, GT);
+      hypre_CSRMatrixDestroy(G);
+      hypre_CSRMatrixDestroy(GT);
+      G = GGT;
+      GGT = NULL;
    }
 
    /* 3: Build Graph
@@ -2281,14 +2283,14 @@ hypre_ILULocalRCMOrder( hypre_CSRMatrix *A, HYPRE_Int *perm)
 
    /* start RCM loop */
    current_num = 0;
-    while(current_num < n)
+   while(current_num < n)
    {
-        hypre_ILULocalRCMMindegree( n, degree, marker, &root);
-         /* This is a new connect component */
-        hypre_ILULocalRCMFindPPNode(A, &root, marker);
+      hypre_ILULocalRCMMindegree( n, degree, marker, &root);
+      /* This is a new connect component */
+      hypre_ILULocalRCMFindPPNode(A, &root, marker);
 
-         /* Numbering of this component */
-        hypre_ILULocalRCMNumbering(A, root, marker, perm, &current_num);
+      /* Numbering of this component */
+      hypre_ILULocalRCMNumbering(A, root, marker, perm, &current_num);
    }
 
    /* free */
@@ -3074,9 +3076,10 @@ hypre_CSRMatrixDropInplace(hypre_CSRMatrix *A, HYPRE_Real droptol, HYPRE_Int max
          /* copy data */
          while(ctrA + drop_len > capacity)
          {
+            HYPRE_Int tmp = capacity;
             capacity = capacity * EXPAND_FACT + 1;
-            new_j = hypre_TReAlloc(new_j, HYPRE_Int, capacity, HYPRE_MEMORY_DEVICE);
-            new_data = hypre_TReAlloc(new_data, HYPRE_Real, capacity, HYPRE_MEMORY_DEVICE);
+            new_j = hypre_TReAlloc_v2(new_j, HYPRE_Int, tmp, HYPRE_Int, capacity, HYPRE_MEMORY_DEVICE);
+            new_data = hypre_TReAlloc_v2(new_data, HYPRE_Real, tmp, HYPRE_Real, capacity, HYPRE_MEMORY_DEVICE);
          }
          hypre_TMemcpy( new_j + ctrA, idx,HYPRE_Int, drop_len, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
          hypre_TMemcpy( new_data + ctrA, data,HYPRE_Real, drop_len, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
@@ -3113,9 +3116,10 @@ hypre_CSRMatrixDropInplace(hypre_CSRMatrix *A, HYPRE_Real droptol, HYPRE_Int max
          /* copy data */
          while(ctrA + drop_len > capacity)
          {
+            HYPRE_Int tmp = capacity;
             capacity = capacity * EXPAND_FACT + 1;
-            new_j = hypre_TReAlloc(new_j, HYPRE_Int, capacity, HYPRE_MEMORY_DEVICE);
-            new_data = hypre_TReAlloc(new_data, HYPRE_Real, capacity, HYPRE_MEMORY_DEVICE);
+            new_j = hypre_TReAlloc_v2(new_j, HYPRE_Int, tmp, HYPRE_Int, capacity, HYPRE_MEMORY_DEVICE);
+            new_data = hypre_TReAlloc_v2(new_data, HYPRE_Real, tmp, HYPRE_Real, capacity, HYPRE_MEMORY_DEVICE);
          }
          hypre_TMemcpy( new_j + ctrA, idx,HYPRE_Int, drop_len, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
          hypre_TMemcpy( new_data + ctrA, data,HYPRE_Real, drop_len, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
@@ -3323,7 +3327,7 @@ hypre_ILUCSRMatrixInverseSelfPrecondMRGlobal(hypre_CSRMatrix *matA, hypre_CSRMat
       {
          i = 1;
       }
-     hypre_printf("matrix size %5d\nfinal norm at loop %5d is %16.12f, time per iteration is %16.12f, complexity is %16.12f out of maximum %16.12f\n",n,i,r_norm, (time_e-time_s)/i, nnzM/nnzA, n/nnzA*n);
+      hypre_printf("matrix size %5d\nfinal norm at loop %5d is %16.12f, time per iteration is %16.12f, complexity is %16.12f out of maximum %16.12f\n",n,i,r_norm, (time_e-time_s)/i, nnzM/nnzA, n/nnzA*n);
    }
 
    hypre_CSRMatrixDestroy(matI);
@@ -3384,7 +3388,7 @@ hypre_ILUParCSRInverseNSH(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix **M, HYPRE_R
 
    if(mr_col_version)
    {
-     hypre_printf("Column version is not yet support, switch to global version\n");
+      hypre_printf("Column version is not yet support, switch to global version\n");
    }
 
    /* call MR to build loacl initial matrix
@@ -3402,13 +3406,13 @@ hypre_ILUParCSRInverseNSH(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix **M, HYPRE_R
 
    /* create parCSR matM */
    matM = hypre_ParCSRMatrixCreate( comm,
-                                    hypre_ParCSRMatrixGlobalNumRows(A),
-                                    hypre_ParCSRMatrixGlobalNumRows(A),
-                                    hypre_ParCSRMatrixRowStarts(A),
-                                    hypre_ParCSRMatrixColStarts(A),
-                                    0,
-                                    hypre_CSRMatrixNumNonzeros(M_diag),
-                                    0 );
+         hypre_ParCSRMatrixGlobalNumRows(A),
+         hypre_ParCSRMatrixGlobalNumRows(A),
+         hypre_ParCSRMatrixRowStarts(A),
+         hypre_ParCSRMatrixColStarts(A),
+         0,
+         hypre_CSRMatrixNumNonzeros(M_diag),
+         0 );
 
    hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(matM));
    hypre_ParCSRMatrixDiag(matM) = M_diag;
@@ -3432,7 +3436,7 @@ hypre_ILUParCSRInverseNSH(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix **M, HYPRE_R
    {
       if(myid == 0)
       {
-        hypre_printf("before NSH the norm is %16.12f\n", norm);
+         hypre_printf("before NSH the norm is %16.12f\n", norm);
       }
       time_s = hypre_MPI_Wtime();
    }
@@ -3475,7 +3479,7 @@ hypre_ILUParCSRInverseNSH(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix **M, HYPRE_R
       }
       if(myid == 0)
       {
-        hypre_printf("after %5d NSH iterations the norm is %16.12f, time per iteration is %16.12f\n", i, norm, (time_e-time_s)/i);
+         hypre_printf("after %5d NSH iterations the norm is %16.12f, time per iteration is %16.12f\n", i, norm, (time_e-time_s)/i);
       }
    }
 
@@ -3484,7 +3488,7 @@ hypre_ILUParCSRInverseNSH(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix **M, HYPRE_R
       /* the residual norm increase after NSH iteration, need to let user know */
       if(myid == 0)
       {
-        hypre_printf("Warning: NSH divergence, probably bad approximate invese matrix.\n");
+         hypre_printf("Warning: NSH divergence, probably bad approximate invese matrix.\n");
       }
    }
 

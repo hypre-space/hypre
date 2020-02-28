@@ -44,7 +44,7 @@ rost="-struct -rt -mpibind -rtol 1e-8 -atol 1e-8"
 rocuda="-cuda -rt -mpibind"
 
 # CUDA with UM
-co="--with-cuda --enable-unified-memory --enable-persistent --enable-cub --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
+co="--with-cuda --enable-unified-memory --enable-persistent --enable-cub --enable-debug --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $roij
 ./renametest.sh basic $output_dir/basic-cuda-um-ij
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ross

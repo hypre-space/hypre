@@ -101,12 +101,12 @@ struct hypre_cub_Mutex
     #if defined(_MSC_VER)
 
         // Microsoft VC++
-        typedef long Spinlock;
+        typedef hypre_longint Spinlock;
 
     #else
 
         // GNU g++
-        typedef int Spinlock;
+        typedef hypre_int Spinlock;
 
         /**
          * Compiler read/write barrier
@@ -119,7 +119,7 @@ struct hypre_cub_Mutex
         /**
          * Atomic exchange
          */
-        __forceinline__ long _InterlockedExchange(volatile int * const Target, const int Value)
+        __forceinline__ hypre_longint _InterlockedExchange(volatile hypre_int * const Target, const hypre_int Value)
         {
             // NOTE: __sync_lock_test_and_set would be an acquire barrier, so we force a full barrier
             _ReadWriteBarrier();
@@ -222,13 +222,13 @@ struct hypre_cub_CachingDeviceAllocator
     //---------------------------------------------------------------------
 
     /// Out-of-bounds bin
-    static const unsigned int INVALID_BIN = (unsigned int) -1;
+    static const hypre_uint INVALID_BIN = (hypre_uint) -1;
 
     /// Invalid size
     static const size_t INVALID_SIZE = (size_t) -1;
 
     /// Invalid device ordinal
-    static const int INVALID_DEVICE_ORDINAL = -1;
+    static const hypre_int INVALID_DEVICE_ORDINAL = -1;
 
     //---------------------------------------------------------------------
     // Type definitions and helper types
@@ -241,13 +241,13 @@ struct hypre_cub_CachingDeviceAllocator
     {
         void*           d_ptr;              // Device pointer
         size_t          bytes;              // Size of allocation in bytes
-        unsigned int    bin;                // Bin enumeration
-        int             device;             // device ordinal
+        hypre_uint      bin;                // Bin enumeration
+        hypre_int       device;             // device ordinal
         cudaStream_t    associated_stream;  // Associated associated_stream
         cudaEvent_t     ready_event;        // Signal when associated stream has run to the point at which this block was freed
 
         // Constructor (suitable for searching maps for a specific block, given its pointer and device)
-        BlockDescriptor(void *d_ptr, int device) :
+        BlockDescriptor(void *d_ptr, hypre_int device) :
             d_ptr(d_ptr),
             bytes(0),
             bin(INVALID_BIN),
@@ -257,7 +257,7 @@ struct hypre_cub_CachingDeviceAllocator
         {}
 
         // Constructor (suitable for searching maps for a range of suitable blocks, given a device)
-        BlockDescriptor(int device) :
+        BlockDescriptor(hypre_int device) :
             d_ptr(NULL),
             bytes(0),
             bin(INVALID_BIN),
@@ -302,7 +302,7 @@ struct hypre_cub_CachingDeviceAllocator
     typedef std::multiset<BlockDescriptor, Compare> BusyBlocks;
 
     /// Map type of device ordinals to the number of cached bytes cached by each device
-    typedef std::map<int, TotalBytes> GpuCachedBytes;
+    typedef std::map<hypre_int, TotalBytes> GpuCachedBytes;
 
 
     //---------------------------------------------------------------------
@@ -312,11 +312,11 @@ struct hypre_cub_CachingDeviceAllocator
     /**
      * Integer pow function for unsigned base and exponent
      */
-    static unsigned int IntPow(
-        unsigned int base,
-        unsigned int exp)
+    static hypre_uint IntPow(
+        hypre_uint base,
+        hypre_uint exp)
     {
-        unsigned int retval = 1;
+        hypre_uint retval = 1;
         while (exp > 0)
         {
             if (exp & 1) {
@@ -333,10 +333,10 @@ struct hypre_cub_CachingDeviceAllocator
      * Round up to the nearest power-of
      */
     void NearestPowerOf(
-        unsigned int    &power,
+        hypre_uint      &power,
         size_t          &rounded_bytes,
-        unsigned int    base,
-        size_t          value)
+        hypre_uint       base,
+        size_t           value)
     {
         power = 0;
         rounded_bytes = 1;
@@ -363,9 +363,9 @@ struct hypre_cub_CachingDeviceAllocator
 
     hypre_cub_Mutex mutex;              /// Mutex for thread-safety
 
-    unsigned int    bin_growth;         /// Geometric growth factor for bin-sizes
-    unsigned int    min_bin;            /// Minimum bin enumeration
-    unsigned int    max_bin;            /// Maximum bin enumeration
+    hypre_uint      bin_growth;         /// Geometric growth factor for bin-sizes
+    hypre_uint      min_bin;            /// Minimum bin enumeration
+    hypre_uint      max_bin;            /// Maximum bin enumeration
 
     size_t          min_bin_bytes;      /// Minimum bin size
     size_t          max_bin_bytes;      /// Maximum bin size
@@ -388,9 +388,9 @@ struct hypre_cub_CachingDeviceAllocator
      * \brief Constructor.
      */
     hypre_cub_CachingDeviceAllocator(
-        unsigned int    bin_growth,                             ///< Geometric growth factor for bin-sizes
-        unsigned int    min_bin             = 1,                ///< Minimum bin (default is bin_growth ^ 1)
-        unsigned int    max_bin             = INVALID_BIN,      ///< Maximum bin (default is no max bin)
+        hypre_uint      bin_growth,                             ///< Geometric growth factor for bin-sizes
+        hypre_uint      min_bin             = 1,                ///< Minimum bin (default is bin_growth ^ 1)
+        hypre_uint      max_bin             = INVALID_BIN,      ///< Maximum bin (default is no max bin)
         size_t          max_cached_bytes    = INVALID_SIZE,     ///< Maximum aggregate cached bytes per device (default is no limit)
         bool            skip_cleanup        = false,            ///< Whether or not to skip a call to \p FreeAllCached() when the destructor is called (default is to deallocate)
         bool            debug               = false,            ///< Whether or not to print (de)allocation events to stdout (default is no stderr output)
@@ -454,7 +454,7 @@ struct hypre_cub_CachingDeviceAllocator
         // Lock
         mutex.Lock();
 
-        if (debug) printf("Changing max_cached_bytes (%lld -> %lld)\n", (long long) this->max_cached_bytes, (long long) max_cached_bytes);
+        if (debug) printf("Changing max_cached_bytes (%zu -> %zu)\n", this->max_cached_bytes, max_cached_bytes);
 
         this->max_cached_bytes = max_cached_bytes;
 
@@ -473,13 +473,13 @@ struct hypre_cub_CachingDeviceAllocator
      * streams when all prior work submitted to \p active_stream has completed.
      */
     cudaError_t DeviceAllocate(
-        int             device,             ///< [in] Device on which to place the allocation
+        hypre_int       device,             ///< [in] Device on which to place the allocation
         void            **d_ptr,            ///< [out] Reference to pointer to the allocation
         size_t          bytes,              ///< [in] Minimum number of bytes for the allocation
         cudaStream_t    active_stream = 0)  ///< [in] The stream to be associated with this allocation
     {
         *d_ptr                          = NULL;
-        int entrypoint_device           = INVALID_DEVICE_ORDINAL;
+        hypre_int entrypoint_device     = INVALID_DEVICE_ORDINAL;
         cudaError_t error               = cudaSuccess;
 
         if (device == INVALID_DEVICE_ORDINAL)
@@ -536,8 +536,8 @@ struct hypre_cub_CachingDeviceAllocator
                     cached_bytes[device].free -= search_key.bytes;
                     cached_bytes[device].live += search_key.bytes;
 
-                    if (debug) printf("\tDevice %d reused cached block at %p (%lld bytes) for stream %lld (previously associated with stream %lld).\n",
-                        device, search_key.d_ptr, (long long) search_key.bytes, (long long) search_key.associated_stream, (long long)  block_itr->associated_stream);
+                    if (debug) printf("\tDevice %d reused cached block at %p (%zu bytes) for stream %p (previously associated with stream %p).\n",
+                        device, search_key.d_ptr, search_key.bytes, search_key.associated_stream, block_itr->associated_stream);
 
                     cached_blocks.erase(block_itr);
 
@@ -573,8 +573,8 @@ struct hypre_cub_CachingDeviceAllocator
             if ((error) == cudaErrorMemoryAllocation)
             {
                 // The allocation attempt failed: free all cached blocks on device and retry
-                if (debug) printf("\tDevice %d failed to allocate %lld bytes for stream %lld, retrying after freeing cached allocations",
-                      device, (long long) search_key.bytes, (long long) search_key.associated_stream);
+                if (debug) printf("\tDevice %d failed to allocate %zu bytes for stream %p, retrying after freeing cached allocations",
+                      device, search_key.bytes, search_key.associated_stream);
 
                 error = cudaSuccess;    // Reset the error we will return
                 cudaGetLastError();     // Reset CUDART's error
@@ -599,8 +599,8 @@ struct hypre_cub_CachingDeviceAllocator
                     // Reduce balance and erase entry
                     cached_bytes[device].free -= block_itr->bytes;
 
-                    if (debug) printf("\tDevice %d freed %lld bytes.\n\t\t  %lld available blocks cached (%lld bytes), %lld live blocks (%lld bytes) outstanding.\n",
-                        device, (long long) block_itr->bytes, (long long) cached_blocks.size(), (long long) cached_bytes[device].free, (long long) live_blocks.size(), (long long) cached_bytes[device].live);
+                    if (debug) printf("\tDevice %d freed %zu bytes.\n\t\t  %zu available blocks cached (%zu bytes), %zu live blocks (%zu bytes) outstanding.\n",
+                        device, block_itr->bytes, cached_blocks.size(), cached_bytes[device].free, live_blocks.size(), cached_bytes[device].live);
 
                     cached_blocks.erase(block_itr);
 
@@ -636,8 +636,8 @@ struct hypre_cub_CachingDeviceAllocator
             cached_bytes[device].live += search_key.bytes;
             mutex.Unlock();
 
-            if (debug) printf("\tDevice %d allocated new device block at %p (%lld bytes associated with stream %lld).\n",
-                      device, search_key.d_ptr, (long long) search_key.bytes, (long long) search_key.associated_stream);
+            if (debug) printf("\tDevice %d allocated new device block at %p (%zu bytes associated with stream %p).\n",
+                      device, search_key.d_ptr, search_key.bytes, search_key.associated_stream);
 
             // Attempt to revert back to previous device if necessary
             if ((entrypoint_device != INVALID_DEVICE_ORDINAL) && (entrypoint_device != device))
@@ -649,8 +649,8 @@ struct hypre_cub_CachingDeviceAllocator
         // Copy device pointer to output parameter
         *d_ptr = search_key.d_ptr;
 
-        if (debug) printf("\t\t%lld available blocks cached (%lld bytes), %lld live blocks outstanding(%lld bytes).\n",
-            (long long) cached_blocks.size(), (long long) cached_bytes[device].free, (long long) live_blocks.size(), (long long) cached_bytes[device].live);
+        if (debug) printf("\t\t%zu available blocks cached (%zu bytes), %zu live blocks outstanding(%zu bytes).\n",
+            cached_blocks.size(), cached_bytes[device].free, live_blocks.size(), cached_bytes[device].live);
 
         return error;
     }
@@ -680,10 +680,10 @@ struct hypre_cub_CachingDeviceAllocator
      * streams when all prior work submitted to \p active_stream has completed.
      */
     cudaError_t DeviceFree(
-        int             device,
+        hypre_int       device,
         void*           d_ptr)
     {
-        int entrypoint_device           = INVALID_DEVICE_ORDINAL;
+        hypre_int entrypoint_device     = INVALID_DEVICE_ORDINAL;
         cudaError_t error               = cudaSuccess;
 
         if (device == INVALID_DEVICE_ORDINAL)
@@ -715,9 +715,9 @@ struct hypre_cub_CachingDeviceAllocator
                 cached_blocks.insert(search_key);
                 cached_bytes[device].free += search_key.bytes;
 
-                if (debug) printf("\tDevice %d returned %lld bytes from associated stream %lld.\n\t\t %lld available blocks cached (%lld bytes), %lld live blocks outstanding. (%lld bytes)\n",
-                    device, (long long) search_key.bytes, (long long) search_key.associated_stream, (long long) cached_blocks.size(),
-                    (long long) cached_bytes[device].free, (long long) live_blocks.size(), (long long) cached_bytes[device].live);
+                if (debug) printf("\tDevice %d returned %zu bytes from associated stream %p.\n\t\t %zu available blocks cached (%zu bytes), %zu live blocks outstanding. (%zu bytes)\n",
+                    device, search_key.bytes, search_key.associated_stream, cached_blocks.size(),
+                    cached_bytes[device].free, live_blocks.size(), cached_bytes[device].live);
             }
         }
 
@@ -742,8 +742,8 @@ struct hypre_cub_CachingDeviceAllocator
             if ((error = cudaFree(d_ptr))) return error;
             if ((error = cudaEventDestroy(search_key.ready_event))) return error;
 
-            if (debug) printf("\tDevice %d freed %lld bytes from associated stream %lld.\n\t\t  %lld available blocks cached (%lld bytes), %lld live blocks (%lld bytes) outstanding.\n",
-                device, (long long) search_key.bytes, (long long) search_key.associated_stream, (long long) cached_blocks.size(), (long long) cached_bytes[device].free, (long long) live_blocks.size(), (long long) cached_bytes[device].live);
+            if (debug) printf("\tDevice %d freed %zu bytes from associated stream %p.\n\t\t  %zu available blocks cached (%zu bytes), %zu live blocks (%zu bytes) outstanding.\n",
+                device, search_key.bytes, search_key.associated_stream, cached_blocks.size(), cached_bytes[device].free, live_blocks.size(), cached_bytes[device].live);
         }
 
         // Reset device
@@ -775,9 +775,9 @@ struct hypre_cub_CachingDeviceAllocator
      */
     cudaError_t FreeAllCached()
     {
-        cudaError_t error         = cudaSuccess;
-        int entrypoint_device     = INVALID_DEVICE_ORDINAL;
-        int current_device        = INVALID_DEVICE_ORDINAL;
+        cudaError_t error           = cudaSuccess;
+        hypre_int entrypoint_device = INVALID_DEVICE_ORDINAL;
+        hypre_int current_device    = INVALID_DEVICE_ORDINAL;
 
         mutex.Lock();
 
@@ -806,8 +806,8 @@ struct hypre_cub_CachingDeviceAllocator
             // Reduce balance and erase entry
             cached_bytes[current_device].free -= begin->bytes;
 
-            if (debug) printf("\tDevice %d freed %lld bytes.\n\t\t  %lld available blocks cached (%lld bytes), %lld live blocks (%lld bytes) outstanding.\n",
-                current_device, (long long) begin->bytes, (long long) cached_blocks.size(), (long long) cached_bytes[current_device].free, (long long) live_blocks.size(), (long long) cached_bytes[current_device].live);
+            if (debug) printf("\tDevice %d freed %zu bytes.\n\t\t  %zu available blocks cached (%zu bytes), %zu live blocks (%zu bytes) outstanding.\n",
+                current_device, begin->bytes, cached_blocks.size(), cached_bytes[current_device].free, live_blocks.size(), cached_bytes[current_device].live);
 
             cached_blocks.erase(begin);
         }

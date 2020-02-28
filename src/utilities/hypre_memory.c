@@ -651,6 +651,7 @@ hypre_ReAlloc(void *ptr, size_t size, HYPRE_MemoryLocation location)
    if (hypre_GetActualMemLocation(location) != hypre_MEMORY_HOST)
    {
       hypre_printf("hypre_TReAlloc only works with HYPRE_MEMORY_HOST; Use hypre_TReAlloc_v2 instead!\n");
+      hypre_assert(0);
       hypre_MPI_Abort(hypre_MPI_COMM_WORLD, -1);
       return NULL;
    }
