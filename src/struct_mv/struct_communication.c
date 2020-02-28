@@ -14,15 +14,6 @@ char       filename[255];
 FILE      *file;
 #endif
 
-/* These are device buffers needed to do MPI communication
- * when the computations (BoxLoop) are excuted on device and the host memory
- * are not accessible from device
- * */
-HYPRE_Complex* global_recv_buffer = NULL;
-HYPRE_Complex* global_send_buffer = NULL;
-HYPRE_Int      global_recv_size = 0;
-HYPRE_Int      global_send_size = 0;
-
 /* this computes a (large enough) size (in doubles) for the message prefix */
 #define hypre_CommPrefixSize(ne)                                        \
    ( (((1+ne)*sizeof(HYPRE_Int) + ne*sizeof(hypre_Box))/sizeof(HYPRE_Complex)) + 1 )
@@ -854,16 +845,14 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
       if (num_sends > 0)
       {
          size = hypre_CommPkgSendBufsize(comm_pkg);
-         if (size > global_send_size)
+         if (size > hypre_HandleStructCommSendBufferSize(hypre_handle))
          {
-            if (global_send_size > 0)
-            {
-               hypre_TFree(global_send_buffer,HYPRE_MEMORY_DEVICE);
-            }
-            global_send_buffer = hypre_CTAlloc(HYPRE_Complex, 5*size,HYPRE_MEMORY_DEVICE);
-            global_send_size   = 5*size;
+            hypre_TFree(hypre_HandleStructCommSendBuffer(hypre_handle), HYPRE_MEMORY_DEVICE);
+            hypre_HandleStructCommSendBufferSize(hypre_handle) = 5 * size;
+            hypre_HandleStructCommSendBuffer(hypre_handle) =
+               hypre_CTAlloc(HYPRE_Complex, hypre_HandleStructCommSendBufferSize(hypre_handle), HYPRE_MEMORY_DEVICE);
          }
-         send_buffers_data[0] = global_send_buffer;
+         send_buffers_data[0] = hypre_HandleStructCommSendBuffer(hypre_handle);
          for (i = 1; i < num_sends; i++)
          {
             comm_type = hypre_CommPkgSendType(comm_pkg, i-1);
@@ -899,16 +888,14 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
       {
          size = hypre_CommPkgRecvBufsize(comm_pkg);
 
-         if (size > global_recv_size)
+         if (size > hypre_HandleStructCommRecvBufferSize(hypre_handle))
          {
-            if (global_recv_size > 0)
-            {
-               hypre_TFree(global_recv_buffer,HYPRE_MEMORY_DEVICE);
-            }
-            global_recv_buffer = hypre_CTAlloc(HYPRE_Complex, 5*size,HYPRE_MEMORY_DEVICE);
-            global_recv_size   = 5*size;
+            hypre_TFree(hypre_HandleStructCommRecvBuffer(hypre_handle), HYPRE_MEMORY_DEVICE);
+            hypre_HandleStructCommRecvBufferSize(hypre_handle) = 5 * size;
+            hypre_HandleStructCommRecvBuffer(hypre_handle) =
+               hypre_CTAlloc(HYPRE_Complex, hypre_HandleStructCommRecvBufferSize(hypre_handle), HYPRE_MEMORY_DEVICE);
          }
-         recv_buffers_data[0] = global_recv_buffer;
+         recv_buffers_data[0] = hypre_HandleStructCommRecvBuffer(hypre_handle);
          for (i = 1; i < num_recvs; i++)
          {
             comm_type = hypre_CommPkgRecvType(comm_pkg, i-1);

@@ -66,7 +66,9 @@ hypre_HandleDestroy(hypre_Handle *hypre_handle_)
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_Int i;
 
-   hypre_TFree(hypre_handle_->cuda_reduce_buffer, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(hypre_HandleCudaReduceBuffer(hypre_handle_),     HYPRE_MEMORY_DEVICE);
+   hypre_TFree(hypre_HandleStructCommRecvBuffer(hypre_handle_), HYPRE_MEMORY_DEVICE);
+   hypre_TFree(hypre_HandleStructCommSendBuffer(hypre_handle_), HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_CURAND)
    if (hypre_handle_->curand_gen)
@@ -236,10 +238,6 @@ HYPRE_Init()
  *
  *****************************************************************************/
 
-/* declared in "struct_communication.c" */
-extern HYPRE_Complex *global_recv_buffer, *global_send_buffer;
-extern HYPRE_Int      global_recv_size, global_send_size;
-
 HYPRE_Int
 HYPRE_Finalize()
 {
@@ -248,9 +246,6 @@ HYPRE_Finalize()
 #if defined(HYPRE_USING_KOKKOS)
    Kokkos::finalize ();
 #endif
-
-   hypre_TFree(global_send_buffer, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(global_recv_buffer, HYPRE_MEMORY_DEVICE);
 
    //if (cudaSuccess == cudaPeekAtLastError() ) hypre_printf("OK...\n");
 

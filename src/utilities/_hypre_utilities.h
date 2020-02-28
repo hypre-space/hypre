@@ -2616,35 +2616,40 @@ extern "C++" {
 
 typedef struct
 {
-   HYPRE_Int              hypre_error;
-   HYPRE_MemoryLocation   memory_location;
+   HYPRE_Int                         hypre_error;
+   HYPRE_MemoryLocation              memory_location;
+   /* These are device buffers needed to do MPI communication for struct comm */
+   HYPRE_Complex*                    struct_comm_recv_buffer;
+   HYPRE_Complex*                    struct_comm_send_buffer;
+   HYPRE_Int                         struct_comm_recv_buffer_size;
+   HYPRE_Int                         struct_comm_send_buffer_size;
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   HYPRE_ExecuctionPolicy default_exec_policy;
-   HYPRE_Int              cuda_device;
+   HYPRE_ExecuctionPolicy            default_exec_policy;
+   HYPRE_Int                         cuda_device;
    /* by default, hypre puts GPU computations in this stream
     * Do not be confused with the default (null) CUDA stream */
-   HYPRE_Int cuda_compute_stream_num;
+   HYPRE_Int                         cuda_compute_stream_num;
    /* if synchronize the stream after computations */
-   HYPRE_Int cuda_compute_stream_sync;
-   curandGenerator_t curand_gen;
-   cublasHandle_t cublas_handle;
-   cusparseHandle_t cusparse_handle;
-   cusparseMatDescr_t cusparse_mat_descr;
-   cudaStream_t cuda_streams[HYPRE_MAX_NUM_STREAMS];
+   HYPRE_Int                         cuda_compute_stream_sync;
+   curandGenerator_t                 curand_gen;
+   cublasHandle_t                    cublas_handle;
+   cusparseHandle_t                  cusparse_handle;
+   cusparseMatDescr_t                cusparse_mat_descr;
+   cudaStream_t                      cuda_streams[HYPRE_MAX_NUM_STREAMS];
    /* work space for hypre's CUDA reducer */
-   void* cuda_reduce_buffer;
+   void*                             cuda_reduce_buffer;
    /* device spgemm options */
-   HYPRE_Int spgemm_use_cusparse;
-   HYPRE_Int spgemm_num_passes;
-   HYPRE_Int spgemm_rownnz_estimate_method;
-   HYPRE_Int spgemm_rownnz_estimate_nsamples;
-   float     spgemm_rownnz_estimate_mult_factor;
-   char      spgemm_hash_type;
+   HYPRE_Int                         spgemm_use_cusparse;
+   HYPRE_Int                         spgemm_num_passes;
+   HYPRE_Int                         spgemm_rownnz_estimate_method;
+   HYPRE_Int                         spgemm_rownnz_estimate_nsamples;
+   float                             spgemm_rownnz_estimate_mult_factor;
+   char                              spgemm_hash_type;
 #ifdef HYPRE_USING_CUB_ALLOCATOR
-   hypre_uint cub_bin_growth;
-   hypre_uint cub_min_bin;
-   hypre_uint cub_max_bin;
-   size_t     cub_max_cached_bytes;
+   hypre_uint                        cub_bin_growth;
+   hypre_uint                        cub_min_bin;
+   hypre_uint                        cub_max_bin;
+   size_t                            cub_max_cached_bytes;
    hypre_cub_CachingDeviceAllocator *cub_dev_allocator;
    hypre_cub_CachingDeviceAllocator *cub_um_allocator;
 #endif
@@ -2657,7 +2662,12 @@ hypre_Handle* hypre_HandleCreate();
 HYPRE_Int hypre_HandleDestroy(hypre_Handle *hypre_handle_);
 
 /* accessor macros to hypre_Handle */
-#define hypre_HandleMemoryLocation(hypre_handle) ((hypre_handle) -> memory_location)
+#define hypre_HandleMemoryLocation(hypre_handle)           ((hypre_handle) -> memory_location)
+#define hypre_HandleStructCommRecvBuffer(hypre_handle)     ((hypre_handle) -> struct_comm_recv_buffer)
+#define hypre_HandleStructCommSendBuffer(hypre_handle)     ((hypre_handle) -> struct_comm_send_buffer)
+#define hypre_HandleStructCommRecvBufferSize(hypre_handle) ((hypre_handle) -> struct_comm_recv_buffer_size)
+#define hypre_HandleStructCommSendBufferSize(hypre_handle) ((hypre_handle) -> struct_comm_send_buffer_size)
+#define hypre_HandleCudaReduceBuffer(hypre_handle)         ((hypre_handle) -> cuda_reduce_buffer)
 
 /* accessor inline functions to hypre_Handle */
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
@@ -3074,14 +3084,13 @@ struct ReduceSum
       __thread_sum = 0.0;
       nblocks = -1;
 
-      if (hypre_handle->cuda_reduce_buffer == NULL)
+      if (hypre_HandleCudaReduceBuffer(hypre_handle) == NULL)
       {
          /* allocate for the max size for reducing double6 type */
-         hypre_handle->cuda_reduce_buffer =
-            hypre_TAlloc(HYPRE_double6, 1024, HYPRE_MEMORY_DEVICE);
+         hypre_HandleCudaReduceBuffer(hypre_handle) = hypre_TAlloc(HYPRE_double6, 1024, HYPRE_MEMORY_DEVICE);
       }
 
-      d_buf = (T*) hypre_handle->cuda_reduce_buffer;
+      d_buf = (T*) hypre_HandleCudaReduceBuffer(hypre_handle);
    }
 
    /* copy constructor */
