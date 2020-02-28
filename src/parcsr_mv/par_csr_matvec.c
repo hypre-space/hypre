@@ -144,7 +144,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
       if (!hypre_ParCSRCommPkgTmpData(comm_pkg))
       {
          /* hypre_ParCSRCommPkgTmpData(comm_pkg) = hypre_TAlloc(HYPRE_Complex, num_cols_offd, HYPRE_MEMORY_DEVICE); */
-         hypre_ParCSRCommPkgTmpData(comm_pkg) = (HYPRE_Complex *) hypre_DeviceMalloc(sizeof(HYPRE_Complex) * num_cols_offd, 0);
+         hypre_ParCSRCommPkgTmpData(comm_pkg) = _hypre_TAlloc(HYPRE_Complex, num_cols_offd, hypre_MEMORY_DEVICE);
       }
       hypre_VectorData(x_tmp) = hypre_ParCSRCommPkgTmpData(comm_pkg);
       hypre_SeqVectorSetDataOwner(x_tmp, 0);
@@ -177,8 +177,9 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
                                                                 hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                                                                 HYPRE_MEMORY_DEVICE);
             */
-            hypre_ParCSRCommPkgBufData(comm_pkg) =
-               (HYPRE_Complex *) hypre_DeviceMalloc(sizeof(HYPRE_Complex) * hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends), 0);
+            hypre_ParCSRCommPkgBufData(comm_pkg) = _hypre_TAlloc(HYPRE_Complex,
+                                                                 hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                                                                 hypre_MEMORY_DEVICE);
          }
          x_buf_data[0] = hypre_ParCSRCommPkgBufData(comm_pkg);
          continue;
@@ -487,8 +488,7 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
       if (!hypre_ParCSRCommPkgTmpData(comm_pkg))
       {
          //hypre_ParCSRCommPkgTmpData(comm_pkg) = hypre_TAlloc(HYPRE_Complex, num_cols_offd, HYPRE_MEMORY_DEVICE);
-         hypre_ParCSRCommPkgTmpData(comm_pkg) =
-            (HYPRE_Complex *) hypre_DeviceMalloc(sizeof(HYPRE_Complex) * num_cols_offd, 0);
+         hypre_ParCSRCommPkgTmpData(comm_pkg) = _hypre_TAlloc(HYPRE_Complex, num_cols_offd, hypre_MEMORY_DEVICE);
       }
       hypre_VectorData(y_tmp) = hypre_ParCSRCommPkgTmpData(comm_pkg);
       hypre_SeqVectorSetDataOwner(y_tmp, 0);
@@ -521,8 +521,9 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
                                                                 hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                                                                 HYPRE_MEMORY_DEVICE);
             */
-            hypre_ParCSRCommPkgBufData(comm_pkg) =
-               (HYPRE_Complex *) hypre_DeviceMalloc(sizeof(HYPRE_Complex) * hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends), 0);
+            hypre_ParCSRCommPkgBufData(comm_pkg) = _hypre_TAlloc(HYPRE_Complex,
+                                                                 hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                                                                 hypre_MEMORY_DEVICE);
          }
          y_buf_data[0] = hypre_ParCSRCommPkgBufData(comm_pkg);
          continue;

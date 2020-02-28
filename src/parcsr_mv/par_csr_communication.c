@@ -389,7 +389,7 @@ hypre_ParCSRCommHandleCreate_v2 ( HYPRE_Int            job,
 
    if ( act_send_memory_location == hypre_MEMORY_DEVICE || act_send_memory_location == hypre_MEMORY_UNIFIED )
    {
-      //send_data = hypre_HostPinnedMalloc(num_send_bytes, 0);
+      //send_data = _hypre_TAlloc(char, num_send_bytes, hypre_MEMORY_HOST_PINNED);
       send_data = hypre_TAlloc(char, num_send_bytes, HYPRE_MEMORY_HOST);
       hypre_TMemcpy(send_data, send_data_in, char, num_send_bytes, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    }
@@ -402,7 +402,7 @@ hypre_ParCSRCommHandleCreate_v2 ( HYPRE_Int            job,
 
    if ( act_recv_memory_location == hypre_MEMORY_DEVICE || act_recv_memory_location == hypre_MEMORY_UNIFIED )
    {
-      //recv_data = hypre_HostPinnedMalloc(num_recv_bytes, 0);
+      //recv_data = hypre_TAlloc(char, num_recv_bytes, hypre_MEMORY_HOST_PINNED);
       recv_data = hypre_TAlloc(char, num_recv_bytes, HYPRE_MEMORY_HOST);
    }
    else
@@ -981,8 +981,8 @@ hypre_MatvecCommPkgDestroy( hypre_ParCSRCommPkg *comm_pkg )
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_MEMORY)
    //hypre_TFree(hypre_ParCSRCommPkgTmpData(comm_pkg),   HYPRE_MEMORY_DEVICE);
    //hypre_TFree(hypre_ParCSRCommPkgBufData(comm_pkg),   HYPRE_MEMORY_DEVICE);
-   hypre_DeviceFree(hypre_ParCSRCommPkgTmpData(comm_pkg));
-   hypre_DeviceFree(hypre_ParCSRCommPkgBufData(comm_pkg));
+   _hypre_TFree(hypre_ParCSRCommPkgTmpData(comm_pkg), hypre_MEMORY_DEVICE);
+   _hypre_TFree(hypre_ParCSRCommPkgBufData(comm_pkg), hypre_MEMORY_DEVICE);
    hypre_TFree(hypre_ParCSRCommPkgWorkSpace(comm_pkg), HYPRE_MEMORY_DEVICE);
 #endif
 

@@ -133,8 +133,7 @@ hypre_HostMalloc(size_t size, HYPRE_Int zeroinit)
    return ptr;
 }
 
-/* static inline void * */
-void *
+static inline void *
 hypre_DeviceMalloc(size_t size, HYPRE_Int zeroinit)
 {
    void *ptr = NULL;
@@ -194,7 +193,7 @@ hypre_UnifiedMalloc(size_t size, HYPRE_Int zeroinit)
    return ptr;
 }
 
-void *
+static inline void *
 hypre_HostPinnedMalloc(size_t size, HYPRE_Int zeroinit)
 {
    void *ptr = NULL;
@@ -211,6 +210,49 @@ hypre_HostPinnedMalloc(size_t size, HYPRE_Int zeroinit)
    return ptr;
 }
 
+static inline void *
+hypre_MAlloc_core(size_t size, HYPRE_Int zeroinit, hypre_MemoryLocation location)
+{
+   if (size == 0)
+   {
+      return NULL;
+   }
+
+   void *ptr = NULL;
+
+   switch (location)
+   {
+      case hypre_MEMORY_HOST :
+         ptr = hypre_HostMalloc(size, zeroinit);
+         break;
+      case hypre_MEMORY_DEVICE :
+         ptr = hypre_DeviceMalloc(size, zeroinit);
+         break;
+      case hypre_MEMORY_UNIFIED :
+         ptr = hypre_UnifiedMalloc(size, zeroinit);
+         break;
+      case hypre_MEMORY_HOST_PINNED :
+         ptr = hypre_HostPinnedMalloc(size, zeroinit);
+         break;
+      default :
+         hypre_WrongMemoryLocation();
+   }
+
+   if (!ptr)
+   {
+      hypre_OutOfMemory(size);
+      hypre_MPI_Abort(hypre_MPI_COMM_WORLD, -1);
+   }
+
+   return ptr;
+}
+
+void *
+_hypre_MAlloc(size_t size, hypre_MemoryLocation location)
+{
+   return hypre_MAlloc_core(size, 0, location);
+}
+
 /*--------------------------------------------------------------------------
  * Free
  *--------------------------------------------------------------------------*/
@@ -220,8 +262,7 @@ hypre_HostFree(void *ptr)
    free(ptr);
 }
 
-/*static inline void*/
-void
+static inline void
 hypre_DeviceFree(void *ptr)
 {
 #if defined(HYPRE_DEVICE_OPENMP_ALLOC)
@@ -249,7 +290,7 @@ hypre_UnifiedFree(void *ptr)
 #endif
 }
 
-void
+static inline void
 hypre_HostPinnedFree(void *ptr)
 {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
@@ -257,12 +298,53 @@ hypre_HostPinnedFree(void *ptr)
 #endif
 }
 
+static inline void
+hypre_Free_core(void *ptr, hypre_MemoryLocation location)
+{
+   if (!ptr)
+   {
+      return;
+   }
+
+#ifdef HYPRE_DEBUG
+   hypre_MemoryLocation tmp;
+   hypre_GetPointerLocation(ptr, &tmp);
+   /* do not use hypre_assert, which has alloc and free;
+    * will create an endless loop otherwise */
+   assert(location == tmp);
+#endif
+
+   switch (location)
+   {
+      case hypre_MEMORY_HOST :
+         hypre_HostFree(ptr);
+         break;
+      case hypre_MEMORY_DEVICE :
+         hypre_DeviceFree(ptr);
+         break;
+      case hypre_MEMORY_UNIFIED :
+         hypre_UnifiedFree(ptr);
+         break;
+      case hypre_MEMORY_HOST_PINNED :
+         hypre_HostPinnedFree(ptr);
+         break;
+      default :
+         hypre_WrongMemoryLocation();
+   }
+}
+
+void
+_hypre_Free(void *ptr, hypre_MemoryLocation location)
+{
+   hypre_Free_core(ptr, location);
+}
+
 
 /*--------------------------------------------------------------------------
  * Memcpy
  *--------------------------------------------------------------------------*/
 static inline void
-_hypre_Memcpy(void *dst, void *src, size_t size, hypre_MemoryLocation loc_dst, hypre_MemoryLocation loc_src)
+hypre_Memcpy_core(void *dst, void *src, size_t size, hypre_MemoryLocation loc_dst, hypre_MemoryLocation loc_src)
 {
    if (dst == NULL || src == NULL)
    {
@@ -377,7 +459,7 @@ _hypre_Memcpy(void *dst, void *src, size_t size, hypre_MemoryLocation loc_dst, h
  * ExecPolicy
  *--------------------------------------------------------------------------*/
 static inline HYPRE_ExecuctionPolicy
-_hypre_GetExecPolicy1(hypre_MemoryLocation location)
+hypre_GetExecPolicy1_core(hypre_MemoryLocation location)
 {
    HYPRE_ExecuctionPolicy exec = HYPRE_EXEC_UNDEFINED;
 
@@ -406,8 +488,8 @@ _hypre_GetExecPolicy1(hypre_MemoryLocation location)
 
 /* for binary operation */
 static inline HYPRE_ExecuctionPolicy
-_hypre_GetExecPolicy2(hypre_MemoryLocation location1,
-                      hypre_MemoryLocation location2)
+hypre_GetExecPolicy2_core(hypre_MemoryLocation location1,
+                          hypre_MemoryLocation location2)
 {
    HYPRE_ExecuctionPolicy exec = HYPRE_EXEC_UNDEFINED;
 
@@ -517,53 +599,16 @@ hypre_MemPrefetch(void *ptr, size_t size, HYPRE_MemoryLocation location)
  * hypre_MAlloc, hypre_CAlloc
  *--------------------------------------------------------------------------*/
 
-static inline void *
-hypre_MAlloc_core(size_t size, HYPRE_Int zeroinit, HYPRE_MemoryLocation location)
-{
-   if (size == 0)
-   {
-      return NULL;
-   }
-
-   void *ptr = NULL;
-
-   switch (hypre_GetActualMemLocation(location))
-   {
-      case hypre_MEMORY_HOST :
-         ptr = hypre_HostMalloc(size, zeroinit);
-         break;
-      case hypre_MEMORY_DEVICE :
-         ptr = hypre_DeviceMalloc(size, zeroinit);
-         break;
-      case hypre_MEMORY_UNIFIED :
-         ptr = hypre_UnifiedMalloc(size, zeroinit);
-         break;
-      case hypre_MEMORY_HOST_PINNED :
-         ptr = hypre_HostPinnedMalloc(size, zeroinit);
-         break;
-      default :
-         hypre_WrongMemoryLocation();
-   }
-
-   if (!ptr)
-   {
-      hypre_OutOfMemory(size);
-      hypre_MPI_Abort(hypre_MPI_COMM_WORLD, -1);
-   }
-
-   return ptr;
-}
-
 void *
 hypre_MAlloc(size_t size, HYPRE_MemoryLocation location)
 {
-   return hypre_MAlloc_core(size, 0, location);
+   return hypre_MAlloc_core(size, 0, hypre_GetActualMemLocation(location));
 }
 
 void *
 hypre_CAlloc( size_t count, size_t elt_size, HYPRE_MemoryLocation location)
 {
-   return hypre_MAlloc_core(count * elt_size, 1, location);
+   return hypre_MAlloc_core(count * elt_size, 1, hypre_GetActualMemLocation(location));
 }
 
 /*--------------------------------------------------------------------------
@@ -573,36 +618,7 @@ hypre_CAlloc( size_t count, size_t elt_size, HYPRE_MemoryLocation location)
 void
 hypre_Free(void *ptr, HYPRE_MemoryLocation location)
 {
-   if (!ptr)
-   {
-      return;
-   }
-
-#ifdef HYPRE_DEBUG
-   hypre_MemoryLocation tmp;
-   hypre_GetPointerLocation(ptr, &tmp);
-   /* do not use hypre_assert, which has alloc and free;
-    * will create an endless loop otherwise */
-   assert(hypre_GetActualMemLocation(location) == tmp);
-#endif
-
-   switch (hypre_GetActualMemLocation(location))
-   {
-      case hypre_MEMORY_HOST :
-         hypre_HostFree(ptr);
-         break;
-      case hypre_MEMORY_DEVICE :
-         hypre_DeviceFree(ptr);
-         break;
-      case hypre_MEMORY_UNIFIED :
-         hypre_UnifiedFree(ptr);
-         break;
-      case hypre_MEMORY_HOST_PINNED :
-         hypre_HostPinnedFree(ptr);
-         break;
-      default :
-         hypre_WrongMemoryLocation();
-   }
+   hypre_Free_core(ptr, hypre_GetActualMemLocation(location));
 }
 
 /*--------------------------------------------------------------------------
@@ -612,7 +628,7 @@ hypre_Free(void *ptr, HYPRE_MemoryLocation location)
 void
 hypre_Memcpy(void *dst, void *src, size_t size, HYPRE_MemoryLocation loc_dst, HYPRE_MemoryLocation loc_src)
 {
-   _hypre_Memcpy( dst, src, size, hypre_GetActualMemLocation(loc_dst), hypre_GetActualMemLocation(loc_src) );
+   hypre_Memcpy_core( dst, src, size, hypre_GetActualMemLocation(loc_dst), hypre_GetActualMemLocation(loc_src) );
 }
 
 /*--------------------------------------------------------------------------
@@ -685,7 +701,7 @@ HYPRE_ExecuctionPolicy
 hypre_GetExecPolicy1(HYPRE_MemoryLocation location)
 {
 
-   return _hypre_GetExecPolicy1(hypre_GetActualMemLocation(location));
+   return hypre_GetExecPolicy1_core(hypre_GetActualMemLocation(location));
 }
 
 /* for binary operation */
@@ -693,8 +709,8 @@ HYPRE_ExecuctionPolicy
 hypre_GetExecPolicy2(HYPRE_MemoryLocation location1,
                      HYPRE_MemoryLocation location2)
 {
-   return _hypre_GetExecPolicy2(hypre_GetActualMemLocation(location1),
-                                hypre_GetActualMemLocation(location2));
+   return hypre_GetExecPolicy2_core(hypre_GetActualMemLocation(location1),
+                                    hypre_GetActualMemLocation(location2));
 }
 
 /*--------------------------------------------------------------------------

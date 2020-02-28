@@ -43,7 +43,7 @@ ross="-struct -sstruct -rt -mpibind -rtol 1e-6 -atol 1e-6"
 rost="-struct -rt -mpibind -rtol 1e-8 -atol 1e-8"
 
 # CUDA with UM
-co="--with-cuda --enable-unified-memory --enable-persistent --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' HYPRE_CUDA_SM=70"
+co="--with-cuda --enable-unified-memory --enable-persistent --enable-cub --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' HYPRE_CUDA_SM=70"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $roij
 ./renametest.sh basic $output_dir/basic-cuda-um-ij
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ross
