@@ -41,7 +41,6 @@ LicStr='SPDX-License-Identifier: \(Apache-2.0 OR MIT\)'
 egrep -LR "$LicStr" . | egrep -v '[.](o|a|filters|pdf|svg|gif)$' |
   egrep -v '[.]/[.]git' |
   egrep -v '[.]/src/(blas|lapack)/.*[.]c' |
-  egrep -v '[.]/src/utilities/cub' |
   egrep -v '[.]/src/examples/docs' |
   egrep -v '[.]/src/test/TEST_.*'    > check-license.files
 
