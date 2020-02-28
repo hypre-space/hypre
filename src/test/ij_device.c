@@ -76,7 +76,9 @@ main( hypre_int argc,
    HYPRE_ParCSRMatrix parcsr_S   = NULL;
    HYPRE_ParCSRMatrix parcsr_S_device  = NULL;
 
-   HYPRE_Int      *h_CF_marker, *h_CF_marker2, *d_CF_marker;
+   HYPRE_Int         *h_CF_marker  = NULL;
+   HYPRE_Int         *h_CF_marker2 = NULL;
+   HYPRE_Int         *d_CF_marker;
 
    HYPRE_Int       errcode;
    HYPRE_Int       num_procs, myid;
@@ -2146,4 +2148,3 @@ BuildParCoordinates( HYPRE_Int                  argc,
    *coord_ptr = coordinates;
    return (0);
 }
-

@@ -20,11 +20,7 @@
 
 #include <time.h>
 
-#include "fortran_matrix.h"
 #include "HYPRE_lobpcg.h"
-#include "interpreter.h"
-#include "multivector.h"
-#include "HYPRE_MatvecFunctions.h"
 
 #define NO_SOLVER -9198
 
