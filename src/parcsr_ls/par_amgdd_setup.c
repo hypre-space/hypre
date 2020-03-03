@@ -654,7 +654,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    // !!! Debug
    HYPRE_Int total_nnz = 0;
    for (level = 0; level < num_levels; level++) total_nnz += hypre_ParCompGridARowPtr(compGrid[level])[hypre_ParCompGridNumNodes(compGrid[level])];
-   printf("rank %d, total total_bin_search_count = %d, percentage = %f\n", myid, total_bin_search_count, ((double)total_bin_search_count)/((double)total_nnz));
+   // printf("rank %d, total total_bin_search_count = %d, percentage = %f\n", myid, total_bin_search_count, ((double)total_bin_search_count)/((double)total_nnz));
 
    #if DEBUG_COMP_GRID
    // Test whether comp grids have correct shape
