@@ -124,6 +124,62 @@ typedef struct
 #define HYPRE_PAR_AMGDD_COMP_GRID_STRUCT
 #endif
 
+/*--------------------------------------------------------------------------
+ * CompGridMatrix (basically a coupled collection of CSR matrices)
+ *--------------------------------------------------------------------------*/
+
+#ifndef HYPRE_PAR_CSR_MATRIX_STRUCT
+#define HYPRE_PAR_CSR_MATRIX_STRUCT
+#endif
+
+typedef struct hypre_ParCompGridMatrix_struct
+{
+   hypre_CSRMatrix      *owned_diag; // Domain: owned domain of mat. Range: owned range of mat.
+   hypre_CSRMatrix      *owned_offd; // Domain: nonowned domain of mat. Range: owned range of mat.
+   hypre_CSRMatrix      *nonowned_diag; // Domain: nonowned domain of mat. Range: nonowned range of mat.
+   hypre_CSRMatrix      *nonowned_offd; // Domain: owned domain of mat. Range: nonowned range of mat.
+
+   HYPRE_Int            owns_owned_matrices;
+
+} hypre_ParCompGridMatrix;
+
+/*--------------------------------------------------------------------------
+ * Accessor functions for the CompGridMatrix structure
+ *--------------------------------------------------------------------------*/
+
+#define hypre_ParCompGridMatrixOwnedDiag(matrix)            ((matrix) -> owned_diag)
+#define hypre_ParCompGridMatrixOwnedOffd(matrix)            ((matrix) -> owned_offd)
+#define hypre_ParCompGridMatrixNonOwnedDiag(matrix)            ((matrix) -> nonowned_diag)
+#define hypre_ParCompGridMatrixNonOwnedOffd(matrix)            ((matrix) -> nonowned_offd)
+#define hypre_ParCompGridMatrixOwnsOwnedMatrices(matrix)       ((matrix) -> owns_owned_matrices)
+
+
+/*--------------------------------------------------------------------------
+ * CompGridVector
+ *--------------------------------------------------------------------------*/
+
+#ifndef HYPRE_PAR_VECTOR_STRUCT
+#define HYPRE_PAR_VECTOR_STRUCT
+#endif
+
+typedef struct hypre_CompGridVector_struct
+{
+   hypre_Vector         *owned_vector; // Original on-processor points (should be ordered)
+   hypre_Vector         *nonowned_vector; // Off-processor points (not ordered)
+
+   HYPRE_Int            owns_owned_vector;
+
+} hypre_ParCompGridVector;
+
+/*--------------------------------------------------------------------------
+ * Accessor functions for the CompGridVector structure
+ *--------------------------------------------------------------------------*/
+
+#define hypre_ParCompGridVectorOwned(vector)            ((vector) -> owned_vector)
+#define hypre_ParCompGridVectorNonOwned(vector)            ((vector) -> nonowned_vector)
+#define hypre_ParCompGridVectorOwnsOwnedVector(vector)       ((vector) -> owns_owned_vector)
+
+
 typedef struct
 {
    HYPRE_Int       num_nodes; // total number of nodes including real and ghost nodes
@@ -2107,18 +2163,22 @@ HYPRE_Int hypre_BoomerAMGDD_FAC_CFL1Jacobi( HYPRE_Solver amg_vdata, hypre_ParCom
 HYPRE_Int hypre_BoomerAMGDD_FAC_OrderedGaussSeidel( HYPRE_Solver amg_vdata, hypre_ParCompGrid *compGrid, HYPRE_Int cycle_param  );
 
 /* par_amgdd_comp_grid.c */
-hypre_ParCompGrid *hypre_ParCompGridCreate ();
-HYPRE_Int hypre_ParCompGridDestroy ( hypre_ParCompGrid *compGrid );
+hypre_ParCompGridMatrix* hypre_ParCompGridMatrixCreate();
+HYPRE_Int hypre_ParCompGridMatrixDestroy(hypre_ParCompGridMatrix *matrix);
+hypre_ParCompGridVector* hypre_ParCompGridVectorCreate();
+HYPRE_Int hypre_ParCompGridVectorDestroy(hypre_ParCompGridVector *vector);
+hypre_ParCompGrid *hypre_ParCompGridCreate();
+HYPRE_Int hypre_ParCompGridDestroy( hypre_ParCompGrid *compGrid );
 HYPRE_Int hypre_ParCompGridInitialize( hypre_ParAMGData *amg_data, HYPRE_Int padding, HYPRE_Int level, HYPRE_Int symmetric );
 HYPRE_Int hypre_ParCompGridSetupRelax( hypre_ParAMGData *amg_data );
 HYPRE_Int hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int start_level, HYPRE_Int transition_level, HYPRE_Int use_rd, HYPRE_Int debug );
 HYPRE_Int hypre_ParCompGridSetupRealDofMarker( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int num_ghost_layers );
-HYPRE_Int hypre_ParCompGridSetSize ( hypre_ParCompGrid *compGrid, HYPRE_Int num_nodes, HYPRE_Int mem_size, HYPRE_Int A_nnz, HYPRE_Int P_nnz, HYPRE_Int full_comp_info );
-HYPRE_Int hypre_ParCompGridResize ( hypre_ParCompGrid *compGrid, HYPRE_Int new_size, HYPRE_Int need_coarse_info, HYPRE_Int type, HYPRE_Int symmetric );
+HYPRE_Int hypre_ParCompGridSetSize( hypre_ParCompGrid *compGrid, HYPRE_Int num_nodes, HYPRE_Int mem_size, HYPRE_Int A_nnz, HYPRE_Int P_nnz, HYPRE_Int full_comp_info );
+HYPRE_Int hypre_ParCompGridResize( hypre_ParCompGrid *compGrid, HYPRE_Int new_size, HYPRE_Int need_coarse_info, HYPRE_Int type, HYPRE_Int symmetric );
 HYPRE_Int hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *num_added_nodes, HYPRE_Int start_level, HYPRE_Int num_levels, HYPRE_Int symmetric );
 HYPRE_Int hypre_ParCompGridSetupLocalIndicesP( hypre_ParCompGrid **compGrid, HYPRE_Int start_level, HYPRE_Int transition_level );
 HYPRE_Int hypre_ParCompGridLocalIndexBinarySearch( hypre_ParCompGrid *compGrid, HYPRE_Int global_index, HYPRE_Int start, HYPRE_Int end, HYPRE_Int *inv_map );
-HYPRE_Int hypre_ParCompGridDebugPrint ( hypre_ParCompGrid *compGrid, const char* filename, HYPRE_Int coarse_num_nodes );
+HYPRE_Int hypre_ParCompGridDebugPrint( hypre_ParCompGrid *compGrid, const char* filename, HYPRE_Int coarse_num_nodes );
 HYPRE_Int hypre_ParCompGridDumpSorted( hypre_ParCompGrid *compGrid, const char* filename);
 HYPRE_Int hypre_ParCompGridGlobalIndicesDump( hypre_ParCompGrid *compGrid, const char* filename);
 HYPRE_Int hypre_ParCompGridRealDofMarkerDump( hypre_ParCompGrid *compGrid, const char* filename);
@@ -2126,9 +2186,9 @@ HYPRE_Int hypre_ParCompGridCoarseGlobalIndicesDump( hypre_ParCompGrid *compGrid,
 HYPRE_Int hypre_ParCompGridCoarseResidualMarkerDump( hypre_ParCompGrid *compGrid, const char* filename);
 HYPRE_Int hypre_ParCompGridMatlabAMatrixDump( hypre_ParCompGrid *compGrid, const char* filename);
 HYPRE_Int hypre_ParCompGridMatlabPMatrixDump( hypre_ParCompGrid *compGrid, const char* filename);
-hypre_ParCompGridCommPkg *hypre_ParCompGridCommPkgCreate ();
-HYPRE_Int hypre_ParCompGridCommPkgDestroy ( hypre_ParCompGridCommPkg *compGridCommPkg );
-hypre_ParCompGridCommPkg *hypre_ParCompGridCommPkgCopy ( hypre_ParCompGridCommPkg *compGridCommPkg );
+hypre_ParCompGridCommPkg *hypre_ParCompGridCommPkgCreate();
+HYPRE_Int hypre_ParCompGridCommPkgDestroy( hypre_ParCompGridCommPkg *compGridCommPkg );
+hypre_ParCompGridCommPkg *hypre_ParCompGridCommPkgCopy( hypre_ParCompGridCommPkg *compGridCommPkg );
 
 #ifdef __cplusplus
 }

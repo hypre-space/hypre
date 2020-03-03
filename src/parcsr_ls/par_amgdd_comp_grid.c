@@ -24,6 +24,60 @@
 HYPRE_Int
 RecursivelyMarkGhostDofs(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *compGrid);
 
+hypre_ParCompGridMatrix* hypre_ParCompGridMatrixCreate()
+{
+   hypre_ParCompGridMatrix *matrix = hypre_CTAlloc(hypre_ParCompGridMatrix, 1, HYPRE_MEMORY_HOST);
+
+   hypre_ParCompGridMatrixOwnedDiag(matrix) = NULL;
+   hypre_ParCompGridMatrixOwnedOffd(matrix) = NULL;
+   hypre_ParCompGridMatrixNonOwnedDiag(matrix) = NULL;
+   hypre_ParCompGridMatrixNonOwnedOffd(matrix) = NULL;
+
+   hypre_ParCompGridMatrixOwnsOwnedMatrices(matrix) = 0;
+
+   return matrix;
+}
+
+HYPRE_Int hypre_ParCompGridMatrixDestroy(hypre_ParCompGridMatrix *matrix)
+{
+   if (hypre_ParCompGridMatrixOwnsOwnedMatrices(matrix))
+   {
+      if (hypre_ParCompGridMatrixOwnedDiag(matrix)) hypre_CSRMatrixDestroy(hypre_ParCompGridMatrixOwnedDiag(matrix));
+      if (hypre_ParCompGridMatrixOwnedOffd(matrix)) hypre_CSRMatrixDestroy(hypre_ParCompGridMatrixOwnedOffd(matrix));
+   }
+   if (hypre_ParCompGridMatrixNonOwnedDiag(matrix)) hypre_CSRMatrixDestroy(hypre_ParCompGridMatrixNonOwnedDiag(matrix));
+   if (hypre_ParCompGridMatrixNonOwnedOffd(matrix)) hypre_CSRMatrixDestroy(hypre_ParCompGridMatrixNonOwnedOffd(matrix));
+
+   hypre_TFree(matrix, HYPRE_MEMORY_HOST);
+
+   return 0;
+}
+
+hypre_ParCompGridVector *hypre_ParCompGridVectorCreate()
+{
+   hypre_ParCompGridVector *vector;
+
+   hypre_ParCompGridVectorOwned(vector) = NULL;
+   hypre_ParCompGridVectorNonOwned(vector) = NULL;
+
+   hypre_ParCompGridVectorOwnsOwnedVector(vector) = 0;
+
+   return vector;
+}
+
+HYPRE_Int hypre_ParCompGridVectorDestroy(hypre_ParCompGridVector *vector)
+{
+   if (hypre_ParCompGridVectorOwnsOwnedVector(vector))
+   {
+      if (hypre_ParCompGridVectorOwned(vector)) hypre_VectorDestroy(hypre_ParCompGridVectorOwned(vector));
+   }
+   if (hypre_ParCompGridVectorNonOwned(vector)) hypre_VectorDestroy(hypre_ParCompGridVectorNonOwned(vector));
+
+   hypre_TFree(vector, HYPRE_MEMORY_HOST);
+
+   return 0;
+}
+
 hypre_ParCompGrid *
 hypre_ParCompGridCreate ()
 {

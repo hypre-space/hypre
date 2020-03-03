@@ -106,6 +106,62 @@ typedef struct
 #define HYPRE_PAR_AMGDD_COMP_GRID_STRUCT
 #endif
 
+/*--------------------------------------------------------------------------
+ * CompGridMatrix (basically a coupled collection of CSR matrices)
+ *--------------------------------------------------------------------------*/
+
+#ifndef HYPRE_PAR_CSR_MATRIX_STRUCT
+#define HYPRE_PAR_CSR_MATRIX_STRUCT
+#endif
+
+typedef struct hypre_ParCompGridMatrix_struct
+{
+   hypre_CSRMatrix      *owned_diag; // Domain: owned domain of mat. Range: owned range of mat.
+   hypre_CSRMatrix      *owned_offd; // Domain: nonowned domain of mat. Range: owned range of mat.
+   hypre_CSRMatrix      *nonowned_diag; // Domain: nonowned domain of mat. Range: nonowned range of mat.
+   hypre_CSRMatrix      *nonowned_offd; // Domain: owned domain of mat. Range: nonowned range of mat.
+
+   HYPRE_Int            owns_owned_matrices;
+
+} hypre_ParCompGridMatrix;
+
+/*--------------------------------------------------------------------------
+ * Accessor functions for the CompGridMatrix structure
+ *--------------------------------------------------------------------------*/
+
+#define hypre_ParCompGridMatrixOwnedDiag(matrix)            ((matrix) -> owned_diag)
+#define hypre_ParCompGridMatrixOwnedOffd(matrix)            ((matrix) -> owned_offd)
+#define hypre_ParCompGridMatrixNonOwnedDiag(matrix)            ((matrix) -> nonowned_diag)
+#define hypre_ParCompGridMatrixNonOwnedOffd(matrix)            ((matrix) -> nonowned_offd)
+#define hypre_ParCompGridMatrixOwnsOwnedMatrices(matrix)       ((matrix) -> owns_owned_matrices)
+
+
+/*--------------------------------------------------------------------------
+ * CompGridVector
+ *--------------------------------------------------------------------------*/
+
+#ifndef HYPRE_PAR_VECTOR_STRUCT
+#define HYPRE_PAR_VECTOR_STRUCT
+#endif
+
+typedef struct hypre_CompGridVector_struct
+{
+   hypre_Vector         *owned_vector; // Original on-processor points (should be ordered)
+   hypre_Vector         *nonowned_vector; // Off-processor points (not ordered)
+
+   HYPRE_Int            owns_owned_vector;
+
+} hypre_CompGridVector;
+
+/*--------------------------------------------------------------------------
+ * Accessor functions for the CompGridVector structure
+ *--------------------------------------------------------------------------*/
+
+#define hypre_ParCompGridVectorOwned(matrix)            ((matrix) -> owned_vector)
+#define hypre_ParCompGridVectorNonOwned(matrix)            ((matrix) -> nonowned_vector)
+#define hypre_ParCompGridVectorOwnsOwnedVector(matrix)       ((matrix) -> owns_owned_vector)
+
+
 typedef struct
 {
    HYPRE_Int       num_nodes; // total number of nodes including real and ghost nodes
@@ -141,6 +197,10 @@ typedef struct
    HYPRE_Int        *R_colind;
    HYPRE_Complex    *R_data;
    
+   // !!! NEW
+   hypre_ParCompGridMatrix *A;
+
+   // !!! OLD
    hypre_CSRMatrix  *A;
    hypre_CSRMatrix  *A_real;
    hypre_CSRMatrix  *P;
@@ -154,6 +214,12 @@ typedef struct
    hypre_Vector     *temp;
    hypre_Vector     *temp2;
    hypre_Vector     *temp3;
+
+
+
+
+
+
 
    HYPRE_Real       *l1_norms;
    HYPRE_Int        *cf_marker_array;
