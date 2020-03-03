@@ -144,6 +144,7 @@ typedef struct
    HYPRE_Int        *edge_indices;
    HYPRE_Int        *sort_map;
    HYPRE_Int        *inv_sort_map;
+   HYPRE_Int        *relax_ordering;
 
    HYPRE_Int        *A_rowptr;
    HYPRE_Int        *A_colind;
@@ -210,6 +211,7 @@ typedef struct
 #define hypre_ParCompGridEdgeIndices(compGrid) ((compGrid) -> edge_indices)
 #define hypre_ParCompGridSortMap(compGrid) ((compGrid) -> sort_map)
 #define hypre_ParCompGridInvSortMap(compGrid) ((compGrid) -> inv_sort_map)
+#define hypre_ParCompGridRelaxOrdering(compGrid) ((compGrid) -> relax_ordering)
 #define hypre_ParCompGridARowPtr(compGrid)         ((compGrid) -> A_rowptr)
 #define hypre_ParCompGridAColInd(compGrid)         ((compGrid) -> A_colind)
 #define hypre_ParCompGridAGlobalColInd(compGrid)         ((compGrid) -> A_global_colind)
@@ -2102,6 +2104,7 @@ HYPRE_Int hypre_BoomerAMGDD_FAC_Jacobi( HYPRE_Solver amg_vdata, hypre_ParCompGri
 HYPRE_Int hypre_BoomerAMGDD_FAC_GaussSeidel( HYPRE_Solver amg_vdata, hypre_ParCompGrid *compGrid, HYPRE_Int cycle_param  );
 HYPRE_Int hypre_BoomerAMGDD_FAC_Cheby( HYPRE_Solver amg_vdata, hypre_ParCompGrid *compGrid, HYPRE_Int cycle_param  );
 HYPRE_Int hypre_BoomerAMGDD_FAC_CFL1Jacobi( HYPRE_Solver amg_vdata, hypre_ParCompGrid *compGrid, HYPRE_Int cycle_param  );
+HYPRE_Int hypre_BoomerAMGDD_FAC_OrderedGaussSeidel( HYPRE_Solver amg_vdata, hypre_ParCompGrid *compGrid, HYPRE_Int cycle_param  );
 
 /* par_amgdd_comp_grid.c */
 hypre_ParCompGrid *hypre_ParCompGridCreate ();

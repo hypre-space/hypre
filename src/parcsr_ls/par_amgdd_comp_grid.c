@@ -60,6 +60,7 @@ hypre_ParCompGridCreate ()
    hypre_ParCompGridEdgeIndices(compGrid) = NULL;
    hypre_ParCompGridSortMap(compGrid) = NULL;
    hypre_ParCompGridInvSortMap(compGrid) = NULL;
+   hypre_ParCompGridRelaxOrdering(compGrid) = NULL;
 
    hypre_ParCompGridARowPtr(compGrid) = NULL;
    hypre_ParCompGridAColInd(compGrid) = NULL;
@@ -162,6 +163,31 @@ hypre_ParCompGridDestroy ( hypre_ParCompGrid *compGrid )
    if (hypre_ParCompGridCoarseLocalIndices(compGrid))
    {
       hypre_TFree(hypre_ParCompGridCoarseLocalIndices(compGrid), HYPRE_MEMORY_HOST);
+   }
+
+   if (hypre_ParCompGridRealDofMarker(compGrid))
+   {
+      hypre_TFree(hypre_ParCompGridRealDofMarker(compGrid), HYPRE_MEMORY_HOST);
+   }
+
+   if (hypre_ParCompGridEdgeIndices(compGrid))
+   {
+      hypre_TFree(hypre_ParCompGridEdgeIndices(compGrid), HYPRE_MEMORY_HOST);
+   }
+
+   if (hypre_ParCompGridSortMap(compGrid))
+   {
+      hypre_TFree(hypre_ParCompGridSortMap(compGrid), HYPRE_MEMORY_HOST);
+   }
+
+   if (hypre_ParCompGridInvSortMap(compGrid))
+   {
+      hypre_TFree(hypre_ParCompGridInvSortMap(compGrid), HYPRE_MEMORY_HOST);
+   }
+
+   if (hypre_ParCompGridRelaxOrdering(compGrid))
+   {
+      hypre_TFree(hypre_ParCompGridRelaxOrdering(compGrid), HYPRE_MEMORY_HOST);
    }
 
    if (hypre_ParCompGridA(compGrid))
@@ -394,6 +420,7 @@ hypre_ParCompGridSetupRelax( hypre_ParAMGData *amg_data )
    else if (hypre_ParAMGDataFACRelaxType(amg_data) == 1) hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data) = hypre_BoomerAMGDD_FAC_GaussSeidel;
    else if (hypre_ParAMGDataFACRelaxType(amg_data) == 2) hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data) = hypre_BoomerAMGDD_FAC_Cheby;
    else if (hypre_ParAMGDataFACRelaxType(amg_data) == 3) hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data) = hypre_BoomerAMGDD_FAC_CFL1Jacobi; 
+   else if (hypre_ParAMGDataFACRelaxType(amg_data) == 4) hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data) = hypre_BoomerAMGDD_FAC_OrderedGaussSeidel; 
 
    for (level = hypre_ParAMGDataAMGDDStartLevel(amg_data); level < hypre_ParAMGDataNumLevels(amg_data); level++)
    {

@@ -500,6 +500,59 @@ hypre_BoomerAMGDD_FAC_GaussSeidel( HYPRE_Solver amg_vdata, hypre_ParCompGrid *co
    return 0;
 }
 
+HYPRE_Int hypre_BoomerAMGDD_FAC_OrderedGaussSeidel( HYPRE_Solver amg_vdata, hypre_ParCompGrid *compGrid, HYPRE_Int cycle_param  )
+{
+   HYPRE_Int               unordered_i, i, j; // loop variables
+   HYPRE_Complex           diag; // placeholder for the diagonal of A
+   HYPRE_Complex           u_before;
+   hypre_ParAMGData   *amg_data = (hypre_ParAMGData*) amg_vdata;
+
+   if (!hypre_ParCompGridRelaxOrdering(compGrid)) 
+   {
+      hypre_ParCompGridRelaxOrdering(compGrid) = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumNodes(compGrid), HYPRE_MEMORY_HOST);
+      hypre_topo_sort(hypre_ParCompGridARowPtr(compGrid), hypre_ParCompGridAColInd(compGrid), hypre_ParCompGridAData(compGrid), hypre_ParCompGridRelaxOrdering(compGrid), hypre_ParCompGridNumNodes(compGrid));
+   }
+
+   // Do Gauss-Seidel relaxation on the real nodes (ordered)
+   for (unordered_i = 0; unordered_i < hypre_ParCompGridNumNodes(compGrid); unordered_i++)
+   {
+      i = hypre_ParCompGridRelaxOrdering(compGrid)[unordered_i];
+      
+      if (i < hypre_ParCompGridNumRealNodes(compGrid))
+      {
+         u_before = hypre_VectorData(hypre_ParCompGridU(compGrid))[i];
+
+         // Initialize u as RHS
+         hypre_VectorData(hypre_ParCompGridU(compGrid))[i] = hypre_VectorData(hypre_ParCompGridF(compGrid))[i];
+         diag = 0.0;
+
+         // Loop over entries in A
+         for (j = hypre_ParCompGridARowPtr(compGrid)[i]; j < hypre_ParCompGridARowPtr(compGrid)[i+1]; j++)
+         {
+            #if DEBUG_FAC
+            if (hypre_ParCompGridAColInd(compGrid)[j] < 0) printf("Real node doesn't have its full stencil in A! row %d, entry %d\n",i,j);
+            #endif
+            // If this is the diagonal, store for later division
+            if (hypre_ParCompGridAColInd(compGrid)[j] == i) diag = hypre_ParCompGridAData(compGrid)[j];
+            // Else, subtract off A_ij*u_j
+            else
+            {
+               hypre_VectorData(hypre_ParCompGridU(compGrid))[i] -= hypre_ParCompGridAData(compGrid)[j] * hypre_VectorData(hypre_ParCompGridU(compGrid))[ hypre_ParCompGridAColInd(compGrid)[j] ];
+            }
+         }
+
+         // Divide by diagonal
+         if (diag == 0.0) printf("Tried to divide by zero diagonal!\n");
+         hypre_VectorData(hypre_ParCompGridU(compGrid))[i] /= diag;
+
+         if (hypre_ParCompGridT(compGrid)) hypre_VectorData(hypre_ParCompGridT(compGrid))[i] += hypre_VectorData(hypre_ParCompGridU(compGrid))[i] - u_before;
+         if (hypre_ParCompGridQ(compGrid)) hypre_VectorData(hypre_ParCompGridQ(compGrid))[i] += hypre_VectorData(hypre_ParCompGridU(compGrid))[i] - u_before;
+      }
+   }
+
+   return 0;
+}
+
 HYPRE_Int 
 hypre_BoomerAMGDD_FAC_Cheby( HYPRE_Solver amg_vdata, hypre_ParCompGrid *compGrid, HYPRE_Int cycle_param )
 {
