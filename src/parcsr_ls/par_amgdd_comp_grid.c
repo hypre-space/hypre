@@ -69,9 +69,9 @@ HYPRE_Int hypre_ParCompGridVectorDestroy(hypre_ParCompGridVector *vector)
 {
    if (hypre_ParCompGridVectorOwnsOwnedVector(vector))
    {
-      if (hypre_ParCompGridVectorOwned(vector)) hypre_VectorDestroy(hypre_ParCompGridVectorOwned(vector));
+      if (hypre_ParCompGridVectorOwned(vector)) hypre_SeqVectorDestroy(hypre_ParCompGridVectorOwned(vector));
    }
-   if (hypre_ParCompGridVectorNonOwned(vector)) hypre_VectorDestroy(hypre_ParCompGridVectorNonOwned(vector));
+   if (hypre_ParCompGridVectorNonOwned(vector)) hypre_SeqVectorDestroy(hypre_ParCompGridVectorNonOwned(vector));
 
    hypre_TFree(vector, HYPRE_MEMORY_HOST);
 
@@ -261,6 +261,103 @@ hypre_ParCompGridDestroy ( hypre_ParCompGrid *compGrid )
 
    hypre_TFree(compGrid, HYPRE_MEMORY_HOST);   
    
+
+   return 0;
+}
+
+HYPRE_Int
+hypre_ParCompGridInitializeNew( hypre_ParAMGData *amg_data, HYPRE_Int padding, HYPRE_Int level, HYPRE_Int symmetric )
+{
+   HYPRE_Int      myid;
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+
+   HYPRE_Int         i,j;
+
+   // Get info from the amg data structure
+   hypre_ParCompGrid *compGrid = hypre_ParAMGDataCompGrid(amg_data)[level];
+   HYPRE_Int *CF_marker_array = hypre_ParAMGDataCFMarkerArray(amg_data)[level];
+   hypre_CSRMatrix *A_diag_original = hypre_ParCSRMatrixDiag( hypre_ParAMGDataAArray(amg_data)[level] );
+   hypre_CSRMatrix *A_offd_original = hypre_ParCSRMatrixOffd( hypre_ParAMGDataAArray(amg_data)[level] );
+   hypre_ParCompGridFirstGlobalIndex(compGrid) = hypre_ParVectorFirstIndex(hypre_ParAMGDataFArray(amg_data)[level]);
+   hypre_ParCompGridLastGlobalIndex(compGrid) = hypre_ParVectorLastIndex(hypre_ParAMGDataFArray(amg_data)[level]);
+   hypre_ParCompGridNumOwnedNodes(compGrid) = hypre_VectorSize(hypre_ParVectorLocalVector(hypre_ParAMGDataFArray(amg_data)[level]));
+   hypre_ParCompGridNumNonOwnedNodes(compGrid) = 0;
+
+   // !!! Check on how good a guess this is for eventual size of the nononwed dofs and nnz
+   HYPRE_Int max_nonowned = 2 * (padding + hypre_ParAMGDataAMGDDNumGhostLayers(amg_data)) * hypre_CSRMatrixNumCols(A_offd_original);
+   HYPRE_Int ave_nnz_per_row = 0;
+   if (hypre_CSRMatrixNumRows(A_diag_original)) ave_nnz_per_row = (HYPRE_Int) (hypre_CSRMatrixNumNonzeros(A_diag_original) / hypre_CSRMatrixNumRows(A_diag_original));
+   HYPRE_Int max_nonowned_diag_nnz = max_nonowned * ave_nnz_per_row;
+   HYPRE_Int max_nonowned_offd_nnz = hypre_CSRMatrixNumNonzeros(A_offd_original);
+
+   // Setup CompGridMatrix A
+   hypre_ParCompGridMatrix *A = hypre_ParCompGridMatrixCreate();
+   hypre_ParCompGridMatrixOwnedDiag(A) = A_diag_original;
+   hypre_ParCompGridMatrixOwnedOffd(A) = A_offd_original;
+   hypre_ParCompGridMatrixOwnsOwnedMatrices(A) = 0;
+   hypre_ParCompGridMatrixNonOwnedDiag(A) = hypre_CSRMatrixCreate(max_nonowned, max_nonowned, max_nonowned_diag_nnz);
+   hypre_CSRMatrixInitialize(hypre_ParCompGridMatrixNonOwnedDiag(A));
+   hypre_ParCompGridMatrixNonOwnedOffd(A) = hypre_CSRMatrixCreate(max_nonowned, hypre_ParCompGridNumOwnedNodes(compGrid), max_nonowned_offd_nnz);
+   hypre_CSRMatrixInitialize(hypre_ParCompGridMatrixNonOwnedOffd(A));
+   hypre_ParCompGridANew(compGrid) = A;
+
+   // !!! Symmetric: in the symmetric case we can go ahead and just setup nonowned_offd 
+
+   // Setup CompGridMatrix P and R if appropriate
+   if (level != hypre_ParAMGDataNumLevels(amg_data) - 1)
+   {
+      hypre_ParCompGridMatrix *P = hypre_ParCompGridMatrixCreate();
+      hypre_ParCompGridMatrixOwnedDiag(P) = hypre_ParCSRMatrixDiag( hypre_ParAMGDataPArray(amg_data)[level] );
+      hypre_ParCompGridMatrixOwnedOffd(P) = hypre_ParCSRMatrixOffd( hypre_ParAMGDataPArray(amg_data)[level] );
+      hypre_ParCompGridMatrixOwnsOwnedMatrices(P) = 0;
+      hypre_ParCompGridPNew(compGrid) = P;
+   }
+   if (hypre_ParAMGDataRestriction(amg_data) && level != 0)
+   {
+      // NOTE: want to associate rows of R with comp grid points, so need to take R from one level finer
+      hypre_ParCompGridMatrix *R = hypre_ParCompGridMatrixCreate();
+      hypre_ParCompGridMatrixOwnedDiag(R) = hypre_ParCSRMatrixDiag( hypre_ParAMGDataRArray(amg_data)[level-1] );
+      hypre_ParCompGridMatrixOwnedOffd(R) = hypre_ParCSRMatrixOffd( hypre_ParAMGDataRArray(amg_data)[level-1] );
+      hypre_ParCompGridMatrixOwnsOwnedMatrices(R) = 0;
+      hypre_ParCompGridRNew(compGrid) = R;
+   }
+
+   // Allocate some extra arrays used during AMG-DD setup
+   hypre_ParCompGridNonOwnedGlobalIndices(compGrid) = hypre_CTAlloc(HYPRE_Int, max_nonowned, HYPRE_MEMORY_HOST);
+   hypre_ParCompGridNonOwnedRealMarker(compGrid) = hypre_CTAlloc(HYPRE_Int, max_nonowned, HYPRE_MEMORY_HOST);
+   hypre_ParCompGridNonOwnedSort(compGrid) = hypre_CTAlloc(HYPRE_Int, max_nonowned, HYPRE_MEMORY_HOST);
+   hypre_ParCompGridNonOwnedInvSort(compGrid) = hypre_CTAlloc(HYPRE_Int, max_nonowned, HYPRE_MEMORY_HOST);
+   hypre_ParCompGridNonOwnedDiagMissingColIndics(compGrid) = hypre_CTAlloc(HYPRE_Int, max_nonowned, HYPRE_MEMORY_HOST);
+
+   if (level != hypre_ParAMGDataNumLevels(amg_data) - 1)
+   {
+      hypre_ParCompGridNonOwnedCoarseIndices(compGrid) = hypre_CTAlloc(HYPRE_Int, max_nonowned, HYPRE_MEMORY_HOST);
+      hypre_ParCompGridOwnedCoarseIndices(compGrid) = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumOwnedNodes(compGrid), HYPRE_MEMORY_HOST);
+
+      // Setup the owned coarse indices
+      if ( CF_marker_array )
+      {
+         HYPRE_Int coarseIndexCounter = 0;
+         for (i = 0; i < hypre_ParCompGridNumOwnedNodes(compGrid); i++)
+         {
+            if ( CF_marker_array[i] == 1 )
+            {
+               hypre_ParCompGridOwnedCoarseIndices(compGrid)[i] = coarseIndexCounter++;
+            }
+            else 
+            {
+               hypre_ParCompGridOwnedCoarseIndices(compGrid)[i] = -1;
+            }
+         }
+      }
+      else 
+      {
+         for (i = 0; i < hypre_ParCompGridNumOwnedNodes(compGrid); i++)
+         {
+            hypre_ParCompGridOwnedCoarseIndices(compGrid)[i] = -1;
+         }
+      }
+   }
 
    return 0;
 }

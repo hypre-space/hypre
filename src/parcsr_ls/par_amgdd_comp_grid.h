@@ -114,7 +114,7 @@ typedef struct
 #define HYPRE_PAR_CSR_MATRIX_STRUCT
 #endif
 
-typedef struct hypre_ParCompGridMatrix_struct
+typedef struct
 {
    hypre_CSRMatrix      *owned_diag; // Domain: owned domain of mat. Range: owned range of mat.
    hypre_CSRMatrix      *owned_offd; // Domain: nonowned domain of mat. Range: owned range of mat.
@@ -144,14 +144,14 @@ typedef struct hypre_ParCompGridMatrix_struct
 #define HYPRE_PAR_VECTOR_STRUCT
 #endif
 
-typedef struct hypre_CompGridVector_struct
+typedef struct
 {
    hypre_Vector         *owned_vector; // Original on-processor points (should be ordered)
    hypre_Vector         *nonowned_vector; // Off-processor points (not ordered)
 
    HYPRE_Int            owns_owned_vector;
 
-} hypre_CompGridVector;
+} hypre_ParCompGridVector;
 
 /*--------------------------------------------------------------------------
  * Accessor functions for the CompGridVector structure
@@ -164,6 +164,35 @@ typedef struct hypre_CompGridVector_struct
 
 typedef struct
 {
+   // !!! NEW
+   HYPRE_Int        first_global_index;
+   HYPRE_Int        last_global_index;
+   HYPRE_Int        num_owned_nodes;
+   HYPRE_Int        num_nonowned_nodes;
+
+   HYPRE_Int        *nonowned_global_indices;
+   HYPRE_Int        *nonowned_coarse_indices;
+   HYPRE_Int        *nonowned_real_marker;
+   HYPRE_Int        *nonowned_sort;
+   HYPRE_Int        *nonowned_invsort;
+   HYPRE_Int        *nonowned_diag_missing_col_indices;
+
+   HYPRE_Int        *owned_coarse_indices;
+
+   hypre_ParCompGridMatrix *A_new;
+   hypre_ParCompGridMatrix *P_new;
+   hypre_ParCompGridMatrix *R_new;
+
+   hypre_ParCompGridVector     *u_new;
+   hypre_ParCompGridVector     *f_new;
+   hypre_ParCompGridVector     *t_new;
+   hypre_ParCompGridVector     *s_new;
+   hypre_ParCompGridVector     *q_new;
+   hypre_ParCompGridVector     *temp_new;
+   hypre_ParCompGridVector     *temp2_new;
+   hypre_ParCompGridVector     *temp3_new;
+
+   // !!! OLD
    HYPRE_Int       num_nodes; // total number of nodes including real and ghost nodes
    HYPRE_Int       num_owned_blocks; // number of blocks of owned nodes
    HYPRE_Int       *owned_block_starts; // start positions for the blocks of owned nodes
@@ -197,10 +226,6 @@ typedef struct
    HYPRE_Int        *R_colind;
    HYPRE_Complex    *R_data;
    
-   // !!! NEW
-   hypre_ParCompGridMatrix *A;
-
-   // !!! OLD
    hypre_CSRMatrix  *A;
    hypre_CSRMatrix  *A_real;
    hypre_CSRMatrix  *P;
@@ -215,12 +240,6 @@ typedef struct
    hypre_Vector     *temp2;
    hypre_Vector     *temp3;
 
-
-
-
-
-
-
    HYPRE_Real       *l1_norms;
    HYPRE_Int        *cf_marker_array;
    int              *c_mask;
@@ -234,6 +253,35 @@ typedef struct
  * Accessor functions for the Comp Grid structure
  *--------------------------------------------------------------------------*/
 
+// !!! NEW
+#define hypre_ParCompGridFirstGlobalIndex(compGrid)               ((compGrid) -> first_global_index)
+#define hypre_ParCompGridLastGlobalIndex(compGrid)               ((compGrid) -> last_global_index)
+#define hypre_ParCompGridNumOwnedNodes(compGrid)               ((compGrid) -> num_owned_nodes)
+#define hypre_ParCompGridNumNonOwnedNodes(compGrid)               ((compGrid) -> num_nonowned_nodes)
+
+#define hypre_ParCompGridNonOwnedGlobalIndices(compGrid)               ((compGrid) -> nonowned_global_indices)
+#define hypre_ParCompGridNonOwnedCoarseIndices(compGrid)               ((compGrid) -> nonowned_coarse_indices)
+#define hypre_ParCompGridNonOwnedRealMarker(compGrid)               ((compGrid) -> nonowned_real_marker)
+#define hypre_ParCompGridNonOwnedSort(compGrid)               ((compGrid) -> nonowned_sort)
+#define hypre_ParCompGridNonOwnedInvSort(compGrid)               ((compGrid) -> nonowned_invsort)
+#define hypre_ParCompGridNonOwnedDiagMissingColIndics(compGrid)               ((compGrid) -> nonowned_diag_missing_col_indices)
+
+#define hypre_ParCompGridOwnedCoarseIndices(compGrid)               ((compGrid) -> owned_coarse_indices)
+
+#define hypre_ParCompGridANew(compGrid)               ((compGrid) -> A_new)
+#define hypre_ParCompGridPNew(compGrid)               ((compGrid) -> P_new)
+#define hypre_ParCompGridRNew(compGrid)               ((compGrid) -> R_new)
+
+#define hypre_ParCompGridUNew(compGrid)           ((compGrid) -> u_new)
+#define hypre_ParCompGridFNew(compGrid)           ((compGrid) -> f_new)
+#define hypre_ParCompGridTNew(compGrid)           ((compGrid) -> t_new)
+#define hypre_ParCompGridSNew(compGrid)           ((compGrid) -> s_new)
+#define hypre_ParCompGridQNew(compGrid)           ((compGrid) -> q_new)
+#define hypre_ParCompGridTempNew(compGrid)        ((compGrid) -> temp_new)
+#define hypre_ParCompGridTemp2New(compGrid)        ((compGrid) -> temp2_new)
+#define hypre_ParCompGridTemp3New(compGrid)        ((compGrid) -> temp3_new)
+
+// !!! OLD
 #define hypre_ParCompGridNumNodes(compGrid)           ((compGrid) -> num_nodes)
 #define hypre_ParCompGridNumOwnedBlocks(compGrid)           ((compGrid) -> num_owned_blocks)
 #define hypre_ParCompGridOwnedBlockStarts(compGrid)           ((compGrid) -> owned_block_starts)
@@ -244,14 +292,7 @@ typedef struct
 #define hypre_ParCompGridAMemSize(compGrid)           ((compGrid) -> A_mem_size)
 #define hypre_ParCompGridPMemSize(compGrid)           ((compGrid) -> P_mem_size)
 #define hypre_ParCompGridRMemSize(compGrid)           ((compGrid) -> R_mem_size)
-#define hypre_ParCompGridU(compGrid)           ((compGrid) -> u)
-#define hypre_ParCompGridF(compGrid)           ((compGrid) -> f)
-#define hypre_ParCompGridT(compGrid)           ((compGrid) -> t)
-#define hypre_ParCompGridS(compGrid)           ((compGrid) -> s)
-#define hypre_ParCompGridQ(compGrid)           ((compGrid) -> q)
-#define hypre_ParCompGridTemp(compGrid)        ((compGrid) -> temp)
-#define hypre_ParCompGridTemp2(compGrid)        ((compGrid) -> temp2)
-#define hypre_ParCompGridTemp3(compGrid)        ((compGrid) -> temp3)
+
 #define hypre_ParCompGridGlobalIndices(compGrid)           ((compGrid) -> global_indices)
 #define hypre_ParCompGridCoarseGlobalIndices(compGrid)           ((compGrid) -> coarse_global_indices)
 #define hypre_ParCompGridCoarseLocalIndices(compGrid)           ((compGrid) -> coarse_local_indices)
@@ -260,6 +301,7 @@ typedef struct
 #define hypre_ParCompGridSortMap(compGrid) ((compGrid) -> sort_map)
 #define hypre_ParCompGridInvSortMap(compGrid) ((compGrid) -> inv_sort_map)
 #define hypre_ParCompGridRelaxOrdering(compGrid) ((compGrid) -> relax_ordering)
+
 #define hypre_ParCompGridARowPtr(compGrid)         ((compGrid) -> A_rowptr)
 #define hypre_ParCompGridAColInd(compGrid)         ((compGrid) -> A_colind)
 #define hypre_ParCompGridAGlobalColInd(compGrid)         ((compGrid) -> A_global_colind)
@@ -275,6 +317,17 @@ typedef struct
 #define hypre_ParCompGridAReal(compGrid)               ((compGrid) -> A_real)
 #define hypre_ParCompGridP(compGrid)               ((compGrid) -> P)
 #define hypre_ParCompGridR(compGrid)               ((compGrid) -> R)
+
+#define hypre_ParCompGridU(compGrid)           ((compGrid) -> u)
+#define hypre_ParCompGridF(compGrid)           ((compGrid) -> f)
+#define hypre_ParCompGridT(compGrid)           ((compGrid) -> t)
+#define hypre_ParCompGridS(compGrid)           ((compGrid) -> s)
+#define hypre_ParCompGridQ(compGrid)           ((compGrid) -> q)
+#define hypre_ParCompGridTemp(compGrid)        ((compGrid) -> temp)
+#define hypre_ParCompGridTemp2(compGrid)        ((compGrid) -> temp2)
+#define hypre_ParCompGridTemp3(compGrid)        ((compGrid) -> temp3)
+
+
 
 #define hypre_ParCompGridL1Norms(compGrid)         ((compGrid) -> l1_norms)
 #define hypre_ParCompGridCFMarkerArray(compGrid)         ((compGrid) -> cf_marker_array)

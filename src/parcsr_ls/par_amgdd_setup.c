@@ -208,6 +208,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
       {
          compGrid[level] = hypre_ParCompGridCreate();
          hypre_ParCompGridInitialize( amg_data, 0, level, symmetric );
+         hypre_ParCompGridInitializeNew( amg_data, 0, level, symmetric );
       }
       hypre_ParCompGridFinalize(compGrid, NULL, amgdd_start_level, num_levels, hypre_ParAMGDataAMGDDUseRD(amg_data), verify_amgdd);
       hypre_ParCompGridSetupRelax(amg_data);
@@ -302,6 +303,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
       {
          compGrid[level] = hypre_ParCompGridCreate();
          hypre_ParCompGridInitialize( amg_data, padding[level], level, symmetric );
+         hypre_ParCompGridInitializeNew( amg_data, padding[level], level, symmetric );
       }
    }
    // Otherwise just initialize comp grid on all levels
@@ -312,9 +314,30 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
       {
          compGrid[level] = hypre_ParCompGridCreate();
          hypre_ParCompGridInitialize( amg_data, padding[level], level, symmetric );
+         hypre_ParCompGridInitializeNew( amg_data, padding[level], level, symmetric );
       }   
    }
    if (timers) hypre_EndTiming(timers[0]);
+
+
+   // !!! Debug: check that initialization produces expected coarse indices
+   // if (myid == 1)
+   // {
+   //    for (level = 0; level < hypre_ParAMGDataNumLevels(amg_data) - 1; level++)
+   //    {
+   //       printf("\nLevel %d hypre_ParCompGridOwnedCoarseIndices vs. hypre_ParCompGridCoarseLocalIndices:\n", level);
+   //       for (i = 0; i < hypre_ParCompGridNumOwnedNodes(compGrid[level]); i++)
+   //       {
+   //          printf("%d, %d\n", hypre_ParCompGridOwnedCoarseIndices(compGrid[level])[i], hypre_ParCompGridCoarseLocalIndices(compGrid[level])[i]);
+   //       }
+   //    }
+   // }
+
+
+
+
+
+
 
 
    #if DEBUG_COMP_GRID == 2
