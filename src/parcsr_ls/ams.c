@@ -602,7 +602,7 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
    HYPRE_MemoryLocation memory_location_tmp = exec == HYPRE_EXEC_HOST ? HYPRE_MEMORY_HOST : HYPRE_MEMORY_DEVICE;
    HYPRE_Real *diag_tmp = NULL;
 
-   HYPRE_Int *cf_marker_offd = NULL;
+   HYPRE_Int *cf_marker_offd = NULL, *cf_marker_dev = NULL;
 
    /* collect the cf marker data from other procs */
    if (cf_marker != NULL)
@@ -617,7 +617,7 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
 
       if (num_cols_offd)
       {
-         cf_marker_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd, HYPRE_MEMORY_HOST);
+         cf_marker_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd, memory_location_tmp);
       }
       num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
       if (hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends))
@@ -634,21 +634,31 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
             int_buf_data[index++] = cf_marker[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
          }
       }
-      comm_handle = hypre_ParCSRCommHandleCreate(11, comm_pkg, int_buf_data,
-                                                 cf_marker_offd);
+      comm_handle = hypre_ParCSRCommHandleCreate_v2(11, comm_pkg, HYPRE_MEMORY_HOST, int_buf_data,
+                                                     memory_location_tmp, cf_marker_offd);
       hypre_ParCSRCommHandleDestroy(comm_handle);
       hypre_TFree(int_buf_data, HYPRE_MEMORY_HOST);
+
+      if (exec == HYPRE_EXEC_DEVICE)
+      {
+         cf_marker_dev = hypre_TAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_DEVICE);
+         hypre_TMemcpy(cf_marker_dev, cf_marker, HYPRE_Int, num_rows, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+      }
+      else
+      {
+         cf_marker_dev = cf_marker;
+      }
    }
 
    if (option == 1)
    {
       /* Set the l1 norm of the diag part */
-      hypre_CSRMatrixComputeRowSum(A_diag, cf_marker, cf_marker, l1_norm, 1, 1.0, "set");
+      hypre_CSRMatrixComputeRowSum(A_diag, cf_marker_dev, cf_marker_dev, l1_norm, 1, 1.0, "set");
 
       /* Add the l1 norm of the offd part */
       if (num_cols_offd)
       {
-         hypre_CSRMatrixComputeRowSum(A_offd, cf_marker, cf_marker_offd, l1_norm, 1, 1.0, "add");
+         hypre_CSRMatrixComputeRowSum(A_offd, cf_marker_dev, cf_marker_offd, l1_norm, 1, 1.0, "add");
       }
    }
    else if (option == 2)
@@ -658,7 +668,7 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
       /* Add the l1 norm of the offd part */
       if (num_cols_offd)
       {
-         hypre_CSRMatrixComputeRowSum(A_offd, cf_marker, cf_marker_offd, l1_norm, 1, 1.0, "add");
+         hypre_CSRMatrixComputeRowSum(A_offd, cf_marker_dev, cf_marker_offd, l1_norm, 1, 1.0, "add");
       }
    }
    else if (option == 3)
@@ -682,7 +692,7 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
       /* Add the scaled l1 norm of the offd part */
       if (num_cols_offd)
       {
-         hypre_CSRMatrixComputeRowSum(A_offd, cf_marker, cf_marker_offd, l1_norm, 1, 0.5, "add");
+         hypre_CSRMatrixComputeRowSum(A_offd, cf_marker_dev, cf_marker_offd, l1_norm, 1, 0.5, "add");
       }
 
       /* Truncate according to Remark 6.2 */
@@ -772,7 +782,12 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
       }
    }
 
-   hypre_TFree(cf_marker_offd, HYPRE_MEMORY_HOST);
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      hypre_TFree(cf_marker_dev, HYPRE_MEMORY_DEVICE);
+   }
+
+   hypre_TFree(cf_marker_offd, memory_location_tmp);
    hypre_TFree(diag_tmp, memory_location_tmp);
 
    return hypre_error_flag;
