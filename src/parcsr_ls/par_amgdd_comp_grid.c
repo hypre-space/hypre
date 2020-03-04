@@ -303,7 +303,7 @@ hypre_ParCompGridInitializeNew( hypre_ParAMGData *amg_data, HYPRE_Int padding, H
 
    // !!! Symmetric: in the symmetric case we can go ahead and just setup nonowned_offd 
 
-   // Setup CompGridMatrix P and R if appropriate
+   // Setup CompGridMatrix P and R if appropriate (!!! Don't actually need to do this here, I guess)
    if (level != hypre_ParAMGDataNumLevels(amg_data) - 1)
    {
       hypre_ParCompGridMatrix *P = hypre_ParCompGridMatrixCreate();
@@ -716,14 +716,12 @@ hypre_ParCompGridSetupRelax( hypre_ParAMGData *amg_data )
 }
 
 HYPRE_Int
-hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int start_level, HYPRE_Int transition_level, HYPRE_Int use_rd, HYPRE_Int debug )
+hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int start_level, HYPRE_Int num_levels, HYPRE_Int use_rd, HYPRE_Int debug )
 {
    HYPRE_Int level, i, j;
-   HYPRE_Int num_levels = transition_level;
-   if (compGridCommPkg) num_levels = hypre_ParCompGridCommPkgNumLevels(compGridCommPkg);
 
    // Post process to remove -1 entries from matrices and reorder !!! Is there a more efficient way here? 
-   for (level = start_level; level < transition_level; level++)
+   for (level = start_level; level < num_levels; level++)
    {
       HYPRE_Int num_nodes = hypre_ParCompGridNumNodes(compGrid[level]);
       HYPRE_Int num_real_nodes = 0;
@@ -750,21 +748,20 @@ hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPk
          HYPRE_Int outer_level;
          for (outer_level = start_level; outer_level < num_levels; outer_level++)
          {
-            HYPRE_Int num_send_partitions = hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg)[outer_level];
-            HYPRE_Int part;
-            for (part = 0; part < num_send_partitions; part++)
+            HYPRE_Int num_send_procs = hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[outer_level];
+            HYPRE_Int proc;
+            for (proc = 0; proc < num_send_procs; proc++)
             {
-               HYPRE_Int num_send_nodes = hypre_ParCompGridCommPkgNumSendNodes(compGridCommPkg)[outer_level][part][level];
+               HYPRE_Int num_send_nodes = hypre_ParCompGridCommPkgNumSendNodes(compGridCommPkg)[outer_level][proc][level];
                for (i = 0; i < num_send_nodes; i++)
                {
-                  if (hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[outer_level][part][level][i] >= 0)
+                  if (hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[outer_level][proc][level][i] >= 0)
                   {
-                     hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[outer_level][part][level][i] = new_indices[hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[outer_level][part][level][i]];
+                     hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[outer_level][proc][level][i] = new_indices[hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[outer_level][proc][level][i]];
                   }
                }
             }
             HYPRE_Int num_recv_procs = hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg)[outer_level];
-            HYPRE_Int proc;
             for (proc = 0; proc < num_recv_procs; proc++)
             {
                HYPRE_Int num_recv_nodes = hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[outer_level][proc][level];
@@ -1041,7 +1038,7 @@ hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPk
       hypre_ParCompGridU(compGrid[level]) = hypre_SeqVectorCreate(num_nodes);
       hypre_SeqVectorInitialize(hypre_ParCompGridU(compGrid[level]));
 
-      if (level < transition_level)
+      if (level < num_levels)
       {
          hypre_ParCompGridS(compGrid[level]) = hypre_SeqVectorCreate(num_nodes);
          hypre_SeqVectorInitialize(hypre_ParCompGridS(compGrid[level]));
@@ -1205,7 +1202,7 @@ hypre_ParCompGridResize ( hypre_ParCompGrid *compGrid, HYPRE_Int new_size, HYPRE
 }
 
 HYPRE_Int 
-hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *nodes_added_on_level, HYPRE_Int start_level, HYPRE_Int transition_level, HYPRE_Int symmetric )
+hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *nodes_added_on_level, HYPRE_Int start_level, HYPRE_Int num_levels, HYPRE_Int symmetric )
 {
    // when nodes are added to a composite grid, global info is copied over, but local indices must be generated appropriately for all added nodes
    // this must be done on each level as info is added to correctly construct subsequent Psi_c grids
@@ -1218,7 +1215,7 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *nod
    HYPRE_Int myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
 
-   for (level = start_level; level < transition_level; level++)
+   for (level = start_level; level < num_levels; level++)
    {
       // If we have added nodes on this level
       if (nodes_added_on_level[level])
@@ -1309,7 +1306,7 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *nod
       }
       
       // if we are not on the coarsest level
-      if (level != transition_level-1)
+      if (level != num_levels-1)
       {
          // loop over indices of non-owned nodes on this level 
          // !!! No guarantee that previous ghost dofs converted to real dofs have coarse local indices setup...
@@ -1349,11 +1346,11 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *nod
    return bin_search_cnt;
 }
 
-HYPRE_Int hypre_ParCompGridSetupLocalIndicesP( hypre_ParCompGrid **compGrid, HYPRE_Int start_level, HYPRE_Int transition_level )
+HYPRE_Int hypre_ParCompGridSetupLocalIndicesP( hypre_ParCompGrid **compGrid, HYPRE_Int start_level, HYPRE_Int num_levels )
 {
    HYPRE_Int                  i,j,level,global_index;
 
-   for (level = start_level; level < transition_level; level++)
+   for (level = start_level; level < num_levels; level++)
    {
       if (hypre_ParCompGridPRowPtr(compGrid[level]))
       {
@@ -1685,37 +1682,27 @@ hypre_ParCompGridMatlabPMatrixDump( hypre_ParCompGrid *compGrid, const char* fil
 }
 
 hypre_ParCompGridCommPkg*
-hypre_ParCompGridCommPkgCreate()
+hypre_ParCompGridCommPkgCreate(HYPRE_Int num_levels)
 {
    hypre_ParCompGridCommPkg   *compGridCommPkg;
 
    compGridCommPkg = hypre_CTAlloc(hypre_ParCompGridCommPkg, 1, HYPRE_MEMORY_HOST);
 
-   hypre_ParCompGridCommPkgNumLevels(compGridCommPkg) = 0;
-   hypre_ParCompGridCommPkgTransitionLevel(compGridCommPkg) = -1;
-   hypre_ParCompGridCommPkgTransitionResRecvSizes(compGridCommPkg) = NULL;
-   hypre_ParCompGridCommPkgTransitionResRecvDisps(compGridCommPkg) = NULL;
-   hypre_ParCompGridCommPkgAggLocalComms(compGridCommPkg) = NULL;
-   hypre_ParCompGridCommPkgAggGlobalComms(compGridCommPkg) = NULL;
-   hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg) = NULL;
-   hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg) = NULL;
-   hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg) = NULL;
-   hypre_ParCompGridCommPkgSendProcs(compGridCommPkg) = NULL;
-   hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg) = NULL;
-   hypre_ParCompGridCommPkgSendPartitions(compGridCommPkg) = NULL;
-   hypre_ParCompGridCommPkgSendProcPartitions(compGridCommPkg) = NULL;
-   hypre_ParCompGridCommPkgSendPartitionRanks(compGridCommPkg) = NULL;
-   hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg) = NULL;
-   hypre_ParCompGridCommPkgSendMapElmts(compGridCommPkg) = NULL;
-   hypre_ParCompGridCommPkgRecvMapStarts(compGridCommPkg) = NULL;
-   hypre_ParCompGridCommPkgRecvMapElmts(compGridCommPkg) = NULL;
-   hypre_ParCompGridCommPkgGhostMarker(compGridCommPkg) = NULL;
-   hypre_ParCompGridCommPkgSendBufferSize(compGridCommPkg) = NULL;
-   hypre_ParCompGridCommPkgRecvBufferSize(compGridCommPkg) = NULL;
-   hypre_ParCompGridCommPkgNumSendNodes(compGridCommPkg) = NULL;
-   hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg) = NULL;
-   hypre_ParCompGridCommPkgSendFlag(compGridCommPkg) = NULL;
-   hypre_ParCompGridCommPkgRecvMap(compGridCommPkg) = NULL;
+   hypre_ParCompGridCommPkgNumLevels(compGridCommPkg) = num_levels;
+
+   hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg) = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
+   hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg) = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
+   hypre_ParCompGridCommPkgSendProcs(compGridCommPkg) = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
+   hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg) = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
+   hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg) = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
+   hypre_ParCompGridCommPkgSendMapElmts(compGridCommPkg) = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
+   hypre_ParCompGridCommPkgGhostMarker(compGridCommPkg) = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
+   hypre_ParCompGridCommPkgSendBufferSize(compGridCommPkg) = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
+   hypre_ParCompGridCommPkgRecvBufferSize(compGridCommPkg) = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
+   hypre_ParCompGridCommPkgNumSendNodes(compGridCommPkg) = hypre_CTAlloc(HYPRE_Int**, num_levels, HYPRE_MEMORY_HOST);
+   hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg) = hypre_CTAlloc(HYPRE_Int**, num_levels, HYPRE_MEMORY_HOST);
+   hypre_ParCompGridCommPkgSendFlag(compGridCommPkg) = hypre_CTAlloc(HYPRE_Int***, num_levels, HYPRE_MEMORY_HOST);
+   hypre_ParCompGridCommPkgRecvMap(compGridCommPkg) = hypre_CTAlloc(HYPRE_Int***, num_levels, HYPRE_MEMORY_HOST);
 
    return compGridCommPkg;
 }
@@ -1724,26 +1711,6 @@ HYPRE_Int
 hypre_ParCompGridCommPkgDestroy( hypre_ParCompGridCommPkg *compGridCommPkg )
 {
    HYPRE_Int         i, j, k;
-
-   if ( hypre_ParCompGridCommPkgTransitionResRecvSizes(compGridCommPkg) )
-   {
-      hypre_TFree(hypre_ParCompGridCommPkgTransitionResRecvSizes(compGridCommPkg), HYPRE_MEMORY_HOST);
-   }
-
-   if ( hypre_ParCompGridCommPkgAggLocalComms(compGridCommPkg) )
-   {
-      hypre_TFree(hypre_ParCompGridCommPkgAggLocalComms(compGridCommPkg), HYPRE_MEMORY_HOST);
-   }
-
-   if ( hypre_ParCompGridCommPkgAggGlobalComms(compGridCommPkg) )
-   {
-      hypre_TFree(hypre_ParCompGridCommPkgAggGlobalComms(compGridCommPkg), HYPRE_MEMORY_HOST);
-   }
-
-   if ( hypre_ParCompGridCommPkgTransitionResRecvDisps(compGridCommPkg) )
-   {
-      hypre_TFree(hypre_ParCompGridCommPkgTransitionResRecvDisps(compGridCommPkg), HYPRE_MEMORY_HOST);
-   }
 
    if ( hypre_ParCompGridCommPkgSendProcs(compGridCommPkg) )
    {
@@ -1812,40 +1779,6 @@ hypre_ParCompGridCommPkgDestroy( hypre_ParCompGridCommPkg *compGridCommPkg )
       hypre_TFree(hypre_ParCompGridCommPkgGhostMarker(compGridCommPkg), HYPRE_MEMORY_HOST);
    }
 
-   if ( hypre_ParCompGridCommPkgSendPartitions(compGridCommPkg) )
-   {
-      for (i = 0; i < hypre_ParCompGridCommPkgNumLevels(compGridCommPkg); i++)
-      {
-         hypre_TFree(hypre_ParCompGridCommPkgSendPartitions(compGridCommPkg)[i], HYPRE_MEMORY_HOST);
-      }
-      hypre_TFree(hypre_ParCompGridCommPkgSendPartitions(compGridCommPkg), HYPRE_MEMORY_HOST);
-   }
-
-   if ( hypre_ParCompGridCommPkgSendProcPartitions(compGridCommPkg) )
-   {
-      for (i = 0; i < hypre_ParCompGridCommPkgNumLevels(compGridCommPkg); i++)
-      {
-         hypre_TFree(hypre_ParCompGridCommPkgSendProcPartitions(compGridCommPkg)[i], HYPRE_MEMORY_HOST);
-      }
-      hypre_TFree(hypre_ParCompGridCommPkgSendProcPartitions(compGridCommPkg), HYPRE_MEMORY_HOST);
-   }
-
-   if ( hypre_ParCompGridCommPkgSendPartitionRanks(compGridCommPkg) )
-   {
-      for (i = 0; i < hypre_ParCompGridCommPkgNumLevels(compGridCommPkg); i++)
-      {
-         if (hypre_ParCompGridCommPkgSendPartitionRanks(compGridCommPkg)[i])
-         {
-            for (j = 0; j < hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg)[i]; j++)
-            {
-               hypre_TFree(hypre_ParCompGridCommPkgSendPartitionRanks(compGridCommPkg)[i][j], HYPRE_MEMORY_HOST);
-            }
-            hypre_TFree(hypre_ParCompGridCommPkgSendPartitionRanks(compGridCommPkg)[i], HYPRE_MEMORY_HOST);
-         }
-      }
-      hypre_TFree(hypre_ParCompGridCommPkgSendPartitionRanks(compGridCommPkg), HYPRE_MEMORY_HOST);
-   }
-
    if ( hypre_ParCompGridCommPkgSendBufferSize(compGridCommPkg) )
    {
       for (i = 0; i < hypre_ParCompGridCommPkgNumLevels(compGridCommPkg); i++)
@@ -1868,7 +1801,7 @@ hypre_ParCompGridCommPkgDestroy( hypre_ParCompGridCommPkg *compGridCommPkg )
    {
       for (i = 0; i < hypre_ParCompGridCommPkgNumLevels(compGridCommPkg); i++)
       {
-         for (j = 0; j < hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg)[i]; j++)
+         for (j = 0; j < hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[i]; j++)
          {
             for (k = 0; k < hypre_ParCompGridCommPkgNumLevels(compGridCommPkg); k++)
             {
@@ -1902,7 +1835,7 @@ hypre_ParCompGridCommPkgDestroy( hypre_ParCompGridCommPkg *compGridCommPkg )
    {
       for (i = 0; i < hypre_ParCompGridCommPkgNumLevels(compGridCommPkg); i++)
       {
-         for (j = 0; j < hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg)[i]; j++)
+         for (j = 0; j < hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[i]; j++)
          {
             hypre_TFree( hypre_ParCompGridCommPkgNumSendNodes(compGridCommPkg)[i][j], HYPRE_MEMORY_HOST );
          }
@@ -1934,301 +1867,156 @@ hypre_ParCompGridCommPkgDestroy( hypre_ParCompGridCommPkg *compGridCommPkg )
       hypre_TFree( hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg), HYPRE_MEMORY_HOST );
    }
    
-   if  ( hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg) )
-   {
-      hypre_TFree( hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg), HYPRE_MEMORY_HOST );
-   }
-
    hypre_TFree(compGridCommPkg, HYPRE_MEMORY_HOST);
 
    return 0;
 }
 
-
-hypre_ParCompGridCommPkg*
-hypre_ParCompGridCommPkgCopy( hypre_ParCompGridCommPkg *compGridCommPkg )
+HYPRE_Int
+hypre_ParCompGridCommPkgFinalize(hypre_ParAMGData* amg_data, hypre_ParCompGridCommPkg *compGridCommPkg, hypre_ParCompGrid **compGrid)
 {
-   HYPRE_Int   num_procs;
-   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
+   HYPRE_Int myid;
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
 
-   hypre_ParCompGridCommPkg *copy_compGridCommPkg = hypre_ParCompGridCommPkgCreate();
+   HYPRE_Int outer_level, proc, level, i;
+   HYPRE_Int num_levels = hypre_ParAMGDataNumLevels(amg_data);
+   HYPRE_Int amgdd_start_level = hypre_ParAMGDataAMGDDStartLevel(amg_data);
 
-   HYPRE_Int num_levels = hypre_ParCompGridCommPkgNumLevels(compGridCommPkg);
-   HYPRE_Int transition_level = hypre_ParCompGridCommPkgTransitionLevel(compGridCommPkg);
-   hypre_ParCompGridCommPkgNumLevels(copy_compGridCommPkg) = num_levels;
-   hypre_ParCompGridCommPkgTransitionLevel(copy_compGridCommPkg) = transition_level;
-
-   HYPRE_Int         i, j, k, l;
-
-   if ( hypre_ParCompGridCommPkgTransitionResRecvSizes(compGridCommPkg) )
+   HYPRE_Int total_num_nodes = 0;
+   HYPRE_Int *offsets = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
+   for (level = amgdd_start_level; level < num_levels; level++)
    {
-      hypre_ParCompGridCommPkgTransitionResRecvSizes(copy_compGridCommPkg) = hypre_CTAlloc(HYPRE_Int, num_procs, HYPRE_MEMORY_HOST);
-      for (i = 0; i < num_procs; i++) 
-         hypre_ParCompGridCommPkgTransitionResRecvSizes(copy_compGridCommPkg)[i] = hypre_ParCompGridCommPkgTransitionResRecvSizes(compGridCommPkg)[i];
+      offsets[level] = total_num_nodes;
+      total_num_nodes += hypre_ParCompGridNumNodes(compGrid[level]);
    }
 
-   if ( hypre_ParCompGridCommPkgAggLocalComms(compGridCommPkg) )
-   {
-      hypre_ParCompGridCommPkgAggLocalComms(copy_compGridCommPkg) = hypre_CTAlloc(MPI_Comm, num_levels, HYPRE_MEMORY_HOST);
-      for (i = 0; i < num_levels; i++)
-         hypre_ParCompGridCommPkgAggLocalComms(copy_compGridCommPkg)[i] = hypre_ParCompGridCommPkgAggLocalComms(compGridCommPkg)[i];
-   }
+   if (!hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)) hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg) = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
+   if (!hypre_ParCompGridCommPkgSendMapElmts(compGridCommPkg)) hypre_ParCompGridCommPkgSendMapElmts(compGridCommPkg) = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
+   if (!hypre_ParCompGridCommPkgRecvMapStarts(compGridCommPkg)) hypre_ParCompGridCommPkgRecvMapStarts(compGridCommPkg) = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
+   if (!hypre_ParCompGridCommPkgRecvMapElmts(compGridCommPkg)) hypre_ParCompGridCommPkgRecvMapElmts(compGridCommPkg) = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
 
-   if ( hypre_ParCompGridCommPkgAggGlobalComms(compGridCommPkg) )
+   for (outer_level = amgdd_start_level; outer_level < num_levels; outer_level++)
    {
-      hypre_ParCompGridCommPkgAggGlobalComms(copy_compGridCommPkg) = hypre_CTAlloc(MPI_Comm, num_levels, HYPRE_MEMORY_HOST);
-      for (i = 0; i < num_levels; i++)
-         hypre_ParCompGridCommPkgAggGlobalComms(copy_compGridCommPkg)[i] = hypre_ParCompGridCommPkgAggGlobalComms(compGridCommPkg)[i];
-   }
+      // Finalize send info
+      HYPRE_Int num_send_procs = hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[outer_level];
 
-   if ( hypre_ParCompGridCommPkgTransitionResRecvDisps(compGridCommPkg) )
-   {
-      hypre_ParCompGridCommPkgTransitionResRecvDisps(copy_compGridCommPkg) = hypre_CTAlloc(HYPRE_Int, num_procs, HYPRE_MEMORY_HOST);
-      for (i = 0; i < num_procs; i++)
-         hypre_ParCompGridCommPkgTransitionResRecvDisps(copy_compGridCommPkg)[i] = hypre_ParCompGridCommPkgTransitionResRecvDisps(compGridCommPkg)[i];
-   }
+      if (hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[outer_level]) hypre_TFree(hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[outer_level], HYPRE_MEMORY_HOST);
+      hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[outer_level] = hypre_CTAlloc(HYPRE_Int, num_send_procs+1, HYPRE_MEMORY_SHARED);
 
-   if  ( hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg) )
-   {
-      hypre_ParCompGridCommPkgNumSendProcs(copy_compGridCommPkg) = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
-      for (i = 0; i < num_levels; i++)
-         hypre_ParCompGridCommPkgNumSendProcs(copy_compGridCommPkg)[i] = hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[i];
-   }
-
-   if  ( hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg) )
-   {
-      hypre_ParCompGridCommPkgNumRecvProcs(copy_compGridCommPkg) = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
-      for (i = 0; i < num_levels; i++)
-         hypre_ParCompGridCommPkgNumRecvProcs(copy_compGridCommPkg)[i] = hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg)[i];
-   }
-   
-   if  ( hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg) )
-   {
-      hypre_ParCompGridCommPkgNumSendPartitions(copy_compGridCommPkg) = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
-      for (i = 0; i < num_levels; i++)
-         hypre_ParCompGridCommPkgNumSendPartitions(copy_compGridCommPkg)[i] = hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg)[i];
-   }
-
-   if ( hypre_ParCompGridCommPkgSendProcs(compGridCommPkg) )
-   {
-      hypre_ParCompGridCommPkgSendProcs(copy_compGridCommPkg) = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
-      for (i = 0; i < num_levels; i++)
+      hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[outer_level][0] = 0;
+      
+      for (proc = 0; proc < num_send_procs; proc++)
       {
-         HYPRE_Int num_comm_procs = hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[i];
-         hypre_ParCompGridCommPkgSendProcs(copy_compGridCommPkg)[i] = hypre_CTAlloc(HYPRE_Int, num_comm_procs, HYPRE_MEMORY_HOST);
-         for (j = 0; j < num_comm_procs; j++)
-            hypre_ParCompGridCommPkgSendProcs(copy_compGridCommPkg)[i][j] = hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[i][j];
-      }
-   }
+         hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[outer_level][proc+1] = hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[outer_level][proc];
 
-   if ( hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg) )
-   {
-      hypre_ParCompGridCommPkgRecvProcs(copy_compGridCommPkg) = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
-      for (i = 0; i < num_levels; i++)
-      {
-         HYPRE_Int num_comm_procs = hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg)[i];
-         hypre_ParCompGridCommPkgRecvProcs(copy_compGridCommPkg)[i] = hypre_CTAlloc(HYPRE_Int, num_comm_procs, HYPRE_MEMORY_HOST);
-         for (j = 0; j < num_comm_procs; j++)
-            hypre_ParCompGridCommPkgRecvProcs(copy_compGridCommPkg)[i][j] = hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[i][j];
-      }
-   }
-
-   if ( hypre_ParCompGridCommPkgSendPartitions(compGridCommPkg) )
-   {
-      hypre_ParCompGridCommPkgSendPartitions(copy_compGridCommPkg) = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
-      for (i = 0; i < num_levels; i++)
-      {
-         HYPRE_Int num_comm_partitions = hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg)[i];
-         hypre_ParCompGridCommPkgSendPartitions(copy_compGridCommPkg)[i] = hypre_CTAlloc(HYPRE_Int, num_comm_partitions, HYPRE_MEMORY_HOST);
-         for (j = 0; j < num_comm_partitions; j++)
-            hypre_ParCompGridCommPkgSendPartitions(copy_compGridCommPkg)[i][j] = hypre_ParCompGridCommPkgSendPartitions(compGridCommPkg)[i][j];
-      }
-   }
-
-   if ( hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg) )
-   {
-      hypre_ParCompGridCommPkgSendMapStarts(copy_compGridCommPkg) = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
-      for (i = 0; i < num_levels; i++)
-      {
-         if (hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[i])
+         for (level = outer_level; level < num_levels; level++)
          {
-            HYPRE_Int num_comm_partitions = hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg)[i];
-            hypre_ParCompGridCommPkgSendMapStarts(copy_compGridCommPkg)[i] = hypre_CTAlloc(HYPRE_Int, num_comm_partitions+1, HYPRE_MEMORY_HOST);
-            for (j = 0; j < num_comm_partitions+1; j++)
-               hypre_ParCompGridCommPkgSendMapStarts(copy_compGridCommPkg)[i][j] = hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[i][j];
-         }
-      }
-   }
-
-   if ( hypre_ParCompGridCommPkgSendMapElmts(compGridCommPkg) )
-   {
-      hypre_ParCompGridCommPkgSendMapElmts(copy_compGridCommPkg) = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
-      for (i = 0; i < num_levels; i++)
-      {
-         if (hypre_ParCompGridCommPkgSendMapElmts(compGridCommPkg)[i])
-         {
-            HYPRE_Int num_elmts = hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[i][ hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg)[i] ];
-            hypre_ParCompGridCommPkgSendMapElmts(copy_compGridCommPkg)[i] = hypre_CTAlloc(HYPRE_Int, num_elmts, HYPRE_MEMORY_HOST);
-            for (j = 0; j < num_elmts; j++)
-               hypre_ParCompGridCommPkgSendMapElmts(copy_compGridCommPkg)[i][j] = hypre_ParCompGridCommPkgSendMapElmts(compGridCommPkg)[i][j];
-         }
-      }
-   }
-
-   if ( hypre_ParCompGridCommPkgGhostMarker(compGridCommPkg) )
-   {
-      hypre_ParCompGridCommPkgGhostMarker(copy_compGridCommPkg) = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
-      for (i = 0; i < num_levels; i++)
-      {
-         if (hypre_ParCompGridCommPkgGhostMarker(compGridCommPkg)[i])
-         {
-            HYPRE_Int num_elmts = hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[i][ hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg)[i] ];
-            hypre_ParCompGridCommPkgGhostMarker(copy_compGridCommPkg)[i] = hypre_CTAlloc(HYPRE_Int, num_elmts, HYPRE_MEMORY_HOST);
-            for (j = 0; j < num_elmts; j++)
-               hypre_ParCompGridCommPkgGhostMarker(copy_compGridCommPkg)[i][j] = hypre_ParCompGridCommPkgGhostMarker(compGridCommPkg)[i][j];
-         }
-      }
-   }
-
-   if ( hypre_ParCompGridCommPkgSendProcPartitions(compGridCommPkg) )
-   {
-      hypre_ParCompGridCommPkgSendProcPartitions(copy_compGridCommPkg) = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
-      for (i = 0; i < num_levels; i++)
-      {
-         HYPRE_Int num_comm_procs = hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[i];
-         hypre_ParCompGridCommPkgSendProcPartitions(copy_compGridCommPkg)[i] = hypre_CTAlloc(HYPRE_Int, num_comm_procs, HYPRE_MEMORY_HOST);
-         for (j = 0; j < num_comm_procs; j++)
-            hypre_ParCompGridCommPkgSendProcPartitions(copy_compGridCommPkg)[i][j] = hypre_ParCompGridCommPkgSendProcPartitions(compGridCommPkg)[i][j];
-      }
-   }
-
-   if ( hypre_ParCompGridCommPkgSendPartitionRanks(compGridCommPkg) )
-   {
-      hypre_ParCompGridCommPkgSendPartitionRanks(copy_compGridCommPkg) = hypre_CTAlloc(HYPRE_Int**, num_levels, HYPRE_MEMORY_HOST);
-      for (i = 0; i < hypre_ParCompGridCommPkgNumLevels(compGridCommPkg); i++)
-      {
-         if (hypre_ParCompGridCommPkgSendPartitionRanks(compGridCommPkg)[i])
-         {
-            hypre_ParCompGridCommPkgSendPartitionRanks(copy_compGridCommPkg)[i] = hypre_CTAlloc(HYPRE_Int*, hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg)[i], HYPRE_MEMORY_HOST);
-            for (j = 0; j < hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg)[i]; j++)
+            for (i = 0; i < hypre_ParCompGridCommPkgNumSendNodes(compGridCommPkg)[outer_level][proc][level]; i++)
             {
-               hypre_ParCompGridCommPkgSendPartitionRanks(copy_compGridCommPkg)[i][j] = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridCommPkgSendPartitionRanks(compGridCommPkg)[i][j][0]+1, HYPRE_MEMORY_HOST);
-               for (k = 0; k < hypre_ParCompGridCommPkgSendPartitionRanks(compGridCommPkg)[i][j][0]+1; k++)
+               if (hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[outer_level][proc][level][i] >= 0)
                {
-                  hypre_ParCompGridCommPkgSendPartitionRanks(copy_compGridCommPkg)[i][j][k] = hypre_ParCompGridCommPkgSendPartitionRanks(compGridCommPkg)[i][j][k];
+                  hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[outer_level][proc+1]++;
                }
             }
          }
       }
-   }
 
-   if ( hypre_ParCompGridCommPkgSendBufferSize(compGridCommPkg) )
-   {
-      hypre_ParCompGridCommPkgSendBufferSize(copy_compGridCommPkg) = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
-      for (i = 0; i < num_levels; i++)
-      {
-         HYPRE_Int num_comm_procs = hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[i];
-         hypre_ParCompGridCommPkgSendBufferSize(copy_compGridCommPkg)[i] = hypre_CTAlloc(HYPRE_Int, num_comm_procs, HYPRE_MEMORY_HOST);
-         for (j = 0; j < num_comm_procs; j++)
-            hypre_ParCompGridCommPkgSendBufferSize(copy_compGridCommPkg)[i][j] = hypre_ParCompGridCommPkgSendBufferSize(compGridCommPkg)[i][j];
-      }
-   }
+      if (hypre_ParCompGridCommPkgSendMapElmts(compGridCommPkg)[outer_level]) hypre_TFree(hypre_ParCompGridCommPkgSendMapElmts(compGridCommPkg)[outer_level], HYPRE_MEMORY_HOST);
+      hypre_ParCompGridCommPkgSendMapElmts(compGridCommPkg)[outer_level] = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[outer_level][num_send_procs], HYPRE_MEMORY_SHARED);
 
-   if ( hypre_ParCompGridCommPkgRecvBufferSize(compGridCommPkg) )
-   {
-      hypre_ParCompGridCommPkgRecvBufferSize(copy_compGridCommPkg) = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
-      for (i = 0; i < num_levels; i++)
+      HYPRE_Int num_send_nodes = 0;
+      HYPRE_Int new_num_send_procs = 0;
+      for (proc = 0; proc < num_send_procs; proc++)
       {
-         HYPRE_Int num_comm_procs = hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg)[i];
-         hypre_ParCompGridCommPkgRecvBufferSize(copy_compGridCommPkg)[i] = hypre_CTAlloc(HYPRE_Int, num_comm_procs, HYPRE_MEMORY_HOST);
-         for (j = 0; j < num_comm_procs; j++)
-            hypre_ParCompGridCommPkgRecvBufferSize(copy_compGridCommPkg)[i][j] = hypre_ParCompGridCommPkgRecvBufferSize(compGridCommPkg)[i][j];
-      }
-   }
-
-   if ( hypre_ParCompGridCommPkgNumSendNodes(compGridCommPkg) )
-   {
-      hypre_ParCompGridCommPkgNumSendNodes(copy_compGridCommPkg) = hypre_CTAlloc(HYPRE_Int**, num_levels, HYPRE_MEMORY_HOST);
-      for (i = 0; i < num_levels; i++)
-      {
-         HYPRE_Int num_comm_procs = hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[i];
-         hypre_ParCompGridCommPkgNumSendNodes(copy_compGridCommPkg)[i] = hypre_CTAlloc(HYPRE_Int*, num_comm_procs, HYPRE_MEMORY_HOST);
-         for (j = 0; j < num_comm_procs; j++)
+         for (level = outer_level; level < num_levels; level++)
          {
-            hypre_ParCompGridCommPkgNumSendNodes(copy_compGridCommPkg)[i][j] = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
-            for (k = 0; k < num_levels; k++)
+            for (i = 0; i < hypre_ParCompGridCommPkgNumSendNodes(compGridCommPkg)[outer_level][proc][level]; i++)
             {
-               hypre_ParCompGridCommPkgNumSendNodes(copy_compGridCommPkg)[i][j][k] = hypre_ParCompGridCommPkgNumSendNodes(compGridCommPkg)[i][j][k];
+               if (hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[outer_level][proc][level][i] >= 0)
+               {
+                  hypre_ParCompGridCommPkgSendMapElmts(compGridCommPkg)[outer_level][num_send_nodes++] = offsets[level] + hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[outer_level][proc][level][i];
+               }
             }
          }
-      }
-   }
 
-   if ( hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg) )
-   {
-      hypre_ParCompGridCommPkgNumRecvNodes(copy_compGridCommPkg) = hypre_CTAlloc(HYPRE_Int**, num_levels, HYPRE_MEMORY_HOST);
-      for (i = 0; i < num_levels; i++)
-      {
-         HYPRE_Int num_comm_procs = hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg)[i];
-         hypre_ParCompGridCommPkgNumRecvNodes(copy_compGridCommPkg)[i] = hypre_CTAlloc(HYPRE_Int*, num_comm_procs, HYPRE_MEMORY_HOST);
-         for (j = 0; j < num_comm_procs; j++)
+         if (hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[outer_level][proc+1] > hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[outer_level][proc])
          {
-            hypre_ParCompGridCommPkgNumRecvNodes(copy_compGridCommPkg)[i][j] = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
-            for (k = 0; k < num_levels; k++)
-            {
-               hypre_ParCompGridCommPkgNumRecvNodes(copy_compGridCommPkg)[i][j][k] = hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[i][j][k];
-            }
+            new_num_send_procs++;
          }
       }
-   }
 
-   if ( hypre_ParCompGridCommPkgSendFlag(compGridCommPkg) )
-   {
-      hypre_ParCompGridCommPkgSendFlag(copy_compGridCommPkg) = hypre_CTAlloc(HYPRE_Int***, num_levels, HYPRE_MEMORY_HOST);
-      for (i = 0; i < num_levels; i++)
+      hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[outer_level] = new_num_send_procs;
+      HYPRE_Int new_cnt = 0;
+      for (proc = 0; proc < num_send_procs; proc++)
       {
-         HYPRE_Int num_comm_procs = hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[i];
-         hypre_ParCompGridCommPkgSendFlag(copy_compGridCommPkg)[i] = hypre_CTAlloc(HYPRE_Int**, num_comm_procs, HYPRE_MEMORY_HOST);
-         for (j = 0; j < num_comm_procs; j++)
+         if (hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[outer_level][proc+1] > hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[outer_level][proc])
          {
-            hypre_ParCompGridCommPkgSendFlag(copy_compGridCommPkg)[i][j] = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
-            for (k = 0; k < num_levels; k++)
+            hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[outer_level][new_cnt] = hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[outer_level][proc];
+            hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[outer_level][new_cnt+1] = hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[outer_level][proc+1];
+            new_cnt++;
+         }
+      }
+
+      // Finalize recv info
+      HYPRE_Int num_recv_procs = hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg)[outer_level];
+
+      if (hypre_ParCompGridCommPkgRecvMapStarts(compGridCommPkg)[outer_level]) hypre_TFree(hypre_ParCompGridCommPkgRecvMapStarts(compGridCommPkg)[outer_level], HYPRE_MEMORY_HOST);
+      hypre_ParCompGridCommPkgRecvMapStarts(compGridCommPkg)[outer_level] = hypre_CTAlloc(HYPRE_Int, num_recv_procs+1, HYPRE_MEMORY_SHARED);
+
+      hypre_ParCompGridCommPkgRecvMapStarts(compGridCommPkg)[outer_level][0] = 0;
+      
+      for (proc = 0; proc < num_recv_procs; proc++)
+      {
+         hypre_ParCompGridCommPkgRecvMapStarts(compGridCommPkg)[outer_level][proc+1] = hypre_ParCompGridCommPkgRecvMapStarts(compGridCommPkg)[outer_level][proc];
+
+         for (level = outer_level; level < num_levels; level++)
+         {
+            for (i = 0; i < hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[outer_level][proc][level]; i++)
             {
-               if ( hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[i][j][k] )
-               {                     
-                  HYPRE_Int num_elmts = hypre_ParCompGridCommPkgNumSendNodes(compGridCommPkg)[i][j][k];
-                  hypre_ParCompGridCommPkgSendFlag(copy_compGridCommPkg)[i][j][k] = hypre_CTAlloc(HYPRE_Int, num_elmts, HYPRE_MEMORY_HOST);
-                  for (l = 0; l < num_elmts; l++)
-                     hypre_ParCompGridCommPkgSendFlag(copy_compGridCommPkg)[i][j][k][l] = hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[i][j][k][l];
+               if (hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[outer_level][proc][level][i] >= 0)
+               {
+                  hypre_ParCompGridCommPkgRecvMapStarts(compGridCommPkg)[outer_level][proc+1]++;
                }
             }
          }
       }
-   }
+      
+      if (hypre_ParCompGridCommPkgRecvMapElmts(compGridCommPkg)[outer_level]) hypre_TFree(hypre_ParCompGridCommPkgRecvMapElmts(compGridCommPkg)[outer_level], HYPRE_MEMORY_HOST);
+      hypre_ParCompGridCommPkgRecvMapElmts(compGridCommPkg)[outer_level] = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridCommPkgRecvMapStarts(compGridCommPkg)[outer_level][num_recv_procs], HYPRE_MEMORY_SHARED);
 
-   if ( hypre_ParCompGridCommPkgRecvMap(compGridCommPkg) )
-   {
-      hypre_ParCompGridCommPkgRecvMap(copy_compGridCommPkg) = hypre_CTAlloc(HYPRE_Int***, num_levels, HYPRE_MEMORY_HOST);
-      for (i = 0; i < num_levels; i++)
+      HYPRE_Int num_recv_nodes = 0;
+      HYPRE_Int new_num_recv_procs = 0;
+      for (proc = 0; proc < num_recv_procs; proc++)
       {
-         HYPRE_Int num_comm_procs = hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg)[i];
-         hypre_ParCompGridCommPkgRecvMap(copy_compGridCommPkg)[i] = hypre_CTAlloc(HYPRE_Int**, num_comm_procs, HYPRE_MEMORY_HOST);
-         for (j = 0; j < num_comm_procs; j++)
+         for (level = outer_level; level < num_levels; level++)
          {
-            hypre_ParCompGridCommPkgRecvMap(copy_compGridCommPkg)[i][j] = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
-            for (k = 0; k < num_levels; k++)
+            for (i = 0; i < hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[outer_level][proc][level]; i++)
             {
-               if ( hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[i][j][k] )
-               {                     
-                  HYPRE_Int num_elmts = hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[i][j][k];
-                  hypre_ParCompGridCommPkgRecvMap(copy_compGridCommPkg)[i][j][k] = hypre_CTAlloc(HYPRE_Int, num_elmts, HYPRE_MEMORY_HOST);
-                  for (l = 0; l < num_elmts; l++)
-                     hypre_ParCompGridCommPkgRecvMap(copy_compGridCommPkg)[i][j][k][l] = hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[i][j][k][l];
+               if (hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[outer_level][proc][level][i] >= 0)
+               {
+                  hypre_ParCompGridCommPkgRecvMapElmts(compGridCommPkg)[outer_level][num_recv_nodes++] = offsets[level] + hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[outer_level][proc][level][i];
                }
             }
+         }
+
+         if (hypre_ParCompGridCommPkgRecvMapStarts(compGridCommPkg)[outer_level][proc+1] > hypre_ParCompGridCommPkgRecvMapStarts(compGridCommPkg)[outer_level][proc])
+         {
+            new_num_recv_procs++;
+         }
+      }
+
+      hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg)[outer_level] = new_num_recv_procs;
+      new_cnt = 0;
+      for (proc = 0; proc < num_recv_procs; proc++)
+      {
+         if (hypre_ParCompGridCommPkgRecvMapStarts(compGridCommPkg)[outer_level][proc+1] > hypre_ParCompGridCommPkgRecvMapStarts(compGridCommPkg)[outer_level][proc])
+         {
+            hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[outer_level][new_cnt] = hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[outer_level][proc];
+            hypre_ParCompGridCommPkgRecvMapStarts(compGridCommPkg)[outer_level][new_cnt+1] = hypre_ParCompGridCommPkgRecvMapStarts(compGridCommPkg)[outer_level][proc+1];
+            new_cnt++;
          }
       }
    }
 
-   return copy_compGridCommPkg;
+   return 0;
 }

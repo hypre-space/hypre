@@ -581,24 +581,6 @@ HYPRE_BoomerAMGGetAMGDDNumGhostLayers( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_BoomerAMGSetAMGDDUseTransitionLevel
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-HYPRE_BoomerAMGSetAMGDDUseTransitionLevel( HYPRE_Solver solver,
-                           HYPRE_Int          use_transition_level  )
-{
-   return( hypre_BoomerAMGSetAMGDDUseTransitionLevel( (void *) solver, use_transition_level ) );
-}
-
-HYPRE_Int
-HYPRE_BoomerAMGGetAMGDDUseTransitionLevel( HYPRE_Solver solver,
-                           HYPRE_Int        * use_transition_level  )
-{
-   return( hypre_BoomerAMGGetAMGDDUseTransitionLevel( (void *) solver, use_transition_level ) );
-}
-
-/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetCoarsenType, HYPRE_BoomerAMGGetCoarsenType
  *--------------------------------------------------------------------------*/
 

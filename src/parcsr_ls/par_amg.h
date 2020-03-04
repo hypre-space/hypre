@@ -117,9 +117,6 @@ typedef struct
    HYPRE_Int                 num_ghost_layers;
    HYPRE_Int                 use_transition_level;
    HYPRE_Int                 amgdd_use_rd;
-   HYPRE_Int                 amgdd_agglomeration_max_num_levels;
-   HYPRE_Int                 amgdd_agglomeration_threshold;
-   HYPRE_Int                 amgdd_agglomeration_partition_size;
    HYPRE_Int                 amgdd_num_global_relax;
    HYPRE_Real                amgdd_correction_step;
    hypre_ParVector          *amgdd_correction_vector;
@@ -401,9 +398,6 @@ typedef struct
 #define hypre_ParAMGDataAMGDDNumGhostLayers(amg_data) ((amg_data)->num_ghost_layers)
 #define hypre_ParAMGDataAMGDDUseTransitionLevel(amg_data) ((amg_data)->use_transition_level)
 #define hypre_ParAMGDataAMGDDUseRD(amg_data) ((amg_data)->amgdd_use_rd)
-#define hypre_ParAMGDataAMGDDAgglomerationMaxNumLevels(amg_data) ((amg_data)->amgdd_agglomeration_max_num_levels)
-#define hypre_ParAMGDataAMGDDAgglomerationThreshold(amg_data) ((amg_data)->amgdd_agglomeration_threshold)
-#define hypre_ParAMGDataAMGDDAgglomerationPartitionSize(amg_data) ((amg_data)->amgdd_agglomeration_partition_size)
 #define hypre_ParAMGDataAMGDDNumGlobalRelax(amg_data) ((amg_data)->amgdd_num_global_relax)
 #define hypre_ParAMGDataAMGDDCorrectionStep(amg_data) ((amg_data)->amgdd_correction_step)
 #define hypre_ParAMGDataAMGDDCorrectionVector(amg_data) ((amg_data)->amgdd_correction_vector)

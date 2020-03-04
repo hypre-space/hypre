@@ -29,7 +29,7 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
       hypre_ParCompGridCommPkg *compGridCommPkg,
       HYPRE_Int ****send_flag, HYPRE_Int ***num_send_nodes,
       HYPRE_Int ****recv_map, HYPRE_Int ***num_recv_nodes, 
-      HYPRE_Int *recv_map_send_buffer_size, HYPRE_Int current_level, HYPRE_Int num_levels, HYPRE_Int transition_level,
+      HYPRE_Int *recv_map_send_buffer_size, HYPRE_Int current_level, HYPRE_Int num_levels,
       HYPRE_Int *nodes_added_on_level, HYPRE_Int buffer_number, HYPRE_Int *num_resizes, HYPRE_Int symmetric );
 
 #ifdef __cplusplus
@@ -449,7 +449,6 @@ SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGr
    {
       hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[level] = 0;
       hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg)[level] = 0;
-      hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg)[level] = 0;
       HYPRE_Int num_procs;
       hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
    }
@@ -485,18 +484,13 @@ SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGr
       // Set the number of send and recv procs
       hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[level] = send_proc_dofs.size();
       hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg)[level] = recv_procs.size();
-      hypre_ParCompGridCommPkgNumSendPartitions(compGridCommPkg)[level] = send_proc_dofs.size();
-      // Setup the list of send procs, partitions, and proc partitions, and count up the total number of send elmts
+      // Setup the list of send procs and count up the total number of send elmts
       HYPRE_Int total_send_elmts = 0;
       hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level] = hypre_CTAlloc(HYPRE_Int, send_proc_dofs.size(), HYPRE_MEMORY_HOST);
-      hypre_ParCompGridCommPkgSendPartitions(compGridCommPkg)[level] = hypre_CTAlloc(HYPRE_Int, send_proc_dofs.size(), HYPRE_MEMORY_HOST);
-      hypre_ParCompGridCommPkgSendProcPartitions(compGridCommPkg)[level] = hypre_CTAlloc(HYPRE_Int, send_proc_dofs.size(), HYPRE_MEMORY_HOST);
       cnt = 0;
       for (auto send_proc_it = send_proc_dofs.begin(); send_proc_it != send_proc_dofs.end(); ++send_proc_it)
       {
          hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level][cnt] = send_proc_it->first;
-         hypre_ParCompGridCommPkgSendPartitions(compGridCommPkg)[level][cnt] = send_proc_it->first;
-         hypre_ParCompGridCommPkgSendProcPartitions(compGridCommPkg)[level][cnt] = cnt;
          total_send_elmts += send_proc_it->second.size();
          cnt++;
       }
@@ -534,7 +528,7 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
       hypre_ParCompGridCommPkg *compGridCommPkg,
       HYPRE_Int ****send_flag, HYPRE_Int ***num_send_nodes,
       HYPRE_Int ****recv_map, HYPRE_Int ***num_recv_nodes, 
-      HYPRE_Int *recv_map_send_buffer_size, HYPRE_Int current_level, HYPRE_Int num_levels, HYPRE_Int transition_level,
+      HYPRE_Int *recv_map_send_buffer_size, HYPRE_Int current_level, HYPRE_Int num_levels,
       HYPRE_Int *nodes_added_on_level, HYPRE_Int buffer_number, HYPRE_Int *num_resizes, HYPRE_Int symmetric )
 {
    // recv_buffer = [ num_psi_levels , [level] , [level] , ... ]
@@ -695,7 +689,7 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
          }
          cnt++;
       }
-      if (level != transition_level-1)
+      if (level != num_levels-1)
       {
          for (i = 0; i < num_recv_nodes[current_level][buffer_number][level]; i++) 
          {   

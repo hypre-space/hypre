@@ -75,8 +75,6 @@ hypre_BoomerAMGDDTestSolve( void               *amg_vdata,
   hypre_ParVectorInitialize(U_comp);
   HYPRE_Int num_comp_cycles = hypre_ParAMGDataMaxFACIter(amg_data);
   HYPRE_Int num_levels = hypre_ParAMGDataNumLevels(amg_data);
-  HYPRE_Int transition_level = hypre_ParCompGridCommPkgTransitionLevel(hypre_ParAMGDataCompGridCommPkg(amg_data));
-  if (transition_level < 0) transition_level = num_levels;
 
   // Generate the residual
   hypre_ParVector *res = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD, hypre_ParVectorGlobalSize(f), hypre_ParVectorPartitioning(f));
@@ -134,7 +132,7 @@ hypre_BoomerAMGDDTestSolve( void               *amg_vdata,
       hypre_ParVectorSetPartitioningOwner(relax_marker[level],0);
       hypre_ParVectorInitialize(relax_marker[level]);
       // Now set the values according to the relevant comp grid
-      if (level < transition_level) SetRelaxMarker(hypre_ParAMGDataCompGrid(amg_data)[level], relax_marker[level], proc);
+      if (level < num_levels) SetRelaxMarker(hypre_ParAMGDataCompGrid(amg_data)[level], relax_marker[level], proc);
       else hypre_ParVectorSetConstantValues(relax_marker[level], 1.0);
     }
 

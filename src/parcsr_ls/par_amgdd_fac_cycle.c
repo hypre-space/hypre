@@ -38,9 +38,6 @@ HYPRE_Int
 FAC_Restrict( hypre_ParCompGrid *compGrid_f, hypre_ParCompGrid *compGrid_c, HYPRE_Int first_iteration );
 
 HYPRE_Int
-FAC_Simple_Restrict( hypre_ParCompGrid *compGrid_f, hypre_ParCompGrid *compGrid_c );
-
-HYPRE_Int
 FAC_CFL1Jacobi( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_Int relax_set );
 
 HYPRE_Int
@@ -92,9 +89,6 @@ HYPRE_Int FAC_Cycle(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type, HYPR
    // Get the AMG structure
    hypre_ParAMGData   *amg_data = (hypre_ParAMGData*) amg_vdata;
    HYPRE_Int num_levels = hypre_ParAMGDataNumLevels(amg_data);
-   HYPRE_Int transition_level = num_levels;
-   if (hypre_ParAMGDataCompGridCommPkg(amg_data)) transition_level = hypre_ParCompGridCommPkgTransitionLevel(hypre_ParAMGDataCompGridCommPkg(amg_data));
-   if (transition_level < 0) transition_level = num_levels;
    HYPRE_Int relax_type = hypre_ParAMGDataFACRelaxType(amg_data);
    HYPRE_Int *numRelax = hypre_ParAMGDataNumGridSweeps(amg_data);
 
@@ -120,16 +114,12 @@ HYPRE_Int FAC_Cycle(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type, HYPR
    // Restrict the residual at all fine points (real and ghost) and set residual at coarse points not under the fine grid
    if (num_levels > 1)
    {
-      if (level < transition_level)
-      {
-         #if DEBUGGING_MESSAGES
-         printf("Rank %d, restrict on level %d\n", myid, level);
-         #endif
-         FAC_Restrict( compGrid[level], compGrid[level+1], first_iteration );
-         hypre_SeqVectorSetConstantValues( hypre_ParCompGridS(compGrid[level]), 0.0 );
-         hypre_SeqVectorSetConstantValues( hypre_ParCompGridT(compGrid[level]), 0.0 );
-      }
-      else FAC_Simple_Restrict( compGrid[level], compGrid[level+1] );
+      #if DEBUGGING_MESSAGES
+      printf("Rank %d, restrict on level %d\n", myid, level);
+      #endif
+      FAC_Restrict( compGrid[level], compGrid[level+1], first_iteration );
+      hypre_SeqVectorSetConstantValues( hypre_ParCompGridS(compGrid[level]), 0.0 );
+      hypre_SeqVectorSetConstantValues( hypre_ParCompGridT(compGrid[level]), 0.0 );
 
       #if DUMP_INTERMEDIATE_TEST_SOLNS
       sprintf(filename, "outputs/actual/f%d_level%d", myid, level+1);
@@ -195,28 +185,20 @@ HYPRE_Int FAC_FCycle(void *amg_vdata, HYPRE_Int first_iteration)
    // Get the AMG structure
    hypre_ParAMGData   *amg_data = (hypre_ParAMGData*) amg_vdata;
    HYPRE_Int num_levels = hypre_ParAMGDataNumLevels(amg_data);
-   HYPRE_Int transition_level = num_levels;
-   if (hypre_ParAMGDataCompGridCommPkg(amg_data)) transition_level = hypre_ParCompGridCommPkgTransitionLevel(hypre_ParAMGDataCompGridCommPkg(amg_data));
-   if (transition_level < 0) transition_level = num_levels;
    HYPRE_Int relax_type = hypre_ParAMGDataFACRelaxType(amg_data);
    HYPRE_Int *numRelax = hypre_ParAMGDataNumGridSweeps(amg_data);
 
    // Get the composite grid
    hypre_ParCompGrid          **compGrid = hypre_ParAMGDataCompGrid(amg_data);
 
-   // ... work down to coarsest ... Note: proper restricted values already stored on and above transition level
+   // ... work down to coarsest ... 
    if (!first_iteration)
    {
       for (level = hypre_ParAMGDataAMGDDStartLevel(amg_data); level < num_levels - 1; level++)
       {
-         // Restrict down from the transition level
-         if (level < transition_level)
-         {
-            FAC_Restrict( compGrid[level], compGrid[level+1], 0 );
-            hypre_SeqVectorSetConstantValues( hypre_ParCompGridS(compGrid[level]), 0.0 );
-            hypre_SeqVectorSetConstantValues( hypre_ParCompGridT(compGrid[level]), 0.0 );
-         }
-         else FAC_Simple_Restrict( compGrid[level], compGrid[level+1] );
+         FAC_Restrict( compGrid[level], compGrid[level+1], 0 );
+         hypre_SeqVectorSetConstantValues( hypre_ParCompGridS(compGrid[level]), 0.0 );
+         hypre_SeqVectorSetConstantValues( hypre_ParCompGridT(compGrid[level]), 0.0 );
       }
    }
 
@@ -246,9 +228,6 @@ HYPRE_Int FAC_Cycle_timed(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type
    // Get the AMG structure
    hypre_ParAMGData   *amg_data = (hypre_ParAMGData*) amg_vdata;
    HYPRE_Int num_levels = hypre_ParAMGDataNumLevels(amg_data);
-   HYPRE_Int transition_level = num_levels;
-   if (hypre_ParAMGDataCompGridCommPkg(amg_data)) transition_level = hypre_ParCompGridCommPkgTransitionLevel(hypre_ParAMGDataCompGridCommPkg(amg_data));
-   if (transition_level < 0) transition_level = num_levels;
    HYPRE_Int relax_type = hypre_ParAMGDataFACRelaxType(amg_data);
    HYPRE_Int *numRelax = hypre_ParAMGDataNumGridSweeps(amg_data);
 
@@ -260,14 +239,10 @@ HYPRE_Int FAC_Cycle_timed(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type
 
    // Restrict the residual at all fine points (real and ghost) and set residual at coarse points not under the fine grid
    if (time_part == 2)
-   { 
-      if (level < transition_level)
-      {
-         FAC_Restrict( compGrid[level], compGrid[level+1], 1 );
-         hypre_SeqVectorSetConstantValues( hypre_ParCompGridS(compGrid[level]), 0.0 );
-         hypre_SeqVectorSetConstantValues( hypre_ParCompGridT(compGrid[level]), 0.0 );
-      }
-      else FAC_Simple_Restrict( compGrid[level], compGrid[level+1] ); // !!! Todo: I don't use s and t here, right?
+   {
+      FAC_Restrict( compGrid[level], compGrid[level+1], 1 );
+      hypre_SeqVectorSetConstantValues( hypre_ParCompGridS(compGrid[level]), 0.0 );
+      hypre_SeqVectorSetConstantValues( hypre_ParCompGridT(compGrid[level]), 0.0 );
    }
 
    //  Either solve on the coarse level or recurse
@@ -293,28 +268,20 @@ HYPRE_Int FAC_FCycle_timed(void *amg_vdata, HYPRE_Int time_part)
    // Get the AMG structure
    hypre_ParAMGData   *amg_data = (hypre_ParAMGData*) amg_vdata;
    HYPRE_Int num_levels = hypre_ParAMGDataNumLevels(amg_data);
-   HYPRE_Int transition_level = num_levels;
-   if (hypre_ParAMGDataCompGridCommPkg(amg_data)) transition_level = hypre_ParCompGridCommPkgTransitionLevel(hypre_ParAMGDataCompGridCommPkg(amg_data));
-   if (transition_level < 0) transition_level = num_levels;
    HYPRE_Int relax_type = hypre_ParAMGDataFACRelaxType(amg_data);
    HYPRE_Int *numRelax = hypre_ParAMGDataNumGridSweeps(amg_data);
 
    // Get the composite grid
    hypre_ParCompGrid          **compGrid = hypre_ParAMGDataCompGrid(amg_data);
 
-   // ... work down to coarsest ... Note: proper restricted values already stored on and above transition level
+   // ... work down to coarsest ... 
    for (level = hypre_ParAMGDataAMGDDStartLevel(amg_data); level < num_levels - 1; level++)
    {
-      // Restrict down from the transition level
       if (time_part == 2)
       {
-         if (level < transition_level)
-         {
-            FAC_Restrict( compGrid[level], compGrid[level+1], 0 );
-            hypre_SeqVectorSetConstantValues( hypre_ParCompGridS(compGrid[level]), 0.0 );
-            hypre_SeqVectorSetConstantValues( hypre_ParCompGridT(compGrid[level]), 0.0 );
-         }
-         else FAC_Simple_Restrict( compGrid[level], compGrid[level+1] );
+         FAC_Restrict( compGrid[level], compGrid[level+1], 0 );
+         hypre_SeqVectorSetConstantValues( hypre_ParCompGridS(compGrid[level]), 0.0 );
+         hypre_SeqVectorSetConstantValues( hypre_ParCompGridT(compGrid[level]), 0.0 );
       }
    }
 
@@ -350,7 +317,7 @@ FAC_Restrict( hypre_ParCompGrid *compGrid_f, hypre_ParCompGrid *compGrid_c, HYPR
    // Get update: s_l <- A_lt_l + s_l 
    hypre_CSRMatrixMatvec(1.0, hypre_ParCompGridA(compGrid_f), hypre_ParCompGridT(compGrid_f), 1.0, hypre_ParCompGridS(compGrid_f));
 
-   // If we need to preserve the updates on the next level !!! Do we need this if statement? Implications? Still need to generally make sure transition level stuff still works...
+   // If we need to preserve the updates on the next level !!! Do we need this if statement? 
    if (hypre_ParCompGridS(compGrid_c))
    {
       // hypre_CSRMatrixMatvecT(1.0, hypre_ParCompGridP(compGrid_f), hypre_ParCompGridS(compGrid_f), 0.0, hypre_ParCompGridS(compGrid_c));
@@ -366,27 +333,6 @@ FAC_Restrict( hypre_ParCompGrid *compGrid_f, hypre_ParCompGrid *compGrid_c, HYPR
       hypre_CSRMatrixMatvec(-1.0, hypre_ParCompGridR(compGrid_f), hypre_ParCompGridS(compGrid_f), 1.0, hypre_ParCompGridF(compGrid_c));
    }
 
-   // Zero out initial guess on coarse grid
-   hypre_SeqVectorSetConstantValues(hypre_ParCompGridU(compGrid_c), 0.0);
-
-   return 0;
-}
-
-HYPRE_Int
-FAC_Simple_Restrict( hypre_ParCompGrid *compGrid_f, hypre_ParCompGrid *compGrid_c )
-{
-   // Calculate fine grid residuals and restrict
-   if (!hypre_ParCompGridTemp(compGrid_f))
-   {      
-      hypre_ParCompGridTemp(compGrid_f) = hypre_SeqVectorCreate(hypre_ParCompGridNumNodes(compGrid_f));
-      hypre_SeqVectorInitialize(hypre_ParCompGridTemp(compGrid_f));
-   }
-   hypre_Vector *res = hypre_ParCompGridTemp(compGrid_f);
-   
-   hypre_CSRMatrixMatvecOutOfPlace(-1.0, hypre_ParCompGridA(compGrid_f), hypre_ParCompGridU(compGrid_f), 1.0, hypre_ParCompGridF(compGrid_f), res, 0);
-   // hypre_CSRMatrixMatvecT(1.0, hypre_ParCompGridP(compGrid_f), res, 0.0, hypre_ParCompGridF(compGrid_c));
-   hypre_CSRMatrixMatvec(1.0, hypre_ParCompGridR(compGrid_f), res, 0.0, hypre_ParCompGridF(compGrid_c));
-   
    // Zero out initial guess on coarse grid
    hypre_SeqVectorSetConstantValues(hypre_ParCompGridU(compGrid_c), 0.0);
 
