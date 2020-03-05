@@ -359,6 +359,9 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
    HYPRE_Int        C_diag_size;
    HYPRE_Int        C_offd_size;
    HYPRE_Int        num_cols_offd_C = 0;
+   HYPRE_Int        starts_size;
+   HYPRE_Int       *row_starts_C;
+   HYPRE_Int       *col_starts_C;
 
    hypre_CSRMatrix *Bs_ext;
 
@@ -991,26 +994,24 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
    } /*end parallel region */
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
-   /* Note that C owns the partitionings */
-   HYPRE_Int  *row_starts_C, *col_starts_C;
-
-   row_starts_C = hypre_TAlloc(HYPRE_Int, 2);
-   col_starts_C = hypre_TAlloc(HYPRE_Int, 2);
-   row_starts_C[0] = row_starts_A[0]; row_starts_C[1] = row_starts_A[1];
-   col_starts_C[0] = col_starts_B[0]; col_starts_C[1] = col_starts_B[1];
+   starts_size = 2;
+#else
+   starts_size = num_procs + 1;
+#endif
+   row_starts_C = hypre_TAlloc(HYPRE_Int, starts_size);
+   col_starts_C = hypre_TAlloc(HYPRE_Int, starts_size);
+   for (HYPRE_Int i = 0; i < starts_size; i++)
+   {
+      row_starts_C[i] = row_starts_A[i];
+   }
+   for (HYPRE_Int i = 0; i < starts_size; i++)
+   {
+      col_starts_C[i] = col_starts_B[i];
+   }
 
    C = hypre_ParCSRMatrixCreate(comm, n_rows_A, n_cols_B,
                                 row_starts_C, col_starts_C,
                                 num_cols_offd_C, C_diag_size, C_offd_size);
-#else
-   /* Note that C does not own the partitionings */
-   C = hypre_ParCSRMatrixCreate(comm, n_rows_A, n_cols_B,
-                                row_starts_A, col_starts_B,
-                                num_cols_offd_C, C_diag_size, C_offd_size);
-
-   hypre_ParCSRMatrixSetRowStartsOwner(C,0);
-   hypre_ParCSRMatrixSetColStartsOwner(C,0);
-#endif
 
    C_diag = hypre_ParCSRMatrixDiag(C);
    hypre_CSRMatrixData(C_diag) = C_diag_data;
@@ -3245,6 +3246,8 @@ hypre_ParCSRMatrix *hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
    HYPRE_Complex          *C_offd_data=NULL;
    HYPRE_Int       *C_offd_i=NULL;
    HYPRE_Int       *C_offd_j=NULL;
+   HYPRE_Int       *row_starts_C;
+   HYPRE_Int       *col_starts_C;
 
    HYPRE_Int       *temp;
    HYPRE_Int       *send_map_starts_A;
@@ -3270,13 +3273,14 @@ hypre_ParCSRMatrix *hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
 
    HYPRE_Int first_row_index, first_col_diag;
    HYPRE_Int local_num_rows, local_num_cols;
+   HYPRE_Int starts_size;
 
    n_rows_A = hypre_ParCSRMatrixGlobalNumRows(A);
    n_cols_A = hypre_ParCSRMatrixGlobalNumCols(A);
    n_rows_B = hypre_ParCSRMatrixGlobalNumRows(B);
    n_cols_B = hypre_ParCSRMatrixGlobalNumCols(B);
 
-   hypre_MPI_Comm_size(comm,&num_procs);
+   hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
    max_num_threads = hypre_NumThreads();
 
@@ -3692,24 +3696,24 @@ hypre_ParCSRMatrix *hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
    hypre_ParCSRMatrixGetrowactive(C) = 0;
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
-   /* Note that C owns the partitionings */
-   HYPRE_Int  *row_starts_C, *col_starts_C;
-
-   row_starts_C = hypre_TAlloc(HYPRE_Int, 2);
-   col_starts_C = hypre_TAlloc(HYPRE_Int, 2);
-   row_starts_C[0] = col_starts_A[0]; row_starts_C[1] = col_starts_A[1];
-   col_starts_C[0] = col_starts_B[0]; col_starts_C[1] = col_starts_B[1];
-
+   starts_size = 2;
+#else
+   starts_size = num_procs + 1;
+#endif
+   row_starts_C = hypre_TAlloc(HYPRE_Int, starts_size);
+   col_starts_C = hypre_TAlloc(HYPRE_Int, starts_size);
+   for (i = 0; i < starts_size; i++)
+   {
+      row_starts_C[i] = col_starts_A[i];
+   }
+   for (i = 0; i < starts_size; i++)
+   {
+      col_starts_C[i] = col_starts_B[i];
+   }
    hypre_ParCSRMatrixRowStarts(C) = row_starts_C;
    hypre_ParCSRMatrixColStarts(C) = col_starts_C;
-#else
-   /* Note that C does not own the partitionings */
-   hypre_ParCSRMatrixRowStarts(C) = col_starts_A;
-   hypre_ParCSRMatrixColStarts(C) = col_starts_B;
-
-   hypre_ParCSRMatrixSetRowStartsOwner(C,0);
-   hypre_ParCSRMatrixSetColStartsOwner(C,0);
-#endif
+   hypre_ParCSRMatrixSetRowStartsOwner(C, 1);
+   hypre_ParCSRMatrixSetColStartsOwner(C, 1);
 
    if (C_diag) hypre_ParCSRMatrixDiag(C) = C_diag;
    else hypre_ParCSRMatrixDiag(C) = C_tmp_diag;
