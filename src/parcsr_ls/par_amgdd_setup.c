@@ -373,20 +373,21 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
                                              &(send_flag_buffer_size_new[i]), send_flag_new, num_send_nodes_new, i, level, num_levels, padding, 
                                              num_ghost_layers, symmetric );
 
-            if (myid == 1 && i == 0)
-            {
-               printf("\nold send buffer = \n");
-               for (j = 0; j < send_buffer_size[level][i]; j++)
-               {
-                  printf("%d\n", send_buffer[i][j]);
-               }
+            // !!! Debug
+            // if (myid == 1 && i == 0)
+            // {
+            //    printf("\nold send buffer = \n");
+            //    for (j = 0; j < send_buffer_size[level][i]; j++)
+            //    {
+            //       printf("%d\n", send_buffer[i][j]);
+            //    }
 
-               printf("\nnew send buffer = \n");
-               for (j = 0; j < send_buffer_size_new[level][i]; j++)
-               {
-                  printf("%d\n", send_buffer_new[i][j]);
-               }
-            }
+            //    printf("\nnew send buffer = \n");
+            //    for (j = 0; j < send_buffer_size_new[level][i]; j++)
+            //    {
+            //       printf("%d\n", send_buffer_new[i][j]);
+            //    }
+            // }
          }
          if (timers) hypre_EndTiming(timers[2]);
 
@@ -461,6 +462,12 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
             num_recv_nodes[level][i] = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
             
             UnpackRecvBuffer(recv_buffer[i], compGrid, compGridCommPkg, 
+               send_flag, num_send_nodes, 
+               recv_map, num_recv_nodes, 
+               &(recv_map_send_buffer_size[i]), level, num_levels, nodes_added_on_level, i, num_resizes, symmetric);
+
+            // !!! New
+            UnpackRecvBufferNew(recv_buffer[i], compGrid, compGridCommPkg, hypre_ParCSRMatrixCommPkg( hypre_ParAMGDataAArray(amg_data)[level] ),
                send_flag, num_send_nodes, 
                recv_map, num_recv_nodes, 
                &(recv_map_send_buffer_size[i]), level, num_levels, nodes_added_on_level, i, num_resizes, symmetric);

@@ -11,7 +11,7 @@
 #include <map>
 #include <set>
 
-// !!! Debug
+// !!! Timing
 #include <chrono>
 
 using namespace std;
@@ -26,6 +26,15 @@ SetupNearestProcessorNeighborsNew( hypre_ParCSRMatrix *A, hypre_ParCompGrid *com
 
 HYPRE_Int
 SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int level, HYPRE_Int *padding, HYPRE_Int num_ghost_layers, HYPRE_Int *communication_cost );
+
+HYPRE_Int
+UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid, 
+      hypre_ParCSRCommPkg *commPkg,
+      hypre_ParCompGridCommPkg *compGridCommPkg,
+      HYPRE_Int ****send_flag, HYPRE_Int ***num_send_nodes,
+      HYPRE_Int ****recv_map, HYPRE_Int ***num_recv_nodes, 
+      HYPRE_Int *recv_map_send_buffer_size, HYPRE_Int current_level, HYPRE_Int num_levels,
+      HYPRE_Int *nodes_added_on_level, HYPRE_Int buffer_number, HYPRE_Int *num_resizes, HYPRE_Int symmetric );
 
 HYPRE_Int
 UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid, 
@@ -142,13 +151,6 @@ FindNeighborProcessors(hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A,
    HYPRE_Int   myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
-
-   // !!! Debug
-   // vector<chrono::duration<double>> timings;
-   // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
-   // auto start = chrono::system_clock::now();
-
-
    // Nodes to request from other processors. Note, requests are only issued to processors within distance 1, i.e. within the original communication stencil for A
    hypre_ParCSRCommPkg *commPkg = hypre_ParCSRMatrixCommPkg(A);
    map< HYPRE_Int, map<HYPRE_Int, map<HYPRE_Int, HYPRE_Int> > > request_proc_dofs; // request_proc_dofs[proc to request from, i.e. recv_proc][destination_proc][dof global index][distance]
@@ -170,21 +172,9 @@ FindNeighborProcessors(hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A,
    // Clear the list of starting dofs
    starting_dofs.clear();
 
-   // !!! Debug
-   // auto end = chrono::system_clock::now();
-   // timings.push_back(end - start);
-
-
-
-
    //////////////////////////////////////////////////
    // Communicate newly connected longer-distance processors to send procs: sending to current long distance send_procs and receiving from current long distance recv_procs
    //////////////////////////////////////////////////
-
-   // !!! Debug
-   // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
-   // start = chrono::system_clock::now();
-
 
    // Get the sizes
    hypre_MPI_Request *requests = hypre_CTAlloc(hypre_MPI_Request, send_proc_dofs.size() + recv_procs.size(), HYPRE_MEMORY_HOST);
@@ -222,12 +212,6 @@ FindNeighborProcessors(hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A,
    statuses = hypre_CTAlloc(hypre_MPI_Status, send_proc_dofs.size() + recv_procs.size(), HYPRE_MEMORY_HOST);
    request_cnt = 0;
 
-   // !!! Debug
-   // end = chrono::system_clock::now();
-   // timings.push_back(end - start);
-   // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
-   // start = chrono::system_clock::now();
-
    // Allocate and post the recvs
    HYPRE_Int **recv_buffers = hypre_CTAlloc(HYPRE_Int*, recv_procs.size(), HYPRE_MEMORY_HOST);
    cnt = 0;
@@ -262,12 +246,6 @@ FindNeighborProcessors(hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A,
    hypre_TFree(requests, HYPRE_MEMORY_HOST);
    hypre_TFree(statuses, HYPRE_MEMORY_HOST);
 
-   // !!! Debug
-   // end = chrono::system_clock::now();
-   // timings.push_back(end - start);
-   // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
-   // start = chrono::system_clock::now();
-
    // Update recv_procs
    HYPRE_Int old_num_recv_procs = recv_procs.size();
    for (HYPRE_Int i = 0; i < old_num_recv_procs; i++)
@@ -286,18 +264,9 @@ FindNeighborProcessors(hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A,
    hypre_TFree(recv_sizes, HYPRE_MEMORY_HOST);
    hypre_TFree(send_sizes, HYPRE_MEMORY_HOST);
 
-   // !!! Debug
-   // end = chrono::system_clock::now();
-   // timings.push_back(end - start);
-   // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
-   // start = chrono::system_clock::now();
-
-
-
    //////////////////////////////////////////////////
    // Communicate request dofs to processors that I recv from: sending to request_procs and receiving from distance 1 send procs
    //////////////////////////////////////////////////
-
 
    // Count up the send size: 1 + sum_{destination_procs}(2 + 2*num_requested_dofs)
    // send_buffer = [num destination procs, [request info for proc], [request info for proc], ... ]
@@ -737,7 +706,8 @@ SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGr
 }
 
 HYPRE_Int
-UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid, 
+UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid, 
+      hypre_ParCSRCommPkg *commPkg,
       hypre_ParCompGridCommPkg *compGridCommPkg,
       HYPRE_Int ****send_flag, HYPRE_Int ***num_send_nodes,
       HYPRE_Int ****recv_map, HYPRE_Int ***num_recv_nodes, 
@@ -762,16 +732,184 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
    // Init the recv_map_send_buffer_size !!! I think this can just be set a priori instead of counting it up in this function... !!!
    *recv_map_send_buffer_size = num_levels - current_level;
 
+   ////////////////////////////////////////////////////////////////////
+   // !!! Treat current_level specially: no redundancy here, and recv positions need to agree with original ParCSRCommPkg (extra comp grid points at the end)
+   ////////////////////////////////////////////////////////////////////
+
+   // Get the compgrid matrix, specifically the nonowned parts that will be added to
+   hypre_ParCompGridMatrix *A = hypre_ParCompGridANew(compGrid[current_level]);
+   hypre_CSRMatrix *owned_offd = hypre_ParCompGridMatrixOwnedOffd(A);
+   hypre_CSRMatrix *nonowned_diag = hypre_ParCompGridMatrixNonOwnedDiag(A);
+   hypre_CSRMatrix *nonowned_offd = hypre_ParCompGridMatrixNonOwnedOffd(A);
+
+   // get the number of nodes on this level
+   num_recv_nodes[current_level][buffer_number][current_level] = recv_buffer[cnt++];
+   nodes_added_on_level[current_level] = num_recv_nodes[current_level][buffer_number][current_level];
+
+   // if necessary, reallocate more space for nonowned dofs
+   HYPRE_Int max_nonowned = hypre_CSRMatrixNumRows(nonowned_diag);
+   if (num_recv_nodes[current_level][buffer_number][current_level] > max_nonowned) 
+   {
+      num_resizes[3*level]++;
+      HYPRE_Int new_size = ceil(1.5*max_nonowned);
+      if (new_size < num_recv_nodes[current_level][buffer_number][current_level]) 
+         new_size = num_recv_nodes[current_level][buffer_number][current_level];
+      hypre_ParCompGridResizeNew(compGrid[level], new_size, level != num_levels-1); // !!! Is there a better way to manage memory? !!!
+   }
+
+   // Skip over original commPkg recv dofs !!! Optimization: can avoid sending GIDs here
+   HYPRE_Int num_original_recv_dofs = hypre_ParCSRCommPkgRecvVecStart(commPkg, buffer_number+1) - hypre_ParCSRCommPkgRecvVecStart(commPkg, buffer_number);
+   HYPRE_Int remaining_dofs = num_recv_nodes[current_level][buffer_number][current_level] - num_original_recv_dofs;
+   cnt += num_original_recv_dofs;
+
+   // Unpack global indices and setup sort and invsort
+   HYPRE_Int start_extra_dofs = hypre_CSRMatrixNumCols(owned_offd);
+   if (start_extra_dofs < hypre_ParCompGridNumNonOwnedNodes(compGrid[current_level]))
+      start_extra_dofs = hypre_ParCompGridNumNonOwnedNodes(compGrid[current_level])
+   HYPRE_Int *sort_map = hypre_ParCompGridSortMap(compGrid[current_level]);
+   HYPRE_Int *inv_sort_map = hypre_ParCompGridInvSortMap(compGrid[current_level]);
+   HYPRE_Int sort_cnt = 0;
+   HYPRE_Int compGrid_cnt = 0;
+   HYPRE_Int incoming_cnt = 0;
+   while (incoming_cnt < remaining_dofs && compGrid_cnt < hypre_CSRMatrixNumCols(owned_offd))
+   {
+      // !!! Optimization: don't have to do these assignments every time... probably doesn't save much (i.e. only update incoming_global_index when necessary, etc.)
+      HYPRE_Int incoming_global_index = recv_buffer[cnt];
+      HYPRE_Int compGrid_global_index = hypre_ParCompGridNonOwnedGlobalIndices(compGrid[current_level])[ compGrid_cnt ];
+
+      HYPRE_Int incoming_is_real = 1;
+      if (incoming_global_index < 0) 
+      {
+         incoming_global_index = -(incoming_global_index + 1);
+         incoming_is_real = 0;
+      }
+
+      if (incoming_global_index < compGrid_global_index)
+      {
+         // Set global index and real marker for incoming extra dof
+         hypre_ParCompGridNonOwnedGlobalIndices(compGrid[current_level])[ incoming_cnt + start_extra_dofs ] = incoming_global_index;
+         hypre_ParCompGridNonOwnedRealMarker(compGrid[current_level])[ incoming_cnt + start_extra_dofs ] = incoming_is_real;
+
+         sort_map[ incoming_cnt + start_extra_dofs ] = sort_cnt;
+         inv_sort_map[sort_cnt] = incoming_cnt + start_extra_dofs;
+         sort_cnt++;
+         incoming_cnt++;
+         cnt++;
+      }
+      else
+      {
+         sort_map[ compGrid_cnt ] = sort_cnt;
+         inv_sort_map[sort_cnt] = compGrid_cnt;
+         compGrid_cnt++;
+         sort_cnt++;
+      }
+   }
+   while (incoming_cnt < remaining_dofs)
+   {
+      sort_map[ incoming_cnt + start_extra_dofs ] = sort_cnt;
+      inv_sort_map[sort_cnt] = incoming_cnt + start_extra_dofs;
+      sort_cnt++;
+      incoming_cnt++;
+      cnt++;
+   }
+   while (compGrid_cnt < hypre_CSRMatrixNumCols(owned_offd))
+   {
+      sort_map[ compGrid_cnt ] = sort_cnt;
+      inv_sort_map[sort_cnt] = compGrid_cnt;
+      compGrid_cnt++;
+      sort_cnt++;
+   }
+
+   // Unpack coarse global indices (need these for original commPkg recvs as well). 
+   // NOTE: store global indices for now, will be adjusted to local indices during SetupLocalIndices
+   if (level != num_levels-1)
+   {
+      for (i = 0; i < num_recv_nodes[current_level][buffer_number][current_level])
+      {
+         HYPRE_Int nonowned_index;
+         if (i < num_original_recv_dofs)
+            nonowned_index = i + hypre_ParCSRCommPkgRecvVecStart(commPkg, buffer_number);
+         else
+            nonowned_index = i + start_extra_dofs;
+         hypre_ParCompGridNonOwnedCoarseIndices(compGrid[current_level])[nonowned_index] = recv_buffer[cnt++];
+      }
+   }
+
+
+
+   // TODO: matrix row sizes and rows... have to split into diag and offd...
+   // NOTE: This is first time we touch these 
+   HYPRE_Int row_sizes_start = cnt;
+   cnt += num_recv_nodes[current_level][buffer_number][current_level];
+
+   // !!! SHIT.... how do I know where to insert col indices? I am no longer in the case of just building up comp grid in order...
+   // I am inserting info in the original commPkg range as well as in the start_extra_dofs range... how do I do it?
+   // I could do something temporary and then fix up after all info on this level is recvd during setuplocalindices?
+   // Yes. I think I can temporarily setup matrices with rows ordered by global index (using sort map)...
+   // Then during setuplocalindices, move everything back using invsort. NO... cause invsort is changing with every recv...
+   // You can just do something simple like A_tmp_indices[nonowned_index][row_index]. Just store whole row (don't split yet).
+   HYPRE_Int diag_rowptr = 0;
+   HYPRE_Int offd_rowptr = 0;
+   
+
+
+   for (i = 0; i < num_recv_nodes[current_level][buffer_number][current_level]; i++)
+   {
+      HYPRE_Int row_size = recv_buffer[ i + row_sizes_start ];
+      for (j = 0; j < row_size; j++)
+      {
+         HYPRE_Int incoming_index = recv_buffer[cnt++];
+
+
+
+
+         // Incoming is a global index
+         if (incoming_index < 0)
+         {
+            incoming_index = -(incoming_index+1);
+            // See whether global index is owned on this proc
+            if (incoming_index >= hypre_ParCompGridFirstGlobalIndex(compGrid[current_level]) && incoming_index <= hypre_ParCompGridLastGlobalIndex(compGrid[current_level]))
+            {
+
+            }
+            else
+            {
+
+            }
+         }
+         // Incoming is an index to dofs within the buffer
+         else
+         {
+
+         }
+
+
+
+
+
+      }
+   }
+
+
+
+
+
+
+
+
+
+
+
+   ////////////////////////////////////////////////////////////////////
    // loop over coarser psi levels
-   for (level = current_level; level < current_level + num_psi_levels; level++)
+   ////////////////////////////////////////////////////////////////////
+
+   for (level = current_level+1; level < current_level + num_psi_levels; level++)
    {
       // get the number of nodes on this level
       num_recv_nodes[current_level][buffer_number][level] = recv_buffer[cnt++];
       level_start = cnt;
       *recv_map_send_buffer_size += num_recv_nodes[current_level][buffer_number][level];
-
-      // !!! Debug
-      // auto start = chrono::system_clock::now();
 
       // Incoming nodes and existing (non-owned) nodes in the comp grid are both sorted by global index, so here we merge these lists together (getting rid of redundant nodes along the way)
       add_node_cnt = 0;
@@ -991,28 +1129,266 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
       }
 
       hypre_ParCompGridNumNodes(compGrid[level]) = num_nodes + add_node_cnt;
-
-      // !!! Debug
-      // auto end = chrono::system_clock::now();
-      // timings[3] += end - start;
       
    }
 
+   return 0;
+}
+
+HYPRE_Int
+UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid, 
+      hypre_ParCompGridCommPkg *compGridCommPkg,
+      HYPRE_Int ****send_flag, HYPRE_Int ***num_send_nodes,
+      HYPRE_Int ****recv_map, HYPRE_Int ***num_recv_nodes, 
+      HYPRE_Int *recv_map_send_buffer_size, HYPRE_Int current_level, HYPRE_Int num_levels,
+      HYPRE_Int *nodes_added_on_level, HYPRE_Int buffer_number, HYPRE_Int *num_resizes, HYPRE_Int symmetric )
+{
+   // recv_buffer = [ num_psi_levels , [level] , [level] , ... ]
+   // level = [ num send nodes, [global indices] , [coarse global indices] , [A row sizes] , [A col ind] ]
+
+   HYPRE_Int            level, i, j, k;
+   HYPRE_Int            num_psi_levels, row_size, level_start, add_node_cnt;
+
+   HYPRE_Int myid;
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+
+   // initialize the counter
+   HYPRE_Int            cnt = 0;
+
+   // get the number of levels received
+   num_psi_levels = recv_buffer[cnt++];
+
+   // Init the recv_map_send_buffer_size !!! I think this can just be set a priori instead of counting it up in this function... !!!
+   *recv_map_send_buffer_size = num_levels - current_level;
+
+   // loop over coarser psi levels
+   for (level = current_level; level < current_level + num_psi_levels; level++)
+   {
+      // get the number of nodes on this level
+      num_recv_nodes[current_level][buffer_number][level] = recv_buffer[cnt++];
+      level_start = cnt;
+      *recv_map_send_buffer_size += num_recv_nodes[current_level][buffer_number][level];
+
+      // Incoming nodes and existing (non-owned) nodes in the comp grid are both sorted by global index, so here we merge these lists together (getting rid of redundant nodes along the way)
+      add_node_cnt = 0;
+      HYPRE_Int num_nodes = hypre_ParCompGridNumNodes(compGrid[level]);
 
 
-   // !!! Debug
-   // auto total_end = chrono::system_clock::now();
-   // timings[0] = total_end - total_start;
-   // if (current_level == 0 && myid == 0)
-   // {
-   //    cout << "Rank " << myid << ", level " << current_level
-   //                         << ", test_cnt = " << test_cnt
-   //                         << ": total " << timings[0].count() 
-   //                         << ", merge plus " << timings[1].count()
-   //                         << ", expensive " << timings[2].count()
-   //                         << ", rest " << timings[3].count()
-   //                         << endl;
-   // }
+      // NOTE: Don't free incoming_dest because we set that as recv_map and use it outside this function
+      HYPRE_Int *incoming_dest = hypre_CTAlloc(HYPRE_Int, num_recv_nodes[current_level][buffer_number][level], HYPRE_MEMORY_HOST);
+
+      // if necessary, reallocate more space for compGrid
+      if (num_recv_nodes[current_level][buffer_number][level] + num_nodes > hypre_ParCompGridMemSize(compGrid[level])) 
+      {
+         num_resizes[3*level]++;
+         HYPRE_Int new_size = ceil(1.5*hypre_ParCompGridMemSize(compGrid[level]));
+         if (new_size < num_recv_nodes[current_level][buffer_number][level] + num_nodes) new_size = num_recv_nodes[current_level][buffer_number][level] + num_nodes;
+         hypre_ParCompGridResize(compGrid[level], new_size, level != num_levels-1, 0, symmetric); // !!! Is there a better way to manage memory? !!!
+      }
+
+      HYPRE_Int *sort_map = hypre_ParCompGridSortMap(compGrid[level]);
+      HYPRE_Int *inv_sort_map = hypre_ParCompGridInvSortMap(compGrid[level]);
+      HYPRE_Int *new_inv_sort_map = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridMemSize(compGrid[level]), HYPRE_MEMORY_HOST);
+      HYPRE_Int sort_cnt = 0;
+      HYPRE_Int compGrid_cnt = 0;
+      HYPRE_Int incoming_cnt = 0;
+      HYPRE_Int dest = num_nodes;
+
+      while (incoming_cnt < num_recv_nodes[current_level][buffer_number][level] && compGrid_cnt < num_nodes)
+      {
+         HYPRE_Int incoming_global_index = recv_buffer[cnt];
+         HYPRE_Int incoming_is_real = 1;
+         if (incoming_global_index < 0) 
+         {
+            incoming_global_index = -(incoming_global_index + 1);
+            incoming_is_real = 0;
+         }
+         HYPRE_Int compGrid_global_index = hypre_ParCompGridGlobalIndices(compGrid[level])[ inv_sort_map[compGrid_cnt] ];
+
+         // !!! Add optimization for owned dofs? That is, some way of skipping over the merge for the owned block.
+
+         if (incoming_global_index == compGrid_global_index)
+         {
+            if (incoming_is_real && !hypre_ParCompGridRealDofMarker(compGrid[level])[ inv_sort_map[compGrid_cnt] ])
+            {
+
+               // !!! Symmetric: Need to insert A col ind (no space allocated for row info at ghost point... but now trying to overwrite with real dof)
+
+               hypre_ParCompGridRealDofMarker(compGrid[level])[ inv_sort_map[compGrid_cnt] ] = 1;
+               
+               incoming_dest[incoming_cnt++] = inv_sort_map[compGrid_cnt]; // Incoming real dof received to existing ghost location
+               cnt++;
+
+            }
+            else
+            {
+               incoming_dest[incoming_cnt++] = -(inv_sort_map[compGrid_cnt] + 1); // Repeated real dof marked as redundant (incoming dest still marks the location of the existing local dof, using negative mapping to denote redundancy)
+               cnt++;
+            }
+         }
+         else if (incoming_global_index < compGrid_global_index)
+         {
+
+            sort_map[dest] = sort_cnt;
+            new_inv_sort_map[sort_cnt] = dest;
+
+            incoming_dest[incoming_cnt] = dest;
+
+            sort_cnt++;
+            incoming_cnt++;
+            dest++;
+            cnt++;
+            add_node_cnt++;
+         }
+         else
+         {
+            sort_map[ inv_sort_map[compGrid_cnt] ] = sort_cnt;
+            new_inv_sort_map[sort_cnt] = inv_sort_map[compGrid_cnt];
+            compGrid_cnt++;
+            sort_cnt++;
+         }
+      }
+      while (incoming_cnt < num_recv_nodes[current_level][buffer_number][level])
+      {
+         // !!! Add optimization for owned dofs? That is, some way of skipping over the merge for the owned block.
+
+         sort_map[dest] = sort_cnt;
+         new_inv_sort_map[sort_cnt] = dest;
+
+         incoming_dest[incoming_cnt] = dest;
+
+         sort_cnt++;
+         incoming_cnt++;
+         dest++;
+         cnt++;
+         add_node_cnt++;
+      }
+      while (compGrid_cnt < num_nodes)
+      {
+         sort_map[ inv_sort_map[compGrid_cnt] ] = sort_cnt;
+         new_inv_sort_map[sort_cnt] = inv_sort_map[compGrid_cnt];
+         compGrid_cnt++;
+         sort_cnt++;
+      }
+
+      nodes_added_on_level[level] += add_node_cnt;
+
+      // Free the old inv sort map and set new
+      hypre_TFree(inv_sort_map, HYPRE_MEMORY_HOST);
+      hypre_ParCompGridInvSortMap(compGrid[level]) = new_inv_sort_map;
+
+      // Set recv_map[current_level] to incoming_dest
+      recv_map[current_level][buffer_number][level] = incoming_dest;
+      
+      // Now copy in the new nodes to their appropriate positions
+      cnt = level_start;
+      for (i = 0; i < num_recv_nodes[current_level][buffer_number][level]; i++) 
+      {   
+         if (incoming_dest[i] >= 0)
+         {
+            HYPRE_Int global_index = recv_buffer[cnt];
+
+            if (global_index < 0) 
+            {
+               global_index = -(global_index + 1);
+               hypre_ParCompGridRealDofMarker(compGrid[level])[ incoming_dest[i] ] = 0;
+            }
+            else hypre_ParCompGridRealDofMarker(compGrid[level])[ incoming_dest[i] ] = 1;
+            hypre_ParCompGridGlobalIndices(compGrid[level])[ incoming_dest[i] ] = global_index;
+         }
+         cnt++;
+      }
+      if (level != num_levels-1)
+      {
+         for (i = 0; i < num_recv_nodes[current_level][buffer_number][level]; i++) 
+         {   
+            if (incoming_dest[i] >= 0)
+            {
+               hypre_ParCompGridCoarseGlobalIndices(compGrid[level])[ incoming_dest[i] ] = recv_buffer[cnt];
+            }
+            cnt++;
+         }
+      }
+
+      // Setup incoming A row ptr info and count up number of nonzeros added to A
+      HYPRE_Int added_A_nnz = 0;
+      for (i = 0; i < num_recv_nodes[current_level][buffer_number][level]; i++)
+      {
+         if (incoming_dest[i] >= num_nodes) // NOTE: if incoming_dest is smaller than num_nodes, it is overwriting a ghost with real and there is no need to copy A row info
+         {
+            row_size = recv_buffer[cnt];
+            added_A_nnz += row_size;
+            hypre_ParCompGridARowPtr(compGrid[level])[ incoming_dest[i] + 1 ] = hypre_ParCompGridARowPtr(compGrid[level])[ incoming_dest[i] ] + row_size;
+         }
+         cnt++;
+      }
+
+      // Check whether we need to reallocate space for A nonzero info
+      if (hypre_ParCompGridARowPtr(compGrid[level])[add_node_cnt + num_nodes] > hypre_ParCompGridAMemSize(compGrid[level]))
+      {
+         num_resizes[3*level + 1]++;
+         HYPRE_Int new_size = ceil(1.5*hypre_ParCompGridAMemSize(compGrid[level]));
+         if (new_size < hypre_ParCompGridARowPtr(compGrid[level])[add_node_cnt + num_nodes]) new_size = hypre_ParCompGridARowPtr(compGrid[level])[add_node_cnt + num_nodes];
+         hypre_ParCompGridResize(compGrid[level], new_size, level != num_levels-1, 1, symmetric); // !!! Is there a better way to manage memory? !!!
+      }
+
+      // Copy in new A global col ind info
+      HYPRE_Int size_cnt = cnt - num_recv_nodes[current_level][buffer_number][level];
+      for (i = 0; i < num_recv_nodes[current_level][buffer_number][level]; i++)
+      {
+         row_size = recv_buffer[size_cnt];
+
+         if (incoming_dest[i] >= 0)
+         {
+            // Treatment for incoming dofs (setup global indices and available local indices)
+            if (incoming_dest[i] >= num_nodes)
+            {
+               for (j = 0; j < row_size; j++)
+               {
+                  HYPRE_Int index = hypre_ParCompGridARowPtr(compGrid[level])[ incoming_dest[i] ] + j;
+                  HYPRE_Int incoming_index = recv_buffer[cnt++];
+                  if (incoming_index < 0)
+                  {
+                     hypre_ParCompGridAGlobalColInd(compGrid[level])[ index ] = -(incoming_index+1);
+                     hypre_ParCompGridAColInd(compGrid[level])[ index ] = -1;
+                  }
+                  else
+                  {
+                     HYPRE_Int local_index = incoming_dest[ incoming_index ];
+                     if (local_index < 0) local_index = -(local_index + 1);
+                     hypre_ParCompGridAColInd(compGrid[level])[ index ] = local_index;
+                     hypre_ParCompGridAGlobalColInd(compGrid[level])[ index ] = hypre_ParCompGridGlobalIndices(compGrid[level])[ local_index ];
+                  }
+               }
+            }
+            // Treatment for ghosts overwritten as real (just need to account for possible missing connections)
+            else
+            {
+               for (j = 0; j < row_size; j++)
+               {
+                  HYPRE_Int index = hypre_ParCompGridARowPtr(compGrid[level])[ incoming_dest[i] ] + j;
+                  HYPRE_Int local_index = hypre_ParCompGridAColInd(compGrid[level])[ index ];
+                  HYPRE_Int incoming_index = recv_buffer[cnt++];
+                  if (incoming_index >= 0 && local_index < 0)
+                  {
+                     local_index = incoming_dest[ incoming_index ];
+                     if (local_index < 0) local_index = -(local_index + 1);
+                     hypre_ParCompGridAColInd(compGrid[level])[ index ] = local_index;
+                     hypre_ParCompGridAGlobalColInd(compGrid[level])[ index ] = hypre_ParCompGridGlobalIndices(compGrid[level])[ local_index ];
+                  }
+               }               
+            }
+         }
+         else
+         {
+            cnt += recv_buffer[size_cnt];
+         }
+         size_cnt++;
+      }
+
+      hypre_ParCompGridNumNodes(compGrid[level]) = num_nodes + add_node_cnt;
+   }
+
 
    return 0;
 }

@@ -329,10 +329,16 @@ hypre_ParCompGridInitializeNew( hypre_ParAMGData *amg_data, HYPRE_Int padding, H
    hypre_ParCompGridNonOwnedInvSort(compGrid) = hypre_CTAlloc(HYPRE_Int, max_nonowned, HYPRE_MEMORY_HOST);
    hypre_ParCompGridNonOwnedDiagMissingColIndics(compGrid) = hypre_CTAlloc(HYPRE_Int, max_nonowned, HYPRE_MEMORY_HOST);
 
-   // Initialize nonowned global indices
+   // Initialize nonowned global indices and the sort and invsort arrays
+   HYPRE_Int prev_gid = 0; // !!! Debug
    for (i = 0; i < hypre_CSRMatrixNumCols(A_offd_original); i++)
    {
       hypre_ParCompGridNonOwnedGlobalIndices(compGrid)[i] = hypre_ParCSRMatrixColMapOffd( hypre_ParAMGDataAArray(amg_data)[level] )[i];
+      
+      // !!! Debug: expect gid ordering
+      if (hypre_ParCompGridNonOwnedGlobalIndices(compGrid)[i] < prev_gid) printf("HEY! ColMapOffd isn't in GID ordering\n");
+      prev_gid = hypre_ParCompGridNonOwnedGlobalIndices(compGrid)[i];
+
    }
 
    if (level != hypre_ParAMGDataNumLevels(amg_data) - 1)
@@ -1153,6 +1159,45 @@ hypre_ParCompGridSetSize ( hypre_ParCompGrid *compGrid, HYPRE_Int num_nodes, HYP
    {
       hypre_ParCompGridPColInd(compGrid) = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridPMemSize(compGrid), HYPRE_MEMORY_HOST);
       hypre_ParCompGridPData(compGrid) = hypre_CTAlloc(HYPRE_Complex, hypre_ParCompGridPMemSize(compGrid), HYPRE_MEMORY_HOST);      
+   }
+
+   return 0;
+}
+
+HYPRE_Int
+hypre_ParCompGridResizeNew ( hypre_ParCompGrid *compGrid, HYPRE_Int new_size, HYPRE_Int need_coarse_info )
+{
+   // This function reallocates memory to hold nonowned info for the comp grid
+
+   hypre_ParCompGridNonOwnedGlobalIndices(compGrid) = hypre_TReAlloc(hypre_ParCompGridNonOwnedGlobalIndices(compGrid), HYPRE_Int, new_size, HYPRE_MEMORY_HOST);
+   hypre_ParCompGridNonOwnedRealMarker(compGrid) = hypre_TReAlloc(hypre_ParCompGridNonOwnedRealMarker(compGrid), HYPRE_Int, new_size, HYPRE_MEMORY_HOST);
+   hypre_ParCompGridNonOwnedSort(compGrid) = hypre_TReAlloc(hypre_ParCompGridNonOwnedSort(compGrid), HYPRE_Int, new_size, HYPRE_MEMORY_HOST);
+   hypre_ParCompGridNonOwnedInvSort(compGrid) = hypre_TReAlloc(hypre_ParCompGridNonOwnedInvSort(compGrid), HYPRE_Int, new_size, HYPRE_MEMORY_HOST);
+
+   hypre_CSRMatrix *nonowned_diag = hypre_ParCompGridMatrixNonOwnedDiag(hypre_ParCompGridANew(compGrid));
+   hypre_CSRMatrix *nonowned_offd = hypre_ParCompGridMatrixNonOwnedOffd(hypre_ParCompGridANew(compGrid));
+   hypre_CSRMatrixResize(nonowned_diag, new_size, new_size, hypre_CSRMatrixNumNonzeros(nonowned_diag));
+   hypre_CSRMatrixResize(nonowned_offd, new_size, hypre_CSRMatrixNumCols(nonowned_offd), hypre_CSRMatrixNumNonzeros(nonowned_offd));
+
+   if (need_coarse_info)
+   {
+      hypre_ParCompGridNonOwnedCoarseIndices(compGrid) = hypre_TReAlloc(hypre_ParCompGridNonOwnedCoarseIndices(compGrid), HYPRE_Int, new_size, HYPRE_MEMORY_HOST);
+
+      // !!! Double check... HEY! Don't I need to reset num cols on adjacent level? Can probably just fix this at the end of setup... 
+      nonowned_diag = hypre_ParCompGridMatrixNonOwnedDiag(hypre_ParCompGridPNew(compGrid));
+      nonowned_offd = hypre_ParCompGridMatrixNonOwnedOffd(hypre_ParCompGridPNew(compGrid));
+      hypre_CSRMatrixResize(nonowned_diag, new_size, hypre_CSRMatrixNumCols(nonowned_diag), hypre_CSRMatrixNumNonzeros(nonowned_diag));
+      hypre_CSRMatrixResize(nonowned_offd, new_size, hypre_CSRMatrixNumCols(nonowned_offd), hypre_CSRMatrixNumNonzeros(nonowned_offd));
+
+   }
+
+   // !!! Double check... HEY! Don't I need to reset num cols on adjacent level? Can probably just fix this at the end of setup... 
+   if (hypre_ParCompGridRNew(compGrid))
+   {
+      nonowned_diag = hypre_ParCompGridMatrixNonOwnedDiag(hypre_ParCompGridRNew(compGrid));
+      nonowned_offd = hypre_ParCompGridMatrixNonOwnedOffd(hypre_ParCompGridRNew(compGrid));
+      hypre_CSRMatrixResize(nonowned_diag, new_size, hypre_CSRMatrixNumCols(nonowned_diag), hypre_CSRMatrixNumNonzeros(nonowned_diag));
+      hypre_CSRMatrixResize(nonowned_offd, new_size, hypre_CSRMatrixNumCols(nonowned_offd), hypre_CSRMatrixNumNonzeros(nonowned_offd));
    }
 
    return 0;
