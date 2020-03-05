@@ -349,6 +349,30 @@ hypre_doubleBoxVolume( hypre_Box *box )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_BoxStrideVolume( hypre_Box   *box,
+                       hypre_Index  stride)
+{
+   HYPRE_Int  ndim = hypre_BoxNDim(box);
+   HYPRE_Int  volume, d, s;
+
+   volume = 1;
+   for (d = 0; d < ndim; d++)
+   {
+      s = hypre_BoxSizeD(box, d);
+      if (s > 0)
+      {
+         s = (s - 1) / hypre_IndexD(stride, d) + 1;
+      }
+      volume *= s;
+   }
+
+   return volume;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_BoxPartialVolume( hypre_Box   *box,
                         hypre_Index  partial_volume)
 {
@@ -400,6 +424,24 @@ hypre_IndexInBox( hypre_Index   index,
    }
 
    return inbox;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BoxMaxSize( hypre_Box   *box)
+{
+   HYPRE_Int  d, ndim = hypre_BoxNDim(box);
+   HYPRE_Int  max;
+
+   max = 0;
+   for (d = 0; d < ndim; d++)
+   {
+      max = hypre_max(max, hypre_BoxSizeD(box, d));
+   }
+
+   return max;
 }
 
 /*--------------------------------------------------------------------------

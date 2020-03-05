@@ -54,7 +54,7 @@ typedef struct
    HYPRE_SStructVariable  *vartypes;         /* types of variables */
    hypre_StructGrid       *sgrids[8];        /* struct grids for each vartype */
    hypre_BoxArray         *iboxarrays[8];    /* interface boxes */
-                                       
+
    hypre_BoxArray         *pneighbors;
    hypre_Index            *pnbor_offsets;
 
@@ -63,10 +63,14 @@ typedef struct
 
    hypre_Index             periodic;         /* Indicates if pgrid is periodic */
 
-  /* GEC0902 additions for ghost expansion of boxes */
-
+   /* GEC0902 additions for ghost expansion of boxes */
+   // TODO: deprecate ghlocal_size
    HYPRE_Int               ghlocal_size;     /* Number of vars including ghosts */
-                           
+
+   HYPRE_Int               dom_ghlocal_size; /* Number of unknowns in the domain grid
+                                                including ghosts */
+   HYPRE_Int               ran_ghlocal_size; /* Number of unknowns in the range grid
+                                                including ghosts */
    HYPRE_Int               cell_sgrid_done;  /* =1 implies cell grid already assembled */
 } hypre_SStructPGrid;
 
@@ -90,7 +94,7 @@ typedef struct
 {
    HYPRE_Int  type;
    HYPRE_Int  offset;
-   HYPRE_Int  ghoffset; 
+   HYPRE_Int  ghoffset;
 
 } hypre_SStructBoxManInfo;
 
@@ -101,13 +105,13 @@ typedef struct
    HYPRE_Int    ghoffset; /* minimum offset ghost for this box */
    HYPRE_Int    proc;     /* redundant with the proc in the entry, but
                              makes some coding easier */
-   HYPRE_Int    boxnum;   /* this is different from the entry id */ 
+   HYPRE_Int    boxnum;   /* this is different from the entry id */
    HYPRE_Int    part;     /* part the box lives on */
    hypre_Index  ilower;   /* box ilower, but on the neighbor index-space */
    hypre_Index  coord;    /* lives on local index-space */
    hypre_Index  dir;      /* lives on local index-space */
    hypre_Index  stride;   /* lives on local index-space */
-   hypre_Index  ghstride; /* the ghost equivalent of strides */ 
+   hypre_Index  ghstride; /* the ghost equivalent of strides */
 
 } hypre_SStructBoxManNborInfo;
 
@@ -118,7 +122,7 @@ typedef struct
    HYPRE_Int        recv_part;
    HYPRE_Int        send_var;
    HYPRE_Int        recv_var;
-   
+
 } hypre_SStructCommInfo;
 
 typedef struct hypre_SStructGrid_struct
@@ -126,11 +130,11 @@ typedef struct hypre_SStructGrid_struct
    MPI_Comm                   comm;
    HYPRE_Int                  ndim;
    HYPRE_Int                  nparts;
-                          
-   /* s-variable info */  
+
+   /* s-variable info */
    hypre_SStructPGrid       **pgrids;
-                          
-   /* neighbor info */    
+
+   /* neighbor info */
    HYPRE_Int                 *nneighbors;
    hypre_SStructNeighbor    **neighbors;
    hypre_Index              **nbor_offsets;
@@ -157,14 +161,13 @@ typedef struct hypre_SStructGrid_struct
 
    HYPRE_Int                  local_size;  /* Number of variables locally */
    HYPRE_Int                  global_size; /* Total number of variables */
-                              
+
    HYPRE_Int                  ref_count;
 
  /* GEC0902 additions for ghost expansion of boxes */
-
+   // TODO: deprecate these ones. SStructMatrix should hold these data instead
    HYPRE_Int               ghlocal_size;  /* GEC0902 Number of vars including ghosts */
    HYPRE_Int               ghstart_rank;  /* GEC0902 start rank including ghosts  */
-
 } hypre_SStructGrid;
 
 /*--------------------------------------------------------------------------
@@ -295,4 +298,3 @@ typedef struct hypre_SStructGrid_struct
 #define hypre_SStructUCVarProc(uc, i)  ((uc) -> uvars[i].proc)
 
 #endif
-

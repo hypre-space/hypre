@@ -57,7 +57,7 @@ extern "C" {
 #define hypre_OWNINFODATA_HEADER
 
 
-typedef struct 
+typedef struct
 {
    HYPRE_Int             size;
 
@@ -106,7 +106,7 @@ typedef struct
 #define hypre_RECVINFODATA_HEADER
 
 
-typedef struct 
+typedef struct
 {
    HYPRE_Int             size;
 
@@ -138,7 +138,7 @@ typedef struct
 #define hypre_SENDINFODATA_HEADER
 
 
-typedef struct 
+typedef struct
 {
    HYPRE_Int             size;
 
@@ -169,10 +169,10 @@ typedef struct
     hypre_IJMatrix    *Face_iedge;
     hypre_IJMatrix    *Element_iedge;
     hypre_IJMatrix    *Edge_iedge;
-                                                                                                                            
+
     hypre_IJMatrix    *Element_Face;
     hypre_IJMatrix    *Element_Edge;
-                                                                                                                            
+
 } hypre_PTopology;
 
 /*BHEADER**********************************************************************
@@ -206,22 +206,22 @@ typedef struct
 typedef struct
 {
    MPI_Comm                comm;
-                      
+
    HYPRE_Real              tol;
    HYPRE_Int               max_iter;
    HYPRE_Int               rel_change;
    HYPRE_Int               zero_guess;
    HYPRE_Int               ndim;
-                      
+
    HYPRE_Int               num_pre_relax;  /* number of pre relaxation sweeps */
    HYPRE_Int               num_post_relax; /* number of post relaxation sweeps */
 
    HYPRE_Int               constant_coef;
-   
+
    hypre_Index            *rfactor;
 
    hypre_SStructGrid     **egrid_l;
-                    
+
    HYPRE_IJMatrix          Aen;
    hypre_ParCSRMatrix    **Aen_l;
 
@@ -253,8 +253,8 @@ typedef struct
    hypre_ParCSRMatrix     *T_transpose;
 
    /* edge data structure. These will have grids. */
-   HYPRE_Int               edge_maxlevels;  
-   HYPRE_Int               edge_numlevels;  
+   HYPRE_Int               edge_maxlevels;
+   HYPRE_Int               edge_numlevels;
    hypre_ParCSRMatrix    **Aee_l;
    hypre_ParVector       **be_l;
    hypre_ParVector       **xe_l;
@@ -307,11 +307,11 @@ typedef struct
 typedef struct
 {
    HYPRE_Int row;
-                                                                                                                                    
+
    HYPRE_Int ncols;
    HYPRE_Int      *cols;
    HYPRE_Real   *data;
-                                                                                                                                    
+
 } hypre_MaxwellOffProcRow;
 
 
@@ -561,6 +561,26 @@ HYPRE_Int HYPRE_SStructSplitSetStructSolver ( HYPRE_SStructSolver solver , HYPRE
 HYPRE_Int HYPRE_SStructSplitGetNumIterations ( HYPRE_SStructSolver solver , HYPRE_Int *num_iterations );
 HYPRE_Int HYPRE_SStructSplitGetFinalRelativeResidualNorm ( HYPRE_SStructSolver solver , HYPRE_Real *norm );
 
+/* HYPRE_sstruct_ssamg.c */
+HYPRE_Int HYPRE_SStructSSAMGCreate( MPI_Comm comm, HYPRE_SStructSolver *solver );
+HYPRE_Int HYPRE_SStructSSAMGDestroy( HYPRE_SStructSolver solver );
+HYPRE_Int HYPRE_SStructSSAMGSetup( HYPRE_SStructSolver solver, HYPRE_SStructMatrix A, HYPRE_SStructVector b, HYPRE_SStructVector x );
+HYPRE_Int HYPRE_SStructSSAMGSolve( HYPRE_SStructSolver solver, HYPRE_SStructMatrix A, HYPRE_SStructVector b, HYPRE_SStructVector x);
+HYPRE_Int HYPRE_SStructSSAMGSetTol( HYPRE_SStructSolver solver, HYPRE_Real tol );
+HYPRE_Int HYPRE_SStructSSAMGSetMaxIter( HYPRE_SStructSolver solver, HYPRE_Int max_iter );
+HYPRE_Int HYPRE_SStructSSAMGSetRelChange( HYPRE_SStructSolver solver, HYPRE_Int rel_change );
+HYPRE_Int HYPRE_SStructSSAMGSetZeroGuess( HYPRE_SStructSolver solver );
+HYPRE_Int HYPRE_SStructSSAMGSetNonZeroGuess( HYPRE_SStructSolver solver );
+HYPRE_Int HYPRE_SStructSSAMGSetRelaxType( HYPRE_SStructSolver solver, HYPRE_Int relax_type );
+HYPRE_Int HYPRE_SStructSSAMGSetRelaxWeight( HYPRE_SStructSolver solver, HYPRE_Real relax_weight );
+HYPRE_Int HYPRE_SStructSSAMGSetNumPreRelax( HYPRE_SStructSolver solver, HYPRE_Int num_pre_relax );
+HYPRE_Int HYPRE_SStructSSAMGSetNumPostRelax( HYPRE_SStructSolver solver, HYPRE_Int num_post_relax );
+HYPRE_Int HYPRE_SStructSSAMGSetDxyz( HYPRE_SStructSolver  solver, HYPRE_Int nparts, HYPRE_Real **dxyz );
+HYPRE_Int HYPRE_SStructSSAMGSetLogging( HYPRE_SStructSolver solver, HYPRE_Int logging );
+HYPRE_Int HYPRE_SStructSSAMGSetPrintLevel( HYPRE_SStructSolver solver, HYPRE_Int print_level );
+HYPRE_Int HYPRE_SStructSSAMGGetNumIterations( HYPRE_SStructSolver  solver, HYPRE_Int *num_iterations );
+HYPRE_Int HYPRE_SStructSSAMGGetFinalRelativeResidualNorm( HYPRE_SStructSolver  solver, HYPRE_Real *norm );
+
 /* HYPRE_sstruct_sys_pfmg.c */
 HYPRE_Int HYPRE_SStructSysPFMGCreate ( MPI_Comm comm , HYPRE_SStructSolver *solver );
 HYPRE_Int HYPRE_SStructSysPFMGDestroy ( HYPRE_SStructSolver solver );
@@ -666,6 +686,51 @@ HYPRE_Int hypre_NodeRelaxSetNodeset ( void *relax_vdata , HYPRE_Int nodeset , HY
 HYPRE_Int hypre_NodeRelaxSetNodesetRank ( void *relax_vdata , HYPRE_Int nodeset , HYPRE_Int nodeset_rank );
 HYPRE_Int hypre_NodeRelaxSetTempVec ( void *relax_vdata , hypre_SStructPVector *t );
 
+/* ssamg.c */
+void * hypre_SSAMGCreate( hypre_MPI_Comm comm );
+HYPRE_Int hypre_SSAMGDestroy( void *ssamg_vdata );
+HYPRE_Int hypre_SSAMGSetTol( void *ssamg_vdata, HYPRE_Real tol );
+HYPRE_Int hypre_SSAMGSetMaxIter( void *ssamg_vdata, HYPRE_Int max_iter );
+HYPRE_Int hypre_SSAMGSetRelChange( void *ssamg_vdata, HYPRE_Real rel_change );
+HYPRE_Int hypre_SSAMGSetZeroGuess( void *ssamg_vdata, HYPRE_Int zero_guess );
+HYPRE_Int hypre_SSAMGSetDxyz( void *ssamg_vdata, HYPRE_Int nparts, HYPRE_Real **dxyz );
+HYPRE_Int hypre_SSAMGSetRelaxType( void *ssamg_vdata, HYPRE_Int relax_type );
+HYPRE_Int hypre_SSAMGSetRelaxWeight( void *ssamg_vdata, HYPRE_Real relax_weight );
+HYPRE_Int hypre_SSAMGSetSkipRelax( void *ssamg_vdata, HYPRE_Int skip_relax );
+HYPRE_Int hypre_SSAMGSetNumPreRelax( void *ssamg_vdata, HYPRE_Int num_pre_relax );
+HYPRE_Int hypre_SSAMGSetNumPosRelax( void *ssamg_vdata, HYPRE_Int num_pos_relax );
+HYPRE_Int hypre_SSAMGSetPrintLevel( void *ssamg_vdata, HYPRE_Int print_level );
+HYPRE_Int hypre_SSAMGSetLogging( void *ssamg_vdata, HYPRE_Int logging );
+HYPRE_Int hypre_SSAMGGetNumIterations( void *ssamg_vdata, HYPRE_Int *num_iterations );
+HYPRE_Int hypre_SSAMGGetFinalRelativeResidualNorm( void *sys_pfmg_vdata, HYPRE_Real *relative_residual_norm );
+
+/* ssamg_interp.c */
+hypre_SStructMatrix* hypre_SSAMGCreateInterpOp( hypre_SStructMatrix *A, hypre_SStructGrid *cgrid, HYPRE_Int *cdir_p );
+HYPRE_Int hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A, HYPRE_Int *cdir_p, hypre_SStructMatrix *P );
+
+/* ssamg_relax.c */
+HYPRE_Int hypre_SSAMGRelaxCreate( MPI_Comm  comm, HYPRE_Int nparts, void **ssamg_relax_vdata_ptr );
+HYPRE_Int hypre_SSAMGRelaxDestroy( void *ssamg_relax_vdata );
+HYPRE_Int hypre_SSAMGRelax( void *ssamg_relax_vdata, hypre_SStructMatrix  *A, hypre_SStructVector *b, hypre_SStructVector *x );
+HYPRE_Int hypre_SSAMGRelaxSetup( void *ssamg_relax_vdata, hypre_SStructMatrix *A, hypre_SStructVector *b, hypre_SStructVector *x );
+HYPRE_Int hypre_SSAMGRelaxSetPreRelax( void  *ssamg_relax_vdata );
+HYPRE_Int hypre_SSAMGRelaxSetPostRelax( void  *ssamg_relax_vdata );
+HYPRE_Int hypre_SSAMGRelaxSetTol( void *ssamg_relax_vdata, HYPRE_Real tol );
+HYPRE_Int hypre_SSAMGRelaxSetWeight( void *ssamg_relax_vdata, HYPRE_Real *weight );
+HYPRE_Int hypre_SSAMGRelaxSetMaxIter( void *ssamg_relax_vdata, HYPRE_Int max_iter );
+HYPRE_Int hypre_SSAMGRelaxSetZeroGuess( void *ssamg_relax_vdata, HYPRE_Int zero_guess );
+HYPRE_Int hypre_SSAMGRelaxSetType( void *ssamg_relax_vdata, HYPRE_Int relax_type );
+HYPRE_Int hypre_SSAMGRelaxSetTempVec( void *ssamg_relax_vdata, hypre_SStructVector *t );
+
+/* ssamg_setup.c */
+HYPRE_Int hypre_SSAMGSetup( void *ssamg_vdata, hypre_SStructMatrix *A, hypre_SStructVector *b, hypre_SStructVector *x );
+HYPRE_Int hypre_SSAMGComputeMaxLevels( hypre_SStructGrid *grid, HYPRE_Int *max_levels );
+HYPRE_Int hypre_SSAMGComputeDxyz( hypre_SStructMatrix *A, HYPRE_Real **dxyz, HYPRE_Int *dxyz_flag );
+HYPRE_Int hypre_SSAMGCoarsen( void *ssamg_vdata, HYPRE_Int *dxyz_flag, HYPRE_Real **dxyz, HYPRE_Real ***relax_weights_ptr );
+
+/* ssamg_solve.c */
+HYPRE_Int hypre_SSAMGSolve( void *ssamg_vdata, hypre_SStructMatrix *A, hypre_SStructVector *b, hypre_SStructVector *x );
+
 /* sstruct_amr_intercommunication.c */
 HYPRE_Int hypre_SStructAMRInterCommunication ( hypre_SStructSendInfoData *sendinfo , hypre_SStructRecvInfoData *recvinfo , hypre_BoxArray *send_data_space , hypre_BoxArray *recv_data_space , HYPRE_Int num_values , MPI_Comm comm , hypre_CommPkg **comm_pkg_ptr );
 
@@ -704,7 +769,7 @@ HYPRE_Int hypre_SysPFMGSetDxyz ( void *sys_pfmg_vdata , HYPRE_Real *dxyz );
 HYPRE_Int hypre_SysPFMGSetLogging ( void *sys_pfmg_vdata , HYPRE_Int logging );
 HYPRE_Int hypre_SysPFMGSetPrintLevel ( void *sys_pfmg_vdata , HYPRE_Int print_level );
 HYPRE_Int hypre_SysPFMGGetNumIterations ( void *sys_pfmg_vdata , HYPRE_Int *num_iterations );
-HYPRE_Int hypre_SysPFMGPrintLogging ( void *sys_pfmg_vdata , HYPRE_Int myid );
+HYPRE_Int hypre_SysPFMGPrintLogging ( void *sys_pfmg_vdata );
 HYPRE_Int hypre_SysPFMGGetFinalRelativeResidualNorm ( void *sys_pfmg_vdata , HYPRE_Real *relative_residual_norm );
 
 /* sys_pfmg_relax.c */
@@ -753,4 +818,3 @@ HYPRE_Int hypre_SysSemiRestrictDestroy ( void *sys_restrict_vdata );
 #endif
 
 #endif
-

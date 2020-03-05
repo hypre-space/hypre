@@ -1066,9 +1066,9 @@ typedef struct hypre_BoxManEntry_struct
    HYPRE_Int position; /* This indicates the location of the entry in the the
                         * box manager entries array and is used for pairing with
                         * the info object (populated in addentry) */
-   
+
    void *boxman; /* The owning manager (populated in addentry) */
-   
+
    struct hypre_BoxManEntry_struct  *next;
 
 } hypre_BoxManEntry;
@@ -1082,32 +1082,32 @@ typedef struct
    MPI_Comm            comm;
 
    HYPRE_Int           max_nentries; /* storage allocated for entries */
-    
+
    HYPRE_Int           is_gather_called; /* Boolean to indicate whether
                                             GatherEntries function has been
                                             called (prior to assemble) - may not
                                             want this (can tell by the size of
                                             gather_regions array) */
-   
+
    hypre_BoxArray     *gather_regions; /* This is where we collect boxes input
                                           by calls to BoxManGatherEntries - to
                                           be gathered in the assemble.  These
                                           are then deleted after the assemble */
-   
+
 
    HYPRE_Int           all_global_known; /* Boolean to say that every processor
                                             already has all of the global data
                                             for this manager (this could be
                                             accessed by a coarsening routine,
                                             for example) */
-   
+
    HYPRE_Int           is_entries_sort; /* Boolean to say that entries were
                                            added in sorted order (id, proc)
                                            (this could be accessed by a
                                            coarsening routine, for example) */
 
    HYPRE_Int           entry_info_size; /* In bytes, the (max) size of the info
-                                           object for the entries */ 
+                                           object for the entries */
 
    HYPRE_Int           is_assembled; /* Flag to indicate if the box manager has
                                         been assembled (used to control whether
@@ -1121,7 +1121,7 @@ typedef struct
 
    HYPRE_Int         *procs_sort; /* The sorted procs corresponding to entries */
    HYPRE_Int         *ids_sort; /* Sorted ids corresponding to the entries */
- 
+
    HYPRE_Int          num_procs_sort; /* Number of distinct procs in entries */
    HYPRE_Int         *procs_sort_offsets; /* Offsets for procs into the
                                              entry_sort array */
@@ -1137,19 +1137,19 @@ typedef struct
                                                  imax of each box in the entries
                                                  array */
    HYPRE_Int           size[HYPRE_MAXDIM]; /* How many indexes in each
-                                              direction */ 
+                                              direction */
 
    HYPRE_Int           last_index[HYPRE_MAXDIM]; /* Last index used in the
                                                     indexes map */
 
    HYPRE_Int           num_my_entries; /* Num entries with proc_id = myid */
-   HYPRE_Int          *my_ids; /* Array of ids corresponding to my entries */ 
+   HYPRE_Int          *my_ids; /* Array of ids corresponding to my entries */
    hypre_BoxManEntry **my_entries; /* Points into entries that are mine and
                                       corresponds to my_ids array.  This is
                                       destroyed in the assemble. */
-   
+
    void               *info_objects; /* Array of info objects (each of size
-                                        entry_info_size), managed byte-wise */ 
+                                        entry_info_size), managed byte-wise */
 
    hypre_StructAssumedPart *assumed_partition; /* The assumed partition object.
                                                   For now this is only used
@@ -1160,7 +1160,7 @@ typedef struct
    hypre_Box          *bounding_box; /* Bounding box from associated grid */
 
    HYPRE_Int           next_id; /* Counter to indicate the next id that would be
-                                   unique (regardless of proc id) */  
+                                   unique (regardless of proc id) */
 
    /* Ghost stuff  */
    HYPRE_Int           num_ghost[2*HYPRE_MAXDIM];
@@ -1183,7 +1183,7 @@ typedef struct
 #define hypre_BoxManNEntries(manager)           ((manager) -> nentries)
 #define hypre_BoxManEntries(manager)            ((manager) -> entries)
 #define hypre_BoxManInfoObjects(manager)        ((manager) -> info_objects)
-#define hypre_BoxManIsAssembled(manager)        ((manager) -> is_assembled) 
+#define hypre_BoxManIsAssembled(manager)        ((manager) -> is_assembled)
 
 #define hypre_BoxManProcsSort(manager)          ((manager) -> procs_sort)
 #define hypre_BoxManIdsSort(manager)            ((manager) -> ids_sort)
@@ -1356,7 +1356,7 @@ typedef struct hypre_StructStencil_struct
 {
    hypre_Index   *shape;   /* Description of a stencil's shape */
    HYPRE_Int      size;    /* Number of stencil coefficients */
-                
+
    HYPRE_Int      ndim;    /* Number of dimensions */
 
    HYPRE_Int      ref_count;
@@ -1539,7 +1539,7 @@ typedef struct hypre_CommHandle_struct
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_CommStencil
  *--------------------------------------------------------------------------*/
- 
+
 #define hypre_CommStencilNDim(cstenc)   (cstenc -> ndim)
 #define hypre_CommStencilBox(cstenc)    (cstenc -> box)
 #define hypre_CommStencilData(cstenc)   (cstenc -> data)
@@ -1550,32 +1550,32 @@ typedef struct hypre_CommHandle_struct
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_CommInfo
  *--------------------------------------------------------------------------*/
- 
+
 #define hypre_CommInfoNDim(info)           (info -> ndim)
 #define hypre_CommInfoSendBoxes(info)      (info -> send_boxes)
 #define hypre_CommInfoSendStride(info)     (info -> send_stride)
 #define hypre_CommInfoSendProcesses(info)  (info -> send_processes)
 #define hypre_CommInfoSendRBoxnums(info)   (info -> send_rboxnums)
 #define hypre_CommInfoSendRBoxes(info)     (info -> send_rboxes)
-                                           
+
 #define hypre_CommInfoRecvBoxes(info)      (info -> recv_boxes)
 #define hypre_CommInfoRecvStride(info)     (info -> recv_stride)
 #define hypre_CommInfoRecvProcesses(info)  (info -> recv_processes)
 #define hypre_CommInfoRecvRBoxnums(info)   (info -> recv_rboxnums)
 #define hypre_CommInfoRecvRBoxes(info)     (info -> recv_rboxes)
-                                           
+
 #define hypre_CommInfoNumTransforms(info)  (info -> num_transforms)
 #define hypre_CommInfoCoords(info)         (info -> coords)
 #define hypre_CommInfoDirs(info)           (info -> dirs)
 #define hypre_CommInfoSendTransforms(info) (info -> send_transforms)
 #define hypre_CommInfoRecvTransforms(info) (info -> recv_transforms)
-                                           
+
 #define hypre_CommInfoBoxesMatch(info)     (info -> boxes_match)
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_CommEntry
  *--------------------------------------------------------------------------*/
- 
+
 #define hypre_CommEntryOffset(entry)       (entry -> offset)
 #define hypre_CommEntryDim(entry)          (entry -> dim)
 #define hypre_CommEntryLengthArray(entry)  (entry -> length_array)
@@ -1585,7 +1585,7 @@ typedef struct hypre_CommHandle_struct
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_CommBlock
  *--------------------------------------------------------------------------*/
- 
+
 #define hypre_CommBlockBufsize(blk)       (blk -> bufsize)
 #define hypre_CommBlockPfxsize(blk)       (blk -> pfxsize)
 #define hypre_CommBlockNDim(blk)          (blk -> ndim)
@@ -1606,7 +1606,7 @@ typedef struct hypre_CommHandle_struct
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_CommType
  *--------------------------------------------------------------------------*/
- 
+
 #define hypre_CommTypeFirstComm(type)     (type -> first_comm)
 #define hypre_CommTypeProc(type)          (type -> proc)
 #define hypre_CommTypeBufsize(type)       (type -> bufsize)
@@ -1618,11 +1618,11 @@ typedef struct hypre_CommHandle_struct
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_CommPkg
  *--------------------------------------------------------------------------*/
- 
+
 #define hypre_CommPkgComm(comm_pkg)            (comm_pkg -> comm)
 
 #define hypre_CommPkgNDim(comm_pkg)            (comm_pkg -> ndim)
-                                               
+
 #define hypre_CommPkgNumSends(comm_pkg)        (comm_pkg -> num_sends)
 #define hypre_CommPkgNumRecvs(comm_pkg)        (comm_pkg -> num_recvs)
 #define hypre_CommPkgSendTypes(comm_pkg)       (comm_pkg -> send_types)
@@ -1642,7 +1642,7 @@ typedef struct hypre_CommHandle_struct
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_CommHandle
  *--------------------------------------------------------------------------*/
- 
+
 #define hypre_CommHandleCommPkg(comm_handle)     (comm_handle -> comm_pkg)
 #define hypre_CommHandleSendData(comm_handle)    (comm_handle -> send_data)
 #define hypre_CommHandleRecvData(comm_handle)    (comm_handle -> recv_data)
@@ -1712,7 +1712,7 @@ typedef struct hypre_ComputePkg_struct
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_ComputeInfo
  *--------------------------------------------------------------------------*/
- 
+
 #define hypre_ComputeInfoCommInfo(info)     (info -> comm_info)
 #define hypre_ComputeInfoIndtBoxes(info)    (info -> indt_boxes)
 #define hypre_ComputeInfoDeptBoxes(info)    (info -> dept_boxes)
@@ -1721,7 +1721,7 @@ typedef struct hypre_ComputePkg_struct
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_ComputePkg
  *--------------------------------------------------------------------------*/
- 
+
 #define hypre_ComputePkgCommPkg(compute_pkg)      (compute_pkg -> comm_pkg)
 
 #define hypre_ComputePkgIndtBoxes(compute_pkg)    (compute_pkg -> indt_boxes)
@@ -1790,13 +1790,13 @@ typedef struct
 #define hypre_StTermID(term)           ((term) -> id)
 #define hypre_StTermEntry(term)        ((term) -> entry)
 #define hypre_StTermShift(term)        ((term) -> shift)
-                                      
+
 #define hypre_StCoeffNTerms(coeff)     ((coeff) -> nterms)
 #define hypre_StCoeffTerms(coeff)      ((coeff) -> terms)
 #define hypre_StCoeffTerm(coeff, t)   &((coeff) -> terms[t])
 #define hypre_StCoeffPrev(coeff)       ((coeff) -> prev)
 #define hypre_StCoeffNext(coeff)       ((coeff) -> next)
-                                      
+
 #define hypre_StMatrixID(stmat)        ((stmat) -> id)
 #define hypre_StMatrixSize(stmat)      ((stmat) -> size)
 #define hypre_StMatrixRMap(stmat)      ((stmat) -> rmap)
@@ -1956,9 +1956,11 @@ typedef struct hypre_StructMatrix_struct
    MPI_Comm              comm;
 
    hypre_StructGrid     *grid;          /* Base grid */
+   HYPRE_Int             ran_ghsize;    /* Number of vars in range grid including ghosts */
    HYPRE_Int             ran_nboxes;    /* Range grid number of boxes */
    HYPRE_Int            *ran_boxnums;   /* Range grid boxnums in base grid */
    hypre_Index           ran_stride;    /* Range grid coarsening stride */
+   HYPRE_Int             dom_ghsize;    /* Number of vars in domain grid including ghosts */
    HYPRE_Int             dom_nboxes;    /* Domain grid number of boxes */
    HYPRE_Int            *dom_boxnums;   /* Domain grid boxnums in base grid */
    hypre_Index           dom_stride;    /* Domain grid coarsening stride */
@@ -1993,7 +1995,7 @@ typedef struct hypre_StructMatrix_struct
    HYPRE_Int             num_ghost[2*HYPRE_MAXDIM]; /* Min num ghost layers */
    HYPRE_Int             sym_ghost[2*HYPRE_MAXDIM]; /* Ghost layers for symmetric */
    HYPRE_Int             trn_ghost[2*HYPRE_MAXDIM]; /* Ghost layers for transpose */
-                      
+
    HYPRE_Int             global_size;  /* Total number of nonzero coeffs */
 
    HYPRE_Int             ref_count;
@@ -2011,10 +2013,12 @@ typedef struct hypre_StructMatrix_struct
 
 #define hypre_StructMatrixComm(matrix)          ((matrix) -> comm)
 #define hypre_StructMatrixGrid(matrix)          ((matrix) -> grid)
+#define hypre_StructMatrixRanGhsize(matrix)     ((matrix) -> ran_ghsize)
 #define hypre_StructMatrixRanNBoxes(matrix)     ((matrix) -> ran_nboxes)
 #define hypre_StructMatrixRanBoxnums(matrix)    ((matrix) -> ran_boxnums)
 #define hypre_StructMatrixRanBoxnum(matrix, i)  ((matrix) -> ran_boxnums[i])
 #define hypre_StructMatrixRanStride(matrix)     ((matrix) -> ran_stride)
+#define hypre_StructMatrixDomGhsize(matrix)     ((matrix) -> dom_ghsize)
 #define hypre_StructMatrixDomNBoxes(matrix)     ((matrix) -> dom_nboxes)
 #define hypre_StructMatrixDomBoxnums(matrix)    ((matrix) -> dom_boxnums)
 #define hypre_StructMatrixDomBoxnum(matrix, i)  ((matrix) -> dom_boxnums[i])
@@ -2108,11 +2112,11 @@ typedef struct hypre_StructVector_struct
    HYPRE_Int            *data_indices; /* Array of indices into the data array.
                                           data_indices[b] is the starting index
                                           of data corresponding to boxnum b. */
-                      
+
    HYPRE_Int             num_ghost[2*HYPRE_MAXDIM]; /* Num ghost layers in each
                                                      * direction */
    HYPRE_Int             bghost_not_clear; /* Are boundary ghosts clear? */
-                      
+
    HYPRE_Int             global_size;  /* Total number coefficients */
 
    HYPRE_Int             ref_count;
@@ -2145,7 +2149,7 @@ typedef struct hypre_StructVector_struct
 #define hypre_StructVectorBGhostNotClear(vector)((vector) -> bghost_not_clear)
 #define hypre_StructVectorGlobalSize(vector)    ((vector) -> global_size)
 #define hypre_StructVectorRefCount(vector)      ((vector) -> ref_count)
- 
+
 #define hypre_StructVectorSaveGrid(vector)      ((vector) -> save_grid)
 #define hypre_StructVectorSaveStride(vector)    ((vector) -> save_stride)
 #define hypre_StructVectorSaveData(vector)      ((vector) -> save_data)
@@ -2157,10 +2161,10 @@ hypre_StructGridNDim(hypre_StructVectorGrid(vector))
 
 #define hypre_StructVectorBox(vector, b) \
 hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), b)
- 
+
 #define hypre_StructVectorBoxData(vector, b) \
 (hypre_StructVectorData(vector) + hypre_StructVectorDataIndices(vector)[b])
- 
+
 #define hypre_StructVectorBoxDataValue(vector, b, index) \
 (hypre_StructVectorBoxData(vector, b) + \
  hypre_BoxIndexRank(hypre_StructVectorBox(vector, b), index))
@@ -2225,9 +2229,11 @@ HYPRE_Int hypre_CopyBox( hypre_Box *box1 , hypre_Box *box2 );
 hypre_Box *hypre_BoxClone ( hypre_Box *box );
 HYPRE_Int hypre_BoxVolume( hypre_Box *box );
 HYPRE_Real hypre_doubleBoxVolume( hypre_Box *box );
+HYPRE_Int hypre_BoxStrideVolume ( hypre_Box *box , hypre_Index stride );
 HYPRE_Int hypre_BoxPartialVolume( hypre_Box *box, hypre_Index partial_volume);
 HYPRE_Int hypre_BoxNnodes( hypre_Box *box );
 HYPRE_Int hypre_IndexInBox ( hypre_Index index , hypre_Box *box );
+HYPRE_Int hypre_BoxMaxSize( hypre_Box *box );
 HYPRE_Int hypre_BoxGetSize ( hypre_Box *box , hypre_Index size );
 HYPRE_Int hypre_BoxGetStrideSize ( hypre_Box *box , hypre_Index stride , hypre_Index size );
 HYPRE_Int hypre_BoxGetStrideVolume ( hypre_Box *box , hypre_Index stride , HYPRE_Int *volume_ptr );
@@ -2499,4 +2505,3 @@ hypre_StructVector *hypre_StructVectorClone ( hypre_StructVector *vector );
 #endif
 
 #endif
-

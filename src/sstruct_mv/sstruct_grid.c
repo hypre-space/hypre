@@ -1936,12 +1936,12 @@ hypre_SStructGridSetNumGhost( hypre_SStructGrid  *grid, HYPRE_Int *num_ghost )
 HYPRE_Int
 hypre_SStructBoxManEntryGetGlobalRank( hypre_BoxManEntry *entry,
                                        hypre_Index        index,
-                                       HYPRE_Int          *rank_ptr,
+                                       HYPRE_Int         *rank_ptr,
                                        HYPRE_Int          type)
 {
    if (type == HYPRE_PARCSR)
    {
-      hypre_SStructBoxManEntryGetGlobalCSRank(entry,index, rank_ptr);
+      hypre_SStructBoxManEntryGetGlobalCSRank(entry, index, rank_ptr);
    }
    if (type == HYPRE_SSTRUCT || type == HYPRE_STRUCT)
    {
@@ -2202,6 +2202,85 @@ hypre_SStructGridIntersect( hypre_SStructGrid   *grid,
 
    *entries_ptr  = entries;
    *nentries_ptr = nentries;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * This routine coarsens a SStructGrid.
+ *
+ * For now, it assumes that all StructGrids share the same origin
+ *
+ * TODO:
+ *        1) How to deal with neighbors?
+ *           How to make the calls to SetNeighborPart or SetSharedPart?
+ *        2) Set FEM data with call to HYPRE_SStructGridSetFEMOrdering
+ *        3) Extend to multiple variables (some pieces of code already done)
+ *        4) Do we really need the call to SStructPGridCellSGridDone?
+ *    *** 5) Are we dealing correctly with parts that have no boxes left for coarsening ?
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+hypre_SStructGridCoarsen( hypre_SStructGrid   *fgrid,
+                          hypre_IndexRef       origin,
+                          hypre_Index         *strides,  // coarsening factor for each part
+                          hypre_Index         *periodic, // periodic data for each part
+                          HYPRE_Int            prune,    // Erase boxes with zero volume
+                          hypre_SStructGrid  **cgrid_ptr )
+{
+   MPI_Comm               comm   = hypre_SStructGridComm(fgrid);
+   HYPRE_Int              ndim   = hypre_SStructGridNDim(fgrid);
+   HYPRE_Int              nparts = hypre_SStructGridNParts(fgrid);
+
+   hypre_SStructGrid     *cgrid;
+   hypre_SStructPGrid    *pfgrid;
+   hypre_SStructPGrid    *pcgrid;
+   hypre_StructGrid      *cell_sgrid;
+   hypre_StructGrid      *sfgrid;
+   hypre_StructGrid      *scgrid;
+   hypre_SStructVariable *vartypes;
+
+   HYPRE_Int              part, var;
+   HYPRE_Int              nvars;
+
+   /* Create coarse SStructGrid */
+   HYPRE_SStructGridCreate(comm, ndim, nparts, &cgrid);
+
+   for (part = 0; part < nparts; part++)
+   {
+      pfgrid = hypre_SStructGridPGrid(fgrid, part);
+      pcgrid = hypre_SStructGridPGrid(cgrid, part);
+      nvars  = hypre_SStructPGridNVars(pfgrid);
+      vartypes = hypre_SStructPGridVarTypes(pfgrid);
+
+      /* Destroy cell grid created by PGridCreate */
+      /* cell_sgrid = hypre_SStructPGridCellSGrid(pcgrid); */
+      /* hypre_StructGridDestroy(cell_sgrid); */
+
+      /* Set number and types of variables in cgrid */
+      HYPRE_SStructGridSetVariables(cgrid, part, nvars, vartypes);
+
+      /* Set periodic data */
+      HYPRE_SStructGridSetPeriodic(cgrid, part, periodic[part]);
+
+      for (var = 0; var < nvars; var++)
+      {
+          sfgrid = hypre_SStructPGridSGrid(pfgrid, var);
+          //scgrid = hypre_SStructPGridSGrid(pcgrid, var);
+
+          /* Coarsen the StructGrid relative to (part, var) */
+          hypre_StructCoarsen(sfgrid, origin, strides[part], prune, &scgrid);
+          hypre_SStructPGridSGrid(pcgrid, var) = scgrid;
+      }
+
+      /* Cell grid was computed before */
+      hypre_SStructPGridCellSGridDone(pcgrid) = 1;
+   }
+
+   /* Assemble coarse SStructGrid */
+   HYPRE_SStructGridAssemble(cgrid);
+
+   /* Set pointer to coarse SStructGrid */
+   *cgrid_ptr = cgrid;
 
    return hypre_error_flag;
 }

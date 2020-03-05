@@ -58,9 +58,11 @@ typedef struct hypre_StructMatrix_struct
    MPI_Comm              comm;
 
    hypre_StructGrid     *grid;          /* Base grid */
+   HYPRE_Int             ran_ghsize;    /* Number of vars in range grid including ghosts */
    HYPRE_Int             ran_nboxes;    /* Range grid number of boxes */
    HYPRE_Int            *ran_boxnums;   /* Range grid boxnums in base grid */
    hypre_Index           ran_stride;    /* Range grid coarsening stride */
+   HYPRE_Int             dom_ghsize;    /* Number of vars in domain grid including ghosts */
    HYPRE_Int             dom_nboxes;    /* Domain grid number of boxes */
    HYPRE_Int            *dom_boxnums;   /* Domain grid boxnums in base grid */
    hypre_Index           dom_stride;    /* Domain grid coarsening stride */
@@ -95,7 +97,7 @@ typedef struct hypre_StructMatrix_struct
    HYPRE_Int             num_ghost[2*HYPRE_MAXDIM]; /* Min num ghost layers */
    HYPRE_Int             sym_ghost[2*HYPRE_MAXDIM]; /* Ghost layers for symmetric */
    HYPRE_Int             trn_ghost[2*HYPRE_MAXDIM]; /* Ghost layers for transpose */
-                      
+
    HYPRE_Int             global_size;  /* Total number of nonzero coeffs */
 
    HYPRE_Int             ref_count;
@@ -113,10 +115,12 @@ typedef struct hypre_StructMatrix_struct
 
 #define hypre_StructMatrixComm(matrix)          ((matrix) -> comm)
 #define hypre_StructMatrixGrid(matrix)          ((matrix) -> grid)
+#define hypre_StructMatrixRanGhsize(matrix)     ((matrix) -> ran_ghsize)
 #define hypre_StructMatrixRanNBoxes(matrix)     ((matrix) -> ran_nboxes)
 #define hypre_StructMatrixRanBoxnums(matrix)    ((matrix) -> ran_boxnums)
 #define hypre_StructMatrixRanBoxnum(matrix, i)  ((matrix) -> ran_boxnums[i])
 #define hypre_StructMatrixRanStride(matrix)     ((matrix) -> ran_stride)
+#define hypre_StructMatrixDomGhsize(matrix)     ((matrix) -> dom_ghsize)
 #define hypre_StructMatrixDomNBoxes(matrix)     ((matrix) -> dom_nboxes)
 #define hypre_StructMatrixDomBoxnums(matrix)    ((matrix) -> dom_boxnums)
 #define hypre_StructMatrixDomBoxnum(matrix, i)  ((matrix) -> dom_boxnums[i])

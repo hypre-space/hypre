@@ -83,7 +83,7 @@ HYPRE_SStructGridCreate( MPI_Comm           comm,
    hypre_SStructGridRefCount(grid)      = 1;
 
    /* GEC0902 ghost addition to the grid    */
-   hypre_SStructGridGhlocalSize(grid)   = 0; 
+   hypre_SStructGridGhlocalSize(grid)   = 0;
 
    *grid_ptr = grid;
 
@@ -204,9 +204,9 @@ HYPRE_SStructGridSetExtents( HYPRE_SStructGrid  grid,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int HYPRE_SStructGridSetVariables( HYPRE_SStructGrid      grid,
-                                   HYPRE_Int              part,
-                                   HYPRE_Int              nvars,
-                                   HYPRE_SStructVariable *vartypes )
+                                         HYPRE_Int              part,
+                                         HYPRE_Int              nvars,
+                                         HYPRE_SStructVariable *vartypes )
 {
    hypre_SStructPGrid  *pgrid = hypre_SStructGridPGrid(grid, part);
 
@@ -628,7 +628,7 @@ HYPRE_SStructGridAssemble( HYPRE_SStructGrid grid )
     * actually live anywhere on the global grid.
     *
     * This is not an issue for cell-centered variables.
-    */ 
+    */
 
    for (part = 0; part < nparts; part++)
    {
@@ -655,7 +655,7 @@ HYPRE_SStructGridAssemble( HYPRE_SStructGrid grid )
    {
       hypre_SStructPGridAssemble(pgrids[part]);
    }
-   
+
    /*-------------------------------------------------------------
     * re-organize u-variables to reference via local cell rank
     *-------------------------------------------------------------*/
@@ -873,10 +873,9 @@ HYPRE_SStructGridSetPeriodic( HYPRE_SStructGrid  grid,
 
 HYPRE_Int
 HYPRE_SStructGridSetNumGhost( HYPRE_SStructGrid grid,
-                              HYPRE_Int      *num_ghost)       
+                              HYPRE_Int      *num_ghost)
 {
    hypre_SStructGridSetNumGhost(grid, num_ghost);
 
    return hypre_error_flag;
 }
-

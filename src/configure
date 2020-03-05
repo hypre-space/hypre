@@ -6760,7 +6760,7 @@ if test "x${hypre_user_chose_cflags}" = "xno"
 then
    case "${CC}" in
       gcc|mpigcc|mpicc)
-        CFLAGS="-g -Wall"
+        CFLAGS="-g -Wall -O0"
         if test "$hypre_using_openmp" = "yes" ; then
           CFLAGS="$CFLAGS -fopenmp"
           LDFLAGS="$LDFLAGS -fopenmp"
@@ -6800,7 +6800,7 @@ if test "x${hypre_user_chose_cxxflags}" = "xno"
 then
    case "${CXX}" in
       g++|gCC|mpig++|mpicxx|mpiCC)
-        CXXFLAGS="-g -Wall"
+        CXXFLAGS="-g -Wall -O0"
         if test "$hypre_using_openmp" = "yes" ; then
           CXXFLAGS="$CXXFLAGS -fopenmp"
         fi
@@ -6836,7 +6836,7 @@ if test "x${hypre_user_chose_fflags}" = "xno"
 then
    case "${FC}" in
       g77|gfortran|mpigfortran|mpif77)
-        FFLAGS="-g -Wall"
+        FFLAGS="-g -Wall -O0"
         if test "$hypre_using_openmp" = "yes" ; then
           FFLAGS="$FFLAGS -fopenmp"
         fi
@@ -8599,4 +8599,3 @@ fi
 mv HYPRE_config.h HYPRE_config.h.tmp
 sed 's/FC_FUNC/HYPRE_FC_FUNC/g' < HYPRE_config.h.tmp > HYPRE_config.h
 rm -f HYPRE_config.h.tmp
-

@@ -498,6 +498,8 @@ hypre_StructMatrixCreate( MPI_Comm             comm,
    hypre_StructMatrixRefCount(matrix)    = 1;
 
    /* set defaults */
+   hypre_StructMatrixRanGhsize(matrix) = 0;
+   hypre_StructMatrixDomGhsize(matrix) = 0;
    hypre_StructMatrixRangeIsCoarse(matrix) = 0;
    hypre_StructMatrixDomainIsCoarse(matrix) = 0;
    hypre_StructMatrixSymmetric(matrix) = 0;
@@ -934,7 +936,9 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
    HYPRE_Int            *constant   = hypre_StructMatrixConstant(matrix);
    hypre_IndexRef        ran_stride = hypre_StructMatrixRanStride(matrix);
    hypre_IndexRef        dom_stride = hypre_StructMatrixDomStride(matrix);
+   HYPRE_Int            *num_ghost  = hypre_StructMatrixNumGhost(matrix);
    hypre_IndexRef        periodic   = hypre_StructGridPeriodic(grid);
+   hypre_BoxArray       *grid_boxes = hypre_StructGridBoxes(grid);
 
    hypre_StructStencil  *user_stencil;
    hypre_StructStencil  *stencil;
@@ -944,7 +948,10 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
    HYPRE_Int            *symm_entries;
    HYPRE_Int             domain_is_coarse;
    hypre_BoxArray       *data_space;
+   hypre_Box            *box;
+   hypre_Box            *ghost_box;
    HYPRE_Int            *sym_ghost;
+   HYPRE_Int             dom_ghsize, ran_ghsize;
    HYPRE_Int             i, j, d, resize;
 
    /*-----------------------------------------------------------------------
@@ -1133,6 +1140,29 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
 
    hypre_StructMatrixGlobalSize(matrix) =
       hypre_StructGridGlobalSize(grid) * stencil_size;
+
+   // Compute number of variables including ghosts (only num_ghost)
+   ghost_box = hypre_BoxCreate(ndim);
+   dom_ghsize = 0; ran_ghsize = 0;
+   hypre_ForBoxI(i, grid_boxes)
+   {
+      box = hypre_BoxArrayBox(grid_boxes, i);
+
+      // Domain grid (columns)
+      hypre_CopyBox(box, ghost_box);
+      hypre_CoarsenBox(ghost_box, NULL, dom_stride);
+      hypre_BoxGrowByArray(ghost_box, num_ghost);
+      dom_ghsize += hypre_BoxVolume(ghost_box);
+
+      // Range grid (rows)
+      hypre_CopyBox(box, ghost_box);
+      hypre_CoarsenBox(ghost_box, NULL, ran_stride);
+      hypre_BoxGrowByArray(ghost_box, num_ghost);
+      ran_ghsize += hypre_BoxVolume(ghost_box);
+   }
+   hypre_StructMatrixDomGhsize(matrix) = dom_ghsize;
+   hypre_StructMatrixRanGhsize(matrix) = ran_ghsize;
+   hypre_BoxDestroy(ghost_box);
 
    /*-----------------------------------------------------------------------
     * Set up information related to the data space and data storage
@@ -1399,10 +1429,10 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
             {
                datap = hypre_StructMatrixBoxData(matrix, i, j);
 
+               /* TODO: this is not the most efficient way of acessing constant entries.
+                        Should use SetConstantValues instead. */
                if (constant[j])
                {
-                  /* call SetConstantValues instead */
-                  hypre_error(HYPRE_ERROR_GENERIC);
                   dvali = hypre_BoxIndexRank(dval_box, dval_start);
 
                   if (action > 0)
@@ -1415,7 +1445,18 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
                   }
                   else
                   {
-                     values[dvali] = *datap;
+                     hypre_BoxGetSize(int_box, loop_size);
+                     hypre_BoxLoop1Begin(hypre_StructMatrixNDim(matrix), loop_size,
+                                         dval_box, dval_start, dval_stride, dvali);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,dvali) HYPRE_SMP_SCHEDULE
+#endif
+                     hypre_BoxLoop1For(dvali)
+                     {
+                        values[dvali] = *datap;
+                     }
+                     hypre_BoxLoop1End(dvali);
+
                      if (action == -2)
                      {
                         *datap = 0;
@@ -1472,7 +1513,7 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
                      }
                      hypre_BoxLoop2End(datai, dvali);
                   }
-               }
+               } /* end if (constant) */
             } /* end if (symm_entries) */
 
             hypre_IndexD(dval_start, 0) ++;
@@ -1731,7 +1772,7 @@ hypre_StructMatrixClearBoxValues( hypre_StructMatrix *matrix,
 HYPRE_Int
 hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
 {
-   HYPRE_Int  num_values = hypre_StructMatrixNumValues(matrix);
+   HYPRE_Int num_values = hypre_StructMatrixNumValues(matrix);
 
    /*-----------------------------------------------------------------------
     * Update the ghost data
@@ -1974,7 +2015,8 @@ hypre_StructMatrixClearGhostValues( hypre_StructMatrix *matrix )
    stencil = hypre_StructMatrixStencil(matrix);
    symm_entries = hypre_StructMatrixSymmEntries(matrix);
    grid_boxes = hypre_StructGridBoxes(hypre_StructMatrixGrid(matrix));
-   data_space = hypre_StructMatrixDataBoxes(matrix);
+   //data_space = hypre_StructMatrixDataBoxes(matrix);
+   data_space = hypre_StructMatrixDataSpace(matrix);
    diff_boxes = hypre_BoxArrayCreate(0, ndim);
    hypre_ForBoxI(i, grid_boxes)
    {

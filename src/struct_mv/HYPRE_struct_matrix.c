@@ -35,7 +35,7 @@ HYPRE_StructMatrixCreate( MPI_Comm             comm,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructMatrixDestroy( HYPRE_StructMatrix matrix )
 {
    return( hypre_StructMatrixDestroy(matrix) );
@@ -79,7 +79,7 @@ HYPRE_StructMatrixInitialize( HYPRE_StructMatrix matrix )
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructMatrixSetValues( HYPRE_StructMatrix  matrix,
                              HYPRE_Int          *grid_index,
                              HYPRE_Int           num_stencil_indices,
@@ -105,7 +105,7 @@ HYPRE_StructMatrixSetValues( HYPRE_StructMatrix  matrix,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructMatrixGetValues( HYPRE_StructMatrix  matrix,
                              HYPRE_Int          *grid_index,
                              HYPRE_Int           num_stencil_indices,
@@ -131,7 +131,7 @@ HYPRE_StructMatrixGetValues( HYPRE_StructMatrix  matrix,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructMatrixSetBoxValues( HYPRE_StructMatrix  matrix,
                                 HYPRE_Int          *ilower,
                                 HYPRE_Int          *iupper,
@@ -201,7 +201,7 @@ HYPRE_StructMatrixGetBoxValues( HYPRE_StructMatrix  matrix,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructMatrixSetConstantValues( HYPRE_StructMatrix matrix,
                                      HYPRE_Int          num_stencil_indices,
                                      HYPRE_Int         *stencil_indices,
@@ -216,7 +216,7 @@ HYPRE_StructMatrixSetConstantValues( HYPRE_StructMatrix matrix,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructMatrixAddToValues( HYPRE_StructMatrix  matrix,
                                HYPRE_Int          *grid_index,
                                HYPRE_Int           num_stencil_indices,
@@ -242,7 +242,7 @@ HYPRE_StructMatrixAddToValues( HYPRE_StructMatrix  matrix,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructMatrixAddToBoxValues( HYPRE_StructMatrix  matrix,
                                   HYPRE_Int          *ilower,
                                   HYPRE_Int          *iupper,
@@ -277,7 +277,7 @@ HYPRE_StructMatrixAddToBoxValues( HYPRE_StructMatrix  matrix,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructMatrixAddToConstantValues( HYPRE_StructMatrix matrix,
                                        HYPRE_Int          num_stencil_indices,
                                        HYPRE_Int         *stencil_indices,
@@ -292,7 +292,7 @@ HYPRE_StructMatrixAddToConstantValues( HYPRE_StructMatrix matrix,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructMatrixAssemble( HYPRE_StructMatrix matrix )
 {
    return( hypre_StructMatrixAssemble(matrix) );
@@ -300,7 +300,7 @@ HYPRE_StructMatrixAssemble( HYPRE_StructMatrix matrix )
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
- 
+
 HYPRE_Int
 HYPRE_StructMatrixSetSymmetric( HYPRE_StructMatrix  matrix,
                                 HYPRE_Int           symmetric )
@@ -339,7 +339,7 @@ HYPRE_StructMatrixSetTranspose( HYPRE_StructMatrix  matrix,
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
- 
+
 HYPRE_Int
 HYPRE_StructMatrixSetNumGhost( HYPRE_StructMatrix  matrix,
                                HYPRE_Int          *num_ghost )
@@ -437,4 +437,3 @@ HYPRE_StructMatrixClearBoundary( HYPRE_StructMatrix matrix )
 {
    return( hypre_StructMatrixClearBoundary(matrix) );
 }
-

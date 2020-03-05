@@ -390,8 +390,11 @@ HYPRE_Int hypre_PFMGRelaxSetTempVec ( void *pfmg_relax_vdata , hypre_StructVecto
 
 /* pfmg_setup.c */
 HYPRE_Int hypre_PFMGSetup ( void *pfmg_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
-HYPRE_Int hypre_PFMGComputeDxyz ( hypre_StructMatrix *A , HYPRE_Real *dxyz , HYPRE_Real *mean , HYPRE_Real *deviation );
+HYPRE_Int hypre_PFMGComputeMaxLevels( hypre_StructGrid *grid, HYPRE_Int *max_levels );
+HYPRE_Int hypre_PFMGComputeDxyz ( hypre_StructMatrix *A , HYPRE_Real *dxyz , HYPRE_Int *dxyz_flag );
 HYPRE_Int hypre_ZeroDiagonal ( hypre_StructMatrix *A );
+HYPRE_Int hypre_PFMGCoarsen( hypre_Box  *cbox, hypre_Index  periodic, HYPRE_Int max_levels, HYPRE_Int dxyz_flag, HYPRE_Real *dxyz, HYPRE_Int **cdir_l_ptr, HYPRE_Int **active_l_ptr, HYPRE_Real **relax_weights_ptr, HYPRE_Int *num_levels );
+
 
 /* pfmg_setup_interp.c */
 hypre_StructMatrix *hypre_zPFMGCreateInterpOp ( hypre_StructMatrix *A , HYPRE_Int cdir , hypre_Index stride );
@@ -641,4 +644,3 @@ HYPRE_Int hypre_SparseMSGSolve ( void *smsg_vdata , hypre_StructMatrix *A , hypr
 #endif
 
 #endif
-

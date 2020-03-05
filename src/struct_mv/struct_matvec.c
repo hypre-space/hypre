@@ -73,8 +73,8 @@ hypre_StructMatvecSetup( void               *matvec_vdata,
                          hypre_StructMatrix *A,
                          hypre_StructVector *x )
 {
-	hypre_StructMatvecData  *matvec_data = (hypre_StructMatvecData  *)matvec_vdata;
-                          
+   hypre_StructMatvecData  *matvec_data = (hypre_StructMatvecData  *)matvec_vdata;
+
    hypre_StructGrid        *grid;
    hypre_StructStencil     *stencil;
    hypre_ComputeInfo       *compute_info;
@@ -190,7 +190,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                            hypre_StructVector *y )
 {
 	hypre_StructMatvecData  *matvec_data = (hypre_StructMatvecData  *)matvec_vdata;
-                          
+
    hypre_ComputePkg        *compute_pkg;
    hypre_CommHandle        *comm_handle;
    HYPRE_Int                transpose;
@@ -200,11 +200,11 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
    hypre_BoxArrayArray     *compute_box_aa;
    hypre_BoxArray          *compute_box_a;
    hypre_Box               *compute_box;
-                          
+
    hypre_BoxArray          *boxes;
    hypre_Index              loop_size, origin, stride;
    hypre_IndexRef           start;
-                          
+
    HYPRE_Complex            temp;
    HYPRE_Int                compute_i, i, j, si;
 
@@ -213,11 +213,11 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
    HYPRE_Int                Ai, xi, yi;
    HYPRE_Int 		    Ab, xb, yb;
    hypre_Index              Adstride, xdstride, ydstride, ustride;
-                          
+
    hypre_StructStencil     *stencil;
    hypre_Index             *stencil_shape;
    HYPRE_Int                stencil_size;
-                          
+
    hypre_StructGrid        *grid;
    HYPRE_Int 		    ran_nboxes;
    HYPRE_Int 		   *ran_boxnums;
@@ -395,7 +395,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
       hypre_MapToCoarseIndex(ydstride, NULL, ran_stride, ndim);
 
       yb = 0;
-      for (i = 0; i < ran_nboxes; i++) 
+      for (i = 0; i < ran_nboxes; i++)
       {
          hypre_Index  Adstart;
          hypre_Index  xdstart;
@@ -584,4 +584,3 @@ hypre_StructMatvecT( HYPRE_Complex       alpha,
 
    return hypre_error_flag;
 }
-

@@ -249,6 +249,176 @@ HYPRE_SStructSysPFMGGetFinalRelativeResidualNorm(HYPRE_SStructSolver solver,
  *--------------------------------------------------------------------------*/
 
 /**
+ * @name SStruct SSAMG Solver
+ *
+ * SSAMG is a semicoarsening multigrid solver similar to PFMG, but for systems
+ * of PDEs. Continue description
+ **/
+/*@{*/
+
+/**
+ * Create a solver object.
+ **/
+HYPRE_Int
+HYPRE_SStructSSAMGCreate(MPI_Comm             comm,
+                         HYPRE_SStructSolver *solver);
+
+/**
+ * Destroy a solver object.  An object should be explicitly destroyed
+ * using this destructor when the user's code no longer needs direct
+ * access to it.  Once destroyed, the object must not be referenced
+ * again.  Note that the object may not be deallocated at the
+ * completion of this call, since there may be internal package
+ * references to the object.  The object will then be destroyed when
+ * all internal reference counts go to zero.
+ **/
+HYPRE_Int
+HYPRE_SStructSSAMGDestroy(HYPRE_SStructSolver solver);
+
+/**
+ * Prepare to solve the system.  The coefficient data in {\tt b} and {\tt x} is
+ * ignored here, but information about the layout of the data may be used.
+ **/
+HYPRE_Int
+HYPRE_SStructSSAMGSetup(HYPRE_SStructSolver solver,
+                          HYPRE_SStructMatrix A,
+                          HYPRE_SStructVector b,
+                          HYPRE_SStructVector x);
+
+/**
+ * Solve the system.
+ **/
+HYPRE_Int
+HYPRE_SStructSSAMGSolve(HYPRE_SStructSolver solver,
+                        HYPRE_SStructMatrix A,
+                        HYPRE_SStructVector b,
+                        HYPRE_SStructVector x);
+
+/**
+ * (Optional) Set the convergence tolerance.
+ **/
+HYPRE_Int
+HYPRE_SStructSSAMGSetTol(HYPRE_SStructSolver solver,
+                         HYPRE_Real          tol);
+
+/**
+ * (Optional) Set maximum number of iterations.
+ **/
+HYPRE_Int
+HYPRE_SStructSSAMGSetMaxIter(HYPRE_SStructSolver solver,
+                             HYPRE_Int           max_iter);
+
+/**
+ * (Optional) Additionally require that the relative difference in
+ * successive iterates be small.
+ **/
+HYPRE_Int
+HYPRE_SStructSSAMGSetRelChange(HYPRE_SStructSolver solver,
+                               HYPRE_Int           rel_change);
+
+/**
+ * (Optional) Use a zero initial guess.  This allows the solver to cut corners
+ * in the case where a zero initial guess is needed (e.g., for preconditioning)
+ * to reduce compuational cost.
+ **/
+HYPRE_Int
+HYPRE_SStructSSAMGSetZeroGuess(HYPRE_SStructSolver solver);
+
+/**
+ * (Optional) Use a nonzero initial guess.  This is the default behavior, but
+ * this routine allows the user to switch back after using {\tt SetZeroGuess}.
+ **/
+HYPRE_Int
+HYPRE_SStructSSAMGSetNonZeroGuess(HYPRE_SStructSolver solver);
+
+/**
+ * (Optional) Set relaxation type.
+ *
+ * Current relaxation methods set by {\tt relax\_type} are:
+ *
+ * \begin{tabular}{l@{ -- }l}
+ * 0 & Jacobi \\
+ * 1 & Weighted Jacobi (default) \\
+ * 2 & Red/Black Gauss-Seidel (symmetric: RB pre-relaxation, BR post-relaxation) \\
+ * \end{tabular}
+ **/
+HYPRE_Int
+HYPRE_SStructSSAMGSetRelaxType(HYPRE_SStructSolver solver,
+                               HYPRE_Int           relax_type);
+
+/**
+ * (Optional) Set Jacobi Weight.
+ **/
+HYPRE_Int
+HYPRE_SStructSSAMGSetRelaxWeight(HYPRE_SStructSolver solver,
+                                 HYPRE_Real          weight);
+
+/**
+ * (Optional) Set number of relaxation sweeps before coarse-grid correction.
+ **/
+HYPRE_Int
+HYPRE_SStructSSAMGSetNumPreRelax(HYPRE_SStructSolver solver,
+                                 HYPRE_Int           num_pre_relax);
+
+/**
+ * (Optional) Set number of relaxation sweeps after coarse-grid correction.
+ **/
+HYPRE_Int
+HYPRE_SStructSSAMGSetNumPostRelax(HYPRE_SStructSolver solver,
+                                  HYPRE_Int           num_post_relax);
+
+/**
+ * (Optional) Skip relaxation on certain grids for isotropic problems.  This can
+ * greatly improve efficiency by eliminating unnecessary relaxations when the
+ * underlying problem is isotropic.
+ **/
+HYPRE_Int
+HYPRE_SStructSSAMGSetSkipRelax(HYPRE_SStructSolver solver,
+                               HYPRE_Int           skip_relax);
+
+/*
+ * RE-VISIT
+ **/
+HYPRE_Int
+HYPRE_SStructSSAMGSetDxyz(HYPRE_SStructSolver  solver,
+                          HYPRE_Int            nparts,
+                          HYPRE_Real         **dxyz);
+
+/**
+ * (Optional) Set the amount of logging to do.
+ **/
+HYPRE_Int
+HYPRE_SStructSSAMGSetLogging(HYPRE_SStructSolver solver,
+                             HYPRE_Int           logging);
+
+/**
+ * (Optional) Set the amount of printing to do to the screen.
+ **/
+HYPRE_Int
+HYPRE_SStructSSAMGSetPrintLevel(HYPRE_SStructSolver solver,
+                                HYPRE_Int           print_level);
+
+
+/**
+ * Return the number of iterations taken.
+ **/
+HYPRE_Int
+HYPRE_SStructSSAMGGetNumIterations(HYPRE_SStructSolver  solver,
+                                   HYPRE_Int           *num_iterations);
+
+/**
+ * Return the norm of the final relative residual.
+ **/
+HYPRE_Int
+HYPRE_SStructSSAMGGetFinalRelativeResidualNorm(HYPRE_SStructSolver solver,
+                                               HYPRE_Real         *norm);
+
+/*@}*/
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/**
  * @name SStruct Split Solver
  **/
 /*@{*/
@@ -460,7 +630,7 @@ HYPRE_SStructFACZeroAMRVectorData(HYPRE_SStructVector  b,
  * (Optional) Set maximum number of FAC levels.
  **/
 HYPRE_Int
-HYPRE_SStructFACSetMaxLevels( HYPRE_SStructSolver solver , 
+HYPRE_SStructFACSetMaxLevels( HYPRE_SStructSolver solver ,
                               HYPRE_Int           max_levels );
 /**
  * (Optional) Set the convergence tolerance.
@@ -738,7 +908,7 @@ HYPRE_SStructMaxwellGetFinalRelativeResidualNorm(HYPRE_SStructSolver solver,
 
 /**
  * @name SStruct PCG Solver
- * 
+ *
  * These routines should be used in conjunction with the generic interface in
  * \Ref{PCG Solver}.
  **/
@@ -1073,7 +1243,7 @@ HYPRE_SStructLGMRESSetup(HYPRE_SStructSolver solver,
                          HYPRE_SStructMatrix A,
                          HYPRE_SStructVector b,
                          HYPRE_SStructVector x);
-   
+
 HYPRE_Int
 HYPRE_SStructLGMRESSolve(HYPRE_SStructSolver solver,
                          HYPRE_SStructMatrix A,
@@ -1290,4 +1460,3 @@ hypre_SStructSetRandomValues(void *v, HYPRE_Int seed);
 #endif
 
 #endif
-

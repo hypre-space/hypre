@@ -63,6 +63,7 @@ FILES =\
  HYPRE_sstruct_pcg.c\
  HYPRE_sstruct_split.c\
  HYPRE_sstruct_sys_pfmg.c\
+ HYPRE_sstruct_ssamg.c\
  fac.c\
  fac_amr_rap.c\
  fac_amr_fcoarsen.c\
@@ -105,7 +106,12 @@ FILES =\
  sys_pfmg_setup_rap.c\
  sys_pfmg_solve.c\
  sys_semi_interp.c\
- sys_semi_restrict.c
+ sys_semi_restrict.c\
+ ssamg.c\
+ ssamg_setup.c\
+ ssamg_relax.c\
+ ssamg_solve.c\
+ ssamg_interp.c
 
 OBJS = ${FILES:.c=.o}
 

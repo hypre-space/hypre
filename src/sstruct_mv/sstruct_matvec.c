@@ -26,10 +26,11 @@
  * hypre_SStructPMatvecData data structure
  *--------------------------------------------------------------------------*/
 
-typedef struct
+typedef struct hypre_SStructPMatvecData_struct
 {
-   HYPRE_Int     nvars;
-   void ***smatvec_data;
+   HYPRE_Int    nvars;
+   HYPRE_Int    transpose;
+   void      ***smatvec_data;
 
 } hypre_SStructPMatvecData;
 
@@ -43,7 +44,23 @@ hypre_SStructPMatvecCreate( void **pmatvec_vdata_ptr )
    hypre_SStructPMatvecData *pmatvec_data;
 
    pmatvec_data = hypre_CTAlloc(hypre_SStructPMatvecData, 1);
+   (pmatvec_data -> transpose) = 0;
+
    *pmatvec_vdata_ptr = (void *) pmatvec_data;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SStructPMatvecSetTranspose
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+hypre_SStructPMatvecSetTranspose( void      *pmatvec_vdata,
+                                  HYPRE_Int  transpose )
+{
+   hypre_SStructPMatvecData  *pmatvec_data = (hypre_SStructPMatvecData *) pmatvec_vdata;
+
+   (pmatvec_data -> transpose) = transpose;
 
    return hypre_error_flag;
 }
@@ -57,12 +74,13 @@ hypre_SStructPMatvecSetup( void                 *pmatvec_vdata,
                            hypre_SStructPMatrix *pA,
                            hypre_SStructPVector *px )
 {
-	hypre_SStructPMatvecData   *pmatvec_data = (hypre_SStructPMatvecData   *)pmatvec_vdata;
-   HYPRE_Int                   nvars;
-   void                     ***smatvec_data;
-   hypre_StructMatrix         *sA;
-   hypre_StructVector         *sx;
-   HYPRE_Int                   vi, vj;
+   hypre_SStructPMatvecData    *pmatvec_data = (hypre_SStructPMatvecData *) pmatvec_vdata;
+   HYPRE_Int                    transpose = (pmatvec_data -> transpose);
+   HYPRE_Int                    nvars;
+   void                      ***smatvec_data;
+   hypre_StructMatrix          *sA;
+   hypre_StructVector          *sx;
+   HYPRE_Int                    vi, vj;
 
    nvars = hypre_SStructPMatrixNVars(pA);
    smatvec_data = hypre_TAlloc(void **, nvars);
@@ -77,6 +95,8 @@ hypre_SStructPMatvecSetup( void                 *pmatvec_vdata,
          if (sA != NULL)
          {
             smatvec_data[vi][vj] = hypre_StructMatvecCreate();
+
+            hypre_StructMatvecSetTranspose(smatvec_data[vi][vj], transpose);
             hypre_StructMatvecSetup(smatvec_data[vi][vj], sA, sx);
          }
       }
@@ -206,10 +226,11 @@ hypre_SStructPMatvec( HYPRE_Complex         alpha,
  * hypre_SStructMatvecData data structure
  *--------------------------------------------------------------------------*/
 
-typedef struct
+typedef struct hypre_SStructMatvecData_struct
 {
    HYPRE_Int    nparts;
-   void **pmatvec_data;
+   HYPRE_Int    transpose;
+   void       **pmatvec_data;
 
 } hypre_SStructMatvecData;
 
@@ -223,7 +244,23 @@ hypre_SStructMatvecCreate( void **matvec_vdata_ptr )
    hypre_SStructMatvecData *matvec_data;
 
    matvec_data = hypre_CTAlloc(hypre_SStructMatvecData, 1);
+   (matvec_data -> transpose) = 0;
+
    *matvec_vdata_ptr = (void *) matvec_data;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SStructMatvecSetTranspose
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+hypre_SStructMatvecSetTranspose( void      *matvec_vdata,
+                                 HYPRE_Int  transpose )
+{
+   hypre_SStructMatvecData  *matvec_data = (hypre_SStructMatvecData *) matvec_vdata;
+
+   (matvec_data -> transpose) = transpose;
 
    return hypre_error_flag;
 }
@@ -238,6 +275,7 @@ hypre_SStructMatvecSetup( void                *matvec_vdata,
                           hypre_SStructVector *x )
 {
    hypre_SStructMatvecData  *matvec_data = (hypre_SStructMatvecData   *)matvec_vdata;
+   HYPRE_Int                 transpose = (matvec_data -> transpose);
    HYPRE_Int                 nparts;
    void                    **pmatvec_data;
    hypre_SStructPMatrix     *pA;
@@ -251,6 +289,8 @@ hypre_SStructMatvecSetup( void                *matvec_vdata,
       hypre_SStructPMatvecCreate(&pmatvec_data[part]);
       pA = hypre_SStructMatrixPMatrix(A, part);
       px = hypre_SStructVectorPVector(x, part);
+
+      hypre_SStructPMatvecSetTranspose(pmatvec_data[part], transpose);
       hypre_SStructPMatvecSetup(pmatvec_data[part], pA, px);
    }
    (matvec_data -> nparts)       = nparts;
@@ -312,23 +352,23 @@ hypre_SStructMatvecCompute( void                *matvec_vdata,
 
          /* do U-matrix computations */
 
-         /* GEC1002 the data chunk pointed by the local-parvectors 
+         /* GEC1002 the data chunk pointed by the local-parvectors
           *  inside the semistruct vectors x and y is now identical to the
           *  data chunk of the structure vectors x and y. The role of the function
           *  convert is to pass the addresses of the data chunk
-          *  to the parx and pary. */  
+          *  to the parx and pary. */
 
          hypre_SStructVectorConvert(x, &parx);
-         hypre_SStructVectorConvert(y, &pary); 
+         hypre_SStructVectorConvert(y, &pary);
 
          hypre_ParCSRMatrixMatvec(alpha, parcsrA, parx, 1.0, pary);
 
          /* dummy functions since there is nothing to restore  */
 
          hypre_SStructVectorRestore(x, NULL);
-         hypre_SStructVectorRestore(y, pary); 
+         hypre_SStructVectorRestore(y, pary);
 
-         parx = NULL; 
+         parx = NULL;
       }
 
   }
@@ -341,9 +381,9 @@ hypre_SStructMatvecCompute( void                *matvec_vdata,
       hypre_ParCSRMatrixMatvec(alpha, parcsrA, parx, beta, pary);
 
       hypre_SStructVectorRestore(x, NULL);
-      hypre_SStructVectorRestore(y, pary); 
+      hypre_SStructVectorRestore(y, pary);
 
-      parx = NULL; 
+      parx = NULL;
    }
 
    return hypre_error_flag;

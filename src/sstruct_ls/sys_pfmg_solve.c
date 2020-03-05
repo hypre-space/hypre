@@ -13,7 +13,7 @@
 #include "_hypre_sstruct_ls.h"
 #include "sys_pfmg.h"
 
-#define DEBUG 0
+#define DEBUG 1
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -55,9 +55,9 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
 
    HYPRE_Real            b_dot_b, r_dot_r, eps = 0;
    HYPRE_Real            e_dot_e = 0, x_dot_x = 1;
-                    
+
    HYPRE_Int             i, l;
-                    
+
 #if DEBUG
    char                  filename[255];
 #endif
@@ -297,6 +297,7 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
 
    hypre_EndTiming(sys_pfmg_data -> time_index);
 
+   hypre_SysPFMGPrintLogging((void *) sys_pfmg_data);
+
    return hypre_error_flag;
 }
-

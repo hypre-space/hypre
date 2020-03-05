@@ -23,7 +23,7 @@
  * hypre_SStructMatrix:
  *--------------------------------------------------------------------------*/
 
-typedef struct
+typedef struct hypre_SStructPMatrix_struct
 {
    MPI_Comm                comm;
    hypre_SStructPGrid     *pgrid;
@@ -35,6 +35,10 @@ typedef struct
    hypre_StructMatrix   ***smatrices;    /* nvar x nvar array of smatrices */
    HYPRE_Int             **symmetric;    /* Stencil entries symmetric?
                                           * (nvar x nvar array) */
+   HYPRE_Int             **num_centries; /* (nvar x nvar) array */
+   HYPRE_Int            ***centries;     /* (nvar x nvar x sentries_size) array constant entries */
+   hypre_Index             dom_stride;   /* domain grid stride */
+   hypre_Index             ran_stride;   /* range grid stride */
 
    /* temporary storage for SetValues routines */
    HYPRE_Int               sentries_size;
@@ -58,11 +62,15 @@ typedef struct hypre_SStructMatrix_struct
    hypre_SStructPMatrix  **pmatrices;
    HYPRE_Int            ***symmetric;    /* Stencil entries symmetric?
                                           * (nparts x nvar x nvar array) */
+   HYPRE_Int            ***num_centries; /* (nparts x nvar x nvar) array */
+   HYPRE_Int           ****centries;     /* (nparts x nvar x nvar x entries_size) array */
+   hypre_Index            *dom_stride;   /* (nparts) array of domain stride */
+   hypre_Index            *ran_stride;   /* (nparts) array of range stride */
 
    /* U-matrix info */
    HYPRE_IJMatrix          ijmatrix;
    hypre_ParCSRMatrix     *parcsrmatrix;
-                         
+
    /* temporary storage for SetValues routines */
    HYPRE_Int               entries_size;
    HYPRE_Int              *Sentries;
@@ -75,9 +83,16 @@ typedef struct hypre_SStructMatrix_struct
 
    HYPRE_Int               ref_count;
 
-  /* GEC0902   adding an object type to the matrix  */
+   HYPRE_Int               dom_ghlocal_size; /* Number of unknowns in the domain grid
+                                                including ghosts */
+   HYPRE_Int               ran_ghlocal_size; /* Number of unknowns in the range grid
+                                                including ghosts */
+   HYPRE_Int               dom_ghstart_rank; /* Start rank in the domain grid
+                                                including ghosts */
+   HYPRE_Int               ran_ghstart_rank; /* Start rank in the range grid
+                                                including ghosts */
+   /* GEC0902   adding an object type to the matrix  */
    HYPRE_Int               object_type;
-
 } hypre_SStructMatrix;
 
 /*--------------------------------------------------------------------------
@@ -93,6 +108,10 @@ typedef struct hypre_SStructMatrix_struct
 #define hypre_SStructMatrixPMatrices(mat)      ((mat) -> pmatrices)
 #define hypre_SStructMatrixPMatrix(mat, part)  ((mat) -> pmatrices[part])
 #define hypre_SStructMatrixSymmetric(mat)      ((mat) -> symmetric)
+#define hypre_SStructMatrixNumCEntries(mat)    ((mat) -> num_centries)
+#define hypre_SStructMatrixCEntries(mat)       ((mat) -> centries)
+#define hypre_SStructMatrixDomainStride(mat)   ((mat) -> dom_stride)
+#define hypre_SStructMatrixRangeStride(mat)    ((mat) -> ran_stride)
 #define hypre_SStructMatrixIJMatrix(mat)       ((mat) -> ijmatrix)
 #define hypre_SStructMatrixParCSRMatrix(mat)   ((mat) -> parcsrmatrix)
 #define hypre_SStructMatrixEntriesSize(mat)    ((mat) -> entries_size)
@@ -103,6 +122,10 @@ typedef struct hypre_SStructMatrix_struct
 #define hypre_SStructMatrixNSSymmetric(mat)    ((mat) -> ns_symmetric)
 #define hypre_SStructMatrixGlobalSize(mat)     ((mat) -> global_size)
 #define hypre_SStructMatrixRefCount(mat)       ((mat) -> ref_count)
+#define hypre_SStructMatrixDomGhlocalSize(mat) ((mat) -> dom_ghlocal_size)
+#define hypre_SStructMatrixRanGhlocalSize(mat) ((mat) -> ran_ghlocal_size)
+#define hypre_SStructMatrixDomGhstartRank(mat) ((mat) -> dom_ghstart_rank)
+#define hypre_SStructMatrixRanGhstartRank(mat) ((mat) -> ran_ghstart_rank)
 #define hypre_SStructMatrixObjectType(mat)     ((mat) -> object_type)
 
 /*--------------------------------------------------------------------------
@@ -125,6 +148,10 @@ hypre_SStructPGridNDim(hypre_SStructPMatrixPGrid(pmat))
 #define hypre_SStructPMatrixSMatrix(pmat, vi, vj)  \
 ((pmat) -> smatrices[vi][vj])
 #define hypre_SStructPMatrixSymmetric(pmat)         ((pmat) -> symmetric)
+#define hypre_SStructPMatrixNumCEntries(pmat)       ((pmat) -> num_centries)
+#define hypre_SStructPMatrixCEntries(pmat)          ((pmat) -> centries)
+#define hypre_SStructPMatrixDomainStride(pmat)      ((pmat) -> dom_stride)
+#define hypre_SStructPMatrixRangeStride(pmat)       ((pmat) -> ran_stride)
 #define hypre_SStructPMatrixSEntriesSize(pmat)      ((pmat) -> sentries_size)
 #define hypre_SStructPMatrixSEntries(pmat)          ((pmat) -> sentries)
 #define hypre_SStructPMatrixAccumulated(pmat)       ((pmat) -> accumulated)
