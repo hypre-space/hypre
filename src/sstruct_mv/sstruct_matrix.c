@@ -889,27 +889,8 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
       }
    }
 
-   if ( hypre_GetExecPolicy1(hypre_IJMatrixMemoryLocation(ijmatrix)) == HYPRE_EXEC_HOST )
-   {
-      if (action > 0)
-      {
-         HYPRE_IJMatrixAddToValues(ijmatrix, 1, &ncoeffs, &row_coord,
-                                   (const HYPRE_BigInt *) col_coords,
-                                   (const HYPRE_Complex *) coeffs);
-      }
-      else if (action > -1)
-      {
-         HYPRE_IJMatrixSetValues(ijmatrix, 1, &ncoeffs, &row_coord,
-                                 (const HYPRE_BigInt *) col_coords,
-                                 (const HYPRE_Complex *) coeffs);
-      }
-      else
-      {
-         HYPRE_IJMatrixGetValues(ijmatrix, 1, &ncoeffs, &row_coord,
-                                 col_coords, values);
-      }
-   }
-   else
+#if defined(HYPRE_USING_CUDA)
+   if ( hypre_GetExecPolicy1(hypre_IJMatrixMemoryLocation(ijmatrix)) == HYPRE_EXEC_DEVICE )
    {
       HYPRE_THRUST_CALL( fill_n, row_coords, ncoeffs, row_coord );
 
@@ -928,6 +909,27 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
       else
       {
          // RL:TODO
+         HYPRE_IJMatrixGetValues(ijmatrix, 1, &ncoeffs, &row_coord,
+                                 col_coords, values);
+      }
+   }
+   else
+#endif
+   {
+      if (action > 0)
+      {
+         HYPRE_IJMatrixAddToValues(ijmatrix, 1, &ncoeffs, &row_coord,
+                                   (const HYPRE_BigInt *) col_coords,
+                                   (const HYPRE_Complex *) coeffs);
+      }
+      else if (action > -1)
+      {
+         HYPRE_IJMatrixSetValues(ijmatrix, 1, &ncoeffs, &row_coord,
+                                 (const HYPRE_BigInt *) col_coords,
+                                 (const HYPRE_Complex *) coeffs);
+      }
+      else
+      {
          HYPRE_IJMatrixGetValues(ijmatrix, 1, &ncoeffs, &row_coord,
                                  col_coords, values);
       }

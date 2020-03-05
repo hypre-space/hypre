@@ -301,20 +301,20 @@ HYPRE_IJVectorSetValues( HYPRE_IJVector        vector,
       return hypre_error_flag;
    }
 
-   HYPRE_ExecuctionPolicy exec = hypre_GetExecPolicy1( hypre_IJVectorMemoryLocation(vector) );
-
    if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
    {
-      if (exec == HYPRE_EXEC_HOST)
-      {
-         return( hypre_IJVectorSetValuesPar(vec, nvalues, indices, values) );
-      }
 #if defined(HYPRE_USING_CUDA)
-      else
+      HYPRE_ExecuctionPolicy exec = hypre_GetExecPolicy1( hypre_IJVectorMemoryLocation(vector) );
+
+      if (exec == HYPRE_EXEC_DEVICE)
       {
          return ( hypre_IJVectorSetAddValuesParDevice(vec, nvalues, indices, values, "set") );
       }
+      else
 #endif
+      {
+         return( hypre_IJVectorSetValuesPar(vec, nvalues, indices, values) );
+      }
    }
    else
    {
@@ -356,20 +356,20 @@ HYPRE_IJVectorAddToValues( HYPRE_IJVector        vector,
       return hypre_error_flag;
    }
 
-   HYPRE_ExecuctionPolicy exec = hypre_GetExecPolicy1( hypre_IJVectorMemoryLocation(vector) );
-
    if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
    {
-      if (exec == HYPRE_EXEC_HOST)
-      {
-         return ( hypre_IJVectorAddToValuesPar(vec, nvalues, indices, values) );
-      }
 #if defined(HYPRE_USING_CUDA)
-      else
+      HYPRE_ExecuctionPolicy exec = hypre_GetExecPolicy1( hypre_IJVectorMemoryLocation(vector) );
+
+      if (exec == HYPRE_EXEC_DEVICE)
       {
          return ( hypre_IJVectorSetAddValuesParDevice(vec, nvalues, indices, values, "add") );
       }
+      else
 #endif
+      {
+         return ( hypre_IJVectorAddToValuesPar(vec, nvalues, indices, values) );
+      }
    }
    else
    {
@@ -394,20 +394,20 @@ HYPRE_IJVectorAssemble( HYPRE_IJVector vector )
       return hypre_error_flag;
    }
 
-   HYPRE_ExecuctionPolicy exec = hypre_GetExecPolicy1( hypre_IJVectorMemoryLocation(vector) );
-
    if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
    {
-      if (exec == HYPRE_EXEC_HOST)
-      {
-         return( hypre_IJVectorAssemblePar(vec) );
-      }
 #if defined(HYPRE_USING_CUDA)
-      else
+      HYPRE_ExecuctionPolicy exec = hypre_GetExecPolicy1( hypre_IJVectorMemoryLocation(vector) );
+
+      if (exec == HYPRE_EXEC_DEVICE)
       {
          return( hypre_IJVectorAssembleParDevice(vec) );
       }
+      else
 #endif
+      {
+         return( hypre_IJVectorAssemblePar(vec) );
+      }
    }
    else
    {

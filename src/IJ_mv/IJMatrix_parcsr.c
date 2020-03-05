@@ -1136,7 +1136,14 @@ hypre_IJMatrixSetConstantValuesParCSR( hypre_IJMatrix *matrix,
       HYPRE_Int           nnz_diag   = hypre_CSRMatrixNumNonzeros(diag);
       HYPRE_Int           nnz_offd   = hypre_CSRMatrixNumNonzeros(offd);
 
-      if (hypre_GetExecPolicy1(hypre_IJMatrixMemoryLocation(matrix)) == HYPRE_EXEC_HOST)
+#if defined(HYPRE_USING_CUDA)
+      if (hypre_GetExecPolicy1(hypre_IJMatrixMemoryLocation(matrix)) == HYPRE_EXEC_DEVICE)
+      {
+         HYPRE_THRUST_CALL( fill_n, diag_data, nnz_diag, value );
+         HYPRE_THRUST_CALL( fill_n, offd_data, nnz_offd, value );
+      }
+      else
+#endif
       {
          HYPRE_Int ii;
 
@@ -1155,13 +1162,6 @@ hypre_IJMatrixSetConstantValuesParCSR( hypre_IJMatrix *matrix,
             offd_data[ii] = value;
          }
       }
-#if defined(HYPRE_USING_CUDA)
-      else
-      {
-         HYPRE_THRUST_CALL( fill_n, diag_data, nnz_diag, value );
-         HYPRE_THRUST_CALL( fill_n, offd_data, nnz_offd, value );
-      }
-#endif
    }
    else
    {
