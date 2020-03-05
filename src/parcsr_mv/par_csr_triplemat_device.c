@@ -379,6 +379,8 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
    /* Move the diagonal entry to the first of each row */
    hypre_CSRMatrixMoveDiagFirstDevice(C_diag);
 
+   hypre_SyncCudaComputeStream(hypre_handle);
+
    return C;
 }
 

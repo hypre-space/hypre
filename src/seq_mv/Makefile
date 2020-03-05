@@ -29,6 +29,7 @@ FILES =\
  csr_matop_device.c\
  csr_matrix.c\
  csr_matvec.c\
+ csr_matvec_device.c\
  csr_matvec_oomp.c\
  csr_spadd_device.c\
  csr_spgemm_device.c\

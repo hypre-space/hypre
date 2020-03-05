@@ -1351,6 +1351,8 @@ hypre_ParCSRMatrixGetRowDevice( hypre_ParCSRMatrix  *mat,
       *values = hypre_ParCSRMatrixRowvalues(mat);
    }
 
+   hypre_SyncCudaComputeStream(hypre_handle);
+
    return hypre_error_flag;
 }
 #endif

@@ -85,10 +85,11 @@ hypre_IJMatrixSetAddValuesParCSRDevice0( hypre_IJMatrix       *matrix,
       hypre_AuxParCSRMatrixMaxStackElmts(aux_matrix) = stack_elmts_max_new;
    }
 
+   HYPRE_THRUST_CALL(fill_n, stack_sora + stack_elmts_current, nelms, SorA);
+
    hypre_TMemcpy(stack_i    + stack_elmts_current, rows,   HYPRE_BigInt,  nelms, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
    hypre_TMemcpy(stack_j    + stack_elmts_current, cols,   HYPRE_BigInt,  nelms, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
    hypre_TMemcpy(stack_data + stack_elmts_current, values, HYPRE_Complex, nelms, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-   HYPRE_THRUST_CALL(fill_n, stack_sora + stack_elmts_current, nelms, SorA);
 
    hypre_AuxParCSRMatrixCurrentStackElmts(aux_matrix) += nelms;
 

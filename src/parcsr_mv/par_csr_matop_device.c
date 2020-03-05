@@ -296,13 +296,14 @@ hypre_MergeDiagAndOffdDevice(hypre_ParCSRMatrix *A)
                               A_diag_i, A_diag_j, A_diag_a, A_offd_i, A_offd_j, A_offd_a,
                               B_i, B_j, B_a);
 
-
    /* output */
    B = hypre_CSRMatrixCreate(B_nrows, B_ncols, B_nnz);
    hypre_CSRMatrixI   (B) = B_i;
    hypre_CSRMatrixBigJ(B) = B_j;
    hypre_CSRMatrixData(B) = B_a;
    hypre_CSRMatrixMemoryLocation(B) = HYPRE_MEMORY_DEVICE;
+
+   hypre_SyncCudaComputeStream(hypre_handle);
 
    return B;
 }

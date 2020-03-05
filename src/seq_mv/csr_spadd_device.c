@@ -87,7 +87,7 @@ hypreDevice_CSRSpAdd(HYPRE_Int  ma,       HYPRE_Int   mb,        HYPRE_Int   n,
    d_at_cp = (HYPRE_Complex *) work_mem;
    work_mem += sizeof(HYPRE_Complex) * nnzT2;
 
-   hypre_assert(work_mem - work_mem_saved == (4*sizeof(HYPRE_Int)+2*sizeof(HYPRE_Complex))*nnzT2);
+   hypre_assert( (size_t) (work_mem - work_mem_saved) == (4*sizeof(HYPRE_Int)+2*sizeof(HYPRE_Complex))*((size_t)nnzT2) );
 
    /* sort: lexicographical order (row, col): hypreDevice_StableSortByTupleKey */
    hypreDevice_StableSortByTupleKey(nnzT, d_it, d_jt, d_at, 0);

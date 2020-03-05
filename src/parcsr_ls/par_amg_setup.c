@@ -2697,7 +2697,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                P_array[level] = Pnew;
             }
          }
-
       }
 
       if (debug_flag==1)
