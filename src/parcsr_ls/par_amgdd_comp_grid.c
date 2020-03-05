@@ -329,8 +329,11 @@ hypre_ParCompGridInitializeNew( hypre_ParAMGData *amg_data, HYPRE_Int padding, H
    hypre_ParCompGridNonOwnedInvSort(compGrid) = hypre_CTAlloc(HYPRE_Int, max_nonowned, HYPRE_MEMORY_HOST);
    hypre_ParCompGridNonOwnedDiagMissingColIndics(compGrid) = hypre_CTAlloc(HYPRE_Int, max_nonowned, HYPRE_MEMORY_HOST);
 
-   // TODO: initialize nonownedglobalindices???
-
+   // Initialize nonowned global indices
+   for (i = 0; i < hypre_CSRMatrixNumCols(A_offd_original); i++)
+   {
+      hypre_ParCompGridNonOwnedGlobalIndices(compGrid)[i] = hypre_ParCSRMatrixColMapOffd( hypre_ParAMGDataAArray(amg_data)[level] )[i];
+   }
 
    if (level != hypre_ParAMGDataNumLevels(amg_data) - 1)
    {
