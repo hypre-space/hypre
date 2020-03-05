@@ -329,6 +329,9 @@ hypre_ParCompGridInitializeNew( hypre_ParAMGData *amg_data, HYPRE_Int padding, H
    hypre_ParCompGridNonOwnedInvSort(compGrid) = hypre_CTAlloc(HYPRE_Int, max_nonowned, HYPRE_MEMORY_HOST);
    hypre_ParCompGridNonOwnedDiagMissingColIndics(compGrid) = hypre_CTAlloc(HYPRE_Int, max_nonowned, HYPRE_MEMORY_HOST);
 
+   // TODO: initialize nonownedglobalindices???
+
+
    if (level != hypre_ParAMGDataNumLevels(amg_data) - 1)
    {
       hypre_ParCompGridNonOwnedCoarseIndices(compGrid) = hypre_CTAlloc(HYPRE_Int, max_nonowned, HYPRE_MEMORY_HOST);
@@ -2017,6 +2020,8 @@ hypre_ParCompGridCommPkgFinalize(hypre_ParAMGData* amg_data, hypre_ParCompGridCo
          }
       }
    }
+
+   // TODO: I think I can free the recvmap and sendflag here
 
    return 0;
 }
