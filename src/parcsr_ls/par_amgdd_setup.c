@@ -502,11 +502,6 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
                &(recv_map_send_buffer_size[i]), level, num_levels, nodes_added_on_level, i, num_resizes, symmetric);
 
             // !!! New
-
-            // !!! Debug
-            sprintf(filename, "outputs/commPkgOutsideLevel%d.txt", level);
-            hypre_PrintCommpkg(hypre_ParAMGDataAArray(amg_data)[level], filename);
-
             recv_map_new[level][i] = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
             num_recv_nodes_new[level][i] = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
 
@@ -519,6 +514,9 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
             
             recv_map_send_buffer[i] = hypre_CTAlloc(HYPRE_Int, recv_map_send_buffer_size[i], HYPRE_MEMORY_HOST);
             PackRecvMapSendBuffer(recv_map_send_buffer[i], recv_map[level][i], num_recv_nodes[level][i], &(recv_buffer_size[level][i]), level, num_levels, compGrid);
+
+            recv_map_send_buffer_new[i] = hypre_CTAlloc(HYPRE_Int, recv_map_send_buffer_size_new[i], HYPRE_MEMORY_HOST);
+            PackRecvMapSendBufferNew(recv_map_send_buffer_new[i], recv_map_new[level][i], num_recv_nodes_new[level][i], &(recv_buffer_size_new[level][i]), level, num_levels, compGrid);
          }
          if (timers) hypre_EndTiming(timers[4]);
 
@@ -540,6 +538,9 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
             // !!! Check send_flag_buffer_size (make sure not overallocated)
             send_flag_buffer[i] = hypre_CTAlloc(HYPRE_Int, send_flag_buffer_size[i], HYPRE_MEMORY_HOST);
             hypre_MPI_Irecv( send_flag_buffer[i], send_flag_buffer_size[i], HYPRE_MPI_INT, hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level][i], 2, comm, &(requests[request_counter++]));
+
+            send_flag_buffer_new[i] = hypre_CTAlloc(HYPRE_Int, send_flag_buffer_size_new[i], HYPRE_MEMORY_HOST);
+            hypre_MPI_Irecv( send_flag_buffer_new[i], send_flag_buffer_size_new[i], HYPRE_MPI_INT, hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level][i], 2, comm, &(requests_new[request_counter_new++]));
          }
 
          // send the recv_map_send_buffer's
@@ -547,6 +548,20 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
          {
             // !!! Check recv_map_send_buffer_size (make sure not overallocated)
             hypre_MPI_Isend( recv_map_send_buffer[i], recv_map_send_buffer_size[i], HYPRE_MPI_INT, hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[level][i], 2, comm, &(requests[request_counter++]));
+
+            hypre_MPI_Isend( recv_map_send_buffer_new[i], recv_map_send_buffer_size_new[i], HYPRE_MPI_INT, hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[level][i], 2, comm, &(requests_new[request_counter_new++]));
+            
+            // !!! Debug
+            // if (myid == 1 && i == 0)
+            // {
+            //    printf("recv_map_send_buffer_new = ");
+            //    for (j = 0; j < recv_map_send_buffer_size_new[i]; j++)
+            //    {
+            //       printf("%d ", recv_map_send_buffer_new[i][j]);
+            //    }
+            //    printf("\n");
+            // }
+
             if (communication_cost)
             {
                communication_cost[level*10 + 2]++;
@@ -559,10 +574,32 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
          hypre_TFree(requests, HYPRE_MEMORY_HOST);
          hypre_TFree(status, HYPRE_MEMORY_HOST);
 
+         hypre_MPI_Waitall( num_send_procs + num_recv_procs, requests_new, status_new );
+         hypre_TFree(requests_new, HYPRE_MEMORY_HOST);
+         hypre_TFree(status_new, HYPRE_MEMORY_HOST);
+
          // unpack and setup the send flag arrays
          for (i = 0; i < num_send_procs; i++)
          {
             UnpackSendFlagBuffer(send_flag_buffer[i], send_flag[level][i], num_send_nodes[level][i], &(send_buffer_size[level][i]), level, num_levels);
+
+            UnpackSendFlagBufferNew(send_flag_buffer_new[i], send_flag_new[level][i], num_send_nodes_new[level][i], &(send_buffer_size_new[level][i]), level, num_levels);
+            
+            // !!! Debug
+            // if (myid == 1)
+            // {
+            //    printf("Send flag after unpack:\n");
+            //    HYPRE_Int l;
+            //    for (l = level; l < num_levels; l++)
+            //    {
+            //       printf("level %d\n", l);
+            //       for (j = 0; j < num_send_nodes_new[level][0][l]; j++)
+            //       {
+            //          printf("%d, %d\n", send_flag_new[level][0][l][j], send_flag[level][0][l][j]);
+            //       }
+            //    }
+            // }
+
          }
 
          if (timers) hypre_EndTiming(timers[6]);
@@ -792,7 +829,7 @@ PackSendBufferNew( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compG
    HYPRE_Int            *sort_map_coarse;
 
    // initialize send map buffer size
-   (*send_flag_buffer_size) = num_levels - current_level;
+   (*send_flag_buffer_size) = num_levels - current_level - 1;
 
    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
    // Mark the nodes to send (including Psi_c grid plus ghost nodes)
@@ -818,7 +855,6 @@ PackSendBufferNew( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compG
 
       (*buffer_size) += hypre_ParCompGridARowPtr(compGrid[current_level])[send_elmt+1] - hypre_ParCompGridARowPtr(compGrid[current_level])[send_elmt];
    }
-   (*send_flag_buffer_size) += finish - start;
 
    // Add the nodes listed by the coarse grid counterparts if applicable
    // Note that the compGridCommPkg is set up to list all nodes within the padding plus ghost layers
@@ -1754,6 +1790,54 @@ RecursivelyBuildPsiComposite(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *com
    return error_code;
 }
 
+HYPRE_Int
+PackRecvMapSendBufferNew(HYPRE_Int *recv_map_send_buffer, 
+   HYPRE_Int **recv_map, 
+   HYPRE_Int *num_recv_nodes, 
+   HYPRE_Int *recv_buffer_size,
+   HYPRE_Int current_level, 
+   HYPRE_Int num_levels,
+   hypre_ParCompGrid **compGrid)
+{
+   HYPRE_Int      level, i, cnt, num_nodes;
+   cnt = 0;
+   *recv_buffer_size = 0;
+   for (level = current_level+1; level < num_levels; level++)
+   {
+      // if there were nodes in psiComposite on this level
+      if (recv_map[level])
+      {
+         // store the number of nodes on this level
+         num_nodes = num_recv_nodes[level];
+         recv_map_send_buffer[cnt++] = num_nodes;
+         num_recv_nodes[level] = 0;
+
+         for (i = 0; i < num_nodes; i++)
+         {
+            // store the map values for each node
+            recv_map_send_buffer[cnt++] = recv_map[level][i];
+
+            if (recv_map[level][i] >= 0)
+            {
+               if (hypre_ParCompGridNonOwnedRealMarker(compGrid[level])[ recv_map[level][i] ] > 0)
+               {
+                  recv_map[level][ num_recv_nodes[level]++ ] = recv_map[level][i];
+               }
+               else
+               {
+                  recv_map[level][ num_recv_nodes[level]++ ] = -(recv_map[level][i] + 1);
+               }
+               (*recv_buffer_size)++;
+            }
+         }
+         recv_map[level] = hypre_TReAlloc(recv_map[level], HYPRE_Int, num_recv_nodes[level], HYPRE_MEMORY_HOST);
+      }
+      // otherwise record that there were zero nodes on this level
+      else recv_map_send_buffer[cnt++] = 0;
+   }
+
+   return 0;
+}
 
 HYPRE_Int
 PackRecvMapSendBuffer(HYPRE_Int *recv_map_send_buffer, 
@@ -1799,6 +1883,37 @@ PackRecvMapSendBuffer(HYPRE_Int *recv_map_send_buffer,
       }
       // otherwise record that there were zero nodes on this level
       else recv_map_send_buffer[cnt++] = 0;
+   }
+
+   return 0;
+}
+
+HYPRE_Int
+UnpackSendFlagBufferNew(HYPRE_Int *send_flag_buffer, 
+   HYPRE_Int **send_flag, 
+   HYPRE_Int *num_send_nodes,
+   HYPRE_Int *send_buffer_size,
+   HYPRE_Int current_level, 
+   HYPRE_Int num_levels)
+{
+   HYPRE_Int      level, i, cnt, num_nodes;
+   cnt = 0;
+   *send_buffer_size = 0;
+   for (level = current_level+1; level < num_levels; level++)
+   {
+      num_nodes = send_flag_buffer[cnt++];
+      num_send_nodes[level] = 0;
+
+      for (i = 0; i < num_nodes; i++)
+      {
+         if (send_flag_buffer[cnt++] >= 0) 
+         {
+            send_flag[level][ num_send_nodes[level]++ ] = send_flag[level][i];
+            (*send_buffer_size)++;
+         }
+      }
+      
+      send_flag[level] = hypre_TReAlloc(send_flag[level], HYPRE_Int, num_send_nodes[level], HYPRE_MEMORY_HOST);
    }
 
    return 0;

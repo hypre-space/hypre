@@ -732,7 +732,7 @@ UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
    num_psi_levels = recv_buffer[cnt++];
 
    // Init the recv_map_send_buffer_size !!! I think this can just be set a priori instead of counting it up in this function... !!!
-   *recv_map_send_buffer_size = num_levels - current_level;
+   *recv_map_send_buffer_size = num_levels - current_level - 1;
 
    ////////////////////////////////////////////////////////////////////
    // !!! Treat current_level specially: no redundancy here, and recv positions need to agree with original ParCSRCommPkg (extra comp grid points at the end)
