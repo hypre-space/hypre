@@ -278,6 +278,7 @@ HYPRE_Complex hypre_CSRMatrixSumElts ( hypre_CSRMatrix *A );
 hypre_CSRMatrix *hypre_CSRMatrixCreate ( HYPRE_Int num_rows , HYPRE_Int num_cols , HYPRE_Int num_nonzeros );
 HYPRE_Int hypre_CSRMatrixDestroy ( hypre_CSRMatrix *matrix );
 HYPRE_Int hypre_CSRMatrixInitialize ( hypre_CSRMatrix *matrix );
+HYPRE_Int hypre_CSRMatrixResize( hypre_CSRMatrix *matrix, HYPRE_Int new_num_rows, HYPRE_Int new_num_cols, HYPRE_Int new_num_nonzeros );
 HYPRE_Int hypre_CSRMatrixBigInitialize ( hypre_CSRMatrix *matrix );
 HYPRE_Int hypre_CSRMatrixBigJtoJ ( hypre_CSRMatrix *matrix );
 HYPRE_Int hypre_CSRMatrixJtoBigJ ( hypre_CSRMatrix *matrix );
