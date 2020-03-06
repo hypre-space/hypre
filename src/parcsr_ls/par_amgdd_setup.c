@@ -525,6 +525,10 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
          if (timers) hypre_BeginTiming(timers[5]);
          total_bin_search_count += hypre_ParCompGridSetupLocalIndices(compGrid, nodes_added_on_level, amgdd_start_level, num_levels, symmetric_tmp);
          for (j = level; j < num_levels; j++) nodes_added_on_level[j] = 0;
+
+         total_bin_search_count += hypre_ParCompGridSetupLocalIndicesNew(compGrid, nodes_added_on_level_new, recv_map_new, num_recv_procs, A_tmp_info, level, num_levels, symmetric);
+         for (j = level; j < num_levels; j++) nodes_added_on_level_new[j] = 0;
+         
          if (timers) hypre_EndTiming(timers[5]);
 
          //////////// Communicate redundancy info ////////////

@@ -151,6 +151,7 @@ typedef struct
    HYPRE_Int        last_global_index;
    HYPRE_Int        num_owned_nodes;
    HYPRE_Int        num_nonowned_nodes;
+   HYPRE_Int        num_missing_col_indices;
 
    HYPRE_Int        *nonowned_global_indices;
    HYPRE_Int        *nonowned_coarse_indices;
@@ -240,13 +241,14 @@ typedef struct
 #define hypre_ParCompGridLastGlobalIndex(compGrid)               ((compGrid) -> last_global_index)
 #define hypre_ParCompGridNumOwnedNodes(compGrid)               ((compGrid) -> num_owned_nodes)
 #define hypre_ParCompGridNumNonOwnedNodes(compGrid)               ((compGrid) -> num_nonowned_nodes)
+#define hypre_ParCompGridNumMissingColIndices(compGrid)               ((compGrid) -> num_missing_col_indices)
 
 #define hypre_ParCompGridNonOwnedGlobalIndices(compGrid)               ((compGrid) -> nonowned_global_indices)
 #define hypre_ParCompGridNonOwnedCoarseIndices(compGrid)               ((compGrid) -> nonowned_coarse_indices)
 #define hypre_ParCompGridNonOwnedRealMarker(compGrid)               ((compGrid) -> nonowned_real_marker)
 #define hypre_ParCompGridNonOwnedSort(compGrid)               ((compGrid) -> nonowned_sort)
 #define hypre_ParCompGridNonOwnedInvSort(compGrid)               ((compGrid) -> nonowned_invsort)
-#define hypre_ParCompGridNonOwnedDiagMissingColIndics(compGrid)               ((compGrid) -> nonowned_diag_missing_col_indices)
+#define hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid)               ((compGrid) -> nonowned_diag_missing_col_indices)
 
 #define hypre_ParCompGridOwnedCoarseIndices(compGrid)               ((compGrid) -> owned_coarse_indices)
 
