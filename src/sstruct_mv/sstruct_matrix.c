@@ -812,7 +812,7 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
    hypre_SStructUVEntry    *Uventry;
    hypre_BoxManEntry       *boxman_entry;
    hypre_SStructBoxManInfo *entry_info;
-   HYPRE_BigInt             row_coord, *row_coords;
+   HYPRE_BigInt             row_coord;
    HYPRE_BigInt            *col_coords;
    HYPRE_Int                ncoeffs;
    HYPRE_Complex           *coeffs;
@@ -841,7 +841,6 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
    hypre_SStructBoxManEntryGetGlobalRank(boxman_entry, index,
                                          &row_coord, matrix_type);
 
-   row_coords = hypre_SStructMatrixTmpRowCoords(matrix);
    col_coords = hypre_SStructMatrixTmpColCoords(matrix);
    coeffs     = hypre_SStructMatrixTmpCoeffs(matrix);
 
@@ -890,6 +889,8 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
    }
 
 #if defined(HYPRE_USING_CUDA)
+   HYPRE_BigInt *row_coords = hypre_SStructMatrixTmpRowCoords(matrix);
+
    if ( hypre_GetExecPolicy1(hypre_IJMatrixMemoryLocation(ijmatrix)) == HYPRE_EXEC_DEVICE )
    {
       HYPRE_THRUST_CALL( fill_n, row_coords, ncoeffs, row_coord );
