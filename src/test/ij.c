@@ -8630,9 +8630,9 @@ BuildBigArrayFromOneFile( HYPRE_Int            argc,
  *----------------------------------------------------------------------*/
 
 HYPRE_Int
-BuildParLaplacian9pt( HYPRE_Int                  argc,
+BuildParLaplacian9pt( HYPRE_Int            argc,
                       char                *argv[],
-                      HYPRE_Int                  arg_index,
+                      HYPRE_Int            arg_index,
                       HYPRE_ParCSRMatrix  *A_ptr     )
 {
    HYPRE_BigInt              nx, ny;
@@ -8751,9 +8751,9 @@ BuildParLaplacian9pt( HYPRE_Int                  argc,
  *----------------------------------------------------------------------*/
 
 HYPRE_Int
-BuildParLaplacian27pt( HYPRE_Int                  argc,
+BuildParLaplacian27pt( HYPRE_Int            argc,
                        char                *argv[],
-                       HYPRE_Int                  arg_index,
+                       HYPRE_Int            arg_index,
                        HYPRE_ParCSRMatrix  *A_ptr     )
 {
    HYPRE_BigInt              nx, ny, nz;
@@ -8870,9 +8870,9 @@ BuildParLaplacian27pt( HYPRE_Int                  argc,
  *----------------------------------------------------------------------*/
 
 HYPRE_Int
-BuildParRotate7pt( HYPRE_Int                  argc,
+BuildParRotate7pt( HYPRE_Int            argc,
                    char                *argv[],
-                   HYPRE_Int                  arg_index,
+                   HYPRE_Int            arg_index,
                    HYPRE_ParCSRMatrix  *A_ptr     )
 {
    HYPRE_BigInt              nx, ny;
@@ -8988,11 +8988,11 @@ BuildParRotate7pt( HYPRE_Int                  argc,
  *----------------------------------------------------------------------*/
 
 HYPRE_Int
-BuildParVarDifConv( HYPRE_Int                  argc,
+BuildParVarDifConv( HYPRE_Int            argc,
                     char                *argv[],
-                    HYPRE_Int                  arg_index,
-                    HYPRE_ParCSRMatrix  *A_ptr    ,
-                    HYPRE_ParVector  *rhs_ptr     )
+                    HYPRE_Int            arg_index,
+                    HYPRE_ParCSRMatrix  *A_ptr,
+                    HYPRE_ParVector     *rhs_ptr     )
 {
    HYPRE_BigInt              nx, ny, nz;
    HYPRE_Int                 P, Q, R;
@@ -9152,11 +9152,11 @@ HYPRE_Int SetSysVcoefValues(HYPRE_Int num_fun, HYPRE_BigInt nx, HYPRE_BigInt ny,
  *----------------------------------------------------------------------*/
 
 HYPRE_Int
-BuildParCoordinates( HYPRE_Int                  argc,
+BuildParCoordinates( HYPRE_Int            argc,
                      char                *argv[],
-                     HYPRE_Int                  arg_index,
-                     HYPRE_Int                 *coorddim_ptr,
-                     float               **coord_ptr     )
+                     HYPRE_Int            arg_index,
+                     HYPRE_Int           *coorddim_ptr,
+                     float              **coord_ptr     )
 {
    HYPRE_BigInt              nx, ny, nz;
    HYPRE_Int                 P, Q, R;
