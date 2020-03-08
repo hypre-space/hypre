@@ -2685,23 +2685,23 @@ hypre_BoomerAMGBuildDirInterp( hypre_ParCSRMatrix   *A,
    hypre_NvtxPushRange("DirInterp");
 #endif
 
-   HYPRE_ExecuctionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(A)) );
-
    HYPRE_Int ierr = 0;
 
-   if (exec == HYPRE_EXEC_HOST)
-   {
-      ierr = hypre_BoomerAMGBuildDirInterpHost(A,CF_marker,S,num_cpts_global,num_functions,dof_func,
-                                               debug_flag,trunc_factor,max_elmts,col_offd_S_to_A, P_ptr);
-   }
 #if defined(HYPRE_USING_CUDA)
-   else
+   HYPRE_ExecuctionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(A)) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
    {
       ierr = hypre_BoomerAMGBuildDirInterpDevice(A,CF_marker,S,num_cpts_global,num_functions,dof_func,
                                                  debug_flag,trunc_factor,max_elmts,col_offd_S_to_A, 
                                                  interp_type, P_ptr);
    }
+   else
 #endif
+   {
+      ierr = hypre_BoomerAMGBuildDirInterpHost(A,CF_marker,S,num_cpts_global,num_functions,dof_func,
+                                               debug_flag,trunc_factor,max_elmts,col_offd_S_to_A, P_ptr);
+   }
 
 #if defined(HYPRE_USING_CUDA)
    hypre_NvtxPopRange();

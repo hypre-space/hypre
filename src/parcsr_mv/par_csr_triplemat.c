@@ -209,21 +209,21 @@ hypre_ParCSRMatMat( hypre_ParCSRMatrix  *A,
    hypre_NvtxPushRange("Mat-Mat");
 #endif
 
+   hypre_ParCSRMatrix *C = NULL;
+
+#if defined(HYPRE_USING_CUDA)
    HYPRE_ExecuctionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A),
                                                        hypre_ParCSRMatrixMemoryLocation(B) );
 
-   hypre_ParCSRMatrix *C = NULL;
-
-   if (exec == HYPRE_EXEC_HOST)
-   {
-      C = hypre_ParCSRMatMatHost(A,B);
-   }
-#if defined(HYPRE_USING_CUDA)
-   else
+   if (exec == HYPRE_EXEC_DEVICE)
    {
       C = hypre_ParCSRMatMatDevice(A,B);
    }
+   else
 #endif
+   {
+      C = hypre_ParCSRMatMatHost(A,B);
+   }
 
 #if defined(HYPRE_USING_CUDA)
    hypre_NvtxPopRange();
@@ -462,21 +462,21 @@ hypre_ParCSRTMatMatKT( hypre_ParCSRMatrix  *A,
    hypre_NvtxPushRange("Mat-T-Mat");
 #endif
 
+   hypre_ParCSRMatrix *C = NULL;
+
+#if defined(HYPRE_USING_CUDA)
    HYPRE_ExecuctionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A),
                                                        hypre_ParCSRMatrixMemoryLocation(B) );
 
-   hypre_ParCSRMatrix *C = NULL;
-
-   if (exec == HYPRE_EXEC_HOST)
-   {
-      C = hypre_ParCSRTMatMatKTHost(A, B, keep_transpose);
-   }
-#if defined(HYPRE_USING_CUDA)
-   else
+   if (exec == HYPRE_EXEC_DEVICE)
    {
       C = hypre_ParCSRTMatMatKTDevice(A, B, keep_transpose);
    }
+   else
 #endif
+   {
+      C = hypre_ParCSRTMatMatKTHost(A, B, keep_transpose);
+   }
 
 #if defined(HYPRE_USING_CUDA)
    hypre_NvtxPopRange();
