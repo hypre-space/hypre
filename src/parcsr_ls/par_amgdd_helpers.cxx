@@ -746,7 +746,8 @@ UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
 
    // get the number of nodes on this level
    num_recv_nodes[current_level][buffer_number][current_level] = recv_buffer[cnt++];
-   nodes_added_on_level[current_level] = num_recv_nodes[current_level][buffer_number][current_level];
+
+   nodes_added_on_level[current_level] += num_recv_nodes[current_level][buffer_number][current_level];
 
    // if necessary, reallocate more space for nonowned dofs
    HYPRE_Int max_nonowned = hypre_CSRMatrixNumRows(nonowned_diag);
@@ -785,14 +786,15 @@ UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
    hypre_ParCompGridNumNonOwnedNodes(compGrid[current_level]) += remaining_dofs;
    HYPRE_Int *sort_map = hypre_ParCompGridNonOwnedSort(compGrid[current_level]);
    HYPRE_Int *inv_sort_map = hypre_ParCompGridNonOwnedInvSort(compGrid[current_level]);
+   HYPRE_Int *new_inv_sort_map = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumRows(nonowned_diag), HYPRE_MEMORY_HOST);
    HYPRE_Int sort_cnt = 0;
    HYPRE_Int compGrid_cnt = 0;
    HYPRE_Int incoming_cnt = 0;
-   while (incoming_cnt < remaining_dofs && compGrid_cnt < hypre_CSRMatrixNumCols(owned_offd))
+   while (incoming_cnt < remaining_dofs && compGrid_cnt < start_extra_dofs)
    {
       // !!! Optimization: don't have to do these assignments every time... probably doesn't save much (i.e. only update incoming_global_index when necessary, etc.)
       HYPRE_Int incoming_global_index = recv_buffer[cnt];
-      HYPRE_Int compGrid_global_index = hypre_ParCompGridNonOwnedGlobalIndices(compGrid[current_level])[ compGrid_cnt ];
+      HYPRE_Int compGrid_global_index = hypre_ParCompGridNonOwnedGlobalIndices(compGrid[current_level])[ inv_sort_map[compGrid_cnt] ];
 
       HYPRE_Int incoming_is_real = 1;
       if (incoming_global_index < 0) 
@@ -808,34 +810,49 @@ UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
          hypre_ParCompGridNonOwnedRealMarker(compGrid[current_level])[ incoming_cnt + start_extra_dofs ] = incoming_is_real;
 
          sort_map[ incoming_cnt + start_extra_dofs ] = sort_cnt;
-         inv_sort_map[sort_cnt] = incoming_cnt + start_extra_dofs;
+         new_inv_sort_map[sort_cnt] = incoming_cnt + start_extra_dofs;
          sort_cnt++;
          incoming_cnt++;
          cnt++;
       }
       else
       {
-         sort_map[ compGrid_cnt ] = sort_cnt;
-         inv_sort_map[sort_cnt] = compGrid_cnt;
+         sort_map[ inv_sort_map[compGrid_cnt] ] = sort_cnt;
+         new_inv_sort_map[sort_cnt] = inv_sort_map[compGrid_cnt];
          compGrid_cnt++;
          sort_cnt++;
       }
    }
    while (incoming_cnt < remaining_dofs)
    {
+      HYPRE_Int incoming_global_index = recv_buffer[cnt];
+
+      HYPRE_Int incoming_is_real = 1;
+      if (incoming_global_index < 0) 
+      {
+         incoming_global_index = -(incoming_global_index + 1);
+         incoming_is_real = 0;
+      }
+
+      hypre_ParCompGridNonOwnedGlobalIndices(compGrid[current_level])[ incoming_cnt + start_extra_dofs ] = incoming_global_index;
+      hypre_ParCompGridNonOwnedRealMarker(compGrid[current_level])[ incoming_cnt + start_extra_dofs ] = incoming_is_real;
+
       sort_map[ incoming_cnt + start_extra_dofs ] = sort_cnt;
-      inv_sort_map[sort_cnt] = incoming_cnt + start_extra_dofs;
+      new_inv_sort_map[sort_cnt] = incoming_cnt + start_extra_dofs;
       sort_cnt++;
       incoming_cnt++;
       cnt++;
    }
-   while (compGrid_cnt < hypre_CSRMatrixNumCols(owned_offd))
+   while (compGrid_cnt < start_extra_dofs)
    {
-      sort_map[ compGrid_cnt ] = sort_cnt;
-      inv_sort_map[sort_cnt] = compGrid_cnt;
+      sort_map[ inv_sort_map[compGrid_cnt] ] = sort_cnt;
+      new_inv_sort_map[sort_cnt] = inv_sort_map[compGrid_cnt];
       compGrid_cnt++;
       sort_cnt++;
    }
+
+   hypre_TFree(inv_sort_map, HYPRE_MEMORY_HOST);
+   hypre_ParCompGridNonOwnedInvSort(compGrid[current_level]) = new_inv_sort_map;
 
    // Unpack coarse global indices (need these for original commPkg recvs as well). 
    // NOTE: store global indices for now, will be adjusted to local indices during SetupLocalIndices
@@ -847,7 +864,7 @@ UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
          if (coarse_index != -1) coarse_index = -(coarse_index+2); // Marking coarse indices that need setup by negative mapping
          hypre_ParCompGridNonOwnedCoarseIndices(compGrid[current_level])[i + hypre_ParCSRCommPkgRecvVecStart(commPkg, buffer_number)] = coarse_index;
       }
-      for (i = num_original_recv_dofs; i < num_recv_nodes[current_level][buffer_number][current_level]; i++)
+      for (i = 0; i < remaining_dofs; i++)
       {
          HYPRE_Int coarse_index = recv_buffer[cnt++];
          if (coarse_index != -1) coarse_index = -(coarse_index+2); // Marking coarse indices that need setup by negative mapping
@@ -906,18 +923,21 @@ UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
             if (incoming_index < num_original_recv_dofs)
                hypre_CSRMatrixJ(nonowned_diag)[diag_rowptr++] = incoming_index + hypre_ParCSRCommPkgRecvVecStart(commPkg, buffer_number);
             else
-               hypre_CSRMatrixJ(nonowned_diag)[diag_rowptr++] = incoming_index + start_extra_dofs;
+            {
+               hypre_CSRMatrixJ(nonowned_diag)[diag_rowptr++] = incoming_index - num_original_recv_dofs + start_extra_dofs;
+            }
          }
       }
 
       // Update row pointers 
-      hypre_CSRMatrixI(nonowned_offd)[ hypre_ParCSRCommPkgRecvVecStart(commPkg, buffer_number) + i + 1 ] = offd_rowptr;
       hypre_CSRMatrixI(nonowned_diag)[ hypre_ParCSRCommPkgRecvVecStart(commPkg, buffer_number) + i + 1 ] = diag_rowptr;
+      hypre_CSRMatrixI(nonowned_offd)[ hypre_ParCSRCommPkgRecvVecStart(commPkg, buffer_number) + i + 1 ] = offd_rowptr;
    }
 
    // Temporary storage for extra comp grid dofs on this level (will be setup after all recv's during SetupLocalIndices)
    // A_tmp_info[buffer_number] = [ size, [row], size, [row], ... ]
-   HYPRE_Int A_tmp_info_size = 1 + remaining_dofs;
+   HYPRE_Int A_tmp_info_size = 2 + remaining_dofs;
+
    for (i = num_original_recv_dofs; i < num_recv_nodes[current_level][buffer_number][current_level]; i++)
    {
       HYPRE_Int row_size = recv_buffer[ i + row_sizes_start ];
@@ -974,12 +994,12 @@ UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
          hypre_ParCompGridResize(compGrid[level], new_size, level != num_levels-1, 0, symmetric); // !!! Is there a better way to manage memory? !!!
       }
 
-      HYPRE_Int *sort_map = hypre_ParCompGridNonOwnedSort(compGrid[level]);
-      HYPRE_Int *inv_sort_map = hypre_ParCompGridNonOwnedInvSort(compGrid[level]);
-      HYPRE_Int *new_inv_sort_map = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumRows(nonowned_diag), HYPRE_MEMORY_HOST);
-      HYPRE_Int sort_cnt = 0;
-      HYPRE_Int compGrid_cnt = 0;
-      HYPRE_Int incoming_cnt = 0;
+      sort_map = hypre_ParCompGridNonOwnedSort(compGrid[level]);
+      inv_sort_map = hypre_ParCompGridNonOwnedInvSort(compGrid[level]);
+      new_inv_sort_map = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumRows(nonowned_diag), HYPRE_MEMORY_HOST);
+      sort_cnt = 0;
+      compGrid_cnt = 0;
+      incoming_cnt = 0;
       HYPRE_Int dest = num_nonowned;
 
       while (incoming_cnt < num_recv_nodes[current_level][buffer_number][level] && compGrid_cnt < num_nonowned)

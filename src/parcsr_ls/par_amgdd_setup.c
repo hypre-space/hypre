@@ -244,6 +244,15 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    }
    #endif
 
+
+   // !!! Debug
+   for (level = 0; level < num_levels; level++)
+   {
+      hypre_sprintf(filename, "outputs/CompGrids/initCompGridRank%dLevel%d.txt", myid, level);
+      hypre_ParCompGridDebugPrintNew( compGrid[level], filename );
+   }
+
+
    #if DEBUGGING_MESSAGES
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
    if (myid == 0) hypre_printf("  Done with comp grid initialization\n");
@@ -319,7 +328,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
       if ( num_send_procs || num_recv_procs ) // If there are any owned nodes on this level
       {
          // !!! Debug
-         printf("Rank %d active on level %d\n", myid, level);
+         // printf("Rank %d active on level %d\n", myid, level);
 
          // Do some allocations
          requests = hypre_CTAlloc(hypre_MPI_Request, num_send_procs + num_recv_procs, HYPRE_MEMORY_HOST );
@@ -374,29 +383,16 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
             send_buffer[i] = PackSendBuffer( compGrid, compGridCommPkg, &(send_buffer_size[level][i]), 
                                              &(send_flag_buffer_size[i]), send_flag, num_send_nodes, i, level, num_levels, padding, 
                                              num_ghost_layers, symmetric );
+         }
 
+         for (i = 0; i < num_send_procs; i++)
+         {
             // !!! NEW
             send_flag_new[level][i] = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
             num_send_nodes_new[level][i] = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
             send_buffer_new[i] = PackSendBufferNew( compGrid, compGridCommPkgNew, &(send_buffer_size_new[level][i]), 
                                              &(send_flag_buffer_size_new[i]), send_flag_new, num_send_nodes_new, i, level, num_levels, padding, 
                                              num_ghost_layers, symmetric );
-
-            // !!! Debug
-            // if (myid == 1 && i == 0)
-            // {
-            //    printf("\nold send buffer = \n");
-            //    for (j = 0; j < send_buffer_size[level][i]; j++)
-            //    {
-            //       printf("%d\n", send_buffer[i][j]);
-            //    }
-
-            //    printf("\nnew send buffer = \n");
-            //    for (j = 0; j < send_buffer_size_new[level][i]; j++)
-            //    {
-            //       printf("%d\n", send_buffer_new[i][j]);
-            //    }
-            // }
          }
          if (timers) hypre_EndTiming(timers[2]);
 
@@ -411,17 +407,21 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
             // !!! Check recv_buffer_size (make sure not overallocated)
             hypre_MPI_Irecv( &(recv_buffer_size[level][i]), 1, HYPRE_MPI_INT, hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[level][i], 0, comm, &(requests[request_counter++]) );
 
-
-            hypre_MPI_Irecv( &(recv_buffer_size_new[level][i]), 1, HYPRE_MPI_INT, hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[level][i], 0, comm, &(requests_new[request_counter_new++]) );
+         }
+         for (i = 0; i < num_recv_procs; i++)
+         {
+            hypre_MPI_Irecv( &(recv_buffer_size_new[level][i]), 1, HYPRE_MPI_INT, hypre_ParCompGridCommPkgRecvProcs(compGridCommPkgNew)[level][i], 0, comm, &(requests_new[request_counter_new++]) );
          }
 
          // send the buffer sizes
          for (i = 0; i < num_send_procs; i++)
          {
             hypre_MPI_Isend(&(send_buffer_size[level][i]), 1, HYPRE_MPI_INT, hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level][i], 0, comm, &(requests[request_counter++]));
+         }
 
-
-            hypre_MPI_Isend(&(send_buffer_size_new[level][i]), 1, HYPRE_MPI_INT, hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level][i], 0, comm, &(requests_new[request_counter_new++]));
+         for (i = 0; i < num_send_procs; i++)
+         {
+            hypre_MPI_Isend(&(send_buffer_size_new[level][i]), 1, HYPRE_MPI_INT, hypre_ParCompGridCommPkgSendProcs(compGridCommPkgNew)[level][i], 0, comm, &(requests_new[request_counter_new++]));
             if (communication_cost)
             {
                communication_cost[level*10 + 2]++;
@@ -452,17 +452,21 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
          {
             recv_buffer[i] = hypre_CTAlloc(HYPRE_Int, recv_buffer_size[level][i], HYPRE_MEMORY_HOST );
             hypre_MPI_Irecv( recv_buffer[i], recv_buffer_size[level][i], HYPRE_MPI_INT, hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[level][i], 1, comm, &(requests[request_counter++]));
-
+         }
+         for (i = 0; i < num_recv_procs; i++)
+         {
             recv_buffer_new[i] = hypre_CTAlloc(HYPRE_Int, recv_buffer_size_new[level][i], HYPRE_MEMORY_HOST );
-            hypre_MPI_Irecv( recv_buffer_new[i], recv_buffer_size_new[level][i], HYPRE_MPI_INT, hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[level][i], 1, comm, &(requests_new[request_counter_new++]));
+            hypre_MPI_Irecv( recv_buffer_new[i], recv_buffer_size_new[level][i], HYPRE_MPI_INT, hypre_ParCompGridCommPkgRecvProcs(compGridCommPkgNew)[level][i], 1, comm, &(requests_new[request_counter_new++]));
          }
 
          // send the buffers
          for (i = 0; i < num_send_procs; i++)
          {
             hypre_MPI_Isend(send_buffer[i], send_buffer_size[level][i], HYPRE_MPI_INT, hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level][i], 1, comm, &(requests[request_counter++]));
-
-            hypre_MPI_Isend(send_buffer_new[i], send_buffer_size_new[level][i], HYPRE_MPI_INT, hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level][i], 1, comm, &(requests_new[request_counter_new++]));
+         }
+         for (i = 0; i < num_send_procs; i++)
+         {
+            hypre_MPI_Isend(send_buffer_new[i], send_buffer_size_new[level][i], HYPRE_MPI_INT, hypre_ParCompGridCommPkgSendProcs(compGridCommPkgNew)[level][i], 1, comm, &(requests_new[request_counter_new++]));
             if (communication_cost)
             {
                communication_cost[level*10 + 2]++;
@@ -504,20 +508,22 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
                recv_map, num_recv_nodes, 
                &(recv_map_send_buffer_size[i]), level, num_levels, nodes_added_on_level, i, num_resizes, symmetric);
 
+            recv_map_send_buffer[i] = hypre_CTAlloc(HYPRE_Int, recv_map_send_buffer_size[i], HYPRE_MEMORY_HOST);
+            PackRecvMapSendBuffer(recv_map_send_buffer[i], recv_map[level][i], num_recv_nodes[level][i], &(recv_buffer_size[level][i]), level, num_levels, compGrid);
+         }
+         for (i = 0; i < num_recv_procs; i++)
+         {
             // !!! New
             recv_map_new[level][i] = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
             num_recv_nodes_new[level][i] = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
 
             UnpackRecvBufferNew(recv_buffer_new[i], compGrid, hypre_ParCSRMatrixCommPkg( hypre_ParAMGDataAArray(amg_data)[level] ),
                A_tmp_info,
-               compGridCommPkg,
+               compGridCommPkgNew,
                send_flag_new, num_send_nodes_new, 
                recv_map_new, num_recv_nodes_new, 
                &(recv_map_send_buffer_size_new[i]), level, num_levels, nodes_added_on_level_new, i, num_resizes, symmetric);
             
-            recv_map_send_buffer[i] = hypre_CTAlloc(HYPRE_Int, recv_map_send_buffer_size[i], HYPRE_MEMORY_HOST);
-            PackRecvMapSendBuffer(recv_map_send_buffer[i], recv_map[level][i], num_recv_nodes[level][i], &(recv_buffer_size[level][i]), level, num_levels, compGrid);
-
             recv_map_send_buffer_new[i] = hypre_CTAlloc(HYPRE_Int, recv_map_send_buffer_size_new[i], HYPRE_MEMORY_HOST);
             PackRecvMapSendBufferNew(recv_map_send_buffer_new[i], recv_map_new[level][i], num_recv_nodes_new[level][i], &(recv_buffer_size_new[level][i]), level, num_levels, compGrid);
          }
@@ -545,9 +551,11 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
             // !!! Check send_flag_buffer_size (make sure not overallocated)
             send_flag_buffer[i] = hypre_CTAlloc(HYPRE_Int, send_flag_buffer_size[i], HYPRE_MEMORY_HOST);
             hypre_MPI_Irecv( send_flag_buffer[i], send_flag_buffer_size[i], HYPRE_MPI_INT, hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level][i], 2, comm, &(requests[request_counter++]));
-
+         }
+         for (i = 0; i < num_send_procs; i++)
+         {
             send_flag_buffer_new[i] = hypre_CTAlloc(HYPRE_Int, send_flag_buffer_size_new[i], HYPRE_MEMORY_HOST);
-            hypre_MPI_Irecv( send_flag_buffer_new[i], send_flag_buffer_size_new[i], HYPRE_MPI_INT, hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level][i], 2, comm, &(requests_new[request_counter_new++]));
+            hypre_MPI_Irecv( send_flag_buffer_new[i], send_flag_buffer_size_new[i], HYPRE_MPI_INT, hypre_ParCompGridCommPkgSendProcs(compGridCommPkgNew)[level][i], 2, comm, &(requests_new[request_counter_new++]));
          }
 
          // send the recv_map_send_buffer's
@@ -555,8 +563,10 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
          {
             // !!! Check recv_map_send_buffer_size (make sure not overallocated)
             hypre_MPI_Isend( recv_map_send_buffer[i], recv_map_send_buffer_size[i], HYPRE_MPI_INT, hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[level][i], 2, comm, &(requests[request_counter++]));
-
-            hypre_MPI_Isend( recv_map_send_buffer_new[i], recv_map_send_buffer_size_new[i], HYPRE_MPI_INT, hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[level][i], 2, comm, &(requests_new[request_counter_new++]));
+         }
+         for (i = 0; i < num_recv_procs; i++)
+         {
+            hypre_MPI_Isend( recv_map_send_buffer_new[i], recv_map_send_buffer_size_new[i], HYPRE_MPI_INT, hypre_ParCompGridCommPkgRecvProcs(compGridCommPkgNew)[level][i], 2, comm, &(requests_new[request_counter_new++]));
             
             // !!! Debug
             // if (myid == 1 && i == 0)
@@ -589,7 +599,9 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
          for (i = 0; i < num_send_procs; i++)
          {
             UnpackSendFlagBuffer(send_flag_buffer[i], send_flag[level][i], num_send_nodes[level][i], &(send_buffer_size[level][i]), level, num_levels);
-
+         }
+         for (i = 0; i < num_send_procs; i++)
+         {
             UnpackSendFlagBufferNew(send_flag_buffer_new[i], send_flag_new[level][i], num_send_nodes_new[level][i], &(send_buffer_size_new[level][i]), level, num_levels);
             
             // !!! Debug
@@ -644,15 +656,28 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
       hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
       // #endif 
 
+
+
+      // #if DEBUG_COMP_GRID == 2
+      for (i = level; i < num_levels; i++)
+      {
+         hypre_sprintf(filename, "outputs/CompGrids/level%dCompGridRank%dLevel%d", level, myid, i);
+         hypre_ParCompGridDebugPrintNew( compGrid[i], filename );
+      }
+      // #endif
+
+
+
+
       #if DEBUG_COMP_GRID
       CheckCompGridLocalIndices(amg_data);
       HYPRE_Int error_code;
       error_code = TestCompGrids1(compGrid, num_levels, padding, num_ghost_layers, level, 1);
       error_code = TestCompGrids1New(compGrid, num_levels, padding, num_ghost_layers, level, 1);
       if (error_code)
-      {
          hypre_printf("TestCompGrids1 failed! Rank %d, level %d\n", myid, level);
-      }
+      else
+         hypre_printf("TestCompGrids1 passed! Rank %d, level %d\n", myid, level);
       #endif
 
 
@@ -669,7 +694,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
       // }
 
       // !!! Debug
-      if (level = num_levels - 2)
+      if (level == 1)
       {
          MPI_Finalize();
          exit(0);
@@ -1086,10 +1111,15 @@ PackSendBufferNew( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compG
 
             if (send_elmt < hypre_ParCompGridNumOwnedNodes(compGrid[level]))
             {
-               send_buffer[cnt++] = hypre_ParCompGridOwnedCoarseIndices(compGrid[level])[ send_elmt ] + hypre_ParCompGridFirstGlobalIndex(compGrid[level+1]);
+               if (hypre_ParCompGridOwnedCoarseIndices(compGrid[level])[ send_elmt ] >= 0)
+                  send_buffer[cnt++] = hypre_ParCompGridOwnedCoarseIndices(compGrid[level])[ send_elmt ] + hypre_ParCompGridFirstGlobalIndex(compGrid[level+1]);
+               else
+                  send_buffer[cnt++] = hypre_ParCompGridOwnedCoarseIndices(compGrid[level])[ send_elmt ];
             }
             else 
             {
+               // !!! Debug
+               if (level == current_level) printf("HEY! Sending a nonowned point on current_level... should not happen\n");
                HYPRE_Int nonowned_index = send_elmt - hypre_ParCompGridNumOwnedNodes(compGrid[level]);
                HYPRE_Int nonowned_coarse_index = hypre_ParCompGridNonOwnedCoarseIndices(compGrid[level])[ nonowned_index ];
                send_buffer[cnt++] = hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level+1])[ nonowned_coarse_index ];
@@ -1163,7 +1193,6 @@ PackSendBufferNew( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compG
                   }
                   else
                   {
-                     // !!! TODO: owned global indices may not be initialized correctly here...
                      send_buffer[cnt++] = -(hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level])[ hypre_CSRMatrixJ(offd)[j] ] + 1); // -(GID + 1)
                   }
                }
@@ -1177,7 +1206,7 @@ PackSendBufferNew( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compG
                // Get diag connections
                for (j = hypre_CSRMatrixI(diag)[nonowned_index]; j < hypre_CSRMatrixI(diag)[nonowned_index+1]; j++)
                {
-                  add_flag_index = sort_map[ hypre_CSRMatrixJ(offd)[j] ] + hypre_ParCompGridNumOwnedNodes(compGrid[level]); // !!! Double check... this is the tricky case. Use sort_map???
+                  add_flag_index = sort_map[ hypre_CSRMatrixJ(diag)[j] ] + hypre_ParCompGridNumOwnedNodes(compGrid[level]); // !!! Double check... this is the tricky case. Use sort_map???
                   if (add_flag[level][add_flag_index] > 0)
                   {
                      send_buffer[cnt++] = add_flag[level][add_flag_index] - 1; // Buffer connection
@@ -1190,7 +1219,7 @@ PackSendBufferNew( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compG
                // Get offd connections
                for (j = hypre_CSRMatrixI(offd)[nonowned_index]; j < hypre_CSRMatrixI(offd)[nonowned_index+1]; j++)
                {
-                  add_flag_index = hypre_CSRMatrixJ(diag)[j];
+                  add_flag_index = hypre_CSRMatrixJ(offd)[j];
                   if (add_flag[level][add_flag_index] > 0)
                   {
                      send_buffer[cnt++] = add_flag[level][add_flag_index] - 1; // Buffer connection
@@ -1637,8 +1666,12 @@ RecursivelyBuildPsiCompositeNew(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *
 
       if (index >= 0)
       {
-         if (owned || !use_sort) sort_index = index;
-         else sort_index = sort_map[index] + hypre_ParCompGridNumOwnedNodes(compGrid);
+         if (owned) sort_index = index;
+         else
+         {
+            if (use_sort) sort_index = sort_map[index] + hypre_ParCompGridNumOwnedNodes(compGrid);
+            else sort_index = index + hypre_ParCompGridNumOwnedNodes(compGrid);
+         }
 
          // If we still need to visit this index (note that add_flag[index] = m means we have already added all distance m-1 neighbors of index)
          if (add_flag[sort_index] < m)
@@ -1657,7 +1690,11 @@ RecursivelyBuildPsiCompositeNew(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *
             {
                // Again, need to set the add_flag to the appropriate value in order to recursively find neighbors on the next level
                if (owned) sort_index = coarse_grid_index;
-               else sort_index = sort_map_coarse[coarse_grid_index] + hypre_ParCompGridNumOwnedNodes(compGrid);
+               else
+               {
+                  if (use_sort) sort_index = sort_map_coarse[coarse_grid_index] + hypre_ParCompGridNumOwnedNodes(compGrids[level+1]);
+                  else sort_index = coarse_grid_index + hypre_ParCompGridNumOwnedNodes(compGrids[level+1]);
+               }
                add_flag_coarse[ sort_index ] = padding+1;
                *nodes_to_add = 1;
             }
@@ -1665,8 +1702,12 @@ RecursivelyBuildPsiCompositeNew(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *
       }
       else
       {
-         error_code = 1; 
-         hypre_printf("Rank %d: Error! Ran into a -1 index in diag when building Psi_c\n", myid);
+         error_code = 1;
+         if (owned == 1) hypre_printf("Rank %d: Error! Negative col index encountered in owned matrix\n"); 
+         // !!! Debug
+         else hypre_printf("Rank %d: Error! Ran into a -1 index in diag when building Psi_c\n", myid);
+         // else if (myid == 0) hypre_printf("Rank %d: Error! Level %d Ran into a -1 index in nonowned_diag, index = %d, node = %d (gid %d)\n", 
+         //    myid, level, index, node, hypre_ParCompGridNonOwnedGlobalIndices(compGrid)[node]);
       }
    }
 
@@ -1679,7 +1720,11 @@ RecursivelyBuildPsiCompositeNew(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *
       if (index >= 0)
       {
          if (!owned) sort_index = index;
-         else sort_index = sort_map[index] + hypre_ParCompGridNumOwnedNodes(compGrid);
+         else
+         {
+            if (use_sort) sort_index = sort_map[index] + hypre_ParCompGridNumOwnedNodes(compGrid);
+            else sort_index = index + hypre_ParCompGridNumOwnedNodes(compGrid);
+         }
 
          // If we still need to visit this index (note that add_flag[index] = m means we have already added all distance m-1 neighbors of index)
          if (add_flag[sort_index] < m)
@@ -1696,18 +1741,31 @@ RecursivelyBuildPsiCompositeNew(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *
 
             if ( coarse_grid_index != -1 ) 
             {
-               // Again, need to set the add_flag to the appropriate value in order to recursively find neighbors on the next level
-               if (!owned) sort_index = coarse_grid_index;
-               else sort_index = sort_map_coarse[coarse_grid_index] + hypre_ParCompGridNumOwnedNodes(compGrid);
-               add_flag_coarse[ sort_index ] = padding+1;
-               *nodes_to_add = 1;
+               if (coarse_grid_index >= 0)
+               {
+                  // Again, need to set the add_flag to the appropriate value in order to recursively find neighbors on the next level
+                  if (!owned) sort_index = coarse_grid_index;
+                  else
+                  {
+                     if (use_sort) sort_index = sort_map_coarse[coarse_grid_index] + hypre_ParCompGridNumOwnedNodes(compGrids[level+1]);
+                     else sort_index = coarse_grid_index + hypre_ParCompGridNumOwnedNodes(compGrids[level+1]);
+                  }
+                  add_flag_coarse[ sort_index ] = padding+1;
+                  *nodes_to_add = 1;
+               }
+               else
+               {
+                  error_code = 1;
+                  hypre_printf("Rank %d: Error! Ran into a coarse index that was not set up when building Psi_c\n", myid);
+               }
             }
          }
       }
       else
       {
          error_code = 1; 
-         hypre_printf("Rank %d: Error! Ran into a -1 index in offd when building Psi_c\n", myid);
+         if (owned == 1) hypre_printf("Rank %d: Error! Negative col index encountered in owned matrix\n");
+         else hypre_printf("Rank %d: Error! Ran into a -1 index in nonowned_offd when building Psi_c\n", myid);
       }
    }
 
@@ -1720,7 +1778,11 @@ RecursivelyBuildPsiCompositeNew(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *
       {
          // Again, need to set the add_flag to the appropriate value in order to recursively find neighbors on the next level
          if (owned) sort_index = coarse_grid_index;
-         else sort_index = sort_map_coarse[coarse_grid_index] + hypre_ParCompGridNumOwnedNodes(compGrid);
+         else
+         {
+            if (use_sort) sort_index = sort_map_coarse[coarse_grid_index] + hypre_ParCompGridNumOwnedNodes(compGrids[level+1]);
+            else sort_index = coarse_grid_index + hypre_ParCompGridNumOwnedNodes(compGrids[level+1]);
+         }
          add_flag_coarse[ sort_index ] = padding+1;
          *nodes_to_add = 1;
       }
@@ -2402,7 +2464,7 @@ TestCompGrids1New(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int 
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
 
    // !!! Debug
-   printf("Rank %d in TestCompGrids1New\n", myid);
+   // printf("Rank %d in TestCompGrids1New\n", myid);
 
    // Allocate add_flag on each level and mark the owned dofs on the finest grid
    for (level = current_level; level < num_levels; level++) 
@@ -2452,7 +2514,8 @@ TestCompGrids1New(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int 
             if (add_flag[level][i] == num_ghost_layers + 1) error_code = RecursivelyBuildPsiCompositeNew(i, padding[level], compGrid, add_flag, 0, NULL, 0, level, 0);
             if (error_code)
             {
-               hypre_printf("Error: recursively add the region of ghost nodes\n");
+               // !!! Debug: commented out
+               // hypre_printf("Error: recursively add the region of ghost nodes\n");
                test_failed = 1;
             }
          }
@@ -2465,7 +2528,16 @@ TestCompGrids1New(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int 
          if (add_flag[level][i] == 0) 
          {
             test_failed = 1;
-            if (myid == 0) hypre_printf("Error: extra nodes present in comp grid, rank %d, level %d, i = %d, global index = %d\n", myid, level, i, hypre_ParCompGridGlobalIndices(compGrid[level])[i]);
+            // !!! Debug: restrict to rank 0
+            // if (myid == 0)
+            {
+               if (i < hypre_ParCompGridNumOwnedNodes(compGrid[level])) 
+                  hypre_printf("Error: extra OWNED (i.e. test is broken) nodes present in comp grid, rank %d, level %d, i = %d, global index = %d\n", 
+                     myid, level, i, i + hypre_ParCompGridFirstGlobalIndex(compGrid[level]));
+               else
+                  hypre_printf("Error: extra nonowned nodes present in comp grid, rank %d, level %d, i = %d, global index = %d\n", 
+                     myid, level, i, hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level])[i - hypre_ParCompGridNumOwnedNodes(compGrid[level])]);
+            }
          }
       }
 
@@ -2477,7 +2549,8 @@ TestCompGrids1New(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int 
             if (add_flag[level][i] < num_ghost_layers + 1 && hypre_ParCompGridNonOwnedRealMarker(compGrid[level])[i - hypre_ParCompGridNumOwnedNodes(compGrid[level])] != 0) 
             {
                test_failed = 1;
-               hypre_printf("Error: dof that should have been marked as ghost was marked as real, rank %d, level %d, GID %d\n", myid, level, hypre_ParCompGridGlobalIndices(compGrid[level])[i]);
+               hypre_printf("Error: dof that should have been marked as ghost was marked as real, rank %d, level %d, GID %d\n", 
+                  myid, level, hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level])[i - hypre_ParCompGridNumOwnedNodes(compGrid[level])]);
             }
             if (add_flag[level][i] > num_ghost_layers && hypre_ParCompGridNonOwnedRealMarker(compGrid[level])[i - hypre_ParCompGridNumOwnedNodes(compGrid[level])] == 0) 
             {

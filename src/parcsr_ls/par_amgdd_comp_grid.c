@@ -330,7 +330,7 @@ hypre_ParCompGridInitializeNew( hypre_ParAMGData *amg_data, HYPRE_Int padding, H
    hypre_ParCompGridNonOwnedSort(compGrid) = hypre_CTAlloc(HYPRE_Int, max_nonowned, HYPRE_MEMORY_HOST);
    hypre_ParCompGridNonOwnedInvSort(compGrid) = hypre_CTAlloc(HYPRE_Int, max_nonowned, HYPRE_MEMORY_HOST);
 
-   // Initialize nonowned global indices and the sort and invsort arrays
+   // Initialize nonowned global indices, real marker, and the sort and invsort arrays
    HYPRE_Int prev_gid = 0; // !!! Debug
    for (i = 0; i < hypre_CSRMatrixNumCols(A_offd_original); i++)
    {
@@ -343,6 +343,9 @@ hypre_ParCompGridInitializeNew( hypre_ParAMGData *amg_data, HYPRE_Int padding, H
       // !!! Question: necessary to initialize sort and invsort? With my current PackSendBufferNew, I need values here
       hypre_ParCompGridNonOwnedSort(compGrid)[i] = i;
       hypre_ParCompGridNonOwnedInvSort(compGrid)[i] = i;
+
+      // !!! Assume at least pad = 1 (i.e. the first layer of dofs are real)
+      hypre_ParCompGridNonOwnedRealMarker(compGrid)[i] = 1;
 
    }
 
@@ -1278,7 +1281,7 @@ hypre_ParCompGridSetupLocalIndicesNew( hypre_ParCompGrid **compGrid, HYPRE_Int *
    hypre_CSRMatrix *nonowned_offd = hypre_ParCompGridMatrixNonOwnedOffd(A);
 
    // On current_level, need to deal with A_tmp_info
-   HYPRE_Int row = hypre_CSRMatrixNumCols(owned_offd);
+   HYPRE_Int row = hypre_CSRMatrixNumCols(owned_offd)+1;
    HYPRE_Int diag_rowptr = hypre_CSRMatrixI(nonowned_diag)[ hypre_CSRMatrixNumCols(owned_offd) ];
    HYPRE_Int offd_rowptr = hypre_CSRMatrixI(nonowned_offd)[ hypre_CSRMatrixNumCols(owned_offd) ];
    for (proc = 0; proc < num_recv_procs; proc++)
@@ -1286,6 +1289,7 @@ hypre_ParCompGridSetupLocalIndicesNew( hypre_ParCompGrid **compGrid, HYPRE_Int *
       HYPRE_Int cnt = 0;
       HYPRE_Int num_original_recv_dofs = A_tmp_info[proc][cnt++];
       HYPRE_Int remaining_dofs = A_tmp_info[proc][cnt++];
+
       for (i = 0; i < remaining_dofs; i++)
       {
          HYPRE_Int row_size = A_tmp_info[proc][cnt++];
@@ -1333,8 +1337,9 @@ hypre_ParCompGridSetupLocalIndicesNew( hypre_ParCompGrid **compGrid, HYPRE_Int *
          }
 
          // Update row pointers 
-         hypre_CSRMatrixI(nonowned_offd)[ row++ ] = offd_rowptr;
-         hypre_CSRMatrixI(nonowned_diag)[ row++ ] = diag_rowptr;
+         hypre_CSRMatrixI(nonowned_offd)[ row ] = offd_rowptr;
+         hypre_CSRMatrixI(nonowned_diag)[ row ] = diag_rowptr;
+         row++;
       }
       hypre_TFree(A_tmp_info[proc], HYPRE_MEMORY_HOST);
    }
@@ -1392,7 +1397,7 @@ hypre_ParCompGridSetupLocalIndicesNew( hypre_ParCompGrid **compGrid, HYPRE_Int *
                bin_search_cnt++;
 
                // !!! Debug
-               if (local_index < 0) printf("Could not find coasre index... shouldn't happen???\n");
+               if (local_index < 0) printf("Rank %d: Error! Level %d: Could not find coasre index %d during setup local indices\n", myid, level, coarse_index);
 
                hypre_ParCompGridNonOwnedCoarseIndices(compGrid[level])[i] = local_index;
             }
@@ -1648,6 +1653,107 @@ HYPRE_Int hypre_ParCompGridLocalIndexBinarySearch( hypre_ParCompGrid *compGrid, 
    }
 
    return -1;
+}
+
+HYPRE_Int
+hypre_ParCompGridDebugPrintNew ( hypre_ParCompGrid *compGrid, const char* filename )
+{
+   HYPRE_Int      myid;
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+
+   HYPRE_Int         i;
+
+   // Print info to given filename   
+   FILE             *file;
+   file = fopen(filename,"w");
+   hypre_fprintf(file, "Num owned nodes: %d [%d - %d]\nNum nonowned nodes: %d\n", 
+      hypre_ParCompGridNumOwnedNodes(compGrid), hypre_ParCompGridFirstGlobalIndex(compGrid),
+      hypre_ParCompGridLastGlobalIndex(compGrid), hypre_ParCompGridNumNonOwnedNodes(compGrid));
+
+   if (hypre_ParCompGridNonOwnedGlobalIndices(compGrid))
+   {
+      hypre_fprintf(file, "\n");
+      hypre_fprintf(file, "hypre_ParCompGridNonOwnedGlobalIndices(compGrid):\n");
+      for (i = 0; i < hypre_ParCompGridNumNonOwnedNodes(compGrid); i++)
+      {
+         hypre_fprintf(file, "%d ", hypre_ParCompGridNonOwnedGlobalIndices(compGrid)[i]);
+      }
+      hypre_fprintf(file, "\n");
+   }
+
+   if (hypre_ParCompGridNonOwnedRealMarker(compGrid))
+   {
+      hypre_fprintf(file, "\n");
+      hypre_fprintf(file, "hypre_ParCompGridNonOwnedRealMarker(compGrid):\n");
+      for (i = 0; i < hypre_ParCompGridNumNonOwnedNodes(compGrid); i++)
+      {
+         hypre_fprintf(file, "%d ", hypre_ParCompGridNonOwnedRealMarker(compGrid)[i]);
+      }
+      hypre_fprintf(file, "\n");
+   }
+
+   if (hypre_ParCompGridNonOwnedSort(compGrid))
+   {
+      hypre_fprintf(file, "\n");
+      hypre_fprintf(file, "hypre_ParCompGridNonOwnedSort(compGrid):\n");
+      for (i = 0; i < hypre_ParCompGridNumNonOwnedNodes(compGrid); i++)
+      {
+         hypre_fprintf(file, "%d ", hypre_ParCompGridNonOwnedSort(compGrid)[i]);
+      }
+      hypre_fprintf(file, "\n");
+   }
+
+   if (hypre_ParCompGridNonOwnedInvSort(compGrid))
+   {
+      hypre_fprintf(file, "\n");
+      hypre_fprintf(file, "hypre_ParCompGridNonOwnedInvSort(compGrid):\n");
+      for (i = 0; i < hypre_ParCompGridNumNonOwnedNodes(compGrid); i++)
+      {
+         hypre_fprintf(file, "%d ", hypre_ParCompGridNonOwnedInvSort(compGrid)[i]);
+      }
+      hypre_fprintf(file, "\n");
+   }
+
+   if (hypre_ParCompGridOwnedCoarseIndices(compGrid))
+   {
+      hypre_fprintf(file, "\n");
+      hypre_fprintf(file, "hypre_ParCompGridOwnedCoarseIndices(compGrid):\n");
+      for (i = 0; i < hypre_ParCompGridNumOwnedNodes(compGrid); i++)
+      {
+         hypre_fprintf(file, "%d ", hypre_ParCompGridOwnedCoarseIndices(compGrid)[i]);
+      }
+      hypre_fprintf(file, "\n");
+   }
+
+   if (hypre_ParCompGridNonOwnedCoarseIndices(compGrid))
+   {
+      hypre_fprintf(file, "\n");
+      hypre_fprintf(file, "hypre_ParCompGridNonOwnedCoarseIndices(compGrid):\n");
+      for (i = 0; i < hypre_ParCompGridNumNonOwnedNodes(compGrid); i++)
+      {
+         hypre_fprintf(file, "%d ", hypre_ParCompGridNonOwnedCoarseIndices(compGrid)[i]);
+      }
+      hypre_fprintf(file, "\n");
+   }
+
+
+   fclose(file);
+
+   char matrix_filename[256];
+   sprintf(matrix_filename, "%s_owned_diag", filename);
+   hypre_CSRMatrixPrint(  hypre_ParCompGridMatrixOwnedDiag(hypre_ParCompGridANew(compGrid)), matrix_filename);
+
+   sprintf(matrix_filename, "%s_owned_offd", filename);
+   hypre_CSRMatrixPrint(  hypre_ParCompGridMatrixOwnedOffd(hypre_ParCompGridANew(compGrid)), matrix_filename);
+
+   sprintf(matrix_filename, "%s_nonowned_diag", filename);
+   hypre_CSRMatrixPrintCustom(  hypre_ParCompGridMatrixNonOwnedDiag(hypre_ParCompGridANew(compGrid)), matrix_filename, hypre_ParCompGridNumNonOwnedNodes(compGrid));
+
+   sprintf(matrix_filename, "%s_nonowned_offd", filename);
+   hypre_CSRMatrixPrintCustom(  hypre_ParCompGridMatrixNonOwnedOffd(hypre_ParCompGridANew(compGrid)), matrix_filename, hypre_ParCompGridNumNonOwnedNodes(compGrid));
+
+   return 0;
+
 }
 
 HYPRE_Int
