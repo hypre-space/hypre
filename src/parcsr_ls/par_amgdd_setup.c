@@ -17,7 +17,7 @@
 #include "par_amg.h"
 #include "par_csr_block_matrix.h"
 
-#define DEBUG_COMP_GRID 0 // if true, runs some tests, prints out what is stored in the comp grids for each processor to a file
+#define DEBUG_COMP_GRID 1 // if true, runs some tests, prints out what is stored in the comp grids for each processor to a file
 #define DEBUG_PROC_NEIGHBORS 0 // if true, dumps info on the add flag structures that determine nearest processor neighbors 
 #define DEBUGGING_MESSAGES 0 // if true, prints a bunch of messages to the screen to let you know where in the algorithm you are
 
@@ -33,7 +33,7 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
 
 HYPRE_Int
 RecursivelyBuildPsiCompositeNew(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid **compGrids, HYPRE_Int **add_flags,
-                           HYPRE_Int need_coarse_info, HYPRE_Int *nodes_to_add, HYPRE_Int padding, HYPRE_Int level);
+                           HYPRE_Int need_coarse_info, HYPRE_Int *nodes_to_add, HYPRE_Int padding, HYPRE_Int level, HYPRE_Int use_sort);
 
 HYPRE_Int
 RecursivelyBuildPsiComposite(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *compGrid, HYPRE_Int *add_flag, HYPRE_Int *add_flag_coarse, 
@@ -47,6 +47,9 @@ UnpackSendFlagBuffer(HYPRE_Int *send_flag_buffer, HYPRE_Int **send_flag, HYPRE_I
 
 HYPRE_Int
 CommunicateRemainingMatrixInfo(hypre_ParAMGData* amg_data, hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int *communication_cost, HYPRE_Int symmetric);
+
+HYPRE_Int
+TestCompGrids1New(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int *padding, HYPRE_Int num_ghost_layers, HYPRE_Int current_level, HYPRE_Int check_ghost_info);
 
 HYPRE_Int
 TestCompGrids1(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int *padding, HYPRE_Int num_ghost_layers, HYPRE_Int current_level, HYPRE_Int check_ghost_info);
@@ -645,6 +648,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
       CheckCompGridLocalIndices(amg_data);
       HYPRE_Int error_code;
       error_code = TestCompGrids1(compGrid, num_levels, padding, num_ghost_layers, level, 1);
+      error_code = TestCompGrids1New(compGrid, num_levels, padding, num_ghost_layers, level, 1);
       if (error_code)
       {
          hypre_printf("TestCompGrids1 failed! Rank %d, level %d\n", myid, level);
@@ -908,8 +912,8 @@ PackSendBufferNew( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compG
             if (add_flag[level][add_flag_index] == padding[level] + 1)
             {
                // Recursively add the region of padding (flagging coarse nodes on the next level if applicable)
-               if (level != num_levels-1) RecursivelyBuildPsiCompositeNew(i, padding[level], compGrid, add_flag, 1, &nodes_to_add, padding[level+1], level);
-               else RecursivelyBuildPsiCompositeNew(i, padding[level], compGrid, add_flag, 0, NULL, 0, level);
+               if (level != num_levels-1) RecursivelyBuildPsiCompositeNew(i, padding[level], compGrid, add_flag, 1, &nodes_to_add, padding[level+1], level, 1);
+               else RecursivelyBuildPsiCompositeNew(i, padding[level], compGrid, add_flag, 0, NULL, 0, level, 1);
             }
          }
 
@@ -928,7 +932,7 @@ PackSendBufferNew( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compG
             else add_flag_index = sort_map[i] + hypre_ParCompGridNumOwnedNodes(compGrid[level]);
 
             // Recursively add the region of ghost nodes (do not add any coarse nodes underneath)
-            if (add_flag[level][add_flag_index] == num_ghost_layers + 1) RecursivelyBuildPsiCompositeNew(i, padding[level], compGrid, add_flag, 0, NULL, 0, level);
+            if (add_flag[level][add_flag_index] == num_ghost_layers + 1) RecursivelyBuildPsiCompositeNew(i, padding[level], compGrid, add_flag, 0, NULL, 0, level, 1);
          }
 
          // Count up the total number of send nodes 
@@ -1589,7 +1593,7 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
 
 HYPRE_Int
 RecursivelyBuildPsiCompositeNew(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid **compGrids, HYPRE_Int **add_flags,
-                           HYPRE_Int need_coarse_info, HYPRE_Int *nodes_to_add, HYPRE_Int padding, HYPRE_Int level)
+                           HYPRE_Int need_coarse_info, HYPRE_Int *nodes_to_add, HYPRE_Int padding, HYPRE_Int level, HYPRE_Int use_sort)
 {
    HYPRE_Int myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
@@ -1633,7 +1637,7 @@ RecursivelyBuildPsiCompositeNew(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *
 
       if (index >= 0)
       {
-         if (owned) sort_index = index;
+         if (owned || !use_sort) sort_index = index;
          else sort_index = sort_map[index] + hypre_ParCompGridNumOwnedNodes(compGrid);
 
          // If we still need to visit this index (note that add_flag[index] = m means we have already added all distance m-1 neighbors of index)
@@ -1641,7 +1645,7 @@ RecursivelyBuildPsiCompositeNew(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *
          {
             add_flag[sort_index] = m;
             // Recursively call to find distance m-1 neighbors of index
-            if (m-1 > 0) error_code = RecursivelyBuildPsiComposite(index, m-1, compGrid, add_flag, add_flag_coarse, sort_map, sort_map_coarse, need_coarse_info, nodes_to_add, padding, level);
+            if (m-1 > 0) error_code = RecursivelyBuildPsiCompositeNew(index, m-1, compGrids, add_flags, need_coarse_info, nodes_to_add, padding, level, use_sort);
          }
          // If m = 1, we won't do another recursive call, so make sure to flag the coarse grid here if applicable
          if (need_coarse_info && m == 1)
@@ -1682,7 +1686,7 @@ RecursivelyBuildPsiCompositeNew(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *
          {
             add_flag[sort_index] = m;
             // Recursively call to find distance m-1 neighbors of index
-            if (m-1 > 0) error_code = RecursivelyBuildPsiComposite(index, m-1, compGrid, add_flag, add_flag_coarse, sort_map, sort_map_coarse, need_coarse_info, nodes_to_add, padding, level);
+            if (m-1 > 0) error_code = RecursivelyBuildPsiCompositeNew(index, m-1, compGrids, add_flags, need_coarse_info, nodes_to_add, padding, level, use_sort);
          }
          // If m = 1, we won't do another recursive call, so make sure to flag the coarse grid here if applicable
          if (need_coarse_info && m == 1)
@@ -2381,6 +2385,114 @@ CommunicateRemainingMatrixInfo(hypre_ParAMGData* amg_data, hypre_ParCompGrid **c
    }
 
    return 0;
+}
+
+HYPRE_Int
+TestCompGrids1New(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int *padding, HYPRE_Int num_ghost_layers, HYPRE_Int current_level, HYPRE_Int check_ghost_info)
+{
+   // TEST 1: See whether the parallel composite grid algorithm algorithm has constructed a composite grid with 
+   // the same shape (and ghost node info) as we expect from serial, top-down composite grid generation
+   HYPRE_Int            level,i;
+   HYPRE_Int            need_coarse_info, nodes_to_add = 1;
+   HYPRE_Int            **add_flag = hypre_CTAlloc( HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST );
+   HYPRE_Int            test_failed = 0;
+   HYPRE_Int            error_code = 0;
+
+   HYPRE_Int myid;
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+
+   // !!! Debug
+   printf("Rank %d in TestCompGrids1New\n", myid);
+
+   // Allocate add_flag on each level and mark the owned dofs on the finest grid
+   for (level = current_level; level < num_levels; level++) 
+      add_flag[level] = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumOwnedNodes(compGrid[level]) + hypre_ParCompGridNumNonOwnedNodes(compGrid[level]), HYPRE_MEMORY_HOST);
+   for (i = 0; i < hypre_ParCompGridNumOwnedNodes(compGrid[current_level]); i++) 
+      add_flag[current_level][i] = padding[current_level] + 1;
+
+   // Serially generate comp grid from top down
+   // Note that if nodes that should be present in the comp grid are not found, we will be alerted by the error message in RecursivelyBuildPsiComposite()
+   for (level = current_level; level < num_levels; level++)
+   {
+      HYPRE_Int total_num_nodes = hypre_ParCompGridNumOwnedNodes(compGrid[level]) + hypre_ParCompGridNumNonOwnedNodes(compGrid[level]);
+      
+      // if there are nodes to add on this grid
+      if (nodes_to_add)
+      {
+         nodes_to_add = 0;
+
+         // see whether we need coarse info on this level
+         if (level != num_levels-1) need_coarse_info = 1;
+         else need_coarse_info = 0;
+
+         // Expand by the padding on this level and add coarse grid counterparts if applicable
+         for (i = 0; i < total_num_nodes; i++)
+         {
+            if (add_flag[level][i] == padding[level] + 1)
+            {
+               if (level != num_levels-1) error_code = RecursivelyBuildPsiCompositeNew(i, padding[level], compGrid, add_flag, 1, &nodes_to_add, padding[level+1], level, 0);
+               else error_code = RecursivelyBuildPsiCompositeNew(i, padding[level], compGrid, add_flag, 0, NULL, 0, level, 0);
+               if (error_code)
+               {
+                  hypre_printf("Error: expand padding\n");
+                  test_failed = 1;
+               }
+            }
+         }
+
+         // Expand by the number of ghost layers 
+         for (i = 0; i < total_num_nodes; i++)
+         {
+            if (add_flag[level][i] > 1) add_flag[level][i] = num_ghost_layers + 2;
+            else if (add_flag[level][i] == 1) add_flag[level][i] = num_ghost_layers + 1;
+         }
+         for (i = 0; i < total_num_nodes; i++)
+         {
+            // Recursively add the region of ghost nodes (do not add any coarse nodes underneath)
+            if (add_flag[level][i] == num_ghost_layers + 1) error_code = RecursivelyBuildPsiCompositeNew(i, padding[level], compGrid, add_flag, 0, NULL, 0, level, 0);
+            if (error_code)
+            {
+               hypre_printf("Error: recursively add the region of ghost nodes\n");
+               test_failed = 1;
+            }
+         }
+      }
+      else break;
+
+      // Check whether add_flag has any zeros (zeros indicate that we have extra nodes in the comp grid that don't belong) 
+      for (i = 0; i < total_num_nodes; i++)
+      {
+         if (add_flag[level][i] == 0) 
+         {
+            test_failed = 1;
+            if (myid == 0) hypre_printf("Error: extra nodes present in comp grid, rank %d, level %d, i = %d, global index = %d\n", myid, level, i, hypre_ParCompGridGlobalIndices(compGrid[level])[i]);
+         }
+      }
+
+      // Check to make sure we have the correct identification of ghost nodes
+      if (level != num_levels-1 && check_ghost_info)
+      {
+         for (i = hypre_ParCompGridNumOwnedNodes(compGrid[level]); i < total_num_nodes; i++) 
+         {
+            if (add_flag[level][i] < num_ghost_layers + 1 && hypre_ParCompGridNonOwnedRealMarker(compGrid[level])[i - hypre_ParCompGridNumOwnedNodes(compGrid[level])] != 0) 
+            {
+               test_failed = 1;
+               hypre_printf("Error: dof that should have been marked as ghost was marked as real, rank %d, level %d, GID %d\n", myid, level, hypre_ParCompGridGlobalIndices(compGrid[level])[i]);
+            }
+            if (add_flag[level][i] > num_ghost_layers && hypre_ParCompGridNonOwnedRealMarker(compGrid[level])[i - hypre_ParCompGridNumOwnedNodes(compGrid[level])] == 0) 
+            {
+               test_failed = 1;
+               hypre_printf("Error: dof that should have been marked as real was marked as ghost, rank %d, level %d\n", myid, level);
+            }
+         }
+      }
+   }
+
+   // Clean up memory
+   for (level = 0; level < num_levels; level++) if (add_flag[level]) hypre_TFree(add_flag[level], HYPRE_MEMORY_HOST);
+   hypre_TFree(add_flag, HYPRE_MEMORY_HOST);
+
+   return test_failed;
 }
 
 HYPRE_Int
