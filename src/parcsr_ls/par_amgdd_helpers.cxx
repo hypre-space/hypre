@@ -725,6 +725,14 @@ UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
    HYPRE_Int myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
+   // !!! Debug
+   for (i = 0; i < hypre_ParCompGridNumNonOwnedNodes(compGrid[1]); i++)
+   {
+      if (hypre_ParCompGridNonOwnedCoarseIndices(compGrid[1])[i] >= hypre_ParCompGridNumNonOwnedNodes(compGrid[2]))
+         printf("Rank %d, level %d, end of setup local current level %d, nonowned coarse index out of bounds: i = %d, coarse index = %d\n",
+            myid, level, current_level, i, hypre_ParCompGridNonOwnedCoarseIndices(compGrid[1])[i]);
+   }
+
    // initialize the counter
    HYPRE_Int            cnt = 0;
 
@@ -779,7 +787,7 @@ UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
    }   
    for (i = num_original_recv_dofs; i < num_recv_nodes[current_level][buffer_number][current_level]; i++)
    {
-      recv_map[current_level][buffer_number][current_level][i] = i + start_extra_dofs;
+      recv_map[current_level][buffer_number][current_level][i] = i - num_original_recv_dofs + start_extra_dofs;
    }
 
    // Unpack global indices and setup sort and invsort
@@ -977,8 +985,6 @@ UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
       diag_rowptr = hypre_CSRMatrixI(nonowned_diag)[ num_nonowned ];
       offd_rowptr = hypre_CSRMatrixI(nonowned_offd)[ num_nonowned ];
 
-
-
       // Incoming nodes and existing (non-owned) nodes in the comp grid are both sorted by global index, so here we merge these lists together (getting rid of redundant nodes along the way)
       add_node_cnt = 0;
 
@@ -991,7 +997,7 @@ UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
          num_resizes[3*level]++;
          HYPRE_Int new_size = ceil(1.5*hypre_CSRMatrixNumRows(nonowned_diag));
          if (new_size < num_recv_nodes[current_level][buffer_number][level] + num_nonowned) new_size = num_recv_nodes[current_level][buffer_number][level] + num_nonowned;
-         hypre_ParCompGridResize(compGrid[level], new_size, level != num_levels-1, 0, symmetric); // !!! Is there a better way to manage memory? !!!
+         hypre_ParCompGridResizeNew(compGrid[level], new_size, level != num_levels-1); // !!! Is there a better way to manage memory? !!!
       }
 
       sort_map = hypre_ParCompGridNonOwnedSort(compGrid[level]);
@@ -1109,20 +1115,25 @@ UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
          {   
             if (incoming_dest[i] >= 0)
             {
-               hypre_ParCompGridNonOwnedCoarseIndices(compGrid[level])[ incoming_dest[i] ] = recv_buffer[cnt];
+               HYPRE_Int coarse_index = recv_buffer[cnt];
+               if (coarse_index != -1) coarse_index = -(coarse_index+2); // Marking coarse indices that need setup by negative mapping
+               hypre_ParCompGridNonOwnedCoarseIndices(compGrid[level])[ incoming_dest[i] ] = coarse_index;
             }
             cnt++;
          }
       }
 
-      // Setup col indices for original commPkg dofs
+      // Setup col indices 
       row_sizes_start = cnt;
       cnt += num_recv_nodes[current_level][buffer_number][level];
       for (i = 0; i < num_recv_nodes[current_level][buffer_number][level]; i++)
       {
          HYPRE_Int row_size = recv_buffer[ i + row_sizes_start ];
 
-         if (incoming_dest[i] >= 0)
+         // !!! Optimization: (probably small gain) right now, I disregard incoming info for real overwriting ghost (internal buf connectivity could be used to avoid a few binary searches later)
+         // !!! Symmetric: need to insert col indices for ghosts overwritten as real somehow
+         // if (incoming_dest[i] >= 0)
+         if (incoming_dest[i] >= num_nonowned)
          {
             for (j = 0; j < row_size; j++)
             {
@@ -1192,8 +1203,8 @@ UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
                   }
                }
                // Update row pointers 
-               hypre_CSRMatrixI(nonowned_offd)[ num_nonowned + i + 1 ] = offd_rowptr;
                hypre_CSRMatrixI(nonowned_diag)[ num_nonowned + i + 1 ] = diag_rowptr;
+               hypre_CSRMatrixI(nonowned_offd)[ num_nonowned + i + 1 ] = offd_rowptr;
             }
          }
          else
@@ -1202,8 +1213,17 @@ UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
          }
       }
 
-      hypre_ParCompGridNumNonOwnedNodes(compGrid[level]) = num_nonowned + add_node_cnt;
+      hypre_ParCompGridNumNonOwnedNodes(compGrid[level]) += add_node_cnt;
    }
+
+   // !!! Debug
+   // if (myid == 0 && current_level <= 1)
+   // {
+   //    printf("AFTER unpack, current_level %d, num missing = %d\n",current_level, hypre_ParCompGridNumMissingColIndices(compGrid[1]));
+   //    for (i = 0; i < hypre_ParCompGridNumMissingColIndices(compGrid[1]); i++)
+   //       printf("%d (%d) ",hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[1])[i],  hypre_CSRMatrixJ( hypre_ParCompGridMatrixNonOwnedDiag( hypre_ParCompGridANew(compGrid[1]) ) )[ hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[1])[i] ]);
+   //    printf("\n");
+   // }
 
    return 0;
 }

@@ -1191,22 +1191,22 @@ hypre_ParCompGridResizeNew ( hypre_ParCompGrid *compGrid, HYPRE_Int new_size, HY
    {
       hypre_ParCompGridNonOwnedCoarseIndices(compGrid) = hypre_TReAlloc(hypre_ParCompGridNonOwnedCoarseIndices(compGrid), HYPRE_Int, new_size, HYPRE_MEMORY_HOST);
 
-      // !!! Double check... HEY! Don't I need to reset num cols on adjacent level? Can probably just fix this at the end of setup... 
-      nonowned_diag = hypre_ParCompGridMatrixNonOwnedDiag(hypre_ParCompGridPNew(compGrid));
-      nonowned_offd = hypre_ParCompGridMatrixNonOwnedOffd(hypre_ParCompGridPNew(compGrid));
-      hypre_CSRMatrixResize(nonowned_diag, new_size, hypre_CSRMatrixNumCols(nonowned_diag), hypre_CSRMatrixNumNonzeros(nonowned_diag));
-      hypre_CSRMatrixResize(nonowned_offd, new_size, hypre_CSRMatrixNumCols(nonowned_offd), hypre_CSRMatrixNumNonzeros(nonowned_offd));
+      // !!! Double check... can just take care of this at the end, yeah?
+      // nonowned_diag = hypre_ParCompGridMatrixNonOwnedDiag(hypre_ParCompGridPNew(compGrid));
+      // nonowned_offd = hypre_ParCompGridMatrixNonOwnedOffd(hypre_ParCompGridPNew(compGrid));
+      // hypre_CSRMatrixResize(nonowned_diag, new_size, hypre_CSRMatrixNumCols(nonowned_diag), hypre_CSRMatrixNumNonzeros(nonowned_diag));
+      // hypre_CSRMatrixResize(nonowned_offd, new_size, hypre_CSRMatrixNumCols(nonowned_offd), hypre_CSRMatrixNumNonzeros(nonowned_offd));
 
    }
 
-   // !!! Double check... HEY! Don't I need to reset num cols on adjacent level? Can probably just fix this at the end of setup... 
-   if (hypre_ParCompGridRNew(compGrid))
-   {
-      nonowned_diag = hypre_ParCompGridMatrixNonOwnedDiag(hypre_ParCompGridRNew(compGrid));
-      nonowned_offd = hypre_ParCompGridMatrixNonOwnedOffd(hypre_ParCompGridRNew(compGrid));
-      hypre_CSRMatrixResize(nonowned_diag, new_size, hypre_CSRMatrixNumCols(nonowned_diag), hypre_CSRMatrixNumNonzeros(nonowned_diag));
-      hypre_CSRMatrixResize(nonowned_offd, new_size, hypre_CSRMatrixNumCols(nonowned_offd), hypre_CSRMatrixNumNonzeros(nonowned_offd));
-   }
+   // !!! Double check... can just take care of this at the end, yeah?
+   // if (hypre_ParCompGridRNew(compGrid))
+   // {
+   //    nonowned_diag = hypre_ParCompGridMatrixNonOwnedDiag(hypre_ParCompGridRNew(compGrid));
+   //    nonowned_offd = hypre_ParCompGridMatrixNonOwnedOffd(hypre_ParCompGridRNew(compGrid));
+   //    hypre_CSRMatrixResize(nonowned_diag, new_size, hypre_CSRMatrixNumCols(nonowned_diag), hypre_CSRMatrixNumNonzeros(nonowned_diag));
+   //    hypre_CSRMatrixResize(nonowned_offd, new_size, hypre_CSRMatrixNumCols(nonowned_offd), hypre_CSRMatrixNumNonzeros(nonowned_offd));
+   // }
 
    return 0;
 }
@@ -1275,6 +1275,14 @@ hypre_ParCompGridSetupLocalIndicesNew( hypre_ParCompGrid **compGrid, HYPRE_Int *
    HYPRE_Int myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
 
+   // !!! Debug
+   for (i = 0; i < hypre_ParCompGridNumNonOwnedNodes(compGrid[1]); i++)
+   {
+      if (hypre_ParCompGridNonOwnedCoarseIndices(compGrid[1])[i] >= hypre_ParCompGridNumNonOwnedNodes(compGrid[2]))
+         printf("Rank %d, level %d, start of setup local current level %d, nonowned coarse index out of bounds: i = %d, coarse index = %d\n",
+            myid, level, current_level, i, hypre_ParCompGridNonOwnedCoarseIndices(compGrid[1])[i]);
+   }
+
    hypre_ParCompGridMatrix *A = hypre_ParCompGridANew(compGrid[current_level]);
    hypre_CSRMatrix *owned_offd = hypre_ParCompGridMatrixOwnedOffd(A);
    hypre_CSRMatrix *nonowned_diag = hypre_ParCompGridMatrixNonOwnedDiag(A);
@@ -1332,7 +1340,6 @@ hypre_ParCompGridSetupLocalIndicesNew( hypre_ParCompGrid **compGrid, HYPRE_Int *
                   hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[current_level]) = hypre_TReAlloc(hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[current_level]), HYPRE_Int, ceil(1.5*hypre_CSRMatrixNumNonzeros(nonowned_diag)), HYPRE_MEMORY_HOST);
                }
                hypre_CSRMatrixJ(nonowned_diag)[diag_rowptr++] = recv_map[current_level][proc][current_level][ incoming_index ];
-
             }
          }
 
@@ -1345,10 +1352,12 @@ hypre_ParCompGridSetupLocalIndicesNew( hypre_ParCompGrid **compGrid, HYPRE_Int *
    }
    hypre_TFree(A_tmp_info, HYPRE_MEMORY_HOST);
 
-
    // Loop over levels from current to coarsest
    for (level = current_level; level < num_levels; level++)
    {
+      A = hypre_ParCompGridANew(compGrid[level]);
+      nonowned_diag = hypre_ParCompGridMatrixNonOwnedDiag(A);
+
       // If we have added nodes on this level
       if (nodes_added_on_level[level])
       {
@@ -1361,7 +1370,13 @@ hypre_ParCompGridSetupLocalIndicesNew( hypre_ParCompGrid **compGrid, HYPRE_Int *
             global_index = hypre_CSRMatrixJ(nonowned_diag)[ j ];
 
             // !!! Debug
-            if (global_index >= 0) printf("global_index >= 0 where I expected negative... should have been missing col ind\n");
+            if (global_index >= 0)
+            {
+               printf("global_index >= 0 where I expected negative... should have been missing col ind\n");
+               printf("Rank %d, level %d, global_index = %d, j = %d, num_missing_col_ind = %d\n", myid, level, global_index, j, num_missing_col_ind);
+            }
+
+
             global_index = -(global_index+1);
 
             local_index = LocalIndexBinarySearch(compGrid[level], global_index);
@@ -1400,9 +1415,20 @@ hypre_ParCompGridSetupLocalIndicesNew( hypre_ParCompGrid **compGrid, HYPRE_Int *
                if (local_index < 0) printf("Rank %d: Error! Level %d: Could not find coasre index %d during setup local indices\n", myid, level, coarse_index);
 
                hypre_ParCompGridNonOwnedCoarseIndices(compGrid[level])[i] = local_index;
+               // !!! Debug
+               if (local_index >= hypre_ParCompGridNumNonOwnedNodes(compGrid[level+1]))
+                  printf("Rank %d, level %d, current level %d, nonowned coarse index out of bounds: local_index = %d\n",myid, level, current_level, local_index);
             }
          }
       }
+   }
+
+   // !!! Debug
+   for (i = 0; i < hypre_ParCompGridNumNonOwnedNodes(compGrid[1]); i++)
+   {
+      if (hypre_ParCompGridNonOwnedCoarseIndices(compGrid[1])[i] >= hypre_ParCompGridNumNonOwnedNodes(compGrid[2]))
+         printf("Rank %d, level %d, end of setup local current level %d, nonowned coarse index out of bounds: i = %d, coarse index = %d\n",
+            myid, level, current_level, i, hypre_ParCompGridNonOwnedCoarseIndices(compGrid[1])[i]);
    }
 
    return bin_search_cnt;
