@@ -904,7 +904,7 @@ UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
             {
                // Add to offd
                if (offd_rowptr >= hypre_CSRMatrixNumNonzeros(nonowned_offd))
-                  hypre_CSRMatrixResize(nonowned_offd, hypre_CSRMatrixNumRows(nonowned_offd), hypre_CSRMatrixNumCols(nonowned_offd), ceil(1.5*hypre_CSRMatrixNumNonzeros(nonowned_offd)));
+                  hypre_CSRMatrixResize(nonowned_offd, hypre_CSRMatrixNumRows(nonowned_offd), hypre_CSRMatrixNumCols(nonowned_offd), ceil(1.5*hypre_CSRMatrixNumNonzeros(nonowned_offd) + 1));
                hypre_CSRMatrixJ(nonowned_offd)[offd_rowptr++] = incoming_index - hypre_ParCompGridFirstGlobalIndex(compGrid[current_level]);
             }
             else
@@ -912,8 +912,8 @@ UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
                // Add to diag (global index, not in buffer, so we store global index and get a local index during SetupLocalIndices)
                if (diag_rowptr >= hypre_CSRMatrixNumNonzeros(nonowned_diag))
                {
-                  hypre_CSRMatrixResize(nonowned_diag, hypre_CSRMatrixNumRows(nonowned_diag), hypre_CSRMatrixNumCols(nonowned_diag), ceil(1.5*hypre_CSRMatrixNumNonzeros(nonowned_diag)));
-                  hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[current_level]) = hypre_TReAlloc(hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[current_level]), HYPRE_Int, ceil(1.5*hypre_CSRMatrixNumNonzeros(nonowned_diag)), HYPRE_MEMORY_HOST);
+                  hypre_CSRMatrixResize(nonowned_diag, hypre_CSRMatrixNumRows(nonowned_diag), hypre_CSRMatrixNumCols(nonowned_diag), ceil(1.5*hypre_CSRMatrixNumNonzeros(nonowned_diag) + 1));
+                  hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[current_level]) = hypre_TReAlloc(hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[current_level]), HYPRE_Int, ceil(1.5*hypre_CSRMatrixNumNonzeros(nonowned_diag) + 1), HYPRE_MEMORY_HOST);
                }
                hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[current_level])[ hypre_ParCompGridNumMissingColIndices(compGrid[current_level])++ ] = diag_rowptr;
                hypre_CSRMatrixJ(nonowned_diag)[diag_rowptr++] = -(incoming_index+1);
@@ -925,8 +925,8 @@ UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
             // Add to diag (index is within buffer, so we can directly go to local index)
             if (diag_rowptr >= hypre_CSRMatrixNumNonzeros(nonowned_diag))
             {
-               hypre_CSRMatrixResize(nonowned_diag, hypre_CSRMatrixNumRows(nonowned_diag), hypre_CSRMatrixNumCols(nonowned_diag), ceil(1.5*hypre_CSRMatrixNumNonzeros(nonowned_diag)));
-               hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[current_level]) = hypre_TReAlloc(hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[current_level]), HYPRE_Int, ceil(1.5*hypre_CSRMatrixNumNonzeros(nonowned_diag)), HYPRE_MEMORY_HOST);
+               hypre_CSRMatrixResize(nonowned_diag, hypre_CSRMatrixNumRows(nonowned_diag), hypre_CSRMatrixNumCols(nonowned_diag), ceil(1.5*hypre_CSRMatrixNumNonzeros(nonowned_diag) + 1));
+               hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[current_level]) = hypre_TReAlloc(hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[current_level]), HYPRE_Int, ceil(1.5*hypre_CSRMatrixNumNonzeros(nonowned_diag) + 1), HYPRE_MEMORY_HOST);
             }
             if (incoming_index < num_original_recv_dofs)
                hypre_CSRMatrixJ(nonowned_diag)[diag_rowptr++] = incoming_index + hypre_ParCSRCommPkgRecvVecStart(commPkg, buffer_number);
@@ -1065,14 +1065,25 @@ UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
       }
       while (incoming_cnt < num_recv_nodes[current_level][buffer_number][level])
       {
-         sort_map[dest] = sort_cnt;
-         new_inv_sort_map[sort_cnt] = dest;
-         incoming_dest[incoming_cnt] = dest;
-         sort_cnt++;
-         incoming_cnt++;
-         dest++;
-         cnt++;
-         add_node_cnt++;
+         HYPRE_Int incoming_global_index = recv_buffer[cnt];
+
+         // If incoming is owned, go on to the next
+         if (incoming_global_index >= hypre_ParCompGridFirstGlobalIndex(compGrid[level]) && incoming_global_index <= hypre_ParCompGridLastGlobalIndex(compGrid[level]))
+         {
+            incoming_dest[incoming_cnt++] = -(incoming_global_index - hypre_ParCompGridFirstGlobalIndex(compGrid[level]) + 1); // Save location info for use below
+            cnt++;
+         }
+         else
+         {
+            sort_map[dest] = sort_cnt;
+            new_inv_sort_map[sort_cnt] = dest;
+            incoming_dest[incoming_cnt] = dest;
+            sort_cnt++;
+            incoming_cnt++;
+            dest++;
+            cnt++;
+            add_node_cnt++;
+         }
       }
       while (compGrid_cnt < num_nonowned)
       {
@@ -1130,6 +1141,11 @@ UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
       {
          HYPRE_Int row_size = recv_buffer[ i + row_sizes_start ];
 
+         // !!! Debug
+         // if (myid == 0 && current_level == 1 && level == 2)
+         //    printf("incoming_dest[i] = %d\n", incoming_dest[i]);
+
+
          // !!! Optimization: (probably small gain) right now, I disregard incoming info for real overwriting ghost (internal buf connectivity could be used to avoid a few binary searches later)
          // !!! Symmetric: need to insert col indices for ghosts overwritten as real somehow
          // if (incoming_dest[i] >= 0)
@@ -1148,7 +1164,7 @@ UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
                   {
                      // Add to offd
                      if (offd_rowptr >= hypre_CSRMatrixNumNonzeros(nonowned_offd))
-                        hypre_CSRMatrixResize(nonowned_offd, hypre_CSRMatrixNumRows(nonowned_offd), hypre_CSRMatrixNumCols(nonowned_offd), ceil(1.5*hypre_CSRMatrixNumNonzeros(nonowned_offd)));
+                        hypre_CSRMatrixResize(nonowned_offd, hypre_CSRMatrixNumRows(nonowned_offd), hypre_CSRMatrixNumCols(nonowned_offd), ceil(1.5*hypre_CSRMatrixNumNonzeros(nonowned_offd) + 1));
                      hypre_CSRMatrixJ(nonowned_offd)[offd_rowptr++] = incoming_index - hypre_ParCompGridFirstGlobalIndex(compGrid[level]);
                   }
                   else
@@ -1156,8 +1172,8 @@ UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
                      // Add to diag (global index, not in buffer, so we store global index and get a local index during SetupLocalIndices)
                      if (diag_rowptr >= hypre_CSRMatrixNumNonzeros(nonowned_diag))
                      {
-                        hypre_CSRMatrixResize(nonowned_diag, hypre_CSRMatrixNumRows(nonowned_diag), hypre_CSRMatrixNumCols(nonowned_diag), ceil(1.5*hypre_CSRMatrixNumNonzeros(nonowned_diag)));
-                        hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[level]) = hypre_TReAlloc(hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[level]), HYPRE_Int, ceil(1.5*hypre_CSRMatrixNumNonzeros(nonowned_diag)), HYPRE_MEMORY_HOST);
+                        hypre_CSRMatrixResize(nonowned_diag, hypre_CSRMatrixNumRows(nonowned_diag), hypre_CSRMatrixNumCols(nonowned_diag), ceil(1.5*hypre_CSRMatrixNumNonzeros(nonowned_diag) + 1));
+                        hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[level]) = hypre_TReAlloc(hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[level]), HYPRE_Int, ceil(1.5*hypre_CSRMatrixNumNonzeros(nonowned_diag) + 1), HYPRE_MEMORY_HOST);
                      }
                      hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[level])[ hypre_ParCompGridNumMissingColIndices(compGrid[level])++ ] = diag_rowptr;
                      hypre_CSRMatrixJ(nonowned_diag)[diag_rowptr++] = -(incoming_index+1);
@@ -1176,7 +1192,7 @@ UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
                      {
                         // Add to offd
                         if (offd_rowptr >= hypre_CSRMatrixNumNonzeros(nonowned_offd))
-                           hypre_CSRMatrixResize(nonowned_offd, hypre_CSRMatrixNumRows(nonowned_offd), hypre_CSRMatrixNumCols(nonowned_offd), ceil(1.5*hypre_CSRMatrixNumNonzeros(nonowned_offd)));
+                           hypre_CSRMatrixResize(nonowned_offd, hypre_CSRMatrixNumRows(nonowned_offd), hypre_CSRMatrixNumCols(nonowned_offd), ceil(1.5*hypre_CSRMatrixNumNonzeros(nonowned_offd) + 1));
                         hypre_CSRMatrixJ(nonowned_offd)[offd_rowptr++] = local_index;     
                      }
                      else
@@ -1184,8 +1200,8 @@ UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
                         // Add to diag (index is within buffer, so we can directly go to local index)
                         if (diag_rowptr >= hypre_CSRMatrixNumNonzeros(nonowned_diag))
                         {
-                           hypre_CSRMatrixResize(nonowned_diag, hypre_CSRMatrixNumRows(nonowned_diag), hypre_CSRMatrixNumCols(nonowned_diag), ceil(1.5*hypre_CSRMatrixNumNonzeros(nonowned_diag)));
-                           hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[level]) = hypre_TReAlloc(hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[level]), HYPRE_Int, ceil(1.5*hypre_CSRMatrixNumNonzeros(nonowned_diag)), HYPRE_MEMORY_HOST);
+                           hypre_CSRMatrixResize(nonowned_diag, hypre_CSRMatrixNumRows(nonowned_diag), hypre_CSRMatrixNumCols(nonowned_diag), ceil(1.5*hypre_CSRMatrixNumNonzeros(nonowned_diag) + 1));
+                           hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[level]) = hypre_TReAlloc(hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[level]), HYPRE_Int, ceil(1.5*hypre_CSRMatrixNumNonzeros(nonowned_diag) + 1), HYPRE_MEMORY_HOST);
                         }
                         hypre_CSRMatrixJ(nonowned_diag)[diag_rowptr++] = local_index - hypre_ParCompGridNumOwnedNodes(compGrid[level]);
                      }
@@ -1196,16 +1212,16 @@ UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
                      // Add to diag (index is within buffer, so we can directly go to local index)
                      if (diag_rowptr >= hypre_CSRMatrixNumNonzeros(nonowned_diag))
                      {
-                        hypre_CSRMatrixResize(nonowned_diag, hypre_CSRMatrixNumRows(nonowned_diag), hypre_CSRMatrixNumCols(nonowned_diag), ceil(1.5*hypre_CSRMatrixNumNonzeros(nonowned_diag)));
-                        hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[level]) = hypre_TReAlloc(hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[level]), HYPRE_Int, ceil(1.5*hypre_CSRMatrixNumNonzeros(nonowned_diag)), HYPRE_MEMORY_HOST);
+                        hypre_CSRMatrixResize(nonowned_diag, hypre_CSRMatrixNumRows(nonowned_diag), hypre_CSRMatrixNumCols(nonowned_diag), ceil(1.5*hypre_CSRMatrixNumNonzeros(nonowned_diag) + 1));
+                        hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[level]) = hypre_TReAlloc(hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[level]), HYPRE_Int, ceil(1.5*hypre_CSRMatrixNumNonzeros(nonowned_diag) + 1), HYPRE_MEMORY_HOST);
                      }
                      hypre_CSRMatrixJ(nonowned_diag)[diag_rowptr++] = local_index;
                   }
                }
-               // Update row pointers 
-               hypre_CSRMatrixI(nonowned_diag)[ num_nonowned + i + 1 ] = diag_rowptr;
-               hypre_CSRMatrixI(nonowned_offd)[ num_nonowned + i + 1 ] = offd_rowptr;
             }
+            // Update row pointers 
+            hypre_CSRMatrixI(nonowned_diag)[ incoming_dest[i] + 1 ] = diag_rowptr;
+            hypre_CSRMatrixI(nonowned_offd)[ incoming_dest[i] + 1 ] = offd_rowptr;
          }
          else
          {
