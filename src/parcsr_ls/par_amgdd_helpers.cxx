@@ -884,12 +884,12 @@ UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
    HYPRE_Int row_sizes_start = cnt;
    cnt += num_recv_nodes[current_level][buffer_number][current_level];
 
-   HYPRE_Int diag_rowptr = hypre_CSRMatrixI(nonowned_diag)[ hypre_ParCSRCommPkgRecvVecStart(commPkg, buffer_number) ];
-   HYPRE_Int offd_rowptr = hypre_CSRMatrixI(nonowned_offd)[ hypre_ParCSRCommPkgRecvVecStart(commPkg, buffer_number) ];
-
    // Setup col indices for original commPkg dofs
    for (i = 0; i < num_original_recv_dofs; i++)
    {
+      HYPRE_Int diag_rowptr = hypre_CSRMatrixI(nonowned_diag)[ hypre_ParCSRCommPkgRecvVecStart(commPkg, buffer_number) + i ];
+      HYPRE_Int offd_rowptr = hypre_CSRMatrixI(nonowned_offd)[ hypre_ParCSRCommPkgRecvVecStart(commPkg, buffer_number) + i ];
+
       HYPRE_Int row_size = recv_buffer[ i + row_sizes_start ];
       for (j = 0; j < row_size; j++)
       {
@@ -982,8 +982,8 @@ UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
       nonowned_offd = hypre_ParCompGridMatrixNonOwnedOffd(A);
 
       HYPRE_Int num_nonowned = hypre_ParCompGridNumNonOwnedNodes(compGrid[level]);
-      diag_rowptr = hypre_CSRMatrixI(nonowned_diag)[ num_nonowned ];
-      offd_rowptr = hypre_CSRMatrixI(nonowned_offd)[ num_nonowned ];
+      HYPRE_Int diag_rowptr = hypre_CSRMatrixI(nonowned_diag)[ num_nonowned ];
+      HYPRE_Int offd_rowptr = hypre_CSRMatrixI(nonowned_offd)[ num_nonowned ];
 
       // Incoming nodes and existing (non-owned) nodes in the comp grid are both sorted by global index, so here we merge these lists together (getting rid of redundant nodes along the way)
       add_node_cnt = 0;
