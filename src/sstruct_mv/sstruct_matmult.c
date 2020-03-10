@@ -70,8 +70,7 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
    hypre_ParCSRMatrix      *parcsr_sM;
    hypre_ParCSRMatrix      *parcsr_sMold;
    hypre_IJMatrix          *ijmatrix;
-   hypre_IJMatrix          *ij_sMold;
-   hypre_IJMatrix          *ij_sA;
+   hypre_IJMatrix         **ij_sA;
    hypre_IJMatrix          *ij_M;
    hypre_BoxArray          *boxes;
    hypre_Box               *box;
@@ -161,28 +160,36 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
    /*-------------------------------------------------------
     * Compute unstructured component
     *-------------------------------------------------------*/
-   // Set initial data
-   t = terms[nmatrices - 1];
-   ijmatrix = hypre_SStructMatrixIJMatrix(ssmatrices[t]);
-   HYPRE_IJMatrixGetObject(ijmatrix, (void **) &parcsr_uMold);
-   ij_sMold = hypre_SStructMatrixToUMatrix(ssmatrices[t]);
-   HYPRE_IJMatrixGetObject(ij_sMold, (void **) &parcsr_sMold);
 
    /* Temporary work matrices */
    parcsr = hypre_TAlloc(hypre_ParCSRMatrix *, 3);
+   ij_sA  = hypre_TAlloc(hypre_IJMatrix *, nmatrices);
+   for (m = 0; m < nmatrices; m++)
+   {
+      ij_sA[m] = NULL;
+   }
+
+   /* Set initial data */
+   t = terms[nmatrices - 1];
+   ijmatrix = hypre_SStructMatrixIJMatrix(ssmatrices[t]);
+   HYPRE_IJMatrixGetObject(ijmatrix, (void **) &parcsr_uMold);
+   ij_sA[t] = hypre_SStructMatrixToUMatrix(ssmatrices[t]);
+   HYPRE_IJMatrixGetObject(ij_sA[t], (void **) &parcsr_sMold);
 
    /* Compute M recursively */
-   for (m = 1; m < nmatrices; m++)
+   for (m = (nmatrices - 2); m >= 0; m--)
    {
-      t = terms[(nmatrices - 1) - m];
+      t = terms[m];
 
       // Convert sA_n to IJMatrix
-      // TODO: should not convert a matrix that was already converted in a previous step
-      ij_sA = hypre_SStructMatrixToUMatrix(ssmatrices[t]);
-      HYPRE_IJMatrixGetObject(ij_sA, (void **) &parcsr_sA);
+      if (ij_sA[t] == NULL)
+      {
+         ij_sA[t] = hypre_SStructMatrixToUMatrix(ssmatrices[t]);
+      }
+      HYPRE_IJMatrixGetObject(ij_sA[t], (void **) &parcsr_sA);
 
       // Compute sA_n*uMold
-      if (transposes[(nmatrices - 1) - m])
+      if (transposes[m])
       {
          parcsr[0] = hypre_ParTMatmul(parcsr_sA, parcsr_uMold);
       }
@@ -194,7 +201,7 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
       // Compute uA_n*uMold
       ijmatrix = hypre_SStructMatrixIJMatrix(ssmatrices[t]);
       HYPRE_IJMatrixGetObject(ijmatrix, (void **) &parcsr_uA);
-      if (transposes[(nmatrices - 1) - m])
+      if (transposes[m])
       {
          parcsr[1] = hypre_ParTMatmul(parcsr_uA, parcsr_uMold);
       }
@@ -218,7 +225,7 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
       hypre_ParCSRMatrixDestroy(parcsr[1]);
 
       // Compute uA_n*sMold
-      if (transposes[(nmatrices - 1) - m])
+      if (transposes[m])
       {
          parcsr[0] = hypre_ParTMatmul(parcsr_uA, parcsr_sMold);
       }
@@ -235,7 +242,7 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
       hypre_ParCSRMatrixDestroy(parcsr[2]);
 
       // Compute sA_n*sMold
-      if (transposes[(nmatrices - 1) - m])
+      if (transposes[m])
       {
          parcsr_sM = hypre_ParTMatmul(parcsr_sA, parcsr_sMold);
       }
@@ -244,13 +251,7 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
          parcsr_sM = hypre_ParMatmul(parcsr_sA, parcsr_sMold);
       }
 
-      // Free temporary work matrices
-      HYPRE_IJMatrixDestroy(ij_sA);
-      if (m == (nmatrices - 2))
-      {
-         HYPRE_IJMatrixDestroy(ij_sMold);
-      }
-      else
+      if (m < (nmatrices - 2))
       {
          hypre_ParCSRMatrixDestroy(parcsr_sMold);
       }
@@ -258,6 +259,16 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
       // Update pointers
       parcsr_sMold = parcsr_sM;
       parcsr_uMold = parcsr_uM;
+   }
+
+   // Free temporary work matrices
+   hypre_TFree(parcsr);
+   for (m = 0; m < nmatrices; m++)
+   {
+      if (ij_sA[m] != NULL)
+      {
+         HYPRE_IJMatrixDestroy(ij_sA[m]);
+      }
    }
 
    /*-------------------------------------------------------
@@ -318,7 +329,6 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
     * Free memory
     *-------------------------------------------------------*/
    hypre_TFree(nparts);
-   hypre_TFree(parcsr);
    hypre_TFree(smatrices);
 
    /* Set pointer to output matrix */
