@@ -854,7 +854,7 @@ UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
          recv_map[current_level][buffer_number][current_level][incoming_cnt + num_original_recv_dofs] = incoming_cnt + start_extra_dofs;
       else
          recv_map[current_level][buffer_number][current_level][incoming_cnt + num_original_recv_dofs] = -(incoming_cnt + start_extra_dofs + 1);
-         
+
       sort_map[ incoming_cnt + start_extra_dofs ] = sort_cnt;
       new_inv_sort_map[sort_cnt] = incoming_cnt + start_extra_dofs;
       sort_cnt++;
@@ -904,6 +904,10 @@ UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
       for (j = 0; j < row_size; j++)
       {
          HYPRE_Int incoming_index = recv_buffer[cnt++];
+
+         // !!! Debug
+         // if (myid == 1 && current_level == 2)
+         //    printf("Rank 1, current_level %d, proc %d, level %d, recv index %d\n", current_level, buffer_number, current_level, incoming_index);
 
          // Incoming is a global index (could be owned or nonowned)
          if (incoming_index < 0)
@@ -1165,6 +1169,10 @@ UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
             {
                HYPRE_Int incoming_index = recv_buffer[cnt++];
 
+               // !!! Debug
+               // if (myid == 1)
+               //    printf("Rank 1, current_level %d, proc %d, level %d, recv index %d\n", current_level, buffer_number, level, incoming_index);
+
                // Incoming is a global index (could be owned or nonowned)
                if (incoming_index < 0)
                {
@@ -1186,6 +1194,17 @@ UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
                         hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[level]) = hypre_TReAlloc(hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[level]), HYPRE_Int, ceil(1.5*hypre_CSRMatrixNumNonzeros(nonowned_diag) + 1), HYPRE_MEMORY_HOST);
                      }
                      hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[level])[ hypre_ParCompGridNumMissingColIndices(compGrid[level])++ ] = diag_rowptr;
+                     
+
+
+                     // !!! Debug
+                     // if (myid == 0 && buffer_number == 0 && hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level])[idx] == 23)
+                     //    // if (incoming_index != hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level])[ hypre_CSRMatrixJ(diag)[diag_rowptr] ])
+                     //       printf("Rank %d, outer_level %d, proc %d, level %d, row %d, recv index %d, diag expected gid = %d\n", 
+                     //          myid, outer_level, proc, level, hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level])[idx], incoming_index, hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level])[ hypre_CSRMatrixJ(diag)[diag_rowptr] ]);
+
+
+
                      hypre_CSRMatrixJ(nonowned_diag)[diag_rowptr++] = -(incoming_index+1);
                   }
                }

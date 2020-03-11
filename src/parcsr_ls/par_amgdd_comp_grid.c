@@ -315,13 +315,18 @@ hypre_ParCompGridInitializeNew( hypre_ParAMGData *amg_data, HYPRE_Int padding, H
    {
       hypre_ParCompGridMatrix *P = hypre_ParCompGridMatrixCreate();
       hypre_ParCompGridMatrixOwnedDiag(P) = hypre_ParCSRMatrixDiag( hypre_ParAMGDataPArray(amg_data)[level] );
-      // Use original rowptr and data from P, but need to use new col indices (setup later)
+      // Use original rowptr and data from P, but need to use new col indices (init to global index, then setup local indices later)
       hypre_CSRMatrix *P_offd_original = hypre_ParCSRMatrixOffd( hypre_ParAMGDataPArray(amg_data)[level] );
       hypre_ParCompGridMatrixOwnedOffd(P) = hypre_CSRMatrixCreate(hypre_CSRMatrixNumRows(P_offd_original), hypre_CSRMatrixNumCols(P_offd_original), hypre_CSRMatrixNumNonzeros(P_offd_original));
       hypre_CSRMatrixI(hypre_ParCompGridMatrixOwnedOffd(P)) = hypre_CSRMatrixI(P_offd_original);
       hypre_CSRMatrixData(hypre_ParCompGridMatrixOwnedOffd(P)) = hypre_CSRMatrixData(P_offd_original);
       hypre_CSRMatrixOwnsData(hypre_ParCompGridMatrixOwnedOffd(P)) = 0;
       hypre_CSRMatrixJ(hypre_ParCompGridMatrixOwnedOffd(P)) = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumNonzeros(P_offd_original), HYPRE_MEMORY_SHARED);
+      
+      // Initialize P owned offd col ind to their global indices
+      for (i = 0; i < hypre_CSRMatrixNumNonzeros(hypre_ParCompGridMatrixOwnedOffd(P)); i++)
+         hypre_CSRMatrixJ(hypre_ParCompGridMatrixOwnedOffd(P))[i] = hypre_ParCSRMatrixColMapOffd( hypre_ParAMGDataPArray(amg_data)[level] )[ hypre_CSRMatrixJ(P_offd_original)[i] ];
+
       hypre_ParCompGridMatrixOwnsOwnedMatrices(P) = 0;
       hypre_ParCompGridMatrixOwnsOffdColIndices(P) = 1;
       hypre_ParCompGridPNew(compGrid) = P;
@@ -1781,17 +1786,35 @@ hypre_ParCompGridDebugPrintNew ( hypre_ParCompGrid *compGrid, const char* filena
    fclose(file);
 
    char matrix_filename[256];
-   sprintf(matrix_filename, "%s_owned_diag", filename);
+   sprintf(matrix_filename, "%s_A_owned_diag", filename);
    hypre_CSRMatrixPrint(  hypre_ParCompGridMatrixOwnedDiag(hypre_ParCompGridANew(compGrid)), matrix_filename);
 
-   sprintf(matrix_filename, "%s_owned_offd", filename);
+   sprintf(matrix_filename, "%s_A_owned_offd", filename);
    hypre_CSRMatrixPrint(  hypre_ParCompGridMatrixOwnedOffd(hypre_ParCompGridANew(compGrid)), matrix_filename);
 
-   sprintf(matrix_filename, "%s_nonowned_diag", filename);
+   sprintf(matrix_filename, "%s_A_nonowned_diag", filename);
    hypre_CSRMatrixPrintCustom(  hypre_ParCompGridMatrixNonOwnedDiag(hypre_ParCompGridANew(compGrid)), matrix_filename, hypre_ParCompGridNumNonOwnedNodes(compGrid));
 
-   sprintf(matrix_filename, "%s_nonowned_offd", filename);
+   sprintf(matrix_filename, "%s_A_nonowned_offd", filename);
    hypre_CSRMatrixPrintCustom(  hypre_ParCompGridMatrixNonOwnedOffd(hypre_ParCompGridANew(compGrid)), matrix_filename, hypre_ParCompGridNumNonOwnedNodes(compGrid));
+
+   if (hypre_ParCompGridPNew(compGrid))
+   {
+      if (hypre_ParCompGridMatrixNonOwnedOffd(hypre_ParCompGridPNew(compGrid)))
+      {
+         sprintf(matrix_filename, "%s_P_owned_diag", filename);
+         hypre_CSRMatrixPrint(  hypre_ParCompGridMatrixOwnedDiag(hypre_ParCompGridPNew(compGrid)), matrix_filename);
+
+         sprintf(matrix_filename, "%s_P_owned_offd", filename);
+         hypre_CSRMatrixPrint(  hypre_ParCompGridMatrixOwnedOffd(hypre_ParCompGridPNew(compGrid)), matrix_filename);
+
+         sprintf(matrix_filename, "%s_P_nonowned_diag", filename);
+         hypre_CSRMatrixPrintCustom(  hypre_ParCompGridMatrixNonOwnedDiag(hypre_ParCompGridPNew(compGrid)), matrix_filename, hypre_ParCompGridNumNonOwnedNodes(compGrid));
+
+         sprintf(matrix_filename, "%s_P_nonowned_offd", filename);
+         hypre_CSRMatrixPrintCustom(  hypre_ParCompGridMatrixNonOwnedOffd(hypre_ParCompGridPNew(compGrid)), matrix_filename, hypre_ParCompGridNumNonOwnedNodes(compGrid));
+      }
+   }
 
    return 0;
 

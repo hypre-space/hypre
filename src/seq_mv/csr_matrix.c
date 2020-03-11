@@ -133,12 +133,12 @@ hypre_CSRMatrixResize( hypre_CSRMatrix *matrix, HYPRE_Int new_num_rows, HYPRE_In
       hypre_printf("Error: called hypre_CSRMatrixResize on a matrix that doesn't owne the data\n");
       return 1;
    }
-   hypre_CSRMatrixNumRows(matrix) = new_num_rows;
    hypre_CSRMatrixNumCols(matrix) = new_num_cols;
-   hypre_CSRMatrixNumNonzeros(matrix) = new_num_nonzeros;
 
-   if (new_num_nonzeros)
+   if (new_num_nonzeros != hypre_CSRMatrixNumNonzeros(matrix))
    {
+      hypre_CSRMatrixNumNonzeros(matrix) = new_num_nonzeros;
+      
       if (!hypre_CSRMatrixData(matrix))
          hypre_CSRMatrixData(matrix) = hypre_CTAlloc(HYPRE_Complex, new_num_nonzeros, HYPRE_MEMORY_SHARED);
       else
@@ -150,8 +150,10 @@ hypre_CSRMatrixResize( hypre_CSRMatrix *matrix, HYPRE_Int new_num_rows, HYPRE_In
          hypre_CSRMatrixJ(matrix) = hypre_TReAlloc(hypre_CSRMatrixJ(matrix), HYPRE_Int, new_num_nonzeros, HYPRE_MEMORY_SHARED);
    }
 
-   if (new_num_rows)
+   if (new_num_rows != hypre_CSRMatrixNumRows(matrix))
    {
+      hypre_CSRMatrixNumRows(matrix) = new_num_rows;
+      
       if (!hypre_CSRMatrixI(matrix))
          hypre_CSRMatrixI(matrix) = hypre_CTAlloc(HYPRE_Int, new_num_rows + 1, HYPRE_MEMORY_SHARED);
       else
