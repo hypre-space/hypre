@@ -784,11 +784,11 @@ UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
    for (i = 0; i < num_original_recv_dofs; i++)
    {
       recv_map[current_level][buffer_number][current_level][i] = i + hypre_ParCSRCommPkgRecvVecStart(commPkg, buffer_number);
-   }   
-   for (i = num_original_recv_dofs; i < num_recv_nodes[current_level][buffer_number][current_level]; i++)
-   {
-      recv_map[current_level][buffer_number][current_level][i] = i - num_original_recv_dofs + start_extra_dofs;
    }
+   // for (i = num_original_recv_dofs; i < num_recv_nodes[current_level][buffer_number][current_level]; i++)
+   // {
+   //    recv_map[current_level][buffer_number][current_level][i] = i - num_original_recv_dofs + start_extra_dofs;
+   // }
 
    // Unpack global indices and setup sort and invsort
    hypre_ParCompGridNumNonOwnedNodes(compGrid[current_level]) += remaining_dofs;
@@ -816,6 +816,11 @@ UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
          // Set global index and real marker for incoming extra dof
          hypre_ParCompGridNonOwnedGlobalIndices(compGrid[current_level])[ incoming_cnt + start_extra_dofs ] = incoming_global_index;
          hypre_ParCompGridNonOwnedRealMarker(compGrid[current_level])[ incoming_cnt + start_extra_dofs ] = incoming_is_real;
+
+         if (incoming_is_real)
+            recv_map[current_level][buffer_number][current_level][incoming_cnt + num_original_recv_dofs] = incoming_cnt + start_extra_dofs;
+         else
+            recv_map[current_level][buffer_number][current_level][incoming_cnt + num_original_recv_dofs] = -(incoming_cnt + start_extra_dofs + 1);
 
          sort_map[ incoming_cnt + start_extra_dofs ] = sort_cnt;
          new_inv_sort_map[sort_cnt] = incoming_cnt + start_extra_dofs;
@@ -845,6 +850,11 @@ UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
       hypre_ParCompGridNonOwnedGlobalIndices(compGrid[current_level])[ incoming_cnt + start_extra_dofs ] = incoming_global_index;
       hypre_ParCompGridNonOwnedRealMarker(compGrid[current_level])[ incoming_cnt + start_extra_dofs ] = incoming_is_real;
 
+      if (incoming_is_real)
+         recv_map[current_level][buffer_number][current_level][incoming_cnt + num_original_recv_dofs] = incoming_cnt + start_extra_dofs;
+      else
+         recv_map[current_level][buffer_number][current_level][incoming_cnt + num_original_recv_dofs] = -(incoming_cnt + start_extra_dofs + 1);
+         
       sort_map[ incoming_cnt + start_extra_dofs ] = sort_cnt;
       new_inv_sort_map[sort_cnt] = incoming_cnt + start_extra_dofs;
       sort_cnt++;

@@ -34,6 +34,7 @@ hypre_ParCompGridMatrix* hypre_ParCompGridMatrixCreate()
    hypre_ParCompGridMatrixNonOwnedOffd(matrix) = NULL;
 
    hypre_ParCompGridMatrixOwnsOwnedMatrices(matrix) = 0;
+   hypre_ParCompGridMatrixOwnsOffdColIndices(matrix) = 0;
 
    return matrix;
 }
@@ -44,6 +45,10 @@ HYPRE_Int hypre_ParCompGridMatrixDestroy(hypre_ParCompGridMatrix *matrix)
    {
       if (hypre_ParCompGridMatrixOwnedDiag(matrix)) hypre_CSRMatrixDestroy(hypre_ParCompGridMatrixOwnedDiag(matrix));
       if (hypre_ParCompGridMatrixOwnedOffd(matrix)) hypre_CSRMatrixDestroy(hypre_ParCompGridMatrixOwnedOffd(matrix));
+   }
+   else if (hypre_ParCompGridMatrixOwnsOffdColIndices(matrix))
+   {
+      if (hypre_CSRMatrixJ(hypre_ParCompGridMatrixOwnedOffd(matrix))) hypre_TFree(hypre_CSRMatrixJ(hypre_ParCompGridMatrixOwnedOffd(matrix)), HYPRE_MEMORY_SHARED);
    }
    if (hypre_ParCompGridMatrixNonOwnedDiag(matrix)) hypre_CSRMatrixDestroy(hypre_ParCompGridMatrixNonOwnedDiag(matrix));
    if (hypre_ParCompGridMatrixNonOwnedOffd(matrix)) hypre_CSRMatrixDestroy(hypre_ParCompGridMatrixNonOwnedOffd(matrix));
@@ -310,12 +315,20 @@ hypre_ParCompGridInitializeNew( hypre_ParAMGData *amg_data, HYPRE_Int padding, H
    {
       hypre_ParCompGridMatrix *P = hypre_ParCompGridMatrixCreate();
       hypre_ParCompGridMatrixOwnedDiag(P) = hypre_ParCSRMatrixDiag( hypre_ParAMGDataPArray(amg_data)[level] );
-      hypre_ParCompGridMatrixOwnedOffd(P) = hypre_ParCSRMatrixOffd( hypre_ParAMGDataPArray(amg_data)[level] );
+      // Use original rowptr and data from P, but need to use new col indices (setup later)
+      hypre_CSRMatrix *P_offd_original = hypre_ParCSRMatrixOffd( hypre_ParAMGDataPArray(amg_data)[level] );
+      hypre_ParCompGridMatrixOwnedOffd(P) = hypre_CSRMatrixCreate(hypre_CSRMatrixNumRows(P_offd_original), hypre_CSRMatrixNumCols(P_offd_original), hypre_CSRMatrixNumNonzeros(P_offd_original));
+      hypre_CSRMatrixI(hypre_ParCompGridMatrixOwnedOffd(P)) = hypre_CSRMatrixI(P_offd_original);
+      hypre_CSRMatrixData(hypre_ParCompGridMatrixOwnedOffd(P)) = hypre_CSRMatrixData(P_offd_original);
+      hypre_CSRMatrixOwnsData(hypre_ParCompGridMatrixOwnedOffd(P)) = 0;
+      hypre_CSRMatrixJ(hypre_ParCompGridMatrixOwnedOffd(P)) = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumNonzeros(P_offd_original), HYPRE_MEMORY_SHARED);
       hypre_ParCompGridMatrixOwnsOwnedMatrices(P) = 0;
+      hypre_ParCompGridMatrixOwnsOffdColIndices(P) = 1;
       hypre_ParCompGridPNew(compGrid) = P;
    }
    if (hypre_ParAMGDataRestriction(amg_data) && level != 0)
    {
+      // !!! TODO
       // NOTE: want to associate rows of R with comp grid points, so need to take R from one level finer
       hypre_ParCompGridMatrix *R = hypre_ParCompGridMatrixCreate();
       hypre_ParCompGridMatrixOwnedDiag(R) = hypre_ParCSRMatrixDiag( hypre_ParAMGDataRArray(amg_data)[level-1] );
@@ -1339,7 +1352,9 @@ hypre_ParCompGridSetupLocalIndicesNew( hypre_ParCompGrid **compGrid, HYPRE_Int *
                   hypre_CSRMatrixResize(nonowned_diag, hypre_CSRMatrixNumRows(nonowned_diag), hypre_CSRMatrixNumCols(nonowned_diag), ceil(1.5*hypre_CSRMatrixNumNonzeros(nonowned_diag)));
                   hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[current_level]) = hypre_TReAlloc(hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[current_level]), HYPRE_Int, ceil(1.5*hypre_CSRMatrixNumNonzeros(nonowned_diag)), HYPRE_MEMORY_HOST);
                }
-               hypre_CSRMatrixJ(nonowned_diag)[diag_rowptr++] = recv_map[current_level][proc][current_level][ incoming_index ];
+               local_index = recv_map[current_level][proc][current_level][ incoming_index ];
+               if (local_index < 0) local_index = -(local_index + 1);
+               hypre_CSRMatrixJ(nonowned_diag)[diag_rowptr++] = local_index;
             }
          }
 
