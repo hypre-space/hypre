@@ -2612,8 +2612,8 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix       *matrix,
                     HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
 
 #if defined(HYPRE_USING_CUDA)
-      hypre_IJMatrixSetAddValuesParCSRDevice0(matrix, off_proc_nelm_recv_cur, off_proc_i_recv_d, off_proc_j_recv_d,
-                                              off_proc_data_recv_d, "add");
+      hypre_IJMatrixSetAddValuesParCSRDevice(matrix, off_proc_nelm_recv_cur, NULL, off_proc_i_recv_d, NULL, off_proc_j_recv_d,
+                                             off_proc_data_recv_d, "add");
 #endif
    }
 
