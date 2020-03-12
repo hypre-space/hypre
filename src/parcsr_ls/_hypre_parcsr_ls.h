@@ -2216,6 +2216,7 @@ HYPRE_Int hypre_ParCompGridResizeNew( hypre_ParCompGrid *compGrid, HYPRE_Int new
 HYPRE_Int hypre_ParCompGridResize( hypre_ParCompGrid *compGrid, HYPRE_Int new_size, HYPRE_Int need_coarse_info, HYPRE_Int type, HYPRE_Int symmetric );
 HYPRE_Int hypre_ParCompGridSetupLocalIndicesNew( hypre_ParCompGrid **compGrid, HYPRE_Int *num_added_nodes, HYPRE_Int ****recv_map, HYPRE_Int num_recv_procs, HYPRE_Int **A_tmp_info, HYPRE_Int start_level, HYPRE_Int num_levels, HYPRE_Int symmetric );
 HYPRE_Int hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *num_added_nodes, HYPRE_Int start_level, HYPRE_Int num_levels, HYPRE_Int symmetric );
+HYPRE_Int hypre_ParCompGridSetupLocalIndicesPNew( hypre_ParCompGrid **compGrid, HYPRE_Int start_level, HYPRE_Int num_levels );
 HYPRE_Int hypre_ParCompGridSetupLocalIndicesP( hypre_ParCompGrid **compGrid, HYPRE_Int start_level, HYPRE_Int num_levels );
 HYPRE_Int hypre_ParCompGridLocalIndexBinarySearch( hypre_ParCompGrid *compGrid, HYPRE_Int global_index, HYPRE_Int start, HYPRE_Int end, HYPRE_Int *inv_map );
 HYPRE_Int hypre_ParCompGridDebugPrintNew( hypre_ParCompGrid *compGrid, const char* filename );

@@ -1599,6 +1599,41 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *nod
    return bin_search_cnt;
 }
 
+HYPRE_Int hypre_ParCompGridSetupLocalIndicesPNew( hypre_ParCompGrid **compGrid, HYPRE_Int start_level, HYPRE_Int num_levels )
+{
+   HYPRE_Int                  i,level;
+
+   for (level = start_level; level < num_levels-1; level++)
+   {
+      // Setup owned offd col indices
+      hypre_CSRMatrix *owned_offd = hypre_ParCompGridMatrixOwnedOffd(hypre_ParCompGridPNew(compGrid[level]));
+
+      for (i = 0; i < hypre_CSRMatrixI(owned_offd)[hypre_ParCompGridNumOwnedNodes(compGrid[level])]; i++)
+      {
+         HYPRE_Int local_index = LocalIndexBinarySearch(compGrid[level+1], hypre_CSRMatrixJ(owned_offd)[i]);
+         if (local_index == -1) hypre_CSRMatrixJ(owned_offd)[i] = -(hypre_CSRMatrixJ(owned_offd)[i] + 1);
+         else hypre_CSRMatrixJ(owned_offd)[i] = local_index;
+      }
+
+      // Setup nonowned diag col indices
+      hypre_CSRMatrix *nonowned_diag = hypre_ParCompGridMatrixNonOwnedDiag(hypre_ParCompGridPNew(compGrid[level]));
+
+      for (i = 0; i < hypre_CSRMatrixI(nonowned_diag)[hypre_ParCompGridNumNonOwnedNodes(compGrid[level])]; i++)
+      {
+         HYPRE_Int local_index = LocalIndexBinarySearch(compGrid[level+1], hypre_CSRMatrixJ(nonowned_diag)[i]);
+         if (local_index == -1) hypre_CSRMatrixJ(nonowned_diag)[i] = -(hypre_CSRMatrixJ(nonowned_diag)[i] + 1);
+         else hypre_CSRMatrixJ(nonowned_diag)[i] = local_index;
+      }
+   }
+
+   // !!! TODO R
+   // if ()
+   // {
+   // }
+
+   return 0;
+}
+
 HYPRE_Int hypre_ParCompGridSetupLocalIndicesP( hypre_ParCompGrid **compGrid, HYPRE_Int start_level, HYPRE_Int num_levels )
 {
    HYPRE_Int                  i,j,level,global_index;
