@@ -20,9 +20,6 @@
 HYPRE_Int
 AddSolution( void *amg_vdata );
 
-// HYPRE_Real
-// GetCompositeResidual(hypre_ParCompGrid *compGrid);
-
 HYPRE_Int
 ZeroInitialGuess( void *amg_vdata );
 
@@ -61,7 +58,16 @@ hypre_BoomerAMGDDSolve( void *amg_vdata,
    HYPRE_Int max_iter = hypre_ParAMGDataMaxIter(amg_data);
    HYPRE_Int converge_type = hypre_ParAMGDataConvergeType(amg_data);
    HYPRE_Int amgdd_start_level = hypre_ParAMGDataAMGDDStartLevel(amg_data);
-
+   
+   // Setup extra temporary variable to hold the solution if necessary
+   if (!hypre_ParAMGDataZtemp(amg_data))
+   {
+      hypre_ParAMGDataZtemp(amg_data) = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(hypre_ParAMGDataAArray(amg_data)[amgdd_start_level]),
+                                    hypre_ParCSRMatrixGlobalNumRows(hypre_ParAMGDataAArray(amg_data)[amgdd_start_level]),
+                                    hypre_ParCSRMatrixRowStarts(hypre_ParAMGDataAArray(amg_data)[amgdd_start_level]));
+      hypre_ParVectorInitialize(hypre_ParAMGDataZtemp(amg_data));
+      hypre_ParVectorSetPartitioningOwner(hypre_ParAMGDataZtemp(amg_data),0);
+   }
 
    // !!! New: trying a solve around just the processor boundary. This is temporary implementation (something much more efficient could be done). Just looking at convergence.
    HYPRE_Int *boundary_marker;
@@ -117,7 +123,7 @@ hypre_BoomerAMGDDSolve( void *amg_vdata,
          hypre_BoomerAMGPartialCycle(amg_vdata, hypre_ParAMGDataFArray(amg_data), hypre_ParAMGDataUArray(amg_data), amgdd_start_level-1, 0);
 
       // Do the AMGDD cycle
-      if (hypre_ParAMGDataAMGDDUseRD(amg_data) > 1) // Do a DD cycles followed by an RD cycles
+      if (hypre_ParAMGDataAMGDDUseRD(amg_data) > 1) // Do DD cycles followed by RD cycles
       {
          hypre_ParVectorCopy(hypre_ParAMGDataFArray(amg_data)[amgdd_start_level], hypre_ParAMGDataVtemp(amg_data));
          if (amgdd_start_level == 0) hypre_ParCSRMatrixMatvec(-1.0, hypre_ParAMGDataAArray(amg_data)[amgdd_start_level], hypre_ParAMGDataUArray(amg_data)[amgdd_start_level], 1.0, hypre_ParAMGDataFArray(amg_data)[amgdd_start_level]);
@@ -278,7 +284,6 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata )
 
    // Setup convergence tolerance info
    HYPRE_Real resid_nrm = 1.;
-   // if (fac_tol != 0.) resid_nrm = GetCompositeResidual(hypre_ParAMGDataCompGrid(amg_data)[amgdd_start_level]);
    HYPRE_Real resid_nrm_init = resid_nrm;
    HYPRE_Real relative_resid = 1.;
    HYPRE_Real conv_fact = 0;
@@ -291,8 +296,8 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata )
 
    for (level = amgdd_start_level; level < num_levels; level++)
    {
-      hypre_SeqVectorSetConstantValues( hypre_ParCompGridT( hypre_ParAMGDataCompGrid(amg_data)[level] ), 0.0 );
-      hypre_SeqVectorSetConstantValues( hypre_ParCompGridS( hypre_ParAMGDataCompGrid(amg_data)[level] ), 0.0 );
+      hypre_ParCompGridVectorSetConstantValues( hypre_ParCompGridTNew( hypre_ParAMGDataCompGrid(amg_data)[level] ), 0.0 );
+      hypre_ParCompGridVectorSetConstantValues( hypre_ParCompGridSNew( hypre_ParAMGDataCompGrid(amg_data)[level] ), 0.0 );
    }
 
 	// Do the cycles
@@ -313,38 +318,11 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata )
    {
       // !!! To do:
       if (myid == 0) printf("fac_tol != 0 not yet implemented\n");
-    //   while ( (relative_resid >= fac_tol || cycle_count < min_fac_iter) && cycle_count < max_fac_iter )
-    //   {
-    //      // Do FAC cycle
-   	// 	hypre_BoomerAMGDD_FAC_Cycle( amg_vdata, first_iteration );
-    //      first_iteration = 0;
-
-    //      // Check convergence and up the cycle count
-    //      resid_nrm = GetCompositeResidual(hypre_ParAMGDataCompGrid(amg_data)[amgdd_start_level]);
-    //      relative_resid = resid_nrm / resid_nrm_init;
-
-    //      ++cycle_count;
-    //      hypre_ParAMGDataNumFACIterations(amg_data) = cycle_count;
-   	// }
    }
    else if (fac_tol < 0)
    {
       // !!! To do:
       if (myid == 0) printf("fac_tol != 0 not yet implemented\n");
-      // fac_tol = -fac_tol;
-      // while ( (conv_fact <= fac_tol || conv_fact >= 1.0 || cycle_count < min_fac_iter) && cycle_count < max_fac_iter )
-      // {
-      //    // Do FAC cycle
-      //    hypre_BoomerAMGDD_FAC_Cycle( amg_vdata, first_iteration );
-      //    first_iteration = 0;
-
-      //    // Check convergence and up the cycle count
-      //    resid_nrm = GetCompositeResidual(hypre_ParAMGDataCompGrid(amg_data)[amgdd_start_level]);
-      //    conv_fact = resid_nrm / resid_nrm_init;
-      //    resid_nrm_init = resid_nrm;
-      //    ++cycle_count;
-      //    hypre_ParAMGDataNumFACIterations(amg_data) = cycle_count;
-      // }
    }
    
 
@@ -375,47 +353,28 @@ AddSolution( void *amg_vdata )
 {
 	hypre_ParAMGData	*amg_data = (hypre_ParAMGData*) amg_vdata;
    HYPRE_Int amgdd_start_level = hypre_ParAMGDataAMGDDStartLevel(amg_data);
-	hypre_ParCompGrid 	**compGrid = hypre_ParAMGDataCompGrid(amg_data);
 
-   hypre_VectorSize(hypre_ParCompGridU(compGrid[amgdd_start_level])) = hypre_VectorSize( hypre_ParVectorLocalVector( hypre_ParAMGDataUArray(amg_data)[amgdd_start_level] ) );
-   hypre_SeqVectorAxpy( 1.0, hypre_ParCompGridU(compGrid[amgdd_start_level]), hypre_ParVectorLocalVector( hypre_ParAMGDataUArray(amg_data)[amgdd_start_level] ) );
-   hypre_VectorSize(hypre_ParCompGridU(compGrid[amgdd_start_level])) = hypre_ParCompGridNumNodes(compGrid[amgdd_start_level]);
-
+   // Original solution was stored in Z temp, so just add this back in
+   hypre_ParVectorAxpy( 1.0, hypre_ParAMGDataZtemp(amg_data), hypre_ParAMGDataUArray(amg_data)[amgdd_start_level]);
+   
 	return 0;
 }
-
-// HYPRE_Real
-// GetCompositeResidual(hypre_ParCompGrid *compGrid)
-// {
-//    HYPRE_Int i,j;
-//    HYPRE_Real res_norm = 0.0;
-//    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
-//    {
-//       if (hypre_ParCompGridARowPtr(compGrid)[i+1] - hypre_ParCompGridARowPtr(compGrid)[i] > 0)
-//       {
-//          HYPRE_Real res = hypre_ParCompGridF(compGrid)[i];
-//          for (j = hypre_ParCompGridARowPtr(compGrid)[i]; j < hypre_ParCompGridARowPtr(compGrid)[i+1]; j++)
-//          {
-//             res -= hypre_ParCompGridAData(compGrid)[j] * hypre_ParCompGridU(compGrid)[ hypre_ParCompGridAColInd(compGrid)[j] ];
-//          }
-//          res_norm += res*res;
-//       }
-//    }
-
-//    return sqrt(res_norm);
-// }
 
 HYPRE_Int
 ZeroInitialGuess( void *amg_vdata )
 {
-	hypre_ParAMGData	*amg_data = (hypre_ParAMGData*) amg_vdata;
-
    HYPRE_Int level;
+	hypre_ParAMGData	*amg_data = (hypre_ParAMGData*) amg_vdata;
    HYPRE_Int amgdd_start_level = hypre_ParAMGDataAMGDDStartLevel(amg_data);
+
+   // Save the original solution (updated at the end of the AMG-DD cycle)
+   hypre_ParVectorCopy(hypre_ParAMGDataUArray(amg_data)[amgdd_start_level], hypre_ParAMGDataZtemp(amg_data));
+
+   // Zero solution on all levels
    for (level = amgdd_start_level; level < hypre_ParAMGDataNumLevels(amg_data); level++)
    {
-      hypre_SeqVectorSetConstantValues( hypre_ParCompGridU(hypre_ParAMGDataCompGrid(amg_data)[level]), 0.0);
-      if (hypre_ParCompGridQ(hypre_ParAMGDataCompGrid(amg_data)[level])) hypre_SeqVectorSetConstantValues( hypre_ParCompGridQ(hypre_ParAMGDataCompGrid(amg_data)[level]), 0.0);
+      hypre_CompGridVectorSetConstantValues( hypre_ParCompGridUNew(hypre_ParAMGDataCompGrid(amg_data)[level]), 0.0);
+      if (hypre_ParCompGridQNew(hypre_ParAMGDataCompGrid(amg_data)[level])) hypre_CompGridVectorSetConstantValues( hypre_ParCompGridQNew(hypre_ParAMGDataCompGrid(amg_data)[level]), 0.0);
    }
 	
 	return 0;
@@ -431,15 +390,14 @@ ZeroCompositeRHS( void *amg_vdata )
    hypre_ParCompGrid *compGrid = hypre_ParAMGDataCompGrid(amg_data)[amgdd_start_level];
    
    // Set RHS = 0, then copy in residual (from AMG F) into the owned portion
-   hypre_SeqVectorSetConstantValues(hypre_ParCompGridF(compGrid), 0.0);
-   hypre_SeqVectorCopy(hypre_ParVectorLocalVector(hypre_ParAMGDataFArray(amg_data)[0]), hypre_ParCompGridF(compGrid));
+   hypre_SeqVectorSetConstantValues(hypre_ParCompGridVectorNonOwned(hypre_ParCompGridFNew(compGrid)), 0.0);
 
    // Restrict rhs to all levels to get appropriate initial values
    for (level = amgdd_start_level; level < hypre_ParAMGDataNumLevels(amg_data)-1; level++)
    {
       hypre_ParCompGrid *compGrid_f = hypre_ParAMGDataCompGrid(amg_data)[level];
       hypre_ParCompGrid *compGrid_c = hypre_ParAMGDataCompGrid(amg_data)[level+1];
-      hypre_CSRMatrixMatvec(1.0, hypre_ParCompGridR(compGrid_f), hypre_ParCompGridF(compGrid_f), 0.0, hypre_ParCompGridF(compGrid_c));
+      hypre_ParCompGridMatvec(1.0, hypre_ParCompGridRNew(compGrid_f), hypre_ParCompGridFNew(compGrid_f), 0.0, hypre_ParCompGridFNew(compGrid_c));
    }
 
    return 0;
@@ -783,6 +741,7 @@ hypre_BoomerAMGRDSolutionCommunication( void *amg_vdata )
    }
 
    // Add update to solution
+   hypre_ParVectorCopy(hypre_ParAMGDataZtemp(amg_data), U_array[amgdd_start_level]);
    hypre_ParVectorAxpy( 1.0, F_array[amgdd_start_level], U_array[amgdd_start_level]);
    
    #if DEBUGGING_MESSAGES

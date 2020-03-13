@@ -166,7 +166,6 @@ typedef struct
 
 typedef struct
 {
-   // !!! NEW
    HYPRE_Int        first_global_index;
    HYPRE_Int        last_global_index;
    HYPRE_Int        num_owned_nodes;
@@ -198,60 +197,13 @@ typedef struct
    hypre_ParCompGridVector     *temp2_new;
    hypre_ParCompGridVector     *temp3_new;
 
-   // !!! OLD
-   HYPRE_Int       num_nodes; // total number of nodes including real and ghost nodes
-   HYPRE_Int       num_owned_blocks; // number of blocks of owned nodes
-   HYPRE_Int       *owned_block_starts; // start positions for the blocks of owned nodes
-   HYPRE_Int       num_real_nodes; // number of real nodes
-   HYPRE_Int       num_c_points; // number of C points
-   HYPRE_Int       num_edge_indices;
-   HYPRE_Int       mem_size;
-   HYPRE_Int       A_mem_size;
-   HYPRE_Int       P_mem_size;
-   HYPRE_Int       R_mem_size;
+   // TODO
+   // HYPRE_Real       *l1_norms;
+   // HYPRE_Int        *cf_marker_array;
+   // int              *c_mask;
+   // int              *f_mask;
 
-   HYPRE_Int        *global_indices;
-   HYPRE_Int        *coarse_global_indices; 
-   HYPRE_Int        *coarse_local_indices;
-   HYPRE_Int        *real_dof_marker;
-   HYPRE_Int        *edge_indices;
-   HYPRE_Int        *sort_map;
-   HYPRE_Int        *inv_sort_map;
-   HYPRE_Int        *relax_ordering;
-
-   HYPRE_Int        *A_rowptr;
-   HYPRE_Int        *A_colind;
-   HYPRE_Int        *A_global_colind;
-   HYPRE_Complex    *A_data;
-
-   HYPRE_Int        *P_rowptr;
-   HYPRE_Int        *P_colind;
-   HYPRE_Complex    *P_data;
-
-   HYPRE_Int        *R_rowptr;
-   HYPRE_Int        *R_colind;
-   HYPRE_Complex    *R_data;
-   
-   hypre_CSRMatrix  *A;
-   hypre_CSRMatrix  *A_real;
-   hypre_CSRMatrix  *P;
-   hypre_CSRMatrix  *R;
-
-   hypre_Vector     *u;
-   hypre_Vector     *f;
-   hypre_Vector     *t;
-   hypre_Vector     *s;
-   hypre_Vector     *q;
-   hypre_Vector     *temp;
-   hypre_Vector     *temp2;
-   hypre_Vector     *temp3;
-
-   HYPRE_Real       *l1_norms;
-   HYPRE_Int        *cf_marker_array;
-   int              *c_mask;
-   int              *f_mask;
-
-   HYPRE_Real       *cheby_coeffs;
+   // HYPRE_Real       *cheby_coeffs;
 
 } hypre_ParCompGrid;
 
@@ -259,7 +211,6 @@ typedef struct
  * Accessor functions for the Comp Grid structure
  *--------------------------------------------------------------------------*/
 
-// !!! NEW
 #define hypre_ParCompGridFirstGlobalIndex(compGrid)               ((compGrid) -> first_global_index)
 #define hypre_ParCompGridLastGlobalIndex(compGrid)               ((compGrid) -> last_global_index)
 #define hypre_ParCompGridNumOwnedNodes(compGrid)               ((compGrid) -> num_owned_nodes)
@@ -291,60 +242,13 @@ typedef struct
 #define hypre_ParCompGridTemp2New(compGrid)        ((compGrid) -> temp2_new)
 #define hypre_ParCompGridTemp3New(compGrid)        ((compGrid) -> temp3_new)
 
-// !!! OLD
-#define hypre_ParCompGridNumNodes(compGrid)           ((compGrid) -> num_nodes)
-#define hypre_ParCompGridNumOwnedBlocks(compGrid)           ((compGrid) -> num_owned_blocks)
-#define hypre_ParCompGridOwnedBlockStarts(compGrid)           ((compGrid) -> owned_block_starts)
-#define hypre_ParCompGridNumRealNodes(compGrid)           ((compGrid) -> num_real_nodes)
-#define hypre_ParCompGridNumCPoints(compGrid)           ((compGrid) -> num_c_points)
-#define hypre_ParCompGridNumEdgeIndices(compGrid)           ((compGrid) -> num_edge_indices)
-#define hypre_ParCompGridMemSize(compGrid)           ((compGrid) -> mem_size)
-#define hypre_ParCompGridAMemSize(compGrid)           ((compGrid) -> A_mem_size)
-#define hypre_ParCompGridPMemSize(compGrid)           ((compGrid) -> P_mem_size)
-#define hypre_ParCompGridRMemSize(compGrid)           ((compGrid) -> R_mem_size)
+// TODO
+// #define hypre_ParCompGridL1Norms(compGrid)         ((compGrid) -> l1_norms)
+// #define hypre_ParCompGridCFMarkerArray(compGrid)         ((compGrid) -> cf_marker_array)
+// #define hypre_ParCompGridCMask(compGrid)         ((compGrid) -> c_mask)
+// #define hypre_ParCompGridFMask(compGrid)         ((compGrid) -> f_mask)
 
-#define hypre_ParCompGridGlobalIndices(compGrid)           ((compGrid) -> global_indices)
-#define hypre_ParCompGridCoarseGlobalIndices(compGrid)           ((compGrid) -> coarse_global_indices)
-#define hypre_ParCompGridCoarseLocalIndices(compGrid)           ((compGrid) -> coarse_local_indices)
-#define hypre_ParCompGridRealDofMarker(compGrid) ((compGrid) -> real_dof_marker)
-#define hypre_ParCompGridEdgeIndices(compGrid) ((compGrid) -> edge_indices)
-#define hypre_ParCompGridSortMap(compGrid) ((compGrid) -> sort_map)
-#define hypre_ParCompGridInvSortMap(compGrid) ((compGrid) -> inv_sort_map)
-#define hypre_ParCompGridRelaxOrdering(compGrid) ((compGrid) -> relax_ordering)
-
-#define hypre_ParCompGridARowPtr(compGrid)         ((compGrid) -> A_rowptr)
-#define hypre_ParCompGridAColInd(compGrid)         ((compGrid) -> A_colind)
-#define hypre_ParCompGridAGlobalColInd(compGrid)         ((compGrid) -> A_global_colind)
-#define hypre_ParCompGridAData(compGrid)           ((compGrid) -> A_data)
-#define hypre_ParCompGridPRowPtr(compGrid)         ((compGrid) -> P_rowptr)
-#define hypre_ParCompGridPColInd(compGrid)         ((compGrid) -> P_colind)
-#define hypre_ParCompGridPData(compGrid)           ((compGrid) -> P_data)
-#define hypre_ParCompGridRRowPtr(compGrid)         ((compGrid) -> R_rowptr)
-#define hypre_ParCompGridRColInd(compGrid)         ((compGrid) -> R_colind)
-#define hypre_ParCompGridRData(compGrid)           ((compGrid) -> R_data)
-
-#define hypre_ParCompGridA(compGrid)               ((compGrid) -> A)
-#define hypre_ParCompGridAReal(compGrid)               ((compGrid) -> A_real)
-#define hypre_ParCompGridP(compGrid)               ((compGrid) -> P)
-#define hypre_ParCompGridR(compGrid)               ((compGrid) -> R)
-
-#define hypre_ParCompGridU(compGrid)           ((compGrid) -> u)
-#define hypre_ParCompGridF(compGrid)           ((compGrid) -> f)
-#define hypre_ParCompGridT(compGrid)           ((compGrid) -> t)
-#define hypre_ParCompGridS(compGrid)           ((compGrid) -> s)
-#define hypre_ParCompGridQ(compGrid)           ((compGrid) -> q)
-#define hypre_ParCompGridTemp(compGrid)        ((compGrid) -> temp)
-#define hypre_ParCompGridTemp2(compGrid)        ((compGrid) -> temp2)
-#define hypre_ParCompGridTemp3(compGrid)        ((compGrid) -> temp3)
-
-
-
-#define hypre_ParCompGridL1Norms(compGrid)         ((compGrid) -> l1_norms)
-#define hypre_ParCompGridCFMarkerArray(compGrid)         ((compGrid) -> cf_marker_array)
-#define hypre_ParCompGridCMask(compGrid)         ((compGrid) -> c_mask)
-#define hypre_ParCompGridFMask(compGrid)         ((compGrid) -> f_mask)
-
-#define hypre_ParCompGridChebyCoeffs(compGrid)         ((compGrid) -> cheby_coeffs)
+// #define hypre_ParCompGridChebyCoeffs(compGrid)         ((compGrid) -> cheby_coeffs)
 
 #endif
 
@@ -2208,25 +2112,21 @@ HYPRE_Int hypre_BoomerAMGDD_FAC_OrderedGaussSeidel( HYPRE_Solver amg_vdata, hypr
 /* par_amgdd_comp_grid.c */
 hypre_ParCompGridMatrix* hypre_ParCompGridMatrixCreate();
 HYPRE_Int hypre_ParCompGridMatrixDestroy(hypre_ParCompGridMatrix *matrix);
+HYPRE_Int hypre_ParCompGridMatvec( HYPRE_Complex alpha, hypre_ParCompGridMatrix *A, hypre_ParCompGridVector *x, HYPRE_Complex beta, hypre_ParCompGridVector *y);
 hypre_ParCompGridVector* hypre_ParCompGridVectorCreate();
 HYPRE_Int hypre_ParCompGridVectorDestroy(hypre_ParCompGridVector *vector);
+HYPRE_Int hypre_ParCompGridVectorAxpy(HYPRE_Complex alpha, hypre_ParCompGridVector *x, hypre_ParCompGridVector *y );
+HYPRE_Int hypre_ParCompGridVectorSetConstantValues(hypre_ParCompGridVector *vector, HYPRE_Complex value );
 hypre_ParCompGrid *hypre_ParCompGridCreate();
 HYPRE_Int hypre_ParCompGridDestroy( hypre_ParCompGrid *compGrid );
 HYPRE_Int hypre_ParCompGridInitializeNew( hypre_ParAMGData *amg_data, HYPRE_Int padding, HYPRE_Int level, HYPRE_Int symmetric );
-HYPRE_Int hypre_ParCompGridInitialize( hypre_ParAMGData *amg_data, HYPRE_Int padding, HYPRE_Int level, HYPRE_Int symmetric );
 HYPRE_Int hypre_ParCompGridSetupRelax( hypre_ParAMGData *amg_data );
-HYPRE_Int hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int start_level, HYPRE_Int num_levels, HYPRE_Int use_rd, HYPRE_Int debug );
 HYPRE_Int hypre_ParCompGridFinalizeNew( hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int start_level, HYPRE_Int num_levels, HYPRE_Int use_rd, HYPRE_Int debug );
 HYPRE_Int hypre_ParCompGridSetupRealDofMarker( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int num_ghost_layers );
 HYPRE_Int hypre_ParCompGridResizeNew( hypre_ParCompGrid *compGrid, HYPRE_Int new_size, HYPRE_Int need_coarse_info );
-HYPRE_Int hypre_ParCompGridResize( hypre_ParCompGrid *compGrid, HYPRE_Int new_size, HYPRE_Int need_coarse_info, HYPRE_Int type, HYPRE_Int symmetric );
 HYPRE_Int hypre_ParCompGridSetupLocalIndicesNew( hypre_ParCompGrid **compGrid, HYPRE_Int *num_added_nodes, HYPRE_Int ****recv_map, HYPRE_Int num_recv_procs, HYPRE_Int **A_tmp_info, HYPRE_Int start_level, HYPRE_Int num_levels, HYPRE_Int symmetric );
-HYPRE_Int hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *num_added_nodes, HYPRE_Int start_level, HYPRE_Int num_levels, HYPRE_Int symmetric );
 HYPRE_Int hypre_ParCompGridSetupLocalIndicesPNew( hypre_ParCompGrid **compGrid, HYPRE_Int start_level, HYPRE_Int num_levels );
-HYPRE_Int hypre_ParCompGridSetupLocalIndicesP( hypre_ParCompGrid **compGrid, HYPRE_Int start_level, HYPRE_Int num_levels );
-HYPRE_Int hypre_ParCompGridLocalIndexBinarySearch( hypre_ParCompGrid *compGrid, HYPRE_Int global_index, HYPRE_Int start, HYPRE_Int end, HYPRE_Int *inv_map );
 HYPRE_Int hypre_ParCompGridDebugPrintNew( hypre_ParCompGrid *compGrid, const char* filename );
-HYPRE_Int hypre_ParCompGridDebugPrint( hypre_ParCompGrid *compGrid, const char* filename, HYPRE_Int coarse_num_nodes );
 HYPRE_Int hypre_ParCompGridDumpSorted( hypre_ParCompGrid *compGrid, const char* filename);
 HYPRE_Int hypre_ParCompGridGlobalIndicesDump( hypre_ParCompGrid *compGrid, const char* filename);
 HYPRE_Int hypre_ParCompGridRealDofMarkerDump( hypre_ParCompGrid *compGrid, const char* filename);

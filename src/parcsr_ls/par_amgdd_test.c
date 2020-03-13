@@ -259,47 +259,47 @@ hypre_BoomerAMGDDTestSolve( void               *amg_vdata,
 HYPRE_Int
 SetRelaxMarker(hypre_ParCompGrid *compGrid, hypre_ParVector *relax_marker, HYPRE_Int proc)
 {
-  HYPRE_Int i;
-  HYPRE_Int myid;
-  hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+  // HYPRE_Int i;
+  // HYPRE_Int myid;
+  // hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
 
-  // Check whether the global indices are still around
-  if (!hypre_ParCompGridGlobalIndices(compGrid) && hypre_ParCompGridNumNodes(compGrid))
-  {
-    if (myid == 0) printf("Error: need to setup AMG-DD with debugging flag set.\n");
-    hypre_MPI_Finalize();
-    exit(0);
-  }
+  // // Check whether the global indices are still around
+  // if (!hypre_ParCompGridGlobalIndices(compGrid) && hypre_ParCompGridNumNodes(compGrid))
+  // {
+  //   if (myid == 0) printf("Error: need to setup AMG-DD with debugging flag set.\n");
+  //   hypre_MPI_Finalize();
+  //   exit(0);
+  // }
 
-  // Broadcast the number of nodes in the composite grid on this level for the root proc
-  HYPRE_Int num_nodes = hypre_ParCompGridNumRealNodes(compGrid);
-  hypre_MPI_Bcast(&num_nodes, 1, HYPRE_MPI_INT, proc, hypre_MPI_COMM_WORLD);
+  // // Broadcast the number of nodes in the composite grid on this level for the root proc
+  // HYPRE_Int num_nodes = hypre_ParCompGridNumRealNodes(compGrid);
+  // hypre_MPI_Bcast(&num_nodes, 1, HYPRE_MPI_INT, proc, hypre_MPI_COMM_WORLD);
 
-  // Broadcast the global indices of the dofs in the composite grid
-  HYPRE_Int *global_indices = hypre_CTAlloc(HYPRE_Int, num_nodes, HYPRE_MEMORY_HOST);
-  if (myid == proc)
-  {
-    for (i = 0; i < num_nodes; i++)
-    {
-      global_indices[i] = hypre_ParCompGridGlobalIndices(compGrid)[i];
-    }
-  }
-  hypre_MPI_Bcast(global_indices, num_nodes, HYPRE_MPI_INT, proc, hypre_MPI_COMM_WORLD);
+  // // Broadcast the global indices of the dofs in the composite grid
+  // HYPRE_Int *global_indices = hypre_CTAlloc(HYPRE_Int, num_nodes, HYPRE_MEMORY_HOST);
+  // if (myid == proc)
+  // {
+  //   for (i = 0; i < num_nodes; i++)
+  //   {
+  //     global_indices[i] = hypre_ParCompGridGlobalIndices(compGrid)[i];
+  //   }
+  // }
+  // hypre_MPI_Bcast(global_indices, num_nodes, HYPRE_MPI_INT, proc, hypre_MPI_COMM_WORLD);
 
-  // Loop over the global indices and mark where to do relaxation
-  HYPRE_Int proc_first_index = hypre_ParVectorFirstIndex(relax_marker);
-  HYPRE_Int proc_last_index = hypre_ParVectorLastIndex(relax_marker);
-  for (i = 0; i < num_nodes; i++)
-  {
-    if (global_indices[i] >= proc_first_index && global_indices[i] <= proc_last_index)
-    {
-      hypre_VectorData(hypre_ParVectorLocalVector(relax_marker))[global_indices[i] - proc_first_index] = 1;
-    }
-  }
+  // // Loop over the global indices and mark where to do relaxation
+  // HYPRE_Int proc_first_index = hypre_ParVectorFirstIndex(relax_marker);
+  // HYPRE_Int proc_last_index = hypre_ParVectorLastIndex(relax_marker);
+  // for (i = 0; i < num_nodes; i++)
+  // {
+  //   if (global_indices[i] >= proc_first_index && global_indices[i] <= proc_last_index)
+  //   {
+  //     hypre_VectorData(hypre_ParVectorLocalVector(relax_marker))[global_indices[i] - proc_first_index] = 1;
+  //   }
+  // }
 
-  hypre_TFree(global_indices, HYPRE_MEMORY_HOST);
+  // hypre_TFree(global_indices, HYPRE_MEMORY_HOST);
 
-  return 0;
+  // return 0;
 }
 
 HYPRE_Real
