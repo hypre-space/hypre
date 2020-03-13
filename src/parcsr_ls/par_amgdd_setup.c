@@ -793,15 +793,12 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    else hypre_printf("TestCompGrids2 success\n");
    #endif
 
-   // !!! Debug
-   MPI_Finalize();
-   exit(0);
-
    if (use_barriers) hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
    if (timers) hypre_BeginTiming(timers[8]);
 
    // Finalize the comp grid structures
    hypre_ParCompGridFinalize(compGrid, compGridCommPkg, amgdd_start_level, num_levels, hypre_ParAMGDataAMGDDUseRD(amg_data), verify_amgdd);
+   hypre_ParCompGridFinalizeNew(amg_data, compGrid, compGridCommPkgNew, amgdd_start_level, num_levels, hypre_ParAMGDataAMGDDUseRD(amg_data), verify_amgdd);
 
    #if DEBUGGING_MESSAGES
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);

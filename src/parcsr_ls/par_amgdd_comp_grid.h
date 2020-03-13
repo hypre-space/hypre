@@ -152,6 +152,9 @@ typedef struct
    HYPRE_Int        last_global_index;
    HYPRE_Int        num_owned_nodes;
    HYPRE_Int        num_nonowned_nodes;
+   HYPRE_Int        num_nonowned_real_nodes;
+   HYPRE_Int        num_owned_c_points;
+   HYPRE_Int        num_nonowned_c_points;
    HYPRE_Int        num_missing_col_indices;
 
    HYPRE_Int        *nonowned_global_indices;
@@ -242,6 +245,9 @@ typedef struct
 #define hypre_ParCompGridLastGlobalIndex(compGrid)               ((compGrid) -> last_global_index)
 #define hypre_ParCompGridNumOwnedNodes(compGrid)               ((compGrid) -> num_owned_nodes)
 #define hypre_ParCompGridNumNonOwnedNodes(compGrid)               ((compGrid) -> num_nonowned_nodes)
+#define hypre_ParCompGridNumNonOwnedRealNodes(compGrid)               ((compGrid) -> num_nonowned_real_nodes)
+#define hypre_ParCompGridNumOwnedCPoints(compGrid)               ((compGrid) -> num_owned_c_points)
+#define hypre_ParCompGridNumNonOwnedCPoints(compGrid)               ((compGrid) -> num_nonowned_c_points)
 #define hypre_ParCompGridNumMissingColIndices(compGrid)               ((compGrid) -> num_missing_col_indices)
 
 #define hypre_ParCompGridNonOwnedGlobalIndices(compGrid)               ((compGrid) -> nonowned_global_indices)
