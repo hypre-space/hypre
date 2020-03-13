@@ -1169,10 +1169,6 @@ UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
             {
                HYPRE_Int incoming_index = recv_buffer[cnt++];
 
-               // !!! Debug
-               // if (myid == 1)
-               //    printf("Rank 1, current_level %d, proc %d, level %d, recv index %d\n", current_level, buffer_number, level, incoming_index);
-
                // Incoming is a global index (could be owned or nonowned)
                if (incoming_index < 0)
                {
