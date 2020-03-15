@@ -21,6 +21,25 @@
 #include <stdio.h>
 #include <math.h>
 
+HYPRE_Int LocalIndexBinarySearch( hypre_ParCompGrid *compGrid, HYPRE_Int global_index )
+{
+   HYPRE_Int      left = 0;
+   HYPRE_Int      right = hypre_ParCompGridNumNonOwnedNodes(compGrid)-1;
+   HYPRE_Int      index, sorted_index;
+   HYPRE_Int      *inv_map = hypre_ParCompGridNonOwnedInvSort(compGrid);
+
+   while (left <= right)
+   {
+      sorted_index = (left + right) / 2;
+      index = inv_map[sorted_index];
+      if (hypre_ParCompGridNonOwnedGlobalIndices(compGrid)[index] < global_index) left = sorted_index + 1;
+      else if (hypre_ParCompGridNonOwnedGlobalIndices(compGrid)[index] > global_index) right = sorted_index - 1;
+      else return index;
+   }
+
+   return -1;
+}
+
 hypre_ParCompGridMatrix* hypre_ParCompGridMatrixCreate()
 {
    hypre_ParCompGridMatrix *matrix = hypre_CTAlloc(hypre_ParCompGridMatrix, 1, HYPRE_MEMORY_HOST);
@@ -510,6 +529,7 @@ hypre_ParCompGridFinalizeNew( hypre_ParAMGData *amg_data, hypre_ParCompGrid **co
                      hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[outer_level][proc][level][new_num_send_nodes++] = new_indices[ hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[outer_level][proc][level][i] - num_owned ] + num_owned;
                   }
                }
+               hypre_ParCompGridCommPkgNumSendNodes(compGridCommPkg)[outer_level][proc][level] = new_num_send_nodes;
                if (new_num_send_nodes)
                {
                   hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[outer_level][new_num_send_procs++][level] = hypre_TReAlloc(hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[outer_level][proc][level], HYPRE_Int, new_num_send_nodes, HYPRE_MEMORY_SHARED);
@@ -530,6 +550,7 @@ hypre_ParCompGridFinalizeNew( hypre_ParAMGData *amg_data, hypre_ParCompGrid **co
                      hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[outer_level][proc][level][new_num_recv_nodes++] = new_indices[hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[outer_level][proc][level][i]];
                   }
                }
+               hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[outer_level][proc][level] = new_num_recv_nodes;
                if (new_num_recv_nodes)
                {
                   hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[outer_level][new_num_recv_procs++][level] = hypre_TReAlloc(hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[outer_level][proc][level], HYPRE_Int, new_num_recv_nodes, HYPRE_MEMORY_SHARED);
@@ -834,13 +855,13 @@ hypre_ParCompGridFinalizeNew( hypre_ParAMGData *amg_data, hypre_ParCompGrid **co
       hypre_TFree(new_indices, HYPRE_MEMORY_HOST);
 
       // Setup comp grid vectors
-      hypre_ParCompGridUNew(compGrid[level]) = hypre_ParCompGridVectorCreate(num_nonowned);
+      hypre_ParCompGridUNew(compGrid[level]) = hypre_ParCompGridVectorCreate();
       hypre_ParCompGridVectorOwned(hypre_ParCompGridUNew(compGrid[level])) = hypre_ParVectorLocalVector( hypre_ParAMGDataUArray(amg_data)[level] );
       hypre_ParCompGridVectorOwnsOwnedVector(hypre_ParCompGridUNew(compGrid[level])) = 0;
       hypre_ParCompGridVectorNonOwned(hypre_ParCompGridUNew(compGrid[level])) = hypre_SeqVectorCreate(num_nonowned);
       hypre_SeqVectorInitialize(hypre_ParCompGridVectorNonOwned(hypre_ParCompGridUNew(compGrid[level])));
 
-      hypre_ParCompGridFNew(compGrid[level]) = hypre_ParCompGridVectorCreate(num_nonowned);
+      hypre_ParCompGridFNew(compGrid[level]) = hypre_ParCompGridVectorCreate();
       hypre_ParCompGridVectorOwned(hypre_ParCompGridFNew(compGrid[level])) = hypre_ParVectorLocalVector( hypre_ParAMGDataFArray(amg_data)[level] );
       hypre_ParCompGridVectorOwnsOwnedVector(hypre_ParCompGridFNew(compGrid[level])) = 0;
       hypre_ParCompGridVectorNonOwned(hypre_ParCompGridFNew(compGrid[level])) = hypre_SeqVectorCreate(num_nonowned);
@@ -848,7 +869,7 @@ hypre_ParCompGridFinalizeNew( hypre_ParAMGData *amg_data, hypre_ParCompGrid **co
 
       if (use_rd)
       {
-         hypre_ParCompGridQNew(compGrid[level]) = hypre_ParCompGridVectorCreate(num_nonowned);
+         hypre_ParCompGridQNew(compGrid[level]) = hypre_ParCompGridVectorCreate();
          hypre_ParCompGridVectorOwned(hypre_ParCompGridQNew(compGrid[level])) = hypre_SeqVectorCreate(num_owned);
          hypre_SeqVectorInitialize(hypre_ParCompGridVectorOwned(hypre_ParCompGridQNew(compGrid[level])));
          hypre_ParCompGridVectorOwnsOwnedVector(hypre_ParCompGridQNew(compGrid[level])) = 1;
@@ -858,14 +879,14 @@ hypre_ParCompGridFinalizeNew( hypre_ParAMGData *amg_data, hypre_ParCompGrid **co
 
       if (level < num_levels)
       {
-         hypre_ParCompGridSNew(compGrid[level]) = hypre_ParCompGridVectorCreate(num_nonowned);
+         hypre_ParCompGridSNew(compGrid[level]) = hypre_ParCompGridVectorCreate();
          hypre_ParCompGridVectorOwned(hypre_ParCompGridSNew(compGrid[level])) = hypre_SeqVectorCreate(num_owned);
          hypre_SeqVectorInitialize(hypre_ParCompGridVectorOwned(hypre_ParCompGridSNew(compGrid[level])));
          hypre_ParCompGridVectorOwnsOwnedVector(hypre_ParCompGridSNew(compGrid[level])) = 1;
          hypre_ParCompGridVectorNonOwned(hypre_ParCompGridSNew(compGrid[level])) = hypre_SeqVectorCreate(num_nonowned);
          hypre_SeqVectorInitialize(hypre_ParCompGridVectorNonOwned(hypre_ParCompGridSNew(compGrid[level])));
 
-         hypre_ParCompGridTNew(compGrid[level]) = hypre_ParCompGridVectorCreate(num_nonowned);
+         hypre_ParCompGridTNew(compGrid[level]) = hypre_ParCompGridVectorCreate();
          hypre_ParCompGridVectorOwned(hypre_ParCompGridTNew(compGrid[level])) = hypre_SeqVectorCreate(num_owned);
          hypre_SeqVectorInitialize(hypre_ParCompGridVectorOwned(hypre_ParCompGridTNew(compGrid[level])));
          hypre_ParCompGridVectorOwnsOwnedVector(hypre_ParCompGridTNew(compGrid[level])) = 1;
@@ -919,6 +940,28 @@ hypre_ParCompGridFinalizeNew( hypre_ParAMGData *amg_data, hypre_ParCompGrid **co
                                   &hypre_ParCompGridMatrixNonOwnedOffd(hypre_ParCompGridRNew(compGrid[level])), 1);
          hypre_CSRMatrixTranspose(hypre_ParCompGridMatrixNonOwnedDiag(hypre_ParCompGridPNew(compGrid[level])), 
                                   &hypre_ParCompGridMatrixNonOwnedDiag(hypre_ParCompGridRNew(compGrid[level])), 1);
+      }
+   }
+
+   // Finish up comm pkg buffer sizes
+   for (start_level = 0; start_level < num_levels; start_level++)
+   {
+      HYPRE_Int proc;
+      for (proc = 0; proc < hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[start_level]; proc++)
+      {
+         hypre_ParCompGridCommPkgSendBufferSize(compGridCommPkg)[start_level][proc] = 0;
+         for (level = start_level; level < num_levels; level++)
+         {
+            hypre_ParCompGridCommPkgSendBufferSize(compGridCommPkg)[start_level][proc] += hypre_ParCompGridCommPkgNumSendNodes(compGridCommPkg)[start_level][proc][level];
+         }
+      }
+      for (proc = 0; proc < hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg)[start_level]; proc++)
+      {
+         hypre_ParCompGridCommPkgRecvBufferSize(compGridCommPkg)[start_level][proc] = 0;
+         for (level = start_level; level < num_levels; level++)
+         {
+            hypre_ParCompGridCommPkgRecvBufferSize(compGridCommPkg)[start_level][proc] += hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[start_level][proc][level];
+         }
       }
    }
 
@@ -1173,25 +1216,6 @@ HYPRE_Int hypre_ParCompGridSetupLocalIndicesPNew( hypre_ParCompGrid **compGrid, 
    // }
 
    return 0;
-}
-
-HYPRE_Int LocalIndexBinarySearch( hypre_ParCompGrid *compGrid, HYPRE_Int global_index )
-{
-   HYPRE_Int      left = 0;
-   HYPRE_Int      right = hypre_ParCompGridNumNonOwnedNodes(compGrid)-1;
-   HYPRE_Int      index, sorted_index;
-   HYPRE_Int      *inv_map = hypre_ParCompGridNonOwnedInvSort(compGrid);
-
-   while (left <= right)
-   {
-      sorted_index = (left + right) / 2;
-      index = inv_map[sorted_index];
-      if (hypre_ParCompGridNonOwnedGlobalIndices(compGrid)[index] < global_index) left = sorted_index + 1;
-      else if (hypre_ParCompGridNonOwnedGlobalIndices(compGrid)[index] > global_index) right = sorted_index - 1;
-      else return index;
-   }
-
-   return -1;
 }
 
 HYPRE_Int
