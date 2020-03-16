@@ -276,8 +276,9 @@ SetRelaxMarker(hypre_ParCompGrid *compGrid, hypre_ParVector *relax_marker, HYPRE
   hypre_MPI_Bcast(&num_nonowned_real, 1, HYPRE_MPI_INT, proc, hypre_MPI_COMM_WORLD);
 
   // Broadcast the global indices of the dofs in the composite grid
-  HYPRE_Int *global_indices = hypre_CTAlloc(HYPRE_Int, num_nonowned_real, HYPRE_MEMORY_HOST);
+  HYPRE_Int *global_indices;
   if (myid == proc) global_indices = hypre_ParCompGridNonOwnedGlobalIndices(compGrid);
+  else global_indices = hypre_CTAlloc(HYPRE_Int, num_nonowned_real, HYPRE_MEMORY_HOST);
   hypre_MPI_Bcast(global_indices, num_nonowned_real, HYPRE_MPI_INT, proc, hypre_MPI_COMM_WORLD);
 
   // Loop over the global indices and mark where to do relaxation
@@ -298,7 +299,7 @@ SetRelaxMarker(hypre_ParCompGrid *compGrid, hypre_ParVector *relax_marker, HYPRE
       hypre_VectorData(hypre_ParVectorLocalVector(relax_marker))[i] = 1;
   }
 
-  hypre_TFree(global_indices, HYPRE_MEMORY_HOST);
+  if (myid != proc) hypre_TFree(global_indices, HYPRE_MEMORY_HOST);
 
   return 0;
 }

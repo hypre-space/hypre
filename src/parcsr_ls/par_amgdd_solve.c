@@ -10,7 +10,7 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-#define TEST_RES_COMM 0
+#define TEST_RES_COMM 1
 #define DEBUGGING_MESSAGES 0
 
 #include "_hypre_parcsr_ls.h"
@@ -539,13 +539,10 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
       hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
       #endif
 
-      #if TEST_RES_COMM
-      HYPRE_Int test_failed = TestResComm(amg_data);
-      #endif
    }
    
    #if TEST_RES_COMM
-   return test_failed;
+   return TestResComm(amg_data);
    #else
    return 0;
    #endif
@@ -712,11 +709,7 @@ hypre_BoomerAMGRDSolutionCommunication( void *amg_vdata )
    #endif
 
    #if TEST_RES_COMM
-   // HYPRE_Int test_failed = TestResComm(amg_data); // !!! TODO: write a test for this
-   #endif
-   
-   #if TEST_RES_COMM
-   return test_failed;
+   return TestResComm(amg_data);
    #else
    return 0;
    #endif
@@ -726,6 +719,9 @@ HYPRE_Complex*
 PackResidualBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int current_level, HYPRE_Int proc )
 {
    HYPRE_Int level,i;
+
+   HYPRE_Int      myid;
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
    HYPRE_Complex *buffer = hypre_CTAlloc(HYPRE_Complex, hypre_ParCompGridCommPkgSendBufferSize(compGridCommPkg)[current_level][proc], HYPRE_MEMORY_HOST);
 
@@ -745,7 +741,7 @@ PackResidualBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *comp
       }
    }
 
-   return 0;
+   return buffer;
 }
 
 HYPRE_Complex*
@@ -771,7 +767,7 @@ PackSolutionBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *comp
       }
    }
 
-   return 0;
+   return buffer;
 }
 
 
@@ -838,19 +834,15 @@ TestResComm(hypre_ParAMGData *amg_data)
          hypre_MPI_Bcast(&num_real_nodes, 1, HYPRE_MPI_INT, proc, hypre_MPI_COMM_WORLD);
 
          // Broadcast the composite residual
-         HYPRE_Complex *comp_res = hypre_CTAlloc(HYPRE_Complex, num_real_nodes, HYPRE_MEMORY_HOST);
-         if (myid == proc)
-         {
-            comp_res = hypre_VectorData(hypre_ParCompGridVectorNonOwned(hypre_ParCompGridFNew(compGrid[level])));
-         }
+         HYPRE_Complex *comp_res;
+         if (myid == proc) comp_res = hypre_VectorData(hypre_ParCompGridVectorNonOwned(hypre_ParCompGridFNew(compGrid[level])));
+         else comp_res = hypre_CTAlloc(HYPRE_Complex, num_real_nodes, HYPRE_MEMORY_HOST);
          hypre_MPI_Bcast(comp_res, num_real_nodes, HYPRE_MPI_COMPLEX, proc, hypre_MPI_COMM_WORLD);
 
          // Broadcast the global indices
-         HYPRE_Int *global_indices = hypre_CTAlloc(HYPRE_Int, num_real_nodes, HYPRE_MEMORY_HOST);
-         if (myid == proc)
-         {
-            global_indices = hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level]);
-         }
+         HYPRE_Int *global_indices;
+         if (myid == proc) global_indices = hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level]);
+         else global_indices = hypre_CTAlloc(HYPRE_Int, num_real_nodes, HYPRE_MEMORY_HOST);
          hypre_MPI_Bcast(global_indices, num_real_nodes, HYPRE_MPI_INT, proc, hypre_MPI_COMM_WORLD);
 
          // Now, each processors checks their owned residual value against the composite residual
