@@ -304,7 +304,7 @@ HYPRE_Int FAC_FCycle_timed(void *amg_vdata, HYPRE_Int time_part)
 HYPRE_Int
 FAC_Interpolate( hypre_ParCompGrid *compGrid_f, hypre_ParCompGrid *compGrid_c )
 {
-   hypre_ParCompGridMatvec(1.0, hypre_ParCompGridP(compGrid_f), hypre_ParCompGridUNew(compGrid_c), 1.0, hypre_ParCompGridUNew(compGrid_f));
+   hypre_ParCompGridMatvec(1.0, hypre_ParCompGridPNew(compGrid_f), hypre_ParCompGridUNew(compGrid_c), 1.0, hypre_ParCompGridUNew(compGrid_f));
    return 0;
 }
 
@@ -404,44 +404,93 @@ hypre_BoomerAMGDD_FAC_Jacobi( HYPRE_Solver amg_vdata, hypre_ParCompGrid *compGri
 HYPRE_Int
 hypre_BoomerAMGDD_FAC_GaussSeidel( HYPRE_Solver amg_vdata, hypre_ParCompGrid *compGrid, HYPRE_Int cycle_param )
 {
-   // HYPRE_Int               i, j; // loop variables
-   // HYPRE_Complex           diag; // placeholder for the diagonal of A
-   // HYPRE_Complex           u_before;
-   // hypre_ParAMGData   *amg_data = (hypre_ParAMGData*) amg_vdata;
+   HYPRE_Int               i, j; // loop variables
+   HYPRE_Complex           diagonal; // placeholder for the diagonal of A
+   HYPRE_Complex           u_before;
+   hypre_ParAMGData   *amg_data = (hypre_ParAMGData*) amg_vdata;
 
-   // // Do Gauss-Seidel relaxation on the real nodes
-   // for (i = 0; i < hypre_ParCompGridNumRealNodes(compGrid); i++)
-   // {
-   //    u_before = hypre_VectorData(hypre_ParCompGridUNew(compGrid))[i];
+   // Get all the info
+   HYPRE_Complex *u_owned_data = hypre_VectorData(hypre_ParCompGridVectorOwned(hypre_ParCompGridUNew(compGrid)));
+   HYPRE_Complex *u_nonowned_data = hypre_VectorData(hypre_ParCompGridVectorNonOwned(hypre_ParCompGridUNew(compGrid)));
+   HYPRE_Complex *f_owned_data = hypre_VectorData(hypre_ParCompGridVectorOwned(hypre_ParCompGridFNew(compGrid)));
+   HYPRE_Complex *f_nonowned_data = hypre_VectorData(hypre_ParCompGridVectorNonOwned(hypre_ParCompGridFNew(compGrid)));
+   HYPRE_Complex *t_owned_data = NULL;
+   HYPRE_Complex *t_nonowned_data = NULL;
+   HYPRE_Complex *q_owned_data = NULL;
+   HYPRE_Complex *q_nonowned_data = NULL;
+   if (hypre_ParCompGridTNew(compGrid))
+   {
+      t_owned_data = hypre_VectorData(hypre_ParCompGridVectorOwned(hypre_ParCompGridTNew(compGrid)));
+      t_nonowned_data = hypre_VectorData(hypre_ParCompGridVectorNonOwned(hypre_ParCompGridTNew(compGrid)));
+   }
+   
+   if (hypre_ParCompGridQNew(compGrid))
+   {
+      q_owned_data = hypre_VectorData(hypre_ParCompGridVectorOwned(hypre_ParCompGridTNew(compGrid)));
+      q_nonowned_data = hypre_VectorData(hypre_ParCompGridVectorNonOwned(hypre_ParCompGridTNew(compGrid)));
+   }
+   hypre_CSRMatrix *owned_diag = hypre_ParCompGridMatrixOwnedDiag(hypre_ParCompGridANew(compGrid));
+   hypre_CSRMatrix *owned_offd = hypre_ParCompGridMatrixOwnedOffd(hypre_ParCompGridANew(compGrid));
+   hypre_CSRMatrix *nonowned_diag = hypre_ParCompGridMatrixNonOwnedDiag(hypre_ParCompGridANew(compGrid));
+   hypre_CSRMatrix *nonowned_offd = hypre_ParCompGridMatrixNonOwnedOffd(hypre_ParCompGridANew(compGrid));
 
-   //    // Initialize u as RHS
-   //    hypre_VectorData(hypre_ParCompGridUNew(compGrid))[i] = hypre_VectorData(hypre_ParCompGridFNew(compGrid))[i];
-   //    diag = 0.0;
+   // Do Gauss-Seidel relaxation on the owned nodes
+   for (i = 0; i < hypre_ParCompGridNumOwnedNodes(compGrid); i++)
+   {
+      u_before = u_owned_data[i];
 
-   //    // Loop over entries in A
-   //    for (j = hypre_ParCompGridANewRowPtr(compGrid)[i]; j < hypre_ParCompGridANewRowPtr(compGrid)[i+1]; j++)
-   //    {
-   //       #if DEBUG_FAC
-   //       if (hypre_ParCompGridANewColInd(compGrid)[j] < 0) printf("Real node doesn't have its full stencil in A! row %d, entry %d\n",i,j);
-   //       #endif
-   //       // If this is the diagonal, store for later division
-   //       if (hypre_ParCompGridANewColInd(compGrid)[j] == i) diag = hypre_ParCompGridANewData(compGrid)[j];
-   //       // Else, subtract off A_ij*u_j
-   //       else
-   //       {
-   //          hypre_VectorData(hypre_ParCompGridUNew(compGrid))[i] -= hypre_ParCompGridANewData(compGrid)[j] * hypre_VectorData(hypre_ParCompGridUNew(compGrid))[ hypre_ParCompGridANewColInd(compGrid)[j] ];
-   //       }
-   //    }
+      // Initialize u as RHS
+      u_owned_data[i] = f_owned_data[i];
+      diagonal = 0.0;
 
-   //    // Divide by diagonal
-   //    if (diag == 0.0) printf("Tried to divide by zero diagonal!\n");
-   //    hypre_VectorData(hypre_ParCompGridUNew(compGrid))[i] /= diag;
+      // Loop over diag entries
+      for (j = hypre_CSRMatrixI(owned_diag)[i]; j < hypre_CSRMatrixI(owned_diag)[i+1]; j++)
+      {
+         if (hypre_CSRMatrixJ(owned_diag)[j] == i) diagonal = hypre_CSRMatrixData(owned_diag)[j];
+         else u_owned_data[i] -= hypre_CSRMatrixData(owned_diag)[j] * u_owned_data[ hypre_CSRMatrixJ(owned_diag)[j] ];
+      }
+      // Loop over offd entries
+      for (j = hypre_CSRMatrixI(owned_offd)[i]; j < hypre_CSRMatrixI(owned_offd)[i+1]; j++)
+      {
+         u_owned_data[i] -= hypre_CSRMatrixData(owned_offd)[j] * u_nonowned_data[ hypre_CSRMatrixJ(owned_offd)[j] ];
+      }
+      // Divide by diagonal
+      if (diagonal == 0.0) printf("Tried to divide by zero diagonal in Gauss-Seidel!\n");
+      u_owned_data[i] /= diagonal;
 
-   //    if (hypre_ParCompGridTNew(compGrid)) hypre_VectorData(hypre_ParCompGridTNew(compGrid))[i] += hypre_VectorData(hypre_ParCompGridUNew(compGrid))[i] - u_before;
-   //    if (hypre_ParCompGridQ(compGrid)) hypre_VectorData(hypre_ParCompGridQ(compGrid))[i] += hypre_VectorData(hypre_ParCompGridUNew(compGrid))[i] - u_before;
-   // }
+      if (hypre_ParCompGridTNew(compGrid)) t_owned_data[i] += u_owned_data[i] - u_before;
+      if (hypre_ParCompGridQNew(compGrid)) q_owned_data[i] += u_owned_data[i] - u_before;
+   }
 
-   // return 0;
+   // Do Gauss-Seidel relaxation on the nonowned nodes
+   for (i = 0; i < hypre_ParCompGridNumNonOwnedNodes(compGrid); i++)
+   {
+      u_before = u_nonowned_data[i];
+
+      // Initialize u as RHS
+      u_nonowned_data[i] = f_nonowned_data[i];
+      diagonal = 0.0;
+
+      // Loop over diag entries
+      for (j = hypre_CSRMatrixI(nonowned_diag)[i]; j < hypre_CSRMatrixI(nonowned_diag)[i+1]; j++)
+      {
+         if (hypre_CSRMatrixJ(nonowned_diag)[j] == i) diagonal = hypre_CSRMatrixData(nonowned_diag)[j];
+         else u_nonowned_data[i] -= hypre_CSRMatrixData(nonowned_diag)[j] * u_nonowned_data[ hypre_CSRMatrixJ(nonowned_diag)[j] ];
+      }
+      // Loop over offd entries
+      for (j = hypre_CSRMatrixI(nonowned_offd)[i]; j < hypre_CSRMatrixI(nonowned_offd)[i+1]; j++)
+      {
+         u_nonowned_data[i] -= hypre_CSRMatrixData(nonowned_offd)[j] * u_owned_data[ hypre_CSRMatrixJ(nonowned_offd)[j] ];
+      }
+      // Divide by diagonal
+      if (diagonal == 0.0) printf("Tried to divide by zero diagonal in Gauss-Seidel!\n");
+      u_nonowned_data[i] /= diagonal;
+
+      if (hypre_ParCompGridTNew(compGrid)) t_nonowned_data[i] += u_nonowned_data[i] - u_before;
+      if (hypre_ParCompGridQNew(compGrid)) q_nonowned_data[i] += u_nonowned_data[i] - u_before;
+   }
+
+   return 0;
 }
 
 HYPRE_Int hypre_BoomerAMGDD_FAC_OrderedGaussSeidel( HYPRE_Solver amg_vdata, hypre_ParCompGrid *compGrid, HYPRE_Int cycle_param  )

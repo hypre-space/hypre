@@ -84,8 +84,8 @@ HYPRE_Int hypre_ParCompGridMatvec( HYPRE_Complex alpha, hypre_ParCompGridMatrix 
    hypre_Vector *x_owned = hypre_ParCompGridVectorOwned(x);
    hypre_Vector *x_nonowned = hypre_ParCompGridVectorNonOwned(x);
 
-   hypre_Vector *y_owned = hypre_ParCompGridVectorOwned(x);
-   hypre_Vector *y_nonowned = hypre_ParCompGridVectorNonOwned(x);
+   hypre_Vector *y_owned = hypre_ParCompGridVectorOwned(y);
+   hypre_Vector *y_nonowned = hypre_ParCompGridVectorNonOwned(y);
 
    hypre_CSRMatrixMatvec(alpha, owned_diag, x_owned, beta, y_owned);
    hypre_CSRMatrixMatvec(alpha, owned_offd, x_nonowned, 0.0, y_owned);
@@ -331,13 +331,13 @@ hypre_ParCompGridInitializeNew( hypre_ParAMGData *amg_data, HYPRE_Int padding, H
 HYPRE_Int 
 hypre_ParCompGridSetupRelax( hypre_ParAMGData *amg_data )
 {
-   // HYPRE_Int level, i, j;
+   HYPRE_Int level, i, j;
 
-   // if (hypre_ParAMGDataFACRelaxType(amg_data) == 0) hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data) = hypre_BoomerAMGDD_FAC_Jacobi;
-   // else if (hypre_ParAMGDataFACRelaxType(amg_data) == 1) hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data) = hypre_BoomerAMGDD_FAC_GaussSeidel;
-   // else if (hypre_ParAMGDataFACRelaxType(amg_data) == 2) hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data) = hypre_BoomerAMGDD_FAC_Cheby;
-   // else if (hypre_ParAMGDataFACRelaxType(amg_data) == 3) hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data) = hypre_BoomerAMGDD_FAC_CFL1Jacobi; 
-   // else if (hypre_ParAMGDataFACRelaxType(amg_data) == 4) hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data) = hypre_BoomerAMGDD_FAC_OrderedGaussSeidel; 
+   if (hypre_ParAMGDataFACRelaxType(amg_data) == 0) hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data) = hypre_BoomerAMGDD_FAC_Jacobi;
+   else if (hypre_ParAMGDataFACRelaxType(amg_data) == 1) hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data) = hypre_BoomerAMGDD_FAC_GaussSeidel;
+   else if (hypre_ParAMGDataFACRelaxType(amg_data) == 2) hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data) = hypre_BoomerAMGDD_FAC_Cheby;
+   else if (hypre_ParAMGDataFACRelaxType(amg_data) == 3) hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data) = hypre_BoomerAMGDD_FAC_CFL1Jacobi; 
+   else if (hypre_ParAMGDataFACRelaxType(amg_data) == 4) hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data) = hypre_BoomerAMGDD_FAC_OrderedGaussSeidel; 
 
    // for (level = hypre_ParAMGDataAMGDDStartLevel(amg_data); level < hypre_ParAMGDataNumLevels(amg_data); level++)
    // {
@@ -814,6 +814,9 @@ hypre_ParCompGridFinalizeNew( hypre_ParAMGData *amg_data, hypre_ParCompGrid **co
       hypre_CSRMatrixI(A_diag) = new_A_diag_rowPtr;
       hypre_CSRMatrixJ(A_diag) = new_A_diag_colInd;
       hypre_CSRMatrixData(A_diag) = new_A_diag_data;
+      hypre_CSRMatrixNumRows(A_diag) = num_nonowned;
+      hypre_CSRMatrixNumCols(A_diag) = num_nonowned;
+      hypre_CSRMatrixNumNonzeros(A_diag) = hypre_CSRMatrixI(A_diag)[num_nonowned];
 
       hypre_TFree(hypre_CSRMatrixI(A_offd), HYPRE_MEMORY_SHARED);
       hypre_TFree(hypre_CSRMatrixJ(A_offd), HYPRE_MEMORY_SHARED);
@@ -821,6 +824,9 @@ hypre_ParCompGridFinalizeNew( hypre_ParAMGData *amg_data, hypre_ParCompGrid **co
       hypre_CSRMatrixI(A_offd) = new_A_offd_rowPtr;
       hypre_CSRMatrixJ(A_offd) = new_A_offd_colInd;
       hypre_CSRMatrixData(A_offd) = new_A_offd_data;
+      hypre_CSRMatrixNumRows(A_offd) = num_nonowned;
+      hypre_CSRMatrixNumCols(A_offd) = hypre_ParCompGridNumOwnedNodes(compGrid[level]);
+      hypre_CSRMatrixNumNonzeros(A_offd) = hypre_CSRMatrixI(A_offd)[num_nonowned];
 
       if (level != num_levels-1)
       {
@@ -833,6 +839,9 @@ hypre_ParCompGridFinalizeNew( hypre_ParAMGData *amg_data, hypre_ParCompGrid **co
          hypre_CSRMatrixI(P_diag) = new_P_diag_rowPtr;
          hypre_CSRMatrixJ(P_diag) = new_P_diag_colInd;
          hypre_CSRMatrixData(P_diag) = new_P_diag_data;
+         hypre_CSRMatrixNumRows(P_diag) = num_nonowned;
+         hypre_CSRMatrixNumCols(P_diag) = hypre_ParCompGridNumNonOwnedNodes(compGrid[level+1]);
+         hypre_CSRMatrixNumNonzeros(P_diag) = hypre_CSRMatrixI(P_diag)[num_nonowned];
 
          hypre_TFree(hypre_CSRMatrixI(P_offd), HYPRE_MEMORY_SHARED);
          hypre_TFree(hypre_CSRMatrixJ(P_offd), HYPRE_MEMORY_SHARED);
@@ -840,6 +849,11 @@ hypre_ParCompGridFinalizeNew( hypre_ParAMGData *amg_data, hypre_ParCompGrid **co
          hypre_CSRMatrixI(P_offd) = new_P_offd_rowPtr;
          hypre_CSRMatrixJ(P_offd) = new_P_offd_colInd;
          hypre_CSRMatrixData(P_offd) = new_P_offd_data;
+         hypre_CSRMatrixNumRows(P_offd) = num_nonowned;
+         hypre_CSRMatrixNumCols(P_offd) = hypre_ParCompGridNumOwnedNodes(compGrid[level+1]);
+         hypre_CSRMatrixNumNonzeros(P_offd) = hypre_CSRMatrixI(P_offd)[num_nonowned];
+
+         hypre_CSRMatrixNumCols(hypre_ParCompGridMatrixOwnedOffd(hypre_ParCompGridPNew(compGrid[level]))) = hypre_ParCompGridNumNonOwnedNodes(compGrid[level+1]);
       }
       // TODO R
       // if (hypre_ParCompGridRRowPtr(compGrid[level]))
@@ -930,8 +944,11 @@ hypre_ParCompGridFinalizeNew( hypre_ParAMGData *amg_data, hypre_ParCompGrid **co
    // Setup R = P^T if R not specified
    if (!hypre_ParAMGDataRestriction(amg_data))
    {
-      for (level = start_level; level < num_levels; level++)
+      for (level = start_level; level < num_levels-1; level++)
       {
+         // !!! TODO: if BoomerAMG explicitly stores R = P^T, use those matrices in
+         hypre_ParCompGridRNew(compGrid[level]) = hypre_ParCompGridMatrixCreate();
+         hypre_ParCompGridMatrixOwnsOwnedMatrices(hypre_ParCompGridRNew(compGrid[level])) = 1;
          hypre_CSRMatrixTranspose(hypre_ParCompGridMatrixOwnedDiag(hypre_ParCompGridPNew(compGrid[level])), 
                                   &hypre_ParCompGridMatrixOwnedDiag(hypre_ParCompGridRNew(compGrid[level])), 1);
          hypre_CSRMatrixTranspose(hypre_ParCompGridMatrixNonOwnedOffd(hypre_ParCompGridPNew(compGrid[level])), 
