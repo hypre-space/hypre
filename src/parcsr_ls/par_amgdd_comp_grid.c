@@ -88,9 +88,9 @@ HYPRE_Int hypre_ParCompGridMatvec( HYPRE_Complex alpha, hypre_ParCompGridMatrix 
    hypre_Vector *y_nonowned = hypre_ParCompGridVectorNonOwned(y);
 
    hypre_CSRMatrixMatvec(alpha, owned_diag, x_owned, beta, y_owned);
-   hypre_CSRMatrixMatvec(alpha, owned_offd, x_nonowned, 0.0, y_owned);
+   hypre_CSRMatrixMatvec(alpha, owned_offd, x_nonowned, 1.0, y_owned);
    hypre_CSRMatrixMatvec(alpha, nonowned_diag, x_nonowned, beta, y_nonowned);
-   hypre_CSRMatrixMatvec(alpha, nonowned_offd, x_owned, 0.0, y_nonowned);
+   hypre_CSRMatrixMatvec(alpha, nonowned_offd, x_owned, 1.0, y_nonowned);
 
    return 0;
 }
@@ -105,6 +105,15 @@ hypre_ParCompGridVector *hypre_ParCompGridVectorCreate()
    hypre_ParCompGridVectorOwnsOwnedVector(vector) = 0;
 
    return vector;
+}
+
+HYPRE_Int hypre_ParCompGridVectorInitialize(hypre_ParCompGridVector *vector, HYPRE_Int num_owned, HYPRE_Int num_nonowned)
+{
+   hypre_ParCompGridVectorOwned(vector) = hypre_SeqVectorCreate(num_owned);
+   hypre_SeqVectorInitialize(hypre_ParCompGridVectorOwned(vector));
+   hypre_ParCompGridVectorOwnsOwnedVector(vector) = 1;
+   hypre_ParCompGridVectorNonOwned(vector) = hypre_SeqVectorCreate(num_nonowned);
+   hypre_SeqVectorInitialize(hypre_ParCompGridVectorNonOwned(vector));
 }
 
 HYPRE_Int hypre_ParCompGridVectorDestroy(hypre_ParCompGridVector *vector)
@@ -137,6 +146,15 @@ HYPRE_Int hypre_ParCompGridVectorSetConstantValues(hypre_ParCompGridVector *vect
    if (hypre_ParCompGridVectorNonOwned(vector))
       hypre_SeqVectorSetConstantValues(hypre_ParCompGridVectorNonOwned(vector), value);
 
+   return 0;
+}
+
+HYPRE_Int hypre_ParCompGridVectorCopy(hypre_ParCompGridVector *x, hypre_ParCompGridVector *y )
+{
+   if (hypre_ParCompGridVectorOwned(x) && hypre_ParCompGridVectorOwned(y))
+      hypre_SeqVectorCopy(hypre_ParCompGridVectorOwned(x), hypre_ParCompGridVectorOwned(y));
+   if (hypre_ParCompGridVectorNonOwned(x) && hypre_ParCompGridVectorNonOwned(y))
+      hypre_SeqVectorCopy(hypre_ParCompGridVectorNonOwned(x), hypre_ParCompGridVectorNonOwned(y));
    return 0;
 }
 
@@ -884,28 +902,16 @@ hypre_ParCompGridFinalizeNew( hypre_ParAMGData *amg_data, hypre_ParCompGrid **co
       if (use_rd)
       {
          hypre_ParCompGridQNew(compGrid[level]) = hypre_ParCompGridVectorCreate();
-         hypre_ParCompGridVectorOwned(hypre_ParCompGridQNew(compGrid[level])) = hypre_SeqVectorCreate(num_owned);
-         hypre_SeqVectorInitialize(hypre_ParCompGridVectorOwned(hypre_ParCompGridQNew(compGrid[level])));
-         hypre_ParCompGridVectorOwnsOwnedVector(hypre_ParCompGridQNew(compGrid[level])) = 1;
-         hypre_ParCompGridVectorNonOwned(hypre_ParCompGridQNew(compGrid[level])) = hypre_SeqVectorCreate(num_nonowned);
-         hypre_SeqVectorInitialize(hypre_ParCompGridVectorNonOwned(hypre_ParCompGridQNew(compGrid[level])));
+         hypre_ParCompGridVectorInitialize(hypre_ParCompGridQNew(compGrid[level]), num_owned, num_nonowned);
       }
 
       if (level < num_levels)
       {
          hypre_ParCompGridSNew(compGrid[level]) = hypre_ParCompGridVectorCreate();
-         hypre_ParCompGridVectorOwned(hypre_ParCompGridSNew(compGrid[level])) = hypre_SeqVectorCreate(num_owned);
-         hypre_SeqVectorInitialize(hypre_ParCompGridVectorOwned(hypre_ParCompGridSNew(compGrid[level])));
-         hypre_ParCompGridVectorOwnsOwnedVector(hypre_ParCompGridSNew(compGrid[level])) = 1;
-         hypre_ParCompGridVectorNonOwned(hypre_ParCompGridSNew(compGrid[level])) = hypre_SeqVectorCreate(num_nonowned);
-         hypre_SeqVectorInitialize(hypre_ParCompGridVectorNonOwned(hypre_ParCompGridSNew(compGrid[level])));
+         hypre_ParCompGridVectorInitialize(hypre_ParCompGridSNew(compGrid[level]), num_owned, num_nonowned);
 
          hypre_ParCompGridTNew(compGrid[level]) = hypre_ParCompGridVectorCreate();
-         hypre_ParCompGridVectorOwned(hypre_ParCompGridTNew(compGrid[level])) = hypre_SeqVectorCreate(num_owned);
-         hypre_SeqVectorInitialize(hypre_ParCompGridVectorOwned(hypre_ParCompGridTNew(compGrid[level])));
-         hypre_ParCompGridVectorOwnsOwnedVector(hypre_ParCompGridTNew(compGrid[level])) = 1;
-         hypre_ParCompGridVectorNonOwned(hypre_ParCompGridTNew(compGrid[level])) = hypre_SeqVectorCreate(num_nonowned);
-         hypre_SeqVectorInitialize(hypre_ParCompGridVectorNonOwned(hypre_ParCompGridTNew(compGrid[level])));
+         hypre_ParCompGridVectorInitialize(hypre_ParCompGridTNew(compGrid[level]), num_owned, num_nonowned);
       }
 
       // Free up arrays we no longer need

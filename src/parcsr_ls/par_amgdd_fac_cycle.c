@@ -340,65 +340,107 @@ FAC_Restrict( hypre_ParCompGrid *compGrid_f, hypre_ParCompGrid *compGrid_c, HYPR
 HYPRE_Int
 hypre_BoomerAMGDD_FAC_Jacobi( HYPRE_Solver amg_vdata, hypre_ParCompGrid *compGrid, HYPRE_Int cycle_param )
 {
-   // HYPRE_Int i,j; 
-   // hypre_ParAMGData   *amg_data = (hypre_ParAMGData*) amg_vdata;
-   // HYPRE_Real relax_weight = hypre_ParAMGDataRelaxWeight(amg_data)[0];
+   HYPRE_Int i,j; 
+   hypre_ParAMGData   *amg_data = (hypre_ParAMGData*) amg_vdata;
+   HYPRE_Real relax_weight = hypre_ParAMGDataRelaxWeight(amg_data)[0];
 
-   // // Calculate l1_norms if necessary (right now, I'm just using this vector for the diagonal of A and doing straight ahead Jacobi)
-   // if (!hypre_ParCompGridL1Norms(compGrid))
-   // {
-   //    hypre_ParCompGridL1Norms(compGrid) = hypre_CTAlloc(HYPRE_Real, hypre_ParCompGridNumNodes(compGrid), HYPRE_MEMORY_SHARED);
-   //    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
-   //    {
-   //       for (j = hypre_ParCompGridANewRowPtr(compGrid)[i]; j < hypre_ParCompGridANewRowPtr(compGrid)[i+1]; j++)
-   //       {
-   //          // hypre_ParCompGridL1Norms(compGrid)[i] += fabs(hypre_ParCompGridANewData(compGrid)[j]);
-   //          if (hypre_ParCompGridANewColInd(compGrid)[j] == i) hypre_ParCompGridL1Norms(compGrid)[i] = hypre_ParCompGridANewData(compGrid)[j];
-   //       }
-   //    }
-   // }
+   // !!! Optimization: don't have to do the matrix vector multiplication, etc. over the ghost dofs
 
-   // // Allocate temporary vector if necessary (needs length num real nodes here)
-   // if (!hypre_ParCompGridTemp(compGrid))
-   // {      
-   //    hypre_ParCompGridTemp(compGrid) = hypre_SeqVectorCreate(hypre_ParCompGridNumNodes(compGrid));
-   //    hypre_SeqVectorInitialize(hypre_ParCompGridTemp(compGrid));
-   // }
-   // hypre_VectorSize(hypre_ParCompGridTemp(compGrid)) = hypre_ParCompGridNumRealNodes(compGrid);
+   // Calculate l1_norms if necessary (right now, I'm just using this vector for the diagonal of A and doing straight ahead Jacobi)
+   if (!hypre_ParCompGridL1Norms(compGrid))
+   {
+      HYPRE_Int total_real_nodes = hypre_ParCompGridNumOwnedNodes(compGrid) + hypre_ParCompGridNumNonOwnedRealNodes(compGrid);
+      hypre_ParCompGridL1Norms(compGrid) = hypre_CTAlloc(HYPRE_Real, total_real_nodes, HYPRE_MEMORY_SHARED);
+      hypre_CSRMatrix *diag = hypre_ParCompGridMatrixOwnedDiag(hypre_ParCompGridANew(compGrid));
+      for (i = 0; i < hypre_ParCompGridNumOwnedNodes(compGrid); i++)
+      {
+         for (j = hypre_CSRMatrixI(diag)[i]; j < hypre_CSRMatrixI(diag)[i+1]; j++)
+         {
+            // hypre_ParCompGridL1Norms(compGrid)[i] += fabs(hypre_CSRMatrixData(diag)[j]);
+            if (hypre_CSRMatrixJ(diag)[j] == i) hypre_ParCompGridL1Norms(compGrid)[i] = hypre_CSRMatrixData(diag)[j];
+         }
+      }
+      diag = hypre_ParCompGridMatrixNonOwnedDiag(hypre_ParCompGridANew(compGrid));
+      for (i = 0; i < hypre_ParCompGridNumNonOwnedRealNodes(compGrid); i++)
+      {
+         for (j = hypre_CSRMatrixI(diag)[i]; j < hypre_CSRMatrixI(diag)[i+1]; j++)
+         {
+            // hypre_ParCompGridL1Norms(compGrid)[i + hypre_ParCompGridNumOwnedNodes(compGrid)] += fabs(hypre_CSRMatrixData(diag)[j]);
+            if (hypre_CSRMatrixJ(diag)[j] == i) hypre_ParCompGridL1Norms(compGrid)[i + hypre_ParCompGridNumOwnedNodes(compGrid)] = hypre_CSRMatrixData(diag)[j];
+         }
+      }
+   }
 
+   // Allocate temporary vector if necessary
+   if (!hypre_ParCompGridTempNew(compGrid))
+   {
+      hypre_ParCompGridTempNew(compGrid) = hypre_ParCompGridVectorCreate();
+      hypre_ParCompGridVectorInitialize(hypre_ParCompGridTempNew(compGrid), hypre_ParCompGridNumOwnedNodes(compGrid), hypre_ParCompGridNumNonOwnedNodes(compGrid));
+   }
 
-   // hypre_SeqVectorCopy(hypre_ParCompGridFNew(compGrid),hypre_ParCompGridTemp(compGrid));
-   
-   // hypre_CSRMatrixMatvec(-relax_weight, hypre_ParCompGridANewReal(compGrid), hypre_ParCompGridUNew(compGrid), relax_weight, hypre_ParCompGridTemp(compGrid));
-   
-   // #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
-   // VecScale(hypre_VectorData(hypre_ParCompGridUNew(compGrid)),hypre_VectorData(hypre_ParCompGridTemp(compGrid)),hypre_ParCompGridL1Norms(compGrid),hypre_ParCompGridNumRealNodes(compGrid),HYPRE_STREAM(4));
-   // if (hypre_ParCompGridTNew(compGrid)) VecScale(hypre_VectorData(hypre_ParCompGridTNew(compGrid)),hypre_VectorData(hypre_ParCompGridTemp(compGrid)),hypre_ParCompGridL1Norms(compGrid),hypre_ParCompGridNumRealNodes(compGrid),HYPRE_STREAM(4));
-   // if (hypre_ParCompGridQ(compGrid)) VecScale(hypre_VectorData(hypre_ParCompGridQ(compGrid)),hypre_VectorData(hypre_ParCompGridTemp(compGrid)),hypre_ParCompGridL1Norms(compGrid),hypre_ParCompGridNumRealNodes(compGrid),HYPRE_STREAM(4));
-   // #else
-   // for (i = 0; i < hypre_ParCompGridNumRealNodes(compGrid); i++)
-   // {
-   //    hypre_VectorData(hypre_ParCompGridUNew(compGrid))[i] += hypre_VectorData(hypre_ParCompGridTemp(compGrid))[i] / hypre_ParCompGridL1Norms(compGrid)[i];
-   // }
-   // if (hypre_ParCompGridTNew(compGrid))
-   // {
-   //    for (i = 0; i < hypre_ParCompGridNumRealNodes(compGrid); i++)
-   //    {
-   //       hypre_VectorData(hypre_ParCompGridTNew(compGrid))[i] += hypre_VectorData(hypre_ParCompGridTemp(compGrid))[i] / hypre_ParCompGridL1Norms(compGrid)[i];
-   //    }
-   // }
-   // if (hypre_ParCompGridQ(compGrid))
-   // {
-   //    for (i = 0; i < hypre_ParCompGridNumRealNodes(compGrid); i++)
-   //    {
-   //       hypre_VectorData(hypre_ParCompGridQ(compGrid))[i] += hypre_VectorData(hypre_ParCompGridTemp(compGrid))[i] / hypre_ParCompGridL1Norms(compGrid)[i];
-   //    }
-   // }
-   // #endif
+   hypre_ParCompGridVectorCopy(hypre_ParCompGridFNew(compGrid),hypre_ParCompGridTempNew(compGrid));
 
-   // hypre_VectorSize(hypre_ParCompGridTemp(compGrid)) = hypre_ParCompGridNumNodes(compGrid);
+   hypre_ParCompGridMatvec(-relax_weight, hypre_ParCompGridANew(compGrid), hypre_ParCompGridUNew(compGrid), relax_weight, hypre_ParCompGridTempNew(compGrid));
 
-   // return 0;
+   #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
+   VecScale(hypre_VectorData(hypre_ParCompGridVectorOwned(hypre_ParCompGridUNew(compGrid))),
+            hypre_VectorData(hypre_ParCompGridVectorOwned(hypre_ParCompGridTempNew(compGrid))),
+            hypre_ParCompGridL1Norms(compGrid),
+            hypre_ParCompGridNumOwnedNodes(compGrid),
+            HYPRE_STREAM(4));
+   VecScale(hypre_VectorData(hypre_ParCompGridVectorNonOwned(hypre_ParCompGridUNew(compGrid))),
+            hypre_VectorData(hypre_ParCompGridVectorNonOwned(hypre_ParCompGridTempNew(compGrid))),
+            &(hypre_ParCompGridL1Norms(compGrid)[ hypre_ParCompGridNumOwnedNodes(compGrid) ]),
+            hypre_ParCompGridNumNonOwnedRealNodes(compGrid),
+            HYPRE_STREAM(4));
+   if (hypre_ParCompGridTNew(compGrid))
+   {
+      VecScale(hypre_VectorData(hypre_ParCompGridVectorOwned(hypre_ParCompGridTNew(compGrid))),
+               hypre_VectorData(hypre_ParCompGridVectorOwned(hypre_ParCompGridTempNew(compGrid))),
+               hypre_ParCompGridL1Norms(compGrid),
+               hypre_ParCompGridNumOwnedNodes(compGrid),
+               HYPRE_STREAM(4));
+      VecScale(hypre_VectorData(hypre_ParCompGridVectorNonOwned(hypre_ParCompGridTNew(compGrid))),
+               hypre_VectorData(hypre_ParCompGridVectorNonOwned(hypre_ParCompGridTempNew(compGrid))),
+               &(hypre_ParCompGridL1Norms(compGrid)[ hypre_ParCompGridNumOwnedNodes(compGrid) ]),
+               hypre_ParCompGridNumNonOwnedRealNodes(compGrid),
+               HYPRE_STREAM(4));
+   }
+   if (hypre_ParCompGridQNew(compGrid))
+   {
+      VecScale(hypre_VectorData(hypre_ParCompGridVectorOwned(hypre_ParCompGridQNew(compGrid))),
+               hypre_VectorData(hypre_ParCompGridVectorOwned(hypre_ParCompGridTempNew(compGrid))),
+               hypre_ParCompGridL1Norms(compGrid),
+               hypre_ParCompGridNumOwnedNodes(compGrid),
+               HYPRE_STREAM(4));
+      VecScale(hypre_VectorData(hypre_ParCompGridVectorNonOwned(hypre_ParCompGridQNew(compGrid))),
+               hypre_VectorData(hypre_ParCompGridVectorNonOwned(hypre_ParCompGridTempNew(compGrid))),
+               &(hypre_ParCompGridL1Norms(compGrid)[ hypre_ParCompGridNumOwnedNodes(compGrid) ]),
+               hypre_ParCompGridNumNonOwnedRealNodes(compGrid),
+               HYPRE_STREAM(4));
+   }
+   #else
+   for (i = 0; i < hypre_ParCompGridNumOwnedNodes(compGrid); i++)
+      hypre_VectorData(hypre_ParCompGridVectorOwned(hypre_ParCompGridUNew(compGrid)))[i] += hypre_VectorData(hypre_ParCompGridVectorOwned(hypre_ParCompGridTempNew(compGrid)))[i] / hypre_ParCompGridL1Norms(compGrid)[i];
+   for (i = 0; i < hypre_ParCompGridNumNonOwnedRealNodes(compGrid); i++)
+      hypre_VectorData(hypre_ParCompGridVectorNonOwned(hypre_ParCompGridUNew(compGrid)))[i] += hypre_VectorData(hypre_ParCompGridVectorNonOwned(hypre_ParCompGridTempNew(compGrid)))[i] / hypre_ParCompGridL1Norms(compGrid)[i + hypre_ParCompGridNumOwnedNodes(compGrid)];
+   if (hypre_ParCompGridTNew(compGrid))
+   {
+      for (i = 0; i < hypre_ParCompGridNumOwnedNodes(compGrid); i++)
+         hypre_VectorData(hypre_ParCompGridVectorOwned(hypre_ParCompGridTNew(compGrid)))[i] += hypre_VectorData(hypre_ParCompGridVectorOwned(hypre_ParCompGridTempNew(compGrid)))[i] / hypre_ParCompGridL1Norms(compGrid)[i];
+      for (i = 0; i < hypre_ParCompGridNumNonOwnedRealNodes(compGrid); i++)
+         hypre_VectorData(hypre_ParCompGridVectorNonOwned(hypre_ParCompGridTNew(compGrid)))[i] += hypre_VectorData(hypre_ParCompGridVectorNonOwned(hypre_ParCompGridTempNew(compGrid)))[i] / hypre_ParCompGridL1Norms(compGrid)[i + hypre_ParCompGridNumOwnedNodes(compGrid)];
+   }
+   if (hypre_ParCompGridQNew(compGrid))
+   {
+      for (i = 0; i < hypre_ParCompGridNumOwnedNodes(compGrid); i++)
+         hypre_VectorData(hypre_ParCompGridVectorOwned(hypre_ParCompGridQNew(compGrid)))[i] += hypre_VectorData(hypre_ParCompGridVectorOwned(hypre_ParCompGridTempNew(compGrid)))[i] / hypre_ParCompGridL1Norms(compGrid)[i];
+      for (i = 0; i < hypre_ParCompGridNumNonOwnedRealNodes(compGrid); i++)
+         hypre_VectorData(hypre_ParCompGridVectorNonOwned(hypre_ParCompGridQNew(compGrid)))[i] += hypre_VectorData(hypre_ParCompGridVectorNonOwned(hypre_ParCompGridTempNew(compGrid)))[i] / hypre_ParCompGridL1Norms(compGrid)[i + hypre_ParCompGridNumOwnedNodes(compGrid)];
+   }
+   #endif
+
+   return 0;
 }
 
 HYPRE_Int
@@ -426,8 +468,8 @@ hypre_BoomerAMGDD_FAC_GaussSeidel( HYPRE_Solver amg_vdata, hypre_ParCompGrid *co
    
    if (hypre_ParCompGridQNew(compGrid))
    {
-      q_owned_data = hypre_VectorData(hypre_ParCompGridVectorOwned(hypre_ParCompGridTNew(compGrid)));
-      q_nonowned_data = hypre_VectorData(hypre_ParCompGridVectorNonOwned(hypre_ParCompGridTNew(compGrid)));
+      q_owned_data = hypre_VectorData(hypre_ParCompGridVectorOwned(hypre_ParCompGridQNew(compGrid)));
+      q_nonowned_data = hypre_VectorData(hypre_ParCompGridVectorNonOwned(hypre_ParCompGridQNew(compGrid)));
    }
    hypre_CSRMatrix *owned_diag = hypre_ParCompGridMatrixOwnedDiag(hypre_ParCompGridANew(compGrid));
    hypre_CSRMatrix *owned_offd = hypre_ParCompGridMatrixOwnedOffd(hypre_ParCompGridANew(compGrid));

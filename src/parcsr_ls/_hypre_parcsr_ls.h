@@ -198,7 +198,7 @@ typedef struct
    hypre_ParCompGridVector     *temp3_new;
 
    // TODO
-   // HYPRE_Real       *l1_norms;
+   HYPRE_Real       *l1_norms;
    // HYPRE_Int        *cf_marker_array;
    // int              *c_mask;
    // int              *f_mask;
@@ -243,7 +243,7 @@ typedef struct
 #define hypre_ParCompGridTemp3New(compGrid)        ((compGrid) -> temp3_new)
 
 // TODO
-// #define hypre_ParCompGridL1Norms(compGrid)         ((compGrid) -> l1_norms)
+#define hypre_ParCompGridL1Norms(compGrid)         ((compGrid) -> l1_norms)
 // #define hypre_ParCompGridCFMarkerArray(compGrid)         ((compGrid) -> cf_marker_array)
 // #define hypre_ParCompGridCMask(compGrid)         ((compGrid) -> c_mask)
 // #define hypre_ParCompGridFMask(compGrid)         ((compGrid) -> f_mask)
@@ -2114,9 +2114,11 @@ hypre_ParCompGridMatrix* hypre_ParCompGridMatrixCreate();
 HYPRE_Int hypre_ParCompGridMatrixDestroy(hypre_ParCompGridMatrix *matrix);
 HYPRE_Int hypre_ParCompGridMatvec( HYPRE_Complex alpha, hypre_ParCompGridMatrix *A, hypre_ParCompGridVector *x, HYPRE_Complex beta, hypre_ParCompGridVector *y);
 hypre_ParCompGridVector* hypre_ParCompGridVectorCreate();
+HYPRE_Int hypre_ParCompGridVectorInitialize(hypre_ParCompGridVector *vector, HYPRE_Int num_owned, HYPRE_Int num_nonowned);
 HYPRE_Int hypre_ParCompGridVectorDestroy(hypre_ParCompGridVector *vector);
 HYPRE_Int hypre_ParCompGridVectorAxpy(HYPRE_Complex alpha, hypre_ParCompGridVector *x, hypre_ParCompGridVector *y );
 HYPRE_Int hypre_ParCompGridVectorSetConstantValues(hypre_ParCompGridVector *vector, HYPRE_Complex value );
+HYPRE_Int hypre_ParCompGridVectorCopy(hypre_ParCompGridVector *x, hypre_ParCompGridVector *y );
 hypre_ParCompGrid *hypre_ParCompGridCreate();
 HYPRE_Int hypre_ParCompGridDestroy( hypre_ParCompGrid *compGrid );
 HYPRE_Int hypre_ParCompGridInitializeNew( hypre_ParAMGData *amg_data, HYPRE_Int padding, HYPRE_Int level, HYPRE_Int symmetric );
