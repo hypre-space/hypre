@@ -1168,7 +1168,7 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
                hypre_BoxGetSize(int_box, loop_size);
 
                hypre_BoxLoop2Begin(ndim, loop_size,
-                                   int_box,  start, dom_stride,  mi,
+                                   int_box,  start, unit_stride, mi,
                                    map_vbox, start, unit_stride, vi);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,mi,vi,index,d) HYPRE_SMP_SCHEDULE
@@ -1699,7 +1699,7 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
 hypre_IJMatrix *
 hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix )
 {
-   HYPRE_IJMatrix           ijmatrix;
+   HYPRE_IJMatrix           ij_A;
    hypre_SStructGraph      *graph    = hypre_SStructMatrixGraph(matrix);
    HYPRE_Int                ndim     = hypre_SStructGraphNDim(graph);
    HYPRE_Int                nparts   = hypre_SStructGraphNParts(graph);
@@ -1785,17 +1785,17 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix )
       } /* Loop over vars */
    } /* Loop over parts */
 
-   /* Create and initialize ijmatrix */
-   HYPRE_IJMatrixCreate(comm, istart, iend, jstart, jend, &ijmatrix);
-   HYPRE_IJMatrixSetObjectType(ijmatrix, HYPRE_PARCSR);
-   HYPRE_IJMatrixSetRowSizes(ijmatrix, (const HYPRE_Int *) row_sizes);
-   HYPRE_IJMatrixInitialize(ijmatrix);
+   /* Create and initialize ij_A */
+   HYPRE_IJMatrixCreate(comm, istart, iend, jstart, jend, &ij_A);
+   HYPRE_IJMatrixSetObjectType(ij_A, HYPRE_PARCSR);
+   HYPRE_IJMatrixSetRowSizes(ij_A, (const HYPRE_Int *) row_sizes);
+   HYPRE_IJMatrixInitialize(ij_A);
 
    /* Free/Allocate memory */
    hypre_TFree(row_sizes);
    values = hypre_CTAlloc(HYPRE_Complex, nrows*max_row_size);
 
-   /* Set entries of ijmatrix */
+   /* Set entries of ij_A */
    for (part = 0; part < nparts; part++)
    {
       pmatrix = hypre_SStructMatrixPMatrix(matrix, part);
@@ -1832,20 +1832,20 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix )
             hypre_SStructPMatrixSetBoxValues(pmatrix, ilower, iupper, var,
                                              nSentries, Sentries, values, -1);
 
-            /* SET values to ijmatrix */
+            /* SET values to ij_A */
             hypre_SStructUMatrixSetBoxValuesHelper(matrix, part, ilower, iupper,
                                                    var, nSentries, Sentries,
-                                                   values, 0, ijmatrix);
+                                                   values, 0, ij_A);
          } /* Loop over boxes */
       } /* Loop over vars */
    } /* Loop over parts */
 
-   /* Assemble ijmatrix */
-   HYPRE_IJMatrixAssemble(ijmatrix);
+   /* Assemble ij_A */
+   HYPRE_IJMatrixAssemble(ij_A);
 
    /* Free memory */
    hypre_BoxDestroy(ghost_box);
    hypre_TFree(values);
 
-   return (hypre_IJMatrix *) ijmatrix;
+   return (hypre_IJMatrix *) ij_A;
 }
