@@ -3275,6 +3275,12 @@ hypre_ParCSRMatrix *hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
    HYPRE_Int local_num_rows, local_num_cols;
    HYPRE_Int starts_size;
 
+   if (!comm_pkg_A)
+   {
+      hypre_MatvecCommPkgCreate(A);
+      comm_pkg_A = hypre_ParCSRMatrixCommPkg(A);
+   }
+
    n_rows_A = hypre_ParCSRMatrixGlobalNumRows(A);
    n_cols_A = hypre_ParCSRMatrixGlobalNumCols(A);
    n_rows_B = hypre_ParCSRMatrixGlobalNumRows(B);
