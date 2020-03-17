@@ -1139,8 +1139,6 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
             hypre_SStructGridIntersect(dom_grid, part, vars[entry], to_box, -1,
                                        &boxman_to_entries, &nboxman_to_entries);
 
-            smatrix = hypre_SStructPMatrixSMatrix(pmatrix, var, vars[entry]);
-
             for (jj = 0; jj < nboxman_to_entries; jj++)
             {
                hypre_SStructBoxManEntryGetStrides(boxman_to_entries[jj],
@@ -1162,8 +1160,10 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
                hypre_SStructBoxManEntryGetGlobalRank(boxman_entries[ii],
                                                      index, &row_base, matrix_type);
                hypre_CopyBox(vbox, map_vbox);
-               hypre_StructMatrixMapDataBox(smatrix, map_vbox);
-               hypre_StructMatrixMapDataBox(smatrix, int_box);
+
+               hypre_SStructMatrixMapDataBox(matrix, part, var, vars[entry], map_vbox);
+               hypre_SStructMatrixMapDataBox(matrix, part, var, vars[entry], int_box);
+
                start = hypre_BoxIMin(int_box);
                hypre_BoxGetSize(int_box, loop_size);
 
@@ -1300,6 +1300,29 @@ hypre_SStructUMatrixAssemble( hypre_SStructMatrix *matrix )
 /*==========================================================================
  * SStructMatrix routines
  *==========================================================================*/
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+hypre_SStructMatrixMapDataBox( hypre_SStructMatrix  *matrix,
+                               HYPRE_Int             part,
+                               HYPRE_Int             vi,
+                               HYPRE_Int             vj,
+                               hypre_Box            *map_vbox )
+{
+   HYPRE_Int             matrix_type = hypre_SStructMatrixObjectType(matrix);
+   hypre_SStructPMatrix *pmatrix;
+   hypre_StructMatrix   *smatrix;
+
+   if (matrix_type == HYPRE_SSTRUCT || matrix_type == HYPRE_STRUCT)
+   {
+      pmatrix = hypre_SStructMatrixPMatrix(matrix, part);
+      smatrix = hypre_SStructPMatrixSMatrix(pmatrix, vi, vj);
+      hypre_StructMatrixMapDataBox(smatrix, map_vbox);
+   }
+
+   return hypre_error_flag;
+}
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
