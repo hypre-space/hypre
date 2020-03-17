@@ -552,51 +552,6 @@ SetupNearestProcessorNeighborsNew( hypre_ParCSRMatrix *A, hypre_ParCompGridCommP
       hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[level][send_proc_dofs.size()] = total_send_elmts;
    }
 
-   // !!! Debug: make sure ordering of recv_procs and send_elmts for compGridCommPkg matches the original ParCSRCommPkg
-   for (auto i = 0; i < hypre_ParCSRCommPkgNumSends(commPkg); i++)
-   {
-      for (auto new_proc = 0; new_proc < hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[level]; new_proc++)
-      {
-         if (hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level][new_proc] == hypre_ParCSRCommPkgSendProc(commPkg,i))
-         {
-            int err = 0;
-            // printf("compGridCommPkg send proc = %d, commPkg send proc = %d\n", hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level][new_proc], hypre_ParCSRCommPkgSendProc(commPkg,i));
-            int num_original_send_dofs = hypre_ParCSRCommPkgSendMapStart(commPkg,i+1) - hypre_ParCSRCommPkgSendMapStart(commPkg,i);
-            int old_offset = hypre_ParCSRCommPkgSendMapStart(commPkg,i);
-            int new_offset = hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[level][new_proc];
-            for (auto j = 0; j < num_original_send_dofs; j++)
-            {
-               if (hypre_ParCompGridCommPkgSendMapElmts(compGridCommPkg)[level][j+new_offset] != hypre_ParCSRCommPkgSendMapElmt(commPkg,j+old_offset))
-               {
-                  err = 1;
-                  printf("%d, %d\n", hypre_ParCompGridCommPkgSendMapElmts(compGridCommPkg)[level][j + new_offset], hypre_ParCSRCommPkgSendMapElmt(commPkg,j + old_offset));
-               }
-            }
-            if (err)
-            {
-               printf("\nlevel %d, hypre_ParCompGridCommPkgSendMapElmts = \n", level);
-               for (auto j = hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[level][new_proc]; j < hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[level][new_proc+1]; j++)
-               {
-                  printf("%d\n", hypre_ParCompGridCommPkgSendMapElmts(compGridCommPkg)[level][j]);
-               }
-               printf("\nhypre_ParCSRCommPkgSendMapElmt = \n");
-               for (auto j = hypre_ParCSRCommPkgSendMapStart(commPkg,i); j < hypre_ParCSRCommPkgSendMapStart(commPkg,i+1); j++)
-               {
-                  printf("%d\n", hypre_ParCSRCommPkgSendMapElmt(commPkg,j));
-               }                  
-            }
-            break;
-         }
-      }
-   }
-   for (auto i = 0; i < hypre_ParCSRCommPkgNumRecvs(commPkg); i++)
-   {
-      if (hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[level][i] != hypre_ParCSRCommPkgRecvProc(commPkg,i))
-         printf("compGridCommPkg recv proc = %d, commPkg recv proc = %d\n", hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[level][i], hypre_ParCSRCommPkgRecvProc(commPkg,i));
-   }
-
-
-
    return 0;
 }
 
@@ -619,24 +574,11 @@ UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
    HYPRE_Int myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
-   // !!! Debug
-   // for (i = 0; i < hypre_ParCompGridNumNonOwnedNodes(compGrid[1]); i++)
-   // {
-   //    if (hypre_ParCompGridNonOwnedCoarseIndices(compGrid[1])[i] >= hypre_ParCompGridNumNonOwnedNodes(compGrid[2]))
-   //       printf("Rank %d, level %d, end of setup local current level %d, nonowned coarse index out of bounds: i = %d, coarse index = %d\n",
-   //          myid, level, current_level, i, hypre_ParCompGridNonOwnedCoarseIndices(compGrid[1])[i]);
-   // }
-
    // initialize the counter
    HYPRE_Int            cnt = 0;
 
    // get the number of levels received
    num_psi_levels = recv_buffer[cnt++];
-
-   // !!! Debug
-   // if (myid == 3 && current_level == 0 && hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[current_level][buffer_number] == 0)
-   //    printf("Rank %d recv from rank %d on current_level %d: num_psi_levels = %d\n",
-   //       myid, hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[current_level][buffer_number], current_level, num_psi_levels);
 
    // Init the recv_map_send_buffer_size !!! I think this can just be set a priori instead of counting it up in this function... !!!
    *recv_map_send_buffer_size = num_levels - current_level - 1;
@@ -653,23 +595,17 @@ UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
 
    // get the number of nodes on this level
    num_recv_nodes[current_level][buffer_number][current_level] = recv_buffer[cnt++];
-
-   // !!! Debug
-   // if (myid == 3 && current_level == 0 && hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[current_level][buffer_number] == 0)
-   //    printf("Rank %d recv from rank %d on current_level %d: num_recv_nodes[%d] = %d\n",
-   //       myid, hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[current_level][buffer_number], current_level, current_level, num_recv_nodes[current_level][buffer_number][current_level]);
-
    nodes_added_on_level[current_level] += num_recv_nodes[current_level][buffer_number][current_level];
 
    // if necessary, reallocate more space for nonowned dofs
    HYPRE_Int max_nonowned = hypre_CSRMatrixNumRows(nonowned_diag);
    HYPRE_Int start_extra_dofs = hypre_ParCompGridNumNonOwnedNodes(compGrid[current_level]);
-   if (num_recv_nodes[current_level][buffer_number][current_level] > max_nonowned) 
+   if (num_recv_nodes[current_level][buffer_number][current_level] + start_extra_dofs > max_nonowned) 
    {
       num_resizes[3*current_level]++;
       HYPRE_Int new_size = ceil(1.5*max_nonowned);
-      if (new_size < num_recv_nodes[current_level][buffer_number][current_level]) 
-         new_size = num_recv_nodes[current_level][buffer_number][current_level];
+      if (new_size < num_recv_nodes[current_level][buffer_number][current_level] + start_extra_dofs) 
+         new_size = num_recv_nodes[current_level][buffer_number][current_level] + start_extra_dofs;
       hypre_ParCompGridResizeNew(compGrid[current_level], new_size, current_level != num_levels-1); // !!! Is there a better way to manage memory? !!!
    }
 
@@ -689,10 +625,6 @@ UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
    {
       recv_map[current_level][buffer_number][current_level][i] = i + hypre_ParCSRCommPkgRecvVecStart(commPkg, buffer_number);
    }
-   // for (i = num_original_recv_dofs; i < num_recv_nodes[current_level][buffer_number][current_level]; i++)
-   // {
-   //    recv_map[current_level][buffer_number][current_level][i] = i - num_original_recv_dofs + start_extra_dofs;
-   // }
 
    // Unpack global indices and setup sort and invsort
    hypre_ParCompGridNumNonOwnedNodes(compGrid[current_level]) += remaining_dofs;
@@ -887,12 +819,6 @@ UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
    {
       // get the number of nodes on this level
       num_recv_nodes[current_level][buffer_number][level] = recv_buffer[cnt++];
-
-      // !!! Debug
-      // if (myid == 3 && current_level == 0 && hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[current_level][buffer_number] == 0)
-      //    printf("Rank %d recv from rank %d on current_level %d: num_recv_nodes[%d] = %d\n",
-      //       myid, hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[current_level][buffer_number], current_level, level, num_recv_nodes[current_level][buffer_number][level]);
-
       level_start = cnt;
       *recv_map_send_buffer_size += num_recv_nodes[current_level][buffer_number][level];
 
@@ -916,7 +842,8 @@ UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
       {
          num_resizes[3*level]++;
          HYPRE_Int new_size = ceil(1.5*hypre_CSRMatrixNumRows(nonowned_diag));
-         if (new_size < num_recv_nodes[current_level][buffer_number][level] + num_nonowned) new_size = num_recv_nodes[current_level][buffer_number][level] + num_nonowned;
+         if (new_size < num_recv_nodes[current_level][buffer_number][level] + num_nonowned) 
+            new_size = num_recv_nodes[current_level][buffer_number][level] + num_nonowned;
          hypre_ParCompGridResizeNew(compGrid[level], new_size, level != num_levels-1); // !!! Is there a better way to manage memory? !!!
       }
 
@@ -938,22 +865,9 @@ UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
             incoming_is_real = 0;
          }
 
-
-         // !!! Debug
-         // if (myid == 3 && current_level == 0 && level == 1 && incoming_global_index == 7457)
-         //    printf("Rank 3 recv, current_level 0, proc %d (rank %d), level 1, recv 7457\n", 
-         //       buffer_number, hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[current_level][buffer_number]);
-
-
          // If incoming is owned, go on to the next
          if (incoming_global_index >= hypre_ParCompGridFirstGlobalIndex(compGrid[level]) && incoming_global_index <= hypre_ParCompGridLastGlobalIndex(compGrid[level]))
          {
-            // !!! Debug
-            // if (myid == 3 && current_level == 0 && level == 1 && incoming_global_index == 7457)
-            //    printf("Rank 3 recv, current_level 0, proc %d (rank %d), level 1, recv 7457, incoming_dest = %d\n", 
-            //       buffer_number, hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[current_level][buffer_number],
-            //       -(incoming_global_index - hypre_ParCompGridFirstGlobalIndex(compGrid[level]) + 1));
-
             incoming_dest[incoming_cnt++] = -(incoming_global_index - hypre_ParCompGridFirstGlobalIndex(compGrid[level]) + 1); // Save location info for use below
             cnt++;
          }
@@ -1006,11 +920,6 @@ UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
          {
             incoming_global_index = -(incoming_global_index + 1);
          }
-
-         // !!! Debug
-         // if (myid == 3 && current_level == 0 && level == 1 && incoming_global_index == 7457)
-         //    printf("Rank 3 recv, current_level 0, proc %d (rank %d), level 1, recv 7457\n", 
-         //       buffer_number, hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[current_level][buffer_number]);
          
          // If incoming is owned, go on to the next
          if (incoming_global_index >= hypre_ParCompGridFirstGlobalIndex(compGrid[level]) && incoming_global_index <= hypre_ParCompGridLastGlobalIndex(compGrid[level]))
@@ -1054,13 +963,6 @@ UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
          if (incoming_dest[i] >= 0)
          {
             HYPRE_Int global_index = recv_buffer[cnt];
-
-            // !!! Debug
-            if (global_index == -(7457+1) && myid == 3 && current_level == 0 && hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[current_level][buffer_number] == 0)
-               printf("Rank %d recv from rank %d on current_level %d: recv global_index, recv_buffer[%d] = %d\n",
-                  myid, hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[current_level][buffer_number], current_level, cnt, global_index);
-
-
             if (global_index < 0) 
             {
                global_index = -(global_index + 1);
@@ -1068,11 +970,6 @@ UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
             }
             else hypre_ParCompGridNonOwnedRealMarker(compGrid[level])[ incoming_dest[i] ] = 1;
             hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level])[ incoming_dest[i] ] = global_index;
-
-            // !!! Debug
-            // if (myid == 3 && current_level == 0 && level == 1 && incoming_dest[i] == 453)
-            //    printf("Setting gid at 453 to %d, recv from rank %d\n", global_index, hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[current_level][buffer_number]);
-
          }
          cnt++;
       }
@@ -1096,11 +993,6 @@ UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
       for (i = 0; i < num_recv_nodes[current_level][buffer_number][level]; i++)
       {
          HYPRE_Int row_size = recv_buffer[ i + row_sizes_start ];
-
-         // !!! Debug
-         // if (myid == 0 && current_level == 1 && level == 2)
-         //    printf("incoming_dest[i] = %d\n", incoming_dest[i]);
-
 
          // !!! Optimization: (probably small gain) right now, I disregard incoming info for real overwriting ghost (internal buf connectivity could be used to avoid a few binary searches later)
          // !!! Symmetric: need to insert col indices for ghosts overwritten as real somehow
@@ -1132,17 +1024,6 @@ UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
                         hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[level]) = hypre_TReAlloc(hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[level]), HYPRE_Int, ceil(1.5*hypre_CSRMatrixNumNonzeros(nonowned_diag) + 1), HYPRE_MEMORY_HOST);
                      }
                      hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[level])[ hypre_ParCompGridNumMissingColIndices(compGrid[level])++ ] = diag_rowptr;
-                     
-
-
-                     // !!! Debug
-                     // if (myid == 0 && buffer_number == 0 && hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level])[idx] == 23)
-                     //    // if (incoming_index != hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level])[ hypre_CSRMatrixJ(diag)[diag_rowptr] ])
-                     //       printf("Rank %d, outer_level %d, proc %d, level %d, row %d, recv index %d, diag expected gid = %d\n", 
-                     //          myid, outer_level, proc, level, hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level])[idx], incoming_index, hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level])[ hypre_CSRMatrixJ(diag)[diag_rowptr] ]);
-
-
-
                      hypre_CSRMatrixJ(nonowned_diag)[diag_rowptr++] = -(incoming_index+1);
                   }
                }
@@ -1198,15 +1079,6 @@ UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
 
       hypre_ParCompGridNumNonOwnedNodes(compGrid[level]) += add_node_cnt;
    }
-
-   // !!! Debug
-   // if (myid == 0 && current_level <= 1)
-   // {
-   //    printf("AFTER unpack, current_level %d, num missing = %d\n",current_level, hypre_ParCompGridNumMissingColIndices(compGrid[1]));
-   //    for (i = 0; i < hypre_ParCompGridNumMissingColIndices(compGrid[1]); i++)
-   //       printf("%d (%d) ",hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[1])[i],  hypre_CSRMatrixJ( hypre_ParCompGridMatrixNonOwnedDiag( hypre_ParCompGridANew(compGrid[1]) ) )[ hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[1])[i] ]);
-   //    printf("\n");
-   // }
 
    return 0;
 }
