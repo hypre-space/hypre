@@ -826,6 +826,7 @@ hypre_ParCompGridFinalizeNew( hypre_ParAMGData *amg_data, hypre_ParCompGrid **co
       hypre_CSRMatrixJ(A_diag) = new_A_diag_colInd;
       hypre_CSRMatrixData(A_diag) = new_A_diag_data;
       hypre_CSRMatrixNumRows(A_diag) = num_nonowned;
+      hypre_CSRMatrixNumRownnz(A_diag) = num_nonowned;
       hypre_CSRMatrixNumCols(A_diag) = num_nonowned;
       hypre_CSRMatrixNumNonzeros(A_diag) = hypre_CSRMatrixI(A_diag)[num_nonowned];
 
@@ -836,6 +837,7 @@ hypre_ParCompGridFinalizeNew( hypre_ParAMGData *amg_data, hypre_ParCompGrid **co
       hypre_CSRMatrixJ(A_offd) = new_A_offd_colInd;
       hypre_CSRMatrixData(A_offd) = new_A_offd_data;
       hypre_CSRMatrixNumRows(A_offd) = num_nonowned;
+      hypre_CSRMatrixNumRownnz(A_offd) = num_nonowned;
       hypre_CSRMatrixNumCols(A_offd) = hypre_ParCompGridNumOwnedNodes(compGrid[level]);
       hypre_CSRMatrixNumNonzeros(A_offd) = hypre_CSRMatrixI(A_offd)[num_nonowned];
 
@@ -851,6 +853,7 @@ hypre_ParCompGridFinalizeNew( hypre_ParAMGData *amg_data, hypre_ParCompGrid **co
          hypre_CSRMatrixJ(P_diag) = new_P_diag_colInd;
          hypre_CSRMatrixData(P_diag) = new_P_diag_data;
          hypre_CSRMatrixNumRows(P_diag) = num_nonowned;
+         hypre_CSRMatrixNumRownnz(P_diag) = num_nonowned;
          hypre_CSRMatrixNumCols(P_diag) = hypre_ParCompGridNumNonOwnedNodes(compGrid[level+1]);
          hypre_CSRMatrixNumNonzeros(P_diag) = hypre_CSRMatrixI(P_diag)[num_nonowned];
 
@@ -861,6 +864,7 @@ hypre_ParCompGridFinalizeNew( hypre_ParAMGData *amg_data, hypre_ParCompGrid **co
          hypre_CSRMatrixJ(P_offd) = new_P_offd_colInd;
          hypre_CSRMatrixData(P_offd) = new_P_offd_data;
          hypre_CSRMatrixNumRows(P_offd) = num_nonowned;
+         hypre_CSRMatrixNumRownnz(P_offd) = num_nonowned;
          hypre_CSRMatrixNumCols(P_offd) = hypre_ParCompGridNumOwnedNodes(compGrid[level+1]);
          hypre_CSRMatrixNumNonzeros(P_offd) = hypre_CSRMatrixI(P_offd)[num_nonowned];
 

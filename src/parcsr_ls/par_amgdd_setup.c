@@ -180,8 +180,6 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    //    }
    // }
 
-
-
    // Debugging: dump out the AMG hierarchy and the initialized composite grids
    #if DEBUG_COMP_GRID == 2
    for (level = 0; level < num_levels; level++)
@@ -460,7 +458,6 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
       if (myid == 0) hypre_printf("All ranks: done with level %d\n", level);
       hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
       #endif 
-
 
       #if DEBUG_COMP_GRID
       HYPRE_Int error_code;
@@ -865,10 +862,18 @@ PackSendBufferNew( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compG
    HYPRE_Int *send_buffer = hypre_CTAlloc(HYPRE_Int, (*buffer_size), HYPRE_MEMORY_HOST);
    cnt = 0;
    send_buffer[cnt++] = num_psi_levels;
+   // !!! Debug
+   // if (myid == 0 && current_level == 0 && hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[current_level][proc] == 3)
+   //    printf("Rank %d sending to rank %d on current_level %d: num_psi_levels = %d\n",
+   //       myid, hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[current_level][proc], current_level, num_psi_levels);
    for (level = current_level; level < current_level + num_psi_levels; level++)
    {
       // store the number of nodes on this level
       send_buffer[cnt++] = num_send_nodes[current_level][proc][level];
+      // !!! Debug
+      // if (myid == 0 && current_level == 0 && hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[current_level][proc] == 3)
+      //    printf("Rank %d sending to rank %d on current_level %d: num_send_nodes[%d] = %d\n",
+      //       myid, hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[current_level][proc], current_level, level, num_send_nodes[current_level][proc][level]);
 
       // copy all global indices
       for (i = 0; i < num_send_nodes[current_level][proc][level]; i++)
@@ -2018,7 +2023,7 @@ TestCompGrids1New(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int 
                      myid, level, i, i + hypre_ParCompGridFirstGlobalIndex(compGrid[level]));
                else
                   hypre_printf("Error: extra nonowned nodes present in comp grid, rank %d, level %d, i = %d, global index = %d\n", 
-                     myid, level, i, hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level])[i - hypre_ParCompGridNumOwnedNodes(compGrid[level])]);
+                     myid, level, i - hypre_ParCompGridNumOwnedNodes(compGrid[level]), hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level])[i - hypre_ParCompGridNumOwnedNodes(compGrid[level])]);
             }
          }
       }
