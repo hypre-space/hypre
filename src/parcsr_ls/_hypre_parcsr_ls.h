@@ -2090,14 +2090,17 @@ HYPRE_Int hypre_BoomerAMGRDSolutionCommunication( void *amg_vdata );
 HYPRE_Int hypre_BoomerAMGDDSetup(  void *amg_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *b, hypre_ParVector *x, HYPRE_Int *timers, HYPRE_Int use_barriers, HYPRE_Int *communication_cost, HYPRE_Int verify_amgdd );
 
 /* par_amgdd_helpers_.cxx */
-HYPRE_Int SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int level, HYPRE_Int *padding, HYPRE_Int num_ghost_layers, HYPRE_Int *communication_cost );
-HYPRE_Int UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid, 
+HYPRE_Int SetupNearestProcessorNeighborsNew( hypre_ParCSRMatrix *A, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int level, HYPRE_Int *padding, HYPRE_Int num_ghost_layers, HYPRE_Int *communication_cost );
+HYPRE_Int UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid, 
+      hypre_ParCSRCommPkg *commPkg,
+      HYPRE_Int **A_tmp_info,
       hypre_ParCompGridCommPkg *compGridCommPkg,
       HYPRE_Int ****send_flag, HYPRE_Int ***num_send_nodes,
       HYPRE_Int ****recv_map, HYPRE_Int ***num_recv_nodes, 
       HYPRE_Int *recv_map_send_buffer_size, HYPRE_Int current_level, HYPRE_Int num_levels,
       HYPRE_Int *nodes_added_on_level, HYPRE_Int buffer_number, HYPRE_Int *num_resizes, HYPRE_Int symmetric );
-/* par_amgdd_test.c */
+
+/* par_amgdd_fac_cycle.c */
 HYPRE_Int hypre_BoomerAMGDDTestSolve( void *amg_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u);
 
 /* par_amgdd_fac_cycle.c */
