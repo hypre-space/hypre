@@ -898,7 +898,7 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
 
    HYPRE_BigInt     num_nonzeros    = hypre_ParCSRMatrixNumNonzeros(A);
    HYPRE_BigInt     global_num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
-   HYPRE_Int        avg_nnzrow      = num_nonzeros/global_num_rows;
+   HYPRE_Int        avg_nnzrow;
 
    hypre_CSRMatrix *S_ext = NULL;
    HYPRE_Int       *S_ext_i = NULL;
@@ -925,7 +925,6 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    HYPRE_Int        ji, jj, jk, jm, index;
    HYPRE_Int        set_empty = 1;
    HYPRE_Int        C_i_nonempty = 0;
-   //HYPRE_Int      num_nonzeros;
    HYPRE_Int        cut, nnzrow;
    HYPRE_Int        num_procs, my_id;
    HYPRE_Int        num_sends = 0;
@@ -1158,9 +1157,10 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    }
 
    /* Set dense rows as SF_PT */
-   cut = cut_factor*avg_nnzrow;
-   if (cut > 0)
+   if ((cut_factor > 0) && (global_num_rows > 0))
    {
+      avg_nnzrow = num_nonzeros/global_num_rows;
+      cut = cut_factor*avg_nnzrow;
       for (j = 0; j < num_variables; j++)
       {
          nnzrow = (A_i[j+1] - A_i[j]) + (A_offd_i[j+1] - A_offd_i[j]);
