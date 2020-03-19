@@ -59,3 +59,4 @@ mpirun -np 8  ./ij -P 2 2 2 -cljp1  -interptype 0 -Pmx 0 > coarsening.out.12
 
 mpirun -np 8  ./ij -P 2 2 2 -pmis1 > coarsening.out.13
 
+mpirun -np 1  ./ij -n 2 2 2 -agg_nl 1 -mxrs 0.1 > coarsening.out.14
