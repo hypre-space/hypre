@@ -36,6 +36,7 @@ FILES="\
  ${TNAME}.out.11\
  ${TNAME}.out.12\
  ${TNAME}.out.13\
+ ${TNAME}.out.14\
 "
 
 for i in $FILES
