@@ -22,10 +22,10 @@ extern "C"
 #endif
 
 HYPRE_Int
-SetupNearestProcessorNeighborsNew( hypre_ParCSRMatrix *A, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int level, HYPRE_Int *padding, HYPRE_Int num_ghost_layers, HYPRE_Int *communication_cost );
+SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int level, HYPRE_Int *padding, HYPRE_Int num_ghost_layers, HYPRE_Int *communication_cost );
 
 HYPRE_Int
-UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid, 
+UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid, 
       hypre_ParCSRCommPkg *commPkg,
       HYPRE_Int **A_tmp_info,
       hypre_ParCompGridCommPkg *compGridCommPkg,
@@ -391,7 +391,7 @@ FindNeighborProcessors(hypre_ParCSRMatrix *A,
 }
 
 HYPRE_Int
-SetupNearestProcessorNeighborsNew( hypre_ParCSRMatrix *A, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int level, HYPRE_Int *padding, HYPRE_Int num_ghost_layers, HYPRE_Int *communication_cost )
+SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int level, HYPRE_Int *padding, HYPRE_Int num_ghost_layers, HYPRE_Int *communication_cost )
 {
    HYPRE_Int               i,j,cnt;
    HYPRE_Int               num_nodes = hypre_ParCSRMatrixNumRows(A);
@@ -556,7 +556,7 @@ SetupNearestProcessorNeighborsNew( hypre_ParCSRMatrix *A, hypre_ParCompGridCommP
 }
 
 HYPRE_Int
-UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid, 
+UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid, 
       hypre_ParCSRCommPkg *commPkg,
       HYPRE_Int **A_tmp_info,
       hypre_ParCompGridCommPkg *compGridCommPkg,
@@ -588,7 +588,7 @@ UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
    ////////////////////////////////////////////////////////////////////
 
    // Get the compgrid matrix, specifically the nonowned parts that will be added to
-   hypre_ParCompGridMatrix *A = hypre_ParCompGridANew(compGrid[current_level]);
+   hypre_ParCompGridMatrix *A = hypre_ParCompGridA(compGrid[current_level]);
    hypre_CSRMatrix *owned_offd = hypre_ParCompGridMatrixOwnedOffd(A);
    hypre_CSRMatrix *nonowned_diag = hypre_ParCompGridMatrixNonOwnedDiag(A);
    hypre_CSRMatrix *nonowned_offd = hypre_ParCompGridMatrixNonOwnedOffd(A);
@@ -606,7 +606,7 @@ UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
       HYPRE_Int new_size = ceil(1.5*max_nonowned);
       if (new_size < num_recv_nodes[current_level][buffer_number][current_level] + start_extra_dofs) 
          new_size = num_recv_nodes[current_level][buffer_number][current_level] + start_extra_dofs;
-      hypre_ParCompGridResizeNew(compGrid[current_level], new_size, current_level != num_levels-1); // !!! Is there a better way to manage memory? !!!
+      hypre_ParCompGridResize(compGrid[current_level], new_size, current_level != num_levels-1); // !!! Is there a better way to manage memory? !!!
    }
 
    // Get the original number of recv dofs in the ParCSRCommPkg (if this proc was recv'd from in original)   
@@ -822,7 +822,7 @@ UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
       level_start = cnt;
       *recv_map_send_buffer_size += num_recv_nodes[current_level][buffer_number][level];
 
-      A = hypre_ParCompGridANew(compGrid[level]);
+      A = hypre_ParCompGridA(compGrid[level]);
       owned_offd = hypre_ParCompGridMatrixOwnedOffd(A);
       nonowned_diag = hypre_ParCompGridMatrixNonOwnedDiag(A);
       nonowned_offd = hypre_ParCompGridMatrixNonOwnedOffd(A);
@@ -844,7 +844,7 @@ UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
          HYPRE_Int new_size = ceil(1.5*hypre_CSRMatrixNumRows(nonowned_diag));
          if (new_size < num_recv_nodes[current_level][buffer_number][level] + num_nonowned) 
             new_size = num_recv_nodes[current_level][buffer_number][level] + num_nonowned;
-         hypre_ParCompGridResizeNew(compGrid[level], new_size, level != num_levels-1); // !!! Is there a better way to manage memory? !!!
+         hypre_ParCompGridResize(compGrid[level], new_size, level != num_levels-1); // !!! Is there a better way to manage memory? !!!
       }
 
       sort_map = hypre_ParCompGridNonOwnedSort(compGrid[level]);

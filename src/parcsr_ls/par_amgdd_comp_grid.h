@@ -165,18 +165,18 @@ typedef struct
 
    HYPRE_Int        *owned_coarse_indices;
 
-   hypre_ParCompGridMatrix *A_new;
-   hypre_ParCompGridMatrix *P_new;
-   hypre_ParCompGridMatrix *R_new;
+   hypre_ParCompGridMatrix *A;
+   hypre_ParCompGridMatrix *P;
+   hypre_ParCompGridMatrix *R;
 
-   hypre_ParCompGridVector     *u_new;
-   hypre_ParCompGridVector     *f_new;
-   hypre_ParCompGridVector     *t_new;
-   hypre_ParCompGridVector     *s_new;
-   hypre_ParCompGridVector     *q_new;
-   hypre_ParCompGridVector     *temp_new;
-   hypre_ParCompGridVector     *temp2_new;
-   hypre_ParCompGridVector     *temp3_new;
+   hypre_ParCompGridVector     *u;
+   hypre_ParCompGridVector     *f;
+   hypre_ParCompGridVector     *t;
+   hypre_ParCompGridVector     *s;
+   hypre_ParCompGridVector     *q;
+   hypre_ParCompGridVector     *temp;
+   hypre_ParCompGridVector     *temp2;
+   hypre_ParCompGridVector     *temp3;
 
    // TODO
    HYPRE_Real       *l1_norms;
@@ -212,18 +212,18 @@ typedef struct
 
 #define hypre_ParCompGridOwnedCoarseIndices(compGrid)               ((compGrid) -> owned_coarse_indices)
 
-#define hypre_ParCompGridANew(compGrid)               ((compGrid) -> A_new)
-#define hypre_ParCompGridPNew(compGrid)               ((compGrid) -> P_new)
-#define hypre_ParCompGridRNew(compGrid)               ((compGrid) -> R_new)
+#define hypre_ParCompGridA(compGrid)               ((compGrid) -> A)
+#define hypre_ParCompGridP(compGrid)               ((compGrid) -> P)
+#define hypre_ParCompGridR(compGrid)               ((compGrid) -> R)
 
-#define hypre_ParCompGridUNew(compGrid)           ((compGrid) -> u_new)
-#define hypre_ParCompGridFNew(compGrid)           ((compGrid) -> f_new)
-#define hypre_ParCompGridTNew(compGrid)           ((compGrid) -> t_new)
-#define hypre_ParCompGridSNew(compGrid)           ((compGrid) -> s_new)
-#define hypre_ParCompGridQNew(compGrid)           ((compGrid) -> q_new)
-#define hypre_ParCompGridTempNew(compGrid)        ((compGrid) -> temp_new)
-#define hypre_ParCompGridTemp2New(compGrid)        ((compGrid) -> temp2_new)
-#define hypre_ParCompGridTemp3New(compGrid)        ((compGrid) -> temp3_new)
+#define hypre_ParCompGridU(compGrid)           ((compGrid) -> u)
+#define hypre_ParCompGridF(compGrid)           ((compGrid) -> f)
+#define hypre_ParCompGridT(compGrid)           ((compGrid) -> t)
+#define hypre_ParCompGridS(compGrid)           ((compGrid) -> s)
+#define hypre_ParCompGridQ(compGrid)           ((compGrid) -> q)
+#define hypre_ParCompGridTemp(compGrid)        ((compGrid) -> temp)
+#define hypre_ParCompGridTemp2(compGrid)        ((compGrid) -> temp2)
+#define hypre_ParCompGridTemp3(compGrid)        ((compGrid) -> temp3)
 
 // TODO
 #define hypre_ParCompGridL1Norms(compGrid)         ((compGrid) -> l1_norms)

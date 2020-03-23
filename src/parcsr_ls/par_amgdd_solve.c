@@ -299,8 +299,8 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata )
 
    for (level = amgdd_start_level; level < num_levels; level++)
    {
-      hypre_ParCompGridVectorSetConstantValues( hypre_ParCompGridTNew( hypre_ParAMGDataCompGrid(amg_data)[level] ), 0.0 );
-      hypre_ParCompGridVectorSetConstantValues( hypre_ParCompGridSNew( hypre_ParAMGDataCompGrid(amg_data)[level] ), 0.0 );
+      hypre_ParCompGridVectorSetConstantValues( hypre_ParCompGridT( hypre_ParAMGDataCompGrid(amg_data)[level] ), 0.0 );
+      hypre_ParCompGridVectorSetConstantValues( hypre_ParCompGridS( hypre_ParAMGDataCompGrid(amg_data)[level] ), 0.0 );
    }
 
 	// Do the cycles
@@ -376,8 +376,8 @@ ZeroInitialGuess( void *amg_vdata )
    // Zero solution on all levels
    for (level = amgdd_start_level; level < hypre_ParAMGDataNumLevels(amg_data); level++)
    {
-      hypre_ParCompGridVectorSetConstantValues( hypre_ParCompGridUNew(hypre_ParAMGDataCompGrid(amg_data)[level]), 0.0);
-      if (hypre_ParCompGridQNew(hypre_ParAMGDataCompGrid(amg_data)[level])) hypre_ParCompGridVectorSetConstantValues( hypre_ParCompGridQNew(hypre_ParAMGDataCompGrid(amg_data)[level]), 0.0);
+      hypre_ParCompGridVectorSetConstantValues( hypre_ParCompGridU(hypre_ParAMGDataCompGrid(amg_data)[level]), 0.0);
+      if (hypre_ParCompGridQ(hypre_ParAMGDataCompGrid(amg_data)[level])) hypre_ParCompGridVectorSetConstantValues( hypre_ParCompGridQ(hypre_ParAMGDataCompGrid(amg_data)[level]), 0.0);
    }
 	
 	return 0;
@@ -393,14 +393,14 @@ ZeroCompositeRHS( void *amg_vdata )
    hypre_ParCompGrid *compGrid = hypre_ParAMGDataCompGrid(amg_data)[amgdd_start_level];
    
    // Set RHS = 0, then copy in residual (from AMG F) into the owned portion
-   hypre_SeqVectorSetConstantValues(hypre_ParCompGridVectorNonOwned(hypre_ParCompGridFNew(compGrid)), 0.0);
+   hypre_SeqVectorSetConstantValues(hypre_ParCompGridVectorNonOwned(hypre_ParCompGridF(compGrid)), 0.0);
 
    // Restrict rhs to all levels to get appropriate initial values
    for (level = amgdd_start_level; level < hypre_ParAMGDataNumLevels(amg_data)-1; level++)
    {
       hypre_ParCompGrid *compGrid_f = hypre_ParAMGDataCompGrid(amg_data)[level];
       hypre_ParCompGrid *compGrid_c = hypre_ParAMGDataCompGrid(amg_data)[level+1];
-      hypre_ParCompGridMatvec(1.0, hypre_ParCompGridRNew(compGrid_f), hypre_ParCompGridFNew(compGrid_f), 0.0, hypre_ParCompGridFNew(compGrid_c));
+      hypre_ParCompGridMatvec(1.0, hypre_ParCompGridR(compGrid_f), hypre_ParCompGridF(compGrid_f), 0.0, hypre_ParCompGridF(compGrid_c));
    }
 
    return 0;
@@ -689,7 +689,7 @@ hypre_BoomerAMGRDSolutionCommunication( void *amg_vdata )
    // Copy owned parts of updates into ParVectors. Using F from AMG, since this is free.
    for (level  = amgdd_start_level; level < num_levels; level++)
    {
-      hypre_SeqVectorCopy(hypre_ParCompGridVectorOwned(hypre_ParCompGridQNew(compGrid[level])), hypre_ParVectorLocalVector(F_array[level]));
+      hypre_SeqVectorCopy(hypre_ParCompGridVectorOwned(hypre_ParCompGridQ(compGrid[level])), hypre_ParVectorLocalVector(F_array[level]));
    }
 
    // Interpolate updates to fine grid
@@ -732,11 +732,11 @@ PackResidualBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *comp
       {
          HYPRE_Int send_elmt = hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[current_level][proc][level][i];
          if (send_elmt < hypre_ParCompGridNumOwnedNodes(compGrid[level]))
-            buffer[cnt++] = hypre_VectorData(hypre_ParCompGridVectorOwned(hypre_ParCompGridFNew(compGrid[level])))[send_elmt];
+            buffer[cnt++] = hypre_VectorData(hypre_ParCompGridVectorOwned(hypre_ParCompGridF(compGrid[level])))[send_elmt];
          else
          {
             send_elmt -= hypre_ParCompGridNumOwnedNodes(compGrid[level]);
-            buffer[cnt++] = hypre_VectorData(hypre_ParCompGridVectorNonOwned(hypre_ParCompGridFNew(compGrid[level])))[send_elmt];
+            buffer[cnt++] = hypre_VectorData(hypre_ParCompGridVectorNonOwned(hypre_ParCompGridF(compGrid[level])))[send_elmt];
          }
       }
    }
@@ -758,11 +758,11 @@ PackSolutionBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *comp
       {
          HYPRE_Int send_elmt = hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[current_level][proc][level][i];
          if (send_elmt < hypre_ParCompGridNumOwnedNodes(compGrid[level]))
-            buffer[cnt++] = hypre_VectorData(hypre_ParCompGridVectorOwned(hypre_ParCompGridUNew(compGrid[level])))[send_elmt];
+            buffer[cnt++] = hypre_VectorData(hypre_ParCompGridVectorOwned(hypre_ParCompGridU(compGrid[level])))[send_elmt];
          else
          {
             send_elmt -= hypre_ParCompGridNumOwnedNodes(compGrid[level]);
-            buffer[cnt++] = hypre_VectorData(hypre_ParCompGridVectorNonOwned(hypre_ParCompGridUNew(compGrid[level])))[send_elmt];
+            buffer[cnt++] = hypre_VectorData(hypre_ParCompGridVectorNonOwned(hypre_ParCompGridU(compGrid[level])))[send_elmt];
          }
       }
    }
@@ -782,7 +782,7 @@ UnpackResidualBuffer( HYPRE_Complex *buffer, hypre_ParCompGrid **compGrid, hypre
       for (i = 0; i < hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[current_level][proc][level]; i++)
       {
          HYPRE_Int recv_elmt = hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[current_level][proc][level][i];
-         hypre_VectorData(hypre_ParCompGridVectorNonOwned(hypre_ParCompGridFNew(compGrid[level])))[recv_elmt] = buffer[cnt++];
+         hypre_VectorData(hypre_ParCompGridVectorNonOwned(hypre_ParCompGridF(compGrid[level])))[recv_elmt] = buffer[cnt++];
       }
    }
 
@@ -800,7 +800,7 @@ UnpackSolutionBuffer( HYPRE_Complex *buffer, hypre_ParCompGrid **compGrid, hypre
       for (i = 0; i < hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[current_level][proc][level]; i++)
       {
          HYPRE_Int recv_elmt = hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[current_level][proc][level][i];
-         hypre_VectorData(hypre_ParCompGridVectorNonOwned(hypre_ParCompGridUNew(compGrid[level])))[recv_elmt] += buffer[cnt++];
+         hypre_VectorData(hypre_ParCompGridVectorNonOwned(hypre_ParCompGridU(compGrid[level])))[recv_elmt] += buffer[cnt++];
       }
    }
 
@@ -835,7 +835,7 @@ TestResComm(hypre_ParAMGData *amg_data)
 
          // Broadcast the composite residual
          HYPRE_Complex *comp_res;
-         if (myid == proc) comp_res = hypre_VectorData(hypre_ParCompGridVectorNonOwned(hypre_ParCompGridFNew(compGrid[level])));
+         if (myid == proc) comp_res = hypre_VectorData(hypre_ParCompGridVectorNonOwned(hypre_ParCompGridF(compGrid[level])));
          else comp_res = hypre_CTAlloc(HYPRE_Complex, num_real_nodes, HYPRE_MEMORY_HOST);
          hypre_MPI_Bcast(comp_res, num_real_nodes, HYPRE_MPI_COMPLEX, proc, hypre_MPI_COMM_WORLD);
 
