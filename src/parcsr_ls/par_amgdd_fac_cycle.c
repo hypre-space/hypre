@@ -787,7 +787,7 @@ FAC_CFL1Jacobi( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_I
       hypre_ParCompGridTempNew(compGrid) = hypre_ParCompGridVectorCreate();
       hypre_ParCompGridVectorInitialize(hypre_ParCompGridTempNew(compGrid), hypre_ParCompGridNumOwnedNodes(compGrid), hypre_ParCompGridNumNonOwnedNodes(compGrid));
    }
-   hypre_ParCompGridVectorCopy(hypre_ParCompGridFNew(compGrid), hypre_ParCompGridTemp(compGrid));
+   hypre_ParCompGridVectorCopy(hypre_ParCompGridFNew(compGrid), hypre_ParCompGridTempNew(compGrid));
    double alpha = -relax_weight;
    double beta = relax_weight;
 
@@ -1008,8 +1008,8 @@ FAC_CFL1Jacobi( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_I
       {
          HYPRE_Complex *owned_q = hypre_VectorData(hypre_ParCompGridVectorOwned(hypre_ParCompGridQNew(compGrid)));
          HYPRE_Complex *nonowned_q = hypre_VectorData(hypre_ParCompGridVectorNonOwned(hypre_ParCompGridQNew(compGrid)));
-         VecScaleMasked(owned_q,owned_qmp,hypre_ParCompGridL1Norms(compGrid),hypre_ParCompGridOwnedFMask(compGrid),hypre_ParCompGridNumOwnedNodes(compGrid) - hypre_ParCompGridNumOwnedCPoints(compGrid),HYPRE_STREAM(4));
-         VecScaleMasked(nonowned_q,nonowned_qmp,&(hypre_ParCompGridL1Norms(compGrid)[hypre_ParCompGridNumOwnedNodes(compGrid)]),hypre_ParCompGridNonOwnedFMask(compGrid),hypre_ParCompGridNumNonOwnedRealNodes(compGrid) - hypre_ParCompGridNumNonOwnedRealCPoints(compGrid),HYPRE_STREAM(4));
+         VecScaleMasked(owned_q,owned_tmp,hypre_ParCompGridL1Norms(compGrid),hypre_ParCompGridOwnedFMask(compGrid),hypre_ParCompGridNumOwnedNodes(compGrid) - hypre_ParCompGridNumOwnedCPoints(compGrid),HYPRE_STREAM(4));
+         VecScaleMasked(nonowned_q,nonowned_tmp,&(hypre_ParCompGridL1Norms(compGrid)[hypre_ParCompGridNumOwnedNodes(compGrid)]),hypre_ParCompGridNonOwnedFMask(compGrid),hypre_ParCompGridNumNonOwnedRealNodes(compGrid) - hypre_ParCompGridNumNonOwnedRealCPoints(compGrid),HYPRE_STREAM(4));
       }
       hypre_CheckErrorDevice(cudaPeekAtLastError());
       hypre_CheckErrorDevice(cudaDeviceSynchronize());
