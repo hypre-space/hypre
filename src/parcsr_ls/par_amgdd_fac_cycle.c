@@ -99,7 +99,7 @@ HYPRE_Int FAC_Cycle(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type, HYPR
    #if DEBUGGING_MESSAGES
    printf("Rank %d, relax on level %d\n", myid, level);
    #endif
-   for (i = 0; i < numRelax[1]; i++) (*hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data))( amg_vdata, compGrid[level], 1 );
+   for (i = 0; i < numRelax[1]; i++) (*hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data))( (HYPRE_Solver) amg_vdata, compGrid[level], 1 );
 
    #if DUMP_INTERMEDIATE_TEST_SOLNS
    sprintf(filename, "outputs/actual/u%d_level%d_relax1", myid, level);
@@ -132,7 +132,7 @@ HYPRE_Int FAC_Cycle(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type, HYPR
          #if DEBUGGING_MESSAGES
          printf("Rank %d, coarse solve on level %d\n", myid, num_levels-1);
          #endif
-         for (i = 0; i < numRelax[3]; i++) (*hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data))( amg_vdata, compGrid[num_levels-1], 3 );
+         for (i = 0; i < numRelax[3]; i++) (*hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data))( (HYPRE_Solver) amg_vdata, compGrid[num_levels-1], 3 );
 
          #if DUMP_INTERMEDIATE_TEST_SOLNS
          sprintf(filename, "outputs/actual/u%d_level%d_relax2", myid, num_levels-1);
@@ -164,7 +164,7 @@ HYPRE_Int FAC_Cycle(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type, HYPR
    #if DEBUGGING_MESSAGES
    printf("Rank %d, relax on level %d\n", myid, level);
    #endif
-   for (i = 0; i < numRelax[2]; i++) (*hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data))( amg_vdata, compGrid[level], 2 );
+   for (i = 0; i < numRelax[2]; i++) (*hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data))( (HYPRE_Solver) amg_vdata, compGrid[level], 2 );
 
    #if DUMP_INTERMEDIATE_TEST_SOLNS
    sprintf(filename, "outputs/actual/u%d_level%d_relax2", myid, level);
@@ -203,7 +203,7 @@ HYPRE_Int FAC_FCycle(void *amg_vdata, HYPRE_Int first_iteration)
    }
 
    //  ... solve on coarsest level ...
-   for (i = 0; i < numRelax[3]; i++) (*hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data))( amg_vdata, compGrid[num_levels-1], 3 );
+   for (i = 0; i < numRelax[3]; i++) (*hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data))( (HYPRE_Solver) amg_vdata, compGrid[num_levels-1], 3 );
 
    // ... and work back up to the finest
    for (level = num_levels - 2; level > hypre_ParAMGDataAMGDDStartLevel(amg_data)-1; level--)
@@ -235,7 +235,7 @@ HYPRE_Int FAC_Cycle_timed(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type
    hypre_ParCompGrid          **compGrid = hypre_ParAMGDataCompGrid(amg_data);
 
    // Relax on the real nodes
-   if (time_part == 1) for (i = 0; i < numRelax[1]; i++) (*hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data))( amg_vdata, compGrid[level], 1 );
+   if (time_part == 1) for (i = 0; i < numRelax[1]; i++) (*hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data))( (HYPRE_Solver) amg_vdata, compGrid[level], 1 );
 
    // Restrict the residual at all fine points (real and ghost) and set residual at coarse points not under the fine grid
    if (time_part == 2)
@@ -246,13 +246,13 @@ HYPRE_Int FAC_Cycle_timed(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type
    }
 
    //  Either solve on the coarse level or recurse
-   if (level+1 == num_levels-1) for (i = 0; i < numRelax[3]; i++) (*hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data))( amg_vdata, compGrid[num_levels-1], 3 );
+   if (level+1 == num_levels-1) for (i = 0; i < numRelax[3]; i++) (*hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data))( (HYPRE_Solver) amg_vdata, compGrid[num_levels-1], 3 );
    else for (i = 0; i < cycle_type; i++) FAC_Cycle_timed(amg_vdata, level+1, cycle_type, time_part);
 
    // Interpolate up and relax
    if (time_part == 3) FAC_Interpolate( compGrid[level], compGrid[level+1] );
 
-   if (time_part == 1) for (i = 0; i < numRelax[2]; i++) (*hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data))( amg_vdata, compGrid[level], 2 );
+   if (time_part == 1) for (i = 0; i < numRelax[2]; i++) (*hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data))( (HYPRE_Solver) amg_vdata, compGrid[level], 2 );
 
    return 0;
 }
@@ -286,7 +286,7 @@ HYPRE_Int FAC_FCycle_timed(void *amg_vdata, HYPRE_Int time_part)
    }
 
    //  ... solve on coarsest level ...
-   if (time_part == 1) for (i = 0; i < numRelax[3]; i++) (*hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data))( amg_vdata, compGrid[num_levels-1], 3 );
+   if (time_part == 1) for (i = 0; i < numRelax[3]; i++) (*hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data))( (HYPRE_Solver) amg_vdata, compGrid[num_levels-1], 3 );
 
    // ... and work back up to the finest
    for (level = num_levels - 2; level > hypre_ParAMGDataAMGDDStartLevel(amg_data)-1; level--)

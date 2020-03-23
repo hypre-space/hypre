@@ -2099,7 +2099,8 @@ HYPRE_Int UnpackRecvBufferNew( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compG
       HYPRE_Int ****recv_map, HYPRE_Int ***num_recv_nodes, 
       HYPRE_Int *recv_map_send_buffer_size, HYPRE_Int current_level, HYPRE_Int num_levels,
       HYPRE_Int *nodes_added_on_level, HYPRE_Int buffer_number, HYPRE_Int *num_resizes, HYPRE_Int symmetric );
-/* par_amgdd_test.c */
+
+/* par_amgdd_fac_cycle.c */
 HYPRE_Int hypre_BoomerAMGDDTestSolve( void *amg_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u);
 
 /* par_amgdd_fac_cycle.c */
