@@ -114,6 +114,8 @@ HYPRE_Int hypre_ParCompGridVectorInitialize(hypre_ParCompGridVector *vector, HYP
    hypre_ParCompGridVectorOwnsOwnedVector(vector) = 1;
    hypre_ParCompGridVectorNonOwned(vector) = hypre_SeqVectorCreate(num_nonowned);
    hypre_SeqVectorInitialize(hypre_ParCompGridVectorNonOwned(vector));
+
+   return 0;
 }
 
 HYPRE_Int hypre_ParCompGridVectorDestroy(hypre_ParCompGridVector *vector)
@@ -934,7 +936,7 @@ hypre_ParCompGridFinalizeNew( hypre_ParAMGData *amg_data, hypre_ParCompGrid **co
          hypre_ParCompGridNonOwnedInvSort(compGrid[level]) = NULL;
       }
    }
-   
+
    // Setup R = P^T if R not specified
    if (!hypre_ParAMGDataRestriction(amg_data))
    {
