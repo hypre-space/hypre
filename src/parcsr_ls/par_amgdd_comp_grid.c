@@ -1142,7 +1142,7 @@ hypre_ParCompGridFinalize( hypre_ParAMGData *amg_data, hypre_ParCompGrid **compG
 }
 
 HYPRE_Int
-hypre_ParCompGridResizeNew ( hypre_ParCompGrid *compGrid, HYPRE_Int new_size, HYPRE_Int need_coarse_info )
+hypre_ParCompGridResize ( hypre_ParCompGrid *compGrid, HYPRE_Int new_size, HYPRE_Int need_coarse_info )
 {
    // This function reallocates memory to hold nonowned info for the comp grid
 
@@ -1343,7 +1343,7 @@ HYPRE_Int hypre_ParCompGridSetupLocalIndicesP( hypre_ParCompGrid **compGrid, HYP
 }
 
 HYPRE_Int
-hypre_ParCompGridDebugPrintNew ( hypre_ParCompGrid *compGrid, const char* filename )
+hypre_ParCompGridDebugPrint ( hypre_ParCompGrid *compGrid, const char* filename )
 {
    HYPRE_Int      myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
