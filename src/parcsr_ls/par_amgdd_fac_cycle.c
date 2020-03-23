@@ -1096,7 +1096,7 @@ FAC_CFL1Jacobi( hypre_ParAMGData *amg_data, hypre_ParCompGrid *compGrid, HYPRE_I
          if (owned_q) owned_q[i] += owned_u[i] - owned_tmp[i];
       }
    }
-   for (i = 0; i < hypre_ParCompGridNumNonOwnedNodes(compGrid); i++)
+   for (i = 0; i < hypre_ParCompGridNumNonOwnedRealNodes(compGrid); i++)
    {
       if (cf_marker[i + hypre_ParCompGridNumOwnedNodes(compGrid)] == relax_set)
       {
