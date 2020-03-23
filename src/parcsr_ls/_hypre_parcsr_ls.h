@@ -172,7 +172,7 @@ typedef struct
    HYPRE_Int        num_nonowned_nodes;
    HYPRE_Int        num_nonowned_real_nodes;
    HYPRE_Int        num_owned_c_points;
-   HYPRE_Int        num_nonowned_c_points;
+   HYPRE_Int        num_nonowned_real_c_points;
    HYPRE_Int        num_missing_col_indices;
 
    HYPRE_Int        *nonowned_global_indices;
@@ -199,9 +199,11 @@ typedef struct
 
    // TODO
    HYPRE_Real       *l1_norms;
-   // HYPRE_Int        *cf_marker_array;
-   // int              *c_mask;
-   // int              *f_mask;
+   HYPRE_Int        *cf_marker_array;
+   int              *owned_c_mask;
+   int              *owned_f_mask;
+   int              *nonowned_c_mask;
+   int              *nonowned_f_mask;
 
    // HYPRE_Real       *cheby_coeffs;
 
@@ -217,7 +219,7 @@ typedef struct
 #define hypre_ParCompGridNumNonOwnedNodes(compGrid)               ((compGrid) -> num_nonowned_nodes)
 #define hypre_ParCompGridNumNonOwnedRealNodes(compGrid)               ((compGrid) -> num_nonowned_real_nodes)
 #define hypre_ParCompGridNumOwnedCPoints(compGrid)               ((compGrid) -> num_owned_c_points)
-#define hypre_ParCompGridNumNonOwnedCPoints(compGrid)               ((compGrid) -> num_nonowned_c_points)
+#define hypre_ParCompGridNumNonOwnedRealCPoints(compGrid)               ((compGrid) -> num_nonowned_real_c_points)
 #define hypre_ParCompGridNumMissingColIndices(compGrid)               ((compGrid) -> num_missing_col_indices)
 
 #define hypre_ParCompGridNonOwnedGlobalIndices(compGrid)               ((compGrid) -> nonowned_global_indices)
@@ -244,9 +246,11 @@ typedef struct
 
 // TODO
 #define hypre_ParCompGridL1Norms(compGrid)         ((compGrid) -> l1_norms)
-// #define hypre_ParCompGridCFMarkerArray(compGrid)         ((compGrid) -> cf_marker_array)
-// #define hypre_ParCompGridCMask(compGrid)         ((compGrid) -> c_mask)
-// #define hypre_ParCompGridFMask(compGrid)         ((compGrid) -> f_mask)
+#define hypre_ParCompGridCFMarkerArray(compGrid)         ((compGrid) -> cf_marker_array)
+#define hypre_ParCompGridOwnedCMask(compGrid)         ((compGrid) -> owned_c_mask)
+#define hypre_ParCompGridOwnedFMask(compGrid)         ((compGrid) -> owned_f_mask)
+#define hypre_ParCompGridNonOwnedCMask(compGrid)         ((compGrid) -> nonowned_c_mask)
+#define hypre_ParCompGridNonOwnedFMask(compGrid)         ((compGrid) -> nonowned_f_mask)
 
 // #define hypre_ParCompGridChebyCoeffs(compGrid)         ((compGrid) -> cheby_coeffs)
 

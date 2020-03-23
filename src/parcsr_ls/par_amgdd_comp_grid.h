@@ -180,9 +180,11 @@ typedef struct
 
    // TODO
    HYPRE_Real       *l1_norms;
-   // HYPRE_Int        *cf_marker_array;
-   // int              *c_mask;
-   // int              *f_mask;
+   HYPRE_Int        *cf_marker_array;
+   int              *owned_c_mask;
+   int              *owned_f_mask;
+   int              *nonowned_c_mask;
+   int              *nonowned_f_mask;
 
    // HYPRE_Real       *cheby_coeffs;
 
@@ -225,9 +227,11 @@ typedef struct
 
 // TODO
 #define hypre_ParCompGridL1Norms(compGrid)         ((compGrid) -> l1_norms)
-// #define hypre_ParCompGridCFMarkerArray(compGrid)         ((compGrid) -> cf_marker_array)
-// #define hypre_ParCompGridCMask(compGrid)         ((compGrid) -> c_mask)
-// #define hypre_ParCompGridFMask(compGrid)         ((compGrid) -> f_mask)
+#define hypre_ParCompGridCFMarkerArray(compGrid)         ((compGrid) -> cf_marker_array)
+#define hypre_ParCompGridOwnedCMask(compGrid)         ((compGrid) -> owned_c_mask)
+#define hypre_ParCompGridOwnedFMask(compGrid)         ((compGrid) -> owned_f_mask)
+#define hypre_ParCompGridNonOwnedCMask(compGrid)         ((compGrid) -> nonowned_c_mask)
+#define hypre_ParCompGridNonOwnedFMask(compGrid)         ((compGrid) -> nonowned_f_mask)
 
 // #define hypre_ParCompGridChebyCoeffs(compGrid)         ((compGrid) -> cheby_coeffs)
 

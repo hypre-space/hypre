@@ -522,6 +522,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    if (use_barriers) hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
    if (timers) hypre_BeginTiming(timers[8]);
 
+
    // Finalize the comp grid structures
    hypre_ParCompGridFinalizeNew(amg_data, compGrid, compGridCommPkgNew, amgdd_start_level, num_levels, hypre_ParAMGDataAMGDDUseRD(amg_data), verify_amgdd);
 
@@ -766,12 +767,6 @@ PackSendBufferNew( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compG
          }
 
          // Eliminate redundant send info by comparing with previous send_flags
-         
-         // !!! Debug
-         // if (myid == 1) printf("current_level %d, proc %d, level %d: num send nodes before = %d\n",
-         //    current_level, proc, level, num_send_nodes[current_level][proc][level]);
-
-
          HYPRE_Int current_send_proc = hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[current_level][proc];
          HYPRE_Int prev_proc, prev_level;
          for (prev_level = current_level+1; prev_level <= level; prev_level++)
@@ -811,10 +806,6 @@ PackSendBufferNew( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compG
                }
             }
          }
-
-         // !!! Debug
-         // if (myid == 1) printf("current_level %d, proc %d, level %d: num send nodes after = %d\n",
-         //    current_level, proc, level, num_send_nodes[current_level][proc][level]);
 
          // Count up the buffer sizes and adjust the add_flag
          memset(add_flag[level], 0, sizeof(HYPRE_Int)*(hypre_ParCompGridNumOwnedNodes(compGrid[level]) + hypre_ParCompGridNumNonOwnedNodes(compGrid[level])) );

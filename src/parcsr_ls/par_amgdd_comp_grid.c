@@ -114,6 +114,8 @@ HYPRE_Int hypre_ParCompGridVectorInitialize(hypre_ParCompGridVector *vector, HYP
    hypre_ParCompGridVectorOwnsOwnedVector(vector) = 1;
    hypre_ParCompGridVectorNonOwned(vector) = hypre_SeqVectorCreate(num_nonowned);
    hypre_SeqVectorInitialize(hypre_ParCompGridVectorNonOwned(vector));
+
+   return 0;
 }
 
 HYPRE_Int hypre_ParCompGridVectorDestroy(hypre_ParCompGridVector *vector)
@@ -171,7 +173,7 @@ hypre_ParCompGridCreate ()
    hypre_ParCompGridNumNonOwnedNodes(compGrid) = 0;
    hypre_ParCompGridNumNonOwnedRealNodes(compGrid) = 0;
    hypre_ParCompGridNumOwnedCPoints(compGrid) = 0;
-   hypre_ParCompGridNumNonOwnedCPoints(compGrid) = 0;
+   hypre_ParCompGridNumNonOwnedRealCPoints(compGrid) = 0;
    hypre_ParCompGridNumMissingColIndices(compGrid) = 0;
 
    hypre_ParCompGridNonOwnedGlobalIndices(compGrid) = NULL;
@@ -348,143 +350,157 @@ hypre_ParCompGridSetupRelax( hypre_ParAMGData *amg_data )
    else if (hypre_ParAMGDataFACRelaxType(amg_data) == 3) hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data) = hypre_BoomerAMGDD_FAC_CFL1Jacobi; 
    else if (hypre_ParAMGDataFACRelaxType(amg_data) == 4) hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data) = hypre_BoomerAMGDD_FAC_OrderedGaussSeidel; 
 
-   // for (level = hypre_ParAMGDataAMGDDStartLevel(amg_data); level < hypre_ParAMGDataNumLevels(amg_data); level++)
-   // {
-   //    hypre_ParCompGrid *compGrid = hypre_ParAMGDataCompGrid(amg_data)[level];
+   for (level = hypre_ParAMGDataAMGDDStartLevel(amg_data); level < hypre_ParAMGDataNumLevels(amg_data); level++)
+   {
+      hypre_ParCompGrid *compGrid = hypre_ParAMGDataCompGrid(amg_data)[level];
 
-   //    if (hypre_ParAMGDataFACRelaxType(amg_data) == 2)
-   //    {
-   //       // Setup chebyshev coefficients
-   //       hypre_CSRMatrix *A = hypre_ParCompGridA(compGrid);
-   //       HYPRE_Real    *coefs = hypre_ParCompGridChebyCoeffs(compGrid);
-   //       HYPRE_Int     scale = hypre_ParAMGDataChebyScale(amg_data);
-   //       HYPRE_Int     order = hypre_ParAMGDataChebyOrder(amg_data);
+      // if (hypre_ParAMGDataFACRelaxType(amg_data) == 2)
+      // {
+      //    // Setup chebyshev coefficients
+      //    hypre_CSRMatrix *A = hypre_ParCompGridA(compGrid);
+      //    HYPRE_Real    *coefs = hypre_ParCompGridChebyCoeffs(compGrid);
+      //    HYPRE_Int     scale = hypre_ParAMGDataChebyScale(amg_data);
+      //    HYPRE_Int     order = hypre_ParAMGDataChebyOrder(amg_data);
 
-   //       // Select submatrix of real to real connections
-   //       HYPRE_Int nnz = 0;
-   //       for (i = 0; i < hypre_ParCompGridNumRealNodes(compGrid); i++)
-   //       {
-   //          for (j = hypre_CSRMatrixI(A)[i]; j < hypre_CSRMatrixI(A)[i+1]; j++)
-   //          {
-   //             if (hypre_CSRMatrixJ(A)[j] < hypre_ParCompGridNumRealNodes(compGrid)) nnz++;
-   //          }
-   //       }
-   //       HYPRE_Int *A_real_i = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumRealNodes(compGrid)+1, HYPRE_MEMORY_SHARED);
-   //       HYPRE_Int *A_real_j = hypre_CTAlloc(HYPRE_Int, nnz, HYPRE_MEMORY_SHARED);
-   //       HYPRE_Complex *A_real_data = hypre_CTAlloc(HYPRE_Complex, nnz, HYPRE_MEMORY_SHARED);
-   //       nnz = 0;
-   //       for (i = 0; i < hypre_ParCompGridNumRealNodes(compGrid); i++)
-   //       {
-   //          for (j = hypre_CSRMatrixI(A)[i]; j < hypre_CSRMatrixI(A)[i+1]; j++)
-   //          {
-   //             if (hypre_CSRMatrixJ(A)[j] < hypre_ParCompGridNumRealNodes(compGrid))
-   //             {
-   //                A_real_j[nnz] = hypre_CSRMatrixJ(A)[j];
-   //                A_real_data[nnz] = hypre_CSRMatrixData(A)[j];
-   //                nnz++;
-   //             }
-   //          }
-   //          A_real_i[i+1] = nnz;
-   //       }
+      //    // Select submatrix of real to real connections
+      //    HYPRE_Int nnz = 0;
+      //    for (i = 0; i < hypre_ParCompGridNumRealNodes(compGrid); i++)
+      //    {
+      //       for (j = hypre_CSRMatrixI(A)[i]; j < hypre_CSRMatrixI(A)[i+1]; j++)
+      //       {
+      //          if (hypre_CSRMatrixJ(A)[j] < hypre_ParCompGridNumRealNodes(compGrid)) nnz++;
+      //       }
+      //    }
+      //    HYPRE_Int *A_real_i = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumRealNodes(compGrid)+1, HYPRE_MEMORY_SHARED);
+      //    HYPRE_Int *A_real_j = hypre_CTAlloc(HYPRE_Int, nnz, HYPRE_MEMORY_SHARED);
+      //    HYPRE_Complex *A_real_data = hypre_CTAlloc(HYPRE_Complex, nnz, HYPRE_MEMORY_SHARED);
+      //    nnz = 0;
+      //    for (i = 0; i < hypre_ParCompGridNumRealNodes(compGrid); i++)
+      //    {
+      //       for (j = hypre_CSRMatrixI(A)[i]; j < hypre_CSRMatrixI(A)[i+1]; j++)
+      //       {
+      //          if (hypre_CSRMatrixJ(A)[j] < hypre_ParCompGridNumRealNodes(compGrid))
+      //          {
+      //             A_real_j[nnz] = hypre_CSRMatrixJ(A)[j];
+      //             A_real_data[nnz] = hypre_CSRMatrixData(A)[j];
+      //             nnz++;
+      //          }
+      //       }
+      //       A_real_i[i+1] = nnz;
+      //    }
 
-   //       HYPRE_BigInt *row_starts = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-   //       row_starts[0] = 0;
-   //       row_starts[1] = hypre_ParCompGridNumRealNodes(compGrid);
-   //       hypre_ParCSRMatrix *A_real = hypre_ParCSRMatrixCreate( MPI_COMM_SELF,
-   //                           (HYPRE_BigInt) hypre_ParCompGridNumRealNodes(compGrid),
-   //                           (HYPRE_BigInt) hypre_ParCompGridNumRealNodes(compGrid),
-   //                           row_starts,
-   //                           NULL,
-   //                           0,
-   //                           nnz,
-   //                           0 );
-   //       hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(A_real)) = A_real_i;
-   //       hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(A_real)) = A_real_j;
-   //       hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(A_real)) = A_real_data;
-   //       hypre_CSRMatrixInitialize(hypre_ParCSRMatrixOffd(A_real));
-   //       hypre_ParCSRMatrixColMapOffd(A_real) = hypre_CTAlloc(HYPRE_BigInt, 0, HYPRE_MEMORY_HOST);
+      //    HYPRE_BigInt *row_starts = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
+      //    row_starts[0] = 0;
+      //    row_starts[1] = hypre_ParCompGridNumRealNodes(compGrid);
+      //    hypre_ParCSRMatrix *A_real = hypre_ParCSRMatrixCreate( MPI_COMM_SELF,
+      //                        (HYPRE_BigInt) hypre_ParCompGridNumRealNodes(compGrid),
+      //                        (HYPRE_BigInt) hypre_ParCompGridNumRealNodes(compGrid),
+      //                        row_starts,
+      //                        NULL,
+      //                        0,
+      //                        nnz,
+      //                        0 );
+      //    hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(A_real)) = A_real_i;
+      //    hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(A_real)) = A_real_j;
+      //    hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(A_real)) = A_real_data;
+      //    hypre_CSRMatrixInitialize(hypre_ParCSRMatrixOffd(A_real));
+      //    hypre_ParCSRMatrixColMapOffd(A_real) = hypre_CTAlloc(HYPRE_BigInt, 0, HYPRE_MEMORY_HOST);
 
-   //       HYPRE_Real max_eig, min_eig = 0;
+      //    HYPRE_Real max_eig, min_eig = 0;
 
-   //       if (hypre_ParAMGDataChebyEigEst(amg_data)) hypre_ParCSRMaxEigEstimateCG(A_real, scale, hypre_ParAMGDataChebyEigEst(amg_data), &max_eig, &min_eig);
-   //       else hypre_ParCSRMaxEigEstimate(A_real, scale, &max_eig);
+      //    if (hypre_ParAMGDataChebyEigEst(amg_data)) hypre_ParCSRMaxEigEstimateCG(A_real, scale, hypre_ParAMGDataChebyEigEst(amg_data), &max_eig, &min_eig);
+      //    else hypre_ParCSRMaxEigEstimate(A_real, scale, &max_eig);
 
-   //       HYPRE_Real *dummy_ptr;
-   //       hypre_ParCSRRelax_Cheby_Setup(hypre_ParAMGDataAArray(amg_data)[level], 
-   //                             max_eig,      
-   //                             min_eig,     
-   //                             hypre_ParAMGDataChebyFraction(amg_data),   
-   //                             order,
-   //                             0,
-   //                             hypre_ParAMGDataChebyVariant(amg_data),           
-   //                             &coefs,
-   //                             &dummy_ptr);
+      //    HYPRE_Real *dummy_ptr;
+      //    hypre_ParCSRRelax_Cheby_Setup(hypre_ParAMGDataAArray(amg_data)[level], 
+      //                          max_eig,      
+      //                          min_eig,     
+      //                          hypre_ParAMGDataChebyFraction(amg_data),   
+      //                          order,
+      //                          0,
+      //                          hypre_ParAMGDataChebyVariant(amg_data),           
+      //                          &coefs,
+      //                          &dummy_ptr);
 
-   //       hypre_ParCompGridChebyCoeffs(compGrid) = coefs;
+      //    hypre_ParCompGridChebyCoeffs(compGrid) = coefs;
 
-   //       hypre_ParCSRMatrixDestroy(A_real);
+      //    hypre_ParCSRMatrixDestroy(A_real);
 
-   //       // Calculate diagonal scaling values 
-   //       hypre_ParCompGridL1Norms(compGrid) = hypre_CTAlloc(HYPRE_Real, hypre_ParCompGridNumNodes(compGrid), HYPRE_MEMORY_SHARED);
-   //       for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
-   //       {
-   //          for (j = hypre_ParCompGridARowPtr(compGrid)[i]; j < hypre_ParCompGridARowPtr(compGrid)[i+1]; j++)
-   //          {
-   //             if (hypre_ParCompGridAColInd(compGrid)[j] == i)
-   //             {
-   //                hypre_ParCompGridL1Norms(compGrid)[i] = 1.0/sqrt(hypre_ParCompGridAData(compGrid)[j]);
-   //                break;
-   //             }
-   //          }
-   //       }
+      //    // Calculate diagonal scaling values 
+      //    hypre_ParCompGridL1Norms(compGrid) = hypre_CTAlloc(HYPRE_Real, hypre_ParCompGridNumNodes(compGrid), HYPRE_MEMORY_SHARED);
+      //    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
+      //    {
+      //       for (j = hypre_ParCompGridARowPtr(compGrid)[i]; j < hypre_ParCompGridARowPtr(compGrid)[i+1]; j++)
+      //       {
+      //          if (hypre_ParCompGridAColInd(compGrid)[j] == i)
+      //          {
+      //             hypre_ParCompGridL1Norms(compGrid)[i] = 1.0/sqrt(hypre_ParCompGridAData(compGrid)[j]);
+      //             break;
+      //          }
+      //       }
+      //    }
 
-   //       // Setup temporary/auxiliary vectors
-   //       hypre_ParCompGridTemp(compGrid) = hypre_SeqVectorCreate(hypre_ParCompGridNumRealNodes(compGrid));
-   //       hypre_SeqVectorInitialize(hypre_ParCompGridTemp(compGrid));
+      //    // Setup temporary/auxiliary vectors
+      //    hypre_ParCompGridTemp(compGrid) = hypre_SeqVectorCreate(hypre_ParCompGridNumRealNodes(compGrid));
+      //    hypre_SeqVectorInitialize(hypre_ParCompGridTemp(compGrid));
 
-   //       hypre_ParCompGridTemp2(compGrid) = hypre_SeqVectorCreate(hypre_ParCompGridNumNodes(compGrid));
-   //       hypre_SeqVectorInitialize(hypre_ParCompGridTemp2(compGrid));
+      //    hypre_ParCompGridTemp2(compGrid) = hypre_SeqVectorCreate(hypre_ParCompGridNumNodes(compGrid));
+      //    hypre_SeqVectorInitialize(hypre_ParCompGridTemp2(compGrid));
 
-   //       hypre_ParCompGridTemp3(compGrid) = hypre_SeqVectorCreate(hypre_ParCompGridNumRealNodes(compGrid));
-   //       hypre_SeqVectorInitialize(hypre_ParCompGridTemp3(compGrid));
-   //    }
-   //    if (hypre_ParAMGDataFACRelaxType(amg_data) == 3)
-   //    {
-   //       // Calculate l1_norms
-   //       hypre_ParCompGridL1Norms(compGrid) = hypre_CTAlloc(HYPRE_Real, hypre_ParCompGridNumNodes(compGrid), HYPRE_MEMORY_SHARED);
-   //       for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
-   //       {
-   //          HYPRE_Int cf_diag = hypre_ParCompGridCFMarkerArray(compGrid)[i];
-   //          for (j = hypre_ParCompGridARowPtr(compGrid)[i]; j < hypre_ParCompGridARowPtr(compGrid)[i+1]; j++)
-   //          {
-   //             if (hypre_ParCompGridCFMarkerArray(compGrid)[ hypre_ParCompGridAColInd(compGrid)[j] ] == cf_diag) 
-   //             {
-   //                hypre_ParCompGridL1Norms(compGrid)[i] += fabs(hypre_ParCompGridAData(compGrid)[j]);
-   //             }
-   //          }
-   //       }
-   //       // Setup temporary/auxiliary vectors
-   //       hypre_ParCompGridTemp(compGrid) = hypre_SeqVectorCreate(hypre_ParCompGridNumNodes(compGrid));
-   //       hypre_SeqVectorInitialize(hypre_ParCompGridTemp(compGrid));
+      //    hypre_ParCompGridTemp3(compGrid) = hypre_SeqVectorCreate(hypre_ParCompGridNumRealNodes(compGrid));
+      //    hypre_SeqVectorInitialize(hypre_ParCompGridTemp3(compGrid));
+      // }
+      if (hypre_ParAMGDataFACRelaxType(amg_data) == 3)
+      {
+         // Calculate l1_norms
+         HYPRE_Int total_num_nodes = hypre_ParCompGridNumOwnedNodes(compGrid) + hypre_ParCompGridNumNonOwnedNodes(compGrid);
+         hypre_ParCompGridL1Norms(compGrid) = hypre_CTAlloc(HYPRE_Real, total_num_nodes, HYPRE_MEMORY_SHARED);
+         hypre_CSRMatrix *diag = hypre_ParCompGridMatrixOwnedDiag(hypre_ParCompGridANew(compGrid));
+         hypre_CSRMatrix *offd = hypre_ParCompGridMatrixOwnedOffd(hypre_ParCompGridANew(compGrid));
+         for (i = 0; i < hypre_ParCompGridNumOwnedNodes(compGrid); i++)
+         {
+            HYPRE_Int cf_diag = hypre_ParCompGridCFMarkerArray(compGrid)[i];
+            for (j = hypre_CSRMatrixI(diag)[i]; j < hypre_CSRMatrixI(diag)[i+1]; j++)
+            {
+               if (hypre_ParCompGridCFMarkerArray(compGrid)[ hypre_CSRMatrixJ(diag)[j] ] == cf_diag) 
+               {
+                  hypre_ParCompGridL1Norms(compGrid)[i] += fabs(hypre_CSRMatrixData(diag)[j]);
+               }
+            }
+            for (j = hypre_CSRMatrixI(offd)[i]; j < hypre_CSRMatrixI(offd)[i+1]; j++)
+            {
+               if (hypre_ParCompGridCFMarkerArray(compGrid)[ hypre_CSRMatrixJ(offd)[j] + hypre_ParCompGridNumOwnedNodes(compGrid) ] == cf_diag) 
+               {
+                  hypre_ParCompGridL1Norms(compGrid)[i] += fabs(hypre_CSRMatrixData(offd)[j]);
+               }
+            }
+         }
+         diag = hypre_ParCompGridMatrixNonOwnedDiag(hypre_ParCompGridANew(compGrid));
+         offd = hypre_ParCompGridMatrixNonOwnedOffd(hypre_ParCompGridANew(compGrid));
+         for (i = 0; i < hypre_ParCompGridNumNonOwnedNodes(compGrid); i++)
+         {
+            HYPRE_Int cf_diag = hypre_ParCompGridCFMarkerArray(compGrid)[i + hypre_ParCompGridNumOwnedNodes(compGrid)];
+            for (j = hypre_CSRMatrixI(diag)[i]; j < hypre_CSRMatrixI(diag)[i+1]; j++)
+            {
+               if (hypre_ParCompGridCFMarkerArray(compGrid)[ hypre_CSRMatrixJ(diag)[j] + hypre_ParCompGridNumOwnedNodes(compGrid) ] == cf_diag) 
+               {
+                  hypre_ParCompGridL1Norms(compGrid)[i + hypre_ParCompGridNumOwnedNodes(compGrid)] += fabs(hypre_CSRMatrixData(diag)[j]);
+               }
+            }
+            for (j = hypre_CSRMatrixI(offd)[i]; j < hypre_CSRMatrixI(offd)[i+1]; j++)
+            {
+               if (hypre_ParCompGridCFMarkerArray(compGrid)[ hypre_CSRMatrixJ(offd)[j]] == cf_diag) 
+               {
+                  hypre_ParCompGridL1Norms(compGrid)[i + hypre_ParCompGridNumOwnedNodes(compGrid)] += fabs(hypre_CSRMatrixData(offd)[j]);
+               }
+            }
+         }
 
-   //       #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
-   //       // Setup c and f point masks
-   //       int num_c_points = 0;
-   //       int num_f_points = 0;
-   //       for (i = 0; i < hypre_ParCompGridNumRealNodes(compGrid); i++) if (hypre_ParCompGridCFMarkerArray(compGrid)[i]) num_c_points++;
-   //       num_f_points = hypre_ParCompGridNumRealNodes(compGrid) - num_c_points;
-   //       hypre_ParCompGridNumCPoints(compGrid) = num_c_points;
-   //       hypre_ParCompGridCMask(compGrid) = hypre_CTAlloc(int, num_c_points, HYPRE_MEMORY_SHARED);
-   //       hypre_ParCompGridFMask(compGrid) = hypre_CTAlloc(int, num_f_points, HYPRE_MEMORY_SHARED);
-   //       int c_cnt = 0, f_cnt = 0;
-   //       for (i = 0; i < hypre_ParCompGridNumRealNodes(compGrid); i++)
-   //       {
-   //          if (hypre_ParCompGridCFMarkerArray(compGrid)[i]) hypre_ParCompGridCMask(compGrid)[c_cnt++] = i;
-   //          else hypre_ParCompGridFMask(compGrid)[f_cnt++] = i;
-   //       }
-   //       #endif
-   //    }
-   // }
+         // Setup temporary/auxiliary vectors
+         hypre_ParCompGridTempNew(compGrid) = hypre_ParCompGridVectorCreate();
+         hypre_ParCompGridVectorInitialize(hypre_ParCompGridTempNew(compGrid), hypre_ParCompGridNumOwnedNodes(compGrid), hypre_ParCompGridNumNonOwnedNodes(compGrid));
+      }
+   }
 
 
    return 0;
@@ -560,6 +576,70 @@ hypre_ParCompGridFinalizeNew( hypre_ParAMGData *amg_data, hypre_ParCompGrid **co
                hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[outer_level][proc][level] = new_num_recv_nodes;
             }
          }
+      }
+
+      // Setup CF marker array and C and F masks
+      hypre_ParCompGridCFMarkerArray(compGrid[level]) = hypre_CTAlloc(HYPRE_Int, num_owned + num_nonowned, HYPRE_MEMORY_SHARED);
+      if (level != num_levels-1)
+      {
+         // Setup CF marker array
+         HYPRE_Int num_owned_c_points = 0;
+         HYPRE_Int num_nonowned_real_c_points = 0;
+         for (i = 0; i < num_owned; i++)
+         {
+            if (hypre_ParCompGridOwnedCoarseIndices(compGrid[level])[i] >= 0)
+            {
+               hypre_ParCompGridCFMarkerArray(compGrid[level])[i] = 1;
+               num_owned_c_points++;
+            }
+            else hypre_ParCompGridCFMarkerArray(compGrid[level])[i] = 0;
+         }
+         for (i = 0; i < num_nonowned; i++)
+         {
+            if (hypre_ParCompGridNonOwnedCoarseIndices(compGrid[level])[i] >= 0)
+            {
+               hypre_ParCompGridCFMarkerArray(compGrid[level])[new_indices[i] + num_owned] = 1;
+               if (new_indices[i] < num_nonowned_real_nodes) num_nonowned_real_c_points++;
+            }
+            else hypre_ParCompGridCFMarkerArray(compGrid[level])[new_indices[i] + num_owned] = 0;
+         }
+         hypre_ParCompGridNumOwnedCPoints(compGrid[level]) = num_owned_c_points;
+         hypre_ParCompGridNumNonOwnedRealCPoints(compGrid[level]) = num_nonowned_real_c_points;
+
+         // Setup owned C and F masks
+         hypre_ParCompGridOwnedCMask(compGrid[level]) = hypre_CTAlloc(int, num_owned_c_points, HYPRE_MEMORY_SHARED);
+         hypre_ParCompGridOwnedFMask(compGrid[level]) = hypre_CTAlloc(int, num_owned - num_owned_c_points, HYPRE_MEMORY_SHARED);
+         HYPRE_Int c_cnt = 0;
+         HYPRE_Int f_cnt = 0;
+         for (i = 0; i < num_owned; i++)
+         {
+            if (hypre_ParCompGridCFMarkerArray(compGrid[level])[i])
+               hypre_ParCompGridOwnedCMask(compGrid[level])[c_cnt++] = i;
+            else
+               hypre_ParCompGridOwnedFMask(compGrid[level])[f_cnt++] = i;
+         }
+         hypre_ParCompGridNonOwnedCMask(compGrid[level]) = hypre_CTAlloc(int, num_nonowned_real_c_points, HYPRE_MEMORY_SHARED);
+         hypre_ParCompGridNonOwnedFMask(compGrid[level]) = hypre_CTAlloc(int, num_nonowned_real_nodes - num_nonowned_real_c_points, HYPRE_MEMORY_SHARED);
+         c_cnt = 0;
+         f_cnt = 0;
+         for (i = 0; i < num_nonowned_real_nodes; i++)
+         {
+            if (hypre_ParCompGridCFMarkerArray(compGrid[level])[i + num_owned])
+               hypre_ParCompGridNonOwnedCMask(compGrid[level])[c_cnt++] = i;
+            else
+               hypre_ParCompGridNonOwnedFMask(compGrid[level])[f_cnt++] = i;
+         }
+      }
+      else
+      {
+         hypre_ParCompGridNumOwnedCPoints(compGrid[level]) = 0;
+         hypre_ParCompGridNumNonOwnedRealCPoints(compGrid[level]) = 0;
+         hypre_ParCompGridOwnedCMask(compGrid[level]) = NULL;
+         hypre_ParCompGridOwnedFMask(compGrid[level]) = hypre_CTAlloc(int, num_owned, HYPRE_MEMORY_SHARED);
+         for (i = 0; i < num_owned; i++) hypre_ParCompGridOwnedFMask(compGrid[level])[i] = i;
+         hypre_ParCompGridNonOwnedCMask(compGrid[level]) = NULL;
+         hypre_ParCompGridNonOwnedFMask(compGrid[level]) = hypre_CTAlloc(int, num_nonowned_real_nodes, HYPRE_MEMORY_SHARED);
+         for (i = 0; i < num_nonowned_real_nodes; i++) hypre_ParCompGridNonOwnedFMask(compGrid[level])[i] = i;
       }
 
       // If global indices are still needed, transform these also
@@ -934,7 +1014,7 @@ hypre_ParCompGridFinalizeNew( hypre_ParAMGData *amg_data, hypre_ParCompGrid **co
          hypre_ParCompGridNonOwnedInvSort(compGrid[level]) = NULL;
       }
    }
-   
+
    // Setup R = P^T if R not specified
    if (!hypre_ParAMGDataRestriction(amg_data))
    {
