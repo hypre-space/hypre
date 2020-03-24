@@ -1343,7 +1343,7 @@ HYPRE_Int hypre_ParCompGridSetupLocalIndicesP( hypre_ParCompGrid **compGrid, HYP
 }
 
 HYPRE_Int
-hypre_ParCompGridDebugPrintNew ( hypre_ParCompGrid *compGrid, const char* filename )
+hypre_ParCompGridDebugPrint ( hypre_ParCompGrid *compGrid, const char* filename )
 {
    HYPRE_Int      myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
