@@ -92,15 +92,6 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
       return hypre_error_flag;
    }
 
-#if DEBUG
-   hypre_sprintf(filename, "zout_A");
-   HYPRE_SStructMatrixPrint(filename, A_l[0], 0);
-   hypre_sprintf(filename, "zout_x");
-   HYPRE_SStructVectorPrint(filename, x_l[0], 0);
-   hypre_sprintf(filename, "zout_b");
-   HYPRE_SStructVectorPrint(filename, b_l[0], 0);
-#endif
-
    /* part of convergence check */
    if (tol > 0.0)
    {
@@ -180,11 +171,11 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
          hypre_SStructMatvecCompute(restrict_data_l[0], 1.0,
                                     RT_l[0], r_l[0], 0.0, b_l[1]);
 #if DEBUG
-         hypre_sprintf(filename, "zout_xdown.%02d.%02d", i, 0);
+         hypre_sprintf(filename, "ssamg_xdown.%02d.%02d", i, 0);
          HYPRE_SStructVectorPrint(filename, x_l[0], 0);
-         hypre_sprintf(filename, "zout_rdown.%02d.%02d", i, 0);
+         hypre_sprintf(filename, "ssamg_rdown.%02d.%02d", i, 0);
          HYPRE_SStructVectorPrint(filename, r_l[0], 0);
-         hypre_sprintf(filename, "zout_b.%02d.%02d", i, 1);
+         hypre_sprintf(filename, "ssamg_b.%02d.%02d", i, 1);
          HYPRE_SStructVectorPrint(filename, b_l[1], 0);
 #endif
          for (l = 1; l <= (num_levels - 2); l++)
@@ -214,11 +205,11 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
             hypre_SStructMatvecCompute(restrict_data_l[l], 1.0,
                                        RT_l[l], r_l[l], 0.0, b_l[l+1]);
 #if DEBUG
-            hypre_sprintf(filename, "zout_xdown.%02d.%02d", i, l);
+            hypre_sprintf(filename, "ssamg_xdown.%02d.%02d", i, l);
             HYPRE_SStructVectorPrint(filename, x_l[l], 0);
-            hypre_sprintf(filename, "zout_rdown.%02d.%02d", i, l);
+            hypre_sprintf(filename, "ssamg_rdown.%02d.%02d", i, l);
             HYPRE_SStructVectorPrint(filename, r_l[l], 0);
-            hypre_sprintf(filename, "zout_b.%02d.%02d", i, l+1);
+            hypre_sprintf(filename, "ssamg_b.%02d.%02d", i, l+1);
             HYPRE_SStructVectorPrint(filename, b_l[l+1], 0);
 #endif
          }
@@ -239,7 +230,7 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
             hypre_SStructVectorSetConstantValues(x_l[l], 0.0);
          }
 #if DEBUG
-         hypre_sprintf(filename, "zout_xbottom.%02d.%02d", i, l);
+         hypre_sprintf(filename, "ssamg_xbottom.%02d.%02d", i, l);
          HYPRE_SStructVectorPrint(filename, x_l[l], 0);
 #endif
 
@@ -254,9 +245,9 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
                                        P_l[l], x_l[l+1], 0.0, e_l[l]);
             hypre_SStructAxpy(1.0, e_l[l], x_l[l]);
 #if DEBUG
-            hypre_sprintf(filename, "zout_eup.%02d.%02d", i, l);
+            hypre_sprintf(filename, "ssamg_eup.%02d.%02d", i, l);
             HYPRE_SStructVectorPrint(filename, e_l[l], 0);
-            hypre_sprintf(filename, "zout_xup.%02d.%02d", i, l);
+            hypre_sprintf(filename, "ssamg_xup.%02d.%02d", i, l);
             HYPRE_SStructVectorPrint(filename, x_l[l], 0);
 #endif
             //if (active_l[l])
@@ -275,9 +266,9 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
                                     P_l[0], x_l[1], 0.0, e_l[0]);
          hypre_SStructAxpy(1.0, e_l[0], x_l[0]);
 #if DEBUG
-         hypre_sprintf(filename, "zout_eup.%02d.%02d", i, 0);
+         hypre_sprintf(filename, "ssamg_eup.%02d.%02d", i, 0);
          HYPRE_SStructVectorPrint(filename, e_l[0], 0);
-         hypre_sprintf(filename, "zout_xup.%02d.%02d", i, 0);
+         hypre_sprintf(filename, "ssamg_xup.%02d.%02d", i, 0);
          HYPRE_SStructVectorPrint(filename, x_l[0], 0);
 #endif
       }
@@ -309,6 +300,8 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
    /* hypre_SStructVectorDestroy(x_l[0]); */
 
    hypre_EndTiming(*time_index);
+
+   hypre_SSAMGPrintLogging(ssamg_data);
 
    return hypre_error_flag;
 }

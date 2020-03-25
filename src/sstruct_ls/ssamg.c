@@ -274,6 +274,158 @@ hypre_SSAMGSetLogging( void       *ssamg_vdata,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_SSAMGPrintLogging( void *ssamg_vdata )
+{
+   hypre_SSAMGData   *ssamg_data     = (hypre_SSAMGData *) ssamg_vdata;
+   MPI_Comm           comm           = (ssamg_data -> comm);
+   HYPRE_Int          num_iterations = (ssamg_data -> num_iterations);
+   HYPRE_Int          logging        = (ssamg_data -> logging);
+   HYPRE_Int          print_level    = (ssamg_data -> print_level);
+   HYPRE_Real        *norms          = (ssamg_data -> norms);
+   HYPRE_Real        *rel_norms      = (ssamg_data -> rel_norms);
+   HYPRE_Int          myid, i;
+   HYPRE_Real         convr = 1.0;
+
+   hypre_MPI_Comm_rank(comm, &myid);
+
+   if (myid == 0)
+   {
+      if ((print_level > 0) && (logging > 0))
+      {
+         hypre_printf("Iters         ||r||_2   conv.rate  ||r||_2/||b||_2\n");
+         hypre_printf("% 5d    %e    %f     %e\n", 0, norms[0], convr, rel_norms[0]);
+         for (i = 1; i < num_iterations; i++)
+         {
+            convr = norms[i] / norms[i-1];
+            hypre_printf("% 5d    %e    %f     %e\n", i, norms[i], convr, rel_norms[i]);
+         }
+      }
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGPrintStats( void *ssamg_vdata )
+{
+   hypre_SSAMGData   *ssamg_data     = (hypre_SSAMGData *) ssamg_vdata;
+   HYPRE_Int          num_levels     = hypre_SSAMGDataNumLevels(ssamg_data);
+   MPI_Comm           comm           = hypre_SSAMGDataComm(ssamg_data);
+   HYPRE_Int          print_level    = hypre_SSAMGDataPrintLevel(ssamg_data);
+   HYPRE_Int          nparts         = hypre_SSAMGDataNparts(ssamg_data);
+   HYPRE_Int          relax_type     = hypre_SSAMGDataRelaxType(ssamg_data);
+   HYPRE_Int          num_pre_relax  = hypre_SSAMGDataNumPreRelax(ssamg_data);
+   HYPRE_Int          num_pos_relax  = hypre_SSAMGDataNumPosRelax(ssamg_data);
+   HYPRE_Int         **cdir_l        = hypre_SSAMGDataCdir(ssamg_data);
+   void              **relax_data_l  = (ssamg_data -> relax_data_l);
+
+   HYPRE_Int          myid, i, l, part;
+   HYPRE_Int          chunk, chunk_size, chunk_last;
+   HYPRE_Int          nparts_per_line = 8;
+   HYPRE_Int          ndigits;
+   HYPRE_Real         relax_weight;
+
+   hypre_MPI_Comm_rank(comm, &myid);
+
+   if ((myid == 0) && (print_level > 1))
+   {
+      hypre_printf("\nSSAMG Setup Parameters:\n\n");
+
+      /* Print coarsening direction */
+      hypre_printf("Coarsening direction:\n\n");
+      chunk_size = hypre_min(nparts, nparts_per_line);
+      for (chunk = 0; chunk < nparts; chunk += chunk_size)
+      {
+         ndigits = 4;
+         hypre_printf("lev   ");
+         chunk_last = hypre_min(chunk + chunk_size, nparts);
+         for (part = chunk; part < chunk_last; part++)
+         {
+            hypre_printf("pt. %d  ", part);
+            ndigits += 7;
+         }
+         hypre_printf("\n");
+         for (i = 0; i < ndigits; i++) hypre_printf("%s", "=");
+         hypre_printf("\n");
+         for (l = 0; l < (num_levels - 1); l++)
+         {
+            hypre_printf("%3d  ", l);
+            for (part = chunk; part < chunk_last; part++)
+            {
+               hypre_printf("%6d ", cdir_l[l][part]);
+            }
+            hypre_printf("\n");
+         }
+	 hypre_printf("\n\n");
+      }
+
+      /* Print Relaxation factor */
+      if (relax_type > 0)
+      {
+         hypre_printf("Relaxation factors:\n\n");
+         chunk_size = hypre_min(nparts, nparts_per_line);
+         for (chunk = 0; chunk < nparts; chunk += chunk_size)
+         {
+            ndigits = 4;
+            hypre_printf("lev   ");
+            chunk_last = hypre_min(chunk + chunk_size, nparts);
+            for (part = chunk; part < chunk_last; part++)
+            {
+               hypre_printf("pt. %d  ", part);
+               ndigits += 7;
+            }
+            hypre_printf("\n");
+            for (i = 0; i < ndigits; i++) hypre_printf("%s", "=");
+            hypre_printf("\n");
+            for (l = 0; l < (num_levels - 1); l++)
+            {
+               hypre_printf("%3d  ", l);
+               for (part = chunk; part < chunk_last; part++)
+               {
+                  hypre_SSAMGRelaxGetRelaxWeight (relax_data_l[l], part, &relax_weight);
+                  hypre_printf("%6.2f ", relax_weight);
+               }
+               hypre_printf("\n");
+            }
+	    hypre_printf("\n\n");
+         }
+      }
+
+      /* SSAMG details */
+      hypre_printf("Relaxation type: ");
+      if (relax_type == 0)
+      {
+         hypre_printf("Jacobi\n");
+      }
+      else if (relax_type == 1)
+      {
+         hypre_printf("Weighted Jacobi\n");
+      }
+      else if (relax_type == 2)
+      {
+         hypre_printf("Red-Black Gauss-Seidel\n");
+      }
+      else
+      {
+         hypre_printf("Unknown - %d\n", relax_type);
+      }
+      hypre_printf("Number of pre-relaxation sweeps: %d\n", num_pre_relax);
+      hypre_printf("Number of pos-relaxation sweeps: %d\n", num_pos_relax);
+      hypre_printf("Number of levels: %d\n", num_levels);
+
+      hypre_printf("\n\n");
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_SSAMGGetNumIterations( void       *ssamg_vdata,
                              HYPRE_Int  *num_iterations)
 {

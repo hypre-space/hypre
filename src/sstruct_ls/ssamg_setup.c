@@ -14,7 +14,7 @@
 #include "_hypre_sstruct_ls.h"
 #include "ssamg.h"
 
-#define DEBUG 0
+#define DEBUG 1
 
 /*--------------------------------------------------------------------------
  *  TODO:
@@ -124,6 +124,11 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
    HYPRE_SStructVectorCreate(comm, grid_l[0], &tx_l[0]);
    HYPRE_SStructVectorInitialize(tx_l[0]);
    HYPRE_SStructVectorAssemble(tx_l[0]);
+
+#if DEBUG
+   hypre_sprintf(filename, "ssamg_A.%02d", 0);
+   HYPRE_SStructMatrixPrint(filename, A_l[0], 0);
+#endif
 
    /* Compute interpolation, restriction and coarse grids */
    for (l = 0; l < (num_levels - 1); l++)
@@ -241,11 +246,8 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
       (ssamg_data -> rel_norms) = hypre_TAlloc(HYPRE_Real, max_iter);
    }
 
-#if DEBUG
-   l = num_levels - 1;
-   hypre_sprintf(filename, "ssamg_A.%02d", l);
-   HYPRE_SStructMatrixPrint(filename, A_l[l], 0);
-#endif
+   /* Print statistics */
+   hypre_SSAMGPrintStats(ssamg_vdata);
 
    /* Free memory */
    for (l = 0; l < max_levels; l++)

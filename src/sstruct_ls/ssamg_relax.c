@@ -404,3 +404,18 @@ hypre_SSAMGRelaxSetTempVec( void                *ssamg_relax_vdata,
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int hypre_SSAMGRelaxGetRelaxWeight( void       *ssamg_relax_vdata,
+                                          HYPRE_Int   part,
+                                          HYPRE_Real *weight )
+{
+   hypre_SSAMGRelaxData *ssamg_relax_data = (hypre_SSAMGRelaxData *) ssamg_relax_vdata;
+   HYPRE_Real           *relax_weight     = (ssamg_relax_data -> relax_weight);
+
+   *weight = relax_weight[part];
+
+   return hypre_error_flag;
+}
