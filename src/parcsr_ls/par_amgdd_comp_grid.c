@@ -212,7 +212,7 @@ HYPRE_Int
 hypre_ParCompGridDestroy ( hypre_ParCompGrid *compGrid )
 {
    if (hypre_ParCompGridNonOwnedGlobalIndices(compGrid)) 
-      hypre_TFree(hypre_ParCompGridNonOwnedGlobalIndices(compGrid), HYPRE_MEMORY_HOST);
+      hypre_TFree(hypre_ParCompGridNonOwnedGlobalIndices(compGrid), HYPRE_MEMORY_SHARED);
    if (hypre_ParCompGridNonOwnedCoarseIndices(compGrid)) 
       hypre_TFree(hypre_ParCompGridNonOwnedCoarseIndices(compGrid), HYPRE_MEMORY_HOST);
    if (hypre_ParCompGridNonOwnedRealMarker(compGrid)) 
@@ -342,7 +342,7 @@ hypre_ParCompGridInitialize( hypre_ParAMGData *amg_data, HYPRE_Int padding, HYPR
    }
 
    // Allocate some extra arrays used during AMG-DD setup
-   hypre_ParCompGridNonOwnedGlobalIndices(compGrid) = hypre_CTAlloc(HYPRE_Int, max_nonowned, HYPRE_MEMORY_HOST);
+   hypre_ParCompGridNonOwnedGlobalIndices(compGrid) = hypre_CTAlloc(HYPRE_Int, max_nonowned, HYPRE_MEMORY_SHARED);
    hypre_ParCompGridNonOwnedRealMarker(compGrid) = hypre_CTAlloc(HYPRE_Int, max_nonowned, HYPRE_MEMORY_HOST);
    hypre_ParCompGridNonOwnedSort(compGrid) = hypre_CTAlloc(HYPRE_Int, max_nonowned, HYPRE_MEMORY_HOST);
    hypre_ParCompGridNonOwnedInvSort(compGrid) = hypre_CTAlloc(HYPRE_Int, max_nonowned, HYPRE_MEMORY_HOST);
@@ -701,7 +701,7 @@ hypre_ParCompGridFinalize( hypre_ParAMGData *amg_data, hypre_ParCompGrid **compG
          {
             new_global_indices[ new_indices[i] ] = hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level])[ i ];
          }
-         hypre_TFree(hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level]), HYPRE_MEMORY_HOST);
+         hypre_TFree(hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level]), HYPRE_MEMORY_SHARED);
          hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level]) = new_global_indices;
       }
 
@@ -1041,7 +1041,7 @@ hypre_ParCompGridFinalize( hypre_ParAMGData *amg_data, hypre_ParCompGrid **compG
       }
       if (hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level]) && !debug)
       {
-         hypre_TFree(hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level]), HYPRE_MEMORY_HOST);
+         hypre_TFree(hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level]), HYPRE_MEMORY_SHARED);
          hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level]) = NULL;
       }
       if (hypre_ParCompGridNonOwnedCoarseIndices(compGrid[level]))
@@ -1146,7 +1146,7 @@ hypre_ParCompGridResize( hypre_ParCompGrid *compGrid, HYPRE_Int new_size, HYPRE_
 {
    // This function reallocates memory to hold nonowned info for the comp grid
 
-   hypre_ParCompGridNonOwnedGlobalIndices(compGrid) = hypre_TReAlloc(hypre_ParCompGridNonOwnedGlobalIndices(compGrid), HYPRE_Int, new_size, HYPRE_MEMORY_HOST);
+   hypre_ParCompGridNonOwnedGlobalIndices(compGrid) = hypre_TReAlloc(hypre_ParCompGridNonOwnedGlobalIndices(compGrid), HYPRE_Int, new_size, HYPRE_MEMORY_SHARED);
    hypre_ParCompGridNonOwnedRealMarker(compGrid) = hypre_TReAlloc(hypre_ParCompGridNonOwnedRealMarker(compGrid), HYPRE_Int, new_size, HYPRE_MEMORY_HOST);
    hypre_ParCompGridNonOwnedSort(compGrid) = hypre_TReAlloc(hypre_ParCompGridNonOwnedSort(compGrid), HYPRE_Int, new_size, HYPRE_MEMORY_HOST);
    hypre_ParCompGridNonOwnedInvSort(compGrid) = hypre_TReAlloc(hypre_ParCompGridNonOwnedInvSort(compGrid), HYPRE_Int, new_size, HYPRE_MEMORY_HOST);

@@ -398,7 +398,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
          // clean up memory for this level
          for (i = 0; i < num_send_procs; i++)
          {
-            hypre_TFree(send_buffer[i], HYPRE_MEMORY_HOST);
+            hypre_TFree(send_buffer[i], HYPRE_MEMORY_SHARED);
             hypre_TFree(send_flag_buffer[i], HYPRE_MEMORY_HOST);
          }
          for (i = 0; i < num_recv_procs; i++)
