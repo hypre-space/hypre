@@ -481,32 +481,34 @@ hypre_PFMGGetNumIterations( void *pfmg_vdata,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_PFMGPrintLogging( void *pfmg_vdata,
-                        HYPRE_Int   myid)
+hypre_PFMGPrintLogging( void *pfmg_vdata )
 {
-   hypre_PFMGData *pfmg_data = (hypre_PFMGData *)pfmg_vdata;
-   HYPRE_Int       i;
-   HYPRE_Int       num_iterations  = (pfmg_data -> num_iterations);
-   HYPRE_Int       logging   = (pfmg_data -> logging);
-   HYPRE_Int    print_level  = (pfmg_data -> print_level);
-   HYPRE_Real     *norms     = (pfmg_data -> norms);
-   HYPRE_Real     *rel_norms = (pfmg_data -> rel_norms);
+   hypre_PFMGData    *pfmg_data      = (hypre_PFMGData *) pfmg_vdata;
+   MPI_Comm           comm           = (pfmg_data -> comm);
+   HYPRE_Int          num_iterations = (pfmg_data -> num_iterations);
+   HYPRE_Int          logging        = (pfmg_data -> logging);
+   HYPRE_Int          print_level    = (pfmg_data -> print_level);
+   HYPRE_Real        *norms          = (pfmg_data -> norms);
+   HYPRE_Real        *rel_norms      = (pfmg_data -> rel_norms);
+   HYPRE_Int          myid, i;
+   HYPRE_Real         convr = 1.0;
+
+   hypre_MPI_Comm_rank(comm, &myid);
 
    if (myid == 0)
    {
-      if (print_level > 0)
+      if ((print_level > 0) && (logging > 0))
       {
-         if (logging > 0)
+         hypre_printf("Iters         ||r||_2   conv.rate  ||r||_2/||b||_2\n");
+         hypre_printf("% 5d    %e    %f     %e\n", 0, norms[0], convr, rel_norms[0]);
+         for (i = 1; i < num_iterations; i++)
          {
-            for (i = 0; i < num_iterations; i++)
-            {
-               hypre_printf("Residual norm[%d] = %e   ",i,norms[i]);
-               hypre_printf("Relative residual norm[%d] = %e\n",i,rel_norms[i]);
-            }
+            convr = norms[i] / norms[i-1];
+            hypre_printf("% 5d    %e    %f     %e\n", i, norms[i], convr, rel_norms[i]);
          }
       }
    }
-  
+
    return hypre_error_flag;
 }
 

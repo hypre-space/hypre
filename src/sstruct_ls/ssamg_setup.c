@@ -14,7 +14,7 @@
 #include "_hypre_sstruct_ls.h"
 #include "ssamg.h"
 
-#define DEBUG 1
+#define DEBUG 0
 
 /*--------------------------------------------------------------------------
  *  TODO:
