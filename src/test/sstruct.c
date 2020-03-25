@@ -3818,6 +3818,30 @@ main( hypre_int argc,
 
       }
 
+      else if (solver_id == 14)
+      {
+         /* use SSAMG solver as preconditioner */
+         HYPRE_SStructSSAMGCreate(hypre_MPI_COMM_WORLD, &precond);
+         HYPRE_SStructSSAMGSetMaxIter(precond, 1);
+         HYPRE_SStructSSAMGSetTol(precond, 0.0);
+         /* weighted Jacobi = 1; red-black GS = 2 */
+         HYPRE_SStructSSAMGSetRelaxType(precond, relax);
+         if (usr_jacobi_weight)
+         {
+            HYPRE_SStructSSAMGSetRelaxWeight(precond, jacobi_weight);
+         }
+         HYPRE_SStructSSAMGSetNumPreRelax(precond, n_pre);
+         HYPRE_SStructSSAMGSetNumPostRelax(precond, n_post);
+         HYPRE_SStructSSAMGSetPrintLevel(precond, 0);
+         HYPRE_SStructSSAMGSetLogging(precond, 1);
+         HYPRE_SStructSSAMGSetup(precond, A, b, x);
+
+         HYPRE_PCGSetPrecond( (HYPRE_Solver) solver,
+                              (HYPRE_PtrToSolverFcn) HYPRE_SStructSSAMGSolve,
+                              (HYPRE_PtrToSolverFcn) HYPRE_SStructSSAMGSetup,
+                              (HYPRE_Solver) precond);
+      }
+
       else if (solver_id == 18)
       {
          /* use diagonal scaling as preconditioner */
