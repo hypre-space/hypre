@@ -3229,6 +3229,9 @@ HYPRE_ParCSRHybridSetNumGridSweeps(HYPRE_Solver  solver,
                                    HYPRE_Int    *num_grid_sweeps);
 
 
+HYPRE_Int
+HYPRE_ParCSRHybridGetSetupSolveTime( HYPRE_Solver solver,
+                                     HYPRE_Real  *time    );
 /**@}*/
 
 /*--------------------------------------------------------------------------

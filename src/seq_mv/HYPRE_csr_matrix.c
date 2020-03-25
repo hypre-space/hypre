@@ -172,18 +172,3 @@ HYPRE_CSRMatrixDeviceSpGemmSetHashType( char value )
    return 0;
 }
 
-HYPRE_Int
-HYPRE_CSRMatrixDeviceSpGemmSetUseCusparse( HYPRE_Int value )
-{
-#if defined(HYPRE_USING_CUDA)
-   if (hypre_handle == NULL)
-   {
-      return -1;
-   }
-
-   hypre_handle->spgemm_use_cusparse = value != 0;
-#endif
-
-   return 0;
-}
-

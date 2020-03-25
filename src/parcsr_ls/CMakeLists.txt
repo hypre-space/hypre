@@ -69,6 +69,7 @@ set(SRCS
   par_indepset.c
   par_interp.c
   par_jacobi_interp.c
+  par_krylov_func.c
   par_multi_interp.c
   par_laplace_27pt.c
   par_laplace_9pt.c
@@ -94,7 +95,6 @@ set(SRCS
   par_sv_interp.c
   par_sv_interp_ln.c
   partial.c
-  pcg_par.c
   schwarz.c
   block_tridiag.c
   ams.c

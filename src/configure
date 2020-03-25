@@ -777,6 +777,7 @@ enable_unified_memory
 enable_cuda_streams
 enable_nvtx
 enable_cusparse
+enable_cub
 enable_cublas
 enable_curand
 enable_gpu_aware_mpi
@@ -1484,6 +1485,7 @@ Optional Features:
   --enable-cuda-streams   Use CUDA streams (default is YES).
   --enable-nvtx           Use NVTX (default is NO).
   --enable-cusparse       Use cuSPARSE (default is YES).
+  --enable-cub            Use CUB Allocator (default is NO).
   --enable-cublas         Use cuBLAS (default is NO).
   --enable-curand         Use cuRAND (default is YES).
   --enable-gpu-aware-mpi  Use GPU memory aware MPI
@@ -2649,6 +2651,7 @@ hypre_using_nvtx=no
 hypre_using_cusparse=yes
 hypre_using_cublas=no
 hypre_using_curand=yes
+hypre_using_cub=no
 
 hypre_using_caliper=no
 hypre_user_gave_caliper_lib=no
@@ -3004,6 +3007,19 @@ if test "${enable_cusparse+set}" = set; then :
  esac
 else
   hypre_using_cusparse=yes
+
+fi
+
+
+# Check whether --enable-cub was given.
+if test "${enable_cub+set}" = set; then :
+  enableval=$enable_cub; case "${enableval}" in
+    yes) hypre_using_cub=yes ;;
+    no)  hypre_using_cub=no ;;
+    *)   hypre_using_cub=no ;;
+ esac
+else
+  hypre_using_cub=no
 
 fi
 
@@ -8381,6 +8397,13 @@ $as_echo "#define HYPRE_USING_CUSPARSE 1" >>confdefs.h
 
    fi
 
+   if test "$hypre_using_cub" = "yes"
+   then
+
+$as_echo "#define HYPRE_USING_CUB_ALLOCATOR 1" >>confdefs.h
+
+   fi
+
    if test "$hypre_using_cublas" = "yes"
    then
 
@@ -8450,15 +8473,17 @@ done
 
    HYPRE_CUDA_GENCODE="-gencode arch=compute_${HYPRE_CUDA_SM},\"code=sm_${HYPRE_CUDA_SM}\""
 
-   CUFLAGS+="-O2 -ccbin=$NVCCBIN ${HYPRE_CUDA_GENCODE} -expt-extended-lambda -dc -std=c++11 --x cu"
+   CUFLAGS+="-lineinfo -ccbin=$NVCCBIN ${HYPRE_CUDA_GENCODE} -expt-extended-lambda -dc -std=c++11 --x cu"
    if test "$hypre_using_debug" = "yes"
    then
-      CUFLAGS="-g ${CUFLAGS}"
+      CUFLAGS="-g -O0 ${CUFLAGS}"
+   else
+      CUFLAGS="-O2 ${CUFLAGS}"
    fi
 
-   if test "$CXX" = "mpixlC" || test "$CXX" = "xlC_r" || test "$CXX" = "xlC"
+   if test "$NVCCBIN" = "mpixlC" || test "$NVCCBIN" = "xlC_r" || test "$NVCCBIN" = "xlC"
    then
-     CXXFLAGS+=" -Wno-deprecated-register"
+     CXXFLAGS+=" -Wno-deprecated-register -Wenum-compare"
    fi
    CXXFLAGS="${CUFLAGS} -Xcompiler \"${CXXFLAGS}\""
 
@@ -10174,3 +10199,4 @@ fi
 mv HYPRE_config.h HYPRE_config.h.tmp
 sed 's/FC_FUNC/HYPRE_FC_FUNC/g' < HYPRE_config.h.tmp > HYPRE_config.h
 rm -f HYPRE_config.h.tmp
+

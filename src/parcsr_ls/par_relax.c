@@ -27,7 +27,7 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                                  HYPRE_Int           relax_points,
                                  HYPRE_Real          relax_weight,
                                  HYPRE_Real          omega,
-                                 HYPRE_Real         *l1_norms,
+                                 hypre_Vector       *l1_norms_vec,
                                  hypre_ParVector    *u,
                                  hypre_ParVector    *Vtemp,
                                  hypre_ParVector    *Ztemp )
@@ -54,6 +54,8 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 
    hypre_Vector   *f_local = hypre_ParVectorLocalVector(f);
    HYPRE_Real     *f_data  = hypre_VectorData(f_local);
+
+   HYPRE_Complex  *l1_norms = l1_norms_vec ? hypre_VectorData(l1_norms_vec) : NULL;
 
    hypre_Vector   *Vtemp_local;
    HYPRE_Real     *Vtemp_data;
@@ -2339,8 +2341,8 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
          /*-----------------------------------------------------------------
           * Copy f into temporary vector.
           *-----------------------------------------------------------------*/
-         hypre_SeqVectorPrefetch(hypre_ParVectorLocalVector(Vtemp), HYPRE_MEMORY_DEVICE);
-         hypre_SeqVectorPrefetch(hypre_ParVectorLocalVector(f), HYPRE_MEMORY_DEVICE);
+         //hypre_SeqVectorPrefetch(hypre_ParVectorLocalVector(Vtemp), HYPRE_MEMORY_DEVICE);
+         //hypre_SeqVectorPrefetch(hypre_ParVectorLocalVector(f), HYPRE_MEMORY_DEVICE);
          hypre_ParVectorCopy(f, Vtemp);
 
          /*-----------------------------------------------------------------

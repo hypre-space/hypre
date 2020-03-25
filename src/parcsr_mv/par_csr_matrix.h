@@ -13,6 +13,8 @@
  *
  *****************************************************************************/
 
+#if 0
+
 #ifndef hypre_PAR_CSR_MATRIX_HEADER
 #define hypre_PAR_CSR_MATRIX_HEADER
 
@@ -176,5 +178,7 @@ typedef struct
 #define hypre_ParCSRBooleanMatrix_Get_NNZ(matrix)           ((matrix)->num_nonzeros)
 #define hypre_ParCSRBooleanMatrix_Get_Rowindices(matrix)    ((matrix)->rowindices)
 #define hypre_ParCSRBooleanMatrix_Get_Getrowactive(matrix)  ((matrix)->getrowactive)
+
+#endif
 
 #endif

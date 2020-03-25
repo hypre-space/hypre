@@ -104,41 +104,18 @@ hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A,
                                  &Bext_diag, &Bext_offd);
       hypre_CSRMatrixDestroy(Bext);
 
-/*
-if (my_id == 3)
-{
-printf("%d\n", num_cols_offd_C);
-HYPRE_Int *host_col_map_offd_C = hypre_TAlloc(HYPRE_Int, num_cols_offd_C, HYPRE_MEMORY_HOST);
-hypre_TMemcpy(host_col_map_offd_C, col_map_offd_C, HYPRE_Int, num_cols_offd_C, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-for (i=0; i<num_cols_offd_C; i++) printf("%d ", host_col_map_offd_C[i]); printf("\n");
-hypre_CSRMatrix *Bext_diag_host = hypre_CSRMatrixClone_v2(Bext_diag, 1, HYPRE_MEMORY_HOST);
-hypre_CSRMatrix *Bext_offd_host = hypre_CSRMatrixClone_v2(Bext_offd, 1, HYPRE_MEMORY_HOST);
-hypre_CSRMatrixPrint2(Bext_diag_host, NULL);
-hypre_CSRMatrixPrint2(Bext_offd_host, NULL);
-}
-exit(0);
-*/
-
       /* These require data from other processes */
       ABext_diag = hypre_CSRMatrixMultiply(A_offd, Bext_diag);
       ABext_offd = hypre_CSRMatrixMultiply(A_offd, Bext_offd);
 
       hypre_CSRMatrixDestroy(Bext_diag);
       hypre_CSRMatrixDestroy(Bext_offd);
-/*
-if (my_id == 3)
-{
-hypre_CSRMatrix *AB_diag_host = hypre_CSRMatrixClone_v2(AB_diag, 1, HYPRE_MEMORY_HOST);
-hypre_CSRMatrix *AB_offd_host = hypre_CSRMatrixClone_v2(AB_offd, 1, HYPRE_MEMORY_HOST);
-hypre_CSRMatrixPrint2(AB_diag_host, NULL);
-hypre_CSRMatrixPrint2(AB_offd_host, NULL);
-}
-*/
 
       /* adjust AB_offd cols indices and number of cols of this matrix
        * NOTE: cannot adjust the cols of B_offd (which needs less work) beforehand, unless want to change B */
       AB_offd_num_nonzeros = hypre_CSRMatrixNumNonzeros(AB_offd);
       AB_offd_j = hypre_CSRMatrixJ(AB_offd);
+      /* RL: TODO XXX thrust manual says map should not overlap result. but it seems work here. */
       HYPRE_THRUST_CALL(gather, AB_offd_j, AB_offd_j + AB_offd_num_nonzeros, map_B_to_C, AB_offd_j);
 
       hypre_TFree(map_B_to_C, HYPRE_MEMORY_DEVICE);
@@ -152,14 +129,6 @@ hypre_CSRMatrixPrint2(AB_offd_host, NULL);
       /*
       hypre_CSRMatrixNumCols(ABext_offd) = num_cols_offd_C;
       */
-
-/*
-if (my_id == 3)
-{
-hypre_CSRMatrix *AB_offd_host = hypre_CSRMatrixClone_v2(AB_offd, 1, HYPRE_MEMORY_HOST);
-hypre_CSRMatrixPrint2(AB_offd_host, NULL);
-}
-*/
 
       C_diag = hypre_CSRMatrixAdd(AB_diag, ABext_diag);
       C_offd = hypre_CSRMatrixAdd(AB_offd, ABext_offd);
@@ -175,16 +144,6 @@ hypre_CSRMatrixPrint2(AB_offd_host, NULL);
       C_offd = hypre_CSRMatrixCreate(num_rows_diag_A, 0, 0);
       hypre_CSRMatrixInitialize_v2(C_offd, 0, HYPRE_MEMORY_DEVICE);
    }
-
-/*
-if (my_id == 3)
-{
-hypre_CSRMatrix *C_diag_host = hypre_CSRMatrixClone_v2(C_diag, 1, HYPRE_MEMORY_HOST);
-hypre_CSRMatrixPrint2(C_diag_host, NULL);
-hypre_CSRMatrix *C_offd_host = hypre_CSRMatrixClone_v2(C_offd, 1, HYPRE_MEMORY_HOST);
-hypre_CSRMatrixPrint2(C_offd_host, NULL);
-}
-*/
 
    /*-----------------------------------------------------------------------
     *  Allocate C_diag_data and C_diag_j arrays.
@@ -419,6 +378,8 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
 
    /* Move the diagonal entry to the first of each row */
    hypre_CSRMatrixMoveDiagFirstDevice(C_diag);
+
+   hypre_SyncCudaComputeStream(hypre_handle);
 
    return C;
 }

@@ -67,7 +67,6 @@ hypre_BoomerAMGCoarsenPMISDevice( hypre_ParCSRMatrix    *S,
 
    /* CF marker */
    CF_marker_diag = hypre_TAlloc(HYPRE_Int, num_cols_diag, HYPRE_MEMORY_DEVICE);
-   //   CF_marker_diag = hypre_TAlloc(HYPRE_Int, num_cols_diag, HYPRE_MEMORY_SHARED);
    CF_marker_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd, HYPRE_MEMORY_DEVICE);
 
    /* arrays for global measure diag and offd parts */
@@ -226,7 +225,7 @@ hypre_GetGlobalMeasureDevice( hypre_ParCSRMatrix  *S,
    }
 
    hypreDevice_GenScatterAdd(measure_diag, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
-                             hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg), real_send_buf);
+                             hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg), real_send_buf, NULL);
 
    /* Augments the measures with a random number between 0 and 1 (only for the local part) */
    if (aug_rand)

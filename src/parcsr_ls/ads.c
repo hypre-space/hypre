@@ -153,8 +153,7 @@ HYPRE_Int hypre_ADSDestroy(void *solver)
    if (ads_data -> g2)
       hypre_ParVectorDestroy(ads_data -> g2);
 
-   if (ads_data -> A_l1_norms)
-      hypre_TFree(ads_data -> A_l1_norms, HYPRE_MEMORY_HOST);
+   hypre_SeqVectorDestroy(ads_data -> A_l1_norms);
 
    /* C, G, x, y and z are not destroyed */
 
@@ -898,8 +897,11 @@ HYPRE_Int hypre_ADSSetup(void *solver,
 
    /* Compute the l1 norm of the rows of A */
    if (ads_data -> A_relax_type >= 1 && ads_data -> A_relax_type <= 4)
-      hypre_ParCSRComputeL1Norms(ads_data -> A, ads_data -> A_relax_type,
-                                 NULL, &ads_data -> A_l1_norms);
+   {
+      ads_data -> A_l1_norms = hypre_SeqVectorCreate(hypre_ParCSRMatrixNumRows(ads_data -> A));
+      hypre_SeqVectorInitialize_v2(ads_data -> A_l1_norms, HYPRE_MEMORY_DEVICE);
+      hypre_ParCSRComputeL1Norms(ads_data -> A, ads_data -> A_relax_type, NULL, ads_data -> A_l1_norms);
+   }
 
    /* Chebyshev? */
    if (ads_data -> A_relax_type == 16)

@@ -11,96 +11,6 @@
 #include <Kokkos_Core.hpp>
 #endif
 
-void hypre_SetExecPolicy( HYPRE_Int policy )
-{
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   if ( policy == HYPRE_EXEC_HOST || policy == HYPRE_EXEC_DEVICE)
-   {
-      hypre_HandleDefaultExecPolicy(hypre_handle) = policy;
-   }
-#endif
-}
-
-/*---------------------------------------------------
- * hypre_GetExecPolicy
- * Return execution policy based on memory locations
- *---------------------------------------------------*/
-/* for unary operation */
-HYPRE_Int
-hypre_GetExecPolicy1(HYPRE_Int location)
-{
-   HYPRE_Int exec = HYPRE_EXEC_UNSET;
-
-   location = hypre_GetActualMemLocation(location);
-
-   switch (location)
-   {
-      case HYPRE_MEMORY_HOST :
-         exec = HYPRE_EXEC_HOST;
-         break;
-      case HYPRE_MEMORY_HOST_PINNED :
-         exec = HYPRE_EXEC_HOST;
-         break;
-      case HYPRE_MEMORY_DEVICE :
-         exec = HYPRE_EXEC_DEVICE;
-         break;
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-      case HYPRE_MEMORY_SHARED :
-         exec = hypre_HandleDefaultExecPolicy(hypre_handle);
-         break;
-#endif
-   }
-
-   return exec;
-}
-
-/* for binary operation */
-HYPRE_Int
-hypre_GetExecPolicy2(HYPRE_Int location1,
-                     HYPRE_Int location2)
-{
-   location1 = hypre_GetActualMemLocation(location1);
-   location2 = hypre_GetActualMemLocation(location2);
-
-   /* HOST_PINNED has the same exec policy as HOST */
-   if (location1 == HYPRE_MEMORY_HOST_PINNED)
-   {
-      location1 = HYPRE_MEMORY_HOST;
-   }
-
-   if (location2 == HYPRE_MEMORY_HOST_PINNED)
-   {
-      location2 = HYPRE_MEMORY_HOST;
-   }
-
-   /* no policy for these combinations */
-   if ( (location1 == HYPRE_MEMORY_HOST && location2 == HYPRE_MEMORY_DEVICE) ||
-        (location2 == HYPRE_MEMORY_HOST && location1 == HYPRE_MEMORY_DEVICE) )
-   {
-      return HYPRE_EXEC_UNSET;
-   }
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   /* policy for S-S can be HOST or DEVICE. Choose HOST by default */
-   if (location1 == HYPRE_MEMORY_SHARED && location2 == HYPRE_MEMORY_SHARED)
-   {
-      return hypre_HandleDefaultExecPolicy(hypre_handle);
-   }
-#endif
-
-   if (location1 == HYPRE_MEMORY_HOST || location2 == HYPRE_MEMORY_HOST)
-   {
-      return HYPRE_EXEC_HOST;
-   }
-
-   if (location1 == HYPRE_MEMORY_DEVICE || location2 == HYPRE_MEMORY_DEVICE)
-   {
-      return HYPRE_EXEC_DEVICE;
-   }
-
-   return HYPRE_EXEC_UNSET;
-}
-
 hypre_Handle *hypre_handle = NULL;
 
 hypre_Handle*
@@ -108,14 +18,26 @@ hypre_HandleCreate()
 {
    hypre_Handle *handle = hypre_CTAlloc(hypre_Handle, 1, HYPRE_MEMORY_HOST);
 
-   /* set default options */
+   hypre_HandleMemoryLocation(handle) = HYPRE_MEMORY_DEVICE;
+
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+
+   /* default CUDA options */
    hypre_HandleDefaultExecPolicy(handle)            = HYPRE_EXEC_HOST;
    hypre_HandleCudaDevice(handle)                   = 0;
    hypre_HandleCudaComputeStreamNum(handle)         = 0;
-   hypre_HandleCudaPrefetchStreamNum(handle)        = 1;
-   hypre_HandleCudaComputeStreamSyncDefault(handle) = 1;
-   handle->spgemm_use_cusparse                      = 0; // TODO: accessor func #ifdef
+#if defined(HYPRE_USING_UNIFIED_MEMORY)
+   hypre_HandleCudaComputeStreamSync(handle)        = 1;
+#else
+   hypre_HandleCudaComputeStreamSync(handle)        = 0;
+#endif
+
+   /* SpGeMM */
+#ifdef HYPRE_USING_CUSPARSE
+   hypre_HandleSpgemmUseCusparse(handle)            = 1;
+#else
+   hypre_HandleSpgemmUseCusparse(handle)            = 0;
+#endif
    handle->spgemm_num_passes                        = 3;
    /* 1: naive overestimate, 2: naive underestimate, 3: Cohen's algorithm */
    handle->spgemm_rownnz_estimate_method            = 3;
@@ -123,8 +45,16 @@ hypre_HandleCreate()
    handle->spgemm_rownnz_estimate_mult_factor       = 1.5;
    handle->spgemm_hash_type                         = 'L';
 
-   hypre_HandleCudaComputeStreamSync(handle).clear();
-   hypre_HandleCudaComputeStreamSyncPush( handle, hypre_HandleCudaComputeStreamSyncDefault(handle) );
+   /* cub */
+#ifdef HYPRE_USING_CUB_ALLOCATOR
+   handle->cub_bin_growth                           = 8u;
+   handle->cub_min_bin                              = 1u;
+   handle->cub_max_bin                              = (hypre_uint) -1;
+   handle->cub_max_cached_bytes                     = (size_t) -1;
+   handle->cub_dev_allocator                        = NULL;
+   handle->cub_um_allocator                         = NULL;
+#endif
+
 #endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 
    return handle;
@@ -136,7 +66,9 @@ hypre_HandleDestroy(hypre_Handle *hypre_handle_)
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_Int i;
 
-   hypre_TFree(hypre_handle_->cuda_reduce_buffer, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(hypre_HandleCudaReduceBuffer(hypre_handle_),     HYPRE_MEMORY_DEVICE);
+   hypre_TFree(hypre_HandleStructCommRecvBuffer(hypre_handle_), HYPRE_MEMORY_DEVICE);
+   hypre_TFree(hypre_HandleStructCommSendBuffer(hypre_handle_), HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_CURAND)
    if (hypre_handle_->curand_gen)
@@ -171,6 +103,11 @@ hypre_HandleDestroy(hypre_Handle *hypre_handle_)
          HYPRE_CUDA_CALL( cudaStreamDestroy(hypre_handle_->cuda_streams[i]) );
       }
    }
+#endif
+
+#ifdef HYPRE_USING_CUB_ALLOCATOR
+   delete hypre_handle_->cub_dev_allocator;
+   delete hypre_handle_->cub_um_allocator;
 #endif
 
    hypre_TFree(hypre_handle_, HYPRE_MEMORY_HOST);
@@ -221,8 +158,10 @@ hypre_SetDevice(HYPRE_Int use_device, hypre_Handle *hypre_handle_)
 
    hypre_HandleCudaDevice(hypre_handle_) = device_id;
 
+   /*
    hypre_printf("Proc [global %d/%d, local %d/%d] can see %d GPUs and is running on %d\n",
                  myid, nproc, myNodeid, NodeSize, nDevices, device_id);
+   */
 
    return hypre_error_flag;
 }
@@ -236,17 +175,20 @@ hypre_SetDevice(HYPRE_Int use_device, hypre_Handle *hypre_handle_)
  *****************************************************************************/
 
 HYPRE_Int
-HYPRE_Init( hypre_int argc, char *argv[] )
+HYPRE_Init()
 {
    hypre_handle = hypre_HandleCreate();
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+
+   HYPRE_CUDA_CALL( cudaGetLastError() );
+
    hypre_SetDevice(-1, hypre_handle);
 
    /* To include the cost of creating streams/cudahandles in HYPRE_Init */
    /* If not here, will be done at the first use */
    hypre_HandleCudaComputeStream(hypre_handle);
-   hypre_HandleCudaPrefetchStream(hypre_handle);
+   //hypre_HandleCudaPrefetchStream(hypre_handle);
 #endif
 
 #if defined(HYPRE_USING_CUBLAS)
@@ -262,9 +204,11 @@ HYPRE_Init( hypre_int argc, char *argv[] )
    hypre_HandleCurandGenerator(hypre_handle);
 #endif
 
+   /*
 #if defined(HYPRE_USING_KOKKOS)
    Kokkos::initialize (argc, argv);
 #endif
+   */
 
    /* Check if cuda arch flags in compiling match the device */
 #if defined(HYPRE_USING_CUDA)
@@ -273,6 +217,16 @@ HYPRE_Init( hypre_int argc, char *argv[] )
 
 #if defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_OMPOffloadOn();
+#endif
+
+#ifdef HYPRE_USING_CUB_ALLOCATOR
+   /* Keep this check here at the end of HYPRE_Init()
+    * Make sure that CUB Allocator has not been setup in HYPRE_Init,
+    * otherwise users are not able to set the parameters of CUB */
+   if (hypre_handle->cub_dev_allocator || hypre_handle->cub_um_allocator)
+   {
+      hypre_printf("ERROR: CUB Allocators have been setup ... \n");
+   }
 #endif
 
    return hypre_error_flag;
@@ -284,10 +238,6 @@ HYPRE_Init( hypre_int argc, char *argv[] )
  *
  *****************************************************************************/
 
-/* declared in "struct_communication.c" */
-extern HYPRE_Complex *global_recv_buffer, *global_send_buffer;
-extern HYPRE_Int      global_recv_size, global_send_size;
-
 HYPRE_Int
 HYPRE_Finalize()
 {
@@ -296,9 +246,6 @@ HYPRE_Finalize()
 #if defined(HYPRE_USING_KOKKOS)
    Kokkos::finalize ();
 #endif
-
-   hypre_TFree(global_send_buffer, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(global_recv_buffer, HYPRE_MEMORY_DEVICE);
 
    //if (cudaSuccess == cudaPeekAtLastError() ) hypre_printf("OK...\n");
 

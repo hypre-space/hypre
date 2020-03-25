@@ -11,6 +11,8 @@
  *
  *****************************************************************************/
 
+#if 0
+
 #ifndef hypre_MULTIBLOCK_MATRIX_HEADER
 #define hypre_MULTIBLOCK_MATRIX_HEADER
 
@@ -38,5 +40,7 @@ typedef struct
 (matrix)[j])
 #define hypre_MultiblockMatrixSubmatrixType(matrix,j) (hypre_MultiblockMatrixSubmatrixTypes\
 (matrix)[j])
+
+#endif
 
 #endif

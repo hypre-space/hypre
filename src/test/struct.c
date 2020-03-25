@@ -184,7 +184,7 @@ main( hypre_int argc,
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
    /* Initialize Hypre */
-   HYPRE_Init(argc, argv);
+   HYPRE_Init();
 
 #ifdef HYPRE_DEBUG
    /*cegdb(&argc, &argv, myid);*/

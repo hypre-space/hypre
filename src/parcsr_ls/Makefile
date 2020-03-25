@@ -101,11 +101,13 @@ FILES =\
  par_interp_device.c\
  par_interp_trunc_device.c\
  par_jacobi_interp.c\
+ par_krylov_func.c\
  par_multi_interp.c\
  par_laplace.c\
  par_laplace_27pt.c\
  par_laplace_9pt.c\
  par_lr_interp.c\
+ par_lr_interp_device.c\
  par_mgr.c\
  par_mgr_setup.c\
  par_mgr_solve.c\
@@ -130,7 +132,6 @@ FILES =\
  par_vardifconv.c\
  par_vardifconv_rs.c\
  partial.c\
- pcg_par.c\
  schwarz.c\
  block_tridiag.c\
  ams.c\

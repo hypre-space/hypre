@@ -16,6 +16,7 @@ extern "C++" {
 
 #include <cuda.h>
 #include <cuda_runtime.h>
+#include <cuda_profiler_api.h>
 #include <curand.h>
 #include <cublas_v2.h>
 #include <cusparse.h>
@@ -45,6 +46,9 @@ extern "C++" {
 #include <thrust/fill.h>
 #include <thrust/adjacent_difference.h>
 #include <thrust/inner_product.h>
+#include <thrust/logical.h>
+#include <thrust/replace.h>
+
 using namespace thrust::placeholders;
 #endif // #if defined(HYPRE_USING_CUDA)
 
@@ -61,14 +65,35 @@ using namespace thrust::placeholders;
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  */
 
+#ifdef HYPRE_DEBUG                                                                                                 \
+
 #define HYPRE_CUDA_LAUNCH(kernel_name, gridsize, blocksize, ...)                                                   \
 {                                                                                                                  \
    if ( gridsize.x  == 0 || gridsize.y  == 0 || gridsize.z  == 0 ||                                                \
         blocksize.x == 0 || blocksize.y == 0 || blocksize.z == 0 )                                                 \
    {                                                                                                               \
       /* hypre_printf("Warning %s %d: Zero CUDA grid/block (%d %d %d) (%d %d %d)\n",                               \
-                   __FILE__, __LINE__,                                                                             \
-                   gridsize.x, gridsize.y, gridsize.z, blocksize.x, blocksize.y, blocksize.z); */                  \
+                 __FILE__, __LINE__,                                                                               \
+                 gridsize.x, gridsize.y, gridsize.z, blocksize.x, blocksize.y, blocksize.z); */                    \
+   }                                                                                                               \
+   else                                                                                                            \
+   {                                                                                                               \
+      (kernel_name) <<< (gridsize), (blocksize), 0, hypre_HandleCudaComputeStream(hypre_handle) >>> (__VA_ARGS__); \
+   }                                                                                                               \
+   hypre_SyncCudaComputeStream(hypre_handle);                                                                      \
+   HYPRE_CUDA_CALL( cudaGetLastError() );                                                                          \
+}
+
+#else
+
+#define HYPRE_CUDA_LAUNCH(kernel_name, gridsize, blocksize, ...)                                                   \
+{                                                                                                                  \
+   if ( gridsize.x  == 0 || gridsize.y  == 0 || gridsize.z  == 0 ||                                                \
+        blocksize.x == 0 || blocksize.y == 0 || blocksize.z == 0 )                                                 \
+   {                                                                                                               \
+      /* hypre_printf("Warning %s %d: Zero CUDA grid/block (%d %d %d) (%d %d %d)\n",                               \
+                 __FILE__, __LINE__,                                                                               \
+                 gridsize.x, gridsize.y, gridsize.z, blocksize.x, blocksize.y, blocksize.z); */                    \
    }                                                                                                               \
    else                                                                                                            \
    {                                                                                                               \
@@ -76,17 +101,19 @@ using namespace thrust::placeholders;
    }                                                                                                               \
 }
 
+#endif
 
-#define HYPRE_THRUST_CALL(func_name, ...)                                                    \
-   thrust::func_name(                                                                        \
-   thrust::cuda::par.on(hypre_HandleCudaComputeStream(hypre_handle)), __VA_ARGS__);          \
+/* RL: TODO Want macro HYPRE_THRUST_CALL to return value but I don't know how to do it right
+ * The following one works OK for now */
+#define HYPRE_THRUST_CALL(func_name, ...)                                                                          \
+   thrust::func_name(thrust::cuda::par.on(hypre_HandleCudaComputeStream(hypre_handle)), __VA_ARGS__);
 
 #define HYPRE_CUBLAS_CALL(call) do {                                                         \
    cublasStatus_t err = call;                                                                \
    if (CUBLAS_STATUS_SUCCESS != err) {                                                       \
       hypre_printf("CUBLAS ERROR (code = %d, %d) at %s:%d\n",                                \
             err, err == CUBLAS_STATUS_EXECUTION_FAILED, __FILE__, __LINE__);                 \
-      exit(1);                                                                               \
+      assert(0); exit(1);                                                                    \
    } } while(0)
 
 #define HYPRE_CUSPARSE_CALL(call) do {                                                       \
@@ -94,24 +121,24 @@ using namespace thrust::placeholders;
    if (CUSPARSE_STATUS_SUCCESS != err) {                                                     \
       hypre_printf("CUSPARSE ERROR (code = %d, %d) at %s:%d\n",                              \
             err, err == CUSPARSE_STATUS_EXECUTION_FAILED, __FILE__, __LINE__);               \
-      exit(1);                                                                               \
+      assert(0); exit(1);                                                                    \
    } } while(0)
 
 
-#define HYPRE_CURAND_CALL(call) do {                        \
-   curandStatus_t err = call;                               \
-   if (CURAND_STATUS_SUCCESS != err) {                      \
-      hypre_printf("CURAND ERROR (code = %d) at %s:%d\n",   \
-                   err, __FILE__, __LINE__);                \
-      exit(1);                                              \
+#define HYPRE_CURAND_CALL(call) do {                                                         \
+   curandStatus_t err = call;                                                                \
+   if (CURAND_STATUS_SUCCESS != err) {                                                       \
+      hypre_printf("CURAND ERROR (code = %d) at %s:%d\n", err, __FILE__, __LINE__);          \
+      assert(0); exit(1);                                                                    \
    } } while(0)
 
 
-#define HYPRE_CUDA_CALL(call) do {                                                                             \
-   cudaError_t err = call;                                                                                     \
-   if (cudaSuccess != err) {                                                                                   \
-      hypre_printf("CUDA ERROR (code = %d, %s) at %s:%d\n", err, cudaGetErrorString(err), __FILE__, __LINE__); \
-      exit(1);                                                                                                 \
+#define HYPRE_CUDA_CALL(call) do {                                                           \
+   cudaError_t err = call;                                                                   \
+   if (cudaSuccess != err) {                                                                 \
+      hypre_printf("CUDA ERROR (code = %d, %s) at %s:%d\n", err, cudaGetErrorString(err),    \
+                   __FILE__, __LINE__);                                                      \
+      assert(0); exit(1);                                                                    \
    } } while(0)
 
 #if defined(HYPRE_USING_CUDA)
@@ -291,6 +318,7 @@ T read_only_load( const T *ptr )
    return __ldg( ptr );
 }
 
+/* exclusive prefix scan */
 template <typename T>
 static __device__ __forceinline__
 T warp_prefix_sum(hypre_int lane_id, T in, T &all_sum)
@@ -438,27 +466,6 @@ struct absolute_value : public thrust::unary_function<T,T>
   }
 };
 
-
-template<typename T1, typename T2>
-struct TupleComp1
-{
-   typedef thrust::tuple<T1, T2> Tuple;
-
-   __host__ __device__ bool operator()(const Tuple& t1, const Tuple& t2)
-   {
-      if (thrust::get<0>(t1) < thrust::get<0>(t2))
-      {
-         return true;
-      }
-      if (thrust::get<0>(t1) > thrust::get<0>(t2))
-      {
-         return false;
-      }
-      return thrust::get<1>(t1) < thrust::get<1>(t2);
-   }
-};
-
-
 template<typename T1, typename T2>
 struct TupleComp2
 {
@@ -478,64 +485,101 @@ struct TupleComp2
    }
 };
 
-#endif // #if defined(HYPRE_USING_CUDA)
-
-#ifdef __cplusplus
-}
-#endif
-
-struct is_negative
+template<typename T1, typename T2>
+struct TupleComp3
 {
-   __host__ __device__ bool operator()(const HYPRE_Int &x)
+   typedef thrust::tuple<T1, T2> Tuple;
+
+   __host__ __device__ bool operator()(const Tuple& t1, const Tuple& t2)
+   {
+      if (thrust::get<0>(t1) < thrust::get<0>(t2))
+      {
+         return true;
+      }
+      if (thrust::get<0>(t1) > thrust::get<0>(t2))
+      {
+         return false;
+      }
+      if (thrust::get<0>(t2) == thrust::get<1>(t2))
+      {
+         return false;
+      }
+      return thrust::get<0>(t1) == thrust::get<1>(t1) || thrust::get<1>(t1) < thrust::get<1>(t2);
+   }
+};
+
+template<typename T>
+struct is_negative : public thrust::unary_function<T,bool>
+{
+   __host__ __device__ bool operator()(const T &x)
    {
       return (x < 0);
    }
 };
 
-struct is_nonnegative
+template<typename T>
+struct is_positive : public thrust::unary_function<T,bool>
 {
-   __host__ __device__ bool operator()(const HYPRE_Int &x)
+   __host__ __device__ bool operator()(const T &x)
+   {
+      return (x > 0);
+   }
+};
+
+template<typename T>
+struct is_nonnegative : public thrust::unary_function<T,bool>
+{
+   __host__ __device__ bool operator()(const T &x)
    {
       return (x >= 0);
    }
 };
 
-struct in_range
+
+template<typename T>
+struct in_range : public thrust::unary_function<T, bool>
 {
-   HYPRE_Int low, up;
+   T low, up;
 
-   in_range(HYPRE_Int low_, HYPRE_Int up_) { low = low_; up = up_; }
+   in_range(T low_, T up_) { low = low_; up = up_; }
 
-   __host__ __device__ bool operator()(const HYPRE_Int &x)
+   __host__ __device__ bool operator()(const T &x)
    {
       return (x >= low && x <= up);
    }
 };
 
-struct out_of_range
+template<typename T>
+struct out_of_range : public thrust::unary_function<T,bool>
 {
-   HYPRE_Int low, up;
+   T low, up;
 
-   out_of_range(HYPRE_Int low_, HYPRE_Int up_) { low = low_; up = up_; }
+   out_of_range(T low_, T up_) { low = low_; up = up_; }
 
-   __host__ __device__ bool operator()(const HYPRE_Int &x)
+   __host__ __device__ bool operator()(const T &x)
    {
       return (x < low || x > up);
    }
 };
 
-struct less_than
+template<typename T>
+struct less_than : public thrust::unary_function<T,bool>
 {
-   HYPRE_Int val;
+   T val;
 
-   less_than(HYPRE_Int val_) { val = val_; }
+   less_than(T val_) { val = val_; }
 
-   __host__ __device__ bool operator()(const HYPRE_Int &x)
+   __host__ __device__ bool operator()(const T &x)
    {
       return (x < val);
    }
 };
 
+#endif // #if defined(HYPRE_USING_CUDA)
+
+#ifdef __cplusplus
+}
+#endif
 
 #if defined(HYPRE_USING_CUDA)
 /* for struct solvers */
