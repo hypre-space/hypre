@@ -1820,13 +1820,20 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
    // !!! Timing: reference
    auto ref_start = chrono::system_clock::now();
    HYPRE_Int *test_buffer = hypre_CTAlloc(HYPRE_Int, (*buffer_size), HYPRE_MEMORY_HOST);
-   for (i = 0; i < (*buffer_size); i++)
-   {
-      test_buffer[i] = i + hypre_ParCompGridNumOwnedNodes(compGrid[0]);
-   }
+   memcpy(test_buffer, send_buffer, (*buffer_size));
    hypre_TFree(test_buffer, HYPRE_MEMORY_HOST);
    auto ref_end = chrono::system_clock::now();
    timings[4] = ref_end - ref_start;
+
+   ref_start = chrono::system_clock::now();
+   test_buffer = hypre_CTAlloc(HYPRE_Int, (*buffer_size), HYPRE_MEMORY_HOST);
+   for (i = 0; i < (*buffer_size); i++)
+   {
+      test_buffer[i] = send_buffer[i];
+   }
+   hypre_TFree(test_buffer, HYPRE_MEMORY_HOST);
+   ref_end = chrono::system_clock::now();
+   timings[5] = ref_end - ref_start;
 
 
    // if (current_level == 0 && myid == 21)
@@ -1835,15 +1842,16 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
       cout.precision(3);
       // cout << scientific;
       cout << "Rank " << myid << ", level " << current_level
-         << ": total " << timings[0].count() 
-         << ", Build Psi_c " << timings[1].count() << " (" << 100 * (timings[1].count() / timings[0].count()) << "%)"
-         << ", Pack Buffer " << timings[2].count() << " (" << 100 * (timings[2].count() / timings[0].count()) << "%)"
-         << ", Pack Col Ind " << timings[3].count() << " (" << 100 * (timings[3].count() / timings[0].count()) << "%)"
-         << ", Reference " << timings[4].count() << " (" << 100 * (timings[4].count() / timings[0].count()) << "%)"
+         // << ": total " << timings[0].count() 
+         // << ", Build Psi_c " << timings[1].count() << " (" << 100 * (timings[1].count() / timings[0].count()) << "%)"
+         << ", Reference " << timings[4].count() << " (" << 100 * (timings[4].count() / timings[4].count()) << "%)"
+         << ", Reference 2 " << timings[5].count() << " (" << 100 * (timings[5].count() / timings[4].count()) << "%)"
+         << ", Pack Buffer " << timings[2].count() << " (" << 100 * (timings[2].count() / timings[4].count()) << "%)"
+         // << ", Pack Col Ind " << timings[3].count() << " (" << 100 * (timings[3].count() / timings[4].count()) << "%)"
          << endl;
       cout << "Rank " << myid << ", level " << current_level
          << ": total items packed " << cnt
-         << ", total col indices packed  " << total_col_indices_packed
+         // << ", total col indices packed  " << total_col_indices_packed
          << endl;
    }
 
