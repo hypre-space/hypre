@@ -239,7 +239,7 @@ hypre_SStructPMatrixDestroy( hypre_SStructPMatrix *pmatrix )
          hypre_TFree(num_centries);
          hypre_TFree(centries);
          hypre_TFree(sentries);
-         hypre_TFree(pmatrix);
+         //hypre_TFree(pmatrix);
       }
    }
 
@@ -1184,6 +1184,8 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
                      cols[nrows + mi] += index[d]*cs[d];
                   }
                   ijvalues[nrows + mi] = values[ei + vi*nentries]; // TODO: change access pattern?
+                  /* hypre_printf("[%d, %d, %d]: (%d, %d): %f\n", nrows, mi, (nrows + mi), */
+                  /*               rows[nrows + mi], cols[nrows + mi], ijvalues[nrows + mi]); */
                }
                hypre_BoxLoop2End(mi, vi);
 

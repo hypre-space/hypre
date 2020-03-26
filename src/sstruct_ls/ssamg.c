@@ -55,6 +55,7 @@ hypre_SSAMGDestroy( void *ssamg_vdata )
    hypre_SSAMGData   *ssamg_data = (hypre_SSAMGData *) ssamg_vdata;
    HYPRE_Int          nparts     = hypre_SSAMGDataNparts(ssamg_data);
    HYPRE_Int          num_levels = hypre_SSAMGDataNumLevels(ssamg_data);
+   HYPRE_Int          max_levels = hypre_SSAMGDataMaxLevels(ssamg_data);
    HYPRE_Int          logging    = hypre_SSAMGDataLogging(ssamg_data);
    HYPRE_Int          l, p;
 
@@ -70,26 +71,36 @@ hypre_SSAMGDestroy( void *ssamg_vdata )
       {
          HYPRE_SStructVectorDestroy(ssamg_data -> b_l[0]);
          HYPRE_SStructVectorDestroy(ssamg_data -> x_l[0]);
+         HYPRE_SStructVectorDestroy(ssamg_data -> tx_l[0]);
          HYPRE_SStructMatrixDestroy(ssamg_data -> A_l[0]);
          HYPRE_SStructGridDestroy(ssamg_data -> grid_l[0]);
          for (l = 1; l < num_levels; l++)
          {
             HYPRE_SStructVectorDestroy(ssamg_data -> b_l[l]);
             HYPRE_SStructVectorDestroy(ssamg_data -> x_l[l]);
-            HYPRE_SStructVectorDestroy(ssamg_data -> r_l[l-1]);
+            HYPRE_SStructVectorDestroy(ssamg_data -> tx_l[l-1]);
             HYPRE_SStructMatrixDestroy(ssamg_data -> P_l[l-1]);
             HYPRE_SStructMatrixDestroy(ssamg_data -> RT_l[l-1]);
             HYPRE_SStructMatrixDestroy(ssamg_data -> A_l[l]);
+            HYPRE_SStructGridDestroy(ssamg_data -> grid_l[l]);
+            hypre_TFree(ssamg_data -> cdir_l[l-1]);
+         }
+         for (l = num_levels; l < max_levels; l++)
+         {
             HYPRE_SStructGridDestroy(ssamg_data -> grid_l[l]);
          }
 
          hypre_TFree(ssamg_data -> b_l);
          hypre_TFree(ssamg_data -> x_l);
-         hypre_TFree(ssamg_data -> r_l);
+         hypre_TFree(ssamg_data -> tx_l);
          hypre_TFree(ssamg_data -> A_l);
          hypre_TFree(ssamg_data -> P_l);
          hypre_TFree(ssamg_data -> RT_l);
          hypre_TFree(ssamg_data -> grid_l);
+         hypre_TFree(ssamg_data -> cdir_l);
+
+         ssamg_data -> e_l = NULL;
+         ssamg_data -> r_l = NULL;
       }
 
       if (nparts > -1)
@@ -132,6 +143,20 @@ hypre_SSAMGSetMaxIter( void       *ssamg_vdata,
    hypre_SSAMGData *ssamg_data = (hypre_SSAMGData *) ssamg_vdata;
 
    hypre_SSAMGDataMaxIter(ssamg_data) = max_iter;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGSetMaxLevels( void       *ssamg_vdata,
+                         HYPRE_Int   max_levels)
+{
+   hypre_SSAMGData *ssamg_data = (hypre_SSAMGData *) ssamg_vdata;
+
+   hypre_SSAMGDataMaxLevels(ssamg_data) = max_levels;
 
    return hypre_error_flag;
 }
@@ -290,7 +315,7 @@ hypre_SSAMGPrintLogging( void *ssamg_vdata )
 
    if (myid == 0)
    {
-      if ((print_level > 0) && (logging > 0))
+      if ((print_level > 0) && (logging > 1))
       {
          hypre_printf("Iters         ||r||_2   conv.rate  ||r||_2/||b||_2\n");
          hypre_printf("% 5d    %e    %f     %e\n", 0, norms[0], convr, rel_norms[0]);
@@ -330,7 +355,7 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
 
    hypre_MPI_Comm_rank(comm, &myid);
 
-   if ((myid == 0) && (print_level > 1))
+   if ((myid == 0) && (print_level > 0))
    {
       hypre_printf("\nSSAMG Setup Parameters:\n\n");
 

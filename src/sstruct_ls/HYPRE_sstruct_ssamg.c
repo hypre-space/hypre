@@ -86,6 +86,16 @@ HYPRE_SStructSSAMGSetMaxIter( HYPRE_SStructSolver solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_SStructSSAMGSetMaxLevels( HYPRE_SStructSolver solver,
+                                HYPRE_Int           max_levels )
+{
+   return( hypre_SSAMGSetMaxLevels( (void *) solver, max_levels ) );
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_SStructSSAMGSetRelChange( HYPRE_SStructSolver solver,
                                 HYPRE_Int           rel_change )
 {

@@ -420,9 +420,9 @@ hypre_SSAMGCoarsen( void                 *ssamg_vdata,
 
    /* Force relaxation on finest grid */
    hypre_SetIndex(coarsen, 1);
-   for (l = 0; l < max_levels; l++)
+   for (l = 0; l < (max_levels - 1); l++)
    {
-      cdir_l[l]        = hypre_TAlloc(HYPRE_Int, nparts);
+      cdir_l[l] = hypre_TAlloc(HYPRE_Int, nparts);
 
       coarse = 0;
       for (part = 0; part < nparts; part++)
@@ -475,15 +475,13 @@ hypre_SSAMGCoarsen( void                 *ssamg_vdata,
          cdir_l[l][part] = cdir;
          if (cdir_l[l][part] > -1)
          {
-            coarse = 1;
-
             /* don't coarsen if a periodic direction and not divisible by 2 */
-            if (((periodic[part][cdir]) && (periodic[part][cdir] % 2)) ||
-                (l == (max_levels - 1)))
+            if ((periodic[part][cdir]) && (periodic[part][cdir] % 2))
             {
                continue;
             }
 
+            coarse = 1;
             /* if (hypre_IndexD(coarsen, cdir) != 0) */
             /* { */
             /*    /\* coarsened previously in this direction, relax level l *\/ */
@@ -511,7 +509,7 @@ hypre_SSAMGCoarsen( void                 *ssamg_vdata,
             /* Update number of levels */
             num_levels = l + 2; // (l + 1)?
          }
-      }
+      } /* loop on parts */
 
       // If there's no part to be coarsened, exit loop
       if (!coarse) break;

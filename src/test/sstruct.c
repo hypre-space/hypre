@@ -2226,7 +2226,8 @@ PrintUsage( char *progname,
       hypre_printf("  -rhsfromcosine     : solution is cosine function (default)\n");
       hypre_printf("  -rhsone            : rhs is vector with unit components\n");
       hypre_printf("  -tol <val>         : convergence tolerance (default 1e-6)\n");
-      hypre_printf("  -itr <val>         : maximal number of iterations (default 100);\n");
+      hypre_printf("  -itr <val>         : maximum number of iterations (default 100);\n");
+      hypre_printf("  -lvl <val>         : maximal number of levels (default 100);\n");
       hypre_printf("  -v <n_pre> <n_post>: SysPFMG and Struct- # of pre and post relax\n");
       hypre_printf("  -skip <s>          : SysPFMG and Struct- skip relaxation (0 or 1)\n");
       hypre_printf("  -rap <r>           : Struct- coarse grid operator type\n");
@@ -2348,6 +2349,9 @@ main( hypre_int argc,
    HYPRE_Int             num_procs, myid;
    HYPRE_Int             time_index;
 
+   HYPRE_Int             maxIterations = 100;
+   HYPRE_Int             maxLevels = 100;
+   HYPRE_Real            tol = 1.0e-6;
    HYPRE_Int             n_pre, n_post;
    HYPRE_Int             skip;
    HYPRE_Int             rap;
@@ -2375,13 +2379,11 @@ main( hypre_int argc,
    HYPRE_Int blockSize = 1;
    HYPRE_Int verbosity = 1;
    HYPRE_Int iterations;
-   HYPRE_Int maxIterations = 100;
    HYPRE_Int checkOrtho = 0;
    HYPRE_Int printLevel = 0;
    HYPRE_Int pcgIterations = 0;
    HYPRE_Int pcgMode = 0;
    HYPRE_Int old_default = 0;
-   HYPRE_Real tol = 1e-6;
    HYPRE_Real pcgTol = 1e-2;
    HYPRE_Real nonOrthF;
 
@@ -2590,6 +2592,11 @@ main( hypre_int argc,
       {
          arg_index++;
          maxIterations = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-lvl") == 0 )
+      {
+         arg_index++;
+         maxLevels = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-v") == 0 )
       {
@@ -3679,6 +3686,7 @@ main( hypre_int argc,
 
       HYPRE_SStructSSAMGCreate(hypre_MPI_COMM_WORLD, &solver);
       HYPRE_SStructSSAMGSetMaxIter(solver, maxIterations);
+      HYPRE_SStructSSAMGSetMaxLevels(solver, maxLevels);
       HYPRE_SStructSSAMGSetTol(solver, tol);
       HYPRE_SStructSSAMGSetRelChange(solver, 0);
       /* weighted Jacobi = 1; red-black GS = 2 */
@@ -3823,8 +3831,8 @@ main( hypre_int argc,
          /* use SSAMG solver as preconditioner */
          HYPRE_SStructSSAMGCreate(hypre_MPI_COMM_WORLD, &precond);
          HYPRE_SStructSSAMGSetMaxIter(precond, 1);
+         HYPRE_SStructSSAMGSetMaxLevels(solver, maxLevels);
          HYPRE_SStructSSAMGSetTol(precond, 0.0);
-         /* weighted Jacobi = 1; red-black GS = 2 */
          HYPRE_SStructSSAMGSetRelaxType(precond, relax);
          if (usr_jacobi_weight)
          {
@@ -3832,7 +3840,7 @@ main( hypre_int argc,
          }
          HYPRE_SStructSSAMGSetNumPreRelax(precond, n_pre);
          HYPRE_SStructSSAMGSetNumPostRelax(precond, n_post);
-         HYPRE_SStructSSAMGSetPrintLevel(precond, 0);
+         HYPRE_SStructSSAMGSetPrintLevel(precond, 1);
          HYPRE_SStructSSAMGSetLogging(precond, 1);
          HYPRE_SStructSSAMGSetup(precond, A, b, x);
 

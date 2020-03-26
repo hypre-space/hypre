@@ -309,6 +309,12 @@ HYPRE_SStructSSAMGSetMaxIter(HYPRE_SStructSolver solver,
                              HYPRE_Int           max_iter);
 
 /**
+ * (Optional) Set maximum number of levels of the multigrid hierarchy.
+ **/
+HYPRE_Int HYPRE_SStructSSAMGSetMaxLevels (HYPRE_SStructSolver solver,
+                                          HYPRE_Int max_levels);
+
+/**
  * (Optional) Additionally require that the relative difference in
  * successive iterates be small.
  **/
