@@ -588,7 +588,7 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
    HYPRE_MemoryLocation memory_location_l1 = hypre_VectorMemoryLocation(l1_norm_vec);
    HYPRE_Real *l1_norm = hypre_VectorData(l1_norm_vec);
 
-   HYPRE_ExecuctionPolicy exec = hypre_GetExecPolicy1( memory_location_l1 );
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( memory_location_l1 );
 
    if (exec == HYPRE_EXEC_HOST)
    {

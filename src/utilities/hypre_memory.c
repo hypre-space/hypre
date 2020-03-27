@@ -458,10 +458,10 @@ hypre_Memcpy_core(void *dst, void *src, size_t size, hypre_MemoryLocation loc_ds
 /*--------------------------------------------------------------------------*
  * ExecPolicy
  *--------------------------------------------------------------------------*/
-static inline HYPRE_ExecuctionPolicy
+static inline HYPRE_ExecutionPolicy
 hypre_GetExecPolicy1_core(hypre_MemoryLocation location)
 {
-   HYPRE_ExecuctionPolicy exec = HYPRE_EXEC_UNDEFINED;
+   HYPRE_ExecutionPolicy exec = HYPRE_EXEC_UNDEFINED;
 
    switch (location)
    {
@@ -487,11 +487,11 @@ hypre_GetExecPolicy1_core(hypre_MemoryLocation location)
 }
 
 /* for binary operation */
-static inline HYPRE_ExecuctionPolicy
+static inline HYPRE_ExecutionPolicy
 hypre_GetExecPolicy2_core(hypre_MemoryLocation location1,
                           hypre_MemoryLocation location2)
 {
-   HYPRE_ExecuctionPolicy exec = HYPRE_EXEC_UNDEFINED;
+   HYPRE_ExecutionPolicy exec = HYPRE_EXEC_UNDEFINED;
 
    /* HOST_PINNED has the same exec policy as HOST */
    if (location1 == hypre_MEMORY_HOST_PINNED)
@@ -698,7 +698,7 @@ hypre_ReAlloc_v2(void *ptr, size_t old_size, size_t new_size, HYPRE_MemoryLocati
  * hypre_GetExecPolicy: return execution policy based on memory locations
  *--------------------------------------------------------------------------*/
 /* for unary operation */
-HYPRE_ExecuctionPolicy
+HYPRE_ExecutionPolicy
 hypre_GetExecPolicy1(HYPRE_MemoryLocation location)
 {
 
@@ -706,7 +706,7 @@ hypre_GetExecPolicy1(HYPRE_MemoryLocation location)
 }
 
 /* for binary operation */
-HYPRE_ExecuctionPolicy
+HYPRE_ExecutionPolicy
 hypre_GetExecPolicy2(HYPRE_MemoryLocation location1,
                      HYPRE_MemoryLocation location2)
 {

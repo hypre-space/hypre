@@ -212,7 +212,7 @@ hypre_ParCSRMatMat( hypre_ParCSRMatrix  *A,
    hypre_ParCSRMatrix *C = NULL;
 
 #if defined(HYPRE_USING_CUDA)
-   HYPRE_ExecuctionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A),
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A),
                                                        hypre_ParCSRMatrixMemoryLocation(B) );
 
    if (exec == HYPRE_EXEC_DEVICE)
@@ -465,7 +465,7 @@ hypre_ParCSRTMatMatKT( hypre_ParCSRMatrix  *A,
    hypre_ParCSRMatrix *C = NULL;
 
 #if defined(HYPRE_USING_CUDA)
-   HYPRE_ExecuctionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A),
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A),
                                                        hypre_ParCSRMatrixMemoryLocation(B) );
 
    if (exec == HYPRE_EXEC_DEVICE)

@@ -79,7 +79,7 @@ main( HYPRE_Int  argc,
    HYPRE_Int                 print_usage;
    HYPRE_MemoryLocation      memory_location;
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   HYPRE_ExecuctionPolicy    default_exec_policy;
+   HYPRE_ExecutionPolicy    default_exec_policy;
 #endif
    char                      memory_location_name[8];
 

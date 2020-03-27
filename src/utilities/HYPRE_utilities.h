@@ -170,12 +170,12 @@ typedef enum _HYPRE_MemoryLocation
    HYPRE_MEMORY_DEVICE
 } HYPRE_MemoryLocation;
 
-typedef enum _HYPRE_ExecuctionPolicy
+typedef enum _HYPRE_ExecutionPolicy
 {
    HYPRE_EXEC_UNDEFINED = -1,
    HYPRE_EXEC_HOST          ,
    HYPRE_EXEC_DEVICE
-} HYPRE_ExecuctionPolicy;
+} HYPRE_ExecutionPolicy;
 
 #ifdef __cplusplus
 }

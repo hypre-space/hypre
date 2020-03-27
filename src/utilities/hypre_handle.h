@@ -28,7 +28,7 @@ typedef struct
    HYPRE_Int                         struct_comm_recv_buffer_size;
    HYPRE_Int                         struct_comm_send_buffer_size;
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   HYPRE_ExecuctionPolicy            default_exec_policy;
+   HYPRE_ExecutionPolicy            default_exec_policy;
    HYPRE_Int                         cuda_device;
    /* by default, hypre puts GPU computations in this stream
     * Do not be confused with the default (null) CUDA stream */
@@ -75,7 +75,7 @@ HYPRE_Int hypre_HandleDestroy(hypre_Handle *hypre_handle_);
 
 /* accessor inline functions to hypre_Handle */
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-static inline HYPRE_ExecuctionPolicy &
+static inline HYPRE_ExecutionPolicy &
 hypre_HandleDefaultExecPolicy(hypre_Handle *hypre_handle_)
 {
    return hypre_handle_->default_exec_policy;

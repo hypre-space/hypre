@@ -403,7 +403,7 @@ main( hypre_int argc,
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_Int spgemm_use_cusparse = 1;
-   HYPRE_ExecuctionPolicy default_exec_policy = HYPRE_EXEC_HOST;
+   HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_HOST;
 #endif
    HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_DEVICE;
 

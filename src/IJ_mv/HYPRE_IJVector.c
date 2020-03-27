@@ -304,7 +304,7 @@ HYPRE_IJVectorSetValues( HYPRE_IJVector        vector,
    if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
    {
 #if defined(HYPRE_USING_CUDA)
-      HYPRE_ExecuctionPolicy exec = hypre_GetExecPolicy1( hypre_IJVectorMemoryLocation(vector) );
+      HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_IJVectorMemoryLocation(vector) );
 
       if (exec == HYPRE_EXEC_DEVICE)
       {
@@ -359,7 +359,7 @@ HYPRE_IJVectorAddToValues( HYPRE_IJVector        vector,
    if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
    {
 #if defined(HYPRE_USING_CUDA)
-      HYPRE_ExecuctionPolicy exec = hypre_GetExecPolicy1( hypre_IJVectorMemoryLocation(vector) );
+      HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_IJVectorMemoryLocation(vector) );
 
       if (exec == HYPRE_EXEC_DEVICE)
       {
@@ -397,7 +397,7 @@ HYPRE_IJVectorAssemble( HYPRE_IJVector vector )
    if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
    {
 #if defined(HYPRE_USING_CUDA)
-      HYPRE_ExecuctionPolicy exec = hypre_GetExecPolicy1( hypre_IJVectorMemoryLocation(vector) );
+      HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_IJVectorMemoryLocation(vector) );
 
       if (exec == HYPRE_EXEC_DEVICE)
       {
