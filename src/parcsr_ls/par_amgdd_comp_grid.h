@@ -162,6 +162,7 @@ typedef struct
    HYPRE_Int        *nonowned_sort;
    HYPRE_Int        *nonowned_invsort;
    HYPRE_Int        *nonowned_diag_missing_col_indices;
+   HYPRE_Int        *nonowned_recv_proc;
 
    HYPRE_Int        *owned_coarse_indices;
 
@@ -209,6 +210,7 @@ typedef struct
 #define hypre_ParCompGridNonOwnedSort(compGrid)               ((compGrid) -> nonowned_sort)
 #define hypre_ParCompGridNonOwnedInvSort(compGrid)               ((compGrid) -> nonowned_invsort)
 #define hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid)               ((compGrid) -> nonowned_diag_missing_col_indices)
+#define hypre_ParCompGridNonOwnedRecvProc(compGrid)               ((compGrid) -> nonowned_recv_proc)
 
 #define hypre_ParCompGridOwnedCoarseIndices(compGrid)               ((compGrid) -> owned_coarse_indices)
 

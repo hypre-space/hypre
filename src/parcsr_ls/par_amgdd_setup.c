@@ -116,6 +116,11 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    HYPRE_Int *num_resizes = hypre_CTAlloc(HYPRE_Int, 3*num_levels, HYPRE_MEMORY_HOST);
    // !!! Debug
    HYPRE_Int total_bin_search_count = 0;
+   HYPRE_Int total_send_size = 0;
+   HYPRE_Int total_redundant_Annz = 0;
+   HYPRE_Int total_redundant_points = 0;
+   HYPRE_Int num_ghost_overwritten_as_real = 0;
+   HYPRE_Int num_removed_redundancies = 0;
 
    // Allocate pointer for the composite grids
    hypre_ParCompGrid **compGrid = hypre_CTAlloc(hypre_ParCompGrid*, num_levels, HYPRE_MEMORY_HOST);
@@ -261,9 +266,11 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
          {
             send_flag[level][i] = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
             num_send_nodes[level][i] = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
-            send_buffer[i] = PackSendBuffer( compGrid, compGridCommPkg, &(send_buffer_size[level][i]), 
+            send_buffer[i] = PackSendBuffer(amg_data, compGrid, compGridCommPkg, &(send_buffer_size[level][i]), 
                                              &(send_flag_buffer_size[i]), send_flag, num_send_nodes, i, level, num_levels, padding, 
-                                             num_ghost_layers, symmetric );
+                                             num_ghost_layers, symmetric, &num_removed_redundancies );
+            // !!! Debug
+            total_send_size += send_buffer_size[level][i];
          }
          if (timers) hypre_EndTiming(timers[2]);
 
@@ -342,7 +349,8 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
                compGridCommPkg,
                send_flag, num_send_nodes, 
                recv_map, num_recv_nodes, 
-               &(recv_map_send_buffer_size[i]), level, num_levels, nodes_added_on_level, i, num_resizes, symmetric);
+               &(recv_map_send_buffer_size[i]), level, num_levels, nodes_added_on_level, i, num_resizes, 
+               symmetric, &total_redundant_Annz, &total_redundant_points, &num_ghost_overwritten_as_real);
             
             recv_map_send_buffer[i] = hypre_CTAlloc(HYPRE_Int, recv_map_send_buffer_size[i], HYPRE_MEMORY_HOST);
             PackRecvMapSendBuffer(recv_map_send_buffer[i], recv_map[level][i], num_recv_nodes[level][i], &(recv_buffer_size[level][i]), level, num_levels, compGrid);
@@ -427,6 +435,15 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
       if (myid == 0) hypre_printf("All ranks: done with level %d\n", level);
       hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
       #endif 
+
+
+      // !!! Debug
+      // if (level == 2)
+      // {
+      //    MPI_Finalize();
+      //    exit(0);
+      // }
+
 
       #if DEBUG_COMP_GRID
       HYPRE_Int error_code;
@@ -551,6 +568,36 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
       hypre_ParCompGridDebugPrint( compGrid[level], filename, coarse_num_nodes );
    }
    #endif
+
+   // !!! Debug
+   HYPRE_Int total_nonowned = 0;
+   HYPRE_Int total_nonowned_nnz = 0;
+   for (level = 0; level < num_levels; level++)
+   {
+      HYPRE_Int num_nonowned = hypre_ParCompGridNumNonOwnedNodes(compGrid[level]);
+      total_nonowned += num_nonowned;
+      hypre_CSRMatrix *diag = hypre_ParCompGridMatrixNonOwnedDiag(hypre_ParCompGridA(compGrid[level]));
+      hypre_CSRMatrix *offd = hypre_ParCompGridMatrixNonOwnedOffd(hypre_ParCompGridA(compGrid[level]));
+      total_nonowned_nnz += hypre_CSRMatrixI(diag)[num_nonowned] + hypre_CSRMatrixI(offd)[num_nonowned];
+   }
+   HYPRE_Int local_size_info[10];
+   local_size_info[0] = total_send_size;
+   local_size_info[1] = total_redundant_Annz;
+   local_size_info[2] = total_nonowned_nnz;
+   local_size_info[3] = total_nonowned;
+   local_size_info[4] = total_redundant_points;
+   local_size_info[5] = num_ghost_overwritten_as_real;
+   local_size_info[6] = num_removed_redundancies;
+   HYPRE_Int global_size_info[10];
+   MPI_Reduce(local_size_info, global_size_info, 10, HYPRE_MPI_INT, MPI_SUM, 0, hypre_MPI_COMM_WORLD);
+   if (myid == 0) printf("%d = total_send_size\n", global_size_info[0]);
+   if (myid == 0) printf("%d = total_redundant_Annz\n", global_size_info[1]);
+   if (myid == 0) printf("%d = total_nonowned_nnz\n", global_size_info[2]);
+   if (myid == 0) printf("%d = total_nonowned\n", global_size_info[3]);
+   if (myid == 0) printf("%d = total_redundant_points\n", global_size_info[4]);
+   if (myid == 0) printf("%d = num_ghost_overwritten_as_real\n", global_size_info[5]);
+   if (myid == 0) printf("%d = num_removed_redundancies\n", global_size_info[6]);
+
 
    #if DEBUG_COMP_GRID
    return test_failed;
