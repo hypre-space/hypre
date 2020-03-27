@@ -60,23 +60,6 @@ typedef struct
 #endif
 } hypre_Handle;
 
-extern hypre_Handle *_hypre_handle;
-
-hypre_Handle* hypre_HandleCreate();
-HYPRE_Int     hypre_HandleDestroy(hypre_Handle *hypre_handle_);
-
-/* accessor to the global ``_hypre_handle'' */
-static inline hypre_Handle*
-hypre_handle()
-{
-   if (!_hypre_handle)
-   {
-      _hypre_handle = hypre_HandleCreate();
-   }
-
-   return _hypre_handle;
-}
-
 /* accessor macros to hypre_Handle */
 #define hypre_HandleMemoryLocation(hypre_handle_)           ((hypre_handle_) -> memory_location)
 #define hypre_HandleStructCommRecvBuffer(hypre_handle_)     ((hypre_handle_) -> struct_comm_recv_buffer)
