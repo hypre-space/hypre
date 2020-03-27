@@ -413,7 +413,7 @@ hypre_ParCSRCommHandleCreate_v2 ( HYPRE_Int            job,
    send_data = send_data_in;
    recv_data = recv_data_in;
    // TODO RL
-   HYPRE_CUDA_CALL( cudaStreamSynchronize(hypre_HandleCudaComputeStream(hypre_handle)) );
+   HYPRE_CUDA_CALL( cudaStreamSynchronize(hypre_HandleCudaComputeStream(hypre_handle())) );
 #endif
 
    num_requests = num_sends + num_recvs;

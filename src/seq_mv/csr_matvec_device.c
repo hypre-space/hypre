@@ -28,8 +28,8 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
    hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ERROR: hypre_CSRMatvecDevice should not be called when bigint is enabled!");
 #else
 
-   cusparseHandle_t handle = hypre_HandleCusparseHandle(hypre_handle);
-   cusparseMatDescr_t descr = hypre_HandleCusparseMatDescr(hypre_handle);
+   cusparseHandle_t handle = hypre_HandleCusparseHandle(hypre_handle());
+   cusparseMatDescr_t descr = hypre_HandleCusparseMatDescr(hypre_handle());
 
    //hypre_CSRMatrixPrefetch(A, HYPRE_MEMORY_DEVICE);
    //hypre_SeqVectorPrefetch(x, HYPRE_MEMORY_DEVICE);
@@ -88,7 +88,7 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
                            x->data, &beta, y->data+offset) );
    }
 
-   hypre_SyncCudaComputeStream(hypre_handle);
+   hypre_SyncCudaComputeStream(hypre_handle());
 #endif
 
    return hypre_error_flag;

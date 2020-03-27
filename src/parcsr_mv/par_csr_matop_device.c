@@ -303,7 +303,7 @@ hypre_MergeDiagAndOffdDevice(hypre_ParCSRMatrix *A)
    hypre_CSRMatrixData(B) = B_a;
    hypre_CSRMatrixMemoryLocation(B) = HYPRE_MEMORY_DEVICE;
 
-   hypre_SyncCudaComputeStream(hypre_handle);
+   hypre_SyncCudaComputeStream(hypre_handle());
 
    return B;
 }

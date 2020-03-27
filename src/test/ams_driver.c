@@ -367,20 +367,20 @@ hypre_int main (hypre_int argc, char *argv[])
              hypre_ParCSRMatrixGlobalNumRows((hypre_ParCSRMatrix*)A));
    }
 
-   hypre_ParCSRMatrixMigrate(A,      hypre_HandleMemoryLocation(hypre_handle));
-   hypre_ParCSRMatrixMigrate(G,      hypre_HandleMemoryLocation(hypre_handle));
-   hypre_ParCSRMatrixMigrate(Aalpha, hypre_HandleMemoryLocation(hypre_handle));
-   hypre_ParCSRMatrixMigrate(Abeta,  hypre_HandleMemoryLocation(hypre_handle));
+   hypre_ParCSRMatrixMigrate(A,      hypre_HandleMemoryLocation(hypre_handle()));
+   hypre_ParCSRMatrixMigrate(G,      hypre_HandleMemoryLocation(hypre_handle()));
+   hypre_ParCSRMatrixMigrate(Aalpha, hypre_HandleMemoryLocation(hypre_handle()));
+   hypre_ParCSRMatrixMigrate(Abeta,  hypre_HandleMemoryLocation(hypre_handle()));
 
-   hypre_ParVectorMigrate(x0, hypre_HandleMemoryLocation(hypre_handle));
-   hypre_ParVectorMigrate(b,  hypre_HandleMemoryLocation(hypre_handle));
-   hypre_ParVectorMigrate(Gx, hypre_HandleMemoryLocation(hypre_handle));
-   hypre_ParVectorMigrate(Gy, hypre_HandleMemoryLocation(hypre_handle));
-   hypre_ParVectorMigrate(Gz, hypre_HandleMemoryLocation(hypre_handle));
-   hypre_ParVectorMigrate(x,  hypre_HandleMemoryLocation(hypre_handle));
-   hypre_ParVectorMigrate(y,  hypre_HandleMemoryLocation(hypre_handle));
-   hypre_ParVectorMigrate(z,  hypre_HandleMemoryLocation(hypre_handle));
-   hypre_ParVectorMigrate(interior_nodes, hypre_HandleMemoryLocation(hypre_handle));
+   hypre_ParVectorMigrate(x0, hypre_HandleMemoryLocation(hypre_handle()));
+   hypre_ParVectorMigrate(b,  hypre_HandleMemoryLocation(hypre_handle()));
+   hypre_ParVectorMigrate(Gx, hypre_HandleMemoryLocation(hypre_handle()));
+   hypre_ParVectorMigrate(Gy, hypre_HandleMemoryLocation(hypre_handle()));
+   hypre_ParVectorMigrate(Gz, hypre_HandleMemoryLocation(hypre_handle()));
+   hypre_ParVectorMigrate(x,  hypre_HandleMemoryLocation(hypre_handle()));
+   hypre_ParVectorMigrate(y,  hypre_HandleMemoryLocation(hypre_handle()));
+   hypre_ParVectorMigrate(z,  hypre_HandleMemoryLocation(hypre_handle()));
+   hypre_ParVectorMigrate(interior_nodes, hypre_HandleMemoryLocation(hypre_handle()));
 
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
 
@@ -663,7 +663,7 @@ hypre_int main (hypre_int argc, char *argv[])
    {
       AMSDriverMatrixRead("mfem.M", &M);
 
-      hypre_ParCSRMatrixMigrate(M, hypre_HandleMemoryLocation(hypre_handle));
+      hypre_ParCSRMatrixMigrate(M, hypre_HandleMemoryLocation(hypre_handle()));
 
       time_index = hypre_InitializeTiming("AME Setup");
       hypre_BeginTiming(time_index);

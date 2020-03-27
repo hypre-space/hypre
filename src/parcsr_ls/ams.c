@@ -83,8 +83,8 @@ HYPRE_Int hypre_ParCSRRelax(/* matrix to relax with */
          */
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-         HYPRE_Int sync_stream = hypre_HandleCudaComputeStreamSync(hypre_handle);
-         hypre_HandleCudaComputeStreamSync(hypre_handle) = 0;
+         HYPRE_Int sync_stream = hypre_HandleCudaComputeStreamSync(hypre_handle());
+         hypre_HandleCudaComputeStreamSync(hypre_handle()) = 0;
 #endif
 
          hypre_ParVectorCopy(f, v);
@@ -106,8 +106,8 @@ HYPRE_Int hypre_ParCSRRelax(/* matrix to relax with */
 #endif /* #if defined(HYPRE_USING_CUDA) */
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-         hypre_HandleCudaComputeStreamSync(hypre_handle) = sync_stream;
-         hypre_SyncCudaComputeStream(hypre_handle);
+         hypre_HandleCudaComputeStreamSync(hypre_handle()) = sync_stream;
+         hypre_SyncCudaComputeStream(hypre_handle());
 #endif
       }
       else if (relax_type == 2 || relax_type == 4) /* offd-l1-scaled block GS */

@@ -1334,7 +1334,7 @@ main( hypre_int argc,
    HYPRE_Init();
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   //hypre_HandleDefaultExecPolicy(hypre_handle) = HYPRE_EXEC_DEVICE;
+   //hypre_HandleDefaultExecPolicy(hypre_handle()) = HYPRE_EXEC_DEVICE;
 #endif
 
    /*-----------------------------------------------------------

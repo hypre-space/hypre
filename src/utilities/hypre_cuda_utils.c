@@ -26,7 +26,7 @@ hypreCUDAKernel_CompileFlagSafetyCheck(HYPRE_Int cuda_arch_actual)
 
 void hypre_CudaCompileFlagCheck()
 {
-   HYPRE_Int device = hypre_HandleCudaDevice(hypre_handle);
+   HYPRE_Int device = hypre_HandleCudaDevice(hypre_handle());
 
    struct cudaDeviceProp props;
    cudaGetDeviceProperties(&props, device);

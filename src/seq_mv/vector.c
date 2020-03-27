@@ -33,7 +33,7 @@ hypre_SeqVectorCreate( HYPRE_Int size )
    /* set defaults */
    hypre_VectorOwnsData(vector) = 1;
 
-   hypre_VectorMemoryLocation(vector) = hypre_HandleMemoryLocation(hypre_handle);
+   hypre_VectorMemoryLocation(vector) = hypre_HandleMemoryLocation(hypre_handle());
 
    return vector;
 }
@@ -295,7 +295,7 @@ hypre_SeqVectorSetConstantValues( hypre_Vector *v,
    }
 #endif /* defined(HYPRE_USING_CUDA) */
 
-   hypre_SyncCudaComputeStream(hypre_handle);
+   hypre_SyncCudaComputeStream(hypre_handle());
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
@@ -451,7 +451,7 @@ hypre_SeqVectorScale( HYPRE_Complex alpha,
 
 #if defined(HYPRE_USING_CUDA)
 #if defined(HYPRE_USING_CUBLAS)
-   HYPRE_CUBLAS_CALL( cublasDscal(hypre_HandleCublasHandle(hypre_handle), size, &alpha, y_data, 1) );
+   HYPRE_CUBLAS_CALL( cublasDscal(hypre_HandleCublasHandle(hypre_handle()), size, &alpha, y_data, 1) );
 #else
    HYPRE_THRUST_CALL( transform, y_data, y_data + size, y_data, alpha * _1 );
 #endif
@@ -469,7 +469,7 @@ hypre_SeqVectorScale( HYPRE_Complex alpha,
 
 #endif /* defined(HYPRE_USING_CUDA) */
 
-   hypre_SyncCudaComputeStream(hypre_handle);
+   hypre_SyncCudaComputeStream(hypre_handle());
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
@@ -502,7 +502,7 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
 
 #if defined(HYPRE_USING_CUDA)
 #if defined(HYPRE_USING_CUBLAS)
-   HYPRE_CUBLAS_CALL( cublasDaxpy(hypre_HandleCublasHandle(hypre_handle), size, &alpha, x_data, 1, y_data, 1) );
+   HYPRE_CUBLAS_CALL( cublasDaxpy(hypre_HandleCublasHandle(hypre_handle()), size, &alpha, x_data, 1, y_data, 1) );
 #else
    HYPRE_THRUST_CALL( transform, x_data, x_data + size, y_data, y_data, alpha * _1 + _2 );
 #endif
@@ -520,7 +520,7 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
 
 #endif /* defined(HYPRE_USING_CUDA) */
 
-   hypre_SyncCudaComputeStream(hypre_handle);
+   hypre_SyncCudaComputeStream(hypre_handle());
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
@@ -554,7 +554,7 @@ hypre_SeqVectorInnerProd( hypre_Vector *x,
 #if defined(HYPRE_USING_CUDA)
 #ifndef HYPRE_COMPLEX
 #if defined(HYPRE_USING_CUBLAS)
-   HYPRE_CUBLAS_CALL( cublasDdot(hypre_HandleCublasHandle(hypre_handle), size, x_data, 1, y_data, 1, &result) );
+   HYPRE_CUBLAS_CALL( cublasDdot(hypre_HandleCublasHandle(hypre_handle()), size, x_data, 1, y_data, 1, &result) );
 #else
    result = HYPRE_THRUST_CALL( inner_product, x_data, x_data + size, y_data, 0.0 );
 #endif
@@ -575,7 +575,7 @@ hypre_SeqVectorInnerProd( hypre_Vector *x,
    }
 #endif /* defined(HYPRE_USING_CUDA) */
 
-   hypre_SyncCudaComputeStream(hypre_handle);
+   hypre_SyncCudaComputeStream(hypre_handle());
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
@@ -676,7 +676,7 @@ hypre_SeqVectorMax( HYPRE_Complex alpha,
 
 #endif /* defined(HYPRE_USING_CUDA) */
 
-   hypre_SyncCudaComputeStream(hypre_handle);
+   hypre_SyncCudaComputeStream(hypre_handle());
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();

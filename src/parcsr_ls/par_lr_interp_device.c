@@ -93,13 +93,6 @@ hypre_BoomerAMGBuildExtInterpDevice(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
    HYPRE_Real* P_diag_data;
 
    dim3 bDim, gDim, gwDim;
-   //   HYPRE_Int memory_location=HYPRE_MEMORY_SHARED;
-   //#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   //   if (hypre_handle->no_cuda_um == 1)
-   //   {
-   //      memory_location = HYPRE_MEMORY_DEVICE;
-   //   }
-   //#endif
 
    hypre_ParCSRMatrixExtractSubmatrixFC( A, CF_marker, num_cpts_global, "FF", &AFF, 0 );
    hypre_ParCSRMatrixExtractSubmatrixFC( A, CF_marker, num_cpts_global, "FC", &AFC, 0 );

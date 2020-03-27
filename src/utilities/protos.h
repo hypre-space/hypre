@@ -34,9 +34,8 @@ HYPRE_Real    hypre_cimag( HYPRE_Complex value );
 /* hypre_general.c */
 HYPRE_Int HYPRE_Init();
 HYPRE_Int HYPRE_Finalize();
-HYPRE_Int hypre_GetDevice(hypre_Handle *hypre_handle);
-HYPRE_Int hypre_SetDevice(HYPRE_Int use_device, hypre_Handle *hypre_handle);
-HYPRE_Int hypre_SyncCudaDefaultStream(hypre_Handle *hypre_handle);
+HYPRE_Int hypre_GetDevice(hypre_Handle *hypre_handle_);
+HYPRE_Int hypre_SetDevice(HYPRE_Int use_device, hypre_Handle *hypre_handle_);
 
 /* hypre_qsort.c */
 void hypre_swap ( HYPRE_Int *v , HYPRE_Int i , HYPRE_Int j );

@@ -1770,7 +1770,7 @@ hypre_StructMatrixMigrate( hypre_StructMatrix *from_matrix,
    hypre_assert( constant_coefficient == hypre_StructMatrixConstantCoefficient( to_matrix ) );
 
    mat_num_values = hypre_StructMatrixNumValues(from_matrix);
-   hypre_assert( mat_num_values = hypre_StructMatrixNumValues(to_matrix) );
+   hypre_assert( mat_num_values == hypre_StructMatrixNumValues(to_matrix) );
 
    if ( constant_coefficient==0 )
    {

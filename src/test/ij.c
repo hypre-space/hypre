@@ -2076,10 +2076,10 @@ main( hypre_int argc,
    hypre_SetCubMemPoolSize( mempool_bin_growth, mempool_min_bin,
                             mempool_max_bin, mempool_max_cached_bytes );
 
-   hypre_HandleMemoryLocation(hypre_handle)    = memory_location;
+   hypre_HandleMemoryLocation(hypre_handle())    = memory_location;
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   hypre_HandleDefaultExecPolicy(hypre_handle) = default_exec_policy;
-   hypre_HandleSpgemmUseCusparse(hypre_handle) = spgemm_use_cusparse;
+   hypre_HandleDefaultExecPolicy(hypre_handle()) = default_exec_policy;
+   hypre_HandleSpgemmUseCusparse(hypre_handle()) = spgemm_use_cusparse;
 #endif
 
    /*-----------------------------------------------------------
@@ -3084,9 +3084,9 @@ main( hypre_int argc,
    /*-----------------------------------------------------------
     * Migrate the system to the wanted memory space
     *-----------------------------------------------------------*/
-   hypre_ParCSRMatrixMigrate(parcsr_A, hypre_HandleMemoryLocation(hypre_handle));
-   hypre_ParVectorMigrate(b, hypre_HandleMemoryLocation(hypre_handle));
-   hypre_ParVectorMigrate(x, hypre_HandleMemoryLocation(hypre_handle));
+   hypre_ParCSRMatrixMigrate(parcsr_A, hypre_HandleMemoryLocation(hypre_handle()));
+   hypre_ParVectorMigrate(b, hypre_HandleMemoryLocation(hypre_handle()));
+   hypre_ParVectorMigrate(x, hypre_HandleMemoryLocation(hypre_handle()));
 
    /* save the initial guess for the 2nd time */
 #if SECOND_TIME
