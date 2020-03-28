@@ -993,7 +993,7 @@ hypre_ParCSRRelax_L1_Jacobi( hypre_ParCSRMatrix *A,
                              HYPRE_Int          *cf_marker,
                              HYPRE_Int           relax_points,
                              HYPRE_Real          relax_weight,
-                             hypre_Vector       *l1_norms,
+                             HYPRE_Real         *l1_norms,
                              hypre_ParVector    *u,
                              hypre_ParVector    *Vtemp )
 
@@ -1111,7 +1111,7 @@ hypre_ParCSRRelax_L1_Jacobi( hypre_ParCSRMatrix *A,
                 ii = A_offd_j[jj];
                 res -= A_offd_data[jj] * Vext_data[ii];
              }
-             u_data[i] += (relax_weight*res) / hypre_VectorData(l1_norms)[i];
+             u_data[i] += (relax_weight*res) / l1_norms[i];
           }
        }
     }
@@ -1146,7 +1146,7 @@ hypre_ParCSRRelax_L1_Jacobi( hypre_ParCSRMatrix *A,
                 ii = A_offd_j[jj];
                 res -= A_offd_data[jj] * Vext_data[ii];
              }
-             u_data[i] += (relax_weight * res) / hypre_VectorData(l1_norms)[i];
+             u_data[i] += (relax_weight * res) / l1_norms[i];
           }
        }
     }

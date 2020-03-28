@@ -1031,36 +1031,40 @@ hypre_MGRSetup( void               *mgr_vdata,
    {
       l1_norms = hypre_CTAlloc(hypre_Vector*, num_c_levels, HYPRE_MEMORY_HOST);
       (mgr_data -> l1_norms) = l1_norms;
-      for (j = 0; j < num_c_levels; j++)
-      {
-         l1_norms[j] = hypre_SeqVectorCreate(hypre_ParCSRMatrixNumRows(A_array[j]));
-         hypre_SeqVectorInitialize_v2(l1_norms[j], HYPRE_MEMORY_DEVICE);
-      }
    }
 
    for (j = 0; j < num_c_levels; j++)
    {
+      HYPRE_Real *l1_norm_data = NULL;
+
       if (relax_type == 8 || relax_type == 13 || relax_type == 14)
       {
          if (relax_order)
          {
-            hypre_ParCSRComputeL1Norms(A_array[j], 4, CF_marker_array[j], l1_norms[j]);
+            hypre_ParCSRComputeL1Norms(A_array[j], 4, CF_marker_array[j], &l1_norm_data);
          }
          else
          {
-            hypre_ParCSRComputeL1Norms(A_array[j], 4, NULL, l1_norms[j]);
+            hypre_ParCSRComputeL1Norms(A_array[j], 4, NULL, &l1_norm_data);
          }
       }
       else if (relax_type == 18)
       {
          if (relax_order)
          {
-            hypre_ParCSRComputeL1Norms(A_array[j], 1, CF_marker_array[j], l1_norms[j]);
+            hypre_ParCSRComputeL1Norms(A_array[j], 1, CF_marker_array[j], &l1_norm_data);
          }
          else
          {
-            hypre_ParCSRComputeL1Norms(A_array[j], 1, NULL, l1_norms[j]);
+            hypre_ParCSRComputeL1Norms(A_array[j], 1, NULL, &l1_norm_data);
          }
+      }
+
+      if (l1_norm_data)
+      {
+         l1_norms[j] = hypre_SeqVectorCreate(hypre_ParCSRMatrixNumRows(A_array[j]));
+         hypre_VectorData(l1_norms[j]) = l1_norm_data;
+         hypre_SeqVectorInitialize_v2(l1_norms[j], hypre_ParCSRMatrixMemoryLocation(A_array[j]));
       }
    }
 

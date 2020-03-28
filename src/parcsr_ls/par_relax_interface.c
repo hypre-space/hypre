@@ -25,7 +25,7 @@ HYPRE_Int  hypre_BoomerAMGRelaxIF( hypre_ParCSRMatrix *A,
                                    HYPRE_Int           cycle_type,
                                    HYPRE_Real          relax_weight,
                                    HYPRE_Real          omega,
-                                   hypre_Vector       *l1_norms,
+                                   HYPRE_Real         *l1_norms,
                                    hypre_ParVector    *u,
                                    hypre_ParVector    *Vtemp,
                                    hypre_ParVector    *Ztemp )

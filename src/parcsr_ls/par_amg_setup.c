@@ -582,7 +582,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          {
             for (i=0; i < smooth_num_levels; i++)
             {
-               if (smoother[i]) 
+               if (smoother[i])
                {
                   HYPRE_ILUDestroy(smoother[i]);
                   smoother[i] = NULL;
@@ -1866,7 +1866,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             {
                hypre_BoomerAMGBuildDirInterp(A_array[level], CF_marker,
                                              S, coarse_pnts_global, num_functions, dof_func_array[level],
-                                             debug_flag, trunc_factor, P_max_elmts, col_offd_S_to_A, 
+                                             debug_flag, trunc_factor, P_max_elmts, col_offd_S_to_A,
                                              interp_type, &P);
                hypre_TFree(col_offd_S_to_A, HYPRE_MEMORY_HOST);
             }
@@ -2366,8 +2366,12 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             }
             else
             {
-               hypre_SeqVectorInitialize_v2(d_diag, HYPRE_MEMORY_DEVICE);
-               hypre_ParCSRComputeL1Norms(A_array[level], 1, NULL, d_diag);
+               HYPRE_Real *d_diag_data = NULL;
+
+               hypre_ParCSRComputeL1Norms(A_array[level], 1, NULL, &d_diag_data);
+
+               hypre_VectorData(d_diag) = d_diag_data;
+               hypre_SeqVectorInitialize_v2(d_diag, hypre_ParCSRMatrixMemoryLocation(A_array[level]));
             }
 
             if (ns == 1)
@@ -2843,11 +2847,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    {
       l1_norms = hypre_CTAlloc(hypre_Vector*, num_levels, HYPRE_MEMORY_HOST);
       hypre_ParAMGDataL1Norms(amg_data) = l1_norms;
-      for (j = 0; j < num_levels; j++)
-      {
-         l1_norms[j] = hypre_SeqVectorCreate(hypre_ParCSRMatrixNumRows(A_array[j]));
-         hypre_SeqVectorInitialize_v2(l1_norms[j], memory_location);
-      }
    }
 
    /* Chebyshev */
@@ -2877,37 +2876,46 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    for (j = 0; j < addlvl; j++)
    {
+      HYPRE_Real *l1_norm_data = NULL;
+
       if (j < num_levels-1 && (grid_relax_type[1] == 8 || grid_relax_type[1] == 13 || grid_relax_type[1] == 14 ||
                                grid_relax_type[2] == 8 || grid_relax_type[2] == 13 || grid_relax_type[2] == 14))
       {
          if (relax_order)
          {
-            hypre_ParCSRComputeL1Norms(A_array[j], 4, CF_marker_array[j], l1_norms[j]);
+            hypre_ParCSRComputeL1Norms(A_array[j], 4, CF_marker_array[j], &l1_norm_data);
          }
          else
          {
-            hypre_ParCSRComputeL1Norms(A_array[j], 4, NULL, l1_norms[j]);
+            hypre_ParCSRComputeL1Norms(A_array[j], 4, NULL, &l1_norm_data);
          }
       }
       else if ((grid_relax_type[3] == 8 || grid_relax_type[3] == 13 || grid_relax_type[3] == 14) && j == num_levels-1)
       {
-         hypre_ParCSRComputeL1Norms(A_array[j], 4, NULL, l1_norms[j]);
+         hypre_ParCSRComputeL1Norms(A_array[j], 4, NULL, &l1_norm_data);
       }
 
       if ((grid_relax_type[1] == 18 || grid_relax_type[2] == 18)  && j < num_levels-1)
       {
          if (relax_order)
          {
-            hypre_ParCSRComputeL1Norms(A_array[j], 1, CF_marker_array[j], l1_norms[j]);
+            hypre_ParCSRComputeL1Norms(A_array[j], 1, CF_marker_array[j], &l1_norm_data);
          }
          else
          {
-            hypre_ParCSRComputeL1Norms(A_array[j], 1, NULL, l1_norms[j]);
+            hypre_ParCSRComputeL1Norms(A_array[j], 1, NULL, &l1_norm_data);
          }
       }
       else if (grid_relax_type[3] == 18 && j == num_levels-1)
       {
-         hypre_ParCSRComputeL1Norms(A_array[j], 1, NULL, l1_norms[j]);
+         hypre_ParCSRComputeL1Norms(A_array[j], 1, NULL, &l1_norm_data);
+      }
+
+      if (l1_norm_data)
+      {
+         l1_norms[j] = hypre_SeqVectorCreate(hypre_ParCSRMatrixNumRows(A_array[j]));
+         hypre_VectorData(l1_norms[j]) = l1_norm_data;
+         hypre_SeqVectorInitialize_v2(l1_norms[j], hypre_ParCSRMatrixMemoryLocation(A_array[j]));
       }
    }
 
@@ -2915,49 +2923,71 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    {
       if (add_rlx == 18 )
       {
-         hypre_ParCSRComputeL1Norms(A_array[j], 1, NULL, l1_norms[j]);
+         HYPRE_Real *l1_norm_data = NULL;
+
+         hypre_ParCSRComputeL1Norms(A_array[j], 1, NULL, &l1_norm_data);
+
+         l1_norms[j] = hypre_SeqVectorCreate(hypre_ParCSRMatrixNumRows(A_array[j]));
+         hypre_VectorData(l1_norms[j]) = l1_norm_data;
+         hypre_SeqVectorInitialize_v2(l1_norms[j], hypre_ParCSRMatrixMemoryLocation(A_array[j]));
       }
    }
 
    for (j = add_end+1; j < num_levels; j++)
    {
+      HYPRE_Real *l1_norm_data = NULL;
+
       if (j < num_levels-1 && (grid_relax_type[1] == 8 || grid_relax_type[1] == 13 || grid_relax_type[1] == 14 ||
                                grid_relax_type[2] == 8 || grid_relax_type[2] == 13 || grid_relax_type[2] == 14))
       {
          if (relax_order)
          {
-            hypre_ParCSRComputeL1Norms(A_array[j], 4, CF_marker_array[j], l1_norms[j]);
+            hypre_ParCSRComputeL1Norms(A_array[j], 4, CF_marker_array[j], &l1_norm_data);
          }
          else
          {
-            hypre_ParCSRComputeL1Norms(A_array[j], 4, NULL, l1_norms[j]);
+            hypre_ParCSRComputeL1Norms(A_array[j], 4, NULL, &l1_norm_data);
          }
       }
       else if ((grid_relax_type[3] == 8 || grid_relax_type[3] == 13 || grid_relax_type[3] == 14) && j == num_levels-1)
       {
-         hypre_ParCSRComputeL1Norms(A_array[j], 4, NULL, l1_norms[j]);
+         hypre_ParCSRComputeL1Norms(A_array[j], 4, NULL, &l1_norm_data);
       }
       if ((grid_relax_type[1] == 18 || grid_relax_type[2] == 18) && j < num_levels-1)
       {
          if (relax_order)
          {
-            hypre_ParCSRComputeL1Norms(A_array[j], 1, CF_marker_array[j], l1_norms[j]);
+            hypre_ParCSRComputeL1Norms(A_array[j], 1, CF_marker_array[j], &l1_norm_data);
          }
          else
          {
-            hypre_ParCSRComputeL1Norms(A_array[j], 1, NULL, l1_norms[j]);
+            hypre_ParCSRComputeL1Norms(A_array[j], 1, NULL, &l1_norm_data);
          }
       }
       else if (grid_relax_type[3] == 18 && j == num_levels-1)
       {
-         hypre_ParCSRComputeL1Norms(A_array[j], 1, NULL, l1_norms[j]);
+         hypre_ParCSRComputeL1Norms(A_array[j], 1, NULL, &l1_norm_data);
+      }
+
+      if (l1_norm_data)
+      {
+         l1_norms[j] = hypre_SeqVectorCreate(hypre_ParCSRMatrixNumRows(A_array[j]));
+         hypre_VectorData(l1_norms[j]) = l1_norm_data;
+         hypre_SeqVectorInitialize_v2(l1_norms[j], hypre_ParCSRMatrixMemoryLocation(A_array[j]));
       }
    }
+
    for (j = 0; j < num_levels; j++)
    {
-      if (grid_relax_type[1] == 7 || grid_relax_type[2] == 7 || (grid_relax_type[3] == 7 && j== (num_levels-1)))
+      if (grid_relax_type[1] == 7 || grid_relax_type[2] == 7 || (grid_relax_type[3] == 7 && j == (num_levels-1)))
       {
-          hypre_ParCSRComputeL1Norms(A_array[j], 5, NULL, l1_norms[j]);
+         HYPRE_Real *l1_norm_data = NULL;
+
+         hypre_ParCSRComputeL1Norms(A_array[j], 5, NULL, &l1_norm_data);
+
+         l1_norms[j] = hypre_SeqVectorCreate(hypre_ParCSRMatrixNumRows(A_array[j]));
+         hypre_VectorData(l1_norms[j]) = l1_norm_data;
+         hypre_SeqVectorInitialize_v2(l1_norms[j], hypre_ParCSRMatrixMemoryLocation(A_array[j]));
       }
       else if (grid_relax_type[1] == 16 || grid_relax_type[2] == 16 || (grid_relax_type[3] == 16 && j== (num_levels-1)))
       {
@@ -3082,11 +3112,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          HYPRE_ILUSetTol(smoother[j], 0.);
          HYPRE_ILUSetLogging(smoother[j],0);
          HYPRE_ILUSetPrintLevel(smoother[j],0);
-         HYPRE_ILUSetLevelOfFill(smoother[j],eu_level); 
+         HYPRE_ILUSetLevelOfFill(smoother[j],eu_level);
          HYPRE_ILUSetup(smoother[j],
                         (HYPRE_ParCSRMatrix) A_array[j],
                         (HYPRE_ParVector) F_array[j],
-                        (HYPRE_ParVector) U_array[j]); 
+                        (HYPRE_ParVector) U_array[j]);
       }
       else if ((smooth_type == 8 || smooth_type == 18) && smooth_num_levels > j)
       {

@@ -674,7 +674,9 @@ hypre_MGRCycle( void               *mgr_vdata,
                for(i=0; i<nsweeps; i++)
                {
                   hypre_ParCSRRelax_L1_Jacobi(A_array[fine_grid], F_array[fine_grid], CF_marker[fine_grid],
-                        relax_points, relax_weight, relax_l1_norms[fine_grid], U_array[fine_grid], Vtemp);
+                        relax_points, relax_weight, 
+                        relax_l1_norms[fine_grid] ? hypre_VectorData(relax_l1_norms[fine_grid]) : NULL, 
+                        U_array[fine_grid], Vtemp);
                }
             }
             else if(relax_type == 8 || relax_type == 13 || relax_type == 14)
@@ -683,7 +685,9 @@ hypre_MGRCycle( void               *mgr_vdata,
                {
                   hypre_BoomerAMGRelax(A_array[fine_grid], F_array[fine_grid], CF_marker[fine_grid],
                         relax_type, relax_points, relax_weight,
-                        omega, relax_l1_norms[fine_grid], U_array[fine_grid], Vtemp, Ztemp);
+                        omega, 
+                        relax_l1_norms[fine_grid] ? hypre_VectorData(relax_l1_norms[fine_grid]) : NULL, 
+                        U_array[fine_grid], Vtemp, Ztemp);
                }
             }
             else
