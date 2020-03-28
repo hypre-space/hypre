@@ -39,6 +39,9 @@ TestCompGrids2(hypre_ParAMGData *amg_data);
 HYPRE_Int 
 CheckCompGridCommPkg(hypre_ParCompGridCommPkg *compGridCommPkg);
 
+HYPRE_Int
+FixUpRecvMaps(hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int start_level, HYPRE_Int num_levels);
+
 /*****************************************************************************
  *
  * Routine for setting up the composite grids in AMG-DD
@@ -478,6 +481,9 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    if (use_barriers) hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
    if (timers) hypre_BeginTiming(timers[7]);
 
+   FixUpRecvMaps(compGrid, compGridCommPkg, amgdd_start_level, num_levels);
+
+
    // Communicate data for A and all info for P
    CommunicateRemainingMatrixInfo(amg_data, compGrid, compGridCommPkg, communication_cost, symmetric);
 
@@ -626,27 +632,27 @@ PackRecvMapSendBuffer(HYPRE_Int *recv_map_send_buffer,
          // store the number of nodes on this level
          num_nodes = num_recv_nodes[level];
          recv_map_send_buffer[cnt++] = num_nodes;
-         num_recv_nodes[level] = 0;
+         // num_recv_nodes[level] = 0;
 
          for (i = 0; i < num_nodes; i++)
          {
             // store the map values for each node
             recv_map_send_buffer[cnt++] = recv_map[level][i];
 
-            if (recv_map[level][i] >= 0)
-            {
-               if (hypre_ParCompGridNonOwnedRealMarker(compGrid[level])[ recv_map[level][i] ] > 0)
-               {
-                  recv_map[level][ num_recv_nodes[level]++ ] = recv_map[level][i];
-               }
-               else
-               {
-                  recv_map[level][ num_recv_nodes[level]++ ] = -(recv_map[level][i] + 1);
-               }
-               (*recv_buffer_size)++;
-            }
+            // if (recv_map[level][i] >= 0)
+            // {
+            //    if (hypre_ParCompGridNonOwnedRealMarker(compGrid[level])[ recv_map[level][i] ] > 0)
+            //    {
+            //       recv_map[level][ num_recv_nodes[level]++ ] = recv_map[level][i];
+            //    }
+            //    else
+            //    {
+            //       recv_map[level][ num_recv_nodes[level]++ ] = -(recv_map[level][i] + 1);
+            //    }
+            //    (*recv_buffer_size)++;
+            // }
          }
-         recv_map[level] = hypre_TReAlloc(recv_map[level], HYPRE_Int, num_recv_nodes[level], HYPRE_MEMORY_HOST);
+         // recv_map[level] = hypre_TReAlloc(recv_map[level], HYPRE_Int, num_recv_nodes[level], HYPRE_MEMORY_HOST);
       }
       // otherwise record that there were zero nodes on this level
       else recv_map_send_buffer[cnt++] = 0;
@@ -1797,3 +1803,54 @@ CheckCompGridCommPkg(hypre_ParCompGridCommPkg *compGridCommPkg)
    }
    return 0;
 }
+
+HYPRE_Int
+FixUpRecvMaps(hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int start_level, HYPRE_Int num_levels)
+{
+
+   HYPRE_Int level, i;
+
+   // Initial fix up of recv map: before, negative indices indicate redundancy, after, negative indices indicate ghosts
+   if (compGridCommPkg)
+   {
+      for (level = start_level; level < num_levels; level++)
+      {
+         HYPRE_Int proc;
+         for (proc = 0; proc < hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg)[level]; proc++)
+         {
+            HYPRE_Int inner_level;
+            for (inner_level = level+1; inner_level < num_levels; inner_level++)
+            {
+               // if there were nodes in psiComposite on this level
+               if (hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[level][proc][inner_level])
+               {
+                  // store the number of nodes on this level
+                  HYPRE_Int num_nodes = hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[level][proc][inner_level];
+                  hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[level][proc][inner_level] = 0;
+
+                  for (i = 0; i < num_nodes; i++)
+                  {
+                     if (hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[level][proc][inner_level][i] >= 0)
+                     {
+                        if (hypre_ParCompGridNonOwnedRealMarker(compGrid[inner_level])[ hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[level][proc][inner_level][i] ] > 0)
+                        {
+                           hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[level][proc][inner_level][ hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[level][proc][inner_level]++ ] = hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[level][proc][inner_level][i];
+                        }
+                        else
+                        {
+                           hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[level][proc][inner_level][ hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[level][proc][inner_level]++ ] = -(hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[level][proc][inner_level][i] + 1);
+                        }
+                     }
+                  }
+                  hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[level][proc][inner_level] = hypre_TReAlloc(hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[level][proc][inner_level], HYPRE_Int, hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[level][proc][inner_level], HYPRE_MEMORY_HOST);
+               }
+            }
+         }
+      }
+   }
+
+   return 0;
+}
+
+
+

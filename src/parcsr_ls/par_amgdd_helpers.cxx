@@ -44,7 +44,16 @@ HYPRE_Int RecursivelyBuildPsiComposite(HYPRE_Int node, HYPRE_Int m, hypre_ParCom
                            HYPRE_Int need_coarse_info, HYPRE_Int *nodes_to_add, HYPRE_Int padding, HYPRE_Int level, HYPRE_Int use_sort);
 
 
-// HYPRE_Int LocalToGlobalIndex(hypre_ParCompGrid *compGrid, HYPRE_Int local_index);
+HYPRE_Int LocalToGlobalIndex(hypre_ParCompGrid *compGrid, HYPRE_Int local_index);
+
+HYPRE_Int
+RemoveRedundancy(hypre_ParCompGrid *compGrid,
+   HYPRE_Int *current_list, 
+   HYPRE_Int *current_list_length, 
+   HYPRE_Int *prev_list, 
+   HYPRE_Int prev_list_length,
+   HYPRE_Int allow_ghost_overwrite,
+   HYPRE_Int debug);
 
 #ifdef __cplusplus
 }
@@ -694,8 +703,8 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
    {
       recv_map[current_level][buffer_number][current_level][i] = i + hypre_ParCSRCommPkgRecvVecStart(commPkg, buffer_number);
       // !!! Debug
-      if (myid == 1 && current_level == 2)
-         printf("Rank 1 current_level 2, recv_map[%d] = %d\n", i, hypre_ParCompGridNonOwnedGlobalIndices(compGrid[current_level])[i + hypre_ParCSRCommPkgRecvVecStart(commPkg, buffer_number)]);
+      // if (myid == 1 && current_level == 2)
+      //    printf("Rank 1 current_level 2, recv_map[%d] = %d\n", i, hypre_ParCompGridNonOwnedGlobalIndices(compGrid[current_level])[i + hypre_ParCSRCommPkgRecvVecStart(commPkg, buffer_number)]);
    }
 
    // Unpack global indices and setup sort and invsort
@@ -720,8 +729,8 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
       }
 
       // !!! Debug
-      if (myid == 0 && current_level == 2)
-         printf("Rank %d current_level 2, incoming_global_index = %d\n", myid, incoming_global_index);
+      // if (myid == 0 && current_level == 2)
+      //    printf("Rank %d current_level 2, incoming_global_index = %d\n", myid, incoming_global_index);
 
 
       if (incoming_global_index < compGrid_global_index)
@@ -754,8 +763,8 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
       HYPRE_Int incoming_global_index = recv_buffer[cnt];
 
       // !!! Debug
-      if (myid == 0 && current_level == 2)
-         printf("Rank %d current_level 2, incoming_global_index = %d\n", myid, incoming_global_index);
+      // if (myid == 0 && current_level == 2)
+      //    printf("Rank %d current_level 2, incoming_global_index = %d\n", myid, incoming_global_index);
 
 
       HYPRE_Int incoming_is_real = 1;
@@ -971,7 +980,7 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
                else
                {
                   // !!! Debug
-                  printf("Rank %d, current_level %d, level %d, gid %d is non-overwrite redundancy\n", myid, current_level, level, incoming_global_index);
+                  // printf("Rank %d, current_level %d, level %d, gid %d is non-overwrite redundancy\n", myid, current_level, level, incoming_global_index);
 
                   incoming_dest[incoming_cnt++] = -(inv_sort_map[compGrid_cnt] + hypre_ParCompGridNumOwnedNodes(compGrid[level]) + 1); // Save location info for use below
                   cnt++;
@@ -1163,19 +1172,19 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
             (*redundant_Annz) += row_size;
             (*redundant_points)++;
             // !!! Debug
-            HYPRE_Int local_index = incoming_dest[i];
-            if (local_index < 0) // If negative, indexes from begining of owned
-            {
-               local_index = -(local_index+1);
-               if (local_index < hypre_ParCompGridNumOwnedNodes(compGrid[level]))
-                  printf("Rank %d, current_level %d, level %d, gid %d (owned) is redundant\n", myid, current_level, level, local_index + hypre_ParCompGridFirstGlobalIndex(compGrid[level]));
-               else 
-                  printf("Rank %d, current_level %d, level %d, gid %d (nonowned) is redundant\n", myid, current_level, level, hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level])[local_index - hypre_ParCompGridNumOwnedNodes(compGrid[level])]);
-            }
-            else // Otherwise index from beginning of nonowned
-            {
-               printf("Rank %d, current_level %d, level %d, gid %d (nonowned) is redundant\n", myid, current_level, level, hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level])[local_index]);
-            }
+            // HYPRE_Int local_index = incoming_dest[i];
+            // if (local_index < 0) // If negative, indexes from begining of owned
+            // {
+            //    local_index = -(local_index+1);
+            //    if (local_index < hypre_ParCompGridNumOwnedNodes(compGrid[level]))
+            //       printf("Rank %d, current_level %d, level %d, gid %d (owned) is redundant\n", myid, current_level, level, local_index + hypre_ParCompGridFirstGlobalIndex(compGrid[level]));
+            //    else 
+            //       printf("Rank %d, current_level %d, level %d, gid %d (nonowned) is redundant\n", myid, current_level, level, hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level])[local_index - hypre_ParCompGridNumOwnedNodes(compGrid[level])]);
+            // }
+            // else // Otherwise index from beginning of nonowned
+            // {
+            //    printf("Rank %d, current_level %d, level %d, gid %d (nonowned) is redundant\n", myid, current_level, level, hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level])[local_index]);
+            // }
          }
       }
 
@@ -1406,153 +1415,48 @@ PackSendBuffer(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypre_P
             i++;
          }
 
+
+         // !!! HERE
+
+
          // Eliminate redundant send info by comparing with previous send_flags and recv_maps
-         hypre_ParCSRCommPkg *original_commPkg = hypre_ParCSRMatrixCommPkg(hypre_ParAMGDataAArray(amg_data)[level]);
          HYPRE_Int current_send_proc = hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[current_level][proc];
          HYPRE_Int prev_proc, prev_level;
          HYPRE_Int num_send_nodes_before = num_send_nodes[current_level][proc][level];
          for (prev_level = current_level+1; prev_level <= level; prev_level++)
          {
+            hypre_ParCSRCommPkg *original_commPkg = hypre_ParCSRMatrixCommPkg(hypre_ParAMGDataAArray(amg_data)[prev_level]);
             for (prev_proc = 0; prev_proc < hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[prev_level]; prev_proc++)
             {
                if (hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[prev_level][prev_proc] == current_send_proc)
                {
-                  // send_flag's are in global index ordering on each level, so can merge 
-                  HYPRE_Int prev_cnt = 0;
-                  HYPRE_Int current_cnt = 0;
-                  HYPRE_Int new_cnt = 0;
+
+                  // !!! Debug
+                  if (prev_level == level && prev_proc < hypre_ParCSRCommPkgNumSends(original_commPkg)) 
+                     if (hypre_ParCSRCommPkgSendProc(original_commPkg, prev_proc) != current_send_proc)
+                        printf("Original comm pkg does not aggree...\n");
+
                   HYPRE_Int prev_list_end;
-                  if (prev_level == level) 
+                  if (prev_level == level && prev_proc < hypre_ParCSRCommPkgNumSends(original_commPkg))
                      prev_list_end = hypre_ParCSRCommPkgSendMapStart(original_commPkg, prev_proc+1) - hypre_ParCSRCommPkgSendMapStart(original_commPkg, prev_proc);
                   else
                      prev_list_end = num_send_nodes[prev_level][prev_proc][level];
-                  while (current_cnt < num_send_nodes[current_level][proc][level] && prev_cnt < prev_list_end)
+
+                  RemoveRedundancy(compGrid[level],
+                     send_flag[current_level][proc][level], 
+                     &(num_send_nodes[current_level][proc][level]), 
+                     send_flag[prev_level][prev_proc][level], 
+                     prev_list_end,
+                     0,0);
+
+                  if (prev_level == level && prev_proc < hypre_ParCSRCommPkgNumSends(original_commPkg))
                   {
-                     // Get the global indices
-                     HYPRE_Int prev_local_index = send_flag[prev_level][prev_proc][level][prev_cnt];
-                     if (prev_local_index < 0) prev_local_index = -(prev_local_index+1);
-                     HYPRE_Int prev_global_index;
-                     if (prev_local_index < hypre_ParCompGridNumOwnedNodes(compGrid[level]))
-                        prev_global_index = prev_local_index + hypre_ParCompGridFirstGlobalIndex(compGrid[level]);
-                     else
-                        prev_global_index = hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level])[prev_local_index - hypre_ParCompGridNumOwnedNodes(compGrid[level])];
-
-                     HYPRE_Int current_local_index = send_flag[current_level][proc][level][current_cnt];
-                     if (current_local_index < 0) current_local_index = -(current_local_index+1);
-                     HYPRE_Int current_global_index;
-                     if (current_local_index < hypre_ParCompGridNumOwnedNodes(compGrid[level]))
-                        current_global_index = current_local_index + hypre_ParCompGridFirstGlobalIndex(compGrid[level]);
-                     else
-                        current_global_index = hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level])[current_local_index - hypre_ParCompGridNumOwnedNodes(compGrid[level])];
-
-                     // !!! Debug
-                     // if (myid == 0 && current_level == 0 && level == 1) 
-                     //    printf("Check first send flag, cur gid %d, prev gid %d\n", current_global_index, prev_global_index);
-
-                     // Do the merge
-                     if (current_global_index > prev_global_index)
-                     {
-                        prev_cnt++;
-                     }
-                     else if (current_global_index < prev_global_index)
-                     {
-                        send_flag[current_level][proc][level][new_cnt] = send_flag[current_level][proc][level][current_cnt];
-                        new_cnt++;
-                        current_cnt++;
-                     }
-                     else
-                     {
-                        // Don't mark ghosts sent later as real as redundant (for now)
-                        if (send_flag[prev_level][prev_proc][level][prev_cnt] < 0 && send_flag[current_level][proc][level][current_cnt] >= 0)
-                        {
-                           send_flag[current_level][proc][level][new_cnt] = send_flag[current_level][proc][level][current_cnt];
-                           new_cnt++;
-                           current_cnt++;
-                           prev_cnt++;
-                        }
-                        else
-                        {
-                           prev_cnt++;
-                           current_cnt++;
-                        }
-                     }
-                  }
-                  while (current_cnt < num_send_nodes[current_level][proc][level])
-                  {
-                     send_flag[current_level][proc][level][new_cnt] = send_flag[current_level][proc][level][current_cnt];
-                     new_cnt++;
-                     current_cnt++;
-                  }
-                  num_send_nodes[current_level][proc][level] = new_cnt;
-
-                  if (prev_level == level)
-                  {
-                     prev_cnt = prev_list_end;
-                     current_cnt = 0;
-                     new_cnt = 0;
-                     while (current_cnt < num_send_nodes[current_level][proc][level] && prev_cnt < num_send_nodes[prev_level][prev_proc][level])
-                     {
-                        // Get the global indices
-                        HYPRE_Int prev_local_index = send_flag[prev_level][prev_proc][level][prev_cnt];
-                        if (prev_local_index < 0) prev_local_index = -(prev_local_index+1);
-                        HYPRE_Int prev_global_index;
-                        if (prev_local_index < hypre_ParCompGridNumOwnedNodes(compGrid[level]))
-                           prev_global_index = prev_local_index + hypre_ParCompGridFirstGlobalIndex(compGrid[level]);
-                        else
-                           prev_global_index = hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level])[prev_local_index - hypre_ParCompGridNumOwnedNodes(compGrid[level])];
-
-                        HYPRE_Int current_local_index = send_flag[current_level][proc][level][current_cnt];
-                        if (current_local_index < 0) current_local_index = -(current_local_index+1);
-                        HYPRE_Int current_global_index;
-                        if (current_local_index < hypre_ParCompGridNumOwnedNodes(compGrid[level]))
-                           current_global_index = current_local_index + hypre_ParCompGridFirstGlobalIndex(compGrid[level]);
-                        else
-                           current_global_index = hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level])[current_local_index - hypre_ParCompGridNumOwnedNodes(compGrid[level])];
-
-                        // !!! Debug
-                        // if (myid == 0 && current_level == 0 && level == 1) 
-                        //    printf("Check second send flag, cur gid %d, prev gid %d\n", current_global_index, prev_global_index);
-
-
-                        // Do the merge
-                        if (current_global_index > prev_global_index)
-                        {
-                           prev_cnt++;
-                        }
-                        else if (current_global_index < prev_global_index)
-                        {
-                           send_flag[current_level][proc][level][new_cnt] = send_flag[current_level][proc][level][current_cnt];
-                           new_cnt++;
-                           current_cnt++;
-                        }
-                        else
-                        {
-                           // Don't mark ghosts sent later as real as redundant (for now)
-                           if (send_flag[prev_level][prev_proc][level][prev_cnt] < 0 && send_flag[current_level][proc][level][current_cnt] >= 0)
-                           {
-                              // !!! Debug
-                              // if (myid == 0 && current_level == 0 && level == 1) 
-                              //    printf("Ghost overwrite case\n", current_global_index, prev_global_index);
-
-                              send_flag[current_level][proc][level][new_cnt] = send_flag[current_level][proc][level][current_cnt];
-                              new_cnt++;
-                              current_cnt++;
-                              prev_cnt++;
-                           }
-                           else
-                           {
-                              prev_cnt++;
-                              current_cnt++;
-                           }
-                        }
-                     }
-                     while (current_cnt < num_send_nodes[current_level][proc][level])
-                     {
-                        send_flag[current_level][proc][level][new_cnt] = send_flag[current_level][proc][level][current_cnt];
-                        new_cnt++;
-                        current_cnt++;
-                     }
-                     num_send_nodes[current_level][proc][level] = new_cnt;
+                     RemoveRedundancy(compGrid[level],
+                        send_flag[current_level][proc][level], 
+                        &(num_send_nodes[current_level][proc][level]), 
+                        &(send_flag[prev_level][prev_proc][level][prev_list_end]), 
+                        num_send_nodes[prev_level][prev_proc][level] - prev_list_end,
+                        0,0);
                   }
                }
             }
@@ -1565,189 +1469,44 @@ PackSendBuffer(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypre_P
                if (hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[prev_level][prev_proc] == current_send_proc)
                {
                   // !!! Debug
-                  // if (myid == 1 && current_level == 1 && level == 2)
-                  // {
-                  //    printf("prev num recv nodes = %d, num owned = %d\n", hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[prev_level][prev_proc][level], hypre_ParCompGridNumOwnedNodes(compGrid[level]));
-                  //    HYPRE_Int l;
-                  //    for (l = 0; l < hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[prev_level][prev_proc][level]; l++)
-                  //       printf("Rank 1, prev level %d, level %d, recv_map[%d] = %d\n", prev_level, level, l, hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[prev_level][prev_proc][level][l]);
-                  // }
+                  if (prev_level == level && prev_proc < hypre_ParCSRCommPkgNumRecvs(original_commPkg)) 
+                     if (hypre_ParCSRCommPkgRecvProc(original_commPkg, prev_proc) != current_send_proc)
+                        printf("Original comm pkg does not aggree...\n");
 
-                  // recv_map's are in global index ordering on each level, so can merge 
-                  HYPRE_Int prev_cnt = 0;
-                  HYPRE_Int current_cnt = 0;
-                  HYPRE_Int new_cnt = 0;
                   HYPRE_Int prev_list_end;
-                  if (prev_level == level) 
+                  HYPRE_Int local_index_type = 1;
+                  if (prev_level == level && prev_proc < hypre_ParCSRCommPkgNumRecvs(original_commPkg)) 
+                  {
+                     local_index_type = 2;
                      prev_list_end = hypre_ParCSRCommPkgRecvVecStart(original_commPkg, prev_proc+1) - hypre_ParCSRCommPkgRecvVecStart(original_commPkg, prev_proc);
+                  }
                   else
                      prev_list_end = hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[prev_level][prev_proc][level];
-                  while (current_cnt < num_send_nodes[current_level][proc][level] && prev_cnt < prev_list_end)
+
+                  RemoveRedundancy(compGrid[level],
+                     send_flag[current_level][proc][level], 
+                     &(num_send_nodes[current_level][proc][level]), 
+                     hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[prev_level][prev_proc][level], 
+                     prev_list_end,
+                     local_index_type,1);
+
+                  if (prev_level == level && prev_proc < hypre_ParCSRCommPkgNumRecvs(original_commPkg))
                   {
-                     // Get the global indices
-                     HYPRE_Int prev_local_index = hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[prev_level][prev_proc][level][prev_cnt];
-                     HYPRE_Int prev_global_index;
-                     if (prev_local_index < 0 && prev_level != level) // In this case, local index counts from begining of owned
-                     {
-                        prev_local_index = -(prev_local_index+1);
-                        if (prev_local_index < hypre_ParCompGridNumOwnedNodes(compGrid[level]))
-                           prev_global_index = prev_local_index + hypre_ParCompGridFirstGlobalIndex(compGrid[level]);
-                        else
-                           prev_global_index = hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level])[prev_local_index - hypre_ParCompGridNumOwnedNodes(compGrid[level])];
-                     }
-                     else
-                     {
-                        if (prev_local_index < 0) prev_local_index = -(prev_local_index+1);
-                        prev_global_index = hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level])[prev_local_index];
-                     }
-
-                     HYPRE_Int current_local_index = send_flag[current_level][proc][level][current_cnt];
-                     if (current_local_index < 0) current_local_index = -(current_local_index+1);
-                     HYPRE_Int current_global_index;
-                     if (current_local_index < hypre_ParCompGridNumOwnedNodes(compGrid[level]))
-                        current_global_index = current_local_index + hypre_ParCompGridFirstGlobalIndex(compGrid[level]);
-                     else
-                        current_global_index = hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level])[current_local_index - hypre_ParCompGridNumOwnedNodes(compGrid[level])];
-
-                     // !!! Debug
-                     if (myid == 0 && current_level == 1 && level == 2) 
-                        printf("Check first recv map, cur gid %d, prev gid %d\n", current_global_index, prev_global_index);
-
-                     // Do the merge
-                     if (current_global_index > prev_global_index)
-                     {
-                        prev_cnt++;
-                     }
-                     else if (current_global_index < prev_global_index)
-                     {
-                        send_flag[current_level][proc][level][new_cnt] = send_flag[current_level][proc][level][current_cnt];
-                     
-                        // !!! Debug
-                        if (myid == 0 && current_level == 1 && level == 2) 
-                           printf("Set send_flag[%d] = %d\n", new_cnt, current_global_index);
-
-                        new_cnt++;
-                        current_cnt++;
-                     }
-                     else
-                     {
-                        prev_cnt++;
-                        current_cnt++;
-                     }
+                     RemoveRedundancy(compGrid[level],
+                        send_flag[current_level][proc][level], 
+                        &(num_send_nodes[current_level][proc][level]), 
+                        &(hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[prev_level][prev_proc][level][prev_list_end]), 
+                        hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[prev_level][prev_proc][level] - prev_list_end,
+                        local_index_type,1);
                   }
-                  while (current_cnt < num_send_nodes[current_level][proc][level])
-                  {
-                     send_flag[current_level][proc][level][new_cnt] = send_flag[current_level][proc][level][current_cnt];
-                     
-                     // !!! Debug
-                     HYPRE_Int current_local_index = send_flag[current_level][proc][level][current_cnt];
-                     if (current_local_index < 0) current_local_index = -(current_local_index+1);
-                     HYPRE_Int current_global_index;
-                     if (current_local_index < hypre_ParCompGridNumOwnedNodes(compGrid[level]))
-                        current_global_index = current_local_index + hypre_ParCompGridFirstGlobalIndex(compGrid[level]);
-                     else
-                        current_global_index = hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level])[current_local_index - hypre_ParCompGridNumOwnedNodes(compGrid[level])];
-                     // !!! Debug
-                     if (myid == 0 && current_level == 1 && level == 2) 
-                        printf("Set send_flag[%d] = %d\n", new_cnt, current_global_index);
-
-                     new_cnt++;
-                     current_cnt++;
-                  }
-                  num_send_nodes[current_level][proc][level] = new_cnt;
-
-                  if (prev_level == level)
-                  {
-                     prev_cnt = prev_list_end;
-                     current_cnt = 0;
-                     new_cnt = 0;
-                     while (current_cnt < num_send_nodes[current_level][proc][level] && prev_cnt < hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[prev_level][prev_proc][level])
-                     {
-                        // Get the global indices
-                        HYPRE_Int prev_local_index = hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[prev_level][prev_proc][level][prev_cnt];
-                        HYPRE_Int prev_global_index;
-                        if (prev_local_index < 0 && prev_level != level) // In this case, local index counts from begining of owned
-                        {
-                           prev_local_index = -(prev_local_index+1);
-                           if (prev_local_index < hypre_ParCompGridNumOwnedNodes(compGrid[level]))
-                              prev_global_index = prev_local_index + hypre_ParCompGridFirstGlobalIndex(compGrid[level]);
-                           else
-                              prev_global_index = hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level])[prev_local_index - hypre_ParCompGridNumOwnedNodes(compGrid[level])];
-                        }
-                        else
-                        {
-                           if (prev_local_index < 0) prev_local_index = -(prev_local_index+1);
-                           prev_global_index = hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level])[prev_local_index];
-                        }
-
-                        HYPRE_Int current_local_index = send_flag[current_level][proc][level][current_cnt];
-                        if (current_local_index < 0) current_local_index = -(current_local_index+1);
-                        HYPRE_Int current_global_index;
-                        if (current_local_index < hypre_ParCompGridNumOwnedNodes(compGrid[level]))
-                           current_global_index = current_local_index + hypre_ParCompGridFirstGlobalIndex(compGrid[level]);
-                        else
-                           current_global_index = hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level])[current_local_index - hypre_ParCompGridNumOwnedNodes(compGrid[level])];
-
-                        // !!! Debug
-                        if (myid == 0 && current_level == 1 && level == 2) 
-                           printf("Check second recv map, cur gid %d, prev gid %d\n", current_global_index, prev_global_index);
-
-                        // Do the merge
-                        if (current_global_index > prev_global_index)
-                        {
-                           prev_cnt++;
-                        }
-                        else if (current_global_index < prev_global_index)
-                        {
-                           send_flag[current_level][proc][level][new_cnt] = send_flag[current_level][proc][level][current_cnt];
-                           
-                           // !!! Debug
-                           if (myid == 0 && current_level == 1 && level == 2) 
-                              printf("Set send_flag[%d] = %d\n", new_cnt, current_global_index);
-
-
-
-                           new_cnt++;
-                           current_cnt++;
-                        }
-                        else
-                        {
-                           prev_cnt++;
-                           current_cnt++;
-                        }
-                     }
-                     while (current_cnt < num_send_nodes[current_level][proc][level])
-                     {
-                        send_flag[current_level][proc][level][new_cnt] = send_flag[current_level][proc][level][current_cnt];
-                        
-                        // !!! Debug
-                        HYPRE_Int current_local_index = send_flag[current_level][proc][level][current_cnt];
-                        if (current_local_index < 0) current_local_index = -(current_local_index+1);
-                        HYPRE_Int current_global_index;
-                        if (current_local_index < hypre_ParCompGridNumOwnedNodes(compGrid[level]))
-                           current_global_index = current_local_index + hypre_ParCompGridFirstGlobalIndex(compGrid[level]);
-                        else
-                           current_global_index = hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level])[current_local_index - hypre_ParCompGridNumOwnedNodes(compGrid[level])];
-                        // !!! Debug
-                        if (myid == 0 && current_level == 1 && level == 2) 
-                           printf("Set send_flag[%d] = %d\n", new_cnt, current_global_index);
-
-                        new_cnt++;
-                        current_cnt++;
-                     }
-                     num_send_nodes[current_level][proc][level] = new_cnt;
-                  }
-
-
-
-
                }
             }
 
 
-
-
          }
+
+
+
          (*num_removed_redundancies) += num_send_nodes_before - num_send_nodes[current_level][proc][level];
 
          // Count up the buffer sizes and adjust the add_flag and get offsets
@@ -2392,71 +2151,107 @@ RecursivelyBuildPsiComposite(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid **co
    return error_code;
 }
 
-// HYPRE_Int
-// LocalToGlobalIndex(hypre_ParCompGrid *compGrid, HYPRE_Int local_index)
-// {
-//    // Assume local index starts with 0 at beginning of owned dofs and continues through the nonowned
-//    if (local_index < 0) local_index = -(local_index+1);
-//    if (local_index < hypre_ParCompGridNumOwnedNodes(compGrid))
-//       return local_index + hypre_ParCompGridFirstGlobalIndex(compGrid);
-//    else
-//       return hypre_ParCompGridNonOwnedGlobalIndices(compGrid)[local_index - hypre_ParCompGridNumOwnedNodes(compGrid)];
-// }
+HYPRE_Int
+LocalToGlobalIndex(hypre_ParCompGrid *compGrid, HYPRE_Int local_index, HYPRE_Int local_index_type)
+{
+   if (local_index_type == 0)
+   {
+      // Local index starts with 0 at beginning of owned dofs and continues through the nonowned
+      if (local_index < 0) local_index = -(local_index+1);
+      if (local_index < hypre_ParCompGridNumOwnedNodes(compGrid))
+         return local_index + hypre_ParCompGridFirstGlobalIndex(compGrid);
+      else
+         return hypre_ParCompGridNonOwnedGlobalIndices(compGrid)[local_index - hypre_ParCompGridNumOwnedNodes(compGrid)];
+   }
+   else if (local_index_type == 1)
+   {
+      // Positive local index starts with 0 at beginning of nonowned
+      if (local_index >= 0)
+      {
+         return hypre_ParCompGridNonOwnedGlobalIndices(compGrid)[local_index];
+      }
+      // Negative local index starts with 0 at beginning of owned
+      else
+      {
+         local_index = -(local_index+1);
+         if (local_index < hypre_ParCompGridNumOwnedNodes(compGrid))
+            return local_index + hypre_ParCompGridFirstGlobalIndex(compGrid);
+         else
+            return hypre_ParCompGridNonOwnedGlobalIndices(compGrid)[local_index - hypre_ParCompGridNumOwnedNodes(compGrid)];
+      }
+   }
+   else if (local_index_type == 2)
+   {
+      // Local index starts with 0 at beginning of nonowned
+      if (local_index < 0) local_index = -(local_index+1);
+      return hypre_ParCompGridNonOwnedGlobalIndices(compGrid)[local_index];
+   }
+}
 
-// HYPRE_Int
-// RemoveRedundancy(hypre_ParCompGrid *compGrid,
-//    HYPRE_Int *current_list, 
-//    HYPRE_Int *current_list_length, 
-//    HYPRE_Int *prev_list, HYPRE_Int 
-//    prev_list_length)
-// {
-//    // send_flag's are in global index ordering on each level, so can merge 
-//    HYPRE_Int prev_cnt = 0;
-//    HYPRE_Int current_cnt = 0;
-//    HYPRE_Int new_cnt = 0;
-//    while (current_cnt < (*current_list_length) && prev_cnt < prev_list_length)
-//    {
-//       // Get the global indices
-//       HYPRE_Int current_global_index = LocalToGlobalIndex(compGrid, current_list[current_cnt]);
-//       HYPRE_Int prev_global_index = LocalToGlobalIndex(compGrid, prev_list[prev_cnt]);
+HYPRE_Int
+RemoveRedundancy(hypre_ParCompGrid *compGrid,
+   HYPRE_Int *current_list, 
+   HYPRE_Int *current_list_length, 
+   HYPRE_Int *prev_list, 
+   HYPRE_Int prev_list_length,
+   HYPRE_Int local_index_type,
+   HYPRE_Int debug)
+{
+   // local_index_type = 0: send, 1: recv
 
-//       // Do the merge
-//       if (current_global_index > prev_global_index)
-//       {
-//          prev_cnt++;
-//       }
-//       else if (current_global_index < prev_global_index)
-//       {
-//          current_list[new_cnt] = current_list[current_cnt];
-//          new_cnt++;
-//          current_cnt++;
-//       }
-//       else
-//       {
-//          // Don't mark ghosts sent later as real as redundant (for now)
-//          if (prev_list[prev_cnt] < 0 && current_list[current_cnt] >= 0)
-//          {
-//             current_list[new_cnt] = current_list[current_cnt];
-//             new_cnt++;
-//             current_cnt++;
-//             prev_cnt++;
-//          }
-//          else
-//          {
-//             prev_cnt++;
-//             current_cnt++;
-//          }
-//       }
-//    }
-//    while (current_cnt < num_send_nodes[current_level][proc][level])
-//    {
-//       current_list[new_cnt] = current_list[current_cnt];
-//       new_cnt++;
-//       current_cnt++;
-//    }
-//    num_send_nodes[current_level][proc][level] = new_cnt;
+   HYPRE_Int   myid;
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
-// }
+   // send_flag's are in global index ordering on each level, so can merge 
+   HYPRE_Int prev_cnt = 0;
+   HYPRE_Int current_cnt = 0;
+   HYPRE_Int new_cnt = 0;
+   while (current_cnt < (*current_list_length) && prev_cnt < prev_list_length)
+   {
+      // Get the global indices
+      HYPRE_Int current_global_index = LocalToGlobalIndex(compGrid, current_list[current_cnt], 0);
+      HYPRE_Int prev_global_index = LocalToGlobalIndex(compGrid, prev_list[prev_cnt], local_index_type);
+
+      // if (debug && myid == 0)
+         // printf("cur gid = %d, prev gid = %d\n", current_global_index, prev_global_index);
+
+      // Do the merge
+      if (current_global_index > prev_global_index)
+      {
+         prev_cnt++;
+      }
+      else if (current_global_index < prev_global_index)
+      {
+         current_list[new_cnt] = current_list[current_cnt];
+         new_cnt++;
+         current_cnt++;
+      }
+      else
+      {
+         // Don't mark ghosts sent later as real as redundant (for now)
+         if (!local_index_type && (prev_list[prev_cnt] < 0 && current_list[current_cnt] >= 0))
+         {
+            current_list[new_cnt] = current_list[current_cnt];
+            new_cnt++;
+            current_cnt++;
+            prev_cnt++;
+         }
+         else
+         {
+            prev_cnt++;
+            current_cnt++;
+         }
+      }
+   }
+   while (current_cnt < (*current_list_length))
+   {
+      current_list[new_cnt] = current_list[current_cnt];
+      new_cnt++;
+      current_cnt++;
+   }
+   (*current_list_length) = new_cnt;
+
+}
 
 
 #endif
