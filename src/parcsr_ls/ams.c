@@ -730,6 +730,8 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
          }
       }
 
+      *l1_norm_ptr = l1_norm;
+
       return hypre_error_flag;
    }
 
