@@ -1442,21 +1442,21 @@ PackSendBuffer(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypre_P
                   else
                      prev_list_end = num_send_nodes[prev_level][prev_proc][level];
 
-                  RemoveRedundancy(compGrid[level],
-                     send_flag[current_level][proc][level], 
-                     &(num_send_nodes[current_level][proc][level]), 
-                     send_flag[prev_level][prev_proc][level], 
-                     prev_list_end,
-                     0,0);
+                  // RemoveRedundancy(compGrid[level],
+                  //    send_flag[current_level][proc][level], 
+                  //    &(num_send_nodes[current_level][proc][level]), 
+                  //    send_flag[prev_level][prev_proc][level], 
+                  //    prev_list_end,
+                  //    0,0);
 
                   if (prev_level == level && prev_proc < hypre_ParCSRCommPkgNumSends(original_commPkg))
                   {
-                     RemoveRedundancy(compGrid[level],
-                        send_flag[current_level][proc][level], 
-                        &(num_send_nodes[current_level][proc][level]), 
-                        &(send_flag[prev_level][prev_proc][level][prev_list_end]), 
-                        num_send_nodes[prev_level][prev_proc][level] - prev_list_end,
-                        0,0);
+                     // RemoveRedundancy(compGrid[level],
+                     //    send_flag[current_level][proc][level], 
+                     //    &(num_send_nodes[current_level][proc][level]), 
+                     //    &(send_flag[prev_level][prev_proc][level][prev_list_end]), 
+                     //    num_send_nodes[prev_level][prev_proc][level] - prev_list_end,
+                     //    0,0);
                   }
                }
             }
@@ -1483,21 +1483,21 @@ PackSendBuffer(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypre_P
                   else
                      prev_list_end = hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[prev_level][prev_proc][level];
 
-                  RemoveRedundancy(compGrid[level],
-                     send_flag[current_level][proc][level], 
-                     &(num_send_nodes[current_level][proc][level]), 
-                     hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[prev_level][prev_proc][level], 
-                     prev_list_end,
-                     local_index_type,1);
+                  // RemoveRedundancy(compGrid[level],
+                  //    send_flag[current_level][proc][level], 
+                  //    &(num_send_nodes[current_level][proc][level]), 
+                  //    hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[prev_level][prev_proc][level], 
+                  //    prev_list_end,
+                  //    local_index_type,1);
 
                   if (prev_level == level && prev_proc < hypre_ParCSRCommPkgNumRecvs(original_commPkg))
                   {
-                     RemoveRedundancy(compGrid[level],
-                        send_flag[current_level][proc][level], 
-                        &(num_send_nodes[current_level][proc][level]), 
-                        &(hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[prev_level][prev_proc][level][prev_list_end]), 
-                        hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[prev_level][prev_proc][level] - prev_list_end,
-                        local_index_type,1);
+                     // RemoveRedundancy(compGrid[level],
+                     //    send_flag[current_level][proc][level], 
+                     //    &(num_send_nodes[current_level][proc][level]), 
+                     //    &(hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[prev_level][prev_proc][level][prev_list_end]), 
+                     //    hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[prev_level][prev_proc][level] - prev_list_end,
+                     //    local_index_type,1);
                   }
                }
             }
@@ -1529,9 +1529,9 @@ PackSendBuffer(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypre_P
          {
             send_elmt = send_flag[current_level][proc][level][i];
             if (send_elmt < 0) send_elmt = -(send_elmt + 1);
-            add_flag[level][send_elmt] = i + 1;
             if (send_elmt < hypre_ParCompGridNumOwnedNodes(compGrid[level]))
             {
+               add_flag[level][send_elmt] = i + 1;
                owned_sends[level][owned_cnt] = send_elmt;
                hypre_CSRMatrix *diag = hypre_ParCompGridMatrixOwnedDiag(hypre_ParCompGridA(compGrid[level]));
                hypre_CSRMatrix *offd = hypre_ParCompGridMatrixOwnedOffd(hypre_ParCompGridA(compGrid[level]));
@@ -1541,8 +1541,9 @@ PackSendBuffer(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypre_P
                (*buffer_size) += hypre_CSRMatrixI(offd)[send_elmt+1] - hypre_CSRMatrixI(offd)[send_elmt];
                owned_cnt++;
             }
-            else
+            else if (send_elmt < hypre_ParCompGridNumOwnedNodes(compGrid[level]) + hypre_ParCompGridNumNonOwnedNodes(compGrid[level]))
             {
+               add_flag[level][send_elmt] = i + 1;
                send_elmt -= hypre_ParCompGridNumOwnedNodes(compGrid[level]);
                nonowned_sends[level][nonowned_cnt] = send_elmt;
                hypre_CSRMatrix *diag = hypre_ParCompGridMatrixNonOwnedDiag(hypre_ParCompGridA(compGrid[level]));
@@ -1552,6 +1553,11 @@ PackSendBuffer(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypre_P
                nonowned_offd_offsets[level][nonowned_cnt] = (*buffer_size);
                (*buffer_size) += hypre_CSRMatrixI(offd)[send_elmt+1] - hypre_CSRMatrixI(offd)[send_elmt];
                nonowned_cnt++;
+            }
+            else
+            {
+               send_elmt -= hypre_ParCompGridNumOwnedNodes(compGrid[level]) + hypre_ParCompGridNumNonOwnedNodes(compGrid[level]);
+               add_flag[level][send_elmt] = i + 1;
             }
          }
          num_owned_sends[level] = owned_cnt;
@@ -1613,6 +1619,9 @@ PackSendBuffer(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypre_P
          }
          else 
          {
+            if (send_elmt > hypre_ParCompGridNumOwnedNodes(compGrid[level]) + hypre_ParCompGridNumNonOwnedNodes(compGrid[level]))
+               send_elmt -= hypre_ParCompGridNumOwnedNodes(compGrid[level]) + hypre_ParCompGridNumNonOwnedNodes(compGrid[level]);
+
             if (send_elmt < hypre_ParCompGridNumOwnedNodes(compGrid[level]))
             {
 
@@ -1641,6 +1650,8 @@ PackSendBuffer(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypre_P
          {
             send_elmt = send_flag[current_level][proc][level][i];
             if (send_elmt < 0) send_elmt = -(send_elmt + 1);
+            else if (send_elmt > hypre_ParCompGridNumOwnedNodes(compGrid[level]) + hypre_ParCompGridNumNonOwnedNodes(compGrid[level]))
+               send_elmt -= hypre_ParCompGridNumOwnedNodes(compGrid[level]) + hypre_ParCompGridNumNonOwnedNodes(compGrid[level]);
 
             if (send_elmt < hypre_ParCompGridNumOwnedNodes(compGrid[level]))
             {
@@ -1677,13 +1688,18 @@ PackSendBuffer(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypre_P
             row_length = hypre_CSRMatrixI(diag)[ send_elmt + 1 ] - hypre_CSRMatrixI(diag)[ send_elmt ]
                        + hypre_CSRMatrixI(offd)[ send_elmt + 1 ] - hypre_CSRMatrixI(offd)[ send_elmt ];
          }
-         else
+         else if (send_elmt < hypre_ParCompGridNumOwnedNodes(compGrid[level]) + hypre_ParCompGridNumNonOwnedNodes(compGrid[level]))
          {
             HYPRE_Int nonowned_index = send_elmt - hypre_ParCompGridNumOwnedNodes(compGrid[level]);
             hypre_CSRMatrix *diag = hypre_ParCompGridMatrixNonOwnedDiag(hypre_ParCompGridA(compGrid[level]));
             hypre_CSRMatrix *offd = hypre_ParCompGridMatrixNonOwnedOffd(hypre_ParCompGridA(compGrid[level]));
             row_length = hypre_CSRMatrixI(diag)[ nonowned_index + 1 ] - hypre_CSRMatrixI(diag)[ nonowned_index ]
                        + hypre_CSRMatrixI(offd)[ nonowned_index + 1 ] - hypre_CSRMatrixI(offd)[ nonowned_index ];
+         }
+         else
+         {
+            row_length = 0;
+            send_flag[current_level][proc][level][i] -= hypre_ParCompGridNumOwnedNodes(compGrid[level]) + hypre_ParCompGridNumNonOwnedNodes(compGrid[level]);
          }
          send_buffer[cnt++] = row_length;
       }
@@ -2156,8 +2172,11 @@ LocalToGlobalIndex(hypre_ParCompGrid *compGrid, HYPRE_Int local_index, HYPRE_Int
 {
    if (local_index_type == 0)
    {
-      // Local index starts with 0 at beginning of owned dofs and continues through the nonowned
+      // Local index starts with 0 at beginning of owned dofs and continues through the nonowned (possible indices that are too large marking real overwriting ghost)
       if (local_index < 0) local_index = -(local_index+1);
+      else if (local_index > hypre_ParCompGridNumOwnedNodes(compGrid) + hypre_ParCompGridNumNonOwnedNodes(compGrid))
+         local_index -= hypre_ParCompGridNumOwnedNodes(compGrid) + hypre_ParCompGridNumNonOwnedNodes(compGrid);
+      
       if (local_index < hypre_ParCompGridNumOwnedNodes(compGrid))
          return local_index + hypre_ParCompGridFirstGlobalIndex(compGrid);
       else
@@ -2231,7 +2250,12 @@ RemoveRedundancy(hypre_ParCompGrid *compGrid,
          // Don't mark ghosts sent later as real as redundant (for now)
          if (!local_index_type && (prev_list[prev_cnt] < 0 && current_list[current_cnt] >= 0))
          {
-            current_list[new_cnt] = current_list[current_cnt];
+            // This is the case of real dof sent to overwrite ghost. 
+            // Current list is a positive local index here. Map beyond the range of total dofs to mark.
+            if (current_list[current_cnt] < hypre_ParCompGridNumOwnedNodes(compGrid) + hypre_ParCompGridNumNonOwnedNodes(compGrid))
+               current_list[new_cnt] = current_list[current_cnt] + hypre_ParCompGridNumOwnedNodes(compGrid) + hypre_ParCompGridNumNonOwnedNodes(compGrid);
+            else
+               current_list[new_cnt] = current_list[current_cnt];
             new_cnt++;
             current_cnt++;
             prev_cnt++;

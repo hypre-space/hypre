@@ -25,7 +25,7 @@ HYPRE_Int
 PackRecvMapSendBuffer(HYPRE_Int *recv_map_send_buffer, HYPRE_Int **recv_map, HYPRE_Int *num_recv_nodes, HYPRE_Int *recv_buffer_size, HYPRE_Int current_level, HYPRE_Int num_levels, hypre_ParCompGrid **compGrid);
 
 HYPRE_Int
-UnpackSendFlagBuffer(HYPRE_Int *send_flag_buffer, HYPRE_Int **send_flag, HYPRE_Int *num_send_nodes, HYPRE_Int *send_buffer_size, HYPRE_Int current_level, HYPRE_Int num_levels);
+UnpackSendFlagBuffer(hypre_ParCompGrid **compGrid, HYPRE_Int *send_flag_buffer, HYPRE_Int **send_flag, HYPRE_Int *num_send_nodes, HYPRE_Int *send_buffer_size, HYPRE_Int current_level, HYPRE_Int num_levels);
 
 HYPRE_Int
 CommunicateRemainingMatrixInfo(hypre_ParAMGData* amg_data, hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int *communication_cost, HYPRE_Int symmetric);
@@ -401,7 +401,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
          // unpack and setup the send flag arrays
          for (i = 0; i < num_send_procs; i++)
          {
-            UnpackSendFlagBuffer(send_flag_buffer[i], send_flag[level][i], num_send_nodes[level][i], &(send_buffer_size[level][i]), level, num_levels);
+            UnpackSendFlagBuffer(compGrid, send_flag_buffer[i], send_flag[level][i], num_send_nodes[level][i], &(send_buffer_size[level][i]), level, num_levels);
          }
 
          if (timers) hypre_EndTiming(timers[6]);
@@ -662,7 +662,8 @@ PackRecvMapSendBuffer(HYPRE_Int *recv_map_send_buffer,
 }
 
 HYPRE_Int
-UnpackSendFlagBuffer(HYPRE_Int *send_flag_buffer, 
+UnpackSendFlagBuffer(hypre_ParCompGrid **compGrid,
+   HYPRE_Int *send_flag_buffer, 
    HYPRE_Int **send_flag, 
    HYPRE_Int *num_send_nodes,
    HYPRE_Int *send_buffer_size,
