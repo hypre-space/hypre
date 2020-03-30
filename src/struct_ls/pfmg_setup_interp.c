@@ -691,6 +691,11 @@ hypre_PFMGSetupInterpOp_CC2
   HYPRE_Int           si0,
   HYPRE_Int           si1 )
 {
+   hypre_StructStencil   *stencil            = hypre_StructMatrixStencil(A);
+   hypre_Index           *stencil_shape      = hypre_StructStencilShape(stencil);
+   HYPRE_Int              stencil_size       = hypre_StructStencilSize(stencil);
+   HYPRE_Int              stencil_diag_entry = hypre_StructStencilDiagEntry(stencil);
+
    HYPRE_Int              si;
    HYPRE_Int              Ai;
    HYPRE_Int              Pi;
@@ -699,17 +704,9 @@ hypre_PFMGSetupInterpOp_CC2
    HYPRE_Real             center, center_offd;
    HYPRE_Int              Astenc;
    HYPRE_Int              mrk0, mrk1, mrk0_offd, mrk1_offd;
-   hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
-   hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
-   HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
-   hypre_Index            diag_offset;
-   HYPRE_Int              diag_entry;
    HYPRE_Int              warning_cnt= 0;
 
-   hypre_SetIndex3(diag_offset, 0, 0, 0);
-   diag_entry = hypre_StructStencilOffsetEntry(stencil, diag_offset);
-
-   if ( rap_type!=0 )
+   if ( rap_type != 0 )
    {
       /* simply force P to be constant coefficient, all 0.5's */
       Pi = hypre_CCBoxIndexRank(P_dbox,startc);
@@ -723,7 +720,7 @@ hypre_PFMGSetupInterpOp_CC2
          variable, and hence "center" below is variable. So we use the constant
          coefficient calculation to initialize the diagonal's variable
          coefficient calculation (which is like constant_coefficient=0). */
-      Ai = hypre_CCBoxIndexRank(A_dbox,start );
+      Ai = hypre_CCBoxIndexRank(A_dbox, start);
 
       center_offd  = 0.0;
       P0 = 0.0;
@@ -733,7 +730,7 @@ hypre_PFMGSetupInterpOp_CC2
 
       for (si = 0; si < stencil_size; si++)
       {
-         if ( si != diag_entry )
+         if ( si != stencil_diag_entry )
          {
             Ap = hypre_StructMatrixBoxData(A, i, si);
             Astenc = hypre_IndexD(stencil_shape[si], cdir);
@@ -758,7 +755,7 @@ hypre_PFMGSetupInterpOp_CC2
          }
       }
 
-      si = diag_entry;
+      si = stencil_diag_entry;
       hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                           A_dbox, start, stride, Ai,
                           P_dbox, startc, stridec, Pi);

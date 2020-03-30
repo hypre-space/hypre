@@ -94,14 +94,12 @@ hypre_PFMGCreateRAPOp( hypre_StructMatrix *R,
       }
       if (constant_coefficient == 2)
       {
-         hypre_Index  diag_offset;
-         HYPRE_Int    diag_entry;
+         HYPRE_Int stencil_diag_entry;
 
          /* Make the diagonal variable */
-         hypre_SetIndex(diag_offset, 0);
-         diag_entry = hypre_StructStencilOffsetEntry(stencil, diag_offset);
+         stencil_diag_entry = hypre_StructStencilDiagEntry(stencil);
          nentries -= 1;
-         for (i = diag_entry; i < nentries; i++)
+         for (i = stencil_diag_entry; i < nentries; i++)
          {
             entries[i] = entries[i+1];
          }

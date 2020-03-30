@@ -43,8 +43,6 @@ typedef struct
    hypre_StructVector     *x;
    hypre_StructVector     *t;
 
-   HYPRE_Int               diag_entry;
-
    hypre_ComputePkg      **compute_pkgs;
 
    /* log info (always logged) */
@@ -150,13 +148,11 @@ hypre_PointRelaxSetup( void               *relax_vdata,
    HYPRE_Int             *pointset_sizes   = (relax_data -> pointset_sizes);
    hypre_Index           *pointset_strides = (relax_data -> pointset_strides);
    hypre_Index          **pointset_indices = (relax_data -> pointset_indices);
-   HYPRE_Int              ndim = hypre_StructMatrixNDim(A);
+   HYPRE_Int              ndim             = hypre_StructMatrixNDim(A);
    hypre_StructVector    *t;
-   HYPRE_Int              diag_entry;
    hypre_ComputeInfo     *compute_info;
    hypre_ComputePkg     **compute_pkgs;
 
-   hypre_Index            diag_offset;
    hypre_IndexRef         stride;
    hypre_IndexRef         index;
                        
@@ -194,21 +190,12 @@ hypre_PointRelaxSetup( void               *relax_vdata,
    }
 
    /*----------------------------------------------------------
-    * Find the matrix diagonal
-    *----------------------------------------------------------*/
-
-   grid    = hypre_StructMatrixGrid(A);
-   stencil = hypre_StructMatrixStencil(A);
-
-   hypre_SetIndex3(diag_offset, 0, 0, 0);
-   diag_entry = hypre_StructStencilOffsetEntry(stencil, diag_offset);
-
-   /*----------------------------------------------------------
     * Set up the compute packages
     *----------------------------------------------------------*/
 
+   grid         = hypre_StructMatrixGrid(A);
+   stencil      = hypre_StructMatrixStencil(A);
    compute_pkgs = hypre_CTAlloc(hypre_ComputePkg *, num_pointsets);
-
    for (p = 0; p < num_pointsets; p++)
    {
       hypre_CreateComputeInfo(grid, stencil, &compute_info);
@@ -285,7 +272,6 @@ hypre_PointRelaxSetup( void               *relax_vdata,
    (relax_data -> A) = hypre_StructMatrixRef(A);
    (relax_data -> x) = hypre_StructVectorRef(x);
    (relax_data -> b) = hypre_StructVectorRef(b);
-   (relax_data -> diag_entry)   = diag_entry;
    (relax_data -> compute_pkgs) = compute_pkgs;
 
    /*-----------------------------------------------------
@@ -316,7 +302,7 @@ hypre_PointRelax( void               *relax_vdata,
                   hypre_StructVector *b,
                   hypre_StructVector *x           )
 {
-   hypre_PointRelaxData  *relax_data = (hypre_PointRelaxData *)relax_vdata;
+   hypre_PointRelaxData  *relax_data       = (hypre_PointRelaxData *) relax_vdata;
 
    HYPRE_Int              max_iter         = (relax_data -> max_iter);
    HYPRE_Int              zero_guess       = (relax_data -> zero_guess);
@@ -325,11 +311,11 @@ hypre_PointRelax( void               *relax_vdata,
    HYPRE_Int             *pointset_ranks   = (relax_data -> pointset_ranks);
    hypre_Index           *pointset_strides = (relax_data -> pointset_strides);
    hypre_StructVector    *t                = (relax_data -> t);
-   HYPRE_Int              diag_entry       = (relax_data -> diag_entry);
    hypre_ComputePkg     **compute_pkgs     = (relax_data -> compute_pkgs);
    HYPRE_Real             tol              = (relax_data -> tol);
    HYPRE_Real             tol2             = tol*tol;
 
+   hypre_StructStencil   *stencil;
    hypre_ComputePkg      *compute_pkg;
    hypre_CommHandle      *comm_handle;
                         
@@ -359,10 +345,9 @@ hypre_PointRelax( void               *relax_vdata,
    hypre_Index            loop_size;
                         
    HYPRE_Int              constant_coefficient;
-
+   HYPRE_Int              stencil_diag_entry;
    HYPRE_Int              iter, p, compute_i, i, j;
    HYPRE_Int              pointset;
-
    HYPRE_Real             bsumsq, rsumsq;
 
    /*----------------------------------------------------------
@@ -393,12 +378,19 @@ hypre_PointRelax( void               *relax_vdata,
       return hypre_error_flag;
    }
 
+   stencil = hypre_StructMatrixStencil(A);
+   stencil_diag_entry = hypre_StructStencilDiagEntry(stencil);
    constant_coefficient = hypre_StructMatrixConstantCoefficient(A);
-   if (constant_coefficient) hypre_StructVectorClearBoundGhostValues(x, 0);
+   if (constant_coefficient)
+   {
+      hypre_StructVectorClearBoundGhostValues(x, 0);
+   }
 
    rsumsq = 0.0;
-   if ( tol>0.0 )
+   if (tol > 0.0)
+   {
       bsumsq = hypre_StructInnerProd( b, b );
+   }
 
    /*----------------------------------------------------------
     * Do zero_guess iteration
@@ -406,7 +398,7 @@ hypre_PointRelax( void               *relax_vdata,
 
    p    = 0;
    iter = 0;
-   if ( tol>0.0)
+   if (tol > 0.0)
    {
       matvec_data = hypre_StructMatvecCreate();
       hypre_StructMatvecSetup( matvec_data, A, x );
@@ -451,7 +443,7 @@ hypre_PointRelax( void               *relax_vdata,
             x_data_box =
                hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
 
-            Ap = hypre_StructMatrixBoxData(A, i, diag_entry);
+            Ap = hypre_StructMatrixBoxData(A, i, stencil_diag_entry);
             bp = hypre_StructVectorBoxData(b, i);
             xp = hypre_StructVectorBoxData(x, i);
 
@@ -580,7 +572,7 @@ hypre_PointRelax( void               *relax_vdata,
                if ( constant_coefficient==1 || constant_coefficient==2 )
                {
                   hypre_PointRelax_core12(
-                     relax_vdata, A, constant_coefficient,
+                     A, constant_coefficient,
                      compute_box, bp, xp, tp, i,
                      A_data_box, b_data_box, x_data_box, t_data_box,
                      stride
@@ -590,14 +582,14 @@ hypre_PointRelax( void               *relax_vdata,
                else
                {
                   hypre_PointRelax_core0(
-                     relax_vdata, A, constant_coefficient,
+                     A, constant_coefficient,
                      compute_box, bp, xp, tp, i,
                      A_data_box, b_data_box, x_data_box, t_data_box,
                      stride
                      );
                }
 
-               Ap = hypre_StructMatrixBoxData(A, i, diag_entry);
+               Ap = hypre_StructMatrixBoxData(A, i, stencil_diag_entry);
 
                if ( constant_coefficient==0 || constant_coefficient==2 )
                   /* divide by the variable diagonal */
@@ -670,8 +662,7 @@ hypre_PointRelax( void               *relax_vdata,
 
 /* for constant_coefficient==0, all coefficients may vary ...*/
 HYPRE_Int
-hypre_PointRelax_core0( void               *relax_vdata,
-                        hypre_StructMatrix *A,
+hypre_PointRelax_core0( hypre_StructMatrix *A,
                         HYPRE_Int           constant_coefficient,
                         hypre_Box          *compute_box,
                         HYPRE_Real         *bp,
@@ -685,8 +676,6 @@ hypre_PointRelax_core0( void               *relax_vdata,
                         hypre_IndexRef      stride
    )
 {
-   hypre_PointRelaxData  *relax_data = (hypre_PointRelaxData *)relax_vdata;
-
    HYPRE_Real            *Ap0;
    HYPRE_Real            *Ap1;
    HYPRE_Real            *Ap2;
@@ -706,8 +695,8 @@ hypre_PointRelax_core0( void               *relax_vdata,
    hypre_StructStencil   *stencil;
    hypre_Index           *stencil_shape;
    HYPRE_Int              stencil_size;
-                        
-   HYPRE_Int              diag_entry        = (relax_data -> diag_entry);
+   HYPRE_Int              stencil_diag_entry;
+
    hypre_IndexRef         start;
    hypre_Index            loop_size;
    HYPRE_Int              si, sk, ssi[MAX_DEPTH], depth, k;
@@ -716,9 +705,10 @@ hypre_PointRelax_core0( void               *relax_vdata,
    HYPRE_Int              xi;
    HYPRE_Int              ti;
 
-   stencil       = hypre_StructMatrixStencil(A);
-   stencil_shape = hypre_StructStencilShape(stencil);
-   stencil_size  = hypre_StructStencilSize(stencil);
+   stencil            = hypre_StructMatrixStencil(A);
+   stencil_shape      = hypre_StructStencilShape(stencil);
+   stencil_size       = hypre_StructStencilSize(stencil);
+   stencil_diag_entry = hypre_StructStencilDiagEntry(stencil);
 
    start  = hypre_BoxIMin(compute_box);
    hypre_BoxGetStrideSize(compute_box, stride, loop_size);
@@ -741,7 +731,7 @@ hypre_PointRelax_core0( void               *relax_vdata,
 
       for (k = 0, sk = si; k < depth; sk++)
       {
-         if (sk == diag_entry)
+         if (sk == stencil_diag_entry)
          {
             depth--;
          }
@@ -940,8 +930,7 @@ hypre_PointRelax_core0( void               *relax_vdata,
 
 /* for constant_coefficient==1 or 2, all offdiagonal coefficients constant over space ...*/
 HYPRE_Int
-hypre_PointRelax_core12( void               *relax_vdata,
-                         hypre_StructMatrix *A,
+hypre_PointRelax_core12( hypre_StructMatrix *A,
                          HYPRE_Int           constant_coefficient,
                          hypre_Box          *compute_box,
                          HYPRE_Real         *bp,
@@ -955,8 +944,6 @@ hypre_PointRelax_core12( void               *relax_vdata,
                          hypre_IndexRef      stride
    )
 {
-   hypre_PointRelaxData  *relax_data = (hypre_PointRelaxData *)relax_vdata;
-
    HYPRE_Real            *Apd;
    HYPRE_Real            *Ap0;
    HYPRE_Real            *Ap1;
@@ -985,8 +972,8 @@ hypre_PointRelax_core12( void               *relax_vdata,
    hypre_StructStencil   *stencil;
    hypre_Index           *stencil_shape;
    HYPRE_Int              stencil_size;
-                        
-   HYPRE_Int              diag_entry        = (relax_data -> diag_entry);
+   HYPRE_Int              stencil_diag_entry;
+
    hypre_IndexRef         start;
    hypre_Index            loop_size;
    HYPRE_Int              si, sk, ssi[MAX_DEPTH], depth, k;
@@ -995,9 +982,10 @@ hypre_PointRelax_core12( void               *relax_vdata,
    HYPRE_Int              xi;
    HYPRE_Int              ti;
 
-   stencil       = hypre_StructMatrixStencil(A);
-   stencil_shape = hypre_StructStencilShape(stencil);
-   stencil_size  = hypre_StructStencilSize(stencil);
+   stencil            = hypre_StructMatrixStencil(A);
+   stencil_shape      = hypre_StructStencilShape(stencil);
+   stencil_size       = hypre_StructStencilSize(stencil);
+   stencil_diag_entry = hypre_StructStencilDiagEntry(stencil);
 
    start  = hypre_BoxIMin(compute_box);
    hypre_BoxGetStrideSize(compute_box, stride, loop_size);
@@ -1011,7 +999,7 @@ hypre_PointRelax_core12( void               *relax_vdata,
    Ai = hypre_CCBoxIndexRank( A_data_box, start );
    if ( constant_coefficient==1 ) /* constant diagonal */
    {
-      Apd = hypre_StructMatrixBoxData(A, boxarray_id, diag_entry);
+      Apd = hypre_StructMatrixBoxData(A, boxarray_id, stencil_diag_entry);
       AApd = 1/Apd[Ai];
 
       hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
@@ -1050,7 +1038,7 @@ hypre_PointRelax_core12( void               *relax_vdata,
 
       for (k = 0, sk = si; k < depth; sk++)
       {
-         if (sk == diag_entry)
+         if (sk == stencil_diag_entry)
          {
             depth--;
          }

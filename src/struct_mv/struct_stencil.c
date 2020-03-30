@@ -29,12 +29,19 @@ hypre_StructStencilCreate( HYPRE_Int     dim,
 {
    hypre_StructStencil   *stencil;
 
+   hypre_Index            diag_offset;
+   HYPRE_Int              diag_entry;
+
    stencil = hypre_TAlloc(hypre_StructStencil, 1);
 
-   hypre_StructStencilShape(stencil)    = shape;
-   hypre_StructStencilSize(stencil)     = size;
+   hypre_StructStencilShape(stencil)     = shape;
+   hypre_StructStencilSize(stencil)      = size;
    hypre_StructStencilNDim(stencil)      = dim;
-   hypre_StructStencilRefCount(stencil) = 1;
+   hypre_StructStencilRefCount(stencil)  = 1;
+
+   hypre_SetIndex(diag_offset, 0);
+   diag_entry = hypre_StructStencilOffsetEntry(stencil, diag_offset);
+   hypre_StructStencilDiagEntry(stencil) = diag_entry;
 
    return stencil;
 }

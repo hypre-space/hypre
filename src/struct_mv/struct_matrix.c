@@ -1826,11 +1826,14 @@ hypre_StructMatrixSetConstantEntries( hypre_StructMatrix *matrix,
                                       HYPRE_Int           nentries,
                                       HYPRE_Int          *entries )
 {
-   hypre_StructStencil *stencil       = hypre_StructMatrixUserStencil(matrix);
-   HYPRE_Int           *constant      = hypre_StructMatrixConstant(matrix);
-   HYPRE_Int            stencil_size  = hypre_StructStencilSize(stencil);
-   hypre_Index          diag_offset;
-   HYPRE_Int            constant_coefficient, diag_entry, i, j, nconst;
+   hypre_StructStencil *stencil            = hypre_StructMatrixUserStencil(matrix);
+   HYPRE_Int           *constant           = hypre_StructMatrixConstant(matrix);
+   HYPRE_Int            stencil_size       = hypre_StructStencilSize(stencil);
+   HYPRE_Int            stencil_diag_entry = hypre_StructStencilDiagEntry(stencil);
+
+   HYPRE_Int            i, j;
+   HYPRE_Int            nconst;
+   HYPRE_Int            constant_coefficient;
 
    /* By counting the nonzeros in constant, and by checking whether its diagonal
       entry is nonzero, we can distinguish between the three legal values of
@@ -1857,9 +1860,8 @@ hypre_StructMatrixSetConstantEntries( hypre_StructMatrix *matrix,
    }
    else
    {
-      hypre_SetIndex(diag_offset, 0);
-      diag_entry = hypre_StructStencilOffsetEntry(stencil, diag_offset);
-      if (constant[diag_entry] == 0)
+      stencil_diag_entry = hypre_StructStencilDiagEntry(stencil);
+      if (constant[stencil_diag_entry] == 0)
       {
          constant_coefficient = 2;
          if (nconst != (stencil_size-1))
