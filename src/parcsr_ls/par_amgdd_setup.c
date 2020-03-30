@@ -19,7 +19,7 @@
 
 #define DEBUG_COMP_GRID 0 // if true, runs some tests, prints out what is stored in the comp grids for each processor to a file
 #define DEBUG_PROC_NEIGHBORS 0 // if true, dumps info on the add flag structures that determine nearest processor neighbors 
-#define DEBUGGING_MESSAGES 1 // if true, prints a bunch of messages to the screen to let you know where in the algorithm you are
+#define DEBUGGING_MESSAGES 0 // if true, prints a bunch of messages to the screen to let you know where in the algorithm you are
 
 HYPRE_Int
 PackRecvMapSendBuffer(HYPRE_Int *recv_map_send_buffer, HYPRE_Int **recv_redundant_marker, HYPRE_Int *num_recv_nodes, HYPRE_Int *recv_buffer_size, HYPRE_Int current_level, HYPRE_Int num_levels, hypre_ParCompGrid **compGrid);
@@ -120,11 +120,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    HYPRE_Int *num_resizes = hypre_CTAlloc(HYPRE_Int, 3*num_levels, HYPRE_MEMORY_HOST);
    // !!! Debug
    HYPRE_Int total_bin_search_count = 0;
-   HYPRE_Int total_send_size = 0;
-   HYPRE_Int total_redundant_Annz = 0;
-   HYPRE_Int total_redundant_points = 0;
-   HYPRE_Int num_ghost_overwritten_as_real = 0;
-   HYPRE_Int num_removed_redundancies = 0;
+   HYPRE_Int total_redundant_sends = 0;
 
    // Allocate pointer for the composite grids
    hypre_ParCompGrid **compGrid = hypre_CTAlloc(hypre_ParCompGrid*, num_levels, HYPRE_MEMORY_HOST);
@@ -274,25 +270,15 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
             num_send_nodes[level][i] = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
             send_buffer[i] = PackSendBuffer(amg_data, compGrid, compGridCommPkg, &(send_buffer_size[level][i]), 
                                              &(send_flag_buffer_size[i]), send_flag, num_send_nodes, i, level, num_levels, padding, 
-                                             num_ghost_layers, symmetric, &num_removed_redundancies );
-            // !!! Debug
-            total_send_size += send_buffer_size[level][i];
+                                             num_ghost_layers, symmetric );
          }
          if (timers) hypre_EndTiming(timers[2]);
-
-         // !!! Debug
-         // if (level == 5)
-         // {
-         //    MPI_Finalize();
-         //    exit(0);
-         // }
-
 
          //////////// Communicate buffer sizes ////////////
 
          if (use_barriers) hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
          if (timers) hypre_BeginTiming(timers[3]);
-
+  
          // post the receives for the buffer size
          for (i = 0; i < num_recv_procs; i++)
          {
@@ -365,7 +351,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
                send_flag, num_send_nodes, 
                recv_map, recv_redundant_marker, num_recv_nodes, 
                &(recv_map_send_buffer_size[i]), level, num_levels, nodes_added_on_level, i, num_resizes, 
-               symmetric, &total_redundant_Annz, &total_redundant_points, &num_ghost_overwritten_as_real);
+               symmetric);
             
             recv_map_send_buffer[i] = hypre_CTAlloc(HYPRE_Int, recv_map_send_buffer_size[i], HYPRE_MEMORY_HOST);
             PackRecvMapSendBuffer(recv_map_send_buffer[i], recv_redundant_marker[level][i], num_recv_nodes[level][i], &(recv_buffer_size[level][i]), level, num_levels, compGrid);
@@ -413,7 +399,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
          // unpack and setup the send flag arrays
          for (i = 0; i < num_send_procs; i++)
          {
-            UnpackSendFlagBuffer(compGrid, send_flag_buffer[i], send_flag[level][i], num_send_nodes[level][i], &(send_buffer_size[level][i]), level, num_levels);
+            total_redundant_sends += UnpackSendFlagBuffer(compGrid, send_flag_buffer[i], send_flag[level][i], num_send_nodes[level][i], &(send_buffer_size[level][i]), level, num_levels);
          }
 
          if (timers) hypre_EndTiming(timers[6]);
@@ -438,12 +424,6 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
       }
       else 
       {
-         // !!! Debug
-         // if (level == 5)
-         // {
-         //    MPI_Finalize();
-         //    exit(0);
-         // }
          if (use_barriers)
          {
             hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
@@ -456,29 +436,6 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
       if (myid == 0) hypre_printf("All ranks: done with level %d\n", level);
       hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
       #endif 
-
-
-
-      // !!! Debug
-      // if (myid == 3)
-      // {
-      //    HYPRE_Int show_level = 6;
-      //    printf("Rank %d current_level %d, coarse indices on level %d = ", myid, level, show_level);
-      //    for (i = 0; i < hypre_ParCompGridNumNonOwnedNodes(compGrid[show_level]); i++)
-      //    {
-      //       printf("%d ", hypre_ParCompGridNonOwnedCoarseIndices(compGrid[show_level])[i]);
-      //    }
-      //    printf("\n");
-      // }
-
-
-      // !!! Debug
-      // if (level == 4)
-      // {
-      //    MPI_Finalize();
-      //    exit(0);
-      // }
-
 
       #if DEBUG_COMP_GRID
       HYPRE_Int error_code;
@@ -514,30 +471,6 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    if (timers) hypre_BeginTiming(timers[7]);
 
    FixUpRecvMaps(compGrid, compGridCommPkg, recv_redundant_marker, amgdd_start_level, num_levels);
-
-
-   // !!! Debug
-   // if (myid == 0)
-   // {
-   //    for (level = 0; level < num_levels; level++)
-   //    {
-   //       HYPRE_Int proc;
-   //       for (proc = 0; proc < hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg)[level]; proc++)
-   //       {
-   //          HYPRE_Int inner_level;
-   //          for (inner_level = level; inner_level < num_levels; inner_level++)
-   //          {
-   //             printf("recv_map[%d][%d][%d] = ", level, proc, inner_level);
-   //             for (i = 0; i < num_recv_nodes[level][proc][inner_level]; i++)
-   //                printf("%d ", recv_map[level][proc][inner_level][i]);
-   //             printf("\n");
-   //          }
-   //       }
-   //    }
-   // }
-   // MPI_Finalize();
-   // exit(0);
-
 
    // Communicate data for A and all info for P
    CommunicateRemainingMatrixInfo(amg_data, compGrid, compGridCommPkg, communication_cost, symmetric);
@@ -633,33 +566,20 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    #endif
 
    // !!! Debug
-   HYPRE_Int total_nonowned = 0;
-   HYPRE_Int total_nonowned_nnz = 0;
-   for (level = 0; level < num_levels; level++)
+   if (timers)
    {
-      HYPRE_Int num_nonowned = hypre_ParCompGridNumNonOwnedNodes(compGrid[level]);
-      total_nonowned += num_nonowned;
-      hypre_CSRMatrix *diag = hypre_ParCompGridMatrixNonOwnedDiag(hypre_ParCompGridA(compGrid[level]));
-      hypre_CSRMatrix *offd = hypre_ParCompGridMatrixNonOwnedOffd(hypre_ParCompGridA(compGrid[level]));
-      total_nonowned_nnz += hypre_CSRMatrixI(diag)[num_nonowned] + hypre_CSRMatrixI(offd)[num_nonowned];
+      HYPRE_Int total_nonowned = 0;
+      for (level = 0; level < num_levels; level++)
+      {
+         total_nonowned += hypre_ParCompGridNumNonOwnedNodes(compGrid[level]);
+      }
+      HYPRE_Int local_size_info[2];
+      local_size_info[0] = total_nonowned;
+      local_size_info[1] = total_redundant_sends;
+      HYPRE_Int global_size_info[2];
+      MPI_Reduce(local_size_info, global_size_info, 2, HYPRE_MPI_INT, MPI_SUM, 0, hypre_MPI_COMM_WORLD);
+      if (myid == 0) printf("Total Setup Redundancy = %f\n", ((double) global_size_info[1] + global_size_info[0])/((double) global_size_info[0]));
    }
-   HYPRE_Int local_size_info[10];
-   local_size_info[0] = total_send_size;
-   local_size_info[1] = total_redundant_Annz;
-   local_size_info[2] = total_nonowned_nnz;
-   local_size_info[3] = total_nonowned;
-   local_size_info[4] = total_redundant_points;
-   local_size_info[5] = num_ghost_overwritten_as_real;
-   local_size_info[6] = num_removed_redundancies;
-   HYPRE_Int global_size_info[10];
-   MPI_Reduce(local_size_info, global_size_info, 10, HYPRE_MPI_INT, MPI_SUM, 0, hypre_MPI_COMM_WORLD);
-   if (myid == 0) printf("%d = total_send_size\n", global_size_info[0]);
-   if (myid == 0) printf("%d = total_redundant_Annz\n", global_size_info[1]);
-   if (myid == 0) printf("%d = total_nonowned_nnz\n", global_size_info[2]);
-   if (myid == 0) printf("%d = total_nonowned\n", global_size_info[3]);
-   if (myid == 0) printf("%d = total_redundant_points\n", global_size_info[4]);
-   if (myid == 0) printf("%d = num_ghost_overwritten_as_real\n", global_size_info[5]);
-   if (myid == 0) printf("%d = num_removed_redundancies\n", global_size_info[6]);
 
 
    #if DEBUG_COMP_GRID
@@ -712,6 +632,9 @@ UnpackSendFlagBuffer(hypre_ParCompGrid **compGrid,
    HYPRE_Int current_level, 
    HYPRE_Int num_levels)
 {
+   // !!! Debug
+   HYPRE_Int num_redundant_sends = 0;
+
    HYPRE_Int      level, i, cnt, num_nodes;
    cnt = 0;
    *send_buffer_size = 0;
@@ -730,9 +653,12 @@ UnpackSendFlagBuffer(hypre_ParCompGrid **compGrid,
       }
       
       send_flag[level] = hypre_TReAlloc(send_flag[level], HYPRE_Int, num_send_nodes[level], HYPRE_MEMORY_HOST);
+      
+      // !!! Debug
+      num_redundant_sends += num_nodes - num_send_nodes[level];
    }
 
-   return 0;
+   return num_redundant_sends;
 }
 
 HYPRE_Int
