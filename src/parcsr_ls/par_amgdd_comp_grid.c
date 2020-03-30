@@ -1313,8 +1313,8 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *nod
             HYPRE_Int is_real = hypre_ParCompGridNonOwnedRealMarker(compGrid[level])[i];
 
             // !!! Debug
-            if (myid == 3 && current_level == 4 && level == 6)
-               printf("coarse_index = %d, is_real = %d\n", coarse_index, is_real);
+            // if (myid == 3 && current_level == 4 && level == 6)
+            //    printf("coarse_index = %d, is_real = %d\n", coarse_index, is_real);
 
             // setup coarse local index if necessary
             if (coarse_index < -1 && is_real)
@@ -1324,8 +1324,8 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *nod
                bin_search_cnt++;
                hypre_ParCompGridNonOwnedCoarseIndices(compGrid[level])[i] = local_index;
                // !!! Debug
-               if (myid == 3 && current_level == 4 && level == 6)
-                  printf("Setting coarse indices [%d] = %d\n", i, local_index);
+               // if (myid == 3 && current_level == 4 && level == 6)
+               //    printf("Setting coarse indices [%d] = %d\n", i, local_index);
             }
          }
       }

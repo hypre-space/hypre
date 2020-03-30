@@ -1958,9 +1958,9 @@ PackSendBuffer(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypre_P
             {
                add_flag_index = hypre_CSRMatrixJ(mat)[j] + hypre_ParCompGridNumOwnedNodes(compGrid[level]);
                // !!! Debug
-               if (add_flag_index >= hypre_ParCompGridNumOwnedNodes(compGrid[level]) + hypre_ParCompGridNumNonOwnedNodes(compGrid[level]))
-                  printf("Rank %d, current_level %d, level %d, hypre_CSRMatrixJ(mat)[%d] = %d\n",
-                     myid, current_level, level, j, hypre_CSRMatrixJ(mat)[j]);
+               // if (add_flag_index >= hypre_ParCompGridNumOwnedNodes(compGrid[level]) + hypre_ParCompGridNumNonOwnedNodes(compGrid[level]))
+               //    printf("Rank %d, current_level %d, level %d, hypre_CSRMatrixJ(mat)[%d] = %d\n",
+               //       myid, current_level, level, j, hypre_CSRMatrixJ(mat)[j]);
                if (add_flag[level][add_flag_index] > 0)
                   send_buffer[nonowned_diag_offsets[level][i] + col_ind_cnt++] = add_flag[level][add_flag_index] - 1; // Buffer connection
                else
@@ -2142,9 +2142,9 @@ RecursivelyBuildPsiComposite(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid **co
                   if (use_sort)
                   {
                      // !!! Debug
-                     if (coarse_grid_index < 0 || coarse_grid_index >= hypre_CSRMatrixNumRows(hypre_ParCompGridMatrixNonOwnedDiag(hypre_ParCompGridA(compGrids[level+1]))))
-                        printf("Rank %d, level %d, coarse_grid_index = %d, index gid = %d, node gid = %d\n", 
-                           myid, level, coarse_grid_index, hypre_ParCompGridNonOwnedGlobalIndices(compGrid)[index], hypre_ParCompGridNonOwnedGlobalIndices(compGrid)[node]);
+                     // if (coarse_grid_index < 0 || coarse_grid_index >= hypre_CSRMatrixNumRows(hypre_ParCompGridMatrixNonOwnedDiag(hypre_ParCompGridA(compGrids[level+1]))))
+                     //    printf("Rank %d, level %d, coarse_grid_index = %d, index gid = %d, node gid = %d\n", 
+                     //       myid, level, coarse_grid_index, hypre_ParCompGridNonOwnedGlobalIndices(compGrid)[index], hypre_ParCompGridNonOwnedGlobalIndices(compGrid)[node]);
                      sort_index = sort_map_coarse[coarse_grid_index] + hypre_ParCompGridNumOwnedNodes(compGrids[level+1]);
                   }
                   else sort_index = coarse_grid_index + hypre_ParCompGridNumOwnedNodes(compGrids[level+1]);
