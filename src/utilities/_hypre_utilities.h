@@ -1246,48 +1246,48 @@ using namespace thrust::placeholders;
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  */
 
-#ifdef HYPRE_DEBUG                                                                                                 \
+#ifdef HYPRE_DEBUG                                                                                                   \
 
-#define HYPRE_CUDA_LAUNCH(kernel_name, gridsize, blocksize, ...)                                                   \
-{                                                                                                                  \
-   if ( gridsize.x  == 0 || gridsize.y  == 0 || gridsize.z  == 0 ||                                                \
-        blocksize.x == 0 || blocksize.y == 0 || blocksize.z == 0 )                                                 \
-   {                                                                                                               \
-      /* hypre_printf("Warning %s %d: Zero CUDA grid/block (%d %d %d) (%d %d %d)\n",                               \
-                 __FILE__, __LINE__,                                                                               \
-                 gridsize.x, gridsize.y, gridsize.z, blocksize.x, blocksize.y, blocksize.z); */                    \
-   }                                                                                                               \
-   else                                                                                                            \
-   {                                                                                                               \
-      (kernel_name) <<< (gridsize), (blocksize), 0, hypre_HandleCudaComputeStream(hypre_handle) >>> (__VA_ARGS__); \
-   }                                                                                                               \
-   hypre_SyncCudaComputeStream(hypre_handle);                                                                      \
-   HYPRE_CUDA_CALL( cudaGetLastError() );                                                                          \
+#define HYPRE_CUDA_LAUNCH(kernel_name, gridsize, blocksize, ...)                                                     \
+{                                                                                                                    \
+   if ( gridsize.x  == 0 || gridsize.y  == 0 || gridsize.z  == 0 ||                                                  \
+        blocksize.x == 0 || blocksize.y == 0 || blocksize.z == 0 )                                                   \
+   {                                                                                                                 \
+      /* hypre_printf("Warning %s %d: Zero CUDA grid/block (%d %d %d) (%d %d %d)\n",                                 \
+                 __FILE__, __LINE__,                                                                                 \
+                 gridsize.x, gridsize.y, gridsize.z, blocksize.x, blocksize.y, blocksize.z); */                      \
+   }                                                                                                                 \
+   else                                                                                                              \
+   {                                                                                                                 \
+      (kernel_name) <<< (gridsize), (blocksize), 0, hypre_HandleCudaComputeStream(hypre_handle()) >>> (__VA_ARGS__); \
+   }                                                                                                                 \
+   hypre_SyncCudaComputeStream(hypre_handle());                                                                      \
+   HYPRE_CUDA_CALL( cudaGetLastError() );                                                                            \
 }
 
 #else
 
-#define HYPRE_CUDA_LAUNCH(kernel_name, gridsize, blocksize, ...)                                                   \
-{                                                                                                                  \
-   if ( gridsize.x  == 0 || gridsize.y  == 0 || gridsize.z  == 0 ||                                                \
-        blocksize.x == 0 || blocksize.y == 0 || blocksize.z == 0 )                                                 \
-   {                                                                                                               \
-      /* hypre_printf("Warning %s %d: Zero CUDA grid/block (%d %d %d) (%d %d %d)\n",                               \
-                 __FILE__, __LINE__,                                                                               \
-                 gridsize.x, gridsize.y, gridsize.z, blocksize.x, blocksize.y, blocksize.z); */                    \
-   }                                                                                                               \
-   else                                                                                                            \
-   {                                                                                                               \
-      (kernel_name) <<< (gridsize), (blocksize), 0, hypre_HandleCudaComputeStream(hypre_handle) >>> (__VA_ARGS__); \
-   }                                                                                                               \
+#define HYPRE_CUDA_LAUNCH(kernel_name, gridsize, blocksize, ...)                                                     \
+{                                                                                                                    \
+   if ( gridsize.x  == 0 || gridsize.y  == 0 || gridsize.z  == 0 ||                                                  \
+        blocksize.x == 0 || blocksize.y == 0 || blocksize.z == 0 )                                                   \
+   {                                                                                                                 \
+      /* hypre_printf("Warning %s %d: Zero CUDA grid/block (%d %d %d) (%d %d %d)\n",                                 \
+                 __FILE__, __LINE__,                                                                                 \
+                 gridsize.x, gridsize.y, gridsize.z, blocksize.x, blocksize.y, blocksize.z); */                      \
+   }                                                                                                                 \
+   else                                                                                                              \
+   {                                                                                                                 \
+      (kernel_name) <<< (gridsize), (blocksize), 0, hypre_HandleCudaComputeStream(hypre_handle()) >>> (__VA_ARGS__); \
+   }                                                                                                                 \
 }
 
 #endif
 
 /* RL: TODO Want macro HYPRE_THRUST_CALL to return value but I don't know how to do it right
  * The following one works OK for now */
-#define HYPRE_THRUST_CALL(func_name, ...)                                                                          \
-   thrust::func_name(thrust::cuda::par.on(hypre_HandleCudaComputeStream(hypre_handle)), __VA_ARGS__);
+#define HYPRE_THRUST_CALL(func_name, ...)                                                                            \
+   thrust::func_name(thrust::cuda::par.on(hypre_HandleCudaComputeStream(hypre_handle())), __VA_ARGS__);
 
 #define HYPRE_CUBLAS_CALL(call) do {                                                         \
    cublasStatus_t err = call;                                                                \
@@ -2640,7 +2640,7 @@ typedef struct
    HYPRE_Int                         struct_comm_recv_buffer_size;
    HYPRE_Int                         struct_comm_send_buffer_size;
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   HYPRE_ExecutionPolicy            default_exec_policy;
+   HYPRE_ExecutionPolicy             default_exec_policy;
    HYPRE_Int                         cuda_device;
    /* by default, hypre puts GPU computations in this stream
     * Do not be confused with the default (null) CUDA stream */
@@ -2672,18 +2672,13 @@ typedef struct
 #endif
 } hypre_Handle;
 
-extern hypre_Handle *hypre_handle;
-
-hypre_Handle* hypre_HandleCreate();
-HYPRE_Int hypre_HandleDestroy(hypre_Handle *hypre_handle_);
-
 /* accessor macros to hypre_Handle */
-#define hypre_HandleMemoryLocation(hypre_handle)           ((hypre_handle) -> memory_location)
-#define hypre_HandleStructCommRecvBuffer(hypre_handle)     ((hypre_handle) -> struct_comm_recv_buffer)
-#define hypre_HandleStructCommSendBuffer(hypre_handle)     ((hypre_handle) -> struct_comm_send_buffer)
-#define hypre_HandleStructCommRecvBufferSize(hypre_handle) ((hypre_handle) -> struct_comm_recv_buffer_size)
-#define hypre_HandleStructCommSendBufferSize(hypre_handle) ((hypre_handle) -> struct_comm_send_buffer_size)
-#define hypre_HandleCudaReduceBuffer(hypre_handle)         ((hypre_handle) -> cuda_reduce_buffer)
+#define hypre_HandleMemoryLocation(hypre_handle_)           ((hypre_handle_) -> memory_location)
+#define hypre_HandleStructCommRecvBuffer(hypre_handle_)     ((hypre_handle_) -> struct_comm_recv_buffer)
+#define hypre_HandleStructCommSendBuffer(hypre_handle_)     ((hypre_handle_) -> struct_comm_send_buffer)
+#define hypre_HandleStructCommRecvBufferSize(hypre_handle_) ((hypre_handle_) -> struct_comm_recv_buffer_size)
+#define hypre_HandleStructCommSendBufferSize(hypre_handle_) ((hypre_handle_) -> struct_comm_send_buffer_size)
+#define hypre_HandleCudaReduceBuffer(hypre_handle_)         ((hypre_handle_) -> cuda_reduce_buffer)
 
 /* accessor inline functions to hypre_Handle */
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
@@ -2894,284 +2889,6 @@ hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle_)
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
-/* CUDA reducer class */
-
-#ifndef HYPRE_CUDA_REDUCER_H
-#define HYPRE_CUDA_REDUCER_H
-
-#if defined(HYPRE_USING_CUDA)
-#if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS)
-
-#ifdef __cplusplus
-extern "C++" {
-#endif
-
-template<typename T> void OneBlockReduce(T *d_arr, HYPRE_Int N, T *h_out);
-
-struct HYPRE_double4
-{
-   HYPRE_Real x,y,z,w;
-
-   __host__ __device__
-   HYPRE_double4() {}
-
-   __host__ __device__
-   HYPRE_double4(HYPRE_Real x1, HYPRE_Real x2, HYPRE_Real x3, HYPRE_Real x4)
-   {
-      x = x1;
-      y = x2;
-      z = x3;
-      w = x4;
-   }
-
-   __host__ __device__
-   void operator=(HYPRE_Real val)
-   {
-      x = y = z = w = val;
-   }
-
-   __host__ __device__
-   void operator+=(HYPRE_double4 rhs)
-   {
-      x += rhs.x;
-      y += rhs.y;
-      z += rhs.z;
-      w += rhs.w;
-   }
-
-};
-
-struct HYPRE_double6
-{
-   HYPRE_Real x,y,z,w,u,v;
-
-   __host__ __device__
-   HYPRE_double6() {}
-
-   __host__ __device__
-   HYPRE_double6(HYPRE_Real x1, HYPRE_Real x2, HYPRE_Real x3, HYPRE_Real x4,
-                 HYPRE_Real x5, HYPRE_Real x6)
-   {
-      x = x1;
-      y = x2;
-      z = x3;
-      w = x4;
-      u = x5;
-      v = x6;
-   }
-
-   __host__ __device__
-   void operator=(HYPRE_Real val)
-   {
-      x = y = z = w = u = v = val;
-   }
-
-   __host__ __device__
-   void operator+=(HYPRE_double6 rhs)
-   {
-      x += rhs.x;
-      y += rhs.y;
-      z += rhs.z;
-      w += rhs.w;
-      u += rhs.u;
-      v += rhs.v;
-   }
-
-};
-
-/* reduction within a warp */
-__inline__ __host__ __device__
-HYPRE_Real warpReduceSum(HYPRE_Real val)
-{
-#ifdef __CUDA_ARCH__
-  for (HYPRE_Int offset = warpSize/2; offset > 0; offset /= 2)
-  {
-    val += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val, offset);
-  }
-#endif
-  return val;
-}
-
-__inline__ __host__ __device__
-HYPRE_double4 warpReduceSum(HYPRE_double4 val) {
-#ifdef __CUDA_ARCH__
-  for (HYPRE_Int offset = warpSize / 2; offset > 0; offset /= 2)
-  {
-    val.x += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.x, offset);
-    val.y += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.y, offset);
-    val.z += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.z, offset);
-    val.w += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.w, offset);
-  }
-#endif
-  return val;
-}
-
-__inline__ __host__ __device__
-HYPRE_double6 warpReduceSum(HYPRE_double6 val) {
-#ifdef __CUDA_ARCH__
-  for (HYPRE_Int offset = warpSize / 2; offset > 0; offset /= 2)
-  {
-    val.x += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.x, offset);
-    val.y += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.y, offset);
-    val.z += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.z, offset);
-    val.w += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.w, offset);
-    val.u += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.u, offset);
-    val.v += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.v, offset);
-  }
-#endif
-  return val;
-}
-
-/* reduction within a block */
-template <typename T>
-__inline__ __host__ __device__
-T blockReduceSum(T val)
-{
-#ifdef __CUDA_ARCH__
-   //static __shared__ T shared[32]; // Shared mem for 32 partial sums
-   __shared__ T shared[32];        // Shared mem for 32 partial sums
-   //HYPRE_Int lane = threadIdx.x % warpSize;
-   //HYPRE_Int wid  = threadIdx.x / warpSize;
-   HYPRE_Int lane = threadIdx.x & (warpSize - 1);
-   HYPRE_Int wid  = threadIdx.x >> 5;
-
-   val = warpReduceSum(val);       // Each warp performs partial reduction
-
-   if (lane == 0)
-   {
-      shared[wid] = val;          // Write reduced value to shared memory
-   }
-
-   __syncthreads();               // Wait for all partial reductions
-
-   //read from shared memory only if that warp existed
-   if (threadIdx.x < blockDim.x / warpSize)
-   {
-      val = shared[lane];
-   }
-   else
-   {
-      val = 0.0;
-   }
-
-   if (wid == 0)
-   {
-      val = warpReduceSum(val); //Final reduce within first warp
-   }
-
-#endif
-   return val;
-}
-
-template<typename T>
-__global__ void
-OneBlockReduceKernel(T *arr, HYPRE_Int N)
-{
-   T sum;
-   sum = 0.0;
-   if (threadIdx.x < N)
-   {
-      sum = arr[threadIdx.x];
-   }
-   sum = blockReduceSum(sum);
-   if (threadIdx.x == 0)
-   {
-      arr[0] = sum;
-   }
-}
-
-/* Reducer class */
-template <typename T>
-struct ReduceSum
-{
-   T init;                    /* initial value passed in */
-   mutable T __thread_sum;    /* place to hold local sum of a thread,
-                                 and partial sum of a block */
-   T *d_buf;                  /* place to store partial sum within blocks
-                                 in the 1st round, used in the 2nd round */
-   HYPRE_Int nblocks;         /* number of blocks used in the 1st round */
-
-   /* constructor
-    * val is the initial value (added to the reduced sum) */
-   __host__
-   ReduceSum(T val)
-   {
-      init = val;
-      __thread_sum = 0.0;
-      nblocks = -1;
-
-      if (hypre_HandleCudaReduceBuffer(hypre_handle) == NULL)
-      {
-         /* allocate for the max size for reducing double6 type */
-         hypre_HandleCudaReduceBuffer(hypre_handle) = hypre_TAlloc(HYPRE_double6, 1024, HYPRE_MEMORY_DEVICE);
-      }
-
-      d_buf = (T*) hypre_HandleCudaReduceBuffer(hypre_handle);
-   }
-
-   /* copy constructor */
-   __host__ __device__
-   ReduceSum(const ReduceSum<T>& other)
-   {
-      *this = other;
-   }
-
-   /* reduction within blocks */
-   __host__ __device__
-   void BlockReduce() const
-   {
-#ifdef __CUDA_ARCH__
-      __thread_sum = blockReduceSum(__thread_sum);
-      if (threadIdx.x == 0)
-      {
-         d_buf[blockIdx.x] = __thread_sum;
-      }
-#endif
-   }
-
-   __host__ __device__
-   void operator+=(T val) const
-   {
-      __thread_sum += val;
-   }
-
-   /* invoke the 2nd reduction at the time want the sum from the reducer */
-   __host__
-   operator T()
-   {
-      T val;
-      /* 2nd reduction with only *one* block */
-      hypre_assert(nblocks >= 0 && nblocks <= 1024);
-      const dim3 gDim(1), bDim(1024);
-      HYPRE_CUDA_LAUNCH( OneBlockReduceKernel, gDim, bDim, d_buf, nblocks );
-      hypre_TMemcpy(&val, d_buf, T, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-      val += init;
-
-      return val;
-   }
-
-   /* destructor */
-   __host__ __device__
-   ~ReduceSum<T>()
-   {
-   }
-};
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* #if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) */
-#endif /* #if defined(HYPRE_USING_CUDA) */
-#endif /* #ifndef HYPRE_CUDA_REDUCER_H */
-
-/******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
- * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
- *
- * SPDX-License-Identifier: (Apache-2.0 OR MIT)
- ******************************************************************************/
-
 /* amg_linklist.c */
 void hypre_dispose_elt ( hypre_LinkList element_ptr );
 void hypre_remove_point ( hypre_LinkList *LoL_head_ptr , hypre_LinkList *LoL_tail_ptr , HYPRE_Int measure , HYPRE_Int index , HYPRE_Int *lists , HYPRE_Int *where );
@@ -3199,11 +2916,12 @@ HYPRE_Real    hypre_cimag( HYPRE_Complex value );
 #endif
 
 /* hypre_general.c */
+hypre_Handle* hypre_handle();
+hypre_Handle* hypre_HandleCreate();
+HYPRE_Int hypre_HandleDestroy(hypre_Handle *hypre_handle_);
 HYPRE_Int HYPRE_Init();
 HYPRE_Int HYPRE_Finalize();
-HYPRE_Int hypre_GetDevice(hypre_Handle *hypre_handle);
-HYPRE_Int hypre_SetDevice(HYPRE_Int use_device, hypre_Handle *hypre_handle);
-HYPRE_Int hypre_SyncCudaDefaultStream(hypre_Handle *hypre_handle);
+HYPRE_Int hypre_SetDevice(HYPRE_Int use_device, hypre_Handle *hypre_handle_);
 
 /* hypre_qsort.c */
 void hypre_swap ( HYPRE_Int *v , HYPRE_Int i , HYPRE_Int j );
@@ -3488,6 +3206,284 @@ void hypre_CudaCompileFlagCheck();
 void hypre_NvtxPushRangeColor(const char *name, HYPRE_Int cid);
 void hypre_NvtxPushRange(const char *name);
 void hypre_NvtxPopRange();
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
+/* CUDA reducer class */
+
+#ifndef HYPRE_CUDA_REDUCER_H
+#define HYPRE_CUDA_REDUCER_H
+
+#if defined(HYPRE_USING_CUDA)
+#if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS)
+
+#ifdef __cplusplus
+extern "C++" {
+#endif
+
+template<typename T> void OneBlockReduce(T *d_arr, HYPRE_Int N, T *h_out);
+
+struct HYPRE_double4
+{
+   HYPRE_Real x,y,z,w;
+
+   __host__ __device__
+   HYPRE_double4() {}
+
+   __host__ __device__
+   HYPRE_double4(HYPRE_Real x1, HYPRE_Real x2, HYPRE_Real x3, HYPRE_Real x4)
+   {
+      x = x1;
+      y = x2;
+      z = x3;
+      w = x4;
+   }
+
+   __host__ __device__
+   void operator=(HYPRE_Real val)
+   {
+      x = y = z = w = val;
+   }
+
+   __host__ __device__
+   void operator+=(HYPRE_double4 rhs)
+   {
+      x += rhs.x;
+      y += rhs.y;
+      z += rhs.z;
+      w += rhs.w;
+   }
+
+};
+
+struct HYPRE_double6
+{
+   HYPRE_Real x,y,z,w,u,v;
+
+   __host__ __device__
+   HYPRE_double6() {}
+
+   __host__ __device__
+   HYPRE_double6(HYPRE_Real x1, HYPRE_Real x2, HYPRE_Real x3, HYPRE_Real x4,
+                 HYPRE_Real x5, HYPRE_Real x6)
+   {
+      x = x1;
+      y = x2;
+      z = x3;
+      w = x4;
+      u = x5;
+      v = x6;
+   }
+
+   __host__ __device__
+   void operator=(HYPRE_Real val)
+   {
+      x = y = z = w = u = v = val;
+   }
+
+   __host__ __device__
+   void operator+=(HYPRE_double6 rhs)
+   {
+      x += rhs.x;
+      y += rhs.y;
+      z += rhs.z;
+      w += rhs.w;
+      u += rhs.u;
+      v += rhs.v;
+   }
+
+};
+
+/* reduction within a warp */
+__inline__ __host__ __device__
+HYPRE_Real warpReduceSum(HYPRE_Real val)
+{
+#ifdef __CUDA_ARCH__
+  for (HYPRE_Int offset = warpSize/2; offset > 0; offset /= 2)
+  {
+    val += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val, offset);
+  }
+#endif
+  return val;
+}
+
+__inline__ __host__ __device__
+HYPRE_double4 warpReduceSum(HYPRE_double4 val) {
+#ifdef __CUDA_ARCH__
+  for (HYPRE_Int offset = warpSize / 2; offset > 0; offset /= 2)
+  {
+    val.x += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.x, offset);
+    val.y += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.y, offset);
+    val.z += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.z, offset);
+    val.w += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.w, offset);
+  }
+#endif
+  return val;
+}
+
+__inline__ __host__ __device__
+HYPRE_double6 warpReduceSum(HYPRE_double6 val) {
+#ifdef __CUDA_ARCH__
+  for (HYPRE_Int offset = warpSize / 2; offset > 0; offset /= 2)
+  {
+    val.x += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.x, offset);
+    val.y += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.y, offset);
+    val.z += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.z, offset);
+    val.w += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.w, offset);
+    val.u += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.u, offset);
+    val.v += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.v, offset);
+  }
+#endif
+  return val;
+}
+
+/* reduction within a block */
+template <typename T>
+__inline__ __host__ __device__
+T blockReduceSum(T val)
+{
+#ifdef __CUDA_ARCH__
+   //static __shared__ T shared[32]; // Shared mem for 32 partial sums
+   __shared__ T shared[32];        // Shared mem for 32 partial sums
+   //HYPRE_Int lane = threadIdx.x % warpSize;
+   //HYPRE_Int wid  = threadIdx.x / warpSize;
+   HYPRE_Int lane = threadIdx.x & (warpSize - 1);
+   HYPRE_Int wid  = threadIdx.x >> 5;
+
+   val = warpReduceSum(val);       // Each warp performs partial reduction
+
+   if (lane == 0)
+   {
+      shared[wid] = val;          // Write reduced value to shared memory
+   }
+
+   __syncthreads();               // Wait for all partial reductions
+
+   //read from shared memory only if that warp existed
+   if (threadIdx.x < blockDim.x / warpSize)
+   {
+      val = shared[lane];
+   }
+   else
+   {
+      val = 0.0;
+   }
+
+   if (wid == 0)
+   {
+      val = warpReduceSum(val); //Final reduce within first warp
+   }
+
+#endif
+   return val;
+}
+
+template<typename T>
+__global__ void
+OneBlockReduceKernel(T *arr, HYPRE_Int N)
+{
+   T sum;
+   sum = 0.0;
+   if (threadIdx.x < N)
+   {
+      sum = arr[threadIdx.x];
+   }
+   sum = blockReduceSum(sum);
+   if (threadIdx.x == 0)
+   {
+      arr[0] = sum;
+   }
+}
+
+/* Reducer class */
+template <typename T>
+struct ReduceSum
+{
+   T init;                    /* initial value passed in */
+   mutable T __thread_sum;    /* place to hold local sum of a thread,
+                                 and partial sum of a block */
+   T *d_buf;                  /* place to store partial sum within blocks
+                                 in the 1st round, used in the 2nd round */
+   HYPRE_Int nblocks;         /* number of blocks used in the 1st round */
+
+   /* constructor
+    * val is the initial value (added to the reduced sum) */
+   __host__
+   ReduceSum(T val)
+   {
+      init = val;
+      __thread_sum = 0.0;
+      nblocks = -1;
+
+      if (hypre_HandleCudaReduceBuffer(hypre_handle()) == NULL)
+      {
+         /* allocate for the max size for reducing double6 type */
+         hypre_HandleCudaReduceBuffer(hypre_handle()) = hypre_TAlloc(HYPRE_double6, 1024, HYPRE_MEMORY_DEVICE);
+      }
+
+      d_buf = (T*) hypre_HandleCudaReduceBuffer(hypre_handle());
+   }
+
+   /* copy constructor */
+   __host__ __device__
+   ReduceSum(const ReduceSum<T>& other)
+   {
+      *this = other;
+   }
+
+   /* reduction within blocks */
+   __host__ __device__
+   void BlockReduce() const
+   {
+#ifdef __CUDA_ARCH__
+      __thread_sum = blockReduceSum(__thread_sum);
+      if (threadIdx.x == 0)
+      {
+         d_buf[blockIdx.x] = __thread_sum;
+      }
+#endif
+   }
+
+   __host__ __device__
+   void operator+=(T val) const
+   {
+      __thread_sum += val;
+   }
+
+   /* invoke the 2nd reduction at the time want the sum from the reducer */
+   __host__
+   operator T()
+   {
+      T val;
+      /* 2nd reduction with only *one* block */
+      hypre_assert(nblocks >= 0 && nblocks <= 1024);
+      const dim3 gDim(1), bDim(1024);
+      HYPRE_CUDA_LAUNCH( OneBlockReduceKernel, gDim, bDim, d_buf, nblocks );
+      hypre_TMemcpy(&val, d_buf, T, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+      val += init;
+
+      return val;
+   }
+
+   /* destructor */
+   __host__ __device__
+   ~ReduceSum<T>()
+   {
+   }
+};
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* #if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) */
+#endif /* #if defined(HYPRE_USING_CUDA) */
+#endif /* #ifndef HYPRE_CUDA_REDUCER_H */
+
 
 #ifdef __cplusplus
 }

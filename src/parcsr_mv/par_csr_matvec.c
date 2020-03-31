@@ -53,8 +53,8 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    HYPRE_Complex *x_local_data = hypre_VectorData(x_local);
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   HYPRE_Int sync_stream = hypre_HandleCudaComputeStreamSync(hypre_handle);
-   hypre_HandleCudaComputeStreamSync(hypre_handle) = 0;
+   HYPRE_Int sync_stream = hypre_HandleCudaComputeStreamSync(hypre_handle());
+   hypre_HandleCudaComputeStreamSync(hypre_handle()) = 0;
 #endif
 
    /*---------------------------------------------------------------------
@@ -335,8 +335,8 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    }
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   hypre_HandleCudaComputeStreamSync(hypre_handle) = sync_stream;
-   hypre_SyncCudaComputeStream(hypre_handle);
+   hypre_HandleCudaComputeStreamSync(hypre_handle()) = sync_stream;
+   hypre_SyncCudaComputeStream(hypre_handle());
 #endif
 
 #ifdef HYPRE_PROFILE
@@ -399,8 +399,8 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
    HYPRE_Complex *y_local_data = hypre_VectorData(y_local);
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   HYPRE_Int sync_stream = hypre_HandleCudaComputeStreamSync(hypre_handle);
-   hypre_HandleCudaComputeStreamSync(hypre_handle) = 0;
+   HYPRE_Int sync_stream = hypre_HandleCudaComputeStreamSync(hypre_handle());
+   hypre_HandleCudaComputeStreamSync(hypre_handle()) = 0;
 #endif
 
    /*---------------------------------------------------------------------
@@ -697,8 +697,8 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
    }
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   hypre_HandleCudaComputeStreamSync(hypre_handle) = sync_stream;
-   hypre_SyncCudaComputeStream(hypre_handle);
+   hypre_HandleCudaComputeStreamSync(hypre_handle()) = sync_stream;
+   hypre_SyncCudaComputeStream(hypre_handle());
 #endif
 
 #ifdef HYPRE_PROFILE

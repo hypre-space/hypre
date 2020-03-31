@@ -38,7 +38,7 @@ hypre_CSRMatrixCreate( HYPRE_Int num_rows,
    hypre_CSRMatrixNumRows(matrix)        = num_rows;
    hypre_CSRMatrixNumCols(matrix)        = num_cols;
    hypre_CSRMatrixNumNonzeros(matrix)    = num_nonzeros;
-   hypre_CSRMatrixMemoryLocation(matrix) = hypre_HandleMemoryLocation(hypre_handle);
+   hypre_CSRMatrixMemoryLocation(matrix) = hypre_HandleMemoryLocation(hypre_handle());
 
    /* set defaults */
    hypre_CSRMatrixOwnsData(matrix)  = 1;

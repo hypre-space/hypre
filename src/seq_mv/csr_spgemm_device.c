@@ -34,19 +34,19 @@ hypreDevice_CSRSpGemm(HYPRE_Int   m,        HYPRE_Int   k,        HYPRE_Int     
 #endif
 
    /* use CUSPARSE */
-   if (hypre_handle->spgemm_use_cusparse)
+   if (hypre_handle()->spgemm_use_cusparse)
    {
       hypreDevice_CSRSpGemmCusparse(m, k, n, nnza, d_ia, d_ja, d_a, nnzb, d_ib, d_jb, d_b,
                                     nnzC, d_ic_out, d_jc_out, d_c_out);
    }
    else
    {
-      HYPRE_Int m2 = hypre_handle->spgemm_num_passes < 3 ? m : 2*m;
+      HYPRE_Int m2 = hypre_handle()->spgemm_num_passes < 3 ? m : 2*m;
       HYPRE_Int *d_rc = hypre_TAlloc(HYPRE_Int, m2, HYPRE_MEMORY_DEVICE);
 
       hypreDevice_CSRSpGemmRownnzEstimate(m, k, n, d_ia, d_ja, d_ib, d_jb, d_rc);
 
-      if (hypre_handle->spgemm_num_passes < 3)
+      if (hypre_handle()->spgemm_num_passes < 3)
       {
          hypreDevice_CSRSpGemmWithRownnzEstimate(m, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc,
                                                  d_ic_out, d_jc_out, d_c_out, nnzC);

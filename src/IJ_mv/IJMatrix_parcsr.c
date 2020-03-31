@@ -326,7 +326,7 @@ hypre_IJMatrixSetMaxOffProcElmtsParCSR(hypre_IJMatrix *matrix,
 HYPRE_Int
 hypre_IJMatrixInitializeParCSR(hypre_IJMatrix *matrix)
 {
-   return hypre_IJMatrixInitializeParCSR_v2(matrix, hypre_HandleMemoryLocation(hypre_handle));
+   return hypre_IJMatrixInitializeParCSR_v2(matrix, hypre_HandleMemoryLocation(hypre_handle()));
 }
 
 HYPRE_Int

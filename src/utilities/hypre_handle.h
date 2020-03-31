@@ -28,7 +28,7 @@ typedef struct
    HYPRE_Int                         struct_comm_recv_buffer_size;
    HYPRE_Int                         struct_comm_send_buffer_size;
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   HYPRE_ExecutionPolicy            default_exec_policy;
+   HYPRE_ExecutionPolicy             default_exec_policy;
    HYPRE_Int                         cuda_device;
    /* by default, hypre puts GPU computations in this stream
     * Do not be confused with the default (null) CUDA stream */
@@ -60,18 +60,13 @@ typedef struct
 #endif
 } hypre_Handle;
 
-extern hypre_Handle *hypre_handle;
-
-hypre_Handle* hypre_HandleCreate();
-HYPRE_Int hypre_HandleDestroy(hypre_Handle *hypre_handle_);
-
 /* accessor macros to hypre_Handle */
-#define hypre_HandleMemoryLocation(hypre_handle)           ((hypre_handle) -> memory_location)
-#define hypre_HandleStructCommRecvBuffer(hypre_handle)     ((hypre_handle) -> struct_comm_recv_buffer)
-#define hypre_HandleStructCommSendBuffer(hypre_handle)     ((hypre_handle) -> struct_comm_send_buffer)
-#define hypre_HandleStructCommRecvBufferSize(hypre_handle) ((hypre_handle) -> struct_comm_recv_buffer_size)
-#define hypre_HandleStructCommSendBufferSize(hypre_handle) ((hypre_handle) -> struct_comm_send_buffer_size)
-#define hypre_HandleCudaReduceBuffer(hypre_handle)         ((hypre_handle) -> cuda_reduce_buffer)
+#define hypre_HandleMemoryLocation(hypre_handle_)           ((hypre_handle_) -> memory_location)
+#define hypre_HandleStructCommRecvBuffer(hypre_handle_)     ((hypre_handle_) -> struct_comm_recv_buffer)
+#define hypre_HandleStructCommSendBuffer(hypre_handle_)     ((hypre_handle_) -> struct_comm_send_buffer)
+#define hypre_HandleStructCommRecvBufferSize(hypre_handle_) ((hypre_handle_) -> struct_comm_recv_buffer_size)
+#define hypre_HandleStructCommSendBufferSize(hypre_handle_) ((hypre_handle_) -> struct_comm_send_buffer_size)
+#define hypre_HandleCudaReduceBuffer(hypre_handle_)         ((hypre_handle_) -> cuda_reduce_buffer)
 
 /* accessor inline functions to hypre_Handle */
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)

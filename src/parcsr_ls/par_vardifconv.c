@@ -382,8 +382,8 @@ GenerateVarDifConv( MPI_Comm         comm,
    hypre_CSRMatrixMemoryLocation(diag) = HYPRE_MEMORY_HOST;
    hypre_CSRMatrixMemoryLocation(offd) = HYPRE_MEMORY_HOST;
 
-   hypre_ParCSRMatrixMigrate(A, hypre_HandleMemoryLocation(hypre_handle));
-   hypre_ParVectorMigrate(par_rhs, hypre_HandleMemoryLocation(hypre_handle));
+   hypre_ParCSRMatrixMigrate(A, hypre_HandleMemoryLocation(hypre_handle()));
+   hypre_ParVectorMigrate(par_rhs, hypre_HandleMemoryLocation(hypre_handle()));
 
    hypre_TFree(nx_part, HYPRE_MEMORY_HOST);
    hypre_TFree(ny_part, HYPRE_MEMORY_HOST);
