@@ -1186,9 +1186,9 @@ PackSendBuffer(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypre_P
    // level = [ num send nodes, [global indices] , [coarse global indices] , [A row sizes] , [A col ind: either global indices or local col indices within buffer] ]
 
    // !!! Timing
-   vector<chrono::duration<double>> timings(10);
-   auto total_start = chrono::system_clock::now();
-   auto time_start = chrono::system_clock::now();
+   // vector<chrono::duration<double>> timings(10);
+   // auto total_start = chrono::system_clock::now();
+   // auto time_start = chrono::system_clock::now();
 
    HYPRE_Int   myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
@@ -1537,9 +1537,9 @@ PackSendBuffer(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypre_P
    }
 
    // !!! Timing
-   auto end = chrono::system_clock::now();
-   timings[1] = end - time_start;
-   time_start = chrono::system_clock::now();
+   // auto end = chrono::system_clock::now();
+   // timings[1] = end - time_start;
+   // time_start = chrono::system_clock::now();
 
    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
    // Pack the buffer
@@ -1862,8 +1862,8 @@ PackSendBuffer(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypre_P
 // #endif
 
       // !!! Timing
-      auto inner_end = chrono::system_clock::now();
-      timings[3] += inner_end - inner_start;
+      // auto inner_end = chrono::system_clock::now();
+      // timings[3] += inner_end - inner_start;
    }
 
    // Clean up memory
@@ -1890,10 +1890,10 @@ PackSendBuffer(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypre_P
 
 
    // !!! Timing
-   end = chrono::system_clock::now();
-   timings[2] = end - time_start;
-   auto total_end = chrono::system_clock::now();
-   timings[0] = total_end - total_start;
+   // end = chrono::system_clock::now();
+   // timings[2] = end - time_start;
+   // auto total_end = chrono::system_clock::now();
+   // timings[0] = total_end - total_start;
 
 
    // !!! Timing: reference
@@ -2182,6 +2182,7 @@ RemoveRedundancy(hypre_ParCompGrid *compGrid,
    }
    (*current_list_length) = new_cnt;
 
+   return 0;
 }
 
 
