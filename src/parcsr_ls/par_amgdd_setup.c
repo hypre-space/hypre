@@ -539,7 +539,14 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
       for (level = amgdd_start_level; level < num_levels; level++)
       {
          communication_cost[level*10 + 4] += hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[level];
-         communication_cost[level*10 + 5] += hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[level][ hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[level] ]*sizeof(HYPRE_Complex);
+         for (i = 0; i < hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[level]; i++)
+         {
+            HYPRE_Int inner_level;
+            for (inner_level = level; inner_level < num_levels; inner_level++)
+            {
+               communication_cost[level*10 + 5] += hypre_ParCompGridCommPkgNumSendNodes(compGridCommPkg)[level][i][inner_level]*sizeof(HYPRE_Complex);
+            }
+         }
       }
    }
 
