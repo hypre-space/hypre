@@ -113,28 +113,21 @@ extern "C"
 
 
 HYPRE_Int
-GetDofRecvProc(HYPRE_Int dof_index, HYPRE_Int neighbor_global_index, hypre_ParCSRMatrix *A)
+GetDofRecvProc(HYPRE_Int dof_index, HYPRE_Int neighbor_local_index, hypre_ParCSRMatrix *A)
 {
    HYPRE_Int *colmap = hypre_ParCSRMatrixColMapOffd(A);
    HYPRE_Int *offdRowPtr = hypre_CSRMatrixI( hypre_ParCSRMatrixOffd(A) );
-   HYPRE_Int offdColIndex = -1;
-
-   // Get the appropriate column index in the offd part of A
-   for (HYPRE_Int i = offdRowPtr[dof_index]; i < offdRowPtr[dof_index+1]; i++)
-   {
-      if (colmap[ hypre_CSRMatrixJ( hypre_ParCSRMatrixOffd(A) )[i] ] == neighbor_global_index)
-      {
-         offdColIndex = hypre_CSRMatrixJ( hypre_ParCSRMatrixOffd(A) )[i];
-      }
-   }
 
    // Use that column index to find which processor this dof is received from
    hypre_ParCSRCommPkg *commPkg = hypre_ParCSRMatrixCommPkg(A);
    HYPRE_Int recv_proc = -1;
    for (HYPRE_Int i = 0; i < hypre_ParCSRCommPkgNumRecvs(commPkg); i++)
    {
-      if (offdColIndex >= hypre_ParCSRCommPkgRecvVecStart(commPkg,i) && offdColIndex < hypre_ParCSRCommPkgRecvVecStart(commPkg,i+1)) 
+      if (neighbor_local_index >= hypre_ParCSRCommPkgRecvVecStart(commPkg,i) && neighbor_local_index < hypre_ParCSRCommPkgRecvVecStart(commPkg,i+1))
+      {
          recv_proc = hypre_ParCSRCommPkgRecvProc(commPkg,i);
+         break;
+      }
    }
 
    return recv_proc;
@@ -163,42 +156,30 @@ RecursivelyFindNeighborNodes(HYPRE_Int dof_index, HYPRE_Int distance, hypre_ParC
       // And if we still need to visit this index (note that send_dofs[neighbor_index] = distance means we have already added all distance-1 neighbors of index)
       
       // See whether this dof is in the send dofs
-      auto neighbor_dof = send_dofs.find(neighbor_index);
-      if (neighbor_dof == send_dofs.end())
+      auto neighbor_dof = send_dofs.insert( pair<HYPRE_Int,HYPRE_Int>(neighbor_index, distance) );
+      if (neighbor_dof.second && distance-1 > 0)
       {
-         // If neighbor dof isn't in the send dofs, add it with appropriate distance and recurse
-         send_dofs[neighbor_index] = distance;
-         if (distance-1 > 0) RecursivelyFindNeighborNodes(neighbor_index, distance-1, A, send_dofs, request_proc_dofs, destination_proc);
+         RecursivelyFindNeighborNodes(neighbor_index, distance-1, A, send_dofs, request_proc_dofs, destination_proc);
       }
-      else if (neighbor_dof->second < distance)
+      else if (neighbor_dof.first->second < distance)
       {
          // If neighbor dof is in the send dofs, but at smaller distance, also need to update distance and recurse
-         send_dofs[neighbor_index] = distance;
+         neighbor_dof.first->second = distance;
          if (distance-1 > 0) RecursivelyFindNeighborNodes(neighbor_index, distance-1, A, send_dofs, request_proc_dofs, destination_proc);
       }
    }
    // Look at offd neighbors
    for (i = hypre_CSRMatrixI(offd)[dof_index]; i < hypre_CSRMatrixI(offd)[dof_index+1]; i++)
    {
-      HYPRE_Int neighbor_global_index = hypre_ParCSRMatrixColMapOffd(A)[ hypre_CSRMatrixJ(offd)[i] ];
+      HYPRE_Int neighbor_local_index = hypre_CSRMatrixJ(offd)[i];
+      HYPRE_Int neighbor_global_index = hypre_ParCSRMatrixColMapOffd(A)[ neighbor_local_index ];
 
-      HYPRE_Int recv_proc = GetDofRecvProc(dof_index, neighbor_global_index, A);
+      HYPRE_Int recv_proc = GetDofRecvProc(dof_index, neighbor_local_index, A);
 
       // If request proc isn't the destination proc
       if (recv_proc != destination_proc)
       {
-         // Check whether we have already requested this node 
-         auto req_dof = request_proc_dofs[recv_proc][destination_proc].find(neighbor_global_index);
-         if (req_dof == request_proc_dofs[recv_proc][destination_proc].end())
-         {
-            // If this hasn't yet been requested, add it
-            request_proc_dofs[recv_proc][destination_proc][neighbor_global_index] = distance;
-         }
-         else if (req_dof->second < distance)
-         {
-            // If reqest is already there, but at smaller distance, update the distance
-            request_proc_dofs[recv_proc][destination_proc][neighbor_global_index] = distance;
-         }
+         request_proc_dofs[recv_proc][destination_proc][neighbor_global_index] = distance;
       }
    }
 
@@ -216,10 +197,18 @@ FindNeighborProcessors(hypre_ParCSRMatrix *A,
    HYPRE_Int   myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
+   // !!! Timing
+   vector<chrono::duration<double>> timings(10);
+   auto total_start = chrono::system_clock::now();
+   auto part_start = chrono::system_clock::now();
+
    // Nodes to request from other processors. Note, requests are only issued to processors within distance 1, i.e. within the original communication stencil for A
    hypre_ParCSRCommPkg *commPkg = hypre_ParCSRMatrixCommPkg(A);
    map< HYPRE_Int, map<HYPRE_Int, map<HYPRE_Int, HYPRE_Int> > > request_proc_dofs; // request_proc_dofs[proc to request from, i.e. recv_proc][destination_proc][dof global index][distance]
    for (HYPRE_Int i = 0; i < hypre_ParCSRCommPkgNumRecvs(commPkg); i++) request_proc_dofs[ hypre_ParCSRCommPkgRecvProc(commPkg,i) ];
+
+   // !!! Debug
+   HYPRE_Int total_starting_dofs = 0;
 
    // Recursively search through the operator stencil to find longer distance neighboring dofs
    // Loop over destination processors
@@ -227,6 +216,10 @@ FindNeighborProcessors(hypre_ParCSRMatrix *A,
    {
       HYPRE_Int destination_proc = dest_proc_it->first;
       // Loop over starting nodes for this proc
+      
+      // !!! Debug
+      total_starting_dofs += dest_proc_it->second.size();
+
       for (auto dof_it = dest_proc_it->second.begin(); dof_it != dest_proc_it->second.end(); ++dof_it)
       {
          HYPRE_Int dof_index = *dof_it;
@@ -236,6 +229,16 @@ FindNeighborProcessors(hypre_ParCSRMatrix *A,
    }
    // Clear the list of starting dofs
    starting_dofs.clear();
+
+
+    // !!! Debug
+    if (myid == 21) cout << "Total starting dofs = " << total_starting_dofs << endl;
+
+
+   // !!! Timing
+   auto part_end = chrono::system_clock::now();
+   timings[1] = part_end - part_start;
+   part_start = chrono::system_clock::now();
 
    //////////////////////////////////////////////////
    // Communicate newly connected longer-distance processors to send procs: sending to current long distance send_procs and receiving from current long distance recv_procs
@@ -328,6 +331,11 @@ FindNeighborProcessors(hypre_ParCSRMatrix *A,
    hypre_TFree(send_buffers, HYPRE_MEMORY_HOST);
    hypre_TFree(recv_sizes, HYPRE_MEMORY_HOST);
    hypre_TFree(send_sizes, HYPRE_MEMORY_HOST);
+
+   // !!! Timing
+   part_end = chrono::system_clock::now();
+   timings[2] = part_end - part_start;
+   part_start = chrono::system_clock::now();
 
    //////////////////////////////////////////////////
    // Communicate request dofs to processors that I recv from: sending to request_procs and receiving from distance 1 send procs
@@ -461,6 +469,20 @@ FindNeighborProcessors(hypre_ParCSRMatrix *A,
    hypre_TFree(send_buffers, HYPRE_MEMORY_HOST);
    hypre_TFree(recv_sizes, HYPRE_MEMORY_HOST);
    hypre_TFree(send_sizes, HYPRE_MEMORY_HOST);
+
+   // !!! Timing
+   part_end = chrono::system_clock::now();
+   timings[3] = part_end - part_start;
+   auto total_end = chrono::system_clock::now();
+   timings[0] = total_end - total_start;
+   if (myid == 21)
+   {
+       cout.precision(3);
+       cout << "Total time " << timings[0].count() << endl
+           << "Part 1 " << timings[1].count() << endl
+           << "Part 2 " << timings[2].count() << endl
+           << "Part 3 " << timings[3].count() << endl;
+   }
 
    return 0;
 }
@@ -1186,9 +1208,9 @@ PackSendBuffer(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypre_P
    // level = [ num send nodes, [global indices] , [coarse global indices] , [A row sizes] , [A col ind: either global indices or local col indices within buffer] ]
 
    // !!! Timing
-   // vector<chrono::duration<double>> timings(10);
-   // auto total_start = chrono::system_clock::now();
-   // auto time_start = chrono::system_clock::now();
+   vector<chrono::duration<double>> timings(10);
+   auto total_start = chrono::system_clock::now();
+   auto time_start = chrono::system_clock::now();
 
    HYPRE_Int   myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
@@ -1398,9 +1420,8 @@ PackSendBuffer(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypre_P
             i++;
          }
 
-
-         // !!! HERE
-
+         // !!! Timing
+         auto redundancy_start = chrono::system_clock::now();
 
          // Eliminate redundant send info by comparing with previous send_flags and recv_maps
          HYPRE_Int current_send_proc = hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[current_level][proc];
@@ -1480,6 +1501,10 @@ PackSendBuffer(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypre_P
             }
          }
 
+         // !!! Timing
+         auto redundancy_end = chrono::system_clock::now();
+         timings[5] = redundancy_end - redundancy_start;
+
          // Count up the buffer sizes and adjust the add_flag and get offsets
          memset(add_flag[level], 0, sizeof(HYPRE_Int)*(hypre_ParCompGridNumOwnedNodes(compGrid[level]) + hypre_ParCompGridNumNonOwnedNodes(compGrid[level])) );
          (*send_flag_buffer_size) += num_send_nodes[current_level][proc][level];
@@ -1537,9 +1562,9 @@ PackSendBuffer(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypre_P
    }
 
    // !!! Timing
-   // auto end = chrono::system_clock::now();
-   // timings[1] = end - time_start;
-   // time_start = chrono::system_clock::now();
+   auto end = chrono::system_clock::now();
+   timings[1] = end - time_start;
+   time_start = chrono::system_clock::now();
 
    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
    // Pack the buffer
@@ -1862,8 +1887,8 @@ PackSendBuffer(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypre_P
 // #endif
 
       // !!! Timing
-      // auto inner_end = chrono::system_clock::now();
-      // timings[3] += inner_end - inner_start;
+      auto inner_end = chrono::system_clock::now();
+      timings[3] += inner_end - inner_start;
    }
 
    // Clean up memory
@@ -1890,49 +1915,48 @@ PackSendBuffer(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypre_P
 
 
    // !!! Timing
-   // end = chrono::system_clock::now();
-   // timings[2] = end - time_start;
-   // auto total_end = chrono::system_clock::now();
-   // timings[0] = total_end - total_start;
+   end = chrono::system_clock::now();
+   timings[2] = end - time_start;
+   auto total_end = chrono::system_clock::now();
+   timings[0] = total_end - total_start;
 
 
    // !!! Timing: reference
-   // auto ref_start = chrono::system_clock::now();
-   // HYPRE_Int *test_buffer = hypre_CTAlloc(HYPRE_Int, (*buffer_size), HYPRE_MEMORY_HOST);
-   // memcpy(test_buffer, send_buffer, (*buffer_size));
-   // hypre_TFree(test_buffer, HYPRE_MEMORY_HOST);
-   // auto ref_end = chrono::system_clock::now();
-   // timings[4] = ref_end - ref_start;
+   /* auto ref_start = chrono::system_clock::now(); */
+   /* HYPRE_Int *test_buffer = hypre_CTAlloc(HYPRE_Int, (*buffer_size), HYPRE_MEMORY_HOST); */
+   /* memcpy(test_buffer, send_buffer, (*buffer_size)); */
+   /* hypre_TFree(test_buffer, HYPRE_MEMORY_HOST); */
+   /* auto ref_end = chrono::system_clock::now(); */
+   /* timings[4] = ref_end - ref_start; */
 
-   // ref_start = chrono::system_clock::now();
-   // test_buffer = hypre_CTAlloc(HYPRE_Int, (*buffer_size), HYPRE_MEMORY_HOST);
-   // for (i = 0; i < (*buffer_size); i++)
-   // {
-   //    test_buffer[i] = send_buffer[i];
-   // }
-   // hypre_TFree(test_buffer, HYPRE_MEMORY_HOST);
-   // ref_end = chrono::system_clock::now();
-   // timings[5] = ref_end - ref_start;
+   /* ref_start = chrono::system_clock::now(); */
+   /* test_buffer = hypre_CTAlloc(HYPRE_Int, (*buffer_size), HYPRE_MEMORY_HOST); */
+   /* for (i = 0; i < (*buffer_size); i++) */
+   /* { */
+   /*    test_buffer[i] = send_buffer[i]; */
+   /* } */
+   /* hypre_TFree(test_buffer, HYPRE_MEMORY_HOST); */
+   /* ref_end = chrono::system_clock::now(); */
+   /* timings[5] = ref_end - ref_start; */
 
 
-   // if (current_level == 0 && myid == 21)
-   // if (myid == 21)
-   // {
-   //    cout.precision(3);
-   //    // cout << scientific;
-   //    cout << "Rank " << myid << ", level " << current_level
-   //       // << ": total " << timings[0].count() 
-   //       // << ", Build Psi_c " << timings[1].count() << " (" << 100 * (timings[1].count() / timings[0].count()) << "%)"
-   //       << ", Reference " << timings[4].count() << " (" << 100 * (timings[4].count() / timings[4].count()) << "%)"
-   //       << ", Reference 2 " << timings[5].count() << " (" << 100 * (timings[5].count() / timings[4].count()) << "%)"
-   //       << ", Pack Buffer " << timings[2].count() << " (" << 100 * (timings[2].count() / timings[4].count()) << "%)"
-   //       // << ", Pack Col Ind " << timings[3].count() << " (" << 100 * (timings[3].count() / timings[4].count()) << "%)"
-   //       << endl;
-   //    cout << "Rank " << myid << ", level " << current_level
-   //       << ": total items packed " << cnt
-   //       // << ", total col indices packed  " << total_col_indices_packed
-   //       << endl;
-   // }
+   /* if (myid == 21) */
+   /* { */
+   /*    cout.precision(3); */
+   /*    // cout << scientific; */
+   /*    cout << "Rank " << myid << ", level " << current_level */
+   /*       << ": total " << timings[0].count() */ 
+   /*       << ", Build Psi_c " << timings[1].count() << " (" << 100 * (timings[1].count() / timings[0].count()) << "%)" */
+   /*       << ", Pack Buffer " << timings[2].count() << " (" << 100 * (timings[2].count() / timings[0].count()) << "%)" */
+   /*       << ", Pack Col Ind " << timings[3].count() << " (" << 100 * (timings[3].count() / timings[0].count()) << "%)" */
+   /*       << ", Redundancy Check " << timings[5].count() << " (" << 100 * (timings[5].count() / timings[0].count()) << "%)" */
+   /*       << ", Reference " << timings[4].count() << " (" << 100 * (timings[4].count() / timings[0].count()) << "%)" */
+   /*       << endl; */
+   /*    /1* cout << "Rank " << myid << ", level " << current_level *1/ */
+   /*    /1*    << ": total items packed " << cnt *1/ */
+   /*    /1*    << ", total col indices packed  " << total_col_indices_packed *1/ */
+   /*    /1*    << endl; *1/ */
+   /* } */
 
    // Return the send buffer
    return send_buffer;
