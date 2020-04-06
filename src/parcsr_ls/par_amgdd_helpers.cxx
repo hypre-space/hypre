@@ -113,7 +113,7 @@ extern "C"
 
 
 HYPRE_Int
-GetDofRecvProc(HYPRE_Int dof_index, HYPRE_Int neighbor_local_index, hypre_ParCSRMatrix *A)
+GetDofRecvProc(HYPRE_Int neighbor_local_index, hypre_ParCSRMatrix *A)
 {
    HYPRE_Int *colmap = hypre_ParCSRMatrixColMapOffd(A);
    HYPRE_Int *offdRowPtr = hypre_CSRMatrixI( hypre_ParCSRMatrixOffd(A) );
@@ -133,6 +133,44 @@ GetDofRecvProc(HYPRE_Int dof_index, HYPRE_Int neighbor_local_index, hypre_ParCSR
    return recv_proc;
 }
 
+HYPRE_Int
+RecursivelyFindNeighborNodesNew(HYPRE_Int dof_index, HYPRE_Int distance, hypre_ParCSRMatrix *A, HYPRE_Int *add_flag, HYPRE_Int *add_flag_requests)
+{
+   HYPRE_Int   myid;
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+
+   HYPRE_Int         i,j;
+
+   hypre_CSRMatrix *diag = hypre_ParCSRMatrixDiag(A);
+   hypre_CSRMatrix *offd = hypre_ParCSRMatrixOffd(A);
+
+   // Look at diag neighbors
+   for (i = hypre_CSRMatrixI(diag)[dof_index]; i < hypre_CSRMatrixI(diag)[dof_index+1]; i++)
+   {
+      // Get the index of the neighbor
+      HYPRE_Int neighbor_index = hypre_CSRMatrixJ(diag)[i];
+
+      // If the neighbor info is available on this proc
+      // And if we still need to visit this index (note that send_dofs[neighbor_index] = distance means we have already added all distance-1 neighbors of index)
+      
+      // See whether this dof is in the send dofs
+      if (add_flag[neighbor_index] < distance)
+      {
+         add_flag[neighbor_index] = distance;
+         if (distance - 1 > 0) RecursivelyFindNeighborNodesNew(neighbor_index, distance-1, A, add_flag, add_flag_requests);
+      }
+   }
+   // Look at offd neighbors
+   for (i = hypre_CSRMatrixI(offd)[dof_index]; i < hypre_CSRMatrixI(offd)[dof_index+1]; i++)
+   {
+      HYPRE_Int neighbor_index = hypre_CSRMatrixJ(offd)[i];
+
+      if (add_flag_requests[neighbor_index] < distance)
+         add_flag_requests[neighbor_index] = distance;
+   }
+
+   return 0;
+}
 HYPRE_Int
 RecursivelyFindNeighborNodes(HYPRE_Int dof_index, HYPRE_Int distance, hypre_ParCSRMatrix *A,
    map<HYPRE_Int, HYPRE_Int> &send_dofs, 
@@ -174,7 +212,7 @@ RecursivelyFindNeighborNodes(HYPRE_Int dof_index, HYPRE_Int distance, hypre_ParC
       HYPRE_Int neighbor_local_index = hypre_CSRMatrixJ(offd)[i];
       HYPRE_Int neighbor_global_index = hypre_ParCSRMatrixColMapOffd(A)[ neighbor_local_index ];
 
-      HYPRE_Int recv_proc = GetDofRecvProc(dof_index, neighbor_local_index, A);
+      HYPRE_Int recv_proc = GetDofRecvProc(neighbor_local_index, A);
 
       // If request proc isn't the destination proc
       if (recv_proc != destination_proc)
@@ -184,6 +222,32 @@ RecursivelyFindNeighborNodes(HYPRE_Int dof_index, HYPRE_Int distance, hypre_ParC
    }
 
    return 0;
+}
+
+HYPRE_Int
+AddToSendAndRequestDofs(hypre_ParCSRMatrix *A, HYPRE_Int *add_flag, HYPRE_Int *add_flag_requests, 
+   map<HYPRE_Int, HYPRE_Int> &send_dofs, 
+   map< HYPRE_Int, map<HYPRE_Int, map<HYPRE_Int, HYPRE_Int> > > &request_proc_dofs, HYPRE_Int destination_proc )
+{
+    for (auto i = 0; i < hypre_ParCSRMatrixNumRows(A); i++)
+    {
+        if (add_flag[i]) send_dofs[i] = add_flag[i]; // !!! Optimization: can probably not even use a map for the send dofs... avoid insert, just push to back of vector or something
+    }
+    for (auto i = 0; i < hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A)); i++)
+    {
+        if (add_flag_requests[i])
+        {
+            HYPRE_Int neighbor_global_index = hypre_ParCSRMatrixColMapOffd(A)[i];
+      
+            HYPRE_Int recv_proc = GetDofRecvProc(i, A);
+      
+            if (recv_proc != destination_proc)
+            {
+                request_proc_dofs[recv_proc][destination_proc][neighbor_global_index] = add_flag_requests[i]; // !!! Optimization: do I need a map here? Maybe not. Avoid insert.
+            } 
+        }
+    }
+    return 0;
 }
 
 HYPRE_Int 
@@ -207,8 +271,13 @@ FindNeighborProcessors(hypre_ParCSRMatrix *A,
    map< HYPRE_Int, map<HYPRE_Int, map<HYPRE_Int, HYPRE_Int> > > request_proc_dofs; // request_proc_dofs[proc to request from, i.e. recv_proc][destination_proc][dof global index][distance]
    for (HYPRE_Int i = 0; i < hypre_ParCSRCommPkgNumRecvs(commPkg); i++) request_proc_dofs[ hypre_ParCSRCommPkgRecvProc(commPkg,i) ];
 
+   HYPRE_Int *add_flag = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRMatrixNumRows(A), HYPRE_MEMORY_SHARED);
+   HYPRE_Int *add_flag_requests = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A)), HYPRE_MEMORY_SHARED);
+
    // !!! Debug
    HYPRE_Int total_starting_dofs = 0;
+   HYPRE_Int total_request_dofs = 0;
+   HYPRE_Int total_proc_connections = 0;
 
    // Recursively search through the operator stencil to find longer distance neighboring dofs
    // Loop over destination processors
@@ -223,16 +292,35 @@ FindNeighborProcessors(hypre_ParCSRMatrix *A,
       for (auto dof_it = dest_proc_it->second.begin(); dof_it != dest_proc_it->second.end(); ++dof_it)
       {
          HYPRE_Int dof_index = *dof_it;
-         HYPRE_Int distance = send_proc_dofs[destination_proc][dof_index];
-         RecursivelyFindNeighborNodes(dof_index, distance-1, A, send_proc_dofs[destination_proc], request_proc_dofs, destination_proc);
+         add_flag[dof_index] = send_proc_dofs[destination_proc][dof_index]; // !!! Optimization: try to avoid this look up
       }
+      for (auto dof_it = dest_proc_it->second.begin(); dof_it != dest_proc_it->second.end(); ++dof_it)
+      {
+         HYPRE_Int dof_index = *dof_it;
+         HYPRE_Int distance = add_flag[dof_index];
+         RecursivelyFindNeighborNodesNew(dof_index, distance-1, A, add_flag, add_flag_requests);
+      }
+      AddToSendAndRequestDofs(A, add_flag, add_flag_requests, send_proc_dofs[destination_proc], request_proc_dofs, destination_proc);
+      memset(add_flag, 0, sizeof(HYPRE_Int)*hypre_ParCSRMatrixNumRows(A) );
+      memset(add_flag_requests, 0, sizeof(HYPRE_Int)*hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A)) );
    }
    // Clear the list of starting dofs
    starting_dofs.clear();
 
-
     // !!! Debug
-    if (myid == 21) cout << "Total starting dofs = " << total_starting_dofs << endl;
+    if (myid == 21)
+    {
+        cout << "Total owned dofs = " << hypre_ParCSRMatrixNumRows(A) << ", num cols offd = " << hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A)) << endl;
+        for (auto req_proc_it = request_proc_dofs.begin(); req_proc_it != request_proc_dofs.end(); ++req_proc_it) // Iterate over recv procs
+            for (auto req_proc_inner_it = req_proc_it->second.begin(); req_proc_inner_it != req_proc_it->second.end(); ++req_proc_inner_it) // Iterate over destinations
+            {
+               total_proc_connections++;
+               total_request_dofs += req_proc_inner_it->second.size();
+            }
+        cout << "total proc connections = " << total_proc_connections << ", num send procs = " << send_proc_dofs.size() << ", num starting procs = " << starting_dofs.size() << endl;
+        cout << "Total starting dofs = " << total_starting_dofs << endl
+           << "Total request dofs = " << total_request_dofs << endl;
+    }
 
 
    // !!! Timing
