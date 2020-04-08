@@ -17,7 +17,7 @@
 #include "par_amg.h"
 #include "par_csr_block_matrix.h"
 
-#define DEBUG_COMP_GRID 2 // if true, runs some tests, prints out what is stored in the comp grids for each processor to a file
+#define DEBUG_COMP_GRID 0 // if true, runs some tests, prints out what is stored in the comp grids for each processor to a file
 #define DEBUG_PROC_NEIGHBORS 0 // if true, dumps info on the add flag structures that determine nearest processor neighbors 
 #define DEBUGGING_MESSAGES 0 // if true, prints a bunch of messages to the screen to let you know where in the algorithm you are
 
@@ -453,6 +453,8 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
 
    /////////////////////////////////////////////////////////////////
 
+   FixUpRecvMaps(compGrid, compGridCommPkg, recv_redundant_marker, amgdd_start_level, num_levels);
+   
    #if DEBUG_COMP_GRID
    // Test whether comp grids have correct shape
    HYPRE_Int test_failed = 0;
@@ -469,8 +471,6 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
 
    if (use_barriers) hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
    if (timers) hypre_BeginTiming(timers[7]);
-
-   FixUpRecvMaps(compGrid, compGridCommPkg, recv_redundant_marker, amgdd_start_level, num_levels);
 
    // Communicate data for A and all info for P
    CommunicateRemainingMatrixInfo(amg_data, compGrid, compGridCommPkg, communication_cost, symmetric);
@@ -1229,7 +1229,7 @@ CommunicateRemainingMatrixInfo(hypre_ParAMGData* amg_data, hypre_ParCompGrid **c
                            {
                               if (offd_rowptr >= hypre_CSRMatrixNumNonzeros(offd))
                                  hypre_CSRMatrixResize(offd, hypre_CSRMatrixNumRows(offd), hypre_CSRMatrixNumCols(offd), ceil(1.5*hypre_CSRMatrixNumNonzeros(offd) + 1));
-                              hypre_CSRMatrixJ(offd)[offd_rowptr] = incoming_index - hypre_ParCompGridFirstGlobalIndex(compGrid[level]);
+                              hypre_CSRMatrixJ(offd)[offd_rowptr] = incoming_index - hypre_ParCompGridFirstGlobalIndex(compGrid[level-1]);
                               hypre_CSRMatrixData(offd)[offd_rowptr] = complex_recv_buffers[proc][complex_cnt++];
                               offd_rowptr++;
                            }
@@ -1348,7 +1348,7 @@ CommunicateRemainingMatrixInfo(hypre_ParAMGData* amg_data, hypre_ParCompGrid **c
                      {
                         if (offd_rowptr >= hypre_CSRMatrixNumNonzeros(offd))
                            hypre_CSRMatrixResize(offd, hypre_CSRMatrixNumRows(offd), hypre_CSRMatrixNumCols(offd), ceil(1.5*hypre_CSRMatrixNumNonzeros(offd) + 1));
-                        hypre_CSRMatrixJ(offd)[offd_rowptr] = incoming_index - hypre_ParCompGridFirstGlobalIndex(compGrid[outer_level+1]);
+                        hypre_CSRMatrixJ(offd)[offd_rowptr] = incoming_index - hypre_ParCompGridFirstGlobalIndex(compGrid[outer_level-1]);
                         hypre_CSRMatrixData(offd)[offd_rowptr] = R_tmp_info_complex[i][j];
                         offd_rowptr++;
                      }
@@ -1362,9 +1362,9 @@ CommunicateRemainingMatrixInfo(hypre_ParAMGData* amg_data, hypre_ParCompGrid **c
                      }
 
                   }
-                  hypre_CSRMatrixI(diag)[R_row_cnt[outer_level]-1] = diag_rowptr;
-                  hypre_CSRMatrixI(offd)[R_row_cnt[outer_level]-1] = offd_rowptr;
-                  R_row_cnt[outer_level]++;
+                  hypre_CSRMatrixI(diag)[R_row_cnt[outer_level-1]+1] = diag_rowptr;
+                  hypre_CSRMatrixI(offd)[R_row_cnt[outer_level-1]+1] = offd_rowptr;
+                  R_row_cnt[outer_level-1]++;
 
                   hypre_TFree(R_tmp_info_int[i], HYPRE_MEMORY_HOST);
                   hypre_TFree(R_tmp_info_complex[i], HYPRE_MEMORY_HOST);
@@ -1523,6 +1523,7 @@ TestCompGrids2(hypre_ParAMGData *amg_data)
    HYPRE_Int num_levels = hypre_ParAMGDataNumLevels(amg_data);
    hypre_ParCSRMatrix **A = hypre_ParAMGDataAArray(amg_data);
    hypre_ParCSRMatrix **P = hypre_ParAMGDataPArray(amg_data);
+   hypre_ParCSRMatrix **R = hypre_ParAMGDataRArray(amg_data);
 
    HYPRE_Int i,j,k;
    HYPRE_Int test_failed = 0;
@@ -1542,10 +1543,14 @@ TestCompGrids2(hypre_ParAMGData *amg_data)
          hypre_CSRMatrix *A_offd = hypre_ParCompGridMatrixNonOwnedOffd(hypre_ParCompGridA(compGrid[level]));
          hypre_CSRMatrix *P_diag = NULL;
          hypre_CSRMatrix *P_offd = NULL;
+         hypre_CSRMatrix *R_diag = NULL;
+         hypre_CSRMatrix *R_offd = NULL;
+
 
          // Broadcast the number of nodes and num non zeros for A, P, and R
          HYPRE_Int num_nonowned = 0;
          HYPRE_Int proc_first_index = 0;
+         HYPRE_Int proc_fine_first_index = 0;
          HYPRE_Int proc_coarse_first_index = 0;
          HYPRE_Int nnz_A_diag = 0;
          HYPRE_Int nnz_A_offd = 0;
@@ -1553,7 +1558,7 @@ TestCompGrids2(hypre_ParAMGData *amg_data)
          HYPRE_Int nnz_P_offd = 0;
          HYPRE_Int nnz_R_diag = 0;
          HYPRE_Int nnz_R_offd = 0;
-         HYPRE_Int sizes_buf[9];
+         HYPRE_Int sizes_buf[10];
          if (myid == proc) 
          {
             num_nonowned = hypre_ParCompGridNumNonOwnedNodes(compGrid[level]);
@@ -1568,31 +1573,36 @@ TestCompGrids2(hypre_ParAMGData *amg_data)
                nnz_P_diag = hypre_CSRMatrixI(P_diag)[num_nonowned];
                nnz_P_offd = hypre_CSRMatrixI(P_offd)[num_nonowned];
             }
-            // !!! TODO R
-            // if (level != 0 && hypre_ParCompGridRRowPtr(compGrid[level]))
-            // {
-            //    nnz_R = hypre_ParCompGridRRowPtr(compGrid[level])[num_nodes];
-            // }
+            if (hypre_ParAMGDataRestriction(amg_data) && level != 0)
+            {
+               proc_fine_first_index = hypre_ParCompGridFirstGlobalIndex(compGrid[level-1]);
+               R_diag = hypre_ParCompGridMatrixNonOwnedDiag(hypre_ParCompGridR(compGrid[level-1]));
+               R_offd = hypre_ParCompGridMatrixNonOwnedOffd(hypre_ParCompGridR(compGrid[level-1]));
+               nnz_R_diag = hypre_CSRMatrixI(R_diag)[num_nonowned];
+               nnz_R_offd = hypre_CSRMatrixI(R_offd)[num_nonowned];
+            }
             sizes_buf[0] = num_nonowned;
             sizes_buf[1] = proc_first_index;
-            sizes_buf[2] = proc_coarse_first_index;
-            sizes_buf[3] = nnz_A_diag;
-            sizes_buf[4] = nnz_A_offd;
-            sizes_buf[5] = nnz_P_diag;
-            sizes_buf[6] = nnz_P_offd;
-            sizes_buf[7] = nnz_R_diag;
-            sizes_buf[8] = nnz_R_offd;
+            sizes_buf[2] = proc_fine_first_index;
+            sizes_buf[3] = proc_coarse_first_index;
+            sizes_buf[4] = nnz_A_diag;
+            sizes_buf[5] = nnz_A_offd;
+            sizes_buf[6] = nnz_P_diag;
+            sizes_buf[7] = nnz_P_offd;
+            sizes_buf[8] = nnz_R_diag;
+            sizes_buf[9] = nnz_R_offd;
          }
-         hypre_MPI_Bcast(sizes_buf, 9, HYPRE_MPI_INT, proc, hypre_MPI_COMM_WORLD);
+         hypre_MPI_Bcast(sizes_buf, 10, HYPRE_MPI_INT, proc, hypre_MPI_COMM_WORLD);
          num_nonowned = sizes_buf[0];
          proc_first_index = sizes_buf[1];
-         proc_coarse_first_index = sizes_buf[2];
-         nnz_A_diag = sizes_buf[3];
-         nnz_A_offd = sizes_buf[4];
-         nnz_P_diag = sizes_buf[5];
-         nnz_P_offd = sizes_buf[6];
-         nnz_R_diag = sizes_buf[7];
-         nnz_R_offd = sizes_buf[8];
+         proc_fine_first_index = sizes_buf[2];
+         proc_coarse_first_index = sizes_buf[3];
+         nnz_A_diag = sizes_buf[4];
+         nnz_A_offd = sizes_buf[5];
+         nnz_P_diag = sizes_buf[6];
+         nnz_P_offd = sizes_buf[7];
+         nnz_R_diag = sizes_buf[8];
+         nnz_R_offd = sizes_buf[9];
 
          // Broadcast the global indices
          HYPRE_Int *global_indices;
@@ -1691,7 +1701,44 @@ TestCompGrids2(hypre_ParAMGData *amg_data)
             hypre_MPI_Bcast(P_offd_data, nnz_P_offd, HYPRE_MPI_COMPLEX, proc, hypre_MPI_COMM_WORLD);
          }
 
-         // !!! TODO R
+         HYPRE_Int *R_diag_rowPtr;
+         HYPRE_Int *R_diag_colInd;
+         HYPRE_Complex *R_diag_data;
+         HYPRE_Int *R_offd_rowPtr;
+         HYPRE_Int *R_offd_colInd;
+         HYPRE_Complex *R_offd_data;
+         if (hypre_ParAMGDataRestriction(amg_data) && level != 0)
+         {
+            // Broadcast the R diag row pointer
+            if (myid == proc) R_diag_rowPtr = hypre_CSRMatrixI(R_diag);
+            else R_diag_rowPtr = hypre_CTAlloc(HYPRE_Int, num_nonowned+1, HYPRE_MEMORY_HOST);
+            hypre_MPI_Bcast(R_diag_rowPtr, num_nonowned+1, HYPRE_MPI_INT, proc, hypre_MPI_COMM_WORLD);
+
+            // Broadcast the P diag column indices
+            if (myid == proc) R_diag_colInd = hypre_CSRMatrixJ(R_diag);
+            else R_diag_colInd = hypre_CTAlloc(HYPRE_Int, nnz_R_diag, HYPRE_MEMORY_HOST);
+            hypre_MPI_Bcast(R_diag_colInd, nnz_R_diag, HYPRE_MPI_INT, proc, hypre_MPI_COMM_WORLD);
+
+            // Broadcast the P diag data
+            if (myid == proc) R_diag_data = hypre_CSRMatrixData(R_diag);
+            else R_diag_data = hypre_CTAlloc(HYPRE_Complex, nnz_R_diag, HYPRE_MEMORY_HOST);
+            hypre_MPI_Bcast(R_diag_data, nnz_R_diag, HYPRE_MPI_COMPLEX, proc, hypre_MPI_COMM_WORLD);
+
+            // Broadcast the P offd row pointer
+            if (myid == proc) R_offd_rowPtr = hypre_CSRMatrixI(R_offd);
+            else R_offd_rowPtr = hypre_CTAlloc(HYPRE_Int, num_nonowned+1, HYPRE_MEMORY_HOST);
+            hypre_MPI_Bcast(R_offd_rowPtr, num_nonowned+1, HYPRE_MPI_INT, proc, hypre_MPI_COMM_WORLD);
+
+            // Broadcast the P offd column indices
+            if (myid == proc) R_offd_colInd = hypre_CSRMatrixJ(R_offd);
+            else R_offd_colInd = hypre_CTAlloc(HYPRE_Int, nnz_R_offd, HYPRE_MEMORY_HOST);
+            hypre_MPI_Bcast(R_offd_colInd, nnz_R_offd, HYPRE_MPI_INT, proc, hypre_MPI_COMM_WORLD);
+
+            // Broadcast the P offd data
+            if (myid == proc) R_offd_data = hypre_CSRMatrixData(R_offd);
+            else R_offd_data = hypre_CTAlloc(HYPRE_Complex, nnz_R_offd, HYPRE_MEMORY_HOST);
+            hypre_MPI_Bcast(R_offd_data, nnz_R_offd, HYPRE_MPI_COMPLEX, proc, hypre_MPI_COMM_WORLD);
+         }
 
          /////////////////////////////////
          // Check all info
@@ -1876,7 +1923,91 @@ TestCompGrids2(hypre_ParAMGData *amg_data)
                   
                   hypre_ParCSRMatrixRestoreRow( P[level], global_indices[i], &row_size, &row_col_ind, &row_values );
                }
-               // !!! TODO R
+               
+               /////////////////////////////////
+               // Check R info
+               /////////////////////////////////
+               
+               if (hypre_ParAMGDataRestriction(amg_data) && level != 0)
+               {
+                  hypre_ParCSRMatrixGetRow( R[level-1], global_indices[i], &row_size, &row_col_ind, &row_values );
+
+                  // Check row size
+                  if (row_size != R_diag_rowPtr[i+1] - R_diag_rowPtr[i] + R_offd_rowPtr[i+1] - R_offd_rowPtr[i])
+                  {
+                     hypre_printf("Error: proc %d has incorrect R row size at global index %d on level %d, checked by rank %d\n", proc, global_indices[i], level, myid);
+                     test_failed = 1;
+                  }
+                  HYPRE_Int num_local_found = 0;
+
+                  // Check diag entries
+                  for (j = R_diag_rowPtr[i]; j < R_diag_rowPtr[i+1]; j++)
+                  {
+                     // Get the global column index
+                     HYPRE_Int global_col_index = R_diag_colInd[j];
+
+                     // Check for that index in the local row
+                     HYPRE_Int found = 0;
+                     for (k = 0; k < row_size; k++)
+                     {
+                        if (global_col_index == row_col_ind[k])
+                        {
+                           found = 1;
+                           num_local_found++;
+                           if (R_diag_data[j] != row_values[k])
+                           {
+                              hypre_printf("Error: proc %d has incorrect R diag data at global index %d on level %d, checked by rank %d\n", proc, global_indices[i], level, myid);
+                              test_failed = 1;
+                           }
+                           break;
+                        }
+                     }
+                     if (!found)
+                     {
+                        hypre_printf("Error: proc %d has incorrect R diag col index at global index %d on level %d, checked by rank %d\n", proc, global_indices[i], level, myid);
+                        test_failed = 1;
+                     }
+                  }
+                  
+                  // Check offd entries
+                  for (j = R_offd_rowPtr[i]; j < R_offd_rowPtr[i+1]; j++)
+                  {
+                     // Get the global column index
+                     HYPRE_Int col_index = R_offd_colInd[j];
+                     HYPRE_Int global_col_index = col_index + proc_fine_first_index;
+
+                     // Check for that index in the local row
+                     HYPRE_Int found = 0;
+                     for (k = 0; k < row_size; k++)
+                     {
+                        if (global_col_index == row_col_ind[k])
+                        {
+                           found = 1;
+                           num_local_found++;
+                           if (R_offd_data[j] != row_values[k])
+                           {
+                              hypre_printf("Error: proc %d has incorrect R offd data at global index %d on level %d, checked by rank %d\n", proc, global_indices[i], level, myid);
+                              test_failed = 1;
+                           }
+                           break;
+                        }
+                     }
+                     if (!found)
+                     {
+                        hypre_printf("Error: proc %d has incorrect R offd col index at global index %d on level %d, checked by rank %d\n", proc, global_indices[i], level, myid);
+                        test_failed = 1;
+                     }
+                  }
+
+                  // Make sure all local entries accounted for
+                  if (num_local_found != row_size)
+                  {
+                     hypre_printf("Error: proc %d does not have all R row entries at global index %d on level %d, checked by rank %d\n", proc, global_indices[i], level, myid);
+                     test_failed = 1;
+                  }
+                  
+                  hypre_ParCSRMatrixRestoreRow( R[level-1], global_indices[i], &row_size, &row_col_ind, &row_values );
+               }
             }
          }
 
@@ -1900,7 +2031,15 @@ TestCompGrids2(hypre_ParAMGData *amg_data)
                hypre_TFree(P_offd_colInd, HYPRE_MEMORY_HOST);
                hypre_TFree(P_offd_data, HYPRE_MEMORY_HOST);
             }
-            // !!! TODO R
+            if (hypre_ParAMGDataRestriction(amg_data) && level != 0)
+            {
+               hypre_TFree(R_diag_rowPtr, HYPRE_MEMORY_HOST);
+               hypre_TFree(R_diag_colInd, HYPRE_MEMORY_HOST);
+               hypre_TFree(R_diag_data, HYPRE_MEMORY_HOST);
+               hypre_TFree(R_offd_rowPtr, HYPRE_MEMORY_HOST);
+               hypre_TFree(R_offd_colInd, HYPRE_MEMORY_HOST);
+               hypre_TFree(R_offd_data, HYPRE_MEMORY_HOST);
+            }
          }
       }
    }

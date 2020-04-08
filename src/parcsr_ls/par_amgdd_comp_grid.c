@@ -990,8 +990,8 @@ hypre_ParCompGridFinalize( hypre_ParAMGData *amg_data, hypre_ParCompGrid **compG
       // Fix up R col indices on this level
       if (hypre_ParAMGDataRestriction(amg_data) && level != num_levels-1)
       {
-         R_diag = hypre_ParCompGridMatrixNonOwnedDiag(hypre_ParCompGridP(compGrid[level]));
-         R_offd = hypre_ParCompGridMatrixOwnedOffd(hypre_ParCompGridP(compGrid[level]));
+         R_diag = hypre_ParCompGridMatrixNonOwnedDiag(hypre_ParCompGridR(compGrid[level]));
+         R_offd = hypre_ParCompGridMatrixOwnedOffd(hypre_ParCompGridR(compGrid[level]));
 
          for (i = 0; i < hypre_CSRMatrixI(R_diag)[ hypre_ParCompGridNumNonOwnedNodes(compGrid[level+1]) ]; i++)
          {
@@ -1577,10 +1577,10 @@ hypre_ParCompGridDebugPrint ( hypre_ParCompGrid *compGrid, const char* filename 
       if (hypre_ParCompGridMatrixNonOwnedDiag(hypre_ParCompGridR(compGrid)))
       {
          sprintf(matrix_filename, "%s_R_nonowned_diag", filename);
-         hypre_CSRMatrixPrintCustom(  hypre_ParCompGridMatrixNonOwnedDiag(hypre_ParCompGridR(compGrid)), matrix_filename, hypre_ParCompGridNumNonOwnedNodes(compGrid));
+         hypre_CSRMatrixPrint(  hypre_ParCompGridMatrixNonOwnedDiag(hypre_ParCompGridR(compGrid)), matrix_filename);
 
          sprintf(matrix_filename, "%s_R_nonowned_offd", filename);
-         hypre_CSRMatrixPrintCustom(  hypre_ParCompGridMatrixNonOwnedOffd(hypre_ParCompGridR(compGrid)), matrix_filename, hypre_ParCompGridNumNonOwnedNodes(compGrid));
+         hypre_CSRMatrixPrint(  hypre_ParCompGridMatrixNonOwnedOffd(hypre_ParCompGridR(compGrid)), matrix_filename);
       }
    }
 
