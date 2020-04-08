@@ -5568,20 +5568,23 @@ hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix  *A,
       k++;
 
       // Get max abs-value element of this row
-      HYPRE_Real temp_max = 0;
+      HYPRE_Real sgdiag = A_diag_a[A_diag_i[i]]>0 ? 1: -1;
+      HYPRE_Real temp_min = 1e30;
       if (strength_thresh > 0) {
          for (j = A_diag_i[i]+1; j < A_diag_i[i+1]; j++) {
-            if (hypre_cabs(A_diag_a[j]) > temp_max) {
-               temp_max = hypre_cabs(A_diag_a[j]);
+            //            if (hypre_cabs(A_diag_a[j]) > temp_max) {
+            //               temp_max = hypre_cabs(A_diag_a[j]);
+            if (sgdiag*A_diag_a[j] < temp_min) {
+               temp_min = sgdiag*A_diag_a[j];
             }
          }
          for (j = A_offd_i[i]; j < A_offd_i[i+1]; j++) {
-            if (hypre_cabs(A_offd_a[j]) > temp_max) {
-               temp_max = hypre_cabs(A_offd_a[j]);
+            if (sgdiag*A_offd_a[j] < temp_min) {
+               temp_min = sgdiag*A_offd_a[j];
             }
          }
       }
-      B_maxel_row[k-1] = temp_max;
+      B_maxel_row[k-1] = temp_min;
 
       // add one for diagonal element
       j = A_diag_i[i];
@@ -5593,7 +5596,8 @@ hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix  *A,
       // Count nnzs larger than tolerance times max row element
       for (j = A_diag_i[i]+1; j < A_diag_i[i+1]; j++) {
          if ( (sub_idx_diag[A_diag_j[j]] != -1) &&
-              (hypre_cabs(A_diag_a[j]) > (strength_thresh*temp_max)) )
+            //              (hypre_cabs(A_diag_a[j]) > (strength_thresh*temp_max)) )
+              (sgdiag*A_diag_a[j] < strength_thresh*temp_min))
          {
             B_nnz_diag++;
          }
@@ -5601,7 +5605,8 @@ hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix  *A,
       for (j = A_offd_i[i]; j < A_offd_i[i+1]; j++)
       {
          if ( (sub_idx_offd[A_offd_j[j]] != -1) &&
-              (hypre_cabs(A_offd_a[j]) > (strength_thresh*temp_max)) )
+            //              (hypre_cabs(A_offd_a[j]) > (strength_thresh*temp_max)) )
+              (sgdiag*A_offd_a[j] < strength_thresh*temp_min))
          {
             B_nnz_offd++;
          }
@@ -5626,11 +5631,12 @@ hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix  *A,
       }
       HYPRE_Real maxel = B_maxel_row[k];
       k++;
-
+      HYPRE_Real sgdiag = A_diag_a[A_diag_i[i]]>0 ? 1: -1;
       for (j = A_diag_i[i]; j < A_diag_i[i+1]; j++)
       {
          HYPRE_Int j1 = sub_idx_diag[A_diag_j[j]];
-         if ( (j1 != -1) && ( (hypre_cabs(A_diag_a[j]) > (strength_thresh*maxel)) || j==A_diag_i[i] ) )
+         //         if ( (j1 != -1) && ( (hypre_cabs(A_diag_a[j]) > (strength_thresh*maxel)) || j==A_diag_i[i] ) )
+         if ( (j1 != -1) && ( (sgdiag*A_diag_a[j] < strength_thresh*maxel) || j==A_diag_i[i] ) )
          {
             B_diag_j[k1] = j1;
             B_diag_a[k1] = A_diag_a[j];
@@ -5640,7 +5646,8 @@ hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix  *A,
       for (j = A_offd_i[i]; j < A_offd_i[i+1]; j++)
       {
          HYPRE_Int j1 = sub_idx_offd[A_offd_j[j]];
-         if ((j1 != -1) && (hypre_cabs(A_offd_a[j]) > (strength_thresh*maxel)))
+         //         if ((j1 != -1) && (hypre_cabs(A_offd_a[j]) > (strength_thresh*maxel)))
+         if ((j1 != -1) && (sgdiag*A_offd_a[j] < strength_thresh*maxel))
          {
             hypre_assert(j1 >= 0 && j1 < num_cols_B_offd);
             B_offd_j[k2] = j1;
@@ -5662,12 +5669,15 @@ hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix  *A,
                                 B_nnz_diag,
                                 B_nnz_offd);
 
+
    B_diag = hypre_ParCSRMatrixDiag(B);
+   hypre_CSRMatrixMemoryLocation(B_diag) = HYPRE_MEMORY_HOST;
    hypre_CSRMatrixData(B_diag) = B_diag_a;
    hypre_CSRMatrixI(B_diag)    = B_diag_i;
    hypre_CSRMatrixJ(B_diag)    = B_diag_j;
 
    B_offd = hypre_ParCSRMatrixOffd(B);
+   hypre_CSRMatrixMemoryLocation(B_offd) = HYPRE_MEMORY_HOST;
    hypre_CSRMatrixData(B_offd) = B_offd_a;
    hypre_CSRMatrixI(B_offd)    = B_offd_i;
    hypre_CSRMatrixJ(B_offd)    = B_offd_j;
