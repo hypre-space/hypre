@@ -179,15 +179,16 @@ typedef struct
    hypre_ParCompGridVector     *temp2;
    hypre_ParCompGridVector     *temp3;
 
-   // TODO
    HYPRE_Real       *l1_norms;
    HYPRE_Int        *cf_marker_array;
    int              *owned_c_mask;
    int              *owned_f_mask;
    int              *nonowned_c_mask;
    int              *nonowned_f_mask;
+   HYPRE_Int        *owned_relax_ordering;
+   HYPRE_Int        *nonowned_relax_ordering;
 
-   // HYPRE_Real       *cheby_coeffs;
+   HYPRE_Real       *cheby_coeffs;
 
 } hypre_ParCompGrid;
 
@@ -227,14 +228,15 @@ typedef struct
 #define hypre_ParCompGridTemp2(compGrid)        ((compGrid) -> temp2)
 #define hypre_ParCompGridTemp3(compGrid)        ((compGrid) -> temp3)
 
-// TODO
 #define hypre_ParCompGridL1Norms(compGrid)         ((compGrid) -> l1_norms)
 #define hypre_ParCompGridCFMarkerArray(compGrid)         ((compGrid) -> cf_marker_array)
 #define hypre_ParCompGridOwnedCMask(compGrid)         ((compGrid) -> owned_c_mask)
 #define hypre_ParCompGridOwnedFMask(compGrid)         ((compGrid) -> owned_f_mask)
 #define hypre_ParCompGridNonOwnedCMask(compGrid)         ((compGrid) -> nonowned_c_mask)
 #define hypre_ParCompGridNonOwnedFMask(compGrid)         ((compGrid) -> nonowned_f_mask)
+#define hypre_ParCompGridOwnedRelaxOrdering(compGrid)         ((compGrid) -> owned_relax_ordering)
+#define hypre_ParCompGridNonOwnedRelaxOrdering(compGrid)         ((compGrid) -> nonowned_relax_ordering)
 
-// #define hypre_ParCompGridChebyCoeffs(compGrid)         ((compGrid) -> cheby_coeffs)
+#define hypre_ParCompGridChebyCoeffs(compGrid)         ((compGrid) -> cheby_coeffs)
 
 #endif

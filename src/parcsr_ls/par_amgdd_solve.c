@@ -624,7 +624,7 @@ hypre_BoomerAMGRDSolutionCommunication( void *amg_vdata )
       // Get some communication info
       comm = hypre_ParCSRMatrixComm(A_array[level]);
       num_send_procs = hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg)[level];
-      num_recv_procs = hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[level]; // !!! TODO: processor agglomeration?
+      num_recv_procs = hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[level];
 
       if ( num_send_procs || num_recv_procs ) // If there are any owned nodes on this level
       {

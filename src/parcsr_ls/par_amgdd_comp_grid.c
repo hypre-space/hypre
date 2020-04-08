@@ -205,6 +205,10 @@ hypre_ParCompGridCreate ()
    hypre_ParCompGridOwnedFMask(compGrid) = NULL;
    hypre_ParCompGridNonOwnedCMask(compGrid) = NULL;
    hypre_ParCompGridNonOwnedFMask(compGrid) = NULL;
+   hypre_ParCompGridOwnedRelaxOrdering(compGrid) = NULL;
+   hypre_ParCompGridNonOwnedRelaxOrdering(compGrid) = NULL;
+
+   hypre_ParCompGridChebyCoeffs(compGrid) = NULL;
 
    return compGrid;
 }
@@ -265,6 +269,13 @@ hypre_ParCompGridDestroy ( hypre_ParCompGrid *compGrid )
       hypre_TFree(hypre_ParCompGridNonOwnedCMask(compGrid), HYPRE_MEMORY_SHARED);
    if (hypre_ParCompGridNonOwnedFMask(compGrid))
       hypre_TFree(hypre_ParCompGridNonOwnedFMask(compGrid), HYPRE_MEMORY_SHARED);
+   if (hypre_ParCompGridOwnedRelaxOrdering(compGrid))
+      hypre_TFree(hypre_ParCompGridOwnedRelaxOrdering(compGrid), HYPRE_MEMORY_SHARED);
+   if (hypre_ParCompGridNonOwnedRelaxOrdering(compGrid))
+      hypre_TFree(hypre_ParCompGridNonOwnedRelaxOrdering(compGrid), HYPRE_MEMORY_SHARED);
+
+   if(hypre_ParCompGridChebyCoeffs(compGrid))
+      hypre_TFree(hypre_ParCompGridChebyCoeffs(compGrid), HYPRE_MEMORY_SHARED);
 
    hypre_TFree(compGrid, HYPRE_MEMORY_HOST);   
    
