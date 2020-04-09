@@ -1116,8 +1116,12 @@ hypre_BoomerAMGDD_FAC_PCG( hypre_ParCompGrid *compGrid, hypre_ParCompGridMatrix 
 {
     HYPRE_Solver pcg_solver = hypre_ParCompGridPCGSolver(compGrid);
 
+    hypre_CSRMatrixMatvec(-1.0, hypre_ParCompGridMatrixRealGhost(A), hypre_ParCompGridVectorNonOwned(u), 1.0, hypre_ParCompGridVectorNonOwned(f));
+
     hypre_ParAMGDDPCGSolve(pcg_solver, hypre_ParCompGridA(compGrid), hypre_ParCompGridF(compGrid), hypre_ParCompGridU(compGrid) );
 
+    hypre_CSRMatrixMatvec(1.0, hypre_ParCompGridMatrixRealGhost(A), hypre_ParCompGridVectorNonOwned(u), 1.0, hypre_ParCompGridVectorNonOwned(f));
+    
     return 0;
 }
 

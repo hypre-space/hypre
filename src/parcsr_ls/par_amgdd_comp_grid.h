@@ -103,6 +103,9 @@ typedef struct
    hypre_CSRMatrix      *nonowned_diag; // Domain: nonowned domain of mat. Range: nonowned range of mat.
    hypre_CSRMatrix      *nonowned_offd; // Domain: owned domain of mat. Range: nonowned range of mat.
 
+   hypre_CSRMatrix      *real_real; // Domain: nonowned real. Range: nonowned real.
+   hypre_CSRMatrix      *real_ghost; // Domain: nonowned ghost. Range: nonowned real.
+
    HYPRE_Int            owns_owned_matrices;
    HYPRE_Int            owns_offd_col_indices;
 
@@ -116,6 +119,8 @@ typedef struct
 #define hypre_ParCompGridMatrixOwnedOffd(matrix)            ((matrix) -> owned_offd)
 #define hypre_ParCompGridMatrixNonOwnedDiag(matrix)            ((matrix) -> nonowned_diag)
 #define hypre_ParCompGridMatrixNonOwnedOffd(matrix)            ((matrix) -> nonowned_offd)
+#define hypre_ParCompGridMatrixRealReal(matrix)            ((matrix) -> real_real)
+#define hypre_ParCompGridMatrixRealGhost(matrix)            ((matrix) -> real_ghost)
 #define hypre_ParCompGridMatrixOwnsOwnedMatrices(matrix)       ((matrix) -> owns_owned_matrices)
 #define hypre_ParCompGridMatrixOwnsOffdColIndices(matrix)         ((matrix) -> owns_offd_col_indices)
 

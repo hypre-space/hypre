@@ -100,6 +100,27 @@ HYPRE_Int hypre_ParCompGridMatvec( HYPRE_Complex alpha, hypre_ParCompGridMatrix 
    return 0;
 }
 
+HYPRE_Int hypre_ParCompGridRealMatvec( HYPRE_Complex alpha, hypre_ParCompGridMatrix *A, hypre_ParCompGridVector *x, HYPRE_Complex beta, hypre_ParCompGridVector *y)
+{
+   hypre_CSRMatrix *owned_diag = hypre_ParCompGridMatrixOwnedDiag(A);
+   hypre_CSRMatrix *owned_offd = hypre_ParCompGridMatrixOwnedOffd(A);
+   hypre_CSRMatrix *nonowned_diag = hypre_ParCompGridMatrixRealReal(A);
+   hypre_CSRMatrix *nonowned_offd = hypre_ParCompGridMatrixNonOwnedOffd(A);
+
+   hypre_Vector *x_owned = hypre_ParCompGridVectorOwned(x);
+   hypre_Vector *x_nonowned = hypre_ParCompGridVectorNonOwned(x);
+
+   hypre_Vector *y_owned = hypre_ParCompGridVectorOwned(y);
+   hypre_Vector *y_nonowned = hypre_ParCompGridVectorNonOwned(y);
+
+   hypre_CSRMatrixMatvec(alpha, owned_diag, x_owned, beta, y_owned);
+   hypre_CSRMatrixMatvec(alpha, owned_offd, x_nonowned, 1.0, y_owned);
+   hypre_CSRMatrixMatvec(alpha, nonowned_diag, x_nonowned, beta, y_nonowned);
+   hypre_CSRMatrixMatvec(alpha, nonowned_offd, x_owned, 1.0, y_nonowned);
+
+   return 0;
+}
+
 hypre_ParCompGridVector *hypre_ParCompGridVectorCreate()
 {
    hypre_ParCompGridVector *vector = hypre_CTAlloc(hypre_ParCompGridVector, 1, HYPRE_MEMORY_HOST);
@@ -798,6 +819,18 @@ hypre_ParCompGridFinalize( hypre_ParAMGData *amg_data, hypre_ParCompGrid **compG
       HYPRE_Int *new_A_offd_rowPtr = hypre_CTAlloc(HYPRE_Int, num_nonowned+1, HYPRE_MEMORY_SHARED);
       HYPRE_Int *new_A_offd_colInd = hypre_CTAlloc(HYPRE_Int, A_offd_nnz, HYPRE_MEMORY_SHARED);
       HYPRE_Complex *new_A_offd_data = hypre_CTAlloc(HYPRE_Complex, A_offd_nnz, HYPRE_MEMORY_SHARED);
+      
+      hypre_CSRMatrix *A_real_real; 
+      A_real_real = hypre_CSRMatrixCreate(num_nonowned_real_nodes, num_nonowned_real_nodes, A_diag_nnz); // !!! Optimization: this is overallocated (too many nonzeros allowed)
+      hypre_CSRMatrixInitialize(A_real_real);
+      hypre_ParCompGridMatrixRealReal(hypre_ParCompGridA(compGrid[level])) = A_real_real;
+      HYPRE_Int A_real_real_nnz = 0;
+      
+      hypre_CSRMatrix *A_real_ghost; 
+      A_real_ghost = hypre_CSRMatrixCreate(num_nonowned_real_nodes, num_nonowned, A_diag_nnz); // !!! Optimization: this is overallocated (too many nonzeros allowed). NOTE: col indexing is from beginning of nonowned nodes (i.e. num cols = total num nonowned instead of num ghost)
+      hypre_CSRMatrixInitialize(A_real_ghost);
+      hypre_ParCompGridMatrixRealGhost(hypre_ParCompGridA(compGrid[level])) = A_real_ghost;
+      HYPRE_Int A_real_ghost_nnz = 0;
 
       hypre_CSRMatrix *P_diag;
       hypre_CSRMatrix *P_offd;
@@ -869,13 +902,28 @@ hypre_ParCompGridFinalize( hypre_ParAMGData *amg_data, hypre_ParCompGrid **compG
          if (hypre_ParCompGridNonOwnedRealMarker(compGrid[level])[i])
          {
             new_A_diag_rowPtr[node_cnt] = A_diag_cnt;
+            hypre_CSRMatrixI(A_real_real)[node_cnt] = A_real_real_nnz;
+            hypre_CSRMatrixI(A_real_ghost)[node_cnt] = A_real_ghost_nnz;
             for (j = hypre_CSRMatrixI(A_diag)[i]; j < hypre_CSRMatrixI(A_diag)[i+1]; j++)
             {
                if (hypre_CSRMatrixJ(A_diag)[j] >= 0)
                {
-                  new_A_diag_colInd[A_diag_cnt] = new_indices[ hypre_CSRMatrixJ(A_diag)[j] ];
+                  HYPRE_Int new_col_ind = new_indices[ hypre_CSRMatrixJ(A_diag)[j] ];
+                  new_A_diag_colInd[A_diag_cnt] = new_col_ind;
                   new_A_diag_data[A_diag_cnt] = hypre_CSRMatrixData(A_diag)[j];
                   A_diag_cnt++;
+                  if (new_col_ind < num_nonowned_real_nodes)
+                  {
+                      hypre_CSRMatrixJ(A_real_real)[A_real_real_nnz] = new_col_ind;
+                      hypre_CSRMatrixData(A_real_real)[A_real_real_nnz] = hypre_CSRMatrixData(A_diag)[j];
+                      A_real_real_nnz++;
+                  }
+                  else 
+                  {
+                      hypre_CSRMatrixJ(A_real_ghost)[A_real_ghost_nnz] = new_col_ind;
+                      hypre_CSRMatrixData(A_real_ghost)[A_real_ghost_nnz] = hypre_CSRMatrixData(A_diag)[j];
+                      A_real_ghost_nnz++;
+                  }
                }
             }
             new_A_offd_rowPtr[node_cnt] = A_offd_cnt;
@@ -1015,6 +1063,10 @@ hypre_ParCompGridFinalize( hypre_ParAMGData *amg_data, hypre_ParCompGrid **compG
       }
       new_A_diag_rowPtr[num_nonowned] = A_diag_cnt;
       new_A_offd_rowPtr[num_nonowned] = A_offd_cnt;
+      hypre_CSRMatrixI(A_real_real)[num_nonowned_real_nodes] = A_real_real_nnz;
+      hypre_CSRMatrixI(A_real_ghost)[num_nonowned_real_nodes] = A_real_ghost_nnz;
+      hypre_CSRMatrixNumNonzeros(A_real_real) = A_real_real_nnz;
+      hypre_CSRMatrixNumNonzeros(A_real_ghost) = A_real_ghost_nnz;
       if (level != num_levels-1)
       {
          new_P_diag_rowPtr[num_nonowned] = P_diag_cnt;

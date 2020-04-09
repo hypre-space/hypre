@@ -121,6 +121,9 @@ typedef struct
    hypre_CSRMatrix      *nonowned_diag; // Domain: nonowned domain of mat. Range: nonowned range of mat.
    hypre_CSRMatrix      *nonowned_offd; // Domain: owned domain of mat. Range: nonowned range of mat.
 
+   hypre_CSRMatrix      *real_real; // Domain: nonowned real. Range: nonowned real.
+   hypre_CSRMatrix      *real_ghost; // Domain: nonowned ghost. Range: nonowned real.
+   
    HYPRE_Int            owns_owned_matrices;
    HYPRE_Int            owns_offd_col_indices;
 
@@ -134,6 +137,8 @@ typedef struct
 #define hypre_ParCompGridMatrixOwnedOffd(matrix)            ((matrix) -> owned_offd)
 #define hypre_ParCompGridMatrixNonOwnedDiag(matrix)            ((matrix) -> nonowned_diag)
 #define hypre_ParCompGridMatrixNonOwnedOffd(matrix)            ((matrix) -> nonowned_offd)
+#define hypre_ParCompGridMatrixRealReal(matrix)            ((matrix) -> real_real)
+#define hypre_ParCompGridMatrixRealGhost(matrix)            ((matrix) -> real_ghost)
 #define hypre_ParCompGridMatrixOwnsOwnedMatrices(matrix)       ((matrix) -> owns_owned_matrices)
 #define hypre_ParCompGridMatrixOwnsOffdColIndices(matrix)         ((matrix) -> owns_offd_col_indices)
 
@@ -2187,6 +2192,7 @@ HYPRE_Int hypre_ParAMGDDKrylovIdentity( void *vdata,
 hypre_ParCompGridMatrix* hypre_ParCompGridMatrixCreate();
 HYPRE_Int hypre_ParCompGridMatrixDestroy(hypre_ParCompGridMatrix *matrix);
 HYPRE_Int hypre_ParCompGridMatvec( HYPRE_Complex alpha, hypre_ParCompGridMatrix *A, hypre_ParCompGridVector *x, HYPRE_Complex beta, hypre_ParCompGridVector *y);
+HYPRE_Int hypre_ParCompGridRealMatvec( HYPRE_Complex alpha, hypre_ParCompGridMatrix *A, hypre_ParCompGridVector *x, HYPRE_Complex beta, hypre_ParCompGridVector *y);
 hypre_ParCompGridVector* hypre_ParCompGridVectorCreate();
 HYPRE_Int hypre_ParCompGridVectorInitialize(hypre_ParCompGridVector *vector, HYPRE_Int num_owned, HYPRE_Int num_nonowned);
 HYPRE_Int hypre_ParCompGridVectorDestroy(hypre_ParCompGridVector *vector);
