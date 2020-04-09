@@ -78,6 +78,7 @@ FILES =\
  HYPRE_ams.c\
  HYPRE_ads.c\
  HYPRE_ame.c\
+ par_2s_interp.c\
  par_amg.c\
  par_amg_setup.c\
  par_amg_solve.c\
@@ -102,6 +103,7 @@ FILES =\
  par_interp_trunc_device.c\
  par_jacobi_interp.c\
  par_krylov_func.c\
+ par_mod_lr_interp.c\
  par_multi_interp.c\
  par_laplace.c\
  par_laplace_27pt.c\

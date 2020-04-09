@@ -677,6 +677,10 @@ HYPRE_Int HYPRE_ParVectorInnerProd ( HYPRE_ParVector x , HYPRE_ParVector y , HYP
 HYPRE_Int HYPRE_VectorToParVector ( MPI_Comm comm , HYPRE_Vector b , HYPRE_BigInt *partitioning , HYPRE_ParVector *vector );
 HYPRE_Int HYPRE_ParVectorGetValues ( HYPRE_ParVector vector, HYPRE_Int num_values, HYPRE_BigInt *indices , HYPRE_Complex *values);
 
+/*gen_fffc.c */
+HYPRE_Int hypre_ParCSRMatrixGenerateFFFC(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker , HYPRE_BigInt *cpts_starts , hypre_ParCSRMatrix *S, hypre_ParCSRMatrix **A_FC_ptr , hypre_ParCSRMatrix **A_FF_ptr ) ;
+HYPRE_Int hypre_ParCSRMatrixGenerateFFFC3(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker , HYPRE_BigInt *cpts_starts , hypre_ParCSRMatrix *S, hypre_ParCSRMatrix **A_FC_ptr , hypre_ParCSRMatrix **A_FF_ptr ) ;
+
 /* new_commpkg.c */
 HYPRE_Int hypre_PrintCommpkg ( hypre_ParCSRMatrix *A , const char *file_name );
 HYPRE_Int hypre_ParCSRCommPkgCreateApart_core ( MPI_Comm comm , HYPRE_BigInt *col_map_off_d , HYPRE_BigInt first_col_diag , HYPRE_Int num_cols_off_d , HYPRE_BigInt global_num_cols , HYPRE_Int *p_num_recvs , HYPRE_Int **p_recv_procs , HYPRE_Int **p_recv_vec_starts , HYPRE_Int *p_num_sends , HYPRE_Int **p_send_procs , HYPRE_Int **p_send_map_starts , HYPRE_Int **p_send_map_elements , hypre_IJAssumedPart *apart );
