@@ -111,6 +111,7 @@ typedef struct
    HYPRE_Real                fac_tol;
    HYPRE_Int                 fac_cycle_type;
    HYPRE_Int                 fac_relax_type;
+   HYPRE_Int                 fac_use_pcg;
    HYPRE_Int                 fac_num_relax;
    HYPRE_Int                 padding;
    HYPRE_Int                 variable_padding;
@@ -122,7 +123,7 @@ typedef struct
    hypre_ParVector          *amgdd_correction_vector;
    hypre_ParCompGrid       **compGrid;
    hypre_ParCompGridCommPkg *compGridCommPkg;
-   HYPRE_PtrToUserFACRelaxation amgddUserFACRelaxation;
+   HYPRE_Int       (*amgddUserFACRelaxation)( hypre_ParCompGrid*, hypre_ParCompGridMatrix*, hypre_ParCompGridVector*, hypre_ParCompGridVector* );
 
    /* Block data */
    hypre_ParCSRBlockMatrix **A_block_array;
@@ -392,6 +393,7 @@ typedef struct
 #define hypre_ParAMGDataFACTol(amg_data) ((amg_data)->fac_tol)
 #define hypre_ParAMGDataFACCycleType(amg_data) ((amg_data)->fac_cycle_type)
 #define hypre_ParAMGDataFACRelaxType(amg_data) ((amg_data)->fac_relax_type)
+#define hypre_ParAMGDataFACUsePCG(amg_data) ((amg_data)->fac_use_pcg)
 #define hypre_ParAMGDataFACNumRelax(amg_data) ((amg_data)->fac_num_relax)
 #define hypre_ParAMGDataAMGDDPadding(amg_data) ((amg_data)->padding)
 #define hypre_ParAMGDataAMGDDVariablePadding(amg_data) ((amg_data)->variable_padding)

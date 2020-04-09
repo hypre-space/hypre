@@ -40,6 +40,11 @@ HYPRE_Int LocalIndexBinarySearch( hypre_ParCompGrid *compGrid, HYPRE_Int global_
    return -1;
 }
 
+HYPRE_Int NoSetup(void* a, void* b, void* c, void* d)
+{
+    return 0;
+}
+
 hypre_ParCompGridMatrix* hypre_ParCompGridMatrixCreate()
 {
    hypre_ParCompGridMatrix *matrix = hypre_CTAlloc(hypre_ParCompGridMatrix, 1, HYPRE_MEMORY_HOST);
@@ -129,6 +134,20 @@ HYPRE_Int hypre_ParCompGridVectorDestroy(hypre_ParCompGridVector *vector)
    hypre_TFree(vector, HYPRE_MEMORY_HOST);
 
    return 0;
+}
+
+HYPRE_Real hypre_ParCompGridVectorInnerProd(hypre_ParCompGridVector *x, hypre_ParCompGridVector *y)
+{
+    return ( hypre_SeqVectorInnerProd(hypre_ParCompGridVectorOwned(x), hypre_ParCompGridVectorOwned(y))
+             + hypre_SeqVectorInnerProd(hypre_ParCompGridVectorNonOwned(x), hypre_ParCompGridVectorNonOwned(y)) );
+}
+
+HYPRE_Int hypre_ParCompGridVectorScale(HYPRE_Complex alpha, hypre_ParCompGridVector *x)
+{
+    hypre_SeqVectorScale(alpha, hypre_ParCompGridVectorOwned(x));
+    hypre_SeqVectorScale(alpha, hypre_ParCompGridVectorNonOwned(x));
+
+    return 0;
 }
 
 HYPRE_Int hypre_ParCompGridVectorAxpy(HYPRE_Complex alpha, hypre_ParCompGridVector *x, hypre_ParCompGridVector *y )
@@ -239,6 +258,9 @@ hypre_ParCompGridDestroy ( hypre_ParCompGrid *compGrid )
       hypre_ParCompGridMatrixDestroy(hypre_ParCompGridP(compGrid));
    if (hypre_ParCompGridR(compGrid)) 
       hypre_ParCompGridMatrixDestroy(hypre_ParCompGridR(compGrid));
+
+   if (hypre_ParCompGridPCGSolver(compGrid))
+       hypre_ParAMGDDPCGDestroy(hypre_ParCompGridPCGSolver(compGrid));
 
    if (hypre_ParCompGridU(compGrid)) 
       hypre_ParCompGridVectorDestroy(hypre_ParCompGridU(compGrid));
@@ -430,17 +452,43 @@ HYPRE_Int
 hypre_ParCompGridSetupRelax( hypre_ParAMGData *amg_data )
 {
    HYPRE_Int level, i, j;
+   
+   HYPRE_Int      myid;
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
-   if (hypre_ParAMGDataFACRelaxType(amg_data) == 0) hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data) = hypre_BoomerAMGDD_FAC_Jacobi;
-   else if (hypre_ParAMGDataFACRelaxType(amg_data) == 1) hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data) = hypre_BoomerAMGDD_FAC_GaussSeidel;
-   else if (hypre_ParAMGDataFACRelaxType(amg_data) == 2) hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data) = hypre_BoomerAMGDD_FAC_Cheby;
-   else if (hypre_ParAMGDataFACRelaxType(amg_data) == 3) hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data) = hypre_BoomerAMGDD_FAC_CFL1Jacobi; 
-   else if (hypre_ParAMGDataFACRelaxType(amg_data) == 4) hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data) = hypre_BoomerAMGDD_FAC_OrderedGaussSeidel; 
+   if (hypre_ParAMGDataFACUsePCG(amg_data))
+   {
+       hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data) = hypre_BoomerAMGDD_FAC_PCG;
+   }
+   else
+   {
+       if (hypre_ParAMGDataFACRelaxType(amg_data) == 0) hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data) = hypre_BoomerAMGDD_FAC_Jacobi;
+       else if (hypre_ParAMGDataFACRelaxType(amg_data) == 1) hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data) = hypre_BoomerAMGDD_FAC_GaussSeidel;
+       else if (hypre_ParAMGDataFACRelaxType(amg_data) == 2) hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data) = hypre_BoomerAMGDD_FAC_Cheby;
+       else if (hypre_ParAMGDataFACRelaxType(amg_data) == 3) hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data) = hypre_BoomerAMGDD_FAC_CFL1Jacobi; 
+       else if (hypre_ParAMGDataFACRelaxType(amg_data) == 4) hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data) = hypre_BoomerAMGDD_FAC_OrderedGaussSeidel; 
+   }
 
    for (level = hypre_ParAMGDataAMGDDStartLevel(amg_data); level < hypre_ParAMGDataNumLevels(amg_data); level++)
    {
       hypre_ParCompGrid *compGrid = hypre_ParAMGDataCompGrid(amg_data)[level];
+      hypre_ParCompGridRelaxWeight(compGrid) = hypre_ParAMGDataRelaxWeight(amg_data)[0];
 
+      if (hypre_ParAMGDataFACUsePCG(amg_data))
+      {
+         HYPRE_Solver pcg_solver = hypre_ParCompGridPCGSolver(compGrid);
+         hypre_ParAMGDDPCGCreate(&pcg_solver);
+         HYPRE_PCGSetTol(pcg_solver, 0.0);
+         HYPRE_PCGSetTwoNorm(pcg_solver, 1);
+         HYPRE_PCGSetMaxIter(pcg_solver, 1);
+         if (hypre_ParAMGDataFACRelaxType(amg_data) == 0) hypre_PCGSetPrecond( (void*) pcg_solver,(HYPRE_Int (*)(void*, void*, void*, void*))hypre_BoomerAMGDD_FAC_Jacobi, NoSetup, (void*) compGrid);
+         else if (hypre_ParAMGDataFACRelaxType(amg_data) == 1) hypre_PCGSetPrecond( (void*) pcg_solver, (HYPRE_Int (*)(void*, void*, void*, void*))hypre_BoomerAMGDD_FAC_GaussSeidel, NoSetup,  (void*) compGrid);
+         else if (hypre_ParAMGDataFACRelaxType(amg_data) == 2) hypre_PCGSetPrecond( (void*) pcg_solver, (HYPRE_Int (*)(void*, void*, void*, void*))hypre_BoomerAMGDD_FAC_Cheby, NoSetup,  (void*) compGrid);
+         else if (hypre_ParAMGDataFACRelaxType(amg_data) == 3) hypre_PCGSetPrecond( (void*) pcg_solver, (HYPRE_Int (*)(void*, void*, void*, void*))hypre_BoomerAMGDD_FAC_CFL1Jacobi, NoSetup,  (void*) compGrid); 
+         else if (hypre_ParAMGDataFACRelaxType(amg_data) == 4) hypre_PCGSetPrecond( (void*) pcg_solver, (HYPRE_Int (*)(void*, void*, void*, void*))hypre_BoomerAMGDD_FAC_OrderedGaussSeidel, NoSetup,  (void*) compGrid); 
+         hypre_ParAMGDDPCGSetup(pcg_solver, hypre_ParCompGridA(compGrid), hypre_ParCompGridF(compGrid), hypre_ParCompGridU(compGrid));
+         hypre_ParCompGridPCGSolver(compGrid) = pcg_solver;
+      }
       // if (hypre_ParAMGDataFACRelaxType(amg_data) == 2)
       // {
       //    // Setup chebyshev coefficients
@@ -582,10 +630,6 @@ hypre_ParCompGridSetupRelax( hypre_ParAMGData *amg_data )
                }
             }
          }
-
-         // Setup temporary/auxiliary vectors
-         hypre_ParCompGridTemp(compGrid) = hypre_ParCompGridVectorCreate();
-         hypre_ParCompGridVectorInitialize(hypre_ParCompGridTemp(compGrid), hypre_ParCompGridNumOwnedNodes(compGrid), hypre_ParCompGridNumNonOwnedNodes(compGrid));
       }
    }
 
@@ -1011,7 +1055,7 @@ hypre_ParCompGridFinalize( hypre_ParAMGData *amg_data, hypre_ParCompGrid **compG
          // Also fix up owned offd col indices 
          for (i = 0; i < hypre_CSRMatrixI(R_offd)[ hypre_ParCompGridNumOwnedNodes(compGrid[level+1]) ]; i++)
          {
-            if (hypre_CSRMatrixJ(R_offd)[i] >= 0)hypre_CSRMatrixJ(R_offd)[i] = new_indices[ hypre_CSRMatrixJ(R_offd)[i] ];
+            if (hypre_CSRMatrixJ(R_offd)[i] >= 0) hypre_CSRMatrixJ(R_offd)[i] = new_indices[ hypre_CSRMatrixJ(R_offd)[i] ];
          }
       }
 
@@ -1112,6 +1156,9 @@ hypre_ParCompGridFinalize( hypre_ParAMGData *amg_data, hypre_ParCompGrid **compG
       hypre_ParCompGridVectorNonOwned(hypre_ParCompGridF(compGrid[level])) = hypre_SeqVectorCreate(num_nonowned);
       hypre_SeqVectorInitialize(hypre_ParCompGridVectorNonOwned(hypre_ParCompGridF(compGrid[level])));
 
+      hypre_ParCompGridTemp(compGrid[level]) = hypre_ParCompGridVectorCreate();
+      hypre_ParCompGridVectorInitialize(hypre_ParCompGridTemp(compGrid[level]), num_owned, num_nonowned);
+      
       if (use_rd)
       {
          hypre_ParCompGridQ(compGrid[level]) = hypre_ParCompGridVectorCreate();

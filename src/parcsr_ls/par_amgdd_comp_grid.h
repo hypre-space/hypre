@@ -170,6 +170,8 @@ typedef struct
    hypre_ParCompGridMatrix *P;
    hypre_ParCompGridMatrix *R;
 
+   HYPRE_Solver pcg_solver;
+
    hypre_ParCompGridVector     *u;
    hypre_ParCompGridVector     *f;
    hypre_ParCompGridVector     *t;
@@ -179,6 +181,8 @@ typedef struct
    hypre_ParCompGridVector     *temp2;
    hypre_ParCompGridVector     *temp3;
 
+   HYPRE_Int        cycle_param;
+   HYPRE_Real       relax_weight;
    HYPRE_Real       *l1_norms;
    HYPRE_Int        *cf_marker_array;
    int              *owned_c_mask;
@@ -219,6 +223,8 @@ typedef struct
 #define hypre_ParCompGridP(compGrid)               ((compGrid) -> P)
 #define hypre_ParCompGridR(compGrid)               ((compGrid) -> R)
 
+#define hypre_ParCompGridPCGSolver(compGrid)       ((compGrid) -> pcg_solver)
+
 #define hypre_ParCompGridU(compGrid)           ((compGrid) -> u)
 #define hypre_ParCompGridF(compGrid)           ((compGrid) -> f)
 #define hypre_ParCompGridT(compGrid)           ((compGrid) -> t)
@@ -228,6 +234,8 @@ typedef struct
 #define hypre_ParCompGridTemp2(compGrid)        ((compGrid) -> temp2)
 #define hypre_ParCompGridTemp3(compGrid)        ((compGrid) -> temp3)
 
+#define hypre_ParCompGridCycleParam(compGrid)         ((compGrid) -> cycle_param)
+#define hypre_ParCompGridRelaxWeight(compGrid)         ((compGrid) -> relax_weight)
 #define hypre_ParCompGridL1Norms(compGrid)         ((compGrid) -> l1_norms)
 #define hypre_ParCompGridCFMarkerArray(compGrid)         ((compGrid) -> cf_marker_array)
 #define hypre_ParCompGridOwnedCMask(compGrid)         ((compGrid) -> owned_c_mask)
