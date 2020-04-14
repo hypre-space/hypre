@@ -137,6 +137,7 @@ typedef struct
    hypre_Vector         *owned_vector; // Original on-processor points (should be ordered)
    hypre_Vector         *nonowned_vector; // Off-processor points (not ordered)
 
+   HYPRE_Int            num_real;
    HYPRE_Int            owns_owned_vector;
 
 } hypre_ParCompGridVector;
@@ -147,11 +148,15 @@ typedef struct
 
 #define hypre_ParCompGridVectorOwned(matrix)            ((matrix) -> owned_vector)
 #define hypre_ParCompGridVectorNonOwned(matrix)            ((matrix) -> nonowned_vector)
+#define hypre_ParCompGridVectorNumReal(vector)            ((vector) -> num_real)
 #define hypre_ParCompGridVectorOwnsOwnedVector(matrix)       ((matrix) -> owns_owned_vector)
 
 
 typedef struct
 {
+   void             *amg_data;
+    
+   HYPRE_Int        level;
    HYPRE_Int        first_global_index;
    HYPRE_Int        last_global_index;
    HYPRE_Int        num_owned_nodes;
@@ -204,6 +209,8 @@ typedef struct
  * Accessor functions for the Comp Grid structure
  *--------------------------------------------------------------------------*/
 
+#define hypre_ParCompGridAMGData(compGrid)               ((compGrid) -> amg_data)
+#define hypre_ParCompGridLevel(compGrid)               ((compGrid) -> level)
 #define hypre_ParCompGridFirstGlobalIndex(compGrid)               ((compGrid) -> first_global_index)
 #define hypre_ParCompGridLastGlobalIndex(compGrid)               ((compGrid) -> last_global_index)
 #define hypre_ParCompGridNumOwnedNodes(compGrid)               ((compGrid) -> num_owned_nodes)

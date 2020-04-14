@@ -503,7 +503,7 @@ hypre_PCGSolve( void *pcg_vdata,
 
       gamma_old = gamma;
 
-      /* x = x + alpha*p */
+    /* x = x + alpha*p */
       (*(pcg_functions->Axpy))(alpha, p, x);
 
       /* r = r - alpha*s */

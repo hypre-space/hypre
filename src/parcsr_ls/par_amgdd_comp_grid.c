@@ -117,9 +117,12 @@ HYPRE_Int hypre_ParCompGridRealMatvec( HYPRE_Complex alpha, hypre_ParCompGridMat
    hypre_Vector *y_nonowned = hypre_ParCompGridVectorNonOwned(y);
 
    hypre_CSRMatrixMatvec(alpha, owned_diag, x_owned, beta, y_owned);
-   hypre_CSRMatrixMatvec(alpha, owned_offd, x_nonowned, 1.0, y_owned);
-   hypre_CSRMatrixMatvec(alpha, nonowned_diag, x_nonowned, beta, y_nonowned);
-   hypre_CSRMatrixMatvec(alpha, nonowned_offd, x_owned, 1.0, y_nonowned);
+   if (owned_offd) 
+       hypre_CSRMatrixMatvec(alpha, owned_offd, x_nonowned, 1.0, y_owned);
+   if (nonowned_diag)
+       hypre_CSRMatrixMatvec(alpha, nonowned_diag, x_nonowned, beta, y_nonowned);
+   if(nonowned_offd)
+       hypre_CSRMatrixMatvec(alpha, nonowned_offd, x_owned, 1.0, y_nonowned);
 
    return 0;
 }
@@ -136,11 +139,12 @@ hypre_ParCompGridVector *hypre_ParCompGridVectorCreate()
    return vector;
 }
 
-HYPRE_Int hypre_ParCompGridVectorInitialize(hypre_ParCompGridVector *vector, HYPRE_Int num_owned, HYPRE_Int num_nonowned)
+HYPRE_Int hypre_ParCompGridVectorInitialize(hypre_ParCompGridVector *vector, HYPRE_Int num_owned, HYPRE_Int num_nonowned, HYPRE_Int num_real)
 {
    hypre_ParCompGridVectorOwned(vector) = hypre_SeqVectorCreate(num_owned);
    hypre_SeqVectorInitialize(hypre_ParCompGridVectorOwned(vector));
    hypre_ParCompGridVectorOwnsOwnedVector(vector) = 1;
+   hypre_ParCompGridVectorNumReal(vector) = num_real;
    hypre_ParCompGridVectorNonOwned(vector) = hypre_SeqVectorCreate(num_nonowned);
    hypre_SeqVectorInitialize(hypre_ParCompGridVectorNonOwned(vector));
 
@@ -166,10 +170,41 @@ HYPRE_Real hypre_ParCompGridVectorInnerProd(hypre_ParCompGridVector *x, hypre_Pa
              + hypre_SeqVectorInnerProd(hypre_ParCompGridVectorNonOwned(x), hypre_ParCompGridVectorNonOwned(y)) );
 }
 
+HYPRE_Real hypre_ParCompGridVectorRealInnerProd(hypre_ParCompGridVector *x, hypre_ParCompGridVector *y)
+{
+    HYPRE_Int orig_x_size = hypre_VectorSize(hypre_ParCompGridVectorNonOwned(x));
+    HYPRE_Int orig_y_size = hypre_VectorSize(hypre_ParCompGridVectorNonOwned(y));
+
+    hypre_VectorSize(hypre_ParCompGridVectorNonOwned(x)) = hypre_ParCompGridVectorNumReal(x);
+    hypre_VectorSize(hypre_ParCompGridVectorNonOwned(y)) = hypre_ParCompGridVectorNumReal(y);
+
+    HYPRE_Real i_prod = hypre_SeqVectorInnerProd(hypre_ParCompGridVectorOwned(x), hypre_ParCompGridVectorOwned(y))
+             + hypre_SeqVectorInnerProd(hypre_ParCompGridVectorNonOwned(x), hypre_ParCompGridVectorNonOwned(y));
+
+    hypre_VectorSize(hypre_ParCompGridVectorNonOwned(x)) = orig_x_size;
+    hypre_VectorSize(hypre_ParCompGridVectorNonOwned(y)) = orig_y_size;
+
+    return i_prod;
+}
+
 HYPRE_Int hypre_ParCompGridVectorScale(HYPRE_Complex alpha, hypre_ParCompGridVector *x)
 {
     hypre_SeqVectorScale(alpha, hypre_ParCompGridVectorOwned(x));
     hypre_SeqVectorScale(alpha, hypre_ParCompGridVectorNonOwned(x));
+
+    return 0;
+}
+
+HYPRE_Int hypre_ParCompGridVectorRealScale(HYPRE_Complex alpha, hypre_ParCompGridVector *x)
+{
+    HYPRE_Int orig_x_size = hypre_VectorSize(hypre_ParCompGridVectorNonOwned(x));
+
+    hypre_VectorSize(hypre_ParCompGridVectorNonOwned(x)) = hypre_ParCompGridVectorNumReal(x);
+
+    hypre_SeqVectorScale(alpha, hypre_ParCompGridVectorOwned(x));
+    hypre_SeqVectorScale(alpha, hypre_ParCompGridVectorNonOwned(x));
+
+    hypre_VectorSize(hypre_ParCompGridVectorNonOwned(x)) = orig_x_size;
 
     return 0;
 }
@@ -184,6 +219,25 @@ HYPRE_Int hypre_ParCompGridVectorAxpy(HYPRE_Complex alpha, hypre_ParCompGridVect
    return 0;
 }
 
+HYPRE_Int hypre_ParCompGridVectorRealAxpy(HYPRE_Complex alpha, hypre_ParCompGridVector *x, hypre_ParCompGridVector *y )
+{
+    HYPRE_Int orig_x_size = hypre_VectorSize(hypre_ParCompGridVectorNonOwned(x));
+    HYPRE_Int orig_y_size = hypre_VectorSize(hypre_ParCompGridVectorNonOwned(y));
+
+    hypre_VectorSize(hypre_ParCompGridVectorNonOwned(x)) = hypre_ParCompGridVectorNumReal(x);
+    hypre_VectorSize(hypre_ParCompGridVectorNonOwned(y)) = hypre_ParCompGridVectorNumReal(y);
+
+   if (hypre_ParCompGridVectorOwned(x))
+      hypre_SeqVectorAxpy(alpha, hypre_ParCompGridVectorOwned(x), hypre_ParCompGridVectorOwned(y));
+   if (hypre_ParCompGridVectorNonOwned(x))
+      hypre_SeqVectorAxpy(alpha, hypre_ParCompGridVectorNonOwned(x), hypre_ParCompGridVectorNonOwned(y));
+
+    hypre_VectorSize(hypre_ParCompGridVectorNonOwned(x)) = orig_x_size;
+    hypre_VectorSize(hypre_ParCompGridVectorNonOwned(y)) = orig_y_size;
+
+   return 0;
+}
+
 HYPRE_Int hypre_ParCompGridVectorSetConstantValues(hypre_ParCompGridVector *vector, HYPRE_Complex value )
 {
    if (hypre_ParCompGridVectorOwned(vector))
@@ -194,12 +248,47 @@ HYPRE_Int hypre_ParCompGridVectorSetConstantValues(hypre_ParCompGridVector *vect
    return 0;
 }
 
+HYPRE_Int hypre_ParCompGridVectorRealSetConstantValues(hypre_ParCompGridVector *vector, HYPRE_Complex value )
+{
+   HYPRE_Int orig_vec_size = hypre_VectorSize(hypre_ParCompGridVectorNonOwned(vector));
+
+   hypre_VectorSize(hypre_ParCompGridVectorNonOwned(vector)) = hypre_ParCompGridVectorNumReal(vector);
+
+   if (hypre_ParCompGridVectorOwned(vector))
+      hypre_SeqVectorSetConstantValues(hypre_ParCompGridVectorOwned(vector), value);
+   if (hypre_ParCompGridVectorNonOwned(vector))
+      hypre_SeqVectorSetConstantValues(hypre_ParCompGridVectorNonOwned(vector), value);
+
+   hypre_VectorSize(hypre_ParCompGridVectorNonOwned(vector)) = orig_vec_size;
+
+   return 0;
+}
+
 HYPRE_Int hypre_ParCompGridVectorCopy(hypre_ParCompGridVector *x, hypre_ParCompGridVector *y )
 {
    if (hypre_ParCompGridVectorOwned(x) && hypre_ParCompGridVectorOwned(y))
       hypre_SeqVectorCopy(hypre_ParCompGridVectorOwned(x), hypre_ParCompGridVectorOwned(y));
    if (hypre_ParCompGridVectorNonOwned(x) && hypre_ParCompGridVectorNonOwned(y))
       hypre_SeqVectorCopy(hypre_ParCompGridVectorNonOwned(x), hypre_ParCompGridVectorNonOwned(y));
+   return 0;
+}
+
+HYPRE_Int hypre_ParCompGridVectorRealCopy(hypre_ParCompGridVector *x, hypre_ParCompGridVector *y )
+{
+    HYPRE_Int orig_x_size = hypre_VectorSize(hypre_ParCompGridVectorNonOwned(x));
+    HYPRE_Int orig_y_size = hypre_VectorSize(hypre_ParCompGridVectorNonOwned(y));
+
+    hypre_VectorSize(hypre_ParCompGridVectorNonOwned(x)) = hypre_ParCompGridVectorNumReal(x);
+    hypre_VectorSize(hypre_ParCompGridVectorNonOwned(y)) = hypre_ParCompGridVectorNumReal(y);
+
+   if (hypre_ParCompGridVectorOwned(x) && hypre_ParCompGridVectorOwned(y))
+      hypre_SeqVectorCopy(hypre_ParCompGridVectorOwned(x), hypre_ParCompGridVectorOwned(y));
+   if (hypre_ParCompGridVectorNonOwned(x) && hypre_ParCompGridVectorNonOwned(y))
+      hypre_SeqVectorCopy(hypre_ParCompGridVectorNonOwned(x), hypre_ParCompGridVectorNonOwned(y));
+    
+   hypre_VectorSize(hypre_ParCompGridVectorNonOwned(x)) = orig_x_size;
+   hypre_VectorSize(hypre_ParCompGridVectorNonOwned(y)) = orig_y_size;
+
    return 0;
 }
 
@@ -336,6 +425,8 @@ hypre_ParCompGridInitialize( hypre_ParAMGData *amg_data, HYPRE_Int padding, HYPR
 
    // Get info from the amg data structure
    hypre_ParCompGrid *compGrid = hypre_ParAMGDataCompGrid(amg_data)[level];
+   hypre_ParCompGridAMGData(compGrid) = (void*) amg_data;
+   hypre_ParCompGridLevel(compGrid) = level;
    HYPRE_Int *CF_marker_array = hypre_ParAMGDataCFMarkerArray(amg_data)[level];
    hypre_CSRMatrix *A_diag_original = hypre_ParCSRMatrixDiag( hypre_ParAMGDataAArray(amg_data)[level] );
    hypre_CSRMatrix *A_offd_original = hypre_ParCSRMatrixOffd( hypre_ParAMGDataAArray(amg_data)[level] );
@@ -1187,31 +1278,33 @@ hypre_ParCompGridFinalize( hypre_ParAMGData *amg_data, hypre_ParCompGrid **compG
       hypre_ParCompGridU(compGrid[level]) = hypre_ParCompGridVectorCreate();
       hypre_ParCompGridVectorOwned(hypre_ParCompGridU(compGrid[level])) = hypre_ParVectorLocalVector( hypre_ParAMGDataUArray(amg_data)[level] );
       hypre_ParCompGridVectorOwnsOwnedVector(hypre_ParCompGridU(compGrid[level])) = 0;
+      hypre_ParCompGridVectorNumReal(hypre_ParCompGridU(compGrid[level])) = num_nonowned_real_nodes;
       hypre_ParCompGridVectorNonOwned(hypre_ParCompGridU(compGrid[level])) = hypre_SeqVectorCreate(num_nonowned);
       hypre_SeqVectorInitialize(hypre_ParCompGridVectorNonOwned(hypre_ParCompGridU(compGrid[level])));
 
       hypre_ParCompGridF(compGrid[level]) = hypre_ParCompGridVectorCreate();
       hypre_ParCompGridVectorOwned(hypre_ParCompGridF(compGrid[level])) = hypre_ParVectorLocalVector( hypre_ParAMGDataFArray(amg_data)[level] );
       hypre_ParCompGridVectorOwnsOwnedVector(hypre_ParCompGridF(compGrid[level])) = 0;
+      hypre_ParCompGridVectorNumReal(hypre_ParCompGridF(compGrid[level])) = num_nonowned_real_nodes;
       hypre_ParCompGridVectorNonOwned(hypre_ParCompGridF(compGrid[level])) = hypre_SeqVectorCreate(num_nonowned);
       hypre_SeqVectorInitialize(hypre_ParCompGridVectorNonOwned(hypre_ParCompGridF(compGrid[level])));
 
       hypre_ParCompGridTemp(compGrid[level]) = hypre_ParCompGridVectorCreate();
-      hypre_ParCompGridVectorInitialize(hypre_ParCompGridTemp(compGrid[level]), num_owned, num_nonowned);
+      hypre_ParCompGridVectorInitialize(hypre_ParCompGridTemp(compGrid[level]), num_owned, num_nonowned, num_nonowned_real_nodes);
       
       if (use_rd)
       {
          hypre_ParCompGridQ(compGrid[level]) = hypre_ParCompGridVectorCreate();
-         hypre_ParCompGridVectorInitialize(hypre_ParCompGridQ(compGrid[level]), num_owned, num_nonowned);
+         hypre_ParCompGridVectorInitialize(hypre_ParCompGridQ(compGrid[level]), num_owned, num_nonowned, num_nonowned_real_nodes);
       }
 
       if (level < num_levels)
       {
          hypre_ParCompGridS(compGrid[level]) = hypre_ParCompGridVectorCreate();
-         hypre_ParCompGridVectorInitialize(hypre_ParCompGridS(compGrid[level]), num_owned, num_nonowned);
+         hypre_ParCompGridVectorInitialize(hypre_ParCompGridS(compGrid[level]), num_owned, num_nonowned, num_nonowned_real_nodes);
 
          hypre_ParCompGridT(compGrid[level]) = hypre_ParCompGridVectorCreate();
-         hypre_ParCompGridVectorInitialize(hypre_ParCompGridT(compGrid[level]), num_owned, num_nonowned);
+         hypre_ParCompGridVectorInitialize(hypre_ParCompGridT(compGrid[level]), num_owned, num_nonowned, num_nonowned_real_nodes);
       }
 
       // Free up arrays we no longer need

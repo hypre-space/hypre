@@ -131,7 +131,7 @@ HYPRE_Int FAC_Cycle(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type, HYPR
          #if DEBUGGING_MESSAGES
          printf("Rank %d, coarse solve on level %d\n", myid, num_levels-1);
          #endif
-         FAC_Relax(amg_data, compGrid[level-1], 3);
+         FAC_Relax(amg_data, compGrid[num_levels-1], 3);
 
          #if DUMP_INTERMEDIATE_TEST_SOLNS
          sprintf(filename, "outputs/actual/u%d_level%d_relax2", myid, num_levels-1);
@@ -395,7 +395,7 @@ hypre_BoomerAMGDD_FAC_Jacobi( hypre_ParCompGrid *compGrid, hypre_ParCompGridMatr
    if (!hypre_ParCompGridTemp2(compGrid))
    {
       hypre_ParCompGridTemp2(compGrid) = hypre_ParCompGridVectorCreate();
-      hypre_ParCompGridVectorInitialize(hypre_ParCompGridTemp2(compGrid), hypre_ParCompGridNumOwnedNodes(compGrid), hypre_ParCompGridNumNonOwnedNodes(compGrid));
+      hypre_ParCompGridVectorInitialize(hypre_ParCompGridTemp2(compGrid), hypre_ParCompGridNumOwnedNodes(compGrid), hypre_ParCompGridNumNonOwnedNodes(compGrid), hypre_ParCompGridNumNonOwnedRealNodes(compGrid));
    }
 
    hypre_ParCompGridVectorCopy(f, hypre_ParCompGridTemp2(compGrid));
