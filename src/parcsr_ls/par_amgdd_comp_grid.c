@@ -580,7 +580,6 @@ hypre_ParCompGridSetupRelax( hypre_ParAMGData *amg_data )
          hypre_ParAMGDDPCGCreate(&pcg_solver);
          HYPRE_PCGSetTol(pcg_solver, 0.0);
          HYPRE_PCGSetTwoNorm(pcg_solver, 1);
-         HYPRE_PCGSetMaxIter(pcg_solver, 1);
          if (hypre_ParAMGDataFACRelaxType(amg_data) == 0) hypre_PCGSetPrecond( (void*) pcg_solver,(HYPRE_Int (*)(void*, void*, void*, void*))hypre_BoomerAMGDD_FAC_Jacobi, NoSetup, (void*) compGrid);
          else if (hypre_ParAMGDataFACRelaxType(amg_data) == 1) hypre_PCGSetPrecond( (void*) pcg_solver, (HYPRE_Int (*)(void*, void*, void*, void*))hypre_BoomerAMGDD_FAC_GaussSeidel, NoSetup,  (void*) compGrid);
          else if (hypre_ParAMGDataFACRelaxType(amg_data) == 2) hypre_PCGSetPrecond( (void*) pcg_solver, (HYPRE_Int (*)(void*, void*, void*, void*))hypre_BoomerAMGDD_FAC_Cheby, NoSetup,  (void*) compGrid);
@@ -735,6 +734,28 @@ hypre_ParCompGridSetupRelax( hypre_ParAMGData *amg_data )
 
 
    return 0;
+}
+
+HYPRE_Int
+hypre_BoomerAMGDDSetFACRelax(HYPRE_Solver amg_solver, HYPRE_Int (*userFACRelaxation)( hypre_ParCompGrid*, hypre_ParCompGridMatrix*, hypre_ParCompGridVector*, hypre_ParCompGridVector* ))
+{
+    hypre_ParAMGData *amg_data = (hypre_ParAMGData*) amg_solver;
+    hypre_ParCompGrid **compGrid = hypre_ParAMGDataCompGrid(amg_data);
+    HYPRE_Int level;
+
+    if (hypre_ParAMGDataFACUsePCG(amg_data))
+    {
+        for (level = hypre_ParAMGDataAMGDDStartLevel(amg_data); level < hypre_ParAMGDataNumLevels(amg_data); level++)
+        {
+            HYPRE_Solver pcg_solver = hypre_ParCompGridPCGSolver(compGrid[level]);
+            hypre_PCGSetPrecond( (void*) pcg_solver,(HYPRE_Int (*)(void*, void*, void*, void*))userFACRelaxation, NoSetup, (void*) compGrid[level]);
+        }
+    }
+    else
+    {
+        hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data) = userFACRelaxation;
+    }
+    return 0;
 }
 
 HYPRE_Int
