@@ -24,6 +24,7 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
                                 hypre_ParCSRMatrix **A_FF_ptr)
 {
    MPI_Comm                 comm     = hypre_ParCSRMatrixComm(A);
+   HYPRE_MemoryLocation memory_location_P = hypre_ParCSRMatrixMemoryLocation(A);
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    hypre_ParCSRCommHandle  *comm_handle;
 
@@ -280,10 +281,10 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
             }
          }
 
-         A_FF_diag_i = hypre_CTAlloc(HYPRE_Int,n_Fpts+1, HYPRE_MEMORY_HOST);
-         A_FC_diag_i = hypre_CTAlloc(HYPRE_Int,n_Fpts+1, HYPRE_MEMORY_HOST);
-         A_FF_offd_i = hypre_CTAlloc(HYPRE_Int,n_Fpts+1, HYPRE_MEMORY_HOST);
-         A_FC_offd_i = hypre_CTAlloc(HYPRE_Int,n_Fpts+1, HYPRE_MEMORY_HOST);
+         A_FF_diag_i = hypre_CTAlloc(HYPRE_Int,n_Fpts+1, memory_location_P);
+         A_FC_diag_i = hypre_CTAlloc(HYPRE_Int,n_Fpts+1, memory_location_P);
+         A_FF_offd_i = hypre_CTAlloc(HYPRE_Int,n_Fpts+1, memory_location_P);
+         A_FC_offd_i = hypre_CTAlloc(HYPRE_Int,n_Fpts+1, memory_location_P);
       }
 
 #ifdef HYPRE_USING_OPENMP
@@ -343,14 +344,14 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
          d_count_FF = A_FF_diag_i[row];
          o_count_FC = A_FC_offd_i[row];
          o_count_FF = A_FF_offd_i[row];
-         A_FF_diag_j = hypre_CTAlloc(HYPRE_Int,d_count_FF, HYPRE_MEMORY_HOST);
-         A_FC_diag_j = hypre_CTAlloc(HYPRE_Int,d_count_FC, HYPRE_MEMORY_HOST);
-         A_FF_offd_j = hypre_CTAlloc(HYPRE_Int,o_count_FF, HYPRE_MEMORY_HOST);
-         A_FC_offd_j = hypre_CTAlloc(HYPRE_Int,o_count_FC, HYPRE_MEMORY_HOST);
-         A_FF_diag_data = hypre_CTAlloc(HYPRE_Real,d_count_FF, HYPRE_MEMORY_HOST);
-         A_FC_diag_data = hypre_CTAlloc(HYPRE_Real,d_count_FC, HYPRE_MEMORY_HOST);
-         A_FF_offd_data = hypre_CTAlloc(HYPRE_Real,o_count_FF, HYPRE_MEMORY_HOST);
-         A_FC_offd_data = hypre_CTAlloc(HYPRE_Real,o_count_FC, HYPRE_MEMORY_HOST);
+         A_FF_diag_j = hypre_CTAlloc(HYPRE_Int,d_count_FF, memory_location_P);
+         A_FC_diag_j = hypre_CTAlloc(HYPRE_Int,d_count_FC, memory_location_P);
+         A_FF_offd_j = hypre_CTAlloc(HYPRE_Int,o_count_FF, memory_location_P);
+         A_FC_offd_j = hypre_CTAlloc(HYPRE_Int,o_count_FC, memory_location_P);
+         A_FF_diag_data = hypre_CTAlloc(HYPRE_Real,d_count_FF, memory_location_P);
+         A_FC_diag_data = hypre_CTAlloc(HYPRE_Real,d_count_FC, memory_location_P);
+         A_FF_offd_data = hypre_CTAlloc(HYPRE_Real,o_count_FF, memory_location_P);
+         A_FC_offd_data = hypre_CTAlloc(HYPRE_Real,o_count_FC, memory_location_P);
       }
 
 #ifdef HYPRE_USING_OPENMP
@@ -440,6 +441,9 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
    hypre_ParCSRMatrixOwnsColStarts(A_FC) = 0;
    hypre_ParCSRMatrixColMapOffd(A_FC) = col_map_offd_A_FC;
 
+   hypre_CSRMatrixMemoryLocation(A_FC_diag) = memory_location_P;
+   hypre_CSRMatrixMemoryLocation(A_FC_offd) = memory_location_P;
+
    A_FF_diag = hypre_ParCSRMatrixDiag(A_FF);
    hypre_CSRMatrixData(A_FF_diag) = A_FF_diag_data;
    hypre_CSRMatrixI(A_FF_diag) = A_FF_diag_i;
@@ -451,6 +455,9 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
    hypre_ParCSRMatrixOwnsRowStarts(A_FF) = 0;
    hypre_ParCSRMatrixOwnsColStarts(A_FF) = 0;
    hypre_ParCSRMatrixColMapOffd(A_FF) = col_map_offd_A_FF;
+
+   hypre_CSRMatrixMemoryLocation(A_FF_diag) = memory_location_P;
+   hypre_CSRMatrixMemoryLocation(A_FF_offd) = memory_location_P;
 
    hypre_TFree(fine_to_coarse, HYPRE_MEMORY_HOST);
    hypre_TFree(fine_to_fine, HYPRE_MEMORY_HOST);
@@ -484,6 +491,7 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix *A,
                                 hypre_ParCSRMatrix **A_FF_ptr)
 {
    MPI_Comm                 comm     = hypre_ParCSRMatrixComm(A);
+   HYPRE_MemoryLocation memory_location_P = hypre_ParCSRMatrixMemoryLocation(A);
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    hypre_ParCSRCommHandle  *comm_handle;
 
@@ -760,10 +768,10 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix *A,
             }
          }
 
-         A_FF_diag_i = hypre_CTAlloc(HYPRE_Int,n_new_Fpts+1, HYPRE_MEMORY_HOST);
-         A_FC_diag_i = hypre_CTAlloc(HYPRE_Int,n_Fpts+1, HYPRE_MEMORY_HOST);
-         A_FF_offd_i = hypre_CTAlloc(HYPRE_Int,n_new_Fpts+1, HYPRE_MEMORY_HOST);
-         A_FC_offd_i = hypre_CTAlloc(HYPRE_Int,n_Fpts+1, HYPRE_MEMORY_HOST);
+         A_FF_diag_i = hypre_CTAlloc(HYPRE_Int,n_new_Fpts+1, memory_location_P);
+         A_FC_diag_i = hypre_CTAlloc(HYPRE_Int,n_Fpts+1, memory_location_P);
+         A_FF_offd_i = hypre_CTAlloc(HYPRE_Int,n_new_Fpts+1, memory_location_P);
+         A_FC_offd_i = hypre_CTAlloc(HYPRE_Int,n_Fpts+1, memory_location_P);
       }
 
 #ifdef HYPRE_USING_OPENMP
@@ -846,14 +854,14 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix *A,
          d_count_FF = A_FF_diag_i[row];
          o_count_FC = A_FC_offd_i[rowc];
          o_count_FF = A_FF_offd_i[row];
-         A_FF_diag_j = hypre_CTAlloc(HYPRE_Int,d_count_FF, HYPRE_MEMORY_HOST);
-         A_FC_diag_j = hypre_CTAlloc(HYPRE_Int,d_count_FC, HYPRE_MEMORY_HOST);
-         A_FF_offd_j = hypre_CTAlloc(HYPRE_Int,o_count_FF, HYPRE_MEMORY_HOST);
-         A_FC_offd_j = hypre_CTAlloc(HYPRE_Int,o_count_FC, HYPRE_MEMORY_HOST);
-         A_FF_diag_data = hypre_CTAlloc(HYPRE_Real,d_count_FF, HYPRE_MEMORY_HOST);
-         A_FC_diag_data = hypre_CTAlloc(HYPRE_Real,d_count_FC, HYPRE_MEMORY_HOST);
-         A_FF_offd_data = hypre_CTAlloc(HYPRE_Real,o_count_FF, HYPRE_MEMORY_HOST);
-         A_FC_offd_data = hypre_CTAlloc(HYPRE_Real,o_count_FC, HYPRE_MEMORY_HOST);
+         A_FF_diag_j = hypre_CTAlloc(HYPRE_Int,d_count_FF, memory_location_P);
+         A_FC_diag_j = hypre_CTAlloc(HYPRE_Int,d_count_FC, memory_location_P);
+         A_FF_offd_j = hypre_CTAlloc(HYPRE_Int,o_count_FF, memory_location_P);
+         A_FC_offd_j = hypre_CTAlloc(HYPRE_Int,o_count_FC, memory_location_P);
+         A_FF_diag_data = hypre_CTAlloc(HYPRE_Real,d_count_FF, memory_location_P);
+         A_FC_diag_data = hypre_CTAlloc(HYPRE_Real,d_count_FC, memory_location_P);
+         A_FF_offd_data = hypre_CTAlloc(HYPRE_Real,o_count_FF, memory_location_P);
+         A_FC_offd_data = hypre_CTAlloc(HYPRE_Real,o_count_FC, memory_location_P);
       }
 
 #ifdef HYPRE_USING_OPENMP
@@ -974,6 +982,9 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix *A,
    hypre_ParCSRMatrixOwnsColStarts(A_FC) = 0;
    hypre_ParCSRMatrixColMapOffd(A_FC) = col_map_offd_A_FC;
 
+   hypre_CSRMatrixMemoryLocation(A_FC_diag) = memory_location_P;
+   hypre_CSRMatrixMemoryLocation(A_FC_offd) = memory_location_P;
+
    A_FF_diag = hypre_ParCSRMatrixDiag(A_FF);
    hypre_CSRMatrixData(A_FF_diag) = A_FF_diag_data;
    hypre_CSRMatrixI(A_FF_diag) = A_FF_diag_i;
@@ -985,6 +996,9 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix *A,
    hypre_ParCSRMatrixOwnsRowStarts(A_FF) = 1;
    hypre_ParCSRMatrixOwnsColStarts(A_FF) = 0;
    hypre_ParCSRMatrixColMapOffd(A_FF) = col_map_offd_A_FF;
+
+   hypre_CSRMatrixMemoryLocation(A_FF_diag) = memory_location_P;
+   hypre_CSRMatrixMemoryLocation(A_FF_offd) = memory_location_P;
 
    hypre_TFree(fine_to_coarse, HYPRE_MEMORY_HOST);
    hypre_TFree(fine_to_fine, HYPRE_MEMORY_HOST);
