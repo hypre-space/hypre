@@ -365,11 +365,15 @@ hypre_BoomerAMGBuildModExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
       {
          P_marker = hypre_CTAlloc(HYPRE_Int, num_cols_P_offd, HYPRE_MEMORY_HOST);
          for (i=0; i < P_offd_size; i++)
+         {
             P_marker[P_offd_j[i]] = 1;
+         }
       
          new_ncols_P_offd = 0;
          for (i=0; i < num_cols_P_offd; i++)
+         {
             if (P_marker[i]) new_ncols_P_offd++;
+         }
 
          new_col_map_offd = hypre_CTAlloc(HYPRE_BigInt, new_ncols_P_offd, HYPRE_MEMORY_HOST);
          map = hypre_CTAlloc(HYPRE_Int, new_ncols_P_offd, HYPRE_MEMORY_HOST);
@@ -392,6 +396,7 @@ hypre_BoomerAMGBuildModExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
             P_offd_j[i] = hypre_BinarySearch(map, P_offd_j[i],
                new_ncols_P_offd);
          }
+
          hypre_TFree(col_map_offd_P, HYPRE_MEMORY_HOST);
          hypre_ParCSRMatrixColMapOffd(P) = new_col_map_offd; 
          hypre_CSRMatrixNumCols(P_offd) = new_ncols_P_offd; 

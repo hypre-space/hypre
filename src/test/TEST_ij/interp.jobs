@@ -38,7 +38,7 @@ mpirun -np 4  ./ij -rhsrand -n 15 15 10 -P 2 2 1 -interptype 8 \
 mpirun -np 4  ./ij -rhsrand -n 15 15 10 -P 2 2 1 -interptype 0 -Pmx 0 -falgout \
  > interp.out.6
 
-mpirun -np 4  ./ij -rhsrand -n 15 15 10 -P 2 2 1 -interptype 16 \
+mpirun -np 4  ./ij -rhsrand -n 15 15 10 -P 2 2 1 -interptype 16 -Pmx 12 \
  > interp.out.7
 
 mpirun -np 4  ./ij -rhsrand -n 15 15 10 -P 2 2 1 -interptype 17 \
