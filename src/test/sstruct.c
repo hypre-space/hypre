@@ -2176,6 +2176,7 @@ PrintUsage( char *progname,
       hypre_printf("                        28 - PCG with diagonal scaling\n");
       hypre_printf("                        30 - GMRES with SMG split precond\n");
       hypre_printf("                        31 - GMRES with PFMG split precond\n");
+      hypre_printf("                        34 - GMRES with SSAMG precond\n");
       hypre_printf("                        38 - GMRES with diagonal scaling\n");
       hypre_printf("                        39 - GMRES\n");
       hypre_printf("                        40 - GMRES with BoomerAMG precond\n");
@@ -2227,8 +2228,11 @@ PrintUsage( char *progname,
       hypre_printf("  -rhsfromcosine     : solution is cosine function (default)\n");
       hypre_printf("  -rhsone            : rhs is vector with unit components\n");
       hypre_printf("  -xone              : solution (x) is vector with unit components\n");
-      hypre_printf("  -tol <val>         : convergence tolerance (default 1e-6)\n");
-      hypre_printf("  -itr <val>         : maximum number of iterations (default 100);\n");
+      hypre_printf("  -tol <val>         : convergence tolerance (def 1e-6)\n");
+      hypre_printf("  -itr <val>         : maximum number of iterations (def 100);\n");
+      hypre_printf("  -k <val>           : dimension Krylov space for GMRES (def 10);\n");
+      hypre_printf("  -aug <val>         : number of augmentation vectors LGMRES (def 2);\n");
+      hypre_printf("  -rel_change        : conv based on relative change of x (def 0);\n");
       hypre_printf("  -lvl <val>         : maximal number of levels (default 100);\n");
       hypre_printf("  -v <n_pre> <n_post>: SysPFMG and Struct- # of pre and post relax\n");
       hypre_printf("  -skip <s>          : SysPFMG and Struct- skip relaxation (0 or 1)\n");
@@ -2354,17 +2358,27 @@ main( hypre_int argc,
    HYPRE_Int             num_procs, myid;
    HYPRE_Int             time_index;
 
-   HYPRE_Int             maxIterations = 100;
-   HYPRE_Int             maxLevels = 100;
-   HYPRE_Real            tol = 1.0e-6;
-   HYPRE_Int             n_pre, n_post;
-   HYPRE_Int             skip;
-   HYPRE_Int             rap;
-   HYPRE_Int             relax;
+   /* parameters for multigrid */
    HYPRE_Real            jacobi_weight;
    HYPRE_Int             usr_jacobi_weight;
+   HYPRE_Int             rap;
+   HYPRE_Int             relax;
+   HYPRE_Int             maxLevels;
+   HYPRE_Int             n_pre, n_post;
+   HYPRE_Int             skip;
    HYPRE_Int             jump;
+
+   /* parameters for Solvers */
+   HYPRE_Int             rel_change;
    HYPRE_Int             solver_type;
+   HYPRE_Int             maxIterations;
+   HYPRE_Real            tol;
+
+   /* parameters for GMRES */
+   HYPRE_Int	         k_dim;
+
+   /* parameters for LGMRES */
+   HYPRE_Int	         aug_dim;
 
    HYPRE_Real            cf_tol;
 
@@ -2464,7 +2478,13 @@ main( hypre_int argc,
    jump  = 0;
    solver_type = 1;
    cf_tol = 0.90;
-
+   maxIterations = 100;
+   maxLevels = 100;
+   tol = 1.0e-6;
+   rel_change = 0;
+   k_dim = 10;
+   aug_dim = 2;
+   
    pooldist   = 0;
    parts      = hypre_TAlloc(HYPRE_Int, nparts);
    refine     = hypre_TAlloc(Index, nparts);
@@ -2602,6 +2622,16 @@ main( hypre_int argc,
       {
          arg_index++;
          maxIterations = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-k") == 0 )
+      {
+         arg_index++;
+         k_dim = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-aug") == 0 )
+      {
+         arg_index++;
+         aug_dim = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-lvl") == 0 )
       {
@@ -3671,7 +3701,7 @@ main( hypre_int argc,
       HYPRE_SStructSysPFMGCreate(hypre_MPI_COMM_WORLD, &solver);
       HYPRE_SStructSysPFMGSetMaxIter(solver, maxIterations);
       HYPRE_SStructSysPFMGSetTol(solver, tol);
-      HYPRE_SStructSysPFMGSetRelChange(solver, 0);
+      HYPRE_SStructSysPFMGSetRelChange(solver, rel_change);
       /* weighted Jacobi = 1; red-black GS = 2 */
       HYPRE_SStructSysPFMGSetRelaxType(solver, relax);
       if (usr_jacobi_weight)
@@ -3716,7 +3746,7 @@ main( hypre_int argc,
       HYPRE_SStructSSAMGSetMaxIter(solver, maxIterations);
       HYPRE_SStructSSAMGSetMaxLevels(solver, maxLevels);
       HYPRE_SStructSSAMGSetTol(solver, tol);
-      HYPRE_SStructSSAMGSetRelChange(solver, 0);
+      HYPRE_SStructSSAMGSetRelChange(solver, rel_change);
       /* weighted Jacobi = 1; red-black GS = 2 */
       HYPRE_SStructSSAMGSetRelaxType(solver, relax);
       if (usr_jacobi_weight)
@@ -3853,7 +3883,7 @@ main( hypre_int argc,
       HYPRE_PCGSetMaxIter( (HYPRE_Solver) solver, maxIterations );
       HYPRE_PCGSetTol( (HYPRE_Solver) solver, tol );
       HYPRE_PCGSetTwoNorm( (HYPRE_Solver) solver, 1 );
-      HYPRE_PCGSetRelChange( (HYPRE_Solver) solver, 0 );
+      HYPRE_PCGSetRelChange( (HYPRE_Solver) solver, rel_change );
       HYPRE_PCGSetPrintLevel( (HYPRE_Solver) solver, 2 );
 
       if ((solver_id == 10) || (solver_id == 11))
@@ -3995,7 +4025,7 @@ main( hypre_int argc,
          HYPRE_PCGSetMaxIter( (HYPRE_Solver) solver, pcgIterations );
          HYPRE_PCGSetTol( (HYPRE_Solver) solver, pcgTol );
          HYPRE_PCGSetTwoNorm( (HYPRE_Solver) solver, 1 );
-         HYPRE_PCGSetRelChange( (HYPRE_Solver) solver, 0 );
+         HYPRE_PCGSetRelChange( (HYPRE_Solver) solver, rel_change );
          HYPRE_PCGSetPrintLevel( (HYPRE_Solver) solver, 0 );
 
          if ((solver_id == 10) || (solver_id == 11))
@@ -4358,7 +4388,7 @@ main( hypre_int argc,
       HYPRE_PCGSetMaxIter( par_solver, maxIterations );
       HYPRE_PCGSetTol( par_solver, tol );
       HYPRE_PCGSetTwoNorm( par_solver, 1 );
-      HYPRE_PCGSetRelChange( par_solver, 0 );
+      HYPRE_PCGSetRelChange( par_solver, rel_change );
       HYPRE_PCGSetPrintLevel( par_solver, 1 );
 
       if (solver_id == 20)
@@ -4454,10 +4484,10 @@ main( hypre_int argc,
       hypre_BeginTiming(time_index);
 
       HYPRE_SStructGMRESCreate(hypre_MPI_COMM_WORLD, &solver);
-      HYPRE_GMRESSetKDim( (HYPRE_Solver) solver, 5 );
+      HYPRE_GMRESSetKDim( (HYPRE_Solver) solver, k_dim );
       HYPRE_GMRESSetMaxIter( (HYPRE_Solver) solver, maxIterations );
       HYPRE_GMRESSetTol( (HYPRE_Solver) solver, tol );
-      HYPRE_GMRESSetPrintLevel( (HYPRE_Solver) solver, 1 );
+      HYPRE_GMRESSetPrintLevel( (HYPRE_Solver) solver, 2 );
       HYPRE_GMRESSetLogging( (HYPRE_Solver) solver, 1 );
 
       if ((solver_id == 30) || (solver_id == 31))
@@ -4479,6 +4509,29 @@ main( hypre_int argc,
                                 (HYPRE_PtrToSolverFcn) HYPRE_SStructSplitSolve,
                                 (HYPRE_PtrToSolverFcn) HYPRE_SStructSplitSetup,
                                 (HYPRE_Solver) precond );
+      }
+
+      else if (solver_id == 34)
+      {
+         /* use SSAMG solver as preconditioner */
+         HYPRE_SStructSSAMGCreate(hypre_MPI_COMM_WORLD, &precond);
+         HYPRE_SStructSSAMGSetMaxIter(precond, 1);
+         HYPRE_SStructSSAMGSetMaxLevels(precond, maxLevels);
+         HYPRE_SStructSSAMGSetTol(precond, 0.0);
+         HYPRE_SStructSSAMGSetRelaxType(precond, relax);
+         if (usr_jacobi_weight)
+         {
+            HYPRE_SStructSSAMGSetRelaxWeight(precond, jacobi_weight);
+         }
+         HYPRE_SStructSSAMGSetNumPreRelax(precond, n_pre);
+         HYPRE_SStructSSAMGSetNumPostRelax(precond, n_post);
+         HYPRE_SStructSSAMGSetPrintLevel(precond, 1);
+         HYPRE_SStructSSAMGSetLogging(precond, 1);
+
+         HYPRE_GMRESSetPrecond( (HYPRE_Solver) solver,
+                                (HYPRE_PtrToSolverFcn) HYPRE_SStructSSAMGSolve,
+                                (HYPRE_PtrToSolverFcn) HYPRE_SStructSSAMGSetup,
+                                (HYPRE_Solver) precond);
       }
 
       else if (solver_id == 38)
@@ -4530,7 +4583,7 @@ main( hypre_int argc,
       hypre_BeginTiming(time_index);
 
       HYPRE_ParCSRGMRESCreate(hypre_MPI_COMM_WORLD, &par_solver);
-      HYPRE_GMRESSetKDim(par_solver, 5);
+      HYPRE_GMRESSetKDim(par_solver, k_dim);
       HYPRE_GMRESSetMaxIter(par_solver, maxIterations);
       HYPRE_GMRESSetTol(par_solver, tol);
       HYPRE_GMRESSetPrintLevel(par_solver, 1);
@@ -4785,7 +4838,7 @@ main( hypre_int argc,
       hypre_BeginTiming(time_index);
 
       HYPRE_SStructFlexGMRESCreate(hypre_MPI_COMM_WORLD, &solver);
-      HYPRE_FlexGMRESSetKDim( (HYPRE_Solver) solver, 5 );
+      HYPRE_FlexGMRESSetKDim( (HYPRE_Solver) solver, k_dim );
       HYPRE_FlexGMRESSetMaxIter( (HYPRE_Solver) solver, maxIterations );
       HYPRE_FlexGMRESSetTol( (HYPRE_Solver) solver, tol );
       HYPRE_FlexGMRESSetPrintLevel( (HYPRE_Solver) solver, 1 );
@@ -4861,7 +4914,7 @@ main( hypre_int argc,
       hypre_BeginTiming(time_index);
 
       HYPRE_ParCSRFlexGMRESCreate(hypre_MPI_COMM_WORLD, &par_solver);
-      HYPRE_FlexGMRESSetKDim(par_solver, 5);
+      HYPRE_FlexGMRESSetKDim(par_solver, k_dim);
       HYPRE_FlexGMRESSetMaxIter(par_solver, maxIterations);
       HYPRE_FlexGMRESSetTol(par_solver, tol);
       HYPRE_FlexGMRESSetPrintLevel(par_solver, 1);
@@ -4922,8 +4975,8 @@ main( hypre_int argc,
       hypre_BeginTiming(time_index);
 
       HYPRE_ParCSRLGMRESCreate(hypre_MPI_COMM_WORLD, &par_solver);
-      HYPRE_LGMRESSetKDim(par_solver, 10);
-      HYPRE_LGMRESSetAugDim(par_solver, 2);
+      HYPRE_LGMRESSetKDim(par_solver, k_dim);
+      HYPRE_LGMRESSetAugDim(par_solver, aug_dim);
       HYPRE_LGMRESSetMaxIter(par_solver, maxIterations);
       HYPRE_LGMRESSetTol(par_solver, tol);
       HYPRE_LGMRESSetPrintLevel(par_solver, 1);
@@ -4986,7 +5039,7 @@ main( hypre_int argc,
       HYPRE_ParCSRHybridCreate(&par_solver);
       HYPRE_ParCSRHybridSetTol(par_solver, tol);
       HYPRE_ParCSRHybridSetTwoNorm(par_solver, 1);
-      HYPRE_ParCSRHybridSetRelChange(par_solver, 0);
+      HYPRE_ParCSRHybridSetRelChange(par_solver, rel_change);
       HYPRE_ParCSRHybridSetPrintLevel(par_solver,1);
       HYPRE_ParCSRHybridSetLogging(par_solver,1);
       HYPRE_ParCSRHybridSetup(par_solver,par_A,par_b,par_x);
@@ -5025,7 +5078,7 @@ main( hypre_int argc,
       HYPRE_StructSMGSetMemoryUse(struct_solver, 0);
       HYPRE_StructSMGSetMaxIter(struct_solver, maxIterations);
       HYPRE_StructSMGSetTol(struct_solver, tol);
-      HYPRE_StructSMGSetRelChange(struct_solver, 0);
+      HYPRE_StructSMGSetRelChange(struct_solver, rel_change);
       HYPRE_StructSMGSetNumPreRelax(struct_solver, n_pre);
       HYPRE_StructSMGSetNumPostRelax(struct_solver, n_post);
       HYPRE_StructSMGSetPrintLevel(struct_solver, 1);
@@ -5061,7 +5114,7 @@ main( hypre_int argc,
       HYPRE_StructPFMGSetMaxLevels(struct_solver, maxLevels);
       HYPRE_StructPFMGSetMaxIter(struct_solver, maxIterations);
       HYPRE_StructPFMGSetTol(struct_solver, tol);
-      HYPRE_StructPFMGSetRelChange(struct_solver, 0);
+      HYPRE_StructPFMGSetRelChange(struct_solver, rel_change);
       HYPRE_StructPFMGSetRAPType(struct_solver, rap);
       HYPRE_StructPFMGSetRelaxType(struct_solver, relax);
       if (usr_jacobi_weight)
@@ -5159,7 +5212,7 @@ main( hypre_int argc,
       HYPRE_StructSparseMSGSetMaxIter(struct_solver, maxIterations);
       HYPRE_StructSparseMSGSetJump(struct_solver, jump);
       HYPRE_StructSparseMSGSetTol(struct_solver, tol);
-      HYPRE_StructSparseMSGSetRelChange(struct_solver, 0);
+      HYPRE_StructSparseMSGSetRelChange(struct_solver, rel_change);
       HYPRE_StructSparseMSGSetRelaxType(struct_solver, relax);
       if (usr_jacobi_weight)
       {
@@ -5240,7 +5293,7 @@ main( hypre_int argc,
       HYPRE_PCGSetMaxIter( (HYPRE_Solver)struct_solver, maxIterations );
       HYPRE_PCGSetTol( (HYPRE_Solver)struct_solver, tol );
       HYPRE_PCGSetTwoNorm( (HYPRE_Solver)struct_solver, 1 );
-      HYPRE_PCGSetRelChange( (HYPRE_Solver)struct_solver, 0 );
+      HYPRE_PCGSetRelChange( (HYPRE_Solver)struct_solver, rel_change );
       HYPRE_PCGSetPrintLevel( (HYPRE_Solver)struct_solver, 1 );
 
       if (solver_id == 210)
@@ -5392,7 +5445,7 @@ main( hypre_int argc,
       /*HYPRE_StructHybridSetPCGAbsoluteTolFactor(struct_solver, 1.0e-200);*/
       HYPRE_StructHybridSetConvergenceTol(struct_solver, cf_tol);
       HYPRE_StructHybridSetTwoNorm(struct_solver, 1);
-      HYPRE_StructHybridSetRelChange(struct_solver, 0);
+      HYPRE_StructHybridSetRelChange(struct_solver, rel_change);
       if (solver_type == 2) /* for use with GMRES */
       {
          HYPRE_StructHybridSetStopCrit(struct_solver, 0);
@@ -5514,11 +5567,12 @@ main( hypre_int argc,
       hypre_BeginTiming(time_index);
 
       HYPRE_StructGMRESCreate(hypre_MPI_COMM_WORLD, &struct_solver);
-      HYPRE_GMRESSetMaxIter( (HYPRE_Solver)struct_solver, maxIterations );
-      HYPRE_GMRESSetTol( (HYPRE_Solver)struct_solver, tol );
-      HYPRE_GMRESSetRelChange( (HYPRE_Solver)struct_solver, 0 );
-      HYPRE_GMRESSetPrintLevel( (HYPRE_Solver)struct_solver, 1 );
-      HYPRE_GMRESSetLogging( (HYPRE_Solver)struct_solver, 1 );
+      HYPRE_GMRESSetKDim( (HYPRE_Solver) struct_solver, k_dim );
+      HYPRE_GMRESSetMaxIter( (HYPRE_Solver) struct_solver, maxIterations );
+      HYPRE_GMRESSetTol( (HYPRE_Solver) struct_solver, tol );
+      HYPRE_GMRESSetRelChange( (HYPRE_Solver) struct_solver, rel_change );
+      HYPRE_GMRESSetPrintLevel( (HYPRE_Solver) struct_solver, 1 );
+      HYPRE_GMRESSetLogging( (HYPRE_Solver) struct_solver, 1 );
 
       if (solver_id == 230)
       {
@@ -5871,12 +5925,12 @@ main( hypre_int argc,
       hypre_SStructInnerProd(b, b, &rhs_norm);
       rhs_norm = sqrt(rhs_norm);
 
-      hypre_SStructInnerProd(r, r, &final_res_norm);
-      final_res_norm = sqrt(final_res_norm);
+      hypre_SStructInnerProd(r, r, &real_res_norm);
+      real_res_norm = sqrt(real_res_norm);
 
       if (rhs_norm > 0)
       {
-         final_res_norm = final_res_norm/rhs_norm;
+         real_res_norm = real_res_norm/rhs_norm;
       }  
 
       hypre_printf("\n");
