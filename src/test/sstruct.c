@@ -2162,6 +2162,7 @@ PrintUsage( char *progname,
       hypre_printf("                         1 - PFMG split solver\n");
       hypre_printf("                         3 - SysPFMG\n");
       hypre_printf("                         4 - SSAMG\n");
+      hypre_printf("                         5 - BoomerAMG\n");
       hypre_printf("                         8 - 1-step Jacobi split solver\n");
       hypre_printf("                        10 - PCG with SMG split precond\n");
       hypre_printf("                        11 - PCG with PFMG split precond\n");
@@ -2225,6 +2226,7 @@ PrintUsage( char *progname,
       hypre_printf("  -print             : print out the system\n");
       hypre_printf("  -rhsfromcosine     : solution is cosine function (default)\n");
       hypre_printf("  -rhsone            : rhs is vector with unit components\n");
+      hypre_printf("  -xone              : solution (x) is vector with unit components\n");
       hypre_printf("  -tol <val>         : convergence tolerance (default 1e-6)\n");
       hypre_printf("  -itr <val>         : maximum number of iterations (default 100);\n");
       hypre_printf("  -lvl <val>         : maximal number of levels (default 100);\n");
@@ -2315,7 +2317,7 @@ main( hypre_int argc,
    Index                *block;
    HYPRE_Int             solver_id, object_type;
    HYPRE_Int             print_system;
-   HYPRE_Int             cosine;
+   HYPRE_Int             rhs_type;
    HYPRE_Real            scale;
 
    HYPRE_SStructGrid     grid, G_grid;
@@ -2323,6 +2325,7 @@ main( hypre_int argc,
    HYPRE_SStructGraph    graph, G_graph;
    HYPRE_SStructMatrix   A, G;
    HYPRE_SStructVector   b;
+   HYPRE_SStructVector   r;
    HYPRE_SStructVector   x;
    HYPRE_SStructSolver   solver;
    HYPRE_SStructSolver   precond;
@@ -2345,6 +2348,8 @@ main( hypre_int argc,
 
    HYPRE_Int             num_iterations;
    HYPRE_Real            final_res_norm;
+   HYPRE_Real            real_res_norm;
+   HYPRE_Real            rhs_norm;
 
    HYPRE_Int             num_procs, myid;
    HYPRE_Int             time_index;
@@ -2484,10 +2489,10 @@ main( hypre_int argc,
 
    solver_id = 39;
    print_system = 0;
-   cosine = 1;
+   rhs_type = 1;
    if (global_data.rhs_true || global_data.fem_rhs_true)
    {
-      cosine = 0;
+      rhs_type = 0;
    }
 
    skip = 0;
@@ -2576,12 +2581,17 @@ main( hypre_int argc,
       else if ( strcmp(argv[arg_index], "-rhsfromcosine") == 0 )
       {
          arg_index++;
-         cosine = 1;
+         rhs_type = 0;
       }
       else if ( strcmp(argv[arg_index], "-rhsone") == 0 )
       {
          arg_index++;
-         cosine = 0;
+         rhs_type = 1;
+      }
+      else if ( strcmp(argv[arg_index], "-xone") == 0 )
+      {
+         arg_index++;
+         rhs_type = 2;
       }
       else if ( strcmp(argv[arg_index], "-tol") == 0 )
       {
@@ -2708,7 +2718,7 @@ main( hypre_int argc,
          old_default = 1;
       }
       else if ( strcmp(argv[arg_index], "-vout") == 0 )
-      {			      /* lobpcg: print level */
+      {
          arg_index++;
          printLevel = atoi(argv[arg_index++]);
       }
@@ -2788,7 +2798,7 @@ main( hypre_int argc,
         ((solver_id >= 60) && (solver_id < 70)) ||
         ((solver_id >= 80) && (solver_id < 90)) ||
         ((solver_id >= 90) && (solver_id < 100)) ||
-        (solver_id == 120) )
+        (solver_id == 120) || (solver_id == 5))
    {
       object_type = HYPRE_PARCSR;
    }
@@ -3214,6 +3224,7 @@ main( hypre_int argc,
          values[j] = 1.0;
       }
    }
+
    for (part = 0; part < data.nparts; part++)
    {
       pdata = data.pdata[part];
@@ -3323,28 +3334,38 @@ main( hypre_int argc,
     *
     *-----------------------------------------------------------*/
 
-   if (cosine)
+   switch (rhs_type)
    {
-      for (part = 0; part < data.nparts; part++)
-      {
-         pdata = data.pdata[part];
-         for (var = 0; var < pdata.nvars; var++)
+      default:
+      case 1:
+         /* rhs is the vector of ones */
+         break;
+
+      case 0:
+         for (part = 0; part < data.nparts; part++)
          {
-            scale = (part+1.0)*(var+1.0);
-            for (box = 0; box < pdata.nboxes; box++)
+            pdata = data.pdata[part];
+            for (var = 0; var < pdata.nvars; var++)
             {
-/*
-  GetVariableBox(pdata.ilowers[box], pdata.iuppers[box],
-  pdata.vartypes[var], ilower, iupper);
-*/
-               GetVariableBox(pdata.ilowers[box], pdata.iuppers[box],
-                              var, ilower, iupper);
-               SetCosineVector(scale, ilower, iupper, values);
-               HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper,
-                                               var, values);
+               scale = (part + 1.0)*(var + 1.0);
+               for (box = 0; box < pdata.nboxes; box++)
+               {
+               /* GetVariableBox(pdata.ilowers[box], pdata.iuppers[box], 
+                                 pdata.vartypes[var], ilower, iupper); */
+                  GetVariableBox(pdata.ilowers[box], pdata.iuppers[box],
+                                 var, ilower, iupper);
+                  SetCosineVector(scale, ilower, iupper, values);
+                  HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper,
+                                                  var, values);
+               }
             }
          }
-      }
+         break;
+
+      case 2:
+         /* x is the vector of ones */
+         HYPRE_SStructVectorSetConstantValues(x, 1.0);
+         break;
    }
 
    HYPRE_SStructVectorAssemble(x);
@@ -3376,31 +3397,38 @@ main( hypre_int argc,
     * Finish resetting the linear system
     *-----------------------------------------------------------*/
 
-   if (cosine)
+   if ((rhs_type == 0) || (rhs_type == 2))
    {
       /* This if/else is due to a bug in SStructMatvec */
       if (object_type == HYPRE_SSTRUCT)
       {
-         /* Apply A to cosine vector to yield righthand side */
          hypre_SStructMatvec(1.0, A, x, 0.0, b);
          /* Reset initial guess to zero */
          hypre_SStructMatvec(0.0, A, b, 0.0, x);
       }
       else if (object_type == HYPRE_PARCSR)
       {
-         /* Apply A to cosine vector to yield righthand side */
          HYPRE_ParCSRMatrixMatvec(1.0, par_A, par_x, 0.0, par_b );
          /* Reset initial guess to zero */
          HYPRE_ParCSRMatrixMatvec(0.0, par_A, par_b, 0.0, par_x );
       }
       else if (object_type == HYPRE_STRUCT)
       {
-         /* Apply A to cosine vector to yield righthand side */
          hypre_StructMatvec(1.0, sA, sx, 0.0, sb);
          /* Reset initial guess to zero */
          hypre_StructMatvec(0.0, sA, sb, 0.0, sx);
       }
    }
+
+#if 0
+   {
+      hypre_ParVector parvec;
+
+      HYPRE_SStructVectorPrint("ssvec_b", b, 0);
+      HYPRE_SStructVectorPrint("ssvec_ghost_b", b, 1);
+      hypre_ParVectorPrint(hypre_SStructVectorParVector(b), "parvec_b");
+   }
+#endif
 
    /*-----------------------------------------------------------
     * Set up a gradient matrix G
@@ -3524,7 +3552,7 @@ main( hypre_int argc,
       HYPRE_SStructVectorGather(x);
       HYPRE_SStructMatrixPrint("sstruct.out.A",  A, 0);
       HYPRE_SStructVectorPrint("sstruct.out.b",  b, 0);
-      HYPRE_SStructVectorPrint("sstruct.out.x0", x, 0);
+      //HYPRE_SStructVectorPrint("sstruct.out.x0", x, 0);
 
       if (gradient_matrix)
       {
@@ -3697,8 +3725,8 @@ main( hypre_int argc,
       }
       HYPRE_SStructSSAMGSetNumPreRelax(solver, n_pre);
       HYPRE_SStructSSAMGSetNumPostRelax(solver, n_post);
-      HYPRE_SStructSSAMGSetPrintLevel(solver, 2);
-      HYPRE_SStructSSAMGSetLogging(solver, 1);
+      HYPRE_SStructSSAMGSetPrintLevel(solver, printLevel);
+      HYPRE_SStructSSAMGSetLogging(solver, 2);
       HYPRE_SStructSSAMGSetup(solver, A, b, x);
 
       hypre_EndTiming(time_index);
@@ -3720,6 +3748,53 @@ main( hypre_int argc,
       HYPRE_SStructSSAMGGetFinalRelativeResidualNorm(solver, &final_res_norm);
 
       HYPRE_SStructSSAMGDestroy(solver);
+   }
+
+   else if (solver_id == 5)
+   {
+      time_index = hypre_InitializeTiming("BoomerAMG Setup");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_BoomerAMGCreate(&par_solver);
+      HYPRE_BoomerAMGSetMaxIter(par_solver, maxIterations);
+      HYPRE_BoomerAMGSetMaxLevels(par_solver, maxLevels);
+      HYPRE_BoomerAMGSetTol(par_solver, tol);
+      HYPRE_BoomerAMGSetPrintLevel(par_solver, printLevel);
+      HYPRE_BoomerAMGSetCycleNumSweeps(par_solver, n_pre, 1);
+      HYPRE_BoomerAMGSetCycleNumSweeps(par_solver, n_post, 2);
+      HYPRE_BoomerAMGSetCycleNumSweeps(par_solver, n_pre, 3);
+      if (usr_jacobi_weight)
+      {
+         HYPRE_BoomerAMGSetRelaxWt(par_solver, jacobi_weight);
+      }
+      if (relax == 1)
+      {
+         HYPRE_BoomerAMGSetRelaxType(par_solver, 0);
+      }
+      else
+      {
+         HYPRE_BoomerAMGSetRelaxType(par_solver, relax);
+      }
+      HYPRE_BoomerAMGSetup(par_solver, par_A, par_b, par_x);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      time_index = hypre_InitializeTiming("BoomerAMG Solve");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_BoomerAMGSolve(par_solver, par_A, par_b, par_x);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      HYPRE_BoomerAMGGetNumIterations(par_solver, &num_iterations);
+      HYPRE_BoomerAMGGetFinalRelativeResidualNorm(par_solver, &final_res_norm);
+      HYPRE_BoomerAMGDestroy(par_solver);
    }
 
    else if ((solver_id >= 0) && (solver_id < 10) && (solver_id != 3))
@@ -3831,7 +3906,7 @@ main( hypre_int argc,
          /* use SSAMG solver as preconditioner */
          HYPRE_SStructSSAMGCreate(hypre_MPI_COMM_WORLD, &precond);
          HYPRE_SStructSSAMGSetMaxIter(precond, 1);
-         HYPRE_SStructSSAMGSetMaxLevels(solver, maxLevels);
+         HYPRE_SStructSSAMGSetMaxLevels(precond, maxLevels);
          HYPRE_SStructSSAMGSetTol(precond, 0.0);
          HYPRE_SStructSSAMGSetRelaxType(precond, relax);
          if (usr_jacobi_weight)
@@ -3842,7 +3917,6 @@ main( hypre_int argc,
          HYPRE_SStructSSAMGSetNumPostRelax(precond, n_post);
          HYPRE_SStructSSAMGSetPrintLevel(precond, 1);
          HYPRE_SStructSSAMGSetLogging(precond, 1);
-         HYPRE_SStructSSAMGSetup(precond, A, b, x);
 
          HYPRE_PCGSetPrecond( (HYPRE_Solver) solver,
                               (HYPRE_PtrToSolverFcn) HYPRE_SStructSSAMGSolve,
@@ -4984,6 +5058,7 @@ main( hypre_int argc,
       hypre_BeginTiming(time_index);
 
       HYPRE_StructPFMGCreate(hypre_MPI_COMM_WORLD, &struct_solver);
+      HYPRE_StructPFMGSetMaxLevels(struct_solver, maxLevels);
       HYPRE_StructPFMGSetMaxIter(struct_solver, maxIterations);
       HYPRE_StructPFMGSetTol(struct_solver, tol);
       HYPRE_StructPFMGSetRelChange(struct_solver, 0);
@@ -5190,6 +5265,7 @@ main( hypre_int argc,
       {
          /* use symmetric PFMG as preconditioner */
          HYPRE_StructPFMGCreate(hypre_MPI_COMM_WORLD, &struct_precond);
+         HYPRE_StructPFMGSetMaxLevels(struct_solver, maxLevels);
          HYPRE_StructPFMGSetMaxIter(struct_precond, 1);
          HYPRE_StructPFMGSetTol(struct_precond, 0.0);
          HYPRE_StructPFMGSetZeroGuess(struct_precond);
@@ -5348,6 +5424,7 @@ main( hypre_int argc,
       {
          /* use symmetric PFMG as preconditioner */
          HYPRE_StructPFMGCreate(hypre_MPI_COMM_WORLD, &struct_precond);
+         HYPRE_StructPFMGSetMaxLevels(struct_solver, maxLevels);
          HYPRE_StructPFMGSetMaxIter(struct_precond, 1);
          HYPRE_StructPFMGSetTol(struct_precond, 0.0);
          HYPRE_StructPFMGSetZeroGuess(struct_precond);
@@ -5465,6 +5542,7 @@ main( hypre_int argc,
       {
          /* use symmetric PFMG as preconditioner */
          HYPRE_StructPFMGCreate(hypre_MPI_COMM_WORLD, &struct_precond);
+         HYPRE_StructPFMGSetMaxLevels(struct_solver, maxLevels);
          HYPRE_StructPFMGSetMaxIter(struct_precond, 1);
          HYPRE_StructPFMGSetTol(struct_precond, 0.0);
          HYPRE_StructPFMGSetZeroGuess(struct_precond);
@@ -5610,6 +5688,7 @@ main( hypre_int argc,
       {
          /* use symmetric PFMG as preconditioner */
          HYPRE_StructPFMGCreate(hypre_MPI_COMM_WORLD, &struct_precond);
+         HYPRE_StructPFMGSetMaxLevels(struct_solver, maxLevels);
          HYPRE_StructPFMGSetMaxIter(struct_precond, 1);
          HYPRE_StructPFMGSetTol(struct_precond, 0.0);
          HYPRE_StructPFMGSetZeroGuess(struct_precond);
@@ -5737,6 +5816,7 @@ main( hypre_int argc,
 
       HYPRE_SStructVectorPrint("sstruct.out.x", x, 0);
 
+#if 0      
       /* print out with shared data replicated */
       values = hypre_TAlloc(HYPRE_Real, data.max_boxsize);
       for (part = 0; part < data.nparts; part++)
@@ -5772,12 +5852,37 @@ main( hypre_int argc,
          }
       }
       hypre_TFree(values);
+#endif
    }
 
    if (myid == 0 /* begin lobpcg */ && !lobpcgFlag /* end lobpcg */)
    {
+      HYPRE_SStructVectorCreate(hypre_MPI_COMM_WORLD, grid, &r);
+      if ( object_type != HYPRE_SSTRUCT )
+      {
+         HYPRE_SStructVectorSetObjectType(r, object_type);
+      }
+      HYPRE_SStructVectorInitialize(r);
+      HYPRE_SStructVectorAssemble(r);
+      hypre_SStructCopy(b, r);
+      hypre_SStructMatvec(-1.0, A, x, 1.0, r);
+      HYPRE_SStructVectorPrint("sstruct.out.r", r, 0);
+
+      hypre_SStructInnerProd(b, b, &rhs_norm);
+      rhs_norm = sqrt(rhs_norm);
+
+      hypre_SStructInnerProd(r, r, &final_res_norm);
+      final_res_norm = sqrt(final_res_norm);
+
+      if (rhs_norm > 0)
+      {
+         final_res_norm = final_res_norm/rhs_norm;
+      }  
+
       hypre_printf("\n");
       hypre_printf("Iterations = %d\n", num_iterations);
+      hypre_printf("RHS Norm = %e\n", rhs_norm);
+      hypre_printf("Real  Relative Residual Norm = %e\n", real_res_norm);
       hypre_printf("Final Relative Residual Norm = %e\n", final_res_norm);
       hypre_printf("\n");
    }
