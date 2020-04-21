@@ -958,6 +958,7 @@ typedef struct
    HYPRE_Int    (*ClearVector)   ( void *x );
    HYPRE_Int    (*ScaleVector)   ( HYPRE_Complex alpha, void *x );
    HYPRE_Int    (*Axpy)          ( HYPRE_Complex alpha, void *x, void *y );
+   HYPRE_Int    (*PrintVector)   ( void *x, const char *filename );
 
 	HYPRE_Int    (*precond)(void *vdata , void *A , void *b , void *x);
 	HYPRE_Int    (*precond_setup)(void *vdata , void *A , void *b , void *x);

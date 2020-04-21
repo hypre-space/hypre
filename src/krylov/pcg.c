@@ -70,6 +70,7 @@ hypre_PCGFunctionsCreate(
    pcg_functions->ClearVector = ClearVector;
    pcg_functions->ScaleVector = ScaleVector;
    pcg_functions->Axpy = Axpy;
+   pcg_functions->PrintVector = NULL;
 /* default preconditioner must be set here but can be changed later... */
    pcg_functions->precond_setup = PrecondSetup;
    pcg_functions->precond       = Precond;
@@ -313,6 +314,7 @@ hypre_PCGSolve( void *pcg_vdata,
 
    HYPRE_Int             i = 0;
    HYPRE_Int             my_id, num_procs;
+   char                  filename[255];
 
    (pcg_data -> converged) = 0;
 
@@ -599,6 +601,12 @@ hypre_PCGSolve( void *pcg_vdata,
          }
       }
 
+      // Print solution
+      if (print_level > 2 && pcg_functions->PrintVector)
+      {
+         hypre_sprintf(filename, "pcg_x.%02d", i);
+         (*(pcg_functions->PrintVector))(x, filename);
+      }
 
       /*--------------------------------------------------------------------
        * check for convergence
