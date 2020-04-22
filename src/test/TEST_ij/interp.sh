@@ -20,6 +20,8 @@ FILES="\
  ${TNAME}.out.4\
  ${TNAME}.out.5\
  ${TNAME}.out.6\
+ ${TNAME}.out.7\
+ ${TNAME}.out.8\
 "
 
 for i in $FILES

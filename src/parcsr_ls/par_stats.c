@@ -343,6 +343,18 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
       {
          hypre_printf(" Interpolation = extended interpolation\n");
       }
+      else if (interp_type == 15)
+      {
+         hypre_printf(" Interpolation = direct interpolation with separation of weights\n");
+      }
+      else if (interp_type == 16)
+      {
+         hypre_printf(" Interpolation = extended interpolation with MMs\n");
+      }
+      else if (interp_type == 17)
+      {
+         hypre_printf(" Interpolation = extended+i interpolation with MMs\n");
+      }
       else if (interp_type == 8)
       {
          hypre_printf(" Interpolation = standard interpolation\n");

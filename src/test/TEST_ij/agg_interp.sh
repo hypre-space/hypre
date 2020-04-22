@@ -26,6 +26,11 @@ FILES="\
  ${TNAME}.out.11\
  ${TNAME}.out.12\
  ${TNAME}.out.13\
+ ${TNAME}.out.14\
+ ${TNAME}.out.15\
+ ${TNAME}.out.16\
+ ${TNAME}.out.17\
+ ${TNAME}.out.18\
 "
 
 for i in $FILES

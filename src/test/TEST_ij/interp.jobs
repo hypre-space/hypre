@@ -6,13 +6,15 @@
 
 #=============================================================================
 # ij: Run default case with different interpolation operators
-#    1: Extended interpolation
-#    2: FF interpolation
-#    3: standard interpolation
-#    4: Extended interpolation and truncation max 4 elmts per row
-#    5: FF interpolation and truncation max 4 elmts per row
-#    6: standard interpolation and truncation max 4 elmts per row
-#    7: Classical modified interpolation
+#    0: Extended+i interpolation
+#    1: FF interpolation
+#    2: standard interpolation
+#    3: Extended interpolation and truncation max 4 elmts per row
+#    4: FF interpolation and truncation max 4 elmts per row
+#    5: standard interpolation and truncation max 4 elmts per row
+#    6: Classical modified interpolation
+#    7: Mod Extended interpolation and truncation max 4 elmts per row
+#    8: Mod Extended+i interpolation and truncation max 4 elmts per row
 #=============================================================================
 
 mpirun -np 4  ./ij -rhsrand -n 15 15 10 -P 2 2 1 -Pmx 0 \
@@ -35,5 +37,11 @@ mpirun -np 4  ./ij -rhsrand -n 15 15 10 -P 2 2 1 -interptype 8 \
 
 mpirun -np 4  ./ij -rhsrand -n 15 15 10 -P 2 2 1 -interptype 0 -Pmx 0 -falgout \
  > interp.out.6
+
+mpirun -np 4  ./ij -rhsrand -n 15 15 10 -P 2 2 1 -interptype 16 -Pmx 12 \
+ > interp.out.7
+
+mpirun -np 4  ./ij -rhsrand -n 15 15 10 -P 2 2 1 -interptype 17 \
+ > interp.out.8
 
 
