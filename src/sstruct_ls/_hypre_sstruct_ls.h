@@ -622,6 +622,7 @@ HYPRE_Int hypre_SStructKrylovClearVector ( void *x );
 HYPRE_Int hypre_SStructKrylovScaleVector ( HYPRE_Complex alpha , void *x );
 HYPRE_Int hypre_SStructKrylovAxpy ( HYPRE_Complex alpha , void *x , void *y );
 HYPRE_Int hypre_SStructKrylovCommInfo ( void *A , HYPRE_Int *my_id , HYPRE_Int *num_procs );
+HYPRE_Int hypre_SStructKrylovPrintVector( void *x, const char *filename );
 
 /* maxwell_grad.c */
 hypre_ParCSRMatrix *hypre_Maxwell_Grad ( hypre_SStructGrid *grid );

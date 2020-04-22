@@ -277,3 +277,12 @@ hypre_SStructKrylovCommInfo( void  *A,
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructKrylovPrintVector( void *x,
+                                const char *filename)
+{
+   return ( HYPRE_SStructVectorPrint( filename, (hypre_SStructVector *) x, 0) );
+}

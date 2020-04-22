@@ -30,6 +30,7 @@ HYPRE_SStructPCGCreate( MPI_Comm             comm,
          hypre_SStructKrylovScaleVector, hypre_SStructKrylovAxpy,
          hypre_SStructKrylovIdentitySetup, hypre_SStructKrylovIdentity );
 
+   pcg_functions->PrintVector = hypre_SStructKrylovPrintVector;
    *solver = ( (HYPRE_SStructSolver) hypre_PCGCreate( pcg_functions ) );
 
    return hypre_error_flag;
