@@ -177,3 +177,11 @@ HYPRE_ILUGetFinalRelativeResidualNorm(  HYPRE_Solver solver, HYPRE_Real *res_nor
 {
    return hypre_ILUGetFinalRelativeResidualNorm(solver, res_norm);
 }
+/*--------------------------------------------------------------------------
+ * HYPRE_ILUSetLocalReordering
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_ILUSetLocalReordering(  HYPRE_Solver solver, HYPRE_Int ordering_type )
+{
+   return hypre_ILUSetLocalReordering(solver, ordering_type);
+}
