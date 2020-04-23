@@ -59,12 +59,16 @@ HYPRE_Int hypre_SLUDistSetup( HYPRE_Solver *solver, hypre_ParCSRMatrix *A, HYPRE
 
    num_rows = hypre_CSRMatrixNumRows(A_local);
    /* Now convert hypre matrix to a SuperMatrix */
+#ifdef HYPRE_MIXEDINT
    rowptr = hypre_CSRMatrixI(A_local);
    big_rowptr = hypre_CTAlloc(HYPRE_BigInt, (num_rows+1), HYPRE_MEMORY_HOST);
    for(i=0; i<(num_rows+1); i++)
    {
       big_rowptr[i] = (HYPRE_BigInt)rowptr[i];
    } 
+#else
+   big_rowptr = hypre_CSRMatrixI(A_local);
+#endif
    dCreate_CompRowLoc_Matrix_dist(
             &(dslu_data->A_dslu),global_num_rows,global_num_rows,
             hypre_CSRMatrixNumNonzeros(A_local),
@@ -76,6 +80,9 @@ HYPRE_Int hypre_SLUDistSetup( HYPRE_Solver *solver, hypre_ParCSRMatrix *A, HYPRE
 
    /* DOK: SuperLU frees assigned data, so set them to null before 
     * calling hypre_CSRMatrixdestroy on A_local to avoid double free memory error */
+#ifndef HYPRE_MIXEDINT
+   hypre_CSRMatrixI(A_local) = NULL;
+#endif
    hypre_CSRMatrixData(A_local) = NULL;
    hypre_CSRMatrixBigJ(A_local) = NULL;
    hypre_CSRMatrixDestroy(A_local);
