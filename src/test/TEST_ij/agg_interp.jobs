@@ -15,10 +15,15 @@
 #     7: 2s-ext interpolation all levels (tr = 0.3 P12_tr = 0.2)
 #     8: multipass interpolation all levels
 #     9: 2s-ei interpolation all levels (Pmx = 4, P12_mx = 3)
-#     8: multipass interpolation all levels for systems problem unknown approach
-#     8: 2s-ei interpolation all levels for systems problem unknown approach
-#     8: multipass interpolation all levels for systems problem hybrid approach
-#     8: 2s-ei interpolation all levels for systems problem hybrid approach
+#    10: multipass interpolation all levels for systems problem unknown approach
+#    11: 2s-ei interpolation all levels for systems problem unknown approach
+#    12: multipass interpolation all levels for systems problem hybrid approach
+#    13: 2s-ei interpolation all levels for systems problem hybrid approach
+#    14: 2s-mod-ext interpolation 1 level (agg_Pmx 4) 
+#    15: 2s-mod-ext interpolation 1 level (agg_tr 0.3) 
+#    16: 2s-mod-ei-ext interpolation 1 level (agg_P12 6 agg_Pmx 4) 
+#    17: 2s-mod-ext interpolation all levels for systems problem unknown approach
+#    18: 2s-mod-ext interpolation all levels for systems problem hybrid approach
 #=============================================================================
 
 mpirun -np 8 ./ij    -rhsrand -n 30 29 31 -P 2 2 2 -agg_nl 1 -agg_interp 1 -agg_Pmx 4 -solver 1 -rlx 6 \
@@ -60,3 +65,17 @@ mpirun -np 8 ./ij    -rhsrand -n 20 19 22 -P 2 2 2 -sysL 3 -nf 3 -agg_nl 10 -agg
 mpirun -np 8 ./ij    -rhsrand -n 20 19 22 -P 2 2 2 -sysL 3 -nf 3 -agg_nl 10 -agg_interp 1 -agg_Pmx 4 -agg_P12_mx 4 -nodal 1 -solver 1 -rlx 6 \
  >> agg_interp.out.13
 
+mpirun -np 8 ./ij    -rhsrand -n 30 29 31 -P 2 2 2 -agg_nl 1 -agg_interp 5 -agg_Pmx 4 -solver 1 -rlx 6 \
+ >> agg_interp.out.14
+
+mpirun -np 8 ./ij    -rhsrand -n 30 29 31 -P 2 2 2 -agg_nl 1 -agg_interp 5 -agg_tr 0.3 -solver 1 -rlx 6 \
+ >> agg_interp.out.15
+
+mpirun -np 8 ./ij    -rhsrand -n 30 29 31 -P 2 2 2 -agg_nl 1 -agg_interp 6 -agg_Pmx 4 -agg_P12_mx 4 -solver 1 -rlx 6 \
+ >> agg_interp.out.16
+
+mpirun -np 8 ./ij    -rhsrand -n 20 19 22 -P 2 2 2 -sysL 3 -nf 3 -agg_nl 10 -interptype 16 -agg_interp 5 -agg_Pmx 4 -agg_P12_mx 4 -solver 1 -rlx 6 \
+ >> agg_interp.out.17
+
+mpirun -np 8 ./ij    -rhsrand -n 20 19 22 -P 2 2 2 -sysL 3 -nf 3 -agg_nl 10 -interptype 17 -agg_interp 5 -agg_tr 0.2 -agg_P12_tr 0.2 -nodal 1 -solver 1 -rlx 6 \
+ >> agg_interp.out.18
