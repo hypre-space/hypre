@@ -79,7 +79,8 @@ HYPRE_Int hypre_SLUDistSetup( HYPRE_Solver *solver, hypre_ParCSRMatrix *A, HYPRE
             SLU_NR_loc, SLU_D, SLU_GE);
 
    /* DOK: SuperLU frees assigned data, so set them to null before 
-    * calling hypre_CSRMatrixdestroy on A_local to avoid double free memory error */
+    * calling hypre_CSRMatrixdestroy on A_local to avoid memory errors. 
+   */
 #ifndef HYPRE_MIXEDINT
    hypre_CSRMatrixI(A_local) = NULL;
 #endif
