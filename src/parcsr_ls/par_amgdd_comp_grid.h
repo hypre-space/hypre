@@ -36,21 +36,16 @@ typedef struct
    // Info needed for subsequent psi_c residual communication
 	HYPRE_Int 			num_levels; // levels in the amg hierarchy
 	HYPRE_Int 			*num_send_procs; // number of send procs to communicate with
-   HYPRE_Int         *num_recv_procs; // number of recv procs to communicate with
+    HYPRE_Int           *num_recv_procs; // number of recv procs to communicate with
 
-   HYPRE_Int         **send_procs; // list of send procs
-   HYPRE_Int         **recv_procs; // list of recv procs
-   HYPRE_Int         **send_map_starts; // send map starts from comm pkg of A^eta on each level later used as send map starts for full residual communication
-   HYPRE_Int         **send_map_elmts; // send map elmts from comm pkg of A^eta on each level later used as send map elmts for full residual communication
-   HYPRE_Int         **recv_map_starts; // recv map starts for full residual communication
-   HYPRE_Int         **recv_map_elmts; // recv map elmts for full residual communication
-   HYPRE_Int         **ghost_marker; // marks send elmts as ghost or real dofs for the associated processor
+    HYPRE_Int         **send_procs; // list of send procs
+    HYPRE_Int         **recv_procs; // list of recv procs
 
 	HYPRE_Int 			**send_buffer_size; // size of send buffer on each level for each proc
 	HYPRE_Int 			**recv_buffer_size; // size of recv buffer on each level for each proc
 
 	HYPRE_Int 			***num_send_nodes; // number of nodes to send on each composite level
-   HYPRE_Int         ***num_recv_nodes; // number of nodes to recv on each composite level
+    HYPRE_Int           ***num_recv_nodes; // number of nodes to recv on each composite level
 	HYPRE_Int 			****send_flag; // flags which nodes to send after composite grid is built
 	HYPRE_Int 			****recv_map; // mapping from recv buffer to appropriate local indices on each comp grid
 
@@ -65,11 +60,6 @@ typedef struct
  #define hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg)           ((compGridCommPkg) -> num_recv_procs)
  #define hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)           ((compGridCommPkg) -> send_procs)
  #define hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)           ((compGridCommPkg) -> recv_procs)
- #define hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)           ((compGridCommPkg) -> send_map_starts)
- #define hypre_ParCompGridCommPkgSendMapElmts(compGridCommPkg)            ((compGridCommPkg) -> send_map_elmts)
- #define hypre_ParCompGridCommPkgRecvMapStarts(compGridCommPkg)           ((compGridCommPkg) -> recv_map_starts)
- #define hypre_ParCompGridCommPkgRecvMapElmts(compGridCommPkg)           ((compGridCommPkg) -> recv_map_elmts)
- #define hypre_ParCompGridCommPkgGhostMarker(compGridCommPkg)           ((compGridCommPkg) -> ghost_marker)
  #define hypre_ParCompGridCommPkgSendBufferSize(compGridCommPkg)		((compGridCommPkg) -> send_buffer_size)
  #define hypre_ParCompGridCommPkgRecvBufferSize(compGridCommPkg)		((compGridCommPkg) -> recv_buffer_size)
  #define hypre_ParCompGridCommPkgNumSendNodes(compGridCommPkg)			((compGridCommPkg) -> num_send_nodes)
