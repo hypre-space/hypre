@@ -5,8 +5,6 @@
 #include "par_amg.h"
 #include "par_csr_block_matrix.h"   
 
-#include <thrust/device_vector.h>
-
 #ifdef __cplusplus
 
 #include <vector>
@@ -619,11 +617,12 @@ SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGridCommPkg 
       hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[level] = hypre_CTAlloc(HYPRE_Int**, send_proc_dofs.size(), HYPRE_MEMORY_HOST);
       hypre_ParCompGridCommPkgNumSendNodes(compGridCommPkg)[level] = hypre_CTAlloc(HYPRE_Int*, send_proc_dofs.size(), HYPRE_MEMORY_HOST);
       HYPRE_Int proc_cnt = 0;
-      cnt = 0;
       for (auto send_proc_it = send_proc_dofs.begin(); send_proc_it != send_proc_dofs.end(); ++send_proc_it)
       {
+         cnt = 0;
          hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[level][proc_cnt] = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST); 
          hypre_ParCompGridCommPkgNumSendNodes(compGridCommPkg)[level][proc_cnt] = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST); 
+
          hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)[level][proc_cnt][level] = hypre_CTAlloc(HYPRE_Int, send_proc_it->second.size(), HYPRE_MEMORY_SHARED); 
          hypre_ParCompGridCommPkgNumSendNodes(compGridCommPkg)[level][proc_cnt][level] = send_proc_it->second.size();
           
@@ -760,7 +759,7 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
    cnt += num_original_recv_dofs;
 
    // Setup the recv map on current level
-   recv_map[current_level][buffer_number][current_level] = hypre_CTAlloc(HYPRE_Int, num_recv_nodes[current_level][buffer_number][current_level], HYPRE_MEMORY_HOST);
+   recv_map[current_level][buffer_number][current_level] = hypre_CTAlloc(HYPRE_Int, num_recv_nodes[current_level][buffer_number][current_level], HYPRE_MEMORY_SHARED);
    for (i = 0; i < num_original_recv_dofs; i++)
    {
       recv_map[current_level][buffer_number][current_level][i] = i + hypre_ParCSRCommPkgRecvVecStart(commPkg, buffer_number) + hypre_ParCompGridNumOwnedNodes(compGrid[current_level]);
@@ -1970,7 +1969,7 @@ PackSendBuffer(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypre_P
    (*buffer_size) += 2;
    if (current_level != num_levels-1) (*buffer_size) += 3*num_send_nodes[current_level][proc][current_level];
    else (*buffer_size) += 2*num_send_nodes[current_level][proc][current_level];
-
+   
    for (i = 0; i < num_send_nodes[current_level][proc][current_level]; i++)
    {
       send_elmt = send_flag[current_level][proc][current_level][i];
