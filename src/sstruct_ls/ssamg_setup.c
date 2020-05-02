@@ -14,7 +14,7 @@
 #include "_hypre_sstruct_ls.h"
 #include "ssamg.h"
 
-#define DEBUG 0
+#define DEBUG 1
 
 /*--------------------------------------------------------------------------
  *  TODO:
@@ -70,6 +70,8 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
    HYPRE_Int              num_levels;
 
 #if DEBUG
+   hypre_SStructVector   *ones  = NULL;
+   hypre_SStructVector   *Pones = NULL;
    char                   filename[255];
 #endif
 
@@ -204,6 +206,32 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
       hypre_SSAMGRelaxSetType(relax_data_l[l], relax_type);
       hypre_SSAMGRelaxSetTempVec(relax_data_l[l], tx_l[l]);
       hypre_SSAMGRelaxSetup(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
+
+      // Check if P interpolates vector of ones
+#if DEBUG
+      if (ones != NULL)
+      {
+         HYPRE_SStructVectorDestroy(ones);
+      }
+      HYPRE_SStructVectorCreate(comm, grid_l[l+1], &ones);
+      HYPRE_SStructVectorInitialize(ones);
+      HYPRE_SStructVectorSetConstantValues(ones, 1.0);
+      HYPRE_SStructVectorAssemble(ones);
+
+      if (Pones != NULL)
+      {
+         HYPRE_SStructVectorDestroy(Pones);
+      }
+      HYPRE_SStructVectorCreate(comm, grid_l[l], &Pones);
+      HYPRE_SStructVectorInitialize(Pones);
+      HYPRE_SStructVectorAssemble(Pones);
+
+      /* interpolate error and correct (x = Pe_c) */
+      hypre_SStructMatvecCompute(interp_data_l[l], 1.0, P_l[l], ones, 0.0, Pones);
+
+      hypre_sprintf(filename, "ssamg_Pones.%02d", l);
+      HYPRE_SStructVectorPrint(filename, Pones, 0);
+#endif
    }
 
    /* set up remaining operations for the coarse grid */
@@ -211,14 +239,26 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
    hypre_SStructMatvecCreate(&matvec_data_l[l]);
    hypre_SStructMatvecSetup(matvec_data_l[l], A_l[l], x_l[l]);
    {
-      HYPRE_Int max_work, relax_max_iter;
+      HYPRE_Int             max_work, relax_max_iter;
+      hypre_Box             bbox;
+      hypre_SStructPGrid   *pgrid;
+      hypre_StructGrid     *sgrid;
 
       /* do no more work on the coarsest grid than the cost of a V-cycle
        * (estimating roughly 4 communications per V-cycle level) */
       max_work = 4*num_levels;
 
       /* do sweeps proportional to the coarsest grid size */
-      cmaxsize = max_work;
+      
+      cmaxsize = 0;
+      for (part = 0; part < nparts; part++)
+      {
+         pgrid = hypre_SStructGridPGrid(grid_l[l], part);
+         sgrid = hypre_SStructPGridCellSGrid(pgrid);
+         hypre_CopyBox(hypre_StructGridBoundingBox(sgrid), &bbox);
+
+         cmaxsize = hypre_max(cmaxsize, hypre_BoxMaxSize(&bbox));
+      }
       relax_max_iter = hypre_min(max_work, cmaxsize);
 
       hypre_SSAMGRelaxCreate(comm, nparts, &relax_data_l[l]);
@@ -228,6 +268,11 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
       hypre_SSAMGRelaxSetMaxIter(relax_data_l[l], relax_max_iter);
       hypre_SSAMGRelaxSetTempVec(relax_data_l[l], tx_l[l]);
       hypre_SSAMGRelaxSetup(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
+
+#if 1
+      hypre_printf("max_work = %d, cmaxsize = %d, cmax_iter = %d\n",
+                   max_work, cmaxsize, relax_max_iter);
+#endif
    }
 
    (ssamg_data -> relax_data_l)    = relax_data_l;
@@ -363,6 +408,7 @@ hypre_SSAMGCoarsen( void                 *ssamg_vdata,
                     HYPRE_Real         ***relax_weights_ptr)
 {
    hypre_SSAMGData      *ssamg_data = (hypre_SSAMGData *) ssamg_vdata;
+   HYPRE_Real            usr_relax_weight = hypre_SSAMGDataRelaxWeight(ssamg_data);
    hypre_SStructGrid   **grid_l;
    hypre_SStructPGrid   *pgrid;
    hypre_StructGrid     *sgrid;
@@ -420,16 +466,13 @@ hypre_SSAMGCoarsen( void                 *ssamg_vdata,
 
    /* Force relaxation on finest grid */
    hypre_SetIndex(coarsen, 1);
-   for (l = 0; l < (max_levels - 1); l++)
+   for (l = 0; l < max_levels; l++)
    {
       cdir_l[l] = hypre_TAlloc(HYPRE_Int, nparts);
 
       coarse = 0;
       for (part = 0; part < nparts; part++)
       {
-         /* Set default weight */
-         relax_weights[l][part] = 1.0;
-
          /* Initialize min_dxyz */
          min_dxyz = 1;
          for (d = 0; d < ndim; d++)
@@ -453,28 +496,36 @@ hypre_SSAMGCoarsen( void                 *ssamg_vdata,
          }
 
          /* Change relax_weights */
-         beta = 0.0;
-         if (dxyz_flag[part] || (ndim == 1))
+         if (usr_relax_weight > 0.0)
          {
-            relax_weights[l][part] = 2.0/3.0;
+            relax_weights[l][part] = usr_relax_weight;
          }
          else
          {
-            for (d = 0; d < ndim; d++)
+            beta = 0.0;
+            if (dxyz_flag[part] || (ndim == 1))
             {
-               if (d != cdir)
-               {
-                  beta += 1.0/(dxyz[part][d]*dxyz[part][d]);
-               }
+               relax_weights[l][part] = 2.0/3.0;
             }
+            else
+            {
+               for (d = 0; d < ndim; d++)
+               {
+                  if (d != cdir)
+                  {
+                     beta += 1.0/(dxyz[part][d]*dxyz[part][d]);
+                  }
+               }
 
-            /* determine level Jacobi weights */
-            relax_weights[l][part] = 2.0/(3.0 - beta/alpha);
+               /* determine level Jacobi weights */
+               relax_weights[l][part] = 2.0/(3.0 - beta/alpha);
+            }
          }
 
-         cdir_l[l][part] = cdir;
-         if (cdir_l[l][part] > -1)
+         if ((cdir > -1) && (l < (max_levels - 1)))
          {
+            cdir_l[l][part] = cdir;
+
             /* don't coarsen if a periodic direction and not divisible by 2 */
             if ((periodic[part][cdir]) && (periodic[part][cdir] % 2))
             {
@@ -509,6 +560,10 @@ hypre_SSAMGCoarsen( void                 *ssamg_vdata,
             /* Update number of levels */
             num_levels = l + 2; // (l + 1)?
          }
+         else
+         {
+            relax_weights[l][part] = 1.0; // Coarse grid relax weight
+         }
       } /* loop on parts */
 
       // If there's no part to be coarsened, exit loop
@@ -516,7 +571,8 @@ hypre_SSAMGCoarsen( void                 *ssamg_vdata,
 
       // Compute the coarsened SStructGrid object
       hypre_SStructGridCoarsen(grid_l[l], NULL, strides, periodic, 0, &grid_l[l+1]);
-   }
+
+   } /* loop on levels */
 
    /* Free memory */
    for (part = 0; part < nparts; part++)
