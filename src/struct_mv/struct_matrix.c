@@ -1993,6 +1993,7 @@ hypre_StructMatrixClearGhostValues( hypre_StructMatrix *matrix )
    HYPRE_Complex        *mp;
 
    hypre_StructStencil  *stencil;
+   HYPRE_Int            *constant;
    HYPRE_Int            *symm_entries;
    hypre_BoxArray       *grid_boxes;
    hypre_BoxArray       *data_space;
@@ -2015,6 +2016,7 @@ hypre_StructMatrixClearGhostValues( hypre_StructMatrix *matrix )
    grid_data_box = hypre_BoxCreate(ndim);
 
    stencil = hypre_StructMatrixStencil(matrix);
+   constant = hypre_StructMatrixConstant(matrix);
    symm_entries = hypre_StructMatrixSymmEntries(matrix);
    grid_boxes = hypre_StructGridBoxes(hypre_StructMatrixGrid(matrix));
    //data_space = hypre_StructMatrixDataBoxes(matrix);
@@ -2030,8 +2032,9 @@ hypre_StructMatrixClearGhostValues( hypre_StructMatrix *matrix )
 
       for (s = 0; s < hypre_StructStencilSize(stencil); s++)
       {
-         /* only clear stencil entries that are explicitly stored */
-         if (symm_entries[s] < 0)
+         /* only clear stencil entries that are explicitly stored
+            and those regarding variable coefficients */
+         if ((symm_entries[s] < 0) && !(constant[s]))
          {
             mp = hypre_StructMatrixBoxData(matrix, i, s);
             hypre_ForBoxI(j, diff_boxes)
