@@ -235,34 +235,31 @@ hypre_StructGridSetMaxDistance( hypre_StructGrid *grid,
 HYPRE_Int
 hypre_StructGridAssemble( hypre_StructGrid *grid )
 {
+   HYPRE_Int            myid, num_procs;
+   HYPRE_Int           *ids = NULL;
+   HYPRE_Int            iperiodic, notcenter;
+   HYPRE_Int            is_boxman;
+   HYPRE_Int            size, ghost_size;
+   HYPRE_Int            num_local_boxes;
+   HYPRE_Int            box_volume;
+   HYPRE_Int            global_size;
+   HYPRE_Int            max_nentries;
+   HYPRE_Int            info_size;
+   HYPRE_Int            num_periods;
+   HYPRE_Int            d, k, p, i;
+   HYPRE_Int            sendbuf6[2*HYPRE_MAXDIM], recvbuf6[2*HYPRE_MAXDIM];
 
-   HYPRE_Int d, k, p, i;
+   hypre_Box           *box;
+   hypre_Box           *ghost_box;
+   hypre_Box           *grow_box;
+   hypre_Box           *periodic_box;
+   hypre_Box           *result_box;
 
-   HYPRE_Int is_boxman;
-   HYPRE_Int size, ghostsize;
-   HYPRE_Int num_local_boxes;
-   HYPRE_Int myid, num_procs;
-   HYPRE_Int global_size;
-   HYPRE_Int max_nentries;
-   HYPRE_Int info_size;
-   HYPRE_Int num_periods;
+   hypre_Index          min_index, max_index, loop_size;
+   hypre_Index         *pshifts;
+   hypre_IndexRef       pshift;
 
-   HYPRE_Int *ids = NULL;
-   HYPRE_Int  iperiodic, notcenter;
-
-   HYPRE_Int  sendbuf6[2*HYPRE_MAXDIM], recvbuf6[2*HYPRE_MAXDIM];
-
-   hypre_Box  *box;
-   hypre_Box  *ghostbox;
-   hypre_Box  *grow_box;
-   hypre_Box  *periodic_box;
-   hypre_Box  *result_box;
-
-   hypre_Index min_index, max_index, loop_size;
-   hypre_Index *pshifts;
-   hypre_IndexRef pshift;
-
-   void *entry_info = NULL;
+   void                *entry_info = NULL;
 
    /*  initialize info from the grid */
    MPI_Comm             comm         = hypre_StructGridComm(grid);
@@ -272,7 +269,7 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
    hypre_Box           *bounding_box = hypre_StructGridBoundingBox(grid);
    hypre_IndexRef       periodic     = hypre_StructGridPeriodic(grid);
    hypre_BoxManager    *boxman       = hypre_StructGridBoxMan(grid);
-   HYPRE_Int           *numghost     = hypre_StructGridNumGhost(grid);
+   HYPRE_Int           *num_ghost    = hypre_StructGridNumGhost(grid);
 
    if (!time_index)
       time_index = hypre_InitializeTiming("StructGridAssemble");
@@ -360,22 +357,26 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
    /********calculate local size and the ghost size **************/
 
    size = 0;
-   ghostsize = 0;
-   ghostbox = hypre_BoxCreate(ndim);
+   ghost_size = 0;
+   ghost_box  = hypre_BoxCreate(ndim);
 
    hypre_ForBoxI(i, local_boxes)
    {
       box = hypre_BoxArrayBox(local_boxes, i);
-      size +=  hypre_BoxVolume(box);
+      box_volume = hypre_BoxVolume(box);
+      size += box_volume;
 
-      hypre_CopyBox(box, ghostbox);
-      hypre_BoxGrowByArray(ghostbox, numghost);
-      ghostsize += hypre_BoxVolume(ghostbox);
+      if (box_volume)
+      {
+         hypre_CopyBox(box, ghost_box);
+         hypre_BoxGrowByArray(ghost_box, num_ghost);
+         ghost_size += hypre_BoxVolume(ghost_box);
+      }
    }
 
-   hypre_StructGridLocalSize(grid) = size;
-   hypre_StructGridGhlocalSize(grid) = ghostsize;
-   hypre_BoxDestroy(ghostbox);
+   hypre_StructGridLocalSize(grid)   = size;
+   hypre_StructGridGhlocalSize(grid) = ghost_size;
+   hypre_BoxDestroy(ghost_box);
 
    /* if the box manager has been created then we don't need to do the
     * following (because it was done through the coarsening routine) */

@@ -1148,17 +1148,20 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
    {
       box = hypre_BoxArrayBox(grid_boxes, i);
 
-      // Domain grid (columns)
-      hypre_CopyBox(box, ghost_box);
-      hypre_CoarsenBox(ghost_box, NULL, dom_stride);
-      hypre_BoxGrowByArray(ghost_box, num_ghost);
-      dom_ghsize += hypre_BoxVolume(ghost_box);
+      if (hypre_BoxVolume(box))
+      {
+         /* Domain grid (columns) */
+         hypre_CopyBox(box, ghost_box);
+         hypre_CoarsenBox(ghost_box, NULL, dom_stride);
+         hypre_BoxGrowByArray(ghost_box, num_ghost);
+         dom_ghsize += hypre_BoxVolume(ghost_box);
 
-      // Range grid (rows)
-      hypre_CopyBox(box, ghost_box);
-      hypre_CoarsenBox(ghost_box, NULL, ran_stride);
-      hypre_BoxGrowByArray(ghost_box, num_ghost);
-      ran_ghsize += hypre_BoxVolume(ghost_box);
+         /* Range grid (rows) */
+         hypre_CopyBox(box, ghost_box);
+         hypre_CoarsenBox(ghost_box, NULL, ran_stride);
+         hypre_BoxGrowByArray(ghost_box, num_ghost);
+         ran_ghsize += hypre_BoxVolume(ghost_box);
+      }
    }
    hypre_StructMatrixDomGhsize(matrix) = dom_ghsize;
    hypre_StructMatrixRanGhsize(matrix) = ran_ghsize;
