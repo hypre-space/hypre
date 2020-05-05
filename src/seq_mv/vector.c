@@ -33,7 +33,7 @@ hypre_SeqVectorCreate( HYPRE_Int size )
    /* set defaults */
    hypre_VectorOwnsData(vector) = 1;
 
-   hypre_VectorMemoryLocation(vector) = HYPRE_MEMORY_SHARED;
+   hypre_VectorMemoryLocation(vector) = hypre_HandleMemoryLocation(hypre_handle());
 
    return vector;
 }
@@ -62,7 +62,7 @@ hypre_SeqVectorDestroy( hypre_Vector *vector )
 
    if (vector)
    {
-      HYPRE_Int memory_location = hypre_VectorMemoryLocation(vector);
+      HYPRE_MemoryLocation memory_location = hypre_VectorMemoryLocation(vector);
 
       if ( hypre_VectorOwnsData(vector) )
       {
@@ -80,7 +80,7 @@ hypre_SeqVectorDestroy( hypre_Vector *vector )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SeqVectorInitialize_v2( hypre_Vector *vector, HYPRE_Int memory_location )
+hypre_SeqVectorInitialize_v2( hypre_Vector *vector, HYPRE_MemoryLocation memory_location )
 {
    HYPRE_Int  size = hypre_VectorSize(vector);
    HYPRE_Int  ierr = 0;
@@ -95,8 +95,7 @@ hypre_SeqVectorInitialize_v2( hypre_Vector *vector, HYPRE_Int memory_location )
     * when being used, and freed */
    if ( !hypre_VectorData(vector) )
    {
-      hypre_VectorData(vector) = hypre_CTAlloc(HYPRE_Complex, num_vectors*size,
-                                               memory_location);
+      hypre_VectorData(vector) = hypre_CTAlloc(HYPRE_Complex, num_vectors*size, memory_location);
    }
 
    if ( multivec_storage_method == 0 )
@@ -167,6 +166,9 @@ hypre_SeqVectorRead( char *file_name )
    hypre_fscanf(fp, "%d", &size);
 
    vector = hypre_SeqVectorCreate(size);
+
+   hypre_VectorMemoryLocation(vector) = HYPRE_MEMORY_HOST;
+
    hypre_SeqVectorInitialize(vector);
 
    data = hypre_VectorData(vector);
@@ -276,7 +278,7 @@ hypre_SeqVectorSetConstantValues( hypre_Vector *v,
 
    size *= hypre_VectorNumVectors(v);
 
-   hypre_SeqVectorPrefetch(v, HYPRE_MEMORY_DEVICE);
+   //hypre_SeqVectorPrefetch(v, HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_CUDA)
    HYPRE_THRUST_CALL( fill_n, vector_data, size, value );
@@ -293,7 +295,7 @@ hypre_SeqVectorSetConstantValues( hypre_Vector *v,
    }
 #endif /* defined(HYPRE_USING_CUDA) */
 
-   hypre_SyncCudaComputeStream(hypre_handle);
+   hypre_SyncCudaComputeStream(hypre_handle());
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
@@ -320,10 +322,23 @@ hypre_SeqVectorSetRandomValues( hypre_Vector *v,
 
    size *= hypre_VectorNumVectors(v);
 
-   /* RDF: threading this loop may cause problems because of hypre_Rand() */
-   for (i = 0; i < size; i++)
+   if (hypre_GetActualMemLocation(hypre_VectorMemoryLocation(v)) == hypre_MEMORY_HOST)
    {
-      vector_data[i] = 2.0 * hypre_Rand() - 1.0;
+      /* RDF: threading this loop may cause problems because of hypre_Rand() */
+      for (i = 0; i < size; i++)
+      {
+         vector_data[i] = 2.0 * hypre_Rand() - 1.0;
+      }
+   }
+   else
+   {
+      HYPRE_Complex *h_data = hypre_TAlloc(HYPRE_Complex, size, HYPRE_MEMORY_HOST);
+      for (i = 0; i < size; i++)
+      {
+         h_data[i] = 2.0 * hypre_Rand() - 1.0;
+      }
+      hypre_TMemcpy(vector_data, h_data, HYPRE_Complex, size, hypre_VectorMemoryLocation(v), HYPRE_MEMORY_HOST);
+      hypre_TFree(h_data, HYPRE_MEMORY_HOST);
    }
 
    return ierr;
@@ -343,41 +358,16 @@ hypre_SeqVectorCopy( hypre_Vector *x,
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] -= hypre_MPI_Wtime();
 #endif
 
-   hypre_SeqVectorPrefetch(x, HYPRE_MEMORY_DEVICE);
-   hypre_SeqVectorPrefetch(y, HYPRE_MEMORY_DEVICE);
+   HYPRE_Int ierr = 0;
 
-   HYPRE_Complex *x_data = hypre_VectorData(x);
-   HYPRE_Complex *y_data = hypre_VectorData(y);
-   HYPRE_Int      size   = hypre_VectorSize(x);
-   HYPRE_Int      size_y = hypre_VectorSize(y);
-   HYPRE_Int      ierr = 0;
+   size_t size = hypre_min( hypre_VectorSize(x), hypre_VectorSize(y) ) * hypre_VectorNumVectors(x);
 
-   if (size > size_y)
-   {
-      size = size_y;
-   }
-   size *= hypre_VectorNumVectors(x);
-
-#if defined(HYPRE_USING_CUDA)
-#if defined(HYPRE_USING_CUBLAS)
-   HYPRE_CUBLAS_CALL( cublasDcopy(hypre_HandleCublasHandle(hypre_handle), size, x_data, 1, y_data, 1) );
-#else
-   HYPRE_THRUST_CALL( copy_n, x_data, size, y_data );
-#endif
-#else
-   HYPRE_Int i;
-#if defined(HYPRE_USING_DEVICE_OPENMP)
-#pragma omp target teams distribute parallel for private(i) is_device_ptr(y_data,x_data)
-#elif defined(HYPRE_USING_OPENMP)
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-#endif
-   for (i = 0; i < size; i++)
-   {
-      y_data[i] = x_data[i];
-   }
-#endif /* defined(HYPRE_USING_CUDA) */
-
-   hypre_SyncCudaComputeStream(hypre_handle);
+   hypre_TMemcpy( hypre_VectorData(y),
+                  hypre_VectorData(x),
+                  HYPRE_Complex,
+                  size,
+                  hypre_VectorMemoryLocation(y),
+                  hypre_VectorMemoryLocation(x) );
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
@@ -392,7 +382,7 @@ hypre_SeqVectorCopy( hypre_Vector *x,
  *--------------------------------------------------------------------------*/
 
 hypre_Vector*
-hypre_SeqVectorCloneDeep( hypre_Vector *x )
+hypre_SeqVectorCloneDeep_v2( hypre_Vector *x, HYPRE_MemoryLocation memory_location )
 {
    HYPRE_Int      size          = hypre_VectorSize(x);
    HYPRE_Int      num_vectors   = hypre_VectorNumVectors(x);
@@ -403,10 +393,16 @@ hypre_SeqVectorCloneDeep( hypre_Vector *x )
    hypre_VectorVectorStride(y) = hypre_VectorVectorStride(x);
    hypre_VectorIndexStride(y) = hypre_VectorIndexStride(x);
 
-   hypre_SeqVectorInitialize(y);
+   hypre_SeqVectorInitialize_v2(y, memory_location);
    hypre_SeqVectorCopy( x, y );
 
    return y;
+}
+
+hypre_Vector*
+hypre_SeqVectorCloneDeep( hypre_Vector *x )
+{
+   return hypre_SeqVectorCloneDeep_v2(x, hypre_VectorMemoryLocation(x));
 }
 
 /*--------------------------------------------------------------------------
@@ -424,6 +420,8 @@ hypre_SeqVectorCloneShallow( hypre_Vector *x )
    hypre_VectorMultiVecStorageMethod(y) = hypre_VectorMultiVecStorageMethod(x);
    hypre_VectorVectorStride(y) = hypre_VectorVectorStride(x);
    hypre_VectorIndexStride(y) = hypre_VectorIndexStride(x);
+
+   hypre_VectorMemoryLocation(y) = hypre_VectorMemoryLocation(x);
 
    hypre_VectorData(y) = hypre_VectorData(x);
    hypre_SeqVectorSetDataOwner( y, 0 );
@@ -449,11 +447,11 @@ hypre_SeqVectorScale( HYPRE_Complex alpha,
 
    size *= hypre_VectorNumVectors(y);
 
-   hypre_SeqVectorPrefetch(y, HYPRE_MEMORY_DEVICE);
+   //hypre_SeqVectorPrefetch(y, HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_CUDA)
 #if defined(HYPRE_USING_CUBLAS)
-   HYPRE_CUBLAS_CALL( cublasDscal(hypre_HandleCublasHandle(hypre_handle), size, &alpha, y_data, 1) );
+   HYPRE_CUBLAS_CALL( cublasDscal(hypre_HandleCublasHandle(hypre_handle()), size, &alpha, y_data, 1) );
 #else
    HYPRE_THRUST_CALL( transform, y_data, y_data + size, y_data, alpha * _1 );
 #endif
@@ -471,7 +469,7 @@ hypre_SeqVectorScale( HYPRE_Complex alpha,
 
 #endif /* defined(HYPRE_USING_CUDA) */
 
-   hypre_SyncCudaComputeStream(hypre_handle);
+   hypre_SyncCudaComputeStream(hypre_handle());
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
@@ -483,7 +481,6 @@ hypre_SeqVectorScale( HYPRE_Complex alpha,
 /*--------------------------------------------------------------------------
  * hypre_SeqVectorAxpy
  *--------------------------------------------------------------------------*/
-
 HYPRE_Int
 hypre_SeqVectorAxpy( HYPRE_Complex alpha,
                      hypre_Vector *x,
@@ -500,12 +497,12 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
 
    size *= hypre_VectorNumVectors(x);
 
-   hypre_SeqVectorPrefetch(x, HYPRE_MEMORY_DEVICE);
-   hypre_SeqVectorPrefetch(y, HYPRE_MEMORY_DEVICE);
+   //hypre_SeqVectorPrefetch(x, HYPRE_MEMORY_DEVICE);
+   //hypre_SeqVectorPrefetch(y, HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_CUDA)
 #if defined(HYPRE_USING_CUBLAS)
-   HYPRE_CUBLAS_CALL( cublasDaxpy(hypre_HandleCublasHandle(hypre_handle), size, &alpha, x_data, 1, y_data, 1) );
+   HYPRE_CUBLAS_CALL( cublasDaxpy(hypre_HandleCublasHandle(hypre_handle()), size, &alpha, x_data, 1, y_data, 1) );
 #else
    HYPRE_THRUST_CALL( transform, x_data, x_data + size, y_data, y_data, alpha * _1 + _2 );
 #endif
@@ -523,7 +520,7 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
 
 #endif /* defined(HYPRE_USING_CUDA) */
 
-   hypre_SyncCudaComputeStream(hypre_handle);
+   hypre_SyncCudaComputeStream(hypre_handle());
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
@@ -551,13 +548,13 @@ hypre_SeqVectorInnerProd( hypre_Vector *x,
 
    size *= hypre_VectorNumVectors(x);
 
-   hypre_SeqVectorPrefetch(x, HYPRE_MEMORY_DEVICE);
-   hypre_SeqVectorPrefetch(y, HYPRE_MEMORY_DEVICE);
+   //hypre_SeqVectorPrefetch(x, HYPRE_MEMORY_DEVICE);
+   //hypre_SeqVectorPrefetch(y, HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_CUDA)
 #ifndef HYPRE_COMPLEX
 #if defined(HYPRE_USING_CUBLAS)
-   HYPRE_CUBLAS_CALL( cublasDdot(hypre_HandleCublasHandle(hypre_handle), size, x_data, 1, y_data, 1, &result) );
+   HYPRE_CUBLAS_CALL( cublasDdot(hypre_HandleCublasHandle(hypre_handle()), size, x_data, 1, y_data, 1, &result) );
 #else
    result = HYPRE_THRUST_CALL( inner_product, x_data, x_data + size, y_data, 0.0 );
 #endif
@@ -578,7 +575,7 @@ hypre_SeqVectorInnerProd( hypre_Vector *x,
    }
 #endif /* defined(HYPRE_USING_CUDA) */
 
-   hypre_SyncCudaComputeStream(hypre_handle);
+   hypre_SyncCudaComputeStream(hypre_handle());
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
@@ -610,32 +607,81 @@ HYPRE_Complex hypre_SeqVectorSumElts( hypre_Vector *vector )
 }
 
 HYPRE_Int
-hypre_SeqVectorPrefetch( hypre_Vector *x, HYPRE_Int to_location)
+hypre_SeqVectorPrefetch( hypre_Vector *x, HYPRE_MemoryLocation memory_location)
 {
    HYPRE_Int      ierr = 0;
 #ifdef HYPRE_USING_UNIFIED_MEMORY
-   HYPRE_Complex *x_data = hypre_VectorData(x);
-   HYPRE_Int      size   = hypre_VectorSize(x) * hypre_VectorNumVectors(x);
-
-   if (hypre_GetActualMemLocation(hypre_VectorMemoryLocation(x)) != HYPRE_MEMORY_SHARED)
+   if (hypre_VectorMemoryLocation(x) != HYPRE_MEMORY_DEVICE)
    {
       /* hypre_error_w_msg(HYPRE_ERROR_GENERIC," Error! CUDA Prefetch with non-unified momory\n");*/
-      return ierr;
+      return 1;
    }
+
+   HYPRE_Complex *x_data = hypre_VectorData(x);
+   HYPRE_Int      size   = hypre_VectorSize(x) * hypre_VectorNumVectors(x);
 
    if (size == 0)
    {
       return ierr;
    }
 
-   /* speical use of TMemcpy for prefetch */
-   hypre_TMemcpy(x_data, x_data, HYPRE_Complex, size, to_location, HYPRE_MEMORY_SHARED);
+   hypre_MemPrefetch(x_data, sizeof(HYPRE_Complex)*size, memory_location);
 #endif
 
    return ierr;
 }
 
-//hypre_int hypre_SeqVectorIsManaged(hypre_Vector *x)
-//{
-//}
+#if 0
+/* y[i] = max(alpha*x[i], beta*y[i]) */
+HYPRE_Int
+hypre_SeqVectorMax( HYPRE_Complex alpha,
+                    hypre_Vector *x,
+                    HYPRE_Complex beta,
+                    hypre_Vector *y     )
+{
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_BLAS1] -= hypre_MPI_Wtime();
+#endif
 
+   HYPRE_Complex *x_data = hypre_VectorData(x);
+   HYPRE_Complex *y_data = hypre_VectorData(y);
+   HYPRE_Int      size   = hypre_VectorSize(x);
+   HYPRE_Int      ierr = 0;
+
+   size *= hypre_VectorNumVectors(x);
+
+   //hypre_SeqVectorPrefetch(x, HYPRE_MEMORY_DEVICE);
+   //hypre_SeqVectorPrefetch(y, HYPRE_MEMORY_DEVICE);
+
+   thrust::maximum<HYPRE_Complex> mx;
+
+#if defined(HYPRE_USING_CUDA)
+   HYPRE_THRUST_CALL( transform,
+                      thrust::make_transform_iterator(x_data,        alpha * _1),
+                      thrust::make_transform_iterator(x_data + size, alpha * _1),
+                      thrust::make_transform_iterator(y_data,        beta  * _1),
+                      y_data,
+                      mx );
+#else
+   HYPRE_Int i;
+#if defined(HYPRE_USING_DEVICE_OPENMP)
+#pragma omp target teams distribute parallel for private(i) is_device_ptr(y_data, x_data)
+#elif defined(HYPRE_USING_OPENMP)
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+   for (i = 0; i < size; i++)
+   {
+      y_data[i] += hypre_max(alpha * x_data[i], beta * y_data[i]);
+   }
+
+#endif /* defined(HYPRE_USING_CUDA) */
+
+   hypre_SyncCudaComputeStream(hypre_handle());
+
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
+#endif
+
+   return ierr;
+}
+#endif

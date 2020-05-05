@@ -262,7 +262,7 @@ HYPRE_ParCSRDiagScale( HYPRE_Solver solver,
    HYPRE_Int ierr = 0;
 #if defined(HYPRE_USING_CUDA)
    hypreDevice_DiagScaleVector(local_size, A_i, A_data, y_data, x_data);
-   //hypre_SyncCudaComputeStream(hypre_handle);
+   //hypre_SyncCudaComputeStream(hypre_handle());
 #else /* #if defined(HYPRE_USING_CUDA) */
    HYPRE_Int i;
 #if defined(HYPRE_USING_DEVICE_OPENMP)
@@ -270,7 +270,7 @@ HYPRE_ParCSRDiagScale( HYPRE_Solver solver,
 #elif defined(HYPRE_USING_OPENMP)
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
-   for (i=0; i < local_size; i++)
+   for (i = 0; i < local_size; i++)
    {
       x_data[i] = y_data[i]/A_data[A_i[i]];
    }
@@ -317,7 +317,7 @@ HYPRE_ParCSRSymPrecondSetup( HYPRE_Solver solver,
 
    for (i=0; i < hypre_VectorSize(hypre_ParVectorLocalVector(x)); i++)
    {
-	x_data[i] = y_data[i]/A_data[A_i[i]];
+      x_data[i] = y_data[i]/A_data[A_i[i]];
    }
 
    return ierr;

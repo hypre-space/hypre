@@ -6,16 +6,16 @@
  ******************************************************************************/
 
 #include "_hypre_parcsr_ls.h"
- 
+
 /*--------------------------------------------------------------------------
  * hypre_GenerateDifConv
  *--------------------------------------------------------------------------*/
 
-HYPRE_ParCSRMatrix 
+HYPRE_ParCSRMatrix
 GenerateDifConv( MPI_Comm comm,
                  HYPRE_BigInt   nx,
                  HYPRE_BigInt   ny,
-                 HYPRE_BigInt   nz, 
+                 HYPRE_BigInt   nz,
                  HYPRE_Int      P,
                  HYPRE_Int      Q,
                  HYPRE_Int      R,
@@ -41,7 +41,7 @@ GenerateDifConv( MPI_Comm comm,
    HYPRE_BigInt ix, iy, iz;
    HYPRE_Int ip, iq, ir;
    HYPRE_Int cnt, o_cnt;
-   HYPRE_Int local_num_rows; 
+   HYPRE_Int local_num_rows;
    HYPRE_BigInt *col_map_offd = NULL;
    HYPRE_Int row_index;
    HYPRE_Int i,j;
@@ -106,8 +106,8 @@ GenerateDifConv( MPI_Comm comm,
 
 #endif
 
-   diag_i = hypre_CTAlloc(HYPRE_Int, local_num_rows+1, HYPRE_MEMORY_SHARED);
-   offd_i = hypre_CTAlloc(HYPRE_Int, local_num_rows+1, HYPRE_MEMORY_SHARED);
+   diag_i = hypre_CTAlloc(HYPRE_Int, local_num_rows+1, HYPRE_MEMORY_HOST);
+   offd_i = hypre_CTAlloc(HYPRE_Int, local_num_rows+1, HYPRE_MEMORY_HOST);
 
    P_busy = hypre_min(nx,P);
    Q_busy = hypre_min(ny,Q);
@@ -136,56 +136,56 @@ GenerateDifConv( MPI_Comm comm,
             diag_i[cnt] = diag_i[cnt-1];
             offd_i[o_cnt] = offd_i[o_cnt-1];
             diag_i[cnt]++;
-            if (iz > nz_part[ir]) 
+            if (iz > nz_part[ir])
                diag_i[cnt]++;
             else
             {
-               if (iz) 
+               if (iz)
                {
                   offd_i[o_cnt]++;
                }
             }
-            if (iy > ny_part[iq]) 
+            if (iy > ny_part[iq])
                diag_i[cnt]++;
             else
             {
-               if (iy) 
+               if (iy)
                {
                   offd_i[o_cnt]++;
                }
             }
-            if (ix > nx_part[ip]) 
+            if (ix > nx_part[ip])
                diag_i[cnt]++;
             else
             {
-               if (ix) 
-               {
-                  offd_i[o_cnt]++; 
-               }
-            }
-            if (ix+1 < nx_part[ip+1]) 
-               diag_i[cnt]++;
-            else
-            {
-               if (ix+1 < nx) 
-               {
-                  offd_i[o_cnt]++; 
-               }
-            }
-            if (iy+1 < ny_part[iq+1]) 
-               diag_i[cnt]++;
-            else
-            {
-               if (iy+1 < ny) 
+               if (ix)
                {
                   offd_i[o_cnt]++;
                }
             }
-            if (iz+1 < nz_part[ir+1]) 
+            if (ix+1 < nx_part[ip+1])
                diag_i[cnt]++;
             else
             {
-               if (iz+1 < nz) 
+               if (ix+1 < nx)
+               {
+                  offd_i[o_cnt]++;
+               }
+            }
+            if (iy+1 < ny_part[iq+1])
+               diag_i[cnt]++;
+            else
+            {
+               if (iy+1 < ny)
+               {
+                  offd_i[o_cnt]++;
+               }
+            }
+            if (iz+1 < nz_part[ir+1])
+               diag_i[cnt]++;
+            else
+            {
+               if (iz+1 < nz)
                {
                   offd_i[o_cnt]++;
                }
@@ -196,14 +196,14 @@ GenerateDifConv( MPI_Comm comm,
       }
    }
 
-   diag_j = hypre_CTAlloc(HYPRE_Int,  diag_i[local_num_rows], HYPRE_MEMORY_SHARED);
-   diag_data = hypre_CTAlloc(HYPRE_Real,  diag_i[local_num_rows], HYPRE_MEMORY_SHARED);
+   diag_j = hypre_CTAlloc(HYPRE_Int,  diag_i[local_num_rows], HYPRE_MEMORY_HOST);
+   diag_data = hypre_CTAlloc(HYPRE_Real,  diag_i[local_num_rows], HYPRE_MEMORY_HOST);
 
    if (offd_i[local_num_rows])
    {
-      offd_j = hypre_CTAlloc(HYPRE_Int,  offd_i[local_num_rows], HYPRE_MEMORY_SHARED);
+      offd_j = hypre_CTAlloc(HYPRE_Int,  offd_i[local_num_rows], HYPRE_MEMORY_HOST);
       big_offd_j = hypre_CTAlloc(HYPRE_BigInt, offd_i[local_num_rows], HYPRE_MEMORY_HOST);
-      offd_data = hypre_CTAlloc(HYPRE_Real,  offd_i[local_num_rows], HYPRE_MEMORY_SHARED);
+      offd_data = hypre_CTAlloc(HYPRE_Real,  offd_i[local_num_rows], HYPRE_MEMORY_HOST);
    }
 
    row_index = 0;
@@ -217,84 +217,84 @@ GenerateDifConv( MPI_Comm comm,
          {
             diag_j[cnt] = row_index;
             diag_data[cnt++] = value[0];
-            if (iz > nz_part[ir]) 
+            if (iz > nz_part[ir])
             {
                diag_j[cnt] = row_index-nx_local*ny_local;
                diag_data[cnt++] = value[3];
             }
             else
             {
-               if (iz) 
+               if (iz)
                {
                   big_offd_j[o_cnt] = hypre_map(ix,iy,iz-1,ip,iq,ir-1,nx,ny,
                                                 nx_part, ny_part, nz_part);
                   offd_data[o_cnt++] = value[3];
                }
             }
-            if (iy > ny_part[iq]) 
+            if (iy > ny_part[iq])
             {
                diag_j[cnt] = row_index-nx_local;
                diag_data[cnt++] = value[2];
             }
             else
             {
-               if (iy) 
+               if (iy)
                {
                   big_offd_j[o_cnt] = hypre_map(ix,iy-1,iz,ip,iq-1,ir,nx,ny,
                                                 nx_part, ny_part, nz_part);
                   offd_data[o_cnt++] = value[2];
                }
             }
-            if (ix > nx_part[ip]) 
+            if (ix > nx_part[ip])
             {
                diag_j[cnt] = row_index-1;
                diag_data[cnt++] = value[1];
             }
             else
             {
-               if (ix) 
+               if (ix)
                {
                   big_offd_j[o_cnt] = hypre_map(ix-1,iy,iz,ip-1,iq,ir,nx,ny,
                                                 nx_part, ny_part, nz_part);
                   offd_data[o_cnt++] = value[1];
                }
             }
-            if (ix+1 < nx_part[ip+1]) 
+            if (ix+1 < nx_part[ip+1])
             {
                diag_j[cnt] = row_index+1;
                diag_data[cnt++] = value[4];
             }
             else
             {
-               if (ix+1 < nx) 
+               if (ix+1 < nx)
                {
                   big_offd_j[o_cnt] = hypre_map(ix+1,iy,iz,ip+1,iq,ir,nx,ny,
                                                 nx_part, ny_part, nz_part);
                   offd_data[o_cnt++] = value[4];
                }
             }
-            if (iy+1 < ny_part[iq+1]) 
+            if (iy+1 < ny_part[iq+1])
             {
                diag_j[cnt] = row_index+nx_local;
                diag_data[cnt++] = value[5];
             }
             else
             {
-               if (iy+1 < ny) 
+               if (iy+1 < ny)
                {
                   big_offd_j[o_cnt] = hypre_map(ix,iy+1,iz,ip,iq+1,ir,nx,ny,
                                                 nx_part, ny_part, nz_part);
                   offd_data[o_cnt++] = value[5];
                }
             }
-            if (iz+1 < nz_part[ir+1]) 
+            if (iz+1 < nz_part[ir+1])
             {
                diag_j[cnt] = row_index+nx_local*ny_local;
                diag_data[cnt++] = value[6];
             }
             else
             {
-               if (iz+1 < nz) 
+               if (iz+1 < nz)
                {
                   big_offd_j[o_cnt] = hypre_map(ix,iy,iz+1,ip,iq,ir+1,nx,ny,
                                                 nx_part, ny_part, nz_part);
@@ -306,7 +306,7 @@ GenerateDifConv( MPI_Comm comm,
       }
    }
 
-   if (num_cols_offd) 
+   if (num_cols_offd)
    {
       col_map_offd = hypre_CTAlloc(HYPRE_BigInt, num_cols_offd, HYPRE_MEMORY_HOST);
       for (i=0; i < num_cols_offd; i++)
@@ -342,6 +342,11 @@ GenerateDifConv( MPI_Comm comm,
       hypre_CSRMatrixJ(offd) = offd_j;
       hypre_CSRMatrixData(offd) = offd_data;
    }
+
+   hypre_CSRMatrixMemoryLocation(diag) = HYPRE_MEMORY_HOST;
+   hypre_CSRMatrixMemoryLocation(offd) = HYPRE_MEMORY_HOST;
+
+   hypre_ParCSRMatrixMigrate(A, hypre_HandleMemoryLocation(hypre_handle()));
 
    hypre_TFree(nx_part, HYPRE_MEMORY_HOST);
    hypre_TFree(ny_part, HYPRE_MEMORY_HOST);

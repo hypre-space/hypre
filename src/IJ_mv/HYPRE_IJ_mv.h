@@ -90,8 +90,10 @@ HYPRE_Int HYPRE_IJMatrixDestroy(HYPRE_IJMatrix matrix);
  **/
 HYPRE_Int HYPRE_IJMatrixInitialize(HYPRE_IJMatrix matrix);
 
+HYPRE_Int HYPRE_IJMatrixInitialize_v2(HYPRE_IJMatrix matrix, HYPRE_MemoryLocation memory_location);
+
 /**
- * Sets values for \e nrows rows or partial rows of the matrix.  
+ * Sets values for \e nrows rows or partial rows of the matrix.
  * The arrays \e ncols
  * and \e rows are of dimension \e nrows and contain the number
  * of columns in each row and the row indices, respectively.  The
@@ -107,8 +109,8 @@ HYPRE_Int HYPRE_IJMatrixInitialize(HYPRE_IJMatrix matrix);
  * a zero value. The actual value needs to be set on proc j.
  *
  * Note that a threaded version (threaded over the number of rows)
- * will be called if 
- * HYPRE_IJMatrixSetOMPFlag is set to a value != 0. 
+ * will be called if
+ * HYPRE_IJMatrixSetOMPFlag is set to a value != 0.
  * This requires that rows[i] != rows[j] for i!= j
  * and is only efficient if a large number of rows is set in one call
  * to HYPRE_IJMatrixSetValues.
@@ -133,13 +135,13 @@ HYPRE_Int HYPRE_IJMatrixSetConstantValues(HYPRE_IJMatrix matrix,
 /**
  * Adds to values for \e nrows rows or partial rows of the matrix.  
  * Usage details are analogous to \ref HYPRE_IJMatrixSetValues.  
- * Adds to any previous values at the specified locations, or, if 
- * there was no value there before, inserts a new one. 
+ * Adds to any previous values at the specified locations, or, if
+ * there was no value there before, inserts a new one.
  * AddToValues can be used to add to values on other processors.
  *
  * Note that a threaded version (threaded over the number of rows)
- * will be called if 
- * HYPRE_IJMatrixSetOMPFlag is set to a value != 0. 
+ * will be called if
+ * HYPRE_IJMatrixSetOMPFlag is set to a value != 0.
  * This requires that rows[i] != rows[j] for i!= j
  * and is only efficient if a large number of rows is added in one call
  * to HYPRE_IJMatrixAddToValues.
@@ -298,17 +300,17 @@ HYPRE_Int HYPRE_IJMatrixSetPrintLevel(HYPRE_IJMatrix matrix,
                                       HYPRE_Int      print_level);
 
 /**
- * (Optional) if set, will use a threaded version of 
+ * (Optional) if set, will use a threaded version of
  * HYPRE_IJMatrixSetValues and HYPRE_IJMatrixAddToValues.
  * This is only useful if a large number of rows is set or added to
- * at once. 
+ * at once.
  *
- * NOTE that the values in the rows array of HYPRE_IJMatrixSetValues 
+ * NOTE that the values in the rows array of HYPRE_IJMatrixSetValues
  * or HYPRE_IJMatrixAddToValues must be different from each other !!!
- * 
- * This option is VERY inefficient if only a small number of rows 
- * is set or added at once and/or 
- * if reallocation of storage is required and/or 
+ *
+ * This option is VERY inefficient if only a small number of rows
+ * is set or added at once and/or
+ * if reallocation of storage is required and/or
  * if values are added to off processor values.
  *
  **/
@@ -380,6 +382,8 @@ HYPRE_Int HYPRE_IJVectorDestroy(HYPRE_IJVector vector);
  **/
 HYPRE_Int HYPRE_IJVectorInitialize(HYPRE_IJVector vector);
 
+HYPRE_Int HYPRE_IJVectorInitialize_v2( HYPRE_IJVector vector, HYPRE_MemoryLocation memory_location );
+
 /**
  * (Optional) Sets the maximum number of elements that are expected to be set
  * (or added) on other processors from this processor
@@ -412,8 +416,8 @@ HYPRE_Int HYPRE_IJVectorSetValues(HYPRE_IJVector       vector,
 /**
  * Adds to values in vector.  Usage details are analogous to
  * \ref HYPRE_IJVectorSetValues.
- * Adds to any previous values at the specified locations, or, if 
- * there was no value there before, inserts a new one. 
+ * Adds to any previous values at the specified locations, or, if
+ * there was no value there before, inserts a new one.
  * AddToValues can be used to add to values on other processors.
  *
  * Not collective.

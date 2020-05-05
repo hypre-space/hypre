@@ -213,6 +213,9 @@ int main (int argc, char *argv[])
    MPI_Comm_rank(MPI_COMM_WORLD, &myid);
    MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
 
+   /* Initialize HYPRE */
+   HYPRE_Init();
+
    /* Set default parameters */
    n                = 10;
    optionAlpha      = 0;
@@ -950,6 +953,9 @@ int main (int argc, char *argv[])
    HYPRE_SStructVectorDestroy(xcoord);
    HYPRE_SStructVectorDestroy(ycoord);
    HYPRE_SStructVectorDestroy(zcoord);
+
+   /* Finalize HYPRE */
+   HYPRE_Finalize();
 
    /* Finalize MPI */
    MPI_Finalize();

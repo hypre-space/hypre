@@ -11,6 +11,8 @@
  *
  *****************************************************************************/
 
+#if 0
+
 #ifndef hypre_PAR_VECTOR_HEADER
 #define hypre_PAR_VECTOR_HEADER
 
@@ -65,3 +67,6 @@ typedef struct hypre_ParVector_struct
 
 
 #endif
+
+#endif
+

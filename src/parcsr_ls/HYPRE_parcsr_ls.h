@@ -1195,6 +1195,12 @@ HYPRE_Int HYPRE_BoomerAMGGetGridHierarchy(HYPRE_Solver solver,
 #ifdef HYPRE_USING_DSUPERLU
 /**
  * HYPRE_BoomerAMGSetDSLUThreshold
+ *
+ * Usage:
+ *  Set slu_threshold >= max_coarse_size (from HYPRE_BoomerAMGSetMaxCoarseSize(...))
+ *  to turn on use of superLU for the coarse grid solve. SuperLU is used if the 
+ *  coarse grid size > max_coarse_size and the grid level is < (max_num_levels - 1) 
+ *  (set with HYPRE_BoomerAMGSetMaxLevels(...)).
  **/
 
 HYPRE_Int HYPRE_BoomerAMGSetDSLUThreshold (HYPRE_Solver solver,
@@ -3229,6 +3235,9 @@ HYPRE_ParCSRHybridSetNumGridSweeps(HYPRE_Solver  solver,
                                    HYPRE_Int    *num_grid_sweeps);
 
 
+HYPRE_Int
+HYPRE_ParCSRHybridGetSetupSolveTime( HYPRE_Solver solver,
+                                     HYPRE_Real  *time    );
 /**@}*/
 
 /*--------------------------------------------------------------------------

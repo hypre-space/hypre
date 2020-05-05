@@ -36,7 +36,7 @@ hypre_MGRSetup( void               *mgr_vdata,
   HYPRE_Int * col_offd_ST_to_AT = NULL;
   HYPRE_Int * dof_func_buff = NULL;
   HYPRE_BigInt * coarse_pnts_global = NULL;
-  HYPRE_Real         **l1_norms = NULL;
+  hypre_Vector       **l1_norms = NULL;
 
   hypre_ParVector     *Ztemp;
   hypre_ParVector     *Vtemp;
@@ -451,7 +451,8 @@ hypre_MGRSetup( void               *mgr_vdata,
     {
       if ((mgr_data -> l1_norms)[j])
       {
-        hypre_TFree((mgr_data -> l1_norms)[j], HYPRE_MEMORY_HOST);
+        hypre_SeqVectorDestroy((mgr_data -> l1_norms)[i]);
+        //hypre_TFree((mgr_data -> l1_norms)[j], HYPRE_MEMORY_HOST);
         (mgr_data -> l1_norms)[j] = NULL;
       }
     }
@@ -1075,49 +1076,46 @@ hypre_MGRSetup( void               *mgr_vdata,
   //hypre_printf("Proc = %d   Coarse grid setup: %f\n", my_id, wall_time);
 
   /* Setup smoother for fine grid */
-  if ( relax_type == 8 || relax_type == 13 || relax_type == 14 || relax_type == 18 )
-  {
-    l1_norms = hypre_CTAlloc(HYPRE_Real *,  num_c_levels, HYPRE_MEMORY_HOST);
-    (mgr_data -> l1_norms) = l1_norms;
-  }
+   if ( relax_type == 8 || relax_type == 13 || relax_type == 14 || relax_type == 18 )
+   {
+      l1_norms = hypre_CTAlloc(hypre_Vector*, num_c_levels, HYPRE_MEMORY_HOST);
+      (mgr_data -> l1_norms) = l1_norms;
+   }
 
-  for (j = 0; j < num_c_levels; j++)
-  {
-    if (num_threads == 1)
-    {
+   for (j = 0; j < num_c_levels; j++)
+   {
+      HYPRE_Real *l1_norm_data = NULL;
+
       if (relax_type == 8 || relax_type == 13 || relax_type == 14)
       {
-        if (relax_order)
-          hypre_ParCSRComputeL1Norms(A_array[j], 4, CF_marker_array[j], &l1_norms[j]);
-        else
-          hypre_ParCSRComputeL1Norms(A_array[j], 4, NULL, &l1_norms[j]);
+         if (relax_order)
+         {
+            hypre_ParCSRComputeL1Norms(A_array[j], 4, CF_marker_array[j], &l1_norm_data);
+         }
+         else
+         {
+            hypre_ParCSRComputeL1Norms(A_array[j], 4, NULL, &l1_norm_data);
+         }
       }
       else if (relax_type == 18)
       {
-        if (relax_order)
-          hypre_ParCSRComputeL1Norms(A_array[j], 1, CF_marker_array[j], &l1_norms[j]);
-        else
-          hypre_ParCSRComputeL1Norms(A_array[j], 1, NULL, &l1_norms[j]);
+         if (relax_order)
+         {
+            hypre_ParCSRComputeL1Norms(A_array[j], 1, CF_marker_array[j], &l1_norm_data);
+         }
+         else
+         {
+            hypre_ParCSRComputeL1Norms(A_array[j], 1, NULL, &l1_norm_data);
+         }
       }
-    }
-    else
-    {
-      if (relax_type == 8 || relax_type == 13 || relax_type == 14)
+
+      if (l1_norm_data)
       {
-        if (relax_order)
-          hypre_ParCSRComputeL1NormsThreads(A_array[j], 4, num_threads, CF_marker_array[j] , &l1_norms[j]);
-        else
-          hypre_ParCSRComputeL1NormsThreads(A_array[j], 4, num_threads, NULL, &l1_norms[j]);
+         l1_norms[j] = hypre_SeqVectorCreate(hypre_ParCSRMatrixNumRows(A_array[j]));
+         hypre_VectorData(l1_norms[j]) = l1_norm_data;
+         hypre_SeqVectorInitialize_v2(l1_norms[j], hypre_ParCSRMatrixMemoryLocation(A_array[j]));
       }
-      else if (relax_type == 18)
-      {
-        if (relax_order)
-          hypre_ParCSRComputeL1NormsThreads(A_array[j], 1, num_threads, CF_marker_array[j] , &l1_norms[j]);
-        else
-          hypre_ParCSRComputeL1NormsThreads(A_array[j], 1, num_threads, NULL, &l1_norms[j]);
-      }
-    }
-  }
+   }
 
    /* Setup Vcycle data for Frelax_method > 0 */
   if(use_VcycleSmoother)

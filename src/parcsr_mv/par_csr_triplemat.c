@@ -100,12 +100,13 @@ hypre_ParCSRMatMatHost( hypre_ParCSRMatrix  *A,
        * equally load balanced partitionings within
        * hypre_ParCSRMatrixExtractBExt
        *--------------------------------------------------------------------*/
-      Bs_ext = hypre_ParCSRMatrixExtractBExt(B,A,1); /* contains communication
-                                                        which should be explicitly included to allow for overlap */
+      Bs_ext = hypre_ParCSRMatrixExtractBExt(B, A, 1); /* contains communication
+                                                          which should be explicitly included to allow for overlap */
 
 
       hypre_CSRMatrixSplit(Bs_ext, first_col_diag_B, last_col_diag_B, num_cols_offd_B, col_map_offd_B,
                            &num_cols_offd_C, &col_map_offd_C, &Bext_diag, &Bext_offd);
+
       hypre_CSRMatrixDestroy(Bs_ext);
 
       /* These are local and could be overlapped with communication */
@@ -179,8 +180,8 @@ hypre_ParCSRMatMatHost( hypre_ParCSRMatrix  *A,
                                 C_diag->num_nonzeros, C_offd->num_nonzeros);
 
    /* Note that C does not own the partitionings */
-   hypre_ParCSRMatrixSetRowStartsOwner(C,0);
-   hypre_ParCSRMatrixSetColStartsOwner(C,0);
+   hypre_ParCSRMatrixSetRowStartsOwner(C, 0);
+   hypre_ParCSRMatrixSetColStartsOwner(C, 0);
 
    hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(C));
    hypre_ParCSRMatrixDiag(C) = C_diag;
@@ -205,43 +206,27 @@ hypre_ParCSRMatMat( hypre_ParCSRMatrix  *A,
                     hypre_ParCSRMatrix  *B )
 {
 #if defined(HYPRE_USING_CUDA)
-   //hypre_SetExecPolicy(HYPRE_EXEC_DEVICE);
+   hypre_NvtxPushRange("Mat-Mat");
 #endif
-
-   HYPRE_Int exec = hypre_GetExecPolicy2( hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(A)),
-                                          hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(B)) );
-
-   hypre_assert(exec != HYPRE_EXEC_UNSET);
 
    hypre_ParCSRMatrix *C = NULL;
 
-   if (exec == HYPRE_EXEC_HOST)
-   {
-      C = hypre_ParCSRMatMatHost(A,B);
-   }
 #if defined(HYPRE_USING_CUDA)
-   else
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A),
+                                                       hypre_ParCSRMatrixMemoryLocation(B) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
    {
       C = hypre_ParCSRMatMatDevice(A,B);
    }
+   else
 #endif
-
-#if defined(HYPRE_USING_CUDA)
-   //hypre_SetExecPolicy(HYPRE_EXEC_HOST);
-#endif
-
-   // TODO
-#if defined(HYPRE_USING_CUDA)
-   if (hypre_GetActualMemLocation(hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(C))) == HYPRE_MEMORY_DEVICE)
    {
-   hypre_CSRMatrix *C_diag = hypre_CSRMatrixClone(hypre_ParCSRMatrixDiag(C), 1);
-   hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(C));
-   hypre_ParCSRMatrixDiag(C) = C_diag;
-
-   hypre_CSRMatrix *C_offd = hypre_CSRMatrixClone(hypre_ParCSRMatrixOffd(C), 1);
-   hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(C));
-   hypre_ParCSRMatrixOffd(C) = C_offd;
+      C = hypre_ParCSRMatMatHost(A,B);
    }
+
+#if defined(HYPRE_USING_CUDA)
+   hypre_NvtxPopRange();
 #endif
 
    return C;
@@ -474,42 +459,27 @@ hypre_ParCSRTMatMatKT( hypre_ParCSRMatrix  *A,
                        HYPRE_Int            keep_transpose)
 {
 #if defined(HYPRE_USING_CUDA)
-   //hypre_SetExecPolicy(HYPRE_EXEC_DEVICE);
+   hypre_NvtxPushRange("Mat-T-Mat");
 #endif
-
-   HYPRE_Int exec = hypre_GetExecPolicy2( hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(A)),
-                                          hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(B)) );
-
-   hypre_assert(exec != HYPRE_EXEC_UNSET);
 
    hypre_ParCSRMatrix *C = NULL;
 
-   if (exec == HYPRE_EXEC_HOST)
-   {
-      C = hypre_ParCSRTMatMatKTHost(A, B, keep_transpose);
-   }
 #if defined(HYPRE_USING_CUDA)
-   else
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A),
+                                                       hypre_ParCSRMatrixMemoryLocation(B) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
    {
       C = hypre_ParCSRTMatMatKTDevice(A, B, keep_transpose);
    }
+   else
 #endif
-
-#if defined(HYPRE_USING_CUDA)
-   //hypre_SetExecPolicy(HYPRE_EXEC_HOST);
-#endif
-
-#if defined(HYPRE_USING_CUDA)
-   if (hypre_GetActualMemLocation(hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(C))) == HYPRE_MEMORY_DEVICE)
    {
-   hypre_CSRMatrix *C_diag = hypre_CSRMatrixClone(hypre_ParCSRMatrixDiag(C), 1);
-   hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(C));
-   hypre_ParCSRMatrixDiag(C) = C_diag;
-
-   hypre_CSRMatrix *C_offd = hypre_CSRMatrixClone(hypre_ParCSRMatrixOffd(C), 1);
-   hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(C));
-   hypre_ParCSRMatrixOffd(C) = C_offd;
+      C = hypre_ParCSRTMatMatKTHost(A, B, keep_transpose);
    }
+
+#if defined(HYPRE_USING_CUDA)
+   hypre_NvtxPopRange();
 #endif
 
    return C;

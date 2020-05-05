@@ -99,14 +99,9 @@ HYPRE_Int
 HYPRE_CSRMatrixDeviceSpGemmSetRownnzEstimateMethod( HYPRE_Int value )
 {
 #if defined(HYPRE_USING_CUDA)
-   if (hypre_handle == NULL)
-   {
-      return -1;
-   }
-
    if (value == 1 || value == 2 || value == 3)
    {
-      hypre_handle->spgemm_rownnz_estimate_method = value;
+      hypre_handle()->spgemm_rownnz_estimate_method = value;
    }
    else
    {
@@ -121,12 +116,7 @@ HYPRE_Int
 HYPRE_CSRMatrixDeviceSpGemmSetRownnzEstimateNSamples( HYPRE_Int value )
 {
 #if defined(HYPRE_USING_CUDA)
-   if (hypre_handle == NULL)
-   {
-      return -1;
-   }
-
-   hypre_handle->spgemm_rownnz_estimate_nsamples = value;
+   hypre_handle()->spgemm_rownnz_estimate_nsamples = value;
 #endif
 
    return 0;
@@ -136,14 +126,9 @@ HYPRE_Int
 HYPRE_CSRMatrixDeviceSpGemmSetRownnzEstimateMultFactor( HYPRE_Real value )
 {
 #if defined(HYPRE_USING_CUDA)
-   if (hypre_handle == NULL)
-   {
-      return -1;
-   }
-
    if (value > 0.0)
    {
-      hypre_handle->spgemm_rownnz_estimate_mult_factor = value;
+      hypre_handle()->spgemm_rownnz_estimate_mult_factor = value;
    }
    else
    {
@@ -158,30 +143,14 @@ HYPRE_Int
 HYPRE_CSRMatrixDeviceSpGemmSetHashType( char value )
 {
 #if defined(HYPRE_USING_CUDA)
-   if (hypre_handle == NULL)
-   {
-      return -1;
-   }
-
    if (value == 'L' || value == 'Q' || value == 'D')
    {
-      hypre_handle->spgemm_hash_type = value;
+      hypre_handle()->spgemm_hash_type = value;
    }
-#endif
-
-   return 0;
-}
-
-HYPRE_Int
-HYPRE_CSRMatrixDeviceSpGemmSetUseCusparse( HYPRE_Int value )
-{
-#if defined(HYPRE_USING_CUDA)
-   if (hypre_handle == NULL)
+   else
    {
       return -1;
    }
-
-   hypre_handle->spgemm_use_cusparse = value != 0;
 #endif
 
    return 0;

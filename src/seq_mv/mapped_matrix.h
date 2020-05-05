@@ -11,6 +11,8 @@
  *
  *****************************************************************************/
 
+#if 0
+
 #ifndef hypre_MAPPED_MATRIX_HEADER
 #define hypre_MAPPED_MATRIX_HEADER
 
@@ -36,5 +38,7 @@ typedef struct
 
 #define hypre_MappedMatrixColIndex(matrix,j) \
          (hypre_MappedMatrixColMap(matrix)(j,hypre_MappedMatrixMapData(matrix)))
+
+#endif
 
 #endif

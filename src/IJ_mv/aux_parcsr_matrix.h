@@ -13,6 +13,8 @@
  *
  *****************************************************************************/
 
+#if 0
+
 #ifndef hypre_AUX_PARCSR_MATRIX_HEADER
 #define hypre_AUX_PARCSR_MATRIX_HEADER
 
@@ -80,3 +82,6 @@ typedef struct
 //#define hypre_AuxParCSRMatrixCancelIndx(matrix)  ((matrix) -> cancel_indx)
 
 #endif
+
+#endif
+
