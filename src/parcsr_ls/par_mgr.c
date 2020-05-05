@@ -1146,6 +1146,7 @@ hypre_MGRBuildP( hypre_ParCSRMatrix   *A,
   a_diag = hypre_CTAlloc(HYPRE_Real,  n_fine, HYPRE_MEMORY_HOST);
   for (i = 0; i < n_fine; i++)
   {
+    if (CF_marker[i] < 0)
     for (jj = A_diag_i[i]; jj < A_diag_i[i+1]; jj++)
     {
       i1 = A_diag_j[jj];
