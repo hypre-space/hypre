@@ -22,9 +22,11 @@ hypre_MGRSetup( void               *mgr_vdata,
   HYPRE_Int       i,j, final_coarse_size, block_size, idx, **block_cf_marker;
   HYPRE_Int       *block_num_coarse_indexes, *point_marker_array;
   HYPRE_BigInt    row, end_idx;
-  HYPRE_Int    lev, num_coarsening_levs, last_level, num_c_levels, num_threads,nc,index_i,cflag;
+  HYPRE_Int    lev, num_coarsening_levs, last_level;
+  HYPRE_Int    num_c_levels,nc,index_i,cflag;
   HYPRE_Int      set_c_points_method;
   HYPRE_Int    debug_flag = 0;
+//  HYPRE_Int	num_threads;
 
   hypre_ParCSRMatrix  *RT = NULL;
   hypre_ParCSRMatrix  *P = NULL;
@@ -113,7 +115,7 @@ hypre_MGRSetup( void               *mgr_vdata,
 
   /* ----- begin -----*/
 
-  num_threads = hypre_NumThreads();
+//  num_threads = hypre_NumThreads();
 
   block_size = (mgr_data -> block_size);
   block_cf_marker = (mgr_data -> block_cf_marker);
