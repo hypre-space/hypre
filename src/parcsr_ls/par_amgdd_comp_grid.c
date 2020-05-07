@@ -350,17 +350,17 @@ hypre_ParCompGridDestroy ( hypre_ParCompGrid *compGrid )
    if (hypre_ParCompGridNonOwnedGlobalIndices(compGrid)) 
       hypre_TFree(hypre_ParCompGridNonOwnedGlobalIndices(compGrid), HYPRE_MEMORY_SHARED);
    if (hypre_ParCompGridNonOwnedCoarseIndices(compGrid)) 
-      hypre_TFree(hypre_ParCompGridNonOwnedCoarseIndices(compGrid), HYPRE_MEMORY_HOST);
+      hypre_TFree(hypre_ParCompGridNonOwnedCoarseIndices(compGrid), HYPRE_MEMORY_SHARED);
    if (hypre_ParCompGridNonOwnedRealMarker(compGrid)) 
-      hypre_TFree(hypre_ParCompGridNonOwnedRealMarker(compGrid), HYPRE_MEMORY_HOST);
+      hypre_TFree(hypre_ParCompGridNonOwnedRealMarker(compGrid), HYPRE_MEMORY_SHARED);
    if (hypre_ParCompGridNonOwnedSort(compGrid)) 
-      hypre_TFree(hypre_ParCompGridNonOwnedSort(compGrid), HYPRE_MEMORY_HOST);
+      hypre_TFree(hypre_ParCompGridNonOwnedSort(compGrid), HYPRE_MEMORY_SHARED);
    if (hypre_ParCompGridNonOwnedInvSort(compGrid)) 
-      hypre_TFree(hypre_ParCompGridNonOwnedInvSort(compGrid), HYPRE_MEMORY_HOST);
+      hypre_TFree(hypre_ParCompGridNonOwnedInvSort(compGrid), HYPRE_MEMORY_SHARED);
    if (hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid)) 
-      hypre_TFree(hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid), HYPRE_MEMORY_HOST);
+      hypre_TFree(hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid), HYPRE_MEMORY_SHARED);
    if (hypre_ParCompGridOwnedCoarseIndices(compGrid))
-      hypre_TFree(hypre_ParCompGridOwnedCoarseIndices(compGrid), HYPRE_MEMORY_HOST);
+      hypre_TFree(hypre_ParCompGridOwnedCoarseIndices(compGrid), HYPRE_MEMORY_SHARED);
 
    if (hypre_ParCompGridA(compGrid)) 
       hypre_ParCompGridMatrixDestroy(hypre_ParCompGridA(compGrid));
@@ -453,7 +453,7 @@ hypre_ParCompGridInitialize( hypre_ParAMGData *amg_data, HYPRE_Int padding, HYPR
    hypre_ParCompGridMatrixNonOwnedOffd(A) = hypre_CSRMatrixCreate(max_nonowned, hypre_ParCompGridNumOwnedNodes(compGrid), max_nonowned_offd_nnz);
    hypre_CSRMatrixInitialize(hypre_ParCompGridMatrixNonOwnedOffd(A));
    hypre_ParCompGridA(compGrid) = A;
-   hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid) = hypre_CTAlloc(HYPRE_Int, max_nonowned_diag_nnz, HYPRE_MEMORY_HOST);
+   hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid) = hypre_CTAlloc(HYPRE_Int, max_nonowned_diag_nnz, HYPRE_MEMORY_SHARED);
 
    // !!! Symmetric: in the symmetric case we can go ahead and just setup nonowned_offd 
 
@@ -502,9 +502,9 @@ hypre_ParCompGridInitialize( hypre_ParAMGData *amg_data, HYPRE_Int padding, HYPR
 
    // Allocate some extra arrays used during AMG-DD setup
    hypre_ParCompGridNonOwnedGlobalIndices(compGrid) = hypre_CTAlloc(HYPRE_Int, max_nonowned, HYPRE_MEMORY_SHARED);
-   hypre_ParCompGridNonOwnedRealMarker(compGrid) = hypre_CTAlloc(HYPRE_Int, max_nonowned, HYPRE_MEMORY_HOST);
-   hypre_ParCompGridNonOwnedSort(compGrid) = hypre_CTAlloc(HYPRE_Int, max_nonowned, HYPRE_MEMORY_HOST);
-   hypre_ParCompGridNonOwnedInvSort(compGrid) = hypre_CTAlloc(HYPRE_Int, max_nonowned, HYPRE_MEMORY_HOST);
+   hypre_ParCompGridNonOwnedRealMarker(compGrid) = hypre_CTAlloc(HYPRE_Int, max_nonowned, HYPRE_MEMORY_SHARED);
+   hypre_ParCompGridNonOwnedSort(compGrid) = hypre_CTAlloc(HYPRE_Int, max_nonowned, HYPRE_MEMORY_SHARED);
+   hypre_ParCompGridNonOwnedInvSort(compGrid) = hypre_CTAlloc(HYPRE_Int, max_nonowned, HYPRE_MEMORY_SHARED);
 
    // Initialize nonowned global indices, real marker, and the sort and invsort arrays
    for (i = 0; i < hypre_CSRMatrixNumCols(A_offd_original); i++)
@@ -517,8 +517,8 @@ hypre_ParCompGridInitialize( hypre_ParAMGData *amg_data, HYPRE_Int padding, HYPR
 
    if (level != hypre_ParAMGDataNumLevels(amg_data) - 1)
    {
-      hypre_ParCompGridNonOwnedCoarseIndices(compGrid) = hypre_CTAlloc(HYPRE_Int, max_nonowned, HYPRE_MEMORY_HOST);
-      hypre_ParCompGridOwnedCoarseIndices(compGrid) = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumOwnedNodes(compGrid), HYPRE_MEMORY_HOST);
+      hypre_ParCompGridNonOwnedCoarseIndices(compGrid) = hypre_CTAlloc(HYPRE_Int, max_nonowned, HYPRE_MEMORY_SHARED);
+      hypre_ParCompGridOwnedCoarseIndices(compGrid) = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumOwnedNodes(compGrid), HYPRE_MEMORY_SHARED);
 
       // Setup the owned coarse indices
       if ( CF_marker_array )
@@ -777,7 +777,7 @@ hypre_ParCompGridFinalize( hypre_ParAMGData *amg_data, hypre_ParCompGrid **compG
          if (hypre_ParCompGridNonOwnedRealMarker(compGrid[level])[i]) num_nonowned_real_nodes++;
       }
       hypre_ParCompGridNumNonOwnedRealNodes(compGrid[level]) = num_nonowned_real_nodes;
-      HYPRE_Int *new_indices = hypre_CTAlloc(HYPRE_Int, num_nonowned, HYPRE_MEMORY_HOST);
+      HYPRE_Int *new_indices = hypre_CTAlloc(HYPRE_Int, num_nonowned, HYPRE_MEMORY_SHARED);
       HYPRE_Int real_cnt = 0;
       HYPRE_Int ghost_cnt = 0;
       for (i = 0; i < num_nonowned; i++)
@@ -897,7 +897,7 @@ hypre_ParCompGridFinalize( hypre_ParAMGData *amg_data, hypre_ParCompGrid **compG
       // If global indices are still needed, transform these also
       if (debug)
       {
-         HYPRE_Int *new_global_indices = hypre_CTAlloc(HYPRE_Int, num_nonowned, HYPRE_MEMORY_HOST);
+         HYPRE_Int *new_global_indices = hypre_CTAlloc(HYPRE_Int, num_nonowned, HYPRE_MEMORY_SHARED);
          for (i = 0; i < num_nonowned; i++)
          {
             new_global_indices[ new_indices[i] ] = hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level])[ i ];
@@ -1293,7 +1293,7 @@ hypre_ParCompGridFinalize( hypre_ParAMGData *amg_data, hypre_ParCompGrid **compG
          hypre_CSRMatrixNumCols(hypre_ParCompGridMatrixOwnedOffd(hypre_ParCompGridR(compGrid[level-1]))) = hypre_ParCompGridNumNonOwnedNodes(compGrid[level-1]);
       }
 
-      hypre_TFree(new_indices, HYPRE_MEMORY_HOST);
+      hypre_TFree(new_indices, HYPRE_MEMORY_SHARED);
 
       // Setup comp grid vectors
       hypre_ParCompGridU(compGrid[level]) = hypre_ParCompGridVectorCreate();
@@ -1331,7 +1331,7 @@ hypre_ParCompGridFinalize( hypre_ParAMGData *amg_data, hypre_ParCompGrid **compG
       // Free up arrays we no longer need
       if (hypre_ParCompGridNonOwnedRealMarker(compGrid[level]))
       {
-         hypre_TFree(hypre_ParCompGridNonOwnedRealMarker(compGrid[level]), HYPRE_MEMORY_HOST);
+         hypre_TFree(hypre_ParCompGridNonOwnedRealMarker(compGrid[level]), HYPRE_MEMORY_SHARED);
          hypre_ParCompGridNonOwnedRealMarker(compGrid[level]) = NULL;
       }
       if (hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level]) && !debug)
@@ -1341,22 +1341,22 @@ hypre_ParCompGridFinalize( hypre_ParAMGData *amg_data, hypre_ParCompGrid **compG
       }
       if (hypre_ParCompGridNonOwnedCoarseIndices(compGrid[level]))
       {
-         hypre_TFree(hypre_ParCompGridNonOwnedCoarseIndices(compGrid[level]), HYPRE_MEMORY_HOST);
+         hypre_TFree(hypre_ParCompGridNonOwnedCoarseIndices(compGrid[level]), HYPRE_MEMORY_SHARED);
          hypre_ParCompGridNonOwnedCoarseIndices(compGrid[level]) = NULL;
       }
       if (hypre_ParCompGridOwnedCoarseIndices(compGrid[level]))
       {
-         hypre_TFree(hypre_ParCompGridOwnedCoarseIndices(compGrid[level]), HYPRE_MEMORY_HOST);
+         hypre_TFree(hypre_ParCompGridOwnedCoarseIndices(compGrid[level]), HYPRE_MEMORY_SHARED);
          hypre_ParCompGridOwnedCoarseIndices(compGrid[level]) = NULL;
       }
       if (hypre_ParCompGridNonOwnedSort(compGrid[level]))
       {
-         hypre_TFree(hypre_ParCompGridNonOwnedSort(compGrid[level]), HYPRE_MEMORY_HOST);
+         hypre_TFree(hypre_ParCompGridNonOwnedSort(compGrid[level]), HYPRE_MEMORY_SHARED);
          hypre_ParCompGridNonOwnedSort(compGrid[level]) = NULL;
       }
       if (hypre_ParCompGridNonOwnedInvSort(compGrid[level]))
       {
-         hypre_TFree(hypre_ParCompGridNonOwnedInvSort(compGrid[level]), HYPRE_MEMORY_HOST);
+         hypre_TFree(hypre_ParCompGridNonOwnedInvSort(compGrid[level]), HYPRE_MEMORY_SHARED);
          hypre_ParCompGridNonOwnedInvSort(compGrid[level]) = NULL;
       }
    }
@@ -1444,9 +1444,9 @@ hypre_ParCompGridResize( hypre_ParCompGrid *compGrid, HYPRE_Int new_size, HYPRE_
    // This function reallocates memory to hold nonowned info for the comp grid
 
    hypre_ParCompGridNonOwnedGlobalIndices(compGrid) = hypre_TReAlloc(hypre_ParCompGridNonOwnedGlobalIndices(compGrid), HYPRE_Int, new_size, HYPRE_MEMORY_SHARED);
-   hypre_ParCompGridNonOwnedRealMarker(compGrid) = hypre_TReAlloc(hypre_ParCompGridNonOwnedRealMarker(compGrid), HYPRE_Int, new_size, HYPRE_MEMORY_HOST);
-   hypre_ParCompGridNonOwnedSort(compGrid) = hypre_TReAlloc(hypre_ParCompGridNonOwnedSort(compGrid), HYPRE_Int, new_size, HYPRE_MEMORY_HOST);
-   hypre_ParCompGridNonOwnedInvSort(compGrid) = hypre_TReAlloc(hypre_ParCompGridNonOwnedInvSort(compGrid), HYPRE_Int, new_size, HYPRE_MEMORY_HOST);
+   hypre_ParCompGridNonOwnedRealMarker(compGrid) = hypre_TReAlloc(hypre_ParCompGridNonOwnedRealMarker(compGrid), HYPRE_Int, new_size, HYPRE_MEMORY_SHARED);
+   hypre_ParCompGridNonOwnedSort(compGrid) = hypre_TReAlloc(hypre_ParCompGridNonOwnedSort(compGrid), HYPRE_Int, new_size, HYPRE_MEMORY_SHARED);
+   hypre_ParCompGridNonOwnedInvSort(compGrid) = hypre_TReAlloc(hypre_ParCompGridNonOwnedInvSort(compGrid), HYPRE_Int, new_size, HYPRE_MEMORY_SHARED);
 
    hypre_CSRMatrix *nonowned_diag = hypre_ParCompGridMatrixNonOwnedDiag(hypre_ParCompGridA(compGrid));
    hypre_CSRMatrix *nonowned_offd = hypre_ParCompGridMatrixNonOwnedOffd(hypre_ParCompGridA(compGrid));
@@ -1455,7 +1455,7 @@ hypre_ParCompGridResize( hypre_ParCompGrid *compGrid, HYPRE_Int new_size, HYPRE_
 
    if (need_coarse_info)
    {
-      hypre_ParCompGridNonOwnedCoarseIndices(compGrid) = hypre_TReAlloc(hypre_ParCompGridNonOwnedCoarseIndices(compGrid), HYPRE_Int, new_size, HYPRE_MEMORY_HOST);
+      hypre_ParCompGridNonOwnedCoarseIndices(compGrid) = hypre_TReAlloc(hypre_ParCompGridNonOwnedCoarseIndices(compGrid), HYPRE_Int, new_size, HYPRE_MEMORY_SHARED);
    }
 
    return 0;
@@ -1516,7 +1516,7 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *nod
                   if (diag_rowptr >= hypre_CSRMatrixNumNonzeros(nonowned_diag))
                   {
                      hypre_CSRMatrixResize(nonowned_diag, hypre_CSRMatrixNumRows(nonowned_diag), hypre_CSRMatrixNumCols(nonowned_diag), ceil(1.5*hypre_CSRMatrixNumNonzeros(nonowned_diag)));
-                     hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[current_level]) = hypre_TReAlloc(hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[current_level]), HYPRE_Int, ceil(1.5*hypre_CSRMatrixNumNonzeros(nonowned_diag)), HYPRE_MEMORY_HOST);
+                     hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[current_level]) = hypre_TReAlloc(hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[current_level]), HYPRE_Int, ceil(1.5*hypre_CSRMatrixNumNonzeros(nonowned_diag)), HYPRE_MEMORY_SHARED);
                   }
                   // If we dof not found in comp grid, then mark this as a missing connection
                   hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[current_level])[ hypre_ParCompGridNumMissingColIndices(compGrid[current_level])++ ] = diag_rowptr;
@@ -1530,7 +1530,7 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *nod
                if (diag_rowptr >= hypre_CSRMatrixNumNonzeros(nonowned_diag))
                {
                   hypre_CSRMatrixResize(nonowned_diag, hypre_CSRMatrixNumRows(nonowned_diag), hypre_CSRMatrixNumCols(nonowned_diag), ceil(1.5*hypre_CSRMatrixNumNonzeros(nonowned_diag)));
-                  hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[current_level]) = hypre_TReAlloc(hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[current_level]), HYPRE_Int, ceil(1.5*hypre_CSRMatrixNumNonzeros(nonowned_diag)), HYPRE_MEMORY_HOST);
+                  hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[current_level]) = hypre_TReAlloc(hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[current_level]), HYPRE_Int, ceil(1.5*hypre_CSRMatrixNumNonzeros(nonowned_diag)), HYPRE_MEMORY_SHARED);
                }
                local_index = recv_map[current_level][proc][current_level][ incoming_index ];
                if (local_index < 0) local_index = -(local_index + 1);
@@ -1543,7 +1543,7 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *nod
          hypre_CSRMatrixI(nonowned_diag)[ row ] = diag_rowptr;
          row++;
       }
-      hypre_TFree(A_tmp_info[proc], HYPRE_MEMORY_HOST);
+      hypre_TFree(A_tmp_info[proc], HYPRE_MEMORY_SHARED);
    }
    hypre_TFree(A_tmp_info, HYPRE_MEMORY_HOST);
 
@@ -1828,7 +1828,7 @@ hypre_ParCompGridCommPkgDestroy( hypre_ParCompGridCommPkg *compGridCommPkg )
    {
       for (i = 0; i < hypre_ParCompGridCommPkgNumLevels(compGridCommPkg); i++)
       {
-         hypre_TFree(hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[i], HYPRE_MEMORY_HOST);
+         hypre_TFree(hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[i], HYPRE_MEMORY_SHARED);
       }
       hypre_TFree(hypre_ParCompGridCommPkgSendProcs(compGridCommPkg), HYPRE_MEMORY_HOST);
    }
@@ -1837,7 +1837,7 @@ hypre_ParCompGridCommPkgDestroy( hypre_ParCompGridCommPkg *compGridCommPkg )
    {
       for (i = 0; i < hypre_ParCompGridCommPkgNumLevels(compGridCommPkg); i++)
       {
-         hypre_TFree(hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[i], HYPRE_MEMORY_HOST);
+         hypre_TFree(hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[i], HYPRE_MEMORY_SHARED);
       }
       hypre_TFree(hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg), HYPRE_MEMORY_HOST);
    }
@@ -1846,7 +1846,7 @@ hypre_ParCompGridCommPkgDestroy( hypre_ParCompGridCommPkg *compGridCommPkg )
    {
       for (i = 0; i < hypre_ParCompGridCommPkgNumLevels(compGridCommPkg); i++)
       {
-         hypre_TFree(hypre_ParCompGridCommPkgSendBufferSize(compGridCommPkg)[i], HYPRE_MEMORY_HOST);
+         hypre_TFree(hypre_ParCompGridCommPkgSendBufferSize(compGridCommPkg)[i], HYPRE_MEMORY_SHARED);
       }
       hypre_TFree(hypre_ParCompGridCommPkgSendBufferSize(compGridCommPkg), HYPRE_MEMORY_HOST);
    }
@@ -1855,7 +1855,7 @@ hypre_ParCompGridCommPkgDestroy( hypre_ParCompGridCommPkg *compGridCommPkg )
    {
       for (i = 0; i < hypre_ParCompGridCommPkgNumLevels(compGridCommPkg); i++)
       {
-         hypre_TFree(hypre_ParCompGridCommPkgRecvBufferSize(compGridCommPkg)[i], HYPRE_MEMORY_HOST);
+         hypre_TFree(hypre_ParCompGridCommPkgRecvBufferSize(compGridCommPkg)[i], HYPRE_MEMORY_SHARED);
       }
       hypre_TFree(hypre_ParCompGridCommPkgRecvBufferSize(compGridCommPkg), HYPRE_MEMORY_HOST);
    }
@@ -1900,7 +1900,7 @@ hypre_ParCompGridCommPkgDestroy( hypre_ParCompGridCommPkg *compGridCommPkg )
       {
          for (j = 0; j < hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[i]; j++)
          {
-            hypre_TFree( hypre_ParCompGridCommPkgNumSendNodes(compGridCommPkg)[i][j], HYPRE_MEMORY_HOST );
+            hypre_TFree( hypre_ParCompGridCommPkgNumSendNodes(compGridCommPkg)[i][j], HYPRE_MEMORY_SHARED );
          }
          hypre_TFree( hypre_ParCompGridCommPkgNumSendNodes(compGridCommPkg)[i], HYPRE_MEMORY_HOST );
       }
@@ -1913,7 +1913,7 @@ hypre_ParCompGridCommPkgDestroy( hypre_ParCompGridCommPkg *compGridCommPkg )
       {
          for (j = 0; j < hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg)[i]; j++)
          {
-            hypre_TFree( hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[i][j], HYPRE_MEMORY_HOST );
+            hypre_TFree( hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[i][j], HYPRE_MEMORY_SHARED );
          }
          hypre_TFree( hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[i], HYPRE_MEMORY_HOST );
       }

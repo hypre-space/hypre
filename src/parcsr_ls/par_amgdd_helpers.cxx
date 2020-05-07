@@ -15,6 +15,11 @@
 #include <chrono>
 #include <iostream>
 
+#if defined(HYPRE_USING_GPU)
+#include <thrust/transform_scan.h>
+#include <thrust/execution_policy.h>
+#endif
+
 using namespace std;
 
 extern "C"
@@ -124,6 +129,79 @@ extern "C"
           marker[ marker_idx ] = i + 1;
       }
    }
+
+   __global__
+   void ExpandPaddingKernel(HYPRE_Int *add_flag,
+                            HYPRE_Int *row_ptr,
+                            HYPRE_Int *col_ind,
+                            HYPRE_Int size)
+   {
+      HYPRE_Int i = blockIdx.x * blockDim.x + threadIdx.x;
+      HYPRE_Int j,jj;
+      if (i < size)
+      {
+         for (jj = row_ptr[i]; jj < row_ptr[i+1]; jj++)
+         {
+            j = col_ind[jj];
+            if (j >= 0) add_flag[j] = 2;
+         }
+      }
+   }
+
+   __global__
+   void ExpandPaddingSortKernel(HYPRE_Int *add_flag,
+                            HYPRE_Int *row_ptr,
+                            HYPRE_Int *col_ind,
+                            HYPRE_Int *sort_map,
+                            HYPRE_Int start,
+                            HYPRE_Int size)
+   {
+      HYPRE_Int i = blockIdx.x * blockDim.x + threadIdx.x;
+      HYPRE_Int j,jj;
+      if (i < size)
+      {
+         for (jj = row_ptr[i]; jj < row_ptr[i+1]; jj++)
+         {
+            j = col_ind[jj];
+            if (j >= 0) add_flag[sort_map[j] + start] = 2;
+         }
+      }
+   }
+
+   void ExpandPadding(hypre_ParCompGrid *compGrid, HYPRE_Int *add_flag)
+   {
+      hypre_ParCompGridMatrix *A = hypre_ParCompGridA(compGrid);
+      const HYPRE_Int tpb=64;
+
+      HYPRE_Int num_blocks = hypre_ParCompGridNumOwnedNodes(compGrid)/tpb+1;
+      ExpandPaddingKernel<<<num_blocks,tpb,0,HYPRE_STREAM(1)>>>(add_flag,
+                          hypre_CSRMatrixI(hypre_ParCompGridMatrixOwnedDiag(A)),
+                          hypre_CSRMatrixJ(hypre_ParCompGridMatrixOwnedDiag(A)),
+                          hypre_ParCompGridNumOwnedNodes(compGrid) );
+      ExpandPaddingSortKernel<<<num_blocks,tpb,0,HYPRE_STREAM(2)>>>(add_flag,
+                          hypre_CSRMatrixI(hypre_ParCompGridMatrixOwnedOffd(A)),
+                          hypre_CSRMatrixJ(hypre_ParCompGridMatrixOwnedOffd(A)),
+                          hypre_ParCompGridNonOwnedSort(compGrid),
+                          hypre_ParCompGridNumOwnedNodes(compGrid),
+                          hypre_ParCompGridNumOwnedNodes(compGrid) );
+
+      num_blocks = hypre_ParCompGridNumNonOwnedNodes(compGrid)/tpb+1;
+      ExpandPaddingSortKernel<<<num_blocks,tpb,0,HYPRE_STREAM(3)>>>(add_flag,
+                          hypre_CSRMatrixI(hypre_ParCompGridMatrixNonOwnedDiag(A)),
+                          hypre_CSRMatrixJ(hypre_ParCompGridMatrixNonOwnedDiag(A)),
+                          hypre_ParCompGridNonOwnedSort(compGrid),
+                          hypre_ParCompGridNumOwnedNodes(compGrid),
+                          hypre_ParCompGridNumNonOwnedNodes(compGrid) );
+      ExpandPaddingKernel<<<num_blocks,tpb,0,HYPRE_STREAM(4)>>>(add_flag,
+                          hypre_CSRMatrixI(hypre_ParCompGridMatrixNonOwnedOffd(A)),
+                          hypre_CSRMatrixJ(hypre_ParCompGridMatrixNonOwnedOffd(A)),
+                          hypre_ParCompGridNumNonOwnedNodes(compGrid) );
+      hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1)));
+      hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(2)));
+      hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(3)));
+      hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(4)));
+   }
+
    __global__
    void MarkCoarseKernel(HYPRE_Int *list,
               HYPRE_Int *marker,
@@ -132,27 +210,33 @@ extern "C"
               HYPRE_Int *nonowned_coarse_sort,
               HYPRE_Int num_owned,
               HYPRE_Int num_owned_coarse,
-              HYPRE_Int list_size)
+              HYPRE_Int list_size,
+              HYPRE_Int *nodes_to_add)
    {
       HYPRE_Int i = blockIdx.x * blockDim.x + threadIdx.x;
       if (i < list_size)
       {
          HYPRE_Int idx = list[i];
-         if (idx < num_owned)
+         if (idx >= 0)
          {
-            HYPRE_Int coarse_index = owned_coarse_indices[idx];
-            if (coarse_index != -1)
+            if (idx < num_owned)
             {
-               marker[ coarse_index ] = 2;
+               HYPRE_Int coarse_index = owned_coarse_indices[idx];
+               if (coarse_index != -1)
+               {
+                  marker[ coarse_index ] = 2;
+                  (*nodes_to_add) = 1;
+               }
             }
-         }
-         else
-         {
-            idx -= num_owned;
-            if (nonowned_coarse_indices[idx] != -1)
+            else
             {
-               HYPRE_Int coarse_index = nonowned_coarse_sort[ nonowned_coarse_indices[idx] ] + num_owned_coarse;
-               marker[ coarse_index ] = 2;
+               idx -= num_owned;
+               if (nonowned_coarse_indices[idx] != -1)
+               {
+                  HYPRE_Int coarse_index = nonowned_coarse_sort[ nonowned_coarse_indices[idx] ] + num_owned_coarse;
+                  marker[ coarse_index ] = 2;
+                  (*nodes_to_add) = 1;
+               }
             }
          }
       }
@@ -892,7 +976,7 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
       sort_cnt++;
    }
 
-   hypre_TFree(inv_sort_map, HYPRE_MEMORY_HOST);
+   hypre_TFree(inv_sort_map, HYPRE_MEMORY_SHARED);
    hypre_ParCompGridNonOwnedInvSort(compGrid[current_level]) = new_inv_sort_map;
 
    // Unpack coarse global indices (need these for original commPkg recvs as well). 
@@ -984,7 +1068,7 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
       HYPRE_Int row_size = recv_buffer[ i + row_sizes_start ];
       A_tmp_info_size += row_size;
    }
-   A_tmp_info[buffer_number] = hypre_CTAlloc(HYPRE_Int, A_tmp_info_size, HYPRE_MEMORY_HOST);
+   A_tmp_info[buffer_number] = hypre_CTAlloc(HYPRE_Int, A_tmp_info_size, HYPRE_MEMORY_SHARED);
    HYPRE_Int A_tmp_info_cnt = 0;
    A_tmp_info[buffer_number][A_tmp_info_cnt++] = num_original_recv_dofs;
    A_tmp_info[buffer_number][A_tmp_info_cnt++] = remaining_dofs;
@@ -1022,7 +1106,7 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
       add_node_cnt = 0;
 
       // NOTE: Don't free incoming_dest because we set that as recv_map and use it outside this function
-      HYPRE_Int *incoming_dest = hypre_CTAlloc(HYPRE_Int, num_recv_nodes[current_level][buffer_number][level], HYPRE_MEMORY_HOST);
+      HYPRE_Int *incoming_dest = hypre_CTAlloc(HYPRE_Int, num_recv_nodes[current_level][buffer_number][level], HYPRE_MEMORY_SHARED);
       recv_redundant_marker[current_level][buffer_number][level] = hypre_CTAlloc(HYPRE_Int, num_recv_nodes[current_level][buffer_number][level], HYPRE_MEMORY_SHARED);
 
       // if necessary, reallocate more space for compGrid
@@ -1037,7 +1121,7 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
 
       sort_map = hypre_ParCompGridNonOwnedSort(compGrid[level]);
       inv_sort_map = hypre_ParCompGridNonOwnedInvSort(compGrid[level]);
-      new_inv_sort_map = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumRows(nonowned_diag), HYPRE_MEMORY_HOST);
+      new_inv_sort_map = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumRows(nonowned_diag), HYPRE_MEMORY_SHARED);
       sort_cnt = 0;
       compGrid_cnt = 0;
       incoming_cnt = 0;
@@ -1160,7 +1244,7 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
       nodes_added_on_level[level] += add_node_cnt;
 
       // Free the old inv sort map and set new
-      hypre_TFree(inv_sort_map, HYPRE_MEMORY_HOST);
+      hypre_TFree(inv_sort_map, HYPRE_MEMORY_SHARED);
       hypre_ParCompGridNonOwnedInvSort(compGrid[level]) = new_inv_sort_map;
 
       // Set recv_map[current_level] to incoming_dest
@@ -1328,6 +1412,7 @@ PackSendBufferGPU(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypr
 
    // Count up the buffer size for the starting nodes
    add_flag[current_level] = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumOwnedNodes(compGrid[current_level]) + hypre_ParCompGridNumNonOwnedNodes(compGrid[current_level]), HYPRE_MEMORY_SHARED);
+   HYPRE_Int *nodes_to_add_new = hypre_CTAlloc(HYPRE_Int, 1, HYPRE_MEMORY_SHARED);
 
    num_owned_sends[current_level] = num_send_nodes[current_level][proc][current_level];
    num_nonowned_sends[current_level] = 0;
@@ -1370,30 +1455,32 @@ PackSendBufferGPU(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypr
    {
       add_flag[current_level+1] = hypre_CTAlloc( HYPRE_Int, hypre_ParCompGridNumOwnedNodes(compGrid[current_level+1]) + hypre_ParCompGridNumNonOwnedNodes(compGrid[current_level+1]), HYPRE_MEMORY_SHARED );
       
-      /* MarkCoarseKernel<<<num_blocks,tpb,0,HYPRE_STREAM(1)>>>(send_flag[current_level][proc][current_level], */
-      /*         add_flag[current_level+1], */
-      /*         hypre_ParCompGridOwnedCoarseIndices(compGrid[current_level]), */
-      /*         hypre_ParCompGridNonOwnedCoarseIndices(compGrid[current_level]), */
-      /*         hypre_ParCompGridNonOwnedSort(compGrid[current_level+1]), */
-      /*         hypre_ParCompGridNumOwnedNodes(compGrid[current_level]), */
-      /*         hypre_ParCompGridNumOwnedNodes(compGrid[current_level+1]), */
-      /*         num_send_nodes[current_level][proc][current_level]); */
-      /* hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1))); */
+      MarkCoarseKernel<<<num_blocks,tpb,0,HYPRE_STREAM(1)>>>(send_flag[current_level][proc][current_level],
+              add_flag[current_level+1],
+              hypre_ParCompGridOwnedCoarseIndices(compGrid[current_level]),
+              hypre_ParCompGridNonOwnedCoarseIndices(compGrid[current_level]),
+              hypre_ParCompGridNonOwnedSort(compGrid[current_level+1]),
+              hypre_ParCompGridNumOwnedNodes(compGrid[current_level]),
+              hypre_ParCompGridNumOwnedNodes(compGrid[current_level+1]),
+              num_send_nodes[current_level][proc][current_level],
+              nodes_to_add_new);
+      hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1)));
+      nodes_to_add = (*nodes_to_add_new);
 
-      for (i = 0; i < num_send_nodes[current_level][proc][current_level]; i++)
-      {
-         // flag nodes that are repeated on the next coarse grid
-         send_elmt = send_flag[current_level][proc][current_level][i];
-         if (send_elmt >= 0)
-         {
-            coarse_grid_index = hypre_ParCompGridOwnedCoarseIndices(compGrid[current_level])[send_elmt];
-            if ( coarse_grid_index != -1 ) 
-            {
-               add_flag[current_level+1][ coarse_grid_index ] = padding[current_level+1]+1;
-               nodes_to_add = 1;
-            }
-         }
-      }
+      /* for (i = 0; i < num_send_nodes[current_level][proc][current_level]; i++) */
+      /* { */
+      /*    // flag nodes that are repeated on the next coarse grid */
+      /*    send_elmt = send_flag[current_level][proc][current_level][i]; */
+      /*    if (send_elmt >= 0) */
+      /*    { */
+      /*       coarse_grid_index = hypre_ParCompGridOwnedCoarseIndices(compGrid[current_level])[send_elmt]; */
+      /*       if ( coarse_grid_index != -1 ) */ 
+      /*       { */
+      /*          add_flag[current_level+1][ coarse_grid_index ] = padding[current_level+1]+1; */
+      /*          nodes_to_add = 1; */
+      /*       } */
+      /*    } */
+      /* } */
    }
 
    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1419,6 +1506,10 @@ PackSendBufferGPU(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypr
 
          // Expand by the padding on this level and add coarse grid counterparts if applicable
          // !!! do recursive Psi_c call, here I go over all dofs and check add flag for distance... replace with list of starting dofs => updated add flag with distances (NOTE I use sort map when marking add flag)
+         ExpandPadding(compGrid[level], add_flag[level]);
+         // !!! now do ghosts, then convert to list, then should be able to call existing mark coarse kernel
+
+
          HYPRE_Int total_num_nodes = hypre_ParCompGridNumOwnedNodes(compGrid[level]) + hypre_ParCompGridNumNonOwnedNodes(compGrid[level]);
          for (i = 0; i < total_num_nodes; i++)
          {
