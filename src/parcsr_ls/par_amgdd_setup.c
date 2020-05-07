@@ -141,12 +141,14 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
 
    // Get the padding on each level
    HYPRE_Int *padding = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
-   if (variable_padding > num_levels - amgdd_start_level) variable_padding = num_levels - amgdd_start_level;
+   /* if (variable_padding > num_levels - amgdd_start_level) variable_padding = num_levels - amgdd_start_level; */
    if (variable_padding)
    {
       // padding[0] = 1;
-      for (level = amgdd_start_level; level < amgdd_start_level + variable_padding; level++) padding[level] = pad;
-      for (level = amgdd_start_level + variable_padding; level < num_levels; level++) padding[level] = 1;
+      // for (level = amgdd_start_level; level < amgdd_start_level + variable_padding; level++) padding[level] = pad;
+      // for (level = amgdd_start_level + variable_padding; level < num_levels; level++) padding[level] = 1;
+      for (level = amgdd_start_level; level < num_levels; level++) padding[level] = pad;
+      padding[num_levels-1] = variable_padding;
    }
    else
    {
@@ -264,9 +266,15 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
          if (timers) hypre_BeginTiming(timers[2]);
          for (i = 0; i < num_send_procs; i++)
          {
+#if defined(HYPRE_USING_GPU)
             send_buffer[i] = PackSendBufferGPU(amg_data, compGrid, compGridCommPkg, &(send_buffer_size[level][i]), 
                                              &(send_flag_buffer_size[i]), send_flag, num_send_nodes, i, level, num_levels, padding, 
                                              num_ghost_layers, symmetric );
+#else
+            send_buffer[i] = PackSendBuffer(amg_data, compGrid, compGridCommPkg, &(send_buffer_size[level][i]), 
+                                             &(send_flag_buffer_size[i]), send_flag, num_send_nodes, i, level, num_levels, padding, 
+                                             num_ghost_layers, symmetric );
+#endif
          }
          if (timers) hypre_EndTiming(timers[2]);
 
