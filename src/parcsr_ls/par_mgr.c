@@ -1147,12 +1147,14 @@ hypre_MGRBuildP( hypre_ParCSRMatrix   *A,
   for (i = 0; i < n_fine; i++)
   {
     if (CF_marker[i] < 0)
-    for (jj = A_diag_i[i]; jj < A_diag_i[i+1]; jj++)
     {
-      i1 = A_diag_j[jj];
-      if ( i==i1 )  /* diagonal of A only */
+      for (jj = A_diag_i[i]; jj < A_diag_i[i+1]; jj++)
       {
-        a_diag[i] = 1.0/A_diag_data[jj];
+        i1 = A_diag_j[jj];
+        if ( i==i1 )  /* diagonal of A only */
+        {
+          a_diag[i] = 1.0/A_diag_data[jj];
+        }
       }
     }
   }
@@ -5262,20 +5264,6 @@ hypre_MGRPrintCoarseSystem( void *mgr_vdata, HYPRE_Int print_flag)
 
   return hypre_error_flag;
 }
-
-/* Print global smoother convergence factor */
-/*
-HYPRE_Int
-hypre_MGRPrintGsmoothConvergenceFactor( void *mgr_vdata, HYPRE_Int print_flag)
-{
-<<<<<<< HEAD
-  hypre_ParMGRData  *mgr_data = (hypre_ParMGRData*) mgr_vdata;
-  mgr_data->print_gsmooth_convergence_factor = print_flag;
-
-  return hypre_error_flag;
-}
-*/
-
 
 /* Print solver params */
 HYPRE_Int
