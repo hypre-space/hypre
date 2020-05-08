@@ -266,18 +266,36 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
          if (timers) hypre_BeginTiming(timers[2]);
          for (i = 0; i < num_send_procs; i++)
          {
-#if defined(HYPRE_USING_GPU)
+/* #if defined(HYPRE_USING_GPU) */
             send_buffer[i] = PackSendBufferGPU(amg_data, compGrid, compGridCommPkg, &(send_buffer_size[level][i]), 
                                              &(send_flag_buffer_size[i]), send_flag, num_send_nodes, i, level, num_levels, padding, 
                                              num_ghost_layers, symmetric );
-#else
-            send_buffer[i] = PackSendBuffer(amg_data, compGrid, compGridCommPkg, &(send_buffer_size[level][i]), 
-                                             &(send_flag_buffer_size[i]), send_flag, num_send_nodes, i, level, num_levels, padding, 
-                                             num_ghost_layers, symmetric );
-#endif
+/* #else */
+            /* send_buffer[i] = PackSendBuffer(amg_data, compGrid, compGridCommPkg, &(send_buffer_size[level][i]), */ 
+            /*                                  &(send_flag_buffer_size[i]), send_flag, num_send_nodes, i, level, num_levels, padding, */ 
+            /*                                  num_ghost_layers, symmetric ); */
+            /* // !!! Debug */
+            /* if (myid == 0) */
+            /* { */
+            /*    HYPRE_Int inner_level; */
+            /*    for (inner_level = level; inner_level < num_levels-1; inner_level++) */
+            /*    { */
+            /*       printf("send flag[%d][%d][%d] = ", level, i, inner_level); */
+            /*       for (j = 0; j < num_send_nodes[level][i][inner_level]; j++) */
+            /*          printf("%d ", send_flag[level][i][inner_level][j]); */
+            /*       printf("\n"); */
+            /*    } */
+            /* } */
+/* #endif */
          }
          if (timers) hypre_EndTiming(timers[2]);
 
+         // !!! Debug
+         /* if (level == 2) */
+         /* { */
+         /*    MPI_Finalize(); */
+         /*    exit(0); */
+         /* } */
          //////////// Communicate buffer sizes ////////////
 
          if (use_barriers) hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
