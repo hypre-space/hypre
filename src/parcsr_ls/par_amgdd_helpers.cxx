@@ -165,25 +165,6 @@ extern "C"
       MarkerToListKernel<<<num_blocks,tpb,0,HYPRE_STREAM(1)>>>(marker, aux_marker, (*list), marker_size, ghost_dist);
       hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1)));
       
-      // !!! Debug
-      /* HYPRE_Int   myid; */
-      /* hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid ); */
-      /* if (myid == 0) */
-      /* { */
-      /*    HYPRE_Int i; */
-      /*    printf("marker = "); */
-      /*    for (i = 0; i < marker_size; i++) */
-      /*       printf("%d ", marker[i]); */
-      /*    printf("\n"); */
-      /*    printf("aux_marker = "); */
-      /*    for (i = 0; i < marker_size; i++) */
-      /*       printf("%d ", aux_marker[i]); */
-      /*    printf("\n"); */
-      /*    printf("list = "); */
-      /*    for (i = 0; i < list_size; i++) */
-      /*       printf("%d ", (*list)[i]); */
-      /*    printf("\n"); */
-      /* } */
       return list_size;
    }
 
@@ -332,6 +313,159 @@ extern "C"
          }
       }
    }
+
+   __global__
+   void LocalToGlobalIndexKernel(HYPRE_Int *local_indices, HYPRE_Int *aux_local_indices, HYPRE_Int *global_indices, HYPRE_Int local_indices_size, HYPRE_Int num_owned, HYPRE_Int first_global, HYPRE_Int *nonowned_global_indices)
+   {
+      HYPRE_Int i = blockIdx.x * blockDim.x + threadIdx.x;
+      if (i < local_indices_size)
+      {
+         if (local_indices[i] < num_owned)
+            global_indices[ aux_local_indices[i] ] = local_indices[i] + first_global;
+         else
+            global_indices[ aux_local_indices[i] ] = nonowned_global_indices[local_indices[i] - num_owned];
+      }
+   }
+
+   __global__
+   void AuxLocalIndexKernel(HYPRE_Int *aux_local_indices, HYPRE_Int *local_indices, HYPRE_Int local_indices_size, HYPRE_Int keep_ghost)
+   {
+      HYPRE_Int i = blockIdx.x * blockDim.x + threadIdx.x;
+      if (i < local_indices_size)
+      {
+         if (local_indices[i] >= 0 || keep_ghost) aux_local_indices[i] = 1;
+         else aux_local_indices[i] = 0;
+      }
+   }
+
+   HYPRE_Int LocalToGlobalIndexGPU(HYPRE_Int *local_indices, HYPRE_Int **global_indices, HYPRE_Int local_indices_size, HYPRE_Int num_owned, HYPRE_Int first_global, HYPRE_Int *nonowned_global_indices, HYPRE_Int keep_ghost)
+   {
+      const HYPRE_Int tpb=64;
+      HYPRE_Int num_blocks = local_indices_size/tpb+1;
+      
+      // Generate aux marker that is 1 whereever marker has nonzero value
+      HYPRE_Int *aux_local_indices = hypre_CTAlloc(HYPRE_Int, local_indices_size, HYPRE_MEMORY_SHARED);
+      AuxLocalIndexKernel<<<num_blocks,tpb,0,HYPRE_STREAM(1)>>>(aux_local_indices, local_indices, local_indices_size, keep_ghost);
+      hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1)));
+
+      // Scan aux marker to get locations for copying to list
+      thrust::exclusive_scan(thrust::device, aux_local_indices, aux_local_indices + local_indices_size, aux_local_indices);
+
+      // Allocate list
+      HYPRE_Int global_indices_size;
+      if (local_indices[local_indices_size-1] < 0) global_indices_size = aux_local_indices[local_indices_size-1];
+      else global_indices_size = aux_local_indices[local_indices_size-1]+ 1;
+      (*global_indices) = hypre_CTAlloc(HYPRE_Int, global_indices_size, HYPRE_MEMORY_SHARED);
+
+      // Collapse from marker to list
+      LocalToGlobalIndexKernel<<<num_blocks,tpb,0,HYPRE_STREAM(1)>>>(local_indices, aux_local_indices, (*global_indices), local_indices_size, num_owned, first_global, nonowned_global_indices);
+      hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1)));
+      
+      return global_indices_size;
+   }
+
+   void RemoveRedundancyGPU(hypre_ParAMGData *amg_data,
+                              hypre_ParCompGrid **compGrid,
+                              hypre_ParCompGridCommPkg *compGridCommPkg,
+                              HYPRE_Int ****send_flag,
+                              HYPRE_Int ****recv_map,
+                              HYPRE_Int ***num_send_nodes,
+                              HYPRE_Int current_level,
+                              HYPRE_Int proc,
+                              HYPRE_Int level)
+   {
+      // Eliminate redundant send info by comparing with previous send_flags and recv_maps
+      HYPRE_Int current_send_proc = hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[current_level][proc];
+      HYPRE_Int prev_proc, prev_level;
+      HYPRE_Int num_send_nodes_before = num_send_nodes[current_level][proc][level];
+      for (prev_level = current_level+1; prev_level <= level; prev_level++)
+      {
+         hypre_ParCSRCommPkg *original_commPkg = hypre_ParCSRMatrixCommPkg(hypre_ParAMGDataAArray(amg_data)[prev_level]);
+         for (prev_proc = 0; prev_proc < hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[prev_level]; prev_proc++)
+         {
+            if (hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[prev_level][prev_proc] == current_send_proc)
+            {
+               HYPRE_Int prev_list_end = num_send_nodes[prev_level][prev_proc][level];
+               if (prev_level == level) 
+               {
+                  HYPRE_Int original_proc;
+                  for (original_proc = 0; original_proc < hypre_ParCSRCommPkgNumSends(original_commPkg); original_proc++)
+                  {
+                     if (hypre_ParCSRCommPkgSendProc(original_commPkg, original_proc) == current_send_proc) 
+                     {
+                        prev_list_end = hypre_ParCSRCommPkgSendMapStart(original_commPkg, original_proc+1) - hypre_ParCSRCommPkgSendMapStart(original_commPkg, original_proc);
+                        break;
+                     }
+                  }
+               }
+
+               // Get the global indices (to be used as keys). NOTE: need to get size of prev send (we exclude ghosts when comparing), combine this with the info in prev_list_end above.
+               HYPRE_Int *current_send_flag = hypre_CTAlloc(HYPRE_Int, num_send_nodes[current_level][proc][level], HYPRE_MEMORY_SHARED);// COPY send_flag[current_level][proc][level]
+               cudaMemcpy(current_send_flag, send_flag[current_level][proc][level], sizeof(HYPRE_Int)*num_send_nodes[current_level][proc][level], cudaMemcpyDeviceToDevice);
+               HYPRE_Int *prev_send_flag = send_flag[prev_level][prev_proc][level];
+               HYPRE_Int *send_gid;
+               LocalToGlobalIndexGPU(current_send_flag, &send_gid, num_send_nodes[current_level][proc][level], hypre_ParCompGridNumOwnedNodes(compGrid[level]), hypre_ParCompGridFirstGlobalIndex(compGrid[level]), hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level]), 1);
+               HYPRE_Int *prev_send_gid;
+               HYPRE_Int prev_send_gid_size = LocalToGlobalIndex(send_flag[prev_level][prev_proc][level], &prev_send_gid, prev_list_end, hypre_ParCompGridNumOwnedNodes(compGrid[level]), hypre_ParCompGridFirstGlobalIndex(compGrid[level]), hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level]), 0);
+               HYPRE_Int *result_gid = hypre_CTAlloc(HYPRE_Int, num_send_nodes[current_level][proc][level], HYPRE_MEMORY_SHARED); //just a dummy array that needs to be allocated, but that we wont actually use
+               thrust::pair<HYPRE_Int*,HYPRE_Int*> end = thrust::set_difference_by_key(thrust::device, send_gid, send_gid + num_send_nodes[current_level][proc][level], 
+                     prev_send_gid, prev_send_gid + prev_send_gid_size, current_send_flag, prev_send_flag, keys_result, send_flag[current_level][proc][level]);
+               num_send_nodes[current_level][proc][level] = end->second - send_flag[current_level][proc][level]; // NOTE: no realloc of send_flag here... do that later I guess when final size determined?
+
+               /* RemoveRedundancy(compGrid[level], */
+               /*    send_flag[current_level][proc][level], */ 
+               /*    &(num_send_nodes[current_level][proc][level]), */ 
+               /*    send_flag[prev_level][prev_proc][level], */ 
+               /*    prev_list_end); */
+
+               if (num_send_nodes[prev_level][prev_proc][level] - prev_list_end > 0)
+               {
+                  RemoveRedundancy(compGrid[level],
+                     send_flag[current_level][proc][level], 
+                     &(num_send_nodes[current_level][proc][level]), 
+                     &(send_flag[prev_level][prev_proc][level][prev_list_end]), 
+                     num_send_nodes[prev_level][prev_proc][level] - prev_list_end);
+               }
+            }
+         }
+
+         for (prev_proc = 0; prev_proc < hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg)[prev_level]; prev_proc++)
+         {
+            if (hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[prev_level][prev_proc] == current_send_proc)
+            {
+               HYPRE_Int prev_list_end = hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[prev_level][prev_proc][level];
+               if (prev_level == level) 
+               {
+                  HYPRE_Int original_proc;
+                  for (original_proc = 0; original_proc < hypre_ParCSRCommPkgNumRecvs(original_commPkg); original_proc++)
+                  {
+                     if (hypre_ParCSRCommPkgRecvProc(original_commPkg, original_proc) == current_send_proc) 
+                     {
+                        prev_list_end = hypre_ParCSRCommPkgRecvVecStart(original_commPkg, original_proc+1) - hypre_ParCSRCommPkgRecvVecStart(original_commPkg, original_proc);
+                        break;
+                     }
+                  }
+               }
+
+               RemoveRedundancy(compGrid[level],
+                  send_flag[current_level][proc][level], 
+                  &(num_send_nodes[current_level][proc][level]), 
+                  hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[prev_level][prev_proc][level], 
+                  prev_list_end);
+
+               if (hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[prev_level][prev_proc][level] - prev_list_end > 0)
+               {
+                  RemoveRedundancy(compGrid[level],
+                     send_flag[current_level][proc][level], 
+                     &(num_send_nodes[current_level][proc][level]), 
+                     &(hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[prev_level][prev_proc][level][prev_list_end]), 
+                     hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[prev_level][prev_proc][level] - prev_list_end);
+               }
+            }
+         }
+      }
+   }
+
 }
 #endif
 
@@ -1575,34 +1709,13 @@ PackSendBufferGPU(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypr
          // if we need coarse info, allocate space for the add flag on the next level
          if (level != num_levels-1) add_flag[level+1] = hypre_CTAlloc( HYPRE_Int, hypre_ParCompGridNumOwnedNodes(compGrid[level+1]) + hypre_ParCompGridNumNonOwnedNodes(compGrid[level+1]), HYPRE_MEMORY_SHARED );
 
-         // !!! Debug
-         /* if (myid == 0) */
-         /* { */
-         /*    printf("add_flag before = "); */
-         /*    for (i = 0; i < hypre_ParCompGridNumOwnedNodes(compGrid[level]) + hypre_ParCompGridNumNonOwnedNodes(compGrid[level]); i++) */
-         /*       printf("%d ", add_flag[level][i]); */
-         /*    printf("\n"); */
-         /* } */
          // Expand by the padding on this level and add coarse grid counterparts if applicable
          // !!! do recursive Psi_c call, here I go over all dofs and check add flag for distance... replace with list of starting dofs => updated add flag with distances (NOTE I use sort map when marking add flag)
          for (i = 0; i < padding[level] + num_ghost_layers; i++) ExpandPadding(compGrid[level], add_flag[level], padding[level] + num_ghost_layers + 1 - i);
-         /* for (i = 0; i < num_ghost_layers; i++) ExpandGhost(compGrid[level], add_flag[level], num_ghost_layers + 1 - i); */
          
          num_send_nodes[current_level][proc][level] = MarkerToList(add_flag[level], 
                                                          &(send_flag[current_level][proc][level]), 
                                                          hypre_ParCompGridNumOwnedNodes(compGrid[level]) + hypre_ParCompGridNumNonOwnedNodes(compGrid[level]), num_ghost_layers);
-         // !!! Debug
-         /* if (myid == 0) */
-         /* { */
-         /*    printf("add_flag = "); */
-         /*    for (i = 0; i < hypre_ParCompGridNumOwnedNodes(compGrid[level]) + hypre_ParCompGridNumNonOwnedNodes(compGrid[level]); i++) */
-         /*       printf("%d ", add_flag[level][i]); */
-         /*    printf("\n"); */
-         /*    printf("send_flag = "); */
-         /*    for (i = 0; i < num_send_nodes[current_level][proc][level]; i++) */
-         /*       printf("%d ", send_flag[current_level][proc][level][i]); */
-         /*    printf("\n"); */
-         /* } */
 
          SortList(compGrid[level], send_flag[current_level][proc][level], num_send_nodes[current_level][proc][level]);
 
@@ -1621,88 +1734,18 @@ PackSendBufferGPU(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypr
             nodes_to_add = (*nodes_to_add_new);
          }
 
-
-         // Eliminate redundant send info by comparing with previous send_flags and recv_maps
-         // !!! Eliminate redundancy... how to do this?
-         HYPRE_Int current_send_proc = hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[current_level][proc];
-         HYPRE_Int prev_proc, prev_level;
-         HYPRE_Int num_send_nodes_before = num_send_nodes[current_level][proc][level];
-         for (prev_level = current_level+1; prev_level <= level; prev_level++)
-         {
-            hypre_ParCSRCommPkg *original_commPkg = hypre_ParCSRMatrixCommPkg(hypre_ParAMGDataAArray(amg_data)[prev_level]);
-            for (prev_proc = 0; prev_proc < hypre_ParCompGridCommPkgNumSendProcs(compGridCommPkg)[prev_level]; prev_proc++)
-            {
-               if (hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[prev_level][prev_proc] == current_send_proc)
-               {
-                  HYPRE_Int prev_list_end = num_send_nodes[prev_level][prev_proc][level];
-                  if (prev_level == level) 
-                  {
-                     HYPRE_Int original_proc;
-                     for (original_proc = 0; original_proc < hypre_ParCSRCommPkgNumSends(original_commPkg); original_proc++)
-                     {
-                        if (hypre_ParCSRCommPkgSendProc(original_commPkg, original_proc) == current_send_proc) 
-                        {
-                           /* prev_list_end = hypre_ParCSRCommPkgSendMapStart(original_commPkg, original_proc+1) - hypre_ParCSRCommPkgSendMapStart(original_commPkg, original_proc); */
-                           break;
-                        }
-                     }
-                  }
-
-                  RemoveRedundancy(compGrid[level],
-                     send_flag[current_level][proc][level], 
-                     &(num_send_nodes[current_level][proc][level]), 
-                     send_flag[prev_level][prev_proc][level], 
-                     prev_list_end);
-
-                  if (num_send_nodes[prev_level][prev_proc][level] - prev_list_end > 0)
-                  {
-                     RemoveRedundancy(compGrid[level],
-                        send_flag[current_level][proc][level], 
-                        &(num_send_nodes[current_level][proc][level]), 
-                        &(send_flag[prev_level][prev_proc][level][prev_list_end]), 
-                        num_send_nodes[prev_level][prev_proc][level] - prev_list_end);
-                  }
-               }
-            }
-
-            for (prev_proc = 0; prev_proc < hypre_ParCompGridCommPkgNumRecvProcs(compGridCommPkg)[prev_level]; prev_proc++)
-            {
-               if (hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[prev_level][prev_proc] == current_send_proc)
-               {
-                  HYPRE_Int prev_list_end = hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[prev_level][prev_proc][level];
-                  if (prev_level == level) 
-                  {
-                     HYPRE_Int original_proc;
-                     for (original_proc = 0; original_proc < hypre_ParCSRCommPkgNumRecvs(original_commPkg); original_proc++)
-                     {
-                        if (hypre_ParCSRCommPkgRecvProc(original_commPkg, original_proc) == current_send_proc) 
-                        {
-                           prev_list_end = hypre_ParCSRCommPkgRecvVecStart(original_commPkg, original_proc+1) - hypre_ParCSRCommPkgRecvVecStart(original_commPkg, original_proc);
-                           break;
-                        }
-                     }
-                  }
-
-                  RemoveRedundancy(compGrid[level],
-                     send_flag[current_level][proc][level], 
-                     &(num_send_nodes[current_level][proc][level]), 
-                     hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[prev_level][prev_proc][level], 
-                     prev_list_end);
-
-                  if (hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[prev_level][prev_proc][level] - prev_list_end > 0)
-                  {
-                     RemoveRedundancy(compGrid[level],
-                        send_flag[current_level][proc][level], 
-                        &(num_send_nodes[current_level][proc][level]), 
-                        &(hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[prev_level][prev_proc][level][prev_list_end]), 
-                        hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[prev_level][prev_proc][level] - prev_list_end);
-                  }
-               }
-            }
-         }
+         RemoveRedundancyGPU(amg_data,
+                              compGrid,
+                              compGridCommPkg,
+                              send_flag,
+                              recv_map,
+                              num_send_nodes,
+                              current_level,
+                              proc,
+                              level);
 
          // Count up the buffer sizes and adjust the add_flag and get offsets
-         memset(add_flag[level], 0, sizeof(HYPRE_Int)*(hypre_ParCompGridNumOwnedNodes(compGrid[level]) + hypre_ParCompGridNumNonOwnedNodes(compGrid[level])) );
+         cudaMemset(add_flag[level], 0, sizeof(HYPRE_Int)*(hypre_ParCompGridNumOwnedNodes(compGrid[level]) + hypre_ParCompGridNumNonOwnedNodes(compGrid[level])) );
          (*send_flag_buffer_size) += num_send_nodes[current_level][proc][level];
          if (level != num_levels-1) (*buffer_size) += 3*num_send_nodes[current_level][proc][level];
          else (*buffer_size) += 2*num_send_nodes[current_level][proc][level];
@@ -2136,13 +2179,6 @@ PackSendBuffer(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypre_P
          if (level != num_levels-1) add_flag[level+1] = hypre_CTAlloc( HYPRE_Int, hypre_ParCompGridNumOwnedNodes(compGrid[level+1]) + hypre_ParCompGridNumNonOwnedNodes(compGrid[level+1]), HYPRE_MEMORY_SHARED );
 
          // !!! Debug
-         /* if (myid == 0) */
-         /* { */
-         /*    printf("add_flag before = "); */
-         /*    for (i = 0; i < hypre_ParCompGridNumOwnedNodes(compGrid[level]) + hypre_ParCompGridNumNonOwnedNodes(compGrid[level]); i++) */
-         /*       printf("%d ", add_flag[level][i]); */
-         /*    printf("\n"); */
-         /* } */
          // Expand by the padding on this level and add coarse grid counterparts if applicable
          HYPRE_Int total_num_nodes = hypre_ParCompGridNumOwnedNodes(compGrid[level]) + hypre_ParCompGridNumNonOwnedNodes(compGrid[level]);
          for (i = 0; i < total_num_nodes; i++)
@@ -2241,18 +2277,6 @@ PackSendBuffer(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypre_P
             i++;
          }
 
-         // !!! Debug
-         /* if (myid == 0) */
-         /* { */
-         /*    printf("add_flag = "); */
-         /*    for (i = 0; i < hypre_ParCompGridNumOwnedNodes(compGrid[level]) + hypre_ParCompGridNumNonOwnedNodes(compGrid[level]); i++) */
-         /*       printf("%d ", add_flag[level][i]); */
-         /*    printf("\n"); */
-         /*    printf("send_flag = "); */
-         /*    for (i = 0; i < num_send_nodes[current_level][proc][level]; i++) */
-         /*       printf("%d ", send_flag[current_level][proc][level][i]); */
-         /*    printf("\n"); */
-         /* } */
          // !!! Timing
          auto redundancy_start = chrono::system_clock::now();
 
