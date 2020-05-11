@@ -2249,6 +2249,7 @@ HYPRE_Int hypre_BoxGrowByBox( hypre_Box *box , hypre_Box *gbox );
 HYPRE_Int hypre_BoxGrowByArray ( hypre_Box *box , HYPRE_Int *array );
 hypre_BoxArray *hypre_BoxArrayCreate ( HYPRE_Int size , HYPRE_Int ndim );
 HYPRE_Int hypre_BoxArrayDestroy ( hypre_BoxArray *box_array );
+HYPRE_Int hypre_BoxArrayVolume ( hypre_BoxArray *box_array );
 HYPRE_Int hypre_BoxArraySetSize ( hypre_BoxArray *box_array , HYPRE_Int size );
 hypre_BoxArray *hypre_BoxArrayClone ( hypre_BoxArray *box_array );
 HYPRE_Int hypre_AppendBox ( hypre_Box *box , hypre_BoxArray *box_array );

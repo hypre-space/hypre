@@ -754,6 +754,26 @@ hypre_BoxArrayDestroy( hypre_BoxArray *box_array )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_BoxArrayVolume( hypre_BoxArray *box_array )
+{
+   HYPRE_Int    box_array_volume;
+   hypre_Box   *box;
+   HYPRE_Int    i;
+
+   box_array_volume = 0;
+   hypre_ForBoxI(i, box_array)
+   {
+      box = hypre_BoxArrayBox(box_array, i);
+      box_array_volume += hypre_BoxVolume(box);
+   }
+
+   return box_array_volume;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_BoxArraySetSize( hypre_BoxArray  *box_array,
                        HYPRE_Int        size      )
 {
