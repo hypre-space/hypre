@@ -973,7 +973,7 @@ hypre_BoomerAMGBuildStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
  *  Comment:
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix   *A,
+hypre_BoomerAMGBuildExtPIInterpHost(hypre_ParCSRMatrix   *A,
                                 HYPRE_Int            *CF_marker,
                                 hypre_ParCSRMatrix   *S,
                                 HYPRE_BigInt         *num_cpts_global,
@@ -5326,4 +5326,45 @@ hypre_BoomerAMGBuildExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
    return ierr;
 }
 
+/*-----------------------------------------------------------------------*/
 
+HYPRE_Int
+hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix   *A,
+                                HYPRE_Int            *CF_marker,
+                                hypre_ParCSRMatrix   *S,
+                                HYPRE_BigInt         *num_cpts_global,
+                                HYPRE_Int             num_functions,
+                                HYPRE_Int            *dof_func,
+                                HYPRE_Int             debug_flag,
+                                HYPRE_Real            trunc_factor,
+                                HYPRE_Int             max_elmts,
+                                HYPRE_Int            *col_offd_S_to_A,
+                                hypre_ParCSRMatrix  **P_ptr)
+{
+#if defined(HYPRE_USING_CUDA)
+   hypre_NvtxPushRange("ExtPIInterp");
+#endif
+
+   HYPRE_ExecuctionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(A)) );
+
+   HYPRE_Int ierr = 0;
+
+   if (exec == HYPRE_EXEC_HOST)
+   {
+      ierr = hypre_BoomerAMGBuildExtPIInterpHost(A,CF_marker,S,num_cpts_global,num_functions,dof_func,
+                                               debug_flag,trunc_factor,max_elmts,col_offd_S_to_A, P_ptr);
+   }
+#if defined(HYPRE_USING_CUDA)
+   else
+   {
+      ierr = hypre_BoomerAMGBuildExtPIInterpDevice(A,CF_marker,S,num_cpts_global,num_functions,dof_func,
+                                                 debug_flag,trunc_factor,max_elmts, P_ptr);
+   }
+#endif
+
+#if defined(HYPRE_USING_CUDA)
+   hypre_NvtxPopRange();
+#endif
+
+   return ierr;
+}
