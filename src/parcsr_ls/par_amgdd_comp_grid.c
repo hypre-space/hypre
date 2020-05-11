@@ -21,6 +21,11 @@
 #include <stdio.h>
 #include <math.h>
 
+#if defined(HYPRE_USING_GPU)
+#include <thrust/gather.h>
+#include <thrust/execution_policy.h>
+#endif
+
 HYPRE_Int LocalIndexBinarySearch( hypre_ParCompGrid *compGrid, HYPRE_Int global_index )
 {
    HYPRE_Int      left = 0;
@@ -471,8 +476,16 @@ hypre_ParCompGridInitialize( hypre_ParAMGData *amg_data, HYPRE_Int padding, HYPR
       hypre_CSRMatrixJ(hypre_ParCompGridMatrixOwnedOffd(P)) = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumNonzeros(P_offd_original), HYPRE_MEMORY_SHARED);
       
       // Initialize P owned offd col ind to their global indices
+#if defined(HYPRE_USING_GPU)
+/*       thrust::gather(thrust::device, */ 
+/*                hypre_CSRMatrixJ(P_offd_original), */ 
+/*                hypre_CSRMatrixJ(P_offd_original) + hypre_CSRMatrixNumNonzeros(hypre_ParCompGridMatrixOwnedOffd(P)), */
+/*                hypre_ParCSRMatrixColMapOffd( hypre_ParAMGDataPArray(amg_data)[level] ), */
+/*                hypre_CSRMatrixJ(hypre_ParCompGridMatrixOwnedOffd(P)) ); */
+/* #else */
       for (i = 0; i < hypre_CSRMatrixNumNonzeros(hypre_ParCompGridMatrixOwnedOffd(P)); i++)
          hypre_CSRMatrixJ(hypre_ParCompGridMatrixOwnedOffd(P))[i] = hypre_ParCSRMatrixColMapOffd( hypre_ParAMGDataPArray(amg_data)[level] )[ hypre_CSRMatrixJ(P_offd_original)[i] ];
+#endif
 
       hypre_ParCompGridMatrixOwnsOwnedMatrices(P) = 0;
       hypre_ParCompGridMatrixOwnsOffdColIndices(P) = 1;
