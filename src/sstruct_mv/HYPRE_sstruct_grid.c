@@ -64,15 +64,16 @@ HYPRE_SStructGridCreate( MPI_Comm           comm,
       fem_vars[i]      = NULL;
       fem_offsets[i]   = NULL;
    }
-   hypre_SStructGridPGrids(grid)  = pgrids;
+   hypre_SStructGridPGrids(grid)      = pgrids;
+   hypre_SStructGridIDs(grid)         = NULL;
    hypre_SStructGridNNeighbors(grid)  = nneighbors;
    hypre_SStructGridNeighbors(grid)   = neighbors;
    hypre_SStructGridNborOffsets(grid) = nbor_offsets;
-   hypre_SStructGridNUCVars(grid) = 0;
-   hypre_SStructGridUCVars(grid)  = NULL;
-   hypre_SStructGridFEMNVars(grid)   = fem_nvars;
-   hypre_SStructGridFEMVars(grid)    = fem_vars;
-   hypre_SStructGridFEMOffsets(grid) = fem_offsets;
+   hypre_SStructGridNUCVars(grid)     = 0;
+   hypre_SStructGridUCVars(grid)      = NULL;
+   hypre_SStructGridFEMNVars(grid)    = fem_nvars;
+   hypre_SStructGridFEMVars(grid)     = fem_vars;
+   hypre_SStructGridFEMOffsets(grid)  = fem_offsets;
 
    hypre_SStructGridBoxManagers(grid) = NULL;
    hypre_SStructGridNborBoxManagers(grid) = NULL;
@@ -98,6 +99,7 @@ HYPRE_SStructGridDestroy( HYPRE_SStructGrid grid )
 {
    HYPRE_Int                      nparts;
    hypre_SStructPGrid           **pgrids;
+   HYPRE_Int                     *ids;
    HYPRE_Int                     *nneighbors;
    hypre_SStructNeighbor        **neighbors;
    hypre_Index                  **nbor_offsets;
@@ -120,6 +122,7 @@ HYPRE_SStructGridDestroy( HYPRE_SStructGrid grid )
       {
          nparts  = hypre_SStructGridNParts(grid);
          pgrids  = hypre_SStructGridPGrids(grid);
+         ids     = hypre_SStructGridIDs(grid);
          nneighbors   = hypre_SStructGridNNeighbors(grid);
          neighbors    = hypre_SStructGridNeighbors(grid);
          nbor_offsets = hypre_SStructGridNborOffsets(grid);
@@ -160,6 +163,7 @@ HYPRE_SStructGridDestroy( HYPRE_SStructGrid grid )
          }
          hypre_TFree(vnbor_comm_info);
          hypre_TFree(pgrids);
+         hypre_TFree(ids);
          hypre_TFree(nneighbors);
          hypre_TFree(neighbors);
          hypre_TFree(nbor_offsets);
@@ -598,6 +602,7 @@ HYPRE_SStructGridAssemble( HYPRE_SStructGrid grid )
    hypre_SStructPGrid      *pgrid;
    HYPRE_SStructVariable   *vartypes;
    hypre_Index              varoffset;
+   HYPRE_Int               *ids;
    HYPRE_Int                nvars;
    HYPRE_Int                part, var, b, vb, d, i, valid;
    HYPRE_Int                nbor_part, sub_part;
@@ -615,6 +620,20 @@ HYPRE_SStructGridAssemble( HYPRE_SStructGrid grid )
          hypre_TFree(neighbors[part]);
          hypre_TFree(nbor_offsets[part]);
       }
+   }
+
+   /*-------------------------------------------------------------
+    * set part identifiers if we haven't done so yet
+    *-------------------------------------------------------------*/
+
+   if (hypre_SStructGridIDs(grid) == NULL)
+   {
+      ids = hypre_TAlloc(HYPRE_Int, nparts);
+      for (part = 0; part < nparts; part++)
+      {
+         ids[part] = part;
+      }
+      hypre_SStructGridIDs(grid) = ids;
    }
 
    /*-------------------------------------------------------------

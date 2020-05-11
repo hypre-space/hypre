@@ -143,6 +143,7 @@ typedef struct hypre_SStructGrid_struct
    MPI_Comm                   comm;
    HYPRE_Int                  ndim;
    HYPRE_Int                  nparts;
+   HYPRE_Int                 *ids; /* Unique IDs for parts */
 
    /* s-variable info */
    hypre_SStructPGrid       **pgrids;
@@ -191,6 +192,7 @@ typedef struct hypre_SStructGrid_struct
 #define hypre_SStructGridComm(grid)           ((grid) -> comm)
 #define hypre_SStructGridNDim(grid)           ((grid) -> ndim)
 #define hypre_SStructGridNParts(grid)         ((grid) -> nparts)
+#define hypre_SStructGridIDs(grid)            ((grid) -> ids)
 #define hypre_SStructGridPGrids(grid)         ((grid) -> pgrids)
 #define hypre_SStructGridPGrid(grid, part)    ((grid) -> pgrids[part])
 #define hypre_SStructGridNNeighbors(grid)     ((grid) -> nneighbors)
