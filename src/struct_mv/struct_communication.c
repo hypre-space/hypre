@@ -45,12 +45,13 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
    HYPRE_Int             ndim = hypre_CommInfoNDim(comm_info);
    hypre_BoxArrayArray  *send_boxes;
    hypre_BoxArrayArray  *recv_boxes;
+   hypre_BoxArrayArray  *send_rboxes;
+   hypre_BoxArrayArray  *recv_rboxes;
    hypre_IndexRef        send_stride;
    hypre_IndexRef        recv_stride;
    HYPRE_Int           **send_processes;
    HYPRE_Int           **recv_processes;
    HYPRE_Int           **send_rboxnums;
-   hypre_BoxArrayArray  *send_rboxes;
 
    HYPRE_Int             num_transforms;
    hypre_Index          *coords;
@@ -70,6 +71,7 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
    hypre_BoxArray       *box_array;
    hypre_Box            *box;
    hypre_BoxArray       *rbox_array;
+   hypre_Box            *rbox;
    hypre_Box            *data_box;
    HYPRE_Int            *data_offsets;
    HYPRE_Int             data_offset;
@@ -92,6 +94,7 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
       recv_processes  = hypre_CommInfoSendProcesses(comm_info);
       send_rboxnums   = hypre_CommInfoRecvRBoxnums(comm_info);
       send_rboxes     = hypre_CommInfoRecvRBoxes(comm_info);
+      recv_rboxes     = hypre_CommInfoSendRBoxes(comm_info);
       send_transforms = hypre_CommInfoRecvTransforms(comm_info); /* may be NULL */
 
       box_array = send_data_space;
@@ -108,6 +111,7 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
       recv_processes  = hypre_CommInfoRecvProcesses(comm_info);
       send_rboxnums   = hypre_CommInfoSendRBoxnums(comm_info);
       send_rboxes     = hypre_CommInfoSendRBoxes(comm_info);
+      recv_rboxes     = hypre_CommInfoRecvRBoxes(comm_info);
       send_transforms = hypre_CommInfoSendTransforms(comm_info); /* may be NULL */
    }
    num_transforms = hypre_CommInfoNumTransforms(comm_info);
@@ -227,10 +231,12 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
    {
       i = comm_boxes_i[m];
       j = comm_boxes_j[m];
-      box_array = hypre_BoxArrayArrayBoxArray(send_boxes, i);
-      box = hypre_BoxArrayBox(box_array, j);
+      box_array  = hypre_BoxArrayArrayBoxArray(send_boxes, i);
+      rbox_array = hypre_BoxArrayArrayBoxArray(send_rboxes, i);
+      box  = hypre_BoxArrayBox(box_array, j);
+      rbox = hypre_BoxArrayBox(rbox_array, j);
 
-      if (hypre_BoxVolume(box) != 0)
+      if ((hypre_BoxVolume(box) != 0) && (hypre_BoxVolume(rbox) != 0))
       {
          p = comm_boxes_p[m];
 
@@ -357,10 +363,12 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
    {
       i = comm_boxes_i[m];
       j = comm_boxes_j[m];
-      box_array = hypre_BoxArrayArrayBoxArray(recv_boxes, i);
-      box = hypre_BoxArrayBox(box_array, j);
+      box_array  = hypre_BoxArrayArrayBoxArray(recv_boxes, i);
+      rbox_array = hypre_BoxArrayArrayBoxArray(recv_rboxes, i);
+      box  = hypre_BoxArrayBox(box_array, j);
+      rbox = hypre_BoxArrayBox(rbox_array, j);
 
-      if (hypre_BoxVolume(box) != 0)
+      if ((hypre_BoxVolume(box) != 0) && (hypre_BoxVolume(rbox) != 0))
       {
          p = comm_boxes_p[m];
 

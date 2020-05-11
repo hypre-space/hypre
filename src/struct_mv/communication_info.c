@@ -116,6 +116,8 @@ hypre_CommInfoProjectRecv( hypre_CommInfo  *comm_info,
 {
    hypre_ProjectBoxArrayArray(hypre_CommInfoRecvBoxes(comm_info),
                               index, stride);
+   hypre_ProjectBoxArrayArray(hypre_CommInfoRecvRBoxes(comm_info),
+                              index, stride);
    hypre_CopyIndex(stride, hypre_CommInfoRecvStride(comm_info));
 
    return hypre_error_flag;
