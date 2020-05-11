@@ -385,10 +385,6 @@ hypre_StructVectorResize( hypre_StructVector *vector,
       data_indices[i] = data_size;
       data_size += hypre_BoxVolume(data_box);
    }
-   /* The following ensures a non-null data pointer after Initialize(), even if
-    * the data_space has size zero.  This enables a reindex and resize between a
-    * data_space of size zero and one that is not. */
-   data_size++;
 
    /* Copy or move old_data to data */
    data = NULL;
@@ -403,7 +399,10 @@ hypre_StructVectorResize( hypre_StructVector *vector,
          old_ids = hypre_StructGridIDs(hypre_StructVectorSaveGrid(vector));
       }
 
-      data = hypre_SharedCTAlloc(HYPRE_Complex, data_size);
+     /* The following (data_size + 1) ensures a non-null data pointer after
+      * Initialize(), even if data_space has size zero. This enables a reindex
+      * and resize between a data_space of size zero and one that is not. */
+      data = hypre_SharedCTAlloc(HYPRE_Complex, data_size + 1);
 
       /* Copy the data */
       hypre_StructDataCopy(old_data, old_data_space, old_ids, data, data_space, ids, ndim, 1);
@@ -463,7 +462,7 @@ hypre_StructVectorRestore( hypre_StructVector *vector )
       /* Move the data */
       if (hypre_StructVectorDataAlloced(vector))
       {
-         data = hypre_SharedCTAlloc(HYPRE_Complex, data_size);
+         data = hypre_SharedCTAlloc(HYPRE_Complex, data_size + 1);
       }
       hypre_StructDataCopy(old_data, old_data_space, old_ids, data, data_space, ids, ndim, 1);
       hypre_TFree(old_data);
@@ -1644,43 +1643,48 @@ hypre_StructVectorMaxValue( hypre_StructVector *vector,
  * Returns a complete copy of x - a deep copy, with its own copy of the data.
  *--------------------------------------------------------------------------*/
 hypre_StructVector *
-hypre_StructVectorClone(
-	hypre_StructVector *x)
+hypre_StructVectorClone( hypre_StructVector *x )
 {
-   MPI_Comm             comm = hypre_StructVectorComm(x);
-   hypre_StructGrid    *grid = hypre_StructVectorGrid(x);
-   hypre_BoxArray      *data_space = hypre_StructVectorDataSpace(x);
-   HYPRE_Int           *data_indices = hypre_StructVectorDataIndices(x);
-   HYPRE_Int            n_boxes = hypre_StructVectorNBoxes(x);
-   HYPRE_Int           *box_nums = hypre_StructVectorBoxnums(x);
-   HYPRE_Int            data_size = hypre_StructVectorDataSize(x);
-   HYPRE_Int            ndim = hypre_StructGridNDim(grid);
-   HYPRE_Int            data_space_size = hypre_BoxArraySize(data_space);
-   HYPRE_Int            i;
-   hypre_StructVector  *y = hypre_StructVectorCreate(comm, grid);
+   hypre_StructVector *y;
+   MPI_Comm            comm            = hypre_StructVectorComm(x);
+   hypre_StructGrid   *grid            = hypre_StructVectorGrid(x);
+   hypre_BoxArray     *data_space      = hypre_StructVectorDataSpace(x);
+   HYPRE_Int          *data_indices    = hypre_StructVectorDataIndices(x);
+   HYPRE_Int           n_boxes         = hypre_StructVectorNBoxes(x);
+   HYPRE_Int          *box_nums        = hypre_StructVectorBoxnums(x);
+   HYPRE_Int           data_size       = hypre_StructVectorDataSize(x);
+   HYPRE_Int           ndim            = hypre_StructGridNDim(grid);
+   HYPRE_Int           data_space_size = hypre_BoxArraySize(data_space);
+   HYPRE_Int           i;
 
-   hypre_StructVectorNBoxes(y) = n_boxes;
+   y = hypre_StructVectorCreate(comm, grid);
+   hypre_StructVectorNBoxes(y)  = n_boxes;
    hypre_StructVectorBoxnums(y) = hypre_CTAlloc(HYPRE_Int, n_boxes);
-   for (i=0; i < n_boxes; i++)
+   for (i = 0; i < n_boxes; i++)
+   {
        hypre_StructVectorBoxnums(y)[i] = box_nums[i];
+   }
    hypre_CopyIndex(hypre_StructVectorStride(x), hypre_StructVectorStride(y));
 
-   hypre_StructVectorDataSize(y) = data_size;
-   hypre_StructVectorDataSpace(y) = hypre_BoxArrayClone(data_space);
-   hypre_StructVectorData(y) = hypre_CTAlloc(HYPRE_Complex,data_size);
-
+   hypre_StructVectorDataSize(y)    = data_size;
+   hypre_StructVectorDataSpace(y)   = hypre_BoxArrayClone(data_space);
+   hypre_StructVectorData(y)        = hypre_CTAlloc(HYPRE_Complex, data_size + 1);
    hypre_StructVectorDataIndices(y) = hypre_CTAlloc(HYPRE_Int, data_space_size);
 
-   for (i=0; i < data_space_size; i++)
+   for (i = 0; i < data_space_size; i++)
+   {
        hypre_StructVectorDataIndices(y)[i] = data_indices[i];
+   }
 
-   hypre_StructVectorCopy( x, y );
+   hypre_StructVectorCopy(x, y);
 
-   for (i=0; i < 2*ndim; i++)
+   for (i = 0; i < 2*ndim; i++)
+   {
       hypre_StructVectorNumGhost(y)[i] = hypre_StructVectorNumGhost(x)[i];
+   }
 
    hypre_StructVectorBGhostNotClear(y) = hypre_StructVectorBGhostNotClear(x);
-   hypre_StructVectorGlobalSize(y) = hypre_StructVectorGlobalSize(x);
+   hypre_StructVectorGlobalSize(y)     = hypre_StructVectorGlobalSize(x);
 
    return y;
 }
