@@ -156,7 +156,7 @@ extern "C"
 
       // Scan aux marker to get locations for copying to list
       thrust::exclusive_scan(thrust::device, aux_marker, aux_marker + marker_size, aux_marker);
-      cudaDeviceSynchronize();
+      hypre_CheckErrorDevice(cudaDeviceSynchronize());
 
       // Allocate list
       HYPRE_Int list_size;
@@ -196,7 +196,7 @@ extern "C"
       thrust::device_vector<HYPRE_Int> thrust_gid(gid, gid + list_size);
       thrust::device_vector<HYPRE_Int> thrust_list(list, list + list_size);
       thrust::sort_by_key(thrust::device, thrust_gid.begin(), thrust_gid.end(), thrust_list.begin());
-      cudaDeviceSynchronize();
+      hypre_CheckErrorDevice(cudaDeviceSynchronize());
       hypre_TFree(gid, HYPRE_MEMORY_SHARED);
    }
 
@@ -362,7 +362,7 @@ extern "C"
 
       // Scan aux marker to get locations for copying to list
       thrust::exclusive_scan(thrust::device, aux_local_indices, aux_local_indices + local_indices_size, aux_local_indices);
-      cudaDeviceSynchronize();
+      hypre_CheckErrorDevice(cudaDeviceSynchronize());
 
       // Allocate list
       HYPRE_Int global_indices_size;
@@ -451,7 +451,7 @@ extern "C"
                   HYPRE_Int *keys_result = hypre_CTAlloc(HYPRE_Int, num_send_nodes[current_level][proc][level], HYPRE_MEMORY_SHARED); //just a dummy array that needs to be allocated, but that we wont actually use
                   thrust::pair<HYPRE_Int*,HYPRE_Int*> end = thrust::set_difference_by_key(thrust::device, send_gid, send_gid + num_send_nodes[current_level][proc][level], 
                         prev_send_gid + original_send_size, prev_send_gid + prev_send_gid_size, current_send_flag, prev_send_flag, keys_result, send_flag[current_level][proc][level]);
-                  cudaDeviceSynchronize();
+                  hypre_CheckErrorDevice(cudaDeviceSynchronize());
                   num_send_nodes[current_level][proc][level] = end.second - send_flag[current_level][proc][level]; // NOTE: no realloc of send_flag here... do that later I guess when final size determined?
 
                   // !!! Debug
@@ -471,7 +471,7 @@ extern "C"
                      LocalToGlobalIndexGPU(current_send_flag, &send_gid, num_send_nodes[current_level][proc][level], hypre_ParCompGridNumOwnedNodes(compGrid[level]), hypre_ParCompGridFirstGlobalIndex(compGrid[level]), hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level]), 1);
                      end = thrust::set_difference_by_key(thrust::device, send_gid, send_gid + num_send_nodes[current_level][proc][level], 
                         prev_send_gid, prev_send_gid + original_send_size, current_send_flag, prev_send_flag, keys_result, send_flag[current_level][proc][level]);
-                     cudaDeviceSynchronize();
+                     hypre_CheckErrorDevice(cudaDeviceSynchronize());
                      num_send_nodes[current_level][proc][level] = end.second - send_flag[current_level][proc][level]; // NOTE: no realloc of send_flag here... do that later I guess when final size determined?
                   }
                   hypre_TFree(current_send_flag, HYPRE_MEMORY_SHARED);
@@ -531,7 +531,7 @@ extern "C"
                   /* HYPRE_Int *keys_result = hypre_CTAlloc(HYPRE_Int, num_send_nodes[current_level][proc][level], HYPRE_MEMORY_SHARED); //just a dummy array that needs to be allocated, but that we wont actually use */
                   /* thrust::pair<HYPRE_Int*,HYPRE_Int*> end = thrust::set_difference_by_key(thrust::device, send_gid, send_gid + num_send_nodes[current_level][proc][level], */ 
                   /*       prev_recv_gid + original_send_size, prev_recv_gid + prev_recv_gid_size, current_send_flag, prev_recv_flag, keys_result, send_flag[current_level][proc][level]); */
-                  /* cudaDeviceSynchronize(); */
+                  /* hypre_CheckErrorDevice(cudaDeviceSynchronize()); */
                   /* num_send_nodes[current_level][proc][level] = end.second - send_flag[current_level][proc][level]; // NOTE: no realloc of send_flag here... do that later I guess when final size determined? */
 
                   /* if (original_send_size) */
@@ -541,7 +541,7 @@ extern "C"
                   /*    LocalToGlobalIndexGPU(current_send_flag, &send_gid, num_send_nodes[current_level][proc][level], hypre_ParCompGridNumOwnedNodes(compGrid[level]), hypre_ParCompGridFirstGlobalIndex(compGrid[level]), hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level]), 1); */
                   /*    end = thrust::set_difference_by_key(thrust::device, send_gid, send_gid + num_send_nodes[current_level][proc][level], */ 
                   /*       prev_recv_gid, prev_recv_gid + original_send_size, current_send_flag, prev_recv_flag, keys_result, send_flag[current_level][proc][level]); */
-                  /*    cudaDeviceSynchronize(); */
+                  /*    hypre_CheckErrorDevice(cudaDeviceSynchronize()); */
                   /*    num_send_nodes[current_level][proc][level] = end.second - send_flag[current_level][proc][level]; // NOTE: no realloc of send_flag here... do that later I guess when final size determined? */
                   /* } */
                   /* hypre_TFree(current_send_flag, HYPRE_MEMORY_SHARED); */

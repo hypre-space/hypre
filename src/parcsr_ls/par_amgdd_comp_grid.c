@@ -477,12 +477,15 @@ hypre_ParCompGridInitialize( hypre_ParAMGData *amg_data, HYPRE_Int padding, HYPR
       
       // Initialize P owned offd col ind to their global indices
 #if defined(HYPRE_USING_GPU)
-/*       thrust::gather(thrust::device, */ 
-/*                hypre_CSRMatrixJ(P_offd_original), */ 
-/*                hypre_CSRMatrixJ(P_offd_original) + hypre_CSRMatrixNumNonzeros(hypre_ParCompGridMatrixOwnedOffd(P)), */
-/*                hypre_ParCSRMatrixColMapOffd( hypre_ParAMGDataPArray(amg_data)[level] ), */
-/*                hypre_CSRMatrixJ(hypre_ParCompGridMatrixOwnedOffd(P)) ); */
-/* #else */
+      HYPRE_Int *col_map_device_copy = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumCols(P_offd_original), HYPRE_MEMORY_SHARED);
+      cudaMemcpy(col_map_device_copy, hypre_ParCSRMatrixColMapOffd( hypre_ParAMGDataPArray(amg_data)[level] ), sizeof(HYPRE_Int)*hypre_CSRMatrixNumCols(P_offd_original), cudaMemcpyHostToDevice);
+      thrust::gather(thrust::device, 
+               hypre_CSRMatrixJ(P_offd_original), 
+               hypre_CSRMatrixJ(P_offd_original) + hypre_CSRMatrixNumNonzeros(hypre_ParCompGridMatrixOwnedOffd(P)),
+               col_map_device_copy,
+               hypre_CSRMatrixJ(hypre_ParCompGridMatrixOwnedOffd(P)) );
+      hypre_CheckErrorDevice(cudaDeviceSynchronize());
+#else
       for (i = 0; i < hypre_CSRMatrixNumNonzeros(hypre_ParCompGridMatrixOwnedOffd(P)); i++)
          hypre_CSRMatrixJ(hypre_ParCompGridMatrixOwnedOffd(P))[i] = hypre_ParCSRMatrixColMapOffd( hypre_ParAMGDataPArray(amg_data)[level] )[ hypre_CSRMatrixJ(P_offd_original)[i] ];
 #endif
