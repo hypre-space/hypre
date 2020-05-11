@@ -23,11 +23,13 @@
 
 HYPRE_Int
 HYPRE_SStructGraphCreate( MPI_Comm             comm,
-                          HYPRE_SStructGrid    grid,
+                          HYPRE_SStructGrid    dom_grid,
+                          HYPRE_SStructGrid    ran_grid,
                           HYPRE_SStructGraph  *graph_ptr )
 {
    hypre_SStructGraph     *graph;
-   HYPRE_Int               nparts;
+   HYPRE_Int               dom_nparts = hypre_SStructGridNParts(dom_grid);
+   HYPRE_Int               ran_nparts = hypre_SStructGridNParts(ran_grid);
    hypre_SStructStencil ***stencils;
    hypre_SStructPGrid    **pgrids;
    HYPRE_Int              *fem_nsparse;
@@ -35,17 +37,26 @@ HYPRE_SStructGraphCreate( MPI_Comm             comm,
    HYPRE_Int             **fem_sparse_j;
    HYPRE_Int             **fem_entries;
    HYPRE_Int               nvars;
-   HYPRE_Int               part, var;
+   HYPRE_Int               part, nparts, var;
 
    graph = hypre_TAlloc(hypre_SStructGraph, 1);
 
    hypre_SStructGraphComm(graph) = comm;
-   hypre_SStructGraphNDim(graph) = hypre_SStructGridNDim(grid);
-   hypre_SStructGridRef(grid, &hypre_SStructGraphGrid(graph));
-   hypre_SStructGridRef(grid, &hypre_SStructGraphDomainGrid(graph));
-   nparts = hypre_SStructGridNParts(grid);
+   hypre_SStructGraphNDim(graph) = hypre_SStructGridNDim(ran_grid);
+   hypre_SStructGridRef(ran_grid, &hypre_SStructGraphGrid(graph));
+   hypre_SStructGridRef(dom_grid, &hypre_SStructGraphDomainGrid(graph));
+   if (ran_nparts > dom_nparts)
+   {
+      nparts = dom_nparts;
+      pgrids = hypre_SStructGridPGrids(dom_grid);
+   }
+   else
+   {
+      nparts = ran_nparts;
+      pgrids = hypre_SStructGridPGrids(ran_grid);
+   }
    hypre_SStructGraphNParts(graph) = nparts;
-   pgrids = hypre_SStructGridPGrids(grid);
+
    stencils = hypre_TAlloc(hypre_SStructStencil **, nparts);
    fem_nsparse  = hypre_TAlloc(HYPRE_Int, nparts);
    fem_sparse_i = hypre_TAlloc(HYPRE_Int *, nparts);

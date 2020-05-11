@@ -25,7 +25,7 @@ hypre_FacSetup2( void                 *fac_vdata,
                  hypre_SStructVector  *b,
                  hypre_SStructVector  *x )
 {
-	hypre_FACData          *fac_data      =  (hypre_FACData*)fac_vdata;
+   hypre_FACData          *fac_data      = (hypre_FACData *) fac_vdata;
 
    HYPRE_Int              *plevels       = (fac_data-> plevels);
    hypre_Index            *rfactors      = (fac_data-> prefinements);
@@ -278,7 +278,8 @@ nested_A= hypre_CoarsenAMROp(fac_vdata, A);*/
    graph_level= hypre_TAlloc(hypre_SStructGraph *, max_level+1);
    for (level= max_level; level >= 0; level--)
    {
-      HYPRE_SStructGraphCreate(comm, grid_level[level], &graph_level[level]);
+      HYPRE_SStructGraphCreate(comm, grid_level[level], grid_level[level],
+                               &graph_level[level]);
    }
 
    for (level= max_level; level >= 0; level--)

@@ -10,7 +10,7 @@ extern "C" {
 #define HYPRE_SStructGraphCreate \
         hypre_F90_NAME(fhypre_sstructgraphcreate, FHYPRE_SSTRUCTGRAPHCREATE)
 extern void hypre_F90_NAME(fhypre_sstructgraphcreate, FHYPRE_SSTRUCTGRAPHCREATE)
-                          (HYPRE_Int *, hypre_F90_Obj *, hypre_F90_Obj *);
+                          (HYPRE_Int *, hypre_F90_Obj *, hypre_F90_Obj *, hypre_F90_Obj *);
 
 #define HYPRE_SStructGraphDestroy \
         hypre_F90_NAME(fhypre_sstructgraphdestroy, FHYPRE_SSTRUCTGRAPHDESTROY)

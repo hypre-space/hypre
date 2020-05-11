@@ -37,6 +37,8 @@
  *            could be done only once and At reused...
  *         2) Should we phase out domain grid and have only a base grid?
  *         3) Info about neighboring parts on grid_M?
+ *         4) Do not build grid_M, use a reference to existing grids from
+ *            ssmatrices instead
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 hypre_SStructMatmult( HYPRE_Int             nmatrices,
@@ -300,7 +302,7 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
    HYPRE_SStructGridAssemble(grid_M);
 
    // Create graph
-   HYPRE_SStructGraphCreate(comm, grid_M, (HYPRE_SStructGraph*) &graph_M);
+   HYPRE_SStructGraphCreate(comm, grid_M, grid_M, (HYPRE_SStructGraph*) &graph_M);
    HYPRE_SStructGraphSetObjectType(graph_M, HYPRE_SSTRUCT);
    for (part = 0; part < nparts[0]; part++)
    {

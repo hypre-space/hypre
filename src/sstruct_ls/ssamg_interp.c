@@ -62,8 +62,7 @@ hypre_SSAMGCreateInterpOp( hypre_SStructMatrix  *A,
    /*-------------------------------------------------------
     * Create SStructGraph data structure for P
     *-------------------------------------------------------*/
-   HYPRE_SStructGraphCreate(comm, grid_A, &graph_P);
-   HYPRE_SStructGraphSetDomainGrid(graph_P, cgrid);
+   HYPRE_SStructGraphCreate(comm, cgrid, grid_A, &graph_P);
    stencils_P = hypre_SStructGraphStencils(graph_P);
 
    for (part = 0; part < nparts; part++)

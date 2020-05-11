@@ -286,7 +286,7 @@ Figure~\ref{fig-sstruct-example}.}
     int c_var = 0, x_var = 1, y_var = 2;
     int part;
     
-1:  HYPRE_SStructGraphCreate(MPI_COMM_WORLD, grid, &graph);
+1:  HYPRE_SStructGraphCreate(MPI_COMM_WORLD, grid, grid, &graph);
     
     /* Set the cell-centered, x-face, and y-face stencils for each part */
     for (part = 0; part < 5; part++)

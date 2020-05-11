@@ -1642,10 +1642,10 @@ main( HYPRE_Int   argc,
     *-----------------------------------------------------------*/
 
 #ifdef HYPRE_FORTRAN
-   HYPRE_SStructGraphCreate(&temp_COMM, &grid, &graph);
+   HYPRE_SStructGraphCreate(&temp_COMM, &grid, &grid, &graph);
    HYPRE_SStructGraphSetObjectType(&graph, &for_HYPRE_PARCSR);  
 #else
-   HYPRE_SStructGraphCreate(hypre_MPI_COMM_WORLD, grid, &graph);
+   HYPRE_SStructGraphCreate(hypre_MPI_COMM_WORLD, grid, grid, &graph);
    HYPRE_SStructGraphSetObjectType(graph, HYPRE_PARCSR);  
 #endif
 

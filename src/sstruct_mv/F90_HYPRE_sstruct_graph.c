@@ -30,14 +30,16 @@ extern "C" {
 void
 hypre_F90_IFACE(hypre_sstructgraphcreate, HYPRE_SSTRUCTGRAPHCREATE)
    (hypre_F90_Comm *comm,
-    hypre_F90_Obj *grid,
-    hypre_F90_Obj *graph_ptr,
-    hypre_F90_Int *ierr)
+    hypre_F90_Obj  *dom_grid,
+    hypre_F90_Obj  *ran_grid,
+    hypre_F90_Obj  *graph_ptr,
+    hypre_F90_Int  *ierr)
 {
    *ierr = (hypre_F90_Int)
       (HYPRE_SStructGraphCreate(
           hypre_F90_PassComm (comm),
-          hypre_F90_PassObj (HYPRE_SStructGrid, grid),
+          hypre_F90_PassObj (HYPRE_SStructGrid, dom_grid),
+          hypre_F90_PassObj (HYPRE_SStructGrid, ran_grid),
           hypre_F90_PassObjRef (HYPRE_SStructGraph, graph_ptr) ) );
 }
 

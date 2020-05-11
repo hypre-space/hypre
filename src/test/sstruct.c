@@ -2918,7 +2918,7 @@ main( hypre_int argc,
     * Set up the graph
     *-----------------------------------------------------------*/
 
-   HYPRE_SStructGraphCreate(hypre_MPI_COMM_WORLD, grid, &graph);
+   HYPRE_SStructGraphCreate(hypre_MPI_COMM_WORLD, grid, grid, &graph);
 
    /* HYPRE_SSTRUCT is the default, so we don't have to call SetObjectType */
    if ( object_type != HYPRE_SSTRUCT )
@@ -3529,7 +3529,7 @@ main( hypre_int argc,
 
       /* Set up the gradient graph */
 
-      HYPRE_SStructGraphCreate(hypre_MPI_COMM_WORLD, grid, &G_graph);
+      HYPRE_SStructGraphCreate(hypre_MPI_COMM_WORLD, grid, grid, &G_graph);
       HYPRE_SStructGraphSetDomainGrid(G_graph, G_grid);
       HYPRE_SStructGraphSetObjectType(G_graph, HYPRE_PARCSR);
       for (part = 0; part < data.nparts; part++)

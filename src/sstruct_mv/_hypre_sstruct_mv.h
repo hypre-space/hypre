@@ -828,7 +828,7 @@ typedef struct hypre_SStructVector_struct
  ***********************************************************************EHEADER*/
 
 /* HYPRE_sstruct_graph.c */
-HYPRE_Int HYPRE_SStructGraphCreate ( MPI_Comm comm , HYPRE_SStructGrid grid , HYPRE_SStructGraph *graph_ptr );
+HYPRE_Int HYPRE_SStructGraphCreate ( MPI_Comm comm , HYPRE_SStructGrid dom_grid , HYPRE_SStructGrid ran_grid , HYPRE_SStructGraph *graph_ptr );
 HYPRE_Int HYPRE_SStructGraphDestroy ( HYPRE_SStructGraph graph );
 HYPRE_Int HYPRE_SStructGraphSetDomainGrid ( HYPRE_SStructGraph graph , HYPRE_SStructGrid domain_grid );
 HYPRE_Int HYPRE_SStructGraphSetStencil ( HYPRE_SStructGraph graph , HYPRE_Int part , HYPRE_Int var , HYPRE_SStructStencil stencil );

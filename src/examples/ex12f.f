@@ -166,7 +166,8 @@ c     the matrix and allows non-stencil relationships between the parts
 c-----------------------------------------------------------------------
 
 c     Create the graph object
-      call HYPRE_SStructGraphCreate(MPI_COMM_WORLD, grid, graph, ierr)
+      call HYPRE_SStructGraphCreate(MPI_COMM_WORLD, grid, grid, 
+     +     graph, ierr)
 
 c     See MatrixSetObjectType below
       call HYPRE_SStructGraphSetObjectType(graph, object_type, ierr)

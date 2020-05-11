@@ -22,14 +22,16 @@ c***************************************************************************
 c-------------------------------------------------------------------------
 c HYPRE_SStructGraphCreate
 c-------------------------------------------------------------------------
-      subroutine fhypre_sstructgraphcreate(fcomm, fgrid, fgraphptr)
+      subroutine fhypre_sstructgraphcreate(fcomm, fgrid, fgrid, 
+     +           fgraphptr)
      
       integer ierr
       integer fcomm
       integer*8 fgrid
       integer*8 fgraphptr
 
-      call HYPRE_SStructGraphCreate(fcomm, fgrid, fgraphptr, ierr)
+      call HYPRE_SStructGraphCreate(fcomm, fgrid, fgrid, fgraphptr, 
+     +                              ierr)
 
       if (ierr .ne. 0) then
          print *, ' fhypre_sstructgraphcreate error = ', ierr

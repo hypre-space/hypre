@@ -1518,7 +1518,7 @@ main( hypre_int argc,
     * Set up the graph
     *-----------------------------------------------------------*/
 
-   HYPRE_SStructGraphCreate(hypre_MPI_COMM_WORLD, grid, &graph);
+   HYPRE_SStructGraphCreate(hypre_MPI_COMM_WORLD, grid, grid, &graph);
    if ( ((solver_id >= 20) && (solver_id <= 30)) ||
         ((solver_id >= 40) && (solver_id < 60)) )
    {

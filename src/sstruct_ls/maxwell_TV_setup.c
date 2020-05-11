@@ -32,7 +32,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
                       hypre_SStructVector  *b_in,
                       hypre_SStructVector  *x_in)
 {
-	hypre_MaxwellData     *maxwell_TV_data = (hypre_MaxwellData     *)maxwell_vdata;
+   hypre_MaxwellData     *maxwell_TV_data = (hypre_MaxwellData *) maxwell_vdata;
 
    MPI_Comm               comm = hypre_SStructMatrixComm(Aee_in);
 
@@ -239,7 +239,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
       }
    }
 
-   HYPRE_SStructGraphCreate(comm, node_grid, &node_graph);
+   HYPRE_SStructGraphCreate(comm, node_grid, node_grid, &node_graph);
    for (part= 0; part< nparts; part++)
    {
       HYPRE_SStructGraphSetStencil(node_graph, part, 0, Ann_stencils[0]);

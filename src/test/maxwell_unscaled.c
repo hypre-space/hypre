@@ -1533,7 +1533,7 @@ main( hypre_int argc,
     * Set up the graph
     *-----------------------------------------------------------*/
 
-   HYPRE_SStructGraphCreate(hypre_MPI_COMM_WORLD, grid, &graph);
+   HYPRE_SStructGraphCreate(hypre_MPI_COMM_WORLD, grid, grid, &graph);
    HYPRE_SStructGraphSetObjectType(graph, HYPRE_PARCSR);  
 
    for (part = 0; part < data.nparts; part++)
