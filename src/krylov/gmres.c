@@ -63,6 +63,7 @@ hypre_GMRESFunctionsCreate(
    gmres_functions->ClearVector = ClearVector;
    gmres_functions->ScaleVector = ScaleVector;
    gmres_functions->Axpy = Axpy;
+   gmres_functions->PrintVector = NULL;
 /* default preconditioner must be set here but can be changed later... */
    gmres_functions->precond_setup = PrecondSetup;
    gmres_functions->precond       = Precond;
@@ -295,6 +296,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
    HYPRE_Int        rel_change_passed = 0, num_rel_change_check = 0;
 
    HYPRE_Real real_r_norm_old, real_r_norm_new;
+   char       filename[256];
 
    (gmres_data -> converged) = 0;
    /*-----------------------------------------------------------------------
@@ -315,10 +317,11 @@ hypre_GMRESSolve(void  *gmres_vdata,
    rs = hypre_CTAllocF(HYPRE_Real,k_dim+1,gmres_functions); 
    c = hypre_CTAllocF(HYPRE_Real,k_dim,gmres_functions); 
    s = hypre_CTAllocF(HYPRE_Real,k_dim,gmres_functions); 
-   if (rel_change) rs_2 = hypre_CTAllocF(HYPRE_Real,k_dim+1,gmres_functions); 
+   if (rel_change || (print_level > 2 && gmres_functions->PrintVector))
+   {
+      rs_2 = hypre_CTAllocF(HYPRE_Real,k_dim+1,gmres_functions);
+   }
    
-
-
    hh = hypre_CTAllocF(HYPRE_Real*,k_dim+1,gmres_functions); 
    for (i=0; i < k_dim+1; i++)
    {	
@@ -544,7 +547,52 @@ hypre_GMRESSolve(void  *gmres_vdata,
                            norms[iter]/norms[iter-1]);
               }
            }
-           /*convergence factor tolerance */
+
+           /* print solution */
+           if (print_level > 2 && gmres_functions->PrintVector)
+           {
+              /* extra copy of rs so we don't need to change the later solve */
+              for (k = 0; k<i; k++)
+              {
+                 rs_2[k] = rs[k];
+              }
+
+              /* solve tri. system */
+              rs_2[i-1] = rs_2[i-1]/hh[i-1][i-1];
+              for (k = i-2; k >= 0; k--)
+              {
+                 t = 0.0;
+                 for (j = k+1; j < i; j++)
+                 {
+                    t -= hh[k][j]*rs_2[j];
+                 }
+                 t+= rs_2[k];
+                 rs_2[k] = t/hh[k][k];
+              }
+
+              (*(gmres_functions->CopyVector))(p[i-1],w);
+              (*(gmres_functions->ScaleVector))(rs_2[i-1],w);
+              for (j = i-2; j >=0; j--)
+              {
+                 (*(gmres_functions->Axpy))(rs_2[j], p[j], w);
+              }
+
+              (*(gmres_functions->ClearVector))(r);
+
+              /* find correction (in r) */
+              precond(precond_data, A, w, r);
+
+              /* copy current solution (x) to w (don't want to over-write x)*/
+              (*(gmres_functions->CopyVector))(x,w);
+
+              /* add the correction to find current solution */
+              (*(gmres_functions->Axpy))(1.0,r,w);
+
+              hypre_sprintf(filename, "gmres_x.%02d", iter);
+              (*(gmres_functions->PrintVector))(w, filename);
+           }
+
+           /* convergence factor tolerance */
            if (cf_tol > 0.0)
            {
               cf_ave_0 = cf_ave_1;
