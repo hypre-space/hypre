@@ -15,6 +15,7 @@ typedef struct
   // block data
   HYPRE_Int  block_size;
   HYPRE_Int  *block_num_coarse_indexes;
+  HYPRE_Int  *point_marker_array;
   HYPRE_Int  **block_cf_marker;
 
   // initial setup data (user provided)
