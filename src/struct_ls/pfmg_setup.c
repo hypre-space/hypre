@@ -94,6 +94,8 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    HYPRE_Int             x_num_ghost[]  = {1, 1, 1, 1, 1, 1};
 
 #if DEBUG
+   hypre_StructVector   *ones  = NULL;
+   hypre_StructVector   *Pones = NULL;
    char                  filename[255];
 #endif
 
@@ -282,6 +284,36 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       restrict_data_l[l] = hypre_StructMatvecCreate();
       hypre_StructMatvecSetTranspose(restrict_data_l[l], 1);
       hypre_StructMatvecSetup(restrict_data_l[l], RT_l[l], r_l[l]);
+
+      // Check if P interpolates vector of ones
+#if DEBUG
+      if (ones != NULL)
+      {
+         HYPRE_StructVectorDestroy(ones);
+      }
+      HYPRE_StructVectorCreate(comm, grid_l[l+1], &ones);
+      HYPRE_StructVectorInitialize(ones);
+      HYPRE_StructVectorSetConstantValues(ones, 1.0);
+      HYPRE_StructVectorAssemble(ones);
+
+      hypre_sprintf(filename, "pfmg_ones.%02d", l);
+      HYPRE_StructVectorPrint(filename, ones, 0);
+
+      if (Pones != NULL)
+      {
+         HYPRE_StructVectorDestroy(Pones);
+      }
+      HYPRE_StructVectorCreate(comm, grid_l[l], &Pones);
+      HYPRE_StructVectorInitialize(Pones);
+      HYPRE_StructVectorAssemble(Pones);
+
+      /* interpolate error and correct (x = Pe_c) */
+      hypre_StructMatvecCompute(interp_data_l[l], 1.0, P_l[l], ones, 0.0, Pones);
+
+      hypre_sprintf(filename, "pfmg_Pones.%02d", l);
+      HYPRE_StructVectorPrint(filename, Pones, 0);
+#endif
+
    }
 
    /*-----------------------------------------------------
