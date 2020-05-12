@@ -181,7 +181,7 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
                              HYPRE_Int            keep_transpose)
 {
    MPI_Comm             comm       = hypre_ParCSRMatrixComm(A);
-   hypre_ParCSRCommPkg *comm_pkg_A = hypre_ParCSRMatrixCommPkg(A);
+   hypre_ParCSRCommPkg *comm_pkg_A = NULL;
 
    hypre_CSRMatrix *A_diag  = hypre_ParCSRMatrixDiag(A);
    hypre_CSRMatrix *A_offd  = hypre_ParCSRMatrixOffd(A);
@@ -282,6 +282,12 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
 
       hypre_ParCSRMatrixDiag(B) = B_diag;
       hypre_ParCSRMatrixOffd(B) = B_offd;
+
+      if (!hypre_ParCSRMatrixCommPkg(A))
+      {
+         hypre_MatvecCommPkgCreate(A);
+      }
+      comm_pkg_A = hypre_ParCSRMatrixCommPkg(A);
 
       hypre_ExchangeExternalRowsDeviceInit(C_int, comm_pkg_A, &request);
 

@@ -166,7 +166,7 @@ hypre_ParCSRMatMatHost( hypre_ParCSRMatrix  *A,
    {
       C_diag = hypre_CSRMatrixMultiply(A_diag, B_diag);
       C_offd = hypre_CSRMatrixCreate(num_rows_diag_A, 0, 0);
-      hypre_CSRMatrixInitialize(C_offd);
+      hypre_CSRMatrixInitialize_v2(C_offd, 0, hypre_CSRMatrixMemoryLocation(C_diag));
    }
 
    /*-----------------------------------------------------------------------
@@ -245,7 +245,7 @@ hypre_ParCSRTMatMatKTHost( hypre_ParCSRMatrix  *A,
                            HYPRE_Int            keep_transpose)
 {
    MPI_Comm             comm       = hypre_ParCSRMatrixComm(A);
-   hypre_ParCSRCommPkg *comm_pkg_A = hypre_ParCSRMatrixCommPkg(A);
+   hypre_ParCSRCommPkg *comm_pkg_A = NULL;
 
    hypre_CSRMatrix *A_diag  = hypre_ParCSRMatrixDiag(A);
    hypre_CSRMatrix *A_offd  = hypre_ParCSRMatrixOffd(A);
@@ -302,7 +302,7 @@ hypre_ParCSRTMatMatKTHost( hypre_ParCSRMatrix  *A,
    {
       C_diag = hypre_CSRMatrixMultiply(AT_diag, B_diag);
       C_offd = hypre_CSRMatrixCreate(num_cols_diag_A, 0, 0);
-      hypre_CSRMatrixInitialize(C_offd);
+      hypre_CSRMatrixInitialize_v2(C_offd, 0, hypre_CSRMatrixMemoryLocation(C_diag));
       if (keep_transpose)
       {
          A->diagT = AT_diag;
@@ -342,6 +342,12 @@ hypre_ParCSRTMatMatKTHost( hypre_ParCSRMatrix  *A,
 
       hypre_ParCSRMatrixDiag(B) = B_diag;
       hypre_ParCSRMatrixOffd(B) = B_offd;
+
+      if (!hypre_ParCSRMatrixCommPkg(A))
+      {
+         hypre_MatvecCommPkgCreate(A);
+      }
+      comm_pkg_A = hypre_ParCSRMatrixCommPkg(A);
 
       /* contains communication; should be explicitly included to allow for overlap */
       hypre_ExchangeExternalRowsInit(C_int, comm_pkg_A, &request);
@@ -848,7 +854,9 @@ hypre_ParCSRMatrix *hypre_ParCSRMatrixRAPKT( hypre_ParCSRMatrix *R,
          hypre_CSRMatrixDestroy(C_ext_diag);
       }
       else
+      {
          C_diag = C_tmp_diag;
+      }
       if (C_ext_offd)
       {
          C_offd = hypre_CSRMatrixAddPartial(C_tmp_offd, C_ext_offd, send_map_elmts_R);
@@ -866,7 +874,7 @@ hypre_ParCSRMatrix *hypre_ParCSRMatrixRAPKT( hypre_ParCSRMatrix *R,
       hypre_CSRMatrixTranspose(R_diag, &RT_diag, 1);
       C_diag = hypre_CSRMatrixMultiply(RT_diag, Q_diag);
       C_offd = hypre_CSRMatrixCreate(num_cols_diag_R, 0, 0);
-      hypre_CSRMatrixInitialize(C_offd);
+      hypre_CSRMatrixInitialize_v2(C_offd, 0, hypre_CSRMatrixMemoryLocation(C_diag));
       if (keep_transpose)
       {
          R->diagT = RT_diag;
