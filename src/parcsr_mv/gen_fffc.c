@@ -73,7 +73,7 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
    HYPRE_Int           i, j, jj;
    HYPRE_Int           startc, index;
    HYPRE_Int           cpt, fpt, row;
-   HYPRE_Int          *CF_marker_offd = NULL;
+   HYPRE_Int          *CF_marker_offd = NULL, *marker_offd=NULL;
    HYPRE_Int          *int_buf_data = NULL;
    HYPRE_BigInt       *big_convert;
    HYPRE_BigInt       *big_convert_offd = NULL;
@@ -87,7 +87,7 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
    HYPRE_Int           start, stop;
    HYPRE_Int           num_threads;
 
-   num_threads = hypre_NumThreads();  
+   num_threads = hypre_NumThreads();
 
    /* MPI size and rank*/
    hypre_MPI_Comm_size(comm, &num_procs);
@@ -125,7 +125,7 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
             fpt_array[my_thread_num+1]++;
          }
       }
-   
+
 #ifdef HYPRE_USING_OPENMP
 #pragma omp barrier
 #endif
@@ -216,7 +216,7 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
 #endif
       if (my_thread_num == 0)
       {
-         if (num_cols_A_offd) 
+         if (num_cols_A_offd)
          {
             CF_marker_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_A_offd, HYPRE_MEMORY_HOST);
             big_convert_offd = hypre_CTAlloc(HYPRE_BigInt,  num_cols_A_offd, HYPRE_MEMORY_HOST);
@@ -245,18 +245,30 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
 
          hypre_ParCSRCommHandleDestroy(comm_handle);
 
+         marker_offd = hypre_CTAlloc(HYPRE_Int, num_cols_A_offd, HYPRE_MEMORY_HOST);
+         for (i = 0; i < n_fine; i++)
+         {
+            if (CF_marker[i] < 0)
+            {
+               for (j = S_offd_i[i]; j < S_offd_i[i+1]; j++)
+               {
+                  marker_offd[S_offd_j[j]] = 1;
+               }
+            }
+         }
+
          num_cols_offd_A_FC = 0;
          num_cols_offd_A_FF = 0;
-         if (num_cols_A_offd) 
+         if (num_cols_A_offd)
          {
             for (i=0; i < num_cols_A_offd; i++)
             {
-               if (CF_marker_offd[i] > 0)
+               if (CF_marker_offd[i] > 0 && marker_offd[i] > 0)
                {
                   fine_to_coarse_offd[i] = num_cols_offd_A_FC++;
                   fine_to_fine_offd[i] = -1;
                }
-               else
+               else if (CF_marker_offd[i] < 0 && marker_offd[i] > 0)
                {
                   fine_to_fine_offd[i] = num_cols_offd_A_FF++;
                   fine_to_coarse_offd[i] = -1;
@@ -265,18 +277,18 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
 
             col_map_offd_A_FF = hypre_TAlloc(HYPRE_BigInt, num_cols_offd_A_FF, HYPRE_MEMORY_HOST);
             col_map_offd_A_FC = hypre_TAlloc(HYPRE_BigInt, num_cols_offd_A_FC, HYPRE_MEMORY_HOST);
-  
+
             cpt = 0;
             fpt = 0;
             for (i=0; i < num_cols_A_offd; i++)
             {
-               if (CF_marker_offd[i] > 0)
+               if (CF_marker_offd[i] > 0 && marker_offd[i] > 0)
                {
                   col_map_offd_A_FC[cpt++] = big_convert_offd[i];
                }
-               else
+               else if (CF_marker_offd[i] < 0 && marker_offd[i] > 0)
                {
-                   col_map_offd_A_FF[fpt++] = big_convert_offd[i];
+                  col_map_offd_A_FF[fpt++] = big_convert_offd[i];
                }
             }
          }
@@ -304,8 +316,8 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
             for (j = S_diag_i[i]; j < S_diag_i[i+1]; j++)
             {
                jj = S_diag_j[j];
-               if (CF_marker[jj] > 0) 
-   	       d_count_FC++;
+               if (CF_marker[jj] > 0)
+                  d_count_FC++;
                else
                   d_count_FF++;
             }
@@ -314,8 +326,8 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
             for (j = S_offd_i[i]; j < S_offd_i[i+1]; j++)
             {
                jj = S_offd_j[j];
-               if (CF_marker_offd[jj] > 0) 
-   	       o_count_FC++;
+               if (CF_marker_offd[jj] > 0)
+                  o_count_FC++;
                else
                   o_count_FF++;
             }
@@ -334,10 +346,10 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
          {
             fpt = fpt_array[i];
             fpt2 = fpt_array[i-1];
-            A_FC_diag_i[fpt] += A_FC_diag_i[fpt2]; 
-            A_FF_diag_i[fpt] += A_FF_diag_i[fpt2]; 
-            A_FC_offd_i[fpt] += A_FC_offd_i[fpt2]; 
-            A_FF_offd_i[fpt] += A_FF_offd_i[fpt2]; 
+            A_FC_diag_i[fpt] += A_FC_diag_i[fpt2];
+            A_FF_diag_i[fpt] += A_FF_diag_i[fpt2];
+            A_FC_offd_i[fpt] += A_FC_offd_i[fpt2];
+            A_FF_offd_i[fpt] += A_FF_offd_i[fpt2];
          }
          row = fpt_array[num_threads];
          d_count_FC = A_FC_diag_i[row];
@@ -375,7 +387,7 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
             {
                jA = A_diag_i[i]+1;
                jS = S_diag_j[j];
-               while (A_diag_j[jA] != jS) jA++; 
+               while (A_diag_j[jA] != jS) jA++;
                if (CF_marker[S_diag_j[j]] > 0)
                {
                   A_FC_diag_j[d_count_FC] = fine_to_coarse[A_diag_j[jA]];
@@ -468,7 +480,7 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
    hypre_TFree(CF_marker_offd, HYPRE_MEMORY_HOST);
    hypre_TFree(int_buf_data, HYPRE_MEMORY_HOST);
    hypre_TFree(big_buf_data, HYPRE_MEMORY_HOST);
-
+   hypre_TFree(marker_offd, HYPRE_MEMORY_HOST);
    hypre_TFree(cpt_array, HYPRE_MEMORY_HOST);
    hypre_TFree(fpt_array, HYPRE_MEMORY_HOST);
 
@@ -556,7 +568,7 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix *A,
    HYPRE_Int           start, stop;
    HYPRE_Int           num_threads;
 
-   num_threads = hypre_NumThreads();  
+   num_threads = hypre_NumThreads();
 
    /* MPI size and rank*/
    hypre_MPI_Comm_size(comm, &num_procs);
@@ -595,12 +607,12 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix *A,
             new_fpt_array[my_thread_num+1]++;
             fpt_array[my_thread_num+1]++;
          }
-         else 
+         else
          {
             fpt_array[my_thread_num+1]++;
          }
       }
-   
+
 #ifdef HYPRE_USING_OPENMP
 #pragma omp barrier
 #endif
@@ -703,7 +715,7 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix *A,
 #endif
       if (my_thread_num == 0)
       {
-         if (num_cols_A_offd) 
+         if (num_cols_A_offd)
          {
             CF_marker_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_A_offd, HYPRE_MEMORY_HOST);
             big_convert_offd = hypre_CTAlloc(HYPRE_BigInt,  num_cols_A_offd, HYPRE_MEMORY_HOST);
@@ -734,7 +746,7 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix *A,
 
          num_cols_offd_A_FC = 0;
          num_cols_offd_A_FF = 0;
-         if (num_cols_A_offd) 
+         if (num_cols_A_offd)
          {
             for (i=0; i < num_cols_A_offd; i++)
             {
@@ -752,7 +764,7 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix *A,
 
             col_map_offd_A_FF = hypre_TAlloc(HYPRE_BigInt, num_cols_offd_A_FF, HYPRE_MEMORY_HOST);
             col_map_offd_A_FC = hypre_TAlloc(HYPRE_BigInt, num_cols_offd_A_FC, HYPRE_MEMORY_HOST);
-  
+
             cpt = 0;
             fpt = 0;
             for (i=0; i < num_cols_A_offd; i++)
@@ -793,8 +805,8 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix *A,
             for (j = S_diag_i[i]; j < S_diag_i[i+1]; j++)
             {
                jj = S_diag_j[j];
-               if (CF_marker[jj] > 0) 
-   	       d_count_FC++;
+               if (CF_marker[jj] > 0)
+                  d_count_FC++;
                else
                   d_count_FF++;
             }
@@ -803,8 +815,8 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix *A,
             for (j = S_offd_i[i]; j < S_offd_i[i+1]; j++)
             {
                jj = S_offd_j[j];
-               if (CF_marker_offd[jj] > 0) 
-   	       o_count_FC++;
+               if (CF_marker_offd[jj] > 0)
+                  o_count_FC++;
                else
                   o_count_FF++;
             }
@@ -817,15 +829,15 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix *A,
             for (j = S_diag_i[i]; j < S_diag_i[i+1]; j++)
             {
                jj = S_diag_j[j];
-               if (CF_marker[jj] > 0) 
-   	       d_count_FC++;
+               if (CF_marker[jj] > 0)
+                  d_count_FC++;
             }
             A_FC_diag_i[rowc] = d_count_FC;
             for (j = S_offd_i[i]; j < S_offd_i[i+1]; j++)
             {
                jj = S_offd_j[j];
-               if (CF_marker_offd[jj] > 0) 
-   	       o_count_FC++;
+               if (CF_marker_offd[jj] > 0)
+                  o_count_FC++;
             }
             A_FC_offd_i[rowc] = o_count_FC;
          }
@@ -843,10 +855,10 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix *A,
             new_fpt = new_fpt_array[i];
             fpt2 = fpt_array[i-1];
             new_fpt2 = new_fpt_array[i-1];
-            A_FC_diag_i[fpt] += A_FC_diag_i[fpt2]; 
-            A_FF_diag_i[new_fpt] += A_FF_diag_i[new_fpt2]; 
-            A_FC_offd_i[fpt] += A_FC_offd_i[fpt2]; 
-            A_FF_offd_i[new_fpt] += A_FF_offd_i[new_fpt2]; 
+            A_FC_diag_i[fpt] += A_FC_diag_i[fpt2];
+            A_FF_diag_i[new_fpt] += A_FF_diag_i[new_fpt2];
+            A_FC_offd_i[fpt] += A_FC_offd_i[fpt2];
+            A_FF_offd_i[new_fpt] += A_FF_offd_i[new_fpt2];
          }
          row = new_fpt_array[num_threads];
          rowc = fpt_array[num_threads];
@@ -887,7 +899,7 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix *A,
             {
                jA = A_diag_i[i]+1;
                jS = S_diag_j[j];
-               while (A_diag_j[jA] != jS) jA++; 
+               while (A_diag_j[jA] != jS) jA++;
                if (CF_marker[S_diag_j[j]] > 0)
                {
                   A_FC_diag_j[d_count_FC] = fine_to_coarse[A_diag_j[jA]];
@@ -928,7 +940,7 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix *A,
             {
                jA = A_diag_i[i]+1;
                jS = S_diag_j[j];
-               while (A_diag_j[jA] != jS) jA++; 
+               while (A_diag_j[jA] != jS) jA++;
                if (CF_marker[S_diag_j[j]] > 0)
                {
                   A_FC_diag_j[d_count_FC] = fine_to_coarse[A_diag_j[jA]];
