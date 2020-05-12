@@ -95,6 +95,21 @@ HYPRE_MGRSetCpointsByBlock( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_MGRSetCpointsByPointMarkerArray
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int 
+HYPRE_MGRSetCpointsByPointMarkerArray( HYPRE_Solver solver, 
+      HYPRE_Int  block_size, 
+      HYPRE_Int  max_num_levels, 
+      HYPRE_Int  *num_block_coarse_points, 
+      HYPRE_Int  **lvl_block_coarse_indexes,
+      HYPRE_Int  *point_marker_array)
+{
+   return( hypre_MGRSetCpointsByPointMarkerArray( (void *) solver, block_size, max_num_levels, num_block_coarse_points, lvl_block_coarse_indexes, point_marker_array));
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_MGRSetNonCpointsToFpoints
  *--------------------------------------------------------------------------*/
 
