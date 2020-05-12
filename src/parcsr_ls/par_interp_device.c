@@ -246,8 +246,10 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
    }
 
    /* !!!! Free them here */
+   /*
    hypre_TFree(hypre_ParCSRMatrixSocDiagJ(S), HYPRE_MEMORY_DEVICE);
    hypre_TFree(hypre_ParCSRMatrixSocOffdJ(S), HYPRE_MEMORY_DEVICE);
+   */
 
    HYPRE_THRUST_CALL(replace, CF_marker_dev, CF_marker_dev + n_fine, -3, -1);
 
