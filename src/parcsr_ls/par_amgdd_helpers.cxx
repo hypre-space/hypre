@@ -133,16 +133,14 @@ extern "C"
       }
    }
 
-   __global__
-   void AuxMarkerKernel(HYPRE_Int *aux_marker, HYPRE_Int *marker, HYPRE_Int marker_size)
+   struct transform_to_0_1
    {
-      HYPRE_Int i = blockIdx.x * blockDim.x + threadIdx.x;
-      if (i < marker_size)
+      __host__ __device__
+      HYPRE_Int operator()(HYPRE_Int x)
       {
-         if (marker[i]) aux_marker[i] = 1;
-         else aux_marker[i] = 0;
+         return x > 0;
       }
-   }
+   };
 
    HYPRE_Int MarkerToList(HYPRE_Int *marker, HYPRE_Int **list, HYPRE_Int marker_size, HYPRE_Int ghost_dist)
    {
@@ -151,8 +149,9 @@ extern "C"
       
       // Generate aux marker that is 1 whereever marker has nonzero value
       HYPRE_Int *aux_marker = hypre_CTAlloc(HYPRE_Int, marker_size, HYPRE_MEMORY_SHARED);
-      AuxMarkerKernel<<<num_blocks,tpb,0,HYPRE_STREAM(1)>>>(aux_marker, marker, marker_size);
-      hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1)));
+      transform_to_0_1 pred;
+      thrust::transform(thrust::device, marker, marker + marker_size, aux_marker, pred);
+      hypre_CheckErrorDevice(cudaDeviceSynchronize());
 
       // Scan aux marker to get locations for copying to list
       thrust::exclusive_scan(thrust::device, aux_marker, aux_marker + marker_size, aux_marker);
