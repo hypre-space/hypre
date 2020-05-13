@@ -10,7 +10,7 @@
 
 #define CUMNUMIT
 
-#include "../parcsr_block_mv/par_csr_block_matrix.h"
+#include "par_csr_block_matrix.h"
 
 /*--------------------------------------------------------------------------
  * hypre_ParAMGData
