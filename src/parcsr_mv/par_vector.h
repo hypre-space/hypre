@@ -11,11 +11,8 @@
  *
  *****************************************************************************/
 
-#if 0
-
 #ifndef hypre_PAR_VECTOR_HEADER
 #define hypre_PAR_VECTOR_HEADER
-
 
 /*--------------------------------------------------------------------------
  * hypre_ParVector
@@ -27,21 +24,22 @@
 
 typedef struct hypre_ParVector_struct
 {
-   MPI_Comm      comm;
+   MPI_Comm              comm;
 
-   HYPRE_BigInt  global_size;
-   HYPRE_BigInt  first_index;
-   HYPRE_BigInt  last_index;
-   HYPRE_BigInt *partitioning;
-   HYPRE_Int     actual_local_size; /* stores actual length of data in local vector
-                                       to allow memory manipulations for temporary vectors*/
-   hypre_Vector *local_vector;
+   HYPRE_BigInt          global_size;
+   HYPRE_BigInt          first_index;
+   HYPRE_BigInt          last_index;
+   HYPRE_BigInt         *partitioning;
+   /* stores actual length of data in local vector to allow memory
+    * manipulations for temporary vectors*/
+   HYPRE_Int             actual_local_size;
+   hypre_Vector         *local_vector;
 
    /* Does the Vector create/destroy `data'? */
-   HYPRE_Int     owns_data;
-   HYPRE_Int     owns_partitioning;
+   HYPRE_Int             owns_data;
+   HYPRE_Int             owns_partitioning;
 
-   hypre_IJAssumedPart *assumed_partition; /* only populated if no_global_partition option
+   hypre_IJAssumedPart  *assumed_partition; /* only populated if no_global_partition option
                                               is used (compile-time option) AND this partition
                                               needed
                                               (for setting off-proc elements, for example)*/
@@ -65,8 +63,11 @@ typedef struct hypre_ParVector_struct
 
 #define hypre_ParVectorAssumedPartition(vector) ((vector) -> assumed_partition)
 
-
-#endif
+static inline HYPRE_MemoryLocation
+hypre_ParVectorMemoryLocation(hypre_ParVector *vector)
+{
+   return hypre_VectorMemoryLocation(hypre_ParVectorLocalVector(vector));
+}
 
 #endif
 

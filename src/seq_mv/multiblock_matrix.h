@@ -11,8 +11,6 @@
  *
  *****************************************************************************/
 
-#if 0
-
 #ifndef hypre_MULTIBLOCK_MATRIX_HEADER
 #define hypre_MULTIBLOCK_MATRIX_HEADER
 
@@ -22,8 +20,8 @@
 
 typedef struct
 {
-   HYPRE_Int                  num_submatrices;
-   HYPRE_Int                 *submatrix_types;
+   HYPRE_Int             num_submatrices;
+   HYPRE_Int            *submatrix_types;
    void                **submatrices;
 
 } hypre_MultiblockMatrix;
@@ -43,4 +41,3 @@ typedef struct
 
 #endif
 
-#endif

@@ -4,11 +4,8 @@
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
-
-#if 0
-
 #ifndef hypre_PARCSR_ASSUMED_PART
-#define  hypre_PARCSR_ASSUMED_PART
+#define hypre_PARCSR_ASSUMED_PART
 
 typedef struct
 {
@@ -19,12 +16,8 @@ typedef struct
    HYPRE_Int                  *proc_list;
    HYPRE_BigInt               *row_start_list;
    HYPRE_BigInt               *row_end_list;
-   HYPRE_Int                   *sort_index;
+   HYPRE_Int                  *sort_index;
 } hypre_IJAssumedPart;
-
-
-
 
 #endif /* hypre_PARCSR_ASSUMED_PART */
 
-#endif
