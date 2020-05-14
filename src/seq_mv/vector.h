@@ -11,8 +11,6 @@
  *
  *****************************************************************************/
 
-#if 0
-
 #ifndef hypre_VECTOR_HEADER
 #define hypre_VECTOR_HEADER
 
@@ -29,7 +27,7 @@ typedef struct
    HYPRE_Int       owns_data;
 
    /* memory location of array data */
-   HYPRE_MemoryLocation       memory_location;
+   HYPRE_MemoryLocation  memory_location;
 
    /* For multivectors...*/
    HYPRE_Int   num_vectors;  /* the above "size" is size of one vector */
@@ -57,4 +55,3 @@ typedef struct
 
 #endif
 
-#endif

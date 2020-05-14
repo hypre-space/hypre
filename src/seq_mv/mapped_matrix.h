@@ -11,8 +11,6 @@
  *
  *****************************************************************************/
 
-#if 0
-
 #ifndef hypre_MAPPED_MATRIX_HEADER
 #define hypre_MAPPED_MATRIX_HEADER
 
@@ -23,7 +21,7 @@
 typedef struct
 {
    void               *matrix;
-   HYPRE_Int               (*ColMap)(HYPRE_Int, void *);
+   HYPRE_Int         (*ColMap)(HYPRE_Int, void *);
    void               *MapData;
 
 } hypre_MappedMatrix;
@@ -34,11 +32,10 @@ typedef struct
 
 #define hypre_MappedMatrixMatrix(matrix)           ((matrix) -> matrix)
 #define hypre_MappedMatrixColMap(matrix)           ((matrix) -> ColMap)
-#define hypre_MappedMatrixMapData(matrix)           ((matrix) -> MapData)
+#define hypre_MappedMatrixMapData(matrix)          ((matrix) -> MapData)
 
 #define hypre_MappedMatrixColIndex(matrix,j) \
          (hypre_MappedMatrixColMap(matrix)(j,hypre_MappedMatrixMapData(matrix)))
 
 #endif
 
-#endif
