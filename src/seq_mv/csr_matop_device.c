@@ -54,6 +54,8 @@ hypre_CSRMatrixAddDevice ( hypre_CSRMatrix *A,
    hypre_CSRMatrixData(C) = C_data;
    hypre_CSRMatrixMemoryLocation(C) = HYPRE_MEMORY_DEVICE;
 
+   hypre_SyncCudaComputeStream(hypre_handle());
+
    return C;
 }
 
@@ -104,6 +106,8 @@ hypre_CSRMatrixMultiplyDevice( hypre_CSRMatrix *A,
    hypre_CSRMatrixJ(C) = C_j;
    hypre_CSRMatrixData(C) = C_data;
    hypre_CSRMatrixMemoryLocation(C) = HYPRE_MEMORY_DEVICE;
+
+   hypre_SyncCudaComputeStream(hypre_handle());
 
    return C;
 }
@@ -193,6 +197,8 @@ hypre_CSRMatrixSplitDevice( hypre_CSRMatrix  *B_ext,
 
    *B_ext_diag_ptr = B_ext_diag;
    *B_ext_offd_ptr = B_ext_offd;
+
+   hypre_SyncCudaComputeStream(hypre_handle());
 
    return ierr;
 }
@@ -388,6 +394,8 @@ hypre_CSRMatrixTransposeDevice(hypre_CSRMatrix  *A,
 
    *AT_ptr = C;
 
+   hypre_SyncCudaComputeStream(hypre_handle());
+
    return hypre_error_flag;
 }
 
@@ -440,6 +448,7 @@ hypre_CSRMatrixAddPartialDevice( hypre_CSRMatrix *A,
    hypre_CSRMatrixData(C) = C_data;
    hypre_CSRMatrixMemoryLocation(C) = HYPRE_MEMORY_DEVICE;
 
+   hypre_SyncCudaComputeStream(hypre_handle());
 
    return C;
 }
@@ -480,6 +489,8 @@ hypre_CSRMatrixColNNzRealDevice( hypre_CSRMatrix  *A,
    hypre_TFree(A_j_sorted,          HYPRE_MEMORY_DEVICE);
    hypre_TFree(reduced_col_indices, HYPRE_MEMORY_DEVICE);
    hypre_TFree(reduced_col_nnz,     HYPRE_MEMORY_DEVICE);
+
+   hypre_SyncCudaComputeStream(hypre_handle());
 
    return hypre_error_flag;
 }
@@ -541,6 +552,8 @@ hypre_CSRMatrixMoveDiagFirstDevice( hypre_CSRMatrix  *A )
 
    HYPRE_CUDA_LAUNCH(hypreCUDAKernel_CSRMoveDiagFirst, gDim, bDim,
                      nrows, A_i, A_j, A_data);
+
+   hypre_SyncCudaComputeStream(hypre_handle());
 
    return hypre_error_flag;
 }
@@ -651,6 +664,8 @@ hypre_CSRMatrixComputeRowSumDevice( hypre_CSRMatrix *A,
       HYPRE_CUDA_LAUNCH( hypreCUDAKernel_CSRRowSum<2>, gDim, bDim, nrows, A_i, A_j, A_data, CF_i, CF_j,
                          row_sum, scal, set_or_add[0] == 's' );
    }
+
+   hypre_SyncCudaComputeStream(hypre_handle());
 }
 
 /* type 0: diag
@@ -727,6 +742,8 @@ hypre_CSRMatrixExtractDiagonalDevice( hypre_CSRMatrix *A,
    gDim = hypre_GetDefaultCUDAGridDimension(nrows, "warp", bDim);
 
    HYPRE_CUDA_LAUNCH( hypreCUDAKernel_CSRExtractDiag, gDim, bDim, nrows, A_i, A_j, A_data, d, type );
+
+   hypre_SyncCudaComputeStream(hypre_handle());
 }
 
 #endif /* HYPRE_USING_CUDA */

@@ -3767,7 +3767,7 @@ hypre_ParCSRMatrix *hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
    local_num_cols = (HYPRE_Int)(col_starts_B[my_id+1]-first_col_diag);
 #endif
 
-   C = hypre_CTAlloc(hypre_ParCSRMatrix,  1, HYPRE_MEMORY_HOST);
+   C = hypre_CTAlloc(hypre_ParCSRMatrix, 1, HYPRE_MEMORY_HOST);
    hypre_ParCSRMatrixComm(C) = comm;
    hypre_ParCSRMatrixGlobalNumRows(C) = n_cols_A;
    hypre_ParCSRMatrixGlobalNumCols(C) = n_cols_B;
@@ -3904,6 +3904,14 @@ hypre_ParCSRMatrix *hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
    {
      hypre_CSRMatrixDestroy(C_tmp_offd);
    }
+
+#if defined(HYPRE_USING_CUDA)
+   if ( hypre_GetExecPolicy2(memory_location_A, memory_location_B) == HYPRE_EXEC_DEVICE )
+   {
+      hypre_CSRMatrixMoveDiagFirstDevice(hypre_ParCSRMatrixDiag(C));
+      hypre_SyncCudaComputeStream(hypre_handle());
+   }
+#endif
 
    return C;
 }

@@ -4,9 +4,6 @@
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
-
-#if 0
-
 #ifndef hypre_NEW_COMMPKG
 #define hypre_NEW_COMMPKG
 
@@ -20,10 +17,7 @@ typedef struct
    HYPRE_BigInt   *elements;
    HYPRE_Real     *d_elements; /* Is this used anywhere? */
    void           *v_elements;
-
 }  hypre_ProcListElements;
 
 #endif /* hypre_NEW_COMMPKG */
-
-#endif
 

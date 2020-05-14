@@ -991,6 +991,7 @@ hypre_BoomerAMGBuildExtPIInterpHost(hypre_ParCSRMatrix   *A,
 
    /* Communication Variables */
    MPI_Comm                     comm = hypre_ParCSRMatrixComm(A);
+
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
 
 

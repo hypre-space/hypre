@@ -326,7 +326,7 @@ hypre_IJMatrixSetMaxOffProcElmtsParCSR(hypre_IJMatrix *matrix,
 HYPRE_Int
 hypre_IJMatrixInitializeParCSR(hypre_IJMatrix *matrix)
 {
-   return hypre_IJMatrixInitializeParCSR_v2(matrix, hypre_HandleMemoryLocation(hypre_handle));
+   return hypre_IJMatrixInitializeParCSR_v2(matrix, hypre_HandleMemoryLocation(hypre_handle()));
 }
 
 HYPRE_Int
@@ -1136,7 +1136,14 @@ hypre_IJMatrixSetConstantValuesParCSR( hypre_IJMatrix *matrix,
       HYPRE_Int           nnz_diag   = hypre_CSRMatrixNumNonzeros(diag);
       HYPRE_Int           nnz_offd   = hypre_CSRMatrixNumNonzeros(offd);
 
-      if (hypre_GetExecPolicy1(hypre_IJMatrixMemoryLocation(matrix)) == HYPRE_EXEC_HOST)
+#if defined(HYPRE_USING_CUDA)
+      if (hypre_GetExecPolicy1(hypre_IJMatrixMemoryLocation(matrix)) == HYPRE_EXEC_DEVICE)
+      {
+         HYPRE_THRUST_CALL( fill_n, diag_data, nnz_diag, value );
+         HYPRE_THRUST_CALL( fill_n, offd_data, nnz_offd, value );
+      }
+      else
+#endif
       {
          HYPRE_Int ii;
 
@@ -1155,13 +1162,6 @@ hypre_IJMatrixSetConstantValuesParCSR( hypre_IJMatrix *matrix,
             offd_data[ii] = value;
          }
       }
-#if defined(HYPRE_USING_CUDA)
-      else
-      {
-         HYPRE_THRUST_CALL( fill_n, diag_data, nnz_diag, value );
-         HYPRE_THRUST_CALL( fill_n, offd_data, nnz_offd, value );
-      }
-#endif
    }
    else
    {
@@ -2612,8 +2612,8 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix       *matrix,
                     HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
 
 #if defined(HYPRE_USING_CUDA)
-      hypre_IJMatrixSetAddValuesParCSRDevice0(matrix, off_proc_nelm_recv_cur, off_proc_i_recv_d, off_proc_j_recv_d,
-                                              off_proc_data_recv_d, "add");
+      hypre_IJMatrixSetAddValuesParCSRDevice(matrix, off_proc_nelm_recv_cur, NULL, off_proc_i_recv_d, NULL, off_proc_j_recv_d,
+                                             off_proc_data_recv_d, "add");
 #endif
    }
 

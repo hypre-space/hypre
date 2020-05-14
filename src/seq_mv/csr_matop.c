@@ -141,21 +141,21 @@ hypre_CSRMatrix*
 hypre_CSRMatrixAdd( hypre_CSRMatrix *A,
                     hypre_CSRMatrix *B)
 {
-   HYPRE_ExecuctionPolicy exec = hypre_GetExecPolicy2( hypre_CSRMatrixMemoryLocation(A),
-                                                       hypre_CSRMatrixMemoryLocation(B) );
-
    hypre_CSRMatrix *C = NULL;
 
-   if (exec == HYPRE_EXEC_HOST)
-   {
-      C = hypre_CSRMatrixAddHost(A, B);
-   }
 #if defined(HYPRE_USING_CUDA)
-   else
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_CSRMatrixMemoryLocation(A),
+                                                       hypre_CSRMatrixMemoryLocation(B) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
    {
       C = hypre_CSRMatrixAddDevice(A, B);
    }
+   else
 #endif
+   {
+      C = hypre_CSRMatrixAddHost(A, B);
+   }
 
    return C;
 }
@@ -476,21 +476,21 @@ hypre_CSRMatrix*
 hypre_CSRMatrixMultiply( hypre_CSRMatrix *A,
                          hypre_CSRMatrix *B)
 {
-   HYPRE_ExecuctionPolicy exec = hypre_GetExecPolicy2( hypre_CSRMatrixMemoryLocation(A),
-                                                       hypre_CSRMatrixMemoryLocation(B) );
-
    hypre_CSRMatrix *C = NULL;
 
-   if (exec == HYPRE_EXEC_HOST)
-   {
-      C = hypre_CSRMatrixMultiplyHost(A,B);
-   }
 #if defined(HYPRE_USING_CUDA)
-   else
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_CSRMatrixMemoryLocation(A),
+                                                       hypre_CSRMatrixMemoryLocation(B) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
    {
       C = hypre_CSRMatrixMultiplyDevice(A,B);
    }
+   else
 #endif
+   {
+      C = hypre_CSRMatrixMultiplyHost(A,B);
+   }
 
    return C;
 }
@@ -783,20 +783,20 @@ hypre_CSRMatrixTranspose(hypre_CSRMatrix  *A,
                          hypre_CSRMatrix **AT,
                          HYPRE_Int         data)
 {
-   HYPRE_ExecuctionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(A) );
-
    HYPRE_Int ierr = 0;
 
-   if (exec == HYPRE_EXEC_HOST)
-   {
-      ierr = hypre_CSRMatrixTransposeHost(A, AT, data);
-   }
 #if defined(HYPRE_USING_CUDA)
-   else
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(A) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
    {
       ierr = hypre_CSRMatrixTransposeDevice(A, AT, data);
    }
+   else
 #endif
+   {
+      ierr = hypre_CSRMatrixTransposeHost(A, AT, data);
+   }
 
    return ierr;
 }
@@ -1363,18 +1363,18 @@ hypre_CSRMatrixComputeRowSum( hypre_CSRMatrix *A,
 {
    hypre_assert( (CF_i && CF_j) || (!CF_i && !CF_j) );
 
-   HYPRE_ExecuctionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(A) );
-
-   if (exec == HYPRE_EXEC_HOST)
-   {
-      hypre_CSRMatrixComputeRowSumHost(A, CF_i, CF_j, row_sum, type, scal, set_or_add);
-   }
 #if defined(HYPRE_USING_CUDA)
-   else
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(A) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
    {
       hypre_CSRMatrixComputeRowSumDevice(A, CF_i, CF_j, row_sum, type, scal, set_or_add);
    }
+   else
 #endif
+   {
+      hypre_CSRMatrixComputeRowSumHost(A, CF_i, CF_j, row_sum, type, scal, set_or_add);
+   }
 }
 
 void
@@ -1419,17 +1419,17 @@ hypre_CSRMatrixExtractDiagonal( hypre_CSRMatrix *A,
                                 HYPRE_Complex   *d,
                                 HYPRE_Int        type)
 {
-   HYPRE_ExecuctionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(A) );
-
-   if (exec == HYPRE_EXEC_HOST)
-   {
-      hypre_CSRMatrixExtractDiagonalHost(A, d, type);
-   }
 #if defined(HYPRE_USING_CUDA)
-   else
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(A) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
    {
       hypre_CSRMatrixExtractDiagonalDevice(A, d, type);
    }
+   else
 #endif
+   {
+      hypre_CSRMatrixExtractDiagonalHost(A, d, type);
+   }
 }
 

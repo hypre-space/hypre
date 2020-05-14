@@ -1351,6 +1351,8 @@ hypre_ParCSRMatrixGetRowDevice( hypre_ParCSRMatrix  *mat,
       *values = hypre_ParCSRMatrixRowvalues(mat);
    }
 
+   hypre_SyncCudaComputeStream(hypre_handle());
+
    return hypre_error_flag;
 }
 #endif
@@ -1362,18 +1364,18 @@ hypre_ParCSRMatrixGetRow( hypre_ParCSRMatrix  *mat,
                           HYPRE_BigInt       **col_ind,
                           HYPRE_Complex      **values )
 {
-   HYPRE_ExecuctionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(mat) );
-
-   if (exec == HYPRE_EXEC_HOST)
-   {
-      return hypre_ParCSRMatrixGetRowHost(mat, row, size, col_ind, values);
-   }
 #if defined(HYPRE_USING_CUDA)
-   else
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(mat) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
    {
       return hypre_ParCSRMatrixGetRowDevice(mat, row, size, col_ind, values);
    }
+   else
 #endif
+   {
+      return hypre_ParCSRMatrixGetRowHost(mat, row, size, col_ind, values);
+   }
 
    return hypre_error_flag;
 }

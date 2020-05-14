@@ -149,7 +149,6 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
    S_diag_j = hypre_TAlloc(HYPRE_Int, S_num_nonzeros_diag, memory_location);
    S_offd_j = hypre_TAlloc(HYPRE_Int, S_num_nonzeros_offd, memory_location);
 
-   /* remove those -1's */
    tmp = HYPRE_THRUST_CALL(copy_if, S_temp_diag_j, S_temp_diag_j + num_nonzeros_diag, S_diag_j, is_nonnegative<HYPRE_Int>());
 
    hypre_assert(S_num_nonzeros_diag == tmp - S_diag_j);
@@ -336,6 +335,12 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
          S_temp_diag_j[i] = cond * (1 + read_only_load(&A_diag_j[i])) - 1;
          row_nnz_diag += cond;
       }
+   }
+
+   /* !!! mark diagonal as -2 !!! */
+   if (diag_pos >= 0)
+   {
+      S_temp_diag_j[diag_pos] = -2;
    }
 
    for (HYPRE_Int i = p_offd + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < q_offd); i += HYPRE_WARP_SIZE)

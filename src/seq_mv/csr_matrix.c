@@ -38,7 +38,7 @@ hypre_CSRMatrixCreate( HYPRE_Int num_rows,
    hypre_CSRMatrixNumRows(matrix)        = num_rows;
    hypre_CSRMatrixNumCols(matrix)        = num_cols;
    hypre_CSRMatrixNumNonzeros(matrix)    = num_nonzeros;
-   hypre_CSRMatrixMemoryLocation(matrix) = hypre_HandleMemoryLocation(hypre_handle);
+   hypre_CSRMatrixMemoryLocation(matrix) = hypre_HandleMemoryLocation(hypre_handle());
 
    /* set defaults */
    hypre_CSRMatrixOwnsData(matrix)  = 1;
@@ -302,7 +302,8 @@ hypre_CSRMatrixCheckSetNumNonzeros( hypre_CSRMatrix *matrix )
    if (hypre_CSRMatrixNumNonzeros(matrix) != nnz)
    {
       ierr = 1;
-      hypre_printf("warning: CSR matrix nnz was not set properly (!= ia[nrow])\n");
+      hypre_printf("warning: CSR matrix nnz was not set properly (!= ia[nrow], %d %d)\n", hypre_CSRMatrixNumNonzeros(matrix), nnz );
+      hypre_assert(0);
       hypre_CSRMatrixNumNonzeros(matrix) = nnz;
    }
 

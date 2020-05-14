@@ -403,7 +403,7 @@ main( hypre_int argc,
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_Int spgemm_use_cusparse = 1;
-   HYPRE_ExecuctionPolicy default_exec_policy = HYPRE_EXEC_HOST;
+   HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_HOST;
 #endif
    HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_DEVICE;
 
@@ -2076,10 +2076,10 @@ main( hypre_int argc,
    hypre_SetCubMemPoolSize( mempool_bin_growth, mempool_min_bin,
                             mempool_max_bin, mempool_max_cached_bytes );
 
-   hypre_HandleMemoryLocation(hypre_handle)    = memory_location;
+   hypre_HandleMemoryLocation(hypre_handle())    = memory_location;
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   hypre_HandleDefaultExecPolicy(hypre_handle) = default_exec_policy;
-   hypre_HandleSpgemmUseCusparse(hypre_handle) = spgemm_use_cusparse;
+   hypre_HandleDefaultExecPolicy(hypre_handle()) = default_exec_policy;
+   hypre_HandleSpgemmUseCusparse(hypre_handle()) = spgemm_use_cusparse;
 #endif
 
    /*-----------------------------------------------------------
@@ -3084,9 +3084,9 @@ main( hypre_int argc,
    /*-----------------------------------------------------------
     * Migrate the system to the wanted memory space
     *-----------------------------------------------------------*/
-   hypre_ParCSRMatrixMigrate(parcsr_A, hypre_HandleMemoryLocation(hypre_handle));
-   hypre_ParVectorMigrate(b, hypre_HandleMemoryLocation(hypre_handle));
-   hypre_ParVectorMigrate(x, hypre_HandleMemoryLocation(hypre_handle));
+   hypre_ParCSRMatrixMigrate(parcsr_A, hypre_HandleMemoryLocation(hypre_handle()));
+   hypre_ParVectorMigrate(b, hypre_HandleMemoryLocation(hypre_handle()));
+   hypre_ParVectorMigrate(x, hypre_HandleMemoryLocation(hypre_handle()));
 
    /* save the initial guess for the 2nd time */
 #if SECOND_TIME
@@ -8630,9 +8630,9 @@ BuildBigArrayFromOneFile( HYPRE_Int            argc,
  *----------------------------------------------------------------------*/
 
 HYPRE_Int
-BuildParLaplacian9pt( HYPRE_Int                  argc,
+BuildParLaplacian9pt( HYPRE_Int            argc,
                       char                *argv[],
-                      HYPRE_Int                  arg_index,
+                      HYPRE_Int            arg_index,
                       HYPRE_ParCSRMatrix  *A_ptr     )
 {
    HYPRE_BigInt              nx, ny;
@@ -8751,9 +8751,9 @@ BuildParLaplacian9pt( HYPRE_Int                  argc,
  *----------------------------------------------------------------------*/
 
 HYPRE_Int
-BuildParLaplacian27pt( HYPRE_Int                  argc,
+BuildParLaplacian27pt( HYPRE_Int            argc,
                        char                *argv[],
-                       HYPRE_Int                  arg_index,
+                       HYPRE_Int            arg_index,
                        HYPRE_ParCSRMatrix  *A_ptr     )
 {
    HYPRE_BigInt              nx, ny, nz;
@@ -8870,9 +8870,9 @@ BuildParLaplacian27pt( HYPRE_Int                  argc,
  *----------------------------------------------------------------------*/
 
 HYPRE_Int
-BuildParRotate7pt( HYPRE_Int                  argc,
+BuildParRotate7pt( HYPRE_Int            argc,
                    char                *argv[],
-                   HYPRE_Int                  arg_index,
+                   HYPRE_Int            arg_index,
                    HYPRE_ParCSRMatrix  *A_ptr     )
 {
    HYPRE_BigInt              nx, ny;
@@ -8988,11 +8988,11 @@ BuildParRotate7pt( HYPRE_Int                  argc,
  *----------------------------------------------------------------------*/
 
 HYPRE_Int
-BuildParVarDifConv( HYPRE_Int                  argc,
+BuildParVarDifConv( HYPRE_Int            argc,
                     char                *argv[],
-                    HYPRE_Int                  arg_index,
-                    HYPRE_ParCSRMatrix  *A_ptr    ,
-                    HYPRE_ParVector  *rhs_ptr     )
+                    HYPRE_Int            arg_index,
+                    HYPRE_ParCSRMatrix  *A_ptr,
+                    HYPRE_ParVector     *rhs_ptr     )
 {
    HYPRE_BigInt              nx, ny, nz;
    HYPRE_Int                 P, Q, R;
@@ -9152,11 +9152,11 @@ HYPRE_Int SetSysVcoefValues(HYPRE_Int num_fun, HYPRE_BigInt nx, HYPRE_BigInt ny,
  *----------------------------------------------------------------------*/
 
 HYPRE_Int
-BuildParCoordinates( HYPRE_Int                  argc,
+BuildParCoordinates( HYPRE_Int            argc,
                      char                *argv[],
-                     HYPRE_Int                  arg_index,
-                     HYPRE_Int                 *coorddim_ptr,
-                     float               **coord_ptr     )
+                     HYPRE_Int            arg_index,
+                     HYPRE_Int           *coorddim_ptr,
+                     float              **coord_ptr     )
 {
    HYPRE_BigInt              nx, ny, nz;
    HYPRE_Int                 P, Q, R;

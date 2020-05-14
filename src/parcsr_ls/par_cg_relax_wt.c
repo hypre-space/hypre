@@ -247,7 +247,7 @@ hypre_BoomerAMGCGRelaxWt( void              *amg_vdata,
                                                   0,
                                                   1.0,
                                                   1.0,
-                                                  l1_norms,
+                                                  l1_norms ? hypre_VectorData(l1_norms) : NULL,
                                                   Ztemp,
                                                   Vtemp,
                                                   Qtemp);

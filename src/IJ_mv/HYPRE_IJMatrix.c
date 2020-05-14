@@ -535,9 +535,15 @@ HYPRE_IJMatrixSetValues2( HYPRE_IJMatrix       matrix,
       return hypre_error_flag;
    }
 
-   HYPRE_ExecuctionPolicy exec = hypre_GetExecPolicy1( hypre_IJMatrixMemoryLocation(matrix) );
+#if defined(HYPRE_USING_CUDA)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_IJMatrixMemoryLocation(matrix) );
 
-   if (exec == HYPRE_EXEC_HOST)
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      hypre_IJMatrixSetAddValuesParCSRDevice(ijmatrix, nrows, ncols, rows, row_indexes, cols, values, "set");
+   }
+   else
+#endif
    {
       HYPRE_Int *row_indexes_tmp = (HYPRE_Int *) row_indexes;
       HYPRE_Int *ncols_tmp = ncols;
@@ -577,12 +583,6 @@ HYPRE_IJMatrixSetValues2( HYPRE_IJMatrix       matrix,
          hypre_TFree(row_indexes_tmp, HYPRE_MEMORY_HOST);
       }
    }
-#if defined(HYPRE_USING_CUDA)
-   else
-   {
-      hypre_IJMatrixSetAddValuesParCSRDevice(ijmatrix, nrows, ncols, rows, row_indexes, cols, values, "set");
-   }
-#endif
 
    return hypre_error_flag;
 }
@@ -742,9 +742,15 @@ HYPRE_IJMatrixAddToValues2( HYPRE_IJMatrix       matrix,
       return hypre_error_flag;
    }
 
-   HYPRE_ExecuctionPolicy exec = hypre_GetExecPolicy1( hypre_IJMatrixMemoryLocation(matrix) );
+#if defined(HYPRE_USING_CUDA)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_IJMatrixMemoryLocation(matrix) );
 
-   if (exec == HYPRE_EXEC_HOST)
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      hypre_IJMatrixSetAddValuesParCSRDevice(ijmatrix, nrows, ncols, rows, row_indexes, cols, values, "add");
+   }
+   else
+#endif
    {
       HYPRE_Int *row_indexes_tmp = (HYPRE_Int *) row_indexes;
       HYPRE_Int *ncols_tmp = ncols;
@@ -784,12 +790,6 @@ HYPRE_IJMatrixAddToValues2( HYPRE_IJMatrix       matrix,
          hypre_TFree(row_indexes_tmp, HYPRE_MEMORY_HOST);
       }
    }
-#if defined(HYPRE_USING_CUDA)
-   else
-   {
-      hypre_IJMatrixSetAddValuesParCSRDevice(ijmatrix, nrows, ncols, rows, row_indexes, cols, values, "add");
-   }
-#endif
 
    return hypre_error_flag;
 }
@@ -808,20 +808,20 @@ HYPRE_IJMatrixAssemble( HYPRE_IJMatrix matrix )
       return hypre_error_flag;
    }
 
-   HYPRE_ExecuctionPolicy exec = hypre_GetExecPolicy1( hypre_IJMatrixMemoryLocation(matrix) );
-
    if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
    {
-      if (exec == HYPRE_EXEC_HOST)
-      {
-         return( hypre_IJMatrixAssembleParCSR( ijmatrix ) );
-      }
 #if defined(HYPRE_USING_CUDA)
-      else
+      HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_IJMatrixMemoryLocation(matrix) );
+
+      if (exec == HYPRE_EXEC_DEVICE)
       {
          return( hypre_IJMatrixAssembleParCSRDevice( ijmatrix ) );
       }
+      else
 #endif
+      {
+         return( hypre_IJMatrixAssembleParCSR( ijmatrix ) );
+      }
    }
    else
    {

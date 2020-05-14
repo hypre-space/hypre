@@ -102,13 +102,13 @@ hypre_UnifiedMemPrefetch(void *ptr, size_t size, hypre_MemoryLocation location)
 
    if (location == hypre_MEMORY_DEVICE)
    {
-      HYPRE_CUDA_CALL( cudaMemPrefetchAsync(ptr, size, hypre_HandleCudaDevice(hypre_handle),
-                       hypre_HandleCudaComputeStream(hypre_handle)) );
+      HYPRE_CUDA_CALL( cudaMemPrefetchAsync(ptr, size, hypre_HandleCudaDevice(hypre_handle()),
+                       hypre_HandleCudaComputeStream(hypre_handle())) );
    }
    else if (location == hypre_MEMORY_HOST)
    {
       HYPRE_CUDA_CALL( cudaMemPrefetchAsync(ptr, size, cudaCpuDeviceId,
-                       hypre_HandleCudaComputeStream(hypre_handle)) );
+                       hypre_HandleCudaComputeStream(hypre_handle())) );
    }
 #endif
 }
@@ -148,7 +148,7 @@ hypre_DeviceMalloc(size_t size, HYPRE_Int zeroinit)
    HYPRE_OMPOffload(hypre__offload_device_num, ptr, size, "enter", "alloc");
 #elif defined(HYPRE_USING_CUDA)
 #if defined(HYPRE_USING_CUB_ALLOCATOR)
-   HYPRE_CUDA_CALL( hypre_HandleCubCachingDeviceAllocator(hypre_handle)->DeviceAllocate( (void**)&ptr, size ) );
+   HYPRE_CUDA_CALL( hypre_HandleCubCachingDeviceAllocator(hypre_handle())->DeviceAllocate( (void**)&ptr, size ) );
 #else
    HYPRE_CUDA_CALL( cudaMalloc(&ptr, size) );
 #endif
@@ -170,12 +170,12 @@ hypre_UnifiedMalloc(size_t size, HYPRE_Int zeroinit)
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 #if defined(HYPRE_USING_CUB_ALLOCATOR)
-   HYPRE_CUDA_CALL( hypre_HandleCubCachingManagedAllocator(hypre_handle)->DeviceAllocate( (void**)&ptr, size ) );
+   HYPRE_CUDA_CALL( hypre_HandleCubCachingManagedAllocator(hypre_handle())->DeviceAllocate( (void**)&ptr, size ) );
 #else
    HYPRE_CUDA_CALL( cudaMallocManaged(&ptr, size, cudaMemAttachGlobal) );
 #endif
    //HYPRE_CUDA_CALL( cudaMemAdvise(ptr, size, cudaMemAdviseSetPreferredLocation,
-   //                               hypre_HandleCudaDevice(hypre_handle)) );
+   //                               hypre_HandleCudaDevice(hypre_handle())) );
    /* prefecth to device */
    hypre_UnifiedMemPrefetch(ptr, size, hypre_MEMORY_DEVICE);
 
@@ -271,7 +271,7 @@ hypre_DeviceFree(void *ptr)
    HYPRE_OMPOffload(hypre__offload_device_num, ptr, ((size_t *) ptr)[-1], "exit", "delete");
 #elif defined(HYPRE_USING_CUDA)
 #ifdef HYPRE_USING_CUB_ALLOCATOR
-   HYPRE_CUDA_CALL( hypre_HandleCubCachingDeviceAllocator(hypre_handle)->DeviceFree(ptr) );
+   HYPRE_CUDA_CALL( hypre_HandleCubCachingDeviceAllocator(hypre_handle())->DeviceFree(ptr) );
 #else
    HYPRE_CUDA_CALL( cudaFree(ptr) );
 #endif
@@ -283,7 +283,7 @@ hypre_UnifiedFree(void *ptr)
 {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 #ifdef HYPRE_USING_CUB_ALLOCATOR
-   HYPRE_CUDA_CALL( hypre_HandleCubCachingManagedAllocator(hypre_handle)->DeviceFree(ptr) );
+   HYPRE_CUDA_CALL( hypre_HandleCubCachingManagedAllocator(hypre_handle())->DeviceFree(ptr) );
 #else
    HYPRE_CUDA_CALL( cudaFree(ptr) );
 #endif
@@ -458,10 +458,10 @@ hypre_Memcpy_core(void *dst, void *src, size_t size, hypre_MemoryLocation loc_ds
 /*--------------------------------------------------------------------------*
  * ExecPolicy
  *--------------------------------------------------------------------------*/
-static inline HYPRE_ExecuctionPolicy
+static inline HYPRE_ExecutionPolicy
 hypre_GetExecPolicy1_core(hypre_MemoryLocation location)
 {
-   HYPRE_ExecuctionPolicy exec = HYPRE_EXEC_UNDEFINED;
+   HYPRE_ExecutionPolicy exec = HYPRE_EXEC_UNDEFINED;
 
    switch (location)
    {
@@ -474,7 +474,7 @@ hypre_GetExecPolicy1_core(hypre_MemoryLocation location)
          break;
       case hypre_MEMORY_UNIFIED :
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-         exec = hypre_HandleDefaultExecPolicy(hypre_handle);
+         exec = hypre_HandleDefaultExecPolicy(hypre_handle());
 #endif
          break;
       default :
@@ -487,11 +487,11 @@ hypre_GetExecPolicy1_core(hypre_MemoryLocation location)
 }
 
 /* for binary operation */
-static inline HYPRE_ExecuctionPolicy
+static inline HYPRE_ExecutionPolicy
 hypre_GetExecPolicy2_core(hypre_MemoryLocation location1,
                           hypre_MemoryLocation location2)
 {
-   HYPRE_ExecuctionPolicy exec = HYPRE_EXEC_UNDEFINED;
+   HYPRE_ExecutionPolicy exec = HYPRE_EXEC_UNDEFINED;
 
    /* HOST_PINNED has the same exec policy as HOST */
    if (location1 == hypre_MEMORY_HOST_PINNED)
@@ -521,7 +521,7 @@ hypre_GetExecPolicy2_core(hypre_MemoryLocation location1,
    if (location1 == hypre_MEMORY_UNIFIED && location2 == hypre_MEMORY_UNIFIED)
    {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-      exec = hypre_HandleDefaultExecPolicy(hypre_handle);
+      exec = hypre_HandleDefaultExecPolicy(hypre_handle());
 #endif
    }
 
@@ -698,7 +698,7 @@ hypre_ReAlloc_v2(void *ptr, size_t old_size, size_t new_size, HYPRE_MemoryLocati
  * hypre_GetExecPolicy: return execution policy based on memory locations
  *--------------------------------------------------------------------------*/
 /* for unary operation */
-HYPRE_ExecuctionPolicy
+HYPRE_ExecutionPolicy
 hypre_GetExecPolicy1(HYPRE_MemoryLocation location)
 {
 
@@ -706,7 +706,7 @@ hypre_GetExecPolicy1(HYPRE_MemoryLocation location)
 }
 
 /* for binary operation */
-HYPRE_ExecuctionPolicy
+HYPRE_ExecutionPolicy
 hypre_GetExecPolicy2(HYPRE_MemoryLocation location1,
                      HYPRE_MemoryLocation location2)
 {
@@ -878,25 +878,20 @@ hypre_SetCubMemPoolSize(hypre_uint cub_bin_growth,
    HYPRE_Int ierr = 0;
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 #ifdef HYPRE_USING_CUB_ALLOCATOR
-   if (!hypre_handle)
-   {
-      return -1;
-   }
-
-   hypre_handle->cub_bin_growth       = cub_bin_growth;
-   hypre_handle->cub_min_bin          = cub_min_bin;
-   hypre_handle->cub_max_bin          = cub_max_bin;
-   hypre_handle->cub_max_cached_bytes = cub_max_cached_bytes;
+   hypre_handle()->cub_bin_growth       = cub_bin_growth;
+   hypre_handle()->cub_min_bin          = cub_min_bin;
+   hypre_handle()->cub_max_bin          = cub_max_bin;
+   hypre_handle()->cub_max_cached_bytes = cub_max_cached_bytes;
 
    // RL: TODO
-   if (hypre_handle->cub_dev_allocator)
+   if (hypre_handle()->cub_dev_allocator)
    {
-      hypre_handle->cub_dev_allocator->SetMaxCachedBytes(cub_max_cached_bytes);
+      hypre_handle()->cub_dev_allocator->SetMaxCachedBytes(cub_max_cached_bytes);
    }
 
-   if (hypre_handle->cub_um_allocator)
+   if (hypre_handle()->cub_um_allocator)
    {
-      hypre_handle->cub_um_allocator->SetMaxCachedBytes(cub_max_cached_bytes);
+      hypre_handle()->cub_um_allocator->SetMaxCachedBytes(cub_max_cached_bytes);
    }
 #endif
 #endif

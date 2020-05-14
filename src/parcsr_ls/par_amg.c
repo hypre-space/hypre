@@ -481,8 +481,12 @@ hypre_BoomerAMGDestroy( void *data )
    HYPRE_ANNOTATION_BEGIN("BoomerAMG.destroy");
 
 #ifdef HYPRE_USING_DSUPERLU
-   if (hypre_ParAMGDataDSLUThreshold(amg_data) > 0)
+//   if (hypre_ParAMGDataDSLUThreshold(amg_data) > 0)
+   if (hypre_ParAMGDataDSLUSolver(amg_data) != NULL)
+   {
       hypre_SLUDistDestroy(hypre_ParAMGDataDSLUSolver(amg_data));
+      hypre_ParAMGDataDSLUSolver(amg_data) = NULL;
+   }
 #endif
 
    if (hypre_ParAMGDataMaxEigEst(amg_data))
@@ -3171,7 +3175,7 @@ hypre_BoomerAMGSetAggInterpType( void     *data,
       hypre_error_in_arg(1);
       return hypre_error_flag;
    }
-   if (agg_interp_type < 0 || agg_interp_type > 4)
+   if (agg_interp_type < 0 || agg_interp_type > 6)
    {
       hypre_error_in_arg(2);
       return hypre_error_flag;

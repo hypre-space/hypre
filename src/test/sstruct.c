@@ -2433,8 +2433,8 @@ main( hypre_int argc,
    HYPRE_Init();
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   /* hypre_SetExecPolicy(HYPRE_EXEC_DEVICE); */
-   /* HYPRE_CSRMatrixDeviceSpGemmSetUseCusparse(0); */
+   //hypre_HandleDefaultExecPolicy(hypre_handle()) = HYPRE_EXEC_DEVICE;
+   //hypre_HandleSpgemmUseCusparse(hypre_handle()) = 1;
 #endif
 
    /*-----------------------------------------------------------
@@ -2593,12 +2593,12 @@ main( hypre_int argc,
       {
          arg_index++;
 
-	 /* begin lobpcg */
-	 if ( strcmp(argv[arg_index], "none") == 0 ) {
+         /* begin lobpcg */
+         if ( strcmp(argv[arg_index], "none") == 0 ) {
             solver_id = NO_SOLVER;
             arg_index++;
-	 }
-	 else /* end lobpcg */
+         }
+         else /* end lobpcg */
             solver_id = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-print") == 0 )
@@ -4269,7 +4269,7 @@ main( hypre_int argc,
       {
          /* use ParaSails as preconditioner */
          HYPRE_ParCSRParaSailsCreate(hypre_MPI_COMM_WORLD, &par_precond );
-	 HYPRE_ParCSRParaSailsSetParams(par_precond, 0.1, 1);
+         HYPRE_ParCSRParaSailsSetParams(par_precond, 0.1, 1);
          HYPRE_PCGSetPrecond( par_solver,
                               (HYPRE_PtrToSolverFcn) HYPRE_ParCSRParaSailsSolve,
                               (HYPRE_PtrToSolverFcn) HYPRE_ParCSRParaSailsSetup,
@@ -4444,8 +4444,8 @@ main( hypre_int argc,
       {
          /* use ParaSails as preconditioner */
          HYPRE_ParCSRParaSailsCreate(hypre_MPI_COMM_WORLD, &par_precond );
-	 HYPRE_ParCSRParaSailsSetParams(par_precond, 0.1, 1);
-	 HYPRE_ParCSRParaSailsSetSym(par_precond, 0);
+         HYPRE_ParCSRParaSailsSetParams(par_precond, 0.1, 1);
+         HYPRE_ParCSRParaSailsSetSym(par_precond, 0);
          HYPRE_GMRESSetPrecond( par_solver,
                                 (HYPRE_PtrToSolverFcn) HYPRE_ParCSRParaSailsSolve,
                                 (HYPRE_PtrToSolverFcn) HYPRE_ParCSRParaSailsSetup,

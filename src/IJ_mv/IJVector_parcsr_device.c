@@ -113,9 +113,10 @@ hypre_IJVectorSetAddValuesParDevice(hypre_IJVector       *vector,
       hypre_AuxParVectorMaxStackElmts(aux_vector) = stack_elmts_max_new;
    }
 
+   HYPRE_THRUST_CALL(fill_n, stack_sora + stack_elmts_current, num_values, SorA);
+
    hypre_TMemcpy(stack_i    + stack_elmts_current, indices, HYPRE_BigInt,  num_values, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
    hypre_TMemcpy(stack_data + stack_elmts_current, values,  HYPRE_Complex, num_values, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-   HYPRE_THRUST_CALL(fill_n, stack_sora + stack_elmts_current, num_values, SorA);
 
    hypre_AuxParVectorCurrentStackElmts(aux_vector) += num_values;
 

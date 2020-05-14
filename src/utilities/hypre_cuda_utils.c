@@ -26,7 +26,7 @@ hypreCUDAKernel_CompileFlagSafetyCheck(HYPRE_Int cuda_arch_actual)
 
 void hypre_CudaCompileFlagCheck()
 {
-   HYPRE_Int device = hypre_HandleCudaDevice(hypre_handle);
+   HYPRE_Int device = hypre_HandleCudaDevice(hypre_handle());
 
    struct cudaDeviceProp props;
    cudaGetDeviceProperties(&props, device);
@@ -371,16 +371,16 @@ hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_
 
 struct hypre_empty_row_functor
 {
-  /* typedef bool result_type; */
+   /* typedef bool result_type; */
 
-  __device__
-  bool operator()(const thrust::tuple<HYPRE_Int, HYPRE_Int>& t) const
-  {
-    const HYPRE_Int a = thrust::get<0>(t);
-    const HYPRE_Int b = thrust::get<1>(t);
+   __device__
+   bool operator()(const thrust::tuple<HYPRE_Int, HYPRE_Int>& t) const
+   {
+      const HYPRE_Int a = thrust::get<0>(t);
+      const HYPRE_Int b = thrust::get<1>(t);
 
-    return a != b;
-  }
+      return a != b;
+   }
 };
 
 HYPRE_Int*

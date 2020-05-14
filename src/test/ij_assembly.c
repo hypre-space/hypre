@@ -12,45 +12,62 @@
  *--------------------------------------------------------------------------*/
 
 #include "HYPRE.h"
+#include "HYPRE_utilities.h"
 #include "_hypre_IJ_mv.h"
 #include "_hypre_parcsr_mv.h"
-#include "_hypre_utilities.h"
+#include "HYPRE_parcsr_ls.h"
 
-HYPRE_Int hypre_GeneratePartitioning(HYPRE_BigInt length, HYPRE_Int num_procs, HYPRE_BigInt **part_ptr);
 HYPRE_Int buildMatrixEntries(MPI_Comm comm,
                              HYPRE_Int nx, HYPRE_Int ny, HYPRE_Int nz,
                              HYPRE_Int Px, HYPRE_Int Py, HYPRE_Int Pz,
                              HYPRE_Int cx, HYPRE_Int cy, HYPRE_Int cz,
                              HYPRE_BigInt *ilower, HYPRE_BigInt *iupper,
+                             HYPRE_BigInt *jlower, HYPRE_BigInt *jupper,
                              HYPRE_Int *nrows, HYPRE_BigInt *num_nonzeros,
                              HYPRE_Int **nnzrow_ptr, HYPRE_BigInt **rows_ptr,
-                             HYPRE_BigInt **cols_ptr, HYPRE_Real **coefs_ptr);
-HYPRE_Int buildRefMatrix(MPI_Comm comm,
-                         HYPRE_BigInt ilower, HYPRE_BigInt iupper,
-                         HYPRE_BigInt num_nonzeros, HYPRE_Int *nnzrow,
-                         HYPRE_BigInt *rows, HYPRE_BigInt *cols,
-                         HYPRE_Real *coefs, HYPRE_IJMatrix *ij_ref_ptr);
-HYPRE_Int checkMatrix(HYPRE_IJMatrix ij_ref, HYPRE_IJMatrix ij_A);
-HYPRE_Int test_SetSet(MPI_Comm comm, HYPRE_Int memory_loc,
+                             HYPRE_BigInt **rows2_ptr, HYPRE_BigInt **cols_ptr,
+                             HYPRE_Real **coefs_ptr, HYPRE_Int stencil, HYPRE_ParCSRMatrix *parcsr_ptr);
+
+HYPRE_Int getParCSRMatrixData(HYPRE_ParCSRMatrix  A, HYPRE_Int *nrows_ptr, HYPRE_BigInt *num_nonzeros_ptr,
+                              HYPRE_Int **nnzrow_ptr, HYPRE_BigInt **rows_ptr, HYPRE_BigInt **rows2_ptr,
+                              HYPRE_BigInt **cols_ptr, HYPRE_Real **coefs_ptr);
+
+HYPRE_Int checkMatrix(HYPRE_ParCSRMatrix parcsr_ref, HYPRE_IJMatrix ij_A);
+
+HYPRE_Int test_Set(MPI_Comm comm, HYPRE_MemoryLocation memory_location, HYPRE_Int option,
+                   HYPRE_BigInt ilower, HYPRE_BigInt iupper,
+                   HYPRE_Int nrows, HYPRE_BigInt num_nonzeros,
+                   HYPRE_Int nchunks, HYPRE_Int *h_nnzrow, HYPRE_Int *nnzrow,
+                   HYPRE_BigInt *rows, HYPRE_BigInt *cols,
+                   HYPRE_Real *coefs, HYPRE_IJMatrix *ij_A_ptr);
+
+HYPRE_Int test_SetOffProc(HYPRE_ParCSRMatrix parcsr_A, HYPRE_MemoryLocation memory_location,
+                          HYPRE_Int nchunks, HYPRE_Int option, HYPRE_IJMatrix *ij_AT_ptr);
+
+HYPRE_Int test_SetSet(MPI_Comm comm, HYPRE_MemoryLocation memory_location, HYPRE_Int option,
                       HYPRE_BigInt ilower, HYPRE_BigInt iupper,
                       HYPRE_Int nrows, HYPRE_BigInt num_nonzeros,
                       HYPRE_Int nchunks, HYPRE_Int *h_nnzrow, HYPRE_Int *nnzrow,
                       HYPRE_BigInt *rows, HYPRE_BigInt *cols,
-                      HYPRE_Real *coefs, HYPRE_IJMatrix *ij_A);
-HYPRE_Int test_AddSet(MPI_Comm comm, HYPRE_Int memory_loc,
+                      HYPRE_Real *coefs, HYPRE_IJMatrix *ij_A_ptr);
+
+HYPRE_Int test_AddSet(MPI_Comm comm, HYPRE_MemoryLocation memory_location, HYPRE_Int option,
                       HYPRE_BigInt ilower, HYPRE_BigInt iupper,
                       HYPRE_Int nrows, HYPRE_BigInt num_nonzeros,
                       HYPRE_Int nchunks, HYPRE_Int *h_nnzrow, HYPRE_Int *nnzrow,
                       HYPRE_BigInt *rows, HYPRE_BigInt *cols,
-                      HYPRE_Real *coefs, HYPRE_IJMatrix *ij_A);
-HYPRE_Int test_SetAddSet(MPI_Comm comm, HYPRE_Int memory_loc,
+                      HYPRE_Real *coefs, HYPRE_IJMatrix *ij_A_ptr);
+
+HYPRE_Int test_SetAddSet(MPI_Comm comm, HYPRE_MemoryLocation memory_location, HYPRE_Int option,
                          HYPRE_BigInt ilower, HYPRE_BigInt iupper,
                          HYPRE_Int nrows, HYPRE_BigInt num_nonzeros,
                          HYPRE_Int nchunks, HYPRE_Int *h_nnzrow, HYPRE_Int *nnzrow,
                          HYPRE_BigInt *rows, HYPRE_BigInt *cols,
-                         HYPRE_Real *coefs, HYPRE_IJMatrix *ij_A);
+                         HYPRE_Real *coefs, HYPRE_IJMatrix *ij_A_ptr);
 
-HYPRE_Int
+//#define CUDA_PROFILER
+
+hypre_int
 main( HYPRE_Int  argc,
       char      *argv[] )
 {
@@ -60,24 +77,34 @@ main( HYPRE_Int  argc,
    HYPRE_Int                 arg_index;
    HYPRE_Int                 time_index;
    HYPRE_Int                 print_usage;
-   HYPRE_Int                 memory_loc;
-   char                      memory_loc_name[32];
+   HYPRE_MemoryLocation      memory_location;
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+   HYPRE_ExecutionPolicy    default_exec_policy;
+#endif
+   char                      memory_location_name[8];
 
    HYPRE_Int                 nrows;
    HYPRE_BigInt              num_nonzeros;
    HYPRE_BigInt              ilower, iupper;
+   HYPRE_BigInt              jlower, jupper;
    HYPRE_Int                *nnzrow, *h_nnzrow, *d_nnzrow;
    HYPRE_BigInt             *rows,   *h_rows,   *d_rows;
+   HYPRE_BigInt             *rows2,  *h_rows2,  *d_rows2;
    HYPRE_BigInt             *cols,   *h_cols,   *d_cols;
    HYPRE_Real               *coefs,  *h_coefs,  *d_coefs;
    HYPRE_IJMatrix            ij_A;
-   HYPRE_IJMatrix            ij_ref;
+   HYPRE_IJMatrix            ij_AT;
+   HYPRE_ParCSRMatrix        parcsr_ref;
 
    // Driver input parameters
    HYPRE_Int                 Px, Py, Pz;
    HYPRE_Int                 nx, ny, nz;
    HYPRE_Real                cx, cy, cz;
    HYPRE_Int                 nchunks;
+   HYPRE_Int                 mode;
+   HYPRE_Int                 option;
+   HYPRE_Int                 stencil;
+   HYPRE_Int                 print_matrix;
 
    /* Initialize MPI */
    hypre_MPI_Init(&argc, &argv);
@@ -94,39 +121,30 @@ main( HYPRE_Int  argc,
    hypre_FinalizeTiming(time_index);
    hypre_ClearTiming();
 
-   hypre_SetExecPolicy(HYPRE_EXEC_DEVICE);
-/* #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP) */
-/*    memory_loc = hypre_handle->no_cuda_um ? HYPRE_MEMORY_DEVICE : HYPRE_MEMORY_SHARED; */
-/* #else */
-/*    memory_loc = HYPRE_MEMORY_SHARED; */
-/* #endif */
-   memory_loc = HYPRE_MEMORY_SHARED;
-
-   switch (memory_loc)
-   {
-      case HYPRE_MEMORY_UNSET:
-         hypre_sprintf(memory_loc_name, "Unset"); break;
-
-      case HYPRE_MEMORY_DEVICE:
-         hypre_sprintf(memory_loc_name, "Device"); break;
-
-      case HYPRE_MEMORY_HOST:
-         hypre_sprintf(memory_loc_name, "Host"); break;
-
-      case HYPRE_MEMORY_SHARED:
-         hypre_sprintf(memory_loc_name, "Shared"); break;
-
-      case HYPRE_MEMORY_HOST_PINNED:
-         hypre_sprintf(memory_loc_name, "Host pinned"); break;
-   }
-
    /*-----------------------------------------------------------
     * Set default parameters
     *-----------------------------------------------------------*/
-   Px = num_procs; Py = 1;   Pz = 1;
-   nx = 10;        ny = 10;  nz = 10;
-   cx = 1.0;       cy = 1.0; cz = 1.0;
-   nchunks = 1;
+   Px = num_procs;
+   Py = 1;
+   Pz = 1;
+
+   nx = 100;
+   ny = 101;
+   nz = 102;
+
+   cx = 1.0;
+   cy = 2.0;
+   cz = 3.0;
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+   default_exec_policy = HYPRE_EXEC_DEVICE;
+#endif
+   memory_location     = HYPRE_MEMORY_DEVICE;
+   mode                = 1;
+   option              = 1;
+   nchunks             = 1;
+   print_matrix        = 0;
+   stencil             = 7;
 
    /*-----------------------------------------------------------
     * Parse command line
@@ -135,7 +153,12 @@ main( HYPRE_Int  argc,
    arg_index = 1;
    while ( (arg_index < argc) && (!print_usage) )
    {
-      if ( strcmp(argv[arg_index], "-P") == 0 )
+      if ( strcmp(argv[arg_index], "-memory_location") == 0 )
+      {
+         arg_index++;
+         memory_location = (HYPRE_MemoryLocation) atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-P") == 0 )
       {
          arg_index++;
          Px = atoi(argv[arg_index++]);
@@ -156,14 +179,39 @@ main( HYPRE_Int  argc,
          cy = atof(argv[arg_index++]);
          cz = atof(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-mode") == 0 )
+      {
+         arg_index++;
+         mode = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-option") == 0 )
+      {
+         arg_index++;
+         option = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-9pt") == 0 )
+      {
+         arg_index++;
+         stencil = 9;
+      }
+      else if ( strcmp(argv[arg_index], "-27pt") == 0 )
+      {
+         arg_index++;
+         stencil = 27;
+      }
       else if ( strcmp(argv[arg_index], "-nchunks") == 0 )
       {
          arg_index++;
          nchunks = atoi(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-print") == 0 )
+      {
+         arg_index++;
+         print_matrix = 1;
+      }
       else
       {
-         print_usage = 1;
+         print_usage = 1; break;
       }
    }
 
@@ -186,9 +234,23 @@ main( HYPRE_Int  argc,
          hypre_printf("\n");
          hypre_printf("Usage: %s [<options>]\n", argv[0]);
          hypre_printf("\n");
-         hypre_printf("      -n <nx> <ny> <nz>    : total problem size \n");
-         hypre_printf("      -P <Px> <Py> <Pz>    : processor topology\n");
-         hypre_printf("      -c <cx> <cy> <cz>    : diffusion coefficients\n");
+         hypre_printf("      -n <nx> <ny> <nz>      : total problem size \n");
+         hypre_printf("      -P <Px> <Py> <Pz>      : processor topology\n");
+         hypre_printf("      -c <cx> <cy> <cz>      : diffusion coefficients\n");
+         hypre_printf("      -memory_location <val> : memory location of the assembled matrix\n");
+         hypre_printf("             0 = HOST\n");
+         hypre_printf("             1 = DEVICE (default)\n");
+         hypre_printf("      -nchunks <val>         : number of chunks passed to Set/AddValues\n");
+         hypre_printf("      -mode <val>            : tests to be performed\n");
+         hypre_printf("             1 = Set (default)\n");
+         hypre_printf("             2 = SetOffProc\n");
+         hypre_printf("             4 = SetSet\n");
+         hypre_printf("             8 = AddSet\n");
+         hypre_printf("            16 = SetAddSet\n");
+         hypre_printf("      -option <val>          : interface option of Set/AddToValues\n");
+         hypre_printf("             1 = CSR-like (default)\n");
+         hypre_printf("             2 = COO-like\n");
+         hypre_printf("      -print                 : print matrices\n");
          hypre_printf("\n");
       }
 
@@ -198,53 +260,56 @@ main( HYPRE_Int  argc,
    /*-----------------------------------------------------------
     * Print driver parameters
     *-----------------------------------------------------------*/
+   switch (memory_location)
+   {
+      case HYPRE_MEMORY_UNDEFINED:
+         return -1;
+
+      case HYPRE_MEMORY_DEVICE:
+         hypre_sprintf(memory_location_name, "Device"); break;
+
+      case HYPRE_MEMORY_HOST:
+         hypre_sprintf(memory_location_name, "Host"); break;
+   }
+
    if (myid == 0)
    {
-      hypre_printf("  Memory location: %s\n", memory_loc_name);
+      hypre_printf("  Memory location: %s\n", memory_location_name);
       hypre_printf("    (nx, ny, nz) = (%b, %b, %b)\n", nx, ny, nz);
       hypre_printf("    (Px, Py, Pz) = (%d, %d, %d)\n", Px, Py, Pz);
       hypre_printf("    (cx, cy, cz) = (%f, %f, %f)\n", cx, cy, cz);
       hypre_printf("\n");
    }
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+   hypre_HandleDefaultExecPolicy(hypre_handle()) = default_exec_policy;
+#endif
+
    /*-----------------------------------------------------------
     * Build matrix entries
     *-----------------------------------------------------------*/
    buildMatrixEntries(comm, nx, ny, nz, Px, Py, Pz, cx, cy, cz,
-                      &ilower, &iupper, &nrows, &num_nonzeros,
-                      &h_nnzrow, &h_rows, &h_cols, &h_coefs);
-   switch (hypre_GetActualMemLocation(memory_loc))
+                      &ilower, &iupper, &jlower, &jupper, &nrows, &num_nonzeros,
+                      &h_nnzrow, &h_rows, &h_rows2, &h_cols, &h_coefs, stencil, &parcsr_ref);
+
+   switch (memory_location)
    {
       case HYPRE_MEMORY_DEVICE:
-         d_nnzrow = hypre_TAlloc(HYPRE_Int, nrows, HYPRE_MEMORY_DEVICE);
-         d_rows   = hypre_TAlloc(HYPRE_BigInt, num_nonzeros, HYPRE_MEMORY_DEVICE);
+         d_nnzrow = hypre_TAlloc(HYPRE_Int,    nrows,        HYPRE_MEMORY_DEVICE);
+         d_rows   = hypre_TAlloc(HYPRE_BigInt, nrows,        HYPRE_MEMORY_DEVICE);
+         d_rows2  = hypre_TAlloc(HYPRE_BigInt, num_nonzeros, HYPRE_MEMORY_DEVICE);
          d_cols   = hypre_TAlloc(HYPRE_BigInt, num_nonzeros, HYPRE_MEMORY_DEVICE);
-         d_coefs  = hypre_TAlloc(HYPRE_Real, num_nonzeros, HYPRE_MEMORY_DEVICE);
+         d_coefs  = hypre_TAlloc(HYPRE_Real,   num_nonzeros, HYPRE_MEMORY_DEVICE);
 
-         hypre_TMemcpy(d_nnzrow, h_nnzrow, HYPRE_Int, nrows, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-         hypre_TMemcpy(d_rows, h_rows, HYPRE_BigInt, num_nonzeros, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-         hypre_TMemcpy(d_cols, h_cols, HYPRE_BigInt, num_nonzeros, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-         hypre_TMemcpy(d_coefs, h_coefs, HYPRE_Real, num_nonzeros, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-
-         nnzrow = d_nnzrow;
-         rows   = d_rows;
-         cols   = d_cols;
-         coefs  = d_coefs;
-         break;
-
-      case HYPRE_MEMORY_SHARED:
-         d_nnzrow = hypre_TAlloc(HYPRE_Int, nrows, HYPRE_MEMORY_SHARED);
-         d_rows   = hypre_TAlloc(HYPRE_BigInt, num_nonzeros, HYPRE_MEMORY_SHARED);
-         d_cols   = hypre_TAlloc(HYPRE_BigInt, num_nonzeros, HYPRE_MEMORY_SHARED);
-         d_coefs  = hypre_TAlloc(HYPRE_Real, num_nonzeros, HYPRE_MEMORY_SHARED);
-
-         hypre_TMemcpy(d_nnzrow, h_nnzrow, HYPRE_Int, nrows, HYPRE_MEMORY_SHARED, HYPRE_MEMORY_HOST);
-         hypre_TMemcpy(d_rows, h_rows, HYPRE_BigInt, num_nonzeros, HYPRE_MEMORY_SHARED, HYPRE_MEMORY_HOST);
-         hypre_TMemcpy(d_cols, h_cols, HYPRE_BigInt, num_nonzeros, HYPRE_MEMORY_SHARED, HYPRE_MEMORY_HOST);
-         hypre_TMemcpy(d_coefs, h_coefs, HYPRE_Real, num_nonzeros, HYPRE_MEMORY_SHARED, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(d_nnzrow, h_nnzrow, HYPRE_Int,    nrows,        HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(d_rows,   h_rows,   HYPRE_BigInt, nrows,        HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(d_rows2,  h_rows2,  HYPRE_BigInt, num_nonzeros, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(d_cols,   h_cols,   HYPRE_BigInt, num_nonzeros, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(d_coefs,  h_coefs,  HYPRE_Real,   num_nonzeros, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
 
          nnzrow = d_nnzrow;
          rows   = d_rows;
+         rows2  = d_rows2;
          cols   = d_cols;
          coefs  = d_coefs;
          break;
@@ -252,62 +317,104 @@ main( HYPRE_Int  argc,
       case HYPRE_MEMORY_HOST:
          nnzrow = h_nnzrow;
          rows   = h_rows;
+         rows2  = h_rows2;
          cols   = h_cols;
          coefs  = h_coefs;
          break;
-   }
 
-   /* Build Reference matrix */
-   buildRefMatrix(comm, ilower, iupper, num_nonzeros, nnzrow,
-                  rows, cols, coefs, &ij_ref);
+      case HYPRE_MEMORY_UNDEFINED:
+         return -1;
+   }
 
    /*-----------------------------------------------------------
     * Test different Set/Add combinations
     *-----------------------------------------------------------*/
-   time_index = hypre_InitializeTiming("Test Set/Set");
-   hypre_BeginTiming(time_index);
-   test_SetSet(comm, memory_loc, ilower, iupper, nrows, num_nonzeros,
-               nchunks, h_nnzrow, nnzrow, rows, cols, coefs, &ij_A);
-   hypre_EndTiming(time_index);
-   hypre_PrintTiming("Test Set/Set", hypre_MPI_COMM_WORLD);
-   hypre_FinalizeTiming(time_index);
-   hypre_ClearTiming();
-   checkMatrix(ij_A, ij_ref);
-   HYPRE_IJMatrixPrint(ij_A, "SetSet");
+   /* Test Set */
+   if (mode & 1)
+   {
+      test_Set(comm, memory_location, option, ilower, iupper, nrows, num_nonzeros,
+               nchunks, h_nnzrow, nnzrow, option == 1 ? rows : rows2, cols, coefs, &ij_A);
+
+      checkMatrix(parcsr_ref, ij_A);
+      if (print_matrix)
+      {
+         HYPRE_IJMatrixPrint(ij_A, "ij_Set");
+      }
+      HYPRE_IJMatrixDestroy(ij_A);
+   }
+
+   /* Test SetOffProc */
+   if (mode & 2)
+   {
+      test_SetOffProc(parcsr_ref, memory_location, nchunks, option, &ij_AT);
+      checkMatrix(parcsr_ref, ij_AT);
+      if (print_matrix)
+      {
+         HYPRE_IJMatrixPrint(ij_A, "ij_SetOffProc");
+      }
+      HYPRE_IJMatrixDestroy(ij_AT);
+   }
+
+   /* Test Set/Set */
+   if (mode & 4)
+   {
+      test_SetSet(comm, memory_location, option, ilower, iupper, nrows, num_nonzeros,
+                  nchunks, h_nnzrow, nnzrow, option == 1 ? rows : rows2, cols, coefs, &ij_A);
+
+      checkMatrix(parcsr_ref, ij_A);
+      if (print_matrix)
+      {
+         HYPRE_IJMatrixPrint(ij_A, "ij_SetSet");
+      }
+      HYPRE_IJMatrixDestroy(ij_A);
+   }
 
    /* Test Add/Set */
-   time_index = hypre_InitializeTiming("Test Add/Set");
-   hypre_BeginTiming(time_index);
-   test_AddSet(comm, memory_loc, ilower, iupper, nrows, num_nonzeros,
-               nchunks, h_nnzrow, nnzrow, rows, cols, coefs, &ij_A);
-   hypre_EndTiming(time_index);
-   hypre_PrintTiming("Test Add/Set", hypre_MPI_COMM_WORLD);
-   hypre_FinalizeTiming(time_index);
-   hypre_ClearTiming();
-   checkMatrix(ij_A, ij_ref);
-   //HYPRE_IJMatrixPrint(ij_A, "AddSet");
+   if (mode & 8)
+   {
+      test_AddSet(comm, memory_location, option, ilower, iupper, nrows, num_nonzeros,
+                  nchunks, h_nnzrow, nnzrow, option == 1 ? rows : rows2, cols, coefs, &ij_A);
+
+      checkMatrix(parcsr_ref, ij_A);
+      if (print_matrix)
+      {
+         HYPRE_IJMatrixPrint(ij_A, "ij_AddSet");
+      }
+      HYPRE_IJMatrixDestroy(ij_A);
+   }
 
    /* Test Set/Add/Set */
-   time_index = hypre_InitializeTiming("Test Set/Add/Set");
-   hypre_BeginTiming(time_index);
-   test_AddSet(comm, memory_loc, ilower, iupper, nrows, num_nonzeros,
-               nchunks, h_nnzrow, nnzrow, rows, cols, coefs, &ij_A);
-   hypre_EndTiming(time_index);
-   hypre_PrintTiming("Test Set/Add/Set", hypre_MPI_COMM_WORLD);
-   hypre_FinalizeTiming(time_index);
-   hypre_ClearTiming();
-   checkMatrix(ij_A, ij_ref);
-   //HYPRE_IJMatrixPrint(ij_A, "SetAddSet");
+   if (mode & 16)
+   {
+      test_SetAddSet(comm, memory_location, option, ilower, iupper, nrows, num_nonzeros,
+                     nchunks, h_nnzrow, nnzrow, option == 1 ? rows : rows2, cols, coefs, &ij_A);
+
+      checkMatrix(parcsr_ref, ij_A);
+      if (print_matrix)
+      {
+         HYPRE_IJMatrixPrint(ij_A, "ij_SetAddSet");
+      }
+      HYPRE_IJMatrixDestroy(ij_A);
+   }
 
    /*-----------------------------------------------------------
     * Free memory
     *-----------------------------------------------------------*/
-   hypre_TFree(nnzrow, memory_loc);
-   hypre_TFree(rows, memory_loc);
-   hypre_TFree(cols, memory_loc);
-   hypre_TFree(coefs, memory_loc);
-   HYPRE_IJMatrixDestroy(ij_A);
-   HYPRE_IJMatrixDestroy(ij_ref);
+   if (memory_location == HYPRE_MEMORY_DEVICE)
+   {
+      hypre_TFree(d_nnzrow, HYPRE_MEMORY_DEVICE);
+      hypre_TFree(d_rows,   HYPRE_MEMORY_DEVICE);
+      hypre_TFree(d_rows2,  HYPRE_MEMORY_DEVICE);
+      hypre_TFree(d_cols,   HYPRE_MEMORY_DEVICE);
+      hypre_TFree(d_coefs,  HYPRE_MEMORY_DEVICE);
+   }
+   hypre_TFree(h_nnzrow, HYPRE_MEMORY_HOST);
+   hypre_TFree(h_rows,   HYPRE_MEMORY_HOST);
+   hypre_TFree(h_rows2,  HYPRE_MEMORY_HOST);
+   hypre_TFree(h_cols,   HYPRE_MEMORY_HOST);
+   hypre_TFree(h_coefs,  HYPRE_MEMORY_HOST);
+
+   HYPRE_ParCSRMatrixDestroy(parcsr_ref);
 
    /* Finalize Hypre */
    HYPRE_Finalize();
@@ -324,331 +431,550 @@ main( HYPRE_Int  argc,
 }
 
 HYPRE_Int
-buildMatrixEntries(MPI_Comm comm,
-                   HYPRE_Int nx, HYPRE_Int ny, HYPRE_Int nz,
-                   HYPRE_Int Px, HYPRE_Int Py, HYPRE_Int Pz,
-                   HYPRE_Int cx, HYPRE_Int cy, HYPRE_Int cz,
-                   HYPRE_BigInt *ilower, HYPRE_BigInt *iupper,
-                   HYPRE_Int *nrows, HYPRE_BigInt *num_nonzeros,
-                   HYPRE_Int **nnzrow_ptr, HYPRE_BigInt **rows_ptr,
-                   HYPRE_BigInt **cols_ptr, HYPRE_Real **coefs_ptr)
+buildMatrixEntries(MPI_Comm            comm,
+                   HYPRE_Int           nx,
+                   HYPRE_Int           ny,
+                   HYPRE_Int           nz,
+                   HYPRE_Int           Px,
+                   HYPRE_Int           Py,
+                   HYPRE_Int           Pz,
+                   HYPRE_Int           cx,
+                   HYPRE_Int           cy,
+                   HYPRE_Int           cz,
+                   HYPRE_BigInt       *ilower_ptr,
+                   HYPRE_BigInt       *iupper_ptr,
+                   HYPRE_BigInt       *jlower_ptr,
+                   HYPRE_BigInt       *jupper_ptr,
+                   HYPRE_Int          *nrows_ptr,
+                   HYPRE_BigInt       *num_nonzeros_ptr,
+                   HYPRE_Int         **nnzrow_ptr,
+                   HYPRE_BigInt      **rows_ptr,   /* row indices of length nrows */
+                   HYPRE_BigInt      **rows2_ptr,  /* row indices of length nnz */
+                   HYPRE_BigInt      **cols_ptr,   /* col indices of length nnz */
+                   HYPRE_Real        **coefs_ptr,  /* values of length nnz */
+                   HYPRE_Int           stencil,
+                   HYPRE_ParCSRMatrix *parcsr_ptr)
 {
    HYPRE_Int        num_procs;
    HYPRE_Int        myid;
-
-   HYPRE_Int       *nnzrow;
-   HYPRE_BigInt    *rows;
-   HYPRE_BigInt    *cols;
-   HYPRE_Real      *coefs;
-
-   HYPRE_BigInt    *nx_part;
-   HYPRE_BigInt    *ny_part;
-   HYPRE_BigInt    *nz_part;
-
-   HYPRE_BigInt     nx_local;
-   HYPRE_BigInt     ny_local;
-   HYPRE_BigInt     nz_local;
-   HYPRE_BigInt     nxy_local;
-   HYPRE_BigInt     nyz_local;
-
-   HYPRE_BigInt     big_row_index;
-   HYPRE_Int        row_index_local;
-   HYPRE_Int        cnt;
-
-   HYPRE_Int        nxy;
-   HYPRE_Int        ip, iq, ir;
-   HYPRE_BigInt     ix, iy, iz;
-   HYPRE_BigInt     big_nx, big_ny, big_nxy;
-
-   HYPRE_Int        stencil_size;
    HYPRE_Real       values[4];
+   HYPRE_ParCSRMatrix A;
 
    hypre_MPI_Comm_size(comm, &num_procs );
    hypre_MPI_Comm_rank(comm, &myid );
 
-   // Generate partitioning
-   hypre_GeneratePartitioning(nx, Px, &nx_part);
-   hypre_GeneratePartitioning(ny, Py, &ny_part);
-   hypre_GeneratePartitioning(nz, Pz, &nz_part);
+   HYPRE_Int ip = myid % Px;
+   HYPRE_Int iq = (( myid - ip)/Px) % Py;
+   HYPRE_Int ir = ( myid - ip - Px*iq)/( Px*Py );
 
-   /* compute p, q, r from Px, Py, Pz and myid */
-   ip = myid % Px;
-   iq = (( myid - ip)/Px) % Py;
-   ir = ( myid - ip - Px*iq)/( Px*Py );
+   values[0] = 0;
+   values[1] = -cx;
+   values[2] = -cy;
+   values[3] = -cz;
 
-   nx_local  = nx_part[ip+1] - nx_part[ip];
-   ny_local  = ny_part[iq+1] - ny_part[iq];
-   nz_local  = nz_part[ir+1] - nz_part[ir];
-   nxy_local = nx_local*ny_local;
-   nyz_local = ny_local*nz_local;
-   nxy     = nx*ny;
-   big_nx  = (HYPRE_BigInt) nx;
-   big_ny  = (HYPRE_BigInt) ny;
-   big_nxy = (HYPRE_BigInt) nxy;
-
-   values[0] = 0;   values[1] = -cx;
-   values[2] = -cy; values[3] = -cz;
-   stencil_size = 7;
-   if (nx == 0)
+   if (stencil == 7)
    {
-      stencil_size -= 2;
+      A = (HYPRE_ParCSRMatrix) GenerateLaplacian(comm, nx, ny, nz, Px, Py, Pz, ip, iq, ir, values);
+   }
+   else if (stencil == 9)
+   {
+      A = (HYPRE_ParCSRMatrix) GenerateLaplacian9pt(comm, nx, ny, Px, Py, ip, iq, values);
+   }
+   else if (stencil == 27)
+   {
+      A = (HYPRE_ParCSRMatrix) GenerateLaplacian27pt(comm, nx, ny, nz, Px, Py, Pz, ip, iq, ir, values);
    }
    else
    {
-      values[0] += 2.0*cx;
-   }
-   if (ny == 0)
-   {
-      stencil_size -= 2;
-   }
-   else
-   {
-      values[0] += 2.0*cy;
-   }
-   if (nz == 0)
-   {
-      stencil_size -= 2;
-   }
-   else
-   {
-      values[0] += 2.0*cz;
+      hypre_assert(0);
    }
 
-   *nrows  = nx_local*ny_local*nz_local;
-   *ilower = nz_part[ir]*big_nx*big_ny + ny_part[iq]*big_nx*nz_local + nx_part[ip]*nyz_local;
-   *iupper = *ilower + *nrows - 1;
-
-   // Test Set/Add values before assembly
-   *num_nonzeros = (*nrows)*stencil_size;
-   nnzrow = hypre_CTAlloc(HYPRE_Int, *nrows, HYPRE_MEMORY_HOST);
-   rows   = hypre_CTAlloc(HYPRE_BigInt, *num_nonzeros, HYPRE_MEMORY_HOST);
-   cols   = hypre_CTAlloc(HYPRE_BigInt, *num_nonzeros, HYPRE_MEMORY_HOST);
-   coefs  = hypre_CTAlloc(HYPRE_Real, *num_nonzeros, HYPRE_MEMORY_HOST);
-
-   cnt = 0;
-   for (iz = nz_part[ir]; iz < nz_part[ir+1]; iz++)
-   {
-      for (iy = ny_part[iq]; iy < ny_part[iq+1]; iy++)
-      {
-         for (ix = nx_part[ip]; ix < nx_part[ip+1]; ix++)
-         {
-            row_index_local = (iz - nz_part[ir])*nxy_local +
-                              (iy - ny_part[iq])*nx_local +
-                              (ix - nx_part[ip]);
-            big_row_index   = *ilower + (HYPRE_BigInt) row_index_local;
-            rows[row_index_local] = big_row_index;
-
-            /* Center coefficient */
-            cols[cnt]  = big_row_index;
-            coefs[cnt] = values[0];
-            nnzrow[row_index_local]++;
-            cnt++;
-
-            /* Bottom coefficient */
-            if (iz > 0)
-            {
-               cols[cnt]  = big_row_index - big_nxy;
-               coefs[cnt] = values[3];
-               nnzrow[row_index_local]++;
-               cnt++;
-            }
-
-            /* Top coefficient */
-            if (iz < (nz - 1))
-            {
-               rows[cnt]  = big_row_index;
-               cols[cnt]  = big_row_index + big_nxy;
-               coefs[cnt] = values[3];
-               nnzrow[row_index_local]++;
-               cnt++;
-            }
-
-            /* South coefficient */
-            if (iy > 0)
-            {
-               rows[cnt]  = big_row_index;
-               cols[cnt]  = big_row_index - big_nx;
-               coefs[cnt] = values[2];
-               nnzrow[row_index_local]++;
-               cnt++;
-            }
-
-            /* North coefficient */
-            if (iy < (ny - 1))
-            {
-               rows[cnt]  = big_row_index;
-               cols[cnt]  = big_row_index + big_nx;
-               coefs[cnt] = values[2];
-               nnzrow[row_index_local]++;
-               cnt++;
-            }
-
-            /* West coefficient */
-            if (ix > 0)
-            {
-               rows[cnt]  = big_row_index;
-               cols[cnt]  = big_row_index - 1;
-               coefs[cnt] = values[1];
-               nnzrow[row_index_local]++;
-               cnt++;
-            }
-
-            /* East coefficient */
-            if (ix < (nx - 1))
-            {
-               rows[cnt]  = big_row_index;
-               cols[cnt]  = big_row_index + 1;
-               coefs[cnt] = values[1];
-               nnzrow[row_index_local]++;
-               cnt++;
-            }
-         }
-      }
-   }
+   hypre_ParCSRMatrixMigrate(A, HYPRE_MEMORY_HOST);
+   getParCSRMatrixData(A, nrows_ptr, num_nonzeros_ptr, nnzrow_ptr, rows_ptr, rows2_ptr, cols_ptr, coefs_ptr);
 
    // Set pointers
-   *num_nonzeros = cnt;
-   *nnzrow_ptr   = nnzrow;
-   *rows_ptr     = rows;
-   *cols_ptr     = cols;
-   *coefs_ptr    = coefs;
-
-   /* Free memory */
-   hypre_TFree(nx_part, HYPRE_MEMORY_HOST);
-   hypre_TFree(ny_part, HYPRE_MEMORY_HOST);
-   hypre_TFree(nz_part, HYPRE_MEMORY_HOST);
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int buildRefMatrix(MPI_Comm comm,
-                         HYPRE_BigInt ilower, HYPRE_BigInt iupper,
-                         HYPRE_BigInt num_nonzeros, HYPRE_Int *nnzrow,
-                         HYPRE_BigInt *rows, HYPRE_BigInt *cols,
-                         HYPRE_Real *coefs, HYPRE_IJMatrix *ij_ref_ptr)
-{
-   HYPRE_IJMatrix  ij_ref;
-   HYPRE_Int       nrows;
-
-   nrows = (HYPRE_Int) (iupper - ilower) + 1;
-
-   HYPRE_IJMatrixCreate(comm, ilower, iupper, ilower, iupper, &ij_ref);
-   HYPRE_IJMatrixSetObjectType(ij_ref, HYPRE_PARCSR);
-   HYPRE_IJMatrixInitialize_v2(ij_ref, HYPRE_MEMORY_HOST);
-   HYPRE_IJMatrixSetValues(ij_ref, nrows, nnzrow, rows, cols, coefs);
-   HYPRE_IJMatrixAssemble(ij_ref);
-
-   // Set pointer to matrix
-   *ij_ref_ptr = ij_ref;
+   *ilower_ptr = hypre_ParCSRMatrixFirstRowIndex(A);
+   *iupper_ptr = hypre_ParCSRMatrixLastRowIndex(A);
+   *jlower_ptr = hypre_ParCSRMatrixFirstColDiag(A);
+   *jupper_ptr = hypre_ParCSRMatrixLastColDiag(A);
+   *parcsr_ptr = A;
 
    return hypre_error_flag;
 }
 
 HYPRE_Int
-checkMatrix(HYPRE_IJMatrix ij_ref, HYPRE_IJMatrix ij_A)
+getParCSRMatrixData(HYPRE_ParCSRMatrix  A,
+                    HYPRE_Int          *nrows_ptr,
+                    HYPRE_BigInt       *num_nonzeros_ptr,
+                    HYPRE_Int         **nnzrow_ptr,
+                    HYPRE_BigInt      **rows_ptr,
+                    HYPRE_BigInt      **rows2_ptr,
+                    HYPRE_BigInt      **cols_ptr,
+                    HYPRE_Real        **coefs_ptr)
 {
-   MPI_Comm              comm = hypre_IJMatrixComm(ij_ref);
-   HYPRE_ParCSRMatrix    parcsr_A = (HYPRE_ParCSRMatrix) hypre_IJMatrixObject(ij_A);
-   HYPRE_ParCSRMatrix    h_parcsr_ref = (HYPRE_ParCSRMatrix) hypre_IJMatrixObject(ij_ref);
-   HYPRE_ParCSRMatrix    h_parcsr_A;
-   HYPRE_ParCSRMatrix    parcsr_error;
-   HYPRE_Int             memory_loc;
-   HYPRE_Int             myid;
-   HYPRE_Real            fnorm;
+   hypre_CSRMatrix    *A_diag   = hypre_ParCSRMatrixDiag(A);
+   hypre_CSRMatrix    *A_offd   = hypre_ParCSRMatrixOffd(A);
+   HYPRE_Int          *A_diag_i = hypre_CSRMatrixI(A_diag);
+   HYPRE_Int          *A_diag_j = hypre_CSRMatrixJ(A_diag);
+   HYPRE_Int          *A_offd_i = hypre_CSRMatrixI(A_offd);
+   HYPRE_Int          *A_offd_j = hypre_CSRMatrixJ(A_offd);
+   HYPRE_BigInt       *col_map_offd_A = hypre_ParCSRMatrixColMapOffd(A);
 
-   hypre_MPI_Comm_rank(comm, &myid );
-   memory_loc = hypre_GetActualMemLocation(hypre_IJMatrixMemoryLocation(ij_A));
-   if (memory_loc == HYPRE_MEMORY_DEVICE)
+   HYPRE_Int          ilower = hypre_ParCSRMatrixFirstRowIndex(A);
+   HYPRE_Int          jlower = hypre_ParCSRMatrixFirstColDiag(A);
+
+   HYPRE_Int          nrows;
+   HYPRE_BigInt       num_nonzeros;
+   HYPRE_Int         *nnzrow;
+   HYPRE_BigInt      *rows;
+   HYPRE_BigInt      *rows2;
+   HYPRE_BigInt      *cols;
+   HYPRE_Real        *coefs;
+   HYPRE_Int          i, j, k;
+
+   nrows  = hypre_ParCSRMatrixNumRows(A);
+   num_nonzeros = hypre_CSRMatrixNumNonzeros(A_diag) + hypre_CSRMatrixNumNonzeros(A_offd);
+   nnzrow = hypre_CTAlloc(HYPRE_Int,    nrows,        HYPRE_MEMORY_HOST);
+   rows   = hypre_CTAlloc(HYPRE_BigInt, nrows,        HYPRE_MEMORY_HOST);
+   rows2  = hypre_CTAlloc(HYPRE_BigInt, num_nonzeros, HYPRE_MEMORY_HOST);
+   cols   = hypre_CTAlloc(HYPRE_BigInt, num_nonzeros, HYPRE_MEMORY_HOST);
+   coefs  = hypre_CTAlloc(HYPRE_Real,   num_nonzeros, HYPRE_MEMORY_HOST);
+
+   k = 0;
+#if 0
+   for (i = 0; i < nrows; i++)
    {
-      h_parcsr_A = hypre_ParCSRMatrixClone_v2(parcsr_A, 1, HYPRE_MEMORY_HOST);
+      nnzrow[i] = A_diag_i[i+1] - A_diag_i[i] +
+                  A_offd_i[i+1] - A_offd_i[i];
+      rows[i]   = ilower + i;
+
+      for (j = A_diag_i[i]; j < A_diag_i[i+1]; j++)
+      {
+         rows2[k]   = ilower + (HYPRE_BigInt) i;
+         cols[k]    = jlower + (HYPRE_BigInt) A_diag_j[j];
+         coefs[k++] = hypre_CSRMatrixData(A_diag)[j];
+      }
+      for (j = A_offd_i[i]; j < A_offd_i[i+1]; j++)
+      {
+         rows2[k]   = ilower + (HYPRE_BigInt) i;
+         cols[k]    = hypre_ParCSRMatrixColMapOffd(A)[A_offd_j[j]];
+         coefs[k++] = hypre_CSRMatrixData(A_offd)[j];
+      }
    }
-   else
+#else
+   for (i = nrows-1; i >= 0; i--)
    {
-      h_parcsr_A = parcsr_A;
+      nnzrow[nrows-1-i] = A_diag_i[i+1] - A_diag_i[i] +
+                          A_offd_i[i+1] - A_offd_i[i];
+      rows[nrows-1-i]   = ilower + i;
+
+      for (j = A_diag_i[i]; j < A_diag_i[i+1]; j++)
+      {
+         rows2[k]   = ilower + (HYPRE_BigInt) i;
+         cols[k]    = jlower + (HYPRE_BigInt) A_diag_j[j];
+         coefs[k++] = hypre_CSRMatrixData(A_diag)[j];
+      }
+      for (j = A_offd_i[i]; j < A_offd_i[i+1]; j++)
+      {
+         rows2[k]   = ilower + (HYPRE_BigInt) i;
+         cols[k]    = col_map_offd_A[A_offd_j[j]];
+         coefs[k++] = hypre_CSRMatrixData(A_offd)[j];
+      }
    }
+#endif
+
+   hypre_assert(k == num_nonzeros);
+
+   // Set pointers
+   *nrows_ptr        = nrows;
+   *num_nonzeros_ptr = num_nonzeros;
+   *nnzrow_ptr       = nnzrow;
+   *rows_ptr         = rows;
+   *rows2_ptr        = rows2;
+   *cols_ptr         = cols;
+   *coefs_ptr        = coefs;
+
+   return hypre_error_flag;
+}
+
+
+HYPRE_Int
+checkMatrix(HYPRE_ParCSRMatrix h_parcsr_ref, HYPRE_IJMatrix ij_A)
+{
+   MPI_Comm            comm         = hypre_IJMatrixComm(ij_A);
+   HYPRE_ParCSRMatrix  parcsr_A     = (HYPRE_ParCSRMatrix) hypre_IJMatrixObject(ij_A);
+   HYPRE_ParCSRMatrix  h_parcsr_A;
+   HYPRE_ParCSRMatrix  parcsr_error;
+   HYPRE_Int           myid;
+   HYPRE_Real          fnorm;
+
+   hypre_MPI_Comm_rank(comm, &myid);
+
+   h_parcsr_A = hypre_ParCSRMatrixClone_v2(parcsr_A, 1, HYPRE_MEMORY_HOST);
 
    // Check norm of (parcsr_ref - parcsr_A)
    hypre_ParcsrAdd(1.0, h_parcsr_ref, -1.0, h_parcsr_A, &parcsr_error);
    fnorm = hypre_ParCSRMatrixFnorm(parcsr_error);
+
    if (myid == 0)
    {
-      hypre_printf("Frobenius norm of (A_ref - A): %f\n", fnorm);
+      hypre_printf("Frobenius norm of (A_ref - A): %e\n", fnorm);
    }
+
+   HYPRE_ParCSRMatrixDestroy(h_parcsr_A);
+   HYPRE_ParCSRMatrixDestroy(parcsr_error);
 
    return hypre_error_flag;
 }
 
 HYPRE_Int
-test_SetSet(MPI_Comm comm, HYPRE_Int memory_loc,
-            HYPRE_BigInt ilower, HYPRE_BigInt iupper,
-            HYPRE_Int nrows, HYPRE_BigInt num_nonzeros,
-            HYPRE_Int nchunks, HYPRE_Int *h_nnzrow, HYPRE_Int *nnzrow,
-            HYPRE_BigInt *rows, HYPRE_BigInt *cols,
-            HYPRE_Real *coefs, HYPRE_IJMatrix *ij_A_ptr)
+test_Set(MPI_Comm             comm,
+         HYPRE_MemoryLocation memory_location,
+         HYPRE_Int            option,           /* 1 or 2 */
+         HYPRE_BigInt         ilower,
+         HYPRE_BigInt         iupper,
+         HYPRE_Int            nrows,
+         HYPRE_BigInt         num_nonzeros,
+         HYPRE_Int            nchunks,
+         HYPRE_Int           *h_nnzrow,
+         HYPRE_Int           *nnzrow,
+         HYPRE_BigInt        *rows,             /* option = 1: length of nrows, = 2: length of num_nonzeros */
+         HYPRE_BigInt        *cols,
+         HYPRE_Real          *coefs,
+         HYPRE_IJMatrix      *ij_A_ptr)
 {
    HYPRE_IJMatrix  ij_A;
    HYPRE_Int       i, chunk, chunk_size;
-   HYPRE_Int       row_cnt, nnz_cnt;
-   HYPRE_Int       nrows_left;
+   HYPRE_Int       time_index;
+   HYPRE_Int      *h_rowptr;
+
+   HYPRE_IJMatrixCreate(comm, ilower, iupper, ilower, iupper, &ij_A);
+   HYPRE_IJMatrixSetObjectType(ij_A, HYPRE_PARCSR);
+   HYPRE_IJMatrixInitialize_v2(ij_A, memory_location);
+   HYPRE_IJMatrixSetOMPFlag(ij_A, 1);
+
+   h_rowptr = hypre_CTAlloc(HYPRE_Int, nrows+1, HYPRE_MEMORY_HOST);
+   for (i = 1; i < nrows + 1; i++)
+   {
+      h_rowptr[i] = h_rowptr[i-1] + h_nnzrow[i-1];
+   }
+   hypre_assert(h_rowptr[nrows] == num_nonzeros);
+
+   chunk_size = nrows / nchunks;
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+   HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
+#if defined(CUDA_PROFILER)
+   cudaProfilerStart();
+#endif
+#endif
+
+   time_index = hypre_InitializeTiming("Test SetValues");
+   hypre_BeginTiming(time_index);
+   for (chunk = 0; chunk < nrows; chunk += chunk_size)
+   {
+      chunk_size = hypre_min(chunk_size, nrows-chunk);
+
+      if (1 == option)
+      {
+         HYPRE_IJMatrixSetValues(ij_A, chunk_size, &nnzrow[chunk], &rows[chunk],
+                                 &cols[h_rowptr[chunk]], &coefs[h_rowptr[chunk]]);
+      }
+      else
+      {
+         HYPRE_IJMatrixSetValues(ij_A, h_rowptr[chunk+chunk_size]-h_rowptr[chunk],
+                                 NULL, &rows[h_rowptr[chunk]],
+                                 &cols[h_rowptr[chunk]], &coefs[h_rowptr[chunk]]);
+      }
+   }
+
+   // Assemble matrix
+   HYPRE_IJMatrixAssemble(ij_A);
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+   HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
+#if defined(CUDA_PROFILER)
+   cudaProfilerStop();
+#endif
+#endif
+
+   // Finalize timer
+   hypre_EndTiming(time_index);
+   hypre_PrintTiming("Test SetValues", hypre_MPI_COMM_WORLD);
+   hypre_FinalizeTiming(time_index);
+   hypre_ClearTiming();
+
+   // Free memory
+   hypre_TFree(h_rowptr, HYPRE_MEMORY_HOST);
+
+   // Set pointer to matrix
+   *ij_A_ptr = ij_A;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+test_SetOffProc(HYPRE_ParCSRMatrix    parcsr_A,
+                HYPRE_MemoryLocation  memory_location,
+                HYPRE_Int             nchunks,
+                HYPRE_Int             option,           /* 1 or 2 */
+                HYPRE_IJMatrix       *ij_AT_ptr)
+{
+   MPI_Comm            comm = hypre_ParCSRMatrixComm(parcsr_A);
+   HYPRE_ParCSRMatrix  parcsr_AT;
+   HYPRE_IJMatrix      ij_AT;
+
+   HYPRE_Int           nrows;
+   HYPRE_BigInt        num_nonzeros;
+   HYPRE_BigInt        ilower, iupper;
+
+   HYPRE_Int          *h_nnzrow;
+   HYPRE_BigInt       *h_rows1;
+   HYPRE_BigInt       *h_rows2;
+   HYPRE_BigInt       *h_cols;
+   HYPRE_Real         *h_coefs;
+
+   HYPRE_Int          *d_nnzrow;
+   HYPRE_BigInt       *d_rows;
+   HYPRE_BigInt       *d_cols;
+   HYPRE_Real         *d_coefs;
+
+   HYPRE_Int          *nnzrow;
+   HYPRE_BigInt       *rows;
+   HYPRE_BigInt       *cols;
+   HYPRE_Real         *coefs;
+
+   HYPRE_Int          *h_rowptr;
+
+   HYPRE_Int           time_index;
+   HYPRE_Int           chunk_size;
+   HYPRE_Int           chunk;
+   HYPRE_Int           i;
+
+   hypre_ParCSRMatrixTranspose(parcsr_A, &parcsr_AT, 1);
+   ilower = hypre_ParCSRMatrixFirstRowIndex(parcsr_AT);
+   iupper = hypre_ParCSRMatrixLastRowIndex(parcsr_AT);
+   getParCSRMatrixData(parcsr_AT, &nrows, &num_nonzeros, &h_nnzrow, &h_rows1, &h_rows2, &h_cols, &h_coefs);
+   HYPRE_ParCSRMatrixDestroy(parcsr_AT);
+
+   switch (memory_location)
+   {
+      case HYPRE_MEMORY_DEVICE:
+         d_nnzrow = hypre_TAlloc(HYPRE_Int,    nrows,        HYPRE_MEMORY_DEVICE);
+         d_cols   = hypre_TAlloc(HYPRE_BigInt, num_nonzeros, HYPRE_MEMORY_DEVICE);
+         d_coefs  = hypre_TAlloc(HYPRE_Real,   num_nonzeros, HYPRE_MEMORY_DEVICE);
+         if (option == 1)
+         {
+            d_rows  = hypre_TAlloc(HYPRE_BigInt, nrows,        HYPRE_MEMORY_DEVICE);
+            hypre_TMemcpy(d_rows,  h_rows1,  HYPRE_BigInt, nrows,        HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+         }
+         else
+         {
+            d_rows  = hypre_TAlloc(HYPRE_BigInt, num_nonzeros, HYPRE_MEMORY_DEVICE);
+            hypre_TMemcpy(d_rows,  h_rows2,  HYPRE_BigInt, num_nonzeros, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+         }
+         hypre_TMemcpy(d_nnzrow, h_nnzrow, HYPRE_Int,    nrows,        HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(d_cols,   h_cols,   HYPRE_BigInt, num_nonzeros, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(d_coefs,  h_coefs,  HYPRE_Real,   num_nonzeros, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+
+         nnzrow = d_nnzrow;
+         rows   = d_rows;
+         cols   = d_cols;
+         coefs  = d_coefs;
+         break;
+
+      case HYPRE_MEMORY_HOST:
+         nnzrow = h_nnzrow;
+         rows   = (option == 1) ? h_rows1 : h_rows2;
+         cols   = h_cols;
+         coefs  = h_coefs;
+         break;
+
+      case HYPRE_MEMORY_UNDEFINED:
+         return -1;
+   }
+
+   // Create transpose with SetValues
+   HYPRE_IJMatrixCreate(comm, ilower, iupper, ilower, iupper, &ij_AT);
+   HYPRE_IJMatrixSetObjectType(ij_AT, HYPRE_PARCSR);
+   HYPRE_IJMatrixInitialize_v2(ij_AT, memory_location);
+   HYPRE_IJMatrixSetOMPFlag(ij_AT, 1);
+
+   h_rowptr = hypre_CTAlloc(HYPRE_Int, nrows+1, HYPRE_MEMORY_HOST);
+   for (i = 1; i < nrows + 1; i++)
+   {
+      h_rowptr[i] = h_rowptr[i-1] + h_nnzrow[i-1];
+   }
+   hypre_assert(h_rowptr[nrows] == num_nonzeros);
+
+   chunk_size = nrows / nchunks;
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+   HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
+#endif
+
+   time_index = hypre_InitializeTiming("Test SetValues OffProc");
+   hypre_BeginTiming(time_index);
+
+   //cudaProfilerStart();
+
+   for (chunk = 0; chunk < nrows; chunk += chunk_size)
+   {
+      chunk_size = hypre_min(chunk_size, nrows-chunk);
+
+      if (1 == option)
+      {
+         HYPRE_IJMatrixSetValues(ij_AT, chunk_size, &nnzrow[chunk], &rows[chunk],
+                                 &cols[h_rowptr[chunk]], &coefs[h_rowptr[chunk]]);
+      }
+      else
+      {
+         HYPRE_IJMatrixSetValues(ij_AT, h_rowptr[chunk+chunk_size]-h_rowptr[chunk],
+                                 NULL, &rows[h_rowptr[chunk]],
+                                 &cols[h_rowptr[chunk]], &coefs[h_rowptr[chunk]]);
+      }
+   }
+
+   // Assemble matrix
+   HYPRE_IJMatrixAssemble(ij_AT);
+
+   //cudaProfilerStop();
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+   HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
+#endif
+
+   hypre_EndTiming(time_index);
+   hypre_PrintTiming("Test SetValues OffProc", hypre_MPI_COMM_WORLD);
+   hypre_FinalizeTiming(time_index);
+   hypre_ClearTiming();
+
+   // Set pointer to output
+   *ij_AT_ptr = ij_AT;
+
+   // Free memory
+   hypre_TFree(h_rowptr, HYPRE_MEMORY_HOST);
+   if (memory_location == HYPRE_MEMORY_DEVICE)
+   {
+      hypre_TFree(d_nnzrow, HYPRE_MEMORY_DEVICE);
+      hypre_TFree(d_rows,   HYPRE_MEMORY_DEVICE);
+      hypre_TFree(d_cols,   HYPRE_MEMORY_DEVICE);
+      hypre_TFree(d_coefs,  HYPRE_MEMORY_DEVICE);
+   }
+   hypre_TFree(h_nnzrow, HYPRE_MEMORY_HOST);
+   hypre_TFree(h_rows1,  HYPRE_MEMORY_HOST);
+   hypre_TFree(h_rows2,  HYPRE_MEMORY_HOST);
+   hypre_TFree(h_cols,   HYPRE_MEMORY_HOST);
+   hypre_TFree(h_coefs,  HYPRE_MEMORY_HOST);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+test_SetSet(MPI_Comm             comm,
+            HYPRE_MemoryLocation memory_location,
+            HYPRE_Int            option,           /* 1 or 2 */
+            HYPRE_BigInt         ilower,
+            HYPRE_BigInt         iupper,
+            HYPRE_Int            nrows,
+            HYPRE_BigInt         num_nonzeros,
+            HYPRE_Int            nchunks,
+            HYPRE_Int           *h_nnzrow,
+            HYPRE_Int           *nnzrow,
+            HYPRE_BigInt        *rows,             /* option = 1: length of nrows, = 2: length of num_nonzeros */
+            HYPRE_BigInt        *cols,
+            HYPRE_Real          *coefs,
+            HYPRE_IJMatrix      *ij_A_ptr)
+{
+   HYPRE_IJMatrix  ij_A;
+   HYPRE_Int       i, chunk, chunk_size;
+   HYPRE_Int       time_index;
+   HYPRE_Int      *h_rowptr;
    HYPRE_Real     *new_coefs;
 
    HYPRE_IJMatrixCreate(comm, ilower, iupper, ilower, iupper, &ij_A);
    HYPRE_IJMatrixSetObjectType(ij_A, HYPRE_PARCSR);
-   HYPRE_IJMatrixInitialize_v2(ij_A, memory_loc);
+   HYPRE_IJMatrixInitialize_v2(ij_A, memory_location);
+   HYPRE_IJMatrixSetOMPFlag(ij_A, 1);
 
-   // First Set
-   chunk_size = nrows/nchunks;
-   new_coefs = hypre_TAlloc(HYPRE_Real, num_nonzeros, memory_loc);
+   h_rowptr = hypre_CTAlloc(HYPRE_Int, nrows+1, HYPRE_MEMORY_HOST);
+   for (i = 1; i < nrows + 1; i++)
+   {
+      h_rowptr[i] = h_rowptr[i-1] + h_nnzrow[i-1];
+   }
+   hypre_assert(h_rowptr[nrows] == num_nonzeros);
+
+   chunk_size = nrows / nchunks;
+   new_coefs = hypre_TAlloc(HYPRE_Real, num_nonzeros, memory_location);
    for (i = 0; i < num_nonzeros; i++)
    {
       new_coefs[i] = 2.0*coefs[i];
    }
-   row_cnt = 0; nnz_cnt = 0;
-   for (chunk = 0; chunk < nchunks; chunk++)
-   {
-      HYPRE_IJMatrixSetValues(ij_A, chunk_size, &nnzrow[row_cnt], &rows[row_cnt],
-                              &cols[nnz_cnt], &new_coefs[nnz_cnt]);
 
-      for (i = row_cnt; i < (row_cnt + chunk_size); i++)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+   HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
+#if defined(CUDA_PROFILER)
+   cudaProfilerStart();
+#endif
+#endif
+
+   // First Set
+   time_index = hypre_InitializeTiming("Test Set/Set");
+   hypre_BeginTiming(time_index);
+   for (chunk = 0; chunk < nrows; chunk += chunk_size)
+   {
+      chunk_size = hypre_min(chunk_size, nrows-chunk);
+
+      if (1 == option)
       {
-         nnz_cnt += h_nnzrow[i];
+         HYPRE_IJMatrixSetValues(ij_A, chunk_size, &nnzrow[chunk], &rows[chunk],
+                                 &cols[h_rowptr[chunk]], &new_coefs[h_rowptr[chunk]]);
       }
-      row_cnt += chunk_size;
-   }
-
-   nrows_left = nrows - row_cnt;
-   if (nrows_left > 0)
-   {
-      HYPRE_IJMatrixSetValues(ij_A, nrows_left, &nnzrow[row_cnt], &rows[row_cnt],
-                              &cols[nnz_cnt], &new_coefs[nnz_cnt]);
+      else
+      {
+         HYPRE_IJMatrixSetValues(ij_A, h_rowptr[chunk+chunk_size]-h_rowptr[chunk],
+                                 NULL, &rows[h_rowptr[chunk]],
+                                 &cols[h_rowptr[chunk]], &new_coefs[h_rowptr[chunk]]);
+      }
    }
 
    // Second set
-   row_cnt = 0; nnz_cnt = 0;
-   for (chunk = 0; chunk < nchunks; chunk++)
+   for (chunk = 0; chunk < nrows; chunk += chunk_size)
    {
-      HYPRE_IJMatrixSetValues(ij_A, chunk_size, &nnzrow[row_cnt], &rows[row_cnt],
-                              &cols[nnz_cnt], &coefs[nnz_cnt]);
+      chunk_size = hypre_min(chunk_size, nrows-chunk);
 
-      for (i = row_cnt; i < (row_cnt + chunk_size); i++)
+      if (1 == option)
       {
-         nnz_cnt += h_nnzrow[i];
+         HYPRE_IJMatrixSetValues(ij_A, chunk_size, &nnzrow[chunk], &rows[chunk],
+                                 &cols[h_rowptr[chunk]], &coefs[h_rowptr[chunk]]);
       }
-      row_cnt += chunk_size;
-   }
-
-   nrows_left = nrows - row_cnt;
-   if (nrows_left > 0)
-   {
-      HYPRE_IJMatrixSetValues(ij_A, nrows_left, &nnzrow[row_cnt], &rows[row_cnt],
-                              &cols[nnz_cnt], &coefs[nnz_cnt]);
+      else
+      {
+         HYPRE_IJMatrixSetValues(ij_A, h_rowptr[chunk+chunk_size]-h_rowptr[chunk],
+                                 NULL, &rows[h_rowptr[chunk]],
+                                 &cols[h_rowptr[chunk]], &coefs[h_rowptr[chunk]]);
+      }
    }
 
    // Assemble matrix
    HYPRE_IJMatrixAssemble(ij_A);
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+   HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
+#if defined(CUDA_PROFILER)
+   cudaProfilerStop();
+#endif
+#endif
+
+   // Finalize timer
+   hypre_EndTiming(time_index);
+   hypre_PrintTiming("Test Set/Set", hypre_MPI_COMM_WORLD);
+   hypre_FinalizeTiming(time_index);
+   hypre_ClearTiming();
 
    // Free memory
-   hypre_TFree(new_coefs, memory_loc);
+   hypre_TFree(h_rowptr, HYPRE_MEMORY_HOST);
+   hypre_TFree(new_coefs, memory_location);
 
    // Set pointer to matrix
    *ij_A_ptr = ij_A;
@@ -657,167 +983,232 @@ test_SetSet(MPI_Comm comm, HYPRE_Int memory_loc,
 }
 
 HYPRE_Int
-test_AddSet(MPI_Comm comm, HYPRE_Int memory_loc,
-            HYPRE_BigInt ilower, HYPRE_BigInt iupper,
-            HYPRE_Int nrows, HYPRE_BigInt num_nonzeros,
-            HYPRE_Int nchunks, HYPRE_Int *h_nnzrow, HYPRE_Int *nnzrow,
-            HYPRE_BigInt *rows, HYPRE_BigInt *cols,
-            HYPRE_Real *coefs, HYPRE_IJMatrix *ij_A_ptr)
+test_AddSet(MPI_Comm             comm,
+            HYPRE_MemoryLocation memory_location,
+            HYPRE_Int            option,           /* 1 or 2 */
+            HYPRE_BigInt         ilower,
+            HYPRE_BigInt         iupper,
+            HYPRE_Int            nrows,
+            HYPRE_BigInt         num_nonzeros,
+            HYPRE_Int            nchunks,
+            HYPRE_Int           *h_nnzrow,
+            HYPRE_Int           *nnzrow,
+            HYPRE_BigInt        *rows,             /* option = 1: length of nrows, = 2: length of num_nonzeros */
+            HYPRE_BigInt        *cols,
+            HYPRE_Real          *coefs,
+            HYPRE_IJMatrix      *ij_A_ptr)
 {
    HYPRE_IJMatrix  ij_A;
    HYPRE_Int       i, chunk, chunk_size;
-   HYPRE_Int       row_cnt, nnz_cnt;
-   HYPRE_Int       nrows_left;
-
-   HYPRE_IJMatrixCreate(comm, ilower, iupper, ilower, iupper, &ij_A);
-   HYPRE_IJMatrixSetObjectType(ij_A, HYPRE_PARCSR);
-   HYPRE_IJMatrixInitialize_v2(ij_A, memory_loc);
-
-   // First Add
-   chunk_size = nrows/nchunks;
-   row_cnt = 0; nnz_cnt = 0;
-   for (chunk = 0; chunk < nchunks; chunk++)
-   {
-      HYPRE_IJMatrixAddToValues(ij_A, chunk_size, &nnzrow[row_cnt], &rows[row_cnt],
-                                &cols[nnz_cnt], &coefs[nnz_cnt]);
-
-      for (i = row_cnt; i < (row_cnt + chunk_size); i++)
-      {
-         nnz_cnt += h_nnzrow[i];
-      }
-      row_cnt += chunk_size;
-   }
-
-   nrows_left = nrows - row_cnt;
-   if (nrows_left > 0)
-   {
-      HYPRE_IJMatrixAddToValues(ij_A, nrows_left, &nnzrow[row_cnt], &rows[row_cnt],
-                                &cols[nnz_cnt], &coefs[nnz_cnt]);
-   }
-
-   // Then Set
-   row_cnt = 0; nnz_cnt = 0;
-   for (chunk = 0; chunk < nchunks; chunk++)
-   {
-      HYPRE_IJMatrixSetValues(ij_A, chunk_size, &nnzrow[row_cnt], &rows[row_cnt],
-                              &cols[nnz_cnt], &coefs[nnz_cnt]);
-
-      for (i = row_cnt; i < (row_cnt + chunk_size); i++)
-      {
-         nnz_cnt += h_nnzrow[i];
-      }
-      row_cnt += chunk_size;
-   }
-
-   nrows_left = nrows - row_cnt;
-   if (nrows_left > 0)
-   {
-      HYPRE_IJMatrixSetValues(ij_A, nrows_left, &nnzrow[row_cnt], &rows[row_cnt],
-                              &cols[nnz_cnt], &coefs[nnz_cnt]);
-   }
-
-   // Assemble matrix
-   HYPRE_IJMatrixAssemble(ij_A);
-
-   // Set pointer to matrix
-   *ij_A_ptr = ij_A;
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-test_SetAddSet(MPI_Comm comm, HYPRE_Int memory_loc,
-               HYPRE_BigInt ilower, HYPRE_BigInt iupper,
-               HYPRE_Int nrows, HYPRE_BigInt num_nonzeros,
-               HYPRE_Int nchunks, HYPRE_Int *h_nnzrow, HYPRE_Int *nnzrow,
-               HYPRE_BigInt *rows, HYPRE_BigInt *cols,
-               HYPRE_Real *coefs, HYPRE_IJMatrix *ij_A_ptr)
-{
-   HYPRE_IJMatrix  ij_A;
-   HYPRE_Int       i, chunk, chunk_size;
-   HYPRE_Int       row_cnt, nnz_cnt;
-   HYPRE_Int       nrows_left;
+   HYPRE_Int       time_index;
+   HYPRE_Int      *h_rowptr;
    HYPRE_Real     *new_coefs;
 
    HYPRE_IJMatrixCreate(comm, ilower, iupper, ilower, iupper, &ij_A);
    HYPRE_IJMatrixSetObjectType(ij_A, HYPRE_PARCSR);
-   HYPRE_IJMatrixInitialize_v2(ij_A, memory_loc);
+   HYPRE_IJMatrixInitialize_v2(ij_A, memory_location);
+   HYPRE_IJMatrixSetOMPFlag(ij_A, 1);
 
-   // First Set
-   new_coefs = hypre_TAlloc(HYPRE_Real, num_nonzeros, memory_loc);
+   h_rowptr = hypre_CTAlloc(HYPRE_Int, nrows+1, HYPRE_MEMORY_HOST);
+   for (i = 1; i < nrows + 1; i++)
+   {
+      h_rowptr[i] = h_rowptr[i-1] + h_nnzrow[i-1];
+   }
+   hypre_assert(h_rowptr[nrows] == num_nonzeros);
+
+   chunk_size = nrows / nchunks;
+   new_coefs = hypre_TAlloc(HYPRE_Real, num_nonzeros, memory_location);
    for (i = 0; i < num_nonzeros; i++)
    {
       new_coefs[i] = 2.0*coefs[i];
    }
-   chunk_size = nrows/nchunks;
-   row_cnt = 0; nnz_cnt = 0;
-   for (chunk = 0; chunk < nchunks; chunk++)
-   {
-      HYPRE_IJMatrixSetValues(ij_A, chunk_size, &nnzrow[row_cnt], &rows[row_cnt],
-                              &cols[nnz_cnt], &new_coefs[nnz_cnt]);
 
-      for (i = row_cnt; i < (row_cnt + chunk_size); i++)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+   HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
+#if defined(CUDA_PROFILER)
+   cudaProfilerStart();
+#endif
+#endif
+
+   // First Add
+   time_index = hypre_InitializeTiming("Test Add/Set");
+   hypre_BeginTiming(time_index);
+   for (chunk = 0; chunk < nrows; chunk += chunk_size)
+   {
+      chunk_size = hypre_min(chunk_size, nrows-chunk);
+
+      if (1 == option)
       {
-         nnz_cnt += h_nnzrow[i];
+         HYPRE_IJMatrixAddToValues(ij_A, chunk_size, &nnzrow[chunk], &rows[chunk],
+                                   &cols[h_rowptr[chunk]], &new_coefs[h_rowptr[chunk]]);
       }
-      row_cnt += chunk_size;
-   }
-
-   nrows_left = nrows - row_cnt;
-   if (nrows_left > 0)
-   {
-      HYPRE_IJMatrixSetValues(ij_A, nrows_left, &nnzrow[row_cnt], &rows[row_cnt],
-                              &cols[nnz_cnt], &new_coefs[nnz_cnt]);
-   }
-
-   // Then Add ...
-   row_cnt = 0; nnz_cnt = 0;
-   for (chunk = 0; chunk < nchunks; chunk++)
-   {
-      HYPRE_IJMatrixAddToValues(ij_A, chunk_size, &nnzrow[row_cnt], &rows[row_cnt],
-                                &cols[nnz_cnt], &coefs[nnz_cnt]);
-
-      for (i = row_cnt; i < (row_cnt + chunk_size); i++)
+      else
       {
-         nnz_cnt += h_nnzrow[i];
+         HYPRE_IJMatrixAddToValues(ij_A, h_rowptr[chunk+chunk_size]-h_rowptr[chunk],
+                                   NULL, &rows[h_rowptr[chunk]],
+                                   &cols[h_rowptr[chunk]], &new_coefs[h_rowptr[chunk]]);
       }
-      row_cnt += chunk_size;
    }
 
-   nrows_left = nrows - row_cnt;
-   if (nrows_left > 0)
+   // Then Set
+   for (chunk = 0; chunk < nrows; chunk += chunk_size)
    {
-      HYPRE_IJMatrixAddToValues(ij_A, nrows_left, &nnzrow[row_cnt], &rows[row_cnt],
-                                &cols[nnz_cnt], &coefs[nnz_cnt]);
-   }
+      chunk_size = hypre_min(chunk_size, nrows-chunk);
 
-   // Final Set with original coefficients
-   chunk_size = nrows/nchunks;
-   row_cnt = 0; nnz_cnt = 0;
-   for (chunk = 0; chunk < nchunks; chunk++)
-   {
-      HYPRE_IJMatrixSetValues(ij_A, chunk_size, &nnzrow[row_cnt], &rows[row_cnt],
-                              &cols[nnz_cnt], &coefs[nnz_cnt]);
-
-      for (i = row_cnt; i < (row_cnt + chunk_size); i++)
+      if (1 == option)
       {
-         nnz_cnt += h_nnzrow[i];
+         HYPRE_IJMatrixSetValues(ij_A, chunk_size, &nnzrow[chunk], &rows[chunk],
+                                 &cols[h_rowptr[chunk]], &coefs[h_rowptr[chunk]]);
       }
-      row_cnt += chunk_size;
-   }
-
-   nrows_left = nrows - row_cnt;
-   if (nrows_left > 0)
-   {
-      HYPRE_IJMatrixSetValues(ij_A, nrows_left, &nnzrow[row_cnt], &rows[row_cnt],
-                              &cols[nnz_cnt], &coefs[nnz_cnt]);
+      else
+      {
+         HYPRE_IJMatrixSetValues(ij_A, h_rowptr[chunk+chunk_size]-h_rowptr[chunk],
+                                 NULL, &rows[h_rowptr[chunk]],
+                                 &cols[h_rowptr[chunk]], &coefs[h_rowptr[chunk]]);
+      }
    }
 
    // Assemble matrix
    HYPRE_IJMatrixAssemble(ij_A);
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+   HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
+#if defined(CUDA_PROFILER)
+   cudaProfilerStop();
+#endif
+#endif
+
+   // Finalize timer
+   hypre_EndTiming(time_index);
+   hypre_PrintTiming("Test Add/Set", hypre_MPI_COMM_WORLD);
+   hypre_FinalizeTiming(time_index);
+   hypre_ClearTiming();
+
    // Free memory
-   hypre_TFree(new_coefs, memory_loc);
+   hypre_TFree(h_rowptr, HYPRE_MEMORY_HOST);
+   hypre_TFree(new_coefs, memory_location);
+
+   // Set pointer to matrix
+   *ij_A_ptr = ij_A;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+test_SetAddSet(MPI_Comm             comm,
+               HYPRE_MemoryLocation memory_location,
+               HYPRE_Int            option,           /* 1 or 2 */
+               HYPRE_BigInt         ilower,
+               HYPRE_BigInt         iupper,
+               HYPRE_Int            nrows,
+               HYPRE_BigInt         num_nonzeros,
+               HYPRE_Int            nchunks,
+               HYPRE_Int           *h_nnzrow,
+               HYPRE_Int           *nnzrow,
+               HYPRE_BigInt        *rows,             /* option = 1: length of nrows, = 2: length of num_nonzeros */
+               HYPRE_BigInt        *cols,
+               HYPRE_Real          *coefs,
+               HYPRE_IJMatrix      *ij_A_ptr)
+{
+   HYPRE_IJMatrix  ij_A;
+   HYPRE_Int       i, chunk, chunk_size;
+   HYPRE_Int       time_index;
+   HYPRE_Int      *h_rowptr;
+
+   HYPRE_IJMatrixCreate(comm, ilower, iupper, ilower, iupper, &ij_A);
+   HYPRE_IJMatrixSetObjectType(ij_A, HYPRE_PARCSR);
+   HYPRE_IJMatrixInitialize_v2(ij_A, memory_location);
+   HYPRE_IJMatrixSetOMPFlag(ij_A, 1);
+
+   h_rowptr = hypre_CTAlloc(HYPRE_Int, nrows+1, HYPRE_MEMORY_HOST);
+   for (i = 1; i < nrows + 1; i++)
+   {
+      h_rowptr[i] = h_rowptr[i-1] + h_nnzrow[i-1];
+   }
+   hypre_assert(h_rowptr[nrows] == num_nonzeros);
+   chunk_size = nrows / nchunks;
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+   HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
+#if defined(CUDA_PROFILER)
+   cudaProfilerStart();
+#endif
+#endif
+
+   // First Set
+   time_index = hypre_InitializeTiming("Test Set/Add/Set");
+   hypre_BeginTiming(time_index);
+   for (chunk = 0; chunk < nrows; chunk += chunk_size)
+   {
+      chunk_size = hypre_min(chunk_size, nrows-chunk);
+
+      if (1 == option)
+      {
+         HYPRE_IJMatrixSetValues(ij_A, chunk_size, &nnzrow[chunk], &rows[chunk],
+                                 &cols[h_rowptr[chunk]], &coefs[h_rowptr[chunk]]);
+      }
+      else
+      {
+         HYPRE_IJMatrixSetValues(ij_A, h_rowptr[chunk+chunk_size]-h_rowptr[chunk],
+                                 NULL, &rows[h_rowptr[chunk]],
+                                 &cols[h_rowptr[chunk]], &coefs[h_rowptr[chunk]]);
+      }
+   }
+
+   // Then Add
+   for (chunk = 0; chunk < nrows; chunk += chunk_size)
+   {
+      chunk_size = hypre_min(chunk_size, nrows-chunk);
+
+      if (1 == option)
+      {
+         HYPRE_IJMatrixAddToValues(ij_A, chunk_size, &nnzrow[chunk], &rows[chunk],
+                                   &cols[h_rowptr[chunk]], &coefs[h_rowptr[chunk]]);
+      }
+      else
+      {
+         HYPRE_IJMatrixAddToValues(ij_A, h_rowptr[chunk+chunk_size]-h_rowptr[chunk],
+                                   NULL, &rows[h_rowptr[chunk]],
+                                   &cols[h_rowptr[chunk]], &coefs[h_rowptr[chunk]]);
+      }
+   }
+
+   // Then Set
+   for (chunk = 0; chunk < nrows; chunk += chunk_size)
+   {
+      chunk_size = hypre_min(chunk_size, nrows-chunk);
+
+      if (1 == option)
+      {
+         HYPRE_IJMatrixSetValues(ij_A, chunk_size, &nnzrow[chunk], &rows[chunk],
+                                 &cols[h_rowptr[chunk]], &coefs[h_rowptr[chunk]]);
+      }
+      else
+      {
+         HYPRE_IJMatrixSetValues(ij_A, h_rowptr[chunk+chunk_size]-h_rowptr[chunk],
+                                 NULL, &rows[h_rowptr[chunk]],
+                                 &cols[h_rowptr[chunk]], &coefs[h_rowptr[chunk]]);
+      }
+   }
+
+   // Assemble matrix
+   HYPRE_IJMatrixAssemble(ij_A);
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+   HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
+#if defined(CUDA_PROFILER)
+   cudaProfilerStop();
+#endif
+#endif
+
+   // Finalize timer
+   hypre_EndTiming(time_index);
+   hypre_PrintTiming("Test Set/Add/Set", hypre_MPI_COMM_WORLD);
+   hypre_FinalizeTiming(time_index);
+   hypre_ClearTiming();
+
+   // Free memory
+   hypre_TFree(h_rowptr, HYPRE_MEMORY_HOST);
 
    // Set pointer to matrix
    *ij_A_ptr = ij_A;
