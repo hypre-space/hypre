@@ -38,7 +38,7 @@ typedef struct hypre_Boxloop_struct
 #define hypre_RAJA_DEVICE   RAJA_DEVICE
 #define hypre_raja_exec_policy   cuda_exec<BLOCKSIZE>
 /* #define hypre_raja_reduce_policy cuda_reduce_atomic<BLOCKSIZE> */
-#define hypre_raja_reduce_policy cuda_reduce<BLOCKSIZE>
+#define hypre_raja_reduce_policy cuda_reduce //<BLOCKSIZE>
 #define hypre_fence()
 /*
 #define hypre_fence() \

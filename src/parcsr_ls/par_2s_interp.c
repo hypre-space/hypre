@@ -315,7 +315,7 @@ hypre_BoomerAMGBuildModPartialExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_mar
          if (D_w[i]) 
          { 
             beta = 1.0/D_w[i];
-            As_FF_diag_data[j] = beta*D_q[i];
+            As_FF_diag_data[j] = beta*D_q[new_fine_to_fine[i]];
             for (j=As_FF_diag_i[i]+1; j < As_FF_diag_i[i+1]; j++)
                As_FF_diag_data[j] *= beta;
             for (j=As_FF_offd_i[i]; j < As_FF_offd_i[i+1]; j++)
@@ -323,7 +323,7 @@ hypre_BoomerAMGBuildModPartialExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_mar
          } 
          else 
          { 
-            As_FF_diag_data[j] = D_q[i];
+            As_FF_diag_data[j] = D_q[new_fine_to_fine[i]];
          } 
       }
       for (i=startf; i<stopf; i++)
