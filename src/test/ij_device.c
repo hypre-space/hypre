@@ -56,6 +56,12 @@ HYPRE_Int SetSysVcoefValues(HYPRE_Int num_fun, HYPRE_Int nx, HYPRE_Int ny, HYPRE
 
 HYPRE_Int BuildParCoordinates (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_Int *coorddim_ptr , float **coord_ptr );
 
+void testPMIS(HYPRE_ParCSRMatrix parcsr_A);
+
+void testFFFC(HYPRE_ParCSRMatrix parcsr_A);
+
+HYPRE_Int CompareParCSRDH(HYPRE_ParCSRMatrix hmat, HYPRE_ParCSRMatrix dmat, HYPRE_Real tol);
+
 #ifdef __cplusplus
 }
 #endif
@@ -73,59 +79,15 @@ main( hypre_int argc,
 
    HYPRE_IJMatrix     ij_A = NULL;
    HYPRE_ParCSRMatrix parcsr_A   = NULL;
-   HYPRE_ParCSRMatrix parcsr_S   = NULL;
-   HYPRE_ParCSRMatrix parcsr_S_device  = NULL;
 
-   HYPRE_Int         *h_CF_marker  = NULL;
-   HYPRE_Int         *h_CF_marker2 = NULL;
-   HYPRE_Int         *d_CF_marker;
-
-   HYPRE_Int       errcode;
-   HYPRE_Int       num_procs, myid;
    HYPRE_Int       time_index;
    MPI_Comm        comm = hypre_MPI_COMM_WORLD;
-   HYPRE_Int first_local_row, last_local_row, local_num_rows;
-   HYPRE_Int first_local_col, last_local_col, local_num_cols;
-   HYPRE_Int local_num_vars, *coarse_dof_func, *coarse_pnts_global, *col_offd_S_to_A;
-
-   /* parameters for BoomerAMG */
-   HYPRE_Real   trunc_factor = 0.0;
-   HYPRE_Int    P_max_elmts = 8;
-   HYPRE_Int    cycle_type;
-   HYPRE_Int    coarsen_type = 10;
-   HYPRE_Int    measure_type = 0;
-   HYPRE_Int    debug_flag = 0;
-   HYPRE_Int    num_CR_relax_steps = 2;
-   HYPRE_Int    rap2=0;
-   HYPRE_Int    keepTranspose = 0;
-   HYPRE_Int    num_functions = 1;
-   HYPRE_Real   strong_threshold = 0.25;
-   HYPRE_Real   max_row_sum = 1.0;
-   HYPRE_Real   fnorm, rfnorm, fnorm0;
-
-   /* interpolation */
-   HYPRE_Int      interp_type  = 6; /* default value */
-   HYPRE_Int      post_interp_type  = 0; /* default value */
-   HYPRE_Int      restri_type = 0;
-
-   HYPRE_Int      print_system = 0;
-
-   HYPRE_Int      mult_order = 0;
-   HYPRE_Int      use_cusparse = 0;
-   HYPRE_Int      rowest_mtd = 3;
-   HYPRE_Int      rowest_nsamples = 32;
-   HYPRE_Real     rowest_mult = 1.0;
-   char           hash_type = 'L';
-   HYPRE_Int nC1 = 0, nC2 = 0, i;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
     *-----------------------------------------------------------*/
    /* Initialize MPI */
    hypre_MPI_Init(&argc, &argv);
-
-   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
-   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
    /* Initialize Hypre */
    HYPRE_Init();
@@ -202,149 +164,9 @@ main( hypre_int argc,
          build_matrix_type      = 7;
          build_matrix_arg_index = arg_index;
       }
-      else if ( strcmp(argv[arg_index], "-concrete_parcsr") == 0 )
-      {
-         arg_index++;
-         build_matrix_arg_index = arg_index;
-      }
-      else if ( strcmp(argv[arg_index], "-cljp") == 0 )
-      {
-         arg_index++;
-         coarsen_type      = 0;
-      }
-      else if ( strcmp(argv[arg_index], "-cljp1") == 0 )
-      {
-         arg_index++;
-         coarsen_type      = 7;
-      }
-      else if ( strcmp(argv[arg_index], "-pmis") == 0 )
-      {
-         arg_index++;
-         coarsen_type      = 8;
-      }
-      else if ( strcmp(argv[arg_index], "-pmis1") == 0 )
-      {
-         arg_index++;
-         coarsen_type      = 9;
-      }
-      else if ( strcmp(argv[arg_index], "-cr1") == 0 )
-      {
-         arg_index++;
-         coarsen_type      = 98;
-      }
-      else if ( strcmp(argv[arg_index], "-cr") == 0 )
-      {
-         arg_index++;
-         coarsen_type      = 99;
-      }
-      else if ( strcmp(argv[arg_index], "-hmis") == 0 )
-      {
-         arg_index++;
-         coarsen_type      = 10;
-      }
-      else if ( strcmp(argv[arg_index], "-ruge") == 0 )
-      {
-         arg_index++;
-         coarsen_type      = 1;
-      }
-      else if ( strcmp(argv[arg_index], "-ruge1p") == 0 )
-      {
-         arg_index++;
-         coarsen_type      = 11;
-      }
-      else if ( strcmp(argv[arg_index], "-ruge2b") == 0 )
-      {
-         arg_index++;
-         coarsen_type      = 2;
-      }
-      else if ( strcmp(argv[arg_index], "-ruge3") == 0 )
-      {
-         arg_index++;
-         coarsen_type      = 3;
-      }
-      else if ( strcmp(argv[arg_index], "-ruge3c") == 0 )
-      {
-         arg_index++;
-         coarsen_type      = 4;
-      }
-      else if ( strcmp(argv[arg_index], "-rugerlx") == 0 )
-      {
-         arg_index++;
-         coarsen_type      = 5;
-      }
-      else if ( strcmp(argv[arg_index], "-falgout") == 0 )
-      {
-         arg_index++;
-         coarsen_type      = 6;
-      }
-      else if ( strcmp(argv[arg_index], "-gm") == 0 )
-      {
-         arg_index++;
-         measure_type      = 1;
-      }
-      else if ( strcmp(argv[arg_index], "-restritype") == 0 )
-      {
-         arg_index++;
-         restri_type  = atoi(argv[arg_index++]);
-      }
       else if ( strcmp(argv[arg_index], "-help") == 0 )
       {
          print_usage = 1;
-      }
-      else if ( strcmp(argv[arg_index], "-tr") == 0 )
-      {
-         arg_index++;
-         trunc_factor  = atof(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-th") == 0 )
-      {
-         arg_index++;
-         strong_threshold  = atof(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-Pmx") == 0 )
-      {
-         arg_index++;
-         P_max_elmts  = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-interptype") == 0 )
-      {
-         arg_index++;
-         interp_type  = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-print") == 0 )
-      {
-         arg_index++;
-         print_system = 1;
-      }
-      else if ( strcmp(argv[arg_index], "-order") == 0 )
-      {
-         arg_index++;
-         mult_order  = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-cusparse") == 0 )
-      {
-         arg_index++;
-         use_cusparse = 1;
-      }
-      else if ( strcmp(argv[arg_index], "-rowest") == 0 )
-      {
-         arg_index++;
-         rowest_mtd  = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-rowestmult") == 0 )
-      {
-         arg_index++;
-         rowest_mult  = atof(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-rowestnsamples") == 0 )
-      {
-         arg_index++;
-         rowest_nsamples  = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-hash") == 0 )
-      {
-         arg_index++;
-         hash_type  = argv[arg_index++][0];;
       }
       else
       {
@@ -352,113 +174,17 @@ main( hypre_int argc,
       }
    }
 
-
    /*-----------------------------------------------------------
     * Print usage info
     *-----------------------------------------------------------*/
-
    if ( print_usage )
    {
-      if ( myid == 0 )
-      {
-         hypre_printf("\n");
-         hypre_printf("Usage: %s [<options>]\n", argv[0]);
-         hypre_printf("\n");
-         hypre_printf("  -fromfile <filename>       : ");
-         hypre_printf("matrix read from multiple files (IJ format)\n");
-         hypre_printf("  -fromparcsrfile <filename> : ");
-         hypre_printf("matrix read from multiple files (ParCSR format)\n");
-         hypre_printf("  -fromonecsrfile <filename> : ");
-         hypre_printf("matrix read from a single file (CSR format)\n");
-         hypre_printf("\n");
-         hypre_printf("  -laplacian [<options>] : build 5pt 2D laplacian problem (default) \n");
-         hypre_printf("  -sysL <num functions>  : build SYSTEMS laplacian 7pt operator\n");
-         hypre_printf("  -9pt [<opts>]          : build 9pt 2D laplacian problem\n");
-         hypre_printf("  -27pt [<opts>]         : build 27pt 3D laplacian problem\n");
-         hypre_printf("  -difconv [<opts>]      : build convection-diffusion problem\n");
-         hypre_printf("    -n <nx> <ny> <nz>    : total problem size \n");
-         hypre_printf("    -P <Px> <Py> <Pz>    : processor topology\n");
-         hypre_printf("    -c <cx> <cy> <cz>    : diffusion coefficients\n");
-         hypre_printf("    -a <ax> <ay> <az>    : convection coefficients\n");
-         hypre_printf("    -atype <type>        : FD scheme for convection \n");
-         hypre_printf("           0=Forward (default)       1=Backward\n");
-         hypre_printf("           2=Centered                3=Upwind\n");
-         hypre_printf("\n");
-         hypre_printf("  -exact_size            : inserts immediately into ParCSR structure\n");
-         hypre_printf("  -storage_low           : allocates not enough storage for aux struct\n");
-         hypre_printf("  -concrete_parcsr       : use parcsr matrix type as concrete type\n");
-         hypre_printf("\n");
-         hypre_printf("  -cljp                 : CLJP coarsening \n");
-         hypre_printf("  -cljp1                : CLJP coarsening, fixed random \n");
-         hypre_printf("  -cgc                  : CGC coarsening \n");
-         hypre_printf("  -cgce                 : CGC-E coarsening \n");
-         hypre_printf("  -pmis                 : PMIS coarsening \n");
-         hypre_printf("  -pmis1                : PMIS coarsening, fixed random \n");
-         hypre_printf("  -hmis                 : HMIS coarsening (default)\n");
-         hypre_printf("  -ruge                 : Ruge-Stueben coarsening (local)\n");
-         hypre_printf("  -ruge1p               : Ruge-Stueben coarsening 1st pass only(local)\n");
-         hypre_printf("  -ruge3                : third pass on boundary\n");
-         hypre_printf("  -ruge3c               : third pass on boundary, keep c-points\n");
-         hypre_printf("  -falgout              : local Ruge_Stueben followed by CLJP\n");
-         hypre_printf("  -gm                   : use global measures\n");
-         hypre_printf("\n");
-         hypre_printf("  -interptype  <val>    : set interpolation type\n");
-         hypre_printf("       0=Classical modified interpolation  \n");
-         hypre_printf("       1=least squares interpolation (for GSMG only)  \n");
-         hypre_printf("       0=Classical modified interpolation for hyperbolic PDEs \n");
-         hypre_printf("       3=direct interpolation with separation of weights  \n");
-         hypre_printf("       4=multipass interpolation  \n");
-         hypre_printf("       5=multipass interpolation with separation of weights  \n");
-         hypre_printf("       6=extended classical modified interpolation (default) \n");
-         hypre_printf("       7=extended (only if no common C neighbor) interpolation  \n");
-         hypre_printf("       8=standard interpolation  \n");
-         hypre_printf("       9=standard interpolation with separation of weights  \n");
-         hypre_printf("      12=FF interpolation  \n");
-         hypre_printf("      13=FF1 interpolation  \n");
-
-         hypre_printf("      16=use modified unknown interpolation for a system (w/unknown or hybrid approach) \n");
-         hypre_printf("      17=use non-systems interp = 6 for a system (w/unknown or hybrid approach) \n");
-         hypre_printf("      18=use non-systems interp = 8 for a system (w/unknown or hybrid approach) \n");
-         hypre_printf("      19=use non-systems interp = 0 for a system (w/unknown or hybrid approach) \n");
-
-         hypre_printf("      10=classical block interpolation for nodal systems AMG\n");
-         hypre_printf("      11=classical block interpolation with diagonal blocks for nodal systems AMG\n");
-         hypre_printf("      20=same as 10, but don't add weak connect. to diag \n");
-         hypre_printf("      21=same as 11, but don't add weak connect. to diag \n");
-         hypre_printf("      22=classical block interpolation w/Ruge's variant for nodal systems AMG \n");
-         hypre_printf("      23=same as 22, but use row sums for diag scaling matrices,for nodal systems AMG \n");
-         hypre_printf("      24=direct block interpolation for nodal systems AMG\n");
-         hypre_printf("     100=One point interpolation [a Boolean matrix]\n");
-         hypre_printf("\n");
-
-         hypre_printf("  -restritype  <val>    : set restriction type\n");
-         hypre_printf("       0=transpose of the interpolation  \n");
-         hypre_printf("       1=local approximate ideal restriction (AIR)  \n");
-         hypre_printf("\n");
-
-         hypre_printf("  -Pmx  <val>            : set maximal no. of elmts per row for AMG interpolation (default: 4)\n");
-      }
       goto final;
    }
 
    /*-----------------------------------------------------------
     * Print driver parameters
     *-----------------------------------------------------------*/
-
-   if (myid == 0)
-   {
-   }
-
-   errcode = HYPRE_CSRMatrixDeviceSpGemmSetRownnzEstimateMethod(rowest_mtd);
-   hypre_assert(errcode == 0);
-   errcode = HYPRE_CSRMatrixDeviceSpGemmSetRownnzEstimateNSamples(rowest_nsamples);
-   hypre_assert(errcode == 0);
-   errcode = HYPRE_CSRMatrixDeviceSpGemmSetRownnzEstimateMultFactor(rowest_mult);
-   hypre_assert(errcode == 0);
-   errcode = HYPRE_CSRMatrixDeviceSpGemmSetHashType(hash_type);
-   hypre_assert(errcode == 0);
-   errcode = HYPRE_CSRMatrixDeviceSpGemmSetUseCusparse(use_cusparse);
-   hypre_assert(errcode == 0);
 
    /*-----------------------------------------------------------
     * Set up matrix
@@ -508,91 +234,21 @@ main( hypre_int argc,
 
    if (build_matrix_type < 0)
    {
-      ierr = HYPRE_IJMatrixGetLocalRange( ij_A,
-                                          &first_local_row, &last_local_row ,
-                                          &first_local_col, &last_local_col );
-
       ierr += HYPRE_IJMatrixGetObject( ij_A, &object);
       parcsr_A = (HYPRE_ParCSRMatrix) object;
    }
-   else
-   {
-      /*-----------------------------------------------------------
-       * Copy the parcsr matrix into the IJMatrix through interface calls
-       *-----------------------------------------------------------*/
-      ierr = HYPRE_ParCSRMatrixGetLocalRange( parcsr_A,
-                                              &first_local_row, &last_local_row ,
-                                              &first_local_col, &last_local_col );
-
-      local_num_rows = last_local_row - first_local_row + 1;
-      local_num_cols = last_local_col - first_local_col + 1;
-   }
-
-   hypre_BoomerAMGCreateS(parcsr_A, strong_threshold, max_row_sum,
-                          num_functions, NULL, &parcsr_S);
-
-   parcsr_S_device = hypre_ParCSRMatrixClone_v2(parcsr_S, 0, HYPRE_MEMORY_DEVICE);
 
    hypre_EndTiming(time_index);
    hypre_PrintTiming("Generate Matrix", hypre_MPI_COMM_WORLD);
    hypre_FinalizeTiming(time_index);
    hypre_ClearTiming();
 
-   /* PMIS on HOST */
-   time_index = hypre_InitializeTiming("Host PMIS");
-   hypre_BeginTiming(time_index);
+   /*
+    * TESTS
+    */
 
-   hypre_BoomerAMGCoarsenPMIS(parcsr_S, parcsr_A, 0, debug_flag, &h_CF_marker);
-
-   hypre_EndTiming(time_index);
-   hypre_PrintTiming("Host PMIS", hypre_MPI_COMM_WORLD);
-   hypre_FinalizeTiming(time_index);
-   hypre_ClearTiming();
-
-   /* PMIS on DEVICE */
-   hypre_BoomerAMGCoarsenPMISDevice(parcsr_S_device, parcsr_A, 0, debug_flag, &d_CF_marker);
-   hypre_TFree(d_CF_marker, HYPRE_MEMORY_DEVICE);
-
-   time_index = hypre_InitializeTiming("Device PMIS");
-   hypre_BeginTiming(time_index);
-
-   hypre_BoomerAMGCoarsenPMISDevice(parcsr_S_device, parcsr_A, 0, debug_flag, &d_CF_marker);
-
-   hypre_EndTiming(time_index);
-   hypre_PrintTiming("Device PMIS", hypre_MPI_COMM_WORLD);
-   hypre_FinalizeTiming(time_index);
-   hypre_ClearTiming();
-
-   local_num_rows = last_local_row - first_local_row + 1;
-
-   h_CF_marker2 = hypre_TAlloc(HYPRE_Int, local_num_rows, HYPRE_MEMORY_HOST);
-   hypre_TMemcpy(h_CF_marker2, d_CF_marker, HYPRE_Int, local_num_rows, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-
-   for (i = 0; i < local_num_rows; i++)
-   {
-      if (h_CF_marker[i] > 0)
-      {
-         nC1++;
-      }
-
-      hypre_assert(h_CF_marker2[i] == 1 || h_CF_marker2[i] == -1 || h_CF_marker2[i] == -3);
-
-      hypre_assert(h_CF_marker[i] == h_CF_marker2[i]);
-
-      if (h_CF_marker2[i] > 0)
-      {
-         nC2++;
-      }
-   }
-
-
-   HYPRE_Int allnC1, allnC2;
-   hypre_MPI_Allreduce(&nC1, &allnC1, 1, HYPRE_MPI_INT, hypre_MPI_SUM, comm);
-   hypre_MPI_Allreduce(&nC2, &allnC2, 1, HYPRE_MPI_INT, hypre_MPI_SUM, comm);
-   if (myid == 0)
-   {
-      printf("nC1 %d nC2 %d\n", allnC1, allnC2);
-   }
+   //testPMIS(parcsr_A);
+   testFFFC(parcsr_A);
 
    /*-----------------------------------------------------------
     * Finalize things
@@ -606,15 +262,6 @@ main( hypre_int argc,
    {
       HYPRE_ParCSRMatrixDestroy(parcsr_A);
    }
-
-   hypre_TFree(h_CF_marker, HYPRE_MEMORY_HOST);
-   hypre_TFree(h_CF_marker2, HYPRE_MEMORY_HOST);
-   hypre_TFree(d_CF_marker, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(coarse_dof_func, HYPRE_MEMORY_HOST);
-
-   hypre_ParCSRMatrixDestroy(parcsr_S);
-
-   hypre_ParCSRMatrixDestroy(parcsr_S_device);
 
  final:
 
@@ -2148,3 +1795,229 @@ BuildParCoordinates( HYPRE_Int                  argc,
    *coord_ptr = coordinates;
    return (0);
 }
+
+
+void
+testPMIS(HYPRE_ParCSRMatrix parcsr_A)
+{
+   HYPRE_Int    nC1 = 0, nC2 = 0, i;
+   HYPRE_Int    time_index;
+   HYPRE_Int   *h_CF_marker  = NULL;
+   HYPRE_Int   *h_CF_marker2 = NULL;
+   HYPRE_Int   *d_CF_marker  = NULL;
+   HYPRE_Real   max_row_sum = 1.0;
+   HYPRE_Int    num_functions = 1;
+   HYPRE_Real   strong_threshold = 0.25;
+   HYPRE_Int    debug_flag = 0;
+   HYPRE_Int    local_num_rows;
+   HYPRE_Int    first_local_row, last_local_row;
+   HYPRE_Int    first_local_col, last_local_col;
+   MPI_Comm     comm = hypre_MPI_COMM_WORLD;
+   HYPRE_Int    num_procs, myid;
+
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+
+   HYPRE_ParCSRMatrixGetLocalRange( parcsr_A,
+                                    &first_local_row, &last_local_row ,
+                                    &first_local_col, &last_local_col );
+
+   local_num_rows = last_local_row - first_local_row + 1;
+   //local_num_cols = last_local_col - first_local_col + 1;
+
+   /* Soc on HOST */
+   HYPRE_ParCSRMatrix parcsr_S   = NULL;
+   HYPRE_ParCSRMatrix parcsr_S_device  = NULL;
+
+   hypre_BoomerAMGCreateS(parcsr_A, strong_threshold, max_row_sum,
+                          num_functions, NULL, &parcsr_S);
+
+   /* PMIS on HOST */
+   time_index = hypre_InitializeTiming("Host PMIS");
+   hypre_BeginTiming(time_index);
+
+   hypre_BoomerAMGCoarsenPMIS(parcsr_S, parcsr_A, 0, debug_flag, &h_CF_marker);
+
+   hypre_EndTiming(time_index);
+   hypre_PrintTiming("Host PMIS", hypre_MPI_COMM_WORLD);
+   hypre_FinalizeTiming(time_index);
+   hypre_ClearTiming();
+
+   /* Soc on DEVICE */
+   hypre_BoomerAMGCreateSDevice(parcsr_A, strong_threshold, max_row_sum,
+                                num_functions, NULL, &parcsr_S_device);
+   /* PMIS on DEVICE */
+   time_index = hypre_InitializeTiming("Device PMIS");
+   hypre_BeginTiming(time_index);
+
+   h_CF_marker2 = hypre_TAlloc(HYPRE_Int, local_num_rows, HYPRE_MEMORY_HOST);
+   hypre_BoomerAMGCoarsenPMISDevice(parcsr_S_device, parcsr_A, 0, debug_flag, &h_CF_marker2);
+
+   hypre_EndTiming(time_index);
+   hypre_PrintTiming("Device PMIS", hypre_MPI_COMM_WORLD);
+   hypre_FinalizeTiming(time_index);
+   hypre_ClearTiming();
+
+   //h_CF_marker2 = hypre_TAlloc(HYPRE_Int, local_num_rows, HYPRE_MEMORY_HOST);
+   //hypre_TMemcpy(h_CF_marker2, d_CF_marker, HYPRE_Int, local_num_rows, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+
+   for (i = 0; i < local_num_rows; i++)
+   {
+      if (h_CF_marker[i] > 0)
+      {
+         nC1++;
+      }
+
+      hypre_assert(h_CF_marker2[i] == 1 || h_CF_marker2[i] == -1 || h_CF_marker2[i] == -3);
+
+      hypre_assert(h_CF_marker[i] == h_CF_marker2[i]);
+
+      if (h_CF_marker2[i] > 0)
+      {
+         nC2++;
+      }
+   }
+
+   HYPRE_Int allnC1, allnC2;
+   hypre_MPI_Allreduce(&nC1, &allnC1, 1, HYPRE_MPI_INT, hypre_MPI_SUM, comm);
+   hypre_MPI_Allreduce(&nC2, &allnC2, 1, HYPRE_MPI_INT, hypre_MPI_SUM, comm);
+   if (myid == 0)
+   {
+      printf("nC1 %d nC2 %d\n", allnC1, allnC2);
+   }
+
+   hypre_ParCSRMatrixDestroy(parcsr_S);
+   hypre_ParCSRMatrixDestroy(parcsr_S_device);
+   hypre_TFree(h_CF_marker,  HYPRE_MEMORY_HOST);
+   hypre_TFree(h_CF_marker2, HYPRE_MEMORY_HOST);
+   hypre_TFree(d_CF_marker,  HYPRE_MEMORY_DEVICE);
+}
+
+void
+testFFFC(HYPRE_ParCSRMatrix parcsr_A)
+{
+   HYPRE_Real   max_row_sum = 1.0;
+   HYPRE_Real   strong_threshold = 0.25;
+   HYPRE_Int    debug_flag = 0;
+   HYPRE_Int    num_functions = 1;
+   HYPRE_Int   *h_CF_marker  = NULL;
+   HYPRE_Int    local_num_rows;
+   HYPRE_Int    first_local_row, last_local_row;
+   HYPRE_Int    first_local_col, last_local_col;
+   HYPRE_Int    *coarse_dof_func = NULL;
+   HYPRE_BigInt *coarse_pnts_global = NULL;
+   HYPRE_Int    ierr = 0;
+   HYPRE_Int    myid;
+
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+   HYPRE_ParCSRMatrix parcsr_A_h;
+   HYPRE_ParCSRMatrix AFF, AFC, W;
+   HYPRE_ParCSRMatrix AFF_h, AFC_h, W_h;
+   HYPRE_ParCSRMatrix parcsr_S_h, parcsr_S_device;
+
+   HYPRE_ParCSRMatrixGetLocalRange( parcsr_A,
+                                    &first_local_row, &last_local_row ,
+                                    &first_local_col, &last_local_col );
+
+   local_num_rows = last_local_row - first_local_row + 1;
+
+   /* Soc on DEVICE */
+   hypre_BoomerAMGCreateSDevice(parcsr_A, strong_threshold, max_row_sum, num_functions, NULL, &parcsr_S_device);
+   h_CF_marker = hypre_TAlloc(HYPRE_Int, local_num_rows, HYPRE_MEMORY_HOST);
+   hypre_BoomerAMGCoarsenPMISDevice(parcsr_S_device, parcsr_A, 0, debug_flag, &h_CF_marker);
+   hypre_BoomerAMGCoarseParms(hypre_ParCSRMatrixComm(parcsr_A), local_num_rows, num_functions, NULL,
+                              h_CF_marker, &coarse_dof_func, &coarse_pnts_global);
+
+   /* FFFC on Device */
+   hypre_ParCSRMatrixGenerateFFFCDevice(parcsr_A, h_CF_marker, coarse_pnts_global, parcsr_S_device, &AFC, &AFF);
+
+   /* FFFC on Host */
+   parcsr_A_h = hypre_ParCSRMatrixClone_v2(parcsr_A, 1, HYPRE_MEMORY_HOST);
+   parcsr_S_h = hypre_ParCSRMatrixClone_v2(parcsr_S_device, 0, HYPRE_MEMORY_HOST);
+   hypre_MatvecCommPkgCreate(parcsr_A_h);
+   hypre_ParCSRMatrixGenerateFFFC(parcsr_A_h, h_CF_marker, coarse_pnts_global, parcsr_S_h, &AFC_h, &AFF_h);
+
+   /* AFF * AFC */
+   W_h = hypre_ParCSRMatMatHost(AFF_h, AFC_h);
+   W   = hypre_ParCSRMatMatDevice(AFF, AFC);
+
+   /* check */
+   HYPRE_Real tol = 1e-15;
+   ierr += CompareParCSRDH(AFF_h, AFF, tol); hypre_assert(!ierr);
+   ierr += CompareParCSRDH(AFC_h, AFC, tol); hypre_assert(!ierr);
+   ierr += CompareParCSRDH(W_h,     W, tol); hypre_assert(!ierr);
+
+   if (myid == 0 && !ierr)
+   {
+      printf("All Tests were OK ...\n");
+   }
+
+   /* done */
+   hypre_TFree(h_CF_marker, HYPRE_MEMORY_HOST);
+   hypre_ParCSRMatrixDestroy(parcsr_A_h);
+   hypre_ParCSRMatrixDestroy(AFF);
+   hypre_ParCSRMatrixDestroy(AFC);
+   hypre_ParCSRMatrixDestroy(W);
+   hypre_ParCSRMatrixDestroy(AFF_h);
+   hypre_ParCSRMatrixDestroy(AFC_h);
+   hypre_ParCSRMatrixDestroy(W_h);
+}
+
+HYPRE_Int
+CompareParCSRDH(HYPRE_ParCSRMatrix hmat, HYPRE_ParCSRMatrix dmat, HYPRE_Real tol)
+{
+   HYPRE_ParCSRMatrix hmat2, emat;
+   HYPRE_Real enorm, fnorm;
+   HYPRE_Int i, ecode = 0, ecode_total = 0;
+
+   hmat2 = hypre_ParCSRMatrixClone_v2(dmat, 1, HYPRE_MEMORY_HOST);
+
+   if (hypre_ParCSRMatrixNumRows(hmat) != hypre_ParCSRMatrixNumRows(hmat2))
+   {
+      ecode ++;
+   }
+   if (hypre_ParCSRMatrixNumCols(hmat) != hypre_ParCSRMatrixNumCols(hmat2))
+   {
+      ecode ++;
+   }
+   if (hypre_CSRMatrixNumRows(hypre_ParCSRMatrixOffd(hmat)) != hypre_CSRMatrixNumRows(hypre_ParCSRMatrixOffd(hmat2)))
+   {
+      ecode ++;
+   }
+   if (hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(hmat)) != hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(hmat2)))
+   {
+      ecode ++;
+   }
+   for (i = 0; i < hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(hmat)); i++)
+   {
+      if (hypre_ParCSRMatrixColMapOffd(hmat)[i] != hypre_ParCSRMatrixColMapOffd(hmat2)[i])
+      {
+         ecode++;
+         break;
+      }
+   }
+   if (hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(hmat)) != hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(hmat2)))
+   {
+      ecode ++;
+   }
+   if (hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(hmat)) != hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(hmat2)))
+   {
+      ecode ++;
+   }
+
+   hypre_MPI_Allreduce(&ecode, &ecode_total, 1, HYPRE_MPI_INT, hypre_MPI_SUM, hypre_MPI_COMM_WORLD);
+
+   hypre_ParcsrAdd(1.0, hmat, -1.0, hmat2, &emat);
+   enorm = hypre_ParCSRMatrixFnorm(emat);
+   fnorm = hypre_ParCSRMatrixFnorm(hmat);
+   if ( (fnorm > 0 ? enorm / fnorm : enorm) > tol )
+   {
+      ecode_total ++;
+   }
+
+   hypre_ParCSRMatrixDestroy(hmat2);
+   hypre_ParCSRMatrixDestroy(emat);
+
+   return ecode_total;
+}
+
