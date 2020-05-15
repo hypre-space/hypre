@@ -49,7 +49,7 @@ co="--enable-debug --with-mli --with-superlu --with-superlu-include=/home/falgou
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic-superlu
 
-co="--enable-debug --with-mli --with-superlu --with-superlu-include=/home/falgout2/codes/superlu/SuperLU_5.2.1/SRC --with-dsuperlu --with-dsuperlu-include=/home/falgout2/codes/superlu/SuperLU_DIST_5.2.1/SRC --with-blas-lib=\\'-L/home/falgout2/codes/blas/BLAS-3.7.1 -lblas -lgfortran\\' --with-dsuperlu-lib=\\'-L/home/falgout2/codes/superlu/SuperLU_DIST_5.2.1/lib -lsuperlu_dist -L/home/falgout2/codes/parmetis/parmetis-4.0.3/build/Linux-x86_64/libparmetis -lparmetis -L/home/falgout2/codes/parmetis/parmetis-4.0.3/build/Linux-x86_64/libmetis -lmetis\\'"
+co="--enable-debug --with-mli --with-superlu --with-superlu-include=/home/falgout2/codes/superlu/SuperLU_5.2.1/SRC --with-dsuperlu --with-dsuperlu-include=/home/falgout2/codes/superlu/superlu_dist-6.3.1/SRC --with-blas-lib=\\'-L/home/falgout2/codes/blas/BLAS-3.7.1 -lblas -lgfortran\\' --with-dsuperlu-lib=\\'-L/home/falgout2/codes/superlu/superlu_dist-6.3.1/lib -lsuperlu_dist -L/home/falgout2/codes/parmetis/parmetis-4.0.3/build/Linux-x86_64/libparmetis -lparmetis -L/home/falgout2/codes/parmetis/parmetis-4.0.3/build/Linux-x86_64/libmetis -lmetis -lstdc++\\'"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh basic $output_dir/basic-dsuperlu
 

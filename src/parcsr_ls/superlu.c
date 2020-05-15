@@ -17,7 +17,7 @@
 #ifndef hypre_DSLU_DATA_HEADER
 #define hypre_DSLU_DATA_HEADER
 
-typedef struct 
+typedef struct
 {
    HYPRE_BigInt global_num_rows;
    SuperMatrix A_dslu;
@@ -28,8 +28,8 @@ typedef struct
    gridinfo_t dslu_data_grid;
    dScalePermstruct_t dslu_ScalePermstruct;
    dSOLVEstruct_t dslu_solve;
-} 
-hypre_DSLUData; 
+}
+hypre_DSLUData;
 
 #endif
 
@@ -40,15 +40,14 @@ HYPRE_Int hypre_SLUDistSetup( HYPRE_Solver *solver, hypre_ParCSRMatrix *A, HYPRE
    MPI_Comm           comm = hypre_ParCSRMatrixComm(A);
    hypre_CSRMatrix *A_local;
    HYPRE_Int num_rows;
-   HYPRE_Int num_procs, my_id, i;
+   HYPRE_Int num_procs, my_id;
    HYPRE_Int pcols=1, prows=1;
-   HYPRE_Int *rowptr = NULL;
-   HYPRE_BigInt *big_rowptr = NULL; 
+   HYPRE_BigInt *big_rowptr = NULL;
    hypre_DSLUData *dslu_data = NULL;
 
    HYPRE_Int info = 0;
    HYPRE_Int nrhs = 0;
-   
+
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
 
@@ -60,12 +59,16 @@ HYPRE_Int hypre_SLUDistSetup( HYPRE_Solver *solver, hypre_ParCSRMatrix *A, HYPRE
    num_rows = hypre_CSRMatrixNumRows(A_local);
    /* Now convert hypre matrix to a SuperMatrix */
 #ifdef HYPRE_MIXEDINT
-   rowptr = hypre_CSRMatrixI(A_local);
-   big_rowptr = hypre_CTAlloc(HYPRE_BigInt, (num_rows+1), HYPRE_MEMORY_HOST);
-   for(i=0; i<(num_rows+1); i++)
    {
-      big_rowptr[i] = (HYPRE_BigInt)rowptr[i];
-   } 
+      HYPRE_Int *rowptr = NULL;
+      HYPRE_Int  i;
+      rowptr = hypre_CSRMatrixI(A_local);
+      big_rowptr = hypre_CTAlloc(HYPRE_BigInt, (num_rows+1), HYPRE_MEMORY_HOST);
+      for(i=0; i<(num_rows+1); i++)
+      {
+         big_rowptr[i] = (HYPRE_BigInt)rowptr[i];
+      }
+   }
 #else
    big_rowptr = hypre_CSRMatrixI(A_local);
 #endif
@@ -78,8 +81,8 @@ HYPRE_Int hypre_SLUDistSetup( HYPRE_Solver *solver, hypre_ParCSRMatrix *A, HYPRE
             hypre_CSRMatrixBigJ(A_local),big_rowptr,
             SLU_NR_loc, SLU_D, SLU_GE);
 
-   /* DOK: SuperLU frees assigned data, so set them to null before 
-    * calling hypre_CSRMatrixdestroy on A_local to avoid memory errors. 
+   /* DOK: SuperLU frees assigned data, so set them to null before
+    * calling hypre_CSRMatrixdestroy on A_local to avoid memory errors.
    */
 #ifndef HYPRE_MIXEDINT
    hypre_CSRMatrixI(A_local) = NULL;
@@ -111,7 +114,7 @@ HYPRE_Int hypre_SLUDistSetup( HYPRE_Solver *solver, hypre_ParCSRMatrix *A, HYPRE
    dslu_data->dslu_options.ReplaceTinyPivot = NO; */
 
    dScalePermstructInit(global_num_rows, global_num_rows, &(dslu_data->dslu_ScalePermstruct));
- 
+
    dLUstructInit(global_num_rows, &(dslu_data->dslu_data_LU));
 
    PStatInit(&(dslu_data->dslu_data_stat));
@@ -120,10 +123,10 @@ HYPRE_Int hypre_SLUDistSetup( HYPRE_Solver *solver, hypre_ParCSRMatrix *A, HYPRE
 
    dslu_data->berr = hypre_CTAlloc(HYPRE_Real, 1, HYPRE_MEMORY_HOST);
    dslu_data->berr[0] = 0.0;
-   
-   pdgssvx(&(dslu_data->dslu_options), &(dslu_data->A_dslu), 
-      &(dslu_data->dslu_ScalePermstruct), NULL, num_rows, nrhs, 
-      &(dslu_data->dslu_data_grid), &(dslu_data->dslu_data_LU), 
+
+   pdgssvx(&(dslu_data->dslu_options), &(dslu_data->A_dslu),
+      &(dslu_data->dslu_ScalePermstruct), NULL, num_rows, nrhs,
+      &(dslu_data->dslu_data_grid), &(dslu_data->dslu_data_LU),
       &(dslu_data->dslu_solve), dslu_data->berr, &(dslu_data->dslu_data_stat), &info);
 
    dslu_data->dslu_options.Fact = FACTORED;
@@ -141,9 +144,9 @@ HYPRE_Int hypre_SLUDistSolve( void* solver, hypre_ParVector *b, hypre_ParVector 
 
    hypre_ParVectorCopy(b,x);
 
-   pdgssvx(&(dslu_data->dslu_options), &(dslu_data->A_dslu), 
-      &(dslu_data->dslu_ScalePermstruct), B, size, nrhs, 
-      &(dslu_data->dslu_data_grid), &(dslu_data->dslu_data_LU), 
+   pdgssvx(&(dslu_data->dslu_options), &(dslu_data->A_dslu),
+      &(dslu_data->dslu_ScalePermstruct), B, size, nrhs,
+      &(dslu_data->dslu_data_grid), &(dslu_data->dslu_data_LU),
       &(dslu_data->dslu_solve), dslu_data->berr, &(dslu_data->dslu_data_stat), &info);
 
    return hypre_error_flag;
@@ -161,8 +164,8 @@ HYPRE_Int hypre_SLUDistDestroy( void* solver)
    if (dslu_data->dslu_options.SolveInitialized)
       dSolveFinalize(&(dslu_data->dslu_options), &(dslu_data->dslu_solve));
    superlu_gridexit(&(dslu_data->dslu_data_grid));
-   hypre_TFree(dslu_data->berr, HYPRE_MEMORY_HOST); 
-   hypre_TFree(dslu_data, HYPRE_MEMORY_HOST); 
+   hypre_TFree(dslu_data->berr, HYPRE_MEMORY_HOST);
+   hypre_TFree(dslu_data, HYPRE_MEMORY_HOST);
    return hypre_error_flag;
 }
 #endif
