@@ -14,10 +14,10 @@ case $1 in
 
    $0 [-h] {src_dir} [options] [-rt <options for runtest.sh script>]
 
-   where: -h|-help   prints this usage information and exits
-          {src_dir}  is the hypre source directory
+   where: {src_dir}  is the hypre source directory
           -<test>    run <test>  (test = ams, fac, ij, sstruct, struct)
           -all       run all tests (default behavior)
+          -h|-help   prints this usage information and exits
 
    This script runs runtest.sh in {src_dir}/test with optional parameters.
 

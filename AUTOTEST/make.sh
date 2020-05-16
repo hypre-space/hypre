@@ -13,8 +13,9 @@ case $1 in
 
    $0 [-h] {src_dir} [options for make]
 
-   where: {src_dir}  is the hypre source directory
-          -h|-help   prints this usage information and exits
+   where: {src_dir}     is the hypre source directory
+          -spack <dir>  compile and link drivers to spack build
+          -h|-help      prints this usage information and exits
 
    This script runs make clean; make [options] in {src_dir}.
 
@@ -29,7 +30,22 @@ esac
 src_dir=`cd $1; pwd`
 shift
 
+# Parse the rest of the command line
+while [ "$*" ]
+do
+   case $1 in
+      -spack)
+         shift; spackdir="$1"; shift
+         ;;
+   esac
+done
+
 # Run make
 cd $src_dir
 make clean
-make $@
+if [ -n "$spackdir" ]; then
+   cd $src_dir/test
+   make HYPRE_BUILD_DIR="$spackdir" $@
+else
+   make $@
+fi
