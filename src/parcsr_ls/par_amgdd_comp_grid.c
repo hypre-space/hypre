@@ -495,20 +495,26 @@ hypre_ParCompGridInitialize( hypre_ParAMGData *amg_data, HYPRE_Int padding, HYPR
       hypre_CSRMatrixJ(hypre_ParCompGridMatrixOwnedOffd(P)) = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumNonzeros(P_offd_original), HYPRE_MEMORY_SHARED);
       
       // Initialize P owned offd col ind to their global indices
-#if defined(HYPRE_USING_GPU)
+/* #if defined(HYPRE_USING_GPU) */
       HYPRE_Int *col_map_device_copy = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumCols(P_offd_original), HYPRE_MEMORY_SHARED);
+      HYPRE_Int *new_P_offd_j = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumNonzeros(hypre_ParCompGridMatrixOwnedOffd(P)), HYPRE_MEMORY_SHARED);
       cudaMemcpy(col_map_device_copy, hypre_ParCSRMatrixColMapOffd( hypre_ParAMGDataPArray(amg_data)[level] ), sizeof(HYPRE_Int)*hypre_CSRMatrixNumCols(P_offd_original), cudaMemcpyHostToDevice);
       thrust::gather(thrust::device, 
                hypre_CSRMatrixJ(P_offd_original), 
                hypre_CSRMatrixJ(P_offd_original) + hypre_CSRMatrixNumNonzeros(hypre_ParCompGridMatrixOwnedOffd(P)),
                col_map_device_copy,
-               hypre_CSRMatrixJ(hypre_ParCompGridMatrixOwnedOffd(P)) );
+               new_P_offd_j );
       hypre_CheckErrorDevice(cudaDeviceSynchronize());
       hypre_TFree(col_map_device_copy, HYPRE_MEMORY_SHARED);
-#else
+/* #else */
       for (i = 0; i < hypre_CSRMatrixNumNonzeros(hypre_ParCompGridMatrixOwnedOffd(P)); i++)
+      {
          hypre_CSRMatrixJ(hypre_ParCompGridMatrixOwnedOffd(P))[i] = hypre_ParCSRMatrixColMapOffd( hypre_ParAMGDataPArray(amg_data)[level] )[ hypre_CSRMatrixJ(P_offd_original)[i] ];
-#endif
+         // !!! Debug
+         if (new_P_offd_j[i] != hypre_CSRMatrixJ(hypre_ParCompGridMatrixOwnedOffd(P))[i])
+               printf("Error: new_P_offd_j\n");
+      }
+/* #endif */
 
       hypre_ParCompGridMatrixOwnsOwnedMatrices(P) = 0;
       hypre_ParCompGridMatrixOwnsOffdColIndices(P) = 1;
@@ -527,20 +533,26 @@ hypre_ParCompGridInitialize( hypre_ParAMGData *amg_data, HYPRE_Int padding, HYPR
          hypre_CSRMatrixJ(hypre_ParCompGridMatrixOwnedOffd(R)) = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumNonzeros(R_offd_original), HYPRE_MEMORY_SHARED);
          
          // Initialize R owned offd col ind to their global indices
-#if defined(HYPRE_USING_GPU)
+/* #if defined(HYPRE_USING_GPU) */
          HYPRE_Int *col_map_device_copy = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumCols(R_offd_original), HYPRE_MEMORY_SHARED);
+         HYPRE_Int *new_R_offd_j = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumNonzeros(hypre_ParCompGridMatrixOwnedOffd(R)), HYPRE_MEMORY_SHARED);
          cudaMemcpy(col_map_device_copy, hypre_ParCSRMatrixColMapOffd( hypre_ParAMGDataRArray(amg_data)[level] ), sizeof(HYPRE_Int)*hypre_CSRMatrixNumCols(R_offd_original), cudaMemcpyHostToDevice);
          thrust::gather(thrust::device, 
                   hypre_CSRMatrixJ(R_offd_original), 
                   hypre_CSRMatrixJ(R_offd_original) + hypre_CSRMatrixNumNonzeros(hypre_ParCompGridMatrixOwnedOffd(R)),
                   col_map_device_copy,
-                  hypre_CSRMatrixJ(hypre_ParCompGridMatrixOwnedOffd(R)) );
+                  new_R_offd_j );
          hypre_CheckErrorDevice(cudaDeviceSynchronize());
          hypre_TFree(col_map_device_copy, HYPRE_MEMORY_SHARED);
-#else
+/* #else */
          for (i = 0; i < hypre_CSRMatrixNumNonzeros(hypre_ParCompGridMatrixOwnedOffd(R)); i++)
+         {
             hypre_CSRMatrixJ(hypre_ParCompGridMatrixOwnedOffd(R))[i] = hypre_ParCSRMatrixColMapOffd( hypre_ParAMGDataRArray(amg_data)[level] )[ hypre_CSRMatrixJ(R_offd_original)[i] ];
-#endif
+            // !!! Debug
+            if (new_R_offd_j[i] != hypre_CSRMatrixJ(hypre_ParCompGridMatrixOwnedOffd(R))[i])
+               printf("Error: new_R_offd_j\n");
+         }
+/* #endif */
 
          hypre_ParCompGridMatrixOwnsOwnedMatrices(R) = 0;
          hypre_ParCompGridMatrixOwnsOffdColIndices(R) = 1;
@@ -555,26 +567,42 @@ hypre_ParCompGridInitialize( hypre_ParAMGData *amg_data, HYPRE_Int padding, HYPR
    hypre_ParCompGridNonOwnedInvSort(compGrid) = hypre_CTAlloc(HYPRE_Int, max_nonowned, HYPRE_MEMORY_SHARED);
 
    // Initialize nonowned global indices, real marker, and the sort and invsort arrays
-#if defined(HYPRE_USING_GPU)
+/* #if defined(HYPRE_USING_GPU) */
    HYPRE_Int *col_map_offd = hypre_ParCSRMatrixColMapOffd( hypre_ParAMGDataAArray(amg_data)[level] );
-   thrust::copy(col_map_offd, col_map_offd + hypre_CSRMatrixNumCols(A_offd_original), hypre_ParCompGridNonOwnedGlobalIndices(compGrid));
+   HYPRE_Int *new_nonowned_global_indices = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumCols(A_offd_original), HYPRE_MEMORY_SHARED);
+   thrust::copy(col_map_offd, col_map_offd + hypre_CSRMatrixNumCols(A_offd_original), new_nonowned_global_indices);
    
-   thrust::sequence(thrust::device, hypre_ParCompGridNonOwnedSort(compGrid), hypre_ParCompGridNonOwnedSort(compGrid) + hypre_CSRMatrixNumCols(A_offd_original));
-   thrust::sequence(thrust::device, hypre_ParCompGridNonOwnedInvSort(compGrid), hypre_ParCompGridNonOwnedInvSort(compGrid) + hypre_CSRMatrixNumCols(A_offd_original));
+   HYPRE_Int *new_nonowned_sort = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumCols(A_offd_original), HYPRE_MEMORY_SHARED);
+   HYPRE_Int *new_nonowned_inv_sort = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumCols(A_offd_original), HYPRE_MEMORY_SHARED);
+   thrust::sequence(thrust::device, new_nonowned_sort, new_nonowned_sort + hypre_CSRMatrixNumCols(A_offd_original));
+   thrust::sequence(thrust::device, new_nonowned_inv_sort, new_nonowned_inv_sort + hypre_CSRMatrixNumCols(A_offd_original));
 
-   thrust::constant_iterator<int> const_iter(1);
-   thrust::copy(const_iter, const_iter + hypre_CSRMatrixNumCols(A_offd_original), hypre_ParCompGridNonOwnedRealMarker(compGrid));
+   thrust::constant_iterator<HYPRE_Int> const_iter(1);
+   HYPRE_Int *new_nonowned_real_marker = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumCols(A_offd_original), HYPRE_MEMORY_SHARED);
+   thrust::copy(const_iter, const_iter + hypre_CSRMatrixNumCols(A_offd_original), new_nonowned_real_marker);
    
    hypre_CheckErrorDevice(cudaDeviceSynchronize());
-#else
+/* #else */
    for (i = 0; i < hypre_CSRMatrixNumCols(A_offd_original); i++)
    {
       hypre_ParCompGridNonOwnedGlobalIndices(compGrid)[i] = hypre_ParCSRMatrixColMapOffd( hypre_ParAMGDataAArray(amg_data)[level] )[i];
+      // !!! Debug
+      if (new_nonowned_global_indices[i] != hypre_ParCompGridNonOwnedGlobalIndices(compGrid)[i])
+         printf("Error: new_nonowned_global_indices\n");
       hypre_ParCompGridNonOwnedSort(compGrid)[i] = i;
+      // !!! Debug
+      if (new_nonowned_sort[i] != hypre_ParCompGridNonOwnedSort(compGrid)[i])
+         printf("Error: new_nonowned_sort\n");
       hypre_ParCompGridNonOwnedInvSort(compGrid)[i] = i;
+      // !!! Debug
+      if (new_nonowned_inv_sort[i] != hypre_ParCompGridNonOwnedInvSort(compGrid)[i])
+         printf("Error: new_nonowned_inv_sort\n");
       hypre_ParCompGridNonOwnedRealMarker(compGrid)[i] = 1; // NOTE: Assume that padding is at least 1, i.e. first layer of points are real
+      // !!! Debug
+      if (new_nonowned_real_marker[i] != hypre_ParCompGridNonOwnedRealMarker(compGrid)[i])
+         printf("Error: new_nonowned_real_marker\n");
    }
-#endif
+/* #endif */
 
    if (level != hypre_ParAMGDataNumLevels(amg_data) - 1)
    {
@@ -584,8 +612,9 @@ hypre_ParCompGridInitialize( hypre_ParAMGData *amg_data, HYPRE_Int padding, HYPR
       // Setup the owned coarse indices
       if ( CF_marker_array )
       {
-#if defined(HYPRE_USING_GPU)
+/* #if defined(HYPRE_USING_GPU) */
          HYPRE_Int *cf_marker_device = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumOwnedNodes(compGrid), HYPRE_MEMORY_SHARED);
+         HYPRE_Int *new_owned_coarse_indices = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumOwnedNodes(compGrid), HYPRE_MEMORY_SHARED);
          cudaMemcpy(cf_marker_device, CF_marker_array, sizeof(HYPRE_Int)*hypre_ParCompGridNumOwnedNodes(compGrid), cudaMemcpyHostToDevice);
          HYPRE_Int *aux_cf_marker = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumOwnedNodes(compGrid), HYPRE_MEMORY_SHARED);
          HYPRE_Int *coarse_counter = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumOwnedNodes(compGrid), HYPRE_MEMORY_SHARED);
@@ -596,12 +625,12 @@ hypre_ParCompGridInitialize( hypre_ParAMGData *amg_data, HYPRE_Int padding, HYPR
          hypre_CheckErrorDevice(cudaDeviceSynchronize());
          const HYPRE_Int tpb=64;
          HYPRE_Int num_blocks = hypre_ParCompGridNumOwnedNodes(compGrid)/tpb+1;
-         CombineArraysByKey<<<num_blocks,tpb,0,HYPRE_STREAM(1)>>>(coarse_counter, cf_marker_device, hypre_ParCompGridOwnedCoarseIndices(compGrid), aux_cf_marker, hypre_ParCompGridNumOwnedNodes(compGrid));
+         CombineArraysByKey<<<num_blocks,tpb,0,HYPRE_STREAM(1)>>>(coarse_counter, cf_marker_device, new_owned_coarse_indices, aux_cf_marker, hypre_ParCompGridNumOwnedNodes(compGrid));
          hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1)));
          hypre_TFree(aux_cf_marker, HYPRE_MEMORY_SHARED);
          hypre_TFree(cf_marker_device, HYPRE_MEMORY_SHARED);
          hypre_TFree(coarse_counter, HYPRE_MEMORY_SHARED);
-#else
+/* #else */
          HYPRE_Int coarseIndexCounter = 0;
          for (i = 0; i < hypre_ParCompGridNumOwnedNodes(compGrid); i++)
          {
@@ -613,20 +642,27 @@ hypre_ParCompGridInitialize( hypre_ParAMGData *amg_data, HYPRE_Int padding, HYPR
             {
                hypre_ParCompGridOwnedCoarseIndices(compGrid)[i] = -1;
             }
+            // !!! Debug
+            if (new_owned_coarse_indices[i] != hypre_ParCompGridOwnedCoarseIndices(compGrid)[i])
+               printf("Error: new_owned_coarse_indices\n");
          }
-#endif
+/* #endif */
       }
       else 
       {
-#if defined(HYPRE_USING_GPU)
+/* #if defined(HYPRE_USING_GPU) */
          thrust::constant_iterator<int> const_iter(-1);
+         HYPRE_Int *new_owned_coarse_indices = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumOwnedNodes(compGrid), HYPRE_MEMORY_SHARED);
          thrust::copy(const_iter, const_iter + hypre_CSRMatrixNumCols(A_offd_original), hypre_ParCompGridOwnedCoarseIndices(compGrid));
-#else
+/* #else */
          for (i = 0; i < hypre_ParCompGridNumOwnedNodes(compGrid); i++)
          {
             hypre_ParCompGridOwnedCoarseIndices(compGrid)[i] = -1;
+            // !!! Debug
+            if (new_owned_coarse_indices[i] != hypre_ParCompGridOwnedCoarseIndices(compGrid)[i])
+               printf("Error: new_owned_coarse_indices\n");
          }
-#endif
+/* #endif */
       }
    }
 
