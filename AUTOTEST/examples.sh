@@ -14,9 +14,10 @@ case $1 in
 
    $0 [-h] {src_dir} [options] [-rt <options for runtest.sh script>]
 
-   where: -h|-help   prints this usage information and exits
-          {src_dir}  is the hypre source directory
-          -<test>    run <test>  (test = default, bigint, maxdim, complex)
+   where: {src_dir}     is the hypre source directory
+          -<test>       run <test>  (test = default, bigint, maxdim, complex)
+          -spack <dir>  compile and link drivers to spack build
+          -h|-help      prints this usage information and exits
 
    This script builds the hypre example codes in {src_dir}/examples and runs the
    example regression tests in test/TEST_examples.
@@ -40,6 +41,9 @@ do
          shift
          break
          ;;
+      -spack)
+         shift; spackdir="$1"; shift
+         ;;
       -*)
          tname=`echo $1 | sed 's/-//'`
          tests="$tests $tname"
@@ -61,9 +65,13 @@ mkdir -p $output_dir
 # Run make in the examples directory
 cd $src_dir/examples
 make clean
+mopt=""
+if [ -n "$spackdir" ]; then
+   mopt="HYPRE_DIR=$spackdir"
+fi
 for tname in $tests
 do
-   make $tname
+   make $mopt $tname
 done
 
 # Run the examples regression test
