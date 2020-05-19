@@ -134,7 +134,7 @@ distclean: clean
 
 ij: ij.o
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $@.o ${LFLAGS}  -lnvToolsExt
+	${LINK_CC} -o $@ $@.o ${LFLAGS}
 
 ij_assembly: ij_assembly.o
 	@echo  "Building" $@ "... "
