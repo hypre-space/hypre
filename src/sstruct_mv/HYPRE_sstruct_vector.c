@@ -732,7 +732,7 @@ HYPRE_SStructVectorSetConstantValues( HYPRE_SStructVector vector,
    {
       pvector = hypre_SStructVectorPVector( vector, part );
       hypre_SStructPVectorSetConstantValues( pvector, value );
-   };
+   }
 
    return hypre_error_flag;
 }
