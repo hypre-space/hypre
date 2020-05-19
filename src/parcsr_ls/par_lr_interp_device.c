@@ -8,6 +8,8 @@
 #include "_hypre_parcsr_ls.h"
 #include "aux_interp.h"
 
+#if defined(HYPRE_USING_CUDA)
+
 #define MAX_C_CONNECTIONS 100
 #define HAVE_COMMON_C 1
 
@@ -938,4 +940,6 @@ void compute_twiaff_w( HYPRE_Int      nr_of_rows,
       }
    }
 }
+
+#endif
 
