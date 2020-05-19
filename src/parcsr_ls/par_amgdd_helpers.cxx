@@ -343,6 +343,64 @@ extern "C"
    }
 
    __global__
+   void PackCoarseGlobalIndicesKernel(HYPRE_Int *local_indices, HYPRE_Int *destination, HYPRE_Int local_indices_size, HYPRE_Int num_owned, HYPRE_Int first_global_coarse, HYPRE_Int *owned_coarse_indices, HYPRE_Int *nonowned_coarse_indices, HYPRE_Int *nonowned_global_indices_coarse)
+   {
+      HYPRE_Int i = blockIdx.x * blockDim.x + threadIdx.x;
+      if (i < local_indices_size)
+      {
+         HYPRE_Int send_elmt = local_indices[i];
+         if (send_elmt < 0) send_elmt = -(send_elmt + 1);
+
+         if (send_elmt < num_owned)
+         {
+            if (owned_coarse_indices[ send_elmt ] >= 0)
+               destination[i] = owned_coarse_indices[ send_elmt ] + first_global_coarse;
+            else
+               destination[i] = owned_coarse_indices[ send_elmt ];
+         }
+         else 
+         {
+            HYPRE_Int nonowned_index = send_elmt - num_owned;
+            HYPRE_Int nonowned_coarse_index = nonowned_coarse_indices[ nonowned_index ];
+            
+            if (nonowned_coarse_index >= 0)
+            {
+               destination[i] = nonowned_global_indices_coarse[ nonowned_coarse_index ];
+            }
+            else if (nonowned_coarse_index == -1)
+               destination[i] = nonowned_coarse_index;
+            else
+               destination[i] = -(nonowned_coarse_index+2);
+         }
+      }
+   }
+
+   __global__
+   void LocalToGlobalIndexMarkGhostKernel(HYPRE_Int *local_indices, HYPRE_Int *global_indices, HYPRE_Int local_indices_size, HYPRE_Int num_owned, HYPRE_Int first_global, HYPRE_Int *nonowned_global_indices)
+   {
+      HYPRE_Int i = blockIdx.x * blockDim.x + threadIdx.x;
+      if (i < local_indices_size)
+      {
+         HYPRE_Int local_index = local_indices[i];
+         if (local_index < 0)
+         {
+            local_index = -(local_index + 1);
+            if (local_index < num_owned)
+               global_indices[i] = -(local_index + first_global + 1);
+            else
+               global_indices[i] = -(nonowned_global_indices[local_index - num_owned] + 1);
+         }
+         else
+         {
+            if (local_index < num_owned)
+               global_indices[i] = local_index + first_global;
+            else
+               global_indices[i] = nonowned_global_indices[local_index - num_owned];
+         }
+      }
+   }
+
+   __global__
    void LocalToGlobalIndexRemoveGhostKernel(HYPRE_Int *local_indices, HYPRE_Int *aux_local_indices, HYPRE_Int *global_indices, HYPRE_Int local_indices_size, HYPRE_Int num_owned, HYPRE_Int first_global, HYPRE_Int *nonowned_global_indices)
    {
       HYPRE_Int i = blockIdx.x * blockDim.x + threadIdx.x;
@@ -359,13 +417,12 @@ extern "C"
       }
    }
 
-   HYPRE_Int LocalToGlobalIndexGPU(HYPRE_Int *local_indices, 
+   HYPRE_Int LocalToGlobalIndexRemoveGhostGPU(HYPRE_Int *local_indices, 
          HYPRE_Int **global_indices, 
          HYPRE_Int local_indices_size, 
          HYPRE_Int num_owned, 
          HYPRE_Int first_global, 
-         HYPRE_Int *nonowned_global_indices, 
-         HYPRE_Int keep_ghost)
+         HYPRE_Int *nonowned_global_indices)
    {
       const HYPRE_Int tpb=64;
       HYPRE_Int num_blocks = local_indices_size/tpb+1;
@@ -373,30 +430,18 @@ extern "C"
       HYPRE_Int *aux_local_indices = NULL;
       HYPRE_Int global_indices_size;
       // If not keeping ghost dofs, need to get locations to gather to and new size for global indices
-      if (!keep_ghost)
-      {
-         aux_local_indices = hypre_CTAlloc(HYPRE_Int, local_indices_size, HYPRE_MEMORY_SHARED);
-         greater_than_equal_zero gtez;
-         thrust::transform(thrust::device, local_indices, local_indices + local_indices_size, aux_local_indices, gtez);
-         hypre_CheckErrorDevice(cudaDeviceSynchronize());
-         thrust::exclusive_scan(thrust::device, aux_local_indices, aux_local_indices + local_indices_size, aux_local_indices);
-         hypre_CheckErrorDevice(cudaDeviceSynchronize());
-         if (local_indices[local_indices_size-1] < 0) global_indices_size = aux_local_indices[local_indices_size-1];
-         else global_indices_size = aux_local_indices[local_indices_size-1]+ 1;
-         (*global_indices) = hypre_CTAlloc(HYPRE_Int, global_indices_size, HYPRE_MEMORY_SHARED);
-         LocalToGlobalIndexRemoveGhostKernel<<<num_blocks,tpb,0,HYPRE_STREAM(1)>>>(local_indices, aux_local_indices, (*global_indices), local_indices_size, num_owned, first_global, nonowned_global_indices);
-         hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1)));
-      }
-      else
-      {
-         global_indices_size = local_indices_size;
-         (*global_indices) = hypre_CTAlloc(HYPRE_Int, global_indices_size, HYPRE_MEMORY_SHARED);
-         LocalToGlobalIndexKernel<<<num_blocks,tpb,0,HYPRE_STREAM(1)>>>(local_indices, (*global_indices), local_indices_size, num_owned, first_global, nonowned_global_indices);
-         hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1)));
-      }
+      aux_local_indices = hypre_CTAlloc(HYPRE_Int, local_indices_size, HYPRE_MEMORY_SHARED);
+      greater_than_equal_zero gtez;
+      thrust::transform(thrust::device, local_indices, local_indices + local_indices_size, aux_local_indices, gtez);
+      hypre_CheckErrorDevice(cudaDeviceSynchronize());
+      thrust::exclusive_scan(thrust::device, aux_local_indices, aux_local_indices + local_indices_size, aux_local_indices);
+      hypre_CheckErrorDevice(cudaDeviceSynchronize());
+      if (local_indices[local_indices_size-1] < 0) global_indices_size = aux_local_indices[local_indices_size-1];
+      else global_indices_size = aux_local_indices[local_indices_size-1]+ 1;
+      (*global_indices) = hypre_CTAlloc(HYPRE_Int, global_indices_size, HYPRE_MEMORY_SHARED);
+      LocalToGlobalIndexRemoveGhostKernel<<<num_blocks,tpb,0,HYPRE_STREAM(1)>>>(local_indices, aux_local_indices, (*global_indices), local_indices_size, num_owned, first_global, nonowned_global_indices);
+      hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1)));
 
-      // Collapse from marker to list
-      
       return global_indices_size;
    }
 
@@ -411,6 +456,7 @@ extern "C"
                               HYPRE_Int level)
    {
 
+      const HYPRE_Int tpb=64;
 
       HYPRE_Int   myid;
       hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
@@ -457,10 +503,13 @@ extern "C"
                   HYPRE_Int *current_send_flag = hypre_CTAlloc(HYPRE_Int, num_send_nodes[current_level][proc][level], HYPRE_MEMORY_SHARED);// COPY send_flag[current_level][proc][level]
                   cudaMemcpy(current_send_flag, send_flag[current_level][proc][level], sizeof(HYPRE_Int)*num_send_nodes[current_level][proc][level], cudaMemcpyDeviceToDevice);
                   HYPRE_Int *prev_send_flag = send_flag[prev_level][prev_proc][level];
-                  HYPRE_Int *send_gid;
-                  LocalToGlobalIndexGPU(current_send_flag, &send_gid, num_send_nodes[current_level][proc][level], hypre_ParCompGridNumOwnedNodes(compGrid[level]), hypre_ParCompGridFirstGlobalIndex(compGrid[level]), hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level]), 1);
+                  HYPRE_Int *send_gid = hypre_CTAlloc(HYPRE_Int, num_send_nodes[current_level][proc][level], HYPRE_MEMORY_SHARED);
+                  HYPRE_Int num_blocks = num_send_nodes[current_level][proc][level]/tpb+1;
+                  LocalToGlobalIndexKernel<<<num_blocks,tpb,0,HYPRE_STREAM(1)>>>(current_send_flag, send_gid, num_send_nodes[current_level][proc][level], hypre_ParCompGridNumOwnedNodes(compGrid[level]), hypre_ParCompGridFirstGlobalIndex(compGrid[level]), hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level]));
+                  hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1)));
+
                   HYPRE_Int *prev_send_gid;
-                  HYPRE_Int prev_send_gid_size = LocalToGlobalIndexGPU(send_flag[prev_level][prev_proc][level], &prev_send_gid, num_send_nodes[prev_level][prev_proc][level], hypre_ParCompGridNumOwnedNodes(compGrid[level]), hypre_ParCompGridFirstGlobalIndex(compGrid[level]), hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level]), 0);
+                  HYPRE_Int prev_send_gid_size = LocalToGlobalIndexRemoveGhostGPU(send_flag[prev_level][prev_proc][level], &prev_send_gid, num_send_nodes[prev_level][prev_proc][level], hypre_ParCompGridNumOwnedNodes(compGrid[level]), hypre_ParCompGridFirstGlobalIndex(compGrid[level]), hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level]));
                   HYPRE_Int *keys_result = hypre_CTAlloc(HYPRE_Int, num_send_nodes[current_level][proc][level], HYPRE_MEMORY_SHARED); //just a dummy array that needs to be allocated, but that we wont actually use
                   thrust::pair<HYPRE_Int*,HYPRE_Int*> end = thrust::set_difference_by_key(thrust::device, send_gid, send_gid + num_send_nodes[current_level][proc][level], 
                         prev_send_gid + original_send_size, prev_send_gid + prev_send_gid_size, current_send_flag, prev_send_flag, keys_result, send_flag[current_level][proc][level]);
@@ -481,7 +530,10 @@ extern "C"
                   {
                      cudaMemcpy(current_send_flag, send_flag[current_level][proc][level], sizeof(HYPRE_Int)*num_send_nodes[current_level][proc][level], cudaMemcpyDeviceToDevice);
                      hypre_TFree(send_gid, HYPRE_MEMORY_SHARED);
-                     LocalToGlobalIndexGPU(current_send_flag, &send_gid, num_send_nodes[current_level][proc][level], hypre_ParCompGridNumOwnedNodes(compGrid[level]), hypre_ParCompGridFirstGlobalIndex(compGrid[level]), hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level]), 1);
+                     send_gid = hypre_CTAlloc(HYPRE_Int, num_send_nodes[current_level][proc][level], HYPRE_MEMORY_SHARED);
+                     num_blocks = num_send_nodes[current_level][proc][level]/tpb+1;
+                     LocalToGlobalIndexKernel<<<num_blocks,tpb,0,HYPRE_STREAM(1)>>>(current_send_flag, send_gid, num_send_nodes[current_level][proc][level], hypre_ParCompGridNumOwnedNodes(compGrid[level]), hypre_ParCompGridFirstGlobalIndex(compGrid[level]), hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level]));
+                     hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1)));
                      end = thrust::set_difference_by_key(thrust::device, send_gid, send_gid + num_send_nodes[current_level][proc][level], 
                         prev_send_gid, prev_send_gid + original_send_size, current_send_flag, prev_send_flag, keys_result, send_flag[current_level][proc][level]);
                      hypre_CheckErrorDevice(cudaDeviceSynchronize());
@@ -1356,7 +1408,7 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
                if (diag_rowptr >= hypre_CSRMatrixNumNonzeros(nonowned_diag))
                {
                   hypre_CSRMatrixResize(nonowned_diag, hypre_CSRMatrixNumRows(nonowned_diag), hypre_CSRMatrixNumCols(nonowned_diag), ceil(1.5*hypre_CSRMatrixNumNonzeros(nonowned_diag) + 1));
-                  hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[current_level]) = hypre_TReAlloc(hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[current_level]), HYPRE_Int, ceil(1.5*hypre_CSRMatrixNumNonzeros(nonowned_diag) + 1), HYPRE_MEMORY_HOST);
+                  hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[current_level]) = hypre_TReAlloc(hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[current_level]), HYPRE_Int, ceil(1.5*hypre_CSRMatrixNumNonzeros(nonowned_diag) + 1), HYPRE_MEMORY_SHARED);
                }
                hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[current_level])[ hypre_ParCompGridNumMissingColIndices(compGrid[current_level])++ ] = diag_rowptr;
                hypre_CSRMatrixJ(nonowned_diag)[diag_rowptr++] = -(incoming_index+1);
@@ -1369,7 +1421,7 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
             if (diag_rowptr >= hypre_CSRMatrixNumNonzeros(nonowned_diag))
             {
                hypre_CSRMatrixResize(nonowned_diag, hypre_CSRMatrixNumRows(nonowned_diag), hypre_CSRMatrixNumCols(nonowned_diag), ceil(1.5*hypre_CSRMatrixNumNonzeros(nonowned_diag) + 1));
-               hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[current_level]) = hypre_TReAlloc(hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[current_level]), HYPRE_Int, ceil(1.5*hypre_CSRMatrixNumNonzeros(nonowned_diag) + 1), HYPRE_MEMORY_HOST);
+               hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[current_level]) = hypre_TReAlloc(hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[current_level]), HYPRE_Int, ceil(1.5*hypre_CSRMatrixNumNonzeros(nonowned_diag) + 1), HYPRE_MEMORY_SHARED);
             }
             if (incoming_index < num_original_recv_dofs)
                hypre_CSRMatrixJ(nonowned_diag)[diag_rowptr++] = incoming_index + hypre_ParCSRCommPkgRecvVecStart(commPkg, buffer_number);
@@ -1879,15 +1931,15 @@ PackSendBufferGPU(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypr
             nodes_to_add = (*nodes_to_add_new);
          }
 
-         /* RemoveRedundancyGPU(amg_data, */
-         /*                      compGrid, */
-         /*                      compGridCommPkg, */
-         /*                      send_flag, */
-         /*                      hypre_ParCompGridCommPkgRecvMap(compGridCommPkg), */
-         /*                      num_send_nodes, */
-         /*                      current_level, */
-         /*                      proc, */
-         /*                      level); */
+         RemoveRedundancyGPU(amg_data,
+                              compGrid,
+                              compGridCommPkg,
+                              send_flag,
+                              hypre_ParCompGridCommPkgRecvMap(compGridCommPkg),
+                              num_send_nodes,
+                              current_level,
+                              proc,
+                              level);
 
          // Count up the buffer sizes and adjust the add_flag and get offsets
          cudaMemset(add_flag[level], 0, sizeof(HYPRE_Int)*(hypre_ParCompGridNumOwnedNodes(compGrid[level]) + hypre_ParCompGridNumNonOwnedNodes(compGrid[level])) );
@@ -1956,79 +2008,28 @@ PackSendBufferGPU(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypr
       // store the number of nodes on this level
       cnt = level_starts[level];
       send_buffer[cnt++] = num_send_nodes[current_level][proc][level];
-      // !!! Debug
-      /* if (myid == 1) printf("Send flag %d %d %d = ", current_level, proc, level); */
 
       // copy all global indices
-      for (i = 0; i < num_send_nodes[current_level][proc][level]; i++)
-      {
-         send_elmt = send_flag[current_level][proc][level][i];
-         if (send_elmt < 0)
-         {
-            send_elmt = -(send_elmt + 1);
-
-            if (send_elmt < hypre_ParCompGridNumOwnedNodes(compGrid[level]))
-            {
-               send_buffer[cnt++] = -(send_elmt + hypre_ParCompGridFirstGlobalIndex(compGrid[level]) + 1);
-            }
-            else
-            {
-               send_buffer[cnt++] = -(hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level])[ send_elmt - hypre_ParCompGridNumOwnedNodes(compGrid[level]) ] + 1);
-            }
-         }
-         else 
-         {
-            if (send_elmt >= hypre_ParCompGridNumOwnedNodes(compGrid[level]) + hypre_ParCompGridNumNonOwnedNodes(compGrid[level]))
-               send_elmt -= hypre_ParCompGridNumOwnedNodes(compGrid[level]) + hypre_ParCompGridNumNonOwnedNodes(compGrid[level]);
-
-            if (send_elmt < hypre_ParCompGridNumOwnedNodes(compGrid[level]))
-            {
-               send_buffer[cnt++] = send_elmt + hypre_ParCompGridFirstGlobalIndex(compGrid[level]);
-            }
-            else
-            {
-               send_buffer[cnt++] = hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level])[ send_elmt - hypre_ParCompGridNumOwnedNodes(compGrid[level]) ];
-            }
-         }
-         // !!! Debug
-         /* if (myid == 1) printf("%d ", send_buffer[cnt-1]); */
-      }
-      // !!! Debug
-      /* if (myid == 1) printf("\n"); */
+      num_blocks = num_send_nodes[current_level][proc][level]/tpb+1;
+      LocalToGlobalIndexMarkGhostKernel<<<num_blocks,tpb,0,HYPRE_STREAM(1)>>>(send_flag[current_level][proc][level], send_buffer + cnt, num_send_nodes[current_level][proc][level], hypre_ParCompGridNumOwnedNodes(compGrid[level]), hypre_ParCompGridFirstGlobalIndex(compGrid[level]), hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level]));
+      hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1)));
+      cnt += num_send_nodes[current_level][proc][level];
 
       // if not on last level, copy coarse gobal indices
       if (level != num_levels-1)
       {
-         for (i = 0; i < num_send_nodes[current_level][proc][level]; i++)
-         {
-            send_elmt = send_flag[current_level][proc][level][i];
-            if (send_elmt < 0) send_elmt = -(send_elmt + 1);
-            else if (send_elmt >= hypre_ParCompGridNumOwnedNodes(compGrid[level]) + hypre_ParCompGridNumNonOwnedNodes(compGrid[level]))
-               send_elmt -= hypre_ParCompGridNumOwnedNodes(compGrid[level]) + hypre_ParCompGridNumNonOwnedNodes(compGrid[level]);
+         num_blocks = num_send_nodes[current_level][proc][level]/tpb+1;
+         PackCoarseGlobalIndicesKernel<<<num_blocks,tpb,0,HYPRE_STREAM(1)>>>(send_flag[current_level][proc][level], 
+               send_buffer + cnt, num_send_nodes[current_level][proc][level], 
+               hypre_ParCompGridNumOwnedNodes(compGrid[level]), 
+               hypre_ParCompGridFirstGlobalIndex(compGrid[level+1]), 
+               hypre_ParCompGridOwnedCoarseIndices(compGrid[level]), 
+               hypre_ParCompGridNonOwnedCoarseIndices(compGrid[level]), 
+               hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level+1]));
 
-            if (send_elmt < hypre_ParCompGridNumOwnedNodes(compGrid[level]))
-            {
-               if (hypre_ParCompGridOwnedCoarseIndices(compGrid[level])[ send_elmt ] >= 0)
-                  send_buffer[cnt++] = hypre_ParCompGridOwnedCoarseIndices(compGrid[level])[ send_elmt ] + hypre_ParCompGridFirstGlobalIndex(compGrid[level+1]);
-               else
-                  send_buffer[cnt++] = hypre_ParCompGridOwnedCoarseIndices(compGrid[level])[ send_elmt ];
-            }
-            else 
-            {
-               HYPRE_Int nonowned_index = send_elmt - hypre_ParCompGridNumOwnedNodes(compGrid[level]);
-               HYPRE_Int nonowned_coarse_index = hypre_ParCompGridNonOwnedCoarseIndices(compGrid[level])[ nonowned_index ];
-               
-               if (nonowned_coarse_index >= 0)
-               {
-                  send_buffer[cnt++] = hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level+1])[ nonowned_coarse_index ];
-               }
-               else if (nonowned_coarse_index == -1)
-                  send_buffer[cnt++] = nonowned_coarse_index;
-               else
-                  send_buffer[cnt++] = -(nonowned_coarse_index+2);
-            }
-         }
-      }
+         hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1)));
+         cnt += num_send_nodes[current_level][proc][level];
+      }         
 
       // store the row length for matrix A
       for (i = 0; i < num_send_nodes[current_level][proc][level]; i++)
