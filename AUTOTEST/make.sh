@@ -31,11 +31,15 @@ src_dir=`cd $1; pwd`
 shift
 
 # Parse the rest of the command line
+mopts=""
 while [ "$*" ]
 do
    case $1 in
       -spack)
          shift; spackdir="$1"; shift
+         ;;
+      *)
+         mopts="$mopts $1"; shift
          ;;
    esac
 done
@@ -45,7 +49,7 @@ cd $src_dir
 make clean
 if [ -n "$spackdir" ]; then
    cd $src_dir/test
-   make HYPRE_BUILD_DIR="$spackdir" $@
+   make HYPRE_BUILD_DIR="$spackdir" $mopts
 else
-   make $@
+   make $mopts
 fi
