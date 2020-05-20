@@ -1038,29 +1038,26 @@ hypre_BoomerAMGBuildStdInterp(hypre_ParCSRMatrix  *A,
  *  Comment:
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix   *A,
-                                HYPRE_Int            *CF_marker,
-                                hypre_ParCSRMatrix   *S,
-                                HYPRE_BigInt         *num_cpts_global,
-                                HYPRE_Int             num_functions,
-                                HYPRE_Int            *dof_func,
-                                HYPRE_Int             debug_flag,
-                                HYPRE_Real            trunc_factor,
-                                HYPRE_Int             max_elmts,
-                                HYPRE_Int            *col_offd_S_to_A,
-                                hypre_ParCSRMatrix  **P_ptr)
+hypre_BoomerAMGBuildExtPIInterpHost(hypre_ParCSRMatrix   *A,
+                                    HYPRE_Int            *CF_marker,
+                                    hypre_ParCSRMatrix   *S,
+                                    HYPRE_BigInt         *num_cpts_global,
+                                    HYPRE_Int             num_functions,
+                                    HYPRE_Int            *dof_func,
+                                    HYPRE_Int             debug_flag,
+                                    HYPRE_Real            trunc_factor,
+                                    HYPRE_Int             max_elmts,
+                                    HYPRE_Int            *col_offd_S_to_A,
+                                    hypre_ParCSRMatrix  **P_ptr)
 {
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_EXTENDED_I_INTERP] -= hypre_MPI_Wtime();
 #endif
 
    /* Communication Variables */
-   MPI_Comm                     comm = hypre_ParCSRMatrixComm(A);
-
+   MPI_Comm                 comm = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
-
-
-   HYPRE_Int              my_id, num_procs;
+   HYPRE_Int                my_id, num_procs;
 
    HYPRE_MemoryLocation memory_location_P = hypre_ParCSRMatrixMemoryLocation(A);
 
@@ -1932,19 +1929,24 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix   *A,
  *  Comment: Only use FF when there is no common c point.
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_BoomerAMGBuildExtPICCInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
-                                  hypre_ParCSRMatrix   *S, HYPRE_BigInt *num_cpts_global,
-                                  HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int debug_flag,
-                                  HYPRE_Real trunc_factor, HYPRE_Int max_elmts,
-                                  HYPRE_Int *col_offd_S_to_A,
-                                  hypre_ParCSRMatrix  **P_ptr)
+hypre_BoomerAMGBuildExtPICCInterp(hypre_ParCSRMatrix  *A,
+                                  HYPRE_Int           *CF_marker,
+                                  hypre_ParCSRMatrix  *S,
+                                  HYPRE_BigInt        *num_cpts_global,
+                                  HYPRE_Int            num_functions,
+                                  HYPRE_Int           *dof_func,
+                                  HYPRE_Int            debug_flag,
+                                  HYPRE_Real           trunc_factor,
+                                  HYPRE_Int            max_elmts,
+                                  HYPRE_Int           *col_offd_S_to_A,
+                                  hypre_ParCSRMatrix **P_ptr)
 {
    /* Communication Variables */
    MPI_Comm                 comm = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+   HYPRE_Int                my_id, num_procs;
 
-
-   HYPRE_Int              my_id, num_procs;
+   HYPRE_MemoryLocation memory_location_P = hypre_ParCSRMatrixMemoryLocation(A);
 
    /* Variables to store input variables */
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
@@ -2088,8 +2090,8 @@ hypre_BoomerAMGBuildExtPICCInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
    /*-----------------------------------------------------------------------
     *  Intialize counters and allocate mapping vector.
     *-----------------------------------------------------------------------*/
-   P_diag_i    = hypre_CTAlloc(HYPRE_Int, n_fine+1, HYPRE_MEMORY_DEVICE);
-   P_offd_i    = hypre_CTAlloc(HYPRE_Int, n_fine+1, HYPRE_MEMORY_DEVICE);
+   P_diag_i = hypre_CTAlloc(HYPRE_Int, n_fine+1, memory_location_P);
+   P_offd_i = hypre_CTAlloc(HYPRE_Int, n_fine+1, memory_location_P);
 
    if (n_fine)
    {
@@ -2369,14 +2371,14 @@ hypre_BoomerAMGBuildExtPICCInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
 
    if (P_diag_size)
    {
-      P_diag_j    = hypre_CTAlloc(HYPRE_Int,  P_diag_size, HYPRE_MEMORY_DEVICE);
-      P_diag_data = hypre_CTAlloc(HYPRE_Real, P_diag_size, HYPRE_MEMORY_DEVICE);
+      P_diag_j    = hypre_CTAlloc(HYPRE_Int,  P_diag_size, memory_location_P);
+      P_diag_data = hypre_CTAlloc(HYPRE_Real, P_diag_size, memory_location_P);
    }
 
    if (P_offd_size)
    {
-      P_offd_j    = hypre_CTAlloc(HYPRE_Int,  P_offd_size, HYPRE_MEMORY_DEVICE);
-      P_offd_data = hypre_CTAlloc(HYPRE_Real, P_offd_size, HYPRE_MEMORY_DEVICE);
+      P_offd_j    = hypre_CTAlloc(HYPRE_Int,  P_offd_size, memory_location_P);
+      P_offd_data = hypre_CTAlloc(HYPRE_Real, P_offd_size, memory_location_P);
    }
 
    P_diag_i[n_fine] = jj_counter;
@@ -2826,6 +2828,9 @@ hypre_BoomerAMGBuildExtPICCInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
    hypre_CSRMatrixJ(P_offd) = P_offd_j;
    hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
 
+   hypre_CSRMatrixMemoryLocation(P_diag) = memory_location_P;
+   hypre_CSRMatrixMemoryLocation(P_offd) = memory_location_P;
+
    /* Compress P, removing coefficients smaller than trunc_factor * Max */
    if (trunc_factor != 0.0 || max_elmts > 0)
    {
@@ -2882,19 +2887,24 @@ hypre_BoomerAMGBuildExtPICCInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
  *  Comment: Only use FF when there is no common c point.
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_BoomerAMGBuildFFInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
-                             hypre_ParCSRMatrix   *S, HYPRE_BigInt *num_cpts_global,
-                             HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int debug_flag,
-                             HYPRE_Real trunc_factor, HYPRE_Int max_elmts,
-                             HYPRE_Int *col_offd_S_to_A,
-                             hypre_ParCSRMatrix  **P_ptr)
+hypre_BoomerAMGBuildFFInterp(hypre_ParCSRMatrix  *A,
+                             HYPRE_Int           *CF_marker,
+                             hypre_ParCSRMatrix  *S,
+                             HYPRE_BigInt        *num_cpts_global,
+                             HYPRE_Int            num_functions,
+                             HYPRE_Int           *dof_func,
+                             HYPRE_Int            debug_flag,
+                             HYPRE_Real           trunc_factor,
+                             HYPRE_Int            max_elmts,
+                             HYPRE_Int           *col_offd_S_to_A,
+                             hypre_ParCSRMatrix **P_ptr)
 {
    /* Communication Variables */
    MPI_Comm                 comm = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+   HYPRE_Int                my_id, num_procs;
 
-
-   HYPRE_Int              my_id, num_procs;
+   HYPRE_MemoryLocation memory_location_P = hypre_ParCSRMatrixMemoryLocation(A);
 
    /* Variables to store input variables */
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
@@ -3035,8 +3045,8 @@ hypre_BoomerAMGBuildFFInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
    /*-----------------------------------------------------------------------
     *  Intialize counters and allocate mapping vector.
     *-----------------------------------------------------------------------*/
-   P_diag_i    = hypre_CTAlloc(HYPRE_Int,  n_fine+1, HYPRE_MEMORY_HOST);
-   P_offd_i    = hypre_CTAlloc(HYPRE_Int,  n_fine+1, HYPRE_MEMORY_HOST);
+   P_diag_i    = hypre_CTAlloc(HYPRE_Int, n_fine+1, memory_location_P);
+   P_offd_i    = hypre_CTAlloc(HYPRE_Int, n_fine+1, memory_location_P);
 
    if (n_fine)
    {
@@ -3281,14 +3291,14 @@ hypre_BoomerAMGBuildFFInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
 
    if (P_diag_size)
    {
-      P_diag_j    = hypre_CTAlloc(HYPRE_Int,  P_diag_size, HYPRE_MEMORY_HOST);
-      P_diag_data = hypre_CTAlloc(HYPRE_Real,  P_diag_size, HYPRE_MEMORY_HOST);
+      P_diag_j    = hypre_CTAlloc(HYPRE_Int,  P_diag_size, memory_location_P);
+      P_diag_data = hypre_CTAlloc(HYPRE_Real, P_diag_size, memory_location_P);
    }
 
    if (P_offd_size)
    {
-      P_offd_j    = hypre_CTAlloc(HYPRE_Int,  P_offd_size, HYPRE_MEMORY_HOST);
-      P_offd_data = hypre_CTAlloc(HYPRE_Real,  P_offd_size, HYPRE_MEMORY_HOST);
+      P_offd_j    = hypre_CTAlloc(HYPRE_Int,  P_offd_size, memory_location_P);
+      P_offd_data = hypre_CTAlloc(HYPRE_Real, P_offd_size, memory_location_P);
    }
 
    P_diag_i[n_fine] = jj_counter;
@@ -3710,6 +3720,9 @@ hypre_BoomerAMGBuildFFInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
    hypre_CSRMatrixJ(P_offd) = P_offd_j;
    hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
 
+   hypre_CSRMatrixMemoryLocation(P_diag) = memory_location_P;
+   hypre_CSRMatrixMemoryLocation(P_offd) = memory_location_P;
+
    /* Compress P, removing coefficients smaller than trunc_factor * Max */
    if (trunc_factor != 0.0 || max_elmts > 0)
    {
@@ -3765,18 +3778,24 @@ hypre_BoomerAMGBuildFFInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
  *  Comment: Only use FF when there is no common c point.
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_BoomerAMGBuildFF1Interp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
-                              hypre_ParCSRMatrix   *S, HYPRE_BigInt *num_cpts_global,
-                              HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int debug_flag,
-                              HYPRE_Real trunc_factor, HYPRE_Int max_elmts,
-                              HYPRE_Int *col_offd_S_to_A,
-                              hypre_ParCSRMatrix  **P_ptr)
+hypre_BoomerAMGBuildFF1Interp(hypre_ParCSRMatrix  *A,
+                              HYPRE_Int           *CF_marker,
+                              hypre_ParCSRMatrix  *S,
+                              HYPRE_BigInt        *num_cpts_global,
+                              HYPRE_Int            num_functions,
+                              HYPRE_Int           *dof_func,
+                              HYPRE_Int            debug_flag,
+                              HYPRE_Real           trunc_factor,
+                              HYPRE_Int            max_elmts,
+                              HYPRE_Int           *col_offd_S_to_A,
+                              hypre_ParCSRMatrix **P_ptr)
 {
    /* Communication Variables */
    MPI_Comm                 comm = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+   HYPRE_Int                my_id, num_procs;
 
-   HYPRE_Int              my_id, num_procs;
+   HYPRE_MemoryLocation memory_location_P = hypre_ParCSRMatrixMemoryLocation(A);
 
    /* Variables to store input variables */
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
@@ -3916,8 +3935,8 @@ hypre_BoomerAMGBuildFF1Interp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
    /*-----------------------------------------------------------------------
     *  Intialize counters and allocate mapping vector.
     *-----------------------------------------------------------------------*/
-   P_diag_i    = hypre_CTAlloc(HYPRE_Int,  n_fine+1, HYPRE_MEMORY_HOST);
-   P_offd_i    = hypre_CTAlloc(HYPRE_Int,  n_fine+1, HYPRE_MEMORY_HOST);
+   P_diag_i    = hypre_CTAlloc(HYPRE_Int, n_fine+1, memory_location_P);
+   P_offd_i    = hypre_CTAlloc(HYPRE_Int, n_fine+1, memory_location_P);
 
    if (n_fine)
    {
@@ -4168,14 +4187,14 @@ hypre_BoomerAMGBuildFF1Interp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
 
    if (P_diag_size)
    {
-      P_diag_j    = hypre_CTAlloc(HYPRE_Int,  P_diag_size, HYPRE_MEMORY_HOST);
-      P_diag_data = hypre_CTAlloc(HYPRE_Real,  P_diag_size, HYPRE_MEMORY_HOST);
+      P_diag_j    = hypre_CTAlloc(HYPRE_Int,  P_diag_size, memory_location_P);
+      P_diag_data = hypre_CTAlloc(HYPRE_Real, P_diag_size, memory_location_P);
    }
 
    if (P_offd_size)
    {
-      P_offd_j    = hypre_CTAlloc(HYPRE_Int,  P_offd_size, HYPRE_MEMORY_HOST);
-      P_offd_data = hypre_CTAlloc(HYPRE_Real,  P_offd_size, HYPRE_MEMORY_HOST);
+      P_offd_j    = hypre_CTAlloc(HYPRE_Int,  P_offd_size, memory_location_P);
+      P_offd_data = hypre_CTAlloc(HYPRE_Real, P_offd_size, memory_location_P);
    }
 
    P_diag_i[n_fine] = jj_counter;
@@ -4603,6 +4622,9 @@ hypre_BoomerAMGBuildFF1Interp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
    hypre_CSRMatrixJ(P_offd) = P_offd_j;
    hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
 
+   hypre_CSRMatrixMemoryLocation(P_diag) = memory_location_P;
+   hypre_CSRMatrixMemoryLocation(P_offd) = memory_location_P;
+
    /* Compress P, removing coefficients smaller than trunc_factor * Max */
    if (trunc_factor != 0.0 || max_elmts > 0)
    {
@@ -4661,23 +4683,22 @@ hypre_BoomerAMGBuildFF1Interp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
  *  Comment:
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_BoomerAMGBuildExtInterp(hypre_ParCSRMatrix  *A,
-                              HYPRE_Int           *CF_marker,
-                              hypre_ParCSRMatrix  *S,
-                              HYPRE_BigInt        *num_cpts_global,
-                              HYPRE_Int            num_functions,
-                              HYPRE_Int           *dof_func,
-                              HYPRE_Int            debug_flag,
-                              HYPRE_Real           trunc_factor,
-                              HYPRE_Int            max_elmts,
-                              HYPRE_Int           *col_offd_S_to_A,
-                              hypre_ParCSRMatrix **P_ptr)
+hypre_BoomerAMGBuildExtInterpHost(hypre_ParCSRMatrix  *A,
+                                  HYPRE_Int           *CF_marker,
+                                  hypre_ParCSRMatrix  *S,
+                                  HYPRE_BigInt        *num_cpts_global,
+                                  HYPRE_Int            num_functions,
+                                  HYPRE_Int           *dof_func,
+                                  HYPRE_Int            debug_flag,
+                                  HYPRE_Real           trunc_factor,
+                                  HYPRE_Int            max_elmts,
+                                  HYPRE_Int           *col_offd_S_to_A,
+                                  hypre_ParCSRMatrix **P_ptr)
 {
    /* Communication Variables */
-   MPI_Comm               comm = hypre_ParCSRMatrixComm(A);
-   hypre_ParCSRCommPkg   *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
-
-   HYPRE_Int              my_id, num_procs;
+   MPI_Comm                 comm = hypre_ParCSRMatrixComm(A);
+   hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+   HYPRE_Int                my_id, num_procs;
 
    HYPRE_MemoryLocation memory_location_P = hypre_ParCSRMatrixMemoryLocation(A);
 
@@ -4825,8 +4846,8 @@ hypre_BoomerAMGBuildExtInterp(hypre_ParCSRMatrix  *A,
    /*-----------------------------------------------------------------------
     *  Intialize counters and allocate mapping vector.
     *-----------------------------------------------------------------------*/
-   P_diag_i    = hypre_CTAlloc(HYPRE_Int, n_fine+1, memory_location_P);
-   P_offd_i    = hypre_CTAlloc(HYPRE_Int, n_fine+1, memory_location_P);
+   P_diag_i = hypre_CTAlloc(HYPRE_Int, n_fine+1, memory_location_P);
+   P_offd_i = hypre_CTAlloc(HYPRE_Int, n_fine+1, memory_location_P);
 
    if (n_fine)
    {
@@ -5419,5 +5440,84 @@ hypre_BoomerAMGBuildExtInterp(hypre_ParCSRMatrix  *A,
    }
 
    return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGBuildExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
+                              hypre_ParCSRMatrix   *S, HYPRE_BigInt *num_cpts_global,
+                              HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int debug_flag,
+                              HYPRE_Real trunc_factor, HYPRE_Int max_elmts,
+                              HYPRE_Int *col_offd_S_to_A,
+                              hypre_ParCSRMatrix  **P_ptr)
+{
+#if defined(HYPRE_USING_CUDA)
+   hypre_NvtxPushRange("ExtInterp");
+#endif
+
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
+
+   HYPRE_Int ierr = 0;
+
+   if (exec == HYPRE_EXEC_HOST)
+   {
+      ierr = hypre_BoomerAMGBuildExtInterpHost(A,CF_marker,S,num_cpts_global,num_functions,dof_func,
+                                               debug_flag,trunc_factor,max_elmts,col_offd_S_to_A,P_ptr);
+   }
+#if defined(HYPRE_USING_CUDA)
+   else
+   {
+      ierr = hypre_BoomerAMGBuildExtInterpDevice(A,CF_marker,S,num_cpts_global,num_functions,dof_func,
+                                                 debug_flag,trunc_factor,max_elmts,col_offd_S_to_A,P_ptr);
+   }
+#endif
+
+#if defined(HYPRE_USING_CUDA)
+   hypre_NvtxPopRange();
+#endif
+
+   return ierr;
+}
+
+/*-----------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix   *A,
+                                HYPRE_Int            *CF_marker,
+                                hypre_ParCSRMatrix   *S,
+                                HYPRE_BigInt         *num_cpts_global,
+                                HYPRE_Int             num_functions,
+                                HYPRE_Int            *dof_func,
+                                HYPRE_Int             debug_flag,
+                                HYPRE_Real            trunc_factor,
+                                HYPRE_Int             max_elmts,
+                                HYPRE_Int            *col_offd_S_to_A,
+                                hypre_ParCSRMatrix  **P_ptr)
+{
+#if defined(HYPRE_USING_CUDA)
+   hypre_NvtxPushRange("ExtPIInterp");
+#endif
+
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
+
+   HYPRE_Int ierr = 0;
+
+   if (exec == HYPRE_EXEC_HOST)
+   {
+      ierr = hypre_BoomerAMGBuildExtPIInterpHost(A, CF_marker, S, num_cpts_global, num_functions, dof_func,
+                                                 debug_flag, trunc_factor, max_elmts, col_offd_S_to_A, P_ptr);
+   }
+#if defined(HYPRE_USING_CUDA)
+   else
+   {
+      ierr = hypre_BoomerAMGBuildExtPIInterpDevice(A, CF_marker, S, num_cpts_global, num_functions, dof_func,
+                                                   debug_flag, trunc_factor, max_elmts, P_ptr);
+   }
+#endif
+
+#if defined(HYPRE_USING_CUDA)
+   hypre_NvtxPopRange();
+#endif
+
+   return ierr;
 }
 

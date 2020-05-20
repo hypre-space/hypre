@@ -5671,11 +5671,13 @@ hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix  *A,
                                 B_nnz_offd);
 
    B_diag = hypre_ParCSRMatrixDiag(B);
+   hypre_CSRMatrixMemoryLocation(B_diag) = HYPRE_MEMORY_HOST;
    hypre_CSRMatrixData(B_diag) = B_diag_a;
    hypre_CSRMatrixI(B_diag)    = B_diag_i;
    hypre_CSRMatrixJ(B_diag)    = B_diag_j;
 
    B_offd = hypre_ParCSRMatrixOffd(B);
+   hypre_CSRMatrixMemoryLocation(B_offd) = HYPRE_MEMORY_HOST;
    hypre_CSRMatrixData(B_offd) = B_offd_a;
    hypre_CSRMatrixI(B_offd)    = B_offd_i;
    hypre_CSRMatrixJ(B_offd)    = B_offd_j;
