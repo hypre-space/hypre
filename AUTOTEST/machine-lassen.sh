@@ -38,9 +38,10 @@ shift
 # Basic build and run tests
 mo="-j test"
 eo=""
-roij="-ij -rt -mpibind -rtol 1e-3 -atol 1e-3"
+roij="-ij -ams -rt -mpibind -rtol 1e-3 -atol 1e-3"
 ross="-struct -sstruct -rt -mpibind -rtol 1e-6 -atol 1e-6"
 rost="-struct -rt -mpibind -rtol 1e-8 -atol 1e-8"
+rocuda="-cuda -rt -mpibind -rtol 1e-5 -atol 3e-5"
 
 # CUDA with UM
 co="--with-cuda --enable-unified-memory --enable-persistent --enable-cub --enable-debug --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' HYPRE_CUDA_SM=70"
@@ -49,9 +50,9 @@ co="--with-cuda --enable-unified-memory --enable-persistent --enable-cub --enabl
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ross
 ./renametest.sh basic $output_dir/basic-cuda-um-struct-sstruct
 
-# CUDA with UM [shared library, no run]
+# CUDA with UM [shared library]
 co="--with-cuda --enable-unified-memory --with-openmp --enable-hopscotch --enable-shared --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' HYPRE_CUDA_SM=70"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $rocuda
 ./renametest.sh basic $output_dir/basic-cuda-um-shared
 #./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $roij
 #./renametest.sh basic $output_dir/basic-cuda-um-shared-ij
