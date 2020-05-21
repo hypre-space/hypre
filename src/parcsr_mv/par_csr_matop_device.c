@@ -648,9 +648,9 @@ hypre_ParCSRMatrixGenerateFFFCDevice( hypre_ParCSRMatrix  *A,
    n_local    = hypre_ParCSRMatrixNumRows(A);
    row_starts = hypre_ParCSRMatrixRowStarts(A);
 
-   map2FC      = hypre_TAlloc(HYPRE_Int, n_local, HYPRE_MEMORY_DEVICE);
-   itmp        = hypre_TAlloc(HYPRE_Int, n_local, HYPRE_MEMORY_DEVICE);;
-   recv_buf    = hypre_TAlloc(HYPRE_BigInt, num_cols_A_offd, HYPRE_MEMORY_DEVICE);
+   map2FC     = hypre_TAlloc(HYPRE_Int, n_local, HYPRE_MEMORY_DEVICE);
+   itmp       = hypre_TAlloc(HYPRE_Int, n_local, HYPRE_MEMORY_DEVICE);;
+   recv_buf   = hypre_TAlloc(HYPRE_BigInt, num_cols_A_offd, HYPRE_MEMORY_DEVICE);
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
    if (my_id == (num_procs -1))
@@ -702,7 +702,9 @@ hypre_ParCSRMatrixGenerateFFFCDevice( hypre_ParCSRMatrix  *A,
    hypre_TFree(itmp, HYPRE_MEMORY_DEVICE);
 
    /* send_buf: global F/C indices. Note F-pts are saved as "-x-1" */
-   send_buf = hypre_TAlloc(HYPRE_BigInt, num_elem_send,   HYPRE_MEMORY_DEVICE);
+   send_buf = hypre_TAlloc(HYPRE_BigInt, num_elem_send, HYPRE_MEMORY_DEVICE);
+
+   hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg);
 
    FFFC_functor functor(F_first, C_first);
    HYPRE_THRUST_CALL( gather,
