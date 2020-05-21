@@ -50,8 +50,9 @@ export OMPI_MCA_rmaps_base_oversubscribe=1
 # test.sh basic.sh ../src -co: -mo: -spack $spackdir -eo: -spack $spackdir
 # ./renametest.sh basic $output_dir/basic-examples
 
+# Use the develop branch for superlu-dist
 superludistspec="superlu-dist@develop"
-spackspec="hypre@develop~debug+superlu-dist ^"$superludistspec
+spackspec="hypre@develop~debug+superlu-dist ^$superludistspec"
 spack install $spackspec
 spack load    $spackspec
 spackdir=`spack location -i $spackspec`
