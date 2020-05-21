@@ -50,12 +50,14 @@ export OMPI_MCA_rmaps_base_oversubscribe=1
 # test.sh basic.sh ../src -co: -mo: -spack $spackdir -eo: -spack $spackdir
 # ./renametest.sh basic $output_dir/basic-examples
 
-spackspec="hypre@develop~debug+superlu-dist"
+superludistspec="superlu-dist@develop"
+spackspec="hypre@develop~debug+superlu-dist ^"$superludistspec
 spack install $spackspec
 spack load    $spackspec
 spackdir=`spack location -i $spackspec`
 test.sh basic.sh ../src -co: -mo: -spack $spackdir -ro: -superlu
 ./renametest.sh basic $output_dir/basic-dsuperlu
+spack uninstall -yR $superludistspec
 
 # Echo to stderr all nonempty error files in $output_dir
 for errfile in $( find $output_dir ! -size 0 -name "*.err" )
