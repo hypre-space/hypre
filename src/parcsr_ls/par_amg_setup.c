@@ -29,9 +29,9 @@
 
 HYPRE_Int
 hypre_BoomerAMGSetup( void               *amg_vdata,
-                   hypre_ParCSRMatrix *A,
-                   hypre_ParVector    *f,
-                   hypre_ParVector    *u         )
+                      hypre_ParCSRMatrix *A,
+                      hypre_ParVector    *f,
+                      hypre_ParVector    *u         )
 {
    MPI_Comm 	      comm = hypre_ParCSRMatrixComm(A); 
    hypre_ParAMGData   *amg_data = (hypre_ParAMGData*) amg_vdata;
@@ -2414,8 +2414,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
     * Print some stuff
     *-----------------------------------------------------------------------*/
 
-   if (amg_print_level == 1 || amg_print_level == 3)
+   if (amg_print_level == 1 || amg_print_level >= 3)
+   {
       hypre_BoomerAMGSetupStats(amg_data,A);
+   }
 
 /* print out CF info to plot grids in matlab (see 'tools/AMGgrids.m') */
 
