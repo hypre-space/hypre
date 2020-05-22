@@ -472,6 +472,8 @@ HYPRE_Int HYPRE_BoomerAMGSetSepWeight(HYPRE_Solver solver,
  *    - 2 : 2-stage standard interpolation
  *    - 3 : 2-stage extended interpolation
  *    - 4 : multipass interpolation
+ *    - 5 : 2-stage extended interpolation in matrix-matrix form
+ *    - 6 : 2-stage extended+i interpolation in matrix-matrix form
  **/
 HYPRE_Int HYPRE_BoomerAMGSetAggInterpType(HYPRE_Solver solver,
                                           HYPRE_Int    agg_interp_type);
