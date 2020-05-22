@@ -3622,18 +3622,31 @@ HYPRE_Int hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
          }
       }
 
-      /* Handle negative definite matrices */
-      for (i = ns; i < ne; i++)
-         if (A_diag_data[A_diag_I[i]] < 0)
-            l1_norm[i] = -l1_norm[i];
-
-      for (i = ns; i < ne; i++)
-         /* if (fabs(l1_norm[i]) < DBL_EPSILON) */
-         if (fabs(l1_norm[i]) == 0.0)
+      else if (option == 5) /*stores diagonal of A for Jacobi using matvec, rlx 7 */
+      {
+         /* Set the diag element */
+         for (i = ns; i < ne; i++)
          {
-            hypre_error_in_arg(1);
-            break;
+            l1_norm[i] =  A_diag_data[A_diag_I[i]];
+            if (l1_norm[i] == 0) l1_norm[i] = 1.0;
          }
+      }
+ 
+      if (option < 5)
+      {
+         /* Handle negative definite matrices */
+         for (i = ns; i < ne; i++)
+            if (A_diag_data[A_diag_I[i]] < 0)
+               l1_norm[i] = -l1_norm[i];
+
+         for (i = ns; i < ne; i++)
+         /* if (fabs(l1_norm[i]) < DBL_EPSILON) */
+            if (fabs(l1_norm[i]) == 0.0)
+            {
+               hypre_error_in_arg(1);
+               break;
+            }
+      }
 
    }
 
