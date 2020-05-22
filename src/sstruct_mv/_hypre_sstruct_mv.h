@@ -193,6 +193,7 @@ typedef struct hypre_SStructGrid_struct
 #define hypre_SStructGridNDim(grid)           ((grid) -> ndim)
 #define hypre_SStructGridNParts(grid)         ((grid) -> nparts)
 #define hypre_SStructGridIDs(grid)            ((grid) -> ids)
+#define hypre_SStructGridID(grid, part)       ((grid) -> ids[part])
 #define hypre_SStructGridPGrids(grid)         ((grid) -> pgrids)
 #define hypre_SStructGridPGrid(grid, part)    ((grid) -> pgrids[part])
 #define hypre_SStructGridNNeighbors(grid)     ((grid) -> nneighbors)
@@ -931,6 +932,7 @@ HYPRE_Int hypre_SStructPGridSetVariables ( hypre_SStructPGrid *pgrid , HYPRE_Int
 HYPRE_Int hypre_SStructPGridSetPNeighbor ( hypre_SStructPGrid *pgrid , hypre_Box *pneighbor_box , hypre_Index pnbor_offset );
 HYPRE_Int hypre_SStructPGridAssemble ( hypre_SStructPGrid *pgrid );
 HYPRE_Int hypre_SStructGridRef ( hypre_SStructGrid *grid , hypre_SStructGrid **grid_ref );
+HYPRE_Int hypre_SStructGridSetIDs( hypre_SStructGrid *grid, HYPRE_Int *ids );
 HYPRE_Int hypre_SStructGridAssembleBoxManagers ( hypre_SStructGrid *grid );
 HYPRE_Int hypre_SStructGridAssembleNborBoxManagers ( hypre_SStructGrid *grid );
 HYPRE_Int hypre_SStructGridCreateCommInfo ( hypre_SStructGrid *grid );

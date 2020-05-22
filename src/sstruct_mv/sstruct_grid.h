@@ -179,6 +179,7 @@ typedef struct hypre_SStructGrid_struct
 #define hypre_SStructGridNDim(grid)           ((grid) -> ndim)
 #define hypre_SStructGridNParts(grid)         ((grid) -> nparts)
 #define hypre_SStructGridIDs(grid)            ((grid) -> ids)
+#define hypre_SStructGridID(grid, part)       ((grid) -> ids[part])
 #define hypre_SStructGridPGrids(grid)         ((grid) -> pgrids)
 #define hypre_SStructGridPGrid(grid, part)    ((grid) -> pgrids[part])
 #define hypre_SStructGridNNeighbors(grid)     ((grid) -> nneighbors)
