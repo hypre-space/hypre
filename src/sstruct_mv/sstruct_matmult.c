@@ -54,14 +54,17 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
    hypre_SStructGraph      *graph_M;
    hypre_SStructGrid       *grid;
    hypre_SStructGrid       *grid_M;
+   hypre_SStructGrid       *dom_grid;
+   hypre_SStructGrid       *ran_grid;
    hypre_SStructPGrid      *pgrid;
    hypre_StructGrid        *sgrid;
    hypre_SStructPMatrix    *pmatrix;
    hypre_StructMatrix     **smatrices;   /* nmatrices array */
    hypre_StructMatrix     **smatrices_M; /* nparts array */
-   HYPRE_Int               *nparts;
-   HYPRE_Int               *nvars;
    HYPRE_SStructVariable   *vartypes;
+   HYPRE_Int               *pids;
+   HYPRE_Int               *pids_M;
+   HYPRE_Int               *pids_all;
 
    /* Temporary data structures */
    hypre_ParCSRMatrix     **parcsr;
@@ -86,35 +89,16 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
    /* This function works for a single variable type only */
    HYPRE_Int                vi = 0, vj = 0;
    HYPRE_Int                ndim;
-   HYPRE_Int                i, m, s, t;
-   HYPRE_Int                part;
+   HYPRE_Int                i, m, p, q, s, t;
+   HYPRE_Int                pid, part, part_cnt;
+   HYPRE_Int                dom_nparts, ran_nparts;
+   HYPRE_Int                nparts, nparts_M, nparts_all;
+   HYPRE_Int                nvars_M;
    hypre_IndexRef           imin, imax;
 
    /*-------------------------------------------------------
     * Safety checks
     *-------------------------------------------------------*/
-   nparts = hypre_TAlloc(HYPRE_Int, nmatrices);
-   nparts[0] = hypre_SStructMatrixNParts(ssmatrices[0]);
-   nvars = hypre_TAlloc(HYPRE_Int, nmatrices);
-   pmatrix = hypre_SStructMatrixPMatrix(ssmatrices[0], 0);
-   nvars[0] = hypre_SStructPMatrixNVars(pmatrix);
-   for (m = 1; m < nmatrices; m++)
-   {
-      nparts[m] = hypre_SStructMatrixNParts(ssmatrices[m]);
-      if (nparts[m] != nparts[m-1])
-      {
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Number of parts must be the same");
-         return hypre_error_flag;
-      }
-
-      pmatrix = hypre_SStructMatrixPMatrix(ssmatrices[m], 0);
-      nvars[m] = hypre_SStructPMatrixNVars(pmatrix);
-      if (nvars[m] != nvars[m-1])
-      {
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Number of variables must be the same");
-         return hypre_error_flag;
-      }
-   }
 
    /* TODO: add a check for the number and types of variables */
 
@@ -124,22 +108,100 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
    comm = hypre_SStructMatrixComm(ssmatrices[0]);
    ndim = hypre_SStructMatrixNDim(ssmatrices[0]);
 
+   t = terms[0];
+   graph = hypre_SStructMatrixGraph(ssmatrices[t]);
+   if (transposes[t])
+   {
+      ran_grid = hypre_SStructGraphDomGrid(graph);
+   }
+   else
+   {
+      ran_grid = hypre_SStructGraphRanGrid(graph);
+   }
+   ran_nparts = hypre_SStructGridNParts(ran_grid);
+
+   t = terms[nterms - 1];
+   graph = hypre_SStructMatrixGraph(ssmatrices[t]);
+   if (transposes[t])
+   {
+      dom_grid = hypre_SStructGraphRanGrid(graph);
+   }
+   else
+   {
+      dom_grid = hypre_SStructGraphDomGrid(graph);
+   }
+   dom_nparts = hypre_SStructGridNParts(dom_grid);
+   nparts_M   = hypre_min(dom_nparts, ran_nparts);
+   pids_M     = hypre_TAlloc(HYPRE_Int, nparts_M);
+
+   /* Compute part ids of M */
+   nparts_all = 0;
+   for (m = 0; m < nmatrices; m++)
+   {
+      t = terms[m];
+      nparts_all += hypre_SStructMatrixNParts(ssmatrices[t]);
+   }
+   pids_all = hypre_TAlloc(HYPRE_Int, nparts_all);
+
+   part_cnt = 0;
+   for (m = 0; m < nmatrices; m++)
+   {
+      t = terms[m];
+      nparts = hypre_SStructMatrixNParts(ssmatrices[t]);
+      graph  = hypre_SStructMatrixGraph(ssmatrices[t]);
+      grid   = hypre_SStructGraphGrid(graph);
+
+      for (part = 0; part < nparts; part++)
+      {
+         pids_all[part_cnt++] = hypre_SStructGridPartID(grid, part);
+      }
+   }
+
+   hypre_qsort0(pids_all, 0, nparts_all - 1);
+
+   part = pids_all[0];
+   part_cnt = 1;
+   nparts_M = 0;
+   for (p = 1; p < nparts_all; p++)
+   {
+      if (pids_all[p] == part)
+      {
+         part_cnt++;
+         if (part_cnt == nmatrices)
+         {
+            pids_M[nparts_M++] = part;
+            part_cnt = 1;
+            part = pids_all[++p];
+         }
+      }
+      else
+      {
+         part = pids_all[p];
+         part_cnt = 1;
+      }
+   }
+   hypre_TFree(pids_all);
+
    /*-------------------------------------------------------
     * Compute structured component
     *-------------------------------------------------------*/
-   /* dom_graph = hypre_SStructMatrixGraph(ssmatrices[nmatrices-1]); */
-   /* ran_graph = hypre_SStructMatrixGraph(ssmatrices[0]); */
-   /* dom_grid  = hypre_SStructGraphGrid(dom_graph); */
-   /* ran_grid  = hypre_SStructGraphGrid(ran_graph); */
-
-   smatrices = hypre_TAlloc(hypre_StructMatrix *, nmatrices);
-   smatrices_M = hypre_TAlloc(hypre_StructMatrix *, nparts[0]);
-   stencils_M = hypre_TAlloc(hypre_SStructStencil *, nparts[0]);
-   for (part = 0; part < nparts[0]; part++)
+   smatrices   = hypre_TAlloc(hypre_StructMatrix *, nmatrices);
+   smatrices_M = hypre_TAlloc(hypre_StructMatrix *, nparts_M);
+   stencils_M  = hypre_TAlloc(hypre_SStructStencil *, nparts_M);
+   for (part = 0; part < nparts_M; part++)
    {
+      pid = pids_M[part];
+
       for (m = 0; m < nmatrices; m++)
       {
-         pmatrix = hypre_SStructMatrixPMatrix(ssmatrices[m], part);
+         nparts = hypre_SStructMatrixNParts(ssmatrices[m]);
+         graph  = hypre_SStructMatrixGraph(ssmatrices[m]);
+         grid   = hypre_SStructGraphGrid(graph);
+         pids   = hypre_SStructGridPartIDs(grid);
+
+         q = hypre_BinarySearch(pids, pid, nparts);
+
+         pmatrix = hypre_SStructMatrixPMatrix(ssmatrices[m], q);
          smatrices[m] = hypre_SStructPMatrixSMatrix(pmatrix, vi, vj);
       }
 
@@ -210,6 +272,11 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
       else
       {
          parcsr[1] = hypre_ParMatmul(parcsr_uA, parcsr_uMold);
+         if (!parcsr[1])
+         {
+            hypre_ParCSRMatrixPrintIJ(parcsr_uA, 0, 0, "parcsr_uA");
+            hypre_ParCSRMatrixPrintIJ(parcsr_uMold, 0, 0, "parcsr_uMold");
+         }
       }
 
       // Note: Cannot free parcsr_uMold here since it holds col_starts info of parcsr[0].
@@ -278,44 +345,55 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
     *-------------------------------------------------------*/
 
    // Create grid
-   HYPRE_SStructGridCreate(comm, ndim, nparts[0], &grid_M);
+   HYPRE_SStructGridCreate(comm, ndim, nparts_M, &grid_M);
    graph = hypre_SStructMatrixGraph(ssmatrices[0]);
    grid  = hypre_SStructGraphGrid(graph);
-   for (part = 0; part < nparts[0]; part++)
+   for (part = 0; part < nparts_M; part++)
    {
-      sgrid = hypre_StructMatrixGrid(smatrices_M[part]);
-      boxes = hypre_StructGridBoxes(sgrid);
-
-      hypre_ForBoxI(i, boxes)
+      if (smatrices_M[part])
       {
-         box  = hypre_BoxArrayBox(boxes, i);
-         imin = hypre_BoxIMin(box);
-         imax = hypre_BoxIMax(box);
+         sgrid = hypre_StructMatrixGrid(smatrices_M[part]);
+         boxes = hypre_StructGridBoxes(sgrid);
 
-         HYPRE_SStructGridSetExtents(grid_M, part, imin, imax);
+         hypre_ForBoxI(i, boxes)
+         {
+            box  = hypre_BoxArrayBox(boxes, i);
+            imin = hypre_BoxIMin(box);
+            imax = hypre_BoxIMax(box);
+
+            HYPRE_SStructGridSetExtents(grid_M, part, imin, imax);
+         }
+
+         pgrid = hypre_SStructGridPGrid(grid, part);
+         vartypes = hypre_SStructPGridVarTypes(pgrid);
+         HYPRE_SStructGridSetVariables(grid_M, part, 1, vartypes);
       }
-
-      pgrid = hypre_SStructGridPGrid(grid, part);
-      vartypes = hypre_SStructPGridVarTypes(pgrid);
-      HYPRE_SStructGridSetVariables(grid_M, part, 1, vartypes);
    }
+   hypre_SStructGridSetPartIDs(grid_M, pids_M);
    HYPRE_SStructGridAssemble(grid_M);
 
    // Create graph
    HYPRE_SStructGraphCreate(comm, grid_M, grid_M, (HYPRE_SStructGraph*) &graph_M);
    HYPRE_SStructGraphSetObjectType(graph_M, HYPRE_SSTRUCT);
-   for (part = 0; part < nparts[0]; part++)
+   for (part = 0; part < nparts_M; part++)
    {
-      HYPRE_SStructGraphSetStencil(graph_M, part, 0, stencils_M[part]);
+      if (stencils_M[part])
+      {
+         HYPRE_SStructGraphSetStencil(graph_M, part, 0, stencils_M[part]);
+      }
    }
 
    // Create matrix
    HYPRE_SStructMatrixCreate(comm, graph_M, &M);
    HYPRE_SStructMatrixInitialize(M);
-   for (part = 0; part < nparts[0]; part++)
+   for (part = 0; part < nparts_M; part++)
    {
       pmatrix = hypre_SStructMatrixPMatrix(M, part);
-      hypre_SStructPMatrixSMatrix(pmatrix, vi, vj) = hypre_StructMatrixRef(smatrices_M[part]);
+      nvars_M = hypre_SStructPMatrixNVars(pmatrix);
+      if (nvars_M)
+      {
+         hypre_SStructPMatrixSMatrix(pmatrix, vi, vj) = hypre_StructMatrixRef(smatrices_M[part]);
+      }
    }
 
    ij_M = hypre_SStructMatrixIJMatrix(M);
@@ -330,7 +408,6 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
    /*-------------------------------------------------------
     * Free memory
     *-------------------------------------------------------*/
-   hypre_TFree(nparts);
    hypre_TFree(smatrices);
 
    /* Set pointer to output matrix */
