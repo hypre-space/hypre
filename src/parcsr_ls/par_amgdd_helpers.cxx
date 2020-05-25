@@ -619,15 +619,6 @@ extern "C"
                      }
                   }
 
-                  // !!! Debug
-                  /* if (myid == 0) */
-                  /* { */
-                  /*    printf("before num_send_nodes[%d][%d][%d] = %d\n", current_level, proc, level, num_send_nodes[current_level][proc][level]); */
-                  /*    HYPRE_Int i; */
-                  /*    for (i = 0; i < num_send_nodes[current_level][proc][level]; i++) */
-                  /*       printf("%d ", send_flag[current_level][proc][level][i] ); */
-                  /*    printf("\n"); */
-                  /* } */
                   // Get the global indices (to be used as keys). NOTE: need to get size of prev send (we exclude ghosts when comparing), combine this with the info in original_send_size above.
                   HYPRE_Int *current_send_flag = hypre_CTAlloc(HYPRE_Int, num_send_nodes[current_level][proc][level], HYPRE_MEMORY_SHARED);// COPY send_flag[current_level][proc][level]
                   cudaMemcpy(current_send_flag, send_flag[current_level][proc][level], sizeof(HYPRE_Int)*num_send_nodes[current_level][proc][level], cudaMemcpyDeviceToDevice);
@@ -638,22 +629,12 @@ extern "C"
                   hypre_CheckErrorDevice(cudaStreamSynchronize(stream));
 
                   HYPRE_Int *prev_send_gid;
-                  HYPRE_Int prev_send_gid_size = LocalToGlobalIndexRemoveGhostGPU(send_flag[prev_level][prev_proc][level], &prev_send_gid, num_send_nodes[prev_level][prev_proc][level], hypre_ParCompGridNumOwnedNodes(compGrid[level]), hypre_ParCompGridFirstGlobalIndex(compGrid[level]), hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level]));
+                  HYPRE_Int prev_send_gid_size = LocalToGlobalIndexRemoveGhostGPU(prev_send_flag, &prev_send_gid, num_send_nodes[prev_level][prev_proc][level], hypre_ParCompGridNumOwnedNodes(compGrid[level]), hypre_ParCompGridFirstGlobalIndex(compGrid[level]), hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level]));
                   HYPRE_Int *keys_result = hypre_CTAlloc(HYPRE_Int, num_send_nodes[current_level][proc][level], HYPRE_MEMORY_SHARED); //just a dummy array that needs to be allocated, but that we wont actually use
                   thrust::pair<HYPRE_Int*,HYPRE_Int*> end = thrust::set_difference_by_key(thrust::cuda::par.on(stream), send_gid, send_gid + num_send_nodes[current_level][proc][level], 
                         prev_send_gid + original_send_size, prev_send_gid + prev_send_gid_size, current_send_flag, prev_send_flag, keys_result, send_flag[current_level][proc][level]);
                   hypre_CheckErrorDevice(cudaStreamSynchronize(stream));
                   num_send_nodes[current_level][proc][level] = end.second - send_flag[current_level][proc][level]; // NOTE: no realloc of send_flag here... do that later I guess when final size determined?
-
-                  // !!! Debug
-                  /* if (myid == 0) */
-                  /* { */
-                  /*    printf("middle num_send_nodes[%d][%d][%d] = %d\n", current_level, proc, level, num_send_nodes[current_level][proc][level]); */
-                  /*    HYPRE_Int i; */
-                  /*    for (i = 0; i < num_send_nodes[current_level][proc][level]; i++) */
-                  /*       printf("%d ", send_flag[current_level][proc][level][i] ); */
-                  /*    printf("\n"); */
-                  /* } */
 
                   if (original_send_size)
                   {
@@ -672,15 +653,6 @@ extern "C"
                   hypre_TFree(send_gid, HYPRE_MEMORY_SHARED);
                   hypre_TFree(prev_send_gid, HYPRE_MEMORY_SHARED);
                   hypre_TFree(keys_result, HYPRE_MEMORY_SHARED);
-                  // !!! Debug
-                  /* if (myid == 0) */
-                  /* { */
-                  /*    printf("after num_send_nodes[%d][%d][%d] = %d\n", current_level, proc, level, num_send_nodes[current_level][proc][level]); */
-                  /*    HYPRE_Int i; */
-                  /*    for (i = 0; i < num_send_nodes[current_level][proc][level]; i++) */
-                  /*       printf("%d ", send_flag[current_level][proc][level][i] ); */
-                  /*    printf("\n"); */
-                  /* } */
                }
             }
          }
@@ -691,7 +663,7 @@ extern "C"
             {
                if (hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[prev_level][prev_proc] == current_send_proc && hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[prev_level][prev_proc][level])
                {
-                  HYPRE_Int original_send_size = hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[prev_level][prev_proc][level];
+                  HYPRE_Int original_send_size = 0;
                   if (prev_level == level) 
                   {
                      hypre_ParCSRCommPkg *original_commPkg = hypre_ParCSRMatrixCommPkg(hypre_ParAMGDataAArray(amg_data)[prev_level]);
@@ -705,43 +677,41 @@ extern "C"
                         }
                      }
                   }
-                  // !!! Debug
-                  /* if (myid == 0) */
-                  /* { */
-                  /*    printf("before prev proc = %d, num_send_nodes[%d][%d][%d] = %d\n", prev_proc, current_level, proc, level, num_send_nodes[current_level][proc][level]); */
-                  /*    HYPRE_Int i; */
-                  /*    for (i = 0; i < num_send_nodes[current_level][proc][level]; i++) */
-                  /*       printf("%d ", send_flag[current_level][proc][level][i] ); */
-                  /*    printf("\n"); */
-                  /* } */
 
-                  /* HYPRE_Int *current_send_flag = hypre_CTAlloc(HYPRE_Int, num_send_nodes[current_level][proc][level], HYPRE_MEMORY_SHARED);// COPY send_flag[current_level][proc][level] */
-                  /* cudaMemcpy(current_send_flag, send_flag[current_level][proc][level], sizeof(HYPRE_Int)*num_send_nodes[current_level][proc][level], cudaMemcpyDeviceToDevice); */
-                  /* HYPRE_Int *prev_recv_flag = hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[prev_level][prev_proc][level]; */
-                  /* HYPRE_Int *send_gid; */
-                  /* LocalToGlobalIndexGPU(current_send_flag, &send_gid, num_send_nodes[current_level][proc][level], hypre_ParCompGridNumOwnedNodes(compGrid[level]), hypre_ParCompGridFirstGlobalIndex(compGrid[level]), hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level]), 1); */
-                  /* HYPRE_Int *prev_recv_gid; */
-                  /* HYPRE_Int prev_recv_gid_size = LocalToGlobalIndexGPU(hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[prev_level][prev_proc][level], &prev_recv_gid, hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[prev_level][prev_proc][level], hypre_ParCompGridNumOwnedNodes(compGrid[level]), hypre_ParCompGridFirstGlobalIndex(compGrid[level]), hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level]), 0); */
-                  /* HYPRE_Int *keys_result = hypre_CTAlloc(HYPRE_Int, num_send_nodes[current_level][proc][level], HYPRE_MEMORY_SHARED); //just a dummy array that needs to be allocated, but that we wont actually use */
-                  /* thrust::pair<HYPRE_Int*,HYPRE_Int*> end = thrust::set_difference_by_key(thrust::device, send_gid, send_gid + num_send_nodes[current_level][proc][level], */ 
-                  /*       prev_recv_gid + original_send_size, prev_recv_gid + prev_recv_gid_size, current_send_flag, prev_recv_flag, keys_result, send_flag[current_level][proc][level]); */
-                  /* hypre_CheckErrorDevice(cudaDeviceSynchronize()); */
-                  /* num_send_nodes[current_level][proc][level] = end.second - send_flag[current_level][proc][level]; // NOTE: no realloc of send_flag here... do that later I guess when final size determined? */
+                  // Get the global indices (to be used as keys). NOTE: need to get size of prev send (we exclude ghosts when comparing), combine this with the info in original_send_size above.
+                  HYPRE_Int *current_send_flag = hypre_CTAlloc(HYPRE_Int, num_send_nodes[current_level][proc][level], HYPRE_MEMORY_SHARED);// COPY send_flag[current_level][proc][level]
+                  cudaMemcpy(current_send_flag, send_flag[current_level][proc][level], sizeof(HYPRE_Int)*num_send_nodes[current_level][proc][level], cudaMemcpyDeviceToDevice);
+                  HYPRE_Int *prev_recv_map = hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[prev_level][prev_proc][level];
+                  HYPRE_Int *send_gid = hypre_CTAlloc(HYPRE_Int, num_send_nodes[current_level][proc][level], HYPRE_MEMORY_SHARED);
+                  HYPRE_Int num_blocks = num_send_nodes[current_level][proc][level]/tpb+1;
+                  LocalToGlobalIndexKernel<<<num_blocks,tpb,0,stream>>>(current_send_flag, send_gid, num_send_nodes[current_level][proc][level], hypre_ParCompGridNumOwnedNodes(compGrid[level]), hypre_ParCompGridFirstGlobalIndex(compGrid[level]), hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level]));
+                  hypre_CheckErrorDevice(cudaStreamSynchronize(stream));
 
-                  /* if (original_send_size) */
-                  /* { */
-                  /*    cudaMemcpy(current_send_flag, send_flag[current_level][proc][level], sizeof(HYPRE_Int)*num_send_nodes[current_level][proc][level], cudaMemcpyDeviceToDevice); */
-                  /*    hypre_TFree(send_gid, HYPRE_MEMORY_SHARED); */
-                  /*    LocalToGlobalIndexGPU(current_send_flag, &send_gid, num_send_nodes[current_level][proc][level], hypre_ParCompGridNumOwnedNodes(compGrid[level]), hypre_ParCompGridFirstGlobalIndex(compGrid[level]), hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level]), 1); */
-                  /*    end = thrust::set_difference_by_key(thrust::device, send_gid, send_gid + num_send_nodes[current_level][proc][level], */ 
-                  /*       prev_recv_gid, prev_recv_gid + original_send_size, current_send_flag, prev_recv_flag, keys_result, send_flag[current_level][proc][level]); */
-                  /*    hypre_CheckErrorDevice(cudaDeviceSynchronize()); */
-                  /*    num_send_nodes[current_level][proc][level] = end.second - send_flag[current_level][proc][level]; // NOTE: no realloc of send_flag here... do that later I guess when final size determined? */
-                  /* } */
-                  /* hypre_TFree(current_send_flag, HYPRE_MEMORY_SHARED); */
-                  /* hypre_TFree(send_gid, HYPRE_MEMORY_SHARED); */
-                  /* hypre_TFree(prev_recv_gid, HYPRE_MEMORY_SHARED); */
-                  /* hypre_TFree(keys_result, HYPRE_MEMORY_SHARED); */
+                  HYPRE_Int *prev_recv_gid;
+                  HYPRE_Int prev_recv_gid_size = LocalToGlobalIndexRemoveGhostGPU(prev_recv_map, &prev_recv_gid, hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[prev_level][prev_proc][level], hypre_ParCompGridNumOwnedNodes(compGrid[level]), hypre_ParCompGridFirstGlobalIndex(compGrid[level]), hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level]));
+                  HYPRE_Int *keys_result = hypre_CTAlloc(HYPRE_Int, num_send_nodes[current_level][proc][level], HYPRE_MEMORY_SHARED); //just a dummy array that needs to be allocated, but that we wont actually use
+                  thrust::pair<HYPRE_Int*,HYPRE_Int*> end = thrust::set_difference_by_key(thrust::cuda::par.on(stream), send_gid, send_gid + num_send_nodes[current_level][proc][level], 
+                        prev_recv_gid + original_send_size, prev_recv_gid + prev_recv_gid_size, current_send_flag, prev_recv_map, keys_result, send_flag[current_level][proc][level]);
+                  hypre_CheckErrorDevice(cudaStreamSynchronize(stream));
+                  num_send_nodes[current_level][proc][level] = end.second - send_flag[current_level][proc][level]; // NOTE: no realloc of send_flag here... do that later I guess when final size determined?
+
+                  if (original_send_size)
+                  {
+                     cudaMemcpy(current_send_flag, send_flag[current_level][proc][level], sizeof(HYPRE_Int)*num_send_nodes[current_level][proc][level], cudaMemcpyDeviceToDevice);
+                     hypre_TFree(send_gid, HYPRE_MEMORY_SHARED);
+                     send_gid = hypre_CTAlloc(HYPRE_Int, num_send_nodes[current_level][proc][level], HYPRE_MEMORY_SHARED);
+                     num_blocks = num_send_nodes[current_level][proc][level]/tpb+1;
+                     LocalToGlobalIndexKernel<<<num_blocks,tpb,0,stream>>>(current_send_flag, send_gid, num_send_nodes[current_level][proc][level], hypre_ParCompGridNumOwnedNodes(compGrid[level]), hypre_ParCompGridFirstGlobalIndex(compGrid[level]), hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level]));
+                     hypre_CheckErrorDevice(cudaStreamSynchronize(stream));
+                     end = thrust::set_difference_by_key(thrust::cuda::par.on(stream), send_gid, send_gid + num_send_nodes[current_level][proc][level], 
+                        prev_recv_gid, prev_recv_gid + original_send_size, current_send_flag, prev_recv_map, keys_result, send_flag[current_level][proc][level]);
+                     hypre_CheckErrorDevice(cudaStreamSynchronize(stream));
+                     num_send_nodes[current_level][proc][level] = end.second - send_flag[current_level][proc][level]; // NOTE: no realloc of send_flag here... do that later I guess when final size determined?
+                  }
+                  hypre_TFree(current_send_flag, HYPRE_MEMORY_SHARED);
+                  hypre_TFree(send_gid, HYPRE_MEMORY_SHARED);
+                  hypre_TFree(prev_recv_gid, HYPRE_MEMORY_SHARED);
+                  hypre_TFree(keys_result, HYPRE_MEMORY_SHARED);
                }
             }
          }
