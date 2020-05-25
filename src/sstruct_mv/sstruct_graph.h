@@ -60,8 +60,9 @@ typedef struct hypre_SStructGraph_struct
 {
    MPI_Comm                comm;
    HYPRE_Int               ndim;
-   hypre_SStructGrid      *grid;
-   hypre_SStructGrid      *domain_grid; /* same as grid by default */
+   hypre_SStructGrid      *grid;     /* pointer to coarser grid */
+   hypre_SStructGrid      *ran_grid; /* range grid */
+   hypre_SStructGrid      *dom_grid; /* domain grid */
    HYPRE_Int               nparts;
    hypre_SStructPGrid    **pgrids;
    hypre_SStructStencil ***stencils; /* each (part, var) has a stencil */
@@ -99,7 +100,8 @@ typedef struct hypre_SStructGraph_struct
 #define hypre_SStructGraphComm(graph)           ((graph) -> comm)
 #define hypre_SStructGraphNDim(graph)           ((graph) -> ndim)
 #define hypre_SStructGraphGrid(graph)           ((graph) -> grid)
-#define hypre_SStructGraphDomainGrid(graph)     ((graph) -> domain_grid)
+#define hypre_SStructGraphRanGrid(graph)        ((graph) -> ran_grid)
+#define hypre_SStructGraphDomGrid(graph)        ((graph) -> dom_grid)
 #define hypre_SStructGraphNParts(graph)         ((graph) -> nparts)
 #define hypre_SStructGraphPGrids(graph) \
    hypre_SStructGridPGrids(hypre_SStructGraphGrid(graph))

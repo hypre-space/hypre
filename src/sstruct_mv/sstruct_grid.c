@@ -421,11 +421,11 @@ hypre_SStructGridRef( hypre_SStructGrid  *grid,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SStructGridSetIDs( hypre_SStructGrid  *grid,
-                         HYPRE_Int          *ids )
+hypre_SStructGridSetPartIDs( hypre_SStructGrid  *grid,
+                             HYPRE_Int          *ids )
 {
-   hypre_TFree(hypre_SStructGridIDs(grid));
-   hypre_SStructGridIDs(grid) = ids;
+   hypre_TFree(hypre_SStructGridPartIDs(grid));
+   hypre_SStructGridPartIDs(grid) = ids;
 
    return hypre_error_flag;
 }
@@ -2244,7 +2244,7 @@ hypre_SStructGridCoarsen( hypre_SStructGrid   *fgrid,
    MPI_Comm                 comm      = hypre_SStructGridComm(fgrid);
    HYPRE_Int                ndim      = hypre_SStructGridNDim(fgrid);
    HYPRE_Int                fnparts   = hypre_SStructGridNParts(fgrid);
-   HYPRE_Int               *fids      = hypre_SStructGridIDs(fgrid);
+   HYPRE_Int               *fids      = hypre_SStructGridPartIDs(fgrid);
 
    hypre_SStructGrid       *cgrid;
    hypre_SStructPGrid      *pfgrid;
@@ -2318,7 +2318,7 @@ hypre_SStructGridCoarsen( hypre_SStructGrid   *fgrid,
    HYPRE_SStructGridCreate(comm, ndim, cnparts, &cgrid);
 
    /* Set coarse grid part ids */
-   hypre_SStructGridSetIDs(cgrid, cids);
+   hypre_SStructGridSetPartIDs(cgrid, cids);
 
    cpart = 0;
    for (fpart = 0; fpart < fnparts; fpart++)

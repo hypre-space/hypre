@@ -43,19 +43,20 @@ HYPRE_SStructGraphCreate( MPI_Comm             comm,
 
    hypre_SStructGraphComm(graph) = comm;
    hypre_SStructGraphNDim(graph) = hypre_SStructGridNDim(ran_grid);
-   hypre_SStructGridRef(ran_grid, &hypre_SStructGraphGrid(graph));
-   hypre_SStructGridRef(dom_grid, &hypre_SStructGraphDomainGrid(graph));
+   hypre_SStructGridRef(dom_grid, &hypre_SStructGraphDomGrid(graph));
+   hypre_SStructGridRef(ran_grid, &hypre_SStructGraphRanGrid(graph));
    if (ran_nparts > dom_nparts)
    {
       nparts = dom_nparts;
-      pgrids = hypre_SStructGridPGrids(dom_grid);
+      hypre_SStructGridRef(dom_grid, &hypre_SStructGraphGrid(graph));
    }
    else
    {
       nparts = ran_nparts;
-      pgrids = hypre_SStructGridPGrids(ran_grid);
+      hypre_SStructGridRef(ran_grid, &hypre_SStructGraphGrid(graph));
    }
    hypre_SStructGraphNParts(graph) = nparts;
+   pgrids = hypre_SStructGraphPGrids(graph);
 
    stencils = hypre_TAlloc(hypre_SStructStencil **, nparts);
    fem_nsparse  = hypre_TAlloc(HYPRE_Int, nparts);
@@ -151,7 +152,8 @@ HYPRE_SStructGraphDestroy( HYPRE_SStructGraph graph )
             hypre_TFree(Uveoffsets[part]);
          }
          HYPRE_SStructGridDestroy(hypre_SStructGraphGrid(graph));
-         HYPRE_SStructGridDestroy(hypre_SStructGraphDomainGrid(graph));
+         HYPRE_SStructGridDestroy(hypre_SStructGraphRanGrid(graph));
+         HYPRE_SStructGridDestroy(hypre_SStructGraphDomGrid(graph));
          hypre_TFree(stencils);
          hypre_TFree(fem_nsparse);
          hypre_TFree(fem_sparse_i);
@@ -183,11 +185,11 @@ HYPRE_SStructGraphDestroy( HYPRE_SStructGraph graph )
 
 HYPRE_Int
 HYPRE_SStructGraphSetDomainGrid( HYPRE_SStructGraph graph,
-                                 HYPRE_SStructGrid  domain_grid)
+                                 HYPRE_SStructGrid  dom_grid)
 {
    /* This should only decrement a reference counter */
-   HYPRE_SStructGridDestroy(hypre_SStructGraphDomainGrid(graph));
-   hypre_SStructGridRef(domain_grid, &hypre_SStructGraphDomainGrid(graph));
+   HYPRE_SStructGridDestroy(hypre_SStructGraphDomGrid(graph));
+   hypre_SStructGridRef(dom_grid, &hypre_SStructGraphDomGrid(graph));
 
    return hypre_error_flag;
 }
@@ -326,7 +328,7 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
    MPI_Comm                  comm        = hypre_SStructGraphComm(graph);
    HYPRE_Int                 ndim        = hypre_SStructGraphNDim(graph);
    hypre_SStructGrid        *grid        = hypre_SStructGraphGrid(graph);
-   hypre_SStructGrid        *dom_grid    = hypre_SStructGraphDomainGrid(graph);
+   hypre_SStructGrid        *dom_grid    = hypre_SStructGraphDomGrid(graph);
    HYPRE_Int                 nparts      = hypre_SStructGraphNParts(graph);
    hypre_SStructStencil   ***stencils    = hypre_SStructGraphStencils(graph);
    HYPRE_Int                 nUventries;
@@ -334,8 +336,8 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
    hypre_SStructUVEntry    **Uventries;
    HYPRE_Int                 Uvesize;
    HYPRE_Int               **Uveoffsets;
-   HYPRE_Int                 type        = hypre_SStructGraphObjectType(graph);
-   hypre_SStructGraphEntry **add_entries = hypre_SStructGraphEntries(graph);
+   HYPRE_Int                 type          = hypre_SStructGraphObjectType(graph);
+   hypre_SStructGraphEntry **add_entries   = hypre_SStructGraphEntries(graph);
    HYPRE_Int                 n_add_entries = hypre_SStructNGraphEntries(graph);
 
    hypre_SStructPGrid       *pgrid;
@@ -664,8 +666,8 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
          hypre_CopyIndex(to_index, hypre_SStructUVEntryToIndex(Uventry, i));
          hypre_SStructUVEntryToVar(Uventry, i) = to_var;
       
-         hypre_SStructGridFindBoxManEntry(
-            dom_grid, to_part, to_index, to_var, &boxman_entry);
+         hypre_SStructGridFindBoxManEntry(dom_grid, to_part, to_index,
+                                          to_var, &boxman_entry);
          hypre_SStructBoxManEntryGetBoxnum(boxman_entry, &to_boxnum);
          hypre_SStructUVEntryToBoxnum(Uventry, i) = to_boxnum;
          hypre_SStructBoxManEntryGetProcess(boxman_entry, &to_proc);

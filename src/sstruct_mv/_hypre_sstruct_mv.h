@@ -80,10 +80,14 @@ typedef struct
 
    hypre_Index             periodic;         /* Indicates if pgrid is periodic */
 
-  /* GEC0902 additions for ghost expansion of boxes */
-
+   /* GEC0902 additions for ghost expansion of boxes */
+   // TODO: deprecate ghlocal_size
    HYPRE_Int               ghlocal_size;     /* Number of vars including ghosts */
 
+   HYPRE_Int               dom_ghlocal_size; /* Number of unknowns in the domain grid
+                                                including ghosts */
+   HYPRE_Int               ran_ghlocal_size; /* Number of unknowns in the range grid
+                                                including ghosts */
    HYPRE_Int               cell_sgrid_done;  /* =1 implies cell grid already assembled */
 } hypre_SStructPGrid;
 
@@ -143,7 +147,7 @@ typedef struct hypre_SStructGrid_struct
    MPI_Comm                   comm;
    HYPRE_Int                  ndim;
    HYPRE_Int                  nparts;
-   HYPRE_Int                 *ids; /* Unique IDs for parts */
+   HYPRE_Int                 *part_ids; /* Unique IDs for parts */
 
    /* s-variable info */
    hypre_SStructPGrid       **pgrids;
@@ -179,10 +183,9 @@ typedef struct hypre_SStructGrid_struct
    HYPRE_Int                  ref_count;
 
  /* GEC0902 additions for ghost expansion of boxes */
-
+   // TODO: deprecate these ones. SStructMatrix should hold these data instead
    HYPRE_Int               ghlocal_size;  /* GEC0902 Number of vars including ghosts */
    HYPRE_Int               ghstart_rank;  /* GEC0902 start rank including ghosts  */
-
 } hypre_SStructGrid;
 
 /*--------------------------------------------------------------------------
@@ -192,8 +195,8 @@ typedef struct hypre_SStructGrid_struct
 #define hypre_SStructGridComm(grid)           ((grid) -> comm)
 #define hypre_SStructGridNDim(grid)           ((grid) -> ndim)
 #define hypre_SStructGridNParts(grid)         ((grid) -> nparts)
-#define hypre_SStructGridIDs(grid)            ((grid) -> ids)
-#define hypre_SStructGridID(grid, part)       ((grid) -> ids[part])
+#define hypre_SStructGridPartIDs(grid)        ((grid) -> part_ids)
+#define hypre_SStructGridPartID(grid, part)   ((grid) -> part_ids[part])
 #define hypre_SStructGridPGrids(grid)         ((grid) -> pgrids)
 #define hypre_SStructGridPGrid(grid, part)    ((grid) -> pgrids[part])
 #define hypre_SStructGridNNeighbors(grid)     ((grid) -> nneighbors)
@@ -315,7 +318,6 @@ typedef struct hypre_SStructGrid_struct
 #define hypre_SStructUCVarProc(uc, i)  ((uc) -> uvars[i].proc)
 
 #endif
-
 /*BHEADER**********************************************************************
  * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
@@ -399,7 +401,7 @@ typedef struct
    HYPRE_Int     part;
    hypre_Index   index;
    HYPRE_Int     var;
-   HYPRE_Int     to_part;
+   HYPRE_Int     to_part;     
    hypre_Index   to_index;
    HYPRE_Int     to_var;
 
@@ -431,8 +433,9 @@ typedef struct hypre_SStructGraph_struct
 {
    MPI_Comm                comm;
    HYPRE_Int               ndim;
-   hypre_SStructGrid      *grid;
-   hypre_SStructGrid      *domain_grid; /* same as grid by default */
+   hypre_SStructGrid      *grid;     /* pointer to coarser grid */
+   hypre_SStructGrid      *ran_grid; /* range grid */
+   hypre_SStructGrid      *dom_grid; /* domain grid */
    HYPRE_Int               nparts;
    hypre_SStructPGrid    **pgrids;
    hypre_SStructStencil ***stencils; /* each (part, var) has a stencil */
@@ -470,7 +473,8 @@ typedef struct hypre_SStructGraph_struct
 #define hypre_SStructGraphComm(graph)           ((graph) -> comm)
 #define hypre_SStructGraphNDim(graph)           ((graph) -> ndim)
 #define hypre_SStructGraphGrid(graph)           ((graph) -> grid)
-#define hypre_SStructGraphDomainGrid(graph)     ((graph) -> domain_grid)
+#define hypre_SStructGraphRanGrid(graph)        ((graph) -> ran_grid)
+#define hypre_SStructGraphDomGrid(graph)        ((graph) -> dom_grid)
 #define hypre_SStructGraphNParts(graph)         ((graph) -> nparts)
 #define hypre_SStructGraphPGrids(graph) \
    hypre_SStructGridPGrids(hypre_SStructGraphGrid(graph))
@@ -583,9 +587,9 @@ typedef struct hypre_SStructPMatrix_struct
    HYPRE_Int             **symmetric;    /* Stencil entries symmetric?
                                           * (nvar x nvar array) */
    HYPRE_Int             **num_centries; /* (nvar x nvar) array */
-   HYPRE_Int            ***centries;     /* (nvar x nvar x sentries_size) array of constant entries */
-   hypre_Index             dom_stride;    /* domain grid stride */
-   hypre_Index             ran_stride;    /* range grid stride */
+   HYPRE_Int            ***centries;     /* (nvar x nvar x sentries_size) array constant entries */
+   hypre_Index             dom_stride;   /* domain grid stride */
+   hypre_Index             ran_stride;   /* range grid stride */
 
    /* temporary storage for SetValues routines */
    HYPRE_Int               sentries_size;
@@ -597,15 +601,22 @@ typedef struct hypre_SStructPMatrix_struct
 
 } hypre_SStructPMatrix;
 
+
+/*--------------------------------------------------------------------------
+ * hypre_SStructMatrix:
+ *
+ * - Storage of parts id dictated by the coarse grid
+ *--------------------------------------------------------------------------*/
 typedef struct hypre_SStructMatrix_struct
 {
    MPI_Comm                comm;
    HYPRE_Int               ndim;
+   HYPRE_Int            ***splits;        /* S/U-matrix split for each stencil */
    hypre_SStructGraph     *graph;
-   HYPRE_Int            ***splits;   /* S/U-matrix split for each stencil */
 
    /* S-matrix info */
    HYPRE_Int               nparts;
+   HYPRE_Int              *part_ids;     /* (nparts) array */
    hypre_SStructPMatrix  **pmatrices;
    HYPRE_Int            ***symmetric;    /* Stencil entries symmetric?
                                           * (nparts x nvar x nvar array) */
@@ -638,7 +649,7 @@ typedef struct hypre_SStructMatrix_struct
                                                 including ghosts */
    HYPRE_Int               ran_ghstart_rank; /* Start rank in the range grid
                                                 including ghosts */
-  /* GEC0902   adding an object type to the matrix  */
+   /* GEC0902   adding an object type to the matrix  */
    HYPRE_Int               object_type;
 } hypre_SStructMatrix;
 
@@ -652,6 +663,8 @@ typedef struct hypre_SStructMatrix_struct
 #define hypre_SStructMatrixSplits(mat)         ((mat) -> splits)
 #define hypre_SStructMatrixSplit(mat, p, v)    ((mat) -> splits[p][v])
 #define hypre_SStructMatrixNParts(mat)         ((mat) -> nparts)
+#define hypre_SStructMatrixPartIDs(mat)        ((mat) -> part_ids)
+#define hypre_SStructMatrixPartID(mat, p)      ((mat) -> part_ids[p])
 #define hypre_SStructMatrixPMatrices(mat)      ((mat) -> pmatrices)
 #define hypre_SStructMatrixPMatrix(mat, part)  ((mat) -> pmatrices[part])
 #define hypre_SStructMatrixSymmetric(mat)      ((mat) -> symmetric)
@@ -743,7 +756,7 @@ typedef struct
 
    HYPRE_Int               ref_count;
 
-   HYPRE_Int              *dataindices;  /* GEC1002 array for starting index of the
+   HYPRE_Int              *dataindices;  /* GEC1002 array for starting index of the 
                                             svector. pdataindices[varx] */
    HYPRE_Int               datasize;     /* Size of the pvector = sums size of svectors */
 
@@ -932,7 +945,6 @@ HYPRE_Int hypre_SStructPGridSetVariables ( hypre_SStructPGrid *pgrid , HYPRE_Int
 HYPRE_Int hypre_SStructPGridSetPNeighbor ( hypre_SStructPGrid *pgrid , hypre_Box *pneighbor_box , hypre_Index pnbor_offset );
 HYPRE_Int hypre_SStructPGridAssemble ( hypre_SStructPGrid *pgrid );
 HYPRE_Int hypre_SStructGridRef ( hypre_SStructGrid *grid , hypre_SStructGrid **grid_ref );
-HYPRE_Int hypre_SStructGridSetIDs( hypre_SStructGrid *grid, HYPRE_Int *ids );
 HYPRE_Int hypre_SStructGridAssembleBoxManagers ( hypre_SStructGrid *grid );
 HYPRE_Int hypre_SStructGridAssembleNborBoxManagers ( hypre_SStructGrid *grid );
 HYPRE_Int hypre_SStructGridCreateCommInfo ( hypre_SStructGrid *grid );
@@ -1006,7 +1018,7 @@ HYPRE_Int hypre_SStructMatvec ( HYPRE_Complex alpha , hypre_SStructMatrix *A , h
 
 /* sstruct_matmult.c */
 HYPRE_Int hypre_SStructMatmult( HYPRE_Int nmatrices_input, hypre_SStructMatrix **ssmatrices_input, HYPRE_Int nterms, HYPRE_Int *terms_input, HYPRE_Int *transposes, hypre_SStructMatrix **M_ptr );
-HYPRE_Int hypre_SStructMatPtAP( hypre_SStructMatrix *A, hypre_SStructMatrix *P, hypre_SStructMatrix **PtAP );
+HYPRE_Int hypre_SStructMatPtAP( hypre_SStructMatrix *A, hypre_SStructMatrix *P, hypre_SStructMatrix **PtAP_ptr );
 
 /* sstruct_scale.c */
 HYPRE_Int hypre_SStructPScale ( HYPRE_Complex alpha , hypre_SStructPVector *py );
@@ -1044,3 +1056,4 @@ HYPRE_Int hypre_SStructVectorClearGhostValues ( hypre_SStructVector *vector );
 #endif
 
 #endif
+

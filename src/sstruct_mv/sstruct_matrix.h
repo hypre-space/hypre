@@ -50,15 +50,22 @@ typedef struct hypre_SStructPMatrix_struct
 
 } hypre_SStructPMatrix;
 
+
+/*--------------------------------------------------------------------------
+ * hypre_SStructMatrix:
+ *
+ * - Storage of parts id dictated by the coarse grid
+ *--------------------------------------------------------------------------*/
 typedef struct hypre_SStructMatrix_struct
 {
    MPI_Comm                comm;
    HYPRE_Int               ndim;
+   HYPRE_Int            ***splits;        /* S/U-matrix split for each stencil */
    hypre_SStructGraph     *graph;
-   HYPRE_Int            ***splits;   /* S/U-matrix split for each stencil */
 
    /* S-matrix info */
    HYPRE_Int               nparts;
+   HYPRE_Int              *part_ids;     /* (nparts) array */
    hypre_SStructPMatrix  **pmatrices;
    HYPRE_Int            ***symmetric;    /* Stencil entries symmetric?
                                           * (nparts x nvar x nvar array) */
@@ -105,6 +112,8 @@ typedef struct hypre_SStructMatrix_struct
 #define hypre_SStructMatrixSplits(mat)         ((mat) -> splits)
 #define hypre_SStructMatrixSplit(mat, p, v)    ((mat) -> splits[p][v])
 #define hypre_SStructMatrixNParts(mat)         ((mat) -> nparts)
+#define hypre_SStructMatrixPartIDs(mat)        ((mat) -> part_ids)
+#define hypre_SStructMatrixPartID(mat, p)      ((mat) -> part_ids[p])
 #define hypre_SStructMatrixPMatrices(mat)      ((mat) -> pmatrices)
 #define hypre_SStructMatrixPMatrix(mat, part)  ((mat) -> pmatrices[part])
 #define hypre_SStructMatrixSymmetric(mat)      ((mat) -> symmetric)
