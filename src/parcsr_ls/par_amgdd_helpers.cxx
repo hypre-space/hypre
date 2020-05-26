@@ -75,104 +75,104 @@ RemoveRedundancy(hypre_ParCompGrid *compGrid,
 #if defined(HYPRE_USING_GPU)
 extern "C"
 {
-   __global__
-   void ExpandPaddingRecursiveKernel(HYPRE_Int *list,
-                        HYPRE_Int *add_flag,
-                        HYPRE_Int *owned_diag_col_ind,
-                        HYPRE_Int *owned_offd_col_ind,
-                        HYPRE_Int *nonowned_diag_col_ind,
-                        HYPRE_Int *nonowned_offd_col_ind,
-                        HYPRE_Int *owned_diag_row_ptr,
-                        HYPRE_Int *owned_offd_row_ptr,
-                        HYPRE_Int *nonowned_diag_row_ptr,
-                        HYPRE_Int *nonowned_offd_row_ptr,
-                        HYPRE_Int list_size,
-                        HYPRE_Int num_owned,
-                        HYPRE_Int list_offset,
-                        HYPRE_Int dist)
-   {
-      HYPRE_Int i = blockIdx.x * blockDim.x + threadIdx.x;
-      HYPRE_Int j, jj;
-      if (i < list_size)
-      {
-         HYPRE_Int idx = list[i] + list_offset;
-         add_flag[idx] = max(dist, add_flag[idx]);
-         if (dist > 1)
-         {
-            if (idx < num_owned)
-            {
-               HYPRE_Int start = owned_diag_row_ptr[idx];
-               HYPRE_Int recurse_size = owned_diag_row_ptr[idx+1] - start;
-               ExpandPaddingRecursiveKernel<<<1,recurse_size>>>(&(owned_diag_col_ind[start]),
-                        add_flag,
-                        owned_diag_col_ind,
-                        owned_offd_col_ind,
-                        nonowned_diag_col_ind,
-                        nonowned_offd_col_ind,
-                        owned_diag_row_ptr,
-                        owned_offd_row_ptr,
-                        nonowned_diag_row_ptr,
-                        nonowned_offd_row_ptr,
-                        recurse_size,
-                        num_owned,
-                        0,
-                        dist-1);
-               start = owned_offd_row_ptr[idx];
-               recurse_size = owned_offd_row_ptr[idx+1] - start;
-               ExpandPaddingRecursiveKernel<<<1,recurse_size>>>(&(owned_offd_col_ind[start]),
-                        add_flag,
-                        owned_diag_col_ind,
-                        owned_offd_col_ind,
-                        nonowned_diag_col_ind,
-                        nonowned_offd_col_ind,
-                        owned_diag_row_ptr,
-                        owned_offd_row_ptr,
-                        nonowned_diag_row_ptr,
-                        nonowned_offd_row_ptr,
-                        recurse_size,
-                        num_owned,
-                        num_owned,
-                        dist-1);
-            }
-            else
-            {
-               idx -= num_owned;
-               HYPRE_Int start = nonowned_diag_row_ptr[idx];
-               HYPRE_Int recurse_size = nonowned_diag_row_ptr[idx+1] - start;
-               ExpandPaddingRecursiveKernel<<<1,recurse_size>>>(&(nonowned_diag_col_ind[start]),
-                        add_flag,
-                        owned_diag_col_ind,
-                        owned_offd_col_ind,
-                        nonowned_diag_col_ind,
-                        nonowned_offd_col_ind,
-                        owned_diag_row_ptr,
-                        owned_offd_row_ptr,
-                        nonowned_diag_row_ptr,
-                        nonowned_offd_row_ptr,
-                        recurse_size,
-                        num_owned,
-                        num_owned,
-                        dist-1);
-               start = nonowned_offd_row_ptr[idx];
-               recurse_size = nonowned_offd_row_ptr[idx+1] - start;
-               ExpandPaddingRecursiveKernel<<<1,recurse_size>>>(&(nonowned_offd_col_ind[start]),
-                        add_flag,
-                        owned_diag_col_ind,
-                        owned_offd_col_ind,
-                        nonowned_diag_col_ind,
-                        nonowned_offd_col_ind,
-                        owned_diag_row_ptr,
-                        owned_offd_row_ptr,
-                        nonowned_diag_row_ptr,
-                        nonowned_offd_row_ptr,
-                        recurse_size,
-                        num_owned,
-                        0,
-                        dist-1);
-            }
-         }
-      } 
-   }
+   /* __global__ */
+   /* void ExpandPaddingRecursiveKernel(HYPRE_Int *list, */
+   /*                      HYPRE_Int *add_flag, */
+   /*                      HYPRE_Int *owned_diag_col_ind, */
+   /*                      HYPRE_Int *owned_offd_col_ind, */
+   /*                      HYPRE_Int *nonowned_diag_col_ind, */
+   /*                      HYPRE_Int *nonowned_offd_col_ind, */
+   /*                      HYPRE_Int *owned_diag_row_ptr, */
+   /*                      HYPRE_Int *owned_offd_row_ptr, */
+   /*                      HYPRE_Int *nonowned_diag_row_ptr, */
+   /*                      HYPRE_Int *nonowned_offd_row_ptr, */
+   /*                      HYPRE_Int list_size, */
+   /*                      HYPRE_Int num_owned, */
+   /*                      HYPRE_Int list_offset, */
+   /*                      HYPRE_Int dist) */
+   /* { */
+   /*    HYPRE_Int i = blockIdx.x * blockDim.x + threadIdx.x; */
+   /*    HYPRE_Int j, jj; */
+   /*    if (i < list_size) */
+   /*    { */
+   /*       HYPRE_Int idx = list[i] + list_offset; */
+   /*       add_flag[idx] = max(dist, add_flag[idx]); */
+   /*       if (dist > 1) */
+   /*       { */
+   /*          if (idx < num_owned) */
+   /*          { */
+   /*             HYPRE_Int start = owned_diag_row_ptr[idx]; */
+   /*             HYPRE_Int recurse_size = owned_diag_row_ptr[idx+1] - start; */
+   /*             ExpandPaddingRecursiveKernel<<<1,recurse_size>>>(&(owned_diag_col_ind[start]), */
+   /*                      add_flag, */
+   /*                      owned_diag_col_ind, */
+   /*                      owned_offd_col_ind, */
+   /*                      nonowned_diag_col_ind, */
+   /*                      nonowned_offd_col_ind, */
+   /*                      owned_diag_row_ptr, */
+   /*                      owned_offd_row_ptr, */
+   /*                      nonowned_diag_row_ptr, */
+   /*                      nonowned_offd_row_ptr, */
+   /*                      recurse_size, */
+   /*                      num_owned, */
+   /*                      0, */
+   /*                      dist-1); */
+   /*             start = owned_offd_row_ptr[idx]; */
+   /*             recurse_size = owned_offd_row_ptr[idx+1] - start; */
+   /*             ExpandPaddingRecursiveKernel<<<1,recurse_size>>>(&(owned_offd_col_ind[start]), */
+   /*                      add_flag, */
+   /*                      owned_diag_col_ind, */
+   /*                      owned_offd_col_ind, */
+   /*                      nonowned_diag_col_ind, */
+   /*                      nonowned_offd_col_ind, */
+   /*                      owned_diag_row_ptr, */
+   /*                      owned_offd_row_ptr, */
+   /*                      nonowned_diag_row_ptr, */
+   /*                      nonowned_offd_row_ptr, */
+   /*                      recurse_size, */
+   /*                      num_owned, */
+   /*                      num_owned, */
+   /*                      dist-1); */
+   /*          } */
+   /*          else */
+   /*          { */
+   /*             idx -= num_owned; */
+   /*             HYPRE_Int start = nonowned_diag_row_ptr[idx]; */
+   /*             HYPRE_Int recurse_size = nonowned_diag_row_ptr[idx+1] - start; */
+   /*             ExpandPaddingRecursiveKernel<<<1,recurse_size>>>(&(nonowned_diag_col_ind[start]), */
+   /*                      add_flag, */
+   /*                      owned_diag_col_ind, */
+   /*                      owned_offd_col_ind, */
+   /*                      nonowned_diag_col_ind, */
+   /*                      nonowned_offd_col_ind, */
+   /*                      owned_diag_row_ptr, */
+   /*                      owned_offd_row_ptr, */
+   /*                      nonowned_diag_row_ptr, */
+   /*                      nonowned_offd_row_ptr, */
+   /*                      recurse_size, */
+   /*                      num_owned, */
+   /*                      num_owned, */
+   /*                      dist-1); */
+   /*             start = nonowned_offd_row_ptr[idx]; */
+   /*             recurse_size = nonowned_offd_row_ptr[idx+1] - start; */
+   /*             ExpandPaddingRecursiveKernel<<<1,recurse_size>>>(&(nonowned_offd_col_ind[start]), */
+   /*                      add_flag, */
+   /*                      owned_diag_col_ind, */
+   /*                      owned_offd_col_ind, */
+   /*                      nonowned_diag_col_ind, */
+   /*                      nonowned_offd_col_ind, */
+   /*                      owned_diag_row_ptr, */
+   /*                      owned_offd_row_ptr, */
+   /*                      nonowned_diag_row_ptr, */
+   /*                      nonowned_offd_row_ptr, */
+   /*                      recurse_size, */
+   /*                      num_owned, */
+   /*                      0, */
+   /*                      dist-1); */
+   /*          } */
+   /*       } */
+   /*    } */ 
+   /* } */
 
    __global__
    void ExpandPaddingNewKernel(HYPRE_Int *add_flag,
@@ -2136,23 +2136,23 @@ PackSendBufferGPU(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypr
       add_flag[current_level+1] = hypre_CTAlloc( HYPRE_Int, hypre_ParCompGridNumOwnedNodes(compGrid[current_level+1]) + hypre_ParCompGridNumNonOwnedNodes(compGrid[current_level+1]), HYPRE_MEMORY_SHARED );
       
       num_blocks = num_send_nodes[current_level][proc][current_level]/tpb+1;
-      num_starting_nodes = MarkCoarseToList(send_flag[current_level][proc][current_level],
-              &starting_nodes,
-              hypre_ParCompGridOwnedCoarseIndices(compGrid[current_level]),
-              hypre_ParCompGridNonOwnedCoarseIndices(compGrid[current_level]),
-              hypre_ParCompGridNumOwnedNodes(compGrid[current_level]),
-              hypre_ParCompGridNumOwnedNodes(compGrid[current_level+1]),
-              num_send_nodes[current_level][proc][current_level],
-              nodes_to_add_new);
-      /* MarkCoarseKernel<<<num_blocks,tpb,0,HYPRE_STREAM(1)>>>(send_flag[current_level][proc][current_level], */
-      /*         add_flag[current_level+1], */
+      /* num_starting_nodes = MarkCoarseToList(send_flag[current_level][proc][current_level], */
+      /*         &starting_nodes, */
       /*         hypre_ParCompGridOwnedCoarseIndices(compGrid[current_level]), */
       /*         hypre_ParCompGridNonOwnedCoarseIndices(compGrid[current_level]), */
       /*         hypre_ParCompGridNumOwnedNodes(compGrid[current_level]), */
       /*         hypre_ParCompGridNumOwnedNodes(compGrid[current_level+1]), */
       /*         num_send_nodes[current_level][proc][current_level], */
-      /*         padding[current_level+1] + num_ghost_layers + 1, */
       /*         nodes_to_add_new); */
+      MarkCoarseKernel<<<num_blocks,tpb,0,HYPRE_STREAM(1)>>>(send_flag[current_level][proc][current_level],
+              add_flag[current_level+1],
+              hypre_ParCompGridOwnedCoarseIndices(compGrid[current_level]),
+              hypre_ParCompGridNonOwnedCoarseIndices(compGrid[current_level]),
+              hypre_ParCompGridNumOwnedNodes(compGrid[current_level]),
+              hypre_ParCompGridNumOwnedNodes(compGrid[current_level+1]),
+              num_send_nodes[current_level][proc][current_level],
+              padding[current_level+1] + num_ghost_layers + 1,
+              nodes_to_add_new);
       hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1)));
       nodes_to_add = (*nodes_to_add_new);
    }
@@ -2193,23 +2193,9 @@ PackSendBufferGPU(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypr
          // Expand by the padding on this level and add coarse grid counterparts if applicable
          // !!! do recursive Psi_c call, here I go over all dofs and check add flag for distance... replace with list of starting dofs => updated add flag with distances (NOTE I use sort map when marking add flag)
          /* for (i = 0; i < padding[level] + num_ghost_layers; i++) ExpandPadding(compGrid[level], add_flag[level], padding[level] + num_ghost_layers + 1 - i); */
-         /* num_blocks = hypre_ParCompGridNumOwnedNodes(compGrid[level]) + hypre_ParCompGridNumNonOwnedNodes(compGrid[level])/tpb+1; */
-         /* for (i = 0; i < padding[level] + num_ghost_layers; i++) */ 
-         /*    ExpandPaddingNewKernel<<<num_blocks,tpb,0,HYPRE_STREAM(1)>>>(add_flag[level], */ 
-         /*                hypre_CSRMatrixJ( hypre_ParCompGridMatrixOwnedDiag(hypre_ParCompGridA(compGrid[level])) ), */
-         /*                hypre_CSRMatrixJ( hypre_ParCompGridMatrixOwnedOffd(hypre_ParCompGridA(compGrid[level])) ), */
-         /*                hypre_CSRMatrixJ( hypre_ParCompGridMatrixNonOwnedDiag(hypre_ParCompGridA(compGrid[level])) ), */
-         /*                hypre_CSRMatrixJ( hypre_ParCompGridMatrixNonOwnedOffd(hypre_ParCompGridA(compGrid[level])) ), */
-         /*                hypre_CSRMatrixI( hypre_ParCompGridMatrixOwnedDiag(hypre_ParCompGridA(compGrid[level])) ), */
-         /*                hypre_CSRMatrixI( hypre_ParCompGridMatrixOwnedOffd(hypre_ParCompGridA(compGrid[level])) ), */
-         /*                hypre_CSRMatrixI( hypre_ParCompGridMatrixNonOwnedDiag(hypre_ParCompGridA(compGrid[level])) ), */
-         /*                hypre_CSRMatrixI( hypre_ParCompGridMatrixNonOwnedOffd(hypre_ParCompGridA(compGrid[level])) ), */
-         /*                hypre_ParCompGridNumOwnedNodes(compGrid[level]) + hypre_ParCompGridNumNonOwnedNodes(compGrid[level]), */
-         /*                hypre_ParCompGridNumOwnedNodes(compGrid[level]), */
-         /*                padding[level] + num_ghost_layers + 1 - i); */
-         num_blocks = num_starting_nodes/tpb+1;
-         ExpandPaddingRecursiveKernel<<<num_blocks,tpb,0,HYPRE_STREAM(1)>>>(starting_nodes,
-                        add_flag[level],
+         num_blocks = hypre_ParCompGridNumOwnedNodes(compGrid[level]) + hypre_ParCompGridNumNonOwnedNodes(compGrid[level])/tpb+1;
+         for (i = 0; i < padding[level] + num_ghost_layers; i++) 
+            ExpandPaddingNewKernel<<<num_blocks,tpb,0,HYPRE_STREAM(1)>>>(add_flag[level], 
                         hypre_CSRMatrixJ( hypre_ParCompGridMatrixOwnedDiag(hypre_ParCompGridA(compGrid[level])) ),
                         hypre_CSRMatrixJ( hypre_ParCompGridMatrixOwnedOffd(hypre_ParCompGridA(compGrid[level])) ),
                         hypre_CSRMatrixJ( hypre_ParCompGridMatrixNonOwnedDiag(hypre_ParCompGridA(compGrid[level])) ),
@@ -2218,12 +2204,26 @@ PackSendBufferGPU(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypr
                         hypre_CSRMatrixI( hypre_ParCompGridMatrixOwnedOffd(hypre_ParCompGridA(compGrid[level])) ),
                         hypre_CSRMatrixI( hypre_ParCompGridMatrixNonOwnedDiag(hypre_ParCompGridA(compGrid[level])) ),
                         hypre_CSRMatrixI( hypre_ParCompGridMatrixNonOwnedOffd(hypre_ParCompGridA(compGrid[level])) ),
-                        num_starting_nodes,
+                        hypre_ParCompGridNumOwnedNodes(compGrid[level]) + hypre_ParCompGridNumNonOwnedNodes(compGrid[level]),
                         hypre_ParCompGridNumOwnedNodes(compGrid[level]),
-                        0,
                         padding[level] + num_ghost_layers + 1 - i);
+         /* num_blocks = num_starting_nodes/tpb+1; */
+         /* ExpandPaddingRecursiveKernel<<<num_blocks,tpb,0,HYPRE_STREAM(1)>>>(starting_nodes, */
+         /*                add_flag[level], */
+         /*                hypre_CSRMatrixJ( hypre_ParCompGridMatrixOwnedDiag(hypre_ParCompGridA(compGrid[level])) ), */
+         /*                hypre_CSRMatrixJ( hypre_ParCompGridMatrixOwnedOffd(hypre_ParCompGridA(compGrid[level])) ), */
+         /*                hypre_CSRMatrixJ( hypre_ParCompGridMatrixNonOwnedDiag(hypre_ParCompGridA(compGrid[level])) ), */
+         /*                hypre_CSRMatrixJ( hypre_ParCompGridMatrixNonOwnedOffd(hypre_ParCompGridA(compGrid[level])) ), */
+         /*                hypre_CSRMatrixI( hypre_ParCompGridMatrixOwnedDiag(hypre_ParCompGridA(compGrid[level])) ), */
+         /*                hypre_CSRMatrixI( hypre_ParCompGridMatrixOwnedOffd(hypre_ParCompGridA(compGrid[level])) ), */
+         /*                hypre_CSRMatrixI( hypre_ParCompGridMatrixNonOwnedDiag(hypre_ParCompGridA(compGrid[level])) ), */
+         /*                hypre_CSRMatrixI( hypre_ParCompGridMatrixNonOwnedOffd(hypre_ParCompGridA(compGrid[level])) ), */
+         /*                num_starting_nodes, */
+         /*                hypre_ParCompGridNumOwnedNodes(compGrid[level]), */
+         /*                0, */
+         /*                padding[level] + num_ghost_layers + 1 - i); */
          hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1)));
-         hypre_TFree(starting_nodes, HYPRE_MEMORY_SHARED);
+         /* hypre_TFree(starting_nodes, HYPRE_MEMORY_SHARED); */
 
          
          num_send_nodes[current_level][proc][level] = MarkerToList(add_flag[level], 
@@ -2235,23 +2235,23 @@ PackSendBufferGPU(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypr
          if (level != num_levels-1)
          {
             num_blocks = num_send_nodes[current_level][proc][level]/tpb+1;
-            num_starting_nodes = MarkCoarseToList(send_flag[current_level][proc][level],
-                                   &starting_nodes,
-                                   hypre_ParCompGridOwnedCoarseIndices(compGrid[level]),
-                                   hypre_ParCompGridNonOwnedCoarseIndices(compGrid[level]),
-                                   hypre_ParCompGridNumOwnedNodes(compGrid[level]),
-                                   hypre_ParCompGridNumOwnedNodes(compGrid[level+1]),
-                                   num_send_nodes[current_level][proc][level],
-                                   nodes_to_add_new);
-            /* MarkCoarseKernel<<<num_blocks,tpb,0,HYPRE_STREAM(1)>>>(send_flag[current_level][proc][level], */
-            /*                              add_flag[level+1], */
-            /*                              hypre_ParCompGridOwnedCoarseIndices(compGrid[level]), */
-            /*                              hypre_ParCompGridNonOwnedCoarseIndices(compGrid[level]), */
-            /*                              hypre_ParCompGridNumOwnedNodes(compGrid[level]), */
-            /*                              hypre_ParCompGridNumOwnedNodes(compGrid[level+1]), */
-            /*                              num_send_nodes[current_level][proc][level], */
-            /*                              padding[level+1] + num_ghost_layers + 1, */
-            /*                              nodes_to_add_new); */
+            /* num_starting_nodes = MarkCoarseToList(send_flag[current_level][proc][level], */
+            /*                        &starting_nodes, */
+            /*                        hypre_ParCompGridOwnedCoarseIndices(compGrid[level]), */
+            /*                        hypre_ParCompGridNonOwnedCoarseIndices(compGrid[level]), */
+            /*                        hypre_ParCompGridNumOwnedNodes(compGrid[level]), */
+            /*                        hypre_ParCompGridNumOwnedNodes(compGrid[level+1]), */
+            /*                        num_send_nodes[current_level][proc][level], */
+            /*                        nodes_to_add_new); */
+            MarkCoarseKernel<<<num_blocks,tpb,0,HYPRE_STREAM(1)>>>(send_flag[current_level][proc][level],
+                                         add_flag[level+1],
+                                         hypre_ParCompGridOwnedCoarseIndices(compGrid[level]),
+                                         hypre_ParCompGridNonOwnedCoarseIndices(compGrid[level]),
+                                         hypre_ParCompGridNumOwnedNodes(compGrid[level]),
+                                         hypre_ParCompGridNumOwnedNodes(compGrid[level+1]),
+                                         num_send_nodes[current_level][proc][level],
+                                         padding[level+1] + num_ghost_layers + 1,
+                                         nodes_to_add_new);
             hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1)));
             nodes_to_add = (*nodes_to_add_new);
          }

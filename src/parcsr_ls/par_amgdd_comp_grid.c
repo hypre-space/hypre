@@ -24,6 +24,14 @@
 #if defined(HYPRE_USING_GPU)
 #include <thrust/gather.h>
 #include <thrust/execution_policy.h>
+struct less_than_zero
+{
+   __host__ __device__
+   HYPRE_Int operator()(HYPRE_Int x)
+   {
+      return x < 0;
+   }
+};
 __global__
 void CombineArraysByKey(HYPRE_Int *list1, HYPRE_Int *list2, HYPRE_Int *return_list, HYPRE_Int *keys, HYPRE_Int size)
 {
@@ -43,6 +51,47 @@ struct transform_to_0_1
    }
 
 };
+__global__
+void UpdateAColIndKernel(HYPRE_Int *missing_col_ind,
+                         HYPRE_Int *col_ind,
+                         HYPRE_Int *nonowned_global_indices,
+                         HYPRE_Int *inv_map,
+                         HYPRE_Int num_nonowned,
+                         HYPRE_Int num_missing_col_ind)
+{
+   HYPRE_Int i = blockIdx.x * blockDim.x + threadIdx.x;
+   if (i < num_missing_col_ind)
+   {
+      HYPRE_Int j = missing_col_ind[i];
+      HYPRE_Int global_index = col_ind[ j ];
+      global_index = -(global_index+1);
+
+      // Do binary search
+      HYPRE_Int      left = 0;
+      HYPRE_Int      right = num_nonowned-1;
+      HYPRE_Int      index, sorted_index;
+      HYPRE_Int      local_index = -1;
+      while (left <= right)
+      {
+         sorted_index = (left + right) / 2;
+         index = inv_map[sorted_index];
+         if (nonowned_global_indices[index] < global_index) left = sorted_index + 1;
+         else if (nonowned_global_indices[index] > global_index) right = sorted_index - 1;
+         else
+         {
+            local_index = index;
+            break;
+         }
+      }
+
+      // If we dof not found in comp grid, then keep this as a missing connection
+      if (local_index == -1)
+         local_index = -(global_index+1);
+      else
+         missing_col_ind[i] = -1;
+      col_ind[ j ] = local_index;
+   }
+}
 #endif
 
 HYPRE_Int LocalIndexBinarySearch( hypre_ParCompGrid *compGrid, HYPRE_Int global_index )
@@ -1559,8 +1608,9 @@ hypre_ParCompGridSetupLocalIndicesGPU( hypre_ParCompGrid **compGrid, HYPRE_Int *
    // also done after each ghost layer is added
    HYPRE_Int      level,proc,i,j,k;
    HYPRE_Int      global_index, local_index, coarse_index;
-
-   HYPRE_Int bin_search_cnt = 0;
+         
+   const HYPRE_Int tpb=64;
+   HYPRE_Int num_blocks;
 
    HYPRE_Int myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
@@ -1646,23 +1696,19 @@ hypre_ParCompGridSetupLocalIndicesGPU( hypre_ParCompGrid **compGrid, HYPRE_Int *
       if (nodes_added_on_level[level])
       {
          // Look for missing col ind connections
+         HYPRE_Int *missing_col_ind = hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[level]);
          HYPRE_Int num_missing_col_ind = hypre_ParCompGridNumMissingColIndices(compGrid[level]);
-         hypre_ParCompGridNumMissingColIndices(compGrid[level]) = 0;
-         for (i = 0; i < num_missing_col_ind; i++)
-         {
-            j = hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[level])[i];
-            global_index = hypre_CSRMatrixJ(nonowned_diag)[ j ];
-            global_index = -(global_index+1);
-            local_index = LocalIndexBinarySearch(compGrid[level], global_index);
-            bin_search_cnt++;
-            // If we dof not found in comp grid, then mark this as a missing connection
-            if (local_index == -1)
-            {
-               local_index = -(global_index+1);
-               hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[level])[ hypre_ParCompGridNumMissingColIndices(compGrid[level])++ ] = j;
-            }
-            hypre_CSRMatrixJ(nonowned_diag)[ j ] = local_index;
-         }
+         num_blocks = num_missing_col_ind/tpb+1;
+         UpdateAColIndKernel<<<num_blocks,tpb,0,HYPRE_STREAM(1)>>>(missing_col_ind,
+                         hypre_CSRMatrixJ(nonowned_diag),
+                         hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level]),
+                         hypre_ParCompGridNonOwnedInvSort(compGrid[level]),
+                         hypre_ParCompGridNumNonOwnedNodes(compGrid[level]),
+                         num_missing_col_ind);
+         hypre_CheckErrorDevice(cudaDeviceSynchronize());
+         HYPRE_Int *new_end = thrust::remove_if(missing_col_ind, missing_col_ind + num_missing_col_ind, less_than_zero());
+         hypre_CheckErrorDevice(cudaDeviceSynchronize());
+         hypre_ParCompGridNumMissingColIndices(compGrid[level]) = new_end - missing_col_ind;
       }
      
       // if we are not on the coarsest level
@@ -1683,14 +1729,13 @@ hypre_ParCompGridSetupLocalIndicesGPU( hypre_ParCompGrid **compGrid, HYPRE_Int *
             {
                coarse_index = -(coarse_index+2); // Map back to regular global index
                local_index = LocalIndexBinarySearch(compGrid[level+1], coarse_index);
-               bin_search_cnt++;
                hypre_ParCompGridNonOwnedCoarseIndices(compGrid[level])[i] = local_index;
             }
          }
       }
    }
 
-   return bin_search_cnt;
+   return 0;
 }
 
 HYPRE_Int 
