@@ -56,7 +56,8 @@ void UpdateCoarseIndKernel(HYPRE_Int *nonowned_coarse_indices,
                          HYPRE_Int *nonowned_real_marker,
                          HYPRE_Int *nonowned_global_indices,
                          HYPRE_Int *inv_map,
-                         HYPRE_Int num_nonowned)
+                         HYPRE_Int num_nonowned,
+                         HYPRE_Int num_nonowned_coarse)
 {
    HYPRE_Int i = blockIdx.x * blockDim.x + threadIdx.x;
    if (i < num_nonowned)
@@ -70,7 +71,7 @@ void UpdateCoarseIndKernel(HYPRE_Int *nonowned_coarse_indices,
          HYPRE_Int global_index = -(coarse_index+2); // Map back to regular global index
          // Do binary search
          HYPRE_Int      left = 0;
-         HYPRE_Int      right = num_nonowned-1;
+         HYPRE_Int      right = num_nonowned_coarse-1;
          HYPRE_Int      index, sorted_index;
          HYPRE_Int      local_index = -1;
          while (left <= right)
@@ -1761,7 +1762,8 @@ hypre_ParCompGridSetupLocalIndicesGPU( hypre_ParCompGrid **compGrid, HYPRE_Int *
                          hypre_ParCompGridNonOwnedRealMarker(compGrid[level]),
                          hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level+1]),
                          hypre_ParCompGridNonOwnedInvSort(compGrid[level+1]),
-                         hypre_ParCompGridNumNonOwnedNodes(compGrid[level]));
+                         hypre_ParCompGridNumNonOwnedNodes(compGrid[level]),
+                         hypre_ParCompGridNumNonOwnedNodes(compGrid[level+1]));
          hypre_CheckErrorDevice(cudaDeviceSynchronize());
       }
    }
