@@ -36,9 +36,6 @@
  *         1) A is transposed in each call to hypre_ParTMatmul. This operation
  *            could be done only once and At reused...
  *         2) Should we phase out domain grid and have only a base grid?
- *         3) Info about neighboring parts on grid_M?
- *         4) Do not build grid_M, use a reference to existing grids from
- *            ssmatrices instead
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 hypre_SStructMatmult( HYPRE_Int             nmatrices,
@@ -53,15 +50,11 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
    hypre_SStructGraph      *graph;
    hypre_SStructGraph      *graph_M;
    hypre_SStructGrid       *grid;
-   hypre_SStructGrid       *grid_M;
    hypre_SStructGrid       *dom_grid;
    hypre_SStructGrid       *ran_grid;
-   hypre_SStructPGrid      *pgrid;
-   hypre_StructGrid        *sgrid;
    hypre_SStructPMatrix    *pmatrix;
    hypre_StructMatrix     **smatrices;   /* nmatrices array */
    hypre_StructMatrix     **smatrices_M; /* nparts array */
-   HYPRE_SStructVariable   *vartypes;
    HYPRE_Int               *pids;
    HYPRE_Int               *pids_M;
    HYPRE_Int               *pids_all;
@@ -77,8 +70,6 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
    hypre_IJMatrix          *ijmatrix;
    hypre_IJMatrix         **ij_sA;
    hypre_IJMatrix          *ij_M;
-   hypre_BoxArray          *boxes;
-   hypre_Box               *box;
 
    /* Stencil data */
    hypre_StructStencil     *stencil_M;
@@ -89,12 +80,11 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
    /* This function works for a single variable type only */
    HYPRE_Int                vi = 0, vj = 0;
    HYPRE_Int                ndim;
-   HYPRE_Int                i, m, p, q, s, t;
+   HYPRE_Int                m, p, q, s, t;
    HYPRE_Int                pid, part, part_cnt;
    HYPRE_Int                dom_nparts, ran_nparts;
    HYPRE_Int                nparts, nparts_M, nparts_all;
    HYPRE_Int                nvars_M;
-   hypre_IndexRef           imin, imax;
 
    /*-------------------------------------------------------
     * Safety checks
@@ -110,7 +100,7 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
 
    t = terms[0];
    graph = hypre_SStructMatrixGraph(ssmatrices[t]);
-   if (transposes[t])
+   if (transposes[0])
    {
       ran_grid = hypre_SStructGraphDomGrid(graph);
    }
@@ -122,7 +112,7 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
 
    t = terms[nterms - 1];
    graph = hypre_SStructMatrixGraph(ssmatrices[t]);
-   if (transposes[t])
+   if (transposes[nterms - 1])
    {
       dom_grid = hypre_SStructGraphRanGrid(graph);
    }
@@ -344,36 +334,8 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
     * Create the resulting SStructMatrix
     *-------------------------------------------------------*/
 
-   // Create grid
-   HYPRE_SStructGridCreate(comm, ndim, nparts_M, &grid_M);
-   graph = hypre_SStructMatrixGraph(ssmatrices[0]);
-   grid  = hypre_SStructGraphGrid(graph);
-   for (part = 0; part < nparts_M; part++)
-   {
-      if (smatrices_M[part])
-      {
-         sgrid = hypre_StructMatrixGrid(smatrices_M[part]);
-         boxes = hypre_StructGridBoxes(sgrid);
-
-         hypre_ForBoxI(i, boxes)
-         {
-            box  = hypre_BoxArrayBox(boxes, i);
-            imin = hypre_BoxIMin(box);
-            imax = hypre_BoxIMax(box);
-
-            HYPRE_SStructGridSetExtents(grid_M, part, imin, imax);
-         }
-
-         pgrid = hypre_SStructGridPGrid(grid, part);
-         vartypes = hypre_SStructPGridVarTypes(pgrid);
-         HYPRE_SStructGridSetVariables(grid_M, part, 1, vartypes);
-      }
-   }
-   hypre_SStructGridSetPartIDs(grid_M, pids_M);
-   HYPRE_SStructGridAssemble(grid_M);
-
-   // Create graph
-   HYPRE_SStructGraphCreate(comm, grid_M, grid_M, (HYPRE_SStructGraph*) &graph_M);
+   /* Create graph_M */
+   HYPRE_SStructGraphCreate(comm, dom_grid, ran_grid, (HYPRE_SStructGraph*) &graph_M);
    HYPRE_SStructGraphSetObjectType(graph_M, HYPRE_SSTRUCT);
    for (part = 0; part < nparts_M; part++)
    {
@@ -383,7 +345,7 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
       }
    }
 
-   // Create matrix
+   /* Create matrix M */
    HYPRE_SStructMatrixCreate(comm, graph_M, &M);
    HYPRE_SStructMatrixInitialize(M);
    for (part = 0; part < nparts_M; part++)
