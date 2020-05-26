@@ -52,6 +52,44 @@ struct transform_to_0_1
 
 };
 __global__
+void UpdateCoarseIndKernel(HYPRE_Int *nonowned_coarse_indices,
+                         HYPRE_Int *nonowned_real_marker,
+                         HYPRE_Int *nonowned_global_indices,
+                         HYPRE_Int *inv_map,
+                         HYPRE_Int num_nonowned)
+{
+   HYPRE_Int i = blockIdx.x * blockDim.x + threadIdx.x;
+   if (i < num_nonowned)
+   {
+      // fix up the coarse local indices
+      HYPRE_Int coarse_index = nonowned_coarse_indices[i];
+      HYPRE_Int is_real = nonowned_real_marker[i];
+      // setup coarse local index if necessary
+      if (coarse_index < -1 && is_real)
+      {
+         HYPRE_Int global_index = -(coarse_index+2); // Map back to regular global index
+         // Do binary search
+         HYPRE_Int      left = 0;
+         HYPRE_Int      right = num_nonowned-1;
+         HYPRE_Int      index, sorted_index;
+         HYPRE_Int      local_index = -1;
+         while (left <= right)
+         {
+            sorted_index = (left + right) / 2;
+            index = inv_map[sorted_index];
+            if (nonowned_global_indices[index] < global_index) left = sorted_index + 1;
+            else if (nonowned_global_indices[index] > global_index) right = sorted_index - 1;
+            else
+            {
+               local_index = index;
+               break;
+            }
+         }
+         nonowned_coarse_indices[i] = local_index;
+      }
+   }
+}
+__global__
 void UpdateAColIndKernel(HYPRE_Int *missing_col_ind,
                          HYPRE_Int *col_ind,
                          HYPRE_Int *nonowned_global_indices,
@@ -1718,20 +1756,13 @@ hypre_ParCompGridSetupLocalIndicesGPU( hypre_ParCompGrid **compGrid, HYPRE_Int *
          // No guarantee that previous ghost dofs converted to real dofs have coarse local indices setup...
          // Thus we go over all non-owned dofs here instead of just the added ones, but we only setup coarse local index where necessary.
          // NOTE: can't use nodes_added_on_level here either because real overwritten by ghost doesn't count as added node (so you can miss setting these up)
-         for (i = 0; i < hypre_ParCompGridNumNonOwnedNodes(compGrid[level]); i++)
-         {
-            // fix up the coarse local indices
-            coarse_index = hypre_ParCompGridNonOwnedCoarseIndices(compGrid[level])[i];
-            HYPRE_Int is_real = hypre_ParCompGridNonOwnedRealMarker(compGrid[level])[i];
-
-            // setup coarse local index if necessary
-            if (coarse_index < -1 && is_real)
-            {
-               coarse_index = -(coarse_index+2); // Map back to regular global index
-               local_index = LocalIndexBinarySearch(compGrid[level+1], coarse_index);
-               hypre_ParCompGridNonOwnedCoarseIndices(compGrid[level])[i] = local_index;
-            }
-         }
+         num_blocks = hypre_ParCompGridNumNonOwnedNodes(compGrid[level])/tpb+1;
+         UpdateCoarseIndKernel<<<num_blocks,tpb,0,HYPRE_STREAM(1)>>>(hypre_ParCompGridNonOwnedCoarseIndices(compGrid[level]),
+                         hypre_ParCompGridNonOwnedRealMarker(compGrid[level]),
+                         hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level+1]),
+                         hypre_ParCompGridNonOwnedInvSort(compGrid[level+1]),
+                         hypre_ParCompGridNumNonOwnedNodes(compGrid[level]));
+         hypre_CheckErrorDevice(cudaDeviceSynchronize());
       }
    }
 
