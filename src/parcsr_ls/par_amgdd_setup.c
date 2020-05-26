@@ -266,15 +266,15 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
          if (timers) hypre_BeginTiming(timers[2]);
          for (i = 0; i < num_send_procs; i++)
          {
-#if defined(HYPRE_USING_GPU)
+/* #if defined(HYPRE_USING_GPU) */
             send_buffer[i] = PackSendBufferGPU(amg_data, compGrid, compGridCommPkg, &(send_buffer_size[level][i]), 
                                              &(send_flag_buffer_size[i]), send_flag, num_send_nodes, i, level, num_levels, padding, 
                                              num_ghost_layers, symmetric );
-#else
-            send_buffer[i] = PackSendBuffer(amg_data, compGrid, compGridCommPkg, &(send_buffer_size[level][i]), 
-                                             &(send_flag_buffer_size[i]), send_flag, num_send_nodes, i, level, num_levels, padding, 
-                                             num_ghost_layers, symmetric );
-#endif
+/* #else */
+            /* send_buffer[i] = PackSendBuffer(amg_data, compGrid, compGridCommPkg, &(send_buffer_size[level][i]), */ 
+            /*                                  &(send_flag_buffer_size[i]), send_flag, num_send_nodes, i, level, num_levels, padding, */ 
+            /*                                  num_ghost_layers, symmetric ); */
+/* #endif */
          }
          if (timers) hypre_EndTiming(timers[2]);
 
@@ -365,8 +365,8 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
          //////////// Setup local indices for the composite grid ////////////
 
          if (timers) hypre_BeginTiming(timers[5]);
-         /* total_bin_search_count += hypre_ParCompGridSetupLocalIndices(compGrid, nodes_added_on_level, recv_map, num_recv_procs, A_tmp_info, level, num_levels, symmetric); */
-         hypre_ParCompGridSetupLocalIndicesGPU(compGrid, nodes_added_on_level, recv_map, num_recv_procs, A_tmp_info, level, num_levels, symmetric);
+         total_bin_search_count += hypre_ParCompGridSetupLocalIndices(compGrid, nodes_added_on_level, recv_map, num_recv_procs, A_tmp_info, level, num_levels, symmetric);
+         /* hypre_ParCompGridSetupLocalIndicesGPU(compGrid, nodes_added_on_level, recv_map, num_recv_procs, A_tmp_info, level, num_levels, symmetric); */
          for (j = level; j < num_levels; j++) nodes_added_on_level[j] = 0;
 
          if (timers) hypre_EndTiming(timers[5]);

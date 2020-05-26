@@ -635,7 +635,7 @@ extern "C"
             if (idx < num_owned)
             {
                HYPRE_Int coarse_index = owned_coarse_indices[idx];
-               if (coarse_index != -1)
+               if (coarse_index >= 0)
                {
                   marker[ coarse_index ] = dist;
                   (*nodes_to_add) = 1;
@@ -644,7 +644,7 @@ extern "C"
             else
             {
                idx -= num_owned;
-               if (nonowned_coarse_indices[idx] != -1)
+               if (nonowned_coarse_indices[idx] >= 0)
                {
                   HYPRE_Int coarse_index = nonowned_coarse_indices[idx] + num_owned_coarse;
                   marker[ coarse_index ] = dist;
@@ -1085,19 +1085,19 @@ FindNeighborProcessors(hypre_ParCSRMatrix *A,
    starting_dofs.clear();
 
     // !!! Debug
-    if (myid == 21)
-    {
-        cout << "Total owned dofs = " << hypre_ParCSRMatrixNumRows(A) << ", num cols offd = " << hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A)) << endl;
-        for (auto req_proc_it = request_proc_dofs.begin(); req_proc_it != request_proc_dofs.end(); ++req_proc_it) // Iterate over recv procs
-            for (auto req_proc_inner_it = req_proc_it->second.begin(); req_proc_inner_it != req_proc_it->second.end(); ++req_proc_inner_it) // Iterate over destinations
-            {
-               total_proc_connections++;
-               total_request_dofs += req_proc_inner_it->second.size();
-            }
-        cout << "total proc connections = " << total_proc_connections << ", num send procs = " << send_proc_dofs.size() << ", num starting procs = " << starting_dofs.size() << endl;
-        cout << "Total starting dofs = " << total_starting_dofs << endl
-           << "Total request dofs = " << total_request_dofs << endl;
-    }
+    /* if (myid == 21) */
+    /* { */
+    /*     cout << "Total owned dofs = " << hypre_ParCSRMatrixNumRows(A) << ", num cols offd = " << hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A)) << endl; */
+    /*     for (auto req_proc_it = request_proc_dofs.begin(); req_proc_it != request_proc_dofs.end(); ++req_proc_it) // Iterate over recv procs */
+    /*         for (auto req_proc_inner_it = req_proc_it->second.begin(); req_proc_inner_it != req_proc_it->second.end(); ++req_proc_inner_it) // Iterate over destinations */
+    /*         { */
+    /*            total_proc_connections++; */
+    /*            total_request_dofs += req_proc_inner_it->second.size(); */
+    /*         } */
+    /*     cout << "total proc connections = " << total_proc_connections << ", num send procs = " << send_proc_dofs.size() << ", num starting procs = " << starting_dofs.size() << endl; */
+    /*     cout << "Total starting dofs = " << total_starting_dofs << endl */
+    /*        << "Total request dofs = " << total_request_dofs << endl; */
+    /* } */
 
 
    // !!! Timing
@@ -1340,14 +1340,14 @@ FindNeighborProcessors(hypre_ParCSRMatrix *A,
    timings[3] = part_end - part_start;
    auto total_end = chrono::system_clock::now();
    timings[0] = total_end - total_start;
-   if (myid == 21)
-   {
-       cout.precision(3);
-       cout << "Total time " << timings[0].count() << endl
-           << "Part 1 " << timings[1].count() << endl
-           << "Part 2 " << timings[2].count() << endl
-           << "Part 3 " << timings[3].count() << endl;
-   }
+   /* if (myid == 21) */
+   /* { */
+   /*     cout.precision(3); */
+   /*     cout << "Total time " << timings[0].count() << endl */
+   /*         << "Part 1 " << timings[1].count() << endl */
+   /*         << "Part 2 " << timings[2].count() << endl */
+   /*         << "Part 3 " << timings[3].count() << endl; */
+   /* } */
 
    return 0;
 }
@@ -2144,6 +2144,7 @@ PackSendBufferGPU(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypr
       /*         hypre_ParCompGridNumOwnedNodes(compGrid[current_level+1]), */
       /*         num_send_nodes[current_level][proc][current_level], */
       /*         nodes_to_add_new); */
+      (*nodes_to_add_new) = 0;
       MarkCoarseKernel<<<num_blocks,tpb,0,HYPRE_STREAM(1)>>>(send_flag[current_level][proc][current_level],
               add_flag[current_level+1],
               hypre_ParCompGridOwnedCoarseIndices(compGrid[current_level]),
@@ -2243,6 +2244,7 @@ PackSendBufferGPU(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypr
             /*                        hypre_ParCompGridNumOwnedNodes(compGrid[level+1]), */
             /*                        num_send_nodes[current_level][proc][level], */
             /*                        nodes_to_add_new); */
+            (*nodes_to_add_new) = 0;
             MarkCoarseKernel<<<num_blocks,tpb,0,HYPRE_STREAM(1)>>>(send_flag[current_level][proc][level],
                                          add_flag[level+1],
                                          hypre_ParCompGridOwnedCoarseIndices(compGrid[level]),
