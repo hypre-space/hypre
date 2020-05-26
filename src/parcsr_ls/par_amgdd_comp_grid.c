@@ -1551,6 +1551,149 @@ hypre_ParCompGridResize( hypre_ParCompGrid *compGrid, HYPRE_Int new_size, HYPRE_
 }
 
 HYPRE_Int 
+hypre_ParCompGridSetupLocalIndicesGPU( hypre_ParCompGrid **compGrid, HYPRE_Int *nodes_added_on_level, HYPRE_Int ****recv_map,
+   HYPRE_Int num_recv_procs, HYPRE_Int **A_tmp_info, HYPRE_Int current_level, HYPRE_Int num_levels, HYPRE_Int symmetric )
+{
+   // when nodes are added to a composite grid, global info is copied over, but local indices must be generated appropriately for all added nodes
+   // this must be done on each level as info is added to correctly construct subsequent Psi_c grids
+   // also done after each ghost layer is added
+   HYPRE_Int      level,proc,i,j,k;
+   HYPRE_Int      global_index, local_index, coarse_index;
+
+   HYPRE_Int bin_search_cnt = 0;
+
+   HYPRE_Int myid;
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+
+   hypre_ParCompGridMatrix *A = hypre_ParCompGridA(compGrid[current_level]);
+   hypre_CSRMatrix *owned_offd = hypre_ParCompGridMatrixOwnedOffd(A);
+   hypre_CSRMatrix *nonowned_diag = hypre_ParCompGridMatrixNonOwnedDiag(A);
+   hypre_CSRMatrix *nonowned_offd = hypre_ParCompGridMatrixNonOwnedOffd(A);
+
+   // On current_level, need to deal with A_tmp_info
+   HYPRE_Int row = hypre_CSRMatrixNumCols(owned_offd)+1;
+   HYPRE_Int diag_rowptr = hypre_CSRMatrixI(nonowned_diag)[ hypre_CSRMatrixNumCols(owned_offd) ];
+   HYPRE_Int offd_rowptr = hypre_CSRMatrixI(nonowned_offd)[ hypre_CSRMatrixNumCols(owned_offd) ];
+   for (proc = 0; proc < num_recv_procs; proc++)
+   {
+      HYPRE_Int cnt = 0;
+      HYPRE_Int num_original_recv_dofs = A_tmp_info[proc][cnt++];
+      HYPRE_Int remaining_dofs = A_tmp_info[proc][cnt++];
+
+      for (i = 0; i < remaining_dofs; i++)
+      {
+         HYPRE_Int row_size = A_tmp_info[proc][cnt++];
+         for (j = 0; j < row_size; j++)
+         {
+            HYPRE_Int incoming_index = A_tmp_info[proc][cnt++];
+
+            // Incoming is a global index (could be owned or nonowned)
+            if (incoming_index < 0)
+            {
+               incoming_index = -(incoming_index+1);
+               // See whether global index is owned on this proc (if so, can directly setup appropriate local index)
+               if (incoming_index >= hypre_ParCompGridFirstGlobalIndex(compGrid[current_level]) && incoming_index <= hypre_ParCompGridLastGlobalIndex(compGrid[current_level]))
+               {
+                  // Add to offd
+                  if (offd_rowptr >= hypre_CSRMatrixNumNonzeros(nonowned_offd))
+                     hypre_CSRMatrixResize(nonowned_offd, hypre_CSRMatrixNumRows(nonowned_offd), hypre_CSRMatrixNumCols(nonowned_offd), ceil(1.5*hypre_CSRMatrixNumNonzeros(nonowned_offd)));
+                  hypre_CSRMatrixJ(nonowned_offd)[offd_rowptr++] = incoming_index - hypre_ParCompGridFirstGlobalIndex(compGrid[current_level]);
+               }
+               else
+               {
+                  // Add to diag (global index, not in buffer, so need to do local binary search)
+                  if (diag_rowptr >= hypre_CSRMatrixNumNonzeros(nonowned_diag))
+                  {
+                     hypre_CSRMatrixResize(nonowned_diag, hypre_CSRMatrixNumRows(nonowned_diag), hypre_CSRMatrixNumCols(nonowned_diag), ceil(1.5*hypre_CSRMatrixNumNonzeros(nonowned_diag)));
+                     hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[current_level]) = hypre_TReAlloc(hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[current_level]), HYPRE_Int, ceil(1.5*hypre_CSRMatrixNumNonzeros(nonowned_diag)), HYPRE_MEMORY_SHARED);
+                  }
+                  // If we dof not found in comp grid, then mark this as a missing connection
+                  hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[current_level])[ hypre_ParCompGridNumMissingColIndices(compGrid[current_level])++ ] = diag_rowptr;
+                  hypre_CSRMatrixJ(nonowned_diag)[diag_rowptr++] = -(incoming_index+1);
+               }
+            }
+            // Incoming is an index to dofs within the buffer (by construction, nonowned)
+            else
+            {
+               // Add to diag (index is within buffer, so we can directly go to local index)
+               if (diag_rowptr >= hypre_CSRMatrixNumNonzeros(nonowned_diag))
+               {
+                  hypre_CSRMatrixResize(nonowned_diag, hypre_CSRMatrixNumRows(nonowned_diag), hypre_CSRMatrixNumCols(nonowned_diag), ceil(1.5*hypre_CSRMatrixNumNonzeros(nonowned_diag)));
+                  hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[current_level]) = hypre_TReAlloc(hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[current_level]), HYPRE_Int, ceil(1.5*hypre_CSRMatrixNumNonzeros(nonowned_diag)), HYPRE_MEMORY_SHARED);
+               }
+               local_index = recv_map[current_level][proc][current_level][ incoming_index ];
+               if (local_index < 0) local_index = -(local_index + 1);
+               hypre_CSRMatrixJ(nonowned_diag)[diag_rowptr++] = local_index - hypre_ParCompGridNumOwnedNodes(compGrid[current_level]);
+            }
+         }
+
+         // Update row pointers 
+         hypre_CSRMatrixI(nonowned_offd)[ row ] = offd_rowptr;
+         hypre_CSRMatrixI(nonowned_diag)[ row ] = diag_rowptr;
+         row++;
+      }
+      hypre_TFree(A_tmp_info[proc], HYPRE_MEMORY_SHARED);
+   }
+   hypre_TFree(A_tmp_info, HYPRE_MEMORY_HOST);
+
+   // Loop over levels from current to coarsest
+   for (level = current_level; level < num_levels; level++)
+   {
+      A = hypre_ParCompGridA(compGrid[level]);
+      nonowned_diag = hypre_ParCompGridMatrixNonOwnedDiag(A);
+
+      // If we have added nodes on this level
+      if (nodes_added_on_level[level])
+      {
+         // Look for missing col ind connections
+         HYPRE_Int num_missing_col_ind = hypre_ParCompGridNumMissingColIndices(compGrid[level]);
+         hypre_ParCompGridNumMissingColIndices(compGrid[level]) = 0;
+         for (i = 0; i < num_missing_col_ind; i++)
+         {
+            j = hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[level])[i];
+            global_index = hypre_CSRMatrixJ(nonowned_diag)[ j ];
+            global_index = -(global_index+1);
+            local_index = LocalIndexBinarySearch(compGrid[level], global_index);
+            bin_search_cnt++;
+            // If we dof not found in comp grid, then mark this as a missing connection
+            if (local_index == -1)
+            {
+               local_index = -(global_index+1);
+               hypre_ParCompGridNonOwnedDiagMissingColIndices(compGrid[level])[ hypre_ParCompGridNumMissingColIndices(compGrid[level])++ ] = j;
+            }
+            hypre_CSRMatrixJ(nonowned_diag)[ j ] = local_index;
+         }
+      }
+     
+      // if we are not on the coarsest level
+      if (level != num_levels-1)
+      {
+         // loop over indices of non-owned nodes on this level 
+         // No guarantee that previous ghost dofs converted to real dofs have coarse local indices setup...
+         // Thus we go over all non-owned dofs here instead of just the added ones, but we only setup coarse local index where necessary.
+         // NOTE: can't use nodes_added_on_level here either because real overwritten by ghost doesn't count as added node (so you can miss setting these up)
+         for (i = 0; i < hypre_ParCompGridNumNonOwnedNodes(compGrid[level]); i++)
+         {
+            // fix up the coarse local indices
+            coarse_index = hypre_ParCompGridNonOwnedCoarseIndices(compGrid[level])[i];
+            HYPRE_Int is_real = hypre_ParCompGridNonOwnedRealMarker(compGrid[level])[i];
+
+            // setup coarse local index if necessary
+            if (coarse_index < -1 && is_real)
+            {
+               coarse_index = -(coarse_index+2); // Map back to regular global index
+               local_index = LocalIndexBinarySearch(compGrid[level+1], coarse_index);
+               bin_search_cnt++;
+               hypre_ParCompGridNonOwnedCoarseIndices(compGrid[level])[i] = local_index;
+            }
+         }
+      }
+   }
+
+   return bin_search_cnt;
+}
+
+HYPRE_Int 
 hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *nodes_added_on_level, HYPRE_Int ****recv_map,
    HYPRE_Int num_recv_procs, HYPRE_Int **A_tmp_info, HYPRE_Int current_level, HYPRE_Int num_levels, HYPRE_Int symmetric )
 {

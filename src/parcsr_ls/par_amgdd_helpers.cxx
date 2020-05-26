@@ -76,6 +76,168 @@ RemoveRedundancy(hypre_ParCompGrid *compGrid,
 extern "C"
 {
    __global__
+   void ExpandPaddingRecursiveKernel(HYPRE_Int *list,
+                        HYPRE_Int *add_flag,
+                        HYPRE_Int *owned_diag_col_ind,
+                        HYPRE_Int *owned_offd_col_ind,
+                        HYPRE_Int *nonowned_diag_col_ind,
+                        HYPRE_Int *nonowned_offd_col_ind,
+                        HYPRE_Int *owned_diag_row_ptr,
+                        HYPRE_Int *owned_offd_row_ptr,
+                        HYPRE_Int *nonowned_diag_row_ptr,
+                        HYPRE_Int *nonowned_offd_row_ptr,
+                        HYPRE_Int list_size,
+                        HYPRE_Int num_owned,
+                        HYPRE_Int list_offset,
+                        HYPRE_Int dist)
+   {
+      HYPRE_Int i = blockIdx.x * blockDim.x + threadIdx.x;
+      HYPRE_Int j, jj;
+      if (i < list_size)
+      {
+         HYPRE_Int idx = list[i] + list_offset;
+         add_flag[idx] = max(dist, add_flag[idx]);
+         if (dist > 1)
+         {
+            if (idx < num_owned)
+            {
+               HYPRE_Int start = owned_diag_row_ptr[idx];
+               HYPRE_Int recurse_size = owned_diag_row_ptr[idx+1] - start;
+               ExpandPaddingRecursiveKernel<<<1,recurse_size>>>(&(owned_diag_col_ind[start]),
+                        add_flag,
+                        owned_diag_col_ind,
+                        owned_offd_col_ind,
+                        nonowned_diag_col_ind,
+                        nonowned_offd_col_ind,
+                        owned_diag_row_ptr,
+                        owned_offd_row_ptr,
+                        nonowned_diag_row_ptr,
+                        nonowned_offd_row_ptr,
+                        recurse_size,
+                        num_owned,
+                        0,
+                        dist-1);
+               start = owned_offd_row_ptr[idx];
+               recurse_size = owned_offd_row_ptr[idx+1] - start;
+               ExpandPaddingRecursiveKernel<<<1,recurse_size>>>(&(owned_offd_col_ind[start]),
+                        add_flag,
+                        owned_diag_col_ind,
+                        owned_offd_col_ind,
+                        nonowned_diag_col_ind,
+                        nonowned_offd_col_ind,
+                        owned_diag_row_ptr,
+                        owned_offd_row_ptr,
+                        nonowned_diag_row_ptr,
+                        nonowned_offd_row_ptr,
+                        recurse_size,
+                        num_owned,
+                        num_owned,
+                        dist-1);
+            }
+            else
+            {
+               idx -= num_owned;
+               HYPRE_Int start = nonowned_diag_row_ptr[idx];
+               HYPRE_Int recurse_size = nonowned_diag_row_ptr[idx+1] - start;
+               ExpandPaddingRecursiveKernel<<<1,recurse_size>>>(&(nonowned_diag_col_ind[start]),
+                        add_flag,
+                        owned_diag_col_ind,
+                        owned_offd_col_ind,
+                        nonowned_diag_col_ind,
+                        nonowned_offd_col_ind,
+                        owned_diag_row_ptr,
+                        owned_offd_row_ptr,
+                        nonowned_diag_row_ptr,
+                        nonowned_offd_row_ptr,
+                        recurse_size,
+                        num_owned,
+                        num_owned,
+                        dist-1);
+               start = nonowned_offd_row_ptr[idx];
+               recurse_size = nonowned_offd_row_ptr[idx+1] - start;
+               ExpandPaddingRecursiveKernel<<<1,recurse_size>>>(&(nonowned_offd_col_ind[start]),
+                        add_flag,
+                        owned_diag_col_ind,
+                        owned_offd_col_ind,
+                        nonowned_diag_col_ind,
+                        nonowned_offd_col_ind,
+                        owned_diag_row_ptr,
+                        owned_offd_row_ptr,
+                        nonowned_diag_row_ptr,
+                        nonowned_offd_row_ptr,
+                        recurse_size,
+                        num_owned,
+                        0,
+                        dist-1);
+            }
+         }
+      } 
+   }
+
+   __global__
+   void ExpandPaddingNewKernel(HYPRE_Int *add_flag,
+                        HYPRE_Int *owned_diag_col_ind,
+                        HYPRE_Int *owned_offd_col_ind,
+                        HYPRE_Int *nonowned_diag_col_ind,
+                        HYPRE_Int *nonowned_offd_col_ind,
+                        HYPRE_Int *owned_diag_row_ptr,
+                        HYPRE_Int *owned_offd_row_ptr,
+                        HYPRE_Int *nonowned_diag_row_ptr,
+                        HYPRE_Int *nonowned_offd_row_ptr,
+                        HYPRE_Int add_flag_size,
+                        HYPRE_Int num_owned,
+                        HYPRE_Int dist)
+   {
+      HYPRE_Int i = blockIdx.x * blockDim.x + threadIdx.x;
+      HYPRE_Int j, jj;
+      if (i < add_flag_size)
+      {
+         if (add_flag[i] == dist)
+         {
+            if (i < num_owned)
+            {
+               HYPRE_Int idx = i;
+               HYPRE_Int start = owned_diag_row_ptr[idx];
+               HYPRE_Int end = owned_diag_row_ptr[idx+1];
+               for (jj = start; jj < end; jj++)
+               {
+                  j = owned_diag_col_ind[jj];
+                  add_flag[j] = max(add_flag[j], dist-1);
+               }
+               start = owned_offd_row_ptr[idx];
+               end = owned_offd_row_ptr[idx+1];
+               for (jj = start; jj < end; jj++)
+               {
+                  j = owned_offd_col_ind[jj];
+                  add_flag[j + num_owned] = max(add_flag[j + num_owned], dist-1);
+               }
+            }
+            else
+            {
+               HYPRE_Int idx = i - num_owned;
+               HYPRE_Int start = nonowned_diag_row_ptr[idx];
+               HYPRE_Int end = nonowned_diag_row_ptr[idx+1];
+               for (jj = start; jj < end; jj++)
+               {
+                  j = nonowned_diag_col_ind[jj];
+                  if (j >= 0)
+                  {
+                     add_flag[j + num_owned] = max(add_flag[j + num_owned], dist-1);
+                  }
+               }
+               start = nonowned_offd_row_ptr[idx];
+               end = nonowned_offd_row_ptr[idx+1];
+               for (jj = start; jj < end; jj++)
+               {
+                  j = nonowned_offd_col_ind[jj];
+                  add_flag[j] = max(add_flag[j], dist-1);
+               }
+            }
+         }     
+      } 
+   }
+
+   __global__
    void PackColIndNewKernel(HYPRE_Int *local_indices, 
                         HYPRE_Int *destination,
                         HYPRE_Int *offsets,
@@ -242,6 +404,15 @@ extern "C"
       }
    };
 
+   struct less_than_zero
+   {
+      __host__ __device__
+      HYPRE_Int operator()(HYPRE_Int x)
+      {
+         return x < 0;
+      }
+   };
+
    struct greater_than_equal_zero
    {
       __host__ __device__
@@ -260,11 +431,11 @@ extern "C"
       HYPRE_Int *aux_marker = hypre_CTAlloc(HYPRE_Int, marker_size, HYPRE_MEMORY_SHARED);
       greater_than_zero gtz;
       thrust::transform(thrust::cuda::par.on(HYPRE_STREAM(1)), marker, marker + marker_size, aux_marker, gtz);
-      hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1)));
+      /* hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1))); */
 
       // Scan aux marker to get locations for copying to list
       thrust::exclusive_scan(thrust::cuda::par.on(HYPRE_STREAM(1)), aux_marker, aux_marker + marker_size, aux_marker);
-      hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1)));
+      /* hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1))); */
 
       // Allocate list
       HYPRE_Int list_size;
@@ -274,7 +445,7 @@ extern "C"
 
       // Collapse from marker to list
       MarkerToListKernel<<<num_blocks,tpb,0,HYPRE_STREAM(1)>>>(marker, aux_marker, (*list), marker_size, ghost_dist);
-      hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1)));
+      /* hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1))); */
       
       return list_size;
    }
@@ -300,11 +471,11 @@ extern "C"
       // Setup the keys as global indices
       HYPRE_Int *gid = hypre_CTAlloc(HYPRE_Int, list_size, HYPRE_MEMORY_SHARED);
       GetGlobalIndexKernel<<<num_blocks,tpb,0,HYPRE_STREAM(1)>>>(list, gid, hypre_ParCompGridNonOwnedGlobalIndices(compGrid), list_size, hypre_ParCompGridNumOwnedNodes(compGrid), hypre_ParCompGridFirstGlobalIndex(compGrid));
-      hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1)));
+      /* hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1))); */
       
       // Sort the list by global index
       thrust::sort_by_key(thrust::cuda::par.on(HYPRE_STREAM(1)), gid, gid + list_size, list);
-      hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1)));
+      /* hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1))); */
       hypre_TFree(gid, HYPRE_MEMORY_SHARED);
    }
 
@@ -384,6 +555,64 @@ extern "C"
       hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(2)));
       hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(3)));
       hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(4)));
+   }
+
+   __global__
+   void GetCoarseIndicesKernel(HYPRE_Int *list,
+              HYPRE_Int *coarse_list,
+              HYPRE_Int *owned_coarse_indices,
+              HYPRE_Int *nonowned_coarse_indices,
+              HYPRE_Int num_owned,
+              HYPRE_Int num_owned_coarse,
+              HYPRE_Int list_size)
+   {
+      HYPRE_Int i = blockIdx.x * blockDim.x + threadIdx.x;
+      if (i < list_size)
+      {
+         HYPRE_Int idx = list[i];
+         if (idx < num_owned)
+         {
+            coarse_list[i] = owned_coarse_indices[idx];
+         }
+         else
+         {
+            idx -= num_owned;
+            HYPRE_Int coarse_index = nonowned_coarse_indices[idx];
+            if (coarse_index >= 0)
+               coarse_list[i] = coarse_index + num_owned_coarse;
+            else
+               coarse_list[i] = coarse_index;
+         }
+      }
+   }
+
+   HYPRE_Int MarkCoarseToList(HYPRE_Int *list,
+              HYPRE_Int **return_coarse_list,
+              HYPRE_Int *owned_coarse_indices,
+              HYPRE_Int *nonowned_coarse_indices,
+              HYPRE_Int num_owned,
+              HYPRE_Int num_owned_coarse,
+              HYPRE_Int list_size,
+              HYPRE_Int *nodes_to_add)
+   {
+      const HYPRE_Int tpb=64;
+      
+      HYPRE_Int *real_list = hypre_CTAlloc(HYPRE_Int, list_size, HYPRE_MEMORY_SHARED);
+      HYPRE_Int *real_list_end = thrust::remove_copy_if(list, list + list_size, real_list, less_than_zero());       
+      HYPRE_Int real_list_size = real_list_end - real_list;
+      HYPRE_Int num_blocks = real_list_size/tpb+1;
+      HYPRE_Int *coarse_list = hypre_CTAlloc(HYPRE_Int, real_list_size, HYPRE_MEMORY_SHARED);
+      GetCoarseIndicesKernel<<<num_blocks,tpb,0,HYPRE_STREAM(1)>>>(real_list,
+              coarse_list,
+              owned_coarse_indices,
+              nonowned_coarse_indices,
+              num_owned,
+              num_owned_coarse,
+              real_list_size);
+      HYPRE_Int *coarse_list_end = thrust::remove_if(coarse_list, coarse_list + real_list_size, less_than_zero());
+      (*return_coarse_list) = coarse_list;
+
+      return coarse_list_end - coarse_list;
    }
 
    __global__
@@ -561,14 +790,14 @@ extern "C"
       aux_local_indices = hypre_CTAlloc(HYPRE_Int, local_indices_size, HYPRE_MEMORY_SHARED);
       greater_than_equal_zero gtez;
       thrust::transform(thrust::cuda::par.on(HYPRE_STREAM(1)), local_indices, local_indices + local_indices_size, aux_local_indices, gtez);
-      hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1)));
+      /* hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1))); */
       thrust::exclusive_scan(thrust::cuda::par.on(HYPRE_STREAM(1)), aux_local_indices, aux_local_indices + local_indices_size, aux_local_indices);
-      hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1)));
+      /* hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1))); */
       if (local_indices[local_indices_size-1] < 0) global_indices_size = aux_local_indices[local_indices_size-1];
       else global_indices_size = aux_local_indices[local_indices_size-1]+ 1;
       (*global_indices) = hypre_CTAlloc(HYPRE_Int, global_indices_size, HYPRE_MEMORY_SHARED);
       LocalToGlobalIndexRemoveGhostKernel<<<num_blocks,tpb,0,HYPRE_STREAM(1)>>>(local_indices, aux_local_indices, (*global_indices), local_indices_size, num_owned, first_global, nonowned_global_indices);
-      hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1)));
+      /* hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1))); */
 
       return global_indices_size;
    }
@@ -592,10 +821,19 @@ extern "C"
       // !!! Debug
       /* if (myid == 0) printf("In RemoveRedundancyGPU() %d, %d, %d\n", current_level, proc, level); */
 
+      // Get the global indices for the send_flag
+      HYPRE_Int *send_gid = hypre_CTAlloc(HYPRE_Int, num_send_nodes[current_level][proc][level], HYPRE_MEMORY_SHARED);
+      HYPRE_Int *keys_result = hypre_CTAlloc(HYPRE_Int, num_send_nodes[current_level][proc][level], HYPRE_MEMORY_SHARED); 
+      HYPRE_Int num_blocks = num_send_nodes[current_level][proc][level]/tpb+1;
+      LocalToGlobalIndexKernel<<<num_blocks,tpb,0,stream>>>(send_flag[current_level][proc][level], send_gid, num_send_nodes[current_level][proc][level], hypre_ParCompGridNumOwnedNodes(compGrid[level]), hypre_ParCompGridFirstGlobalIndex(compGrid[level]), hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level]));
+      /* hypre_CheckErrorDevice(cudaStreamSynchronize(stream)); */
+
+      // Will need a copy of the send flag
+      HYPRE_Int *current_send_flag = hypre_CTAlloc(HYPRE_Int, num_send_nodes[current_level][proc][level], HYPRE_MEMORY_SHARED);
+      
       // Eliminate redundant send info by comparing with previous send_flags and recv_maps
       HYPRE_Int current_send_proc = hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[current_level][proc];
       HYPRE_Int prev_proc, prev_level;
-      HYPRE_Int num_send_nodes_before = num_send_nodes[current_level][proc][level];
       for (prev_level = current_level+1; prev_level <= level; prev_level++)
       {
          if (num_send_nodes[current_level][proc][level])
@@ -620,39 +858,27 @@ extern "C"
                   }
 
                   // Get the global indices (to be used as keys). NOTE: need to get size of prev send (we exclude ghosts when comparing), combine this with the info in original_send_size above.
-                  HYPRE_Int *current_send_flag = hypre_CTAlloc(HYPRE_Int, num_send_nodes[current_level][proc][level], HYPRE_MEMORY_SHARED);// COPY send_flag[current_level][proc][level]
-                  cudaMemcpy(current_send_flag, send_flag[current_level][proc][level], sizeof(HYPRE_Int)*num_send_nodes[current_level][proc][level], cudaMemcpyDeviceToDevice);
+                  cudaMemcpyAsync(current_send_flag, send_flag[current_level][proc][level], sizeof(HYPRE_Int)*num_send_nodes[current_level][proc][level], cudaMemcpyDeviceToDevice, stream);
                   HYPRE_Int *prev_send_flag = send_flag[prev_level][prev_proc][level];
-                  HYPRE_Int *send_gid = hypre_CTAlloc(HYPRE_Int, num_send_nodes[current_level][proc][level], HYPRE_MEMORY_SHARED);
-                  HYPRE_Int num_blocks = num_send_nodes[current_level][proc][level]/tpb+1;
-                  LocalToGlobalIndexKernel<<<num_blocks,tpb,0,stream>>>(current_send_flag, send_gid, num_send_nodes[current_level][proc][level], hypre_ParCompGridNumOwnedNodes(compGrid[level]), hypre_ParCompGridFirstGlobalIndex(compGrid[level]), hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level]));
-                  hypre_CheckErrorDevice(cudaStreamSynchronize(stream));
 
                   HYPRE_Int *prev_send_gid;
                   HYPRE_Int prev_send_gid_size = LocalToGlobalIndexRemoveGhostGPU(prev_send_flag, &prev_send_gid, num_send_nodes[prev_level][prev_proc][level], hypre_ParCompGridNumOwnedNodes(compGrid[level]), hypre_ParCompGridFirstGlobalIndex(compGrid[level]), hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level]));
-                  HYPRE_Int *keys_result = hypre_CTAlloc(HYPRE_Int, num_send_nodes[current_level][proc][level], HYPRE_MEMORY_SHARED); //just a dummy array that needs to be allocated, but that we wont actually use
                   thrust::pair<HYPRE_Int*,HYPRE_Int*> end = thrust::set_difference_by_key(thrust::cuda::par.on(stream), send_gid, send_gid + num_send_nodes[current_level][proc][level], 
                         prev_send_gid + original_send_size, prev_send_gid + prev_send_gid_size, current_send_flag, prev_send_flag, keys_result, send_flag[current_level][proc][level]);
-                  hypre_CheckErrorDevice(cudaStreamSynchronize(stream));
+                  /* hypre_CheckErrorDevice(cudaStreamSynchronize(stream)); */
                   num_send_nodes[current_level][proc][level] = end.second - send_flag[current_level][proc][level]; // NOTE: no realloc of send_flag here... do that later I guess when final size determined?
+                  cudaMemcpyAsync(send_gid, keys_result, sizeof(HYPRE_Int)*num_send_nodes[current_level][proc][level], cudaMemcpyDeviceToDevice, stream);
 
                   if (original_send_size)
                   {
-                     cudaMemcpy(current_send_flag, send_flag[current_level][proc][level], sizeof(HYPRE_Int)*num_send_nodes[current_level][proc][level], cudaMemcpyDeviceToDevice);
-                     hypre_TFree(send_gid, HYPRE_MEMORY_SHARED);
-                     send_gid = hypre_CTAlloc(HYPRE_Int, num_send_nodes[current_level][proc][level], HYPRE_MEMORY_SHARED);
-                     num_blocks = num_send_nodes[current_level][proc][level]/tpb+1;
-                     LocalToGlobalIndexKernel<<<num_blocks,tpb,0,stream>>>(current_send_flag, send_gid, num_send_nodes[current_level][proc][level], hypre_ParCompGridNumOwnedNodes(compGrid[level]), hypre_ParCompGridFirstGlobalIndex(compGrid[level]), hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level]));
-                     hypre_CheckErrorDevice(cudaStreamSynchronize(stream));
+                     cudaMemcpyAsync(current_send_flag, send_flag[current_level][proc][level], sizeof(HYPRE_Int)*num_send_nodes[current_level][proc][level], cudaMemcpyDeviceToDevice, stream);
                      end = thrust::set_difference_by_key(thrust::cuda::par.on(stream), send_gid, send_gid + num_send_nodes[current_level][proc][level], 
                         prev_send_gid, prev_send_gid + original_send_size, current_send_flag, prev_send_flag, keys_result, send_flag[current_level][proc][level]);
-                     hypre_CheckErrorDevice(cudaStreamSynchronize(stream));
+                     /* hypre_CheckErrorDevice(cudaStreamSynchronize(stream)); */
                      num_send_nodes[current_level][proc][level] = end.second - send_flag[current_level][proc][level]; // NOTE: no realloc of send_flag here... do that later I guess when final size determined?
+                     cudaMemcpyAsync(send_gid, keys_result, sizeof(HYPRE_Int)*num_send_nodes[current_level][proc][level], cudaMemcpyDeviceToDevice, stream);
                   }
-                  hypre_TFree(current_send_flag, HYPRE_MEMORY_SHARED);
-                  hypre_TFree(send_gid, HYPRE_MEMORY_SHARED);
                   hypre_TFree(prev_send_gid, HYPRE_MEMORY_SHARED);
-                  hypre_TFree(keys_result, HYPRE_MEMORY_SHARED);
                }
             }
          }
@@ -679,43 +905,36 @@ extern "C"
                   }
 
                   // Get the global indices (to be used as keys). NOTE: need to get size of prev send (we exclude ghosts when comparing), combine this with the info in original_send_size above.
-                  HYPRE_Int *current_send_flag = hypre_CTAlloc(HYPRE_Int, num_send_nodes[current_level][proc][level], HYPRE_MEMORY_SHARED);// COPY send_flag[current_level][proc][level]
-                  cudaMemcpy(current_send_flag, send_flag[current_level][proc][level], sizeof(HYPRE_Int)*num_send_nodes[current_level][proc][level], cudaMemcpyDeviceToDevice);
+                  cudaMemcpyAsync(current_send_flag, send_flag[current_level][proc][level], sizeof(HYPRE_Int)*num_send_nodes[current_level][proc][level], cudaMemcpyDeviceToDevice, stream);
                   HYPRE_Int *prev_recv_map = hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[prev_level][prev_proc][level];
-                  HYPRE_Int *send_gid = hypre_CTAlloc(HYPRE_Int, num_send_nodes[current_level][proc][level], HYPRE_MEMORY_SHARED);
-                  HYPRE_Int num_blocks = num_send_nodes[current_level][proc][level]/tpb+1;
-                  LocalToGlobalIndexKernel<<<num_blocks,tpb,0,stream>>>(current_send_flag, send_gid, num_send_nodes[current_level][proc][level], hypre_ParCompGridNumOwnedNodes(compGrid[level]), hypre_ParCompGridFirstGlobalIndex(compGrid[level]), hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level]));
-                  hypre_CheckErrorDevice(cudaStreamSynchronize(stream));
+                  /* hypre_CheckErrorDevice(cudaStreamSynchronize(stream)); */
 
                   HYPRE_Int *prev_recv_gid;
                   HYPRE_Int prev_recv_gid_size = LocalToGlobalIndexRemoveGhostGPU(prev_recv_map, &prev_recv_gid, hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[prev_level][prev_proc][level], hypre_ParCompGridNumOwnedNodes(compGrid[level]), hypre_ParCompGridFirstGlobalIndex(compGrid[level]), hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level]));
-                  HYPRE_Int *keys_result = hypre_CTAlloc(HYPRE_Int, num_send_nodes[current_level][proc][level], HYPRE_MEMORY_SHARED); //just a dummy array that needs to be allocated, but that we wont actually use
                   thrust::pair<HYPRE_Int*,HYPRE_Int*> end = thrust::set_difference_by_key(thrust::cuda::par.on(stream), send_gid, send_gid + num_send_nodes[current_level][proc][level], 
                         prev_recv_gid + original_send_size, prev_recv_gid + prev_recv_gid_size, current_send_flag, prev_recv_map, keys_result, send_flag[current_level][proc][level]);
-                  hypre_CheckErrorDevice(cudaStreamSynchronize(stream));
+                  /* hypre_CheckErrorDevice(cudaStreamSynchronize(stream)); */
                   num_send_nodes[current_level][proc][level] = end.second - send_flag[current_level][proc][level]; // NOTE: no realloc of send_flag here... do that later I guess when final size determined?
+                  cudaMemcpyAsync(send_gid, keys_result, sizeof(HYPRE_Int)*num_send_nodes[current_level][proc][level], cudaMemcpyDeviceToDevice, stream);
 
                   if (original_send_size)
                   {
-                     cudaMemcpy(current_send_flag, send_flag[current_level][proc][level], sizeof(HYPRE_Int)*num_send_nodes[current_level][proc][level], cudaMemcpyDeviceToDevice);
-                     hypre_TFree(send_gid, HYPRE_MEMORY_SHARED);
-                     send_gid = hypre_CTAlloc(HYPRE_Int, num_send_nodes[current_level][proc][level], HYPRE_MEMORY_SHARED);
-                     num_blocks = num_send_nodes[current_level][proc][level]/tpb+1;
-                     LocalToGlobalIndexKernel<<<num_blocks,tpb,0,stream>>>(current_send_flag, send_gid, num_send_nodes[current_level][proc][level], hypre_ParCompGridNumOwnedNodes(compGrid[level]), hypre_ParCompGridFirstGlobalIndex(compGrid[level]), hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level]));
-                     hypre_CheckErrorDevice(cudaStreamSynchronize(stream));
+                     cudaMemcpyAsync(current_send_flag, send_flag[current_level][proc][level], sizeof(HYPRE_Int)*num_send_nodes[current_level][proc][level], cudaMemcpyDeviceToDevice, stream);
+                     /* hypre_CheckErrorDevice(cudaStreamSynchronize(stream)); */
                      end = thrust::set_difference_by_key(thrust::cuda::par.on(stream), send_gid, send_gid + num_send_nodes[current_level][proc][level], 
                         prev_recv_gid, prev_recv_gid + original_send_size, current_send_flag, prev_recv_map, keys_result, send_flag[current_level][proc][level]);
-                     hypre_CheckErrorDevice(cudaStreamSynchronize(stream));
+                     /* hypre_CheckErrorDevice(cudaStreamSynchronize(stream)); */
                      num_send_nodes[current_level][proc][level] = end.second - send_flag[current_level][proc][level]; // NOTE: no realloc of send_flag here... do that later I guess when final size determined?
+                     cudaMemcpyAsync(send_gid, keys_result, sizeof(HYPRE_Int)*num_send_nodes[current_level][proc][level], cudaMemcpyDeviceToDevice, stream);
                   }
-                  hypre_TFree(current_send_flag, HYPRE_MEMORY_SHARED);
-                  hypre_TFree(send_gid, HYPRE_MEMORY_SHARED);
                   hypre_TFree(prev_recv_gid, HYPRE_MEMORY_SHARED);
-                  hypre_TFree(keys_result, HYPRE_MEMORY_SHARED);
                }
             }
          }
       }
+      hypre_TFree(current_send_flag, HYPRE_MEMORY_SHARED);
+      hypre_TFree(send_gid, HYPRE_MEMORY_SHARED);
+      hypre_TFree(keys_result, HYPRE_MEMORY_SHARED);
    }
 
 }
@@ -1870,19 +2089,21 @@ PackSendBufferGPU(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypr
    HYPRE_Int            num_psi_levels = 1;
    HYPRE_Int            coarse_proc;
 
-
    HYPRE_Int stream_num;
-   HYPRE_Int finalize_send_flag_stream = 2;
-   HYPRE_Int finalize_send_flag_stream_cnt = 0;
-   HYPRE_Int finalize_send_flag_stream_num = 2;
-   HYPRE_Int row_sizes_stream = 2 + finalize_send_flag_stream_num;
-   HYPRE_Int row_sizes_stream_cnt = 0;
-   HYPRE_Int row_sizes_stream_num = 2;
+   /* HYPRE_Int finalize_send_flag_stream = 2; */
+   /* HYPRE_Int finalize_send_flag_stream_cnt = 0; */
+   /* HYPRE_Int finalize_send_flag_stream_num = 2; */
+   /* HYPRE_Int row_sizes_stream = 2 + finalize_send_flag_stream_num; */
+   /* HYPRE_Int row_sizes_stream_cnt = 0; */
+   /* HYPRE_Int row_sizes_stream_num = 2; */
 
 
    const HYPRE_Int tpb=64;
    HYPRE_Int num_blocks;
    
+   HYPRE_Int num_starting_nodes;
+   HYPRE_Int *starting_nodes;
+
    // initialize send map buffer size
    (*send_flag_buffer_size) = num_levels - current_level - 1;
 
@@ -1906,7 +2127,7 @@ PackSendBufferGPU(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypr
    /* stream_num = finalize_send_flag_stream + (finalize_send_flag_stream++ % finalize_send_flag_stream_num); */
    stream_num = 1;
    ListToMarkerKernel<<<num_blocks,tpb,0,HYPRE_STREAM(stream_num)>>>(send_flag[current_level][proc][current_level], add_flag[current_level], num_send_nodes[current_level][proc][current_level]);
-   hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(stream_num)));
+   /* hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(stream_num))); */
 
    // Add the nodes listed by the coarse grid counterparts if applicable
    // Note that the compGridCommPkg is set up to list all nodes within the padding plus ghost layers
@@ -1915,15 +2136,23 @@ PackSendBufferGPU(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypr
       add_flag[current_level+1] = hypre_CTAlloc( HYPRE_Int, hypre_ParCompGridNumOwnedNodes(compGrid[current_level+1]) + hypre_ParCompGridNumNonOwnedNodes(compGrid[current_level+1]), HYPRE_MEMORY_SHARED );
       
       num_blocks = num_send_nodes[current_level][proc][current_level]/tpb+1;
-      MarkCoarseKernel<<<num_blocks,tpb,0,HYPRE_STREAM(1)>>>(send_flag[current_level][proc][current_level],
-              add_flag[current_level+1],
+      num_starting_nodes = MarkCoarseToList(send_flag[current_level][proc][current_level],
+              &starting_nodes,
               hypre_ParCompGridOwnedCoarseIndices(compGrid[current_level]),
               hypre_ParCompGridNonOwnedCoarseIndices(compGrid[current_level]),
               hypre_ParCompGridNumOwnedNodes(compGrid[current_level]),
               hypre_ParCompGridNumOwnedNodes(compGrid[current_level+1]),
               num_send_nodes[current_level][proc][current_level],
-              padding[current_level+1] + num_ghost_layers + 1,
               nodes_to_add_new);
+      /* MarkCoarseKernel<<<num_blocks,tpb,0,HYPRE_STREAM(1)>>>(send_flag[current_level][proc][current_level], */
+      /*         add_flag[current_level+1], */
+      /*         hypre_ParCompGridOwnedCoarseIndices(compGrid[current_level]), */
+      /*         hypre_ParCompGridNonOwnedCoarseIndices(compGrid[current_level]), */
+      /*         hypre_ParCompGridNumOwnedNodes(compGrid[current_level]), */
+      /*         hypre_ParCompGridNumOwnedNodes(compGrid[current_level+1]), */
+      /*         num_send_nodes[current_level][proc][current_level], */
+      /*         padding[current_level+1] + num_ghost_layers + 1, */
+      /*         nodes_to_add_new); */
       hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1)));
       nodes_to_add = (*nodes_to_add_new);
    }
@@ -1932,15 +2161,17 @@ PackSendBufferGPU(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypr
    row_sizes[current_level] = hypre_CTAlloc(HYPRE_Int, num_send_nodes[current_level][proc][current_level], HYPRE_MEMORY_SHARED);
    /* stream_num = row_sizes_stream + (row_sizes_stream++ % row_sizes_stream_num); */
    stream_num = 1;
-   GetRowSizesKernel<<<num_blocks,tpb,0,HYPRE_STREAM(stream_num)>>>(send_flag[current_level][proc][current_level], row_sizes[current_level], 
+   cudaStream_t row_size_stream;
+   cudaStreamCreate(&row_size_stream);
+   GetRowSizesKernel<<<num_blocks,tpb,0,row_size_stream>>>(send_flag[current_level][proc][current_level], row_sizes[current_level], 
       hypre_CSRMatrixI( hypre_ParCompGridMatrixOwnedDiag(hypre_ParCompGridA(compGrid[current_level])) ),
       hypre_CSRMatrixI( hypre_ParCompGridMatrixOwnedOffd(hypre_ParCompGridA(compGrid[current_level])) ),
       hypre_CSRMatrixI( hypre_ParCompGridMatrixNonOwnedDiag(hypre_ParCompGridA(compGrid[current_level])) ),
       hypre_CSRMatrixI( hypre_ParCompGridMatrixNonOwnedOffd(hypre_ParCompGridA(compGrid[current_level])) ),
       num_send_nodes[current_level][proc][current_level], hypre_ParCompGridNumOwnedNodes(compGrid[current_level]));
-   hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(stream_num)));
-   (*buffer_size) += thrust::reduce(thrust::cuda::par.on(HYPRE_STREAM(stream_num)), row_sizes[current_level], row_sizes[current_level] + num_send_nodes[current_level][proc][current_level]);
-   hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(stream_num)));
+   /* hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(stream_num))); */
+   (*buffer_size) += thrust::reduce(thrust::cuda::par.on(row_size_stream), row_sizes[current_level], row_sizes[current_level] + num_send_nodes[current_level][proc][current_level]);
+   /* hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(stream_num))); */
 
    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
    // Now build out the psi_c composite grid (along with required ghost nodes) on coarser levels
@@ -1961,7 +2192,39 @@ PackSendBufferGPU(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypr
 
          // Expand by the padding on this level and add coarse grid counterparts if applicable
          // !!! do recursive Psi_c call, here I go over all dofs and check add flag for distance... replace with list of starting dofs => updated add flag with distances (NOTE I use sort map when marking add flag)
-         for (i = 0; i < padding[level] + num_ghost_layers; i++) ExpandPadding(compGrid[level], add_flag[level], padding[level] + num_ghost_layers + 1 - i);
+         /* for (i = 0; i < padding[level] + num_ghost_layers; i++) ExpandPadding(compGrid[level], add_flag[level], padding[level] + num_ghost_layers + 1 - i); */
+         /* num_blocks = hypre_ParCompGridNumOwnedNodes(compGrid[level]) + hypre_ParCompGridNumNonOwnedNodes(compGrid[level])/tpb+1; */
+         /* for (i = 0; i < padding[level] + num_ghost_layers; i++) */ 
+         /*    ExpandPaddingNewKernel<<<num_blocks,tpb,0,HYPRE_STREAM(1)>>>(add_flag[level], */ 
+         /*                hypre_CSRMatrixJ( hypre_ParCompGridMatrixOwnedDiag(hypre_ParCompGridA(compGrid[level])) ), */
+         /*                hypre_CSRMatrixJ( hypre_ParCompGridMatrixOwnedOffd(hypre_ParCompGridA(compGrid[level])) ), */
+         /*                hypre_CSRMatrixJ( hypre_ParCompGridMatrixNonOwnedDiag(hypre_ParCompGridA(compGrid[level])) ), */
+         /*                hypre_CSRMatrixJ( hypre_ParCompGridMatrixNonOwnedOffd(hypre_ParCompGridA(compGrid[level])) ), */
+         /*                hypre_CSRMatrixI( hypre_ParCompGridMatrixOwnedDiag(hypre_ParCompGridA(compGrid[level])) ), */
+         /*                hypre_CSRMatrixI( hypre_ParCompGridMatrixOwnedOffd(hypre_ParCompGridA(compGrid[level])) ), */
+         /*                hypre_CSRMatrixI( hypre_ParCompGridMatrixNonOwnedDiag(hypre_ParCompGridA(compGrid[level])) ), */
+         /*                hypre_CSRMatrixI( hypre_ParCompGridMatrixNonOwnedOffd(hypre_ParCompGridA(compGrid[level])) ), */
+         /*                hypre_ParCompGridNumOwnedNodes(compGrid[level]) + hypre_ParCompGridNumNonOwnedNodes(compGrid[level]), */
+         /*                hypre_ParCompGridNumOwnedNodes(compGrid[level]), */
+         /*                padding[level] + num_ghost_layers + 1 - i); */
+         num_blocks = num_starting_nodes/tpb+1;
+         ExpandPaddingRecursiveKernel<<<num_blocks,tpb,0,HYPRE_STREAM(1)>>>(starting_nodes,
+                        add_flag[level],
+                        hypre_CSRMatrixJ( hypre_ParCompGridMatrixOwnedDiag(hypre_ParCompGridA(compGrid[level])) ),
+                        hypre_CSRMatrixJ( hypre_ParCompGridMatrixOwnedOffd(hypre_ParCompGridA(compGrid[level])) ),
+                        hypre_CSRMatrixJ( hypre_ParCompGridMatrixNonOwnedDiag(hypre_ParCompGridA(compGrid[level])) ),
+                        hypre_CSRMatrixJ( hypre_ParCompGridMatrixNonOwnedOffd(hypre_ParCompGridA(compGrid[level])) ),
+                        hypre_CSRMatrixI( hypre_ParCompGridMatrixOwnedDiag(hypre_ParCompGridA(compGrid[level])) ),
+                        hypre_CSRMatrixI( hypre_ParCompGridMatrixOwnedOffd(hypre_ParCompGridA(compGrid[level])) ),
+                        hypre_CSRMatrixI( hypre_ParCompGridMatrixNonOwnedDiag(hypre_ParCompGridA(compGrid[level])) ),
+                        hypre_CSRMatrixI( hypre_ParCompGridMatrixNonOwnedOffd(hypre_ParCompGridA(compGrid[level])) ),
+                        num_starting_nodes,
+                        hypre_ParCompGridNumOwnedNodes(compGrid[level]),
+                        0,
+                        padding[level] + num_ghost_layers + 1 - i);
+         hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1)));
+         hypre_TFree(starting_nodes, HYPRE_MEMORY_SHARED);
+
          
          num_send_nodes[current_level][proc][level] = MarkerToList(add_flag[level], 
                                                          &(send_flag[current_level][proc][level]), 
@@ -1972,15 +2235,23 @@ PackSendBufferGPU(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypr
          if (level != num_levels-1)
          {
             num_blocks = num_send_nodes[current_level][proc][level]/tpb+1;
-            MarkCoarseKernel<<<num_blocks,tpb,0,HYPRE_STREAM(1)>>>(send_flag[current_level][proc][level],
-                                         add_flag[level+1],
-                                         hypre_ParCompGridOwnedCoarseIndices(compGrid[level]),
-                                         hypre_ParCompGridNonOwnedCoarseIndices(compGrid[level]),
-                                         hypre_ParCompGridNumOwnedNodes(compGrid[level]),
-                                         hypre_ParCompGridNumOwnedNodes(compGrid[level+1]),
-                                         num_send_nodes[current_level][proc][level],
-                                         padding[level+1] + num_ghost_layers + 1,
-                                         nodes_to_add_new);
+            num_starting_nodes = MarkCoarseToList(send_flag[current_level][proc][level],
+                                   &starting_nodes,
+                                   hypre_ParCompGridOwnedCoarseIndices(compGrid[level]),
+                                   hypre_ParCompGridNonOwnedCoarseIndices(compGrid[level]),
+                                   hypre_ParCompGridNumOwnedNodes(compGrid[level]),
+                                   hypre_ParCompGridNumOwnedNodes(compGrid[level+1]),
+                                   num_send_nodes[current_level][proc][level],
+                                   nodes_to_add_new);
+            /* MarkCoarseKernel<<<num_blocks,tpb,0,HYPRE_STREAM(1)>>>(send_flag[current_level][proc][level], */
+            /*                              add_flag[level+1], */
+            /*                              hypre_ParCompGridOwnedCoarseIndices(compGrid[level]), */
+            /*                              hypre_ParCompGridNonOwnedCoarseIndices(compGrid[level]), */
+            /*                              hypre_ParCompGridNumOwnedNodes(compGrid[level]), */
+            /*                              hypre_ParCompGridNumOwnedNodes(compGrid[level+1]), */
+            /*                              num_send_nodes[current_level][proc][level], */
+            /*                              padding[level+1] + num_ghost_layers + 1, */
+            /*                              nodes_to_add_new); */
             hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1)));
             nodes_to_add = (*nodes_to_add_new);
          }
@@ -2001,7 +2272,7 @@ PackSendBufferGPU(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypr
          // Reset the add_flag as an inverse mapping for send_flag
          num_blocks = num_send_nodes[current_level][proc][level]/tpb+1;
          ListToMarkerKernel<<<num_blocks,tpb,0,HYPRE_STREAM(stream_num)>>>(send_flag[current_level][proc][level], add_flag[level], num_send_nodes[current_level][proc][level]);
-         hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(stream_num)));
+         /* hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(stream_num))); */
 
          // Count up the buffer sizes
          (*send_flag_buffer_size) += num_send_nodes[current_level][proc][level];
@@ -2009,18 +2280,19 @@ PackSendBufferGPU(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypr
          else (*buffer_size) += 2*num_send_nodes[current_level][proc][level];
 
          num_blocks = num_send_nodes[current_level][proc][level]/tpb+1;
+         hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1)));
          row_sizes[level] = hypre_CTAlloc(HYPRE_Int, num_send_nodes[current_level][proc][level], HYPRE_MEMORY_SHARED);
          /* stream_num = row_sizes_stream + (row_sizes_stream++ % row_sizes_stream_num); */
          stream_num = 1;
-         GetRowSizesKernel<<<num_blocks,tpb,0,HYPRE_STREAM(stream_num)>>>(send_flag[current_level][proc][level], row_sizes[level], 
+         GetRowSizesKernel<<<num_blocks,tpb,0,row_size_stream>>>(send_flag[current_level][proc][level], row_sizes[level], 
             hypre_CSRMatrixI( hypre_ParCompGridMatrixOwnedDiag(hypre_ParCompGridA(compGrid[level])) ),
             hypre_CSRMatrixI( hypre_ParCompGridMatrixOwnedOffd(hypre_ParCompGridA(compGrid[level])) ),
             hypre_CSRMatrixI( hypre_ParCompGridMatrixNonOwnedDiag(hypre_ParCompGridA(compGrid[level])) ),
             hypre_CSRMatrixI( hypre_ParCompGridMatrixNonOwnedOffd(hypre_ParCompGridA(compGrid[level])) ),
             num_send_nodes[current_level][proc][level], hypre_ParCompGridNumOwnedNodes(compGrid[level]));
-         hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(stream_num)));
-         (*buffer_size) += thrust::reduce(thrust::cuda::par.on(HYPRE_STREAM(stream_num)), row_sizes[level], row_sizes[level] + num_send_nodes[current_level][proc][level]);
-         hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(stream_num)));
+         /* hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(stream_num))); */
+         (*buffer_size) += thrust::reduce(thrust::cuda::par.on(row_size_stream), row_sizes[level], row_sizes[level] + num_send_nodes[current_level][proc][level]);
+         /* hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(stream_num))); */
       }
       else break;
    }
@@ -2036,6 +2308,7 @@ PackSendBufferGPU(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypr
    // Pack the buffer
    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+   hypre_CheckErrorDevice(cudaStreamSynchronize(row_size_stream));
    HYPRE_Int *send_buffer = hypre_CTAlloc(HYPRE_Int, (*buffer_size), HYPRE_MEMORY_SHARED);
    send_buffer[0] = num_psi_levels;
    for (level = current_level; level < current_level + num_psi_levels; level++)
@@ -2047,7 +2320,7 @@ PackSendBufferGPU(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypr
       // copy all global indices
       num_blocks = num_send_nodes[current_level][proc][level]/tpb+1;
       LocalToGlobalIndexMarkGhostKernel<<<num_blocks,tpb,0,HYPRE_STREAM(1)>>>(send_flag[current_level][proc][level], send_buffer + cnt, num_send_nodes[current_level][proc][level], hypre_ParCompGridNumOwnedNodes(compGrid[level]), hypre_ParCompGridFirstGlobalIndex(compGrid[level]), hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level]));
-      hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1)));
+      /* hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1))); */
       cnt += num_send_nodes[current_level][proc][level];
 
       // if not on last level, copy coarse gobal indices
@@ -2062,19 +2335,19 @@ PackSendBufferGPU(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypr
                hypre_ParCompGridNonOwnedCoarseIndices(compGrid[level]), 
                hypre_ParCompGridNonOwnedGlobalIndices(compGrid[level+1]));
 
-         hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1)));
+         /* hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1))); */
          cnt += num_send_nodes[current_level][proc][level];
       }         
 
       // store the row length for matrix A
       cudaMemcpyAsync(send_buffer + cnt, row_sizes[level], sizeof(HYPRE_Int)*num_send_nodes[current_level][proc][level], cudaMemcpyDeviceToDevice,HYPRE_STREAM(1));
-      hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1)));
+      /* hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1))); */
       cnt += num_send_nodes[current_level][proc][level];
 
       // copy the col indices
       HYPRE_Int *offsets = hypre_CTAlloc(HYPRE_Int, num_send_nodes[current_level][proc][level], HYPRE_MEMORY_SHARED);
       thrust::exclusive_scan(thrust::cuda::par.on(HYPRE_STREAM(1)), row_sizes[level], row_sizes[level] + num_send_nodes[current_level][proc][level], row_sizes[level]);
-      hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1)));
+      /* hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1))); */
       
       num_blocks = num_send_nodes[current_level][proc][level]/tpb+1;
       PackColIndNewKernel<<<num_blocks,tpb,0,HYPRE_STREAM(1)>>>(send_flag[current_level][proc][level], 
@@ -2093,7 +2366,7 @@ PackSendBufferGPU(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypr
                         num_send_nodes[current_level][proc][level],
                         hypre_ParCompGridNumOwnedNodes(compGrid[level]),
                         hypre_ParCompGridFirstGlobalIndex(compGrid[level]));
-      hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1)));
+      /* hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1))); */
    }
 
    // Clean up memory
@@ -2108,6 +2381,7 @@ PackSendBufferGPU(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypr
    cudaProfilerStop();
 
    // Return the send buffer
+   hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1)));
    return send_buffer;
 }
 #endif
