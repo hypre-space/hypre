@@ -27,8 +27,6 @@ HYPRE_SStructMatrixCreate( MPI_Comm              comm,
                            HYPRE_SStructMatrix  *matrix_ptr )
 {
    hypre_SStructGrid      *grid     = hypre_SStructGraphGrid(graph);
-   hypre_SStructGrid      *dom_grid = hypre_SStructGraphDomGrid(graph);
-   hypre_SStructGrid      *ran_grid = hypre_SStructGraphRanGrid(graph);
    hypre_SStructStencil ***stencils = hypre_SStructGraphStencils(graph);
    HYPRE_Int               nparts   = hypre_SStructGridNParts(grid);
 
@@ -40,8 +38,6 @@ HYPRE_SStructMatrixCreate( MPI_Comm              comm,
    HYPRE_Int           ****centries;
    hypre_Index            *dom_stride;
    hypre_Index            *ran_stride;
-   HYPRE_Int               dom_is_coarse;
-   HYPRE_Int               ran_is_coarse;
 
    hypre_SStructPGrid     *pgrid;
    HYPRE_Int              *part_ids;

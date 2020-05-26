@@ -54,6 +54,7 @@ typedef struct
    HYPRE_SStructVariable  *vartypes;         /* types of variables */
    hypre_StructGrid       *sgrids[8];        /* struct grids for each vartype */
    hypre_BoxArray         *iboxarrays[8];    /* interface boxes */
+   hypre_BoxArray         *pbnd_boxa[8];     /* arrays of part boundaries */
 
    hypre_BoxArray         *pneighbors;
    hypre_Index            *pnbor_offsets;
@@ -238,6 +239,12 @@ typedef struct hypre_SStructGrid_struct
 ((pgrid) -> iboxarrays[HYPRE_SSTRUCT_VARIABLE_CELL])
 #define hypre_SStructPGridVTIBoxArray(pgrid, vartype) \
 ((pgrid) -> iboxarrays[vartype])
+
+#define hypre_SStructPGridPBndBoxArrays(pgrid)    ((pgrid) -> pbnd_boxa)
+#define hypre_SStructPGridPBndBoxArray(pgrid, var) \
+((pgrid) -> pbnd_boxa[hypre_SStructPGridVarType(pgrid, var)])
+#define hypre_SStructPGridVTPBndBoxArray(pgrid, vartype) \
+((pgrid) -> pbnd_boxa[vartype])
 
 #define hypre_SStructPGridPNeighbors(pgrid)       ((pgrid) -> pneighbors)
 #define hypre_SStructPGridPNborOffsets(pgrid)     ((pgrid) -> pnbor_offsets)

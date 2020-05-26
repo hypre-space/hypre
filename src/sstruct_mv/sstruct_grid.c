@@ -97,8 +97,9 @@ hypre_SStructPGridCreate( MPI_Comm             comm,
 
    for (t = 0; t < 8; t++)
    {
-      hypre_SStructPGridVTSGrid(pgrid, t)     = NULL;
-      hypre_SStructPGridVTIBoxArray(pgrid, t) = NULL;
+      hypre_SStructPGridVTPBndBoxArray(pgrid, t) = NULL;
+      hypre_SStructPGridVTSGrid(pgrid, t)        = NULL;
+      hypre_SStructPGridVTIBoxArray(pgrid, t)    = NULL;
    }
    HYPRE_StructGridCreate(comm, ndim, &sgrid);
    hypre_SStructPGridCellSGrid(pgrid) = sgrid;
@@ -111,6 +112,7 @@ hypre_SStructPGridCreate( MPI_Comm             comm,
 
    /* GEC0902 ghost addition to the grid    */
    hypre_SStructPGridGhlocalSize(pgrid)   = 0;
+
 
    hypre_SetIndex(hypre_SStructPGridPeriodic(pgrid), 0);
 
@@ -127,17 +129,20 @@ hypre_SStructPGridDestroy( hypre_SStructPGrid *pgrid )
 {
    hypre_StructGrid **sgrids;
    hypre_BoxArray   **iboxarrays;
+   hypre_BoxArray   **partbnd_boxa;
    HYPRE_Int          t;
 
    if (pgrid)
    {
-      sgrids     = hypre_SStructPGridSGrids(pgrid);
-      iboxarrays = hypre_SStructPGridIBoxArrays(pgrid);
+      sgrids       = hypre_SStructPGridSGrids(pgrid);
+      iboxarrays   = hypre_SStructPGridIBoxArrays(pgrid);
+      partbnd_boxa = hypre_SStructPGridPBndBoxArrays(pgrid);
       hypre_TFree(hypre_SStructPGridVarTypes(pgrid));
       for (t = 0; t < 8; t++)
       {
          HYPRE_StructGridDestroy(sgrids[t]);
          hypre_BoxArrayDestroy(iboxarrays[t]);
+         hypre_BoxArrayDestroy(partbnd_boxa[t]);
       }
       hypre_BoxArrayDestroy(hypre_SStructPGridPNeighbors(pgrid));
       hypre_TFree(hypre_SStructPGridPNborOffsets(pgrid));
@@ -236,6 +241,7 @@ hypre_SStructPGridAssemble( hypre_SStructPGrid  *pgrid )
    HYPRE_SStructVariable *vartypes      = hypre_SStructPGridVarTypes(pgrid);
    hypre_StructGrid     **sgrids        = hypre_SStructPGridSGrids(pgrid);
    hypre_BoxArray       **iboxarrays    = hypre_SStructPGridIBoxArrays(pgrid);
+   hypre_BoxArray       **pboxarrays    = hypre_SStructPGridPBndBoxArrays(pgrid);
    hypre_BoxArray        *pneighbors    = hypre_SStructPGridPNeighbors(pgrid);
    hypre_Index           *pnbor_offsets = hypre_SStructPGridPNborOffsets(pgrid);
    hypre_IndexRef         periodic      = hypre_SStructPGridPeriodic(pgrid);
@@ -272,7 +278,7 @@ hypre_SStructPGridAssemble( hypre_SStructPGrid  *pgrid )
 
    /* get neighbor info from the struct grid box manager */
    boxman     = hypre_StructGridBoxMan(cell_sgrid);
-   hood_boxes =  hypre_BoxArrayCreate(0, ndim);
+   hood_boxes = hypre_BoxArrayCreate(0, ndim);
    hypre_BoxManGetAllEntriesBoxes(boxman, hood_boxes);
    hood_first_local = hypre_BoxManFirstLocal(boxman);
    hood_num_local   = hypre_BoxManNumMyEntries(boxman);
@@ -349,7 +355,6 @@ hypre_SStructPGridAssemble( hypre_SStructPGrid  *pgrid )
 
          hypre_StructGridSetBoxes(sgrid, boxes);
          HYPRE_StructGridAssemble(sgrid);
-
          sgrids[t] = sgrid;
       }
    }
@@ -361,14 +366,19 @@ hypre_SStructPGridAssemble( hypre_SStructPGrid  *pgrid )
    hypre_BoxArrayDestroy(tmp_boxes);
 
    /*-------------------------------------------------------------
-    * compute iboxarrays
+    * compute iboxarrays and allocate pboxarrays
     *-------------------------------------------------------------*/
-
    for (t = 0; t < 8; t++)
    {
       sgrid = sgrids[t];
       if (sgrid != NULL)
       {
+         /* allocate part boundary box arrays if it hasn't done before*/
+         if (pboxarrays[t] == NULL)
+         {
+            pboxarrays[t] = hypre_BoxArrayCreate(0, ndim);
+         }
+
          iboxarray = hypre_BoxArrayClone(hypre_StructGridBoxes(sgrid));
 
          hypre_SStructVariableGetOffset((hypre_SStructVariable) t,
@@ -2249,25 +2259,25 @@ hypre_SStructGridCoarsen( hypre_SStructGrid   *fgrid,
    hypre_SStructGrid       *cgrid;
    hypre_SStructPGrid      *pfgrid;
    hypre_SStructPGrid      *pcgrid;
-   hypre_StructGrid        *cell_sgrid;
    hypre_StructGrid        *sfgrid;
    hypre_StructGrid        *scgrid;
-   hypre_SStructVariable   *vartypes;
+   hypre_BoxArray          *fpbnd_boxa;
+   hypre_BoxArray          *cpbnd_boxa;
 
    hypre_Box               *box;
    hypre_BoxArray          *cgrid_boxes;
    HYPRE_Int              **coarsen_s; // Coarsen this structured grid?
    HYPRE_Int               *coarsen_p; // Coarsen this part?
-   HYPRE_SStructVariable   *fvartypes;
-   HYPRE_SStructVariable  **cvartypes;
+   hypre_SStructVariable   *fvartypes;
+   hypre_SStructVariable  **cvartypes;
 
    HYPRE_Int               *cids;
    HYPRE_Int                cnparts;
    HYPRE_Int                fpart, cpart;
-   HYPRE_Int                fid, cid;
+   HYPRE_Int                fid;
    HYPRE_Int                fvar, cvar;
    HYPRE_Int                fnvars, *cnvars;
-   HYPRE_Int                fvartype, cvartype;
+   HYPRE_Int                i;
 
    /* Allocate some data */
    coarsen_s = hypre_TAlloc(HYPRE_Int *, fnparts);
@@ -2291,8 +2301,7 @@ hypre_SStructGridCoarsen( hypre_SStructGrid   *fgrid,
 
       for (fvar = 0; fvar < fnvars; fvar++)
       {
-         fvartype = fvartypes[fvar];
-         sfgrid   = hypre_SStructPGridSGrid(pfgrid, fvartype);
+         sfgrid = hypre_SStructPGridSGrid(pfgrid, fvar);
 
          cgrid_boxes = hypre_BoxArrayClone(hypre_StructGridBoxes(sfgrid));
          hypre_CoarsenBoxArray(cgrid_boxes, origin, strides[fid]);
@@ -2300,7 +2309,7 @@ hypre_SStructGridCoarsen( hypre_SStructGrid   *fgrid,
          if (hypre_BoxArrayVolume(cgrid_boxes))
          {
             coarsen_s[fpart][fvar] = 1;
-            cvartypes[cnparts][cnvars[cnparts]] = fvartype;
+            cvartypes[cnparts][cnvars[cnparts]] = fvartypes[fvar];
             cnvars[cnparts]++;
          }
       }
@@ -2339,8 +2348,8 @@ hypre_SStructGridCoarsen( hypre_SStructGrid   *fgrid,
             fvartypes = hypre_SStructPGridVarTypes(pfgrid);
             if (coarsen_s[fpart][fvar])
             {
-               fvartype = fvartypes[fvar];
-               sfgrid   = hypre_SStructPGridSGrid(pfgrid, fvartype);
+               sfgrid     = hypre_SStructPGridSGrid(pfgrid, fvar);
+               fpbnd_boxa = hypre_SStructPGridPBndBoxArray(pfgrid, fvar);
 
                hypre_StructCoarsen(sfgrid, origin, strides[fid], prune, &scgrid);
                hypre_SStructPGridSGrid(pcgrid, cvar) = scgrid;
@@ -2350,6 +2359,19 @@ hypre_SStructGridCoarsen( hypre_SStructGrid   *fgrid,
                {
                   hypre_SStructPGridCellSGridDone(pcgrid) = 1;
                }
+
+               /* coarsen part boundary box array */
+               cpbnd_boxa = hypre_BoxArrayClone(fpbnd_boxa);
+               hypre_ForBoxI(i, cpbnd_boxa)
+               {
+                  box = hypre_BoxArrayBox(cpbnd_boxa, i);
+
+                  hypre_SnapIndexPos(hypre_BoxIMin(box), origin, strides[fid], ndim);
+                  hypre_MapToCoarseIndex(hypre_BoxIMin(box), origin, strides[fid], ndim);
+                  hypre_SnapIndexPos(hypre_BoxIMax(box), origin, strides[fid], ndim);
+                  hypre_MapToCoarseIndex(hypre_BoxIMax(box), origin, strides[fid], ndim);
+               }
+               hypre_SStructPGridPBndBoxArray(pcgrid, cvar) = cpbnd_boxa;
 
                cvar++;
             }
