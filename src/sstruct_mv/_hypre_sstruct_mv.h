@@ -71,6 +71,7 @@ typedef struct
    HYPRE_SStructVariable  *vartypes;         /* types of variables */
    hypre_StructGrid       *sgrids[8];        /* struct grids for each vartype */
    hypre_BoxArray         *iboxarrays[8];    /* interface boxes */
+   hypre_BoxArray         *pbnd_boxa[8];     /* arrays of part boundaries */
 
    hypre_BoxArray         *pneighbors;
    hypre_Index            *pnbor_offsets;
@@ -255,6 +256,12 @@ typedef struct hypre_SStructGrid_struct
 ((pgrid) -> iboxarrays[HYPRE_SSTRUCT_VARIABLE_CELL])
 #define hypre_SStructPGridVTIBoxArray(pgrid, vartype) \
 ((pgrid) -> iboxarrays[vartype])
+
+#define hypre_SStructPGridPBndBoxArrays(pgrid)    ((pgrid) -> pbnd_boxa)
+#define hypre_SStructPGridPBndBoxArray(pgrid, var) \
+((pgrid) -> pbnd_boxa[hypre_SStructPGridVarType(pgrid, var)])
+#define hypre_SStructPGridVTPBndBoxArray(pgrid, vartype) \
+((pgrid) -> pbnd_boxa[vartype])
 
 #define hypre_SStructPGridPNeighbors(pgrid)       ((pgrid) -> pneighbors)
 #define hypre_SStructPGridPNborOffsets(pgrid)     ((pgrid) -> pnbor_offsets)
@@ -587,7 +594,7 @@ typedef struct hypre_SStructPMatrix_struct
    HYPRE_Int             **symmetric;    /* Stencil entries symmetric?
                                           * (nvar x nvar array) */
    HYPRE_Int             **num_centries; /* (nvar x nvar) array */
-   HYPRE_Int            ***centries;     /* (nvar x nvar x sentries_size) array constant entries */
+   HYPRE_Int            ***centries;     /* (nvar x nvar x sentries_size) array cte entries */
    hypre_Index             dom_stride;   /* domain grid stride */
    hypre_Index             ran_stride;   /* range grid stride */
 
@@ -692,30 +699,29 @@ typedef struct hypre_SStructMatrix_struct
  * Accessor macros: hypre_SStructPMatrix
  *--------------------------------------------------------------------------*/
 
-#define hypre_SStructPMatrixComm(pmat)              ((pmat) -> comm)
-#define hypre_SStructPMatrixPGrid(pmat)             ((pmat) -> pgrid)
-#define hypre_SStructPMatrixNDim(pmat) \
-hypre_SStructPGridNDim(hypre_SStructPMatrixPGrid(pmat))
-#define hypre_SStructPMatrixStencils(pmat)          ((pmat) -> stencils)
-#define hypre_SStructPMatrixNVars(pmat)             ((pmat) -> nvars)
-#define hypre_SStructPMatrixStencil(pmat, var)      ((pmat) -> stencils[var])
-#define hypre_SStructPMatrixSMaps(pmat)             ((pmat) -> smaps)
-#define hypre_SStructPMatrixSMap(pmat, var)         ((pmat) -> smaps[var])
-#define hypre_SStructPMatrixSStencils(pmat)         ((pmat) -> sstencils)
+#define hypre_SStructPMatrixComm(pmat)             ((pmat) -> comm)
+#define hypre_SStructPMatrixPGrid(pmat)            ((pmat) -> pgrid)
+#define hypre_SStructPMatrixNDim(pmat)             (hypre_SStructPGridNDim((pmat) -> pgrid))
+#define hypre_SStructPMatrixStencils(pmat)         ((pmat) -> stencils)
+#define hypre_SStructPMatrixNVars(pmat)            ((pmat) -> nvars)
+#define hypre_SStructPMatrixStencil(pmat, var)     ((pmat) -> stencils[var])
+#define hypre_SStructPMatrixSMaps(pmat)            ((pmat) -> smaps)
+#define hypre_SStructPMatrixSMap(pmat, var)        ((pmat) -> smaps[var])
+#define hypre_SStructPMatrixSStencils(pmat)        ((pmat) -> sstencils)
 #define hypre_SStructPMatrixSStencil(pmat, vi, vj) \
 ((pmat) -> sstencils[vi][vj])
-#define hypre_SStructPMatrixSMatrices(pmat)         ((pmat) -> smatrices)
+#define hypre_SStructPMatrixSMatrices(pmat)        ((pmat) -> smatrices)
 #define hypre_SStructPMatrixSMatrix(pmat, vi, vj)  \
 ((pmat) -> smatrices[vi][vj])
-#define hypre_SStructPMatrixSymmetric(pmat)         ((pmat) -> symmetric)
-#define hypre_SStructPMatrixNumCEntries(pmat)       ((pmat) -> num_centries)
-#define hypre_SStructPMatrixCEntries(pmat)          ((pmat) -> centries)
-#define hypre_SStructPMatrixDomainStride(pmat)      ((pmat) -> dom_stride)
-#define hypre_SStructPMatrixRangeStride(pmat)       ((pmat) -> ran_stride)
-#define hypre_SStructPMatrixSEntriesSize(pmat)      ((pmat) -> sentries_size)
-#define hypre_SStructPMatrixSEntries(pmat)          ((pmat) -> sentries)
-#define hypre_SStructPMatrixAccumulated(pmat)       ((pmat) -> accumulated)
-#define hypre_SStructPMatrixRefCount(pmat)          ((pmat) -> ref_count)
+#define hypre_SStructPMatrixSymmetric(pmat)        ((pmat) -> symmetric)
+#define hypre_SStructPMatrixNumCEntries(pmat)      ((pmat) -> num_centries)
+#define hypre_SStructPMatrixCEntries(pmat)         ((pmat) -> centries)
+#define hypre_SStructPMatrixDomainStride(pmat)     ((pmat) -> dom_stride)
+#define hypre_SStructPMatrixRangeStride(pmat)      ((pmat) -> ran_stride)
+#define hypre_SStructPMatrixSEntriesSize(pmat)     ((pmat) -> sentries_size)
+#define hypre_SStructPMatrixSEntries(pmat)         ((pmat) -> sentries)
+#define hypre_SStructPMatrixAccumulated(pmat)      ((pmat) -> accumulated)
+#define hypre_SStructPMatrixRefCount(pmat)         ((pmat) -> ref_count)
 
 #endif
 /*BHEADER**********************************************************************
@@ -945,6 +951,7 @@ HYPRE_Int hypre_SStructPGridSetVariables ( hypre_SStructPGrid *pgrid , HYPRE_Int
 HYPRE_Int hypre_SStructPGridSetPNeighbor ( hypre_SStructPGrid *pgrid , hypre_Box *pneighbor_box , hypre_Index pnbor_offset );
 HYPRE_Int hypre_SStructPGridAssemble ( hypre_SStructPGrid *pgrid );
 HYPRE_Int hypre_SStructGridRef ( hypre_SStructGrid *grid , hypre_SStructGrid **grid_ref );
+HYPRE_Int hypre_SStructGridSetPartIDs ( hypre_SStructGrid *grid, HYPRE_Int *ids );
 HYPRE_Int hypre_SStructGridAssembleBoxManagers ( hypre_SStructGrid *grid );
 HYPRE_Int hypre_SStructGridAssembleNborBoxManagers ( hypre_SStructGrid *grid );
 HYPRE_Int hypre_SStructGridCreateCommInfo ( hypre_SStructGrid *grid );
