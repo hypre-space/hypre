@@ -1221,13 +1221,11 @@ hypre_BoomerAMGBuildModNewExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marke
          {
             index = As_FF_diag_j[j];
             D_tau[i] += As_FF_diag_data[j]*D_tmp[index];
-            //D_tau[i] += D_tmp[index];
          }
          for (j=As_FF_offd_i[i]; j < As_FF_offd_i[i+1]; j++)
          {
             index = As_FF_offd_j[j];
             D_tau[i] += As_FF_offd_data[j]*D_tmp_offd[index];
-            //D_tau[i] += D_tmp_offd[index];
          }
       }
       for (i=startf; i<stopf; i++)
