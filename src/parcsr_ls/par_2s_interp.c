@@ -783,6 +783,7 @@ hypre_BoomerAMGBuildModPartialNewExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *C
          comm_handle = hypre_ParCSRCommHandleCreate( 1, comm_pkg, buf_data, D_lambda_offd);
          hypre_ParCSRCommHandleDestroy(comm_handle);
 
+         index = 0;
          for (i = 0; i < num_sends; i++)
          {
             startc = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);

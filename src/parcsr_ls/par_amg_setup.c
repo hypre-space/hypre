@@ -1531,7 +1531,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                                    debug_flag,
                                                    agg_P12_trunc_factor, agg_P12_max_elmts, col_offd_S_to_A, &P1);
                else if (agg_interp_type == 6)
-                  hypre_BoomerAMGBuildModNewExtPIInterp(A_array[level],
+                  hypre_BoomerAMGBuildModExtPIInterp(A_array[level],
                                                    CF_marker, S, coarse_pnts_global1,
                                                    debug_flag,
                                                    agg_P12_trunc_factor, agg_P12_max_elmts, col_offd_S_to_A, &P1);
@@ -1705,7 +1705,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   }
                   else if (agg_interp_type == 6)
                   {
-                     hypre_BoomerAMGBuildModNewExtPIInterp(A_array[level],
+                     hypre_BoomerAMGBuildModExtPIInterp(A_array[level],
                                                    CF3_marker, S, coarse_pnts_global1,
                                                    debug_flag,
                                                    agg_P12_trunc_factor, agg_P12_max_elmts, col_offd_S_to_A, &P1);

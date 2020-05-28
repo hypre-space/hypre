@@ -1457,8 +1457,6 @@ hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
                   A_FF_diag_data[d_count_FF++] = A_diag_data[jA++];
                }
             }
-            A_FF_diag_i[row] = d_count_FF;
-            A_FC_diag_i[rowc] = d_count_FC;
             for (j = S_offd_i[i]; j < S_offd_i[i+1]; j++)
             {
                jA = A_offd_i[i];
@@ -1479,6 +1477,8 @@ hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
             }
             if (sum) D_lambda[rowc] = D_lambda[rowc]/sum;
             rowc++;
+            A_FF_diag_i[row] = d_count_FF;
+            A_FC_diag_i[rowc] = d_count_FC;
             A_FF_offd_i[row] = o_count_FF;
             A_FC_offd_i[rowc] = o_count_FC;
          }
@@ -1502,7 +1502,6 @@ hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
                   D_lambda[rowc] += A_diag_data[jA];
                }
             }
-            A_FC_diag_i[rowc] = d_count_FC;
             for (j = S_offd_i[i]; j < S_offd_i[i+1]; j++)
             {
                jA = A_offd_i[i];
@@ -1521,6 +1520,7 @@ hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
             }
             if (sum) D_lambda[rowc] = D_lambda[rowc]/sum;
             rowc++;
+            A_FC_diag_i[rowc] = d_count_FC;
             A_FC_offd_i[rowc] = o_count_FC;
          }
       }
