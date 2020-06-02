@@ -26,6 +26,7 @@
 */
 
 #include <stdio.h>
+#include <string.h>
 
 /* Struct linear solvers header */
 #include "HYPRE_struct_ls.h"

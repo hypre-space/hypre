@@ -31,6 +31,9 @@
                  recommend comparing this example with Example 5.
 */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <math.h>
 #include "HYPRE_krylov.h"
 #include "HYPRE.h"

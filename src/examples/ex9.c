@@ -38,6 +38,9 @@
                    We recommend viewing Examples 3, 6 and 7 before this example.
 */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <math.h>
 #include "HYPRE_sstruct_ls.h"
 #include "HYPRE_krylov.h"

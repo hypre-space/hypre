@@ -24,6 +24,9 @@
                  The eigensolver is LOBPCG with AMG preconditioner.
 */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <math.h>
 #include "HYPRE.h"
 #include "HYPRE_parcsr_ls.h"

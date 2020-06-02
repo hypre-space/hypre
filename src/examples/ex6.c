@@ -27,6 +27,8 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 /* SStruct linear solvers headers */
 #include "HYPRE_sstruct_ls.h"
