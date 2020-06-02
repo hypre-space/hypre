@@ -30,7 +30,9 @@
 /* SStruct linear solvers headers */
 #include "HYPRE_sstruct_ls.h"
 
+#ifdef HYPRE_EXVIS
 #include "vis.c"
+#endif
 
 int main (int argc, char *argv[])
 {
@@ -746,9 +748,11 @@ int main (int argc, char *argv[])
    /* Save the solution for GLVis visualization, see vis/glvis-ex8.sh */
    if (vis)
    {
+#ifdef HYPRE_EXVIS
       GLVis_PrintSStructGrid(grid, "vis/ex8.mesh", myid, NULL, NULL);
       GLVis_PrintSStructVector(x, 0, "vis/ex8.sol", myid);
       GLVis_PrintData("vis/ex8.data", myid, num_procs);
+#endif
    }
 
    /* Free memory */

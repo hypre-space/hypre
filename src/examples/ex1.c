@@ -31,7 +31,9 @@
 /* Struct linear solvers header */
 #include "HYPRE_struct_ls.h"
 
+#ifdef HYPRE_EXVIS
 #include "vis.c"
+#endif
 
 int main (int argc, char *argv[])
 {
@@ -327,9 +329,11 @@ int main (int argc, char *argv[])
    /* Save the solution for GLVis visualization, see vis/glvis-ex1.sh */
    if (vis)
    {
+#ifdef HYPRE_EXVIS
       GLVis_PrintStructGrid(grid, "vis/ex1.mesh", myid, NULL, NULL);
       GLVis_PrintStructVector(x, "vis/ex1.sol", myid);
       GLVis_PrintData("vis/ex1.data", myid, num_procs);
+#endif
    }
 
    /* Free memory */

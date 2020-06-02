@@ -26,21 +26,21 @@ lev  rows x cols  min  max  avgW     weight      weight       min         max
 
      Complexity:    grid = 1.719927
                 operator = 2.361942
-                  memory = 3.194052
+                memory = 3.194052
 
 
 
 
 BoomerAMG SOLVER PARAMETERS:
 
-  Maximum number of cycles:         20
-  Stopping Tolerance:               1.000000e-07
+  Maximum number of cycles:         20 
+  Stopping Tolerance:               1.000000e-07 
   Cycle type (1 = V, 2 = W, etc.):  1
 
   Relaxation Parameters:
    Visiting Grid:                     down   up  coarse
-            Number of sweeps:            1    1     1
-   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:      3    3     9
+            Number of sweeps:            1    1     1 
+   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:      3    3     9 
    Point types, partial sweeps (1=C, -1=F):
                   Pre-CG relaxation (down):   1  -1
                    Post-CG relaxation (up):  -1   1
@@ -50,20 +50,20 @@ BoomerAMG SOLVER PARAMETERS:
 
 BoomerAMG SOLVER PARAMETERS:
 
-  Maximum number of cycles:         20
-  Stopping Tolerance:               1.000000e-07
+  Maximum number of cycles:         20 
+  Stopping Tolerance:               1.000000e-07 
   Cycle type (1 = V, 2 = W, etc.):  1
 
   Relaxation Parameters:
    Visiting Grid:                     down   up  coarse
-            Number of sweeps:            1    1     1
-   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:      3    3     9
+            Number of sweeps:            1    1     1 
+   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:      3    3     9 
    Point types, partial sweeps (1=C, -1=F):
                   Pre-CG relaxation (down):   1  -1
                    Post-CG relaxation (up):  -1   1
                              Coarsest grid:   0
 
- Output flag (print_level): 3
+ Output flag (print_level): 3 
 
 
 AMG SOLUTION INFO:
@@ -71,13 +71,13 @@ AMG SOLUTION INFO:
                residual        factor       residual
                --------        ------       --------
     Initial    2.854671e-02                 1.000000e+00
-    Cycle  1   2.995663e-03    0.104939     1.049390e-01
-    Cycle  2   1.941234e-04    0.064801     6.800200e-03
-    Cycle  3   1.245674e-05    0.064169     4.363634e-04
-    Cycle  4   7.816537e-07    0.062749     2.738157e-05
-    Cycle  5   4.829130e-08    0.061781     1.691659e-06
-    Cycle  6   2.956748e-09    0.061227     1.035758e-07
-    Cycle  7   1.801266e-10    0.060921     6.309890e-09
+    Cycle  1   2.995663e-03    0.104939     1.049390e-01 
+    Cycle  2   1.941234e-04    0.064801     6.800200e-03 
+    Cycle  3   1.245674e-05    0.064169     4.363634e-04 
+    Cycle  4   7.816537e-07    0.062749     2.738157e-05 
+    Cycle  5   4.829130e-08    0.061781     1.691659e-06 
+    Cycle  6   2.956748e-09    0.061227     1.035758e-07 
+    Cycle  7   1.801266e-10    0.060921     6.309890e-09 
 
 
  Average Convergence Factor = 0.067387
@@ -93,31 +93,19 @@ Iterations = 7
 Final Relative Residual Norm = 6.309890e-09
 
 # Output file: bigint.out.2
-=============================================
-SStruct phase times:
-=============================================
-SStruct Setup:
-  wall clock time = 0.210000 seconds
-  wall MFLOPS     = 0.000000
-  cpu clock time  = 0.210000 seconds
-  cpu MFLOPS      = 0.000000
+
+SStruct Setup time = 0.370296 seconds
 
 Problem size: 26460
 
-=============================================
-Setup phase times:
-=============================================
-AMS Setup:
-  wall clock time = 0.090000 seconds
-  wall MFLOPS     = 0.000000
-  cpu clock time  = 0.100000 seconds
-  cpu MFLOPS      = 0.000000
+
+AMS Setup time = 0.460101 seconds
 
 <C*b,b>: 8.373120e-02
 
 
 Iters       ||r||_C     conv.rate  ||r||_C/||b||_C
------    ------------    ---------  ------------
+-----    ------------    ---------  ------------ 
     1    2.820328e-02    0.097467    9.746663e-02
     2    1.245772e-03    0.044171    4.305215e-03
     3    9.147965e-05    0.073432    3.161410e-04
@@ -127,14 +115,8 @@ Iters       ||r||_C     conv.rate  ||r||_C/||b||_C
     7    1.393405e-07    0.178534    4.815415e-07
 
 
-=============================================
-Solve phase times:
-=============================================
-AMS Solve:
-  wall clock time = 0.160000 seconds
-  wall MFLOPS     = 0.000000
-  cpu clock time  = 0.160000 seconds
-  cpu MFLOPS      = 0.000000
+
+AMS Solve time = 0.607814 seconds
 
 
 Iterations = 7

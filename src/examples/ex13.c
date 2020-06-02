@@ -78,7 +78,6 @@
 */
 
 #include <math.h>
-#include "_hypre_utilities.h"
 #include "HYPRE_sstruct_mv.h"
 #include "HYPRE_sstruct_ls.h"
 #include "HYPRE.h"
@@ -87,7 +86,9 @@
 #define M_PI 3.14159265358979
 #endif
 
+#ifdef HYPRE_EXVIS
 #include "vis.c"
+#endif
 
 /*
    This routine computes the bilinear finite element stiffness matrix and
@@ -628,6 +629,7 @@ int main (int argc, char *argv[])
       /* Save the solution for GLVis visualization, see vis/glvis-ex13.sh */
       if (vis)
       {
+#ifdef HYPRE_EXVIS
          FILE *file;
          char filename[255];
 
@@ -668,6 +670,7 @@ int main (int argc, char *argv[])
 
          /* additional visualization data */
          GLVis_PrintData("vis/ex13.data", myid, num_procs);
+#endif
       }
 
       if (myid == 0)

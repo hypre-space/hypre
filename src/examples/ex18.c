@@ -20,7 +20,6 @@
 */
 
 #include <math.h>
-#include "_hypre_utilities.h"
 #include "HYPRE_sstruct_ls.h"
 
 #define NDIM   4

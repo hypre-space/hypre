@@ -25,12 +25,13 @@
 */
 
 #include <math.h>
-#include "_hypre_utilities.h"
 #include "HYPRE_sstruct_mv.h"
 #include "HYPRE_sstruct_ls.h"
 #include "HYPRE.h"
 
+#ifdef HYPRE_EXVIS
 #include "vis.c"
+#endif
 
 /*
    This routine computes the stiffness matrix for the Laplacian on a square of
@@ -585,6 +586,7 @@ int main (int argc, char *argv[])
       /* Save the solution for GLVis visualization, see vis/glvis-ex16.sh */
       if (vis)
       {
+#ifdef HYPRE_EXVIS
          FILE *file;
          char  filename[255];
 
@@ -646,6 +648,7 @@ int main (int argc, char *argv[])
 
          /* Additional visualization data */
          GLVis_PrintData("vis/ex16.data", myid, num_procs);
+#endif
       }
 
       if (myid == 0)

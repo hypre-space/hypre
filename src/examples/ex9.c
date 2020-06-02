@@ -39,11 +39,12 @@
 */
 
 #include <math.h>
-#include "_hypre_utilities.h"
 #include "HYPRE_sstruct_ls.h"
 #include "HYPRE_krylov.h"
 
+#ifdef HYPRE_EXVIS
 #include "vis.c"
+#endif
 
 int main (int argc, char *argv[])
 {
@@ -706,6 +707,7 @@ int main (int argc, char *argv[])
       /* Save the solution for GLVis visualization, see vis/glvis-ex7.sh */
       if (vis)
       {
+#ifdef HYPRE_EXVIS
          FILE *file;
          char filename[255];
 
@@ -762,6 +764,7 @@ int main (int argc, char *argv[])
          /* save global finite element mesh */
          if (myid == 0)
             GLVis_PrintGlobalSquareMesh("vis/ex9.mesh", N*n-1);
+#endif
       }
 
       if (myid == 0)
