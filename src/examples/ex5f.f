@@ -20,7 +20,7 @@
 !
 !                 This example solves the same problem as Example 3.
 !                 Available solvers are AMG, PCG, and PCG with AMG,
-!                 and PCG with ParaSails    
+!                 and PCG with ParaSails
 !
 !
 !                 Notes: for PCG, GMRES and BiCGStab, precond_id means:
@@ -71,7 +71,7 @@
       integer*8  par_x
       integer*8  solver
       integer*8  precond
- 
+
 !-----------------------------------------------------------------------
 !     Initialize MPI
 !-----------------------------------------------------------------------
@@ -80,6 +80,8 @@
       call MPI_COMM_RANK(MPI_COMM_WORLD, myid, ierr)
       call MPI_COMM_SIZE(MPI_COMM_WORLD, num_procs, ierr)
       mpi_comm = MPI_COMM_WORLD
+
+      call HYPRE_Init(ierr)
 
 !   Default problem parameters
       n = 33
@@ -93,7 +95,7 @@
       if ( n*n .lt. num_procs ) then
          n = int(sqrt(real(num_procs))) + 1
       endif
-!     ng = global no. rows, h = mesh size      
+!     ng = global no. rows, h = mesh size
       ng = n*n
       h = 1.0d0/(n+1)
       h2 = h*h
@@ -140,13 +142,13 @@
 
       do i = ilower, iupper
          nnz = 1
-         
+
 
 !        The left identity block:position i-n
          if ( (i-n) .ge. 0 ) then
-	    cols(nnz) = i-n
-	    values(nnz) = -1.0d0
-	    nnz = nnz + 1
+            cols(nnz) = i-n
+            values(nnz) = -1.0d0
+            nnz = nnz + 1
          endif
 
 !         The left -1: position i-1
@@ -194,7 +196,7 @@
      1     ilower, iupper, b, ierr)
       call HYPRE_IJVectorSetObjectType(b, HYPRE_PARCSR, ierr)
       call HYPRE_IJVectorInitialize(b, ierr)
-  
+
       call HYPRE_IJVectorCreate(mpi_comm,
      1     ilower, iupper, x, ierr)
       call HYPRE_IJVectorSetObjectType(x, HYPRE_PARCSR, ierr)
@@ -233,20 +235,20 @@
 
 !        Set some parameters (See Reference Manual for more parameters)
 
-!        print solve info + parameters 
-         call HYPRE_BoomerAMGSetPrintLevel(solver, 3, ierr)  
+!        print solve info + parameters
+         call HYPRE_BoomerAMGSetPrintLevel(solver, 3, ierr)
 !        old defaults, Falgout coarsening, mod. class. interpolation
-         call HYPRE_BoomerAMGSetOldDefault(solver, ierr) 
-!        G-S/Jacobi hybrid relaxation 
-         call HYPRE_BoomerAMGSetRelaxType(solver, 3, ierr)     
-!        C/F relaxation 
-         call HYPRE_BoomerAMGSetRelaxOrder(solver, 1, ierr)     
+         call HYPRE_BoomerAMGSetOldDefault(solver, ierr)
+!        G-S/Jacobi hybrid relaxation
+         call HYPRE_BoomerAMGSetRelaxType(solver, 3, ierr)
+!        C/F relaxation
+         call HYPRE_BoomerAMGSetRelaxOrder(solver, 1, ierr)
 !        Sweeeps on each level
-         call HYPRE_BoomerAMGSetNumSweeps(solver, 1, ierr)  
-!         maximum number of levels 
-         call HYPRE_BoomerAMGSetMaxLevels(solver, 20, ierr) 
+         call HYPRE_BoomerAMGSetNumSweeps(solver, 1, ierr)
+!         maximum number of levels
+         call HYPRE_BoomerAMGSetMaxLevels(solver, 20, ierr)
 !        conv. tolerance
-         call HYPRE_BoomerAMGSetTol(solver, 1.0d-7, ierr)    
+         call HYPRE_BoomerAMGSetTol(solver, 1.0d-7, ierr)
 
 !        Now setup and solve!
          call HYPRE_BoomerAMGSetup(
@@ -255,8 +257,8 @@
      1        solver, parcsr_A, par_b, par_x, ierr)
 
 
-!        Run info - needed logging turned on 
-         call HYPRE_BoomerAMGGetNumIterations(solver, num_iterations, 
+!        Run info - needed logging turned on
+         call HYPRE_BoomerAMGGetNumIterations(solver, num_iterations,
      1        ierr)
          call HYPRE_BoomerAMGGetFinalReltvRes(solver, final_res_norm,
      1        ierr)
@@ -269,25 +271,25 @@
      1            " Final Relative Residual Norm = ", final_res_norm
             print *
          endif
-         
+
 !        Destroy solver
          call HYPRE_BoomerAMGDestroy(solver, ierr)
 
 !     PCG (with DS)
-      elseif ( solver_id .eq. 50 ) then  
-         
+      elseif ( solver_id .eq. 50 ) then
+
 
 !        Create solver
          call HYPRE_ParCSRPCGCreate(MPI_COMM_WORLD, solver, ierr)
 
-!        Set some parameters (See Reference Manual for more parameters) 
+!        Set some parameters (See Reference Manual for more parameters)
          call HYPRE_ParCSRPCGSetMaxIter(solver, 1000, ierr)
          call HYPRE_ParCSRPCGSetTol(solver, 1.0d-7, ierr)
          call HYPRE_ParCSRPCGSetTwoNorm(solver, 1, ierr)
          call HYPRE_ParCSRPCGSetPrintLevel(solver, 2, ierr)
          call HYPRE_ParCSRPCGSetLogging(solver, 1, ierr)
 
-!        set ds (diagonal scaling) as the pcg preconditioner 
+!        set ds (diagonal scaling) as the pcg preconditioner
          precond_id = 1
          call HYPRE_ParCSRPCGSetPrecond(solver, precond_id,
      1        precond, ierr)
@@ -301,7 +303,7 @@
      &                            par_x, ierr)
 
 
-!        Run info - needed logging turned on 
+!        Run info - needed logging turned on
 
         call HYPRE_ParCSRPCGGetNumIterations(solver, num_iterations,
      &                                       ierr)
@@ -315,17 +317,17 @@
             print *
          endif
 
-!       Destroy solver 
+!       Destroy solver
         call HYPRE_ParCSRPCGDestroy(solver, ierr)
 
 
 !     PCG with AMG preconditioner
       elseif ( solver_id == 1 ) then
-     
+
 !        Create solver
          call HYPRE_ParCSRPCGCreate(MPI_COMM_WORLD, solver, ierr)
 
-!        Set some parameters (See Reference Manual for more parameters) 
+!        Set some parameters (See Reference Manual for more parameters)
          call HYPRE_ParCSRPCGSetMaxIter(solver, 1000, ierr)
          call HYPRE_ParCSRPCGSetTol(solver, 1.0d-7, ierr)
          call HYPRE_ParCSRPCGSetTwoNorm(solver, 1, ierr)
@@ -340,18 +342,18 @@
 !        Set some parameters (See Reference Manual for more parameters)
 
 !        print less solver info since a preconditioner
-         call HYPRE_BoomerAMGSetPrintLevel(precond, 1, ierr); 
+         call HYPRE_BoomerAMGSetPrintLevel(precond, 1, ierr);
 !        Falgout coarsening
-         call HYPRE_BoomerAMGSetCoarsenType(precond, 6, ierr) 
+         call HYPRE_BoomerAMGSetCoarsenType(precond, 6, ierr)
 !        old defaults
-         call HYPRE_BoomerAMGSetOldDefault(precond, ierr) 
-!        SYMMETRIC G-S/Jacobi hybrid relaxation 
-         call HYPRE_BoomerAMGSetRelaxType(precond, 6, ierr)     
+         call HYPRE_BoomerAMGSetOldDefault(precond, ierr)
+!        SYMMETRIC G-S/Jacobi hybrid relaxation
+         call HYPRE_BoomerAMGSetRelaxType(precond, 6, ierr)
 !        Sweeeps on each level
-         call HYPRE_BoomerAMGSetNumSweeps(precond, 1, ierr)  
+         call HYPRE_BoomerAMGSetNumSweeps(precond, 1, ierr)
 !        conv. tolerance
-         call HYPRE_BoomerAMGSetTol(precond, 0.0d0, ierr)     
-!        do only one iteration! 
+         call HYPRE_BoomerAMGSetTol(precond, 0.0d0, ierr)
+!        do only one iteration!
          call HYPRE_BoomerAMGSetMaxIter(precond, 1, ierr)
 
 !        set amg as the pcg preconditioner
@@ -367,7 +369,7 @@
      1                            par_x, ierr)
 
 
-!        Run info - needed logging turned on 
+!        Run info - needed logging turned on
 
         call HYPRE_ParCSRPCGGetNumIterations(solver, num_iterations,
      1                                       ierr)
@@ -392,7 +394,7 @@
 !        Create solver
          call HYPRE_ParCSRPCGCreate(MPI_COMM_WORLD, solver, ierr)
 
-!        Set some parameters (See Reference Manual for more parameters) 
+!        Set some parameters (See Reference Manual for more parameters)
          call HYPRE_ParCSRPCGSetMaxIter(solver, 1000, ierr)
          call HYPRE_ParCSRPCGSetTol(solver, 1.0d-7, ierr)
          call HYPRE_ParCSRPCGSetTwoNorm(solver, 1, ierr)
@@ -419,7 +421,7 @@
      1                            par_x, ierr)
 
 
-!        Run info - needed logging turned on 
+!        Run info - needed logging turned on
 
         call HYPRE_ParCSRPCGGetNumIterations(solver, num_iterations,
      1                                       ierr)
@@ -439,10 +441,10 @@
         call HYPRE_ParCSRPCGDestroy(solver, ierr)
 
       else
-         if ( myid .eq. 0 ) then 
+         if ( myid .eq. 0 ) then
            print *,'Invalid solver id specified'
            stop
-         endif  
+         endif
       endif
 
 
@@ -458,6 +460,7 @@
       call HYPRE_IJVectorDestroy(b, ierr)
       call HYPRE_IJVectorDestroy(x, ierr)
 
+      call HYPRE_Finalize(ierr)
 
 !     Finalize MPI
       call MPI_Finalize(ierr)

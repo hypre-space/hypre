@@ -53,7 +53,7 @@ typedef struct hypre_Boxloop_struct
 #define hypre_RAJA_DEVICE   RAJA_DEVICE
 #define hypre_raja_exec_policy   cuda_exec<BLOCKSIZE>
 /* #define hypre_raja_reduce_policy cuda_reduce_atomic<BLOCKSIZE> */
-#define hypre_raja_reduce_policy cuda_reduce<BLOCKSIZE>
+#define hypre_raja_reduce_policy cuda_reduce //<BLOCKSIZE>
 #define hypre_fence()
 /*
 #define hypre_fence() \
@@ -3089,12 +3089,8 @@ typedef struct hypre_StructStencil_struct
 /*--------------------------------------------------------------------------
  * hypre_CommInfo:
  *
- * For "reverse" communication, the following are not needed (may be NULL)
- *    send_rboxnums, send_rboxes, send_transforms
- *
- * For "forward" communication, the following are not needed (may be NULL)
- *    recv_rboxnums, recv_rboxes, recv_transforms
- *
+ * For "reverse" communication, send_transforms is not needed (may be NULL).
+ * For "forward" communication, recv_transforms is not needed (may be NULL).
  *--------------------------------------------------------------------------*/
 
 typedef struct hypre_CommInfo_struct
@@ -3447,11 +3443,11 @@ typedef struct hypre_StructMatrix_struct
                                                        constant coefficient matrices
                                                        or 2 for constant coefficient
                                                        with variable diagonal */
-                      
+
    HYPRE_Int             symmetric;                 /* Is the matrix symmetric */
    HYPRE_Int            *symm_elements;             /* Which elements are "symmetric" */
    HYPRE_Int             num_ghost[2*HYPRE_MAXDIM]; /* Num ghost layers in each direction */
-                      
+
    HYPRE_BigInt          global_size;               /* Total number of nonzero coeffs */
 
    hypre_CommPkg        *comm_pkg;                  /* Info on how to update ghost data */

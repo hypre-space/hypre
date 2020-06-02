@@ -45,9 +45,12 @@ set(SRCS
   HYPRE_parcsr_pcg.c
   HYPRE_parcsr_pilut.c
   HYPRE_parcsr_schwarz.c
+  HYPRE_parcsr_mgr.c
+  HYPRE_parcsr_ilu.c
   HYPRE_ams.c
   HYPRE_ads.c
   HYPRE_ame.c
+  par_2s_interp.c
   par_amg.c
   par_amg_setup.c
   par_amg_solve.c
@@ -67,6 +70,8 @@ set(SRCS
   par_indepset.c
   par_interp.c
   par_jacobi_interp.c
+  par_krylov_func.c
+  par_mod_lr_interp.c
   par_multi_interp.c
   par_laplace_27pt.c
   par_laplace_9pt.c
@@ -92,7 +97,6 @@ set(SRCS
   par_sv_interp.c
   par_sv_interp_ln.c
   partial.c
-  pcg_par.c
   schwarz.c
   block_tridiag.c
   ams.c
@@ -100,16 +104,22 @@ set(SRCS
   ame.c
   par_restr.c
   par_lr_restr.c
+  par_mgr.c
+  par_mgr_setup.c
+  par_mgr_solve.c
+  par_ilu.c
+  par_ilu_setup.c
+  par_ilu_solve.c
 )
 
 if (HYPRE_USING_DSUPERLU)
   list(APPEND SRCS superlu.c)
 endif()  
 
+target_sources(HYPRE
+  PRIVATE ${SRCS}
+          ${HDRS}
+  )
+
 convert_filenames_to_full_paths(HDRS)
-convert_filenames_to_full_paths(SRCS)
-
 set(HYPRE_HEADERS ${HYPRE_HEADERS} ${HDRS} PARENT_SCOPE)
-set(HYPRE_SOURCES ${HYPRE_SOURCES} ${SRCS} PARENT_SCOPE)
-
-

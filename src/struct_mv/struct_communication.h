@@ -11,12 +11,8 @@
 /*--------------------------------------------------------------------------
  * hypre_CommInfo:
  *
- * For "reverse" communication, the following are not needed (may be NULL)
- *    send_rboxnums, send_rboxes, send_transforms
- *
- * For "forward" communication, the following are not needed (may be NULL)
- *    recv_rboxnums, recv_rboxes, recv_transforms
- *
+ * For "reverse" communication, send_transforms is not needed (may be NULL).
+ * For "forward" communication, recv_transforms is not needed (may be NULL).
  *--------------------------------------------------------------------------*/
 
 typedef struct hypre_CommInfo_struct

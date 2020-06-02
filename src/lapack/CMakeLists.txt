@@ -3,7 +3,8 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
-set(SRCS
+target_sources(HYPRE
+  PRIVATE
   dbdsqr.c
   dgebd2.c
   dgebrd.c
@@ -78,10 +79,6 @@ set(SRCS
   lsame.c
   xerbla.c
 )
-  
-convert_filenames_to_full_paths(SRCS)
-
-set(HYPRE_SOURCES ${HYPRE_SOURCES} ${SRCS} PARENT_SCOPE)
 
 # Turn optimization off for this file
 if (MSVC)
@@ -89,4 +86,3 @@ if (MSVC)
 else ()
   set_source_files_properties (dlamch.c PROPERTIES COMPILE_FLAGS -O0)
 endif ()
-

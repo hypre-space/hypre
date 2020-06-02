@@ -26,16 +26,12 @@
 
 #include <math.h>
 #include "_hypre_utilities.h"
-#include "krylov.h"
 #include "HYPRE.h"
 #include "HYPRE_parcsr_ls.h"
+#include "HYPRE_krylov.h"
 
 /* lobpcg stuff */
 #include "HYPRE_lobpcg.h"
-#include "interpreter.h"
-#include "HYPRE_MatvecFunctions.h"
-#include "temp_multivector.h"
-#include "_hypre_parcsr_mv.h"
 
 #include "vis.c"
 
@@ -67,6 +63,9 @@ int main (int argc, char *argv[])
    MPI_Init(&argc, &argv);
    MPI_Comm_rank(MPI_COMM_WORLD, &myid);
    MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
+
+   /* Initialize HYPRE */
+   HYPRE_Init();
 
    /* Default problem parameters */
    n = 33;
@@ -176,9 +175,9 @@ int main (int argc, char *argv[])
          /* The left identity block:position i-n */
          if ((i-n)>=0)
          {
-	    cols[nnz] = i-n;
-	    values[nnz] = -1.0;
-	    nnz++;
+            cols[nnz] = i-n;
+            values[nnz] = -1.0;
+            nnz++;
          }
 
          /* The left -1: position i-1 */
@@ -273,7 +272,7 @@ int main (int argc, char *argv[])
 
       /* eigenvectors - get a pointer */
       {
-		  mv_TempMultiVector* tmp = (mv_TempMultiVector*) mv_MultiVectorGetData(eigenvectors);
+         mv_TempMultiVector* tmp = (mv_TempMultiVector*) mv_MultiVectorGetData(eigenvectors);
          pvx = (HYPRE_ParVector*)(tmp -> vector);
       }
 
@@ -349,6 +348,9 @@ int main (int argc, char *argv[])
    HYPRE_IJMatrixDestroy(A);
    HYPRE_IJVectorDestroy(b);
    HYPRE_IJVectorDestroy(x);
+
+   /* Finalize HYPRE */
+   HYPRE_Finalize();
 
    /* Finalize MPI*/
    MPI_Finalize();

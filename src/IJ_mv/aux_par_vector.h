@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+#if 0
 /******************************************************************************
  *
  * Header info for Auxiliary Parallel Vector data structures
@@ -38,5 +39,7 @@ typedef struct
 #define hypre_AuxParVectorOffProcI(matrix)  ((matrix) -> off_proc_i)
 #define hypre_AuxParVectorOffProcData(matrix)  ((matrix) -> off_proc_data)
 //#define hypre_AuxParVectorCancelIndx(matrix)  ((matrix) -> cancel_indx)
+
+#endif
 
 #endif

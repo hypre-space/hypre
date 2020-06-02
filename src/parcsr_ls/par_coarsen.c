@@ -14,7 +14,6 @@
 
 #include "_hypre_parcsr_ls.h"
 
-
 /*==========================================================================*/
 /*==========================================================================*/
 /**
@@ -78,7 +77,7 @@
   threshold parameter used to define strength
   @param S_ptr [OUT]
   strength matrix
-  @param CF_marker_ptr [OUT]
+  @param CF_marker_ptr [IN/OUT]
   array indicating C/F points
 
   @see */
@@ -135,7 +134,7 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
    HYPRE_BigInt        global_graph_size;
 
    HYPRE_Int           i, j, k, kc, jS, kS, ig, elmt;
-   HYPRE_Int           index, start, my_id, num_procs, jrow, cnt;
+   HYPRE_Int           index, start, my_id, num_procs, jrow, cnt, nnzrow;
 
    HYPRE_Int           use_commpkg_A = 0;
    HYPRE_Int           break_var = 1;
@@ -270,51 +269,72 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
 
    graph_offd_size = num_cols_offd;
 
-   if (CF_init==1)
+   /* Allocate CF_marker if not done before */
+   if (*CF_marker_ptr == NULL)
    {
-      CF_marker = *CF_marker_ptr;
+      *CF_marker_ptr = hypre_CTAlloc(HYPRE_Int, num_variables, HYPRE_MEMORY_HOST);
+   }
+   CF_marker = *CF_marker_ptr;
+
+   if (CF_init == 1)
+   {
       cnt = 0;
-      for (i=0; i < num_variables; i++)
+      for (i = 0; i < num_variables; i++)
       {
-         if ( (S_offd_i[i+1]-S_offd_i[i]) > 0
-               || CF_marker[i] == -1)
+         if ( CF_marker[i] != SF_PT )
          {
-            CF_marker[i] = 0;
-         }
-         if ( CF_marker[i] == Z_PT)
-         {
-            if (measure_array[i] >= 1.0 ||
-                  (S_diag_i[i+1]-S_diag_i[i]) > 0)
+            if ( (S_offd_i[i+1] - S_offd_i[i]) > 0 ||
+                 (CF_marker[i] == F_PT) )
             {
                CF_marker[i] = 0;
-               graph_array[cnt++] = i;
+            }
+            if ( CF_marker[i] == Z_PT)
+            {
+               if ( (S_diag_i[i+1] - S_diag_i[i]) > 0 ||
+                    (measure_array[i] >= 1.0) )
+               {
+                  CF_marker[i] = 0;
+                  graph_array[cnt++] = i;
+               }
+               else
+               {
+                  CF_marker[i] = F_PT;
+               }
             }
             else
             {
-               CF_marker[i] = F_PT;
+               graph_array[cnt++] = i;
             }
          }
-         else if (CF_marker[i] == SF_PT)
-            measure_array[i] = 0;
          else
-            graph_array[cnt++] = i;
+         {
+            measure_array[i] = 0;
+         }
       }
    }
    else
    {
-      CF_marker = hypre_CTAlloc(HYPRE_Int,  num_variables, HYPRE_MEMORY_HOST);
       cnt = 0;
-      for (i=0; i < num_variables; i++)
+      for (i = 0; i < num_variables; i++)
       {
-         CF_marker[i] = 0;
-         if ( (S_diag_i[i+1]-S_diag_i[i]) == 0
-               && (S_offd_i[i+1]-S_offd_i[i]) == 0)
+         if ( CF_marker[i] != SF_PT )
          {
-            CF_marker[i] = SF_PT;
-            measure_array[i] = 0;
+            CF_marker[i] = 0;
+            nnzrow = (S_diag_i[i+1] - S_diag_i[i]) + (S_offd_i[i+1] - S_offd_i[i]);
+            if (nnzrow == 0)
+            {
+               CF_marker[i] = SF_PT;
+               measure_array[i] = 0;
+            }
+            else
+            {
+               graph_array[cnt++] = i;
+            }
          }
          else
-            graph_array[cnt++] = i;
+         {
+            measure_array[i] = 0;
+         }
       }
    }
    graph_size = cnt;
@@ -830,8 +850,6 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
    hypre_TFree(CF_marker_offd, HYPRE_MEMORY_HOST);
    if (num_procs > 1) hypre_CSRMatrixDestroy(S_ext);
 
-   *CF_marker_ptr   = CF_marker;
-
    return hypre_error_flag;
 }
 
@@ -857,21 +875,30 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
                             hypre_ParCSRMatrix    *A,
                             HYPRE_Int              measure_type,
                             HYPRE_Int              coarsen_type,
+                            HYPRE_Int              cut_factor,
                             HYPRE_Int              debug_flag,
                             HYPRE_Int            **CF_marker_ptr)
 {
    MPI_Comm                comm          = hypre_ParCSRMatrixComm(S);
    hypre_ParCSRCommPkg    *comm_pkg      = hypre_ParCSRMatrixCommPkg(S);
    hypre_ParCSRCommHandle *comm_handle;
+   hypre_CSRMatrix *A_diag        = hypre_ParCSRMatrixDiag(A);
    hypre_CSRMatrix *S_diag        = hypre_ParCSRMatrixDiag(S);
+   hypre_CSRMatrix *A_offd        = hypre_ParCSRMatrixOffd(A);
    hypre_CSRMatrix *S_offd        = hypre_ParCSRMatrixOffd(S);
+   HYPRE_Int       *A_i           = hypre_CSRMatrixI(A_diag);
    HYPRE_Int       *S_i           = hypre_CSRMatrixI(S_diag);
    HYPRE_Int       *S_j           = hypre_CSRMatrixJ(S_diag);
+   HYPRE_Int       *A_offd_i      = hypre_CSRMatrixI(A_offd);
    HYPRE_Int       *S_offd_i      = hypre_CSRMatrixI(S_offd);
-   HYPRE_Int       *S_offd_j = NULL;
+   HYPRE_Int       *S_offd_j      = NULL;
    HYPRE_Int        num_variables = hypre_CSRMatrixNumRows(S_diag);
    HYPRE_Int        num_cols_offd = hypre_CSRMatrixNumCols(S_offd);
-   HYPRE_BigInt    *col_map_offd    = hypre_ParCSRMatrixColMapOffd(S);
+   HYPRE_BigInt    *col_map_offd  = hypre_ParCSRMatrixColMapOffd(S);
+
+   HYPRE_BigInt     num_nonzeros    = hypre_ParCSRMatrixNumNonzeros(A);
+   HYPRE_BigInt     global_num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
+   HYPRE_Int        avg_nnzrow;
 
    hypre_CSRMatrix *S_ext = NULL;
    HYPRE_Int       *S_ext_i = NULL;
@@ -898,7 +925,7 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    HYPRE_Int        ji, jj, jk, jm, index;
    HYPRE_Int        set_empty = 1;
    HYPRE_Int        C_i_nonempty = 0;
-   //HYPRE_Int      num_nonzeros;
+   HYPRE_Int        cut, nnzrow;
    HYPRE_Int        num_procs, my_id;
    HYPRE_Int        num_sends = 0;
    HYPRE_BigInt     first_col;
@@ -1095,24 +1122,56 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
     *
     *************************************************************/
 
-   CF_marker = hypre_CTAlloc(HYPRE_Int,  num_variables, HYPRE_MEMORY_HOST);
+   /* Allocate CF_marker if not done before */
+   if (*CF_marker_ptr == NULL)
+   {
+      *CF_marker_ptr = hypre_CTAlloc(HYPRE_Int, num_variables, HYPRE_MEMORY_HOST);
+   }
+   CF_marker = *CF_marker_ptr;
 
    num_left = 0;
    for (j = 0; j < num_variables; j++)
    {
-      if (S_i[j+1]-S_i[j] == 0 && S_offd_i[j+1]-S_offd_i[j] == 0)
+      if (CF_marker[j] == 0)
       {
-         CF_marker[j] = SF_PT;
-         if (agg_2)
+         nnzrow = (S_i[j+1] - S_i[j]) + (S_offd_i[j+1] - S_offd_i[j]);
+         if (nnzrow == 0)
          {
-            CF_marker[j] = SC_PT;
+            CF_marker[j] = SF_PT;
+            if (agg_2)
+            {
+               CF_marker[j] = SC_PT;
+            }
+            measure_array[j] = 0;
          }
-         measure_array[j] = 0;
+         else
+         {
+            CF_marker[j] = UNDECIDED;
+            num_left++;
+         }
       }
       else
       {
-         CF_marker[j] = UNDECIDED;
-         num_left++;
+         measure_array[j] = 0;
+      }
+   }
+
+   /* Set dense rows as SF_PT */
+   if ((cut_factor > 0) && (global_num_rows > 0))
+   {
+      avg_nnzrow = num_nonzeros/global_num_rows;
+      cut = cut_factor*avg_nnzrow;
+      for (j = 0; j < num_variables; j++)
+      {
+         nnzrow = (A_i[j+1] - A_i[j]) + (A_offd_i[j+1] - A_offd_i[j]);
+         if (nnzrow > cut)
+         {
+            if (CF_marker[j] == UNDECIDED)
+            {
+               num_left--;
+            }
+            CF_marker[j] = SF_PT;
+         }
       }
    }
 
@@ -1131,7 +1190,6 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
             {
                hypre_error_w_msg(HYPRE_ERROR_GENERIC,"negative measure!\n");
             }
-            /*if (measure < 0) hypre_printf("negative measure!\n");*/
 
             CF_marker[j] = f_pnt;
             for (k = S_i[j]; k < S_i[j+1]; k++)
@@ -1288,7 +1346,6 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
 
    if (coarsen_type == 11)
    {
-      *CF_marker_ptr = CF_marker;
       if (meas_type && num_procs > 1)
       {
          hypre_CSRMatrixDestroy(S_ext);
@@ -1927,18 +1984,17 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
       hypre_CSRMatrixDestroy(S_ext);
    }
 
-   *CF_marker_ptr   = CF_marker;
-
    return hypre_error_flag;
 }
 
 
 HYPRE_Int
-hypre_BoomerAMGCoarsenFalgout( hypre_ParCSRMatrix    *S,
-                               hypre_ParCSRMatrix    *A,
-                               HYPRE_Int                    measure_type,
-                               HYPRE_Int                    debug_flag,
-                               HYPRE_Int                  **CF_marker_ptr)
+hypre_BoomerAMGCoarsenFalgout( hypre_ParCSRMatrix  *S,
+                               hypre_ParCSRMatrix  *A,
+                               HYPRE_Int            measure_type,
+                               HYPRE_Int            cut_factor,
+                               HYPRE_Int            debug_flag,
+                               HYPRE_Int          **CF_marker_ptr)
 {
    HYPRE_Int              ierr = 0;
 
@@ -1946,11 +2002,10 @@ hypre_BoomerAMGCoarsenFalgout( hypre_ParCSRMatrix    *S,
     * Perform Ruge coarsening followed by CLJP coarsening
     *-------------------------------------------------------*/
 
-   ierr += hypre_BoomerAMGCoarsenRuge (S, A, measure_type, 6, debug_flag,
-         CF_marker_ptr);
+   ierr += hypre_BoomerAMGCoarsenRuge (S, A, measure_type, 6, cut_factor,
+                                       debug_flag, CF_marker_ptr);
 
-   ierr += hypre_BoomerAMGCoarsen (S, A, 1, debug_flag,
-         CF_marker_ptr);
+   ierr += hypre_BoomerAMGCoarsen (S, A, 1, debug_flag, CF_marker_ptr);
 
    return (ierr);
 }
@@ -1974,10 +2029,10 @@ hypre_BoomerAMGCoarsenFalgout( hypre_ParCSRMatrix    *S,
  **************************************************************/
 HYPRE_Int
 hypre_BoomerAMGCoarsenPMISHost( hypre_ParCSRMatrix    *S,
-                            hypre_ParCSRMatrix    *A,
-                            HYPRE_Int              CF_init,
-                            HYPRE_Int              debug_flag,
-                            HYPRE_Int            **CF_marker_ptr)
+                                hypre_ParCSRMatrix    *A,
+                                HYPRE_Int              CF_init,
+                                HYPRE_Int              debug_flag,
+                                HYPRE_Int            **CF_marker_ptr)
 {
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_PMIS] -= hypre_MPI_Wtime();
@@ -2019,6 +2074,7 @@ hypre_BoomerAMGCoarsenPMISHost( hypre_ParCSRMatrix    *S,
 
    HYPRE_Int                 i, j, jj, jS, ig;
    HYPRE_Int                 index, start, my_id, num_procs, jrow, cnt, elmt;
+   HYPRE_Int                 nnzrow;
 
    HYPRE_Int                 ierr = 0;
 
@@ -2213,46 +2269,55 @@ CF_marker, CF_marker_offd: initialize CF_marker
    /* now the local part of the graph array, and the local CF_marker array */
    graph_array = hypre_CTAlloc(HYPRE_Int, num_variables, HYPRE_MEMORY_HOST);
 
+   /* Allocate CF_marker if not done before */
+   if (*CF_marker_ptr == NULL)
+   {
+      *CF_marker_ptr = hypre_CTAlloc(HYPRE_Int, num_variables, HYPRE_MEMORY_HOST);
+   }
+   CF_marker = *CF_marker_ptr;
+
    if (CF_init == 1)
    {
-      CF_marker = *CF_marker_ptr;
       cnt = 0;
       for (i = 0; i < num_variables; i++)
       {
-         if ( S_offd_i[i+1] - S_offd_i[i] > 0 || CF_marker[i] == -1 )
+         if ( CF_marker[i] != SF_PT )
          {
-            CF_marker[i] = 0;
-         }
-         if ( CF_marker[i] == Z_PT)
-         {
-            if ( measure_array[i] >= 1.0 || S_diag_i[i+1] - S_diag_i[i] > 0 )
+            if ( S_offd_i[i+1] - S_offd_i[i] > 0 || CF_marker[i] == -1 )
             {
                CF_marker[i] = 0;
-               graph_array[cnt++] = i;
+            }
+            if ( CF_marker[i] == Z_PT)
+            {
+               if ( measure_array[i] >= 1.0 || S_diag_i[i+1] - S_diag_i[i] > 0 )
+               {
+                  CF_marker[i] = 0;
+                  graph_array[cnt++] = i;
+               }
+               else
+               {
+                  CF_marker[i] = F_PT;
+               }
             }
             else
             {
-               CF_marker[i] = F_PT;
+               graph_array[cnt++] = i;
             }
-         }
-         else if (CF_marker[i] == SF_PT)
-         {
-            measure_array[i] = 0;
          }
          else
          {
-            graph_array[cnt++] = i;
+            measure_array[i] = 0;
          }
       }
    }
    else
    {
-      CF_marker = hypre_CTAlloc(HYPRE_Int, num_variables, HYPRE_MEMORY_HOST);
       cnt = 0;
       for (i = 0; i < num_variables; i++)
       {
          CF_marker[i] = 0;
-         if ( S_diag_i[i+1] - S_diag_i[i] == 0 && S_offd_i[i+1] - S_offd_i[i] == 0)
+         nnzrow = (S_diag_i[i+1] - S_diag_i[i]) + (S_offd_i[i+1] - S_offd_i[i]);
+         if (nnzrow == 0)
          {
             CF_marker[i] = SF_PT; /* an isolated fine grid */
             if (CF_init == 3 || CF_init == 4)
@@ -2665,8 +2730,6 @@ CF_marker, CF_marker_offd: initialize CF_marker
    hypre_TFree(CF_marker_offd, HYPRE_MEMORY_HOST);
    /*if (num_procs > 1) hypre_CSRMatrixDestroy(S_ext);*/
 
-   *CF_marker_ptr   = CF_marker;
-
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_PMIS] += hypre_MPI_Wtime();
 #endif
@@ -2682,30 +2745,26 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
                             HYPRE_Int            **CF_marker_ptr)
 {
 #if defined(HYPRE_USING_CUDA)
-   //hypre_SetExecPolicy(HYPRE_EXEC_DEVICE);
+   hypre_NvtxPushRange("PMIS");
 #endif
-
-   HYPRE_Int exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(A)) );
-
-   hypre_assert(exec != HYPRE_EXEC_UNSET);
 
    HYPRE_Int ierr = 0;
 
-   if (exec == HYPRE_EXEC_HOST)
-   {
-      /*      printf(" coarsen PMIS Host \n");*/
-      ierr = hypre_BoomerAMGCoarsenPMISHost( S, A, CF_init, debug_flag, CF_marker_ptr );
-   }
 #if defined(HYPRE_USING_CUDA)
-   else
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(A)) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
    {
-      /*      printf(" coarsen PMIS Device \n");*/
       ierr = hypre_BoomerAMGCoarsenPMISDevice( S, A, CF_init, debug_flag, CF_marker_ptr );
    }
+   else
 #endif
+   {
+      ierr = hypre_BoomerAMGCoarsenPMISHost( S, A, CF_init, debug_flag, CF_marker_ptr );
+   }
 
 #if defined(HYPRE_USING_CUDA)
-   //hypre_SetExecPolicy(HYPRE_EXEC_HOST);
+   hypre_NvtxPopRange();
 #endif
 
    return ierr;
@@ -2714,9 +2773,10 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
 HYPRE_Int
 hypre_BoomerAMGCoarsenHMIS( hypre_ParCSRMatrix    *S,
                             hypre_ParCSRMatrix    *A,
-                            HYPRE_Int                    measure_type,
-                            HYPRE_Int                    debug_flag,
-                            HYPRE_Int                  **CF_marker_ptr)
+                            HYPRE_Int              measure_type,
+                            HYPRE_Int              cut_factor,
+                            HYPRE_Int              debug_flag,
+                            HYPRE_Int            **CF_marker_ptr)
 {
    HYPRE_Int              ierr = 0;
 
@@ -2724,11 +2784,10 @@ hypre_BoomerAMGCoarsenHMIS( hypre_ParCSRMatrix    *S,
     * Perform Ruge coarsening followed by CLJP coarsening
     *-------------------------------------------------------*/
 
-   ierr += hypre_BoomerAMGCoarsenRuge (S, A, measure_type, 10, debug_flag,
-                                CF_marker_ptr);
+   ierr += hypre_BoomerAMGCoarsenRuge (S, A, measure_type, 10, cut_factor,
+                                       debug_flag, CF_marker_ptr);
 
-   ierr += hypre_BoomerAMGCoarsenPMISHost (S, A, 1, debug_flag,
-                                CF_marker_ptr);
+   ierr += hypre_BoomerAMGCoarsenPMISHost (S, A, 1, debug_flag, CF_marker_ptr);
 
    return (ierr);
 }

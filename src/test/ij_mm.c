@@ -86,7 +86,7 @@ main( hypre_int argc,
    HYPRE_ParCSRMatrix parcsr_AH_2 = NULL;
    HYPRE_ParCSRMatrix parcsr_error = NULL;
 
-   HYPRE_Int      *CF_marker;
+   HYPRE_Int         *CF_marker = NULL;
 
    HYPRE_Int       errcode;
    HYPRE_Int       num_procs, myid;
@@ -135,7 +135,7 @@ main( hypre_int argc,
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
    /* Initialize Hypre */
-   HYPRE_Init(argc, argv);
+   HYPRE_Init();
 
    //hypre_SetNumThreads(20);
    hypre_printf("CPU #OMP THREADS %d\n", hypre_NumThreads());
@@ -2248,4 +2248,3 @@ BuildParCoordinates( HYPRE_Int                  argc,
    *coord_ptr = coordinates;
    return (0);
 }
-

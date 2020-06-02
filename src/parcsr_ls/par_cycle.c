@@ -98,8 +98,8 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    HYPRE_Int       my_id;
    HYPRE_Int       restri_type;
    HYPRE_Real      alpha;
-   HYPRE_Real    **l1_norms = NULL;
-   HYPRE_Real     *l1_norms_level;
+   hypre_Vector  **l1_norms = NULL;
+   hypre_Vector   *l1_norms_level;
    HYPRE_Real    **ds = hypre_ParAMGDataChebyDS(amg_data);
    HYPRE_Real    **coefs = hypre_ParAMGDataChebyCoefs(amg_data);
    HYPRE_Int       seq_cg = 0;
@@ -422,6 +422,14 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                   hypre_ParVectorAxpy(relax_weight[level],Utemp,Aux_U);
                }
                else if (smooth_num_levels > level &&
+	               (smooth_type == 5 || smooth_type == 15))
+	       {
+                  HYPRE_ILUSolve(smoother[level],
+                                 (HYPRE_ParCSRMatrix) A_array[level],
+                                 (HYPRE_ParVector) Aux_F,
+                                 (HYPRE_ParVector) Aux_U);
+	       }
+               else if (smooth_num_levels > level &&
                         (smooth_type == 6 || smooth_type == 16))
                {
                   HYPRE_SchwarzSolve(smoother[level],
@@ -457,7 +465,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                                                     CF_marker_array[level],
                                                     loc_relax_points[i],
                                                     relax_weight[level],
-                                                    l1_norms[level],
+                                                    l1_norms[level] ? hypre_VectorData(l1_norms[level]) : NULL,
                                                     Aux_U,
                                                     Vtemp);
                      }
@@ -469,7 +477,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                                        Aux_F,
                                        1,
                                        1,
-                                       l1_norms_level,
+                                       l1_norms_level ? hypre_VectorData(l1_norms_level) : NULL,
                                        relax_weight[level],
                                        omega[level],0,0,0,0,
                                        Aux_U,
@@ -482,7 +490,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                                           Aux_F,
                                           1,
                                           1,
-                                          l1_norms_level,
+                                          l1_norms_level ? hypre_VectorData(l1_norms_level) : NULL,
                                           relax_weight[level],
                                           omega[level],0,0,0,0,
                                           Aux_U,
@@ -495,7 +503,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                                                  Aux_F,
                                                  1,
                                                  1,
-                                                 l1_norms_level,
+                                                 l1_norms_level ? hypre_VectorData(l1_norms_level) : NULL,
                                                  relax_weight[level],
                                                  omega[level],
                                                  Aux_U,
@@ -555,7 +563,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                                                         relax_points,
                                                         relax_weight[level],
                                                         omega[level],
-                                                        l1_norms_level,
+                                                        l1_norms_level ? hypre_VectorData(l1_norms_level) : NULL,
                                                         Aux_U,
                                                         Vtemp,
                                                         Ztemp);
@@ -586,7 +594,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                                                              cycle_param,
                                                              relax_weight[level],
                                                              omega[level],
-                                                             l1_norms_level,
+                                                             l1_norms_level ? hypre_VectorData(l1_norms_level) : NULL,
                                                              Aux_U,
                                                              Vtemp,
                                                              Ztemp);
@@ -665,8 +673,8 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 
          if (block_mode)
          {
-            hypre_ParCSRBlockMatrixMatvecT(alpha,R_block_array[fine_grid],Vtemp,
-                                           beta,F_array[coarse_grid]);
+            hypre_ParCSRBlockMatrixMatvecT(alpha, R_block_array[fine_grid], Vtemp,
+                                           beta, F_array[coarse_grid]);
          }
          else
          {
@@ -678,7 +686,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
             }
             else
             {
-               hypre_ParCSRMatrixMatvecT(alpha, R_array[fine_grid],Vtemp,
+               hypre_ParCSRMatrixMatvecT(alpha, R_array[fine_grid], Vtemp,
                                          beta, F_array[coarse_grid]);
             }
          }

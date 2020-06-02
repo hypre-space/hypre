@@ -35,6 +35,7 @@ FILES =\
  F90_par_vector.c\
  HYPRE_parcsr_matrix.c\
  HYPRE_parcsr_vector.c\
+ gen_fffc.c\
  new_commpkg.c\
  numbers.c\
  par_csr_aat.c\

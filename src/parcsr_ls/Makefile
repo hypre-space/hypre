@@ -70,6 +70,7 @@ FILES =\
  HYPRE_parcsr_hybrid.c\
  HYPRE_parcsr_int.c\
  HYPRE_parcsr_mgr.c\
+ HYPRE_parcsr_ilu.c \
  HYPRE_parcsr_ParaSails.c\
  HYPRE_parcsr_pcg.c\
  HYPRE_parcsr_pilut.c\
@@ -77,6 +78,7 @@ FILES =\
  HYPRE_ams.c\
  HYPRE_ads.c\
  HYPRE_ame.c\
+ par_2s_interp.c\
  par_amg.c\
  par_amg_setup.c\
  par_amg_solve.c\
@@ -100,14 +102,20 @@ FILES =\
  par_interp_device.c\
  par_interp_trunc_device.c\
  par_jacobi_interp.c\
+ par_krylov_func.c\
+ par_mod_lr_interp.c\
  par_multi_interp.c\
  par_laplace.c\
  par_laplace_27pt.c\
  par_laplace_9pt.c\
  par_lr_interp.c\
+ par_lr_interp_device.c\
  par_mgr.c\
  par_mgr_setup.c\
  par_mgr_solve.c\
+ par_ilu.c\
+ par_ilu_setup.c \
+ par_ilu_solve.c \
  par_nongalerkin.c\
  par_nodal_systems.c\
  par_rap.c\
@@ -126,7 +134,6 @@ FILES =\
  par_vardifconv.c\
  par_vardifconv_rs.c\
  partial.c\
- pcg_par.c\
  schwarz.c\
  block_tridiag.c\
  ams.c\

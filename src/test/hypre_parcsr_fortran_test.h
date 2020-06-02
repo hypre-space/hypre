@@ -8,7 +8,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    
+
 /******************************************************************************
  * Definitions of ParCSR Fortran interface routines
  *****************************************************************************/
@@ -81,7 +81,7 @@ extern void hypre_F90_NAME(fhypre_csrmatrixtoparcsrmatrix, FHYPRE_CSRMATRIXTOPAR
 #define HYPRE_ParCSRMatrixMatvec  \
         hypre_F90_NAME(fhypre_parcsrmatrixmatvec, FHYPRE_PARCSRMATRIXMATVEC)
 extern void hypre_F90_NAME(fhypre_parcsrmatrixmatvec, FHYPRE_PARCSRMATRIXMATVEC)
-                      (HYPRE_Real *, hypre_F90_Obj *, hypre_F90_Obj *, HYPRE_Real *, hypre_F90_Obj *);  
+                      (HYPRE_Real *, hypre_F90_Obj *, hypre_F90_Obj *, HYPRE_Real *, hypre_F90_Obj *);
 
 #define HYPRE_ParCSRMatrixMatvecT  \
         hypre_F90_NAME(fhypre_parcsrmatrixmatvect, FHYPRE_PARCSRMATRIXMATVECT)
@@ -219,6 +219,16 @@ extern void hypre_F90_NAME(fhypre_boomeramgsetmaxlevels, FHYPRE_BOOMERAMGSETMAXL
         hypre_F90_NAME(fhypre_boomeramggetmaxlevels, FHYPRE_BOOMERAMGGETMAXLEVELS)
 extern void hypre_F90_NAME(fhypre_boomeramggetmaxlevels, FHYPRE_BOOMERAMGGETMAXLEVELS)
                       (hypre_F90_Obj *, HYPRE_Int *);
+
+#define HYPRE_BoomerAMGSetCoarsenCutFactor  \
+        hypre_F90_NAME(fhypre_boomeramgsetcoarsencutfa, FHYPRE_BOOMERAMGSETCOARSENCUTFAC)
+extern void hypre_F90_NAME(fhypre_boomeramgsetcoarsencutfa, FHYPRE_BOOMERAMGSETCOARSENCUTFAC)
+                      (hypre_F90_Obj *, HYPRE_Real *);
+
+#define HYPRE_BoomerAMGGetCoarsenCutFactor  \
+        hypre_F90_NAME(fhypre_boomeramggetcoarsencutfa, FHYPRE_BOOMERAMGGETCOARSENCUTFAC)
+extern void hypre_F90_NAME(fhypre_boomeramggetcoarsencutfa, FHYPRE_BOOMERAMGGETCOARSENCUTFAC)
+                      (hypre_F90_Obj *, HYPRE_Real *);
 
 #define HYPRE_BoomerAMGSetStrongThreshold  \
         hypre_F90_NAME(fhypre_boomeramgsetstrongthrshl, FHYPRE_BOOMERAMGSETSTRONGTHRSHL)

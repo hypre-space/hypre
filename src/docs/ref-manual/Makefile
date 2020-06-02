@@ -10,12 +10,12 @@ PDFLATEX = pdflatex --interaction=nonstopmode
 ##################################################################
 
 # all: html pdf
-all: html pdf
+all: pdf
 
 install:
 
 clean:
-	@/bin/rm -fr html latex
+	@/bin/rm -fr html latex xml
 
 distclean: clean
 
