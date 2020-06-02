@@ -938,6 +938,9 @@ test_SetSet(MPI_Comm             comm,
       }
    }
 
+   // Assemble matrix
+   HYPRE_IJMatrixAssemble(ij_A);
+
    // Second set
    for (chunk = 0; chunk < nrows; chunk += chunk_size)
    {
