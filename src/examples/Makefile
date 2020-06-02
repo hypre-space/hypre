@@ -3,37 +3,39 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
+include ../config/Makefile.config
+
 ########################################################################
 # Compiler and external dependences
 ########################################################################
-CC        = mpicc
-F77       = mpif77
-CXX       = mpicxx
-F90       = mpifort
-HYPRE_DIR = ../hypre
+CC        := $(CC)
+F77       = $(FC)
+CXX       := $(CXX)
+F90       = $(FC)
+HYPRE_DIR = $(HYPRE_SRC_TOP_DIR)/hypre
 
 ########################################################################
 # Compiling and linking options
 ########################################################################
-COPTS     = -g -Wall
+COPTS     = -g
 CINCLUDES = -I$(HYPRE_DIR)/include
 CDEFS     = -DHAVE_CONFIG_H -DHYPRE_TIMING
-CFLAGS    = $(COPTS) $(CINCLUDES) $(CDEFS)
+CFLAGS    := $(CFLAGS) $(COPTS) $(CINCLUDES) $(CDEFS)
 FOPTS     = -g
 FINCLUDES = $(CINCLUDES)
-FFLAGS    = $(FOPTS) $(FINCLUDES)
+FFLAGS    = $(FFLAGS) $(FOPTS) $(FINCLUDES)
 CXXOPTS   = $(COPTS) -Wno-deprecated
 CXXINCLUDES = $(CINCLUDES) -I..
 CXXDEFS   = $(CDEFS)
-IFLAGS_BXX = 
-CXXFLAGS  = $(CXXOPTS) $(CXXINCLUDES) $(CXXDEFS) $(IFLAGS_BXX)
-IF90FLAGS = 
+IFLAGS_BXX =
+CXXFLAGS  = $(CXXFLAGS) $(CXXOPTS) $(CXXINCLUDES) $(CXXDEFS) $(IFLAGS_BXX)
+IF90FLAGS =
 F90FLAGS = $(FFLAGS) $(IF90FLAGS)
 
 
 LINKOPTS  = $(COPTS)
-LIBS      = -L$(HYPRE_DIR)/lib -lHYPRE -lm
-LFLAGS    = $(LINKOPTS) $(LIBS) -lstdc++
+LIBS      := -L$(HYPRE_DIR)/lib -lHYPRE -lm $(LIBS)
+LFLAGS    = $(LINKOPTS) $(LIBS) $(LDFLAGS) -lstdc++
 LFLAGS_B =\
  -L${HYPRE_DIR}/lib\
  -lbHYPREClient-C\
@@ -49,12 +51,12 @@ LFLAGS90 =
 ########################################################################
 .SUFFIXES: .c .f .cxx .f90
 
-.c.o:
-	$(CC) $(CFLAGS) -c $<
-.f.o:
-	$(F77) $(FFLAGS) -c $<
-.cxx.o:
-	$(CXX) $(CXXFLAGS) -c $<
+#.c.o:
+#	$(CC) $(CFLAGS) -c $<
+#.f.o:
+#	$(F77) $(FFLAGS) -c $<
+#.cxx.o:
+#	$(CXX) $(CXXFLAGS) -c $<
 
 ########################################################################
 # List of all programs to be compiled

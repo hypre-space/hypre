@@ -49,6 +49,14 @@
 
 #include "vis.c"
 
+#if defined(HYPRE_USING_CUDA)
+#define Malloc(type, count) ( {void *ptr = NULL; cudaMallocManaged(&ptr, count*sizeof(type)); (type *) ptr;} )
+#define Free(ptr) ( cudaFree(ptr), ptr = NULL )
+#else
+#define Malloc(type, count) ( (type *) malloc(count*sizeof(type)) )
+#define Free(ptr) ( free(ptr), ptr = NULL )
+#endif
+
 int main (int argc, char *argv[])
 {
    int i, j, k;
@@ -79,9 +87,6 @@ int main (int argc, char *argv[])
    MPI_Init(&argc, &argv);
    MPI_Comm_rank(MPI_COMM_WORLD, &myid);
    MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
-
-   /* Initialize HYPRE */
-   HYPRE_Init();
 
    /* Set defaults */
    n = 33;
@@ -150,6 +155,9 @@ int main (int argc, char *argv[])
       }
    }
 
+   /* Initialize HYPRE */
+   HYPRE_Init();
+
    /* Figure out the processor grid (N x N).  The local problem
       size for the interior nodes is indicated by n (n x n).
       pi and pj indicate position in the processor grid. */
@@ -208,7 +216,7 @@ int main (int argc, char *argv[])
       /* Indicate that the matrix coefficients are ready to be set */
       HYPRE_StructMatrixInitialize(A);
 
-      values = (double*) calloc(nvalues, sizeof(double));
+      values = Malloc(double, nvalues);
 
       for (j = 0; j < nentries; j++)
          stencil_indices[j] = j;
@@ -225,7 +233,7 @@ int main (int argc, char *argv[])
       HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, nentries,
                                      stencil_indices, values);
 
-      free(values);
+      Free(values);
    }
 
    /* 4. Incorporate the zero boundary conditions: go along each edge of
@@ -240,7 +248,7 @@ int main (int argc, char *argv[])
       double *values;
       int stencil_indices[1];
 
-      values = (double*) calloc(nvalues, sizeof(double));
+      values = Malloc(double, nvalues);
       for (j = 0; j < nvalues; j++)
          values[j] = 0.0;
 
@@ -305,7 +313,7 @@ int main (int argc, char *argv[])
                                         stencil_indices, values);
       }
 
-      free(values);
+      Free(values);
    }
 
    /* This is a collective call finalizing the matrix assembly.
@@ -317,7 +325,7 @@ int main (int argc, char *argv[])
       int    nvalues = n*n;
       double *values;
 
-      values = (double*) calloc(nvalues, sizeof(double));
+      values = Malloc(double, nvalues);
 
       /* Create an empty vector object */
       HYPRE_StructVectorCreate(MPI_COMM_WORLD, grid, &b);
@@ -336,7 +344,7 @@ int main (int argc, char *argv[])
          values[i] = 0.0;
       HYPRE_StructVectorSetBoxValues(x, ilower, iupper, values);
 
-      free(values);
+      Free(values);
 
       /* This is a collective call finalizing the vector assembly.
          The vector is now ``ready to be used'' */
@@ -411,7 +419,7 @@ int main (int argc, char *argv[])
       char filename[255];
 
       int nvalues = n*n;
-      double *values = (double*) calloc(nvalues, sizeof(double));
+      double *values = Malloc(double, nvalues);
 
       /* get the local solution */
       HYPRE_StructVectorGetBoxValues(x, ilower, iupper, values);
@@ -432,7 +440,7 @@ int main (int argc, char *argv[])
 
       fflush(file);
       fclose(file);
-      free(values);
+      Free(values);
 
       /* save global finite element mesh */
       if (myid == 0)

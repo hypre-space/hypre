@@ -32,6 +32,14 @@
 
 #include "vis.c"
 
+#if defined(HYPRE_USING_CUDA)
+#define Malloc(type, count) ( {void *ptr = NULL; cudaMallocManaged(&ptr, count*sizeof(type)); (type *) ptr;} )
+#define Free(ptr) ( cudaFree(ptr), ptr = NULL )
+#else
+#define Malloc(type, count) ( (type *) malloc(count*sizeof(type)) )
+#define Free(ptr) ( free(ptr), ptr = NULL )
+#endif
+
 int main (int argc, char *argv[])
 {
    int i, j;
@@ -53,9 +61,6 @@ int main (int argc, char *argv[])
    MPI_Comm_rank(MPI_COMM_WORLD, &myid);
    MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
 
-   /* Initialize HYPRE */
-   HYPRE_Init();
-
    if (num_procs != 2)
    {
       if (myid == 0) printf("Must run with 2 processors!\n");
@@ -63,6 +68,9 @@ int main (int argc, char *argv[])
 
       return(0);
    }
+
+   /* Initialize HYPRE */
+   HYPRE_Init();
 
    /* Parse command line */
    {
@@ -181,12 +189,7 @@ int main (int argc, char *argv[])
 
             int nentries = 5;
             int nvalues  = 30; /* 6 grid points, each with 5 stencil entries */
-            double values[30];
-
-            double *d_values = NULL;
-#if defined(HYPRE_USING_CUDA)
-            cudaMalloc(&d_values, nvalues*sizeof(double));
-#endif
+            double *values = Malloc(double, 30);
 
             int stencil_indices[5];
             for (j = 0; j < nentries; j++) /* label the stencil indices -
@@ -201,18 +204,10 @@ int main (int argc, char *argv[])
                   values[i+j] = -1.0;
             }
 
-#if defined(HYPRE_USING_CUDA)
-            cudaMemcpy(d_values, values, nvalues*sizeof(double), cudaMemcpyHostToDevice);
-#else
-            d_values = values;
-#endif
-
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, nentries,
-                                           stencil_indices, d_values);
+                                           stencil_indices, values);
 
-#if defined(HYPRE_USING_CUDA)
-            cudaFree(d_values);
-#endif
+            Free(values);
          }
 
          /* Set the matrix coefficients for some set of stencil entries
@@ -223,12 +218,8 @@ int main (int argc, char *argv[])
 
             int nentries = 5;
             int nvalues  = 60; /* 12 grid points, each with 5 stencil entries */
-            double values[60];
+            double *values = Malloc(double, 60);
 
-            double *d_values = NULL;
-#if defined(HYPRE_USING_CUDA)
-            cudaMalloc(&d_values, nvalues*sizeof(double));
-#endif
             int stencil_indices[5];
             for (j = 0; j < nentries; j++)
                stencil_indices[j] = j;
@@ -240,18 +231,10 @@ int main (int argc, char *argv[])
                   values[i+j] = -1.0;
             }
 
-#if defined(HYPRE_USING_CUDA)
-            cudaMemcpy(d_values, values, nvalues*sizeof(double), cudaMemcpyHostToDevice);
-#else
-            d_values = values;
-#endif
-
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, nentries,
-                                           stencil_indices, d_values);
+                                           stencil_indices, values);
 
-#if defined(HYPRE_USING_CUDA)
-            cudaFree(d_values);
-#endif
+            Free(values);
          }
       }
       else if (myid == 1)
@@ -264,12 +247,8 @@ int main (int argc, char *argv[])
 
             int nentries = 5;
             int nvalues  = 80; /* 16 grid points, each with 5 stencil entries */
-            double values[80];
-            double *d_values = NULL;
+            double *values = Malloc(double, 80);
 
-#if defined(HYPRE_USING_CUDA)
-            cudaMalloc(&d_values, nvalues*sizeof(double));
-#endif
             int stencil_indices[5];
             for (j = 0; j < nentries; j++)
                stencil_indices[j] = j;
@@ -281,17 +260,10 @@ int main (int argc, char *argv[])
                   values[i+j] = -1.0;
             }
 
-#if defined(HYPRE_USING_CUDA)
-            cudaMemcpy(d_values, values, nvalues*sizeof(double), cudaMemcpyHostToDevice);
-#else
-            d_values = values;
-#endif
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, nentries,
-                                           stencil_indices, d_values);
+                                           stencil_indices, values);
 
-#if defined(HYPRE_USING_CUDA)
-            cudaFree(d_values);
-#endif
+            Free(values);
          }
       }
 
@@ -300,21 +272,10 @@ int main (int argc, char *argv[])
       if (myid == 0)
       {
          int maxnvalues = 6;
-         double values[6];
-
-         double *d_values = NULL;
-#if defined(HYPRE_USING_CUDA)
-         cudaMalloc(&d_values, maxnvalues*sizeof(double));
-#endif
+         double *values = Malloc(double, 6);
 
          for (i = 0; i < maxnvalues; i++)
             values[i] = 0.0;
-
-#if defined(HYPRE_USING_CUDA)
-         cudaMemset(d_values, 0, maxnvalues*sizeof(double));
-#else
-         d_values = values;
-#endif
 
          {
             /* Values below our first AND second box */
@@ -324,7 +285,7 @@ int main (int argc, char *argv[])
             int stencil_indices[1] = {3};
 
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, 1,
-                                           stencil_indices, d_values);
+                                           stencil_indices, values);
          }
 
          {
@@ -335,7 +296,7 @@ int main (int argc, char *argv[])
             int stencil_indices[1] = {1};
 
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, 1,
-                                           stencil_indices, d_values);
+                                           stencil_indices, values);
          }
 
          {
@@ -346,7 +307,7 @@ int main (int argc, char *argv[])
             int stencil_indices[1] = {4};
 
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, 1,
-                                           stencil_indices, d_values);
+                                           stencil_indices, values);
          }
 
          {
@@ -358,7 +319,7 @@ int main (int argc, char *argv[])
             int stencil_indices[1] = {1};
 
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, 1,
-                                           stencil_indices, d_values);
+                                           stencil_indices, values);
          }
 
          {
@@ -369,31 +330,19 @@ int main (int argc, char *argv[])
             int stencil_indices[1] = {4};
 
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, 1,
-                                           stencil_indices, d_values);
+                                           stencil_indices, values);
          }
 
-#if defined(HYPRE_USING_CUDA)
-         cudaFree(d_values);
-#endif
+         Free(values);
       }
       else if (myid == 1)
       {
          int maxnvalues = 4;
-         double values[4];
-
-         double *d_values = NULL;
-#if defined(HYPRE_USING_CUDA)
-         cudaMalloc(&d_values, maxnvalues*sizeof(double));
-#endif
+         double *values = Malloc(double, 4);
 
          for (i = 0; i < maxnvalues; i++)
             values[i] = 0.0;
 
-#if defined(HYPRE_USING_CUDA)
-         cudaMemset(d_values, 0, maxnvalues*sizeof(double));
-#else
-         d_values = values;
-#endif
          {
             /* Values below our box */
             int ilower[2] = { 3, 1};
@@ -402,7 +351,7 @@ int main (int argc, char *argv[])
             int stencil_indices[1] = {3};
 
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, 1,
-                                           stencil_indices, d_values);
+                                           stencil_indices, values);
          }
 
          {
@@ -413,7 +362,7 @@ int main (int argc, char *argv[])
             int stencil_indices[1] = {2};
 
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, 1,
-                                           stencil_indices, d_values);
+                                           stencil_indices, values);
          }
 
          {
@@ -424,12 +373,10 @@ int main (int argc, char *argv[])
             int stencil_indices[1] = {4};
 
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, 1,
-                                           stencil_indices, d_values);
+                                           stencil_indices, values);
          }
 
-#if defined(HYPRE_USING_CUDA)
-         cudaFree(d_values);
-#endif
+         Free(values);
       }
 
       /* This is a collective call finalizing the matrix assembly.
@@ -455,35 +402,17 @@ int main (int argc, char *argv[])
             int iupper[2] = {-1, 2};
 
             int nvalues = 6;  /* 6 grid points */
-            double values[6];
-
-            double *d_values = NULL;
-#if defined(HYPRE_USING_CUDA)
-            cudaMalloc(&d_values, nvalues*sizeof(double));
-#endif
+            double *values = Malloc(double, 6);
 
             for (i = 0; i < nvalues; i ++)
                values[i] = 1.0;
-
-#if defined(HYPRE_USING_CUDA)
-            cudaMemcpy(d_values, values, nvalues*sizeof(double), cudaMemcpyHostToDevice);
-#else
-            d_values = values;
-#endif
-            HYPRE_StructVectorSetBoxValues(b, ilower, iupper, d_values);
+            HYPRE_StructVectorSetBoxValues(b, ilower, iupper, values);
 
             for (i = 0; i < nvalues; i ++)
                values[i] = 0.0;
+            HYPRE_StructVectorSetBoxValues(x, ilower, iupper, values);
 
-#if defined(HYPRE_USING_CUDA)
-            cudaMemcpy(d_values, values, nvalues*sizeof(double), cudaMemcpyHostToDevice);
-#endif
-
-            HYPRE_StructVectorSetBoxValues(x, ilower, iupper, d_values);
-
-#if defined(HYPRE_USING_CUDA)
-            cudaFree(d_values);
-#endif
+            Free(values);
          }
 
          /* Set the vector coefficients over the gridpoints in my second box */
@@ -492,35 +421,17 @@ int main (int argc, char *argv[])
             int iupper[2] = { 2, 4};
 
             int nvalues = 12; /* 12 grid points */
-            double values[12];
-
-            double *d_values = NULL;
-#if defined(HYPRE_USING_CUDA)
-            cudaMalloc(&d_values, nvalues*sizeof(double));
-#endif
+            double *values = Malloc(double, 12);
 
             for (i = 0; i < nvalues; i ++)
                values[i] = 1.0;
-
-#if defined(HYPRE_USING_CUDA)
-            cudaMemcpy(d_values, values, nvalues*sizeof(double), cudaMemcpyHostToDevice);
-#else
-            d_values = values;
-#endif
-
-            HYPRE_StructVectorSetBoxValues(b, ilower, iupper, d_values);
+            HYPRE_StructVectorSetBoxValues(b, ilower, iupper, values);
 
             for (i = 0; i < nvalues; i ++)
                values[i] = 0.0;
+            HYPRE_StructVectorSetBoxValues(x, ilower, iupper, values);
 
-#if defined(HYPRE_USING_CUDA)
-            cudaMemcpy(d_values, values, nvalues*sizeof(double), cudaMemcpyHostToDevice);
-#endif
-            HYPRE_StructVectorSetBoxValues(x, ilower, iupper, d_values);
-
-#if defined(HYPRE_USING_CUDA)
-            cudaFree(d_values);
-#endif
+            Free(values);
          }
       }
       else if (myid == 1)
@@ -531,36 +442,17 @@ int main (int argc, char *argv[])
             int iupper[2] = { 6, 4};
 
             int nvalues = 16; /* 16 grid points */
-            double values[16];
-
-            double *d_values = NULL;
-#if defined(HYPRE_USING_CUDA)
-            cudaMalloc(&d_values, nvalues*sizeof(double));
-#endif
+            double *values = Malloc(double, 16);
 
             for (i = 0; i < nvalues; i ++)
                values[i] = 1.0;
-
-#if defined(HYPRE_USING_CUDA)
-            cudaMemcpy(d_values, values, nvalues*sizeof(double), cudaMemcpyHostToDevice);
-#else
-            d_values = values;
-#endif
-
-            HYPRE_StructVectorSetBoxValues(b, ilower, iupper, d_values);
+            HYPRE_StructVectorSetBoxValues(b, ilower, iupper, values);
 
             for (i = 0; i < nvalues; i ++)
                values[i] = 0.0;
+            HYPRE_StructVectorSetBoxValues(x, ilower, iupper, values);
 
-#if defined(HYPRE_USING_CUDA)
-            cudaMemcpy(d_values, values, nvalues*sizeof(double), cudaMemcpyHostToDevice);
-#endif
-
-            HYPRE_StructVectorSetBoxValues(x, ilower, iupper, d_values);
-
-#if defined(HYPRE_USING_CUDA)
-            cudaFree(d_values);
-#endif
+            Free(values);
          }
       }
 
