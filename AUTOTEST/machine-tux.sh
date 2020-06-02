@@ -50,6 +50,8 @@ mv -f check-int.??? $output_dir
 mv -f check-double.??? $output_dir
 ./test.sh check-mpi.sh $src_dir
 mv -f check-mpi.??? $output_dir
+./test.sh check-headers.sh $src_dir
+mv -f check-headers.??? $output_dir
 
 # Basic build and run tests
 mo="-j test"
