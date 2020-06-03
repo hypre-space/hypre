@@ -2118,17 +2118,24 @@ HYPRE_Int UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid
       HYPRE_Int *recv_map_send_buffer_size, HYPRE_Int current_level, HYPRE_Int num_levels,
       HYPRE_Int *nodes_added_on_level, HYPRE_Int buffer_number, HYPRE_Int *num_resizes, 
       HYPRE_Int symmetric );
+HYPRE_Int MarkCoarseCPU(HYPRE_Int *list,
+           HYPRE_Int *marker,
+           HYPRE_Int *owned_coarse_indices,
+           HYPRE_Int *nonowned_coarse_indices,
+           HYPRE_Int *sort_map,
+           HYPRE_Int num_owned,
+           HYPRE_Int total_num_nodes,
+           HYPRE_Int num_owned_coarse,
+           HYPRE_Int list_size,
+           HYPRE_Int dist,
+           HYPRE_Int use_sort,
+           HYPRE_Int *nodes_to_add);
+HYPRE_Int RecursivelyBuildPsiCompositeNew(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *compGrid, HYPRE_Int *add_flag, HYPRE_Int use_sort);
 HYPRE_Int RecursivelyBuildPsiComposite(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid **compGrids, HYPRE_Int **add_flags,
                            HYPRE_Int need_coarse_info, HYPRE_Int *nodes_to_add, HYPRE_Int padding, HYPRE_Int level, HYPRE_Int use_sort);
-/* #if defined(HYPRE_USING_GPU) */
-HYPRE_Int* PackSendBufferGPU(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int *buffer_size, HYPRE_Int *send_flag_buffer_size, 
-   HYPRE_Int ****send_flag, HYPRE_Int ***num_send_nodes, HYPRE_Int proc, HYPRE_Int current_level, HYPRE_Int num_levels, HYPRE_Int *padding, 
-   HYPRE_Int num_ghost_layers, HYPRE_Int symmetric );
-/* #else */
 HYPRE_Int* PackSendBuffer(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int *buffer_size, HYPRE_Int *send_flag_buffer_size, 
    HYPRE_Int ****send_flag, HYPRE_Int ***num_send_nodes, HYPRE_Int proc, HYPRE_Int current_level, HYPRE_Int num_levels, HYPRE_Int *padding, 
    HYPRE_Int num_ghost_layers, HYPRE_Int symmetric );
-/* #endif */
 
 /* par_amgdd_fac_cycle.c */
 HYPRE_Int hypre_BoomerAMGDDTestSolve( void *amg_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u);
@@ -2215,7 +2222,6 @@ HYPRE_Int hypre_BoomerAMGDDSetFACRelax(HYPRE_Solver amg_solver, HYPRE_Int (*user
 HYPRE_Int hypre_ParCompGridFinalize( hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int start_level, HYPRE_Int num_levels, HYPRE_Int use_rd, HYPRE_Int debug );
 HYPRE_Int hypre_ParCompGridSetupRealDofMarker( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int num_ghost_layers );
 HYPRE_Int hypre_ParCompGridResize( hypre_ParCompGrid *compGrid, HYPRE_Int new_size, HYPRE_Int need_coarse_info );
-HYPRE_Int hypre_ParCompGridSetupLocalIndicesGPU( hypre_ParCompGrid **compGrid, HYPRE_Int *num_added_nodes, HYPRE_Int ****recv_map, HYPRE_Int num_recv_procs, HYPRE_Int **A_tmp_info, HYPRE_Int start_level, HYPRE_Int num_levels, HYPRE_Int symmetric );
 HYPRE_Int hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *num_added_nodes, HYPRE_Int ****recv_map, HYPRE_Int num_recv_procs, HYPRE_Int **A_tmp_info, HYPRE_Int start_level, HYPRE_Int num_levels, HYPRE_Int symmetric );
 HYPRE_Int hypre_ParCompGridSetupLocalIndicesP( hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, HYPRE_Int start_level, HYPRE_Int num_levels );
 HYPRE_Int hypre_ParCompGridDebugPrint( hypre_ParCompGrid *compGrid, const char* filename );
