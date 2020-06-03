@@ -274,6 +274,26 @@ hypre_int hypre_cuda_get_grid_warp_id()
           hypre_cuda_get_warp_id<bdim>();
 }
 
+#if defined(__CUDA_ARCH__) && __CUDA_ARCH__ < 600
+static __device__ __forceinline__
+hypre_double atomicAdd(hypre_double* address, hypre_double val)
+{
+    hypre_ulonglongint* address_as_ull = (hypre_ulonglongint*) address;
+    hypre_ulonglongint old = *address_as_ull, assumed;
+
+    do {
+        assumed = old;
+        old = atomicCAS(address_as_ull, assumed,
+                        __double_as_longlong(val +
+                               __longlong_as_double(assumed)));
+
+    // Note: uses integer comparison to avoid hang in case of NaN (since NaN != NaN)
+    } while (assumed != old);
+
+    return __longlong_as_double(old);
+}
+#endif
+
 #if CUDA_VERSION < 9000
 
 template <typename T>
