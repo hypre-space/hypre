@@ -21,13 +21,13 @@ FILES="\
  ${TNAME}.out.7\
  ${TNAME}.out.8\
  ${TNAME}.out.9\
- ${TNAME}.out.11\
  ${TNAME}.out.12\
  ${TNAME}.out.12f\
  ${TNAME}.out.13\
  ${TNAME}.out.14\
  ${TNAME}.out.15\
 "
+# ${TNAME}.out.11\
 
 # Need to avoid output lines about "no global partition"
 for i in $FILES

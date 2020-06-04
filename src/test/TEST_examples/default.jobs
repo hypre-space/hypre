@@ -28,7 +28,7 @@ mpirun -np 2 ./ex8 > default.out.8
 
 mpirun -np 16 ./ex9 -n 33 -solver 0 -v 1 1 > default.out.9
 
-mpirun -np 4 ./ex11 > default.out.11
+# mpirun -np 4 ./ex11 > default.out.11
 
 mpirun -np 2 ./ex12 -pfmg > default.out.12
 

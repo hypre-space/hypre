@@ -46,8 +46,10 @@
                    chapter of the User's Manual.
 */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <math.h>
-#include "_hypre_utilities.h"
 #include "HYPRE_krylov.h"
 #include "HYPRE_sstruct_ls.h"
 
@@ -57,7 +59,9 @@
   #define PI 3.14159265358979
 #endif
 
+#ifdef HYPRE_EXVIS
 #include "vis.c"
+#endif
 
 /* Macro to evaluate a function F in the grid point (i,j) */
 #define Eval(F,i,j) (F( (ilower[0]+(i))*h, (ilower[1]+(j))*h ))
@@ -196,7 +200,8 @@ int main (int argc, char *argv[])
    int solver_id;
    int n_pre, n_post;
    int rap, relax, skip, sym;
-   int time_index;
+   double mytime = 0.0;
+   double walltime = 0.0;
 
    int object_type;
 
@@ -893,8 +898,7 @@ int main (int argc, char *argv[])
       if (solver_id == 0) /* SMG */
       {
          /* Start timing */
-         time_index = hypre_InitializeTiming("SMG Setup");
-         hypre_BeginTiming(time_index);
+         mytime -= MPI_Wtime();
 
          /* Options and setup */
          HYPRE_StructSMGCreate(MPI_COMM_WORLD, &solver);
@@ -909,23 +913,26 @@ int main (int argc, char *argv[])
          HYPRE_StructSMGSetup(solver, sA, sb, sx);
 
          /* Finalize current timing */
-         hypre_EndTiming(time_index);
-         hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
-         hypre_FinalizeTiming(time_index);
-         hypre_ClearTiming();
+         mytime += MPI_Wtime();
+         MPI_Allreduce(&mytime, &walltime, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+         if (myid == 0)
+         {
+            printf("\nSMG Setup time = %f seconds\n\n", walltime);
+         }
 
          /* Start timing again */
-         time_index = hypre_InitializeTiming("SMG Solve");
-         hypre_BeginTiming(time_index);
+         mytime -= MPI_Wtime();
 
          /* Solve */
          HYPRE_StructSMGSolve(solver, sA, sb, sx);
-         hypre_EndTiming(time_index);
-         /* Finalize current timing */
 
-         hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
-         hypre_FinalizeTiming(time_index);
-         hypre_ClearTiming();
+         /* Finalize current timing */
+         mytime += MPI_Wtime();
+         MPI_Allreduce(&mytime, &walltime, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+         if (myid == 0)
+         {
+            printf("\nSMG Solve time = %f seconds\n\n", walltime);
+         }
 
          /* Get info and release memory */
          HYPRE_StructSMGGetNumIterations(solver, &num_iterations);
@@ -936,8 +943,7 @@ int main (int argc, char *argv[])
       if (solver_id == 1) /* PFMG */
       {
          /* Start timing */
-         time_index = hypre_InitializeTiming("PFMG Setup");
-         hypre_BeginTiming(time_index);
+         mytime -= MPI_Wtime();
 
          /* Options and setup */
          HYPRE_StructPFMGCreate(MPI_COMM_WORLD, &solver);
@@ -954,23 +960,26 @@ int main (int argc, char *argv[])
          HYPRE_StructPFMGSetup(solver, sA, sb, sx);
 
          /* Finalize current timing */
-         hypre_EndTiming(time_index);
-         hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
-         hypre_FinalizeTiming(time_index);
-         hypre_ClearTiming();
+         mytime += MPI_Wtime();
+         MPI_Allreduce(&mytime, &walltime, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+         if (myid == 0)
+         {
+            printf("\nPFMG Setup time = %f seconds\n\n", walltime);
+         }
 
          /* Start timing again */
-         time_index = hypre_InitializeTiming("PFMG Solve");
-         hypre_BeginTiming(time_index);
+         mytime -= MPI_Wtime();
 
          /* Solve */
          HYPRE_StructPFMGSolve(solver, sA, sb, sx);
 
          /* Finalize current timing */
-         hypre_EndTiming(time_index);
-         hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
-         hypre_FinalizeTiming(time_index);
-         hypre_ClearTiming();
+         mytime += MPI_Wtime();
+         MPI_Allreduce(&mytime, &walltime, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+         if (myid == 0)
+         {
+            printf("\nPFMG Solve time = %f seconds\n\n", walltime);
+         }
 
          /* Get info and release memory */
          HYPRE_StructPFMGGetNumIterations(solver, &num_iterations);
@@ -981,8 +990,7 @@ int main (int argc, char *argv[])
       /* Preconditioned CG */
       if ((solver_id > 9) && (solver_id < 20))
       {
-         time_index = hypre_InitializeTiming("PCG Setup");
-         hypre_BeginTiming(time_index);
+         mytime -= MPI_Wtime();
 
          HYPRE_StructPCGCreate(MPI_COMM_WORLD, &solver);
          HYPRE_StructPCGSetMaxIter(solver, 200 );
@@ -1055,21 +1063,24 @@ int main (int argc, char *argv[])
          /* PCG Setup */
          HYPRE_StructPCGSetup(solver, sA, sb, sx );
 
-         hypre_EndTiming(time_index);
-         hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
-         hypre_FinalizeTiming(time_index);
-         hypre_ClearTiming();
+         mytime += MPI_Wtime();
+         MPI_Allreduce(&mytime, &walltime, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+         if (myid == 0)
+         {
+            printf("\nPCG Setup time = %f seconds\n\n", walltime);
+         }
 
-         time_index = hypre_InitializeTiming("PCG Solve");
-         hypre_BeginTiming(time_index);
+         mytime -= MPI_Wtime();
 
          /* PCG Solve */
          HYPRE_StructPCGSolve(solver, sA, sb, sx);
 
-         hypre_EndTiming(time_index);
-         hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
-         hypre_FinalizeTiming(time_index);
-         hypre_ClearTiming();
+         mytime += MPI_Wtime();
+         MPI_Allreduce(&mytime, &walltime, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+         if (myid == 0)
+         {
+            printf("\nPCG Solve time = %f seconds\n\n", walltime);
+         }
 
          /* Get info and release memory */
          HYPRE_StructPCGGetNumIterations( solver, &num_iterations );
@@ -1093,8 +1104,7 @@ int main (int argc, char *argv[])
       /* Preconditioned GMRES */
       if ((solver_id > 29) && (solver_id < 40))
       {
-         time_index = hypre_InitializeTiming("GMRES Setup");
-         hypre_BeginTiming(time_index);
+         mytime -= MPI_Wtime();
 
          HYPRE_StructGMRESCreate(MPI_COMM_WORLD, &solver);
 
@@ -1176,21 +1186,24 @@ int main (int argc, char *argv[])
          /* GMRES Setup */
          HYPRE_StructGMRESSetup(solver, sA, sb, sx );
 
-         hypre_EndTiming(time_index);
-         hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
-         hypre_FinalizeTiming(time_index);
-         hypre_ClearTiming();
+         mytime += MPI_Wtime();
+         MPI_Allreduce(&mytime, &walltime, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+         if (myid == 0)
+         {
+            printf("\nGMRES Setup time = %f seconds\n\n", walltime);
+         }
 
-         time_index = hypre_InitializeTiming("GMRES Solve");
-         hypre_BeginTiming(time_index);
+         mytime -= MPI_Wtime();
 
          /* GMRES Solve */
          HYPRE_StructGMRESSolve(solver, sA, sb, sx);
 
-         hypre_EndTiming(time_index);
-         hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
-         hypre_FinalizeTiming(time_index);
-         hypre_ClearTiming();
+         mytime += MPI_Wtime();
+         MPI_Allreduce(&mytime, &walltime, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+         if (myid == 0)
+         {
+            printf("\nGMRES Solve time = %f seconds\n\n", walltime);
+         }
 
          /* Get info and release memory */
          HYPRE_StructGMRESGetNumIterations(solver, &num_iterations);
@@ -1216,6 +1229,7 @@ int main (int argc, char *argv[])
    /* Save the solution for GLVis visualization, see vis/glvis-ex7.sh */
    if (vis)
    {
+#ifdef HYPRE_EXVIS
       FILE *file;
       char filename[255];
 
@@ -1248,6 +1262,7 @@ int main (int argc, char *argv[])
       /* save global finite element mesh */
       if (myid == 0)
          GLVis_PrintGlobalSquareMesh("vis/ex7.mesh", N*n-1);
+#endif
    }
 
    if (myid == 0)

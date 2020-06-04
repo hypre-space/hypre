@@ -43,15 +43,19 @@
                    example.
 */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <math.h>
-#include "_hypre_utilities.h"
 #include "HYPRE_struct_ls.h"
 
+#ifdef HYPRE_EXVIS
 #include "vis.c"
+#endif
 
 int main (int argc, char *argv[])
 {
-   int i, j, k;
+   int i, j;
 
    int myid, num_procs;
 
@@ -407,10 +411,11 @@ int main (int argc, char *argv[])
    /* Save the solution for GLVis visualization, see vis/glvis-ex3.sh */
    if (vis)
    {
+#ifdef HYPRE_EXVIS
       FILE *file;
       char filename[255];
 
-      int nvalues = n*n;
+      int k, nvalues = n*n;
       double *values = (double*) calloc(nvalues, sizeof(double));
 
       /* get the local solution */
@@ -437,6 +442,7 @@ int main (int argc, char *argv[])
       /* save global finite element mesh */
       if (myid == 0)
          GLVis_PrintGlobalSquareMesh("vis/ex3.mesh", N*n-1);
+#endif
    }
 
    if (myid == 0)

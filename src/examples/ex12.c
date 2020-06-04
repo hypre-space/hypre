@@ -35,7 +35,9 @@
 #include "HYPRE_parcsr_ls.h"
 #include "HYPRE_krylov.h"
 
+#ifdef HYPRE_EXVIS
 #include "vis.c"
+#endif
 
 int main (int argc, char *argv[])
 {
@@ -476,12 +478,14 @@ int main (int argc, char *argv[])
    /* Save the solution for GLVis visualization, see vis/glvis-ex12.sh */
    if (vis)
    {
+#ifdef HYPRE_EXVIS
       /* Gather the solution vector */
       HYPRE_SStructVectorGather(x);
 
       GLVis_PrintSStructGrid(grid, "vis/ex12.mesh", myid, NULL, NULL);
       GLVis_PrintSStructVector(x, 0, "vis/ex12.sol", myid);
       GLVis_PrintData("vis/ex12.data", myid, num_procs);
+#endif
    }
 
    /* Free memory */
