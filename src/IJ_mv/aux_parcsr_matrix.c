@@ -206,3 +206,12 @@ hypre_AuxParCSRMatrixInitialize_v2( hypre_AuxParCSRMatrix *matrix, HYPRE_MemoryL
    return 0;
 }
 
+HYPRE_Int
+hypre_AuxParCSRMatrixInitialize(hypre_AuxParCSRMatrix *matrix)
+{
+   if (matrix)
+   {
+      hypre_AuxParCSRMatrixInitialize_v2(matrix, hypre_AuxParCSRMatrixMemoryLocation(matrix));
+   }
+}
+
