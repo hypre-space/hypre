@@ -211,7 +211,9 @@ hypre_AuxParCSRMatrixInitialize(hypre_AuxParCSRMatrix *matrix)
 {
    if (matrix)
    {
-      hypre_AuxParCSRMatrixInitialize_v2(matrix, hypre_AuxParCSRMatrixMemoryLocation(matrix));
+      return hypre_AuxParCSRMatrixInitialize_v2(matrix, hypre_AuxParCSRMatrixMemoryLocation(matrix));
    }
+
+   return -2;
 }
 
