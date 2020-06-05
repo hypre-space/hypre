@@ -7,6 +7,19 @@
 # This file chronicles user-level changes, beginning with the most recent.
 # =============================================================================
 
+Version 2.19.0 released 2020/05/26
+
+- Updated to soupport superlu-dist version to 6.3.1
+- Moved reference manual API to online documentation
+- New AMG features to keep specified F-points and/or C-points.
+- Added GPU support for AMG setup and several interpolation approaches.
+- New parallel ILU solvers and smoothers.
+- New MGR features.
+- Added several interpolation routines based on matrix-matrix interpolations.
+- Various bug fixes.
+
+#====================================
+
 Version 2.18.2 released 2019/10/28
 
 - Fixed mixedint bugs.

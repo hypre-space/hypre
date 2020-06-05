@@ -90,6 +90,12 @@ HYPRE_Int HYPRE_IJMatrixDestroy(HYPRE_IJMatrix matrix);
  **/
 HYPRE_Int HYPRE_IJMatrixInitialize(HYPRE_IJMatrix matrix);
 
+/**
+ * Prepare a matrix object for setting coefficient values.  This
+ * routine will also re-initialize an already assembled matrix,
+ * allowing users to modify coefficient values. This routine
+ * also specifies the memory location, i.e. host or device.
+ **/
 HYPRE_Int HYPRE_IJMatrixInitialize_v2(HYPRE_IJMatrix matrix, HYPRE_MemoryLocation memory_location);
 
 /**
@@ -382,6 +388,12 @@ HYPRE_Int HYPRE_IJVectorDestroy(HYPRE_IJVector vector);
  **/
 HYPRE_Int HYPRE_IJVectorInitialize(HYPRE_IJVector vector);
 
+/**
+ * Prepare a vector object for setting coefficient values.  This
+ * routine will also re-initialize an already assembled vector,
+ * allowing users to modify coefficient values. This routine
+ * also specifies the memory location, i.e. host or device.
+ **/
 HYPRE_Int HYPRE_IJVectorInitialize_v2( HYPRE_IJVector vector, HYPRE_MemoryLocation memory_location );
 
 /**

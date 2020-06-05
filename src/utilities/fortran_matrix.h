@@ -8,13 +8,13 @@
 #ifndef FORTRAN_STYLE_MATRIX
 #define FORTRAN_STYLE_MATRIX
 
-#include "_hypre_utilities.h"
+#include "HYPRE_utilities.h"
 
 typedef struct
 {
-  hypre_longint	globalHeight;
-  hypre_longint	height;
-  hypre_longint	width;
+  HYPRE_BigInt	globalHeight;
+  HYPRE_BigInt	height;
+  HYPRE_BigInt	width;
   HYPRE_Real* value;
   HYPRE_Int		ownsValues;
 } utilities_FortranMatrix;
@@ -26,19 +26,19 @@ extern "C" {
 utilities_FortranMatrix* 
 utilities_FortranMatrixCreate(void);
 void 
-utilities_FortranMatrixAllocateData( hypre_longint h, hypre_longint w, 
+utilities_FortranMatrixAllocateData( HYPRE_BigInt h, HYPRE_BigInt w, 
 				     utilities_FortranMatrix* mtx );
 void 
-utilities_FortranMatrixWrap( HYPRE_Real*, hypre_longint gh, hypre_longint h, hypre_longint w, 
+utilities_FortranMatrixWrap( HYPRE_Real*, HYPRE_BigInt gh, HYPRE_BigInt h, HYPRE_BigInt w, 
 			     utilities_FortranMatrix* mtx );
 void 
 utilities_FortranMatrixDestroy( utilities_FortranMatrix* mtx );
 
-hypre_longint
+HYPRE_BigInt
 utilities_FortranMatrixGlobalHeight( utilities_FortranMatrix* mtx );
-hypre_longint
+HYPRE_BigInt
 utilities_FortranMatrixHeight( utilities_FortranMatrix* mtx );
-hypre_longint
+HYPRE_BigInt
 utilities_FortranMatrixWidth( utilities_FortranMatrix* mtx );
 HYPRE_Real*
 utilities_FortranMatrixValues( utilities_FortranMatrix* mtx );
@@ -89,17 +89,17 @@ utilities_FortranMatrixFNorm( utilities_FortranMatrix* mtx );
 
 HYPRE_Real 
 utilities_FortranMatrixValue( utilities_FortranMatrix* mtx, 
-			      hypre_longint i, hypre_longint j );
+			      HYPRE_BigInt i, HYPRE_BigInt j );
 HYPRE_Real* 
 utilities_FortranMatrixValuePtr( utilities_FortranMatrix* mtx, 
-				 hypre_longint i, hypre_longint j );
+				 HYPRE_BigInt i, HYPRE_BigInt j );
 HYPRE_Real 
 utilities_FortranMatrixMaxValue( utilities_FortranMatrix* mtx );
 
 void 
 utilities_FortranMatrixSelectBlock( utilities_FortranMatrix* mtx,
-				    hypre_longint iFrom, hypre_longint iTo, 
-				    hypre_longint jFrom, hypre_longint jTo,
+				    HYPRE_BigInt iFrom, HYPRE_BigInt iTo, 
+				    HYPRE_BigInt jFrom, HYPRE_BigInt jTo,
 				    utilities_FortranMatrix* block );
 void 
 utilities_FortranMatrixUpperInv( utilities_FortranMatrix* u );

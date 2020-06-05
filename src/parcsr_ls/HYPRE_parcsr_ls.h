@@ -415,14 +415,14 @@ HYPRE_Int HYPRE_BoomerAMGSetNodalDiag(HYPRE_Solver solver,
  * (Optional) Defines which parallel interpolation operator is used.
  * There are the following options for \e interp_type:
  *
- *    - 0  : classical modified interpolation
- *    - 1  : LS interpolation (for use with GSMG)
+ *    - 0  : classical modified interpolation 
+ *    - 1  : LS interpolation (for use with GSMG) 
  *    - 2  : classical modified interpolation for hyperbolic PDEs
- *    - 3  : direct interpolation (with separation of weights)
+ *    - 3  : direct interpolation (with separation of weights) (also for GPU use)
  *    - 4  : multipass interpolation
  *    - 5  : multipass interpolation (with separation of weights)
- *    - 6  : extended+i interpolation
- *    - 7  : extended+i (if no common C neighbor) interpolation
+ *    - 6  : extended+i interpolation (also for GPU use)
+ *    - 7  : extended+i (if no common C neighbor) interpolation 
  *    - 8  : standard interpolation
  *    - 9  : standard interpolation (with separation of weights)
  *    - 10 : classical block interpolation (for use with nodal systems version only)
@@ -430,7 +430,10 @@ HYPRE_Int HYPRE_BoomerAMGSetNodalDiag(HYPRE_Solver solver,
  *           with diagonalized diagonal blocks
  *    - 12 : FF interpolation
  *    - 13 : FF1 interpolation
- *    - 14 : extended interpolation
+ *    - 14 : extended interpolation (also for GPU use)
+ *    - 15 : interpolation with adaptive weights (GPU use only)
+ *    - 16 : extended interpolation in matrix-matrix form
+ *    - 17 : extended+i interpolation in matrix-matrix form
  *
  * The default is ext+i interpolation (interp_type 6) trunctated to at most 4
  * elements per row. (see HYPRE_BoomerAMGSetPMaxElmts).
@@ -469,6 +472,8 @@ HYPRE_Int HYPRE_BoomerAMGSetSepWeight(HYPRE_Solver solver,
  *    - 2 : 2-stage standard interpolation
  *    - 3 : 2-stage extended interpolation
  *    - 4 : multipass interpolation
+ *    - 5 : 2-stage extended interpolation in matrix-matrix form
+ *    - 6 : 2-stage extended+i interpolation in matrix-matrix form
  **/
 HYPRE_Int HYPRE_BoomerAMGSetAggInterpType(HYPRE_Solver solver,
                                           HYPRE_Int    agg_interp_type);
@@ -1138,7 +1143,8 @@ HYPRE_Int HYPRE_BoomerAMGInitGridRelaxation(HYPRE_Int    **num_grid_sweeps_ptr,
 
 /**
  * (Optional) If rap2 not equal 0, the triple matrix product RAP is
- * replaced by two matrix products.
+ * replaced by two matrix products. 
+ * (Required for triple matrix product generation on GPUs)
  **/
 HYPRE_Int HYPRE_BoomerAMGSetRAP2(HYPRE_Solver solver,
                                  HYPRE_Int    rap2);
@@ -1146,6 +1152,7 @@ HYPRE_Int HYPRE_BoomerAMGSetRAP2(HYPRE_Solver solver,
 /**
  * (Optional) If mod_rap2 not equal 0, the triple matrix product RAP is
  * replaced by two matrix products with modularized kernels
+ * (Required for triple matrix product generation on GPUs)
  **/
 HYPRE_Int HYPRE_BoomerAMGSetModuleRAP2(HYPRE_Solver solver,
                                        HYPRE_Int    mod_rap2);
@@ -1153,6 +1160,7 @@ HYPRE_Int HYPRE_BoomerAMGSetModuleRAP2(HYPRE_Solver solver,
 /**
  * (Optional) If set to 1, the local interpolation transposes will
  * be saved to use more efficient matvecs instead of matvecTs
+ * (Recommended for efficient use on GPUs)
  **/
 HYPRE_Int HYPRE_BoomerAMGSetKeepTranspose(HYPRE_Solver solver,
                                       HYPRE_Int    keepTranspose);
