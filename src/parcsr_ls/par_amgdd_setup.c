@@ -17,7 +17,7 @@
 #include "par_amg.h"
 #include "par_csr_block_matrix.h"
 
-#define DEBUG_COMP_GRID 1 // if true, runs some tests, prints out what is stored in the comp grids for each processor to a file
+#define DEBUG_COMP_GRID 0 // if true, runs some tests, prints out what is stored in the comp grids for each processor to a file
 #define DEBUG_PROC_NEIGHBORS 0 // if true, dumps info on the add flag structures that determine nearest processor neighbors 
 #define DEBUGGING_MESSAGES 0 // if true, prints a bunch of messages to the screen to let you know where in the algorithm you are
 
@@ -105,6 +105,9 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    hypre_MPI_Request       *requests;
    hypre_MPI_Status        *status;
    HYPRE_Int               request_counter = 0;
+
+   // !!! Timings
+   HYPRE_Real total_timings[10];
 
    // get info from amg about how to setup amgdd
    HYPRE_Int num_levels = hypre_ParAMGDataNumLevels(amg_data);
@@ -268,7 +271,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
          {
             send_buffer[i] = PackSendBuffer(amg_data, compGrid, compGridCommPkg, &(send_buffer_size[level][i]), 
                                              &(send_flag_buffer_size[i]), send_flag, num_send_nodes, i, level, num_levels, padding, 
-                                             num_ghost_layers, symmetric );
+                                             num_ghost_layers, symmetric, total_timings );
          }
          if (timers) hypre_EndTiming(timers[2]);
 
@@ -604,6 +607,21 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
       HYPRE_Int global_size_info[2];
       MPI_Reduce(local_size_info, global_size_info, 2, HYPRE_MPI_INT, MPI_SUM, 0, hypre_MPI_COMM_WORLD);
       if (myid == 0) printf("Total Setup Redundancy = %f\n", ((double) global_size_info[1] + global_size_info[0])/((double) global_size_info[0]));
+   }
+
+   // !!! Timings
+   HYPRE_Real global_total_timings[10];
+   MPI_Reduce(total_timings, global_total_timings, 6, HYPRE_MPI_REAL, MPI_SUM, 0, hypre_MPI_COMM_WORLD);
+   if (myid == 0)
+   {
+      printf("Pack Send Buffer Times: \n");
+      printf("   Total: %e\n", global_total_timings[0]/num_procs);
+      printf("   Expand: %e\n", global_total_timings[1]/num_procs);
+      printf("   Add to send flag: %e\n", global_total_timings[2]/num_procs);
+      printf("   Remove Redundancy: %e\n", global_total_timings[3]/num_procs);
+      printf("   Mark Coarse: %e\n", global_total_timings[4]/num_procs);
+      printf("   Adjust add flag: %e\n", global_total_timings[5]/num_procs);
+      printf("\n");
    }
 
 

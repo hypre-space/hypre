@@ -46,7 +46,7 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_ParCompGrid **compGrid,
 
 HYPRE_Int* PackSendBuffer(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int *buffer_size, HYPRE_Int *send_flag_buffer_size, 
    HYPRE_Int ****send_flag, HYPRE_Int ***num_send_nodes, HYPRE_Int proc, HYPRE_Int current_level, HYPRE_Int num_levels, HYPRE_Int *padding, 
-   HYPRE_Int num_ghost_layers, HYPRE_Int symmetric );
+   HYPRE_Int num_ghost_layers, HYPRE_Int symmetric, HYPRE_Real *total_timings );
 
 HYPRE_Int LocalToGlobalIndex(hypre_ParCompGrid *compGrid, HYPRE_Int local_index);
 
@@ -2200,7 +2200,7 @@ HYPRE_Int RemoveRedundancyCPU(hypre_ParAMGData* amg_data,
 HYPRE_Int*
 PackSendBuffer(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int *buffer_size, 
    HYPRE_Int *send_flag_buffer_size, HYPRE_Int ****send_flag, HYPRE_Int ***num_send_nodes,
-   HYPRE_Int proc, HYPRE_Int current_level, HYPRE_Int num_levels, HYPRE_Int *padding, HYPRE_Int num_ghost_layers, HYPRE_Int symmetric )
+   HYPRE_Int proc, HYPRE_Int current_level, HYPRE_Int num_levels, HYPRE_Int *padding, HYPRE_Int num_ghost_layers, HYPRE_Int symmetric, HYPRE_Real *total_timings )
 {
    // send_buffer = [ num_psi_levels , [level] , [level] , ... ]
    // level = [ num send nodes, [global indices] , [coarse global indices] , [A row sizes] , [A col ind: either global indices or local col indices within buffer] ]
@@ -2236,6 +2236,9 @@ PackSendBuffer(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypre_P
    if (current_level != num_levels-1) (*buffer_size) += 3*num_send_nodes[current_level][proc][current_level];
    else (*buffer_size) += 2*num_send_nodes[current_level][proc][current_level];
    
+   // !!! Timing
+   auto inner_start = chrono::system_clock::now();
+
    for (i = 0; i < num_send_nodes[current_level][proc][current_level]; i++)
    {
       send_elmt = send_flag[current_level][proc][current_level][i];
@@ -2247,6 +2250,11 @@ PackSendBuffer(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypre_P
       (*buffer_size) += hypre_CSRMatrixI(diag)[send_elmt+1] - hypre_CSRMatrixI(diag)[send_elmt];
       (*buffer_size) += hypre_CSRMatrixI(offd)[send_elmt+1] - hypre_CSRMatrixI(offd)[send_elmt];
    }
+
+   // !!! Timing
+   auto inner_end = chrono::system_clock::now();
+   timings[5] += inner_end - inner_start;
+   inner_start = chrono::system_clock::now();
 
    // Add the nodes listed by the coarse grid counterparts if applicable
    // Note that the compGridCommPkg is set up to list all nodes within the padding plus ghost layers
@@ -2286,6 +2294,10 @@ PackSendBuffer(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypre_P
       }
    }
 
+   // !!! Timing
+   inner_end = chrono::system_clock::now();
+   timings[4] += inner_end - inner_start;
+
 
    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
    // Now build out the psi_c composite grid (along with required ghost nodes) on coarser levels
@@ -2305,7 +2317,7 @@ PackSendBuffer(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypre_P
          if (level != num_levels-1) add_flag[level+1] = hypre_CTAlloc( HYPRE_Int, hypre_ParCompGridNumOwnedNodes(compGrid[level+1]) + hypre_ParCompGridNumNonOwnedNodes(compGrid[level+1]), HYPRE_MEMORY_SHARED );
 
          // !!! Timing
-         auto inner_start = chrono::system_clock::now();
+         inner_start = chrono::system_clock::now();
          
          // Expand by the padding on this level and add coarse grid counterparts if applicable
 #if defined(HYPRE_USING_GPU)
@@ -2351,8 +2363,9 @@ PackSendBuffer(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypre_P
          }
 
          // !!! Timing
-         auto inner_end = chrono::system_clock::now();
+         inner_end = chrono::system_clock::now();
          timings[1] += inner_end - inner_start;
+         inner_start = chrono::system_clock::now();
          
 #if defined(HYPRE_USING_GPU)
          if (level < level_switch_to_cpu)
@@ -2368,6 +2381,11 @@ PackSendBuffer(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypre_P
                            add_flag[level],
                            &(num_send_nodes[current_level][proc][level]), num_ghost_layers);
          }
+
+         // !!! Timing
+         inner_end = chrono::system_clock::now();
+         timings[2] += inner_end - inner_start;
+         inner_start = chrono::system_clock::now();
 
          // Compare with previous send/recvs to eliminate redundant info
 #if defined(HYPRE_USING_GPU)
@@ -2396,6 +2414,11 @@ PackSendBuffer(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypre_P
                            proc,
                            level);
          }
+
+         // !!! Timing
+         inner_end = chrono::system_clock::now();
+         timings[3] += inner_end - inner_start;
+         inner_start = chrono::system_clock::now();
          
          // Mark the points to start from on the next level
          if (level != num_levels-1)
@@ -2433,6 +2456,11 @@ PackSendBuffer(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypre_P
             }
          }
 
+         // !!! Timing
+         inner_end = chrono::system_clock::now();
+         timings[4] += inner_end - inner_start;
+         inner_start = chrono::system_clock::now();
+
          // Count up the buffer sizes and adjust the add_flag 
          memset(add_flag[level], 0, sizeof(HYPRE_Int)*(hypre_ParCompGridNumOwnedNodes(compGrid[level]) + hypre_ParCompGridNumNonOwnedNodes(compGrid[level])) );
          (*send_flag_buffer_size) += num_send_nodes[current_level][proc][level];
@@ -2466,6 +2494,10 @@ PackSendBuffer(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypre_P
                add_flag[level][send_elmt] = i + 1;
             }
          }
+
+         // !!! Timing
+         inner_end = chrono::system_clock::now();
+         timings[5] += inner_end - inner_start;
       }
       else break;
    }
@@ -2474,6 +2506,8 @@ PackSendBuffer(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypre_P
    auto total_end = chrono::system_clock::now();
    timings[0] = total_end - total_start;
 
+   for (i = 0; i < 6; i++)
+      total_timings[i] += timings[i].count();
 
    /* cout.precision(3); */
    /* // cout << scientific; */
