@@ -31,7 +31,7 @@ shift
 
 # Configure and make library
 cd $src_dir
-configure --enable-debug
+./configure --enable-debug
 make clean
 make -j test
 
