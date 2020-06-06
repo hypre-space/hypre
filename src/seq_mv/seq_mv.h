@@ -284,14 +284,17 @@ void hypre_CSRMatrixExtractDiagonalHost( hypre_CSRMatrix *A, HYPRE_Complex *d, H
 #if defined(HYPRE_USING_CUDA)
 hypre_CSRMatrix *hypre_CSRMatrixAddDevice ( hypre_CSRMatrix *A , hypre_CSRMatrix *B );
 hypre_CSRMatrix *hypre_CSRMatrixMultiplyDevice ( hypre_CSRMatrix *A , hypre_CSRMatrix *B );
-HYPRE_Int hypre_CSRMatrixSplitDevice_core( HYPRE_Int num_rows, HYPRE_Int B_ext_nnz, HYPRE_Int *B_ext_row_indices, HYPRE_BigInt *B_ext_j, HYPRE_Complex *B_ext_data, char *B_ext_xata, HYPRE_BigInt first_col_diag_B, HYPRE_BigInt last_col_diag_B, HYPRE_Int num_cols_offd_B, HYPRE_BigInt *col_map_offd_B, HYPRE_Int **map_B_to_C_ptr, HYPRE_Int *num_cols_offd_C_ptr, HYPRE_BigInt **col_map_offd_C_ptr, HYPRE_Int *B_ext_diag_nnz_ptr, HYPRE_Int **B_ext_diag_row_indices_ptr, HYPRE_Int **B_ext_diag_j_ptr, HYPRE_Complex **B_ext_diag_data_ptr, char **B_ext_diag_xata_ptr, HYPRE_Int *B_ext_offd_nnz_ptr, HYPRE_Int **B_ext_offd_row_indices_ptr, HYPRE_Int **B_ext_offd_j_ptr, HYPRE_Complex **B_ext_offd_data_ptr, char **B_ext_offd_xata_ptr );
+hypre_CSRMatrix *hypre_CSRMatrixTripleMultiplyDevice ( hypre_CSRMatrix *A, hypre_CSRMatrix *B, hypre_CSRMatrix *C );
+HYPRE_Int hypre_CSRMatrixSplitDevice_core( HYPRE_Int job, HYPRE_Int num_rows, HYPRE_Int B_ext_nnz, HYPRE_Int *B_ext_ii, HYPRE_BigInt *B_ext_bigj, HYPRE_Complex *B_ext_data, char *B_ext_xata, HYPRE_BigInt first_col_diag_B, HYPRE_BigInt last_col_diag_B, HYPRE_Int num_cols_offd_B, HYPRE_BigInt *col_map_offd_B, HYPRE_Int **map_B_to_C_ptr, HYPRE_Int *num_cols_offd_C_ptr, HYPRE_BigInt **col_map_offd_C_ptr, HYPRE_Int *B_ext_diag_nnz_ptr, HYPRE_Int *B_ext_diag_ii, HYPRE_Int *B_ext_diag_j, HYPRE_Complex *B_ext_diag_data, char *B_ext_diag_xata, HYPRE_Int *B_ext_offd_nnz_ptr, HYPRE_Int *B_ext_offd_ii, HYPRE_Int *B_ext_offd_j, HYPRE_Complex *B_ext_offd_data, char *B_ext_offd_xata );
 HYPRE_Int hypre_CSRMatrixSplitDevice(hypre_CSRMatrix *B_ext, HYPRE_BigInt first_col_diag_B, HYPRE_BigInt last_col_diag_B, HYPRE_Int num_cols_offd_B, HYPRE_BigInt *col_map_offd_B, HYPRE_Int **map_B_to_C_ptr, HYPRE_Int *num_cols_offd_C_ptr, HYPRE_BigInt **col_map_offd_C_ptr, hypre_CSRMatrix **B_ext_diag_ptr, hypre_CSRMatrix **B_ext_offd_ptr);
 HYPRE_Int hypre_CSRMatrixTransposeDevice ( hypre_CSRMatrix *A , hypre_CSRMatrix **AT , HYPRE_Int data );
 hypre_CSRMatrix* hypre_CSRMatrixAddPartialDevice( hypre_CSRMatrix *A, hypre_CSRMatrix *B, HYPRE_Int *row_nums);
 HYPRE_Int hypre_CSRMatrixColNNzRealDevice( hypre_CSRMatrix *A, HYPRE_Real *colnnz);
 HYPRE_Int hypre_CSRMatrixMoveDiagFirstDevice( hypre_CSRMatrix  *A );
+HYPRE_Int hypre_CSRMatrixCheckDiagFirstDevice( hypre_CSRMatrix  *A );
 void hypre_CSRMatrixComputeRowSumDevice( hypre_CSRMatrix *A, HYPRE_Int *CF_i, HYPRE_Int *CF_j, HYPRE_Complex *row_sum, HYPRE_Int type, HYPRE_Complex scal, const char *set_or_add);
 void hypre_CSRMatrixExtractDiagonalDevice( hypre_CSRMatrix *A, HYPRE_Complex *d, HYPRE_Int type);
+hypre_CSRMatrix* hypre_CSRMatrixStack2Device(hypre_CSRMatrix *A, hypre_CSRMatrix *B);
 #endif
 
 /* csr_matrix.c */
