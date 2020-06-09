@@ -346,6 +346,12 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
          {
             fpt = fpt_array[i];
             fpt2 = fpt_array[i-1];
+
+            if (fpt == fpt2)
+            {
+               continue;
+            }
+
             A_FC_diag_i[fpt] += A_FC_diag_i[fpt2];
             A_FF_diag_i[fpt] += A_FF_diag_i[fpt2];
             A_FC_offd_i[fpt] += A_FC_offd_i[fpt2];
