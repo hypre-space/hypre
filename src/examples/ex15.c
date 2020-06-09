@@ -39,14 +39,17 @@
                    this example.
 */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <math.h>
-#include "_hypre_utilities.h"
 #include "HYPRE_sstruct_mv.h"
 #include "HYPRE_sstruct_ls.h"
-#include "_hypre_parcsr_ls.h"
 #include "HYPRE.h"
 
+#ifdef HYPRE_EXVIS
 #include "vis.c"
+#endif
 
 int optionAlpha, optionBeta;
 
@@ -70,7 +73,7 @@ double alpha(double x, double y, double z)
          else
             return 1.0e-6;
       case 4: /* random coefficient */
-         return hypre_Rand();
+         return ((double)rand()/RAND_MAX);
       default:
          return 1.0;
    }
@@ -96,7 +99,7 @@ double beta(double x, double y, double z)
          else
             return 1.0e-6;
       case 4: /* random coefficient */
-         return hypre_Rand();
+         return ((double)rand()/RAND_MAX);
       default:
          return 1.0;
    }
@@ -201,7 +204,8 @@ int main (int argc, char *argv[])
    int amg_interp_type, amg_Pmax;
    int singular_problem ;
 
-   int time_index;
+   double mytime = 0.0;
+   double walltime = 0.0;
 
    HYPRE_SStructGrid     edge_grid;
    HYPRE_SStructGraph    A_graph;
@@ -405,8 +409,7 @@ int main (int argc, char *argv[])
    pi = myid - pj*N - pk*N*N;
 
    /* Start timing */
-   time_index = hypre_InitializeTiming("SStruct Setup");
-   hypre_BeginTiming(time_index);
+   mytime -= MPI_Wtime();
 
    /* 1. Set up the edge and nodal grids.  Note that we do this simultaneously
          to make sure that they have the same extents.  For simplicity we use
@@ -826,10 +829,12 @@ int main (int argc, char *argv[])
    }
 
    /* Finalize current timing */
-   hypre_EndTiming(time_index);
-   hypre_PrintTiming("SStruct phase times", MPI_COMM_WORLD);
-   hypre_FinalizeTiming(time_index);
-   hypre_ClearTiming();
+   mytime += MPI_Wtime();
+   MPI_Allreduce(&mytime, &walltime, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+   if (myid == 0)
+   {
+      printf("\nSStruct Setup time = %f seconds\n\n", walltime);
+   }
 
    /* 6. Set up and call the PCG-AMS solver (Solver options can be found in the
          Reference Manual.) */
@@ -856,12 +861,14 @@ int main (int argc, char *argv[])
       HYPRE_SStructVectorGetObject(zcoord, (void **) &par_zcoord);
 
       if (myid == 0)
-         printf("Problem size: %d\n\n",
-             hypre_ParCSRMatrixGlobalNumRows((hypre_ParCSRMatrix*)par_A));
+      {
+         HYPRE_Int numrows, numcols;
+         HYPRE_ParCSRMatrixGetDims(par_A, &numrows, &numcols);
+         printf("Problem size: %d\n\n", numrows);
+      }
 
       /* Start timing */
-      time_index = hypre_InitializeTiming("AMS Setup");
-      hypre_BeginTiming(time_index);
+      mytime -= MPI_Wtime();
 
       /* Create solver */
       HYPRE_ParCSRPCGCreate(MPI_COMM_WORLD, &solver);
@@ -915,23 +922,26 @@ int main (int argc, char *argv[])
       HYPRE_ParCSRPCGSetup(solver, par_A, par_b, par_x);
 
       /* Finalize current timing */
-      hypre_EndTiming(time_index);
-      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
-      hypre_FinalizeTiming(time_index);
-      hypre_ClearTiming();
+      mytime += MPI_Wtime();
+      MPI_Allreduce(&mytime, &walltime, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+      if (myid == 0)
+      {
+         printf("\nAMS Setup time = %f seconds\n\n", walltime);
+      }
 
       /* Start timing again */
-      time_index = hypre_InitializeTiming("AMS Solve");
-      hypre_BeginTiming(time_index);
+      mytime -= MPI_Wtime();
 
       /* Call the solve */
       HYPRE_ParCSRPCGSolve(solver, par_A, par_b, par_x);
 
       /* Finalize current timing */
-      hypre_EndTiming(time_index);
-      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
-      hypre_FinalizeTiming(time_index);
-      hypre_ClearTiming();
+      mytime += MPI_Wtime();
+      MPI_Allreduce(&mytime, &walltime, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+      if (myid == 0)
+      {
+         printf("\nAMS Solve time = %f seconds\n\n", walltime);
+      }
 
       /* Get some info */
       HYPRE_PCGGetNumIterations(solver, &its);
@@ -947,6 +957,7 @@ int main (int argc, char *argv[])
       /* Save the solution for GLVis visualization, see vis/glvis-ex15.sh */
       if (vis)
       {
+#ifdef HYPRE_EXVIS
          FILE *file;
          char  filename[255];
 
@@ -1041,6 +1052,7 @@ int main (int argc, char *argv[])
 
          /* Additional visualization data */
          GLVis_PrintData("vis/ex15.data", myid, num_procs);
+#endif
       }
 
       if (myid == 0)

@@ -214,18 +214,7 @@ hypre_GetGlobalMeasureDevice( hypre_ParCSRMatrix  *S,
    hypre_ParCSRCommHandleDestroy(comm_handle);
 
    /* add to the local column nnz of the diag part */
-   if (hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) == NULL)
-   {
-      hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) =
-         hypre_TAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
-                      HYPRE_MEMORY_DEVICE);
-
-      hypre_TMemcpy(hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
-                    hypre_ParCSRCommPkgSendMapElmts(comm_pkg),
-                    HYPRE_Int,
-                    hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
-                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-   }
+   hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg);
 
    hypreDevice_GenScatterAdd(measure_diag, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                              hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg), real_send_buf, NULL);

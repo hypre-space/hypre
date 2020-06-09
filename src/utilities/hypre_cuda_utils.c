@@ -127,7 +127,7 @@ hypreDevice_GetRowNnz(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int *d_di
 
 __global__ void
 hypreCUDAKernel_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int has_offd,
-                               HYPRE_Int first_col, HYPRE_Int *d_col_map_offd_A,
+                               HYPRE_BigInt first_col, HYPRE_Int *d_col_map_offd_A,
                                HYPRE_Int *d_diag_i, HYPRE_Int *d_diag_j, HYPRE_Complex *d_diag_a,
                                HYPRE_Int *d_offd_i, HYPRE_Int *d_offd_j, HYPRE_Complex *d_offd_a,
                                HYPRE_Int *d_ib, HYPRE_BigInt *d_jb, HYPRE_Complex *d_ab)
@@ -210,7 +210,7 @@ hypreCUDAKernel_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_
 /* B = A(row_indices, :) */
 /* Note: d_ib is an input vector that contains row ptrs,
  *       i.e., start positions where to put the rows in d_jb and d_ab.
- *       The col indices in B are global indices
+ *       The col indices in B are global indices, i.e., BigJ
  *       of length (nrows + 1) or nrow (without the last entry, nnz) */
 /* Special cases:
  *    if d_row_indices == NULL, it means d_row_indices=[0,1,...,nrows-1]
@@ -387,22 +387,14 @@ HYPRE_Int*
 hypreDevice_CsrRowPtrsToIndices(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr)
 {
    /* trivial case */
-   if (nrows <= 0)
+   if (nrows <= 0 || nnz <= 0)
    {
       return NULL;
    }
 
-   HYPRE_Int *d_row_ind = hypre_CTAlloc(HYPRE_Int, nnz, HYPRE_MEMORY_DEVICE);
+   HYPRE_Int *d_row_ind = hypre_TAlloc(HYPRE_Int, nnz, HYPRE_MEMORY_DEVICE);
 
-   HYPRE_THRUST_CALL( scatter_if,
-                      thrust::counting_iterator<HYPRE_Int>(0),
-                      thrust::counting_iterator<HYPRE_Int>(nrows),
-                      d_row_ptr,
-                      thrust::make_transform_iterator( thrust::make_zip_iterator(thrust::make_tuple(d_row_ptr, d_row_ptr+1)),
-                                                       hypre_empty_row_functor() ),
-                      d_row_ind );
-
-   HYPRE_THRUST_CALL( inclusive_scan, d_row_ind, d_row_ind + nnz, d_row_ind, thrust::maximum<HYPRE_Int>());
+   hypreDevice_CsrRowPtrsToIndices_v2(nrows, nnz, d_row_ptr, d_row_ind);
 
    return d_row_ind;
 }
@@ -411,7 +403,7 @@ HYPRE_Int
 hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr, HYPRE_Int *d_row_ind)
 {
    /* trivial case */
-   if (nrows <= 0)
+   if (nrows <= 0 || nnz <= 0)
    {
       return hypre_error_flag;
    }
@@ -675,6 +667,7 @@ hypreDevice_BigToSmallCopy(HYPRE_Int *tgt, const HYPRE_BigInt *src, HYPRE_Int si
 /* https://github.com/OrangeOwlSolutions/Thrust/blob/master/Sort_by_key_with_tuple_key.cu */
 /* opt: 0, (a,b) < (a',b') iff a < a' or (a = a' and  b  <  b')  [normal tupe comp]
  *      1, (a,b) < (a',b') iff a < a' or (a = a' and |b| > |b'|) [used in dropping small entries]
+ *      2, (a,b) < (a',b') iff a < a' or (a = a' and (b == a or b < b') and b' != a') [used in putting diagonal first]
  */
 template <typename T1, typename T2, typename T3>
 HYPRE_Int
@@ -690,6 +683,10 @@ hypreDevice_StableSortByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *vals, HY
    else if (opt == 1)
    {
       HYPRE_THRUST_CALL(stable_sort_by_key, begin_keys, end_keys, vals, TupleComp2<T1,T2>());
+   }
+   else if (opt == 2)
+   {
+      HYPRE_THRUST_CALL(stable_sort_by_key, begin_keys, end_keys, vals, TupleComp3<T1,T2>());
    }
 
    return hypre_error_flag;
