@@ -24,8 +24,10 @@
                  The eigensolver is LOBPCG with AMG preconditioner.
 */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <math.h>
-#include "_hypre_utilities.h"
 #include "HYPRE.h"
 #include "HYPRE_parcsr_ls.h"
 #include "HYPRE_krylov.h"
@@ -33,7 +35,12 @@
 /* lobpcg stuff */
 #include "HYPRE_lobpcg.h"
 
+#ifdef HYPRE_EXVIS
+#include "_hypre_utilities.h"
 #include "vis.c"
+#endif
+
+#define my_min(a,b)  (((a)<(b)) ? (a) : (b))
 
 int main (int argc, char *argv[])
 {
@@ -53,10 +60,11 @@ int main (int argc, char *argv[])
    HYPRE_ParVector par_b;
    HYPRE_IJVector x;
    HYPRE_ParVector par_x;
-   HYPRE_ParVector* pvx;
 
    HYPRE_Solver precond, lobpcg_solver;
    mv_InterfaceInterpreter* interpreter;
+   mv_MultiVectorPtr eigenvectors = NULL;
+   mv_MultiVectorPtr constraints = NULL;
    HYPRE_MatvecFunctions matvec_fn;
 
    /* Initialize MPI */
@@ -134,10 +142,10 @@ int main (int argc, char *argv[])
    extra = N - local_size*num_procs;
 
    ilower = local_size*myid;
-   ilower += hypre_min(myid, extra);
+   ilower += my_min(myid, extra);
 
    iupper = local_size*(myid+1);
-   iupper += hypre_min(myid+1, extra);
+   iupper += my_min(myid+1, extra);
    iupper = iupper - 1;
 
    /* How many rows do I have? */
@@ -245,7 +253,8 @@ int main (int argc, char *argv[])
 
    /* LOBPCG eigensolver */
    {
-      int time_index;
+      double mytime = 0.0;
+      double walltime = 0.0;
 
       int maxIterations = 100; /* maximum number of iterations */
       int pcgMode = 1;         /* use rhs as initial guess for inner pcg iterations */
@@ -253,15 +262,13 @@ int main (int argc, char *argv[])
       double tol = 1.e-8;      /* absolute tolerance (all eigenvalues) */
       int lobpcgSeed = 775;    /* random seed */
 
-      mv_MultiVectorPtr eigenvectors = NULL;
-      mv_MultiVectorPtr constraints = NULL;
       double *eigenvalues = NULL;
 
       if (myid != 0)
          verbosity = 0;
 
       /* define an interpreter for the ParCSR interface */
-      interpreter = hypre_CTAlloc(mv_InterfaceInterpreter, 1, HYPRE_MEMORY_HOST);
+      interpreter = (mv_InterfaceInterpreter *) calloc(1, sizeof(mv_InterfaceInterpreter));
       HYPRE_ParCSRSetupInterpreter(interpreter);
       HYPRE_ParCSRSetupMatvec(&matvec_fn);
 
@@ -269,12 +276,6 @@ int main (int argc, char *argv[])
       eigenvectors =
          mv_MultiVectorCreateFromSampleVector(interpreter, blockSize, par_x);
       mv_MultiVectorSetRandom (eigenvectors, lobpcgSeed);
-
-      /* eigenvectors - get a pointer */
-      {
-         mv_TempMultiVector* tmp = (mv_TempMultiVector*) mv_MultiVectorGetData(eigenvectors);
-         pvx = (HYPRE_ParVector*)(tmp -> vector);
-      }
 
       /* eigenvalues - allocate space */
       eigenvalues = (double*) calloc( blockSize, sizeof(double) );
@@ -294,31 +295,37 @@ int main (int argc, char *argv[])
       HYPRE_LOBPCGSetup(lobpcg_solver, (HYPRE_Matrix)parcsr_A,
                         (HYPRE_Vector)par_b, (HYPRE_Vector)par_x);
 
-      time_index = hypre_InitializeTiming("LOBPCG Solve");
-      hypre_BeginTiming(time_index);
+      mytime -= MPI_Wtime();
 
       HYPRE_LOBPCGSolve(lobpcg_solver, constraints, eigenvectors, eigenvalues );
 
-      hypre_EndTiming(time_index);
-      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
-      hypre_FinalizeTiming(time_index);
-      hypre_ClearTiming();
+      mytime += MPI_Wtime();
+      MPI_Allreduce(&mytime, &walltime, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+      if (myid == 0)
+      {
+         printf("\nLOBPCG Solve time = %f seconds\n\n", walltime);
+      }
 
       /* clean-up */
       HYPRE_BoomerAMGDestroy(precond);
       HYPRE_LOBPCGDestroy(lobpcg_solver);
-      hypre_TFree(eigenvalues, HYPRE_MEMORY_HOST);
-      hypre_TFree(interpreter, HYPRE_MEMORY_HOST);
+      free(eigenvalues);
+      free(interpreter);
    }
 
    /* Save the solution for GLVis visualization, see vis/glvis-ex11.sh */
    if (vis)
    {
+#ifdef HYPRE_EXVIS
       FILE *file;
       char filename[255];
 
       int nvalues = local_size;
       double *values;
+
+      /* eigenvectors - get a pointer */
+      mv_TempMultiVector* tmp = (mv_TempMultiVector*) mv_MultiVectorGetData(eigenvectors);
+      HYPRE_ParVector*    pvx = (HYPRE_ParVector*)(tmp -> vector);
 
       /* get the local solution */
       values = hypre_VectorData(hypre_ParVectorLocalVector(
@@ -342,6 +349,7 @@ int main (int argc, char *argv[])
       /* save global finite element mesh */
       if (myid == 0)
          GLVis_PrintGlobalSquareMesh("vis/ex11.mesh", n-1);
+#endif
    }
 
    /* Clean up */

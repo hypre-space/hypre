@@ -23,17 +23,22 @@
                  solvers are AMG, PCG, and PCG with AMG or Parasails
                  preconditioners.  */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <math.h>
-#include "_hypre_utilities.h"
 #include "HYPRE_krylov.h"
 #include "HYPRE.h"
 #include "HYPRE_parcsr_ls.h"
 
+#ifdef HYPRE_EXVIS
 #include "vis.c"
+#endif
 
 int hypre_FlexGMRESModifyPCAMGExample(void *precond_data, int iterations,
                                       double rel_residual_norm);
 
+#define my_min(a,b)  (((a)<(b)) ? (a) : (b))
 
 int main (int argc, char *argv[])
 {
@@ -148,10 +153,10 @@ int main (int argc, char *argv[])
    extra = N - local_size*num_procs;
 
    ilower = local_size*myid;
-   ilower += hypre_min(myid, extra);
+   ilower += my_min(myid, extra);
 
    iupper = local_size*(myid+1);
-   iupper += hypre_min(myid+1, extra);
+   iupper += my_min(myid+1, extra);
    iupper = iupper - 1;
 
    /* How many rows do I have? */
@@ -552,6 +557,7 @@ int main (int argc, char *argv[])
    /* Save the solution for GLVis visualization, see vis/glvis-ex5.sh */
    if (vis)
    {
+#ifdef HYPRE_EXVIS
       FILE *file;
       char filename[255];
 
@@ -586,6 +592,7 @@ int main (int argc, char *argv[])
       /* save global finite element mesh */
       if (myid == 0)
          GLVis_PrintGlobalSquareMesh("vis/ex5.mesh", n-1);
+#endif
    }
 
    /* Clean up */

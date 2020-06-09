@@ -498,10 +498,11 @@ hypre_ParCSRTMatMat( hypre_ParCSRMatrix  *A,
    return hypre_ParCSRTMatMatKT( A, B, 0);
 }
 
-hypre_ParCSRMatrix *hypre_ParCSRMatrixRAPKT( hypre_ParCSRMatrix *R,
-                                             hypre_ParCSRMatrix *A,
-                                             hypre_ParCSRMatrix *P,
-                                             HYPRE_Int keep_transpose )
+hypre_ParCSRMatrix*
+hypre_ParCSRMatrixRAPKTHost( hypre_ParCSRMatrix *R,
+                             hypre_ParCSRMatrix *A,
+                             hypre_ParCSRMatrix *P,
+                             HYPRE_Int           keep_transpose )
 {
    MPI_Comm         comm = hypre_ParCSRMatrixComm(A);
 
@@ -915,6 +916,39 @@ hypre_ParCSRMatrix *hypre_ParCSRMatrixRAPKT( hypre_ParCSRMatrix *R,
       /* hypre_GenerateRAPCommPkg(RAP, A); */
       hypre_MatvecCommPkgCreate(C);
    }
+
+   return C;
+}
+
+hypre_ParCSRMatrix*
+hypre_ParCSRMatrixRAPKT( hypre_ParCSRMatrix  *R,
+                         hypre_ParCSRMatrix  *A,
+                         hypre_ParCSRMatrix  *P,
+                         HYPRE_Int            keep_transpose)
+{
+#if defined(HYPRE_USING_CUDA)
+   hypre_NvtxPushRange("TripleMat-RAP");
+#endif
+
+   hypre_ParCSRMatrix *C = NULL;
+
+#if defined(HYPRE_USING_CUDA)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(R),
+                                                      hypre_ParCSRMatrixMemoryLocation(A) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      C = hypre_ParCSRMatrixRAPKTDevice(R, A, P, keep_transpose);
+   }
+   else
+#endif
+   {
+      C = hypre_ParCSRMatrixRAPKTHost(R, A, P, keep_transpose);
+   }
+
+#if defined(HYPRE_USING_CUDA)
+   hypre_NvtxPopRange();
+#endif
 
    return C;
 }

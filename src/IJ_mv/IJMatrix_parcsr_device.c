@@ -517,174 +517,222 @@ hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix)
 
       /* adjust row indices from global to local */
       HYPRE_Int *new_i_local = hypre_TAlloc(HYPRE_Int, new_nnz, HYPRE_MEMORY_DEVICE);
-      HYPRE_THRUST_CALL(transform, new_i, new_i + new_nnz, new_i_local, _1 - row_start);
+      HYPRE_THRUST_CALL( transform,
+                         new_i,
+                         new_i + new_nnz,
+                         new_i_local,
+                         _1 - row_start );
+
+      hypre_TFree(new_i, HYPRE_MEMORY_DEVICE);
 
       HYPRE_Int      num_cols_offd_new;
       HYPRE_BigInt  *col_map_offd_new;
       HYPRE_Int     *col_map_offd_map;
       HYPRE_Int      diag_nnz_new;
-      HYPRE_Int     *diag_i_new;
-      HYPRE_Int     *diag_j_new;
-      HYPRE_Complex *diag_a_new;
-      HYPRE_Int      offd_nnz_new;
-      HYPRE_Int     *offd_i_new;
-      HYPRE_Int     *offd_j_new;
-      HYPRE_Complex *offd_a_new;
+      HYPRE_Int     *diag_i_new = NULL;
+      HYPRE_Int     *diag_j_new = NULL;
+      HYPRE_Complex *diag_a_new = NULL;
       char          *diag_sora_new = NULL;
+      HYPRE_Int      offd_nnz_new;
+      HYPRE_Int     *offd_i_new = NULL;
+      HYPRE_Int     *offd_j_new = NULL;
+      HYPRE_Complex *offd_a_new = NULL;
       char          *offd_sora_new = NULL;
 
       HYPRE_Int diag_nnz_existed = hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(par_matrix));
       HYPRE_Int offd_nnz_existed = hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(par_matrix));
 
+      hypre_CSRMatrixSplitDevice_core( 0,
+                                       nrows,
+                                       new_nnz,
+                                       NULL,
+                                       new_j,
+                                       NULL,
+                                       NULL,
+                                       col_start,
+                                       col_end - 1,
+                                       hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(par_matrix)),
+                                       NULL,
+                                       NULL,
+                                       NULL,
+                                       NULL,
+                                       &diag_nnz_new,
+                                       NULL,
+                                       NULL,
+                                       NULL,
+                                       NULL,
+                                       &offd_nnz_new,
+                                       NULL,
+                                       NULL,
+                                       NULL,
+                                       NULL );
+
+      if (diag_nnz_new)
+      {
+         diag_i_new = hypre_TAlloc(HYPRE_Int,     diag_nnz_existed + diag_nnz_new, HYPRE_MEMORY_DEVICE);
+         diag_j_new = hypre_TAlloc(HYPRE_Int,     diag_nnz_existed + diag_nnz_new, HYPRE_MEMORY_DEVICE);
+         diag_a_new = hypre_TAlloc(HYPRE_Complex, diag_nnz_existed + diag_nnz_new, HYPRE_MEMORY_DEVICE);
+         if (diag_nnz_existed)
+         {
+            diag_sora_new = hypre_TAlloc(char,    diag_nnz_existed + diag_nnz_new, HYPRE_MEMORY_DEVICE);
+         }
+      }
+
+      if (offd_nnz_new)
+      {
+         offd_i_new = hypre_TAlloc(HYPRE_Int,     offd_nnz_existed + offd_nnz_new, HYPRE_MEMORY_DEVICE);
+         offd_j_new = hypre_TAlloc(HYPRE_Int,     offd_nnz_existed + offd_nnz_new, HYPRE_MEMORY_DEVICE);
+         offd_a_new = hypre_TAlloc(HYPRE_Complex, offd_nnz_existed + offd_nnz_new, HYPRE_MEMORY_DEVICE);
+         if (offd_nnz_existed)
+         {
+            offd_sora_new = hypre_TAlloc(char,    offd_nnz_existed + offd_nnz_new, HYPRE_MEMORY_DEVICE);
+         }
+      }
+
       /* split IJ into diag and offd */
-      hypre_CSRMatrixSplitDevice_core( nrows, new_nnz,
-                                       new_i_local, new_j, new_data,
+      hypre_CSRMatrixSplitDevice_core( 1,
+                                       nrows,
+                                       new_nnz,
+                                       new_i_local,
+                                       new_j,
+                                       new_data,
                                        diag_nnz_existed || offd_nnz_existed ? new_sora : NULL,
-                                       col_start, col_end-1,
+                                       col_start,
+                                       col_end - 1,
                                        hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(par_matrix)),
                                        hypre_ParCSRMatrixDeviceColMapOffd(par_matrix),
                                        &col_map_offd_map,
-                                       &num_cols_offd_new, &col_map_offd_new,
-                                       &diag_nnz_new, &diag_i_new, &diag_j_new, &diag_a_new,
-                                       diag_nnz_existed ? &diag_sora_new : NULL,
-                                       &offd_nnz_new, &offd_i_new, &offd_j_new, &offd_a_new,
-                                       offd_nnz_existed ? &offd_sora_new : NULL );
+                                       &num_cols_offd_new,
+                                       &col_map_offd_new,
+                                       &diag_nnz_new,
+                                       diag_i_new + diag_nnz_existed,
+                                       diag_j_new + diag_nnz_existed,
+                                       diag_a_new + diag_nnz_existed,
+                                       diag_nnz_existed ? diag_sora_new + diag_nnz_existed : NULL,
+                                       &offd_nnz_new,
+                                       offd_i_new + offd_nnz_existed,
+                                       offd_j_new + offd_nnz_existed,
+                                       offd_a_new + offd_nnz_existed,
+                                       offd_nnz_existed ? offd_sora_new + offd_nnz_existed : NULL );
 
-      hypre_TFree(new_i,       HYPRE_MEMORY_DEVICE);
+      hypre_TFree(new_i_local, HYPRE_MEMORY_DEVICE);
       hypre_TFree(new_j,       HYPRE_MEMORY_DEVICE);
       hypre_TFree(new_data,    HYPRE_MEMORY_DEVICE);
       hypre_TFree(new_sora,    HYPRE_MEMORY_DEVICE);
-      hypre_TFree(new_i_local, HYPRE_MEMORY_DEVICE);
+
+      HYPRE_Int      nnz_new;
+      HYPRE_Int     *tmp_i;
+      HYPRE_Int     *tmp_j;
+      HYPRE_Complex *tmp_a;
 
       /* expand the existing diag/offd and compress with the new one */
-      if (diag_nnz_existed)
+      if (diag_nnz_new > 0)
       {
-         HYPRE_Int     *tmp_i = hypre_TAlloc(HYPRE_Int,     diag_nnz_existed + diag_nnz_new, HYPRE_MEMORY_DEVICE);
-         HYPRE_Int     *tmp_j = hypre_TAlloc(HYPRE_Int,     diag_nnz_existed + diag_nnz_new, HYPRE_MEMORY_DEVICE);
-         char          *tmp_x = hypre_TAlloc(char,          diag_nnz_existed + diag_nnz_new, HYPRE_MEMORY_DEVICE);
-         HYPRE_Complex *tmp_a = hypre_TAlloc(HYPRE_Complex, diag_nnz_existed + diag_nnz_new, HYPRE_MEMORY_DEVICE);
+         if (diag_nnz_existed)
+         {
+            /* the existing parcsr should come first and the entries are "add" */
+            hypreDevice_CsrRowPtrsToIndices_v2(nrows, diag_nnz_existed,
+                                               hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(par_matrix)), diag_i_new);
 
-         /* the existing parcsr should come first and the entries are "add" */
-         hypreDevice_CsrRowPtrsToIndices_v2(nrows, diag_nnz_existed,
-                                            hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(par_matrix)), tmp_i);
-         hypre_TMemcpy(tmp_j, hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(par_matrix)), HYPRE_Int,
-                       diag_nnz_existed, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-         HYPRE_THRUST_CALL(fill_n, tmp_x, diag_nnz_existed, 0);
-         hypre_TMemcpy(tmp_a, hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(par_matrix)), HYPRE_Complex,
-                       diag_nnz_existed, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+            hypre_TMemcpy(diag_j_new, hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(par_matrix)), HYPRE_Int,
+                          diag_nnz_existed, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
-         hypre_TMemcpy(tmp_i + diag_nnz_existed, diag_i_new, HYPRE_Int, diag_nnz_new,
-                       HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-         hypre_TMemcpy(tmp_j + diag_nnz_existed, diag_j_new, HYPRE_Int, diag_nnz_new,
-                       HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-         hypre_TMemcpy(tmp_x + diag_nnz_existed, diag_sora_new, char, diag_nnz_new,
-                       HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-         hypre_TMemcpy(tmp_a + diag_nnz_existed, diag_a_new, HYPRE_Complex, diag_nnz_new,
-                       HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+            hypre_TMemcpy(diag_a_new, hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(par_matrix)), HYPRE_Complex,
+                          diag_nnz_existed, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
-         hypre_TFree(diag_i_new,    HYPRE_MEMORY_DEVICE);
-         hypre_TFree(diag_j_new,    HYPRE_MEMORY_DEVICE);
-         hypre_TFree(diag_sora_new, HYPRE_MEMORY_DEVICE);
-         hypre_TFree(diag_a_new,    HYPRE_MEMORY_DEVICE);
+            HYPRE_THRUST_CALL(fill_n, diag_sora_new, diag_nnz_existed, 0);
 
-         HYPRE_Int nnz_new;
-         hypre_IJMatrixAssembleSortAndReduce2(diag_nnz_existed + diag_nnz_new, tmp_i, tmp_j, tmp_x, tmp_a,
-                                              &nnz_new, &diag_i_new, &diag_j_new, &diag_a_new, 2);
+            hypre_IJMatrixAssembleSortAndReduce2(diag_nnz_existed + diag_nnz_new, diag_i_new, diag_j_new, diag_sora_new, diag_a_new,
+                                                 &nnz_new, &tmp_i, &tmp_j, &tmp_a, 2);
 
-         hypre_TFree(tmp_i, HYPRE_MEMORY_DEVICE);
-         hypre_TFree(tmp_j, HYPRE_MEMORY_DEVICE);
-         hypre_TFree(tmp_x, HYPRE_MEMORY_DEVICE);
-         hypre_TFree(tmp_a, HYPRE_MEMORY_DEVICE);
+            hypre_TFree(diag_i_new,    HYPRE_MEMORY_DEVICE);
+            hypre_TFree(diag_j_new,    HYPRE_MEMORY_DEVICE);
+            hypre_TFree(diag_sora_new, HYPRE_MEMORY_DEVICE);
+            hypre_TFree(diag_a_new,    HYPRE_MEMORY_DEVICE);
 
-         diag_j_new = hypre_TReAlloc_v2(diag_j_new, HYPRE_Int,     diag_nnz_existed + diag_nnz_new, HYPRE_Int,
-                                        nnz_new, HYPRE_MEMORY_DEVICE);
-         diag_a_new = hypre_TReAlloc_v2(diag_a_new, HYPRE_Complex, diag_nnz_existed + diag_nnz_new, HYPRE_Complex,
-                                        nnz_new, HYPRE_MEMORY_DEVICE);
-         diag_nnz_new = nnz_new;
+            tmp_j = hypre_TReAlloc_v2(tmp_j, HYPRE_Int,     diag_nnz_existed + diag_nnz_new, HYPRE_Int,     nnz_new, HYPRE_MEMORY_DEVICE);
+            tmp_a = hypre_TReAlloc_v2(tmp_a, HYPRE_Complex, diag_nnz_existed + diag_nnz_new, HYPRE_Complex, nnz_new, HYPRE_MEMORY_DEVICE);
+
+            diag_nnz_new = nnz_new;
+            diag_i_new   = tmp_i;
+            diag_j_new   = tmp_j;
+            diag_a_new   = tmp_a;
+         }
+
+         hypre_CSRMatrix *diag               = hypre_CSRMatrixCreate(nrows, ncols, diag_nnz_new);
+         hypre_CSRMatrixI(diag)              = hypreDevice_CsrRowIndicesToPtrs(nrows, diag_nnz_new, diag_i_new);
+         hypre_CSRMatrixJ(diag)              = diag_j_new;
+         hypre_CSRMatrixData(diag)           = diag_a_new;
+         hypre_CSRMatrixMemoryLocation(diag) = HYPRE_MEMORY_DEVICE;
+
+         hypre_TFree(diag_i_new, HYPRE_MEMORY_DEVICE);
+
+         hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(par_matrix));
+         hypre_ParCSRMatrixDiag(par_matrix) = diag;
       }
 
-      if (offd_nnz_existed)
+      if (offd_nnz_new > 0)
       {
-         HYPRE_Int     *tmp_i = hypre_TAlloc(HYPRE_Int,     offd_nnz_existed + offd_nnz_new, HYPRE_MEMORY_DEVICE);
-         HYPRE_Int     *tmp_j = hypre_TAlloc(HYPRE_Int,     offd_nnz_existed + offd_nnz_new, HYPRE_MEMORY_DEVICE);
-         char          *tmp_x = hypre_TAlloc(char,          offd_nnz_existed + offd_nnz_new, HYPRE_MEMORY_DEVICE);
-         HYPRE_Complex *tmp_a = hypre_TAlloc(HYPRE_Complex, offd_nnz_existed + offd_nnz_new, HYPRE_MEMORY_DEVICE);
+         if (offd_nnz_existed)
+         {
+            /* the existing parcsr should come first and the entries are "add" */
+            hypreDevice_CsrRowPtrsToIndices_v2(nrows, offd_nnz_existed,
+                                               hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(par_matrix)), offd_i_new);
 
-         /* the existing parcsr should come first and the entries are "add" */
-         hypreDevice_CsrRowPtrsToIndices_v2(nrows, offd_nnz_existed,
-                                            hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(par_matrix)), tmp_i);
-         /* adjust with the new col_map_offd_map */
-         HYPRE_THRUST_CALL(gather,
-                           hypre_CSRMatrixJ(hypre_ParCSRMatrixOffd(par_matrix)),
-                           hypre_CSRMatrixJ(hypre_ParCSRMatrixOffd(par_matrix)) + offd_nnz_existed,
-                           col_map_offd_map, tmp_j);
-         HYPRE_THRUST_CALL(fill_n, tmp_x, offd_nnz_existed, 0);
-         hypre_TMemcpy(tmp_a, hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(par_matrix)), HYPRE_Complex,
-                       offd_nnz_existed, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+            /* adjust with the new col_map_offd_map */
+            HYPRE_THRUST_CALL( gather,
+                               hypre_CSRMatrixJ(hypre_ParCSRMatrixOffd(par_matrix)),
+                               hypre_CSRMatrixJ(hypre_ParCSRMatrixOffd(par_matrix)) + offd_nnz_existed,
+                               col_map_offd_map,
+                               offd_j_new );
 
-         hypre_TMemcpy(tmp_i + offd_nnz_existed, offd_i_new, HYPRE_Int, offd_nnz_new,
-                       HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-         hypre_TMemcpy(tmp_j + offd_nnz_existed, offd_j_new, HYPRE_Int, offd_nnz_new,
-                       HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-         hypre_TMemcpy(tmp_x + offd_nnz_existed, offd_sora_new, char, offd_nnz_new,
-                       HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-         hypre_TMemcpy(tmp_a + offd_nnz_existed, offd_a_new, HYPRE_Complex, offd_nnz_new,
-                       HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+            hypre_TMemcpy(offd_a_new, hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(par_matrix)), HYPRE_Complex,
+                          offd_nnz_existed, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
-         hypre_TFree(offd_i_new,    HYPRE_MEMORY_DEVICE);
-         hypre_TFree(offd_j_new,    HYPRE_MEMORY_DEVICE);
-         hypre_TFree(offd_sora_new, HYPRE_MEMORY_DEVICE);
-         hypre_TFree(offd_a_new,    HYPRE_MEMORY_DEVICE);
+            HYPRE_THRUST_CALL(fill_n, offd_sora_new, offd_nnz_existed, 0);
 
-         HYPRE_Int nnz_new;
-         hypre_IJMatrixAssembleSortAndReduce2(offd_nnz_existed + offd_nnz_new, tmp_i, tmp_j, tmp_x, tmp_a,
-                                              &nnz_new, &offd_i_new, &offd_j_new, &offd_a_new, 0);
+            hypre_IJMatrixAssembleSortAndReduce2(offd_nnz_existed + offd_nnz_new, offd_i_new, offd_j_new, offd_sora_new, offd_a_new,
+                                                 &nnz_new, &tmp_i, &tmp_j, &tmp_a, 0);
 
-         hypre_TFree(tmp_i, HYPRE_MEMORY_DEVICE);
-         hypre_TFree(tmp_j, HYPRE_MEMORY_DEVICE);
-         hypre_TFree(tmp_x, HYPRE_MEMORY_DEVICE);
-         hypre_TFree(tmp_a, HYPRE_MEMORY_DEVICE);
+            hypre_TFree(offd_i_new,    HYPRE_MEMORY_DEVICE);
+            hypre_TFree(offd_j_new,    HYPRE_MEMORY_DEVICE);
+            hypre_TFree(offd_sora_new, HYPRE_MEMORY_DEVICE);
+            hypre_TFree(offd_a_new,    HYPRE_MEMORY_DEVICE);
 
-         offd_j_new = hypre_TReAlloc_v2(offd_j_new, HYPRE_Int,     offd_nnz_existed + offd_nnz_new, HYPRE_Int,
-                                        nnz_new, HYPRE_MEMORY_DEVICE);
-         offd_a_new = hypre_TReAlloc_v2(offd_a_new, HYPRE_Complex, offd_nnz_existed + offd_nnz_new, HYPRE_Complex,
-                                        nnz_new, HYPRE_MEMORY_DEVICE);
-         offd_nnz_new = nnz_new;
+            tmp_j = hypre_TReAlloc_v2(tmp_j, HYPRE_Int,     offd_nnz_existed + offd_nnz_new, HYPRE_Int,     nnz_new, HYPRE_MEMORY_DEVICE);
+            tmp_a = hypre_TReAlloc_v2(tmp_a, HYPRE_Complex, offd_nnz_existed + offd_nnz_new, HYPRE_Complex, nnz_new, HYPRE_MEMORY_DEVICE);
+
+            offd_nnz_new = nnz_new;
+            offd_i_new   = tmp_i;
+            offd_j_new   = tmp_j;
+            offd_a_new   = tmp_a;
+         }
+
+         hypre_CSRMatrix *offd               = hypre_CSRMatrixCreate(nrows, num_cols_offd_new, offd_nnz_new);
+         hypre_CSRMatrixI(offd)              = hypreDevice_CsrRowIndicesToPtrs(nrows, offd_nnz_new, offd_i_new);
+         hypre_CSRMatrixJ(offd)              = offd_j_new;
+         hypre_CSRMatrixData(offd)           = offd_a_new;
+         hypre_CSRMatrixMemoryLocation(offd) = HYPRE_MEMORY_DEVICE;
+
+         hypre_TFree(offd_i_new, HYPRE_MEMORY_DEVICE);
+
+         hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(par_matrix));
+         hypre_ParCSRMatrixOffd(par_matrix) = offd;
+
+         hypre_TFree(hypre_ParCSRMatrixDeviceColMapOffd(par_matrix), HYPRE_MEMORY_DEVICE);
+         hypre_ParCSRMatrixDeviceColMapOffd(par_matrix) = col_map_offd_new;
+
+         hypre_TFree(hypre_ParCSRMatrixColMapOffd(par_matrix), HYPRE_MEMORY_HOST);
+         hypre_ParCSRMatrixColMapOffd(par_matrix) = hypre_TAlloc(HYPRE_BigInt, num_cols_offd_new, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(hypre_ParCSRMatrixColMapOffd(par_matrix), col_map_offd_new, HYPRE_BigInt, num_cols_offd_new,
+                       HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+
+         col_map_offd_new = NULL;
       }
 
       hypre_TFree(col_map_offd_map, HYPRE_MEMORY_DEVICE);
-
-      /* convert to CSR's */
-      hypre_CSRMatrix *diag               = hypre_CSRMatrixCreate(nrows, ncols, diag_nnz_new);
-      hypre_CSRMatrixI(diag)              = hypreDevice_CsrRowIndicesToPtrs(nrows, diag_nnz_new, diag_i_new);
-      hypre_CSRMatrixJ(diag)              = diag_j_new;
-      hypre_CSRMatrixData(diag)           = diag_a_new;
-      hypre_CSRMatrixMemoryLocation(diag) = HYPRE_MEMORY_DEVICE;
-
-      hypre_TFree(diag_i_new, HYPRE_MEMORY_DEVICE);
-
-      hypre_CSRMatrix *offd               = hypre_CSRMatrixCreate(nrows, num_cols_offd_new, offd_nnz_new);
-      hypre_CSRMatrixI(offd)              = hypreDevice_CsrRowIndicesToPtrs(nrows, offd_nnz_new, offd_i_new);
-      hypre_CSRMatrixJ(offd)              = offd_j_new;
-      hypre_CSRMatrixData(offd)           = offd_a_new;
-      hypre_CSRMatrixMemoryLocation(offd) = HYPRE_MEMORY_DEVICE;
-
-      hypre_TFree(offd_i_new, HYPRE_MEMORY_DEVICE);
-
-      hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(par_matrix));
-      hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(par_matrix));
-
-      hypre_ParCSRMatrixDiag(par_matrix) = diag;
-      hypre_ParCSRMatrixOffd(par_matrix) = offd;
-
-      hypre_TFree(hypre_ParCSRMatrixDeviceColMapOffd(par_matrix), HYPRE_MEMORY_DEVICE);
-      hypre_ParCSRMatrixDeviceColMapOffd(par_matrix) = col_map_offd_new;
-
-      hypre_TFree(hypre_ParCSRMatrixColMapOffd(par_matrix), HYPRE_MEMORY_HOST);
-      hypre_ParCSRMatrixColMapOffd(par_matrix) = hypre_TAlloc(HYPRE_BigInt, num_cols_offd_new, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(hypre_ParCSRMatrixColMapOffd(par_matrix), col_map_offd_new, HYPRE_BigInt, num_cols_offd_new,
-                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-   }
+      hypre_TFree(col_map_offd_new, HYPRE_MEMORY_DEVICE);
+   } /* if (nelms) */
 
    hypre_IJMatrixAssembleFlag(matrix) = 1;
    hypre_AuxParCSRMatrixDestroy(aux_matrix);

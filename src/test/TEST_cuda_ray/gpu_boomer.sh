@@ -5,6 +5,8 @@
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 TNAME=`basename $0 .sh`
+RTOL=$1
+ATOL=$2
 
 #=============================================================================
 # compare with baseline case
@@ -16,28 +18,26 @@ FILES="\
  ${TNAME}.out.3\
  ${TNAME}.out.4\
  ${TNAME}.out.5\
- ${TNAME}.out.5f\
  ${TNAME}.out.6\
  ${TNAME}.out.7\
  ${TNAME}.out.8\
  ${TNAME}.out.9\
+ ${TNAME}.out.10\
+ ${TNAME}.out.11\
  ${TNAME}.out.12\
- ${TNAME}.out.12f\
  ${TNAME}.out.13\
  ${TNAME}.out.14\
- ${TNAME}.out.15\
 "
-# ${TNAME}.out.11\
 
-# Need to avoid output lines about "no global partition"
 for i in $FILES
 do
   echo "# Output file: $i"
-  tail -93 $i
+  grep -A 3 "Complexity" $i
+  tail -3 $i
 done > ${TNAME}.out
 
 # Make sure that the output files are reasonable
-CHECK_LINE="Iterations"
+CHECK_LINE="Complexity"
 OUT_COUNT=`grep "$CHECK_LINE" ${TNAME}.out | wc -l`
 SAVED_COUNT=`grep "$CHECK_LINE" ${TNAME}.saved | wc -l`
 if [ "$OUT_COUNT" != "$SAVED_COUNT" ]; then
@@ -45,5 +45,11 @@ if [ "$OUT_COUNT" != "$SAVED_COUNT" ]; then
 fi
 
 if [ -z $HYPRE_NO_SAVED ]; then
-   diff -U3 -bI"time" ${TNAME}.saved ${TNAME}.out >&2
+   (../runcheck.sh ${TNAME}.out ${TNAME}.saved $RTOL $ATOL) >&2
 fi
+
+#=============================================================================
+# remove temporary files
+#=============================================================================
+
+rm -f ${TNAME}.testdata*
