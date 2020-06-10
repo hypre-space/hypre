@@ -861,10 +861,16 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix *A,
             new_fpt = new_fpt_array[i];
             fpt2 = fpt_array[i-1];
             new_fpt2 = new_fpt_array[i-1];
-            A_FC_diag_i[fpt] += A_FC_diag_i[fpt2];
-            A_FF_diag_i[new_fpt] += A_FF_diag_i[new_fpt2];
-            A_FC_offd_i[fpt] += A_FC_offd_i[fpt2];
-            A_FF_offd_i[new_fpt] += A_FF_offd_i[new_fpt2];
+            if (new_fpt != new_fpt2) 
+            {
+               A_FF_diag_i[new_fpt] += A_FF_diag_i[new_fpt2];
+               A_FF_offd_i[new_fpt] += A_FF_offd_i[new_fpt2];
+            }
+            if (fpt != fpt2) 
+            {
+               A_FC_diag_i[fpt] += A_FC_diag_i[fpt2];
+               A_FC_offd_i[fpt] += A_FC_offd_i[fpt2];
+            }
          }
          row = new_fpt_array[num_threads];
          rowc = fpt_array[num_threads];
@@ -1405,10 +1411,16 @@ hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
             new_fpt = new_fpt_array[i];
             fpt2 = fpt_array[i-1];
             new_fpt2 = new_fpt_array[i-1];
-            A_FC_diag_i[fpt] += A_FC_diag_i[fpt2];
-            A_FF_diag_i[new_fpt] += A_FF_diag_i[new_fpt2];
-            A_FC_offd_i[fpt] += A_FC_offd_i[fpt2];
-            A_FF_offd_i[new_fpt] += A_FF_offd_i[new_fpt2];
+            if (fpt != fpt2)
+            {
+               A_FC_diag_i[fpt] += A_FC_diag_i[fpt2];
+               A_FC_offd_i[fpt] += A_FC_offd_i[fpt2];
+            }
+            if (new_fpt != new_fpt2)
+            {
+               A_FF_diag_i[new_fpt] += A_FF_diag_i[new_fpt2];
+               A_FF_offd_i[new_fpt] += A_FF_offd_i[new_fpt2];
+            }
          }
          row = new_fpt_array[num_threads];
          rowc = fpt_array[num_threads];
