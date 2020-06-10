@@ -434,6 +434,7 @@ HYPRE_Int HYPRE_BoomerAMGSetNodalDiag(HYPRE_Solver solver,
  *    - 15 : interpolation with adaptive weights (GPU use only)
  *    - 16 : extended interpolation in matrix-matrix form
  *    - 17 : extended+i interpolation in matrix-matrix form
+ *    - 18 : extended+e interpolation in matrix-matrix form
  *
  * The default is ext+i interpolation (interp_type 6) trunctated to at most 4
  * elements per row. (see HYPRE_BoomerAMGSetPMaxElmts).
@@ -474,6 +475,7 @@ HYPRE_Int HYPRE_BoomerAMGSetSepWeight(HYPRE_Solver solver,
  *    - 4 : multipass interpolation
  *    - 5 : 2-stage extended interpolation in matrix-matrix form
  *    - 6 : 2-stage extended+i interpolation in matrix-matrix form
+ *    - 7 : 2-stage extended+e interpolation in matrix-matrix form
  **/
 HYPRE_Int HYPRE_BoomerAMGSetAggInterpType(HYPRE_Solver solver,
                                           HYPRE_Int    agg_interp_type);

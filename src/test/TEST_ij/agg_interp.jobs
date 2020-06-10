@@ -24,6 +24,8 @@
 #    16: 2s-mod-ei-ext interpolation 1 level (agg_P12 6 agg_Pmx 4) 
 #    17: 2s-mod-ext interpolation all levels for systems problem unknown approach
 #    18: 2s-mod-ext interpolation all levels for systems problem hybrid approach
+#    18: 2s-mod-ee interpolation 1 levels (agg_tr 0.3)
+#    18: 2s-mod-ee interpolation all levels (agg_Pmx 4 agg_P12_mx 4)
 #=============================================================================
 
 mpirun -np 8 ./ij    -rhsrand -n 30 29 31 -P 2 2 2 -agg_nl 1 -agg_interp 1 -agg_Pmx 4 -solver 1 -rlx 6 \
@@ -79,3 +81,10 @@ mpirun -np 8 ./ij    -rhsrand -n 20 19 22 -P 2 2 2 -sysL 3 -nf 3 -agg_nl 10 -int
 
 mpirun -np 8 ./ij    -rhsrand -n 20 19 22 -P 2 2 2 -sysL 3 -nf 3 -agg_nl 10 -interptype 17 -agg_interp 5 -agg_tr 0.2 -agg_P12_tr 0.2 -nodal 1 -solver 1 -rlx 6 \
  >> agg_interp.out.18
+
+mpirun -np 8 ./ij    -rhsrand -n 30 29 31 -P 2 2 2 -agg_nl 1 -agg_interp 7 -interptype 18 -agg_tr 0.3 -solver 1 -rlx 8 \
+ >> agg_interp.out.19
+
+mpirun -np 8 ./ij    -rhsrand -n 30 29 31 -P 2 2 2 -agg_nl 10 -agg_interp 7 -agg_Pmx 4 -agg_P12_mx 4 -solver 1 -rlx 6 \
+ >> agg_interp.out.20
+
