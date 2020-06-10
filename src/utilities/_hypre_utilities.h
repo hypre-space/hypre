@@ -32,13 +32,14 @@ extern "C" {
 #define hypre_GENERAL_HEADER
 
 /* This allows us to consistently avoid 'int' throughout hypre */
-typedef int               hypre_int;
-typedef long int          hypre_longint;
-typedef unsigned int      hypre_uint;
-typedef unsigned long int hypre_ulongint;
+typedef int                    hypre_int;
+typedef long int               hypre_longint;
+typedef unsigned int           hypre_uint;
+typedef unsigned long int      hypre_ulongint;
+typedef unsigned long long int hypre_ulonglongint;
 
 /* This allows us to consistently avoid 'double' throughout hypre */
-typedef double            hypre_double;
+typedef double                 hypre_double;
 
 /*--------------------------------------------------------------------------
  * Define various functions
@@ -1454,6 +1455,26 @@ hypre_int hypre_cuda_get_grid_warp_id()
    return hypre_cuda_get_block_id<gdim>() * hypre_cuda_get_num_warps<bdim>() +
           hypre_cuda_get_warp_id<bdim>();
 }
+
+#if defined(__CUDA_ARCH__) && __CUDA_ARCH__ < 600
+static __device__ __forceinline__
+hypre_double atomicAdd(hypre_double* address, hypre_double val)
+{
+    hypre_ulonglongint* address_as_ull = (hypre_ulonglongint*) address;
+    hypre_ulonglongint old = *address_as_ull, assumed;
+
+    do {
+        assumed = old;
+        old = atomicCAS(address_as_ull, assumed,
+                        __double_as_longlong(val +
+                               __longlong_as_double(assumed)));
+
+    // Note: uses integer comparison to avoid hang in case of NaN (since NaN != NaN)
+    } while (assumed != old);
+
+    return __longlong_as_double(old);
+}
+#endif
 
 #if CUDA_VERSION < 9000
 
