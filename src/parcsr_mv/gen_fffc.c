@@ -829,7 +829,7 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix *A,
             A_FF_offd_i[row] = o_count_FF;
             A_FC_offd_i[rowc] = o_count_FC;
          }
-         else if (CF_marker[i] == -1)
+         else if (CF_marker[i] < 0)
          {
             rowc++;
             for (j = S_diag_i[i]; j < S_diag_i[i+1]; j++)
@@ -938,7 +938,7 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix *A,
             A_FF_offd_i[row] = o_count_FF;
             A_FC_offd_i[rowc] = o_count_FC;
          }
-         else if (CF_marker[i] == -1)
+         else if (CF_marker[i] < 0)
          {
             HYPRE_Int jS, jA;
             rowc++;
@@ -1373,7 +1373,7 @@ hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
             A_FF_offd_i[row] = o_count_FF;
             A_FC_offd_i[rowc] = o_count_FC;
          }
-         else if (CF_marker[i] == -1)
+         else if (CF_marker[i] < 0)
          {
             rowc++;
             for (j = S_diag_i[i]; j < S_diag_i[i+1]; j++)
@@ -1488,7 +1488,7 @@ hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
             A_FF_offd_i[row] = o_count_FF;
             A_FC_offd_i[rowc] = o_count_FC;
          }
-         else if (CF_marker[i] == -1)
+         else if (CF_marker[i] < 0)
          {
             HYPRE_Int jS, jA;
             HYPRE_Real sum = 0;
