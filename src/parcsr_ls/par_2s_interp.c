@@ -238,7 +238,7 @@ hypre_BoomerAMGBuildModPartialExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_mar
          {
             new_fine_to_fine[row++] = fpt++;
          }
-         else if (CF_marker[i] == -1)
+         else if (CF_marker[i] < 0)
          {
             fpt++;
          }
@@ -747,7 +747,7 @@ hypre_BoomerAMGBuildModPartialNewExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *C
          {
             new_fine_to_fine[row++] = fpt++;
          }
-         else if (CF_marker[i] == -1)
+         else if (CF_marker[i] < 0)
          {
             fpt++;
          }

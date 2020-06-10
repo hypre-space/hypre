@@ -1535,7 +1535,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                                    CF_marker, S, coarse_pnts_global1,
                                                    debug_flag,
                                                    agg_P12_trunc_factor, agg_P12_max_elmts, col_offd_S_to_A, &P1);
-               else if (agg_interp_type == 7)
+               else if (agg_interp_type == 7 || agg_interp_type == 8)
                   hypre_BoomerAMGBuildModNewExtPIInterp(A_array[level],
                                                    CF_marker, S, coarse_pnts_global1,
                                                    debug_flag,
@@ -1570,7 +1570,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   /*if (num_functions > 1 && nodal > -1 && (!block_mode) )
                      dof_func_array[level+1] = coarse_dof_func;*/
                   hypre_TFree(col_offd_S_to_A, HYPRE_MEMORY_HOST);
-                  if (agg_interp_type == 1 || agg_interp_type == 6)
+                  if (agg_interp_type == 1 || agg_interp_type == 6 || agg_interp_type == 8)
                   {
                      hypre_BoomerAMGBuildPartialExtPIInterp(A_array[level],
                                                             CF_marker, S, coarse_pnts_global,
@@ -1710,7 +1710,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                                    debug_flag,
                                                    agg_P12_trunc_factor, agg_P12_max_elmts, col_offd_S_to_A, &P1);
                   }
-                  else if (agg_interp_type == 7)
+                  else if (agg_interp_type == 7 || agg_interp_type == 8)
                   {
                      hypre_BoomerAMGBuildModNewExtPIInterp(A_array[level],
                                                    CF3_marker, S, coarse_pnts_global1,
@@ -1741,7 +1741,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                              &coarse_dof_func,&coarse_pnts_global);
                   /*if (num_functions > 1 && nodal > -1 && (!block_mode) )
                      dof_func_array[level+1] = coarse_dof_func;*/
-                  if (agg_interp_type == 1 || agg_interp_type == 6)
+                  if (agg_interp_type == 1 || agg_interp_type == 6 || agg_interp_type == 8)
                   {
                      hypre_BoomerAMGBuildPartialExtPIInterp(A_array[level],
                                                             CF_marker, S, coarse_pnts_global,
