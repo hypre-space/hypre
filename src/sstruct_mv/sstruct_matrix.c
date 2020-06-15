@@ -764,20 +764,31 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
    HYPRE_IJMatrix          ijmatrix    = hypre_SStructMatrixIJMatrix(matrix);
    HYPRE_Int               matrix_type = hypre_SStructMatrixObjectType(matrix);
    hypre_SStructGraph     *graph       = hypre_SStructMatrixGraph(matrix);
-   hypre_SStructGrid      *grid        = hypre_SStructGraphGrid(graph);
-   HYPRE_Int               nparts      = hypre_SStructGraphNParts(graph);
-   hypre_SStructPGrid    **pgrids      = hypre_SStructGraphPGrids(graph);
    hypre_SStructStencil ***stencils    = hypre_SStructGraphStencils(graph);
    HYPRE_Int               nUventries  = hypre_SStructGraphNUVEntries(graph);
    HYPRE_Int              *iUventries  = hypre_SStructGraphIUVEntries(graph);
    hypre_SStructUVEntry  **Uventries   = hypre_SStructGraphUVEntries(graph);
+   hypre_SStructGrid      *grid        = hypre_SStructGraphGrid(graph);
    HYPRE_Int             **nvneighbors = hypre_SStructGridNVNeighbors(grid);
+
+   hypre_SStructGrid      *ran_grid    = hypre_SStructGraphRanGrid(graph);
+   hypre_SStructPGrid    **ran_pgrids  = hypre_SStructGridPGrids(ran_grid);
+   HYPRE_Int               ran_nparts  = hypre_SStructGraphNParts(ran_grid);
+   HYPRE_Int              *ran_pids    = hypre_SStructGridPartIDs(ran_grid);
+
+   hypre_SStructGrid      *dom_grid    = hypre_SStructGraphDomGrid(graph);
+   hypre_SStructPGrid    **dom_pgrids  = hypre_SStructGridPGrids(dom_grid);
+   HYPRE_Int               dom_nparts  = hypre_SStructGraphNParts(dom_grid);
+   HYPRE_Int              *dom_pids    = hypre_SStructGridPartIDs(dom_grid);
+
    hypre_StructGrid       *sgrid;
    hypre_SStructStencil   *stencil;
    HYPRE_Int              *split;
    HYPRE_Int               nvars;
-   HYPRE_Int               nrows, rowstart, nnzs ;
-   HYPRE_Int               part, var, entry, b, m, mi;
+   HYPRE_Int               nrows, rowstart, nnzs;
+   HYPRE_Int               ran_part, dom_part, part_id;
+   HYPRE_Int               var, entry, b, m, mi;
+   HYPRE_Int               box_volume;
    HYPRE_Int              *row_sizes;
    HYPRE_Int               max_row_size;
 
@@ -791,13 +802,13 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
 
    if (matrix_type == HYPRE_SSTRUCT || matrix_type == HYPRE_STRUCT)
    {
-      rowstart = hypre_SStructGridGhstartRank(grid);
-      nrows = hypre_SStructGridGhlocalSize(grid) ;
+      rowstart = hypre_SStructGridGhstartRank(ran_grid);
+      nrows = hypre_SStructGridGhlocalSize(ran_grid);
    }
    else /* matrix_type == HYPRE_PARCSR */
    {
-      rowstart = hypre_SStructGridStartRank(grid);
-      nrows = hypre_SStructGridLocalSize(grid);
+      rowstart = hypre_SStructGridStartRank(ran_grid);
+      nrows = hypre_SStructGridLocalSize(ran_grid);
    }
 
    /* set row sizes */
@@ -806,60 +817,103 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
    ghost_box = hypre_BoxCreate(ndim);
    row_sizes = hypre_CTAlloc(HYPRE_Int, nrows);
    hypre_SetIndex(stride, 1);
-   for (part = 0; part < nparts; part++)
+   for (ran_part = 0; ran_part < ran_nparts; ran_part++)
    {
-      nvars = hypre_SStructPGridNVars(pgrids[part]);
-      for (var = 0; var < nvars; var++)
-      {
-         sgrid = hypre_SStructPGridSGrid(pgrids[part], var);
+      part_id = ran_pids[ran_part];
 
-         stencil = stencils[part][var];
-         split = hypre_SStructMatrixSplit(matrix, part, var);
-         nnzs = 0;
-         for (entry = 0; entry < hypre_SStructStencilSize(stencil); entry++)
+      /* Check if this part belongs also to the domain grid */
+      dom_part = hypre_BinarySearch(dom_pids, part_id, dom_nparts);
+
+      if (dom_part > -1)
+      {
+         nvars = hypre_SStructPGridNVars(dom_pgrids[dom_part]);
+         for (var = 0; var < nvars; var++)
          {
-            if (split[entry] == -1)
+            sgrid = hypre_SStructPGridSGrid(dom_pgrids[dom_part], var);
+
+            stencil = stencils[dom_part][var];
+            split = hypre_SStructMatrixSplit(matrix, dom_part, var);
+            nnzs = 0;
+            for (entry = 0; entry < hypre_SStructStencilSize(stencil); entry++)
             {
-               nnzs++;
+               if (split[entry] == -1)
+               {
+                  nnzs++;
+               }
             }
-         }
 #if 0
-         /* TODO: For now, assume stencil is full/complete */
-         if (hypre_SStructMatrixSymmetric(matrix))
-         {
-            nnzs = 2*nnzs - 1;
-         }
-#endif
-         boxes = hypre_StructGridBoxes(sgrid);
-         hypre_ForBoxI(b, boxes)
-         {
-            box = hypre_BoxArrayBox(boxes, b);
-            hypre_CopyBox(box, ghost_box);
-            if (matrix_type == HYPRE_SSTRUCT || matrix_type == HYPRE_STRUCT)
-	    {
-               hypre_BoxGrowByArray(ghost_box, hypre_StructGridNumGhost(sgrid));
+            /* TODO: For now, assume stencil is full/complete */
+            if (hypre_SStructMatrixSymmetric(matrix))
+            {
+               nnzs = 2*nnzs - 1;
             }
-            start = hypre_BoxIMin(box);
-            hypre_BoxGetSize(box, loop_size);
-            hypre_BoxLoop1Begin(hypre_SStructMatrixNDim(matrix), loop_size,
-                                ghost_box, start, stride, mi);
+#endif
+            boxes = hypre_StructGridBoxes(sgrid);
+            hypre_ForBoxI(b, boxes)
+            {
+               box = hypre_BoxArrayBox(boxes, b);
+               hypre_CopyBox(box, ghost_box);
+               if (matrix_type == HYPRE_SSTRUCT || matrix_type == HYPRE_STRUCT)
+               {
+                  hypre_BoxGrowByArray(ghost_box, hypre_StructGridNumGhost(sgrid));
+               }
+               box_volume = hypre_BoxVolume(ghost_box);
+
+               start = hypre_BoxIMin(box);
+               hypre_BoxGetSize(box, loop_size);
+               hypre_BoxLoop1Begin(ndim, loop_size, ghost_box, start, stride, mi);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,mi) HYPRE_SMP_SCHEDULE
 #endif
-            hypre_BoxLoop1For(mi)
-            {
-               row_sizes[m+mi] = nnzs;
+               hypre_BoxLoop1For(mi)
+               {
+                  row_sizes[m+mi] = nnzs;
+               }
+               hypre_BoxLoop1End(mi);
+
+               m += box_volume;
             }
-            hypre_BoxLoop1End(mi);
 
-            m += hypre_BoxVolume(ghost_box);
+            max_row_size = hypre_max(max_row_size, nnzs);
+            if (nvneighbors[dom_part][var])
+            {
+               max_row_size =
+                  hypre_max(max_row_size, hypre_SStructStencilSize(stencil));
+            }
          }
-
-         max_row_size = hypre_max(max_row_size, nnzs);
-         if (nvneighbors[part][var])
+      }
+      else
+      {
+         /* This part belongs only to the range grid */
+         nvars = hypre_SStructPGridNVars(ran_pgrids[ran_part]);
+         for (var = 0; var < nvars; var++)
          {
-            max_row_size =
-               hypre_max(max_row_size, hypre_SStructStencilSize(stencil));
+            sgrid = hypre_SStructPGridSGrid(ran_pgrids[ran_part], var);
+            boxes = hypre_StructGridBoxes(sgrid);
+            hypre_ForBoxI(b, boxes)
+            {
+               box = hypre_BoxArrayBox(boxes, b);
+               hypre_CopyBox(box, ghost_box);
+               if (matrix_type == HYPRE_SSTRUCT || matrix_type == HYPRE_STRUCT)
+               {
+                  hypre_BoxGrowByArray(ghost_box, hypre_StructGridNumGhost(sgrid));
+               }
+               box_volume = hypre_BoxVolume(ghost_box);
+
+               start = hypre_BoxIMin(box);
+               hypre_BoxGetSize(box, loop_size);
+               hypre_BoxLoop1Begin(ndim, loop_size, ghost_box, start, stride, mi);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,mi) HYPRE_SMP_SCHEDULE
+#endif
+               hypre_BoxLoop1For(mi)
+               {
+                  row_sizes[m+mi] = 1;
+               }
+               hypre_BoxLoop1End(mi);
+
+               m += box_volume;
+            }
          }
       }
    }
