@@ -69,7 +69,7 @@ HYPRE_Int test_SetAddSet(MPI_Comm comm, HYPRE_MemoryLocation memory_location, HY
 //#define CUDA_PROFILER
 
 hypre_int
-main( HYPRE_Int  argc,
+main( hypre_int  argc,
       char      *argv[] )
 {
    MPI_Comm                  comm = hypre_MPI_COMM_WORLD;
