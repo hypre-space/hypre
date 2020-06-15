@@ -26,9 +26,19 @@ HEADERS =\
 
 FILES =\
  csr_matop.c\
- csr_matop_device.c\
  csr_matrix.c\
  csr_matvec.c\
+ genpart.c\
+ HYPRE_csr_matrix.c\
+ HYPRE_mapped_matrix.c\
+ HYPRE_multiblock_matrix.c\
+ HYPRE_vector.c\
+ mapped_matrix.c\
+ multiblock_matrix.c\
+ vector_batched.c
+
+CUFILES =\
+ csr_matop_device.c\
  csr_matvec_device.c\
  csr_matvec_oomp.c\
  csr_spadd_device.c\
@@ -40,18 +50,15 @@ FILES =\
  csr_spgemm_device_rowest.c\
  csr_spgemm_device_util.c\
  csr_sptrans_device.c\
- genpart.c\
- HYPRE_csr_matrix.c\
- HYPRE_mapped_matrix.c\
- HYPRE_multiblock_matrix.c\
- HYPRE_vector.c\
- mapped_matrix.c\
- multiblock_matrix.c\
- vector.c\
- vector_batched.c
+ vector.c
 
-OBJS = ${FILES:.c=.o}
-#CUOBJS = ${FILES_NVCC:.cu=.o}
+COBJS = ${FILES:.c=.o}
+ifeq ($(CUCC), )
+   CUOBJS = ${CUFILES:.c=.o}
+else
+   CUOBJS = ${CUFILES:.c=.obj}
+endif
+OBJS = ${COBJS} ${CUOBJS}
 
 SONAME = libHYPRE_seq_mv-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
@@ -70,7 +77,7 @@ install: libHYPRE_seq_mv${HYPRE_LIB_SUFFIX}
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
-	rm -f *.o libHYPRE*
+	rm -f *.o* libHYPRE*
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
@@ -79,7 +86,7 @@ distclean: clean
 # Rules
 ##################################################################
 
-libHYPRE_seq_mv.a: ${OBJS} ${CUOBJS}
+libHYPRE_seq_mv.a: ${OBJS}
 	@echo  "Building $@ ... "
 	${AR} $@ ${OBJS}
 	${RANLIB} $@

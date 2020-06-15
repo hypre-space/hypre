@@ -333,9 +333,9 @@ hypreDevice_CSRSpGemmRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    // for cases where one WARP works on a row
    dim3 gDim( (m + bDim.z - 1) / bDim.z );
 
-   HYPRE_Int   row_est_mtd    = hypre_handle()->spgemm_rownnz_estimate_method;
-   HYPRE_Int   cohen_nsamples = hypre_handle()->spgemm_rownnz_estimate_nsamples;
-   float cohen_mult           = hypre_handle()->spgemm_rownnz_estimate_mult_factor;
+   HYPRE_Int   row_est_mtd    = hypre_HandleSpgemmRownnzEstimateMethod(hypre_handle());
+   HYPRE_Int   cohen_nsamples = hypre_HandleSpgemmRownnzEstimateNsamples(hypre_handle());
+   float cohen_mult           = hypre_HandleSpgemmRownnzEstimateMultFactor(hypre_handle());
 
    if (row_est_mtd == 1)
    {

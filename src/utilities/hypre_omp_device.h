@@ -108,11 +108,6 @@ HYPRE_Int HYPRE_OMPOffloadOn();
 HYPRE_Int HYPRE_OMPOffloadOff();
 HYPRE_Int HYPRE_OMPOffloadStatPrint();
 
-#define HYPRE_MIN_GPU_SIZE (131072)
-
-#define hypre_SetDeviceOn() HYPRE_OMPOffloadOn()
-#define hypre_SetDeviceOff() HYPRE_OMPOffloadOff()
-
 #endif /* HYPRE_USING_DEVICE_OPENMP */
 #endif /* HYPRE_OMP_DEVICE_H */
 

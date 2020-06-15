@@ -12,6 +12,7 @@
  *****************************************************************************/
 
 #include "_hypre_IJ_mv.h"
+#include "hypre_cuda_utils.h"
 
 #if defined(HYPRE_USING_CUDA)
 
@@ -739,6 +740,22 @@ hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix)
    hypre_IJMatrixTranslator(matrix) = NULL;
 
    return hypre_error_flag;
+}
+
+void
+hypre_IJMatrixSetConstantValuesParCSRDevice( hypre_IJMatrix *matrix,
+                                             HYPRE_Complex   value )
+{
+   hypre_ParCSRMatrix *par_matrix = (hypre_ParCSRMatrix *) hypre_IJMatrixObject( matrix );
+   hypre_CSRMatrix    *diag       = hypre_ParCSRMatrixDiag(par_matrix);
+   hypre_CSRMatrix    *offd       = hypre_ParCSRMatrixOffd(par_matrix);
+   HYPRE_Complex      *diag_data  = hypre_CSRMatrixData(diag);
+   HYPRE_Complex      *offd_data  = hypre_CSRMatrixData(offd);
+   HYPRE_Int           nnz_diag   = hypre_CSRMatrixNumNonzeros(diag);
+   HYPRE_Int           nnz_offd   = hypre_CSRMatrixNumNonzeros(offd);
+
+   HYPRE_THRUST_CALL( fill_n, diag_data, nnz_diag, value );
+   HYPRE_THRUST_CALL( fill_n, offd_data, nnz_offd, value );
 }
 
 #endif

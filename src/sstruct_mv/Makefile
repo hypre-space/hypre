@@ -18,6 +18,8 @@ C_COMPILE_FLAGS = \
  -I$(srcdir)/../IJ_mv\
  ${CINCLUDES}
 
+CU_COMPILE_FLAGS = ${C_COMPILE_FLAGS}
+
 HEADERS =\
  HYPRE_sstruct_mv.h\
  _hypre_sstruct_mv.h\
@@ -46,10 +48,18 @@ FILES =\
  sstruct_matrix.c\
  sstruct_matvec.c\
  sstruct_scale.c\
- sstruct_stencil.c\
+ sstruct_stencil.c
+
+CUFILES =\
  sstruct_vector.c
 
-OBJS = ${FILES:.c=.o}
+COBJS = ${FILES:.c=.o}
+ifeq ($(CUCC), )
+   CUOBJS = ${CUFILES:.c=.o}
+else
+   CUOBJS = ${CUFILES:.c=.obj}
+endif
+OBJS = ${COBJS} ${CUOBJS}
 
 SONAME = libHYPRE_sstruct_mv-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
@@ -68,7 +78,7 @@ install: libHYPRE_sstruct_mv${HYPRE_LIB_SUFFIX}
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
-	rm -f *.o libHYPRE*
+	rm -f *.o* libHYPRE*
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean

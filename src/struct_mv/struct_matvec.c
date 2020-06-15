@@ -12,6 +12,7 @@
  *****************************************************************************/
 
 #include "_hypre_struct_mv.h"
+#include "boxloop.h"
 
 /* this currently cannot be greater than 7 */
 #ifdef MAX_DEPTH

@@ -30,6 +30,8 @@
 #include "superlu_ddefs.h"
 #endif
 
+#include "../utilities/hypre_cuda_utils.h"
+
 /* begin lobpcg */
 
 #define NO_SOLVER -9198

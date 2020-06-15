@@ -78,11 +78,6 @@ HYPRE_Int HYPRE_VectorInitialize( HYPRE_Vector vector );
 HYPRE_Int HYPRE_VectorPrint( HYPRE_Vector vector , char *file_name );
 HYPRE_Vector HYPRE_VectorRead( char *file_name );
 
-HYPRE_Int HYPRE_CSRMatrixDeviceSpGemmSetRownnzEstimateMethod( HYPRE_Int value );
-HYPRE_Int HYPRE_CSRMatrixDeviceSpGemmSetRownnzEstimateNSamples( HYPRE_Int value );
-HYPRE_Int HYPRE_CSRMatrixDeviceSpGemmSetRownnzEstimateMultFactor( HYPRE_Real value );
-HYPRE_Int HYPRE_CSRMatrixDeviceSpGemmSetHashType( char value );
-
 typedef enum HYPRE_TimerID
 {
    // timers for solver phase

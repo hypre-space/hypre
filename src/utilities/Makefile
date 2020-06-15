@@ -14,7 +14,9 @@ C_COMPILE_FLAGS =\
    -I$(srcdir)\
    ${CINCLUDES}\
    ${CDEFS}
+
 CXX_COMPILE_FLAGS = ${C_COMPILE_FLAGS}
+CU_COMPILE_FLAGS = ${C_COMPILE_FLAGS}
 
 HEADERS =\
  amg_linklist.h\
@@ -39,15 +41,11 @@ FILES =\
  fortran_matrix.c\
  hypre_ap.c\
  hypre_complex.c\
- hypre_cuda_utils.c\
  hypre_error.c\
- hypre_general.c\
  hypre_hopscotch_hash.c\
- hypre_memory.c\
  hypre_merge_sort.c\
  hypre_mpi_comm_f2c.c\
  hypre_nvtx.c\
- hypre_omp_device.c\
  hypre_prefix_sum.c\
  hypre_printf.c\
  hypre_qsort.c\
@@ -58,7 +56,19 @@ FILES =\
  timer.c\
  timing.c
 
-OBJS = ${FILES:.c=.o}
+CUFILES=\
+ hypre_cuda_utils.c\
+ hypre_general.c\
+ hypre_memory.c\
+ hypre_omp_device.c
+
+COBJS = ${FILES:.c=.o}
+ifeq ($(CUCC), )
+   CUOBJS = ${CUFILES:.c=.o}
+else
+   CUOBJS = ${CUFILES:.c=.obj}
+endif
+OBJS = ${COBJS} ${CUOBJS}
 
 SONAME = libHYPRE_utilities-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
@@ -80,7 +90,7 @@ install: libHYPRE_utilities${HYPRE_LIB_SUFFIX}
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
-	rm -f *.o libHYPRE*
+	rm -f *.o* libHYPRE*
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean

@@ -6,6 +6,7 @@
  ******************************************************************************/
 
 #include "_hypre_utilities.h"
+#include "hypre_omp_device.h"
 
 #if defined(HYPRE_USING_DEVICE_OPENMP)
 

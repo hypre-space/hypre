@@ -16,6 +16,7 @@
 #include "_hypre_IJ_mv.h"
 #include "_hypre_parcsr_mv.h"
 #include "HYPRE_parcsr_ls.h"
+#include "../utilities/hypre_cuda_utils.h"
 
 HYPRE_Int buildMatrixEntries(MPI_Comm comm,
                              HYPRE_Int nx, HYPRE_Int ny, HYPRE_Int nz,

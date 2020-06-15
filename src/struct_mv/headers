@@ -27,40 +27,6 @@ cat > $INTERNAL_HEADER <<@
 
 @
 
-
-cat >> $INTERNAL_HEADER <<@
-#if defined(HYPRE_USING_RAJA)
-@
-
-cat boxloop_raja.h                >> $INTERNAL_HEADER
-
-cat >> $INTERNAL_HEADER <<@
-#elif defined(HYPRE_USING_KOKKOS)
-@
-
-cat boxloop_kokkos.h              >> $INTERNAL_HEADER
-
-cat >> $INTERNAL_HEADER <<@
-#elif defined(HYPRE_USING_CUDA)
-@
-
-cat boxloop_cuda.h                >> $INTERNAL_HEADER
-
-cat >> $INTERNAL_HEADER <<@
-#elif defined(HYPRE_USING_DEVICE_OPENMP)
-@
-cat boxloop_omp45.h                >> $INTERNAL_HEADER
-
-cat >> $INTERNAL_HEADER <<@
-#else
-@
-
-cat boxloop.h                     >> $INTERNAL_HEADER
-
-cat >> $INTERNAL_HEADER <<@
-#endif
-@
-
 cat >> $INTERNAL_HEADER <<@
 #ifdef __cplusplus
 extern "C" {
@@ -71,15 +37,15 @@ extern "C" {
 # Structures and prototypes
 #===========================================================================
 
-cat box.h                  >> $INTERNAL_HEADER  
+cat box.h                  >> $INTERNAL_HEADER
 cat assumed_part.h         >> $INTERNAL_HEADER
 cat box_manager.h          >> $INTERNAL_HEADER
-cat struct_grid.h          >> $INTERNAL_HEADER  
-cat struct_stencil.h       >> $INTERNAL_HEADER  
-cat struct_communication.h >> $INTERNAL_HEADER  
-cat computation.h          >> $INTERNAL_HEADER  
-cat struct_matrix.h        >> $INTERNAL_HEADER  
-cat struct_vector.h        >> $INTERNAL_HEADER  
+cat struct_grid.h          >> $INTERNAL_HEADER
+cat struct_stencil.h       >> $INTERNAL_HEADER
+cat struct_communication.h >> $INTERNAL_HEADER
+cat computation.h          >> $INTERNAL_HEADER
+cat struct_matrix.h        >> $INTERNAL_HEADER
+cat struct_vector.h        >> $INTERNAL_HEADER
 
 cat protos.h               >> $INTERNAL_HEADER
 

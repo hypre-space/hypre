@@ -7,6 +7,7 @@
 
 #include "_hypre_sstruct_ls.h"
 #include "_hypre_parcsr_ls.h"
+#include "boxloop.h"
 
 #include "gselim.h"
 

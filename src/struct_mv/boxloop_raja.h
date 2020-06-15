@@ -283,15 +283,11 @@ hypre_CheckErrorDevice(cudaDeviceSynchronize());
    hypre_fence();                                                              \
 }
 
-#define zypre_newBoxLoopSetOneBlock()
-
 #define hypre_newBoxLoopGetIndex(index)                                        \
   index[0] = hypre_IndexD(local_idx, 0);                                       \
   index[1] = hypre_IndexD(local_idx, 1);                                       \
   index[2] = hypre_IndexD(local_idx, 2);
 
-#define hypre_BoxLoopGetIndex    zypre_BoxLoopGetIndex
-#define hypre_BoxLoopSetOneBlock zypre_newBoxLoopSetOneBlock
 #define hypre_BoxLoopBlock()       0
 #define hypre_BoxLoop0Begin      zypre_newBoxLoop0Begin
 #define hypre_BoxLoop0For        zypre_newBoxLoop0For

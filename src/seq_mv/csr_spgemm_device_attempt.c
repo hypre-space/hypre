@@ -438,7 +438,7 @@ hypreDevice_CSRSpGemmWithRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    // for cases where one WARP works on a row
    dim3 gDim( (m + bDim.z - 1) / bDim.z );
 
-   char hash_type = hypre_handle()->spgemm_hash_type;
+   char hash_type = hypre_HandleSpgemmHashType(hypre_handle());
 
    /* ---------------------------------------------------------------------------
     * build hash table

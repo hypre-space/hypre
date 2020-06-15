@@ -12,6 +12,7 @@
 #include "_hypre_utilities.h"
 #include "HYPRE_struct_ls.h"
 #include "HYPRE_krylov.h"
+#include "../struct_mv/boxloop.h"
 
 #define HYPRE_MFLOPS 0
 #if HYPRE_MFLOPS

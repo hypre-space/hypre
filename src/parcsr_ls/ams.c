@@ -8,6 +8,7 @@
 #include "_hypre_parcsr_ls.h"
 #include "float.h"
 #include "ams.h"
+#include "hypre_cuda_utils.h"
 
 /*--------------------------------------------------------------------------
  * hypre_ParCSRRelax

@@ -6,6 +6,7 @@
  ******************************************************************************/
 
 #include "_hypre_parcsr_mv.h"
+#include "hypre_cuda_utils.h"
 
 #if defined(HYPRE_USING_CUDA)
 
