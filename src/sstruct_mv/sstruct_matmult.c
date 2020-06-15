@@ -149,25 +149,27 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
 
    hypre_qsort0(pids_all, 0, nparts_all - 1);
 
-   part = pids_all[0];
-   part_cnt = 1;
-   nparts_M = 0;
+   part_cnt = nparts_M = 0;
    for (p = 1; p < nparts_all; p++)
    {
+      if (part_cnt == 0)
+      {
+         part = pids_all[p];
+         part_cnt++;
+      }
+
       if (pids_all[p] == part)
       {
          part_cnt++;
          if (part_cnt == nmatrices)
          {
             pids_M[nparts_M++] = part;
-            part_cnt = 1;
-            part = pids_all[++p];
+            part_cnt = 0;
          }
       }
       else
       {
-         part = pids_all[p];
-         part_cnt = 1;
+         part_cnt = 0;
       }
    }
    hypre_TFree(pids_all);
