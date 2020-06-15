@@ -491,10 +491,13 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
    hypre_IndexRef         start;
    hypre_Index            stride;
 
-   HYPRE_Int              ndim, i, si, d, sdiag;
-
-   HYPRE_Real             cx, cy, cz, sqcx, sqcy, sqcz, tcx, tcy, tcz, diag;
-   HYPRE_Real             mean[HYPRE_MAXDIM], deviation[HYPRE_MAXDIM];
+   HYPRE_Int              ndim, i, si, d;
+   HYPRE_Int              diag_entry;
+   HYPRE_Real             cx, cy, cz;
+   HYPRE_Real             sqcx, sqcy, sqcz;
+   HYPRE_Real             tcx, tcy, tcz, diag;
+   HYPRE_Real             sqmean[HYPRE_MAXDIM];
+   HYPRE_Real             deviation[HYPRE_MAXDIM];
 
    /*----------------------------------------------------------
     * Exit if user gives dxyz different than zero
@@ -514,6 +517,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
    stencil       = hypre_StructMatrixStencil(A);
    stencil_shape = hypre_StructStencilShape(stencil);
    stencil_size  = hypre_StructStencilSize(stencil);
+   diag_entry    = hypre_StructStencilDiagEntry(stencil);
    compute_boxes = hypre_StructGridBoxes(grid);
    tot_size      = hypre_StructGridGlobalSize(grid);
    constant_coefficient = hypre_StructMatrixConstantCoefficient(A);
@@ -532,18 +536,6 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
    sqcy = 0.0;
    sqcz = 0.0;
 
-   /* find diagonal stencil entry */
-   for (si = 0; si < stencil_size; si++)
-   {
-      if ((hypre_IndexD(stencil_shape[si], 0) == 0) &&
-          (hypre_IndexD(stencil_shape[si], 1) == 0) &&
-          (hypre_IndexD(stencil_shape[si], 2) == 0))
-      {
-         sdiag = si;
-         break;
-      }
-   }
-
    hypre_ForBoxI(i, compute_boxes)
    {
       compute_box = hypre_BoxArrayBox(compute_boxes, i);
@@ -561,7 +553,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
          tcz = 0.0;
 
          /* get sign of diagonal */
-         Ap = hypre_StructMatrixBoxData(A, i, sdiag);
+         Ap = hypre_StructMatrixBoxData(A, i, diag_entry);
          diag = 1.0;
          if (Ap[Ai] < 0)
          {
@@ -618,7 +610,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
             tcz = 0.0;
 
             /* get sign of diagonal */
-            Ap = hypre_StructMatrixBoxData(A, i, sdiag);
+            Ap = hypre_StructMatrixBoxData(A, i, diag_entry);
             diag = 1.0;
             if (Ap[Ai] < 0)
             {
@@ -680,8 +672,8 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
    {
       for (d = 0; d < ndim; d++)
       {
-         mean[d]= cxyz[d];
-         deviation[d]= sqcxyz[d];
+         sqmean[d]    = cxyz[d]*cxyz[d];
+         deviation[d] = sqcxyz[d];
       }
    }
    /* constant_coefficient==0, all coefficients vary with space */
@@ -702,7 +694,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
 
       for (d = 0; d < ndim; d++)
       {
-         mean[d]      = cxyz[d]/tot_size;
+         sqmean[d]    = pow(cxyz[d]/tot_size, 2);
          deviation[d] = sqcxyz[d]/tot_size;
       }
    }
@@ -734,7 +726,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
    for (d = 0; d < ndim; d++)
    {
       /* square of coeff. of variation */
-      if (deviation[d]/(mean[d]*mean[d]) > 1.1)
+      if (sqmean[d] > 0 && deviation[d]/sqmean[d] > 1.1)
       {
          *dxyz_flag = 1;
       }
