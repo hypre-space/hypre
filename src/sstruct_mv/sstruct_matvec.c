@@ -313,6 +313,7 @@ hypre_SStructMatvecCompute( void                *matvec_vdata,
 {
    hypre_SStructMatvecData  *matvec_data  = (hypre_SStructMatvecData   *)matvec_vdata;
    HYPRE_Int                 nparts       = (matvec_data -> nparts);
+   HYPRE_Int                 transpose    = (matvec_data -> transpose);
    void                    **pmatvec_data = (matvec_data -> pmatvec_data);
 
    void                     *pdata;
@@ -361,7 +362,14 @@ hypre_SStructMatvecCompute( void                *matvec_vdata,
          hypre_SStructVectorConvert(x, &parx);
          hypre_SStructVectorConvert(y, &pary);
 
-         hypre_ParCSRMatrixMatvec(alpha, parcsrA, parx, 1.0, pary);
+         if (transpose)
+         {
+            hypre_ParCSRMatrixMatvecT(alpha, parcsrA, parx, 1.0, pary);
+         }
+         else
+         {
+            hypre_ParCSRMatrixMatvec(alpha, parcsrA, parx, 1.0, pary);
+         }
 
          /* dummy functions since there is nothing to restore  */
 
