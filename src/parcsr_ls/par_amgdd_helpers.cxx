@@ -18,6 +18,7 @@
 #if defined(HYPRE_USING_GPU)
 #include "cuda_profiler_api.h"
 #include <thrust/transform_scan.h>
+#include <thrust/gather.h>
 #include <thrust/sort.h>
 #include <thrust/set_operations.h>
 #include <thrust/execution_policy.h>
@@ -336,6 +337,138 @@ extern "C"
       }
    }
 
+   struct not_in_range
+   {
+      HYPRE_Int lower;
+      HYPRE_Int upper;
+      __host__ __device__
+      bool operator()(const int x)
+      {
+         return (x < lower || x >= upper);
+      }
+   };
+   struct minus_equal
+   {
+      HYPRE_Int a;
+      __host__ __device__
+      HYPRE_Int operator()(const HYPRE_Int x)
+      {
+         return x - a;
+      }
+   };
+
+   void MarkCoarseGPU(hypre_ParCompGrid *compGrid,
+                        HYPRE_Int *send_flag,
+                        HYPRE_Int num_send_nodes,
+                        HYPRE_Int *add_flag, 
+                        HYPRE_Int num_owned_coarse,
+                        HYPRE_Int dist)
+   {
+      // Owned points 
+      not_in_range owned_range;
+      owned_range.lower = 0;
+      owned_range.upper = hypre_ParCompGridNumOwnedNodes(compGrid);
+      thrust::device_vector<HYPRE_Int> owned_real_indices_d(num_send_nodes); 
+      thrust::device_vector<HYPRE_Int> owned_coarse_indices_d(num_send_nodes); 
+
+      // !!! Debug
+      HYPRE_Int myid;
+      hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+      if (myid == 1)
+      {
+         HYPRE_Int i;
+         printf("send flag = ");
+         for (i = 0; i < num_send_nodes; i++)
+            printf("%d ", send_flag[i]);
+         printf("\n");
+         printf("sequential coarse indices = ");
+         for (i = 0; i < num_send_nodes; i++)
+            if (send_flag[i] >= 0)
+               printf("%d ", hypre_ParCompGridOwnedCoarseIndices(compGrid)[ send_flag[i] ]);
+         printf("\n");
+      }
+
+      auto owned_real_indices_end = thrust::remove_copy_if(thrust::cuda::par.on(HYPRE_STREAM(1)),
+                                                         send_flag,
+                                                         send_flag + num_send_nodes,
+                                                         send_flag,
+                                                         owned_real_indices_d.begin(),
+                                                         owned_range); 	
+      hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1)));
+      HYPRE_Int num_owned_real = owned_real_indices_end - owned_real_indices_d.begin();
+
+      // !!! Debug
+      /* if (myid == 1) */
+      /* { */
+      /*    thrust::host_vector<HYPRE_Int> owned_real_indices_h = owned_real_indices_d; */
+      /*    HYPRE_Int i; */
+      /*    printf("owned real indices = "); */
+      /*    for (auto it = owned_real_indices_h.begin(); it != owned_real_indices_h.end(); ++it) */
+      /*       printf("%d, ", *it); */
+      /*    printf("\n"); */
+      /* } */
+
+      thrust::gather(thrust::cuda::par.on(HYPRE_STREAM(1)),
+                        owned_real_indices_d.begin(),
+                        owned_real_indices_end,
+                        hypre_ParCompGridOwnedCoarseIndices(compGrid),
+                        owned_coarse_indices_d.begin());
+      hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1)));
+
+      // !!! Debug
+      if (myid == 1)
+      {
+         thrust::host_vector<HYPRE_Int> owned_coarse_indices_h = owned_coarse_indices_d;
+         HYPRE_Int i;
+         printf("    owned coarse indices = ");
+         for (auto it = owned_coarse_indices_h.begin(); it != owned_coarse_indices_h.end(); ++it)
+            printf("%d ", *it);
+         printf("\n");
+      }
+
+      thrust::constant_iterator<HYPRE_Int> dist_it(dist);
+      thrust::scatter_if(thrust::cuda::par.on(HYPRE_STREAM(1)),
+                           dist_it,
+                           dist_it + (owned_real_indices_end - owned_real_indices_d.begin()),
+                           owned_coarse_indices_d.begin(),
+                           owned_coarse_indices_d.begin(),
+                           add_flag,
+                           greater_than_equal_zero());
+      hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1)));
+
+      // !!! Debug
+      if (myid == 1)
+      {
+         HYPRE_Int i;
+         printf("add_flag = ");
+         for (i = 0; i < num_owned_coarse; i++)
+            printf("%d, ", add_flag[i]);
+         printf("\n");
+      }
+      // Nonowned points 
+      /* not_in_range nonowned_range; */
+      /* nonowned_range.lower = 0; */
+      /* nonowned_range.upper = hypre_ParCompGridNumNonOwnedNodes(compGrid); */
+      /* minus_equal minus_num_owned; */
+      /* minus_num_owned.a = hypre_ParCompGridNumOwnedNodes(compGrid); */
+      /* thrust::device_vector<HYPRE_Int> nonowned_scatter_indices_d(num_send_nodes); */ 
+      /* thrust::gather_if(thrust::cuda::par.on(HYPRE_STREAM(2)), */
+      /*                      thrust::make_transform_iterator(send_flag, minus_num_owned), */
+      /*                      thrust::make_transform_iterator(send_flag + num_send_nodes, minus_num_owned), */
+      /*                      thrust::make_transform_iterator(send_flag, minus_num_owned), */
+	                        /* hypre_ParCompGridNonOwnedCoarseIndices(compGrid), */
+      /*                      nonowned_scatter_indices_d.begin(), */
+      /*                      nonowned_range); */
+      /* thrust::scatter(thrust::cuda::par.on(HYPRE_STREAM(2)), */
+      /*                      dist_it, */
+      /*                      dist_it + num_send_nodes, */
+      /*                      nonowned_scatter_indices_d.begin(), */
+      /*                      add_flag + num_owned_coarse); */
+      hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1)));
+      /* hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(2))); */
+
+   }
+
    __global__
    void MarkCoarseKernel(HYPRE_Int *list,
               HYPRE_Int *marker,
@@ -360,8 +493,6 @@ extern "C"
                HYPRE_Int coarse_index = owned_coarse_indices[idx];
                if (coarse_index >= 0)
                {
-                  // !!! Debug
-                  /* if (myid == 10) printf("kernel idx %d, owned marker[%d] = %d\n", idx, coarse_index, dist); */
                   marker[ coarse_index ] = dist;
                   (*nodes_to_add) = 1;
                }
@@ -2214,7 +2345,7 @@ PackSendBuffer(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypre_P
 
    HYPRE_Int num_blocks;
    HYPRE_Int tpb = 64;
-   HYPRE_Int level_switch_to_cpu = 3;
+   HYPRE_Int level_switch_to_cpu = 10003;
 
    HYPRE_Int            level,i,j,k,cnt,row_length,send_elmt,coarse_grid_index,add_flag_index;
    HYPRE_Int            *nodes_to_add = hypre_CTAlloc(HYPRE_Int, 1, HYPRE_MEMORY_SHARED);
@@ -2275,6 +2406,12 @@ PackSendBuffer(hypre_ParAMGData *amg_data, hypre_ParCompGrid **compGrid, hypre_P
                  padding[current_level+1] + num_ghost_layers + 1,
                  nodes_to_add, myid);
          hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1)));
+         /* MarkCoarseGPU(compGrid[current_level], */
+         /*                send_flag[current_level][proc][current_level], */
+         /*                num_send_nodes[current_level][proc][current_level], */
+         /*                add_flag[current_level+1], */ 
+         /*                hypre_ParCompGridNumOwnedNodes(compGrid[current_level+1]), */
+         /*                padding[current_level+1] + num_ghost_layers + 1); */
       }
       else
 #endif
