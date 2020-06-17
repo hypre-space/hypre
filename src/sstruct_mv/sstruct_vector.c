@@ -860,3 +860,167 @@ hypre_SStructVectorClearGhostValues(hypre_SStructVector *vector)
 
    return hypre_error_flag;
 }   
+
+/*--------------------------------------------------------------------------
+ * hypre_SStructVectorPrintGLVis
+ *
+ * Print vector to a format readable by GLVis.
+ * This is mainly for debugging purposes.
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+hypre_SStructVectorPrintGLVis(const char           *fileprefix,
+                              hypre_SStructVector  *vector )
+{
+   hypre_SStructPVector   *pvector;
+   hypre_StructVector     *svector;
+   hypre_SStructPGrid     *pgrid;
+   hypre_StructGrid       *sgrid;
+   hypre_BoxArray         *grid_boxes;
+   hypre_BoxArray         *data_space;
+   hypre_Box              *gbox;
+   hypre_Box              *dbox;
+   hypre_IndexRef          start;
+   hypre_Index             loop_size;
+   hypre_Index             stride;
+   HYPRE_SStructVariable   vartype;
+   HYPRE_Real             *data;
+
+   FILE                   *file[8];
+   char                    filename[255];
+   char                    fe_coll[100];
+   HYPRE_Int               cellNV;
+   HYPRE_Int               var_off;
+   HYPRE_Int               vinc[8][3] = {{0, 0, 0}, {1, 0, 0},
+                                         {1, 1, 0}, {0, 1, 0},
+                                         {0, 0, 1}, {1, 0, 1},
+                                         {1, 1, 1}, {0, 1, 1}};
+   HYPRE_Int               myid;
+   HYPRE_Int               i, v, d, ndim, datai;
+   HYPRE_Int               part, nparts;
+   HYPRE_Int               var, nvars;
+   HYPRE_Int               dbox_volume;
+
+   /* Initialize some data */
+   hypre_SetIndex(stride, 1);
+   ndim   = hypre_SStructVectorNDim(vector);
+   nparts = hypre_SStructVectorNParts(vector);
+   hypre_MPI_Comm_rank(hypre_SStructVectorComm(vector), &myid);
+   switch (ndim)
+   {
+      case 2:
+         cellNV = 4;
+         break;
+
+      case 3:
+         cellNV = 8;
+         break;
+
+      default:
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                           "SStructVectorPrintGLVis works only in 2D/3D.\n");
+         return hypre_error_flag;
+   }
+   for (var = 0; var < 8; var++)
+   {
+      file[var] = NULL;
+   }
+
+   /* Open files */
+   for (part = 0; part < nparts; part++)
+   {
+      pvector = hypre_SStructVectorPVector(vector, part);
+      pgrid   = hypre_SStructPVectorPGrid(pvector);
+      nvars   = hypre_SStructPGridNVars(pgrid);
+      for (var = 0; var < nvars; var++)
+      {
+         vartype = hypre_SStructPGridVarType(pgrid, var);
+         hypre_sprintf(filename, "%s.%02d.%05d", fileprefix, vartype, myid);
+         if (file[vartype] == NULL)
+         {
+            file[vartype] = fopen(filename, "w");
+         }
+      }
+   }
+
+   /* Print variables separately */
+   for (part = 0; part < nparts; part++)
+   {
+      pvector = hypre_SStructVectorPVector(vector, part);
+      pgrid   = hypre_SStructPVectorPGrid(pvector);
+
+      for (var = 0; var < nvars; var++)
+      {
+         svector = hypre_SStructPVectorSVector(pvector, var);
+         vartype = hypre_SStructPGridVarType(pgrid, var);
+         sgrid   = hypre_SStructPGridCellSGrid(pgrid);
+
+         /* set the finite element collection based on variable type */
+         switch (vartype)
+         {
+            case HYPRE_SSTRUCT_VARIABLE_CELL:
+               hypre_sprintf(fe_coll, "Local_L2_%dD_P0", ndim);
+               var_off = 0;
+               break;
+
+            case HYPRE_SSTRUCT_VARIABLE_NODE:
+               hypre_sprintf(fe_coll, "Local_H1_%dD_P1", ndim);
+               var_off = 1;
+               break;
+
+            default:
+               hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: unsuported variable type\n");
+               return hypre_error_flag;
+         }
+
+         /* grid function header */
+         hypre_fprintf(file[vartype], "FiniteElementSpace\n");
+         hypre_fprintf(file[vartype], "FiniteElementCollection: %s\n", fe_coll);
+         hypre_fprintf(file[vartype], "VDim: 1\n");
+         hypre_fprintf(file[vartype], "Ordering: 0\n\n");
+
+         grid_boxes  = hypre_StructGridBoxes(sgrid);
+         data_space  = hypre_StructVectorDataSpace(svector);
+         data        = hypre_StructVectorData(svector);
+         dbox_volume = 0;
+         hypre_ForBoxI(i, grid_boxes)
+         {
+            gbox = hypre_BoxArrayBox(grid_boxes, i);
+            dbox = hypre_BoxArrayBox(data_space, i);
+
+            start       = hypre_BoxIMin(gbox);
+            dbox_volume = hypre_BoxVolume(dbox);
+            hypre_BoxGetSize(gbox, loop_size);
+            switch (vartype)
+            {
+               case HYPRE_SSTRUCT_VARIABLE_CELL:
+                  hypre_BoxLoop1Begin(ndim, loop_size, dbox, start, stride, datai);
+                  hypre_BoxLoop1For(datai)
+                  {
+                     hypre_fprintf(file[vartype], "%.14e\n", data[datai]);
+                  }
+                  hypre_BoxLoop1End(datai);
+                  break;
+
+               case HYPRE_SSTRUCT_VARIABLE_NODE:
+                  hypre_error_w_msg(HYPRE_ERROR_GENERIC, "TODO: print node variables");
+                  return hypre_error_flag;
+            }
+            data += dbox_volume;
+         } /* loop on grid boxes */
+      } /* loop on parts */
+   } /* loop on variables */
+
+   /*----------------------------------------
+    * Close files
+    *----------------------------------------*/
+   for (var = 0; var < 8; var++)
+   {
+      if (file[var] != NULL)
+      {
+         fflush(file[var]);
+         fclose(file[var]);
+      }
+   }
+
+   return hypre_error_flag;
+}
