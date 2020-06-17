@@ -129,20 +129,20 @@ hypre_SStructPGridDestroy( hypre_SStructPGrid *pgrid )
 {
    hypre_StructGrid **sgrids;
    hypre_BoxArray   **iboxarrays;
-   hypre_BoxArray   **partbnd_boxa;
+   hypre_BoxArray   **pbnd_boxa;
    HYPRE_Int          t;
 
    if (pgrid)
    {
-      sgrids       = hypre_SStructPGridSGrids(pgrid);
-      iboxarrays   = hypre_SStructPGridIBoxArrays(pgrid);
-      partbnd_boxa = hypre_SStructPGridPBndBoxArrays(pgrid);
+      sgrids     = hypre_SStructPGridSGrids(pgrid);
+      iboxarrays = hypre_SStructPGridIBoxArrays(pgrid);
+      pbnd_boxa  = hypre_SStructPGridPBndBoxArrays(pgrid);
       hypre_TFree(hypre_SStructPGridVarTypes(pgrid));
       for (t = 0; t < 8; t++)
       {
          HYPRE_StructGridDestroy(sgrids[t]);
          hypre_BoxArrayDestroy(iboxarrays[t]);
-         hypre_BoxArrayDestroy(partbnd_boxa[t]);
+         hypre_BoxArrayDestroy(pbnd_boxa[t]);
       }
       hypre_BoxArrayDestroy(hypre_SStructPGridPNeighbors(pgrid));
       hypre_TFree(hypre_SStructPGridPNborOffsets(pgrid));
@@ -2230,6 +2230,214 @@ hypre_SStructGridIntersect( hypre_SStructGrid   *grid,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_SStructGridPrintGLVis
+ *
+ * Save a GLVis mesh file with the given prefix corresponding to the input
+ * SStruct grid assuming that the cells in each part are the same. The optional
+ * trans and origin parameters specify the coordinate transformation for each
+ * part, relative to a square Cartesian grid.
+ *
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+hypre_SStructGridPrintGLVis( hypre_SStructGrid *grid,
+                             const char *meshprefix,
+                             HYPRE_Real *trans,
+                             HYPRE_Real *origin )
+{
+   HYPRE_Int            ndim   = hypre_SStructGridNDim(grid);
+   HYPRE_Int            nparts = hypre_SStructGridNParts(grid);
+
+   hypre_SStructPGrid  *pgrid;
+   hypre_StructGrid    *sgrid;
+   hypre_BoxArray      *boxes;
+   hypre_Box           *box;
+   hypre_Index          loop_size;
+   hypre_Index          index;
+   hypre_Index          stride;
+
+   /* GLVis data */
+   FILE                *file;
+   char                 meshfile[255];
+   HYPRE_Int            cellNV;
+   HYPRE_Int            ncells;
+   HYPRE_Int            nvertices;
+   HYPRE_Int            nelements;
+   HYPRE_Int            element_id = 2*ndim-1;
+   HYPRE_Int            use_trans = (trans != NULL && origin != NULL);
+   HYPRE_Real           coords[HYPRE_MAXDIM];
+   HYPRE_Int            vinc[8][3] = {{0, 0, 0}, {1, 0, 0},
+                                      {1, 1, 0}, {0, 1, 0},
+                                      {0, 0, 1}, {1, 0, 1},
+                                      {1, 1, 1}, {0, 1, 1}};
+
+   /* Local data */
+   char                 msg[512];
+   HYPRE_Int            myid;
+   HYPRE_Int            d, dd, i, v, part, vertex;
+   HYPRE_Real          *T, *O;
+
+   /* Initialize some data */
+   hypre_MPI_Comm_rank(hypre_SStructGridComm(grid), &myid);
+   hypre_SetIndex(stride, 1);
+   switch (ndim)
+   {
+      case 2:
+         cellNV = 4;
+         break;
+
+      case 3:
+         cellNV = 8;
+         break;
+
+      default:
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                           "SStructGridPrintGLVis works only in 2D/3D.\n");
+         return hypre_error_flag;
+   }
+
+   if (use_trans)
+   {
+      T = trans;
+      O = origin;
+   }
+   else
+   {
+      T = hypre_CTAlloc(HYPRE_Real, ndim*ndim);
+      O = hypre_CTAlloc(HYPRE_Real, ndim);
+      for (d = 0; d < ndim; d++)
+      {
+         T[ndim*d + d] = 1.0;
+      }
+   }
+
+   /* Compute number of elements and vertices */
+   nvertices = nelements = 0;
+   for (part = 0; part < nparts; part++)
+   {
+      pgrid = hypre_SStructGridPGrid(grid, part);
+      sgrid = hypre_SStructPGridCellSGrid(pgrid);
+      boxes = hypre_StructGridBoxes(sgrid);
+
+      hypre_ForBoxI(i, boxes)
+      {
+         box = hypre_BoxArrayBox(boxes, i);
+
+         ncells     = hypre_BoxVolume(box);
+         nvertices += ncells*cellNV;
+         nelements += ncells;
+      }
+   }
+
+   /* Open mesh file */
+   hypre_sprintf(meshfile, "%s.%06d", meshprefix, myid);
+   if ((file = fopen(meshfile, "w")) == NULL)
+   {
+      hypre_sprintf(msg, "Error: can't open output file %s\n", meshfile);
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, msg);
+      return hypre_error_flag;
+   }
+
+   /* Write mesh header */
+   hypre_fprintf(file, "MFEM mesh v1.0\n");
+   hypre_fprintf(file, "\ndimension\n");
+   hypre_fprintf(file, "%d\n", ndim);
+
+   /* Write mesh elements */
+   hypre_fprintf(file, "\nelements\n");
+   hypre_fprintf(file, "%d\n", nelements);
+   vertex = 0;
+   for (part = 0; part < nparts; part++)
+   {
+      pgrid = hypre_SStructGridPGrid(grid, part);
+      sgrid = hypre_SStructPGridCellSGrid(pgrid);
+      boxes = hypre_StructGridBoxes(sgrid);
+
+      hypre_ForBoxI(i, boxes)
+      {
+         box = hypre_BoxArrayBox(boxes, i);
+
+         hypre_BoxGetSize(box, loop_size);
+         hypre_BoxLoop0Begin(ndim, loop_size);
+         hypre_BoxLoopSetOneBlock();
+         hypre_BoxLoop0For()
+         {
+            hypre_fprintf(file, "1 %d ", element_id);
+            for (v = 0; v < cellNV; v++, vertex++)
+            {
+               hypre_fprintf(file, "%d ", vertex);
+            }
+            hypre_fprintf(file, "\n");
+         }
+         hypre_BoxLoop0End()
+      }
+   }
+
+   /* boundary will be generated by GLVis */
+   hypre_fprintf(file, "\nboundary\n");
+   hypre_fprintf(file, "0\n");
+
+   /* mesh vertices */
+   hypre_fprintf(file, "\nvertices\n");
+   hypre_fprintf(file, "%d\n", nvertices);
+   hypre_fprintf(file, "%d\n", ndim);
+   for (part = 0; part < nparts; part++)
+   {
+      pgrid = hypre_SStructGridPGrid(grid, part);
+      sgrid = hypre_SStructPGridCellSGrid(pgrid);
+      boxes = hypre_StructGridBoxes(sgrid);
+
+      hypre_ForBoxI(i, boxes)
+      {
+         box = hypre_BoxArrayBox(boxes, i);
+
+         hypre_BoxGetSize(box, loop_size);
+         hypre_BoxLoop0Begin(ndim, loop_size);
+         hypre_BoxLoopSetOneBlock();
+         hypre_BoxLoop0For()
+         {
+            hypre_BoxLoopGetIndex(index);
+            hypre_AddIndexes(index, hypre_BoxIMin(box), ndim, index);
+
+            for (v = 0; v < cellNV; v++)
+            {
+               for (d = 0; d < ndim; d++)
+               {
+                  coords[d] = O[d];
+                  for (dd = 0; dd < ndim; dd++)
+                  {
+                     coords[d] += T[d*ndim + dd]*(index[dd] + vinc[v][dd]);
+                  }
+                  hypre_fprintf(file, "%.14e ", coords[d]);
+               }
+               hypre_fprintf(file, "\n");
+            }
+         }
+         hypre_BoxLoop0End()
+      }
+      hypre_fprintf(file, "\n");
+
+      if (use_trans)
+      {
+         T += ndim*ndim;
+         O += ndim;
+      }
+   }
+
+   /* Close file */
+   fflush(file);
+   fclose(file);
+
+   /* Free memory */
+   if (!use_trans)
+   {
+      hypre_TFree(T);
+      hypre_TFree(O);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * This routine coarsens a SStructGrid.
  *
  * For now, it assumes that all StructGrids share the same origin
@@ -2302,7 +2510,6 @@ hypre_SStructGridCoarsen( hypre_SStructGrid   *fgrid,
       for (fvar = 0; fvar < fnvars; fvar++)
       {
          sfgrid = hypre_SStructPGridSGrid(pfgrid, fvar);
-
          cgrid_boxes = hypre_BoxArrayClone(hypre_StructGridBoxes(sfgrid));
          hypre_CoarsenBoxArray(cgrid_boxes, origin, strides[fid]);
 
@@ -2312,6 +2519,7 @@ hypre_SStructGridCoarsen( hypre_SStructGrid   *fgrid,
             cvartypes[cnparts][cnvars[cnparts]] = fvartypes[fvar];
             cnvars[cnparts]++;
          }
+         hypre_BoxArrayDestroy(cgrid_boxes);
       }
 
       /* Update part id and number of parts in cgrid */
@@ -2348,8 +2556,7 @@ hypre_SStructGridCoarsen( hypre_SStructGrid   *fgrid,
             fvartypes = hypre_SStructPGridVarTypes(pfgrid);
             if (coarsen_s[fpart][fvar])
             {
-               sfgrid     = hypre_SStructPGridSGrid(pfgrid, fvar);
-               fpbnd_boxa = hypre_SStructPGridPBndBoxArray(pfgrid, fvar);
+               sfgrid = hypre_SStructPGridSGrid(pfgrid, fvar);
 
                hypre_StructCoarsen(sfgrid, origin, strides[fid], prune, &scgrid);
                hypre_SStructPGridSGrid(pcgrid, cvar) = scgrid;
@@ -2361,6 +2568,7 @@ hypre_SStructGridCoarsen( hypre_SStructGrid   *fgrid,
                }
 
                /* coarsen part boundary box array */
+               fpbnd_boxa = hypre_SStructPGridPBndBoxArray(pfgrid, fvar);
                cpbnd_boxa = hypre_BoxArrayClone(fpbnd_boxa);
                hypre_ForBoxI(i, cpbnd_boxa)
                {
@@ -2368,6 +2576,7 @@ hypre_SStructGridCoarsen( hypre_SStructGrid   *fgrid,
 
                   hypre_SnapIndexPos(hypre_BoxIMin(box), origin, strides[fid], ndim);
                   hypre_MapToCoarseIndex(hypre_BoxIMin(box), origin, strides[fid], ndim);
+
                   hypre_SnapIndexPos(hypre_BoxIMax(box), origin, strides[fid], ndim);
                   hypre_MapToCoarseIndex(hypre_BoxIMax(box), origin, strides[fid], ndim);
                }

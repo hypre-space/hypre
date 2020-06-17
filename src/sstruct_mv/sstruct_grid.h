@@ -73,6 +73,10 @@ typedef struct
    HYPRE_Int               ran_ghlocal_size; /* Number of unknowns in the range grid
                                                 including ghosts */
    HYPRE_Int               cell_sgrid_done;  /* =1 implies cell grid already assembled */
+
+   /* Geometrical data */
+   HYPRE_Real              coords_origin[HYPRE_MAXDIM]; /* Origin coordinates */
+   hypre_Index             coords_stride;
 } hypre_SStructPGrid;
 
 typedef struct
@@ -224,6 +228,8 @@ typedef struct hypre_SStructGrid_struct
 #define hypre_SStructPGridVarTypes(pgrid)         ((pgrid) -> vartypes)
 #define hypre_SStructPGridVarType(pgrid, var)     ((pgrid) -> vartypes[var])
 #define hypre_SStructPGridCellSGridDone(pgrid)    ((pgrid) -> cell_sgrid_done)
+#define hypre_SStructPGridCoordsOrigin(pgrid)     ((pgrid) -> coords_origin)
+#define hypre_SStructPGridCoordsStride(pgrid)     ((pgrid) -> coords_stride)
 
 #define hypre_SStructPGridSGrids(pgrid)           ((pgrid) -> sgrids)
 #define hypre_SStructPGridSGrid(pgrid, var) \
