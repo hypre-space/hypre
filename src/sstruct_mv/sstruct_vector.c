@@ -868,8 +868,8 @@ hypre_SStructVectorClearGhostValues(hypre_SStructVector *vector)
  * This is mainly for debugging purposes.
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_SStructVectorPrintGLVis(const char           *fileprefix,
-                              hypre_SStructVector  *vector )
+hypre_SStructVectorPrintGLVis( hypre_SStructVector  *vector,
+                               const char           *fileprefix )
 {
    hypre_SStructPVector   *pvector;
    hypre_StructVector     *svector;
