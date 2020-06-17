@@ -1058,7 +1058,7 @@ HYPRE_Int hypre_SStructVectorParRestore ( hypre_SStructVector *vector , hypre_Pa
 HYPRE_Int hypre_SStructPVectorInitializeShell ( hypre_SStructPVector *pvector );
 HYPRE_Int hypre_SStructVectorInitializeShell ( hypre_SStructVector *vector );
 HYPRE_Int hypre_SStructVectorClearGhostValues ( hypre_SStructVector *vector );
-HYPRE_Int hypre_SStructVectorPrintGLVis(const char *fileprefix, hypre_SStructVector *vector );
+HYPRE_Int hypre_SStructVectorPrintGLVis( hypre_SStructVector *vector, const char *fileprefix );
 
 #ifdef __cplusplus
 }
