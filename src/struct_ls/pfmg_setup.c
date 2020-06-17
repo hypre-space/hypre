@@ -8,7 +8,6 @@
 #include "_hypre_struct_ls.h"
 #include "_hypre_struct_mv.hpp"
 #include "pfmg.h"
-#include "hypre_cuda_reducer.h"
 
 #include <time.h>
 #define DEBUG 0

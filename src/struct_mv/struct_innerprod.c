@@ -13,7 +13,6 @@
 
 #include "_hypre_struct_mv.h"
 #include "_hypre_struct_mv.hpp"
-#include "hypre_cuda_reducer.h"
 
 /*--------------------------------------------------------------------------
  * hypre_StructInnerProd

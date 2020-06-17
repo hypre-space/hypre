@@ -11,12 +11,12 @@ CDEFS = ${TIMERDEFS}
 C_COMPILE_FLAGS =\
    -I..\
    -I$(srcdir)/..\
+   -I$(srcdir)/../struct_mv\
    -I$(srcdir)\
    ${CINCLUDES}\
    ${CDEFS}
 
 CXX_COMPILE_FLAGS = ${C_COMPILE_FLAGS}
-CU_COMPILE_FLAGS = ${C_COMPILE_FLAGS}
 
 HEADERS =\
  amg_linklist.h\
@@ -63,11 +63,7 @@ CUFILES=\
  hypre_omp_device.c
 
 COBJS = ${FILES:.c=.o}
-ifeq ($(CUCC), )
-   CUOBJS = ${CUFILES:.c=.o}
-else
-   CUOBJS = ${CUFILES:.c=.obj}
-endif
+CUOBJS = ${CUFILES:.c=.obj}
 OBJS = ${COBJS} ${CUOBJS}
 
 SONAME = libHYPRE_utilities-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
@@ -79,6 +75,7 @@ SONAME = libHYPRE_utilities-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 all: libHYPRE_utilities${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/_hypre_utilities.h $(HYPRE_BUILD_DIR)/include
+	cp -fR $(srcdir)/_hypre_utilities.hpp $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/hypre_hopscotch_hash.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/fortran*.h $(HYPRE_BUILD_DIR)/include
 #	cp -fR libHYPRE* $(HYPRE_BUILD_DIR)/lib

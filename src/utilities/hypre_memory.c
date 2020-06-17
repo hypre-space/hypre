@@ -15,7 +15,6 @@
 #include "_hypre_utilities.hpp"
 #include "_hypre_struct_mv.h"
 #include "_hypre_struct_mv.hpp"
-#include "hypre_cub_allocator.h"
 
 #ifdef HYPRE_USE_UMALLOC
 #undef HYPRE_USE_UMALLOC
