@@ -26,8 +26,6 @@ C_COMPILE_FLAGS = \
  $(DSUPERLU_INCLUDE)\
  ${CINCLUDES}
 
-CU_COMPILE_FLAGS = ${C_COMPILE_FLAGS}
-
 HEADERS =\
  HYPRE_sstruct_ls.h\
  _hypre_sstruct_ls.h\
@@ -107,11 +105,7 @@ CUFILES =\
  node_relax.c\
 
 COBJS = ${FILES:.c=.o}
-ifeq ($(CUCC), )
-   CUOBJS = ${CUFILES:.c=.o}
-else
-   CUOBJS = ${CUFILES:.c=.obj}
-endif
+CUOBJS = ${CUFILES:.c=.obj}
 OBJS = ${COBJS} ${CUOBJS}
 
 SONAME = libHYPRE_sstruct_ls-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}

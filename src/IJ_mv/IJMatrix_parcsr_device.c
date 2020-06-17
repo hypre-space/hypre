@@ -12,7 +12,7 @@
  *****************************************************************************/
 
 #include "_hypre_IJ_mv.h"
-#include "hypre_cuda_utils.h"
+#include "_hypre_utilities.hpp"
 
 #if defined(HYPRE_USING_CUDA)
 

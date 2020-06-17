@@ -12,9 +12,9 @@
 #include "_hypre_utilities.h"
 #include "HYPRE_struct_ls.h"
 #include "HYPRE_krylov.h"
-#include "../struct_mv/boxloop.h"
 
 #include "_hypre_struct_mv.h"
+#include "_hypre_struct_mv.hpp"
 
 /*--------------------------------------------------------------------------
  * Test driver to time new boxloops and compare to the old ones

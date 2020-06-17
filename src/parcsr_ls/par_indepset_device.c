@@ -10,7 +10,7 @@
  *****************************************************************************/
 
 #include "_hypre_parcsr_ls.h"
-#include "hypre_cuda_utils.h"
+#include "_hypre_utilities.hpp"
 
 #if defined(HYPRE_USING_CUDA)
 __global__ void

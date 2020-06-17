@@ -13,7 +13,7 @@
 
 #include "seq_mv.h"
 #include "csr_matrix.h"
-#include "hypre_cuda_utils.h"
+#include "_hypre_utilities.hpp"
 
 #if defined(HYPRE_USING_CUDA)
 

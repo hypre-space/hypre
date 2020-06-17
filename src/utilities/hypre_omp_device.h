@@ -39,7 +39,7 @@ extern size_t hypre__target_dtoh_bytes;
 #endif
 
 /* OMP 4.5 offloading macro */
-#define hypre_omp45_offload(devnum, hptr, datatype, offset, count, type1, type2) \
+#define hypre_omp_device_offload(devnum, hptr, datatype, offset, count, type1, type2) \
 {\
    /* devnum: device number \
     * hptr: host poiter \

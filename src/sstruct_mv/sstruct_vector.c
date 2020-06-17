@@ -12,7 +12,7 @@
  *****************************************************************************/
 
 #include "_hypre_sstruct_mv.h"
-#include "boxloop.h"
+#include "_hypre_struct_mv.hpp"
 
 /*==========================================================================
  * SStructPVector routines

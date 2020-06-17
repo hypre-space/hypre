@@ -8,7 +8,7 @@
 #ifndef CSR_SPGEMM_DEVICE_H
 #define CSR_SPGEMM_DEVICE_H
 
-#include "hypre_cuda_utils.h"
+#include "_hypre_utilities.hpp"
 
 #if defined(HYPRE_USING_CUDA)
 

@@ -7,7 +7,7 @@
 
 #include "_hypre_struct_ls.h"
 #include "temp_multivector.h"
-#include "boxloop.h"
+#include "_hypre_struct_mv.hpp"
 
 HYPRE_Int
 hypre_StructVectorSetRandomValues( hypre_StructVector *vector,

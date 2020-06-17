@@ -10,10 +10,10 @@
 #include <math.h>
 
 #include "_hypre_utilities.h"
-#include "../struct_mv/boxloop.h"
 #include "HYPRE_struct_mv.h"
 /* RDF: This include is only needed for AddValuesVector() */
 #include "_hypre_struct_mv.h"
+#include "_hypre_struct_mv.hpp"
 
 HYPRE_Int AddValuesVector( hypre_StructGrid   *grid,
                            hypre_StructVector *vector,

@@ -18,12 +18,6 @@
 #ifndef HYPRE_NEWBOXLOOP_HEADER
 #define HYPRE_NEWBOXLOOP_HEADER
 
-#include <cuda.h>
-#include <cuda_runtime.h>
-#ifdef HYPRE_USING_OPENMP
-#include <omp.h>
-#endif
-
 #define HYPRE_LAMBDA [=] __host__  __device__
 #define BLOCKSIZE 512
 
@@ -53,7 +47,9 @@ typedef struct hypre_Boxloop_struct
 
 /* #define hypre_reduce_policy  cuda_reduce<BLOCKSIZE> */
 
+#ifdef __cplusplus
 extern "C++" {
+#endif
 
 template <typename LOOP_BODY>
 __global__ void forall_kernel(LOOP_BODY loop_body, HYPRE_Int length)
@@ -120,7 +116,9 @@ void ReductionBoxLoopforall(HYPRE_ExecutionPolicy policy, HYPRE_Int length, LOOP
    }
 }
 
+#ifdef __cplusplus
 }
+#endif
 
 
 #define hypre_BoxLoopIncK(k,box,hypre__i)                                               \

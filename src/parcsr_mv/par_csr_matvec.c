@@ -12,7 +12,7 @@
  *****************************************************************************/
 
 #include "_hypre_parcsr_mv.h"
-#include "hypre_cuda_utils.h" //RL: TODO par_csr_matvec_device.c, include cuda there
+#include "_hypre_utilities.hpp" //RL: TODO par_csr_matvec_device.c, include cuda there
 
 /*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixMatvec

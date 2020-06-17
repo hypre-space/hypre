@@ -17,8 +17,6 @@ C_COMPILE_FLAGS = \
  -I$(srcdir)/../struct_mv\
  ${CINCLUDES}
 
-CU_COMPILE_FLAGS = ${C_COMPILE_FLAGS}
-
 HEADERS =\
  HYPRE_struct_ls.h\
  _hypre_struct_ls.h\
@@ -99,11 +97,7 @@ CUFILES =\
  sparse_msg_restrict.c
 
 COBJS = ${FILES:.c=.o}
-ifeq ($(CUCC), )
-   CUOBJS = ${CUFILES:.c=.o}
-else
-   CUOBJS = ${CUFILES:.c=.obj}
-endif
+CUOBJS = ${CUFILES:.c=.obj}
 OBJS = ${COBJS} ${CUOBJS}
 
 SONAME = libHYPRE_struct_ls-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}

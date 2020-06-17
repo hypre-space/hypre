@@ -6,7 +6,7 @@
  ******************************************************************************/
 
 #include "_hypre_struct_ls.h"
-#include "boxloop.h"
+#include "_hypre_struct_mv.hpp"
 
 /*--------------------------------------------------------------------------
  * Macro to "change coordinates".  This routine is written as though

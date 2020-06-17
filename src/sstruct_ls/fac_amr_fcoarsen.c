@@ -14,7 +14,7 @@
  ******************************************************************************/
 
 #include "_hypre_sstruct_ls.h"
-#include "boxloop.h"
+#include "_hypre_struct_mv.hpp"
 #include "fac.h"
 
 #define MapStencilRank(stencil, rank)           \

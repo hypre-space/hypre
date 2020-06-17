@@ -14,8 +14,6 @@ C_COMPILE_FLAGS =\
  -I$(srcdir)/../utilities\
  ${CINCLUDES}
 
-CU_COMPILE_FLAGS = ${C_COMPILE_FLAGS}
-
 HEADERS =\
  csr_matrix.h\
  HYPRE_seq_mv.h\
@@ -53,11 +51,7 @@ CUFILES =\
  vector.c
 
 COBJS = ${FILES:.c=.o}
-ifeq ($(CUCC), )
-   CUOBJS = ${CUFILES:.c=.o}
-else
-   CUOBJS = ${CUFILES:.c=.obj}
-endif
+CUOBJS = ${CUFILES:.c=.obj}
 OBJS = ${COBJS} ${CUOBJS}
 
 SONAME = libHYPRE_seq_mv-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
@@ -91,7 +85,7 @@ libHYPRE_seq_mv.a: ${OBJS}
 	${AR} $@ ${OBJS}
 	${RANLIB} $@
 
-libHYPRE_seq_mv.so libHYPRE_seq_mv.dylib: ${OBJS} ${CUOBJS}
+libHYPRE_seq_mv.so libHYPRE_seq_mv.dylib: ${OBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
 	ln -s ${SONAME} $@

@@ -40,6 +40,7 @@ cat hypre_error.h              >> $INTERNAL_HEADER
 cat mpistubs.h                 >> $INTERNAL_HEADER
 cat hypre_smp.h                >> $INTERNAL_HEADER
 cat hypre_memory.h             >> $INTERNAL_HEADER
+cat hypre_omp_device.h         >> $INTERNAL_HEADER
 cat threading.h                >> $INTERNAL_HEADER
 cat timing.h                   >> $INTERNAL_HEADER
 cat amg_linklist.h             >> $INTERNAL_HEADER

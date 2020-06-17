@@ -28,8 +28,6 @@ C_COMPILE_FLAGS =\
  $(DSUPERLU_INCLUDE)\
  ${CINCLUDES}
 
-CU_COMPILE_FLAGS = ${C_COMPILE_FLAGS}
-
 HEADERS =\
  HYPRE_parcsr_ls.h\
  _hypre_parcsr_ls.h\
@@ -148,11 +146,7 @@ CUFILES =\
  par_strength_device.c
 
 COBJS = ${FILES:.c=.o}
-ifeq ($(CUCC), )
-   CUOBJS = ${CUFILES:.c=.o}
-else
-   CUOBJS = ${CUFILES:.c=.obj}
-endif
+CUOBJS = ${CUFILES:.c=.obj}
 OBJS = ${COBJS} ${CUOBJS}
 
 SONAME = libHYPRE_parcsr_ls-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}

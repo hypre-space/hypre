@@ -11,7 +11,7 @@
  *****************************************************************************/
 
 #include "_hypre_struct_ls.h"
-#include "boxloop.h"
+#include "_hypre_struct_mv.hpp"
 
 #define DEBUG 0
 

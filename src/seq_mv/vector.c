@@ -12,7 +12,7 @@
  *****************************************************************************/
 
 #include "seq_mv.h"
-#include "hypre_cuda_utils.h" //RL: TODO vector_device.c, include cuda there
+#include "_hypre_utilities.hpp" //RL: TODO vector_device.c, include cuda there
 
 /*--------------------------------------------------------------------------
  * hypre_SeqVectorCreate

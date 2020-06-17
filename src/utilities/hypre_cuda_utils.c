@@ -6,7 +6,7 @@
  ******************************************************************************/
 
 #include "_hypre_utilities.h"
-#include "hypre_cuda_utils.h"
+#include "_hypre_utilities.hpp"
 #include "hypre_cub_allocator.h"
 
 #if defined(HYPRE_USING_CUDA)

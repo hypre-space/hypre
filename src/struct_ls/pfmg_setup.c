@@ -6,7 +6,7 @@
  ******************************************************************************/
 
 #include "_hypre_struct_ls.h"
-#include "boxloop.h"
+#include "_hypre_struct_mv.hpp"
 #include "pfmg.h"
 #include "hypre_cuda_reducer.h"
 

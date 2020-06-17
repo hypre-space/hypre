@@ -18,10 +18,16 @@
 #ifndef HYPRE_NEWBOXLOOP_HEADER
 #define HYPRE_NEWBOXLOOP_HEADER
 
+#ifdef __cplusplus
 extern "C++" {
+#endif
+
 #include <Kokkos_Core.hpp>
 using namespace Kokkos;
+
+#ifdef __cplusplus
 }
+#endif
 
 #if defined( KOKKOS_HAVE_MPI )
 #include <mpi.h>

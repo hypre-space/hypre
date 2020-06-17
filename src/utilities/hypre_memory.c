@@ -12,13 +12,10 @@
  *****************************************************************************/
 
 #include "_hypre_utilities.h"
-#include "hypre_cuda_utils.h"
-#include "../struct_mv/_hypre_struct_mv.h"
+#include "_hypre_utilities.hpp"
+#include "_hypre_struct_mv.h"
+#include "_hypre_struct_mv.hpp"
 #include "hypre_cub_allocator.h"
-#include "hypre_omp_device.h"
-#if defined(HYPRE_DEVICE_OPENMP_ALLOC)
-#include "../struct_mv/boxloop_omp45.h"
-#endif
 
 #ifdef HYPRE_USE_UMALLOC
 #undef HYPRE_USE_UMALLOC

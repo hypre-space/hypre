@@ -17,8 +17,6 @@ C_COMPILE_FLAGS =\
  -I$(srcdir)/../parcsr_ls\
  ${CINCLUDES}
 
-CU_COMPILE_FLAGS = ${C_COMPILE_FLAGS}
-
 HEADERS =\
  aux_parcsr_matrix.h\
  aux_par_vector.h\
@@ -50,11 +48,7 @@ CUFILES =\
  IJVector_parcsr_device.c
 
 COBJS = ${FILES:.c=.o}
-ifeq ($(CUCC), )
-   CUOBJS = ${CUFILES:.c=.o}
-else
-   CUOBJS = ${CUFILES:.c=.obj}
-endif
+CUOBJS = ${CUFILES:.c=.obj}
 OBJS = ${COBJS} ${CUOBJS}
 
 SONAME = libHYPRE_IJ_mv-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}

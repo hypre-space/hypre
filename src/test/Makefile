@@ -21,8 +21,6 @@ C_COMPILE_FLAGS = \
  ${CINCLUDES}\
  ${CDEFS}
 
-CU_COMPILE_FLAGS = ${C_COMPILE_FLAGS}
-
 CXX_COMPILE_FLAGS = \
  -I$(srcdir)\
  -I$(srcdir)/..\

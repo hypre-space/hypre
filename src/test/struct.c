@@ -12,7 +12,6 @@
 #include "_hypre_utilities.h"
 #include "HYPRE_struct_ls.h"
 #include "HYPRE_krylov.h"
-#include "../struct_mv/boxloop.h"
 
 #define HYPRE_MFLOPS 0
 #if HYPRE_MFLOPS
@@ -21,6 +20,7 @@
 
 /* RDF: Why is this include here? */
 #include "_hypre_struct_mv.h"
+#include "_hypre_struct_mv.hpp"
 
 #ifdef HYPRE_DEBUG
 /*#include <cegdb.h>*/
