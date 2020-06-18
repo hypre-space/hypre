@@ -742,7 +742,7 @@ hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix)
    return hypre_error_flag;
 }
 
-void
+HYPRE_Int
 hypre_IJMatrixSetConstantValuesParCSRDevice( hypre_IJMatrix *matrix,
                                              HYPRE_Complex   value )
 {
@@ -756,6 +756,8 @@ hypre_IJMatrixSetConstantValuesParCSRDevice( hypre_IJMatrix *matrix,
 
    HYPRE_THRUST_CALL( fill_n, diag_data, nnz_diag, value );
    HYPRE_THRUST_CALL( fill_n, offd_data, nnz_offd, value );
+
+   return hypre_error_flag;
 }
 
 #endif
