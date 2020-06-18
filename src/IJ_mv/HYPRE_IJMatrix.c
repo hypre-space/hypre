@@ -45,14 +45,14 @@ HYPRE_IJMatrixCreate( MPI_Comm        comm,
 
    ijmatrix = hypre_CTAlloc(hypre_IJMatrix,  1, HYPRE_MEMORY_HOST);
 
-   hypre_IJMatrixComm(ijmatrix)         = comm;
-   hypre_IJMatrixObject(ijmatrix)       = NULL;
-   hypre_IJMatrixTranslator(ijmatrix)   = NULL;
-   hypre_IJMatrixAssumedPart(ijmatrix)   = NULL;
-   hypre_IJMatrixObjectType(ijmatrix)   = HYPRE_UNITIALIZED;
-   hypre_IJMatrixAssembleFlag(ijmatrix) = 0;
-   hypre_IJMatrixPrintLevel(ijmatrix) = 0;
-   hypre_IJMatrixOMPFlag(ijmatrix) = 0;
+   hypre_IJMatrixComm(ijmatrix)           = comm;
+   hypre_IJMatrixObject(ijmatrix)         = NULL;
+   hypre_IJMatrixTranslator(ijmatrix)     = NULL;
+   hypre_IJMatrixAssumedPart(ijmatrix)    = NULL;
+   hypre_IJMatrixObjectType(ijmatrix)     = HYPRE_UNITIALIZED;
+   hypre_IJMatrixAssembleFlag(ijmatrix)   = 0;
+   hypre_IJMatrixPrintLevel(ijmatrix)     = 0;
+   hypre_IJMatrixOMPFlag(ijmatrix)        = 0;
 
    hypre_MPI_Comm_size(comm,&num_procs);
    hypre_MPI_Comm_rank(comm, &myid);
@@ -90,8 +90,8 @@ HYPRE_IJMatrixCreate( MPI_Comm        comm,
 
    info = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
 
-   row_partitioning = hypre_CTAlloc(HYPRE_BigInt,  2, HYPRE_MEMORY_HOST);
-   col_partitioning = hypre_CTAlloc(HYPRE_BigInt,  2, HYPRE_MEMORY_HOST);
+   row_partitioning = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
+   col_partitioning = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
 
    row_partitioning[0] = ilower;
    row_partitioning[1] = iupper+1;
@@ -102,7 +102,7 @@ HYPRE_IJMatrixCreate( MPI_Comm        comm,
       as the global first row and column index */
 
    /* proc 0 has the first row and col */
-   if (myid==0)
+   if (myid == 0)
    {
       info[0] = ilower;
       info[1] = jlower;
@@ -304,6 +304,30 @@ HYPRE_IJMatrixInitialize( HYPRE_IJMatrix matrix )
 
 }
 
+HYPRE_Int
+HYPRE_IJMatrixInitialize_v2( HYPRE_IJMatrix matrix, HYPRE_MemoryLocation memory_location )
+{
+   hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
+
+   if (!ijmatrix)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
+   {
+      hypre_IJMatrixInitializeParCSR_v2( ijmatrix, memory_location ) ;
+   }
+   else
+   {
+      hypre_error_in_arg(1);
+   }
+
+   return hypre_error_flag;
+
+}
+
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
@@ -347,7 +371,7 @@ hypre_PrefixSumInt(HYPRE_Int   nvals,
    }
    else
    {
-   
+
       /* Compute preliminary partial sums (in parallel) within each interval */
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE
@@ -355,20 +379,20 @@ hypre_PrefixSumInt(HYPRE_Int   nvals,
       for (j = 0; j < nvals; j += bsize)
       {
          HYPRE_Int  i, n = hypre_min((j+bsize), nvals);
-   
+
          sums[0] = 0;
          for (i = j+1; i < n; i++)
          {
             sums[i] = sums[i-1] + vals[i-1];
          }
       }
-   
+
       /* Compute final partial sums (in serial) for the first entry of every interval */
       for (j = bsize; j < nvals; j += bsize)
       {
          sums[j] = sums[j-bsize] + sums[j-1] + vals[j-1];
       }
-   
+
       /* Compute final partial sums (in parallel) for the remaining entries */
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE
@@ -376,7 +400,7 @@ hypre_PrefixSumInt(HYPRE_Int   nvals,
       for (j = bsize; j < nvals; j += bsize)
       {
          HYPRE_Int  i, n = hypre_min((j+bsize), nvals);
-   
+
          for (i = j+1; i < n; i++)
          {
             sums[i] += sums[j];
@@ -400,7 +424,6 @@ HYPRE_IJMatrixSetValues( HYPRE_IJMatrix       matrix,
                          const HYPRE_Complex *values )
 {
    hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
-   HYPRE_Int      *row_indexes;
 
    if (nrows == 0)
    {
@@ -413,11 +436,13 @@ HYPRE_IJMatrixSetValues( HYPRE_IJMatrix       matrix,
       return hypre_error_flag;
    }
 
+   /*
    if (!ncols)
    {
       hypre_error_in_arg(3);
       return hypre_error_flag;
    }
+   */
 
    if (!rows)
    {
@@ -443,18 +468,127 @@ HYPRE_IJMatrixSetValues( HYPRE_IJMatrix       matrix,
       return hypre_error_flag;
    }
 
-   /* Compute row_indexes and call Values2 routine (TODO: add OpenMP)*/
-   row_indexes = hypre_CTAlloc(HYPRE_Int, nrows, HYPRE_MEMORY_HOST);
-   hypre_PrefixSumInt(nrows, ncols, row_indexes);
-   HYPRE_IJMatrixSetValues2(matrix, nrows, ncols, rows, row_indexes, cols, values);
-   hypre_TFree(row_indexes, HYPRE_MEMORY_HOST);
+   HYPRE_IJMatrixSetValues2(matrix, nrows, ncols, rows, NULL, cols, values);
 
    return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_IJMatrixSetValues2( HYPRE_IJMatrix       matrix,
+                          HYPRE_Int            nrows,
+                          HYPRE_Int           *ncols,
+                          const HYPRE_BigInt  *rows,
+                          const HYPRE_Int     *row_indexes,
+                          const HYPRE_BigInt  *cols,
+                          const HYPRE_Complex *values )
+{
+   hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
 
+   if (nrows == 0)
+   {
+      return hypre_error_flag;
+   }
+
+   if (!ijmatrix)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if (nrows < 0)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   /*
+   if (!ncols)
+   {
+      hypre_error_in_arg(3);
+      return hypre_error_flag;
+   }
+   */
+
+   if (!rows)
+   {
+      hypre_error_in_arg(4);
+      return hypre_error_flag;
+   }
+
+   if (!cols)
+   {
+      hypre_error_in_arg(6);
+      return hypre_error_flag;
+   }
+
+   if (!values)
+   {
+      hypre_error_in_arg(7);
+      return hypre_error_flag;
+   }
+
+   if ( hypre_IJMatrixObjectType(ijmatrix) != HYPRE_PARCSR )
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+#if defined(HYPRE_USING_CUDA)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_IJMatrixMemoryLocation(matrix) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      hypre_IJMatrixSetAddValuesParCSRDevice(ijmatrix, nrows, ncols, rows, row_indexes, cols, values, "set");
+   }
+   else
+#endif
+   {
+      HYPRE_Int *row_indexes_tmp = (HYPRE_Int *) row_indexes;
+      HYPRE_Int *ncols_tmp = ncols;
+
+      if (!ncols_tmp)
+      {
+         HYPRE_Int i;
+         ncols_tmp = hypre_TAlloc(HYPRE_Int, nrows, HYPRE_MEMORY_HOST);
+         for (i = 0; i < nrows; i++)
+         {
+            ncols_tmp[i] = 1;
+         }
+      }
+
+      if (!row_indexes)
+      {
+         row_indexes_tmp = hypre_CTAlloc(HYPRE_Int, nrows, HYPRE_MEMORY_HOST);
+         hypre_PrefixSumInt(nrows, ncols_tmp, row_indexes_tmp);
+      }
+
+      if (hypre_IJMatrixOMPFlag(ijmatrix))
+      {
+         hypre_IJMatrixSetValuesOMPParCSR(ijmatrix, nrows, ncols_tmp, rows, row_indexes_tmp, cols, values);
+      }
+      else
+      {
+         hypre_IJMatrixSetValuesParCSR(ijmatrix, nrows, ncols_tmp, rows, row_indexes_tmp, cols, values);
+      }
+
+      if (!ncols)
+      {
+         hypre_TFree(ncols_tmp, HYPRE_MEMORY_HOST);
+      }
+
+      if (!row_indexes)
+      {
+         hypre_TFree(row_indexes_tmp, HYPRE_MEMORY_HOST);
+      }
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
 HYPRE_Int
 HYPRE_IJMatrixSetConstantValues( HYPRE_IJMatrix matrix, HYPRE_Complex value)
 {
@@ -490,7 +624,6 @@ HYPRE_IJMatrixAddToValues( HYPRE_IJMatrix       matrix,
                            const HYPRE_Complex *values )
 {
    hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
-   HYPRE_Int      *row_indexes;
 
    if (nrows == 0)
    {
@@ -509,11 +642,13 @@ HYPRE_IJMatrixAddToValues( HYPRE_IJMatrix       matrix,
       return hypre_error_flag;
    }
 
+   /*
    if (!ncols)
    {
       hypre_error_in_arg(3);
       return hypre_error_flag;
    }
+   */
 
    if (!rows)
    {
@@ -539,93 +674,9 @@ HYPRE_IJMatrixAddToValues( HYPRE_IJMatrix       matrix,
       return hypre_error_flag;
    }
 
-   /* Compute row_indexes and call Values2 routine */
-   row_indexes = hypre_CTAlloc(HYPRE_Int, nrows, HYPRE_MEMORY_HOST);
-   hypre_PrefixSumInt(nrows, ncols, row_indexes);
-   HYPRE_IJMatrixAddToValues2(matrix, nrows, ncols, rows, row_indexes, cols, values);
-   hypre_TFree(row_indexes, HYPRE_MEMORY_HOST);
+   HYPRE_IJMatrixAddToValues2(matrix, nrows, ncols, rows, NULL, cols, values);
 
    return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-HYPRE_IJMatrixSetValues2( HYPRE_IJMatrix       matrix,
-                          HYPRE_Int            nrows,
-                          HYPRE_Int           *ncols,
-                          const HYPRE_BigInt  *rows,
-                          const HYPRE_Int     *row_indexes,
-                          const HYPRE_BigInt  *cols,
-                          const HYPRE_Complex *values )
-{
-   hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
-
-   if (nrows == 0)
-   {
-      return hypre_error_flag;
-   }
-
-   if (!ijmatrix)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
-
-   if (nrows < 0)
-   {
-      hypre_error_in_arg(2);
-      return hypre_error_flag;
-   }
-
-   if (!ncols)
-   {
-      hypre_error_in_arg(3);
-      return hypre_error_flag;
-   }
-
-   if (!rows)
-   {
-      hypre_error_in_arg(4);
-      return hypre_error_flag;
-   }
-
-   if (!row_indexes)
-   {
-      hypre_error_in_arg(5);
-      return hypre_error_flag;
-   }
-
-   if (!cols)
-   {
-      hypre_error_in_arg(6);
-      return hypre_error_flag;
-   }
-
-   if (!values)
-   {
-      hypre_error_in_arg(7);
-      return hypre_error_flag;
-   }
-
-   if ( hypre_IJMatrixObjectType(ijmatrix) != HYPRE_PARCSR )
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
-
-   if (hypre_IJMatrixOMPFlag(ijmatrix))
-   {
-      hypre_IJMatrixSetValuesOMPParCSR(ijmatrix, nrows, ncols, rows, row_indexes, cols, values);
-   }
-   else
-   {
-      hypre_IJMatrixSetValuesParCSR(ijmatrix, nrows, ncols, rows, row_indexes, cols, values);
-   }
-
-   return hypre_error_flag;
-
 }
 
 /*--------------------------------------------------------------------------
@@ -659,21 +710,17 @@ HYPRE_IJMatrixAddToValues2( HYPRE_IJMatrix       matrix,
       return hypre_error_flag;
    }
 
+   /*
    if (!ncols)
    {
       hypre_error_in_arg(3);
       return hypre_error_flag;
    }
+   */
 
    if (!rows)
    {
       hypre_error_in_arg(4);
-      return hypre_error_flag;
-   }
-
-   if (!row_indexes)
-   {
-      hypre_error_in_arg(5);
       return hypre_error_flag;
    }
 
@@ -695,13 +742,53 @@ HYPRE_IJMatrixAddToValues2( HYPRE_IJMatrix       matrix,
       return hypre_error_flag;
    }
 
-   if (hypre_IJMatrixOMPFlag(ijmatrix))
+#if defined(HYPRE_USING_CUDA)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_IJMatrixMemoryLocation(matrix) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
    {
-      hypre_IJMatrixAddToValuesOMPParCSR(ijmatrix, nrows, ncols, rows, row_indexes, cols, values);
+      hypre_IJMatrixSetAddValuesParCSRDevice(ijmatrix, nrows, ncols, rows, row_indexes, cols, values, "add");
    }
    else
+#endif
    {
-      hypre_IJMatrixAddToValuesParCSR(ijmatrix, nrows, ncols, rows, row_indexes, cols, values);
+      HYPRE_Int *row_indexes_tmp = (HYPRE_Int *) row_indexes;
+      HYPRE_Int *ncols_tmp = ncols;
+
+      if (!ncols_tmp)
+      {
+         HYPRE_Int i;
+         ncols_tmp = hypre_TAlloc(HYPRE_Int, nrows, HYPRE_MEMORY_HOST);
+         for (i = 0; i < nrows; i++)
+         {
+            ncols_tmp[i] = 1;
+         }
+      }
+
+      if (!row_indexes)
+      {
+         row_indexes_tmp = hypre_CTAlloc(HYPRE_Int, nrows, HYPRE_MEMORY_HOST);
+         hypre_PrefixSumInt(nrows, ncols_tmp, row_indexes_tmp);
+      }
+
+      if (hypre_IJMatrixOMPFlag(ijmatrix))
+      {
+         hypre_IJMatrixAddToValuesOMPParCSR(ijmatrix, nrows, ncols_tmp, rows, row_indexes_tmp, cols, values);
+      }
+      else
+      {
+         hypre_IJMatrixAddToValuesParCSR(ijmatrix, nrows, ncols_tmp, rows, row_indexes_tmp, cols, values);
+      }
+
+      if (!ncols)
+      {
+         hypre_TFree(ncols_tmp, HYPRE_MEMORY_HOST);
+      }
+
+      if (!row_indexes)
+      {
+         hypre_TFree(row_indexes_tmp, HYPRE_MEMORY_HOST);
+      }
    }
 
    return hypre_error_flag;
@@ -723,7 +810,18 @@ HYPRE_IJMatrixAssemble( HYPRE_IJMatrix matrix )
 
    if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
    {
-      return( hypre_IJMatrixAssembleParCSR( ijmatrix ) );
+#if defined(HYPRE_USING_CUDA)
+      HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_IJMatrixMemoryLocation(matrix) );
+
+      if (exec == HYPRE_EXEC_DEVICE)
+      {
+         return( hypre_IJMatrixAssembleParCSRDevice( ijmatrix ) );
+      }
+      else
+#endif
+      {
+         return( hypre_IJMatrixAssembleParCSR( ijmatrix ) );
+      }
    }
    else
    {
@@ -1075,7 +1173,8 @@ HYPRE_IJMatrixRead( const char     *filename,
    HYPRE_IJMatrixCreate(comm, ilower, iupper, jlower, jupper, &matrix);
 
    HYPRE_IJMatrixSetObjectType(matrix, type);
-   HYPRE_IJMatrixInitialize(matrix);
+
+   HYPRE_IJMatrixInitialize_v2(matrix, HYPRE_MEMORY_HOST);
 
    /* It is important to ensure that whitespace follows the index value to help
     * catch mistakes in the input file.  See comments in IJVectorRead(). */

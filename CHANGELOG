@@ -7,7 +7,45 @@
 # This file chronicles user-level changes, beginning with the most recent.
 # =============================================================================
 
-Version 2.17.0 released 2019/06/10
+Version 2.19.0 released 2020/05/26
+
+- Updated to soupport superlu-dist version to 6.3.1
+- Moved reference manual API to online documentation
+- New AMG features to keep specified F-points and/or C-points.
+- Added GPU support for AMG setup and several interpolation approaches.
+- New parallel ILU solvers and smoothers.
+- New MGR features.
+- Added several interpolation routines based on matrix-matrix interpolations.
+- Various bug fixes.
+
+#====================================
+
+Version 2.18.2 released 2019/10/28
+
+- Fixed mixedint bugs.
+
+#====================================
+
+Version 2.18.1 released 2019/10/15
+
+- Various bug fixes.
+
+#====================================
+
+Version 2.18.0 released 2019/09/27
+
+- Ported BoomerAMG setup to run on GPUs.  Only a subset of setup phase features
+  are currently available.
+
+- Updated CMake to support more of the features available in configure/make.
+
+- Added RecomputeResidual options to several hybrid solvers.
+
+- Various bug fixes.
+
+#====================================
+
+Version 2.17.0 released 2019/07/10
 
 - Changed open source license to dual MIT/Apache-2.0
 

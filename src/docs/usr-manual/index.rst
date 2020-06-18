@@ -25,3 +25,5 @@ Welcome to hypre's documentation!
    ch-misc
    ch-references
 
+   ch-api
+

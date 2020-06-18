@@ -21,10 +21,13 @@
 typedef struct
 {
    HYPRE_Complex  *data;
-   HYPRE_Int      size;
+   HYPRE_Int       size;
 
    /* Does the Vector create/destroy `data'? */
-   HYPRE_Int      owns_data;
+   HYPRE_Int       owns_data;
+
+   /* memory location of array data */
+   HYPRE_MemoryLocation  memory_location;
 
    /* For multivectors...*/
    HYPRE_Int   num_vectors;  /* the above "size" is size of one vector */
@@ -35,26 +38,20 @@ typedef struct
       With rowwise storage, vj[i] = data[ j + num_vectors*i] */
    HYPRE_Int  vecstride, idxstride;
    /* ... so vj[i] = data[ j*vecstride + i*idxstride ] regardless of row_storage.*/
-#ifdef HYPRE_USING_GPU
-  HYPRE_Int on_device;
-#endif
-#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
-  HYPRE_Int mapped;
-  HYPRE_Int drc; /* device ref count */
-  HYPRE_Int hrc; /* host ref count */
-#endif
 } hypre_Vector;
 
 /*--------------------------------------------------------------------------
  * Accessor functions for the Vector structure
  *--------------------------------------------------------------------------*/
 
-#define hypre_VectorData(vector)      ((vector) -> data)
-#define hypre_VectorSize(vector)      ((vector) -> size)
-#define hypre_VectorOwnsData(vector)  ((vector) -> owns_data)
-#define hypre_VectorNumVectors(vector) ((vector) -> num_vectors)
+#define hypre_VectorData(vector)                  ((vector) -> data)
+#define hypre_VectorSize(vector)                  ((vector) -> size)
+#define hypre_VectorOwnsData(vector)              ((vector) -> owns_data)
+#define hypre_VectorMemoryLocation(vector)        ((vector) -> memory_location)
+#define hypre_VectorNumVectors(vector)            ((vector) -> num_vectors)
 #define hypre_VectorMultiVecStorageMethod(vector) ((vector) -> multivec_storage_method)
-#define hypre_VectorVectorStride(vector) ((vector) -> vecstride )
-#define hypre_VectorIndexStride(vector) ((vector) -> idxstride )
+#define hypre_VectorVectorStride(vector)          ((vector) -> vecstride )
+#define hypre_VectorIndexStride(vector)           ((vector) -> idxstride )
 
 #endif
+

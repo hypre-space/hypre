@@ -18,6 +18,7 @@ set(SRCS
   binsearch.c
   exchange_data.c
   F90_HYPRE_error.c
+  F90_HYPRE_general.c
   fortran_matrix.c
   hypre_ap.c
   hypre_complex.c
@@ -37,11 +38,11 @@ set(SRCS
   timer.c
   timing.c
 )
-  
+
+target_sources(HYPRE
+  PRIVATE ${SRCS}
+          ${HDRS}
+  )
+
 convert_filenames_to_full_paths(HDRS)
-convert_filenames_to_full_paths(SRCS)
-
 set(HYPRE_HEADERS ${HYPRE_HEADERS} ${HDRS} PARENT_SCOPE)
-set(HYPRE_SOURCES ${HYPRE_SOURCES} ${SRCS} PARENT_SCOPE)
-
-

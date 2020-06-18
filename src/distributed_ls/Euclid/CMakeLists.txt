@@ -3,7 +3,8 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
-set(EUCLID_SRCS
+target_sources(HYPRE
+  PRIVATE
   blas_dh.c
   Euclid_apply.c
   Euclid_dh.c
@@ -33,9 +34,3 @@ set(EUCLID_SRCS
   Timer_dh.c
   Vec_dh.c
 )
-  
-convert_filenames_to_full_paths(EUCLID_SRCS)
-
-set(SRCS ${SRCS} ${EUCLID_SRCS} PARENT_SCOPE)
-
-

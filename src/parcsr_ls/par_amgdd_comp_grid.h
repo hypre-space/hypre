@@ -145,8 +145,9 @@ typedef struct
 typedef struct
 {
    void             *amg_data;
-    
    HYPRE_Int        level;
+   HYPRE_MemoryLocation  memory_location;   /* memory location of matrices/vectors */
+
    HYPRE_Int        first_global_index;
    HYPRE_Int        last_global_index;
    HYPRE_Int        num_owned_nodes;
@@ -201,6 +202,7 @@ typedef struct
 
 #define hypre_ParCompGridAMGData(compGrid)               ((compGrid) -> amg_data)
 #define hypre_ParCompGridLevel(compGrid)               ((compGrid) -> level)
+#define hypre_ParCompGridMemoryLocation(compGrid)               ((compGrid) -> memory_location)
 #define hypre_ParCompGridFirstGlobalIndex(compGrid)               ((compGrid) -> first_global_index)
 #define hypre_ParCompGridLastGlobalIndex(compGrid)               ((compGrid) -> last_global_index)
 #define hypre_ParCompGridNumOwnedNodes(compGrid)               ((compGrid) -> num_owned_nodes)

@@ -228,6 +228,7 @@ hypre_ParCSRBooleanMatrix *hypre_ParBooleanMatmul
 
    hypre_ParMatmul_RowSizes(
       /*&C_diag_i, &C_offd_i, &B_marker,*/
+      HYPRE_MEMORY_DEVICE, /* RL: XXX */
       &C_diag_i, &C_offd_i, 
       A_diag_i, A_diag_j, A_offd_i, A_offd_j,
       B_diag_i, B_diag_j, B_offd_i, B_offd_j,

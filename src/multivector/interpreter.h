@@ -8,7 +8,7 @@
 #ifndef LOBPCG_INTERFACE_INTERPRETER
 #define LOBPCG_INTERFACE_INTERPRETER
 
-#include "_hypre_utilities.h"
+#include "HYPRE_utilities.h"
 
 typedef struct
 {

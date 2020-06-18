@@ -408,7 +408,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
          // clean up memory for this level
          for (i = 0; i < num_send_procs; i++)
          {
-            hypre_TFree(send_buffer[i], HYPRE_MEMORY_SHARED);
+            hypre_TFree(send_buffer[i], HYPRE_MEMORY_HOST);
             hypre_TFree(send_flag_buffer[i], HYPRE_MEMORY_HOST);
          }
          for (i = 0; i < num_recv_procs; i++)
@@ -577,7 +577,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
          HYPRE_Int k;
          for (k = 0; k < hypre_ParCompGridCommPkgNumLevels(compGridCommPkg); k++)
          {
-            if ( recv_redundant_marker[i][j][k] ) hypre_TFree( recv_redundant_marker[i][j][k], HYPRE_MEMORY_SHARED );
+            if ( recv_redundant_marker[i][j][k] ) hypre_TFree( recv_redundant_marker[i][j][k], HYPRE_MEMORY_HOST );
          }
          hypre_TFree( recv_redundant_marker[i][j], HYPRE_MEMORY_HOST );
       }
@@ -702,7 +702,7 @@ UnpackSendFlagBuffer(hypre_ParCompGrid **compGrid,
          }
       }
       
-      send_flag[level] = hypre_TReAlloc(send_flag[level], HYPRE_Int, num_send_nodes[level], HYPRE_MEMORY_SHARED);
+      send_flag[level] = hypre_TReAlloc(send_flag[level], HYPRE_Int, num_send_nodes[level], HYPRE_MEMORY_HOST);
       
       // !!! Debug
       num_redundant_sends += num_nodes - num_send_nodes[level];
@@ -2225,7 +2225,7 @@ FixUpRecvMaps(hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCo
                         hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[level][proc][inner_level][ hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[level][proc][inner_level]++ ] = map_val;
                      }
                   }
-                  hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[level][proc][inner_level] = hypre_TReAlloc(hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[level][proc][inner_level], HYPRE_Int, hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[level][proc][inner_level], HYPRE_MEMORY_SHARED);
+                  hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[level][proc][inner_level] = hypre_TReAlloc(hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)[level][proc][inner_level], HYPRE_Int, hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[level][proc][inner_level], HYPRE_MEMORY_HOST);
                }
             }
          }

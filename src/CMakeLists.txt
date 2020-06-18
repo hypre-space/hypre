@@ -3,37 +3,50 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
-cmake_minimum_required (VERSION 2.8.8)
-if (POLICY CMP0074)
-   cmake_policy(SET CMP0074 NEW) 
-endif (POLICY CMP0074)
+cmake_minimum_required (VERSION 3.13...3.16)
 
-project (hypre)
+if(${CMAKE_VERSION} VERSION_LESS 3.16)
+  cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
+else()
+  cmake_policy(VERSION 3.16)
+endif()
 
 # The version number.
-set (HYPRE_VERSION 2.17.0)
-set (HYPRE_DATE    2019/06/10)
+set (HYPRE_VERSION 2.19.0)
+set (HYPRE_DATE    2020/05/26)
 set (HYPRE_TIME    00:00:00)
 set (HYPRE_BUGS    hypre-support@llnl.gov)
 set (HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
+
+project (hypre
+  VERSION ${HYPRE_VERSION}
+  LANGUAGES C CXX)
 
 if (${hypre_SOURCE_DIR} STREQUAL ${hypre_BINARY_DIR})
   message(FATAL_ERROR "In-place build not allowed! Please use a separate build directory. See the Users Manual or INSTALL file for details.")
 endif ()
 
-# Set cmake module path 
-set(CMAKE_MODULE_PATH ${hypre_SOURCE_DIR}/config/cmake) 
+# Set cmake module path
+set(CMAKE_MODULE_PATH "${hypre_SOURCE_DIR}/config/cmake" "${CMAKE_MODULE_PATH}")
 include(hypre_CMakeUtilities)
 
 # Set default installation directory, but provide a means for users to change
 set (HYPRE_INSTALL_PREFIX "${PROJECT_SOURCE_DIR}/hypre" CACHE PATH
-  "Installation directory for HYPRE")
-set (CMAKE_INSTALL_PREFIX "${HYPRE_INSTALL_PREFIX}" CACHE INTERNAL "" FORCE)
+    "Installation directory for HYPRE")
+if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  set (CMAKE_INSTALL_PREFIX "${HYPRE_INSTALL_PREFIX}" CACHE INTERNAL "" FORCE)
+endif ()
 
 # Set default compile optimization flag
 set (HYPRE_BUILD_TYPE "Release" CACHE STRING
-  "Optimization flags: set to Debug, Release, RelWithDebInfo, or MinSizeRel")
-set (CMAKE_BUILD_TYPE "${HYPRE_BUILD_TYPE}" CACHE INTERNAL "" FORCE)
+    "Optimization flags: set to Debug, Release, RelWithDebInfo, or MinSizeRel")
+
+if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  set (CMAKE_BUILD_TYPE "${HYPRE_BUILD_TYPE}" CACHE INTERNAL "" FORCE)
+  # Set the possible values of build type for cmake-gui
+  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
+    "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
+endif ()
 
 # Configuration options
 option(HYPRE_ENABLE_SHARED           "Build a shared library" OFF)
@@ -56,6 +69,7 @@ option(HYPRE_PRINT_ERRORS            "Print HYPRE errors" OFF)
 option(HYPRE_TIMING                  "Use HYPRE timing routines" OFF)
 option(HYPRE_BUILD_EXAMPLES          "Build examples" OFF)
 option(HYPRE_BUILD_TESTS             "Build tests" OFF)
+option(HYPRE_USING_HOST_MEMORY       "Use host memory" ON)
 
 option(TPL_DSUPERLU_LIBRARIES        "List of absolute paths to SuperLU_Dist link libraries [].")
 option(TPL_DSUPERLU_INCLUDE_DIRS     "List of absolute paths to SuperLU_Dist include directories [].")
@@ -99,13 +113,13 @@ endif()
 
 if (HYPRE_ENABLE_GLOBAL_PARTITION)
   set(HYPRE_NO_GLOBAL_PARTITION OFF CACHE BOOL "" FORCE)
-elseif()
+else()
   set(HYPRE_NO_GLOBAL_PARTITION ON CACHE BOOL "" FORCE)
 endif()
 
 if (HYPRE_WITH_MPI)
   set(HYPRE_SEQUENTIAL OFF CACHE BOOL "" FORCE)
-elseif()
+else()
   set(HYPRE_SEQUENTIAL ON CACHE BOOL "" FORCE)
 endif()
 
@@ -142,43 +156,42 @@ if (HYPRE_SEQUENTIAL)
   set (HYPRE_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 endif ()
 
+add_library (HYPRE)
+
 # Headers and sources
 set (HYPRE_HEADERS "")
-set (HYPRE_SOURCES "")
 
 # Headers and sources: .
-list (APPEND HYPRE_HEADERS
-  "${PROJECT_BINARY_DIR}/HYPRE_config.h"
+set(HYPRE_MAIN_HEADERS
+  ${CMAKE_CURRENT_BINARY_DIR}/HYPRE_config.h
   HYPREf.h
   HYPRE.h
 )
-
-# This is a list of TPLs that are used by all targets
-set(TPL_LIBRARIES "")
-
-# This is a list of linker flags to be used with TPLs for all targets
-set(TPL_LINKER_FLAGS "")
+target_sources(HYPRE
+  PRIVATE ${HYPRE_MAIN_HEADERS}
+  )
+set(HYPRE_HEADERS ${HYPRE_HEADERS} ${HYPRE_MAIN_HEADERS})
 
 # Headers and sources: blas
 if (HYPRE_USING_HYPRE_BLAS)
-  add_subdirectory(blas) 
+  add_subdirectory(blas)
 else()
   # Find system blas
   find_package(BLAS REQUIRED)
-  list(APPEND TPL_LIBRARIES ${BLAS_LIBRARIES})
-  set(CMAKE_C_FLAGS "-DUSE_VENDOR_BLAS ${CMAKE_C_FLAGS}")
+  target_link_libraries(HYPRE PUBLIC "${BLAS_LIBRARIES}")
+  target_compile_definitions(HYPRE PUBLIC "USE_VENDOR_BLAS")
 endif()
 
 # Headers and sources: lapack
 if (HYPRE_USING_HYPRE_LAPACK)
-  add_subdirectory(lapack) 
+  add_subdirectory(lapack)
 else()
   # Find system lapack
   find_package(LAPACK REQUIRED)
-  list(APPEND TPL_LIBRARIES ${LAPACK_LIBRARIES})
+  target_link_libraries(HYPRE PUBLIC "${LAPACK_LIBRARIES}")
 endif()
 
-# Find DSUPERLU, if requested 
+# Find DSUPERLU, if requested
 if (HYPRE_USING_DSUPERLU)
   if (NOT TPL_DSUPERLU_LIBRARIES)
     message(FATAL_ERROR "TPL_DSUPERLU_LIBRARIES option should be set for SuperLU_Dist support.")
@@ -195,52 +208,36 @@ if (HYPRE_USING_DSUPERLU)
   endforeach()
   message("-- Enabled support for using DSUPERLU.")
   set(DSUPERLU_FOUND TRUE)
-  list(APPEND TPL_LIBRARIES ${TPL_DSUPERLU_LIBRARIES} stdc++)
+  target_link_libraries(HYPRE PUBLIC ${TPL_DSUPERLU_LIBRARIES} stdc++)
+  target_include_directories(${TPL_DSUPERLU_INCLUDE_DIRS})
 endif()
-
-if (TPL_DSUPERLU_INCLUDE_DIRS)
-  include_directories(${TPL_DSUPERLU_INCLUDE_DIRS})  
-endif ()
 
 if(DSUPERLU_FOUND)
   set(HYPRE_USING_DSUPERLU TRUE)
 endif()
 
-
 # Headers and sources: remaining subdirectories
 set(HYPRE_DIRS utilities multivector krylov seq_mv parcsr_mv parcsr_block_mv distributed_matrix IJ_mv matrix_matrix distributed_ls parcsr_ls struct_mv struct_ls sstruct_mv sstruct_ls)
 foreach(DIR IN LISTS HYPRE_DIRS)
   add_subdirectory(${DIR})
+  target_include_directories(HYPRE PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${DIR}>)
 endforeach()
 
 # Configure a header file to pass CMake settings to the source code
 configure_file (
-  "${PROJECT_SOURCE_DIR}/config/HYPRE_config.h.cmake.in"
-  "${PROJECT_BINARY_DIR}/HYPRE_config.h"
+  "${CMAKE_CURRENT_SOURCE_DIR}/config/HYPRE_config.h.cmake.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/HYPRE_config.h"
   )
 
 # BINARY must be first in order to get the correct HYPRE_config.h file
-include_directories(${hypre_BINARY_DIR})
-include_directories(${hypre_SOURCE_DIR})
-
-
-
-# !!! Include ParMETIS: what is the proper way to do this? Need to also make changes in regular makefiles?
-include_directories(../../parmetis-4.0.3/include/)
-include_directories(../../parmetis-4.0.3/metis/include)
-
-# !!! What's the proper way to ensure C++11 support?
-set (CMAKE_CXX_STANDARD 11)
-
-
-include_directories(blas)
-include_directories(lapack)
-# Add remaining subdirectories
-foreach(DIR IN LISTS HYPRE_DIRS)
-  include_directories(${DIR})
-endforeach()
-include_directories(distributed_ls/Euclid)
-include_directories(distributed_ls/ParaSails)
+target_include_directories(HYPRE PUBLIC
+  $<BUILD_INTERFACE:${hypre_BINARY_DIR}>
+  $<BUILD_INTERFACE:${hypre_SOURCE_DIR}>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/blas>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/lapack>
+  $<INSTALL_INTERFACE:include>
+  )
 
 # Set library build type
 if (HYPRE_SHARED)
@@ -251,24 +248,19 @@ endif ()
 
 # Set MPI compile flags
 if (NOT HYPRE_SEQUENTIAL)
-  find_package (MPI)
-  if ((MPI_C_FOUND) AND (NOT CMAKE_C_COMPILER STREQUAL MPI_C_COMPILER))
-    include_directories (${MPI_C_INCLUDE_PATH})
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${MPI_C_COMPILE_FLAGS}")
-    list(APPEND TPL_LIBRARIES ${MPI_C_LIBRARIES})
-  endif ()
+  find_program (MPIEXEC_EXECUTABLE NAMES mpiexec mpirun)
+  find_package (MPI REQUIRED)
+  target_link_libraries (HYPRE PUBLIC MPI::MPI_C)
 endif (NOT HYPRE_SEQUENTIAL)
 
 # Set OpenMP compile flags
 if (HYPRE_USING_OPENMP)
-  find_package (OpenMP)
-  if (OPENMP_FOUND)
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-  endif (OPENMP_FOUND)
+  find_package (OpenMP REQUIRED)
+  target_link_libraries (HYPRE PUBLIC OpenMP::OpenMP_C)
 endif (HYPRE_USING_OPENMP)
 
 if (MSVC)
-  add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+  target_compile_definitions(HYPRE PRIVATE _CRT_SECURE_NO_WARNINGS)
   # Use the C++ compiler to compile these files to get around lack of C99 support
   set_source_files_properties (utilities/hypre_hopscotch_hash.c PROPERTIES COMPILE_FLAGS /TP)
   set_source_files_properties (utilities/hypre_merge_sort.c     PROPERTIES COMPILE_FLAGS /TP)
@@ -304,12 +296,41 @@ if (HYPRE_BUILD_TESTS)
   add_subdirectory(test)
 endif()
 
-# Cleanup the TPL list
-list(REMOVE_DUPLICATES TPL_LIBRARIES)
+include (GNUInstallDirs)
+install (TARGETS HYPRE
+  EXPORT HYPRETargets
+  LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+  ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+  INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+install (FILES ${HYPRE_HEADERS} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
 
-add_library (HYPRE ${HYPRE_SOURCES} ${HYPRE_HEADERS} ${FEI_LIBS})
+include (CMakePackageConfigHelpers)
+write_basic_package_version_file (
+  HYPREConfigVersion.cmake
+  VERSION ${PACKAGE_VERSION}
+  COMPATIBILITY SameMajorVersion
+  )
 
-target_link_libraries(HYPRE PUBLIC ${TPL_LIBRARIES})
+install (EXPORT HYPRETargets
+  FILE HYPRETargets.cmake
+  NAMESPACE HYPRE::
+  DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/HYPRE"
+  )
 
-install (TARGETS HYPRE DESTINATION lib)
-install (FILES ${HYPRE_HEADERS} DESTINATION include)
+configure_package_config_file (
+  config/HYPREConfig.cmake.in HYPREConfig.cmake
+  INSTALL_DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/HYPREConfig.cmake"
+  )
+install (
+  FILES
+      "${CMAKE_CURRENT_BINARY_DIR}/HYPREConfig.cmake"
+      "${CMAKE_CURRENT_BINARY_DIR}/HYPREConfigVersion.cmake"
+  DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/HYPRE"
+  )
+
+export (EXPORT HYPRETargets
+  FILE "${CMAKE_CURRENT_BINARY_DIR}/HYPRETargets.cmake"
+  NAMESPACE HYPRE::
+  )
+
+export (PACKAGE HYPRE)

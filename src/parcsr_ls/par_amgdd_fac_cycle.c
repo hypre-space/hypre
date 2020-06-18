@@ -382,7 +382,7 @@ hypre_BoomerAMGDD_FAC_Jacobi( hypre_ParCompGrid *compGrid, hypre_ParCompGridMatr
    if (!hypre_ParCompGridL1Norms(compGrid))
    {
       HYPRE_Int total_real_nodes = hypre_ParCompGridNumOwnedNodes(compGrid) + hypre_ParCompGridNumNonOwnedRealNodes(compGrid);
-      hypre_ParCompGridL1Norms(compGrid) = hypre_CTAlloc(HYPRE_Real, total_real_nodes, HYPRE_MEMORY_SHARED);
+      hypre_ParCompGridL1Norms(compGrid) = hypre_CTAlloc(HYPRE_Real, total_real_nodes, hypre_ParCompGridMemoryLocation(compGrid));
       hypre_CSRMatrix *diag = hypre_ParCompGridMatrixOwnedDiag(A);
       for (i = 0; i < hypre_ParCompGridNumOwnedNodes(compGrid); i++)
       {
@@ -507,12 +507,12 @@ HYPRE_Int hypre_BoomerAMGDD_FAC_OrderedGaussSeidel( hypre_ParCompGrid *compGrid,
 
    if (!hypre_ParCompGridOwnedRelaxOrdering(compGrid)) 
    {
-      hypre_ParCompGridOwnedRelaxOrdering(compGrid) = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumOwnedNodes(compGrid), HYPRE_MEMORY_SHARED);
+      hypre_ParCompGridOwnedRelaxOrdering(compGrid) = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumOwnedNodes(compGrid), hypre_ParCompGridMemoryLocation(compGrid));
       hypre_topo_sort(hypre_CSRMatrixI(hypre_ParCompGridMatrixOwnedDiag(hypre_ParCompGridA(compGrid))), hypre_CSRMatrixJ(hypre_ParCompGridMatrixOwnedDiag(hypre_ParCompGridA(compGrid))), hypre_CSRMatrixData(hypre_ParCompGridMatrixOwnedDiag(hypre_ParCompGridA(compGrid))), hypre_ParCompGridOwnedRelaxOrdering(compGrid), hypre_ParCompGridNumOwnedNodes(compGrid));
    }
    if (!hypre_ParCompGridNonOwnedRelaxOrdering(compGrid)) 
    {
-      hypre_ParCompGridNonOwnedRelaxOrdering(compGrid) = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumNonOwnedNodes(compGrid), HYPRE_MEMORY_SHARED);
+      hypre_ParCompGridNonOwnedRelaxOrdering(compGrid) = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumNonOwnedNodes(compGrid), hypre_ParCompGridMemoryLocation(compGrid));
       hypre_topo_sort(hypre_CSRMatrixI(hypre_ParCompGridMatrixNonOwnedDiag(hypre_ParCompGridA(compGrid))), hypre_CSRMatrixJ(hypre_ParCompGridMatrixNonOwnedDiag(hypre_ParCompGridA(compGrid))), hypre_CSRMatrixData(hypre_ParCompGridMatrixNonOwnedDiag(hypre_ParCompGridA(compGrid))), hypre_ParCompGridNonOwnedRelaxOrdering(compGrid), hypre_ParCompGridNumNonOwnedNodes(compGrid));
    }
 

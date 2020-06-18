@@ -409,7 +409,7 @@ HYPRE_Int hypre_ParMPSchwarzSolve(hypre_ParCSRMatrix *par_A,
    if (use_nonsymm)
       uplo = 'N';
 
-/*x_vector = hypre_ParVectorLocalVector(par_x);*/
+   /*x_vector = hypre_ParVectorLocalVector(par_x);*/
    A_diag_i = hypre_CSRMatrixI(A_diag);
    A_diag_j = hypre_CSRMatrixJ(A_diag);
    A_diag_data = hypre_CSRMatrixData(A_diag);
@@ -710,7 +710,7 @@ HYPRE_Int hypre_MPSchwarzSolve(hypre_ParCSRMatrix *par_A,
    HYPRE_Int *j_dof_dof;
    HYPRE_Real *a_dof_dof;
    HYPRE_Real *x;
-   HYPRE_Real *rhs;
+   hypre_Vector *rhs;
    HYPRE_Real *aux;
    hypre_CSRMatrix *A;
    hypre_Vector *x_vector;
@@ -750,9 +750,13 @@ HYPRE_Int hypre_MPSchwarzSolve(hypre_ParCSRMatrix *par_A,
 
 
    if (num_procs > 1)
-      hypre_parCorrRes(par_A,par_x,rhs_vector,&rhs);
+   {
+      hypre_parCorrRes(par_A, par_x, rhs_vector, &rhs);
+   }
    else
-      rhs = hypre_VectorData(rhs_vector);
+   {
+      rhs = rhs_vector;
+   }
 
    /* forward solve: ----------------------------------------------- */
 
@@ -766,7 +770,7 @@ HYPRE_Int hypre_MPSchwarzSolve(hypre_ParCSRMatrix *par_A,
       jj = 0;
       for (j=i_domain_dof[i]; j < i_domain_dof[i+1]; j++)
       {
-         aux[jj] = rhs[j_domain_dof[j]];
+         aux[jj] = hypre_VectorData(rhs)[j_domain_dof[j]];
          for (k=i_dof_dof[j_domain_dof[j]];
               k<i_dof_dof[j_domain_dof[j]+1]; k++)
             aux[jj] -= a_dof_dof[k] * x[j_dof_dof[k]];
@@ -798,14 +802,6 @@ HYPRE_Int hypre_MPSchwarzSolve(hypre_ParCSRMatrix *par_A,
       piv_counter += matrix_size;
    }
 
-/*  if (num_procs > 1)
-    {
-    hypre_TFree(rhs, HYPRE_MEMORY_HOST);
-    hypre_parCorrRes(par_A,par_x,rhs_vector,&rhs);
-    }
-    else
-    rhs = hypre_VectorData(rhs_vector);
-*/
    /* backward solve: ------------------------------------------------ */
    for (i=num_domains-1; i > -1; i--)
    {
@@ -818,7 +814,7 @@ HYPRE_Int hypre_MPSchwarzSolve(hypre_ParCSRMatrix *par_A,
       jj = 0;
       for (j=i_domain_dof[i]; j < i_domain_dof[i+1]; j++)
       {
-         aux[jj] = rhs[j_domain_dof[j]];
+         aux[jj] = hypre_VectorData(rhs)[j_domain_dof[j]];
          for (k=i_dof_dof[j_domain_dof[j]];
               k<i_dof_dof[j_domain_dof[j]+1]; k++)
             aux[jj] -= a_dof_dof[k] * x[j_dof_dof[k]];
@@ -846,11 +842,14 @@ HYPRE_Int hypre_MPSchwarzSolve(hypre_ParCSRMatrix *par_A,
       jj = 0;
       for (j=i_domain_dof[i]; j < i_domain_dof[i+1]; j++)
       {
-         x[j_domain_dof[j]]+=  relax_wt*aux[jj++];
+         x[j_domain_dof[j]] += relax_wt*aux[jj++];
       }
    }
 
-   if (num_procs > 1) hypre_TFree(rhs, HYPRE_MEMORY_SHARED);
+   if (num_procs > 1)
+   {
+      hypre_SeqVectorDestroy(rhs);
+   }
 
    return hypre_error_flag;
 }
@@ -871,7 +870,7 @@ HYPRE_Int hypre_MPSchwarzCFSolve(hypre_ParCSRMatrix *par_A,
    HYPRE_Int *j_dof_dof;
    HYPRE_Real *a_dof_dof;
    HYPRE_Real *x;
-   HYPRE_Real *rhs;
+   hypre_Vector *rhs;
    HYPRE_Real *aux;
    hypre_CSRMatrix *A;
    hypre_Vector *x_vector;
@@ -908,9 +907,13 @@ HYPRE_Int hypre_MPSchwarzCFSolve(hypre_ParCSRMatrix *par_A,
       uplo = 'N';
 
    if (num_procs > 1)
-      hypre_parCorrRes(par_A,par_x,rhs_vector,&rhs);
+   {
+      hypre_parCorrRes(par_A, par_x, rhs_vector, &rhs);
+   }
    else
-      rhs = hypre_VectorData(rhs_vector);
+   {
+      rhs = rhs_vector;
+   }
 
    /* forward solve: ----------------------------------------------- */
 
@@ -926,7 +929,7 @@ HYPRE_Int hypre_MPSchwarzCFSolve(hypre_ParCSRMatrix *par_A,
          jj = 0;
          for (j=i_domain_dof[i]; j < i_domain_dof[i+1]; j++)
          {
-            aux[jj] = rhs[j_domain_dof[j]];
+            aux[jj] = hypre_VectorData(rhs)[j_domain_dof[j]];
             if (CF_marker[j_domain_dof[j]] == rlx_pt)
             {
                for (k=i_dof_dof[j_domain_dof[j]];
@@ -962,14 +965,6 @@ HYPRE_Int hypre_MPSchwarzCFSolve(hypre_ParCSRMatrix *par_A,
       }
    }
 
-/*  if (num_procs > 1)
-    {
-    hypre_TFree(rhs, HYPRE_MEMORY_HOST);
-    hypre_parCorrRes(par_A,par_x,rhs_vector,&rhs);
-    }
-    else
-    rhs = hypre_VectorData(rhs_vector);
-*/
    /* backward solve: ------------------------------------------------ */
    for (i=num_domains-1; i > -1; i--)
    {
@@ -983,7 +978,7 @@ HYPRE_Int hypre_MPSchwarzCFSolve(hypre_ParCSRMatrix *par_A,
          jj = 0;
          for (j=i_domain_dof[i]; j < i_domain_dof[i+1]; j++)
          {
-            aux[jj] = rhs[j_domain_dof[j]];
+            aux[jj] = hypre_VectorData(rhs)[j_domain_dof[j]];
             if (CF_marker[j_domain_dof[j]] == rlx_pt)
             {
                for (k=i_dof_dof[j_domain_dof[j]];
@@ -1018,7 +1013,10 @@ HYPRE_Int hypre_MPSchwarzCFSolve(hypre_ParCSRMatrix *par_A,
       }
    }
 
-   if (num_procs > 1) hypre_TFree(rhs, HYPRE_MEMORY_HOST);
+   if (num_procs > 1)
+   {
+      hypre_SeqVectorDestroy(rhs);
+   }
 
    return hypre_error_flag;
 }
@@ -1037,7 +1035,7 @@ HYPRE_Int hypre_MPSchwarzFWSolve(hypre_ParCSRMatrix *par_A,
    HYPRE_Int *j_dof_dof;
    HYPRE_Real *a_dof_dof;
    HYPRE_Real *x;
-   HYPRE_Real *rhs;
+   hypre_Vector *rhs;
    HYPRE_Real *aux;
    hypre_CSRMatrix *A;
    hypre_Vector *x_vector;
@@ -1073,9 +1071,13 @@ HYPRE_Int hypre_MPSchwarzFWSolve(hypre_ParCSRMatrix *par_A,
       x[i] = 0.e0; */
 
    if (num_procs > 1)
-      hypre_parCorrRes(par_A,par_x,rhs_vector,&rhs);
+   {
+      hypre_parCorrRes(par_A, par_x, rhs_vector, &rhs);
+   }
    else
-      rhs = hypre_VectorData(rhs_vector);
+   {
+      rhs = rhs_vector;
+   }
 
    /* forward solve: ----------------------------------------------- */
 
@@ -1089,7 +1091,7 @@ HYPRE_Int hypre_MPSchwarzFWSolve(hypre_ParCSRMatrix *par_A,
       jj = 0;
       for (j=i_domain_dof[i]; j < i_domain_dof[i+1]; j++)
       {
-         aux[jj] = rhs[j_domain_dof[j]];
+         aux[jj] = hypre_VectorData(rhs)[j_domain_dof[j]];
          for (k=i_dof_dof[j_domain_dof[j]];
               k<i_dof_dof[j_domain_dof[j]+1]; k++)
             aux[jj] -= a_dof_dof[k] * x[j_dof_dof[k]];
@@ -1122,7 +1124,10 @@ HYPRE_Int hypre_MPSchwarzFWSolve(hypre_ParCSRMatrix *par_A,
       piv_counter += matrix_size;
    }
 
-   if (num_procs > 1) hypre_TFree(rhs, HYPRE_MEMORY_HOST);
+   if (num_procs > 1)
+   {
+      hypre_SeqVectorDestroy(rhs);
+   }
 
    return hypre_error_flag;
 }
@@ -1143,7 +1148,7 @@ HYPRE_Int hypre_MPSchwarzCFFWSolve(hypre_ParCSRMatrix *par_A,
    HYPRE_Int *j_dof_dof;
    HYPRE_Real *a_dof_dof;
    HYPRE_Real *x;
-   HYPRE_Real *rhs;
+   hypre_Vector *rhs;
    HYPRE_Real *aux;
    hypre_CSRMatrix *A;
    hypre_Vector *x_vector;
@@ -1182,9 +1187,13 @@ HYPRE_Int hypre_MPSchwarzCFFWSolve(hypre_ParCSRMatrix *par_A,
       uplo = 'N';
 
    if (num_procs > 1)
-      hypre_parCorrRes(par_A,par_x,rhs_vector,&rhs);
+   {
+      hypre_parCorrRes(par_A, par_x, rhs_vector, &rhs);
+   }
    else
-      rhs = hypre_VectorData(rhs_vector);
+   {
+      rhs = rhs_vector;
+   }
 
    /* forward solve: ----------------------------------------------- */
 
@@ -1200,7 +1209,7 @@ HYPRE_Int hypre_MPSchwarzCFFWSolve(hypre_ParCSRMatrix *par_A,
          jj = 0;
          for (j=i_domain_dof[i]; j < i_domain_dof[i+1]; j++)
          {
-            aux[jj] = rhs[j_domain_dof[j]];
+            aux[jj] = hypre_VectorData(rhs)[j_domain_dof[j]];
             if (CF_marker[j_domain_dof[j]] == rlx_pt)
             {
                for (k=i_dof_dof[j_domain_dof[j]];
@@ -1237,7 +1246,10 @@ HYPRE_Int hypre_MPSchwarzCFFWSolve(hypre_ParCSRMatrix *par_A,
       }
    }
 
-   if (num_procs > 1) hypre_TFree(rhs, HYPRE_MEMORY_HOST);
+   if (num_procs > 1)
+   {
+      hypre_SeqVectorDestroy(rhs);
+   }
 
    return hypre_error_flag;
 }
@@ -1784,6 +1796,8 @@ hypre_AMGCreateDomainDof(hypre_CSRMatrix     *A,
 
    domain_structure = hypre_CSRMatrixCreate(num_domains, max_local_dof_counter,
                                             i_domain_dof[num_domains]);
+
+   hypre_CSRMatrixMemoryLocation(domain_structure) = HYPRE_MEMORY_HOST;
 
    hypre_CSRMatrixI(domain_structure) = i_domain_dof;
    hypre_CSRMatrixJ(domain_structure) = j_domain_dof;
@@ -2463,9 +2477,9 @@ HYPRE_Int hypre_matinv(HYPRE_Real *x, HYPRE_Real *a, HYPRE_Int k)
 
 HYPRE_Int
 hypre_parCorrRes( hypre_ParCSRMatrix *A,
-                  hypre_ParVector *x,
-                  hypre_Vector *rhs,
-                  HYPRE_Real **tmp_ptr)
+                  hypre_ParVector    *x,
+                  hypre_Vector       *rhs,
+                  hypre_Vector      **tmp_ptr )
 {
    HYPRE_Int i, j, index, start;
    HYPRE_Int num_sends, num_cols_offd;
@@ -2488,8 +2502,8 @@ hypre_parCorrRes( hypre_ParCSRMatrix *A,
    if (num_cols_offd)
    {
       num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-      x_buf_data = hypre_CTAlloc(HYPRE_Real, 
-                                 hypre_ParCSRCommPkgSendMapStart(comm_pkg,  num_sends), HYPRE_MEMORY_HOST);
+      x_buf_data = hypre_CTAlloc(HYPRE_Real,
+            hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends), HYPRE_MEMORY_HOST);
 
       index = 0;
       for (i = 0; i < num_sends; i++)
@@ -2508,6 +2522,7 @@ hypre_parCorrRes( hypre_ParCSRMatrix *A,
                                                   x_tmp_data);
 
       tmp_vector = hypre_SeqVectorCreate(local_size);
+      hypre_VectorMemoryLocation(tmp_vector) = HYPRE_MEMORY_DEVICE;
       hypre_SeqVectorInitialize(tmp_vector);
       hypre_SeqVectorCopy(rhs,tmp_vector);
 
@@ -2522,13 +2537,12 @@ hypre_parCorrRes( hypre_ParCSRMatrix *A,
    else
    {
       tmp_vector = hypre_SeqVectorCreate(local_size);
+      hypre_VectorMemoryLocation(tmp_vector) = HYPRE_MEMORY_DEVICE;
       hypre_SeqVectorInitialize(tmp_vector);
       hypre_SeqVectorCopy(rhs,tmp_vector);
    }
 
-   *tmp_ptr = hypre_VectorData(tmp_vector);
-   hypre_VectorOwnsData(tmp_vector) = 0;
-   hypre_SeqVectorDestroy(tmp_vector);
+   *tmp_ptr = tmp_vector;
 
    return 0;
 }

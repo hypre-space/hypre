@@ -81,7 +81,7 @@ hypre_StructInterpAssemble( hypre_StructMatrix  *A,
    hypre_CommInfoProjectSend(comm_info, index, stride);
    hypre_CommInfoProjectRecv(comm_info, index, stride);
 
-   for (s = 0; s < 3; s++)
+   for (s = 0; s < 4; s++)
    {
       switch(s)
       {
@@ -89,12 +89,18 @@ hypre_StructInterpAssemble( hypre_StructMatrix  *A,
             box_aa = hypre_CommInfoSendBoxes(comm_info);
             hypre_SetIndex3(hypre_CommInfoSendStride(comm_info), 1, 1, 1);
             break;
+
          case 1:
             box_aa = hypre_CommInfoRecvBoxes(comm_info);
             hypre_SetIndex3(hypre_CommInfoRecvStride(comm_info), 1, 1, 1);
             break;
+
          case 2:
             box_aa = hypre_CommInfoSendRBoxes(comm_info);
+            break;
+
+         case 3:
+            box_aa = hypre_CommInfoRecvRBoxes(comm_info);
             break;
       }
 

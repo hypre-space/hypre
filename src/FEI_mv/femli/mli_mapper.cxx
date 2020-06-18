@@ -6,14 +6,13 @@
  ******************************************************************************/
 
 #include <string.h>
-#include <assert.h>
 #include "_hypre_utilities.h"
 #include "HYPRE.h"
 #include "mli_mapper.h"
 #include "mli_utils.h"
 
 /***************************************************************************
- * constructor function for the MLI_Mapper 
+ * constructor function for the MLI_Mapper
  *--------------------------------------------------------------------------*/
 
 MLI_Mapper::MLI_Mapper()
@@ -24,7 +23,7 @@ MLI_Mapper::MLI_Mapper()
 }
 
 /***************************************************************************
- * destructor function for the MLI_Mapper 
+ * destructor function for the MLI_Mapper
  *--------------------------------------------------------------------------*/
 
 MLI_Mapper::~MLI_Mapper()
@@ -58,16 +57,16 @@ int MLI_Mapper::setMap(int nItems, int *itemList, int *mapList)
  * adjust map offset (This is used for slide surface reduction)
  *--------------------------------------------------------------------------*/
 
-int MLI_Mapper::adjustMapOffset(MPI_Comm comm, int *procNRows, 
+int MLI_Mapper::adjustMapOffset(MPI_Comm comm, int *procNRows,
                                 int *procOffsets)
 {
    int i, j, nprocs;
 
    if ( nEntries <= 0 ) return -1;
    MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
-   for ( i = 0; i < nEntries; i++ ) 
+   for ( i = 0; i < nEntries; i++ )
    {
-      for ( j = 0; j < nprocs; j++ ) 
+      for ( j = 0; j < nprocs; j++ )
          if ( tokenList[i] < procNRows[j] ) break;
       tokenMap[i] -= procOffsets[j-1];
    }
@@ -90,7 +89,7 @@ int MLI_Mapper::getMap(int nItems, int *itemList, int *mapList)
    MLI_Utils_IntQSort2( itemTemp, itemAux, 0, nItems-1 );
 
    counter = 0;
-   for ( i = 0; i < nItems; i++ ) 
+   for ( i = 0; i < nItems; i++ )
    {
       if ( itemTemp[i] == tokenList[counter] )
          mapList[itemAux[i]] = tokenMap[counter];
@@ -111,7 +110,7 @@ int MLI_Mapper::getMap(int nItems, int *itemList, int *mapList)
       {
          printf("MLI_Mapper::getMap - item not found %d.\n", itemList[i]);
          exit(1);
-      } 
+      }
    }
    delete [] itemTemp;
    delete [] itemAux;
@@ -119,7 +118,7 @@ int MLI_Mapper::getMap(int nItems, int *itemList, int *mapList)
 }
 
 /***************************************************************************
- * setParams 
+ * setParams
  *--------------------------------------------------------------------------*/
 
 int MLI_Mapper::setParams(char *param_string, int argc, char **argv)

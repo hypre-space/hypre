@@ -175,34 +175,34 @@ hypre_BoomerAMGDDSolve( void *amg_vdata,
          }
       }
 
-      HYPRE_Int relax_type, i;
-      for (i = 0; i < hypre_ParAMGDataAMGDDNumGlobalRelax(amg_data); i++)
-         for (relax_type = 13; relax_type < 15; relax_type++)
-            hypre_BoomerAMGRelax( hypre_ParAMGDataAArray(amg_data)[amgdd_start_level],
-                                 hypre_ParAMGDataFArray(amg_data)[amgdd_start_level],
-                                 hypre_ParAMGDataCFMarkerArray(amg_data)[amgdd_start_level],
-                                 relax_type,
-                                 0,
-                                 hypre_ParAMGDataRelaxWeight(amg_data)[amgdd_start_level],
-                                 hypre_ParAMGDataOmega(amg_data)[amgdd_start_level],
-                                 hypre_ParAMGDataL1Norms(amg_data)[amgdd_start_level],
-                                 hypre_ParAMGDataUArray(amg_data)[amgdd_start_level],
-                                 hypre_ParAMGDataVtemp(amg_data),
-                                 hypre_ParAMGDataZtemp(amg_data) );
-      if (hypre_ParAMGDataAMGDDNumGlobalRelax(amg_data) < 0)
-         for (i = 0; i < -hypre_ParAMGDataAMGDDNumGlobalRelax(amg_data); i++)
-            for (relax_type = 13; relax_type < 15; relax_type++)
-               hypre_BoomerAMGRelax( hypre_ParAMGDataAArray(amg_data)[amgdd_start_level],
-                                 hypre_ParAMGDataFArray(amg_data)[amgdd_start_level],
-                                 boundary_marker,
-                                 relax_type,
-                                 1,
-                                 hypre_ParAMGDataRelaxWeight(amg_data)[amgdd_start_level],
-                                 hypre_ParAMGDataOmega(amg_data)[amgdd_start_level],
-                                 hypre_ParAMGDataL1Norms(amg_data)[amgdd_start_level],
-                                 hypre_ParAMGDataUArray(amg_data)[amgdd_start_level],
-                                 hypre_ParAMGDataVtemp(amg_data),
-                                 hypre_ParAMGDataZtemp(amg_data) );
+      /* HYPRE_Int relax_type, i; */
+      /* for (i = 0; i < hypre_ParAMGDataAMGDDNumGlobalRelax(amg_data); i++) */
+      /*    for (relax_type = 13; relax_type < 15; relax_type++) */
+      /*       hypre_BoomerAMGRelax( hypre_ParAMGDataAArray(amg_data)[amgdd_start_level], */
+      /*                            hypre_ParAMGDataFArray(amg_data)[amgdd_start_level], */
+      /*                            hypre_ParAMGDataCFMarkerArray(amg_data)[amgdd_start_level], */
+      /*                            relax_type, */
+      /*                            0, */
+      /*                            hypre_ParAMGDataRelaxWeight(amg_data)[amgdd_start_level], */
+      /*                            hypre_ParAMGDataOmega(amg_data)[amgdd_start_level], */
+      /*                            hypre_ParAMGDataL1Norms(amg_data)[amgdd_start_level], */
+      /*                            hypre_ParAMGDataUArray(amg_data)[amgdd_start_level], */
+      /*                            hypre_ParAMGDataVtemp(amg_data), */
+      /*                            hypre_ParAMGDataZtemp(amg_data) ); */
+      /* if (hypre_ParAMGDataAMGDDNumGlobalRelax(amg_data) < 0) */
+      /*    for (i = 0; i < -hypre_ParAMGDataAMGDDNumGlobalRelax(amg_data); i++) */
+      /*       for (relax_type = 13; relax_type < 15; relax_type++) */
+      /*          hypre_BoomerAMGRelax( hypre_ParAMGDataAArray(amg_data)[amgdd_start_level], */
+      /*                            hypre_ParAMGDataFArray(amg_data)[amgdd_start_level], */
+      /*                            boundary_marker, */
+      /*                            relax_type, */
+      /*                            1, */
+      /*                            hypre_ParAMGDataRelaxWeight(amg_data)[amgdd_start_level], */
+      /*                            hypre_ParAMGDataOmega(amg_data)[amgdd_start_level], */
+      /*                            hypre_ParAMGDataL1Norms(amg_data)[amgdd_start_level], */
+      /*                            hypre_ParAMGDataUArray(amg_data)[amgdd_start_level], */
+      /*                            hypre_ParAMGDataVtemp(amg_data), */
+      /*                            hypre_ParAMGDataZtemp(amg_data) ); */
 
       // Do normal AMG V-cycle upsweep back up to the fine grid
       if (amgdd_start_level > 0) 

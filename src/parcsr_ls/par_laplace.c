@@ -12,7 +12,7 @@
  *--------------------------------------------------------------------------*/
 
 HYPRE_ParCSRMatrix
-GenerateLaplacian( MPI_Comm comm,
+GenerateLaplacian( MPI_Comm       comm,
                    HYPRE_BigInt   nx,
                    HYPRE_BigInt   ny,
                    HYPRE_BigInt   nz,
@@ -22,7 +22,7 @@ GenerateLaplacian( MPI_Comm comm,
                    HYPRE_Int      ip,
                    HYPRE_Int      iq,
                    HYPRE_Int      ir,
-                   HYPRE_Real  *value )
+                   HYPRE_Real    *value )
 {
    hypre_ParCSRMatrix *A;
    hypre_CSRMatrix *diag;
@@ -101,8 +101,8 @@ GenerateLaplacian( MPI_Comm comm,
 
 #endif
 
-   diag_i = hypre_CTAlloc(HYPRE_Int,  local_num_rows+1, HYPRE_MEMORY_SHARED);
-   offd_i = hypre_CTAlloc(HYPRE_Int,  local_num_rows+1, HYPRE_MEMORY_SHARED);
+   diag_i = hypre_CTAlloc(HYPRE_Int, local_num_rows+1, HYPRE_MEMORY_HOST);
+   offd_i = hypre_CTAlloc(HYPRE_Int, local_num_rows+1, HYPRE_MEMORY_HOST);
 
    P_busy = hypre_min(nx,P);
    Q_busy = hypre_min(ny,Q);
@@ -193,14 +193,14 @@ GenerateLaplacian( MPI_Comm comm,
       }
    }
 
-   diag_j = hypre_CTAlloc(HYPRE_Int,  diag_i[local_num_rows], HYPRE_MEMORY_SHARED);
-   diag_data = hypre_CTAlloc(HYPRE_Real,  diag_i[local_num_rows], HYPRE_MEMORY_SHARED);
+   diag_j    = hypre_CTAlloc(HYPRE_Int,  diag_i[local_num_rows], HYPRE_MEMORY_HOST);
+   diag_data = hypre_CTAlloc(HYPRE_Real, diag_i[local_num_rows], HYPRE_MEMORY_HOST);
 
    if (num_procs > 1)
    {
       big_offd_j = hypre_CTAlloc(HYPRE_BigInt, offd_i[local_num_rows], HYPRE_MEMORY_HOST);
-      offd_j = hypre_CTAlloc(HYPRE_Int,  offd_i[local_num_rows], HYPRE_MEMORY_SHARED);
-      offd_data = hypre_CTAlloc(HYPRE_Real,  offd_i[local_num_rows], HYPRE_MEMORY_SHARED);
+      offd_j     = hypre_CTAlloc(HYPRE_Int,    offd_i[local_num_rows], HYPRE_MEMORY_HOST);
+      offd_data  = hypre_CTAlloc(HYPRE_Real,   offd_i[local_num_rows], HYPRE_MEMORY_HOST);
    }
 
    row_index = 0;
@@ -344,9 +344,14 @@ GenerateLaplacian( MPI_Comm comm,
       hypre_CSRMatrixData(offd) = offd_data;
    }
 
-   hypre_TFree(nx_part, HYPRE_MEMORY_HOST);
-   hypre_TFree(ny_part, HYPRE_MEMORY_HOST);
-   hypre_TFree(nz_part, HYPRE_MEMORY_HOST);
+   hypre_CSRMatrixMemoryLocation(diag) = HYPRE_MEMORY_HOST;
+   hypre_CSRMatrixMemoryLocation(offd) = HYPRE_MEMORY_HOST;
+
+   hypre_ParCSRMatrixMigrate(A, hypre_HandleMemoryLocation(hypre_handle()));
+
+   hypre_TFree(nx_part,    HYPRE_MEMORY_HOST);
+   hypre_TFree(ny_part,    HYPRE_MEMORY_HOST);
+   hypre_TFree(nz_part,    HYPRE_MEMORY_HOST);
    hypre_TFree(big_offd_j, HYPRE_MEMORY_HOST);
 
    return (HYPRE_ParCSRMatrix) A;
@@ -486,8 +491,8 @@ GenerateSysLaplacian( MPI_Comm comm,
    gp_size = num_procs+1;
 #endif
 
-   diag_i = hypre_CTAlloc(HYPRE_Int,  local_num_rows+1, HYPRE_MEMORY_SHARED);
-   offd_i = hypre_CTAlloc(HYPRE_Int,  local_num_rows+1, HYPRE_MEMORY_SHARED);
+   diag_i = hypre_CTAlloc(HYPRE_Int, local_num_rows+1, HYPRE_MEMORY_HOST);
+   offd_i = hypre_CTAlloc(HYPRE_Int, local_num_rows+1, HYPRE_MEMORY_HOST);
 
    P_busy = hypre_min(nx,P);
    Q_busy = hypre_min(ny,Q);
@@ -572,27 +577,27 @@ GenerateSysLaplacian( MPI_Comm comm,
                   offd_i[cnt] += num_fun;
                }
             }
-	    num_coeffs = diag_i[cnt]-diag_i[cnt-1];
-	    num_offd_coeffs = offd_i[cnt]-offd_i[cnt-1];
+            num_coeffs = diag_i[cnt]-diag_i[cnt-1];
+            num_offd_coeffs = offd_i[cnt]-offd_i[cnt-1];
             cnt++;
-	    for (i=1; i < num_fun; i++)
+            for (i=1; i < num_fun; i++)
             {
-	       diag_i[cnt] = diag_i[cnt-1]+num_coeffs;
-	       offd_i[cnt] = offd_i[cnt-1]+num_offd_coeffs;
+               diag_i[cnt] = diag_i[cnt-1]+num_coeffs;
+               offd_i[cnt] = offd_i[cnt-1]+num_offd_coeffs;
                cnt++;
             }
          }
       }
    }
 
-   diag_j = hypre_CTAlloc(HYPRE_Int,  diag_i[local_num_rows], HYPRE_MEMORY_SHARED);
-   diag_data = hypre_CTAlloc(HYPRE_Real,  diag_i[local_num_rows], HYPRE_MEMORY_SHARED);
+   diag_j    = hypre_CTAlloc(HYPRE_Int,  diag_i[local_num_rows], HYPRE_MEMORY_HOST);
+   diag_data = hypre_CTAlloc(HYPRE_Real, diag_i[local_num_rows], HYPRE_MEMORY_HOST);
 
    if (num_procs > 1)
    {
-      offd_j = hypre_CTAlloc(HYPRE_Int, offd_i[local_num_rows], HYPRE_MEMORY_SHARED);
+      offd_j     = hypre_CTAlloc(HYPRE_Int,    offd_i[local_num_rows], HYPRE_MEMORY_HOST);
       big_offd_j = hypre_CTAlloc(HYPRE_BigInt, offd_i[local_num_rows], HYPRE_MEMORY_HOST);
-      offd_data = hypre_CTAlloc(HYPRE_Real, offd_i[local_num_rows], HYPRE_MEMORY_SHARED);
+      offd_data  = hypre_CTAlloc(HYPRE_Real,   offd_i[local_num_rows], HYPRE_MEMORY_HOST);
    }
 
    row_index = 0;
@@ -604,31 +609,31 @@ GenerateSysLaplacian( MPI_Comm comm,
          {
             cnt = diag_i[row_index];;
             o_cnt = offd_i[row_index];;
-	    num_coeffs = diag_i[row_index+1]-diag_i[row_index];
-	    num_offd_coeffs = offd_i[row_index+1]-offd_i[row_index];
+            num_coeffs = diag_i[row_index+1]-diag_i[row_index];
+            num_offd_coeffs = offd_i[row_index+1]-offd_i[row_index];
             first_j = row_index;
             for (i=0; i < num_fun; i++)
-	    {
+            {
                for (j=0; j < num_fun; j++)
-	       {
+               {
                   j_ind = cnt+i*num_coeffs+j;
                   diag_j[j_ind] = first_j+j;
                   diag_data[j_ind] = value[0]*mtrx[i*num_fun+j];
-	       }
-	    }
+               }
+            }
             cnt += num_fun;
             if (iz > nz_part[r])
             {
                first_j = row_index-nx_local*ny_local*num_fun;
                for (i=0; i < num_fun; i++)
-	       {
+               {
                   for (j=0; j < num_fun; j++)
-	          {
+                  {
                      j_ind = cnt+i*num_coeffs+j;
                      diag_j[j_ind] = first_j+j;
                      diag_data[j_ind] = value[3]*mtrx[i*num_fun+j];
-	          }
-	       }
+                  }
+               }
                cnt += num_fun;
             }
             else
@@ -638,14 +643,14 @@ GenerateSysLaplacian( MPI_Comm comm,
                   big_first_j = big_num_fun*hypre_map(ix,iy,iz-1,p,q,r-1,nx,ny,
                                                 nx_part,ny_part,nz_part);
                   for (i=0; i < num_fun; i++)
-	          {
+                  {
                      for (j=0; j < num_fun; j++)
-	             {
+                     {
                         j_ind = o_cnt+i*num_offd_coeffs+j;
                         big_offd_j[j_ind] = big_first_j+(HYPRE_BigInt)j;
                         offd_data[j_ind] = value[3]*mtrx[i*num_fun+j];
-	             }
-	          }
+                     }
+                  }
                   o_cnt += num_fun;
                }
             }
@@ -653,14 +658,14 @@ GenerateSysLaplacian( MPI_Comm comm,
             {
                first_j = row_index-nx_local*num_fun;
                for (i=0; i < num_fun; i++)
-	       {
+               {
                   for (j=0; j < num_fun; j++)
-	          {
+                  {
                      j_ind = cnt+i*num_coeffs+j;
                      diag_j[j_ind] = first_j+j;
                      diag_data[j_ind] = value[2]*mtrx[i*num_fun+j];
-	          }
-	       }
+                  }
+               }
                cnt += num_fun;
             }
             else
@@ -670,14 +675,14 @@ GenerateSysLaplacian( MPI_Comm comm,
                   big_first_j = big_num_fun*hypre_map(ix,iy-1,iz,p,q-1,r,nx,ny,
                                                 nx_part,ny_part,nz_part);
                   for (i=0; i < num_fun; i++)
-	          {
+                  {
                      for (j=0; j < num_fun; j++)
-	             {
+                     {
                         j_ind = o_cnt+i*num_offd_coeffs+j;
                         big_offd_j[j_ind] = big_first_j+(HYPRE_BigInt)j;
                         offd_data[j_ind] = value[2]*mtrx[i*num_fun+j];
-	             }
-	          }
+                     }
+                  }
                   o_cnt += num_fun;
                }
             }
@@ -685,14 +690,14 @@ GenerateSysLaplacian( MPI_Comm comm,
             {
                first_j = row_index-num_fun;
                for (i=0; i < num_fun; i++)
-	       {
+               {
                   for (j=0; j < num_fun; j++)
-	          {
+                  {
                      j_ind = cnt+i*num_coeffs+j;
                      diag_j[j_ind] = first_j+j;
                      diag_data[j_ind] = value[1]*mtrx[i*num_fun+j];
-	          }
-	       }
+                  }
+               }
                cnt += num_fun;
             }
             else
@@ -702,14 +707,14 @@ GenerateSysLaplacian( MPI_Comm comm,
                   big_first_j = big_num_fun*hypre_map(ix-1,iy,iz,p-1,q,r,nx,ny,
                                                 nx_part,ny_part,nz_part);
                   for (i=0; i < num_fun; i++)
-	          {
+                  {
                      for (j=0; j < num_fun; j++)
-	             {
+                     {
                         j_ind = o_cnt+i*num_offd_coeffs+j;
                         big_offd_j[j_ind] = big_first_j+(HYPRE_BigInt)j;
                         offd_data[j_ind] = value[1]*mtrx[i*num_fun+j];
-	             }
-	          }
+                     }
+                  }
                   o_cnt += num_fun;
                }
             }
@@ -717,14 +722,14 @@ GenerateSysLaplacian( MPI_Comm comm,
             {
                first_j = row_index+num_fun;
                for (i=0; i < num_fun; i++)
-	       {
+               {
                   for (j=0; j < num_fun; j++)
-	          {
+                  {
                      j_ind = cnt+i*num_coeffs+j;
                      diag_j[j_ind] = first_j+j;
                      diag_data[j_ind] = value[1]*mtrx[i*num_fun+j];
-	          }
-	       }
+                  }
+               }
                cnt += num_fun;
             }
             else
@@ -734,14 +739,14 @@ GenerateSysLaplacian( MPI_Comm comm,
                   big_first_j = big_num_fun*hypre_map(ix+1,iy,iz,p+1,q,r,nx,ny,
                                                 nx_part,ny_part,nz_part);
                   for (i=0; i < num_fun; i++)
-	          {
+                  {
                      for (j=0; j < num_fun; j++)
-	             {
+                     {
                         j_ind = o_cnt+i*num_offd_coeffs+j;
                         big_offd_j[j_ind] = big_first_j+(HYPRE_BigInt)j;
                         offd_data[j_ind] = value[1]*mtrx[i*num_fun+j];
-	             }
-	          }
+                     }
+                  }
                   o_cnt += num_fun;
                }
             }
@@ -749,14 +754,14 @@ GenerateSysLaplacian( MPI_Comm comm,
             {
                first_j = row_index+nx_local*num_fun;
                for (i=0; i < num_fun; i++)
-	       {
+               {
                   for (j=0; j < num_fun; j++)
-	          {
+                  {
                      j_ind = cnt+i*num_coeffs+j;
                      diag_j[j_ind] = first_j+j;
                      diag_data[j_ind] = value[2]*mtrx[i*num_fun+j];
-	          }
-	       }
+                  }
+               }
                cnt += num_fun;
             }
             else
@@ -766,14 +771,14 @@ GenerateSysLaplacian( MPI_Comm comm,
                   big_first_j = big_num_fun*hypre_map(ix,iy+1,iz,p,q+1,r,nx,ny,
                                                 nx_part,ny_part,nz_part);
                   for (i=0; i < num_fun; i++)
-	          {
+                  {
                      for (j=0; j < num_fun; j++)
-	             {
+                     {
                         j_ind = o_cnt+i*num_offd_coeffs+j;
                         big_offd_j[j_ind] = big_first_j+(HYPRE_BigInt)j;
                         offd_data[j_ind] = value[2]*mtrx[i*num_fun+j];
-	             }
-	          }
+                     }
+                  }
                   o_cnt += num_fun;
                }
             }
@@ -781,14 +786,14 @@ GenerateSysLaplacian( MPI_Comm comm,
             {
                first_j = row_index+nx_local*ny_local*num_fun;
                for (i=0; i < num_fun; i++)
-	       {
+               {
                   for (j=0; j < num_fun; j++)
-	          {
+                  {
                      j_ind = cnt+i*num_coeffs+j;
                      diag_j[j_ind] = first_j+j;
                      diag_data[j_ind] = value[3]*mtrx[i*num_fun+j];
-	          }
-	       }
+                  }
+               }
                cnt += num_fun;
             }
             else
@@ -798,14 +803,14 @@ GenerateSysLaplacian( MPI_Comm comm,
                   big_first_j = big_num_fun*hypre_map(ix,iy,iz+1,p,q,r+1,nx,ny,
                                                 nx_part,ny_part,nz_part);
                   for (i=0; i < num_fun; i++)
-	          {
+                  {
                      for (j=0; j < num_fun; j++)
-	             {
+                     {
                         j_ind = o_cnt+i*num_offd_coeffs+j;
                         big_offd_j[j_ind] = big_first_j+(HYPRE_BigInt)j;
                         offd_data[j_ind] = value[3]*mtrx[i*num_fun+j];
-	             }
-	          }
+                     }
+                  }
                   o_cnt += num_fun;
                }
             }
@@ -818,12 +823,12 @@ GenerateSysLaplacian( MPI_Comm comm,
    {
          cnt = 0;
          for (i=0; i < local_num_rows; i+=num_fun)
- 	 {
-	    for (j=offd_i[i]; j < offd_i[i+1]; j++)
+         {
+            for (j=offd_i[i]; j < offd_i[i+1]; j++)
             {
                col_map_offd[cnt++] = big_offd_j[j];
-	    }
-	 }
+            }
+         }
 
       hypre_BigQsort0(col_map_offd, 0, num_cols_offd-1);
 
@@ -843,15 +848,15 @@ GenerateSysLaplacian( MPI_Comm comm,
    {
       for (i=0; i<local_grid_size; i++)
       {
-	  row = i*num_fun+j;
-	  diag_index = diag_i[row];
-	  index = diag_index+j;
-	  val = diag_data[diag_index];
-	  col = diag_j[diag_index];
-	  diag_data[diag_index] = diag_data[index];
-	  diag_j[diag_index] = diag_j[index];
-	  diag_data[index] = val;
-	  diag_j[index] = col;
+         row = i*num_fun+j;
+         diag_index = diag_i[row];
+         index = diag_index+j;
+         val = diag_data[diag_index];
+         col = diag_j[diag_index];
+         diag_data[diag_index] = diag_data[index];
+         diag_j[diag_index] = diag_j[index];
+         diag_data[index] = val;
+         diag_j[index] = col;
       }
    }
 
@@ -875,9 +880,14 @@ GenerateSysLaplacian( MPI_Comm comm,
       hypre_CSRMatrixData(offd) = offd_data;
    }
 
-   hypre_TFree(nx_part, HYPRE_MEMORY_HOST);
-   hypre_TFree(ny_part, HYPRE_MEMORY_HOST);
-   hypre_TFree(nz_part, HYPRE_MEMORY_HOST);
+   hypre_CSRMatrixMemoryLocation(diag) = HYPRE_MEMORY_HOST;
+   hypre_CSRMatrixMemoryLocation(offd) = HYPRE_MEMORY_HOST;
+
+   hypre_ParCSRMatrixMigrate(A, hypre_HandleMemoryLocation(hypre_handle()));
+
+   hypre_TFree(nx_part,    HYPRE_MEMORY_HOST);
+   hypre_TFree(ny_part,    HYPRE_MEMORY_HOST);
+   hypre_TFree(nz_part,    HYPRE_MEMORY_HOST);
    hypre_TFree(big_offd_j, HYPRE_MEMORY_HOST);
 
    return (HYPRE_ParCSRMatrix) A;
@@ -890,19 +900,19 @@ GenerateSysLaplacian( MPI_Comm comm,
  *--------------------------------------------------------------------------*/
 
 HYPRE_ParCSRMatrix
-GenerateSysLaplacianVCoef( MPI_Comm comm,
-                      HYPRE_BigInt   nx,
-                      HYPRE_BigInt   ny,
-                      HYPRE_BigInt   nz,
-                      HYPRE_Int      P,
-                      HYPRE_Int      Q,
-                      HYPRE_Int      R,
-                      HYPRE_Int      p,
-                      HYPRE_Int      q,
-                      HYPRE_Int      r,
-                      HYPRE_Int      num_fun,
-                      HYPRE_Real  *mtrx,
-                      HYPRE_Real  *value )
+GenerateSysLaplacianVCoef( MPI_Comm       comm,
+                           HYPRE_BigInt   nx,
+                           HYPRE_BigInt   ny,
+                           HYPRE_BigInt   nz,
+                           HYPRE_Int      P,
+                           HYPRE_Int      Q,
+                           HYPRE_Int      R,
+                           HYPRE_Int      p,
+                           HYPRE_Int      q,
+                           HYPRE_Int      r,
+                           HYPRE_Int      num_fun,
+                           HYPRE_Real    *mtrx,
+                           HYPRE_Real    *value )
 {
    hypre_ParCSRMatrix *A;
    hypre_CSRMatrix *diag;
@@ -991,8 +1001,8 @@ GenerateSysLaplacianVCoef( MPI_Comm comm,
 #endif
 
    local_num_rows = num_fun*local_grid_size;
-   diag_i = hypre_CTAlloc(HYPRE_Int,  local_num_rows+1, HYPRE_MEMORY_SHARED);
-   offd_i = hypre_CTAlloc(HYPRE_Int,  local_num_rows+1, HYPRE_MEMORY_SHARED);
+   diag_i = hypre_CTAlloc(HYPRE_Int, local_num_rows+1, HYPRE_MEMORY_HOST);
+   offd_i = hypre_CTAlloc(HYPRE_Int, local_num_rows+1, HYPRE_MEMORY_HOST);
 
    P_busy = hypre_min(nx,P);
    Q_busy = hypre_min(ny,Q);
@@ -1077,27 +1087,27 @@ GenerateSysLaplacianVCoef( MPI_Comm comm,
                   offd_i[cnt] += num_fun;
                }
             }
-	    num_coeffs = diag_i[cnt]-diag_i[cnt-1];
-	    num_offd_coeffs = offd_i[cnt]-offd_i[cnt-1];
+            num_coeffs = diag_i[cnt]-diag_i[cnt-1];
+            num_offd_coeffs = offd_i[cnt]-offd_i[cnt-1];
             cnt++;
-	    for (i=1; i < num_fun; i++)
+            for (i=1; i < num_fun; i++)
             {
-	       diag_i[cnt] = diag_i[cnt-1]+num_coeffs;
-	       offd_i[cnt] = offd_i[cnt-1]+num_offd_coeffs;
+               diag_i[cnt] = diag_i[cnt-1]+num_coeffs;
+               offd_i[cnt] = offd_i[cnt-1]+num_offd_coeffs;
                cnt++;
             }
          }
       }
    }
 
-   diag_j = hypre_CTAlloc(HYPRE_Int,  diag_i[local_num_rows], HYPRE_MEMORY_HOST);
-   diag_data = hypre_CTAlloc(HYPRE_Real,  diag_i[local_num_rows], HYPRE_MEMORY_HOST);
+   diag_j    = hypre_CTAlloc(HYPRE_Int,  diag_i[local_num_rows], HYPRE_MEMORY_HOST);
+   diag_data = hypre_CTAlloc(HYPRE_Real, diag_i[local_num_rows], HYPRE_MEMORY_HOST);
 
    if (num_procs > 1)
    {
-      offd_j = hypre_CTAlloc(HYPRE_Int, offd_i[local_num_rows], HYPRE_MEMORY_SHARED);
+      offd_j     = hypre_CTAlloc(HYPRE_Int,    offd_i[local_num_rows], HYPRE_MEMORY_HOST);
       big_offd_j = hypre_CTAlloc(HYPRE_BigInt, offd_i[local_num_rows], HYPRE_MEMORY_HOST);
-      offd_data = hypre_CTAlloc(HYPRE_Real, offd_i[local_num_rows], HYPRE_MEMORY_SHARED);
+      offd_data  = hypre_CTAlloc(HYPRE_Real,   offd_i[local_num_rows], HYPRE_MEMORY_HOST);
    }
 
    row_index = 0;
@@ -1109,31 +1119,31 @@ GenerateSysLaplacianVCoef( MPI_Comm comm,
          {
             cnt = diag_i[row_index];;
             o_cnt = offd_i[row_index];;
-	    num_coeffs = diag_i[row_index+1]-diag_i[row_index];
-	    num_offd_coeffs = offd_i[row_index+1]-offd_i[row_index];
+            num_coeffs = diag_i[row_index+1]-diag_i[row_index];
+            num_offd_coeffs = offd_i[row_index+1]-offd_i[row_index];
             first_j = row_index;
             for (i=0; i < num_fun; i++)
-	    {
+            {
                for (j=0; j < num_fun; j++)
-	       {
+               {
                   j_ind = cnt+i*num_coeffs+j;
                   diag_j[j_ind] = first_j+j;
                   diag_data[j_ind] = value[0*sz + i*num_fun+j]*mtrx[i*num_fun+j];
-	       }
-	    }
+               }
+            }
             cnt += num_fun;
             if (iz > nz_part[r])
             {
                first_j = row_index-nx_local*ny_local*num_fun;
                for (i=0; i < num_fun; i++)
-	       {
+               {
                   for (j=0; j < num_fun; j++)
-	          {
+                  {
                      j_ind = cnt+i*num_coeffs+j;
                      diag_j[j_ind] = first_j+j;
                      diag_data[j_ind] = value[3*sz + i*num_fun+j]*mtrx[i*num_fun+j];
-	          }
-	       }
+                  }
+               }
                cnt += num_fun;
             }
             else
@@ -1143,14 +1153,14 @@ GenerateSysLaplacianVCoef( MPI_Comm comm,
                   big_first_j = big_num_fun*hypre_map(ix,iy,iz-1,p,q,r-1,nx,ny,
                                                 nx_part,ny_part,nz_part);
                   for (i=0; i < num_fun; i++)
-	          {
+                  {
                      for (j=0; j < num_fun; j++)
-	             {
+                     {
                         j_ind = o_cnt+i*num_offd_coeffs+j;
                         big_offd_j[j_ind] = big_first_j+(HYPRE_BigInt)j;
                         offd_data[j_ind] = value[3*sz + i*num_fun+j]*mtrx[i*num_fun+j];
-	             }
-	          }
+                     }
+                  }
                   o_cnt += num_fun;
                }
             }
@@ -1158,14 +1168,14 @@ GenerateSysLaplacianVCoef( MPI_Comm comm,
             {
                first_j = row_index-nx_local*num_fun;
                for (i=0; i < num_fun; i++)
-	       {
+               {
                   for (j=0; j < num_fun; j++)
-	          {
+                  {
                      j_ind = cnt+i*num_coeffs+j;
                      diag_j[j_ind] = first_j+j;
                      diag_data[j_ind] = value[2*sz + i*num_fun+j]*mtrx[i*num_fun+j];
-	          }
-	       }
+                  }
+               }
                cnt += num_fun;
             }
             else
@@ -1175,14 +1185,14 @@ GenerateSysLaplacianVCoef( MPI_Comm comm,
                   big_first_j = big_num_fun*hypre_map(ix,iy-1,iz,p,q-1,r,nx,ny,
                                                 nx_part,ny_part,nz_part);
                   for (i=0; i < num_fun; i++)
-	          {
+                  {
                      for (j=0; j < num_fun; j++)
-	             {
+                     {
                         j_ind = o_cnt+i*num_offd_coeffs+j;
                         big_offd_j[j_ind] = big_first_j+(HYPRE_BigInt)j;
                         offd_data[j_ind] = value[2*sz + i*num_fun+j]*mtrx[i*num_fun+j];
-	             }
-	          }
+                     }
+                  }
                   o_cnt += num_fun;
                }
             }
@@ -1190,14 +1200,14 @@ GenerateSysLaplacianVCoef( MPI_Comm comm,
             {
                first_j = row_index-num_fun;
                for (i=0; i < num_fun; i++)
-	       {
+               {
                   for (j=0; j < num_fun; j++)
-	          {
+                  {
                      j_ind = cnt+i*num_coeffs+j;
                      diag_j[j_ind] = first_j+j;
                      diag_data[j_ind] = value[1*sz + i*num_fun+j]*mtrx[i*num_fun+j];
-	          }
-	       }
+                  }
+               }
                cnt += num_fun;
             }
             else
@@ -1207,14 +1217,14 @@ GenerateSysLaplacianVCoef( MPI_Comm comm,
                   big_first_j = big_num_fun*hypre_map(ix-1,iy,iz,p-1,q,r,nx,ny,
                                                 nx_part,ny_part,nz_part);
                   for (i=0; i < num_fun; i++)
-	          {
+                  {
                      for (j=0; j < num_fun; j++)
-	             {
+                     {
                         j_ind = o_cnt+i*num_offd_coeffs+j;
                         big_offd_j[j_ind] = big_first_j+(HYPRE_BigInt)j;
                         offd_data[j_ind] = value[1*sz + i*num_fun+j]*mtrx[i*num_fun+j];
-	             }
-	          }
+                     }
+                  }
                   o_cnt += num_fun;
                }
             }
@@ -1222,14 +1232,14 @@ GenerateSysLaplacianVCoef( MPI_Comm comm,
             {
                first_j = row_index+num_fun;
                for (i=0; i < num_fun; i++)
-	       {
+               {
                   for (j=0; j < num_fun; j++)
-	          {
+                  {
                      j_ind = cnt+i*num_coeffs+j;
                      diag_j[j_ind] = first_j+j;
                      diag_data[j_ind] = value[1*sz + i*num_fun+j]*mtrx[i*num_fun+j];
-	          }
-	       }
+                  }
+               }
                cnt += num_fun;
             }
             else
@@ -1239,14 +1249,14 @@ GenerateSysLaplacianVCoef( MPI_Comm comm,
                   big_first_j = big_num_fun*hypre_map(ix+1,iy,iz,p+1,q,r,nx,ny,
                                                 nx_part,ny_part,nz_part);
                   for (i=0; i < num_fun; i++)
-	          {
+                  {
                      for (j=0; j < num_fun; j++)
-	             {
+                     {
                         j_ind = o_cnt+i*num_offd_coeffs+j;
                         big_offd_j[j_ind] = big_first_j+(HYPRE_BigInt)j;
                         offd_data[j_ind] = value[1*sz + i*num_fun+j]*mtrx[i*num_fun+j];
-	             }
-	          }
+                     }
+                  }
                   o_cnt += num_fun;
                }
             }
@@ -1254,14 +1264,14 @@ GenerateSysLaplacianVCoef( MPI_Comm comm,
             {
                first_j = row_index+nx_local*num_fun;
                for (i=0; i < num_fun; i++)
-	       {
+               {
                   for (j=0; j < num_fun; j++)
-	          {
+                  {
                      j_ind = cnt+i*num_coeffs+j;
                      diag_j[j_ind] = first_j+j;
                      diag_data[j_ind] = value[2*sz + i*num_fun+j]*mtrx[i*num_fun+j];
-	          }
-	       }
+                  }
+               }
                cnt += num_fun;
             }
             else
@@ -1271,14 +1281,14 @@ GenerateSysLaplacianVCoef( MPI_Comm comm,
                   big_first_j = big_num_fun*hypre_map(ix,iy+1,iz,p,q+1,r,nx,ny,
                                                 nx_part,ny_part,nz_part);
                   for (i=0; i < num_fun; i++)
-	          {
+                  {
                      for (j=0; j < num_fun; j++)
-	             {
+                     {
                         j_ind = o_cnt+i*num_offd_coeffs+j;
                         big_offd_j[j_ind] = big_first_j+(HYPRE_BigInt)j;
                         offd_data[j_ind] = value[2*sz + i*num_fun+j]*mtrx[i*num_fun+j];
-	             }
-	          }
+                     }
+                  }
                   o_cnt += num_fun;
                }
             }
@@ -1286,14 +1296,14 @@ GenerateSysLaplacianVCoef( MPI_Comm comm,
             {
                first_j = row_index+nx_local*ny_local*num_fun;
                for (i=0; i < num_fun; i++)
-	       {
+               {
                   for (j=0; j < num_fun; j++)
-	          {
+                  {
                      j_ind = cnt+i*num_coeffs+j;
                      diag_j[j_ind] = first_j+j;
                      diag_data[j_ind] = value[3*sz + i*num_fun+j]*mtrx[i*num_fun+j];
-	          }
-	       }
+                  }
+               }
                cnt += num_fun;
             }
             else
@@ -1303,14 +1313,14 @@ GenerateSysLaplacianVCoef( MPI_Comm comm,
                   big_first_j = big_num_fun*hypre_map(ix,iy,iz+1,p,q,r+1,nx,ny,
                                                 nx_part,ny_part,nz_part);
                   for (i=0; i < num_fun; i++)
-	          {
+                  {
                      for (j=0; j < num_fun; j++)
-	             {
+                     {
                         j_ind = o_cnt+i*num_offd_coeffs+j;
                         big_offd_j[j_ind] = big_first_j+(HYPRE_BigInt)j;
                         offd_data[j_ind] = value[3*sz + i*num_fun+j]*mtrx[i*num_fun+j];
-	             }
-	          }
+                     }
+                  }
                   o_cnt += num_fun;
                }
             }
@@ -1323,12 +1333,12 @@ GenerateSysLaplacianVCoef( MPI_Comm comm,
    {
          cnt = 0;
          for (i=0; i < local_num_rows; i+=num_fun)
- 	 {
-	    for (j=offd_i[i]; j < offd_i[i+1]; j++)
+         {
+            for (j=offd_i[i]; j < offd_i[i+1]; j++)
             {
                col_map_offd[cnt++] = big_offd_j[j];
-	    }
-	 }
+            }
+         }
 
       hypre_BigQsort0(col_map_offd, 0, num_cols_offd-1);
 
@@ -1348,15 +1358,15 @@ GenerateSysLaplacianVCoef( MPI_Comm comm,
    {
       for (i=0; i<local_grid_size; i++)
       {
-	  row = i*num_fun+j;
-	  diag_index = diag_i[row];
-	  index = diag_index+j;
-	  val = diag_data[diag_index];
-	  col = diag_j[diag_index];
-	  diag_data[diag_index] = diag_data[index];
-	  diag_j[diag_index] = diag_j[index];
-	  diag_data[index] = val;
-	  diag_j[index] = col;
+         row = i*num_fun+j;
+         diag_index = diag_i[row];
+         index = diag_index+j;
+         val = diag_data[diag_index];
+         col = diag_j[diag_index];
+         diag_data[diag_index] = diag_data[index];
+         diag_j[diag_index] = diag_j[index];
+         diag_data[index] = val;
+         diag_j[index] = col;
       }
    }
 
@@ -1380,9 +1390,14 @@ GenerateSysLaplacianVCoef( MPI_Comm comm,
       hypre_CSRMatrixData(offd) = offd_data;
    }
 
-   hypre_TFree(nx_part, HYPRE_MEMORY_HOST);
-   hypre_TFree(ny_part, HYPRE_MEMORY_HOST);
-   hypre_TFree(nz_part, HYPRE_MEMORY_HOST);
+   hypre_CSRMatrixMemoryLocation(diag) = HYPRE_MEMORY_HOST;
+   hypre_CSRMatrixMemoryLocation(offd) = HYPRE_MEMORY_HOST;
+
+   hypre_ParCSRMatrixMigrate(A, hypre_HandleMemoryLocation(hypre_handle()));
+
+   hypre_TFree(nx_part,    HYPRE_MEMORY_HOST);
+   hypre_TFree(ny_part,    HYPRE_MEMORY_HOST);
+   hypre_TFree(nz_part,    HYPRE_MEMORY_HOST);
    hypre_TFree(big_offd_j, HYPRE_MEMORY_HOST);
 
    return (HYPRE_ParCSRMatrix) A;

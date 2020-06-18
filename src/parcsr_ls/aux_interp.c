@@ -18,7 +18,7 @@
    OUT_marker
 
    offd nodes from comm_pkg take up first chunk of CF_marker_offd, offd
-   nodes from extend_comm_pkg take up the second chunk 0f CF_marker_offd. */
+   nodes from extend_comm_pkg take up the second chunk of CF_marker_offd. */
 
 
 
@@ -626,7 +626,15 @@ HYPRE_Int hypre_exchange_interp_data(
 
   /* AHB - create a new comm package just for extended info -
      this will work better with the assumed partition*/
-  hypre_ParCSRFindExtendCommPkg(A, newoff, found, extend_comm_pkg);
+  hypre_ParCSRFindExtendCommPkg(hypre_ParCSRMatrixComm(A),
+                                hypre_ParCSRMatrixGlobalNumCols(A),
+                                hypre_ParCSRMatrixFirstColDiag(A),
+                                hypre_CSRMatrixNumCols(A_diag),
+                                hypre_ParCSRMatrixColStarts(A),
+                                hypre_ParCSRMatrixAssumedPartition(A),
+                                newoff,
+                                found,
+                                extend_comm_pkg);
 
   *CF_marker_offd = hypre_TReAlloc(*CF_marker_offd, HYPRE_Int, *full_off_procNodes, HYPRE_MEMORY_HOST);
   hypre_exchange_marker(*extend_comm_pkg, CF_marker, *CF_marker_offd + A_ext_rows);

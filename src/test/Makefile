@@ -37,7 +37,7 @@ F77_COMPILE_FLAGS = \
  -I${HYPRE_BUILD_DIR}/include\
  ${CINCLUDES}
 
-MPILIBFLAGS = ${MPILIBDIRS} ${MPILIBS} ${MPIFLAGS} 
+MPILIBFLAGS = ${MPILIBDIRS} ${MPILIBS} ${MPIFLAGS}
 LAPACKLIBFLAGS = ${LAPACKLIBDIRS} ${LAPACKLIBS}
 BLASLIBFLAGS = ${BLASLIBDIRS} ${BLASLIBS}
 LIBFLAGS = ${LDFLAGS} ${LIBS}
@@ -136,6 +136,10 @@ ij: ij.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $@.o ${LFLAGS}
 
+ij_assembly: ij_assembly.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $@.o ${LFLAGS}
+
 sstruct: sstruct.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $@.o ${LFLAGS}
@@ -164,11 +168,23 @@ ij_mv: ij_mv.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $@.o ${LFLAGS}
 
+ij_device: ij_device.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $@.o ${LFLAGS}
+
+ij_mm: ij_mm.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $@.o ${LFLAGS}
+
 zboxloop: zboxloop.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $@.o ${LFLAGS}
 
 struct_newboxloop: struct_newboxloop.o $(KOKKOS_LINK_DEPENDS)
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $@.o ${LFLAGS}
+
+test_mgr: test_mgr.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $@.o ${LFLAGS}
 
@@ -269,7 +285,7 @@ fparcsr_mv: fparcsr_mv.f
 	@echo  "Building" $@ "... "
 	${LINK_FC} -c $@
 
-fsstruct_ls: fsstruct_ls.f 
+fsstruct_ls: fsstruct_ls.f
 	@echo  "Building" $@ "... "
 	${LINK_FC} -c $@
 
@@ -284,4 +300,3 @@ fstruct_ls: fstruct_ls.f
 fstruct_mv: fstruct_mv.f
 	@echo  "Building" $@ "... "
 	${LINK_FC} -c $@
-
