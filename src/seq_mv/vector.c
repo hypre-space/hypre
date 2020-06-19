@@ -12,6 +12,7 @@
  *****************************************************************************/
 
 #include "seq_mv.h"
+#include "_hypre_utilities.hpp" //RL: TODO vector_device.c, include cuda there
 
 /*--------------------------------------------------------------------------
  * hypre_SeqVectorCreate
@@ -295,7 +296,9 @@ hypre_SeqVectorSetConstantValues( hypre_Vector *v,
    }
 #endif /* defined(HYPRE_USING_CUDA) */
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    hypre_SyncCudaComputeStream(hypre_handle());
+#endif
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
@@ -469,7 +472,9 @@ hypre_SeqVectorScale( HYPRE_Complex alpha,
 
 #endif /* defined(HYPRE_USING_CUDA) */
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    hypre_SyncCudaComputeStream(hypre_handle());
+#endif
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
@@ -520,7 +525,9 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
 
 #endif /* defined(HYPRE_USING_CUDA) */
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    hypre_SyncCudaComputeStream(hypre_handle());
+#endif
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
@@ -575,7 +582,9 @@ hypre_SeqVectorInnerProd( hypre_Vector *x,
    }
 #endif /* defined(HYPRE_USING_CUDA) */
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    hypre_SyncCudaComputeStream(hypre_handle());
+#endif
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();

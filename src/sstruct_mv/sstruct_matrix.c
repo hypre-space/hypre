@@ -391,7 +391,7 @@ hypre_SStructPMatrixSetBoxValues( hypre_SStructPMatrix *pmatrix,
                                   values, action, -1, 0);
    /* TODO: Why need DeviceSync? */
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   HYPRE_CUDA_CALL(cudaDeviceSynchronize());
+   hypre_SyncCudaDevice(hypre_handle());
 #endif
    /* set (AddTo/Get) or clear (Set) values outside the grid in ghost zones */
    if (action != 0)
@@ -893,7 +893,7 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
 
    if ( hypre_GetExecPolicy1(hypre_IJMatrixMemoryLocation(ijmatrix)) == HYPRE_EXEC_DEVICE )
    {
-      HYPRE_THRUST_CALL( fill_n, row_coords, ncoeffs, row_coord );
+      hypreDevice_BigIntFilln(row_coords, ncoeffs, row_coord);
 
       if (action > 0)
       {

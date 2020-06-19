@@ -34,19 +34,19 @@ hypreDevice_CSRSpGemm(HYPRE_Int   m,        HYPRE_Int   k,        HYPRE_Int     
 #endif
 
    /* use CUSPARSE */
-   if (hypre_handle()->spgemm_use_cusparse)
+   if (hypre_HandleSpgemmUseCusparse(hypre_handle()))
    {
       hypreDevice_CSRSpGemmCusparse(m, k, n, nnza, d_ia, d_ja, d_a, nnzb, d_ib, d_jb, d_b,
                                     nnzC, d_ic_out, d_jc_out, d_c_out);
    }
    else
    {
-      HYPRE_Int m2 = hypre_handle()->spgemm_num_passes < 3 ? m : 2*m;
+      HYPRE_Int m2 = hypre_HandleSpgemmNumPasses(hypre_handle()) < 3 ? m : 2*m;
       HYPRE_Int *d_rc = hypre_TAlloc(HYPRE_Int, m2, HYPRE_MEMORY_DEVICE);
 
       hypreDevice_CSRSpGemmRownnzEstimate(m, k, n, d_ia, d_ja, d_ib, d_jb, d_rc);
 
-      if (hypre_handle()->spgemm_num_passes < 3)
+      if (hypre_HandleSpgemmNumPasses(hypre_handle()) < 3)
       {
          hypreDevice_CSRSpGemmWithRownnzEstimate(m, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc,
                                                  d_ic_out, d_jc_out, d_c_out, nnzC);
@@ -80,5 +80,67 @@ hypreDevice_CSRSpGemm(HYPRE_Int   m,        HYPRE_Int   k,        HYPRE_Int     
    return hypre_error_flag;
 }
 
+HYPRE_Int
+hypre_CSRMatrixDeviceSpGemmSetRownnzEstimateMethod( HYPRE_Int value )
+{
+   if (value == 1 || value == 2 || value == 3)
+   {
+      hypre_HandleCudaData(hypre_handle())->spgemm_rownnz_estimate_method = value;
+   }
+   else
+   {
+      return -1;
+   }
+
+   return 0;
+}
+
+HYPRE_Int
+hypre_CSRMatrixDeviceSpGemmSetRownnzEstimateNSamples( HYPRE_Int value )
+{
+   hypre_HandleCudaData(hypre_handle())->spgemm_rownnz_estimate_nsamples = value;
+
+   return 0;
+}
+
+HYPRE_Int
+hypre_CSRMatrixDeviceSpGemmSetRownnzEstimateMultFactor( HYPRE_Real value )
+{
+   if (value > 0.0)
+   {
+      hypre_HandleCudaData(hypre_handle())->spgemm_rownnz_estimate_mult_factor = value;
+   }
+   else
+   {
+      return -1;
+   }
+
+   return 0;
+}
+
+HYPRE_Int
+hypre_CSRMatrixDeviceSpGemmSetHashType( char value )
+{
+   if (value == 'L' || value == 'Q' || value == 'D')
+   {
+      hypre_HandleCudaData(hypre_handle())->spgemm_hash_type = value;
+   }
+   else
+   {
+      return -1;
+   }
+
+   return 0;
+}
+
 #endif /* HYPRE_USING_CUDA */
+
+HYPRE_Int
+hypre_CSRMatrixDeviceSpGemmUseCusparse( HYPRE_Int use_cusparse )
+{
+#if defined(HYPRE_USING_CUDA)
+   hypre_HandleCudaData(hypre_handle())->spgemm_use_cusparse = use_cusparse;
+#endif
+   return 0;
+}
 

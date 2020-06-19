@@ -1197,7 +1197,7 @@ then
    then
       if test "$hypre_using_device_openmp" = "yes"
       then
-         AC_CHECK_PROGS(CC, [xlc-gpu clang-gpu])
+         AC_CHECK_PROGS(CUCC, [xlc-gpu clang-gpu])
       fi
 
       if test "$hypre_using_openmp" = "yes"
@@ -1209,7 +1209,7 @@ then
    else
       if test "$hypre_using_device_openmp" = "yes"
       then
-         AC_CHECK_PROGS(CC, [mpixlc-gpu mpiclang-gpu])
+         AC_CHECK_PROGS(CUCC, [mpixlc-gpu mpiclang-gpu])
       fi
 
       if test "$hypre_using_openmp" = "yes"
@@ -1232,7 +1232,7 @@ then
    then
       if test "$hypre_using_device_openmp" = "yes"
       then
-         AC_CHECK_PROGS(CXX, [xlC-gpu clang++-gpu])
+         AC_CHECK_PROGS(CUCC, [xlC-gpu clang++-gpu])
       fi
 
       if test "$hypre_using_openmp" = "yes"
@@ -1244,7 +1244,7 @@ then
    else
       if test "$hypre_using_device_openmp" = "yes"
       then
-         AC_CHECK_PROGS(CXX, [mpixlC-gpu mpiclang++-gpu])
+         AC_CHECK_PROGS(CUCC, [mpixlC-gpu mpiclang++-gpu])
       fi
 
       if test "$hypre_using_openmp" = "yes"
@@ -1737,10 +1737,8 @@ then
    dnl let CC/CXX and LINK be CUCC and let host compiler be CXX
    AC_CHECK_PROGS(CUCC, nvcc)
    NVCCBIN=${CXX}
-   CC=${CUCC}
-   CXX=${CUCC}
-   LINK_CC=${CXX}
-   LINK_CXX=${CXX}
+   LINK_CC=${CUCC}
+   LINK_CXX=${CUCC}
 
    dnl CUDA SM
    if test "x$HYPRE_CUDA_SM" = "x"
@@ -1762,7 +1760,8 @@ then
    then
      CXXFLAGS+=" -Wno-deprecated-register -Wenum-compare"
    fi
-   CXXFLAGS="${CUFLAGS} -Xcompiler \"${CXXFLAGS}\""
+
+   CUFLAGS="${CUFLAGS} -Xcompiler \"${CXXFLAGS}\""
 
    CFLAGS=${CXXFLAGS}
    LDFLAGS="-ccbin=$NVCCBIN ${HYPRE_CUDA_GENCODE} -Xcompiler \"${LDFLAGS}\""
@@ -1821,6 +1820,9 @@ then
    AC_DEFINE([HYPRE_USING_OPENMP],1,[Enable OpenMP support])
 fi
 
+dnl *********************************************************************
+dnl * Set Device OpenMP options
+dnl *********************************************************************
 if test "$hypre_using_device_openmp" = "yes"
 then
    AC_DEFINE(HYPRE_USING_CUSPARSE, 1, [cuSPARSE being used])
@@ -1834,18 +1836,19 @@ then
 
    dnl AC_DEFINE(HYPRE_DEVICE_OPENMP_MAPPED, 1, [Enable device OpenMP target mapped version])
 
-   AC_CHECK_PROGS(CUCC, nvcc)
+   dnl AC_CHECK_PROGS(CUCC, nvcc)
 
-   CFLAGS="${CFLAGS}"
-   CXXFLAGS="${CXXFLAGS}"
+   dnl CFLAGS="${CFLAGS}"
+   dnl CXXFLAGS="${CXXFLAGS}"
+   CUFLAGS=${CFLAGS}
 
-   if [test "$CC" = "clang-gpu" || test "$CC" = "mpiclang-gpu"]
+   if [test "$CUCC" = "clang-gpu" || test "$CUCC" = "mpiclang-gpu"]
    then
-      CFLAGS+=" -fopenmp-nonaliased-maps"
+      CUFLAGS+=" -fopenmp-nonaliased-maps"
    fi
-   if [test "$CXX" = "clang++-gpu" || test "$CXX" = "mpiclang++-gpu"]
+   if [test "$CUCC" = "clang++-gpu" || test "$CUCC" = "mpiclang++-gpu"]
    then
-      CXXFLAGS+=" -fopenmp-nonaliased-maps"
+      CUFLAGS+=" -fopenmp-nonaliased-maps"
    fi
    if test "$hypre_using_debug" = "yes"
    then
@@ -1860,10 +1863,11 @@ then
    fi
 
    dnl let CC be CXX
-   CC=${CXX}
-   LINK_CC=${LINK_CXX}
-   CXXFLAGS="-x c++ ${CXXFLAGS}"
-   CFLAGS=${CXXFLAGS}
+   dnl CC=${CXX}
+   LINK_CC=${CUCC}
+   LINK_CXX=${CUCC}
+   dnl CXXFLAGS="-x c++ ${CXXFLAGS}"
+   dnl CFLAGS=${CXXFLAGS}
 fi
 
 dnl *********************************************************************
@@ -1872,7 +1876,7 @@ dnl *********************************************************************
 if test "$hypre_using_shared" = "yes"
 then
    HYPRE_LIBSUFFIX=".so"
-   if [test "x$CXX" = "xnvcc" || test "x$CC" = "xnvcc"]
+   if [test "x$CUCC" = "xnvcc"]
    then
       SHARED_SET_SONAME="-Xlinker=-soname,"
       SHARED_OPTIONS="-Xlinker=-z,defs"
@@ -1895,14 +1899,11 @@ dnl                          LINK_F77="${F77} -brtl"
                                    SHARED_OPTIONS="-undefined error" ;;
                        *) SHARED_BUILD_FLAG="-shared" ;;
    esac
-   if [test "x$CXX" = "xnvcc" || test "x$CC" = "xnvcc"]
-   then
-      SHARED_BUILD_FLAG="${SHARED_BUILD_FLAG} ${HYPRE_CUDA_GENCODE}"
-   fi
    SHARED_BUILD_FLAG="${SHARED_BUILD_FLAG} ${EXTRA_BUILDFLAGS}"
    FFLAGS="${FFLAGS} ${SHARED_COMPILE_FLAG}"
    CFLAGS="${CFLAGS} ${SHARED_COMPILE_FLAG}"
    CXXFLAGS="${CXXFLAGS} ${SHARED_COMPILE_FLAG}"
+   CUFLAGS="${CUFLAGS} ${SHARED_COMPILE_FLAG}"
 dnl   BUILD_F77_SHARED="${F77} ${SHARED_BUILD_FLAG}"
    BUILD_FC_SHARED="${FC} ${SHARED_BUILD_FLAG}"
    if test "$hypre_using_fei" = "yes"
@@ -1912,6 +1913,10 @@ dnl   BUILD_F77_SHARED="${F77} ${SHARED_BUILD_FLAG}"
       BUILD_CC_SHARED="${CC} ${SHARED_BUILD_FLAG}"
    fi
    BUILD_CXX_SHARED="${CXX} ${SHARED_BUILD_FLAG}"
+   if [test "x$CUCC" != "x"]
+   then
+      BUILD_CC_SHARED="${CUCC} ${SHARED_BUILD_FLAG} ${HYPRE_CUDA_GENCODE}"
+   fi
 fi
 
 if test "x$hypre_using_cuda_streams" = "xyes"

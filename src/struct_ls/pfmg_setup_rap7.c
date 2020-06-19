@@ -6,6 +6,7 @@
  ******************************************************************************/
 
 #include "_hypre_struct_ls.h"
+#include "_hypre_struct_mv.hpp"
 #include "pfmg.h"
 
 /*--------------------------------------------------------------------------
@@ -23,11 +24,11 @@
    cdir = (cdir + 1) % 3;
 
 /*--------------------------------------------------------------------------
- * hypre_PFMGCreateCoarseOp7 
+ * hypre_PFMGCreateCoarseOp7
  *    Sets up new coarse grid operator stucture. Fine grid
  *    operator is 7pt and so is coarse, i.e. non-Galerkin.
  *--------------------------------------------------------------------------*/
- 
+
 hypre_StructMatrix *
 hypre_PFMGCreateCoarseOp7( hypre_StructMatrix *R,
                            hypre_StructMatrix *A,
@@ -46,7 +47,7 @@ hypre_PFMGCreateCoarseOp7( hypre_StructMatrix *R,
    hypre_Index            index_temp;
    HYPRE_Int              k, j, i;
    HYPRE_Int              stencil_rank;
- 
+
    RAP_stencil_dim = 3;
 
    /*-----------------------------------------------------------------------
@@ -63,7 +64,7 @@ hypre_PFMGCreateCoarseOp7( hypre_StructMatrix *R,
    {
 
       /*--------------------------------------------------------------------
-       * 7 point coarse grid stencil 
+       * 7 point coarse grid stencil
        *--------------------------------------------------------------------*/
       RAP_stencil_size = 7;
       RAP_stencil_shape = hypre_CTAlloc(hypre_Index,  RAP_stencil_size, HYPRE_MEMORY_HOST);
@@ -197,10 +198,10 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
    HYPRE_Real           *rap_cc, *rap_cw, *rap_ce, *rap_cs, *rap_cn;
    HYPRE_Real           *rap_cb, *rap_ca;
    HYPRE_Real            center_int, center_bdy;
-                      
-   HYPRE_Int             OffsetA; 
-   HYPRE_Int             OffsetP; 
-                      
+
+   HYPRE_Int             OffsetA;
+   HYPRE_Int             OffsetP;
+
    stridef = cstride;
    hypre_SetIndex3(stridec, 1, 1, 1);
 
@@ -249,8 +250,8 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
 
       /*-----------------------------------------------------------------
        * Extract pointers for interpolation operator:
-       * pb is pointer for weight for f-point below c-point 
-       * pa is pointer for weight for f-point above c-point 
+       * pb is pointer for weight for f-point below c-point
+       * pa is pointer for weight for f-point above c-point
        *-----------------------------------------------------------------*/
 
       hypre_SetIndex3(index_temp,0,0,-1);
@@ -262,10 +263,10 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
       pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index);
       //RL PTROFFSET
       HYPRE_Int pbOffset = hypre_BoxOffsetDistance(P_dbox, index);
- 
+
       /*-----------------------------------------------------------------
        * Extract pointers for 7-point fine grid operator:
-       * 
+       *
        * a_cc is pointer for center coefficient
        * a_cw is pointer for west coefficient
        * a_ce is pointer for east coefficient
@@ -341,7 +342,7 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
        *
        * In the BoxLoop below I assume iA and iP refer to data associated
        * with the point which we are building the stencil for. The below
-       * Offsets are used in refering to data associated with other points. 
+       * Offsets are used in refering to data associated with other points.
        *-----------------------------------------------------------------*/
 
       hypre_SetIndex3(index_temp,0,0,1);
@@ -352,7 +353,7 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
 
       /*--------------------------------------------------------------
        * Loop for symmetric 7-point fine grid operator; produces a
-       * symmetric 7-point coarse grid operator. 
+       * symmetric 7-point coarse grid operator.
        *--------------------------------------------------------------*/
 
       if ( constant_coefficient==0 )
@@ -367,7 +368,7 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
          {
             HYPRE_Int iAm1,iAp1,iPm1,iPp1;
             HYPRE_Real west,east,south,north;
-             
+
             iAm1 = iA - OffsetA;
             iAp1 = iA + OffsetA;
 
@@ -395,7 +396,7 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
             rap_cs[iAc] = south;
             rap_cn[iAc] = north;
 
-            rap_cc[iAc] = a_cc[iA] 
+            rap_cc[iAc] = a_cc[iA]
                + a_cw[iA] + a_ce[iA] + a_cs[iA] + a_cn[iA]
                + a_cb[iA] * pb[iP-pbOffset] + a_ca[iA] * pa[iP]
                - west - east - south - north;

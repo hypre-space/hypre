@@ -6,6 +6,7 @@
  ******************************************************************************/
 
 #include "_hypre_parcsr_ls.h"
+#include "_hypre_utilities.hpp"
 
 #define C_PT  1
 #define F_PT -1

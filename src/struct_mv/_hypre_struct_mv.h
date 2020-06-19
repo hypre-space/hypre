@@ -12,1993 +12,6 @@
 #include "HYPRE_struct_mv.h"
 #include "_hypre_utilities.h"
 
-#if defined(HYPRE_USING_RAJA)
-/******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
- * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
- *
- * SPDX-License-Identifier: (Apache-2.0 OR MIT)
- ******************************************************************************/
-
-/******************************************************************************
- *
- * Header info for the BoxLoop
- *
- *****************************************************************************/
-
-/*--------------------------------------------------------------------------
- * BoxLoop macros:
- *--------------------------------------------------------------------------*/
-
-#ifndef HYPRE_NEWBOXLOOP_HEADER
-#define HYPRE_NEWBOXLOOP_HEADER
-
-extern "C++" {
-#include <RAJA/RAJA.hpp>
-}
-using namespace RAJA;
-
-typedef struct hypre_Boxloop_struct
-{
-   HYPRE_Int lsize0,lsize1,lsize2;
-   HYPRE_Int strides0,strides1,strides2;
-   HYPRE_Int bstart0,bstart1,bstart2;
-   HYPRE_Int bsize0,bsize1,bsize2;
-} hypre_Boxloop;
-
-
-#if defined(HYPRE_USING_CUDA) /* RAJA with CUDA, running on device */
-
-#define BLOCKSIZE 256
-#define hypre_RAJA_DEVICE   RAJA_DEVICE
-#define hypre_raja_exec_policy   cuda_exec<BLOCKSIZE>
-/* #define hypre_raja_reduce_policy cuda_reduce_atomic<BLOCKSIZE> */
-#define hypre_raja_reduce_policy cuda_reduce //<BLOCKSIZE>
-#define hypre_fence()
-/*
-#define hypre_fence() \
-cudaError err = cudaGetLastError();\
-if ( cudaSuccess != err ) {\
-printf("\n ERROR zypre_newBoxLoop: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
-}\
-hypre_CheckErrorDevice(cudaDeviceSynchronize());
-*/
-
-#elif defined(HYPRE_USING_DEVICE_OPENMP) /* RAJA with OpenMP (>4.5), running on device */
-
-//TODO
-
-#elif defined(HYPRE_USING_OPENMP) /* RAJA with OpenMP, running on host (CPU) */
-
-#define hypre_RAJA_DEVICE 
-#define hypre_raja_exec_policy   omp_for_exec
-#define hypre_raja_reduce_policy omp_reduce
-#define hypre_fence() 
-
-#else /* RAJA, running on host (CPU) */
-
-#define hypre_RAJA_DEVICE 
-#define hypre_raja_exec_policy   seq_exec
-#define hypre_raja_reduce_policy seq_reduce
-#define hypre_fence()
-
-#endif /* #if defined(HYPRE_USING_CUDA) */
-
-
-
-
-#define zypre_BoxLoopIncK(k,box,hypre__i)                                               \
-   HYPRE_Int hypre_boxD##k = 1;                                                         \
-   HYPRE_Int hypre__i = 0;                                                              \
-   hypre__i += (hypre_IndexD(local_idx, 0)*box.strides0 + box.bstart0) * hypre_boxD##k; \
-   hypre_boxD##k *= hypre_max(0, box.bsize0 + 1);                                       \
-   hypre__i += (hypre_IndexD(local_idx, 1)*box.strides1 + box.bstart1) * hypre_boxD##k; \
-   hypre_boxD##k *= hypre_max(0, box.bsize1 + 1);                                       \
-   hypre__i += (hypre_IndexD(local_idx, 2)*box.strides2 + box.bstart2) * hypre_boxD##k; \
-   hypre_boxD##k *= hypre_max(0, box.bsize2 + 1);                                       \
-
-
-#define zypre_newBoxLoopInit(ndim,loop_size)                                \
-  HYPRE_Int hypre__tot = 1;                                                 \
-  for (HYPRE_Int d = 0;d < ndim;d ++)                                       \
-      hypre__tot *= loop_size[d];
-
-
-#define zypre_newBoxLoopDeclare(box)                                    \
-  hypre_Index local_idx;                                                \
-  HYPRE_Int idx_local = idx;                                            \
-  hypre_IndexD(local_idx, 0)  = idx_local % box.lsize0;                 \
-  idx_local = idx_local / box.lsize0;                                   \
-  hypre_IndexD(local_idx, 1)  = idx_local % box.lsize1;                 \
-  idx_local = idx_local / box.lsize1;                                   \
-  hypre_IndexD(local_idx, 2)  = idx_local % box.lsize2;
-
-#define zypre_BoxLoopDataDeclareK(k,ndim,loop_size,dbox,start,stride)   \
-   hypre_Boxloop databox##k;                                            \
-   databox##k.lsize0 = loop_size[0];                                    \
-   databox##k.strides0 = stride[0];                                     \
-   databox##k.bstart0  = start[0] - dbox->imin[0];                      \
-   databox##k.bsize0   = dbox->imax[0]-dbox->imin[0];                   \
-   if (ndim > 1)                                                        \
-   {                                                                    \
-      databox##k.lsize1 = loop_size[1];                                 \
-      databox##k.strides1 = stride[1];                                  \
-      databox##k.bstart1  = start[1] - dbox->imin[1];                   \
-      databox##k.bsize1   = dbox->imax[1]-dbox->imin[1];                \
-   }                                                                    \
-   else                                                                 \
-   {                                                                    \
-      databox##k.lsize1 = 1;                                            \
-      databox##k.strides1 = 0;                                          \
-      databox##k.bstart1  = 0;                                          \
-      databox##k.bsize1   = 0;                                          \
-   }                                                                    \
-   if (ndim == 3)                                                       \
-   {                                                                    \
-      databox##k.lsize2 = loop_size[2];                                 \
-      databox##k.strides2 = stride[2];                                  \
-      databox##k.bstart2  = start[2] - dbox->imin[2];                   \
-      databox##k.bsize2   = dbox->imax[2]-dbox->imin[2];                \
-   }                                                                    \
-   else                                                                 \
-   {                                                                    \
-      databox##k.lsize2 = 1;                                            \
-      databox##k.strides2 = 0;                                          \
-      databox##k.bstart2  = 0;                                          \
-      databox##k.bsize2   = 0;                                          \
-   }
-
-#define zypre_newBoxLoop0Begin(ndim, loop_size)                                                   \
-{                                                                                                 \
-   zypre_newBoxLoopInit(ndim,loop_size);                                                          \
-   forall< hypre_raja_exec_policy >(RangeSegment(0, hypre__tot), [=] hypre_RAJA_DEVICE (HYPRE_Int idx) \
-   {
-
-
-#define zypre_newBoxLoop0End()    \
-        });                       \
-        hypre_fence();            \
-}
-
-#define zypre_newBoxLoop1Begin(ndim, loop_size,                                                    \
-                               dbox1, start1, stride1, i1)                                         \
-{                                                                                                  \
-    zypre_newBoxLoopInit(ndim,loop_size);                                                          \
-    zypre_BoxLoopDataDeclareK(1,ndim,loop_size,dbox1,start1,stride1);                              \
-    forall< hypre_raja_exec_policy >(RangeSegment(0, hypre__tot), [=] hypre_RAJA_DEVICE (HYPRE_Int idx) \
-    {                                                                                              \
-       zypre_newBoxLoopDeclare(databox1);                                                          \
-       zypre_BoxLoopIncK(1,databox1,i1);
-
-      
-#define zypre_newBoxLoop1End(i1) \
-    });                          \
-    hypre_fence();               \
-}
-        
-#define zypre_newBoxLoop2Begin(ndim, loop_size,                                                  \
-                               dbox1, start1, stride1, i1,                                       \
-                               dbox2, start2, stride2, i2)                                       \
-{                                                                                                \
-  zypre_newBoxLoopInit(ndim,loop_size);                                                          \
-  zypre_BoxLoopDataDeclareK(1,ndim,loop_size,dbox1,start1,stride1);                              \
-  zypre_BoxLoopDataDeclareK(2,ndim,loop_size,dbox2,start2,stride2);                              \
-  forall< hypre_raja_exec_policy >(RangeSegment(0, hypre__tot), [=] hypre_RAJA_DEVICE (HYPRE_Int idx) \
-  {                                                                                              \
-     zypre_newBoxLoopDeclare(databox1);                                                          \
-     zypre_BoxLoopIncK(1,databox1,i1);                                                           \
-     zypre_BoxLoopIncK(2,databox2,i2);
-
-
-#define zypre_newBoxLoop2End(i1, i2) \
-  });                                \
-  hypre_fence();                     \
-}
-
-#define zypre_newBoxLoop3Begin(ndim, loop_size,                                                   \
-                               dbox1, start1, stride1, i1,                                        \
-                               dbox2, start2, stride2, i2,                                        \
-                               dbox3, start3, stride3, i3)                                        \
-{                                                                                                 \
-   zypre_newBoxLoopInit(ndim,loop_size);                                                          \
-   zypre_BoxLoopDataDeclareK(1,ndim,loop_size,dbox1,start1,stride1);                              \
-   zypre_BoxLoopDataDeclareK(2,ndim,loop_size,dbox2,start2,stride2);                              \
-   zypre_BoxLoopDataDeclareK(3,ndim,loop_size,dbox3,start3,stride3);                              \
-   forall< hypre_raja_exec_policy >(RangeSegment(0, hypre__tot), [=] hypre_RAJA_DEVICE (HYPRE_Int idx) \
-   {                                                                                              \
-      zypre_newBoxLoopDeclare(databox1);                                                          \
-      zypre_BoxLoopIncK(1,databox1,i1);                                                           \
-      zypre_BoxLoopIncK(2,databox2,i2);                                                           \
-      zypre_BoxLoopIncK(3,databox3,i3);
-
-#define zypre_newBoxLoop3End(i1, i2, i3)                                      \
-    });                                                                       \
-    hypre_fence();                                                            \
-}
-
-#define zypre_newBoxLoop4Begin(ndim, loop_size,                                                   \
-                               dbox1, start1, stride1, i1,                                        \
-                               dbox2, start2, stride2, i2,                                        \
-                               dbox3, start3, stride3, i3,                                        \
-                               dbox4, start4, stride4, i4)                                        \
-{                                                                                                 \
-   zypre_newBoxLoopInit(ndim,loop_size);                                                          \
-   zypre_BoxLoopDataDeclareK(1,ndim,loop_size,dbox1,start1,stride1);                              \
-   zypre_BoxLoopDataDeclareK(2,ndim,loop_size,dbox2,start2,stride2);                              \
-   zypre_BoxLoopDataDeclareK(3,ndim,loop_size,dbox3,start3,stride3);                              \
-   zypre_BoxLoopDataDeclareK(4,ndim,loop_size,dbox4,start4,stride4);                              \
-   forall< hypre_raja_exec_policy >(RangeSegment(0, hypre__tot), [=] hypre_RAJA_DEVICE (HYPRE_Int idx) \
-   {                                                                                              \
-      zypre_newBoxLoopDeclare(databox1);                                                          \
-      zypre_BoxLoopIncK(1,databox1,i1);                                                           \
-      zypre_BoxLoopIncK(2,databox2,i2);                                                           \
-      zypre_BoxLoopIncK(3,databox3,i3);                                                           \
-      zypre_BoxLoopIncK(4,databox4,i4);
-
-#define zypre_newBoxLoop4End(i1, i2, i3, i4)                                  \
-   });                                                                        \
-   hypre_fence();                                                             \
-}
-
-#define zypre_BasicBoxLoopDataDeclareK(k,ndim,loop_size,stride)               \
-   hypre_Boxloop databox##k;                                                  \
-   databox##k.lsize0   = loop_size[0];                                        \
-   databox##k.strides0 = stride[0];                                           \
-   databox##k.bstart0  = 0;                                                   \
-   databox##k.bsize0   = 0;                                                   \
-   if (ndim > 1)                                                              \
-   {                                                                          \
-      databox##k.lsize1   = loop_size[1];                                     \
-      databox##k.strides1 = stride[1];                                        \
-      databox##k.bstart1  = 0;                                                \
-      databox##k.bsize1   = 0;                                                \
-   }                                                                          \
-   else                                                                       \
-   {                                                                          \
-      databox##k.lsize1   = 1;                                                \
-      databox##k.strides1 = 0;                                                \
-      databox##k.bstart1  = 0;                                                \
-      databox##k.bsize1   = 0;                                                \
-   }                                                                          \
-   if (ndim == 3)                                                             \
-   {                                                                          \
-      databox##k.lsize2   = loop_size[2];                                     \
-      databox##k.strides2 = stride[2];                                        \
-      databox##k.bstart2  = 0;                                                \
-      databox##k.bsize2   = 0;                                                \
-   }                                                                          \
-   else                                                                       \
-   {                                                                          \
-      databox##k.lsize2   = 1;                                                \
-      databox##k.strides2 = 0;                                                \
-      databox##k.bstart2  = 0;                                                \
-      databox##k.bsize2   = 0;                                                \
-   }
-        
-#define zypre_newBasicBoxLoop2Begin(ndim, loop_size,                                               \
-                                    stride1, i1,                                                   \
-                                    stride2, i2)                                                   \
-{                                                                                                  \
-    zypre_newBoxLoopInit(ndim,loop_size);                                                          \
-    zypre_BasicBoxLoopDataDeclareK(1,ndim,loop_size,stride1);                                      \
-    zypre_BasicBoxLoopDataDeclareK(2,ndim,loop_size,stride2);                                      \
-    forall< hypre_raja_exec_policy >(RangeSegment(0, hypre__tot), [=] hypre_RAJA_DEVICE (HYPRE_Int idx) \
-    {                                                                                              \
-       zypre_newBoxLoopDeclare(databox1);                                                          \
-       zypre_BoxLoopIncK(1,databox1,i1);                                                           \
-       zypre_BoxLoopIncK(2,databox2,i2);                                                           \
-
-#define hypre_LoopBegin(size,idx)                                                           \
-{                                                                                           \
-   forall< hypre_raja_exec_policy >(RangeSegment(0, size), [=] hypre_RAJA_DEVICE (HYPRE_Int idx) \
-   {
-
-#define hypre_LoopEnd()                                                        \
-   });                                                                         \
-   hypre_fence();                                                              \
-}
-
-#define zypre_newBoxLoopSetOneBlock()
-
-#define hypre_newBoxLoopGetIndex(index)                                        \
-  index[0] = hypre_IndexD(local_idx, 0);                                       \
-  index[1] = hypre_IndexD(local_idx, 1);                                       \
-  index[2] = hypre_IndexD(local_idx, 2);
-
-#define hypre_BoxLoopGetIndex    zypre_BoxLoopGetIndex
-#define hypre_BoxLoopSetOneBlock zypre_newBoxLoopSetOneBlock
-#define hypre_BoxLoopBlock()       0
-#define hypre_BoxLoop0Begin      zypre_newBoxLoop0Begin
-#define hypre_BoxLoop0For        zypre_newBoxLoop0For
-#define hypre_BoxLoop0End        zypre_newBoxLoop0End
-#define hypre_BoxLoop1Begin      zypre_newBoxLoop1Begin
-#define hypre_BoxLoop1For        zypre_newBoxLoop1For
-#define hypre_BoxLoop1End        zypre_newBoxLoop1End
-#define hypre_BoxLoop2Begin      zypre_newBoxLoop2Begin
-#define hypre_BoxLoop2For        zypre_newBoxLoop2For
-#define hypre_BoxLoop2End        zypre_newBoxLoop2End
-#define hypre_BoxLoop3Begin      zypre_newBoxLoop3Begin
-#define hypre_BoxLoop3For        zypre_newBoxLoop3For
-#define hypre_BoxLoop3End        zypre_newBoxLoop3End
-#define hypre_BoxLoop4Begin      zypre_newBoxLoop4Begin
-#define hypre_BoxLoop4For        zypre_newBoxLoop4For
-#define hypre_BoxLoop4End        zypre_newBoxLoop4End
-#define hypre_newBoxLoopInit     zypre_newBoxLoopInit
-
-#define hypre_BasicBoxLoop2Begin zypre_newBasicBoxLoop2Begin
-
-/* Reduction */
-#define hypre_BoxLoop1ReductionBegin(ndim, loop_size, dbox1, start1, stride1, i1, reducesum) \
-        hypre_BoxLoop1Begin(ndim, loop_size, dbox1, start1, stride1, i1)
-
-#define hypre_BoxLoop1ReductionEnd(i1, reducesum) \
-        hypre_BoxLoop1End(i1)
-
-#define hypre_BoxLoop2ReductionBegin(ndim, loop_size, dbox1, start1, stride1, i1, \
-                                                      dbox2, start2, stride2, i2, reducesum) \
-        hypre_BoxLoop2Begin(ndim, loop_size, dbox1, start1, stride1, i1, \
-                                             dbox2, start2, stride2, i2)
-
-#define hypre_BoxLoop2ReductionEnd(i1, i2, reducesum) \
-        hypre_BoxLoop2End(i1, i2)
-
-#endif
-#elif defined(HYPRE_USING_KOKKOS)
-/******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
- * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
- *
- * SPDX-License-Identifier: (Apache-2.0 OR MIT)
- ******************************************************************************/
-
-/******************************************************************************
- *
- * Header info for the BoxLoop
- *
- *****************************************************************************/
-
-/*--------------------------------------------------------------------------
- * BoxLoop macros:
- *--------------------------------------------------------------------------*/
-
-#ifndef HYPRE_NEWBOXLOOP_HEADER
-#define HYPRE_NEWBOXLOOP_HEADER
-
-extern "C++" {
-#include <Kokkos_Core.hpp>
-using namespace Kokkos;
-}
-
-#if defined( KOKKOS_HAVE_MPI )
-#include <mpi.h>
-#endif
-
-typedef struct hypre_Boxloop_struct
-{
-   HYPRE_Int lsize0,lsize1,lsize2;
-   HYPRE_Int strides0,strides1,strides2;
-   HYPRE_Int bstart0,bstart1,bstart2;
-   HYPRE_Int bsize0,bsize1,bsize2;
-} hypre_Boxloop;
-
-
-#define hypre_fence()
-/*
-#define hypre_fence()                                \
-   cudaError err = cudaGetLastError();               \
-   if ( cudaSuccess != err ) {                                                \
-     printf("\n ERROR hypre_newBoxLoop: %s in %s(%d) function %s\n", cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
-   }                                                                        \
-   hypre_CheckErrorDevice(cudaDeviceSynchronize());
-*/
-
-
-#define hypre_newBoxLoopInit(ndim,loop_size)                                \
-   HYPRE_Int hypre__tot = 1;                                                \
-   for (HYPRE_Int d = 0;d < ndim;d ++)                                      \
-      hypre__tot *= loop_size[d];
-
-
-#define hypre_BoxLoopIncK(k,box,hypre__i)                                                \
-   HYPRE_Int hypre_boxD##k = 1;                                                          \
-   HYPRE_Int hypre__i = 0;                                                               \
-   hypre__i += (hypre_IndexD(local_idx, 0)*box.strides0 + box.bstart0) * hypre_boxD##k;  \
-   hypre_boxD##k *= hypre_max(0, box.bsize0 + 1);                                        \
-   hypre__i += (hypre_IndexD(local_idx, 1)*box.strides1 + box.bstart1) * hypre_boxD##k;  \
-   hypre_boxD##k *= hypre_max(0, box.bsize1 + 1);                                        \
-   hypre__i += (hypre_IndexD(local_idx, 2)*box.strides2 + box.bstart2) * hypre_boxD##k;  \
-   hypre_boxD##k *= hypre_max(0, box.bsize2 + 1);                                        \
-
-#define hypre_newBoxLoopDeclare(box)                                        \
-  hypre_Index local_idx;                                                    \
-  HYPRE_Int idx_local = idx;                                                \
-  hypre_IndexD(local_idx, 0)  = idx_local % box.lsize0;                     \
-  idx_local = idx_local / box.lsize0;                                       \
-  hypre_IndexD(local_idx, 1)  = idx_local % box.lsize1;                     \
-  idx_local = idx_local / box.lsize1;                                       \
-  hypre_IndexD(local_idx, 2)  = idx_local % box.lsize2;
-
-#define hypre_BoxLoopDataDeclareK(k,ndim,loop_size,dbox,start,stride)       \
-   hypre_Boxloop databox##k;                                                \
-   databox##k.lsize0 = loop_size[0];                                        \
-   databox##k.strides0 = stride[0];                                         \
-   databox##k.bstart0  = start[0] - dbox->imin[0];                          \
-   databox##k.bsize0   = dbox->imax[0]-dbox->imin[0];                       \
-   if (ndim > 1)                                                            \
-   {                                                                        \
-      databox##k.lsize1 = loop_size[1];                                     \
-      databox##k.strides1 = stride[1];                                      \
-      databox##k.bstart1  = start[1] - dbox->imin[1];                       \
-      databox##k.bsize1   = dbox->imax[1]-dbox->imin[1];                    \
-   }                                                                        \
-   else                                                                     \
-   {                                                                        \
-      databox##k.lsize1 = 1;                                                \
-      databox##k.strides1 = 0;                                              \
-      databox##k.bstart1  = 0;                                              \
-      databox##k.bsize1   = 0;                                              \
-   }                                                                        \
-   if (ndim == 3)                                                           \
-   {                                                                        \
-      databox##k.lsize2 = loop_size[2];                                     \
-      databox##k.strides2 = stride[2];                                      \
-      databox##k.bstart2  = start[2] - dbox->imin[2];                       \
-      databox##k.bsize2   = dbox->imax[2]-dbox->imin[2];                    \
-   }                                                                        \
-   else                                                                     \
-   {                                                                        \
-      databox##k.lsize2 = 1;                                                \
-      databox##k.strides2 = 0;                                              \
-      databox##k.bstart2  = 0;                                              \
-      databox##k.bsize2   = 0;                                              \
-   }
-
-#define hypre_newBoxLoop0Begin(ndim, loop_size)                         \
-{                                                                       \
-   hypre_newBoxLoopInit(ndim,loop_size);                                \
-   Kokkos::parallel_for (hypre__tot, KOKKOS_LAMBDA (HYPRE_Int idx)      \
-   {
-
-
-#define hypre_newBoxLoop0End(i1)                                        \
-   });                                                                  \
-   hypre_fence();                                                       \
-}
-
-
-#define hypre_newBoxLoop1Begin(ndim, loop_size,                         \
-                               dbox1, start1, stride1, i1)              \
-{                                                                       \
-   hypre_newBoxLoopInit(ndim,loop_size)                                 \
-   hypre_BoxLoopDataDeclareK(1,ndim,loop_size,dbox1,start1,stride1);    \
-   Kokkos::parallel_for (hypre__tot, KOKKOS_LAMBDA (HYPRE_Int idx)      \
-   {                                                                    \
-      hypre_newBoxLoopDeclare(databox1);                                \
-      hypre_BoxLoopIncK(1,databox1,i1);
-
-
-#define hypre_newBoxLoop1End(i1)                                        \
-   });                                                                  \
-     hypre_fence();                                                     \
- }
-
-
-#define hypre_newBoxLoop2Begin(ndim, loop_size,                         \
-                               dbox1, start1, stride1, i1,              \
-                               dbox2, start2, stride2, i2)              \
-{                                                                       \
-   hypre_newBoxLoopInit(ndim,loop_size);                                \
-   hypre_BoxLoopDataDeclareK(1,ndim,loop_size,dbox1,start1,stride1);    \
-   hypre_BoxLoopDataDeclareK(2,ndim,loop_size,dbox2,start2,stride2);    \
-   Kokkos::parallel_for (hypre__tot, KOKKOS_LAMBDA (HYPRE_Int idx)      \
-   {                                                                    \
-      hypre_newBoxLoopDeclare(databox1)                                 \
-      hypre_BoxLoopIncK(1,databox1,i1);                                 \
-      hypre_BoxLoopIncK(2,databox2,i2);
-
-#define hypre_newBoxLoop2End(i1, i2)                                    \
-   });                                                                  \
-   hypre_fence();                                                       \
-}
-
-
-#define hypre_newBoxLoop3Begin(ndim, loop_size,                         \
-                               dbox1, start1, stride1, i1,              \
-                               dbox2, start2, stride2, i2,              \
-                               dbox3, start3, stride3, i3)              \
-{                                                                       \
-   hypre_newBoxLoopInit(ndim,loop_size);                                \
-   hypre_BoxLoopDataDeclareK(1,ndim,loop_size,dbox1,start1,stride1);    \
-   hypre_BoxLoopDataDeclareK(2,ndim,loop_size,dbox2,start2,stride2);    \
-   hypre_BoxLoopDataDeclareK(3,ndim,loop_size,dbox3,start3,stride3);    \
-   Kokkos::parallel_for (hypre__tot, KOKKOS_LAMBDA (HYPRE_Int idx)      \
-   {                                                                    \
-      hypre_newBoxLoopDeclare(databox1);                                \
-      hypre_BoxLoopIncK(1,databox1,i1);                                 \
-      hypre_BoxLoopIncK(2,databox2,i2);                                 \
-      hypre_BoxLoopIncK(3,databox3,i3);
-
-#define hypre_newBoxLoop3End(i1, i2, i3)                                \
-   });                                                                  \
-   hypre_fence();                                                       \
-}
-
-#define hypre_newBoxLoop4Begin(ndim, loop_size,                         \
-                               dbox1, start1, stride1, i1,              \
-                               dbox2, start2, stride2, i2,              \
-                               dbox3, start3, stride3, i3,              \
-                               dbox4, start4, stride4, i4)              \
-{                                                                       \
-   hypre_newBoxLoopInit(ndim,loop_size);                                \
-   hypre_BoxLoopDataDeclareK(1,ndim,loop_size,dbox1,start1,stride1);    \
-   hypre_BoxLoopDataDeclareK(2,ndim,loop_size,dbox2,start2,stride2);    \
-   hypre_BoxLoopDataDeclareK(3,ndim,loop_size,dbox3,start3,stride3);    \
-   hypre_BoxLoopDataDeclareK(4,ndim,loop_size,dbox4,start4,stride4);    \
-   Kokkos::parallel_for (hypre__tot, KOKKOS_LAMBDA (HYPRE_Int idx)      \
-   {                                                                    \
-      hypre_newBoxLoopDeclare(databox1);                                \
-      hypre_BoxLoopIncK(1,databox1,i1);                                 \
-      hypre_BoxLoopIncK(2,databox2,i2);                                 \
-      hypre_BoxLoopIncK(3,databox3,i3);                                 \
-      hypre_BoxLoopIncK(4,databox4,i4);
-
-
-#define hypre_newBoxLoop4End(i1, i2, i3, i4)                            \
-   });                                                                  \
-   hypre_fence();                                                       \
-}
-
-#define hypre_BasicBoxLoopDataDeclareK(k,ndim,loop_size,stride)         \
-        hypre_Boxloop databox##k;                                       \
-        databox##k.lsize0 = loop_size[0];                               \
-        databox##k.strides0 = stride[0];                                \
-        databox##k.bstart0  = 0;                                        \
-        databox##k.bsize0   = 0;                                        \
-        if (ndim > 1)                                                   \
-        {                                                               \
-            databox##k.lsize1 = loop_size[1];                           \
-            databox##k.strides1 = stride[1];                            \
-            databox##k.bstart1  = 0;                                    \
-            databox##k.bsize1   = 0;                                    \
-        }                                                               \
-        else                                                            \
-        {                                                               \
-                databox##k.lsize1 = 1;                                  \
-                databox##k.strides1 = 0;                                \
-                databox##k.bstart1  = 0;                                \
-                databox##k.bsize1   = 0;                                \
-        }                                                               \
-        if (ndim == 3)                                                  \
-        {                                                               \
-            databox##k.lsize2 = loop_size[2];                           \
-            databox##k.strides2 = stride[2];                            \
-            databox##k.bstart2  = 0;                                    \
-            databox##k.bsize2   = 0;                                    \
-        }                                                               \
-        else                                                            \
-        {                                                               \
-            databox##k.lsize2 = 1;                                      \
-            databox##k.strides2 = 0;                                    \
-            databox##k.bstart2  = 0;                                    \
-            databox##k.bsize2   = 0;                                    \
-        }
-
-#define hypre_newBasicBoxLoop2Begin(ndim, loop_size,                    \
-                                    stride1, i1,                        \
-                                    stride2, i2)                        \
-{                                                                       \
-   hypre_newBoxLoopInit(ndim,loop_size);                                \
-   hypre_BasicBoxLoopDataDeclareK(1,ndim,loop_size,stride1);            \
-   hypre_BasicBoxLoopDataDeclareK(2,ndim,loop_size,stride2);            \
-   Kokkos::parallel_for (hypre__tot, KOKKOS_LAMBDA (HYPRE_Int idx)      \
-   {                                                                    \
-      hypre_newBoxLoopDeclare(databox1);                                \
-      hypre_BoxLoopIncK(1,databox1,i1);                                 \
-      hypre_BoxLoopIncK(2,databox2,i2);                                 \
-
-#define hypre_BoxLoop1ReductionBegin(ndim, loop_size,                   \
-                                     dbox1, start1, stride1, i1,        \
-                                     HYPRE_BOX_REDUCTION)               \
- {                                                                      \
-     HYPRE_Real __hypre_sum_tmp = HYPRE_BOX_REDUCTION;                  \
-     HYPRE_BOX_REDUCTION = 0.0;                                         \
-     hypre_newBoxLoopInit(ndim,loop_size);                              \
-     hypre_BoxLoopDataDeclareK(1,ndim,loop_size,dbox1,start1,stride1);  \
-     Kokkos::parallel_reduce (hypre__tot, KOKKOS_LAMBDA (HYPRE_Int idx, \
-                              HYPRE_Real &HYPRE_BOX_REDUCTION)          \
-     {                                                                  \
-        hypre_newBoxLoopDeclare(databox1);                              \
-        hypre_BoxLoopIncK(1,databox1,i1);                               \
-
-
-
- #define hypre_BoxLoop1ReductionEnd(i1, HYPRE_BOX_REDUCTION)            \
-     }, HYPRE_BOX_REDUCTION);                                           \
-     hypre_fence();                                                     \
-     HYPRE_BOX_REDUCTION += __hypre_sum_tmp;                            \
- }
-
- #define hypre_BoxLoop2ReductionBegin(ndim, loop_size,                  \
-                                      dbox1, start1, stride1, i1,       \
-                                      dbox2, start2, stride2, i2,       \
-                                      HYPRE_BOX_REDUCTION)              \
- {                                                                      \
-     HYPRE_Real __hypre_sum_tmp = HYPRE_BOX_REDUCTION;                  \
-     HYPRE_BOX_REDUCTION = 0.0;                                         \
-     hypre_newBoxLoopInit(ndim,loop_size);                              \
-     hypre_BoxLoopDataDeclareK(1,ndim,loop_size,dbox1,start1,stride1);  \
-     hypre_BoxLoopDataDeclareK(2,ndim,loop_size,dbox2,start2,stride2);  \
-     Kokkos::parallel_reduce (hypre__tot, KOKKOS_LAMBDA (HYPRE_Int idx, \
-                              HYPRE_Real &HYPRE_BOX_REDUCTION)          \
-     {                                                                  \
-         hypre_newBoxLoopDeclare(databox1);                             \
-         hypre_BoxLoopIncK(1,databox1,i1);                              \
-         hypre_BoxLoopIncK(2,databox2,i2);                              \
-
- #define hypre_BoxLoop2ReductionEnd(i1, i2, HYPRE_BOX_REDUCTION)        \
-     }, HYPRE_BOX_REDUCTION);                                           \
-     hypre_fence();                                                     \
-     HYPRE_BOX_REDUCTION += __hypre_sum_tmp;                            \
- }
-
-#define hypre_LoopBegin(size,idx)                                       \
-{                                                                       \
-   Kokkos::parallel_for(size, KOKKOS_LAMBDA (HYPRE_Int idx)             \
-   {
-
-#define hypre_LoopEnd()                                                 \
-   });                                                                  \
-   hypre_fence();                                                       \
-}
-
-/*
-extern "C++"
-{
-struct ColumnSums
-{
-  typedef HYPRE_Real value_type[];
-  typedef View<HYPRE_Real**>::size_type size_type;
-  size_type value_count;
-  View<HYPRE_Real**> X_;
-  ColumnSums(const View<HYPRE_Real**>& X):value_count(X.dimension_1()),X_(X){}
-  KOKKOS_INLINE_FUNCTION void
-  operator()(const size_type i,value_type sum) const
-  {
-    for (size_type j = 0;j < value_count;j++)
-    {
-       sum[j] += X_(i,j);
-    }
-  }
-  KOKKOS_INLINE_FUNCTION void
-  join (volatile value_type dst,volatile value_type src) const
-  {
-    for (size_type j= 0;j < value_count;j++)
-    {
-      dst[j] +=src[j];
-    }
-  }
-  KOKKOS_INLINE_FUNCTION void init(value_type sum) const
-  {
-    for (size_type j= 0;j < value_count;j++)
-    {
-      sum[j] += 0.0;
-    }
-  }
-};
-}
-*/
-
-#define hypre_newBoxLoopSetOneBlock()
-
-#define hypre_newBoxLoopGetIndex(index)\
-  index[0] = hypre_IndexD(local_idx, 0); index[1] = hypre_IndexD(local_idx, 1); index[2] = hypre_IndexD(local_idx, 2);
-  
-#define hypre_BoxLoopGetIndex    zypre_BoxLoopGetIndex
-#define hypre_BoxLoopSetOneBlock hypre_newBoxLoopSetOneBlock
-#define hypre_BoxLoopBlock()       0
-#define hypre_BoxLoop0Begin      hypre_newBoxLoop0Begin
-#define hypre_BoxLoop0For        hypre_newBoxLoop0For
-#define hypre_BoxLoop0End        hypre_newBoxLoop0End
-#define hypre_BoxLoop1Begin      hypre_newBoxLoop1Begin
-#define hypre_BoxLoop1For        hypre_newBoxLoop1For
-#define hypre_BoxLoop1End        hypre_newBoxLoop1End
-#define hypre_BoxLoop2Begin      hypre_newBoxLoop2Begin
-#define hypre_BoxLoop2For        hypre_newBoxLoop2For
-#define hypre_BoxLoop2End        hypre_newBoxLoop2End
-#define hypre_BoxLoop3Begin      hypre_newBoxLoop3Begin
-#define hypre_BoxLoop3For        hypre_newBoxLoop3For
-#define hypre_BoxLoop3End        hypre_newBoxLoop3End
-#define hypre_BoxLoop4Begin      hypre_newBoxLoop4Begin
-#define hypre_BoxLoop4For        hypre_newBoxLoop4For
-#define hypre_BoxLoop4End        hypre_newBoxLoop4End
-
-#define hypre_BasicBoxLoop2Begin hypre_newBasicBoxLoop2Begin
-#endif
-#elif defined(HYPRE_USING_CUDA)
-/******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
- * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
- *
- * SPDX-License-Identifier: (Apache-2.0 OR MIT)
- ******************************************************************************/
-
-/******************************************************************************
- *
- * Header info for the BoxLoop
- *
- *****************************************************************************/
-
-/*--------------------------------------------------------------------------
- * BoxLoop macros:
- *--------------------------------------------------------------------------*/
-
-#ifndef HYPRE_NEWBOXLOOP_HEADER
-#define HYPRE_NEWBOXLOOP_HEADER
-
-#include <cuda.h>
-#include <cuda_runtime.h>
-#ifdef HYPRE_USING_OPENMP
-#include <omp.h>
-#endif
-
-#define HYPRE_LAMBDA [=] __host__  __device__
-#define BLOCKSIZE 512
-
-typedef struct hypre_Boxloop_struct
-{
-   HYPRE_Int lsize0,lsize1,lsize2;
-   HYPRE_Int strides0,strides1,strides2;
-   HYPRE_Int bstart0,bstart1,bstart2;
-   HYPRE_Int bsize0,bsize1,bsize2;
-} hypre_Boxloop;
-
-#if 1
-#define hypre_fence()
-/*printf("\n hypre_newBoxLoop in %s(%d) function %s\n",__FILE__,__LINE__,__FUNCTION__);*/
-#else
-#define hypre_fence()                                                                                                       \
-{                                                                                                                           \
-  cudaError err = cudaGetLastError();                                                                                       \
-  if ( cudaSuccess != err )                                                                                                 \
-  {                                                                                                                         \
-    printf("\n ERROR hypre_newBoxLoop: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
-    /* HYPRE_Int *p = NULL; *p = 1; */                                                                                      \
-  }                                                                                                                         \
-  hypre_CheckErrorDevice(cudaDeviceSynchronize());                                                                          \
-}
-#endif
-
-/* #define hypre_reduce_policy  cuda_reduce<BLOCKSIZE> */
-
-extern "C++" {
-
-template <typename LOOP_BODY>
-__global__ void forall_kernel(LOOP_BODY loop_body, HYPRE_Int length)
-{
-   HYPRE_Int idx = blockDim.x * blockIdx.x + threadIdx.x;
-   if (idx < length)
-   {
-      loop_body(idx);
-   }
-}
-
-template<typename LOOP_BODY>
-void BoxLoopforall(HYPRE_Int policy, HYPRE_Int length, LOOP_BODY loop_body)
-{
-   if (policy == HYPRE_MEMORY_HOST)
-   {
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for HYPRE_SMP_SCHEDULE
-#endif
-      for (HYPRE_Int idx = 0; idx < length; idx++)
-      {
-         loop_body(idx);
-      }
-   }
-   else if (policy == HYPRE_MEMORY_DEVICE)
-   {
-      HYPRE_Int gridSize = (length + BLOCKSIZE - 1) / BLOCKSIZE;
-      const dim3 gDim(gridSize), bDim(BLOCKSIZE);
-      HYPRE_CUDA_LAUNCH( forall_kernel, gDim, bDim, loop_body, length );
-   }
-   else if (policy == 2)
-   {
-   }
-}
-
-
-template <typename LOOP_BODY>
-__global__ void reductionforall_kernel(LOOP_BODY ReductionLoop,
-                                       HYPRE_Int length)
-{
-   ReductionLoop(blockDim.x*blockIdx.x+threadIdx.x, blockDim.x*gridDim.x, length);
-}
-
-template<typename LOOP_BODY>
-void ReductionBoxLoopforall(HYPRE_Int policy, HYPRE_Int length, LOOP_BODY ReductionLoop)
-{
-   if (length <= 0)
-   {
-      return;
-   }
-
-   if (policy == HYPRE_MEMORY_HOST)
-   {
-   }
-   else if (policy == HYPRE_MEMORY_DEVICE)
-   {
-      HYPRE_Int gridSize = (length + BLOCKSIZE - 1) / BLOCKSIZE;
-      gridSize = hypre_min(gridSize, 1024);
-
-      /*
-      hypre_printf("length= %d, blocksize = %d, gridsize = %d\n",
-                   length, BLOCKSIZE, gridSize);
-      */
-      const dim3 gDim(gridSize), bDim(BLOCKSIZE);
-      HYPRE_CUDA_LAUNCH( reductionforall_kernel, gDim, bDim, ReductionLoop, length );
-   }
-}
-
-}
-
-
-#define hypre_BoxLoopIncK(k,box,hypre__i)                                               \
-   HYPRE_Int hypre_boxD##k = 1;                                                         \
-   HYPRE_Int hypre__i = 0;                                                              \
-   hypre__i += (hypre_IndexD(local_idx, 0)*box.strides0 + box.bstart0) * hypre_boxD##k; \
-   hypre_boxD##k *= hypre_max(0, box.bsize0 + 1);                                       \
-   hypre__i += (hypre_IndexD(local_idx, 1)*box.strides1 + box.bstart1) * hypre_boxD##k; \
-   hypre_boxD##k *= hypre_max(0, box.bsize1 + 1);                                       \
-   hypre__i += (hypre_IndexD(local_idx, 2)*box.strides2 + box.bstart2) * hypre_boxD##k; \
-   hypre_boxD##k *= hypre_max(0, box.bsize2 + 1);
-
-#define hypre_newBoxLoopInit(ndim,loop_size)            \
-  HYPRE_Int hypre__tot = 1;                             \
-  for (HYPRE_Int hypre_d = 0;hypre_d < ndim;hypre_d ++) \
-    hypre__tot *= loop_size[hypre_d];
-
-#define hypre_BasicBoxLoopInit(ndim,loop_size)          \
-  HYPRE_Int hypre__tot = 1;                             \
-  for (HYPRE_Int hypre_d = 0;hypre_d < ndim;hypre_d ++) \
-    hypre__tot *= loop_size[hypre_d];                   \
-
-#define hypre_newBoxLoopDeclare(box)                    \
-  hypre_Index local_idx;                                \
-  HYPRE_Int idx_local = idx;                            \
-  hypre_IndexD(local_idx, 0)  = idx_local % box.lsize0; \
-  idx_local = idx_local / box.lsize0;                   \
-  hypre_IndexD(local_idx, 1)  = idx_local % box.lsize1; \
-  idx_local = idx_local / box.lsize1;                   \
-  hypre_IndexD(local_idx, 2)  = idx_local % box.lsize2; \
-
-#define hypre_newBoxLoop0Begin(ndim, loop_size)                            \
-{                                                                          \
-   hypre_newBoxLoopInit(ndim,loop_size);                                   \
-   BoxLoopforall(hypre_exec_policy,hypre__tot,HYPRE_LAMBDA (HYPRE_Int idx) \
-   {
-
-#define hypre_newBoxLoop0End() \
-    });                        \
-    hypre_fence();             \
-}
-
-#define hypre_BoxLoopDataDeclareK(k,ndim,loop_size,dbox,start,stride) \
-hypre_Boxloop databox##k;                                             \
-databox##k.lsize0 = loop_size[0];                                     \
-databox##k.strides0 = stride[0];                                      \
-databox##k.bstart0  = start[0] - dbox->imin[0];                       \
-databox##k.bsize0   = dbox->imax[0]-dbox->imin[0];                    \
-if (ndim > 1)                                                         \
-{                                                                     \
-   databox##k.lsize1 = loop_size[1];                                  \
-   databox##k.strides1 = stride[1];                                   \
-   databox##k.bstart1  = start[1] - dbox->imin[1];                    \
-   databox##k.bsize1   = dbox->imax[1]-dbox->imin[1];                 \
-}                                                                     \
-else                                                                  \
-{                                                                     \
-   databox##k.lsize1 = 1;                                             \
-   databox##k.strides1 = 0;                                           \
-   databox##k.bstart1  = 0;                                           \
-   databox##k.bsize1   = 0;                                           \
-}                                                                     \
-if (ndim == 3)                                                        \
-{                                                                     \
-   databox##k.lsize2 = loop_size[2];                                  \
-   databox##k.strides2 = stride[2];                                   \
-   databox##k.bstart2  = start[2] - dbox->imin[2];                    \
-   databox##k.bsize2   = dbox->imax[2]-dbox->imin[2];                 \
-}                                                                     \
-else                                                                  \
-{                                                                     \
-   databox##k.lsize2 = 1;                                             \
-   databox##k.strides2 = 0;                                           \
-   databox##k.bstart2  = 0;                                           \
-   databox##k.bsize2   = 0;                                           \
-}
-
-#define hypre_newBoxLoop1Begin(ndim, loop_size,                             \
-                               dbox1, start1, stride1, i1)                  \
-{                                                                           \
-    hypre_newBoxLoopInit(ndim,loop_size);                                   \
-    hypre_BoxLoopDataDeclareK(1,ndim,loop_size,dbox1,start1,stride1);       \
-    BoxLoopforall(hypre_exec_policy,hypre__tot,HYPRE_LAMBDA (HYPRE_Int idx) \
-    {                                                                       \
-      hypre_newBoxLoopDeclare(databox1);                                    \
-      hypre_BoxLoopIncK(1,databox1,i1);
-
-#define hypre_newBoxLoop1End(i1) \
-    });                          \
-    hypre_fence();               \
-}
-
-#define hypre_newBoxLoop2Begin(ndim, loop_size,                             \
-                               dbox1, start1, stride1, i1,                  \
-                               dbox2, start2, stride2, i2)                  \
-{                                                                           \
-    hypre_newBoxLoopInit(ndim,loop_size);                                   \
-    hypre_BoxLoopDataDeclareK(1,ndim,loop_size,dbox1,start1,stride1);       \
-    hypre_BoxLoopDataDeclareK(2,ndim,loop_size,dbox2,start2,stride2);       \
-    BoxLoopforall(hypre_exec_policy,hypre__tot,HYPRE_LAMBDA (HYPRE_Int idx) \
-    {                                                                       \
-       hypre_newBoxLoopDeclare(databox1);                                   \
-       hypre_BoxLoopIncK(1,databox1,i1);                                    \
-       hypre_BoxLoopIncK(2,databox2,i2);
-
-#define hypre_newBoxLoop2End(i1, i2) \
-    });                              \
-    hypre_fence();                   \
-}
-
-#define hypre_newBoxLoop3Begin(ndim, loop_size,                             \
-                               dbox1, start1, stride1, i1,                  \
-                               dbox2, start2, stride2, i2,                  \
-                               dbox3, start3, stride3, i3)                  \
-{                                                                           \
-   hypre_newBoxLoopInit(ndim,loop_size);                                    \
-   hypre_BoxLoopDataDeclareK(1,ndim,loop_size,dbox1,start1,stride1);        \
-   hypre_BoxLoopDataDeclareK(2,ndim,loop_size,dbox2,start2,stride2);        \
-   hypre_BoxLoopDataDeclareK(3,ndim,loop_size,dbox3,start3,stride3);        \
-   BoxLoopforall(hypre_exec_policy,hypre__tot,HYPRE_LAMBDA (HYPRE_Int idx)  \
-   {                                                                        \
-         hypre_newBoxLoopDeclare(databox1);                                 \
-         hypre_BoxLoopIncK(1,databox1,i1);                                  \
-         hypre_BoxLoopIncK(2,databox2,i2);                                  \
-         hypre_BoxLoopIncK(3,databox3,i3);
-
-
-#define hypre_newBoxLoop3End(i1, i2,i3) \
-    });                                 \
-    hypre_fence();                      \
-}
-
-#define hypre_newBoxLoop4Begin(ndim, loop_size,                            \
-                               dbox1, start1, stride1, i1,                 \
-                               dbox2, start2, stride2, i2,                 \
-                               dbox3, start3, stride3, i3,                 \
-                               dbox4, start4, stride4, i4)                 \
-{                                                                          \
-   hypre_newBoxLoopInit(ndim,loop_size);                                   \
-   hypre_BoxLoopDataDeclareK(1,ndim,loop_size,dbox1,start1,stride1);       \
-   hypre_BoxLoopDataDeclareK(2,ndim,loop_size,dbox2,start2,stride2);       \
-   hypre_BoxLoopDataDeclareK(3,ndim,loop_size,dbox3,start3,stride3);       \
-   hypre_BoxLoopDataDeclareK(4,ndim,loop_size,dbox4,start4,stride4);       \
-   BoxLoopforall(hypre_exec_policy,hypre__tot,HYPRE_LAMBDA (HYPRE_Int idx) \
-   {                                                                       \
-         hypre_newBoxLoopDeclare(databox1);                                \
-         hypre_BoxLoopIncK(1,databox1,i1);                                 \
-         hypre_BoxLoopIncK(2,databox2,i2);                                 \
-         hypre_BoxLoopIncK(3,databox3,i3);                                 \
-         hypre_BoxLoopIncK(4,databox4,i4);
-
-#define hypre_newBoxLoop4End(i1, i2, i3, i4) \
-    });                                      \
-    hypre_fence();                           \
-}
-
-#define zypre_BasicBoxLoopDataDeclareK(k,ndim,loop_size,stride) \
-hypre_Boxloop databox##k;                                       \
-databox##k.lsize0   = loop_size[0];                             \
-databox##k.strides0 = stride[0];                                \
-databox##k.bstart0  = 0;                                        \
-databox##k.bsize0   = 0;                                        \
-if (ndim > 1)                                                   \
-{                                                               \
-   databox##k.lsize1   = loop_size[1];                          \
-   databox##k.strides1 = stride[1];                             \
-   databox##k.bstart1  = 0;                                     \
-   databox##k.bsize1   = 0;                                     \
-}                                                               \
-else                                                            \
-{                                                               \
-   databox##k.lsize1   = 1;                                     \
-   databox##k.strides1 = 0;                                     \
-   databox##k.bstart1  = 0;                                     \
-   databox##k.bsize1   = 0;                                     \
-}                                                               \
-if (ndim == 3)                                                  \
-{                                                               \
-   databox##k.lsize2   = loop_size[2];                          \
-   databox##k.strides2 = stride[2];                             \
-   databox##k.bstart2  = 0;                                     \
-   databox##k.bsize2   = 0;                                     \
-}                                                               \
-else                                                            \
-{                                                               \
-    databox##k.lsize2   = 1;                                    \
-    databox##k.strides2 = 0;                                    \
-    databox##k.bstart2  = 0;                                    \
-    databox##k.bsize2   = 0;                                    \
-}
-
-#define zypre_newBasicBoxLoop1Begin(ndim, loop_size,                        \
-                                    stride1, i1)                            \
-{                                                                           \
-    hypre_BasicBoxLoopInit(ndim,loop_size);                                 \
-    zypre_BasicBoxLoopDataDeclareK(1,ndim,loop_size,stride1);               \
-    BoxLoopforall(hypre_exec_policy,hypre__tot,HYPRE_LAMBDA (HYPRE_Int idx) \
-    {                                                                       \
-        hypre_newBoxLoopDeclare(databox1);                                  \
-        hypre_BoxLoopIncK(1,databox1,i1);                                   \
-
-#define zypre_newBasicBoxLoop2Begin(ndim, loop_size,                        \
-                                    stride1, i1,                            \
-                                    stride2, i2)                            \
-{                                                                           \
-    hypre_BasicBoxLoopInit(ndim,loop_size);                                 \
-    zypre_BasicBoxLoopDataDeclareK(1,ndim,loop_size,stride1);               \
-    zypre_BasicBoxLoopDataDeclareK(2,ndim,loop_size,stride2);               \
-    BoxLoopforall(hypre_exec_policy,hypre__tot,HYPRE_LAMBDA (HYPRE_Int idx) \
-    {                                                                       \
-        hypre_newBoxLoopDeclare(databox1);                                  \
-        hypre_BoxLoopIncK(1,databox1,i1);                                   \
-        hypre_BoxLoopIncK(2,databox2,i2);                                   \
-
-
-#define hypre_LoopBegin(size,idx)                                    \
-{                                                                    \
-   BoxLoopforall(hypre_exec_policy,size,HYPRE_LAMBDA (HYPRE_Int idx) \
-   {
-
-#define hypre_LoopEnd() \
-   });                  \
-   hypre_fence();       \
-}
-
-#define hypre_newBoxLoopGetIndex(index)                                                                                \
-  index[0] = hypre_IndexD(local_idx, 0); index[1] = hypre_IndexD(local_idx, 1); index[2] = hypre_IndexD(local_idx, 2);
-
-#define hypre_BoxLoopGetIndex    zypre_BoxLoopGetIndex
-
-#define hypre_BoxLoopSetOneBlock() ;
-#define hypre_BoxLoopBlock()       0
-
-#define hypre_BoxLoop0Begin      hypre_newBoxLoop0Begin
-#define hypre_BoxLoop0For        hypre_newBoxLoop0For
-#define hypre_BoxLoop0End        hypre_newBoxLoop0End
-#define hypre_BoxLoop1Begin      hypre_newBoxLoop1Begin
-#define hypre_BoxLoop1For        hypre_newBoxLoop1For
-#define hypre_BoxLoop1End        hypre_newBoxLoop1End
-#define hypre_BoxLoop2Begin      hypre_newBoxLoop2Begin
-#define hypre_BoxLoop2For        hypre_newBoxLoop2For
-#define hypre_BoxLoop2End        hypre_newBoxLoop2End
-#define hypre_BoxLoop3Begin      hypre_newBoxLoop3Begin
-#define hypre_BoxLoop3For        hypre_newBoxLoop3For
-#define hypre_BoxLoop3End        hypre_newBoxLoop3End
-#define hypre_BoxLoop4Begin      hypre_newBoxLoop4Begin
-#define hypre_BoxLoop4For        hypre_newBoxLoop4For
-#define hypre_BoxLoop4End        hypre_newBoxLoop4End
-
-#define hypre_BasicBoxLoop1Begin zypre_newBasicBoxLoop1Begin
-#define hypre_BasicBoxLoop2Begin zypre_newBasicBoxLoop2Begin
-
-/* Reduction BoxLoop1*/
-#define hypre_BoxLoop1ReductionBegin(ndim, loop_size,                         \
-                                     dbox1, start1, stride1, i1,              \
-                                     reducesum)                               \
-{                                                                             \
-   hypre_newBoxLoopInit(ndim,loop_size);                                      \
-   hypre_BoxLoopDataDeclareK(1,ndim,loop_size,dbox1,start1,stride1);          \
-   reducesum.nblocks = hypre_min( (hypre__tot+BLOCKSIZE-1)/BLOCKSIZE, 1024 ); \
-   ReductionBoxLoopforall(hypre_exec_policy, hypre__tot,                      \
-                          HYPRE_LAMBDA (HYPRE_Int tid, HYPRE_Int nthreads,    \
-                                        HYPRE_Int len)                        \
-   {                                                                          \
-       for (HYPRE_Int idx = tid;                                              \
-                      idx < len;                                              \
-                      idx += nthreads)                                        \
-       {                                                                      \
-          hypre_newBoxLoopDeclare(databox1);                                  \
-          hypre_BoxLoopIncK(1,databox1,i1);
-
-#define hypre_BoxLoop1ReductionEnd(i1, reducesum) \
-       }                                          \
-       reducesum.BlockReduce();                   \
-    });                                           \
-    hypre_fence();                                \
-}
-
-/* Reduction BoxLoop2 */
-#define hypre_BoxLoop2ReductionBegin(ndim, loop_size,                         \
-                                     dbox1, start1, stride1, i1,              \
-                                     dbox2, start2, stride2, i2,              \
-                                     reducesum)                               \
-{                                                                             \
-   hypre_newBoxLoopInit(ndim,loop_size);                                      \
-   hypre_BoxLoopDataDeclareK(1,ndim,loop_size,dbox1,start1,stride1);          \
-   hypre_BoxLoopDataDeclareK(2,ndim,loop_size,dbox2,start2,stride2);          \
-   reducesum.nblocks = hypre_min( (hypre__tot+BLOCKSIZE-1)/BLOCKSIZE, 1024 ); \
-   ReductionBoxLoopforall(hypre_exec_policy, hypre__tot,                      \
-                          HYPRE_LAMBDA (HYPRE_Int tid, HYPRE_Int nthreads,    \
-                                        HYPRE_Int len)                        \
-   {                                                                          \
-       for (HYPRE_Int idx = tid;                                              \
-                      idx < len;                                              \
-                      idx += nthreads)                                        \
-       {                                                                      \
-          hypre_newBoxLoopDeclare(databox1);                                  \
-          hypre_BoxLoopIncK(1,databox1,i1);                                   \
-          hypre_BoxLoopIncK(2,databox2,i2);
-
-
-#define hypre_BoxLoop2ReductionEnd(i1, i2, reducesum) \
-       }                                              \
-       reducesum.BlockReduce();                       \
-    });                                               \
-    hypre_fence();                                    \
-}
-
-#endif
-#elif defined(HYPRE_USING_DEVICE_OPENMP)
-/******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
- * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
- *
- * SPDX-License-Identifier: (Apache-2.0 OR MIT)
- ******************************************************************************/
-
-/******************************************************************************
- *
- * Header info for the BoxLoop
- *
- *****************************************************************************/
-
-/*--------------------------------------------------------------------------
- * BoxLoop macros:
- *--------------------------------------------------------------------------*/
-
-#ifndef HYPRE_NEWBOXLOOP_HEADER
-#define HYPRE_NEWBOXLOOP_HEADER
-
-#include "omp.h"
-
-/* concatenation:
- */
-#define HYPRE_CONCAT2(x, y) x ## _ ## y
-#define HYPRE_XCONCAT2(x, y) HYPRE_CONCAT2(x, y)
-
-#define HYPRE_CONCAT3(x, y, z) x ## _ ## y ## _ ## z
-#define HYPRE_XCONCAT3(x, y, z) HYPRE_CONCAT3(x, y, z)
-
-/* if use OMP 4.5 default team size and number of teams */
-#define AUTO_OMP_TEAM
-
-#ifndef AUTO_OMP_TEAM
-/* omp team size (aka. gpu block size) */
-#define hypre_gpu_block_size 512
-/* the max number of omp teams */
-#define hypre_max_num_blocks 1000000
-#endif
-
-//#define HYPRE_BOXLOOP_ENTRY_PRINT hypre_printf("%s %s %d\n", __FILE__, __func__, __LINE__);
-#define HYPRE_BOXLOOP_ENTRY_PRINT
-
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-   BOX LOOPS [TEAM DISTRIBUTE VERSION]
-   !!! NOTE: THIS CODE ONLY WORKS FOR DIM <= 3 !!!
- * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
-/*
-#define hypre_BoxLoop0For()
-#define hypre_BoxLoop1For(i1)
-#define hypre_BoxLoop2For(i1, i2)
-#define hypre_BoxLoop3For(i1, i2, i3)
-#define hypre_BoxLoop4For(i1, i2, i3, i4)
-*/
-#define hypre_BoxLoopGetIndex    zypre_BoxLoopGetIndex
-#define hypre_BoxLoopSetOneBlock() ;
-#define hypre_BoxLoopBlock()       0
-
-#define hypre_BoxLoop0Begin  zypre_omp4_dist_BoxLoop0Begin
-#define hypre_BoxLoop0End    zypre_omp4_dist_BoxLoopEnd
-#define hypre_BoxLoop1Begin  zypre_omp4_dist_BoxLoop1Begin
-#define hypre_BoxLoop1End    zypre_omp4_dist_BoxLoopEnd
-#define hypre_BasicBoxLoop2Begin    zypre_omp4_dist_BoxLoop2_v2_Begin
-#define hypre_BoxLoop2Begin  zypre_omp4_dist_BoxLoop2Begin
-#define hypre_BoxLoop2End    zypre_omp4_dist_BoxLoopEnd
-#define hypre_BoxLoop3Begin  zypre_omp4_dist_BoxLoop3Begin
-#if 0
-#define hypre_BoxLoop3_SAME_STRIDE_Begin  zypre_omp4_dist_BoxLoop3_SAME_STRIDE_Begin
-#endif
-#define hypre_BoxLoop3End    zypre_omp4_dist_BoxLoopEnd
-#define hypre_BoxLoop4Begin  zypre_omp4_dist_BoxLoop4Begin
-#define hypre_BoxLoop4End    zypre_omp4_dist_BoxLoopEnd
-#define hypre_LoopBegin      zypre_LoopBegin
-#define hypre_LoopEnd        zypre_omp4_dist_BoxLoopEnd
-
-/* Look for more in struct_ls/red_black_gs.h" */
-
-#define zypre_omp4_dist_BoxLoopEnd(...) \
-   }\
-   /*cudaDeviceSynchronize();*/ \
-}
-
-#define HYPRE_BOX_REDUCTION
-
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- * host code: declare variables used in the box loop
- * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
-#define zypre_omp4_BoxLoopDeclareInit_0(ndim, loop_size) \
-HYPRE_Int hypre__ndim = ndim, hypre__tot = 1; \
-/* HYPRE_Int hypre__thread; */ \
-/* loop size */ \
-HYPRE_Int hypre__loop_size_0, hypre__loop_size_1, hypre__loop_size_2; \
-if (hypre__ndim > 0) { hypre__loop_size_0 = loop_size[0];  hypre__tot *= hypre__loop_size_0; } \
-if (hypre__ndim > 1) { hypre__loop_size_1 = loop_size[1];  hypre__tot *= hypre__loop_size_1; } \
-if (hypre__ndim > 2) { hypre__loop_size_2 = loop_size[2];  hypre__tot *= hypre__loop_size_2; }
-
-#ifdef AUTO_OMP_TEAM
-#define TEAM_CLAUSE
-#define zypre_omp4_BoxLoopDeclareInit(ndim, loop_size) zypre_omp4_BoxLoopDeclareInit_0(ndim, loop_size)
-#else
-#define TEAM_CLAUSE num_teams(num_blocks) thread_limit(block_size)
-#define zypre_omp4_BoxLoopDeclareInit(ndim, loop_size) zypre_omp4_BoxLoopDeclareInit_0(ndim, loop_size) \
-/* GPU block numbers and dimensions */ \
-HYPRE_Int block_size = hypre_gpu_block_size; \
-HYPRE_Int num_blocks = hypre_min(hypre_max_num_blocks, (hypre__tot + hypre_gpu_block_size - 1) / hypre_gpu_block_size);
-#endif
-
-
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- * host code: declare and initialize variables for box k
- * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
-#define zypre_omp4_BoxKDeclareInitBody(j, k, startk, dboxk, stridek) \
-   HYPRE_XCONCAT3(hypre__stride,j,k) = stridek[j]; \
-/* precompute some entities used in the parallel for loop */ \
-   HYPRE_XCONCAT3(hypre__box_start_imin,j,k) = startk[j] - dboxk->imin[j]; \
-   HYPRE_XCONCAT3(hypre__box_imax_imin,j,k) = dboxk->imax[j] - dboxk->imin[j] + 1;
-
-
-#define zypre_omp4_BoxKDeclareInit(k, startk, dboxk, stridek)\
-/* start - imin */ \
-HYPRE_Int HYPRE_XCONCAT3(hypre__box_start_imin,0,k), HYPRE_XCONCAT3(hypre__box_start_imin,1,k), HYPRE_XCONCAT3(hypre__box_start_imin,2,k); \
-/* imax - imin + 1 */ \
-HYPRE_Int HYPRE_XCONCAT3(hypre__box_imax_imin,0,k), HYPRE_XCONCAT3(hypre__box_imax_imin,1,k), HYPRE_XCONCAT3(hypre__box_imax_imin,2,k); \
-/* stride */ \
-HYPRE_Int HYPRE_XCONCAT3(hypre__stride,0,k), HYPRE_XCONCAT3(hypre__stride,1,k), HYPRE_XCONCAT3(hypre__stride,2,k); \
-/*if (hypre__ndim > 0)*/ { zypre_omp4_BoxKDeclareInitBody(0, k, startk, dboxk, stridek) } \
-  if (hypre__ndim > 1)   { zypre_omp4_BoxKDeclareInitBody(1, k, startk, dboxk, stridek) } \
-  if (hypre__ndim > 2)   { zypre_omp4_BoxKDeclareInitBody(2, k, startk, dboxk, stridek) } \
-
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- * map clause
- * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
-#define MAP_CLAUSE0
-#define MAP_CLAUSE1
-#define MAP_CLAUSE2
-#define MAP_CLAUSE3
-#define MAP_CLAUSE4
-
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- * if clause
- * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
-#define IF_CLAUSE if (hypre__global_offload && hypre__tot > 0)
-//#define IF_CLAUSE
-
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- * is_device_ptr clause
- * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
-#if defined(HYPRE_DEVICE_OPENMP_ALLOC)
-#define IS_DEVICE_CLAUSE DEVICE_VAR
-#else
-#define IS_DEVICE_CLAUSE
-#endif
-
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- * device code for BoxLoop 1, set i1
- * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
-#define zypre_omp4_BoxLoopSet1Body(j, i1) \
-/* coord in dimension j */ \
-hypre__i = hypre__J % HYPRE_XCONCAT2(hypre__loop_size,j); \
-/* once */ \
-hypre__i_1 = hypre__i * HYPRE_XCONCAT3(hypre__stride,j,1) + HYPRE_XCONCAT3(hypre__box_start_imin,j,1);\
-/* once */ \
-i1 += hypre__i_1 * hypre__I_1; \
-/* once */ \
-hypre__I_1 *= HYPRE_XCONCAT3(hypre__box_imax_imin,j,1); \
-/* */ \
-hypre__J /= HYPRE_XCONCAT2(hypre__loop_size,j); \
-/* !!! special for BoxLoop1: save the 3-D id */ \
-/* HYPRE_XCONCAT2(hypre__id,j) = hypre__i; */
-
-
-#define zypre_omp4_BoxLoopSet1(i1) \
-HYPRE_Int hypre__I_1, hypre__i, hypre__i_1, hypre__J, i1, idx; \
-/* HYPRE_Int hypre__id_0, hypre__id_1, hypre__id_2; */ \
-hypre__I_1 = 1;  idx = hypre__J = hypre__thread;  i1 = 0; \
-/*if (hypre__ndim > 0)*/ { zypre_omp4_BoxLoopSet1Body(0, i1) } \
-  if (hypre__ndim > 1)   { zypre_omp4_BoxLoopSet1Body(1, i1) } \
-  if (hypre__ndim > 2)   { zypre_omp4_BoxLoopSet1Body(2, i1) }
-
-
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- * device code for BoxLoop 2, set i1, i2
- * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
-#define zypre_omp4_BoxLoopSet2Body(j, i1, i2) \
-/* */ \
-hypre__i = hypre__J % HYPRE_XCONCAT2(hypre__loop_size,j); \
-/* twice */ \
-hypre__i_1 = hypre__i * HYPRE_XCONCAT3(hypre__stride,j,1) + HYPRE_XCONCAT3(hypre__box_start_imin,j,1);\
-hypre__i_2 = hypre__i * HYPRE_XCONCAT3(hypre__stride,j,2) + HYPRE_XCONCAT3(hypre__box_start_imin,j,2);\
-/* twice */ \
-i1 += hypre__i_1 * hypre__I_1; \
-i2 += hypre__i_2 * hypre__I_2; \
-/* twice */ \
-hypre__I_1 *= HYPRE_XCONCAT3(hypre__box_imax_imin,j,1); \
-hypre__I_2 *= HYPRE_XCONCAT3(hypre__box_imax_imin,j,2); \
-/* */ \
-hypre__J /= HYPRE_XCONCAT2(hypre__loop_size,j);
-
-
-#define zypre_omp4_BoxLoopSet2(i1, i2) \
-HYPRE_Int hypre__I_1, hypre__I_2, hypre__i, hypre__i_1, hypre__i_2, hypre__J, i1, i2; \
-hypre__I_1 = hypre__I_2 = 1;  hypre__J = hypre__thread;  i1 = i2 = 0; \
-/*if (hypre__ndim > 0)*/ { zypre_omp4_BoxLoopSet2Body(0, i1, i2) } \
-  if (hypre__ndim > 1)   { zypre_omp4_BoxLoopSet2Body(1, i1, i2) } \
-  if (hypre__ndim > 2)   { zypre_omp4_BoxLoopSet2Body(2, i1, i2) }
-
-
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- * device code for BoxLoop 3, set i1, i2, i3
- * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
-#define zypre_omp4_BoxLoopSet3Body(j, i1, i2, i3) \
-/* */ \
-hypre__i = hypre__J % HYPRE_XCONCAT2(hypre__loop_size,j); \
-/* 3 times */ \
-hypre__i_1 = hypre__i * HYPRE_XCONCAT3(hypre__stride,j,1) + HYPRE_XCONCAT3(hypre__box_start_imin,j,1);\
-hypre__i_2 = hypre__i * HYPRE_XCONCAT3(hypre__stride,j,2) + HYPRE_XCONCAT3(hypre__box_start_imin,j,2);\
-hypre__i_3 = hypre__i * HYPRE_XCONCAT3(hypre__stride,j,3) + HYPRE_XCONCAT3(hypre__box_start_imin,j,3);\
-/* 3 times */ \
-i1 += hypre__i_1 * hypre__I_1; \
-i2 += hypre__i_2 * hypre__I_2; \
-i3 += hypre__i_3 * hypre__I_3; \
-/* 3 times */ \
-hypre__I_1 *= HYPRE_XCONCAT3(hypre__box_imax_imin,j,1); \
-hypre__I_2 *= HYPRE_XCONCAT3(hypre__box_imax_imin,j,2); \
-hypre__I_3 *= HYPRE_XCONCAT3(hypre__box_imax_imin,j,3); \
-/* */ \
-hypre__J /= HYPRE_XCONCAT2(hypre__loop_size,j);
-
-
-#define zypre_omp4_BoxLoopSet3(i1, i2, i3) \
-HYPRE_Int hypre__I_1, hypre__I_2, hypre__I_3, hypre__i, hypre__i_1, hypre__i_2, hypre__i_3, hypre__J, i1, i2, i3; \
-hypre__I_1 = hypre__I_2 = hypre__I_3 = 1;  hypre__J = hypre__thread;  i1 = i2 = i3 = 0; \
-/*if (hypre__ndim > 0)*/ { zypre_omp4_BoxLoopSet3Body(0, i1, i2, i3) } \
-  if (hypre__ndim > 1)   { zypre_omp4_BoxLoopSet3Body(1, i1, i2, i3) } \
-  if (hypre__ndim > 2)   { zypre_omp4_BoxLoopSet3Body(2, i1, i2, i3) }
-
-#if 0
-/* - - - - - special Box 3: XXX */
-#define zypre_omp4_BoxLoopSet3_SAME_STRIDE_Body(j, i1, i2, i3) \
-/* */ \
-hypre__i = (hypre__J % HYPRE_XCONCAT2(hypre__loop_size,j)) * HYPRE_XCONCAT3(hypre__stride,j,1); \
-/* 3 times */ \
-hypre__i_1 = hypre__i + HYPRE_XCONCAT3(hypre__box_start_imin,j,1);\
-hypre__i_2 = hypre__i + HYPRE_XCONCAT3(hypre__box_start_imin,j,2);\
-hypre__i_3 = hypre__i + HYPRE_XCONCAT3(hypre__box_start_imin,j,3);\
-/* 3 times */ \
-i1 += hypre__i_1 * hypre__I_1; \
-i2 += hypre__i_2 * hypre__I_2; \
-i3 += hypre__i_3 * hypre__I_3; \
-/* 3 times */ \
-hypre__I_1 *= HYPRE_XCONCAT3(hypre__box_imax_imin,j,1); \
-hypre__I_2 *= HYPRE_XCONCAT3(hypre__box_imax_imin,j,2); \
-hypre__I_3 *= HYPRE_XCONCAT3(hypre__box_imax_imin,j,3); \
-/* */ \
-hypre__J /= HYPRE_XCONCAT2(hypre__loop_size,j);
-
-
-#define zypre_omp4_BoxLoopSet3_SAME_STRIDE(i1, i2, o2, i3) \
-HYPRE_Int hypre__I_1, hypre__I_2, hypre__I_3, hypre__i, hypre__i_1, hypre__i_2, hypre__i_3, hypre__J; \
-hypre__I_1 = hypre__I_2 = hypre__I_3 = 1;  hypre__J = hypre__thread;  i1 = i3 = 0; i2 = o2;\
-/*if (hypre__ndim > 0)*/ { zypre_omp4_BoxLoopSet3_SAME_STRIDE_Body(0, i1, i2, i3) } \
-  if (hypre__ndim > 1)   { zypre_omp4_BoxLoopSet3_SAME_STRIDE_Body(1, i1, i2, i3) } \
-  if (hypre__ndim > 2)   { zypre_omp4_BoxLoopSet3_SAME_STRIDE_Body(2, i1, i2, i3) }
-#endif
-
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- * device code for BoxLoop 4, set i1, i2, i3, i4
- * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
-#define zypre_omp4_BoxLoopSet4Body(j, i1, i2, i3, i4) \
-/* */ \
-hypre__i = hypre__J % HYPRE_XCONCAT2(hypre__loop_size,j); \
-/* 4 times */ \
-hypre__i_1 = hypre__i * HYPRE_XCONCAT3(hypre__stride,j,1) + HYPRE_XCONCAT3(hypre__box_start_imin,j,1);\
-hypre__i_2 = hypre__i * HYPRE_XCONCAT3(hypre__stride,j,2) + HYPRE_XCONCAT3(hypre__box_start_imin,j,2);\
-hypre__i_3 = hypre__i * HYPRE_XCONCAT3(hypre__stride,j,3) + HYPRE_XCONCAT3(hypre__box_start_imin,j,3);\
-hypre__i_4 = hypre__i * HYPRE_XCONCAT3(hypre__stride,j,4) + HYPRE_XCONCAT3(hypre__box_start_imin,j,4);\
-/* 4 times */ \
-i1 += hypre__i_1 * hypre__I_1; \
-i2 += hypre__i_2 * hypre__I_2; \
-i3 += hypre__i_3 * hypre__I_3; \
-i4 += hypre__i_4 * hypre__I_4; \
-/* 4 times */ \
-hypre__I_1 *= HYPRE_XCONCAT3(hypre__box_imax_imin,j,1); \
-hypre__I_2 *= HYPRE_XCONCAT3(hypre__box_imax_imin,j,2); \
-hypre__I_3 *= HYPRE_XCONCAT3(hypre__box_imax_imin,j,3); \
-hypre__I_4 *= HYPRE_XCONCAT3(hypre__box_imax_imin,j,4); \
-/* */ \
-hypre__J /= HYPRE_XCONCAT2(hypre__loop_size,j);
-
-
-#define zypre_omp4_BoxLoopSet4(i1, i2, i3, i4) \
-HYPRE_Int hypre__I_1, hypre__I_2, hypre__I_3, hypre__I_4, hypre__i, hypre__i_1, hypre__i_2, hypre__i_3, hypre__i_4, hypre__J, i1, i2, i3, i4; \
-hypre__I_1 = hypre__I_2 = hypre__I_3 = hypre__I_4 = 1;  hypre__J = hypre__thread;  i1 = i2 = i3 = i4 = 0; \
-/*if (hypre__ndim > 0)*/ { zypre_omp4_BoxLoopSet4Body(0, i1, i2, i3, i4) } \
-  if (hypre__ndim > 1)   { zypre_omp4_BoxLoopSet4Body(1, i1, i2, i3, i4) } \
-  if (hypre__ndim > 2)   { zypre_omp4_BoxLoopSet4Body(2, i1, i2, i3, i4) }
-
-
-
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- * BoxLoop 0
- * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
-#define zypre_omp4_dist_BoxLoop0Begin(ndim, loop_size) \
-{\
-   /* host code: */ \
-   HYPRE_BOXLOOP_ENTRY_PRINT \
-   zypre_omp4_BoxLoopDeclareInit(ndim, loop_size) \
-   /* device code: */ \
-   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE MAP_CLAUSE0 IS_DEVICE_CLAUSE TEAM_CLAUSE)) \
-   for (HYPRE_Int hypre__thread = 0; hypre__thread < hypre__tot; hypre__thread++) \
-   {\
-
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- * BoxLoop 1
- * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
-
-#define zypre_omp4_dist_BoxLoop1Begin(ndim, loop_size, dbox1, start1, stride1, i1) \
-{\
-   /* host code: */ \
-   HYPRE_BOXLOOP_ENTRY_PRINT \
-   zypre_omp4_BoxLoopDeclareInit(ndim, loop_size) \
-   zypre_omp4_BoxKDeclareInit(1, start1, dbox1, stride1) \
-   /* device code: */ \
-   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE MAP_CLAUSE1 IS_DEVICE_CLAUSE HYPRE_BOX_REDUCTION TEAM_CLAUSE)) \
-   for (HYPRE_Int hypre__thread = 0; hypre__thread < hypre__tot; hypre__thread++) \
-   {\
-      zypre_omp4_BoxLoopSet1(i1)
-
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- * BoxLoop 2
- * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
-
-#define zypre_omp4_dist_BoxLoop2Begin(ndim, loop_size, dbox1, start1, stride1, i1, dbox2, start2, stride2, i2) \
-{\
-   /* host code: */ \
-   HYPRE_BOXLOOP_ENTRY_PRINT \
-   zypre_omp4_BoxLoopDeclareInit(ndim, loop_size) \
-   zypre_omp4_BoxKDeclareInit(1, start1, dbox1, stride1) \
-   zypre_omp4_BoxKDeclareInit(2, start2, dbox2, stride2) \
-   /* device code: */ \
-   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE MAP_CLAUSE2 IS_DEVICE_CLAUSE HYPRE_BOX_REDUCTION TEAM_CLAUSE)) \
-   for (HYPRE_Int hypre__thread = 0; hypre__thread < hypre__tot; hypre__thread++) \
-   {\
-      zypre_omp4_BoxLoopSet2(i1, i2)
-
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- * BoxLoop 3
- * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
-#define zypre_omp4_dist_BoxLoop3Begin(ndim, loop_size, \
-      dbox1, start1, stride1, i1, \
-      dbox2, start2, stride2, i2, \
-      dbox3, start3, stride3, i3) \
-{\
-   /* host code: */ \
-   HYPRE_BOXLOOP_ENTRY_PRINT \
-   zypre_omp4_BoxLoopDeclareInit(ndim, loop_size) \
-   zypre_omp4_BoxKDeclareInit(1, start1, dbox1, stride1) \
-   zypre_omp4_BoxKDeclareInit(2, start2, dbox2, stride2) \
-   zypre_omp4_BoxKDeclareInit(3, start3, dbox3, stride3) \
-   /* device code: */ \
-   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE MAP_CLAUSE3 IS_DEVICE_CLAUSE TEAM_CLAUSE)) \
-   for (HYPRE_Int hypre__thread = 0; hypre__thread < hypre__tot; hypre__thread++) \
-   {\
-      zypre_omp4_BoxLoopSet3(i1, i2, i3)
-
-#if 0
-#define zypre_omp4_dist_BoxLoop3_SAME_STRIDE_Begin(ndim, loop_size, \
-      dbox1, start1, stride1, i1, \
-      dbox2, start2, stride2, i2, o2, \
-      dbox3, start3, stride3, i3) \
-{\
-   /* host code: */ \
-   zypre_omp4_BoxLoopDeclareInit(ndim, loop_size) \
-   zypre_omp4_BoxKDeclareInit(1, start1, dbox1, stride1) \
-   zypre_omp4_BoxKDeclareInit(2, start2, dbox2, stride2) \
-   zypre_omp4_BoxKDeclareInit(3, start3, dbox3, stride3) \
-   /* device code: */ \
-   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE MAP_CLAUSE3 IS_DEVICE_CLAUSE TEAM_CLAUSE)) \
-   for (HYPRE_Int hypre__thread = 0; hypre__thread < hypre__tot; hypre__thread++) \
-   {\
-      zypre_omp4_BoxLoopSet3_SAME_STRIDE(i1, i2, o2, i3)
-#endif
-
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- * BoxLoop 4
- * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
-#define zypre_omp4_dist_BoxLoop4Begin(ndim, loop_size, \
-      dbox1, start1, stride1, i1, \
-      dbox2, start2, stride2, i2, \
-      dbox3, start3, stride3, i3, \
-      dbox4, start4, stride4, i4) \
-{\
-   /* host code: */ \
-   HYPRE_BOXLOOP_ENTRY_PRINT \
-   zypre_omp4_BoxLoopDeclareInit(ndim, loop_size) \
-   zypre_omp4_BoxKDeclareInit(1, start1, dbox1, stride1) \
-   zypre_omp4_BoxKDeclareInit(2, start2, dbox2, stride2) \
-   zypre_omp4_BoxKDeclareInit(3, start3, dbox3, stride3) \
-   zypre_omp4_BoxKDeclareInit(4, start4, dbox4, stride4) \
-   /* device code: */ \
-   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE MAP_CLAUSE4 IS_DEVICE_CLAUSE TEAM_CLAUSE)) \
-   for (HYPRE_Int hypre__thread = 0; hypre__thread < hypre__tot; hypre__thread++) \
-   {\
-      zypre_omp4_BoxLoopSet4(i1, i2, i3, i4)
-
-#if 0
-
-/* no longer needed, use the above BoxLoop's for reductions */
-
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- * BoxLoop 1 reduction
- * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
-
-#define zypre_omp4_dist_Red_BoxLoop1Begin(ndim, loop_size, dbox1, start1, stride1, i1, xsum) \
-{\
-   /* host code: */ \
-   zypre_omp4_BoxLoopDeclareInit(ndim, loop_size) \
-   zypre_omp4_BoxKDeclareInit(1, start1, dbox1, stride1) \
-   /* device code: */ \
-   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE MAP_CLAUSE1 map(tofrom: xsum) reduction(+:xsum) TEAM_CLAUSE)) \
-   for (HYPRE_Int hypre__thread = 0; hypre__thread < hypre__tot; hypre__thread++) \
-   {\
-      zypre_omp4_BoxLoopSet1(i1)
-
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- * BoxLoop 2 reduction
- * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
-#define zypre_omp4_dist_Red_BoxLoop2Begin(ndim, loop_size, dbox1, start1, stride1, i1, dbox2, start2, stride2, i2, xsum) \
-{\
-   /* host code: */ \
-   zypre_omp4_BoxLoopDeclareInit(ndim, loop_size) \
-   zypre_omp4_BoxKDeclareInit(1, start1, dbox1, stride1) \
-   zypre_omp4_BoxKDeclareInit(2, start2, dbox2, stride2) \
-   /* device code: */ \
-   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE MAP_CLAUSE2 map(tofrom: xsum) reduction(+:xsum) TEAM_CLAUSE)) \
-   for (HYPRE_Int hypre__thread = 0; hypre__thread < hypre__tot; hypre__thread++) \
-   {\
-      zypre_omp4_BoxLoopSet2(i1, i2)
-
-#endif
-
-
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- *                     v2
- * host code: declare and initialize variables for box k
- * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
-#define zypre_omp4_BoxKDeclareInit_v2(k, stridek)\
-/* stridek[0,1,2] */ \
-HYPRE_Int HYPRE_XCONCAT3(hypre__stride,0,k), HYPRE_XCONCAT3(hypre__stride,1,k), HYPRE_XCONCAT3(hypre__stride,2,k); \
-/*if (hypre__ndim > 0)*/ { HYPRE_XCONCAT3(hypre__stride,0,k) = stridek[0]; } \
-  if (hypre__ndim > 1)   { HYPRE_XCONCAT3(hypre__stride,1,k) = stridek[1]; } \
-  if (hypre__ndim > 2)   { HYPRE_XCONCAT3(hypre__stride,2,k) = stridek[2]; } \
-
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- *                     v2
- * device code for BoxLoop 1, set i1
- * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
-#define zypre_omp4_BoxLoopSet1Body_v2(j, i1) \
-i1 += ( hypre__J % HYPRE_XCONCAT2(hypre__loop_size,j) ) * HYPRE_XCONCAT3(hypre__stride,j,1);\
-hypre__J /= HYPRE_XCONCAT2(hypre__loop_size,j);
-
-
-#define zypre_omp4_BoxLoopSet1_v2(i1, idx) \
-HYPRE_Int hypre__J, i1, idx; \
-idx = hypre__J = hypre__thread; i1 = 0; \
-/*if (hypre__ndim > 0)*/ { zypre_omp4_BoxLoopSet1Body_v2(0, i1) } \
-  if (hypre__ndim > 1)   { zypre_omp4_BoxLoopSet1Body_v2(1, i1) } \
-  if (hypre__ndim > 2)   { zypre_omp4_BoxLoopSet1Body_v2(2, i1) }
-
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- *                      v2: Basic
- * BoxLoop 1
- * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
-#define zypre_omp4_dist_BoxLoop1_v2_Begin(ndim, loop_size, stride1, i1, idx) \
-{\
-   /* host code: */ \
-   HYPRE_BOXLOOP_ENTRY_PRINT \
-   zypre_omp4_BoxLoopDeclareInit(ndim, loop_size) \
-   zypre_omp4_BoxKDeclareInit_v2(1, stride1) \
-   /* device code: */ \
-   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE MAP_CLAUSE1 IS_DEVICE_CLAUSE TEAM_CLAUSE)) \
-   for (HYPRE_Int hypre__thread = 0; hypre__thread < hypre__tot; hypre__thread++) \
-   {\
-      zypre_omp4_BoxLoopSet1_v2(i1, idx)
-
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- *                     v2
- * device code for BoxLoop 2, set i1, i2
- * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
-#define zypre_omp4_BoxLoopSet2Body_v2(j, i1, i2) \
-hypre__i = hypre__J % HYPRE_XCONCAT2(hypre__loop_size,j); \
-/* twice */ \
-i1 += hypre__i * HYPRE_XCONCAT3(hypre__stride,j,1); \
-i2 += hypre__i * HYPRE_XCONCAT3(hypre__stride,j,2); \
-hypre__J /= HYPRE_XCONCAT2(hypre__loop_size,j);
-
-
-#define zypre_omp4_BoxLoopSet2_v2(i1, i2) \
-HYPRE_Int hypre__i, hypre__J, i1, i2; \
-hypre__J = hypre__thread;  i1 = i2 = 0; \
-/*if (hypre__ndim > 0)*/ { zypre_omp4_BoxLoopSet2Body_v2(0, i1, i2) } \
-  if (hypre__ndim > 1)   { zypre_omp4_BoxLoopSet2Body_v2(1, i1, i2) } \
-  if (hypre__ndim > 2)   { zypre_omp4_BoxLoopSet2Body_v2(2, i1, i2) }
-
-
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- *                      v2: Basic
- * BoxLoop 2
- * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
-
-#define zypre_omp4_dist_BoxLoop2_v2_Begin(ndim, loop_size, stride1, i1, stride2, i2) \
-{ \
-   /* host code: */ \
-   HYPRE_BOXLOOP_ENTRY_PRINT \
-   zypre_omp4_BoxLoopDeclareInit(ndim, loop_size) \
-   zypre_omp4_BoxKDeclareInit_v2(1, stride1) \
-   zypre_omp4_BoxKDeclareInit_v2(2, stride2) \
-   /* device code: */ \
-   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE MAP_CLAUSE2 IS_DEVICE_CLAUSE TEAM_CLAUSE)) \
-   for (HYPRE_Int hypre__thread = 0; hypre__thread < hypre__tot; hypre__thread++) \
-   { \
-      zypre_omp4_BoxLoopSet2_v2(i1, i2)
-
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- * Basic Loop
- * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
-#define zypre_LoopBegin(size, idx) \
-{ \
-   /* host code: */ \
-   /* HYPRE_Int idx = 0; */\
-   HYPRE_Int hypre__tot = size; \
-   HYPRE_BOXLOOP_ENTRY_PRINT \
-   /* device code: */ \
-   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE MAP_CLAUSE2 IS_DEVICE_CLAUSE TEAM_CLAUSE)) \
-   for (HYPRE_Int idx = 0; idx < hypre__tot; idx++) \
-   {
-
-#if 0
-#define hypre_LoopBegin0(size, idx) \
-{ \
-   HYPRE_Int idx, hypre__size = size; \
-   for (idx = 0; idx < hypre__size; idx++) \
-   {
-
-#define hypre_newBoxLoopGetIndex(index) \
-  index[0] = hypre__id_0; \
-  index[1] = hypre__id_1; \
-  index[2] = hypre__id_2;
-#endif
-
-/* Reduction */
-#define hypre_BoxLoop1ReductionBegin(ndim, loop_size, dbox1, start1, stride1, i1, reducesum) \
-        hypre_BoxLoop1Begin(ndim, loop_size, dbox1, start1, stride1, i1)
-
-#define hypre_BoxLoop1ReductionEnd(i1, reducesum) \
-        hypre_BoxLoop1End(i1)
-
-#define hypre_BoxLoop2ReductionBegin(ndim, loop_size, dbox1, start1, stride1, i1, \
-                                                      dbox2, start2, stride2, i2, reducesum) \
-        hypre_BoxLoop2Begin(ndim, loop_size, dbox1, start1, stride1, i1, \
-                                             dbox2, start2, stride2, i2)
-
-#define hypre_BoxLoop2ReductionEnd(i1, i2, reducesum) \
-        hypre_BoxLoop2End(i1, i2)
-
-#endif
-
-#else
-/******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
- * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
- *
- * SPDX-License-Identifier: (Apache-2.0 OR MIT)
- ******************************************************************************/
-
-/******************************************************************************
- *
- * Header info for the BoxLoop
- *
- *****************************************************************************/
-
-/*--------------------------------------------------------------------------
- * BoxLoop macros:
- *--------------------------------------------------------------------------*/
-
-#ifndef HYPRE_NEWBOXLOOP_HEADER
-#define HYPRE_NEWBOXLOOP_HEADER
-
-#ifdef HYPRE_USING_OPENMP
-#define HYPRE_BOX_REDUCTION 
-#ifdef WIN32
-#define Pragma(x) __pragma(HYPRE_XSTR(x))
-#else
-#define Pragma(x) _Pragma(HYPRE_XSTR(x))
-#endif
-#define OMP1 Pragma(omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_BOX_REDUCTION HYPRE_SMP_SCHEDULE)
-#else
-#define OMP1
-#endif
-
-typedef struct hypre_Boxloop_struct
-{
-   HYPRE_Int lsize0,lsize1,lsize2;
-   HYPRE_Int strides0,strides1,strides2;
-   HYPRE_Int bstart0,bstart1,bstart2;
-   HYPRE_Int bsize0,bsize1,bsize2;
-} hypre_Boxloop;
-
-#define zypre_newBoxLoop0Begin(ndim, loop_size)                               \
-{                                                                             \
-   zypre_BoxLoopDeclare();                                                    \
-   zypre_BoxLoopInit(ndim, loop_size);                                        \
-   OMP1                                                                       \
-   for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)   \
-   {                                                                          \
-      zypre_BoxLoopSet();                                                     \
-      for (hypre__J = 0; hypre__J < hypre__JN; hypre__J++)                    \
-      {                                                                       \
-         for (hypre__I = 0; hypre__I < hypre__IN; hypre__I++)                 \
-         {
-
-#define zypre_newBoxLoop0End()                                                \
-         }                                                                    \
-         zypre_BoxLoopInc1();                                                 \
-         zypre_BoxLoopInc2();                                                 \
-      }                                                                       \
-   }                                                                          \
-}
-
-#define zypre_newBoxLoop1Begin(ndim, loop_size,                               \
-                               dbox1, start1, stride1, i1)                    \
-{                                                                             \
-   HYPRE_Int i1;                                                              \
-   zypre_BoxLoopDeclare();                                                    \
-   zypre_BoxLoopDeclareK(1);                                                  \
-   zypre_BoxLoopInit(ndim, loop_size);                                        \
-   zypre_BoxLoopInitK(1, dbox1, start1, stride1, i1);                         \
-   OMP1                                                                       \
-   for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)   \
-   {                                                                          \
-      HYPRE_Int i1;                                                           \
-      zypre_BoxLoopSet();                                                     \
-      zypre_BoxLoopSetK(1, i1);                                               \
-      for (hypre__J = 0; hypre__J < hypre__JN; hypre__J++)                    \
-      {                                                                       \
-         for (hypre__I = 0; hypre__I < hypre__IN; hypre__I++)                 \
-         {
-
-#define zypre_newBoxLoop1End(i1)                                              \
-            i1 += hypre__i0inc1;                                              \
-         }                                                                    \
-         zypre_BoxLoopInc1();                                                 \
-         i1 += hypre__ikinc1[hypre__d];                                       \
-         zypre_BoxLoopInc2();                                                 \
-      }                                                                       \
-   }                                                                          \
-}
-
-
-#define zypre_newBoxLoop2Begin(ndim, loop_size,                               \
-                               dbox1, start1, stride1, i1,                    \
-                               dbox2, start2, stride2, i2)                    \
-{                                                                             \
-   HYPRE_Int i1, i2;                                                          \
-   zypre_BoxLoopDeclare();                                                    \
-   zypre_BoxLoopDeclareK(1);                                                  \
-   zypre_BoxLoopDeclareK(2);                                                  \
-   zypre_BoxLoopInit(ndim, loop_size);                                        \
-   zypre_BoxLoopInitK(1, dbox1, start1, stride1, i1);                         \
-   zypre_BoxLoopInitK(2, dbox2, start2, stride2, i2);                         \
-   OMP1                                                                       \
-   for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)   \
-   {                                                                          \
-      HYPRE_Int i1, i2;                                                       \
-      zypre_BoxLoopSet();                                                     \
-      zypre_BoxLoopSetK(1, i1);                                               \
-      zypre_BoxLoopSetK(2, i2);                                               \
-      for (hypre__J = 0; hypre__J < hypre__JN; hypre__J++)                    \
-      {                                                                       \
-         for (hypre__I = 0; hypre__I < hypre__IN; hypre__I++)                 \
-         {
-
-#define zypre_newBoxLoop2End(i1, i2)                                          \
-            i1 += hypre__i0inc1;                                              \
-            i2 += hypre__i0inc2;                                              \
-         }                                                                    \
-         zypre_BoxLoopInc1();                                                 \
-         i1 += hypre__ikinc1[hypre__d];                                       \
-         i2 += hypre__ikinc2[hypre__d];                                       \
-         zypre_BoxLoopInc2();                                                 \
-      }                                                                       \
-   }                                                                          \
-}
-
-
-#define zypre_newBoxLoop3Begin(ndim, loop_size,                               \
-                               dbox1, start1, stride1, i1,                    \
-                               dbox2, start2, stride2, i2,                    \
-                               dbox3, start3, stride3, i3)                    \
-{                                                                             \
-   HYPRE_Int i1, i2, i3;                                                      \
-   zypre_BoxLoopDeclare();                                                    \
-   zypre_BoxLoopDeclareK(1);                                                  \
-   zypre_BoxLoopDeclareK(2);                                                  \
-   zypre_BoxLoopDeclareK(3);                                                  \
-   zypre_BoxLoopInit(ndim, loop_size);                                        \
-   zypre_BoxLoopInitK(1, dbox1, start1, stride1, i1);                         \
-   zypre_BoxLoopInitK(2, dbox2, start2, stride2, i2);                         \
-   zypre_BoxLoopInitK(3, dbox3, start3, stride3, i3);                         \
-   OMP1                                                                       \
-   for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)   \
-   {                                                                          \
-      HYPRE_Int i1, i2, i3;                                                   \
-      zypre_BoxLoopSet();                                                     \
-      zypre_BoxLoopSetK(1, i1);                                               \
-      zypre_BoxLoopSetK(2, i2);                                               \
-      zypre_BoxLoopSetK(3, i3);                                               \
-      for (hypre__J = 0; hypre__J < hypre__JN; hypre__J++)                    \
-      {                                                                       \
-         for (hypre__I = 0; hypre__I < hypre__IN; hypre__I++)                 \
-         {
-
-#define zypre_newBoxLoop3End(i1, i2, i3)                                      \
-            i1 += hypre__i0inc1;                                              \
-            i2 += hypre__i0inc2;                                              \
-            i3 += hypre__i0inc3;                                              \
-         }                                                                    \
-         zypre_BoxLoopInc1();                                                 \
-         i1 += hypre__ikinc1[hypre__d];                                       \
-         i2 += hypre__ikinc2[hypre__d];                                       \
-         i3 += hypre__ikinc3[hypre__d];                                       \
-         zypre_BoxLoopInc2();                                                 \
-      }                                                                       \
-   }                                                                          \
-}
-
-#define zypre_newBoxLoop4Begin(ndim, loop_size,                               \
-                            dbox1, start1, stride1, i1,                       \
-                            dbox2, start2, stride2, i2,                       \
-                            dbox3, start3, stride3, i3,                       \
-                            dbox4, start4, stride4, i4)                       \
-{                                                                             \
-   HYPRE_Int i1, i2, i3, i4;                                                  \
-   zypre_BoxLoopDeclare();                                                    \
-   zypre_BoxLoopDeclareK(1);                                                  \
-   zypre_BoxLoopDeclareK(2);                                                  \
-   zypre_BoxLoopDeclareK(3);                                                  \
-   zypre_BoxLoopDeclareK(4);                                                  \
-   zypre_BoxLoopInit(ndim, loop_size);                                        \
-   zypre_BoxLoopInitK(1, dbox1, start1, stride1, i1);                         \
-   zypre_BoxLoopInitK(2, dbox2, start2, stride2, i2);                         \
-   zypre_BoxLoopInitK(3, dbox3, start3, stride3, i3);                         \
-   zypre_BoxLoopInitK(4, dbox4, start4, stride4, i4);                         \
-   OMP1                                                                       \
-   for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)   \
-   {                                                                          \
-      HYPRE_Int i1, i2, i3, i4;                                               \
-      zypre_BoxLoopSet();                                                     \
-      zypre_BoxLoopSetK(1, i1);                                               \
-      zypre_BoxLoopSetK(2, i2);                                               \
-      zypre_BoxLoopSetK(3, i3);                                               \
-      zypre_BoxLoopSetK(4, i4);                                               \
-      for (hypre__J = 0; hypre__J < hypre__JN; hypre__J++)                    \
-      {                                                                       \
-         for (hypre__I = 0; hypre__I < hypre__IN; hypre__I++)                 \
-         {
-
-#define zypre_newBoxLoop4End(i1, i2, i3, i4)                                  \
-            i1 += hypre__i0inc1;                                              \
-            i2 += hypre__i0inc2;                                              \
-            i3 += hypre__i0inc3;                                              \
-            i4 += hypre__i0inc4;                                              \
-         }                                                                    \
-         zypre_BoxLoopInc1();                                                 \
-         i1 += hypre__ikinc1[hypre__d];                                       \
-         i2 += hypre__ikinc2[hypre__d];                                       \
-         i3 += hypre__ikinc3[hypre__d];                                       \
-         i4 += hypre__ikinc4[hypre__d];                                       \
-         zypre_BoxLoopInc2();                                                 \
-      }                                                                       \
-   }                                                                          \
-}
-
-#define zypre_newBasicBoxLoop2Begin(ndim, loop_size,                          \
-                                    stride1, i1,                              \
-                                    stride2, i2)                              \
-{                                                                             \
-   zypre_BoxLoopDeclare();                                                    \
-   zypre_BoxLoopDeclareK(1);                                                  \
-   zypre_BoxLoopDeclareK(2);                                                  \
-   zypre_BoxLoopInit(ndim, loop_size);                                        \
-   zypre_BasicBoxLoopInitK(1, stride1);                                       \
-   zypre_BasicBoxLoopInitK(2, stride2);                                       \
-   OMP1                                                                       \
-   for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)   \
-   {                                                                          \
-      HYPRE_Int i1, i2;                                                       \
-      zypre_BoxLoopSet();                                                     \
-      zypre_BoxLoopSetK(1, i1);                                               \
-      zypre_BoxLoopSetK(2, i2);                                               \
-      for (hypre__J = 0; hypre__J < hypre__JN; hypre__J++)                    \
-      {                                                                       \
-         for (hypre__I = 0; hypre__I < hypre__IN; hypre__I++)                 \
-         {
-
-
-#define hypre_LoopBegin(size,idx)                                             \
-{                                                                             \
-   HYPRE_Int idx;                                                             \
-   for (idx = 0;idx < size;idx ++)                                            \
-   {
-
-#define hypre_LoopEnd()                                                       \
-  }                                                                           \
-}
-
-#define hypre_newBoxLoopGetIndex zypre_BoxLoopGetIndex
-#define hypre_BoxLoopGetIndex    zypre_BoxLoopGetIndex
-#define hypre_BoxLoopSetOneBlock zypre_BoxLoopSetOneBlock
-#define hypre_BoxLoopBlock       zypre_BoxLoopBlock
-#define hypre_BoxLoop0Begin      zypre_newBoxLoop0Begin
-#define hypre_BoxLoop0End        zypre_newBoxLoop0End
-#define hypre_BoxLoop1Begin      zypre_newBoxLoop1Begin
-#define hypre_BoxLoop1End        zypre_newBoxLoop1End
-#define hypre_BoxLoop2Begin      zypre_newBoxLoop2Begin
-#define hypre_BoxLoop2End        zypre_newBoxLoop2End
-#define hypre_BoxLoop3Begin      zypre_newBoxLoop3Begin
-#define hypre_BoxLoop3End        zypre_newBoxLoop3End
-#define hypre_BoxLoop4Begin      zypre_newBoxLoop4Begin
-#define hypre_BoxLoop4End        zypre_newBoxLoop4End
-#define hypre_BasicBoxLoop2Begin zypre_newBasicBoxLoop2Begin
-
-/* Reduction */
-#define hypre_BoxLoop1ReductionBegin(ndim, loop_size, dbox1, start1, stride1, i1, reducesum) \
-        hypre_BoxLoop1Begin(ndim, loop_size, dbox1, start1, stride1, i1)
-
-#define hypre_BoxLoop1ReductionEnd(i1, reducesum) \
-        hypre_BoxLoop1End(i1)
-
-#define hypre_BoxLoop2ReductionBegin(ndim, loop_size, dbox1, start1, stride1, i1, \
-                                                      dbox2, start2, stride2, i2, reducesum) \
-        hypre_BoxLoop2Begin(ndim, loop_size, dbox1, start1, stride1, i1, \
-                                             dbox2, start2, stride2, i2)
-
-#define hypre_BoxLoop2ReductionEnd(i1, i2, reducesum) \
-        hypre_BoxLoop2End(i1, i2)
-
-#endif
-#endif
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -2021,6 +34,13 @@ extern "C" {
 #ifndef HYPRE_MAXDIM
 #define HYPRE_MAXDIM 3
 #endif
+
+#if defined(HYPRE_USING_RAJA) || defined(HYPRE_USING_KOKKOS) || defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#define hypre_BoxLoopSetOneBlock()
+#else
+#define hypre_BoxLoopSetOneBlock zypre_BoxLoopSetOneBlock
+#endif
+#define hypre_BoxLoopGetIndex    zypre_BoxLoopGetIndex
 
 /*--------------------------------------------------------------------------
  * hypre_Index:
@@ -2965,9 +985,9 @@ typedef struct
 typedef struct hypre_StructGrid_struct
 {
    MPI_Comm             comm;
-                      
+
    HYPRE_Int            ndim;         /* Number of grid dimensions */
-                      
+
    hypre_BoxArray      *boxes;        /* Array of boxes in this process */
    HYPRE_Int           *ids;          /* Unique IDs for boxes */
    hypre_Index          max_distance; /* Neighborhood size - in each dimension*/
@@ -2979,7 +999,7 @@ typedef struct hypre_StructGrid_struct
 
    hypre_Index          periodic;     /* Indicates if grid is periodic */
    HYPRE_Int            num_periods;  /* number of box set periods */
-   
+
    hypre_Index         *pshifts;      /* shifts of periodicity */
 
 
@@ -2987,11 +1007,11 @@ typedef struct hypre_StructGrid_struct
 
 
    HYPRE_Int            ghlocal_size; /* Number of vars in box including ghosts */
-   HYPRE_Int            num_ghost[2*HYPRE_MAXDIM]; /* ghost layer size */  
+   HYPRE_Int            num_ghost[2*HYPRE_MAXDIM]; /* ghost layer size */
 
    hypre_BoxManager    *boxman;
-#if defined(HYPRE_USING_CUDA) 
-   HYPRE_Int            data_location;
+#if defined(HYPRE_USING_CUDA)
+   HYPRE_MemoryLocation data_location;
 #endif
 } hypre_StructGrid;
 
@@ -3014,24 +1034,26 @@ typedef struct hypre_StructGrid_struct
 #define hypre_StructGridRefCount(grid)      ((grid) -> ref_count)
 #define hypre_StructGridGhlocalSize(grid)   ((grid) -> ghlocal_size)
 #define hypre_StructGridNumGhost(grid)      ((grid) -> num_ghost)
-#define hypre_StructGridBoxMan(grid)        ((grid) -> boxman) 
+#define hypre_StructGridBoxMan(grid)        ((grid) -> boxman)
 
-#define hypre_StructGridBox(grid, i) \
-(hypre_BoxArrayBox(hypre_StructGridBoxes(grid), i))
-#define hypre_StructGridNumBoxes(grid) \
-(hypre_BoxArraySize(hypre_StructGridBoxes(grid)))
+#define hypre_StructGridBox(grid, i)        (hypre_BoxArrayBox(hypre_StructGridBoxes(grid), i))
+#define hypre_StructGridNumBoxes(grid)      (hypre_BoxArraySize(hypre_StructGridBoxes(grid)))
 
-#define hypre_StructGridIDPeriod(grid) \
-hypre_BoxNeighborsIDPeriod(hypre_StructGridNeighbors(grid))
-#if defined(HYPRE_USING_CUDA) 
-#define hypre_StructGridDataLocation(grid)        ((grid) -> data_location)
+#define hypre_StructGridIDPeriod(grid)      hypre_BoxNeighborsIDPeriod(hypre_StructGridNeighbors(grid))
+#if defined(HYPRE_USING_CUDA)
+#define hypre_StructGridDataLocation(grid)  ((grid) -> data_location)
 #endif
 /*--------------------------------------------------------------------------
  * Looping macros:
  *--------------------------------------------------------------------------*/
- 
-#define hypre_ForStructGridBoxI(i, grid) \
-hypre_ForBoxI(i, hypre_StructGridBoxes(grid))
+
+#define hypre_ForStructGridBoxI(i, grid)    hypre_ForBoxI(i, hypre_StructGridBoxes(grid))
+
+#if defined(HYPRE_USING_CUDA)
+#define HYPRE_MIN_GPU_SIZE                  (131072)
+#define hypre_SetDeviceOn()                 hypre_HandleStructExecPolicy(hypre_handle()) = HYPRE_EXEC_DEVICE
+#define hypre_SetDeviceOff()                hypre_HandleStructExecPolicy(hypre_handle()) = HYPRE_EXEC_HOST
+#endif
 
 #endif
 
@@ -3880,6 +1902,855 @@ HYPRE_Int hypre_StructVectorMigrate ( hypre_CommPkg *comm_pkg , hypre_StructVect
 HYPRE_Int hypre_StructVectorPrint ( const char *filename , hypre_StructVector *vector , HYPRE_Int all );
 hypre_StructVector *hypre_StructVectorRead ( MPI_Comm comm , const char *filename , HYPRE_Int *num_ghost );
 hypre_StructVector *hypre_StructVectorClone ( hypre_StructVector *vector );
+
+#if defined(HYPRE_USING_DEVICE_OPENMP)
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
+/******************************************************************************
+ *
+ * Header info for the BoxLoop
+ *
+ *****************************************************************************/
+
+/*--------------------------------------------------------------------------
+ * BoxLoop macros:
+ *--------------------------------------------------------------------------*/
+
+#ifndef HYPRE_NEWBOXLOOP_HEADER
+#define HYPRE_NEWBOXLOOP_HEADER
+
+#include "omp.h"
+
+/* concatenation:
+ */
+#define HYPRE_CONCAT2(x, y) x ## _ ## y
+#define HYPRE_XCONCAT2(x, y) HYPRE_CONCAT2(x, y)
+
+#define HYPRE_CONCAT3(x, y, z) x ## _ ## y ## _ ## z
+#define HYPRE_XCONCAT3(x, y, z) HYPRE_CONCAT3(x, y, z)
+
+/* if use OMP 4.5 default team size and number of teams */
+#define AUTO_OMP_TEAM
+
+#ifndef AUTO_OMP_TEAM
+/* omp team size (aka. gpu block size) */
+#define hypre_gpu_block_size 512
+/* the max number of omp teams */
+#define hypre_max_num_blocks 1000000
+#endif
+
+//#define HYPRE_BOXLOOP_ENTRY_PRINT hypre_printf("%s %s %d\n", __FILE__, __func__, __LINE__);
+#define HYPRE_BOXLOOP_ENTRY_PRINT
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+   BOX LOOPS [TEAM DISTRIBUTE VERSION]
+   !!! NOTE: THIS CODE ONLY WORKS FOR DIM <= 3 !!!
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
+/*
+#define hypre_BoxLoop0For()
+#define hypre_BoxLoop1For(i1)
+#define hypre_BoxLoop2For(i1, i2)
+#define hypre_BoxLoop3For(i1, i2, i3)
+#define hypre_BoxLoop4For(i1, i2, i3, i4)
+*/
+#define hypre_BoxLoopBlock()       0
+
+#define hypre_BoxLoop0Begin  zypre_omp4_dist_BoxLoop0Begin
+#define hypre_BoxLoop0End    zypre_omp4_dist_BoxLoopEnd
+#define hypre_BoxLoop1Begin  zypre_omp4_dist_BoxLoop1Begin
+#define hypre_BoxLoop1End    zypre_omp4_dist_BoxLoopEnd
+#define hypre_BasicBoxLoop2Begin    zypre_omp4_dist_BoxLoop2_v2_Begin
+#define hypre_BoxLoop2Begin  zypre_omp4_dist_BoxLoop2Begin
+#define hypre_BoxLoop2End    zypre_omp4_dist_BoxLoopEnd
+#define hypre_BoxLoop3Begin  zypre_omp4_dist_BoxLoop3Begin
+#if 0
+#define hypre_BoxLoop3_SAME_STRIDE_Begin  zypre_omp4_dist_BoxLoop3_SAME_STRIDE_Begin
+#endif
+#define hypre_BoxLoop3End    zypre_omp4_dist_BoxLoopEnd
+#define hypre_BoxLoop4Begin  zypre_omp4_dist_BoxLoop4Begin
+#define hypre_BoxLoop4End    zypre_omp4_dist_BoxLoopEnd
+#define hypre_LoopBegin      zypre_LoopBegin
+#define hypre_LoopEnd        zypre_omp4_dist_BoxLoopEnd
+
+/* Look for more in struct_ls/red_black_gs.h" */
+
+#define zypre_omp4_dist_BoxLoopEnd(...) \
+   }\
+   /*cudaDeviceSynchronize();*/ \
+}
+
+#define HYPRE_BOX_REDUCTION
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ * host code: declare variables used in the box loop
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
+#define zypre_omp4_BoxLoopDeclareInit_0(ndim, loop_size) \
+HYPRE_Int hypre__ndim = ndim, hypre__tot = 1; \
+/* HYPRE_Int hypre__thread; */ \
+/* loop size */ \
+HYPRE_Int hypre__loop_size_0, hypre__loop_size_1, hypre__loop_size_2; \
+if (hypre__ndim > 0) { hypre__loop_size_0 = loop_size[0];  hypre__tot *= hypre__loop_size_0; } \
+if (hypre__ndim > 1) { hypre__loop_size_1 = loop_size[1];  hypre__tot *= hypre__loop_size_1; } \
+if (hypre__ndim > 2) { hypre__loop_size_2 = loop_size[2];  hypre__tot *= hypre__loop_size_2; }
+
+#ifdef AUTO_OMP_TEAM
+#define TEAM_CLAUSE
+#define zypre_omp4_BoxLoopDeclareInit(ndim, loop_size) zypre_omp4_BoxLoopDeclareInit_0(ndim, loop_size)
+#else
+#define TEAM_CLAUSE num_teams(num_blocks) thread_limit(block_size)
+#define zypre_omp4_BoxLoopDeclareInit(ndim, loop_size) zypre_omp4_BoxLoopDeclareInit_0(ndim, loop_size) \
+/* GPU block numbers and dimensions */ \
+HYPRE_Int block_size = hypre_gpu_block_size; \
+HYPRE_Int num_blocks = hypre_min(hypre_max_num_blocks, (hypre__tot + hypre_gpu_block_size - 1) / hypre_gpu_block_size);
+#endif
+
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ * host code: declare and initialize variables for box k
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
+#define zypre_omp4_BoxKDeclareInitBody(j, k, startk, dboxk, stridek) \
+   HYPRE_XCONCAT3(hypre__stride,j,k) = stridek[j]; \
+/* precompute some entities used in the parallel for loop */ \
+   HYPRE_XCONCAT3(hypre__box_start_imin,j,k) = startk[j] - dboxk->imin[j]; \
+   HYPRE_XCONCAT3(hypre__box_imax_imin,j,k) = dboxk->imax[j] - dboxk->imin[j] + 1;
+
+
+#define zypre_omp4_BoxKDeclareInit(k, startk, dboxk, stridek)\
+/* start - imin */ \
+HYPRE_Int HYPRE_XCONCAT3(hypre__box_start_imin,0,k), HYPRE_XCONCAT3(hypre__box_start_imin,1,k), HYPRE_XCONCAT3(hypre__box_start_imin,2,k); \
+/* imax - imin + 1 */ \
+HYPRE_Int HYPRE_XCONCAT3(hypre__box_imax_imin,0,k), HYPRE_XCONCAT3(hypre__box_imax_imin,1,k), HYPRE_XCONCAT3(hypre__box_imax_imin,2,k); \
+/* stride */ \
+HYPRE_Int HYPRE_XCONCAT3(hypre__stride,0,k), HYPRE_XCONCAT3(hypre__stride,1,k), HYPRE_XCONCAT3(hypre__stride,2,k); \
+/*if (hypre__ndim > 0)*/ { zypre_omp4_BoxKDeclareInitBody(0, k, startk, dboxk, stridek) } \
+  if (hypre__ndim > 1)   { zypre_omp4_BoxKDeclareInitBody(1, k, startk, dboxk, stridek) } \
+  if (hypre__ndim > 2)   { zypre_omp4_BoxKDeclareInitBody(2, k, startk, dboxk, stridek) } \
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ * map clause
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
+#define MAP_CLAUSE0
+#define MAP_CLAUSE1
+#define MAP_CLAUSE2
+#define MAP_CLAUSE3
+#define MAP_CLAUSE4
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ * if clause
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
+#define IF_CLAUSE if (hypre__global_offload && hypre__tot > 0)
+//#define IF_CLAUSE
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ * is_device_ptr clause
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
+#if defined(HYPRE_DEVICE_OPENMP_ALLOC)
+#define IS_DEVICE_CLAUSE DEVICE_VAR
+#else
+#define IS_DEVICE_CLAUSE
+#endif
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ * device code for BoxLoop 1, set i1
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
+#define zypre_omp4_BoxLoopSet1Body(j, i1) \
+/* coord in dimension j */ \
+hypre__i = hypre__J % HYPRE_XCONCAT2(hypre__loop_size,j); \
+/* once */ \
+hypre__i_1 = hypre__i * HYPRE_XCONCAT3(hypre__stride,j,1) + HYPRE_XCONCAT3(hypre__box_start_imin,j,1);\
+/* once */ \
+i1 += hypre__i_1 * hypre__I_1; \
+/* once */ \
+hypre__I_1 *= HYPRE_XCONCAT3(hypre__box_imax_imin,j,1); \
+/* */ \
+hypre__J /= HYPRE_XCONCAT2(hypre__loop_size,j); \
+/* !!! special for BoxLoop1: save the 3-D id */ \
+/* HYPRE_XCONCAT2(hypre__id,j) = hypre__i; */
+
+
+#define zypre_omp4_BoxLoopSet1(i1) \
+HYPRE_Int hypre__I_1, hypre__i, hypre__i_1, hypre__J, i1, idx; \
+/* HYPRE_Int hypre__id_0, hypre__id_1, hypre__id_2; */ \
+hypre__I_1 = 1;  idx = hypre__J = hypre__thread;  i1 = 0; \
+/*if (hypre__ndim > 0)*/ { zypre_omp4_BoxLoopSet1Body(0, i1) } \
+  if (hypre__ndim > 1)   { zypre_omp4_BoxLoopSet1Body(1, i1) } \
+  if (hypre__ndim > 2)   { zypre_omp4_BoxLoopSet1Body(2, i1) }
+
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ * device code for BoxLoop 2, set i1, i2
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
+#define zypre_omp4_BoxLoopSet2Body(j, i1, i2) \
+/* */ \
+hypre__i = hypre__J % HYPRE_XCONCAT2(hypre__loop_size,j); \
+/* twice */ \
+hypre__i_1 = hypre__i * HYPRE_XCONCAT3(hypre__stride,j,1) + HYPRE_XCONCAT3(hypre__box_start_imin,j,1);\
+hypre__i_2 = hypre__i * HYPRE_XCONCAT3(hypre__stride,j,2) + HYPRE_XCONCAT3(hypre__box_start_imin,j,2);\
+/* twice */ \
+i1 += hypre__i_1 * hypre__I_1; \
+i2 += hypre__i_2 * hypre__I_2; \
+/* twice */ \
+hypre__I_1 *= HYPRE_XCONCAT3(hypre__box_imax_imin,j,1); \
+hypre__I_2 *= HYPRE_XCONCAT3(hypre__box_imax_imin,j,2); \
+/* */ \
+hypre__J /= HYPRE_XCONCAT2(hypre__loop_size,j);
+
+
+#define zypre_omp4_BoxLoopSet2(i1, i2) \
+HYPRE_Int hypre__I_1, hypre__I_2, hypre__i, hypre__i_1, hypre__i_2, hypre__J, i1, i2; \
+hypre__I_1 = hypre__I_2 = 1;  hypre__J = hypre__thread;  i1 = i2 = 0; \
+/*if (hypre__ndim > 0)*/ { zypre_omp4_BoxLoopSet2Body(0, i1, i2) } \
+  if (hypre__ndim > 1)   { zypre_omp4_BoxLoopSet2Body(1, i1, i2) } \
+  if (hypre__ndim > 2)   { zypre_omp4_BoxLoopSet2Body(2, i1, i2) }
+
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ * device code for BoxLoop 3, set i1, i2, i3
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
+#define zypre_omp4_BoxLoopSet3Body(j, i1, i2, i3) \
+/* */ \
+hypre__i = hypre__J % HYPRE_XCONCAT2(hypre__loop_size,j); \
+/* 3 times */ \
+hypre__i_1 = hypre__i * HYPRE_XCONCAT3(hypre__stride,j,1) + HYPRE_XCONCAT3(hypre__box_start_imin,j,1);\
+hypre__i_2 = hypre__i * HYPRE_XCONCAT3(hypre__stride,j,2) + HYPRE_XCONCAT3(hypre__box_start_imin,j,2);\
+hypre__i_3 = hypre__i * HYPRE_XCONCAT3(hypre__stride,j,3) + HYPRE_XCONCAT3(hypre__box_start_imin,j,3);\
+/* 3 times */ \
+i1 += hypre__i_1 * hypre__I_1; \
+i2 += hypre__i_2 * hypre__I_2; \
+i3 += hypre__i_3 * hypre__I_3; \
+/* 3 times */ \
+hypre__I_1 *= HYPRE_XCONCAT3(hypre__box_imax_imin,j,1); \
+hypre__I_2 *= HYPRE_XCONCAT3(hypre__box_imax_imin,j,2); \
+hypre__I_3 *= HYPRE_XCONCAT3(hypre__box_imax_imin,j,3); \
+/* */ \
+hypre__J /= HYPRE_XCONCAT2(hypre__loop_size,j);
+
+
+#define zypre_omp4_BoxLoopSet3(i1, i2, i3) \
+HYPRE_Int hypre__I_1, hypre__I_2, hypre__I_3, hypre__i, hypre__i_1, hypre__i_2, hypre__i_3, hypre__J, i1, i2, i3; \
+hypre__I_1 = hypre__I_2 = hypre__I_3 = 1;  hypre__J = hypre__thread;  i1 = i2 = i3 = 0; \
+/*if (hypre__ndim > 0)*/ { zypre_omp4_BoxLoopSet3Body(0, i1, i2, i3) } \
+  if (hypre__ndim > 1)   { zypre_omp4_BoxLoopSet3Body(1, i1, i2, i3) } \
+  if (hypre__ndim > 2)   { zypre_omp4_BoxLoopSet3Body(2, i1, i2, i3) }
+
+#if 0
+/* - - - - - special Box 3: XXX */
+#define zypre_omp4_BoxLoopSet3_SAME_STRIDE_Body(j, i1, i2, i3) \
+/* */ \
+hypre__i = (hypre__J % HYPRE_XCONCAT2(hypre__loop_size,j)) * HYPRE_XCONCAT3(hypre__stride,j,1); \
+/* 3 times */ \
+hypre__i_1 = hypre__i + HYPRE_XCONCAT3(hypre__box_start_imin,j,1);\
+hypre__i_2 = hypre__i + HYPRE_XCONCAT3(hypre__box_start_imin,j,2);\
+hypre__i_3 = hypre__i + HYPRE_XCONCAT3(hypre__box_start_imin,j,3);\
+/* 3 times */ \
+i1 += hypre__i_1 * hypre__I_1; \
+i2 += hypre__i_2 * hypre__I_2; \
+i3 += hypre__i_3 * hypre__I_3; \
+/* 3 times */ \
+hypre__I_1 *= HYPRE_XCONCAT3(hypre__box_imax_imin,j,1); \
+hypre__I_2 *= HYPRE_XCONCAT3(hypre__box_imax_imin,j,2); \
+hypre__I_3 *= HYPRE_XCONCAT3(hypre__box_imax_imin,j,3); \
+/* */ \
+hypre__J /= HYPRE_XCONCAT2(hypre__loop_size,j);
+
+
+#define zypre_omp4_BoxLoopSet3_SAME_STRIDE(i1, i2, o2, i3) \
+HYPRE_Int hypre__I_1, hypre__I_2, hypre__I_3, hypre__i, hypre__i_1, hypre__i_2, hypre__i_3, hypre__J; \
+hypre__I_1 = hypre__I_2 = hypre__I_3 = 1;  hypre__J = hypre__thread;  i1 = i3 = 0; i2 = o2;\
+/*if (hypre__ndim > 0)*/ { zypre_omp4_BoxLoopSet3_SAME_STRIDE_Body(0, i1, i2, i3) } \
+  if (hypre__ndim > 1)   { zypre_omp4_BoxLoopSet3_SAME_STRIDE_Body(1, i1, i2, i3) } \
+  if (hypre__ndim > 2)   { zypre_omp4_BoxLoopSet3_SAME_STRIDE_Body(2, i1, i2, i3) }
+#endif
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ * device code for BoxLoop 4, set i1, i2, i3, i4
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
+#define zypre_omp4_BoxLoopSet4Body(j, i1, i2, i3, i4) \
+/* */ \
+hypre__i = hypre__J % HYPRE_XCONCAT2(hypre__loop_size,j); \
+/* 4 times */ \
+hypre__i_1 = hypre__i * HYPRE_XCONCAT3(hypre__stride,j,1) + HYPRE_XCONCAT3(hypre__box_start_imin,j,1);\
+hypre__i_2 = hypre__i * HYPRE_XCONCAT3(hypre__stride,j,2) + HYPRE_XCONCAT3(hypre__box_start_imin,j,2);\
+hypre__i_3 = hypre__i * HYPRE_XCONCAT3(hypre__stride,j,3) + HYPRE_XCONCAT3(hypre__box_start_imin,j,3);\
+hypre__i_4 = hypre__i * HYPRE_XCONCAT3(hypre__stride,j,4) + HYPRE_XCONCAT3(hypre__box_start_imin,j,4);\
+/* 4 times */ \
+i1 += hypre__i_1 * hypre__I_1; \
+i2 += hypre__i_2 * hypre__I_2; \
+i3 += hypre__i_3 * hypre__I_3; \
+i4 += hypre__i_4 * hypre__I_4; \
+/* 4 times */ \
+hypre__I_1 *= HYPRE_XCONCAT3(hypre__box_imax_imin,j,1); \
+hypre__I_2 *= HYPRE_XCONCAT3(hypre__box_imax_imin,j,2); \
+hypre__I_3 *= HYPRE_XCONCAT3(hypre__box_imax_imin,j,3); \
+hypre__I_4 *= HYPRE_XCONCAT3(hypre__box_imax_imin,j,4); \
+/* */ \
+hypre__J /= HYPRE_XCONCAT2(hypre__loop_size,j);
+
+
+#define zypre_omp4_BoxLoopSet4(i1, i2, i3, i4) \
+HYPRE_Int hypre__I_1, hypre__I_2, hypre__I_3, hypre__I_4, hypre__i, hypre__i_1, hypre__i_2, hypre__i_3, hypre__i_4, hypre__J, i1, i2, i3, i4; \
+hypre__I_1 = hypre__I_2 = hypre__I_3 = hypre__I_4 = 1;  hypre__J = hypre__thread;  i1 = i2 = i3 = i4 = 0; \
+/*if (hypre__ndim > 0)*/ { zypre_omp4_BoxLoopSet4Body(0, i1, i2, i3, i4) } \
+  if (hypre__ndim > 1)   { zypre_omp4_BoxLoopSet4Body(1, i1, i2, i3, i4) } \
+  if (hypre__ndim > 2)   { zypre_omp4_BoxLoopSet4Body(2, i1, i2, i3, i4) }
+
+
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ * BoxLoop 0
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
+#define zypre_omp4_dist_BoxLoop0Begin(ndim, loop_size) \
+{\
+   /* host code: */ \
+   HYPRE_BOXLOOP_ENTRY_PRINT \
+   zypre_omp4_BoxLoopDeclareInit(ndim, loop_size) \
+   /* device code: */ \
+   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE MAP_CLAUSE0 IS_DEVICE_CLAUSE TEAM_CLAUSE)) \
+   for (HYPRE_Int hypre__thread = 0; hypre__thread < hypre__tot; hypre__thread++) \
+   {\
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ * BoxLoop 1
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
+
+#define zypre_omp4_dist_BoxLoop1Begin(ndim, loop_size, dbox1, start1, stride1, i1) \
+{\
+   /* host code: */ \
+   HYPRE_BOXLOOP_ENTRY_PRINT \
+   zypre_omp4_BoxLoopDeclareInit(ndim, loop_size) \
+   zypre_omp4_BoxKDeclareInit(1, start1, dbox1, stride1) \
+   /* device code: */ \
+   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE MAP_CLAUSE1 IS_DEVICE_CLAUSE HYPRE_BOX_REDUCTION TEAM_CLAUSE)) \
+   for (HYPRE_Int hypre__thread = 0; hypre__thread < hypre__tot; hypre__thread++) \
+   {\
+      zypre_omp4_BoxLoopSet1(i1)
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ * BoxLoop 2
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
+
+#define zypre_omp4_dist_BoxLoop2Begin(ndim, loop_size, dbox1, start1, stride1, i1, dbox2, start2, stride2, i2) \
+{\
+   /* host code: */ \
+   HYPRE_BOXLOOP_ENTRY_PRINT \
+   zypre_omp4_BoxLoopDeclareInit(ndim, loop_size) \
+   zypre_omp4_BoxKDeclareInit(1, start1, dbox1, stride1) \
+   zypre_omp4_BoxKDeclareInit(2, start2, dbox2, stride2) \
+   /* device code: */ \
+   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE MAP_CLAUSE2 IS_DEVICE_CLAUSE HYPRE_BOX_REDUCTION TEAM_CLAUSE)) \
+   for (HYPRE_Int hypre__thread = 0; hypre__thread < hypre__tot; hypre__thread++) \
+   {\
+      zypre_omp4_BoxLoopSet2(i1, i2)
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ * BoxLoop 3
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
+#define zypre_omp4_dist_BoxLoop3Begin(ndim, loop_size, \
+      dbox1, start1, stride1, i1, \
+      dbox2, start2, stride2, i2, \
+      dbox3, start3, stride3, i3) \
+{\
+   /* host code: */ \
+   HYPRE_BOXLOOP_ENTRY_PRINT \
+   zypre_omp4_BoxLoopDeclareInit(ndim, loop_size) \
+   zypre_omp4_BoxKDeclareInit(1, start1, dbox1, stride1) \
+   zypre_omp4_BoxKDeclareInit(2, start2, dbox2, stride2) \
+   zypre_omp4_BoxKDeclareInit(3, start3, dbox3, stride3) \
+   /* device code: */ \
+   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE MAP_CLAUSE3 IS_DEVICE_CLAUSE TEAM_CLAUSE)) \
+   for (HYPRE_Int hypre__thread = 0; hypre__thread < hypre__tot; hypre__thread++) \
+   {\
+      zypre_omp4_BoxLoopSet3(i1, i2, i3)
+
+#if 0
+#define zypre_omp4_dist_BoxLoop3_SAME_STRIDE_Begin(ndim, loop_size, \
+      dbox1, start1, stride1, i1, \
+      dbox2, start2, stride2, i2, o2, \
+      dbox3, start3, stride3, i3) \
+{\
+   /* host code: */ \
+   zypre_omp4_BoxLoopDeclareInit(ndim, loop_size) \
+   zypre_omp4_BoxKDeclareInit(1, start1, dbox1, stride1) \
+   zypre_omp4_BoxKDeclareInit(2, start2, dbox2, stride2) \
+   zypre_omp4_BoxKDeclareInit(3, start3, dbox3, stride3) \
+   /* device code: */ \
+   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE MAP_CLAUSE3 IS_DEVICE_CLAUSE TEAM_CLAUSE)) \
+   for (HYPRE_Int hypre__thread = 0; hypre__thread < hypre__tot; hypre__thread++) \
+   {\
+      zypre_omp4_BoxLoopSet3_SAME_STRIDE(i1, i2, o2, i3)
+#endif
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ * BoxLoop 4
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
+#define zypre_omp4_dist_BoxLoop4Begin(ndim, loop_size, \
+      dbox1, start1, stride1, i1, \
+      dbox2, start2, stride2, i2, \
+      dbox3, start3, stride3, i3, \
+      dbox4, start4, stride4, i4) \
+{\
+   /* host code: */ \
+   HYPRE_BOXLOOP_ENTRY_PRINT \
+   zypre_omp4_BoxLoopDeclareInit(ndim, loop_size) \
+   zypre_omp4_BoxKDeclareInit(1, start1, dbox1, stride1) \
+   zypre_omp4_BoxKDeclareInit(2, start2, dbox2, stride2) \
+   zypre_omp4_BoxKDeclareInit(3, start3, dbox3, stride3) \
+   zypre_omp4_BoxKDeclareInit(4, start4, dbox4, stride4) \
+   /* device code: */ \
+   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE MAP_CLAUSE4 IS_DEVICE_CLAUSE TEAM_CLAUSE)) \
+   for (HYPRE_Int hypre__thread = 0; hypre__thread < hypre__tot; hypre__thread++) \
+   {\
+      zypre_omp4_BoxLoopSet4(i1, i2, i3, i4)
+
+#if 0
+
+/* no longer needed, use the above BoxLoop's for reductions */
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ * BoxLoop 1 reduction
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
+
+#define zypre_omp4_dist_Red_BoxLoop1Begin(ndim, loop_size, dbox1, start1, stride1, i1, xsum) \
+{\
+   /* host code: */ \
+   zypre_omp4_BoxLoopDeclareInit(ndim, loop_size) \
+   zypre_omp4_BoxKDeclareInit(1, start1, dbox1, stride1) \
+   /* device code: */ \
+   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE MAP_CLAUSE1 map(tofrom: xsum) reduction(+:xsum) TEAM_CLAUSE)) \
+   for (HYPRE_Int hypre__thread = 0; hypre__thread < hypre__tot; hypre__thread++) \
+   {\
+      zypre_omp4_BoxLoopSet1(i1)
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ * BoxLoop 2 reduction
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
+#define zypre_omp4_dist_Red_BoxLoop2Begin(ndim, loop_size, dbox1, start1, stride1, i1, dbox2, start2, stride2, i2, xsum) \
+{\
+   /* host code: */ \
+   zypre_omp4_BoxLoopDeclareInit(ndim, loop_size) \
+   zypre_omp4_BoxKDeclareInit(1, start1, dbox1, stride1) \
+   zypre_omp4_BoxKDeclareInit(2, start2, dbox2, stride2) \
+   /* device code: */ \
+   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE MAP_CLAUSE2 map(tofrom: xsum) reduction(+:xsum) TEAM_CLAUSE)) \
+   for (HYPRE_Int hypre__thread = 0; hypre__thread < hypre__tot; hypre__thread++) \
+   {\
+      zypre_omp4_BoxLoopSet2(i1, i2)
+
+#endif
+
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ *                     v2
+ * host code: declare and initialize variables for box k
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
+#define zypre_omp4_BoxKDeclareInit_v2(k, stridek)\
+/* stridek[0,1,2] */ \
+HYPRE_Int HYPRE_XCONCAT3(hypre__stride,0,k), HYPRE_XCONCAT3(hypre__stride,1,k), HYPRE_XCONCAT3(hypre__stride,2,k); \
+/*if (hypre__ndim > 0)*/ { HYPRE_XCONCAT3(hypre__stride,0,k) = stridek[0]; } \
+  if (hypre__ndim > 1)   { HYPRE_XCONCAT3(hypre__stride,1,k) = stridek[1]; } \
+  if (hypre__ndim > 2)   { HYPRE_XCONCAT3(hypre__stride,2,k) = stridek[2]; } \
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ *                     v2
+ * device code for BoxLoop 1, set i1
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
+#define zypre_omp4_BoxLoopSet1Body_v2(j, i1) \
+i1 += ( hypre__J % HYPRE_XCONCAT2(hypre__loop_size,j) ) * HYPRE_XCONCAT3(hypre__stride,j,1);\
+hypre__J /= HYPRE_XCONCAT2(hypre__loop_size,j);
+
+
+#define zypre_omp4_BoxLoopSet1_v2(i1, idx) \
+HYPRE_Int hypre__J, i1, idx; \
+idx = hypre__J = hypre__thread; i1 = 0; \
+/*if (hypre__ndim > 0)*/ { zypre_omp4_BoxLoopSet1Body_v2(0, i1) } \
+  if (hypre__ndim > 1)   { zypre_omp4_BoxLoopSet1Body_v2(1, i1) } \
+  if (hypre__ndim > 2)   { zypre_omp4_BoxLoopSet1Body_v2(2, i1) }
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ *                      v2: Basic
+ * BoxLoop 1
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
+#define zypre_omp4_dist_BoxLoop1_v2_Begin(ndim, loop_size, stride1, i1, idx) \
+{\
+   /* host code: */ \
+   HYPRE_BOXLOOP_ENTRY_PRINT \
+   zypre_omp4_BoxLoopDeclareInit(ndim, loop_size) \
+   zypre_omp4_BoxKDeclareInit_v2(1, stride1) \
+   /* device code: */ \
+   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE MAP_CLAUSE1 IS_DEVICE_CLAUSE TEAM_CLAUSE)) \
+   for (HYPRE_Int hypre__thread = 0; hypre__thread < hypre__tot; hypre__thread++) \
+   {\
+      zypre_omp4_BoxLoopSet1_v2(i1, idx)
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ *                     v2
+ * device code for BoxLoop 2, set i1, i2
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
+#define zypre_omp4_BoxLoopSet2Body_v2(j, i1, i2) \
+hypre__i = hypre__J % HYPRE_XCONCAT2(hypre__loop_size,j); \
+/* twice */ \
+i1 += hypre__i * HYPRE_XCONCAT3(hypre__stride,j,1); \
+i2 += hypre__i * HYPRE_XCONCAT3(hypre__stride,j,2); \
+hypre__J /= HYPRE_XCONCAT2(hypre__loop_size,j);
+
+
+#define zypre_omp4_BoxLoopSet2_v2(i1, i2) \
+HYPRE_Int hypre__i, hypre__J, i1, i2; \
+hypre__J = hypre__thread;  i1 = i2 = 0; \
+/*if (hypre__ndim > 0)*/ { zypre_omp4_BoxLoopSet2Body_v2(0, i1, i2) } \
+  if (hypre__ndim > 1)   { zypre_omp4_BoxLoopSet2Body_v2(1, i1, i2) } \
+  if (hypre__ndim > 2)   { zypre_omp4_BoxLoopSet2Body_v2(2, i1, i2) }
+
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ *                      v2: Basic
+ * BoxLoop 2
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
+
+#define zypre_omp4_dist_BoxLoop2_v2_Begin(ndim, loop_size, stride1, i1, stride2, i2) \
+{ \
+   /* host code: */ \
+   HYPRE_BOXLOOP_ENTRY_PRINT \
+   zypre_omp4_BoxLoopDeclareInit(ndim, loop_size) \
+   zypre_omp4_BoxKDeclareInit_v2(1, stride1) \
+   zypre_omp4_BoxKDeclareInit_v2(2, stride2) \
+   /* device code: */ \
+   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE MAP_CLAUSE2 IS_DEVICE_CLAUSE TEAM_CLAUSE)) \
+   for (HYPRE_Int hypre__thread = 0; hypre__thread < hypre__tot; hypre__thread++) \
+   { \
+      zypre_omp4_BoxLoopSet2_v2(i1, i2)
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ * Basic Loop
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
+#define zypre_LoopBegin(size, idx) \
+{ \
+   /* host code: */ \
+   /* HYPRE_Int idx = 0; */\
+   HYPRE_Int hypre__tot = size; \
+   HYPRE_BOXLOOP_ENTRY_PRINT \
+   /* device code: */ \
+   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE MAP_CLAUSE2 IS_DEVICE_CLAUSE TEAM_CLAUSE)) \
+   for (HYPRE_Int idx = 0; idx < hypre__tot; idx++) \
+   {
+
+#if 0
+#define hypre_LoopBegin0(size, idx) \
+{ \
+   HYPRE_Int idx, hypre__size = size; \
+   for (idx = 0; idx < hypre__size; idx++) \
+   {
+
+#define hypre_newBoxLoopGetIndex(index) \
+  index[0] = hypre__id_0; \
+  index[1] = hypre__id_1; \
+  index[2] = hypre__id_2;
+#endif
+
+/* Reduction */
+#define hypre_BoxLoop1ReductionBegin(ndim, loop_size, dbox1, start1, stride1, i1, reducesum) \
+        hypre_BoxLoop1Begin(ndim, loop_size, dbox1, start1, stride1, i1)
+
+#define hypre_BoxLoop1ReductionEnd(i1, reducesum) \
+        hypre_BoxLoop1End(i1)
+
+#define hypre_BoxLoop2ReductionBegin(ndim, loop_size, dbox1, start1, stride1, i1, \
+                                                      dbox2, start2, stride2, i2, reducesum) \
+        hypre_BoxLoop2Begin(ndim, loop_size, dbox1, start1, stride1, i1, \
+                                             dbox2, start2, stride2, i2)
+
+#define hypre_BoxLoop2ReductionEnd(i1, i2, reducesum) \
+        hypre_BoxLoop2End(i1, i2)
+
+#endif
+
+
+#elif !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && !defined(HYPRE_USING_CUDA)
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
+/******************************************************************************
+ *
+ * Header info for the BoxLoop
+ *
+ *****************************************************************************/
+
+/*--------------------------------------------------------------------------
+ * BoxLoop macros:
+ *--------------------------------------------------------------------------*/
+
+#ifndef HYPRE_NEWBOXLOOP_HEADER
+#define HYPRE_NEWBOXLOOP_HEADER
+
+#ifdef HYPRE_USING_OPENMP
+#define HYPRE_BOX_REDUCTION
+#ifdef WIN32
+#define Pragma(x) __pragma(HYPRE_XSTR(x))
+#else
+#define Pragma(x) _Pragma(HYPRE_XSTR(x))
+#endif
+#define OMP1 Pragma(omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_BOX_REDUCTION HYPRE_SMP_SCHEDULE)
+#else
+#define OMP1
+#endif
+
+typedef struct hypre_Boxloop_struct
+{
+   HYPRE_Int lsize0,lsize1,lsize2;
+   HYPRE_Int strides0,strides1,strides2;
+   HYPRE_Int bstart0,bstart1,bstart2;
+   HYPRE_Int bsize0,bsize1,bsize2;
+} hypre_Boxloop;
+
+#define zypre_newBoxLoop0Begin(ndim, loop_size)                               \
+{                                                                             \
+   zypre_BoxLoopDeclare();                                                    \
+   zypre_BoxLoopInit(ndim, loop_size);                                        \
+   OMP1                                                                       \
+   for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)   \
+   {                                                                          \
+      zypre_BoxLoopSet();                                                     \
+      for (hypre__J = 0; hypre__J < hypre__JN; hypre__J++)                    \
+      {                                                                       \
+         for (hypre__I = 0; hypre__I < hypre__IN; hypre__I++)                 \
+         {
+
+#define zypre_newBoxLoop0End()                                                \
+         }                                                                    \
+         zypre_BoxLoopInc1();                                                 \
+         zypre_BoxLoopInc2();                                                 \
+      }                                                                       \
+   }                                                                          \
+}
+
+#define zypre_newBoxLoop1Begin(ndim, loop_size,                               \
+                               dbox1, start1, stride1, i1)                    \
+{                                                                             \
+   HYPRE_Int i1;                                                              \
+   zypre_BoxLoopDeclare();                                                    \
+   zypre_BoxLoopDeclareK(1);                                                  \
+   zypre_BoxLoopInit(ndim, loop_size);                                        \
+   zypre_BoxLoopInitK(1, dbox1, start1, stride1, i1);                         \
+   OMP1                                                                       \
+   for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)   \
+   {                                                                          \
+      HYPRE_Int i1;                                                           \
+      zypre_BoxLoopSet();                                                     \
+      zypre_BoxLoopSetK(1, i1);                                               \
+      for (hypre__J = 0; hypre__J < hypre__JN; hypre__J++)                    \
+      {                                                                       \
+         for (hypre__I = 0; hypre__I < hypre__IN; hypre__I++)                 \
+         {
+
+#define zypre_newBoxLoop1End(i1)                                              \
+            i1 += hypre__i0inc1;                                              \
+         }                                                                    \
+         zypre_BoxLoopInc1();                                                 \
+         i1 += hypre__ikinc1[hypre__d];                                       \
+         zypre_BoxLoopInc2();                                                 \
+      }                                                                       \
+   }                                                                          \
+}
+
+
+#define zypre_newBoxLoop2Begin(ndim, loop_size,                               \
+                               dbox1, start1, stride1, i1,                    \
+                               dbox2, start2, stride2, i2)                    \
+{                                                                             \
+   HYPRE_Int i1, i2;                                                          \
+   zypre_BoxLoopDeclare();                                                    \
+   zypre_BoxLoopDeclareK(1);                                                  \
+   zypre_BoxLoopDeclareK(2);                                                  \
+   zypre_BoxLoopInit(ndim, loop_size);                                        \
+   zypre_BoxLoopInitK(1, dbox1, start1, stride1, i1);                         \
+   zypre_BoxLoopInitK(2, dbox2, start2, stride2, i2);                         \
+   OMP1                                                                       \
+   for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)   \
+   {                                                                          \
+      HYPRE_Int i1, i2;                                                       \
+      zypre_BoxLoopSet();                                                     \
+      zypre_BoxLoopSetK(1, i1);                                               \
+      zypre_BoxLoopSetK(2, i2);                                               \
+      for (hypre__J = 0; hypre__J < hypre__JN; hypre__J++)                    \
+      {                                                                       \
+         for (hypre__I = 0; hypre__I < hypre__IN; hypre__I++)                 \
+         {
+
+#define zypre_newBoxLoop2End(i1, i2)                                          \
+            i1 += hypre__i0inc1;                                              \
+            i2 += hypre__i0inc2;                                              \
+         }                                                                    \
+         zypre_BoxLoopInc1();                                                 \
+         i1 += hypre__ikinc1[hypre__d];                                       \
+         i2 += hypre__ikinc2[hypre__d];                                       \
+         zypre_BoxLoopInc2();                                                 \
+      }                                                                       \
+   }                                                                          \
+}
+
+
+#define zypre_newBoxLoop3Begin(ndim, loop_size,                               \
+                               dbox1, start1, stride1, i1,                    \
+                               dbox2, start2, stride2, i2,                    \
+                               dbox3, start3, stride3, i3)                    \
+{                                                                             \
+   HYPRE_Int i1, i2, i3;                                                      \
+   zypre_BoxLoopDeclare();                                                    \
+   zypre_BoxLoopDeclareK(1);                                                  \
+   zypre_BoxLoopDeclareK(2);                                                  \
+   zypre_BoxLoopDeclareK(3);                                                  \
+   zypre_BoxLoopInit(ndim, loop_size);                                        \
+   zypre_BoxLoopInitK(1, dbox1, start1, stride1, i1);                         \
+   zypre_BoxLoopInitK(2, dbox2, start2, stride2, i2);                         \
+   zypre_BoxLoopInitK(3, dbox3, start3, stride3, i3);                         \
+   OMP1                                                                       \
+   for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)   \
+   {                                                                          \
+      HYPRE_Int i1, i2, i3;                                                   \
+      zypre_BoxLoopSet();                                                     \
+      zypre_BoxLoopSetK(1, i1);                                               \
+      zypre_BoxLoopSetK(2, i2);                                               \
+      zypre_BoxLoopSetK(3, i3);                                               \
+      for (hypre__J = 0; hypre__J < hypre__JN; hypre__J++)                    \
+      {                                                                       \
+         for (hypre__I = 0; hypre__I < hypre__IN; hypre__I++)                 \
+         {
+
+#define zypre_newBoxLoop3End(i1, i2, i3)                                      \
+            i1 += hypre__i0inc1;                                              \
+            i2 += hypre__i0inc2;                                              \
+            i3 += hypre__i0inc3;                                              \
+         }                                                                    \
+         zypre_BoxLoopInc1();                                                 \
+         i1 += hypre__ikinc1[hypre__d];                                       \
+         i2 += hypre__ikinc2[hypre__d];                                       \
+         i3 += hypre__ikinc3[hypre__d];                                       \
+         zypre_BoxLoopInc2();                                                 \
+      }                                                                       \
+   }                                                                          \
+}
+
+#define zypre_newBoxLoop4Begin(ndim, loop_size,                               \
+                            dbox1, start1, stride1, i1,                       \
+                            dbox2, start2, stride2, i2,                       \
+                            dbox3, start3, stride3, i3,                       \
+                            dbox4, start4, stride4, i4)                       \
+{                                                                             \
+   HYPRE_Int i1, i2, i3, i4;                                                  \
+   zypre_BoxLoopDeclare();                                                    \
+   zypre_BoxLoopDeclareK(1);                                                  \
+   zypre_BoxLoopDeclareK(2);                                                  \
+   zypre_BoxLoopDeclareK(3);                                                  \
+   zypre_BoxLoopDeclareK(4);                                                  \
+   zypre_BoxLoopInit(ndim, loop_size);                                        \
+   zypre_BoxLoopInitK(1, dbox1, start1, stride1, i1);                         \
+   zypre_BoxLoopInitK(2, dbox2, start2, stride2, i2);                         \
+   zypre_BoxLoopInitK(3, dbox3, start3, stride3, i3);                         \
+   zypre_BoxLoopInitK(4, dbox4, start4, stride4, i4);                         \
+   OMP1                                                                       \
+   for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)   \
+   {                                                                          \
+      HYPRE_Int i1, i2, i3, i4;                                               \
+      zypre_BoxLoopSet();                                                     \
+      zypre_BoxLoopSetK(1, i1);                                               \
+      zypre_BoxLoopSetK(2, i2);                                               \
+      zypre_BoxLoopSetK(3, i3);                                               \
+      zypre_BoxLoopSetK(4, i4);                                               \
+      for (hypre__J = 0; hypre__J < hypre__JN; hypre__J++)                    \
+      {                                                                       \
+         for (hypre__I = 0; hypre__I < hypre__IN; hypre__I++)                 \
+         {
+
+#define zypre_newBoxLoop4End(i1, i2, i3, i4)                                  \
+            i1 += hypre__i0inc1;                                              \
+            i2 += hypre__i0inc2;                                              \
+            i3 += hypre__i0inc3;                                              \
+            i4 += hypre__i0inc4;                                              \
+         }                                                                    \
+         zypre_BoxLoopInc1();                                                 \
+         i1 += hypre__ikinc1[hypre__d];                                       \
+         i2 += hypre__ikinc2[hypre__d];                                       \
+         i3 += hypre__ikinc3[hypre__d];                                       \
+         i4 += hypre__ikinc4[hypre__d];                                       \
+         zypre_BoxLoopInc2();                                                 \
+      }                                                                       \
+   }                                                                          \
+}
+
+#define zypre_newBasicBoxLoop2Begin(ndim, loop_size,                          \
+                                    stride1, i1,                              \
+                                    stride2, i2)                              \
+{                                                                             \
+   zypre_BoxLoopDeclare();                                                    \
+   zypre_BoxLoopDeclareK(1);                                                  \
+   zypre_BoxLoopDeclareK(2);                                                  \
+   zypre_BoxLoopInit(ndim, loop_size);                                        \
+   zypre_BasicBoxLoopInitK(1, stride1);                                       \
+   zypre_BasicBoxLoopInitK(2, stride2);                                       \
+   OMP1                                                                       \
+   for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)   \
+   {                                                                          \
+      HYPRE_Int i1, i2;                                                       \
+      zypre_BoxLoopSet();                                                     \
+      zypre_BoxLoopSetK(1, i1);                                               \
+      zypre_BoxLoopSetK(2, i2);                                               \
+      for (hypre__J = 0; hypre__J < hypre__JN; hypre__J++)                    \
+      {                                                                       \
+         for (hypre__I = 0; hypre__I < hypre__IN; hypre__I++)                 \
+         {
+
+
+#define hypre_LoopBegin(size,idx)                                             \
+{                                                                             \
+   HYPRE_Int idx;                                                             \
+   for (idx = 0;idx < size;idx ++)                                            \
+   {
+
+#define hypre_LoopEnd()                                                       \
+  }                                                                           \
+}
+
+#define hypre_newBoxLoopGetIndex zypre_BoxLoopGetIndex
+#define hypre_BoxLoopBlock       zypre_BoxLoopBlock
+#define hypre_BoxLoop0Begin      zypre_newBoxLoop0Begin
+#define hypre_BoxLoop0End        zypre_newBoxLoop0End
+#define hypre_BoxLoop1Begin      zypre_newBoxLoop1Begin
+#define hypre_BoxLoop1End        zypre_newBoxLoop1End
+#define hypre_BoxLoop2Begin      zypre_newBoxLoop2Begin
+#define hypre_BoxLoop2End        zypre_newBoxLoop2End
+#define hypre_BoxLoop3Begin      zypre_newBoxLoop3Begin
+#define hypre_BoxLoop3End        zypre_newBoxLoop3End
+#define hypre_BoxLoop4Begin      zypre_newBoxLoop4Begin
+#define hypre_BoxLoop4End        zypre_newBoxLoop4End
+#define hypre_BasicBoxLoop2Begin zypre_newBasicBoxLoop2Begin
+
+/* Reduction */
+#define hypre_BoxLoop1ReductionBegin(ndim, loop_size, dbox1, start1, stride1, i1, reducesum) \
+        hypre_BoxLoop1Begin(ndim, loop_size, dbox1, start1, stride1, i1)
+
+#define hypre_BoxLoop1ReductionEnd(i1, reducesum) \
+        hypre_BoxLoop1End(i1)
+
+#define hypre_BoxLoop2ReductionBegin(ndim, loop_size, dbox1, start1, stride1, i1, \
+                                                      dbox2, start2, stride2, i2, reducesum) \
+        hypre_BoxLoop2Begin(ndim, loop_size, dbox1, start1, stride1, i1, \
+                                             dbox2, start2, stride2, i2)
+
+#define hypre_BoxLoop2ReductionEnd(i1, i2, reducesum) \
+        hypre_BoxLoop2End(i1, i2)
+
+#endif
+
+#endif
 
 #ifdef __cplusplus
 }

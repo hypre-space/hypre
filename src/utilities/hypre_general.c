@@ -6,6 +6,7 @@
  ******************************************************************************/
 
 #include "_hypre_utilities.h"
+#include "_hypre_utilities.hpp"
 
 /*
 #if defined(HYPRE_USING_KOKKOS)
@@ -38,41 +39,10 @@ hypre_HandleCreate()
    hypre_HandleMemoryLocation(hypre_handle_) = HYPRE_MEMORY_DEVICE;
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-
-   /* default CUDA options */
-   hypre_HandleDefaultExecPolicy(hypre_handle_)            = HYPRE_EXEC_HOST;
-   hypre_HandleCudaDevice(hypre_handle_)                   = 0;
-   hypre_HandleCudaComputeStreamNum(hypre_handle_)         = 0;
-#if defined(HYPRE_USING_UNIFIED_MEMORY)
-   hypre_HandleCudaComputeStreamSync(hypre_handle_)        = 1;
-#else
-   hypre_HandleCudaComputeStreamSync(hypre_handle_)        = 0;
+   hypre_HandleDefaultExecPolicy(hypre_handle_) = HYPRE_EXEC_HOST;
+   hypre_HandleStructExecPolicy(hypre_handle_) = HYPRE_EXEC_DEVICE;
+   hypre_HandleCudaData(hypre_handle_) = hypre_CudaDataCreate();
 #endif
-
-   /* SpGeMM */
-#ifdef HYPRE_USING_CUSPARSE
-   hypre_HandleSpgemmUseCusparse(hypre_handle_)            = 1;
-#else
-   hypre_HandleSpgemmUseCusparse(hypre_handle_)            = 0;
-#endif
-   hypre_handle_->spgemm_num_passes                        = 3;
-   /* 1: naive overestimate, 2: naive underestimate, 3: Cohen's algorithm */
-   hypre_handle_->spgemm_rownnz_estimate_method            = 3;
-   hypre_handle_->spgemm_rownnz_estimate_nsamples          = 32;
-   hypre_handle_->spgemm_rownnz_estimate_mult_factor       = 1.5;
-   hypre_handle_->spgemm_hash_type                         = 'L';
-
-   /* cub */
-#ifdef HYPRE_USING_CUB_ALLOCATOR
-   hypre_handle_->cub_bin_growth                           = 8u;
-   hypre_handle_->cub_min_bin                              = 1u;
-   hypre_handle_->cub_max_bin                              = (hypre_uint) -1;
-   hypre_handle_->cub_max_cached_bytes                     = (size_t) -1;
-   hypre_handle_->cub_dev_allocator                        = NULL;
-   hypre_handle_->cub_um_allocator                         = NULL;
-#endif
-
-#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 
    return hypre_handle_;
 }
@@ -86,50 +56,7 @@ hypre_HandleDestroy(hypre_Handle *hypre_handle_)
    }
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   HYPRE_Int i;
-
-   hypre_TFree(hypre_HandleCudaReduceBuffer(hypre_handle_),     HYPRE_MEMORY_DEVICE);
-   hypre_TFree(hypre_HandleStructCommRecvBuffer(hypre_handle_), HYPRE_MEMORY_DEVICE);
-   hypre_TFree(hypre_HandleStructCommSendBuffer(hypre_handle_), HYPRE_MEMORY_DEVICE);
-
-#if defined(HYPRE_USING_CURAND)
-   if (hypre_handle_->curand_gen)
-   {
-      HYPRE_CURAND_CALL( curandDestroyGenerator(hypre_handle_->curand_gen) );
-   }
-#endif
-
-#if defined(HYPRE_USING_CUBLAS)
-   if (hypre_handle_->cublas_handle)
-   {
-      HYPRE_CUBLAS_CALL( cublasDestroy(hypre_handle_->cublas_handle) );
-   }
-#endif
-
-#if defined(HYPRE_USING_CUSPARSE)
-   if (hypre_handle_->cusparse_handle)
-   {
-      HYPRE_CUSPARSE_CALL( cusparseDestroy(hypre_handle_->cusparse_handle) );
-   }
-
-   if (hypre_handle_->cusparse_mat_descr)
-   {
-      HYPRE_CUSPARSE_CALL( cusparseDestroyMatDescr(hypre_handle_->cusparse_mat_descr) );
-   }
-#endif
-
-   for (i = 0; i < HYPRE_MAX_NUM_STREAMS; i++)
-   {
-      if (hypre_handle_->cuda_streams[i])
-      {
-         HYPRE_CUDA_CALL( cudaStreamDestroy(hypre_handle_->cuda_streams[i]) );
-      }
-   }
-#endif
-
-#ifdef HYPRE_USING_CUB_ALLOCATOR
-   delete hypre_handle_->cub_dev_allocator;
-   delete hypre_handle_->cub_um_allocator;
+   hypre_CudaDataDestroy(hypre_HandleCudaData(hypre_handle_));
 #endif
 
    hypre_TFree(hypre_handle_, HYPRE_MEMORY_HOST);
@@ -252,7 +179,8 @@ HYPRE_Init()
     *       hypre_HandleCubCachingManagedAllocator
     *       are not used, since allocation would happen therein,
     *       which is not wanted here */
-   if (_hypre_handle->cub_dev_allocator || _hypre_handle->cub_um_allocator)
+   if ( hypre_HandleCubDevAllocator(_hypre_handle) ||
+        hypre_HandleCubUvmAllocator(_hypre_handle) )
    {
       hypre_printf("ERROR: CUB Allocators have been setup ... \n");
    }

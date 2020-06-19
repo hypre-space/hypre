@@ -6,6 +6,7 @@
  ******************************************************************************/
 
 #include "_hypre_struct_mv.h"
+#include "_hypre_struct_mv.hpp"
 
 #define DEBUG 0
 
@@ -841,12 +842,13 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
 #if defined(HYPRE_USING_RAJA) || defined(HYPRE_USING_KOKKOS)
    alloc_dev_buffer = 1;
 #elif defined(HYPRE_USING_CUDA)
-   alloc_dev_buffer = (hypre_exec_policy == HYPRE_MEMORY_DEVICE);
+   alloc_dev_buffer = (hypre_HandleStructExecPolicy(hypre_handle()) == HYPRE_EXEC_DEVICE);
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
    alloc_dev_buffer = hypre__global_offload;
 #endif
 #endif
 
+#if (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP))
    if (alloc_dev_buffer)
    {
       send_buffers_data = hypre_TAlloc(HYPRE_Complex *, num_sends,HYPRE_MEMORY_HOST);
@@ -870,6 +872,7 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
       }
    }
    else
+#endif
    {
       send_buffers_data = send_buffers;
    }
@@ -889,6 +892,7 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
    }
 
    /* Prepare recv buffers */
+#if (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP))
    if (alloc_dev_buffer)
    {
       recv_buffers_data = hypre_TAlloc(HYPRE_Complex *, num_recvs,HYPRE_MEMORY_HOST);
@@ -913,6 +917,7 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
       }
    }
    else
+#endif
    {
       recv_buffers_data = recv_buffers;
    }
@@ -1205,7 +1210,7 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
 #if defined(HYPRE_USING_RAJA) || defined(HYPRE_USING_KOKKOS)
    alloc_dev_buffer = 1;
 #elif defined(HYPRE_USING_CUDA)
-   alloc_dev_buffer = (hypre_exec_policy == HYPRE_MEMORY_DEVICE);
+   alloc_dev_buffer = (hypre_HandleStructExecPolicy(hypre_handle()) == HYPRE_EXEC_DEVICE);
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
    alloc_dev_buffer = hypre__global_offload;
 #endif

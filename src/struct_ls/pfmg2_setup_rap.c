@@ -6,6 +6,7 @@
  ******************************************************************************/
 
 #include "_hypre_struct_ls.h"
+#include "_hypre_struct_mv.hpp"
 #include "pfmg.h"
 
 /*--------------------------------------------------------------------------
@@ -24,7 +25,7 @@
 /*--------------------------------------------------------------------------
  * Sets up new coarse grid operator stucture.
  *--------------------------------------------------------------------------*/
- 
+
 hypre_StructMatrix *
 hypre_PFMG2CreateRAPOp( hypre_StructMatrix *R,
                         hypre_StructMatrix *A,
@@ -43,7 +44,7 @@ hypre_PFMG2CreateRAPOp( hypre_StructMatrix *R,
    hypre_Index            index_temp;
    HYPRE_Int              j, i;
    HYPRE_Int              stencil_rank;
- 
+
    RAP_stencil_dim = 2;
 
    /*-----------------------------------------------------------------------
@@ -137,7 +138,7 @@ hypre_PFMG2CreateRAPOp( hypre_StructMatrix *R,
  * Routines to build RAP. These routines are fairly general
  *  1) No assumptions about symmetry of A
  *  2) No assumption that R = transpose(P)
- *  3) 5 or 9-point fine grid A 
+ *  3) 5 or 9-point fine grid A
  *
  * I am, however, assuming that the c-to-c interpolation is the identity.
  *
@@ -307,11 +308,11 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0(
    HYPRE_Real           *rap_csw, *rap_cse;
 
    HYPRE_Int             iA_offd, iA_offdm1, iA_offdp1;
-                      
-   HYPRE_Int             yOffsetA, yOffsetA_diag, yOffsetA_offd; 
-   HYPRE_Int             xOffsetP; 
-   HYPRE_Int             yOffsetP; 
-                      
+
+   HYPRE_Int             yOffsetA, yOffsetA_diag, yOffsetA_offd;
+   HYPRE_Int             xOffsetP;
+   HYPRE_Int             yOffsetP;
+
    stridef = cstride;
    hypre_SetIndex3(stridec, 1, 1, 1);
 
@@ -332,8 +333,8 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0(
 
    /*-----------------------------------------------------------------
     * Extract pointers for interpolation operator:
-    * pa is pointer for weight for f-point above c-point 
-    * pb is pointer for weight for f-point below c-point 
+    * pa is pointer for weight for f-point above c-point
+    * pb is pointer for weight for f-point below c-point
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,-1,0);
@@ -346,11 +347,11 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0(
    pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index);
    //RL PTROFFSET
    HYPRE_Int pbOffset = hypre_BoxOffsetDistance(P_dbox, index);
- 
+
    /*-----------------------------------------------------------------
     * Extract pointers for restriction operator:
-    * ra is pointer for weight for f-point above c-point 
-    * rb is pointer for weight for f-point below c-point 
+    * ra is pointer for weight for f-point above c-point
+    * rb is pointer for weight for f-point below c-point
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,-1,0);
@@ -363,10 +364,10 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0(
    rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index);
    //RL PTROFFSET
    HYPRE_Int rbOffset = hypre_BoxOffsetDistance(R_dbox, index);
- 
+
    /*-----------------------------------------------------------------
     * Extract pointers for 5-point fine grid operator:
-    * 
+    *
     * a_cc is pointer for center coefficient
     * a_cw is pointer for west coefficient
     * a_ce is pointer for east coefficient
@@ -399,7 +400,7 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0(
     * Extract pointers for coarse grid operator - always 9-point:
     *
     * We build only the lower triangular part (plus diagonal).
-    * 
+    *
     * rap_cc is pointer for center coefficient (etc.)
     *-----------------------------------------------------------------*/
 
@@ -428,7 +429,7 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0(
     *
     * In the BoxLoop below I assume iA and iP refer to data associated
     * with the point which we are building the stencil for. The below
-    * Offsets are used in refering to data associated with other points. 
+    * Offsets are used in refering to data associated with other points.
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,1,0);
@@ -471,10 +472,10 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0(
       {
          HYPRE_Int iAm1 = iA - yOffsetA;
          HYPRE_Int iAp1 = iA + yOffsetA;
-           
+
          HYPRE_Int iP1 = iP - yOffsetP - xOffsetP;
          rap_csw[iAc] = rb[iR-rbOffset] * a_cw[iAm1] * pa[iP1];
-           
+
          iP1 = iP - yOffsetP;
          rap_cs[iAc] = rb[iR-rbOffset] * a_cc[iAm1] * pa[iP1]
             +          rb[iR-rbOffset] * a_cs[iAm1]
@@ -486,7 +487,7 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0(
          rap_cw[iAc] =          a_cw[iA]
             +          rb[iR-rbOffset] * a_cw[iAm1] * pb[iP1-pbOffset]
             +          ra[iR] * a_cw[iAp1] * pa[iP1];
-           
+
          rap_cc[iAc] =          a_cc[iA]
             +          rb[iR-rbOffset] * a_cc[iAm1] * pb[iP-pbOffset]
             +          ra[iR] * a_cc[iAp1] * pa[iP]
@@ -591,10 +592,10 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC1(
    HYPRE_Int             iAc;
    HYPRE_Int             iP, iP1;
    HYPRE_Int             iR;
-   HYPRE_Int             yOffsetA; 
-   HYPRE_Int             xOffsetP; 
-   HYPRE_Int             yOffsetP; 
-                      
+   HYPRE_Int             yOffsetA;
+   HYPRE_Int             xOffsetP;
+   HYPRE_Int             yOffsetP;
+
    cgrid = hypre_StructMatrixGrid(RAP);
    cgrid_boxes = hypre_StructGridBoxes(cgrid);
 
@@ -605,8 +606,8 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC1(
 
    /*-----------------------------------------------------------------
     * Extract pointers for interpolation operator:
-    * pa is pointer for weight for f-point above c-point 
-    * pb is pointer for weight for f-point below c-point 
+    * pa is pointer for weight for f-point above c-point
+    * pb is pointer for weight for f-point below c-point
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,-1,0);
@@ -617,11 +618,11 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC1(
    MapIndex(index_temp, cdir, index);
 
    pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index);
- 
+
    /*-----------------------------------------------------------------
     * Extract pointers for restriction operator:
-    * ra is pointer for weight for f-point above c-point 
-    * rb is pointer for weight for f-point below c-point 
+    * ra is pointer for weight for f-point above c-point
+    * rb is pointer for weight for f-point below c-point
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,-1,0);
@@ -632,10 +633,10 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC1(
    MapIndex(index_temp, cdir, index);
 
    rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index);
- 
+
    /*-----------------------------------------------------------------
     * Extract pointers for 5-point fine grid operator:
-    * 
+    *
     * a_cc is pointer for center coefficient
     * a_cw is pointer for west coefficient
     * a_ce is pointer for east coefficient
@@ -667,7 +668,7 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC1(
     * Extract pointers for coarse grid operator - always 9-point:
     *
     * We build only the lower triangular part (plus diagonal).
-    * 
+    *
     * rap_cc is pointer for center coefficient (etc.)
     *-----------------------------------------------------------------*/
 
@@ -696,13 +697,13 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC1(
     *
     * In the BoxLoop below I assume iA and iP refer to data associated
     * with the point which we are building the stencil for. The below
-    * Offsets are used in refering to data associated with other points. 
+    * Offsets are used in refering to data associated with other points.
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
 
-   yOffsetA = 0; 
+   yOffsetA = 0;
    yOffsetP = 0;
 
    hypre_SetIndex3(index_temp,1,0,0);
@@ -806,11 +807,11 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC0(
    HYPRE_Real           *rap_csw, *rap_cse;
 
    HYPRE_Int             iA_offd, iA_offdm1, iA_offdp1;
-                      
-   HYPRE_Int             yOffsetA, yOffsetA_diag, yOffsetA_offd; 
-   HYPRE_Int             xOffsetP; 
-   HYPRE_Int             yOffsetP; 
-                      
+
+   HYPRE_Int             yOffsetA, yOffsetA_diag, yOffsetA_offd;
+   HYPRE_Int             xOffsetP;
+   HYPRE_Int             yOffsetP;
+
    stridef = cstride;
    hypre_SetIndex3(stridec, 1, 1, 1);
 
@@ -831,8 +832,8 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC0(
 
    /*-----------------------------------------------------------------
     * Extract pointers for interpolation operator:
-    * pa is pointer for weight for f-point above c-point 
-    * pb is pointer for weight for f-point below c-point 
+    * pa is pointer for weight for f-point above c-point
+    * pb is pointer for weight for f-point below c-point
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,-1,0);
@@ -845,11 +846,11 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC0(
    pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index);
    //RL PTROFFSET
    HYPRE_Int pbOffset = hypre_BoxOffsetDistance(P_dbox, index);
- 
+
    /*-----------------------------------------------------------------
     * Extract pointers for restriction operator:
-    * ra is pointer for weight for f-point above c-point 
-    * rb is pointer for weight for f-point below c-point 
+    * ra is pointer for weight for f-point above c-point
+    * rb is pointer for weight for f-point below c-point
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,-1,0);
@@ -861,10 +862,10 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC0(
 
    rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index);
    HYPRE_Int rbOffset = hypre_BoxOffsetDistance(R_dbox, index);
- 
+
    /*-----------------------------------------------------------------
     * Extract pointers for 5-point fine grid operator:
-    * 
+    *
     * a_cc is pointer for center coefficient
     * a_cw is pointer for west coefficient
     * a_ce is pointer for east coefficient
@@ -917,7 +918,7 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC0(
     * Extract pointers for coarse grid operator - always 9-point:
     *
     * We build only the lower triangular part (plus diagonal).
-    * 
+    *
     * rap_cc is pointer for center coefficient (etc.)
     *-----------------------------------------------------------------*/
 
@@ -946,7 +947,7 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC0(
     *
     * In the BoxLoop below I assume iA and iP refer to data associated
     * with the point which we are building the stencil for. The below
-    * Offsets are used in refering to data associated with other points. 
+    * Offsets are used in refering to data associated with other points.
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,1,0);
@@ -1134,10 +1135,10 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC1(
    HYPRE_Int             iAc;
    HYPRE_Int             iP, iP1;
    HYPRE_Int             iR;
-   HYPRE_Int             yOffsetA; 
-   HYPRE_Int             xOffsetP; 
-   HYPRE_Int             yOffsetP; 
-                      
+   HYPRE_Int             yOffsetA;
+   HYPRE_Int             xOffsetP;
+   HYPRE_Int             yOffsetP;
+
    cgrid = hypre_StructMatrixGrid(RAP);
    cgrid_boxes = hypre_StructGridBoxes(cgrid);
 
@@ -1148,8 +1149,8 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC1(
 
    /*-----------------------------------------------------------------
     * Extract pointers for interpolation operator:
-    * pa is pointer for weight for f-point above c-point 
-    * pb is pointer for weight for f-point below c-point 
+    * pa is pointer for weight for f-point above c-point
+    * pb is pointer for weight for f-point below c-point
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,-1,0);
@@ -1160,11 +1161,11 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC1(
    MapIndex(index_temp, cdir, index);
 
    pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index);
- 
+
    /*-----------------------------------------------------------------
     * Extract pointers for restriction operator:
-    * ra is pointer for weight for f-point above c-point 
-    * rb is pointer for weight for f-point below c-point 
+    * ra is pointer for weight for f-point above c-point
+    * rb is pointer for weight for f-point below c-point
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,-1,0);
@@ -1175,10 +1176,10 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC1(
    MapIndex(index_temp, cdir, index);
 
    rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index);
- 
+
    /*-----------------------------------------------------------------
     * Extract pointers for 5-point fine grid operator:
-    * 
+    *
     * a_cc is pointer for center coefficient
     * a_cw is pointer for west coefficient
     * a_ce is pointer for east coefficient
@@ -1231,7 +1232,7 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC1(
     * Extract pointers for coarse grid operator - always 9-point:
     *
     * We build only the lower triangular part (plus diagonal).
-    * 
+    *
     * rap_cc is pointer for center coefficient (etc.)
     *-----------------------------------------------------------------*/
 
@@ -1260,13 +1261,13 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC1(
     *
     * In the BoxLoop below I assume iA and iP refer to data associated
     * with the point which we are building the stencil for. The below
-    * Offsets are used in refering to data associated with other points. 
+    * Offsets are used in refering to data associated with other points.
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
 
-   yOffsetA = 0; 
+   yOffsetA = 0;
    yOffsetP = 0;
 
    hypre_SetIndex3(index_temp,1,0,0);
@@ -1326,7 +1327,7 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC1(
       +                   a_cs[iA]   * pb[iP]
       +                   a_cn[iA]   * pa[iP];
 
- 
+
 
 /*      }*/ /* end ForBoxI */
 
@@ -1348,7 +1349,7 @@ hypre_PFMG2BuildRAPNoSym( hypre_StructMatrix *A,
 
    hypre_StructStencil  *fine_stencil;
    HYPRE_Int             fine_stencil_size;
-                        
+
    hypre_StructGrid     *fgrid;
    HYPRE_Int            *fgrid_ids;
    hypre_StructGrid     *cgrid;
@@ -1465,7 +1466,7 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0(
 
    hypre_Index           index;
    hypre_Index           index_temp;
-                        
+
    hypre_StructGrid     *cgrid;
    hypre_BoxArray       *cgrid_boxes;
    hypre_Box            *cgrid_box;
@@ -1496,7 +1497,7 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0(
    HYPRE_Int             yOffsetA, yOffsetA_diag, yOffsetA_offd;
    HYPRE_Int             xOffsetP;
    HYPRE_Int             yOffsetP;
-                     
+
    /*hypre_printf("nosym 5.0\n");*/
    stridef = cstride;
    hypre_SetIndex3(stridec, 1, 1, 1);
@@ -1526,8 +1527,8 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0(
 
    /*-----------------------------------------------------------------
     * Extract pointers for interpolation operator:
-    * pa is pointer for weight for f-point above c-point 
-    * pb is pointer for weight for f-point below c-point 
+    * pa is pointer for weight for f-point above c-point
+    * pb is pointer for weight for f-point below c-point
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,-1,0);
@@ -1540,11 +1541,11 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0(
    pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index);
    //RL PTROFFSET
    HYPRE_Int pbOffset = hypre_BoxOffsetDistance(P_dbox, index);
- 
+
    /*-----------------------------------------------------------------
     * Extract pointers for restriction operator:
-    * ra is pointer for weight for f-point above c-point 
-    * rb is pointer for weight for f-point below c-point 
+    * ra is pointer for weight for f-point above c-point
+    * rb is pointer for weight for f-point below c-point
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,-1,0);
@@ -1557,10 +1558,10 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0(
    rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index);
    //RL PTROFFSET
    HYPRE_Int rbOffset = hypre_BoxOffsetDistance(R_dbox, index);
- 
+
    /*-----------------------------------------------------------------
     * Extract pointers for 5-point fine grid operator:
-    * 
+    *
     * a_cc is pointer for center coefficient
     * a_cw is pointer for west coefficient
     * a_ce is pointer for east coefficient
@@ -1613,7 +1614,7 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0(
     *
     * In the BoxLoop below I assume iA and iP refer to data associated
     * with the point which we are building the stencil for. The below
-    * Offsets are used in refering to data associated with other points. 
+    * Offsets are used in refering to data associated with other points.
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,1,0);
@@ -1692,7 +1693,7 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0(
       a_ce_offd = a_ce[iA_offd];
       a_ce_offdm1 = a_ce[iA_offdm1];
       a_ce_offdp1 = a_ce[iA_offdp1];
- 
+
 #define DEVICE_VAR is_device_ptr(rap_cne,ra,pb,rap_cn,a_cc,rap_cnw,rap_ce,rb,pa)
       hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                           P_dbox, cstart, stridec, iP,
@@ -1763,7 +1764,7 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC1(
    HYPRE_Int             yOffsetA;
    HYPRE_Int             xOffsetP;
    HYPRE_Int             yOffsetP;
-                     
+
    /* hypre_printf("nosym 5.1\n");*/
 
    cgrid = hypre_StructMatrixGrid(RAP);
@@ -1776,8 +1777,8 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC1(
 
    /*-----------------------------------------------------------------
     * Extract pointers for interpolation operator:
-    * pa is pointer for weight for f-point above c-point 
-    * pb is pointer for weight for f-point below c-point 
+    * pa is pointer for weight for f-point above c-point
+    * pb is pointer for weight for f-point below c-point
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,-1,0);
@@ -1788,11 +1789,11 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC1(
    MapIndex(index_temp, cdir, index);
 
    pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index);
- 
+
    /*-----------------------------------------------------------------
     * Extract pointers for restriction operator:
-    * ra is pointer for weight for f-point above c-point 
-    * rb is pointer for weight for f-point below c-point 
+    * ra is pointer for weight for f-point above c-point
+    * rb is pointer for weight for f-point below c-point
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,-1,0);
@@ -1803,10 +1804,10 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC1(
    MapIndex(index_temp, cdir, index);
 
    rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index);
- 
+
    /*-----------------------------------------------------------------
     * Extract pointers for 5-point fine grid operator:
-    * 
+    *
     * a_cc is pointer for center coefficient
     * a_cw is pointer for west coefficient
     * a_ce is pointer for east coefficient
@@ -1859,13 +1860,13 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC1(
     *
     * In the BoxLoop below I assume iA and iP refer to data associated
     * with the point which we are building the stencil for. The below
-    * Offsets are used in refering to data associated with other points. 
+    * Offsets are used in refering to data associated with other points.
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
 
-   yOffsetA = 0; 
+   yOffsetA = 0;
    yOffsetP = 0;
 
    hypre_SetIndex3(index_temp,1,0,0);
@@ -1962,7 +1963,7 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC0(
    HYPRE_Int             yOffsetA, yOffsetA_diag, yOffsetA_offd;
    HYPRE_Int             xOffsetP;
    HYPRE_Int             yOffsetP;
-                     
+
    /*hypre_printf("nosym 9.0\n");*/
    stridef = cstride;
    hypre_SetIndex3(stridec, 1, 1, 1);
@@ -1992,8 +1993,8 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC0(
 
    /*-----------------------------------------------------------------
     * Extract pointers for interpolation operator:
-    * pa is pointer for weight for f-point above c-point 
-    * pb is pointer for weight for f-point below c-point 
+    * pa is pointer for weight for f-point above c-point
+    * pb is pointer for weight for f-point below c-point
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,-1,0);
@@ -2006,11 +2007,11 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC0(
    pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index);
    //RL PTROFFSET
    HYPRE_Int pbOffset = hypre_BoxOffsetDistance(P_dbox, index);
- 
+
    /*-----------------------------------------------------------------
     * Extract pointers for restriction operator:
-    * ra is pointer for weight for f-point above c-point 
-    * rb is pointer for weight for f-point below c-point 
+    * ra is pointer for weight for f-point above c-point
+    * rb is pointer for weight for f-point below c-point
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,-1,0);
@@ -2023,10 +2024,10 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC0(
    rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index);
    //RL PTROFFSET
    HYPRE_Int rbOffset = hypre_BoxOffsetDistance(R_dbox, index);
- 
+
    /*-----------------------------------------------------------------
     * Extract pointers for 5-point fine grid operator:
-    * 
+    *
     * a_cc is pointer for center coefficient
     * a_cw is pointer for west coefficient
     * a_ce is pointer for east coefficient
@@ -2100,7 +2101,7 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC0(
     *
     * In the BoxLoop below I assume iA and iP refer to data associated
     * with the point which we are building the stencil for. The below
-    * Offsets are used in refering to data associated with other points. 
+    * Offsets are used in refering to data associated with other points.
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,1,0);
@@ -2280,7 +2281,7 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC1(
    HYPRE_Int             yOffsetA;
    HYPRE_Int             xOffsetP;
    HYPRE_Int             yOffsetP;
-                     
+
    /*hypre_printf("nosym 9.1\n");*/
 
    cgrid = hypre_StructMatrixGrid(RAP);
@@ -2293,8 +2294,8 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC1(
 
    /*-----------------------------------------------------------------
     * Extract pointers for interpolation operator:
-    * pa is pointer for weight for f-point above c-point 
-    * pb is pointer for weight for f-point below c-point 
+    * pa is pointer for weight for f-point above c-point
+    * pb is pointer for weight for f-point below c-point
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,-1,0);
@@ -2305,11 +2306,11 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC1(
    MapIndex(index_temp, cdir, index);
 
    pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index);
- 
+
    /*-----------------------------------------------------------------
     * Extract pointers for restriction operator:
-    * ra is pointer for weight for f-point above c-point 
-    * rb is pointer for weight for f-point below c-point 
+    * ra is pointer for weight for f-point above c-point
+    * rb is pointer for weight for f-point below c-point
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,-1,0);
@@ -2320,10 +2321,10 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC1(
    MapIndex(index_temp, cdir, index);
 
    rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index);
- 
+
    /*-----------------------------------------------------------------
     * Extract pointers for 5-point fine grid operator:
-    * 
+    *
     * a_cc is pointer for center coefficient
     * a_cw is pointer for west coefficient
     * a_ce is pointer for east coefficient
@@ -2397,13 +2398,13 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC1(
     *
     * In the BoxLoop below I assume iA and iP refer to data associated
     * with the point which we are building the stencil for. The below
-    * Offsets are used in refering to data associated with other points. 
+    * Offsets are used in refering to data associated with other points.
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
 
-   yOffsetA = 0; 
+   yOffsetA = 0;
    yOffsetP = 0;
 
    hypre_SetIndex3(index_temp,1,0,0);

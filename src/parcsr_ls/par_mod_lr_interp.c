@@ -1037,12 +1037,15 @@ hypre_BoomerAMGBuildModExtPIInterp(hypre_ParCSRMatrix  *A,
  *  Comment:
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_BoomerAMGBuildModNewExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
-                              hypre_ParCSRMatrix   *S, HYPRE_BigInt *num_cpts_global,
-                              HYPRE_Int debug_flag,
-                              HYPRE_Real trunc_factor, HYPRE_Int max_elmts,
-                              HYPRE_Int *col_offd_S_to_A,
-                              hypre_ParCSRMatrix  **P_ptr)
+hypre_BoomerAMGBuildModNewExtPIInterp(hypre_ParCSRMatrix   *A,
+                                      HYPRE_Int            *CF_marker,
+                                      hypre_ParCSRMatrix   *S,
+                                      HYPRE_BigInt         *num_cpts_global,
+                                      HYPRE_Int             debug_flag,
+                                      HYPRE_Real            trunc_factor,
+                                      HYPRE_Int             max_elmts,
+                                      HYPRE_Int            *col_offd_S_to_A,
+                                      hypre_ParCSRMatrix  **P_ptr)
 {
    /* Communication Variables */
    MPI_Comm                 comm = hypre_ParCSRMatrixComm(A);
@@ -1188,7 +1191,7 @@ hypre_BoomerAMGBuildModNewExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marke
       start_array[my_thread_num+1] = stop;
       for (i=start; i < stop; i++)
       {
-         if (CF_marker[i] > 0) 
+         if (CF_marker[i] > 0)
          {
             cpt_array[my_thread_num]++;
          }
@@ -1343,17 +1346,17 @@ hypre_BoomerAMGBuildModNewExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marke
          }
       }
 
-   }   /* end parallel region */ 
+   }   /* end parallel region */
 
    W = hypre_ParMatmul(As_FF, As_FC);
    W_diag = hypre_ParCSRMatrixDiag(W);
    W_offd = hypre_ParCSRMatrixOffd(W);
-   W_diag_i = hypre_CSRMatrixI(W_diag); 
-   W_diag_j = hypre_CSRMatrixJ(W_diag); 
-   W_diag_data = hypre_CSRMatrixData(W_diag); 
-   W_offd_i = hypre_CSRMatrixI(W_offd); 
-   W_offd_j = hypre_CSRMatrixJ(W_offd); 
-   W_offd_data = hypre_CSRMatrixData(W_offd); 
+   W_diag_i = hypre_CSRMatrixI(W_diag);
+   W_diag_j = hypre_CSRMatrixJ(W_diag);
+   W_diag_data = hypre_CSRMatrixData(W_diag);
+   W_offd_i = hypre_CSRMatrixI(W_offd);
+   W_offd_j = hypre_CSRMatrixJ(W_offd);
+   W_offd_data = hypre_CSRMatrixData(W_offd);
    num_cols_P_offd = hypre_CSRMatrixNumCols(W_offd);
    /*-----------------------------------------------------------------------
     *  Intialize data for P
@@ -1418,8 +1421,8 @@ hypre_BoomerAMGBuildModNewExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marke
          P_offd_i[i+1] = cnt_offd;
       }
 
-   }   /* end parallel region */ 
-   
+   }   /* end parallel region */
+
    /*-----------------------------------------------------------------------
     *  Create matrix
     *-----------------------------------------------------------------------*/
@@ -1468,7 +1471,7 @@ hypre_BoomerAMGBuildModNewExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marke
          P_marker = hypre_CTAlloc(HYPRE_Int, num_cols_P_offd, HYPRE_MEMORY_HOST);
          for (i=0; i < P_offd_size; i++)
             P_marker[P_offd_j[i]] = 1;
-      
+
          new_ncols_P_offd = 0;
          for (i=0; i < num_cols_P_offd; i++)
             if (P_marker[i]) new_ncols_P_offd++;
@@ -1495,8 +1498,8 @@ hypre_BoomerAMGBuildModNewExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marke
                new_ncols_P_offd);
          }
          hypre_TFree(col_map_offd_P, HYPRE_MEMORY_HOST);
-         hypre_ParCSRMatrixColMapOffd(P) = new_col_map_offd; 
-         hypre_CSRMatrixNumCols(P_offd) = new_ncols_P_offd; 
+         hypre_ParCSRMatrixColMapOffd(P) = new_col_map_offd;
+         hypre_CSRMatrixNumCols(P_offd) = new_ncols_P_offd;
          hypre_TFree(map, HYPRE_MEMORY_HOST);
       }
    }

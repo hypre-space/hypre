@@ -16,6 +16,7 @@
 #include "_hypre_IJ_mv.h"
 #include "_hypre_parcsr_mv.h"
 #include "HYPRE_parcsr_ls.h"
+#include "_hypre_utilities.hpp"
 
 HYPRE_Int buildMatrixEntries(MPI_Comm comm,
                              HYPRE_Int nx, HYPRE_Int ny, HYPRE_Int nz,
@@ -68,7 +69,7 @@ HYPRE_Int test_SetAddSet(MPI_Comm comm, HYPRE_MemoryLocation memory_location, HY
 //#define CUDA_PROFILER
 
 hypre_int
-main( HYPRE_Int  argc,
+main( hypre_int  argc,
       char      *argv[] )
 {
    MPI_Comm                  comm = hypre_MPI_COMM_WORLD;
