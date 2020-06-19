@@ -601,35 +601,35 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    #endif
 
    // !!! Debug
-   if (timers)
-   {
-      HYPRE_Int total_nonowned = 0;
-      for (level = 0; level < num_levels; level++)
-      {
-         total_nonowned += hypre_ParCompGridNumNonOwnedNodes(compGrid[level]);
-      }
-      HYPRE_Int local_size_info[2];
-      local_size_info[0] = total_nonowned;
-      local_size_info[1] = total_redundant_sends;
-      HYPRE_Int global_size_info[2];
-      MPI_Reduce(local_size_info, global_size_info, 2, HYPRE_MPI_INT, MPI_SUM, 0, hypre_MPI_COMM_WORLD);
-      if (myid == 0) printf("Total Setup Redundancy = %f\n", ((double) global_size_info[1] + global_size_info[0])/((double) global_size_info[0]));
-   }
+   /* if (timers) */
+   /* { */
+   /*    HYPRE_Int total_nonowned = 0; */
+   /*    for (level = 0; level < num_levels; level++) */
+   /*    { */
+   /*       total_nonowned += hypre_ParCompGridNumNonOwnedNodes(compGrid[level]); */
+   /*    } */
+   /*    HYPRE_Int local_size_info[2]; */
+   /*    local_size_info[0] = total_nonowned; */
+   /*    local_size_info[1] = total_redundant_sends; */
+   /*    HYPRE_Int global_size_info[2]; */
+   /*    MPI_Reduce(local_size_info, global_size_info, 2, HYPRE_MPI_INT, MPI_SUM, 0, hypre_MPI_COMM_WORLD); */
+   /*    if (myid == 0) printf("Total Setup Redundancy = %f\n", ((double) global_size_info[1] + global_size_info[0])/((double) global_size_info[0])); */
+   /* } */
 
    // !!! Timings
-   HYPRE_Real global_total_timings[10];
-   MPI_Reduce(total_timings, global_total_timings, 6, HYPRE_MPI_REAL, MPI_SUM, 0, hypre_MPI_COMM_WORLD);
-   if (myid == 0)
-   {
-      printf("Pack Send Buffer Times: \n");
-      printf("   Total: %e\n", global_total_timings[0]/num_procs);
-      printf("   Expand: %e\n", global_total_timings[1]/num_procs);
-      printf("   Add to send flag: %e\n", global_total_timings[2]/num_procs);
-      printf("   Remove Redundancy: %e\n", global_total_timings[3]/num_procs);
-      printf("   Mark Coarse: %e\n", global_total_timings[4]/num_procs);
-      printf("   Adjust add flag: %e\n", global_total_timings[5]/num_procs);
-      printf("\n");
-   }
+   /* HYPRE_Real global_total_timings[10]; */
+   /* MPI_Reduce(total_timings, global_total_timings, 6, HYPRE_MPI_REAL, MPI_SUM, 0, hypre_MPI_COMM_WORLD); */
+   /* if (myid == 0) */
+   /* { */
+   /*    printf("Pack Send Buffer Times: \n"); */
+   /*    printf("   Total: %e\n", global_total_timings[0]/num_procs); */
+   /*    printf("   Expand: %e\n", global_total_timings[1]/num_procs); */
+   /*    printf("   Add to send flag: %e\n", global_total_timings[2]/num_procs); */
+   /*    printf("   Remove Redundancy: %e\n", global_total_timings[3]/num_procs); */
+   /*    printf("   Mark Coarse: %e\n", global_total_timings[4]/num_procs); */
+   /*    printf("   Adjust add flag: %e\n", global_total_timings[5]/num_procs); */
+   /*    printf("\n"); */
+   /* } */
 
 
    #if DEBUG_COMP_GRID

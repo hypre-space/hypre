@@ -122,8 +122,8 @@ hypre_BoomerAMGDDSolve( void *amg_vdata,
    while ( (relative_resid >= tol || cycle_count < min_iter) && cycle_count < max_iter )
    {
       // Do normal AMG V-cycle downsweep to where we start AMG-DD
-      if (amgdd_start_level > 0) 
-         hypre_BoomerAMGPartialCycle(amg_vdata, hypre_ParAMGDataFArray(amg_data), hypre_ParAMGDataUArray(amg_data), amgdd_start_level-1, 0);
+      /* if (amgdd_start_level > 0) */ 
+      /*    hypre_BoomerAMGPartialCycle(amg_vdata, hypre_ParAMGDataFArray(amg_data), hypre_ParAMGDataUArray(amg_data), amgdd_start_level-1, 0); */
 
       // Do the AMGDD cycle
       if (hypre_ParAMGDataAMGDDUseRD(amg_data) > 1) // Do DD cycles followed by RD cycles
@@ -205,13 +205,13 @@ hypre_BoomerAMGDDSolve( void *amg_vdata,
       /*                            hypre_ParAMGDataZtemp(amg_data) ); */
 
       // Do normal AMG V-cycle upsweep back up to the fine grid
-      if (amgdd_start_level > 0) 
-      {
-         // Interpolate
-         hypre_ParCSRMatrixMatvec(1.0, hypre_ParAMGDataPArray(amg_data)[amgdd_start_level-1], hypre_ParAMGDataUArray(amg_data)[amgdd_start_level], 1.0, hypre_ParAMGDataUArray(amg_data)[amgdd_start_level-1]);
-         // V-cycle back to finest grid
-         hypre_BoomerAMGPartialCycle(amg_vdata, hypre_ParAMGDataFArray(amg_data), hypre_ParAMGDataUArray(amg_data), amgdd_start_level-1, 1);
-      }
+      /* if (amgdd_start_level > 0) */ 
+      /* { */
+      /*    // Interpolate */
+      /*    hypre_ParCSRMatrixMatvec(1.0, hypre_ParAMGDataPArray(amg_data)[amgdd_start_level-1], hypre_ParAMGDataUArray(amg_data)[amgdd_start_level], 1.0, hypre_ParAMGDataUArray(amg_data)[amgdd_start_level-1]); */
+      /*    // V-cycle back to finest grid */
+      /*    hypre_BoomerAMGPartialCycle(amg_vdata, hypre_ParAMGDataFArray(amg_data), hypre_ParAMGDataUArray(amg_data), amgdd_start_level-1, 1); */
+      /* } */
 
       // Calculate a new resiudal
       if (tol > 0.)
