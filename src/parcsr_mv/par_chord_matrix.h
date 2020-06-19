@@ -11,13 +11,8 @@
  *
  *****************************************************************************/
 
-#include <HYPRE_config.h>
-
 #ifndef hypre_PAR_CHORD_MATRIX_HEADER
 #define hypre_PAR_CHORD_MATRIX_HEADER
-
-#include "_hypre_utilities.h"
-#include "seq_mv.h"
 
 /*--------------------------------------------------------------------------
  * Parallel Chord Matrix
@@ -27,37 +22,37 @@ typedef struct
 {
    MPI_Comm comm;
 
-  /*  A structure: -------------------------------------------------------- */
-  HYPRE_Int num_inprocessors;
-  HYPRE_Int *inprocessor;
+   /*  A structure: -------------------------------------------------------- */
+   HYPRE_Int num_inprocessors;
+   HYPRE_Int *inprocessor;
 
-  /* receiving in idof from different (in)processors; ---------------------- */
-  HYPRE_Int *num_idofs_inprocessor; 
-  HYPRE_Int **idof_inprocessor; 
+   /* receiving in idof from different (in)processors; ---------------------- */
+   HYPRE_Int *num_idofs_inprocessor;
+   HYPRE_Int **idof_inprocessor;
 
-  /* symmetric information: ----------------------------------------------- */
-  /* this can be replaces by CSR format: ---------------------------------- */
-  HYPRE_Int     *num_inchords;
-  HYPRE_Int     **inchord_idof;
-  HYPRE_Int     **inchord_rdof;
-  HYPRE_Complex **inchord_data;
+   /* symmetric information: ----------------------------------------------- */
+   /* this can be replaces by CSR format: ---------------------------------- */
+   HYPRE_Int     *num_inchords;
+   HYPRE_Int     **inchord_idof;
+   HYPRE_Int     **inchord_rdof;
+   HYPRE_Complex **inchord_data;
 
-  HYPRE_Int num_idofs;
-  HYPRE_Int num_rdofs;
+   HYPRE_Int num_idofs;
+   HYPRE_Int num_rdofs;
 
-  HYPRE_Int *firstindex_idof; /* not owned by my_id; ---------------------- */
-  HYPRE_Int *firstindex_rdof; /* not owned by my_id; ---------------------- */
+   HYPRE_Int *firstindex_idof; /* not owned by my_id; ---------------------- */
+   HYPRE_Int *firstindex_rdof; /* not owned by my_id; ---------------------- */
 
-  /* --------------------------- mirror information: ---------------------- */
-  /* participation of rdof in different processors; ----------------------- */
+   /* --------------------------- mirror information: ---------------------- */
+   /* participation of rdof in different processors; ----------------------- */
 
-  HYPRE_Int num_toprocessors;
-  HYPRE_Int *toprocessor;
+   HYPRE_Int num_toprocessors;
+   HYPRE_Int *toprocessor;
 
-  /* rdofs to be sentto toprocessors; -------------------------------------
-     ---------------------------------------------------------------------- */
-  HYPRE_Int *num_rdofs_toprocessor;
-  HYPRE_Int **rdof_toprocessor;
+   /* rdofs to be sentto toprocessors; -------------------------------------
+      ---------------------------------------------------------------------- */
+   HYPRE_Int *num_rdofs_toprocessor;
+   HYPRE_Int **rdof_toprocessor;
 
 } hypre_ParChordMatrix;
 
@@ -83,7 +78,7 @@ typedef struct
 #define hypre_ParChordMatrixNumRdofs(matrix)    ((matrix) -> num_rdofs)
 
 #define hypre_ParChordMatrixFirstindexIdof(matrix) ((matrix) -> firstindex_idof)
-#define hypre_ParChordMatrixFirstindexRdof(matrix) ((matrix) -> firstindex_rdof) 
+#define hypre_ParChordMatrixFirstindexRdof(matrix) ((matrix) -> firstindex_rdof)
 
 /* participation of rdof in different processors; ---------- */
 
@@ -92,5 +87,5 @@ typedef struct
 #define hypre_ParChordMatrixNumRdofsToprocessor(matrix) ((matrix) -> num_rdofs_toprocessor)
 #define hypre_ParChordMatrixRdofToprocessor(matrix) ((matrix) -> rdof_toprocessor)
 
-
 #endif
+

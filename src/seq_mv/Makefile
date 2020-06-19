@@ -5,9 +5,6 @@
 
 include ../config/Makefile.config
 
-#FILES_NVCC = gpukernels.cu
-#include $(HYPRE_NVCC_MAKEFILE)
-
 CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
 
 C_COMPILE_FLAGS =\
@@ -29,8 +26,20 @@ HEADERS =\
 
 FILES =\
  csr_matop.c\
+ csr_matop_device.c\
  csr_matrix.c\
  csr_matvec.c\
+ csr_matvec_device.c\
+ csr_matvec_oomp.c\
+ csr_spadd_device.c\
+ csr_spgemm_device.c\
+ csr_spgemm_device_attempt.c\
+ csr_spgemm_device_confident.c\
+ csr_spgemm_device_cusparse.c\
+ csr_spgemm_device_rowbound.c\
+ csr_spgemm_device_rowest.c\
+ csr_spgemm_device_util.c\
+ csr_sptrans_device.c\
  genpart.c\
  HYPRE_csr_matrix.c\
  HYPRE_mapped_matrix.c\
@@ -39,8 +48,7 @@ FILES =\
  mapped_matrix.c\
  multiblock_matrix.c\
  vector.c\
- csr_matvec_oomp.c\
- gpukernels.c
+ vector_batched.c
 
 OBJS = ${FILES:.c=.o}
 #CUOBJS = ${FILES_NVCC:.cu=.o}

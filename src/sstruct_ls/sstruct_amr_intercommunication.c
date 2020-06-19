@@ -32,6 +32,7 @@ hypre_SStructAMRInterCommunication( hypre_SStructSendInfoData *sendinfo,
 
    hypre_BoxArrayArray    *recvboxes;
    HYPRE_Int             **rprocesses;
+   hypre_BoxArrayArray    *recv_rboxes;
    HYPRE_Int             **recv_rboxnums;
 
    hypre_BoxArray         *boxarray;
@@ -61,8 +62,9 @@ hypre_SStructAMRInterCommunication( hypre_SStructSendInfoData *sendinfo,
       }
    }
 
-   recvboxes  = hypre_BoxArrayArrayDuplicate(recvinfo -> recv_boxes);
-   rprocesses = hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArrayArraySize(recvboxes), HYPRE_MEMORY_HOST);
+   recvboxes   = hypre_BoxArrayArrayDuplicate(recvinfo -> recv_boxes);
+   recv_rboxes = hypre_BoxArrayArrayDuplicate(recvinfo -> recv_boxes);
+   rprocesses  = hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArrayArraySize(recvboxes), HYPRE_MEMORY_HOST);
 
    /* dummy pointer for CommInfoCreate */
    recv_rboxnums = hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArrayArraySize(recvboxes), HYPRE_MEMORY_HOST);
@@ -81,8 +83,8 @@ hypre_SStructAMRInterCommunication( hypre_SStructSendInfoData *sendinfo,
 
 
    hypre_CommInfoCreate(sendboxes, recvboxes, sprocesses, rprocesses,
-                        send_rboxnums, recv_rboxnums, send_rboxes, NULL,
-                        1, &comm_info);
+                        send_rboxnums, recv_rboxnums, send_rboxes,
+                        recv_rboxes, 1, &comm_info);
 
    hypre_CommPkgCreate(comm_info,
                        send_data_space,

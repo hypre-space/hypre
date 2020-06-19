@@ -12,8 +12,6 @@
  *****************************************************************************/
 
 #include "seq_mv.h"
-#include <assert.h>
-
 
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixMatvec
@@ -33,18 +31,14 @@ hypre_CSRMatrixMatvecOutOfPlace( HYPRE_Complex    alpha,
    HYPRE_Real time_begin = hypre_MPI_Wtime();
 #endif
 
-#if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY) /* CUDA */
-   PUSH_RANGE_PAYLOAD("MATVEC",0, hypre_CSRMatrixNumRows(A));
+#if defined(HYPRE_USING_CUDA) /* CUDA */
 #ifdef HYPRE_BIGINT
-   HYPRE_Int ierr = hypre_CSRMatrixMatvecDeviceBIGINT( alpha,A,x,beta,b,y,offset );
+   HYPRE_Int ierr = hypre_CSRMatrixMatvecDeviceBIGINT(alpha, A, x, beta, b, y, offset);
 #else
-   HYPRE_Int ierr = hypre_CSRMatrixMatvecDevice( alpha,A,x,beta,b,y,offset );
+   HYPRE_Int ierr = hypre_CSRMatrixMatvecDevice(0, alpha, A, x, beta, b, y, offset);
 #endif
-   POP_RANGE;
-#elif defined(HYPRE_USING_OPENMP_OFFLOAD) /* OMP 4.5 */
-   PUSH_RANGE_PAYLOAD("MATVEC-OMP",0, hypre_CSRMatrixNumRows(A));
-   HYPRE_Int ierr = hypre_CSRMatrixMatvecOutOfPlaceOOMP( alpha,A,x,beta,b,y,offset );
-   POP_RANGE;
+#elif defined(HYPRE_USING_DEVICE_OPENMP) /* OMP 4.5 */
+   HYPRE_Int ierr = hypre_CSRMatrixMatvecOutOfPlaceOOMP(0, alpha, A, x, beta, b, y, offset);
 #else /* CPU */
    HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
    HYPRE_Int        *A_i      = hypre_CSRMatrixI(A) + offset;
@@ -128,7 +122,7 @@ hypre_CSRMatrixMatvecOutOfPlace( HYPRE_Complex    alpha,
 
    temp = beta / alpha;
 
-/* use rownnz pointer to do the A*x multiplication  when num_rownnz is smaller than num_rows */
+   /* use rownnz pointer to do the A*x multiplication  when num_rownnz is smaller than num_rows */
 
    if (num_rownnz < xpar*(num_rows) || num_vectors > 1)
    {
@@ -157,8 +151,8 @@ hypre_CSRMatrixMatvecOutOfPlace( HYPRE_Complex    alpha,
       }
       else
       {
-            for (i = 0; i < num_rows*num_vectors; i++)
-               y_data[i] = b_data[i];
+         for (i = 0; i < num_rows*num_vectors; i++)
+            y_data[i] = b_data[i];
       }
 
 
@@ -237,172 +231,175 @@ hypre_CSRMatrixMatvecOutOfPlace( HYPRE_Complex    alpha,
 #pragma omp parallel private(i,jj,tempx)
 #endif
       {
-      HYPRE_Int iBegin = hypre_CSRMatrixGetLoadBalancedPartitionBegin(A);
-      HYPRE_Int iEnd = hypre_CSRMatrixGetLoadBalancedPartitionEnd(A);
-      hypre_assert(iBegin <= iEnd);
-      hypre_assert(iBegin >= 0 && iBegin <= num_rows);
-      hypre_assert(iEnd >= 0 && iEnd <= num_rows);
+         HYPRE_Int iBegin = hypre_CSRMatrixGetLoadBalancedPartitionBegin(A);
+         HYPRE_Int iEnd = hypre_CSRMatrixGetLoadBalancedPartitionEnd(A);
+         hypre_assert(iBegin <= iEnd);
+         hypre_assert(iBegin >= 0 && iBegin <= num_rows);
+         hypre_assert(iEnd >= 0 && iEnd <= num_rows);
 
-      if (0 == temp)
-      {
-         if (1 == alpha) // JSP: a common path
+         if (0 == temp)
          {
-            for (i = iBegin; i < iEnd; i++)
+            if (1 == alpha) // JSP: a common path
             {
-               tempx = 0.0;
-               for (jj = A_i[i]; jj < A_i[i+1]; jj++)
+               for (i = iBegin; i < iEnd; i++)
                {
-                  tempx += A_data[jj] * x_data[A_j[jj]];
+                  tempx = 0.0;
+                  for (jj = A_i[i]; jj < A_i[i+1]; jj++)
+                  {
+                     tempx += A_data[jj] * x_data[A_j[jj]];
+                  }
+                  y_data[i] = tempx;
                }
-               y_data[i] = tempx;
-            }
-         } // y = A*x
-         else if (-1 == alpha)
+            } // y = A*x
+            else if (-1 == alpha)
+            {
+               for (i = iBegin; i < iEnd; i++)
+               {
+                  tempx = 0.0;
+                  for (jj = A_i[i]; jj < A_i[i+1]; jj++)
+                  {
+                     tempx -= A_data[jj] * x_data[A_j[jj]];
+                  }
+                  y_data[i] = tempx;
+               }
+            } // y = -A*x
+            else
+            {
+               for (i = iBegin; i < iEnd; i++)
+               {
+                  tempx = 0.0;
+                  for (jj = A_i[i]; jj < A_i[i+1]; jj++)
+                  {
+                     tempx += A_data[jj] * x_data[A_j[jj]];
+                  }
+                  y_data[i] = alpha*tempx;
+               }
+            } // y = alpha*A*x
+         } // temp == 0
+         else if (-1 == temp) // beta == -alpha
          {
-            for (i = iBegin; i < iEnd; i++)
+            if (1 == alpha) // JSP: a common path
             {
-               tempx = 0.0;
-               for (jj = A_i[i]; jj < A_i[i+1]; jj++)
+               for (i = iBegin; i < iEnd; i++)
                {
-                  tempx -= A_data[jj] * x_data[A_j[jj]];
+                  tempx = -b_data[i];
+                  for (jj = A_i[i]; jj < A_i[i+1]; jj++)
+                  {
+                     tempx += A_data[jj] * x_data[A_j[jj]];
+                  }
+                  y_data[i] = tempx;
                }
-               y_data[i] = tempx;
-            }
-         } // y = -A*x
+            } // y = A*x - y
+            else if (-1 == alpha) // JSP: a common path
+            {
+               for (i = iBegin; i < iEnd; i++)
+               {
+                  tempx = b_data[i];
+                  for (jj = A_i[i]; jj < A_i[i+1]; jj++)
+                  {
+                     tempx -= A_data[jj] * x_data[A_j[jj]];
+                  }
+                  y_data[i] = tempx;
+               }
+            } // y = -A*x + y
+            else
+            {
+               for (i = iBegin; i < iEnd; i++)
+               {
+                  tempx = -b_data[i];
+                  for (jj = A_i[i]; jj < A_i[i+1]; jj++)
+                  {
+                     tempx += A_data[jj] * x_data[A_j[jj]];
+                  }
+                  y_data[i] = alpha*tempx;
+               }
+            } // y = alpha*(A*x - y)
+         } // temp == -1
+         else if (1 == temp)
+         {
+            if (1 == alpha) // JSP: a common path
+            {
+               for (i = iBegin; i < iEnd; i++)
+               {
+                  tempx = b_data[i];
+                  for (jj = A_i[i]; jj < A_i[i+1]; jj++)
+                  {
+                     tempx += A_data[jj] * x_data[A_j[jj]];
+                  }
+                  y_data[i] = tempx;
+               }
+            } // y = A*x + y
+            else if (-1 == alpha)
+            {
+               for (i = iBegin; i < iEnd; i++)
+               {
+                  tempx = -b_data[i];
+                  for (jj = A_i[i]; jj < A_i[i+1]; jj++)
+                  {
+                     tempx -= A_data[jj] * x_data[A_j[jj]];
+                  }
+                  y_data[i] = tempx;
+               }
+            } // y = -A*x - y
+            else
+            {
+               for (i = iBegin; i < iEnd; i++)
+               {
+                  tempx = b_data[i];
+                  for (jj = A_i[i]; jj < A_i[i+1]; jj++)
+                  {
+                     tempx += A_data[jj] * x_data[A_j[jj]];
+                  }
+                  y_data[i] = alpha*tempx;
+               }
+            } // y = alpha*(A*x + y)
+         }
          else
          {
-            for (i = iBegin; i < iEnd; i++)
+            if (1 == alpha) // JSP: a common path
             {
-               tempx = 0.0;
-               for (jj = A_i[i]; jj < A_i[i+1]; jj++)
+               for (i = iBegin; i < iEnd; i++)
                {
-                  tempx += A_data[jj] * x_data[A_j[jj]];
+                  tempx = b_data[i]*temp;
+                  for (jj = A_i[i]; jj < A_i[i+1]; jj++)
+                  {
+                     tempx += A_data[jj] * x_data[A_j[jj]];
+                  }
+                  y_data[i] = tempx;
                }
-               y_data[i] = alpha*tempx;
-            }
-         } // y = alpha*A*x
-      } // temp == 0
-      else if (-1 == temp) // beta == -alpha
-      {
-         if (1 == alpha) // JSP: a common path
-         {
-            for (i = iBegin; i < iEnd; i++)
+            } // y = A*x + temp*y
+            else if (-1 == alpha)
             {
-               tempx = -b_data[i];
-               for (jj = A_i[i]; jj < A_i[i+1]; jj++)
+               for (i = iBegin; i < iEnd; i++)
                {
-                  tempx += A_data[jj] * x_data[A_j[jj]];
+                  tempx = -b_data[i]*temp;
+                  for (jj = A_i[i]; jj < A_i[i+1]; jj++)
+                  {
+                     tempx -= A_data[jj] * x_data[A_j[jj]];
+                  }
+                  y_data[i] = tempx;
                }
-               y_data[i] = tempx;
-            }
-         } // y = A*x - y
-         else if (-1 == alpha) // JSP: a common path
-         {
-            for (i = iBegin; i < iEnd; i++)
+            } // y = -A*x - temp*y
+            else
             {
-               tempx = b_data[i];
-               for (jj = A_i[i]; jj < A_i[i+1]; jj++)
+               for (i = iBegin; i < iEnd; i++)
                {
-                  tempx -= A_data[jj] * x_data[A_j[jj]];
+                  tempx = b_data[i]*temp;
+                  for (jj = A_i[i]; jj < A_i[i+1]; jj++)
+                  {
+                     tempx += A_data[jj] * x_data[A_j[jj]];
+                  }
+                  y_data[i] = alpha*tempx;
                }
-               y_data[i] = tempx;
-            }
-         } // y = -A*x + y
-         else
-         {
-            for (i = iBegin; i < iEnd; i++)
-            {
-               tempx = -b_data[i];
-               for (jj = A_i[i]; jj < A_i[i+1]; jj++)
-               {
-                  tempx += A_data[jj] * x_data[A_j[jj]];
-               }
-               y_data[i] = alpha*tempx;
-            }
-         } // y = alpha*(A*x - y)
-      } // temp == -1
-      else if (1 == temp)
-      {
-         if (1 == alpha) // JSP: a common path
-         {
-            for (i = iBegin; i < iEnd; i++)
-            {
-               tempx = b_data[i];
-               for (jj = A_i[i]; jj < A_i[i+1]; jj++)
-               {
-                  tempx += A_data[jj] * x_data[A_j[jj]];
-               }
-               y_data[i] = tempx;
-            }
-         } // y = A*x + y
-         else if (-1 == alpha)
-         {
-            for (i = iBegin; i < iEnd; i++)
-            {
-               tempx = -b_data[i];
-               for (jj = A_i[i]; jj < A_i[i+1]; jj++)
-               {
-                  tempx -= A_data[jj] * x_data[A_j[jj]];
-               }
-               y_data[i] = tempx;
-            }
-         } // y = -A*x - y
-         else
-         {
-            for (i = iBegin; i < iEnd; i++)
-            {
-               tempx = b_data[i];
-               for (jj = A_i[i]; jj < A_i[i+1]; jj++)
-               {
-                  tempx += A_data[jj] * x_data[A_j[jj]];
-               }
-               y_data[i] = alpha*tempx;
-            }
-         } // y = alpha*(A*x + y)
-      }
-      else
-      {
-         if (1 == alpha) // JSP: a common path
-         {
-            for (i = iBegin; i < iEnd; i++)
-            {
-               tempx = b_data[i]*temp;
-               for (jj = A_i[i]; jj < A_i[i+1]; jj++)
-               {
-                  tempx += A_data[jj] * x_data[A_j[jj]];
-               }
-               y_data[i] = tempx;
-            }
-         } // y = A*x + temp*y
-         else if (-1 == alpha)
-         {
-            for (i = iBegin; i < iEnd; i++)
-            {
-               tempx = -b_data[i]*temp;
-               for (jj = A_i[i]; jj < A_i[i+1]; jj++)
-               {
-                  tempx -= A_data[jj] * x_data[A_j[jj]];
-               }
-               y_data[i] = tempx;
-            }
-         } // y = -A*x - temp*y
-         else
-         {
-            for (i = iBegin; i < iEnd; i++)
-            {
-               tempx = b_data[i]*temp;
-               for (jj = A_i[i]; jj < A_i[i+1]; jj++)
-               {
-                  tempx += A_data[jj] * x_data[A_j[jj]];
-               }
-               y_data[i] = alpha*tempx;
-            }
-         } // y = alpha*(A*x + temp*y)
-      } // temp != 0 && temp != -1 && temp != 1
+            } // y = alpha*(A*x + temp*y)
+         } // temp != 0 && temp != -1 && temp != 1
       } // omp parallel
    }
 
-   if (x == y) hypre_SeqVectorDestroy(x_tmp);
+   if (x == y)
+   {
+      hypre_SeqVectorDestroy(x_tmp);
+   }
 
 #endif /* CPU */
 
@@ -423,18 +420,6 @@ hypre_CSRMatrixMatvec( HYPRE_Complex    alpha,
    return hypre_CSRMatrixMatvecOutOfPlace(alpha, A, x, beta, y, y, 0);
 }
 
-#if defined (HYPRE_USING_UNIFIED_MEMORY)
-HYPRE_Int
-hypre_CSRMatrixMatvec3( HYPRE_Complex    alpha,
-                       hypre_CSRMatrix *A,
-                       hypre_Vector    *x,
-                       HYPRE_Complex    beta,
-                       hypre_Vector    *y     )
-{
-   return hypre_CSRMatrixMatvecOutOfPlaceOOMP3(alpha, A, x, beta, y, y, 0);
-}
-#endif
-
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixMatvecT
  *
@@ -452,7 +437,11 @@ hypre_CSRMatrixMatvecT( HYPRE_Complex    alpha,
                         HYPRE_Complex    beta,
                         hypre_Vector    *y     )
 {
-
+#if defined(HYPRE_USING_CUDA) /* CUDA */
+   HYPRE_Int ierr = hypre_CSRMatrixMatvecDevice(1, alpha, A, x, beta, y, y, 0 );
+#elif defined(HYPRE_USING_DEVICE_OPENMP) /* OMP 4.5 */
+   HYPRE_Int ierr = hypre_CSRMatrixMatvecOutOfPlaceOOMP(1, alpha, A, x, beta, y, y, 0);
+#else /* CPU */
    HYPRE_Complex    *A_data    = hypre_CSRMatrixData(A);
    HYPRE_Int        *A_i       = hypre_CSRMatrixI(A);
    HYPRE_Int        *A_j       = hypre_CSRMatrixJ(A);
@@ -649,10 +638,14 @@ hypre_CSRMatrixMatvecT( HYPRE_Complex    alpha,
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
       for (i = 0; i < num_cols*num_vectors; i++)
+      {
          y_data[i] *= alpha;
+      }
    }
 
    if (x == y) hypre_SeqVectorDestroy(x_tmp);
+
+#endif
 
    return ierr;
 }
@@ -660,7 +653,6 @@ hypre_CSRMatrixMatvecT( HYPRE_Complex    alpha,
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixMatvec_FF
  *--------------------------------------------------------------------------*/
-
 HYPRE_Int
 hypre_CSRMatrixMatvec_FF( HYPRE_Complex    alpha,
                           hypre_CSRMatrix *A,
@@ -783,192 +775,4 @@ hypre_CSRMatrixMatvec_FF( HYPRE_Complex    alpha,
 
    return ierr;
 }
-#if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
-HYPRE_Int
-hypre_CSRMatrixMatvecDevice( HYPRE_Complex    alpha,
-                             hypre_CSRMatrix *A,
-                             hypre_Vector    *x,
-                             HYPRE_Complex    beta,
-                             hypre_Vector    *b,
-                             hypre_Vector    *y,
-                             HYPRE_Int        offset )
-{
-#ifdef HYPRE_BIGINT
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ERROR: hypre_CSRMatvecDevice should not be called when bigint is enabled!");
-#else
-  static cusparseHandle_t handle;
-  static cusparseMatDescr_t descr;
-  static HYPRE_Int FirstCall=1;
-  cusparseStatus_t status;
-  static cudaStream_t s[10];
-  static HYPRE_Int myid;
 
-  if (b!=y){
-
-    PUSH_RANGE_PAYLOAD("MEMCPY",1,y->size-offset);
-    VecCopy(y->data,b->data,(y->size-offset),HYPRE_STREAM(4));
-    POP_RANGE
-  }
-
-  if (x==y) hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ERROR::x and y are the same pointer in hypre_CSRMatrixMatvecDevice\n");
-
-  if (FirstCall){
-    PUSH_RANGE("FIRST_CALL",4);
-
-    handle=getCusparseHandle();
-
-    status= cusparseCreateMatDescr(&descr);
-    if (status != CUSPARSE_STATUS_SUCCESS) {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ERROR:: Matrix descriptor initialization failed\n");
-      return hypre_error_flag;
-    }
-
-    cusparseSetMatType(descr,CUSPARSE_MATRIX_TYPE_GENERAL);
-    cusparseSetMatIndexBase(descr,CUSPARSE_INDEX_BASE_ZERO);
-
-    FirstCall=0;
-    hypre_int jj;
-    for(jj=0;jj<5;jj++)
-      s[jj]=HYPRE_STREAM(jj);
-    nvtxNameCudaStreamA(s[4], "HYPRE_COMPUTE_STREAM");
-    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
-    myid++;
-    POP_RANGE;
-  }
-
-  PUSH_RANGE("PREFETCH+SPMV",2);
-
-  hypre_CSRMatrixPrefetchToDevice(A);
-  hypre_SeqVectorPrefetchToDevice(x);
-  hypre_SeqVectorPrefetchToDevice(y);
-
-  //if (offset!=0) hypre_printf("WARNING:: Offset is not zero in hypre_CSRMatrixMatvecDevice :: \n");
-#if defined(HYPRE_SINGLE)
-   cusparseErrchk(cusparseScsrmv(handle ,
-                 CUSPARSE_OPERATION_NON_TRANSPOSE,
-                 A->num_rows-offset, A->num_cols, A->num_nonzeros,
-                 &alpha, descr,
-                 A->data ,A->i+offset,A->j,
-                 x->data, &beta, y->data+offset));
-#else
-   cusparseErrchk(cusparseDcsrmv(handle ,
-                 CUSPARSE_OPERATION_NON_TRANSPOSE,
-                 A->num_rows-offset, A->num_cols, A->num_nonzeros,
-                 &alpha, descr,
-                 A->data ,A->i+offset,A->j,
-                 x->data, &beta, y->data+offset));
-#endif
-
-  if (!GetAsyncMode()){
-  hypre_CheckErrorDevice(cudaStreamSynchronize(s[4]));
-  }
-  POP_RANGE;
-#endif
-  return hypre_error_flag;
-
-}
-
-HYPRE_Int
-hypre_CSRMatrixMatvecDeviceBIGINT( HYPRE_Complex    alpha,
-                       hypre_CSRMatrix *A,
-                       hypre_Vector    *x,
-                       HYPRE_Complex    beta,
-                       hypre_Vector    *b,
-                       hypre_Vector    *y,
-                       HYPRE_Int offset )
-{
-#ifdef HYPRE_BIGINT
-  static cusparseHandle_t handle;
-  static cusparseMatDescr_t descr;
-  static HYPRE_Int FirstCall=1;
-  cusparseStatus_t status;
-  static cudaStream_t s[10];
-  static HYPRE_Int myid;
-
-  if (b!=y){
-
-    PUSH_RANGE_PAYLOAD("MEMCPY",1,y->size-offset);
-    VecCopy(y->data,b->data,(y->size-offset),HYPRE_STREAM(4));
-    POP_RANGE
-  }
-
-  if (x==y) fprintf(stderr,"ERROR::x and y are the same pointer in hypre_CSRMatrixMatvecDevice\n");
-
-  if (FirstCall){
-    PUSH_RANGE("FIRST_CALL",4);
-
-    handle=getCusparseHandle();
-
-    status= cusparseCreateMatDescr(&descr);
-    if (status != CUSPARSE_STATUS_SUCCESS) {
-      printf("ERROR:: Matrix descriptor initialization failed\n");
-      exit(2);
-    }
-
-    cusparseSetMatType(descr,CUSPARSE_MATRIX_TYPE_GENERAL);
-    cusparseSetMatIndexBase(descr,CUSPARSE_INDEX_BASE_ZERO);
-
-    FirstCall=0;
-    hypre_int jj;
-    for(jj=0;jj<5;jj++)
-      s[jj]=HYPRE_STREAM(jj);
-    nvtxNameCudaStreamA(s[4], "HYPRE_COMPUTE_STREAM");
-    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
-    myid++;
-    POP_RANGE;
-  }
-
-  PUSH_RANGE("PREFETCH+SPMV",2);
-  hypre_int  num_rows     = hypre_CSRMatrixNumRows(A);
-  hypre_int  num_cols     = hypre_CSRMatrixNumCols(A);
-  hypre_int  num_nonzeros = hypre_CSRMatrixNumNonzeros(A);
-
-  if (A->i_short==NULL) {
-
-
-
-    A->i_short = hypre_CTAlloc(hypre_int,  num_rows + 1, HYPRE_MEMORY_SHARED);
-    A->j_short = hypre_CTAlloc(hypre_int,  num_nonzeros, HYPRE_MEMORY_SHARED);
-
-    hypre_CSRMatrixPrefetchToDevice(A);
-    hypre_CSRMatrixPrefetchToDeviceBIGINT(A);
-
-    BigToSmallCopy(A->i_short,A->i,num_rows+1,0);
-    BigToSmallCopy(A->j_short,A->j,num_nonzeros,0);
-
-    hypre_CheckErrorDevice(cudaStreamSynchronize(0));
-    //hypre_printf("BIGINT MOD :: Arrays copied \n");
-  }
-
-  //hypre_CSRMatrixPrefetchToDevice(A);
-  hypre_SeqVectorPrefetchToDevice(x);
-  hypre_SeqVectorPrefetchToDevice(y);
-
-  if (offset!=0) hypre_error_w_msg(HYPRE_ERROR_GENERIC, "WARNING:: Offset is not zero in hypre_CSRMatrixMatvecDevice \n");
-
-#if defined(HYPRE_SINGLE)
-   cusparseErrchk(cusparseScsrmv(handle ,
-                                CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                num_rows-offset, num_cols, num_nonzeros,
-                                &alpha, descr,
-                                A->data ,A->i_short+offset,A->j_short,
-                                x->data, &beta, y->data+offset));
-#else
-   cusparseErrchk(cusparseDcsrmv(handle ,
-                                CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                num_rows-offset, num_cols, num_nonzeros,
-                                &alpha, descr,
-                                A->data ,A->i_short+offset,A->j_short,
-                                x->data, &beta, y->data+offset));
-#endif
-
-  if (!GetAsyncMode()){
-  hypre_CheckErrorDevice(cudaStreamSynchronize(s[4]));
-  }
-  POP_RANGE;
-#endif
-  return 0;
-
-}
-
-#endif

@@ -89,3 +89,6 @@
 
 /* As F77_FUNC, but for C identifiers containing underscores. */
 #define HYPRE_F77_FUNC_(name,NAME) name ## __
+
+/* Define to 1 if using host memory only */
+#cmakedefine HYPRE_USING_HOST_MEMORY 1

@@ -115,7 +115,6 @@ HYPRE_NAP_INCLUDE = @HYPRE_NAP_INCLUDE@
 ##################################################################
 ##  CUDA options
 ##################################################################
-HYPRE_NVCC_MAKEFILE = @HYPRE_NVCC_MAKEFILE@
 HYPRE_CUDA_INCL = @HYPRE_CUDA_INCL@
 HYPRE_CUDA_LIBS = @HYPRE_CUDA_LIBS@
 

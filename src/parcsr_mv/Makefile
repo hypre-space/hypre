@@ -35,6 +35,7 @@ FILES =\
  F90_par_vector.c\
  HYPRE_parcsr_matrix.c\
  HYPRE_parcsr_vector.c\
+ gen_fffc.c\
  new_commpkg.c\
  numbers.c\
  par_csr_aat.c\
@@ -43,9 +44,12 @@ FILES =\
  par_csr_bool_matrix.c\
  par_csr_communication.c\
  par_csr_matop.c\
+ par_csr_matop_device.c\
  par_csr_matrix.c\
  par_csr_matop_marked.c\
  par_csr_matvec.c\
+ par_csr_triplemat.c\
+ par_csr_triplemat_device.c\
  par_vector.c\
  par_make_system.c
 

@@ -19,7 +19,7 @@ To install HYPRE, please see either the documentation or the file [INSTALL.md](.
 An overview of the HYPRE release history can be found in the file [CHANGELOG](./CHANGELOG).
 
 We appreciate feedback from users.  Please submit comments, suggestions, and
-issue reports to hypre-support@llnl.gov.
+issue reports to hypre-support@llnl.gov. See also [SUPPORT.md](./SUPPORT.md).
 
 
 License

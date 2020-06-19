@@ -14,14 +14,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <assert.h>
 #include <math.h>
 #include "_hypre_utilities.h"
 #include "HYPRE.h"
 #include "LLNL_FEI_Matrix.h"
 
 /**************************************************************************
- Constructor 
+ Constructor
  -------------------------------------------------------------------------*/
 LLNL_FEI_Matrix::LLNL_FEI_Matrix( MPI_Comm comm )
 {
@@ -76,7 +75,7 @@ LLNL_FEI_Matrix::LLNL_FEI_Matrix( MPI_Comm comm )
 }
 
 /**************************************************************************
- destructor 
+ destructor
  -------------------------------------------------------------------------*/
 LLNL_FEI_Matrix::~LLNL_FEI_Matrix()
 {
@@ -145,7 +144,7 @@ int LLNL_FEI_Matrix::resetMatrix(double s)
    if ( sendProcs_       != NULL ) delete [] sendProcs_;
    if ( sendProcIndices_ != NULL ) delete [] sendProcIndices_;
    if ( dSendBufs_       != NULL ) delete [] dSendBufs_;
-   if ( mpiRequests_     != NULL ) delete [] mpiRequests_; 
+   if ( mpiRequests_     != NULL ) delete [] mpiRequests_;
    localNRows_       = 0;
    nConstraints_     = 0;
    extNRows_         = 0;
@@ -178,8 +177,8 @@ int LLNL_FEI_Matrix::resetMatrix(double s)
 /**************************************************************************
  set element and node information
  -------------------------------------------------------------------------*/
-int LLNL_FEI_Matrix::setMatrix(int nRows, int *diagIA, int *diagJA, 
-                    double *diagAA, int extNRows, int *colMap, int *offdIA, 
+int LLNL_FEI_Matrix::setMatrix(int nRows, int *diagIA, int *diagJA,
+                    double *diagAA, int extNRows, int *colMap, int *offdIA,
                     int *offdJA, double *offdAA, double *diagonal,
                     int *eqnOffsets, int *crOffsets)
 {
@@ -260,7 +259,7 @@ int LLNL_FEI_Matrix::setComplete()
 }
 
 /**************************************************************************
- set constraints 
+ set constraints
  -------------------------------------------------------------------------*/
 int LLNL_FEI_Matrix::setConstraints(int nConstr, int *constrEqns)
 {
@@ -273,7 +272,7 @@ int LLNL_FEI_Matrix::setConstraints(int nConstr, int *constrEqns)
 /**************************************************************************
  form residual norm
  -------------------------------------------------------------------------*/
-int LLNL_FEI_Matrix::residualNorm(int whichNorm, double *solnVec, 
+int LLNL_FEI_Matrix::residualNorm(int whichNorm, double *solnVec,
                               double *rhsVec, double* norms)
 {
    int    totalNRows, irow;
@@ -284,15 +283,15 @@ int LLNL_FEI_Matrix::residualNorm(int whichNorm, double *solnVec,
 
    totalNRows = localNRows_ + extNRows_;
    rVec       = new double[totalNRows];
-   matvec( solnVec, rVec ); 
-   for ( irow = 0; irow < localNRows_; irow++ ) 
+   matvec( solnVec, rVec );
+   for ( irow = 0; irow < localNRows_; irow++ )
       rVec[irow] = rhsVec[irow] - rVec[irow];
 
-   switch(whichNorm) 
+   switch(whichNorm)
    {
       case 0:
            rnorm = 0.0;
-           for ( irow = 0; irow < localNRows_; irow++ ) 
+           for ( irow = 0; irow < localNRows_; irow++ )
            {
               dtemp = fabs( rVec[irow] );
               if ( dtemp > rnorm ) rnorm = dtemp;
@@ -302,14 +301,14 @@ int LLNL_FEI_Matrix::residualNorm(int whichNorm, double *solnVec,
            break;
       case 1:
            rnorm = 0.0;
-           for ( irow = 0; irow < localNRows_; irow++ ) 
+           for ( irow = 0; irow < localNRows_; irow++ )
               rnorm += fabs( rVec[irow] );
            MPI_Allreduce(&rnorm, &dtemp, 1, MPI_DOUBLE, MPI_SUM, mpiComm_);
            (*norms) = dtemp;
            break;
       case 2:
            rnorm = 0.0;
-           for ( irow = 0; irow < localNRows_; irow++ ) 
+           for ( irow = 0; irow < localNRows_; irow++ )
               rnorm += rVec[irow] * rVec[irow];
            MPI_Allreduce(&rnorm, &dtemp, 1, MPI_DOUBLE, MPI_SUM, mpiComm_);
            (*norms) = sqrt(dtemp);
@@ -340,10 +339,10 @@ void LLNL_FEI_Matrix::matvec(double *xvec, double *yvec)
     * in case global stiffness matrix has been composed, use it
     * -----------------------------------------------------------------*/
 
-   for ( iD = 0; iD < matDim; iD++ ) 
+   for ( iD = 0; iD < matDim; iD++ )
    {
       ddata = 0.0;
-      for ( iD2 = diagIA_[iD]; iD2 < diagIA_[iD+1]; iD2++ ) 
+      for ( iD2 = diagIA_[iD]; iD2 < diagIA_[iD+1]; iD2++ )
          ddata += diagAA_[iD2] * xvec[diagJA_[iD2]];
       yvec[iD] = ddata;
    }
@@ -354,10 +353,10 @@ void LLNL_FEI_Matrix::matvec(double *xvec, double *yvec)
 
    if ( offdIA_ != NULL )
    {
-      for ( iD = 0; iD < matDim; iD++ ) 
+      for ( iD = 0; iD < matDim; iD++ )
       {
          ddata = 0.0;
-         for ( iD2 = offdIA_[iD]; iD2 < offdIA_[iD+1]; iD2++ ) 
+         for ( iD2 = offdIA_[iD]; iD2 < offdIA_[iD+1]; iD2++ )
            ddata += offdAA_[iD2] * dExtBufs_[offdJA_[iD2]-localNRows_];
          yvec[iD] += ddata;
       }
@@ -391,7 +390,7 @@ void LLNL_FEI_Matrix::scatterDData( double *dvec )
       for ( iD = 0; iD < sendLengs_[iP]; iD++ )
       {
          ind1 = sendProcIndices_[offset+iD];
-         dSendBufs_[offset+iD] = dvec[ind1]; 
+         dSendBufs_[offset+iD] = dvec[ind1];
       }
       MPI_Send( &dSendBufs_[offset], sendLengs_[iP], MPI_DOUBLE,
                 sendProcs_[iP], 40343, mpiComm_);
@@ -405,14 +404,14 @@ void LLNL_FEI_Matrix::scatterDData( double *dvec )
       for ( iD = 0; iD < recvLengs_[iP]; iD++ )
       {
          ind1 = recvProcIndices_[offset+iD] - localNRows_;
-         dExtBufs_[ind1] = dRecvBufs_[offset+iD]; 
+         dExtBufs_[ind1] = dRecvBufs_[offset+iD];
       }
       offset += recvLengs_[iP];
    }
 }
 
 /**************************************************************************
- exchange data between processors 
+ exchange data between processors
  -------------------------------------------------------------------------*/
 void LLNL_FEI_Matrix::gatherAddDData( double *dvec )
 {
@@ -432,7 +431,7 @@ void LLNL_FEI_Matrix::gatherAddDData( double *dvec )
       for ( iD = 0; iD < recvLengs_[iP]; iD++ )
       {
          ind1 = recvProcIndices_[offset+iD];
-         dRecvBufs_[offset+iD] = dvec[ind1]; 
+         dRecvBufs_[offset+iD] = dvec[ind1];
       }
       MPI_Send( &dRecvBufs_[offset], recvLengs_[iP], MPI_DOUBLE,
                 recvProcs_[iP], 40342, mpiComm_);
@@ -446,7 +445,7 @@ void LLNL_FEI_Matrix::gatherAddDData( double *dvec )
       for ( iD = 0; iD < sendLengs_[iP]; iD++ )
       {
          ind1 = sendProcIndices_[offset+iD];
-         dvec[ind1] += dSendBufs_[offset+iD]; 
+         dvec[ind1] += dSendBufs_[offset+iD];
       }
       offset += sendLengs_[iP];
    }
@@ -475,11 +474,11 @@ void LLNL_FEI_Matrix::printMatrix()
    {
       for ( iD2 = diagIA_[iD]; iD2 < diagIA_[iD+1]; iD2++ )
          if ( diagJA_[iD2] == iD )
-            fprintf(fp,"%6d  %6d  %25.16e \n", iD+offset+1, 
+            fprintf(fp,"%6d  %6d  %25.16e \n", iD+offset+1,
                     diagJA_[iD2]+offset+1, diagAA_[iD2]);
       for ( iD2 = diagIA_[iD]; iD2 < diagIA_[iD+1]; iD2++ )
          if ( diagJA_[iD2] != iD )
-            fprintf(fp,"%6d  %6d  %25.16e \n", iD+offset+1, 
+            fprintf(fp,"%6d  %6d  %25.16e \n", iD+offset+1,
                     diagJA_[iD2]+offset+1, diagAA_[iD2]);
       if ( offdIA_ != NULL )
       {
@@ -490,7 +489,7 @@ void LLNL_FEI_Matrix::printMatrix()
          }
       }
    }
-   if ( FLAG_MatrixOverlap_ == 1 ) 
+   if ( FLAG_MatrixOverlap_ == 1 )
    {
       iEnd = localNRows_ + extNRows_;
       for ( iD = localNRows_; iD < iEnd; iD++ )
@@ -530,14 +529,14 @@ void LLNL_FEI_Matrix::printMatrix()
 /**************************************************************************
  perform local matrix matrix multiplication
  -------------------------------------------------------------------------*/
-void LLNL_FEI_Matrix::matMult( int ANRows, int ANCols, int *AIA, int *AJA, 
-             double *AAA, int BNRows, int BNCols, int *BIA, int *BJA, 
-             double *BAA, int *DNRows, int *DNCols, int **DIA, int **DJA, 
+void LLNL_FEI_Matrix::matMult( int ANRows, int ANCols, int *AIA, int *AJA,
+             double *AAA, int BNRows, int BNCols, int *BIA, int *BJA,
+             double *BAA, int *DNRows, int *DNCols, int **DIA, int **DJA,
              double **DAA)
 {
    (void) ANCols;
    (void) BNRows;
-   int    CNRows, CNCols, CNnz, *CReg, ia, ib, ia2, colIndA, colIndB, iTemp; 
+   int    CNRows, CNCols, CNnz, *CReg, ia, ib, ia2, colIndA, colIndB, iTemp;
    int    *CIA, *CJA, offset;
    double dTempA, dTempB, *CAA;
 
@@ -696,12 +695,12 @@ void LLNL_FEI_Matrix::exchangeSubMatrices()
     * construct and fill the communication buffers for sending matrix rows
     * -----------------------------------------------------------------*/
 
-   if ( nRecvs > 0 ) 
+   if ( nRecvs > 0 )
    {
       dRecvBufs = new double*[nRecvs];
       iRecvBufs = new int*[nRecvs];
    }
-   if ( nSends > 0 ) 
+   if ( nSends > 0 )
    {
       dSendBufs = new double*[nSends];
       iSendBufs = new int*[nSends];
@@ -725,7 +724,7 @@ void LLNL_FEI_Matrix::exchangeSubMatrices()
          {
             for ( iD = offdIA_[currRow]; iD < offdIA_[currRow+1]; iD++ )
             {
-               index = extColMap_[offdJA_[iD]-localNRows_]; 
+               index = extColMap_[offdJA_[iD]-localNRows_];
                iSendBufs[iP][count] = index;
                dSendBufs[iP][count++] = offdAA_[iD];
             }
@@ -762,7 +761,7 @@ void LLNL_FEI_Matrix::exchangeSubMatrices()
    for ( iP = 0; iP < nRecvs; iP++ ) MPI_Wait( &requests[iP], &status );
 
    if ( nRecvs > 0 ) delete [] requests;
-   if ( nSends > 0 )  
+   if ( nSends > 0 )
    {
       for ( iP = 0; iP < nSends; iP++ ) delete [] sendRowLengs[iP];
       delete [] sendRowLengs;
@@ -780,12 +779,12 @@ void LLNL_FEI_Matrix::exchangeSubMatrices()
    rowStart = eqnOffset;
    rowEndp1 = rowStart + localNRows_;
    diagRowLengs = new int[localNRows_];
-   for ( iD = 0; iD < localNRows_; iD++ ) 
+   for ( iD = 0; iD < localNRows_; iD++ )
       diagRowLengs[iD] = diagIA_[iD+1] - diagIA_[iD];
    offdRowLengs = new int[localNRows_];
    if ( offdIA_ != NULL )
    {
-      for ( iD = 0; iD < localNRows_; iD++ ) 
+      for ( iD = 0; iD < localNRows_; iD++ )
          offdRowLengs[iD] = offdIA_[iD+1] - offdIA_[iD];
    }
    else
@@ -793,13 +792,13 @@ void LLNL_FEI_Matrix::exchangeSubMatrices()
       for ( iD = 0; iD < localNRows_; iD++ ) offdRowLengs[iD] = 0;
    }
    offset = 0;
-   for ( iP = 0; iP < nSends_; iP++ ) 
+   for ( iP = 0; iP < nSends_; iP++ )
    {
       count = 0;
-      for ( iN = 0; iN < sendLengs_[iP]; iN++ ) 
+      for ( iN = 0; iN < sendLengs_[iP]; iN++ )
       {
          rowInd = sendProcIndices_[offset+iN];
-         for ( iD = 0; iD < recvRowLengs[iP][iN]; iD++ ) 
+         for ( iD = 0; iD < recvRowLengs[iP][iN]; iD++ )
          {
             index = iRecvBufs[iP][count++];
             if ( index >= rowStart && index < rowEndp1 )
@@ -820,12 +819,12 @@ void LLNL_FEI_Matrix::exchangeSubMatrices()
    TdiagJA = new int[newDiagNNZ];
    TdiagAA = new double[newDiagNNZ];
    TdiagIA[0] = 0;
-   for ( iD = 1; iD <= localNRows_; iD++ ) 
+   for ( iD = 1; iD <= localNRows_; iD++ )
       TdiagIA[iD] = TdiagIA[iD-1] + diagRowLengs[iD-1];
-   for ( iD = 0; iD < localNRows_; iD++ ) 
+   for ( iD = 0; iD < localNRows_; iD++ )
    {
       index = TdiagIA[iD];
-      for ( iD2 = diagIA_[iD]; iD2 < diagIA_[iD+1]; iD2++ ) 
+      for ( iD2 = diagIA_[iD]; iD2 < diagIA_[iD+1]; iD2++ )
       {
          TdiagJA[index] = diagJA_[iD2];
          TdiagAA[index] = diagAA_[iD2];
@@ -842,16 +841,16 @@ void LLNL_FEI_Matrix::exchangeSubMatrices()
       ToffdJA = new int[newOffdNNZ];
       ToffdAA = new double[newOffdNNZ];
       ToffdIA[0] = 0;
-      for ( iD = 1; iD <= localNRows_; iD++ ) 
+      for ( iD = 1; iD <= localNRows_; iD++ )
          ToffdIA[iD] = ToffdIA[iD-1] + offdRowLengs[iD-1];
       if ( offdIA_ != NULL )
       {
-         for ( iD = 0; iD < localNRows_; iD++ ) 
+         for ( iD = 0; iD < localNRows_; iD++ )
          {
             index = ToffdIA[iD];
-            for ( iD2 = offdIA_[iD]; iD2 < offdIA_[iD+1]; iD2++ ) 
+            for ( iD2 = offdIA_[iD]; iD2 < offdIA_[iD+1]; iD2++ )
             {
-               count = extColMap_[offdJA_[iD2]-localNRows_]; 
+               count = extColMap_[offdJA_[iD2]-localNRows_];
                ToffdJA[index] = count;
                ToffdAA[index] = offdAA_[iD2];
                index++;
@@ -867,13 +866,13 @@ void LLNL_FEI_Matrix::exchangeSubMatrices()
       }
    }
    offset = 0;
-   for ( iP = 0; iP < nSends_; iP++ ) 
+   for ( iP = 0; iP < nSends_; iP++ )
    {
       count = 0;
-      for ( iN = 0; iN < sendLengs_[iP]; iN++ ) 
+      for ( iN = 0; iN < sendLengs_[iP]; iN++ )
       {
          rowInd = sendProcIndices_[offset+iN];
-         for ( iD = 0; iD < recvRowLengs[iP][iN]; iD++ ) 
+         for ( iD = 0; iD < recvRowLengs[iP][iN]; iD++ )
          {
             index = iRecvBufs[iP][count];
             if ( index >= rowStart && index < rowEndp1 )
@@ -891,7 +890,7 @@ void LLNL_FEI_Matrix::exchangeSubMatrices()
       }
       offset += sendLengs_[iP];
    }
-   if (nRecvs > 0) 
+   if (nRecvs > 0)
    {
       for ( iP = 0; iP < nRecvs; iP++ ) delete [] iRecvBufs[iP];
       for ( iP = 0; iP < nRecvs; iP++ ) delete [] dRecvBufs[iP];
@@ -908,15 +907,15 @@ void LLNL_FEI_Matrix::exchangeSubMatrices()
     * -----------------------------------------------------------------*/
 
    TdiagIA[0] = 0;
-   for ( iD = 1; iD <= localNRows_; iD++ ) 
+   for ( iD = 1; iD <= localNRows_; iD++ )
       TdiagIA[iD] = TdiagIA[iD-1] + diagRowLengs[iD-1];
-   for ( iD = 0; iD < localNRows_; iD++ ) 
+   for ( iD = 0; iD < localNRows_; iD++ )
    {
       index = TdiagIA[iD];
       leng  = diagRowLengs[iD];
       IntSort2a(&(TdiagJA[index]),&(TdiagAA[index]),0,leng-1);
       count = index;
-      for ( iN = index+1; iN < index+leng; iN++ ) 
+      for ( iN = index+1; iN < index+leng; iN++ )
       {
          if ( TdiagJA[iN] != TdiagJA[count] )
          {
@@ -936,11 +935,11 @@ void LLNL_FEI_Matrix::exchangeSubMatrices()
    diagAA_ = new double[newDiagNNZ];
    newDiagNNZ = 0;
    diagIA_[0] = newDiagNNZ;
-   for ( iD = 0; iD < localNRows_; iD++ ) 
+   for ( iD = 0; iD < localNRows_; iD++ )
    {
       index = TdiagIA[iD];
       leng  = diagRowLengs[iD];
-      for ( iN = index; iN < index+leng; iN++ ) 
+      for ( iN = index; iN < index+leng; iN++ )
       {
          diagJA_[newDiagNNZ] = TdiagJA[iN];
          diagAA_[newDiagNNZ++] = TdiagAA[iN];
@@ -959,16 +958,16 @@ void LLNL_FEI_Matrix::exchangeSubMatrices()
    if ( newOffdNNZ > 0 )
    {
       ToffdIA[0] = 0;
-      for ( iD = 1; iD <= localNRows_; iD++ ) 
+      for ( iD = 1; iD <= localNRows_; iD++ )
          ToffdIA[iD] = ToffdIA[iD-1] + offdRowLengs[iD-1];
       newOffdNNZ = 0;
-      for ( iD = 0; iD < localNRows_; iD++ ) 
+      for ( iD = 0; iD < localNRows_; iD++ )
       {
          index = ToffdIA[iD];
          leng  = offdRowLengs[iD];
          IntSort2a(&(ToffdJA[index]),&(ToffdAA[index]),0,leng-1);
          count = index;
-         for ( iN = index+1; iN < index+leng; iN++ ) 
+         for ( iN = index+1; iN < index+leng; iN++ )
          {
             if ( ToffdJA[iN] != ToffdJA[count] )
             {
@@ -980,14 +979,14 @@ void LLNL_FEI_Matrix::exchangeSubMatrices()
          }
          if ( leng > 0 ) offdRowLengs[iD] = count - index + 1;
          else            offdRowLengs[iD] = 0;
-         for ( iN = 0; iN < offdRowLengs[iD]; iN++ ) 
+         for ( iN = 0; iN < offdRowLengs[iD]; iN++ )
          {
             ToffdJA[newOffdNNZ] = ToffdJA[index+iN];
             ToffdAA[newOffdNNZ++] = ToffdAA[index+iN];
          }
       }
    }
-   
+
    /* -----------------------------------------------------------------
     * sort the off-diagonal block to find distinct indices and construct
     * new receive information
@@ -1001,20 +1000,20 @@ void LLNL_FEI_Matrix::exchangeSubMatrices()
       /* sort all the off-diagonal indices */
 
       iSortArray1 = new int[newOffdNNZ];
-      for ( iD = 0; iD < newOffdNNZ; iD++ ) iSortArray1[iD] = ToffdJA[iD]; 
+      for ( iD = 0; iD < newOffdNNZ; iD++ ) iSortArray1[iD] = ToffdJA[iD];
       iSortArray2 = new int[newOffdNNZ];
-      for ( iD = 0; iD < newOffdNNZ; iD++ ) iSortArray2[iD] = iD; 
+      for ( iD = 0; iD < newOffdNNZ; iD++ ) iSortArray2[iD] = iD;
       IntSort2(iSortArray1, iSortArray2, 0, newOffdNNZ-1);
 
       /* put the short list in iShortList and the offset in iSortArray1 */
 
       totalRecvs = 0;
       index = iSortArray1[0];
-      for ( iD = 1; iD < newOffdNNZ; iD++ ) 
+      for ( iD = 1; iD < newOffdNNZ; iD++ )
       {
-         if ( iSortArray1[iD] != index ) 
+         if ( iSortArray1[iD] != index )
          {
-            totalRecvs++; 
+            totalRecvs++;
             index = iSortArray1[iD];
          }
       }
@@ -1024,12 +1023,12 @@ void LLNL_FEI_Matrix::exchangeSubMatrices()
       index = iSortArray1[0];
       iShortList[0] = iSortArray1[0];
       iSortArray1[0] = totalRecvs;
-      for ( iD = 1; iD < newOffdNNZ; iD++ ) 
+      for ( iD = 1; iD < newOffdNNZ; iD++ )
       {
-         if ( iSortArray1[iD] != index ) 
+         if ( iSortArray1[iD] != index )
          {
-            totalRecvs++; 
-            index = iSortArray1[iD]; 
+            totalRecvs++;
+            index = iSortArray1[iD];
             iShortList[totalRecvs] = index;
          }
          iSortArray1[iD] = totalRecvs;
@@ -1041,24 +1040,24 @@ void LLNL_FEI_Matrix::exchangeSubMatrices()
 
       /* convert the indices in ToffdJA */
 
-      for ( iD = 0; iD < newOffdNNZ; iD++ ) 
+      for ( iD = 0; iD < newOffdNNZ; iD++ )
          ToffdJA[iSortArray2[iD]] = iSortArray1[iD] + localNRows_;
 
       /* compress the Toffd matrix */
 
       ToffdIA[0] = 0;
-      for ( iD = 1; iD <= localNRows_; iD++ ) 
+      for ( iD = 1; iD <= localNRows_; iD++ )
          ToffdIA[iD] = ToffdIA[iD-1] + offdRowLengs[iD-1];
 
       offdIA_ = ToffdIA;
       offdJA_ = new int[newOffdNNZ];
       offdAA_ = new double[newOffdNNZ];
       newOffdNNZ = 0;
-      for ( iD = 0; iD < localNRows_; iD++ ) 
+      for ( iD = 0; iD < localNRows_; iD++ )
       {
          index = ToffdIA[iD];
          leng  = offdRowLengs[iD];
-         for ( iN = index; iN < index+leng; iN++ ) 
+         for ( iN = index; iN < index+leng; iN++ )
          {
             offdJA_[newOffdNNZ] = ToffdJA[iN];
             offdAA_[newOffdNNZ++] = ToffdAA[iN];
@@ -1070,8 +1069,8 @@ void LLNL_FEI_Matrix::exchangeSubMatrices()
       /* construct nRecvs, recvLengs and recvProcs */
 
       procLengs = new int[nprocs+1];
-      for ( iP = 0; iP < nprocs; iP++ ) procLengs[iP] = 0; 
-      for ( iP = 0; iP <= nprocs; iP++ ) 
+      for ( iP = 0; iP < nprocs; iP++ ) procLengs[iP] = 0;
+      for ( iP = 0; iP <= nprocs; iP++ )
       {
          index = globalEqnOffsets_[iP];
          iD2 = BinarySearch2(iShortList,0,totalRecvs,index);
@@ -1081,8 +1080,8 @@ void LLNL_FEI_Matrix::exchangeSubMatrices()
          procLengs[iP] = iD2;
       }
       nRecvs = 0;
-      for ( iP = 0; iP < nprocs; iP++ ) 
-         if ( procLengs[iP] != procLengs[iP+1] ) nRecvs++; 
+      for ( iP = 0; iP < nprocs; iP++ )
+         if ( procLengs[iP] != procLengs[iP+1] ) nRecvs++;
       if ( nRecvs > 0 )
       {
          recvProcs = new int[nRecvs];
@@ -1094,11 +1093,11 @@ void LLNL_FEI_Matrix::exchangeSubMatrices()
          recvLengs = NULL;
       }
       nRecvs = 0;
-      for ( iP = 0; iP < nprocs; iP++ ) 
-         if ( procLengs[iP] != procLengs[iP+1] ) 
+      for ( iP = 0; iP < nprocs; iP++ )
+         if ( procLengs[iP] != procLengs[iP+1] )
          {
-            recvLengs[nRecvs] = procLengs[iP+1] - procLengs[iP]; 
-            recvProcs[nRecvs++] = iP; 
+            recvLengs[nRecvs] = procLengs[iP+1] - procLengs[iP];
+            recvProcs[nRecvs++] = iP;
          }
       delete [] iSortArray1;
       delete [] iSortArray2;
@@ -1115,7 +1114,7 @@ void LLNL_FEI_Matrix::exchangeSubMatrices()
    delete [] offdRowLengs;
 
    /* -----------------------------------------------------------------
-    * diagnostics 
+    * diagnostics
     * -----------------------------------------------------------------*/
 
 #if 0
@@ -1123,8 +1122,8 @@ void LLNL_FEI_Matrix::exchangeSubMatrices()
    char fname[20];
    sprintf(fname,"extMap.%d",mypid_);
    FILE *fp = fopen(fname, "w");
-   for ( iD = 0; iD < extNRows_; iD++ ) 
-      fprintf(fp,"%10d %10d\n",iD,extColMap_[iD]); 
+   for ( iD = 0; iD < extNRows_; iD++ )
+      fprintf(fp,"%10d %10d\n",iD,extColMap_[iD]);
    for ( iP = 0; iP < nRecvs; iP++ )
       fprintf(fp,"recv proc = %10d, length = %10d\n",recvProcs[iP],
               recvLengs[iP]);
@@ -1153,16 +1152,16 @@ void LLNL_FEI_Matrix::exchangeSubMatrices()
       requests  = new MPI_Request[nSends];
    }
    for ( iP = 0; iP < nSends; iP++ )
-      MPI_Irecv(&(sendLengs[iP]),1,MPI_INT,MPI_ANY_SOURCE,12233,mpiComm_, 
+      MPI_Irecv(&(sendLengs[iP]),1,MPI_INT,MPI_ANY_SOURCE,12233,mpiComm_,
                 &requests[iP]);
    for ( iP = 0; iP < nRecvs; iP++ )
       MPI_Send(&(recvLengs[iP]),1,MPI_INT,recvProcs[iP],12233,mpiComm_);
-   for ( iP = 0; iP < nSends; iP++ ) 
+   for ( iP = 0; iP < nSends; iP++ )
    {
       MPI_Wait( &requests[iP], &status );
       sendProcs[iP] = status.MPI_SOURCE;
    }
-   if ( nSends > 0 ) 
+   if ( nSends > 0 )
    {
       count = 0;
       for ( iP = 0; iP < nSends; iP++ ) count += sendLengs[iP];
@@ -1205,10 +1204,10 @@ void LLNL_FEI_Matrix::exchangeSubMatrices()
    {
       for ( iN = 0; iN < sendLengs_[iP]; iN++ )
       {
-         if ( sendProcIndices[count+iN] < eqnOffset || 
+         if ( sendProcIndices[count+iN] < eqnOffset ||
               sendProcIndices[count+iN] >= eqnOffset+localNRows_ )
-            printf("%4d : exchangeSubMatrices ERROR : sendIndex %d (%d,%d).\n", 
-                   mypid_, sendProcIndices[count+iN], eqnOffset, 
+            printf("%4d : exchangeSubMatrices ERROR : sendIndex %d (%d,%d).\n",
+                   mypid_, sendProcIndices[count+iN], eqnOffset,
                    eqnOffset+localNRows_);
          else
             sendProcIndices[count+iN] -= eqnOffset;
@@ -1236,7 +1235,7 @@ void LLNL_FEI_Matrix::exchangeSubMatrices()
    if (nRecvs_+nSends_ > 0) mpiRequests_ = new MPI_Request[nRecvs_+nSends_];
 
    /* -----------------------------------------------------------------
-    * diagnostics 
+    * diagnostics
     * -----------------------------------------------------------------*/
 
 #if 0
@@ -1245,7 +1244,7 @@ void LLNL_FEI_Matrix::exchangeSubMatrices()
    sprintf(fname,"commInfo.%d",mypid_);
    FILE *fp = fopen(fname, "w");
    count = 0;
-   for ( iP = 0; iP < nRecvs_; iP++ ) 
+   for ( iP = 0; iP < nRecvs_; iP++ )
    {
       fprintf(fp,"recv from %10d = %10d\n",recvProcs_[iP],recvLengs_[iP]);
       for ( iD = 0; iD < recvLengs_[iP]; iD++ )
@@ -1255,7 +1254,7 @@ void LLNL_FEI_Matrix::exchangeSubMatrices()
       }
    }
    count = 0;
-   for ( iP = 0; iP < nSends_; iP++ ) 
+   for ( iP = 0; iP < nSends_; iP++ )
    {
       fprintf(fp,"send  to  %10d = %10d\n",sendProcs_[iP],sendLengs_[iP]);
       for ( iD = 0; iD < sendLengs_[iP]; iD++ )
@@ -1279,7 +1278,7 @@ int LLNL_FEI_Matrix::BinarySearch2(int *map, int start, int mapSize, int num)
    int k, khi, klo ;
 
    if (map == NULL) return -1 ;
-   
+
    klo = start ;
    khi = start + mapSize;
    k = ((khi+klo) >> 1) + 1 ;

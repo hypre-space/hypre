@@ -62,3 +62,6 @@ Final Relative Residual Norm = 3.701014e-07
 Iterations = 7
 Final Relative Residual Norm = 3.701014e-07
 
+# Output file: periodic.out.60
+Iterations = 10
+Final Relative Residual Norm = 1.565392e-07

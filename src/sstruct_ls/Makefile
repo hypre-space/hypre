@@ -18,6 +18,7 @@ C_COMPILE_FLAGS = \
  -I$(srcdir)/../seq_mv\
  -I$(srcdir)/../parcsr_mv\
  -I$(srcdir)/../IJ_mv\
+ -I$(srcdir)/../parcsr_block_mv\
  -I$(srcdir)/../sstruct_mv\
  -I$(srcdir)/../struct_ls\
  -I$(srcdir)/../parcsr_ls\

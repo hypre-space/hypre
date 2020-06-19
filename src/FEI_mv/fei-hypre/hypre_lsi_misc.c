@@ -8,7 +8,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <assert.h>
 
 #include "utilities/_hypre_utilities.h"
 #include "IJ_mv/HYPRE_IJ_mv.h"
@@ -28,7 +27,7 @@ extern void hypre_qsort1(int*, double*, int, int);
 /* (read by a single processor)                                            */
 /*-------------------------------------------------------------------------*/
 
-void HYPRE_LSI_Get_IJAMatrixFromFile(double **val, int **ia, 
+void HYPRE_LSI_Get_IJAMatrixFromFile(double **val, int **ia,
      int **ja, int *N, double **rhs, char *matfile, char *rhsfile)
 {
     int    i, j, Nrows, nnz, icount, rowindex, colindex, curr_row;
@@ -179,8 +178,8 @@ int HYPRE_LSI_Search2(int key, int nlist, int *list)
 /* this function extracts the matrix in a CSR format                        */
 /* ------------------------------------------------------------------------ */
 
-int HYPRE_LSI_GetParCSRMatrix(HYPRE_IJMatrix Amat, int nrows, int nnz, 
-                              int *ia_ptr, int *ja_ptr, double *a_ptr) 
+int HYPRE_LSI_GetParCSRMatrix(HYPRE_IJMatrix Amat, int nrows, int nnz,
+                              int *ia_ptr, int *ja_ptr, double *a_ptr)
 {
     int                nz, i, j, ierr, rowSize, *colInd, nz_ptr, *colInd2;
     int                firstNnz;
@@ -200,7 +199,7 @@ int HYPRE_LSI_GetParCSRMatrix(HYPRE_IJMatrix Amat, int nrows, int nnz,
     for ( i = 0; i < nrows; i++ )
     {
        ierr = HYPRE_ParCSRMatrixGetRow(A_csr,i,&rowSize,&colInd,&colVal);
-       assert(!ierr);
+       hypre_assert(!ierr);
        colInd2 = hypre_TAlloc(int, rowSize , HYPRE_MEMORY_HOST);
        colVal2 = hypre_TAlloc(double, rowSize , HYPRE_MEMORY_HOST);
        for ( j = 0; j < rowSize; j++ )
@@ -218,18 +217,18 @@ int HYPRE_LSI_GetParCSRMatrix(HYPRE_IJMatrix Amat, int nrows, int nnz,
        {
           if ( colVal2[j] != 0.0 )
           {
-             if (nz_ptr > 0 && firstNnz > 0 && colInd2[j] == ja_ptr[nz_ptr-1]) 
+             if (nz_ptr > 0 && firstNnz > 0 && colInd2[j] == ja_ptr[nz_ptr-1])
              {
                 a_ptr[nz_ptr-1] += colVal2[j];
                 printf("HYPRE_LSI_GetParCSRMatrix:: repeated col in row %d\n",i);
              }
              else
-             { 
+             {
                 ja_ptr[nz_ptr] = colInd2[j];
                 a_ptr[nz_ptr++]  = colVal2[j];
                 if ( nz_ptr > nnz )
                 {
-                   printf("HYPRE_LSI_GetParCSRMatrix Error (1) - %d %d.\n",i, 
+                   printf("HYPRE_LSI_GetParCSRMatrix Error (1) - %d %d.\n",i,
                           nrows);
                    exit(1);
                 }
@@ -241,8 +240,8 @@ int HYPRE_LSI_GetParCSRMatrix(HYPRE_IJMatrix Amat, int nrows, int nnz,
        free( colVal2 );
        ia_ptr[i+1] = nz_ptr;
        ierr = HYPRE_ParCSRMatrixRestoreRow(A_csr,i,&rowSize,&colInd,&colVal);
-       assert(!ierr);
-    }   
+       hypre_assert(!ierr);
+    }
     /*
     if ( nnz != nz_ptr )
     {
@@ -386,8 +385,8 @@ int HYPRE_LSI_SplitDSort(double *dlist, int nlist, int *ilist, int limit)
    first = 0;
    last  = nlist - 1;
 
-   do 
-   { 
+   do
+   {
       cur_index = first;
       cur_val = dlist[cur_index];
 
@@ -403,7 +402,7 @@ int HYPRE_LSI_SplitDSort(double *dlist, int nlist, int *ilist, int limit)
             dlist[cur_index] = dlist[i];
             dlist[i] = dtemp;
          }
-      } 
+      }
       itemp = ilist[cur_index];
       ilist[cur_index] = ilist[first];
       ilist[first] = itemp;
@@ -411,8 +410,8 @@ int HYPRE_LSI_SplitDSort(double *dlist, int nlist, int *ilist, int limit)
       dlist[cur_index] = dlist[first];
       dlist[first] = dtemp;
 
-      if ( cur_index > limit ) last = cur_index - 1; 
-      else if ( cur_index < limit ) first = cur_index + 1; 
+      if ( cur_index > limit ) last = cur_index - 1;
+      else if ( cur_index < limit ) first = cur_index + 1;
    } while ( cur_index != limit );
 
    return 0;
@@ -453,17 +452,17 @@ int HYPRE_LSI_Cuthill(int n, int *ia, int *ja, double *aa, int *order_array,
    root   = -1;
    for ( i = 0; i < n; i++ )
    {
-      if ( nz_array[i] == 1 ) 
+      if ( nz_array[i] == 1 )
       {
          tag_array[i] = 1;
          order_array[norder++] = i;
          reorder_array[i] = norder-1;
       }
-      else if ( nz_array[i] < mindeg ) 
+      else if ( nz_array[i] < mindeg )
       {
          mindeg = nz_array[i];
          root = i;
-      } 
+      }
    }
    if ( root == -1 )
    {
@@ -481,7 +480,7 @@ int HYPRE_LSI_Cuthill(int n, int *ia, int *ja, double *aa, int *order_array,
       reorder_array[root] = norder - 1;
       for ( j = ia[root]; j < ia[root+1]; j++ )
       {
-         if ( tag_array[ja[j]] == 0 ) 
+         if ( tag_array[ja[j]] == 0 )
          {
             tag_array[ja[j]] = 1;
             queue[nqueue++] = ja[j];
@@ -490,7 +489,7 @@ int HYPRE_LSI_Cuthill(int n, int *ia, int *ja, double *aa, int *order_array,
       if ( qhead == nqueue && norder < n )
          for ( j = 0; j < n; j++ )
             if ( tag_array[j] == 0 ) queue[nqueue++] = j;
-   }   
+   }
    ia2 = hypre_TAlloc(int,  (n+1) , HYPRE_MEMORY_HOST);
    ja2 = hypre_TAlloc(int,  nnz , HYPRE_MEMORY_HOST);
    aa2 = hypre_TAlloc(double,  nnz , HYPRE_MEMORY_HOST);
@@ -501,13 +500,13 @@ int HYPRE_LSI_Cuthill(int n, int *ia, int *ja, double *aa, int *order_array,
       cnt = order_array[i];
       for ( j = ia[cnt]; j < ia[cnt+1]; j++ )
       {
-         ja2[nnz] = ja[j]; 
-         aa2[nnz++] = aa[j]; 
+         ja2[nnz] = ja[j];
+         aa2[nnz++] = aa[j];
       }
       ia2[i+1] = nnz;
    }
-   for ( i = 0; i < nnz; i++ ) ja[i] = reorder_array[ja2[i]]; 
-   for ( i = 0; i < nnz; i++ ) aa[i] = aa2[i]; 
+   for ( i = 0; i < nnz; i++ ) ja[i] = reorder_array[ja2[i]];
+   for ( i = 0; i < nnz; i++ ) aa[i] = aa2[i];
    for ( i = 0; i <= n; i++ )  ia[i] = ia2[i];
    free( ia2 );
    free( ja2 );
@@ -516,7 +515,7 @@ int HYPRE_LSI_Cuthill(int n, int *ia, int *ja, double *aa, int *order_array,
    free( tag_array );
    free( queue );
    return 0;
-}   
+}
 
 /* ******************************************************************** */
 /* matrix of a dense matrix                                             */
@@ -528,12 +527,12 @@ int HYPRE_LSI_MatrixInverse( double **Amat, int ndim, double ***Cmat )
    double denom, **Bmat, dmax;
 
    (*Cmat) = NULL;
-   if ( ndim == 1 ) 
+   if ( ndim == 1 )
    {
       if ( habs(Amat[0][0]) <= 1.0e-16 ) return -1;
       Bmat = hypre_TAlloc(double*,  ndim , HYPRE_MEMORY_HOST);
-      for ( i = 0; i < ndim; i++ ) 
-         Bmat[i] = hypre_TAlloc(double,  ndim , HYPRE_MEMORY_HOST); 
+      for ( i = 0; i < ndim; i++ )
+         Bmat[i] = hypre_TAlloc(double,  ndim , HYPRE_MEMORY_HOST);
       Bmat[0][0] = 1.0 / Amat[0][0];
       (*Cmat) = Bmat;
       return 0;
@@ -543,8 +542,8 @@ int HYPRE_LSI_MatrixInverse( double **Amat, int ndim, double ***Cmat )
       denom = Amat[0][0] * Amat[1][1] - Amat[0][1] * Amat[1][0];
       if ( habs( denom ) <= 1.0e-16 ) return -1;
       Bmat = hypre_TAlloc(double*,  ndim , HYPRE_MEMORY_HOST);
-      for ( i = 0; i < ndim; i++ ) 
-         Bmat[i] = hypre_TAlloc(double,  ndim , HYPRE_MEMORY_HOST); 
+      for ( i = 0; i < ndim; i++ )
+         Bmat[i] = hypre_TAlloc(double,  ndim , HYPRE_MEMORY_HOST);
       Bmat[0][0] = Amat[1][1] / denom;
       Bmat[1][1] = Amat[0][0] / denom;
       Bmat[0][1] = - ( Amat[0][1] / denom );
@@ -555,55 +554,55 @@ int HYPRE_LSI_MatrixInverse( double **Amat, int ndim, double ***Cmat )
    else
    {
       Bmat = hypre_TAlloc(double*,  ndim , HYPRE_MEMORY_HOST);
-      for ( i = 0; i < ndim; i++ ) 
-      { 
-         Bmat[i] = hypre_TAlloc(double,  ndim , HYPRE_MEMORY_HOST); 
+      for ( i = 0; i < ndim; i++ )
+      {
+         Bmat[i] = hypre_TAlloc(double,  ndim , HYPRE_MEMORY_HOST);
          for ( j = 0; j < ndim; j++ ) Bmat[i][j] = 0.0;
          Bmat[i][i] = 1.0;
-      } 
-      for ( i = 1; i < ndim; i++ ) 
+      }
+      for ( i = 1; i < ndim; i++ )
       {
-         for ( j = 0; j < i; j++ ) 
+         for ( j = 0; j < i; j++ )
          {
             if ( habs(Amat[j][j]) < 1.0e-16 ) return -1;
             denom = Amat[i][j] / Amat[j][j];
-            for ( k = 0; k < ndim; k++ ) 
+            for ( k = 0; k < ndim; k++ )
             {
                Amat[i][k] -= denom * Amat[j][k];
                Bmat[i][k] -= denom * Bmat[j][k];
             }
          }
       }
-      for ( i = ndim-2; i >= 0; i-- ) 
+      for ( i = ndim-2; i >= 0; i-- )
       {
-         for ( j = ndim-1; j >= i+1; j-- ) 
+         for ( j = ndim-1; j >= i+1; j-- )
          {
             if ( habs(Amat[j][j]) < 1.0e-16 ) return -1;
             denom = Amat[i][j] / Amat[j][j];
-            for ( k = 0; k < ndim; k++ ) 
+            for ( k = 0; k < ndim; k++ )
             {
                Amat[i][k] -= denom * Amat[j][k];
                Bmat[i][k] -= denom * Bmat[j][k];
             }
          }
       }
-      for ( i = 0; i < ndim; i++ ) 
+      for ( i = 0; i < ndim; i++ )
       {
          denom = Amat[i][i];
          if ( habs(denom) < 1.0e-16 ) return -1;
          for ( j = 0; j < ndim; j++ ) Bmat[i][j] /= denom;
       }
 
-      for ( i = 0; i < ndim; i++ ) 
-         for ( j = 0; j < ndim; j++ ) 
+      for ( i = 0; i < ndim; i++ )
+         for ( j = 0; j < ndim; j++ )
             if ( habs(Bmat[i][j]) < 1.0e-17 ) Bmat[i][j] = 0.0;
       dmax = 0.0;
-      for ( i = 0; i < ndim; i++ ) 
+      for ( i = 0; i < ndim; i++ )
       {
-         for ( j = 0; j < ndim; j++ ) 
+         for ( j = 0; j < ndim; j++ )
             if ( habs(Bmat[i][j]) > dmax ) dmax = habs(Bmat[i][j]);
 /*
-         for ( j = 0; j < ndim; j++ ) 
+         for ( j = 0; j < ndim; j++ )
             if ( habs(Bmat[i][j]/dmax) < 1.0e-15 ) Bmat[i][j] = 0.0;
 */
       }
@@ -622,22 +621,22 @@ int HYPRE_LSI_PartitionMatrix( int nRows, int startRow, int *rowLengths,
                                int *nLabels, int **labels)
 {
    int irow, rowCnt, labelNum, *localLabels, actualNRows;
-   int jcol, root, indHead, indTail, *indSet, index; 
+   int jcol, root, indHead, indTail, *indSet, index;
 
    /*----------------------------------------------------------------*/
    /* search for constraint rows                                     */
    /*----------------------------------------------------------------*/
 
-   for ( irow = nRows-1; irow >= 0; irow-- ) 
+   for ( irow = nRows-1; irow >= 0; irow-- )
    {
       index = irow + startRow;
-      for ( jcol = 0; jcol < rowLengths[irow]; jcol++ ) 
+      for ( jcol = 0; jcol < rowLengths[irow]; jcol++ )
          if (colIndices[irow][jcol] == index && colValues[irow][jcol] != 0.0)
             break;
       if ( jcol != rowLengths[irow] ) break;
    }
    (*nLabels) = actualNRows = irow + 1;
- 
+
    /*----------------------------------------------------------------*/
    /* search for constraint rows                                     */
    /*----------------------------------------------------------------*/
@@ -645,7 +644,7 @@ int HYPRE_LSI_PartitionMatrix( int nRows, int startRow, int *rowLengths,
    localLabels = hypre_TAlloc(int,  actualNRows , HYPRE_MEMORY_HOST);
    for ( irow = 0; irow < actualNRows; irow++ ) localLabels[irow] = -1;
    indSet = hypre_TAlloc(int,  actualNRows , HYPRE_MEMORY_HOST);
-   
+
    labelNum = 0;
    rowCnt   = actualNRows;
 
@@ -660,15 +659,15 @@ int HYPRE_LSI_PartitionMatrix( int nRows, int startRow, int *rowLengths,
          exit(1);
       }
       indHead = indTail = 0;
-      localLabels[root] = labelNum; 
+      localLabels[root] = labelNum;
       rowCnt--;
       for ( jcol = 0; jcol < rowLengths[root]; jcol++ )
       {
          index = colIndices[root][jcol] - startRow;
-         if ( index >= 0 && index < actualNRows && localLabels[index] < 0 ) 
+         if ( index >= 0 && index < actualNRows && localLabels[index] < 0 )
          {
             indSet[indTail++] = index;
-            localLabels[index] = labelNum; 
+            localLabels[index] = labelNum;
          }
       }
       while ( (indTail - indHead) > 0 )
@@ -678,30 +677,30 @@ int HYPRE_LSI_PartitionMatrix( int nRows, int startRow, int *rowLengths,
          for ( jcol = 0; jcol < rowLengths[root]; jcol++ )
          {
             index = colIndices[root][jcol] - startRow;
-            if ( index >= 0 && index < actualNRows && localLabels[index] < 0 ) 
+            if ( index >= 0 && index < actualNRows && localLabels[index] < 0 )
             {
                indSet[indTail++] = index;
-               localLabels[index] = labelNum; 
+               localLabels[index] = labelNum;
             }
          }
       }
       labelNum++;
    }
-   if ( labelNum > 4 )       
+   if ( labelNum > 4 )
    {
       printf("HYPRE_LSI_PartitionMatrix : number of labels %d too large.\n",
              labelNum+1);
       free( localLabels );
-      (*nLabels) = 0; 
-      (*labels)  = NULL; 
+      (*nLabels) = 0;
+      (*labels)  = NULL;
    }
    else
    {
       printf("HYPRE_LSI_PartitionMatrix : number of labels = %d.\n",
              labelNum);
-      (*labels)  = localLabels; 
+      (*labels)  = localLabels;
    }
    free( indSet );
    return 0;
-} 
+}
 

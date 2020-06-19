@@ -698,9 +698,9 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
       ic++;
    } /* outermost loop, for (i=0,...), for each C-pt find restriction */
 
-   hypre_assert(ic == n_cpts)
-   hypre_assert(cnt_diag == nnz_diag)
-   hypre_assert(cnt_offd == nnz_offd)
+   hypre_assert(ic == n_cpts);
+   hypre_assert(cnt_diag == nnz_diag);
+   hypre_assert(cnt_offd == nnz_offd);
 
    /* num of cols in the offd part of R */
    num_cols_offd_R = 0;
@@ -970,12 +970,12 @@ void hypre_ordered_GS(const HYPRE_Complex L[],
                       const HYPRE_Int n)
 {
    // Get triangular ordering of L^T in col major as ordering of L in row major
-   HYPRE_Int ordering[n];
+   HYPRE_Int *ordering = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
    hypre_dense_topo_sort(L, ordering, n, 0);
 
    // Ordered Gauss-Seidel iteration
    HYPRE_Int i, col;
-   for (i=0; i<n; i++)
+   for (i = 0; i < n; i++)
    {
       HYPRE_Int row = ordering[i];
       HYPRE_Complex temp = rhs[row];
@@ -996,5 +996,7 @@ void hypre_ordered_GS(const HYPRE_Complex L[],
          x[row] = temp / diag;
       }
    }
+
+   hypre_TFree(ordering, HYPRE_MEMORY_HOST);
 }
 

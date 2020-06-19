@@ -7,14 +7,13 @@
 
 /******************************************************************************
  *
- * PrunedRows - Collection of pruned rows that are cached on the local 
+ * PrunedRows - Collection of pruned rows that are cached on the local
  * processor.  Direct access to these rows is available, via the local
  * index number.
  *
  *****************************************************************************/
 
 #include <stdlib.h>
-#include <assert.h>
 #include "Common.h"
 #include "Mem.h"
 #include "Matrix.h"
@@ -32,11 +31,11 @@
  * diag_scale - diagonal scale object used to scale the thresholding (input)
  * thresh     - threshold for pruning the matrix (input)
  *
- * The local pruned rows are stored in the first part of the len and ind 
+ * The local pruned rows are stored in the first part of the len and ind
  * arrays.
  *--------------------------------------------------------------------------*/
 
-PrunedRows *PrunedRowsCreate(Matrix *mat, HYPRE_Int size, DiagScale *diag_scale, 
+PrunedRows *PrunedRowsCreate(Matrix *mat, HYPRE_Int size, DiagScale *diag_scale,
   HYPRE_Real thresh)
 {
     HYPRE_Int row, len, *ind, count, j, *data;
@@ -60,7 +59,7 @@ PrunedRows *PrunedRowsCreate(Matrix *mat, HYPRE_Int size, DiagScale *diag_scale,
         for (j=0; j<len; j++)
         {
             temp = DiagScaleGet(diag_scale, row);
-            if (temp*ABS(val[j])*DiagScaleGet(diag_scale, ind[j]) 
+            if (temp*ABS(val[j])*DiagScaleGet(diag_scale, ind[j])
               >= thresh && ind[j] != row)
                 count++;
         }
@@ -73,7 +72,7 @@ PrunedRows *PrunedRowsCreate(Matrix *mat, HYPRE_Int size, DiagScale *diag_scale,
         for (j=0; j<len; j++)
         {
             temp = DiagScaleGet(diag_scale, row);
-            if (temp*ABS(val[j])*DiagScaleGet(diag_scale, ind[j]) 
+            if (temp*ABS(val[j])*DiagScaleGet(diag_scale, ind[j])
               >= thresh && ind[j] != row)
                 *data++ = ind[j];
         }
@@ -127,7 +126,7 @@ void PrunedRowsPut(PrunedRows *p, HYPRE_Int index, HYPRE_Int len, HYPRE_Int *ind
 }
 
 /*--------------------------------------------------------------------------
- * PrunedRowsGet - Return the row with index "index" through the pointers 
+ * PrunedRowsGet - Return the row with index "index" through the pointers
  * "lenp" and "indp" in the pruned rows object "p".
  *--------------------------------------------------------------------------*/
 

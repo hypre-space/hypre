@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+#if 0
 /******************************************************************************
  *
  * Header info for the hypre_IJMatrix structures
@@ -27,16 +28,17 @@ typedef struct hypre_IJMatrix_struct
 
    HYPRE_Int     object_type;         /* Indicates the type of "object" */
    void         *object;              /* Structure for storing local portion */
-   void         *translator;          /* optional storage_type specfic structure
-                                       for holding additional local info */
-   void         *assumed_part;	   /* IJMatrix assumed partition */
-   HYPRE_Int     assemble_flag;       /* indicates whether matrix has been 
-				       assembled */
+   void         *translator;          /* optional storage_type specific structure
+                                         for holding additional local info */
+   void         *assumed_part;        /* IJMatrix assumed partition */
+   HYPRE_Int     assemble_flag;       /* indicates whether matrix has been
+                                         assembled */
 
-   HYPRE_BigInt  global_first_row;    /* these for data items are necessary */
-   HYPRE_BigInt  global_first_col;    /*   to be able to avoind using the global */
-   HYPRE_BigInt  global_num_rows;     /*   global partition */ 
+   HYPRE_BigInt  global_first_row;    /* these four data items are necessary */
+   HYPRE_BigInt  global_first_col;    /* to be able to avoid using the global */
+   HYPRE_BigInt  global_num_rows;     /* global partition */
    HYPRE_BigInt  global_num_cols;
+
    HYPRE_Int     omp_flag;
    HYPRE_Int     print_level;
 
@@ -75,11 +77,13 @@ typedef struct hypre_IJMatrix_struct
 HYPRE_Int
 hypre_GetIJMatrixParCSRMatrix( HYPRE_IJMatrix IJmatrix, Mat *reference )
 #endif
-  
+
 #ifdef ISIS_AVAILABLE
 /* IJMatrix_isis.c */
 HYPRE_Int
 hypre_GetIJMatrixISISMatrix( HYPRE_IJMatrix IJmatrix, RowMatrix *reference )
+#endif
+
 #endif
 
 #endif

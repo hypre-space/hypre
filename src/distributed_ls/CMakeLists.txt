@@ -4,13 +4,9 @@
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 set(HDRS "")
-set(SRCS "")
 
 add_subdirectory(Euclid)
 add_subdirectory(ParaSails)
 add_subdirectory(pilut)
 
 set(HYPRE_HEADERS ${HYPRE_HEADERS} ${HDRS} PARENT_SCOPE)
-set(HYPRE_SOURCES ${HYPRE_SOURCES} ${SRCS} PARENT_SCOPE)
-
-

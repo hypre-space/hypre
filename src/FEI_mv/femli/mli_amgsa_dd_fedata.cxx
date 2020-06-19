@@ -14,7 +14,6 @@
 // ---------------------------------------------------------------------
 
 #include <string.h>
-#include <assert.h>
 
 // *********************************************************************
 // HYPRE includes external to MLI
@@ -177,9 +176,9 @@ int MLI_Method_AMGSA::setupFEDataBasedNullSpaces( MLI *mli )
    csrNrows = newNNodes * blockSize;
    csrIA    = new int[csrNrows+1];
    csrJA    = new int[csrNrows*rowSize];
-   assert( ((long) csrJA) );
+   hypre_assert( ((long) csrJA) );
    csrAA    = new double[csrNrows*rowSize];
-   assert( ((long) csrAA) );
+   hypre_assert( ((long) csrAA) );
    csrIA[0] = 0;
    for ( i = 1; i < csrNrows; i++ ) csrIA[i] = csrIA[i-1] + rowSize;
 
@@ -298,7 +297,7 @@ int MLI_Method_AMGSA::setupFEDataBasedNullSpaces( MLI *mli )
    eigenR = new double[nullspaceDim_+1];
    eigenI = new double[nullspaceDim_+1];
    eigenV = new double[csrNrows*(nullspaceDim_+1)];
-   assert((long) eigenV);
+   hypre_assert((long) eigenV);
 
 #ifdef MLI_ARPACK
    sigmaR = 1.0e-5;

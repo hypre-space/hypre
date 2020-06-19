@@ -40,8 +40,10 @@ FILES =\
  IJ_assumed_part.c\
  IJMatrix.c\
  IJMatrix_parcsr.c\
+ IJMatrix_parcsr_device.c\
  IJVector.c\
- IJVector_parcsr.c
+ IJVector_parcsr.c\
+ IJVector_parcsr_device.c
 
 OBJS = ${FILES:.c=.o}
 

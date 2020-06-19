@@ -52,7 +52,7 @@ static void Axpy(HYPRE_Int n, HYPRE_Real alpha, HYPRE_Real *x, HYPRE_Real *y)
 /*--------------------------------------------------------------------------
  * PCG_ParaSails - PCG solver using ParaSails.
  * Use NULL for ps if to get unpreconditioned solve.
- * Solver will stop at step 500 if rel. resid. norm reduction is not less 
+ * Solver will stop at step 500 if rel. resid. norm reduction is not less
  * than 0.1 at that point.
  *--------------------------------------------------------------------------*/
 
@@ -93,7 +93,7 @@ void PCG_ParaSails(Matrix *mat, ParaSails *ps, HYPRE_Real *b, HYPRE_Real *x,
    MatrixMatvec(mat, x, r);  /* r = Ax */
    ScaleVector(n, -1.0, r);  /* r = -r */
    Axpy(n, 1.0, b, r);       /* r = r + b */
- 
+
    /* p = C*r */
    if (ps != NULL)
       ParaSailsApply(ps, r, p);
@@ -120,7 +120,7 @@ void PCG_ParaSails(Matrix *mat, ParaSails *ps, HYPRE_Real *b, HYPRE_Real *x,
 
       /* r = r - alpha*s */
       Axpy(n, -alpha, s, r);
-         
+
       /* s = C*r */
       if (ps != NULL)
          ParaSailsApply(ps, r, s);
@@ -149,12 +149,12 @@ void PCG_ParaSails(Matrix *mat, ParaSails *ps, HYPRE_Real *b, HYPRE_Real *x,
             hypre_printf("Aborting solve due to slow or no convergence.\n");
          break;
       }
- 
+
       /* beta = gamma / gamma_old */
       beta = gamma / gamma_old;
 
       /* p = s + beta p */
-      ScaleVector(n, beta, p);   
+      ScaleVector(n, beta, p);
       Axpy(n, 1.0, s, p);
    }
 

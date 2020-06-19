@@ -5,8 +5,6 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
-#include <assert.h>
-
 #include "_hypre_parcsr_ls.h"
 #include "interpreter.h"
 #include "HYPRE_MatvecFunctions.h"
@@ -37,38 +35,38 @@ HYPRE_Int hypre_ParVectorSize(void * x)
 }
 
 HYPRE_Int
-hypre_ParCSRMultiVectorPrint( void* x_, const char* fileName ) {
+HYPRE_ParCSRMultiVectorPrint( void* x_, const char* fileName ) {
 
   HYPRE_Int i, ierr;
   mv_TempMultiVector* x;
   char fullName[128];
-  
+
   x = (mv_TempMultiVector*)x_;
   hypre_assert( x != NULL );
 
   ierr = 0;
   for ( i = 0; i < x->numVectors; i++ ) {
-    hypre_sprintf( fullName, "%s.%d", fileName, i ); 
-    ierr = ierr || 
+    hypre_sprintf( fullName, "%s.%d", fileName, i );
+    ierr = ierr ||
       hypre_ParPrintVector( x->vector[i], fullName );
   }
   return ierr;
 }
-							
-void* 
-hypre_ParCSRMultiVectorRead( MPI_Comm comm, void* ii_, const char* fileName ) {
+
+void*
+HYPRE_ParCSRMultiVectorRead( MPI_Comm comm, void* ii_, const char* fileName ) {
 
   HYPRE_Int i, n, id;
   FILE* fp;
   char fullName[128];
   mv_TempMultiVector* x;
   mv_InterfaceInterpreter* ii = (mv_InterfaceInterpreter*)ii_;
-  
+
   hypre_MPI_Comm_rank( comm, &id );
-  
+
   n = 0;
   do {
-    hypre_sprintf( fullName, "%s.%d.%d", fileName, n, id ); 
+    hypre_sprintf( fullName, "%s.%d.%d", fileName, n, id );
     if ( (fp = fopen(fullName, "r")) ) {
 	  n++;
       fclose( fp );
@@ -80,18 +78,18 @@ hypre_ParCSRMultiVectorRead( MPI_Comm comm, void* ii_, const char* fileName ) {
 
   x = hypre_TAlloc(mv_TempMultiVector, 1, HYPRE_MEMORY_HOST);
   hypre_assert( x != NULL );
-  
+
   x->interpreter = ii;
 
   x->numVectors = n;
-  
+
   x->vector = hypre_CTAlloc(void*,  n, HYPRE_MEMORY_HOST);
   hypre_assert( x->vector != NULL );
 
   x->ownsVectors = 1;
 
   for ( i = 0; i < n; i++ ) {
-    hypre_sprintf( fullName, "%s.%d", fileName, i ); 
+    hypre_sprintf( fullName, "%s.%d", fileName, i );
     x->vector[i] = hypre_ParReadVector( comm, fullName );
   }
 
@@ -100,7 +98,7 @@ hypre_ParCSRMultiVectorRead( MPI_Comm comm, void* ii_, const char* fileName ) {
 
   return x;
 }
-							
+
 HYPRE_Int
 aux_maskCount( HYPRE_Int n, HYPRE_Int* mask ) {
 
@@ -120,7 +118,7 @@ void
 aux_indexFromMask( HYPRE_Int n, HYPRE_Int* mask, HYPRE_Int* index ) {
 
   HYPRE_Int i, j;
-  
+
   if ( mask != NULL ) {
     for ( i = 0, j = 0; i < n; i++ )
       if ( mask[i] )
@@ -133,12 +131,12 @@ aux_indexFromMask( HYPRE_Int n, HYPRE_Int* mask, HYPRE_Int* index ) {
 }
 
 
-/* The function below is a temporary one that fills the multivector 
-   part of the HYPRE_InterfaceInterpreter structure with pointers 
-   that come from the temporary implementation of the multivector 
-   (cf. temp_multivector.h). 
+/* The function below is a temporary one that fills the multivector
+   part of the HYPRE_InterfaceInterpreter structure with pointers
+   that come from the temporary implementation of the multivector
+   (cf. temp_multivector.h).
    It must be eventually replaced with a function that
-   provides the respective pointers to properly implemented 
+   provides the respective pointers to properly implemented
    parcsr multivector functions */
 
 HYPRE_Int
@@ -147,8 +145,8 @@ HYPRE_TempParCSRSetupInterpreter( mv_InterfaceInterpreter *i )
   /* Vector part */
 
   i->CreateVector = hypre_ParKrylovCreateVector;
-  i->DestroyVector = hypre_ParKrylovDestroyVector; 
-  i->InnerProd = hypre_ParKrylovInnerProd; 
+  i->DestroyVector = hypre_ParKrylovDestroyVector;
+  i->InnerProd = hypre_ParKrylovInnerProd;
   i->CopyVector = hypre_ParKrylovCopyVector;
   i->ClearVector = hypre_ParKrylovClearVector;
   i->SetRandomValues = hypre_ParSetRandomValues;
@@ -184,7 +182,7 @@ HYPRE_ParCSRSetupInterpreter( mv_InterfaceInterpreter *i )
   return HYPRE_TempParCSRSetupInterpreter( i );
 }
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_ParCSRSetupMatvec(HYPRE_MatvecFunctions * mv)
 {
   mv->MatvecCreate = hypre_ParKrylovMatvecCreate;

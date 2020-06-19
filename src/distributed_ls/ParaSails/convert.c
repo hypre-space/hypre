@@ -25,14 +25,14 @@ HYPRE_Int convert(FILE *infile, FILE *outfile)
     HYPRE_Int i, j;
 
     /* skip the comment section */
-    do 
+    do
     {
-        if (fgets(line, MM_MAX_LINE_LENGTH, infile) == NULL) 
+        if (fgets(line, MM_MAX_LINE_LENGTH, infile) == NULL)
             return -1;
     }
     while (line[0] == '%');
 
-    hypre_sscanf(line, "%d %d %d", &M, &N, &nz); 
+    hypre_sscanf(line, "%d %d %d", &M, &N, &nz);
 
     hypre_printf("%d %d %d\n", M, N, nz);
     nnz = 2*nz - M;
@@ -58,7 +58,7 @@ HYPRE_Int convert(FILE *infile, FILE *outfile)
     /* allocate space for whole matrix */
     ind = hypre_TAlloc(HYPRE_Int, nnz , HYPRE_MEMORY_HOST);
     val = hypre_TAlloc(HYPRE_Real, nnz , HYPRE_MEMORY_HOST);
-    
+
     /* set pointer to beginning of each row */
     pointers[1] = 0;
     for (i=2; i<=M; i++)

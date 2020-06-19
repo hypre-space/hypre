@@ -103,7 +103,7 @@ hypre_InitializeTiming( const char *name )
          old_name      = (hypre_global_timing_ref(threadid, name));
          old_state     = (hypre_global_timing_ref(threadid, state));
          old_num_regs  = (hypre_global_timing_ref(threadid, num_regs));
-    
+
          (hypre_global_timing_ref(threadid, wall_time)) =
             hypre_CTAlloc(HYPRE_Real,  (time_index+1), HYPRE_MEMORY_HOST);
          (hypre_global_timing_ref(threadid, cpu_time))  =
@@ -176,7 +176,7 @@ hypre_FinalizeTiming( HYPRE_Int time_index )
    if ((hypre_global_timing -> num_names) == 0)
    {
       for (i = 0; i < (hypre_global_timing -> size); i++)
-      {  
+      {
          hypre_TFree(hypre_global_timing_ref(i,  wall_time), HYPRE_MEMORY_HOST);
          hypre_TFree(hypre_global_timing_ref(i,  cpu_time), HYPRE_MEMORY_HOST);
          hypre_TFree(hypre_global_timing_ref(i,  flops), HYPRE_MEMORY_HOST);
@@ -184,7 +184,7 @@ hypre_FinalizeTiming( HYPRE_Int time_index )
          hypre_TFree(hypre_global_timing_ref(i,  state), HYPRE_MEMORY_HOST);
          hypre_TFree(hypre_global_timing_ref(i,  num_regs), HYPRE_MEMORY_HOST);
       }
-      
+
       hypre_TFree(hypre_global_timing, HYPRE_MEMORY_HOST);
       hypre_global_timing = NULL;
    }

@@ -103,7 +103,10 @@ function MpirunString
          shift
          RunString="srun -n$*"
          ;;
-
+      pascal*)
+         shift
+         RunString="srun -n$*"
+         ;;
       *)
          shift
          if [ $NumThreads -gt 0 ] ; then
