@@ -11,10 +11,46 @@
  *
  *****************************************************************************/
 
+#include <cuda_runtime_api.h>
+
 #include "seq_mv.h"
 #include "_hypre_utilities.hpp"
 
+
 #if defined(HYPRE_USING_CUDA)
+
+#ifndef CUDART_VERSION
+#error CUDART_VERSION Undefined!
+#endif
+
+#if (CUDART_VERSION >= 11000)
+
+#if (defined(HYPRE_BIGINT) || defined(HYPRE_MIXEDINT) || defined(HYPRE_SINGLE) || defined(HYPRE_LONG_DOUBLE))
+#error "Cuda datatypes not dynamically determined"
+#endif
+
+//TODO: Move to a separate file
+//TODO: Determine cuda types from hypre types 
+//TODO: Does HYPRE_Int type impact these functions?
+
+cusparseSpMatDescr_t hypre_CSRMatToCuda(const hypre_CSRMatrix *A, HYPRE_Int offset) {
+   const cudaDataType data_type = CUDA_R_64F;
+   const cusparseIndexType_t index_type = CUSPARSE_INDEX_32I;
+   const cusparseIndexBase_t index_base = CUSPARSE_INDEX_BASE_ZERO;
+
+   cusparseSpMatDescr_t matA;
+   HYPRE_CUSPARSE_CALL(cusparseCreateCsr(&matA, A->num_rows-offset, A->num_cols, A->num_nonzeros, A->i+offset, A->j, A->data, index_type, index_type, index_base, data_type));
+   return matA;
+}
+
+cusparseDnVecDescr_t hypre_VecToCuda(const hypre_Vector *x, HYPRE_Int offset) {
+   const cudaDataType data_type = CUDA_R_64F;
+   cusparseDnVecDescr_t vecX;
+   HYPRE_CUSPARSE_CALL(cusparseCreateDnVec(&vecX, x->size-offset, x->data+offset, data_type));
+   return vecX;
+}
+#endif
+
 HYPRE_Int
 hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
                              HYPRE_Complex    alpha,
@@ -30,7 +66,6 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
 #else
 
    cusparseHandle_t handle = hypre_HandleCusparseHandle(hypre_handle());
-   cusparseMatDescr_t descr = hypre_HandleCusparseMatDescr(hypre_handle());
 
    //hypre_CSRMatrixPrefetch(A, HYPRE_MEMORY_DEVICE);
    //hypre_SeqVectorPrefetch(x, HYPRE_MEMORY_DEVICE);
@@ -60,6 +95,48 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
 
    hypre_assert(offset == 0);
 
+//The generic API is techinically supported on 10.1,10.2 as a preview, with Dscrmv being deprecated. However, there are limitations.
+//While in Cuda < 11, there are specific mentions of using csr2csc involving transposed matrix products with dcsrm*, they are not present in SpMV interface.
+//TODO: Investigation is required to see if the csr2csc provides performance benefits.
+//
+#ifndef CUDART_VERSION
+#error CUDART_VERSION Undefined!
+#elif (CUDART_VERSION >= 11000)
+   //Cusparse does not seem to handle the case when a vector has size 0
+   if((A->num_cols == 0) || (A->num_rows - offset == 0))
+   {
+   } 
+   else
+   {
+      cusparseSpMatDescr_t matA = hypre_CSRMatToCuda(A, offset);
+      cusparseDnVecDescr_t vecX = hypre_VecToCuda(x, offset);
+      cusparseDnVecDescr_t vecY = hypre_VecToCuda(y, offset);
+      //TODO: See if alternate buffer system is recommended
+      void* dBuffer = NULL;
+      size_t bufferSize;
+      
+      const cusparseSpMVAlg_t alg = CUSPARSE_MV_ALG_DEFAULT;
+      const cusparseOperation_t oper = trans?CUSPARSE_OPERATION_TRANSPOSE:CUSPARSE_OPERATION_NON_TRANSPOSE;
+      //TODO: Dynamically determine type
+      const cudaDataType data_type = CUDA_R_64F;
+
+      //TODO: Profile to see if need to handle transpose intentionally
+      if(trans)
+      {
+      }
+      
+      HYPRE_CUSPARSE_CALL(cusparseSpMV_bufferSize(handle, oper, &alpha, matA, vecX, &beta, vecY, data_type, alg, &bufferSize));
+      HYPRE_CUDA_CALL(cudaMalloc(&dBuffer, bufferSize));
+      HYPRE_CUSPARSE_CALL(cusparseSpMV(handle, oper, &alpha, matA, vecX, &beta, vecY, data_type, alg, dBuffer));
+
+      HYPRE_CUSPARSE_CALL(cusparseDestroySpMat(matA));
+      HYPRE_CUSPARSE_CALL(cusparseDestroyDnVec(vecX));
+      HYPRE_CUSPARSE_CALL(cusparseDestroyDnVec(vecY));
+      HYPRE_CUDA_CALL(cudaFree(dBuffer));
+   }
+#else
+   cusparseMatDescr_t descr = hypre_HandleCusparseMatDescr(hypre_handle());
+
    if (trans)
    {
       HYPRE_Complex *csc_a = hypre_TAlloc(HYPRE_Complex, A->num_nonzeros, HYPRE_MEMORY_DEVICE);
@@ -88,6 +165,7 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
                            A->data, A->i+offset, A->j,
                            x->data, &beta, y->data+offset) );
    }
+#endif
 
    hypre_SyncCudaComputeStream(hypre_handle());
 #endif

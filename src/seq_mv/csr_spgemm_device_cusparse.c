@@ -101,7 +101,11 @@ hypreDevice_CSRSpGemmCusparse(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
 
    d_ic = hypre_TAlloc(HYPRE_Int, m+1, HYPRE_MEMORY_DEVICE);
 
-   //
+   // TODO: Update Cuda calls to 11
+   if(true) 
+   {
+     assert(false && "ABCD");
+#if 0
    HYPRE_CUSPARSE_CALL(
          cusparseXcsrgemmNnz(cusparsehandle, transA, transB,
                              m, n, k,
@@ -109,6 +113,8 @@ hypreDevice_CSRSpGemmCusparse(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
                              descrB, nnzB, d_ib, d_jb_sorted,
                              descrC,       d_ic, nnzTotalDevHostPtr )
          );
+#endif
+   }
 
    if (NULL != nnzTotalDevHostPtr)
    {
@@ -125,20 +131,34 @@ hypreDevice_CSRSpGemmCusparse(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
 
    if (isDoublePrecision)
    {
+     // TODO: Update Cuda calls to 11
+     if(true)
+     {
+       assert(false && "ABCD");
+#if 0
       HYPRE_CUSPARSE_CALL(
             cusparseDcsrgemm(cusparsehandle, transA, transB, m, n, k,
                              descrA, nnzA, d_a_sorted, d_ia, d_ja_sorted,
                              descrB, nnzB, d_b_sorted, d_ib, d_jb_sorted,
                              descrC,       d_c, d_ic, d_jc)
             );
+#endif
+     }
    } else if (isSinglePrecision)
    {
+     // TODO: Update Cuda calls to 11
+     if(true)
+     {
+       assert(false && "ABCD");
+#if 0
       HYPRE_CUSPARSE_CALL(
             cusparseScsrgemm(cusparsehandle, transA, transB, m, n, k,
                              descrA, nnzA, (float *) d_a_sorted, d_ia, d_ja_sorted,
                              descrB, nnzB, (float *) d_b_sorted, d_ib, d_jb_sorted,
                              descrC,       (float *) d_c, d_ic, d_jc)
             );
+#endif
+     }
    }
 
    *d_ic_out = d_ic;
