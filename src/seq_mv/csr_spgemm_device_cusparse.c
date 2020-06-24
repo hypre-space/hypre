@@ -14,6 +14,19 @@
 #error "Cuda datatypes not dynamically determined"
 #endif
 
+/*
+ * @brief Sorts an unsorted CSR
+ * @param[in] cusparsehandle A Cusparse handle
+ * @param[in] n Number of rows
+ * @param[in] m Number of columns
+ * @param[in] nnzA Number of nonzeroes
+ * @param[in] *d_ia (Unsorted) Row indices
+ * @param[in] *d_ja (Unsorted) Column indices
+ * @param[in] *d_a (Unsorted) Values
+ * @param[in,out] *d_ja_sorted Pre-allocated! On return: Sorted row Indices
+ * @param[in,out] *d_a_sorted Pre-allocated! On return: Sorted values
+ * @warning Requires d_ja_sorted and d_a_sorted to be preallocated
+ */
 void hypre_sortCSR(cusparseHandle_t cusparsehandle, HYPRE_Int n, HYPRE_Int m,
                    HYPRE_Int nnzA,
                    HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a, HYPRE_Int *d_ja_sorted, HYPRE_Complex *d_a_sorted) {
@@ -51,7 +64,10 @@ void hypre_sortCSR(cusparseHandle_t cusparsehandle, HYPRE_Int n, HYPRE_Int m,
 
 /*
  * @brief Determines the associated CudaDataType for the HYPRE_Complex typedef
+ * @return Returns cuda data type corresponding with HYPRE_Complex
+ *
  * @todo Should be known compile time
+ * @warning Only works for Single and Double precision
  * @note Perhaps some typedefs should be added where HYPRE_Complex is typedef'd
  */
 cudaDataType hypre_getCudaDataTypeComplex() 
@@ -70,9 +86,19 @@ cudaDataType hypre_getCudaDataTypeComplex()
   return CUDA_R_64F;
 }
 
-//TODO: Move to a separate file
-//TODO: Determine cuda types from hypre types 
-//TODO: Does HYPRE_Int type impact these functions?
+/*
+ * @brief Creates a cuda csr descriptor for a raw CSR matrix
+ * @param[in] n Number of rows
+ * @param[in] m Number of columns
+ * @param[in] nnz Number of nonzeroes
+ * @param[in] *i Row indices
+ * @param[in] *j Colmn indices
+ * @param[in] *data Values
+ * @return Descriptor
+ * @TODO Move to a separate file
+ * @TODO Determine cuda types from hypre types 
+ * @TODO Does HYPRE_Int type impact these functions?
+ */
 cusparseSpMatDescr_t hypre_CSRMatRawToCuda(HYPRE_Int n, HYPRE_Int m, HYPRE_Int nnz,
 HYPRE_Int *i, HYPRE_Int *j, HYPRE_Complex *data) {
 
@@ -121,32 +147,31 @@ hypreDevice_CSRSpGemmCusparseGenericAPI(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
                               HYPRE_Int *nnzC_out,
                               HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_c_out)
 {
+   cusparseHandle_t cusparsehandle = 0;//hypre_HandleCusparseHandle(hypre_handle());
+   HYPRE_CUSPARSE_CALL( cusparseCreate(&cusparsehandle) );
 
-      //Sort the A,B matrices. May not be needed with new API, unsure
-      //
-      csru2csrInfo_t sortInfoA;
-      csru2csrInfo_t sortInfoB;
-
-      cusparseMatDescr_t descrA=0;
-      cusparseMatDescr_t descrB=0;
-
-      /* initialize cusparse library */
-
-      /* create and setup matrix descriptor */
-      HYPRE_CUSPARSE_CALL( cusparseCreateMatDescr(&descrA) );
-      HYPRE_CUSPARSE_CALL( cusparseSetMatType(descrA, CUSPARSE_MATRIX_TYPE_GENERAL) );
-      HYPRE_CUSPARSE_CALL( cusparseSetMatIndexBase(descrA, CUSPARSE_INDEX_BASE_ZERO) );
-
-      HYPRE_CUSPARSE_CALL( cusparseCreateMatDescr(&descrB) );
-      HYPRE_CUSPARSE_CALL( cusparseSetMatType(descrB, CUSPARSE_MATRIX_TYPE_GENERAL) );
-      HYPRE_CUSPARSE_CALL( cusparseSetMatIndexBase(descrB, CUSPARSE_INDEX_BASE_ZERO) );
-
-      cusparseHandle_t cusparsehandle = hypre_HandleCusparseHandle(hypre_handle());
+#if 0
+   //Sort the A,B matrices. 
+   //Initial tests indicate that the new API does not each row to be sorted, but
+   //in case this is not true, this commented out part sorts it
+   //TODO: Determine with 100% certainty if sorting is (not) required
 
    HYPRE_Int isDoublePrecision = sizeof(HYPRE_Complex) == sizeof(hypre_double);
    HYPRE_Int isSinglePrecision = sizeof(HYPRE_Complex) == sizeof(hypre_double) / 2;
-
    hypre_assert(isDoublePrecision || isSinglePrecision);
+   cusparseMatDescr_t descrA=0;
+   cusparseMatDescr_t descrB=0;
+
+   /* initialize cusparse library */
+
+   /* create and setup matrix descriptor */
+   HYPRE_CUSPARSE_CALL( cusparseCreateMatDescr(&descrA) );
+   HYPRE_CUSPARSE_CALL( cusparseSetMatType(descrA, CUSPARSE_MATRIX_TYPE_GENERAL) );
+   HYPRE_CUSPARSE_CALL( cusparseSetMatIndexBase(descrA, CUSPARSE_INDEX_BASE_ZERO) );
+
+   HYPRE_CUSPARSE_CALL( cusparseCreateMatDescr(&descrB) );
+   HYPRE_CUSPARSE_CALL( cusparseSetMatType(descrB, CUSPARSE_MATRIX_TYPE_GENERAL) );
+   HYPRE_CUSPARSE_CALL( cusparseSetMatIndexBase(descrB, CUSPARSE_INDEX_BASE_ZERO) );
 
    HYPRE_Int  *d_ja_sorted, *d_jb_sorted;
    HYPRE_Complex *d_a_sorted, *d_b_sorted;
@@ -163,66 +188,63 @@ hypreDevice_CSRSpGemmCusparseGenericAPI(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
 
    hypre_sortCSR(cusparsehandle, m, k, nnzA,  d_ia, d_ja, d_a, d_ja_sorted, d_a_sorted);
    hypre_sortCSR(cusparsehandle, k, n, nnzB,  d_ib, d_jb, d_b, d_jb_sorted, d_b_sorted);
+#endif
+   //Initialize the descriptors for the mats
+   cusparseSpMatDescr_t matA = hypre_CSRMatRawToCuda(m,k,nnzA,d_ia,d_ja,d_a);
+   cusparseSpMatDescr_t matB = hypre_CSRMatRawToCuda(k,n,nnzB,d_ib,d_jb,d_b);
+   cusparseSpMatDescr_t matC = hypre_CSRMatRawToCuda(m,n,0,NULL,NULL,NULL);
+   cusparseOperation_t opA = CUSPARSE_OPERATION_NON_TRANSPOSE;
+   cusparseOperation_t opB = CUSPARSE_OPERATION_NON_TRANSPOSE;
+
+   cusparseSpGEMMDescr_t spgemmDesc;
+   HYPRE_CUSPARSE_CALL( cusparseSpGEMM_createDescr(&spgemmDesc));
+
+   cudaDataType        computeType = CUDA_R_64F;
+   HYPRE_Complex alpha = 1.0;
+   HYPRE_Complex beta = 0.0;
+   size_t bufferSize1;
+   size_t bufferSize2;
+   void *dBuffer1 = NULL;
+   void *dBuffer2 = NULL;
+
+   HYPRE_CUSPARSE_CALL(cusparseSpGEMM_workEstimation(cusparsehandle, opA, opB, &alpha, matA, matB, &beta,  matC, computeType, CUSPARSE_SPGEMM_DEFAULT, spgemmDesc, &bufferSize1, NULL));
+   HYPRE_CUDA_CALL(cudaMalloc(&dBuffer1, bufferSize1));
+   HYPRE_CUSPARSE_CALL(cusparseSpGEMM_workEstimation(cusparsehandle, opA, opB, &alpha, matA, matB, &beta,  matC, computeType, CUSPARSE_SPGEMM_DEFAULT, spgemmDesc, &bufferSize1, dBuffer1));
 
 
-      //Initialize the descriptors for the mats
-      cusparseSpMatDescr_t matA = hypre_CSRMatRawToCuda(m,k,nnzA,d_ia,d_ja_sorted,d_a_sorted);
-      cusparseSpMatDescr_t matB = hypre_CSRMatRawToCuda(k,n,nnzB,d_ib,d_jb_sorted,d_b_sorted);
-      cusparseSpMatDescr_t matC = hypre_CSRMatRawToCuda(m,n,0,NULL,NULL,NULL);
-      cusparseOperation_t opA = CUSPARSE_OPERATION_NON_TRANSPOSE;
-      cusparseOperation_t opB = CUSPARSE_OPERATION_NON_TRANSPOSE;
-
-      cusparseSpGEMMDescr_t spgemmDesc;
-      HYPRE_CUSPARSE_CALL( cusparseSpGEMM_createDescr(&spgemmDesc));
-
-      cudaDataType        computeType = CUDA_R_64F;
-      HYPRE_Complex alpha = 1.0;
-      HYPRE_Complex beta = 0.0;
-      size_t bufferSize1;
-      size_t bufferSize2;
-      void *dBuffer1 = NULL;
-      void *dBuffer2 = NULL;
-
-      HYPRE_CUSPARSE_CALL(cusparseSpGEMM_workEstimation(cusparsehandle, opA, opB, &alpha, matA, matB, &beta,  matC, computeType, CUSPARSE_SPGEMM_DEFAULT, spgemmDesc, &bufferSize1, NULL));
-      HYPRE_CUDA_CALL(cudaMalloc(&dBuffer1, bufferSize1));
-      HYPRE_CUSPARSE_CALL(cusparseSpGEMM_workEstimation(cusparsehandle, opA, opB, &alpha, matA, matB, &beta,  matC, computeType, CUSPARSE_SPGEMM_DEFAULT, spgemmDesc, &bufferSize1, dBuffer1));
+   HYPRE_CUSPARSE_CALL(cusparseSpGEMM_compute(cusparsehandle, opA, opB, &alpha, matA, matB, &beta,  matC, computeType, CUSPARSE_SPGEMM_DEFAULT, spgemmDesc, &bufferSize2, NULL));
+   HYPRE_CUDA_CALL(cudaMalloc(&dBuffer2, bufferSize2));
+   HYPRE_CUSPARSE_CALL(cusparseSpGEMM_compute(cusparsehandle, opA, opB, &alpha, matA, matB, &beta,  matC, computeType, CUSPARSE_SPGEMM_DEFAULT, spgemmDesc, &bufferSize2, dBuffer2));
 
 
-      HYPRE_CUSPARSE_CALL(cusparseSpGEMM_compute(cusparsehandle, opA, opB, &alpha, matA, matB, &beta,  matC, computeType, CUSPARSE_SPGEMM_DEFAULT, spgemmDesc, &bufferSize2, NULL));
-      HYPRE_CUDA_CALL(cudaMalloc(&dBuffer2, bufferSize2));
-      HYPRE_CUSPARSE_CALL(cusparseSpGEMM_compute(cusparsehandle, opA, opB, &alpha, matA, matB, &beta,  matC, computeType, CUSPARSE_SPGEMM_DEFAULT, spgemmDesc, &bufferSize2, dBuffer2));
+   //TODO Investigate typing
+   int64_t C_num_rows, C_num_cols, nnzC;
+   HYPRE_Int  *d_ic, *d_jc;
+   HYPRE_Complex  *d_c;
 
+   HYPRE_CUSPARSE_CALL(cusparseSpMatGetSize(matC, &C_num_rows, &C_num_cols, &nnzC));
+   hypre_assert(C_num_rows == m);
+   hypre_assert(C_num_cols == n);
+   d_ic = hypre_TAlloc(HYPRE_Int,     C_num_rows+1, HYPRE_MEMORY_DEVICE);
+   d_jc = hypre_TAlloc(HYPRE_Int,     nnzC, HYPRE_MEMORY_DEVICE);
+   d_c  = hypre_TAlloc(HYPRE_Complex, nnzC, HYPRE_MEMORY_DEVICE);
+   HYPRE_CUSPARSE_CALL(cusparseCsrSetPointers(matC, d_ic, d_jc, d_c));
 
-      //TODO Investigate typing
-      int64_t C_num_rows, C_num_cols, nnzC;
-      HYPRE_Int  *d_ic, *d_jc;
-      HYPRE_Complex  *d_c;
-
-      HYPRE_CUSPARSE_CALL(cusparseSpMatGetSize(matC, &C_num_rows, &C_num_cols, &nnzC));
-      hypre_assert(C_num_rows == m);
-      hypre_assert(C_num_cols == k);
-      //d_ic = hypre_TAlloc(HYPRE_Int,     C_num_rows, HYPRE_MEMORY_DEVICE);
-      //d_jc = hypre_TAlloc(HYPRE_Int,     nnzC, HYPRE_MEMORY_DEVICE);
-      //d_c  = hypre_TAlloc(HYPRE_Complex, nnzC, HYPRE_MEMORY_DEVICE);
-      HYPRE_CUDA_CALL(cudaMalloc(&d_ic, C_num_rows * sizeof(HYPRE_Int)));
-      HYPRE_CUDA_CALL(cudaMalloc(&d_jc, nnzC * sizeof(HYPRE_Int)));
-      HYPRE_CUDA_CALL(cudaMalloc(&d_c,  nnzC * sizeof(HYPRE_Complex)));
-      HYPRE_CUSPARSE_CALL(cusparseCsrSetPointers(matC, d_ic, d_jc, d_c));
-
-      HYPRE_CUSPARSE_CALL(cusparseSpGEMM_copy(cusparsehandle, opA, opB, &alpha, matA, matB, &beta, matC, computeType, CUSPARSE_SPGEMM_DEFAULT,
+   HYPRE_CUSPARSE_CALL(cusparseSpGEMM_copy(cusparsehandle, opA, opB, &alpha, matA, matB, &beta, matC, computeType, CUSPARSE_SPGEMM_DEFAULT,
 spgemmDesc));
-      HYPRE_CUSPARSE_CALL(cusparseSpGEMM_destroyDescr(spgemmDesc));
-      HYPRE_CUSPARSE_CALL(cusparseDestroySpMat(matA));
-      HYPRE_CUSPARSE_CALL(cusparseDestroySpMat(matB));
-      HYPRE_CUSPARSE_CALL(cusparseDestroySpMat(matC));
-      HYPRE_CUSPARSE_CALL(cusparseDestroy(cusparsehandle));
 
-      HYPRE_CUDA_CALL(cudaFree(dBuffer1));
-      HYPRE_CUDA_CALL(cudaFree(dBuffer2));
-      *nnzC_out = nnzC;
-      *d_ic_out = d_ic;
-      *d_jc_out = d_jc;
-      *d_c_out = d_c;
+   HYPRE_CUSPARSE_CALL(cusparseSpGEMM_destroyDescr(spgemmDesc));
+   HYPRE_CUSPARSE_CALL(cusparseDestroySpMat(matA));
+   HYPRE_CUSPARSE_CALL(cusparseDestroySpMat(matB));
+   HYPRE_CUSPARSE_CALL(cusparseDestroySpMat(matC));
+   HYPRE_CUSPARSE_CALL(cusparseDestroy(cusparsehandle));
+
+   HYPRE_CUDA_CALL(cudaFree(dBuffer1));
+   HYPRE_CUDA_CALL(cudaFree(dBuffer2));
+   *nnzC_out = nnzC;
+   *d_ic_out = d_ic;
+   *d_jc_out = d_jc;
+   *d_c_out = d_c;
 
    return hypre_error_flag;
 }
@@ -249,8 +271,6 @@ hypreDevice_CSRSpGemmCusparseGenericAPI(m, k, n,
                               d_ib, d_jb, d_b,
                               nnzC_out, d_ic_out, d_jc_out, d_c_out);
 #else
-   hypre_printf("%i\n",CUDART_VERSION);
-
    HYPRE_Int  *d_ic, *d_jc, baseC, nnzC;
    HYPRE_Int  *d_ja_sorted, *d_jb_sorted;
    HYPRE_Complex *d_c, *d_a_sorted, *d_b_sorted;
@@ -303,7 +323,6 @@ hypreDevice_CSRSpGemmCusparseGenericAPI(m, k, n,
 
    d_ic = hypre_TAlloc(HYPRE_Int, m+1, HYPRE_MEMORY_DEVICE);
 
-   // TODO: Update Cuda calls to 11
 #if (CUDART_VERSION < 11000)
    HYPRE_CUSPARSE_CALL(
          cusparseXcsrgemmNnz(cusparsehandle, transA, transB,
@@ -343,7 +362,6 @@ hypreDevice_CSRSpGemmCusparseGenericAPI(m, k, n,
 #endif
    } else if (isSinglePrecision)
    {
-     // TODO: Update Cuda calls to 11
 #if (CUDART_VERSION < 11000)
       HYPRE_CUSPARSE_CALL(
             cusparseScsrgemm(cusparsehandle, transA, transB, m, n, k,

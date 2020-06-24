@@ -33,6 +33,13 @@
 //TODO: Determine cuda types from hypre types 
 //TODO: Does HYPRE_Int type impact these functions?
 
+/*
+ * @brief Creates a cuSPARSE CSR descriptor from a hypre_CSRMatrix
+ * @param[in] *A Pointer to hypre_CSRMatrix
+ * @param[in] offset Row offset
+ * @return cuSPARSE CSR Descriptor
+ * @warning Assumes CSRMatrix uses doubles for values and ints for indices
+ */
 cusparseSpMatDescr_t hypre_CSRMatToCuda(const hypre_CSRMatrix *A, HYPRE_Int offset) {
    const cudaDataType data_type = CUDA_R_64F;
    const cusparseIndexType_t index_type = CUSPARSE_INDEX_32I;
@@ -43,6 +50,13 @@ cusparseSpMatDescr_t hypre_CSRMatToCuda(const hypre_CSRMatrix *A, HYPRE_Int offs
    return matA;
 }
 
+/*
+ * @brief Creates a cuSPARSE dense vector descriptor from a hypre_Vector
+ * @param[in] *x Pointer to a hypre_Vector
+ * @param[in] offset Row offset
+ * @return cuSPARSE dense vector descriptor
+ * @warning Assumes CSRMatrix uses doubles for values
+ */
 cusparseDnVecDescr_t hypre_VecToCuda(const hypre_Vector *x, HYPRE_Int offset) {
    const cudaDataType data_type = CUDA_R_64F;
    cusparseDnVecDescr_t vecX;
