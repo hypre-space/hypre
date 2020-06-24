@@ -23,7 +23,7 @@
 #error CUDART_VERSION Undefined!
 #endif
 
-#if (CUDART_VERSION >= 11000)
+#if (CUDART_VERSION >= 10010)
 
 #if (defined(HYPRE_BIGINT) || defined(HYPRE_MIXEDINT) || defined(HYPRE_SINGLE) || defined(HYPRE_LONG_DOUBLE))
 #error "Cuda datatypes not dynamically determined"
@@ -101,7 +101,7 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
 //
 #ifndef CUDART_VERSION
 #error CUDART_VERSION Undefined!
-#elif (CUDART_VERSION >= 11000)
+#elif (CUDART_VERSION >= 10010)
    //Cusparse does not seem to handle the case when a vector has size 0
    if((A->num_cols == 0) || (A->num_rows - offset == 0))
    {
@@ -126,7 +126,7 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
       }
       
       HYPRE_CUSPARSE_CALL(cusparseSpMV_bufferSize(handle, oper, &alpha, matA, vecX, &beta, vecY, data_type, alg, &bufferSize));
-      HYPRE_CUDA_CALL(cudaMalloc(&dBuffer, bufferSize));
+      dBuffer = hypre_TAlloc(char, bufferSize, HYPRE_MEMORY_DEVICE);
       HYPRE_CUSPARSE_CALL(cusparseSpMV(handle, oper, &alpha, matA, vecX, &beta, vecY, data_type, alg, dBuffer));
 
       HYPRE_CUSPARSE_CALL(cusparseDestroySpMat(matA));
