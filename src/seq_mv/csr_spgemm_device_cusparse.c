@@ -7,114 +7,14 @@
 
 #include "seq_mv.h"
 #include "csr_spgemm_device.h"
+#include "hypre_cuda_utils.h"
+#include "csr_matrix_cuda_utils.h"
 
 #if defined(HYPRE_USING_CUDA)
 
-#if (defined(HYPRE_BIGINT) || defined(HYPRE_MIXEDINT) || defined(HYPRE_SINGLE) || defined(HYPRE_LONG_DOUBLE))
-#error "Cuda datatypes not dynamically determined"
-#endif
 
-/*
- * @brief Sorts an unsorted CSR
- * @param[in] cusparsehandle A Cusparse handle
- * @param[in] n Number of rows
- * @param[in] m Number of columns
- * @param[in] nnzA Number of nonzeroes
- * @param[in] *d_ia (Unsorted) Row indices
- * @param[in] *d_ja (Unsorted) Column indices
- * @param[in] *d_a (Unsorted) Values
- * @param[in,out] *d_ja_sorted Pre-allocated! On return: Sorted row Indices
- * @param[in,out] *d_a_sorted Pre-allocated! On return: Sorted values
- * @warning Requires d_ja_sorted and d_a_sorted to be preallocated
- */
-void hypre_sortCSR(cusparseHandle_t cusparsehandle, HYPRE_Int n, HYPRE_Int m,
-                   HYPRE_Int nnzA,
-                   HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a, HYPRE_Int *d_ja_sorted, HYPRE_Complex *d_a_sorted) {
-   csru2csrInfo_t sortInfoA;
-
-   cusparseMatDescr_t descrA=0;
-   HYPRE_CUSPARSE_CALL( cusparseCreateMatDescr(&descrA) );
-
-
-
-   size_t pBufferSizeInBytes = 0;
-   void *pBuffer = NULL;
-
-   HYPRE_Int isDoublePrecision = sizeof(HYPRE_Complex) == sizeof(hypre_double);
-   HYPRE_Int isSinglePrecision = sizeof(HYPRE_Complex) == sizeof(hypre_double) / 2;
-
-   HYPRE_CUSPARSE_CALL(cusparseCreateCsru2csrInfo(&sortInfoA));
-   if (isDoublePrecision)
-   {
-      HYPRE_CUSPARSE_CALL(cusparseDcsru2csr_bufferSizeExt(cusparsehandle, n, m, nnzA, d_a_sorted, d_ia, d_ja_sorted, sortInfoA, &pBufferSizeInBytes));
-      pBuffer = hypre_TAlloc(char, pBufferSizeInBytes, HYPRE_MEMORY_DEVICE);
-      HYPRE_CUSPARSE_CALL(cusparseDcsru2csr(cusparsehandle, n, m, nnzA, descrA, d_a_sorted, d_ia, d_ja_sorted, sortInfoA, pBuffer));
-   }
-   else if (isSinglePrecision)
-   {
-      HYPRE_CUSPARSE_CALL(cusparseScsru2csr_bufferSizeExt(cusparsehandle, n, m, nnzA, (float *) d_a_sorted, d_ia, d_ja_sorted, sortInfoA, &pBufferSizeInBytes));
-      pBuffer = hypre_TAlloc(char, pBufferSizeInBytes, HYPRE_MEMORY_DEVICE);
-      HYPRE_CUSPARSE_CALL(cusparseScsru2csr(cusparsehandle, n, m, nnzA, descrA, (float *)d_a_sorted, d_ia, d_ja_sorted, sortInfoA, pBuffer));
-   }
-   hypre_TFree(pBuffer, HYPRE_MEMORY_DEVICE);
-   HYPRE_CUSPARSE_CALL(cusparseDestroyCsru2csrInfo(sortInfoA));
-}
 
 #if (CUDART_VERSION >= 11000)
-
-/*
- * @brief Determines the associated CudaDataType for the HYPRE_Complex typedef
- * @return Returns cuda data type corresponding with HYPRE_Complex
- *
- * @todo Should be known compile time
- * @warning Only works for Single and Double precision
- * @note Perhaps some typedefs should be added where HYPRE_Complex is typedef'd
- */
-cudaDataType hypre_getCudaDataTypeComplex() 
-{ 
-   HYPRE_Int isDoublePrecision = sizeof(HYPRE_Complex) == sizeof(hypre_double);
-   HYPRE_Int isSinglePrecision = sizeof(HYPRE_Complex) == sizeof(hypre_double) / 2;
-  if(isDoublePrecision) 
-  {
-     return CUDA_R_64F;
-  }
-  if(isSinglePrecision) 
-  {
-     return CUDA_R_32F;
-  }
-  hypre_assert(false);
-  return CUDA_R_64F;
-}
-
-/*
- * @brief Creates a cuda csr descriptor for a raw CSR matrix
- * @param[in] n Number of rows
- * @param[in] m Number of columns
- * @param[in] nnz Number of nonzeroes
- * @param[in] *i Row indices
- * @param[in] *j Colmn indices
- * @param[in] *data Values
- * @return Descriptor
- * @TODO Move to a separate file
- * @TODO Determine cuda types from hypre types 
- * @TODO Does HYPRE_Int type impact these functions?
- */
-cusparseSpMatDescr_t hypre_CSRMatRawToCuda(HYPRE_Int n, HYPRE_Int m, HYPRE_Int nnz,
-HYPRE_Int *i, HYPRE_Int *j, HYPRE_Complex *data) {
-
-   HYPRE_Int isDoublePrecision = sizeof(HYPRE_Complex) == sizeof(hypre_double);
-   hypre_assert(isDoublePrecision);
-
-   const cudaDataType data_type = hypre_getCudaDataTypeComplex();
-   const cusparseIndexType_t index_type = CUSPARSE_INDEX_32I;
-   const cusparseIndexBase_t index_base = CUSPARSE_INDEX_BASE_ZERO;
-
-   cusparseSpMatDescr_t matA;
-   HYPRE_CUSPARSE_CALL(cusparseCreateCsr(&matA, n, m, nnz, i, j, data, index_type, index_type, index_base, data_type));
-   return matA;
-}
-
-
 
 
 /*
@@ -186,8 +86,8 @@ hypreDevice_CSRSpGemmCusparseGenericAPI(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    hypre_TMemcpy(d_jb_sorted, d_jb, HYPRE_Int, nnzB, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
    hypre_TMemcpy(d_b_sorted, d_b, HYPRE_Complex, nnzB, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
-   hypre_sortCSR(cusparsehandle, m, k, nnzA,  d_ia, d_ja, d_a, d_ja_sorted, d_a_sorted);
-   hypre_sortCSR(cusparsehandle, k, n, nnzB,  d_ib, d_jb, d_b, d_jb_sorted, d_b_sorted);
+   hypre_sortCSR(cusparsehandle, m, k, nnzA,  d_ia, d_ja_sorted, d_a_sorted);
+   hypre_sortCSR(cusparsehandle, k, n, nnzB,  d_ib, d_jb_sorted, d_b_sorted);
 #endif
    //Initialize the descriptors for the mats
    cusparseSpMatDescr_t matA = hypre_CSRMatRawToCuda(m,k,nnzA,d_ia,d_ja,d_a);
@@ -325,8 +225,8 @@ hypreDevice_CSRSpGemmCusparseGenericAPI(m, k, n,
    hypre_TMemcpy(d_b_sorted, d_b, HYPRE_Complex, nnzB, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
    /* Sort each of the CSR matrices */
-   hypre_sortCSR(cusparsehandle, m, k, nnzA,  d_ia, d_ja, d_a, d_ja_sorted, d_a_sorted);
-   hypre_sortCSR(cusparsehandle, k, n, nnzB,  d_ib, d_jb, d_b, d_jb_sorted, d_b_sorted);
+   hypre_sortCSR(cusparsehandle, m, k, nnzA,  d_ia, d_ja_sorted, d_a_sorted);
+   hypre_sortCSR(cusparsehandle, k, n, nnzB,  d_ib, d_jb_sorted, d_b_sorted);
 
 
 

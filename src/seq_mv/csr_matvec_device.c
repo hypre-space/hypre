@@ -18,52 +18,12 @@
 
 
 #if defined(HYPRE_USING_CUDA)
+#include "csr_matrix_cuda_utils.h"
 
 #ifndef CUDART_VERSION
 #error CUDART_VERSION Undefined!
 #endif
 
-#if (CUDART_VERSION >= 10010)
-
-#if (defined(HYPRE_BIGINT) || defined(HYPRE_MIXEDINT) || defined(HYPRE_SINGLE) || defined(HYPRE_LONG_DOUBLE))
-#error "Cuda datatypes not dynamically determined"
-#endif
-
-//TODO: Move to a separate file
-//TODO: Determine cuda types from hypre types 
-//TODO: Does HYPRE_Int type impact these functions?
-
-/*
- * @brief Creates a cuSPARSE CSR descriptor from a hypre_CSRMatrix
- * @param[in] *A Pointer to hypre_CSRMatrix
- * @param[in] offset Row offset
- * @return cuSPARSE CSR Descriptor
- * @warning Assumes CSRMatrix uses doubles for values and ints for indices
- */
-cusparseSpMatDescr_t hypre_CSRMatToCuda(const hypre_CSRMatrix *A, HYPRE_Int offset) {
-   const cudaDataType data_type = CUDA_R_64F;
-   const cusparseIndexType_t index_type = CUSPARSE_INDEX_32I;
-   const cusparseIndexBase_t index_base = CUSPARSE_INDEX_BASE_ZERO;
-
-   cusparseSpMatDescr_t matA;
-   HYPRE_CUSPARSE_CALL(cusparseCreateCsr(&matA, A->num_rows-offset, A->num_cols, A->num_nonzeros, A->i+offset, A->j, A->data, index_type, index_type, index_base, data_type));
-   return matA;
-}
-
-/*
- * @brief Creates a cuSPARSE dense vector descriptor from a hypre_Vector
- * @param[in] *x Pointer to a hypre_Vector
- * @param[in] offset Row offset
- * @return cuSPARSE dense vector descriptor
- * @warning Assumes CSRMatrix uses doubles for values
- */
-cusparseDnVecDescr_t hypre_VecToCuda(const hypre_Vector *x, HYPRE_Int offset) {
-   const cudaDataType data_type = CUDA_R_64F;
-   cusparseDnVecDescr_t vecX;
-   HYPRE_CUSPARSE_CALL(cusparseCreateDnVec(&vecX, x->size-offset, x->data+offset, data_type));
-   return vecX;
-}
-#endif
 
 HYPRE_Int
 hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
