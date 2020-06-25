@@ -51,7 +51,7 @@ hypreDevice_CSRSpGemmCusparseGenericAPI(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    HYPRE_CUSPARSE_CALL( cusparseCreate(&cusparsehandle) );
 
 #if 0
-   //Sort the A,B matrices. 
+   //Sort the A,B matrices.
    //Initial tests indicate that the new API does not each row to be sorted, but
    //in case this is not true, this commented out part sorts it
    //TODO: Determine with 100% certainty if sorting is (not) required
@@ -173,7 +173,7 @@ hypreDevice_CSRSpGemmCusparse(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
                               HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_c_out)
 {
 #if (CUDART_VERSION >= 11000)
-return 
+return
 hypreDevice_CSRSpGemmCusparseGenericAPI(m, k, n,
                               nnzA,
                               d_ia, d_ja, d_a,

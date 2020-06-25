@@ -15,32 +15,34 @@
  * @warning Only works for Single and Double precision
  * @note Perhaps some typedefs should be added where HYPRE_Complex is typedef'd
  */
-cudaDataType hypre_getCudaDataTypeComplex() 
-{ 
-	if(sizeof(char)*CHAR_BIT!=8) {
-		hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ERROR:  Unsupported char size");
-		hypre_assert(false);
-	}
+cudaDataType hypre_getCudaDataTypeComplex()
+{
+   if(sizeof(char)*CHAR_BIT!=8)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ERROR:  Unsupported char size");
+      hypre_assert(false);
+   }
 
 #if defined(HYPRE_COMPLEX)
 #error "Complex types not yet supported"
 #endif
 
-	if((sizeof(HYPRE_Complex) != 8) && (sizeof(HYPRE_Complex) != 4)) {
-		hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ERROR:  Unsupported HYPRE_Complex size");
-		assert(false);
-	}
+   if((sizeof(HYPRE_Complex) != 8) && (sizeof(HYPRE_Complex) != 4))
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ERROR:  Unsupported HYPRE_Complex size");
+      assert(false);
+   }
 
-	if(sizeof(HYPRE_Complex) == 8) 
-	{
-		return CUDA_R_64F;
-	}
-	if(sizeof(HYPRE_Complex) == 4) 
-	{
-		return CUDA_R_32F;
-	}
-	hypre_assert(false);
-	return CUDA_R_64F;
+   if(sizeof(HYPRE_Complex) == 8)
+   {
+      return CUDA_R_64F;
+   }
+   if(sizeof(HYPRE_Complex) == 4)
+   {
+      return CUDA_R_32F;
+   }
+   hypre_assert(false);
+   return CUDA_R_64F;
 }
 #endif
 
@@ -53,14 +55,15 @@ cudaDataType hypre_getCudaDataTypeComplex()
  * @return cuSPARSE CSR Descriptor
  * @warning Assumes CSRMatrix has base 0
  */
-cusparseSpMatDescr_t hypre_CSRMatToCuda(const hypre_CSRMatrix *A, HYPRE_Int offset) {
-	const cudaDataType data_type = hypre_getCudaDataTypeComplex();
-	const cusparseIndexType_t index_type = hypre_getCusparseIndexTypeInt();
-	const cusparseIndexBase_t index_base = CUSPARSE_INDEX_BASE_ZERO;
+cusparseSpMatDescr_t hypre_CSRMatToCuda(const hypre_CSRMatrix *A, HYPRE_Int offset)
+{
+   const cudaDataType data_type = hypre_getCudaDataTypeComplex();
+   const cusparseIndexType_t index_type = hypre_getCusparseIndexTypeInt();
+   const cusparseIndexBase_t index_base = CUSPARSE_INDEX_BASE_ZERO;
 
-	cusparseSpMatDescr_t matA;
-	HYPRE_CUSPARSE_CALL(cusparseCreateCsr(&matA, A->num_rows-offset, A->num_cols, A->num_nonzeros, A->i+offset, A->j, A->data, index_type, index_type, index_base, data_type));
-	return matA;
+   cusparseSpMatDescr_t matA;
+   HYPRE_CUSPARSE_CALL(cusparseCreateCsr(&matA, A->num_rows-offset, A->num_cols, A->num_nonzeros, A->i+offset, A->j, A->data, index_type, index_type, index_base, data_type));
+   return matA;
 }
 
 
@@ -71,11 +74,12 @@ cusparseSpMatDescr_t hypre_CSRMatToCuda(const hypre_CSRMatrix *A, HYPRE_Int offs
  * @return cuSPARSE dense vector descriptor
  * @warning Assumes CSRMatrix uses doubles for values
  */
-cusparseDnVecDescr_t hypre_VecToCuda(const hypre_Vector *x, HYPRE_Int offset) {
-	const cudaDataType data_type = hypre_getCudaDataTypeComplex();
-	cusparseDnVecDescr_t vecX;
-	HYPRE_CUSPARSE_CALL(cusparseCreateDnVec(&vecX, x->size-offset, x->data+offset, data_type));
-	return vecX;
+cusparseDnVecDescr_t hypre_VecToCuda(const hypre_Vector *x, HYPRE_Int offset)
+{
+   const cudaDataType data_type = hypre_getCudaDataTypeComplex();
+   cusparseDnVecDescr_t vecX;
+   HYPRE_CUSPARSE_CALL(cusparseCreateDnVec(&vecX, x->size-offset, x->data+offset, data_type));
+   return vecX;
 }
 
 /*
@@ -89,28 +93,32 @@ cusparseDnVecDescr_t hypre_VecToCuda(const hypre_Vector *x, HYPRE_Int offset) {
  * @note Perhaps some typedefs should be added where HYPRE_Complex is typedef'd
  */
 
-cusparseIndexType_t hypre_getCusparseIndexTypeInt() 
-{ 
+cusparseIndexType_t hypre_getCusparseIndexTypeInt()
+{
 
-	if(sizeof(char)*CHAR_BIT!=8) {
-		hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ERROR:  Unsupported char size");
-		hypre_assert(false);
-	}
+   if(sizeof(char)*CHAR_BIT!=8)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ERROR:  Unsupported char size");
+      hypre_assert(false);
+   }
 
-	if((sizeof(HYPRE_Int) != 8) && (sizeof(HYPRE_Int) != 4)) {
-		hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ERROR:  Unsupported HYPRE_Int size");
-		hypre_assert(false);
-	}
+   if((sizeof(HYPRE_Int) != 8) && (sizeof(HYPRE_Int) != 4))
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ERROR:  Unsupported HYPRE_Int size");
+      hypre_assert(false);
+   }
 
-	if(sizeof(HYPRE_Int) == 4)  {
-		return CUSPARSE_INDEX_32I;
-	}
-	if(sizeof(HYPRE_Int) == 8)  {
-		return CUSPARSE_INDEX_64I;
-	}
-	hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ERROR:  Unsupported HYPRE_Int size");
-	hypre_assert(false);
-	return CUSPARSE_INDEX_32I;
+   if(sizeof(HYPRE_Int) == 4)
+   {
+      return CUSPARSE_INDEX_32I;
+   }
+   if(sizeof(HYPRE_Int) == 8)
+   {
+      return CUSPARSE_INDEX_64I;
+   }
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ERROR:  Unsupported HYPRE_Int size");
+   hypre_assert(false);
+   return CUSPARSE_INDEX_32I;
 }
 
 
@@ -127,9 +135,8 @@ cusparseIndexType_t hypre_getCusparseIndexTypeInt()
  * @param[in,out] *d_a_sorted Pre-allocated! On return: Sorted values
  * @warning Requires d_ja_sorted and d_a_sorted to be preallocated
  */
-void hypre_sortCSR(cusparseHandle_t cusparsehandle, HYPRE_Int n, HYPRE_Int m,
-                   HYPRE_Int nnzA,
-                   const HYPRE_Int *d_ia, HYPRE_Int *d_ja_sorted, HYPRE_Complex *d_a_sorted) {
+void hypre_sortCSR(cusparseHandle_t cusparsehandle, HYPRE_Int n, HYPRE_Int m, HYPRE_Int nnzA, const HYPRE_Int *d_ia, HYPRE_Int *d_ja_sorted, HYPRE_Complex *d_a_sorted)
+{
    csru2csrInfo_t sortInfoA;
 
    cusparseMatDescr_t descrA=0;
@@ -175,18 +182,19 @@ void hypre_sortCSR(cusparseHandle_t cusparsehandle, HYPRE_Int n, HYPRE_Int m,
  * @return Descriptor
  */
 cusparseSpMatDescr_t hypre_CSRMatRawToCuda(HYPRE_Int n, HYPRE_Int m, HYPRE_Int nnz,
-		HYPRE_Int *i, HYPRE_Int *j, HYPRE_Complex *data) {
+      HYPRE_Int *i, HYPRE_Int *j, HYPRE_Complex *data)
+{
 
-	HYPRE_Int isDoublePrecision = sizeof(HYPRE_Complex) == sizeof(hypre_double);
-	hypre_assert(isDoublePrecision);
+   HYPRE_Int isDoublePrecision = sizeof(HYPRE_Complex) == sizeof(hypre_double);
+   hypre_assert(isDoublePrecision);
 
-	const cudaDataType data_type = hypre_getCudaDataTypeComplex();
-	const cusparseIndexType_t index_type = hypre_getCusparseIndexTypeInt();
-	const cusparseIndexBase_t index_base = CUSPARSE_INDEX_BASE_ZERO;
+   const cudaDataType data_type = hypre_getCudaDataTypeComplex();
+   const cusparseIndexType_t index_type = hypre_getCusparseIndexTypeInt();
+   const cusparseIndexBase_t index_base = CUSPARSE_INDEX_BASE_ZERO;
 
-	cusparseSpMatDescr_t matA;
-	HYPRE_CUSPARSE_CALL(cusparseCreateCsr(&matA, n, m, nnz, i, j, data, index_type, index_type, index_base, data_type));
-	return matA;
+   cusparseSpMatDescr_t matA;
+   HYPRE_CUSPARSE_CALL(cusparseCreateCsr(&matA, n, m, nnz, i, j, data, index_type, index_type, index_base, data_type));
+   return matA;
 }
 
 #endif

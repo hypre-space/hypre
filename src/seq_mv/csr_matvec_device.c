@@ -79,7 +79,7 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
    //Cusparse does not seem to handle the case when a vector has size 0
    if((A->num_cols == 0) || (A->num_rows - offset == 0))
    {
-   } 
+   }
    else
    {
       cusparseSpMatDescr_t matA = hypre_CSRMatToCuda(A, offset);
@@ -88,7 +88,7 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
       //TODO: See if alternate buffer system is recommended
       void* dBuffer = NULL;
       size_t bufferSize;
-      
+
       const cusparseSpMVAlg_t alg = CUSPARSE_MV_ALG_DEFAULT;
       const cusparseOperation_t oper = trans?CUSPARSE_OPERATION_TRANSPOSE:CUSPARSE_OPERATION_NON_TRANSPOSE;
       //TODO: Dynamically determine type
@@ -98,7 +98,7 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
       if(trans)
       {
       }
-      
+
       HYPRE_CUSPARSE_CALL(cusparseSpMV_bufferSize(handle, oper, &alpha, matA, vecX, &beta, vecY, data_type, alg, &bufferSize));
       dBuffer = hypre_TAlloc(char, bufferSize, HYPRE_MEMORY_DEVICE);
       HYPRE_CUSPARSE_CALL(cusparseSpMV(handle, oper, &alpha, matA, vecX, &beta, vecY, data_type, alg, dBuffer));
