@@ -129,13 +129,10 @@ cusparseIndexType_t hypre_getCusparseIndexTypeInt()
  * @param[in] m Number of columns
  * @param[in] nnzA Number of nonzeroes
  * @param[in] *d_ia (Unsorted) Row indices
- * @param[in] *d_ja (Unsorted) Column indices
- * @param[in] *d_a (Unsorted) Values
- * @param[in,out] *d_ja_sorted Pre-allocated! On return: Sorted row Indices
- * @param[in,out] *d_a_sorted Pre-allocated! On return: Sorted values
- * @warning Requires d_ja_sorted and d_a_sorted to be preallocated
+ * @param[in,out] *d_ja_sorted On Start: Unsorted column indices. On return: Sorted column indices
+ * @param[in,out] *d_a_sorted On Start: Unsorted values. On Return: Sorted values corresponding with column indices
  */
-void hypre_sortCSR(cusparseHandle_t cusparsehandle, HYPRE_Int n, HYPRE_Int m, HYPRE_Int nnzA, const HYPRE_Int *d_ia, HYPRE_Int *d_ja_sorted, HYPRE_Complex *d_a_sorted)
+void hypre_sortCSR_cusparse(cusparseHandle_t cusparsehandle, HYPRE_Int n, HYPRE_Int m, HYPRE_Int nnzA, const HYPRE_Int *d_ia, HYPRE_Int *d_ja_sorted, HYPRE_Complex *d_a_sorted)
 {
    csru2csrInfo_t sortInfoA;
 

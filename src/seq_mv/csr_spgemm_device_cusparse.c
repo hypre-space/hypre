@@ -31,9 +31,10 @@
  * @param[in] *d_ib Array containing the row pointers of B
  * @param[in] *d_jb Array containing the column indices of B
  * @param[in] *d_b Array containing values of B
- * @param[out] *d_ic Array containing the row pointers of C
- * @param[out] *d_jc Array containing the column indices of C
- * @param[out] *d_c Array containing values of C
+ * @param[out] *nnzC_out Pointer to address with number of nonzeros in C
+ * @param[out] *d_ic_out Array containing the row pointers of C
+ * @param[out] *d_jc_out Array containing the column indices of C
+ * @param[out] *d_c_out Array containing values of C
  * @warning Only supports opA=opB=CUSPARSE_OPERATION_NON_TRANSPOSE
  * @note This call now has support for the cusparse generic API function calls, as it appears that the other types of SpM x SpM calls are getting deprecated in the near future.
  * Unfortunately, as of now (2020-06-24), it appears these functions have minimal documentation, and are not very mature.
@@ -100,7 +101,7 @@ hypreDevice_CSRSpGemmCusparseGenericAPI(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    cusparseSpGEMMDescr_t spgemmDesc;
    HYPRE_CUSPARSE_CALL( cusparseSpGEMM_createDescr(&spgemmDesc));
 
-   cudaDataType        computeType = CUDA_R_64F;
+   cudaDataType        computeType = hypre_getCudaDataTypeComplex();
    HYPRE_Complex alpha = 1.0;
    HYPRE_Complex beta = 0.0;
    size_t bufferSize1;
@@ -120,7 +121,7 @@ hypreDevice_CSRSpGemmCusparseGenericAPI(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    HYPRE_CUSPARSE_CALL(cusparseSpGEMM_compute(cusparsehandle, opA, opB, &alpha, matA, matB, &beta,  matC, computeType, CUSPARSE_SPGEMM_DEFAULT, spgemmDesc, &bufferSize2, dBuffer2));
 
 
-   //TODO Investigate typing
+   /* Required by cusparse api (as of 11) to be int64_t */
    int64_t C_num_rows, C_num_cols, nnzC;
    HYPRE_Int  *d_ic, *d_jc;
    HYPRE_Complex  *d_c;

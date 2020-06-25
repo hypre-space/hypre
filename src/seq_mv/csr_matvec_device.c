@@ -92,7 +92,7 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
       const cusparseSpMVAlg_t alg = CUSPARSE_MV_ALG_DEFAULT;
       const cusparseOperation_t oper = trans?CUSPARSE_OPERATION_TRANSPOSE:CUSPARSE_OPERATION_NON_TRANSPOSE;
       //TODO: Dynamically determine type
-      const cudaDataType data_type = CUDA_R_64F;
+      const cudaDataType data_type = hypre_getCudaDataTypeComplex();
 
       //TODO: Profile to see if need to handle transpose intentionally
       if(trans)
