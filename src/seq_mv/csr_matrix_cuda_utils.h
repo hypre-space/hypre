@@ -1,6 +1,5 @@
 #ifndef CSR_MATRIX_CUDA_UTILS
 
-#include <cusparse.h>
 
 #include "seq_mv.h"
 #include <HYPRE_config.h>
@@ -10,6 +9,7 @@
 #include "csr_matrix.h"
 
 #if defined(HYPRE_USING_CUDA)
+#include <cusparse.h>
 
 
 

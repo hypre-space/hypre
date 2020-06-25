@@ -11,13 +11,13 @@
  *
  *****************************************************************************/
 
-#include <cuda_runtime_api.h>
 
 #include "seq_mv.h"
 #include "_hypre_utilities.hpp"
 
 
 #if defined(HYPRE_USING_CUDA)
+#include <cuda_runtime_api.h>
 #include "csr_matrix_cuda_utils.h"
 
 #ifndef CUDART_VERSION
