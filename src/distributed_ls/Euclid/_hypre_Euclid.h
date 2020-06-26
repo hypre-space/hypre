@@ -1,9 +1,3 @@
-/******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
- * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
- *
- * SPDX-License-Identifier: (Apache-2.0 OR MIT)
- ******************************************************************************/
 
 #ifndef hypre_EUCLID_HEADER
 #define hypre_EUCLID_HEADER
@@ -13,19 +7,16 @@
 #define HYPRE_MODE
 #define OPTIMIZED_DH
 
-#if defined(HYPRE_MODE)
-#include "HYPRE_parcsr_mv.h"
-#include "HYPRE_config.h"
-#include "HYPRE_distributed_matrix_mv.h"
-#include "_hypre_utilities.h"
-
-#elif defined(PETSC_MODE)
-#include "petsc_config.h"
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #ifndef EUCLID_CONF_DH
 #define EUCLID_CONF_DH
@@ -60,7 +51,7 @@ extern "C" {
 #define EXIT_NOW(msg) \
       { setError_dh(msg, __FUNC__, __FILE__, __LINE__); \
         ERRCHKA; \
-      }
+      } 
 
 #define ERRCHKA   \
     if (errFlag_dh) {  \
@@ -74,7 +65,7 @@ extern "C" {
         Mem_dhPrint(mem_dh, stderr, false); \
       } \
       EUCLID_EXIT; \
-    }
+    } 
 
 
   /* let Euclid do its thing, before handing off to PETSc;
@@ -92,10 +83,10 @@ extern "C" {
       printErrorMsg(stderr);  \
       hypre_fprintf(stderr, "\n[%i] ierr = %i, errFlag_dh = %i\n", myid_dh, ierr, errFlag_dh); \
       CHKERRA(ierr); \
-    }
+    } 
 
 
-#define MAX_SUBDOMAINS  20
+#define MAX_SUBDOMAINS  20   
   /* The maximum number of subdomains into which
      the matrix may be partitioned.  Rule of thumb:
      MAX_SUBDOMAINS >= number of threads.
@@ -108,7 +99,7 @@ extern "C" {
 
 /*---------------------------------------------------------------------
  * Memory management.  These macros work with functions in Mem_dh.c;
- * Change if you want to use some memory management and reporting schemes
+ * Change if you want to use some memory management and reporting schemes 
  * other than that supplied with Euclid.   These depend on the global
  * object "Mem_dh mem_dh" which is defined in globalObjects.c (yuck!)
  ---------------------------------------------------------------------*/
@@ -125,7 +116,7 @@ extern "C" {
 #endif
 
 
-  /* The actual calls used by Mem_dh objects to allocate/free memory
+  /* The actual calls used by Mem_dh objects to allocate/free memory 
    * from the heap.
    */
 #define PRIVATE_MALLOC  malloc
@@ -146,6 +137,13 @@ you need to write EUCLID_GET_ROW() functions: see src/getRow.c
 */
 
 #endif
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 #ifndef MACROS_DH
 #define MACROS_DH
 
@@ -169,17 +167,15 @@ you need to write EUCLID_GET_ROW() functions: see src/getRow.c
 #define FABS(a)    ((a) < 0 ? -(a) : a)
 #endif
 
+/* used in Mat_SEQ_PrintTriples, so matlab won't discard zeros (yuck!) */
 #ifdef HYPRE_SINGLE
-#define _ATOL_ 1.0e-16   /* used to compute absolute tolerance for Euclid's internal Krylov solvers */
-#define _MATLAB_ZERO_  1e-30 /* used in Mat_SEQ_PrintTriples, so matlab won't discard zeros (yuck!) */
+#define _MATLAB_ZERO_  1e-30
 #else // default
-#define _ATOL_ 1.0e-50
 #define _MATLAB_ZERO_  1e-100
 #endif
 
 
-
-/*----------------------------------------------------------------------
+/*---------------------------------------------------------------------- 
  * macros for error handling everyplace except in main.
  *---------------------------------------------------------------------- */
 
@@ -255,13 +251,13 @@ you need to write EUCLID_GET_ROW() functions: see src/getRow.c
             return (retval); \
           }
 
-/*----------------------------------------------------------------------
+/*---------------------------------------------------------------------- 
  * informational macros
  *---------------------------------------------------------------------- */
 
 #define SET_INFO(msg)  setInfo_dh(msg, __FUNC__, __FILE__, __LINE__);
 
-/*----------------------------------------------------------------------
+/*---------------------------------------------------------------------- 
  * macros for tracking the function call stack
  *---------------------------------------------------------------------- */
 #ifdef OPTIMIZED_DH
@@ -327,9 +323,16 @@ you need to write EUCLID_GET_ROW() functions: see src/getRow.c
           } \
 
 
-#endif
+#endif 
 
 #endif  /* #ifndef MACROS_DH */
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 #ifndef COMMON_DH
 #define COMMON_DH
 
@@ -348,6 +351,16 @@ you need to write EUCLID_GET_ROW() functions: see src/getRow.c
  * maintainer's note: this is the only place where non-Euclid
  * files are included.
  *-----------------------------------------------------------------------*/
+
+#if defined(HYPRE_MODE)
+#include "HYPRE_parcsr_mv.h"
+#include "HYPRE_config.h"
+#include "HYPRE_distributed_matrix_mv.h"
+#include "_hypre_utilities.h"
+
+#elif defined(PETSC_MODE)
+#include "petsc_config.h"
+#endif
 
 #if ( !defined(FAKE_MPI) && defined(USING_MPI) && \
       !defined(HYPRE_MODE) && !defined(PETSC_MODE) )
@@ -426,8 +439,8 @@ extern HYPRE_Int  ref_counter; /* for internal use only!  Reference counter
  * macros defined in "macros_dh.h"
  */
 extern bool  errFlag_dh;
-extern void  setInfo_dh(const char *msg,const char *function,const char *file, HYPRE_Int line);
-extern void  setError_dh(const char *msg,const char *function,const char *file, HYPRE_Int line);
+extern void  setInfo_dh(const char *msg, const char *function, const char *file, HYPRE_Int line);
+extern void  setError_dh(const char *msg, const char *function, const char *file, HYPRE_Int line);
 extern void  printErrorMsg(FILE *fp);
 
 #ifndef hypre_MPI_MAX_ERROR_STRING
@@ -435,11 +448,7 @@ extern void  printErrorMsg(FILE *fp);
 #endif
 
 #define MSG_BUF_SIZE_DH MAX(1024, hypre_MPI_MAX_ERROR_STRING)
-#if defined(HYPRE_USING_RAJA) || defined(HYPRE_USING_KOKKOS) || defined(HYPRE_USING_CUDA)
-static char  msgBuf_dh[MSG_BUF_SIZE_DH];
-#else
 extern char  msgBuf_dh[MSG_BUF_SIZE_DH];
-#endif
 
 /* Each processor (may) open a logfile.
  * The bools are switches for controlling the amount of informational
@@ -454,7 +463,7 @@ extern bool logFuncsToStderr;
 extern bool logFuncsToFile;
 extern void Error_dhStartFunc(char *function, char *file, HYPRE_Int line);
 extern void Error_dhEndFunc(char *function);
-extern void dh_StartFunc(const char *function,const char *file, HYPRE_Int line, HYPRE_Int priority);
+extern void dh_StartFunc(const char *function, const char *file, HYPRE_Int line, HYPRE_Int priority);
 extern void dh_EndFunc(const char *function, HYPRE_Int priority);
 extern void printFunctionStack(FILE *fp);
 
@@ -462,7 +471,7 @@ extern void EuclidInitialize(HYPRE_Int argc, char *argv[], char *help); /* insta
 extern void EuclidFinalize();    /* deletes global objects */
 extern bool EuclidIsInitialized();
 extern void printf_dh(const char *fmt, ...);
-extern void fprintf_dh(FILE *fp,const char *fmt, ...);
+extern void fprintf_dh(FILE *fp, const char *fmt, ...);
 
   /* echo command line invocation to stdout.
      The "prefix" string is for grepping; it may be NULL.
@@ -471,6 +480,13 @@ extern void echoInvocation_dh(MPI_Comm comm, char *prefix, HYPRE_Int argc, char 
 
 
 #endif
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 /* for internal use */
 
 #ifndef EXTERNAL_ROWS_DH_H
@@ -491,16 +507,16 @@ struct _extrows_dh {
     Factor_dh F;           /* not owned! */
 
     hypre_MPI_Status status[MAX_MPI_TASKS];
-    hypre_MPI_Request req1[MAX_MPI_TASKS];
+    hypre_MPI_Request req1[MAX_MPI_TASKS]; 
     hypre_MPI_Request req2[MAX_MPI_TASKS];
-    hypre_MPI_Request req3[MAX_MPI_TASKS];
+    hypre_MPI_Request req3[MAX_MPI_TASKS]; 
     hypre_MPI_Request req4[MAX_MPI_TASKS];
     hypre_MPI_Request cval_req[MAX_MPI_TASKS];
     hypre_MPI_Request fill_req[MAX_MPI_TASKS];
     hypre_MPI_Request aval_req[MAX_MPI_TASKS];
 
     /*------------------------------------------------------------------------
-     *  data structures for receiving, storing, and accessing external rows
+     *  data structures for receiving, storing, and accessing external rows 
      *  from lower-ordered nabors
      *------------------------------------------------------------------------*/
     /* for reception of row counts, row numbers, and row lengths: */
@@ -534,6 +550,13 @@ struct _extrows_dh {
 };
 
 #endif
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 #ifndef FACTOR_DH
 #define FACTOR_DH
 
@@ -541,7 +564,7 @@ struct _extrows_dh {
 
 struct _factor_dh {
   /* dimensions of local rectangular submatrix; global matrix is n*n */
-  HYPRE_Int m, n;
+  HYPRE_Int m, n;    
 
   HYPRE_Int id;          /* this subdomain's id after reordering */
   HYPRE_Int beg_row;     /* global number of 1st locally owned row */
@@ -554,7 +577,7 @@ struct _factor_dh {
   bool blockJacobi;
 
   /* sparse row-oriented storage for locally owned submatrix */
-  HYPRE_Int *rp;
+  HYPRE_Int *rp;       
   HYPRE_Int *cval;
   REAL_DH *aval;
   HYPRE_Int *fill;
@@ -579,7 +602,7 @@ struct _factor_dh {
   hypre_MPI_Request  recv_reqLo[MAX_MPI_TASKS], recv_reqHi[MAX_MPI_TASKS]; /* used for persistent comms */
   hypre_MPI_Request  send_reqLo[MAX_MPI_TASKS], send_reqHi[MAX_MPI_TASKS]; /* used for persistent comms */
   hypre_MPI_Request  requests[MAX_MPI_TASKS];
-  hypre_MPI_Status   status[MAX_MPI_TASKS];
+  hypre_MPI_Status   status[MAX_MPI_TASKS];  
 
   bool debug;
 };
@@ -621,6 +644,13 @@ extern void Factor_dhPrintRows(Factor_dh mat, FILE *fp);
   /* prints local matrix to logfile, if open */
 
 #endif
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 #ifndef VEC_DH_H
 #define VEC_DH_H
 
@@ -638,7 +668,7 @@ extern void Vec_dhInit(Vec_dh v, HYPRE_Int size);
 
 extern void Vec_dhDuplicate(Vec_dh v, Vec_dh *out);
         /* creates vec and allocates storage, but neither
-         * initializes nor copies values
+         * initializes nor copies values 
          */
 
 extern void Vec_dhCopy(Vec_dh x, Vec_dh y);
@@ -654,8 +684,15 @@ extern void Vec_dhSetRand(Vec_dh v);
 extern void Vec_dhRead(Vec_dh *v, HYPRE_Int ignore, char *filename);
 extern void Vec_dhReadBIN(Vec_dh *v, char *filename);
 extern void Vec_dhPrint(Vec_dh v, SubdomainGraph_dh sg, char *filename);
-extern void Vec_dhPrintBIN(Vec_dh v, SubdomainGraph_dh sg, char *filename);
+extern void Vec_dhPrintBIN(Vec_dh v, SubdomainGraph_dh sg, char *filename); 
 #endif
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 #ifndef MATGENFD_DH_DH
 #define MATGENFD_DH_DH
 
@@ -702,15 +739,15 @@ Misc.
 /* #include "euclid_common.h" */
 
 struct _matgenfd {
-  bool allocateMem;
+  bool allocateMem; 
         /* If true, memory is allocated when run() is called, in which case
          * the caller is responsible for calling FREE_DH for the rp, cval,
          * aval, and rhs arrays.  If false, caller is assumed to have
-         * allocated memory when run is called.
+         * allocated memory when run is called.  
          * Default is "true"
          */
   HYPRE_Int px, py, pz;  /* Processor graph dimensions */
-  bool threeD;
+  bool threeD;  
   HYPRE_Int m;           /* number of matrix rows in local matrix */
   HYPRE_Int cc;          /* Dimension of each processor's subgrid */
   HYPRE_Real hh;       /* Grid spacing; this is constant,  equal to 1.0/(px*cc-1) */
@@ -719,7 +756,7 @@ struct _matgenfd {
   HYPRE_Real stencil[8];
 
 
-  /* derivative coefficients; a,b,c are 2nd derivatives,
+  /* derivative coefficients; a,b,c are 2nd derivatives, 
    * c,d,e are 1st derivatives; f,g,h not currently used.
    */
   HYPRE_Real a, b, c, d, e, f, g, h;
@@ -731,7 +768,7 @@ struct _matgenfd {
   HYPRE_Real bcX1, bcX2;
   HYPRE_Real bcY1, bcY2;
   HYPRE_Real bcZ1, bcZ2;
-
+                
   /* The following return coefficients; default is konstant() */
   HYPRE_Real (*A)(HYPRE_Real coeff, HYPRE_Real x, HYPRE_Real y, HYPRE_Real z);
   HYPRE_Real (*B)(HYPRE_Real coeff, HYPRE_Real x, HYPRE_Real y, HYPRE_Real z);
@@ -781,12 +818,19 @@ extern HYPRE_Real box_1(HYPRE_Real coeff, HYPRE_Real x, HYPRE_Real y, HYPRE_Real
   /* -bd2 is diffusion coeff outside box;
      -bd1 is diffusion coeff inside box.
   */
-
+     
 
 
 extern HYPRE_Real box_2(HYPRE_Real coeff, HYPRE_Real x, HYPRE_Real y, HYPRE_Real z);
 
 #endif
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 #ifndef MAT_DH_DH
 #define MAT_DH_DH
 
@@ -809,7 +853,7 @@ struct _mat_dh {
   HYPRE_Int bs;        /* block size */
 
   /* sparse row-oriented storage for locally owned submatrix */
-  HYPRE_Int *rp;
+  HYPRE_Int *rp;       
   HYPRE_Int *len;   /* length of each row; only used for MPI triangular solves */
   HYPRE_Int *cval;
   HYPRE_Int *fill;
@@ -833,17 +877,17 @@ struct _mat_dh {
   bool matvec_timing;
 
   /* used for MatVecs */
-  HYPRE_Int          num_recv;
+  HYPRE_Int          num_recv; 
   HYPRE_Int          num_send;   /* used in destructor */
   hypre_MPI_Request  *recv_req;
-  hypre_MPI_Request  *send_req;
-  HYPRE_Real   *recvbuf, *sendbuf;
+  hypre_MPI_Request  *send_req; 
+  HYPRE_Real   *recvbuf, *sendbuf;  
   HYPRE_Int          *sendind;
-  HYPRE_Int          sendlen;
-  HYPRE_Int          recvlen;
+  HYPRE_Int          sendlen;               
+  HYPRE_Int          recvlen;               
   bool         matvecIsSetup;
   Numbering_dh numb;
-  hypre_MPI_Status   *status;
+  hypre_MPI_Status   *status;  
 
   bool debug;
 };
@@ -915,7 +959,7 @@ extern void Mat_dhGetRow(Mat_dh B, HYPRE_Int globalRow, HYPRE_Int *len, HYPRE_In
 extern void Mat_dhRestoreRow(Mat_dh B, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, HYPRE_Real **val);
 
   /* partition matrix into "k" blocks.  User must free storage. */
-extern void Mat_dhPartition(Mat_dh mat, HYPRE_Int k, HYPRE_Int **beg_rowOUT,
+extern void Mat_dhPartition(Mat_dh mat, HYPRE_Int k, HYPRE_Int **beg_rowOUT, 
                             HYPRE_Int **row_countOUT, HYPRE_Int **n2oOUT, HYPRE_Int **o2nOUT);
 
 
@@ -932,6 +976,13 @@ extern void dldperm(HYPRE_Int job, HYPRE_Int n, HYPRE_Int nnz, HYPRE_Int colptr[
 
 
 #endif
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 #ifndef SUBDOMAIN_GRAPH_DH
 #define SUBDOMAIN_GRAPH_DH
 
@@ -964,7 +1015,7 @@ struct _subdomain_dh {
 
   HYPRE_Int *beg_row;   /* global ordering of first local row owned by P_i */
   HYPRE_Int *beg_rowP;  /* global ordering of first local row owned by P_i after
-                     subdomain reordering
+                     subdomain reordering 
                    */
   HYPRE_Int *row_count; /* P_i owns row_count[i] local rows */
   HYPRE_Int *bdry_count; /* bdry_count[i] of P_i's rows are boundary rows */
@@ -994,7 +1045,7 @@ extern void SubdomainGraph_dhDestroy(SubdomainGraph_dh s);
 
 extern void SubdomainGraph_dhInit(SubdomainGraph_dh s, HYPRE_Int blocks, bool bj, void *A);
   /* Partitions matrix A into the specified number of blocks,
-     if there is a single MPI task; for mpi use, "blocks" must be the same
+     if there is a single MPI task; for mpi use, "blocks" must be the same 
      as the number of mpi tasks; for sequential, it may vary.
      On completion, the subdomain graph will be fully formed,
      (all fields valid); o2n_row[] and n2o_col[] will be permutations
@@ -1043,12 +1094,19 @@ extern void SubdomainGraph_dhPrintRatios(SubdomainGraph_dh s, FILE *fp);
 extern void SubdomainGraph_dhPrintStats(SubdomainGraph_dh sg, FILE *fp);
 
 #endif
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 /*
-    Euclid employs a global object:
+    Euclid employs a global object: 
 
         TimeLog_dh timlog_dh;
 
-    for recording timing information.
+    for recording timing information.  
 */
 
 #ifndef TIMELOG_DH_DH
@@ -1065,6 +1123,13 @@ extern void TimeLog_dhMark(TimeLog_dh t, const char *description);
 extern void TimeLog_dhPrint(TimeLog_dh t, FILE *fp, bool allPrint);
 
 #endif
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 #ifndef SORTED_SET_DH
 #define SORTED_SET_DH
 
@@ -1083,6 +1148,13 @@ extern void SortedSet_dhGetList(SortedSet_dh ss, HYPRE_Int **list, HYPRE_Int *co
 
 
 #endif
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 #ifndef MEM_DH_DH
 #define MEM_DH_DH
 
@@ -1103,6 +1175,13 @@ extern void  Mem_dhPrint(Mem_dh m, FILE* fp, bool allPrint);
    */
 
 #endif
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 #ifndef SUPPORT_DH
 #define SUPPORT_DH
 
@@ -1118,6 +1197,13 @@ extern void shellSort_int_int_float(HYPRE_Int n, HYPRE_Int *x, HYPRE_Int *y, HYP
 */
 
 #endif
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 #ifndef NUMBERING_DH_H
 #define NUMBERING_DH_H
 
@@ -1129,7 +1215,7 @@ extern void shellSort_int_int_float(HYPRE_Int n, HYPRE_Int *x, HYPRE_Int *y, HYP
 
 struct _numbering_dh {
   HYPRE_Int   size;    /* max number of indices that can be stored;
-                    (length of idx_ext[])
+                    (length of idx_ext[]) 
                   */
   HYPRE_Int   first;   /* global number of 1st local index (row) */
   HYPRE_Int   m;       /* number of local indices (number of local rows in mat) */
@@ -1157,10 +1243,17 @@ extern void Numbering_dhSetup(Numbering_dh numb, Mat_dh mat);
      output: local_out[len], containing corresponding local numbers.
      note: global_in[] and local_out[] may be identical.
    */
-extern void Numbering_dhGlobalToLocal(Numbering_dh numb, HYPRE_Int len,
+extern void Numbering_dhGlobalToLocal(Numbering_dh numb, HYPRE_Int len, 
                                       HYPRE_Int *global_in, HYPRE_Int *local_out);
 
 #endif
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 /* This is similar to the Hash_i_dh class (woe, for a lack
    of templates); this this class is for hashing data
    consisting of single, non-negative integers.
@@ -1170,10 +1263,10 @@ extern void Numbering_dhGlobalToLocal(Numbering_dh numb, HYPRE_Int len,
 #define HASH_I_DH
 
 /* #include "euclid_common.h" */
-
+                                 
 /*
-    class methods
-    note: all parameters are inputs; the only output
+    class methods 
+    note: all parameters are inputs; the only output 
           is the "HYPRE_Int" returned by Hash_i_dhLookup.
 */
 extern void Hash_i_dhCreate(Hash_i_dh *h, HYPRE_Int size);
@@ -1197,6 +1290,13 @@ extern HYPRE_Int  Hash_i_dhLookup(Hash_i_dh h, HYPRE_Int key);
      */
 
 #endif
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 #ifndef TIMER_DH_H
 #define TIMER_DH_H
 
@@ -1212,7 +1312,7 @@ extern HYPRE_Int  Hash_i_dhLookup(Hash_i_dh h, HYPRE_Int key);
  * You may need to fiddle with some of these includes, depending
  * on your system.  Make sure and check the logFile to ensure
  * that CLK_TCK was properly defined.  See Timer_dhCreate()
- * for additional details.
+ * for additional details. 
  *
  * if "JUNK_TIMING" is defined during compilation, timing functions
  * either do nothing, or return -1.0; this is primarily for debugging.
@@ -1233,7 +1333,7 @@ extern HYPRE_Int  Hash_i_dhLookup(Hash_i_dh h, HYPRE_Int key);
 #endif
 
 
-/*
+/* 
    ??? may be needed for some compilers/platforms?
 #include <limits.h>
 #include <time.h>
@@ -1246,14 +1346,14 @@ extern HYPRE_Int  Hash_i_dhLookup(Hash_i_dh h, HYPRE_Int key);
 struct _timer_dh {
   bool isRunning;
   hypre_longint sc_clk_tck;
-  HYPRE_Real begin_wall;
+  HYPRE_Real begin_wall; 
   HYPRE_Real end_wall;
 
 #ifdef EUCLID_TIMING
   struct tms  begin_cpu;
   struct tms  end_cpu;
 #endif
-
+ 
 };
 
 extern void Timer_dhCreate(Timer_dh *t);
@@ -1265,7 +1365,7 @@ extern HYPRE_Real Timer_dhReadWall(Timer_dh t);
 extern HYPRE_Real Timer_dhReadUsage(Timer_dh t);
 
 /* notes:
-    (1)  unless compiled with EUCLID_TIMING defined, readCPU
+    (1)  unless compiled with EUCLID_TIMING defined, readCPU 
          and readUseage return -1.0.
     (2)  whenever start() is called, the timer is reset; you
          don't need to call stop() first.
@@ -1277,6 +1377,13 @@ extern HYPRE_Real Timer_dhReadUsage(Timer_dh t);
 
 
 #endif
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 #ifndef PARSER_DH_DH
 #define PARSER_DH_DH
 
@@ -1285,10 +1392,10 @@ extern HYPRE_Real Timer_dhReadUsage(Timer_dh t);
 extern void Parser_dhCreate(Parser_dh *p);
 extern void Parser_dhDestroy(Parser_dh p);
 
-extern bool Parser_dhHasSwitch(Parser_dh p,const char *in);
-extern bool Parser_dhReadString(Parser_dh p,const char *in, char **out);
-extern bool Parser_dhReadInt(Parser_dh p,const char *in, HYPRE_Int *out);
-extern bool Parser_dhReadDouble(Parser_dh p,const char *in, HYPRE_Real *out);
+extern bool Parser_dhHasSwitch(Parser_dh p, const char *in);
+extern bool Parser_dhReadString(Parser_dh p, const char *in, char **out);
+extern bool Parser_dhReadInt(Parser_dh p, const char *in, HYPRE_Int *out);
+extern bool Parser_dhReadDouble(Parser_dh p, const char *in, HYPRE_Real *out);
   /* if the flag (char *in) is found, these four return
      true and set "out" accordingly.  If not found, they return
      false, and "out" is unaltered.
@@ -1299,12 +1406,12 @@ extern void Parser_dhPrint(Parser_dh p, FILE *fp, bool allPrint);
    * only meaningful when Euclid is compiled in MPI mode
    */
 
-extern void Parser_dhInsert(Parser_dh p,const char *name,const char *value);
+extern void Parser_dhInsert(Parser_dh p, const char *name, const char *value);
   /* For inserting a new <flag,value> pair, or altering
    * the value of an existing pair from within user apps.
    */
 
-extern void Parser_dhUpdateFromFile(Parser_dh p,const char *name);
+extern void Parser_dhUpdateFromFile(Parser_dh p, const char *name);
 
 extern void Parser_dhInit(Parser_dh p, HYPRE_Int argc, char *argv[]);
   /* Init enters <flag,value> pairs in its internal database in
@@ -1339,6 +1446,12 @@ extern void Parser_dhInit(Parser_dh p, HYPRE_Int argc, char *argv[]);
    */
 
 #endif
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #ifndef SORTEDLIST_DH_H
 #define SORTEDLIST_DH_H
@@ -1378,7 +1491,7 @@ extern SRecord * SortedList_dhGetSmallest(SortedList_dh sList);
 
 extern SRecord * SortedList_dhGetSmallestLowerTri(SortedList_dh sList);
   /* returns record with smallest column value that hasn't been
-     retrieved via this method since last call to reset.
+     retrieved via this method since last call to reset.  
      Only returns records where SRecord sr.col < row (per Init).
      If all records have been retrieved, returns NULL.
    */
@@ -1391,14 +1504,14 @@ extern void SortedList_dhInsert(SortedList_dh sList, SRecord *sr);
 
 extern void SortedList_dhInsertOrUpdateVal(SortedList_dh sList, SRecord *sr);
   /* unilateral insert: does not check to see if already
-     inserted; does not permute sr->col; used in numeric
+     inserted; does not permute sr->col; used in numeric 
      factorization routines.
    */
 
 extern bool SortedList_dhPermuteAndInsert(SortedList_dh sList, SRecord *sr, HYPRE_Real thresh);
   /* permutes sr->col, and inserts record in sorted list.
      Note: the contents of the passed variable "sr" may be changed.
-     Note: this performs sparsification
+     Note: this performs sparsification 
   */
 
 
@@ -1412,12 +1525,19 @@ extern void SortedList_dhInsertOrUpdate(SortedList_dh sList, SRecord *sr);
   */
 
 extern SRecord * SortedList_dhFind(SortedList_dh sList, SRecord *sr);
-  /* returns NULL if no record is found containing sr->col
+  /* returns NULL if no record is found containing sr->col 
    */
 
 extern void SortedList_dhUpdateVal(SortedList_dh sList, SRecord *sr);
 
 #endif
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 #ifndef HASH_D_DH
 #define HASH_D_DH
 
@@ -1473,13 +1593,20 @@ extern void Hash_dhPrint(Hash_dh h, FILE *fp);
           }
 
 #endif
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 #ifndef MAT_DH_PRIVATE
 #define MAT_DH_PRIVATE
 
 /* Functions called by Mat_dh, Factor_dh, and possibly others.
    Also, a few handy functions for dealing with permutations,
    etc.
-
+ 
  */
 
 /* #include "euclid_common.h" */
@@ -1491,7 +1618,7 @@ extern void mat_dh_transpose_private(HYPRE_Int m, HYPRE_Int *rpIN, HYPRE_Int **r
                                      HYPRE_Real *avalIN, HYPRE_Real **avalOUT);
 
   /* same as above, but memory for output was already allocated */
-extern void mat_dh_transpose_reuse_private(HYPRE_Int m,
+extern void mat_dh_transpose_reuse_private(HYPRE_Int m, 
                                      HYPRE_Int *rpIN, HYPRE_Int *cvalIN, HYPRE_Real *avalIN,
                                      HYPRE_Int *rpOUT, HYPRE_Int *cvalOUT, HYPRE_Real *avalOUT);
 
@@ -1504,7 +1631,7 @@ extern void mat_dh_transpose_reuse_private(HYPRE_Int m,
  * the "ignore" parameter is only used for the matrix "trip" format,
  * and the vector "csr" and "trip" formats (which are misnamed, and identical);
  * the intention is to skip over the first "ignore" lines of the file;
- * this is a hack to enable reading of Matrix Market, etc, formats.
+ * this is a hack to enable reading of Matrix Market, etc, formats. 
  *-------------------------------------------------------------------------*/
 extern void readMat(Mat_dh *Aout, char *fileType, char *fileName, HYPRE_Int ignore);
 extern void readVec(Vec_dh *bout, char *fileType, char *fileName, HYPRE_Int ignore);
@@ -1512,7 +1639,7 @@ extern void writeMat(Mat_dh Ain, char *fileType, char *fileName);
 extern void writeVec(Vec_dh b, char *fileType, char *fileName);
 
 /* Next function is primarily (?) for testing/development/debugging.
-   P_0 reads and partitions the matrix, then distributes
+   P_0 reads and partitions the matrix, then distributes 
    amongst the other processors.
 */
 extern void readMat_par(Mat_dh *Aout, char *fileType, char *fileName, HYPRE_Int ignore);
@@ -1533,7 +1660,7 @@ extern void profileMat(Mat_dh A);
  *         beg_row is global number of 1st locally owned row;
  *         m, beg_row, rp, cval may not be null (caller's responsiblity);
  *         if n2o is NULL, it's assumed that o2n is NULL;
- *         if
+ *         if 
  *
  *         error thrown:
  *         if a nonlocal column (a column index that is less than beg_row,
@@ -1544,30 +1671,30 @@ extern void profileMat(Mat_dh A);
  *-------------------------------------------------------------------------*/
 
 /* seq or mpi */
-extern void mat_dh_print_graph_private(HYPRE_Int m, HYPRE_Int beg_row, HYPRE_Int *rp, HYPRE_Int *cval,
+extern void mat_dh_print_graph_private(HYPRE_Int m, HYPRE_Int beg_row, HYPRE_Int *rp, HYPRE_Int *cval, 
                    HYPRE_Real *aval, HYPRE_Int *n2o, HYPRE_Int *o2n, Hash_i_dh hash, FILE* fp);
 
 
 /* seq; reordering not implemented */
 /* see io_dh.h
-                                HYPRE_Int *rp, HYPRE_Int *cval, HYPRE_Real *aval,
+                                HYPRE_Int *rp, HYPRE_Int *cval, HYPRE_Real *aval, 
                            HYPRE_Int *n2o, HYPRE_Int *o2n, Hash_i_dh hash, char *filename);
 */
 
 /* seq only */
 extern void mat_dh_print_csr_private(HYPRE_Int m, HYPRE_Int *rp, HYPRE_Int *cval, HYPRE_Real *aval,
-                                                                    FILE* fp);
+                                                                    FILE* fp); 
 
 
 /* seq only */
 extern void mat_dh_read_csr_private(HYPRE_Int *m, HYPRE_Int **rp, HYPRE_Int **cval, HYPRE_Real **aval,
-                                                                    FILE* fp);
+                                                                    FILE* fp); 
 
 /* seq only */
-extern void mat_dh_read_triples_private(HYPRE_Int ignore, HYPRE_Int *m, HYPRE_Int **rp,
-                                         HYPRE_Int **cval, HYPRE_Real **aval, FILE* fp);
+extern void mat_dh_read_triples_private(HYPRE_Int ignore, HYPRE_Int *m, HYPRE_Int **rp, 
+                                         HYPRE_Int **cval, HYPRE_Real **aval, FILE* fp); 
 
-/* seq or mpi */
+/* seq or mpi */ 
 /* see io_dh.h
                                      HYPRE_Real **aval, char *filename);
 */
@@ -1590,6 +1717,13 @@ extern void make_symmetric_private(HYPRE_Int m, HYPRE_Int **rp, HYPRE_Int **cval
 extern void make_symmetric_private(HYPRE_Int m, HYPRE_Int **rp, HYPRE_Int **cval, HYPRE_Real **aval);
 
 #endif
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 #ifndef GET_ROW_DH
 #define GET_ROW_DH
 
@@ -1608,6 +1742,13 @@ extern void PrintMatUsingGetRow(void* A, HYPRE_Int beg_row, HYPRE_Int m,
 
 
 #endif
+
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #ifndef ILU_MPI_DH
 #define ILU_MPI_DH
@@ -1643,6 +1784,13 @@ extern void ilut_seq(Euclid_dh ctx);
 
 #endif
 
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 #ifndef EUCLID_MPI_INTERFACE_DH
 #define EUCLID_MPI_INTERFACE_DH
 
@@ -1660,7 +1808,7 @@ extern void ilut_seq(Euclid_dh ctx);
  *             Mat_dhSolve, and is in src/Mat_dh.c
  *
  * Users should only need to call functions with names of the form
- * Euclid_dhXXX (public functions).
+ * Euclid_dhXXX (public functions). 
  *
  * Some of the functions whose names are of the form XXX_private_XXX,
  * as could easily be static functions; similarly, the enums and
@@ -1723,21 +1871,21 @@ enum{ SOLVE_START_T,
 #define STATS_BINS 10
 enum{ NZA_STATS,       /* cumulative nonzeros for all systems solved */
       NZF_STATS,       /* cumulative nonzeros for all systems solved */
-      NZA_USED_STATS,  /* cumulative nonzeros NOT dropped by sparseA */
+      NZA_USED_STATS,  /* cumulative nonzeros NOT dropped by sparseA */ 
       NZA_RATIO_STATS  /* NZA_USED_STATS/NZA_STATS, over all processors */
     };
 
 
-/* primary data structure: this is monstrously long; but it works.
+/* primary data structure: this is monstrously long; but it works. 
    Users must ensure the following fields are initialized prior
    to calling Euclid_dhSetup(): m, n, beg_row, A
 */
 struct _mpi_interface_dh {
   bool isSetup;
 
-  HYPRE_Real rho_init;
-  HYPRE_Real rho_final;
-    /* Memory allocation for factor; will initially allocate space for
+  HYPRE_Real rho_init;  
+  HYPRE_Real rho_final;  
+    /* Memory allocation for factor; will initially allocate space for 
        rho_init*nzA nonzeros; rho_final is computed after factorization,
        and is the minimum that rho_init whoulc have been to avoid
        memory reallocation; rho_final is a maximum across all processors.
@@ -1748,7 +1896,7 @@ struct _mpi_interface_dh {
   HYPRE_Real *rhs;   /* used for debugging; this vector is not owned! */
   void *A;       /*  PETSc, HYPRE, Euclid, or other matrix object. */
   Factor_dh F;   /* data structure for the factor, F = L+U-I */
-  SubdomainGraph_dh sg;
+  SubdomainGraph_dh sg; 
 
   REAL_DH *scale;      /* row scaling vector */
   bool    isScaled;    /* set at runtime, turns scaling on or off */
@@ -1789,26 +1937,40 @@ struct _mpi_interface_dh {
   bool timingsWereReduced;
   bool   printStats; /* if true, on 2nd and subsequent calls to Setup,
                         calls Euclid_dhPrintStatsShorter().  Intent is to
-                        print out stats for each setup phase when
+                        print out stats for each setup phase when 
                         using Euclid, e.g, for nonlinear solves.
                      */
-};
+}; 
 
 #endif /*  #ifndef EUCLID_MPI_INTERFACE_DH */
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 #ifndef THREADED_KRYLOV_H
 #define THREADED_KRYLOV_H
 
 /* #include "blas_dh.h" */
 
-extern void bicgstab_euclid(Mat_dh A, Euclid_dh ctx, HYPRE_Real *x, HYPRE_Real *b,
+extern void bicgstab_euclid(Mat_dh A, Euclid_dh ctx, HYPRE_Real *x, HYPRE_Real *b, 
                                                               HYPRE_Int *itsOUT);
 
-extern void cg_euclid(Mat_dh A, Euclid_dh ctx, HYPRE_Real *x, HYPRE_Real *b,
+extern void cg_euclid(Mat_dh A, Euclid_dh ctx, HYPRE_Real *x, HYPRE_Real *b, 
                                                               HYPRE_Int *itsOUT);
 
 #endif
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 /*
-   Note: this module contains functionality for reading/writing
+   Note: this module contains functionality for reading/writing 
          Euclid's binary io format, and opening and closing files.
          Additional io can be found in in mat_dh_private, which contains
          private functions for reading/writing various matrix and
@@ -1835,7 +1997,7 @@ bool isSmallEndian();
 
 /* seq only ?? */
 extern void io_dh_print_ebin_mat_private(HYPRE_Int m, HYPRE_Int beg_row,
-                                HYPRE_Int *rp, HYPRE_Int *cval, HYPRE_Real *aval,
+                                HYPRE_Int *rp, HYPRE_Int *cval, HYPRE_Real *aval, 
                            HYPRE_Int *n2o, HYPRE_Int *o2n, Hash_i_dh hash, char *filename);
 
 /* seq only ?? */
@@ -1850,6 +2012,13 @@ extern void io_dh_read_ebin_vec_private(HYPRE_Int *n, HYPRE_Real **vals, char *f
 
 
 #endif
+
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #ifndef THREADED_BLAS_DH
 #define THREADED_BLAS_DH
@@ -1881,3 +2050,4 @@ extern void ScaleVec(HYPRE_Int n, HYPRE_Real alpha, HYPRE_Real *x);
 #endif
 
 #endif
+

@@ -111,8 +111,8 @@ extern HYPRE_Int  ref_counter; /* for internal use only!  Reference counter
  * macros defined in "macros_dh.h"
  */
 extern bool  errFlag_dh;
-extern void  setInfo_dh(char *msg, char *function, char *file, HYPRE_Int line);
-extern void  setError_dh(char *msg, char *function, char *file, HYPRE_Int line);
+extern void  setInfo_dh(const char *msg, const char *function, const char *file, HYPRE_Int line);
+extern void  setError_dh(const char *msg, const char *function, const char *file, HYPRE_Int line);
 extern void  printErrorMsg(FILE *fp);
 
 #ifndef hypre_MPI_MAX_ERROR_STRING
@@ -135,15 +135,15 @@ extern bool logFuncsToStderr;
 extern bool logFuncsToFile;
 extern void Error_dhStartFunc(char *function, char *file, HYPRE_Int line);
 extern void Error_dhEndFunc(char *function);
-extern void dh_StartFunc(char *function, char *file, HYPRE_Int line, HYPRE_Int priority);
-extern void dh_EndFunc(char *function, HYPRE_Int priority);
+extern void dh_StartFunc(const char *function, const char *file, HYPRE_Int line, HYPRE_Int priority);
+extern void dh_EndFunc(const char *function, HYPRE_Int priority);
 extern void printFunctionStack(FILE *fp);
 
 extern void EuclidInitialize(HYPRE_Int argc, char *argv[], char *help); /* instantiates global objects */
 extern void EuclidFinalize();    /* deletes global objects */
 extern bool EuclidIsInitialized();
-extern void printf_dh(char *fmt, ...);
-extern void fprintf_dh(FILE *fp, char *fmt, ...);
+extern void printf_dh(const char *fmt, ...);
+extern void fprintf_dh(FILE *fp, const char *fmt, ...);
 
   /* echo command line invocation to stdout.
      The "prefix" string is for grepping; it may be NULL.
