@@ -163,7 +163,7 @@ include:
 GPU build
 ------------------------------------------------------------------------------
 
-Hypre can support GPUs with CUDA and OpenMP (:math:`{\ge}` 4.5). The related ``configure`` options are listed as follows
+Hypre can support GPUs with CUDA and OpenMP (:math:`{\ge}` 4.5). The related ``configure`` options are
 
 .. code-block:: none
 
@@ -173,17 +173,7 @@ Hypre can support GPUs with CUDA and OpenMP (:math:`{\ge}` 4.5). The related ``c
   --with-device-openmp    Use OpenMP 4.5 Device Directives. This may affect
                           which compiler is chosen.
 
-  --enable-nvtx           Use NVTX (default is NO).
-
-  --enable-cusparse       Use cuSPARSE (default is YES).
-
-  --enable-cub            Use CUB caching allocator (default is NO).
-
-  --enable-cublas         Use cuBLAS (default is NO).
-
-  --enable-curand         Use cuRAND (default is YES).
-
-Environment variables related to CUDA
+The related environment variables
 
 .. code-block:: none
 
@@ -194,7 +184,8 @@ Environment variables related to CUDA
 need to be set properly.
 
 When configured with ``--with-cuda`` or ``--with-device-openmp``, the memory allocated on the GPUs, by default, is the GPU device memory, which is not accessible from the CPUs.
-Hypre's Struct solvers can work fine with the device memory, whereas BoomerAMG and the SStruct solvers require the unified (CUDA managed) memory, for which
+Hypre's Struct solvers can work fine with only  device memory,
+whereas BoomerAMG and the SStruct solvers require  unified (CUDA managed) memory, for which
 the following option should be added
 
 .. code-block:: none
@@ -202,7 +193,8 @@ the following option should be added
   --enable-unified-memory Use unified memory for allocating the memory
                           (default is NO).
 
-Hypre's Struct solvers can also use RAJA and Kokkos as the backend of the BoxLoop. The related ``configure`` options include
+Hypre's Struct solvers can also choose RAJA and Kokkos as the backend.
+The ``configure`` options are
 
 .. code-block:: none
 
@@ -212,40 +204,16 @@ Hypre's Struct solvers can also use RAJA and Kokkos as the backend of the BoxLoo
   --with-kokkos           Use Kokkos. Require kokkos package to be compiled
                           properly(default is NO).
 
-  --with-raja-include=DIR User specifies that RAJA/*.h is in DIR. The options
-                          --with-raja-include --with-raja-libs and
-                          --with-raja-lib-dirs must be used together.
+To run on the GPUs with RAJA and Kokkos, the options ``--with-cuda`` and ``--with-device-openmp`` are also needed,
+and the RAJA and Kokkos libraries should be built with CUDA or OpenMP 4.5 correspondingly.
 
-  --with-raja-libs=LIBS   LIBS is space-separated list (enclosed in quotes) of
-                          libraries needed for RAJA (base name only). The
-                          options --with-raja-libs and --with-raja-lib-dirs
-                          must be used together.
+The other GPU related options include:
 
-  --with-raja-lib-dirs=DIRS
-                          DIRS is space-separated list (enclosed in quotes) of
-                          directories containing the libraries specified by
-                          --with-raja-libs, e.g "usr/lib /usr/local/lib". The
-                          options --with-raja-libs and --raja-blas-lib-dirs
-                          must be used together.
-
-  --with-kokkos-include=DIR
-                          User specifies that KOKKOS headers is in DIR. The
-                          options --with-kokkos-include --with-kokkos-libs and
-                          --with-kokkos-dirs must be used together.
-
-  --with-kokkos-libs=LIBS LIBS is space-separated list (enclosed in quotes) of
-                          libraries needed for KOKKOS (base name only). The
-                          options --with-kokkos-libs and --with-kokkos-dirs
-                          must be used together.
-
-  --with-kokkos-lib-dirs=DIRS
-                          DIRS is space-separated list (enclosed in quotes) of
-                          directories containing the libraries and
-                          Makefile.kokkos is assumed to be in DIRS/../ . The
-                          options --with-kokkos-libs and --with-kokkos-dirs
-                          must be used together.
-
-To run on the GPUs, the option ``--with-cuda`` or ``--with-device-openmp`` is also needed, and the provided RAJA and Kokkos libraries should have been built with CUDA or OpenMP 4.5 correspondingly.
+* ``--enable-nvtx``: enable NVTX annotations for CUDA profilers
+* ``--enable-cub`` : enable the caching GPU memory allocator in hypre
+* ``--enable-cusparse`` : choose cuSPARSE for GPU sparse kernels
+* ``--enable-cublas`` : choose cuBLAS for GPU dense kernels
+* ``--enable-curand`` : generating random numbers on GPUs
 
 Testing the Library
 ==============================================================================
