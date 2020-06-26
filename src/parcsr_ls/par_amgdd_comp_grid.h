@@ -1,24 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
-
-
 /******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * Header info for Parallel AMGDD composite grid structure (on a single level)
- *
- *****************************************************************************/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #ifndef hypre_PAR_AMGDD_COMP_GRID_HEADER
 #define hypre_PAR_AMGDD_COMP_GRID_HEADER
@@ -27,25 +12,21 @@
  * hypre_ParCompGridCommPkg
  *--------------------------------------------------------------------------*/
 
-#ifndef HYPRE_PAR_AMGDD_COMP_GRID_COMM_PKG
-#define HYPRE_PAR_AMGDD_COMP_GRID_COMM_PKG
-#endif
-
 typedef struct
 {
    // Info needed for subsequent psi_c residual communication
 	HYPRE_Int 			num_levels; // levels in the amg hierarchy
 	HYPRE_Int 			*num_send_procs; // number of send procs to communicate with
-    HYPRE_Int           *num_recv_procs; // number of recv procs to communicate with
+   HYPRE_Int           *num_recv_procs; // number of recv procs to communicate with
 
-    HYPRE_Int         **send_procs; // list of send procs
-    HYPRE_Int         **recv_procs; // list of recv procs
+   HYPRE_Int         **send_procs; // list of send procs
+   HYPRE_Int         **recv_procs; // list of recv procs
 
 	HYPRE_Int 			**send_buffer_size; // size of send buffer on each level for each proc
 	HYPRE_Int 			**recv_buffer_size; // size of recv buffer on each level for each proc
 
 	HYPRE_Int 			***num_send_nodes; // number of nodes to send on each composite level
-    HYPRE_Int           ***num_recv_nodes; // number of nodes to recv on each composite level
+   HYPRE_Int           ***num_recv_nodes; // number of nodes to recv on each composite level
 	HYPRE_Int 			****send_flag; // flags which nodes to send after composite grid is built
 	HYPRE_Int 			****recv_map; // mapping from recv buffer to appropriate local indices on each comp grid
 
@@ -68,23 +49,9 @@ typedef struct
  #define hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)				((compGridCommPkg) -> recv_map)
 
 
-
-
-/*--------------------------------------------------------------------------
- * hypre_ParCompGrid
- *--------------------------------------------------------------------------*/
-
-#ifndef HYPRE_PAR_AMGDD_COMP_GRID_STRUCT
-#define HYPRE_PAR_AMGDD_COMP_GRID_STRUCT
-#endif
-
 /*--------------------------------------------------------------------------
  * CompGridMatrix (basically a coupled collection of CSR matrices)
  *--------------------------------------------------------------------------*/
-
-#ifndef HYPRE_PAR_CSR_MATRIX_STRUCT
-#define HYPRE_PAR_CSR_MATRIX_STRUCT
-#endif
 
 typedef struct
 {
@@ -118,10 +85,6 @@ typedef struct
  * CompGridVector
  *--------------------------------------------------------------------------*/
 
-#ifndef HYPRE_PAR_VECTOR_STRUCT
-#define HYPRE_PAR_VECTOR_STRUCT
-#endif
-
 typedef struct
 {
    hypre_Vector         *owned_vector; // Original on-processor points (should be ordered)
@@ -141,6 +104,9 @@ typedef struct
 #define hypre_ParCompGridVectorNumReal(vector)            ((vector) -> num_real)
 #define hypre_ParCompGridVectorOwnsOwnedVector(matrix)       ((matrix) -> owns_owned_vector)
 
+/*--------------------------------------------------------------------------
+ * hypre_ParCompGrid
+ *--------------------------------------------------------------------------*/
 
 typedef struct
 {
@@ -154,7 +120,7 @@ typedef struct
    HYPRE_Int        num_nonowned_nodes;
    HYPRE_Int        num_nonowned_real_nodes;
    HYPRE_Int        num_owned_c_points;
-   HYPRE_Int        num_nonowned_c_points;
+   HYPRE_Int        num_nonowned_real_c_points;
    HYPRE_Int        num_missing_col_indices;
 
    HYPRE_Int        *nonowned_global_indices;
@@ -192,8 +158,6 @@ typedef struct
    HYPRE_Int        *owned_relax_ordering;
    HYPRE_Int        *nonowned_relax_ordering;
 
-   HYPRE_Real       *cheby_coeffs;
-
 } hypre_ParCompGrid;
 
 /*--------------------------------------------------------------------------
@@ -209,7 +173,7 @@ typedef struct
 #define hypre_ParCompGridNumNonOwnedNodes(compGrid)               ((compGrid) -> num_nonowned_nodes)
 #define hypre_ParCompGridNumNonOwnedRealNodes(compGrid)               ((compGrid) -> num_nonowned_real_nodes)
 #define hypre_ParCompGridNumOwnedCPoints(compGrid)               ((compGrid) -> num_owned_c_points)
-#define hypre_ParCompGridNumNonOwnedCPoints(compGrid)               ((compGrid) -> num_nonowned_c_points)
+#define hypre_ParCompGridNumNonOwnedRealCPoints(compGrid)               ((compGrid) -> num_nonowned_real_c_points)
 #define hypre_ParCompGridNumMissingColIndices(compGrid)               ((compGrid) -> num_missing_col_indices)
 
 #define hypre_ParCompGridNonOwnedGlobalIndices(compGrid)               ((compGrid) -> nonowned_global_indices)
@@ -246,7 +210,5 @@ typedef struct
 #define hypre_ParCompGridNonOwnedFMask(compGrid)         ((compGrid) -> nonowned_f_mask)
 #define hypre_ParCompGridOwnedRelaxOrdering(compGrid)         ((compGrid) -> owned_relax_ordering)
 #define hypre_ParCompGridNonOwnedRelaxOrdering(compGrid)         ((compGrid) -> nonowned_relax_ordering)
-
-#define hypre_ParCompGridChebyCoeffs(compGrid)         ((compGrid) -> cheby_coeffs)
 
 #endif
