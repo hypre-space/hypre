@@ -363,9 +363,7 @@ typedef struct
 
    /* composide grid data for AMG-DD */
    HYPRE_Int                 amgdd_start_level;
-   HYPRE_Int                 min_fac_iter;
    HYPRE_Int                 max_fac_iter;
-   HYPRE_Real                fac_tol;
    HYPRE_Int                 fac_cycle_type;
    HYPRE_Int                 fac_relax_type;
    HYPRE_Int                 fac_use_pcg;
@@ -374,9 +372,6 @@ typedef struct
    HYPRE_Int                 variable_padding;
    HYPRE_Int                 num_ghost_layers;
    HYPRE_Int                 amgdd_use_rd;
-   HYPRE_Int                 amgdd_num_global_relax;
-   HYPRE_Real                amgdd_correction_step;
-   hypre_ParVector          *amgdd_correction_vector;
    hypre_ParCompGrid       **compGrid;
    hypre_ParCompGridCommPkg *compGridCommPkg;
    HYPRE_Int       (*amgddUserFACRelaxation)( hypre_ParCompGrid*, hypre_ParCompGridMatrix*, hypre_ParCompGridVector*, hypre_ParCompGridVector* );
@@ -441,7 +436,6 @@ typedef struct
    /* log info */
    HYPRE_Int        logging;
    HYPRE_Int        num_iterations;
-   HYPRE_Int        num_fac_iterations;
 #ifdef CUMNUMIT
    HYPRE_Int        cum_num_iterations;
 #endif
@@ -659,9 +653,7 @@ typedef struct
 
 /* composite grid data */
 #define hypre_ParAMGDataAMGDDStartLevel(amg_data) ((amg_data)->amgdd_start_level)
-#define hypre_ParAMGDataMinFACIter(amg_data) ((amg_data)->min_fac_iter)
 #define hypre_ParAMGDataMaxFACIter(amg_data) ((amg_data)->max_fac_iter)
-#define hypre_ParAMGDataFACTol(amg_data) ((amg_data)->fac_tol)
 #define hypre_ParAMGDataFACCycleType(amg_data) ((amg_data)->fac_cycle_type)
 #define hypre_ParAMGDataFACRelaxType(amg_data) ((amg_data)->fac_relax_type)
 #define hypre_ParAMGDataFACUsePCG(amg_data) ((amg_data)->fac_use_pcg)
@@ -670,9 +662,6 @@ typedef struct
 #define hypre_ParAMGDataAMGDDVariablePadding(amg_data) ((amg_data)->variable_padding)
 #define hypre_ParAMGDataAMGDDNumGhostLayers(amg_data) ((amg_data)->num_ghost_layers)
 #define hypre_ParAMGDataAMGDDUseRD(amg_data) ((amg_data)->amgdd_use_rd)
-#define hypre_ParAMGDataAMGDDNumGlobalRelax(amg_data) ((amg_data)->amgdd_num_global_relax)
-#define hypre_ParAMGDataAMGDDCorrectionStep(amg_data) ((amg_data)->amgdd_correction_step)
-#define hypre_ParAMGDataAMGDDCorrectionVector(amg_data) ((amg_data)->amgdd_correction_vector)
 #define hypre_ParAMGDataCompGrid(amg_data) ((amg_data)->compGrid)
 #define hypre_ParAMGDataCompGridCommPkg(amg_data) ((amg_data)->compGridCommPkg)
 #define hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data) ((amg_data)->amgddUserFACRelaxation)
@@ -701,7 +690,6 @@ typedef struct
 /* log info data */
 #define hypre_ParAMGDataLogging(amg_data) ((amg_data)->logging)
 #define hypre_ParAMGDataNumIterations(amg_data) ((amg_data)->num_iterations)
-#define hypre_ParAMGDataNumFACIterations(amg_data) ((amg_data)->num_fac_iterations)
 #ifdef CUMNUMIT
 #define hypre_ParAMGDataCumNumIterations(amg_data) ((amg_data)->cum_num_iterations)
 #endif
@@ -1104,12 +1092,8 @@ HYPRE_Int HYPRE_BoomerAMGSetSepWeight ( HYPRE_Solver solver , HYPRE_Int sep_weig
 HYPRE_Int HYPRE_BoomerAMGSetMinIter ( HYPRE_Solver solver , HYPRE_Int min_iter );
 HYPRE_Int HYPRE_BoomerAMGSetMaxIter ( HYPRE_Solver solver , HYPRE_Int max_iter );
 HYPRE_Int HYPRE_BoomerAMGGetMaxIter ( HYPRE_Solver solver , HYPRE_Int *max_iter );
-HYPRE_Int HYPRE_BoomerAMGSetMinFACIter ( HYPRE_Solver solver , HYPRE_Int min_fac_iter );
-HYPRE_Int HYPRE_BoomerAMGGetMinFACIter ( HYPRE_Solver solver , HYPRE_Int *min_fac_iter );
 HYPRE_Int HYPRE_BoomerAMGSetMaxFACIter ( HYPRE_Solver solver , HYPRE_Int max_fac_iter );
 HYPRE_Int HYPRE_BoomerAMGGetMaxFACIter ( HYPRE_Solver solver , HYPRE_Int *max_fac_iter );
-HYPRE_Int HYPRE_BoomerAMGSetFACTol ( HYPRE_Solver solver , HYPRE_Real fac_tol );
-HYPRE_Int HYPRE_BoomerAMGGetFACTol ( HYPRE_Solver solver , HYPRE_Real *fac_tol );
 HYPRE_Int HYPRE_BoomerAMGSetFACCycleType ( HYPRE_Solver solver , HYPRE_Int fac_cycle_type );
 HYPRE_Int HYPRE_BoomerAMGGetFACCycleType ( HYPRE_Solver solver , HYPRE_Int *fac_cycle_type );
 HYPRE_Int HYPRE_BoomerAMGSetFACRelaxType ( HYPRE_Solver solver , HYPRE_Int fac_relax_type );
@@ -1166,7 +1150,6 @@ HYPRE_Int HYPRE_BoomerAMGSetDebugFlag ( HYPRE_Solver solver , HYPRE_Int debug_fl
 HYPRE_Int HYPRE_BoomerAMGGetDebugFlag ( HYPRE_Solver solver , HYPRE_Int *debug_flag );
 HYPRE_Int HYPRE_BoomerAMGGetNumIterations ( HYPRE_Solver solver , HYPRE_Int *num_iterations );
 HYPRE_Int HYPRE_BoomerAMGGetCumNumIterations ( HYPRE_Solver solver , HYPRE_Int *cum_num_iterations );
-HYPRE_Int HYPRE_BoomerAMGGetNumFACIterations ( HYPRE_Solver solver, HYPRE_Int *num_fac_iterations );
 HYPRE_Int HYPRE_BoomerAMGGetResidual ( HYPRE_Solver solver , HYPRE_ParVector *residual );
 HYPRE_Int HYPRE_BoomerAMGGetFinalRelativeResidualNorm ( HYPRE_Solver solver , HYPRE_Real *rel_resid_norm );
 HYPRE_Int HYPRE_BoomerAMGSetVariant ( HYPRE_Solver solver , HYPRE_Int variant );
@@ -1596,12 +1579,8 @@ HYPRE_Int hypre_BoomerAMGSetMinIter ( void *data , HYPRE_Int min_iter );
 HYPRE_Int hypre_BoomerAMGGetMinIter ( void *data , HYPRE_Int *min_iter );
 HYPRE_Int hypre_BoomerAMGSetMaxIter ( void *data , HYPRE_Int max_iter );
 HYPRE_Int hypre_BoomerAMGGetMaxIter ( void *data , HYPRE_Int *max_iter );
-HYPRE_Int hypre_BoomerAMGSetMinFACIter ( void *data , HYPRE_Int min_fac_iter );
-HYPRE_Int hypre_BoomerAMGGetMinFACIter ( void *data , HYPRE_Int *min_fac_iter );
 HYPRE_Int hypre_BoomerAMGSetMaxFACIter ( void *data , HYPRE_Int max_fac_iter );
 HYPRE_Int hypre_BoomerAMGGetMaxFACIter ( void *data , HYPRE_Int *max_fac_iter );
-HYPRE_Int hypre_BoomerAMGSetFACTol ( void *data , HYPRE_Real fac_tol );
-HYPRE_Int hypre_BoomerAMGGetFACTol ( void *data , HYPRE_Real *fac_tol );
 HYPRE_Int hypre_BoomerAMGSetFACCycleType ( void *data , HYPRE_Int fac_cycle_type );
 HYPRE_Int hypre_BoomerAMGGetFACCycleType ( void *data , HYPRE_Int *fac_cycle_type );
 HYPRE_Int hypre_BoomerAMGSetFACRelaxType ( void *data , HYPRE_Int fac_relax_type );
@@ -1703,9 +1682,7 @@ HYPRE_Int hypre_BoomerAMGSetDofFunc ( void *data , HYPRE_Int *dof_func );
 HYPRE_Int hypre_BoomerAMGSetPointDofMap ( void *data , HYPRE_Int *point_dof_map );
 HYPRE_Int hypre_BoomerAMGSetDofPoint ( void *data , HYPRE_Int *dof_point );
 HYPRE_Int hypre_BoomerAMGGetNumIterations ( void *data , HYPRE_Int *num_iterations );
-HYPRE_Int hypre_BoomerAMGGetNumFACIterations ( void *data , HYPRE_Int *num_fac_iterations );
 HYPRE_Int hypre_BoomerAMGGetCumNumIterations ( void *data , HYPRE_Int *cum_num_iterations );
-HYPRE_Int hypre_BoomerAMGGetNumFACIterations ( void *data , HYPRE_Int *num_fac_iterations );
 HYPRE_Int hypre_BoomerAMGGetResidual ( void *data , hypre_ParVector **resid );
 HYPRE_Int hypre_BoomerAMGGetRelResidualNorm ( void *data , HYPRE_Real *rel_resid_norm );
 HYPRE_Int hypre_BoomerAMGSetVariant ( void *data , HYPRE_Int variant );

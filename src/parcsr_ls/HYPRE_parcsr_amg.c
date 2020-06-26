@@ -455,24 +455,6 @@ HYPRE_BoomerAMGGetMaxIter( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_BoomerAMGSetMinFACIter
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-HYPRE_BoomerAMGSetMinFACIter( HYPRE_Solver solver,
-                           HYPRE_Int          min_fac_iter  )
-{
-   return( hypre_BoomerAMGSetMinFACIter( (void *) solver, min_fac_iter ) );
-}
-
-HYPRE_Int
-HYPRE_BoomerAMGGetMinFACIter( HYPRE_Solver solver,
-                           HYPRE_Int        * min_fac_iter  )
-{
-   return( hypre_BoomerAMGGetMinFACIter( (void *) solver, min_fac_iter ) );
-}
-
-/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetMaxFACIter
  *--------------------------------------------------------------------------*/
 
@@ -488,24 +470,6 @@ HYPRE_BoomerAMGGetMaxFACIter( HYPRE_Solver solver,
                            HYPRE_Int        * max_fac_iter  )
 {
    return( hypre_BoomerAMGGetMaxFACIter( (void *) solver, max_fac_iter ) );
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_BoomerAMGSetFACTol
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-HYPRE_BoomerAMGSetFACTol( HYPRE_Solver solver,
-                           HYPRE_Real          fac_tol  )
-{
-   return( hypre_BoomerAMGSetFACTol( (void *) solver, fac_tol ) );
-}
-
-HYPRE_Int
-HYPRE_BoomerAMGGetFACTol( HYPRE_Solver solver,
-                           HYPRE_Real        * fac_tol  )
-{
-   return( hypre_BoomerAMGGetFACTol( (void *) solver, fac_tol ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -1137,17 +1101,6 @@ HYPRE_BoomerAMGGetNumIterations( HYPRE_Solver  solver,
                                  HYPRE_Int          *num_iterations  )
 {
    return( hypre_BoomerAMGGetNumIterations( (void *) solver, num_iterations ) );
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_BoomerAMGGetNumFACIterations
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int 
-HYPRE_BoomerAMGDGetNumFACIterations ( HYPRE_Solver solver, 
-                                       HYPRE_Int *fac_num_iterations )
-{
-  return ( hypre_BoomerAMGGetNumFACIterations( (void *) solver, fac_num_iterations ) );
 }
 
 /*--------------------------------------------------------------------------

@@ -72,17 +72,6 @@ hypre_BoomerAMGDDSolve( void *amg_vdata,
       hypre_ParVectorSetPartitioningOwner(hypre_ParAMGDataZtemp(amg_data),0);
    }
 
-   // !!! New: trying a solve around just the processor boundary. This is temporary implementation (something much more efficient could be done). Just looking at convergence.
-   HYPRE_Int *boundary_marker;
-   if (hypre_ParAMGDataAMGDDNumGlobalRelax(amg_data) < 0) 
-   {
-      boundary_marker = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRMatrixNumRows(hypre_ParAMGDataAArray(amg_data)[amgdd_start_level]), HYPRE_MEMORY_HOST);
-      HYPRE_Int i;
-      hypre_ParCSRCommPkg  *comm_pkg = hypre_ParCSRMatrixCommPkg(hypre_ParAMGDataAArray(amg_data)[amgdd_start_level]);
-      for (i = 0; i < hypre_ParCSRCommPkgSendMapStart(comm_pkg, hypre_ParCSRCommPkgNumSends(comm_pkg)); i++) boundary_marker[ hypre_ParCSRCommPkgSendMapElmt(comm_pkg,i) ] = 1;
-   }
-
-
    // Set the fine grid operator, left-hand side, and right-hand side
    hypre_ParAMGDataAArray(amg_data)[0] = A;
    hypre_ParCompGrid *compGrid = hypre_ParAMGDataCompGrid(amg_data)[0];
@@ -184,35 +173,6 @@ hypre_BoomerAMGDDSolve( void *amg_vdata,
          }
       }
 
-      /* HYPRE_Int relax_type, i; */
-      /* for (i = 0; i < hypre_ParAMGDataAMGDDNumGlobalRelax(amg_data); i++) */
-      /*    for (relax_type = 13; relax_type < 15; relax_type++) */
-      /*       hypre_BoomerAMGRelax( hypre_ParAMGDataAArray(amg_data)[amgdd_start_level], */
-      /*                            hypre_ParAMGDataFArray(amg_data)[amgdd_start_level], */
-      /*                            hypre_ParAMGDataCFMarkerArray(amg_data)[amgdd_start_level], */
-      /*                            relax_type, */
-      /*                            0, */
-      /*                            hypre_ParAMGDataRelaxWeight(amg_data)[amgdd_start_level], */
-      /*                            hypre_ParAMGDataOmega(amg_data)[amgdd_start_level], */
-      /*                            hypre_ParAMGDataL1Norms(amg_data)[amgdd_start_level], */
-      /*                            hypre_ParAMGDataUArray(amg_data)[amgdd_start_level], */
-      /*                            hypre_ParAMGDataVtemp(amg_data), */
-      /*                            hypre_ParAMGDataZtemp(amg_data) ); */
-      /* if (hypre_ParAMGDataAMGDDNumGlobalRelax(amg_data) < 0) */
-      /*    for (i = 0; i < -hypre_ParAMGDataAMGDDNumGlobalRelax(amg_data); i++) */
-      /*       for (relax_type = 13; relax_type < 15; relax_type++) */
-      /*          hypre_BoomerAMGRelax( hypre_ParAMGDataAArray(amg_data)[amgdd_start_level], */
-      /*                            hypre_ParAMGDataFArray(amg_data)[amgdd_start_level], */
-      /*                            boundary_marker, */
-      /*                            relax_type, */
-      /*                            1, */
-      /*                            hypre_ParAMGDataRelaxWeight(amg_data)[amgdd_start_level], */
-      /*                            hypre_ParAMGDataOmega(amg_data)[amgdd_start_level], */
-      /*                            hypre_ParAMGDataL1Norms(amg_data)[amgdd_start_level], */
-      /*                            hypre_ParAMGDataUArray(amg_data)[amgdd_start_level], */
-      /*                            hypre_ParAMGDataVtemp(amg_data), */
-      /*                            hypre_ParAMGDataZtemp(amg_data) ); */
-
       // Do normal AMG V-cycle upsweep back up to the fine grid
       /* if (amgdd_start_level > 0) */ 
       /* { */
@@ -251,9 +211,6 @@ hypre_BoomerAMGDDSolve( void *amg_vdata,
       hypre_ParAMGDataNumIterations(amg_data) = cycle_count;
    }
 
-   // !!! New: clean up
-   if (hypre_ParAMGDataAMGDDNumGlobalRelax(amg_data) < 0) hypre_TFree(boundary_marker, HYPRE_MEMORY_HOST);
-
    return test_failed;
 }
 
@@ -265,13 +222,10 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata )
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
 
 	HYPRE_Int i,level;
-   HYPRE_Int cycle_count = 0;
 	hypre_ParAMGData	*amg_data = (hypre_ParAMGData*) amg_vdata;
   	HYPRE_Int num_levels = hypre_ParAMGDataNumLevels(amg_data);
    HYPRE_Int amgdd_start_level = hypre_ParAMGDataAMGDDStartLevel(amg_data);
-   HYPRE_Int min_fac_iter = hypre_ParAMGDataMinFACIter(amg_data);
    HYPRE_Int max_fac_iter = hypre_ParAMGDataMaxFACIter(amg_data);
-   HYPRE_Real fac_tol = hypre_ParAMGDataFACTol(amg_data);
 
    #if DEBUGGING_MESSAGES
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
@@ -314,31 +268,13 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata )
 
 	// Do the cycles
    HYPRE_Int first_iteration = 1;
-   if (fac_tol == 0.0)
+   for (i = 0; i < max_fac_iter; i++)
    {
-      while ( cycle_count < max_fac_iter )
-      {
-         // Do FAC cycle
-         hypre_BoomerAMGDD_FAC_Cycle( amg_vdata, first_iteration );
-         first_iteration = 0;
-
-         ++cycle_count;
-         hypre_ParAMGDataNumFACIterations(amg_data) = cycle_count;
-      }
-   }
-   else if (fac_tol > 0)
-   {
-      // !!! To do:
-      if (myid == 0) printf("fac_tol != 0 not yet implemented\n");
-   }
-   else if (fac_tol < 0)
-   {
-      // !!! To do:
-      if (myid == 0) printf("fac_tol != 0 not yet implemented\n");
+      // Do FAC cycle
+      hypre_BoomerAMGDD_FAC_Cycle( amg_vdata, first_iteration );
+      first_iteration = 0;
    }
    
-
-
 	// Update fine grid solution
    if (hypre_ParAMGDataAMGDDUseRD(amg_data))
    {

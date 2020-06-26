@@ -111,9 +111,7 @@ typedef struct
 
    /* composide grid data for AMG-DD */
    HYPRE_Int                 amgdd_start_level;
-   HYPRE_Int                 min_fac_iter;
    HYPRE_Int                 max_fac_iter;
-   HYPRE_Real                fac_tol;
    HYPRE_Int                 fac_cycle_type;
    HYPRE_Int                 fac_relax_type;
    HYPRE_Int                 fac_use_pcg;
@@ -123,9 +121,6 @@ typedef struct
    HYPRE_Int                 num_ghost_layers;
    HYPRE_Int                 use_transition_level;
    HYPRE_Int                 amgdd_use_rd;
-   HYPRE_Int                 amgdd_num_global_relax;
-   HYPRE_Real                amgdd_correction_step;
-   hypre_ParVector          *amgdd_correction_vector;
    hypre_ParCompGrid       **compGrid;
    hypre_ParCompGridCommPkg *compGridCommPkg;
    HYPRE_Int       (*amgddUserFACRelaxation)( hypre_ParCompGrid*, hypre_ParCompGridMatrix*, hypre_ParCompGridVector*, hypre_ParCompGridVector* );
@@ -190,7 +185,6 @@ typedef struct
    /* log info */
    HYPRE_Int        logging;
    HYPRE_Int        num_iterations;
-   HYPRE_Int        num_fac_iterations;
 #ifdef CUMNUMIT
    HYPRE_Int        cum_num_iterations;
 #endif
@@ -408,9 +402,7 @@ typedef struct
 
 /* composite grid data */
 #define hypre_ParAMGDataAMGDDStartLevel(amg_data) ((amg_data)->amgdd_start_level)
-#define hypre_ParAMGDataMinFACIter(amg_data) ((amg_data)->min_fac_iter)
 #define hypre_ParAMGDataMaxFACIter(amg_data) ((amg_data)->max_fac_iter)
-#define hypre_ParAMGDataFACTol(amg_data) ((amg_data)->fac_tol)
 #define hypre_ParAMGDataFACCycleType(amg_data) ((amg_data)->fac_cycle_type)
 #define hypre_ParAMGDataFACRelaxType(amg_data) ((amg_data)->fac_relax_type)
 #define hypre_ParAMGDataFACUsePCG(amg_data) ((amg_data)->fac_use_pcg)
@@ -420,9 +412,6 @@ typedef struct
 #define hypre_ParAMGDataAMGDDNumGhostLayers(amg_data) ((amg_data)->num_ghost_layers)
 #define hypre_ParAMGDataAMGDDUseTransitionLevel(amg_data) ((amg_data)->use_transition_level)
 #define hypre_ParAMGDataAMGDDUseRD(amg_data) ((amg_data)->amgdd_use_rd)
-#define hypre_ParAMGDataAMGDDNumGlobalRelax(amg_data) ((amg_data)->amgdd_num_global_relax)
-#define hypre_ParAMGDataAMGDDCorrectionStep(amg_data) ((amg_data)->amgdd_correction_step)
-#define hypre_ParAMGDataAMGDDCorrectionVector(amg_data) ((amg_data)->amgdd_correction_vector)
 #define hypre_ParAMGDataCompGrid(amg_data) ((amg_data)->compGrid)
 #define hypre_ParAMGDataCompGridCommPkg(amg_data) ((amg_data)->compGridCommPkg)
 #define hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data) ((amg_data)->amgddUserFACRelaxation)
@@ -450,7 +439,6 @@ typedef struct
 /* log info data */
 #define hypre_ParAMGDataLogging(amg_data) ((amg_data)->logging)
 #define hypre_ParAMGDataNumIterations(amg_data) ((amg_data)->num_iterations)
-#define hypre_ParAMGDataNumFACIterations(amg_data) ((amg_data)->num_fac_iterations)
 #ifdef CUMNUMIT
 #define hypre_ParAMGDataCumNumIterations(amg_data) ((amg_data)->cum_num_iterations)
 #endif
