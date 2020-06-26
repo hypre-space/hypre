@@ -146,7 +146,6 @@ HYPRE_Int hypre_ParCSRMaxEigEstimateCG(hypre_ParCSRMatrix *A, /* matrix to relax
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
    HYPRE_Real      *A_diag_data  = hypre_CSRMatrixData(A_diag);
    HYPRE_Int       *A_diag_i     = hypre_CSRMatrixI(A_diag);
-   HYPRE_Int       *A_diag_j     = hypre_CSRMatrixJ(A_diag);
 
 
    /* check the size of A - don't iterate more than the size */
@@ -213,15 +212,8 @@ HYPRE_Int hypre_ParCSRMaxEigEstimateCG(hypre_ParCSRMatrix *A, /* matrix to relax
     {
        for (i = 0; i < local_size; i++)
        {
-        for (j = A_diag_i[i]; j < A_diag_i[i+1]; j++)
-        {
-          if (A_diag_j[j] == i)
-          {
-            diag = A_diag_data[j];
-            break;
-          }
-        }
-        ds_data[i] = 1/sqrt(diag);
+          diag = A_diag_data[A_diag_i[i]];
+          ds_data[i] = 1/sqrt(diag);
        }
 
     }
@@ -1029,17 +1021,17 @@ hypre_ParCSRRelax_L1_Jacobi( hypre_ParCSRMatrix *A,
 
     hypre_Vector   *Vtemp_local = hypre_ParVectorLocalVector(Vtemp);
     HYPRE_Real     *Vtemp_data = hypre_VectorData(Vtemp_local);
-    HYPRE_Real     *Vext_data = NULL;
-    HYPRE_Real     *v_buf_data;
+    HYPRE_Real 	   *Vext_data = NULL;
+    HYPRE_Real 	   *v_buf_data;
 
     HYPRE_Int            i, j;
     HYPRE_Int            ii, jj;
-    HYPRE_Int      num_sends;
-    HYPRE_Int      index, start;
-    HYPRE_Int      num_procs, my_id ;
+    HYPRE_Int		   num_sends;
+    HYPRE_Int		   index, start;
+    HYPRE_Int		   num_procs, my_id ;
 
     HYPRE_Real     zero = 0.0;
-    HYPRE_Real     res;
+    HYPRE_Real	   res;
 
 
     hypre_MPI_Comm_size(comm,&num_procs);
@@ -1132,7 +1124,6 @@ hypre_ParCSRRelax_L1_Jacobi( hypre_ParCSRMatrix *A,
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i,ii,jj,res) HYPRE_SMP_SCHEDULE
 #endif
-
        for (i = 0; i < n; i++)
        {
 

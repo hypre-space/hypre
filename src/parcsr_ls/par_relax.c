@@ -2335,6 +2335,7 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 
       case 7: /* Jacobi (uses ParMatvec) */
       {
+
          /*-----------------------------------------------------------------
           * Copy f into temporary vector.
           *-----------------------------------------------------------------*/

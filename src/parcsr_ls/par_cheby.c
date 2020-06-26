@@ -17,17 +17,25 @@
 
 
 /******************************************************************************
+
 Chebyshev relaxation
+
  
 Can specify order 1-4 (this is the order of the resid polynomial)- here we
 explicitly code the coefficients (instead of
 iteratively determining)
+
+
 variant 0: standard chebyshev
 this is rlx 11 if scale = 0, and 16 if scale == 1
+
 variant 1: modified cheby: T(t)* f(t) where f(t) = (1-b/t)
 this is rlx 15 if scale = 0, and 17 if scale == 1
+
 ratio indicates the percentage of the whole spectrum to use (so .5
 means half, and .1 means 10percent)
+
+
 *******************************************************************************/
 
 HYPRE_Int hypre_ParCSRRelax_Cheby_Setup(hypre_ParCSRMatrix *A, /* matrix to relax with */
