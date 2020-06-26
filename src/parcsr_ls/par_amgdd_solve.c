@@ -85,8 +85,17 @@ hypre_BoomerAMGDDSolve( void *amg_vdata,
 
    // Set the fine grid operator, left-hand side, and right-hand side
    hypre_ParAMGDataAArray(amg_data)[0] = A;
+   hypre_ParCompGrid *compGrid = hypre_ParAMGDataCompGrid(amg_data)[0];
+   if (A != hypre_ParAMGDataAArray(amg_data)[0])
+   {
+      hypre_printf("Warning: calling BoomerAMGDD solve with different matrix than what was used for initial setup. Non-owned parts of fine-grid matrix and fine-grid communication patterns may be incorrect.\n");
+      hypre_ParCompGridMatrixOwnedDiag(hypre_ParCompGridA(compGrid)) = hypre_ParCSRMatrixDiag(A);
+      hypre_ParCompGridMatrixOwnedOffd(hypre_ParCompGridA(compGrid)) = hypre_ParCSRMatrixOffd(A);
+   }
    hypre_ParAMGDataUArray(amg_data)[0] = u;
+   hypre_ParCompGridVectorOwned(hypre_ParCompGridU(compGrid)) = hypre_ParVectorLocalVector(u);
    hypre_ParAMGDataFArray(amg_data)[0] = f;
+   hypre_ParCompGridVectorOwned(hypre_ParCompGridF(compGrid)) = hypre_ParVectorLocalVector(f);
 
    // Setup convergence tolerance info
    if (tol > 0.)
