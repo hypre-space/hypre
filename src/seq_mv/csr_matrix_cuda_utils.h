@@ -27,13 +27,10 @@ cusparseDnVecDescr_t hypre_VecToCuda(const hypre_Vector *x, HYPRE_Int offset);
 cusparseIndexType_t hypre_getCusparseIndexTypeInt() ;
 
 
-void hypre_sortCSR(cusparseHandle_t cusparsehandle, HYPRE_Int n, HYPRE_Int m,
+void hypre_sortCSRCusparse(cusparseHandle_t cusparsehandle, HYPRE_Int n, HYPRE_Int m,
                    HYPRE_Int nnzA,
                    const HYPRE_Int *d_ia, HYPRE_Int *d_ja_sort, HYPRE_Complex *d_a_sort);
 
-#endif
-
-#if (CUDART_VERSION >= 11000)
 
 cusparseSpMatDescr_t hypre_CSRMatRawToCuda(HYPRE_Int n, HYPRE_Int m, HYPRE_Int nnz, HYPRE_Int *i, HYPRE_Int *j, HYPRE_Complex *data);
 

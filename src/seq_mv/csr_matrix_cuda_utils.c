@@ -132,7 +132,7 @@ cusparseIndexType_t hypre_getCusparseIndexTypeInt()
  * @param[in,out] *d_ja_sorted On Start: Unsorted column indices. On return: Sorted column indices
  * @param[in,out] *d_a_sorted On Start: Unsorted values. On Return: Sorted values corresponding with column indices
  */
-void hypre_sortCSR_cusparse(cusparseHandle_t cusparsehandle, HYPRE_Int n, HYPRE_Int m, HYPRE_Int nnzA, const HYPRE_Int *d_ia, HYPRE_Int *d_ja_sorted, HYPRE_Complex *d_a_sorted)
+void hypre_sortCSRCusparse(cusparseHandle_t cusparsehandle, HYPRE_Int n, HYPRE_Int m, HYPRE_Int nnzA, const HYPRE_Int *d_ia, HYPRE_Int *d_ja_sorted, HYPRE_Complex *d_a_sorted)
 {
    csru2csrInfo_t sortInfoA;
 
@@ -164,9 +164,6 @@ void hypre_sortCSR_cusparse(cusparseHandle_t cusparsehandle, HYPRE_Int n, HYPRE_
    HYPRE_CUSPARSE_CALL(cusparseDestroyCsru2csrInfo(sortInfoA));
 }
 
-#endif
-
-#if (CUDART_VERSION >= 11000)
 
 /*
  * @brief Creates a cuda csr descriptor for a raw CSR matrix

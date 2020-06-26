@@ -87,8 +87,8 @@ hypreDevice_CSRSpGemmCusparseGenericAPI(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    hypre_TMemcpy(d_jb_sorted, d_jb, HYPRE_Int, nnzB, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
    hypre_TMemcpy(d_b_sorted, d_b, HYPRE_Complex, nnzB, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
-   hypre_sortCSR(cusparsehandle, m, k, nnzA,  d_ia, d_ja_sorted, d_a_sorted);
-   hypre_sortCSR(cusparsehandle, k, n, nnzB,  d_ib, d_jb_sorted, d_b_sorted);
+   hypre_sortCSRCusparse(cusparsehandle, m, k, nnzA,  d_ia, d_ja_sorted, d_a_sorted);
+   hypre_sortCSRCusparse(cusparsehandle, k, n, nnzB,  d_ib, d_jb_sorted, d_b_sorted);
 #endif
    //Initialize the descriptors for the mats
    cusparseSpMatDescr_t matA = hypre_CSRMatRawToCuda(m,k,nnzA,d_ia,d_ja,d_a);
@@ -226,8 +226,8 @@ hypreDevice_CSRSpGemmCusparseGenericAPI(m, k, n,
    hypre_TMemcpy(d_b_sorted, d_b, HYPRE_Complex, nnzB, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
    /* Sort each of the CSR matrices */
-   hypre_sortCSR(cusparsehandle, m, k, nnzA,  d_ia, d_ja_sorted, d_a_sorted);
-   hypre_sortCSR(cusparsehandle, k, n, nnzB,  d_ib, d_jb_sorted, d_b_sorted);
+   hypre_sortCSRCusparse(cusparsehandle, m, k, nnzA,  d_ia, d_ja_sorted, d_a_sorted);
+   hypre_sortCSRCusparse(cusparsehandle, k, n, nnzB,  d_ib, d_jb_sorted, d_b_sorted);
 
 
 
