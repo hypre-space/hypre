@@ -42,8 +42,6 @@ typedef struct hypre_ParILUData_struct
    hypre_ParCSRMatrix      *Aperm;
    hypre_ParCSRMatrix      *R;
    hypre_ParCSRMatrix      *P;
-   hypre_ParVector         *Xtemp;
-   hypre_ParVector         *Ytemp;
    hypre_Vector            *Ftemp_upper;
    hypre_Vector            *Utemp_lower;
    HYPRE_Int               *A_diag_fake;//fake diagonal, used to pretend that the diagonal matrix is empty
@@ -54,6 +52,9 @@ typedef struct hypre_ParILUData_struct
    hypre_ParCSRMatrix   *matL;
    HYPRE_Real           *matD;
    hypre_ParCSRMatrix   *matU;
+   hypre_ParCSRMatrix   *matmL;
+   HYPRE_Real           *matmD;
+   hypre_ParCSRMatrix   *matmU;
    hypre_ParCSRMatrix   *matS;
    HYPRE_Real           *droptol;/* should be an array of 3 element, for B, (E and F), S respectively */
    HYPRE_Int            own_droptol_data;/* should I free droptols */
@@ -87,6 +88,8 @@ typedef struct hypre_ParILUData_struct
    /* temp vectors for solve phase */
    hypre_ParVector      *Utemp;
    hypre_ParVector      *Ftemp;
+   hypre_ParVector      *Xtemp;
+   hypre_ParVector      *Ytemp;
    HYPRE_Real           *uext;
    HYPRE_Real           *fext;
    
@@ -119,8 +122,11 @@ typedef struct hypre_ParILUData_struct
    HYPRE_Int            sp_max_iter;/* max precond iter or max MR iteration */
    HYPRE_Real           sp_tol;
    
+   HYPRE_Int            test_opt;
+   
 } hypre_ParILUData;
 
+#define hypre_ParILUDataTestOption(ilu_data)                   ((ilu_data) -> test_opt)
 #ifdef HYPRE_USING_CUDA
    #define hypre_ParILUDataMatLMatrixDescription(ilu_data)     ((ilu_data) -> matL_des)
    #define hypre_ParILUDataMatUMatrixDescription(ilu_data)     ((ilu_data) -> matU_des)
@@ -137,8 +143,7 @@ typedef struct hypre_ParILUData_struct
    #define hypre_ParILUDataMatSILUDevice(ilu_data)             ((ilu_data) -> matSLU_d)
    #define hypre_ParILUDataMatEDevice(ilu_data)                ((ilu_data) -> matE_d)
    #define hypre_ParILUDataMatFDevice(ilu_data)                ((ilu_data) -> matF_d)
-   #define hypre_ParILUDataXTemp(ilu_data)                     ((ilu_data) -> Xtemp)
-   #define hypre_ParILUDataYTemp(ilu_data)                     ((ilu_data) -> Ytemp)
+ 
    #define hypre_ParILUDataAperm(ilu_data)                     ((ilu_data) -> Aperm)
    #define hypre_ParILUDataR(ilu_data)                         ((ilu_data) -> R)
    #define hypre_ParILUDataP(ilu_data)                         ((ilu_data) -> P)
@@ -151,6 +156,9 @@ typedef struct hypre_ParILUData_struct
 #define hypre_ParILUDataMatL(ilu_data)                         ((ilu_data) -> matL)
 #define hypre_ParILUDataMatD(ilu_data)                         ((ilu_data) -> matD)
 #define hypre_ParILUDataMatU(ilu_data)                         ((ilu_data) -> matU)
+#define hypre_ParILUDataMatLModified(ilu_data)                 ((ilu_data) -> matmL)
+#define hypre_ParILUDataMatDModified(ilu_data)                 ((ilu_data) -> matmD)
+#define hypre_ParILUDataMatUModified(ilu_data)                 ((ilu_data) -> matmU)
 #define hypre_ParILUDataMatS(ilu_data)                         ((ilu_data) -> matS)
 #define hypre_ParILUDataDroptol(ilu_data)                      ((ilu_data) -> droptol)
 #define hypre_ParILUDataOwnDroptolData(ilu_data)               ((ilu_data) -> own_droptol_data)
@@ -177,6 +185,8 @@ typedef struct hypre_ParILUData_struct
 #define hypre_ParILUDataNLU(ilu_data)                          ((ilu_data) -> nLU)
 #define hypre_ParILUDataNI(ilu_data)                           ((ilu_data) -> nI)
 #define hypre_ParILUDataUEnd(ilu_data)                         ((ilu_data) -> u_end)
+#define hypre_ParILUDataXTemp(ilu_data)                        ((ilu_data) -> Xtemp)
+#define hypre_ParILUDataYTemp(ilu_data)                        ((ilu_data) -> Ytemp)
 #define hypre_ParILUDataUTemp(ilu_data)                        ((ilu_data) -> Utemp)
 #define hypre_ParILUDataFTemp(ilu_data)                        ((ilu_data) -> Ftemp)
 #define hypre_ParILUDataUExt(ilu_data)                         ((ilu_data) -> uext)
