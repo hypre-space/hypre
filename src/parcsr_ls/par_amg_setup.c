@@ -297,7 +297,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    grid_relax_type[3] = hypre_ParAMGDataUserCoarseRelaxType(amg_data);
 
-   HYPRE_ANNOTATION_BEGIN("BoomerAMG.setup");
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
    /* change in definition of standard and multipass interpolation, by
       eliminating interp_type 9 and 5 and setting sep_weight instead
@@ -1952,21 +1952,21 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             else if (interp_type == 16) /*Extended classical MM interpolation */
             {
                hypre_BoomerAMGBuildModExtInterp(A_array[level], CF_marker,
-                                             S, coarse_pnts_global, 
+                                             S, coarse_pnts_global,
                                              debug_flag, trunc_factor, P_max_elmts, col_offd_S_to_A, &P);
                hypre_TFree(col_offd_S_to_A, HYPRE_MEMORY_HOST);
             }
             else if (interp_type == 17) /*Extended+i MM interpolation */
             {
                hypre_BoomerAMGBuildModExtPIInterp(A_array[level], CF_marker,
-                                             S, coarse_pnts_global, 
+                                             S, coarse_pnts_global,
                                              debug_flag, trunc_factor, P_max_elmts, col_offd_S_to_A, &P);
                hypre_TFree(col_offd_S_to_A, HYPRE_MEMORY_HOST);
             }
             else if (interp_type == 18) /*Extended+e MM interpolation */
             {
                hypre_BoomerAMGBuildModNewExtPIInterp(A_array[level], CF_marker,
-                                             S, coarse_pnts_global, 
+                                             S, coarse_pnts_global,
                                              debug_flag, trunc_factor, P_max_elmts, col_offd_S_to_A, &P);
                hypre_TFree(col_offd_S_to_A, HYPRE_MEMORY_HOST);
             }
@@ -3457,7 +3457,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 }
 #endif
 
-   HYPRE_ANNOTATION_END("BoomerAMG.setup");
+   HYPRE_ANNOTATE_FUNC_END;
 
    return(hypre_error_flag);
 }

@@ -20,15 +20,18 @@
 
 #include <caliper/cali.h>
 
-#define HYPRE_ANNOTATION_BEGIN( str ) cali_begin_string_byname("hypre.kernel", str)
-#define HYPRE_ANNOTATION_END( str ) cali_end_byname("hypre.kernel")
+#define HYPRE_ANNOTATION_BEGIN(str) CALI_MARK_BEGIN(str)
+#define HYPRE_ANNOTATION_END(str)   CALI_MARK_END(str)
+#define HYPRE_ANNOTATE_FUNC_BEGIN   CALI_MARK_FUNCTION_BEGIN
+#define HYPRE_ANNOTATE_FUNC_END     CALI_MARK_FUNCTION_END
 
 #else
 
-#define HYPRE_ANNOTATION_BEGIN( str ) 
-#define HYPRE_ANNOTATION_END( str ) 
+#define HYPRE_ANNOTATION_BEGIN(str)
+#define HYPRE_ANNOTATION_END(str)
+#define HYPRE_ANNOTATE_FUNC_BEGIN
+#define HYPRE_ANNOTATE_FUNC_END
 
 #endif
 
 #endif /* CALIPER_INSTRUMENTATION_HEADER */
-
