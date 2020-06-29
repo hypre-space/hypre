@@ -640,17 +640,17 @@ HYPRE_Int
 HYPRE_SStructVectorSetConstantValues( HYPRE_SStructVector vector,
                                       HYPRE_Complex       value )
 {
-   hypre_SStructPVector *pvector;
-   HYPRE_Int part;
-   HYPRE_Int nparts   = hypre_SStructVectorNParts(vector);
+   return (hypre_SStructVectorSetConstantValues(vector, value));
+}
 
-   for ( part = 0; part < nparts; part++ )
-   {
-      pvector = hypre_SStructVectorPVector( vector, part );
-      hypre_SStructPVectorSetConstantValues( pvector, value );
-   };
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
 
-   return hypre_error_flag;
+HYPRE_Int
+HYPRE_SStructVectorSetRandomValues( HYPRE_SStructVector vector,
+                                    HYPRE_Int           seed )
+{
+   return (hypre_SStructVectorSetRandomValues(vector, seed));
 }
 
 /*--------------------------------------------------------------------------

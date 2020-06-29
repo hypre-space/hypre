@@ -194,7 +194,7 @@ HYPRE_SStructGridSetFEMOrdering(HYPRE_SStructGrid  grid,
  * Indexes should increase from {\tt ilower} to {\tt iupper}.  It is not
  * necessary that indexes increase from {\tt nbor\_ilower} to {\tt
  * nbor\_iupper}.
- * 
+ *
  * The {\tt index\_map} describes the mapping of indexes 0, 1, and 2 on part
  * {\tt part} to the corresponding indexes on part {\tt nbor\_part}.  For
  * example, triple (1, 2, 0) means that indexes 0, 1, and 2 on part {\tt part}
@@ -257,7 +257,7 @@ HYPRE_SStructGridSetNeighborPart(HYPRE_SStructGrid  grid,
  * The {\tt shared\_offset} is used in the same way as {\tt offset}, but with
  * respect to the box extents {\tt shared\_ilower} and {\tt shared\_iupper} on
  * part {\tt shared\_part}.
- * 
+ *
  * The {\tt index\_map} describes the mapping of indexes 0, 1, and 2 on part
  * {\tt part} to the corresponding indexes on part {\tt shared\_part}.  For
  * example, triple (1, 2, 0) means that indexes 0, 1, and 2 on part {\tt part}
@@ -672,7 +672,7 @@ HYPRE_SStructGraphAssemble(HYPRE_SStructGraph graph);
  * Set the storage type of the associated matrix object.  This object type is
  * inherited by {\tt SStructMatrix} at its creation, but can also be changed
  * through the corresponding {\tt SetObjectType} routine.
- * 
+ *
  * See {\tt HYPRE_SStructGridSetObjectType} for available values for {\tt type}.
  * The default type is inherited from the grid.
  **/
@@ -896,7 +896,7 @@ HYPRE_SStructMatrixAssemble(HYPRE_SStructMatrix matrix);
  * ``all''.  For example, if {\tt part} and {\tt to\_var} are set to -1, then
  * the boolean is applied to stencil entries on all parts that couple variable
  * {\tt var} to all other variables.
- * 
+ *
  * By default, matrices are assumed to be nonsymmetric.  Significant
  * storage savings can be made if the matrix is symmetric.
  **/
@@ -990,6 +990,19 @@ HYPRE_SStructVectorSetValues(HYPRE_SStructVector  vector,
                              HYPRE_Int           *index,
                              HYPRE_Int            var,
                              HYPRE_Complex       *value);
+
+/**
+ * Set vector coefficients to a constant value over the grid.
+ **/
+HYPRE_Int HYPRE_SStructVectorSetConstantValues(HYPRE_SStructVector vector,
+                                               HYPRE_Complex       value);
+
+/**
+ * Set vector coefficients to random values between -1.0 and 1.0 over the grid.
+ * The parameter {\tt seed} controls the generation of random numbers.
+ **/
+HYPRE_Int HYPRE_SStructVectorSetRandomValues(HYPRE_SStructVector  vector,
+                                             HYPRE_Int            seed);
 
 /**
  * Add to vector coefficients index by index.
@@ -1212,4 +1225,3 @@ HYPRE_SStructGetAMRObjects(HYPRE_SStructMatrix   matrix,
 #endif
 
 #endif
-

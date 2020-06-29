@@ -18,47 +18,6 @@
 #include "HYPRE_MatvecFunctions.h"
 #include "temp_multivector.h"
 
-
-HYPRE_Int 
-hypre_SStructPVectorSetRandomValues( hypre_SStructPVector *pvector, HYPRE_Int seed )
-{
-   HYPRE_Int ierr = 0;
-   HYPRE_Int           nvars = hypre_SStructPVectorNVars(pvector);
-   hypre_StructVector *svector;
-   HYPRE_Int           var;
-
-   srand( seed );
-
-   for (var = 0; var < nvars; var++)
-   {
-      svector = hypre_SStructPVectorSVector(pvector, var);
-	  seed = rand();
-      hypre_StructVectorSetRandomValues(svector, seed);
-   }
-
-   return ierr;
-}
-
-HYPRE_Int 
-hypre_SStructVectorSetRandomValues( hypre_SStructVector *vector, HYPRE_Int seed )
-{
-   HYPRE_Int ierr = 0;
-   HYPRE_Int             nparts = hypre_SStructVectorNParts(vector);
-   hypre_SStructPVector *pvector;
-   HYPRE_Int             part;
-
-   srand( seed );
-
-   for (part = 0; part < nparts; part++)
-   {
-      pvector = hypre_SStructVectorPVector(vector, part);
-	  seed = rand();
-      hypre_SStructPVectorSetRandomValues(pvector, seed);
-   }
-
-   return ierr;
-}
-
 HYPRE_Int
 hypre_SStructSetRandomValues( void* v, HYPRE_Int seed ) {
 
@@ -69,8 +28,8 @@ HYPRE_Int
 HYPRE_SStructSetupInterpreter( mv_InterfaceInterpreter *i )
 {
   i->CreateVector = hypre_SStructKrylovCreateVector;
-  i->DestroyVector = hypre_SStructKrylovDestroyVector; 
-  i->InnerProd = hypre_SStructKrylovInnerProd; 
+  i->DestroyVector = hypre_SStructKrylovDestroyVector;
+  i->InnerProd = hypre_SStructKrylovInnerProd;
   i->CopyVector = hypre_SStructKrylovCopyVector;
   i->ClearVector = hypre_SStructKrylovClearVector;
   i->SetRandomValues = hypre_SStructSetRandomValues;
@@ -102,7 +61,7 @@ HYPRE_Int
 HYPRE_SStructSetupMatvec(HYPRE_MatvecFunctions * mv)
 {
   mv->MatvecCreate = hypre_SStructKrylovMatvecCreate;
-  mv->Matvec = hypre_SStructKrylovMatvec; 
+  mv->Matvec = hypre_SStructKrylovMatvec;
   mv->MatvecDestroy = hypre_SStructKrylovMatvecDestroy;
 
   mv->MatMultiVecCreate = NULL;
