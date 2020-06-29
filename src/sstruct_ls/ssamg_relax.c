@@ -23,7 +23,11 @@ typedef struct hypre_SSAMGRelaxData_struct
    HYPRE_Real             *relax_weight;
    HYPRE_Int               nparts;
    HYPRE_Int               relax_type;
+   HYPRE_Int               zero_guess;
+   HYPRE_Int               max_iter;
 
+   hypre_SStructVector    *r;
+   hypre_SStructVector    *e;
 } hypre_SSAMGRelaxData;
 
 /*--------------------------------------------------------------------------
@@ -40,11 +44,13 @@ hypre_SSAMGRelaxCreate( MPI_Comm    comm,
 
    ssamg_relax_data = hypre_CTAlloc(hypre_SSAMGRelaxData, 1);
    (ssamg_relax_data -> nparts)       = nparts;
-   (ssamg_relax_data -> relax_type)   = 0; /* Weighted Jacobi */
+   (ssamg_relax_data -> zero_guess)   = 0;
+   (ssamg_relax_data -> relax_type)   = 0;
    (ssamg_relax_data -> relax_data)   = hypre_CTAlloc(void *, nparts);
    (ssamg_relax_data -> relax_weight) = hypre_CTAlloc(HYPRE_Real, nparts);
    for (part = 0; part < nparts; part++)
    {
+      (ssamg_relax_data -> relax_weight[part]) = 1.0;
       (ssamg_relax_data -> relax_data[part]) = hypre_NodeRelaxCreate(comm);
    }
 
@@ -70,6 +76,9 @@ hypre_SSAMGRelaxDestroy( void *ssamg_relax_vdata )
       {
          hypre_NodeRelaxDestroy((ssamg_relax_data -> relax_data[part]));
       }
+
+      HYPRE_SStructVectorDestroy(ssamg_relax_data -> r);
+      HYPRE_SStructVectorDestroy(ssamg_relax_data -> e);
       hypre_TFree(ssamg_relax_data -> relax_weight);
       hypre_TFree(ssamg_relax_data -> relax_data);
       hypre_TFree(ssamg_relax_data);
@@ -83,18 +92,27 @@ hypre_SSAMGRelaxDestroy( void *ssamg_relax_vdata )
 
 HYPRE_Int
 hypre_SSAMGRelax( void                 *ssamg_relax_vdata,
+                  void                 *matvec_vdata,
                   hypre_SStructMatrix  *A,
                   hypre_SStructVector  *b,
                   hypre_SStructVector  *x )
 {
-   hypre_SSAMGRelaxData  *ssamg_relax_data = (hypre_SSAMGRelaxData *) ssamg_relax_vdata;
-   hypre_SStructPMatrix  *pA;
-   hypre_SStructPVector  *pb;
-   hypre_SStructPVector  *px;
-   void                 **relax_data = (ssamg_relax_data -> relax_data);
+   hypre_SSAMGRelaxData    *ssamg_relax_data = (hypre_SSAMGRelaxData *) ssamg_relax_vdata;
+   hypre_SStructPMatrix    *pA;
+   hypre_SStructPVector    *pr;
+   hypre_SStructPVector    *pe;
+   hypre_SStructPVector    *pb;
+   hypre_SStructPVector    *px;
+   hypre_SStructVector     *r = (ssamg_relax_data -> r);
+   hypre_SStructVector     *e = (ssamg_relax_data -> e);
+   void                   **relax_data = (ssamg_relax_data -> relax_data);
+   HYPRE_Int                zero_guess = (ssamg_relax_data -> zero_guess);
+   HYPRE_Int                max_iter   = (ssamg_relax_data -> max_iter);
 
-   HYPRE_Int              nparts, nparts_A, nparts_b, nparts_x;
-   HYPRE_Int              part;
+   HYPRE_Int                nparts, nparts_A;
+   HYPRE_Int                nparts_b, nparts_x;
+   HYPRE_Int                part;
+   HYPRE_Int                iter;
 
    nparts   = (ssamg_relax_data -> nparts);
    nparts_A = hypre_SStructMatrixNParts(A);
@@ -107,13 +125,38 @@ hypre_SSAMGRelax( void                 *ssamg_relax_vdata,
       return hypre_error_flag;
    }
 
-   for (part = 0; part < nparts_A; part++)
+   iter = 0;
+   if (zero_guess)
    {
-      pA = hypre_SStructMatrixPMatrix(A, part);
-      pb = hypre_SStructVectorPVector(b, part);
-      px = hypre_SStructVectorPVector(x, part);
+      for (part = 0; part < nparts; part++)
+      {
+         pA = hypre_SStructMatrixPMatrix(A, part);
+         pb = hypre_SStructVectorPVector(b, part);
+         px = hypre_SStructVectorPVector(x, part);
 
-      hypre_NodeRelax(relax_data[part], pA, pb, px);
+         hypre_NodeRelax(relax_data[part], pA, pb, px);
+      }
+      iter++;
+   }
+
+   while (iter < max_iter)
+   {
+      hypre_SStructCopy(b, r);
+      hypre_SStructMatvecCompute(matvec_vdata, -1.0, A, x, 1.0, r);
+      hypre_SSAMGRelaxSetZeroGuess(ssamg_relax_data, 1);
+
+      for (part = 0; part < nparts; part++)
+      {
+         pA = hypre_SStructMatrixPMatrix(A, part);
+         pr = hypre_SStructVectorPVector(r, part);
+         pe = hypre_SStructVectorPVector(e, part);
+
+         hypre_NodeRelax(relax_data[part], pA, pr, pe);
+      }
+
+      hypre_SStructAxpy(1.0, e, x);
+      hypre_SSAMGRelaxSetZeroGuess(ssamg_relax_data, zero_guess);
+      iter++;
    }
 
    return hypre_error_flag;
@@ -130,13 +173,18 @@ hypre_SSAMGRelaxSetup( void                *ssamg_relax_vdata,
 {
    hypre_SSAMGRelaxData  *ssamg_relax_data = (hypre_SSAMGRelaxData *) ssamg_relax_vdata;
 
-   hypre_SStructPMatrix  *pA;
-   hypre_SStructPVector  *pb;
-   hypre_SStructPVector  *px;
-
    void                 **relax_data   = (ssamg_relax_data -> relax_data);
    HYPRE_Real            *relax_weight = (ssamg_relax_data -> relax_weight);
    HYPRE_Int              relax_type   = (ssamg_relax_data -> relax_type);
+
+   MPI_Comm               comm = hypre_SStructMatrixComm(A);
+   hypre_SStructGrid     *grid_b = hypre_SStructVectorGrid(b);
+   hypre_SStructGrid     *grid_x = hypre_SStructVectorGrid(x);
+   hypre_SStructVector   *r;
+   hypre_SStructVector   *e;
+   hypre_SStructPMatrix  *pA;
+   hypre_SStructPVector  *pb;
+   hypre_SStructPVector  *px;
 
    HYPRE_Int              nparts, nparts_A, nparts_b, nparts_x;
    HYPRE_Int              part;
@@ -151,6 +199,16 @@ hypre_SSAMGRelaxSetup( void                *ssamg_relax_vdata,
       // TODO: handle error
       return hypre_error_flag;
    }
+
+   HYPRE_SStructVectorCreate(comm, grid_b, &r);
+   HYPRE_SStructVectorInitialize(r);
+   HYPRE_SStructVectorAssemble(r);
+   (ssamg_relax_data -> r) = r;
+
+   HYPRE_SStructVectorCreate(comm, grid_x, &e);
+   HYPRE_SStructVectorInitialize(e);
+   HYPRE_SStructVectorAssemble(e);
+   (ssamg_relax_data -> e) = e;
 
    for (part = 0; part < nparts_A; part++)
    {
@@ -285,12 +343,12 @@ hypre_SSAMGRelaxSetMaxIter( void       *ssamg_relax_vdata,
    hypre_SSAMGRelaxData  *ssamg_relax_data = (hypre_SSAMGRelaxData *) ssamg_relax_vdata;
    void                 **relax_data       = (ssamg_relax_data -> relax_data);
    HYPRE_Int              nparts           = (ssamg_relax_data -> nparts);
-
    HYPRE_Int              part;
 
+   (ssamg_relax_data -> max_iter) = max_iter;
    for (part = 0; part < nparts; part++)
    {
-      hypre_NodeRelaxSetMaxIter(relax_data[part], max_iter);
+      hypre_NodeRelaxSetMaxIter(relax_data[part], 1);
    }
 
    return hypre_error_flag;
@@ -309,6 +367,7 @@ hypre_SSAMGRelaxSetZeroGuess( void      *ssamg_relax_vdata,
 
    HYPRE_Int              part;
 
+   (ssamg_relax_data -> zero_guess) = zero_guess;
    for (part = 0; part < nparts; part++)
    {
       hypre_NodeRelaxSetZeroGuess(relax_data[part], zero_guess);
@@ -419,3 +478,21 @@ HYPRE_Int hypre_SSAMGRelaxGetRelaxWeight( void       *ssamg_relax_vdata,
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ * TODO: this and other assumes that relax_data is of type hypre_NodeRelaxData
+ *       Need to make it general
+ *--------------------------------------------------------------------------*/
+#if 0
+HYPRE_Int hypre_SSAMGRelaxGetMaxIter( void       *ssamg_relax_vdata,
+                                      HYPRE_Int   part,
+                                      HYPRE_Int  *max_iter )
+{
+   hypre_SSAMGRelaxData  *ssamg_relax_data = (hypre_SSAMGRelaxData *) ssamg_relax_vdata;
+   void                 **relax_data       = (ssamg_relax_data -> relax_data);
+
+   *max_iter = (relax_data[part] -> max_iter);
+
+   return hypre_error_flag;
+}
+#endif

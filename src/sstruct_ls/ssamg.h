@@ -24,7 +24,7 @@
 typedef struct hypre_SSAMGData_struct
 {
    hypre_MPI_Comm          comm;
-   HYPRE_Int               nparts;
+   HYPRE_Int              *nparts; /* number of active parts per level */
 
    HYPRE_Real              tol;
    HYPRE_Int               max_iter;
@@ -76,7 +76,7 @@ typedef struct hypre_SSAMGData_struct
  *--------------------------------------------------------------------------*/
 
 #define hypre_SSAMGDataComm(ssamg_data)          ((ssamg_data) -> comm)
-#define hypre_SSAMGDataNparts(ssamg_data)        ((ssamg_data) -> nparts)
+#define hypre_SSAMGDataNParts(ssamg_data)        ((ssamg_data) -> nparts)
 #define hypre_SSAMGDataTol(ssamg_data)           ((ssamg_data) -> tol)
 #define hypre_SSAMGDataNumLevels(ssamg_data)     ((ssamg_data) -> num_levels)
 #define hypre_SSAMGDataMaxLevels(ssamg_data)     ((ssamg_data) -> max_levels)

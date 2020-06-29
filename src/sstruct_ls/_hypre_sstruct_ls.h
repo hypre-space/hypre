@@ -716,7 +716,7 @@ HYPRE_Int hypre_SSAMGSetupInterpOp ( hypre_SStructMatrix  *A, HYPRE_Int *cdir_p,
 /* ssamg_relax.c */
 HYPRE_Int hypre_SSAMGRelaxCreate ( MPI_Comm  comm, HYPRE_Int nparts, void **ssamg_relax_vdata_ptr );
 HYPRE_Int hypre_SSAMGRelaxDestroy ( void *ssamg_relax_vdata );
-HYPRE_Int hypre_SSAMGRelax ( void *ssamg_relax_vdata, hypre_SStructMatrix  *A, hypre_SStructVector *b, hypre_SStructVector *x );
+HYPRE_Int hypre_SSAMGRelax( void *ssamg_relax_vdata, void *matvec_vdata, hypre_SStructMatrix *A, hypre_SStructVector *b, hypre_SStructVector *x );
 HYPRE_Int hypre_SSAMGRelaxSetup ( void *ssamg_relax_vdata, hypre_SStructMatrix *A, hypre_SStructVector *b, hypre_SStructVector *x );
 HYPRE_Int hypre_SSAMGRelaxSetPreRelax ( void  *ssamg_relax_vdata );
 HYPRE_Int hypre_SSAMGRelaxSetPostRelax ( void  *ssamg_relax_vdata );
