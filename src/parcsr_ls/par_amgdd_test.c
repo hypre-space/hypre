@@ -23,7 +23,7 @@
 
 
 HYPRE_Int
-SetRelaxMarker(hypre_ParCompGrid *compGrid, hypre_ParVector *relax_marker, HYPRE_Int proc);
+SetRelaxMarker(hypre_AMGDDCompGrid *compGrid, hypre_ParVector *relax_marker, HYPRE_Int proc);
 
 HYPRE_Real
 GetTestCompositeResidual(hypre_ParCSRMatrix *A, hypre_ParVector *U_comp, hypre_ParVector *res, hypre_Vector *relax_marker, HYPRE_Int proc);
@@ -73,7 +73,7 @@ hypre_BoomerAMGDDTestSolve( void               *amg_vdata,
   hypre_ParVector  *U_comp = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD, hypre_ParVectorGlobalSize(u), hypre_ParVectorPartitioning(u));
   hypre_ParVectorSetPartitioningOwner(U_comp, 0);
   hypre_ParVectorInitialize(U_comp);
-  HYPRE_Int num_comp_cycles = hypre_ParAMGDataMaxFACIter(amg_data);
+  HYPRE_Int num_comp_cycles = hypre_ParAMGDataAMGDDFACNumCycles(amg_data);
   HYPRE_Int num_levels = hypre_ParAMGDataNumLevels(amg_data);
 
   // Generate the residual
@@ -132,7 +132,7 @@ hypre_BoomerAMGDDTestSolve( void               *amg_vdata,
       hypre_ParVectorSetPartitioningOwner(relax_marker[level],0);
       hypre_ParVectorInitialize(relax_marker[level]);
       // Now set the values according to the relevant comp grid
-      if (level < num_levels) SetRelaxMarker(hypre_ParAMGDataCompGrid(amg_data)[level], relax_marker[level], proc);
+      if (level < num_levels) SetRelaxMarker(hypre_ParAMGDataAMGDDCompGrid(amg_data)[level], relax_marker[level], proc);
       else hypre_ParVectorSetConstantValues(relax_marker[level], 1.0);
     }
 
@@ -257,14 +257,14 @@ hypre_BoomerAMGDDTestSolve( void               *amg_vdata,
 }
 
 HYPRE_Int
-SetRelaxMarker(hypre_ParCompGrid *compGrid, hypre_ParVector *relax_marker, HYPRE_Int proc)
+SetRelaxMarker(hypre_AMGDDCompGrid *compGrid, hypre_ParVector *relax_marker, HYPRE_Int proc)
 {
   HYPRE_Int i;
   HYPRE_Int myid;
   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
 
   // Check whether the global indices are still around
-  if (!hypre_ParCompGridNonOwnedGlobalIndices(compGrid) && hypre_ParCompGridNumNonOwnedNodes(compGrid))
+  if (!hypre_AMGDDCompGridNonOwnedGlobalIndices(compGrid) && hypre_AMGDDCompGridNumNonOwnedNodes(compGrid))
   {
     if (myid == 0) printf("Error: need to setup AMG-DD with debugging flag set.\n");
     hypre_MPI_Finalize();
@@ -272,12 +272,12 @@ SetRelaxMarker(hypre_ParCompGrid *compGrid, hypre_ParVector *relax_marker, HYPRE
   }
 
   // Broadcast the number of nodes in the composite grid on this level for the root proc
-  HYPRE_Int num_nonowned_real = hypre_ParCompGridNumNonOwnedRealNodes(compGrid);
+  HYPRE_Int num_nonowned_real = hypre_AMGDDCompGridNumNonOwnedRealNodes(compGrid);
   hypre_MPI_Bcast(&num_nonowned_real, 1, HYPRE_MPI_INT, proc, hypre_MPI_COMM_WORLD);
 
   // Broadcast the global indices of the dofs in the composite grid
   HYPRE_Int *global_indices;
-  if (myid == proc) global_indices = hypre_ParCompGridNonOwnedGlobalIndices(compGrid);
+  if (myid == proc) global_indices = hypre_AMGDDCompGridNonOwnedGlobalIndices(compGrid);
   else global_indices = hypre_CTAlloc(HYPRE_Int, num_nonowned_real, HYPRE_MEMORY_HOST);
   hypre_MPI_Bcast(global_indices, num_nonowned_real, HYPRE_MPI_INT, proc, hypre_MPI_COMM_WORLD);
 
@@ -295,7 +295,7 @@ SetRelaxMarker(hypre_ParCompGrid *compGrid, hypre_ParVector *relax_marker, HYPRE
   // Set relax marker on active proc
   if (myid == proc)
   {
-    for (i = 0; i < hypre_ParCompGridNumOwnedNodes(compGrid); i++)
+    for (i = 0; i < hypre_AMGDDCompGridNumOwnedNodes(compGrid); i++)
       hypre_VectorData(hypre_ParVectorLocalVector(relax_marker))[i] = 1;
   }
 

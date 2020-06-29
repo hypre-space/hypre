@@ -454,58 +454,112 @@ HYPRE_BoomerAMGGetMaxIter( HYPRE_Solver solver,
    return( hypre_BoomerAMGGetMaxIter( (void *) solver, max_iter ) );
 }
 
-/*--------------------------------------------------------------------------
- * HYPRE_BoomerAMGSetMaxFACIter
+/*-------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetAMGDDStartLevel
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_BoomerAMGSetMaxFACIter( HYPRE_Solver solver,
-                           HYPRE_Int          max_fac_iter  )
+HYPRE_BoomerAMGSetAMGDDStartLevel( HYPRE_Solver solver,
+                           HYPRE_Int          start_level  )
 {
-   return( hypre_BoomerAMGSetMaxFACIter( (void *) solver, max_fac_iter ) );
+   return( hypre_BoomerAMGSetAMGDDStartLevel( (void *) solver, start_level ) );
 }
 
 HYPRE_Int
-HYPRE_BoomerAMGGetMaxFACIter( HYPRE_Solver solver,
-                           HYPRE_Int        * max_fac_iter  )
+HYPRE_BoomerAMGGetAMGDDStartLevel( HYPRE_Solver solver,
+                           HYPRE_Int        * start_level  )
 {
-   return( hypre_BoomerAMGGetMaxFACIter( (void *) solver, max_fac_iter ) );
+   return( hypre_BoomerAMGGetAMGDDStartLevel( (void *) solver, start_level ) );
 }
 
-/*--------------------------------------------------------------------------
- * HYPRE_BoomerAMGSetFACCycleType
+/*-------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetAMGDDUseRD
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_BoomerAMGSetFACCycleType( HYPRE_Solver solver,
-                           HYPRE_Int          fac_cycle_type  )
+HYPRE_BoomerAMGSetAMGDDUseRD( HYPRE_Solver solver,
+                           HYPRE_Int          use_rd  )
 {
-   return( hypre_BoomerAMGSetFACCycleType( (void *) solver, fac_cycle_type ) );
+   return( hypre_BoomerAMGSetAMGDDUseRD( (void *) solver, use_rd ) );
 }
 
 HYPRE_Int
-HYPRE_BoomerAMGGetFACCycleType( HYPRE_Solver solver,
-                           HYPRE_Int        * fac_cycle_type  )
+HYPRE_BoomerAMGGetAMGDDUseRD( HYPRE_Solver solver,
+                           HYPRE_Int        * use_rd  )
 {
-   return( hypre_BoomerAMGGetFACCycleType( (void *) solver, fac_cycle_type ) );
+   return( hypre_BoomerAMGGetAMGDDUseRD( (void *) solver, use_rd ) );
 }
 
-/*--------------------------------------------------------------------------
- * HYPRE_BoomerAMGSetFACRelaxType
+/*-------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetAMGDDFACNumRelax
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_BoomerAMGSetFACRelaxType( HYPRE_Solver solver,
-                           HYPRE_Int          fac_relax_type  )
+HYPRE_BoomerAMGSetAMGDDFACNumRelax( HYPRE_Solver solver,
+                           HYPRE_Int          amgdd_fac_num_relax  )
 {
-   return( hypre_BoomerAMGSetFACRelaxType( (void *) solver, fac_relax_type ) );
+   return( hypre_BoomerAMGSetAMGDDFACNumRelax( (void *) solver, amgdd_fac_num_relax ) );
 }
 
 HYPRE_Int
-HYPRE_BoomerAMGGetFACRelaxType( HYPRE_Solver solver,
-                           HYPRE_Int        * fac_relax_type  )
+HYPRE_BoomerAMGGetAMGDDFACNumRelax( HYPRE_Solver solver,
+                           HYPRE_Int        * amgdd_fac_num_relax  )
 {
-   return( hypre_BoomerAMGGetFACRelaxType( (void *) solver, fac_relax_type ) );
+   return( hypre_BoomerAMGGetAMGDDFACNumRelax( (void *) solver, amgdd_fac_num_relax ) );
+}
+
+/*-------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetAMGDDFACNumCycles
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetAMGDDFACNumCycles( HYPRE_Solver solver,
+                           HYPRE_Int          amgdd_fac_num_cycles  )
+{
+   return( hypre_BoomerAMGSetAMGDDFACNumCycles( (void *) solver, amgdd_fac_num_cycles ) );
+}
+
+HYPRE_Int
+HYPRE_BoomerAMGGetAMGDDFACNumCycles( HYPRE_Solver solver,
+                           HYPRE_Int        * amgdd_fac_num_cycles  )
+{
+   return( hypre_BoomerAMGGetAMGDDFACNumCycles( (void *) solver, amgdd_fac_num_cycles ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetAMGDDFACCycleType
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetAMGDDFACCycleType( HYPRE_Solver solver,
+                           HYPRE_Int          amgdd_fac_cycle_type  )
+{
+   return( hypre_BoomerAMGSetAMGDDFACCycleType( (void *) solver, amgdd_fac_cycle_type ) );
+}
+
+HYPRE_Int
+HYPRE_BoomerAMGGetAMGDDFACCycleType( HYPRE_Solver solver,
+                           HYPRE_Int        * amgdd_fac_cycle_type  )
+{
+   return( hypre_BoomerAMGGetAMGDDFACCycleType( (void *) solver, amgdd_fac_cycle_type ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetAMGDDFACRelaxType
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetAMGDDFACRelaxType( HYPRE_Solver solver,
+                           HYPRE_Int          amgdd_fac_relax_type  )
+{
+   return( hypre_BoomerAMGSetAMGDDFACRelaxType( (void *) solver, amgdd_fac_relax_type ) );
+}
+
+HYPRE_Int
+HYPRE_BoomerAMGGetAMGDDFACRelaxType( HYPRE_Solver solver,
+                           HYPRE_Int        * amgdd_fac_relax_type  )
+{
+   return( hypre_BoomerAMGGetAMGDDFACRelaxType( (void *) solver, amgdd_fac_relax_type ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -527,7 +581,7 @@ HYPRE_BoomerAMGGetAMGDDPadding( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_BoomerAMGSetAMGDDPadding
+ * HYPRE_BoomerAMGSetAMGDDVariablePadding
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int

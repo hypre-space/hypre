@@ -45,9 +45,9 @@ hypre_ParAMGDDPCGDestroy( HYPRE_Solver solver )
 
 HYPRE_Int 
 hypre_ParAMGDDPCGSetup( HYPRE_Solver solver,
-                      hypre_ParCompGridMatrix *A,
-                      hypre_ParCompGridVector *b,
-                      hypre_ParCompGridVector *x      )
+                      hypre_AMGDDCompGridMatrix *A,
+                      hypre_AMGDDCompGridVector *b,
+                      hypre_AMGDDCompGridVector *x      )
 {
    return( HYPRE_PCGSetup( solver,
                            (HYPRE_Matrix) A,
@@ -61,9 +61,9 @@ hypre_ParAMGDDPCGSetup( HYPRE_Solver solver,
 
 HYPRE_Int 
 hypre_ParAMGDDPCGSolve( HYPRE_Solver solver,
-                      hypre_ParCompGridMatrix *A,
-                      hypre_ParCompGridVector *b,
-                      hypre_ParCompGridVector *x      )
+                      hypre_AMGDDCompGridMatrix *A,
+                      hypre_AMGDDCompGridVector *b,
+                      hypre_AMGDDCompGridVector *x      )
 {
    return( HYPRE_PCGSolve( solver,
                            (HYPRE_Matrix) A,
@@ -102,11 +102,11 @@ hypre_ParAMGDDKrylovFree( void *ptr )
 void *
 hypre_ParAMGDDKrylovCreateVector( void *vvector )
 {
-   hypre_ParCompGridVector *vector = (hypre_ParCompGridVector *) vvector;
-   hypre_ParCompGridVector *new_vector;
+   hypre_AMGDDCompGridVector *vector = (hypre_AMGDDCompGridVector *) vvector;
+   hypre_AMGDDCompGridVector *new_vector;
 
-   new_vector = hypre_ParCompGridVectorCreate(); 
-   hypre_ParCompGridVectorInitialize(new_vector, hypre_VectorSize(hypre_ParCompGridVectorOwned(vector)), hypre_VectorSize(hypre_ParCompGridVectorNonOwned(vector)), hypre_ParCompGridVectorNumReal(vector));
+   new_vector = hypre_AMGDDCompGridVectorCreate(); 
+   hypre_AMGDDCompGridVectorInitialize(new_vector, hypre_VectorSize(hypre_AMGDDCompGridVectorOwned(vector)), hypre_VectorSize(hypre_AMGDDCompGridVectorNonOwned(vector)), hypre_AMGDDCompGridVectorNumReal(vector));
 
    return ( (void *) new_vector );
 }
@@ -119,9 +119,9 @@ hypre_ParAMGDDKrylovCreateVector( void *vvector )
 HYPRE_Int
 hypre_ParAMGDDKrylovDestroyVector( void *vvector )
 {
-   hypre_ParCompGridVector *vector = (hypre_ParCompGridVector *) vvector;
+   hypre_AMGDDCompGridVector *vector = (hypre_AMGDDCompGridVector *) vvector;
 
-   return( hypre_ParCompGridVectorDestroy( vector ) );
+   return( hypre_AMGDDCompGridVectorDestroy( vector ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -151,11 +151,11 @@ hypre_ParAMGDDKrylovMatvec( void   *matvec_data,
                        HYPRE_Complex  beta,
                        void   *y           )
 {
-   return ( hypre_ParCompGridRealMatvec ( alpha,
-                                       (hypre_ParCompGridMatrix *) A,
-                                       (hypre_ParCompGridVector *) x,
+   return ( hypre_AMGDDCompGridRealMatvec ( alpha,
+                                       (hypre_AMGDDCompGridMatrix *) A,
+                                       (hypre_AMGDDCompGridVector *) x,
                                        beta,
-                                       (hypre_ParCompGridVector *) y ) );
+                                       (hypre_AMGDDCompGridVector *) y ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -176,8 +176,8 @@ HYPRE_Real
 hypre_ParAMGDDKrylovInnerProd( void *x, 
                           void *y )
 {
-   return ( hypre_ParCompGridVectorRealInnerProd( (hypre_ParCompGridVector *) x,
-                                      (hypre_ParCompGridVector *) y ) );
+   return ( hypre_AMGDDCompGridVectorRealInnerProd( (hypre_AMGDDCompGridVector *) x,
+                                      (hypre_AMGDDCompGridVector *) y ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -188,8 +188,8 @@ HYPRE_Int
 hypre_ParAMGDDKrylovCopyVector( void *x, 
                            void *y )
 {
-   return ( hypre_ParCompGridVectorRealCopy( (hypre_ParCompGridVector *) x,
-                                 (hypre_ParCompGridVector *) y ) );
+   return ( hypre_AMGDDCompGridVectorRealCopy( (hypre_AMGDDCompGridVector *) x,
+                                 (hypre_AMGDDCompGridVector *) y ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -199,7 +199,7 @@ hypre_ParAMGDDKrylovCopyVector( void *x,
 HYPRE_Int
 hypre_ParAMGDDKrylovClearVector( void *x )
 {
-   return ( hypre_ParCompGridVectorRealSetConstantValues( (hypre_ParCompGridVector *) x, 0.0 ) );
+   return ( hypre_AMGDDCompGridVectorRealSetConstantValues( (hypre_AMGDDCompGridVector *) x, 0.0 ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -210,7 +210,7 @@ HYPRE_Int
 hypre_ParAMGDDKrylovScaleVector( HYPRE_Complex  alpha,
                             void   *x     )
 {
-   return ( hypre_ParCompGridVectorRealScale( alpha, (hypre_ParCompGridVector *) x ) );
+   return ( hypre_AMGDDCompGridVectorRealScale( alpha, (hypre_AMGDDCompGridVector *) x ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -222,8 +222,8 @@ hypre_ParAMGDDKrylovAxpy( HYPRE_Complex alpha,
                      void   *x,
                      void   *y )
 {
-   return ( hypre_ParCompGridVectorRealAxpy( alpha, (hypre_ParCompGridVector *) x,
-                                 (hypre_ParCompGridVector *) y ) );
+   return ( hypre_AMGDDCompGridVectorRealAxpy( alpha, (hypre_AMGDDCompGridVector *) x,
+                                 (hypre_AMGDDCompGridVector *) y ) );
 }
 
 /*--------------------------------------------------------------------------
