@@ -44,6 +44,48 @@ cudaDataType hypre_getCudaDataTypeComplex()
    hypre_assert(false);
    return CUDA_R_64F;
 }
+
+/*
+ * @brief Sorts an unsorted CSR INPLACE
+ * @param[in] cusparsehandle A Cusparse handle
+ * @param[in] n Number of rows
+ * @param[in] m Number of columns
+ * @param[in] nnzA Number of nonzeroes
+ * @param[in] *d_ia (Unsorted) Row indices
+ * @param[in,out] *d_ja_sorted On Start: Unsorted column indices. On return: Sorted column indices
+ * @param[in,out] *d_a_sorted On Start: Unsorted values. On Return: Sorted values corresponding with column indices
+ */
+void hypre_sortCSRCusparse(cusparseHandle_t cusparsehandle, HYPRE_Int n, HYPRE_Int m, HYPRE_Int nnzA, const HYPRE_Int *d_ia, HYPRE_Int *d_ja_sorted, HYPRE_Complex *d_a_sorted)
+{
+   csru2csrInfo_t sortInfoA;
+
+   cusparseMatDescr_t descrA=0;
+   HYPRE_CUSPARSE_CALL( cusparseCreateMatDescr(&descrA) );
+
+
+
+   size_t pBufferSizeInBytes = 0;
+   void *pBuffer = NULL;
+
+   HYPRE_Int isDoublePrecision = sizeof(HYPRE_Complex) == sizeof(hypre_double);
+   HYPRE_Int isSinglePrecision = sizeof(HYPRE_Complex) == sizeof(hypre_double) / 2;
+
+   HYPRE_CUSPARSE_CALL(cusparseCreateCsru2csrInfo(&sortInfoA));
+   if (isDoublePrecision)
+   {
+      HYPRE_CUSPARSE_CALL(cusparseDcsru2csr_bufferSizeExt(cusparsehandle, n, m, nnzA, d_a_sorted, d_ia, d_ja_sorted, sortInfoA, &pBufferSizeInBytes));
+      pBuffer = hypre_TAlloc(char, pBufferSizeInBytes, HYPRE_MEMORY_DEVICE);
+      HYPRE_CUSPARSE_CALL(cusparseDcsru2csr(cusparsehandle, n, m, nnzA, descrA, d_a_sorted, d_ia, d_ja_sorted, sortInfoA, pBuffer));
+   }
+   else if (isSinglePrecision)
+   {
+      HYPRE_CUSPARSE_CALL(cusparseScsru2csr_bufferSizeExt(cusparsehandle, n, m, nnzA, (float *) d_a_sorted, d_ia, d_ja_sorted, sortInfoA, &pBufferSizeInBytes));
+      pBuffer = hypre_TAlloc(char, pBufferSizeInBytes, HYPRE_MEMORY_DEVICE);
+      HYPRE_CUSPARSE_CALL(cusparseScsru2csr(cusparsehandle, n, m, nnzA, descrA, (float *)d_a_sorted, d_ia, d_ja_sorted, sortInfoA, pBuffer));
+   }
+   hypre_TFree(pBuffer, HYPRE_MEMORY_DEVICE);
+   HYPRE_CUSPARSE_CALL(cusparseDestroyCsru2csrInfo(sortInfoA));
+}
 #endif
 
 #if (CUDART_VERSION >= 10010)
@@ -122,47 +164,6 @@ cusparseIndexType_t hypre_getCusparseIndexTypeInt()
 }
 
 
-/*
- * @brief Sorts an unsorted CSR INPLACE
- * @param[in] cusparsehandle A Cusparse handle
- * @param[in] n Number of rows
- * @param[in] m Number of columns
- * @param[in] nnzA Number of nonzeroes
- * @param[in] *d_ia (Unsorted) Row indices
- * @param[in,out] *d_ja_sorted On Start: Unsorted column indices. On return: Sorted column indices
- * @param[in,out] *d_a_sorted On Start: Unsorted values. On Return: Sorted values corresponding with column indices
- */
-void hypre_sortCSRCusparse(cusparseHandle_t cusparsehandle, HYPRE_Int n, HYPRE_Int m, HYPRE_Int nnzA, const HYPRE_Int *d_ia, HYPRE_Int *d_ja_sorted, HYPRE_Complex *d_a_sorted)
-{
-   csru2csrInfo_t sortInfoA;
-
-   cusparseMatDescr_t descrA=0;
-   HYPRE_CUSPARSE_CALL( cusparseCreateMatDescr(&descrA) );
-
-
-
-   size_t pBufferSizeInBytes = 0;
-   void *pBuffer = NULL;
-
-   HYPRE_Int isDoublePrecision = sizeof(HYPRE_Complex) == sizeof(hypre_double);
-   HYPRE_Int isSinglePrecision = sizeof(HYPRE_Complex) == sizeof(hypre_double) / 2;
-
-   HYPRE_CUSPARSE_CALL(cusparseCreateCsru2csrInfo(&sortInfoA));
-   if (isDoublePrecision)
-   {
-      HYPRE_CUSPARSE_CALL(cusparseDcsru2csr_bufferSizeExt(cusparsehandle, n, m, nnzA, d_a_sorted, d_ia, d_ja_sorted, sortInfoA, &pBufferSizeInBytes));
-      pBuffer = hypre_TAlloc(char, pBufferSizeInBytes, HYPRE_MEMORY_DEVICE);
-      HYPRE_CUSPARSE_CALL(cusparseDcsru2csr(cusparsehandle, n, m, nnzA, descrA, d_a_sorted, d_ia, d_ja_sorted, sortInfoA, pBuffer));
-   }
-   else if (isSinglePrecision)
-   {
-      HYPRE_CUSPARSE_CALL(cusparseScsru2csr_bufferSizeExt(cusparsehandle, n, m, nnzA, (float *) d_a_sorted, d_ia, d_ja_sorted, sortInfoA, &pBufferSizeInBytes));
-      pBuffer = hypre_TAlloc(char, pBufferSizeInBytes, HYPRE_MEMORY_DEVICE);
-      HYPRE_CUSPARSE_CALL(cusparseScsru2csr(cusparsehandle, n, m, nnzA, descrA, (float *)d_a_sorted, d_ia, d_ja_sorted, sortInfoA, pBuffer));
-   }
-   hypre_TFree(pBuffer, HYPRE_MEMORY_DEVICE);
-   HYPRE_CUSPARSE_CALL(cusparseDestroyCsru2csrInfo(sortInfoA));
-}
 
 
 /*
