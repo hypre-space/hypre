@@ -13,58 +13,6 @@
 #include "_hypre_struct_ls.h"
 #include "temp_multivector.h"
 
-HYPRE_Int 
-hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
-                                   HYPRE_Int seed )
-{
-   hypre_Box          *v_data_box;
-                    
-   HYPRE_Int           vi;
-   HYPRE_Real         *vp;
-
-   hypre_BoxArray     *boxes;
-   hypre_Box          *box;
-   hypre_Index         loop_size;
-   hypre_IndexRef      start;
-   hypre_Index         unit_stride;
-
-   HYPRE_Int           i;
-
-   /*-----------------------------------------------------------------------
-    * Set the vector coefficients
-    *-----------------------------------------------------------------------*/
-
-   srand( seed );
-
-   hypre_SetIndex3(unit_stride, 1, 1, 1);
- 
-   boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(vector));
-   hypre_ForBoxI(i, boxes)
-   {
-      box      = hypre_BoxArrayBox(boxes, i);
-      start = hypre_BoxIMin(box);
-
-      v_data_box =
-         hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), i);
-      vp = hypre_StructVectorBoxData(vector, i);
- 
-      hypre_BoxGetSize(box, loop_size);
-
-      hypre_BoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
-                          v_data_box, start, unit_stride, vi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,vi ) HYPRE_SMP_SCHEDULE
-#endif
-      hypre_BoxLoop1For(vi)
-      {
-         vp[vi] = 2.0*rand()/RAND_MAX - 1.0;
-      }
-      hypre_BoxLoop1End(vi);
-   }
-
-   return hypre_error_flag;
-}
-
 HYPRE_Int
 hypre_StructSetRandomValues( void* v, HYPRE_Int seed ) {
 
@@ -75,8 +23,8 @@ HYPRE_Int
 HYPRE_StructSetupInterpreter( mv_InterfaceInterpreter *i )
 {
    i->CreateVector = hypre_StructKrylovCreateVector;
-   i->DestroyVector = hypre_StructKrylovDestroyVector; 
-   i->InnerProd = hypre_StructKrylovInnerProd; 
+   i->DestroyVector = hypre_StructKrylovDestroyVector;
+   i->InnerProd = hypre_StructKrylovInnerProd;
    i->CopyVector = hypre_StructKrylovCopyVector;
    i->ClearVector = hypre_StructKrylovClearVector;
    i->SetRandomValues = hypre_StructSetRandomValues;

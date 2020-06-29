@@ -280,6 +280,7 @@ HYPRE_Int HYPRE_StructMatrixSetConstantValues(HYPRE_StructMatrix  matrix,
                                               HYPRE_Int           nentries,
                                               HYPRE_Int          *entries,
                                               HYPRE_Complex      *values);
+
 /**
  * Add to matrix coefficients which are constant over the grid.  The {\tt
  * values} array is of length {\tt nentries}.
@@ -479,6 +480,19 @@ HYPRE_Int HYPRE_StructVectorSetValues(HYPRE_StructVector  vector,
                                       HYPRE_Complex       value);
 
 /**
+ * Set vector coefficients to a constant value over the grid.
+ **/
+HYPRE_Int HYPRE_StructVectorSetConstantValues(HYPRE_StructVector vector,
+                                              HYPRE_Complex      value);
+
+/**
+ * Set vector coefficients to random values between -1.0 and 1.0 over the grid.
+ * The parameter {\tt seed} controls the generation of random numbers.
+ **/
+HYPRE_Int HYPRE_StructVectorSetRandomValues(HYPRE_StructVector  vector,
+                                            HYPRE_Int           seed);
+
+/**
  * Add to vector coefficients index by index.
  *
  * NOTE: For better efficiency, use \Ref{HYPRE_StructVectorAddToBoxValues} to
@@ -574,9 +588,6 @@ typedef struct hypre_CommPkg_struct *HYPRE_CommPkg;
 
 HYPRE_Int HYPRE_StructVectorSetNumGhost(HYPRE_StructVector  vector,
                                         HYPRE_Int          *num_ghost);
-
-HYPRE_Int HYPRE_StructVectorSetConstantValues(HYPRE_StructVector vector,
-                                              HYPRE_Complex      values);
 
 HYPRE_Int HYPRE_StructVectorGetMigrateCommPkg(HYPRE_StructVector  from_vector,
                                               HYPRE_StructVector  to_vector,

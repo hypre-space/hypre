@@ -139,7 +139,6 @@ HYPRE_Int HYPRE_StructHybridGetPCGNumIterations ( HYPRE_StructSolver solver , HY
 HYPRE_Int HYPRE_StructHybridGetFinalRelativeResidualNorm ( HYPRE_StructSolver solver , HYPRE_Real *norm );
 
 /* HYPRE_struct_int.c */
-HYPRE_Int hypre_StructVectorSetRandomValues ( hypre_StructVector *vector , HYPRE_Int seed );
 HYPRE_Int hypre_StructSetRandomValues ( void *v , HYPRE_Int seed );
 HYPRE_Int HYPRE_StructSetupInterpreter ( mv_InterfaceInterpreter *i );
 HYPRE_Int HYPRE_StructSetupMatvec ( HYPRE_MatvecFunctions *mv );

@@ -209,7 +209,7 @@ HYPRE_Int HYPRE_StructPFMGSetMaxIter(HYPRE_StructSolver solver,
 /**
  * (Optional) Set maximum number of multigrid grid levels.
  **/
-HYPRE_Int HYPRE_StructPFMGSetMaxLevels(HYPRE_StructSolver solver, 
+HYPRE_Int HYPRE_StructPFMGSetMaxLevels(HYPRE_StructSolver solver,
                                  HYPRE_Int          max_levels);
 
 /**
@@ -758,7 +758,7 @@ HYPRE_Int HYPRE_StructLGMRESSetTol(HYPRE_StructSolver solver,
 
 HYPRE_Int HYPRE_StructLGMRESSetAbsoluteTol(HYPRE_StructSolver solver,
                                      HYPRE_Real         tol);
-   
+
 HYPRE_Int HYPRE_StructLGMRESSetMaxIter(HYPRE_StructSolver solver,
                                  HYPRE_Int          max_iter);
 
@@ -1092,13 +1092,7 @@ HYPRE_StructSetupInterpreter(mv_InterfaceInterpreter *i);
 HYPRE_Int
 HYPRE_StructSetupMatvec(HYPRE_MatvecFunctions *mv);
 
-/* The next routines should not be here (lower-case prefix). (RDF) */
-
-/*
- * Set hypre_StructPVector to random values.
- **/
-HYPRE_Int
-hypre_StructVectorSetRandomValues(hypre_StructVector *vector, HYPRE_Int seed);
+/* The next routine should not be here (lower-case prefix). (RDF) */
 
 /*
  * Same as hypre_StructVectorSetRandomValues except uses void pointer.
@@ -1118,4 +1112,3 @@ hypre_StructSetRandomValues(void *v, HYPRE_Int seed);
 #endif
 
 #endif
-
