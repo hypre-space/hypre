@@ -932,6 +932,7 @@ HYPRE_Int HYPRE_SStructVectorSetConstantValues ( HYPRE_SStructVector vector , HY
 HYPRE_Int HYPRE_SStructVectorSetObjectType ( HYPRE_SStructVector vector , HYPRE_Int type );
 HYPRE_Int HYPRE_SStructVectorGetObject ( HYPRE_SStructVector vector , void **object );
 HYPRE_Int HYPRE_SStructVectorPrint ( const char *filename , HYPRE_SStructVector vector , HYPRE_Int all );
+HYPRE_Int HYPRE_SStructVectorPrintGLVis( hypre_SStructVector *vector, const char *fileprefix );
 HYPRE_Int HYPRE_SStructVectorCopy ( HYPRE_SStructVector x , HYPRE_SStructVector y );
 HYPRE_Int HYPRE_SStructVectorScale ( HYPRE_Complex alpha , HYPRE_SStructVector y );
 HYPRE_Int HYPRE_SStructInnerProd ( HYPRE_SStructVector x , HYPRE_SStructVector y , HYPRE_Real *result );
