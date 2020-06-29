@@ -14,7 +14,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-
+#include <fenv.h>
 
 
 #include "_hypre_utilities.h"
@@ -27,8 +27,6 @@
 /* begin lobpcg */
 
 #include <time.h>
-
-
 
 #include "fortran_matrix.h"
 #include "HYPRE_lobpcg.h"
@@ -2256,6 +2254,7 @@ PrintUsage( char *progname,
       hypre_printf("  -cri <ix> <iy> <iz>: Struct- cyclic reduction base_index\n");
       hypre_printf("  -crs <sx> <sy> <sz>: Struct- cyclic reduction base_stride\n");
       hypre_printf("  -old_default: sets old BoomerAMG defaults, possibly better for 2D problems\n");
+      hypre_printf("  -vis               : save the solution for GLVis visualization");
 
       /* begin lobpcg */
 
@@ -2382,6 +2381,9 @@ main( hypre_int argc,
    /* parameters for LGMRES */
    HYPRE_Int	         aug_dim;
 
+   /* Misc */
+   HYPRE_Int             vis = 0;
+
    HYPRE_Real            cf_tol;
 
    HYPRE_Int             cycred_tdim;
@@ -2401,7 +2403,7 @@ main( hypre_int argc,
    HYPRE_Int verbosity = 1;
    HYPRE_Int iterations;
    HYPRE_Int checkOrtho = 0;
-   HYPRE_Int printLevel = 0;
+   HYPRE_Int printLevel = 1;
    HYPRE_Int pcgIterations = 0;
    HYPRE_Int pcgMode = 0;
    HYPRE_Int old_default = 0;
@@ -2438,6 +2440,7 @@ main( hypre_int argc,
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
 
    hypre_InitMemoryDebug(myid);
+   feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
 
    /*-----------------------------------------------------------
     * Read input file
@@ -2486,7 +2489,7 @@ main( hypre_int argc,
    rel_change = 0;
    k_dim = 10;
    aug_dim = 2;
-   krylov_print_level = 0;
+   krylov_print_level = 2;
 
    pooldist   = 0;
    parts      = hypre_TAlloc(HYPRE_Int, nparts);
@@ -2600,6 +2603,11 @@ main( hypre_int argc,
       {
          arg_index++;
          print_system = 1;
+      }
+      else if ( strcmp(argv[arg_index], "-vis") == 0 )
+      {
+         arg_index++;
+         vis = 1;
       }
       else if ( strcmp(argv[arg_index], "-rhsfromcosine") == 0 )
       {
@@ -3388,7 +3396,7 @@ main( hypre_int argc,
                scale = (part + 1.0)*(var + 1.0);
                for (box = 0; box < pdata.nboxes; box++)
                {
-               /* GetVariableBox(pdata.ilowers[box], pdata.iuppers[box], 
+               /* GetVariableBox(pdata.ilowers[box], pdata.iuppers[box],
                                  pdata.vartypes[var], ilower, iupper); */
                   GetVariableBox(pdata.ilowers[box], pdata.iuppers[box],
                                  var, ilower, iupper);
@@ -5873,12 +5881,12 @@ main( hypre_int argc,
 
    if (print_system)
    {
+      HYPRE_SStructVectorPrint("sstruct.out.x", x, 0);
+
+#if 0
       FILE *file;
       char  filename[255];
 
-      HYPRE_SStructVectorPrint("sstruct.out.x", x, 0);
-
-#if 0      
       /* print out with shared data replicated */
       values = hypre_TAlloc(HYPRE_Real, data.max_boxsize);
       for (part = 0; part < data.nparts; part++)
@@ -5934,12 +5942,13 @@ main( hypre_int argc,
       rhs_norm = sqrt(rhs_norm);
 
       hypre_SStructInnerProd(r, r, &real_res_norm);
+      HYPRE_SStructVectorDestroy(r);
       real_res_norm = sqrt(real_res_norm);
 
       if (rhs_norm > 0)
       {
          real_res_norm = real_res_norm/rhs_norm;
-      }  
+      }
 
       hypre_printf("\n");
       hypre_printf("Iterations = %d\n", num_iterations);
@@ -5947,6 +5956,13 @@ main( hypre_int argc,
       hypre_printf("Real  Relative Residual Norm = %e\n", real_res_norm);
       hypre_printf("Final Relative Residual Norm = %e\n", final_res_norm);
       hypre_printf("\n");
+   }
+
+   if (vis)
+   {
+      HYPRE_SStructGridPrintGLVis(grid, "sstruct.mesh", NULL, NULL);
+      HYPRE_SStructVectorPrintGLVis(b, "sstruct.rhs");
+      HYPRE_SStructVectorPrintGLVis(x, "sstruct.sol");
    }
 
    /*-----------------------------------------------------------
