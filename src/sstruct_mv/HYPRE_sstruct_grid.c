@@ -898,3 +898,17 @@ HYPRE_SStructGridSetNumGhost( HYPRE_SStructGrid grid,
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructGridPrintGLVis( HYPRE_SStructGrid grid,
+                             const char *meshprefix,
+                             HYPRE_Real *trans,
+                             HYPRE_Real *origin )
+{
+   hypre_SStructGridPrintGLVis(grid, meshprefix, trans, origin);
+
+   return hypre_error_flag;
+}

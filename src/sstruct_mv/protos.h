@@ -34,6 +34,7 @@ HYPRE_Int HYPRE_SStructGridAddUnstructuredPart ( HYPRE_SStructGrid grid , HYPRE_
 HYPRE_Int HYPRE_SStructGridAssemble ( HYPRE_SStructGrid grid );
 HYPRE_Int HYPRE_SStructGridSetPeriodic ( HYPRE_SStructGrid grid , HYPRE_Int part , HYPRE_Int *periodic );
 HYPRE_Int HYPRE_SStructGridSetNumGhost ( HYPRE_SStructGrid grid , HYPRE_Int *num_ghost );
+HYPRE_Int HYPRE_SStructGridPrintGLVis ( HYPRE_SStructGrid grid, const char *meshprefix, HYPRE_Real *trans, HYPRE_Real *origin );
 
 /* HYPRE_sstruct_matrix.c */
 HYPRE_Int HYPRE_SStructMatrixCreate ( MPI_Comm comm , HYPRE_SStructGraph graph , HYPRE_SStructMatrix *matrix_ptr );

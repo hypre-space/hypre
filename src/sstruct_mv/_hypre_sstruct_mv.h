@@ -414,7 +414,7 @@ typedef struct
    HYPRE_Int     part;
    hypre_Index   index;
    HYPRE_Int     var;
-   HYPRE_Int     to_part;     
+   HYPRE_Int     to_part;
    hypre_Index   to_index;
    HYPRE_Int     to_var;
 
@@ -772,7 +772,7 @@ typedef struct
 
    HYPRE_Int               ref_count;
 
-   HYPRE_Int              *dataindices;  /* GEC1002 array for starting index of the 
+   HYPRE_Int              *dataindices;  /* GEC1002 array for starting index of the
                                             svector. pdataindices[varx] */
    HYPRE_Int               datasize;     /* Size of the pvector = sums size of svectors */
 
@@ -883,6 +883,7 @@ HYPRE_Int HYPRE_SStructGridAddUnstructuredPart ( HYPRE_SStructGrid grid , HYPRE_
 HYPRE_Int HYPRE_SStructGridAssemble ( HYPRE_SStructGrid grid );
 HYPRE_Int HYPRE_SStructGridSetPeriodic ( HYPRE_SStructGrid grid , HYPRE_Int part , HYPRE_Int *periodic );
 HYPRE_Int HYPRE_SStructGridSetNumGhost ( HYPRE_SStructGrid grid , HYPRE_Int *num_ghost );
+HYPRE_Int HYPRE_SStructGridPrintGLVis ( HYPRE_SStructGrid grid, const char *meshprefix, HYPRE_Real *trans, HYPRE_Real *origin );
 
 /* HYPRE_sstruct_matrix.c */
 HYPRE_Int HYPRE_SStructMatrixCreate ( MPI_Comm comm , HYPRE_SStructGraph graph , HYPRE_SStructMatrix *matrix_ptr );
@@ -1075,4 +1076,3 @@ HYPRE_Int hypre_SStructVectorPrintGLVis ( hypre_SStructVector *vector, const cha
 #endif
 
 #endif
-
