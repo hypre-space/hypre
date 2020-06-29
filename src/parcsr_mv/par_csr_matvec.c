@@ -508,7 +508,7 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
 /*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixMatvec_FF
  *--------------------------------------------------------------------------*/
-                                                                                    HYPRE_Int
+HYPRE_Int
 hypre_ParCSRMatrixMatvec_FF( HYPRE_Complex       alpha,
                              hypre_ParCSRMatrix *A,
                              hypre_ParVector    *x,

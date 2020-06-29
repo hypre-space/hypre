@@ -1489,6 +1489,9 @@ hypre_SStructGridFindBoxManEntry( hypre_SStructGrid  *grid,
 }
 
 /*--------------------------------------------------------------------------
+ * TODO: refactor hypre_SStructGridFindBoxManEntry and
+ *                hypre_SStructGridFindNborBoxManEntry
+ *       into a single function.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int

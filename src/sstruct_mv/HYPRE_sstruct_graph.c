@@ -19,6 +19,9 @@
 #include "_hypre_sstruct_mv.h"
 
 /*--------------------------------------------------------------------------
+ * NOTE:
+ *       1) This function assumes that the domain grid is a coarsening of
+ *          the range grid.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -30,14 +33,22 @@ HYPRE_SStructGraphCreate( MPI_Comm             comm,
    hypre_SStructGraph     *graph;
    HYPRE_Int               dom_nparts = hypre_SStructGridNParts(dom_grid);
    HYPRE_Int               ran_nparts = hypre_SStructGridNParts(ran_grid);
+   HYPRE_Int              *ran_pids   = hypre_SStructGridPartIDs(ran_grid);
+
    hypre_SStructStencil ***stencils;
-   hypre_SStructPGrid    **pgrids;
+   hypre_SStructPGrid     *pgrid;
    HYPRE_Int              *fem_nsparse;
    HYPRE_Int             **fem_sparse_i;
    HYPRE_Int             **fem_sparse_j;
    HYPRE_Int             **fem_entries;
-   HYPRE_Int               nvars;
-   HYPRE_Int               part, nparts, var;
+
+   HYPRE_Int               active_nparts;
+   HYPRE_Int              *active_nvars;
+   HYPRE_Int              *active_pids;
+   HYPRE_Int              *active_pmaps;
+
+   HYPRE_Int               part, var, nvars;
+   HYPRE_Int               active_part;
 
    graph = hypre_TAlloc(hypre_SStructGraph, 1);
 
@@ -45,28 +56,40 @@ HYPRE_SStructGraphCreate( MPI_Comm             comm,
    hypre_SStructGraphNDim(graph) = hypre_SStructGridNDim(ran_grid);
    hypre_SStructGridRef(dom_grid, &hypre_SStructGraphDomGrid(graph));
    hypre_SStructGridRef(ran_grid, &hypre_SStructGraphRanGrid(graph));
+   hypre_SStructGridRef(ran_grid, &hypre_SStructGraphGrid(graph));
    if (ran_nparts > dom_nparts)
    {
-      nparts = dom_nparts;
-      hypre_SStructGridRef(dom_grid, &hypre_SStructGraphGrid(graph));
+      active_nparts = dom_nparts;
+      active_pids   = hypre_SStructGridPartIDs(dom_grid);
    }
    else
    {
-      nparts = ran_nparts;
-      hypre_SStructGridRef(ran_grid, &hypre_SStructGraphGrid(graph));
+      active_nparts = ran_nparts;
+      active_pids   = hypre_SStructGridPartIDs(ran_grid);
    }
-   hypre_SStructGraphNParts(graph) = nparts;
-   pgrids = hypre_SStructGraphPGrids(graph);
+   hypre_SStructGraphActiveNParts(graph)  = active_nparts;
+   hypre_SStructGraphActivePartIDs(graph) = active_pids;
 
-   stencils = hypre_TAlloc(hypre_SStructStencil **, nparts);
-   fem_nsparse  = hypre_TAlloc(HYPRE_Int, nparts);
-   fem_sparse_i = hypre_TAlloc(HYPRE_Int *, nparts);
-   fem_sparse_j = hypre_TAlloc(HYPRE_Int *, nparts);
-   fem_entries  = hypre_TAlloc(HYPRE_Int *, nparts);
-   for (part = 0; part < nparts; part++)
+   stencils     = hypre_TAlloc(hypre_SStructStencil **, active_nparts);
+   active_nvars = hypre_TAlloc(HYPRE_Int,   active_nparts);
+   active_pmaps = hypre_TAlloc(HYPRE_Int,   active_nparts);
+   fem_nsparse  = hypre_TAlloc(HYPRE_Int,   active_nparts);
+   fem_sparse_i = hypre_TAlloc(HYPRE_Int *, active_nparts);
+   fem_sparse_j = hypre_TAlloc(HYPRE_Int *, active_nparts);
+   fem_entries  = hypre_TAlloc(HYPRE_Int *, active_nparts);
+   for (part = 0; part < active_nparts; part++)
    {
-      nvars = hypre_SStructPGridNVars(pgrids[part]);
-      stencils[part]  = hypre_TAlloc(hypre_SStructStencil *, nvars);
+      /* Find index of active part */
+      active_part = hypre_BinarySearch(ran_pids, active_pids[part], ran_nparts);
+      active_pmaps[part] = active_part;
+
+      /* Set number of active variables */
+      pgrid = hypre_SStructGraphPGrid(graph, active_part);
+      nvars = hypre_SStructPGridNVars(pgrid);
+      active_nvars[part] = nvars;
+
+      /* Allocate/Initialize pointers */
+      stencils[part]     = hypre_TAlloc(hypre_SStructStencil *, nvars);
       fem_nsparse[part]  = 0;
       fem_sparse_i[part] = NULL;
       fem_sparse_j[part] = NULL;
@@ -76,11 +99,13 @@ HYPRE_SStructGraphCreate( MPI_Comm             comm,
          stencils[part][var] = NULL;
       }
    }
-   hypre_SStructGraphStencils(graph)   = stencils;
-   hypre_SStructGraphFEMNSparse(graph) = fem_nsparse;
-   hypre_SStructGraphFEMSparseJ(graph) = fem_sparse_i;
-   hypre_SStructGraphFEMSparseI(graph) = fem_sparse_j;
-   hypre_SStructGraphFEMEntries(graph) = fem_entries;
+   hypre_SStructGraphStencils(graph)    = stencils;
+   hypre_SStructGraphActiveNVars(graph) = active_nvars;
+   hypre_SStructGraphActivePMaps(graph) = active_pmaps;
+   hypre_SStructGraphFEMNSparse(graph)  = fem_nsparse;
+   hypre_SStructGraphFEMSparseJ(graph)  = fem_sparse_i;
+   hypre_SStructGraphFEMSparseI(graph)  = fem_sparse_j;
+   hypre_SStructGraphFEMEntries(graph)  = fem_entries;
 
    hypre_SStructGraphNUVEntries(graph) = 0;
    hypre_SStructGraphIUVEntries(graph) = NULL;
@@ -95,7 +120,7 @@ HYPRE_SStructGraphCreate( MPI_Comm             comm,
    hypre_SStructGraphEntries(graph)    = NULL;
    hypre_SStructNGraphEntries(graph)   = 0;
    hypre_SStructAGraphEntries(graph)   = 0;
-   
+
    *graph_ptr = graph;
 
    return hypre_error_flag;
@@ -108,7 +133,8 @@ HYPRE_Int
 HYPRE_SStructGraphDestroy( HYPRE_SStructGraph graph )
 {
    HYPRE_Int               nparts;
-   hypre_SStructPGrid    **pgrids;
+   HYPRE_Int              *nvars;
+   HYPRE_Int              *pmaps;
    hypre_SStructStencil ***stencils;
    HYPRE_Int              *fem_nsparse;
    HYPRE_Int             **fem_sparse_i;
@@ -116,10 +142,9 @@ HYPRE_SStructGraphDestroy( HYPRE_SStructGraph graph )
    HYPRE_Int             **fem_entries;
    HYPRE_Int               nUventries;
    HYPRE_Int              *iUventries;
-    hypre_SStructUVEntry **Uventries;
+   hypre_SStructUVEntry  **Uventries;
    hypre_SStructUVEntry   *Uventry;
    HYPRE_Int             **Uveoffsets;
-   HYPRE_Int               nvars;
    HYPRE_Int               part, var, i;
 
    if (graph)
@@ -127,21 +152,30 @@ HYPRE_SStructGraphDestroy( HYPRE_SStructGraph graph )
       hypre_SStructGraphRefCount(graph) --;
       if (hypre_SStructGraphRefCount(graph) == 0)
       {
-         nparts   = hypre_SStructGraphNParts(graph);
-         pgrids   = hypre_SStructGraphPGrids(graph);
-         stencils = hypre_SStructGraphStencils(graph);
+         /* Active part data */
+         nparts = hypre_SStructGraphActiveNParts(graph);
+         pmaps  = hypre_SStructGraphActivePMaps(graph);
+         nvars  = hypre_SStructGraphActiveNVars(graph);
+         hypre_SStructGraphActivePartIDs(graph) = NULL;
+
+         /* FEM data */
          fem_nsparse  = hypre_SStructGraphFEMNSparse(graph);
          fem_sparse_i = hypre_SStructGraphFEMSparseJ(graph);
          fem_sparse_j = hypre_SStructGraphFEMSparseI(graph);
          fem_entries  = hypre_SStructGraphFEMEntries(graph);
+
+         /* S-graph data */
+         stencils = hypre_SStructGraphStencils(graph);
+
+         /* U-graph data */
          nUventries = hypre_SStructGraphNUVEntries(graph);
          iUventries = hypre_SStructGraphIUVEntries(graph);
          Uventries  = hypre_SStructGraphUVEntries(graph);
          Uveoffsets = hypre_SStructGraphUVEOffsets(graph);
+
          for (part = 0; part < nparts; part++)
          {
-            nvars = hypre_SStructPGridNVars(pgrids[part]);
-            for (var = 0; var < nvars; var++)
+            for (var = 0; var < nvars[part]; var++)
             {
                HYPRE_SStructStencilDestroy(stencils[part][var]);
             }
@@ -154,6 +188,8 @@ HYPRE_SStructGraphDestroy( HYPRE_SStructGraph graph )
          HYPRE_SStructGridDestroy(hypre_SStructGraphGrid(graph));
          HYPRE_SStructGridDestroy(hypre_SStructGraphRanGrid(graph));
          HYPRE_SStructGridDestroy(hypre_SStructGraphDomGrid(graph));
+         hypre_TFree(pmaps);
+         hypre_TFree(nvars);
          hypre_TFree(stencils);
          hypre_TFree(fem_nsparse);
          hypre_TFree(fem_sparse_i);
@@ -271,10 +307,10 @@ HYPRE_SStructGraphAddEntries( HYPRE_SStructGraph   graph,
 
    hypre_SStructGraphEntry **entries   = hypre_SStructGraphEntries(graph);
    hypre_SStructGraphEntry  *new_entry;
-   
+
    HYPRE_Int                 n_entries = hypre_SStructNGraphEntries(graph);
    HYPRE_Int                 a_entries = hypre_SStructAGraphEntries(graph);
-   
+
    /* check storage */
    if (!a_entries)
    {
@@ -288,11 +324,11 @@ HYPRE_SStructGraphAddEntries( HYPRE_SStructGraph   graph,
    {
       a_entries += 1000;
       entries = hypre_TReAlloc(entries, hypre_SStructGraphEntry *, a_entries);
-   
+
       hypre_SStructAGraphEntries(graph) = a_entries;
       hypre_SStructGraphEntries(graph) = entries;
    }
-   
+
    /*save parameters to a new entry */
 
    new_entry = hypre_TAlloc(hypre_SStructGraphEntry, 1);
@@ -306,7 +342,7 @@ HYPRE_SStructGraphAddEntries( HYPRE_SStructGraph   graph,
    hypre_CopyToCleanIndex(index, ndim, hypre_SStructGraphEntryIndex(new_entry));
    hypre_CopyToCleanIndex(
       to_index, ndim, hypre_SStructGraphEntryToIndex(new_entry));
-     
+
    entries[n_entries] = new_entry;
 
    /* update count */
@@ -329,7 +365,8 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
    HYPRE_Int                 ndim        = hypre_SStructGraphNDim(graph);
    hypre_SStructGrid        *grid        = hypre_SStructGraphGrid(graph);
    hypre_SStructGrid        *dom_grid    = hypre_SStructGraphDomGrid(graph);
-   HYPRE_Int                 nparts      = hypre_SStructGraphNParts(graph);
+   HYPRE_Int                 nparts      = hypre_SStructGraphActiveNParts(graph);
+   HYPRE_Int                *pmaps       = hypre_SStructGraphActivePMaps(graph);
    hypre_SStructStencil   ***stencils    = hypre_SStructGraphStencils(graph);
    HYPRE_Int                 nUventries;
    HYPRE_Int                *iUventries;
@@ -344,8 +381,6 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
    hypre_StructGrid         *sgrid;
    HYPRE_Int                 nvars;
    hypre_BoxArray           *boxes;
-   hypre_Box                *box;
-   HYPRE_Int                 vol, d;
 
    hypre_SStructGraphEntry  *new_entry;
    hypre_SStructUVEntry     *Uventry;
@@ -358,11 +393,11 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
    HYPRE_Int                 to_proc;
    HYPRE_Int                 Uverank, rank;
    hypre_BoxManEntry        *boxman_entry;
-                         
+
    HYPRE_Int                 nprocs, myproc;
    HYPRE_Int                 part, var;
    hypre_IndexRef            index;
-   HYPRE_Int                 i, j;
+   HYPRE_Int                 i, j, d;
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
 
@@ -371,14 +406,14 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
    hypre_BoxManager        ***new_managers = NULL;
    hypre_BoxManager          *orig_boxman;
    hypre_BoxManager          *new_boxman;
-   
+
    HYPRE_Int                  global_n_add_entries;
    HYPRE_Int                  is_gather, k;
-   
+
    hypre_BoxManEntry         *all_entries, *entry;
    HYPRE_Int                  num_entries;
    void                      *info;
-   hypre_Box                 *bbox, *new_box;
+   hypre_Box                 *bbox, *new_box, *grow_box;
    hypre_Box               ***new_gboxes, *new_gbox;
    HYPRE_Int                 *num_ghost;
 
@@ -400,13 +435,14 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
     *  are local, which is generally how they should be used).
     *---------------------------------------------------------*/
 
-   new_box = hypre_BoxCreate(ndim);
-   
+   new_box  = hypre_BoxCreate(ndim);
+   grow_box = hypre_BoxCreate(ndim);
+
    /* if any processor has added entries, then all need to participate */
 
    hypre_MPI_Allreduce(&n_add_entries, &global_n_add_entries,
                        1, HYPRE_MPI_INT, hypre_MPI_SUM, comm);
- 
+
    if (global_n_add_entries > 0 )
    {
       /* create new managers */
@@ -415,21 +451,21 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
 
       for (part = 0; part < nparts; part++)
       {
-         pgrid = hypre_SStructGridPGrid(grid, part);
+         pgrid = hypre_SStructGridPGrid(grid, pmaps[part]);
          nvars = hypre_SStructPGridNVars(pgrid);
-         
+
          new_managers[part] = hypre_TAlloc(hypre_BoxManager *, nvars);
          new_gboxes[part] = hypre_TAlloc(hypre_Box *, nvars);
-         
+
          for (var = 0; var < nvars; var++)
          {
             sgrid = hypre_SStructPGridSGrid(pgrid, var);
-       
+
             orig_boxman = managers[part][var];
             bbox =  hypre_BoxManBoundingBox(orig_boxman);
-            
-            hypre_BoxManCreate(hypre_BoxManNEntries(orig_boxman), 
-                               hypre_BoxManEntryInfoSize(orig_boxman), 
+
+            hypre_BoxManCreate(hypre_BoxManNEntries(orig_boxman),
+                               hypre_BoxManEntryInfoSize(orig_boxman),
                                hypre_StructGridNDim(sgrid), bbox,
                                hypre_StructGridComm(sgrid),
                                &new_managers[part][var]);
@@ -470,11 +506,11 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
             /* if the index is not within the bounds of the struct grid bounding
                box (which has been set in the box manager) then there should not
                be a coupling here (doesn't make sense) */
-            
+
             new_boxman = new_managers[part][var];
             new_gbox = new_gboxes[part][var];
             bbox =  hypre_BoxManBoundingBox(new_boxman);
-            
+
             if (hypre_IndexInBox(index, bbox) != 0)
             {
                /* compute new gather box extents based on index */
@@ -488,15 +524,15 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
             }
          }
       }
-      
+
       /* Now go through the managers and if gather has been called (on any
          processor) then populate the new manager with the entries from the old
          manager and then assemble and delete the old manager. */
       for (part = 0; part < nparts; part++)
       {
-         pgrid = hypre_SStructGridPGrid(grid, part);
+         pgrid = hypre_SStructGridPGrid(grid, pmaps[part]);
          nvars = hypre_SStructPGridNVars(pgrid);
-         
+
          for (var = 0; var < nvars; var++)
          {
             new_boxman = new_managers[part][var];
@@ -514,17 +550,17 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
             if (is_gather)
             {
                /* copy orig boxman information to the new boxman*/
-               
+
                orig_boxman = managers[part][var];
 
                hypre_BoxManGetAllEntries(orig_boxman, &num_entries, &all_entries);
-               
+
                for (j=0; j< num_entries; j++)
                {
                   entry = &all_entries[j];
-                  
+
                   hypre_BoxManEntryGetInfo(entry, &info);
-                  
+
                   hypre_BoxManAddEntry(new_boxman,
                                        hypre_BoxManEntryIMin(entry),
                                        hypre_BoxManEntryIMax(entry),
@@ -532,7 +568,7 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
                                        hypre_BoxManEntryId(entry),
                                        info);
                }
-               
+
                /* call assemble for new boxmanager*/
                hypre_BoxManAssemble(new_boxman);
 
@@ -542,7 +578,7 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
                   hypre_MPI_Comm_rank(comm, &myproc);
                   hypre_printf("myid = %d, new_entries = %d, old entries = %d\n", myproc, hypre_BoxManNEntries(new_boxman), num_entries);
                   } */
-               
+
                /* destroy old manager */
                hypre_BoxManDestroy (managers[part][var]);
             }
@@ -550,11 +586,11 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
             {
                /*leave the old manager (so destroy the new one)  */
                hypre_BoxManDestroy(new_boxman);
-               
+
                /*copy the old to the new */
                new_managers[part][var] = managers[part][var];
             }
-            
+
             hypre_BoxDestroy(new_gboxes[part][var]);
          } /* end of var loop */
          hypre_TFree(managers[part]);
@@ -562,7 +598,7 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
       } /* end of part loop */
       hypre_TFree(managers);
       hypre_TFree(new_gboxes);
-   
+
       /* assign the new ones */
       hypre_SStructGridBoxManagers(grid) = new_managers;
    }
@@ -586,8 +622,9 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
    Uveoffsets = hypre_TAlloc(HYPRE_Int *, nparts);
    for (part = 0; part < nparts; part++)
    {
-      pgrid = hypre_SStructGridPGrid(grid, part);
+      pgrid = hypre_SStructGridPGrid(grid, pmaps[part]);
       nvars = hypre_SStructPGridNVars(pgrid);
+
       Uveoffsets[part] = hypre_TAlloc(HYPRE_Int, nvars);
       for (var = 0; var < nvars; var++)
       {
@@ -596,18 +633,15 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
          boxes = hypre_StructGridBoxes(sgrid);
          hypre_ForBoxI(i, boxes)
          {
-            box = hypre_BoxArrayBox(boxes, i);
-            vol = 1;
-            for (d = 0; d < ndim; d++)
-            {
-               vol *= (hypre_BoxSizeD(box, d) + 2);
-            }
-            Uvesize += vol;
+            hypre_CopyBox(hypre_BoxArrayBox(boxes, i), grow_box);
+            hypre_BoxGrowByValue(grow_box, 1);
+            Uvesize += hypre_BoxVolume(grow_box);
          }
       }
    }
    hypre_SStructGraphUVESize(graph)    = Uvesize;
    hypre_SStructGraphUVEOffsets(graph) = Uveoffsets;
+   hypre_BoxDestroy(grow_box);
 
    /* now set up nUventries, iUventries, and Uventries */
 
@@ -622,14 +656,14 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
    for (j = 0; j < n_add_entries; j++)
    {
       new_entry = add_entries[j];
-      
+
       part =  hypre_SStructGraphEntryPart(new_entry);
       var = hypre_SStructGraphEntryVar(new_entry);
       index = hypre_SStructGraphEntryIndex(new_entry);
       to_part =  hypre_SStructGraphEntryToPart(new_entry) ;
       to_var =  hypre_SStructGraphEntryToVar(new_entry);
       to_index = hypre_SStructGraphEntryToIndex(new_entry);
-      
+
       /* compute location (rank) for Uventry */
       hypre_SStructGraphGetUVEntryRank(graph, part, var, index, &Uverank);
 
@@ -665,7 +699,7 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
          hypre_SStructUVEntryToPart(Uventry, i) = to_part;
          hypre_CopyIndex(to_index, hypre_SStructUVEntryToIndex(Uventry, i));
          hypre_SStructUVEntryToVar(Uventry, i) = to_var;
-      
+
          hypre_SStructGridFindBoxManEntry(dom_grid, to_part, to_index,
                                           to_var, &boxman_entry);
          hypre_SStructBoxManEntryGetBoxnum(boxman_entry, &to_boxnum);
@@ -673,11 +707,11 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
          hypre_SStructBoxManEntryGetProcess(boxman_entry, &to_proc);
          hypre_SStructUVEntryToProc(Uventry, i)= to_proc;
          hypre_SStructBoxManEntryGetGlobalRank(
-            boxman_entry, to_index, &rank, type);          
+            boxman_entry, to_index, &rank, type);
          hypre_SStructUVEntryToRank(Uventry, i) = rank;
-      
+
          Uventries[Uverank] = Uventry;
-      
+
          nUventries++;
          hypre_SStructGraphNUVEntries(graph) = nUventries;
 
@@ -688,10 +722,10 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
       hypre_TFree(new_entry);
 
    }/* end of loop through add entries */
-   
+
    /* free the storage for the add entires */
    hypre_TFree(add_entries);
-   
+
    /*---------------------------------------------------------
     * Set up the FEM stencil information
     *---------------------------------------------------------*/
@@ -714,7 +748,8 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
          hypre_Index **stencil_offsets;
          HYPRE_Int   **stencil_vars;
 
-         nvars = hypre_SStructPGridNVars(hypre_SStructGridPGrid(grid, part));
+         pgrid = hypre_SStructGridPGrid(grid, pmaps[part]);
+         nvars = hypre_SStructPGridNVars(pgrid);
 
          /* build default full sparsity pattern if nothing set by user */
          if (fem_nsparse < 0)
@@ -782,7 +817,7 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
                stencil_vars[iv][entry] = jv;
                stencil_sizes[iv]++;
             }
-            
+
             fem_entries[s] = entry;
          }
 

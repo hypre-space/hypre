@@ -55,6 +55,7 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
    hypre_SStructPMatrix    *pmatrix;
    hypre_StructMatrix     **smatrices;   /* nmatrices array */
    hypre_StructMatrix     **smatrices_M; /* nparts array */
+   HYPRE_Int               *pmap;
    HYPRE_Int               *pids;
    HYPRE_Int               *pids_M;
    HYPRE_Int               *pids_all;
@@ -138,11 +139,13 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
       t = terms[m];
       nparts = hypre_SStructMatrixNParts(ssmatrices[t]);
       graph  = hypre_SStructMatrixGraph(ssmatrices[t]);
+      pmap   = hypre_SStructGraphActivePMaps(graph);
       grid   = hypre_SStructGraphGrid(graph);
+      pids   = hypre_SStructGridPartIDs(grid);
 
       for (part = 0; part < nparts; part++)
       {
-         pids_all[part_cnt++] = hypre_SStructGridPartID(grid, part);
+         pids_all[part_cnt++] = pids[pmap[part]];
       }
    }
 
@@ -185,10 +188,9 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
 
       for (m = 0; m < nmatrices; m++)
       {
-         nparts = hypre_SStructMatrixNParts(ssmatrices[m]);
          graph  = hypre_SStructMatrixGraph(ssmatrices[m]);
-         grid   = hypre_SStructGraphGrid(graph);
-         pids   = hypre_SStructGridPartIDs(grid);
+         pids   = hypre_SStructGraphActivePartIDs(graph);
+         nparts = hypre_SStructGraphActiveNParts(graph);
 
          q = hypre_BinarySearch(pids, pid, nparts);
 

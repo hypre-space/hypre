@@ -90,6 +90,10 @@ typedef struct
    HYPRE_Int               ran_ghlocal_size; /* Number of unknowns in the range grid
                                                 including ghosts */
    HYPRE_Int               cell_sgrid_done;  /* =1 implies cell grid already assembled */
+
+   /* Geometrical data */
+   HYPRE_Real              coords_origin[HYPRE_MAXDIM]; /* Origin coordinates */
+   hypre_Index             coords_stride;
 } hypre_SStructPGrid;
 
 typedef struct
@@ -241,6 +245,8 @@ typedef struct hypre_SStructGrid_struct
 #define hypre_SStructPGridVarTypes(pgrid)         ((pgrid) -> vartypes)
 #define hypre_SStructPGridVarType(pgrid, var)     ((pgrid) -> vartypes[var])
 #define hypre_SStructPGridCellSGridDone(pgrid)    ((pgrid) -> cell_sgrid_done)
+#define hypre_SStructPGridCoordsOrigin(pgrid)     ((pgrid) -> coords_origin)
+#define hypre_SStructPGridCoordsStride(pgrid)     ((pgrid) -> coords_stride)
 
 #define hypre_SStructPGridSGrids(pgrid)           ((pgrid) -> sgrids)
 #define hypre_SStructPGridSGrid(pgrid, var) \
@@ -440,14 +446,18 @@ typedef struct hypre_SStructGraph_struct
 {
    MPI_Comm                comm;
    HYPRE_Int               ndim;
-   hypre_SStructGrid      *grid;     /* pointer to coarser grid */
+   hypre_SStructGrid      *grid;     /* pointer to base grid */
    hypre_SStructGrid      *ran_grid; /* range grid */
    hypre_SStructGrid      *dom_grid; /* domain grid */
-   HYPRE_Int               nparts;
-   hypre_SStructPGrid    **pgrids;
    hypre_SStructStencil ***stencils; /* each (part, var) has a stencil */
 
-   /* info for fem-based user input */
+   /* Active parts data */
+   HYPRE_Int               active_nparts; /* number of active parts */
+   HYPRE_Int              *active_pids;   /* array of active part identifiers */
+   HYPRE_Int              *active_pmaps;  /* indices of active parts */
+   HYPRE_Int              *active_nvars;  /* array of active variables */
+
+   /* Info for fem-based user input */
    HYPRE_Int              *fem_nsparse;
    HYPRE_Int             **fem_sparse_i;
    HYPRE_Int             **fem_sparse_j;
@@ -462,15 +472,14 @@ typedef struct hypre_SStructGraph_struct
    HYPRE_Int               Uemaxsize;  /* max size of Uentries */
    HYPRE_Int             **Uveoffsets; /* offsets for computing rank indexes */
 
-   HYPRE_Int               ref_count;
-
-   HYPRE_Int               type;    /* GEC0203 */
-
    /* These are created in GraphAddEntries() then deleted in GraphAssemble() */
    hypre_SStructGraphEntry **graph_entries;
    HYPRE_Int               n_graph_entries; /* number graph entries */
    HYPRE_Int               a_graph_entries; /* alloced graph entries */
 
+   /* Object data */
+   HYPRE_Int               ref_count;
+   HYPRE_Int               type;
 } hypre_SStructGraph;
 
 /*--------------------------------------------------------------------------
@@ -482,13 +491,16 @@ typedef struct hypre_SStructGraph_struct
 #define hypre_SStructGraphGrid(graph)           ((graph) -> grid)
 #define hypre_SStructGraphRanGrid(graph)        ((graph) -> ran_grid)
 #define hypre_SStructGraphDomGrid(graph)        ((graph) -> dom_grid)
-#define hypre_SStructGraphNParts(graph)         ((graph) -> nparts)
 #define hypre_SStructGraphPGrids(graph) \
    hypre_SStructGridPGrids(hypre_SStructGraphGrid(graph))
 #define hypre_SStructGraphPGrid(graph, p) \
    hypre_SStructGridPGrid(hypre_SStructGraphGrid(graph), p)
 #define hypre_SStructGraphStencils(graph)       ((graph) -> stencils)
 #define hypre_SStructGraphStencil(graph, p, v)  ((graph) -> stencils[p][v])
+#define hypre_SStructGraphActiveNParts(graph)   ((graph) -> active_nparts)
+#define hypre_SStructGraphActivePartIDs(graph)  ((graph) -> active_pids)
+#define hypre_SStructGraphActivePMaps(graph)    ((graph) -> active_pmaps)
+#define hypre_SStructGraphActiveNVars(graph)    ((graph) -> active_nvars)
 
 #define hypre_SStructGraphFEMNSparse(graph)     ((graph) -> fem_nsparse)
 #define hypre_SStructGraphFEMSparseI(graph)     ((graph) -> fem_sparse_i)
@@ -509,11 +521,11 @@ typedef struct hypre_SStructGraph_struct
 #define hypre_SStructGraphUVEOffsets(graph)     ((graph) -> Uveoffsets)
 #define hypre_SStructGraphUVEOffset(graph, p, v)((graph) -> Uveoffsets[p][v])
 
-#define hypre_SStructGraphRefCount(graph)       ((graph) -> ref_count)
-#define hypre_SStructGraphObjectType(graph)     ((graph) -> type)
 #define hypre_SStructGraphEntries(graph)        ((graph) -> graph_entries)
 #define hypre_SStructNGraphEntries(graph)       ((graph) -> n_graph_entries)
 #define hypre_SStructAGraphEntries(graph)       ((graph) -> a_graph_entries)
+#define hypre_SStructGraphRefCount(graph)       ((graph) -> ref_count)
+#define hypre_SStructGraphObjectType(graph)     ((graph) -> type)
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_SStructUVEntry
@@ -594,7 +606,7 @@ typedef struct hypre_SStructPMatrix_struct
    HYPRE_Int             **symmetric;    /* Stencil entries symmetric?
                                           * (nvar x nvar array) */
    HYPRE_Int             **num_centries; /* (nvar x nvar) array */
-   HYPRE_Int            ***centries;     /* (nvar x nvar x sentries_size) array cte entries */
+   HYPRE_Int            ***centries;     /* (nvar x nvar x sentries_size) array constant entries */
    hypre_Index             dom_stride;   /* domain grid stride */
    hypre_Index             ran_stride;   /* range grid stride */
 
@@ -623,7 +635,6 @@ typedef struct hypre_SStructMatrix_struct
 
    /* S-matrix info */
    HYPRE_Int               nparts;
-   HYPRE_Int              *part_ids;     /* (nparts) array */
    hypre_SStructPMatrix  **pmatrices;
    HYPRE_Int            ***symmetric;    /* Stencil entries symmetric?
                                           * (nparts x nvar x nvar array) */
@@ -670,8 +681,6 @@ typedef struct hypre_SStructMatrix_struct
 #define hypre_SStructMatrixSplits(mat)         ((mat) -> splits)
 #define hypre_SStructMatrixSplit(mat, p, v)    ((mat) -> splits[p][v])
 #define hypre_SStructMatrixNParts(mat)         ((mat) -> nparts)
-#define hypre_SStructMatrixPartIDs(mat)        ((mat) -> part_ids)
-#define hypre_SStructMatrixPartID(mat, p)      ((mat) -> part_ids[p])
 #define hypre_SStructMatrixPMatrices(mat)      ((mat) -> pmatrices)
 #define hypre_SStructMatrixPMatrix(mat, part)  ((mat) -> pmatrices[part])
 #define hypre_SStructMatrixSymmetric(mat)      ((mat) -> symmetric)
@@ -699,29 +708,30 @@ typedef struct hypre_SStructMatrix_struct
  * Accessor macros: hypre_SStructPMatrix
  *--------------------------------------------------------------------------*/
 
-#define hypre_SStructPMatrixComm(pmat)             ((pmat) -> comm)
-#define hypre_SStructPMatrixPGrid(pmat)            ((pmat) -> pgrid)
-#define hypre_SStructPMatrixNDim(pmat)             (hypre_SStructPGridNDim((pmat) -> pgrid))
-#define hypre_SStructPMatrixStencils(pmat)         ((pmat) -> stencils)
-#define hypre_SStructPMatrixNVars(pmat)            ((pmat) -> nvars)
-#define hypre_SStructPMatrixStencil(pmat, var)     ((pmat) -> stencils[var])
-#define hypre_SStructPMatrixSMaps(pmat)            ((pmat) -> smaps)
-#define hypre_SStructPMatrixSMap(pmat, var)        ((pmat) -> smaps[var])
-#define hypre_SStructPMatrixSStencils(pmat)        ((pmat) -> sstencils)
+#define hypre_SStructPMatrixComm(pmat)              ((pmat) -> comm)
+#define hypre_SStructPMatrixPGrid(pmat)             ((pmat) -> pgrid)
+#define hypre_SStructPMatrixNDim(pmat) \
+hypre_SStructPGridNDim(hypre_SStructPMatrixPGrid(pmat))
+#define hypre_SStructPMatrixStencils(pmat)          ((pmat) -> stencils)
+#define hypre_SStructPMatrixNVars(pmat)             ((pmat) -> nvars)
+#define hypre_SStructPMatrixStencil(pmat, var)      ((pmat) -> stencils[var])
+#define hypre_SStructPMatrixSMaps(pmat)             ((pmat) -> smaps)
+#define hypre_SStructPMatrixSMap(pmat, var)         ((pmat) -> smaps[var])
+#define hypre_SStructPMatrixSStencils(pmat)         ((pmat) -> sstencils)
 #define hypre_SStructPMatrixSStencil(pmat, vi, vj) \
 ((pmat) -> sstencils[vi][vj])
-#define hypre_SStructPMatrixSMatrices(pmat)        ((pmat) -> smatrices)
+#define hypre_SStructPMatrixSMatrices(pmat)         ((pmat) -> smatrices)
 #define hypre_SStructPMatrixSMatrix(pmat, vi, vj)  \
 ((pmat) -> smatrices[vi][vj])
-#define hypre_SStructPMatrixSymmetric(pmat)        ((pmat) -> symmetric)
-#define hypre_SStructPMatrixNumCEntries(pmat)      ((pmat) -> num_centries)
-#define hypre_SStructPMatrixCEntries(pmat)         ((pmat) -> centries)
-#define hypre_SStructPMatrixDomainStride(pmat)     ((pmat) -> dom_stride)
-#define hypre_SStructPMatrixRangeStride(pmat)      ((pmat) -> ran_stride)
-#define hypre_SStructPMatrixSEntriesSize(pmat)     ((pmat) -> sentries_size)
-#define hypre_SStructPMatrixSEntries(pmat)         ((pmat) -> sentries)
-#define hypre_SStructPMatrixAccumulated(pmat)      ((pmat) -> accumulated)
-#define hypre_SStructPMatrixRefCount(pmat)         ((pmat) -> ref_count)
+#define hypre_SStructPMatrixSymmetric(pmat)         ((pmat) -> symmetric)
+#define hypre_SStructPMatrixNumCEntries(pmat)       ((pmat) -> num_centries)
+#define hypre_SStructPMatrixCEntries(pmat)          ((pmat) -> centries)
+#define hypre_SStructPMatrixDomainStride(pmat)      ((pmat) -> dom_stride)
+#define hypre_SStructPMatrixRangeStride(pmat)       ((pmat) -> ran_stride)
+#define hypre_SStructPMatrixSEntriesSize(pmat)      ((pmat) -> sentries_size)
+#define hypre_SStructPMatrixSEntries(pmat)          ((pmat) -> sentries)
+#define hypre_SStructPMatrixAccumulated(pmat)       ((pmat) -> accumulated)
+#define hypre_SStructPMatrixRefCount(pmat)          ((pmat) -> ref_count)
 
 #endif
 /*BHEADER**********************************************************************
@@ -1058,7 +1068,7 @@ HYPRE_Int hypre_SStructVectorParRestore ( hypre_SStructVector *vector , hypre_Pa
 HYPRE_Int hypre_SStructPVectorInitializeShell ( hypre_SStructPVector *pvector );
 HYPRE_Int hypre_SStructVectorInitializeShell ( hypre_SStructVector *vector );
 HYPRE_Int hypre_SStructVectorClearGhostValues ( hypre_SStructVector *vector );
-HYPRE_Int hypre_SStructVectorPrintGLVis( hypre_SStructVector *vector, const char *fileprefix );
+HYPRE_Int hypre_SStructVectorPrintGLVis ( hypre_SStructVector *vector, const char *fileprefix );
 
 #ifdef __cplusplus
 }
