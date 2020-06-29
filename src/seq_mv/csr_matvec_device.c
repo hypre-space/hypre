@@ -89,9 +89,8 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
       void* dBuffer = NULL;
       size_t bufferSize;
 
-      const cusparseSpMVAlg_t alg = CUSPARSE_MV_ALG_DEFAULT;
+      const cusparseSpMVAlg_t alg = CUSPARSE_CSRMV_ALG2;
       const cusparseOperation_t oper = trans?CUSPARSE_OPERATION_TRANSPOSE:CUSPARSE_OPERATION_NON_TRANSPOSE;
-      //TODO: Dynamically determine type
       const cudaDataType data_type = hypre_getCudaDataTypeComplex();
 
       //TODO: Profile to see if need to handle transpose intentionally
