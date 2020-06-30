@@ -2225,7 +2225,9 @@ PrintUsage( char *progname,
       hypre_printf("  -print             : print out the system\n");
       hypre_printf("  -rhsfromcosine     : solution is cosine function (default)\n");
       hypre_printf("  -rhsone            : rhs is vector with unit components\n");
+      hypre_printf("  -rhszero           : rhs is vector with zero components\n");
       hypre_printf("  -xone              : solution (x) is vector with unit components\n");
+      hypre_printf("  -x0rand            : initial solution (x0) is vector with random components \n");
       hypre_printf("  -tol <val>         : convergence tolerance (def 1e-6)\n");
       hypre_printf("  -itr <val>         : maximum number of iterations (def 100);\n");
       hypre_printf("  -k <val>           : dimension Krylov space for GMRES (def 10);\n");
@@ -2255,6 +2257,9 @@ PrintUsage( char *progname,
       hypre_printf("  -crs <sx> <sy> <sz>: Struct- cyclic reduction base_stride\n");
       hypre_printf("  -old_default: sets old BoomerAMG defaults, possibly better for 2D problems\n");
       hypre_printf("  -vis               : save the solution for GLVis visualization");
+      hypre_printf("  -seed <val>        : use <val> as the seed for the pseudo-random number generator\n");
+      hypre_printf("                       (default seed is based on the time of the run)\n");
+
 
       /* begin lobpcg */
 
@@ -2266,9 +2271,6 @@ PrintUsage( char *progname,
       hypre_printf("\n");
       hypre_printf("\n");
       hypre_printf("  -vrand <val>       : compute <val> eigenpairs using random initial vectors (default 1)\n");
-      hypre_printf("\n");
-      hypre_printf("  -seed <val>        : use <val> as the seed for the pseudo-random number generator\n");
-      hypre_printf("                       (default seed is based on the time of the run)\n");
       hypre_printf("\n");
       hypre_printf("  -orthchk           : check eigenvectors for orthonormality\n");
       hypre_printf("\n");
@@ -2321,7 +2323,9 @@ main( hypre_int argc,
    Index                *block;
    HYPRE_Int             solver_id, object_type;
    HYPRE_Int             print_system;
-   HYPRE_Int             rhs_type;
+   HYPRE_Int             sol_type;
+   HYPRE_Int             sol0_type;
+   HYPRE_Real            rhs_value;
    HYPRE_Real            scale;
 
    HYPRE_SStructGrid     grid, G_grid;
@@ -2382,7 +2386,8 @@ main( hypre_int argc,
    HYPRE_Int	         aug_dim;
 
    /* Misc */
-   HYPRE_Int             vis = 0;
+   HYPRE_Int             vis;
+   HYPRE_Int             seed;
 
    HYPRE_Real            cf_tol;
 
@@ -2398,7 +2403,6 @@ main( hypre_int argc,
    HYPRE_SStructSolver   lobpcg_solver;
 
    HYPRE_Int lobpcgFlag = 0;
-   HYPRE_Int lobpcgSeed = 0;
    HYPRE_Int blockSize = 1;
    HYPRE_Int verbosity = 1;
    HYPRE_Int iterations;
@@ -2515,15 +2519,14 @@ main( hypre_int argc,
 
    solver_id = 39;
    print_system = 0;
-   rhs_type = 1;
-   if (global_data.rhs_true || global_data.fem_rhs_true)
-   {
-      rhs_type = 0;
-   }
-
+   rhs_value = 1.0;
+   sol_type = -1;
+   sol0_type = 0;
    skip = 0;
    n_pre  = 1;
    n_post = 1;
+   vis = 0;
+   seed = 1;
 
    /*-----------------------------------------------------------
     * Parse command line
@@ -2609,20 +2612,35 @@ main( hypre_int argc,
          arg_index++;
          vis = 1;
       }
-      else if ( strcmp(argv[arg_index], "-rhsfromcosine") == 0 )
+      else if ( strcmp(argv[arg_index], "-seed") == 0 )
       {
          arg_index++;
-         rhs_type = 0;
+         seed = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-rhszero") == 0 )
+      {
+         arg_index++;
+         rhs_value = 0.0;
       }
       else if ( strcmp(argv[arg_index], "-rhsone") == 0 )
       {
          arg_index++;
-         rhs_type = 1;
+         rhs_value = 1.0;
+      }
+      else if ( strcmp(argv[arg_index], "-xfromcosine") == 0 )
+      {
+         arg_index++;
+         sol_type = 0;
       }
       else if ( strcmp(argv[arg_index], "-xone") == 0 )
       {
          arg_index++;
-         rhs_type = 2;
+         sol_type = 1;
+      }
+      else if ( strcmp(argv[arg_index], "-x0rand") == 0 )
+      {
+         arg_index++;
+         sol0_type = 1;
       }
       else if ( strcmp(argv[arg_index], "-tol") == 0 )
       {
@@ -2737,11 +2755,6 @@ main( hypre_int argc,
       {                         /* lobpcg: block size */
          arg_index++;
          blockSize = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-seed") == 0 )
-      {		           /* lobpcg: seed for srand */
-         arg_index++;
-         lobpcgSeed = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-pcgitr") == 0 )
       {		   /* lobpcg: max inner pcg iterations */
@@ -3263,11 +3276,11 @@ main( hypre_int argc,
          values[j] = 0.0;
       }
    }
-   else /* rhs=1 is the default */
+   else /* rhs_value is the default */
    {
       for (j = 0; j < data.max_boxsize; j++)
       {
-         values[j] = 1.0;
+         values[j] = rhs_value;
       }
    }
 
@@ -3362,32 +3375,21 @@ main( hypre_int argc,
 
    HYPRE_SStructVectorAssemble(b);
 
+   /*-----------------------------------------------------------
+    * Create solution vector
+    *-----------------------------------------------------------*/
    HYPRE_SStructVectorCreate(hypre_MPI_COMM_WORLD, grid, &x);
-
-   /* HYPRE_SSTRUCT is the default, so we don't have to call SetObjectType */
-   if ( object_type != HYPRE_SSTRUCT )
-   {
-      HYPRE_SStructVectorSetObjectType(x, object_type);
-   }
-
+   HYPRE_SStructVectorSetObjectType(x, object_type);
    HYPRE_SStructVectorInitialize(x);
 
-   /*-----------------------------------------------------------
-    * If requested, reset linear system so that it has
-    * exact solution:
-    *
-    *   u(part,var,i,j,k) = (part+1)*(var+1)*cosine[(i+j+k)/10]
-    *
-    *-----------------------------------------------------------*/
-
-   switch (rhs_type)
+   switch (sol_type)
    {
-      default:
-      case 1:
-         /* rhs is the vector of ones */
-         break;
-
       case 0:
+         /*-----------------------------------------------------------
+          * Set RHS such that the solution vector is given by
+          *
+          *  u(part,var,i,j,k) = (part+1)*(var+1)*cosine[(i+j+k)/10]
+          *-----------------------------------------------------------*/
          for (part = 0; part < data.nparts; part++)
          {
             pdata = data.pdata[part];
@@ -3408,13 +3410,30 @@ main( hypre_int argc,
          }
          break;
 
-      case 2:
-         /* x is the vector of ones */
+      case 1:
          HYPRE_SStructVectorSetConstantValues(x, 1.0);
          break;
    }
 
    HYPRE_SStructVectorAssemble(x);
+   if (sol_type == 0 || sol_type == 1)
+   {
+      HYPRE_SStructMatrixMatvec(1.0, A, x, 0.0, b);
+   }
+
+   /*-----------------------------------------------------------
+    * Set initial solution
+    *-----------------------------------------------------------*/
+   switch (sol0_type)
+   {
+      case 0:
+         HYPRE_SStructVectorSetConstantValues(x, 1.0);
+         break;
+
+      case 1:
+         HYPRE_SStructVectorSetRandomValues(x, seed);
+         break;
+   }
 
    hypre_EndTiming(time_index);
    hypre_PrintTiming("SStruct Interface", hypre_MPI_COMM_WORLD);
@@ -3438,43 +3457,6 @@ main( hypre_int argc,
       HYPRE_SStructVectorGetObject(b, (void **) &sb);
       HYPRE_SStructVectorGetObject(x, (void **) &sx);
    }
-
-   /*-----------------------------------------------------------
-    * Finish resetting the linear system
-    *-----------------------------------------------------------*/
-
-   if ((rhs_type == 0) || (rhs_type == 2))
-   {
-      /* This if/else is due to a bug in SStructMatvec */
-      if (object_type == HYPRE_SSTRUCT)
-      {
-         hypre_SStructMatvec(1.0, A, x, 0.0, b);
-         /* Reset initial guess to zero */
-         hypre_SStructMatvec(0.0, A, b, 0.0, x);
-      }
-      else if (object_type == HYPRE_PARCSR)
-      {
-         HYPRE_ParCSRMatrixMatvec(1.0, par_A, par_x, 0.0, par_b );
-         /* Reset initial guess to zero */
-         HYPRE_ParCSRMatrixMatvec(0.0, par_A, par_b, 0.0, par_x );
-      }
-      else if (object_type == HYPRE_STRUCT)
-      {
-         hypre_StructMatvec(1.0, sA, sx, 0.0, sb);
-         /* Reset initial guess to zero */
-         hypre_StructMatvec(0.0, sA, sb, 0.0, sx);
-      }
-   }
-
-#if 0
-   {
-      hypre_ParVector parvec;
-
-      HYPRE_SStructVectorPrint("ssvec_b", b, 0);
-      HYPRE_SStructVectorPrint("ssvec_ghost_b", b, 1);
-      hypre_ParVectorPrint(hypre_SStructVectorParVector(b), "parvec_b");
-   }
-#endif
 
    /*-----------------------------------------------------------
     * Set up a gradient matrix G
@@ -3598,7 +3580,7 @@ main( hypre_int argc,
       HYPRE_SStructVectorGather(x);
       HYPRE_SStructMatrixPrint("sstruct.out.A",  A, 0);
       HYPRE_SStructVectorPrint("sstruct.out.b",  b, 0);
-      //HYPRE_SStructVectorPrint("sstruct.out.x0", x, 0);
+      HYPRE_SStructVectorPrint("sstruct.out.x0", x, 0);
 
       if (gradient_matrix)
       {
@@ -4124,8 +4106,8 @@ main( hypre_int argc,
                                                               x );
          eigenvalues = (HYPRE_Real*) calloc( blockSize, sizeof(HYPRE_Real) );
 
-         if ( lobpcgSeed )
-            mv_MultiVectorSetRandom( eigenvectors, lobpcgSeed );
+         if ( seed )
+            mv_MultiVectorSetRandom( eigenvectors, seed );
          else
             mv_MultiVectorSetRandom( eigenvectors, (HYPRE_Int)time(0) );
 
@@ -4294,8 +4276,8 @@ main( hypre_int argc,
                                                               x );
          eigenvalues = (HYPRE_Real*) calloc( blockSize, sizeof(HYPRE_Real) );
 
-         if ( lobpcgSeed )
-            mv_MultiVectorSetRandom( eigenvectors, lobpcgSeed );
+         if ( seed )
+            mv_MultiVectorSetRandom( eigenvectors, seed );
          else
             mv_MultiVectorSetRandom( eigenvectors, (HYPRE_Int)time(0) );
 

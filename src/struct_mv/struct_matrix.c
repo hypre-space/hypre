@@ -1875,7 +1875,8 @@ hypre_StructMatrixSetConstantEntries( hypre_StructMatrix *matrix,
       else
       {
          constant_coefficient = 0;
-         hypre_error(HYPRE_ERROR_GENERIC);
+         /* TODO: Fix this for rectangular matrices */
+         //hypre_error(HYPRE_ERROR_GENERIC);
       }
    }
 
