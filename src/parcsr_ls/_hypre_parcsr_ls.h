@@ -1705,6 +1705,7 @@ HYPRE_Int hypre_BoomerAMGSetDSLUThreshold ( void *data , HYPRE_Int slu_threshold
 HYPRE_Int hypre_BoomerAMGSetCPoints( void *data, HYPRE_Int cpt_coarse_level, HYPRE_Int  num_cpt_coarse, HYPRE_BigInt *cpt_coarse_index );
 HYPRE_Int hypre_BoomerAMGSetFPoints( void *data, HYPRE_Int isolated, HYPRE_Int num_points, HYPRE_BigInt *indices );
 
+HYPRE_Int hypre_BoomerAMGDDSetAMGDDUserFACRelaxation(HYPRE_Solver amg_solver, HYPRE_Int (*userFACRelaxation)( hypre_AMGDDCompGrid*, hypre_AMGDDCompGridMatrix*, hypre_AMGDDCompGridVector*, hypre_AMGDDCompGridVector* ));
 HYPRE_Int hypre_BoomerAMGSetAMGDDStartLevel ( void *data , HYPRE_Int start_level );
 HYPRE_Int hypre_BoomerAMGGetAMGDDStartLevel ( void *data , HYPRE_Int *start_level );
 HYPRE_Int hypre_BoomerAMGSetAMGDDUseRD ( void *data , HYPRE_Int use_rd );
