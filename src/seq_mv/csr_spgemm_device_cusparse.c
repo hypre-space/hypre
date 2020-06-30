@@ -35,9 +35,6 @@
  * @param[out] *d_ic_out Array containing the row pointers of C
  * @param[out] *d_jc_out Array containing the column indices of C
  * @param[out] *d_c_out Array containing values of C
- * @warning Only supports opA=opB=CUSPARSE_OPERATION_NON_TRANSPOSE
- * @note This call now has support for the cusparse generic API function calls, as it appears that the other types of SpM x SpM calls are getting deprecated in the near future.
- * Unfortunately, as of now (2020-06-24), it appears these functions have minimal documentation, and are not very mature.
  */
 HYPRE_Int
 hypreDevice_CSRSpGemmCusparseGenericAPI(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
@@ -55,7 +52,6 @@ hypreDevice_CSRSpGemmCusparseGenericAPI(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    //Sort the A,B matrices.
    //Initial tests indicate that the new API does not each row to be sorted, but
    //in case this is not true, this commented out part sorts it
-   //TODO: Determine with 100% certainty if sorting is (not) required
 
    HYPRE_Int isDoublePrecision = sizeof(HYPRE_Complex) == sizeof(hypre_double);
    HYPRE_Int isSinglePrecision = sizeof(HYPRE_Complex) == sizeof(hypre_double) / 2;

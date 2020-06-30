@@ -71,8 +71,6 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
 
 //The generic API is techinically supported on 10.1,10.2 as a preview, with Dscrmv being deprecated. However, there are limitations.
 //While in Cuda < 11, there are specific mentions of using csr2csc involving transposed matrix products with dcsrm*, they are not present in SpMV interface.
-//TODO: Investigation is required to see if the csr2csc provides performance benefits.
-//
 #ifndef CUDART_VERSION
 #error CUDART_VERSION Undefined!
 #elif (CUDART_VERSION >= 10010)
@@ -85,7 +83,6 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
       cusparseSpMatDescr_t matA = hypre_CSRMatToCuda(A, offset);
       cusparseDnVecDescr_t vecX = hypre_VecToCuda(x, offset);
       cusparseDnVecDescr_t vecY = hypre_VecToCuda(y, offset);
-      //TODO: See if alternate buffer system is recommended
       void* dBuffer = NULL;
       size_t bufferSize;
 
@@ -93,7 +90,8 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
       const cusparseOperation_t oper = trans?CUSPARSE_OPERATION_TRANSPOSE:CUSPARSE_OPERATION_NON_TRANSPOSE;
       const cudaDataType data_type = hypre_getCudaDataTypeComplex();
 
-      //TODO: Profile to see if need to handle transpose intentionally
+      //Initial tests indicate that handling the transpose using the oper parameter does not result in degradation
+      //Thus it is not handled explicitly currently
       if(trans)
       {
       }

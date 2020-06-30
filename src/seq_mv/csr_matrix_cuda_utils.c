@@ -3,14 +3,15 @@
 #if defined(HYPRE_USING_CUDA)
 
 #if (CUDART_VERSION >= 8000)
-//Oldest online documentation currently available
+//Oldest online documentation currently available, so I cannot confirm the
+//existence in earlier cuda versions
 
 /*
  * @brief Determines the associated CudaDataType for the HYPRE_Complex typedef
  * @return Returns cuda data type corresponding with HYPRE_Complex
  *
  * @todo Should be known compile time
- * @todo Support different sizes
+ * @todo Support more sizes
  * @todo Support complex
  * @warning Only works for Single and Double precision
  * @note Perhaps some typedefs should be added where HYPRE_Complex is typedef'd
@@ -129,8 +130,6 @@ cusparseDnVecDescr_t hypre_VecToCuda(const hypre_Vector *x, HYPRE_Int offset)
  * @return Returns cuda data type corresponding with HYPRE_Complex
  *
  * @todo Should be known compile time
- * @todo Support different sizes
- * @todo Support complex
  * @warning Only works for Single and Double precision
  * @note Perhaps some typedefs should be added where HYPRE_Complex is typedef'd
  */
