@@ -2166,7 +2166,6 @@ PrintUsage( char *progname,
       hypre_printf("                        11 - PCG with PFMG split precond\n");
       hypre_printf("                        13 - PCG with SysPFMG precond\n");
       hypre_printf("                        14 - PCG with SSAMG precond\n");
-      hypre_printf("                        15 - PCG with BoomerAMG precond\n");
       hypre_printf("                        18 - PCG with diagonal scaling\n");
       hypre_printf("                        19 - PCG\n");
       hypre_printf("                        20 - PCG with BoomerAMG precond\n");
@@ -2949,12 +2948,7 @@ main( hypre_int argc,
     *-----------------------------------------------------------*/
 
    HYPRE_SStructGraphCreate(hypre_MPI_COMM_WORLD, grid, grid, &graph);
-
-   /* HYPRE_SSTRUCT is the default, so we don't have to call SetObjectType */
-   if ( object_type != HYPRE_SSTRUCT )
-   {
-      HYPRE_SStructGraphSetObjectType(graph, object_type);
-   }
+   HYPRE_SStructGraphSetObjectType(graph, object_type);
 
    for (part = 0; part < data.nparts; part++)
    {
@@ -3038,13 +3032,7 @@ main( hypre_int argc,
                                       data.symmetric_booleans[i]);
    }
    HYPRE_SStructMatrixSetNSSymmetric(A, data.ns_symmetric);
-
-   /* HYPRE_SSTRUCT is the default, so we don't have to call SetObjectType */
-   if ( object_type != HYPRE_SSTRUCT )
-   {
-      HYPRE_SStructMatrixSetObjectType(A, object_type);
-   }
-
+   HYPRE_SStructMatrixSetObjectType(A, object_type);
    HYPRE_SStructMatrixInitialize(A);
 
    if (data.nstencils > 0)
@@ -3253,13 +3241,7 @@ main( hypre_int argc,
     *-----------------------------------------------------------*/
 
    HYPRE_SStructVectorCreate(hypre_MPI_COMM_WORLD, grid, &b);
-
-   /* HYPRE_SSTRUCT is the default, so we don't have to call SetObjectType */
-   if ( object_type != HYPRE_SSTRUCT )
-   {
-      HYPRE_SStructVectorSetObjectType(b, object_type);
-   }
-
+   HYPRE_SStructVectorSetObjectType(b, object_type);
    HYPRE_SStructVectorInitialize(b);
 
    /* Initialize the rhs values */
@@ -3421,10 +3403,14 @@ main( hypre_int argc,
    {
       HYPRE_SStructMatrixMatvec(1.0, A, x, 0.0, b);
    }
+   HYPRE_SStructVectorDestroy(x);
 
    /*-----------------------------------------------------------
     * Set initial solution
     *-----------------------------------------------------------*/
+   HYPRE_SStructVectorCreate(hypre_MPI_COMM_WORLD, grid, &x);
+   HYPRE_SStructVectorSetObjectType(x, object_type);
+   HYPRE_SStructVectorInitialize(x);
    switch (sol0_type)
    {
       case 0:
@@ -3435,6 +3421,7 @@ main( hypre_int argc,
          HYPRE_SStructVectorSetRandomValues(x, seed);
          break;
    }
+   HYPRE_SStructVectorAssemble(x);
 
    hypre_EndTiming(time_index);
    hypre_PrintTiming("SStruct Interface", hypre_MPI_COMM_WORLD);
@@ -3953,35 +3940,6 @@ main( hypre_int argc,
                               (HYPRE_Solver) precond);
       }
 
-      else if (solver_id == 15)
-      {
-         HYPRE_BoomerAMGCreate(&par_precond);
-         HYPRE_BoomerAMGSetMaxIter(par_precond, 1);
-         HYPRE_BoomerAMGSetMaxLevels(par_precond, maxLevels);
-         HYPRE_BoomerAMGSetTol(par_precond, 0.0);
-         HYPRE_BoomerAMGSetPrintLevel(par_precond, printLevel);
-         HYPRE_BoomerAMGSetCycleNumSweeps(par_precond, n_pre, 1);
-         HYPRE_BoomerAMGSetCycleNumSweeps(par_precond, n_post, 2);
-         HYPRE_BoomerAMGSetCycleNumSweeps(par_precond, n_pre, 3);
-         if (usr_jacobi_weight)
-         {
-            HYPRE_BoomerAMGSetRelaxWt(par_precond, jacobi_weight);
-         }
-         if (relax == 1)
-         {
-            HYPRE_BoomerAMGSetRelaxType(par_precond, 0);
-         }
-         else
-         {
-            HYPRE_BoomerAMGSetRelaxType(par_precond, relax);
-         }
-
-         HYPRE_PCGSetPrecond( (HYPRE_Solver) par_solver,
-                              (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
-                              (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup,
-                              (HYPRE_Solver) par_precond);
-      }
-
       else if (solver_id == 18)
       {
          /* use diagonal scaling as preconditioner */
@@ -4424,11 +4382,27 @@ main( hypre_int argc,
          /* use BoomerAMG as preconditioner */
          HYPRE_BoomerAMGCreate(&par_precond);
          if (old_default) HYPRE_BoomerAMGSetOldDefault(par_precond);
-         HYPRE_BoomerAMGSetStrongThreshold(par_precond, 0.25);
-         HYPRE_BoomerAMGSetTol(par_precond, 0.0);
-         HYPRE_BoomerAMGSetPrintLevel(par_precond, 1);
-         HYPRE_BoomerAMGSetPrintFileName(par_precond, "sstruct.out.log");
          HYPRE_BoomerAMGSetMaxIter(par_precond, 1);
+         HYPRE_BoomerAMGSetMaxLevels(par_precond, maxLevels);
+         HYPRE_BoomerAMGSetTol(par_precond, 0.0);
+         HYPRE_BoomerAMGSetPrintLevel(par_precond, printLevel);
+         HYPRE_BoomerAMGSetPrintFileName(par_precond, "sstruct.out.log");
+         HYPRE_BoomerAMGSetCycleNumSweeps(par_precond, n_pre, 1);
+         HYPRE_BoomerAMGSetCycleNumSweeps(par_precond, n_post, 2);
+         HYPRE_BoomerAMGSetCycleNumSweeps(par_precond, n_pre, 3);
+         if (usr_jacobi_weight)
+         {
+            HYPRE_BoomerAMGSetRelaxWt(par_precond, jacobi_weight);
+         }
+         if (relax == 1)
+         {
+            HYPRE_BoomerAMGSetRelaxType(par_precond, 0);
+         }
+         else
+         {
+            HYPRE_BoomerAMGSetRelaxType(par_precond, relax);
+         }
+
          HYPRE_PCGSetPrecond( par_solver,
                               (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
                               (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup,
