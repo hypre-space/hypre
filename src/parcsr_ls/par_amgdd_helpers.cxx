@@ -736,7 +736,7 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_AMGDDCompGrid **compGrid,
    hypre_AMGDDCompGridNumNonOwnedNodes(compGrid[current_level]) += remaining_dofs;
    HYPRE_Int *sort_map = hypre_AMGDDCompGridNonOwnedSort(compGrid[current_level]);
    HYPRE_Int *inv_sort_map = hypre_AMGDDCompGridNonOwnedInvSort(compGrid[current_level]);
-   HYPRE_Int *new_inv_sort_map = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumRows(nonowned_diag), HYPRE_MEMORY_HOST);
+   HYPRE_Int *new_inv_sort_map = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumRows(nonowned_diag), hypre_AMGDDCompGridMemoryLocation(compGrid[current_level]));
    HYPRE_Int sort_cnt = 0;
    HYPRE_Int compGrid_cnt = 0;
    HYPRE_Int incoming_cnt = 0;
@@ -955,7 +955,7 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_AMGDDCompGrid **compGrid,
 
       sort_map = hypre_AMGDDCompGridNonOwnedSort(compGrid[level]);
       inv_sort_map = hypre_AMGDDCompGridNonOwnedInvSort(compGrid[level]);
-      new_inv_sort_map = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumRows(nonowned_diag), HYPRE_MEMORY_HOST);
+      new_inv_sort_map = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumRows(nonowned_diag), hypre_AMGDDCompGridMemoryLocation(compGrid[level]));
       sort_cnt = 0;
       compGrid_cnt = 0;
       incoming_cnt = 0;
@@ -1078,7 +1078,7 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_AMGDDCompGrid **compGrid,
       nodes_added_on_level[level] += add_node_cnt;
 
       // Free the old inv sort map and set new
-      hypre_TFree(inv_sort_map, HYPRE_MEMORY_HOST);
+      hypre_TFree(inv_sort_map, hypre_AMGDDCompGridMemoryLocation(compGrid[level]));
       hypre_AMGDDCompGridNonOwnedInvSort(compGrid[level]) = new_inv_sort_map;
 
       // Set recv_map[current_level] to incoming_dest
@@ -1673,43 +1673,18 @@ PackSendBuffer(hypre_ParAMGData *amg_data, hypre_AMGDDCompGrid **compGrid, hypre
    if (current_level != num_levels-1)
    {
       add_flag[current_level+1] = hypre_CTAlloc( HYPRE_Int, hypre_AMGDDCompGridNumOwnedNodes(compGrid[current_level+1]) + hypre_AMGDDCompGridNumNonOwnedNodes(compGrid[current_level+1]), hypre_AMGDDCompGridMemoryLocation(compGrid[current_level+1]) );
-#if defined(HYPRE_USING_CUDA)
-      if (current_level < level_switch_to_cpu-1)
-      {
-         num_blocks = num_send_nodes[current_level][proc][current_level]/tpb+1;
-         MarkCoarseKernel<<<num_blocks,tpb,0,HYPRE_STREAM(1)>>>(send_flag[current_level][proc][current_level],
-                 add_flag[current_level+1],
-                 hypre_AMGDDCompGridOwnedCoarseIndices(compGrid[current_level]),
-                 hypre_AMGDDCompGridNonOwnedCoarseIndices(compGrid[current_level]),
-                 hypre_AMGDDCompGridNumOwnedNodes(compGrid[current_level]),
-                 hypre_AMGDDCompGridNumOwnedNodes(compGrid[current_level+1]),
-                 num_send_nodes[current_level][proc][current_level],
-                 padding[current_level+1] + num_ghost_layers + 1,
-                 nodes_to_add, myid);
-         hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1)));
-         /* MarkCoarseGPU(compGrid[current_level], */
-         /*                send_flag[current_level][proc][current_level], */
-         /*                num_send_nodes[current_level][proc][current_level], */
-         /*                add_flag[current_level+1], */ 
-         /*                hypre_AMGDDCompGridNumOwnedNodes(compGrid[current_level+1]), */
-         /*                padding[current_level+1] + num_ghost_layers + 1); */
-      }
-      else
-#endif
-      {
-         MarkCoarse(send_flag[current_level][proc][current_level],
-              add_flag[current_level+1],
-              hypre_AMGDDCompGridOwnedCoarseIndices(compGrid[current_level]),
-              hypre_AMGDDCompGridNonOwnedCoarseIndices(compGrid[current_level]),
-              hypre_AMGDDCompGridNonOwnedSort(compGrid[current_level+1]),
-              hypre_AMGDDCompGridNumOwnedNodes(compGrid[current_level]),
-              hypre_AMGDDCompGridNumOwnedNodes(compGrid[current_level]) + hypre_AMGDDCompGridNumNonOwnedNodes(compGrid[current_level]),
-              hypre_AMGDDCompGridNumOwnedNodes(compGrid[current_level+1]),
-              num_send_nodes[current_level][proc][current_level],
-              padding[current_level+1] + num_ghost_layers + 1,
-              1,
-              nodes_to_add);
-      }
+      MarkCoarse(send_flag[current_level][proc][current_level],
+           add_flag[current_level+1],
+           hypre_AMGDDCompGridOwnedCoarseIndices(compGrid[current_level]),
+           hypre_AMGDDCompGridNonOwnedCoarseIndices(compGrid[current_level]),
+           hypre_AMGDDCompGridNonOwnedSort(compGrid[current_level+1]),
+           hypre_AMGDDCompGridNumOwnedNodes(compGrid[current_level]),
+           hypre_AMGDDCompGridNumOwnedNodes(compGrid[current_level]) + hypre_AMGDDCompGridNumNonOwnedNodes(compGrid[current_level]),
+           hypre_AMGDDCompGridNumOwnedNodes(compGrid[current_level+1]),
+           num_send_nodes[current_level][proc][current_level],
+           padding[current_level+1] + num_ghost_layers + 1,
+           1,
+           nodes_to_add);
    }
 
    // !!! Timing
@@ -1738,46 +1713,13 @@ PackSendBuffer(hypre_ParAMGData *amg_data, hypre_AMGDDCompGrid **compGrid, hypre
          inner_start = chrono::system_clock::now();
          
          // Expand by the padding on this level and add coarse grid counterparts if applicable
-#if defined(HYPRE_USING_CUDA)
-         if (level < level_switch_to_cpu)
+         for (i = 0; i < total_num_nodes; i++)
          {
-            for (i = 0; i < padding[level] + num_ghost_layers; i++) 
-            {
-               num_blocks = hypre_AMGDDCompGridNumOwnedNodes(compGrid[level])/tpb+1;
-               ExpandPaddingNewKernel<<<num_blocks,tpb,0,HYPRE_STREAM(1)>>>(add_flag[level],
-                           hypre_CSRMatrixJ( hypre_AMGDDCompGridMatrixOwnedDiag(hypre_AMGDDCompGridA(compGrid[level])) ),
-                           hypre_CSRMatrixJ( hypre_AMGDDCompGridMatrixOwnedOffd(hypre_AMGDDCompGridA(compGrid[level])) ),
-                           hypre_CSRMatrixI( hypre_AMGDDCompGridMatrixOwnedDiag(hypre_AMGDDCompGridA(compGrid[level])) ),
-                           hypre_CSRMatrixI( hypre_AMGDDCompGridMatrixOwnedOffd(hypre_AMGDDCompGridA(compGrid[level])) ),
-                           hypre_AMGDDCompGridNumOwnedNodes(compGrid[level]),
-                           0,
-                           hypre_AMGDDCompGridNumOwnedNodes(compGrid[level]),
-                           padding[level] + num_ghost_layers + 1 - i); 
-               num_blocks = hypre_AMGDDCompGridNumNonOwnedNodes(compGrid[level])/tpb+1;
-               ExpandPaddingNewKernel<<<num_blocks,tpb,0,HYPRE_STREAM(2)>>>(add_flag[level],
-                           hypre_CSRMatrixJ( hypre_AMGDDCompGridMatrixNonOwnedOffd(hypre_AMGDDCompGridA(compGrid[level])) ),
-                           hypre_CSRMatrixJ( hypre_AMGDDCompGridMatrixNonOwnedDiag(hypre_AMGDDCompGridA(compGrid[level])) ),
-                           hypre_CSRMatrixI( hypre_AMGDDCompGridMatrixNonOwnedOffd(hypre_AMGDDCompGridA(compGrid[level])) ),
-                           hypre_CSRMatrixI( hypre_AMGDDCompGridMatrixNonOwnedDiag(hypre_AMGDDCompGridA(compGrid[level])) ),
-                           hypre_AMGDDCompGridNumNonOwnedNodes(compGrid[level]),
-                           hypre_AMGDDCompGridNumOwnedNodes(compGrid[level]),
-                           hypre_AMGDDCompGridNumOwnedNodes(compGrid[level]),
-                           padding[level] + num_ghost_layers + 1 - i); 
-               hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1)));
-               hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(2)));
-            }
-         }
-         else
-#endif
-         {
-            for (i = 0; i < total_num_nodes; i++)
-            {
-               if (i < hypre_AMGDDCompGridNumOwnedNodes(compGrid[level])) add_flag_index = i;
-               else add_flag_index = hypre_AMGDDCompGridNonOwnedSort(compGrid[level])[i - hypre_AMGDDCompGridNumOwnedNodes(compGrid[level])] + hypre_AMGDDCompGridNumOwnedNodes(compGrid[level]);
+            if (i < hypre_AMGDDCompGridNumOwnedNodes(compGrid[level])) add_flag_index = i;
+            else add_flag_index = hypre_AMGDDCompGridNonOwnedSort(compGrid[level])[i - hypre_AMGDDCompGridNumOwnedNodes(compGrid[level])] + hypre_AMGDDCompGridNumOwnedNodes(compGrid[level]);
 
-               if (add_flag[level][add_flag_index] == padding[level] + num_ghost_layers + 1)
-                  RecursivelyBuildPsiComposite(i, padding[level] + num_ghost_layers, compGrid[level], add_flag[level], 1);
-            }
+            if (add_flag[level][add_flag_index] == padding[level] + num_ghost_layers + 1)
+               RecursivelyBuildPsiComposite(i, padding[level] + num_ghost_layers, compGrid[level], add_flag[level], 1);
          }
 
          // !!! Timing
@@ -1785,20 +1727,9 @@ PackSendBuffer(hypre_ParAMGData *amg_data, hypre_AMGDDCompGrid **compGrid, hypre
          timings[1] += inner_end - inner_start;
          inner_start = chrono::system_clock::now();
          
-#if defined(HYPRE_USING_CUDA)
-         if (level < level_switch_to_cpu)
-         {
-            send_flag[current_level][proc][level] = AddFlagToSendFlagGPU(compGrid[level],
-                           add_flag[level],
-                           &(num_send_nodes[current_level][proc][level]), num_ghost_layers);
-         }
-         else
-#endif
-         {
-            send_flag[current_level][proc][level] = AddFlagToSendFlag(compGrid[level],
-                           add_flag[level],
-                           &(num_send_nodes[current_level][proc][level]), num_ghost_layers);
-         }
+         send_flag[current_level][proc][level] = AddFlagToSendFlag(compGrid[level],
+                        add_flag[level],
+                        &(num_send_nodes[current_level][proc][level]), num_ghost_layers);
 
          // !!! Timing
          inner_end = chrono::system_clock::now();
@@ -1806,32 +1737,14 @@ PackSendBuffer(hypre_ParAMGData *amg_data, hypre_AMGDDCompGrid **compGrid, hypre
          inner_start = chrono::system_clock::now();
 
          // Compare with previous send/recvs to eliminate redundant info
-#if defined(HYPRE_USING_CUDA)
-         if (level < level_switch_to_cpu)
-         {
-            RemoveRedundancyGPU(amg_data,
-                           compGrid,
-                           compGridCommPkg,
-                           send_flag,
-                           hypre_AMGDDCommPkgRecvMap(compGridCommPkg),
-                           num_send_nodes,
-                           current_level,
-                           proc,
-                           level,
-                           HYPRE_STREAM(1)); 
-         }
-         else
-#endif
-         {
-            RemoveRedundancy(amg_data,
-                           send_flag,
-                           num_send_nodes,
-                           compGrid,
-                           compGridCommPkg,
-                           current_level,
-                           proc,
-                           level);
-         }
+         RemoveRedundancy(amg_data,
+                        send_flag,
+                        num_send_nodes,
+                        compGrid,
+                        compGridCommPkg,
+                        current_level,
+                        proc,
+                        level);
 
          // !!! Timing
          inner_end = chrono::system_clock::now();
@@ -1841,37 +1754,18 @@ PackSendBuffer(hypre_ParAMGData *amg_data, hypre_AMGDDCompGrid **compGrid, hypre
          // Mark the points to start from on the next level
          if (level != num_levels-1)
          {
-#if defined(HYPRE_USING_CUDA)
-            if (level < level_switch_to_cpu-1)
-            {
-               num_blocks = num_send_nodes[current_level][proc][level]/tpb+1;
-               MarkCoarseKernel<<<num_blocks,tpb,0,HYPRE_STREAM(1)>>>(send_flag[current_level][proc][level],
-                                      add_flag[level+1],
-                                      hypre_AMGDDCompGridOwnedCoarseIndices(compGrid[level]),
-                                      hypre_AMGDDCompGridNonOwnedCoarseIndices(compGrid[level]),
-                                      hypre_AMGDDCompGridNumOwnedNodes(compGrid[level]),
-                                      hypre_AMGDDCompGridNumOwnedNodes(compGrid[level+1]),
-                                      num_send_nodes[current_level][proc][level],
-                                      padding[level+1] + num_ghost_layers + 1,
-                                      nodes_to_add, myid);
-               hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(1)));
-            }
-            else
-#endif
-            {
-               MarkCoarse(send_flag[current_level][proc][level],
-                 add_flag[level+1],
-                 hypre_AMGDDCompGridOwnedCoarseIndices(compGrid[level]),
-                 hypre_AMGDDCompGridNonOwnedCoarseIndices(compGrid[level]),
-                 hypre_AMGDDCompGridNonOwnedSort(compGrid[level+1]),
-                 hypre_AMGDDCompGridNumOwnedNodes(compGrid[level]),
-                 hypre_AMGDDCompGridNumOwnedNodes(compGrid[level]) + hypre_AMGDDCompGridNumNonOwnedNodes(compGrid[level]),
-                 hypre_AMGDDCompGridNumOwnedNodes(compGrid[level+1]),
-                 num_send_nodes[current_level][proc][level],
-                 padding[level+1] + num_ghost_layers + 1,
-                 1,
-                 nodes_to_add);
-            }
+            MarkCoarse(send_flag[current_level][proc][level],
+              add_flag[level+1],
+              hypre_AMGDDCompGridOwnedCoarseIndices(compGrid[level]),
+              hypre_AMGDDCompGridNonOwnedCoarseIndices(compGrid[level]),
+              hypre_AMGDDCompGridNonOwnedSort(compGrid[level+1]),
+              hypre_AMGDDCompGridNumOwnedNodes(compGrid[level]),
+              hypre_AMGDDCompGridNumOwnedNodes(compGrid[level]) + hypre_AMGDDCompGridNumNonOwnedNodes(compGrid[level]),
+              hypre_AMGDDCompGridNumOwnedNodes(compGrid[level+1]),
+              num_send_nodes[current_level][proc][level],
+              padding[level+1] + num_ghost_layers + 1,
+              1,
+              nodes_to_add);
          }
 
          // !!! Timing

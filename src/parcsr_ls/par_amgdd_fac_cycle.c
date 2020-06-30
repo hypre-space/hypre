@@ -375,6 +375,11 @@ FAC_Relax(hypre_ParAMGData *amg_data, hypre_AMGDDCompGrid *compGrid, HYPRE_Int c
 HYPRE_Int
 hypre_BoomerAMGDD_FAC_Jacobi( hypre_AMGDDCompGrid *compGrid, hypre_AMGDDCompGridMatrix *A, hypre_AMGDDCompGridVector *f, hypre_AMGDDCompGridVector *u )
 {
+
+#if defined(HYPRE_USING_CUDA)
+   return hypre_BoomerAMGDD_FAC_Jacobi_device(compGrid, A, f, u);
+#endif
+   
    HYPRE_Int i,j; 
    HYPRE_Real relax_weight = hypre_AMGDDCompGridRelaxWeight(compGrid);
 
@@ -414,23 +419,10 @@ hypre_BoomerAMGDD_FAC_Jacobi( hypre_AMGDDCompGrid *compGrid, hypre_AMGDDCompGrid
 
    hypre_AMGDDCompGridMatvec(-relax_weight, A, u, relax_weight, hypre_AMGDDCompGridTemp2(compGrid));
 
-   #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
-   VecScale(hypre_VectorData(hypre_AMGDDCompGridVectorOwned(u)),
-            hypre_VectorData(hypre_AMGDDCompGridVectorOwned(hypre_AMGDDCompGridTemp2(compGrid))),
-            hypre_AMGDDCompGridL1Norms(compGrid),
-            hypre_AMGDDCompGridNumOwnedNodes(compGrid),
-            HYPRE_STREAM(4));
-   VecScale(hypre_VectorData(hypre_AMGDDCompGridVectorNonOwned(u)),
-            hypre_VectorData(hypre_AMGDDCompGridVectorNonOwned(hypre_AMGDDCompGridTemp2(compGrid))),
-            &(hypre_AMGDDCompGridL1Norms(compGrid)[ hypre_AMGDDCompGridNumOwnedNodes(compGrid) ]),
-            hypre_AMGDDCompGridNumNonOwnedRealNodes(compGrid),
-            HYPRE_STREAM(4));
-   #else
    for (i = 0; i < hypre_AMGDDCompGridNumOwnedNodes(compGrid); i++)
       hypre_VectorData(hypre_AMGDDCompGridVectorOwned(u))[i] += hypre_VectorData(hypre_AMGDDCompGridVectorOwned(hypre_AMGDDCompGridTemp2(compGrid)))[i] / hypre_AMGDDCompGridL1Norms(compGrid)[i];
    for (i = 0; i < hypre_AMGDDCompGridNumNonOwnedRealNodes(compGrid); i++)
       hypre_VectorData(hypre_AMGDDCompGridVectorNonOwned(u))[i] += hypre_VectorData(hypre_AMGDDCompGridVectorNonOwned(hypre_AMGDDCompGridTemp2(compGrid)))[i] / hypre_AMGDDCompGridL1Norms(compGrid)[i + hypre_AMGDDCompGridNumOwnedNodes(compGrid)];
-   #endif
 
    return 0;
 }
@@ -586,6 +578,19 @@ hypre_BoomerAMGDD_FAC_CFL1Jacobi( hypre_AMGDDCompGrid *compGrid, hypre_AMGDDComp
 
    HYPRE_Int cycle_param = hypre_AMGDDCompGridCycleParam(compGrid);
 
+#if defined(HYPRE_USING_CUDA)
+   if (cycle_param == 1)
+   {
+      FAC_CFL1Jacobi_device(compGrid, 1); 
+      FAC_CFL1Jacobi_device(compGrid, 0);
+   }
+   else if (cycle_param == 2)
+   {
+      FAC_CFL1Jacobi_device(compGrid, 0);
+      FAC_CFL1Jacobi_device(compGrid, 1);
+   }
+   else FAC_CFL1Jacobi_device(compGrid, 0);
+#else
    if (cycle_param == 1)
    {
       FAC_CFL1Jacobi(compGrid, 1); 
@@ -597,6 +602,7 @@ hypre_BoomerAMGDD_FAC_CFL1Jacobi( hypre_AMGDDCompGrid *compGrid, hypre_AMGDDComp
       FAC_CFL1Jacobi(compGrid, 1);
    }
    else FAC_CFL1Jacobi(compGrid, 0);
+#endif
 
    return 0;
 }
@@ -608,235 +614,6 @@ FAC_CFL1Jacobi( hypre_AMGDDCompGrid *compGrid, HYPRE_Int relax_set )
    HYPRE_Int            i, j;
 
    HYPRE_Real relax_weight = hypre_AMGDDCompGridRelaxWeight(compGrid);
-
-#if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
-
-   // Get cusparse handle and setup bsr matrix
-   static cusparseHandle_t handle;
-   static cusparseMatDescr_t descr;
-   static HYPRE_Int FirstCall=1;
-
-   if (FirstCall)
-   {
-      handle=getCusparseHandle();
-
-      cusparseStatus_t status= cusparseCreateMatDescr(&descr);
-      if (status != CUSPARSE_STATUS_SUCCESS) {
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ERROR:: Matrix descriptor initialization failed\n");
-         return hypre_error_flag;
-      }
-
-      cusparseSetMatType(descr,CUSPARSE_MATRIX_TYPE_GENERAL);
-      cusparseSetMatIndexBase(descr,CUSPARSE_INDEX_BASE_ZERO);
-
-      FirstCall=0;
-   }
-   if (!hypre_AMGDDCompGridTemp2(compGrid))
-   {
-      hypre_AMGDDCompGridTemp2(compGrid) = hypre_AMGDDCompGridVectorCreate();
-      hypre_AMGDDCompGridVectorInitialize(hypre_AMGDDCompGridTemp2(compGrid), hypre_AMGDDCompGridNumOwnedNodes(compGrid), hypre_AMGDDCompGridNumNonOwnedNodes(compGrid), hypre_AMGDDCompGridNumNonOwnedRealNodes(compGrid));
-   }
-   hypre_AMGDDCompGridVectorCopy(hypre_AMGDDCompGridF(compGrid), hypre_AMGDDCompGridTemp2(compGrid));
-   double alpha = -relax_weight;
-   double beta = relax_weight;
-
-   HYPRE_Complex *owned_u = hypre_VectorData(hypre_AMGDDCompGridVectorOwned(hypre_AMGDDCompGridU(compGrid)));
-   HYPRE_Complex *nonowned_u = hypre_VectorData(hypre_AMGDDCompGridVectorNonOwned(hypre_AMGDDCompGridU(compGrid)));
-   HYPRE_Complex *owned_tmp = hypre_VectorData(hypre_AMGDDCompGridVectorOwned(hypre_AMGDDCompGridTemp2(compGrid)));
-   HYPRE_Complex *nonowned_tmp = hypre_VectorData(hypre_AMGDDCompGridVectorNonOwned(hypre_AMGDDCompGridTemp2(compGrid)));
-
-   if (relax_set)
-   {
-      hypre_CSRMatrix *mat = hypre_AMGDDCompGridMatrixOwnedDiag(hypre_AMGDDCompGridA(compGrid));
-      beta = relax_weight;
-      cusparseDbsrxmv(handle,
-                CUSPARSE_DIRECTION_ROW,
-                CUSPARSE_OPERATION_NON_TRANSPOSE,
-                hypre_AMGDDCompGridNumOwnedCPoints(compGrid),
-                hypre_CSRMatrixNumRows(mat),
-                hypre_CSRMatrixNumCols(mat),
-                hypre_CSRMatrixNumNonzeros(mat),
-                &alpha,
-                descr,
-                hypre_CSRMatrixData(mat),
-                hypre_AMGDDCompGridOwnedCMask(compGrid),
-                hypre_CSRMatrixI(mat),
-                &(hypre_CSRMatrixI(mat)[1]),
-                hypre_CSRMatrixJ(mat),
-                1,
-                owned_u,
-                &beta,
-                owned_tmp);
-
-      mat = hypre_AMGDDCompGridMatrixOwnedOffd(hypre_AMGDDCompGridA(compGrid));
-      beta = 1.0;
-      cusparseDbsrxmv(handle,
-                CUSPARSE_DIRECTION_ROW,
-                CUSPARSE_OPERATION_NON_TRANSPOSE,
-                hypre_AMGDDCompGridNumOwnedCPoints(compGrid),
-                hypre_CSRMatrixNumRows(mat),
-                hypre_CSRMatrixNumCols(mat),
-                hypre_CSRMatrixNumNonzeros(mat),
-                &alpha,
-                descr,
-                hypre_CSRMatrixData(mat),
-                hypre_AMGDDCompGridOwnedCMask(compGrid),
-                hypre_CSRMatrixI(mat),
-                &(hypre_CSRMatrixI(mat)[1]),
-                hypre_CSRMatrixJ(mat),
-                1,
-                nonowned_u,
-                &beta,
-                owned_tmp);
-
-      mat = hypre_AMGDDCompGridMatrixNonOwnedDiag(hypre_AMGDDCompGridA(compGrid));
-      beta = relax_weight;
-      cusparseDbsrxmv(handle,
-                CUSPARSE_DIRECTION_ROW,
-                CUSPARSE_OPERATION_NON_TRANSPOSE,
-                hypre_AMGDDCompGridNumNonOwnedRealCPoints(compGrid),
-                hypre_CSRMatrixNumRows(mat),
-                hypre_CSRMatrixNumCols(mat),
-                hypre_CSRMatrixNumNonzeros(mat),
-                &alpha,
-                descr,
-                hypre_CSRMatrixData(mat),
-                hypre_AMGDDCompGridNonOwnedCMask(compGrid),
-                hypre_CSRMatrixI(mat),
-                &(hypre_CSRMatrixI(mat)[1]),
-                hypre_CSRMatrixJ(mat),
-                1,
-                nonowned_u,
-                &beta,
-                nonowned_tmp);
-
-      mat = hypre_AMGDDCompGridMatrixNonOwnedOffd(hypre_AMGDDCompGridA(compGrid));
-      beta = 1.0;
-      cusparseDbsrxmv(handle,
-                CUSPARSE_DIRECTION_ROW,
-                CUSPARSE_OPERATION_NON_TRANSPOSE,
-                hypre_AMGDDCompGridNumNonOwnedRealCPoints(compGrid),
-                hypre_CSRMatrixNumRows(mat),
-                hypre_CSRMatrixNumCols(mat),
-                hypre_CSRMatrixNumNonzeros(mat),
-                &alpha,
-                descr,
-                hypre_CSRMatrixData(mat),
-                hypre_AMGDDCompGridNonOwnedCMask(compGrid),
-                hypre_CSRMatrixI(mat),
-                &(hypre_CSRMatrixI(mat)[1]),
-                hypre_CSRMatrixJ(mat),
-                1,
-                owned_u,
-                &beta,
-                nonowned_tmp);
-
-      hypre_CheckErrorDevice(cudaPeekAtLastError());
-      hypre_CheckErrorDevice(cudaDeviceSynchronize());
-
-      VecScaleMasked(owned_u,owned_tmp,hypre_AMGDDCompGridL1Norms(compGrid),hypre_AMGDDCompGridOwnedCMask(compGrid),hypre_AMGDDCompGridNumOwnedCPoints(compGrid),HYPRE_STREAM(4));
-      VecScaleMasked(nonowned_u,nonowned_tmp,&(hypre_AMGDDCompGridL1Norms(compGrid)[hypre_AMGDDCompGridNumOwnedNodes(compGrid)]),hypre_AMGDDCompGridNonOwnedCMask(compGrid),hypre_AMGDDCompGridNumNonOwnedRealCPoints(compGrid),HYPRE_STREAM(4));
-      
-      hypre_CheckErrorDevice(cudaPeekAtLastError());
-      hypre_CheckErrorDevice(cudaDeviceSynchronize());
-   }
-   else
-   {
-      hypre_CSRMatrix *mat = hypre_AMGDDCompGridMatrixOwnedDiag(hypre_AMGDDCompGridA(compGrid));
-      beta = relax_weight;
-      cusparseDbsrxmv(handle,
-                CUSPARSE_DIRECTION_ROW,
-                CUSPARSE_OPERATION_NON_TRANSPOSE,
-                hypre_AMGDDCompGridNumOwnedNodes(compGrid) - hypre_AMGDDCompGridNumOwnedCPoints(compGrid),
-                hypre_CSRMatrixNumRows(mat),
-                hypre_CSRMatrixNumCols(mat),
-                hypre_CSRMatrixNumNonzeros(mat),
-                &alpha,
-                descr,
-                hypre_CSRMatrixData(mat),
-                hypre_AMGDDCompGridOwnedFMask(compGrid),
-                hypre_CSRMatrixI(mat),
-                &(hypre_CSRMatrixI(mat)[1]),
-                hypre_CSRMatrixJ(mat),
-                1,
-                owned_u,
-                &beta,
-                owned_tmp);
-
-      mat = hypre_AMGDDCompGridMatrixOwnedOffd(hypre_AMGDDCompGridA(compGrid));
-      beta = 1.0;
-      cusparseDbsrxmv(handle,
-                CUSPARSE_DIRECTION_ROW,
-                CUSPARSE_OPERATION_NON_TRANSPOSE,
-                hypre_AMGDDCompGridNumOwnedNodes(compGrid) - hypre_AMGDDCompGridNumOwnedCPoints(compGrid),
-                hypre_CSRMatrixNumRows(mat),
-                hypre_CSRMatrixNumCols(mat),
-                hypre_CSRMatrixNumNonzeros(mat),
-                &alpha,
-                descr,
-                hypre_CSRMatrixData(mat),
-                hypre_AMGDDCompGridOwnedFMask(compGrid),
-                hypre_CSRMatrixI(mat),
-                &(hypre_CSRMatrixI(mat)[1]),
-                hypre_CSRMatrixJ(mat),
-                1,
-                nonowned_u,
-                &beta,
-                owned_tmp);
-
-      mat = hypre_AMGDDCompGridMatrixNonOwnedDiag(hypre_AMGDDCompGridA(compGrid));
-      beta = relax_weight;
-      cusparseDbsrxmv(handle,
-                CUSPARSE_DIRECTION_ROW,
-                CUSPARSE_OPERATION_NON_TRANSPOSE,
-                hypre_AMGDDCompGridNumNonOwnedRealNodes(compGrid) - hypre_AMGDDCompGridNumNonOwnedRealCPoints(compGrid),
-                hypre_CSRMatrixNumRows(mat),
-                hypre_CSRMatrixNumCols(mat),
-                hypre_CSRMatrixNumNonzeros(mat),
-                &alpha,
-                descr,
-                hypre_CSRMatrixData(mat),
-                hypre_AMGDDCompGridNonOwnedFMask(compGrid),
-                hypre_CSRMatrixI(mat),
-                &(hypre_CSRMatrixI(mat)[1]),
-                hypre_CSRMatrixJ(mat),
-                1,
-                nonowned_u,
-                &beta,
-                nonowned_tmp);
-
-      mat = hypre_AMGDDCompGridMatrixNonOwnedOffd(hypre_AMGDDCompGridA(compGrid));
-      beta = 1.0;
-      cusparseDbsrxmv(handle,
-                CUSPARSE_DIRECTION_ROW,
-                CUSPARSE_OPERATION_NON_TRANSPOSE,
-                hypre_AMGDDCompGridNumNonOwnedRealNodes(compGrid) - hypre_AMGDDCompGridNumNonOwnedRealCPoints(compGrid),
-                hypre_CSRMatrixNumRows(mat),
-                hypre_CSRMatrixNumCols(mat),
-                hypre_CSRMatrixNumNonzeros(mat),
-                &alpha,
-                descr,
-                hypre_CSRMatrixData(mat),
-                hypre_AMGDDCompGridNonOwnedFMask(compGrid),
-                hypre_CSRMatrixI(mat),
-                &(hypre_CSRMatrixI(mat)[1]),
-                hypre_CSRMatrixJ(mat),
-                1,
-                owned_u,
-                &beta,
-                nonowned_tmp);
-
-      hypre_CheckErrorDevice(cudaPeekAtLastError());
-      hypre_CheckErrorDevice(cudaDeviceSynchronize());
-
-      VecScaleMasked(owned_u,owned_tmp,hypre_AMGDDCompGridL1Norms(compGrid),hypre_AMGDDCompGridOwnedFMask(compGrid),hypre_AMGDDCompGridNumOwnedNodes(compGrid) - hypre_AMGDDCompGridNumOwnedCPoints(compGrid),HYPRE_STREAM(4));
-      VecScaleMasked(nonowned_u,nonowned_tmp,&(hypre_AMGDDCompGridL1Norms(compGrid)[hypre_AMGDDCompGridNumOwnedNodes(compGrid)]),hypre_AMGDDCompGridNonOwnedFMask(compGrid),hypre_AMGDDCompGridNumNonOwnedRealNodes(compGrid) - hypre_AMGDDCompGridNumNonOwnedRealCPoints(compGrid),HYPRE_STREAM(4));
-      
-      hypre_CheckErrorDevice(cudaPeekAtLastError());
-      hypre_CheckErrorDevice(cudaDeviceSynchronize());
-   }
-
-#else
 
    hypre_CSRMatrix *owned_diag = hypre_AMGDDCompGridMatrixOwnedDiag(hypre_AMGDDCompGridA(compGrid));
    hypre_CSRMatrix *owned_offd = hypre_AMGDDCompGridMatrixOwnedOffd(hypre_AMGDDCompGridA(compGrid));
@@ -921,8 +698,6 @@ FAC_CFL1Jacobi( hypre_AMGDDCompGrid *compGrid, HYPRE_Int relax_set )
          nonowned_u[i] += (relax_weight * res)/l1_norms[i + hypre_AMGDDCompGridNumOwnedNodes(compGrid)];
       }
    }
-
-#endif
 
    return 0;
 }
