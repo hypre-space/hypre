@@ -156,7 +156,8 @@ CUFILES =\
  par_interp_trunc_device.c\
  par_lr_interp_device.c\
  par_strength_device.c\
- par_amgdd_device.c
+ par_amgdd_device.c\
+ par_amgdd_fac_cycle_device.c
 
 COBJS = ${FILES:.c=.o}
 OBJSCXX = ${FILESCXX:.cxx=.o}

@@ -2270,6 +2270,10 @@ HYPRE_Int hypre_BoomerAMGDD_FAC_CFL1Jacobi( hypre_AMGDDCompGrid *compGrid, hypre
 HYPRE_Int hypre_BoomerAMGDD_FAC_OrderedGaussSeidel( hypre_AMGDDCompGrid *compGrid, hypre_AMGDDCompGridMatrix *A, hypre_AMGDDCompGridVector *f, hypre_AMGDDCompGridVector *u );
 HYPRE_Int hypre_BoomerAMGDD_FAC_PCG( hypre_AMGDDCompGrid *compGrid, hypre_AMGDDCompGridMatrix *A, hypre_AMGDDCompGridVector *f, hypre_AMGDDCompGridVector *u );
 
+/* par_amgdd_fac_cycles_device.c */
+HYPRE_Int hypre_BoomerAMGDD_FAC_Jacobi_device( hypre_AMGDDCompGrid *compGrid, hypre_AMGDDCompGridMatrix *A, hypre_AMGDDCompGridVector *f, hypre_AMGDDCompGridVector *u );
+HYPRE_Int FAC_CFL1Jacobi_device( hypre_AMGDDCompGrid *compGrid, HYPRE_Int relax_set );
+
 /* par_amgdd_pcg.c */
 HYPRE_Int hypre_ParAMGDDPCGCreate( HYPRE_Solver *solver );
 HYPRE_Int hypre_ParAMGDDPCGDestroy( HYPRE_Solver solver );
