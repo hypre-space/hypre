@@ -1521,11 +1521,13 @@ HYPRE_Int
 hypre_AMGDDCompGridResize( hypre_AMGDDCompGrid *compGrid, HYPRE_Int new_size, HYPRE_Int need_coarse_info )
 {
    // This function reallocates memory to hold nonowned info for the comp grid
+   HYPRE_MemoryLocation memory_location = hypre_AMGDDCompGridMemoryLocation(compGrid);
+   HYPRE_Int old_size = hypre_AMGDDCompGridNumNonOwnedNodes(compGrid);
 
-   hypre_AMGDDCompGridNonOwnedGlobalIndices(compGrid) = hypre_TReAlloc(hypre_AMGDDCompGridNonOwnedGlobalIndices(compGrid), HYPRE_Int, new_size, hypre_AMGDDCompGridMemoryLocation(compGrid));
-   hypre_AMGDDCompGridNonOwnedRealMarker(compGrid) = hypre_TReAlloc(hypre_AMGDDCompGridNonOwnedRealMarker(compGrid), HYPRE_Int, new_size, hypre_AMGDDCompGridMemoryLocation(compGrid));
-   hypre_AMGDDCompGridNonOwnedSort(compGrid) = hypre_TReAlloc(hypre_AMGDDCompGridNonOwnedSort(compGrid), HYPRE_Int, new_size, hypre_AMGDDCompGridMemoryLocation(compGrid));
-   hypre_AMGDDCompGridNonOwnedInvSort(compGrid) = hypre_TReAlloc(hypre_AMGDDCompGridNonOwnedInvSort(compGrid), HYPRE_Int, new_size, hypre_AMGDDCompGridMemoryLocation(compGrid));
+   hypre_AMGDDCompGridNonOwnedGlobalIndices(compGrid) = hypre_TReAlloc_v2(hypre_AMGDDCompGridNonOwnedGlobalIndices(compGrid), HYPRE_Int, old_size, HYPRE_Int, new_size, memory_location);
+   hypre_AMGDDCompGridNonOwnedRealMarker(compGrid) = hypre_TReAlloc_v2(hypre_AMGDDCompGridNonOwnedRealMarker(compGrid), HYPRE_Int, old_size, HYPRE_Int, new_size, memory_location);
+   hypre_AMGDDCompGridNonOwnedSort(compGrid) = hypre_TReAlloc_v2(hypre_AMGDDCompGridNonOwnedSort(compGrid), HYPRE_Int, old_size, HYPRE_Int, new_size, memory_location);
+   hypre_AMGDDCompGridNonOwnedInvSort(compGrid) = hypre_TReAlloc_v2(hypre_AMGDDCompGridNonOwnedInvSort(compGrid), HYPRE_Int, old_size, HYPRE_Int, new_size, memory_location);
 
    hypre_CSRMatrix *nonowned_diag = hypre_AMGDDCompGridMatrixNonOwnedDiag(hypre_AMGDDCompGridA(compGrid));
    hypre_CSRMatrix *nonowned_offd = hypre_AMGDDCompGridMatrixNonOwnedOffd(hypre_AMGDDCompGridA(compGrid));
@@ -1534,7 +1536,7 @@ hypre_AMGDDCompGridResize( hypre_AMGDDCompGrid *compGrid, HYPRE_Int new_size, HY
 
    if (need_coarse_info)
    {
-      hypre_AMGDDCompGridNonOwnedCoarseIndices(compGrid) = hypre_TReAlloc(hypre_AMGDDCompGridNonOwnedCoarseIndices(compGrid), HYPRE_Int, new_size, hypre_AMGDDCompGridMemoryLocation(compGrid));
+      hypre_AMGDDCompGridNonOwnedCoarseIndices(compGrid) = hypre_TReAlloc_v2(hypre_AMGDDCompGridNonOwnedCoarseIndices(compGrid), HYPRE_Int, old_size, HYPRE_Int, new_size, memory_location);
    }
 
    return 0;
