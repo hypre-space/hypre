@@ -117,11 +117,11 @@ cusparseSpMatDescr_t hypre_CSRMatToCuda(const hypre_CSRMatrix *A, HYPRE_Int offs
  * @return cuSPARSE dense vector descriptor
  * @warning Assumes CSRMatrix uses doubles for values
  */
-cusparseDnVecDescr_t hypre_VecToCuda(const hypre_Vector *x, HYPRE_Int offset)
+cusparseDnVecDescr_t hypre_VecToCuda(const hypre_Vector *x, HYPRE_Int offset, HYPRE_Int size_override)
 {
    const cudaDataType data_type = hypre_getCudaDataTypeComplex();
    cusparseDnVecDescr_t vecX;
-   HYPRE_CUSPARSE_CALL(cusparseCreateDnVec(&vecX, x->size-offset, x->data+offset, data_type));
+   HYPRE_CUSPARSE_CALL(cusparseCreateDnVec(&vecX, (size_override>0)?size_override:x->size-offset, x->data+offset, data_type));
    return vecX;
 }
 

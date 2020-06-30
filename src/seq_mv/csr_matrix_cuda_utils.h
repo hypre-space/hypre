@@ -25,7 +25,7 @@ void hypre_sortCSRCusparse(cusparseHandle_t cusparsehandle, HYPRE_Int n, HYPRE_I
 #if (CUDART_VERSION >= 10010)
 cusparseSpMatDescr_t hypre_CSRMatToCuda(const hypre_CSRMatrix *A, HYPRE_Int offset);
 
-cusparseDnVecDescr_t hypre_VecToCuda(const hypre_Vector *x, HYPRE_Int offset);
+cusparseDnVecDescr_t hypre_VecToCuda(const hypre_Vector *x, HYPRE_Int offset, HYPRE_Int size_override);
 
 
 cusparseIndexType_t hypre_getCusparseIndexTypeInt() ;

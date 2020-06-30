@@ -233,7 +233,12 @@ HYPRE_Int hypre_ParCSRRelax_Cheby_Solve(hypre_ParCSRMatrix *A, /* matrix to rela
    {
       /* get residual: r = f - A*u */
       hypre_ParVectorCopy(f, r); 
+      const HYPRE_Int r_saved_size = hypre_VectorSize(hypre_ParVectorLocalVector(r));
+      const HYPRE_Int r_desired_size = hypre_VectorSize(hypre_ParVectorLocalVector(f));
+
+      hypre_VectorSize(hypre_ParVectorLocalVector(r)) = r_desired_size;
       hypre_ParCSRMatrixMatvec(-1.0, A, u, 1.0, r);
+      hypre_VectorSize(hypre_ParVectorLocalVector(r)) = r_saved_size;
 
       for ( i = 0; i < num_rows; i++ ) 
       {

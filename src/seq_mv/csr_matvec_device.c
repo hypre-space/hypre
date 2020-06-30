@@ -81,8 +81,19 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
    else
    {
       cusparseSpMatDescr_t matA = hypre_CSRMatToCuda(A, offset);
-      cusparseDnVecDescr_t vecX = hypre_VecToCuda(x, offset);
-      cusparseDnVecDescr_t vecY = hypre_VecToCuda(y, offset);
+
+      int y_size_override = 0;
+      int x_size_override = 0;
+      if(A->num_rows != y->size) {
+         hypre_printf("WARNING: A matrix-vector product with mismatching dimensions is attempted (likely y incorrect, rows) \n");
+         y_size_override = trans?A->num_cols:A->num_rows;
+      }
+      if(A->num_cols != x->size) {
+         hypre_printf("WARNING: A matrix-vector product with mismatching dimensions is attempted (likely x incorrect, cols) \n");
+         x_size_override = trans?A->num_rows:A->num_cols;
+      }
+      cusparseDnVecDescr_t vecX = hypre_VecToCuda(x, offset, x_size_override);
+      cusparseDnVecDescr_t vecY = hypre_VecToCuda(y, offset, y_size_override);
       void* dBuffer = NULL;
       size_t bufferSize;
 
