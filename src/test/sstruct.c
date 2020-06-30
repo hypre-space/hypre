@@ -2166,6 +2166,7 @@ PrintUsage( char *progname,
       hypre_printf("                        11 - PCG with PFMG split precond\n");
       hypre_printf("                        13 - PCG with SysPFMG precond\n");
       hypre_printf("                        14 - PCG with SSAMG precond\n");
+      hypre_printf("                        15 - PCG with BoomerAMG precond\n");
       hypre_printf("                        18 - PCG with diagonal scaling\n");
       hypre_printf("                        19 - PCG\n");
       hypre_printf("                        20 - PCG with BoomerAMG precond\n");
@@ -3950,6 +3951,35 @@ main( hypre_int argc,
                               (HYPRE_PtrToSolverFcn) HYPRE_SStructSSAMGSolve,
                               (HYPRE_PtrToSolverFcn) HYPRE_SStructSSAMGSetup,
                               (HYPRE_Solver) precond);
+      }
+
+      else if (solver_id == 15)
+      {
+         HYPRE_BoomerAMGCreate(&par_precond);
+         HYPRE_BoomerAMGSetMaxIter(par_precond, 1);
+         HYPRE_BoomerAMGSetMaxLevels(par_precond, maxLevels);
+         HYPRE_BoomerAMGSetTol(par_precond, 0.0);
+         HYPRE_BoomerAMGSetPrintLevel(par_precond, printLevel);
+         HYPRE_BoomerAMGSetCycleNumSweeps(par_precond, n_pre, 1);
+         HYPRE_BoomerAMGSetCycleNumSweeps(par_precond, n_post, 2);
+         HYPRE_BoomerAMGSetCycleNumSweeps(par_precond, n_pre, 3);
+         if (usr_jacobi_weight)
+         {
+            HYPRE_BoomerAMGSetRelaxWt(par_precond, jacobi_weight);
+         }
+         if (relax == 1)
+         {
+            HYPRE_BoomerAMGSetRelaxType(par_precond, 0);
+         }
+         else
+         {
+            HYPRE_BoomerAMGSetRelaxType(par_precond, relax);
+         }
+
+         HYPRE_PCGSetPrecond( (HYPRE_Solver) par_solver,
+                              (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
+                              (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup,
+                              (HYPRE_Solver) par_precond);
       }
 
       else if (solver_id == 18)
