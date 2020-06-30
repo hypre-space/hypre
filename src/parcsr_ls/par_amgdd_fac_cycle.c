@@ -319,7 +319,7 @@ FAC_Restrict( hypre_AMGDDCompGrid *compGrid_f, hypre_AMGDDCompGrid *compGrid_c, 
    // Get update: s_l <- A_lt_l + s_l 
    hypre_AMGDDCompGridMatvec(1.0, hypre_AMGDDCompGridA(compGrid_f), hypre_AMGDDCompGridT(compGrid_f), 1.0, hypre_AMGDDCompGridS(compGrid_f));
 
-   // If we need to preserve the updates on the next level !!! Do we need this if statement? 
+   // If we need to preserve the updates on the next level 
    if (hypre_AMGDDCompGridS(compGrid_c))
    {
       hypre_AMGDDCompGridMatvec(1.0, hypre_AMGDDCompGridR(compGrid_f), hypre_AMGDDCompGridS(compGrid_f), 0.0, hypre_AMGDDCompGridS(compGrid_c));

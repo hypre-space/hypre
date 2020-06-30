@@ -91,8 +91,6 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    HYPRE_Int pad = hypre_ParAMGDataAMGDDPadding(amg_data);
    HYPRE_Int variable_padding = hypre_ParAMGDataAMGDDVariablePadding(amg_data);
    HYPRE_Int num_ghost_layers = hypre_ParAMGDataAMGDDNumGhostLayers(amg_data);
-   HYPRE_Int symmetric_tmp = hypre_ParAMGDataSym(amg_data);
-   HYPRE_Int symmetric = 0;
 
    // !!! Debug
    HYPRE_Int *num_resizes = hypre_CTAlloc(HYPRE_Int, 3*num_levels, HYPRE_MEMORY_HOST);
@@ -110,7 +108,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
       for (level = amgdd_start_level; level < num_levels; level++)
       {
          compGrid[level] = hypre_AMGDDCompGridCreate();
-         hypre_AMGDDCompGridInitialize( amg_data, 0, level, symmetric );
+         hypre_AMGDDCompGridInitialize( amg_data, 0, level);
       }
       hypre_AMGDDCompGridFinalize(amg_data, compGrid, NULL, amgdd_start_level, num_levels, hypre_ParAMGDataAMGDDUseRD(amg_data), verify_amgdd);
       hypre_AMGDDCompGridSetupRelax(amg_data);
@@ -139,7 +137,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    for (level = amgdd_start_level; level < num_levels; level++)
    {
       compGrid[level] = hypre_AMGDDCompGridCreate();
-      hypre_AMGDDCompGridInitialize( amg_data, padding[level], level, symmetric );
+      hypre_AMGDDCompGridInitialize( amg_data, padding[level], level );
    }
    if (timers) hypre_EndTiming(timers[0]);
 
@@ -246,7 +244,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
          {
             send_buffer[i] = PackSendBuffer(amg_data, compGrid, compGridCommPkg, &(send_buffer_size[level][i]), 
                                              &(send_flag_buffer_size[i]), send_flag, num_send_nodes, i, level, num_levels, padding, 
-                                             num_ghost_layers, symmetric, total_timings );
+                                             num_ghost_layers, total_timings );
          }
          if (timers) hypre_EndTiming(timers[2]);
 
@@ -326,8 +324,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
                compGridCommPkg,
                send_flag, num_send_nodes, 
                recv_map, recv_redundant_marker, num_recv_nodes, 
-               &(recv_map_send_buffer_size[i]), level, num_levels, nodes_added_on_level, i, num_resizes, 
-               symmetric);
+               &(recv_map_send_buffer_size[i]), level, num_levels, nodes_added_on_level, i, num_resizes);
             
             recv_map_send_buffer[i] = hypre_CTAlloc(HYPRE_Int, recv_map_send_buffer_size[i], HYPRE_MEMORY_HOST);
             PackRecvMapSendBuffer(recv_map_send_buffer[i], recv_redundant_marker[level][i], num_recv_nodes[level][i], &(recv_buffer_size[level][i]), level, num_levels, compGrid);
@@ -337,7 +334,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
          //////////// Setup local indices for the composite grid ////////////
 
          if (timers) hypre_BeginTiming(timers[5]);
-         total_bin_search_count += hypre_AMGDDCompGridSetupLocalIndices(compGrid, nodes_added_on_level, recv_map, num_recv_procs, A_tmp_info, level, num_levels, symmetric);
+         total_bin_search_count += hypre_AMGDDCompGridSetupLocalIndices(compGrid, nodes_added_on_level, recv_map, num_recv_procs, A_tmp_info, level, num_levels);
          for (j = level; j < num_levels; j++) nodes_added_on_level[j] = 0;
 
          if (timers) hypre_EndTiming(timers[5]);
@@ -465,7 +462,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    if (timers) hypre_BeginTiming(timers[7]);
 
    // Communicate data for A and all info for P
-   CommunicateRemainingMatrixInfo(amg_data, compGrid, compGridCommPkg, communication_cost, symmetric);
+   CommunicateRemainingMatrixInfo(amg_data, compGrid, compGridCommPkg, communication_cost);
 
    #if DEBUGGING_MESSAGES
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);

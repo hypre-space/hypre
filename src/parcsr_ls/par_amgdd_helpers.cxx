@@ -28,7 +28,7 @@ extern "C"
 #endif
 
 HYPRE_Int
-SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_AMGDDCommPkg *compGridCommPkg, HYPRE_Int level, HYPRE_Int *padding, HYPRE_Int num_ghost_layers, HYPRE_Int *communication_cost );
+SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_AMGDDCommPkg *compGridCommPkg, HYPRE_Int level, HYPRE_Int *padding, HYPRE_Int num_ghost_layers, HYPRE_Int *communication_cost);
 
 HYPRE_Int
 UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_AMGDDCompGrid **compGrid, 
@@ -38,12 +38,11 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_AMGDDCompGrid **compGrid,
       HYPRE_Int ****send_flag, HYPRE_Int ***num_send_nodes,
       HYPRE_Int ****recv_map, HYPRE_Int ****recv_redundant_marker, HYPRE_Int ***num_recv_nodes, 
       HYPRE_Int *recv_map_send_buffer_size, HYPRE_Int current_level, HYPRE_Int num_levels,
-      HYPRE_Int *nodes_added_on_level, HYPRE_Int buffer_number, HYPRE_Int *num_resizes, 
-      HYPRE_Int symmetric);
+      HYPRE_Int *nodes_added_on_level, HYPRE_Int buffer_number, HYPRE_Int *num_resizes);
 
 HYPRE_Int* PackSendBuffer(hypre_ParAMGData *amg_data, hypre_AMGDDCompGrid **compGrid, hypre_AMGDDCommPkg *compGridCommPkg, HYPRE_Int *buffer_size, HYPRE_Int *send_flag_buffer_size, 
    HYPRE_Int ****send_flag, HYPRE_Int ***num_send_nodes, HYPRE_Int proc, HYPRE_Int current_level, HYPRE_Int num_levels, HYPRE_Int *padding, 
-   HYPRE_Int num_ghost_layers, HYPRE_Int symmetric, HYPRE_Real *total_timings );
+   HYPRE_Int num_ghost_layers, HYPRE_Real *total_timings );
 
 HYPRE_Int LocalToGlobalIndex(hypre_AMGDDCompGrid *compGrid, HYPRE_Int local_index);
 
@@ -54,7 +53,7 @@ HYPRE_Int
 UnpackSendFlagBuffer(hypre_AMGDDCompGrid **compGrid, HYPRE_Int *send_flag_buffer, HYPRE_Int **send_flag, HYPRE_Int *num_send_nodes, HYPRE_Int *send_buffer_size, HYPRE_Int current_level, HYPRE_Int num_levels);
 
 HYPRE_Int
-CommunicateRemainingMatrixInfo(hypre_ParAMGData* amg_data, hypre_AMGDDCompGrid **compGrid, hypre_AMGDDCommPkg *compGridCommPkg, HYPRE_Int *communication_cost, HYPRE_Int symmetric);
+CommunicateRemainingMatrixInfo(hypre_ParAMGData* amg_data, hypre_AMGDDCompGrid **compGrid, hypre_AMGDDCommPkg *compGridCommPkg, HYPRE_Int *communication_cost);
 
 HYPRE_Int
 FixUpRecvMaps(hypre_AMGDDCompGrid **compGrid, hypre_AMGDDCommPkg *compGridCommPkg, HYPRE_Int ****recv_redundant_marker, HYPRE_Int start_level, HYPRE_Int num_levels);
@@ -668,8 +667,7 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_AMGDDCompGrid **compGrid,
       HYPRE_Int ****send_flag, HYPRE_Int ***num_send_nodes,
       HYPRE_Int ****recv_map, HYPRE_Int ****recv_redundant_marker, HYPRE_Int ***num_recv_nodes, 
       HYPRE_Int *recv_map_send_buffer_size, HYPRE_Int current_level, HYPRE_Int num_levels,
-      HYPRE_Int *nodes_added_on_level, HYPRE_Int buffer_number, HYPRE_Int *num_resizes, 
-      HYPRE_Int symmetric )
+      HYPRE_Int *nodes_added_on_level, HYPRE_Int buffer_number, HYPRE_Int *num_resizes)
 {
    // recv_buffer = [ num_psi_levels , [level] , [level] , ... ]
    // level = [ num send nodes, [global indices] , [coarse global indices] , [A row sizes] , [A col ind] ]
@@ -1012,7 +1010,6 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_AMGDDCompGrid **compGrid,
             {
                if (incoming_is_real && !hypre_AMGDDCompGridNonOwnedRealMarker(compGrid[level])[ inv_sort_map[compGrid_cnt] ])
                {
-                  // !!! Symmetric: Need to insert A col ind (no space allocated for row info at ghost point... but now trying to overwrite with real dof)
                   hypre_AMGDDCompGridNonOwnedRealMarker(compGrid[level])[ inv_sort_map[compGrid_cnt] ] = 1;
                   incoming_dest[incoming_cnt] = inv_sort_map[compGrid_cnt] + hypre_AMGDDCompGridNumOwnedNodes(compGrid[level]); // Incoming real dof received to existing ghost location
                   incoming_cnt++;
@@ -1129,8 +1126,6 @@ UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_AMGDDCompGrid **compGrid,
          HYPRE_Int row_size = recv_buffer[ i + row_sizes_start ];
 
          // !!! Optimization: (probably small gain) right now, I disregard incoming info for real overwriting ghost (internal buf connectivity could be used to avoid a few binary searches later)
-         // !!! Symmetric: need to insert col indices for ghosts overwritten as real somehow
-         // if (incoming_dest[i] >= 0)
          dest = incoming_dest[i];
          if (dest < 0) dest = -(dest+1);
          dest -= hypre_AMGDDCompGridNumOwnedNodes(compGrid[level]);
@@ -1363,8 +1358,6 @@ HYPRE_Int MarkCoarse(HYPRE_Int *list,
             coarse_index = owned_coarse_indices[idx];
             if (coarse_index >= 0)
             {
-                  // !!! Debug
-                  /* if (myid == 10) printf("cpu idx %d, owned marker[%d] = %d\n", idx, coarse_index, dist); */
                marker[ coarse_index ] = dist;
                (*nodes_to_add) = 1;
             }
@@ -1612,7 +1605,7 @@ HYPRE_Int RemoveRedundancy(hypre_ParAMGData* amg_data,
 HYPRE_Int*
 PackSendBuffer(hypre_ParAMGData *amg_data, hypre_AMGDDCompGrid **compGrid, hypre_AMGDDCommPkg *compGridCommPkg, HYPRE_Int *buffer_size, 
    HYPRE_Int *send_flag_buffer_size, HYPRE_Int ****send_flag, HYPRE_Int ***num_send_nodes,
-   HYPRE_Int proc, HYPRE_Int current_level, HYPRE_Int num_levels, HYPRE_Int *padding, HYPRE_Int num_ghost_layers, HYPRE_Int symmetric, HYPRE_Real *total_timings )
+   HYPRE_Int proc, HYPRE_Int current_level, HYPRE_Int num_levels, HYPRE_Int *padding, HYPRE_Int num_ghost_layers, HYPRE_Real *total_timings )
 {
    // send_buffer = [ num_psi_levels , [level] , [level] , ... ]
    // level = [ num send nodes, [global indices] , [coarse global indices] , [A row sizes] , [A col ind: either global indices or local col indices within buffer] ]
@@ -2155,7 +2148,7 @@ UnpackSendFlagBuffer(hypre_AMGDDCompGrid **compGrid,
 }
 
 HYPRE_Int
-CommunicateRemainingMatrixInfo(hypre_ParAMGData* amg_data, hypre_AMGDDCompGrid **compGrid, hypre_AMGDDCommPkg *compGridCommPkg, HYPRE_Int *communication_cost, HYPRE_Int symmetric)
+CommunicateRemainingMatrixInfo(hypre_ParAMGData* amg_data, hypre_AMGDDCompGrid **compGrid, hypre_AMGDDCommPkg *compGridCommPkg, HYPRE_Int *communication_cost )
 {
    HYPRE_Int outer_level,proc,level,i,j;
    HYPRE_Int num_levels = hypre_AMGDDCommPkgNumLevels(compGridCommPkg);
@@ -2181,7 +2174,7 @@ CommunicateRemainingMatrixInfo(hypre_ParAMGData* amg_data, hypre_AMGDDCompGrid *
          hypre_CSRMatrix *P_diag_original = hypre_ParCSRMatrixDiag(hypre_ParAMGDataPArray(amg_data)[outer_level]);
          hypre_CSRMatrix *P_offd_original = hypre_ParCSRMatrixOffd(hypre_ParAMGDataPArray(amg_data)[outer_level]);
          HYPRE_Int ave_nnz_per_row = 1;
-         if (hypre_ParAMGDataPMaxElmts(amg_data)) // !!! Double check (when is this zero, negative, etc?)
+         if (hypre_ParAMGDataPMaxElmts(amg_data)) 
             ave_nnz_per_row = hypre_ParAMGDataPMaxElmts(amg_data);
          else if (hypre_CSRMatrixNumRows(P_diag_original)) 
             ave_nnz_per_row = (HYPRE_Int) (hypre_CSRMatrixNumNonzeros(P_diag_original) / hypre_CSRMatrixNumRows(P_diag_original));
@@ -2560,14 +2553,13 @@ CommunicateRemainingMatrixInfo(hypre_ParAMGData* amg_data, hypre_AMGDDCompGrid *
                   if (idx < 0) idx = -(idx + 1);
 
                   // !!! Optimization: I send (and setup) A info twice for ghosts overwritten as real
-                  // !!! Double check ordering of incoming data vs. ordering of existing col ind
                   // Unpack A data
                   diag = hypre_AMGDDCompGridMatrixNonOwnedDiag(hypre_AMGDDCompGridA(compGrid[level]));
                   offd = hypre_AMGDDCompGridMatrixNonOwnedOffd(hypre_AMGDDCompGridA(compGrid[level]));
                   HYPRE_Int diag_rowptr = hypre_CSRMatrixI(diag)[idx];
                   HYPRE_Int offd_rowptr = hypre_CSRMatrixI(offd)[idx];
 
-                  while (diag_rowptr < hypre_CSRMatrixI(diag)[idx+1] || offd_rowptr < hypre_CSRMatrixI(offd)[idx+1]) // !!! Double check
+                  while (diag_rowptr < hypre_CSRMatrixI(diag)[idx+1] || offd_rowptr < hypre_CSRMatrixI(offd)[idx+1]) 
                   {
                      HYPRE_Int incoming_index = int_recv_buffers[proc][int_cnt++];
 
